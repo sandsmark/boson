@@ -1,0 +1,58 @@
+Release of Boson 0.6.1, a Real Time Strategy (RTS) game for the K Desktop Environment.
+
+Where 0.6 was a complete rewrite to libkdegames and KDE 3.0, 0.6.1 is a minor bug fix release.
+
+Boson currently requires a minimum of 2 players due to lack of an artificial intelligence. We are in need of more
+developers, especially graphics artists. If you have any spare time and the ability to code in Qt/C++ or you know your
+way around a graphics editor, we would appreciate the help.
+
+The 0.6 release does not include the map editor for functionality and stability reasons.
+
+List of bug fixes since 0.6:
+ - The chat widget is now hidden by default
+ - Stopping unit/building production now only returns money if building was started (opposed to still in queue)
+ - Boson will now compile with gcc 2.96, 3.1, and possibly 3.0
+ - Many small fixes
+
+To compile and install Boson, you will need the following:
+ - Gcc, Gnu make (http://www.gnu.org)
+ - Qt 3.0.x (http://www.trolltech.com)
+ - KDE 3.x (http://www.kde.org)
+
+note: You do not need the entire KDE distribution. Simply installing kdelibs, kdebase, arts, kdegames, and
+kdemultimedia should suffice. If you are using precompiled packages (such as rpms and debs), make sure you have the
+devel- packages for each!
+
+Installing Boson:
+
+There are two methods of installing Boson from tarballs. The easier way is to grab boson-all-0.6.1.tar.bz2. However,
+that file is very big, and if you are on a slow connection, you may wish to simply get the code and data packages. The
+required packages can be found at: http://sourceforge.net/project/showfiles.php?group_id=15087
+
+Let me say that again: download either boson-all or both boson-code and boson-data. Do not waste your time downloading
+all three! If you are updating via CVS and you have 0.6 installed already, do not update the data module. It has not
+changed since 0.6.
+
+If you decided to grab the individual packages, you can optionally download the music files for Boson at:
+http://boson.eu.org/music/
+
+
+
+The installation itself: 
+
+Decompress the package(s):
+ % tar xjvf <package name>
+ cd into each directory and:
+ % ./configure
+ % make
+ As root:
+ # make install 
+
+Tarball checksums and sizes for the paranoid: 
+File name                 Size   MD5 Checksum 
+boson-all-0.6.1.tar.bz2   27 MB  ee1571120c461787004e869f08fce8e2
+boson-code-0.6.1.tar.bz2  487 kB fa403f5387def5fe6d3db1711048fca1
+boson-data-0.6.1.tar.bz2  11 MB  da74a8d7cde05211e5adad82771c5174
+boson-music-0.6.1.tar.bz2 17 MB  f777b7a232ef55eb23c0b547fc335873
+
+The Boson Team 
