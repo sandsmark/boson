@@ -477,18 +477,28 @@ QByteArray BosonNewEditorWidget::createNewMap()
  boDebug() << k_funcinfo << "saving completed" << endl;
  playField.changeMap(0); // deletes the map!
 
- QDomDocument playersDoc("Players");
- QDomElement playersRoot = playersDoc.createElement("Players");
+ QDomDocument playersDoc(QString::fromLatin1("Players"));
+ QDomDocument canvasDoc(QString::fromLatin1("Canvas"));
+ QDomElement playersRoot = playersDoc.createElement(QString::fromLatin1("Players"));
+ QDomElement canvasRoot = canvasDoc.createElement(QString::fromLatin1("Canvas"));
  playersDoc.appendChild(playersRoot);
+ canvasDoc.appendChild(canvasRoot);
+ canvasRoot.appendChild(canvasDoc.createElement(QString::fromLatin1("DataHandler")));
  for (int i = 0; i < maxPlayers; i++) {
-	QDomElement p = playersDoc.createElement("Player");
+	QDomElement p = playersDoc.createElement(QString::fromLatin1("Player"));
+	p.setAttribute("Id", i);
 	playersRoot.appendChild(p);
+
+	QDomElement items = canvasDoc.createElement(QString::fromLatin1("Items"));
+	items.setAttribute("Id", i);
+	canvasRoot.appendChild(items);
  }
 // playersRoot.setAttribute("LocalPlayerId", );
  files.insert("players.xml", playersDoc.toCString());
+ files.insert("canvas.xml", canvasDoc.toCString());
 
  QByteArray b = BosonPlayField::streamFiles(files);
  boDebug() << k_funcinfo << "files got streamed" << endl;
- return BosonPlayField::streamFiles(files);
+ return b;
 }
 
