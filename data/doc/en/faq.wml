@@ -45,5 +45,5 @@
     The system crashes should go away but please contact us because we need more people with the same problem.
     </p>
 
-#include "nav.wml" before_url="units/aircraft.html" before_text="Aircraft" after_url="credits.html" after_text="Credits" up_url="index.html"
+#include "nav.wml" before_url="editor/facilities.html" before_text="Building facilities" after_url="credits.html" after_text="Credits" up_url="index.html"
 #include "footer.wml"
