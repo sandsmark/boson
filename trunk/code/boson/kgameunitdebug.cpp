@@ -24,6 +24,7 @@
 #include "unitplugins.h"
 #include "player.h"
 #include "boitemlist.h"
+#include "bosoncanvas.h"
 #include "bodebug.h"
 
 #include <klistview.h>
@@ -194,11 +195,10 @@ void KGameUnitDebug::slotUpdate()
  }
 
  QPtrList<Unit> units;
- QPtrList<KPlayer>list = *d->mBoson->playerList();
- for (unsigned int i = 0; i < d->mBoson->playerCount(); i++) {
-	QPtrList<Unit> playerUnits = *((Player*)list.at(i))->allUnits();
-	for (unsigned int j = 0; j < playerUnits.count(); j++) {
-		units.append(playerUnits.at(j));
+ BoItemList::ConstIterator itemIt = boGame->canvas()->allItems()->begin();
+ for (; itemIt != boGame->canvas()->allItems()->end(); ++itemIt) {
+	if (RTTI::isUnit((*itemIt)->rtti())) {
+		units.append((Unit*)*itemIt);
 	}
  }
 
