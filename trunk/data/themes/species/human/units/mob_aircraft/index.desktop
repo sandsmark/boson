@@ -8,6 +8,8 @@ MineralCost=100
 Range=100
 Damage=10
 Reload=30
+CanShootAtAirUnits=true
+CanShootAtLandUnits=true
 
 [Boson Mobile Unit]
 Speed=6

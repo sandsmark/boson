@@ -66,6 +66,11 @@ TerrainType=Number  - The default terrain type of the unit. One of 0 (Land),
                       The default is 0 (=Land Unit)
 ProductionTime=Number - The number of advance calls needed to produce this unit
                         Default is (currenlty) 100.
+CanShootAtAirUnits  - Can this unit shoot at aircrafts?
+                      Default true for TeeeainType=2, otherwise false.
+CanShootAtLandUnits - Can this unit shoot at ground units? True or False.
+                      Default is true for TerrainType=0 or TerrainType=1, 
+                      otherwise false.
 -------------------------------------------------------------------------------
 
 The entries marked with * are mandatory.

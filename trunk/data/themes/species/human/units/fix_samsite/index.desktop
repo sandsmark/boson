@@ -8,3 +8,5 @@ MineralCost=100
 Range=100
 Damage=30
 Reload=30
+CanShootAtAirUnits=true
+CanShootAtLandUnits=false
