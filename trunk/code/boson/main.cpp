@@ -29,7 +29,7 @@
 static const char *description =
     I18N_NOOP("A realtime strategy game for KDE");
 
-static const char *version = "v0.6pre";
+static const char *version = "v0.6";
 
 static KCmdLineOptions options[] =
 {

@@ -30,6 +30,7 @@ Game TODOs
 - display "filling" status of harvesters instead of firepower. use different
   colors!
 - TopWidget::slotNewGame() is broken
+- chat widget should be hidden by default
 
 Editor (map, unit, scenario) TODOs
 - totally broken, currently
