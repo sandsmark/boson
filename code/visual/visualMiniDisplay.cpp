@@ -27,14 +27,10 @@
 
 visualMiniDisplay::visualMiniDisplay(visualTopLevel *v, QWidget*parent, const char *name)
 	: QWidget(parent, name)
-	, vtl(v)
+	, _w(-1), _h(-1), vtl(v), _ground(0l)
 {
 
-/* create the (back)ground pixmap */
-	_ground = new QPixmap(v->maxX(), v->maxY());
-	_ground->fill(black);
 	sync();
-
 /* make the connection */
 	connect(vcanvas, SIGNAL(newCell(int,int, groundType)), this, SLOT(newCell(int,int, groundType)));
 	connect(vcanvas, SIGNAL(updateMobile(visualMobUnit *)), this, SLOT(drawMobile(visualMobUnit *)));
@@ -43,7 +39,17 @@ visualMiniDisplay::visualMiniDisplay(visualTopLevel *v, QWidget*parent, const ch
 
 // connect(, SIGNAL(), this, SLOT());
 	connect(this, SIGNAL(reCenterView(int, int)), vtl, SLOT(reCenterView(int, int)));
-	connect(this, SIGNAL(reSizeView(int, int)), vtl, SLOT(reSizeView(int, int)));
+//	connect(this, SIGNAL(reSizeView(int, int)), vtl, SLOT(reSizeView(int, int)));
+}
+
+
+void visualMiniDisplay::createData(void)
+{
+	/* create the (back)ground pixmap */
+	if (_ground) delete _ground;
+	_ground = new QPixmap(_w,_h);
+	_ground->fill(black);
+
 }
 
 
@@ -54,10 +60,16 @@ void visualMiniDisplay::sync(void)
 	groundType g;
 	QPainter p;
 
+	if (vtl->maxX()!= _w || vtl->maxY()!=_h) {
+		_w = vtl->maxX();
+		_h = vtl->maxY();
+		createData();
+	}
+
 	p.begin(_ground);
 
-	for (i=0; i< vtl->maxX(); i++)
-		for (j=0; j< vtl->maxY(); j++) {
+	for (i=0; i< _w; i++)
+		for (j=0; j< _h; j++) {
 
 			g = ground(vcanvas->tile(i,j));
 
@@ -67,6 +79,8 @@ void visualMiniDisplay::sync(void)
 			switch(g) {
 				default:
 					logf(LOG_ERROR, "visualMiniDisplay::sync : unexpected groundType : %d", g);
+					setPoint( i, j, black, &p);
+					break;
 				case GROUND_WATER :
 				case GROUND_WATER_OIL:
 					setPoint( i, j, blue, &p);
@@ -109,8 +123,8 @@ void visualMiniDisplay::paintEvent(QPaintEvent *evt)
 void visualMiniDisplay::newCell(int i, int j, groundType g) //, QPainter *p)
 {
 	QPainter p;
-	boAssert(i<vtl->maxX());
-	boAssert(j<vtl->maxY());
+	boAssert(i<_w);
+	boAssert(j<_h);
 
 	//printf("visualMiniDisplay::newCell : receiving %d\n", (int)g);
 
@@ -122,6 +136,8 @@ void visualMiniDisplay::newCell(int i, int j, groundType g) //, QPainter *p)
 	switch(g) {
 		default:
 			logf(LOG_ERROR, "visualMiniDisplay::newCell : unexpected groundType : %d", g);
+			setPoint( i, j, black, &p);
+			break;
 		case GROUND_WATER :
 		case GROUND_WATER_OIL:
 			setPoint( i, j, blue, &p);

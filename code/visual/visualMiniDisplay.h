@@ -44,7 +44,7 @@ public:
 
 signals:
   void	reCenterView(int x, int y);
-  void  reSizeView(int l, int h);
+//  void  reSizeView(int l, int h);
 
 public slots:
   void newCell(int,int, groundType);
@@ -54,7 +54,8 @@ public slots:
   void	sync(void);
 
 protected:
-  void setPoint(int x, int y, const QColor &color, QPainter *p=0L);
+	void setPoint(int x, int y, const QColor &color, QPainter *p=0L);
+	void createData();
 
 /* events */
   virtual void paintEvent(QPaintEvent *evt);
@@ -62,8 +63,9 @@ protected:
 
 private:
 
+  int			_w, _h;
   visualTopLevel	*vtl;
-  QPixmap	*_ground;
+  QPixmap		*_ground;
 
 };
 
