@@ -159,10 +159,8 @@ void BosonMiniMap::slotChangeCell(int x, int y, int groundType, unsigned char ve
 	return;
  }
  BO_CHECK_NULL_RET(mCanvas)
- if (x < 0 || x >= mapWidth()) {
-	return;
- }
- if (y < 0 || y >= mapHeight()) {
+ if (!mCanvas->cell(x, y)) {
+	boError() << k_funcinfo << x << "," << y << " is no valid cell!" << endl;
 	return;
  }
  // AB: note that mLocalPlayer == NULL is valid in editor mode here!
@@ -279,6 +277,7 @@ void BosonMiniMap::moveUnit(Unit* unit, const QPointArray& newCells, const QPoin
  // stuff can be undefined at this point! especially when adding units
  // (oldX==oldY==-1)!
  BO_CHECK_NULL_RET(mLocalPlayer)
+ BO_CHECK_NULL_RET(mCanvas)
  BO_CHECK_NULL_RET(unit)
  BO_CHECK_NULL_RET(map())
  if (newCells.count() == oldCells.count()) {
@@ -320,7 +319,7 @@ void BosonMiniMap::moveUnit(Unit* unit, const QPointArray& newCells, const QPoin
  for (unsigned int i = 0; i < newCells.count(); i++) {
 	int x = newCells[i].x();
 	int y = newCells[i].y();
-	if (x < 0 || x >= mapWidth() || y < 0 || y >= mapHeight()) {
+	if (!mCanvas->cell(x, y)) {
 		continue;
 	}
 	if (mLocalPlayer && mLocalPlayer->isFogged(x, y)) {
@@ -338,10 +337,8 @@ void BosonMiniMap::updateCell(int x, int y)
  BO_CHECK_NULL_RET(map())
  BO_CHECK_NULL_RET(ground())
  BO_CHECK_NULL_RET(mCanvas)
- if (x < 0 || x >= mapWidth()) {
-	return;
- }
- if (y < 0 || y >= mapHeight()) {
+ if (!map()->cell(x, y)) {
+	boError() << k_funcinfo << x << "," << y << " is no valid cell!" << endl;
 	return;
  }
  // AB: note that mLocalPlayer == NULL is valid in editor mode here!

@@ -601,8 +601,14 @@ bool Unit::moveTo(float x, float y, int range, bool attack)
  if (range == -1) {
 	range = d->mMoveRange;
  }
- if (!owner()->isFogged((int)(x / BO_TILE_SIZE), (int)(y / BO_TILE_SIZE))) {
-	Cell* c = canvas()->cell((int)(x / BO_TILE_SIZE), (int)(y / BO_TILE_SIZE));
+ int cellX = (int)(x / BO_TILE_SIZE);
+ int cellY = (int)(x / BO_TILE_SIZE);
+ if (!canvas()->cell(cellX, cellY)) {
+	boError() << k_funcinfo << x << "," << y << " is no valid cell!" << endl;
+	return false;
+ }
+ if (!owner()->isFogged(cellX, cellY)) {
+	Cell* c = canvas()->cell(cellX, cellY);
 	if (!c) {
 		boError() << k_funcinfo << "unit " << id() << ": NULL cell at " << x << "," << y << endl;
 		return false;
@@ -635,6 +641,10 @@ bool Unit::moveTo(float x, float y, int range, bool attack)
 void Unit::newPath()
 {
  boDebug() << k_funcinfo << "unit " << id() << endl;
+ if (!canvas()->cell(d->mMoveDestX / BO_TILE_SIZE, d->mMoveDestY / BO_TILE_SIZE)) {
+	boError() << k_funcinfo << "invalid cell " << d->mMoveDestX / BO_TILE_SIZE << "," << d->mMoveDestY / BO_TILE_SIZE << endl;
+	return;
+ }
  if (!owner()->isFogged(d->mMoveDestX / BO_TILE_SIZE, d->mMoveDestY / BO_TILE_SIZE)) {
 	Cell* destCell = canvas()->cell(d->mMoveDestX / BO_TILE_SIZE,
 			d->mMoveDestY / BO_TILE_SIZE);

@@ -761,6 +761,10 @@ void BosonBigDisplayBase::paintGL()
 	QPointArray cells = item->cells();
 	bool visible = false;
 	for (unsigned int i = 0; i < cells.count(); i++) {
+		if (!canvas()->cell(cells[i].x(), cells[i].y())) {
+			boError() << k_funcinfo << cells[i].x() << "," << cells[i].y() << " is no valid cell!" << endl;
+			continue;
+		}
 		if (!localPlayer()->isFogged(cells[i].x(), cells[i].y())) {
 			visible = true;
 			// ugly but faster than placing this into the loop
@@ -1100,8 +1104,10 @@ void BosonBigDisplayBase::renderParticles()
 	if (sphereInFrustum(s->position(), s->boundingSphereRadius())) {
 #warning FIXME
 		// FIXME: this is wrong: parts of particle system may be visible even if it's center point isn't
-		if (canvas()->onCanvas(s->x(), s->y()) && !localPlayer()->isFogged(s->x(), s->y())) {
-			visible.append(s);
+		if (canvas()->onCanvas(s->x(), s->y())) {
+			if (!localPlayer()->isFogged(s->x() / BO_TILE_SIZE, s->y() / BO_TILE_SIZE)) {
+				visible.append(s);
+			}
 		}
 	}
  }
@@ -1737,6 +1743,10 @@ void BosonBigDisplayBase::removeSelectionRect(bool replace)
 	QPoint canvasPos;
 	worldToCanvas(x, y, z, &canvasPos);
 	Unit* unit = 0l;
+	if (!canvas()->onCanvas(canvasPos)) {
+		boError() << k_funcinfo << canvasPos.x() << "," << canvasPos.y() << " is no on the canvas!" << endl;
+		return;
+	}
 #warning FIMXE
 	// this is not good: isFogged() should get checked *everywhere* where a
 	// player tries to select a unit!
@@ -1793,6 +1803,10 @@ void BosonBigDisplayBase::selectArea(bool replace)
  list = canvas()->collisions(r);
  for (it = list.begin(); it != list.end(); ++it) {
 	if (!RTTI::isUnit((*it)->rtti())) {
+		continue;
+	}
+	if (!canvas()->onCanvas((*it)->x(), (*it)->y())) {
+		boError() << k_funcinfo << "item is not on the canvas" << endl;
 		continue;
 	}
 	if (localPlayer()->isFogged((*it)->x() / BO_TILE_SIZE, (*it)->y() / BO_TILE_SIZE)) {

@@ -89,6 +89,10 @@ void BosonBigDisplay::actionClicked(const BoAction& action, QDataStream& stream,
  if (selection()->isEmpty()) {
 	return;
  }
+ if (!canvas()->onCanvas(action.canvasPos())) {
+	boError() << k_funcinfo << action.canvasPos().x() << "," << action.canvasPos().y() << " is not on the canvas!" << endl;
+	return;
+ }
 
  if (actionLocked()) {
 	switch (d->mActionType) {
@@ -519,7 +523,9 @@ void BosonBigDisplay::updateCursor()
 	return;
  }
 
- if (!canvas()->onCanvas(cursorCanvasPos()) && !actionLocked()) {  // TODO: show "can't do that" cursor if action is locked
+ if (!canvas()->onCanvas(cursorCanvasPos())) {
+	if (actionLocked()) {  // TODO: show "can't do that" cursor if action is locked
+	}
 	d->mCursorType = CursorDefault;
 	c->setCursor(d->mCursorType);
 	c->setWidgetCursor(this);
