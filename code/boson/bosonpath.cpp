@@ -3444,7 +3444,7 @@ bofixed BosonPath2::highLevelDistToGoal(BosonPathRegion* r, BosonPathInfo* info)
   // If this is the start region, we use dist between start and end points
   if(r == info->startRegion)
   {
-    return TNG_HIGH_DIST_MULTIPLIER * QMAX(QABS(info->start.x() - info->dest.x()), QABS(info->start.y() - info->dest.y()));
+    return QMAX(QABS(info->start.x() - info->dest.x()), QABS(info->start.y() - info->dest.y())) * TNG_HIGH_DIST_MULTIPLIER;
   }
   /*else if(r == info->destRegion)
   {
@@ -3468,7 +3468,7 @@ bofixed BosonPath2::highLevelDistToGoal(BosonPathRegion* r, BosonPathInfo* info)
     cross = -cross;
   }
 
-  return (cross / HIGH_CROSS_DIVIDER) + TNG_HIGH_DIST_MULTIPLIER * QMAX(QABS(dx1), QABS(dy1));
+  return (cross / HIGH_CROSS_DIVIDER) + QMAX(QABS(dx1), QABS(dy1)) * TNG_HIGH_DIST_MULTIPLIER;
 }
 
 bofixed BosonPath2::highLevelCost(BosonPathRegion* r, BosonPathInfo*)
@@ -3493,17 +3493,17 @@ bofixed BosonPath2::lowLevelDistToGoal(int x, int y, BosonPathInfo* info)
     cross = -cross;
   }
 
-  return (cross / bofixed(LOW_CROSS_DIVIDER)) + TNG_LOW_DIST_MULTIPLIER * QMAX(QABS(dx1), QABS(dy1));
+  return (bofixed(cross) / LOW_CROSS_DIVIDER) + QMAX(QABS(dx1), QABS(dy1)) * TNG_LOW_DIST_MULTIPLIER;
 }
 
 bofixed BosonPath2::lowLevelCost(int x, int y, BosonPathInfo* info)
 {
-  return TNG_LOW_BASE_COST + cell(x, y)->passageCostLand();
+  return cell(x, y)->passageCostLand() + TNG_LOW_BASE_COST;
 }
 
 bofixed BosonPath2::lowLevelCostAir(int x, int y, BosonPathInfo* info)
 {
-  return TNG_LOW_BASE_COST + cell(x, y)->passageCostAir();
+  return cell(x, y)->passageCostAir() + TNG_LOW_BASE_COST;
 }
 
 void BosonPath2::neighbor(int& x, int& y, Direction d)
