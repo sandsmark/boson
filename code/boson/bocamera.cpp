@@ -482,7 +482,7 @@ void BoGameCamera::checkRadius()
   {
     setRadius(0.0f);
   }
-  else if(radius() * MIN_CAMERA_ANGLE_TAN > z())
+  else if(radius() * MIN_CAMERA_ANGLE_TAN > z() && z() > 0)
   {
     setRadius(z() / MIN_CAMERA_ANGLE_TAN);
   }
