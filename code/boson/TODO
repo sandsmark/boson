@@ -39,6 +39,7 @@ Game TODOs
 - show messagebox if data files can't be found. Don't crash
 - minimap zooming factor should always be integral. It looks terrible otherwise
 - BUG: "Defaults" button in OptionsDialog doesn't work
+- Do not start game before all players has loaded their data
 
 Editor (map, unit, scenario) TODOs
 - totally broken, currently
@@ -92,6 +93,10 @@ General TODOs
   Why? It is used internally only... Failing e.g. here:
   inline bool operator<(const BosonPath::PathNode& a, const BosonPath::PathNode& b)
 - pixmaps on startup widgets should be centered horizontally
+- Saving and loading of games. Basics are already there (save() and load()
+  methods in some classes) but it still needs lot of work.
+- Use KMD5 to calculate checksum of map and unitProperties at the beginning of
+  game and transfer only needed things over network. Saves some traffic
 
 Data TODOs
 - sound for minimap activated/deactivated
