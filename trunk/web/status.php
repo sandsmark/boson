@@ -47,9 +47,6 @@ draw_bigbox_text("This is a list of features that I consider as
 	the list of features for the next release, but just a TODO list!
 	<h2>TODO</h2>
 	<ul>
-	  <li>Make map/scenario editor work. Maps should at least be modifyable,
-	  optionally you should be able to create new maps. Loading/Saving code
-	  is necessary for this.</li>
 	  <li>Use UnitProperties in bounit</li>
 	  <li>Commandframe (un)-docking must be fixed. See #48058</li>
 	  <li>All units must have their own 3D model</li>
@@ -72,6 +69,8 @@ draw_bigbox_text("This is a list of features that I consider as
 	  <li>Experimental support for unit animations (currenlty comsat only)</li>
 	  <li>Support for multiple weapons per unit (experimental)</li>
 	  <li>Rename all index.desktop files to appropriate names</li>
+	  <li>Map/scenario editor is working again. Map are at least modifyable,
+	  you can add/delete a few units.</li>
 	</ul>
 	");
 
