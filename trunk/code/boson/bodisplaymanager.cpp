@@ -479,6 +479,15 @@ void BoDisplayManager::slotPlaceCell(int tile)
  activeDisplay()->placeCell(tile);
 }
 
+void BoDisplayManager::slotDeleteSelectedUnits()
+{
+ if (!activeDisplay()) {
+	boError() << k_funcinfo << "NULL active display" << endl;
+	return;
+ }
+ activeDisplay()->deleteSelectedUnits();
+}
+
 void BoDisplayManager::addChatMessage(const QString& text)
 {
  QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);

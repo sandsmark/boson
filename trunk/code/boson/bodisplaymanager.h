@@ -146,6 +146,11 @@ public slots:
 	 **/
 	void slotPlaceCell(int tile);
 
+	/**
+	 * Editor mode only: delete all currently selected units.
+	 **/
+	void slotDeleteSelectedUnits();
+
 	void slotUpdateIntervalChanged(unsigned int);
 	void slotCenterHomeBase();
 	void slotResetViewProperties();

@@ -309,8 +309,7 @@ void BosonCanvas::shotHit(BosonShot* s)
  }
  // Set age of flying particle systems (e.g. smoke traces) to 0 so they wont create any new particles
  QPtrListIterator<BosonParticleSystem> it(*(s->flyParticleSystems()));
- while(it.current())
- {
+ while (it.current()) {
 	it.current()->setAge(0);
 	++it;
  }
@@ -440,19 +439,33 @@ void BosonCanvas::destroyUnit(Unit* unit)
 	}
 
 	// the unit is added to a list - now displayed as a wreckage only.
-	unit->setAnimated(false);
-	unit->setHealth(0); // in case of an accidental change before
-	unit->setWork(UnitBase::WorkDestroyed);
-	owner->unitDestroyed(unit); // remove from player without deleting
+	removeUnit(unit);
 	unit->playSound(SoundReportDestroyed);
 	// Pos is center of unit
 	BoVector3 pos(unit->x() + unit->width() / 2,unit->y() + unit->height() / 2, unit->z());
 	addParticleSystems(unit->unitProperties()->newDestroyedParticleSystems(pos[0], pos[1], pos[2]));
-	emit signalUnitDestroyed(unit);
 	if (owner->checkOutOfGame()) {
 		killPlayer(owner);
 	}
  }
+}
+
+void BosonCanvas::removeUnit(Unit* unit)
+{
+ // please note: you MUST NOT delete the unit here!!
+ // we call it from advance() and items must not be deleted from there!
+ if (!unit) {
+	return;
+ }
+ Player* owner = unit->owner();
+ unit->setAnimated(false);
+ unit->setHealth(0); // in case of an accidental change before
+ unit->setWork(UnitBase::WorkDestroyed);
+ owner->unitDestroyed(unit); // remove from player without deleting
+ emit signalUnitRemoved(unit);
+
+ // note: we don't add unit to any list and we don't delete it here.
+ // editor will now delete it, while game mustn't delete it (displays wreckage)
 }
 
 Cell* BosonCanvas::cellAt(Unit* unit) const

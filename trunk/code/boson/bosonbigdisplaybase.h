@@ -148,6 +148,11 @@ public:
 	 **/
 	virtual void placeCell(int) {}
 
+	/**
+	 * See @ref EditorBigDisplay::deleteSelectedUnits
+	 **/
+	virtual void deleteSelectedUnits() {}
+
 	void setKGameChat(KGameChat* chat);
 	void addChatMessage(const QString& message);
 

@@ -265,3 +265,22 @@ void EditorBigDisplay::placeCell(int tile)
  d->mPlacement.placeCell(tile);
 }
 
+void EditorBigDisplay::deleteSelectedUnits()
+{
+ if (!selection()) {
+	boError() << k_funcinfo << "NULL selection" << endl;
+	return;
+ }
+ if (selection()->isEmpty()) {
+	boDebug() << k_funcinfo << "no unit selected" << endl;
+	return;
+ }
+ QPtrList<Unit> units = selection()->allUnits();
+ QPtrListIterator<Unit> it(units);
+ for (; it.current(); ++it) {
+	canvas()->removeUnit(it.current());
+ }
+ units.setAutoDelete(true);
+ units.clear();
+}
+
