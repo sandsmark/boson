@@ -42,5 +42,5 @@ Damage=25
 Speed=15
 DamageRange=2
 HitParticles=2001
-FlyParticles=5001
+FlyParticles=5001,5002
 
