@@ -227,13 +227,15 @@ protected:
 
 	virtual void enterEvent(QEvent*);
 	virtual void leaveEvent(QEvent*);
+	virtual bool eventFilter(QObject*, QEvent*);
 
 protected slots:
 	void slotMouseEvent(KGameIO*, QDataStream& stream, QMouseEvent* e, bool *eatevent);
-
 	void slotEditorMouseEvent(QMouseEvent* e, bool* eatevent);
 
 	void slotContentsMoving(int x, int y);
+
+	void slotCursorEdgeTimeout();
 
 private:
 	void init();

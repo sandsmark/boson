@@ -101,6 +101,15 @@ public:
 	int commandButtonsPerRow() const;
 	void setRMBMove(bool m) { mRMBMove = m; }
 	bool rmbMove() const { return mRMBMove; }
+	void setMMBMove(bool m) { mMMBMove = m; }
+	bool mmbMove() const { return mMMBMove; }
+
+	/**
+	 * @param m How "sensitive" the edge is. I.e. the number the cursor must
+	 * be in range of m pixels to an edge of the window. 0 to disable
+	 **/
+	void setCursorEdgeSensity(unsigned int m) { mCursorEdgeSensity = m; }
+	unsigned int cursorEdgeSensity() const { return mCursorEdgeSensity; }
 
 	DebugMode debugMode() const;
 	/**
@@ -146,6 +155,12 @@ protected:
 	void saveRMBMove(KConfig* conf);
 	bool readRMBMove(KConfig* conf);
 
+	void saveMMBMove(KConfig* conf);
+	bool readMMBMove(KConfig* conf);
+
+	void saveCursorEdgeSensity(KConfig* conf);
+	unsigned int readCursorEdgeSensity(KConfig* conf);
+
 private:
 	static BosonConfig* mBosonConfig;
 	
@@ -159,6 +174,8 @@ private:
 	double mMiniMapZoom;
 	unsigned int mArrowKeyStep;
 	bool mRMBMove;
+	bool mMMBMove;
+	unsigned int mCursorEdgeSensity;
 };
 
 #endif
