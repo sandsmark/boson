@@ -11,7 +11,6 @@ libbosonstartupwidgets_la_SOURCES = \
 	bosonwelcomewidget.cpp\
 	bosonnetworkoptionswidget.cpp \
 	bosonloadingwidget.cpp \
-	bosonstartwidgetbase.cpp \
 	bosonnewgamewidget.cpp \
 	bosonneweditorwidget.cpp \
 	kloadsavegamewidget.cpp \
