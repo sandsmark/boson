@@ -1,21 +1,21 @@
 [Boson Mobile Unit]
 CanGoOnLand=true
 CanGoOnWater=true
-Speed=10
+Speed=8
 
 [Boson Unit]
-Armor=5
+Armor=4
 DestroyedParticles=1001,3001
 ExplodingDamage=0
 ExplodingDamageRange=0
-Health=250
-Id=10004
+Health=200
+Id=10005
 IsFacility=false
-MineralCost=500
-OilCost=250
-Name=Tornado
+MineralCost=600
+OilCost=300
+Name=Puma
 Producer=2
-ProductionTime=500
+ProductionTime=600
 Requirements=1,14
 Shield=0
 SightRange=6
@@ -24,7 +24,7 @@ TerrainType=2
 UnitDepth=1
 UnitHeight=1.5
 UnitWidth=1.5
-Weapons=2
+Weapons=1
 
 [Sounds]
 OrderAttack=order_attack
@@ -38,29 +38,13 @@ Shoot=shoot
 [Weapon_0]
 CanShootAtAirUnits=true
 CanShootAtLandUnits=true
-Damage=10
+Damage=12
 DamageRange=1
 HitParticles=2002
 Height=1
 Name=Cannon
 Offset=0,0,0
 Range=4
-Reload=10
+Reload=8
 ShootParticles=
 Speed=0
-
-[Weapon_1]
-CanShootAtAirUnits=true
-CanShootAtLandUnits=true
-Damage=25
-DamageRange=2
-FlyParticles=5001
-HitParticles=2001
-MaxHeight=1
-Model=missile.3ds
-Name=Missiles
-Offset=0.7,0,0
-Range=6
-Reload=30
-ShootParticles=
-Speed=15
