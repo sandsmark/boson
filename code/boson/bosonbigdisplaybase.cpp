@@ -755,7 +755,7 @@ void BosonBigDisplayBase::paintGL()
  Unit* factory = selection()->leader();
  if (factory) {
 	ProductionPlugin* production = (ProductionPlugin*)(factory->plugin(UnitPlugin::Production));
-	if (production && production->completedProductionId() > 0) {
+	if (production && production->completedProductionId() > 0 && production->completedProductionType() == ProduceUnit) {
 		// We have completed production
 		const UnitProperties* u = localPlayer()->unitProperties(production->currentProductionId());
 		if(u->isFacility()) {
