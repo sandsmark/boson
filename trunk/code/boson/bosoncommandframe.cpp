@@ -50,10 +50,10 @@
 
 #define UPDATE_TIMEOUT 200
 
-class BoMinerWidget : public QWidget
+class BoHarvesterWidget : public QWidget
 {
 public:
-	BoMinerWidget(QWidget* parent) : QWidget(parent)
+	BoHarvesterWidget(QWidget* parent) : QWidget(parent)
 	{
 		QHBoxLayout* layout = new QHBoxLayout(this);
 
@@ -66,24 +66,22 @@ public:
 		layout->addWidget(mProgress);
 	}
 
-	~BoMinerWidget()
+	~BoHarvesterWidget()
 	{
 	}
 
-	void setMiner(MobileUnit* miner)
+	void setMiner(HarvesterPlugin* h)
 	{
-		const HarvesterProperties* prop = (HarvesterProperties*)miner->properties(PluginProperties::Harvester);
-		HarvesterPlugin* h = (HarvesterPlugin*)miner->plugin(UnitPlugin::Harvester);
-		if (!prop || (!prop->canMineMinerals() && !prop->canMineOil()) || !h) {
+		if (!h || (!h->canMineMinerals() && !h->canMineOil())) {
 			return;
 		}
-		if (prop->canMineMinerals()) {
+		if (h->canMineMinerals()) {
 			mMinerType->setText(i18n("Mineral Filling:"));
 		} else {
 			mMinerType->setText(i18n("Oil Filling:"));
 		}
 
-		unsigned int max = prop->maxResources();
+		unsigned int max = h->maxResources();
 		unsigned int r = h->resourcesMined();
 		double p = (double)(r * 100) / (double)max;
 		mProgress->setValue((int)p);
@@ -461,7 +459,7 @@ public:
 	QPtrList<QWidget> mActionWidgets;
 	BoOrderWidget* mOrderWidget;
 	BoConstructionProgress* mConstructionProgress;
-	BoMinerWidget* mMinerWidget;
+	BoHarvesterWidget* mMinerWidget;
 
 	Player* mOwner;
 
@@ -518,12 +516,12 @@ BosonCommandFrame::BosonCommandFrame(QWidget* parent, bool editor) : QFrame(pare
  d->mActionWidgets.append(d->mConstructionProgress);
 
 // the miner display (minerals/oil)
- d->mMinerWidget = new BoMinerWidget(actionWidget);
+ d->mMinerWidget = new BoHarvesterWidget(actionWidget);
  d->mMinerWidget->setBackgroundOrigin(WindowOrigin);
  actionLayout->addWidget(d->mMinerWidget);
  d->mMinerWidget->hide();
  d->mActionWidgets.append(d->mMinerWidget);
- 
+
  actionLayout->addStretch(1);
  setBackgroundOrigin(WindowOrigin);
  show();
@@ -563,7 +561,7 @@ void BosonCommandFrame::slotSetAction(Unit* unit)
  // this makes sure that they are even hidden if the unit cannot produce or
  // something:
  hideActions();
- 
+
  if (!unit) {
 	// display nothing
 	return;
@@ -578,7 +576,7 @@ void BosonCommandFrame::slotSetAction(Unit* unit)
 	return;
  }
 
- // don't display production items of units of other players. 
+ // don't display production items of units of other players.
  if (owner != d->mOwner) {
 	return;
  }
@@ -589,50 +587,53 @@ void BosonCommandFrame::slotSetAction(Unit* unit)
  d->mOrderWidget->showUnitActions(unit);
  d->mOrderWidget->show();
 
- if (unit->isFacility()) {
+ if (d->mSelectedUnit->isFacility()) {
 	Facility* fac = (Facility*)d->mSelectedUnit;
 	if (!fac->isConstructionComplete()) {
 		slotShowConstructionProgress(fac);
+		kdWarning() << "construction not completed" << endl;
+		// we must not yet display anything else.
 		return;
 	}
-	ProductionPlugin* production = (ProductionPlugin*)fac->plugin(UnitPlugin::Production);
-	if (production) {
-		if (!fac->unitProperties()->properties(PluginProperties::Production)) {
-			// must not happen if the units has the production
-			// plugin
-			kdError() << k_funcinfo << "no production properties!" << endl;
-			return;
-		}
-		ProductionProperties* pp = (ProductionProperties*)fac->unitProperties()->properties(PluginProperties::Production);
-		QValueList<unsigned long int> produceList = fac->speciesTheme()->productions(pp->producerList());
-		// Filter out things that player can't actually build (requirements aren't
-		//  met yet)
-		QValueList<unsigned long int>::Iterator it;
-		it = produceList.begin();
-		while(it != produceList.end()) {
-			if(!owner->canBuild(*it)) {
-				it = produceList.remove(it);
-			} else {
-				it++;
-			}
-		}
-		d->mOrderWidget->setOrderButtons(produceList, owner, (Facility*)unit);
-		if (production->hasProduction()) {
-			d->mUpdateTimer.start(UPDATE_TIMEOUT);
-		}
-		d->mOrderWidget->show();
+ }
+ kdDebug() << k_funcinfo << endl;
+
+ if (d->mSelectedUnit->plugin(UnitPlugin::Production)) {
+	kdDebug() << k_funcinfo << "prod" << endl;
+	ProductionPlugin* production = (ProductionPlugin*)d->mSelectedUnit->plugin(UnitPlugin::Production);
+	if (!d->mSelectedUnit->properties(PluginProperties::Production)) {
+		// must not happen if the units has the production
+		// plugin
+		kdError() << k_funcinfo << "no production properties!" << endl;
 		return;
 	}
- } else {
-	MobileUnit* mob = (MobileUnit*)d->mSelectedUnit;
-	if (d->mSelectedUnit->properties(PluginProperties::Harvester)) {
-		d->mMinerWidget->setMiner(mob);
-		d->mMinerWidget->show();
+	ProductionProperties* pp = (ProductionProperties*)d->mSelectedUnit->properties(PluginProperties::Production);
+	QValueList<unsigned long int> produceList = d->mSelectedUnit->speciesTheme()->productions(pp->producerList());
+	// Filter out things that player can't actually build (requirements aren't
+	//  met yet)
+	QValueList<unsigned long int>::Iterator it;
+	it = produceList.begin();
+	while(it != produceList.end()) {
+		if(!owner->canBuild(*it)) {
+			it = produceList.remove(it);
+		} else {
+			it++;
+		}
+	}
+	d->mOrderWidget->setOrderButtons(produceList, owner, (Facility*)unit);
+	d->mOrderWidget->show();
+	if (production->hasProduction()) {
 		if (!d->mUpdateTimer.isActive()) {
 			d->mUpdateTimer.start(UPDATE_TIMEOUT);
 		}
 	}
-	return;
+ }
+ if (d->mSelectedUnit->plugin(UnitPlugin::Harvester)) {
+	d->mMinerWidget->setMiner((HarvesterPlugin*)d->mSelectedUnit->plugin(UnitPlugin::Harvester));
+	d->mMinerWidget->show();
+	if (!d->mUpdateTimer.isActive()) {
+		d->mUpdateTimer.start(UPDATE_TIMEOUT);
+	}
  }
 }
 
@@ -767,7 +768,7 @@ void BosonCommandFrame::slotUpdate()
 	if (d->mSelectedUnit->currentPluginType() == UnitPlugin::Harvester) {
 		used = true;
 	}
-	d->mMinerWidget->setMiner((MobileUnit*)d->mSelectedUnit);
+	d->mMinerWidget->setMiner((HarvesterPlugin*)d->mSelectedUnit->plugin(UnitPlugin::Harvester));
  }
  if (!used) {
 	d->mUpdateTimer.stop();
