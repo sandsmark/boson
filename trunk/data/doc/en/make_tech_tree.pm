@@ -7,6 +7,14 @@ use strict;
 
 # AB: there might be problems with this script if the index.unit files were
 # stored in dos mode!!
+#
+# FS:
+# - there are problems if there are recursive dependences between the facilities..
+# - print will print into the html file.
+# - use print_mesg(message) for debug output.
+# - don't print outside a sub.
+# - exit code !=0 will give a wml error during make but no make error.
+
 
 sub draw_map() {
 
