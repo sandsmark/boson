@@ -99,6 +99,7 @@ protected:
 	virtual void updateCursor();
 
 	virtual bool actionLocked() const;
+	virtual void unlockAction();
 	/**
 	 * @return The currently active @ref UnitAction if @ref actionLocked is
 	 * TRUE. Otherwise undefined.
