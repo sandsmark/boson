@@ -113,9 +113,6 @@ public:
 	bool isValid() const;
 
 
-	static bool loadUnit(const QDomElement& node, Unit* unit);
-	static bool loadBasicUnit(const QDomElement& node, unsigned long int& unitType, unsigned int& x, unsigned int& y);
-
 	static bool saveUnit(QDomElement& node, const Unit* unit);
 
 	static bool saveBasicUnit(QDomElement& node, unsigned long int unitType, unsigned int x, unsigned int y);

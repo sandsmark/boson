@@ -58,9 +58,6 @@ UnitBase::UnitBase(const UnitProperties* prop, Player* owner, BosonCanvas* canva
  mDeletionTimer.setEmittingSignal(false);
  mShieldReloadCounter.setEmittingSignal(false);
 
- mId = 0;
-
-
  mWork.setLocal((int)WorkNone);
  mAdvanceWork.setLocal((int)WorkNone);
  mHealth.setLocal(0); // initially destroyed
@@ -138,7 +135,6 @@ bool UnitBase::saveAsXML(QDomElement& root)
  QDomDocument doc = root.ownerDocument();
  root.setAttribute(QString::fromLatin1("Rtti"), (int)rtti());
  root.setAttribute(QString::fromLatin1("Type"), (unsigned int)type());
- root.setAttribute(QString::fromLatin1("Id"), (unsigned int)id());
  root.setAttribute(QString::fromLatin1("Group"), 0);
  root.setAttribute(QString::fromLatin1("GroupType"), 0);
 

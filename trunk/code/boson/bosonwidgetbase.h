@@ -43,6 +43,7 @@ class BosonMiniMap;
 class BosonPlayField;
 class OptionsDialog;
 class BosonLocalPlayerInput;
+class BosonItem;
 
 /**
  * This is the actual main widget of boson for the game
@@ -255,7 +256,7 @@ protected slots:
 
 	virtual void slotChangeCursor(int mode, const QString& dir) = 0;
 
-	void slotAddUnit(Unit* unit, int x, int y);
+	void slotItemAdded(BosonItem*);
 	void slotUnitRemoved(Unit* unit);
 
 	/**

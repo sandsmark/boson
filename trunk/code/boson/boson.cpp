@@ -615,8 +615,6 @@ void Boson::createCanvas()
 	return;
  }
  d->mCanvas = new BosonCanvas(this);
- connect(this, SIGNAL(signalAddUnit(Unit*, int, int)),
-		d->mCanvas, SLOT(slotAddUnit(Unit*, int, int)));
 }
 
 BosonCanvas* Boson::canvasNonConst() const
@@ -1367,26 +1365,27 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 	{
 		Q_UINT32 unitType;
 		Q_UINT32 owner;
-		Q_INT32 x;
-		Q_INT32 y;
+		Q_INT32 cellX;
+		Q_INT32 cellY;
 
 		stream >> owner;
 		stream >> unitType;
-		stream >> x;
-		stream >> y;
+		stream >> cellX;
+		stream >> cellY;
 
-		KPlayer* p = 0;
+		Player* p = 0;
 		if (owner >= 1024) { // a KPlayer ID
-			p = findPlayer(owner);
+			p = (Player*)findPlayer(owner);
 		} else {
-			p = playerList()->at(owner);
+			p = (Player*)playerList()->at(owner);
 		}
 		if (!p) {
 			boError() << k_lineinfo << "Cannot find player " << owner << endl;
 			break;
 		}
 
-		addUnit(unitType, (Player*)p, x, y);
+		BoVector3 pos((float)cellX * BO_TILE_SIZE, (float)cellY * BO_TILE_SIZE, 0.0f);
+		d->mCanvas->createNewItem(RTTI::UnitStart + unitType, p, ItemType(unitType), pos);
 		break;
 	}
 	case BosonMessage::MoveChangeTexMap:
@@ -1671,8 +1670,6 @@ KPlayer* Boson::createPlayer(int , int , bool ) // AB: we don't use these params
 	// AB: this will never be reached. unused. can probably be removed.
 	p->initMap(d->mPlayField->map(), boGame->gameMode());
  }
- connect(p, SIGNAL(signalUnitLoaded(Unit*, int, int)),
-		this, SIGNAL(signalAddUnit(Unit*, int, int)));
  return p;
 }
 
@@ -1758,28 +1755,6 @@ void Boson::slotPropertyChanged(KGamePropertyBase* p)
  }
 }
 
-void Boson::addInitialUnits(const QString& xmlDocument, Player* owner)
-{
- if (!owner) {
-	boError() << k_funcinfo << "NULL owner" << endl;
-	return;
- }
- BosonProfiler profiler(BosonProfiling::AddUnitsXML);
- boDebug() << k_lineinfo << endl;
- QDomDocument doc;
- if (!loadXMLDoc(&doc, xmlDocument)) {
-	boError() << k_funcinfo << "unable to load xml document for player " << owner->id() << endl;
-	return;
- }
- QDomElement root = doc.documentElement();
- QDomNodeList list = root.elementsByTagName("Unit");
- for (unsigned int i = 0; i < list.count(); i++) {
-	QDomElement e = list.item(i).toElement();
-	addUnit(e, owner);
- }
- boDebug() << k_lineinfo << "done" << endl;
-}
-
 void Boson::slotReplacePlayerIO(KPlayer* player, bool* remove)
 {
  *remove = false;
@@ -1794,8 +1769,12 @@ void Boson::slotReplacePlayerIO(KPlayer* player, bool* remove)
 // boDebug() << k_funcinfo << endl;
 }
 
-bool Boson::buildProducedUnit(ProductionPlugin* factory, unsigned long int unitType, int x, int y)
+bool Boson::buildProducedUnit(ProductionPlugin* factory, unsigned long int unitType, int cellX, int cellY)
 {
+ if (!d->mCanvas) {
+	BO_NULL_ERROR(d->mCanvas);
+	return false;
+ }
  if (!factory) {
 	boError() << k_funcinfo << "NULL factory plugin cannot produce" << endl;
 	return false;
@@ -1805,11 +1784,12 @@ bool Boson::buildProducedUnit(ProductionPlugin* factory, unsigned long int unitT
 	boError() << k_funcinfo << "NULL owner" << endl;
 	return false;
  }
- if (!(d->mCanvas)->canPlaceUnitAtCell(p->unitProperties(unitType), QPoint(x, y), 0)) {
+ if (!(d->mCanvas)->canPlaceUnitAtCell(p->unitProperties(unitType), QPoint(cellX, cellY), 0)) {
 	boDebug() << k_funcinfo << "Cannot create unit here" << endl;
 	return false;
  }
- Unit* unit = addUnit(unitType, p, x, y);
+ BoVector3 pos((float)cellX * BO_TILE_SIZE, (float)cellY * BO_TILE_SIZE, 0.0f);
+ Unit* unit = (Unit*)d->mCanvas->createNewItem(RTTI::UnitStart + unitType, p, ItemType(unitType), pos);
  if (!unit) {
 	boError() << k_funcinfo << "NULL unit" << endl;
 	return false;
@@ -1826,67 +1806,6 @@ bool Boson::buildProducedUnit(ProductionPlugin* factory, unsigned long int unitT
  return true;
 }
 
-
-/**
- * AB:
- * @li BosonCanvas::createNewItem()
- * @li Boson::signalAddUnit
- ***/
-Unit* Boson::addUnit(unsigned long int unitType, Player* p, int x, int y)
-{
- BO_CHECK_NULL_RET0(d->mCanvas);
- if (x < 0 || (unsigned int)x >= d->mCanvas->mapWidth()) {
-	boError() << k_funcinfo << "Invalid x-coordinate " << x << endl;
-	return 0;
- }
- if (y < 0 || (unsigned int)y >= d->mCanvas->mapHeight()) {
-	boError() << k_funcinfo << "Invalid y-coordinate " << y << endl;
-	return 0;
- }
- if (!p) {
-	boError() << k_funcinfo << "NULL player" << endl;
-	return 0;
- }
- Unit* unit = (Unit*)d->mCanvas->createNewItem(RTTI::UnitStart + unitType, p, ItemType(unitType));
- if (!unit) {
-	boError() << k_funcinfo << "NULL unit when adding new unit with type " << unitType << endl;
-	return 0;
- }
- emit signalAddUnit(unit, x * BO_TILE_SIZE, y * BO_TILE_SIZE);
- return unit;
-}
-
-/**
- * AB:
- * @li BosonCanvas::createNewItem()
- * @li BosonScenario::loadUnit  <--
- * @li Boson::signalAddUnit
- **/
-Unit* Boson::addUnit(QDomElement& node, Player* p)
-{
- BO_CHECK_NULL_RET0(d->mCanvas);
- unsigned long int unitType = 0;
- unsigned int x = 0;
- unsigned int y = 0;
- if (!BosonScenario::loadBasicUnit(node, unitType, x, y)) {
-	boError() << k_funcinfo << "Received invalid XML file from server!!!! (very bad)" << endl;
-	return 0;
- }
- Unit* unit = (Unit*)d->mCanvas->createNewItem(RTTI::UnitStart + unitType, p, ItemType(unitType));
- if (!unit) {
-	boError() << k_funcinfo << "NULL unit when adding new unit with type " << unitType << endl;
-	return 0;
- }
- if (!BosonScenario::loadUnit(node, unit)) {
-	boWarning() << k_funcinfo << "Received broken XML file from server. It may be that network is broken now!" << endl;
-	// don't return - the error should be on every client so with some luck
-	// the player will never know that we had a problem here. Just a few
-	// (non-critical) values were not loaded.
- }
-
- emit signalAddUnit(unit, x * BO_TILE_SIZE, y * BO_TILE_SIZE);
- return unit;
-}
 
 void Boson::slotPlayerJoinedGame(KPlayer* p)
 {

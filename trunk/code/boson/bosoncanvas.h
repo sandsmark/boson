@@ -156,7 +156,7 @@ public:
 	 * This will also do the necessary steps for newly added items, such as
 	 * loading unit defaults and adding the unit to the @p owner.
 	 **/
-	BosonItem* createNewItem(int rtti, Player* owner, const ItemType& type);
+	BosonItem* createNewItem(int rtti, Player* owner, const ItemType& type, const BoVector3& pos);
 
 	/**
 	 * Test whether the unit can go over rect. This method only tests for
@@ -413,22 +413,12 @@ public:
 
 public slots:
 	/**
-	 * The game (@ref Boson) reports that a unit shall be added - lets do
-	 * that :-)
-	 *
-	 * Note that unit->x() and unit->y() may return values different to @p x
-	 * and @p y, as the slot which moves the unit to its actual position
-	 * might not have been called yet. So you should prefer the @p x and @p
-	 * y parameters here.
-	 **/
-	void slotAddUnit(Unit* unit, int x, int y);
-
-	/**
 	 * @param See @ref Boson::signalAdvance
 	 **/
 	void slotAdvance(unsigned int advanceCount, bool advanceFlag);
 	
 signals:
+	void signalItemAdded(BosonItem* item);
 	void signalUnitMoved(Unit* unit, float oldX, float oldY);
 	void signalUnitRemoved(Unit* unit);
 
@@ -466,7 +456,7 @@ protected:
 	 *
 	 * @param id A unique ID for the item. See @ref BosonItem::setId
 	 **/
-	BosonItem* createItem(int rtti, Player* owner, const ItemType& type, unsigned long int id);
+	BosonItem* createItem(int rtti, Player* owner, const ItemType& type, const BoVector3& pos, unsigned long int id);
 
 	Unit* createUnit(Player* owner, unsigned long int unitType);
 	BosonShot* createShot(Player* owner, unsigned long int shotType, unsigned long int unitType, unsigned long int weaponPropertyId);

@@ -190,19 +190,6 @@ public:
 	 **/
 	KGamePropertyHandler* weaponDataHandler();
 
-	/**
-	 * The ID of the unit. This ID is unique for this game.
-	 * @return The uniuque ID of the unit
-	 **/
-	unsigned long int id() const { return mId; }
-
-	/**
-	 * Set the ID of this unit. A ID must be unique for the owner, so it
-	 * must be ensured that a ID exists only once per player. Should be done
-	 * on construction only.
-	 **/
-	void setId(unsigned long int id) { mId = id; }
-
 	inline unsigned long int shields() const { return mShields; }
 	void setShields(unsigned long int shields);
 
@@ -321,7 +308,6 @@ private:
 
 private:
 	Player* mOwner;
-	unsigned long int mId; // not a KGameProperty, to make saving to XML (i.e. scenario files) more easy.
 	bool mIsMoving;
 
 	KGameProperty<unsigned long int> mArmor;

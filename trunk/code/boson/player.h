@@ -213,8 +213,6 @@ signals:
 
 	void signalShowMiniMap(bool show);
 
-	void signalUnitLoaded(Unit* unit, int x, int y);
-
 public slots:
 	/**
 	 * Called when a @ref KGameProperty object of a @ref Unit changes.

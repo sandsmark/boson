@@ -517,6 +517,9 @@ bool BosonItem::saveAsXML(QDomElement& root)
  root.setAttribute(QString::fromLatin1("Group"), (int)0);
  root.setAttribute(QString::fromLatin1("GroupType"), (int)0);
 
+
+ root.setAttribute(QString::fromLatin1("Id"), id());
+
  // the data handler
  BosonCustomPropertyXML propertyXML;
  QDomDocument doc = root.ownerDocument();

@@ -238,8 +238,8 @@ void BosonWidgetBase::initConnections()
  connect(canvas(), SIGNAL(signalUnitRemoved(Unit*)),
 		this, SLOT(slotUnitRemoved(Unit*)));
 
- connect(boGame, SIGNAL(signalAddUnit(Unit*, int, int)),
-		this, SLOT(slotAddUnit(Unit*, int, int)));
+ connect(canvas(), SIGNAL(signalItemAdded(BosonItem*)),
+		this, SLOT(slotItemAdded(BosonItem*)));
 
  connect(boGame, SIGNAL(signalLoadExternalStuff(QDataStream&)),
 		this, SLOT(slotLoadExternalStuff(QDataStream&)));
@@ -426,12 +426,16 @@ void BosonWidgetBase::slotHack1()
  displayManager()->activeDisplay()->resize(size);
 }
 
-void BosonWidgetBase::slotAddUnit(Unit* unit, int, int)
+void BosonWidgetBase::slotItemAdded(BosonItem* item)
 {
- if (!unit) {
-	boError() << k_funcinfo << "NULL unit" << endl;
+ if (!item) {
+	boError() << k_funcinfo << "NULL item" << endl;
 	return;
  }
+ if (!RTTI::isUnit(item->rtti())) {
+	return;
+ }
+ Unit* unit = (Unit*)item;
  Player* p = unit->owner();
  if (!p) {
 	boError() << k_funcinfo << "NULL owner" << endl;

@@ -161,6 +161,18 @@ public:
 	virtual int rtti() const = 0;
 
 	/**
+	 * Set a unique Id for this item. The Id <em>must</em> be unique for
+	 * <em>all</em> items in the game. Otherwise the results are undefined.
+	 **/
+	void setId(unsigned long int id) { mId = id; }
+
+	/**
+	 * @return An id that identifies this item uniquely. There are never 2
+	 * different items with the same Id.
+	 **/
+	inline unsigned long int id() const { return mId; }
+
+	/**
 	 * @return The x-coordinate of the left edge of the object.Note that
 	 * this has <em>nothing</em> to do with the OpenGL coordinates. 
 	 * These are the internal canvas coordinates.
@@ -593,6 +605,7 @@ private:
 	BosonAnimation* mCurrentAnimation;
 	// FIXME: use KGameProperty here. We can do so, since we don't use
 	// QCanvasSprite anymore.
+	unsigned long int mId;
 	float mX;
 	float mY;
 	float mZ;

@@ -924,34 +924,11 @@ bool Unit::loadFromXML(const QDomElement& root)
 	boError(260) << k_funcinfo << "Unit not loaded properly" << endl;
 	return false;
  }
- bool ok;
- float x;
- float y;
- float z;
- float rotation;
- x = root.attribute(QString::fromLatin1("x")).toFloat(&ok);
- if (!ok) {
-	boError() << k_funcinfo << "Invalid value for x tag" << endl;
-	x = 0;
-	// don't stop (will be broken, but unit won't get deleted)
- }
- y = root.attribute(QString::fromLatin1("y")).toFloat(&ok);
- if (!ok) {
-	boError() << k_funcinfo << "Invalid value for y tag" << endl;
-	y = 0;
-	// don't stop (will be broken, but unit won't get deleted)
- }
- z = root.attribute(QString::fromLatin1("z")).toFloat(&ok);
- if (!ok) {
-	boError() << k_funcinfo << "Invalid value for z tag" << endl;
-	z = 0;
-	// don't stop (will be broken, but unit won't get deleted)
- }
- rotation = root.attribute(QString::fromLatin1("Rotation")).toFloat(&ok);
+ bool ok = false;
+ float rotation = root.attribute(QString::fromLatin1("Rotation")).toFloat(&ok);
  if (!ok) {
 	boError() << k_funcinfo << "Invalid value for Rotation tag" << endl;
-	rotation = 0;
-	// don't stop (will be broken, but unit won't get deleted)
+	rotation = 0.0f;
  }
 
  int pluginIndex = 0;
@@ -988,7 +965,6 @@ bool Unit::loadFromXML(const QDomElement& root)
 	}
  }
 
- move(x, y, z);
  setRotation(rotation);
  setAdvanceWork(advanceWork());
  return true;
@@ -1727,14 +1703,16 @@ bool MobileUnit::loadFromXML(const QDomElement& root)
 	return false;
  }
 
- bool ok;
- float speed;
- speed = root.attribute("Speed").toFloat(&ok);
- if (!ok) {
-	boError() << k_funcinfo << "Invalid value for Speed tag" << endl;
-	return false;
+ bool ok = false;
+ float speed = 0.0f;
+ if (root.hasAttribute("Speed")) {
+	speed = root.attribute("Speed").toFloat(&ok);
+	if (!ok) {
+		boWarning() << k_funcinfo << "Invalid value for Speed attribute" << endl;
+	} else {
+		setSpeed(speed);
+	}
  }
- setSpeed(speed);
 
  return true;
 }

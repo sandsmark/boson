@@ -730,12 +730,16 @@ bool BosonFileConverter::convertScenario_From_0_8_To_0_9(const QByteArray& scena
 			UnitNode* u = &p->units[j];
 			QDomElement item = canvasDoc.createElement("Item");
 			items.appendChild(item);
+			item.setAttribute("Id", 0); // 0 == boson assigns an id
+			item.setAttribute("DataHandlerId", -1); // -1 == boson assigns an id
 			item.setAttribute("Rtti", 200 + u->type);
 			item.setAttribute("Type", u->type);
 			item.setAttribute("Group", u->type);
 			item.setAttribute("GroupType", u->type);
 			item.setAttribute("x", (float)u->x * 48);
 			item.setAttribute("y", (float)u->y * 48);
+			item.setAttribute("z", 0.0f);
+			item.setAttribute("Rotation", 0.0f);
 			QDomElement dataHandler = canvasDoc.createElement("DataHandler");
 			item.appendChild(dataHandler);
 			if (u->isFacility && u->constructionCompleted) {
