@@ -1,4 +1,4 @@
-INCLUDES = -I$(top_srcdir)/boson/bodebug -I$(top_srcdir)/boson $(all_includes)
+INCLUDES = -I$(top_srcdir)/boson/bodebug $(all_includes)
 
 noinst_LTLIBRARIES = libbosoncommandframe.la
 
