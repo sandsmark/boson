@@ -6,12 +6,14 @@ TODO:
 0.1 release : (june, 15th?)
 =============
 
+bug : select mobile, move, somewhere, can't move somewhere else...
+
 does units::rect need to be virtual anymore ?
 
 bug : mobile on very-bottom-right can't be selected
 
 how to handle selection drawing ?
-menu clean-up :-)
+menu clean-up :-), and also toolbar and so on.
 
 when clicking (no box) on two mobiles, both are selected, but shouldn't
 	then -> client units : shouldn't move over each other
@@ -42,8 +44,6 @@ Website : documentation about
 0.2 release:
 ============
 
-have to install local CVS
-
 basic map editor
 server GUI
 client and server should be peer-killed proof
@@ -56,13 +56,12 @@ see again "virtual(?) Unit::getWidth" and checkUnitDiscovered badly centered
 ============
 
 list of places to announce (mailing-list, portal, friends, school, packager ..)
-
 mailing list ?
 
+then:
+=====
 
-si succes :
-	quemander du matos a suse ???? :-))
-	demander une adresse a kde  ?
+	forgotten fog of war
 
 
 1.0 release :
