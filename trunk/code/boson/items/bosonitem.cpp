@@ -163,7 +163,7 @@ BosonItem::BosonItem(BosonModel* model, BosonCanvas* canvas)
  }
 
  // set the default animation mode
- setAnimationMode(0);
+ setAnimationMode(UnitAnimationIdle);
 
  // FIXME the correct frame must be set after this constructor!
  if (mGLConstructionStep >= glConstructionSteps()) {
