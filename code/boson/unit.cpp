@@ -74,6 +74,7 @@ Unit::Unit(const UnitProperties* prop, Player* owner, QCanvas* canvas)
 
  d->mDirection.setLocal(0); // not yet used
  d->mReloadState.setLocal(0);
+ setAnimated(true);
 }
 
 Unit::~Unit()
@@ -123,7 +124,6 @@ void Unit::setTarget(Unit* target)
  }
  if (!target->isDestroyed()) {
 	setWork(WorkAttack);
-	setAnimated(true);
  }
 }
 
@@ -190,10 +190,7 @@ void Unit::moveBy(double moveX, double moveY)
  if (d->mSelectBox) {
 	d->mSelectBox->moveBy(moveX, moveY);
  }
- if(d->mLeader)
-	boCanvas()->leaderMoved(this, oldX, oldY);
- else
-	boCanvas()->unitMoved(this, oldX, oldY);
+ boCanvas()->unitMoved(this, oldX, oldY);
 }
 
 void Unit::advance(int phase)
@@ -357,9 +354,9 @@ void Unit::stopMoving()
  }
  setXVelocity(0);
  setYVelocity(0);
- if(d->mLeader)
+ if(d->mLeader) {
 	boCanvas()->leaderStopped(this);
-// setAnimated(false); // do not call advance() anymore - is more efficient
+ }
 }
 
 void Unit::stopAttacking()
@@ -540,6 +537,7 @@ QValueList<Unit*> Unit::unitCollisions(bool exact) const
 	if (unit->isDestroyed()) {
 		continue;
 	}
+	units.append(unit);
  }
  return units;
 }
@@ -559,12 +557,12 @@ void Unit::setWork(WorkType w)
 
 void Unit::moveInGroup()
 {
-  setWork(WorkMoveInGroup);
+ setWork(WorkMoveInGroup);
 }
 
 void Unit::setGroupLeader(bool leader)
 {
-  d->mLeader = leader;
+ d->mLeader = leader;
 }
 
 
@@ -732,6 +730,12 @@ void MobileUnit::advanceMove()
  }*/
 }
 
+void MobileUnit::advanceGroupMove(Unit* leader)
+{
+ setXVelocity(leader->xVelocity());
+ setYVelocity(leader->yVelocity());
+}
+
 void MobileUnit::advanceMoveCheck()
 {
  if (!canvas()->onCanvas(boundingRectAdvanced().topLeft())) {
@@ -821,15 +825,14 @@ void MobileUnit::turnTo()
 
 void MobileUnit::leaderMoved(double x, double y)
 {
- if(work() == WorkMoveInGroup)
- {
+ if(work() == WorkMoveInGroup) {
 	setVelocity(x, y);
 	turnTo();
 	setVelocity(0, 0);
 	moveBy(x, y);
- }
- else
+ } else {
 	kdDebug() << "MobileUnit::leaderMoved() called, but work() != WorkMoveInGroup" << endl;
+ }
 }
 
 
@@ -864,7 +867,6 @@ Facility::Facility(const UnitProperties* prop, Player* owner, QCanvas* canvas) :
  d->mProductionState.setLocal(0);
 
  setWork(WorkConstructed);
- setAnimated(true); // construcion animation
 
  d->mProductions.setEmittingSignal(false); // just to prevent warning in Player::slotUnitPropertyChanged()
 }
@@ -887,7 +889,6 @@ void Facility::advanceConstruction()
 		setFrame(d->mConstructionState / constructionDelay());
 	}
  } else {
-//	setAnimated(false);
 	setWork(WorkNone);
  }
 }
@@ -976,7 +977,6 @@ void Facility::addProduction(int unitType)
  if (start) {
 	setWork(WorkProduce);
  }
- setAnimated(true);
 }
 
 void Facility::removeProduction()
@@ -1009,7 +1009,6 @@ void Facility::advanceProduction()
  }
  int type = currentProduction();
  if (type < 0) { // no production
-//	setAnimated(false);
 	setWork(WorkNone);
 	d->mProductionState = 0;
 	return;

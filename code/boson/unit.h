@@ -98,6 +98,11 @@ public:
 	 * MobileUnit
 	 **/
 	virtual void advanceMove() { }
+
+	/**
+	 * Move according to the velocity of the leader
+	 **/
+	virtual void advanceGroupMove(Unit* ) { }
 	
 	/**
 	 * Also reimplemented in @ref MobileUnit. Used to check whether the path
@@ -201,7 +206,7 @@ public:
 	void stopAttacking();
 
 	void moveInGroup();
-	void leaderMoved(double x, double y) {};
+	void leaderMoved(double , double ) {};
 	void setGroupLeader(bool leader);
 
 	virtual bool save(QDataStream& stream);
@@ -272,6 +277,10 @@ public:
 
 protected:
 	virtual void advanceMove(); // move one step futher to path
+	/**
+	 * Move according to the velocity of leader
+	 **/
+	virtual void advanceGroupMove(Unit* leader);
 	virtual void advanceMoveCheck();
 
 private:
