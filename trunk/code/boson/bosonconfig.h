@@ -519,6 +519,9 @@ public:
 	void setDebugBoundingBoxes(bool debug) { mDebugBoundingBoxes = debug; }
 	bool debugBoundingBoxes() const { return mDebugBoundingBoxes; }
 
+	unsigned int defaultLodCount() const { return mDefaultLodCount; }
+	void setDefaultLodCount(unsigned int c) { mDefaultLodCount = c; }
+
 	void setDebugFPS(bool debug) { mDebugFPS = debug; }
 	bool debugFPS() const { return mDebugFPS; }
 
@@ -603,6 +606,7 @@ private:
 	bool mDebugFPS;
 	bool mShowResources;
 	bool mEnableColormap;
+	unsigned int mDefaultLodCount;
 };
 
 #endif

@@ -307,6 +307,7 @@ BosonConfig::BosonConfig(KConfig* conf)
  mDebugFPS = false;
  mShowResources = true;
  mEnableColormap = false;
+ mDefaultLodCount = 5;
 
  // these are dynamic entries. usually they are added in the class where they
  // get used, but sometimes it is also handy to add them here (e.g. when it
@@ -317,7 +318,6 @@ BosonConfig::BosonConfig(KConfig* conf)
  addDynamicEntry(new BoConfigDoubleEntry(this, "ATIDepthWorkaroundValue", 0.00390625));
  addDynamicEntry(new BoConfigStringEntry(this, "GLFont", QString::null));
  addDynamicEntry(new BoConfigBoolEntry(this, "SmoothShading", true));
- addDynamicEntry(new BoConfigUIntEntry(this, "DefaultLODCount", 5));
 
  // load from config
  reset(conf);
