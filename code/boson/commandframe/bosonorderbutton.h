@@ -147,7 +147,7 @@ signals:
 
 protected:
 	virtual void displayUnitPixmap(Unit* unit);
-	virtual void displayUnitPixmap(unsigned long int unitType, Player* owner);
+	virtual void displayUnitPixmap(unsigned long int unitType, const Player* owner);
 
 	void setPixmap(const QPixmap& pixmap);
 
