@@ -76,6 +76,8 @@ Unit::Unit(const UnitProperties* prop, Player* owner, QCanvas* canvas)
 
  d->mDirection.setLocal(0); // not yet used
  setAnimated(true);
+ d->mMoveDestX.setLocal(0);
+ d->mMoveDestY.setLocal(0);
 
  KSpriteToolTip::add(rtti(), unitProperties()->name());
 }
@@ -333,7 +335,9 @@ void Unit::newPath()
 	return;
  }
  if(!owner()->isFogged(d->mMoveDestX / BO_TILE_SIZE, d->mMoveDestY / BO_TILE_SIZE)) {
-	if((! boCanvas()->cell(d->mMoveDestX / BO_TILE_SIZE, d->mMoveDestY / BO_TILE_SIZE)->canGo(unitProperties())) ||
+	Cell* destCell = boCanvas()->cell(d->mMoveDestX / BO_TILE_SIZE,
+			d->mMoveDestY / BO_TILE_SIZE);
+	if(!destCell || (!destCell->canGo(unitProperties())) ||
 			(boCanvas()->cellOccupied(d->mMoveDestX / BO_TILE_SIZE, d->mMoveDestY / BO_TILE_SIZE, this) && work() != WorkAttack)) {
 		// If we can't move to destination, then we add waypoint with coordinates
 		//  -1; -1 and in MobileUnit::advanceMove(), if currentWaypoint()'s
@@ -371,7 +375,7 @@ const QPoint& Unit::currentWaypoint() const
 
 void Unit::stopMoving()
 {
- kdDebug() << "stopMoving" << endl;
+// kdDebug() << k_funcinfo << endl;
  clearWaypoints();
 
  // Call this only if we are only moving - stopMoving() is also called e.g. on
@@ -657,7 +661,7 @@ MobileUnit::~MobileUnit()
 
 void MobileUnit::advanceMove()
 {
- kdDebug() << k_funcinfo << endl;
+// kdDebug() << k_funcinfo << endl;
  if (speed() == 0) {
 	kdWarning() << "speed == 0" << endl;
 	stopMoving();
@@ -701,7 +705,8 @@ void MobileUnit::advanceMove()
 	stopMoving();
 
  // Check if we can actually go to waypoint (maybe it was fogged)
- if((boCanvas()->cellOccupied(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE, this, true) &&
+ if(!boCanvas()->cell(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE) ||
+		(boCanvas()->cellOccupied(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE, this, true) &&
 		work() != WorkAttack) || 
 		!boCanvas()->cell(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE)->canGo(unitProperties())) {
 	kdDebug() << "cannot go to waypoint, finding new path" << endl;
@@ -834,7 +839,7 @@ void MobileUnit::advanceMoveCheck()
  }
  QValueList<Unit*> l = unitCollisions(true);
  if (!l.isEmpty()) {
-	kdDebug() << k_funcinfo << "collisions" << endl;
+//	kdDebug() << k_funcinfo << "collisions" << endl;
 //	kdWarning() << k_funcinfo << ": " << id() << " -> " << l.first()->id() 
 //		<< " (count=" << l.count() <<")"  << endl;
 	// do not move at all. Moving is not stopped completely!

@@ -431,6 +431,10 @@ bool BosonCanvas::canGo(const UnitProperties* prop, const QRect& rect) const
 	int x = rect.x() / BO_TILE_SIZE;
 	do {
 		Cell* newCell = cell(x, y);
+		if (!newCell) {
+			kdError() << k_funcinfo << "NULL cell" << endl;
+			return false;
+		}
 		if (!newCell->canGo(prop)) {
 			kdDebug() << "can  not go on " << x << "," << y << endl;
 			return false;
@@ -672,7 +676,12 @@ void BosonCanvas::fogLocal(int x, int y)
  if (!d->mFogPixmap) {
 	return;
  }
- if (d->mFogOfWar[cell(x, y)]) {
+ Cell* c = cell(x, y);
+ if (!c) {
+	kdError() << k_funcinfo << "NULL cell" << endl;
+	return;
+ }
+ if (d->mFogOfWar[c]) {
 	kdError() << "tried adding fog of war twice!!!!" << endl;
 	return;
  }
@@ -680,13 +689,19 @@ void BosonCanvas::fogLocal(int x, int y)
  fog->move(x * BO_TILE_SIZE, y * BO_TILE_SIZE);
  fog->setZ(Z_FOG_OF_WAR);
  fog->show();
- d->mFogOfWar.insert(cell(x, y), fog);
+ d->mFogOfWar.insert(c, fog);
 }
 
 void BosonCanvas::unfogLocal(int x, int y)
 {
 // it seems like this doesn't work sometimes... dunno why...
- QCanvasSprite* s = d->mFogOfWar.take(cell(x, y));
+ Cell* c = cell(x, y);
+ if (!c) {
+	kdError() << k_funcinfo << "NULL cell" << endl;
+	return;
+ }
+
+ QCanvasSprite* s = d->mFogOfWar.take(c);
  if (s) {
 	s->hide();
 	delete s;

@@ -416,6 +416,10 @@ float BosonPath::cost(int x, int y)
   }
 
   Cell* c = mUnit->boCanvas()->cell(x, y);
+  if (!c) {
+    kdError() << k_funcinfo << "NULL cell" << endl;
+    return ERROR_COST;
+  }
 
   // Check if we can go to that tile, if we can't, return ERROR_COST
   if(! c->canGo(mUnit->unitProperties()))
