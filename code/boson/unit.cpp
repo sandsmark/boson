@@ -266,12 +266,20 @@ void Unit::moveTo(const QPoint& pos)
 
 void Unit::moveTo(int x, int y)
 {
- clearWaypoints();
+ stopMoving();
+ 
+ if(! boCanvas()->cell(x / BO_TILE_SIZE,
+			y / BO_TILE_SIZE)->canGo(unitProperties())) {
+	// No pathfinding if goal not reachable
+	return;
+ }
+
  // Find path to target
  QValueList<QPoint> path = BosonPath::findPath(this, x, y);
  for (int unsigned i = 0; i < path.count(); i++) {
 	 addWaypoint(path[i]);
  }
+ setWork(WorkMove);
 }
 
 void Unit::clearWaypoints()
