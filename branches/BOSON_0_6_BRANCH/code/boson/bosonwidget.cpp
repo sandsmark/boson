@@ -247,6 +247,7 @@ void BosonWidget::initDisplayManager()
 void BosonWidget::initChat()
 {
  d->mChatDock = d->mTop->createDockWidget("chat_dock", 0, 0, i18n("Chat"));
+ d->mChatDock->setEnableDocking(KDockWidget::DockTop | KDockWidget::DockBottom);
  d->mChat = new KGameChat(game(), BosonMessage::IdChat, d->mChatDock);
  d->mChatDock->setWidget(d->mChat);
  d->mChatDock->hide();
@@ -414,6 +415,7 @@ void BosonWidget::addMouseIO(BosonBigDisplay* b)
 void BosonWidget::initGameCommandFrame()
 {
  d->mCommandFrameDock = d->mTop->createDockWidget("cmdframe_dock", 0, 0, i18n("Command Frame"));
+ d->mCommandFrameDock->setEnableDocking(KDockWidget::DockLeft | KDockWidget::DockRight);
  d->mCommandFrame = new BosonCommandFrame(d->mCommandFrameDock, false);
  d->mCommandFrameDock->setWidget(d->mCommandFrame);
  d->mCommandFrameDock->hide();
