@@ -67,7 +67,6 @@
         <blockquote>
         <table border="0" class="nav">
             <tr><th colspan="2" align="left">OpenGL</th></tr>
-            <tr><td>Have OpenGL data</td><td>Yes</td></tr>
             <tr><td>Is Direct</td><td>Yes</th></tr>
             <tr><th colspan="2" align="left">NVidia</td></tr>
             <tr><td>Textfield *</td><td>No errors found...</td></tr>
