@@ -20,7 +20,6 @@
 #define BOSONCOMMANDFRAMEBASE_H
 
 #include <qframe.h>
-#include <qvaluelist.h>
 #include "../global.h"
 
 class Unit;

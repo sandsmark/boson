@@ -35,7 +35,6 @@
 #include <qlayout.h>
 #include <qscrollview.h>
 #include <qtimer.h>
-#include <qlabel.h>
 #include <qvbox.h>
 
 #define UPDATE_TIMEOUT 200
