@@ -66,6 +66,7 @@
 #include <qhbox.h>
 #include <qvbox.h>
 
+#include <stdlib.h>
 #include <config.h>
 
 
@@ -129,13 +130,14 @@ TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
  KGlobal::dirs()->addPrefix(BOSON_PREFIX);
 
  if (!BosonGroundTheme::createGroundThemeList()) {
-	// TODO: message box
 	boError() << k_funcinfo << "Unable to create groundTheme list" << endl;
-	kapp->exit(1);
+	KMessageBox::sorry(this, i18n("Unable to load groundThemes. Check your installation!"));
+	exit(1);
  }
  if (!BosonPlayField::preLoadAllPlayFields()) {
 	boError() << k_funcinfo << "Unable to preload playFields" << endl;
-	kapp->exit(1);
+	KMessageBox::sorry(this, i18n("Unable to preload playFields. Check your installation!"));
+	exit(1);
  }
  boMusic->setSound(boConfig->sound());
  boMusic->setMusic(boConfig->music());
@@ -835,6 +837,9 @@ bool TopWidget::queryClose()
 
 bool TopWidget::queryExit()
 {
+ if (!boGame) {
+	return true;
+ }
  if (boGame->gameStatus() != KGame::Init) {
 	// note that even a startup widget might be on top here (e.g. when
 	// saving a game)!

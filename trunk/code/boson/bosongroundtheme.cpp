@@ -39,6 +39,9 @@ struct TextureGroundType
 };
 
 
+/**
+ * @short plugin for BosonData providing access to a @ref BosonGroundTheme object
+ **/
 class BosonGroundData : public BosonDataObject
 {
 public:
@@ -151,8 +154,13 @@ bool BosonGroundTheme::createGroundThemeList()
 		continue;
 	}
 	if (!BosonData::bosonData()->insertGroundTheme(data)) {
+		boWarning() << k_funcinfo << "unable to insert theme " << *it << endl;
 		delete data;
 	}
+ }
+ if (BosonData::bosonData()->availableGroundThemes().count() == 0) {
+	boError() << k_funcinfo << "no valid groundTheme found" << endl;
+	return false;
  }
  return true;
 }
