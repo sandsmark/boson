@@ -245,7 +245,7 @@ void BosonApp::initView(int w, int h)
 { 
 
 	/* the field is created when a game is created */
-	field = new bosonField(w,h);
+	vfield = field = new bosonField(w,h);
 
 	/* a mainView is each window containing : field, mini, order...
 	   this one is the first one, other can pop up as well */

@@ -25,7 +25,9 @@
 
 class groundTheme;
 class speciesTheme;
+class visualField;
 
+extern	visualField	*vfield;
 extern	groundTheme	*ground;
 extern	speciesTheme	*species[BOSON_MAX_PLAYERS];
 extern	int		nb_player;
