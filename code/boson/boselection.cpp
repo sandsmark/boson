@@ -36,7 +36,6 @@ BoSelection::~BoSelection()
 
 void BoSelection::copy(BoSelection* selection, bool replace)
 {
- // this function does not emit any signal!
  if (replace) {
 	clear(false);
  }
@@ -48,6 +47,7 @@ void BoSelection::copy(BoSelection* selection, bool replace)
  for (; it.current(); ++it) {
 	add(it.current());
  }
+ emit signalSelectionChanged(this);
 }
 
 void BoSelection::clear(bool emitSignal)
