@@ -1,6 +1,5 @@
 Game TODOs
 - waypoints
-- constructing - maybe use Boson::slotDelayedAddUnit() or so? - partially done
 - make player color selectable in the new game dialog
 - unit accelleration: units should slowly start to accelerate and to brake when
   moving
@@ -10,12 +9,15 @@ Game TODOs
 - remove wreckages after a certain timeout
 - left dbl-click should select ALL units of that type
 - auto-attacking when unit is in range
-- auto positioning of produced units
 - end of game - winner ; statistics
-- display progress of unit production
-- don't allow to build units when player has not enough minerals/oil
 - fullscreen mode
 - scroll if cursor at the edge of the window
+- constructing - maybe use Boson::slotDelayedAddUnit() or so? - partially done
+- don't allow to build units when player has not enough minerals/oil
+- auto positioning of produced units
+- display progress of unit production
+- center cell at mosue pos with mmb
+- RMB + mouse move => move map
 
 
 Editor (map, unit, scenario) TODOs
@@ -40,6 +42,10 @@ General TODOs
 - the selection rect is not drawn correctly if it is started when the mouse is
   already moving
 - bigger minimap
+- add revision (CVS) number of files to the connection protocol. If the versions
+  differ then deny connection. This ensures that all clients are at the smae
+  version. We need the revision number of each file - how to do add this
+  automatically?
 
 
 Data TODOs

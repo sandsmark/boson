@@ -89,6 +89,7 @@ public:
 
 	KSpriteToolTip* mUnitTips;
 
+	QHBoxLayout* mTopLayout;
 	QVBoxLayout* mFrameLayout; // minimap and command frame
 
 	// performance variables:
@@ -104,10 +105,10 @@ BosonWidget::BosonWidget(QWidget* parent)
 {
  init();
 
- QHBoxLayout* topLayout = new QHBoxLayout(this, 5); // FIXME: 5 is hardcoded
+ d->mTopLayout = new QHBoxLayout(this, 5); // FIXME: 5 is hardcoded
  d->mFrameLayout = new QVBoxLayout();
- topLayout->addWidget(d->mBigDisplay);
- topLayout->addLayout(d->mFrameLayout);
+ d->mTopLayout->addWidget(d->mBigDisplay);
+ d->mTopLayout->addLayout(d->mFrameLayout);
  d->mFrameLayout->addWidget(d->mMiniMap, 0, AlignHCenter);
 
 // the map is also found here. This is currently only used on startup to load
@@ -450,11 +451,14 @@ void BosonWidget::slotGamePreferences()
  connect(dlg, SIGNAL(finished()), dlg, SLOT(slotDelayedDestruct())); // seems not to be called if you quit with "cancel"!
  dlg->setGameSpeed(d->mBoson->gameSpeed());
  dlg->setArrowScrollSpeed(d->mArrowKeyStep);
+// dlg->setCommandFramePosition(); // TODO
 
  connect(dlg, SIGNAL(signalArrowScrollChanged(int)),
 		this, SLOT(slotArrowScrollChanged(int)));
  connect(dlg, SIGNAL(signalSpeedChanged(int)),
 		d->mBoson, SLOT(slotSetGameSpeed(int)));
+ connect(dlg, SIGNAL(signalCommandFramePositionChanged(int)),
+		this, SLOT(slotCommandFramePosition(int)));
  dlg->show();
 }
 
@@ -784,3 +788,26 @@ void BosonWidget::slotInitFogOfWar()
  d->mMiniMap->initFogOfWar(d->mLocalPlayer);
 }
 
+void BosonWidget::slotCommandFramePosition(int pos)
+{
+// redo layout
+ delete d->mFrameLayout;
+ delete d->mTopLayout;
+ d->mTopLayout = new QHBoxLayout(this, 5); // FIXME: 5 is hardcoded
+ d->mFrameLayout = new QVBoxLayout();
+ d->mFrameLayout->addWidget(d->mMiniMap, 0, AlignHCenter);
+ insertCommandFrame(d->mCommandFrame);
+ if (pos == OptionsDialog::Left) {
+	d->mTopLayout->addLayout(d->mFrameLayout);
+	d->mTopLayout->addWidget(d->mBigDisplay);
+ } else if (pos == OptionsDialog::Right) {
+	d->mTopLayout->addWidget(d->mBigDisplay);
+	d->mTopLayout->addLayout(d->mFrameLayout);
+ } else {
+	kdError() << k_funcinfo << pos << " not implemented" << endl;
+	// use Left as default
+	d->mTopLayout->addLayout(d->mFrameLayout);
+	d->mTopLayout->addWidget(d->mBigDisplay);
+ }
+ d->mTopLayout->activate();
+}

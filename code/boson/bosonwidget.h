@@ -129,6 +129,8 @@ signals:
 	void signalOilUpdated(int);
 
 protected slots:
+	void slotCommandFramePosition(int);
+	
 	void slotStartScenario();
 	void slotSendChangeSpecies(const QString& species);
 
