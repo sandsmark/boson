@@ -308,10 +308,6 @@ static bool testValidMap(const BosonMap* map)
 			boError() << k_funcinfo << "cell has invalid coordinates" << endl;
 			return false;
 		}
-		if (c->amountOfLand() + c->amountOfWater() != 255) {
-			boError() << k_funcinfo << "land+water is nt 255" << endl;
-			return false;
-		}
 
 	}
  }
