@@ -1026,6 +1026,7 @@ bool BosonCanvas::loadFromXML(const QDomElement& root)
 
 
  QDomNodeList list = root.elementsByTagName(QString::fromLatin1("Items"));
+ unsigned int itemCount = 0;
  for (unsigned int i = 0; i < list.count(); i++) {
 	QDomElement items = list.item(i).toElement();
 	if (items.isNull()) {
@@ -1055,8 +1056,10 @@ bool BosonCanvas::loadFromXML(const QDomElement& root)
 			boError(260) << k_funcinfo << "Item " << j << " was not loaded correctly" << endl;
 			continue;
 		}
+		itemCount++;
 	}
  }
+ boDebug(260) << k_funcinfo << "loaded " << itemCount << " items" << endl;
  return true;
 }
 
@@ -1152,9 +1155,7 @@ bool BosonCanvas::loadItemFromXML(const QDomElement& item, Player* owner)
 		return false;
 	}
 
-	// Create unit with Boson
-//	Unit* u = boGame->loadUnit(type, owner);
-	Unit* u = createItem(RTTI::UnitStart + type, owner, type);
+	Unit* u = (Unit*)createItem(RTTI::UnitStart + type, owner, type);
 
 	// Set additional properties
 	owner->addUnit(u, dataHandlerId);
