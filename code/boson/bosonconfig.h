@@ -189,6 +189,9 @@ public:
 	static QString readLocalPlayerMap(KConfig* conf = 0);
 	static void saveLocalPlayerMap(const QString& id, KConfig* conf = 0);
 
+	static QString readEditorMap(KConfig* conf = 0);
+	static void saveEditorMap(const QString& id, KConfig* conf = 0);
+
 	static void saveGameSpeed(int speed, KConfig* conf = 0);
 	static int readGameSpeed(KConfig* conf = 0);
 

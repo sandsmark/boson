@@ -84,6 +84,13 @@ BosonNewEditorWidget::BosonNewEditorWidget(BosonStartupNetwork* interface, QWidg
 
 BosonNewEditorWidget::~BosonNewEditorWidget()
 {
+ QString playFieldIdentifier;
+ if (mChooseBosonMap->currentItem()) {
+	if (d->mItem2Map.contains(mChooseBosonMap->currentItem())) {
+		playFieldIdentifier = d->mItem2Map[mChooseBosonMap->currentItem()];
+	}
+ }
+ boConfig->saveEditorMap(playFieldIdentifier); // QString::null == "New Map"
  delete d;
 }
 
@@ -102,7 +109,17 @@ void BosonNewEditorWidget::initPlayFields()
  mChooseBosonMap->insertItem(item);
  d->mItem2Map.insert(item, QString::null);
 
- networkInterface()->sendChangePlayField(QString::null);
+ QString mapId = boConfig->readEditorMap();
+ if (mapId.isEmpty()) {
+	// KConfig doesnt store a null string - it will be empty only. but we
+	// really need a null string for that case.
+	mapId = QString::null;
+ }
+ if (!list.contains(mapId) && !mapId.isNull()) {
+	// fallback: new map
+	mapId = QString::null;
+ }
+ networkInterface()->sendChangePlayField(mapId);
 }
 
 void BosonNewEditorWidget::initSpecies()
