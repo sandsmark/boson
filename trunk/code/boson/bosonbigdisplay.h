@@ -221,17 +221,6 @@ protected:
 	virtual void enterEvent(QEvent*);
 	virtual void leaveEvent(QEvent*);
 
-	/**
-	 * Write text on the label.
-	 *
-	 * The label will have a mask using @ref QWidget::setMask so that only
-	 * the text is displayed.
-	 **/
-	void updateLabel(QLabel* label, const QString& text);
-
-	virtual void drawContents(QPainter*, int, int, int, int);
-
-
 protected slots:
 	void slotMouseEvent(KGameIO*, QDataStream& stream, QMouseEvent* e, bool *eatevent);
 
