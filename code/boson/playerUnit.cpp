@@ -623,6 +623,7 @@ bool harvesterUnit::getWantedMove(QPoint &wstate)
 //				puts("harvester : arrived home");
 				harvestEndMsg_t    he;
 				he.key = key;
+				bocanvas->play("harvester_emptying.wav");
 				sendMsg(buffer, MSG_UNIT_HARVEST_END, MSG(he) );
 				hstate = goingTo;
 				playerMobUnit::u_goto(harvest*BO_TILE_SIZE); // go to harvest point

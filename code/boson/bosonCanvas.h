@@ -37,7 +37,7 @@ class QPainter;
 class Unit;
 
 
-#define RADAR_PULSE_PERIOD	150		// every RADAR_PULSE_PERIOD jiffies, the radar emits a bip
+#define RADAR_PULSE_PERIOD	1450		// every RADAR_PULSE_PERIOD jiffies, the radar emits a bip
 
 /** 
   * This class encapsulate the "physical" idea of the map : size, contents..
