@@ -75,7 +75,7 @@ int main(int argc, char* argv[])
 
 	/* XXX orzel : temp, until GUI is really functionnal */
 	QString themePath = KGlobal::instance()->dirs()->findResourceDir("data", "boson/map/basic.bpf");
-	themePath	+= "boson/themes/grounds/earth.bmp";
+	themePath	+= "boson/themes/grounds/earth.png";
 	printf("loading groundTheme : %s\n", themePath.latin1() );
 	QPixmap *p = new QPixmap(themePath);
 	if (p->isNull() ) {

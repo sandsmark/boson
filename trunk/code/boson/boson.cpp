@@ -95,7 +95,7 @@ void BosonApp::initCanvas(int w, int h)
 {
 	/* the field is created when a game is created */
 	QString themePath = KGlobal::instance()->dirs()->findResourceDir("data", "boson/map/basic.bpf");
-	themePath	+= "boson/themes/grounds/earth.bmp";
+	themePath	+= "boson/themes/grounds/earth.png";
 
 	printf("initView : loading groundTheme : %s\n", themePath.latin1() );
 
