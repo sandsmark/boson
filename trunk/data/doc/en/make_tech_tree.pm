@@ -218,8 +218,12 @@ while ($count < $maxcount && @done_list < @idlist) {
 }
 
 my $file = "map.jpg";
+my $small_file = "map_small.jpg";
 print_mesg("Write to $file\n");
 $image->Write($file);
+
+$image->Resize(geometry=>'120x75');
+$image->Write($small_file);
 
 
 
@@ -282,7 +286,7 @@ sub draw_line($$$$)
 	my $towidth = $boxwidth{$to_id};
 	$fromx = $fromx + $fromwidth/2;
 	$tox = $tox + $towidth/2;
-	$image->Draw(primitive=>'line', stroke=>'orange', points=>"$fromx,$fromy $tox,$toy");
+	$image->Draw(primitive=>'line', stroke=>'lawngreen', points=>"$fromx,$fromy $tox,$toy");
 }
 
 sub print_mesg()
