@@ -683,9 +683,9 @@ void BosonBigDisplayBase::paintGL()
 
  glColor3ub(255, 255, 255);
 
- // note: we don't call gluLookAt() here because of performance. instead we just
- // push the matrix here and pop it at the end of paintGL() again. gluLookAt()
- // is called only whenever cameraChanged() is called.
+ // note: we don't call BoCamera::applyCameraToScene() here because of performance. instead we just
+ // push the matrix here and pop it at the end of paintGL() again.
+ // applyCameraToScene() is called only whenever cameraChanged() is called.
  glPushMatrix();
 
 
@@ -2355,10 +2355,10 @@ void BosonBigDisplayBase::cameraChanged()
  glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
 
  if (checkError()) {
-	boError() << k_funcinfo << "after gluLookAt()" << endl;
+	boError() << k_funcinfo << "after BoCamera::applyCameraToScene()" << endl;
  }
 
- // the gluLookAt() above is the most important call for the modelview matrix.
+ // the applyCameraToScene() above is the most important call for the modelview matrix.
  // everything else will be discarded by glPushMatrix/glPopMatrix anyway (in
  // paintGL()). So we cache the matrix here, for mapCoordinates() and some other
  // stuff
