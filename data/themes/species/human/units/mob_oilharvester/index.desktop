@@ -6,6 +6,8 @@ Id=10002
 Health=150
 MineralCost=300
 Producer=0
+CanShootAtAirUnits=false
+CanShootAtLandUnits=false
 
 [Boson Mobile Unit]
 Speed=3
