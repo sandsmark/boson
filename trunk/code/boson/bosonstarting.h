@@ -36,8 +36,18 @@ public:
 	BosonStarting(QObject* parent);
 
 	void setLoadingWidget(BosonLoadingWidget* w) { mLoadingWidget = w; }
+
+	/**
+	 * The playfield that gets assigned here should be an <em>empty</em>
+	 * playfield. It is <em>not</em> the playfield that gets loaded, but
+	 * rather the place where it gets loaded to.
+	 *
+	 * Use @ref setPlayFieldId to specify the playfield that should get
+	 * loaded.
+	 **/
 	void setPlayField(BosonPlayField* f) { mPlayField = f; }
 	void setLocalPlayer(Player* p) { mPlayer = p; }
+	void setPlayFieldId(const QString& id) { mPlayFieldId = id; }
 
 	void startNewGame();
 
@@ -71,13 +81,10 @@ signals:
 	 * started. A message starting the scenario has been sent, but it will
 	 * be received after this signal only. This also means that @ref
 	 * Boson::gameStatus is still @ref KGame::Init
+	 * @param playFieldId The playfield in case that a scenario should be
+	 * started. QString::null if no scenario should get started.
 	 **/
-	void signalStartGame();
-
-	/**
-	 * See @ref Top::slotStartGameLoadWorkaround
-	 **/
-	void signalStartGameLoadWorkaround();
+	void signalStartGame(const QString& playFieldId);
 
 	void signalStartingFailed();
 
@@ -118,12 +125,16 @@ protected:
 	void loadPlayerData();
 	void loadUnitDatas(Player* player, int progress);
 
-public: // FIXME
+private:
 	BosonLoadingWidget* mLoadingWidget;
 	BosonPlayField* mPlayField;
 	Player* mPlayer;
 
 	bool mLoading; //AB: find a way around this!
+
+	QString mPlayFieldId; // which playfield will get started. note: only ADMIN should use the id!
+	                      // all other clients should receive the data from
+	                      // network.
 };
 
 #endif

@@ -61,7 +61,7 @@ public:
 	/**
 	 * Default Constructor
 	 **/
-	BosonWidget(TopWidget* top, QWidget* parent, bool loading = false);
+	BosonWidget(TopWidget* top, QWidget* parent);
 
 	/**
 	 * Default Destructor
@@ -81,7 +81,6 @@ signals:
 	void signalLoadGame();
 
 protected slots:
-	virtual void slotStartScenario();
 	virtual void slotChangeCursor(int mode, const QString& dir);
 
 	/**
@@ -99,6 +98,8 @@ protected:
 	virtual void initDisplayManager();
 	virtual void initConnections();
 	virtual void setBosonXMLFile();
+
+	virtual void startScenarioAndGame();
 
 private:
 	class BosonWidgetPrivate;

@@ -24,10 +24,15 @@
 class BosonMap;
 class BosonScenario;
 class Boson;
+class BPFFile;
 
+class KArchiveDirectory;
+class KTar;
+class KArchiveFile;
 class QDomDocument;
 class QDomElement;
 class QDataStream;
+template<class T> class QDict;
 
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
@@ -39,7 +44,39 @@ public:
 	BosonPlayField(QObject* parent = 0);
 	~BosonPlayField();
 
-	bool loadPlayField(const QString& fileName);
+	/**
+	 * Preload all playFields into memory. Note that this will consume pretty much
+	 * memory, so once a map is started all other maps should be cleared
+	 * again.
+	 **/
+	static void preLoadAllPlayFields();
+
+	/**
+	 * Clear all preloaded playfields (see @ref preLoadAllPlayFields)
+	 **/
+	static void clearAllPreLoadedPlayFields();
+
+	static BosonPlayField* playField(const QString& identifier);
+
+	/**
+	 * Load all data from the playField. Needs to be done only once - when
+	 * the map gets started. You may want to use @ref preLoadPlayField
+	 * instead, which loads the important data only.
+	 *
+	 * @ref preLoadPlayField is sufficient for displaying description and
+	 * winning conditions and so on of a game. You need to load it
+	 * completely for starting a playField only.
+	 * @param identifier The filename without suffix. As returned by @ref
+	 * availablePlayFields.
+	 **/
+	bool loadPlayField(const QString& identifier);
+
+	/**
+	 * Load the important data (description for example) from the playField.
+	 * Use @ref loadPlayField to load <em>all</em> data. preLoadPlayField is
+	 * much faster than @ref loadPlayField.
+	 **/
+	bool preLoadPlayField(const QString& identifier);
 
 	/**
 	 * Remember to call @ref applyScenario first! The @ref
@@ -50,8 +87,23 @@ public:
 
 	void applyScenario(Boson* boson);
 
+	/**
+	 * @return The default playfield which is meant to be used if the player
+	 * didn't select a playfield at all
+	 **/
 	static QString defaultPlayField();
+
+	/**
+	 * @return The identifiers of all playfields that are currently
+	 * available.
+	 **/
 	static QStringList availablePlayFields();
+
+	/**
+	 * @return The i18n'ed name of the specified playfield
+	 **/
+	static QString playFieldName(const QString& identifier);
+	static QString playFieldComment(const QString& identifier);
 
 	/**
 	 * Load a @ref BosonMap from stream. Create a new BosonMap object if it
@@ -83,8 +135,6 @@ public:
 
 	void quit();
 
-	static QString playFieldFileName(const QString& identifier);
-
 	bool modified() const;
 
 	/**
@@ -99,6 +149,23 @@ public:
 	 **/
 	void changeScenario(BosonScenario* s);
 
+	const QString& playFieldName() const { return mName; }
+	const QString& playFieldComment() const { return mComment; }
+
+	/**
+	 * @return Whether the the playfield has been completely loaded. This is
+	 * the case when @ref loadPlayField has been called (<em>not</em> @ref
+	 * preLoadPlayField)
+	 **/
+	bool isLoaded() const { return mLoaded; }
+
+	/**
+	 * @return Whether the the playfield has been pre-loaded. This is
+	 * the case when @ref preLoadPlayField has been called. Note that this
+	 * happens in @ref loadPlayField as well.
+	 **/
+	bool isPreLoaded() const { return mPreLoaded; }
+
 signals:
 	/**
 	 * Emitted when the map changes. Note that this can even be 0!
@@ -106,15 +173,28 @@ signals:
 	void signalNewMap(BosonMap*);
 
 protected:
-	bool loadMap(QDomElement& node);
-	bool loadScenario(QDomElement& node);
+	bool loadDescriptionXML(const QByteArray& xml);
+	bool loadMapXML(const QByteArray& xml);
+	bool loadScenarioXML(const QByteArray& xml);
+
+	QString saveDescriptionXML();
+	QString saveMapXML();
+	QString saveScenarioXML();
+
+private:
+	static void initStatic();
 
 private:
 	BosonMap* mMap;
 	BosonScenario* mScenario;
+	QString mIdentifier; // AB: this is not yet fully implemented - e.g. it isn't changed when saving or changing the map. should be the filename (see BPFFile::identifier())
+	QString mName;
+	QString mComment;
+	bool mLoaded;
+	bool mPreLoaded;
+	BPFFile* mFile;
 
-	class BosonPlayFieldPrivate;
-	BosonPlayFieldPrivate* d;
+	static QDict<BosonPlayField>* mPlayFields;
 };
 
 #endif

@@ -60,8 +60,8 @@ public:
 	GameOverDialog* mGameOverDialog;
 };
 
-BosonWidget::BosonWidget(TopWidget* top, QWidget* parent, bool loading)
-    : BosonWidgetBase(top, parent, loading)
+BosonWidget::BosonWidget(TopWidget* top, QWidget* parent)
+    : BosonWidgetBase(top, parent)
 {
  d = new BosonWidgetPrivate;
 }
@@ -179,14 +179,13 @@ void BosonWidget::slotChangeCursor(int mode, const QString& cursorDir_)
  mCursorTheme = cursorDir;
 }
 
-void BosonWidget::slotStartScenario()
+void BosonWidget::startScenarioAndGame()
 {
- BosonWidgetBase::slotStartScenario();
- boMusic->startLoop();
-
+ BosonWidgetBase::startScenarioAndGame();
  if (boGame->isAdmin()) {
 	boGame->slotSetGameSpeed(BosonConfig::readGameSpeed());
  }
+ boMusic->startLoop();
 }
 
 void BosonWidget::slotGamePreferences()

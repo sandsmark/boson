@@ -93,13 +93,12 @@ public:
 	bool mInitialized;
 };
 
-BosonWidgetBase::BosonWidgetBase(TopWidget* top, QWidget* parent, bool loading)
+BosonWidgetBase::BosonWidgetBase(TopWidget* top, QWidget* parent)
     : QWidget( parent, "BosonWidgetBase" ), KXMLGUIClient(/*FIXME: clientParent!*/)
 {
  d = new BosonWidgetBasePrivate;
  d->mInitialized = false;
  mTop = top;
- mLoading = loading;
 
  mMiniMap = 0;
  mDisplayManager = 0;
@@ -127,11 +126,6 @@ BosonWidgetBase::~BosonWidgetBase()
 BosonCanvas* BosonWidgetBase::canvas() const
 {
  return mTop->canvas();
-}
-
-BosonPlayField* BosonWidgetBase::playField() const
-{
- return mTop->playField();
 }
 
 #include <kstandarddirs.h> //locate()
@@ -168,11 +162,16 @@ void BosonWidgetBase::initMap()
 {
  boDebug() << k_funcinfo << endl;
 
- canvas()->setMap(playField()->map());
- minimap()->setMap(playField()->map());
+ if (!boGame->playField()) {
+	boError() << k_funcinfo << "NULL playfield" << endl;
+	return;
+ }
+ BosonMap* map = boGame->playField()->map();
+ canvas()->setMap(map);
+ minimap()->setMap(map);
  minimap()->initMap();
  displayManager()->mapChanged();
-// boGame->setPlayField(playField()); // already done on startup
+// boGame->setPlayField(playField()); // already done on startup in BosonStarting
 
  // AB: note that this meets the name "initMap" only slightly. We can't do this
  // when players are initialized, as the map must be known to them once we start
@@ -181,7 +180,7 @@ void BosonWidgetBase::initMap()
 	boDebug() << "init map for player " << i << endl;
 	Player* p = (Player*)boGame->playerList()->at(i);
 	if (p) {
-		p->initMap(playField()->map(), boGame->gameMode());
+		p->initMap(map, boGame->gameMode());
 	}
  }
 
@@ -268,13 +267,13 @@ void BosonWidgetBase::initPlayer()
  emit signalFacilitiesCount(localPlayer()->facilitiesCount());
 }
 
-void BosonWidgetBase::initGameMode()//FIXME: rename! we don't have a difference to initEditorMode anymore. maybe just initGame() or so??
+void BosonWidgetBase::initGameMode(const QString& playFieldId)//FIXME: rename! we don't have a difference to initEditorMode anymore. maybe just initGame() or so??
 {
  initLayout();
- if (!mLoading) {
-	slotStartScenario();
+ if (!playFieldId.isEmpty()) {
+	startScenario(playFieldId);
  }
- mLoading = false;
+ startScenarioAndGame();
 }
 
 void BosonWidgetBase::initBigDisplay(BosonBigDisplayBase* b)
@@ -348,8 +347,21 @@ void BosonWidgetBase::changeCursor(BosonCursor* cursor)
 
 void BosonWidgetBase::slotDebug()
 {
+ if (!boGame) {
+	boError() << k_funcinfo << "NULL game" << endl;
+	return;
+ }
+ if (!boGame->playField()) {
+	boError() << k_funcinfo << "NULL playField" << endl;
+	return;
+ }
+ BosonMap* map = boGame->playField()->map();
+ if (!map) {
+	boError() << k_funcinfo << "NULL map" << endl;
+	return;
+ }
  KGameDebugDialog* dlg = new KGameDebugDialog(boGame, this);
- 
+
  QVBox* b = dlg->addVBoxPage(i18n("Debug &Units"));
  KGameUnitDebug* units = new KGameUnitDebug(b);
  units->setBoson(boGame);
@@ -360,7 +372,7 @@ void BosonWidgetBase::slotDebug()
 
  b = dlg->addVBoxPage(i18n("Debug &Cells"));
  KGameCellDebug* cells = new KGameCellDebug(b);
- cells->setMap(playField()->map());
+ cells->setMap(map);
 
  connect(dlg, SIGNAL(finished()), dlg, SLOT(slotDelayedDestruct()));
  connect(dlg, SIGNAL(signalRequestIdName(int,bool,QString&)),
@@ -494,7 +506,16 @@ void BosonWidgetBase::slotSetCommandButtonsPerRow(int b)
 
 void BosonWidgetBase::slotUnfogAll(Player* pl)
 {
- if (!playField()->map()) {
+ if (!boGame) {
+	boError() << k_funcinfo << "NULL game" << endl;
+	return;
+ }
+ if (!boGame->playField()) {
+	boError() << k_funcinfo << "NULL playField" << endl;
+	return;
+ }
+ BosonMap* map = boGame->playField()->map();
+ if (!map) {
 	boError() << k_funcinfo << "NULL map" << endl;
 	return;
  }
@@ -506,8 +527,8 @@ void BosonWidgetBase::slotUnfogAll(Player* pl)
  }
  for (unsigned int i = 0; i < list.count(); i++) {
 	Player* p = (Player*)list.at(i);
-	for (unsigned int x = 0; x < playField()->map()->width(); x++) {
-		for (unsigned int y = 0; y < playField()->map()->height(); y++) {
+	for (unsigned int x = 0; x < map->width(); x++) {
+		for (unsigned int y = 0; y < map->height(); y++) {
 			p->unfog(x, y);
 		}
 	}
@@ -794,17 +815,44 @@ void BosonWidgetBase::saveConfig()
  boDebug() << k_funcinfo << "done" << endl;
 }
 
-void BosonWidgetBase::slotStartScenario()
+void BosonWidgetBase::startScenario(const QString& playFieldId)
 {
- playField()->scenario()->startScenario(boGame);
-
- // This DOES NOT work correctly
- boGame->startGame(); // correct here? should be so.
-
- // as soon as this message is received the game is actually started
  if (boGame->isAdmin()) {
+	boDebug() << k_funcinfo << playFieldId << endl;
+#warning FIXME
+	// this must be called for ADMIN only, but we have a few calls in here
+	// which must be done for ALL players. e.g. Player::setOil() and so.
+
+	// TODO this really has to be fixed! TODO
+
+	// I repeat: this MUST NOT be called for the clients, ONLY for ADMIN.
+	// the reason is that one player might have modified a scenario, so we
+	// need to transmit the entire thing over network. we can do this by
+	// either transmitting the entire XML file or only the commands. since
+	// the latter is faster we do that.
+	BosonPlayField* field = BosonPlayField::playField(playFieldId);
+
+	// we don't return on error, so that we don't have a totally broken
+	// display
+	if (!field) {
+		boError() << k_funcinfo << "NULL playfield" << endl;
+	} else if (!field->scenario()) {
+		boError() << k_funcinfo << "NULL scenario" << endl;
+	} else {
+		field->scenario()->startScenario(boGame);
+	}
+ }
+}
+
+void BosonWidgetBase::startScenarioAndGame()
+{
+ boDebug() << k_funcinfo << endl;
+ boGame->startGame();
+ if (boGame->isAdmin()) {
+	// as soon as this message is received the game is actually started
 	boGame->sendMessage(0, BosonMessage::IdGameIsStarted);
  }
+
  displayManager()->slotCenterHomeBase();
 
  #warning FIXME

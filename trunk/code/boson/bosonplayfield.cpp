@@ -19,34 +19,35 @@
 
 #include "bosonplayfield.h"
 
-#include "bosonmap.h"
-#include "bosonscenario.h"
+#include "../bosonmap.h"
+#include "../bosonscenario.h"
 #include "bodebug.h"
+#include "bpfdescription.h"
+#include "bpffile.h"
+#include "../defines.h"
 
 #include <qdom.h>
 #include <qdatastream.h>
-#include <qfile.h>
 
-#include <kfilterdev.h>
 #include <kstandarddirs.h>
-#include <ksimpleconfig.h>
+#include <kstaticdeleter.h>
+#include <klocale.h>
 
 #include "bosonplayfield.moc"
 
-class BosonPlayField::BosonPlayFieldPrivate
-{
-public:
-	BosonPlayFieldPrivate()
-	{
-	}
-};
+KStaticDeleter< QDict<BosonPlayField> > sd;
+QDict<BosonPlayField>* BosonPlayField::mPlayFields = 0;
+
 
 BosonPlayField::BosonPlayField(QObject* parent) : QObject(parent, "BosonPlayField")
 {
- d = new BosonPlayFieldPrivate;
-
  mMap = 0;
  mScenario = 0;
+ mFile = 0;
+ mPreLoaded = false;
+ mLoaded = false;
+
+ initStatic();
 }
 
 BosonPlayField::~BosonPlayField()
@@ -54,80 +55,231 @@ BosonPlayField::~BosonPlayField()
  emit signalNewMap(0);
  delete mMap;
  delete mScenario;
- delete d;
+ delete mFile;
 }
+
+void BosonPlayField::initStatic()
+{
+ if (!mPlayFields) {
+	sd.setObject(mPlayFields, new QDict<BosonPlayField>);
+	mPlayFields->setAutoDelete(true);
+
+	QTime t;
+	t.start();
+	// note: this might take some time, since we use gzip compressed files
+	// which get extracted here.
+	// TODO: free the memory once a map is being started!!
+	preLoadAllPlayFields();
+	boDebug() << k_funcinfo << t.elapsed() << endl;
+ }
+}
+
+void BosonPlayField::preLoadAllPlayFields()
+{
+ // TODO: profiling!
+ // TODO: ensure that UI doesn't block (i.e. call process events)
+ QStringList list = KGlobal::dirs()->findAllResources("data", "boson/maps/*.bpf");
+ if (list.isEmpty()) {
+	boError() << k_funcinfo << "Cannot find any playfield?!" << endl;
+	return;
+ }
+ for (unsigned int i = 0; i < list.count(); i++) {
+	BosonPlayField* playField = new BosonPlayField();
+	bool ok = playField->preLoadPlayField(list[i]);
+	if (!ok) {
+		boError() << k_funcinfo << "Could not load " << list[i] << endl;
+		delete playField;
+		continue;
+	}
+	mPlayFields->insert(playField->mIdentifier, playField);
+ }
+ if (mPlayFields->count() == 0) {
+	boError() << k_funcinfo << "no valid map found!" << endl;
+ }
+}
+
+BosonPlayField* BosonPlayField::playField(const QString& identifier)
+{
+ return mPlayFields->find(identifier);
+}
+
+void BosonPlayField::clearAllPreLoadedPlayFields()
+{
+ if (!mPlayFields) {
+	return;
+ }
+ mPlayFields->clear();
+}
+
 
 QString BosonPlayField::defaultPlayField()
 {
- QString identifier;
  QStringList l = availablePlayFields();
- for (unsigned int i = 0; i < l.count(); i++) {
-	KSimpleConfig cfg(l[i]);
-	cfg.setGroup("Boson PlayField");
-	QString ident = cfg.readEntry("Identifier");
-	if (ident == QString::fromLatin1("Basic2")) {
-		return ident;
-	} else if (identifier == QString::null) {
-		identifier = ident;
-	}
+ if (l.contains(DEFAULT_PLAYFIELD)) {
+	return DEFAULT_PLAYFIELD;
  }
- boWarning() << "cannot find Basic2 map - using " << identifier << " instead" << endl;
- return identifier;
+ if (l.count() == 0) {
+	return QString::null;
+ }
+ boWarning() << "cannot find " << DEFAULT_PLAYFIELD << " map - using " << l[0] << " instead" << endl;
+ return l[0];
 }
 
 QStringList BosonPlayField::availablePlayFields()
 {
- QStringList list = KGlobal::dirs()->findAllResources("data",
-		"boson/maps/*.boson");
- if (list.isEmpty()) {
-	boError() << k_funcinfo << "Cannot find any playfield?!" << endl;
-	return list;
+ QStringList list;
+ QDictIterator<BosonPlayField> it(*mPlayFields);
+ for (; it.current(); ++it) {
+	list.append(it.currentKey());
  }
- QStringList validList;
- for (unsigned int i = 0; i < list.count(); i++) {
-	QString fileName = list[i].left(list[i].length() -  strlen(".boson"));
-	fileName += QString::fromLatin1(".bpf");
-	if (QFile::exists(fileName)) {
-		validList.append(list[i]);
-	}
+ return list;
+}
+
+QString BosonPlayField::playFieldName(const QString& id)
+{
+ BosonPlayField* f = mPlayFields->find(id);
+ if (!f) {
+	return QString::null;
  }
- return validList;
+ return f->playFieldName();
+}
+
+QString BosonPlayField::playFieldComment(const QString& id)
+{
+ BosonPlayField* f = mPlayFields->find(id);
+ if (!f) {
+	return QString::null;
+ }
+ return f->playFieldComment();
+}
+
+bool BosonPlayField::preLoadPlayField(const QString& file)
+{
+ if (isPreLoaded()) {
+	return true;
+ }
+ delete mFile;
+ mFile = new BPFFile(file, true);
+ if (!mFile->checkTar()) {
+	boError() << k_funcinfo << "Oops - broken file " << file << endl;
+	return false;
+ }
+ if (!loadDescriptionXML(mFile->descriptionData())) {
+	boError() << k_funcinfo << "Could not load description file" << endl;
+	return false;
+ }
+ mIdentifier = mFile->identifier();
+ if (!loadScenarioXML(mFile->scenarioData())) {
+	boError() << k_funcinfo << "Error loading scenario from " << file << endl;
+	return false;
+ }
+
+ mPreLoaded = true;
+ return true;
 }
 
 bool BosonPlayField::loadPlayField(const QString& file)
 {
- QIODevice* dev = KFilterDev::deviceForFile(file);
- if (!dev) {
-	boError() << k_funcinfo << "No file " << file << endl;
+ if (isLoaded()) {
+	// no need to load again :-)
+	boDebug() << k_funcinfo << "playfield " << file << " has already been loaded" << endl;
+	return true;
+ }
+ boDebug() << k_funcinfo << endl;
+ if (!preLoadPlayField(file)) {
 	return false;
  }
- if (!dev->open(IO_ReadOnly)) {
-	boError() << k_funcinfo << "Can't open file " << file << endl;
-	delete dev;
+ if (!mFile) {
+	boError() << k_funcinfo << "NULL file" << endl;
 	return false;
  }
- QDomDocument doc("BosonPlayField");
+ if (mFile->fileName() != file) {
+	boError() << k_funcinfo << "conflicting filenames: " << file << "!=" << mFile->fileName() << endl;
+	return false;
+ }
+
+ // this takes most loading time
+ if (!loadMapXML(mFile->mapData())) {
+	boError() << k_funcinfo << "Error loading map from " << file << endl;
+	return false;
+ }
+ mFile->close();
+ delete mFile;
+ mLoaded = true;
+ return true;
+}
+
+bool BosonPlayField::loadDescriptionXML(const QByteArray& xml)
+{
+ if (xml.size() == 0) {
+	boError() << k_funcinfo << "Oops - NULL description file" << endl;
+	return i18n("Invalid");
+ }
+ BPFDescription description(xml);
+ mName = description.name();
+ mComment = description.comment();
+ return description.toString();
+}
+
+bool BosonPlayField::loadMapXML(const QByteArray& xml)
+{
+ if (xml.size() == 0) {
+	boError() << k_funcinfo << "empty byte array" << endl;
+	return false;
+ }
+ QDomDocument doc("BosonMap");
  QString errorMsg;
  int lineNo, columnNo;
- if (!doc.setContent(dev->readAll(), &errorMsg, &lineNo, &columnNo)) {
-	boError() << "Parse error in line " << lineNo << ",column " << columnNo
+ if (!doc.setContent(xml, &errorMsg, &lineNo, &columnNo)) {
+	boError() << k_funcinfo << "Parse error in line " << lineNo << ",column " << columnNo
 			<< " error message: " << errorMsg << endl;
-	delete dev;
 	return false;
  }
- delete dev;
-
  QDomElement root = doc.documentElement();
 
- if (!loadMap(root)) {
-	boError() << "Error loading map from " << file << endl;
+ if (root.childNodes().count() < 2) { // at least map geo and map cells
+	boError() << k_funcinfo << "No map found in file" << endl;
 	return false;
  }
- if (!loadScenario(root)) {
-	boError() << "Error loading scenario from " << file << endl;
+ delete mMap;
+ mMap = new BosonMap(this);
+ bool ret = mMap->loadMap(root);
+ if (!ret) {
+	boError() << k_funcinfo << "Could not load map" << endl;
 	return false;
  }
- return true;
+ emit signalNewMap(mMap);
+ return ret;
+}
+
+bool BosonPlayField::loadScenarioXML(const QByteArray& xml)
+{
+ if (xml.size() == 0) {
+	boError() << k_funcinfo << "empty byte array" << endl;
+	return false;
+ }
+ QDomDocument doc("BosonScenario");
+ QString errorMsg;
+ int lineNo, columnNo;
+ if (!doc.setContent(xml, &errorMsg, &lineNo, &columnNo)) {
+	boError() << k_funcinfo << "Parse error in line " << lineNo << ",column " << columnNo
+			<< " error message: " << errorMsg << endl;
+	return false;
+ }
+ QDomElement root = doc.documentElement();
+
+ if (root.childNodes().count() < 2) { // at least scenario settings and one player (will always be more)
+	boError() << k_funcinfo << "No scenario found in file" << endl;
+	return false;
+ }
+ delete mScenario;
+ mScenario = new BosonScenario();
+ bool ret = mScenario->loadScenario(root);
+ if (!ret) {
+	boError() << k_funcinfo << "Could not load scenario" << endl;
+	return false;
+ }
+ return ret;
 }
 
 bool BosonPlayField::savePlayField(const QString& fileName)
@@ -142,68 +294,87 @@ bool BosonPlayField::savePlayField(const QString& fileName)
 	boError() << k_funcinfo << "NULL scenario" << endl;
 	return false;
  }
- QDomDocument doc("BosonPlayField");
- QDomElement root = doc.createElement("BosonPlayField");
- doc.appendChild(root);
 
- if (!mScenario->saveScenario(root)) {
-	boError() << k_funcinfo << "Error saving scenario" << endl;
+ QString description = saveDescriptionXML();
+ if (description.isEmpty()) {
+	boError() << k_funcinfo << "Unable to save description" << endl;
 	return false;
  }
- if (!mMap->saveMap(root)) {
-	boError() << k_funcinfo << "Error saving map" << endl;
+ QString map = saveMapXML();
+ if (map.isEmpty()) {
+	boError() << k_funcinfo << "Unable to save map" << endl;
+	return false;
+ }
+ QString scenario = saveScenarioXML();
+ if (scenario.isEmpty()) {
+	boError() << k_funcinfo << "Unable to save scenario" << endl;
 	return false;
  }
 
- QIODevice* dev = KFilterDev::deviceForFile(fileName, "application/x-gzip");
- if (!dev) {
-	boError() << k_funcinfo << "Cannot save to " << fileName << endl;
-	return false;
+ QString topDir = fileName;
+ if (topDir.right(7) == QString::fromLatin1(".tar.gz")) {
+	// might be the case for debugging
+	topDir = topDir.left(topDir.length() - 7);
  }
- if (!dev->open(IO_WriteOnly)) {
-	boError() << k_funcinfo << "Cannot open " << fileName << endl;
-	delete dev;
-	return false;
+ if (topDir.findRev('.') > 0) {
+	topDir.truncate(topDir.findRev('.'));
  }
- QString xml = doc.toString();
- dev->writeBlock(xml.data(), xml.length());
- dev->close();
- delete dev;
+
+ BPFFile* f = new BPFFile(fileName, false);
+// BPFFile* f = new BPFFile("/home/andi/44/ab1.bpf.tar.gz", false);
+
+#warning TODO
+ QString user = "foobar";
+ QString group = "foobar";
+ f->writeFile(QString::fromLatin1("%1/map.xml").arg(topDir), user, group, map.length(), map.data());
+ f->writeFile(QString::fromLatin1("%1/scenario.xml").arg(topDir), user, group, scenario.length(), scenario.data());
+ f->writeFile(QString::fromLatin1("%1/%2/description.xml").arg(topDir).arg(QString::fromLatin1("C")), user, group, description.length(), description.data());
+
  mMap->setModified(false);
  mScenario->setModified(false);
+ f->close();
+ delete f;
  return true;
 }
 
-bool BosonPlayField::loadMap(QDomElement& root)
+QString BosonPlayField::saveDescriptionXML()
 {
- QDomNodeList list = root.elementsByTagName("BosonMap");
- if (list.count() < 1) {
-	boError() << k_funcinfo << "No map found in file" << endl;
-	return false;
- } else if (list.count() > 1) {
-	boWarning() << k_funcinfo << "More than one map in file - picking first" << endl;
- }
- QDomElement node = list.item(0).toElement();
- delete mMap;
- mMap = new BosonMap(this);
- bool ret = mMap->loadMap(node);
- emit signalNewMap(mMap);
- return ret;
+ BPFDescription description;
+ description.setName(mName);
+ description.setComment(mComment);
+ return description.toString();
 }
 
-bool BosonPlayField::loadScenario(QDomElement& root)
+QString BosonPlayField::saveMapXML()
 {
- QDomNodeList list = root.elementsByTagName("BosonScenario");
- if (list.count() < 1) {
-	boError() << k_funcinfo << "No scenario found in file" << endl;
-	return false;
- } else if (list.count() > 1) {
-	boWarning() << k_funcinfo << "More than one scenario in file ... we probably will never support this - but definitely *not* yet. picking first" << endl;
+ if (!mMap) {
+	boError() << k_funcinfo << "NULL map" << endl;
+	return QString::null;
  }
- QDomElement node = list.item(0).toElement();
- delete mScenario;
- mScenario = new BosonScenario();
- return mScenario->loadScenario(node);
+ QDomDocument doc("BosonMap");
+ QDomElement root = doc.createElement("BosonMap");
+ doc.appendChild(root);
+ if (!mMap->saveMap(root)) {
+	boError() << k_funcinfo << "Error saving map" << endl;
+	return QString::null;
+ }
+ return doc.toString();
+}
+
+QString BosonPlayField::saveScenarioXML()
+{
+ if (!mScenario) {
+	boError() << k_funcinfo << "NULL scenario" << endl;
+	return QString::null;
+ }
+ QDomDocument doc("BosonScenario");
+ QDomElement root = doc.createElement("BosonScenario");
+ doc.appendChild(root);
+ if (!mScenario->saveScenario(root)) {
+	boError() << k_funcinfo << "Error saving scenario" << endl;
+	return QString::null;
+ }
+ return doc.toString();
 }
 
 bool BosonPlayField::loadMap(QDataStream& stream)
@@ -237,26 +408,6 @@ void BosonPlayField::quit()
  mMap = 0;
  delete mScenario;
  mScenario = 0;
-}
-
-QString BosonPlayField::playFieldFileName(const QString& identifier)
-{
- QStringList l = availablePlayFields();
- for (unsigned int i = 0; i < l.count(); i++) {
-	KSimpleConfig cfg(l[i]);
-	cfg.setGroup("Boson PlayField");
-	if (cfg.readEntry("Identifier") == identifier) {
-		QString m = l[i].left(l[i].length() - strlen(".boson"));
-		m += QString::fromLatin1(".bpf");
-		if (QFile::exists(m)) {
-			return m;
-		} else {
-			boError() << "Cannot find " << m << " for valid .boson file" << endl;
-		}
-	}
- }
- boWarning() << "no map file found for " << identifier << endl;
- return QString::null;
 }
 
 void BosonPlayField::applyScenario(Boson* boson)

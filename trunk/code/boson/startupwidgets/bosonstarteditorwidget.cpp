@@ -295,7 +295,9 @@ void BosonStartEditorWidget::slotMapChanged(const QString& identifier)
 		int index = it.key();
 		mMapCombo->setCurrentItem(index);
 		boDebug() << k_funcinfo << "loading map: " << identifier << endl;
-		playField()->loadPlayField(BosonPlayField::playFieldFileName(identifier));
+#warning FIXME
+		boFatal() << k_funcinfo << "needs to be fixed!" << endl;
+//		playField()->loadPlayField(BosonPlayField::playFieldFileName(identifier));
 		BosonMap* map = playField()->map();
 		BosonScenario* scenario = playField()->scenario();
 		if (!map) {

@@ -52,6 +52,9 @@
 #define MAX_MAP_HEIGHT 500
 #define MAX_MAP_WIDTH 500
 
+// playfield that gets used by default
+#define DEFAULT_PLAYFIELD QString::fromLatin1("Basic2")
+
 
 // default values
 // used for both BosonConfig and OptionsDialog
