@@ -940,6 +940,7 @@ void BosonWidget::slotDebugRequestIdName(int msgid, bool , QString& name)
 void BosonWidget::slotEndGame()
 {
 // this needs to be done first, before the players are removed
+ displayManager()->quitGame();
  canvas()->deleteDestroyed();
  game()->quitGame();
 }
