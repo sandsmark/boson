@@ -94,16 +94,16 @@ KGameCellDebug::~KGameCellDebug()
 void KGameCellDebug::setMap(BosonMap* m)
 {
  d->mMap = m;
- for (unsigned int i = 0; i < d->mMap->height(); i++) {
-	for (unsigned int j = 0; j < d->mMap->width(); j++) {
+ for (unsigned int i = 0; i < d->mMap->width(); i++) {
+	for (unsigned int j = 0; j < d->mMap->height(); j++) {
 		Cell* c = d->mMap->cell(i, j);
 		if (!c) {
 			kdError() << k_funcinfo << "NULL cell" << endl;
 			continue;
 		}
 		QListViewItem* item = new QListViewItem(d->mCellList);
-		item->setText(d->mCellXId, QString::number(j));
-		item->setText(d->mCellYId, QString::number(i));
+		item->setText(d->mCellXId, QString::number(i));
+		item->setText(d->mCellYId, QString::number(j));
 		item->setText(d->mCellGroundTypeId, QString::number(c->groundType()));
 		item->setText(d->mCellVersionId, QString::number(c->version()));
 		item->setText(d->mCellTileId, QString::number(c->tile()));
@@ -118,8 +118,8 @@ void KGameCellDebug::slotUpdate()
  if (!d->mMap) {
 	return;
  }
- for (unsigned int i = 0; i < d->mMap->height(); i++) {
-	for (unsigned int j = 0; j < d->mMap->width(); j++) {
+ for (unsigned int i = 0; i < d->mMap->width(); i++) {
+	for (unsigned int j = 0; j < d->mMap->height(); j++) {
 		Cell* c = d->mMap->cell(i, j);
 		if (!c) {
 			kdError() << k_funcinfo << "NULL cell" << endl;
@@ -134,7 +134,7 @@ void KGameCellDebug::slotUpdate()
 	}
  }
  // update the selected cell
- 
+ slotUpdateCell(d->mCellList->selectedItem());
 }
 
 void KGameCellDebug::slotUpdateCell(QListViewItem* item)
