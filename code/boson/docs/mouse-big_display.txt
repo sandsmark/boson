@@ -82,9 +82,11 @@ by 3 or some other constant). This action modifier is the Control button
 This leaves us the following combinations:
 Modifiers:
 - None                          zoom in/out
-- Shift is pressed              move the camera?
-- Action locked                 nothing yet. same as None.
-- Action locked + Shift         nothing yet. same as Shift only.
+- Shift is pressed              rotate the camera
+- Action locked                 Ignored. Has the same effect as if action wasn't
+                                locked. This is important because you may need
+                                to zoom/rotate the camera with action locked as
+                                well.
 
 Remember that all combinations can forward the CTRL is pressed status to their
 action. You can e.g. move the camera horizontally when it is not pressed and
@@ -214,11 +216,11 @@ Modifiers:
 Possible actions:
 - select all units (of the local player) of the type of the unit below the
   cursor.
-  By default this should be done when no modifier is pressed (LMB).
+  By default this should be done when Shift is pressed (LMB).
   CTRL should *add* them to the current selection
 - select all units (of the local player) of the type of the unit below the
   cursor that are on the screen.
-  By default this should be done when Shift is pressed (LMB).
+  By default this should be done when no modifier is pressed (LMB).
   CTRL should *add* them to the current selection
 AB: maybe we should swap default settings, i.e. without modifier select those
 that are on screen only, with modifier select all of that type.
@@ -297,8 +299,13 @@ Modifiers:
                                 (unit-)action on the point that was clicked.
                                 ("unit action" means something like move,
                                 attack, mine, repair, ...)
-                                With CTRL pressed this will always attack the
-                                point (ignoring if and which unit is there)
+                                With CTRL pressed this will always enforce the
+                                action at that point (ignoring if and which
+                                unit is there). For example if a unit is
+                                selected then it would force attack that point,
+                                even if none or a friendly unit is there.
+                                The same might be possible for other actions
+                                (i.e. other actions than "attack").
 - CTRL                          Once again this is an "action modifier" (see
                                 above), i.e. what this does depends on the
                                 performed action.
