@@ -490,11 +490,19 @@ void BoDisplayManager::slotUnitAction(int action)
 
 void BoDisplayManager::slotPlaceUnit(unsigned long int unitType, Player* owner)
 {
+ if (!activeDisplay()) {
+	kdError() << k_funcinfo << "NULL active display" << endl;
+	return;
+ }
  activeDisplay()->placeUnit(unitType, owner);
 }
 
 void BoDisplayManager::slotPlaceCell(int tile)
 {
+ if (!activeDisplay()) {
+	kdError() << k_funcinfo << "NULL active display" << endl;
+	return;
+ }
  activeDisplay()->placeCell(tile);
 }
 
