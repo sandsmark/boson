@@ -137,6 +137,7 @@ BosonCommandFrame::BosonCommandFrame(QWidget* parent, bool editor) : QFrame(pare
 
 // the order buttons
  d->mScrollView = new OrderScrollView(this);
+ d->mScrollView->setResizePolicy(QScrollView::AutoOneFit);
  d->mTopLayout->addWidget(d->mScrollView, 1);
  d->mOrderWidget = new QWidget(d->mScrollView->viewport());
  d->mScrollView->addChild(d->mOrderWidget);
@@ -209,13 +210,14 @@ void BosonCommandFrame::resetLayout()
 {
  delete d->mOrderLayout;
  int buttons = boConfig->commandButtonsPerRow();
- d->mOrderLayout = new QGridLayout(d->mOrderWidget);
+ d->mOrderLayout = new QGridLayout(d->mOrderWidget, -1, -1);
  for (unsigned int i = 0; i < d->mOrderButton.count(); i++) {
 	BosonCommandWidget* b = d->mOrderButton[i];
-	d->mOrderLayout->addWidget(b, i / buttons, i % buttons);
+	d->mOrderLayout->addWidget(b, i / buttons, i % buttons, AlignHCenter);
  }
- int column = (d->mOrderButton.count() - 1) / buttons + 1;
- d->mOrderLayout->addMultiCellWidget(d->mConstructionProgress, column, column, 0, buttons - 1);
+ int row = ((d->mOrderButton.count() - 1) / buttons) + 1;
+ d->mOrderLayout->addMultiCellWidget(d->mConstructionProgress, row, row, 0, buttons - 1);
+ d->mOrderLayout->setRowStretch(row + 1, 1);
  d->mOrderLayout->activate();
 }
 
@@ -228,21 +230,21 @@ void BosonCommandFrame::slotShowSingleUnit(Unit* unit)
 	return;
  }
  if (unit->isDestroyed()) {
-	kdWarning() << k_funcinfo << ": unit is destroyed" << endl;
+	kdWarning() << k_funcinfo << "unit is destroyed" << endl;
 	return;
  }
  if (!unit->owner()) {
-	kdError() << k_funcinfo << ": unit has no owner" << endl;
+	kdError() << k_funcinfo << "unit has no owner" << endl;
 	return;
  }
  SpeciesTheme* theme = unit->owner()->speciesTheme();
  if (!theme) {
-	kdError() << k_funcinfo << ": owner has no species theme" << endl;
+	kdError() << k_funcinfo << "owner has no species theme" << endl;
 	return;
  }
  QPixmap* p = theme->bigOverview(unit->type());
  if (!p) {
-	kdError() << k_funcinfo << ": unit has no big overview in this theme" 
+	kdError() << k_funcinfo << "unit has no big overview in this theme" 
 			<< endl;
 	return;
  }
@@ -352,12 +354,12 @@ void BosonCommandFrame::slotEditorProduction(int index, Player* owner)
 	return;
  }
  if (!owner) {
-	kdError() << k_funcinfo << ": NULL owner" << endl;
+	kdError() << k_funcinfo << "NULL owner" << endl;
 	return;
  }
  SpeciesTheme* theme = owner->speciesTheme();
  if (!theme) {
-	kdError() << k_funcinfo << ": NULL theme" << endl;
+	kdError() << k_funcinfo << "NULL theme" << endl;
 	return;
  }
  d->mOrderType = (OrderType)index;
