@@ -143,7 +143,7 @@ BosonCommandFrame::BosonCommandFrame(QWidget* parent, bool editor) : QFrame(pare
 
  d->mOrderMap = new QSignalMapper(d->mOrderWidget);
  connect(d->mOrderMap, SIGNAL(mapped(int)), this, SLOT(slotHandleOrder(int)));
-
+ show();
 }
 
 void BosonCommandFrame::init()

@@ -46,78 +46,43 @@ class Top::TopPrivate
 public:
 	TopPrivate()
 	{
-		mBosonWidget = 0;
-		mToolbarAction = 0;
-		mStatusbarAction = 0;
-		mZoomAction = 0;
 	}
 
-	BosonWidget* mBosonWidget;
-	KToggleAction* mToolbarAction;
-	KToggleAction* mStatusbarAction;
-	KSelectAction* mZoomAction;
 };
 
-Top::Top()
-    : KMainWindow( 0 )
+Top::Top() : TopBase()
 {
  d = new TopPrivate;
 
- d->mBosonWidget = new BosonWidget(this);
- d->mBosonWidget->addGameCommandFrame();
+ bosonWidget()->addGameCommandFrame();
 
- // tell the KMainWindow that this is indeed the main widget
- setCentralWidget(d->mBosonWidget);
-
- // then, setup our actions
- setupActions();
-
- // and a status bar
- setupStatusBar();
+ initKAction();
+ initStatusBar();
 
  showMaximized();
 
- d->mBosonWidget->slotNewGame(); // adds a local player, too
+ bosonWidget()->slotNewGame(); // adds a local player, too
 }
 
 Top::~Top()
 {
- d->mBosonWidget->saveConfig();
+ bosonWidget()->saveConfig();
  delete d;
 }
 
-void Top::setupActions()
+void Top::initKAction()
 {
- KStdGameAction::gameNew(d->mBosonWidget, SLOT(slotNewGame()), actionCollection());
-// KStdGameAction::save(this, SLOT(fileSave()), actionCollection());
-// KStdGameAction::saveAs(this, SLOT(fileSaveAs()), actionCollection());
+ KStdGameAction::gameNew(bosonWidget(), SLOT(slotNewGame()), actionCollection());
  KStdGameAction::quit(kapp, SLOT(quit()), actionCollection());
- KStdGameAction::end(d->mBosonWidget, SLOT(slotEndGame()), actionCollection());
-// (void)new KAction(i18n("Connect To localhost"), 0, d->mBosonWidget, SLOT(slotConnect()), actionCollection(), "game_connect");
+ KStdGameAction::end(bosonWidget(), SLOT(slotEndGame()), actionCollection());
 
-// Debug - no i18n!
- (void)new KAction("Debug", QKeySequence(), d->mBosonWidget, SLOT(slotDebug()), actionCollection(), "game_debug");
-
- d->mToolbarAction = KStdAction::showToolbar(this, SLOT(optionsShowToolbar()), actionCollection());
- d->mStatusbarAction = KStdAction::showStatusbar(this, SLOT(optionsShowStatusbar()), actionCollection());
-
- KStdAction::keyBindings(this, SLOT(optionsConfigureKeys()), actionCollection());
- KStdAction::configureToolbars(this, SLOT(optionsConfigureToolbars()), actionCollection());
- KStdAction::preferences(d->mBosonWidget, SLOT(slotGamePreferences()), actionCollection()); // FIXME: for game only - not editor!
-
- d->mZoomAction = new KSelectAction(i18n("&Zoom"), QKeySequence(), actionCollection(), "options_zoom");
- connect(d->mZoomAction, SIGNAL(activated(int)), 
-		this, SLOT(slotZoom(int)));
- QStringList items;
- items.append(QString::number(50));
- items.append(QString::number(100));
- items.append(QString::number(150));
- d->mZoomAction->setItems(items);
+ KStdAction::keyBindings(this, SLOT(slotConfigureKeys()), actionCollection());
+ KStdAction::preferences(bosonWidget(), SLOT(slotGamePreferences()), actionCollection()); // FIXME: for game only - not editor!
 
  createGUI();
 }
 
-void Top::setupStatusBar()
+void Top::initStatusBar()
 {
  statusBar()->show();
 }
@@ -146,57 +111,11 @@ void Top::readProperties(KConfig *config)
 
 void Top::slotGameNew()
 {
- d->mBosonWidget->slotNewGame();
+ bosonWidget()->slotNewGame();
 }
 
-void Top::fileSave()
-{
-}
-
-void Top::fileSaveAs()
-{
-}
-
-void Top::optionsShowToolbar()
-{
- if (d->mToolbarAction->isChecked()) {
-	toolBar()->show();
- } else {
-	toolBar()->hide();
- }
-}
-
-void Top::optionsShowStatusbar()
-{
- if (d->mStatusbarAction->isChecked()) {
-        statusBar()->show();
- } else {
-        statusBar()->hide();
- }
-}
-
-void Top::optionsConfigureKeys()
+void Top::slotConfigureKeys()
 {
  KKeyDialog::configureKeys(actionCollection(), "bosonui.rc");
-}
-
-void Top::optionsConfigureToolbars()
-{
- // use the standard toolbar editor
- KEditToolbar dlg(actionCollection());
- if (dlg.exec()) {
-	// recreate our GUI
-	createGUI();
- } 
-}
-
-void Top::slotZoom(int index)
-{
-kdDebug() << "zoom index=" << index << endl;
- double percent = d->mZoomAction->items()[index].toDouble();
- double factor = (double)percent / 100;
- QWMatrix m;
- m.scale(factor, factor);
- d->mBosonWidget->zoom(m);
 }
 
