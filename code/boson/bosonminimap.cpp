@@ -266,8 +266,10 @@ void BosonMiniMap::mousePressEvent(QMouseEvent *e)
 
 void BosonMiniMap::slotAddUnit(Unit* unit, int x, int y)
 {
+ // AB: obsolete. units will move anyway (and therefore call slotMoveUnit)
+
  // x and y are canvas coordinates
- moveUnit(unit, makeCellList(unit, x, y), QPointArray());
+// moveUnit(unit, makeCellList(unit, x, y), QPointArray());
 }
 
 void BosonMiniMap::slotMoveUnit(Unit* unit, float oldX, float oldY)
