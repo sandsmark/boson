@@ -73,7 +73,6 @@ General TODOs
 - pixmaps on startup widgets should be centered horizontally
 - Use KMD5 to calculate checksum of map and unitProperties at the beginning of
   game and transfer only needed things over network. Saves some traffic
-- Minimap doesn't support units with width or height not equal to BO_TILE_SIZE
 - Click+Move in minimap should move the rectangle (aka the screen position)
 - ./configure allows --without-gl
 - Clean up BosonNewGameWidget. E.g. map selection stuff sucks IMHO and we also
