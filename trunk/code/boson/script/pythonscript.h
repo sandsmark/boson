@@ -41,6 +41,7 @@ class PythonScript : public BosonScript
 
     virtual void advance();
     virtual void init();
+    virtual void setPlayerId(int id);
 
     virtual bool load(QDataStream& stream);
     virtual bool save(QDataStream& stream) const;
