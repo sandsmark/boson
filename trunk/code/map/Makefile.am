@@ -56,8 +56,6 @@ DISTCLEANFILES = basic.bpf
 #messages:
 #	$(XGETTEXT) -C -ki18n -x ../../../kdelibs/po/kde.pot $(libboson_la_SOURCES) && mv messages.po ../po/bocommon.pot
 
-
-
-
-
+basic.bpf : boeditor
+	./boeditor
 
