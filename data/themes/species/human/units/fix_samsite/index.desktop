@@ -12,3 +12,8 @@ CanShootAtAirUnits=true
 CanShootAtLandUnits=false
 Producer=10
 Requirements=5,0,2
+
+[Textures]
+Textures=bomber_m.jpg
+bomber_m.jpg=bomber_metal1a.jpg
+
