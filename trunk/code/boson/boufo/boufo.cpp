@@ -663,15 +663,9 @@ void BoUfoWidget::setPreferredSize(const ufo::UDimension& s)
  widget()->setPreferredSize(s);
 }
 
-void BoUfoWidget::show()
+void BoUfoWidget::setVisible(bool v)
 {
- widget()->setVisible(true);
- invalidate(); // AB: libufo fails to do so
-}
-
-void BoUfoWidget::hide()
-{
- widget()->setVisible(false);
+ widget()->setVisible(v);
  invalidate(); // AB: libufo fails to do so
 }
 
@@ -1356,6 +1350,44 @@ bool BoUfoCheckBox::checked() const
  return mCheckBox->isSelected();
 }
 
+
+BoUfoMatrix::BoUfoMatrix() : BoUfoWidget()
+{
+ init();
+}
+
+BoUfoMatrix::~BoUfoMatrix()
+{
+ // AB: remember NOT to delete the mMatrix[i] elements. libufo does so. we just
+ // need to delete the array containing the pointers.
+ delete[] mMatrix;
+}
+
+void BoUfoMatrix::init()
+{
+ setLayoutClass(UHBoxLayout);
+
+ BoUfoVBox* rows[4];
+ for (int i = 0; i < 4; i++) {
+	rows[i] = new BoUfoVBox();
+	addWidget(rows[i]);
+ }
+
+ mMatrix = new BoUfoLabel*[16];
+ for (int i = 0; i < 16; i++) {
+	mMatrix[i] = new BoUfoLabel();
+	rows[i % 4]->addWidget(mMatrix[i]);
+ }
+}
+
+void BoUfoMatrix::setMatrix(const float* m)
+{
+ for (int i = 0; i < 16; i++) {
+	mMatrix[i]->setText(QString::number(m[i]));
+ }
+}
+
+
 BoUfoVBox::BoUfoVBox() : BoUfoWidget()
 {
  init();
@@ -1571,11 +1603,6 @@ void BoUfoInternalFrame::init()
 void BoUfoInternalFrame::setBounds(int x, int y, int w, int h)
 {
  frame()->setBounds(x, y, w, h);
-}
-
-void BoUfoInternalFrame::setVisible(bool v)
-{
- frame()->setVisible(v);
 }
 
 void BoUfoInternalFrame::setTitle(const QString& t)
