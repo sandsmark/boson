@@ -56,7 +56,7 @@ draw_bigbox_text("What has been changed since 0.9.1:
     <li>Dependency changes:</li>
     <ul>
     <li>Added: <a href=\"http://www.openal.org/\">OpenAL</a></li>
-    <li>Removed: arts, kdemultimedia and kdegames</li>
+    <li>Removed: arts, kdemultimedia, kdegames</li>
     </ul>
  </ul>
 
@@ -72,7 +72,7 @@ draw_bigbox_text("What has been changed since 0.9.1:
     <li>Use vertex arrays and vertex buffer objects by default if possible,
     increases speed by a few FPS</li>
     <li>First steps for transparent textures (transparent surfaces support)</li>
-    <li>New effects system which replaces particle systems. At the moment is an
+    <li>New effects system which replaces particle systems. At the moment this is an
     internal change only</li>
     <li>Units are correctly rotated, depending on the slope of the terrain that
     they're on</li>
@@ -104,13 +104,14 @@ draw_bigbox_text("What has been changed since 0.9.1:
 
  <h3>Data</h3>
  <ul>
-     <li>Some neutral objects added (trees, stone, house...)</li>
+     <li>Some neutral objects added (mineralmine, trees, stone, house...)</li>
      <li>New explosions</li>
      <li>Two textured fonts added</li>
      <li>Scaled down a texture</li>
      <li>General map changes</li>
      <li>New map: Canyon</li>
      <li>New map: We are under attack</li>
+     <li>Documentation updates</li>
  </ul>
 
  <h3>Internal</h3>
@@ -125,6 +126,8 @@ draw_bigbox_text("What has been changed since 0.9.1:
     <li>The menu is properly removed when a game is ended, fixing menu duplication
     (see <a href=\"http://bugs.kde.org/show_bug.cgi?id=66715\">66715</a>)</li>
     <li>Boson now provides it's own copy of kgame</li>
+    <li>Emergency save added, it saves all game data. A developer can now took at a replay of this session</li>
+    <li>Gcc 3.4 fixes</li>
  </ul>
 
 
@@ -139,7 +142,6 @@ draw_bigbox_text("This is a list of features that we consider as
     conversion on startup</li>
     <li>Find out whether save/load is still working</li>
     <li>Find out whether playfield saving is still working</li>
-    <li>Look for more textures which can be scaled down</li>
     <li>Fix #79494</li>
   </ul>");
 draw_bigbox_end();
