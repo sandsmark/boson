@@ -185,6 +185,7 @@ BoGameCamera& BoGameCamera::operator=(const BoGameCamera& c)
 
 void BoGameCamera::init()
 {
+  setAutoCamera(new BoAutoGameCamera(this));
   initStatic();
   setMoveRect(-100000, 100000, -100000, 100000); // just very big values
   mPosZ = 8.0f;
