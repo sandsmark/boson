@@ -21,6 +21,7 @@
 #include "kloadsavegamewidget.moc"
 
 #include "bodebug.h"
+#include "../bofiledialog.h"
 
 #include <qdir.h>
 #include <qscrollview.h>
@@ -411,9 +412,9 @@ void KLoadSaveGameWidget::slotBrowse()
 {
  QString file;
  if (d->mSave) {
-	file = KFileDialog::getSaveFileName();
+	file = BoFileDialog::getSaveFileName();
  } else {
-	file = KFileDialog::getOpenFileName();
+	file = BoFileDialog::getOpenFileName();
  }
 
  if (file.isEmpty()) {

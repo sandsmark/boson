@@ -21,6 +21,7 @@
 #include "boinfodialog.moc"
 #include "boinfo.h"
 #include "../boglobal.h"
+#include "../bofiledialog.h"
 #include "bodebug.h"
 
 #include <kfiledialog.h>
@@ -587,7 +588,7 @@ void BoInfoDialog::loadFromFile(const QString& file)
 void BoInfoDialog::slotSaveToFile()
 {
  QString file;
- file = KFileDialog::getSaveFileName();
+ file = BoFileDialog::getSaveFileName();
  if (file.isNull()) {
 	return;
  }
@@ -607,7 +608,7 @@ void BoInfoDialog::slotSaveToFile()
 void BoInfoDialog::slotLoadFromFile()
 {
  QString file;
- file = KFileDialog::getOpenFileName();
+ file = BoFileDialog::getOpenFileName();
  if (file.isNull()) {
 	return;
  }
