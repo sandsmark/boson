@@ -53,7 +53,7 @@ gameProperties.ground		= new groundTheme("ben");
 
 gameProperties.species[1]	=
 gameProperties.myspecies	= ///orzel : hum....
-gameProperties.species[0]	= new speciesTheme("ben");
+gameProperties.species[0]	= new speciesTheme("Red");
 
 }
 

@@ -124,7 +124,7 @@ for (int i=0; i<ORDER_BUTTONS_NB; i++) {
 void orderWin::selectFix(playerFacility *f)
 {
 fixSelected = f;
-view_one->setPixmap(*gameProperties.myspecies->getOverview(f)); ///orzel 0 is not 0, it's my_number_in_the_game
+view_one->setPixmap(*gameProperties.myspecies->getBigOverview(f)); ///orzel 0 is not 0, it's my_number_in_the_game
 logf(LOG_GAME_LOW, "select facility");
 
 }
@@ -137,7 +137,7 @@ if (mobSelected.isEmpty()) {
 	}
 
 mobSelected.insert(key, m);
-view_one->setPixmap(*gameProperties.myspecies->getOverview(m)); ///orzel 0 is not 0, it's my_number_in_the_game
+view_one->setPixmap(*gameProperties.myspecies->getBigOverview(m)); ///orzel 0 is not 0, it's my_number_in_the_game
 logf(LOG_GAME_LOW, "select mobile");
 }
 

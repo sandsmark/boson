@@ -30,11 +30,9 @@
 */
 
 mobileProperties_t mobileProp[] = {
-	{"Arrow", 0, 32,32, 5, 10},	// MOB_ARROW
-	{"Quad", 0, 64,64, 6, 4},	// MOB_QUAD
-	{"Tank", 0, 48,48, 5, 7},	// MOB_TANK
-/*	{"", 0, 2, 2}			// MOB_
-*/
+	{"Quad", 0, 32, 32, 3, 4},	// MOB_QUAD
+	{"Aircraft", 0, 72, 72, 5, 4},	// MOB_AIRCRAFT
+	{"Ship", 0, 96, 96, 4, 4},	// MOB_SHIP
 	};
 
 facilityProperties_t facilityProp[] = {
@@ -49,3 +47,6 @@ facilityProperties_t facilityProp[] = {
 
 const int facilityPropNb = (sizeof(facilityProp)/sizeof(facilityProp [0]));
 const int mobilePropNb = (sizeof(mobileProp)/sizeof(mobileProp [0]));
+
+
+
