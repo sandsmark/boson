@@ -16,43 +16,33 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-
-#ifndef BOSONWELCOMEWIDGET_H
-#define BOSONWELCOMEWIDGET_H
+#ifndef KGAMEPLAYERDEBUG_H
+#define KGAMEPLAYERDEBUG_H
 
 #include <qwidget.h>
 
-class QVBoxLayout;
-class QHBoxLayout;
-class QGridLayout;
-class QLabel;
-class QPushButton;
+class Boson;
+class Player;
 
-class BosonWelcomeWidget : public QWidget
+/**
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+class KGamePlayerDebug : public QWidget
 {
-  Q_OBJECT
-  public:
-    BosonWelcomeWidget(QWidget* parent);
-    ~BosonWelcomeWidget();
+	Q_OBJECT
+public:
+	KGamePlayerDebug(QWidget* parent);
+	~KGamePlayerDebug();
 
-  signals:
-    void signalNewGame();
-    void signalLoadGame();
-    void signalStartEditor();
-    void signalQuit();
+	void setBoson(Boson* boson);
+	void setLocalPlayer(Player* p);
 
-  protected:
-    QVBoxLayout* mBosonWelcomeWidgetLayout;
-    QVBoxLayout* mMainLayout;
-
-  private:
-    QPushButton* mNewGameButton;
-    QPushButton* mLoadGameButton;
-    QPushButton* mEditorButton;
-    QPushButton* mQuitButton;
-
-    QLabel* mBanner;
-
+protected slots:
+	void slotUpdate();
+	
+private:
+	class KGamePlayerDebugPrivate;
+	KGamePlayerDebugPrivate* d;
 };
 
-#endif // BOSONWELCOMEWIDGET_H
+#endif

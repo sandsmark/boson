@@ -34,6 +34,7 @@
 #include "bosonconfig.h"
 #include "optionsdialog.h"
 #include "kgameunitdebug.h"
+#include "kgameplayerdebug.h"
 #include "bosonmusic.h"
 #include "bosoncursor.h"
 #include "commandinput.h"
@@ -140,7 +141,7 @@ inline BosonCanvas* BosonWidget::canvas() const
 
 inline BosonPlayField* BosonWidget::map() const
 {
- return mTop->map();
+ return mTop->playField();
 }
 
 inline Player* BosonWidget::player() const
@@ -427,9 +428,14 @@ void BosonWidget::initLayout()
 void BosonWidget::slotDebug()
 {
  KGameDebugDialog* dlg = new KGameDebugDialog(game(), this);
+ 
  QVBox* b = dlg->addVBoxPage(i18n("Debug &Units"));
  KGameUnitDebug* units = new KGameUnitDebug(b);
  units->setBoson(game());
+
+ b = dlg->addVBoxPage(i18n("Debug &Boson Players"));
+ KGamePlayerDebug* player = new KGamePlayerDebug(b);
+ player->setBoson(game());
  connect(dlg, SIGNAL(finished()), dlg, SLOT(slotDelayedDestruct()));
  connect(dlg, SIGNAL(signalRequestIdName(int,bool,QString&)),
 		this, SLOT(slotDebugRequestIdName(int,bool,QString&)));

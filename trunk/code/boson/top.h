@@ -50,7 +50,7 @@ public:
 
 	Boson* game() const { return mBoson; };
 	Player* player() const { return mPlayer; };
-	BosonPlayField* map() const { return mMap; };
+	BosonPlayField* playField() const { return mPlayField; };
 	BosonCanvas* canvas() const { return mCanvas; };
 
 	void loadGameDockConfig();
@@ -180,7 +180,7 @@ private:
 	void initMusic();
 	void initBoson();
 	void initPlayer();
-	void initMap();
+	void initPlayField();
 	void initActions();
 	void initStatusBar();
 	void enableGameActions(bool enable);
@@ -214,7 +214,7 @@ private:
 	QWidgetStack* mWs;
 	Boson* mBoson;
 	Player* mPlayer;
-	BosonPlayField* mMap;
+	BosonPlayField* mPlayField;
 	BosonCanvas* mCanvas;
 	KDockWidget* mMainDock;
 	bool mGame;
