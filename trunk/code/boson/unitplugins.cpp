@@ -1012,7 +1012,7 @@ RessourceMinePlugin::RessourceMinePlugin(Unit* unit)
 		: UnitPlugin(unit)
 {
  unit->registerData(&mMinerals, Unit::IdRessourceMineMinerals);
- unit->registerData(&mMinerals, Unit::IdRessourceMineOil);
+ unit->registerData(&mOil, Unit::IdRessourceMineOil);
  mMinerals.setLocal(0);
  mOil.setLocal(0);
 }
@@ -1053,5 +1053,51 @@ bool RessourceMinePlugin::loadFromXML(const QDomElement& root)
 
 void RessourceMinePlugin::advance(unsigned int)
 {
+}
+
+bool RessourceMinePlugin::canProvideMinerals() const
+{
+ const RessourceMineProperties* prop = (RessourceMineProperties*)unit()->properties(PluginProperties::RessourceMine);
+ if (!prop) {
+	return false;
+ }
+ return prop->canProvideMinerals();
+}
+
+bool RessourceMinePlugin::canProvideOil() const
+{
+ const RessourceMineProperties* prop = (RessourceMineProperties*)unit()->properties(PluginProperties::RessourceMine);
+ if (!prop) {
+	return false;
+ }
+ return prop->canProvideOil();
+}
+
+void RessourceMinePlugin::setMinerals(int m)
+{
+ if (!canProvideMinerals()) {
+	mMinerals = m;
+	return;
+ }
+ mMinerals = m;
+}
+
+void RessourceMinePlugin::setOil(int o)
+{
+ if (!canProvideOil()) {
+	mOil = 0;
+	return;
+ }
+ mOil = o;
+}
+
+int RessourceMinePlugin::minerals() const
+{
+ return mMinerals;
+}
+
+int RessourceMinePlugin::oil() const
+{
+ return mOil;
 }
 
