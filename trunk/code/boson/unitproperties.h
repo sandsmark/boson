@@ -356,6 +356,13 @@ public:
 
 	BoAction* produceAction() const { return mProduceAction; };
 
+	unsigned int explodingFragmentCount() const { return mExplodingFragmentCount; };
+	long int explodingFragmentDamage() const { return mExplodingFragmentDamage; };
+	float explodingFragmentDamageRange() const { return mExplodingFragmentDamageRange; };
+	QPtrList<BosonParticleSystem> newExplodingFragmentFlyParticleSystems(BoVector3 pos) const;
+	QPtrList<BosonParticleSystem> newExplodingFragmentHitParticleSystems(BoVector3 pos) const;
+
+
 	/**
 	 * Load actions for this unit. Must be called after overview pixmaps are
 	 * loaded.
@@ -464,6 +471,9 @@ private:
 	long int mExplodingDamage;
 	float mExplodingDamageRange;
 	BoAction* mProduceAction;
+	unsigned int mExplodingFragmentCount;
+	long int mExplodingFragmentDamage;
+	float mExplodingFragmentDamageRange;
 
 	MobileProperties* mMobileProperties;
 	FacilityProperties* mFacilityProperties;

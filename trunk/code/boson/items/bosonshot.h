@@ -28,35 +28,82 @@
 class Unit;
 class Player;
 class BosonParticleSystem;
+class BosonParticleSystemProperties;
 class BosonWeaponProperties;
+class UnitProperties;
 
 class QDomElement;
+template<class T> class QPtrList;
 
 
 /** @short Base class for shots
+ *
+ * This is the base class for all shots.
+ * Shots are not only bullets/missiles but basically everything that can damage
+ * units.
  *
  * @author Rivo Laks <rivolaks@hot.ee>
  **/
 class BosonShot : public BosonItem
 {
   public:
-    enum Type { Bullet = 0, Missile, Explosion, Mine, Bomb };
+    /**
+     * Type of the shot
+     **/
+    enum Type { Bullet = 0, Missile, Explosion, Mine, Bomb, Fragment };
 
     /**
      * @param owner The player that shot. This is usually @ref Unit::owner of
      * the unit that is attacking.
      * @param canvas The @ref BosonCanvas object
-     * @param prop The kind of weapon that fired this shot. Can be skipped
+     * @param prop The kind of weapon that fired this shot.
      **/
-    BosonShot(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop = 0);
+    BosonShot(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop);
 
+    /**
+     * Same as above, except that it meant to be used when you don't have weapon
+     * properties, but still want to use a model
+     **/
+    BosonShot(Player* owner, BosonCanvas* canvas, BosonModel* model);
+
+    BosonShot(Player* owner, BosonCanvas* canvas);
+
+    /**
+     * @return Owner of this shot, i.e. the player whose unit fired the shot.
+     * Used for statistics
+     **/
     Player* owner() const { return mOwner; }
+    /**
+     * @return Weapon properties of this shot if it has one.
+     * Note that it's perfectly legal to return NULL pointer here, so you should
+     * always check it before doing anything with it.
+     **/
     inline const BosonWeaponProperties* properties() const  { return mProp; };
 
+    /**
+     * @return Damage made by this shot when it explodes.
+     * If you supply weapon properties in ctor, this equals to properties()->damage().
+     * Otherwise, you should re-implement it in derived classes
+     **/
     virtual long int damage() const;
+    /**
+     * @return Damage range of this shot.
+     * If you supply weapon properties in ctor, this equals to properties()->damageRange().
+     * Otherwise, you should re-implement it in derived classes
+     **/
     virtual float damageRange() const;
+    /**
+     * @return Full damage range of this shot.
+     * If you supply weapon properties in ctor, this equals to properties()->fullDamageRange().
+     * Otherwise, you should re-implement it in derived classes
+     **/
     virtual float fullDamageRange() const;
 
+    /**
+     * @return If this shot is active.
+     * Once shot has exploded, it becomes inactive. Inactive shots can be
+     * deleted.
+     **/
     inline bool isActive() const  { return mActive; };
 
     inline virtual int rtti() const  { return RTTI::Shot; }
@@ -101,12 +148,21 @@ class BosonShot : public BosonItem
     virtual void moveToTarget() {};
 
   private:
+    void init();
+
     bool mActive;
     Player* mOwner;
     const BosonWeaponProperties* mProp;
 };
 
 
+/**
+ * @short Shot class for bullets
+ *
+ * Bullet is a shot with infinite speed, it immediately reaches it's target
+ *
+ * @author Rivo Laks <rivolaks@hot.ee>
+ **/
 class BosonShotBullet : public BosonShot
 {
   public:
@@ -130,6 +186,13 @@ class BosonShotBullet : public BosonShot
 };
 
 
+/**
+ * @short Shot class for missiles
+ *
+ * Missile is a shot that flies through the air from initial position to target
+ *
+ * @author Rivo Laks <rivolaks@hot.ee>
+ **/
 class BosonShotMissile : public BosonShot
 {
   public:
@@ -162,6 +225,15 @@ class BosonShotMissile : public BosonShot
 };
 
 
+/**
+ * @short Shot class for explosion
+ *
+ * Explosion is a shot which will explode after given time.
+ * It has no visual appearance.
+ * Used when units explode (you can make nice chain reactions with it ;-))
+ *
+ * @author Rivo Laks <rivolaks@hot.ee>
+ **/
 class BosonShotExplosion : public BosonShot
 {
   public:
@@ -190,6 +262,14 @@ class BosonShotExplosion : public BosonShot
 };
 
 
+/**
+ * @short Shot class for mines
+ *
+ * Mine is an item that will explode when it collides with any other item.
+ * Until then, mine doesn't move
+ *
+ * @author Rivo Laks <rivolaks@hot.ee>
+ **/
 class BosonShotMine : public BosonShot
 {
   public:
@@ -211,6 +291,14 @@ class BosonShotMine : public BosonShot
 };
 
 
+/**
+ * @short Shot class for bombs
+ *
+ * Bomb is basically like a mine, except that it should be dropped from planes
+ * and it also explodes when it touches ground
+ *
+ * @author Rivo Laks <rivolaks@hot.ee>
+ **/
 class BosonShotBomb : public BosonShot
 {
   public:
@@ -229,6 +317,45 @@ class BosonShotBomb : public BosonShot
 
   private:
     bool mActivated;
+};
+
+
+/**
+ * @short Shot class for fragments
+ *
+ * Fragment is actually not a shot, it's an explosion fragment.
+ *
+ * @author Rivo Laks <rivolaks@hot.ee>
+ **/
+class BosonShotFragment : public BosonShot
+{
+  public:
+    BosonShotFragment(Player* owner, BosonCanvas* canvas, BosonModel* model, BoVector3 pos,
+        const UnitProperties* unitproperties);
+    BosonShotFragment(Player* owner, BosonCanvas* canvas, BosonModel* model);
+
+    virtual bool saveAsXML(QDomElement& root);
+    virtual bool loadFromXML(const QDomElement& root);
+    virtual void save(QDataStream& stream);
+    virtual void load(QDataStream& stream);
+
+    virtual long int damage() const;
+    virtual float damageRange() const;
+    virtual float fullDamageRange() const;
+
+    inline virtual int type() const { return BosonShot::Fragment; };
+
+    virtual QPtrList<BosonParticleSystem>* particleSystems() const  { return mParticleSystems; };
+
+    virtual void explode();
+
+  protected:
+    virtual void advanceMoveInternal();
+
+  private:
+    QPtrList<BosonParticleSystem>* mParticleSystems;
+    BoVector3 mVelo;
+    const UnitProperties* mUnitProperties;
 };
 
 

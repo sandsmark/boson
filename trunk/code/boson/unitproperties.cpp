@@ -54,6 +54,10 @@ public:
 	QValueList<unsigned long int> mDestroyedParticleSystemIds;
 	QPtrList<BosonParticleSystemProperties> mConstructedParticleSystems;
 	QValueList<unsigned long int> mConstructedParticleSystemIds;
+	QPtrList<BosonParticleSystemProperties> mExplodingFragmentFlyParticleSystems;
+	QValueList<unsigned long int> mExplodingFragmentFlyParticleSystemIds;
+	QPtrList<BosonParticleSystemProperties> mExplodingFragmentHitParticleSystems;
+	QValueList<unsigned long int> mExplodingFragmentHitParticleSystemIds;
 	BoVector3 mHitPoint;  // FIXME: better name
 };
 
@@ -153,6 +157,15 @@ void UnitProperties::loadUnitType(const QString& fileName, bool fullmode)
  d->mRequirements = BosonConfig::readUnsignedLongNumList(&conf, "Requirements");
  mExplodingDamage = conf.readLongNumEntry("ExplodingDamage", 0);
  mExplodingDamageRange = (float)(conf.readDoubleNumEntry("ExplodingDamageRange", 0));
+ mExplodingFragmentCount = conf.readUnsignedNumEntry("ExplodingFragmentCount", 0);
+ mExplodingFragmentDamage = conf.readLongNumEntry("ExplodingFragmentDamage", 10);
+ mExplodingFragmentDamageRange = (float)conf.readDoubleNumEntry("ExplodingFragmentDamageRange", 0.5);
+ d->mExplodingFragmentFlyParticleSystemIds = BosonConfig::readUnsignedLongNumList(&conf, "ExplodingFragmentFlyParticles");
+ d->mExplodingFragmentHitParticleSystemIds = BosonConfig::readUnsignedLongNumList(&conf, "ExplodingFragmentHitParticles");
+ if (mFullMode) {
+	d->mExplodingFragmentFlyParticleSystems = BosonParticleSystemProperties::loadParticleSystemProperties(d->mExplodingFragmentFlyParticleSystemIds, mTheme);
+	d->mExplodingFragmentHitParticleSystems = BosonParticleSystemProperties::loadParticleSystemProperties(d->mExplodingFragmentHitParticleSystemIds, mTheme);
+ }
  d->mHitPoint = BoVector3::load(&conf, "HitPoint");  // FIXME: better name
  d->mHitPoint.cellToCanvas();
 
@@ -570,6 +583,34 @@ QPtrList<BosonParticleSystem> UnitProperties::newConstructedParticleSystems(floa
  QPtrListIterator<BosonParticleSystemProperties> it(d->mConstructedParticleSystems);
  while (it.current()) {
 	BosonParticleSystem* s = it.current()->newSystem(BoVector3(x, y, z));
+	if (s) {
+		list.append(s);
+	}
+	++it;
+ }
+ return list;
+}
+
+QPtrList<BosonParticleSystem> UnitProperties::newExplodingFragmentFlyParticleSystems(BoVector3 pos) const
+{
+ QPtrList<BosonParticleSystem> list;
+ QPtrListIterator<BosonParticleSystemProperties> it(d->mExplodingFragmentFlyParticleSystems);
+ while (it.current()) {
+	BosonParticleSystem* s = it.current()->newSystem(pos);
+	if (s) {
+		list.append(s);
+	}
+	++it;
+ }
+ return list;
+}
+
+QPtrList<BosonParticleSystem> UnitProperties::newExplodingFragmentHitParticleSystems(BoVector3 pos) const
+{
+ QPtrList<BosonParticleSystem> list;
+ QPtrListIterator<BosonParticleSystemProperties> it(d->mExplodingFragmentHitParticleSystems);
+ while (it.current()) {
+	BosonParticleSystem* s = it.current()->newSystem(pos);
 	if (s) {
 		list.append(s);
 	}
