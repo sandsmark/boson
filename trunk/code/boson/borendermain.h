@@ -19,6 +19,8 @@
 #ifndef BORENDERMAIN_H
 #define BORENDERMAIN_H
 
+#include "bodebugdcopiface.h"
+
 #include <qgl.h>
 #include <qptrlist.h>
 #include <qptrdict.h>
@@ -264,6 +266,7 @@ private:
 	ModelPreview* mPreview;
 	QPtrList<SpeciesTheme> mSpecies;
 	QPtrDict<SpeciesTheme> mPopup2Species;
+	BoDebugDCOPIface* mIface;
 };
 
 #endif

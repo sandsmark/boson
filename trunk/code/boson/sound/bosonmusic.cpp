@@ -21,7 +21,7 @@
 
 #include "../defines.h"
 #include "../bosonconfig.h"
-#include "../bodebug.h"
+#include "bodebug.h"
 #include "bosonsound.h"
 
 #include <kglobal.h>

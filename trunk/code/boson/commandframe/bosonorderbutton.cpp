@@ -27,7 +27,7 @@
 #include "../unitproperties.h"
 #include "../defines.h"
 #include "../upgradeproperties.h"
-#include "../bodebug.h"
+#include "bodebug.h"
 
 #include <kgameprogress.h>
 #include <kpixmap.h>

@@ -35,6 +35,7 @@
 #include "bosonbigdisplaybase.h"
 #include "bosonstarting.h"
 #include "bodebug.h"
+#include "bodebugdcopiface.h"
 #include "startupwidgets/bosonwelcomewidget.h"
 #include "startupwidgets/bosonnewgamewidget.h"
 #include "startupwidgets/bosonloadingwidget.h"
@@ -79,6 +80,8 @@ public:
 		mActionFullScreen = 0;
 
 		mStarting = 0;
+
+		mIface = 0;
 	};
 
 	BosonWelcomeWidget* mWelcome;
@@ -99,6 +102,8 @@ public:
 #if KDE_VERSION < 310
 	bool mLoadingDockConfig;
 #endif
+
+	BoDebugDCOPIface* mIface;
 };
 
 TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
@@ -136,6 +141,8 @@ TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
  reinitGame();
 
  loadInitialDockConfig();
+
+ d->mIface = new BoDebugDCOPIface();
 }
 
 TopWidget::~TopWidget()

@@ -31,7 +31,7 @@
 #include "../bosonplayfield.h"
 #include "../speciestheme.h"
 #include "../bosonscenario.h"
-#include "../bodebug.h"
+#include "bodebug.h"
 
 #include <klocale.h>
 #include <kgame/kgameproperty.h>

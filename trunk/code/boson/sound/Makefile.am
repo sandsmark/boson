@@ -1,6 +1,6 @@
-noinst_LTLIBRARIES = libbosonsound.la
+INCLUDES = -I$(top_srcdir)/boson/bodebug $(all_includes)
 
-INCLUDES = $(all_includes)
+noinst_LTLIBRARIES = libbosonsound.la
 
 METASOURCES = AUTO
 

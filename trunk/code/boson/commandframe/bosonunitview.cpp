@@ -24,7 +24,7 @@
 #include "../unitproperties.h"
 #include "../speciestheme.h"
 #include "../unit.h"
-#include "../bodebug.h"
+#include "bodebug.h"
 
 #include <klocale.h>
 

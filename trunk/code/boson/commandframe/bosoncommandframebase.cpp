@@ -27,7 +27,7 @@
 #include "../speciestheme.h"
 #include "../boselection.h"
 #include "../defines.h"
-#include "../bodebug.h"
+#include "bodebug.h"
 
 #include <klocale.h>
 

@@ -30,7 +30,7 @@
 #include "../boselection.h"
 #include "../defines.h"
 #include "../upgradeproperties.h"
-#include "../bodebug.h"
+#include "bodebug.h"
 
 #include <klocale.h>
 #include <kgameprogress.h>

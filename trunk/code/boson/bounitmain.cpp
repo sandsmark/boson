@@ -19,6 +19,8 @@
 
 #include "bouniteditor.h"
 
+#include "bodebugdcopiface.h"
+
 #include <kapplication.h>
 #include <kcmdlineargs.h>
 #include <kaboutdata.h>
@@ -57,9 +59,11 @@ int main(int argc, char **argv)
  BoUnitEditor* dlg = new BoUnitEditor(0);
  app.setMainWidget(dlg);
  dlg->show();
- 
+
+ BoDebugDCOPIface* iface = new BoDebugDCOPIface();
  args->clear();
  int r = app.exec();
+ delete iface;
  delete dlg;
  return r;
 }

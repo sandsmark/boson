@@ -22,7 +22,7 @@
 #include "../rtti.h"
 #include "../selectbox.h"
 #include "../bosonmodel.h"
-#include "../bodebug.h"
+#include "bodebug.h"
 
 #include <qintdict.h>
 #include <qrect.h>

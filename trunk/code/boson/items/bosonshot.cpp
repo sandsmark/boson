@@ -25,7 +25,7 @@
 #include "../bosoncanvas.h"
 #include "../bosonparticlesystem.h"
 #include "../bosonweapon.h"
-#include "../bodebug.h"
+#include "bodebug.h"
 
 #include <ksimpleconfig.h>
 

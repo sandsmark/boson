@@ -21,7 +21,7 @@
 #include "bosonnetworkoptionswidget.moc"
 
 #include "../boson.h"
-#include "../bodebug.h"
+#include "bodebug.h"
 #include "../defines.h"
 
 #include <knuminput.h>
