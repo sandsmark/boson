@@ -105,7 +105,7 @@ public:
 
 
 	float mMaxX;
-	float mMinX; // lowest (i.e. negative) x-
+	float mMinX; // lowest (i.e. negative) x
 	float mMaxY;
 	float mMinY;
 	float mMaxZ;
@@ -161,7 +161,8 @@ BosonModel::~BosonModel()
  kdDebug() << k_funcinfo << endl;
  mModelTextures->removeModel(this);
  if (m3ds) {
-	lib3ds_file_free(m3ds); // we can probably free already after creating the display lists!
+	// FIXME: we can do this once the model has been loaded completely
+	lib3ds_file_free(m3ds);
 	m3ds = 0;
  }
  mFrames.clear();

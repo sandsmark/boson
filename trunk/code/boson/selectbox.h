@@ -20,8 +20,6 @@
 #ifndef SELECTBOX_H
 #define SELECTBOX_H
 
-#include "defines.h"
-
 class BosonSprite;
 class BosonCanvas;
 

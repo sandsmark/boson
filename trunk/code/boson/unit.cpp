@@ -777,9 +777,9 @@ public:
 MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas) : Unit(prop, owner, canvas)
 {
  d = new MobileUnitPrivate;
- d->mSpeed.registerData(IdSpeed, dataHandler(), 
+ d->mSpeed.registerData(IdSpeed, dataHandler(),
 		KGamePropertyBase::PolicyLocal, "Speed");
- d->mMovingFailed.registerData(IdMob_MovingFailed, dataHandler(), 
+ d->mMovingFailed.registerData(IdMob_MovingFailed, dataHandler(),
 		KGamePropertyBase::PolicyLocal, "MovingFailed");
  d->mPathRecalculated.registerData(IdMob_PathRecalculated, dataHandler(),
 		KGamePropertyBase::PolicyLocal, "PathRecalculated");

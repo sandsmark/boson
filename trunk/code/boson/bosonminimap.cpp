@@ -19,13 +19,13 @@
 
 #include "bosonminimap.h"
 
+#include "defines.h"
 #include "cell.h"
 #include "bosonmap.h"
 #include "bosoncanvas.h"
 #include "bosonconfig.h"
 #include "unit.h"
 #include "player.h"
-#include "defines.h"
 
 #include <kdebug.h>
 #include <klocale.h>
