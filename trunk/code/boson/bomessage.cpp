@@ -182,6 +182,13 @@ unsigned int BoMessageDelayer::delayedMessageCount() const
  return mDelayedMessages->count();
 }
 
+void BoMessageDelayer::clearDelayedMessages()
+{
+ mDelayedMessages->clear();
+ mAdvanceMessageWaiting = 0;
+ mDelayedWaiting = false;
+}
+
 bool BoMessageDelayer::processMessage(BoMessage* m)
 {
  if (!m) {

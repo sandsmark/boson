@@ -98,6 +98,11 @@ public:
 	}
 
 	/**
+	 * Just delete all delayed messages. They are completely discarded.
+	 **/
+	void clearDelayedMessages();
+
+	/**
 	 * Process a network message. Call this before @ref
 	 * KGame::networkTransmission is executed!
 	 *
