@@ -145,12 +145,6 @@ BosonItem::BosonItem(Player* owner, BosonCanvas* canvas)
 
  mCells = new QPtrVector<Cell>();
  mRenderer = 0;
-
- if (!boConfig->disableModelLoading()) {
-	mRenderer = new BosonItemModelRenderer(this);
- } else {
-	mRenderer = new BosonItemRenderer(this);
- }
 }
 
 BosonItem::~BosonItem()
@@ -516,12 +510,45 @@ void BosonItem::setRendererToEditorMode()
  itemRenderer()->setAnimationMode(UnitAnimationIdle);
 }
 
+#include "bosonshot.h" // for an explosion hack below
 bool BosonItem::initItemRenderer()
 {
- if (itemRenderer()) {
-	return itemRenderer()->setModel(getModelForItem());
+ if (mRenderer) {
+	boWarning() << k_funcinfo << "called twice" << endl;
+	return true;
  }
- return true;
+
+ // TODO: a virtual bool providesModel() method would be handy here. by default
+ // it would return true, but e.g. the explosion class would return false.
+ bool providesModel = true;
+
+ if (RTTI::isShot(rtti())) {
+	// AB: this is a hack. implement a providesModel() method instead.
+	if (((BosonShot*)this)->type() == BosonShot::Explosion) {
+		providesModel = false;
+	}
+ }
+
+ if (boConfig->disableModelLoading()) {
+	providesModel = false;
+ }
+
+ // AB: note that we can of course use renderers other than the model renderer.
+ // e.g. we might use some special renderer for bullets or so (i.e. not use any
+ // model).
+ // but as this is not required yet, a simple if (providesModel) is sufficient
+ // here.
+ bool ret = true;
+ if (providesModel) {
+	mRenderer = new BosonItemModelRenderer(this);
+	ret = itemRenderer()->setModel(getModelForItem());
+	if (!ret) {
+		boWarning() << k_funcinfo << "itemRenderer()->setModel() failed" << endl;
+	}
+ } else {
+	mRenderer = new BosonItemRenderer(this);
+ }
+ return ret;
 }
 
 bool BosonItem::itemInFrustum(const float* frustum) const
