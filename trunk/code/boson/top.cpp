@@ -25,7 +25,6 @@
 #include "bosonconfig.h"
 #include "boson.h"
 #include "player.h"
-#include "boitemlisthandler.h"
 #include "bosonplayfield.h"
 #include "bosoncanvas.h"
 #include "bosonmessage.h"
