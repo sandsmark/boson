@@ -46,6 +46,7 @@
 #include <kaccel.h>
 
 #include <qdict.h>
+#include <qintdict.h>
 #include <qdom.h>
 #include <qfile.h>
 #include <qvaluelist.h>
@@ -687,6 +688,7 @@ public:
 	{
 	}
 	QPtrList<BoUfoAction> mActions;
+	QIntDict<BoUfoAction> mId2Action;
 };
 
 
@@ -723,16 +725,58 @@ void BoUfoActionMenu::plug(ufo::UWidget* w)
  redoMenus();
 }
 
-void BoUfoActionMenu::insert(BoUfoAction* a) // TODO: index
+void BoUfoActionMenu::insert(BoUfoAction* a, int id, int index) // TODO: index
 {
- d->mActions.append(a);
+ if (index < 0) {
+	index = d->mActions.count();
+ }
+ if (id >= 0 && d->mId2Action[id]) {
+	boError() << k_funcinfo << "Id " << id << " already in use" << endl;
+	id = -1;
+ }
+ if (id < 0) {
+	id = 0;
+	while (d->mId2Action[id]) {
+		id++;
+	}
+ }
+ connect(a, SIGNAL(signalActivated()), this, SLOT(slotMenuItemActivated()));
+ d->mActions.insert(index, a);
+ d->mId2Action.insert(id, a);
  redoMenus();
+}
+
+void BoUfoActionMenu::insertItem(const QString& name, int id, int index)
+{
+ BoUfoAction* a = new BoUfoAction(name, KShortcut(), 0, 0, 0, 0);
+ insert(a, id, index);
 }
 
 void BoUfoActionMenu::remove(BoUfoAction* a)
 {
+ int id = itemId(a);
+ if (id >= 0) {
+	d->mId2Action.remove(id);
+ }
  d->mActions.removeRef(a);
  redoMenus();
+}
+
+BoUfoAction* BoUfoActionMenu::item(int id) const
+{
+ return d->mId2Action[id];
+}
+
+int BoUfoActionMenu::itemId(BoUfoAction* a) const
+{
+ QIntDictIterator<BoUfoAction> it(d->mId2Action);
+ while (it.current()) {
+	if (it.current() == a) {
+		return it.currentKey();
+	}
+	++it;
+ }
+ return -1;
 }
 
 void BoUfoActionMenu::clear()
@@ -744,6 +788,32 @@ void BoUfoActionMenu::clear()
 	++it;
  }
 }
+
+void BoUfoActionMenu::slotMenuItemActivated()
+{
+ BO_CHECK_NULL_RET(sender());
+ if (!sender()->inherits("BoUfoAction")) {
+	boError() << k_funcinfo << "sender() is not a BoUfoAction" << endl;
+	return;
+ }
+ BoUfoAction* a = (BoUfoAction*)sender();
+ QPtrListIterator<BoUfoAction> it(actions());
+ while (it.current()) {
+	if (it.current() == a) {
+		int id = itemId(a);
+		if (id < 0) {
+			boError() << k_funcinfo << "unknown item " << a << endl;
+			return;
+		}
+		setCurrentItem(id);
+		emit signalActivated(id);
+		return;
+	}
+	++it;
+ }
+ boError() << k_funcinfo << "could not find item" << endl;
+}
+
 
 void BoUfoActionMenu::redoMenus()
 {
@@ -809,35 +879,15 @@ void BoUfoSelectAction::setItems(const QStringList& list)
 {
  clear();
  QStringList::ConstIterator it = list.begin();
- for (; it != list.end(); ++it) {
-	BoUfoToggleAction* a = new BoUfoToggleAction(*it, KShortcut(), this, SLOT(slotItemActivated()), 0, 0);
-	insert(a);
- }
-}
-
-void BoUfoSelectAction::slotItemActivated()
-{
- BO_CHECK_NULL_RET(sender());
- if (!sender()->inherits("BoUfoAction")) {
-	boError() << k_funcinfo << "sender() is not a BoUfoAction" << endl;
-	return;
- }
- BoUfoAction* a = (BoUfoAction*)sender();
- QPtrListIterator<BoUfoAction> it(actions());
  int i = 0;
- while (it.current()) {
-	if (it.current() == a) {
-		setCurrentItem(i);
-		emit signalActivated(i);
-		return;
-	}
+ for (; it != list.end(); ++it) {
+	BoUfoToggleAction* a = new BoUfoToggleAction(*it, KShortcut(), 0, 0, 0, 0);
+	insert(a, i, i);
 	i++;
-	++it;
  }
- boError() << k_funcinfo << "could not find item" << endl;
 }
 
-void BoUfoSelectAction::setCurrentItem(int index)
+void BoUfoSelectAction::setCurrentItem(int id)
 {
  QPtrList<BoUfoAction> list = actions();
  QPtrListIterator<BoUfoAction> it(list);
@@ -847,7 +897,7 @@ void BoUfoSelectAction::setCurrentItem(int index)
 		continue;
 	}
 	BoUfoToggleAction* t = (BoUfoToggleAction*)it.current();
-	if (i == index) {
+	if (itemId(it.current()) == id) {
 		if (!t->isChecked()) {
 			t->setChecked(true);
 		}
@@ -957,6 +1007,16 @@ bool BoUfoActionCollection::hasAction(const QString& name) const
 	return false;
  }
  return true;
+}
+
+void BoUfoActionCollection::setActionEnabled(const QString& name, bool enabled)
+{
+ BoUfoAction* a = action(name);
+ if (!a) {
+	boError() << k_funcinfo << "no action " << name << endl;
+	return;
+ }
+ a->setEnabled(enabled);
 }
 
 bool BoUfoActionCollection::createGUI(const QString& file)
