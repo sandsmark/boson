@@ -311,7 +311,9 @@ public:
 		addColumn(i18n("Flags"), metrics.width(QString::number(11)));
 		addColumn(i18n("Smoothing"), metrics.width(QString::number(1111)));
 		addColumn(i18n("Normal"), metrics.width(QString::number(11111)));
+		addColumn(i18n("Boson Normal"), metrics.width(QString::number(11111)));
 
+		setAllColumnsShowFocus(true);
 		resize(100, height());
 	}
 
@@ -337,19 +339,23 @@ public:
 		// class is easier to use then.
 
 		BoMatrix matrix;
-		if (!lib3dsCoordinates) {
-			Lib3dsMatrix invMeshMatrix;
-			lib3ds_matrix_copy(invMeshMatrix, mesh->matrix);
-			lib3ds_matrix_inv(invMeshMatrix);
-			matrix.loadMatrix(&invMeshMatrix[0][0]);
-		}
+		Lib3dsMatrix invMeshMatrix;
+		lib3ds_matrix_copy(invMeshMatrix, mesh->matrix);
+		lib3ds_matrix_inv(invMeshMatrix);
+		matrix.loadMatrix(&invMeshMatrix[0][0]);
 
+		BoVector3 meshVertex[3];
 		BoVector3 v;
 		for (int j = 0; j < 3; j++) {
 			v.set(mesh->pointL[ face->points[j] ].pos);
-			if (!lib3dsCoordinates) {
-				BoVector3 v2 = v;
-				matrix.transform(&v, &v2);
+			matrix.transform(&meshVertex[j], &v);
+		}
+
+		for (int j = 0; j < 3; j++) {
+			if (lib3dsCoordinates) {
+				v.set(mesh->pointL[ face->points[j] ].pos);
+			} else {
+				v = meshVertex[j];
 			}
 			item->setText(j + 1, QString("%1;%2;%3").arg(v[0]).arg(v[1]).arg(v[2]));
 		}
@@ -358,6 +364,15 @@ public:
 		item->setText(5, flags);
 		item->setText(6, QString::number(face->smoothing));
 		item->setText(7, QString("%1;%2;%3").arg(face->normal[0]).arg(face->normal[1]).arg(face->normal[2]));
+
+		BoVector3 p, q;
+		p = meshVertex[2] - meshVertex[1];
+		q = meshVertex[0] - meshVertex[1];
+		BoVector3 normal = BoVector3::crossProduct(p, q);
+		if (normal.length() != 0.0f) {
+			normal.normalize();
+		}
+		item->setText(8, QString("%1;%2;%3").arg(normal[0]).arg(normal[1]).arg(normal[2]));
 		return item;
 	}
 };
@@ -732,6 +747,7 @@ public:
 
 		mMeshView = 0;
 		mFaceList = 0;
+		mConnectableWidget = 0;
 		mConnectedFacesList = 0;
 		mUnconnectedFacesList = 0;
 		mUseLib3dsCoordinates = 0;
@@ -768,6 +784,7 @@ public:
 	QPtrDict<Lib3dsMesh> mListItem2Mesh;
 	QPtrDict<Lib3dsFace> mListItem2Face;
 	BoFaceView* mFaceList;
+	QVBox* mConnectableWidget;
 	BoFaceView* mConnectedFacesList;
 	BoFaceView* mUnconnectedFacesList;
 	QCheckBox* mUseLib3dsCoordinates;
@@ -887,10 +904,11 @@ void KGameModelDebug::initMeshPage()
  QVBox* faceView = new QVBox(splitter);
  d->mFaceList = new BoFaceView(faceView);
  connect(d->mFaceList, SIGNAL(executed(QListViewItem*)), this, SLOT(slotConnectToFace(QListViewItem*)));
- (void)new QLabel(i18n("Connectable to selected face:"), faceView);
- d->mConnectedFacesList = new BoFaceView(faceView);
- (void)new QLabel(i18n("Unconnectable to selected face:"), faceView);
- d->mUnconnectedFacesList = new BoFaceView(faceView);
+ d->mConnectableWidget = new QVBox(faceView);
+ (void)new QLabel(i18n("Connectable to selected face:"), d->mConnectableWidget);
+ d->mConnectedFacesList = new BoFaceView(d->mConnectableWidget);
+ (void)new QLabel(i18n("Unconnectable to selected face:"), d->mConnectableWidget);
+ d->mUnconnectedFacesList = new BoFaceView(d->mConnectableWidget);
  d->mUseLib3dsCoordinates = new QCheckBox(i18n("Display lib3ds coordinates of points"), faceView);
  d->mUseLib3dsCoordinates->setChecked(true);
  connect(d->mUseLib3dsCoordinates, SIGNAL(toggled(bool)), this, SLOT(slotUseLib3dsCoordinates(bool)));
@@ -1324,10 +1342,8 @@ void KGameModelDebug::slotConnectToFace(QListViewItem* item)
 void KGameModelDebug::slotHideConnectableWidgets(bool h)
 {
  if (h) {
-	d->mConnectedFacesList->hide();
-	d->mUnconnectedFacesList->hide();
+	d->mConnectableWidget->hide();
  } else {
-	d->mConnectedFacesList->show();
-	d->mUnconnectedFacesList->show();
+	d->mConnectableWidget->show();
  }
 }
