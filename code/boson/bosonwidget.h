@@ -78,7 +78,6 @@ protected slots:
 protected:
 	virtual void initConnections();
 	virtual void initDisplayManager();
-	virtual void setBosonXMLFile();
 
 	virtual void startScenarioAndGame();
 
