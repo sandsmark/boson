@@ -65,10 +65,13 @@ BosonParticleSystem* BosonParticleManager::newSystem(BoVector3 pos, Type type)
 
   if(type == Explosion)
   {
-    maxnum = 200;
-    initnum = 200;
+    maxnum = 400;
+    initnum = 250;
     size = 1.0;
+    age = 0.3;
+    rate = 150;
     initfunc = &initExplosionParticle;
+    updatefunc = &updateExplosionParticle;
     blendfunc = GL_ONE;
   }
   else if(type == Smoke)
@@ -134,7 +137,7 @@ void BosonParticleManager::initExplosionParticle(BosonParticleSystem*, BosonPart
   particle->life = getFloat(0.5, 0.7);  // Particle's lifetime is between 0.5 and 0.7 seconds
   particle->maxage = particle->life;
   particle->velo = BoVector3(getFloat(-1.6, 1.6), getFloat(-1.6, 1.6), getFloat(0, 1.4));  // Random velocity (per second)
-  particle->color = BoVector4(1.0, 0.07, 0.02, 0.25);  // Color of particle
+  particle->color = BoVector4(1.0, 0.5, 0.0, 0.25);  // Color of particle
   // Note that particle's position is relative to position of particle system
   particle->pos = BoVector3(getFloat(-0.1, 0.1), getFloat(-0.1, 0.1), getFloat(0.2, 0.7));  // We randomize position little bit
 }
@@ -175,13 +178,6 @@ void BosonParticleManager::initFireParticle(BosonParticleSystem* s, BosonParticl
   particle->pos = BoVector3(getFloat(-0.05, 0.05), getFloat(-0.05, 0.05), getFloat(0.5, 0.6));
 }
 
-void BosonParticleManager::updateFireParticle(BosonParticleSystem*, BosonParticle* particle)
-{
-  particle->color.setY(0.3 * (particle->life / particle->maxage));  // Green - makes fire more yellow
-  particle->color.setZ(0.15 * (particle->life / particle->maxage));  // Blue - makes fire more white
-  particle->color.setW(0.3 * (particle->life / particle->maxage));  // Alpha
-}
-
 void BosonParticleManager::initShockWaveParticle(BosonParticleSystem*, BosonParticle* particle)
 {
   particle->life = 0.5;
@@ -200,5 +196,30 @@ void BosonParticleManager::updateFadeOutParticle(BosonParticleSystem*, BosonPart
   if((particle->life * 2) < particle->maxage)
   {
     particle->color.setW(0.25 * (particle->life * 2 / particle->maxage));
+  }
+}
+
+void BosonParticleManager::updateFireParticle(BosonParticleSystem*, BosonParticle* particle)
+{
+  particle->color.setY(0.3 * (particle->life / particle->maxage));  // Green - makes fire more yellow
+  particle->color.setZ(0.15 * (particle->life / particle->maxage));  // Blue - makes fire more white
+  particle->color.setW(0.3 * (particle->life / particle->maxage));  // Alpha
+}
+
+void BosonParticleManager::updateExplosionParticle(BosonParticleSystem*, BosonParticle* particle)
+{
+  if((particle->life * 4) >= particle->maxage)
+  {
+    // Particle's age is at most 75% of maximum. Particle will get more red (explosion -> fire)
+    particle->color.setY(0.5 * ((particle->life / particle->maxage - 0.25) / 3 * 4));
+  }
+  else
+  {
+    // Particle's age is more than 75% of maximum. Particle will get more grey (fire -> smoke)
+    float factor = 1.0 - particle->life / particle->maxage * 4;  // at 75%, this is 0 and at the end, it's 1
+    particle->color.setX(1.0 - 0.8 * factor);
+    particle->color.setY(0.2 * factor);
+    particle->color.setZ(0.2 * factor);
+    particle->color.setW(0.3 - 0.3 * factor);  // Alpha
   }
 }
