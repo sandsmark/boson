@@ -108,9 +108,9 @@ public slots:
 public: ///orzel : bof...
 	visualFacility		*fixSelected;
 	QIntDict<visualMobUnit>	mobSelected;
+	int			selectionWho; // -1 is nobody
 protected:
 	selectionMode_t		selectionMode;
-	int			selectionWho; // -1 is nobody
 
 };
 

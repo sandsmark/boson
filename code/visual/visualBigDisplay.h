@@ -59,6 +59,8 @@ public:
   ~visualBigDisplay();
 
 
+	/* from display classes */
+	virtual void actionClicked(int, int);		// selecting, moving...
 
 signals:
   void  relativeReCenterView(int x, int y);

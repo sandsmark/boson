@@ -1,9 +1,9 @@
 /***************************************************************************
-                          bosonView.cpp  -  description                              
+                       bosonBigDisplay.cpp  -  description                              
                              -------------------                                         
 
     version              : $Id$
-    begin                : Sat Jan  9 19:35:36 CET 1999
+    begin                : Sat Feb 17, 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
     email                : capricel@enst.fr                                     
@@ -20,13 +20,26 @@
 
 #include "../common/log.h"
 
-#include "bosonView.h"
 #include "playerUnit.h"
+#include "visualBigDisplay.h"
 #include "game.h"
 
-bosonView::bosonView(visualField *p, QObject *parent, const char *name=0L)
-	:visualView(p,parent,name)
-{
-}
 
+void visualBigDisplay::actionClicked(int mx, int my)
+{
+	QIntDictIterator<visualMobUnit> mobIt(view->mobSelected);
+
+	if (view->mobSelected.isEmpty()) {
+		return;
+		}
+
+	if (gpp.who_am_i != view->selectionWho)
+		return; 		// nothing to do
+
+	for (mobIt.toFirst(); mobIt; ++mobIt) {
+		boAssert(mobIt.current()->who == gpp.who_am_i);
+		((playerMobUnit *)mobIt.current())->u_goto(mx,my);
+		}
+
+} 
 

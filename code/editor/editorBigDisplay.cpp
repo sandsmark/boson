@@ -25,6 +25,7 @@
 #include "editorBigDisplay.h"
 #include "visualView.h"
 #include "visualCell.h"
+#include "editorField.h"
 
 editorBigDisplay::editorBigDisplay(visualView *v, QWidget *p, const char *n, WFlags f)
 	:visualBigDisplay(v,p,n,f)
@@ -144,6 +145,25 @@ void editorBigDisplay::setItem(int i)
 	boAssert(i>=0 && i<4);
 	selectedCell->setFrame( i);
 	view->field->update();
+}
+
+#define eMap		(((editorField*)(view->field)))
+
+void visualBigDisplay::actionClicked(int mx, int my) {}
+
+void editorBigDisplay::actionClicked(int mx, int my)
+{
+	int	x = mx / BO_TILE_SIZE,
+		y = my / BO_TILE_SIZE;
+
+
+	boAssert(x>0);
+//	boAssert(x<eMap->width);
+	boAssert(y>0);
+//	boAssert(y<eMap->height);
+	selectedCell = &(eMap->cells[x][y]);
+	popup->exec(QCursor::pos());
+	
 }
 
 
