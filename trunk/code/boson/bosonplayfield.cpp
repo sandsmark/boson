@@ -767,11 +767,7 @@ bool BosonPlayField::loadFromDiskToFiles(QMap<QString, QByteArray>& destFiles)
 	return false;
  }
 
- QByteArray externalXML;
-#if 0
- // TODO: not yet suported. will be.
- externalXML = mFile->externalData();
-#endif
+ QByteArray externalXML = mFile->externalData();
  destFiles.insert("map/texmap", texMap);
  destFiles.insert("map/heightmap.png", heightMap);
  destFiles.insert("map/map.xml", mapXML);
