@@ -170,6 +170,13 @@ class BoTexture
     void load(unsigned char* data, int width, int height, int side = 0);
 
     /**
+     * Reloads the texture.
+     * Note that it only works if the texture was loaded from a file. If it
+     *  was loaded from specified data, this method does nothing.
+     **/
+    void reload();
+
+    /**
      * Bind this texture.
      * Note that this does not enable the texture.
      **/
@@ -200,6 +207,8 @@ class BoTexture
     int options() const  { return mOptions; }
     /**
      * @return Id of this texture.
+     * Note that you shouldn't cache this anywhere as some functions, e.g.
+     *  @ref reload() can change it.
      **/
     GLuint id() const  { return mId; }
 
@@ -207,6 +216,14 @@ class BoTexture
      * @return Whether texture has been correctly loaded.
      **/
     bool loaded() const  { return mLoaded; }
+
+    /**
+     * @return Path to the image file where the texture was downloaded from.
+     * Note that it works only if you use load() function which takes filename
+     *  as a parameter. It will return null string if texture was loaded from
+     *  specified data.
+     **/
+    const QString& filePath() const  { return mFilePath; }
 
     /**
      * @return _Approximate_ amount of memory used by this texture, in bytes.
@@ -237,6 +254,9 @@ class BoTexture
 
     // Whether texture has been correctly loaded
     bool mLoaded;
+
+    // Path to texture image file
+    QString mFilePath;
 
     // Texture class
     Class mClass;
@@ -333,9 +353,9 @@ class BoTextureManager
     int maxCubeTextureSize() const  { return mMaxCubeTextureSize; }
     int textureUnits() const  { return mTextureUnits; }
 
-    bool useColoredMipmaps() const  { return mUseColoredMipmaps; }
-    bool useTextureCompression() const  { return mUseCompressedTextures; }
-    int textureFilter() const  { return mTextureFilter; }
+    bool useColoredMipmaps() const;
+    bool useTextureCompression() const;
+    int textureFilter() const;
 
 
     // Those are meant to be used by only BoTexture.
@@ -344,6 +364,13 @@ class BoTextureManager
     void textureLoaded(BoTexture* tex, bool firsttime);
 
     void textureFilterChanged();
+
+    /**
+     * Reloads all textures that have been loaded from image files.
+     * Note that it won't touch textures loaded from custom data.
+     * Also note that it might take a few seconds to reload the textures.
+     **/
+    void reloadTextures();
 
     /**
      * @return The amount of memory that is used for all textures currently
@@ -390,10 +417,6 @@ class BoTextureManager
     int mMax3DTextureSize;
     int mMaxCubeTextureSize;
     int mTextureUnits;
-
-    bool mUseColoredMipmaps;
-    bool mUseCompressedTextures;
-    int mTextureFilter;
 };
 
 #endif // BOTEXTURE_H
