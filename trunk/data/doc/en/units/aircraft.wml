@@ -15,7 +15,7 @@
 
 <!-- Get the values from the index.desktop files -->
 <:
-open( FILE, '<../../../themes/species/human/units/mob_batzen/index.desktop') || die "Open failed";
+open( FILE, '<../../../themes/species/human/units/mob_aircraft/index.desktop') || die "Open failed";
 open( FILE2, '<../values.list') || die "Open failed";
 
 @CONTENT = <FILE>;
