@@ -32,6 +32,8 @@
 #include <arts/soundserver.h>
 
 #include <qintdict.h>
+#include <qptrdict.h>
+#include <qbitmap.h>
 
 #include "defines.h"
 
@@ -43,16 +45,17 @@ public:
 	BosonCanvasPrivate()
 	{
 		mMap = 0;
-		mLocalPlayer = 0;
+		mFogPixmap = 0;
 	}
 	
 	QPixmap mPix;
 	QPtrList<QCanvasItem> mAnimList; // see BosonCanvas::advance()
 	QPtrList<Unit> mDestroyUnits;
 	QPtrList<Unit> mDestroyedUnits;
+	QPtrDict<QCanvasSprite> mFogOfWar;
+	QCanvasPixmapArray* mFogPixmap;
 
 	BosonMap* mMap; // just a pointer - no memory allocated
-	Player* mLocalPlayer; // also just a pointer
 
 	Arts::SimpleSoundServer* mSoundServer;
 };
@@ -84,6 +87,27 @@ void BosonCanvas::init()
 	kdWarning() << "Sound could not be initialized - sound disabled" << endl;
  }
  d->mDestroyedUnits.setAutoDelete(true);
+ d->mFogOfWar.setAutoDelete(true);
+
+ QString fogPath = locate("data", "boson/themes/fow.xpm");
+ d->mFogPixmap = new QCanvasPixmapArray(fogPath);
+ if (!d->mFogPixmap->image(0) || 
+		d->mFogPixmap->image(0)->width() != (BO_TILE_SIZE * 2) ||
+		d->mFogPixmap->image(0)->height() != (BO_TILE_SIZE * 2)) {
+	kdError() << k_funcinfo << "Cannot load fow.xpm" << endl;
+	delete d->mFogPixmap;
+	d->mFogPixmap = 0;
+	return;
+ }
+ QBitmap mask(fogPath);
+ if (mask.width() != (BO_TILE_SIZE * 2) || mask.height() != (BO_TILE_SIZE * 2)) {
+	kdError() << k_funcinfo << "Can't create fow mask" << endl;
+	delete d->mFogPixmap;
+	d->mFogPixmap = 0;
+	return;
+ }
+ d->mFogPixmap->image(0)->setMask(mask);
+ d->mFogPixmap->image(0)->setOffset(BO_TILE_SIZE / 2, BO_TILE_SIZE / 2);
 }
 
 BosonCanvas::~BosonCanvas()
@@ -92,6 +116,7 @@ BosonCanvas::~BosonCanvas()
  d->mDestroyUnits.clear();
  d->mDestroyedUnits.clear();
  d->mAnimList.clear();
+ d->mFogOfWar.clear();
  delete d->mSoundServer;
  delete d;
 }
@@ -239,9 +264,7 @@ void BosonCanvas::initMap(const QString& tileFile)
 			continue;
 		}
 		slotAddCell(i, j, c->groundType(), c->version());
-		// FIXME: if (editor) {
-		c->fog(this, i, j);
-		// }
+		fogLocal(i, j); // the fog of war of the local player
 	}
  }
  update();
@@ -264,7 +287,6 @@ void BosonCanvas::addAnimation(QCanvasItem* item)
 
 void BosonCanvas::removeAnimation(QCanvasItem* item)
 {
- kdDebug() << "remove Anim" << endl;
  d->mAnimList.removeRef(item);
 }
 
@@ -285,9 +307,6 @@ void BosonCanvas::updateSight(Unit* unit, double, double)
 // these coordinates and if not out fog on them again. Remember to check for -1
 // (new unit placed)!
 
- if (unit->owner() != d->mLocalPlayer) {
-	return;
- }
  unsigned int sight = unit->sightRange(); // *cell* number! not pixel number!
  unsigned int x = unit->boundingRect().center().x() / BO_TILE_SIZE;
  unsigned int y = unit->boundingRect().center().y() / BO_TILE_SIZE;
@@ -306,22 +325,14 @@ void BosonCanvas::updateSight(Unit* unit, double, double)
 
  for (int i = left; i < right; i++) {
 	for (int j = top; j < bottom; j++) {
-		Cell* c = cell(x + i, y + j);
 		if (i*i + j*j < (int)sight) {
-			if (!c) {
-				kdError() << k_lineinfo << "invalid cell " 
-						<< x + i << "," << y + j << endl;
-				continue;
-			}
-			c->unfog();
-			emit signalUnfog(x + i, y + j); // minimap
+			unit->owner()->unfog(x + i, y + j);
 		} else {
 			//TODO
 			// cell(i, j) is not in sight anymore. Check if any
 			// other unit can see it!
 			// if (we_cannot_see_this) {
-			// 	c->fog(this, i, j);
-			// 	emit signalFog(i, j); // minimap
+			//	unit->owner()->fog(x + i, y + j);
 			// }
 		}
 	}
@@ -387,8 +398,26 @@ BosonMap* BosonCanvas::map() const
  return d->mMap;
 }
 
-void BosonCanvas::setLocalPlayer(Player* p)
+void BosonCanvas::fogLocal(int x, int y)
 {
- d->mLocalPlayer = p;
+ // AB: I would rather like to place this into BosonBigDisplay as the fog of war
+ // logically belongs to there. But I'd need to add a BosonMap pointer there and
+ // make some small hacks - so you can find this here now. Note that this is
+ // only the *local* fow, i.e. the fog of the local player.
+ // Same is valid for unfogLocal.
+
+ if (!d->mFogPixmap) {
+	return;
+ }
+ QCanvasSprite* fog = new QCanvasSprite(d->mFogPixmap, this);
+ fog->move(x * BO_TILE_SIZE, y * BO_TILE_SIZE);
+ fog->setZ(Z_FOG_OF_WAR);
+ fog->show();
+ d->mFogOfWar.insert(cell(x, y), fog);
+}
+
+void BosonCanvas::unfogLocal(int x, int y)
+{
+ d->mFogOfWar.remove(cell(x, y));
 }
 

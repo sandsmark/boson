@@ -195,10 +195,6 @@ void BosonWidget::init()
 
  connect(d->mCanvas, SIGNAL(signalUnitMoved(Unit*, double, double)),
 		d->mMiniMap, SLOT(slotMoveUnit(Unit*, double, double)));
- connect(d->mCanvas, SIGNAL(signalUnfog(int, int)),
-		d->mMiniMap, SLOT(slotUnfog(int, int)));
- connect(d->mCanvas, SIGNAL(signalFog(int, int)),
-		d->mMiniMap, SLOT(slotFog(int, int)));
  connect(d->mCanvas, SIGNAL(signalUnitDestroyed(Unit*)), 
 		this, SLOT(slotRemoveUnit(Unit*)));
  connect(d->mCanvas, SIGNAL(signalUnitDestroyed(Unit*)), 
@@ -246,6 +242,10 @@ void BosonWidget::addLocalPlayer()
  KGameMouseIO* bigDisplayIO = new KGameMouseIO(d->mBigDisplay, true);
  connect(bigDisplayIO, SIGNAL(signalMouseEvent(KGameIO*, QDataStream&, QMouseEvent*, bool*)),
 		d->mBigDisplay, SLOT(slotMouseEvent(KGameIO*, QDataStream&, QMouseEvent*, bool*)));
+ connect(p, SIGNAL(signalUnfog(int, int)),
+		this, SLOT(slotUnfog(int, int)));
+ connect(p, SIGNAL(signalFog(int, int)),
+		this, SLOT(slotFog(int, int)));
  p->addGameIO(bigDisplayIO);
  d->mBoson->addPlayer(p);
 
@@ -260,17 +260,21 @@ void BosonWidget::addDummyComputerPlayer(const QString& name)
  p->loadTheme(SpeciesTheme::speciesDirectory(SpeciesTheme::defaultSpecies()), SpeciesTheme::defaultColor());// FIXME - should be selectable in new game dialog
 }
 
-void BosonWidget::slotPlayerJoinedGame(KPlayer* p)
+void BosonWidget::slotPlayerJoinedGame(KPlayer* player)
 {
- if (!p) {
+ if (!player) {
 	kdError() << k_funcinfo << ": NULL player" << endl;
 	return;
  }
+ Player* p = (Player*)player;
  // BosonBigDisplay knows whether a unit was selected. If a unit changed forward
  // the signal to the big display and let it decide whether the
  // signalSingleUnitSelected should be emitted
  connect(p, SIGNAL(signalUnitChanged(Unit*)), 
 		d->mBigDisplay, SLOT(slotUnitChanged(Unit*)));
+ if (d->mMap) {
+	p->initMap(d->mMap);
+ }
 }
 
 void BosonWidget::keyReleaseEvent(QKeyEvent* e)
@@ -625,6 +629,12 @@ void BosonWidget::slotReceiveMap(const QByteArray& buffer)
  // load tiles if in editor mode - otherwise this does nothing
  emit signalEditorLoadTiles(tiles);
 
+ for (unsigned int i = 0; i < d->mBoson->playerCount(); i++) {
+	Player* p = (Player*)d->mBoson->playerList()->at(i);
+	if (p) {
+		p->initMap(d->mMap);
+	}
+ }
 // kdDebug() << "init minimap" << endl;
  d->mMiniMap->initMap(); // very fast function
  kdDebug() << "init map" << endl;
@@ -646,7 +656,6 @@ void BosonWidget::changeLocalPlayer(Player* localPlayer)
  d->mLocalPlayer = localPlayer; // is this used?
  d->mBigDisplay->setLocalPlayer(d->mLocalPlayer);
  d->mCommandFrame->setLocalPlayer(d->mLocalPlayer);
- d->mCanvas->setLocalPlayer(d->mLocalPlayer);
 }
 
 void BosonWidget::slotAddComputerPlayer(Player* computer)
@@ -711,5 +720,23 @@ void BosonWidget::slotSendChangeSpecies(const QString& species)
 void BosonWidget::zoom(const QWMatrix& m)
 {
  d->mBigDisplay->setWorldMatrix(m);
+}
+
+void BosonWidget::slotFog(int x, int y)
+{
+ // very time critical function!!
+
+ // FIXME: don't connect to this slot if in editor mode!
+ // slotFog() and slotUnfog() exist here so that we need only a single slot
+ // instead of two (on ein minimap and one to actually create/remove the fog)
+ // should save some performance (at least I hope)
+ d->mMiniMap->slotFog(x, y); // FIXME: no need for slot
+ d->mCanvas->fogLocal(x, y);
+}
+
+void BosonWidget::slotUnfog(int x, int y)
+{
+ d->mMiniMap->slotUnfog(x, y); // FIXME: no need for slot
+ d->mCanvas->unfogLocal(x, y);
 }
 

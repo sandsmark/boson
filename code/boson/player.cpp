@@ -22,12 +22,14 @@
 #include "speciestheme.h"
 #include "unit.h"
 #include "bosonmessage.h"
+#include "bosonmap.h"
 
 #include <kgame/kgamepropertyhandler.h>
 #include <kgame/kgame.h>
 #include <kgame/kgamemessage.h>
 
 #include <qcanvas.h>
+#include <qbitarray.h>
 
 #include "player.moc"
 
@@ -37,12 +39,14 @@ public:
 	PlayerPrivate()
 	{
 		mUnitPropID = 0;
-	
+		mMap = 0;
 	}
 
 	QPtrList<Unit> mUnits;
 
 	int mUnitPropID; // used for KGamePropertyHandler
+	QBitArray mFogged;
+	BosonMap* mMap;
 };
 
 Player::Player() : KPlayer()
@@ -365,3 +369,40 @@ const UnitProperties* Player::unitProperties(int unitType) const
  }
  return speciesTheme()->unitProperties(unitType);
 }
+
+void Player::initMap(BosonMap* map)
+{
+ d->mMap = map;
+ if (!map) {
+	d->mFogged.resize(0);
+	return;
+ }
+ d->mFogged.fill(false, map->width() * map->height());
+}
+
+void Player::fog(int x, int y)
+{
+ if (!d->mMap) {
+	return;
+ }
+//kdDebug() << k_funcinfo << x << "," << y << endl;
+ d->mFogged.setBit(x + d->mMap->width() * y);
+ // emit signal (actual fog on map + minimap)
+ // TODO: any way to emit only for the local player?
+ emit signalFog(x, y);
+//kdDebug() << k_funcinfo << "done " << endl;
+}
+
+void Player::unfog(int x, int y)
+{
+ if (!d->mMap) {
+	return;
+ }
+//kdDebug() << k_funcinfo << x << "," << y << endl;
+ d->mFogged.clearBit(x + d->mMap->width() * y);
+ // emit signal (actual fog on map + minimap)
+ // TODO: any way to emit only for the local player?
+ emit signalUnfog(x, y);
+//kdDebug() << k_funcinfo << "done " << endl;
+}
+

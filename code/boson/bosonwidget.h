@@ -128,6 +128,9 @@ protected slots:
 	void slotStartScenario();
 	void slotSendChangeSpecies(const QString& species);
 
+	void slotUnfog(int x, int y);
+	void slotFog(int x, int y);
+
 protected:
 	void changeSpecies(const QString& species);
 	void addLocalPlayer();
