@@ -23,6 +23,7 @@
 
 template<class T> class QValueList;
 template<class T, class T2> class QMap;
+class QDomDocument;
 
 class BosonFileConverter
 {
@@ -69,6 +70,8 @@ public:
 	 **/
 	bool convertSaveGame_From_0_8_128_To_0_9(QMap<QString, QByteArray>& list);
 
+protected:
+	bool loadXMLDoc(QDomDocument* doc, const QString& xml) const;
 };
 
 /**
