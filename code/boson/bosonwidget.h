@@ -171,6 +171,7 @@ protected slots:
 	void slotChatFramePosition(int);
 	void slotCommandFramePosition(int);
 	void slotCmdBackgroundChanged(const QString& file);
+	void slotMiniMapScaleChanged(double);
 	
 	void slotStartScenario();
 	void slotSendChangeSpecies(const QString& species);
