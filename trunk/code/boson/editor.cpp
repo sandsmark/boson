@@ -37,7 +37,9 @@
 #include <kstdaction.h>
 #include <kfiledialog.h>
 #include <kmessagebox.h>
+#if HAVE_KSHORTCUT
 #include <kshortcut.h>
+#endif
 
 #include <qintdict.h>
 #include <qwmatrix.h>
@@ -163,14 +165,27 @@ void Editor::initKAction()
  KStdAction::openNew(this, SLOT(slotFileNew()), actionCollection());
  KStdAction::quit(kapp, SLOT(quit()), actionCollection());
 
+#if HAVE_KSHORTCUT
  (void)new KAction(i18n("Save &Map as..."), KShortcut(), this,
-		  SLOT(slotSaveMapAs()), actionCollection(),
-		  "file_save_map_as");
- (void)new KAction(i18n("Save &Scenario as..."), KShortcut(), this,
-		  SLOT(slotSaveScenarioAs()), actionCollection(), 
-		  "file_save_scenario_as");
+#else
+ (void)new KAction(i18n("Save &Map as..."), QKeySequence(), this,
+#endif
+		SLOT(slotSaveMapAs()), actionCollection(),
+		"file_save_map_as");
 
+#if HAVE_KSHORTCUT
+ (void)new KAction(i18n("Save &Scenario as..."), KShortcut(), this,
+#else
+ (void)new KAction(i18n("Save &Scenario as..."), QKeySequence(), this,
+#endif
+		SLOT(slotSaveScenarioAs()), actionCollection(), 
+		"file_save_scenario_as");
+
+#if HAVE_KSHORTCUT
  d->mEdit = new KSelectAction(i18n("&Edit"), KShortcut(), actionCollection(), "editor_edit");
+#else
+ d->mEdit = new KSelectAction(i18n("&Edit"), QKeySequence(), actionCollection(), "editor_edit");
+#endif
  connect(d->mEdit, SIGNAL(activated(int)), this, SLOT(slotChangeEdit(int)));
  QStringList list;
  list.append(i18n("&Map"));
@@ -178,38 +193,74 @@ void Editor::initKAction()
  d->mEdit->setItems(list);
  list.clear();
  
+#if HAVE_KSHORTCUT
  d->mPlayerAction = new KSelectAction(i18n("&Player"), KShortcut(), actionCollection(), "editor_player");
+#else
+ d->mPlayerAction = new KSelectAction(i18n("&Player"), QKeySequence(), actionCollection(), "editor_player");
+#endif
  connect(d->mPlayerAction, SIGNAL(activated(int)), 
 		bosonWidget(), SLOT(slotChangeLocalPlayer(int)));
+#if HAVE_KSHORTCUT
  d->mActionFacilities = new KRadioAction(i18n("&Facilities"), KShortcut(),
+#else
+ d->mActionFacilities = new KRadioAction(i18n("&Facilities"), QKeySequence(),
+#endif
 		this, SLOT(slotPlaceFacilities()), actionCollection(),
 		"editor_place_facilities");
  d->mActionFacilities->setExclusiveGroup("Place");
+#if HAVE_KSHORTCUT
  d->mActionMobiles = new KRadioAction(i18n("&Mobiles"), KShortcut(),
+#else
+ d->mActionMobiles = new KRadioAction(i18n("&Mobiles"), QKeySequence(),
+#endif
 		this, SLOT(slotPlaceMobiles()), actionCollection(),
 		"editor_place_mobiles");
  d->mActionMobiles->setExclusiveGroup("Place");
+#if HAVE_KSHORTCUT
  d->mActionCellSmall = new KRadioAction(i18n("&Small"), KShortcut(),
+#else
+ d->mActionCellSmall = new KRadioAction(i18n("&Small"), QKeySequence(),
+#endif
 		this, SLOT(slotPlaceCellSmall()), actionCollection(),
 		"editor_place_cell_small");
  d->mActionCellSmall->setExclusiveGroup("Place");
+#if HAVE_KSHORTCUT
  d->mActionCellPlain = new KRadioAction(i18n("&Plain"), KShortcut(), 
+#else
+ d->mActionCellPlain = new KRadioAction(i18n("&Plain"), QKeySequence(), 
+#endif
 		this, SLOT(slotPlaceCellPlain()), actionCollection(),
 		"editor_place_cell_plain");
  d->mActionCellPlain->setExclusiveGroup("Place");
+#if HAVE_KSHORTCUT
  d->mActionCellBig1 = new KRadioAction(i18n("&Big1"), KShortcut(), 
+#else
+ d->mActionCellBig1 = new KRadioAction(i18n("&Big1"), QKeySequence(), 
+#endif
 		this, SLOT(slotPlaceCellBig1()),actionCollection(),
 		"editor_place_cell_big1");
  d->mActionCellBig1->setExclusiveGroup("Place");
- d->mActionCellBig2 = new KRadioAction(i18n("B&ig2"), KShortcut(), 
+#if HAVE_KSHORTCUT
+ d->mActionCellBig2 = new KRadioAction(i18n("B&ig2"), KShortcut(),
+#else
+ d->mActionCellBig2 = new KRadioAction(i18n("B&ig2"), QKeySequence(),
+#endif
 		this, SLOT(slotPlaceCellBig2()),actionCollection(),
 		"editor_place_cell_big2");
  d->mActionCellBig2->setExclusiveGroup("Place");
 
+#if HAVE_KSHORTCUT
  (void)new KAction(i18n("&Create Custom Unit"), KShortcut(), this,
+#else
+ (void)new KAction(i18n("&Create Custom Unit"), QKeySequence(), this,
+#endif
 		  SLOT(slotCreateUnit()), actionCollection(),
 		  "editor_create_unit");
+#if HAVE_KSHORTCUT
  (void)new KAction(i18n("&Generate Custom Tiles Ground"), KShortcut(), this,
+#else
+ (void)new KAction(i18n("&Generate Custom Tiles Ground"), QKeySequence(), this,
+#endif
 		  SLOT(slotCreateTiles()), actionCollection(),
 		  "editor_create_tiles");
 

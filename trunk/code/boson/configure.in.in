@@ -1,0 +1,10 @@
+AC_DEFUN(AC_CHECK_KSHORTCUT,
+[
+AC_FIND_FILE(kshortcut.h, $kde_includes, kshortcut)
+if "$kshortcut" eq "NO"; then
+  AC_DEFINE_UNQUOTED(HAVE_KSHORTCUT, 0, [ ])
+else 
+  AC_DEFINE_UNQUOTED(HAVE_KSHORTCUT, 1, [ ])
+fi
+])
+AC_CHECK_KSHORTCUT
