@@ -29,6 +29,8 @@ class QColor;
 class QString;
 class QStringList;
 class BoVector3;
+class BoMatrix;
+class BoMesh;
 template<class T> class QPtrList; //hmm is this working for all compilers? can templates be forwarded safely?
 template<class T, class T2> class QMap;
 
@@ -219,6 +221,13 @@ protected:
 	 * @param reload See @ref loadNodes
 	 **/
 	void loadNode(Lib3dsNode* node, bool reload);
+	/**
+	 * Used by @ref loadNode. This renders the specified mesh, so that it
+	 * can be stored into the display list.
+	 * @param textured TRUE if this is a textured mesh. WARNING:
+	 * textureMatrix can be non-NULL even, when textured is FALSE!
+	 **/
+	void renderMesh(BoMesh* boMesh, Lib3dsMesh* mesh, bool textured, Lib3dsMatrix invMeshMatrix, BoMatrix* textureMatrix);
 
 	/**
 	 * Render the specified node according to the values for the current
@@ -247,12 +256,16 @@ protected:
 	 **/
 	const QString& baseDirectory() const;
 
+	void renderPoint(Lib3dsMesh* mesh, Lib3dsFace* face, int point, bool textured, Lib3dsMatrix invMeshMatrix, const BoMatrix* textureMatrix);
+
 public:
 	/**
 	 * @return Whether the triangle @p face1 is adjacent to the triangle @p
 	 * face2. That means that at least 2 points (i.e. vectors) are equal.
 	 **/
 	static bool isAdjacent(BoVector3* face1, BoVector3* face2);
+	static int findPoint(const BoVector3& point, const BoVector3* array);
+	static void makeVectors(BoVector3* dest, Lib3dsMesh* mesh, Lib3dsFace* face);
 
 	/**
 	 * Find adjacent faces in @p mesh and place them into @p adjacentFaces.
@@ -277,6 +290,8 @@ public:
 	 **/
 	static void dumpTriangle(BoVector3* v, GLuint texture = 0, Lib3dsTexel* tex = 0);
 	static void dumpTriangle(Lib3dsVector* v, GLuint texture = 0, Lib3dsTexel* tex = 0);
+
+	static bool isTeamColor(const Lib3dsMesh* mesh);
 
 private:
 	void init();
