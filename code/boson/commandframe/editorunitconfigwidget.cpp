@@ -47,6 +47,8 @@ public:
 		mProductionList = 0;
 		mResourceMineMinerals = 0;
 		mResourceMineOil = 0;
+
+		mRotation = 0;
 	}
 
 	unsigned long int mUnitId; // used to check whether we actually have values for the selected unit in updateUnit()
@@ -62,6 +64,8 @@ public:
 //	KIntNumInput* mHarvesterOil; // TODO once the plugin is ready
 	KIntNumInput* mResourceMineMinerals;
 	KIntNumInput* mResourceMineOil;
+
+	KIntNumInput* mRotation;
 };
 
 EditorUnitConfigWidget::EditorUnitConfigWidget(BosonCommandFrameBase* frame, QWidget* parent)
@@ -112,6 +116,12 @@ EditorUnitConfigWidget::EditorUnitConfigWidget(BosonCommandFrameBase* frame, QWi
  layout->addWidget(d->mResourceMineOil);
 
 
+ d->mRotation = new KIntNumInput(this);
+ d->mRotation->setLabel(i18n("Rotation: "), AlignVCenter);
+ d->mRotation->setRange(0, 359);
+ connect(d->mRotation, SIGNAL(valueChanged(int)), this, SIGNAL(signalUpdateUnit()));
+ layout->addWidget(d->mRotation);
+
  // AB: some interesting things: configure plugins (e.g. production lists),
  // configure waypoints, configure work (use combobox with real names!)
 }
@@ -159,6 +169,8 @@ bool EditorUnitConfigWidget::display(Unit* unit)
  } else {
 	d->mShields->hide();
  }
+
+ d->mRotation->setValue(unit->rotation());
 
  displayProductionPlugin(unit);
  displayHarvesterPlugin(unit);
@@ -248,6 +260,9 @@ void EditorUnitConfigWidget::updateUnit(Unit* unit)
 		}
 	}
  }
+
+ unit->setRotation(d->mRotation->value());
+ unit->updateRotation();
 
  updateProductionPlugin(unit);
  updateHarvesterPlugin(unit);
