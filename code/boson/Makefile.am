@@ -6,12 +6,19 @@ SUBDIRS = data \
 	meshrenderer \
 	groundrenderer
 
-noinst_LTLIBRARIES = libboson.la
+noinst_LTLIBRARIES = \
+		libboson.la \
+		libboprofiling.la \
+		libbocursor.la \
+		libborender.la \
+		libboinfo.la \
+		libbo3dsdebug.la
 bin_PROGRAMS = boson bounit boprofiling bocursor borender boinfo bo3dsdebug
 
 INCLUDES = -I$(kde_includes)/arts -I$(top_srcdir)/bodebug $(all_includes)
 
-BOSON_COMMON_SRC = \
+
+libboson_la_SOURCES = \
 	boapplication.cpp \
 	boglobal.cpp \
 	cell.cpp \
@@ -108,15 +115,6 @@ BOSON_COMMON_SRC = \
 	boacload.cpp
 
 
-
-BOPROFILING_SRC= \
-	boapplication.cpp \
-	boglobal.cpp \
-	bosonprofilingdialog.cpp \
-	bosonprofiling.cpp \
-	boprofilingmain.cpp
-
-libboson_la_SOURCES = $(BOSON_COMMON_SRC)
 libboson_la_LIBADD = \
 		$(top_builddir)/bodebug/libbodebug.la \
 		$(top_builddir)/boson/items/libbosonitems.la \
@@ -147,60 +145,76 @@ bounit_SOURCES = \
 		bounitmain.cpp bosonsearchpathswidget.ui \
 		bouniteditor.ui
 
+libboprofiling_la_SOURCES = \
+		boapplication.cpp \
+		boglobal.cpp \
+		bosonprofilingdialog.cpp \
+		bosonprofiling.cpp
 boprofiling_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 boprofiling_LDADD = \
+		$(top_builddir)/boson/libboprofiling.la \
 		$(top_builddir)/bodebug/libbodebug.la \
 		$(LIB_KDEUI) \
 		$(LIB_KIO)
 boprofiling_SOURCES = \
-		$(BOPROFILING_SRC)
+		boprofilingmain.cpp
 
+libbocursor_la_SOURCES = \
+		boapplication.cpp \
+		boglobal.cpp \
+		bosoncursor.cpp \
+		bosontexturearray.cpp \
+		bosonconfig.cpp \
+		bosonglwidget.cpp
 bocursor_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 bocursor_LDADD = \
 		$(top_builddir)/bodebug/libbodebug.la \
 		$(top_builddir)/boson/info/libbosoninfo.la \
+		$(top_builddir)/boson/libbocursor.la \
 		$(LIB_KDEUI) \
 		$(LIB_KIO) \
 		$(GLLIB)
 bocursor_SOURCES = \
-		boapplication.cpp \
-		boglobal.cpp \
-		bocursormain.cpp bosoncursoreditor.cpp bosoncursor.cpp \
-		bosontexturearray.cpp bosonconfig.cpp \
-		bosonglwidget.cpp
+		bocursormain.cpp bosoncursoreditor.cpp
 
+libborender_la_SOURCES = \
+		kgamemodeldebug.cpp
 borender_LDFLAGS = $(KDE_RPATH) $(all_libraries) -Xlinker -export-dynamic
 borender_LDADD = \
-		$(top_builddir)/boson/libboson.la
+		$(top_builddir)/boson/libboson.la \
+		$(top_builddir)/boson/libborender.la
 borender_SOURCES = \
-		kgamemodeldebug.cpp \
 		kgamespeciesdebug.cpp \
 		borendermain.cpp
 
+libboinfo_la_SOURCES = \
+		boapplication.cpp \
+		boglobal.cpp \
+		bosonglwidget.cpp
 boinfo_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 boinfo_LDADD = \
+		$(top_builddir)/boson/libboinfo.la \
 		$(top_builddir)/bodebug/libbodebug.la \
 		$(top_builddir)/boson/info/libbosoninfo.la \
 		$(GLLIB) \
 		-lkio $(LIB_KDEUI)
 boinfo_SOURCES = \
-		boapplication.cpp \
-		boglobal.cpp \
-		bosonglwidget.cpp \
 		boinfomain.cpp
 
+libbo3dsdebug_la_SOURCES = \
+		boapplication.cpp \
+		boglobal.cpp \
+		bo3dtools.cpp \
+		kgamemodeldebug.cpp \
+		bomatrixwidget.cpp
 bo3dsdebug_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 bo3dsdebug_LDADD = \
+		$(top_builddir)/boson/libbo3dsdebug.la \
 		$(top_builddir)/bodebug/libbodebug.la \
 		-l3ds \
 		$(GLLIB) \
 		-lkio $(LIB_KDEUI)
 bo3dsdebug_SOURCES = \
-		boapplication.cpp \
-		boglobal.cpp \
-		bo3dtools.cpp \
-		kgamemodeldebug.cpp \
-		bomatrixwidget.cpp \
 		bo3dsdebugmain.cpp
 
 METASOURCES = AUTO
