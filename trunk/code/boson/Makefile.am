@@ -19,17 +19,31 @@ BOEDITOR_SRC = editor.cpp bosonunitdialog.cpp
 # all used-by-both files.
 # actually editorinput.cpp should be in BOEDITOR_SRC but it is used by
 # bosonwidget.cpp...
-COMMON_SRC = unitbase.cpp unit.cpp unitproperties.cpp cell.cpp \
-	kspritetooltip.cpp bosonmap.cpp bosoncanvas.cpp boson.cpp \
-	player.cpp selectpart.cpp speciestheme.cpp \
-	bosoncommandframe.cpp kgamedialogbosonconfig.cpp \
-	bosonbigdisplay.cpp bosonminimap.cpp bosonunitview.cpp \
-	kgameunitdebug.cpp bosonwidget.cpp \
-	editorinput.cpp boshot.cpp bosontiles.cpp \
-	bosonscenario.cpp bosonconfig.cpp \
+COMMON_SRC = \
+	cell.cpp unitproperties.cpp unitbase.cpp \
+	kspritetooltip.cpp \
+	selectpart.cpp \
+	bosonmap.cpp \
+	bosonscenario.cpp \
+	bosoncanvas.cpp \
+	boson.cpp \
+	speciestheme.cpp player.cpp \
+	bosoncommandframe.cpp \
+	kgamedialogbosonconfig.cpp \
+	bosonbigdisplay.cpp \
+	bosonminimap.cpp \
+	bosonunitview.cpp \
+	kgameunitdebug.cpp \
+	bosonwidget.cpp \
+	editorinput.cpp \
+	boshot.cpp \
+	bosontiles.cpp \
+	bosonconfig.cpp \
 	optionsdialog.cpp \
-	bosoncomputerio.cpp kgamedialogcomputerconfig.cpp \
-	bosonpath.cpp
+	bosoncomputerio.cpp \
+	kgamedialogcomputerconfig.cpp \
+	bosonpath.cpp \
+	unit.cpp
 
 boson_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 boson_LDADD = -lkdegames -lqtmcop -lsoundserver_idl $(LIB_KDEUI)
