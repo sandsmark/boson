@@ -37,11 +37,8 @@ mobUnit::mobUnit(mobileMsg_t *msg, QObject* parent, const char *name=0L)
 :Unit(parent,name)
 {
 key	= msg->key;
-//pos_x	= msg->x;
-//pos_y	= msg->y;
 who	= msg->who;
 type	= msg->type;
-//printf("mobUnit, creation with type = %d\n", type);
 
 isShown = TRUE; ///orzel : should be removed since Qw handles this now...
 }
@@ -58,8 +55,6 @@ Facility::Facility(facilityMsg_t *msg, QObject* parent, const char *name=0L)
 :Unit(parent,name)
 {
 key	= msg->key;
-//pos_x	= msg->x;
-//pos_y	= msg->y;
 who	= msg->who;
 type	= msg->type;
 }
@@ -67,9 +62,7 @@ type	= msg->type;
 
 QRect Facility::rect(void)
 {
-return QRect(
-		BO_TILE_SIZE * _x(),
-		BO_TILE_SIZE * _y(),
+return QRect( _x(), _y(),
 		BO_TILE_SIZE * facilityProp[type].width,
 		BO_TILE_SIZE * facilityProp[type].height);
 }
