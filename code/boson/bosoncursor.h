@@ -162,12 +162,33 @@ public:
 	BosonOpenGLCursorData();
 	~BosonOpenGLCursorData();
 
-	BosonTextureArray* mArray;
-	unsigned int mHotspotX;
-	unsigned int mHotspotY;
+	void setHotspot(unsigned int x, unsigned int y)
+	{
+		mHotspotX = x;
+		mHotspotY = y;
+	}
+
+	/**
+	 * Compute a display lists for every image in @p images. The list will
+	 * display a rectangular cursor (you'll want to render it with alpha
+	 * blending enabled).
+	 *
+	 * Note that the hotspot must already be applied when you call this.
+	 * @param images Use these images as textures. Note that a @ref
+	 * BosonTextureArray object will get generated for this.
+	 **/
+	bool computeDisplayLists(QValueList<QImage> images);
+
+	GLuint* mDisplayLists;
+	GLuint mDisplayListCount;
 	bool mAnimated;
 	unsigned int mAnimationSpeed;
 	int mRotateDegree;
+
+private:
+	BosonTextureArray* mTextureArray;
+	unsigned int mHotspotX;
+	unsigned int mHotspotY;
 };
 
 class BosonOpenGLCursor : public BosonCursor
@@ -181,19 +202,6 @@ public:
 	virtual void setWidgetCursor(QWidget* w);
 
 	virtual bool insertMode(int mode, QString baseDir, QString cursor);
-
-	inline unsigned int hotspotX() const 
-	{
-		return mCurrentData ? mCurrentData->mHotspotX : 0;
-	}
-	inline unsigned int hotspotY() const 
-	{
-		return mCurrentData ? mCurrentData->mHotspotY : 0;
-	}
-	GLuint currentTexture() const
-	{
-		return mCurrentData ? mCurrentTexture : 0;
-	}
 
 	bool insertMode(int mode, BosonOpenGLCursorData* data);
 	void setCurrentTextureArray(BosonTextureArray* array);
@@ -212,7 +220,7 @@ private:
 	BosonOpenGLCursorPrivate* d;
 
 	BosonOpenGLCursorData* mCurrentData;
-	GLuint mCurrentTexture;
+	GLuint mCurrentDisplayList;
 };
 
 
