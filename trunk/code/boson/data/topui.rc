@@ -12,6 +12,7 @@
     <Action name="debug_bodebuglog" />
     <Action name="debug_profiling" />
     <Action name="debug_sleep_1s" />
+    <MergeLocal />
   </Menu>
   <Menu name="settings" group="settingsmenu"><text>&amp;Settings</text>
     <Action name="options_sound" append="show_merge" />
