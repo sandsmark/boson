@@ -313,7 +313,6 @@ void TopWidget::initStartupWidget(StartupWidgetIds id)
 				this, SLOT(slotShowMainMenu()));
 		connect(d->mNewGame, SIGNAL(signalShowNetworkOptions()),
 				this, SLOT(slotShowNetworkOptions()));
-		d->mNewGame->show();
 		break;
 	}
 	case IdStartEditor:
@@ -374,6 +373,38 @@ void TopWidget::showStartupWidget(StartupWidgetIds id)
 	case IdNetwork:
 	case IdLoading:
 		showHideMenubar();
+		break;
+	default:
+		boWarning() << k_funcinfo << "Invalid id " << id << endl;
+		break;
+ }
+}
+
+void TopWidget::removeStartupWidget(StartupWidgetIds id)
+{
+ QWidget* w = mWs->widget((int)id);
+ if (!w) {
+	return;
+ }
+ delete w; // note: this also deletes child widgets, such as e.g. d->mNewGame for IdNewGame
+ switch (id) {
+	case IdWelcome:
+		d->mWelcome = 0;
+		break;
+	case IdNewGame:
+		d->mNewGame = 0;
+		break;
+	case IdStartEditor:
+		d->mStartEditor = 0;
+		break;
+	case IdBosonWidget:
+		d->mBosonWidget = 0;
+		break;
+	case IdNetwork:
+		d->mNetworkOptions = 0;
+		break;
+	case IdLoading:
+		d->mLoadingWidget = 0;
 		break;
 	default:
 		boWarning() << k_funcinfo << "Invalid id " << id << endl;
@@ -540,15 +571,9 @@ void TopWidget::slotLoadGame()
 
 void TopWidget::slotShowMainMenu()
 {
- if (d->mNewGame) {
-	disconnect(d->mNewGame);
-	delete d->mNewGame;
-	d->mNewGame = 0;
- }
- if (d->mStartEditor) {
-	delete d->mStartEditor;
-	d->mStartEditor = 0;
- }
+ removeStartupWidget(IdNewGame);
+ removeStartupWidget(IdStartEditor);
+
  // Delete all players to remove added AI players, then re-init local player
  boGame->removeAllPlayers();
  initPlayer();
@@ -562,9 +587,7 @@ void TopWidget::slotShowNetworkOptions()
 
 void TopWidget::slotHideNetworkOptions()
 {
- disconnect(d->mNetworkOptions);
- delete d->mNetworkOptions;
- d->mNetworkOptions = 0;
+ removeStartupWidget(IdNetwork);
  d->mNewGame->slotSetAdmin(boGame->isAdmin());
  showStartupWidget(IdNewGame);
 }
@@ -607,12 +630,9 @@ void TopWidget::slotStartGame()
 
  int progress = 0; // FIXME: wrong value!
  showStartupWidget(IdBosonWidget);
- delete d->mNewGame;
- d->mNewGame = 0;
- delete d->mStartEditor;
- d->mStartEditor = 0;
- delete d->mLoadingWidget; // AB: ok here? FIXME: remove comment if this doesnt crash
- d->mLoadingWidget = 0;
+ removeStartupWidget(IdNewGame);
+ removeStartupWidget(IdStartEditor);
+ removeStartupWidget(IdLoading);
 
  // Init some stuff
  statusBar()->show();
@@ -678,6 +698,7 @@ void TopWidget::endGame()
  // Delete all objects
  delete d->mBosonWidget;
  d->mBosonWidget = 0;
+ removeStartupWidget(IdBosonWidget); // redundant, btw
  Boson::deleteBoson();  // Easiest way to reset game info
  delete mCanvas;
  mCanvas = 0;
@@ -929,7 +950,12 @@ void TopWidget::raiseWidget(StartupWidgetIds id)
 		boDebug() << k_funcinfo << "unknown id " << id << endl;
 		break;
  }
- mWs->raiseWidget(id);
+ if (!mWs->widget((int)id)) {
+	kdWarning() << k_funcinfo << "NULL widget " << id << endl;
+	return;
+ }
+ mWs->raiseWidget((int)id);
+ mWs->widget((int)id)->show();
 }
 
 void TopWidget::slotUpdateFPS()
