@@ -35,8 +35,6 @@
 struct TextureGroundType
 {
 	QString mFile; // relative to groundTheme dir
-	unsigned char mAmountOfLand;
-	unsigned char mAmountOfWater;
 	QRgb mMiniMapColor;
 	int mAnimationDelay;
 	QString mPixmapFile;
@@ -212,20 +210,10 @@ bool BosonGroundTheme::loadGroundThemeConfig(const QString& file)
 	}
 	types[i].mFile = texFile;
 	// the other values have usable defaults.
-	types[i].mAmountOfLand = (unsigned char)conf.readUnsignedNumEntry("AmountOfLand", 0);
-	types[i].mAmountOfWater = (unsigned char)conf.readUnsignedNumEntry("AmountOfWater", 0);
 	BoVector3 color = BosonConfig::readBoVector3Entry(&conf, "MiniMapColor");
 	types[i].mMiniMapColor = qRgb((int)color.x(), (int)color.y(), (int)color.z());
 	types[i].mAnimationDelay = conf.readUnsignedNumEntry("AnimationDelay", 1);
 	types[i].mPixmapFile = conf.readEntry("Pixmap", QString::null);
-
-	// ensure correct values:
-	if (types[i].mAmountOfLand + types[i].mAmountOfWater != 255) {
-		boWarning() << k_funcinfo << "AmountOfLand + AmountOfWater must be 255 for texture " << i << endl;
-		int diff = 255 - (types[i].mAmountOfLand + types[i].mAmountOfWater);
-		// add the diff to water, as most units cannot go there
-		types[i].mAmountOfWater += diff;
-	}
  }
  if (!ret) {
 	boError() << k_funcinfo << "Could not load ground theme config file " << file << endl;
@@ -257,22 +245,6 @@ bool BosonGroundTheme::loadGroundTheme(QString dir)
 
  d->mGroundThemeDir = dir;
  return true;
-}
-
-unsigned char BosonGroundTheme::amountOfLand(unsigned int texture) const
-{
- if (texture >= textureCount()) {
-	return 0;
- }
- return d->mGroundTypes[texture].mAmountOfLand;
-}
-
-unsigned char BosonGroundTheme::amountOfWater(unsigned int texture) const
-{
- if (texture >= textureCount()) {
-	return 0;
- }
- return d->mGroundTypes[texture].mAmountOfWater;
 }
 
 int BosonGroundTheme::textureAnimationDelay(unsigned int texture) const

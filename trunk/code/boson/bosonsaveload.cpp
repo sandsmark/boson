@@ -270,6 +270,7 @@ bool BosonSaveLoad::saveToFile(const QMap<QString, QByteArray>& files, const QSt
  QByteArray canvasXML = files["canvas.xml"];
  QByteArray externalXML = files["external.xml"];
  QByteArray mapXML = files["map/map.xml"];
+ QByteArray waterXML = files["map/water.xml"];
  QByteArray heightMap = files["map/heightmap.png"];
  QByteArray texMap = files["map/texmap"];
  QByteArray descriptionXML = files["C/description.xml"];
@@ -294,6 +295,10 @@ bool BosonSaveLoad::saveToFile(const QMap<QString, QByteArray>& files, const QSt
  }
  if (mapXML.size() == 0) {
 	boError() << k_funcinfo << "no mapXML found" << endl;
+	return false;
+ }
+ if (waterXML.size() == 0) {
+	boError() << k_funcinfo << "no waterXML found" << endl;
 	return false;
  }
  if (heightMap.size() == 0) {
@@ -327,6 +332,10 @@ bool BosonSaveLoad::saveToFile(const QMap<QString, QByteArray>& files, const QSt
  }
  if (!f.writeFile(QString::fromLatin1("map.xml"), QString(mapXML), QString::fromLatin1("map"))) {
 	boError() << k_funcinfo << "Could not write map to " << file << endl;
+	return false;
+ }
+ if (!f.writeFile(QString::fromLatin1("water.xml"), QString(waterXML), QString::fromLatin1("map"))) {
+	boError() << k_funcinfo << "Could not write water to " << file << endl;
 	return false;
  }
  if (!f.writeFile(QString::fromLatin1("heightmap.png"), heightMap, QString::fromLatin1("map"))) {

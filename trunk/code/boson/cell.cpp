@@ -26,8 +26,6 @@ Cell::Cell()
 	: mX(0),
 	mY(0),
 	mItems(BoItemList(2, false)),
-	mAmountOfLand(0),
-	mAmountOfWater(0),
 	mRegion(0),
 	mPassable(true)
 {
@@ -41,34 +39,6 @@ void Cell::setPosition(int x, int y)
 {
  mX = x;
  mY = y;
-}
-
-void Cell::makeCell(unsigned char amountOfLand, unsigned char amountOfWater)
-{
- if ((int)amountOfLand + (int)amountOfWater != 255) {
-	boError() << k_funcinfo << "amountOfLand(==" << (int)amountOfLand
-			<< ") + amountOfWater(==" << (int)amountOfWater
-			<< ") != 255" << endl;
-	amountOfLand = 0;
-	amountOfWater = 255;
- }
-
- mAmountOfLand = amountOfLand;
- mAmountOfWater = amountOfWater;
-}
-
-bool Cell::canGo(const UnitProperties* prop) const
-{ // probably a time critical function!
- if (!prop) {
-	boError() << k_funcinfo << "NULL unit properties" << endl;
-	return false;
- }
- if (mAmountOfLand >= 128) {
-	return prop->canGoOnLand();
- } else {
-	return prop->canGoOnWater();
- }
- return false;
 }
 
 int Cell::moveCost() const

@@ -199,7 +199,7 @@ bool BosonStarting::start()
 	return false;
  }
  emit signalLoadingType(BosonLoadingWidget::LoadWater);
- boWaterManager->initOpenGL();
+ boWaterManager->loadNecessaryTextures();
 
  emit signalLoadingType(BosonLoadingWidget::InitGame); // obsolete
  emit signalLoadingType(BosonLoadingWidget::StartingGame);

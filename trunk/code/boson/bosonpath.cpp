@@ -30,6 +30,7 @@
 #include "bosonprofiling.h"
 #include "bosonmap.h"
 #include "unitplugins.h"
+#include "bowater.h"
 
 #include <qptrqueue.h>
 
@@ -934,19 +935,32 @@ float BosonPath::cost(int x, int y)
     {
       // cell is ok
       // Check if we can go to that tile, if we can't, cost will be ERROR_COST
-      if(! c->canGo(mUnit->unitProperties()))
+      if(!c->passable())
       {
-        //boDebug() << k_lineinfo << "cannot go on " << x << "," << y << endl;
         co = ERROR_COST;
       }
       else
       {
+        if(boWaterManager->cellPassable(x, y))
+        {
+          if(!mUnit->unitProperties()->canGoOnLand())
+          {
+            return ERROR_COST;
+          }
+        }
+        else
+        {
+          if(!mUnit->unitProperties()->canGoOnWater())
+          {
+            return ERROR_COST;
+          }
+        }
 #ifndef NEWER_PF_STYLE
 #ifndef MOVE_IN_LINE
         // If we are close to our starting point or to our goal, then consider cell
         //  to be occupied even if only moving units are on it (we assume they can't
         //  move away fast enough)
-       bool includeMoving = false;
+        bool includeMoving = false;
         if(QMAX(QABS(x - mStartx), QABS(y - mStarty)) <= 2) // Change 2 to 1???
         {
           includeMoving = true;
@@ -3485,9 +3499,9 @@ BosonPath2::PassabilityType BosonPath2::cellPassability(int x, int y)
   {
     return NotPassable;
   }
-  else if(cell(x, y)->amountOfLand() >= 154)
+  else if(boWaterManager->cellPassable(x, y))
   {
-    // Cell is passable by land units if it has at least 60% of land
+    // Cell is passable by land units
     return Land;
   }
   else

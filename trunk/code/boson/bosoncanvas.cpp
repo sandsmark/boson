@@ -581,11 +581,22 @@ bool BosonCanvas::canGo(const UnitProperties* prop, const QRect& rect) const
 			boError() << k_funcinfo << "NULL cell" << endl;
 			return false;
 		}
-		if (!newCell->canGo(prop)) {
-			boDebug() << k_funcinfo << "can not go on " << x << "," << y << endl;
+		if (!newCell->passable()) {
+			// Cell is not passable by any unit (probably the slope is too big).
 			return false;
-		} else {
-//			boDebug() << k_funcinfo << "can go on " << x << "," << y << endl;
+		} else if (!prop->isAircraft()) {
+			// Non-aircrafts can usually only move on either land or water (aircrafts can move on both).
+			if (boWaterManager->cellPassable(x, y)) {
+				if (!prop->canGoOnLand()) {
+					// Cell is passable for land units, but this unit can't move on land
+					return false;
+				}
+			} else {
+				if (!prop->canGoOnWater()) {
+					// Cell is passable for water units, but this unit can't move on water
+					return false;
+				}
+			}
 		}
 		x++;
 	} while (x * BO_TILE_SIZE < rect.right());
