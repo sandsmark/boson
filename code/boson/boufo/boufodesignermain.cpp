@@ -48,6 +48,82 @@
 
 //static const char *version = BOSON_VERSION_STRING;
 
+class QEnumContainerListItem : public QCheckListItem
+{
+public:
+	QEnumContainerListItem(QListView* lv, const QString& text)
+		: QCheckListItem(lv, text, RadioButtonController)
+	{
+		mDisableItemChanged = false;
+		setRenameEnabled(1, false);
+	}
+
+	/**
+	 * Called by @ref QEnumCheckListItem only
+	 **/
+	void selectedItemChanged()
+	{
+		if (mDisableItemChanged) {
+			return;
+		}
+		disableItemChanged(true);
+		QListViewItem* child = firstChild();
+		while (child) {
+			if (child->rtti() == 1) {
+				QCheckListItem* check = (QCheckListItem*)child;
+				if (check->isOn()) {
+					int col = 1;
+					setRenameEnabled(col, true);
+					setText(col, check->text(0));
+					startRename(col);
+					okRename(col);
+					setRenameEnabled(col, false);
+				}
+			}
+			child = child->nextSibling();
+		}
+		disableItemChanged(false);
+	}
+
+	void disableItemChanged(bool d)
+	{
+		mDisableItemChanged = d;
+	}
+
+private:
+	bool mDisableItemChanged;
+};
+
+class QEnumCheckListItem : public QCheckListItem
+{
+public:
+	QEnumCheckListItem(QEnumContainerListItem* item, const QString& text)
+		: QCheckListItem(item, text, RadioButton)
+	{
+	}
+
+	/**
+	 * Call @ref setOn, but don't call@ ref
+	 * QEnumContainerListItem::selectedItemChanged
+	 **/
+	void setManualOn(bool on)
+	{
+		((QEnumContainerListItem*)parent())->disableItemChanged(true);
+		setOn(on);
+		((QEnumContainerListItem*)parent())->disableItemChanged(false);
+	}
+	
+protected:
+	virtual void stateChange(bool s)
+	{
+		QCheckListItem::stateChange(s);
+		BO_CHECK_NULL_RET(parent());
+		QEnumContainerListItem* c = (QEnumContainerListItem*)parent();
+		c->selectedItemChanged();
+	}
+
+};
+
 
 // TODO: provide this information in the BoUfoFactory!
 static bool isContainerWidget(const QString& className)
@@ -720,15 +796,64 @@ void BoPropertiesWidget::displayProperties(const QDomElement& e)
 	return;
  }
  QString className;
+ QMetaObject* metaObject = 0;
  QDomNamedNodeMap attributes = e.attributes();
  for (unsigned int i = 0; i < attributes.count(); i++) {
 	QDomAttr a = attributes.item(i).toAttr();
 	if (a.name() == "ClassName") {
 		className = a.value();
+
+		// WARNING: trolltech marks this as internal!
+		// but it is sooo useful
+		metaObject = QMetaObject::metaObject(className);
 		continue;
 	}
-	QListViewItem* item = new QListViewItem(mListView, a.name(), a.value());
-	item->setRenameEnabled(1, true);
+ }
+ if (!metaObject) {
+	boError() << k_funcinfo << "cannot find clas " << className << endl;
+	return;
+ }
+ for (unsigned int i = 0; i < attributes.count(); i++) {
+	QDomAttr a = attributes.item(i).toAttr();
+	if (a.name() == "ClassName") {
+		continue;
+	}
+	int index = metaObject->findProperty(a.name(), true);
+	if (index < 0) {
+		boWarning() << k_funcinfo << "don't know property " << a.name() << " in class " << className << endl;
+		continue;
+	}
+	const QMetaProperty* prop = metaObject->property(index, true);
+	if (!prop->writable()) {
+		(void)new QListViewItem(mListView, a.name(), a.value());
+		continue;
+	}
+	if (prop->isSetType()) {
+		boWarning() << k_funcinfo << "property is a set - this is not supported yet" << endl;
+		// it'll be displayed as normal text.
+
+		// a set can be implemented just like a normal enum, but instead
+		// of radio buttons we use checkboxes (values can be ORed
+		// together).
+		// but we probably don't need that anyway
+	}
+	if (prop->isEnumType() && !prop->isSetType()) {
+		QEnumContainerListItem* item = new QEnumContainerListItem(mListView, a.name());
+		item->setText(1, a.value());
+		item->setOpen(true);
+		QStrList enums = prop->enumKeys();
+		QStrListIterator it(enums);
+		while (it.current()) {
+			QEnumCheckListItem* c = new QEnumCheckListItem(item, QString::fromLatin1(it.current()));
+			if (a.value() == it.current()) {
+				c->setManualOn(true);
+			}
+			++it;
+		}
+	} else {
+		QListViewItem* item = new QListViewItem(mListView, a.name(), a.value());
+		item->setRenameEnabled(1, true);
+	}
  }
  if (className.isEmpty() && e.tagName() == "Widgets") {
 	className = tr("BoUfoWidget (root widget)");
