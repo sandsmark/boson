@@ -152,10 +152,6 @@ bool SpeciesTheme::loadTheme(const QString& speciesDir, const QColor& teamColor)
 	kdError() << "Couldn't load action pixmaps" << endl;
  }
 
- if (!loadShot()) {
-	kdError() << "Could not load shot sequence" << endl;
- }
-
  // don't preload units here as the species can still be changed in new game
  // dialog 
  return true;
@@ -473,6 +469,7 @@ bool SpeciesTheme::loadUnitImage(const QString &fileName, QImage &_image, bool w
  return true;
 }
 
+/*
 bool SpeciesTheme::loadShotPixmap(const QString& fileName, QPixmap& pix)
 {
  QImage image(fileName);
@@ -520,6 +517,7 @@ bool SpeciesTheme::loadShotPixmap(const QString& fileName, QPixmap& pix)
  pix.setMask(m);
  return true;
 }
+*/
 
 void SpeciesTheme::loadNewUnit(UnitBase* unit)
 {
@@ -643,18 +641,6 @@ QValueList<unsigned long int> SpeciesTheme::productions(QValueList<int> producer
  return list;
 }
 
-bool SpeciesTheme::loadShot()
-{
- kdWarning() << k_funcinfo << "not yet implemented for OpenGL" << endl;
- return true;
-}
-
-bool SpeciesTheme::loadBigShot(bool isFacility, unsigned int version)
-{
- kdWarning() << k_funcinfo << "not yet implemented for OpenGL" << endl;
- return true;
-}
-
 QStringList SpeciesTheme::availableSpecies()
 {
  QStringList list = KGlobal::dirs()->findAllResources("data", 
@@ -726,6 +712,9 @@ void SpeciesTheme::loadUnitModel(const UnitProperties* prop)
 		((float)prop->unitHeight()) * BO_GL_CELL_SIZE / BO_TILE_SIZE);
  m->setLongNames(prop->longTextureNames());
  m->loadModel();
+ if (prop->isFacility()) {
+	m->generateConstructionLists();
+ }
  d->mUnitModels.insert(prop->typeId(), m);
 }
 

@@ -591,7 +591,7 @@ void BosonCommandFrame::slotSetAction(Unit* unit)
 	Facility* fac = (Facility*)d->mSelectedUnit;
 	if (!fac->isConstructionComplete()) {
 		slotShowConstructionProgress(fac);
-		kdWarning() << "construction not completed" << endl;
+		kdWarning() << k_funcinfo << "construction not completed" << endl;
 		// we must not yet display anything else.
 		return;
 	}

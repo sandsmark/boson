@@ -51,8 +51,27 @@ public:
 
 	void loadModel();
 
+	/**
+	 * Generate display lists for steps construction steps. The unit will
+	 * display more and more objects of the final model, when being
+	 * constructed.
+	 **/
+	void generateConstructionLists();
+
+	/**
+	 * Note: as long as @ref constructionStep is < @ref constructionSteps
+	 * you can't call this function!
+	 *
+	 * (note also that by default @ref constructionStep == @ref
+	 * constructionSteps == 0)
+	 **/
 	void setFrame(unsigned int frame);
 	unsigned int frame() const { return mFrame; }
+	inline unsigned int frames() const { return mFrames.count(); }
+
+	void setConstructionStep(unsigned int step);
+	inline unsigned int constructionSteps() const { return mConstructionSteps.count(); }
+	inline unsigned int constructionStep() const { return mConstructionStep; }
 
 	/**
 	 * @return The display list of the current @ref frame.
@@ -67,8 +86,6 @@ public:
 	 * the actual depth (height in z-direction) of the unit
 	 **/
 	float depthMultiplier() const { return mDepthMultiplier; }
-
-	inline unsigned int frames() const { return mFrames.count(); }
 
 	/**
 	 * Since .3ds files seem to supprt filenames of 8+3 chars only you can
@@ -101,6 +118,7 @@ protected:
 
 private:
 	void init();
+	void setCurrentFrame(BoFrame* frame);
 
 private:
 	Lib3dsFile* m3ds;
@@ -108,9 +126,11 @@ private:
 	QMap<QString, QString> mTextureNames;
 	GLuint mDisplayList;
 	QIntDict<BoFrame> mFrames;
+	QIntDict<BoFrame> mConstructionSteps;
 	QString mDirectory;
 	QString mFile;
 	unsigned int mFrame;
+	unsigned int mConstructionStep;
 
 	float mWidth;
 	float mHeight;

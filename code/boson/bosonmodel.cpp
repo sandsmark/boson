@@ -45,6 +45,13 @@ public:
 		mDisplayList = 0;
 		mRadius = 0.0;
 	}
+	BoFrame(const BoFrame& f)
+	{
+		mDisplayList = f.mDisplayList;
+		mDepthMultiplier = f.mDepthMultiplier;
+		mRadius = f.mRadius;
+	}
+
 	void setDisplayList(GLuint l) { mDisplayList = l; }
 	GLuint displayList() const { return mDisplayList; }
 	float depthMultiplier() const { return mDepthMultiplier; }
@@ -67,6 +74,7 @@ public:
 		mMaxZ = 0.0;
 		mMinZ = 0.0;
 	}
+	
 	void addPoint(float x, float y, float z)
 	{
 		if (x > mMaxX) {
@@ -101,6 +109,14 @@ public:
 	float lengthX() const { return (mMaxX - mMinX); }
 	float lengthY() const { return (mMaxY - mMinY); }
 	float lengthZ() const { return (mMaxZ - mMinZ); }
+
+	float scale(float w, float h) const
+	{
+		float scaleX = w / lengthX();
+		float scaleY = h / lengthY();
+		// we don't care about z-size here!
+		return QMIN(scaleX, scaleY);
+	}
 
 
 
@@ -149,6 +165,7 @@ void BosonModel::init()
  mWidth = 0;
  mHeight = 0;
  mFrame = 0;
+ mConstructionStep = 0;
  mDepthMultiplier = 1.0;
  mFrames.setAutoDelete(true);
  if (!mModelTextures) { // TODO static deleter!
@@ -209,8 +226,8 @@ void BosonModel::loadModel()
  kdDebug() << k_funcinfo << "loaded from " << fullFile << endl;
 
  // WARNING: FIXME!
- mWidth = BO_TILE_SIZE;
- mHeight = BO_TILE_SIZE;
+// mWidth = BO_TILE_SIZE;
+// mHeight = BO_TILE_SIZE;
  boProfiling->stop(BosonProfiling::LoadModel);
 }
 
@@ -300,10 +317,7 @@ void BosonModel::createDisplayLists()
 		// later (in Unit or so).
 		if (i == 0) {
 			// we compute scaling for the first frame only.
-			float scaleX = mWidth / helper.lengthX();
-			float scaleY = mHeight / helper.lengthY();
-			// we don't care about z-size here!
-			scale = QMIN(scaleX, scaleY);
+			scale = helper.scale(mWidth, mHeight);
 		}
 		glScalef(scale, scale, scale);
 
@@ -331,6 +345,60 @@ void BosonModel::createDisplayLists()
 	mFrames.insert(m3ds->current_frame, frame);
  }
  setFrame(frame());
+}
+
+void BosonModel::generateConstructionLists()
+{
+ if (!m3ds) {
+	kdError() << k_funcinfo << "NULL file" << endl;
+	return;
+ }
+ m3ds->current_frame = 0;
+ lib3ds_file_eval(m3ds, m3ds->current_frame);
+ BoFrame* frame0 = mFrames[0];
+ if (!frame0) {
+	kdError() << k_funcinfo << "No frame was loaded yet!" << endl;
+	return;
+ }
+ unsigned int nodes = 0;
+ Lib3dsNode* node;
+ for (node = m3ds->nodes; node; node = node->next) {
+	nodes++;
+ }
+ kdDebug() << k_funcinfo << "Generating " << nodes << " construction lists" << endl;
+
+ // again this iterating... it is exactly the same as it was for the first frame
+ // in createDisplayLists() but I don't want to store it somewhere. Especially
+ // not for *all* frames - would take quite same memory. after startup we don't
+ // need this helper anymore!
+ BoHelper helper;
+ for (node = m3ds->nodes; node; node = node->next) {
+	computeBoundings(node, &helper);
+ }
+
+ float scale = helper.scale(mWidth, mHeight);
+ GLuint base = glGenLists(nodes);
+ for (unsigned int i = 0; i < nodes; i++) {
+	GLuint list = base + i;
+	BoFrame* step = new BoFrame(*frame0);
+
+	unsigned int j = 0;
+	// AB: FIXME: this code is pretty much redundant. we use the same code as
+	// in createDisplayLists(), but for a limted number of nodes only. we
+	// could merge both in a new function!
+	glNewList(list, GL_COMPILE);
+		glPushMatrix();
+		glScalef(scale, scale, scale);
+		glTranslatef(0.0, 0.0, -helper.mMinZ * scale);
+		for (node = m3ds->nodes; node && j <= i; node = node->next) {
+			renderNode(node);
+			j++;
+		}
+		glPopMatrix();
+	glEndList();
+	step->setDisplayList(list);
+	mConstructionSteps.insert(i, step);
+ }
 }
 
 void BosonModel::computeBoundings(Lib3dsNode* node, BosonModel::BoHelper* helper)
@@ -460,11 +528,28 @@ void BosonModel::renderNode(Lib3dsNode* node)
 				}
 				glBindTexture(GL_TEXTURE_2D, myTex);
 				if (myTex) {
+					Lib3dsTextureMap* t = &mat->texture1_map;
+					glMatrixMode(GL_TEXTURE);
+					glPushMatrix();
+					if (t->scale[0] || t->scale[1]) {
+						glScalef(t->scale[0], t->scale[1], 1.0);
+					}
+					glTranslatef(t->offset[0], t->offset[1], 0.0);
+					if (t->rotation != 0.0) {
+						glRotatef(t->rotation, 0.0, 0.0, 1.0);
+					}
+					glTranslatef(mesh->map_data.pos[0], mesh->map_data.pos[1], mesh->map_data.pos[2]);
+					float scale = mesh->map_data.scale;
+					if (scale != 0.0 && scale != 1.0) {
+						glScalef(scale, scale, 1.0);
+					}
 					glBegin(GL_TRIANGLES);
 						glTexCoord2fv(tex[0]); glVertex3fv(v[0]);
 						glTexCoord2fv(tex[1]); glVertex3fv(v[1]);
 						glTexCoord2fv(tex[2]); glVertex3fv(v[2]);
 					glEnd();
+					glPopMatrix();
+					glMatrixMode(GL_MODELVIEW);
 				} else {
 					glBegin(GL_TRIANGLES);
 						glVertex3fv(v[0]);
@@ -497,6 +582,10 @@ void BosonModel::renderNode(Lib3dsNode* node)
 
 void BosonModel::setFrame(unsigned int frame)
 {
+ if (constructionStep() < constructionSteps()) {
+	// not yet constructed
+	return;
+ }
  BoFrame* f = mFrames[frame];
  if (!f) {
 	kdWarning() << k_funcinfo << "Invalid frame " << frame << endl;
@@ -506,6 +595,32 @@ void BosonModel::setFrame(unsigned int frame)
 	return;
  }
  mFrame = frame;
+ setCurrentFrame(f);
+}
+
+void BosonModel::setConstructionStep(unsigned int step)
+{
+ BoFrame* f = mConstructionSteps[step];
+ if (!f) {
+	if (step >= mConstructionSteps.count()) {
+		mConstructionStep = step;
+		f = mConstructionSteps[constructionSteps() - 1];
+		if (f) {
+			// we use the last construction step until an actual
+			// frame is assigned.
+			setCurrentFrame(f);
+		}
+	} else {
+		kdWarning() << k_funcinfo << "Invalid construction step " << step << endl;
+	}
+	return;
+ }
+ mConstructionStep = step;
+ setCurrentFrame(f);
+}
+
+void BosonModel::setCurrentFrame(BoFrame* f)
+{
  mDepthMultiplier = f->depthMultiplier();
  mDisplayList = f->displayList();
 }

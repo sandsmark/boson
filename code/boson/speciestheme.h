@@ -179,8 +179,8 @@ public:
 	 * Load the shot "animation"
 	 **/
 	//TODO: OpenGL implementations!
-	bool loadShot();
-	bool loadBigShot(bool isFacility, unsigned int version);
+//	bool loadShot();
+//	bool loadBigShot(bool isFacility, unsigned int version);
 
 	/**
 	 * @return The @ref BosonSound object for this species.
