@@ -28,7 +28,7 @@
 
 
 bosonBigDisplay::bosonBigDisplay(bosonTopLevel *_btl, QWidget *parent, const char *name, WFlags f)
-	:visualBigDisplay(btl,parent,name,f)
+	:visualBigDisplay(_btl,parent,name,f)
 {
 	btl = _btl;
 }
