@@ -60,6 +60,11 @@ QDataStream& operator>>(QDataStream& s, BoVector4Float& v);
 QDataStream& operator>>(QDataStream& s, BoVector4Fixed& v);
 
 
+bool saveVector2AsXML(const BoVector2Float&, QDomElement& root, const QString& name);
+bool saveVector2AsXML(const BoVector2Fixed&, QDomElement& root, const QString& name);
+bool loadVector2FromXML(BoVector2Float*, const QDomElement& root, const QString& name);
+bool loadVector2FromXML(BoVector2Fixed*, const QDomElement& root, const QString& name);
+
 bool saveVector3AsXML(const BoVector3Float&, QDomElement& root, const QString& name);
 bool saveVector3AsXML(const BoVector3Fixed&, QDomElement& root, const QString& name);
 bool loadVector3FromXML(BoVector3Float*, const QDomElement& root, const QString& name);
@@ -195,6 +200,15 @@ template<class T> class BoVector2
 
     inline const T* data() const { return mData; }
 
+
+    bool saveAsXML(QDomElement& root, const QString& name) const
+    {
+      return saveVector2AsXML(*this, root, name);
+    }
+    bool loadFromXML(const QDomElement& root, const QString& name)
+    {
+      return loadVector2FromXML(this, root, name);
+    }
 
   private:
     T mData[2];
