@@ -45,6 +45,7 @@ BosonItem::BosonItem(BosonModel* model, BosonCanvas* canvas)
 
  mXVelocity = 0.0;
  mYVelocity = 0.0;
+ mZVelocity = 0.0;
 
  mCurrentAnimation = 0;
  // 1.732 == sqrt(3) i.e. lenght of vector whose all components are 1
