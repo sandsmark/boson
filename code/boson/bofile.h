@@ -24,6 +24,7 @@
 
 class KTar;
 class KArchiveDirectory;
+template<class T1, class T2> class QMap;
 
 /**
  * This is the base class for BPFFile. It acts as an interface
@@ -49,12 +50,9 @@ public:
 	QString fileName() const;
 
 	/**
-	 * @return The content of a toplevel file. Doesn't work with
-	 * subdirectories (i.e. C/description.xml doesn't work whereas map.xml
-	 * does) (AB: obsolete!)
-	 * @param subdir You can specify a subdir (e.g. "C" or "de") here. Note
-	 * that only a single subdir is supported ("de/foobar" won't work)
-	 * currently.
+	 * @return The contents of the specified file.
+	 * @param subdir You can specify a subdir (e.g. "C" or "de") here. Even
+	 * sub-subdirs (e.g. "de/foobar") are allowed.
 	 **/
 	QByteArray fileData(const QString& fileName, const QString& subdir = QString::null) const;
 
@@ -256,10 +254,17 @@ public:
 	}
 
 	/**
-	 * @return The content of the description.xml file of the locale
-	 * directory.
+	 * @return The contents of all description.xml files of all locale
+	 * directories. The key of the map is the filename including the
+	 * directory, e.g. "C/description.xml" for the default locale.
 	 **/
-	QByteArray descriptionData() const;
+	QMap<QString, QByteArray> descriptionsData() const;
+
+	/**
+	 * @return The contents of all files in the scripts directory and all
+	 * subdirectories.
+	 **/
+	QMap<QString, QByteArray> scriptsData() const;
 
 	static QString fileNameToIdentifier(const QString& fileName);
 

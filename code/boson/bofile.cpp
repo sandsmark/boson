@@ -22,8 +22,8 @@
 #include "bodebug.h"
 #include "defines.h"
 
-//#include <qdom.h>
 #include <qfileinfo.h>
+#include <qmap.h>
 
 #include <ktar.h>
 
@@ -121,17 +121,22 @@ QByteArray BoFile::fileData(const QString& fileName, const QString& subdir) cons
  if (subdir.isEmpty()) {
 	dir = topLevel;
  } else {
-	// currently we support only a single subdir, i.e. "de" but not
-	// "de/foobar". if we change that we could us QStringList::split() with
-	// '/'. But keep in mind that directories with a slash in the name might
-	// be possible!
-	const KArchiveEntry* e = topLevel->entry(subdir);
-	if (!e->isDirectory()) {
-		boError() << k_funcinfo << subdir << " is not a directory" << endl;
-		return b;
-	} else {
-		dir = (const KArchiveDirectory*)e;
+	// AB: a directory like "foo\/bar" is not allowed by us. I believe this
+	// is only a very minor restriction :)
+	QStringList dirs = QStringList::split('/', subdir);
+	QStringList::iterator it;
+
+	const KArchiveDirectory* currentDir = topLevel;
+	for (it = dirs.begin(); it != dirs.end(); ++it) {
+		const KArchiveEntry* entry = currentDir->entry(*it);
+		if (!entry || !entry->isDirectory()) {
+			boError() << k_funcinfo << *it << " part of " << subdir << " is not a directory" << endl;
+			return b;
+		} else {
+			currentDir = (const KArchiveDirectory*)entry;
+		}
 	}
+	dir = currentDir;
  }
  if (!dir) {
 	boError() << k_funcinfo << "Cannot find subdir " << subdir << endl;
@@ -265,24 +270,67 @@ bool BPFFile::checkTar() const
  return true;
 }
 
-QByteArray BPFFile::descriptionData() const
+QMap<QString, QByteArray> BPFFile::descriptionsData() const
 {
-// TODO: pick locales dir e.g. for german "de" probably KLocale should be useful
-// here
+ QMap<QString, QByteArray> descriptions;
+ if (!hasFile(QString::fromLatin1("description.xml"), QString::fromLatin1("C"))) {
+	// the default locale must always be present.
+	boError() << k_funcinfo << "no description.xml for default language \"C\" found in map!" << endl;
+	return descriptions;
+ }
 
- QString locale;
- if (!locale.isEmpty()) {
-	if (hasFile(QString::fromLatin1("description.xml"), locale)) {
-		return fileData(QString::fromLatin1("description.xml"), locale);
-	} else {
-		boDebug() << k_funcinfo << "Could not find description.xml in " << locale << " will try C instead" << endl;
+ const KArchiveDirectory* top = topLevelDir();
+ QStringList entries = top->entries();
+ QStringList::iterator it;
+ for (it = entries.begin(); it != entries.end(); ++it) {
+	if (!hasDirectory(*it)) {
+		continue;
+	}
+	if (hasFile(QString::fromLatin1("description.xml"), *it)) {
+		QByteArray b = fileData(QString::fromLatin1("description.xml"), *it);
+		descriptions.insert(QString::fromLatin1("%1/description.xml").arg(*it), b);
 	}
  }
- if (!hasFile(QString::fromLatin1("description.xml"), QString::fromLatin1("C"))) {
-	boError() << k_funcinfo << "no description.xml for default language \"C\" found in map!" << endl;
-	return QByteArray();
+
+ return descriptions;
+}
+
+QMap<QString, QByteArray> BPFFile::scriptsData() const
+{
+ QMap<QString, QByteArray> scripts;
+
+ if (!hasDirectory("scripts")) {
+	return scripts;
  }
- return fileData(QString::fromLatin1("description.xml"), QString::fromLatin1("C"));
+ typedef QPair<QString, const KArchiveDirectory*> MyPair;
+ QValueList<MyPair> dirs;
+ dirs.append(MyPair("scripts", (KArchiveDirectory*)topLevelDir()->entry("scripts")));
+ while (!dirs.isEmpty()) {
+	QPair<QString, const KArchiveDirectory*> pair = dirs[0];
+	dirs.pop_front();
+
+	QString dirName = pair.first;
+	const KArchiveDirectory* dir = pair.second;
+
+	QStringList entries = dir->entries();
+	QStringList::iterator it;
+	for (it = entries.begin(); it != entries.end(); ++it) {
+		const KArchiveEntry* e = dir->entry(*it);
+		if (!e) {
+			continue;
+		}
+		QString entryName = dirName + "/" + *it;
+		if (e->isFile()) {
+			const KArchiveFile* file = (const KArchiveFile*)e;
+			scripts.insert(entryName, file->data());
+		} else if (e->isDirectory()) {
+			const KArchiveDirectory* d = (const KArchiveDirectory*)e;
+			dirs.append(MyPair(entryName, d));
+		}
+	}
+ }
+
+ return scripts;
 }
 
 QString BPFFile::fileNameToIdentifier(const QString& fileName)
