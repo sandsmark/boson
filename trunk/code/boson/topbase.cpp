@@ -171,8 +171,6 @@ TopBase::TopBase()
 
  initKAction();
  initStatusBar();
-
- showMaximized();
 }
 
 TopBase::~TopBase()
