@@ -196,6 +196,10 @@ public:
 
 	bool advanceFunctionLocked() const { return mAdvanceFunctionLocked; }
 
+	int particleSystemsCount();
+	void updateParticleSystems(float elapsed);
+	void renderParticleSystems();
+
 public slots:
 	/**
 	 * The game (@ref Boson) reports that a unit shall be added - lets do

@@ -28,6 +28,7 @@
 #include "sound/bosonmusic.h"
 #include "sound/bosonsound.h"
 #include "upgradeproperties.h"
+#include "bosonparticlemanager.h"
 
 #include <kstandarddirs.h>
 #include <ksimpleconfig.h>
@@ -161,6 +162,12 @@ bool SpeciesTheme::loadTheme(const QString& speciesDir, const QColor& teamColor)
  // don't preload units here as the species can still be changed in new game
  // dialog 
  return true;
+}
+
+void SpeciesTheme::loadParticles()
+{
+ // Load particle textures
+ BosonParticleManager::loadTextures(themePath() + "/particles");
 }
 
 bool SpeciesTheme::loadUnitGraphics(const UnitProperties* prop)

@@ -98,6 +98,8 @@ public:
 	 **/
 	bool loadTechnologies();
 
+	void loadParticles();
+
 	/**
 	 * @return Pixmap for the specified action
 	 **/

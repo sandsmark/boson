@@ -38,6 +38,7 @@
 #include "selectbox.h"
 #include "visual/bosonchat.h"
 #include "bosonprofiling.h"
+#include "bosonparticlesystem.h"
 
 #include <kgame/kgameio.h>
 
@@ -542,7 +543,7 @@ void BosonBigDisplayBase::paintGL()
 	glDepthRange(1.0, 0.5);
  }
  d->mEvenFlag = !d->mEvenFlag;
- calcFPS();
+ float elapsed = calcFPS();
 
  // note: we don't call gluLookAt() here because of performance. instead we just
  // push the matrix here and pop it at the end of paintGL() again. gluLookAt()
@@ -656,6 +657,24 @@ void BosonBigDisplayBase::paintGL()
 
  if (checkError()) {
 	kdError() << k_funcinfo << "cells rendered" << endl;
+ }
+
+ // Render particle systems
+ boProfiling->renderParticles(true);
+ canvas()->updateParticleSystems(elapsed);
+ int count = canvas()->particleSystemsCount();
+ if(count > 0) {
+	kdDebug() << k_funcinfo << "rendering " << count << " particle systems (elapsed: " << elapsed << ")" << endl;
+	glEnable(GL_BLEND);
+	glDisable(GL_DEPTH_TEST);
+	canvas()->renderParticleSystems();
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glDisable(GL_BLEND);
+ }
+ boProfiling->renderParticles(false);
+
+ if (checkError()) {
+	kdError() << k_funcinfo << "when particles rendered" << endl;
  }
 
 
@@ -1641,11 +1660,14 @@ void BosonBigDisplayBase::setUpdateInterval(unsigned int ms)
  QTimer::singleShot(d->mUpdateInterval, this, SLOT(updateGL()));
 }
 
-void BosonBigDisplayBase::calcFPS()
+float BosonBigDisplayBase::calcFPS()
 {
- long long int now;
+ float elapsed;
+ static long long int now = 0;
  struct timeval time;
  gettimeofday(&time, 0);
+ elapsed = (time.tv_sec * 1000000 + time.tv_usec) - now;
+ elapsed /= 1000000;
  now = time.tv_sec * 1000000 + time.tv_usec;
  // FPS is updated once per second
  if((now - d->mFpsTime) >= 1000000) {
@@ -1655,6 +1677,7 @@ void BosonBigDisplayBase::calcFPS()
 //	kdDebug() << k_funcinfo << "FPS: " << d->mFps << endl;
  }
  d->mFramecount++;
+ return elapsed;
 }
 
 double BosonBigDisplayBase::fps() const
