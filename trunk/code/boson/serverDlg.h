@@ -21,7 +21,7 @@
 #ifndef SERVER_DLG_H 
 #define SERVER_DLG_H 
 
-#include <qdialog.h>
+#include <kdialogbase.h>
 
 class QLineEdit;
 class QPushButton;
@@ -29,7 +29,7 @@ class QLabel;
 class KProcess;
 
 
-class serverDlg : public QDialog 
+class serverDlg : public KDialogBase
 {
 	Q_OBJECT
 
@@ -38,8 +38,11 @@ public:
 
 signals:
 	void	configure(const char *server, const char *port);
+
+protected slots:
+	virtual void 	slotOk();
+
 private slots:
-	void	doIt(void);
 	void	receivedStdout(KProcess *proc, char *buffer, int buflen);
     	/** called whenever the server died */
 	void	serverDied(KProcess *);
@@ -47,7 +50,6 @@ private slots:
 
 private:
 	QLineEdit	*e_server, *e_port;
-	QPushButton	*b_ok;
 	QLabel		*l_host;
 	KProcess	*proc;
 };
