@@ -23,6 +23,9 @@ FACILITIES = \
 	tree5 \
 	tree5-big \
 	tree5-small \
+	tree6 \
+	tree6-big \
+	tree6-small \
 	oiltower \
 	mineralmine
 

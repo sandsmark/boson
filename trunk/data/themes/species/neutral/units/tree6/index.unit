@@ -1,0 +1,17 @@
+[Boson Facility]
+ConstructionSteps=0
+
+[Boson Unit]
+Name=Tree6
+Health=100
+Id=50
+IsFacility=true
+MineralCost=100
+OilCost=0
+#Producer=10
+#ProductionTime=20
+SupportMiniMap=false
+TerrainType=0
+UnitDepth=1.85
+UnitHeight=0.8
+UnitWidth=0.8
