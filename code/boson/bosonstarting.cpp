@@ -155,11 +155,12 @@ bool BosonStarting::start()
 	boGame->unlock();
 	return false;
  }
- if (!loadGameData3()) {
-	boError(270) << k_funcinfo << "loading game data failed" << endl;
+ if (!loadPlayerData()) {
+	boError(270) << k_funcinfo << "loading player data failed" << endl;
 	boGame->unlock();
 	return false;
  }
+ emit signalLoadingType(BosonLoadingWidget::InitGame); // obsolete
  emit signalLoadingType(BosonLoadingWidget::StartingGame);
  if (!startScenario()) {
 	boError(270) << k_funcinfo << "starting scenario failed" << endl;
@@ -248,27 +249,10 @@ bool BosonStarting::loadTiles()
  return true;
 }
 
-bool BosonStarting::loadGameData3() // FIXME rename!
-{
- boProfiling->start(BosonProfiling::LoadGameData3);
-
- if (!loadPlayerData()) { // FIXME: most of the stuff below should be in this method, too!
-	boError(270) << k_funcinfo << "player loading failed" << endl;
-	return false;
- }
-
- emit signalLoadingType(BosonLoadingWidget::InitGame);
-
- checkEvents();
-
- boProfiling->stop(BosonProfiling::LoadGameData3);
- boDebug(270) << k_funcinfo << "done" << endl;
- return true;
-}
-
 bool BosonStarting::loadPlayerData()
 {
- boDebug() << k_funcinfo << endl;
+ boDebug(270) << k_funcinfo << endl;
+ BosonProfiler profiler(BosonProfiling::LoadGameData3); // TODO rename to LoadPlayerData
 
  // Load unit datas (pixmaps and sounds)
  QPtrListIterator<KPlayer> it(*(boGame->playerList()));
@@ -281,7 +265,7 @@ bool BosonStarting::loadPlayerData()
  }
 
  if (!mPlayer) {
-	boError() << k_funcinfo << "NULL player!" << endl;
+	boError(270) << k_funcinfo << "NULL player!" << endl;
 	return false;
  }
 
@@ -291,16 +275,16 @@ bool BosonStarting::loadPlayerData()
  // FIXME: do we need to support player-independant sounds?
  emit signalLoadingType(BosonLoadingWidget::LoadGeneralData);
  mPlayer->speciesTheme()->loadGeneralSounds();
- boDebug() << k_funcinfo << "done" << endl;
+ boDebug(270) << k_funcinfo << "done" << endl;
  return true;
 }
 
-void BosonStarting::slotLoadPlayerData(Player* p)
+void BosonStarting::slotLoadPlayerData(Player* p) // FIXME: not a slot anymore
 {
  BO_CHECK_NULL_RET(p);
  BO_CHECK_NULL_RET(p->speciesTheme());
 
- boDebug() << k_funcinfo << p->id() << endl;
+ boDebug(270) << k_funcinfo << p->id() << endl;
  // Order of calls below is very important!!! Don't change this unless you're sure you know what you're doing!!!
  emit signalLoadingType(BosonLoadingWidget::LoadActions);
  p->speciesTheme()->loadActions();
@@ -353,15 +337,15 @@ bool BosonStarting::startScenario()
  QMap<QString, QByteArray> files;
  if (!BosonPlayField::unstreamFiles(files, mNewGameData)) {
 	// oops - it was unstreamed successfully before!
-	boError() << k_funcinfo << "invalid stream??" << endl;
+	boError(270) << k_funcinfo << "invalid stream??" << endl;
 	return false;
  }
  if (!files.contains("players.xml")) {
-	boError() << k_funcinfo << "no players.xml found" << endl;
+	boError(270) << k_funcinfo << "no players.xml found" << endl;
 	return false;
  }
  if (!files.contains("canvas.xml")) {
-	boError() << k_funcinfo << "no canvas.xml found" << endl;
+	boError(270) << k_funcinfo << "no canvas.xml found" << endl;
 	return false;
  }
  QByteArray playersXML = files["players.xml"];
@@ -373,7 +357,7 @@ bool BosonStarting::startScenario()
  int line = 0, column = 0;
  QDomDocument playersDoc;
  if (!playersDoc.setContent(QString(playersXML), &errorMsg, &line, &column)) {
-	boError() << k_funcinfo << "unable to load playersXML - parse error at line=" << line << ",column=" << column << " errorMsg=" << errorMsg << endl;
+	boError(270) << k_funcinfo << "unable to load playersXML - parse error at line=" << line << ",column=" << column << " errorMsg=" << errorMsg << endl;
 	return false;
  }
  QDomElement playersRoot = playersDoc.documentElement();
@@ -381,27 +365,27 @@ bool BosonStarting::startScenario()
  if (playersList.count() < 2) {
 	// there must be at least to Player tags: one player and one neutral
 	// player (netral must always be present)
-	boError() << k_funcinfo << "not enough Player tags found" << endl;
+	boError(270) << k_funcinfo << "not enough Player tags found" << endl;
 	return false;
  }
  for (unsigned int i = 0; i < playersList.count(); i++) {
 	QDomElement e = playersList.item(i).toElement();
 	if (e.isNull()) {
-		boError() << k_funcinfo << "invalid Player tag" << endl;
+		boError(270) << k_funcinfo << "invalid Player tag" << endl;
 		return false;
 	}
 
 	// the IDs in the file must be in sequential order.
 	unsigned int id = e.attribute("Id").toUInt();
 	if (id != i) {
-		boError() << k_funcinfo << "unexpected Id " << id << " for Player tag. expected " << i << endl;
+		boError(270) << k_funcinfo << "unexpected Id " << id << " for Player tag. expected " << i << endl;
 		return false;
 	}
  }
 
  QDomDocument canvasDoc;
  if (!canvasDoc.setContent(QString(canvasXML), &errorMsg, &line, &column)) {
-	boError() << k_funcinfo << "unable to load canvasXML - parse error at line=" << line << ",column=" << column << " errorMsg=" << errorMsg << endl;
+	boError(270) << k_funcinfo << "unable to load canvasXML - parse error at line=" << line << ",column=" << column << " errorMsg=" << errorMsg << endl;
 	return false;
  }
  QDomElement canvasRoot = canvasDoc.documentElement();
@@ -412,7 +396,7 @@ bool BosonStarting::startScenario()
 	// the IDs in the file must be in sequential order.
 	unsigned int id = e.attribute("Id").toUInt();
 	if (id != i) {
-		boError() << k_funcinfo << "Unexpected Id " << id << " for Items tag. expected " << i << endl;
+		boError(270) << k_funcinfo << "Unexpected Id " << id << " for Items tag. expected " << i << endl;
 		return false;
 	}
  }
@@ -429,11 +413,11 @@ bool BosonStarting::startScenario()
 		playerIndex = i;
 		e = playersList.item(playerIndex).toElement();
 		if (e.isNull()) {
-			boError(260) << k_funcinfo << "invalid Player tag " << playerIndex << endl;
+			boError(270) << k_funcinfo << "invalid Player tag " << playerIndex << endl;
 			return false;
 		}
 		if (e.attribute("Id").toUInt() != playerIndex) {
-			boError(260) << k_funcinfo << "unexpected Id for Player tag " << playerIndex << endl;
+			boError(270) << k_funcinfo << "unexpected Id for Player tag " << playerIndex << endl;
 			return false;
 		}
 	} else {
@@ -442,20 +426,20 @@ bool BosonStarting::startScenario()
 		playerIndex = playersList.count() - 1;
 		e = playersList.item(playerIndex).toElement();
 		if (e.isNull()) {
-			boError(260) << k_funcinfo << "invalid Player tag for neutral player (" << playerIndex << ")" << endl;
+			boError(270) << k_funcinfo << "invalid Player tag for neutral player (" << playerIndex << ")" << endl;
 			return false;
 		}
 		if (!e.hasAttribute("IsNeutral")) {
-			boError(260) << k_funcinfo << "file format error: last player must be neutral player" << endl;
+			boError(270) << k_funcinfo << "file format error: last player must be neutral player" << endl;
 			return false;
 		}
 		bool ok = false;
 		if (e.attribute("IsNeutral").toUInt(&ok) != 1) {
-			boError(260) << k_funcinfo << "IsNeutral attribute must be 1 if present" << endl;
+			boError(270) << k_funcinfo << "IsNeutral attribute must be 1 if present" << endl;
 			return false;
 		}
 		if (!ok) {
-			boError(260) << k_funcinfo << "invalid value for IsNeutral attribute" << endl;
+			boError(270) << k_funcinfo << "invalid value for IsNeutral attribute" << endl;
 			return false;
 		}
 	}
@@ -464,11 +448,11 @@ bool BosonStarting::startScenario()
 	// the Items tag must be fixed as well.
 	e = itemsList.item(playerIndex).toElement();
 	if (e.isNull()) {
-		boError() << k_funcinfo << "invalid Items tag " << playerIndex << endl;
+		boError(270) << k_funcinfo << "invalid Items tag " << playerIndex << endl;
 		return false;
 	}
 	if (e.attribute("Id").toUInt() != playerIndex) {
-		boError() << k_funcinfo << "unexpected Id for Items tag " << playerIndex << endl;
+		boError(270) << k_funcinfo << "unexpected Id for Items tag " << playerIndex << endl;
 		return false;
 	}
 	e.setAttribute("Id", actualId);
@@ -487,7 +471,7 @@ bool BosonStarting::startScenario()
 
  BosonSaveLoad* load = new BosonSaveLoad(boGame);
  if (!load->loadNewGame(playersXML, canvasXML)) {
-	boError() << k_funcinfo << "failed starting game" << endl;
+	boError(270) << k_funcinfo << "failed starting game" << endl;
 	return false;
  }
  return true;
