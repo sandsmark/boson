@@ -21,6 +21,7 @@
     <Action name="debug_light0" />
     <Action name="debug_show_opengl_states" />
     <Action name="debug_advance_calls" />
+    <Action name="debug_texture_memory" />
     <Menu name="debug_lazy"><text>&amp;Lazyness</text>
       <Action name="debug_lazy_reload_model_textures" />
       <Action name="debug_lazy_reload_meshrenderer" />

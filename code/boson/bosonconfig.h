@@ -553,6 +553,9 @@ public:
 	void setDebugAdvanceCalls(bool debug) { mDebugAdvanceCalls = debug; }
 	bool debugAdvanceCalls() const { return mDebugAdvanceCalls; }
 
+	void setDebugTextureMemory(bool debug) { mDebugTextureMemory = debug; }
+	bool debugTextureMemory() const { return mDebugTextureMemory; }
+
 	void setShowResources(bool show) { mShowResources = show; }
 	bool showResources() const { return mShowResources; }
 
@@ -645,6 +648,7 @@ private:
 	bool mDebugBoundingBoxes;
 	bool mDebugFPS;
 	bool mDebugAdvanceCalls;
+	bool mDebugTextureMemory;
 	bool mShowResources;
 	bool mEnableColormap;
 	bool mDisableModelLoading;

@@ -444,6 +444,7 @@ protected:
 	void updateUfoLabelOpenGLCamera();
 	void updateUfoLabelRenderCounts();
 	void updateUfoLabelAdvanceCalls();
+	void updateUfoLabelTextureMemory();
 
 	/**
 	 * Called by @ref paintGL only to render the cells on the screen

@@ -645,6 +645,9 @@ void BosonWidgetBase::initKActions()
  KToggleAction* debugAdvanceCalls = new KToggleAction(i18n("Debug &Advance calls"),
 		KShortcut(), 0, 0, actionCollection(), "debug_advance_calls");
  connect(debugAdvanceCalls, SIGNAL(toggled(bool)), this, SLOT(slotSetDebugAdvanceCalls(bool)));
+ KToggleAction* debugTextureMemory = new KToggleAction(i18n("Debug &Texture Memory"),
+		KShortcut(), 0, 0, actionCollection(), "debug_texture_memory");
+ connect(debugTextureMemory, SIGNAL(toggled(bool)), this, SLOT(slotSetDebugTextureMemory(bool)));
  (void)new KAction(i18n("&Unfog"), KShortcut(), this,
 		SLOT(slotUnfogAll()), actionCollection(), "debug_unfog");
  (void)new KAction(i18n("Dump game &log"), KShortcut(), this,
@@ -1120,6 +1123,11 @@ void BosonWidgetBase::slotSetDebugFPS(bool debug)
 void BosonWidgetBase::slotSetDebugAdvanceCalls(bool debug)
 {
  boConfig->setDebugAdvanceCalls(debug);
+}
+
+void BosonWidgetBase::slotSetDebugTextureMemory(bool debug)
+{
+ boConfig->setDebugTextureMemory(debug);
 }
 
 void BosonWidgetBase::slotSetShowResources(bool show)

@@ -274,6 +274,7 @@ protected slots:
 	void slotSetDebugBoundingBoxes(bool);
 	void slotSetDebugFPS(bool);
 	void slotSetDebugAdvanceCalls(bool);
+	void slotSetDebugTextureMemory(bool);
 	void slotSetShowResources(bool show);
 	void slotSetEnableColormap(bool);
 
