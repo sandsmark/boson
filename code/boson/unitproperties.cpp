@@ -108,7 +108,6 @@ void UnitProperties::init()
  d->mPlugins.setAutoDelete(true);
  d->mUpgrades.setAutoDelete(true);
  d->mNotResearchedUpgrades.setAutoDelete(true);
- d->mDestroyedParticleSystems.setAutoDelete(true);
 }
 
 UnitProperties::~UnitProperties()
