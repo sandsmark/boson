@@ -427,12 +427,11 @@ void BosonNewGameWidget::slotPlayerLeftGame(KPlayer* p)
     if (it.current() == p)
     {
       playerslist->removeItem(playerslist->index((QListBoxItem*)it.currentKey()));
+      initColors();
       return;
     }
     ++it;
   }
-
-  initColors();
 }
 
 void BosonNewGameWidget::slotPropertyChanged(KGamePropertyBase* prop, KPlayer* p)
