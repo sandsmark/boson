@@ -198,8 +198,12 @@ up
 This matrix is what we want (the translation will get done by us as well).
 \layout Standard
 
-The matrix same matrix can be achieved using our three glRotate() calls
- (AB: WARNING !! this is an assumption and still needs to be proven!).
+The same matrix can be achieved using our three glRotate() calls, as you
+ can achieve just 
+\emph on 
+any
+\emph default 
+ rotation using one of these ways (gluLookAt() or 3 rotations).
  Above you can see the matrix that results from three glRotate() calls in
  a row.
  Now let's have a look on what gluLookAt() does with the vectors to get
@@ -209,7 +213,7 @@ The matrix same matrix can be achieved using our three glRotate() calls
 The matrix
 \layout Standard
 
-This is easy:
+The resulting matrix looks very easy:
 \layout Standard
 
 
@@ -224,7 +228,7 @@ z[0] & z[1] & z[2]\end{array}\right)\]
 
 \layout Standard
 
-getting x, y and z is slightly more difficult
+getting x, y and z is slightly more difficult though.
 \layout Subsubsection
 
 The z vector
@@ -321,6 +325,13 @@ We know all elements of M, as we have just called gluLookAt() or have calculated
 \end_inset 
 
 .
+ Of course we do know that both rotation matrices (M and 
+\begin_inset Formula $R_{XYZ}$
+\end_inset 
+
+) are equal.
+ We just want to find out which angles should be used to achieve the same
+ rotation matrix as gluLookAt() does.
 \layout Standard
 
 You will see this one very fast:
@@ -436,7 +447,12 @@ Ok, now we know that
 
  is not unique.
  So we either have take the other equations into account, or we prove that
- we can ignore this fact.
+ we can ignore that multiple angles can lead to the same sine and just use
+ the angle returned by 
+\begin_inset Formula $\arcsin$
+\end_inset 
+
+.
 \layout Standard
 
 We have 3 rotations - one about the x-, the y- and the z-axis.
@@ -453,11 +469,39 @@ So we assume that
 \layout Standard
 
 
-\begin_inset Formula $\beta=\arcsin\sin\beta=\arcsin x[2]$
+\begin_inset Formula $\beta=\arcsin(\sin\beta)=\arcsin(x[2])$
 \end_inset 
 
 .
- 
+\layout Standard
+
+I say now, that this will always give you the correct angles, although 
+\begin_inset Formula $\beta$
+\end_inset 
+
+ will be in the range of 
+\begin_inset Formula $\pm\frac{\pi}{2}$
+\end_inset 
+
+.
+ You will always be able to emulate the remaining angles (
+\begin_inset Formula $\beta$
+\end_inset 
+
+ could be in the range of up to 
+\begin_inset Formula $\pm\pi$
+\end_inset 
+
+) using the remaining 
+\begin_inset Formula $\alpha$
+\end_inset 
+
+ and 
+\begin_inset Formula $\gamma$
+\end_inset 
+
+.
+ Just believe me that this is possible, or read the following prove.
 \layout Subsubsection
 
 Prove
@@ -472,7 +516,7 @@ Anyway it is important to show that we actually
 can
 \emph default 
  assume that 
-\begin_inset Formula $\beta=\arcsin\sin\beta=\arcsin x[2]$
+\begin_inset Formula $\beta=\arcsin(\sin\beta)=\arcsin x[2]$
 \end_inset 
 
 , without fearing that we might get a different rotation.
@@ -513,10 +557,30 @@ Using the fact that
 \end_inset 
 
 .
+ 
+\layout Standard
+
+So if 
+\begin_inset Formula $x[2]\ge0$
+\end_inset 
+
+, we know that 
+\begin_inset Formula $\beta$
+\end_inset 
+
+ must be 
+\begin_inset Formula $\beta_{1}$
+\end_inset 
+
+ or 
+\begin_inset Formula $\beta_{2}$
+\end_inset 
+
+.
 \layout Subparagraph
 
 Now let 
-\begin_inset Formula $x[1]<0$
+\begin_inset Formula $x[2]<0$
 \end_inset 
 
 :
@@ -544,11 +608,40 @@ Using the fact that
 .
 \layout Standard
 
-So it is always valid that 
+So if 
+\begin_inset Formula $x[1]<0$
+\end_inset 
+
+, 
+\begin_inset Formula $\beta$
+\end_inset 
+
+ must be 
+\begin_inset Formula $\beta_{!}$
+\end_inset 
+
+ or 
+\begin_inset Formula $\beta_{2}$
+\end_inset 
+
+.
+\layout Subparagraph
+
+
+\series medium 
+In both cases (
+\begin_inset Formula $x[2]\ge0$
+\end_inset 
+
+ and 
+\begin_inset Formula $x[2]<0$
+\end_inset 
+
+) the equation 
 \begin_inset Formula $\cos\beta=-\cos\beta'$
 \end_inset 
 
- where 
+ is valid, where 
 \begin_inset Formula $\beta':=\beta_{1}$
 \end_inset 
 
@@ -560,15 +653,50 @@ So it is always valid that
 \begin_inset Formula $\arcsin x[2]$
 \end_inset 
 
-.
-\layout Standard
-
-Now what we have to show is, can we still achieve the correct rotation matrix,
- although we assume 
-\begin_inset Formula $\beta'=\arcsin x[2]$
+ (i.e.
+ either 
+\begin_inset Formula $\pi-\arcsin x[2]$
 \end_inset 
 
-? Let's have a look at x[0] and x[1] for that.
+ or 
+\begin_inset Formula $-\pi-\arcsin x[2]$
+\end_inset 
+
+).
+\layout Standard
+
+Now what we have to show is that we can we still achieve the correct rotation
+ matrix if we 
+\emph on 
+always
+\emph default 
+ choose 
+\begin_inset Formula $\beta'=\beta_{1}$
+\end_inset 
+
+, but never 
+\begin_inset Formula $\beta$
+\end_inset 
+
+ as our angle.
+ We need to show that we can achieve the rotation that is done by 
+\begin_inset Formula $\beta,\gamma,\alpha$
+\end_inset 
+
+ as well if we use 
+\begin_inset Formula $\beta'$
+\end_inset 
+
+ instead - if we choose 
+\begin_inset Formula $\alpha'$
+\end_inset 
+
+ and 
+\begin_inset Formula $\gamma'$
+\end_inset 
+
+ carefully.
+ Let's have a look at x[0] and x[1] for that.
 \layout Standard
 
 
@@ -622,6 +750,20 @@ Now what we have to show is, can we still achieve the correct rotation matrix,
 \end_inset 
 
 .
+ Note that we have chosen an unique angle 
+\begin_inset Formula $\gamma'$
+\end_inset 
+
+ now, as we have taken both the sine and the cosine into account (only one
+ is not unique, as neither 
+\begin_inset Formula $\arccos$
+\end_inset 
+
+ nor 
+\begin_inset Formula $\arcsin$
+\end_inset 
+
+ is unique).
 \layout Standard
 
 You can do exactly the same with y[2] and z[2] concerning 
@@ -645,6 +787,10 @@ So now we know, that
 
 , but we have to make sure that this will actually work with the other elements
  of the matrix (y[0], y[1], z[0], z[1]).
+ Actually I believe we don't have to, as we have already taken both, the
+ sine and the cosine into account and therefore found the unique angles.
+ But anyway - I do not trust my mathematic skills and therefore we go for
+ sure here.
 \layout Standard
 
 Let's pick y[0] as an example:
@@ -685,7 +831,7 @@ Since
 y[0] & = & \sin\alpha'\sin\beta\sin\gamma'+\cos\alpha'\sin\gamma'\\
  & = & \sin(\alpha+\pi)\sin\beta\cos(\gamma+\pi)+\cos(\alpha+\pi)\sin(\gamma+\pi)\\
  & = & (-\sin\alpha)\sin\beta(-\cos\gamma)+(-\cos\alpha)(­\sin\gamma)\\
- & = & \sin\alpha)\sin\cos\gamma+\cos\alpha\sin\gamma\end{eqnarray*}
+ & = & \sin\alpha\sin\beta\cos\gamma+\cos\alpha\sin\gamma\end{eqnarray*}
 
 \end_inset 
 
