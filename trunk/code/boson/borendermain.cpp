@@ -124,7 +124,7 @@ void postBosonConfigInit();
 
 
 ModelPreview::ModelPreview(const QPtrList<SpeciesTheme>& species, QWidget* parent)
-	: BosonUfoGLWidget(parent)
+	: BosonUfoGLWidget(parent, "modelpreview")
 {
  mSpecies = species;
  mUpdateTimer = new QTimer(this);
@@ -390,10 +390,10 @@ void ModelPreview::initUfoGUI()
 		kapp, SLOT(closeAllWindows()),
 		actionCollection, "file_quit");
  (void)new BoUfoAction(i18n("Vertex point size..."), 0,
-		this, SIGNAL(signalChangeVertexPointSize()),
+		this, SLOT(slotChangeVertexPointSize()),
 		actionCollection, "options_vertex_point_size");
  (void)new BoUfoAction(i18n("Grid unit size..."), 0,
-		this, SIGNAL(signalChangeGridUnitSize()),
+		this, SLOT(slotChangeGridUnitSize()),
 		actionCollection, "options_grid_unit_size");
  (void)new BoUfoAction(i18n("Background color..."), 0,
 		this, SIGNAL(signalChangeBackgroundColor()),
@@ -792,6 +792,39 @@ void ModelPreview::slotResetView()
 void ModelPreview::slotShowVertexPoints(bool s)
 {
  boConfig->setBoolValue("ShowVertexPoints", s);
+}
+
+// TODO: prevent displaying two dialogs of the same type at once!
+void ModelPreview::slotChangeVertexPointSize()
+{
+ unsigned int size = boConfig->uintValue("VertexPointSize");
+ BoUfoInputDialog::getIntegerWidget(ufoManager(), this, SLOT(slotSetVertexPointSize(int)),
+		i18n("Vertex point size (in pixels)"), i18n("Vertex point size"),
+
+		(int)size, 0, 500, 1);
+// emit signalChangeVertexPointSize(); // obsolete
+}
+
+// TODO: prevent displaying two dialogs of the same type at once!
+void ModelPreview::slotChangeGridUnitSize()
+{
+ float size = (float)boConfig->doubleValue("GridUnitSize", 0.1);
+ BoUfoInputDialog::getFloatWidget(ufoManager(), this, SLOT(slotSetGridUnitSize(float)),
+		i18n("Grid unit size"), i18n("Grid unit size"),
+
+		size, 0.0, 1.0, 0.1);
+// emit signalChangeVertexPointSize(); // obsolete
+}
+
+void ModelPreview::slotSetVertexPointSize(int size)
+{
+ boDebug() << k_funcinfo << size << endl;
+ boConfig->setUIntValue("VertexPointSize", size);
+}
+
+void ModelPreview::slotSetGridUnitSize(float size)
+{
+ boConfig->setDoubleValue("GridUnitSize", size);
 }
 
 void ModelPreview::slotConstructionChanged(bool on)
@@ -1325,10 +1358,12 @@ RenderMain::RenderMain() : KMainWindow()
  mMaterialWidget = new BoMaterialWidget(0);
  mMaterialWidget->hide();
 
+#if 0
  connect(mPreview, SIGNAL(signalChangeVertexPointSize()),
 		this, SLOT(slotVertexPointSize()));
  connect(mPreview, SIGNAL(signalChangeGridUnitSize()),
 		this, SLOT(slotGridUnitSize()));
+#endif
  connect(mPreview, SIGNAL(signalChangeBackgroundColor()),
 		this, SLOT(slotBackgroundColor()));
  connect(mPreview, SIGNAL(signalShowLightWidget()),
@@ -1603,6 +1638,7 @@ void RenderMain::slotDebugSpecies()
 
 void RenderMain::slotVertexPointSize()
 {
+#if 0
  bool ok = false;
  unsigned int size = boConfig->uintValue("VertexPointSize");
  size = (unsigned int)QInputDialog::getInteger(i18n("Vertex point size"),
@@ -1611,10 +1647,14 @@ void RenderMain::slotVertexPointSize()
  if (ok) {
 	boConfig->setUIntValue("VertexPointSize", size);
  }
+#else
+ KMessageBox::sorry(this, i18n("Please use the libufo menu entry!"));
+#endif
 }
 
 void RenderMain::slotGridUnitSize()
 {
+#if 0
  bool ok = false;
  double size = boConfig->doubleValue("GridUnitSize", 0.1);
  size = QInputDialog::getDouble(i18n("Grid unit size"),
@@ -1623,6 +1663,9 @@ void RenderMain::slotGridUnitSize()
  if (ok) {
 	boConfig->setDoubleValue("GridUnitSize", size);
  }
+#else
+ KMessageBox::sorry(this, i18n("Please use the libufo menu entry!"));
+#endif
 }
 
 void RenderMain::slotShowVertexPoints(bool s)
