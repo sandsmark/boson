@@ -29,7 +29,6 @@
 #include "../bosoncampaign.h"
 #include "../bosonplayfield.h"
 #include "../bpfdescription.h"
-#include "../bosonscenario.h"
 #include "../bosonmap.h"
 #include "../bosondata.h"
 #include "../bosonwidgets/bosonplayfieldview.h"
@@ -554,8 +553,12 @@ void BosonNewGameWidget::slotNetColorChanged(Player* p)
 void BosonNewGameWidget::slotNetPlayFieldChanged(BosonPlayField* field)
 {
  BO_CHECK_NULL_RET(field);
- BO_CHECK_NULL_RET(field->scenario());
  boDebug() << k_funcinfo << "id: " << field->identifier() << endl;
+ if (!field->isPreLoaded()) {
+	// well, if that happens - something evil must have happened!
+	boWarning() << k_funcinfo << "playfield not yet preloaded?!" << endl;
+	field->preLoadPlayField(field->identifier());
+ }
  QStringList list = boData->availablePlayFields();
  QMap<QListViewItem*, QString>::Iterator it;
  QListViewItem* item = 0;
@@ -580,15 +583,13 @@ void BosonNewGameWidget::slotNetPlayFieldChanged(BosonPlayField* field)
 	}
   mSelectMap->ensureItemVisible(item);
  }
- mMinPlayers = field->scenario()->minPlayers();
- mMaxPlayers = field->scenario()->maxPlayers();
+ mMinPlayers = field->information()->minPlayers();
+ mMaxPlayers = field->information()->maxPlayers();
  boDebug() << "minPlayers: " << mMinPlayers << " ; maxPlayers: " << mMaxPlayers << endl;
 
  // Update general map info label
  QString info;
- // FIXME: store map size somewhere as metadata so that it can be preloaded
-// info += i18n("Size: %1x%2\n").arg(field->map()->width()).arg(field->map()->height());
- info += i18n("Size: N/A\n");
+ info += i18n("Size: %1x%2\n").arg(field->information()->mapWidth()).arg(field->information()->mapHeight());
  if (mMinPlayers == mMaxPlayers) {
 	info += i18n("Players: %1").arg(mMinPlayers);
  } else {
