@@ -81,14 +81,14 @@ class BoCamera
      * @return The eye vector (camera position), as it can get used by
      * gluLookAt().
      **/
-    const BoVector3& cameraPos();
+    virtual const BoVector3& cameraPos();
 
     /**
      * @return The up vector, as it can get used by gluLookAt(). The up
      * vector is the vector pointing straight "up" from the position of the
      * camera. it can change when the camera is rotated.
      **/
-    const BoVector3& up();
+    virtual const BoVector3& up();
 
 
     // These will _move_ given things by given values
@@ -112,15 +112,6 @@ class BoCamera
 
 
   protected:
-    /**
-     * Update the parameters for gluLookAt() (@ref cameraPos
-     * and @ref up) according to the new values from @ref radius,
-     * @ref rotation and @ref lookAt.
-     * Don't call this manually, call @ref setPositionDirty instead. This will
-     * be automatically called by @ref cameraPos and @ref up, if it's dirty.
-     **/
-    virtual void updatePosition() = 0;
-
     void setPositionDirty(bool dirty = true) { mPosDirty = dirty; }
     bool positionDirty() const { return mPosDirty; }
 
@@ -181,6 +172,8 @@ class BoGameCamera : public BoCamera
     void changeRotation(GLfloat diff);
 
     virtual void setLookAt(const BoVector3& pos);
+    virtual const BoVector3& cameraPos();
+    virtual const BoVector3& up();
 
     // these will change the up and cameraPos vectors!
     /**
@@ -241,7 +234,7 @@ class BoGameCamera : public BoCamera
      * Don't call this manually, call @ref setPositionDirty instead. This will
      * be automatically called by @ref cameraPos and @ref up, if it's dirty.
      **/
-    virtual void updatePosition();
+    void updatePosition();
 
     void checkRotation();
 
