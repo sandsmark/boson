@@ -39,6 +39,13 @@
 
 #include "bosoncanvas.moc"
 
+class FogOfWar : public QCanvasSprite
+{
+public:
+	FogOfWar(QCanvasPixmapArray* a, QCanvas* c) : QCanvasSprite(a, c) {}
+	virtual int rtti() const { return RTTI::FogOfWar; }
+};
+
 class BosonCanvas::BosonCanvasPrivate
 {
 public:
@@ -409,7 +416,7 @@ void BosonCanvas::fogLocal(int x, int y)
  if (!d->mFogPixmap) {
 	return;
  }
- QCanvasSprite* fog = new QCanvasSprite(d->mFogPixmap, this);
+ QCanvasSprite* fog = new FogOfWar(d->mFogPixmap, this);
  fog->move(x * BO_TILE_SIZE, y * BO_TILE_SIZE);
  fog->setZ(Z_FOG_OF_WAR);
  fog->show();

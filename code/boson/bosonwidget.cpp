@@ -653,9 +653,10 @@ void BosonWidget::slotChangeLocalPlayer(int index)
 
 void BosonWidget::changeLocalPlayer(Player* localPlayer)
 {
- d->mLocalPlayer = localPlayer; // is this used?
+ d->mLocalPlayer = localPlayer;
  d->mBigDisplay->setLocalPlayer(d->mLocalPlayer);
  d->mCommandFrame->setLocalPlayer(d->mLocalPlayer);
+ d->mMiniMap->setLocalPlayer(d->mLocalPlayer);
 }
 
 void BosonWidget::slotAddComputerPlayer(Player* computer)

@@ -24,6 +24,7 @@
 #include "speciestheme.h"
 #include "unit.h"
 #include "defines.h"
+#include "player.h"
 
 #include <kdebug.h>
 
@@ -45,6 +46,7 @@ public:
 		mMapHeight = -1;
 
 		mMap = 0;
+		mLocalPlayer = 0;
 	}
 
 	QPixmap* mGround;
@@ -55,6 +57,7 @@ public:
 	QPoint mPos;
 
 	BosonMap* mMap;
+	Player* mLocalPlayer;
 };
 
 BosonMiniMap::BosonMiniMap(QWidget* parent) : QWidget(parent)
@@ -180,6 +183,9 @@ void BosonMiniMap::slotAddUnit(Unit* unit, int x, int y)
 	kdError() << k_funcinfo << ": NULL unit" << endl;
 	return;
  }
+ if (d->mLocalPlayer->isFogged(x, y)) {
+	return;
+ }
  SpeciesTheme* theme = unit->speciesTheme();
  QColor color;
  if (!theme) {
@@ -223,15 +229,6 @@ void BosonMiniMap::initMap()
 	return;
  }
  slotCreateMap(d->mMap->width(), d->mMap->height());
- return;
- for (unsigned int i = 0; i < d->mMap->width(); i++) {
-	for (unsigned int j = 0; j < d->mMap->height(); j++) {
-		Cell* c = d->mMap->cell(i, j);
-		if (c) {
-			slotAddCell(i, j, c->groundType(), c->version());
-		}
-	}
- }
 }
 
 void BosonMiniMap::slotMoveUnit(Unit* unit, double oldX, double oldY)
@@ -246,13 +243,13 @@ void BosonMiniMap::slotMoveUnit(Unit* unit, double oldX, double oldY)
  }
  int x = (int)(oldX / BO_TILE_SIZE);
  int y = (int)(oldY / BO_TILE_SIZE);
- Cell* c = d->mMap->cell(x, y);
- if (c) {
-//	if (!c->isFogged()) {
-		slotAddCell(x, y, c->groundType(), c->version());
-//	}
- } else {
-	kdWarning() << k_funcinfo << ": NULL cell" << endl;
+ if (!d->mLocalPlayer->isFogged(x, y)) {
+	Cell* c = d->mMap->cell(x, y);
+	if (!c) {
+		kdError() << k_lineinfo << "NULL cell" << endl;
+		return;
+	}
+	slotAddCell(x, y, c->groundType(), c->version());
  }
  x = (int)(unit->x() / BO_TILE_SIZE);
  y = (int)(unit->y() / BO_TILE_SIZE);
@@ -296,3 +293,7 @@ void BosonMiniMap::slotFog(int x, int y)
  setPoint(x, y, COLOR_UNKNOWN);
 }
 
+void BosonMiniMap::setLocalPlayer(Player* p)
+{
+ d->mLocalPlayer = p;
+}

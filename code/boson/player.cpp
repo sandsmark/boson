@@ -377,7 +377,7 @@ void Player::initMap(BosonMap* map)
 	d->mFogged.resize(0);
 	return;
  }
- d->mFogged.fill(false, map->width() * map->height());
+ d->mFogged.fill(true, map->width() * map->height());
 }
 
 void Player::fog(int x, int y)
@@ -406,3 +406,7 @@ void Player::unfog(int x, int y)
 //kdDebug() << k_funcinfo << "done " << endl;
 }
 
+bool Player::isFogged(int x, int y) const
+{
+ return d->mFogged.at(x + d->mMap->width() * y);
+}

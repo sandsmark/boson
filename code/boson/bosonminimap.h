@@ -47,6 +47,8 @@ public:
 
 	void setMap(BosonMap* map);
 	void initMap();
+
+	void setLocalPlayer(Player*);
 	
 
 signals:

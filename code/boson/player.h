@@ -76,6 +76,7 @@ public:
 
 	void fog(int x, int y);
 	void unfog(int x, int y);
+	bool isFogged(int x, int y) const;
 
 	void initMap(BosonMap* map);
 
