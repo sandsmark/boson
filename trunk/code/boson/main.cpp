@@ -18,7 +18,6 @@
 */
 
 #include "top.h"
-#include "startupwidgets/bosonprefixchecker.h"
 
 #include "bosonconfig.h"
 
@@ -74,13 +73,6 @@ int main(int argc, char **argv)
  if (!args->isSet("sound")) {
 	boConfig->setDisableSound(true);
  }
-
- BosonPrefixChecker* bpc = new BosonPrefixChecker();
- if (!bpc->prefixFound()) {
-	// Is it safe to do so?
-	return 1;
- }
- delete bpc;
 
  TopWidget *top = new TopWidget;
  app.setMainWidget(top);
