@@ -5,14 +5,13 @@ function counter()
 global $visitcount;
 global $counter_file;
 global $basedir;
-$fp = fopen($basedir . $counter_file, "r");
+$fp = fopen($basedir . $counter_file, "r+");
+flock($fp, LOCK_EX) or die ("Failure accesing $counter_file");
 $visits = (int)fgets($fp, 80);
-fclose($fp);
-
 $visits++;
-
-$fp = fopen($basedir . $counter_file, "w");
+ftruncate($fp, 0);
 fputs($fp, (string)$visits);
+flock($fp, LOCK_UN) or die ("Cannot release lock file");
 fclose($fp);
 
 // For some reason, bmann doesn't like visitor counter so it's commented out for now
