@@ -7,7 +7,7 @@
     <Minerals>10000</Minerals>
     <Oil>10000</Oil>
     <Unit x="1" y="1" UnitType="5" ConstructionCompleted="1" />
-    <Unit x="1" y="6" UnitType="0" />
+    <Unit x="1" y="6" UnitType="14" />
     <Unit x="1" y="8" UnitType="1" />
     <Unit x="1" y="10" UnitType="2" />
     <Unit x="7" y="1" UnitType="4" />
@@ -61,7 +61,7 @@
     <Unit x="38" y="35" UnitType="6" />
     <Unit x="43" y="35" UnitType="6" />
     <Unit x="45" y="46" UnitType="5" ConstructionCompleted="1" />
-    <Unit x="32" y="46" UnitType="0" />
+    <Unit x="32" y="46" UnitType="14" />
     <Unit x="34" y="46" UnitType="1" />
     <Unit x="36" y="46" UnitType="2" />
     <Unit x="46" y="42" UnitType="3" ConstructionCompleted="1" />
