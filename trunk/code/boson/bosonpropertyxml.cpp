@@ -245,6 +245,42 @@ void BosonCustomPropertyXML::slotRequestValue(KGamePropertyBase* prop, QString& 
 	KGameProperty<QPoint>* p = (KGameProperty<QPoint>*)prop;
 	QTextStream s(&value, IO_WriteOnly);
 	s << p->value();
+ } else if (*t == typeid(BoVector2Fixed)) {
+	KGameProperty<BoVector2Fixed>* p = (KGameProperty<BoVector2Fixed>*)prop;
+	QString x = QString::number(p->value().x());
+	QString y = QString::number(p->value().y());
+	value = QString("%1,%2").arg(x).arg(y);
+ } else if (*t == typeid(BoVector3Fixed)) {
+	KGameProperty<BoVector3Fixed>* p = (KGameProperty<BoVector3Fixed>*)prop;
+	QString x = QString::number(p->value().x());
+	QString y = QString::number(p->value().y());
+	QString z = QString::number(p->value().z());
+	value = QString("%1,%2,%3").arg(x).arg(y).arg(z);
+ } else if (*t == typeid(BoVector4Fixed)) {
+	KGameProperty<BoVector4Fixed>* p = (KGameProperty<BoVector4Fixed>*)prop;
+	QString x = QString::number(p->value().x());
+	QString y = QString::number(p->value().y());
+	QString z = QString::number(p->value().z());
+	QString w = QString::number(p->value().w());
+	value = QString("%1,%2,%3,%4").arg(x).arg(y).arg(z).arg(w);
+ } else if (*t == typeid(BoVector2Float)) {
+	KGameProperty<BoVector2Float>* p = (KGameProperty<BoVector2Float>*)prop;
+	QString x = QString::number(p->value().x());
+	QString y = QString::number(p->value().y());
+	value = QString("%1,%2").arg(x).arg(y);
+ } else if (*t == typeid(BoVector3Float)) {
+	KGameProperty<BoVector3Float>* p = (KGameProperty<BoVector3Float>*)prop;
+	QString x = QString::number(p->value().x());
+	QString y = QString::number(p->value().y());
+	QString z = QString::number(p->value().z());
+	value = QString("%1,%2,%3").arg(x).arg(y).arg(z);
+ } else if (*t == typeid(BoVector4Float)) {
+	KGameProperty<BoVector4Float>* p = (KGameProperty<BoVector4Float>*)prop;
+	QString x = QString::number(p->value().x());
+	QString y = QString::number(p->value().y());
+	QString z = QString::number(p->value().z());
+	QString w = QString::number(p->value().w());
+	value = QString("%1,%2,%3,%4").arg(x).arg(y).arg(z).arg(w);
  } else if (*t == typeid(KGamePropertyBase*)) {
 	// prop->typeinfo() returns info on a KGamePropertyBase pointer when
 	// typeinfo() wasn't reimplemented. This is the case for all
@@ -289,6 +325,114 @@ void BosonCustomPropertyXML::slotRequestSetValue(KGamePropertyBase* prop, const 
 	QPoint point;
 	s >> point;
 	p->setValue(point);
+ } else if (*t == typeid(BoVector2Fixed)) {
+	QStringList l = QStringList::split(',', value);
+	if (l.count() != 2) {
+		boError() << k_funcinfo << "invalid number of elements in vector. expected 2, found " << l.count() << endl;
+		return;
+	}
+	bool ok0;
+	bool ok1;
+	bofixed x = bofixed(l[0].toFloat(&ok0));
+	bofixed y = bofixed(l[1].toFloat(&ok1));
+	if (!ok0 || !ok1) {
+		boError() << k_funcinfo << "invalid number for vector element" << endl;
+		return;
+	}
+	KGameProperty<BoVector2Fixed>* p = (KGameProperty<BoVector2Fixed>*)prop;
+	p->setValue(BoVector2Fixed(x, y));
+ } else if (*t == typeid(BoVector3Fixed)) {
+	QStringList l = QStringList::split(',', value);
+	if (l.count() != 3) {
+		boError() << k_funcinfo << "invalid number of elements in vector. expected 3, found " << l.count() << endl;
+		return;
+	}
+	bool ok0;
+	bool ok1;
+	bool ok2;
+	bofixed x = bofixed(l[0].toFloat(&ok0));
+	bofixed y = bofixed(l[1].toFloat(&ok1));
+	bofixed z = bofixed(l[2].toFloat(&ok2));
+	if (!ok0 || !ok1 || !ok2) {
+		boError() << k_funcinfo << "invalid number for vector element" << endl;
+		return;
+	}
+	KGameProperty<BoVector3Fixed>* p = (KGameProperty<BoVector3Fixed>*)prop;
+	p->setValue(BoVector3Fixed(x, y, z));
+ } else if (*t == typeid(BoVector4Fixed)) {
+	QStringList l = QStringList::split(',', value);
+	if (l.count() != 4) {
+		boError() << k_funcinfo << "invalid number of elements in vector. expected 4, found " << l.count() << endl;
+		return;
+	}
+	bool ok0;
+	bool ok1;
+	bool ok2;
+	bool ok3;
+	bofixed x = bofixed(l[0].toFloat(&ok0));
+	bofixed y = bofixed(l[1].toFloat(&ok1));
+	bofixed z = bofixed(l[2].toFloat(&ok2));
+	bofixed w = bofixed(l[3].toFloat(&ok3));
+	if (!ok0 || !ok1 || !ok2 || !ok3) {
+		boError() << k_funcinfo << "invalid number for vector element" << endl;
+		return;
+	}
+	KGameProperty<BoVector4Fixed>* p = (KGameProperty<BoVector4Fixed>*)prop;
+	p->setValue(BoVector4Fixed(x, y, z, w));
+ } else if (*t == typeid(BoVector2Float)) {
+	QStringList l = QStringList::split(',', value);
+	if (l.count() != 2) {
+		boError() << k_funcinfo << "invalid number of elements in vector. expected 2, found " << l.count() << endl;
+		return;
+	}
+	bool ok0;
+	bool ok1;
+	float x = l[0].toFloat(&ok0);
+	float y = l[1].toFloat(&ok1);
+	if (!ok0 || !ok1) {
+		boError() << k_funcinfo << "invalid number for vector element" << endl;
+		return;
+	}
+	KGameProperty<BoVector2Float>* p = (KGameProperty<BoVector2Float>*)prop;
+	p->setValue(BoVector2Float(x, y));
+ } else if (*t == typeid(BoVector3Float)) {
+	QStringList l = QStringList::split(',', value);
+	if (l.count() != 3) {
+		boError() << k_funcinfo << "invalid number of elements in vector. expected 3, found " << l.count() << endl;
+		return;
+	}
+	bool ok0;
+	bool ok1;
+	bool ok2;
+	float x = l[0].toFloat(&ok0);
+	float y = l[1].toFloat(&ok1);
+	float z = l[2].toFloat(&ok2);
+	if (!ok0 || !ok1 || !ok2) {
+		boError() << k_funcinfo << "invalid number for vector element" << endl;
+		return;
+	}
+	KGameProperty<BoVector3Float>* p = (KGameProperty<BoVector3Float>*)prop;
+	p->setValue(BoVector3Float(x, y, z));
+ } else if (*t == typeid(BoVector4Float)) {
+	QStringList l = QStringList::split(',', value);
+	if (l.count() != 4) {
+		boError() << k_funcinfo << "invalid number of elements in vector. expected 4, found " << l.count() << endl;
+		return;
+	}
+	bool ok0;
+	bool ok1;
+	bool ok2;
+	bool ok3;
+	float x = l[0].toFloat(&ok0);
+	float y = l[1].toFloat(&ok1);
+	float z = l[2].toFloat(&ok2);
+	float w = l[3].toFloat(&ok3);
+	if (!ok0 || !ok1 || !ok2 || !ok3) {
+		boError() << k_funcinfo << "invalid number for vector element" << endl;
+		return;
+	}
+	KGameProperty<BoVector4Float>* p = (KGameProperty<BoVector4Float>*)prop;
+	p->setValue(BoVector4Float(x, y, z, w));
  } else if (*t == typeid(KGamePropertyBase*)) {
 	if (typeid(*prop) == typeid(KGamePropertyList<QPoint>)) {
 		KGamePropertyList<QPoint>* list = (KGamePropertyList<QPoint>*)prop;
