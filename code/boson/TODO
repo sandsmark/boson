@@ -39,6 +39,10 @@ Game TODOs
 - maybe provide UnitGroups without keyboard, too. select units, click on a
   (empty) button to store that group. another click on that button restores the
   group. rmb on that button deletes it
+- Use different config file fields for repairing and weapon damage. Then unit
+  that can repair can also shoot at enemies.
+- Support more than 1 weapon per unit. Think of a unit that has one weapon for
+  air units and other one for land units.
 
 Editor (map, unit, scenario) TODOs
 - totally broken, currently
