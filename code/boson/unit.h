@@ -53,7 +53,6 @@ class Unit : public UnitBase, public BosonItem
 public:
 	enum PropertyIds {
 		// properties in Unit
-		IdDirection = UnitBase::IdLast + 1,
 		IdWaypoints = UnitBase::IdLast + 2,
 		IdMoveDestX = UnitBase::IdLast + 3,
 		IdMoveDestY = UnitBase::IdLast + 4,
