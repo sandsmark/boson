@@ -302,6 +302,5 @@ void bosonCanvas::shoot(shootMsg_t &m)
 void bosonCanvas::setCell(int i, int j, cell_t c)
 {
 	visualCanvas::setCell(i,j,c);
-	cell(i,j).setGround( ground(c) );
 }
 
