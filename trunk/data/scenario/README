@@ -1,0 +1,12 @@
+Just a few ideas here currently:
+the map file contains information about the map itself (cells/tiles). See
+map/README.
+
+The scenario file should first contain the map on which the scenario is being
+played. This map must be unique! (imagine you add a ship and on map A this is on
+water and on map B it's on land...)
+
+Then the scenario file contains information about players (min/max players) and
+their units (count, type, position).
+
+Currently that's all. Very much under construction.
