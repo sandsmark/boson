@@ -474,6 +474,9 @@ void BosonStartupWidget::slotShowWelcomeWidget()
 	d->mWidgetStack->addWidget(w, (int)IdWelcome);
  }
  d->mWidgetStack->raiseWidget((int)IdWelcome);
+ // This must be called to set mGame to 0 in BosonStartupNetwork. Otherwise it
+ //  will crash because Boson object will be deleted and reinited with next signal.
+ d->mNetworkInterface->setGame(0);
  emit signalResetGame();
  d->mNetworkInterface->setGame(boGame);
 
