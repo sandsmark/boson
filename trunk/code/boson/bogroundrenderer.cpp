@@ -35,8 +35,7 @@
 
 
 // ugly in this file
-#include "player.h"
-//#include "playerio.h"
+#include "playerio.h"
 
 #include <klocale.h>
 
@@ -52,7 +51,7 @@ public:
 
 		mViewFrustum = 0;
 
-		mLocalPlayer = 0;
+		mLocalPlayerIO = 0;
 	}
 
 	//AB: we should use a float* here which can be used as vertex array. we
@@ -69,8 +68,7 @@ public:
 	const int* mViewport;
 	const double* mViewFrustum;
 
-	// FIXME: replace by PlayerIO
-	Player* mLocalPlayer;
+	PlayerIO* mLocalPlayerIO;
 };
 
 BoGroundRenderer::BoGroundRenderer()
@@ -118,14 +116,14 @@ const double* BoGroundRenderer::viewFrustum() const
  return d->mViewFrustum;
 }
 
-void BoGroundRenderer::setLocalPlayer(Player* p)
+void BoGroundRenderer::setLocalPlayerIO(PlayerIO* p)
 {
- d->mLocalPlayer = p;
+ d->mLocalPlayerIO = p;
 }
 
-Player* BoGroundRenderer::localPlayer() const
+PlayerIO* BoGroundRenderer::localPlayerIO() const
 {
- return d->mLocalPlayer;
+ return d->mLocalPlayerIO;
 }
 
 unsigned int BoGroundRenderer::renderCells(const BosonMap* map)
@@ -139,7 +137,7 @@ unsigned int BoGroundRenderer::renderCells(const BosonMap* map)
 	generateCellList(map);
  }
 
- BO_CHECK_NULL_RET0(localPlayer());
+ BO_CHECK_NULL_RET0(localPlayerIO());
 
  BO_CHECK_NULL_RET0(map);
  BO_CHECK_NULL_RET0(map->heightMap());
@@ -148,7 +146,7 @@ unsigned int BoGroundRenderer::renderCells(const BosonMap* map)
  int heightMapWidth = map->width() + 1;
 
  int cellsCount = 0;
- Cell** renderCells = createVisibleCellList(&cellsCount, localPlayer());
+ Cell** renderCells = createVisibleCellList(&cellsCount, localPlayerIO());
  BO_CHECK_NULL_RET0(renderCells);
 
  renderVisibleCells(renderCells, cellsCount, map);
@@ -203,9 +201,9 @@ void BoGroundRenderer::renderCellGrid(Cell** cells, int cellsCount, float* heigh
 }
 
 
-Cell** BoGroundRenderer::createVisibleCellList(int* cells, Player* player)
+Cell** BoGroundRenderer::createVisibleCellList(int* cells, PlayerIO* playerIO)
 {
- BO_CHECK_NULL_RET0(player);
+ BO_CHECK_NULL_RET0(playerIO);
  BO_CHECK_NULL_RET0(cells);
  Cell** renderCells = 0; // FIXME: store two arrays. one with x, one with y coordinate (or both in one array). don't store pointers to Cell
  if (renderCellsCount() > 0) {
@@ -224,7 +222,7 @@ Cell** BoGroundRenderer::createVisibleCellList(int* cells, Player* player)
 
 	// AB: better solution: check *before* the cells get assigned to this
 	// class. localPlayerIO() is *very* ugly in this class
-	if (player->isFogged(c->x(), c->y())) {
+	if (playerIO->isFogged(c->x(), c->y())) {
 		// don't draw anything at all. the cell will just be black,
 		// because of the glClear() call.
 		continue;
