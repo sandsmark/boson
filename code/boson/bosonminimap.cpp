@@ -151,7 +151,7 @@ void BosonMiniMap::slotAddCell(int x, int y, int groundType, unsigned char)
 	return;
  }
  if (!ground()) {
-	kdError() << k_funcinfo << ": map not yet created" << endl;
+	kdError() << k_funcinfo << "map not yet created" << endl;
 	return;
  }
  switch (groundType) {
@@ -177,7 +177,7 @@ void BosonMiniMap::slotAddCell(int x, int y, int groundType, unsigned char)
 void BosonMiniMap::setPoint(int x, int y, const QColor& color)
 {
  if (!ground()) {
-	kdError() << k_funcinfo << ": NULL ground" << endl;
+	kdError() << k_funcinfo << "NULL ground" << endl;
 	return;
  }
  QPainter p;
@@ -211,7 +211,7 @@ void BosonMiniMap::mousePressEvent(QMouseEvent *e)
 void BosonMiniMap::slotAddUnit(Unit* unit, int x, int y)
 {
  if (!unit) {
-	kdError() << k_funcinfo << ": NULL unit" << endl;
+	kdError() << k_funcinfo << "NULL unit" << endl;
 	return;
  }
  if (mLocalPlayer->isFogged(x, y)) {
@@ -251,7 +251,7 @@ void BosonMiniMap::setCanvas(BosonCanvas* c)
 void BosonMiniMap::initMap()
 {
  if (!mMap) {
-	kdError() << k_funcinfo << ": NULL map" << endl;
+	kdError() << k_funcinfo << "NULL map" << endl;
 	return;
  }
  slotCreateMap(mMap->width(), mMap->height());
@@ -268,11 +268,11 @@ void BosonMiniMap::initMap()
 void BosonMiniMap::slotMoveUnit(Unit* unit, double oldX, double oldY)
 {
  if (!mMap) {
-	kdError() << k_funcinfo << ": NULL map" << endl;
+	kdError() << k_funcinfo << "NULL map" << endl;
 	return;
  }
  if (!unit) {
-	kdError() << k_funcinfo << ": NULL unit" << endl;
+	kdError() << k_funcinfo << "NULL unit" << endl;
 	return;
  }
  int x = (int)(oldX / BO_TILE_SIZE);
@@ -300,7 +300,7 @@ void BosonMiniMap::slotUnitDestroyed(Unit* unit)
  int y = (int)(unit->y() / BO_TILE_SIZE);
  Cell* c = mMap->cell(x, y);
  if (!c) {
-	kdError() << k_funcinfo << ": NULL cell" << endl;
+	kdError() << k_funcinfo << "NULL cell" << endl;
 	return;
  }
  slotUnfog(x, y);
