@@ -20,6 +20,8 @@
 
 #include <qpopupmenu.h>
 
+#include "../common/log.h"
+
 #include "editorBigDisplay.h"
 #include "visualView.h"
 #include "visualCell.h"
@@ -46,24 +48,31 @@ editorBigDisplay::editorBigDisplay(visualView *v, QWidget *p, const char *n, WFl
 	// transitions type
 	qpm = new QPopupMenu();
 
-	qpm->insertItem("grass-water");
-	qpm->insertItem("desert-grass");
-	qpm->insertItem("desert-water");
+	qpm->insertItem("grass - water", TRANS_GW);
+	qpm->insertItem("grass - desert", TRANS_GD);
+	qpm->insertItem("water - desert", TRANS_WD);
+	qpm->insertItem("deep water - water", TRANS_DWD);
 
-	connect(qpm, SIGNAL(activated(int)), this, SLOT(setTransType(int)));
+	connect(qpm, SIGNAL(activated(int)), this, SLOT(setTransRef(int)));
 	popup->insertItem("Transition type", qpm);
 
 	// transitions tiles
 	qpm = new QPopupMenu();
 
-	qpm->insertItem("up");
-	qpm->insertItem("down");
-	qpm->insertItem("left");
-	qpm->insertItem("right");
-	qpm->insertItem("upper-left");
-	qpm->insertItem("upper-right");
-	qpm->insertItem("lower-left");
-	qpm->insertItem("lower-right");
+	qpm->insertItem("up", TRANS_UP);
+	qpm->insertItem("down", TRANS_DOWN);
+	qpm->insertItem("left", TRANS_LEFT);
+	qpm->insertItem("right", TRANS_RIGHT);
+
+	qpm->insertItem("upper-left", TRANS_UL);
+	qpm->insertItem("upper-right", TRANS_UR);
+	qpm->insertItem("lower-left", TRANS_DL);
+	qpm->insertItem("lower-right", TRANS_DR);
+
+	qpm->insertItem("upper-left-inverted", TRANS_ULI);
+	qpm->insertItem("upper-right-inverted", TRANS_URI);
+	qpm->insertItem("lower-left-inverted", TRANS_DLI);
+	qpm->insertItem("lower-right-inverted", TRANS_DRI);
 
 	connect(qpm, SIGNAL(activated(int)), this, SLOT(setTransTile(int)));
 	popup->insertItem("Transition sprite", qpm);
@@ -71,12 +80,12 @@ editorBigDisplay::editorBigDisplay(visualView *v, QWidget *p, const char *n, WFl
 	// transitions type
 	qpm = new QPopupMenu();
 
-	qpm->insertItem("# 1");
-	qpm->insertItem("# 2");
-	qpm->insertItem("# 3");
-	qpm->insertItem("# 4");
+	qpm->insertItem("# 1", 0);
+	qpm->insertItem("# 2", 1);
+	qpm->insertItem("# 3", 2);
+	qpm->insertItem("# 4", 3);
 
-	connect(qpm, SIGNAL(activated(int)), this, SLOT(setTransItem(int)));
+	connect(qpm, SIGNAL(activated(int)), this, SLOT(setItem(int)));
 	popup->insertItem("Transition Item", qpm);
 
 }
@@ -88,16 +97,53 @@ void editorBigDisplay::setCell(int g)
 	view->field->update();
 }
 
-void editorBigDisplay::setTransTile(int)
+void editorBigDisplay::setTransTile(int t)
 {
+	int ref, tile;
+	groundType g = selectedCell->getGroundType();
+
+	boAssert(t>=0 && t< TILES_PER_TRANSITION);
+
+	if (! IS_TRANS(g)) {
+		g = GET_TRANS_NUMBER( TRANS_GW, t);
+		selectedCell->set(g);
+		view->field->update();
+	}
+
+	ref	= GET_TRANS_REF(g);
+	tile	= t;
+
+	g = GET_TRANS_NUMBER(ref,tile);
+	selectedCell->set(g);
+	view->field->update();
 }
 
-void editorBigDisplay::setTransType(int)
+void editorBigDisplay::setTransRef(int r)
 {
+	int ref, tile;
+	groundType g = selectedCell->getGroundType();
+
+	boAssert(r>=0 && r<TRANS_LAST);
+
+	if (! IS_TRANS(g)) {
+		g = GET_TRANS_NUMBER(r, 0);
+		selectedCell->set(g);
+		view->field->update();
+	}
+
+	ref	= r;
+	tile	= GET_TRANS_TILE(g);
+
+	g = GET_TRANS_NUMBER(ref,tile);
+	selectedCell->set(g);
+	view->field->update();
 }
 
-void editorBigDisplay::setTransItem(int)
+void editorBigDisplay::setItem(int i)
 {
+	boAssert(i>=0 && i<4);
+	selectedCell->frame( i);
+	view->field->update();
 }
 
 
