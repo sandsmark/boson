@@ -296,6 +296,11 @@ void BosonProfilingDialog::slotLoadFromFile()
  if (file == QString::null) {
 	return;
  }
+ loadFromFile(file);
+}
+
+void BosonProfilingDialog::loadFromFile(const QString& file)
+{
  delete d->mData;
  d->mData = new BosonProfiling;
  if (!d->mData->loadFromFile(file)) {

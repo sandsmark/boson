@@ -35,6 +35,8 @@ public:
 	BosonProfilingDialog(QWidget* parent, bool modal = false);
 	~BosonProfilingDialog();
 
+	void loadFromFile(const QString& file);
+
 protected:
 	void initLoadUnitPage();
 	void initRenderPage();
