@@ -492,8 +492,8 @@ PyObject* PythonScript::py_nearestMineralLocations(PyObject*, PyObject* args)
   {
     // We use tuples for positions
     PyObject* pos = PyTuple_New(2);
-    PyTuple_SetItem(pos, 0, PyFloat_FromDouble((*it).x()));
-    PyTuple_SetItem(pos, 1, PyFloat_FromDouble((*it).y()));
+    PyTuple_SetItem(pos, 0, PyFloat_FromDouble((float)(*it).x()));
+    PyTuple_SetItem(pos, 1, PyFloat_FromDouble((float)(*it).y()));
     PyList_SetItem(pylist, i, pos);
     i++;
   }
@@ -519,8 +519,8 @@ PyObject* PythonScript::py_nearestOilLocations(PyObject*, PyObject* args)
   {
     // We use tuples for positions
     PyObject* pos = PyTuple_New(2);
-    PyTuple_SetItem(pos, 0, PyFloat_FromDouble((*it).x()));
-    PyTuple_SetItem(pos, 1, PyFloat_FromDouble((*it).y()));
+    PyTuple_SetItem(pos, 0, PyFloat_FromDouble((float)(*it).x()));
+    PyTuple_SetItem(pos, 1, PyFloat_FromDouble((float)(*it).y()));
     PyList_SetItem(pylist, i, pos);
     i++;
   }
@@ -726,7 +726,7 @@ PyObject* PythonScript::py_unitPosition(PyObject*, PyObject* args)
 
   BoVector2 pos = BosonScript::unitPosition(id);
 
-  return Py_BuildValue((char*)"(ff)", pos.x(), pos.y());
+  return Py_BuildValue((char*)"(ff)", (float)pos.x(), (float)pos.y());
 }
 
 PyObject* PythonScript::py_unitOwner(PyObject*, PyObject* args)

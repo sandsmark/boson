@@ -41,9 +41,9 @@ class BoVector2
 {
   public:
     BoVector2()  { reset(); }
-    BoVector2(GLfloat x, GLfloat y)  { set(x, y); }
+    BoVector2(bofixed x, bofixed y)  { set(x, y); }
     BoVector2(const QPoint& p);
-    BoVector2(const GLfloat* data)  { set(data); }
+    BoVector2(const bofixed* data)  { set(data); }
     BoVector2(const BoVector2& v)  { set(v); }
     ~BoVector2()  {}
 
@@ -55,16 +55,16 @@ class BoVector2
     /**
      * @return The first (x) coordinate of the vector.
      **/
-    inline GLfloat x() const  { return mData[0]; }
+    inline bofixed x() const  { return mData[0]; }
     /**
      * @return The second (y) coordinate of the vector.
      **/
-    inline GLfloat y() const  { return mData[1]; }
+    inline bofixed y() const  { return mData[1]; }
 
     /**
      * Assign the values @p x, @p y to the vector.
      **/
-    inline void set(GLfloat x, GLfloat y)
+    inline void set(bofixed x, bofixed y)
     {
       mData[0] = x;  mData[1] = y;
     }
@@ -75,34 +75,34 @@ class BoVector2
     /**
      * @overload
      **/
-    inline void set(const float* v)  { set(v[0], v[1]); }
+    inline void set(const bofixed* v)  { set(v[0], v[1]); }
 
     /**
      * Assign the x coordinate to the vector.
      **/
-    inline void setX(GLfloat x)  { mData[0] = x; }
+    inline void setX(bofixed x)  { mData[0] = x; }
     /**
      * Assign the y coordinate to the vector.
      **/
-    inline void setY(GLfloat y)  { mData[1] = y; }
+    inline void setY(bofixed y)  { mData[1] = y; }
 
-    inline float dotProduct() const
+    inline bofixed dotProduct() const
     {
       return mData[0] * mData[0] + mData[1] * mData[1];
     }
-    float length() const;
+    bofixed length() const;
 
-    inline GLfloat operator[](int i) const  { return mData[i]; }
+    inline bofixed operator[](int i) const  { return mData[i]; }
     inline void operator=(const BoVector2& v)  { set(v); }
     inline bool operator==(const BoVector2& v) const
     {
       return isEqual(mData, v.data());
     }
-    static bool isEqual(const float* v1, const float* v2, float diff = 0.001)
+    static bool isEqual(const bofixed* v1, const bofixed* v2, bofixed diff = 0.001)
     {
       // avoid fabsf() as we don't include math.h
-      float d1 = v1[0] - v2[0];
-      float d2 = v1[1] - v2[1];
+      bofixed d1 = v1[0] - v2[0];
+      bofixed d2 = v1[1] - v2[1];
       if (d1 < 0.0f)
       {
         d1 = -d1;
@@ -130,11 +130,11 @@ class BoVector2
     {
       return BoVector2(mData[0] - v[0], mData[1] - v[1]);
     }
-    inline BoVector2 operator*(float f) const
+    inline BoVector2 operator*(bofixed f) const
     {
       return BoVector2(mData[0] * f, mData[1] * f);
     }
-    inline BoVector2 operator/(float f) const
+    inline BoVector2 operator/(bofixed f) const
     {
       return BoVector2(mData[0] / f, mData[1] / f);
     }
@@ -147,14 +147,14 @@ class BoVector2
       mData[0] -= v[0];
     }
 
-    inline const GLfloat* data() const { return mData; }
+    inline const bofixed* data() const { return mData; }
 
 
   private:
     friend QDataStream& operator<<(QDataStream& s, const BoVector2& v);
     friend QDataStream& operator>>(QDataStream& s, BoVector2& v);
 
-    GLfloat mData[2];
+    bofixed mData[2];
 };
 
 QDataStream& operator<<(QDataStream& s, const BoVector2& v);
@@ -173,7 +173,7 @@ class BoRect
     {
       set(topLeft, bottomRight);
     }
-    BoRect(const GLfloat left, const GLfloat top, const GLfloat right, const GLfloat bottom)
+    BoRect(const bofixed left, const bofixed top, const bofixed right, const bofixed bottom)
     {
       set(left, top, right, bottom);
     }
@@ -183,25 +183,25 @@ class BoRect
       mTopLeft = topLeft;
       mBottomRight = bottomRight;
     }
-    inline void set(const GLfloat left, const GLfloat top, const GLfloat right, const GLfloat bottom)
+    inline void set(const bofixed left, const bofixed top, const bofixed right, const bofixed bottom)
     {
       mTopLeft = BoVector2(left, top);
       mBottomRight = BoVector2(right, bottom);
     }
 
-    inline GLfloat left() const  { return mTopLeft.x(); }
-    inline GLfloat top() const  { return mTopLeft.y(); }
-    inline GLfloat right() const  { return mBottomRight.x(); }
-    inline GLfloat bottom() const  { return mBottomRight.y(); }
+    inline bofixed left() const  { return mTopLeft.x(); }
+    inline bofixed top() const  { return mTopLeft.y(); }
+    inline bofixed right() const  { return mBottomRight.x(); }
+    inline bofixed bottom() const  { return mBottomRight.y(); }
 
     inline const BoVector2& topLeft() const { return mTopLeft; }
     inline const BoVector2& bottomRight() const { return mBottomRight; }
 
-    inline GLfloat x() const  { return mTopLeft.x(); }
-    inline GLfloat y() const  { return mTopLeft.y(); }
+    inline bofixed x() const  { return mTopLeft.x(); }
+    inline bofixed y() const  { return mTopLeft.y(); }
 
-    inline GLfloat width() const  { return mBottomRight.x() - mTopLeft.x(); }
-    inline GLfloat height() const  { return mBottomRight.y() - mTopLeft.y(); }
+    inline bofixed width() const  { return mBottomRight.x() - mTopLeft.x(); }
+    inline bofixed height() const  { return mBottomRight.y() - mTopLeft.y(); }
 
     inline BoVector2 center() const
     {
