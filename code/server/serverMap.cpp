@@ -255,7 +255,7 @@ bool BosonServer::loadGround()
 bool BosonServer::loadUnits()
 {
 	
-	int		i;
+	uint		i;
 	mobileMsg_t	mob;
 	facilityMsg_t	fix;
 
