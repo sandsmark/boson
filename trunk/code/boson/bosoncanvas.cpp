@@ -915,8 +915,11 @@ void BosonCanvas::deleteUnusedShots()
 	if (RTTI::isShot(i->rtti())) {
 		if (!((BosonShot*)i)->isActive()) {
 			shotHit((BosonShot*)i);
-			d->mAnimList.remove();
-			d->mAllItems.removeItem(i);
+#warning FIXME ?
+			// AB: this gets called in the d'tor.
+			// do we *really* need this here??
+			removeAnimation(i);
+			removeItem(i);
 			delete i;
 		}
 	}
