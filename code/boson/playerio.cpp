@@ -350,3 +350,8 @@ void PlayerIO::emitSignalShowMiniMap(bool s)
  mPlayer->emitSignalShowMiniMap(s);
 }
 
+QPtrList<KGameIO>* PlayerIO::ioList()
+{
+ return player()->ioList();
+}
+
