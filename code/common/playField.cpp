@@ -28,6 +28,7 @@
 #include "playField.h"
 
 #include "../common/groundType.h"
+#include "../common/log.h"
 
 
 #define		TAG_MOB		(0xba)
@@ -164,6 +165,12 @@ bool	playField::load(groundType &gt)
 	if (TAG_CELL !=g ) return false;
 	
 	*stream >> g;
+	if (! IS_GROUND(g)) {
+//	if (g<0 || g> 150) {
+//		logf(LOG_ERROR, "playField::load : bad groundType : %d", g);
+		printf("playField::load : bad groundType : %d", g);
+		return false; 
+	}
 	gt = (groundType) g;
 	return true;
 }
@@ -194,9 +201,9 @@ bool playField::loadPeople()
 
 	*stream >> people.nbMobiles;
 	*stream >> people.nbFacilities;
-	assert(people.nbMobiles>0);
+	assert(people.nbMobiles>=0);
 	assert(people.nbMobiles<20);
-	assert(people.nbFacilities>0);
+	assert(people.nbFacilities>=0);
 	assert(people.nbFacilities<20);
 
 	people.mobile = new origMobile[people.nbMobiles];
