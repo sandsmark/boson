@@ -587,8 +587,16 @@ void BoInfoDialog::slotSaveToFile()
 {
  QString file;
  file = KFileDialog::getSaveFileName();
-  if (file == QString::null) {
+ if (file == QString::null) {
 	return;
+ }
+ QFileInfo fileInfo(file);
+ if (fileInfo.exists()) {
+	int ok = KMessageBox::questionYesNoCancel(this,
+			i18n("The file %1 does already exists. Do you want to overwrite it?").arg(file));
+	if (ok != KMessageBox::Yes) {
+		return;
+	}
  }
  if (!d->data()->saveToFile(file)) {
 	KMessageBox::sorry(this, i18n("Unable to save to file %1").arg(file));
