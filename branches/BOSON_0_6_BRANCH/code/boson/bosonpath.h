@@ -91,8 +91,10 @@ class BosonPath
      */
     float pathCost() const { return mPathCost; };
 
-  private:
+  public:
     class PathNode;
+    
+  private:
     class Marking;
     /// TODO: QTL impl.
 #ifdef USE_STL
