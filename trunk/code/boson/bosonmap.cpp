@@ -350,7 +350,6 @@ bool BosonMap::loadHeightMapImage(const QByteArray& heightMap)
 	return loadHeightMapImage(QByteArray());
  }
  int increment = 1;
- boWarning() << map.bytesPerLine() << " " << map.width() << endl;
  if (map.bytesPerLine() > map.width() + 1) {
 	// QT doesn't save images as grayscale. it returns bytesPerLine() ==
 	// width() (i.e. 8bits per pixel) for all *actual* grayscale images
