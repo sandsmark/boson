@@ -26,7 +26,7 @@
 
 #include <qcanvas.h>
 #include <qpoint.h>
-#include <qdatetime.h> // only for debug
+#include <sys/time.h> // only for debug
 
 #ifdef USE_STL
  #include <vector.h>
@@ -137,8 +137,139 @@ QValueList<QPoint> BosonPath::findPath(Unit* unit, int goalx, int goaly, int ran
 
 bool BosonPath::findPath()
 {
-  QTime time;
-  time.start();
+  // We now have 2 different pathfinding methods: fast and slow
+  // Fast method searches with dumb but very fast algorithm and fails if there
+  //  is any units on the way
+  // Slow method is the one used before. It should always find some path and it
+  //  can find path around other units. It's at least about 10 times slower
+  //  though (with a simple path)
+  if(findFastPath())
+  {
+    return true;
+  }
+  else
+  {
+    return findSlowPath();
+  }
+}
+
+bool BosonPath::findFastPath()
+{
+  struct timeval time1, time2;
+  gettimeofday(&time1, 0);
+
+  int x[SEARCH_STEPS];
+  int y[SEARCH_STEPS];
+  int lastx, lasty;
+  int tox, toy;
+  bool movebyx, movebyy;
+  int steps;
+
+  lastx = mStartx;
+  lasty = mStarty;
+
+  for(steps = 0; steps < SEARCH_STEPS; steps++)
+  {
+    // Calculate, how many steps to go in each direction
+    tox = QABS(lastx - mGoalx);
+    toy = QABS(lasty - mGoaly);
+
+    // Check if we're at goal already
+    if(tox == 0 && toy == 0)
+    {
+      break;
+    }
+
+    // Check by which direction to move
+    if(tox > toy)
+    {
+      // More steps to go by x direction: move by x direction
+      movebyx = true;
+      movebyy = false;
+    }
+    else if(tox < toy)
+    {
+      // More steps to go by y direction: move by y direction
+      movebyx = false;
+      movebyy = true;
+    }
+    else
+    {
+      // Same amount of steps in both directions: move diagonally
+      movebyx = true;
+      movebyy = true;
+    }
+
+    // Move
+    if(movebyx)
+    {
+      if(lastx < mGoalx)
+      {
+        lastx++;  // Go right
+      }
+      else
+      {
+        lastx--;  // Go left
+      }
+    }
+    if(movebyy)
+    {
+      if(lasty < mGoaly)
+      {
+        lasty++;  // Go down
+      }
+      else
+      {
+        lasty--;  // Go up
+      }
+    }
+
+    // Set waypoint
+    x[steps] = lastx;
+    y[steps] = lasty;
+
+    // Check if we can move to waypoint
+    if(cost(lastx, lasty) == ERROR_COST)
+    {
+      // Path can't be found using fast method
+      gettimeofday(&time2, 0);
+      kdDebug() << k_funcinfo << "Can't find path using fast method. Time elapsed: " <<
+          time2.tv_usec - time1.tv_usec << "microsec." << endl;
+      return false;
+    }
+  }
+
+  // Compose path
+  QPoint wp;
+  int i;
+  for(i = 0; i < steps; i++)
+  {
+    wp.setX(x[i] * BO_TILE_SIZE + BO_TILE_SIZE / 2);
+    wp.setY(y[i] * BO_TILE_SIZE + BO_TILE_SIZE / 2);
+    path.push_back(wp);
+  }
+
+  i = steps - 1;
+  if((x[i] != mGoalx) || (y[i] != mGoaly))
+  {
+    // Only partial path was found
+    wp.setX(-2);
+    wp.setY(-2);
+    path.push_back(wp);
+  }
+
+  gettimeofday(&time2, 0);
+  kdDebug() << k_funcinfo << "Path found (using fast method)! Time elapsed: " <<
+      time2.tv_usec - time1.tv_usec << "microsec." << endl;
+
+  return true;
+}
+
+bool BosonPath::findSlowPath()
+{
+  struct timeval time1, time2;
+  gettimeofday(&time1, 0);
+
   mNodesRemoved = 0;
   mPathLength = 0;
   mPathCost = 0;
@@ -430,7 +561,10 @@ bool BosonPath::findPath()
     path.push_back(QPoint(-1, -1));
   }
 
-  kdDebug() << "BosonPath::findPath() : path found, took " << time.elapsed() << " ms" << endl;
+  gettimeofday(&time2, 0);
+  kdDebug() << k_funcinfo << "Path found (using slow method)! Time elapsed: " <<
+      time2.tv_usec - time1.tv_usec << "microsec." << endl;
+
   return (pathfound != NoPath);
 }
 

@@ -112,6 +112,9 @@ class BosonPath
     inline bool inRange(int x, int y);
 
     void debug() const;
+    
+    bool findFastPath();
+    bool findSlowPath();
   
   private:
     int mStartx;
