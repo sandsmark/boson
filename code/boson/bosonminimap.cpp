@@ -217,6 +217,10 @@ void BosonMiniMap::changeCell(int x, int y, int groundType, unsigned char)
 
 void BosonMiniMap::setPoint(int x, int y, const QColor& color)
 {
+ // AB: according to cachegrind setPen() and setBrush() take each 37% of the
+ // time spent in this function!
+ // setPoint() is close to time critical (only close), so we might want to cache
+ // that or so.
  BO_CHECK_NULL_RET(ground());
  QPainter p;
  QPainter p2;
@@ -264,20 +268,19 @@ void BosonMiniMap::mousePressEvent(QMouseEvent *e)
 void BosonMiniMap::slotAddUnit(Unit* unit, int x, int y)
 {
  // AB: obsolete. units will move anyway (and therefore call slotMoveUnit)
-
- // x and y are canvas coordinates
-// moveUnit(unit, makeCellList(unit, x, y), QPointArray());
 }
 
 void BosonMiniMap::slotMoveUnit(Unit* unit, float oldX, float oldY)
 {
  BO_CHECK_NULL_RET(unit);
- QPointArray newCells = makeCellList(unit, unit->x(), unit->y());
- QPointArray oldCells = makeCellList(unit, oldX, oldY);
- moveUnit(unit, newCells, oldCells);
+ QPtrVector<Cell> newCells;
+ QPtrVector<Cell> oldCells;
+ makeCellList(&newCells, unit, unit->x(), unit->y());
+ makeCellList(&oldCells, unit, oldX, oldY);
+ moveUnit(unit, &newCells, &oldCells);
 }
 
-void BosonMiniMap::moveUnit(Unit* unit, const QPointArray& newCells, const QPointArray& oldCells)
+void BosonMiniMap::moveUnit(Unit* unit, const QPtrVector<Cell>* newCells, const QPtrVector<Cell>* oldCells)
 {
  // all parameters use cell coordinates!
  // note that using unit->x() and unit->y() as well as unit->cells() and such
@@ -287,11 +290,12 @@ void BosonMiniMap::moveUnit(Unit* unit, const QPointArray& newCells, const QPoin
  BO_CHECK_NULL_RET(mCanvas);
  BO_CHECK_NULL_RET(unit);
  BO_CHECK_NULL_RET(map());
- if (newCells.count() == oldCells.count()) {
+ BO_CHECK_NULL_RET(newCells);
+ if (oldCells && newCells->count() == oldCells->count()) {
 	if (!unit->isDestroyed()) {
 		bool moved = false;
-		for (unsigned int i = 0; i < newCells.count() && !moved; i++) {
-			if (newCells[i] != oldCells[i]) {
+		for (unsigned int i = 0; i < newCells->count() && !moved; i++) {
+			if (newCells->at(i) != oldCells->at(i)) {
 				moved = true;
 			}
 		}
@@ -304,31 +308,35 @@ void BosonMiniMap::moveUnit(Unit* unit, const QPointArray& newCells, const QPoin
 	}
  }
 
- if (oldCells.count() != 0) {
+ if (oldCells && oldCells->count() != 0) {
 	// unit is moving.
 	// pretty much everything can happen here now. the cell that the unit
 	// left can be fogged for the local player, can have another unit, ...
 	// so we need to update all cells that the unit has left.
-	for (unsigned int i = 0; i < oldCells.count(); i++) {
+	for (unsigned int i = 0; i < oldCells->count(); i++) {
 		bool found = false;
-		for (unsigned int j = 0; j < newCells.count(); j++) {
-			if (newCells[j] == oldCells[i]) {
+		for (unsigned int j = 0; j < newCells->count(); j++) {
+			if (newCells->at(j) == oldCells->at(i)) {
 				found = true;
 				break;
 			}
 		}
 		if (!found) {
-			updateCell(oldCells[i].x(), oldCells[i].y());
+			Cell* c = oldCells->at(i);
+			if (c) {
+				updateCell(c->x(), c->y());
+			}
 		}
 	}
  }
  QColor color = unit->owner()->teamColor();
- for (unsigned int i = 0; i < newCells.count(); i++) {
-	int x = newCells[i].x();
-	int y = newCells[i].y();
-	if (!mCanvas->cell(x, y)) {
+ for (unsigned int i = 0; i < newCells->count(); i++) {
+	Cell* c = newCells->at(i);
+	if (!c) {
 		continue;
 	}
+	int x = c->x();
+	int y = c->y();
 	if (mLocalPlayer && mLocalPlayer->isFogged(x, y)) {
 		// we don't call slotFog() here now, as it should be fogged
 		// already. maybe we should do this anyway?
@@ -368,7 +376,9 @@ void BosonMiniMap::updateCell(int x, int y)
 	changeCell(x, y, cell->groundType(), cell->version());
  } else {
 	Unit* u = list.first();
-	moveUnit(u, makeCellList(u, u->x(), u->y()), QPointArray());
+	QPtrVector<Cell> cells;
+	makeCellList(&cells, u, u->x(), u->y());
+	moveUnit(u, &cells, 0);
  }
 }
 
@@ -422,7 +432,9 @@ void BosonMiniMap::initMap()
 void BosonMiniMap::slotUnitDestroyed(Unit* unit)
 {
  BO_CHECK_NULL_RET(unit)
- moveUnit(unit, makeCellList(unit, unit->x(), unit->y()), QPointArray());
+ QPtrVector<Cell> cells;
+ makeCellList(&cells, unit, unit->x(), unit->y());
+ moveUnit(unit, &cells, 0);
 }
 
 void BosonMiniMap::slotUnfog(int x, int y)
@@ -439,7 +451,9 @@ void BosonMiniMap::slotUnfog(int x, int y)
  QValueList<Unit*> list = mCanvas->unitsAtCell(x, y);
  if (!list.isEmpty()) {
 	Unit* u = list.first();
-	moveUnit(u, makeCellList(u, u->x(), u->y()), QPointArray());
+	QPtrVector<Cell> cells;
+	makeCellList(&cells, u, u->x(), u->y());
+	moveUnit(u, &cells, 0);
  } else {
 	changeCell(x, y, cell->groundType(), cell->version());
  }
@@ -615,23 +629,16 @@ void BosonMiniMap::createGround()
  p.end();
 }
 
-QPointArray BosonMiniMap::makeCellList(Unit* unit, float x, float y)
+void BosonMiniMap::makeCellList(QPtrVector<Cell>* cells, const Unit* unit, float x, float y)
 {
- QPointArray array;
- if (!unit) {
-	BO_NULL_ERROR(unit);
-	return QPointArray();
- }
- if (!map()) {
-	BO_NULL_ERROR(map());
-	return QPointArray();
- }
+ BO_CHECK_NULL_RET(unit);
+ BO_CHECK_NULL_RET(map());
  int left, right, top, bottom;
  BosonItem::leftTopCell(&left, &top, x, y);
  BosonItem::rightBottomCell(&right, &bottom, x + unit->width() - 1, y + unit->height() - 1);
  right = QMIN(right, QMAX((int)mapWidth() - 1, 0));
  bottom = QMIN(bottom, QMAX((int)mapHeight() - 1, 0));
- return BosonItem::cells(left, right, top, bottom);
+ return BosonItem::makeCells(mCanvas, cells, left, right, top, bottom);
 }
 
 void BosonMiniMap::setPixmapTheme(const QString& theme)

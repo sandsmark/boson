@@ -22,11 +22,11 @@
 #include "../rtti.h"
 #include "../selectbox.h"
 #include "../bosonmodel.h"
+#include "../cell.h" // for deleteitem. i dont want this. how can we avoid this? don't use qptrvector probably.
 #include "bodebug.h"
 
 #include <qintdict.h>
 #include <qrect.h>
-#include <qpointarray.h>
 
 BosonItem::BosonItem(BosonModel* model, BosonCanvas* canvas)
 {
@@ -91,7 +91,7 @@ BosonItem::~BosonItem()
  }
 }
 
-QPointArray BosonItem::cells()
+QPtrVector<Cell>* BosonItem::cells()
 {
  if (mCellsDirty) {
 	int left, right, top, bottom;
@@ -99,13 +99,13 @@ QPointArray BosonItem::cells()
 	rightBottomCell(&right, &bottom);
 	right = QMIN(right, QMAX((int)canvas()->mapWidth() - 1, 0));
 	bottom = QMIN(bottom, QMAX((int)canvas()->mapHeight() - 1, 0));
-	mCells = cells(left, right, top, bottom);
+	makeCells(canvas(), &mCells, left, right, top, bottom);
 	mCellsDirty = false;
  }
- return mCells;
+ return &mCells;
 }
 
-QPointArray BosonItem::cells(int left, int right, int top, int bottom)
+void BosonItem::makeCells(const BosonCanvas* canvas, QPtrVector<Cell>* cells, int left, int right, int top, int bottom)
 {
  left = QMAX(left, 0);
  top = QMAX(top, 0);
@@ -113,17 +113,27 @@ QPointArray BosonItem::cells(int left, int right, int top, int bottom)
  bottom = QMAX(top, bottom);
 
  int size = (right - left + 1) * (bottom - top + 1);
- if (size <= 0) {
-	return QPointArray();
+ cells->resize(size);
+ if (size == 0) {
+	return;
  }
  int n = 0;
- QPointArray c(size);
  for (int i = left; i <= right; i++) {
 	for (int j = top; j <= bottom; j++) {
-		c[n++] = QPoint(i, j);
+		// AB: canvas->cell() is not really efficient here. we should
+		// prefer direct access on BosonMap::cells() using
+		// BosonMap::cellArrayPos(). But we would have to include
+		// bosonmap.h for this, so we do it this way.
+		// we may want to replace if it turns out that we need more
+		// speed (i dont think so, btw).
+		Cell* c = canvas->cell(i, j);
+		if (!c) {
+			continue;
+		}
+		cells->insert(n, c);
+		n++;
 	}
  }
- return c;
 }
 
 bool BosonItem::bosonCollidesWith(BosonItem* item) const
