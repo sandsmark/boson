@@ -446,7 +446,7 @@ void BosonStarting::loadUnitDatas(Player* p)
 void BosonStarting::startScenario()
 {
  if (!boGame->isAdmin()) {
-	boError() << "not admin" << endl;
+	boError() << k_funcinfo << "not admin" << endl;
 	return;
  }
  if (mLoading) {
