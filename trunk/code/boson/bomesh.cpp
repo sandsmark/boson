@@ -1281,7 +1281,7 @@ BoVector3 BoMesh::vertex(unsigned int face, unsigned int i, unsigned int _lod) c
 	boError(100) << k_funcinfo << "NULL face " << face << endl;
 	return BoVector3();
  }
- return vertex(f->pointIndex()[i]);
+ return vertex(f->pointIndex()[i] - d->mMeshPoints.pointsMovedBy());
 }
 
 void BoMesh::setTexel(unsigned int index, const BoVector3& texel)
@@ -1466,6 +1466,36 @@ void BoMesh::renderBoundingObject()
 	}
  }
  d->mBoundingObject->render();
+}
+
+void BoMesh::renderVertexPoints(unsigned int _lod)
+{
+ if (_lod >= lodCount()) {
+	_lod = lodCount() - 1;
+ }
+ BoMeshLOD* lod = levelOfDetail(_lod);
+ if (!lod) {
+	BO_NULL_ERROR(lod);
+	return;
+ }
+
+ BoFaceNode* node = lod->nodes();
+ if (!node) {
+	return;
+ }
+ glBegin(GL_POINTS);
+	while (node) {
+		const BoFace* face = node->face();
+		const int* points = face->pointIndex();
+		BoVector3 v1 = vertex(points[0] - d->mMeshPoints.pointsMovedBy());
+		glVertex3f(v1[0], v1[1], v1[2]);
+		BoVector3 v2 = vertex(points[1] - d->mMeshPoints.pointsMovedBy());
+		glVertex3f(v2[0], v2[1], v2[2]);
+		BoVector3 v3 = vertex(points[2] - d->mMeshPoints.pointsMovedBy());
+		glVertex3f(v3[0], v3[1], v3[2]);
+		node = node->next();
+	}
+ glEnd();
 }
 
 // there MUST be a valid context set already!!
@@ -1741,3 +1771,4 @@ const QString& BoMesh::name() const
 {
  return d->mName;
 }
+
