@@ -5,7 +5,9 @@ Speed=4
 
 [Boson Unit]
 Armor=2
-DestroyedParticles=1002,3002,6001
+DestroyedParticles=1002,3002,6001,7001
+ExplodingDamage=0
+ExplodingDamageRange=0
 Health=200
 Id=10008
 IsFacility=false

@@ -1,5 +1,5 @@
 # add your particle to particles_DATA (space separated) to make it install!
-particles_DATA = particles.boson explosion.png smoke.png
+particles_DATA = particles.boson explosion.png smoke.png dirt.png shockwave.png
 
 # no further editing need here
 

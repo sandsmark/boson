@@ -6,6 +6,8 @@ Speed=5
 [Boson Unit]
 Armor=0
 DestroyedParticles=1002,3003,6001,7001
+ExplodingDamage=0
+ExplodingDamageRange=0
 Health=80
 Id=10001
 IsFacility=false
@@ -34,10 +36,10 @@ ReportUnderAttack=report_underattack
 Shoot=shoot
 
 [Upgrade_1]
-RequireTechnologies=12
-WeaponRange=5
-WeaponDamage=15
 Health=60
+RequireTechnologies=12
+WeaponDamage=15
+WeaponRange=5
 
 [Weapon_0]
 CanShootAtAirUnits=false
