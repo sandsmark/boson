@@ -716,6 +716,8 @@ public:
 
 	virtual void setOpaque(bool o);
 
+	void setEditable(bool);
+
 private:
 	void init();
 
@@ -774,6 +776,9 @@ public:
 	virtual void setPreferredSize(const ufo::UDimension& size);
 
 	virtual void setOpaque(bool o);
+
+	void clear();
+	unsigned int count() const;
 
 signals:
 	void signalSelectionChanged(int firstIndex, int lastIndex);

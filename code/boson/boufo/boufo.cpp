@@ -1745,6 +1745,11 @@ void BoUfoTextEdit::init()
  widget()->add(mTextEdit);
 }
 
+void BoUfoTextEdit::setEditable(bool e)
+{
+ mTextEdit->setEditable(e);
+}
+
 void BoUfoTextEdit::setOpaque(bool o)
 {
  BoUfoWidget::setOpaque(o);
@@ -1840,6 +1845,16 @@ void BoUfoListBox::init()
  widget()->add(mListBox);
 
  CONNECT_UFO_TO_QT(BoUfoListBox, mListBox, SelectionChanged);
+}
+
+void BoUfoListBox::clear()
+{
+ mListBox->removeAllItems();
+}
+
+unsigned int BoUfoListBox::count() const
+{
+ return mListBox->getItemCount();
 }
 
 void BoUfoListBox::setOpaque(bool o)
