@@ -42,7 +42,7 @@ boson_LDADD   =  ../common/libboson.a -lkfile -lkfm -lkdeui -lkdecore -lQwSprite
 #(un)install stuff
 install-data-local:
 	$(mkinstalldirs) $(kde_appsdir)/
-	$(INSTALL_DATA) boson.kdelnk $(kde_appsdir)/boson.kdelnk
+	$(INSTALL_DATA) boson.kdelnk $(kde_appsdir)/Games/boson.kdelnk
 	$(mkinstalldirs) $(kde_icondir)/
 	$(INSTALL_DATA) boson.xpm $(kde_icondir)/boson.xpm
 	$(mkinstalldirs) $(kde_minidir)/
