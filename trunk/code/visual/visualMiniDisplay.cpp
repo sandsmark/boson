@@ -106,7 +106,7 @@ void visualMiniDisplay::sync(void)
 }
 
 
-void visualMiniDisplay::paintEvent(QPaintEvent *evt)
+void visualMiniDisplay::paintEvent(QPaintEvent *)
 {
 	QPainter p;
 

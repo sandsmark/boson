@@ -37,14 +37,14 @@ speciesTheme::speciesTheme(char *themeName, QRgb color)
 {
 	team_color		= color;
 
-	mobBigOverview		= new (QPixmap*)[mobilePropNb];
-	fixBigOverview		= new (QPixmap*)[facilityPropNb];
-	mobSmallOverview	= new (QPixmap*)[mobilePropNb];
-	fixSmallOverview	= new (QPixmap*)[facilityPropNb];
+	mobBigOverview		= new QPixmap*[mobilePropNb];
+	fixBigOverview		= new QPixmap*[facilityPropNb];
+	mobSmallOverview	= new QPixmap*[mobilePropNb];
+	fixSmallOverview	= new QPixmap*[facilityPropNb];
 
 
-	mobSprite		= new (QCanvasPixmapArray*)[mobilePropNb];
-	fixSprite		= new (QCanvasPixmapArray*)[facilityPropNb];
+	mobSprite		= new QCanvasPixmapArray*[mobilePropNb];
+	fixSprite		= new QCanvasPixmapArray*[facilityPropNb];
 
 
 	mobiles			= new QBitArray(mobilePropNb);
