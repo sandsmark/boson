@@ -391,8 +391,6 @@ void BoEditorApp::readOptions()
 	tool_bar_0_pos = (KToolBar::BarPosition)config->readNumEntry("ToolBar_0_Pos", KToolBar::Right);
 
 	config->readListEntry("Recent Files", *recentList);
-	for (uint i =0 ; i < recentList->count(); i++)
-		file_menu_recent->insertItem(recentList->at(i));
 
 
 }
