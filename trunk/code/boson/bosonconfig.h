@@ -336,7 +336,7 @@ public:
 
 	/**
 	 * Add a dynamic entry to BosonConfig. A dynamic entry does not have a
-	 * dedicates set/get function, but rather uses @ref setBoolValue,
+	 * dedicated set/get function, but rather uses @ref setBoolValue,
 	 * @ref value and friends.
 	 *
 	 * You should not use this for extremely time critical config entries
