@@ -154,6 +154,106 @@ void
 UXDisplay::pushMouseButtonDown(UContext * context,
 		int x, int y, UMod_t button)
 {
+	mouseButtonDown(context, x, y, button, true);
+}
+
+void
+UXDisplay::pushMouseButtonUp(UContext * context,
+		int x, int y, UMod_t button)
+{
+	mouseButtonUp(context, x, y, button, true);
+}
+
+void
+UXDisplay::pushMouseMove(UContext * context,
+		int x, int y)
+{
+	mouseMove(context, x, y, true);
+}
+
+void
+UXDisplay::pushMouseWheelDown(UContext * context,
+		int x, int y, int delta, int mouseWheelNum)
+{
+	mouseWheelDown(context, x, y, delta, mouseWheelNum, true);
+}
+
+void
+UXDisplay::pushMouseWheelUp(UContext * context,
+		int x, int y, int delta, int mouseWheelNum)
+{
+	mouseWheelDown(context, x, y, delta, mouseWheelNum, true);
+}
+
+void
+UXDisplay::pushKeyDown(UContext * context,
+		UKeyCode_t keyCode, wchar_t keyChar)
+{
+	keyDown(context, keyCode, keyChar, true);
+}
+
+void
+UXDisplay::pushKeyUp(UContext * context,
+		UKeyCode_t keyCode, wchar_t keyChar)
+{
+	keyUp(context, keyCode, keyChar, true);
+}
+
+bool
+UXDisplay::dispatchMouseButtonDown(UContext * context,
+		int x, int y, UMod_t button)
+{
+	return mouseButtonDown(context, x, y, button, false);
+}
+
+bool
+UXDisplay::dispatchMouseButtonUp(UContext * context,
+		int x, int y, UMod_t button)
+{
+	return mouseButtonUp(context, x, y, button, false);
+}
+
+bool
+UXDisplay::dispatchMouseMove(UContext * context,
+		int x, int y)
+{
+	return mouseMove(context, x, y, false);
+}
+
+bool
+UXDisplay::dispatchMouseWheelDown(UContext * context,
+		int x, int y, int delta, int mouseWheelNum)
+{
+	return mouseWheelDown(context, x, y, delta, mouseWheelNum, false);
+}
+
+bool
+UXDisplay::dispatchMouseWheelUp(UContext * context,
+		int x, int y, int delta, int mouseWheelNum)
+{
+	return mouseWheelDown(context, x, y, delta, mouseWheelNum, false);
+}
+
+bool
+UXDisplay::dispatchKeyDown(UContext * context,
+		UKeyCode_t keyCode, wchar_t keyChar)
+{
+	return keyDown(context, keyCode, keyChar, false);
+}
+
+bool
+UXDisplay::dispatchKeyUp(UContext * context,
+		UKeyCode_t keyCode, wchar_t keyChar)
+{
+	return keyUp(context, keyCode, keyChar, false);
+}
+
+bool
+UXDisplay::mouseButtonDown(UContext * context,
+		int x, int y, UMod_t button,
+		bool push)
+{
+	bool ret = true;
 	int modifiers = getModState();
 	// FIXME: should button down events have that button as modifier?
 	// add the newly pressed button to the modifiers
@@ -172,13 +272,23 @@ UXDisplay::pushMouseButtonDown(UContext * context,
 		0 // click count
 	);
 
-	pushEvent(e);
+	if (push) {
+		pushEvent(e);
+	} else {
+		e->reference();
+		dispatchEvent(e);
+		ret = e->isConsumed();
+		e->unreference();
+	}
+	return ret;
 }
 
-void
-UXDisplay::pushMouseButtonUp(UContext * context,
-		int x, int y, UMod_t button)
+bool
+UXDisplay::mouseButtonUp(UContext * context,
+		int x, int y, UMod_t button,
+		bool push)
 {
+	bool ret = true;
 	int modifiers = getModState();
 	// FIXME: should button up events have that button as modifier?
 	// remove the newly released button to the modifiers
@@ -195,7 +305,14 @@ UXDisplay::pushMouseButtonUp(UContext * context,
 		0 // click count
 	);
 
-	pushEvent(e);
+	if (push) {
+		pushEvent(e);
+	} else {
+		e->reference();
+		dispatchEvent(e);
+		ret = e->isConsumed();
+		e->unreference();
+	}
 
 	uint32_t time = UXToolkit::getToolkit()->getTicks();
 	if ((time - m_lastMousePressTime) <= m_clickDelay) {
@@ -220,16 +337,23 @@ UXDisplay::pushMouseButtonUp(UContext * context,
 			button, // changed button
 			m_clickCount // click count
 		);
-		pushEvent(e);
+		if (push) {
+			pushEvent(e);
+		} else {
+			dispatchEvent(e);
+		}
 
 		m_lastMousePressTime = time;
 	}
+	return ret;
 }
 
-void
-UXDisplay::pushMouseMove(UContext * context,
-		int x, int y)
+bool
+UXDisplay::mouseMove(UContext * context,
+		int x, int y,
+		bool push)
 {
+	bool ret = true;
 	UPoint pos(x, y);
 
 	UMouseEvent * e = new UMouseEvent(
@@ -242,13 +366,23 @@ UXDisplay::pushMouseMove(UContext * context,
 		0 // click count
 	);
 	m_mousePos = pos;
-	pushEvent(e);
+	if (push) {
+		pushEvent(e);
+	} else {
+		e->reference();
+		dispatchEvent(e);
+		ret = e->isConsumed();
+		e->unreference();
+	}
+	return ret;
 }
 
-void
-UXDisplay::pushMouseWheelDown(UContext * context,
-		int x, int y, int delta, int mouseWheelNum)
+bool
+UXDisplay::mouseWheelDown(UContext * context,
+		int x, int y, int delta, int mouseWheelNum,
+		bool push)
 {
+	bool ret = true;
 	UMouseWheelEvent * e = new UMouseWheelEvent(
 		context->getRootPane(), // we do not need a source, but just in case..
 		UEvent::MouseWheel, // type
@@ -258,13 +392,23 @@ UXDisplay::pushMouseWheelDown(UContext * context,
 		mouseWheelNum // wheel number (only one mouse wheel is supported by SDL)
 	);
 
-	pushEvent(e);
+	if (push) {
+		pushEvent(e);
+	} else {
+		e->reference();
+		dispatchEvent(e);
+		ret = e->isConsumed();
+		e->unreference();
+	}
+	return ret;
 }
 
-void
-UXDisplay::pushMouseWheelUp(UContext * context,
-		int x, int y, int delta, int mouseWheelNum)
+bool
+UXDisplay::mouseWheelUp(UContext * context,
+		int x, int y, int delta, int mouseWheelNum,
+		bool push)
 {
+	bool ret = true;
 	UMouseWheelEvent * e = new UMouseWheelEvent(
 		context->getRootPane(), // we do not need a source, but just in case..
 		UEvent::MouseWheel, // type
@@ -274,52 +418,82 @@ UXDisplay::pushMouseWheelUp(UContext * context,
 		mouseWheelNum // wheel number (only one mouse wheel is supported by SDL)
 	);
 
-	pushEvent(e);
+	if (push) {
+		pushEvent(e);
+	} else {
+		e->reference();
+		dispatchEvent(e);
+		ret = e->isConsumed();
+		e->unreference();
+	}
+	return ret;
 }
 
-void
-UXDisplay::pushKeyDown(UContext * context,
-		UKeyCode_t keyCode, wchar_t keyChar)
+bool
+UXDisplay::keyDown(UContext * context,
+		UKeyCode_t keyCode, wchar_t keyChar,
+		bool push)
 {
+	bool ret = true;
 	UMod_t modifiers = getModState();
-	pushEvent(
-		new UKeyEvent(
-			context->getRootPane(),  // source
-			UEvent::KeyPressed,
-			modifiers,
-			keyCode,
-			keyChar
-		)
+	UKeyEvent* e = new UKeyEvent(
+		context->getRootPane(),  // source
+		UEvent::KeyPressed,
+		modifiers,
+		keyCode,
+		keyChar
 	);
+	if (push) {
+		pushEvent(e);
+	} else {
+		e->reference();
+		dispatchEvent(e);
+		ret = e->isConsumed();
+		e->unreference();
+	}
 
 	// FIXME keytyped: is this correct?
 	if (! /*std::*/iscntrl(keyChar)) {
-		pushEvent(
-			new UKeyEvent(
-				context->getRootPane(),  // source
-				UEvent::KeyTyped,
-				modifiers,  // modifier
-				UKey::UK_UNDEFINED,  // SDLkey
-				keyChar
-			)
+		UKeyEvent* e = new UKeyEvent(
+			context->getRootPane(),  // source
+			UEvent::KeyTyped,
+			modifiers,  // modifier
+			UKey::UK_UNDEFINED,  // SDLkey
+			keyChar
 		);
+		if (push) {
+			pushEvent(e);
+		} else {
+			dispatchEvent(e);
+		}
 	}
+	return ret;
 }
 
-void
-UXDisplay::pushKeyUp(UContext * context,
-		UKeyCode_t keyCode, wchar_t keyChar)
+bool
+UXDisplay::keyUp(UContext * context,
+		UKeyCode_t keyCode, wchar_t keyChar,
+		bool push)
 {
-	pushEvent(
-		new UKeyEvent(
-			context->getRootPane(),  // source
-			UEvent::KeyReleased,
-			getModState(),
-			keyCode,
-			keyChar
-		)
+	bool ret = true;
+	UKeyEvent* e = new UKeyEvent(
+		context->getRootPane(),  // source
+		UEvent::KeyReleased,
+		getModState(),
+		keyCode,
+		keyChar
 	);
+	if (push) {
+		pushEvent(e);
+	} else {
+		e->reference();
+		dispatchEvent(e);
+		ret = e->isConsumed();
+		e->unreference();
+	}
+	return ret;
 }
+
 
 
 #if 0
