@@ -109,8 +109,8 @@ void BoFastGroundRenderer::renderVisibleCells(int* renderCells, unsigned int cel
 		int celloffset = y * cornersWidth + x;
 		const float* heightMapUpperLeft = heightMap + celloffset;
 
-		GLfloat cellXPos = (float)x * BO_GL_CELL_SIZE;
-		GLfloat cellYPos = -(float)y * BO_GL_CELL_SIZE;
+		GLfloat cellXPos = (float)x;
+		GLfloat cellYPos = -(float)y;
 
 		float upperLeftHeight = *heightMapUpperLeft;
 		float upperRightHeight = *(heightMapUpperLeft + w);
@@ -126,13 +126,13 @@ void BoFastGroundRenderer::renderVisibleCells(int* renderCells, unsigned int cel
 
 #warning see default ground renderer - do we have to take w,h into account for the offsets?
 		glTexCoord2f(texOffsets[x % offsetCount], texOffsets[y % offsetCount]);
-		glVertex3f(cellXPos, cellYPos - h * BO_GL_CELL_SIZE, lowerLeftHeight);
+		glVertex3f(cellXPos, cellYPos - h, lowerLeftHeight);
 
 		glTexCoord2f(texOffsets[x % offsetCount] + offset, texOffsets[y % offsetCount]);
-		glVertex3f(cellXPos + w * BO_GL_CELL_SIZE, cellYPos - h * BO_GL_CELL_SIZE, lowerRightHeight);
+		glVertex3f(cellXPos + w, cellYPos - h, lowerRightHeight);
 
 		glTexCoord2f(texOffsets[x % offsetCount] + offset, texOffsets[y % offsetCount] + offset);
-		glVertex3f(cellXPos + w * BO_GL_CELL_SIZE, cellYPos, upperRightHeight);
+		glVertex3f(cellXPos + w, cellYPos, upperRightHeight);
 		quads++;
 	}
 	glEnd();

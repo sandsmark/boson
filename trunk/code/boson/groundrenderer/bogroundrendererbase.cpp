@@ -582,10 +582,10 @@ int* CellListBuilderNoTree::generateCellList(const BosonMap* map, int* origRende
  // if everything went fine we need to add those cells that are in the
  // ((minX,minY),(maxX,maxY)) rectangle only.
 
- int cellMinX = (int)(minX / BO_GL_CELL_SIZE); // AB: *no* +1 for min values!
- int cellMaxX = (int)(maxX / BO_GL_CELL_SIZE) + 1; // +1 because of a modulo (very probably at this point)
- int cellMinY = (int)(minY / BO_GL_CELL_SIZE);
- int cellMaxY = (int)(maxY / BO_GL_CELL_SIZE) + 1;
+ int cellMinX = (int)(minX); // AB: *no* +1 for min values!
+ int cellMaxX = (int)(maxX) + 1; // +1 because of a modulo (very probably at this point)
+ int cellMinY = (int)(minY);
+ int cellMaxY = (int)(maxY) + 1;
 
  // finally we ensure that the cell values are valid, too.
  // after these lines we mustn't modify cellM* anymore!
@@ -625,8 +625,8 @@ int* CellListBuilderNoTree::generateCellList(const BosonMap* map, int* origRende
 		// here!
 		c = &allCells[map->cellArrayPos(x, y)];
 
-		glX = (float)c->x() * BO_GL_CELL_SIZE + BO_GL_CELL_SIZE / 2;
-		glY = -((float)c->y() * BO_GL_CELL_SIZE + BO_GL_CELL_SIZE / 2);
+		glX = (float)c->x() + 1.0f / 2;
+		glY = -((float)c->y() + 1.0f / 2);
 
 		// Calculate average height and radius of bounding sphere of the cell
 		// Reset variables
@@ -641,7 +641,7 @@ int* CellListBuilderNoTree::generateCellList(const BosonMap* map, int* origRende
 		}
 		z = (maxz - minz) / 2;
 
-		if (Bo3dTools::sphereInFrustum(viewFrustum(), BoVector3(glX, glY, (minz + maxz) / 2), sqrt(2 * (BO_GL_CELL_SIZE/2) * (BO_GL_CELL_SIZE/2) + z * z))) {
+		if (Bo3dTools::sphereInFrustum(viewFrustum(), BoVector3(glX, glY, (minz + maxz) / 2), sqrt(2 * (1.0f / 2) * (1.0f / 2) + z * z))) {
 			// AB: instead of storing the cell here we should store
 			// cell coordinates and create a vertex array with that
 			BoGroundRenderer::setCell(renderCells, count, c->x(), c->y(), 1, 1);
@@ -674,8 +674,8 @@ void CellListBuilderNoTree::calculateWorldRect(const QRect& rect, int mapWidth, 
  }
 
 
- const float mapRight = (mapWidth - 1) * BO_GL_CELL_SIZE;
- const float mapBottom = -(mapHeight - 1) * BO_GL_CELL_SIZE;
+ const float mapRight = (mapWidth - 1);
+ const float mapBottom = -(mapHeight - 1);
 
  class LineSegment {
  public:
@@ -1041,8 +1041,8 @@ void CellListBuilderNoTree::calculateWorldRect(const QRect& rect, int mapWidth, 
  LineSegment* l = first;
  // initialize max x/y to the minimum and min x/y to the maximum.
  *maxX = *maxY = 0.0f;
- *minX = (mapWidth - 1) * BO_GL_CELL_SIZE;
- *minY = (mapHeight - 1) * BO_GL_CELL_SIZE;
+ *minX = (mapWidth - 1);
+ *minY = (mapHeight - 1);
  int lineCount = 0;
  do {
 	*maxX = QMAX(*maxX, l->mStart[0]);
@@ -1069,10 +1069,10 @@ void CellListBuilderNoTree::calculateWorldRect(const QRect& rect, int mapWidth, 
  *maxY = QMAX(0, *maxY);
  *minX = QMAX(0, *minX);
  *minY = QMAX(0, *minY);
- *maxX = QMIN((mapWidth - 1) * BO_GL_CELL_SIZE, *maxX);
- *minX = QMIN((mapWidth - 1) * BO_GL_CELL_SIZE, *minX);
- *maxY = QMIN((mapHeight - 1) * BO_GL_CELL_SIZE, *maxY);
- *minY = QMIN((mapHeight - 1) * BO_GL_CELL_SIZE, *minY);
+ *maxX = QMIN((mapWidth - 1), *maxX);
+ *minX = QMIN((mapWidth - 1), *minX);
+ *maxY = QMIN((mapHeight - 1), *maxY);
+ *minY = QMIN((mapHeight - 1), *minY);
 
  *minY *= -1;
  *maxY *= -1;
@@ -1286,8 +1286,8 @@ static float distanceFromPlane(const float* plane, const CellTreeNode* node, con
  const int b = node->mBottom;
  const float x = (float)node->mLeft;
  const float y = (float)-node->mTop;
- const float x2 = ((float)node->mRight) + BO_GL_CELL_SIZE;
- const float y2 = ((float)-node->mBottom) - BO_GL_CELL_SIZE;
+ const float x2 = ((float)node->mRight) + 1.0f;
+ const float y2 = ((float)-node->mBottom) - 1.0f;
  const float zTopLeft = map->heightAtCorner(l, t);
  const float zTopRight = map->heightAtCorner(r + 1, t);
  const float zBottomLeft = map->heightAtCorner(l, b + 1);
