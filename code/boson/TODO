@@ -30,13 +30,8 @@ Game TODOs
 - display "filling" status of harvesters instead of firepower. use different
   colors!
 - TopWidget::slotNewGame() is broken
-- chat widget should be hidden by default
-- BUG: when you select some building that can shoot and then move cursor over an
-  enemy's unit or building, cursor becomes attack cursor but it doesn't change
-  back to normal when you move cursor away from enemy's unit or building
 - "welcome to Boson" text in startup screen should be translateable (we can use
   QPainter to paint it to pixmap)
-- minimap zooming factor should always be integral. It looks terrible otherwise
 - Do not start game before all players has loaded their data
 
 Editor (map, unit, scenario) TODOs
@@ -82,11 +77,12 @@ General TODOs
   unremovable
 - canvas text: we want a static non-moving text in the upper right corner
   displaying the resources of the player. up to now all implementations flicker
-  in any way...
+  in any way...  update: do we need it anyway? We have same labels on statusbar
+  and they're ok for me...
 - use KDock for the dispalys
 - color combobox should have same width as other comboboxes
 - hostname lineedit in BosonNetworkOptionsWidget seems to have wrong
-  BackgroundOrigin
+  BackgroundOrigin  update: it's not wrong, it's disabled-color
 - BsoonPath::PathNode needs to be public to compile in gcc 2.96
   Why? It is used internally only... Failing e.g. here:
   inline bool operator<(const BosonPath::PathNode& a, const BosonPath::PathNode& b)
@@ -95,6 +91,8 @@ General TODOs
   methods in some classes) but it still needs lot of work.
 - Use KMD5 to calculate checksum of map and unitProperties at the beginning of
   game and transfer only needed things over network. Saves some traffic
+- Rewrite or optimize minimap. Currently, it has terrible performance (scroll
+  the map and you'll see)
 
 Data TODOs
 - sound for minimap activated/deactivated
