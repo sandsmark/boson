@@ -72,8 +72,8 @@
 #include "bosonglfont.h"
 
 // both must be > 0.0:
-#define NEAR 1.0 // FIXME: should be > 1.0
-#define FAR 100.0
+#define NEAR 1.0f // FIXME: should be > 1.0
+#define FAR 100.0f
 
 // Camera limits
 #define CAMERA_MIN_Z NEAR + 3
@@ -81,7 +81,7 @@
 #define CAMERA_MAX_RADIUS 80
 
 #define BO_LIGHT 1
-#define CLEAR_DEPTH_FULL 1
+#define CLEAR_DEPTH 1.0f
 
 #ifdef BO_LIGHT
 #warning move to class !
@@ -225,46 +225,36 @@ private:
 	GLfloat mMapWidth;
 	GLfloat mMapHeight;
 };
-//int a1, a2;
 
 class SelectionRect
 {
 public:
 	SelectionRect()
 	{
-		mStartX = mEndX = 0.0;
-		mStartY = mEndY = 0.0;
-		mStartZ = mEndZ = 0.0;
 		mVisible = false;
 	}
 	
-	void start(GLfloat* x, GLfloat* y, GLfloat* z) const
+	void widgetRect(QRect* rect) const
 	{
-		*x = mStartX;
-		*y = mStartY;
-		*z = mStartZ;
+		QRect r(mStartPos, mEndPos);
+		*rect = r.normalize();
 	}
-	void end(GLfloat* x, GLfloat* y, GLfloat* z) const
+
+	void setStartWidgetPos(const QPoint& pos)
 	{
-		*x = mEndX;
-		*y = mEndY;
-		*z = mEndZ;
-	}
-	void setStart(GLfloat x, GLfloat y, GLfloat z)
-	{
-		mStartX = x;
-		mStartY = y;
-		mStartZ = z;
-		setEnd(x, y, z);
+		mStartPos = pos;
+		setEndWidgetPos(mStartPos);
 	}
 	
-	void setEnd(GLfloat x, GLfloat y, GLfloat z)
+	void setEndWidgetPos(const QPoint& pos)
 	{
-		mEndX = x;
-		mEndY = y;
-		mEndZ = z;
+		mEndPos = pos;
 	}
-	
+	const QPoint& startPos() const
+	{
+		return mStartPos;
+	}
+
 	bool isVisible() const
 	{
 		return mVisible;
@@ -274,12 +264,8 @@ public:
 		mVisible = v;
 	}
 private:
-	GLfloat mStartX;
-	GLfloat mStartY;
-	GLfloat mStartZ;
-	GLfloat mEndX;
-	GLfloat mEndY;
-	GLfloat mEndZ;
+	QPoint mStartPos;
+	QPoint mEndPos;
 	bool mVisible;
 };
 
@@ -413,8 +399,8 @@ public:
 	Camera mCamera;
 
 	GLint mViewport[4]; // x,y,w,h of the viewport. see setViewport
-	GLdouble mProjectionMatrix[16];
-	GLdouble mModelviewMatrix[16];
+	BoMatrix mProjectionMatrix;
+	BoMatrix mModelviewMatrix;
 	GLdouble mFrustumMatrix[6][4];
 
 
@@ -465,6 +451,7 @@ public:
 
 	bool mDebugMapCoordinates;
 	bool mDebugShowCellGrid;
+	bool mDebugMatrices;
 	float mDebugMapCoordinatesX;
 	float mDebugMapCoordinatesY;
 	float mDebugMapCoordinatesZ;
@@ -503,6 +490,7 @@ void BosonBigDisplayBase::init()
  d->mCellPlacementTexture = 0;
  d->mDebugMapCoordinates = false;
  d->mDebugShowCellGrid = false;
+ d->mDebugMatrices = false;
  d->mDebugMapCoordinatesX = 0.0f;
  d->mDebugMapCoordinatesY = 0.0f;
  d->mDebugMapCoordinatesZ = 0.0f;
@@ -513,10 +501,6 @@ void BosonBigDisplayBase::init()
 
  for (int i = 0; i < 4; i++) {
 	d->mViewport[i] = 0;
- }
- for (int i = 0; i < 16; i++) {
-	d->mProjectionMatrix[i] = 0.0;
-	d->mModelviewMatrix[i] = 0.0;
  }
  for (int i = 0; i < 6; i++) {
 	for (int j = 0; j < 4; j++) {
@@ -588,6 +572,16 @@ void BosonBigDisplayBase::initializeGL()
 
  glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
 
+#if 0
+
+#warning FIXME: is extenstion there?
+ // AB: if everything is inside the view volume we can use this to skip the
+ // volume clipping tests. should be faster
+ // FIXME: do we actually render stuff thats inside the view volume only?
+ glHint(GL_CLIP_VOLUME_CLIPPING_HINT_EXT, GL_FASTEST);
+
+#endif
+
  // AB: GL_MODULATE is the default and the models don't use it. unortunately the
  // light code seems to have problems with GL_REPLACE. GL_REPLACE would be
  // faster
@@ -646,24 +640,14 @@ void BosonBigDisplayBase::resizeGL(int w, int h)
 
  // cache the composed projection matrix. we'll need it very often in
  // mapCoordinates()
- glGetDoublev(GL_PROJECTION_MATRIX, d->mProjectionMatrix);
+ d->mProjectionMatrix.loadMatrix(GL_PROJECTION_MATRIX);
  extractFrustum(); // projection matrix changed
  generateCellList();
  glMatrixMode(GL_MODELVIEW);
 
 
-#ifdef GL_CLEAR_DEPTH_FULL
- glDepthFunc(GL_GREATER);
- glClearDepth(0.0);
+ glClearDepth(CLEAR_DEPTH);
  glClear(GL_DEPTH_BUFFER_BIT);
- glDepthRange(0.0, 1.0);
-#else
- glClearDepth(1.0);
- glClear(GL_DEPTH_BUFFER_BIT);
- glDepthRange(0.0, 0.5);
- glDepthFunc(GL_LESS);
-#endif
- d->mEvenFlag = true;
 
 
  // update the minimap
@@ -745,27 +729,10 @@ void BosonBigDisplayBase::paintGL()
  // cells! i.e. render cells *after* units!
 
  boProfiling->renderClear(true);
-#ifdef CLEAR_DEPTH_FULL
  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-#else
- glClear(GL_COLOR_BUFFER_BIT);
-#endif
  boProfiling->renderClear(false);
 
- glColor3f(1.0, 1.0, 1.0);
-
- // the guy who wrote http://www.mesa3d.org/brianp/sig97/perfopt.htm is *really* clever!
- // this trick avoids clearing the depth buffer:
-#ifndef CLEAR_DEPTH_FULL
- if (d->mEvenFlag) {
-	glDepthFunc(GL_LESS);
-	glDepthRange(0.0, 0.5);
- } else {
-	glDepthFunc(GL_GREATER);
-	glDepthRange(1.0, 0.5);
- }
- d->mEvenFlag = !d->mEvenFlag;
-#endif
+ glColor3ub(255, 255, 255);
 
  // note: we don't call gluLookAt() here because of performance. instead we just
  // push the matrix here and pop it at the end of paintGL() again. gluLookAt()
@@ -1001,7 +968,7 @@ void BosonBigDisplayBase::paintGL()
  glDisable(GL_DEPTH_TEST);
  glDisable(GL_LIGHTING);
 
- boProfiling->renderText(true); // AB: actually this is text and cursor
+ boProfiling->renderText(true); // AB: actually this is text and cursor and selectionrect
 
  // cursor and text are drawn in a 2D-matrix, so that we can use window
  // coordinates
@@ -1029,6 +996,30 @@ void BosonBigDisplayBase::paintGL()
  }
  renderText();
 
+ if (d->mSelectionRect.isVisible()) {
+	glPushMatrix();
+
+	glColor3ub(255, 0, 0); // FIXME hardcoded
+	
+	QRect rect;
+	d->mSelectionRect.widgetRect(&rect);
+
+	int x = rect.left();
+	int w = rect.width();
+	int y = d->mViewport[3] - rect.top();
+	int h = rect.height();
+
+	glBegin(GL_LINE_LOOP);
+		glVertex3f(x, y, 0.0f);
+		glVertex3f(x + w, y, 0.0f);
+		glVertex3f(x + w, y - h, 0.0f);
+		glVertex3f(x, y - h, 0.0f);
+	glEnd();
+
+	glColor3ub(255, 255, 255);
+	glPopMatrix();
+ }
+
  // now restore the old 3D-matrix
  glMatrixMode(GL_PROJECTION);
  glPopMatrix();
@@ -1036,36 +1027,6 @@ void BosonBigDisplayBase::paintGL()
  glPopMatrix();
  boProfiling->renderText(false);
 
-
-
- if (d->mSelectionRect.isVisible()) {
-	glPushMatrix();
-	GLfloat x, y, w, h;
-	GLfloat x1, y1, x2, y2;
-	GLfloat z; // currently the z-coordinate of the rect is not used - we set our own below
-
-	glColor3ub(255, 0, 0); // FIXME hardcoded
-	
-	d->mSelectionRect.start(&x1, &y1, &z);
-	d->mSelectionRect.end(&x2, &y2, &z);
-
-	x = QMIN(x1, x2);
-	y = QMAX(y1, y2);
-	w = QABS(x1 - x2);
-	h = QABS(y1 - y2);
-	z = 0.0;
-
-	glTranslatef(x, y - h, z);
-	glBegin(GL_LINE_LOOP);
-		glVertex3f(0.0, 0.0, 0.0);
-		glVertex3f(0.0, h, 0.0);
-		glVertex3f(w, h, 0.0);
-		glVertex3f(w, 0.0, 0.0);
-	glEnd();
-
-	glColor3ub(255, 255, 255);
-	glPopMatrix();
- }
  if (checkError()) {
 	boError() << k_funcinfo << "selection rect rendered" << endl;
  }
@@ -1113,16 +1074,14 @@ void BosonBigDisplayBase::renderText()
  glCallLists(oil.length(), GL_UNSIGNED_BYTE, (GLubyte*)oil.latin1());
 
  if (d->mDebugMapCoordinates) {
-	canvasToWorld(d->mCanvasPos.x(), d->mCanvasPos.y(), 0.0,
-			&d->mDebugMapCoordinatesX,
-			&d->mDebugMapCoordinatesY,
-			&d->mDebugMapCoordinatesZ);
-	QString s = QString::fromLatin1("World: (%1,%2,%2) Canvas: (%4,%5)").
+	QString s = QString::fromLatin1("World: (%1,%2,%2) Canvas: (%4,%5) Window: %6,%7").
 			arg((double)d->mDebugMapCoordinatesX, 6, 'f', 3).
 			arg((double)d->mDebugMapCoordinatesY, 6, 'f', 3).
 			arg((double)d->mDebugMapCoordinatesZ, 6, 'f', 3).
 			arg(d->mCanvasPos.x(), 4, 10).
-			arg(d->mCanvasPos.y(), 4, 10);
+			arg(d->mCanvasPos.y(), 4, 10).
+			arg(mapFromGlobal(QCursor::pos()).x(), 4, 10).
+			arg(mapFromGlobal(QCursor::pos()).y(), 4, 10);
 	w = d->mDefaultFont->width(s);
 	x = d->mViewport[2] - border - w;
 	y -= d->mDefaultFont->height();
@@ -1132,10 +1091,92 @@ void BosonBigDisplayBase::renderText()
 	glRecti(x - alphaborder, y + d->mDefaultFont->height() + alphaborder,
 			x + w + alphaborder,
 			y - alphaborder);
+	glDisable(GL_BLEND);
 
 	glColor3ub(255, 255, 255);
 	glRasterPos2i(x, y);
 	glCallLists(s.length(), GL_UNSIGNED_BYTE, (GLubyte*)s.latin1());
+ }
+ if (d->mDebugMatrices) {
+	int x = border;
+	int y = d->mViewport[3] - border;
+	BoMatrix model(d->mModelviewMatrix);
+	BoMatrix proj(d->mProjectionMatrix);
+	renderMatrix(x, y, &model, i18n("Modelview matrix:"));
+	y -= (5 * d->mDefaultFont->height() + 20);
+	renderMatrix(x, y, &proj, i18n("Projection matrix:"));
+	y -= (5 * d->mDefaultFont->height() + 20);
+
+	proj.multiply(model.data());
+	renderMatrix(x, y, &proj, i18n("Projection * Modelview:"));
+	y -= (5 * d->mDefaultFont->height() + 20);
+
+	BoMatrix inverse;
+	// AB: we could calculate this for mapCoordinates whenever camera
+	// changes!
+	proj.invert(&inverse); // invert (proj*model)
+	renderMatrix(x, y, &inverse, i18n("(Projection * Modelview)^(-1):"));
+	y -= (5 * d->mDefaultFont->height() + 20);
+
+	BoMatrix identity(inverse);
+	identity.multiply(proj.data());
+	renderMatrix(x, y, &identity, i18n("Should be close to identity:"));
+	y -= (5 * d->mDefaultFont->height() + 20);
+
+
+
+	// some kind of d->mDebugMapCoordinates... but we do our own
+	// calculations instead of glUnProject.
+	QPoint widgetPos = mapFromGlobal(QCursor::pos());
+	GLint realy = d->mViewport[3] - (GLint)widgetPos.y() - 1;
+	GLfloat depth = 0.0f;
+	glReadPixels(widgetPos.x(), realy, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
+
+	BoVector4 v;
+	v.setX( (GLfloat)((widgetPos.x() - d->mViewport[0]) * 2) / d->mViewport[2] - 1.0f );
+	v.setY( (GLfloat)((realy - d->mViewport[1]) * 2) / d->mViewport[3] - 1.0f );
+	v.setZ(2 * depth - 1.0f);
+	v.setW(1.0f);
+	BoVector4 result;
+	inverse.transform(&result, &v);
+
+	// it is a column vector, but we display as a row (so ^T)
+	QString text = i18n("(Projection * Modelview)^(-1) * (%1 , %2 , %3 , %3)^T:").
+			arg(v[0], 6, 'f', 3).
+			arg(v[1], 6, 'f', 3).
+			arg(v[2], 6, 'f', 3).
+			arg(v[3], 6, 'f', 3);
+	QString resultText = i18n("(%1 , %2 , %3 , %3)^T").
+			arg(result[0], 6, 'f', 3).
+			arg(result[1], 6, 'f', 3).
+			arg(result[2], 6, 'f', 3).
+			arg(result[3], 6, 'f', 3);
+	if (result[3] == 0.0f) {
+		boError() << k_funcinfo << endl;
+		return;
+	}
+	QString realCoords = i18n("x = %1  ;  y = %2  ;  z = %3").
+			arg(result[0] / result[3]).
+			arg(result[1] / result[3]).
+			arg(result[2] / result[3]);
+	glEnable(GL_BLEND);
+	glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
+	glRecti(x, y + d->mDefaultFont->height(),
+			x + d->mDefaultFont->width(text), y);
+	glRecti(x, y,
+			x + d->mDefaultFont->width(resultText), y - d->mDefaultFont->height());
+	glRecti(x, y - d->mDefaultFont->height(),
+			x + d->mDefaultFont->width(realCoords), y - 2 * d->mDefaultFont->height());
+	glColor3ub(255, 255, 255);
+	glDisable(GL_BLEND);
+	glRasterPos2i(x, y);
+	glCallLists(text.length(), GL_UNSIGNED_BYTE, (GLubyte*)text.latin1());
+	y -= d->mDefaultFont->height();
+	glRasterPos2i(x, y);
+	glCallLists(resultText.length(), GL_UNSIGNED_BYTE, (GLubyte*)resultText.latin1());
+	y -= d->mDefaultFont->height();
+	glRasterPos2i(x, y);
+	glCallLists(realCoords.length(), GL_UNSIGNED_BYTE, (GLubyte*)realCoords.latin1());
  }
 
 // now the chat messages
@@ -1152,7 +1193,7 @@ void BosonBigDisplayBase::renderText()
 	renderToolTip();
  }
 
- glColor3f(1.0, 1.0, 1.0);
+ glColor3ub(255, 255, 255);
  glDisable(GL_BLEND);
 }
 
@@ -1468,7 +1509,7 @@ void BosonBigDisplayBase::renderParticles()
  }
  glEnd();
 
- glColor4f(1.0, 1.0, 1.0, 1.0); // Reset color
+ glColor4ub(255, 255, 255, 255); // Reset color
  glDepthMask(GL_TRUE);
  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
  glDisable(GL_BLEND);
@@ -1479,6 +1520,47 @@ void BosonBigDisplayBase::renderParticles()
  //boDebug(150) << k_funcinfo << "        Particles drawing: " << end.tv_usec - tmsort.tv_usec << " us" << endl;
 }
 
+void BosonBigDisplayBase::renderMatrix(int x, int y, const BoMatrix* matrix, const QString& text)
+{
+ y -= d->mDefaultFont->height(); // y is now at the bottom of the first line
+ glListBase(d->mDefaultFont->displayList());
+
+ QString lines[4];
+ int w = 0;
+ for (int i = 0; i < 4; i++) {
+	lines[i] = QString("%1   %2   %3   %4").
+			arg(matrix->data()[i + 0], 6, 'f', 3).
+			arg(matrix->data()[i + 4], 6, 'f', 3).
+			arg(matrix->data()[i + 8], 6, 'f', 3).
+			arg(matrix->data()[i + 12], 6, 'f', 3);
+	w = QMAX(w, d->mDefaultFont->width(lines[i]));
+ }
+ glEnable(GL_BLEND);
+ glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
+ glRecti(x, y + d->mDefaultFont->height(),
+		x + d->mDefaultFont->width(text),
+		y);
+ glRecti(x, y,
+		x + w,
+		y - 4 * d->mDefaultFont->height());
+
+ glColor3ub(255, 255, 255);
+
+ glRasterPos2i(x, y);
+ glCallLists(text.length(), GL_UNSIGNED_BYTE, (GLubyte*)text.latin1());
+ y -= d->mDefaultFont->height();
+
+
+ for (int i = 0; i < 4; i++) {
+	glRasterPos2i(x, y);
+	glCallLists(lines[i].length(), GL_UNSIGNED_BYTE, (GLubyte*)lines[i].latin1());
+	y -= d->mDefaultFont->height();
+ }
+ glDisable(GL_BLEND);
+}
+
+
+
 // one day we might support swapping LMB and RMB so let's use defines already to
 // make that easier.
 #define LEFT_BUTTON LeftButton
@@ -1488,9 +1570,9 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 {
 // AB: maybe we could move this function to the displayInput directly!
  BO_CHECK_NULL_RET(displayInput());
- GLdouble posX = 0.0;
- GLdouble posY = 0.0;
- GLdouble posZ = 0.0;
+ GLfloat posX = 0.0;
+ GLfloat posY = 0.0;
+ GLfloat posZ = 0.0;
  if (!mapCoordinates(e->pos(), &posX, &posY, &posZ)) {
 	boError() << k_funcinfo << "Cannot map coordinates" << endl;
 	return;
@@ -1558,7 +1640,7 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 		// no action should happen here!
 		isDoubleClick = NoButton;
 		if (e->button() == LEFT_BUTTON) {
-			d->mSelectionRect.setStart(posX, posY, posZ);
+			d->mSelectionRect.setStartWidgetPos(e->pos());
 		} else if (e->button() == MidButton) {
 			// nothing to be done here
 		} else if (e->button() == RIGHT_BUTTON) {
@@ -1673,7 +1755,7 @@ void BosonBigDisplayBase::mouseEventMove(int buttonState, const BoAction& action
 		// selection rect gets drawn.
 		// other modifiers are ignored
 		d->mSelectionRect.setVisible(true);
-		moveSelectionRect(posX, posY, posZ);
+		moveSelectionRect(action.widgetPos());
 	}
  } else if (buttonState & RIGHT_BUTTON) {
 	// RMB+MouseMove does *not* depend on CTRL or Shift. the
@@ -1697,7 +1779,7 @@ void BosonBigDisplayBase::mouseEventMove(int buttonState, const BoAction& action
 
 		// modifiers are ignored.
 		d->mMouseMoveDiff.startRMBMove();
-		GLdouble dx, dy;
+		GLfloat dx, dy;
 		int moveX = d->mMouseMoveDiff.dx();
 		int moveY = d->mMouseMoveDiff.dy();
 		mapDistance(moveX, moveY, &dx, &dy);
@@ -1710,8 +1792,11 @@ void BosonBigDisplayBase::mouseEventMove(int buttonState, const BoAction& action
 	// currently unused
  }
  QPoint widgetPos = mapFromGlobal(QCursor::pos());
- GLdouble x = 0.0, y = 0.0, z = 0.0;
+ GLfloat x = 0.0, y = 0.0, z = 0.0;
  mapCoordinates(widgetPos, &x, &y, &z);
+ d->mDebugMapCoordinatesX = x;
+ d->mDebugMapCoordinatesY = y;
+ d->mDebugMapCoordinatesZ = z;
  worldToCanvas(x, y, z, &(d->mCanvasPos));
  displayInput()->updatePlacementPreviewData();
 
@@ -1731,8 +1816,8 @@ void BosonBigDisplayBase::mouseEventRelease(ButtonState button,const BoAction& a
 			// basically the same as a normal RMB
 			displayInput()->actionClicked(action, stream, send);
 		} else if (action.shiftButton()) {
-			QRect rect = selectionRectCanvas();
-			displayInput()->unselectArea(rect);
+			BoItemList* items = selectionRectItems();
+			displayInput()->unselectArea(items);
 			d->mSelectionRect.setVisible(false);
 		} else if (action.controlButton()) {
 			removeSelectionRect(false);
@@ -1934,7 +2019,7 @@ void BosonBigDisplayBase::canvasToWorld(int x, int y, float z, GLfloat* glx, GLf
  *glz = z;
 }
 
-bool BosonBigDisplayBase::mapCoordinates(const QPoint& pos, GLdouble* posX, GLdouble* posY, GLdouble* posZ) const
+bool BosonBigDisplayBase::mapCoordinates(const QPoint& pos, GLfloat* posX, GLfloat* posY, GLfloat* posZ, bool useRealDepth) const
 {
  GLint realy = d->mViewport[3] - (GLint)pos.y() - 1;
  // we basically calculate a line here .. nearX/Y/Z is the starting point,
@@ -1943,48 +2028,63 @@ bool BosonBigDisplayBase::mapCoordinates(const QPoint& pos, GLdouble* posX, GLdo
  // and then find the point that is on z=0.0
  GLdouble nearX, nearY, nearZ;
  GLdouble farX, farY, farZ;
- if (!gluUnProject((GLdouble)pos.x(), (GLdouble)realy, 0.0,
-		d->mModelviewMatrix, d->mProjectionMatrix, d->mViewport,
-		&nearX, &nearY, &nearZ)) {
+ BoVector3 near, far;
+ if (!boUnProject(pos, &near, 0.0f)) {
 	return false;
  }
- if (!gluUnProject((GLdouble)pos.x(), (GLdouble)realy, 1.0,
-		d->mModelviewMatrix, d->mProjectionMatrix, d->mViewport,
-		&farX, &farY, &farZ)) {
+ if (!boUnProject(pos, &far, 1.0f)) {
 	return false;
  }
+ nearX = near[0];
+ nearY = near[1];
+ nearZ = near[2];
+ farX = far[0];
+ farY = far[1];
+ farZ = far[2];
+
+ GLdouble zAtPoint = 0.0f;
 
  // we need to find out which z position is at the point pos. this is important
  // for mapping 2d values (screen coordinates) to 3d (world coordinates)
-// GLfloat zAtPoint = 0.0;
-// glReadPixels(pos.x(), d->mViewport[3] - (GLint)pos.y() - 1, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &zAtPoint);
+ GLfloat depth = 0.0;
+ glReadPixels(pos.x(), realy, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
 
-// boDebug() << k_funcinfo << zAtPoint << endl;
+ // AB: 0.0f is reached when we have a point that is outside the actual window!
+ if (useRealDepth && depth != CLEAR_DEPTH && depth != 0.0f) {
+	// retrieve z
+	BoVector3 v;
+	if (!boUnProject(pos, &v)) {
+		return false;
+	}
+	zAtPoint = v[2];
+ } else {
+	// assume we're using z = 0.0f
+	zAtPoint = 0.0f;
+ }
 
  // simple maths .. however it took me pretty much time to do this.. I haven't
  // done this for way too long time!
+ GLdouble dist = (nearZ - zAtPoint); // distance from nearZ to our actual z. for z=0.0 this is equal to nearZ.
  GLdouble tanAlphaX = (nearX - farX) / (nearZ - farZ);
- *posX = (GLfloat)(nearX - tanAlphaX * nearZ);
+ *posX = (GLfloat)(nearX - tanAlphaX * dist);
 
  GLdouble tanAlphaY = (nearY - farY) / (nearZ - farZ);
- *posY = (GLfloat)(nearY - tanAlphaY * nearZ);
+ *posY = (GLfloat)(nearY - tanAlphaY * dist);
 
- // AB: what should we do with posZ ??
- *posZ = 0.0f;
-// *posZ = zAtPoint;
+ *posZ = zAtPoint;
  return true;
 }
 
-bool BosonBigDisplayBase::mapDistance(int windx, int windy, GLdouble* dx, GLdouble* dy) const
+bool BosonBigDisplayBase::mapDistance(int windx, int windy, GLfloat* dx, GLfloat* dy) const
 {
- GLdouble moveZ; // unused
- GLdouble moveX1, moveY1;
- GLdouble moveX2, moveY2;
- if (!mapCoordinates(QPoint(0, 0), &moveX1, &moveY1, &moveZ)) {
+ GLfloat moveZ; // unused
+ GLfloat moveX1, moveY1;
+ GLfloat moveX2, moveY2;
+ if (!mapCoordinates(QPoint(0, 0), &moveX1, &moveY1, &moveZ, false)) {
 	boError() << k_funcinfo << "Cannot map coordinates" << endl;
 	return false;
  }
- if (!mapCoordinates(QPoint(windx, windy), &moveX2, &moveY2, &moveZ)) {
+ if (!mapCoordinates(QPoint(windx, windy), &moveX2, &moveY2, &moveZ, false)) {
 	boError() << k_funcinfo << "Cannot map coordinates" << endl;
 	return false;
  }
@@ -1995,7 +2095,7 @@ bool BosonBigDisplayBase::mapDistance(int windx, int windy, GLdouble* dx, GLdoub
 
 bool BosonBigDisplayBase::mapCoordinatesToCell(const QPoint& pos, QPoint* cell)
 {
- GLdouble x, y, z;
+ GLfloat x, y, z;
  if (!mapCoordinates(pos, &x, &y, &z)) {
 	return false;
  }
@@ -2064,45 +2164,10 @@ void BosonBigDisplayBase::slotUnitChanged(Unit* unit)
 }
 
 
-void BosonBigDisplayBase::selectionStart(GLfloat* x, GLfloat* y, GLfloat* z) const
-{
- d->mSelectionRect.start(x, y, z);
-}
-
-void BosonBigDisplayBase::selectionEnd(GLfloat* x, GLfloat* y, GLfloat* z) const
-{
- d->mSelectionRect.end(x, y, z);
-}
-
-void BosonBigDisplayBase::startSelection(GLdouble x, GLdouble y, GLdouble z)
-{
- QPoint canvasPos;
- worldToCanvas(x, y, z, &canvasPos);
- /*
- Unit* unit = canvas()->findUnitAt(canvasPos);
- boDebug() << k_funcinfo << x << " " << y << " " << z << endl;
- if (!unit) {*/
-	// nothing has been found - its a ground click
-	// Here we have to draw the selection rect
-	d->mSelectionRect.setStart(x, y, z);
-	d->mSelectionRect.setVisible(true);
-	return;
-	/*
- }
-
- boDebug() << k_funcinfo << "unit" << endl;
- selectSingle(unit);
-
- if (localPlayer() == unit->owner()) {
-	unit->playSound(SoundOrderSelect);
- }
- */
-}
-
-void BosonBigDisplayBase::moveSelectionRect(GLfloat x, GLfloat y, GLfloat z)
+void BosonBigDisplayBase::moveSelectionRect(const QPoint& widgetPos)
 {
  if (d->mSelectionRect.isVisible()) {
-	d->mSelectionRect.setEnd(x, y, z);
+	d->mSelectionRect.setEndWidgetPos(widgetPos);
 	// would be great here but is a huge performance
 	// problem (therefore in releasebutton):
 	// selectArea();
@@ -2115,8 +2180,8 @@ void BosonBigDisplayBase::removeSelectionRect(bool replace)
  if (d->mSelectionRect.isVisible()) {
 	// here as there is a performance problem in
 	// mousemove:
-	QRect rect = selectionRectCanvas();
-	displayInput()->selectArea(rect, replace);
+	BoItemList* items = selectionRectItems();
+	displayInput()->selectArea(items, replace);
 
 	d->mSelectionRect.setVisible(false);
 	if (!selection()->isEmpty()) {
@@ -2130,12 +2195,15 @@ void BosonBigDisplayBase::removeSelectionRect(bool replace)
  } else {
 	// a simple click on the map
 	GLfloat x,y,z;
-	d->mSelectionRect.start(&x, &y, &z);
+	if (!mapCoordinates(d->mSelectionRect.startPos(), &x, &y, &z)) {
+		boError() << k_funcinfo << "Cannot map coordinates" << endl;
+		return;
+	}
 	QPoint canvasPos;
 	worldToCanvas(x, y, z, &canvasPos);
 	Unit* unit = 0l;
 	if (!canvas()->onCanvas(canvasPos)) {
-		boError() << k_funcinfo << canvasPos.x() << "," << canvasPos.y() << " is no on the canvas!" << endl;
+		boError() << k_funcinfo << canvasPos.x() << "," << canvasPos.y() << " is not on the canvas!" << endl;
 		return;
 	}
 	// this is not good: isFogged() should get checked *everywhere* where a
@@ -2161,17 +2229,130 @@ void BosonBigDisplayBase::removeSelectionRect(bool replace)
 }
 
 
-QRect BosonBigDisplayBase::selectionRectCanvas() const
+BoItemList* BosonBigDisplayBase::selectionRectItems()
 {
- QPoint start, end;
- GLfloat startx, starty, startz, endx, endy, endz;
- selectionStart(&startx, &starty, &startz);
- selectionEnd(&endx, &endy, &endz);
- worldToCanvas(startx, starty, startz, &start);
- worldToCanvas(endx, endy, endz, &end);
- QRect r(start, end);
- r = r.normalize();
- return r;
+ if (!canvas()) {
+	return new BoItemList();
+ }
+ const bool debugMe = false;
+
+ QRect widgetRect;
+ d->mSelectionRect.widgetRect(&widgetRect);
+
+ GLfloat maxX, maxY;
+ GLfloat minX, minY;
+ calculateWorldRect(widgetRect, &minX, &minY, &maxX, &maxY);
+ maxX /= BO_GL_CELL_SIZE;
+ minX /= BO_GL_CELL_SIZE;
+ maxY /= -BO_GL_CELL_SIZE;
+ minY /= -BO_GL_CELL_SIZE;
+
+ if (debugMe) {
+	boDebug() << k_funcinfo << "maxX: " << maxX << " maxY: " << maxY
+			<< " minX: " << minX
+			<< " minY: " << minY
+			<< endl;
+ }
+
+
+ // now the really ugly part starts. we really should improve this.
+ // the rect (pos1, pos2) is the smallest possible 2d rect that contains all
+ // cells (with 2d rect i mean: parallel to x and y world-axis).
+ // but we we need an actual world rect, as the view is most probably rotated
+ // and so a lot of cells that are in the parallel rect are not in the actual
+ // rect.
+ // to achieve this we loop through all cells in the parallel rect and check
+ // whether they are in the actual rect.
+ // someone with some maths knowledge and/or some time can surely speed this up
+ // by using some proper formulas!
+
+ QRect cellRect = QRect(QPoint(minX, minY), QPoint(maxX, maxY)).normalize();
+ QPoint win;
+ QValueList<Cell*> cells;
+ if (debugMe) {
+	boDebug() << k_funcinfo << cellRect.left()
+			<< " " << cellRect.right()
+			<< " " << cellRect.top()
+			<< " " << cellRect.bottom() << endl;
+	boDebug() << "widgetrect: " << widgetRect.left()
+			<< " " << widgetRect.right()
+			<< " " << widgetRect.top()
+			<< " " << widgetRect.bottom() << endl;
+ }
+ for (int x = cellRect.left(); x <= cellRect.right(); x++) {
+	for (int y = cellRect.top(); y <= cellRect.bottom(); y++) {
+		Cell* c = canvas()->cell(x, y);
+		if (!c) {
+			boDebug() << "NULL cell at " << x << "," << y << endl;
+			continue;
+		}
+		// AB: we use z==0.0, that is not really nice here. anyway,
+		// let's wait until it causes trouble.
+		// (read: I don't know which kind of trouble it will cause)
+		GLfloat glx, gly, glz;
+		// top left corner of cell
+		glx = x * BO_GL_CELL_SIZE;
+		gly = -y * BO_GL_CELL_SIZE;
+		glz = 0.0f;
+		boProject(glx, gly, glz, &win);
+		if (widgetRect.contains(win)) {
+			if (debugMe) {
+				boDebug() << "adding cell at " << x << "," << y << endl;
+			}
+			cells.append(c);
+			continue;
+		}
+		// top right corner of cell
+		glx = (x + 1) * BO_GL_CELL_SIZE;
+		gly = -y * BO_GL_CELL_SIZE;
+		boProject(glx, gly, glz, &win);
+		if (widgetRect.contains(win)) {
+			if (debugMe) {
+				boDebug() << "adding cell at " << x << "," << y << endl;
+			}
+			cells.append(c);
+			continue;
+		}
+		// bottom left corner of cell
+		glx = x * BO_GL_CELL_SIZE;
+		gly = -(y + 1) * BO_GL_CELL_SIZE;
+		boProject(glx, gly, glz, &win);
+		if (widgetRect.contains(win)) {
+			if (debugMe) {
+				boDebug() << "adding cell at " << x << "," << y << endl;
+			}
+			cells.append(c);
+			continue;
+		}
+		// bottom right corner of cell
+		glx = (x + 1) * BO_GL_CELL_SIZE;
+		gly = -(y + 1) * BO_GL_CELL_SIZE;
+		boProject(glx, gly, glz, &win);
+		if (widgetRect.contains(win)) {
+			if (debugMe) {
+				boDebug() << "adding cell at " << x << "," << y << endl;
+			}
+			cells.append(c);
+			continue;
+		}
+		if (debugMe) {
+			boDebug() << "not adding cell at " << x << "," << y
+					<< " at winx=" << win.x() << " "
+					<< " winy=" << win.y() << endl;
+		}
+	}
+ }
+
+ // another ugly part of this function...
+ QPtrVector<Cell> cellVector(cells.count());
+ QValueList<Cell*>::Iterator it;
+ int i = 0;
+ for (it = cells.begin(); it != cells.end(); ++it) {
+	cellVector.insert(i, *it);
+	i++;
+ }
+
+ return canvas()->collisions()->collisionsAtCells(&cellVector, 0, true);
 }
 
 void BosonBigDisplayBase::setKGameChat(KGameChat* chat)
@@ -2207,7 +2388,7 @@ void BosonBigDisplayBase::slotCursorEdgeTimeout()
 	d->mCursorEdgeTimer.stop();
 	d->mCursorEdgeCounter = 0;
  } else {
-	GLdouble dx, dy;
+	GLfloat dx, dy;
 	mapDistance((int)x, (int)y, &dx, &dy);
 	if (!d->mCursorEdgeTimer.isActive()) {
 		d->mCursorEdgeTimer.start(20);
@@ -2223,10 +2404,47 @@ void BosonBigDisplayBase::slotCursorEdgeTimeout()
 
 void BosonBigDisplayBase::scrollBy(int dx, int dy)
 {
- GLdouble x, y;
+ GLfloat x, y;
  mapDistance(dx, dy, &x, &y);
  camera()->moveLookAtBy(x, y, 0);
  cameraChanged();
+}
+
+void BosonBigDisplayBase::calculateWorldRect(const QRect& rect, float* minX, float* minY, float* maxX, float* maxY) const
+{
+ const BosonMap* map = mCanvas->map();
+ BO_CHECK_NULL_RET(map);
+ GLfloat posX, posY;
+ GLfloat posZ;
+ mapCoordinates(rect.topLeft(), &posX, &posY, &posZ);
+ *maxX = *minX = posX;
+ *maxY = *minY = -posY;
+ mapCoordinates(rect.topRight(), &posX, &posY, &posZ);
+ *maxX = QMAX(*maxX, posX);
+ *maxY = QMAX(*maxY, -posY);
+ *minX = QMIN(*minX, posX);
+ *minY = QMIN(*minY, -posY);
+ mapCoordinates(rect.bottomLeft(), &posX, &posY, &posZ);
+ *maxX = QMAX(*maxX, posX);
+ *maxY = QMAX(*maxY, -posY);
+ *minX = QMIN(*minX, posX);
+ *minY = QMIN(*minY, -posY);
+ mapCoordinates(rect.bottomRight(), &posX, &posY, &posZ);
+ *maxX = QMAX(*maxX, posX);
+ *maxY = QMAX(*maxY, -posY);
+ *minX = QMIN(*minX, posX);
+ *minY = QMIN(*minY, -posY);
+
+ *maxX = QMAX(0, *maxX);
+ *maxY = QMAX(0, *maxY);
+ *minX = QMAX(0, *minX);
+ *minY = QMAX(0, *minY);
+ *maxX = QMIN((map->width() - 1) * BO_GL_CELL_SIZE, *maxX);
+ *minX = QMIN((map->width() - 1) * BO_GL_CELL_SIZE, *minX);
+ *maxY = QMIN((map->height() - 1) * BO_GL_CELL_SIZE, *maxY);
+ *minY = QMIN((map->height() - 1) * BO_GL_CELL_SIZE, *minY);
+ *minY *= -1;
+ *maxY *= -1;
 }
 
 void BosonBigDisplayBase::generateCellList()
@@ -2256,35 +2474,9 @@ void BosonBigDisplayBase::generateCellList()
  }
  float maxX, maxY;
  float minX, minY;
- GLdouble posX, posY;
- GLdouble posZ;
- mapCoordinates(QPoint(0,0), &posX, &posY, &posZ);
- maxX = minX = posX;
- maxY = minY = -posY;
- mapCoordinates(QPoint(width(),0), &posX, &posY, &posZ);
- maxX = QMAX(maxX, posX);
- maxY = QMAX(maxY, -posY);
- minX = QMIN(minX, posX);
- minY = QMIN(minY, -posY);
- mapCoordinates(QPoint(0,height()), &posX, &posY, &posZ);
- maxX = QMAX(maxX, posX);
- maxY = QMAX(maxY, -posY);
- minX = QMIN(minX, posX);
- minY = QMIN(minY, -posY);
- mapCoordinates(QPoint(width(),height()), &posX, &posY, &posZ);
- maxX = QMAX(maxX, posX);
- maxY = QMAX(maxY, -posY);
- minX = QMIN(minX, posX);
- minY = QMIN(minY, -posY);
-
- maxX = QMAX(0, maxX);
- maxY = QMAX(0, maxY);
- minX = QMAX(0, minX);
- minY = QMAX(0, minY);
- maxX = QMIN(map->width() - 1, maxX);
- minX = QMIN(map->width() - 1, minX);
- maxY = QMIN(map->height() - 1, maxY);
- minY = QMIN(map->height() - 1, minY);
+ calculateWorldRect(QRect(QPoint(0, 0), QPoint(width(), height())), &minX, &minY, &maxX, &maxY);
+ minY *= -1;
+ maxY *= -1;
 
  // if everything went fine we need to add those cells that are in the
  // ((minX,minY),(maxX,maxY)) rectangle only.
@@ -2397,8 +2589,10 @@ void BosonBigDisplayBase::cameraChanged()
 
  // the gluLookAt() above is the most important call for the modelview matrix.
  // everything else will be discarded by glPushMatrix/glPopMatrix anyway (in
- // paintGL()). So we cache the matrix here, for mapCoordinates()
- glGetDoublev(GL_MODELVIEW_MATRIX, d->mModelviewMatrix);
+ // paintGL()). So we cache the matrix here, for mapCoordinates() and some other
+ // stuff
+ d->mModelviewMatrix.loadMatrix(GL_MODELVIEW_MATRIX);
+
  extractFrustum(); // modelview matrix changed
  generateCellList();
 
@@ -2507,77 +2701,80 @@ void BosonBigDisplayBase::setViewport(int x, int y, GLsizei w, GLsizei h)
 void BosonBigDisplayBase::extractFrustum()
 {
  // modelview or projection matrix was changed (and therefore the frustum).
- GLdouble clip[16];
- GLdouble t;
+ GLfloat clip[16];
+ GLfloat t;
+
+ const GLfloat* model = d->mModelviewMatrix.data();
+ const GLfloat* proj = d->mProjectionMatrix.data();
 
  // Combine the two matrices (multiply projection by modelview)
- clip[0] = d->mModelviewMatrix[0] * d->mProjectionMatrix[0] +
-		d->mModelviewMatrix[1] * d->mProjectionMatrix[4] +
-		d->mModelviewMatrix[2] * d->mProjectionMatrix[8] +
-		d->mModelviewMatrix[3] * d->mProjectionMatrix[12];
- clip[1] = d->mModelviewMatrix[0] * d->mProjectionMatrix[1] +
-		d->mModelviewMatrix[1] * d->mProjectionMatrix[5] +
-		d->mModelviewMatrix[2] * d->mProjectionMatrix[9] +
-		d->mModelviewMatrix[3] * d->mProjectionMatrix[13];
- clip[2] = d->mModelviewMatrix[0] * d->mProjectionMatrix[2] +
-		d->mModelviewMatrix[1] * d->mProjectionMatrix[6] +
-		d->mModelviewMatrix[2] * d->mProjectionMatrix[10] +
-		d->mModelviewMatrix[3] * d->mProjectionMatrix[14];
- clip[3] = d->mModelviewMatrix[0] * d->mProjectionMatrix[3] +
-		d->mModelviewMatrix[1] * d->mProjectionMatrix[7] +
-		d->mModelviewMatrix[2] * d->mProjectionMatrix[11] +
-		d->mModelviewMatrix[3] * d->mProjectionMatrix[15];
+ clip[0] = model[0] * proj[0] +
+		model[1] * proj[4] +
+		model[2] * proj[8] +
+		model[3] * proj[12];
+ clip[1] = model[0] * proj[1] +
+		model[1] * proj[5] +
+		model[2] * proj[9] +
+		model[3] * proj[13];
+ clip[2] = model[0] * proj[2] +
+		model[1] * proj[6] +
+		model[2] * proj[10] +
+		model[3] * proj[14];
+ clip[3] = model[0] * proj[3] +
+		model[1] * proj[7] +
+		model[2] * proj[11] +
+		model[3] * proj[15];
 
- clip[4] = d->mModelviewMatrix[4] * d->mProjectionMatrix[0] +
-		d->mModelviewMatrix[5] * d->mProjectionMatrix[4] +
-		d->mModelviewMatrix[6] * d->mProjectionMatrix[8] +
-		d->mModelviewMatrix[7] * d->mProjectionMatrix[12];
- clip[5] = d->mModelviewMatrix[4] * d->mProjectionMatrix[1] +
-		d->mModelviewMatrix[5] * d->mProjectionMatrix[5] +
-		d->mModelviewMatrix[6] * d->mProjectionMatrix[9] +
-		d->mModelviewMatrix[7] * d->mProjectionMatrix[13];
- clip[6] = d->mModelviewMatrix[4] * d->mProjectionMatrix[2] +
-		d->mModelviewMatrix[5] * d->mProjectionMatrix[6] +
-		d->mModelviewMatrix[6] * d->mProjectionMatrix[10] +
-		d->mModelviewMatrix[7] * d->mProjectionMatrix[14];
- clip[7] = d->mModelviewMatrix[4] * d->mProjectionMatrix[3] +
-		d->mModelviewMatrix[5] * d->mProjectionMatrix[7] +
-		d->mModelviewMatrix[6] * d->mProjectionMatrix[11] +
-		d->mModelviewMatrix[7] * d->mProjectionMatrix[15];
+ clip[4] = model[4] * proj[0] +
+		model[5] * proj[4] +
+		model[6] * proj[8] +
+		model[7] * proj[12];
+ clip[5] = model[4] * proj[1] +
+		model[5] * proj[5] +
+		model[6] * proj[9] +
+		model[7] * proj[13];
+ clip[6] = model[4] * proj[2] +
+		model[5] * proj[6] +
+		model[6] * proj[10] +
+		model[7] * proj[14];
+ clip[7] = model[4] * proj[3] +
+		model[5] * proj[7] +
+		model[6] * proj[11] +
+		model[7] * proj[15];
 
- clip[8] = d->mModelviewMatrix[8] * d->mProjectionMatrix[0] +
-		d->mModelviewMatrix[9] * d->mProjectionMatrix[4] +
-		d->mModelviewMatrix[10] * d->mProjectionMatrix[8] +
-		d->mModelviewMatrix[11] * d->mProjectionMatrix[12];
- clip[9] = d->mModelviewMatrix[8] * d->mProjectionMatrix[1] +
-		d->mModelviewMatrix[9] * d->mProjectionMatrix[5] +
-		d->mModelviewMatrix[10] * d->mProjectionMatrix[9] +
-		d->mModelviewMatrix[11] * d->mProjectionMatrix[13];
- clip[10] = d->mModelviewMatrix[8] * d->mProjectionMatrix[2] +
-		d->mModelviewMatrix[9] * d->mProjectionMatrix[6] +
-		d->mModelviewMatrix[10] * d->mProjectionMatrix[10] +
-		d->mModelviewMatrix[11] * d->mProjectionMatrix[14];
- clip[11] = d->mModelviewMatrix[8] * d->mProjectionMatrix[3] +
-		d->mModelviewMatrix[9] * d->mProjectionMatrix[7] +
-		d->mModelviewMatrix[10] * d->mProjectionMatrix[11] +
-		d->mModelviewMatrix[11] * d->mProjectionMatrix[15];
+ clip[8] = model[8] * proj[0] +
+		model[9] * proj[4] +
+		model[10] * proj[8] +
+		model[11] * proj[12];
+ clip[9] = model[8] * proj[1] +
+		model[9] * proj[5] +
+		model[10] * proj[9] +
+		model[11] * proj[13];
+ clip[10] = model[8] * proj[2] +
+		model[9] * proj[6] +
+		model[10] * proj[10] +
+		model[11] * proj[14];
+ clip[11] = model[8] * proj[3] +
+		model[9] * proj[7] +
+		model[10] * proj[11] +
+		model[11] * proj[15];
 
- clip[12] = d->mModelviewMatrix[12] * d->mProjectionMatrix[0] +
-		d->mModelviewMatrix[13] * d->mProjectionMatrix[4] +
-		d->mModelviewMatrix[14] * d->mProjectionMatrix[8] +
-		d->mModelviewMatrix[15] * d->mProjectionMatrix[12];
- clip[13] = d->mModelviewMatrix[12] * d->mProjectionMatrix[1] +
-		d->mModelviewMatrix[13] * d->mProjectionMatrix[5] +
-		d->mModelviewMatrix[14] * d->mProjectionMatrix[9] +
-		d->mModelviewMatrix[15] * d->mProjectionMatrix[13];
- clip[14] = d->mModelviewMatrix[12] * d->mProjectionMatrix[2] +
-		d->mModelviewMatrix[13] * d->mProjectionMatrix[6] +
-		d->mModelviewMatrix[14] * d->mProjectionMatrix[10] +
-		d->mModelviewMatrix[15] * d->mProjectionMatrix[14];
- clip[15] = d->mModelviewMatrix[12] * d->mProjectionMatrix[3] +
-		d->mModelviewMatrix[13] * d->mProjectionMatrix[7] +
-		d->mModelviewMatrix[14] * d->mProjectionMatrix[11] +
-		d->mModelviewMatrix[15] * d->mProjectionMatrix[15];
+ clip[12] = model[12] * proj[0] +
+		model[13] * proj[4] +
+		model[14] * proj[8] +
+		model[15] * proj[12];
+ clip[13] = model[12] * proj[1] +
+		model[13] * proj[5] +
+		model[14] * proj[9] +
+		model[15] * proj[13];
+ clip[14] = model[12] * proj[2] +
+		model[13] * proj[6] +
+		model[14] * proj[10] +
+		model[15] * proj[14];
+ clip[15] = model[12] * proj[3] +
+		model[13] * proj[7] +
+		model[14] * proj[11] +
+		model[15] * proj[15];
 
  // Extract the numbers for the RIGHT plane
  d->mFrustumMatrix[0][0] = clip[3] - clip[0];
@@ -2685,12 +2882,10 @@ float BosonBigDisplayBase::sphereInFrustum(const BoVector3& pos, float radius) c
  return distance + radius;
 }
 
-
 void BosonBigDisplayBase::mapChanged()
 {
  camera()->setMapSize(mCanvas->mapWidth(), mCanvas->mapHeight());
 }
-
 
 const QPoint& BosonBigDisplayBase::cursorCanvasPos() const
 {
@@ -2802,4 +2997,87 @@ void BosonBigDisplayBase::setDebugShowCellGrid(bool debug)
  d->mDebugShowCellGrid = debug;
 }
 
+void BosonBigDisplayBase::setDebugMatrices(bool debug)
+{
+ d->mDebugMatrices = debug;
+}
+
+bool BosonBigDisplayBase::boProject(GLfloat x, GLfloat y, GLfloat z, QPoint* pos) const
+{
+ // AB: once again - most credits go to mesa :)
+ BoVector4 v;
+ v.setX(x);
+ v.setY(y);
+ v.setZ(z);
+ v.setW(1.0f);
+
+ BoVector4 v2;
+ d->mModelviewMatrix.transform(&v2, &v);
+ d->mProjectionMatrix.transform(&v, &v2);
+
+ if (v[3] == 0.0f) {
+	boError() << k_funcinfo << "Can't divide by zero" << endl;
+	return false;
+ }
+ v2.setX(v[0] / v[3]);
+ v2.setY(v[1] / v[3]);
+ v2.setZ(v[2] / v[3]);
+
+ pos->setX(d->mViewport[0] + (1 + v2[0]) * d->mViewport[2] / 2);
+ pos->setY(d->mViewport[1] + (1 + v2[1]) * d->mViewport[3] / 2);
+
+ // return the actual window y
+ pos->setY(d->mViewport[3] - pos->y());
+ return true;
+}
+
+bool BosonBigDisplayBase::boUnProject(const QPoint& pos, BoVector3* ret, float z) const
+{
+ // AB: most code is from mesa's gluUnProject().
+ BoMatrix A(d->mProjectionMatrix);
+ BoMatrix B;
+
+ // A = A x Modelview (== Projection x Modelview)
+ A.multiply(&d->mModelviewMatrix);
+
+ // B = A^(-1)
+ if (!A.invert(&B)) {
+	boError() << k_funcinfo << "Could not invert (Projection x Modelview)" << endl;
+	return false;
+ }
+
+ // AB: we could calculate the inverse whenever camera changes!
+ // --> less inverses to be calculated.
+
+ GLfloat depth = 0.0f;
+ GLint realy = d->mViewport[3] - (GLint)pos.y() - 1;
+ if (z == -1.0f) {
+	glReadPixels(pos.x(), realy, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
+ } else {
+	depth = z;
+ }
+
+
+ BoVector4 v;
+ BoVector4 result;
+ v.setX( ((GLfloat)((pos.x() - d->mViewport[0]) * 2)) / d->mViewport[2] - 1.0f);
+ v.setY( ((GLfloat)((realy - d->mViewport[1]) * 2)) / d->mViewport[3] - 1.0f);
+#if 0
+ // mesa uses this
+ v.setX( (pos.x() - d->mViewport[0]) * 2 / d->mViewport[2] - 1.0f);
+ v.setY( (realy - d->mViewport[1]) * 2 / d->mViewport[3] - 1.0f);
+#endif
+ v.setZ(2 * depth - 1.0f);
+ v.setW(1.0f);
+ B.transform(&result, &v);
+
+ if (result[3] == 0.0f) {
+	boError() << k_funcinfo << "Can't divide by zero" << endl;
+	return false;
+ }
+
+ ret->set(result[0] / result[3], result[1] / result[3], result[2] / result[3]);
+
+ return true;
+}
 

@@ -87,12 +87,12 @@ void BosonBigDisplayInputBase::selectSingle(Unit* unit, bool replace)
  selection()->selectUnit(unit, replace);
 }
 
-void BosonBigDisplayInputBase::selectArea(const QRect& rect, bool replace)
+void BosonBigDisplayInputBase::selectArea(BoItemList* itemsInArea, bool replace)
 {
+ BO_CHECK_NULL_RET(itemsInArea);
  if (boConfig->debugMode() == BosonConfig::DebugSelection) {
-	QRect r = rect;
-	BoItemList* list = collisions()->collisions(r);
-	BoItemList::Iterator it;
+	const BoItemList* list = itemsInArea;
+	BoItemList::ConstIterator it;
 	boDebug() << "Selection count: " << list->count() << endl;
 	for (it = list->begin(); it != list->end(); ++it) {
 		QString s = QString("Selected: RTTI=%1").arg((*it)->rtti());
@@ -107,12 +107,10 @@ void BosonBigDisplayInputBase::selectArea(const QRect& rect, bool replace)
 	}
  }
 
- QRect r = rect;
  QPtrList<Unit> unitList;
  Unit* fallBackUnit= 0; // in case no localplayer mobile unit can be found we'll select this instead
  BoItemList::Iterator it;
- BoItemList* list = collisions()->collisions(r);
- for (it = list->begin(); it != list->end(); ++it) {
+ for (it = itemsInArea->begin(); it != itemsInArea->end(); ++it) {
 	if (!RTTI::isUnit((*it)->rtti())) {
 		continue;
 	}
@@ -144,17 +142,18 @@ void BosonBigDisplayInputBase::selectArea(const QRect& rect, bool replace)
  } else if (fallBackUnit && selection()->count() == 0) {
 	selectSingle(fallBackUnit, replace);
  } else {
+	boDebug() << k_funcinfo << "select nothing" << endl;
 	if (replace) {
 		selection()->clear();
 	}
  }
 }
 
-void BosonBigDisplayInputBase::unselectArea(const QRect& rect)
+void BosonBigDisplayInputBase::unselectArea(BoItemList* itemsInArea)
 {
- BoItemList* list = collisions()->collisions(rect);
+ BO_CHECK_NULL_RET(itemsInArea);
  BoItemList::Iterator it;
- for (it = list->begin(); it != list->end(); ++it) {
+ for (it = itemsInArea->begin(); it != itemsInArea->end(); ++it) {
 	if (!RTTI::isUnit((*it)->rtti())) {
 		continue;
 	}
