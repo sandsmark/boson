@@ -38,6 +38,10 @@
 #include <qintdict.h>
 #include <qptrvector.h>
 
+#if HAVE_GL_GLEXT_H
+#include <GL/glext.h>
+#endif
+
 // use GL_TRIANGLE_STRIP ? (experimental and not working!)
 // AB: there are 2 different optimizing approaches. one is to use
 // GL_TRIANGLE_STRIP, the other one is using a single glBegin()/glEnd() call (we
@@ -49,6 +53,13 @@
 
 // some testings for me. this is here for my own use only currently.
 // #define AB_TEST 1
+
+
+// Whether to use just one vbo/array for vertex, normal and texel data.
+//  Otherwise they'll be stored in separate arrays/vbos
+#define USE_ONE_VBO
+
+bool BosonModel::mUseVBO = false;
 
 class BoMeshSorter
 {
@@ -569,7 +580,13 @@ class BosonModelPrivate
 public:
 	BosonModelPrivate()
 	{
-		mPoints = 0;
+		mVBOVertices = 0;
+		mVBONormals = 0;
+		mVBOTexels = 0;
+
+		mVertexArray = 0;
+		mNormalArray = 0;
+		mTexelArray = 0;
 	}
 
 	QPtrVector<BoMesh> mMeshes;
@@ -583,10 +600,17 @@ public:
 	QString mDirectory;
 	QString mFile;
 
-	// consists of vertices and texture coordinates:
-	float* mPoints;
-
 	unsigned int mLODCount;
+
+	// VBOs for vertices, normals and texels
+	unsigned int mVBOVertices;
+	unsigned int mVBONormals;
+	unsigned int mVBOTexels;
+
+	// If VBOs aren't available, we use standard arrays instead
+	float* mVertexArray;
+	float* mNormalArray;
+	float* mTexelArray;
 };
 
 BosonModel::BosonModel(const QString& dir, const QString& file, float width, float height)
@@ -626,7 +650,21 @@ BosonModel::~BosonModel()
  d->mAnimations.clear();
  boDebug(100) << k_funcinfo << "delete meshes" << endl;
  d->mMeshes.clear();
- delete[] d->mPoints;
+ // Delete vertex arrays
+ delete[] d->mVertexArray;
+ delete[] d->mNormalArray;
+ delete[] d->mTexelArray;
+#ifdef GL_ARB_vertex_buffer_object
+ if (useVBO()) {
+	// Delete VBOs
+#ifdef USE_ONE_VBO
+	glDeleteBuffersARB(1, &d->mVBOVertices);
+#else
+	unsigned int buffers[3] = { d->mVBOVertices, d->mVBONormals, d->mVBOTexels };
+	glDeleteBuffersARB(3, buffers);
+#endif
+ }
+#endif
  delete d;
  boDebug(100) << k_funcinfo << "done" << endl;
 }
@@ -1095,24 +1133,56 @@ void BosonModel::generateLOD()
 
 void BosonModel::mergeArrays()
 {
- if (d->mPoints) {
+ if (d->mVertexArray || d->mVBOVertices) {
 	// this is dangerous!
 	// crash is probably close (broken indices)
-	boError() << k_funcinfo << "points already allocated" << endl;
+	boError() << k_funcinfo << "arrays already merged!" << endl;
 	return;
  }
+
  // count the points in the meshes first.
- unsigned int size = 0;
+ unsigned int elements = 0;
+ unsigned int oldsize = 0;  // Only for debugging, in bytes
  for (unsigned int i = 0; i < meshCount(); i++) {
 	BoMesh* m = mesh(i);
 	if (!m) {
 		BO_NULL_ERROR(m);
 		continue;
 	}
-	size += m->points() * BoMesh::pointSize();
+	elements += m->elements();
+	// Holding data in BoMesh uses:
+	//  * vertices + texels for every point = points * 5 * 4  (I assume sizeof(float) = 4 here)
+	//  * for every point in every face in every lod: point indices + smoothgroup + normals = (3 + 1 + 9) * 4
+	oldsize += m->points() * 5 * 4 + m->elements() * (3 + 1 + 9) * 4;
  }
 
- d->mPoints = new float[size];
+ static unsigned int totalsize = 0;
+ static unsigned int totaloldsize = 0;
+ totalsize += elements * 8 * sizeof(float);
+ totaloldsize += oldsize;
+ boDebug() << k_funcinfo << "This model uses " << (elements * 8 * sizeof(float)) / 1024.0 << " KB memory" << endl;
+ boDebug(100) << k_funcinfo << "In BoMesh we have also " << oldsize / 1024.0 << " KB" << endl;
+ boDebug() << k_funcinfo << "Total size used is now: " << totalsize / 1024.0 << " KB  (in BosonModel);  (" <<
+		totaloldsize / 1024.0 << " KB in BoMesh)" << endl;
+
+ // Create arrays for vertices, normals and texels
+#ifdef USE_ONE_VBO
+ // Everything will be put to one big array. d->mVBONormals and d->mVBOTexels
+ //  are offsets for main array (d->mVBOVertices)
+ d->mVertexArray = new float[elements * 8];
+ d->mVBONormals = elements * 3;  // Offsets to d->mVertexArray
+ d->mVBOTexels = elements * 6;
+#else
+ // There are separate arrays for vertices/normals/texels
+ d->mVertexArray = new float[elements * 3];
+ d->mNormalArray = new float[elements * 3];
+ d->mTexelArray = new float[elements * 2];
+#endif
+
+
+ // Move vertices and friends from meshes to arrays
+ boDebug() << k_funcinfo << "Arrays: V: " << d->mVertexArray << "; N: " << d->mVertexArray + d->mVBONormals <<
+		"; T: " << d->mVertexArray + d->mVBOTexels << ";  elements: " << elements << endl;
  int index = 0;
  for (unsigned int i = 0; i < meshCount(); i++) {
 	BoMesh* m = mesh(i);
@@ -1120,9 +1190,40 @@ void BosonModel::mergeArrays()
 		BO_NULL_ERROR(m);
 		continue;
 	}
-	unsigned int pointsMoved = m->movePoints(d->mPoints, index);
+#ifdef USE_ONE_VBO
+	unsigned int pointsMoved = m->movePoints(d->mVertexArray, d->mVertexArray + d->mVBONormals, d->mVertexArray + d->mVBOTexels, index);
+#else
+	unsigned int pointsMoved = m->movePoints(d->mVertexArray, d->mNormalArray, d->mTexelArray, index);
+#endif
 	index += pointsMoved;
  }
+
+#ifdef GL_ARB_vertex_buffer_object
+ if (useVBO()) {
+	boDebug() << k_funcinfo << "Generating VBOs" << endl;
+	// Generate VBOs
+#ifdef USE_ONE_VBO
+	glGenBuffersARB(1, &d->mVBOVertices);
+	glBindBufferARB(GL_ARRAY_BUFFER_ARB, d->mVBOVertices);
+	glBufferDataARB(GL_ARRAY_BUFFER_ARB, elements * 8 * sizeof(float), d->mVertexArray, GL_STATIC_DRAW_ARB);
+#else
+	glGenBuffersARB(1, &d->mVBOVertices);
+	glBindBufferARB(GL_ARRAY_BUFFER_ARB, d->mVBOVertices);
+	glBufferDataARB(GL_ARRAY_BUFFER_ARB, elements * 3 * sizeof(float), d->mVertexArray, GL_STATIC_DRAW_ARB);
+	glGenBuffersARB(1, &d->mVBONormals);
+	glBindBufferARB(GL_ARRAY_BUFFER_ARB, d->mVBONormals);
+	glBufferDataARB(GL_ARRAY_BUFFER_ARB, elements * 3 * sizeof(float), d->mNormalArray, GL_STATIC_DRAW_ARB);
+	glGenBuffersARB(1, &d->mVBOTexels);
+	glBindBufferARB(GL_ARRAY_BUFFER_ARB, d->mVBOTexels);
+	glBufferDataARB(GL_ARRAY_BUFFER_ARB, elements * 2 * sizeof(float), d->mTexelArray, GL_STATIC_DRAW_ARB);
+#endif
+
+	// No need to keep copys of arrays
+	delete[] d->mVertexArray;
+	delete[] d->mNormalArray;
+	delete[] d->mTexelArray;
+ }
+#endif // GL_ARB_vertex_buffer_object
 }
 
 void BosonModel::mergeMeshesInFrames()
@@ -1152,11 +1253,6 @@ void BosonModel::sortByDepth()
  }
 }
 
-float* BosonModel::pointArray() const
-{
- return d->mPoints;
-}
-
 void BosonModel::prepareRendering()
 {
  // TODO: performance:
@@ -1167,9 +1263,41 @@ void BosonModel::prepareRendering()
  // then we could replace the index of one of them by the index of the other one
  //
  // TODO: performance: interleaved arrays
- int stride = BoMesh::pointSize() * sizeof(float);
- glVertexPointer(3, GL_FLOAT, stride, d->mPoints + BoMesh::vertexPos());
- glTexCoordPointer(2, GL_FLOAT, stride, d->mPoints + BoMesh::texelPos());
+#ifdef GL_ARB_vertex_buffer_object
+ if (useVBO()) {
+//	boDebug() << k_funcinfo << "Binding VBOs with ids " << d->mVBOVertices << ", " << d->mVBONormals << ", " << d->mVBOTexels << endl;
+#define BUFFER_OFFSET(i) ((char *)NULL + (i * sizeof(float)))
+#ifdef USE_ONE_VBO
+	glBindBufferARB(GL_ARRAY_BUFFER_ARB, d->mVBOVertices);
+	glVertexPointer(3, GL_FLOAT, 0, BUFFER_OFFSET(0));
+	// If one vbo/buffer is used, d->mVBONormals and d->mVBOTexels are offsets for
+	//  main array (d->mVBOVertices)
+	glNormalPointer(GL_FLOAT, 0, BUFFER_OFFSET(d->mVBONormals));
+	glTexCoordPointer(2, GL_FLOAT, 0, BUFFER_OFFSET(d->mVBOTexels));
+#else
+	glBindBufferARB(GL_ARRAY_BUFFER_ARB, d->mVBOVertices);
+	glVertexPointer(3, GL_FLOAT, 0, BUFFER_OFFSET(0));
+	glBindBufferARB(GL_ARRAY_BUFFER_ARB, d->mVBONormals);
+	glNormalPointer(GL_FLOAT, 0, BUFFER_OFFSET(0));
+	glBindBufferARB(GL_ARRAY_BUFFER_ARB, d->mVBOTexels);
+	glTexCoordPointer(2, GL_FLOAT, 0, BUFFER_OFFSET(0));
+#endif
+ }
+ else
+#endif // GL_ARB_vertex_buffer_object
+ {
+#ifdef USE_ONE_VBO
+	// If one vbo/buffer is used, d->mVBONormals and d->mVBOTexels are offsets for
+	//  main array (d->mVBOVertices)
+	glVertexPointer(3, GL_FLOAT, 0, d->mVertexArray);
+	glNormalPointer(GL_FLOAT, 0, d->mVertexArray + d->mVBONormals);
+	glTexCoordPointer(2, GL_FLOAT, 0, d->mVertexArray + d->mVBOTexels);
+#else
+	glVertexPointer(3, GL_FLOAT, 0, d->mVertexArray);
+	glNormalPointer(GL_FLOAT, 0, d->mNormalArray);
+	glTexCoordPointer(2, GL_FLOAT, 0, d->mTexelArray);
+#endif
+ }
 }
 
 unsigned int BosonModel::lodCount() const
@@ -1197,5 +1325,15 @@ unsigned int BosonModel::preferredLod(float dist) const
  }
 
  return lod;
+}
+
+bool BosonModel::useVBO()
+{
+ return mUseVBO;
+}
+
+void BosonModel::setUseVBO(bool use)
+{
+ mUseVBO = use;
 }
 

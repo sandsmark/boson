@@ -31,6 +31,7 @@
 #include "bofullscreen.h"
 #include "bosonfont/bosonglfont.h"
 #include "bosonfont/bosonglfontchooser.h"
+#include "info/boinfo.h"
 
 #include <klocale.h>
 #include <knuminput.h>
@@ -545,6 +546,18 @@ OpenGLOptions::OpenGLOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
  connect(mUseLOD, SIGNAL(toggled(bool)), hbox, SLOT(setEnabled(bool)));
  mSmoothShading = new QCheckBox(i18n("Smooth shade model"), mAdvanced);
  mSmoothShading->setChecked(true);
+ mUseVBO = new QCheckBox(i18n("Use vertex buffer object extension (VBO)"), mAdvanced);
+ mUseVBO->setChecked(boConfig->useVBO());
+ // Disable this checkbox is VBOs aren't supported
+#ifdef GL_ARB_vertex_buffer_object
+	if (!BoInfo::boInfo()->openGLExtensions().contains("GL_ARB_vertex_buffer_object")) {
+		mUseVBO->setChecked(false);
+		mUseVBO->setEnabled(false);
+	}
+#else
+ mUseVBO->setChecked(false);
+ mUseVBO->setEnabled(false);
+#endif
 }
 
 OpenGLOptions::~OpenGLOptions()
@@ -609,6 +622,7 @@ void OpenGLOptions::setRenderingSpeed(int speed)
 		setUseLOD(true);
 		setDefaultLOD(0);
 		mSmoothShading->setChecked(true);
+		setUseVBO(DEFAULT_USE_VBO);
 		break;
 	case BestQuality:
 		// we mostly use defaults here.
@@ -623,6 +637,7 @@ void OpenGLOptions::setRenderingSpeed(int speed)
 		setUseLOD(true);
 		setDefaultLOD(0);
 		mSmoothShading->setChecked(true);
+		setUseVBO(DEFAULT_USE_VBO);
 		break;
 	case Fastest:
 		setUpdateInterval(DEFAULT_UPDATE_INTERVAL);
@@ -636,6 +651,7 @@ void OpenGLOptions::setRenderingSpeed(int speed)
 		setUseLOD(true);
 		setDefaultLOD(5000);
 		mSmoothShading->setChecked(false);
+		setUseVBO(DEFAULT_USE_VBO);
 		break;
 	
  }
@@ -738,6 +754,15 @@ void OpenGLOptions::apply()
  }
  boConfig->setBoolValue("SmoothShading", mSmoothShading->isChecked());
 
+ // If VBO box isn't enabled, then VBO extension isn't supported and we won't
+ //  update anything
+ if(mUseVBO->isEnabled()) {
+	if (boConfig->useVBO() != mUseVBO->isChecked()) {
+		KMessageBox::information(this, i18n("VBO changes will take effect after restarting Boson."));
+	}
+	boConfig->setUseVBO(mUseVBO->isChecked());
+ }
+
  if (mResolution->isEnabled() && mResolution->currentItem() > 0) {
 	// first entry is "do not change", then a list, as provided by
 	// BoFullScreen
@@ -770,6 +795,7 @@ void OpenGLOptions::setDefaults()
  setUseLOD(DEFAULT_USE_LOD);
  setDefaultLOD(0);
  mSmoothShading->setChecked(true);
+ setUseVBO(DEFAULT_USE_VBO);
  mResolution->setCurrentItem(0);
 }
 
@@ -795,6 +821,7 @@ void OpenGLOptions::load()
  }
  mFont->setText(mFontInfo->guiName());
  mSmoothShading->setChecked(boConfig->boolValue("SmoothShading", true));
+ setUseVBO(boConfig->useVBO());
  mFontChanged = false;
  mResolution->setCurrentItem(0);
 }
@@ -914,6 +941,20 @@ bool OpenGLOptions::useLOD() const
 void OpenGLOptions::setUseLOD(bool use)
 {
  mUseLOD->setChecked(use);
+}
+
+bool OpenGLOptions::useVBO() const
+{
+ return mUseVBO->isChecked();
+}
+
+void OpenGLOptions::setUseVBO(bool use)
+{
+ // If VBO checkbox is disabled, then VBO extension isn't supported and we won't
+ //  change value of it (it's set to false already)
+ if(mUseVBO->isEnabled()) {
+	mUseVBO->setChecked(use);
+ }
 }
 
 unsigned int OpenGLOptions::defaultLOD() const

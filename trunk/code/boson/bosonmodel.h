@@ -287,13 +287,6 @@ public:
 	QString file() const;
 
 	/**
-	 * @return A pointer to the points (vertices and texture coordinates)
-	 * for this model. You must call @ref mergeArraysbefore you can use
-	 * this.
-	 **/
-	float* pointArray() const;
-
-	/**
 	 * Prepare this model for being rendered next. This must be called once
 	 * before rendering anything (frame, mesh, ..) in this model.
 	 *
@@ -312,6 +305,16 @@ public:
 	 * distanceFromCamera.
 	 **/
 	unsigned int preferredLod(float distanceFromCamera) const;
+
+	/**
+	 * @return Whether VBOs (vertex buffer objects) should be used for rendering
+	 */
+	static bool useVBO();
+	/**
+	 * Set whether VBOs should be used for rendering.
+	 * This should be called _only when initing_ from BosonBigDisplayBase.
+	 **/
+	static void setUseVBO(bool use);
 
 protected:
 	class BoHelper; // for computing width,height,.. of the model. this is a hack!
@@ -393,6 +396,7 @@ private:
 
 	float mWidth;
 	float mHeight;
+	static bool mUseVBO;
 };
 
 
