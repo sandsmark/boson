@@ -10,7 +10,8 @@ WeaponDamage=15
 Reload=10
 Producer=10
 Requirements=5,2,3
+ProductionTime=60
 
 [Boson Facility]
-ConstructionSteps=20
+ConstructionSteps=12
 

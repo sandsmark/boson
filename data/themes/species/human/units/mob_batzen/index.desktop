@@ -12,6 +12,7 @@ Producer=0
 Requirements=3
 Armor=1
 Shield=50
+ProductionTime=80
 
 [Boson Mobile Unit]
 Speed=4

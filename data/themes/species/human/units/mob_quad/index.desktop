@@ -10,6 +10,7 @@ WeaponDamage=10
 Reload=5
 Producer=0
 Requirements=3
+ProductionTime=70
 
 [Boson Mobile Unit]
 Speed=4

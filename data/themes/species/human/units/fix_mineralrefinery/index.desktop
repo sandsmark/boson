@@ -9,6 +9,7 @@ Producer=10
 Requirements=5,2
 UnitWidth=2.0
 UnitHeight=2.0
+ProductionTime=130
 
 [Boson Facility]
 CanRefineMinerals=true

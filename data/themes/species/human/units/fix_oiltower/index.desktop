@@ -7,7 +7,8 @@ Health=50
 MineralCost=100
 Producer=10
 Requirements=8
+ProductionTime=50
 
 [Boson Facility]
-ConstructionSteps=20
+ConstructionSteps=10
 

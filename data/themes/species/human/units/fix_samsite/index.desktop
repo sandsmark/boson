@@ -12,7 +12,8 @@ CanShootAtAirUnits=true
 CanShootAtLandUnits=false
 Producer=10
 Requirements=5,14,2
+ProductionTime=70
 
 [Boson Facility]
-ConstructionSteps=20
+ConstructionSteps=14
 

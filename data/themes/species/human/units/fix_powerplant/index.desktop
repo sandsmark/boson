@@ -9,7 +9,8 @@ Producer=10
 Requirements=5
 UnitWidth=2.0
 UnitHeight=2.0
+ProductionTime=160
 
 [Boson Facility]
-ConstructionSteps=20
+ConstructionSteps=25
 

@@ -12,6 +12,7 @@ Producer=1
 Requirements=3
 UnitWidth=2.0
 UnitHeight=2.0
+ProductionTime=100
 
 [Boson Mobile Unit]
 Speed=3

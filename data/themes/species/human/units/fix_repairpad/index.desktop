@@ -10,7 +10,8 @@ WeaponDamage=-10
 Requirements=5,2,12,3
 UnitWidth=2.0
 UnitHeight=2.0
+ProductionTime=100
 
 [Boson Facility]
-ConstructionSteps=20
+ConstructionSteps=18
 
