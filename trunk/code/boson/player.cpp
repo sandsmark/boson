@@ -930,10 +930,18 @@ void Player::loadFogOfWar(const QDomElement& root)
 	return;
  }
  QTextIStream s(&text);
+ s.flags(s.flags() & ~QTextStream::skipws);
  Q_UINT32 size;
  s >> size;
- char space;
+
+ QChar space; // note: QTextStream skips whitespaces for char, not for QChar
  s >> space;
+ if (space != ' ') {
+	boError() << k_funcinfo << "oops - format error. read: " << space.latin1() << " should be: " << ' ' << endl;
+	// we can not even resize the flog array, because it may be just any
+	// random value. we can't depend on it being correct
+	return;
+ }
  d->mFogged.resize(size);
  for (unsigned int i = 0; i < size; i++) {
 	char bit;
