@@ -182,9 +182,6 @@ void EditorBigDisplay::actionClicked(const BoAction& action, QDataStream& stream
 		return;
 	}
  }
- if (actionPlace(stream, action.canvasPos())) {
-	*send = true;
- }
 }
 
 bool EditorBigDisplay::actionPlace(QDataStream& stream, const QPoint& canvasPos)
@@ -345,18 +342,26 @@ bool EditorBigDisplay::selectAll(const UnitProperties* prop, bool replace)
 
 void EditorBigDisplay::updatePlacementPreviewData()
 {
- if (!d->mPlacement.isUnit()) {
+ if (!d->mPlacement.isUnit() && !d->mPlacement.isCell()) {
 	setPlacementPreviewData(0, false);
 	return;
  }
- if (!d->mPlacement.owner()) {
-	boError() << k_funcinfo << "NULL owner" << endl;
-	setPlacementPreviewData(0, false);
-	return;
+ if (d->mPlacement.isUnit()) {
+	if (!d->mPlacement.owner()) {
+		boError() << k_funcinfo << "NULL owner" << endl;
+		setPlacementPreviewData(0, false);
+		return;
+	}
+	QPoint pos(cursorCanvasPos() / BO_TILE_SIZE);
+	const UnitProperties* prop = d->mPlacement.owner()->unitProperties(d->mPlacement.unitType());
+	setPlacementPreviewData(prop, canvas()->canPlaceUnitAt(prop, pos, 0));
+ } else if (d->mPlacement.isCell()) {
+	if (d->mPlacement.cell() < 0) {
+		boError() << k_funcinfo << "invalid cell" << endl;
+		return;
+	}
+	setPlacementCellPreviewData(d->mPlacement.cell(), true); // we could use false if there is a unit or so?
  }
- const UnitProperties* prop = d->mPlacement.owner()->unitProperties(d->mPlacement.unitType());
- QPoint pos(cursorCanvasPos() / BO_TILE_SIZE);
- setPlacementPreviewData(prop, canvas()->canPlaceUnitAt(prop, pos, 0));
 }
 
 
