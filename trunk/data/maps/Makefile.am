@@ -10,6 +10,7 @@ maps_DATA = \
 	experimental5.bpf \
 	just_for_fun.bpf \
 	oneunit.bpf \
+	the_pass.bpf \
 	units-test.bpf \
 	wartest1.bpf
 
