@@ -106,7 +106,7 @@ void UpgradePropertiesBase::load(KSimpleConfig* cfg)
       boError() << k_funcinfo << "Invalid id: 0" << endl;
     }
     mName = cfg->readEntry("Name", i18n("unknown"));
-    mMineralCost = cfg->readUnsignedLongNumEntry("MineralCost", 100);
+    mMineralCost = cfg->readUnsignedLongNumEntry("MineralCost", 0);
     mOilCost = cfg->readUnsignedLongNumEntry("OilCost", 0);
     mProducer = cfg->readUnsignedNumEntry("Producer", 0);
     mProductionTime = cfg->readUnsignedNumEntry("ProductionTime", 100);
