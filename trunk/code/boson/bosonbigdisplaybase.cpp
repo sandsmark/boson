@@ -2904,17 +2904,6 @@ float BosonBigDisplayBase::sphereInFrustum(const BoVector3& pos, float radius) c
  return Bo3dTools::sphereInFrustum(d->mViewFrustum, pos, radius);
 }
 
-void BosonBigDisplayBase::mapChanged()
-{
- BO_CHECK_NULL_RET(canvas());
- boDebug() << k_funcinfo << endl;
- if (d->mGLMiniMap) {
-	d->mGLMiniMap->createMap(canvas()->map(), d->mViewport);
- } else {
-	BO_NULL_ERROR(d->mGLMiniMap);
- }
-}
-
 const QPoint& BosonBigDisplayBase::cursorCanvasPos() const
 {
  return d->mCanvasPos;

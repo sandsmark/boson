@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -345,11 +345,6 @@ void BoDisplayManager::setLocalPlayer(Player* p)
 void BoDisplayManager::setCanvas(BosonCanvas* c)
 {
  boDebug() << k_funcinfo << endl;
- QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
- while (it.current()) {
-	it.current()->setCanvas(c);
-	++it;
- }
  QIntDictIterator<BoSelection> selectIt(d->mSelectionGroups);
  for (; selectIt.current(); ++selectIt) {
 	connect(c, SIGNAL(signalRemovedItem(BosonItem*)),
@@ -601,15 +596,6 @@ void BoDisplayManager::slotUnitRemoved(Unit* u)
 {
  for(int i = 0; i < 10; i++) {
 	d->mSelectionGroups[i]->removeUnit(u);
- }
-}
-
-void BoDisplayManager::mapChanged()
-{
- QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
- while (it.current()) {
-	it.current()->mapChanged();
-	++it;
  }
 }
 

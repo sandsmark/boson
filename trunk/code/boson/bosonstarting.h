@@ -90,17 +90,6 @@ signals:
 	void signalStartingFailed();
 
 	/**
-	 * When this signal is emitted the game is meant to assign the map to
-	 * its main classes. The map will be in the playField that has been
-	 * provided by @ref setPlayField.
-	 *
-	 * This signal is necessary for loading code, which needs the map before
-	 * units can be loaded.
-	 **/
-	void signalAssignMap();
-
-
-	/**
 	 * Change the type of data thats currently being loaded. See @ref
 	 * BosonLoadingWidget::LoadingType
 	 **/

@@ -30,6 +30,7 @@
 #include "bosonprofiling.h"
 #include "startupwidgets/bosonloadingwidget.h"
 #include "bosondata.h"
+#include "bosoncanvas.h"
 #include "bodebug.h"
 #include "bpfdescription.h"
 #include "bosonsaveload.h"
@@ -141,8 +142,36 @@ bool BosonStarting::start()
  }
  boDebug(270) << k_funcinfo << "playfield loaded" << endl;
 
+ if (!mDestPlayField->map()) {
+	boError(270) << k_funcinfo << "NULL map loaded" << endl;
+	return false;
+ }
+
  boGame->setPlayField(mDestPlayField);
- emit signalAssignMap(); // for the BosonWidgetBase
+
+ boGame->createCanvas();
+
+ BosonCanvas* canvas = boGame->canvasNonConst();
+ if (!canvas) {
+	BO_NULL_ERROR(canvas);
+	return false;
+ }
+ canvas->setMap(mDestPlayField->map());
+
+ boDebug(270) << "PATHFINDER: " << k_funcinfo << "trying to init..." << endl;
+ canvas->initPathfinder();
+ boDebug(270) << "PATHFINDER: " << k_funcinfo << "initing done :-)" << endl;
+
+ // AB: note that this meets the name "initMap" only slightly. We can't do this
+ // when players are initialized, as the map must be known to them once we start
+ // loading the units (for *loading* games)
+ for (unsigned int i = 0; i < boGame->playerCount(); i++) {
+	boDebug(270) << "init map for player " << i << endl;
+	Player* p = (Player*)boGame->playerList()->at(i);
+	if (p) {
+		p->initMap(mDestPlayField->map(), boGame->gameMode());
+	}
+ }
 
  boGame->lock();
  if (!loadTiles()) {

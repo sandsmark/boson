@@ -253,8 +253,6 @@ public:
 
 	double fps() const;
 
-	void mapChanged();
-
 	Player* localPlayer() const;
 	PlayerIO* localPlayerIO() const;
 

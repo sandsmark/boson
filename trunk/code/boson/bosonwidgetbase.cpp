@@ -215,37 +215,6 @@ void BosonWidgetBase::init(KDockWidget* chatDock, KDockWidget* commandFrameDock)
  BosonScript::setGame(boGame);
 }
 
-void BosonWidgetBase::initMap()
-{
- boDebug() << k_funcinfo << endl;
-
- if (!boGame->playField()) {
-	boError() << k_funcinfo << "NULL playfield" << endl;
-	return;
- }
- BosonMap* map = boGame->playField()->map();
- canvas()->setMap(map);
- displayManager()->mapChanged();
-// boGame->setPlayField(playField()); // already done on startup in BosonStarting
-
- boDebug() << "PATHFINDER: " << k_funcinfo << "trying to init..." << endl;
- canvas()->initPathfinder();
- boDebug() << "PATHFINDER: " << k_funcinfo << "initing done :-)" << endl;
-
-
- // AB: note that this meets the name "initMap" only slightly. We can't do this
- // when players are initialized, as the map must be known to them once we start
- // loading the units (for *loading* games)
- for (unsigned int i = 0; i < boGame->playerCount(); i++) {
-	boDebug() << "init map for player " << i << endl;
-	Player* p = (Player*)boGame->playerList()->at(i);
-	if (p) {
-		p->initMap(map, boGame->gameMode());
-	}
- }
-
-}
-
 void BosonWidgetBase::initConnections()
 {
  connect(boGame, SIGNAL(signalLoadExternalStuff(QDataStream&)),
@@ -1255,3 +1224,7 @@ void BosonWidgetBase::setCanvas(BosonCanvas* canvas)
  BosonScript::setCanvas(d->mCanvas);
 }
 
+void BosonWidgetBase::initMap()
+{
+ // implemented by EditorWidget
+}
