@@ -36,7 +36,7 @@
             <dl>
 	      <dt>2.1 <a href="game/configure.html">Configure Boson</a></dt>
               <dt>2.2 <a href="game/scrolling.html">Scrolling</a></dt>
-	      <dt>2.3 <a href="game/cursors.html">The cursor</a></dt>
+	      <dt>2.3 <a href="game/cursor.html">The cursor</a></dt>
               <dt>2.4 <a href="game/buildfac.html">Building facilities</a></dt>
               <dt>2.5 <a href="game/buildunit.html">Building units</a></dt>
               <dt>2.6 <a href="game/moving.html">Selecting and moving Units</a></dt>
