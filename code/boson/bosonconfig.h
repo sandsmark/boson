@@ -47,7 +47,7 @@ class KConfig;
  * @short Global configuration class for Boson
  *
  * All values which are stored in BosonConfig can be read from the config file
- * using @ref reset and stored using @ref save. Note that @reset is called on
+ * using @ref reset and stored using @ref save. Note that @ref reset is called on
  * construction but @ref save is <em>not</em> called on destruction!
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
