@@ -4,6 +4,9 @@ TODO:
 Generic :
 =========
 
+
+redo icon/.desktop stuff into makefile.am's
+
 editor/boson : mapping different signal to ONE function (int signal_nb) is possible with qt2
 ben's bug
 
