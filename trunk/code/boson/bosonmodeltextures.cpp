@@ -113,7 +113,11 @@ void BosonModelTextures::loadTexture(const QString& textureName, GLuint tex)
 	image = QImage(64, 64, 32);
 	image.fill(Qt::red.rgb());
  }
- BosonTextureArray::createTexture(image, tex, boConfig->modelTexturesMipmaps());
+ bool useAlpha = false;
+ if (image.hasAlphaBuffer()) {
+	useAlpha = true;
+ }
+ BosonTextureArray::createTexture(image, tex, boConfig->modelTexturesMipmaps(), useAlpha);
 }
 
 void BosonModelTextures::removeModel(BosonModel* model)
