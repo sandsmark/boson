@@ -535,7 +535,7 @@ void BosonBigDisplayInput::updatePlacementPreviewData()
  // note: this applies to mobiles as well as for facilities!
  // (mobiles are usually auto placed, but manual placement might get used if
  // auto-placement failed)
- bigDisplay()->setPlacementPreviewData(prop, canvas()->canPlaceUnitAt(prop, BoVector2Fixed(cursorCanvasPos().x(), cursorCanvasPos().y()), pp));
+ bigDisplay()->setPlacementPreviewData(prop, canvas()->canPlaceUnitAt(prop, BoVector2Fixed(cursorCanvasVector().x(), cursorCanvasVector().y()), pp));
 
 }
 

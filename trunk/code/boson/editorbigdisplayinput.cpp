@@ -418,7 +418,7 @@ void EditorBigDisplayInput::updatePlacementPreviewData()
 #warning do NOT use Player here! use PlayerIO
 	const UnitProperties* prop = d->mPlacement.owner()->unitProperties(d->mPlacement.unitType());
 
-	bool canPlace = canvas()->canPlaceUnitAt(prop, BoVector2Fixed(cursorCanvasPos().x(), cursorCanvasPos().y()), 0);
+	bool canPlace = canvas()->canPlaceUnitAt(prop, BoVector2Fixed(cursorCanvasVector().x(), cursorCanvasVector().y()), 0);
 	bigDisplay()->setPlacementPreviewData(prop, canPlace);
  } else if (d->mPlacement.isGround()) {
 	if (d->mPlacement.textureCount() == 0) {
