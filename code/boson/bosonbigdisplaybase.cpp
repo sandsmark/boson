@@ -2168,7 +2168,7 @@ bool BosonBigDisplayBase::mapDistance(int windx, int windy, GLfloat* dx, GLfloat
 bool BosonBigDisplayBase::mapCoordinatesToCell(const QPoint& pos, QPoint* cell)
 {
  GLfloat x, y, z;
- if (canvas()) {
+ if (!canvas()) {
 	BO_NULL_ERROR(canvas());
 	return false;
  }
