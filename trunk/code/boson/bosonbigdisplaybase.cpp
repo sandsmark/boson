@@ -1548,10 +1548,12 @@ void BosonBigDisplayBase::mouseEventMove(int buttonState, const BoAction& action
 		cameraChanged();
 	}
  } else if (buttonState & LEFT_BUTTON) {
-	// selection rect gets drawn.
-	// modifiers are ignored
-	d->mSelectionRect.setVisible(true);
-	moveSelectionRect(posX, posY, posZ);
+	if (!displayInput()->actionLocked()) {
+		// selection rect gets drawn.
+		// other modifiers are ignored
+		d->mSelectionRect.setVisible(true);
+		moveSelectionRect(posX, posY, posZ);
+	}
  } else if (buttonState & RIGHT_BUTTON) {
 	// RMB+MouseMove does *not* depend on CTRL or Shift. the
 	// map is moved in all cases (currently - we have some
