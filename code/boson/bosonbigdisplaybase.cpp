@@ -808,7 +808,9 @@ void BosonBigDisplayBase::paintGL()
 	BosonParticleSystem* s;
 	while ((s = it.current()) != 0) {
 		++it;
-		s->draw();
+		if (sphereInFrustum(s->position().data(), s->boundingSphereRadius())) {
+			s->draw();
+		}
 	}
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDisable(GL_BLEND);
@@ -2002,14 +2004,14 @@ d->mFrustumMatrix[4][3] = clip[15] - clip[14];
  d->mFrustumMatrix[5][3] /= t;
 }
 
-float BosonBigDisplayBase::sphereInFrustum(float x, float y, float z, float radius) const
+float BosonBigDisplayBase::sphereInFrustum(const float* pos, float radius) const
 {
  // FIXME: performance: we might unrull the loop and then make this function
  // inline. We call it pretty often!
  float distance;
  for (int p = 0; p < 6; p++) {
-	distance = d->mFrustumMatrix[p][0] * x + d->mFrustumMatrix[p][1] * y +
-			d->mFrustumMatrix[p][2] * z + d->mFrustumMatrix[p][3];
+	distance = d->mFrustumMatrix[p][0] * pos[0] + d->mFrustumMatrix[p][1] * pos[1] +
+			d->mFrustumMatrix[p][2] * pos[2] + d->mFrustumMatrix[p][3];
 	if (distance <= -radius){
 		return 0;
 	}
@@ -2046,7 +2048,7 @@ void BosonBigDisplayBase::mapChanged()
 }
 
 
-QPoint BosonBigDisplayBase::cursorCanvasPos() const
+const QPoint& BosonBigDisplayBase::cursorCanvasPos() const
 {
  return d->mCanvasPos;
 }

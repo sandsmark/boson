@@ -258,7 +258,7 @@ protected:
 	virtual void updateCursor() = 0;
 	virtual void actionClicked(const BoAction& action, QDataStream& stream, bool* send) = 0;
 
-	QPoint cursorCanvasPos() const;
+	const QPoint& cursorCanvasPos() const;
 
 	void generateCellList();
 
@@ -292,7 +292,12 @@ protected:
 	 * otherwise the distance from the near plane. We might use this for the
 	 * level of detail.
 	 **/
-	float sphereInFrustum(float x, float y, float z, float radius) const;
+	float sphereInFrustum(const float* pos, float radius) const;
+	inline float sphereInFrustum(float x, float y, float z, float radius) const
+	{
+		float pos[3] = {x,y,z};
+		return sphereInFrustum(pos, radius);
+	}
 
 	void setCamera(const Camera& c);
 	Camera* camera() const;

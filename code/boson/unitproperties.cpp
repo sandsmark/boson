@@ -526,9 +526,11 @@ QPtrList<BosonParticleSystem> UnitProperties::newDestroyedParticleSystems(float 
 {
  QPtrList<BosonParticleSystem> list;
  QPtrListIterator<BosonParticleSystemProperties> it(d->mDestroyedParticleSystems);
- while (it.current())
- {
-	list.append(it.current()->newSystem(BoVector3(x, y, z)));
+ while (it.current()) {
+	BosonParticleSystem* s = it.current()->newSystem(BoVector3(x, y, z));
+	if (s) {
+		list.append(s);
+	}
 	++it;
  }
  return list;

@@ -152,7 +152,7 @@ class BosonParticleSystem
     /**
      * @return Current position of this system
      **/
-    const BoVector3 position() { return mPos; };
+    inline const BoVector3 position() { return mPos; };
 
     void setRotation(BoVector3 r) { mRot = r; };
 
@@ -167,7 +167,7 @@ class BosonParticleSystem
     /**
      * @return Current velocity of particles in this system
      **/
-//    const BoVector3& velocity() { return mVelo; };
+//    const BoVector3& velocity() const { return mVelo; };
 
     /**
      * Sets color of particles in this system.
@@ -179,7 +179,7 @@ class BosonParticleSystem
     /**
      * @return Color of particles in this system
      **/
-//    BoVector4 color() { return mColor; };
+//    const BoVector4& color() const { return mColor; };
 
     /**
      * @return Average size of particles in this system
@@ -207,7 +207,7 @@ class BosonParticleSystem
     /**
      * @return Current creation rate of particles (per second)
      **/
-//    float createRate() { return mCreateRate; };
+//    float createRate() const { return mCreateRate; };
     /**
      * Sets current creation rate of particles (per second).
      * New particles are periodically created every @ref update call.
