@@ -31,7 +31,6 @@ General TODOs
 - selection rect is not working correctly if zooming in
 - SpeciesTheme loads all pixmaps into memory - share it between different
   players (if they have the same themes)
-- player should select team color in new game dialog
 - find out whether signalUnitPropertyChanged() is a good thing at all. Might
   save some performance if we don't use it.
 - use typeId = 0 as invalid (NOT -1!)
