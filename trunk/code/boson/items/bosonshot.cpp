@@ -196,28 +196,6 @@ bool BosonShot::loadFromXML(const QDomElement& root)
   return true;
 }
 
-bool BosonShot::save(QDataStream& stream)
-{
-  stream << (float)x();
-  stream << (float)y();
-  stream << (float)z();
-  return true;
-}
-
-bool BosonShot::load(QDataStream& stream)
-{
-  float x, y, z;
-  stream >> x >> y >> z;
-
-  mActive = true; // Inactive shots won't be saved
-  move(x, y, z);
-
-  // Is it ok to do these here?
-  setAnimated(true);
-
-  return true;
-}
-
 void BosonShot::explode()
 {
  mActive = false;
@@ -497,41 +475,6 @@ bool BosonShotMissile::loadFromXML(const QDomElement& root)
   return true;
 }
 
-bool BosonShotMissile::save(QDataStream& stream)
-{
-  bool ret = BosonShot::save(stream);
-
-  stream << mVelo;
-  stream << mTarget;
-  stream << (float)mTotalDist;
-  stream << (float)mPassedDist;
-  stream << (float)mZ;
-  stream << (float)mMaxHeight;
-  stream << speed();
-  return ret;
-}
-
-bool BosonShotMissile::load(QDataStream& stream)
-{
-  bool ret = BosonShot::load(stream);
-
-  float speed;
-
-  stream >> mVelo;
-  stream >> mTarget;
-  stream >> mTotalDist >> mPassedDist;
-  stream >> mZ >> mMaxHeight;
-  stream >> speed;
-
-  mParticleVelo = sqrt(mVelo[0] * mVelo[0] + mVelo[1] * mVelo[1]) / (float)BO_TILE_SIZE;
-  setRotation(Bo3dTools::rotationToPoint(mVelo[0], mVelo[1]));
-  setSpeed(speed);
-  setAccelerationSpeed(properties()->accelerationSpeed());
-  setMaxSpeed(properties()->speed());
-  setVisible(true);
-  return ret;
-}
-
 void BosonShotMissile::moveToTarget()
 {
   move(mTarget.x(), mTarget.y(), mTarget.z());
@@ -617,26 +560,6 @@ bool BosonShotExplosion::loadFromXML(const QDomElement& root)
   return true;
 }
 
-bool BosonShotExplosion::save(QDataStream& stream)
-{
-  BosonShot::save(stream);
-  stream << mDamage;
-  stream << mDamageRange;
-  stream << mFullDamageRange;
-  stream << mDelay;
-  return true;
-}
-
-bool BosonShotExplosion::load(QDataStream& stream)
-{
-  BosonShot::load(stream);
-  stream >> mDamage;
-  stream >> mDamageRange;
-  stream >> mFullDamageRange;
-  stream >> mDelay;
-  return true;
-}
-
 void BosonShotExplosion::advanceMoveInternal()
 {
   mDelay--;
@@ -702,21 +625,6 @@ bool BosonShotMine::loadFromXML(const QDomElement& root)
   setVisible(true);
 
   return true;
-}
-
-bool BosonShotMine::save(QDataStream& stream)
-{
-  bool ret = BosonShot::save(stream);
-  stream << (Q_UINT8)mActivated;
-  return ret;
-}
-
-bool BosonShotMine::load(QDataStream& stream)
-{
-  bool ret = BosonShot::load(stream);
-  stream >> (Q_UINT8)mActivated;
-  setVisible(true);
-  return ret;
 }
 
 void BosonShotMine::advanceMoveInternal()
@@ -822,27 +730,6 @@ bool BosonShotBomb::loadFromXML(const QDomElement& root)
   setVisible(true);
 
   return true;
-}
-
-bool BosonShotBomb::save(QDataStream& stream)
-{
-  bool ret = BosonShot::save(stream);
-  stream << (Q_UINT8)mActivated;
-  stream << speed();
-  return ret;
-}
-
-bool BosonShotBomb::load(QDataStream& stream)
-{
-  bool ret = BosonShot::load(stream);
-  float speed;
-  stream >> (Q_UINT8)mActivated;
-  stream >> speed;
-  setSpeed(speed);
-  setAccelerationSpeed(properties()->accelerationSpeed());
-  setMaxSpeed(properties()->speed());
-  setVisible(true);
-  return ret;
 }
 
 void BosonShotBomb::advanceMoveInternal()
@@ -1004,42 +891,6 @@ bool BosonShotFragment::loadFromXML(const QDomElement& root)
   setVisible(true);
 
   return true;
-}
-
-bool BosonShotFragment::save(QDataStream& stream)
-{
-  bool ret = BosonShot::save(stream);
-
-  stream << mVelo.x();
-  stream << mVelo.y();
-  stream << mVelo.z();
-  stream << (Q_UINT32)mUnitProperties->typeId();
-  return ret;
-}
-
-bool BosonShotFragment::load(QDataStream& stream)
-{
-  bool ret = BosonShot::load(stream);
-
-  float velox, veloy, veloz;
-  unsigned long int props;
-
-  stream >> velox;
-  stream >> veloy;
-  stream >> veloz;
-  stream >> props;
-
-
-  mVelo.set(velox, veloy, veloz);
-  setRotation(Bo3dTools::rotationToPoint(mVelo.x(), mVelo.y()));
-  mUnitProperties = owner()->speciesTheme()->unitProperties(props);
-  if(!mUnitProperties)
-  {
-    boError() << k_funcinfo << "NULL properties for " << props << endl;
-    return false;
-  }
-  setVisible(true);
-  return ret;
 }
 
 void BosonShotFragment::advanceMoveInternal()

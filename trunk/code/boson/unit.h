@@ -325,8 +325,6 @@ public:
 
 	virtual bool saveAsXML(QDomElement& root);
 	virtual bool loadFromXML(const QDomElement& root);
-	virtual bool save(QDataStream& stream);
-	virtual bool load(QDataStream& stream);
 
 	void updateSelectBox();
 
@@ -517,8 +515,6 @@ public:
 
 	virtual bool saveAsXML(QDomElement& root);
 	virtual bool loadFromXML(const QDomElement& root);
-	virtual bool load(QDataStream& stream);
-	virtual bool save(QDataStream& stream);
 
 	virtual void stopMoving();
 
@@ -622,8 +618,6 @@ public:
 
 	virtual bool saveAsXML(QDomElement& root);
 	virtual bool loadFromXML(const QDomElement& root);
-	virtual bool load(QDataStream& stream);
-	virtual bool save(QDataStream& stream);
 
 private:
 	class FacilityPrivate;
