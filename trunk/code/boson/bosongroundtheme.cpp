@@ -208,6 +208,14 @@ bool BosonGroundTheme::loadGroundThemeConfig(const QString& file)
 	types[i].mAmountOfLand = (unsigned char)conf.readUnsignedNumEntry("AmountOfLand", 0);
 	types[i].mAmountOfWater = (unsigned char)conf.readUnsignedNumEntry("AmountOfWater", 0);
 	types[i].mMiniMapColor = conf.readUnsignedNumEntry("MiniMapColor", 0);
+
+	// ensure correct values:
+	if (types[i].mAmountOfLand + types[i].mAmountOfWater != 255) {
+		boWarning() << k_funcinfo << "AmountOfLand + AmountOfWater must be 255 for texture " << i << endl;
+		int diff = 255 - (types[i].mAmountOfLand + types[i].mAmountOfWater);
+		// add the diff to water, as most units cannot go there
+		types[i].mAmountOfWater += diff;
+	}
  }
  if (!ret) {
 	boError() << k_funcinfo << "Could not load ground theme config file " << file << endl;
