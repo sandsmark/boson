@@ -11,7 +11,6 @@ Game TODOs
 - rewrite fog of war (QCanvas suckz): use QCanvasSprite::hide() on all units and
   let the Cell display black. Don't use a QCanvasSprite for the fog of war.
   Terrible performance.
-- display how many (and which) units are still in queue for production
 - BosonPath needs to be improved greatly - in progress
 - AI
 - BosonCanvas::unitsAtCell() uses QCanvas::collisions() and is therefore quite

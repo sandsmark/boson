@@ -26,11 +26,7 @@
 #include "unitproperties.h"
 #include "defines.h"
 
-#ifdef HAVE_KGAMEPROGRESS
 #include <kgameprogress.h>
-#else
-#include <kprogress.h>
-#endif
 #include <kpixmap.h>
 #include <kpixmapeffect.h>
 #include <klocale.h>
@@ -50,18 +46,10 @@
 
 // KProgress has been renamed to KGameProgress after KDE3 beta1. KProgress is
 // now useless for us. But For Beta1 it's still ok.
-#ifdef HAVE_KGAMEPROGRESS
 class BoProgress : public KGameProgress
-#else
-class BoProgress : public KProgress
-#endif
 {
 	public:
-#ifdef HAVE_KGAMEPROGRESS
 		BoProgress(QWidget* p) : KGameProgress(p) { }
-#else
-		BoProgress(QWidget* p) : KProgress(p) { }
-#endif
 
 		virtual void setGeometry(int x, int y, int w, int h)
 		{
@@ -69,11 +57,7 @@ class BoProgress : public KProgress
 			pix.fill(green);
 			KPixmapEffect::gradient(pix, green, red, KPixmapEffect::VerticalGradient);
 			setBarPixmap(pix);
-#ifdef HAVE_KGAMEPROGRESS
 			KGameProgress::setGeometry(x, y, w, h);
-#else
-			KProgress::setGeometry(x, y, w, h);
-#endif
 		}
 };
 
@@ -83,6 +67,7 @@ public:
 	BoButton(QWidget* p) : QPushButton(p)
 	{
 		mGrayOut = false;
+		mProductionCount = 0;
 	}
 
 	virtual QSize sizeHint() const
@@ -106,15 +91,32 @@ public:
 		if (mGrayOut) {
 			KPixmap p(pix);
 			KPixmapEffect::desaturate(p, 1.0);
+			if (mProductionCount > 0) {
+				addProductionCount(&p);
+			}
 			QPushButton::setPixmap(p);
 		} else {
-			QPushButton::setPixmap(pix);
+			QPixmap p(pix);
+			if (mProductionCount > 0) {
+				addProductionCount(&p);
+			}
+			QPushButton::setPixmap(p);
 		}
+	}
+
+	void setProductionCount(int c)
+	{
+		mProductionCount = c;
+		QPixmap p(mPixmap);
+		if (mProductionCount > 0) {
+			addProductionCount(&p);
+		}
+		QPushButton::setPixmap(p);
 	}
 protected:
 	virtual void drawButton(QPainter* p)
 	{
-		// we want to have a *visible* pixmap - not just a grey pixmap!
+		// we want to have a *visible* pixmap - not just a gray pixmap!
 		bool e = isEnabled();
 		clearWState(WState_Disabled);
 		drawButtonLabel(p);
@@ -123,8 +125,18 @@ protected:
 		}
 	}
 
+	void addProductionCount(QPixmap* pix)
+	{
+		QPainter painter(pix);
+		painter.setPen(black);
+		painter.setBrush(black);
+		painter.drawText(5, 5 + painter.fontMetrics().height(), QString::number(mProductionCount));
+		painter.end();
+	}
+
 private:
 	bool mGrayOut;
+	int mProductionCount;
 	QPixmap mPixmap; // FIXME: this means addiditional memory space for *every* command button!!!
 };
 
@@ -223,6 +235,7 @@ void BosonCommandWidget::setUnit(Unit* unit)
  d->mReload->show(); // TODO don't show if unit cannot shoot
 
  show();
+ setProductionCount(0);
  setEnabled(true);
  setGrayOut(false);
 }
@@ -257,7 +270,7 @@ void BosonCommandWidget::setUnit(int unitType, Player* owner)
 
  show();
  // note: setEnabled() and setGrayOut() are handled in BosonCommandFrame for
- // this!
+ // this! (same for setProductionCount())
 }
 
 void BosonCommandWidget::setCell(int tileNo, BosonTiles* tileSet)
@@ -275,6 +288,7 @@ void BosonCommandWidget::setCell(int tileNo, BosonTiles* tileSet)
  d->mReload->hide();
 
  show();
+ setProductionCount(0);
  setEnabled(true);
  setGrayOut(false);
 }
@@ -453,4 +467,9 @@ void BosonCommandWidget::advanceProduction(double percentage)
 void BosonCommandWidget::setGrayOut(bool g)
 {
  d->mPixmap->setGrayOut(g);
+}
+
+void BosonCommandWidget::setProductionCount(int count)
+{
+ d->mPixmap->setProductionCount(count);
 }
