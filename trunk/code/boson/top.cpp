@@ -48,6 +48,7 @@
 #include <qhbox.h>
 #include <qptrdict.h>
 #include <kpopupmenu.h>
+#include <kmessagebox.h>
 
 #define ID_DEBUG_KILLPLAYER 0
 #define ID_WIDGETSTACK_WELCOME 1
@@ -130,6 +131,7 @@ TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
  enableGameActions(false);
  initStatusBar();
  showWelcomeWidget();
+ loadInitialDockConfig();
 }
 
 TopWidget::~TopWidget()
@@ -144,7 +146,6 @@ void TopWidget::saveProperties(KConfig *config)
  if (!config) {
 	return;
  }
-    
 }
 
 void TopWidget::readProperties(KConfig *config)
@@ -337,7 +338,6 @@ void TopWidget::showWelcomeWidget()
 	initWelcomeWidget();
  }
  mWs->raiseWidget(ID_WIDGETSTACK_WELCOME);
- loadInitialDockConfig();
 }
 
 void TopWidget::initNewGameWidget()
@@ -650,6 +650,12 @@ void TopWidget::slotToggleFullScreen()
 
 void TopWidget::slotEndGame()
 {
+ int answer = KMessageBox::warningYesNo(this, i18n("Are you sure you want to end this game?"),
+		i18n("Are you sure?"), KStdGuiItem::yes(), KStdGuiItem::no(), "ConfirmEndGame");
+ if(answer == KMessageBox::No) {
+	return;
+ }
+
  d->mBosonWidget->slotEndGame();
  disconnect(d->mBosonWidget, 0, 0, 0);
  // Delete all objects
@@ -787,7 +793,18 @@ void TopWidget::setGeometry(const QRect& r)
 
 bool TopWidget::queryClose()
 {
- // TODO display "really wanna quit" msgbox
+ kdDebug() << k_funcinfo << endl;
+ if(mGame) {
+	int answer = KMessageBox::warningYesNo(this, i18n("Are you sure you want to quit Boson?\n"
+			"This will end current game."), i18n("Are you sure?"), KStdGuiItem::yes(),
+			KStdGuiItem::no(), "ConfirmQuitWhenGameRunning");
+	if(answer == KMessageBox::Yes) {
+		return true;
+	}
+	else if(answer == KMessageBox::No) {
+		return false;
+	}
+ }
  return true;
 }
 
@@ -814,4 +831,3 @@ bool TopWidget::queryExit()
  }
  return true;
 }
-
