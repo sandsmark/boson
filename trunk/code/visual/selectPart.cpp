@@ -29,7 +29,7 @@
 #define SP_H		(SP_CORNER_LEN+SP_CORNER_POS)
 
 static void drawSelectBox(QPainter &painter, QColor c1, QColor c2, int power);
-static QwSpritePixmapSequence *initStatic(bool isDown);
+static QwSpritePixmapSequence *initStatic(selectPart::sp_type type);
 
 QwSpritePixmapSequence * selectPart::qsps_up = 0l;
 QwSpritePixmapSequence * selectPart::qsps_down = 0l;
@@ -37,13 +37,13 @@ QwSpritePixmapSequence * selectPart::qsps_down = 0l;
 /*
  *  selectPart
  */
-selectPart::selectPart(int _f, int _z, bool isDown)
+selectPart::selectPart(int _f, int _z, sp_type type)
 {
-	if (isDown) {
-		if (!qsps_down) qsps_down = initStatic(true);
+	if (PART_DOWN == type) {
+		if (!qsps_down) qsps_down = initStatic(PART_DOWN);
 		setSequence(qsps_down);
 	} else {
-		if (!qsps_up) qsps_up = initStatic(false);
+		if (!qsps_up) qsps_up = initStatic(PART_UP);
 		setSequence(qsps_up);
 	}
 	boAssert(_f>=0);
@@ -74,7 +74,7 @@ void drawSelectBox(QPainter &painter, QColor c1, QColor c2, int power)
 }
 
 
-QwSpritePixmapSequence *initStatic(bool isDown)
+QwSpritePixmapSequence *initStatic(selectPart::sp_type type)
 {
 	int i;
 	QList<QPixmap>	pixmaps;
@@ -96,7 +96,7 @@ QwSpritePixmapSequence *initStatic(bool isDown)
 		_pix->fill();
 	
 		painter.begin(_pix);
-		if (isDown) {
+		if (selectPart::PART_DOWN == type) {
 			painter.rotate(180);
 			painter.translate(-SP_W+1, -SP_H+1);
 		}
@@ -107,7 +107,7 @@ QwSpritePixmapSequence *initStatic(bool isDown)
 		_mask->fill(black);
 	
 		painter.begin(_mask);
-		if (isDown) {
+		if (selectPart::PART_DOWN == type) {
 			painter.rotate(180);
 			painter.translate(-SP_W+1, -SP_H+1);
 		}
@@ -121,7 +121,7 @@ QwSpritePixmapSequence *initStatic(bool isDown)
 		pix = new QPixmap(*_pix);
 		pixmaps.append (pix);
 
-		if (isDown)
+		if (selectPart::PART_DOWN == type)
 			point = new QPoint(1, SP_H-2 - SP_CORNER_POS);
 		else
 			point = new QPoint(SP_W-2, SP_CORNER_POS);

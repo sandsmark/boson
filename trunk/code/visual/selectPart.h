@@ -32,7 +32,10 @@
 class selectPart : public QwSprite
 {
 public:
-	selectPart(int frame, int z, bool isDown);
+	enum sp_type { PART_UP, PART_DOWN};
+
+	selectPart(int frame, int z, sp_type type);
+	
 	virtual int rtti() const { return S_PART; } /* Qw stuff */
 private:
 	static QwSpritePixmapSequence  *qsps_up;
