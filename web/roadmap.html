@@ -1,0 +1,132 @@
+<HTML>
+
+  <HEAD>
+    <TITLE>Boson HomePage - RoadMap</TITLE>
+  </HEAD>
+
+<BODY BACKGROUND = "graphics/bg.jpg">
+
+<CENTER>
+
+<TABLE WIDTH = "90%">
+
+  <TR><TD>
+
+    <CENTER><IMG SRC = "graphics/logo-roadmap.jpg"></CENTER>
+
+    <BR><BR>
+
+  </TD></TR>
+
+
+  <TR><TD BGCOLOR = "#FFDE00">
+  
+    <FONT FACE="helvetica" SIZE="3">
+
+    <B>This is the roadmap for the development of Boson:</B>
+
+    </FONT>
+
+  </TD></TR>
+
+
+  <TR><TD>
+  
+    <BR>
+
+    <FONT FACE="helvetica" SIZE="3">
+
+    <P><B>0.1 Release</B></P>
+
+    </FONT>
+
+    <FONT FACE="helvetica" SIZE="2">
+    
+    <UL>
+
+    <LI>Floating toolbar with move command.
+    <LI>Bug : select mobile, move, somewhere, can't move somewhere else...
+    <LI>How to handle non 1x1 tiles?
+    <LI>Does units::rect need to be virtual anymore ?
+    <LI>Bug : mobile on very-bottom-right can't be selected.
+    <LI>What about drag and dropping units?
+    <LI>How to handle selection drawing ?
+    <LI>Menu and toolbar clean-up.
+    <LI>When clicking (no box) on two mobiles, both are selected, but only one should.
+    <LI>Client units shouldn't move over each other.
+    <LI>Checkvisibility -> units.
+    <LI>Server : add a 'known' state to serverUnits.
+    <LI>Broadcast 'moving' to all people knowing me, and then update 'known'.
+    <LI>Everything should be seen by others if ground is known.
+    <LI>Use different pixmap according to 'direction'.
+    <LI>Server : check that each unit does max 1 move each jiffie.
+    <LI>Version check whithin the ask_connect msg.
+    <LI>Check that loading of pixmap has been done well.
+    <LI>OK for species, ground still needs checking.
+    <LI>#good (with _no_ layout)  positionning of widget.
+    <LI>#boAssert( celldiscovered has j<max) seems to have problems.
+    <LI>#integration of Ben mobiles (with different colors).
+    <LI>#click-zone for selection is still badly centered.
+    <LI>#mMp : inheritate Cell, and put serverCell back in server dir.
+
+    </UL>
+    
+    </FONT>
+
+    <BR>
+
+    <FONT FACE="helvetica" SIZE="3">
+
+    <P><B>0.2 Release</B></P>
+
+    </FONT>
+
+    <FONT FACE="helvetica" SIZE="2">
+
+    <UL>
+
+    <LI>make a toolbar with concerned buttons (move, stop, etc..)
+    <LI>handling non squared 48^2 transitions
+    <LI>basic map editor
+    <LI>server GUI
+    <LI>client and server should be peer-killed proof
+    <LI>smooth  known-unknown transition
+    <LI>see again "virtual(?) Unit::getWidth" and checkUnitDiscovered badly centered
+
+    </UL>
+    
+    </FONT>
+
+    <BR>
+
+    <FONT FACE="helvetica" SIZE="3">
+
+    <P><B>1.0 Release</B></P>
+
+    </FONT>
+
+    <FONT FACE="helvetica" SIZE="2">
+    
+    <UL>
+
+    <LI>Theme editor.
+    <LI>Map editor.
+    <LI>On-demand theme loading to speed launching up?
+    <LI>Server can handle multiple games?
+    <LI>Theme is configured in a file (explaining, for example, how many different implementation there are for a given pixmap)
+
+    </UL>
+    
+    </FONT>
+
+  </TD></TR>
+
+</TABLE>
+
+</CENTER>
+
+<BR><BR><BR>
+
+</BODY>
+
+</HTML>
