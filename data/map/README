@@ -1,3 +1,6 @@
+The map file is either a gzip compressed XML file, a normal XML file or a binary
+file.
+
 a map file contains information about the map *only*
 It contains information about the tiles (cells) and (or only this?)
 it can (? TODO) contain information about maximal and minimal players but no
