@@ -234,9 +234,9 @@ void TopWidget::initKActions()
  d->mActionFullScreen->setChecked(false);
 
  // Debug
- (void)new KAction(i18n("&Profiling"), KShortcut(), this,
+ (void)new KAction(i18n("&Profiling..."), KShortcut(), this,
 		SLOT(slotProfiling()), actionCollection(), "debug_profiling");
- (void)new KAction(i18n("&Debug KGame"), KShortcut(), this,
+ (void)new KAction(i18n("&Debug KGame..."), KShortcut(), this,
 		SLOT(slotDebugKGame()), actionCollection(), "debug_kgame");
 
  createGUI("topui.rc", false);
