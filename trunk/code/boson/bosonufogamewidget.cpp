@@ -340,6 +340,7 @@ BosonBigDisplayBase* BosonUfoGameWidget::display() const
 
 void BosonUfoGameWidget::updateUfoLabels()
 {
+ BO_CHECK_NULL_RET(localPlayerIO());
  QString minerals = QString::number(localPlayerIO()->minerals());
  QString oil = QString::number(localPlayerIO()->oil());
  d->mMineralsLabel->setText(minerals);
