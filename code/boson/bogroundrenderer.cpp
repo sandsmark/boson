@@ -41,8 +41,6 @@
 #include <GL/gl.h>
 #include <math.h>
 
-static void renderCellsNow(Cell** cells, int count, int mapCorners, float* heightMap, unsigned char* texMapStart);
-
 class BoGroundRendererPrivate
 {
 public:
@@ -69,9 +67,6 @@ public:
 	const int* mViewport;
 	const double* mViewFrustum;
 
-	// how many cells got rendered by renderCells()
-	unsigned int mRenderedCells;
-
 	// FIXME: replace by PlayerIO
 	Player* mLocalPlayer;
 };
@@ -79,7 +74,6 @@ public:
 BoGroundRenderer::BoGroundRenderer()
 {
  d = new BoGroundRendererPrivate;
- d->mRenderedCells = 0;
  d->mRenderCellsSize = 0;
  d->mRenderCellsCount = 0;
 }
@@ -88,11 +82,6 @@ BoGroundRenderer::~BoGroundRenderer()
 {
  delete[] d->mRenderCells;
  delete d;
-}
-
-unsigned int BoGroundRenderer::renderedCells() const
-{
- return d->mRenderedCells;
 }
 
 void BoGroundRenderer::setMatrices(const BoMatrix* modelviewMatrix, const BoMatrix* projectionMatrix, const int* viewport)
@@ -124,7 +113,7 @@ Player* BoGroundRenderer::localPlayer() const
  return d->mLocalPlayer;
 }
 
-void renderCellsNow(Cell** cells, int count, int cornersWidth, float* heightMap, unsigned char* texMapStart)
+void BoGroundRenderer::renderCellsNow(Cell** cells, int count, int cornersWidth, float* heightMap, unsigned char* texMapStart)
 {
  // Texture offsets
  const int offsetCount = 5;
@@ -177,24 +166,9 @@ void renderCellsNow(Cell** cells, int count, int cornersWidth, float* heightMap,
 }
 
 
-void BoGroundRenderer::renderCells(const BosonMap* map)
+unsigned int BoGroundRenderer::renderCells(const BosonMap* map)
 {
- BO_CHECK_NULL_RET(map);
-#if 0
- BosonTextureArray* textures = map->textures();
- if (!textures) {
-	makeCurrent();
-	// TODO: load a default theme
-#if 0
-	tiles->generateTextures();
-	textures = tiles->textures();
-#endif
-	if (!textures) {
-		boWarning() << k_funcinfo << "NULL textures for cells" << endl;
-		return;
-	}
- }
-#endif
+ BO_CHECK_NULL_RET0(map);
 
  if (d->mRenderCellsCount == 0) {
 	// this happens either when we have to generate the list first or if no
@@ -203,13 +177,13 @@ void BoGroundRenderer::renderCells(const BosonMap* map)
 	generateCellList(map);
  }
 
- BO_CHECK_NULL_RET(localPlayer());
+ BO_CHECK_NULL_RET0(localPlayer());
 
- BO_CHECK_NULL_RET(map);
- BO_CHECK_NULL_RET(map->texMap());
- BO_CHECK_NULL_RET(map->heightMap());
- BO_CHECK_NULL_RET(map->groundTheme());
- BO_CHECK_NULL_RET(map->textures());
+ BO_CHECK_NULL_RET0(map);
+ BO_CHECK_NULL_RET0(map->texMap());
+ BO_CHECK_NULL_RET0(map->heightMap());
+ BO_CHECK_NULL_RET0(map->groundTheme());
+ BO_CHECK_NULL_RET0(map->textures());
 
  BosonGroundTheme* groundTheme = map->groundTheme();
  float* heightMap = map->heightMap();
@@ -219,11 +193,10 @@ void BoGroundRenderer::renderCells(const BosonMap* map)
  // by two array defining the coordinates of cells and the heightmap values.
  // we could use that as vertex array for example.
  int heightMapWidth = map->width() + 1;
- d->mRenderedCells = 0;
 
  int cellsCount = 0;
  Cell** renderCells = createVisibleCellList(&cellsCount, localPlayer());
- BO_CHECK_NULL_RET(renderCells);
+ BO_CHECK_NULL_RET0(renderCells);
 
  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -244,7 +217,6 @@ void BoGroundRenderer::renderCells(const BosonMap* map)
 	glBindTexture(GL_TEXTURE_2D, tex);
 	renderCellsNow(renderCells, cellsCount, map->width() + 1, heightMap, map->texMap(i));
  }
- d->mRenderedCells += cellsCount;
 
  glDisable(GL_BLEND);
  glEnable(GL_DEPTH_TEST);
@@ -252,6 +224,8 @@ void BoGroundRenderer::renderCells(const BosonMap* map)
  renderCellGrid(renderCells, cellsCount, heightMap, heightMapWidth);
 
  delete[] renderCells;
+
+ return cellsCount;
 }
 
 void BoGroundRenderer::renderCellGrid(Cell** cells, int cellsCount, float* heightMap, int heightMapWidth)

@@ -1224,8 +1224,7 @@ void BosonBigDisplayBase::renderCells()
  }
 
  BO_CHECK_NULL_RET(d->mGroundRenderer);
- d->mGroundRenderer->renderCells(map);
- d->mRenderedCells = d->mGroundRenderer->renderedCells();
+ d->mRenderedCells = d->mGroundRenderer->renderCells(map);
 
  if (checkError()) {
 	boError() << k_funcinfo << "OpenGL error" << endl;
