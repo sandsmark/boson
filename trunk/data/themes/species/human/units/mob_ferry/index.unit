@@ -1,7 +1,7 @@
 [Boson Mobile Unit]
 CanGoOnLand=false
 CanGoOnWater=true
-Speed=2
+Speed=2.5
 
 [Boson Unit]
 Armor=0
@@ -13,12 +13,12 @@ Id=10011
 IsFacility=false
 MineralCost=350
 Name=Ferry
-OilCost=100
+OilCost=120
 Producer=1
 ProductionTime=15
 Requirements=3
 Shield=0
-SightRange=6
+SightRange=9
 SupportMiniMap=false
 TerrainType=1
 UnitDepth=1

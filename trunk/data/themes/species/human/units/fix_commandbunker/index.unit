@@ -4,7 +4,7 @@ CanRefineOil=false
 ConstructionSteps=22
 
 [Boson Unit]
-Armor=2
+Armor=10
 ConstructedEffects=
 DestroyedEffects=1010,3011,6011,7010,4001
 ExplodingDamage=0
@@ -24,7 +24,7 @@ Producer=10
 ProductionTime=60
 Requirements=
 Shield=0
-SightRange=5
+SightRange=10
 SupportMiniMap=false
 TerrainType=0
 UnitDepth=0.67

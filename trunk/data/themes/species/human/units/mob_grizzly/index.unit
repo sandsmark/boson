@@ -1,10 +1,10 @@
 [Boson Mobile Unit]
 CanGoOnLand=true
 CanGoOnWater=false
-Speed=1.667
+Speed=1.65
 
 [Boson Unit]
-Armor=0
+Armor=2
 ConstructedEffects=
 DestroyedEffects=1002,3001,6001,7001
 ExplodingDamage=0
@@ -20,7 +20,7 @@ Producer=0
 ProductionTime=10
 Requirements=3,14
 Shield=0
-SightRange=5
+SightRange=9
 SupportMiniMap=false
 TerrainType=0
 UnitDepth=0.54
@@ -40,21 +40,20 @@ Shoot=shoot
 [Weapon_0]
 CanShootAtAirUnits=true
 CanShootAtLandUnits=true
-Damage=30
+Damage=80
 DamageRange=1
 FlyEffects=5001,5010
-Height=0.25
+Height=0.15
 HitEffects=2001
 MaxHeight=1
 Model=missile
 Name=Missiles
 Offset=0,0,0.6
-Range=5
-Reload=2.25
+Range=10
+Reload=3
 ShootEffects=
 SoundFly=
 SoundHit=hit
 SoundShoot=shoot
-Speed=3.5
-TakeTargetVeloIntoAccount=true
+Speed=5
 Type=Rocket
