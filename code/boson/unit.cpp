@@ -541,6 +541,9 @@ QValueList<Unit*> Unit::unitCollisions(bool exact) const
 	if (unit->isDestroyed()) {
 		continue;
 	}
+	if (unit->isFlying()) {
+		continue;
+	}
 	units.append(unit);
  }
  return units;
