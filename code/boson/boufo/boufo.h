@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2004 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2004-2005 Andreas Beckermann (b_mann@gmx.de)
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -82,6 +82,103 @@ class BoUfoFactory
 public:
 	static BoUfoWidget* createWidget(const QString& className);
 	static QStringList widgets();
+};
+
+class BoUfoManager;
+
+/**
+ * @short Class that stores information about a font
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+class BoUfoFontInfo
+{
+public:
+	enum Styles {
+		StyleItalic = 1,
+		StyleBold = 2,
+		StyleUnderline = 4,
+		StyleStrikeOut = 8
+	};
+public:
+	BoUfoFontInfo();
+	BoUfoFontInfo(const BoUfoFontInfo&);
+	BoUfoFontInfo(const QString& fontPlugin, const ufo::UFontInfo&);
+
+	BoUfoFontInfo& operator=(const BoUfoFontInfo&);
+
+	void setFontPlugin(const QString& plugin) { mFontPlugin = plugin; }
+	const QString& fontPlugin() const { return mFontPlugin;}
+
+	void setFamily(const QString& family) { mFamily = family; }
+	const QString& family() const { return mFamily; }
+
+	void setPointSize(float s) { mPointSize = s; }
+	float pointSize() const { return mPointSize; }
+
+	void setItalic(bool e)
+	{
+		if (e) {
+			mStyle |= StyleItalic;
+		} else {
+			mStyle &= ~StyleItalic;
+		}
+	}
+	bool italic() const { return mStyle & StyleItalic; }
+	void setBold(bool e)
+	{
+		if (e) {
+			mStyle |= StyleBold;
+		} else {
+			mStyle &= ~StyleBold;
+		}
+	}
+	bool bold() const { return mStyle & StyleBold; }
+	void setUnderline(bool e)
+	{
+		if (e) {
+			mStyle |= StyleUnderline;
+		} else {
+			mStyle &= ~StyleUnderline;
+		}
+	}
+	bool underline() const { return mStyle & StyleUnderline; }
+	void setStrikeOut(bool e)
+	{
+		if (e) {
+			mStyle |= StyleStrikeOut;
+		} else {
+			mStyle &= ~StyleStrikeOut;
+		}
+	}
+	bool strikeOut() const { return mStyle & StyleStrikeOut; }
+
+	/**
+	 * Set the style directly using values from the @ref Styles enum.
+	 * Ususually you should use @ref setItalic, @ref setBold, ... instead
+	 **/
+	void setStyle(int style) { mStyle = style; }
+	int style() const { return mStyle; }
+
+	void setFixedSize(bool e) { mFixedSize = e; }
+	bool fixedSize() const { return mFixedSize; }
+
+	/**
+	 * This creates a NEW (!!) font according to the properties of this
+	 * font. If there is no such font available, libufo will return an
+	 * alternative font.
+	 *
+	 * You should use this font in a ufo widget (using setFont) or delete
+	 * it.
+	 **/
+	ufo::UFont* ufoFont(BoUfoManager* manager) const;
+
+	ufo::UFontInfo ufoFontInfo() const;
+private:
+	QString mFontPlugin;
+	QString mFamily;
+	int mStyle;
+	float mPointSize;
+	bool mFixedSize;
 };
 
 
@@ -226,8 +323,8 @@ public:
 	QString ufoToolkitProperty(const QString& key) const;
 	QMap<QString, QString> toolkitProperties() const;
 
-	QValueList<ufo::UFontInfo> listFonts();
-	QValueList<ufo::UFontInfo> listFonts(const ufo::UFontInfo&);
+	QValueList<BoUfoFontInfo> listFonts();
+	QValueList<BoUfoFontInfo> listFonts(const BoUfoFontInfo&);
 
 private:
 	ufo::UXDisplay* mDisplay;
@@ -598,6 +695,11 @@ public:
 
 	static void setDefaultForegroundColor(const QColor& color);
 	static const QColor& defaultForegroundColor();
+
+	// AB: probably this should be in BoUfoWidget and all derived classes
+	// reimplement it for their own widget.
+	// however atm we don't really need it
+	void setFont(BoUfoManager*, const BoUfoFontInfo& info);
 
 protected:
 	virtual void setMinimumSize(const ufo::UDimension& size);

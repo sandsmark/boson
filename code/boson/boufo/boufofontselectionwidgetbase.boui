@@ -1,0 +1,29 @@
+<!DOCTYPE BoUfoDesigner>
+<BoUfoDesigner>
+ <Widgets preferredHeight="" minimumHeight="" opaque="" constraints="" verticalAlignment="" preferredWidth="" ClassName="BoUfoWidget" horizontalAlignment="" layout="UVBoxLayout" name="BoUfoFontSelectionWidgetBase" minimumWidth="" backgroundImageFile="" >
+  <Widget opaque="" minimumHeight="" preferredHeight="" constraints="" verticalAlignment="" ClassName="BoUfoWidget" preferredWidth="" horizontalAlignment="" layout="" name="mGroupBox" minimumWidth="" backgroundImageFile="" >
+   <Widget opaque="" minimumHeight="" preferredHeight="" constraints="" verticalAlignment="" ClassName="BoUfoVBox" preferredWidth="" horizontalAlignment="" layout="UVBoxLayout" name="mWidget3" minimumWidth="" backgroundImageFile="" >
+    <Widget opaque="" minimumHeight="" preferredHeight="" constraints="" verticalAlignment="" ClassName="BoUfoHBox" preferredWidth="" horizontalAlignment="" layout="UHBoxLayout" name="mWidget4" minimumWidth="" backgroundImageFile="" >
+     <Widget opaque="" minimumHeight="" preferredHeight="" constraints="" verticalAlignment="" ClassName="BoUfoVBox" preferredWidth="" horizontalAlignment="" layout="UVBoxLayout" name="mWidget5" minimumWidth="" backgroundImageFile="" >
+      <Widget opaque="" minimumHeight="" preferredHeight="" constraints="" verticalAlignment="" ClassName="BoUfoLabel" preferredWidth="" horizontalAlignment="" layout="" name="mWidget9" iconFile="" minimumWidth="" text="Font:" backgroundImageFile="" />
+      <Widget selection="" opaque="" minimumHeight="" preferredHeight="" constraints="" verticalAlignment="" ClassName="BoUfoListBox" preferredWidth="" horizontalAlignment="" layout="" name="mFonts" minimumWidth="" backgroundImageFile="" />
+     </Widget>
+     <Widget opaque="" minimumHeight="" preferredHeight="" constraints="" verticalAlignment="" ClassName="BoUfoVBox" preferredWidth="" horizontalAlignment="" layout="UVBoxLayout" name="mWidget6" minimumWidth="" backgroundImageFile="" >
+      <Widget opaque="" minimumHeight="" preferredHeight="" constraints="" verticalAlignment="" ClassName="BoUfoLabel" preferredWidth="" horizontalAlignment="" layout="" name="mWidget11" iconFile="" minimumWidth="" text="Font style:" backgroundImageFile="" />
+      <Widget selection="" opaque="" minimumHeight="" preferredHeight="" constraints="" verticalAlignment="" ClassName="BoUfoListBox" preferredWidth="" horizontalAlignment="" layout="" name="mStyles" minimumWidth="" backgroundImageFile="" />
+     </Widget>
+     <Widget opaque="" minimumHeight="" preferredHeight="" constraints="" verticalAlignment="" ClassName="BoUfoVBox" preferredWidth="" horizontalAlignment="" layout="UVBoxLayout" name="mWidget7" minimumWidth="" backgroundImageFile="" >
+      <Widget opaque="" minimumHeight="" preferredHeight="" constraints="" verticalAlignment="" ClassName="BoUfoLabel" preferredWidth="" horizontalAlignment="" layout="" name="mWidget10" iconFile="" minimumWidth="" text="Size:" backgroundImageFile="" />
+      <Widget opaque="" minimumHeight="" preferredHeight="" constraints="" verticalAlignment="" ClassName="BoUfoComboBox" preferredWidth="" horizontalAlignment="" layout="" name="mSizesCombo" minimumWidth="" backgroundImageFile="" />
+      <Widget selection="" opaque="" minimumHeight="" preferredHeight="" constraints="" verticalAlignment="" ClassName="BoUfoListBox" preferredWidth="" horizontalAlignment="" layout="" name="mSizes" minimumWidth="" backgroundImageFile="" />
+     </Widget>
+    </Widget>
+    <Widget opaque="" minimumHeight="" preferredHeight="" constraints="" verticalAlignment="" ClassName="BoUfoLabel" preferredWidth="" horizontalAlignment="" layout="" name="mPreview" iconFile="" minimumWidth="" text="Foobar 123 Boson libufo font" backgroundImageFile="" />
+   </Widget>
+  </Widget>
+  <Widget opaque="" minimumHeight="" preferredHeight="" constraints="" verticalAlignment="" ClassName="BoUfoHBox" preferredWidth="" horizontalAlignment="" layout="UHBoxLayout" name="mWidget16" minimumWidth="" backgroundImageFile="" >
+   <Widget opaque="" minimumHeight="" preferredHeight="" constraints="" verticalAlignment="" ClassName="BoUfoPushButton" preferredWidth="" horizontalAlignment="" layout="" name="mOk" iconFile="" minimumWidth="" text="&amp;OK" backgroundImageFile="" />
+   <Widget opaque="" minimumHeight="" preferredHeight="" constraints="" verticalAlignment="" ClassName="BoUfoPushButton" preferredWidth="" horizontalAlignment="" layout="" name="mCancel" iconFile="" minimumWidth="" text="&amp;Cancel" backgroundImageFile="" />
+  </Widget>
+ </Widgets>
+</BoUfoDesigner>

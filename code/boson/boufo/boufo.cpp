@@ -322,6 +322,151 @@ static ufo::UKeyCode_t convertQtKeyToUfo(int key)
 }
 
 
+BoUfoFontInfo::BoUfoFontInfo()
+{
+ mPointSize = 12.0f;
+ mStyle = 0;
+ mFixedSize = false;
+}
+
+BoUfoFontInfo::BoUfoFontInfo(const BoUfoFontInfo& font)
+{
+ *this = font;
+}
+
+BoUfoFontInfo::BoUfoFontInfo(const QString& fontPlugin, const ufo::UFontInfo& font)
+{
+ mFontPlugin = fontPlugin;
+ mPointSize = font.pointSize;
+ mFixedSize = false;
+ mStyle = 0;
+
+ if (fontPlugin == "builtin_font") {
+	// AB: the builtin fonts don't use font.face
+	switch (font.family) {
+		default:
+		case ufo::UFontInfo::DefaultFamily:
+		case ufo::UFontInfo::SansSerif:
+		case ufo::UFontInfo::Decorative:
+			mFamily = "SansSerif";
+			break;
+		case ufo::UFontInfo::Serif:
+			mFamily = "Serif";
+			break;
+		case ufo::UFontInfo::MonoSpaced:
+			mFamily = "MonoSpaced";
+			mFixedSize = true;
+			break;
+	}
+ } else {
+	mFamily = QString::fromLatin1(font.face.c_str());
+	if (mFamily.isEmpty()) {
+		mFamily = QString("Unknown");
+	}
+ }
+
+ // non-builtin plugins currently don't use the family property, but for
+ // completelyness we check anyway
+ if (font.family == ufo::UFontInfo::MonoSpaced) {
+	mFixedSize = true;
+ }
+
+ switch (font.weight) {
+	default:
+		break;
+	case ufo::UFontInfo::Bold:
+	case ufo::UFontInfo::Black:
+		mStyle |= StyleBold;
+		break;
+ }
+ if (font.style & ufo::UFontInfo::Italic) {
+	mStyle |= StyleItalic;
+ }
+ if (font.style & ufo::UFontInfo::Underline) {
+	mStyle |= StyleUnderline;
+ }
+ if (font.style & ufo::UFontInfo::StrikeOut) {
+	mStyle |= StyleStrikeOut;
+ }
+}
+
+BoUfoFontInfo& BoUfoFontInfo::operator=(const BoUfoFontInfo& font)
+{
+ mFontPlugin = font.fontPlugin();
+ mFamily = font.family();
+ mStyle = font.style();
+ mPointSize = font.pointSize();
+ mFixedSize = font.fixedSize();
+ return *this;
+}
+
+ufo::UFont* BoUfoFontInfo::ufoFont(BoUfoManager* manager) const
+{
+ QString originalFontPlugin = manager->ufoToolkitProperty("font");
+ if (!fontPlugin().isEmpty()) {
+	manager->setUfoToolkitProperty("font", fontPlugin());
+ }
+
+ ufo::UFont* font = new ufo::UFont(ufoFontInfo());
+
+ manager->setUfoToolkitProperty("font", originalFontPlugin);
+ return font;
+}
+
+ufo::UFontInfo BoUfoFontInfo::ufoFontInfo() const
+{
+ ufo::UFontInfo::Family family = ufo::UFontInfo::DefaultFamily;
+ std::string face = "";
+ bool fixed = fixedSize();
+
+ if (mFontPlugin == "builtin_font") {
+	if (mFamily == "Decorative") {
+		family = ufo::UFontInfo::SansSerif;
+	} else if (mFamily == "SansSerif") {
+		family = ufo::UFontInfo::SansSerif;
+	} else if (mFamily == "Serif") {
+		family = ufo::UFontInfo::Serif;
+	} else if (mFamily == "MonoSpaced") {
+		fixed = true;
+		family = ufo::UFontInfo::MonoSpaced;
+	}
+	face = ""; // unused by this plugin
+ } else {
+	family = ufo::UFontInfo::DefaultFamily; // unused by all other plugins
+	face = std::string(mFamily.latin1());
+ }
+
+ int weight = ufo::UFontInfo::Normal;
+ int style = ufo::UFontInfo::AnyStyle;
+ if (italic()) {
+	style |= ufo::UFontInfo::Italic;
+ }
+ if (underline()) {
+	style |= ufo::UFontInfo::Underline;
+ }
+ if (strikeOut()) {
+	style |= ufo::UFontInfo::StrikeOut;
+ }
+ if (style == ufo::UFontInfo::AnyStyle) {
+	style = ufo::UFontInfo::Plain;
+ }
+
+ if (fixed) {
+	family = ufo::UFontInfo::MonoSpaced;
+	face = "";
+ }
+
+ ufo::UFontInfo fontInfo;
+ fontInfo.family = family;
+ fontInfo.face = face;
+ fontInfo.pointSize = pointSize();
+ fontInfo.weight = weight;
+ fontInfo.style = style;
+ fontInfo.encoding = ufo::UFontInfo::Encoding_Default;
+ return fontInfo;
+}
+
+
 BoUfoImageIO::BoUfoImageIO()
 {
  init();
@@ -844,27 +989,30 @@ QMap<QString, QString> BoUfoManager::toolkitProperties() const
  return p;
 }
 
-QValueList<ufo::UFontInfo> BoUfoManager::listFonts(const ufo::UFontInfo& fontInfo)
+QValueList<BoUfoFontInfo> BoUfoManager::listFonts(const BoUfoFontInfo& fontInfo)
 {
-#warning TODO (for fontinfo)
- // TODO: once we use BoUfoFontInfo, we first need to set the current font
- // plugin here!
- // setUfoToolkitProperty("font", fontInfo->fontPlugin());
-
- QValueList<ufo::UFontInfo> ret;
- std::vector<ufo::UFontInfo> fonts = toolkit()->listFonts(fontInfo);
- for (unsigned int i = 0; i < fonts.size(); i++) {
-	ret.append(fonts[i]);
+ QString originalFontPlugin = ufoToolkitProperty("font");
+ QString fontPlugin = fontInfo.fontPlugin();
+ if (fontPlugin.isEmpty()) {
+	fontPlugin = originalFontPlugin;
  }
+ setUfoToolkitProperty("font", fontInfo.fontPlugin());
+
+ QValueList<BoUfoFontInfo> ret;
+ std::vector<ufo::UFontInfo> fonts = toolkit()->listFonts(fontInfo.ufoFontInfo());
+ for (unsigned int i = 0; i < fonts.size(); i++) {
+	ret.append(BoUfoFontInfo(fontPlugin, fonts[i]));
+ }
+ setUfoToolkitProperty("font", originalFontPlugin);
  return ret;
 }
 
-QValueList<ufo::UFontInfo> BoUfoManager::listFonts()
+QValueList<BoUfoFontInfo> BoUfoManager::listFonts()
 {
  QString originalFontPlugin = ufoToolkitProperty("font");
  if (!toolkit()) {
 	BO_NULL_ERROR(toolkit());
-	return QValueList<ufo::UFontInfo>();
+	return QValueList<BoUfoFontInfo>();
  }
 
  QStringList fontPlugins;
@@ -875,14 +1023,12 @@ QValueList<ufo::UFontInfo> BoUfoManager::listFonts()
 	}
  }
 
-// QValueList<BoUfoFontInfo> ret;
- QValueList<ufo::UFontInfo> ret;
+ QValueList<BoUfoFontInfo> ret;
  for (QStringList::iterator it = fontPlugins.begin(); it != fontPlugins.end(); ++it) {
 	setUfoToolkitProperty("font", *it);
 	std::vector<ufo::UFontInfo> fonts = toolkit()->listFonts();
 	for (unsigned int i = 0; i < fonts.size(); i++) {
-		// BoUfoFontInfo info(*it, ...);
-		ret.append(fonts[i]);
+		ret.append(BoUfoFontInfo(*it, fonts[i]));
 	}
  }
  setUfoToolkitProperty("font", originalFontPlugin);
@@ -2290,6 +2436,20 @@ void BoUfoLabel::setIconFile(const QString& file)
 QString BoUfoLabel::iconFile() const
 {
  return mIconFile;
+}
+
+void BoUfoLabel::setFont(BoUfoManager* m, const BoUfoFontInfo& info)
+{
+ ufo::UFont* font = info.ufoFont(m);
+
+#warning FIXME: memory leak
+ // this should be done by ufo::UWidget::setFont() and that one should also
+ // unreference it.
+ // it is necessary because otherwise the application crashes when rendering due
+ // to ufo::UGraphics::setFont().
+ font->reference();
+
+ mLabel->setFont(font);
 }
 
 BoUfoCheckBox::BoUfoCheckBox() : BoUfoWidget()
