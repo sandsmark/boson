@@ -26,6 +26,8 @@
 #include "bosonwidgets/bonuminput.h"
 #include "bomatrixwidget.h"
 #include "boorbiterwidget.h"
+#include "bosonglwidget.h" // BoContext
+#include "bolight.h"
 
 #include <qlayout.h>
 #include <qvgroupbox.h>
@@ -970,5 +972,155 @@ void BoOrbiterCameraWidget::setCamera(BoCamera* camera)
 {
  BoCameraConfigWidgetBase::setCamera(camera);
  d->mOrbiter->setCamera(camera);
+}
+
+
+
+BoLightCameraWidget::BoLightCameraWidget(QWidget* parent) : QWidget(parent)
+{
+ mCamera = 0;
+
+ QVBoxLayout* layout = new QVBoxLayout(this);
+ mCameraWidget = new BoCameraWidget(this);
+ layout->addWidget(mCameraWidget);
+
+ mDirectional = new QCheckBox(i18n("Directional light"), this);
+ layout->addWidget(mDirectional);
+
+ QHBox* hbox = 0;
+ hbox = new QHBox(this);
+ layout->addWidget(hbox);
+ (void)new QLabel(i18n("Constant Attenuation"), hbox);
+ mConstantAttenuation = new BoFloatNumInput(hbox);
+
+ hbox = new QHBox(this);
+ layout->addWidget(hbox);
+ (void)new QLabel(i18n("Linear Attenuation"), hbox);
+ mLinearAttenuation = new BoFloatNumInput(hbox);
+
+ hbox = new QHBox(this);
+ layout->addWidget(hbox);
+ (void)new QLabel(i18n("Quadratic Attenuation"), hbox);
+ mQuadraticAttenuation = new BoFloatNumInput(hbox);
+
+ hbox = new QHBox(this);
+ layout->addWidget(hbox);
+ (void)new QLabel(i18n("Ambient:"), hbox);
+ mAmbientR = new BoFloatNumInput(hbox);
+ mAmbientG = new BoFloatNumInput(hbox);
+ mAmbientB = new BoFloatNumInput(hbox);
+ mAmbientA = new BoFloatNumInput(hbox);
+
+ hbox = new QHBox(this);
+ layout->addWidget(hbox);
+ (void)new QLabel(i18n("Diffuse:"), hbox);
+ mDiffuseR = new BoFloatNumInput(hbox);
+ mDiffuseG = new BoFloatNumInput(hbox);
+ mDiffuseB = new BoFloatNumInput(hbox);
+ mDiffuseA = new BoFloatNumInput(hbox);
+
+ hbox = new QHBox(this);
+ layout->addWidget(hbox);
+ (void)new QLabel(i18n("Specular:"), hbox);
+ mSpecularR = new BoFloatNumInput(hbox);
+ mSpecularG = new BoFloatNumInput(hbox);
+ mSpecularB = new BoFloatNumInput(hbox);
+ mSpecularA = new BoFloatNumInput(hbox);
+
+ mAmbientR->setRange(0.0f, 1.0f, 0.1f, false);
+ mAmbientG->setRange(0.0f, 1.0f, 0.1f, false);
+ mAmbientB->setRange(0.0f, 1.0f, 0.1f, false);
+ mAmbientA->setRange(0.0f, 1.0f, 0.1f, false);
+ mDiffuseR->setRange(0.0f, 1.0f, 0.1f, false);
+ mDiffuseG->setRange(0.0f, 1.0f, 0.1f, false);
+ mDiffuseB->setRange(0.0f, 1.0f, 0.1f, false);
+ mDiffuseA->setRange(0.0f, 1.0f, 0.1f, false);
+ mSpecularR->setRange(0.0f, 1.0f, 0.1f, false);
+ mSpecularG->setRange(0.0f, 1.0f, 0.1f, false);
+ mSpecularB->setRange(0.0f, 1.0f, 0.1f, false);
+ mSpecularA->setRange(0.0f, 1.0f, 0.1f, false);
+ connect(mAmbientR, SIGNAL(signalValueChanged(float)), this, SLOT(slotLightChanged()));
+ connect(mAmbientG, SIGNAL(signalValueChanged(float)), this, SLOT(slotLightChanged()));
+ connect(mAmbientB, SIGNAL(signalValueChanged(float)), this, SLOT(slotLightChanged()));
+ connect(mAmbientA, SIGNAL(signalValueChanged(float)), this, SLOT(slotLightChanged()));
+ connect(mDiffuseR, SIGNAL(signalValueChanged(float)), this, SLOT(slotLightChanged()));
+ connect(mDiffuseG, SIGNAL(signalValueChanged(float)), this, SLOT(slotLightChanged()));
+ connect(mDiffuseB, SIGNAL(signalValueChanged(float)), this, SLOT(slotLightChanged()));
+ connect(mDiffuseA, SIGNAL(signalValueChanged(float)), this, SLOT(slotLightChanged()));
+ connect(mSpecularR, SIGNAL(signalValueChanged(float)), this, SLOT(slotLightChanged()));
+ connect(mSpecularG, SIGNAL(signalValueChanged(float)), this, SLOT(slotLightChanged()));
+ connect(mSpecularB, SIGNAL(signalValueChanged(float)), this, SLOT(slotLightChanged()));
+ connect(mSpecularA, SIGNAL(signalValueChanged(float)), this, SLOT(slotLightChanged()));
+
+ mBlockLightChanges = false;
+}
+
+BoLightCameraWidget::~BoLightCameraWidget()
+{
+ delete mCamera;
+}
+
+void BoLightCameraWidget::setLight(BoLight* light, BoContext* context)
+{
+ boDebug() << k_funcinfo << endl;
+ if (mCamera) {
+	mCameraWidget->setCamera(0);
+ }
+ delete mCamera;
+ mCamera = new BoLightCamera(light, context);
+ mCameraWidget->setCamera(mCamera);
+ mLight = light;
+ mContext = context;
+
+ if (!mLight) {
+	BO_NULL_ERROR(mLight);
+	return;
+ }
+ mBlockLightChanges = true;
+ mDirectional->setChecked(mLight->isDirectional());
+ mConstantAttenuation->setValue(mLight->constantAttenuation());
+ mLinearAttenuation->setValue(mLight->linearAttenuation());
+ mQuadraticAttenuation->setValue(mLight->quadraticAttenuation());
+ mAmbientR->setValue(mLight->ambient().x());
+ mAmbientG->setValue(mLight->ambient().y());
+ mAmbientB->setValue(mLight->ambient().z());
+ mAmbientA->setValue(mLight->ambient().w());
+ mDiffuseR->setValue(mLight->diffuse().x());
+ mDiffuseG->setValue(mLight->diffuse().y());
+ mDiffuseB->setValue(mLight->diffuse().z());
+ mDiffuseA->setValue(mLight->diffuse().w());
+ mSpecularR->setValue(mLight->specular().x());
+ mSpecularG->setValue(mLight->specular().y());
+ mSpecularB->setValue(mLight->specular().z());
+ mSpecularA->setValue(mLight->specular().w());
+ mBlockLightChanges = false;
+}
+
+void BoLightCameraWidget::slotLightChanged()
+{
+ if (!mLight) {
+	return;
+ }
+ if (!mContext) {
+	return;
+ }
+ if (mBlockLightChanges) {
+	return;
+ }
+ boDebug() << k_funcinfo << endl;
+ BoContext* old = BoContext::currentContext();
+ mContext->makeCurrent();
+
+ mLight->setDirectional(mDirectional->isChecked());
+ mLight->setAmbient(BoVector4(mAmbientR->value(), mAmbientG->value(), mAmbientB->value(), mAmbientA->value()));
+ mLight->setDiffuse(BoVector4(mDiffuseR->value(), mDiffuseG->value(), mDiffuseB->value(), mDiffuseA->value()));
+ mLight->setSpecular(BoVector4(mSpecularR->value(), mSpecularG->value(), mSpecularB->value(), mSpecularA->value()));
+ mLight->setConstantAttenuation(mConstantAttenuation->value());
+ mLight->setLinearAttenuation(mLinearAttenuation->value());
+ mLight->setQuadraticAttenuation(mQuadraticAttenuation->value());
+
+ if (old) {
+	old->makeCurrent();
+ }
 }
 

@@ -26,6 +26,11 @@ class BoCamera;
 class BoGameCamera;
 class BoCameraConfigWidgetBase;
 class BoVector3;
+class BoLight;
+class BoContext;
+class BoLightCamera;
+class BoFloatNumInput;
+class QCheckBox;
 
 class BoCameraWidgetPrivate;
 
@@ -267,6 +272,57 @@ protected:
 
 private:
 	BoOrbiterCameraWidgetPrivate* d;
+};
+
+/**
+ * This widget allows configuring all aspects of a light (ambient, diffuse,
+ * specular color, ...) and therefore it is not actually a "camera" widget.
+ *
+ * But nevertheless the main purpose is to configure the position of the light
+ * and it therefore is very similar to configuring the camera.
+ *
+ * This widget does NOT provide a separate camera configuration widget and
+ * therefore it is not derived of @ref BoCameraConfigWidgetBase. Instead it
+ * <em>uses</em> the other camera widget and therefore it contains a @ref
+ * BoCameraWidget object.
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+class BoLightCameraWidget : public QWidget
+{
+	Q_OBJECT
+public:
+	BoLightCameraWidget(QWidget* parent);
+	~BoLightCameraWidget();
+
+	void setLight(BoLight* light, BoContext* context);
+
+private slots:
+	void slotLightChanged();
+
+private:
+	BoLightCamera* mCamera;
+	BoCameraWidget* mCameraWidget;
+	BoLight* mLight;
+	BoContext* mContext;
+	bool mBlockLightChanges;
+
+	QCheckBox* mDirectional;
+	BoFloatNumInput* mConstantAttenuation;
+	BoFloatNumInput* mLinearAttenuation;
+	BoFloatNumInput* mQuadraticAttenuation;
+	BoFloatNumInput* mAmbientR;
+	BoFloatNumInput* mAmbientG;
+	BoFloatNumInput* mAmbientB;
+	BoFloatNumInput* mAmbientA;
+	BoFloatNumInput* mDiffuseR;
+	BoFloatNumInput* mDiffuseG;
+	BoFloatNumInput* mDiffuseB;
+	BoFloatNumInput* mDiffuseA;
+	BoFloatNumInput* mSpecularR;
+	BoFloatNumInput* mSpecularG;
+	BoFloatNumInput* mSpecularB;
+	BoFloatNumInput* mSpecularA;
+
 };
 
 #endif

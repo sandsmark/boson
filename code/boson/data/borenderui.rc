@@ -11,6 +11,7 @@
     <Action name="options_vertex_point_size" />
     <Action name="options_grid_unit_size" />
     <Action name="options_background_color" />
+    <Action name="options_light" />
   </Menu>
 </MenuBar>
 </kpartgui>

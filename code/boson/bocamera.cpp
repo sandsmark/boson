@@ -23,6 +23,8 @@
 #include "defines.h"
 #include "bosonconfig.h"
 #include "bodebug.h"
+#include "bosonglwidget.h" // BoContext
+#include "bolight.h"
 
 #include <qdom.h>
 
@@ -477,6 +479,51 @@ void BoGameCamera::setMoveRect(GLfloat minX, GLfloat maxX, GLfloat minY, GLfloat
   mMaxX = maxX;
   mMinY = minY;
   mMaxY = maxY;
+}
+
+
+BoLightCamera::BoLightCamera(BoLight* light, BoContext* ctx) : BoCamera()
+{
+  mContext = ctx;
+  mLight = light;
+  if(!mContext)
+  {
+    BO_NULL_ERROR(mContext);
+  }
+  if(!mLight)
+  {
+    BO_NULL_ERROR(mLight);
+  }
+}
+
+BoLightCamera::~BoLightCamera()
+{
+}
+
+void BoLightCamera::setLightPos(const BoVector3& pos)
+{
+  setGluLookAt(pos, BoVector3(), BoVector3());
+}
+
+void BoLightCamera::setGluLookAt(const BoVector3& c, const BoVector3& l, const BoVector3& u)
+{
+  BoCamera::setGluLookAt(c, l, u);
+  if(!mContext)
+  {
+    return;
+  }
+  if(!mLight)
+  {
+    return;
+  }
+  BoContext* old = BoContext::currentContext();
+  mContext->makeCurrent();
+  mLight->setPosition3(l * -1);
+
+  if(old)
+  {
+    old->makeCurrent();
+  }
 }
 
 
