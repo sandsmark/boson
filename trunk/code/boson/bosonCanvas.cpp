@@ -52,7 +52,7 @@ bosonCanvas::~bosonCanvas()
 }
 
 
-void bosonCanvas::setCellFlag(QRect r, uint flag)
+void bosonCanvas::setCellFlag(QRect r, Cell::cell_flags flag)
 {
 	int i,j;
 	for(i=r.left(); i<=r.right(); i++)
@@ -60,7 +60,7 @@ void bosonCanvas::setCellFlag(QRect r, uint flag)
 			bocanvas->cell(i,j).setFlag( flag);
 }
 
-void bosonCanvas::unsetCellFlag(QRect r, uint flag)
+void bosonCanvas::unsetCellFlag(QRect r, Cell::cell_flags flag)
 {
 	int i,j;
 	for(i=r.left(); i<=r.right(); i++)
@@ -127,7 +127,7 @@ void bosonCanvas::destroyMob(destroyedMsg_t &m)
 		return;
 	}
 
-	if ( QPoint(m.x, m.y) != f->gridRect().topLeft() )
+	if ( QPoint(m.x, m.y) != mob->gridRect().topLeft() )
 		logf(LOG_WARNING, "Assertion failed file %s, line %d", __FILE__, __LINE__);
 
 	QPoint p  = mob->center();
