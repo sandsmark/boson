@@ -170,8 +170,8 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 
 		// AB: warning: this might cause trouble at this point! see Unit::moveBy()
 		boProfiling->advanceItemMove(true);
-		if (s->xVelocity() || s->yVelocity()) {
-			s->moveBy(s->xVelocity(), s->yVelocity(), 0.0);
+		if (s->xVelocity() || s->yVelocity() || s->zVelocity()) {
+			s->moveBy(s->xVelocity(), s->yVelocity(), s->zVelocity());
 		}
 		boProfiling->advanceItemMove(false);
 		boProfiling->advanceItemStop();
@@ -201,8 +201,8 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 
 		// AB: warning: this might cause trouble at this point! see Unit::moveBy()
 		boProfiling->advanceItemMove(true);
-		if (s->xVelocity() || s->yVelocity()) {
-			s->moveBy(s->xVelocity(), s->yVelocity(), 0.0);
+		if (s->xVelocity() || s->yVelocity() || s->zVelocity()) {
+			s->moveBy(s->xVelocity(), s->yVelocity(), s->zVelocity());
 		}
 		boProfiling->advanceItemMove(false);
 		boProfiling->advanceItemStop();

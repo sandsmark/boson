@@ -698,7 +698,7 @@ void Unit::stopMoving()
  } else if (advanceWork() != work()) {
 	setAdvanceWork(work());
  }
- setVelocity(0.0, 0.0);
+ setVelocity(0.0, 0.0, 0.0);
 }
 
 void Unit::stopAttacking()
@@ -927,7 +927,7 @@ void Unit::setAdvanceWork(WorkType w)
  boDebug(300) << k_funcinfo << "unit " << id() << endl;
  // velicities should be 0 anyway - this is the final fallback in case it was 
  // missing by any reason
- setVelocity(0.0, 0.0);
+ setVelocity(0.0, 0.0, 0.0);
 
  UnitBase::setAdvanceWork(w);
 
@@ -1217,7 +1217,7 @@ void MobileUnit::advanceMoveInternal(unsigned int) // this actually needs to be 
  }
 
  // Set velocity for actual moving
- setVelocity(xspeed, yspeed);
+ setVelocity(xspeed, yspeed, 0.0);
 
  // set the new direction according to new speed
  turnTo();
@@ -1248,7 +1248,7 @@ void MobileUnit::advanceMoveCheck()
 	// advanceMove() call
 
 	d->mMovingFailed = d->mMovingFailed + 1;
-	setVelocity(0.0, 0.0);
+	setVelocity(0.0, 0.0, 0.0);
 
 	const int recalculate = 50; // recalculate when 50 advanceMove() failed
 	if (d->mPathRecalculated >= 2) {
