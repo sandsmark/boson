@@ -1,23 +1,4 @@
-#include "top.wml"
-    <h1>
-      Facilities - Sam-Site
-    </h1>
-    <p>&nbsp;</p>
-    <table border="0">
-	<tr>
-		<td><img src="samsite.png" border="0">&nbsp;</td>
-		<td valign="top"><img src="../none.png" border="0" height="30"><br>
-		A Sam-Site can fire missiles against <a href="../units/tornados.html">Tornados</a>.
-	</tr>
-    </table>
-    
-<:
-use get_values;
-
-# ( facility type, facility name)
-get_values->getval("fix", "samsite");
-:>
-    
-
-#include "nav.wml" before_url="turret.html" before_text="Turret" after_url="../units/index.html" after_text="Units" up_url="index.html"
-#include "footer.wml"
+#include "facilities.wml" type="Facilities" name="Sam-Site" \
+        description="A Sam-Site can fire missiles against <a href='../units/tornados.html'>Tornados</a>." \
+        name2="samsite" type2="fix" \
+        before_url="turret.html" before_text="Turret" after_url="../units/index.html" after_text="Units" up_url="index.html"

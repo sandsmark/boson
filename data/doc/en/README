@@ -26,6 +26,12 @@ nav.wml
 footer.wml
         It adds the "maintained by" line and the </body></html> tags.
 
+facilities.wml
+        This will generate a complete facilities page for you.
+
+indexes.wml and indexes_footer.wml
+        Simple include for a page index
+
 
 ----------
 Eperl

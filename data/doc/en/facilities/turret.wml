@@ -1,24 +1,4 @@
-#include "top.wml"
-    <h1>
-      Facilities - Turret
-    </h1>
-    <p>&nbsp;</p>
-    <table border="0">
-	<tr>
-		<td><img src="turret.png" border="0">&nbsp;</td>
-		<td valign="top"><img src="../none.png" border="0" height="30"><br>
-		A revolving tower constructed of thick iron plates and armed with cannons.<br>
-		Turrets are used on vessels of war and on land.
-	</tr>
-    </table>
-    
-<:
-use get_values;
-
-# ( facility type, facility name)
-get_values->getval("fix", "turret");
-:>
-    
-
-#include "nav.wml" before_url="helipad.html" before_text="Helipad" after_url="samsite.html" after_text="Sam-Site" up_url="index.html"
-#include "footer.wml"
+#include "facilities.wml" type="Facilities" name="Turret" \
+        description="A revolving tower constructed of thick iron plates and armed with cannons.<br> Turrets are used on vessels of war and on land." \
+        name2="turret" type2="fix" \
+        before_url="helipad.html" before_text="Helipad" after_url="samsite.html" after_text="Sam-Site" up_url="index.html"
