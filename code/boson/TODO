@@ -29,6 +29,8 @@ Game TODOs
   hurts performance. But it is necessary for slow game speed :(
 - refine minerals/oil
 - mine/harvest minerals/oil is only at an experimantal state
+- oil towers: they should be placed on an oil field. oil tankers go to the
+  towers and receive the oil from them, which they take to the refinery
 
 
 Editor (map, unit, scenario) TODOs
