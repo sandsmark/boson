@@ -762,7 +762,8 @@ void Boson::startGame()
 
 void Boson::slotSendAdvance()
 {
- sendMessage(0, BosonMessage::Advance10);
+ QByteArray b;
+ sendMessage(b, BosonMessage::Advance10);
 }
 
 Unit* Boson::createUnit(int unitType, Player* owner)
