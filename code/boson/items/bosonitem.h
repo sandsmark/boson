@@ -50,7 +50,7 @@ class BosonItem
 public:
 	/**
 	 * Note: when you subclass this class you must set the width/height in
-	 * order to make correct use of it! See @ref GLSprite::setWidth
+	 * order to make correct use of it! See @ref setSize
 	 **/
 	BosonItem(BosonModel* model, BosonCanvas*);
 	virtual ~BosonItem();
@@ -148,8 +148,6 @@ public:
 	inline void leftTopCell(int* left, int* top)  const
 	{
 		leftTopCell(left, top, leftEdge(), topEdge());
-		*left = (int)(leftEdge() / BO_TILE_SIZE);
-		*top = (int)(topEdge() / BO_TILE_SIZE);
 	}
 
 	/**
