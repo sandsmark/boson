@@ -22,7 +22,7 @@
 #include "defines.h"
 #include "bo3dtools.h"
 
-#include "bosonglwidget.h"
+#include "bosonufoglwidget.h"
 
 class BosonCanvas;
 class BosonCursor;
@@ -167,7 +167,7 @@ public:
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class BosonBigDisplayBase : public BosonGLWidget
+class BosonBigDisplayBase : public BosonUfoGLWidget
 {
 	Q_OBJECT
 public:
@@ -437,6 +437,14 @@ protected:
 	 **/
 	void renderText();
 
+	void updateUfoLabels();
+	void updateUfoLabelPathFinderDebug();
+	void updateUfoLabelMatricesDebug();
+	void updateUfoLabelItemWorkStatistics();
+	void updateUfoLabelOpenGLCamera();
+	void updateUfoLabelRenderCounts();
+	void updateUfoLabelAdvanceCalls();
+
 	/**
 	 * Part of @ref renderText.
 	 * This just renders the chat messages.
@@ -564,6 +572,7 @@ protected:
 	void generateMovieFrame(const QByteArray& data, BoPixmapRenderer* renderer);
 private:
 	void init();
+	void initUfoGUI();
 
 private:
 	class BosonBigDisplayBasePrivate;
