@@ -27,6 +27,41 @@ class KSimpleConfig;
 class UnitProperties;
 template<class T> class QValueList;
 
+class UpgradePropertiesBase;
+
+enum UpgradeType { Health = 0, Armor, Shields, MineralCost, OilCost, SightRange,
+    ProductionTime, Speed };
+
+
+template<class TYPE> class UpgradePropertiesValue
+{
+  public:
+    enum ValueType { Absolute = 0, Relative, Percent };
+
+    UpgradePropertiesValue()  { specified = false; };
+
+    virtual void loadValue(KSimpleConfig* cfg, QString key) = 0;
+    virtual QString loadBaseValue(KSimpleConfig* cfg, QString key);
+    void applyProperty(QValueList<unsigned long int>* typeIds, Player* player,
+        UpgradeType type);
+    TYPE applyValue(TYPE applyTo);
+
+    ValueType type;
+    TYPE value;
+    bool specified;
+};
+
+class UpgradePropertiesUIntValue : public UpgradePropertiesValue<unsigned long int>
+{
+  public:
+    virtual void loadValue(KSimpleConfig* cfg, QString key);
+};
+class UpgradePropertiesFloatValue : public UpgradePropertiesValue<float>
+{
+  public:
+    virtual void loadValue(KSimpleConfig* cfg, QString key);
+};
+
 /**
  * @short Base class for properties of upgrades and technologies
  *
@@ -125,38 +160,20 @@ class UpgradePropertiesBase
      **/
     QValueList<unsigned long int> requiredTechnologies() const;
 
-  protected:
-    QValueList<unsigned long int> readUIntList(KSimpleConfig* cfg, const char* key) const;
 
   protected:
     class UpgradePropertiesBasePrivate;
     UpgradePropertiesBasePrivate* d;
 
-    unsigned long int mHealth;
-    unsigned long int mWeaponRange;
-    unsigned int mSightRange;
-    long int mWeaponDamage;
-    unsigned int mReload;
-    unsigned int mUnitProductionTime;
-    unsigned long int mUnitMineralCost;
-    unsigned long int mUnitOilCost;
-    unsigned long int mArmor;
-    unsigned long int mShields;
-    float mSpeed;
-    unsigned long int mMaxResources;
+    UpgradePropertiesUIntValue mHealth;
+    UpgradePropertiesUIntValue mArmor;
+    UpgradePropertiesUIntValue mShields;
+    UpgradePropertiesUIntValue mUnitMineralCost;
+    UpgradePropertiesUIntValue mUnitOilCost;
+    UpgradePropertiesUIntValue mSightRange;
+    UpgradePropertiesUIntValue mUnitProductionTime;
+    UpgradePropertiesFloatValue mSpeed;
 
-    bool mHealthSpecified;
-    bool mWeaponRangeSpecified;
-    bool mSightRangeSpecified;
-    bool mWeaponDamageSpecified;
-    bool mReloadSpecified;
-    bool mUnitProductionTimeSpecified;
-    bool mUnitMineralCostSpecified;
-    bool mUnitOilCostSpecified;
-    bool mArmorSpecified;
-    bool mShieldsSpecified;
-    bool mSpeedSpecified;
-    bool mMaxResourcesSpecified;
 
     bool mResearched;
     bool mTechnology;
