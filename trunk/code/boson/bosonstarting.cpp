@@ -679,7 +679,6 @@ bool BosonStarting::fixPlayerIdsInFileNames(int* actualIds, unsigned int players
 		continue;
 	}
 	QString number = hasPlayerId.cap(1);
-	boDebug() << k_funcinfo << "cap(1)=" << number << endl;
 	bool ok;
 	unsigned int n = number.toUInt(&ok);
 	if (!ok) {
