@@ -217,6 +217,8 @@ public:
 
 	BoItemList* unitsAtCells(const QPtrVector<Cell>* cells) const;
 
+	void emitSignalShowMiniMap(bool show);
+
 private:
 	PlayerIOPrivate* d;
 	Player* mPlayer;

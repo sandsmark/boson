@@ -245,6 +245,8 @@ public:
 
 	void writeGameLog(QTextStream& log);
 
+	void emitSignalShowMiniMap(bool show);
+
 signals:
 	void signalLoadUnit(unsigned long int unitType, unsigned long int id, Player* owner);
 
