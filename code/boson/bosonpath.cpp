@@ -1529,7 +1529,7 @@ void BosonPath2::findPath(BosonPathInfo* info)
       long int elapsed = profiler.stop();
       totalelapsed += elapsed;
       boDebug(500) << k_funcinfo << "ELAPSED (failed 1): " << elapsed << " microsec." << endl;
-      boError(510) << k_funcinfo << "No start region!" << endl;
+      boDebug(510) << k_funcinfo << "No start region!" << endl;
       info->passable = false;
       return;
     }
@@ -3256,7 +3256,7 @@ void BosonPath2::findHighLevelGoal(BosonPathInfo* info)
   info->startRegion = cellRegion(info->start / BO_TILE_SIZE);
   if(!info->startRegion)
   {
-    boError(510) << k_funcinfo << "No start region! Start point: (" << info->start.x() << "; " << info->start.y() <<
+    boDebug(510) << k_funcinfo << "No start region! Start point: (" << info->start.x() << "; " << info->start.y() <<
         "); in cell coords: (" << (info->start / BO_TILE_SIZE).x() << "; " << (info->start / BO_TILE_SIZE).y() << ")" << endl;
     return;
   }
