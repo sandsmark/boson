@@ -46,6 +46,8 @@ PyMethodDef PythonScript::mCallbacks[] = {
   { (char*)"moveUnitWithAttacking", py_moveUnitWithAttacking, METH_VARARGS, 0 },
   { (char*)"attack", py_attack, METH_VARARGS, 0 },
   { (char*)"stopUnit", py_stopUnit, METH_VARARGS, 0 },
+  { (char*)"mineUnit", py_mineUnit, METH_VARARGS, 0 },
+  { (char*)"spawnUnit", py_spawnUnit, METH_VARARGS, 0 },
   { (char*)"unitsOnCell", py_unitsOnCell, METH_VARARGS, 0 },
   { (char*)"unitsInRect", py_unitsInRect, METH_VARARGS, 0 },
   { (char*)"cellOccupied", py_cellOccupied, METH_VARARGS, 0 },
@@ -374,6 +376,20 @@ PyObject* PythonScript::py_mineUnit(PyObject*, PyObject* args)
   }
 
   BosonScript::mineUnit(player, id, x, y);
+
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+PyObject* PythonScript::py_spawnUnit(PyObject*, PyObject* args)
+{
+  int player, type, x, y;
+  if(!PyArg_ParseTuple(args, (char*)"iiii", &player, &type, &x, &y))
+  {
+    return 0;
+  }
+
+  BosonScript::spawnUnit(player, type, x, y);
 
   Py_INCREF(Py_None);
   return Py_None;

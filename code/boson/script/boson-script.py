@@ -31,6 +31,8 @@ def advance():
   #advanceA10Game(cycle);
   if cycle == 10:
     printUnitInfo();
+  if cycle == 5:
+    spawnSomeUnits();
   oldAIAdvance();
 
 def advanceA10Game(cycle):
@@ -209,4 +211,8 @@ def oldAIFindTarget():
   # nothing was found
   return -1;
 
-
+def spawnSomeUnits():
+  global player;
+  print "spawning some units for player ", player;
+  for x in range(4):
+    BoScript.spawnUnit(player, 10035, 5, 5 + x * 2);

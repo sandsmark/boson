@@ -60,6 +60,7 @@ class PythonScript : public BosonScript
     static PyObject* py_attack(PyObject* self, PyObject* args);
     static PyObject* py_stopUnit(PyObject* self, PyObject* args);
     static PyObject* py_mineUnit(PyObject* self, PyObject* args);
+    static PyObject* py_spawnUnit(PyObject* self, PyObject* args);
 
     static PyObject* py_unitsOnCell(PyObject* self, PyObject* args);
     static PyObject* py_unitsInRect(PyObject* self, PyObject* args);
