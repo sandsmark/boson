@@ -32,6 +32,7 @@ class KPlayer;
 class KGame;
 class KGameChat;
 class BosonCursor;
+class BoSelection;
 
 class QLabel;
 
@@ -62,12 +63,6 @@ public:
 	BosonBigDisplay(QCanvas* c, QWidget* parent);
 	BosonBigDisplay(QWidget* parent);
 	~BosonBigDisplay();
-
-	enum SelectionMode {
-		SelectNone = 0,
-		SelectSingle = 1,
-		SelectRect = 2
-	};
 
 	void setLocalPlayer(Player* p);
 	
@@ -105,6 +100,8 @@ public:
 	 **/
 	void makeActive();
 
+	BoSelection* selection() const;
+
 public slots:
 	/**
 	 * @param pos The new position - cell coordinates! so you have to
@@ -130,17 +127,6 @@ public slots:
 
 signals:
 	/**
-	 * Emitted when a single unit (@ref selectionMode == Select_Single) is
-	 * selected. The image of the unit should be displayed now.
-	 *
-	 * If this is a factory the order buttons also should be changed.
-	 **/
-	void signalSingleUnitSelected(Unit* unit);
-
-	void signalSelectUnit(Unit* unit);
-	void signalUnselectUnit(Unit* unit);
-
-	/**
 	 * Emitted by @ref resizeEvent
 	 **/
 	void signalSizeChanged(int w, int h);
@@ -157,17 +143,12 @@ signals:
 
 protected:
 	/**
-	 * Sets the selection mode after clearing any previous selection.
-	 **/
-	void setSelectionMode(SelectionMode mode);
-
-	/**
-	 * Clears the selection list and sets @ref selectionMode = Select_None
+	 * Clears the selection list 
 	 **/
 	void clearSelection();
 
 	/**
-	 * Selects units in the specified rect. See also @ref addUnitSelection
+	 * Selects units in the specified rect. See also @ref BoSelection
 	 **/
 	void selectArea();
 
@@ -180,21 +161,6 @@ protected:
 	 * @return The end point of the selection rect
 	 **/
 	const QPoint& selectionEnd() const;
-
-	/**
-	 * @return The currently selected units. See also @ref addUnitSelection
-	 **/
-	QPtrList<Unit>& selection() const;
-
-	/**
-	 * @return The selection mode. See @ref setSelectionMode
-	 **/
-	SelectionMode selectionMode() const;
-
-	/**
-	 * Add a unit to the selection list
-	 **/
-	void addUnitSelection(Unit* unit);
 
 	/**
 	 * Select all units (of the local player) that have this unit properties
@@ -238,8 +204,6 @@ protected:
 	/**
 	 * Move the selection rect. @ref selectionStart is still the start point
 	 * but @ref selectionEnd is now newEnd
-	 *
-	 * Do nothing if @ref selectionMode is not Select_Rect
 	 **/
 	void moveSelectionRect(const QPoint& newEnd);
 
@@ -252,6 +216,8 @@ protected:
 	virtual void enterEvent(QEvent*);
 	virtual void leaveEvent(QEvent*);
 	virtual bool eventFilter(QObject*, QEvent*);
+
+	void updateCursor();
 
 protected slots:
 	void slotMouseEvent(KGameIO*, QDataStream& stream, QMouseEvent* e, bool *eatevent);
