@@ -135,7 +135,7 @@ void Player::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 sende
  }
 // first check if the message is a property of a unit
  QPtrListIterator<Unit> it(d->mUnits);
- while(it.current() && !it.current()->dataHandler()->processMessage(stream, msgid + KGamePropertyBase::IdUser, issender)) {
+ while (it.current() && !it.current()->dataHandler()->processMessage(stream, msgid + KGamePropertyBase::IdUser, issender)) {
 	++it;
  }
  Unit* unit = it.current();
@@ -171,7 +171,8 @@ void Player::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 sende
 
  // this wasn't a unit property but a normal message
  switch (msgid) {
-	// nothing done here currently
+	case BosonMessage::IdChat:
+		break;
 	default:
 		boWarning() << k_funcinfo << "Unknown message " << msgid << endl;
 		break;
