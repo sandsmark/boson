@@ -198,7 +198,9 @@ bool BosonPlayField::preLoadPlayField(const QString& file)
  // - clear the preloaded maps once a game is started
  //   --> we'd have to preload again when another game is started. anyway I
  //   think this is the best solution. TODO
+#if 0
  loadPlayField(QString::null); // we don't need to provide the filename again.
+#endif
  return true;
 }
 
