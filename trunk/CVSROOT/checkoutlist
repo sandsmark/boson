@@ -12,4 +12,9 @@
 #
 # comment lines begin with '#'
 
+# loginfo.pl - slightly modified version from KDE project. used to send mails to
+# boson-cvs@lists.sourceforge.net
+loginfo.pl
+
+# syncmail *can* send mails from cvs - but isn't used anymore.
 syncmail
