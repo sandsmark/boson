@@ -144,6 +144,11 @@ BosonPath::BosonPath(Unit* unit, int startx, int starty, int goalx, int goaly, i
   /// TODO: those variables needs tuning and *lots* of testing!
 
   //boDebug(500) << k_funcinfo << "start: " << mStartx << "," << mStarty << " goal: " << mGoalx << "," << mGoaly << " range: " << mRange << endl;
+
+  mNodesRemoved  = 0;
+  mPathLength = 0;
+  mPathCost = 0.0f;
+  mRange = 0;
 }
 
 BosonPath::~BosonPath()
@@ -1096,6 +1101,11 @@ BosonPathSector::BosonPathSector()
 {
   regions.setAutoDelete(true);
   regions.resize(2);
+  x = 0;
+  y = 0;
+  w = 0;
+  h = 0;
+  pathfinder = 0;
 }
 
 void BosonPathSector::setPathfinder(BosonPath2* pf)
@@ -1190,6 +1200,7 @@ BosonPathRegion::BosonPathRegion(BosonPathSector* s)
   centerx = 0.0f;
   centery = 0.0f;
   group = 0;
+  parent = 0;
   id = sector->pathfinder->addRegion(this);
 }
 
@@ -1521,6 +1532,9 @@ BosonPath2::BosonPath2(BosonMap* map)
   boDebug(510) << k_funcinfo << endl;
   mMap = map;
   mSectors = 0;
+  mSectorWidth = 0;
+  mSectorHeight = 0;
+  mRegionIdUsed = 0;
   boDebug(510) << k_funcinfo << "END" << endl;
 }
 
