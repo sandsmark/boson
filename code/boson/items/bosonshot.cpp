@@ -68,7 +68,7 @@ BosonShot* BosonShotProperties::newShot(Unit* attacker, float x, float y, float 
   return new BosonShot(this, attacker, x, y, z, tx, ty, tz);
 }
 
-QPtrList<BosonParticleSystem> BosonShotProperties::newFlyParticleSystems(float x, float y, float z)
+QPtrList<BosonParticleSystem> BosonShotProperties::newFlyParticleSystems(float x, float y, float z) const
 {
   QPtrList<BosonParticleSystem> list;
   QPtrListIterator<BosonParticleSystemProperties> it(mFlyParticleSystems);
@@ -80,21 +80,15 @@ QPtrList<BosonParticleSystem> BosonShotProperties::newFlyParticleSystems(float x
   return list;
 }
 
-QPtrList<BosonParticleSystem> BosonShotProperties::newHitParticleSystems(float x, float y, float z)
+QPtrList<BosonParticleSystem> BosonShotProperties::newHitParticleSystems(float x, float y, float z) const
 {
-  kdDebug() << "    " << k_funcinfo << "Start" << endl;
   QPtrList<BosonParticleSystem> list;
-  kdDebug() << "    " << k_funcinfo << "Start2" << endl;
-  kdDebug() << "    " << k_funcinfo << "There are " << mHitParticleSystems.count() << " particle systems in list" << endl;
   QPtrListIterator<BosonParticleSystemProperties> it(mHitParticleSystems);
-  kdDebug() << "    " << k_funcinfo << "Start3" << endl;
   while(it.current())
   {
-    kdDebug() << "    " << k_funcinfo << "Creating new system and appending it to list" << endl;
     list.append(it.current()->newSystem(x, y, z));
     ++it;
   }
-  kdDebug() << "    " << k_funcinfo << "Returning list (with " << list.count() << " systems)" << endl;
   return list;
 }
 

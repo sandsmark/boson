@@ -50,7 +50,7 @@ BosonWeaponProperties::~BosonWeaponProperties()
 {
 }
 
-QPtrList<BosonParticleSystem> BosonWeaponProperties::newShootParticleSystems(float x, float y, float z)
+QPtrList<BosonParticleSystem> BosonWeaponProperties::newShootParticleSystems(float x, float y, float z) const
 {
   QPtrList<BosonParticleSystem> list;
   QPtrListIterator<BosonParticleSystemProperties> it(mShootParticleSystems);
