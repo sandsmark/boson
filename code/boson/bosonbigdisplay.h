@@ -28,6 +28,23 @@ class Unit;
 class Player;
 
 /**
+ * This is the "view" of the canvas - the part of the canvas that you can
+ * actually see on the screen. See @ref QCanvasView documentation for more on
+ * this.
+ *
+ * Here you can find most of the local visual stuff. E.g. the selection rect is
+ * implemented here. The messages for the network (e.g. "move unit with ID z to
+ * x,y") are generated here as well as they are a direct result of the input of
+ * the local player on the view. Note that these messages are <em>not</em>
+ * received or read here! This happens in the class @ref Boson which is
+ * responsible for all of the network stuff. The so called "playerInput" is read
+ * there (which was generated here) and the unit is moved according to the
+ * message (if it is valid).
+ *
+ * Here you should not find much of the game logic - this should be done in @ref
+ * Unit or @ref Boson if possible and senseful. All you can find here should not
+ * influence any other client directly.
+ * @short The main view of the game
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
  **/
 class BosonBigDisplay : public QCanvasView

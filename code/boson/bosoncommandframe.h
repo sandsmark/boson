@@ -28,6 +28,7 @@ class Player;
 class QPixmap;
 
 /**
+ * @short The frame where you can order units
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
  **/
 class BosonCommandFrame : public QFrame
