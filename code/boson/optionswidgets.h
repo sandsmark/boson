@@ -186,6 +186,9 @@ protected:
 	int minificationFilter() const;
 	void setMinificationFilter(int f);
 
+	void setLOD(unsigned int l);
+	unsigned int lod() const;
+
 	/**
 	 * @return GL_NEAREST, GL_LINEAR, GL_*_MIPMAP_* for mipmapped textures
 	 **/
@@ -207,6 +210,7 @@ private:
 	QCheckBox* mUseLight;
 	QCheckBox* mUseMaterials;
 	QComboBox* mGroundRenderer;
+	QComboBox* mLOD;
 };
 
 class ChatOptions : public QVBox, public OptionsWidget

@@ -1626,7 +1626,7 @@ void BoMesh::generateLOD()
  // these numbers can be used by renderMesh() (or indirectly by renderFrame())
  // to choose which LOD should be rendered at. 0 is always the default, i.e.
  // render all points and faces.
- unsigned int LODCount = 1; // must be at least 1, as we have at leas the full-detailed version
+ unsigned int LODCount = 2; // must be at least 1, as we have at leas the full-detailed version
 
  unsigned int oldCount = d->mLODCount;
  if (LODCount < oldCount) {

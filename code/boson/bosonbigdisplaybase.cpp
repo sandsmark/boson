@@ -810,6 +810,9 @@ void BosonBigDisplayBase::renderItems()
  // loops for rendering items and rendering selection rects. short: it is
  // better.
  createRenderItemList(); // AB: this is very fast. < 1.5ms on experimental5 for me
+
+ unsigned int lod = boConfig->uintValue("UseLOD", 0);
+
  BoItemList::Iterator it = d->mRenderItemList->begin();
  for (; it != d->mRenderItemList->end(); ++it) {
 	BosonItem* item = *it;
@@ -842,7 +845,9 @@ void BosonBigDisplayBase::renderItems()
 	} else {
 		glColor3ub(255, 255, 255);
 	}
-	item->renderItem();
+	// FIXME the LOD should also depend on the distance of the item to the
+	// camera
+	item->renderItem(lod);
 	glColor3ub(255, 255, 255);
 	glPopMatrix();
 
