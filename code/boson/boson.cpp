@@ -39,7 +39,6 @@
 #include "bosonstarting.h"
 #include "boevent.h"
 #include "boeventmanager.h"
-#include "boeventlistener.h"
 #include "bomessage.h"
 #include "startupwidgets/bosonloadingwidget.h"
 
@@ -2270,13 +2269,11 @@ void Boson::queueEvent(BoEvent* event)
 
 bool Boson::loadCanvasConditions(const QDomElement& root)
 {
- BoEventListener* listener = canvasNonConst()->eventListener();
- return listener->loadConditions(root);
+ return canvasNonConst()->loadConditions(root);
 }
 
 bool Boson::saveCanvasConditions(QDomElement& root) const
 {
- const BoEventListener* listener = canvas()->eventListener();
- return listener->saveConditions(root);
+ return canvas()->saveConditions(root);
 }
 

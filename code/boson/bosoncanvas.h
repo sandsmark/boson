@@ -410,6 +410,26 @@ public:
 	bool saveAsXML(QDomElement& root);
 
 	/**
+	 * Load the conditions for the @ref BoCanvasEventListener (i.e. the
+	 * global @ref BoEventListener) from @p root.
+	 *
+	 * Note that the conditions are loaded <em>only</em>, not the whole
+	 * event listener.
+	 *
+	 * See also @ref BoEventListener::loadConditions
+	 **/
+	bool loadConditions(const QDomElement& root);
+
+	/**
+	 * Save the conditions from the @ref BoCanvasEventListener to @p root.
+	 * This @ref QDomElement can be used for loading the conditions using
+	 * @ref loadConditions again.
+	 *
+	 * See also @ref BoEventListener::saveConditions
+	 **/
+	bool saveConditions(QDomElement& root) const;
+
+	/**
 	 * Valid in editor mode only. Delete the specified items.
 	 **/
 	void deleteItems(const QValueList<unsigned long int>& items);
