@@ -111,6 +111,17 @@ class BosonWeaponProperties : public PluginProperties
      **/
     inline bofixed maxFlyDistance() const  { return mMaxFlyDistance; }
     /**
+     * @return Starting angle (in degrees) of the missile of this weapon.
+     * This is the vertical angle that the missile will get when it's launched.
+     *  If it's 0, missile will start to fly horizontally towards the target,
+     *  if it's 90, missile will first fly upward and then turn to it's target.
+     *  If it's -1, then missile will start flying directly towards it's
+     *  target.
+     * Must be in range 0-90 or -1.
+     * This has effect only for missile weapons.
+     **/
+    inline bofixed startAngle() const  { return mStartAngle; }
+    /**
      * @return The number of advance calls until the weapon is reloaded
      **/
     inline unsigned int reloadingTime() const  { return m_reloadingTime; }
@@ -233,6 +244,7 @@ class BosonWeaponProperties : public PluginProperties
     void setTakeTargetVeloIntoAccount(bool take)  { mTakeTargetVeloIntoAccount = take; }
     void setMaxFlyDistance(bofixed dist)  { mMaxFlyDistance = dist; }
     void setTurningSpeed(bofixed s)  { mTurningSpeed = s; }
+    void setStartAngle(bofixed a)  { mStartAngle = a; }
 
     void reset();
     void loadAction(UnitAction type, KSimpleConfig* cfg, const QString& key, bool useDefault = false);
@@ -280,6 +292,7 @@ class BosonWeaponProperties : public PluginProperties
     bool mTakeTargetVeloIntoAccount;
     bofixed mMaxFlyDistance;
     bofixed mTurningSpeed;
+    bofixed mStartAngle;
 
 
 #undef DECLAREUPGRADEABLE

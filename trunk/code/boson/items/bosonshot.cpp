@@ -42,6 +42,12 @@
 
 #include <math.h>
 
+// Degrees to radians conversion (AB: from mesa/src/macros.h)
+#define DEG2RAD (M_PI/180.0)
+// And radians to degrees conversion
+#define RAD2DEG (180.0/M_PI)
+
+
 /*****  BosonShot  *****/
 
 BosonShot::BosonShot(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop) :
@@ -559,8 +565,19 @@ void BosonShotMissile::init(const BoVector3Fixed& pos, Unit* target)
   mPassedDist = 0;
 
   // Initial velocity
-  mVelo.set(mTarget->x() - x(), mTarget->y() - y(), mTarget->z() - z());
-  mVelo.normalize();
+  if(properties()->startAngle() == -1)
+  {
+    mVelo.set(mTarget->x() - x(), mTarget->y() - y(), mTarget->z() - z());
+    mVelo.normalize();
+  }
+  else
+  {
+    mVelo.set(mTarget->x() - x(), mTarget->y() - y(), 0);
+    mVelo.normalize();
+    mVelo.scale(cos(properties()->startAngle() * DEG2RAD));
+    mVelo.setZ(sin(properties()->startAngle() * DEG2RAD));
+    // mVelo is already normalized
+  }
 }
 
 // move the shot by one step

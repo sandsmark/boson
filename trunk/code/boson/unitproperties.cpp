@@ -237,8 +237,8 @@ void UnitProperties::loadMobileProperties(KSimpleConfig* conf)
 			" for unit " << typeId() << ", defaulting to 0" << endl;
 	m_speed.init(0);
  }
- mAccelerationSpeed = conf->readDoubleNumEntry("AccelerationSpeed", 1) / 20.0f;
- mDecelerationSpeed = conf->readDoubleNumEntry("DecelerationSpeed", 2) / 20.0f;
+ mAccelerationSpeed = conf->readDoubleNumEntry("AccelerationSpeed", 1) / 20.0f / 20.0f;
+ mDecelerationSpeed = conf->readDoubleNumEntry("DecelerationSpeed", 2) / 20.0f / 20.0f;
  mRotationSpeed = (int)(conf->readNumEntry("RotationSpeed", (int)(speed() * 20.0f * 90.0f)) / 20.0f);
  mCanGoOnLand = conf->readBoolEntry("CanGoOnLand", (isLand() || isAircraft()));
  mCanGoOnWater = conf->readBoolEntry("CanGoOnWater", (isShip() || isAircraft()));
@@ -375,8 +375,8 @@ void UnitProperties::saveMobileProperties(KSimpleConfig* conf)
  // We multiply speeds with 20 because speeds in config files are cells/second,
  //  but here we have cells/advance call
  conf->writeEntry("Speed", speed() * 20.0f);
- conf->writeEntry("AccelerationSpeed", (double)mAccelerationSpeed * 20.0f);
- conf->writeEntry("DecelerationSpeed", (double)mDecelerationSpeed * 20.0f);
+ conf->writeEntry("AccelerationSpeed", (double)mAccelerationSpeed * 20.0f * 20.0f);
+ conf->writeEntry("DecelerationSpeed", (double)mDecelerationSpeed * 20.0f * 20.0f);
  conf->writeEntry("RotationSpeed", mRotationSpeed * 20.0f);
  conf->writeEntry("CanGoOnLand", mCanGoOnLand);
  conf->writeEntry("CanGoOnWater", mCanGoOnWater);
@@ -707,8 +707,8 @@ void UnitProperties::reset()
  mExplodingDamageRange = 0;
  // Mobile stuff (because unit is mobile by default)
  mIsFacility = false;
- mAccelerationSpeed = 2;
- mDecelerationSpeed = 4;
+ mAccelerationSpeed = 2 / 20.0f / 20.0f;
+ mDecelerationSpeed = 4 / 20.0f / 20.0f;
  mRotationSpeed = (int)(45.0f * speed());
  mCanGoOnLand = true;
  mCanGoOnWater = false;
