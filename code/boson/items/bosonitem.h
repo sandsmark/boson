@@ -324,7 +324,9 @@ public:
 	 **/
 	inline virtual void advance(unsigned int )
 	{
-		animate();
+		if (mCurrentAnimation) {
+			animate();
+		}
 	}
 
 	/**
