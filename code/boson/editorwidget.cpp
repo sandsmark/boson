@@ -40,8 +40,10 @@
 #include <kaction.h>
 #include <kdeversion.h>
 #include <kmessagebox.h>
+#include <klineeditdlg.h>
 
 #include <qptrlist.h>
+#include <qvalidator.h>
 
 #include "editorwidget.moc"
 
@@ -184,6 +186,12 @@ void EditorWidget::initKActions()
  (void)new KAction(i18n("Map &description"), KShortcut(), this,
 		SLOT(slotEditMapDescription()), actionCollection(),
 		"editor_map_description");
+ (void)new KAction(i18n("Edit &Minerals"), KShortcut(), this,
+		SLOT(slotEditPlayerMinerals()), actionCollection(),
+		"editor_player_minerals");
+ (void)new KAction(i18n("Edit &Oil"), KShortcut(), this,
+		SLOT(slotEditPlayerOil()), actionCollection(),
+		"editor_player_oil");
 
 // KStdAction::preferences(bosonWidget(), SLOT(slotGamePreferences()), actionCollection()); // FIXME: slotEditorPreferences()
 }
@@ -393,5 +401,44 @@ void EditorWidget::slotEditorPreferences()
 	return;
  }
  dlg->show();
+}
+
+void EditorWidget::slotEditPlayerMinerals()
+{
+ BO_CHECK_NULL_RET(localPlayer());
+ bool ok = false;
+ QString value = QString::number(localPlayer()->minerals());
+ QIntValidator val(this);
+ val.setBottom(0);
+ val.setTop(1000000); // we need to set a top, because int is limited. this should be enough, i hope (otherwise feel free to increase)
+ value = KLineEditDlg::getText(i18n("Minerals for player %1").arg(localPlayer()->name()), value, &ok, this, &val);
+ boDebug() << k_funcinfo << value << endl;
+ unsigned long int v = value.toULong(&ok);
+ if (!ok) {
+	boWarning() << k_funcinfo << "value " << value << " not valid" << endl;
+	return;
+ }
+ localPlayer()->setMinerals(v);
+}
+
+void EditorWidget::slotEditPlayerOil()
+{
+ BO_CHECK_NULL_RET(localPlayer());
+ bool ok = false;
+ QString value = QString::number(localPlayer()->oil());
+ QIntValidator val(this);
+ val.setBottom(0);
+ val.setTop(1000000); // we need to set a top, because int is limited. this should be enough, i hope (otherwise feel free to increase)
+ value = KLineEditDlg::getText(i18n("Oil for player %1").arg(localPlayer()->name()), value, &ok, this, &val);
+ if (!ok) {
+	return;
+ }
+ boDebug() << k_funcinfo << value << endl;
+ unsigned long int v = value.toULong(&ok);
+ if (!ok) {
+	boWarning() << k_funcinfo << "value " << value << " not valid" << endl;
+	return;
+ }
+ localPlayer()->setOil(v);
 }
 

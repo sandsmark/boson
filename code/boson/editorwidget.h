@@ -94,6 +94,8 @@ protected slots:
 	void slotChangeLocalPlayer(int);
 	void slotPlace(int index);
 	void slotEditMapDescription();
+	void slotEditPlayerMinerals();
+	void slotEditPlayerOil();
 
 	void slotGameStarted();
 
