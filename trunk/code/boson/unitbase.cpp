@@ -257,7 +257,7 @@ bool UnitBase::saveScenario(QDomElement& unit)
  QIntDictIterator<KGamePropertyBase> it(dict);
  for (; it.current(); ++it) {
 	QString s = dataHandler()->propertyValue(it.current());
-	if (s == QString::null) {
+	if (s.isNull()) {
 		// AB: we need to connect to
 		// KGamePropertyHandler::signalRequestValue if this ever
 		// happens!

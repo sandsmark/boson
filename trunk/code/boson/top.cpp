@@ -472,7 +472,7 @@ void TopWidget::slotSaveGame(const QString& fileName, const QString& description
 {
  boDebug() << k_funcinfo << endl;
  QString file = fileName;
- if (file == QString::null) {
+ if (file.isNull()) {
 	return;
  }
  if (file[0] != '/') {

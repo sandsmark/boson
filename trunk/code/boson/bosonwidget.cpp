@@ -151,7 +151,7 @@ void BosonWidget::slotChangeCursor(int mode, const QString& cursorDir_)
  }
 
  QString cursorDir = cursorDir_;
- if (cursorDir == QString::null) {
+ if (cursorDir.isNull()) {
 	cursorDir = BosonCursor::defaultTheme();
  }
 

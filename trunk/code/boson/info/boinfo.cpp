@@ -179,7 +179,7 @@ bool BoInfo::load(QDomElement& root)
 		continue;
 	}
 	QString value = e.text();
-	if (value == QString::null) {
+	if (value.isNull()) {
 		boWarning() << k_funcinfo << "no value for key " << key << endl;
 		continue;
 	}
@@ -688,7 +688,7 @@ void BoInfo::debug() const
  QMap<int, QVariant>::Iterator it;
  for (it = d->mInfos.begin(); it != d->mInfos.end(); ++it) {
 	QString value = valueToString(it.key());
-	if (value != QString::null) {
+	if (!value.isNull()) {
 		QString name = keyToName(it.key());
 		boDebug() << name  + ": " << value << endl;
 	}
