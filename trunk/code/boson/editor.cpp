@@ -60,7 +60,7 @@ int main(int argc, char **argv)
 {
 //FIXME:
  KAboutData about("boson",
-		I18N_NOOP("Boson game"),
+		I18N_NOOP("Boson Map Editor"),
 		version,
 		description,
 		KAboutData::License_GPL,
