@@ -1,0 +1,7 @@
+[Boson Unit]
+IsFacility=true
+TerrainType=0
+Name=Oil Tower
+Id=7
+Health=100
+Prize=100

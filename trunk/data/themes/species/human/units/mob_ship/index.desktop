@@ -1,0 +1,15 @@
+[Boson Unit]
+IsFacility=false
+TerrainType=1
+Name=Ship
+Id=10000
+Health=100
+Prize=100
+Range=100
+Damage=40
+Reload=30
+
+[Boson Mobile Unit]
+Speed=3
+CanGoOnLand=false
+CanGoOnWater=true

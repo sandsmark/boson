@@ -1,0 +1,10 @@
+[Boson Unit]
+IsFacility=true
+TerrainType=0
+Name=Turret
+Id=10
+Health=100
+Prize=100
+Range=100
+Damage=20
+Reload=30

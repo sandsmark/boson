@@ -1,0 +1,11 @@
+[Boson Unit]
+IsFacility=true
+TerrainType=0
+Name=War Factory
+Id=3
+Health=100
+Prize=100
+
+[Boson Facility]
+CanProduce=true
+ProduceList=10000,10001,10002,10003,10004

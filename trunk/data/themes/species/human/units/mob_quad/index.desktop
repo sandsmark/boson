@@ -1,0 +1,15 @@
+[Boson Unit]
+IsFacility=false
+TerrainType=0
+Name=Quad
+Id=10001
+Health=100
+Prize=100
+Range=100
+Damage=10
+Reload=30
+
+[Boson Mobile Unit]
+Speed=4
+CanGoOnLand=true
+CanGoOnWater=false

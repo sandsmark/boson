@@ -1,0 +1,7 @@
+[Boson Unit]
+IsFacility=true
+TerrainType=0
+Name=Refinery
+Id=8
+Health=100
+Prize=100
