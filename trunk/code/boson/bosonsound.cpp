@@ -27,15 +27,16 @@
 #include <kglobal.h>
 #include <kapplication.h>
 #include <kstandarddirs.h>
+#include <kmimetype.h>
 #include <kdebug.h>
-#include <arts/kplayobject.h>
-#include <arts/kplayobjectfactory.h>
 #include <arts/kartsserver.h>
 #include <arts/flowsystem.h>
 #include <arts/connect.h>
+#include <arts/artsflow.h>
 
 #include <qstringlist.h>
 #include <qintdict.h>
+#include <qdir.h>
 
 class BoPlayObject
 {
@@ -44,43 +45,29 @@ public:
 	{
 		mFile = file;
 		mParent = parent;
-		mPlayObject = 0;
+		mPlayObject = Arts::PlayObject::null();
 		reload();
 	}
 	~BoPlayObject()
 	{
-		killObject();
 	}
+
 	const QString& file() const { return mFile; }
-	KPlayObject* object() const { return mPlayObject; }
+	Arts::PlayObject object() const { return mPlayObject; }
 
 	bool isNull() const
 	{
-		if (object()) {
-			return object()->isNull();
-		}
-		return true;
-	}
-
-	void killObject()
-	{
-		if (mPlayObject) {
-			Arts::disconnect(object()->object(), "left",
-					mParent->effectStack(), "inleft");
-			Arts::disconnect(object()->object(), "right",
-					mParent->effectStack(), "inright");
-			delete mPlayObject;
-			mPlayObject = 0;
-		}
-
+		return object().isNull();
 	}
 
 	void play()
 	{
 		kdDebug() << k_funcinfo << endl;
 		if (!isNull()) {
-			object()->play();
+			object().play();
 			mPlayed = true;
+		} else {
+			kdDebug() << k_funcinfo << "NULL playobject" << endl;
 		}
 	}
 
@@ -90,7 +77,7 @@ public:
 		if (isNull()) {
 			return;
 		}
-		if (!(object()->capabilities() & Arts::capSeek)) {
+		if (!(object().capabilities() & Arts::capSeek)) {
 			kdDebug() << "cannot seek" << endl;
 			reload();
 			return;
@@ -100,7 +87,7 @@ public:
 			Arts::poTime begin;
 			begin.seconds = 0;
 			begin.ms = 0;
-			object()->seek(begin);
+			object().seek(begin);
 			if (position() > 0) {
 				kdDebug() << "seeking did not work :-(" << endl;
 				reload();
@@ -110,37 +97,36 @@ public:
 	void reload()
 	{
 		kdDebug() << k_funcinfo << endl;
-		killObject();
+		KMimeType::Ptr mimeType = KMimeType::findByURL(file(), 0, true, true);
 
-		KPlayObjectFactory factory(mParent->server().server());
-		mPlayObject = factory.createPlayObject(file(), false);
-		if (mPlayObject && !mPlayObject->isNull()) {
-			mPlayed = false;
+		Arts::PlayObject result;
+		result = mParent->server().server().createPlayObjectForURL(
+				string(file()), string(mimeType->name()),
+				false); // false as we connect it to the soundcard ourselfes
 
-			// code taken from noatun's engine.cpp
-			// we connect the playobject to the effect stack of the
-			// parent.
-			// There is defined 'how' the object should be played -
-			// e.g. which volume.
+		Arts::Synth_BUS_UPLINK uplink = Arts::DynamicCast(
+				mParent->server().server().createObject(
+				"Arts::Synth_BUS_UPLINK"));
+		uplink.busname("out_soundcard");
+		Arts::connect(result, "left", uplink, "left");
+		Arts::connect(result, "right", uplink, "right");
+		uplink.start();
+		result._node()->start();
+		result._addChild(uplink, "uplink");
 
-			object()->object()._node()->start(); // I really don't know what this means...
-			Arts::connect(object()->object(), "left", 
-					mParent->effectStack(), "inleft");
-			Arts::connect(object()->object(), "right", 
-					mParent->effectStack(), "inright");
-		} else {
-			delete mPlayObject;
-			mPlayObject = 0;
-		}
+		mPlayObject = result;
+		mPlayed = false;
+
 	}
 
 	void playFromBeginning()
 	{
 		kdDebug() << k_funcinfo << endl;
 		if (isNull()) {
+			kdWarning() << k_funcinfo << "isNull" << endl;
 			return;
 		}
-		if (object()->state() != Arts::posIdle) {
+		if (object().state() != Arts::posIdle) {
 			kdDebug() << k_funcinfo << "not posIdle" << endl;
 //			return; // AB: ? ??? 
 		}
@@ -156,11 +142,11 @@ protected:
 		if (isNull()) {
 			return -1;
 		}
-		if (!(object()->capabilities() & Arts::capSeek)) {
+		if (!(object().capabilities() & Arts::capSeek)) {
 			kdDebug() << "cannot seek!!" << endl;
 			return -1;
 		}
-		Arts::poTime t(object()->currentTime());
+		Arts::poTime t(object().currentTime());
 		kdDebug() << k_funcinfo << t.ms + t.seconds * 1000 << endl;
 		return t.ms + t.seconds * 1000;
 	}
@@ -168,7 +154,7 @@ private:
 	BosonSound* mParent;
 
 	QString mFile;
-	KPlayObject* mPlayObject;
+	Arts::PlayObject mPlayObject;
 	bool mPlayed;
 };
 
@@ -199,7 +185,8 @@ BosonSound::BosonSound()
 {
  d = new BosonSoundPrivate;
  d->mSounds.setAutoDelete(true);
-
+ 
+/*
  // taken from noatun's code:
  d->mAmanPlay = Arts::DynamicCast(server().server().createObject("Arts::Synth_AMAN_PLAY"));
  if (d->mAmanPlay.isNull()) {
@@ -219,7 +206,7 @@ BosonSound::BosonSound()
  }
  d->mEffectStack.start();
  Arts::connect(d->mEffectStack, d->mAmanPlay);
-
+*/
  // the volume control
 /*
  d->mVolumeControl = Arts::DynamicCast(server().server().createObject("Arts::StereoVolumeControl"));
@@ -282,16 +269,16 @@ void BosonSound::addUnitSounds(const UnitProperties* prop)
  if (boConfig->disableSound()) {
 	return;
  }
- QStringList sounds = KGlobal::dirs()->findAllResources("data", "boson/themes/species/*/units/*/sounds/*.ogg");
- sounds += KGlobal::dirs()->findAllResources("data", "boson/themes/species/*/units/*/sounds/*.wav");
+ QDir dir(QString("%1sounds").arg(prop->unitPath()));
+ dir.setFilter(QDir::Files);
 
- addEvent(prop->typeId(), Unit::SoundShoot, sounds);
- addEvent(prop->typeId(), Unit::SoundOrderMove, sounds);
- addEvent(prop->typeId(), Unit::SoundOrderAttack, sounds);
- addEvent(prop->typeId(), Unit::SoundOrderSelect, sounds);
- addEvent(prop->typeId(), Unit::SoundReportProduced, sounds);
- addEvent(prop->typeId(), Unit::SoundReportDestroyed, sounds);
- addEvent(prop->typeId(), Unit::SoundReportUnderAttack, sounds);
+ addEvent(prop->typeId(), Unit::SoundShoot, dir);
+ addEvent(prop->typeId(), Unit::SoundOrderMove, dir);
+ addEvent(prop->typeId(), Unit::SoundOrderAttack, dir);
+ addEvent(prop->typeId(), Unit::SoundOrderSelect, dir);
+ addEvent(prop->typeId(), Unit::SoundReportProduced, dir);
+ addEvent(prop->typeId(), Unit::SoundReportDestroyed, dir);
+ addEvent(prop->typeId(), Unit::SoundReportUnderAttack, dir);
 }
 
 void BosonSound::loadDefaultEvent(int event, const QString& filter)
@@ -305,8 +292,11 @@ void BosonSound::loadDefaultEvent(int event, const QString& filter)
  if (server().server().isNull()) {
 	return;
  }
+
+ // TODO: replace * by correct species path
  QStringList defaultSounds = KGlobal::dirs()->findAllResources("data", "boson/themes/species/*/sounds/*.ogg");
  defaultSounds += KGlobal::dirs()->findAllResources("data", "boson/themes/species/*/sounds/*.wav");
+
  QStringList list = defaultSounds.grep(filter);
  for (unsigned int i = 0; i < list.count(); i++) {
 	kdDebug() << k_funcinfo << "adding " << event << " = " << list[i] << endl;
@@ -339,7 +329,7 @@ void BosonSound::addSound(int id, const QString& file)
  }
 }
 
-void BosonSound::addEvent(int unitType, int event, const QStringList& sounds)
+void BosonSound::addEvent(int unitType, int event, QDir& dir)
 {
  QString filter;
  switch (event) {
@@ -365,10 +355,11 @@ void BosonSound::addEvent(int unitType, int event, const QStringList& sounds)
 		filter = "report_underattack";
 		break;
  }
+ dir.setNameFilter(QString("%1*.ogg;%2*.wav").arg(filter).arg(filter));
+ QStringList list = dir.entryList();
  loadDefaultEvent(event, filter);
- QStringList list = sounds.grep(filter);
  for (unsigned int i = 0; i < list.count(); i++) {
-	addEventSound(unitType, event, list[i]);
+	addEventSound(unitType, event, dir.absPath() + QString::fromLatin1("/") + list[i]);
  }
  (d->mUnitSounds[unitType])[event].setAutoDelete(true);
 }
@@ -379,7 +370,6 @@ void BosonSound::addEventSound(int unitType, int event, const QString& file)
 	return;
  }
  kdDebug() << k_funcinfo << "adding: " << unitType << "->" << event << " = " << file << endl;
- KPlayObjectFactory factory(server().server());
  BoPlayObject* playObject = new BoPlayObject(this, file);
  if (!playObject->isNull()) {
 	// that's really ugly code:

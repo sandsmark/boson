@@ -30,6 +30,7 @@ class QString;
 class KArtsServer;
 class BoPlayObject;
 class QStringList;
+class QDir;
 
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
@@ -70,7 +71,7 @@ public:
 	Arts::StereoEffectStack effectStack();
 
 protected:
-	void addEvent(int unitType, int unitSound, const QStringList& sounds);
+	void addEvent(int unitType, int unitSound, QDir& dir);
 	void addEventSound(int unitType, int unitSound, const QString& file);
 
 private:
