@@ -597,7 +597,7 @@ void BosonCommandFrame::slotSetAction(Unit* unit)
 	ProductionPlugin* production = fac->productionPlugin();
 	if (production) {
 		QValueList<unsigned long int> produceList = fac->speciesTheme()->productions(prop->producerList());
-		// Filter out things that player can't actually build (requisities aren't
+		// Filter out things that player can't actually build (requirements aren't
 		//  met yet)
 		QValueList<unsigned long int>::Iterator it;
 		it = produceList.begin();

@@ -116,10 +116,10 @@ void UnitProperties::loadUnitType(const QString& fileName)
  isFacility = conf.readBoolEntry("IsFacility", false);
  // KConfig doesn't support reading list of _unsigned_ int's so we must cast
  //  them ourselves
- QValueList<int> tmpRequisities = conf.readIntListEntry("Requisities");
+ QValueList<int> tmpRequirements = conf.readIntListEntry("Requirements");
  QValueList<int>::Iterator it;
- for(it = tmpRequisities.begin(); it != tmpRequisities.end(); it++) {
-	mRequisities.append((unsigned long int)(*it));
+ for(it = tmpRequirements.begin(); it != tmpRequirements.end(); it++) {
+	mRequirements.append((unsigned long int)(*it));
  }
 
  if (isFacility) {

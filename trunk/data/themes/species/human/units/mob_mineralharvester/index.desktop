@@ -8,7 +8,7 @@ MineralCost=300
 Producer=0
 CanShootAtAirUnits=false
 CanShootAtLandUnits=false
-Requisities=13,3
+Requirements=13,3
 
 [Boson Mobile Unit]
 Speed=3

@@ -537,7 +537,7 @@ int Player::facilitiesCount()
 
 bool Player::canBuild(unsigned long int unitType) const
 {
- QValueList<unsigned long int> neededTypes = speciesTheme()->unitProperties(unitType)->requisities();
+ QValueList<unsigned long int> neededTypes = speciesTheme()->unitProperties(unitType)->requirements();
  if(neededTypes.isEmpty()) {
 	return true;
  }

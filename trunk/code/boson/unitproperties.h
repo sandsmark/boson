@@ -284,7 +284,7 @@ public:
 	 *  of this type
 	 * @see Player::canBuild
 	 **/
-	QValueList<unsigned long int> requisities() const { return mRequisities; };
+	QValueList<unsigned long int> requirements() const { return mRequirements; };
 
 	/**
 	 * .3ds files seem to support only filenames of 8+3 length. We work
@@ -319,7 +319,7 @@ private:
 	bool mCanShootAtAirUnits;
 	bool mCanShootAtLandUnits;
 	bool mSupportMiniMap;
-	QValueList<unsigned long int> mRequisities;
+	QValueList<unsigned long int> mRequirements;
 	unsigned long int mArmor;
 	unsigned long int mShields;
 
