@@ -114,7 +114,8 @@ for(j=0; j<12; j++) {
 		return false;
 		}
 	pix_l.append(p);
-	pp = new QPoint(p->width()/2, p->height()/2 );
+	pp = new QPoint(0,0);
+	//pp = new QPoint(p->width()/2, p->height()/2 );
 	point_l.append(pp);
 }
 
