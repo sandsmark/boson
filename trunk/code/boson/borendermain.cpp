@@ -17,6 +17,13 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#define LIBUFO 0
+#if LIBUFO
+#include <ufo/ufo.hpp>
+#include <ufo/ux/ux.hpp>
+#include "boufo.h"
+#endif
+
 #include "borendermain.h"
 #include "borendermain.moc"
 
@@ -78,6 +85,62 @@
 #define PU_USE_NONE
 #include <plib/pu.h>
 
+#if LIBUFO
+ufo::UXContext* g_context = 0;
+ufo::UXDisplay* g_display = 0;
+
+// TODO (libufo):
+// - convertQtModifiersToUfo() (-> modifiers for mouse events)
+// - puseMouseWheelDown()/Up()
+// - pushKeyDown()/Up()
+// - find out whether a mouse event was taken and stop processing it in
+//   mouse*Event()
+// - resize events
+
+
+static ufo::UMod_t convertQtMouseButtonToUfo(int button)
+{
+ ufo::UMod_t ubutton = ufo::UMod::NoModifier;
+ switch (button) {
+	case QMouseEvent::LeftButton:
+		ubutton = ufo::UMod::LeftButton;
+		break;
+	case QMouseEvent::RightButton:
+		ubutton = ufo::UMod::RightButton;
+		break;
+	case QMouseEvent::MidButton:
+		ubutton = ufo::UMod::MiddleButton;
+		break;
+	default:
+		ubutton = ufo::UMod::NoModifier;
+		break;
+ }
+ return ubutton;
+}
+
+#endif // LIBUFO
+
+static int convertQtMouseButtonToPUI(int button)
+{
+ int puButton = PU_NOBUTTON;
+ switch (button) {
+	case Qt::LeftButton:
+		puButton = PU_LEFT_BUTTON;
+		break;
+	case QMouseEvent::RightButton:
+		puButton = PU_RIGHT_BUTTON;
+		break;
+	case QMouseEvent::MidButton:
+		puButton = PU_MIDDLE_BUTTON;
+		break;
+	default:
+		puButton = PU_NOBUTTON;
+		break;
+ }
+ return puButton;
+}
+
+
 static const char *description =
     I18N_NOOP("Rendering tester for Boson");
 
@@ -125,6 +188,7 @@ ModelPreview::ModelPreview(QWidget* parent) : BosonGLWidget(parent)
  connect(mUpdateTimer, SIGNAL(timeout()), this, SLOT(slotUpdateGL()));
  qApp->setGlobalMouseTracking(true);
  qApp->installEventFilter(this);
+ setMouseTracking(true);
  setFocusPolicy(StrongFocus);
 
  mCurrentFrame = 0;
@@ -146,6 +210,9 @@ ModelPreview::ModelPreview(QWidget* parent) : BosonGLWidget(parent)
 
  mCamera = new BoCamera;
  mLight = 0;
+#if LIBUFO
+ mUfoManager = 0;
+#endif
 
  mPUILayout = new BoPUIVLayout(this, "topLayout");
 
@@ -216,6 +283,7 @@ void ModelPreview::initializeGL()
  mUpdateTimer->start(GL_UPDATE_TIMER);
 
  initPUIGUI();
+ initUfoGUI();
 
  recursive = false;
 }
@@ -224,6 +292,11 @@ void ModelPreview::initPUIGUI()
 {
  puInit();
  puSetWindow(winId());
+
+#if LIBUFO
+#warning plib disabled
+ return;
+#endif
 
  BoPUINumInput* fovy = new BoPUINumInput(this);
  BoPUINumInput* frame = new BoPUINumInput(this);
@@ -367,6 +440,111 @@ void ModelPreview::initPUIGUI()
  mPUILayout->doLayout();
 }
 
+void ModelPreview::initUfoGUI()
+{
+#if LIBUFO
+ static bool initialized = false;
+ if (initialized) {
+	boWarning() << k_funcinfo << "called twice" << endl;
+	return;
+ }
+ initialized = true;
+ if (mUfoManager) {
+	boError() << k_funcinfo << "UFO manager not NULL" << endl;
+	return;
+ }
+
+ mUfoManager = new BoUfoManager(width(), height());
+ mUfoManager->contentWidget()->setLayout(new ufo::UFlowLayout());
+
+ BoUfoVBox* topWidget = new BoUfoVBox(this);
+ mUfoManager->contentWidget()->add(topWidget->contentWidget());
+
+ BoUfoNumInput* fovy = new BoUfoNumInput(this);
+ BoUfoNumInput* frame = new BoUfoNumInput(this);
+ BoUfoNumInput* lod = new BoUfoNumInput(this);
+ connect(this, SIGNAL(signalFovYChanged(float)), fovy, SLOT(setValue(float)));
+ connect(fovy, SIGNAL(signalValueChanged(float)), this, SLOT(slotFovYChanged(float)));
+ connect(this, SIGNAL(signalLODChanged(float)), lod, SLOT(setValue(float)));
+ connect(this, SIGNAL(signalMaxLODChanged(float)), lod, SLOT(slotSetMaxValue(float)));
+ connect(lod, SIGNAL(signalValueChanged(float)), this, SLOT(slotLODChanged(float)));
+ connect(this, SIGNAL(signalMaxFramesChanged(float)), frame, SLOT(slotSetMaxValue(float)));
+ connect(this, SIGNAL(signalFrameChanged(float)), frame, SLOT(setValue(float)));
+ connect(frame, SIGNAL(signalValueChanged(float)), this, SLOT(slotFrameChanged(float)));
+ fovy->setLabel(i18n("FovY"));
+ fovy->setStepSize(1.0f);
+ fovy->setRange(MIN_FOVY, MAX_FOVY);
+ lod->setLabel(i18n("LOD"));
+ lod->setStepSize(1.0f);
+ lod->setRange(0.0f, 0.0f);
+ frame->setLabel(i18n("Frame"));
+ frame->setStepSize(1.0f);
+ frame->setRange(0.0f, 0.0f);
+
+
+ BoUfoHBox* hideWidget = new BoUfoHBox(topWidget);
+ BoUfoPushButton* hide = new BoUfoPushButton(i18n("Hide"), hideWidget);
+ BoUfoPushButton* hideOthers = new BoUfoPushButton(i18n("Hide others"), hideWidget);
+ BoUfoPushButton* unhideAll = new BoUfoPushButton(i18n("UnHide all"), hideWidget);
+ hideWidget->addWidget(hide);
+ hideWidget->addWidget(hideOthers);
+ hideWidget->addWidget(unhideAll);
+ connect(hide, SIGNAL(signalClicked()), this, SLOT(slotHideSelectedMesh()));
+ connect(hideOthers, SIGNAL(signalClicked()), this, SLOT(slotHideUnSelectedMeshes()));
+ connect(unhideAll, SIGNAL(signalClicked()), this, SLOT(slotUnHideAllMeshes()));
+
+ BoUfoHBox* placementWidget = new BoUfoHBox(topWidget);
+ BoUfoCheckBox* placement = new BoUfoCheckBox(i18n("Show placement preview"), placementWidget);
+ BoUfoCheckBox* disallowPlacement= new BoUfoCheckBox(i18n("Disallow placement"), placementWidget);
+ placementWidget->addWidget(placement);
+ placementWidget->addWidget(disallowPlacement);
+ BoUfoCheckBox* wireframe = new BoUfoCheckBox(i18n("Show wireframe"), this);
+ BoUfoCheckBox* construction = new BoUfoCheckBox(i18n("Show construction"), this);
+ BoUfoCheckBox* axis = new BoUfoCheckBox(i18n("Render axis"), this);
+ BoUfoCheckBox* grid = new BoUfoCheckBox(i18n("Render grid"), this);
+ BoUfoCheckBox* light = new BoUfoCheckBox(i18n("Enable Light"), boConfig->useLight(), this);
+ BoUfoCheckBox* materials= new BoUfoCheckBox(i18n("Enable Materials"), boConfig->useMaterials(), this);
+ connect(placement, SIGNAL(signalToggled(bool)), this, SLOT(slotPlacementPreviewChanged(bool)));
+ connect(disallowPlacement, SIGNAL(signalToggled(bool)), this, SLOT(slotDisallowPlacementChanged(bool)));
+ connect(wireframe, SIGNAL(signalToggled(bool)), this, SLOT(slotWireFrameChanged(bool)));
+ connect(construction, SIGNAL(signalToggled(bool)), this, SLOT(slotConstructionChanged(bool)));
+ connect(axis, SIGNAL(signalToggled(bool)), this, SLOT(slotRenderAxisChanged(bool)));
+ connect(grid, SIGNAL(signalToggled(bool)), this, SLOT(slotRenderGridChanged(bool)));
+ connect(light, SIGNAL(signalToggled(bool)), this, SLOT(slotEnableLight(bool)));
+ connect(materials, SIGNAL(signalToggled(bool)), this, SLOT(slotEnableMaterials(bool)));
+
+
+#if 0
+ BoPUICameraWidget* camera = new BoPUICameraWidget(this);
+ camera->setCamera(mCamera);
+ connect(this, SIGNAL(signalCameraChanged()), camera, SLOT(slotUpdateFromCamera()));
+#endif
+ BoUfoPushButton* defaults = new BoUfoPushButton(i18n("Reset Defaults"), this);
+ connect(defaults, SIGNAL(signalClicked()), this, SLOT(slotResetView()));
+
+ topWidget->addSpacing(10); // TODO: add spacinghint and marginhint to layouts
+ topWidget->addSpacing(60); // distance from "mesh under cursor" text
+ topWidget->addWidget(fovy);
+ topWidget->addWidget(frame);
+ topWidget->addWidget(lod);
+ topWidget->addSpacing(20);
+ topWidget->addWidget(hideWidget);
+ topWidget->addSpacing(20);
+ topWidget->addWidget(placementWidget);
+ topWidget->addWidget(wireframe);
+ topWidget->addWidget(construction);
+ topWidget->addWidget(axis);
+ topWidget->addWidget(grid);
+ topWidget->addWidget(light);
+ topWidget->addWidget(materials);
+ topWidget->addSpacing(50);
+#if 0
+ topWidget->addWidget(camera);
+#endif
+ topWidget->addWidget(defaults);
+#endif // LIBUFO
+}
+
 void ModelPreview::setFont(const BoFontInfo& font)
 {
  makeCurrent();
@@ -392,6 +570,13 @@ void ModelPreview::resizeGL(int w, int h)
 	menuBar()->createMenu();
  }
  mPUILayout->doLayout();
+
+#if LIBUFO
+ if (mUfoManager) {
+	mUfoManager->postResizeEvent(width(), height());
+	mUfoManager->contentWidget()->invalidate();
+ }
+#endif
 }
 
 void ModelPreview::paintGL()
@@ -433,6 +618,29 @@ void ModelPreview::paintGL()
  renderText();
  puSetWindow(winId());
  puDisplay();
+
+
+#if LIBUFO
+ if (mUfoManager) {
+	static int id = boProfiling->requestEventId("libufo-events");
+	static int idEvents = boProfiling->requestEventId("libufo-events");
+	static int idRendering = boProfiling->requestEventId("libufo-rendering");
+	BosonProfiler prof(-id);
+	BosonProfiler profEvents(-idEvents);
+	mUfoManager->display()->dispatchEvents();
+	long int events = profEvents.elapsed();
+	BosonProfiler profRendering(-idRendering);
+	mUfoManager->render();
+	long int rendering = profRendering.elapsed();
+
+	// AB: libufo resets our viewport, but doesn't fix it again
+	glViewport(0, 0, width(), height());
+
+	long int total = prof.elapsed();
+
+//	boDebug() << k_funcinfo << "libufo took: " << total << " , events:" << events << " rendering: " << rendering << endl;
+ }
+#endif
 }
 
 void ModelPreview::renderAxii()
@@ -929,22 +1137,13 @@ bool ModelPreview::eventFilter(QObject* o, QEvent* e)
 
 void ModelPreview::mousePressEvent(QMouseEvent* e)
 {
- puSetWindow(winId());
- int puButton;
- switch (e->button()) {
-	case QMouseEvent::LeftButton:
-		puButton = PU_LEFT_BUTTON;
-		break;
-	case QMouseEvent::RightButton:
-		puButton = PU_RIGHT_BUTTON;
-		break;
-	case QMouseEvent::MidButton:
-		puButton = PU_MIDDLE_BUTTON;
-		break;
-	default:
-		puButton = PU_NOBUTTON;
-		break;
+#if LIBUFO
+ if (mUfoManager) {
+	mUfoManager->postMousePressEvent(e);
  }
+#endif
+ puSetWindow(winId());
+ int puButton = convertQtMouseButtonToPUI(e->button());
  if (puMouse(puButton, PU_DOWN, e->x(), e->y())) {
 	e->accept();
 	return;
@@ -962,22 +1161,13 @@ void ModelPreview::mousePressEvent(QMouseEvent* e)
 
 void ModelPreview::mouseReleaseEvent(QMouseEvent* e)
 {
- puSetWindow(winId());
- int puButton;
- switch (e->button()) {
-	case QMouseEvent::LeftButton:
-		puButton = PU_LEFT_BUTTON;
-		break;
-	case QMouseEvent::RightButton:
-		puButton = PU_RIGHT_BUTTON;
-		break;
-	case QMouseEvent::MidButton:
-		puButton = PU_MIDDLE_BUTTON;
-		break;
-	default:
-		puButton = PU_NOBUTTON;
-		break;
+#if LIBUFO
+ if (mUfoManager) {
+	mUfoManager->postMouseReleaseEvent(e);
  }
+#endif
+ puSetWindow(winId());
+ int puButton = convertQtMouseButtonToPUI(e->button());
  if (puMouse(puButton, PU_UP, e->x(), e->y())) {
 	e->accept();
 	return;
@@ -1001,9 +1191,16 @@ void ModelPreview::selectMesh(int mesh)
 
 void ModelPreview::mouseMoveEvent(QMouseEvent* e)
 {
+#if LIBUFO
+ if (mUfoManager) {
+	mUfoManager->postMouseMoveEvent(e);
+ }
+#endif
  puSetWindow(winId());
  puMouse(e->x(), e->y());
  mMouseMoveDiff->moveEvent(e);
+
+
  if (e->state() & LeftButton) {
  } else if (e->state() & RightButton) {
 	// dx == rot. around x axis. this is equal to d_y_ mouse movement.
@@ -1042,6 +1239,11 @@ void ModelPreview::mouseMoveEvent(QMouseEvent* e)
 void ModelPreview::wheelEvent(QWheelEvent* e)
 {
  BO_CHECK_NULL_RET(camera());
+#if LIBUFO
+ if (mUfoManager) {
+	mUfoManager->postWheelEvent(e);
+ }
+#endif
  float delta = e->delta() / 120;
  if (e->orientation() == Horizontal) {
  } else {
@@ -1065,6 +1267,11 @@ void ModelPreview::wheelEvent(QWheelEvent* e)
 
 void ModelPreview::keyPressEvent(QKeyEvent* e)
 {
+#if LIBUFO
+ if (mUfoManager) {
+	mUfoManager->postKeyPressEvent(e);
+ }
+#endif
  puSetWindow(winId());
  if (puKeyboard(e->ascii(), PU_DOWN)) {
 	e->accept();
@@ -1075,6 +1282,11 @@ void ModelPreview::keyPressEvent(QKeyEvent* e)
 
 void ModelPreview::keyReleaseEvent(QKeyEvent* e)
 {
+#if LIBUFO
+ if (mUfoManager) {
+	mUfoManager->postKeyReleaseEvent(e);
+ }
+#endif
  puSetWindow(winId());
  if (puKeyboard(e->ascii(), PU_UP)) {
 	e->accept();

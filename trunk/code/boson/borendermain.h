@@ -54,6 +54,7 @@ class KCmdLineArgs;
 class QCheckBox;
 class BoFontInfo;
 class BoPUILayout;
+class BoUfoManager;
 
 class KMyFloatNumInput : public KDoubleNumInput
 {
@@ -250,6 +251,7 @@ protected:
 
 private:
 	void initPUIGUI();
+	void initUfoGUI();
 
 private:
 	friend class RenderMain; // we need to emit signals from outside, in order to save lots of forwarding code
@@ -260,6 +262,7 @@ private:
 	int mMeshUnderMouse;
 	int mSelectedMesh;
 
+	BoUfoManager* mUfoManager;
 	BoPUILayout* mPUILayout;
 	BosonGLFont* mDefaultFont;
 
