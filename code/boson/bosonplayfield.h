@@ -142,6 +142,12 @@ public:
 	 **/
 	void changeScenario(BosonScenario* s);
 
+	/**
+	 * Make @p d the new description of this playfield. Called by the editor
+	 * only.
+	 **/
+	void changeDescription(BPFDescription* d);
+
 	QString playFieldName() const;
 	QString playFieldComment() const;
 

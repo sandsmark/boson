@@ -38,6 +38,9 @@ public:
 	BosonNewEditorWidget(BosonStartupNetwork* interface, QWidget* parent);
 	~BosonNewEditorWidget();
 
+public slots:
+	virtual void slotStartClicked();
+
 protected slots: // implementations for the .ui slots
 	// these slots describe actions that the local player has executed in
 	// his widget. nearly all must be transferred over network before the
@@ -45,9 +48,11 @@ protected slots: // implementations for the .ui slots
 	virtual void slotPlayFieldChanged(QListViewItem*);
 	virtual void slotGroundThemeChanged(int);
 	virtual void slotMaxPlayersChanged(int);
-	virtual void slotMaxWidthChanged(int);
-	virtual void slotMaxHeightChanged(int);
+	virtual void slotWidthChanged(int);
+	virtual void slotHeightChanged(int);
 	virtual void slotNewMapToggled(bool);
+	virtual void slotCreateNewToggled(bool checked);
+	virtual void slotEditExistingToggled(bool checked);
 
 private slots:
 	void slotNetStart();
@@ -58,8 +63,17 @@ protected:
 	BosonStartupNetwork* networkInterface() const { return mNetworkInterface; }
 private:
 	void initPlayFields();
-	void initSpecies();
 	void initGroundThemes();
+
+signals:
+	/**
+	 * Emitted when the player clicks on cancel. The widget should get
+	 * hidden now. (back to welcome widget)
+	 **/
+	void signalCancelled();
+
+private:
+	void initKGame();
 
 private:
 	BosonNewEditorWidgetPrivate* d;

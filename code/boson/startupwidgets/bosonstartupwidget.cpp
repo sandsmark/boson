@@ -23,7 +23,7 @@
 #include "bosonwelcomewidget.h"
 #include "bosonloadingwidget.h"
 #include "bosonstartgamewidget.h"
-#include "bosonstarteditorwidget.h"
+#include "bosonneweditorwidget.h"
 #include "bosonnetworkoptionswidget.h"
 #include "kloadsavegamewidget.h"
 #include "bosonstartupnetwork.h"
@@ -100,9 +100,9 @@ void BosonStartupWidget::init()
  logo->setPixmap(*d->mLogoPix);
 
  QVBoxLayout* topLayout = new QVBoxLayout(this);
- topLayout->addSpacing(20); // FIXME hardcoded
+ topLayout->addSpacing(5); // FIXME hardcoded
  topLayout->addWidget(logo, 0, AlignHCenter);
- topLayout->addSpacing(10); // FIXME hardcoded
+ topLayout->addSpacing(0); // FIXME hardcoded
  topLayout->addWidget(d->mWidgetStack, 1);
 
  d->mNetworkInterface = new BosonStartupNetwork(this);
@@ -293,7 +293,7 @@ void BosonStartupWidget::initWidget(WidgetId widgetId)
 	}
 	case IdStartEditor:
 	{
-		BosonStartEditorWidget* startEditor = new BosonStartEditorWidget(networkInterface(), this);
+		BosonNewEditorWidget* startEditor = new BosonNewEditorWidget(networkInterface(), this);
 		connect(startEditor, SIGNAL(signalCancelled()),
 				this, SLOT(slotShowWelcomeWidget()));
 
