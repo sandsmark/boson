@@ -48,7 +48,6 @@ BOSON_SRC = \
 	bosonpath.cpp \
 	unit.cpp \
 	selectbox.cpp \
-	commandinput.cpp \
 	bosoncursor.cpp \
 	bosonstatistics.cpp \
 	gameoverdialog.cpp \
@@ -75,7 +74,9 @@ BOSON_SRC = \
 	bomesh.cpp \
 	bosonpropertyxml.cpp \
 	bomemorytrace.cpp \
-	bosondata.cpp
+	boaction.cpp \
+	bosondata.cpp \
+	bosonlocalplayerinput.cpp
 
 
 BOPROFILING_SRC= \

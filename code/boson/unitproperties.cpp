@@ -26,6 +26,7 @@
 #include "bosonweapon.h"
 #include "bosonconfig.h"
 #include "bodebug.h"
+#include "boaction.h"
 
 #include <ksimpleconfig.h>
 #include <klocale.h>
@@ -46,6 +47,8 @@ public:
 
 	QMap<QString, QString> mTextureNames;
 	QMap<int, QString> mSounds;
+
+	QIntDict<BoAction> mActions;
 
 	QPtrList<BosonParticleSystemProperties> mDestroyedParticleSystems;
 	QValueList<unsigned long int> mDestroyedParticleSystemIds;
@@ -328,6 +331,34 @@ void UnitProperties::loadWeapons(KSimpleConfig* conf)
  mMaxWeaponRange = QMAX(mMaxAirWeaponRange, mMaxLandWeaponRange);
 }
 
+void UnitProperties::loadActions()
+{
+ KSimpleConfig conf(unitPath() + "index.unit");
+ // Produce action first
+ // Produce is special because it uses little overview as pixmap and it's
+ //  tooltip text is auto-generated. Only thing we load here is hotkey
+ // TODO: load hotkey
+ conf.setGroup("Actions");
+ mProduceAction = new BoAction(QString("ProduceAction-%1").arg(typeId()), theme()->smallOverview(typeId()),
+		"Produce"/*, hotkey*/);
+ if (canShoot()) {
+	d->mActions.insert(ActionAttack, theme()->action(conf.readEntry("ActionAttack", "ActionAttack")));
+ }
+ if (isMobile()) {
+	d->mActions.insert(ActionMove, theme()->action(conf.readEntry("ActionMove", "ActionMove")));
+	d->mActions.insert(ActionFollow, theme()->action(conf.readEntry("ActionFollow", "ActionFollow")));
+ }
+ if (properties(PluginProperties::Harvester)) {
+	d->mActions.insert(ActionHarvest, theme()->action(conf.readEntry("ActionHarvest", "ActionHarvest")));
+ }
+ if (properties(PluginProperties::Repair)) {
+	d->mActions.insert(ActionHarvest, theme()->action(conf.readEntry("ActionRepair", "ActionRepair")));
+ }
+ if (!d->mActions.isEmpty()) {
+	d->mActions.insert(ActionStop, theme()->action(conf.readEntry("ActionStop", "ActionStop")));
+ }
+}
+
 void UnitProperties::saveMobileProperties(KSimpleConfig* conf)
 {
  conf->setGroup("Boson Mobile Unit");
@@ -425,6 +456,16 @@ QString UnitProperties::sound(int soundEvent) const
 QMap<int, QString> UnitProperties::sounds() const
 {
  return d->mSounds;
+}
+
+BoAction* UnitProperties::action(UnitAction type) const
+{
+ return d->mActions[type];
+}
+
+const QIntDict<BoAction>* UnitProperties::allActions() const
+{
+ return &d->mActions;
 }
 
 void UnitProperties::setRequirements(QValueList<unsigned long int> requirements)

@@ -19,15 +19,19 @@
 #ifndef UNITPROPERTIES_H
 #define UNITPROPERTIES_H
 
+#include "global.h"
+
 class SpeciesTheme;
 class PluginProperties;
 class BosonWeaponProperties;
 class BosonParticleSystem;
 class BosonParticleSystemProperties;
 class BoVector3;
+class BoAction;
 class QString;
 template<class T> class QValueList;
 template<class T> class QPtrList;
+template<class T> class QIntDict;
 template<class T1, class T2> class QMap;
 
 class KSimpleConfig;
@@ -346,6 +350,20 @@ public:
 	 **/
 	const BosonWeaponProperties* weaponProperties(unsigned long int id) const;
 
+	BoAction* action(UnitAction type) const;
+
+	const QIntDict<BoAction>* allActions() const;
+
+	BoAction* produceAction() const { return mProduceAction; };
+
+	/**
+	 * Load actions for this unit. Must be called after overview pixmaps are
+	 * loaded.
+	 * Should be used by only SpeciesTheme.
+	 **/
+	void loadActions();
+
+
 protected:
 	void loadMobileProperties(KSimpleConfig* conf);
 	void loadFacilityProperties(KSimpleConfig* conf);
@@ -445,6 +463,7 @@ private:
 	unsigned long int mMaxAirWeaponRange;
 	long int mExplodingDamage;
 	float mExplodingDamageRange;
+	BoAction* mProduceAction;
 
 	MobileProperties* mMobileProperties;
 	FacilityProperties* mFacilityProperties;

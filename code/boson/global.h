@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -59,19 +59,39 @@ enum CursorType {
 	CursorDefault = 2
 };
 
+
 /**
  * Describes unit's action such as attack, move or stop
  **/
 enum UnitAction {
-	ActionAttack = 0,
-	ActionMove = 1,
-	ActionStop = 2,
-	ActionFollow = 3,
-	ActionMine = 4,
-	ActionRepair = 5,
-	ActionBuild = 6, // placement of a facility (usually - mobile is possible, too). also used for cell placements in editor
-	ActionChangeHeight = 7 // change height of a corner of a cell (editor only)
+	ActionInvalid = 0,
+
+	ActionUnitStart = 1, // Start of unit actions
+	ActionMove = 2,
+	ActionStop = 3,
+	ActionFollow = 4,
+	ActionHarvest = 5,
+	ActionRepair = 6,
+	ActionAttack = 7,
+	ActionUnitEnd = 29, // End of unit actions
+
+	ActionWeaponStart = 30, // Start of weapon actions
+	ActionAttackGround = 31,
+	ActionLayMine = 32,
+	ActionDropBomb = 33,
+	ActionWeaponEnd = 49, // End of weapon actions
+
+	ActionProduceStart = 50, // Start of produce actions
+	ActionProduceUnit = 51,
+	ActionProduceTech = 52,
+	ActionStopProduceUnit = 53,
+	ActionStopProduceTech = 54,
+	ActionProduceEnd = 69, // End of produce actions
+
+	ActionChangeHeight = 100, // change height of a corner of a cell (editor only)
+	ActionPlacementPreview = 101
 };
+
 
 enum UnitSoundEvent {
 	SoundOrderMove = 0,
@@ -97,32 +117,6 @@ enum ProductionType {
 	ProduceNothing = 0,
 	ProduceUnit = 1,
 	ProduceTech = 2
-};
-
-/**
- * These are the valid types of the @ref BosonOrderButton. A @ref
- * BosonOrderWidget (which contains several @ref BosonOrderButton objects) also
- * uses this, to inform other classes about the currently displayed type.
- *
- * Usually the buttons and the widget is in OrderNothing (i.e. nothing
- * displayed).
- *
- * OrderCell is for editor only
- *
- * OrderProduce for editor (unit placements) and for units with a
- * @ref ProductionPlugin.
- *
- * OrderUnitSelected is used when the button displays the image of a
- * currently selected unit.
- *
- * OrderAction are the action buttons (move, attack, mine, ...)
- **/
-enum OrderType {
-	OrderNothing = 0,
-	OrderCell = 1,
-	OrderProduce = 2,
-	OrderUnitSelected = 3,
-	OrderAction = 4
 };
 
 enum CameraAction {

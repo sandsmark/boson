@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -74,6 +74,11 @@ const QPoint& BosonBigDisplayInputBase::cursorCanvasPos() const
 const BoVector3& BosonBigDisplayInputBase::cursorCanvasVector() const
 {
  return bigDisplay()->cursorCanvasVector();
+}
+
+void BosonBigDisplayInputBase::setLocalPlayerInput(BosonLocalPlayerInput* input)
+{
+ mLocalPlayerInput = input;
 }
 
 void BosonBigDisplayInputBase::selectSingle(Unit* unit, bool replace)

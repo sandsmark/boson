@@ -36,6 +36,7 @@ class UpgradeProperties;
 class BosonParticleSystemProperties;
 class BosonWeaponProperties;
 class SpeciesData;
+class BoAction;
 
 class QPixmap;
 class QStringList;
@@ -91,12 +92,6 @@ public:
 	bool loadUnit(unsigned long int unitType);
 
 	/**
-	 * Load pixmaps of available actions (attack, move ...). This must be
-	 * done before @ref actionPixmap can return anything useful
-	 **/
-	bool loadActionGraphics();
-
-	/**
 	 * Load all available technologies. This must be done before starting game
 	 **/
 	bool loadTechnologies();
@@ -105,12 +100,9 @@ public:
 
 	void loadObjects();
 
-	const BosonParticleSystemProperties* particleSystemProperties(long unsigned int id);
+	void loadActions();
 
-	/**
-	 * @return Pixmap for the specified action
-	 **/
-	QPixmap* actionPixmap(UnitAction action);
+	const BosonParticleSystemProperties* particleSystemProperties(long unsigned int id);
 
 	/**
 	 * @return The i18n'ed name of the specified unit action. Can be used
@@ -118,9 +110,9 @@ public:
 	 **/
 	static QString unitActionName(UnitAction action);
 
-	QPixmap* techPixmap(unsigned long int techType);
+	BoAction* action(const QString& name);
 
-	QPixmap* upgradePixmapByName(const QString& name);
+	QPixmap* pixmap(const QString& name);
 
 	/**
 	 * @return The @ref BosonModel object for the specified unit type in

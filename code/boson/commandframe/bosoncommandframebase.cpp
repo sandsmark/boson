@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -92,6 +92,8 @@ public:
 		mUnitDisplayBox = 0;
 
 		mOwner = 0;
+
+		mSelection = 0;
 	}
 
 	QVBoxLayout* mTopLayout;
@@ -108,6 +110,8 @@ public:
 	Player* mOwner;
 
 	QTimer mUpdateTimer;
+
+	BoSelection* mSelection;
 };
 
 BosonCommandFrameBase::BosonCommandFrameBase(QWidget* parent) : QFrame(parent, "cmd frame")
@@ -197,6 +201,7 @@ void BosonCommandFrameBase::slotSelectionChanged(BoSelection* selection)
 {
  boDebug() << k_funcinfo << endl;
  Unit* leader = 0;
+ d->mSelection = selection;
  if (!selection || selection->count() == 0) {
 	clearSelection();
  } else {
@@ -209,11 +214,9 @@ void BosonCommandFrameBase::slotSelectionChanged(BoSelection* selection)
 		boError() << k_funcinfo << "group leader has NULL owner" << endl;
 		leader = 0;
 		clearSelection();
-	} else {
-		if (leader->isDestroyed()) {
-			boWarning() << k_funcinfo << "group leader is destroyed" << endl;
-			leader = 0;
-		}
+	} else if (leader->isDestroyed()) {
+		boWarning() << k_funcinfo << "group leader is destroyed" << endl;
+		leader = 0;
 	}
  }
 
@@ -299,27 +302,27 @@ Player* BosonCommandFrameBase::localPlayer() const
  return d->mOwner;
 }
 
-void BosonCommandFrameBase::slotPlaceUnit(ProductionType t, unsigned long int unitType)
+void BosonCommandFrameBase::slotPlaceUnit(BoSpecificAction action)
 {
  if (!localPlayer()) {
 	boError() << k_funcinfo << "NULL local player" << endl;
 	return;
  }
- if (t != ProduceUnit) {
-	boError() << k_funcinfo << "Only ProduceUnit supported" << endl;
-	return;
- }
- emit signalPlaceUnit(unitType, localPlayer());
- emit signalAction(ActionBuild); // placement preview
+ emit signalPlaceUnit(action.productionId(), localPlayer());
+ BoSpecificAction a;
+ a.setType(ActionPlacementPreview);
+ emit signalAction(a);
 }
 
 void BosonCommandFrameBase::slotPlaceGround(unsigned int textureCount, unsigned char* alpha)
 {
  emit signalPlaceGround(textureCount, alpha);
- emit signalAction(ActionBuild); // placement preview
+ BoSpecificAction a;
+ a.setType(ActionPlacementPreview);
+ emit signalAction(a);
 }
 
-void BosonCommandFrameBase::slotProduce(ProductionType type, unsigned long int id)
+void BosonCommandFrameBase::slotProduce(BoSpecificAction action)
 {
  boDebug() << k_funcinfo << endl;
  if (selectedUnit()) {
@@ -327,30 +330,26 @@ void BosonCommandFrameBase::slotProduce(ProductionType type, unsigned long int i
 		boError() << k_funcinfo << "local owner != selected unit owner" << endl;
 		return;
 	}
-	ProductionPlugin* pp = (ProductionPlugin*)selectedUnit()->plugin(UnitPlugin::Production);
-	if (!pp) {
-		boWarning() << k_funcinfo << "NULL production plugin?!" << endl;
-		return;
-	}
-	if (pp->completedProductionType() == type && pp->completedProductionId() == id) {
-		// the player did not start to place the completed production.
-		// enable the placement preview (aka lock the action)
-		emit signalAction(ActionBuild);
-		return; // do NOT start to produce more here.
-	}
- }
- emit signalProduce(type, id, (UnitBase*)selectedUnit(), localPlayer());
-}
-
-void BosonCommandFrameBase::slotStopProduction(ProductionType type, unsigned long int id)
-{
- if (selectedUnit()) {
-	if (localPlayer() != selectedUnit()->owner()) {
-		boError() << k_funcinfo << "local player != owner of selected unit" << endl;
-		return;
+	// FIXME: is there any way not to hardcode this
+	if (action.type() != ActionStopProduceUnit && action.type() != ActionStopProduceTech) {
+		ProductionPlugin* pp = (ProductionPlugin*)selectedUnit()->plugin(UnitPlugin::Production);
+		if (!pp) {
+			boWarning() << k_funcinfo << "NULL production plugin?!" << endl;
+			return;
+		}
+		if (pp->completedProductionType() == action.productionType() &&
+				pp->completedProductionId() == action.productionId()) {
+			// the player did not start to place the completed production.
+			// enable the placement preview (aka lock the action)
+			action.setType(ActionPlacementPreview);
+			emit signalAction(action);
+			return; // do NOT start to produce more here.
+		}
 	}
  }
- emit signalStopProduction(type, id, (UnitBase*)selectedUnit(), localPlayer());
+ boDebug() << k_funcinfo << "Emitting signalAction(action)  (for producing; type: " << action.type() << ")" << endl;
+ action.setUnit(selectedUnit());
+ emit signalAction(action);
 }
 
 void BosonCommandFrameBase::slotUpdateProduction(Unit* f)
@@ -359,7 +358,7 @@ void BosonCommandFrameBase::slotUpdateProduction(Unit* f)
 	boError() << k_funcinfo << "NULL unit" << endl;
 	return;
  }
- if (selectedUnit() == f && selectionWidget()->orderType() == OrderProduce) {
+ if (selectedUnit() == f && selectionWidget()->isProduceAction()) {
 	boDebug() << k_funcinfo << endl;
 	setProduction(f);
  }
@@ -367,7 +366,7 @@ void BosonCommandFrameBase::slotUpdateProduction(Unit* f)
 
 void BosonCommandFrameBase::slotUpdateProductionOptions()
 {
- if (selectedUnit() && selectionWidget()->orderType() == OrderProduce) {
+ if (selectedUnit() && selectionWidget()->isProduceAction()) {
 	boDebug() << k_funcinfo << endl;
 	setProduction(selectedUnit());
  }
@@ -449,5 +448,10 @@ void BosonCommandFrameBase::addUnitView()
  d->mUnitView = new BosonUnitView(this);
  d->mUnitViewLayout->addWidget(d->mUnitView, 0, AlignHCenter);
  d->mUnitView->setBackgroundOrigin(WindowOrigin);
+}
+
+BoSelection* BosonCommandFrameBase::selection() const
+{
+ return d->mSelection;
 }
 

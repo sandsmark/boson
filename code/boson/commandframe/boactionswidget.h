@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,8 +21,11 @@
 
 #include <qwidget.h>
 
+#include "../boaction.h"
+
 class Unit;
 class BosonOrderButton;
+
 
 // AB: we have a lot of duplicated code from BosonOrderWidget here. I don't want
 // to merge them using a base class because the editor will porbably use a
@@ -53,7 +56,7 @@ protected:
 	void resetLayout();
 
 signals:
-	void signalAction(int actionType);
+	void signalAction(BoSpecificAction action);
 
 private:
 	class BoActionsWidgetPrivate;

@@ -27,6 +27,7 @@
 #include "bosonconfig.h"
 #include "bosonweapon.h"
 #include "bosoncanvas.h"
+#include "boaction.h"
 
 #include <ksimpleconfig.h>
 #include <klocale.h>
@@ -49,9 +50,11 @@ public:
   QMap<QString, QString> mEntryList;
 };
 
-UpgradeProperties::UpgradeProperties()
+UpgradeProperties::UpgradeProperties(SpeciesTheme* theme)
 {
   d = new UpgradePropertiesPrivate;
+
+  mTheme = theme;
 
   mResearched = false;
   mId = 0;
@@ -60,7 +63,7 @@ UpgradeProperties::UpgradeProperties()
   mOilCost = 0;
   mProducer = 0;
   mProductionTime = 0;
-  mPixmapName = "";
+  mProduceAction = 0;
 }
 
 UpgradeProperties::~UpgradeProperties()
@@ -115,7 +118,7 @@ void UpgradeProperties::load(KSimpleConfig* cfg, const QString& group)
   mOilCost = cfg->readUnsignedLongNumEntry("OilCost", 0);
   mProducer = cfg->readUnsignedNumEntry("Producer", 0);
   mProductionTime = cfg->readUnsignedNumEntry("ProductionTime", 100);
-  mPixmapName = cfg->readEntry("Pixmap", "none.png");
+  mProduceAction = mTheme->action(cfg->readEntry("ProduceAction", ""));
   d->mRequireUnits = BosonConfig::readUnsignedLongNumList(cfg, "RequireUnits");
   d->mRequireTechnologies = BosonConfig::readUnsignedLongNumList(cfg, "RequireTechnologies");
   d->mApplyToTypes = BosonConfig::readUnsignedLongNumList(cfg, "ApplyToTypes");

@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@
 
 #include <qframe.h>
 #include "../global.h"
+#include "../boaction.h"
 
 class Unit;
 class UnitBase;
@@ -93,6 +94,11 @@ public:
 	 **/
 	Unit* selectedUnit() const { return mSelectedUnit; }
 
+	/**
+	 * @return Current selection
+	 **/
+	BoSelection* selection() const;
+
 public slots:
 	/**
 	 * Derived classes should apply this value also to the unit actions
@@ -106,6 +112,11 @@ public slots:
 	 **/
 	void slotUpdateProduction(Unit* factory);
 
+	/**
+	 * One of the most important methods in this class
+	 * This is called whenever selection changes, i.e. when unit(s) is selected
+	 * or unselected.
+	 **/
 	void slotSelectionChanged(BoSelection*);
 
 	void slotUpdateProductionOptions();
@@ -168,16 +179,6 @@ protected:
 	void addUnitView();
 
 signals:
-	/**
-	 * Emitted when a unit should be produced.
-	 * @param factory The factory producing the unit. Usually equal to the
-	 * selected unit. Is NULL in editor mode
-	 * @param owner The local player. See @ref setLocalPlayer. Note that
-	 * this is (in game mode) the same as factory->owner()
-	 **/
-	void signalProduce(ProductionType type, unsigned long int id, UnitBase* factory, KPlayer* owner);
-	void signalStopProduction(ProductionType type, unsigned long int id, UnitBase* factory, KPlayer* owner);
-
 	void signalPlaceUnit(unsigned long int unitType, Player* owner);
 
 	/**
@@ -192,7 +193,7 @@ signals:
 	 * the placement preview, when the player clicks on a constructed
 	 * facility and wants it to be placed on the map.
 	 */
-	void signalAction(int actionType);
+	void signalAction(BoSpecificAction action);
 
 	/**
 	 * This unit should become the only selected unit. See @ref
@@ -204,17 +205,12 @@ protected slots:
 	/**
 	 * Game mode only. Emit @ref signalProduce.
 	 **/
-	void slotProduce(ProductionType type, unsigned long int id);
-
-	/**
-	 * Game mode only. Emit @ref signalStopProduction.
-	 **/
-	void slotStopProduction(ProductionType type, unsigned long int id);
+	void slotProduce(BoSpecificAction action);
 
 	/**
 	 * Editor mode only. Emit @ref signalPlaceUnit.
 	 **/
-	void slotPlaceUnit(ProductionType, unsigned long int unitType);
+	void slotPlaceUnit(BoSpecificAction action);
 
 	/**
 	 * Editor mode only. Emit @ref signalPlaceGround.

@@ -35,6 +35,7 @@
 #include "bofile.h"
 #include "bodebug.h"
 #include "bosonpropertyxml.h"
+#include "bosonweapon.h"
 #include "startupwidgets/bosonloadingwidget.h"
 
 #include <klocale.h>
@@ -869,6 +870,41 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 				unit->setWork(Unit::WorkFollow);
 			}
 		}
+		break;
+	}
+	case BosonMessage::MoveLayMine:
+	{
+		boDebug() << k_funcinfo << "MoveLayMine action" << endl;
+		Q_UINT32 unitCount;
+		Q_UINT32 unitId, weaponId;
+
+		stream >> unitCount;
+
+		for (unsigned int i = 0; i < unitCount; i++) {
+			stream >> unitId;
+			stream >> weaponId;
+			boDebug() << k_funcinfo << "unit: " << unitId << "; weapon: " << weaponId << endl;
+
+			Unit* unit = findUnit(unitId, 0);
+			if (!unit) {
+				boWarning() << "unit " << unitId << " not found" << endl;
+				continue;
+			}
+			if (unit->isDestroyed()) {
+				boWarning() << "cannot do anything with destroyed units" << endl;
+				continue;
+			}
+			BosonWeapon* weapon = unit->weapon(weaponId);
+			if (!weapon) {
+				boError() << "weapon " << weaponId << " not found for unit " << unitId << endl;
+				continue;
+			}
+			boDebug() << k_funcinfo << "Calling layMine()" << endl;
+			weapon->layMine();
+			// TODO: move unit away from mine so mine can activate
+		}
+		boDebug() << k_funcinfo << "done" << endl;
+
 		break;
 	}
 	case BosonMessage::MovePlaceUnit:

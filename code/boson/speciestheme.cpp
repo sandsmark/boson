@@ -127,16 +127,8 @@ bool SpeciesTheme::loadTheme(const QString& speciesDir, const QColor& teamColor)
 
  mSound = boMusic->addSounds(themePath());
 
- // the initial values for the units - config files :-)
- //readUnitConfigs();
-
- // action pixmaps - it doesn't hurt
- if (!loadActionGraphics()) {
-	boError() << "Couldn't load action pixmaps" << endl;
- }
-
  // don't preload units here as the species can still be changed in new game
- // dialog 
+ // dialog
  return true;
 }
 
@@ -152,6 +144,12 @@ bool SpeciesTheme::loadUnit(unsigned long int type)
  // once we load the overview pixmaps the teamcolor can't be changed anymore
  finalizeTeamColor();
  bool ret = mData->loadUnitOverview(prop, teamColor());
+
+ // Unit's produce action is tricky because it needs overview pixmap which is
+ //  not loaded when UnitProperties are being loaded. So we load it (and other
+ //  actions) here
+ nonConstUnitProperties(type)->loadActions();
+
  loadUnitModel(prop);
 
  if (!ret) {
@@ -184,19 +182,19 @@ bool SpeciesTheme::loadUnit(unsigned long int type)
  return true;
 }
 
-bool SpeciesTheme::loadActionGraphics()
+void SpeciesTheme::loadActions()
 {
- return mData->loadActionPixmaps();
+ mData->loadActions();
 }
 
-QPixmap* SpeciesTheme::techPixmap(unsigned long int techType)
+QPixmap* SpeciesTheme::pixmap(const QString& name)
 {
- return upgradePixmapByName(technology(techType)->pixmapName());
+ return mData->pixmap(name);
 }
 
-QPixmap* SpeciesTheme::upgradePixmapByName(const QString& name)
+BoAction* SpeciesTheme::action(const QString& name)
 {
- return mData->upgradePixmapByName(name);
+ return mData->action(name);
 }
 
 bool SpeciesTheme::loadTechnologies()
@@ -216,7 +214,7 @@ bool SpeciesTheme::loadTechnologies()
  QStringList::Iterator it;
  for(it = techs.begin(); it != techs.end(); ++it) {
 	boDebug() << k_funcinfo << "Loading upgrade from group " << *it << endl;
-	UpgradeProperties* tech = new UpgradeProperties;
+	UpgradeProperties* tech = new UpgradeProperties(this);
 	tech->load(&cfg, *it);
 	if (!d->mTechnologies.find(tech->id())) {
 		d->mTechnologies.insert(tech->id(), tech);
@@ -273,12 +271,6 @@ QPixmap* SpeciesTheme::smallOverview(unsigned long int unitType)
  return p;
 }
 
-QPixmap* SpeciesTheme::actionPixmap(UnitAction action)
-{
- // check for NULL?
- return mData->actionPixmap(action);
-}
-
 QString SpeciesTheme::unitActionName(UnitAction action)
 {
  switch (action) {
@@ -290,12 +282,14 @@ QString SpeciesTheme::unitActionName(UnitAction action)
 		return i18n("Stop");
 	case ActionFollow:
 		return i18n("Follow");
-	case ActionMine:
-		return i18n("Mine");
+	case ActionHarvest:
+		return i18n("Harvest");
 	case ActionRepair:
 		return i18n("Repair");
-	case ActionBuild:
-		return i18n("Build");
+	case ActionProduceUnit:
+		return i18n("ProduceUnit");
+	case ActionProduceTech:
+		return i18n("ProduceTech");
 	case ActionChangeHeight:
 		return i18n("Change Height");
 	default:

@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -42,6 +42,7 @@ class Boson;
 class BosonMiniMap;
 class BosonPlayField;
 class OptionsDialog;
+class BosonLocalPlayerInput;
 
 /**
  * This is the actual main widget of boson for the game
@@ -93,6 +94,7 @@ public:
 	inline BosonMiniMap* minimap() const { return mMiniMap; }
 	inline BoDisplayManager* displayManager() const { return mDisplayManager; }
 	Player* localPlayer() const { return mLocalPlayer; }
+	BosonLocalPlayerInput* localPlayerInput() const { return mLocalPlayerInput; }
 
 	/**
 	 * @param playFieldId See @ref Top::slotStartGame
@@ -299,6 +301,7 @@ private:
 	TopWidget* mTop;
 	BosonMiniMap* mMiniMap;
 	BoDisplayManager* mDisplayManager;
+	BosonLocalPlayerInput* mLocalPlayerInput;
 };
 
 #endif

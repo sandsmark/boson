@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2001-2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -61,7 +61,7 @@ protected:
 		//TODO: do not re-display if already displayed and text didn't
 		//change
 		QString text;
-		QWidget* w = (commandWidget()->orderType() == OrderUnitSelected) ? commandWidget()->childAt(pos) : 0;
+		QWidget* w = (commandWidget()->type() == BosonOrderButton::ShowUnit) ? commandWidget()->childAt(pos) : 0;
 		if (w == (QWidget*)commandWidget()->mHealth && commandWidget()->unit()) {
 			Unit* u = commandWidget()->unit();
 			text = i18n("%1\nId: %2\nHealth: %3\n").arg(u->unitProperties()->name()).arg(u->id()).arg(u->health());
@@ -83,37 +83,36 @@ protected:
 	QString mainTip() const
 	{
 		QString text;
-		switch (commandWidget()->orderType()) {
-			case OrderNothing:
+		switch (commandWidget()->type()) {
+			case BosonOrderButton::ShowNothing:
 				// do not display anything
 				return QString::null;
-			case OrderCell:
+			case BosonOrderButton::ShowCell:
 				//TODO: place something useful here
 				text = i18n("Texturenumber: %1").arg(commandWidget()->texture());
 				break;
-			case OrderProduce:
-			{
-				if(commandWidget()->productionType() == ProduceUnit) {
-					const UnitProperties* prop = commandWidget()->productionOwner()->unitProperties(commandWidget()->productionId());
-					text = i18n("%1\nMinerals: %2\nOil: %3").arg(prop->name()).arg(prop->mineralCost()).arg(prop->oilCost());
-				} else if(commandWidget()->productionType() == ProduceTech) {
-					UpgradeProperties* prop = commandWidget()->productionOwner()->speciesTheme()->technology(commandWidget()->productionId());
-					text = i18n("%1\nMinerals: %2\nOil: %3").arg(prop->upgradeName()).arg(prop->mineralCost()).arg(prop->oilCost());
-				} else {
-					boWarning() << k_funcinfo << "Invalid productiontype when producing!" << endl;
-					return QString::null;
-				}
-				break;
-			}
-			case OrderUnitSelected:
+			case BosonOrderButton::ShowUnit:
 				if (!commandWidget()->unit()) {
-					boWarning() << k_funcinfo << "OrderUnitSelected, but NULL unit" << endl;
+					boWarning() << k_funcinfo << "type is ShowUnit, but NULL unit" << endl;
 					return QString::null;
 				}
 				text = i18n("%1\nId: %2").arg(commandWidget()->unit()->unitProperties()->name()).arg(commandWidget()->unit()->id());
 				break;
-			case OrderAction:
-				text = SpeciesTheme::unitActionName((UnitAction)commandWidget()->action());
+			case BosonOrderButton::ShowAction:
+				if (commandWidget()->action().isProduceAction()) {
+					if(commandWidget()->action().productionType() == ProduceUnit) {
+						const UnitProperties* prop = commandWidget()->productionOwner()->unitProperties(commandWidget()->productionId());
+						text = i18n("%1\nMinerals: %2\nOil: %3").arg(prop->name()).arg(prop->mineralCost()).arg(prop->oilCost());
+					} else if(commandWidget()->action().productionType() == ProduceTech) {
+						const UpgradeProperties* prop = commandWidget()->productionOwner()->speciesTheme()->technology(commandWidget()->productionId());
+						text = i18n("%1\nMinerals: %2\nOil: %3").arg(prop->upgradeName()).arg(prop->mineralCost()).arg(prop->oilCost());
+					} else {
+						boWarning() << k_funcinfo << "Invalid productiontype when producing!" << endl;
+						return QString::null;
+					}
+				} else {
+					text = commandWidget()->action().text();
+				}
 				break;
 		}
 		return text;
@@ -245,12 +244,8 @@ BosonOrderButton::BosonOrderButton(QWidget* parent) : QWidget(parent)
 {
  d = new BosonOrderButtonPrivate;
  mUnit = 0;
- mProductionOwner = 0;
- mProductionId = 0;
- mProductionType = ProduceNothing;
  mTextureNumber = 0;
- mAction = -1;
- mOrderType = OrderNothing;
+ mType = ShowNothing;
 
  QHBoxLayout* topLayout = new QHBoxLayout(this);
  topLayout->setAutoAdd(true);
@@ -292,7 +287,7 @@ void BosonOrderButton::setUnit(Unit* unit)
 	return;
  }
  mUnit = unit;
- mOrderType = OrderUnitSelected;
+ mType = ShowUnit;
  displayUnitPixmap(unit);
  connect(mUnit->owner(), SIGNAL(signalUnitChanged(Unit*)), this,
 		 SLOT(slotUnitChanged(Unit*)));
@@ -305,44 +300,17 @@ void BosonOrderButton::setUnit(Unit* unit)
  setGrayOut(false);
 }
 
-void BosonOrderButton::setProduction(ProductionType type, unsigned long int id, Player* owner)
+void BosonOrderButton::setAction(BoSpecificAction action)
 {
- if (!owner) {
-	boError() << k_funcinfo << "NULL owner" << endl;
+ boDebug() << k_funcinfo << "Setting action" << endl;
+ mType = ShowAction;
+ mAction = action;
+
+ if (!action.pixmap()) {
+	boError() << k_funcinfo << "NULL pixmap for action " << action.id() << endl;
 	return;
  }
- if (mUnit) {
-	unset();
- }
- mUnit = 0;
- mProductionType = type;
- mProductionId = id;
- mProductionOwner = owner;
- mOrderType = OrderProduce;
-
- if(type == ProduceUnit) {
-	displayUnitPixmap(id, owner);
- } else {
-	displayTechPixmap(id, owner);
- }
-
- mHealth->hide();
-
- show();
- // note: setGrayOut() and setProductionCount() are handled in 
- // BosonCommandFrame for this!
-}
-
-void BosonOrderButton::setAction(UnitAction action, Player* owner)
-{
- mOrderType = OrderAction;
- mAction = (int)action;
-
- if (!owner->speciesTheme()->actionPixmap(action)) {
-	boError() << k_funcinfo << "NULL pixmap for action " << action << endl;
-	return;
- }
- setPixmap(*owner->speciesTheme()->actionPixmap(action));
+ setPixmap(*action.pixmap());
 
  mHealth->hide();
 
@@ -357,10 +325,8 @@ void BosonOrderButton::setGround(unsigned int texture, BosonGroundTheme* theme)
  mUnit = 0;
  BO_CHECK_NULL_RET(theme);
 
- // we don't store pointer to theme, so that we don't have to worry about
- // deletion of it.
  mTextureNumber = texture;
- mOrderType = OrderCell;
+ mType = ShowCell;
  setPixmap(theme->pixmap(mTextureNumber));
 
  mHealth->hide();
@@ -370,7 +336,7 @@ void BosonOrderButton::setGround(unsigned int texture, BosonGroundTheme* theme)
  setGrayOut(false);
 }
 
-void BosonOrderButton::displayUnitPixmap(Unit* unit) 
+void BosonOrderButton::displayUnitPixmap(Unit* unit)
 {
  if (!unit) {
 	boError() << k_funcinfo << "NULL unit" << endl;
@@ -394,20 +360,6 @@ void BosonOrderButton::displayUnitPixmap(unsigned long int unitType, Player* own
  setPixmap(*small);
 }
 
-void BosonOrderButton::displayTechPixmap(unsigned long int id, Player* owner)
-{
- if (!owner) {
-	boError() << k_funcinfo << "NULL owner" << endl;
-	return;
- }
- QPixmap* small = owner->speciesTheme()->techPixmap(id);
- if (!small) {
-	boError() << k_funcinfo << "Cannot find pixmap for  " << id << endl;
-	return;
- }
- setPixmap(*small);
-}
-
 void BosonOrderButton::setPixmap(const QPixmap& pixmap)
 {
  mPixmap->setPixmap(pixmap);
@@ -416,17 +368,14 @@ void BosonOrderButton::setPixmap(const QPixmap& pixmap)
 
 void BosonOrderButton::slotClicked()
 {
- switch (orderType()) {
-	case OrderNothing:
-		boWarning() << "Invalid order Type \"Nothing\"" << endl;
+ switch (type()) {
+	case ShowNothing:
+		boWarning() << "Invalid type \"ShowNothing\"" << endl;
 		break;
-	case OrderCell:
+	case ShowCell:
 		emit signalPlaceGround((unsigned int)texture());
 		break;
-	case OrderProduce:
-		emit signalProduce(productionType(), productionId());
-		break;
-	case OrderUnitSelected:
+	case ShowUnit:
 		if (!unit()) {
 			boError() << k_lineinfo << "NULL unit" << endl;
 		} else {
@@ -434,23 +383,28 @@ void BosonOrderButton::slotClicked()
 			emit signalSelectUnit(unit());
 		}
 		break;
-	case OrderAction:
+	case ShowAction:
 		emit signalAction(mAction);
 		break;
 	default:
-		boError() << "Unknown order Type " << orderType() << endl;
+		boError() << "Unknown type " << type() << endl;
 		break;
  }
 }
 
 void BosonOrderButton::slotRightClicked()
 {
- switch (orderType()) {
-	case OrderProduce:
-		emit signalStopProduction(productionType(), productionId());
-		break;
-	default:
-		break;
+ if (type() == ShowAction && mAction.isProduceAction()) {
+	BoSpecificAction a = mAction;
+	if (mAction.type() == ActionProduceUnit) {
+		a.setType(ActionStopProduceUnit);
+	} else if (mAction.type() == ActionProduceTech) {
+		a.setType(ActionStopProduceTech);
+	} else {
+		boError() << k_funcinfo << "Produce action, but invalid actionType: " << mAction.type() << endl;
+		return;
+	}
+	emit signalAction(a);
  }
 }
 
@@ -481,32 +435,28 @@ void BosonOrderButton::unset()
 	disconnect(mUnit->owner(), 0, this, 0);
  }
  mUnit = 0;
- mProductionId = 0;
- mProductionType = ProduceNothing;
  mTextureNumber = 0;
- mAction = -1;
- mOrderType = OrderNothing;
- mProductionOwner = 0;
+ mAction.reset();
+ mType = ShowNothing;
 }
 
 void BosonOrderButton::advanceProduction(double percentage)
 {
- if (!mProductionOwner) {
+ if (!mAction.ok()) {
+	boError() << k_funcinfo << "No action set" << endl;
+	return;
+ }
+ if (!mAction.unit()->owner()) {
 	boError() << k_funcinfo << "NULL owner" << endl;
 	return;
  }
- if (mProductionId <= 0) {
-	boError() << k_funcinfo << "production id: " << mProductionId << endl;
+ if (mAction.productionId() <= 0) {
+	boError() << k_funcinfo << "invalid production id: " << mAction.productionId() << endl;
 	return;
  }
- QPixmap* pix;
- if(mProductionType == ProduceUnit) {
-	pix = mProductionOwner->speciesTheme()->smallOverview(mProductionId);
- } else {
-	pix = mProductionOwner->speciesTheme()->techPixmap(mProductionId);
- }
+ QPixmap* pix = mAction.pixmap();
  if (!pix) {
-	boError() << k_funcinfo << "NULL pixmap for " << mProductionId << endl;
+	boError() << k_funcinfo << "NULL pixmap for action " << mAction.id() << endl;
 	return;
  }
  QPixmap small(*pix);
@@ -554,5 +504,20 @@ void BosonOrderButton::setGrayOut(bool g)
 void BosonOrderButton::setProductionCount(int count)
 {
  mPixmap->setProductionCount(count);
+}
+
+unsigned long int BosonOrderButton::productionId() const
+{
+ return (type() == ShowAction) ? mAction.productionId() : 0;
+}
+
+ProductionType BosonOrderButton::productionType() const
+{
+ return (type() == ShowAction) ? mAction.productionType() : ProduceNothing;
+}
+
+Player* BosonOrderButton::productionOwner() const
+{
+ return (type() == ShowAction) ? mAction.productionOwner() : 0;
 }
 

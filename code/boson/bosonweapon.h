@@ -32,7 +32,9 @@ class SpeciesTheme;
 class BosonParticleSystem;
 class BosonParticleSystemProperties;
 class Unit;
+class BoAction;
 class QString;
+template<class T> class QIntDict;
 template<class T1, class T2> class QMap;
 
 
@@ -55,11 +57,6 @@ class BosonWeaponProperties : public PluginProperties
     ~BosonWeaponProperties();
 
     /**
-     * @return The weapon range of this unit. It's a number of cells, so multiply
-     *  with BO_TILE_SIZE to use it on the canvas.
-    **/
-    inline unsigned long int range() const  { return mRange; };
-    /**
      * @return Whether this unit can shoot at aircrafts.
      **/
     inline bool canShootAtAirUnits() const  { return mCanShootAtAirUnits; };
@@ -67,6 +64,11 @@ class BosonWeaponProperties : public PluginProperties
      * @return Whether this unit can shoot at land units
      **/
     inline bool canShootAtLandUnits() const  { return mCanShootAtLandUnits; };
+    /**
+     * @return The weapon range of this unit. It's a number of cells, so multiply
+     *  with BO_TILE_SIZE to use it on the canvas.
+    **/
+    inline unsigned long int range() const  { return mRange; };
     /**
      * @return The number of advance calls until the weapon is reloaded
      **/
@@ -155,6 +157,8 @@ class BosonWeaponProperties : public PluginProperties
     virtual void loadPlugin(KSimpleConfig* config, bool full = true);
     virtual void savePlugin(KSimpleConfig* config);
     virtual int pluginType() const  { return Weapon; };
+
+    QIntDict<BoAction>* actions()  { return &mActions; };
     
   protected:
     void setWeaponName(QString str)  { mName = str; };
@@ -176,6 +180,7 @@ class BosonWeaponProperties : public PluginProperties
     void setSound(int event, QString filename);
 
     void reset();
+    void loadAction(UnitAction type, KSimpleConfig* cfg, const QString& key, bool useDefault = false);
 
     friend class BoUnitEditor;
     friend class UpgradeProperties;
@@ -205,6 +210,7 @@ class BosonWeaponProperties : public PluginProperties
     QValueList<unsigned long int> mHitParticleSystemIds;
     BoVector3 mOffset;
     QMap<int, QString> mSounds;
+    QIntDict<BoAction> mActions;
 };
 
 
@@ -262,8 +268,17 @@ class BosonWeapon : public UnitPlugin
     void shoot(Unit* u);
     void shoot(const BoVector3& target);
 
+    /**
+     * Lay mine at current location of unit
+     * If mine is laid, returns true. If weapon is not a minelayer, not reloaded
+     * or some other error occurs, returns false
+     **/
+    bool layMine();
+
   protected:
     inline void reload()  { if(mReloadCounter > 0) { mReloadCounter = mReloadCounter - 1; } }
+
+    void shoot(const BoVector3& pos, const BoVector3& target);
 
     void registerWeaponData(int weaponNumber, KGamePropertyBase* prop, int id, bool local = true);
 

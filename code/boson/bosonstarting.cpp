@@ -388,6 +388,8 @@ void BosonStarting::slotLoadPlayerData(Player* p)
  BO_CHECK_NULL_RET(p);
  boDebug() << k_funcinfo << p->id() << endl;
  // Order of calls below is very important!!! Don't change this unless you're sure you know what you're doing!!!
+ emit signalLoadingType(BosonLoadingWidget::LoadActions);
+ p->speciesTheme()->loadActions();
  emit signalLoadingType(BosonLoadingWidget::LoadObjects);
  p->speciesTheme()->loadObjects();
  emit signalLoadingType(BosonLoadingWidget::LoadParticleSystems);

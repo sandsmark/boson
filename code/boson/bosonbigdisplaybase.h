@@ -43,10 +43,10 @@ template<class T> class QPtrList;
 /**
  * @author Andreas Beckermann <b_mann@gmx.de
  **/
-class BoAction
+class BoMouseEvent
 {
 public:
-	BoAction()
+	BoMouseEvent()
 	{
 		mX = 0.0;
 		mY = 0.0;
@@ -56,7 +56,7 @@ public:
 		mAltButton = false;
 	}
 
-	~BoAction()
+	~BoMouseEvent()
 	{
 	}
 
@@ -311,21 +311,21 @@ protected:
 	 * moved.
 	 * @param orientation Guess what? Yes! Horizontal or Vertical wheel.
 	 * @param action Information about the event (position, modifiers, ...).
-	 * See @ref BoAction
+	 * See @ref BoMouseEvent
 	 * @param stream You won't need this here.
 	 * @param send You won't need this here.
 	 **/
-	void mouseEventWheel(float delta, Orientation orientation, const BoAction& action, QDataStream& stream, bool* send);
+	void mouseEventWheel(float delta, Orientation orientation, const BoMouseEvent& action, QDataStream& stream, bool* send);
 
 	/**
 	 * @param buttonState See @ref QMouseEvent::state. This tells you which
 	 * buttons are currently pressed.
 	 * @param action Information about the event (position, modifiers, ...).
-	 * See @ref BoAction
+	 * See @ref BoMouseEvent
 	 * @param stream You won't need this here.
 	 * @param send You won't need this here.
 	 **/
-	void mouseEventMove(int buttonState, const BoAction& action, QDataStream& stream, bool* send);
+	void mouseEventMove(int buttonState, const BoMouseEvent& action, QDataStream& stream, bool* send);
 
 	/**
 	 * This is the main event for actual actions. When a player clicks RMB
@@ -337,7 +337,7 @@ protected:
 	 * allowed actions here.
 	 * @param button Which button produced this event.
 	 * @param action Information about the event (position, modifiers, ...).
-	 * See @ref BoAction
+	 * See @ref BoMouseEvent
 	 * @param stream Stream your action here, if it is network (i.e.
 	 * game-)relevant. Actions like zooming, rotating (i.e. chaging the
 	 * camera) or selecting units can be done immediately, but all that
@@ -345,12 +345,12 @@ protected:
 	 * message.
 	 * @param send Set this to TRUE in order to actually send the @p stream
 	 **/
-	void mouseEventRelease(ButtonState button, const BoAction& action, QDataStream& stream, bool* send);
+	void mouseEventRelease(ButtonState button, const BoMouseEvent& action, QDataStream& stream, bool* send);
 
 	/**
 	 * @param button Which button produced this event.
 	 * @param action Information about the event (position, modifiers, ...).
-	 * See @ref BoAction
+	 * See @ref BoMouseEvent
 	 * @param stream Stream your action here, if it is network (i.e.
 	 * game-)relevant. Actions like zooming, rotating (i.e. chaging the
 	 * camera) or selecting units can be done immediately, but all that
@@ -358,7 +358,7 @@ protected:
 	 * message.
 	 * @param send Set this to TRUE in order to actually send the @p stream
 	 **/
-	void mouseEventReleaseDouble(ButtonState button, const BoAction& action, QDataStream& stream, bool* send);
+	void mouseEventReleaseDouble(ButtonState button, const BoMouseEvent& action, QDataStream& stream, bool* send);
 
 protected:
 	virtual void initializeGL();

@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -27,12 +27,14 @@ class BosonBigDisplayBase;
 class BoSelection;
 class BosonCanvas;
 class BosonCollisions;
-class BoAction;
+class BoMouseEvent;
 class Player;
 class Unit;
 class UnitProperties;
 class BoItemList;
 class BoVector3;
+class BoSpecificAction;
+class BosonLocalPlayerInput;
 
 template<class T> class QPtrList;
 
@@ -48,10 +50,13 @@ public:
 	BosonCanvas* canvas() const;
 	BosonCollisions* collisions() const;
 	Player* localPlayer() const;
+	BosonLocalPlayerInput* localPlayerInput() const { return mLocalPlayerInput; }
 	const QPoint& cursorCanvasPos() const;
 	const BoVector3& cursorCanvasVector() const;
 
 	void setActionType(UnitAction type) { mActionType = type; }
+
+	void setLocalPlayerInput(BosonLocalPlayerInput* input);
 
 	/**
 	 * @return The currently active @ref UnitAction if @ref actionLocked is
@@ -78,16 +83,12 @@ public:
 	 * Called when the user right-clicks on the big display.
 	 *
 	 * Should e.g. move a unit
-	 * @param action Contains information about the mouse event (position,
+	 * @param event Contains information about the mouse event (position,
 	 * additional buttons, ...)
-	 * @param stream The move should be placed here. A move should
-	 * <em>not</em> be done in this method but rather sent to @ref KGame
-	 * which performs the move on every client
-	 * @param send Set to true if you actually want to send the stream
 	 **/
-	virtual void actionClicked(const BoAction& action, QDataStream& stream, bool* send) = 0;
+	virtual void actionClicked(const BoMouseEvent& event) = 0;
 
-	virtual void unitAction(int actionType) = 0;
+	virtual void action(BoSpecificAction action) = 0;
 
 	/**
 	 * Called when the placement preview should get updated. Note that you
@@ -181,6 +182,7 @@ protected:
 
 private:
 	BosonBigDisplayBase* mBigDisplay;
+	BosonLocalPlayerInput* mLocalPlayerInput;
 	bool mActionLocked;
 	UnitAction mActionType;
 	CursorType mCursorType;
