@@ -24,7 +24,7 @@
 
 #define LOG_MIN LOG_INFO
 
-static char *logLevelName[] = {
+static const char *logLevelName[] = {
 	"FATAL    ", 
 	"ERROR    ", 
 	"WARNING  ", 
@@ -34,7 +34,7 @@ static char *logLevelName[] = {
 	"COMM     ", 
 	"LAYER2   ", 
 	"LAYER1   ",
-	"LAYER0   ",
+	"LAYER0   "
 	};
 
 int logf(boLogLevel level, const char *fmt, ...)
