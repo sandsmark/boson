@@ -100,7 +100,7 @@ void UnitProperties::loadUnitType(const QString& fileName)
  }
  mName = conf.readEntry("Name", i18n("Unknown"));
  mHealth = conf.readUnsignedLongNumEntry("Health", 100);
- mMineralCost= conf.readUnsignedLongNumEntry("MineralCost", 0); 
+ mMineralCost= conf.readUnsignedLongNumEntry("MineralCost", 100); 
  mOilCost = conf.readUnsignedLongNumEntry("OilCost", 0); 
  mDamage = conf.readLongNumEntry("Damage", 0); 
  mRange = conf.readUnsignedLongNumEntry("Range", 0); 
