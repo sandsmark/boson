@@ -75,6 +75,7 @@ Unit::Unit(const UnitProperties* prop, Player* owner, QCanvas* canvas)
  d->mDirection.setLocal(0); // not yet used
  d->mReloadState.setLocal(0);
  setAnimated(true);
+ searchpath = false;
 }
 
 Unit::~Unit()
@@ -292,7 +293,10 @@ void Unit::moveTo(int x, int y)
  d->mMoveDestX = x;
  d->mMoveDestY = y;
 
- newPath();
+ // Do not find new path here!!! Instead, set work to WorkMove and searchpath
+ //  to true and then find path later in advanceMove()
+ //newPath();
+ searchpath = true;
 }
 
 bool Unit::newPath()
@@ -608,6 +612,13 @@ void MobileUnit::advanceMove()
 	return;
  }
 
+ if(searchpath)
+ {
+	if(! newPath())
+		stopMoving();
+	searchpath = false;
+ }
+
  if(waypointCount() == 0) {
 	// waypoints are PolicyClean - so they might need some advanceMove()
 	// calls until they are actually here
@@ -619,14 +630,19 @@ void MobileUnit::advanceMove()
 
  QPoint wp = currentWaypoint(); // where we go to
  // Check if we can actually go to waypoint (maybe it was fogged)
- if((boCanvas()->cellOccupied(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE, this) &&
+ if((boCanvas()->cellOccupied(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE, this, true) &&
 		work() != WorkAttack) || 
 		!boCanvas()->cell(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE)->canGo(unitProperties())) {
-	kdDebug() << "cannot go there :-( (1)" << endl;
+	kdDebug() << "cannot go to waypoint, finding new path" << endl;
+	kdDebug() << "waypoint is at (" << wp.x() << ", " << wp.y() << "), my pos: (" << x() << ", " << y() << ")" << endl;
 	setXVelocity(0);
 	setYVelocity(0);
-//	d->mRecalcPath = 0;
-	return; // path recalculated in advanceMoveCheck()
+	// We have to clear waypoints first to make sure that they aren't used next
+	//  advance() call (when new waypoints haven't arrived yet)
+	clearWaypoints();
+	if(! newPath())
+		stopMoving();
+	return;
  }
 
  QRect position = boundingRect(); // where we currently are.
@@ -651,14 +667,18 @@ void MobileUnit::advanceMove()
 	
 	wp = currentWaypoint();
 	// Check if we can actually go to waypoint
-	if((boCanvas()->cellOccupied(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE, this) &&
+	if((boCanvas()->cellOccupied(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE, this, true) &&
 			work() != WorkAttack) ||
 			!boCanvas()->cell(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE)->canGo(unitProperties())) {
 		setXVelocity(0);
 		setYVelocity(0);
-		kdDebug() << "cannot go there :-(" << endl;
-//		d->mRecalcPath = 0;
-		return; // path recalculated in advanceMoveCheck()
+		kdDebug() << "cannot go to new waypoint, finding new path" << endl;
+		// We have to clear waypoints first to make sure that they aren't used next
+		//  advance() call (when new waypoints haven't arrived yet)
+		clearWaypoints();
+		if(! newPath())
+			stopMoving();
+		return;
 	}
 	
  }
@@ -690,13 +710,7 @@ void MobileUnit::advanceMove()
  // set the new direction according to new speed
  turnTo();
 
- // Check for units on way
- QValueList<Unit*> collisionList = unitCollisions(true); // also tests using collidesWith()
- for (int unsigned i = 0; i < collisionList.count(); i++) {
-	kdWarning() << id() << " colliding with unit" << endl;
-	/// TODO: wait some time before searching new path
-//	mPathrecalc = 0;
- }
+// Dont't test for unit collisions here, because advanceMoveCheck() will be called anyway
 /* QCanvasItemList collisionList = collisions(exact);
  if(! collisionList.isEmpty())
  {
@@ -770,7 +784,8 @@ void MobileUnit::advanceMoveCheck()
 		// all changed of variables with PolicyClean are ok, as they are sent
 		// over network and do not take immediate effect.
 
-		newPath();
+		if(! newPath())
+			stopMoving();
 		d->mMovingFailed = 0;
 	}
 	return;

@@ -46,7 +46,8 @@ enum CursorMode {
 };
 enum GroupMoveMode {
 	GroupMoveOld = 0,
-	GroupMoveFollow = 1
+	GroupMoveFollow = 1,
+	GroupMoveNew = 2
 };
 
 enum Direction {
