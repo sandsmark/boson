@@ -119,11 +119,11 @@ protected slots:
 	void slotProduceUnit(int unitType);
 	void slotStopProduction(int unitType);
 
-	void slotProductionAdvanced(Unit* factory, double percentage);
-
 	void slotUpdate();
 
 protected:
+	void productionAdvanced(Unit* factory, double percentage);
+
 	/**
 	 * Set the orderbuttons to containt a list of producable units.
 	 * @param produceList A list containing UnitTypeIDs.
