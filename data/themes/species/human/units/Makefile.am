@@ -29,12 +29,12 @@ uninstall-local:
 	rm -rf $(unitsdir)
 
 install-data-local:
+	@if test -d $(DESTDIR)$(unitsdir); then \
+		echo "removing old unit directory" ;\
+		rm -rf $(DESTDIR)$(unitsdir);\
+	fi
 	@$(mkinstalldirs) $(DESTDIR)$(unitsdir)
 	@for i in $(MOBILE_UNITS) $(FACILITIES); do \
-		if test -d $(DESTDIR)$(unitsdir)/$$i; then \
-			echo "refreshing and removing $$i" ;\
-			rm -rf $(DESTDIR)$(unitsdir)/$$i;\
-		fi ;\
 		echo "installing $$i" ;\
 		mkdir -p $(DESTDIR)$(unitsdir)/$$i ;\
 		files=`cd $(srcdir)/$$i && find . -type f | grep -v CVS` ;\
