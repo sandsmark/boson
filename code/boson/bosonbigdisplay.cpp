@@ -651,20 +651,12 @@ void BosonBigDisplay::slotUpdateOil(int oil)
 
 void BosonBigDisplay::slotContentsMoving(int x, int y)
 {
- viewport()->setUpdatesEnabled(false);
  d->mMinerals->move(x + visibleWidth() - 5 - d->mMinerals->boundingRect().width(), y + 5);
  d->mOil->move     (x + visibleWidth() - 5 - d->mOil->boundingRect().width(), y + 5 + d->mMinerals->boundingRect().height());
- QTimer::singleShot(0, this, SLOT(test()));
+ canvas()->update();
 
  d->mChat->move(x + 10, y + visibleHeight() - 10); // FIXME: hardcoded!
 }
-
-void BosonBigDisplay::test()
-{
- viewport()->setUpdatesEnabled(true);
- viewport()->update();
-}
-
 
 bool BosonBigDisplay::isModified() const
 {

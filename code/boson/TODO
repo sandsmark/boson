@@ -18,7 +18,6 @@ Game TODOs
 - display how many (and which) units are still in queue for production
 - connect to Boson::signalNotEnough[Minerals|Oild]() and give some visual
   feedback
-- fix this evil BosonBigDisplay::test() hack
 
 
 Editor (map, unit, scenario) TODOs
