@@ -152,8 +152,6 @@ void BosonBigDisplay::init()
  d->mChat->setCanvas(canvas());
  d->mChat->setZ(Z_CANVASTEXT);
 
-// slotChangeCursor(boConfig->readCursorMode());
-
  disconnect(this, SIGNAL(contentsMoving(int,int)), this, SLOT(cMoving(int,int)));
 }
 
@@ -740,7 +738,7 @@ void BosonBigDisplay::slotContentsMoving(int newx, int newy)
 
 	
 // canvas()->setChanged(QRect(contentsX() + x , contentsY() + 5, 40, 40));
- canvas()->setAllChanged();
+// canvas()->setAllChanged();
 //TODO: use a QLabel here (just like d->mMinerals and d->mOil)
  d->mChat->move(newx + 10, newy + visibleHeight() - 10); // FIXME: hardcoded!
 }
