@@ -51,6 +51,7 @@ public:
 		LoadModelTextures,
 		LoadModelDisplayLists,
 		LoadModelDummy,
+		AddUnitsXML,
 
 		ProfilingEnd // must remain the last entry!
 	};
