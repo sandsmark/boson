@@ -265,3 +265,48 @@ XF86VidModeQueryExtension(dpy, &ev, &er);
 ])
 AC_BOSON_CHECK_VIDMODE
 
+AC_DEFUN(AC_BOSON_CHECK_XRANDR,
+[
+  AC_LANG_SAVE
+  AC_LANG_C
+  bo_xrandr_extension="no"
+  bo_save_ldflags="$LDFLAGS"
+  bo_save_cflags="$CFLAGS"
+  bo_save_libs="$LIBS"
+  dnl AB: maybe we need -lXRender, too
+  bo_lib_xrandr="-lXext -lXrandr"
+  AC_MSG_CHECKING(for XFree86 Xrandr extension)
+  LDFLAGS="$LDFLAGS $X_LDFLAGS"
+  CFLAGS="$CFLAGS $X_INCLUDES"
+  LIBS="$LIBS -lX11 $bo_lib_xrandr"
+
+  AC_TRY_LINK(
+	[
+#include <X11/Xlib.h>
+#include <X11/extensions/Xrandr.h>
+	],[
+Display* dpy = 0;
+int ev, er;
+XRRQueryExtension(dpy, &ev, &er);
+	],
+	[bo_xrandr_extension=yes],
+	[bo_xrandr_extension=no]
+  )
+
+  if test "x$bo_xrandr_extension" = "xyes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_XFREE86_XRANDR, 1, [ Defines if you have the XFree86 Xrandr extension ])
+    LIB_XRANDR="$bo_lib_xrandr"
+  else
+    AC_MSG_RESULT([no])
+    LIB_XRANDR=""
+  fi
+
+  AC_LANG_RESTORE
+  LDFLAGS="$bo_save_ldflags"
+  CFLAGS="$bo_save_cflags"
+  LIBS="$bo_save_libs"
+  AC_SUBST(LIB_XRANDR)
+])
+AC_BOSON_CHECK_XRANDR
+
