@@ -45,23 +45,12 @@ public:
 
 	void enqueueCommand(BoAudioCommand* command);
 
-	// AB: if you add public functions you MUST make them thread safe!
-	// if they are accessed from the audio thread only then make them
-	// protected and use friends.
+	void executeCommand(BoAudioCommand* command);
 
 public slots:
 	void slotReceiveStdin(int);
 
 protected:
-	/**
-	 * @param a See @ref audio
-	 * @param music The music object, if @p command is a music command
-	 * (other than creating the music object). Otherwise NULL
-	 * @param sound The relevant sound object if @p sound is a sound command
-	 * (@ref BoAudioCommand::species is not empty) other than creating a
-	 * sound object. Otherwise NULL.
-	 **/
-	void executeCommand(BoAudioCommand* command, BosonAudio* a, BosonMusic* music, BosonSound* sound);
 
 	BosonAudio* audio() const;
 	BoAudioCommand* dequeueCommand();
