@@ -472,7 +472,9 @@ public:
 	 *
 	 * @param matrix The matrix of the first frame. Note that the max/min
 	 * values can change when the frames changes, but we will always use the
-	 * values from the _first_ frame only.
+	 * values from the _first_ frame only. UPDATE: this parameter is most
+	 * probably obsolete. Use the identity matrix here. if you know a
+	 * reason for why you want to use something else - please tell me.
 	 **/
 	void calculateMaxMin(const BoMatrix* matrix);
 

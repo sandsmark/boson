@@ -122,7 +122,16 @@ public:
 		// have bad bounding boxes - they could easily be smaller.
 		// but that would be harder to code...
 		float v[3];
-		BoMatrix matrix; // TODO use first frame matrix.
+
+		// TODO use first frame matrix.
+		// AB: UPDATE: why should we use a non-identity matrix here?
+		// for rendering this makes nearly no sense, as we will multiply
+		// the modelview matrix by the frame matrix anyway. i believe
+		// the situation will be similar for occlusion culling (which
+		// needs to take the current frame matrix into account anyway).
+		// so the above TODO is probably totally obsolete
+		BoMatrix matrix;
+
 		mesh->calculateMaxMin(&matrix); // probably redundant! we need to ensure that these values are final!
 
 		v[0] = mesh->maxX();
