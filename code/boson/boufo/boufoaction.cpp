@@ -1333,6 +1333,7 @@ BoUfoAction* BoUfoStdAction::create(StdAction id, const QObject* receiver, const
 		const KAboutData* aboutData = KGlobal::instance()->aboutData();
 		QString appName = (aboutData) ? aboutData->programName() : QString::fromLatin1(qApp->name());
 		label = i18n(info->label).arg(appName);
+		break;
 	}
 	default:
 		label = i18n(info->label);
