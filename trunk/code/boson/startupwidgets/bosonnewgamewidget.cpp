@@ -48,10 +48,10 @@
 #include <qlayout.h>
 #include <qpainter.h>
 
-/*
- *  Constructs a BosonNewGameWidget which is a child of 'parent', with the 
- *  name 'name' and widget flags set to 'f'.
- */
+// AB: FIXME: the code design here is BAAAD. lots of strange names for the
+// layouts, strange names for the spacers (which might be replaced by normal
+// stretches).
+// short: qt designer code
 BosonNewGameWidget::BosonNewGameWidget(TopWidget* top, QWidget* parent)
     : QWidget(parent)
 {
@@ -294,7 +294,7 @@ void BosonNewGameWidget::initMaps()
 //    d->mPlayFieldIndex2Comment.insert(i, cfg.readEntry("Comment", i18n("None")));
 //    QString fileName = list[i].left(list[i].length() - strlen(".boson")) + QString::fromLatin1(".bpf");
 //    d->mPlayFieldIndex2FileName.insert(i, fileName);
-    mMapIndex2Identifier.insert(i, cfg.readEntry("Identifier", i18n("Unknown")));
+    mMapIndex2Identifier.insert(i, cfg.readEntry("Identifier", QString::fromLatin1("Unknown")));
   }
   mMapCombo->setCurrentItem(0);
   mMap = 0;
