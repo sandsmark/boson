@@ -29,6 +29,7 @@ class BoSelection;
 class Player;
 class Unit;
 class UnitProperties;
+class Camera;
 
 class KGameChat;
 class KGameIO;
@@ -203,6 +204,18 @@ protected:
 
 	void generateMapDisplayList();
 
+	/**
+	 * Set a viewport. Basically the same as glViewport, but you should use
+	 * this instead the standard OpenGL function. The viewport values are
+	 * cached in boson, so that we can easily use it in @ref mapCoordinates.
+	 *
+	 * Note that the current matrix is not changed before glViewport is
+	 * calles, so you need to ensure that it is called at the correct
+	 * time/place.
+	 **/
+	void setViewport(int x, int y, GLsizei w, GLsizei h);
+
+	void setCamera(const Camera& c);
 	void setCameraPos(GLfloat x, GLfloat y, GLfloat z);
 	GLfloat cameraX() const;
 	GLfloat cameraY() const;
