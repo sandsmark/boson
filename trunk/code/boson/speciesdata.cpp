@@ -23,6 +23,7 @@
 #include "bosonmodel.h"
 #include "bodebug.h"
 #include "boaction.h"
+#include "bosonconfig.h"
 
 #include <qintdict.h>
 #include <qdict.h>
@@ -214,6 +215,9 @@ bool SpeciesData::loadUnitModel(const UnitProperties* prop, const QColor& )
  if (!prop) {
 	BO_NULL_ERROR(prop);
 	return false;
+ }
+ if (boConfig->disableModelLoading()) {
+	return true;
  }
  BosonModel* m = d->mUnitModels[prop->typeId()];
 
@@ -418,7 +422,7 @@ const BoAction* SpeciesData::action(const QString& name) const
 BosonModel* SpeciesData::objectModel(const QString& name) const
 {
  BosonModel* m = d->mObjectModels[name];
- if (!m) {
+ if (!m && !boConfig->disableModelLoading()) {
 	boError() << k_funcinfo << "No object with name " << name << endl;
 	return 0;
  }
@@ -449,6 +453,9 @@ bool SpeciesData::loadObjects(const QColor& teamColor)
 
 	cfg.setGroup(*it);
 
+	if (boConfig->disableModelLoading()) {
+		continue;
+	}
 	BosonModel* m = d->mObjectModels.find(*it);
 	if (!m) {
 		BosonModelFactory factory;
