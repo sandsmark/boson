@@ -55,6 +55,38 @@
 #include <qlayout.h>
 #include <qpainter.h>
 
+
+class QListBoxPlayerText : public QListBoxText
+{
+public:
+	QListBoxPlayerText(QListBox* listBox, const QString& text)
+		: QListBoxText(listBox, text)
+	{
+	}
+	QListBoxPlayerText(const QString& text)
+		: QListBoxText(text)
+	{
+	}
+	void setColor(const QColor& c)
+	{
+		mPlayerColor = c;
+	}
+	const QColor& color() const
+	{
+		return mPlayerColor;
+	}
+
+	virtual void paint(QPainter* p)
+	{
+		p->setPen(color());
+		QListBoxText::paint(p);
+	}
+
+private:
+	QColor mPlayerColor;
+};
+
+
 class BosonNewGameWidgetPrivate
 {
 public:
@@ -323,7 +355,8 @@ void BosonNewGameWidget::slotNetStart()
 
 void BosonNewGameWidget::slotNetPlayerJoinedGame(KPlayer* p)
 {
- QListBoxText* t = new QListBoxText(p->name());
+ QListBoxPlayerText* t = new QListBoxPlayerText(p->name());
+ t->setColor(((Player*)p)->teamColor());
  d->mItem2Player.insert(t, p);
  mConnectPlayers->insertItem(t);
 
@@ -351,8 +384,18 @@ void BosonNewGameWidget::slotNetSpeciesChanged(Player* p)
  boWarning() << k_funcinfo << "TODO" << endl;
 }
 
-void BosonNewGameWidget::slotNetColorChanged(Player*)
+void BosonNewGameWidget::slotNetColorChanged(Player* p)
 {
+ QPtrDictIterator<KPlayer> it(d->mItem2Player);
+ while (it.current()) {
+	if (it.current() == (KPlayer*)p) {
+		QListBoxPlayerText* t = (QListBoxPlayerText*)it.currentKey();
+		t->setColor(p->teamColor());
+		break;
+	}
+	++it;
+ }
+ mConnectPlayers->triggerUpdate(false);
  initColors();
 }
 
@@ -409,13 +452,14 @@ void BosonNewGameWidget::slotNetPlayerNameChanged(Player* p)
  QPtrDictIterator<KPlayer> it(d->mItem2Player);
  while (it.current()) {
 	if (it.current() == (KPlayer*)p) {
-		QListBoxText* old = (QListBoxText*)it.currentKey();
+		QListBoxPlayerText* old = (QListBoxPlayerText*)it.currentKey();
 		int index = mConnectPlayers->index(old);
 		if (index < 0 || (unsigned int)index >= mConnectPlayers->count()) {
 			boError() << k_funcinfo << "invalid index " << index << endl;
 			return;
 		}
-		QListBoxItem* t = new QListBoxText(p->name());
+		QListBoxPlayerText* t = new QListBoxPlayerText(p->name());
+		t->setColor(p->teamColor());
 		d->mItem2Player.remove(old);
 		mConnectPlayers->changeItem(t, index);
 		d->mItem2Player.insert(t, p);
