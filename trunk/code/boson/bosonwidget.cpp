@@ -124,6 +124,8 @@ BosonCommandFrameBase* BosonWidget::createCommandFrame(QWidget* parent)
  BosonCommandFrame* frame = new BosonCommandFrame(parent);
  connect(game(), SIGNAL(signalUpdateProduction(Unit*)),
 		frame, SLOT(slotUpdateProduction(Unit*)));
+ connect(game(), SIGNAL(signalUpdateProductionOptions()),
+		frame, SLOT(slotUpdateProductionOptions()));
 
  //AB: can we use the same input for the editor?
  d->mCmdInput = new CommandInput;
