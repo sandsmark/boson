@@ -6,10 +6,9 @@ bin_PROGRAMS = boson bounit boprofiling bocursor borender boinfo
 
 INCLUDES = -I$(kde_includes)/arts -I$(top_srcdir)/bodebug $(all_includes)
 
-BOSON_SRC = \
+BOSON_COMMON_SRC = \
 	boapplication.cpp \
 	boglobal.cpp \
-	top.cpp  \
 	cell.cpp \
 	unitproperties.cpp \
 	pluginproperties.cpp \
@@ -121,7 +120,8 @@ boson_LDADD = \
 		$(GLLIB) -l3ds \
 		$(LIB_KDEUI)
 boson_SOURCES = \
-		$(BOSON_SRC)\
+		$(BOSON_COMMON_SRC)\
+		top.cpp  \
 		main.cpp
 
 bounit_LDFLAGS = $(KDE_RPATH) $(all_libraries)
@@ -130,7 +130,6 @@ bounit_LDADD = \
 		$(top_builddir)/boson/sound/libbosonsoundinterface.la \
 		$(top_builddir)/boson/info/libbosoninfo.la \
 		$(top_builddir)/boson/commandframe/libbosoncommandframe.la \
-		$(top_builddir)/boson/startupwidgets/libbosonstartupwidgets.la \
 		$(top_builddir)/bodebug/libbodebug.la \
 		$(top_builddir)/boson/bosonwidgets/libbosonwidgets.la \
 		$(top_builddir)/boson/script/libbosonscript.la \
@@ -138,7 +137,7 @@ bounit_LDADD = \
 		$(GLLIB) -l3ds \
 		-lkio $(LIB_KDEUI)
 bounit_SOURCES = \
-		$(BOSON_SRC) \
+		$(BOSON_COMMON_SRC) \
 		bounitmain.cpp bosonsearchpathswidget.ui \
 		bouniteditor.ui
 
@@ -167,14 +166,13 @@ borender_LDADD = \
 		$(top_builddir)/boson/sound/libbosonsoundinterface.la \
 		$(top_builddir)/boson/info/libbosoninfo.la \
 		$(top_builddir)/boson/commandframe/libbosoncommandframe.la \
-		$(top_builddir)/boson/startupwidgets/libbosonstartupwidgets.la \
 		$(top_builddir)/boson/bosonwidgets/libbosonwidgets.la \
 		$(top_builddir)/boson/script/libbosonscript.la \
 		-lkdegames \
 		$(GLLIB) -l3ds \
 		$(LIB_KDEUI)
 borender_SOURCES = \
-		$(BOSON_SRC) \
+		$(BOSON_COMMON_SRC) \
 		kgamemodeldebug.cpp \
 		kgamespeciesdebug.cpp \
 		borendermain.cpp
@@ -195,7 +193,7 @@ METASOURCES = AUTO
 
 # not yet used:
 #messages: rc.cpp
-#	$(XGETTEXT) rc.cpp $(COMMON_SRC) $(BOSON_SRC) $(BOEDITOR_SRC) -o $(podir)/boson.pot
+#	$(XGETTEXT) rc.cpp $(COMMON_SRC) $(BOSON_COMMON_SRC) $(BOEDITOR_SRC) -o $(podir)/boson.pot
 
 include ../admin/Doxyfile.am
 
