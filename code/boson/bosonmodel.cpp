@@ -65,20 +65,22 @@ public:
 		{
 			matrix = 0;
 			mesh = 0;
+			hidden = false;
 		}
 		Mesh(const Mesh& m)
 		{
-			mesh = m.mesh;
-			matrix = m.matrix;
+			*this = m;
 		}
 		Mesh& operator=(const Mesh& m)
 		{
 			mesh = m.mesh;
 			matrix = m.matrix;
+			hidden = m.hidden;
 			return *this;
 		}
 		BoMatrix* matrix;
 		BoMesh* mesh;
+		bool hidden;
 	};
 
 	BoMeshSorter()
@@ -126,6 +128,7 @@ protected:
 			BoMeshSorter::Mesh mesh;
 			mesh.mesh = frame->mesh(i);
 			mesh.matrix = frame->matrix(i);
+			mesh.hidden = frame->hidden(i);
 			meshes->append(mesh);
 		}
 	}
@@ -296,6 +299,7 @@ void BoFrame::init()
  mMatrices = 0;
  mMeshes = 0;
  mMeshCount = 0;
+ mHidden = 0;
 }
 
 BoFrame::~BoFrame()
@@ -310,11 +314,12 @@ BoFrame::~BoFrame()
  }
  delete[] mMeshes;
  delete[] mMatrices;
+ delete[] mHidden;
 }
 
 void BoFrame::copyMeshes(const BoFrame& f, unsigned int* meshes, unsigned int count)
 {
- if (f.mMeshCount == 0 || !f.mMeshes || !f.mMatrices) {
+ if (f.mMeshCount == 0 || !f.mMeshes || !f.mMatrices || !f.mHidden) {
 	boError() << k_funcinfo << "oops - can't copy from invalid mesh!" << endl;
 	return;
  }
@@ -345,6 +350,7 @@ void BoFrame::copyMeshes(const BoFrame& f, unsigned int* meshes, unsigned int co
 	unsigned int index = meshes[i];
 	mMeshes[i] = f.mMeshes[index]; // copy the pointer only
 	mMatrices[i]->loadMatrix(*f.mMatrices[index]);
+	mHidden[i] = f.mHidden[index];
  }
 }
 
@@ -362,25 +368,41 @@ void BoFrame::allocMeshes(int meshes)
 	boError() << k_funcinfo << "meshes already allocated??" << endl;
 	delete[] mMeshes;
  }
+ if (mHidden) {
+	boError() << k_funcinfo << "\"hidden\" flags already allocated??" << endl;
+	delete[] mHidden;
+ }
  mMeshes = new BoMesh*[meshes];
  mMatrices = new BoMatrix*[meshes];
+ mHidden = new bool[meshes];
  mMeshCount = meshes; // unused?
  for (int i = 0; i < meshes; i++) {
 	mMeshes[i] = 0;
 	mMatrices[i] = new BoMatrix;
+	mHidden[i] = false;
  }
 }
 
 void BoFrame::setMesh(unsigned int index, BoMesh* mesh)
 {
  if (index >= mMeshCount) {
-	boError() << k_funcinfo << "invalid mesh " << mesh << " , count=" << mMeshCount << endl;
+	boError() << k_funcinfo << "invalid mesh " << index << " , count=" << mMeshCount << endl;
 	return;
  }
  BO_CHECK_NULL_RET(mesh);
  BO_CHECK_NULL_RET(mMeshes);
  // we store the *pointer* only!
  mMeshes[index] = mesh;
+}
+
+void BoFrame::setHidden(unsigned int index, bool hidden)
+{
+ if (index >= mMeshCount) {
+	boError() << k_funcinfo << "invalid mesh " << index << " , count=" << mMeshCount << endl;
+	return;
+ }
+ BO_CHECK_NULL_RET(mHidden);
+ mHidden[index] = hidden;
 }
 
 BoMatrix* BoFrame::matrix(int index) const
@@ -391,6 +413,9 @@ BoMatrix* BoFrame::matrix(int index) const
 void BoFrame::renderFrame(const QColor* teamColor, unsigned int lod, int mode)
 {
  for (unsigned int i = 0; i < mMeshCount; i++) {
+	if (mHidden[i]) {
+		continue;
+	}
 	BoMatrix* m = mMatrices[i];
 	BoMesh* mesh = mMeshes[i];
 	if (!m) {
@@ -453,18 +478,24 @@ void BoFrame::sortByDepth()
 // BoMeshSorter::sortByMaxZ(this, &meshes);
  BoMeshSorter::sortByMaxSize(this, &meshes);
 
+ BO_CHECK_NULL_RET(mMeshes);
+ BO_CHECK_NULL_RET(mMatrices);
+ BO_CHECK_NULL_RET(mHidden);
+
  // meshes is now sorted by maxZ.
  QValueList<BoMeshSorter::Mesh>::Iterator it;
  int i = 0;
  for (it = meshes.begin(); it != meshes.end(); ++it) {
 	BoMesh* mesh = (*it).mesh;
 	BoMatrix* matrix = (*it).matrix;
+	bool hidden = (*it).hidden;
 	if (!mesh || !matrix) {
 		boError() << k_funcinfo << "oops" << endl;
 		continue;
 	}
 	mMeshes[i] = mesh;
 	mMatrices[i] = matrix;
+	mHidden[i] = hidden;
 	i++;
  }
 }
