@@ -407,7 +407,7 @@ void BosonCanvas::explosion(const BoVector3& pos, long int damage, float range, 
  float r = QMAX(0, range * BO_TILE_SIZE - 1);  // - 1 is needed to prevent units on next cells from also being damaged
  float fr = QMAX(0, fullrange * BO_TILE_SIZE - 1);
  long int d;
- int dist;
+ float dist;
  QValueList<Unit*> l = unitCollisionsInSphere(pos, r);
  for (unsigned int i = 0; i < l.count(); i++) {
 	dist = l[i]->distance(pos);
