@@ -30,6 +30,7 @@
 
 #define POWER_LEVELS 15
 
+#warning this is never freed
 SelectBoxData* SelectBox::mBoxData = 0;
 
 SelectBoxData::SelectBoxData()
@@ -40,6 +41,7 @@ SelectBoxData::SelectBoxData()
 SelectBoxData::~SelectBoxData()
 {
  // TODO: free the display lists?
+ delete mTextures;
 }
 
 GLuint SelectBoxData::list(double factor)
