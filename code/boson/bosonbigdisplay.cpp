@@ -159,6 +159,13 @@ void BosonBigDisplay::init()
  d->mSelection = new BoSelection(this);
 
  disconnect(this, SIGNAL(contentsMoving(int,int)), this, SLOT(cMoving(int,int)));
+
+ // the following needs to be done only once for all displays. we can safely
+ // call it for every new display, it'll just be ignored.
+ KSpriteToolTip::ignore(RTTI::SelectPart);
+ KSpriteToolTip::ignore(RTTI::BoShot);
+ KSpriteToolTip::ignore(RTTI::FogOfWar);// we don't display "fog of war" or so...
+ KSpriteToolTip::ignore(RTTI::SpriteCursor);// we don't display "fog of war" or so...
 }
 
 BosonBigDisplay::~BosonBigDisplay()

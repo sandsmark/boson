@@ -42,6 +42,73 @@
 
 #define BAR_WIDTH 10 // FIXME hardcoded value
 
+class BoToolTip : public QToolTip
+{
+public:
+	BoToolTip(BosonCommandWidget* parent) : QToolTip(parent)
+	{
+	}
+
+	inline BosonCommandWidget* commandWidget() const
+	{
+		return (BosonCommandWidget*)parentWidget();
+	}
+
+protected:
+	virtual void maybeTip(const QPoint& pos)
+	{
+		//TODO: do not re-display if already displayed and text didn't
+		//change
+		QString text = mainTip();
+
+		if (text == QString::null) {
+			return;
+		}
+		tip(QRect(commandWidget()->rect()), text);
+	}
+
+	/**
+	 * Tip for the widget if there is no other tip available. Some parts of
+	 * the widget (e.g. the progress bars) can provide another tip that
+	 * overrides this one.
+	 **/
+	QString mainTip() const
+	{
+		QString text;
+		switch (commandWidget()->commandType()) {
+			case BosonCommandWidget::CommandNothing:
+				// do not display anything
+				return QString::null;
+			case BosonCommandWidget::CommandCell:
+				//TODO: place something useful here
+				text = i18n("Tilenumber: %1").arg(commandWidget()->tile());
+				break;
+			case BosonCommandWidget::CommandUnit:
+			{
+				if (commandWidget()->unitType() < 0) {
+					kdWarning() << k_funcinfo << "CommandUnit, but no unittype" << endl;
+					return QString::null;
+				}
+				if (!commandWidget()->productionOwner()) {
+					kdWarning() << k_funcinfo << "CommandUnit, but no production owner" << endl;
+					return QString::null;
+				}
+				const UnitProperties* prop = commandWidget()->productionOwner()->unitProperties(commandWidget()->unitType());
+				text = i18n("%1\nMinerals: %2\nOil: %3").arg(prop->name()).arg(prop->mineralCost()).arg(prop->oilCost());
+				break;
+			}
+			case BosonCommandWidget::CommandUnitSelected:
+				if (!commandWidget()->unit()) {
+					kdWarning() << k_funcinfo << "CommandUnitSelected, but NULL unit" << endl;
+					return QString::null;
+				}
+				text = i18n("%1\nId: %2").arg(commandWidget()->unit()->unitProperties()->name()).arg(commandWidget()->unit()->id());
+				break;
+		}
+		return text;
+	}
+};
+
 class BoProgress : public KGameProgress
 {
 	public:
@@ -155,48 +222,38 @@ public:
 	{
 		mPixmap = 0;
 
-		mTileNumber = -1;
-		mUnitType = -1;
-		mUnit = 0;
-
-		mCommandType = CommandNothing;
-
-		mTopLayout = 0;
-
 		mHealth = 0;
 		mReload = 0;
 
-		mOwner = 0;
+		mTip = 0;
 	}
 
 	BoButton * mPixmap;
 
-	int mTileNumber;
-	int mUnitType;
-	Unit* mUnit;
-
-	CommandType mCommandType;
-
-	QHBoxLayout* mTopLayout;
-
 	BoProgress* mHealth;
 	BoProgress* mReload;
 
-	Player* mOwner; // kind of a workaround: we need this to display the progress of production
+	BoToolTip* mTip;
 };
 
 BosonCommandWidget::BosonCommandWidget(QWidget* parent) : QWidget(parent)
 {
  d = new BosonCommandWidgetPrivate;
- d->mTopLayout = new QHBoxLayout(this);
- d->mTopLayout->setAutoAdd(true);
+ mUnit = 0;
+ mProductionOwner = 0;
+ mUnitType = 0;
+ mTileNumber = 0;
+ mCommandType = CommandNothing;
+
+ QHBoxLayout* topLayout = new QHBoxLayout(this);
+ topLayout->setAutoAdd(true);
 
  QWidget* display = new QWidget(this);
  QHBoxLayout* displayLayout = new QHBoxLayout(display);
- d->mPixmap = new BoButton(display);
- connect(d->mPixmap, SIGNAL(clicked()), this, SLOT(slotClicked()));
- connect(d->mPixmap, SIGNAL(rightClicked()), this, SLOT(slotRightClicked()));
- displayLayout->addWidget(d->mPixmap);
+ mPixmap = new BoButton(display);
+ connect(mPixmap, SIGNAL(clicked()), this, SLOT(slotClicked()));
+ connect(mPixmap, SIGNAL(rightClicked()), this, SLOT(slotRightClicked()));
+ displayLayout->addWidget(mPixmap);
 
  d->mHealth = new BoProgress(display);
  d->mHealth->setOrientation(Vertical);
@@ -210,17 +267,20 @@ BosonCommandWidget::BosonCommandWidget(QWidget* parent) : QWidget(parent)
  d->mReload->setFixedWidth(BAR_WIDTH);
  displayLayout->addWidget(d->mReload);
 
+ d->mTip = new BoToolTip(this);
+
  d->mHealth->setValue(0);
  d->mReload->setValue(0);
  
- d->mPixmap->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
+ mPixmap->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
  setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
  setSizePolicy(QSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum));
 }
 
 BosonCommandWidget::~BosonCommandWidget()
 {
- delete d->mPixmap;
+ delete d->mTip;
+ delete mPixmap;
  delete d;
 }
 
@@ -231,13 +291,12 @@ void BosonCommandWidget::setUnit(Unit* unit)
 	hide();
 	return;
  }
- d->mUnit = unit;
- d->mCommandType = CommandUnitSelected;
+ mUnit = unit;
+ mCommandType = CommandUnitSelected;
  displayUnitPixmap(unit);
- connect(d->mUnit->owner(), SIGNAL(signalUnitChanged(Unit*)), this,
+ connect(mUnit->owner(), SIGNAL(signalUnitChanged(Unit*)), this,
 		 SLOT(slotUnitChanged(Unit*)));
- slotUnitChanged(d->mUnit);
- setToolTip(i18n("%1\nId: %2").arg(unit->unitProperties()->name()).arg(unit->id()));
+ slotUnitChanged(mUnit);
 
  show();
  d->mHealth->show();
@@ -253,25 +312,16 @@ void BosonCommandWidget::setUnit(int unitType, Player* owner)
 	kdError() << k_funcinfo << "NULL owner" << endl;
 	return;
  }
- if (d->mUnit) {
+ if (mUnit) {
 	unset();
  }
- d->mUnit = 0;
+ mUnit = 0;
+ mUnitType = unitType;
+ mProductionOwner = owner;
+ mCommandType = CommandUnit;
+ 
  displayUnitPixmap(unitType, owner);
 
- const UnitProperties* prop = owner->speciesTheme()->unitProperties(unitType);
- if (!prop) {
-	kdError() << k_funcinfo << "No unit properties for " << unitType
-			<< endl;
-	return;
- }
- setToolTip(i18n("%1\nMinerals: %2\nOil: %3").arg(prop->name()).arg(
-			prop->mineralCost()).arg(prop->oilCost()));
- 
- d->mUnitType = unitType;
- d->mOwner = owner;
- d->mCommandType = CommandUnit;
- 
  d->mHealth->hide();
  d->mReload->hide();
 
@@ -282,14 +332,14 @@ void BosonCommandWidget::setUnit(int unitType, Player* owner)
 
 void BosonCommandWidget::setCell(int tileNo, BosonTiles* tileSet)
 {
- if (d->mUnit) {
+ if (mUnit) {
 	unset();
  }
- d->mUnit = 0;
+ mUnit = 0;
 
- d->mTileNumber = tileNo;
- setPixmap(tileSet->tile(d->mTileNumber));
- d->mCommandType = CommandCell;
+ mTileNumber = tileNo;
+ mCommandType = CommandCell;
+ setPixmap(tileSet->tile(mTileNumber));
 
  d->mHealth->hide();
  d->mReload->hide();
@@ -325,14 +375,8 @@ void BosonCommandWidget::displayUnitPixmap(int unitType, Player* owner)
 
 void BosonCommandWidget::setPixmap(const QPixmap& pixmap)
 {
- d->mPixmap->setPixmap(pixmap);
- d->mPixmap->show();
-}
-
-void BosonCommandWidget::setToolTip(const QString& text)
-{
- QToolTip::remove(this);
- QToolTip::add(this, text);
+ mPixmap->setPixmap(pixmap);
+ mPixmap->show();
 }
 
 void BosonCommandWidget::slotClicked()
@@ -354,7 +398,7 @@ void BosonCommandWidget::slotClicked()
 			// shall we do something here? maybe make this unit the
 			// only selected unit if there are several units
 			// selected? or can we omit this signal?
-//			emit signalUnit(d->mUnit);
+//			emit signalUnit(mUnit);
 		}
 		break;
 	default:
@@ -376,7 +420,7 @@ void BosonCommandWidget::slotRightClicked()
 
 void BosonCommandWidget::slotUnitChanged(Unit* unit)
 {
- if (unit != d->mUnit) {
+ if (unit != mUnit) {
 	return;
  }
  if (!unit) {
@@ -397,64 +441,32 @@ void BosonCommandWidget::slotUnitChanged(Unit* unit)
  d->mReload->setValue(r);
 }
 
-int BosonCommandWidget::tile() const
-{
- if (d->mCommandType == CommandCell) {
-	return d->mTileNumber;
- } else {
-	return -1;
- }
-}
-
-int BosonCommandWidget::unitType() const
-{
- if (d->mCommandType == CommandUnit) {
-	return d->mUnitType;
- } else {
-	return -1;
- }
-}
-
-Unit* BosonCommandWidget::unit() const
-{
- if (d->mCommandType == CommandUnitSelected) {
-	return d->mUnit;
- } else {
-	return 0;
- }
-}
-
-BosonCommandWidget::CommandType BosonCommandWidget::commandType() const
-{
- return d->mCommandType;
-}
 
 void BosonCommandWidget::unset()
 {
- if (d->mUnit) {
-	disconnect(d->mUnit->owner(), 0, this, 0);
+ if (mUnit) {
+	disconnect(mUnit->owner(), 0, this, 0);
  }
- d->mUnit = 0;
- d->mUnitType = 0;
- d->mTileNumber = 0;
- d->mCommandType = CommandNothing;
- d->mOwner = 0;
- QToolTip::remove(this);
+ mUnit = 0;
+ mUnitType = 0;
+ mTileNumber = 0;
+ mCommandType = CommandNothing;
+ mProductionOwner = 0;
 }
 
 void BosonCommandWidget::advanceProduction(double percentage)
 {
- if (!d->mOwner) {
+ if (!mProductionOwner) {
 	kdError() << k_funcinfo << "NULL owner" << endl;
 	return;
  }
- if (d->mUnitType < 0) {
-	kdError() << k_funcinfo << "unitType: " << d->mUnitType << endl;
+ if (mUnitType < 0) {
+	kdError() << k_funcinfo << "unitType: " << mUnitType << endl;
 	return;
  }
- QPixmap* smallOverview = d->mOwner->speciesTheme()->smallOverview(d->mUnitType);
+ QPixmap* smallOverview = mProductionOwner->speciesTheme()->smallOverview(mUnitType);
  if (!smallOverview) {
-	kdError() << k_funcinfo << "NULL smalloverview for " << d->mUnitType << endl;
+	kdError() << k_funcinfo << "NULL smalloverview for " << mUnitType << endl;
 	return;
  }
  QPixmap small(*smallOverview);
@@ -496,10 +508,11 @@ void BosonCommandWidget::advanceProduction(double percentage)
 
 void BosonCommandWidget::setGrayOut(bool g)
 {
- d->mPixmap->setGrayOut(g);
+ mPixmap->setGrayOut(g);
 }
 
 void BosonCommandWidget::setProductionCount(int count)
 {
- d->mPixmap->setProductionCount(count);
+ mPixmap->setProductionCount(count);
 }
+

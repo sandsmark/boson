@@ -25,6 +25,7 @@
 class Unit;
 class Player;
 class BosonTiles;
+class BoButton;
 
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
@@ -47,27 +48,46 @@ public:
 	void setUnit(int unitType, Player* owner);
 	void setCell(int tileNo, BosonTiles* tileSet);
 
-	void setToolTip(const QString& text);
-
 	/**
 	 * @return The displayed unit or 0 if no unit is displayed. See also
 	 * @ref tile and @ref unitType
 	 **/
-	Unit* unit() const;
+	Unit* unit() const 
+	{
+		return (commandType() == CommandUnitSelected) ? mUnit : 0;
+	}
 
 	/**
 	 * @return The unitType that is displayed or -1 if none. See also @ref
 	 * tile and @ref unit
 	 **/
-	int unitType() const;
+	int unitType() const 
+	{
+		return (commandType() == CommandUnit) ? mUnitType : -1;
+	}
+
+	/**
+	 * Only valid if @ref unitType is >= 0! If @ref unitType is -1 then this
+	 * will also be NULL !
+	 * @return Usually NULL, except if the widget displays a production
+	 * entry (i.e. an order button) then it is the player that produces
+	 * here.
+	 **/
+	Player* productionOwner() const 
+	{ 
+		return (commandType() == CommandUnit) ? mProductionOwner : 0;
+	}
 
 	/**
 	 * @return The displayed tilenumber or -1 if none is displayed. See also
 	 * @ref unit and @ref unitType
 	 **/
-	int tile() const;
+	int tile() const 
+	{ 
+		return (commandType() == CommandCell) ? mTileNumber : -1;
+	}
 
-	CommandType commandType() const;
+	CommandType commandType() const { return mCommandType; }
 
 	void unset();
 
@@ -125,6 +145,15 @@ protected slots:
 private:
 	class BosonCommandWidgetPrivate;
 	BosonCommandWidgetPrivate* d;
+
+	Unit* mUnit;
+	int mUnitType;
+	int mTileNumber;
+	CommandType mCommandType;
+
+	Player* mProductionOwner;
+
+	BoButton* mPixmap;
 };
 
 class BoButton : public QPushButton

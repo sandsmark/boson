@@ -19,6 +19,8 @@
 
 #include "bosoncursor.h"
 
+#include "rtti.h" // if we ever make this class public we should remove dependancy on this class
+
 #include <ksimpleconfig.h>
 #include <kstandarddirs.h>
 #include <kdebug.h>
@@ -221,6 +223,7 @@ class BoCursorSprite : public QCanvasSprite
 public:
 	BoCursorSprite(QCanvasPixmapArray* a,QCanvas* c) : QCanvasSprite(a,c) { }
 	virtual bool collidesWith(const QCanvasItem*) const { return false; }
+	virtual int rtti() const { return RTTI::SpriteCursor; }
 };
 
 class BosonSpriteCursor::BosonSpriteCursorPrivate

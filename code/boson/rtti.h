@@ -43,6 +43,7 @@ public:
 		SelectPart = 15,
 		BoShot = 16,
 		FogOfWar = 17,
+		SpriteCursor = 18,
 
 
 		UnitStart = 200 // the IDs of the units start at this value. 
