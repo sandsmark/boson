@@ -49,6 +49,12 @@ protected:
 	QHBoxLayout* mainLayout() const;
 
 	/**
+	 * @return The layout containing the @ref QSlider, if existing.
+	 * Otherwise the layout is empty.
+	 **/
+	QHBoxLayout* sliderLayout() const;
+
+	/**
 	 * @return The top layout. Inside it you'll find the @ref mainLayout.
 	 * The label (see @ref setLabel) can be at top of this layout, at it's
 	 * bottom or in @ref mainLayout, depending on the alignment flags.
@@ -87,12 +93,49 @@ signals:
 
 protected slots:
 	void slotSpinValueChanged(int);
+	void slotSliderMoved(int);
 
 private:
 	void init();
 
 private:
 	BoIntNumInputPrivate* d;
+};
+
+class BoFloatNumInputPrivate;
+class BoFloatNumInput : public BoNumInput
+{
+	Q_OBJECT
+public:
+	BoFloatNumInput(QWidget* parent = 0, const char* name = 0);
+	~BoFloatNumInput();
+
+	void setRange(float min, float max, float step = 0.1f, bool showSlider = true);
+	float minValue() const;
+	float maxValue() const;
+
+	float value() const;
+
+	virtual bool showSlider() const;
+
+public slots:
+	void setValue(float);
+
+signals:
+	void signalValueChanged(float);
+
+protected slots:
+	void slotSpinValueChanged(int);
+	void slotSliderMoved(int);
+
+protected:
+	double mapSliderToSpin(int) const;
+
+private:
+	void init();
+
+private:
+	BoFloatNumInputPrivate* d;
 };
 
 #endif
