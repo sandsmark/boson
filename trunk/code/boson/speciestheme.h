@@ -270,8 +270,6 @@ private:
 #ifdef NO_OPENGL
 	QCanvasPixmapArray* mShot;
 #endif
-
-	static int mThemeNumber;
 };
 
 #endif
