@@ -26,6 +26,7 @@
 class QStringList;
 class BosonGroundTheme;
 class BosonPlayField;
+template<class T> class BoGlobalObject;
 
 class BosonDataObject
 {
@@ -133,7 +134,10 @@ public:
 	 **/
 	static QStringList availableFiles(const QString& searchPattern, bool recursive = false);
 
-//protected:
+protected:
+	// AB: I am a bit surprised, that g++ accepts this, as BoGlobalObject is
+	// a forwarded template. is this valid c++ ?
+	friend class BoGlobalObject<BosonData>;
 	// protected, so that noone can make an object except for ourselves.
 	BosonData();
 
