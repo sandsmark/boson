@@ -83,11 +83,6 @@ signals:
 protected slots:
 	virtual void slotChangeCursor(int mode, const QString& dir);
 
-	/**
-	 * See @ref BosonWidgetBase::slotSetActiveDisplay
-	 **/
-	virtual void slotSetActiveDisplay(BosonBigDisplayBase* active, BosonBigDisplayBase* old);
-
 	void slotOutOfGame(Player* p);
 	void slotGameOverDialogFinished();
 

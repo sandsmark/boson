@@ -3074,12 +3074,6 @@ BosonBigDisplayInputBase* BosonBigDisplayBase::displayInput() const
  return d->mInput;
 }
 
-void BosonBigDisplayBase::slotMoveSelection(int x, int y)
-{
- BO_CHECK_NULL_RET(displayInput());
- displayInput()->slotMoveSelection(x, y);
-}
-
 void BosonBigDisplayBase::setDebugMapCoordinates(bool debug)
 {
  d->mDebugMapCoordinates = debug;
