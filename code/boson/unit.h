@@ -44,9 +44,10 @@ public:
 		IdDirection = UnitBase::IdLast + 1,
 		IdWaypoints = UnitBase::IdLast + 2,
 		IdFix_ConstructionState = UnitBase::IdLast + 3,
-		IdFix_ConstructionDelay = UnitBase::IdLast + 4,
+//		IdFix_ConstructionDelay = UnitBase::IdLast + 4,
 		IdReloadState = UnitBase::IdLast + 5,
-		IdFix_Constructions = UnitBase::IdLast + 6
+		IdFix_Productions = UnitBase::IdLast + 6,
+		IdFix_ProductionState = UnitBase::IdLast + 7
 
 	};
 
@@ -81,18 +82,6 @@ public:
 
 	void attackUnit(Unit* target);
 	
-	/**
-	 * Move the unit. By default this does nothing. Reimplemented in @ref
-	 * MobileUnit
-	 **/
-	virtual void advanceMove() { }
-
-	/**
-	 * Move the construction animation one step forward. Does nothing by
-	 * default - reimplemented in Facility
-	 **/
-	virtual void advanceConstruction() { }
-
 	Unit* target() const;
 	void setTarget(Unit* target);
 	bool inRange(Unit* unit) const;
@@ -156,6 +145,20 @@ protected:
 	 **/
 	QValueList<Unit*> unitCollisions(bool exact = false) const;
 
+	/**
+	 * Move the unit. By default this does nothing. Reimplemented in @ref
+	 * MobileUnit
+	 **/
+	virtual void advanceMove() { }
+
+	/**
+	 * Move the construction animation one step forward. Does nothing by
+	 * default - reimplemented in Facility
+	 **/
+	virtual void advanceConstruction() { }
+
+	virtual void advanceProduction() { }
+
 private:
 	class UnitPrivate;
 	UnitPrivate* d;
@@ -171,11 +174,12 @@ public:
 	MobileUnit(int type, Player* owner, QCanvas* canvas);
 	virtual ~MobileUnit();
 
-	virtual void advanceMove(); // move one step futher to path
-
 	virtual void setSpeed(double s);
 	virtual double speed() const;
-	
+
+protected:
+	virtual void advanceMove(); // move one step futher to path
+
 private:
 	// a d pointer is probably not very good here - far too much memory consumption
 	// same apllies to Unit and UnitBase. But it speeds up compiling as we don't
@@ -200,24 +204,6 @@ public:
 	static int constructionSteps();
 
 	/**
-	 * @return The number of @ref advance calls to achieve another
-	 * construction step. See @ref constructionSteps
-	 **/
-	int constructionDelay() const;
-
-	/**
-	 * Change the number of @ref advance calls needed to achieve another
-	 * construction step. See @ref constructionDelay
-	 **/
-	void setConstructionDelay(int delay);
-
-	/**
-	 * Advance the construction animation. This is usually called when
-	 * placing the unit until thje construction is completed.
-	 **/
-	virtual void advanceConstruction();
-
-	/**
 	 * @return Whether there are any productions pending for this unit.
 	 * Always FALSE if unitProperties()->canProduce() is FALSE.
 	 **/
@@ -236,6 +222,13 @@ public:
 	int completedProduction() const;
 
 	/**
+	 * @return The unit type ID of the current production. -1 if there is no
+	 * production.
+	 **/
+	int currentProduction() const;
+	 
+
+	/**
 	 * Remove the first item from the production list.
 	 **/
 	void removeProduction(); // removes first item
@@ -247,6 +240,15 @@ public:
 	void addProduction(int unitType);
 
 	QValueList<int> productionList() const;
+
+protected:
+	virtual void advanceProduction();
+
+	/**
+	 * Advance the construction animation. This is usually called when
+	 * placing the unit until thje construction is completed.
+	 **/
+	virtual void advanceConstruction();
 
 private:
 	class FacilityPrivate;

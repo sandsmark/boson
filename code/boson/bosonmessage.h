@@ -34,7 +34,6 @@ public:
 		AddUnit = 50, // whenever a unit is added
 		Advance = 51, // call BosonCanvas::advance()
 		IdChat = 52, // a chat message
-		IdStopMoving = 53, // a unit shall stop moving. obsolete.
 
 	// Player Moves:
 		MoveMove = 100, // Unit(s) is/are moved

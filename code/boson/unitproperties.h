@@ -147,6 +147,27 @@ public:
 	 **/
 	const QString& unitPath() const { return mUnitPath; };
 
+	/**
+	 * @return The number of @ref Unit::advance calls to achieve another
+	 * construction step. See @ref Facility::constructionSteps
+	 **/
+	int constructionDelay() const;
+
+	/**
+	 * The time that a unit needs to be produced
+	 * 
+	 * Note that in contrary to @ref constructionDelay which influences the
+	 * construction of a building after if was placed on the map the
+	 * productionTime is the time that is needed to <em>build</em> the unit,
+	 * so <em>before</em> it is being placed on the map.
+	 *
+	 * The production time may be influenced by the facility which produces
+	 * the unit and maybe th number of facilities (to name 2 examples).
+	 * @return The number of @ref Unit::advance calls this unit needs 
+	 * (usually) to be produced.
+	 **/
+	unsigned int productionTime() const;
+
 protected:
 	void loadMobileProperties(KSimpleConfig* conf);
 	void loadFacilityProperties(KSimpleConfig* conf);
@@ -163,6 +184,9 @@ private:
 	unsigned int mSightRange;
 	long int mDamage;
 	unsigned int mReload;
+	unsigned int mProductionTime;
+	unsigned long int mMineralCost;
+	unsigned long int mOilCost;
 	TerrainType mTerrain;
 };
 

@@ -223,7 +223,7 @@ void Unit::advance(int phase)
 	} else if (work() == WorkAttack) {
 		attackUnit(target());
 	} else if (work() == WorkProduce) {
-		// TODO
+		advanceProduction();
 	} else if (work() == WorkMine) {
 		// TODO
 	} else if (work() == WorkConstructed) {
@@ -341,9 +341,6 @@ void Unit::stopMoving()
  // network traffik!
  
  // UPDATE (01/12/22): This is now obsolete. we don't need it anymore.
-// if (send) {
-//	owner()->sendStopMoving(this);
-// }
 }
 
 void Unit::stopAttacking()
@@ -686,9 +683,10 @@ public:
 	}
 
 	KGamePropertyInt mConstructionState; // state of *this* unit
-	KGamePropertyInt mConstructionDelay; // delay for *this* unit
 
 	KGamePropertyList<int> mProductions; // what this unit produces currently
+
+	KGameProperty<unsigned int> mProductionState; // state of the unit we are producing
 };
 
 Facility::Facility(int type, Player* owner, QCanvas* canvas) : Unit(type, owner, canvas)
@@ -696,15 +694,15 @@ Facility::Facility(int type, Player* owner, QCanvas* canvas) : Unit(type, owner,
  d = new FacilityPrivate;
  d->mConstructionState.registerData(IdFix_ConstructionState, dataHandler(), 
 		KGamePropertyBase::PolicyLocal, "Construction State");
- d->mConstructionDelay.registerData(IdFix_ConstructionDelay, dataHandler(), 
-		KGamePropertyBase::PolicyLocal, "Construction Delay");
- d->mProductions.registerData(IdFix_Constructions, dataHandler(), 
+ d->mProductions.registerData(IdFix_Productions, dataHandler(), 
 		KGamePropertyBase::PolicyLocal, "Productions");
+ d->mProductionState.registerData(IdFix_ProductionState, dataHandler(), 
+		KGamePropertyBase::PolicyLocal, "ProductionState");
  d->mConstructionState.setLocal(0);
+ d->mProductionState.setLocal(0);
 
  setWork(WorkConstructed);
  setAnimated(true); // construcion animation
- setConstructionDelay(50); // default
 
  d->mProductions.setEmittingSignal(false); // just to prevent warning in Player::slotUnitPropertyChanged()
 }
@@ -719,25 +717,12 @@ int Facility::constructionSteps()
  return FACILITY_CONSTRUCTION_STEPS;
 }
 
-void Facility::setConstructionDelay(int delay)
-{
- d->mConstructionDelay = delay;
-}
-
-int Facility::constructionDelay() const
-{
- if (d->mConstructionDelay > 0) {
-	return d->mConstructionDelay;
- }
- return 1;
-}
-
 void Facility::advanceConstruction()
 {
- if (d->mConstructionState < (constructionSteps() - 1) * constructionDelay()) {
+ if (d->mConstructionState < (constructionSteps() - 1) * unitProperties()->constructionDelay()) {
 	d->mConstructionState = d->mConstructionState + 1;
-	if (d->mConstructionState % constructionDelay() == 0) {
-		setFrame(d->mConstructionState / constructionDelay());
+	if (d->mConstructionState % unitProperties()->constructionDelay() == 0) {
+		setFrame(d->mConstructionState / unitProperties()->constructionDelay());
 	}
  } else {
 	setAnimated(false);
@@ -773,6 +758,16 @@ bool Facility::canPlaceProductionAt(const QPoint& pos) const
 int Facility::completedProduction() const
 {
 //FIXME: currently a construction is always completed.
+ int type = currentProduction();
+ if (d->mProductionState < owner()->unitProperties(type)->productionTime()) {
+	kdDebug() << "not yet completed: " << type << endl;
+	return -1;
+ }
+ return type;
+}
+
+int Facility::currentProduction() const
+{
  return d->mProductions.first();
 }
 
@@ -783,6 +778,8 @@ void Facility::addProduction(int unitType)
 	return;
  }
  d->mProductions.append(unitType);
+ setWork(WorkProduce);
+ setAnimated(true);
 }
 
 void Facility::removeProduction()
@@ -793,4 +790,21 @@ void Facility::removeProduction()
 QValueList<int> Facility::productionList() const
 {
  return d->mProductions;
+}
+
+void Facility::advanceProduction()
+{
+ int type = currentProduction();
+ if (type < 0) { // no production
+	setAnimated(false);
+	d->mProductionState = 0;
+	return;
+ }
+ // a unit is completed as soon as d->mProductionState == owner()->unitProperties(type)->productionTime()
+ if (d->mProductionState <= owner()->unitProperties(type)->productionTime()) {
+	if (d->mProductionState == owner()->unitProperties(type)->productionTime()) {
+		kdDebug() << "unit " << type << " completed :-)" << endl;
+	}
+	d->mProductionState = d->mProductionState + 1;
+ }
 }
