@@ -150,12 +150,18 @@ private:
 
 class BoLineVisualization
 {
-  public:
-    BoLineVisualization()  { color.set(1.0f, 1.0f, 1.0f, 1.0f); timeout = 60; pointsize = 1.0f; }
-    QValueList<BoVector3Fixed> points;
-    BoVector4Float color;
-    int timeout;
-    float pointsize;
+public:
+	BoLineVisualization()
+	{
+		color.set(1.0f, 1.0f, 1.0f, 1.0f);
+		timeout = 60;
+		pointsize = 1.0f;
+	}
+
+	QValueList<BoVector3Fixed> points;
+	BoVector4Float color;
+	int timeout;
+	float pointsize;
 };
 
 /**
