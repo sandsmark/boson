@@ -383,6 +383,12 @@ MaxResources=number
         The maximal amount of resourced that can be mined until
         the unit needs to return to a refinery.
         Must be > 0. Default is 100.
+MiningSpeed=number
+        How fast this unit mines. This is per advance call.
+        Default is 10
+UnloadingSpeed=number
+        How fast this unit gives resources to refinery. This is per advance call.
+        Default is 10
 -------------------------------------------------------------------------------
 [Sounds]
 Sounds are stored in $KDEDIR/share/apps/boson/themes/species/${species}/sounds/
@@ -409,7 +415,6 @@ ReportUnderAttack=soundfile
         Default is report_underattack.
 -------------------------------------------------------------------------------
 [RefinePlugin]
-(not yet supported)
 CanRefineOil=Boolean
         True if this is an oilrefinery.
         Default is false
