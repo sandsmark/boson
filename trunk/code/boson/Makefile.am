@@ -1,10 +1,10 @@
 ## Makefile.am for boson
 
-SUBDIRS = data bosonwidgets items commandframe bodebug startupwidgets sound info script
+SUBDIRS = data bosonwidgets items commandframe startupwidgets sound info script
 
 bin_PROGRAMS = boson bounit boprofiling bocursor borender boinfo
 
-INCLUDES = -I$(kde_includes)/arts -I$(top_srcdir)/boson/bodebug $(all_includes)
+INCLUDES = -I$(kde_includes)/arts -I$(top_srcdir)/bodebug $(all_includes)
 
 BOSON_SRC = \
 	boapplication.cpp \
@@ -94,7 +94,7 @@ BOPROFILING_SRC= \
 
 #botriangles_test_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 #botriangles_test_LDADD = \
-#		$(top_builddir)/boson/bodebug/libbodebug.la \
+#		$(top_builddir)/bodebug/libbodebug.la \
 #		$(LIB_QT) $(LIB_KDECORE) \
 #		-l3ds
 #botriangles_test_SOURCES = \
@@ -108,7 +108,7 @@ boson_LDADD = \
 		$(top_builddir)/boson/info/libbosoninfo.la \
 		$(top_builddir)/boson/commandframe/libbosoncommandframe.la \
 		$(top_builddir)/boson/startupwidgets/libbosonstartupwidgets.la \
-		$(top_builddir)/boson/bodebug/libbodebug.la \
+		$(top_builddir)/bodebug/libbodebug.la \
 		$(top_builddir)/boson/bosonwidgets/libbosonwidgets.la \
 		$(top_builddir)/boson/script/libbosonscript.la \
 		-lkdegames \
@@ -125,7 +125,7 @@ bounit_LDADD = \
 		$(top_builddir)/boson/info/libbosoninfo.la \
 		$(top_builddir)/boson/commandframe/libbosoncommandframe.la \
 		$(top_builddir)/boson/startupwidgets/libbosonstartupwidgets.la \
-		$(top_builddir)/boson/bodebug/libbodebug.la \
+		$(top_builddir)/bodebug/libbodebug.la \
 		$(top_builddir)/boson/bosonwidgets/libbosonwidgets.la \
 		$(top_builddir)/boson/script/libbosonscript.la \
 		-lkdegames \
@@ -138,14 +138,14 @@ bounit_SOURCES = \
 
 boprofiling_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 boprofiling_LDADD = \
-		$(top_builddir)/boson/bodebug/libbodebug.la \
+		$(top_builddir)/bodebug/libbodebug.la \
 		-lkio $(LIB_KDEUI)
 boprofiling_SOURCES = \
 		$(BOPROFILING_SRC)
 
 bocursor_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 bocursor_LDADD = \
-		$(top_builddir)/boson/bodebug/libbodebug.la \
+		$(top_builddir)/bodebug/libbodebug.la \
 		-lkio $(LIB_KDEUI) $(GLLIB)
 bocursor_SOURCES = \
 		boapplication.cpp \
@@ -156,7 +156,7 @@ bocursor_SOURCES = \
 
 borender_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 borender_LDADD = \
-		$(top_builddir)/boson/bodebug/libbodebug.la \
+		$(top_builddir)/bodebug/libbodebug.la \
 		$(top_builddir)/boson/items/libbosonitems.la \
 		$(top_builddir)/boson/sound/libbosonsoundinterface.la \
 		$(top_builddir)/boson/info/libbosoninfo.la \
@@ -175,7 +175,7 @@ borender_SOURCES = \
 
 boinfo_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 boinfo_LDADD = \
-		$(top_builddir)/boson/bodebug/libbodebug.la \
+		$(top_builddir)/bodebug/libbodebug.la \
 		$(top_builddir)/boson/info/libbosoninfo.la \
 		$(GLLIB) \
 		-lkio $(LIB_KDEUI)
@@ -190,3 +190,6 @@ METASOURCES = AUTO
 # not yet used:
 #messages: rc.cpp
 #	$(XGETTEXT) rc.cpp $(COMMON_SRC) $(BOSON_SRC) $(BOEDITOR_SRC) -o $(podir)/boson.pot
+
+include ../admin/Doxyfile.am
+

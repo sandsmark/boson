@@ -10,3 +10,6 @@ libbodebug_la_SOURCES = \
 	bodebug.cpp \
 	bodebugdcopiface.cpp \
 	bodebugdcopiface.skel
+
+include ../admin/Doxyfile.am
+
