@@ -766,11 +766,6 @@ void BosonWidgetBase::startScenarioAndGame()
  if (boGame->loadingStatus() != BosonSaveLoad::LoadingCompleted) {
 	displayManager()->slotCenterHomeBase();
  }
-
- #warning FIXME
- // this is a strange bug: we need to resize the widget once it is shown - otherwise we'll have a VERY slot frame rate.
- // I can't find out where the problem resides :-(
- //QTimer::singleShot(500, this, SLOT(slotHack1()));
 }
 
 void BosonWidgetBase::slotDebugMode(int index)
