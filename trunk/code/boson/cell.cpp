@@ -49,7 +49,7 @@ void Cell::makeCell(int groundType, unsigned char version)
  setGroundType((GroundType)groundType);
  setVersion(version);
  if (groundType == GroundUnknown) {
-	boError() << "unknown ground?!" << endl;
+	boError() << k_funcinfo << "unknown ground?!" << endl;
  }
 }
 
@@ -65,7 +65,7 @@ bool Cell::canGo(const UnitProperties* prop) const
 	TransType g = (TransType)getTransRef(groundType());
 	return (canGo(prop, from(g)) && canGo(prop, to(g)));
  } else {
-	boWarning() << "neither plain nor transition" << endl;
+	boWarning() << k_funcinfo << "neither plain nor transition" << endl;
 	return false;
  }
 }
@@ -86,7 +86,7 @@ bool Cell::canGo(const UnitProperties* prop, GroundType ground)
 	case GroundWater:
 		return prop->canGoOnWater();
 	default:
-		boWarning() << "unknown groundType " << ground << endl;
+		boWarning() << k_funcinfo << "unknown groundType " << ground << endl;
 		return false;
  }
  return false; // never reached, btw
@@ -143,7 +143,7 @@ Cell::GroundType Cell::from(TransType trans)
 	case TransDeepWater:
 		return GroundDeepWater;
 	default:
-		boError() << "Unknown trans " << (int)trans << endl;
+		boError() << k_funcinfo << "Unknown trans " << (int)trans << endl;
 		return GroundUnknown;
  }
 }
@@ -159,7 +159,7 @@ Cell::GroundType Cell::to(TransType trans)
 	case TransDeepWater:
 		return GroundWater;
 	default:
-		boError() << "Unknown trans " << (int)trans
+		boError() << k_funcinfo << "Unknown trans " << (int)trans
 				<< endl;
 		return GroundUnknown;
  }
@@ -236,7 +236,7 @@ int Cell::smallTileNumber(int smallNo, TransType trans, bool inverted)
 				TransDownRightInverted : TransDownRight);
 		break;
 	default:
-		boError() << "Unknwon small tile " << smallNo << endl;
+		boError() << k_funcinfo << "Unknwon small tile " << smallNo << endl;
 		return 0;
  }
  return tileNo;
