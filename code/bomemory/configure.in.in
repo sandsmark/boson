@@ -1,4 +1,4 @@
-AC_DEFUN(AC_INCLUDE_BOMEMORY_H,
+AC_DEFUN([AC_INCLUDE_BOMEMORY_H],
 [
  AC_ARG_ENABLE(
   bomemory,
@@ -46,19 +46,4 @@ dnl AC_MSG_CHECKING(for libGL)
  AM_CONDITIONAL(include_bomemory, test -n "$LIB_BOMEMORY")
 ])
 AC_INCLUDE_BOMEMORY_H
-
-
-AC_DEFUN(AC_FOOBAR1,
-[
- AC_LANG_SAVE
- AC_LANG_CPLUSPLUS
- AC_TRY_COMPILE([
-	#include <foobar.h>
-	],
-	[],
-	bo_can_include="yes",
-	bo_can_include="no"
- )
-])
-AC_FOOBAR1
 
