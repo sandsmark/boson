@@ -28,9 +28,13 @@
 #include <lib3ds/mesh.h>
 #include <lib3ds/vector.h>
 
+BosonModel::BosonModel(GLuint list)
+{
+ mDisplayList = list;
+}
+
 BosonModel::BosonModel(const QString& f)
 {
-return; //AB: we don't provide any files currently anyway...
  QString file = f;
 // QString file = "/home/guest/3ds/3ds/andi3d/sphere.3DS"; // AB: temporary for debugging
  m3ds = lib3ds_file_load(file);

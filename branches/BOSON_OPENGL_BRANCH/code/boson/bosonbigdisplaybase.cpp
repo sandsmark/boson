@@ -36,6 +36,7 @@
 #include "boselection.h"
 #include "bosonconfig.h"
 #include "bosonmusic.h"
+#include "selectbox.h"
 
 #include <kgame/kgameio.h>
 
@@ -61,7 +62,6 @@
 #define FAR 100.0
 
 
-#define USE_3DS_FILES 0
 #define PLIB 0 // obsolete - we use Lib3ds
 
 #if PLIB
@@ -269,6 +269,9 @@ public:
 	long long int mFpsTime;
 	double mFps;
 	int mFramecount;
+
+	bool mEvenFlag; // this is used for a nice trick to avoid clearing the depth 
+	                // buffer - see http://www.mesa3d.org/brianp/sig97/perfopt.htm
 #endif // !NO_OPENGL
 
 	SelectionRect mSelectionRect;
@@ -277,6 +280,7 @@ public:
 
 	QTimer mUpdateTimer;
 	int mUpdateInterval;
+	
 
 #ifndef NO_OPENGL
 #if PLIB
@@ -348,7 +352,7 @@ void BosonBigDisplayBase::initializeGL()
 {
  glClearColor(0.0, 0.0, 0.0, 0.0);
 
- qglClearColor(Qt::white);
+ qglClearColor(Qt::black);
  glShadeModel(GL_FLAT); // GL_SMOOTH is default - but esp. in software rendering way slower. in hardware it *may* be equal (concerning speed) to GL_FLAT
  glDisable(GL_DITHER); // we don't need this, I guess (and its enabled by default)
 
@@ -382,6 +386,14 @@ void BosonBigDisplayBase::resizeGL(int w, int h)
 
  glMatrixMode(GL_MODELVIEW);
 
+
+ glClearDepth(1.0);
+ glClear(GL_DEPTH_BUFFER_BIT);
+ glDepthRange(0.0, 0.5);
+ glDepthFunc(GL_LESS);
+ d->mEvenFlag = true;
+
+
  emit signalSizeChanged(w, h);
  if (checkError()) {
 	kdError() << k_funcinfo << endl;
@@ -408,9 +420,7 @@ void BosonBigDisplayBase::paintGL()
  // TODO: performance: maybe enable depth-buffer/depth-testing after the cells
  // have been drawn - so useless cell-drawings can be discarded. remember to
  // disable it before drawing the background (i.e. cells) !
- // TODO: performance and code cleanness: use glGetError() !!! fixinf such
- // errors will speed up rendering and lead to cleaner code :)
- // remove the glGetError() calls in releases and so on, since they slow
+ // FIXME: remove the glGetError() calls in releases and so on, since they slow
  // rendering down, like all getGet*'s
  // TODO: performance: from the URL above:
  // Transparency may be implemented with stippling instead of blending 
@@ -424,20 +434,24 @@ void BosonBigDisplayBase::paintGL()
  // point arguments (i.e. GLfloat) if there are single precisions (GLfloat)
  // available. mesa uses float internally and therefore needs to convert...
 
- // AB: performance: we don't need to clear the color buffer, since the scene we
- // are drawing covers the entire screen anyway.
- // TODO: make sure that the player can't move the screen beyond the map!
  // TODO: performance: we'll probably need the depth buffer soon - there is a
  // nice trick to avoid clearing it. see
  // http://www.mesa3d.org/brianp/sig97/perfopt.htm
  // in 3.5!
  glClear(GL_COLOR_BUFFER_BIT);
+ // the guy who wrote http://www.mesa3d.org/brianp/sig97/perfopt.htm is *really* clever!
+ // this trick avoids clearing the depth buffer:
+ if (d->mEvenFlag) {
+	glDepthFunc(GL_LESS);
+	glDepthRange(0.0, 0.5);
+ } else {
+	glDepthFunc(GL_GREATER);
+	glDepthRange(1.0, 0.5);
+ }
+ d->mEvenFlag = !d->mEvenFlag;
  calcFPS();
  glMatrixMode(GL_MODELVIEW); // default matrix mode anyway ; redundant!
  glLoadIdentity();
- if (checkError()) {
-	kdError() << k_funcinfo << "1" << endl;
- }
 
  float upX, upY, upZ;
  upX = 0.0;
@@ -459,6 +473,8 @@ void BosonBigDisplayBase::paintGL()
  }
 
  glEnable(GL_TEXTURE_2D);
+ // hmm.. I don't want to enable the depth buffer for cell-drawing, but otherwise we seem to have some overlapping on scrolling
+// glEnable(GL_DEPTH_TEST); // if we enable this we need to change the z-positions of cells and/or units
  if (!d->mMapDisplayList) {
 	generateMapDisplayList();
 	if (!d->mMapDisplayList) {
@@ -472,6 +488,7 @@ void BosonBigDisplayBase::paintGL()
 	kdError() << k_funcinfo << "cells rendered" << endl;
  }
 
+ glEnable(GL_DEPTH_TEST); // FIXME: this should be the first occurance of glEnable(GL_DEPTH_TEST)!
  glEnable(GL_BLEND);
  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
  //wow.. we have a LOT of space for tuning here!
@@ -482,48 +499,37 @@ void BosonBigDisplayBase::paintGL()
 	//closer to surface, then flying units
 		
 	BosonSprite* item = *it;
-#if USE_3DS_FILES
+
+	GLfloat x = item->x() * BO_GL_CELL_SIZE / BO_TILE_SIZE;
+	GLfloat y = -(item->y() * BO_GL_CELL_SIZE / BO_TILE_SIZE + ((float)item->height()) * BO_GL_CELL_SIZE / BO_TILE_SIZE);
+	GLfloat z = item->z() * BO_GL_CELL_SIZE / BO_TILE_SIZE;
+
+	glTranslatef(x, y, z); // AB: we can use the item->vertexPointer(), too!
+	
 	// FIXME!!! don't apply here, don't cast here
 	Unit* u = (Unit*)item;
-	// FIXME: dont push matrix here
-	glPushMatrix();
-	glTranslatef(u->x() / BO_TILE_SIZE * BO_GL_CELL_SIZE, 
-			-u->y() / BO_TILE_SIZE * BO_GL_CELL_SIZE, 
-			u->z() / BO_TILE_SIZE * BO_GL_CELL_SIZE);
 	if (item->displayList() == 0) {
 		GLuint list = u->speciesTheme()->displayList(u->type());
 		item->setDisplayList(list);
 	}
+	// FIXME: performance: we could create a displaylist that contains the selectbox and simply channe item->displayList()
+	// when the item is selected/unselected
 	glCallList(item->displayList());
-	glPopMatrix();
-#else
-	GLuint tex = item->currentTexture();
-	if (tex == 0) {
-		kdWarning() << k_funcinfo << "invalid texture" << endl;
-		if (!item->textures()) {
-			kdError() << "NULL textures" << endl;
-		} else {
-			kdDebug() << "frame=" << item->frame() << endl;
-		}
-		continue;
+	if (item->isSelected()) {
+		glCallList(item->selectBox()->displayList());
 	}
 
-	glBindTexture(GL_TEXTURE_2D, tex); // which texture to load
-
-	// FIXME: vertex arrays are an opengl extension! add an #ifdef for it!!
-	// FIXME: performance: we could combine all units with the same texture
-	glTexCoordPointer(2, GL_FLOAT, 0, textureCoordPointer); 
-	glVertexPointer(3, GL_FLOAT, 0, item->vertexPointer());
-
-#endif
+	glTranslatef(-x, -y, -z); 
  }
  if (checkError()) {
 	kdError() << k_funcinfo << "when units rendered" << endl;
  }
+ glDisable(GL_DEPTH_TEST);
 
-//TODO: cursor must always be on top!
-//possible solutions: load the identity matrix ; maybe even use an ortho
-//projection matrix for the cursor (it seems that we can mix them!)
+// TODO: cursor must always be on top and should not be scaled (i.e. cause of zoom)
+// possible solutions: load the identity matrix ; maybe even use an ortho
+// projection matrix for the cursor (it seems that we can mix them!)
+// AB: it'll be always on top, cause we disabled the depth buffer test above
  if (cursor() && cursor()->isA("BosonSpriteCursor")) {
 	BosonSpriteCursor* c = (BosonSpriteCursor*)cursor();
 	GLuint tex = c->currentTexture();
@@ -573,7 +579,6 @@ void BosonBigDisplayBase::paintGL()
 	h = QABS(y1 - y2);
 	z = 0.0;
 
-	//FIXME: ensure that the rect is *always* on top - even for units with z > 0
 	glTranslatef(x, y - h, z);
 	glBegin(GL_LINE_LOOP);
 		glVertex3f(0.0, 0.0, 0.0);

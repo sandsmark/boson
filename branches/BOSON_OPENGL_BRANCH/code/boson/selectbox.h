@@ -37,15 +37,45 @@ class BosonCanvas;
 
 #if 1
 
+#include <GL/gl.h>
+#include <qmap.h>
+
+class BosonTextureArray;
+
+class SelectBoxData
+{
+public:
+	SelectBoxData();
+	~SelectBoxData();
+
+	/**
+	 * @param factor Should be health/maxHealth of the unit
+	 **/
+	GLuint list(double factor);
+
+protected:
+	void loadBoxes();
+	static void drawCube();
+
+private:
+	QMap<int, GLuint> mDisplayLists;
+	BosonTextureArray* mTextures;
+};
+
 class SelectBox
 {
 public :
-	SelectBox(BosonSprite*, BosonCanvas* canvas, bool groupLeader = false)
-	{
-	}
-	void update(double) {}
+	SelectBox(BosonSprite*, BosonCanvas* canvas, bool groupLeader = false);
+	~SelectBox();
+	void update(double);
 	void setVisible(bool) {}
 	void moveBy(float dx, float dy, float dz) {}
+
+	inline GLuint displayList() const { return mDisplayList; }
+
+private:
+	GLuint mDisplayList;
+	static SelectBoxData* mBoxData;
 };
 
 #else

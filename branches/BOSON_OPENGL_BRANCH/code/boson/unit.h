@@ -90,8 +90,7 @@ public:
 
 	inline BosonCanvas* boCanvas() const { return (BosonCanvas*)canvas(); }
 
-	void select();
-	void unselect();
+	virtual void select(bool markAsLeader = false);
 
 	/**
 	 * Note that we use float all over in boson, since mesa uses float

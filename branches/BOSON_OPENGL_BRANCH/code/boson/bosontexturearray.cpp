@@ -33,8 +33,11 @@ BosonTextureArray::BosonTextureArray()
 
 BosonTextureArray::BosonTextureArray(QValueList<QImage> images, GLenum mode)
 {
+// FIXME: remove mode parameter. will always be 2d anyway
  init();
- createTextures(images, mode);
+ if (!createTextures(images, mode)) {
+	kdWarning() << k_funcinfo << "Could not create textures" << endl;
+ }
 }
 
 void BosonTextureArray::init()
@@ -65,6 +68,7 @@ bool BosonTextureArray::createTextures(QValueList<QImage> images, GLenum mode)
  // TODO: performance: use smaller textures!! so we can store more textures in
  // texture memory and don't need to swap from/to system memory
  if (mTextures || mCount) {
+	kdDebug() << k_funcinfo << "textures already generated?!" << endl;
 	return false;
  }
  QImage buffer;
@@ -126,6 +130,7 @@ bool BosonTextureArray::createTextures(QValueList<QImage> images, GLenum mode)
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
  }
 #endif
+ return true;
 }
 
 int BosonTextureArray::nextPower2(int n) const

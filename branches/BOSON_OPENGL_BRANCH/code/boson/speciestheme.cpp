@@ -45,6 +45,8 @@
 #ifndef NO_GL
 #include <qgl.h>
 
+#define USE_3DS_FILES 0
+
 int SpeciesTheme::mThemeNumber = 0;
 
 #endif
@@ -939,8 +941,38 @@ void SpeciesTheme::loadUnitTextures(int unitType, QValueList<QImage> list)
 
 void SpeciesTheme::loadUnitModel(const UnitProperties* prop)
 {
+#if USE_3DS_FILES
  QString fileName = prop->unitPath() + QString::fromLatin1("unit.3ds");
  BosonModel* m = new BosonModel(fileName);
+#else
+ BosonTextureArray* texArray = textureArray(prop->typeId());
+ if (!texArray) {
+	kdError() << k_funcinfo << "NULL textures" << endl;
+	return;
+ }
+ float width = ((float)texArray->width(0)) * BO_GL_CELL_SIZE / BO_TILE_SIZE;
+ float height = ((float)texArray->height(0)) * BO_GL_CELL_SIZE / BO_TILE_SIZE;
+ #warning FIXME - directions are not supported
+ GLuint tex = texArray->texture(0); // this doesn't support directions!!
+ if (tex == 0) {
+	kdWarning() << k_funcinfo << "invalid texture" << endl;
+	return;
+ }
+
+ GLuint list = glGenLists(1);
+ glNewList(list, GL_COMPILE);
+	glBindTexture(GL_TEXTURE_2D, tex); // which texture to load
+
+	glBegin(GL_QUADS);
+		glTexCoord2f(0.0,0.0); glVertex3f(0.0, 0.0, 0.0);
+		glTexCoord2f(1.0,0.0); glVertex3f(width, 0.0, 0.0);
+		glTexCoord2f(1.0,1.0); glVertex3f(width, height, 0.0);
+		glTexCoord2f(0.0,1.0); glVertex3f(0.0, height, 0.0);
+
+	glEnd();
+ glEndList();
+ BosonModel* m = new BosonModel(list);
+#endif
  d->mUnitModels.insert(prop->typeId(), m);
 }
 
