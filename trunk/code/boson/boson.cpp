@@ -1516,7 +1516,6 @@ void Boson::unlock()
  kdDebug() << k_funcinfo << endl;
 #endif
  d->mIsLocked = false;
- int c = d->mDelayedMessages.count();
  while (!d->mDelayedMessages.isEmpty() && !d->mIsLocked) {
 	slotProcessDelayed();
  }
