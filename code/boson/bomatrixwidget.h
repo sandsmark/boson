@@ -61,6 +61,9 @@ public:
 	void mark(unsigned int i);
 	void unmark(unsigned int i);
 
+	void setPrecision(int prec = 6) { mPrecision = prec; }
+	int precision() const { return mPrecision; }
+
 	/**
 	 * Compare the of this widget matrix with @p matrix and @ref mark all
 	 * elements, that don't match.
@@ -80,6 +83,7 @@ public:
 
 private:
 	BoMatrixWidgetPrivate* d;
+	int mPrecision;
 };
 
 

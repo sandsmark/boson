@@ -50,6 +50,7 @@ BoMatrixWidget::BoMatrixWidget(QWidget* parent, const char* name) : QWidget(pare
 	d->mLabel.insert(i, l);
 	d->mLayout->addWidget(l, i % 4, i / 4);
  }
+ mPrecision = 6;
 }
 BoMatrixWidget::~BoMatrixWidget()
 {
@@ -70,10 +71,10 @@ void BoMatrixWidget::setMatrix(const BoMatrix& m)
  d->mMatrix = m;
  for (int i = 0; i < 4; i++) {
 	const float* data = d->mMatrix.data();
-	d->mLabel[i + 0]->setText(QString::number(data[i + 0]));
-	d->mLabel[i + 4]->setText(QString::number(data[i + 4]));
-	d->mLabel[i + 8]->setText(QString::number(data[i + 8]));
-	d->mLabel[i + 12]->setText(QString::number(data[i + 12]));
+	d->mLabel[i + 0]->setText(QString::number(data[i + 0], 'f', precision()));
+	d->mLabel[i + 4]->setText(QString::number(data[i + 4], 'f', precision()));
+	d->mLabel[i + 8]->setText(QString::number(data[i + 8], 'f', precision()));
+	d->mLabel[i + 12]->setText(QString::number(data[i + 12], 'f', precision()));
  }
 }
 
