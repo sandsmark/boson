@@ -26,7 +26,6 @@
 #include <kmessagebox.h>
 #include <klocale.h>
 #include <kmenubar.h>
-#include <ksock.h>
 
 #include "common/boconfig.h"
 #include "common/log.h"
