@@ -54,11 +54,6 @@
 
 #include "bosoncanvas.moc"
 
-// if this is set to 1, we do per-item profiling. this takes both - quite some
-// time and a lot of memory, so expect noticeable performance drops if you use
-// it
-#define DO_ITEM_ADVANCE_PROFILING 0
-
 ItemType ItemType::typeForUnit(unsigned long int unitType)
 {
  return ItemType(unitType);
@@ -328,43 +323,16 @@ void BoCanvasAdvance::advanceFunctionAndMove(unsigned int advanceCallsCount, boo
 //	boDebug() << "advancing " << (*it).count() << " items with advanceWork=" << work << endl;
 	QPtrListIterator<BosonItem> itemIt(*it);
 	for (; itemIt.current(); ++itemIt) {
-		unsigned int id;
-		int work;
 		BosonItem* s = itemIt.current();
-		if (RTTI::isUnit(s->rtti())) {
-			id = ((Unit*)s)->id();
-			work = (int)((Unit*)s)->advanceWork();
-		} else {
-			id = 0;
-			work = -1;
-		}
-#if DO_ITEM_ADVANCE_PROFILING
-		boProfiling->advanceItemStart(s->rtti(), id, work);
-		boProfiling->advanceItemFunction(true);
-#endif
 		if (advanceFlag) { // bah - inside the loop..
 			s->advanceFunction(advanceCallsCount); // once this was called this object is allowed to change its advanceFunction()
 		} else {
 			s->advanceFunction2(advanceCallsCount); // once this was called this object is allowed to change its advanceFunction()
 		}
-#if DO_ITEM_ADVANCE_PROFILING
-		boProfiling->advanceItemFunction(false);
-#endif
 
-		// AB: moveBy() is *NOT* called if advanceFunction() isn't
-		// called for an item!!
-		// --> i.e. if it isn't in one of the lists that are executed
-		// here
-#if DO_ITEM_ADVANCE_PROFILING
-		boProfiling->advanceItemMove(true);
-#endif
 		if (s->xVelocity() || s->yVelocity() || s->zVelocity()) {
 			s->moveBy(s->xVelocity(), s->yVelocity(), s->zVelocity());
 		}
-#if DO_ITEM_ADVANCE_PROFILING
-		boProfiling->advanceItemMove(false);
-		boProfiling->advanceItemStop();
-#endif
 	}
  }
 }
