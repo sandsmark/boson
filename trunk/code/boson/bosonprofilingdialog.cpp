@@ -98,6 +98,9 @@ BosonProfilingDialog::BosonProfilingDialog(QWidget* parent, bool modal)
 		Ok, parent, "bosonprofilingdialog", modal, true)
 {
  d = new BosonProfilingDialogPrivate;
+ if (boProfiling) {
+	d->mData = new BosonProfiling(*boProfiling);
+ }
 
  initLoadUnitPage();
  initRenderPage();
