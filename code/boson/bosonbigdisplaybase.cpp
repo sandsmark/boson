@@ -393,6 +393,8 @@ public:
 	QTimer mUpdateTimer;
 	int mUpdateInterval;
 
+	bool mIsQuit;
+
 };
 
 BosonBigDisplayBase::BosonBigDisplayBase(BosonCanvas* c, QWidget* parent)
@@ -422,6 +424,7 @@ void BosonBigDisplayBase::init()
  d->mCursorEdgeCounter = 0;
  d->mUpdateInterval = 0;
  d->mInitialized = false;
+ d->mIsQuit = false;
 
  mSelection = new BoSelection(this);
  d->mChat = new BosonGLChat(this);
@@ -553,6 +556,10 @@ void BosonBigDisplayBase::paintGL()
 {
  if (!d->mInitialized) {
 	glInit();
+	return;
+ }
+ if (d->mIsQuit) {
+	// we will get deleted soon
 	return;
  }
  if (boGame->gameStatus() == KGame::Init) {
@@ -1317,6 +1324,7 @@ void BosonBigDisplayBase::leaveEvent(QEvent*)
 void BosonBigDisplayBase::quitGame()
 {
  selection()->clear();
+ d->mIsQuit = true; // don't call paintGL() anymore
 }
 
 bool BosonBigDisplayBase::eventFilter(QObject* o, QEvent* e)
