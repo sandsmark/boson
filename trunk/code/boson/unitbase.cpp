@@ -25,6 +25,8 @@
 #include "player.h"
 #include "speciestheme.h"
 
+#include <kgame/kgamepropertyhandler.h>
+
 #include <kdebug.h>
 
 
@@ -115,11 +117,6 @@ void UnitBase::setArmor(unsigned long int a)
 void UnitBase::setShields(unsigned long int s)
 {
  mShields = s;
-}
-
-KGamePropertyHandler* UnitBase::dataHandler() const
-{
- return mProperties;
 }
 
 unsigned long int UnitBase::type() const
