@@ -57,12 +57,17 @@ unsigned long int PlayerIO::oil() const
  return player()->oil();
 }
 
+BosonStatistics* PlayerIO::statistics() const
+{
+ return player()->statistics();
+}
+
 bool PlayerIO::isFogged(int x, int y) const
 {
  return player()->isFogged(x, y);
 }
 
-bool PlayerIO::isFogged(Cell* c) const
+bool PlayerIO::isFogged(const Cell* c) const
 {
  if (!c) {
 	return true;
@@ -84,12 +89,25 @@ bool PlayerIO::canSee(BosonItem* item) const
  return false;
 }
 
-bool PlayerIO::ownsUnit(Unit* unit) const
+bool PlayerIO::ownsUnit(const Unit* unit) const
 {
  if (!unit) {
 	return false;
  }
  return (unit->owner() == player());
+}
+
+bool PlayerIO::isEnemy(Player* p) const
+{
+ return player()->isEnemy(p);
+}
+
+bool PlayerIO::isEnemyUnit(const Unit* unit) const
+{
+ if (!unit) {
+	return false;
+ }
+ return isEnemy(unit->owner());
 }
 
 QPoint PlayerIO::homeBase() const
@@ -168,5 +186,24 @@ bool PlayerIO::canBuild(unsigned long int unitType) const
 bool PlayerIO::canResearchTech(unsigned long int id) const
 {
  return player()->canResearchTech(id);
+}
+
+bool PlayerIO::canGo(const UnitProperties* prop, const Cell* cell, bool _default) const
+{
+ if (!prop || !cell) {
+	return _default;
+ }
+ if (!canSee(cell)) {
+	return _default;
+ }
+ return cell->canGo(prop);
+}
+
+bool PlayerIO::canGo(const Unit* unit, const Cell* cell, bool _default) const
+{
+ if (unit) {
+	return canGo(unit->unitProperties(), cell, _default);
+ }
+ return _default;
 }
 
