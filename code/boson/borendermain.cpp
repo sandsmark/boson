@@ -44,6 +44,7 @@
 #include <kstandarddirs.h>
 #include <kdialogbase.h>
 #include <kinputdialog.h>
+#include <kcolordialog.h>
 
 #include <qtimer.h>
 #include <qhbox.h>
@@ -131,6 +132,7 @@ ModelPreview::ModelPreview(QWidget* parent) : BosonGLWidget(parent)
 
  boConfig->addDynamicEntry(new BoConfigBoolEntry(boConfig, "ShowVertexPoints", true));
  boConfig->addDynamicEntry(new BoConfigUIntEntry(boConfig, "VertexPointSize", 3));
+ boConfig->addDynamicEntry(new BoConfigColorEntry(boConfig, "BoRenderBackgroundColor", Qt::black));
 }
 
 ModelPreview::~ModelPreview()
@@ -173,7 +175,9 @@ void ModelPreview::paintGL()
 
  camera()->applyCameraToScene();
 
- // AB: try to keep this basically similar to BosonBigDisplay::paintGL()
+ QColor background = boConfig->colorValue("BoRenderBackgroundColor", Qt::black);
+ glClearColor((GLfloat)background.red() / 255.0f, (GLfloat)background.green() / 255.0f, background.blue() / 255.0f, 0.0f);
+
  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
  glColor3ub(255, 255, 255);
 
@@ -831,6 +835,7 @@ RenderMain::RenderMain()
 
 RenderMain::~RenderMain()
 {
+ boConfig->save(false);
  mSpecies.clear();
  delete mIface;
 }
@@ -1044,6 +1049,15 @@ void RenderMain::slotShowVertexPoints(bool s)
  boConfig->setBoolValue("ShowVertexPoints", s);
 }
 
+void RenderMain::slotBackgroundColor()
+{
+ QColor color = boConfig->colorValue("BoRenderBackgroundColor", Qt::black);
+ int result = KColorDialog::getColor(color, color, this);
+ if (result == KColorDialog::Accepted) {
+	boConfig->setColorValue("BoRenderBackgroundColor", color);
+ }
+}
+
 SpeciesTheme* RenderMain::findTheme(const QString& theme) const
 {
  SpeciesTheme* s = 0;
@@ -1172,6 +1186,10 @@ void RenderMain::initKAction()
  (void)new KAction(i18n("Vertex point size..."), 0, this,
 		SLOT(slotVertexPointSize()),
 		actionCollection(), "options_vertex_point_size");
+ (void)new KAction(i18n("Background color..."), 0, this,
+		SLOT(slotBackgroundColor()),
+		actionCollection(), "options_background_color");
+
  (void)new KAction(i18n("Debug &Models"), 0, this, SLOT(slotDebugModels()),
 		actionCollection(), "debug_models");
  (void)new KAction(i18n("Debug &Species"), 0, this, SLOT(slotDebugSpecies()),
