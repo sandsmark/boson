@@ -1689,6 +1689,7 @@ void BoMesh::generateLOD()
 	lod[i] = d->mLODs[i];
  }
  if (oldCount == 0) {
+	boError() << k_funcinfo << "old LOD count is 0??! must be at least 1! will probably crash!" << endl;
 	lod[0] = 0;
  }
  boDebug(100) << k_funcinfo << "lods=" << LODCount
