@@ -247,26 +247,23 @@
                         <property name="name">
                             <cstring>unnamed</cstring>
                         </property>
-                        <widget class="KListView" row="0" column="0" rowspan="2" colspan="1">
-                            <column>
-                                <property name="text">
-                                    <string>Map</string>
-                                </property>
-                                <property name="clickable">
-                                    <bool>false</bool>
-                                </property>
-                                <property name="resizable">
-                                    <bool>false</bool>
-                                </property>
-                            </column>
+                        <widget class="BosonPlayFieldView" row="0" column="0" rowspan="2" colspan="1">
                             <property name="name">
                                 <cstring>mChooseBosonMap</cstring>
                             </property>
-                            <property name="fullWidth">
-                                <bool>true</bool>
+                        </widget>
+                        <widget class="BosonMiniMap" row="1" column="1">
+                            <property name="name">
+                                <cstring>mBosonMiniMap</cstring>
+                            </property>
+                            <property name="minimumSize">
+                                <size>
+                                    <width>0</width>
+                                    <height>0</height>
+                                </size>
                             </property>
                         </widget>
-                        <widget class="KTextBrowser" row="1" column="1">
+                        <widget class="KTextBrowser" row="0" column="1">
                             <property name="name">
                                 <cstring>mMapPropertiesTextBrowser</cstring>
                             </property>
@@ -277,23 +274,6 @@
                                 <enum>WidgetWidth</enum>
                             </property>
                         </widget>
-                        <spacer row="0" column="1">
-                            <property name="name">
-                                <cstring>mMapImageSpacer</cstring>
-                            </property>
-                            <property name="orientation">
-                                <enum>Horizontal</enum>
-                            </property>
-                            <property name="sizeType">
-                                <enum>Expanding</enum>
-                            </property>
-                            <property name="sizeHint">
-                                <size>
-                                    <width>150</width>
-                                    <height>130</height>
-                                </size>
-                            </property>
-                        </spacer>
                     </grid>
                 </widget>
             </grid>
@@ -321,7 +301,7 @@
     </connection>
     <connection>
         <sender>mChooseBosonMap</sender>
-        <signal>clicked(QListViewItem*)</signal>
+        <signal>pressed(QListViewItem*)</signal>
         <receiver>BosonNewEditorWidgetBase</receiver>
         <slot>slotPlayFieldChanged(QListViewItem*)</slot>
     </connection>
@@ -368,6 +348,9 @@
         <slot>setValue(int)</slot>
     </connection>
 </connections>
+<forwards>
+    <forward>class QListViewItem</forward>
+</forwards>
 <slots>
     <slot access="protected" specifier="pure virtual">slotPlayFieldChanged(QListViewItem*)</slot>
     <slot access="protected" specifier="pure virtual">slotTilesetChanged(int)</slot>
@@ -384,7 +367,8 @@
     <includehint>knuminput.h</includehint>
     <includehint>knuminput.h</includehint>
     <includehint>knuminput.h</includehint>
-    <includehint>klistview.h</includehint>
+    <includehint>bosonwidgets/bosonplayfieldview.h</includehint>
+    <includehint>bosonminimap.h</includehint>
     <includehint>ktextbrowser.h</includehint>
 </includehints>
 </UI>
