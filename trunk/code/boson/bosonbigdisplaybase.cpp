@@ -664,10 +664,10 @@ void BosonBigDisplayBase::paintGL()
 
  // Render missiles
  boProfiling->renderMissiles(true);
- if(canvas()->missiles()->count() > 0) {
+ if (canvas()->missiles()->count() > 0) {
 	QPtrListIterator<BosonMissile> it(*(canvas()->missiles()));
 	BosonMissile* s;
-	while((s = it.current()) != 0) {
+	while ((s = it.current()) != 0) {
 		++it;
 		s->draw();
 	}
@@ -687,7 +687,7 @@ void BosonBigDisplayBase::paintGL()
 	glDisable(GL_DEPTH_TEST);
 	QPtrListIterator<BosonParticleSystem> it(*(canvas()->particleSystems()));
 	BosonParticleSystem* s;
-	while((s = it.current()) != 0) {
+	while ((s = it.current()) != 0) {
 		++it;
 		s->draw();
 	}
@@ -1678,7 +1678,7 @@ float BosonBigDisplayBase::calcFPS()
  elapsed /= 1000000;
  now = time.tv_sec * 1000000 + time.tv_usec;
  // FPS is updated once per second
- if((now - d->mFpsTime) >= 1000000) {
+ if ((now - d->mFpsTime) >= 1000000) {
 	d->mFps = d->mFramecount / ((now - d->mFpsTime) / 1000000.0);
 	d->mFpsTime = now;
 	d->mFramecount = 0;
