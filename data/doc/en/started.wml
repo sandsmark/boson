@@ -21,7 +21,8 @@ performance)
         <li><a href="http://www.vorbis.org" target="_blank">libvorbis</a> (for sound and music)</li>
         <li><a href="http://lib3ds.sourceforge.net" target="_blank">lib3ds</a> (Units and building rendering)</li>
         <li><a href="http://www.xfree86.org" target="_blank">OpenGL</a> - The OpenGL library (should be included in your XFree server or graphics card driver)</li>
-        <li><a href="http://www.thewml.org" target="_blank">WML</a> - For the handbook, if you don't use a package or an official release</li>
+        <li><a href="http://www.thewml.org" target="_blank">WML</a> - For the handbook, if you don't use a binary package</li>
+        <li>Image::Magick - For the handbook technologie dependency tree image, if you don't use a binary package and want this image.</li>
     </ul>
 
     <p>
