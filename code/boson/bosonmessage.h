@@ -19,6 +19,9 @@
 #ifndef __BOSONMESSAGE_H__
 #define __BOSONMESSAGE_H__
 
+/**
+ * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
+ **/
 class BosonMessage
 {
 public:

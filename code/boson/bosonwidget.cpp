@@ -57,7 +57,7 @@
 
 #include "bosonwidget.moc"
 
-class BosonWidgetPrivate
+class BosonWidget::BosonWidgetPrivate
 {
 public:
 	BosonWidgetPrivate()

@@ -21,7 +21,6 @@
 
 #include <kdialogbase.h>
 
-class OptionsDialogPrivate;
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
@@ -53,6 +52,7 @@ signals:
 	void signalSpeedChanged(int);
 
 private:
+	class OptionsDialogPrivate;
 	OptionsDialogPrivate* d;
 
 };

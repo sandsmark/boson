@@ -33,7 +33,7 @@
 #define OVERVIEW_WIDTH 180
 #define OVERVIEW_HEIGHT 110
 
-class BosonUnitViewPrivate
+class BosonUnitView::BosonUnitViewPrivate
 {
 public:
 	BosonUnitViewPrivate()

@@ -23,6 +23,9 @@
 
 class KConfig;
 
+/**
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
 class BosonConfig
 {
 public:

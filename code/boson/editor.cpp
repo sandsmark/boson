@@ -100,7 +100,7 @@ int main(int argc, char **argv)
 
 
 
-class EditorPrivate
+class Editor::EditorPrivate
 {
 public:
 	EditorPrivate()

@@ -23,6 +23,9 @@
 
 class Player;
 
+/**
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
 class BosonComputerIO : public KGameComputerIO
 {
 	Q_OBJECT

@@ -25,11 +25,10 @@
 
 class KSimpleConfig;
 
-class UnitPropertiesPrivate;
-
 /**
  * Represents the config file of a unit. See README of the config file for
  * infos.
+ * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
  **/
 class UnitProperties
 {
@@ -150,7 +149,9 @@ protected:
 	void loadFacilityProperties(KSimpleConfig* conf);
 	
 private:
+	class UnitPropertiesPrivate;
 	UnitPropertiesPrivate* d;
+
 	QString mName;
 	QString mUnitPath; // the path to the unit files
 	int mTypeId; // note: -1 is invalid!

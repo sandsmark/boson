@@ -25,7 +25,7 @@
 
 #define SHOT_DELAY 0 // number of advance() calls without changing frames
 
-class BoShotPrivate
+class BoShot::BoShotPrivate
 {
 public:
 	BoShotPrivate()

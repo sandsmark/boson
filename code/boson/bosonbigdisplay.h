@@ -27,7 +27,9 @@ class KGameIO;
 class Unit;
 class Player;
 
-class BosonBigDisplayPrivate;
+/**
+ * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
+ **/
 class BosonBigDisplay : public QCanvasView
 {
 	Q_OBJECT
@@ -177,6 +179,7 @@ private:
 	void init();
 
 private:
+	class BosonBigDisplayPrivate;
 	BosonBigDisplayPrivate* d;
 };
 

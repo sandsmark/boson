@@ -39,7 +39,7 @@
 #define TAG_FIELD_LEN 18 // len of above
 #define TAG_CELL (0xde)
 
-class BosonMapPrivate
+class BosonMap::BosonMapPrivate
 {
 public:
 	BosonMapPrivate()

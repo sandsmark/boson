@@ -29,7 +29,9 @@ class QStringList;
 class UnitProperties;
 class UnitBase;
 
-class SpeciesThemePrivate;
+/**
+ * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
+ **/
 class SpeciesTheme
 {
 public:
@@ -117,15 +119,10 @@ public:
 	const UnitProperties* unitProperties(int unitType) const;
 
 	/**
-	 * @return The name of the species (NOT i18n'ed!) - currently "human"
-	 **/
-//	const QString& species() const;
-
-	/**
 	 * @return the path to the species theme (ending with
 	 * boson/themes/species/your_species/)
 	 **/
-	const QString& themePath() const;
+	const QString& themePath() const { return mThemePath; }
 
 	/**
 	 * @return The typeIds of all facilities in this theme. See also @ref
@@ -190,8 +187,10 @@ protected:
 	void readUnitConfigs();
 
 private:
+	class SpeciesThemePrivate;
 	SpeciesThemePrivate* d;
 
+	QString mThemePath;
 };
 
 #endif

@@ -30,8 +30,9 @@ class QPainter;
 class QPaintEvent;
 class QMouseEvent;
 
-class BosonMiniMapPrivate;
-
+/**
+ * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
+ **/
 class BosonMiniMap : public QWidget
 {
 	Q_OBJECT
@@ -74,6 +75,7 @@ protected:
 	virtual void mousePressEvent(QMouseEvent*);
 	
 private:
+	class BosonMiniMapPrivate;
 	BosonMiniMapPrivate* d;
 };
 #endif

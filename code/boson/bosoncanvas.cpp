@@ -38,7 +38,7 @@
 
 #include "bosoncanvas.moc"
 
-class BosonCanvasPrivate
+class BosonCanvas::BosonCanvasPrivate
 {
 public:
 	BosonCanvasPrivate()

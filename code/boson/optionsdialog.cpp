@@ -28,7 +28,7 @@
 
 #include "optionsdialog.moc"
 
-class OptionsDialogPrivate
+class OptionsDialog::OptionsDialogPrivate
 {
 public:
 	OptionsDialogPrivate()

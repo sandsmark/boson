@@ -41,7 +41,7 @@
 
 #include "kgamedialogbosonconfig.moc"
 
-class KGameDialogBosonConfigPrivate
+class KGameDialogBosonConfig::KGameDialogBosonConfigPrivate
 {
 public:
 	KGameDialogBosonConfigPrivate()

@@ -22,7 +22,6 @@
 #include <qwidget.h>
 
 class Boson;
-class KGameUnitDebugPrivate;
 class Unit;
 
 /**
@@ -44,6 +43,7 @@ protected slots:
 	void slotUpdate();
 
 private:
+	class KGameUnitDebugPrivate;
 	KGameUnitDebugPrivate* d;
 };
 

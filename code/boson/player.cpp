@@ -31,7 +31,7 @@
 
 #include "player.moc"
 
-class PlayerPrivate
+class Player::PlayerPrivate
 {
 public:
 	PlayerPrivate()

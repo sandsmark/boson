@@ -27,7 +27,9 @@ class Player;
 
 class QPixmap;
 
-class BosonCommandFramePrivate;
+/**
+ * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
+ **/
 class BosonCommandFrame : public QFrame
 {
 	Q_OBJECT
@@ -145,6 +147,7 @@ private:
 	void initEditor();
 
 private:
+	class BosonCommandFramePrivate;
 	BosonCommandFramePrivate* d;
 };
 

@@ -36,9 +36,7 @@
 #define PM_DELTA_H      (+4)   // mobiles selection boxes are DELTA pixels more inside rect()
 #define PM_DELTA_V      (+10)   // mobiles selection boxes are DELTA pixels more inside rect()
 
-
-
-class UnitPrivate
+class Unit::UnitPrivate
 {
 public:
 	UnitPrivate()
@@ -483,7 +481,7 @@ QCanvasItemList Unit::enemyUnitsInRange() const
 // MobileUnit
 /////////////////////////////////////////////////
 
-class MobileUnitPrivate
+class MobileUnit::MobileUnitPrivate
 {
 public:
 	MobileUnitPrivate()
@@ -655,7 +653,7 @@ QValueList<Unit*> Unit::unitCollisions(bool exact) const
 }
 
 
-class FacilityPrivate
+class Facility::FacilityPrivate
 {
 public:
 	FacilityPrivate()

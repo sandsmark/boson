@@ -66,7 +66,7 @@ protected:
 
 };
 
-class BosonCommandFramePrivate
+class BosonCommandFrame::BosonCommandFramePrivate
 {
 public:
 	BosonCommandFramePrivate()

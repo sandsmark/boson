@@ -23,7 +23,7 @@
 #include <qcanvas.h>
 #include <qmap.h>
 
-class KSpriteToolTipPrivate
+class KSpriteToolTip::KSpriteToolTipPrivate
 {
 public:
 	KSpriteToolTipPrivate()

@@ -33,7 +33,7 @@
 #include <qptrlist.h>
 
 
-class UnitBasePrivate
+class UnitBase::UnitBasePrivate
 {
 public:
 	UnitBasePrivate()
