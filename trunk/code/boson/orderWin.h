@@ -35,6 +35,8 @@ class QScrollView;
 class fieldMap;
 class QVBoxLayout;
 
+#define ORDER_BUTTONS_NB  (8)
+
 enum selectionMode_t {
 	SELECT_NONE, 		/* is doing nothing */
 /*	SELECT_FACILITY, 
@@ -88,8 +90,8 @@ private:
 	fieldMap	*field;
 
 /* GUI */
-	QVBoxLayout	*globalLay;
-	QPushButton	*orderButton[5];
+//	QVBoxLayout	*globalLay;
+	QPushButton	*orderButton[ORDER_BUTTONS_NB];
 
 /* ordering buttons */
 };

@@ -43,41 +43,43 @@ orderWin::orderWin(fieldMap *f, QWidget *parent, const char *name)
 {
 QString path(kapp->kde_datadir() + "/boson/pics/misc/overview_none.xpm" );
 
-/* GUI  */
-globalLay = new QVBoxLayout(this, 5);
-
 setFrameStyle(QFrame::Sunken | QFrame::Panel);
 setLineWidth(5);
 
 
-	/* stack */
-view_none = new QPixmap(path);
+/* stack */
 stack = new QWidgetStack(this, "qwidgetstack");
-stack->setFixedSize(200,200);
+//stack->setFixedSize(200,200);
+stack->setFrameStyle(QFrame::Raised | QFrame::Panel);
+stack->setLineWidth(5);
+stack->setGeometry(10,10,180,110);
+
+/* stack/one */
+view_none = new QPixmap(path);
 view_one = new QLabel(stack,"preview");
 view_one->setPixmap(*view_none);
 stack->addWidget(view_one, VIEW_ONE);
 
+/* stack/many */
 view_many = new QScrollView(stack,"scrollview");
 stack->addWidget(view_many, VIEW_MANY);
 
 stack->raiseWidget(VIEW_ONE);
-globalLay->addWidget(stack);
 
-globalLay->addStretch();
-
-	/* buttons */
-for (int i=0; i<5; i++) {
+/* buttons */
+static char * button_text[ORDER_BUTTONS_NB] = {
+	"Move", "Stop",
+	"Move", "Stop",
+	"Move", "Stop",
+	"Move", "Stop",
+	};
+for (int i=0; i<ORDER_BUTTONS_NB; i++) {
 	orderButton[i] = new QPushButton(this);
-	globalLay->addWidget(orderButton[i]);
 	orderButton[i]->setText("Move");
-	orderButton[i]->setFixedSize(100,40);
+	//orderButton[i]->setFixedSize(100,40);
+	orderButton[i]->setGeometry( 10+(i%2)*91, 42*(i/2) + 130, 89, 40);
 	orderButton[i]->hide();
 	}
-
-	/* the end */
-globalLay->activate();
-
 }
 
 
@@ -112,9 +114,9 @@ return m;
 void orderWin::unSelectAll(void)
 {
 /* */
-for (int i=0; i<5; i++) {
+for (int i=0; i<ORDER_BUTTONS_NB; i++) {
 	orderButton[i]->hide();
-	disconnect(orderButton[0]);
+	disconnect(orderButton[i]);
 	}
 }
 
