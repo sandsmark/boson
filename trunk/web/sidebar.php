@@ -86,6 +86,11 @@ echo "
        src=\"pictures/valid-css.png\"
        alt=\"Valid CSS!\">
  </a>";
+// Copyright
+echo "
+<br><br>
+<font class=\"copyright\">(C) 2002  <a class=\"copyright\" href=\"mailto:boson-devel@lists.sourceforge.net\">
+The Boson Team</a></font><br>";
 
 sidebar_box_end();
 }

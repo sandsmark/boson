@@ -7,21 +7,16 @@ $startusec;
 
 function print_footer()
 {
-// Copyright
-echo "
-<font class=\"copyright\">(C) 2002  <a class=\"copyright\" href=\"mailto:boson-devel@lists.sourceforge.net\">
-The Boson Team</a></font><br>";
-
 // Generation timer stuff
 // Note that actually it's not exact time, because html_print_footer is called
 //  after it. But it's probably just a matter of few microseconds...
-global $startsec, $startusec;
+/*global $startsec, $startusec;
 $timearray = gettimeofday();
 $elapsedtime=($timearray["sec"] - $startsec) * 1000000 + ($timearray["usec"] - $startusec);
 $elapsedtime /= 1000;
 echo "
 <font class=\"elapsedtime\">It took <font class=\"elapsedtimevalue\">$elapsedtime</font>
- msec to generate this page</font>";
+ msec to generate this page</font>";*/
 }
 
 function print_header()
@@ -50,10 +45,10 @@ echo "
 // title : Title of the page
 function html_print_header($title)
 {
-global $startsec, $startusec;
+/*global $startsec, $startusec;
 $timearray = gettimeofday();
 $startsec=$timearray["sec"];
-$startusec=$timearray["usec"];
+$startusec=$timearray["usec"];*/
 
 // We don't want anthing to cache this page, because it changes dynamically all the time (counter)
 // This is taken from PHP Manual
