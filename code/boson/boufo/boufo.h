@@ -339,9 +339,9 @@ public:
 	void loadPropertiesFromXML(const QDomNamedNodeMap&);
 	void loadProperties(const QMap<QString, QString>&);
 
-protected:
 	virtual void setMinimumSize(const ufo::UDimension& size);
 	virtual void setPreferredSize(const ufo::UDimension& size);
+	virtual void setSize(int w, int h);
 
 
 signals:
@@ -444,14 +444,13 @@ public:
 	void setText(const QString& text);
 	QString text() const;
 
+	virtual void setMinimumSize(const ufo::UDimension& size);
+	virtual void setPreferredSize(const ufo::UDimension& size);
+
 signals:
 	void signalActivated();
 	void signalClicked(); // equivalent to signalActivated()
 	void signalHighlighted();
-
-protected:
-	virtual void setMinimumSize(const ufo::UDimension& size);
-	virtual void setPreferredSize(const ufo::UDimension& size);
 
 private:
 	void init();
@@ -482,14 +481,13 @@ public:
 	void setChecked(bool);
 	bool checked() const;
 
+	virtual void setMinimumSize(const ufo::UDimension& size);
+	virtual void setPreferredSize(const ufo::UDimension& size);
+
 signals:
 	void signalActivated();
 	void signalHighlighted();
 	void signalToggled(bool);
-
-protected:
-	virtual void setMinimumSize(const ufo::UDimension& size);
-	virtual void setPreferredSize(const ufo::UDimension& size);
 
 private:
 	void init();
@@ -515,13 +513,12 @@ public:
 	void setText(const QString& text);
 	QString text() const;
 
+	virtual void setMinimumSize(const ufo::UDimension& size);
+	virtual void setPreferredSize(const ufo::UDimension& size);
+
 signals:
 	void signalActivated();
 	void signalActivated(const QString& text);
-
-protected:
-	virtual void setMinimumSize(const ufo::UDimension& size);
-	virtual void setPreferredSize(const ufo::UDimension& size);
 
 private:
 	void init();
@@ -549,7 +546,6 @@ public:
 	void setText(const QString& text);
 	QString text() const;
 
-protected:
 	virtual void setMinimumSize(const ufo::UDimension& size);
 	virtual void setPreferredSize(const ufo::UDimension& size);
 
@@ -574,14 +570,13 @@ public:
 		return mComboBox;
 	}
 
+	virtual void setMinimumSize(const ufo::UDimension& size);
+	virtual void setPreferredSize(const ufo::UDimension& size);
+
 signals:
 	void signalActivated(int);
 	void signalHighlighted(int);
 	void signalSelectionChanged(int, int);
-
-protected:
-	virtual void setMinimumSize(const ufo::UDimension& size);
-	virtual void setPreferredSize(const ufo::UDimension& size);
 
 private:
 	void init();
@@ -606,12 +601,11 @@ public:
 		return mListBox;
 	}
 
-signals:
-	void signalSelectionChanged(int firstIndex, int lastIndex);
-
-protected:
 	virtual void setMinimumSize(const ufo::UDimension& size);
 	virtual void setPreferredSize(const ufo::UDimension& size);
+
+signals:
+	void signalSelectionChanged(int firstIndex, int lastIndex);
 
 private:
 	void init();
