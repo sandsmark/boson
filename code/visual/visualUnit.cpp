@@ -45,6 +45,22 @@ void visualUnit::unSelect()
 }
 
 
+void visualUnit::doHide()
+{
+	if (sp_up) sp_up->hide();
+	if (sp_down) sp_down->hide();
+	hide();
+}
+
+
+void visualUnit::doShow()
+{
+	if (sp_up) sp_up->show();
+	if (sp_down) sp_down->show();
+	show();
+}
+
+
 /*
  * visualMobUnit
  */
