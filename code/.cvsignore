@@ -14,4 +14,4 @@ config.status
 libtool
 stamp-h
 pics
-/opt/kde/share/apps/boson/pics
+boson.kdoc
