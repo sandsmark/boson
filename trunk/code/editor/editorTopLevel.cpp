@@ -94,6 +94,8 @@ editorTopLevel::editorTopLevel( BoEditorApp *app,  const char *name, WFlags f)
 	/* actual building */
 	createGUI("boeditorui.rc");
 
+	resize (790, 590);
+
 }
 #undef ADD_ACTION
 

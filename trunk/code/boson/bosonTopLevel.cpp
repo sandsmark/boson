@@ -72,7 +72,7 @@ bosonTopLevel::bosonTopLevel(BosonApp * /*parent*/, const char *name, WFlags f)
 	connect(bocanvas , SIGNAL(pingUpdated(int)), label, SLOT(setNum(int)));
 	ksb->addWidget(qhb);
 
-
+	resize (790, 590);
 
 	/* .. */
 	orderType = OT_NONE;
