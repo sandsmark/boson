@@ -742,10 +742,27 @@ void Unit::advanceTurn(unsigned int)
  updateRotation();
 
  if (d->mWantedRotation == dir) {
+	/**
+	 * AFAICS there are 3 possibilities:
+	 * 1. The user explicitly wanted the unit to turn.
+	 *    -> we are done now, set work to WorkNone
+	 *       (work also includes advanceWork!)
+	 * 2. The user wanted to do something else (move, shoot, ...) and for
+	 *    this the unit had to turn.
+	 *    -> continue with original work, by setting advanceWork to work()
+	 * 3. The user wanted to do something else (just like 2.) and for that
+	 *    the unit had to _move_ which required the unit to turn.
+	 *    -> continue moving, i.e. set advanceWork to WorkMove
+	 **/
 	if (work() == WorkTurn) {
 		setWork(WorkNone);
 	} else if (advanceWork() != work()) {
-		setAdvanceWork(work());
+		if (pathPointCount() != 0 || waypointCount() != 0) {
+			// this is probably case 3 (but case 2 is possible, too)
+			setAdvanceWork(WorkMove);
+		} else {
+			setAdvanceWork(work());
+		}
 	}
  }
 }
