@@ -113,24 +113,7 @@ protected:
 				text = i18n("%1\nId: %2").arg(commandWidget()->unit()->unitProperties()->name()).arg(commandWidget()->unit()->id());
 				break;
 			case OrderAction:
-				if(commandWidget()->action() == ActionMove) {
-					text = i18n("Move");
-				}
-				else if(commandWidget()->action() == ActionAttack) {
-					text = i18n("Attack");
-				}
-				else if(commandWidget()->action() == ActionStop) {
-					text = i18n("Stop");
-				}
-				else if(commandWidget()->action() == ActionFollow) {
-					text = i18n("Follow");
-				}
-				else if(commandWidget()->action() == ActionMine) {
-					text = i18n("Mine");
-				}
-				else if(commandWidget()->action() == ActionRepair) {
-					text = i18n("Repair");
-				}
+				text = SpeciesTheme::unitActionName(commandWidget()->action());
 				break;
 		}
 		return text;
