@@ -38,6 +38,7 @@
 #include "bosonprofiling.h"
 #include "bodisplaymanager.h"
 #include "bosonbigdisplaybase.h"
+#include "bosonstarteditorwidget.h"
 #include "sound/bosonmusic.h"
 
 #include <kapplication.h>
@@ -65,14 +66,10 @@
 #define ID_DEBUG_KILLPLAYER 0
 #define ID_WIDGETSTACK_WELCOME 1
 #define ID_WIDGETSTACK_NEWGAME 2
+#define ID_WIDGETSTACK_STARTEDITOR 3
 #define ID_WIDGETSTACK_BOSONWIDGET 4
 #define ID_WIDGETSTACK_NETWORK 5
 #define ID_WIDGETSTACK_LOADING 6
-
-#ifndef NO_EDITOR
-#include "bosonstarteditorwidget.h"
-#define ID_WIDGETSTACK_STARTEDITOR 3
-#endif
 
 class TopWidget::TopWidgetPrivate
 {
@@ -81,9 +78,7 @@ public:
 	{
 		mWelcome = 0;
 		mNewGame = 0;
-#ifndef NO_EDITOR
 		mStartEditor = 0;
-#endif
 		mNetworkOptions = 0;
 		mLoading = 0;
 		mBosonWidget = 0;
@@ -91,9 +86,7 @@ public:
 
 	BosonWelcomeWidget* mWelcome;
 	BosonNewGameWidget* mNewGame;
-#ifndef NO_EDITOR
 	BosonStartEditorWidget* mStartEditor;
-#endif
 	BosonNetworkOptionsWidget* mNetworkOptions;
 	BosonLoadingWidget* mLoading;
 	BosonWidgetBase* mBosonWidget;
@@ -403,7 +396,6 @@ void TopWidget::showNewGameWidget()
 
 void TopWidget::initStartEditorWidget()
 {
-#ifndef NO_EDITOR
  if(d->mStartEditor) {
 	return;
  }
@@ -412,17 +404,14 @@ void TopWidget::initStartEditorWidget()
  d->mStartEditor = new BosonStartEditorWidget(this, startup->plainWidget());
  startup->initBackgroundOrigin();
  connect(d->mStartEditor, SIGNAL(signalCancelled()), this, SLOT(slotShowMainMenu()));
-#endif
 }
 
 void TopWidget::showStartEditorWidget()
 {
-#ifndef NO_EDITOR
  if(!d->mStartEditor) {
 	initStartEditorWidget();
  }
  raiseWidget(ID_WIDGETSTACK_STARTEDITOR);
-#endif
 }
 
 void TopWidget::initBosonWidget(bool loading)
@@ -505,9 +494,7 @@ void TopWidget::slotNewGame()
 
 void TopWidget::slotStartEditor()
 {
-#ifndef NO_EDITOR
  showStartEditorWidget();
-#endif
 }
 
 void TopWidget::slotStartGame()
@@ -548,12 +535,10 @@ void TopWidget::slotShowMainMenu()
 	delete d->mNewGame;
 	d->mNewGame = 0;
  }
-#ifndef NO_EDITOR
  if (d->mStartEditor) {
 	delete d->mStartEditor;
 	d->mStartEditor = 0;
  }
-#endif
  // Delete all players to remove added AI players, then re-init local player
  mBoson->removeAllPlayers();
  initPlayer();
@@ -748,12 +733,10 @@ void TopWidget::loadGameData3() // FIXME rename!
 	delete d->mNewGame;
 	d->mNewGame = 0;
  }
-#ifndef NO_EDITOR
  if(d->mStartEditor) {
 	delete d->mStartEditor;
 	d->mStartEditor = 0;
  }
-#endif
  // Init some stuff
  statusBar()->show();
  d->mBosonWidget->initGameMode();
@@ -1185,9 +1168,7 @@ void TopWidget::raiseWidget(int id)
 		menuBar()->hide();
 		break;
 	case ID_WIDGETSTACK_BOSONWIDGET:
-#ifndef NO_EDITOR
 	case ID_WIDGETSTACK_STARTEDITOR:
-#endif
 		setMinimumSize(BOSON_MINIMUM_WIDTH, BOSON_MINIMUM_HEIGHT);
 		setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
 		menuBar()->show();
