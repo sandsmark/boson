@@ -82,8 +82,8 @@ QRect Facility::rect(void)
 void Facility::fill(facilityMsg_t &msg)
 {
 	msg.who = who;
-	msg.x   = _x();
-	msg.y   = _y();
+	msg.x   = _x() / BO_TILE_SIZE;
+	msg.y   = _y() / BO_TILE_SIZE;
 	msg.type= type;
 }
 
