@@ -479,17 +479,17 @@ QCString BosonSaveLoad::saveExternalAsXML()
 bool BosonSaveLoad::loadNewGame(const QByteArray& playersXML, const QByteArray& canvasXML)
 {
  // AB: nearly all code copied from loadFromFile().
- boDebug() << k_funcinfo << endl;
+ boDebug(260) << k_funcinfo << endl;
  d->mLoadingStatus = LoadingInProgress;
 
   if (playersXML.isEmpty()) {
-	boError() << k_funcinfo << "Empty playersXML" << endl;
+	boError(260) << k_funcinfo << "Empty playersXML" << endl;
 	addLoadError(SaveLoadError::LoadBSGFileError, i18n("empty file: players.xml"));
 	d->mLoadingStatus = BSGFileError;
 	return false;
  }
  if (canvasXML.isEmpty()) {
-	boError() << k_funcinfo << "Empty canvasXML" << endl;
+	boError(260) << k_funcinfo << "Empty canvasXML" << endl;
 	addLoadError(SaveLoadError::LoadBSGFileError, i18n("empty file: canvas.xml"));
 	d->mLoadingStatus = BSGFileError;
 	return false;
@@ -498,7 +498,7 @@ bool BosonSaveLoad::loadNewGame(const QByteArray& playersXML, const QByteArray& 
  if (!loadPlayersFromXML(playersXML)) {
 	return false;
  }
- boDebug() << k_funcinfo << d->mBoson->playerCount() << " players loaded" << endl;
+ boDebug(260) << k_funcinfo << d->mBoson->playerCount() << " players loaded" << endl;
  emit signalLoadingType(BosonLoadingWidget::ReceiveMap);
 
 
@@ -513,7 +513,7 @@ bool BosonSaveLoad::loadNewGame(const QByteArray& playersXML, const QByteArray& 
 	emit signalLoadingType(BosonLoadingWidget::LoadSavedUnits);
  }
 
- boDebug() << k_funcinfo << "loading units" << endl;
+ boDebug(260) << k_funcinfo << "loading units" << endl;
 
  // Load canvas (items - i.e. units and shots)
  if (!loadCanvasFromXML(canvasXML)) {
@@ -589,6 +589,7 @@ bool BosonSaveLoad::loadKGameFromXML(const QString& xml)
 
 bool BosonSaveLoad::loadPlayersFromXML(const QString& playersXML)
 {
+ boDebug(260) << k_funcinfo << endl;
  QDomDocument doc(QString::fromLatin1("Players"));
  if (!loadXMLDoc(&doc, playersXML)) {
 	addLoadError(SaveLoadError::LoadInvalidXML, i18n("Parsing error in players.xml"));
@@ -625,7 +626,7 @@ bool BosonSaveLoad::loadPlayersFromXML(const QString& playersXML)
 		QDomElement e = list.item(j).toElement();
 		unsigned int id = e.attribute(QString::fromLatin1("Id")).toUInt(&ok);
 		if (!ok) {
-			boError() << k_funcinfo << "missing or invalid Id attribute for Player tag " << j << endl;
+			boError(260) << k_funcinfo << "missing or invalid Id attribute for Player tag " << j << endl;
 			continue;
 		}
 		if (p->id() != id) {
@@ -634,8 +635,23 @@ bool BosonSaveLoad::loadPlayersFromXML(const QString& playersXML)
 		player = e;
 	}
 	if (player.isNull()) {
-		boError() << k_funcinfo << "no Player tag found for player with id " << p->id() << endl;
+		boError(260) << k_funcinfo << "no Player tag found for player with id " << p->id() << endl;
 		return false;
+	}
+	if (i == d->mBoson->playerList()->count() - 1) {
+		boDebug(260) << k_funcinfo << "loading neutral player" << endl;
+		if (!player.hasAttribute("IsNeutral")) {
+			boError(260) << k_funcinfo << "file format error: missing IsNeutral attribute for neutral player" << endl;
+			return false;
+		}
+		bool ok = false;
+		if (player.attribute("IsNeutral").toUInt(&ok) != 1) {
+			boError(260) << k_funcinfo << "IsNeutral attribute must be 1, if present!" << endl;
+			return false;
+		} else if (!ok) {
+			boError(260) << k_funcinfo << "invalid IsNeutral attribute (must be 1)!" << endl;
+			return false;
+		}
 	}
 	if (p->id() == localId) {
 		localPlayer = p;
@@ -653,7 +669,7 @@ bool BosonSaveLoad::loadPlayersFromXML(const QString& playersXML)
 
 bool BosonSaveLoad::loadCanvasFromXML(const QString& xml)
 {
- boDebug() << k_funcinfo << endl;
+ boDebug(260) << k_funcinfo << endl;
  QDomDocument doc(QString::fromLatin1("Canvas"));
  if (!loadXMLDoc(&doc, xml)) {
 	addLoadError(SaveLoadError::LoadInvalidXML, i18n("Parsing error in canvas.xml"));
@@ -673,7 +689,7 @@ bool BosonSaveLoad::loadCanvasFromXML(const QString& xml)
 
 bool BosonSaveLoad::loadExternalFromXML(const QString& xml)
 {
- boDebug() << k_funcinfo << endl;
+ boDebug(260) << k_funcinfo << endl;
  // Load external stuff (camera)
  QDomDocument doc(QString::fromLatin1("External"));
  if (!loadXMLDoc(&doc, xml)) {

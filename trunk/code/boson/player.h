@@ -44,10 +44,25 @@ public:
 	enum PropertyIds {
 		IdFogged = KGamePropertyBase::IdUser + 1,
 		IdMinerals = KGamePropertyBase::IdUser + 2,
-		IdOil = KGamePropertyBase::IdUser + 3
+		IdOil = KGamePropertyBase::IdUser + 3,
+		IdIsNeutral = KGamePropertyBase::IdUser + 4
 	};
-	Player();
+
+	/**
+	 * @param neutral TRUE if this is meant to be the neutral player. There
+	 * is only exactly one neutral player per game!
+	 **/
+	Player(bool neutral = false);
 	virtual ~Player();
+
+	/**
+	 * @return TRUE if this is the neutral player. Note that the neutral
+	 * player is always at (Boson::playerList()->count() - 1), i.e. it is
+	 * always the last player in the list of players. You should prefer the
+	 * player index if possible. This method is used to ensure that if there
+	 * is a last player in the list it actually is the neutral player.
+	 **/
+	bool isNeutral() const;
 
 	PlayerIO* playerIO() const;
 

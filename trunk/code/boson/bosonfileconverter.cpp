@@ -540,6 +540,77 @@ bool BosonFileConverter::convertPlayField_From_0_9_To_0_9_1(QMap<QString, QByteA
  return true;
 }
 
+bool BosonFileConverter::convertPlayField_From_0_9_1_To_0_10(QMap<QString, QByteArray>& files)
+{
+ QDomDocument kgameDoc(QString::fromLatin1("Boson"));
+ if (!loadXMLDoc(&kgameDoc, files["kgame.xml"])) {
+	boError() << k_funcinfo << "could not load kgame.xml" << endl;
+	return false;
+ }
+ QDomElement kgameRoot = kgameDoc.documentElement();
+ unsigned int version = kgameRoot.attribute("Version").toUInt();
+ if (version != BOSON_SAVEGAME_FORMAT_VERSION_0_9_1) {
+	boError() << k_funcinfo << "invalid version: " << version << endl;
+	return false;
+ }
+ kgameRoot.setAttribute("Version", BOSON_SAVEGAME_FORMAT_VERSION_0_10);
+
+ QDomDocument playersDoc(QString::fromLatin1("Players"));
+ if (!loadXMLDoc(&playersDoc, files["players.xml"])) {
+	boError() << k_funcinfo << "could not load players.xml" << endl;
+	return false;
+ }
+ QDomElement playersRoot = playersDoc.documentElement();
+
+ QDomNodeList playerList = playersRoot.elementsByTagName("Player");
+ for (unsigned int i = 0; i < playerList.count(); i++) {
+	QDomElement p = playerList.item(i).toElement();
+	if (p.hasAttribute("IsNeutral")) {
+		boError() << k_funcinfo << "IsNeutral attribute already present! cannot convert!" << endl;
+		return false;
+	}
+ }
+ QDomDocument canvasDoc(QString::fromLatin1("Canvas"));
+ if (!loadXMLDoc(&canvasDoc, files["canvas.xml"])) {
+	boError() << k_funcinfo << "could not load canvas.xml" << endl;
+	return false;
+ }
+ QDomElement canvasRoot = canvasDoc.documentElement();
+ QDomNodeList itemsList = canvasRoot.elementsByTagName("Items");
+
+ if (itemsList.count() != playerList.count()) {
+	boError() << k_funcinfo << "itemsList.count() != playerList.count()" << endl;
+	return false;
+ }
+
+ QDomElement neutralPlayer = playersDoc.createElement(QString::fromLatin1("Player"));
+ neutralPlayer.setAttribute("Id", playerList.count());
+ neutralPlayer.setAttribute("IsNeutral", 1);
+ {
+	QDomElement dataHandler = playersDoc.createElement("DataHandler");
+	neutralPlayer.appendChild(dataHandler);
+	QDomElement minerals = playersDoc.createElement("KGameProperty");
+	dataHandler.appendChild(minerals);
+	minerals.setAttribute("Id", 258);
+	minerals.appendChild(playersDoc.createTextNode(QString::number(0)));
+
+	QDomElement oil = playersDoc.createElement("KGameProperty");
+	dataHandler.appendChild(oil);
+	oil.setAttribute("Id", 259);
+	oil.appendChild(playersDoc.createTextNode(QString::number(0)));
+ }
+ playersRoot.appendChild(neutralPlayer);
+
+ QDomElement neutralItems = canvasDoc.createElement("Items");
+ neutralItems.setAttribute("Id", itemsList.count());
+ canvasRoot.appendChild(neutralItems);
+
+ files.insert("kgame.xml", kgameDoc.toString().utf8());
+ files.insert("players.xml", playersDoc.toString().utf8());
+ files.insert("canvas.xml", canvasDoc.toString().utf8());
+ return true;
+}
+
 
 
 bool MapToTexMap_From_0_8_To_0_9::convert(int* groundTypes, QByteArray* newMap, QByteArray* texMap)

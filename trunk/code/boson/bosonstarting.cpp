@@ -32,7 +32,6 @@
 #include "bosondata.h"
 #include "bodebug.h"
 #include "bpfdescription.h"
-#include "bosonfileconverter.h"
 #include "bosonsaveload.h"
 
 #include <klocale.h>
@@ -106,6 +105,10 @@ bool BosonStarting::start()
 	boError() << k_funcinfo
 		<< "Boson must be in init status to receive map!" << endl
 		<< "Current status: " << boGame->gameStatus() << endl;
+	return false;
+ }
+ if (boGame->playerCount() < 2) {
+	boError() << k_funcinfo << "not enough players in game. there must be at least a real player and a (internal) neutral player" << endl;
 	return false;
  }
  if (!mDestPlayField) {
@@ -390,8 +393,10 @@ bool BosonStarting::startScenario()
  }
  QDomElement playersRoot = playersDoc.documentElement();
  QDomNodeList playersList = playersRoot.elementsByTagName("Player");
- if (playersList.count() < 1) {
-	boError() << k_funcinfo << "no Player tag found" << endl;
+ if (playersList.count() < 2) {
+	// there must be at least to Player tags: one player and one neutral
+	// player (netral must always be present)
+	boError() << k_funcinfo << "not enough Player tags found" << endl;
 	return false;
  }
  for (unsigned int i = 0; i < playersList.count(); i++) {
@@ -432,26 +437,53 @@ bool BosonStarting::startScenario()
 	// numbers from 0..maxPlayers. we need the actual IDs to start loading,
 	// so we need to replace the dummy IDs.
 	int actualId = boGame->playerList()->at(i)->id();
+	unsigned int playerIndex = 0; // index of the Player tag
 
-	QDomElement e = playersList.item(i).toElement();
-	if (e.isNull()) {
-		boError() << k_funcinfo << "invalid Player tag " << i << endl;
-		return false;
-	}
-	if (e.attribute("Id").toUInt() != i) {
-		boError() << k_funcinfo << "unexpected Id for Player tag " << i << endl;
-		return false;
+	QDomElement e;
+	if (i != boGame->playerList()->count() - 1) {
+		playerIndex = i;
+		e = playersList.item(playerIndex).toElement();
+		if (e.isNull()) {
+			boError(260) << k_funcinfo << "invalid Player tag " << playerIndex << endl;
+			return false;
+		}
+		if (e.attribute("Id").toUInt() != playerIndex) {
+			boError(260) << k_funcinfo << "unexpected Id for Player tag " << playerIndex << endl;
+			return false;
+		}
+	} else {
+		// per definition the last player in the list is _always_ the
+		// neutral player.
+		playerIndex = playersList.count() - 1;
+		e = playersList.item(playerIndex).toElement();
+		if (e.isNull()) {
+			boError(260) << k_funcinfo << "invalid Player tag for neutral player (" << playerIndex << ")" << endl;
+			return false;
+		}
+		if (!e.hasAttribute("IsNeutral")) {
+			boError(260) << k_funcinfo << "file format error: last player must be neutral player" << endl;
+			return false;
+		}
+		bool ok = false;
+		if (e.attribute("IsNeutral").toUInt(&ok) != 1) {
+			boError(260) << k_funcinfo << "IsNeutral attribute must be 1 if present" << endl;
+			return false;
+		}
+		if (!ok) {
+			boError(260) << k_funcinfo << "invalid value for IsNeutral attribute" << endl;
+			return false;
+		}
 	}
 	e.setAttribute("Id", actualId);
 
 	// the Items tag must be fixed as well.
-	e = itemsList.item(i).toElement();
+	e = itemsList.item(playerIndex).toElement();
 	if (e.isNull()) {
-		boError() << k_funcinfo << "invalid Items tag " << i << endl;
+		boError() << k_funcinfo << "invalid Items tag " << playerIndex << endl;
 		return false;
 	}
-	if (e.attribute("Id").toUInt() != i) {
-		boError() << k_funcinfo << "unexpected Id for Items tag " << i << endl;
+	if (e.attribute("Id").toUInt() != playerIndex) {
+		boError() << k_funcinfo << "unexpected Id for Items tag " << playerIndex << endl;
 		return false;
 	}
 	e.setAttribute("Id", actualId);

@@ -2458,3 +2458,31 @@ unsigned int Boson::advanceCallsCount() const
  return d->mAdvance->advanceCallsCount();
 }
 
+bool Boson::addNeutralPlayer()
+{
+ QPtrListIterator<KPlayer> it(*playerList());
+ while (it.current()) {
+	if (((Player*)it.current())->isNeutral()) {
+		boWarning() << k_funcinfo << "already have a neutral player. removing." << endl;
+
+		// note: this will _send_ a request to remove only. will get
+		// removed once the message is received.
+		removePlayer(it.current());
+	}
+	++it;
+ }
+ QValueList<QColor> colors = availableTeamColors();
+ if (colors.count() == 0) {
+	boError() << k_funcinfo << "no color for neutral player available. not enough colors." << endl;
+	return false;
+ }
+ Player* p = new Player(true);
+ p->setName(i18n("Neutral"));
+ p->loadTheme(SpeciesTheme::speciesDirectory("Neutral"), colors.first());
+
+ // will send a request for adding a player. player is added once the request is
+ // received.
+ bosonAddPlayer(p);
+ return true;
+}
+

@@ -161,6 +161,16 @@ bool BosonStartupNetwork::sendNewGame(BosonPlayField* field, bool editor, const 
 		return false;
 	}
  }
+ // AB: note that _only_ admin does this!
+ if (mGame->maxPlayers() >= 0) {
+	// we increase the limit for the neutral player only!
+	mGame->setMaxPlayers(mGame->maxPlayers() + 1);
+ }
+ if (!mGame->addNeutralPlayer()) {
+	boError() << k_funcinfo << "unable to add neutral player. cannot send newgame message." << endl;
+	return false;
+ }
+ boDebug() << k_funcinfo << "neutral player will get added from network soon. sending newgame message." << endl;
  if (editor) {
 	mGame->sendMessage(data, BosonMessage::IdNewEditor);
  } else {

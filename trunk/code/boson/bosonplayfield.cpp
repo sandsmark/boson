@@ -208,7 +208,6 @@ bool BosonPlayFieldInformation::loadMapInformation(const QByteArray& xml)
  QDomDocument doc(QString::fromLatin1("BosonMap"));
  if (!doc.setContent(QString(xml), &errorMsg, &line, &column)) {
 	boError() << k_funcinfo << "unable to set XML content - error in line=" << line << ",column=" << column << " errorMsg=" << errorMsg << endl;
-	boDebug() << QString(xml) << endl;
 	return false;
  }
  QDomElement root = doc.documentElement();
@@ -1005,6 +1004,17 @@ bool BosonPlayField::convertFilesToCurrentFormat(QMap<QString, QByteArray>& dest
 	{
 		BosonFileConverter converter;
 		if (!converter.convertPlayField_From_0_9_To_0_9_1(destFiles)) {
+			boError() << k_funcinfo << "could not convert from boson 0.9 to boson 0.9.1 file format" << endl;
+			ret = false;
+		} else {
+			ret = true;
+		}
+		break;
+	}
+	case BOSON_SAVEGAME_FORMAT_VERSION_0_9_1:
+	{
+		BosonFileConverter converter;
+		if (!converter.convertPlayField_From_0_9_1_To_0_10(destFiles)) {
 			boError() << k_funcinfo << "could not convert from boson 0.9 to boson 0.9.1 file format" << endl;
 			ret = false;
 		} else {
