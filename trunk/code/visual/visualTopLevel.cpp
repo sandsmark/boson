@@ -158,7 +158,7 @@ void visualTopLevel::selectMob(long key, visualMobUnit *m)
 		}
 	else {
 		boAssert( selectionWho>=0 );
-		if (m->who != selectionWho)
+		if ((int)m->who != selectionWho)
 			return;
 		}
 
