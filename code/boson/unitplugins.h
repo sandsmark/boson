@@ -28,6 +28,7 @@ class UnitProperties;
 class BosonCanvas;
 class Cell;
 class Player;
+class PluginProperties;
 
 class UnitPlugin
 {
@@ -60,6 +61,11 @@ class UnitPlugin
 	 * Convenience method for unit()->unitProperties()
 	 **/
 	const UnitProperties* unitProperties() const;
+
+	/**
+	 * Convenience method for unit()->properties()
+	 **/
+	const PluginProperties* properties(int propertyType) const;
 
 	/**
 	 * Convenience method for unit()->canvas()
@@ -232,6 +238,21 @@ public:
 	bool canMine(Cell* cell) const;
 
 	inline Unit* refinery() const { return mRefinery; }
+
+	/**
+	 * @return PluginProperties::canMineMinerals
+	 **/
+	bool canMineMinerals() const;
+
+	/**
+	 * @return PluginProperties::canMineOil
+	 **/
+	bool canMineOil() const;
+
+	/**
+	 * @return PluginProperties::maxResources
+	 **/
+	unsigned int maxResources() const;
 
 private:
 	KGameProperty<int> mResourcesX;

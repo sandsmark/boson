@@ -56,6 +56,11 @@ const UnitProperties* UnitPlugin::unitProperties() const
  return unit()->unitProperties();
 }
 
+const PluginProperties* UnitPlugin::properties(int propertyType) const
+{
+ return unit()->properties(propertyType);
+}
+
 KGamePropertyHandler* UnitPlugin::dataHandler() const
 {
  return unit()->dataHandler();
@@ -505,17 +510,39 @@ void HarvesterPlugin::setRefinery(Unit* refinery)
 
 bool HarvesterPlugin::canMine(Cell* cell) const
 {
- const HarvesterProperties* prop = (HarvesterProperties*)unit()->properties(PluginProperties::Harvester);
- if (!prop) {
-	return false;
- }
- if (prop->canMineMinerals() &&
-		cell->groundType() == Cell::GroundGrassMineral) {
+ if (canMineMinerals() && cell->groundType() == Cell::GroundGrassMineral) {
 	return true;
  }
- if (prop->canMineOil() && 
-		cell->groundType() == Cell::GroundGrassOil) {
+ if (canMineOil() && cell->groundType() == Cell::GroundGrassOil) {
 	return true;
  }
  return false;
 }
+
+bool HarvesterPlugin::canMineMinerals() const
+{
+ const HarvesterProperties* prop = (HarvesterProperties*)unit()->properties(PluginProperties::Harvester);
+ if (!prop) {
+	return false;
+ }
+ return prop->canMineMinerals();
+}
+
+bool HarvesterPlugin::canMineOil() const
+{
+ const HarvesterProperties* prop = (HarvesterProperties*)unit()->properties(PluginProperties::Harvester);
+ if (!prop) {
+	return false;
+ }
+ return prop->canMineOil();
+}
+
+unsigned int HarvesterPlugin::maxResources() const
+{
+ const HarvesterProperties* prop = (HarvesterProperties*)unit()->properties(PluginProperties::Harvester);
+ if (!prop) {
+	return false;
+ }
+ return prop->maxResources();
+}
+
