@@ -163,8 +163,9 @@ gluLookAt(0.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 100.0, 0.0);
  if test "x$bo_have_glu" != "xyes"; then
 	AC_MSG_RESULT([no])
 	AC_MSG_ERROR([configure was unable to link to libGLU. Please install GLU (e.g.  mesa-glu). Note this is NOT included in your graphics card driver!])
+ else
+	AC_MSG_RESULT([yes])
  fi
- AC_MSG_RESULT([yes])
 
  dnl AB: the AC_DEFINE is pretty useless, as we abort anyway, if GL not there
  AC_DEFINE(HAVE_GL, 1, [Defines if you have GL (Mesa, OpenGL, ...)])
