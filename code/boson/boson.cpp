@@ -56,149 +56,12 @@
 #include <qtextstream.h>
 #include <qcstring.h>
 #include <qfile.h>
-//#include <qintdict.h>
-
-#ifndef KGAME_HAVE_KGAME_HOSTNAME
-// AB: !KGAME_HAVE_KGAME_PORT implies !KGAME_HAVE_KGAME_HOSTNAME
-// (KGame::hostName() was added after KGame::port())
-#include <qsocket.h>
-#include <qserversocket.h>
-#include <qobjectlist.h>
-#endif
 
 #include "boson.moc"
 
 Boson* Boson::mBoson = 0;
 
 #define ADVANCE_INTERVAL 250 // ms
-
-
-#if KDE_VERSION <= KDE_MAKE_VERSION(3,1,4)
-#include <kgame/kmessageio.h>
-#include <kmessagebox.h>
-#include <qsocket.h>
-static QMap<KMessageSocket*, BoMyKMessageSocket*> KMessageSocket2BoMyKMessageSocket;
-static QMap<QSocket*, KMessageSocket*> QSocket2KMessageSocket;
-
-static void fixKMessageSocketIsRecursive()
-{
- if (!boGame) {
-	return;
- }
- const QObjectList* list = QObject::objectTrees();
- QObjectListIt it(*list);
- for (; it.current(); ++it) {
-	if (qstrcmp((*it)->className(), "KMessageSocket") != 0) {
-		continue;
-	}
-	boDebug() << k_funcinfo << "found a KMessageSocket" << endl;
-	if (KMessageSocket2BoMyKMessageSocket.contains((KMessageSocket*)(*it))) {
-		boDebug() << k_funcinfo << "KMessageSocket already fixed" << endl;
-		continue;
-	}
-	boDebug() << k_funcinfo << "fixing KMessageSocket" << endl;
-	BoMyKMessageSocket* s = new BoMyKMessageSocket();
-	QSocket* sock = 0;
-	const QObjectList* list2 = QObject::objectTrees();
-	QObjectListIt it2(*list2);
-	for (; it2.current() && !sock; ++it2) {
-		if (qstrcmp((*it2)->className(), "QSocket") != 0) {
-			continue;
-		}
-		if (QSocket2KMessageSocket[(QSocket*)(*it2)] != 0) {
-			continue;
-		}
-		if (sock) {
-			boError() << k_funcinfo << "already a QSocket object found! baaaaaad! your netowork will probably be broken!" << endl;
-			KMessageBox::sorry(0, i18n("A workaround for a bug in libkdegames from KDE < 3.2 failed. Your network will be broken."));
-		}
-		sock = (QSocket*)(*it2);
-	}
-
-	if (!sock) {
-		boError() << k_funcinfo << "QSocket object not found" << endl;
-		return;
-	}
-
-	s->setSocket((KMessageSocket*)(*it), sock);
-	KMessageSocket2BoMyKMessageSocket.insert((KMessageSocket*)(*it), s);
-	QSocket2KMessageSocket.insert(sock, (KMessageSocket*)(*it));
- }
-}
-
-void BoMyKMessageSocket::setSocket(KMessageSocket* s, QSocket* sock)
-{
- mSocket = s;
- mSocketSocket = sock;
- connect(this, SIGNAL(signalReceived(const QByteArray&)), mSocket, SIGNAL(received(const QByteArray&)));
-
- disconnect(mSocketSocket, SIGNAL(readyRead()), mSocket, SLOT(processNewData()));
- connect(mSocketSocket, SIGNAL(readyRead()), this, SLOT(slotProcessNewData()));
- mNextBlockLength = 0;
- mAwaitingHeader = 0;
-}
-
-void BoMyKMessageSocket::slotProcessNewData()
-{
- BO_CHECK_NULL_RET(mSocket);
- static bool isRecursive = false;
- if (isRecursive) {
-	return;
- }
-
- isRecursive = true;
-
- QDataStream str(mSocketSocket);
- while (mSocketSocket->bytesAvailable() > 0) {
-	if (mAwaitingHeader) {
-		// Header = magic number + packet length = 5 bytes
-		if (mSocketSocket->bytesAvailable() < 5) {
-			isRecursive = false;
-			return;
-		}
-
-		// Read the magic number first. If something unexpected is found,
-		// start over again, ignoring the data that was read up to then.
-
-		Q_UINT8 v;
-		str >> v;
-		if (v != 'M') {
-			kdWarning(11001) << k_funcinfo << "Received unexpected data, magic number wrong!" << endl;
-			continue;
-		}
-
-		str >> mNextBlockLength;
-		mAwaitingHeader = false;
-	} else {
-		// Data not completly read => wait for more
-		if (mSocketSocket->bytesAvailable() < (Q_ULONG) mNextBlockLength) {
-			isRecursive = false;
-			return;
-		}
-
-		QByteArray msg (mNextBlockLength);
-		str.readRawBytes (msg.data(), mNextBlockLength);
-
-		// send the received message
-		emit signalReceived (msg);
-
-		// Waiting for the header of the next message
-		mAwaitingHeader = true;
-	}
- }
-
- isRecursive = false;
-}
-
-#else
-void BoMyKMessageSocket::setSocket(KMessageSocket* s, QSocket* sock)
-{
-}
-void BoMyKMessageSocket::slotProcessNewData()
-{
- // nothing. KMessageSocket is fixed in this version.
-}
-#endif
 
 
 /**
@@ -2029,11 +1892,6 @@ void Boson::slotPlayerJoinedGame(KPlayer* p)
  if (!p) {
 	return;
  }
-#if KDE_VERSION <= KDE_MAKE_VERSION(3,1,4)
- // this is an UGLY hack to make sure that network is working correctly.
- // we've had a KMessageSocket bug in kdegames < 3.2
- fixKMessageSocketIsRecursive();
-#endif
  KGameIO* io = p->findRttiIO(KGameIO::ComputerIO);
  if (io) {
 	// note the IO is added on only *one* client!
@@ -2174,14 +2032,7 @@ bool Boson::savePlayFieldToFile(const QString& file)
 
 bool Boson::save(QDataStream& stream, bool saveplayers)
 {
-#if HAVE_KGAME_SAVEGAME
  return KGame::save(stream, saveplayers);
-#else
-// KDE 3.0 didn't have KGame::savegame() - we provide our own savegame()
-// version, but the KGame code is in KGame::save(). we need to call that from
-// Boson::save(), instead of savegame()
- return savegame(stream, false, saveplayers);
-#endif
 }
 
 
@@ -2218,12 +2069,7 @@ bool Boson::savegame(QDataStream& stream, bool network, bool saveplayers)
  stream << (Q_UINT32)BosonSaveLoad::latestSavegameVersion();
 
  // Save KGame stuff
-#if !HAVE_KGAME_SAVEGAME
- boWarning() << k_funcinfo << "Saving without KGame::savegame() is untested! (KDE 3.1 has KGame::savegame())" << endl;
- if (!KGame::save(stream, saveplayers)) {
-#else
  if (!KGame::savegame(stream, network, saveplayers)) {
-#endif
 	boError() << k_funcinfo << "Can't save KGame!" << endl;
 	return false;
  }
@@ -2376,108 +2222,16 @@ bool Boson::loadXMLDoc(QDomDocument* doc, const QString& xml)
 
 Q_UINT16 Boson::bosonPort()
 {
-#ifdef KGAME_HAVE_KGAME_PORT
  return KGame::port();
-#else
- if (!isNetwork()) {
-	return 0;
- }
- boDebug() << k_funcinfo << endl;
- // ugly hack... luckily we *can* do such hacks :)
- const QObjectList* list = QObject::objectTrees();
- QObjectListIt it(*list);
- if (isOfferingConnections()) {
-	for (; it.current(); ++it) {
-		if (qstrcmp((*it)->className(), "KMessageServerSocket") == 0) {
-			QServerSocket* server = (QServerSocket*)(*it);
-			return server->port();
-		}
-	}
-	boWarning() << k_funcinfo << "could not find KMessageServerSocket!" << endl;
- } else {
-	for (; it.current(); ++it) {
-		if (qstrcmp((*it)->className(), "QSocket") == 0) {
-			QSocket* socket = (QSocket*)*it;
-			return socket->peerPort();
-
-		}
-	}
-	boWarning() << k_funcinfo << "could not find QSocket!" << endl;
- }
- return 0;
-#endif
 }
 
 QString Boson::bosonHostName()
 {
-#ifdef KGAME_HAVE_KGAME_HOSTNAME
  return KGame::hostName();
-#else
- if (!isNetwork() || isOfferingConnections()) {
-	return QString::fromLatin1("localhost");
- }
- boDebug() << k_funcinfo << endl;
- // ugly hack... luckily we *can* do such hacks :)
- const QObjectList* list = QObject::objectTrees();
- QObjectListIt it(*list);
- for (; it.current(); ++it) {
-	if (qstrcmp((*it)->className(), "QSocket") == 0) {
-		QSocket* socket = (QSocket*)*it;
-		return socket->peerName();
-	}
- }
- boWarning() << k_funcinfo << "could not find QSocket!" << endl;
- return QString::fromLatin1("localhost");
-#endif
 }
 
 void Boson::bosonAddPlayer(KPlayer* player)
 {
- if (player->id() != 0) {
-	// we don't have a problem.
-	KGame::addPlayer(player);
-	return;
- }
-
-#ifndef KGAME_HAVE_FIXED_ADDPLAYER_ID
- // this is going to be ugly.
- // in KDE < 3.2 KGame::addPlayer() did not set a player ID, but sent the player
- // out directly. KGame::systemAddPlayer() would set the ID then on all clients,
- // but as they have different client IDs, this ID would be broken.
- // in KDE 3.2 addPlayer() does this correctly.
- //
- // as a workaround we call systemAddPlayer() directly here and revert
- // everything that is done beyond the call to player->setId().
- // note that this is possibe, as we already _do_ know what is done in
- // systemAddPlayer() and that it can _not_ change in the future, as this refers
- // to KDE < 3.2 _only_
- //
- // also note that simply setting the ID on our own is even more dangerous. e.g.
- // the state of the ID counter is saved together with KGame and we can get very
- // undefined results if it is invalid!
-
- // first prevent signalPlayerJoinedGame() from being emitted.
- bool blocks = signalsBlocked();
- blockSignals(true);
-
- // save the old KGame pointer of the player. probably NULL.
- KGame* oldGame = player->game();
-
- // now do the dangerous call.
- systemAddPlayer(player);
-
- // remove the player from the player list. will be added once systemAddPlayer()
- // is called from a valid point.
- playerList()->removeRef(player);
-
- // revert to the old KGame pointer
- player->setGame(oldGame);
-
- // allow signals again, if they were before. we are done now.
- blockSignals(blocks);
-#else
- // we can safely call KGame::addPlayer() directly
-#endif
  KGame::addPlayer(player);
 }
 
