@@ -17,8 +17,9 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #include "optionswidgets.h"
-#include "bosonconfig.h"
+#include "optionswidgets.moc"
 
+#include "bosonconfig.h"
 #include "bosoncursor.h"
 #include "bosonmodeltextures.h"
 #include "boson.h"
@@ -30,8 +31,6 @@
 #include "bofullscreen.h"
 #include "bomeshrenderermanager.h"
 #include "bowater.h"
-#include "bosonfont/bosonglfont.h"
-#include "bosonfont/bosonglfontchooser.h"
 #include "info/boinfo.h"
 #include "botexture.h"
 
@@ -50,7 +49,15 @@
 #include <qpushbutton.h>
 #include <qlineedit.h>
 
-#include "optionswidgets.moc"
+
+// we use libufo fonts now.
+// TODO: make them configurable
+// TODO: port bosonfont to libufo
+#define BOSONFONT 0
+#if BOSONFONT
+#include "bosonfont/bosonglfont.h"
+#include "bosonfont/bosonglfontchooser.h"
+#endif
 
 OptionsWidget::OptionsWidget()
 {
@@ -463,12 +470,14 @@ OpenGLOptions::OpenGLOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
  mEnableATIDepthWorkaround->setChecked(false);
  slotEnableATIDepthWorkaround(false);
 
+#if BOSONFONT
  QHBox* fontBox = new QHBox(this);
  (void)new QLabel(i18n("Font: "), fontBox);
  mFont = new QPushButton(fontBox);
  mFontChanged = false;
  mFontInfo = new BoFontInfo();
  connect(mFont, SIGNAL(clicked()), this, SLOT(slotChangeFont()));
+#endif
 
  QHBox* resolutionBox = new QHBox(this);
  (void)new QLabel(i18n("Resolution:"), resolutionBox);
@@ -659,6 +668,7 @@ void OpenGLOptions::slotShowDetails(bool show)
 
 void OpenGLOptions::slotChangeFont()
 {
+#if BOSONFONT
  BoFontInfo f = *mFontInfo;
  int result = BosonGLFontChooser::getFont(f, this);
  if (result == QDialog::Accepted) {
@@ -666,6 +676,7 @@ void OpenGLOptions::slotChangeFont()
 	mFontChanged = true;
 	mFont->setText(mFontInfo->guiName());
  }
+#endif
 }
 
 void OpenGLOptions::apply()
@@ -718,11 +729,13 @@ void OpenGLOptions::apply()
  boConfig->setBoolValue("UseLOD", useLOD());
  boConfig->setUIntValue("DefaultLOD", defaultLOD());
 
+#if BOSONFONT
  if (mFontChanged) {
 	boConfig->setStringValue("GLFont", mFontInfo->toString());
 	mFontChanged = false;
 	emit signalFontChanged(*mFontInfo);
  }
+#endif
 
 
  boConfig->setBoolValue("EnableATIDepthWorkaround", mEnableATIDepthWorkaround->isChecked());
@@ -805,13 +818,15 @@ void OpenGLOptions::load()
  setDefaultLOD(boConfig->uintValue("DefaultLOD", 0));
  mEnableATIDepthWorkaround->setChecked(boConfig->boolValue("EnableATIDepthWorkaround"));
  mATIDepthWorkaroundValue->setText(QString::number(boConfig->doubleValue("ATIDepthWorkaroundValue")));
+#if BOSONFONT
  if (!mFontInfo->fromString(boConfig->stringValue("GLFont", QString::null))) {
 	boError() << k_funcinfo << "Could not load font " << boConfig->stringValue("GLFont", QString::null) << endl;
 	*mFontInfo = BoFontInfo();
  }
  mFont->setText(mFontInfo->guiName());
- mSmoothShading->setChecked(boConfig->boolValue("SmoothShading", true));
  mFontChanged = false;
+#endif
+ mSmoothShading->setChecked(boConfig->boolValue("SmoothShading", true));
  mResolution->setCurrentItem(0);
 
  setCurrentMeshRenderer(BoMeshRendererManager::manager()->currentRendererName());
