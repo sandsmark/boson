@@ -203,7 +203,7 @@ public:
 	 * @return Turning speed of this mobile unit (degrees per advance call). 0 if
 	 * this is a facility. See @ref isFacility
 	 **/
-	float rotationSpeed() const;
+	int rotationSpeed() const;
 
 	/**
 	 * @return Whether this unit can go over land
@@ -392,7 +392,7 @@ protected:
 	void setSpeed(float speed);
 	void setAccelerationSpeed(float speed);
 	void setDecelerationSpeed(float speed);
-	void setRotationSpeed(float speed);
+	void setRotationSpeed(int speed);
 	void setCanGoOnLand(bool c);
 	void setCanGoOnWater(bool c);
 

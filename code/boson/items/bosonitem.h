@@ -40,11 +40,14 @@ template<class T> class QPtrList;
 
 /**
  * This is the base class for all visual items, i.e. a OpenGL objects in boson.
- * Subclasses can be e.g. a missile object, units or mines.
+ * Subclasses can be e.g. a missile objects, units or mines.
  *
- * Every BosonItem must have a model assigned, which will be used to render the
- * object onto the screen. You also have to use a <em>unique</em> @ref rtti for
- * every item, i.e. a missile must have a different rtti than the units.
+ * Every BosonItem should have a model assigned, which will be used to render
+ * the object onto the screen. If you don't want the item to be rendered or if
+ * you don't have a model, you can use @ref setVisible to prevent item from
+ * being rendered
+ * You also have to use a <em>unique</em> @ref rtti for every item, i.e. a
+ * missile must have a different rtti than the units.
  *
  * Note that only <em>canvas</em> coordinates are stored in this class,
  * <em>not</em> OpenGL coordinates!
@@ -87,9 +90,7 @@ public:
 	inline float y() const { return mY; }
 
 	/**
-	 * @return The z-position of the unit. Currently 0.0 for all units,
-	 * except flying units. Might be changed to the height of the ground one
-	 * day
+	 * @return The z-position of the item.
 	 **/
 	inline float z() const { return mZ; }
 
@@ -97,12 +98,13 @@ public:
 	 * @param width Width in cells * BO_TILE_SIZE. FIXME: should be changed to cell value (float!!)
 	 * @param height Height in cells * BO_TILE_SIZE. FIXME: should be changed to cell value (float!!)
 	 **/
-	void setSize(int width, int height);
+	void setSize(int width, int height, float depth);
 
 	// note: for GLunit all frames must have the same width/height!
 	// different depth is ok!
 	inline int width() const { return mWidth; }
 	inline int height() const { return mHeight; }
+  inline float depth() const { return mDepth; }
 
 	inline float leftEdge() const { return x(); }
 	inline float topEdge() const { return y(); }
@@ -485,6 +487,7 @@ private:
 	float mZ;
 	int mWidth;
 	int mHeight;
+  float mDepth;
 
 	float mXVelocity;
 	float mYVelocity;

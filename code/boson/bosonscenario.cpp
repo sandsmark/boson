@@ -669,8 +669,8 @@ bool BosonScenario::saveMobile(QDomElement& node, MobileUnit* mob)
  const UnitProperties* prop = mob->unitProperties();
 
 // meant to change during the game one day - but it is unused currenlty.
- if (mob->speed() != prop->speed()) {
-	node.setAttribute("Speed", (double)mob->speed());
+ if (mob->maxSpeed() != prop->speed()) {
+	node.setAttribute("MaxSpeed", (double)mob->maxSpeed());
  }
  return ret;
 }
@@ -683,10 +683,10 @@ bool BosonScenario::loadMobile(QDomElement& node, MobileUnit* mob)
  // Check if mob is 0 before actually using it!
  bool ret = true;
  bool ok = false; // for QString::toInt() like functions
- if (node.hasAttribute("Speed")) {
-	double speed = node.attribute("Speed").toDouble(&ok);
+ if (node.hasAttribute("MaxSpeed")) {
+	double speed = node.attribute("MaxSpeed").toDouble(&ok);
 	if (!ok) {
-		boError(250) << k_funcinfo << "Invalid value for speed!" << endl;
+		boError(250) << k_funcinfo << "Invalid value for MaxSpeed!" << endl;
 	} else if (mob) {
 		mob->setMaxSpeed(speed);
 	}

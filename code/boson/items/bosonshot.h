@@ -120,8 +120,6 @@ class BosonShotBullet : public BosonShot
     virtual void save(QDataStream&) {};
     virtual void load(QDataStream&) { setActive(false); };
 
-    virtual QPtrList<BosonParticleSystem>* particleSystems() const  { return 0; };
-
     inline virtual int type() const { return BosonShot::Bullet; };
 
   protected:
@@ -175,8 +173,6 @@ class BosonShotExplosion : public BosonShot
     virtual void save(QDataStream& stream);
     virtual void load(QDataStream& stream);
 
-    virtual QPtrList<BosonParticleSystem>* particleSystems() const  { return 0; };
-
     inline virtual int type() const { return BosonShot::Explosion; };
 
     virtual long int damage() const  { return mDamage; };
@@ -193,11 +189,11 @@ class BosonShotExplosion : public BosonShot
     int mDelay;
 };
 
-/*
+
 class BosonShotMine : public BosonShot
 {
   public:
-    BosonShotMine(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop, BoVector3 pos, BoVector3 target);
+    BosonShotMine(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop, BoVector3 pos);
     BosonShotMine(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop);
 
     virtual bool saveAsXML(QDomElement& root);
@@ -205,11 +201,15 @@ class BosonShotMine : public BosonShot
     virtual void save(QDataStream& stream);
     virtual void load(QDataStream& stream);
 
-    virtual QPtrList<BosonParticleSystem>* particleSystems() const;
-
     inline virtual int type() const { return BosonShot::Mine; };
+
+  protected:
+    virtual void advanceMoveInternal();
+
+  private:
+    bool mActivated;
 };
-*/
+
 
 #endif // BOSONSHOT_H
 /*

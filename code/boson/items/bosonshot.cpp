@@ -25,6 +25,7 @@
 #include "../bosonweapon.h"
 #include "../player.h"
 #include "../unitproperties.h"
+#include "../boitemlist.h"
 #include "bodebug.h"
 
 #include <ksimpleconfig.h>
@@ -45,7 +46,7 @@ BosonShot::BosonShot(Player* owner, BosonCanvas* canvas, const BosonWeaponProper
   mOwner = owner;
   mProp = prop;
   // FIXME: can't we use values from objects config file here?
-  setSize(BO_TILE_SIZE / 2, BO_TILE_SIZE / 2); // AB: pretty much a random value
+  setSize(BO_TILE_SIZE / 2, BO_TILE_SIZE / 2, BO_GL_CELL_SIZE / 2); // AB: pretty much a random value
 
   // At first shot is invisible. It will be set visible when it's advanced. This
   //  is needed because x rotation isn't calculated in constructor and it would
@@ -552,6 +553,64 @@ void BosonShotExplosion::advanceMoveInternal()
   if(mDelay <= 0)
   {
     explode();
+  }
+}
+
+
+/*****  BosonShotExplosion  *****/
+
+BosonShotMine::BosonShotMine(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop, BoVector3 pos) :
+    BosonShot(owner, canvas, prop)
+{
+  mActivated = false;
+  move(pos.x(), pos.y(), pos.z());
+  setVisible(true);
+}
+
+BosonShotMine::BosonShotMine(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop) :
+    BosonShot(owner, canvas, prop)
+{
+}
+
+bool BosonShotMine::saveAsXML(QDomElement& root)
+{
+  return true;
+}
+
+bool BosonShotMine::loadFromXML(const QDomElement& root)
+{
+  return true;
+}
+
+void BosonShotMine::save(QDataStream& stream)
+{
+}
+
+void BosonShotMine::load(QDataStream& stream)
+{
+}
+
+void BosonShotMine::advanceMoveInternal()
+{
+  boDebug() << "MINE: " << k_funcinfo << endl;
+  BoItemList* contacts = collisions()->collisions(boundingRect(), this, true);
+  if(!contacts->isEmpty())
+  {
+    // Somebody is touching the mine. If mine is activated, explode
+    if(mActivated)
+    {
+      boDebug() << "MINE: " << k_funcinfo << "contact. BOOM" << endl;
+      explode();
+    }
+  }
+  else
+  {
+    // Nobody is touching the mine. If mine is unactivated, activate it
+    if(!mActivated)
+    {
+      boDebug() << "MINE: " << k_funcinfo << "Mine activated" << endl;
+      mActivated = true;
+    }
   }
 }
 
