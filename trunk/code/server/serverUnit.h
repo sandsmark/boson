@@ -62,7 +62,7 @@ public:
 	void 	reportHidden(int player = SEND_TO_KNOWN);
 
 /* request */
-	void	r_moveBy(moveMsg_t &, int playerId);
+	void	r_moveBy(moveMsg_t &, uint playerId);
 
 	virtual void	getWantedAction(void) {};
 	bool		shooted(void);
