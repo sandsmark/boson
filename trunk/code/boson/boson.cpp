@@ -1359,7 +1359,7 @@ void Boson::slotProcessDelayed() // TODO: rename: processDelayed()
  delete m;
 }
 
-bool Boson::save(QDataStream& stream, bool saveplayers)
+bool Boson::savegame(QDataStream& stream, bool network, bool saveplayers)
 {
  kdDebug() << k_funcinfo << endl;
  // KGame::load() doesn't emit signalLoadPrePlayers in KDE 3.0.x, so we have to
@@ -1389,7 +1389,7 @@ bool Boson::save(QDataStream& stream, bool saveplayers)
  }
 
  // Save KGame stuff
- if(!KGame::save(stream, saveplayers)) {
+ if(!KGame::savegame(stream, network, saveplayers)) {
 	kdError() << k_funcinfo << "Can't save KGame!" << endl;
 	return false;
  }
