@@ -28,14 +28,14 @@
 #define BOSON_COOKIE 992
 #define BOSON_PORT 5454
 
-#define MAXIMAL_ADVANCE_COUNT 200 // maximal value of advanceCount param emitted by Boson::signalAdvance
+#define MAXIMAL_ADVANCE_COUNT 20 // maximal value of advanceCount param emitted by Boson::signalAdvance
 
 #define BOSON_MAX_PLAYERS 10 // test if this is working - 2 is tested
 
 #define MAX_GAME_SPEED 25 // the advance period - lower means faster
 #define MIN_GAME_SPEED 2 // the advance period - higher means slower
 
-#define REMOVE_WRECKAGES_TIME 20 // remove wreckages after a certain time
+#define REMOVE_WRECKAGES_TIME 10 // remove wreckages after a certain time (after 10 secs with normal game speed)
 
 #define BUILD_RANGE 5 * BO_TILE_SIZE // units can be placed within 10 tiles from its factory
 
