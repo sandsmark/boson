@@ -100,9 +100,9 @@ static Colormap choose_cmap( Display *dpy, XVisualInfo *vi )
     // qDebug( "Choosing cmap for vID %0x", vi->visualid );
 
     if ( vi->visualid ==
-	 XVisualIDFromVisual( (Visual*)QPaintDevice::x11AppVisual( vi->screen ) ) ) {
+	 XVisualIDFromVisual( (Visual*)QPaintDevice::x11AppVisual( ) ) ) {
 	// qDebug( "Using x11AppColormap" );
-	return QPaintDevice::x11AppColormap( vi->screen );
+	return QPaintDevice::x11AppColormap( );
     }
 
     if ( mesa_gl ) {				// we're using MesaGL
