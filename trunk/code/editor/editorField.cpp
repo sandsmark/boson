@@ -68,6 +68,10 @@ bool editorField::Load(QString filename)
 				cells[i][j].set( GROUND_WATER, i, j);
 				cells[i][j].z( Z_INVISIBLE);
 				cells[i][j].set( GROUND_UNKNOWN);
+				boAssert (
+					(i>0 && IS_BIG_TRANS(cells[i-1][j].getGroundType())) ||
+					(j>0 && IS_BIG_TRANS(cells[i][j-1].getGroundType())) ||
+					(i>0 && j>0 && IS_BIG_TRANS(cells[i-1][j-1].getGroundType())) );
 			}
 		}
 	
