@@ -24,6 +24,11 @@
 #include <ufo/events/ukeysym.hpp>
 #include <ufo/widgets/uslider.hpp>
 
+// AB: make sure that we are compatible to system that have QT_NO_STL defined
+#ifndef QT_NO_STL
+#define QT_NO_STL
+#endif
+
 #include "boufo.h"
 #include "boufo.moc"
 
@@ -35,6 +40,7 @@
 #include <bodebug.h>
 
 #include <GL/gl.h>
+
 
 
 /**
@@ -519,6 +525,7 @@ void BoUfoWidget::init(ufo::UWidget* w)
 
 void BoUfoWidget::invalidate()
 {
+ boDebug() << k_funcinfo << endl;
  widget()->invalidate();
 }
 
@@ -699,7 +706,7 @@ QString BoUfoWidget::constraints() const
  if (!o) {
 	return QString::null;
  }
- return o->toString();
+ return o->toString().c_str();
 }
 
 BoUfoWidget::~BoUfoWidget()
@@ -1049,7 +1056,7 @@ void BoUfoPushButton::setText(const QString& text)
 
 QString BoUfoPushButton::text() const
 {
- QString text = mButton->getText();
+ QString text = mButton->getText().c_str();
  return text;
 }
 
@@ -1097,7 +1104,7 @@ void BoUfoLineEdit::setText(const QString& text)
 
 QString BoUfoLineEdit::text() const
 {
- QString text = mLineEdit->getText();
+ QString text = mLineEdit->getText().c_str();
  return text;
 }
 
@@ -1136,7 +1143,7 @@ void BoUfoTextEdit::setText(const QString& text)
 
 QString BoUfoTextEdit::text() const
 {
- QString text = mTextEdit->getText();
+ QString text = mTextEdit->getText().c_str();
  return text;
 }
 
@@ -1260,7 +1267,7 @@ void BoUfoLabel::setText(const QString& text)
 
 QString BoUfoLabel::text() const
 {
- QString text = mLabel->getText();
+ QString text = mLabel->getText().c_str();
  return text;
 }
 
@@ -1324,7 +1331,7 @@ void BoUfoCheckBox::setText(const QString& text)
 
 QString BoUfoCheckBox::text() const
 {
- QString text = mCheckBox->getText();
+ QString text = mCheckBox->getText().c_str();
  return text;
 }
 
@@ -1484,6 +1491,7 @@ void BoUfoTabWidget::setCurrentTab(int id)
 	return;
  }
  w->show();
+ invalidate();
 }
 
 BoUfoWidget* BoUfoTabWidget::currentTab() const

@@ -26,6 +26,10 @@
 #include <ufo/signals/usignal.hpp>
 #include <ufo/ufo.hpp>
 
+#ifndef QT_NO_STL
+#define QT_NO_STL
+#endif
+
 #include "boufoaction.h"
 #include "boufoaction.moc"
 
@@ -744,7 +748,7 @@ void BoUfoMenuBarMenu::createUfoSubMenu(ufo::UWidget* parentWidget)
 		BoUfoMenuBarMenu* m = (BoUfoMenuBarMenu*)items()[i];
 
 		// TODO: we could provide an icon
-		ufo::UMenu* menu = new ufo::UMenu(m->text());
+		ufo::UMenu* menu = new ufo::UMenu(m->text().latin1());
 		menu->sigActivated().connect(slot(*((BoUfoMenuBarItem*)m), &BoUfoMenuBarMenu::uslotActivated));
 		menu->sigHighlighted().connect(slot(*((BoUfoMenuBarItem*)m), &BoUfoMenuBarItem::uslotHighlighted));
 
@@ -757,20 +761,20 @@ void BoUfoMenuBarMenu::createUfoSubMenu(ufo::UWidget* parentWidget)
 		ufo::UMenuItem* menuItem = 0;
 		if (!action) {
 			// e.g. a separator
-			menuItem = new ufo::UMenuItem(item->text());
+			menuItem = new ufo::UMenuItem(item->text().latin1());
 		} else if (action->inherits("BoUfoToggleAction")) {
 			BoUfoToggleAction* toggle = (BoUfoToggleAction*)action;
 #if UFO_MAJOR_VERSION == 0 && UFO_MINOR_VERSION <= 7 && UFO_MICRO_VERSION <= 2
 			// AB: libufo <= 0.7.2 had a broken UCheckBoxMenuItem
 			// implementation.
-			ufo::UMenuItem* c = new ufo::UMenuItem(item->text());
+			ufo::UMenuItem* c = new ufo::UMenuItem(item->text().latin1());
 #else
 			ufo::UCheckBoxMenuItem* c = new ufo::UCheckBoxMenuItem(item->text());
 			c->setSelected(toggle->checked());
 #endif
 			menuItem = c;
 		} else {
-			menuItem = new ufo::UMenuItem(item->text());
+			menuItem = new ufo::UMenuItem(item->text().latin1());
 		}
 		item->setUfoItem(menuItem);
 		menuItem->sigActivated().connect(slot(*item, &BoUfoMenuBarItem::uslotActivated));
