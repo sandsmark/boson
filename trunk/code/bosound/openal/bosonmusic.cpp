@@ -186,8 +186,10 @@ void BosonMusic::slotUpdateTicker()
 		}
 		break;
 	}
+	case AL_INITIAL:
+		break;
 	default:
-		boDebug(200) << k_funcinfo << "unknown status " << v << endl;
+		boDebug(200) << k_funcinfo << "unknown state " << v << endl;
 		break;
  }
 }
