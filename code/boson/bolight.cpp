@@ -139,7 +139,6 @@ void BoLight::setPosition(const BoVector4& pos)
   }
 
   mPos = pos;
-  boDebug() << k_funcinfo << "Position changed to " << mPos.debugString(3) << endl;
   glLightfv(GL_LIGHT0 + mId, GL_POSITION, mPos.data());
 }
 
