@@ -78,10 +78,15 @@ void BosonStarting::startNewGame()
 {
  boDebug() << k_funcinfo << endl;
  mLoading = false; // we are starting a new game
+ // Reset progressbar
  emit signalLoadingShowProgressBar(true);
- emit signalLoadingProgress(0);
+ emit signalLoadingSetLoading(false);
+ emit signalLoadingReset();
+ emit signalLoadingSetAdmin(boGame->isAdmin());
+ emit signalLoadingPlayersCount(boGame->playerList()->count());
+ // Transmit playfield over the net if we're admin
  if (boGame->isAdmin()) {
-	emit signalLoadingType(BosonLoadingWidget::SendMap);
+	emit signalLoadingType(BosonLoadingWidget::AdminLoadMap);
 	QByteArray buffer;
 	QDataStream stream(buffer, IO_WriteOnly);
 
@@ -117,10 +122,9 @@ void BosonStarting::startNewGame()
 	delete mNewPlayField;
 	mNewPlayField = 0;
 
-	emit signalLoadingProgress(50);
+	emit signalLoadingType(BosonLoadingWidget::SendMap);
 	// send the loaded map via network
 	boGame->sendMessage(stream, BosonMessage::InitMap);
-	emit signalLoadingProgress(100);
  }
  boDebug() << k_funcinfo << endl;
  if (!mPlayField) {
@@ -155,7 +159,11 @@ bool BosonStarting::loadGame(const QString& loadingFileName)
 
  // Load game
  emit signalLoadingShowProgressBar(false);
- emit signalLoadingType(BosonLoadingWidget::LoadMap);
+ emit signalLoadingSetLoading(true);
+ emit signalLoadingReset();
+ connect(boGame, SIGNAL(signalLoadPlayerData(Player*)), this, SLOT(slotLoadPlayerData(Player*)));
+ connect(boGame, SIGNAL(signalLoadingPlayersCount(int)), this, SIGNAL(signalLoadingPlayersCount(int)));
+ connect(boGame, SIGNAL(signalLoadingPlayer(int)), this, SIGNAL(signalLoadingPlayer(int)));
  boGame->lock();
  bool loaded = boGame->load(s, true);
  slotLoadTiles();
@@ -175,11 +183,6 @@ void BosonStarting::checkEvents()
  if (qApp->hasPendingEvents()) {
 	qApp->processEvents(100);
  }
-}
-
-void BosonStarting::slotTilesLoading(int tiles)
-{
- emit signalLoadingTileProgress(600, tiles);
 }
 
 void BosonStarting::slotReceiveMap(const QByteArray& buffer)
@@ -204,7 +207,7 @@ void BosonStarting::slotReceiveMap(const QByteArray& buffer)
 	return;
  }
 
-
+ emit signalLoadingType(BosonLoadingWidget::LoadMap);
  QDataStream stream(buffer, IO_ReadOnly);
  if (!mPlayField->loadMap(stream)) {
 	boError() << k_funcinfo << "Broken map file at this point?!" << endl;
@@ -217,8 +220,6 @@ void BosonStarting::slotReceiveMap(const QByteArray& buffer)
  boGame->setPlayField(mPlayField);
  emit signalAssignMap(); // for the BosonWidgetBase
 
- emit signalLoadingProgress(300);
-
  // we need to do this with timer because we can't add checkEvents() here. there is a
  // (more or less) KGame bug in KDE < 3.1 that causes KGame to go into an
  // infinite loop when calling checkEvents() from a slot that gets called from a
@@ -228,12 +229,6 @@ void BosonStarting::slotReceiveMap(const QByteArray& buffer)
  } else {
 	// loading code mustn't contain any singleShot()s
 //	slotLoadTiles();
- }
-
- // If we're loading game, almost everything except map (players, units...) are
- //  loaded after this method returns. So we set correct loading label
- if (mLoading) {
-	emit signalLoadingType(BosonLoadingWidget::LoadGame);
  }
 }
 
@@ -262,12 +257,11 @@ void BosonStarting::slotLoadTiles()
  boGame->lock();
  boProfiling->start(BosonProfiling::LoadTiles);
 
- emit signalLoadingProgress(600);
- emit signalLoadingType((int)BosonLoadingWidget::LoadTiles);
+ emit signalLoadingType(BosonLoadingWidget::LoadTiles);
  // just in case.. disconnect before connecting. the map should be newly
- // created, bu i don't know if this will stay this way.
+ // created, but i don't know if this will stay this way.
  disconnect(playField()->map(), 0, this, 0);
- connect(playField()->map(), SIGNAL(signalTilesLoading(int)), this, SLOT(slotTilesLoading(int)));
+ connect(playField()->map(), SIGNAL(signalTilesLoading(int)), this, SIGNAL(signalLoadingTile(int)));
  checkEvents();
 
  // Note that next call doesn't return before tiles are fully loaded (because
@@ -277,7 +271,6 @@ void BosonStarting::slotLoadTiles()
  //  loading tiles
  playField()->map()->loadTiles(QString("earth"), false);
 
- emit signalLoadingProgress(3000);
  boProfiling->stop(BosonProfiling::LoadTiles);
 
  slotLoadGameData3(); // FIXME: not a slot
@@ -306,8 +299,6 @@ void BosonStarting::slotLoadGameData3() // FIXME rename!
 
  loadPlayerData(); // FIXME: most of the stuff below should be in this method, too!
 
- int progress = 3000 + boGame->playerList()->count() * BosonLoadingWidget::unitDataLoadingFactor();
-
  emit signalLoadingType(BosonLoadingWidget::InitGame);
 
 #warning FIXME
@@ -332,8 +323,6 @@ void BosonStarting::slotLoadGameData3() // FIXME rename!
 
  boProfiling->stop(BosonProfiling::LoadGameData3);
 
- progress += 100;
- emit signalLoadingProgress(progress);
  emit signalLoadingType(BosonLoadingWidget::StartingGame);
 
  boDebug() << k_funcinfo << "done" << endl;
@@ -352,7 +341,6 @@ void BosonStarting::loadPlayerData()
  // If we're loading saved game, local player isn't set and inited, because it
  //  was not known (not loaded) when BosonWidgetBase was constructed. Set and init
  //  it now
- int progress = 0;
  boDebug() << k_funcinfo << endl;
  if (mLoading) {
 	boDebug() << k_funcinfo << "set local player for loaded games now" << endl;
@@ -370,16 +358,12 @@ void BosonStarting::loadPlayerData()
  //  and unit datas loaded
  if (!mLoading) {
 	QPtrListIterator<KPlayer> it(*(boGame->playerList()));
-	progress = 3000;
+	int currentplayer = 0;
 	while (it.current()) {
-		// Order of calls below is very important!!! Don't change this unless you're sure you know what you're doing!!!
-		((Player*)it.current())->speciesTheme()->loadParticleSystems();
-		((Player*)it.current())->speciesTheme()->readUnitConfigs();
-		loadUnitDatas(((Player*)it.current()), progress);
-		((Player*)it.current())->speciesTheme()->loadTechnologies();
-//		((Player*)it.current())->speciesTheme()->loadObjectModels();
+		emit signalLoadingPlayer(currentplayer);
+		slotLoadPlayerData((Player*)it.current());
+		currentplayer++;
 		++it;
-		progress += BosonLoadingWidget::unitDataLoadingFactor();
 	}
  }
 
@@ -394,29 +378,38 @@ void BosonStarting::loadPlayerData()
  // FIXME: are there sounds of other player (i.e. non-localplayers) we need,
  // too?
  // FIXME: do we need to support player-independant sounds?
+ emit signalLoadingType(BosonLoadingWidget::LoadGeneralData);
  mPlayer->speciesTheme()->loadGeneralSounds();
- emit signalLoadingProgress(progress);
  boDebug() << k_funcinfo << "done" << endl;
 }
 
-void BosonStarting::loadUnitDatas(Player* p, int progress)
+void BosonStarting::slotLoadPlayerData(Player* p)
+{
+ // Order of calls below is very important!!! Don't change this unless you're sure you know what you're doing!!!
+ emit signalLoadingType(BosonLoadingWidget::LoadParticleSystems);
+ p->speciesTheme()->loadParticleSystems();
+ emit signalLoadingType(BosonLoadingWidget::LoadUnitConfigs);
+ p->speciesTheme()->readUnitConfigs();
+ loadUnitDatas(p);
+ emit signalLoadingType(BosonLoadingWidget::LoadTechnologies);
+ p->speciesTheme()->loadTechnologies();
+// ((Player*)it.current())->speciesTheme()->loadObjectModels();
+}
+
+void BosonStarting::loadUnitDatas(Player* p)
 {
  // This loads all unit datas for player p
- emit signalLoadingProgress(progress);
  emit signalLoadingType(BosonLoadingWidget::LoadUnits);
  checkEvents();
  // First get all id's of units
  QValueList<unsigned long int> unitIds = p->speciesTheme()->allFacilities();
  unitIds += p->speciesTheme()->allMobiles();
+ emit signalLoadingUnitsCount(unitIds.count());
  QValueList<unsigned long int>::iterator it;
- int current = 0;
- int total = unitIds.count();
- for (it = unitIds.begin(); it != unitIds.end(); ++it) {
-	current++;
+ int currentunit = 0;
+ for (it = unitIds.begin(); it != unitIds.end(); ++it, currentunit++) {
+	emit signalLoadingUnit(currentunit);
 	p->speciesTheme()->loadUnit(*it);
-	emit signalLoadingUnitProgress(progress, current, total);
  }
 }
-
-
 

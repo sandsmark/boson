@@ -246,13 +246,6 @@ void BosonStartupWidget::initWidget(WidgetId widgetId)
 	{
 		BosonLoadingWidget* loadingWidget = new BosonLoadingWidget(d->mWidgetStack);
 
-		// If we're loading game, we don't know number of players here
-		// If game is loaded, we disable progressbar in loading widget, but still set
-		// steps and progress to make code less messy (it's better than having
-		// if (!mLoading) { ... }  everywhere)
-		loadingWidget->setTotalSteps(3400, boGame->playerCount());
-		loadingWidget->setProgress(0);
-
 		w = loadingWidget;
 		break;
 	}
@@ -346,24 +339,59 @@ void BosonStartupWidget::slotLoadingShowProgressBar(bool s)
  }
 }
 
-void BosonStartupWidget::slotLoadingProgress(int progress)
+void BosonStartupWidget::slotLoadingReset()
 {
  if (loadingWidget()) {
-	loadingWidget()->setProgress(progress);
+	loadingWidget()->resetProgress();
  }
 }
 
-void BosonStartupWidget::slotLoadingTileProgress(int base, int tiles)
+void BosonStartupWidget::slotLoadingSetAdmin(bool isAdmin)
 {
  if (loadingWidget()) {
-	loadingWidget()->setTileProgress(base, tiles);
+	loadingWidget()->setAdmin(isAdmin);
  }
 }
 
-void BosonStartupWidget::slotLoadingUnitProgress(int progress, int current, int total)
+void BosonStartupWidget::slotLoadingSetLoading(bool isLoading)
 {
  if (loadingWidget()) {
-	loadingWidget()->setUnitProgress(progress, current, total);
+	loadingWidget()->setLoading(isLoading);
+ }
+}
+
+void BosonStartupWidget::slotLoadingPlayersCount(int count)
+{
+ if (loadingWidget()) {
+	loadingWidget()->setTotalPlayers(count);
+ }
+}
+
+void BosonStartupWidget::slotLoadingPlayer(int current)
+{
+ if (loadingWidget()) {
+	loadingWidget()->setCurrentPlayer(current);
+ }
+}
+
+void BosonStartupWidget::slotLoadingUnitsCount(int count)
+{
+ if (loadingWidget()) {
+	loadingWidget()->setTotalUnits(count);
+ }
+}
+
+void BosonStartupWidget::slotLoadingUnit(int current)
+{
+ if (loadingWidget()) {
+	loadingWidget()->setCurrentUnit(current);
+ }
+}
+
+void BosonStartupWidget::slotLoadingTile(int tile)
+{
+ if (loadingWidget()) {
+	loadingWidget()->setCurrentTile(tile);
  }
 }
 

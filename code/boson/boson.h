@@ -259,6 +259,11 @@ signals:
 
 	void signalInitMap(const QByteArray&);
 
+	void signalLoadPlayerData(Player* player);
+	void signalLoadingPlayersCount(int count);
+	void signalLoadingPlayer(int current);
+	void signalLoadingType(int type);
+
 	/**
 	 * Emitted when the editor is meant to change the map.
 	 **/

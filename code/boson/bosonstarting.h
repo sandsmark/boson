@@ -97,6 +97,7 @@ signals:
 	 **/
 	void signalAssignMap();
 
+
 	/**
 	 * Change the type of data thats currently being loaded. See @ref
 	 * BosonLoadingWidget::LoadingType
@@ -104,9 +105,14 @@ signals:
 	void signalLoadingType(int type);
 
 	void signalLoadingShowProgressBar(bool show);
-	void signalLoadingProgress(int progress);
-	void signalLoadingTileProgress(int, int);
-	void signalLoadingUnitProgress(int progress, int current, int total);
+	void signalLoadingReset();
+	void signalLoadingSetAdmin(bool isAdmin);
+	void signalLoadingSetLoading(bool isLoading);
+	void signalLoadingPlayersCount(int count);
+	void signalLoadingPlayer(int current);
+	void signalLoadingUnitsCount(int count);
+	void signalLoadingUnit(int current);
+	void signalLoadingTile(int);
 
 protected slots:
 	void slotReceiveMap(const QByteArray&);
@@ -124,7 +130,8 @@ protected slots:
 
 	void slotLoadGameData3();
 
-	void slotTilesLoading(int);
+	void slotLoadPlayerData(Player* p);
+
 protected:
 	/**
 	 * @return The playfield. protected, as you should get this from
@@ -133,7 +140,7 @@ protected:
 	BosonPlayField* playField() const { return mPlayField; }
 
 	void loadPlayerData();
-	void loadUnitDatas(Player* player, int progress);
+	void loadUnitDatas(Player* p);
 
 private:
 	BosonPlayField* mPlayField;

@@ -52,9 +52,14 @@ public:
 public slots:
 	void slotLoadingType(int);
 	void slotLoadingShowProgressBar(bool);
-	void slotLoadingProgress(int progress);
-	void slotLoadingTileProgress(int, int);
-	void slotLoadingUnitProgress(int progress, int current, int total);
+	void slotLoadingReset();
+	void slotLoadingSetAdmin(bool isAdmin);
+	void slotLoadingSetLoading(bool isLoading);
+	void slotLoadingPlayersCount(int count);
+	void slotLoadingPlayer(int current);
+	void slotLoadingUnitsCount(int count);
+	void slotLoadingUnit(int current);
+	void slotLoadingTile(int);
 
 	/**
 	 * Show the welcome widget and reset all previous widget, i.e. delete

@@ -623,14 +623,24 @@ void TopWidget::reinitGame()
  d->mStarting = new BosonStarting(this); // manages startup of games
  connect(d->mStarting, SIGNAL(signalStartGame(const QString&)), this, SLOT(slotStartGame(const QString&)));
  connect(d->mStarting, SIGNAL(signalAssignMap()), this, SLOT(slotAssignMap()));
- connect(d->mStarting, SIGNAL(signalLoadingProgress(int)),
-			d->mStartup, SLOT(slotLoadingProgress(int)));
+ connect(d->mStarting, SIGNAL(signalLoadingReset()),
+			d->mStartup, SLOT(slotLoadingReset()));
+ connect(d->mStarting, SIGNAL(signalLoadingSetAdmin(bool)),
+			d->mStartup, SLOT(slotLoadingSetAdmin(bool)));
+ connect(d->mStarting, SIGNAL(signalLoadingSetLoading(bool)),
+			d->mStartup, SLOT(slotLoadingSetLoading(bool)));
  connect(d->mStarting, SIGNAL(signalLoadingType(int)),
 			d->mStartup, SLOT(slotLoadingType(int)));
- connect(d->mStarting, SIGNAL(signalLoadingTileProgress(int, int)),
-			d->mStartup, SLOT(slotLoadingTileProgress(int, int)));
- connect(d->mStarting, SIGNAL(signalLoadingUnitProgress(int, int, int)),
-			d->mStartup, SLOT(slotLoadingUnitProgress(int, int, int)));
+ connect(d->mStarting, SIGNAL(signalLoadingPlayersCount(int)),
+			d->mStartup, SLOT(slotLoadingPlayersCount(int)));
+ connect(d->mStarting, SIGNAL(signalLoadingPlayer(int)),
+			d->mStartup, SLOT(slotLoadingPlayer(int)));
+ connect(d->mStarting, SIGNAL(signalLoadingUnitsCount(int)),
+			d->mStartup, SLOT(slotLoadingUnitsCount(int)));
+ connect(d->mStarting, SIGNAL(signalLoadingUnit(int)),
+			d->mStartup, SLOT(slotLoadingUnit(int)));
+ connect(d->mStarting, SIGNAL(signalLoadingTile(int)),
+			d->mStartup, SLOT(slotLoadingTile(int)));
  connect(d->mStarting, SIGNAL(signalLoadingShowProgressBar(bool)),
 			d->mStartup, SLOT(slotLoadingShowProgressBar(bool)));
 
