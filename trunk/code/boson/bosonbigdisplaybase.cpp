@@ -96,7 +96,7 @@
 #include <GL/glext.h>
 #endif
 
-unsigned int glstat_item_faces, glstat_item_vertices, glstat_terrain_faces, glstat_terrain_vertices;
+unsigned int glstat_terrain_faces, glstat_terrain_vertices;
 
 
 /**
@@ -704,7 +704,7 @@ void BosonBigDisplayBase::paintGL()
  d->mRenderedItems = 0;
  d->mRenderedCells = 0;
  d->mRenderedParticles = 0;
- glstat_item_faces = glstat_item_vertices = glstat_terrain_faces = glstat_terrain_vertices = 0;
+ glstat_terrain_faces = glstat_terrain_vertices = 0;
 
  glColor3ub(255, 255, 255);
 
@@ -1376,9 +1376,8 @@ void BosonBigDisplayBase::renderText()
  if (boConfig->debugRenderCounts()) {
 	QString text;
 	text += i18n("Items rendered: %1\n").arg(d->mRenderedItems);
-	text += i18n("  F/V: %1/%2\n").arg(glstat_item_faces).arg(glstat_item_vertices);
 	text += i18n("Cells rendered: %1\n").arg(d->mRenderedCells);
-	text += i18n("  F/V: %1/%2\n").arg(glstat_terrain_faces).arg(glstat_terrain_vertices);
+	text += i18n("  Faces/Vertices (cells): %1/%2\n").arg(glstat_terrain_faces).arg(glstat_terrain_vertices);
 	text += i18n("Particles rendered: %1").arg(d->mRenderedParticles);
 	y -= d->mDefaultFont->renderText(x, y, text, width() - x);
 
