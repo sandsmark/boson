@@ -18,7 +18,6 @@ Game TODOs
   Terrible performance.
 - gray the other order-buttons out when a unit is being produced
 - display how many (and which) units are still in queue for production
-- sometimes (always?) boson crashes when placing a new building
 
 
 Editor (map, unit, scenario) TODOs

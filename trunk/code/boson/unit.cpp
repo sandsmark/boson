@@ -770,6 +770,9 @@ int Facility::completedProduction() const
 	return -1;
  }
  int type = currentProduction();
+ if (type < 0) {
+	return -1;
+ }
  if (d->mProductionState < owner()->unitProperties(type)->productionTime()) {
 	kdDebug() << "not yet completed: " << type << endl;
 	return -1;
@@ -779,6 +782,9 @@ int Facility::completedProduction() const
 
 int Facility::currentProduction() const
 {
+ if (d->mProductions.isEmpty()) {
+	return -1;
+ }
  return d->mProductions.first();
 }
 
