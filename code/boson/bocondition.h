@@ -64,14 +64,6 @@ public:
 	bool requireScript() const;
 
 	/**
-	 * @return The event that is caused when the condition is fullfilled
-	 **/
-	const QCString& eventCaused() const
-	{
-		return mEventCaused;
-	}
-
-	/**
 	 * @return TRUE if this condition is done, or one of the other
 	 * disjunctions (ORs) is done. See @ref thisConditionDone
 	 **/
@@ -105,8 +97,8 @@ protected:
 	bool thisConditionDone(BosonScript* script) const;
 
 private:
-	QCString mEventCaused;
 	BoConditionPrivate* d;
+	BoEvent* mEventCaused;
 };
 
 #endif
