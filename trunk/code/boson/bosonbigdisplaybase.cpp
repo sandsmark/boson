@@ -2632,6 +2632,9 @@ void BosonBigDisplayBase::addChatMessage(const QString& message)
 void BosonBigDisplayBase::slotCursorEdgeTimeout()
 {
  BO_CHECK_NULL_RET(camera());
+ if (!boGame) {
+	return;
+ }
  if (boGame->gameStatus() == KGame::Init) {
 	// probably startup screen visible
 	return;
