@@ -220,11 +220,21 @@ void BosonScenario::startScenario(Boson* boson)
 	kdError() << k_funcinfo << "NULL game" << endl;
 	return;
  }
+ kdDebug() << k_funcinfo << endl;
 
  // no error must happen here anymore!! everything should have been checked in
  // loadScenario()
 
- QDomNodeList list = d->mInternalDoc.documentElement().elementsByTagName("ScenarioPlayers").item(0).toElement().elementsByTagName("Player");
+ QDomNodeList l = d->mInternalDoc.documentElement().elementsByTagName("ScenarioPlayers");
+ if (l.count() < 1) {
+	kdError() << k_funcinfo << "oops - broken file? no players!" << endl;
+	return;
+ }
+ QDomNodeList list = l.item(0).toElement().elementsByTagName("Player");
+ if (boson->playerList()->count() > list.count()) {
+	kdError() << k_funcinfo << "too many players for this scenario" << endl;
+	return;
+ }
  QValueList<int> playerOrder;
  for (int unsigned i = 0; i < list.count(); i++) {
 	QDomElement player = list.item(i).toElement();
@@ -247,7 +257,8 @@ void BosonScenario::startScenario(Boson* boson)
  }
 
  
- for (unsigned int i = 0; i < list.count(); i++) {
+ kdDebug() << k_funcinfo << "players done" << endl;
+ for (unsigned int i = 0; i < boson->playerList()->count(); i++) {
 	bool ok = false;
 	QDomElement node = list.item(i).toElement();
 	Player* p = (Player*)boson->playerList()->at(playerOrder[i]);
@@ -271,6 +282,7 @@ void BosonScenario::startScenario(Boson* boson)
 
 	loadPlayer(node, p);
  }
+ kdDebug() << k_funcinfo << "done" << endl;
 }
 
 void BosonScenario::applyScenario(Boson* boson)
