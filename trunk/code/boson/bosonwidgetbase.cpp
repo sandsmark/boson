@@ -61,6 +61,7 @@
 #include <qptrlist.h>
 #include <qtimer.h>
 #include <qptrdict.h>
+#include <qsignalmapper.h>
 
 #include "bosonwidgetbase.moc"
 
@@ -608,34 +609,25 @@ void BosonWidgetBase::slotCmdBackgroundChanged(const QString& file)
 
 void BosonWidgetBase::initKActions()
 {
-#if KDE_VERSION < 310 // old kactions
- (void)new KAction(i18n("Scroll Up"), Qt::Key_Up, displayManager(),
-		SLOT(slotScrollUp()), actionCollection(),
+ QSignalMapper* scrollMapper = new QSignalMapper(this);
+ connect(scrollMapper, SIGNAL(mapped(int)), displayManager(), SLOT(slotScroll(int)));
+ KAction* a;
+ a = new KAction(i18n("Scroll Up"), Qt::Key_Up, scrollMapper,
+		SLOT(map()), actionCollection(),
 		"scroll_up");
- (void)new KAction(i18n("Scroll Down"), Qt::Key_Down, displayManager(),
-		SLOT(slotScrollDown()), actionCollection(),
+ scrollMapper->setMapping(a, BoDisplayManager::ScrollUp);
+ a = new KAction(i18n("Scroll Down"), Qt::Key_Down, scrollMapper,
+		SLOT(map()), actionCollection(),
 		"scroll_down");
- (void)new KAction(i18n("Scroll Left"), Qt::Key_Left, displayManager(),
-		SLOT(slotScrollLeft()), actionCollection(),
+ scrollMapper->setMapping(a, BoDisplayManager::ScrollDown);
+ a = new KAction(i18n("Scroll Left"), Qt::Key_Left, scrollMapper,
+		SLOT(map()), actionCollection(),
 		"scroll_left");
- (void)new KAction(i18n("Scroll Right"), Qt::Key_Right, displayManager(),
-		SLOT(slotScrollRight()), actionCollection(),
+ scrollMapper->setMapping(a, BoDisplayManager::ScrollLeft);
+ a = new KAction(i18n("Scroll Right"), Qt::Key_Right, scrollMapper,
+		SLOT(map()), actionCollection(),
 		"scroll_right");
-#else
- // KAction supports slots that take integer parameter :-)
- (void)new KAction(i18n("Scroll Up"), Qt::Key_Up, displayManager(),
-		SLOT(slotScroll(int)), actionCollection(),
-		QString("scroll_up {%1}").arg(BoDisplayManager::ScrollUp));
- (void)new KAction(i18n("Scroll Down"), Qt::Key_Down, displayManager(),
-		SLOT(slotScroll(int)), actionCollection(),
-		QString("scroll_down {%1}").arg(BoDisplayManager::ScrollDown));
- (void)new KAction(i18n("Scroll Left"), Qt::Key_Left, displayManager(),
-		SLOT(slotScroll(int)), actionCollection(),
-		QString("scroll_left {%1}").arg(BoDisplayManager::ScrollLeft));
- (void)new KAction(i18n("Scroll Right"), Qt::Key_Right, displayManager(),
-		SLOT(slotScroll(int)), actionCollection(),
-		QString("scroll_right {%1}").arg(BoDisplayManager::ScrollRight));
-#endif
+ scrollMapper->setMapping(a, BoDisplayManager::ScrollRight);
 
  // FIXME: the editor should not have a "game" menu, so what to do with this?
  (void)new KAction(i18n("&Reset View Properties"), KShortcut(Qt::Key_R), 

@@ -44,6 +44,7 @@
 #include <kdeversion.h>
 
 #include <qregexp.h>
+#include <qsignalmapper.h>
 
 #include "bosonwidget.moc"
 
@@ -251,36 +252,25 @@ void BosonWidget::slotOutOfGame(Player* p)
 void BosonWidget::initKActions()
 {
  BosonWidgetBase::initKActions();
-#if KDE_VERSION < 310 // old kactions
+ QSignalMapper* selectMapper = new QSignalMapper(this);
+ QSignalMapper* createMapper = new QSignalMapper(this);
+ connect(selectMapper, SIGNAL(mapped(int)), displayManager(), SLOT(slotSelectGroup(int)));
+ connect(createMapper, SIGNAL(mapped(int)), displayManager(), SLOT(slotCreateGroup(int)));
+
  QString slotSelect = SLOT(slotSelectGroup());
  QString slotCreate = SLOT(slotCreateGroup());
  for (int i = 0; i < 10; i++) {
-	QString s = slotSelect;
-	s = s.replace(QRegExp("slotSelectGroup"), QString("slotSelectGroup%1").arg(i));
-	(void)new KAction(i18n("Select Group %1").arg(i == 0 ? 10 : i), 
-			Qt::Key_0 + i, displayManager(), 
-			s, actionCollection(),
+	KAction* a = new KAction(i18n("Select Group %1").arg(i == 0 ? 10 : i),
+			Qt::Key_0 + i, selectMapper,
+			SLOT(map()), actionCollection(),
 			QString("select_group_%1").arg(i));
-	s = slotCreate;
-	s = s.replace(QRegExp("slotCreateGroup"), QString("slotCreateGroup%1").arg(i));
-	(void)new KAction(i18n("Create Group %1").arg(i == 0 ? 10 : i), 
-			Qt::CTRL + Qt::Key_0 + i, displayManager(), 
-			s, actionCollection(),
+	selectMapper->setMapping(a, i);
+	a = new KAction(i18n("Create Group %1").arg(i == 0 ? 10 : i),
+			Qt::CTRL + Qt::Key_0 + i, createMapper,
+			SLOT(map()), actionCollection(),
 			QString("create_group_%1").arg(i));
+	createMapper->setMapping(a, i);
  }
-#else
- // KAction supports slots that take integer parameter :-)
- for (int i = 0; i < 10; i++) {
-	(void)new KAction(i18n("Select Group %1").arg(i == 0 ? 10 : i), 
-			Qt::Key_0 + i, displayManager(), 
-			SLOT(slotSelectGroup(int)), actionCollection(),
-			QString("select_group {%1}").arg(i));
-	(void)new KAction(i18n("Create Group %1").arg(i == 0 ? 10 : i), 
-			Qt::CTRL + Qt::Key_0 + i, displayManager(), 
-			SLOT(slotCreateGroup(int)), actionCollection(),
-			QString("create_group {%1}").arg(i));
- }
-#endif
  (void)new KAction(i18n("Center &Home Base"), KShortcut(Qt::Key_H), 
 		displayManager(), SLOT(slotCenterHomeBase()), actionCollection(), "game_center_base");
 // (void)KStdAction::gameNew(this, SLOT(), actionCollection()); //TODO
@@ -291,8 +281,6 @@ void BosonWidget::initKActions()
  (void)KStdGameAction::quit(this, SIGNAL(signalQuit()), actionCollection());
 
  (void)KStdAction::preferences(this, SLOT(slotGamePreferences()), actionCollection());
-
-
 
 }
 
