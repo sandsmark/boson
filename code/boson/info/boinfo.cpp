@@ -21,6 +21,7 @@
 #include "bodebug.h"
 
 #include "../boversion.h"
+#include "../boglobal.h"
 #include "../defines.h"
 
 #include <kdeversion.h>
@@ -68,8 +69,7 @@
 #define XEXTLIBGLX_SO "/usr/X11R6/lib/modules/extensions/libglx.so" // proprietary
 #define NVIDIAXDRIVER "/usr/X11R6/lib/modules/drivers/nvidia_drv.o" // proprietary
 
-static KStaticDeleter<BoInfo> sd;
-BoInfo* BoInfo::mBoInfo = 0;
+static BoGlobalObject<BoInfo> globalInfo(BoGlobalObjectBase::BoGlobalInfo);
 
 class BoInfoPrivate
 {
@@ -98,16 +98,9 @@ void BoInfo::init()
  d = new BoInfoPrivate;
 }
 
-void BoInfo::initBoInfo()
-{
- if (!mBoInfo) {
-	sd.setObject(mBoInfo, new BoInfo);
- }
-}
-
 BoInfo* BoInfo::boInfo()
 {
- return mBoInfo;
+ return BoGlobal::boGlobal()->boInfo();
 }
 
 void BoInfo::reset()

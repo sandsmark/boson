@@ -21,13 +21,13 @@
 
 #include "../defines.h"
 #include "../bosonconfig.h"
+#include "../boglobal.h"
 #include "bodebug.h"
 #include "bosonsound.h"
 
 #include <kglobal.h>
 #include <kstandarddirs.h>
 #include <kapplication.h>
-#include <kstaticdeleter.h>
 
 #include <arts/kplayobject.h>
 #include <arts/kplayobjectfactory.h>
@@ -43,9 +43,7 @@
 
 #define TICKER_VALUE 500 // same as in kaboodle
 
-static KStaticDeleter<BosonMusic> sd;
-BosonMusic* BosonMusic::mBosonMusic = 0;
-
+static BoGlobalObject<BosonMusic> globalMusic(BoGlobalObjectBase::BoGlobalMusic);
 
 class BosonMusic::BosonMusicPrivate
 {
@@ -136,12 +134,9 @@ boDebug(200) << k_funcinfo << endl;
  delete d;
 }
 
-void BosonMusic::initBosonMusic()
+BosonMusic* BosonMusic::bosonMusic()
 {
- if (mBosonMusic) {
-	return;
- }
- sd.setObject(mBosonMusic, new BosonMusic(0));
+ return BoGlobal::boGlobal()->bosonMusic();
 }
 
 void BosonMusic::play()

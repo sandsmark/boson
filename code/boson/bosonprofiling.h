@@ -64,8 +64,10 @@ public:
 	BosonProfiling(const BosonProfiling& profiling);
 	~BosonProfiling();
 
-	static void initProfiling();
-	static BosonProfiling* bosonProfiling() { return mProfiling; }
+	/**
+	 * @return BoGlobal::boGlobal()->bosonProfiling();
+	 **/
+	static BosonProfiling* bosonProfiling();
 
 	/**
 	 * Change the OpenGL update interval. This value can be useful when
@@ -182,8 +184,6 @@ private:
 private:
 	BosonProfilingPrivate* d;
 	friend class BosonProfilingDialog;
-
-	static BosonProfiling* mProfiling;
 };
 
 unsigned long int compareTimes(const struct timeval& t1, const struct timeval& t2);

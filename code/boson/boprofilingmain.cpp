@@ -18,12 +18,11 @@
 */
 
 #include "bosonprofilingdialog.h"
-#include "bosonprofiling.h"
 
 #include "bodebugdcopiface.h"
 #include "boversion.h"
+#include "boapplication.h"
 
-#include <kapplication.h>
 #include <kcmdlineargs.h>
 #include <kaboutdata.h>
 #include <klocale.h>
@@ -53,12 +52,11 @@ int main(int argc, char **argv)
 
  KCmdLineArgs::init(argc, argv, &about);
  KCmdLineArgs::addCmdLineOptions(options);
- KApplication app;
+ BoApplication app;
 
     // register ourselves as a dcop client
 //    app.dcopClient()->registerAs(app.name(), false);
 
- BosonProfiling::initProfiling();
  KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
  QObject::connect(kapp, SIGNAL(lastWindowClosed()), kapp, SLOT(quit()));
 

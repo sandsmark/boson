@@ -20,10 +20,11 @@
 #include "top.h"
 
 #include "bosonconfig.h"
+#include "boglobal.h"
+#include "boapplication.h"
 #include "boversion.h"
 #include "bodebug.h"
 
-#include <kapplication.h>
 #include <kaboutdata.h>
 #include <kcmdlineargs.h>
 #include <klocale.h>
@@ -54,9 +55,12 @@ static KCmdLineOptions options[] =
     { 0, 0, 0 }
 };
 
+
+void postBosonConfigInit();
+
+
 int main(int argc, char **argv)
 {
-//FIXME:
  KAboutData about("boson",
 		I18N_NOOP("Boson"),
 		version,
@@ -73,16 +77,51 @@ int main(int argc, char **argv)
  about.addAuthor("Rivo Laks", I18N_NOOP("Coding & Homepage Redesign"), "rivolaks@hot.ee");
  about.addAuthor("Felix Seeger", I18N_NOOP("Documentation"), "felix.seeger@gmx.de");
 
+ // first tell BoGlobal that we need to do extra stuff after BosonConfig's
+ // initialization
+ BosonConfig::setPostInitFunction(&postBosonConfigInit);
+
  KCmdLineArgs::init(argc, argv, &about);
  KCmdLineArgs::addCmdLineOptions(options);
- KApplication app;
+ BoApplication app;
  KGlobal::locale()->insertCatalogue("libkdegames");
 
     // register ourselves as a dcop client
 //    app.dcopClient()->registerAs(app.name(), false);
 
- BosonConfig::initBosonConfig();
+ TopWidget *top = new TopWidget;
+ app.setMainWidget(top);
+
+ top->show();
+
  KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
+ if (args->isSet("new")) {
+	top->slotNewGame(args);
+ } else if (args->isSet("editor")) {
+	top->slotStartEditor(args);
+ } else if (args->isSet("load")) {
+	top->slotLoadGame(args);
+ }
+ args->clear();
+ return app.exec();
+}
+
+void postBosonConfigInit()
+{
+ KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
+ if (!args) {
+	boError() << k_funcinfo << "NULL cmdline args" << endl;
+	return;
+ }
+ if (!BoGlobal::boGlobal()) {
+	boError() << k_funcinfo << "NULL BoGlobal object" << endl;
+	return;
+ }
+ BosonConfig* conf = BoGlobal::boGlobal()->bosonConfig();
+ if (!conf) {
+	boError() << k_funcinfo << "NULL BosonConfig object" << endl;
+	return;
+ }
  if (!args->isSet("sound")) {
 	boConfig->setDisableSound(true);
  }
@@ -104,20 +143,5 @@ int main(int argc, char **argv)
 	boWarning() << k_funcinfo << "use indirect rendering (slow!)" << endl;
 	boConfig->setWantDirect(false);
  }
-
- TopWidget *top = new TopWidget;
- app.setMainWidget(top);
-
- top->show();
-
- if (args->isSet("new")) {
-	top->slotNewGame(args);
- } else if (args->isSet("editor")) {
-	top->slotStartEditor(args);
- } else if (args->isSet("load")) {
-	top->slotLoadGame(args);
- }
- args->clear();
- return app.exec();
 }
 

@@ -38,7 +38,6 @@
 #include "bodebugdcopiface.h"
 #include "startupwidgets/bosonstartupwidget.h"
 #include "sound/bosonmusic.h"
-#include "info/boinfo.h"
 #include "kgameunitdebug.h"
 #include "kgameplayerdebug.h"
 #include "kgamecelldebug.h"
@@ -128,28 +127,6 @@ TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
  // out there.
  // we tell KDE here which our prefix is and add it this way to $KDEDIRS
  KGlobal::dirs()->addPrefix(BOSON_PREFIX);
-
- // initialize some global objects first.
- // AB: I don't really like this part. we have many #includes only for these
- // lines. i would prefer a single class (e.g. "BoGlobal") to contain all of
- // these objects (i.e. it contains non-static objects and is itself a global
- // static object). but this causes trouble with our other applications, such as
- // boinfo, which don't link to all of these classes. i don't want to do a
- // subclassed BoGlobal.
- // AB: an idea: store pointers only on BoGlobal, don't do direct
- // construction/destruction. maybe with a "BoGlobalObject" class, similar to
- // our new BosonDataObject class (it would be responsible for new/delete). then
- // add a global object to the file where the class is implemented (such as
- // bosonsound.cpp). it gets constructed on program startup.
- // but note that BoGlobal would have to be constructed first, but the order of
- // object initialization is undefined! to solve this we could call
- // BoGlobal::initBoGlobal() in the c'tor of all of these objects.
- BosonData::initBosonData();
- BoInfo::initBoInfo();
- BosonConfig::initBosonConfig();
- BosonProfiling::initProfiling();
- BosonMusic::initBosonMusic();
- BoItemListHandler::initStatic();
 
  if (!BosonGroundTheme::createGroundThemeList()) {
 	// TODO: message box

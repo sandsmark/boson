@@ -20,6 +20,7 @@
 #include "boinfodialog.h"
 #include "boinfodialog.moc"
 #include "boinfo.h"
+#include "../boglobal.h"
 #include "bodebug.h"
 
 #include <kfiledialog.h>
@@ -176,18 +177,13 @@ BoInfoDialog::BoInfoDialog(QWidget* parent, bool modal)
 		"boinfodialog", modal, true)
 {
  d = new BoInfoDialogPrivate;
- if (!BoInfo::boInfo()) {
-	boWarning() << k_funcinfo << "the BoInfo object was not yet initialized - doing it now (data may be insufficient!)" << endl;
-	BoInfo::initBoInfo();
-
-	// we do not provide a QWidget pointer here, since that would be
-	// unreliable. we have to provide the same screen and display as the GLX
-	// context uses (the window may have been moved to another screen for
-	// example). this won't be a problem, since this update is only a
-	// fallback anyway.
-	BoInfo::boInfo()->update(0);
+ if (!BoGlobal::boGlobal()) {
+	BO_NULL_ERROR(BoGlobal::boGlobal());
+	// don't return
+ } else if (!BoGlobal::boGlobal()->boInfo()) {
+	BO_NULL_ERROR(BoGlobal::boGlobal()->boInfo());
+	// don't return
  }
-
  initBosonPage();
  initQtPage();
  initKDEPage();

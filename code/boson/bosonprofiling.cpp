@@ -21,14 +21,12 @@
 #include "bosonprofilingprivate.h"
 #include "bodebug.h"
 #include "bosonconfig.h"
+#include "boglobal.h"
 #include "defines.h"
-
-#include <kstaticdeleter.h>
 
 #include <qfile.h>
 
-static KStaticDeleter<BosonProfiling> sd;
-BosonProfiling* BosonProfiling::mProfiling = 0;
+static BoGlobalObject<BosonProfiling> globalProfiling(BoGlobalObjectBase::BoGlobalProfiling);
 
 #define COMPARE_TIMES(time1, time2) ( ((time2.tv_sec - time1.tv_sec) * 1000000) + (time2.tv_usec - time1.tv_usec) )
 
@@ -204,12 +202,9 @@ BosonProfiling::~BosonProfiling()
  delete d;
 }
 
-void BosonProfiling::initProfiling()
+BosonProfiling* BosonProfiling::bosonProfiling()
 {
- if (mProfiling) {
-	return;
- }
- sd.setObject(mProfiling, new BosonProfiling);
+ return BoGlobal::boGlobal()->bosonProfiling();
 }
 
 void BosonProfiling::loadUnit()
