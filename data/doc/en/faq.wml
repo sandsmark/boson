@@ -1,4 +1,5 @@
 #include "top.wml"
+    <!-- START_FAQ -->
     <h1>
       Frequently Asked Questions (FAQ)
     </h1>
@@ -8,38 +9,20 @@
     </p>
     <h4>General</h4>
       <a href="#gen_1">- When is Boson finished ?</a><br>
-      <a href="#gen_2">- Why is Boson so slow ?</a><br>
       <a href="#gen_3">- How can I submit a bug report ?</a><br>
       <a href="#gen_98">- Are there other supported languages than english ?</a><br>
       <a href="#gen_99">- Boson crashed my computer, what can I do ?</a><br>
     <h4>Game</h4>
-      <a href="#game_4">- Where is the menubar ?</a><br>
-    
-    <br>
-    <h4>General</h4>
+      <a href="#game_1">- Where is the menubar ?</a><br>
+      <a href="#game_2">- Why is Boson so slow ?</a><br>
+
+
+    <br><br><br>
+    <h3>General</h3>
     <a name="gen_1">- When is Boson finished ?</a>
     <p>When it's done.</p>
     <br>
     
-    <a name="gen_2">- Why is boson so slow ?</a>
-    <p>
-    There may be many reasons, some things that can help:<br>
-    - Check your hardware: <a href="started.html">here</a><br>
-    - Try resizing the window and/or make it smaller<br>
-    - Increase the update interval in the Boson settings<br>
-    - Change the color depth of your XServer to 16bit<br>
-    - If you use a very big map (300x300 and more) things can be slow down<br>
-    - Check the speed of other OpenGL games like tuxkart and tuxracer, maybe they also run slow<br>
-    - If you are using a Nvidia card you can use a script called<a href="http://boson.sourceforge.net/download/nvcheck.sh"> nvcheck.sh</a>
-    to check your driver installation.<br>
-    - Make sure you are using hardware accellerated OpenGL:<br>
-        <blockquote>You will need the program glxinfo, it is part of your X Server. Enter this into your console:
-        <pre>glxinfo | grep "direct rendering:"</pre>
-        If you get a yes, 3D accelleration should be ok. If this says "No", you are running software OpenGL and this is very slow.
-        </blockquote>
-    </p>
-    <br>
-
     <a name="gen_3">- How can I submit a bug report ?</a>
     <p>
     You can submit a bugreport through <a href="http://bugs.kde.org/wizard.cgi" target="_blank">bugs.kde.org</a>.<br>
@@ -62,12 +45,31 @@
     <br>
 
     <h3>Game</h3>
-    <a name="game_4">- Where is the menubar ?</a>
+    <a name="game_1">- Where is the menubar ?</a>
     <p>
     To enable the application menubar press the right mouse button on the welcome screen and click on "Show Menubar".
     </p>
     <br>
-
+    
+    <a name="game_2">- Why is boson so slow ?</a>
+    <p>
+    There may be many reasons, some things that can help:<br>
+    - Check your hardware: <a href="started.html">here</a><br>
+    - Try resizing the window and/or make it smaller<br>
+    - Increase the update interval in the Boson settings<br>
+    - Change the color depth of your XServer to 16bit<br>
+    - If you use a very big map (300x300 and more) things can be slow down<br>
+    - Check the speed of other OpenGL games like tuxkart and tuxracer, maybe they also run slow<br>
+    - If you are using a Nvidia card you can use a script called<a href="http://boson.sourceforge.net/download/nvcheck.sh"> nvcheck.sh</a>
+    to check your driver installation.<br>
+    - Make sure you are using hardware accellerated OpenGL:<br>
+        <blockquote>You will need the program glxinfo, it is part of your X Server. Enter this into your console:
+        <pre>glxinfo | grep "direct rendering:"</pre>
+        If you get a yes, 3D accelleration should be ok. If this says "No", you are running software OpenGL and this is very slow.
+        </blockquote>
+    </p>
+    <br>
+    <!-- END_FAQ -->
 
 #include "nav.wml" before_url="editor/facilities.html" before_text="Building facilities" after_url="credits.html" after_text="Credits" up_url="index.html"
 #include "footer.wml"
