@@ -26,6 +26,7 @@
 
 #include "bodebug.h"
 #include "../bo3dtools.h"
+#include "../bosonprofiling.h"
 
 
 PyObject* PythonScript::mDict = 0;
@@ -34,26 +35,44 @@ PyObject* PythonScript::mDict = 0;
 // Keep this up to date!
 PyMethodDef PythonScript::mCallbacks[] = {
   // Players
-  { "areEnemies", py_areEnemies, METH_VARARGS, "" },
-  { "playerId", py_playerId, METH_VARARGS, "" },
+  { (char*)"areEnemies", py_areEnemies, METH_VARARGS, 0 },
+  { (char*)"playerId", py_playerId, METH_VARARGS, 0 },
+  { (char*)"allPlayers", py_allPlayers, METH_VARARGS, 0 },
+  // Resources
+  { (char*)"minerals", py_minerals, METH_VARARGS, 0 },
+  { (char*)"oil", py_oil, METH_VARARGS, 0 },
   // Units
-  { "moveUnit", py_moveUnit, METH_VARARGS, "" },
-  { "moveUnitWithAttacking", py_moveUnitWithAttacking, METH_VARARGS, "" },
-  { "attack", py_attack, METH_VARARGS, "" },
-  { "stopUnit", py_stopUnit, METH_VARARGS, "" },
+  { (char*)"moveUnit", py_moveUnit, METH_VARARGS, 0 },
+  { (char*)"moveUnitWithAttacking", py_moveUnitWithAttacking, METH_VARARGS, 0 },
+  { (char*)"attack", py_attack, METH_VARARGS, 0 },
+  { (char*)"stopUnit", py_stopUnit, METH_VARARGS, 0 },
+  { (char*)"unitsOnCell", py_unitsOnCell, METH_VARARGS, 0 },
+  { (char*)"unitsInRect", py_unitsInRect, METH_VARARGS, 0 },
+  { (char*)"cellOccupied", py_cellOccupied, METH_VARARGS, 0 },
+  { (char*)"unitPosition", py_unitPosition, METH_VARARGS, 0 },
+  { (char*)"unitOwner", py_unitOwner, METH_VARARGS, 0 },
+  { (char*)"unitType", py_unitType, METH_VARARGS, 0 },
+  { (char*)"isUnitMobile", py_isUnitMobile, METH_VARARGS, 0 },
+  { (char*)"canUnitShoot", py_canUnitShoot, METH_VARARGS, 0 },
+  { (char*)"isMyUnit", py_isMyUnit, METH_VARARGS, 0 },
+  { (char*)"isUnitAlive", py_isUnitAlive, METH_VARARGS, 0 },
+  { (char*)"allMyUnits", py_allMyUnits, METH_VARARGS, 0 },
+  { (char*)"allPlayerUnits", py_allPlayerUnits, METH_VARARGS, 0 },
   // Camera
-  { "moveCamera", py_moveCamera, METH_VARARGS, "Move camera" },
-  { "moveCameraBy", py_moveCameraBy, METH_VARARGS, "" },
-  { "setCameraRotation", py_setCameraRotation, METH_VARARGS, "" },
-  { "setCameraRadius", py_setCameraRadius, METH_VARARGS, "" },
-  { "setCameraZ", py_setCameraZ, METH_VARARGS, "" },
-  { "setCameraMoveMode", py_setCameraMoveMode, METH_VARARGS, "" },
-  { "commitCameraChanges", py_commitCameraChanges, METH_VARARGS, "" },
-  { "cameraPos", py_cameraPos, METH_VARARGS, "" },
-  { "cameraRotation", py_cameraRotation, METH_VARARGS, "" },
-  { "cameraRadius", py_cameraRadius, METH_VARARGS, "" },
-  { "cameraZ", py_cameraZ, METH_VARARGS, "" },
-  //{ "", py_, METH_VARARGS, "" },
+  { (char*)"moveCamera", py_moveCamera, METH_VARARGS, 0 },
+  { (char*)"moveCameraBy", py_moveCameraBy, METH_VARARGS, 0 },
+  { (char*)"setCameraRotation", py_setCameraRotation, METH_VARARGS, 0 },
+  { (char*)"setCameraRadius", py_setCameraRadius, METH_VARARGS, 0 },
+  { (char*)"setCameraZ", py_setCameraZ, METH_VARARGS, 0 },
+  { (char*)"setCameraMoveMode", py_setCameraMoveMode, METH_VARARGS, 0 },
+  { (char*)"commitCameraChanges", py_commitCameraChanges, METH_VARARGS, 0 },
+  { (char*)"cameraPos", py_cameraPos, METH_VARARGS, 0 },
+  { (char*)"cameraRotation", py_cameraRotation, METH_VARARGS, 0 },
+  { (char*)"cameraRadius", py_cameraRadius, METH_VARARGS, 0 },
+  { (char*)"cameraZ", py_cameraZ, METH_VARARGS, 0 },
+  // AI
+  { (char*)"aiDelay", py_aiDelay, METH_VARARGS, 0 },
+  //{ (char*)"", py_, METH_VARARGS, 0 },
   { 0, 0, 0, 0 }
 };
 
@@ -65,8 +84,7 @@ PythonScript::PythonScript()
   boDebug() << k_funcinfo << endl;
   Py_Initialize();
 
-  PyImport_AddModule("BoScript");
-  Py_InitModule("BoScript", mCallbacks);
+  Py_InitModule((char*)"BoScript", mCallbacks);
 
   mDict = 0;
 }
@@ -89,15 +107,15 @@ void PythonScript::loadScript(QString file)
   }
 
   QString filePath = fi.dirPath(true);
-  boDebug() << k_funcinfo << "filePath: " << filePath << endl;
+  //boDebug() << k_funcinfo << "filePath: " << filePath << endl;
   QString fileName = fi.baseName();
-  boDebug() << k_funcinfo << "fileName: " << fileName << endl;
+  //boDebug() << k_funcinfo << "fileName: " << fileName << endl;
 
   char pypath[4096];
   sprintf(pypath, "sys.path.insert(0, '%s')", filePath.ascii());
-  PyRun_SimpleString("import sys");
+  PyRun_SimpleString((char*)"import sys");
   PyRun_SimpleString(pypath);
-  PyRun_SimpleString("sys.path.insert(0, '')");
+  PyRun_SimpleString((char*)"sys.path.insert(0, '')");
 
 
   PyObject* pName = PyString_FromString(fileName.ascii());
@@ -108,9 +126,11 @@ void PythonScript::loadScript(QString file)
   PyObject* pModule = PyImport_Import(pName);
   if(!pModule)
   {
+    PyErr_Print();
     boError() << k_funcinfo << "pModule is NULL" << endl;
     boError() << k_funcinfo << "Probably there's a parse error in the script. Aborting." << endl;
     boError() << k_funcinfo << "File was: '" << fi.absFilePath() << "'" << endl;
+    return;
   }
   mDict = PyModule_GetDict(pModule);
 }
@@ -127,11 +147,21 @@ void PythonScript::callFunction(QString function)
   PyObject* func = PyDict_GetItemString(mDict, (char*)function.ascii());
   if(!func)
   {
+    PyErr_Print();
     boError() << k_funcinfo << "No such function: " << function << endl;
     return;
   }
 
-  PyObject_CallObject(func, 0);
+  PyObject* pValue = PyObject_CallObject(func, 0);
+  if(!pValue)
+  {
+    PyErr_Print();
+    boError() << k_funcinfo << "Error while calling function " << function << endl;
+  }
+  else
+  {
+    Py_DECREF(pValue);
+  }
 }
 
 void PythonScript::execLine(const QString& line)
@@ -154,26 +184,46 @@ void PythonScript::init()
 PyObject* PythonScript::py_areEnemies(PyObject*, PyObject* args)
 {
   int id1, id2;
-  if(!PyArg_ParseTuple(args, "ii", &id1, &id2))
+  if(!PyArg_ParseTuple(args, (char*)"ii", &id1, &id2))
   {
     return 0;
   }
 
   bool enemies = boScript->areEnemies(id1, id2);
 
-  return Py_BuildValue("i", enemies ? 1 : 0);
+  return Py_BuildValue((char*)"i", enemies ? 1 : 0);
 }
 
 PyObject* PythonScript::py_playerId(PyObject*, PyObject*)
 {
-  return Py_BuildValue("i", boScript->playerId());
+  return Py_BuildValue((char*)"i", boScript->playerId());
 }
 
+PyObject* PythonScript::py_allPlayers(PyObject*, PyObject*)
+{
+  QValueList<int> players = boScript->allPlayers();
+
+  return QValueListToPyList(&players);
+}
+
+
+/*****  Resource functions  *****/
+PyObject* PythonScript::py_minerals(PyObject*, PyObject*)
+{
+  return Py_BuildValue((char*)"l", (long int)(boScript->mineralsAmount()));
+}
+
+PyObject* PythonScript::py_oil(PyObject*, PyObject*)
+{
+  return Py_BuildValue((char*)"l", (long int)(boScript->oilAmount()));
+}
+
+
 /*****  Unit functions  *****/
-PyObject* PythonScript::py_moveUnit(PyObject* self, PyObject* args)
+PyObject* PythonScript::py_moveUnit(PyObject*, PyObject* args)
 {
   int id, x, y;
-  if(!PyArg_ParseTuple(args, "iii", &id, &x, &y))
+  if(!PyArg_ParseTuple(args, (char*)"iii", &id, &x, &y))
   {
     return 0;
   }
@@ -184,10 +234,10 @@ PyObject* PythonScript::py_moveUnit(PyObject* self, PyObject* args)
   return Py_None;
 }
 
-PyObject* PythonScript::py_moveUnitWithAttacking(PyObject* self, PyObject* args)
+PyObject* PythonScript::py_moveUnitWithAttacking(PyObject*, PyObject* args)
 {
   int id, x, y;
-  if(!PyArg_ParseTuple(args, "iii", &id, &x, &y))
+  if(!PyArg_ParseTuple(args, (char*)"iii", &id, &x, &y))
   {
     return 0;
   }
@@ -198,10 +248,10 @@ PyObject* PythonScript::py_moveUnitWithAttacking(PyObject* self, PyObject* args)
   return Py_None;
 }
 
-PyObject* PythonScript::py_attack(PyObject* self, PyObject* args)
+PyObject* PythonScript::py_attack(PyObject*, PyObject* args)
 {
   int id, target;
-  if(!PyArg_ParseTuple(args, "ii", &id, &target))
+  if(!PyArg_ParseTuple(args, (char*)"ii", &id, &target))
   {
     return 0;
   }
@@ -212,10 +262,10 @@ PyObject* PythonScript::py_attack(PyObject* self, PyObject* args)
   return Py_None;
 }
 
-PyObject* PythonScript::py_stopUnit(PyObject* self, PyObject* args)
+PyObject* PythonScript::py_stopUnit(PyObject*, PyObject* args)
 {
   int id;
-  if(!PyArg_ParseTuple(args, "i", &id))
+  if(!PyArg_ParseTuple(args, (char*)"i", &id))
   {
     return 0;
   }
@@ -226,12 +276,155 @@ PyObject* PythonScript::py_stopUnit(PyObject* self, PyObject* args)
   return Py_None;
 }
 
+PyObject* PythonScript::py_unitsOnCell(PyObject*, PyObject* args)
+{
+  int x, y;
+  if(!PyArg_ParseTuple(args, (char*)"ii", &x, &y))
+  {
+    return 0;
+  }
+
+  QValueList<int> units = boScript->unitsOnCell(x, y);
+
+  return QValueListToPyList(&units);
+}
+
+PyObject* PythonScript::py_unitsInRect(PyObject*, PyObject* args)
+{
+  int x1, y1, x2, y2;
+  if(!PyArg_ParseTuple(args, (char*)"iiii", &x1, &y1, &x2, &y2))
+  {
+    return 0;
+  }
+
+  QValueList<int> units = boScript->unitsInRect(x1, y1, x2, y2);
+
+  return QValueListToPyList(&units);
+}
+
+PyObject* PythonScript::py_cellOccupied(PyObject*, PyObject* args)
+{
+  int x, y;
+  if(!PyArg_ParseTuple(args, (char*)"ii", &x, &y))
+  {
+    return 0;
+  }
+
+  bool occupied = boScript->cellOccupied(x, y);
+
+  return Py_BuildValue((char*)"i", occupied ? 1 : 0);
+}
+
+PyObject* PythonScript::py_unitPosition(PyObject*, PyObject* args)
+{
+  int id;
+  if(!PyArg_ParseTuple(args, (char*)"i", &id))
+  {
+    return 0;
+  }
+
+  QPoint pos = boScript->unitPosition(id);
+
+  return Py_BuildValue((char*)"(ii)", pos.x(), pos.y());
+}
+
+PyObject* PythonScript::py_unitOwner(PyObject*, PyObject* args)
+{
+  int id;
+  if(!PyArg_ParseTuple(args, (char*)"i", &id))
+  {
+    return 0;
+  }
+
+  return Py_BuildValue((char*)"i", boScript->unitOwner(id));
+}
+
+PyObject* PythonScript::py_unitType(PyObject*, PyObject* args)
+{
+  int id;
+  if(!PyArg_ParseTuple(args, (char*)"i", &id))
+  {
+    return 0;
+  }
+
+  return Py_BuildValue((char*)"i", boScript->unitType(id));
+}
+
+PyObject* PythonScript::py_isUnitMobile(PyObject*, PyObject* args)
+{
+  int id;
+  if(!PyArg_ParseTuple(args, (char*)"i", &id))
+  {
+    return 0;
+  }
+
+  return Py_BuildValue((char*)"i", boScript->isUnitMobile(id) ? 1 : 0);
+}
+
+PyObject* PythonScript::py_canUnitShoot(PyObject*, PyObject* args)
+{
+  int id;
+  if(!PyArg_ParseTuple(args, (char*)"i", &id))
+  {
+    return 0;
+  }
+
+  return Py_BuildValue((char*)"i", boScript->canUnitShoot(id) ? 1 : 0);
+}
+
+PyObject* PythonScript::py_isMyUnit(PyObject*, PyObject* args)
+{
+  int id;
+  if(!PyArg_ParseTuple(args, (char*)"i", &id))
+  {
+    return 0;
+  }
+
+  return Py_BuildValue((char*)"i", boScript->isMyUnit(id) ? 1 : 0);
+}
+
+PyObject* PythonScript::py_isUnitAlive(PyObject*, PyObject* args)
+{
+  int id;
+  if(!PyArg_ParseTuple(args, (char*)"i", &id))
+  {
+    return 0;
+  }
+
+  return Py_BuildValue((char*)"i", boScript->isUnitAlive(id) ? 1 : 0);
+}
+
+PyObject* PythonScript::py_allMyUnits(PyObject*, PyObject*)
+{
+  // FIXME: current implementation of methods returning arrays is quite
+  //  ineffiecient. First we usually get a list of units, then add ids of those
+  //  units to id list and then covert id list to Python list. We could add ids
+  //  directly to Python list.
+  QValueList<int> units = boScript->allMyUnits();
+
+  return QValueListToPyList(&units);
+}
+
+PyObject* PythonScript::py_allPlayerUnits(PyObject*, PyObject* args)
+{
+  int id;
+  if(!PyArg_ParseTuple(args, (char*)"i", &id))
+  {
+    return 0;
+  }
+
+  QValueList<int> units = boScript->allPlayerUnits(id);
+
+  return QValueListToPyList(&units);
+}
+
+
 /*****  Camera functions  *****/
 
 PyObject* PythonScript::py_moveCamera(PyObject*, PyObject* args)
 {
   float x, y, z;
-  if(!PyArg_ParseTuple(args, "fff", &x, &y, &z))
+  if(!PyArg_ParseTuple(args, (char*)"fff", &x, &y, &z))
   {
     return 0;
   }
@@ -243,7 +436,7 @@ PyObject* PythonScript::py_moveCamera(PyObject*, PyObject* args)
 PyObject* PythonScript::py_moveCameraBy(PyObject*, PyObject* args)
 {
   float x, y, z;
-  if(!PyArg_ParseTuple(args, "fff", &x, &y, &z))
+  if(!PyArg_ParseTuple(args, (char*)"fff", &x, &y, &z))
   {
     return 0;
   }
@@ -255,7 +448,7 @@ PyObject* PythonScript::py_moveCameraBy(PyObject*, PyObject* args)
 PyObject* PythonScript::py_setCameraRotation(PyObject*, PyObject* args)
 {
   float r;
-  if(!PyArg_ParseTuple(args, "f", &r))
+  if(!PyArg_ParseTuple(args, (char*)"f", &r))
   {
     return 0;
   }
@@ -267,7 +460,7 @@ PyObject* PythonScript::py_setCameraRotation(PyObject*, PyObject* args)
 PyObject* PythonScript::py_setCameraRadius(PyObject*, PyObject* args)
 {
   float r;
-  if(!PyArg_ParseTuple(args, "f", &r))
+  if(!PyArg_ParseTuple(args, (char*)"f", &r))
   {
     return 0;
   }
@@ -279,7 +472,7 @@ PyObject* PythonScript::py_setCameraRadius(PyObject*, PyObject* args)
 PyObject* PythonScript::py_setCameraZ(PyObject*, PyObject* args)
 {
   float z;
-  if(!PyArg_ParseTuple(args, "f", &z))
+  if(!PyArg_ParseTuple(args, (char*)"f", &z))
   {
     return 0;
   }
@@ -291,7 +484,7 @@ PyObject* PythonScript::py_setCameraZ(PyObject*, PyObject* args)
 PyObject* PythonScript::py_setCameraMoveMode(PyObject*, PyObject* args)
 {
   int m;
-  if(!PyArg_ParseTuple(args, "i", &m))
+  if(!PyArg_ParseTuple(args, (char*)"i", &m))
   {
     return 0;
   }
@@ -303,7 +496,7 @@ PyObject* PythonScript::py_setCameraMoveMode(PyObject*, PyObject* args)
 PyObject* PythonScript::py_commitCameraChanges(PyObject*, PyObject* args)
 {
   int ticks;
-  if(!PyArg_ParseTuple(args, "i", &ticks))
+  if(!PyArg_ParseTuple(args, (char*)"i", &ticks))
   {
     return 0;
   }
@@ -315,23 +508,44 @@ PyObject* PythonScript::py_commitCameraChanges(PyObject*, PyObject* args)
 PyObject* PythonScript::py_cameraPos(PyObject*, PyObject*)
 {
   BoVector3 pos = boScript->cameraPos();
-  return Py_BuildValue("[f, f, f]", pos.x(), pos.y(), pos.z());
+  return Py_BuildValue((char*)"[f, f, f]", pos.x(), pos.y(), pos.z());
 }
 
 PyObject* PythonScript::py_cameraRotation(PyObject*, PyObject*)
 {
-  float r = boScript->cameraRotation();
-  return Py_BuildValue("f", r);
+  return Py_BuildValue((char*)"f", boScript->cameraRotation());
 }
 
 PyObject* PythonScript::py_cameraRadius(PyObject*, PyObject*)
 {
-  float r = boScript->cameraRadius();
-  return Py_BuildValue("f", r);
+  return Py_BuildValue((char*)"f", boScript->cameraRadius());
 }
 
 PyObject* PythonScript::py_cameraZ(PyObject*, PyObject*)
 {
-  float r = boScript->cameraZ();
-  return Py_BuildValue("f", r);
+  return Py_BuildValue((char*)"f", boScript->cameraZ());
 }
+
+
+/*****  AI functions  *****/
+PyObject* PythonScript::py_aiDelay(PyObject*, PyObject*)
+{
+  return Py_BuildValue((char*)"f", boScript->aiDelay());
+}
+
+
+PyObject* PythonScript::QValueListToPyList(QValueList<int>* list)
+{
+  PyObject* pylist = PyList_New(list->count());
+
+  int i = 0;
+  QValueList<int>::Iterator it;
+  for(it = list->begin(); it != list->end(); ++it)
+  {
+    PyList_SetItem(pylist, i, PyInt_FromLong(*it));
+    i++;
+  }
+
+  return pylist;
+}
+

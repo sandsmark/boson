@@ -6,6 +6,7 @@ cycle = 0;
 def init():
   print "Init called";
   method1();
+  oldAIInit();
 
 def method1():
   print "script method 1 called";
@@ -24,7 +25,10 @@ def advance():
   #if (cycle % 10) == 0:
   #  print "advance method called, cycle: ", cycle;
   #advanceBigCircle(cycle);
-  advanceA10Game(cycle);
+  #advanceA10Game(cycle);
+  if cycle == 10:
+    printUnitInfo();
+  oldAIAdvance();
 
 def advanceA10Game(cycle):
   if cycle == 100:
@@ -118,3 +122,85 @@ def advanceA10Video(cycle):
 
 def myfunc():
   print "hi! this is myfunc";
+
+def printUnitInfo():
+  units = BoScript.unitsInRect(0, 0, 1000, 1000)
+  myunits = 0
+  print "There are ", len(units), " units on the map"
+  for unit in units:
+    if BoScript.isMyUnit(unit) == 1:
+      myunits = myunits + 1;
+  print "I have ", myunits, " of them";
+
+
+# AI stuff
+aidelay = 0;
+aicycle = 0;
+aiunit = -1;
+aitarget = -1;
+
+def oldAIInit():
+  print "oldAIInit() called";
+  global aidelay;
+  aidelay = int(BoScript.aiDelay() * 20);
+  print "  aidelay set to ", aidelay;
+
+def oldAIAdvance():
+  global aidelay, aicycle, aiunit, aitarget;
+  # AI will do something every aidelay advance calls
+  aicycle = aicycle + 1;
+  if not aicycle == aidelay:
+    return;
+  print "oldAIAdvance() executing";
+  # reset aicycle
+  aicycle = 0;
+  # check if target is still alive
+  if aitarget == -1 or BoScript.isUnitAlive(aitarget) == 0:
+    print "  Target not set";
+    aitarget = oldAIFindTarget();
+    if aitarget == -1:
+      print "No enemies left. Disabling self";
+      aidelay = 0;
+      return;
+  print "  Target is ", aitarget;
+  # find attacker
+  attacker = -1;
+  units = BoScript.allMyUnits();
+  while attacker == -1:
+    aiunit = aiunit + 1;
+    if aiunit >= len(units):
+      aiunit = -1;
+      print "No attacker found, returning";
+      return;
+    u = units[aiunit];
+    if BoScript.isUnitMobile(u) and BoScript.canUnitShoot(u):
+      attacker = u;
+      print "  attacker set to ", attacker;
+  print "  Sending ", aiunit, ". unit with id ", attacker, " to attack";
+  targetpos = BoScript.unitPosition(aitarget);
+  BoScript.moveUnitWithAttacking(attacker, targetpos[0], targetpos[1]);
+
+
+def oldAIFindTarget():
+  players = BoScript.allPlayers();
+  target = -1;
+  # iterate through all players
+  for p in players:
+    if not BoScript.areEnemies(p, BoScript.playerId()):
+      continue;
+    units = BoScript.allPlayerUnits(p);
+    # iterate through all units of player
+    for u in units:
+      if not BoScript.isUnitAlive(u):
+        continue;
+      # FIXME: command center id is hardcoded
+      if BoScript.unitType(u) == 5:
+        return u;
+      if target == -1:
+        target = u;
+    # if cmdcenter wasn't found, return any other unit
+    return target;
+  # nothing was found
+  return -1;
+
+
