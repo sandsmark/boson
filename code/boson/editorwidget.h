@@ -27,7 +27,7 @@ class KActionCollection;
 
 class BosonCursor;
 class BosonCanvas;
-class BosonCommandFrame;
+class BosonCommandFrameBase;
 class BosonBigDisplay;
 class BosonBigDisplayBase;
 class Unit;
@@ -73,8 +73,6 @@ public:
 	virtual void initPlayer();
 
 public slots:
-	void slotEndGame();
-
 signals:
 
 protected slots:
@@ -82,11 +80,22 @@ protected slots:
 
 	void slotOutOfGame(Player* p);
 
+	void slotSavePlayFieldAs();
+	void slotSavePlayField();
+	void slotChangeLocalPlayer(int);
+	void slotPlaceFacilities();
+	void slotPlaceMobiles();
+	void slotPlaceCellSmall();
+	void slotPlaceCellPlain();
+	void slotPlaceCellBig1();
+	void slotPlaceCellBig2();
+
 protected:
-	virtual BosonCommandFrame* createCommandFrame(QWidget* parent);
+	virtual BosonCommandFrameBase* createCommandFrame(QWidget* parent);
 
 	virtual void initKActions();
 	virtual void initConnections();
+	virtual void setBosonXMLFile();
 
 private:
 	class EditorWidgetPrivate;

@@ -22,7 +22,7 @@
 #include <kgame/kgameio.h>
 
 class UnitBase;
-class BosonCommandFrame;
+class BosonCommandFrameBase;
 
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
@@ -35,7 +35,7 @@ public:
 	CommandInput();
 	virtual ~CommandInput();
 
-	void setCommandFrame(BosonCommandFrame*);
+	void setCommandFrame(BosonCommandFrameBase*);
 
 	virtual int rtti() const { return 125; } // just any unique number
 

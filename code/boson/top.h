@@ -91,16 +91,6 @@ public slots:
 	 **/
 	void slotHideNetworkOptions();
 
-	/**
-	 * Toggles if chat dock is shown or hidden 
-	 **/
-	void slotToggleChat();
-
-	/**
-	 * Toggles if  is shown or hidden 
-	 **/
-	void slotToggleCmdFrame();
-
 	/** 
 	 * Toggles sound
 	 **/
@@ -133,9 +123,6 @@ public slots:
 	 * be started.
 	 * */
 	void slotEndGame();
-
-	/** Shows game preferences dialog */
-	void slotGamePreferences();
 
 	/** Splits active display horzontally */
 	void slotSplitDisplayHorizontal();
@@ -208,38 +195,30 @@ protected:
 	 **/
 	void showHideMenubar();
 
+	void changeLocalPlayer(Player* p);
+
 protected slots:
 	void slotCanvasTilesLoading(int);
 	void slotCanvasTilesLoaded();
 	void slotReceiveMap(const QByteArray& buffer);
-	void slotCmdFrameDockHidden();
-	void slotChatDockHidden();
-	void slotDebugPlayer(int);
 	void slotUpdateFPS();
 
 private slots:
 	void loadGameData3();
-	void slotDebugMode(int index);
-	void slotZoom(int index);
-	void slotDebug();
-	void slotProfiling();
-	void slotUnfogAll();
 
 private:
 	void initMusic();
 	void initBoson();
 	void initPlayer();
 	void initPlayField();
-	void initActions();
+	void initKActions();
 	void initStatusBar();
 	void enableGameActions(bool enable);
-	void initDebugPlayersMenu();
 
 	void loadGameData1();
 	void loadGameData2();
 	void slotWaitForMap();
 	void checkEvents();
-	void checkDockStatus();
 
 	void initWelcomeWidget();
 	void showWelcomeWidget();

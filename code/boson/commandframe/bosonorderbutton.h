@@ -16,8 +16,8 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef BOSONCOMMANDWIDGET_H
-#define BOSONCOMMANDWIDGET_H
+#ifndef BOSONORDERBUTTON_H
+#define BOSONORDERBUTTON_H
 
 #include <qwidget.h>
 #include <qpushbutton.h>

@@ -37,6 +37,7 @@
 #include "commandframe/bosoncommandframe.h"
 #include "sound/bosonmusic.h"
 
+#include <kstdgameaction.h>
 #include <klocale.h>
 #include <kaction.h>
 #include <kdebug.h>
@@ -95,21 +96,21 @@ void BosonWidget::initConnections()
 void BosonWidget::initPlayer()
 {
  BosonWidgetBase::initPlayer();
- player()->addGameIO(d->mCmdInput);
+ localPlayer()->addGameIO(d->mCmdInput);
 
- connect(player(), SIGNAL(signalUnfog(int, int)),
+ connect(localPlayer(), SIGNAL(signalUnfog(int, int)),
 		this, SLOT(slotUnfog(int, int)));
- connect(player(), SIGNAL(signalFog(int, int)),
+ connect(localPlayer(), SIGNAL(signalFog(int, int)),
 		this, SLOT(slotFog(int, int)));
- connect(player(), SIGNAL(signalShowMiniMap(bool)),
+ connect(localPlayer(), SIGNAL(signalShowMiniMap(bool)),
 		minimap(), SLOT(slotShowMap(bool)));
 
- minimap()->slotShowMap(player()->hasMiniMap());
+ minimap()->slotShowMap(localPlayer()->hasMiniMap());
 }
 
-BosonCommandFrame* BosonWidget::createCommandFrame(QWidget* parent)
+BosonCommandFrameBase* BosonWidget::createCommandFrame(QWidget* parent)
 {
- BosonCommandFrame* frame = new BosonCommandFrame(parent, false);
+ BosonCommandFrame* frame = new BosonCommandFrame(parent);
  connect(game(), SIGNAL(signalUpdateProduction(Unit*)),
 		frame, SLOT(slotUpdateProduction(Unit*)));
 
@@ -238,7 +239,7 @@ void BosonWidget::slotOutOfGame(Player* p)
 	kdDebug() << k_funcinfo << "We have a winner! id=" << winner->id() << endl;
 	delete d->mGameOverDialog;
 	d->mGameOverDialog = new GameOverDialog(this);
-	d->mGameOverDialog->createStatistics(game(), winner, player());
+	d->mGameOverDialog->createStatistics(game(), winner, localPlayer());
 	d->mGameOverDialog->show();
 	connect(d->mGameOverDialog, SIGNAL(finished()), this, SLOT(slotGameOverDialogFinished()));
 	game()->setGameStatus(KGame::End);
@@ -283,15 +284,17 @@ void BosonWidget::initKActions()
 #endif
  (void)new KAction(i18n("Center &Home Base"), KShortcut(Qt::Key_H), 
 		displayManager(), SLOT(slotCenterHomeBase()), actionCollection(), "game_center_base");
- (void)KStdAction::preferences(this, SLOT(slotGamePreferences()), actionCollection());
-}
+// (void)KStdAction::gameNew(this, SLOT(), actionCollection()); //TODO
+ (void)KStdGameAction::save(this, SIGNAL(signalSaveGame()), actionCollection());
+// (void)KStdGameAction::pause(this, SLOT(slotPause()), actionCollection());
+// (void)KStdGameAction::pause(mBoson, SLOT(slotTogglePause()), d->mGameActions);
+ (void)KStdGameAction::end(this, SIGNAL(signalEndGame()), actionCollection());
+ (void)KStdGameAction::quit(this, SIGNAL(signalQuit()), actionCollection());
 
-void BosonWidget::slotEndGame()
-{
-// this needs to be done first, before the players are removed
- displayManager()->quitGame();
- canvas()->deleteDestroyed();
- game()->quitGame();
+ (void)KStdAction::preferences(this, SLOT(slotGamePreferences()), actionCollection());
+
+
+
 }
 
 void BosonWidget::saveConfig()
@@ -303,13 +306,13 @@ void BosonWidget::saveConfig()
 	kdError() << k_funcinfo << "NULL game" << endl;
 	return;
  }
- if (!player()) {
+ if (!localPlayer()) {
 	kdError() << k_funcinfo << "NULL local player" << endl;
 	return;
  }
  BosonWidgetBase::saveConfig();
 
- BosonConfig::saveLocalPlayerName(player()->name());
+ BosonConfig::saveLocalPlayerName(localPlayer()->name());
  BosonConfig::saveGameSpeed(game()->gameSpeed());
  if (cursor()) {
 	if (cursor()->isA("BosonSpriteCursor")) {
@@ -331,5 +334,11 @@ void BosonWidget::slotGameOverDialogFinished()
 {
  d->mGameOverDialog->delayedDestruct();
  emit signalGameOver();
+}
+
+void BosonWidget::setBosonXMLFile()
+{
+ BosonWidgetBase::setBosonXMLFile();
+ setXMLFile("bosonui.rc", true);
 }
 

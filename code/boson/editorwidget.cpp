@@ -33,7 +33,7 @@
 #include "global.h"
 #include "bosonbigdisplay.h"
 #include "commandinput.h"
-#include "commandframe/bosoncommandframe.h"
+#include "commandframe/editorcommandframe.h"
 #include "sound/bosonmusic.h"
 
 #include <klocale.h>
@@ -43,6 +43,7 @@
 
 #include <qtimer.h>
 #include <qregexp.h>
+#include <qintdict.h>
 
 #include "editorwidget.moc"
 
@@ -52,9 +53,31 @@ public:
 	EditorWidgetPrivate()
 	{
 		mCmdInput = 0;
+
+		mPlayerAction = 0;
+		mCellsAction = 0;
+
+		mActionFacilities = 0;
+		mActionMobiles = 0;
+		mActionCellPlain = 0;
+		mActionCellSmall = 0;
+		mActionCellBig1 = 0;
+		mActionCellBig2 = 0;
 	}
 
 	CommandInput* mCmdInput;
+
+	KSelectAction* mPlayerAction;
+	KSelectAction* mCellsAction;
+
+	KRadioAction* mActionFacilities;
+	KRadioAction* mActionMobiles;
+	KRadioAction* mActionCellPlain;
+	KRadioAction* mActionCellSmall;
+	KRadioAction* mActionCellBig1;
+	KRadioAction* mActionCellBig2;
+
+	QIntDict<Player> mPlayers;
 };
 
 EditorWidget::EditorWidget(TopWidget* top, QWidget* parent, bool loading)
@@ -81,14 +104,14 @@ void EditorWidget::initConnections()
 void EditorWidget::initPlayer()
 {
  BosonWidgetBase::initPlayer();
- player()->addGameIO(d->mCmdInput);// AB: for editor mode, too? maybe place into base widget
+ localPlayer()->addGameIO(d->mCmdInput);// AB: for editor mode, too? maybe place into base widget
 
  minimap()->slotShowMap(true);
 }
 
-BosonCommandFrame* EditorWidget::createCommandFrame(QWidget* parent)
+BosonCommandFrameBase* EditorWidget::createCommandFrame(QWidget* parent)
 {
- BosonCommandFrame* frame = new BosonCommandFrame(parent, true);
+ EditorCommandFrame* frame = new EditorCommandFrame(parent);
  connect(game(), SIGNAL(signalUpdateProduction(Unit*)),
 		frame, SLOT(slotUpdateProduction(Unit*)));
 
@@ -111,14 +134,43 @@ void EditorWidget::slotOutOfGame(Player* p)
 void EditorWidget::initKActions()
 {
  BosonWidgetBase::initKActions();
-}
+ (void)new KAction(i18n("Save &PlayField as..."), KShortcut(), this,
+		SLOT(slotSavePlayFieldAs()), actionCollection(),
+		"file_save_playfield_as");
 
-void EditorWidget::slotEndGame()
-{
-// this needs to be done first, before the players are removed
- displayManager()->quitGame();
- canvas()->deleteDestroyed();
- game()->quitGame();
+ d->mPlayerAction = new KSelectAction(i18n("&Player"), KShortcut(), actionCollection(), "editor_player");
+ connect(d->mPlayerAction, SIGNAL(activated(int)),
+		this, SLOT(slotChangeLocalPlayer(int)));
+ d->mActionFacilities = new KRadioAction(i18n("&Facilities"), KShortcut(),
+		this, SLOT(slotPlaceFacilities()), actionCollection(),
+		"editor_place_facilities");
+ d->mActionFacilities->setExclusiveGroup("Place");
+ d->mActionMobiles = new KRadioAction(i18n("&Mobiles"), KShortcut(),
+		this, SLOT(slotPlaceMobiles()), actionCollection(),
+		"editor_place_mobiles");
+ d->mActionMobiles->setExclusiveGroup("Place");
+ d->mActionCellSmall = new KRadioAction(i18n("&Small"), KShortcut(),
+		this, SLOT(slotPlaceCellSmall()), actionCollection(),
+		"editor_place_cell_small");
+ d->mActionCellSmall->setExclusiveGroup("Place");
+ d->mActionCellPlain = new KRadioAction(i18n("&Plain"), KShortcut(), 
+		this, SLOT(slotPlaceCellPlain()), actionCollection(),
+		"editor_place_cell_plain");
+ d->mActionCellPlain->setExclusiveGroup("Place");
+ d->mActionCellBig1 = new KRadioAction(i18n("&Big1"), KShortcut(), 
+		this, SLOT(slotPlaceCellBig1()),actionCollection(),
+		"editor_place_cell_big1");
+ d->mActionCellBig1->setExclusiveGroup("Place");
+ d->mActionCellBig2 = new KRadioAction(i18n("B&ig2"), KShortcut(),
+		this, SLOT(slotPlaceCellBig2()),actionCollection(),
+		"editor_place_cell_big2");
+ d->mActionCellBig2->setExclusiveGroup("Place");
+
+// (void)new KAction(i18n("&Create Custom Unit"), KShortcut(), this,
+//		  SLOT(slotCreateUnit()), actionCollection(),
+//		  "editor_create_unit");
+
+// KStdAction::preferences(bosonWidget(), SLOT(slotGamePreferences()), actionCollection()); // FIXME: slotEditorPreferences()
 }
 
 void EditorWidget::saveConfig()
@@ -130,7 +182,7 @@ void EditorWidget::saveConfig()
 	kdError() << k_funcinfo << "NULL game" << endl;
 	return;
  }
- if (!player()) {
+ if (!localPlayer()) {
 	kdError() << k_funcinfo << "NULL local player" << endl;
 	return;
  }
@@ -138,5 +190,47 @@ void EditorWidget::saveConfig()
 
 // boConfig->save(editor); //FIXME
  kdDebug() << k_funcinfo << "done" << endl;
+}
+
+void EditorWidget::slotSavePlayFieldAs()
+{
+}
+
+void EditorWidget::slotSavePlayField()
+{
+}
+
+void EditorWidget::slotChangeLocalPlayer(int)
+{
+}
+
+void EditorWidget::slotPlaceFacilities()
+{
+}
+
+void EditorWidget::slotPlaceMobiles()
+{
+}
+
+void EditorWidget::slotPlaceCellSmall()
+{
+}
+
+void EditorWidget::slotPlaceCellPlain()
+{
+}
+
+void EditorWidget::slotPlaceCellBig1()
+{
+}
+
+void EditorWidget::slotPlaceCellBig2()
+{
+}
+
+void EditorWidget::setBosonXMLFile()
+{
+ BosonWidgetBase::setBosonXMLFile();
+ setXMLFile("editorui.rc", true);
 }
 
