@@ -72,12 +72,12 @@ public:
 	unsigned int effectsCount() const;
 
 	/**
-	 * Increase the number work-count for @p work by 1. For non-Unit items
-	 * (which therefore do no have a "work") you can use -1.
+	 * Increase the number work-count for @p work by @p by. For non-Unit items
+	 * (which therefore do no have a "work") you can use -1 for  @p work.
 	 *
 	 * See also @ref workCounts and @ref resetWorkCounts
 	 **/
-	void increaseWorkCount(int work);
+	void increaseWorkCountBy(int work, int by);
 
 	/**
 	 * This is a counter of all work kinds (see @ref Unit::advanceWork) of

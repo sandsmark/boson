@@ -107,8 +107,8 @@ void BosonCanvasStatistics::updateItemCount()
  }
 }
 
-void BosonCanvasStatistics::increaseWorkCount(int work)
+void BosonCanvasStatistics::increaseWorkCountBy(int work, int by)
 {
- d->mWorkCounts[work]++;
+ d->mWorkCounts[work] += by;
 }
 
