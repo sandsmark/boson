@@ -150,6 +150,20 @@ class BoCamera
     BoQuaternion quaternion();
 
 
+    /**
+     * @return Whether camera has changed since it was last applied to scene.
+     * Whenever you change any camera parameters (e.g. lookat position), this
+     *  will be set to true. In display class, before rendering, if camera is
+     *  changed, it will be reapplied.
+     **/
+    bool isCameraChanged()  { return mChanged; }
+    /**
+     * Set changed status of camera.
+     * Note that normally you shouldn't use this! It may be made protected later.
+     **/
+    void setCameraChanged(bool changed)  { mChanged = changed; }
+
+
   protected:
     void setPositionDirty(bool dirty = true) { mPosDirty = dirty; }
     bool positionDirty() const { return mPosDirty; }
@@ -166,6 +180,7 @@ class BoCamera
     BoVector3 mCameraPos;
 
     bool mPosDirty;
+    bool mChanged;
 };
 
 /**
@@ -259,6 +274,31 @@ class BoGameCamera : public BoCamera
     float minCameraZ();
     float maxCameraZ();
 
+
+    /**
+     * Set whether camera is in free movement mode.
+     * In free mode, BoGameCamera acts like BoCamera: z, radius and rotation
+     * settings have no effect and you have to manually set lookat/position/up
+     * vectors to change camera.
+     * Note that no limits are applied to camera in free mode, so you can do
+     * whatever you want there.
+     * This is intended to be used only in cutscenes! Do not use it in game and
+     * always set it back to false at the end of cutscene!
+     **/
+    // TODO: maybe check for limits if mode is set to non-free?
+    void setFreeMovement(bool free);
+
+    /**
+     * Set whether limits are checked for when camera changes.
+     * Limits include checking camera's height and radius and make sure that
+     * camera doesn't e.g. go into the ground.
+     * This is intended only to be used in cutscenes in case you want to do some
+     * "crazy stuff" with camera that would't be allowed otherwise. Always set
+     * it back to true at the end of cutscene!
+     **/
+    // TODO: maybe check for limits if limits are set to true?
+    void setUseLimits(bool use);
+
   protected:
     /**
      * Checks if camera's lookat point is on the map.
@@ -300,6 +340,8 @@ class BoGameCamera : public BoCamera
     GLfloat mRadius;
 
     const BosonCanvas* mCanvas;
+
+    bool mFree, mLimits;
 };
 
 

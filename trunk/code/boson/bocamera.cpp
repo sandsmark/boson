@@ -66,6 +66,7 @@ BoCamera& BoCamera::operator=(const BoCamera& c)
   setAutoCamera(new BoAutoCamera(*c.autoCamera()));
 
   setPositionDirty();
+  setCameraChanged(true);
 
   return *this;
 }
@@ -80,6 +81,7 @@ void BoCamera::init()
   mAutoCamera = 0;
 
   setPositionDirty();
+  setCameraChanged(true);
   setAutoCamera(new BoAutoCamera(this));
 }
 
@@ -98,6 +100,7 @@ void BoCamera::setGluLookAt(const BoVector3& cameraPos, const BoVector3& lookAt,
   mLookAt = lookAt;
   mCameraPos = cameraPos;
   mUp = up;
+  setCameraChanged(true);
 }
 
 void BoCamera::changeLookAt(const BoVector3& diff)
@@ -183,6 +186,7 @@ bool BoCamera::loadFromXML(const QDomElement& root)
   mUp.set(upx, upy, upz);
 
   setPositionDirty();
+  setCameraChanged(true);
   return true;
  }
 
@@ -228,6 +232,7 @@ void BoCamera::applyCameraToScene()
 
   glMultMatrixf(rotationMatrix().data());
   glTranslatef(-cameraPos().x(), -cameraPos().y(), -cameraPos().z());
+  setCameraChanged(false);
 }
 
 const BoVector3& BoCamera::cameraPos()
@@ -244,18 +249,21 @@ void BoCamera::setLookAt(const BoVector3& pos)
 {
   mLookAt = pos;
   setPositionDirty();
+  setCameraChanged(true);
 }
 
 void BoCamera::setCameraPos(const BoVector3& pos)
 {
   mCameraPos = pos;
   setPositionDirty();
+  setCameraChanged(true);
 }
 
 void BoCamera::setUp(const BoVector3& up)
 {
   mUp = up;
   setPositionDirty();
+  setCameraChanged(true);
 }
 
 
@@ -282,6 +290,9 @@ BoGameCamera& BoGameCamera::operator=(const BoGameCamera& c)
   mRotation = c.mRotation;
   mRadius = c.mRadius;
 
+  mFree = c.mFree;
+  mLimits = c.mLimits;
+
   mCanvas = c.mCanvas;
   setAutoCamera(new BoAutoGameCamera(*c.autoGameCamera()));
 
@@ -296,6 +307,8 @@ void BoGameCamera::init()
   mPosZ = 8.0f;
   mRotation = 0.0f;
   mRadius = 5.0f;
+  mFree = false;
+  mLimits = true;
 }
 
 void BoGameCamera::initStatic()
@@ -327,6 +340,12 @@ float BoGameCamera::maxCameraZ()
 void BoGameCamera::updateCamera()
 {
   boDebug() << k_funcinfo << endl;
+  if(mFree)
+  {
+    // In free mode, rotation, radius, etc aren't used and all gluLookAt params
+    // are set directly, so return here
+    return;
+  }
   float diffX = 0.0f;
   float diffY = 0.0f;
   float radius = this->radius();
@@ -342,11 +361,17 @@ void BoGameCamera::updateCamera()
   BoCamera::setUp(BoVector3(-diffX, -diffY, 0.0f));
 
   setPositionDirty(false);
+  setCameraChanged(true);
 }
 
 void BoGameCamera::checkLookAtPosition()
 {
   boDebug() << k_funcinfo << endl;
+  if(mFree || !mLimits)
+  {
+    // No restrictions
+    return;
+  }
   // We use canvas for checking here, so if we don't have it, return
   if(!mCanvas)
   {
@@ -396,6 +421,11 @@ void BoGameCamera::checkLookAtPosition()
 void BoGameCamera::checkCameraPosition()
 {
   boDebug() << k_funcinfo << endl;
+  if(mFree || !mLimits)
+  {
+    // No restrictions
+    return;
+  }
   // Maybe rename to checkCameraHeight() as it only checks height
   //  (z-coordinate)? Note that camera's height != z(), because z() only gives
   //  height measured from lookat point, so to get real height you'll have to do
@@ -430,6 +460,11 @@ void BoGameCamera::checkCameraPosition()
 void BoGameCamera::checkRotation()
 {
   boDebug() << k_funcinfo << endl;
+  if(mFree || !mLimits)
+  {
+    // No restrictions
+    return;
+  }
   if(mRotation > 360.0f)
   {
     setRotation(mRotation - 360.0f);
@@ -443,6 +478,11 @@ void BoGameCamera::checkRotation()
 void BoGameCamera::checkRadius()
 {
   boDebug() << k_funcinfo << endl;
+  if(mFree || !mLimits)
+  {
+    // No restrictions
+    return;
+  }
   // Make sure radius is within limits
   if(radius() < 0.0f)
   {
@@ -613,6 +653,45 @@ void BoGameCamera::setZ(GLfloat z)
 
   // Validate camera pos
   checkCameraPosition();
+}
+
+void BoGameCamera::setFreeMovement(bool free)
+{
+  if(mFree == free)
+  {
+    return;
+  }
+
+  mFree = free;
+
+  if(!mFree)
+  {
+    // Update camera
+    // TODO: maybe also check for limits?
+    //  Actually, in free mode, camera should not accept any input, but until
+    //  this will be implemented, player can set camera parameters (such as z)
+    //  to higher values than allowed, and when camera comes out of free mode,
+    //  those values won't be checked for.
+    updateCamera();
+  }
+}
+
+void BoGameCamera::setUseLimits(bool use)
+{
+  if(mLimits == use)
+  {
+    return;
+  }
+
+  mLimits = use;
+
+  if(mLimits)
+  {
+    // Check for limits
+    checkRadius();
+    checkLookAtPosition();
+    checkCameraPosition();
+  }
 }
 
 

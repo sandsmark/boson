@@ -687,7 +687,7 @@ QValueList<int> BosonScript::productionTypes(int id)
       list.append(*it);
     }
   }
-  
+
   return list;
 }
 
@@ -832,16 +832,6 @@ int BosonScript::playerUnitsOfTypeCount(int playerid, int type)
 
 /*****  Camera methods  *****/
 
-void BosonScript::moveCamera(const BoVector3& pos)
-{
-  autoCamera()->setLookAt(pos);
-}
-
-void BosonScript::moveCameraBy(const BoVector3& pos)
-{
-  autoCamera()->changeLookAt(pos);
-}
-
 void BosonScript::setCameraRotation(float r)
 {
   autoCamera()->setRotation(r);
@@ -863,14 +853,49 @@ void BosonScript::setCameraMoveMode(int mode)
   autoCamera()->setMoveMode((BoAutoCamera::MoveMode)mode);
 }
 
+void BosonScript::setCameraLookAt(const BoVector3& pos)
+{
+  autoCamera()->setLookAt(pos);
+}
+
+void BosonScript::setCameraPos(const BoVector3& pos)
+{
+  autoCamera()->setCameraPos(pos);
+}
+
+void BosonScript::setCameraUp(const BoVector3& up)
+{
+  autoCamera()->setUp(up);
+}
+
+void BosonScript::setCameraLimits(bool on)
+{
+  camera()->setUseLimits(on);
+}
+
+void BosonScript::setCameraFreeMode(bool on)
+{
+  camera()->setFreeMovement(on);
+}
+
 void BosonScript::commitCameraChanges(int ticks)
 {
   autoCamera()->commitChanges(ticks);
 }
 
-BoVector3 BosonScript::cameraPos()
+BoVector3 BosonScript::cameraLookAt()
 {
   return camera()->lookAt();
+}
+
+BoVector3 BosonScript::cameraPos()
+{
+  return camera()->cameraPos();
+}
+
+BoVector3 BosonScript::cameraUp()
+{
+  return camera()->up();
 }
 
 float BosonScript::cameraRotation()
