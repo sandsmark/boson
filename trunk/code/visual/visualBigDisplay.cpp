@@ -27,9 +27,7 @@
 
 #include "visualTopLevel.h"
 #include "visualBigDisplay.h"
-#include "visualCell.h"
 #include "speciesTheme.h"
-#include "groundTheme.h"
   
 
 visualBigDisplay::visualBigDisplay(/*orderWin *o,*/ visualTopLevel *v, QWidget*parent, const char *name, WFlags f)
@@ -41,9 +39,9 @@ visualBigDisplay::visualBigDisplay(/*orderWin *o,*/ visualTopLevel *v, QWidget*p
 //setBackgroundMode(fixedColor);
 
 // QScrollView stuff 
+setResizePolicy(QScrollView::AutoOne);
 setVScrollBarMode( AlwaysOff);
 setHScrollBarMode( AlwaysOff);
-setResizePolicy(QScrollView::AutoOne);
 
 connect(this, SIGNAL(relativeReCenterView(int, int)), vtl, SLOT(relativeReCenterView(int, int)));
 connect(this, SIGNAL(reSizeView(int, int)), vtl, SLOT(reSizeView(int, int)));

@@ -22,7 +22,6 @@
 #include <qfile.h>
 
 #include "common/log.h"
-#include "common/cell.h"
 #include "common/msgData.h"
 #include "boFile.h"
 
@@ -180,7 +179,7 @@ void	boFile::load(facilityMsg_t &f)
 	return ;
 }
 
-void boFile::load(Cell &c)
+void boFile::load(cell_t &c)
 {
 	int g;
 	byte b;
@@ -197,11 +196,11 @@ void boFile::load(Cell &c)
 	*stream >> g;
 	boAssert( IS_VALID_GROUND(g) || GROUND_UNKNOWN == g);
 		// GROUND_UNKNOWN are thoes cell behind big transitions (2x2)
-	c.setGroundType((groundType)g);
-
+	
 	*stream >> b;
 	boAssert( b<4);
-	c.setItem(b);
+
+	c = cell( (groundType)g, b);
 }
 
 /** write ***/
@@ -222,12 +221,12 @@ void boFile::write(facilityMsg_t &f)
 	*stream << (int)f.type << f.x << f.y << f.who;
 }
 
-void boFile::write(Cell &c)
+void boFile::write(cell_t c)
 {
 	stateAssert(Write);
 
 	*stream << TAG_CELL;
-	*stream << (int)c.getGroundType();
-	*stream << c.getItem();
+	*stream << (int) ground(c);
+	*stream << (byte) tile(c);
 }
 

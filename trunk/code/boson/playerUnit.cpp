@@ -24,8 +24,6 @@
 #include "common/map.h"
 #include "common/log.h"
 
-#include "visualCell.h"
-
 #include "bosonCanvas.h"
 #include "selectPart.h"
 #include "playerUnit.h"

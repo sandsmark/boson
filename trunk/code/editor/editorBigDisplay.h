@@ -25,7 +25,6 @@
 #include "editorTopLevel.h"
 
 class QPopupMenu;
-class visualCell;
 
 /** 
   * Add all editor-specific 'bells and whistles' to the visual/visualBigDisplay 

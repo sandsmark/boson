@@ -21,24 +21,22 @@
 #include <assert.h>
 
 #include <kapp.h>
-//#include <kmessagebox.h>
 
 #include "common/log.h"
 #include "common/boconfig.h"
 #include "common/map.h"
 
 #include "speciesTheme.h"
-#include "groundTheme.h"
 #include "visual.h"
   
 
-visualCanvas::visualCanvas(uint w, uint h)
-	: QCanvas (w * BO_TILE_SIZE ,h * BO_TILE_SIZE)
+visualCanvas::visualCanvas( QPixmap p, uint w, uint h)
+	: QCanvas ( p, w, h, BO_TILE_SIZE, BO_TILE_SIZE)
 {
 	/* map geometry */
 	maxX = w; maxY = h;
 
-	init();
+	initTheme();
 }
 
 
@@ -48,24 +46,12 @@ visualCanvas::visualCanvas(void)
 {
 	/* map geometry */
 	maxX = 0; maxY = 0;
-
-	init();
 }
 	
 	
 	
-void visualCanvas::init(void)
+void visualCanvas::initTheme(void)
 {
-
-
-/* Themes selection (should be moved thereafter) */
-ground	= new groundTheme("earth");
-/*
-	if (!ground->isOk()) KMsgBox::message(0l,
-		i18n("Pixmap loading error"),
-		i18n("Error while loading groundTheme,\nsome images will show up awfully"),
-		KMsgBox::EXCLAMATION);
-*/
 
 species[1]	= new speciesTheme("human", qRgb(0, 0, 255) );
 /*
@@ -96,16 +82,18 @@ void visualCanvas::resize (int w, int h)
 }
 
 
-void visualCanvas::setCell(int i, int j, groundType g)
+void visualCanvas::setCell(int i, int j, cell_t c)
 {
-	boAssert(i>=0); boAssert(j>=0);
-	boAssert(i<width()); boAssert(j<height());
+	boAssert(i>=0);
+	boAssert(j>=0);
+	boAssert(i< tilesHorizontally() );
+	boAssert(j< tilesVertically() );
 
-//	(void) new visualCell(g, i, j);
-//	printf("setCell bypassed, g,i,j = %d,%d,%d \n", g, i, j);
-	//	XXXX
+//	printf("setCell :  i,j,c = %d,%d,%d...", i, j, c); fflush(stdout);
+	setTile( i, j, c);
+//	printf("ok\n"); fflush(stdout);
 
-	emit newCell(i,j,g);
+	emit newCell(i,j, ground(c));
 }
 
 

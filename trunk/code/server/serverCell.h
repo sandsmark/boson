@@ -21,18 +21,26 @@
 #ifndef SERVERCELL_H 
 #define SERVERCELL_H 
 
-#include "common/cell.h"
-#include "server/knownBy.h"
+#include "common/groundType.h"
+#include "knownBy.h"
+
+class BosonServer;
 
 /** 
   * This is a cell in the server point of view
   */
-class serverCell : public knownBy, public Cell
+class serverCell : public knownBy
 {
+	friend	BosonServer; /* to write in _cell */
 
- public:
-  serverCell(groundType g = GROUND_UNKNOWN);
+public:
+	serverCell() { _cell = cell(GROUND_UNKNOWN); }
 
+	groundType	getGroundType(void) { return ground(_cell); }
+	byte		getTile(void) { return tile(_cell); }
+	void		operator= (cell_t c) { _cell = c; }
+private:
+	cell_t	_cell;
 };
 
 #endif // SERVERCELL_H

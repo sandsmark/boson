@@ -32,8 +32,6 @@
 #include "common/log.h"
 #include "common/map.h"
 
-#include "groundTheme.h"
-
 #include "editorTopLevel.h"
 #include "editorCanvas.h"
 #include "speciesTheme.h"
@@ -52,7 +50,6 @@ FILE *logfile = (FILE *) 0L;
  * visual/visual.h
  */
 visualCanvas		*vcanvas;
-groundTheme		*ground = 0;
 speciesTheme		*species[BOSON_MAX_PLAYERS] = {0l, 0l};
 int			nb_player;
 
@@ -61,31 +58,8 @@ editorTopLevel::editorTopLevel( const char *name, WFlags f)
 	: visualTopLevel(name,f)
 	, mw(this)
 {
-
 	makeCommandGui();
-
 	setView(&mw, false);
-
-	/* orders buttons 
-	for (int i=0; i< 11; i++) {
-		orderButton[i] = new QPushButton(mw.mainFrame, "orderButtons");
-		orderButton[i]->setGeometry( 10+(i%3)*60, 141+(i/3)*60, 55, 55);
-		orderButton[i]->hide();
-		}
-
-	connect(orderButton[0], SIGNAL(clicked(void)), mw.mainFrame, SLOT(bc0(void)));
-	connect(orderButton[1], SIGNAL(clicked(void)), mw.mainFrame, SLOT(bc1(void)));
-	connect(orderButton[2], SIGNAL(clicked(void)), mw.mainFrame, SLOT(bc2(void)));
-	connect(orderButton[3], SIGNAL(clicked(void)), mw.mainFrame, SLOT(bc3(void)));
-	connect(orderButton[4], SIGNAL(clicked(void)), mw.mainFrame, SLOT(bc4(void)));
-	connect(orderButton[5], SIGNAL(clicked(void)), mw.mainFrame, SLOT(bc5(void)));
-	connect(orderButton[6], SIGNAL(clicked(void)), mw.mainFrame, SLOT(bc6(void)));
-	connect(orderButton[7], SIGNAL(clicked(void)), mw.mainFrame, SLOT(bc7(void)));
-	connect(orderButton[8], SIGNAL(clicked(void)), mw.mainFrame, SLOT(bc8(void)));
-	connect(orderButton[9], SIGNAL(clicked(void)), mw.mainFrame, SLOT(bc9(void)));
-	connect(orderButton[10], SIGNAL(clicked(void)), mw.mainFrame, SLOT(bc10(void)));
-	*/
-
 }
 
 
@@ -118,6 +92,7 @@ void editorTopLevel::redrawTiles(void)
 	
 	switch(which) {
 		case W_BIG_GROUND_1:
+			/* XXXX temp....
 			seq = ground->getPixmap( GET_TRANS_NUMBER(trans, (inverted?16:12) + 0) );
 			bigTiles[0]->setPixmap(*seq->image(0));
 			seq = ground->getPixmap( GET_TRANS_NUMBER(trans, (inverted?16:12) + 1) );
@@ -126,9 +101,11 @@ void editorTopLevel::redrawTiles(void)
 			bigTiles[2]->setPixmap(*seq->image(0));
 			seq = ground->getPixmap( GET_TRANS_NUMBER(trans, (inverted?16:12) + 3) );
 			bigTiles[3]->setPixmap(*seq->image(0));
+			*/
 			break;
 
 		case W_BIG_GROUND_2:
+			/* XXXX temp....
 			seq = ground->getPixmap( GET_TRANS_NUMBER(trans, (inverted?24:20) + 0) );
 			bigTiles[0]->setPixmap(*seq->image(0));
 			seq = ground->getPixmap( GET_TRANS_NUMBER(trans, (inverted?24:20) + 1) );
@@ -137,9 +114,11 @@ void editorTopLevel::redrawTiles(void)
 			bigTiles[2]->setPixmap(*seq->image(0));
 			seq = ground->getPixmap( GET_TRANS_NUMBER(trans, (inverted?24:20) + 3) );
 			bigTiles[3]->setPixmap(*seq->image(0));
+			*/
 			break;
 
 		case W_SMALL_GROUND:
+			/* XXXX temp....
 			seq = ground->getPixmap( GET_TRANS_NUMBER(trans, inverted?TRANS_ULI:TRANS_UL) );
 			tiles[0]->setPixmap(*seq->image(0));
 			seq = ground->getPixmap( GET_TRANS_NUMBER(trans, inverted?TRANS_DOWN:TRANS_UP) );
@@ -162,11 +141,14 @@ void editorTopLevel::redrawTiles(void)
 			// middle one
 			seq = ground->getPixmap( inverted?groundTransProp[trans].to:groundTransProp[trans].from);
 			tiles[4]->setPixmap(*seq->image(0));
+			*/
 			break;
 			
 		case W_SMALL_PLAIN:
+			/* XXXX temp
 			for (i=0; i<GROUND_LAST; i++)
 				tiles[i]->setPixmap( *ground->getPixmap( (groundType) i)->image(0) );
+			*/
 			break;
 
 		case W_FACILITIES:
@@ -304,7 +286,7 @@ void editorTopLevel::handleButton(int but)
 			g = GET_TRANS_NUMBER(trans, (inverted?16:12) + but);
 
 			otype = OT_GROUND;
-			setSelected( ground->getPixmap(g)->image(0));
+// XXX			setSelected( ground->getPixmap(g)->image(0));
 			emit setSelectedObject (otype, g);		// need to be after the setSelected
 			break;
 
@@ -313,7 +295,7 @@ void editorTopLevel::handleButton(int but)
 			g = GET_TRANS_NUMBER(trans, (inverted?24:20) + but);
 
 			otype = OT_GROUND;
-			setSelected( ground->getPixmap(g)->image(0));
+// XXX			setSelected( ground->getPixmap(g)->image(0));
 			emit setSelectedObject (otype, g);		// need to be after the setSelected
 			break;
 
@@ -325,7 +307,7 @@ void editorTopLevel::handleButton(int but)
 				g = inverted?groundTransProp[trans].to:groundTransProp[trans].from;
 			else	g = GET_TRANS_NUMBER(trans, m_map[ (inverted?9:0) + but ]);
 			otype = OT_GROUND;
-			setSelected( ground->getPixmap(g)->image(0));
+// XXX			setSelected( ground->getPixmap(g)->image(0));
 			emit setSelectedObject (otype, g);		// need to be after the setSelected
 			break;
 
@@ -333,7 +315,7 @@ void editorTopLevel::handleButton(int but)
 			boAssert(but<6);
 			g = (groundType) but;
 			otype = OT_GROUND;
-			setSelected( ground->getPixmap(g)->image(0));
+// XXX			setSelected( ground->getPixmap(g)->image(0));
 			emit setSelectedObject (otype, g);		// need to be after the setSelected
 			break;
 

@@ -133,10 +133,7 @@ switch(State) {
 			nb_player	= data->accepted.total_player;
 
 			/* actual creation of the bocanvas */
-			vcanvas = bocanvas = new bosonCanvas (data->accepted.sizeX, data->accepted.sizeY);
-			(new bosonTopLevel())->show();
-			logf(LOG_INFO, "canvas and TopLevel window created");
-
+			initCanvas (data->accepted.sizeX, data->accepted.sizeY);
 			myspecy	= species[data->accepted.who_you_are];
 			break;
 		case MSG_DLG_REFUSED :
@@ -188,8 +185,8 @@ switch(tag) {
 	case MSG_MAP_DISCOVERED :
 		ASSERT_DATA_BLENGHT(sizeof(data->coo));
 		logf(LOG_GAME_LOW, "received MSG_MAP_DISCOVERED : (%d,%d) = %d",
-			data->coo.x, data->coo.y, (int)data->coo.g );
-		bocanvas->setCell(data->coo.x, data->coo.y, data->coo.g);
+			data->coo.x, data->coo.y, (int)data->coo.c );
+		bocanvas->setCell(data->coo.x, data->coo.y, data->coo.c);
 		return;
 		break;
 
@@ -295,7 +292,6 @@ switch(tag) {
 		emit ressourcesUpdated();
 		break;
 
-	}
-
-
+	} // switch
 }
+

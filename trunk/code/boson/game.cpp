@@ -25,7 +25,6 @@
  * visual/visual.h
  */
 visualCanvas		*vcanvas=0;
-groundTheme		*ground = 0;
 speciesTheme		*species[BOSON_MAX_PLAYERS] = {0l, 0l};
 int			nb_player;
 

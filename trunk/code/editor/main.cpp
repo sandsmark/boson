@@ -24,9 +24,15 @@
 #include <kcmdlineargs.h>
 #include <kaboutdata.h>
 #include <kapp.h>
+#include <kstddirs.h>
+//#include <kinstance.h>
 
+
+#include "common/log.h"
 #include "editorCanvas.h"
 #include "editorTopLevel.h"
+
+#include "visual.h"
  
 int main(int argc, char* argv[])
 { 
@@ -48,14 +54,43 @@ int main(int argc, char* argv[])
 	KCmdLineArgs::init( 1, &fake_arg, &aboutData );
 	//KCmdLineArgs::init( argc, argv, &aboutData );
 
+
+	/* temp XXX : logfile initialisation  */
+	logfile = fopen(BOSON_LOGFILE_EDITOR, "a+b");
+	if (!logfile) {
+		logfile = stderr;
+		logf(LOG_ERROR, "Can't open logfile, using stderr");
+		}
+	
+	logf(LOG_INFO, "========= New Log File ==============");
+
+
+
 	KApplication app;  
  
 	//BoEditorApp* boEditor = new BoEditorApp( (argc>1)?argv[1]:0l);
 	
 
+
+
 	/* XXX orzel : temp, until GUI is really functionnal */
+	QString themePath = KGlobal::instance()->dirs()->findResourceDir("data", "boson/map/basic.bpf");
+	themePath	+= "boson/themes/grounds/earth.bmp";
+	printf("loading groundTheme : %s\n", themePath.latin1() );
+	QPixmap *p = new QPixmap(themePath);
+	if (p->isNull() ) {
+		printf("can't load earth.jpeg\n");
+		exit(1);
+	}
+
+
+
+
+
+
+	/* the canvas is created when a game is created */
 	editorCanvas *ecanvas;
-	vcanvas = ecanvas = new editorCanvas();
+	vcanvas = ecanvas = new editorCanvas(*p);
 	assert (true == ecanvas->Load("/opt/be/share/apps/boson/map/basic.bpf"));
 
 

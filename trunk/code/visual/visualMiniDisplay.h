@@ -25,10 +25,8 @@
 
 #include <qframe.h> ///orzel qwidget.h
 
-class Cell;
 class Unit;
 class QPixmap;
-class visualCell;
 class visualTopLevel;
 class visualMobUnit;
 class visualFacility;

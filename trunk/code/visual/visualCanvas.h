@@ -30,8 +30,6 @@
 
 class QRect;
 class QPainter;
-class Cell;
-class groundTheme;
 class speciesTheme;
 class visualFacility;
 class visualMobUnit;
@@ -46,13 +44,13 @@ class visualCanvas : public QCanvas
 	Q_OBJECT
 
 public:
-	visualCanvas( uint , uint );
+	visualCanvas( QPixmap,  uint , uint );
 
 /* geometry ? , still public */
 	int		maxX, maxY;	// size of the map
 ///orzel should be maxX * BO_TILE_SIZE = width(), maxY * BO_TILE_SIZE
 
-	void setCell(int i, int j, groundType g);
+	void setCell(int i, int j, cell_t c);
 	/** find the unit at this position */
 	QCanvasItem		*findUnitAt(int x, int y);
 	groundType		findGroundAt(int x, int y);
@@ -61,7 +59,7 @@ public:
 	virtual void resize (int, int);
 protected:
 	visualCanvas();		// to be used by editorField
-	void init(void);
+	void initTheme(void);
 
 signals:
 	void newCell(int,int, groundType g);
