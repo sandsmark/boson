@@ -25,6 +25,8 @@
 #include "../common/unitType.h"
 #include "../common/msgData.h"
 
+#include "../map/map.h"
+
 
 enum workType {
 	WORK_NONE =0, 
@@ -53,6 +55,8 @@ class Unit : public QObject
   virtual	QRect	rect(void)=0;
   virtual	int	_x(void)=0;
   virtual	int	_y(void)=0;
+  virtual	int	getWidth(void)=0;
+  virtual	int	getHeight(void)=0;
 
   //int 		pos_x,pos_y;		// cartesian Position
   uint		who;		// who is the owner ?
@@ -80,8 +84,8 @@ class mobUnit : public Unit
 
   mobType	getType(void) {return type;}
 
-  int		getWidth(void) { return mobileProp[type].width;}
-  int		getHeight(void) { return mobileProp[type].height;}
+  virtual	int	getWidth(void) { return mobileProp[type].width;}
+  virtual	int	getHeight(void) { return mobileProp[type].height;}
   virtual	uint	getVisibility(void) {return mobileProp[type].visibility; }
   virtual	QRect	rect(void);
 
@@ -99,8 +103,8 @@ class Facility : public Unit
  public:
   		Facility(facilityMsg_t *msg, QObject* parent=0L, const char *name=0L);
   facilityType	getType(void) {return type;}
-  int		getWidth(void) { return facilityProp[type].width;}
-  int		getHeight(void) { return facilityProp[type].height;}
+  virtual int	getWidth(void) { return facilityProp[type].width * BO_TILE_SIZE;}
+  virtual int	getHeight(void) { return facilityProp[type].height * BO_TILE_SIZE;}
   virtual	uint	getVisibility(void) {return facilityProp[type].visibility; }
   virtual	QRect	rect(void);
 
