@@ -70,7 +70,7 @@ BosonNewGameWidget::BosonNewGameWidget(TopWidget* top, QWidget* parent)
   header_font.setPointSize( 30 );
   header_font.setBold( TRUE );
   header->setFont( header_font ); 
-  header->setText( i18n( "Start new game" ) );
+  header->setText( i18n( "Start New Game" ) );
   header->setAlignment( int( QLabel::AlignCenter ) );
   mainlayout->addWidget( header );
   QSpacerItem* spacer = new QSpacerItem( 20, 20, QSizePolicy::Minimum, QSizePolicy::Preferred );
@@ -103,7 +103,7 @@ BosonNewGameWidget::BosonNewGameWidget(TopWidget* top, QWidget* parent)
   youroptionslayout->addMultiCellWidget( colorcombo, 1, 1, 3, 4 );
 
   namelabel = new QLabel( this, "namelabel" );
-  namelabel->setText( i18n( "Your name:" ) );
+  namelabel->setText( i18n( "Your Name:" ) );
 
   youroptionslayout->addWidget( namelabel, 0, 0 );
 
@@ -124,7 +124,7 @@ BosonNewGameWidget::BosonNewGameWidget(TopWidget* top, QWidget* parent)
   mapname->hide();
 
   specieslabel = new QLabel( this, "specieslabel" );
-  specieslabel->setText( i18n( "Your species:" ) );
+  specieslabel->setText( i18n( "Your Species:" ) );
 
   youroptionslayout->addWidget( specieslabel, 2, 0 );
   leftlayout->addLayout( youroptionslayout );
@@ -132,7 +132,7 @@ BosonNewGameWidget::BosonNewGameWidget(TopWidget* top, QWidget* parent)
   leftlayout->addItem( spacer_6 );
 
   addaigroup = new QGroupBox( this, "addaigroup" );
-  addaigroup->setTitle( i18n( "Add computer player" ) );
+  addaigroup->setTitle( i18n( "Add Computer Player" ) );
   addaigroup->setColumnLayout(0, Qt::Vertical );
   addaigroup->layout()->setSpacing( 6 );
   addaigroup->layout()->setMargin( 11 );
@@ -162,7 +162,7 @@ BosonNewGameWidget::BosonNewGameWidget(TopWidget* top, QWidget* parent)
   playerslabel = new QLabel( this, "playerslabel" );
   QFont playerslabel_font(  playerslabel->font() );
   playerslabel->setFont( playerslabel_font ); 
-  playerslabel->setText( i18n( "Connected players:" ) );
+  playerslabel->setText( i18n( "Connected Players:" ) );
   playerslayout->addWidget( playerslabel );
 
   playerslist = new QListBox( this, "playerslist" );
@@ -170,7 +170,7 @@ BosonNewGameWidget::BosonNewGameWidget(TopWidget* top, QWidget* parent)
 
   removeplayerbutton = new QPushButton( this, "removeplayerbutton" );
   removeplayerbutton->setEnabled( FALSE );
-  removeplayerbutton->setText( i18n( "&Remove player" ) );
+  removeplayerbutton->setText( i18n( "&Remove Player" ) );
   playerslayout->addWidget( removeplayerbutton );
   upperlayout->addLayout( playerslayout );
   mainlayout->addLayout( upperlayout );
@@ -200,14 +200,14 @@ BosonNewGameWidget::BosonNewGameWidget(TopWidget* top, QWidget* parent)
   QSpacerItem* spacer_9 = new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum );
   startgamelayout->addItem( spacer_9 );
 
-  serverbutton = new QPushButton( this, "serverbutton" );
-  serverbutton->setText( i18n( "Server options" ) );
-  startgamelayout->addWidget( serverbutton );
+  networkButton = new QPushButton( this, "networkbutton" );
+  networkButton->setText( i18n( "&Network Options" ) );
+  startgamelayout->addWidget( networkButton );
   QSpacerItem* spacer_10 = new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum );
   startgamelayout->addItem( spacer_10 );
 
   startgamebutton = new QPushButton( this, "startgamebutton" );
-  startgamebutton->setText( i18n( "S&tart game" ) );
+  startgamebutton->setText( i18n( "S&tart Game" ) );
   startgamelayout->addWidget( startgamebutton );
   mainlayout->addLayout( startgamelayout );
   BosonNewGameWidgetLayout->addLayout( mainlayout );
@@ -223,7 +223,7 @@ BosonNewGameWidget::BosonNewGameWidget(TopWidget* top, QWidget* parent)
   // signals and slots connections
   connect(removeplayerbutton, SIGNAL(clicked()), this, SLOT(slotRemovePlayer()));
   connect(cancelbutton, SIGNAL(clicked()), this, SLOT(slotCancel()));
-  connect(serverbutton, SIGNAL(clicked()), this, SLOT(slotServerOptions()));
+  connect(networkButton, SIGNAL(clicked()), this, SLOT(slotNetworkOptions()));
   connect(startgamebutton, SIGNAL(clicked()), this, SLOT(slotStart()));
   connect(addaibutton, SIGNAL(clicked()), this, SLOT(slotAddAIPlayer()));
   connect(playerslist, SIGNAL(highlighted(QListBoxItem*)), this, SLOT(slotPlayerSelected(QListBoxItem*)));
@@ -542,9 +542,9 @@ void BosonNewGameWidget::slotRemovePlayer()
     game()->removePlayer(mHighlightedPlayer);
 }
 
-void BosonNewGameWidget::slotServerOptions()
+void BosonNewGameWidget::slotNetworkOptions()
 {
-  emit signalShowServerOptions();
+  emit signalShowNetworkOptions();
 }
 
 void BosonNewGameWidget::slotPlayerSelected(QListBoxItem* item)

@@ -60,13 +60,13 @@ BosonWelcomeWidget::BosonWelcomeWidget(QWidget* parent) : QWidget(parent)
   buttonslayout = new QVBoxLayout( 0, 0, 6, "buttonslayout"); 
 
   newgamebutton = new QPushButton( this, "newgamebutton" );
-  newgamebutton->setText( i18n( "Start new game" ) );
+  newgamebutton->setText( i18n( "S&tart new game" ) );
   buttonslayout->addWidget( newgamebutton );
   QSpacerItem* spacer_3 = new QSpacerItem( 20, 20, QSizePolicy::Minimum, QSizePolicy::Expanding );
   buttonslayout->addItem( spacer_3 );
 
   quitbutton = new QPushButton( this, "quitbutton" );
-  quitbutton->setText( i18n( "Quit Boson" ) );
+  quitbutton->setText( i18n( "&Quit Boson" ) );
   buttonslayout->addWidget( quitbutton );
   QSpacerItem* spacer_4 = new QSpacerItem( 20, 20, QSizePolicy::Minimum, QSizePolicy::Expanding );
   buttonslayout->addItem( spacer_4 );
