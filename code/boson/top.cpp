@@ -475,7 +475,7 @@ void TopWidget::initBosonWidget()
 	// do not return, since it might even be allowed for editor (currently
 	// it is not)
  }
- changeLocalPlayer(boGame->localPlayer(), false);
+ changeLocalPlayer(boGame->localPlayer());
 
  d->mBosonWidget->init(d->mChatDock, d->mCommandFrameDock); // this depends on several virtual methods and therefore can't be called in the c'tor
 
@@ -960,7 +960,7 @@ void TopWidget::showHideMenubar()
 
 
 
-void TopWidget::changeLocalPlayer(Player* p, bool init)
+void TopWidget::changeLocalPlayer(Player* p)
 {
  boDebug() << k_funcinfo << p << endl;
 
@@ -985,7 +985,7 @@ void TopWidget::changeLocalPlayer(Player* p, bool init)
  // but it is NULL when the startup widgets call it
  boGame->setLocalPlayer(p);
  if (d->mBosonWidget) {
-	d->mBosonWidget->setLocalPlayer(p, init);
+	d->mBosonWidget->setLocalPlayer(p, false); // AB: false: do not call initPlayer()
  }
 }
 
