@@ -484,7 +484,7 @@ void Unit::advanceTurn(unsigned int)
  }
 
  // FIXME: This algorithm _sucks_. Replace it with something better
- for (int i = 0; i < TURN_STEP; i++) {
+ for (int i = 0; i < (int)(2 * speed())/*TURN_STEP*/; i++) {
 	if (dir == d->mWantedRotation) {
 		break;
 	}
