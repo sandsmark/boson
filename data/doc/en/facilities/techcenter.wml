@@ -12,10 +12,14 @@
 	<tr><td><br>&nbsp</td></tr>
     </table>
     
-    <table border="1">
-	<tr><td>Health</td><td>300</td></tr>
-	<tr><td>Mineral cost</td><td>400</td></tr>
-    </table>
+<:
+# add the parent directory to @INC and load the module
+use lib '../';
+use get_values;
+
+# ( facility type, facility name, filesystem level )
+get_values->getval("fix", "techcenter", 2);
+:>
     
 
 #include "nav.wml" before_url="comsat.html" before_text="Comsat" after_url="repairpad.html" after_text="Repair Pad"        

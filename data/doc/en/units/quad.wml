@@ -14,36 +14,13 @@
 	<tr><td><br>&nbsp</td></tr>
     </table>
         
-<!-- Get the values from the index.desktop files -->
 <:
-open( FILE, '<../../../themes/species/human/units/mob_quad/index.desktop') || die "Open failed";
-open( FILE2, '<../values.list') || die "Open failed";
+# add the parent directory to @INC and load the module
+use lib '../';
+use get_values;
 
-@CONTENT = <FILE>;
-close(FILE);
-
-@CONTENT2 = <FILE2>;
-close(FILE2);
-
-print "<table border=\"1\">\n";
-
-foreach $line (@CONTENT) {
-	# remove all spaces
-	$line =~ s/\s//g;
-
-	foreach $line2 (@CONTENT2) {
-		$line2 =~ s/\s//g;
-		$line2 =~ tr/\n//d;
-		#print $line2;
-		#print $line;
-		#print "trying: $line <--> $line2\n";
-		if ($line =~ /^$line2=\s*(\w+)/ ) {
-			$value = $1;
-			print "<tr><td>$line2</td><td>$value</td></tr>\n";
-		}
-	}
-}
-print "</table>\n";
+# ( facility type, facility name, filesystem level )
+get_values->getval("mob", "quad", 2);
 :>
 
 #include "nav.wml" before_url="oil_harvester.html" before_text="Oil Harvester" after_url="batzen.html" after_text="Batzen"    
