@@ -481,13 +481,6 @@ protected:
 	virtual bool playerInput(QDataStream& stream, KPlayer* player);
 
 	/**
-	 * Load the XML file in @p xml into @p doc and display an error message
-	 * if an error occured.
-	 * @return TRUE on success
-	 **/
-	bool loadXMLDoc(QDomDocument* doc, const QString& xml);
-
-	/**
 	 * Create a game log (see @ref writeGameLog) and store it for later use (see
 	 * @ref saveGameLogs).
 	 **/
