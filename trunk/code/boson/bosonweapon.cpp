@@ -113,20 +113,25 @@ void BosonWeaponProperties::savePlugin(KSimpleConfig* cfg)
 
 void BosonWeaponProperties::reset()
 {
- mName = "";
- mRange = 0;
- mReload = 0;
- mSpeed = 0;
- mDamage = 0;
- mDamageRange = 1;
- mCanShootAtAirUnits = false;
- mCanShootAtLandUnits = false;
- mHeight = 0.25;
- mOffset = BoVector3();
- mShootParticleSystemIds.clear();
- mFlyParticleSystemIds.clear();
- mHitParticleSystemIds.clear();
- mModelFileName = "missile.3ds";
+  mName = "";
+  mRange = 0;
+  mReload = 0;
+  mSpeed = 0;
+  mDamage = 0;
+  mDamageRange = 1;
+  mFullDamageRange = 0.25 * mDamageRange;
+  mCanShootAtAirUnits = false;
+  mCanShootAtLandUnits = false;
+  mHeight = 0.25;
+  mOffset = BoVector3();
+  mShootParticleSystemIds.clear();
+  mFlyParticleSystemIds.clear();
+  mHitParticleSystemIds.clear();
+  mModelFileName = "missile.3ds";
+  mSounds.clear();
+  mSounds.insert(SoundWeaponShoot, "shoot");
+  mSounds.insert(SoundWeaponFly, "missile_fly");
+  mSounds.insert(SoundWeaponHit, "hit");
 }
 
 BosonShot* BosonWeaponProperties::newShot(Unit* attacker, BoVector3 pos, BoVector3 target) const
