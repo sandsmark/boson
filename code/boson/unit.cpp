@@ -1367,6 +1367,12 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCount) // this actually
  }
 
  if (mSearchPath) {
+	if (attackEnemyUnitsInRange()) {
+		boDebug(401) << k_funcinfo << "unit " << id() << ": Enemy units found in range, attacking" << endl;
+		setVelocity(0.0, 0.0, 0.0);  // To prevent moving
+		setMoving(false);
+		return;
+	}
 	newPath();
 	d->mPathAge = 0;
 	mSearchPath = false;
@@ -1413,7 +1419,7 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCount) // this actually
 	// Don't check for enemies every time (if we don't have a target) because it
 	//  slows things down
   // TODO: Maybe check for enemies every time waypoint is reached instead?
-	if (target() || (advanceCount % 20 == 0)) {
+	if (target()) {
 		if (attackEnemyUnitsInRange()) {
 			boDebug(401) << k_funcinfo << "unit " << id() << ": Enemy units found in range, attacking" << endl;
 			setVelocity(0.0, 0.0, 0.0);  // To prevent moving
@@ -1455,6 +1461,12 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCount) // this actually
 	boDebug(401) << k_funcinfo << "unit " << id() << ": unit is at waypoint" << endl;
 	waypointDone();
 
+	if (attackEnemyUnitsInRange()) {
+		boDebug(401) << k_funcinfo << "unit " << id() << ": Enemy units found in range, attacking" << endl;
+		setVelocity(0.0, 0.0, 0.0);  // To prevent moving
+		setMoving(false);
+		return;
+	}
 	if (waypointCount() == 0) {
 		//boDebug(401) << k_funcinfo << "unit " << id() << ": no more waypoints. Stopping moving" << endl;
 		newPath();
