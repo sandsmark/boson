@@ -1,4 +1,4 @@
-SUBDIRS = species grounds ui cursors textures
+SUBDIRS = species grounds ui cursors textures effects
 
 #misc_DATA = fow.xpm
 #miscdir = $(kde_datadir)/boson/themes
