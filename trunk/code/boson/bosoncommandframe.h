@@ -91,7 +91,7 @@ public slots:
 
 	/**
 	 * If the selected unit is a facility that has not been constructed
-	 * completely (see @ref Unit::completedConstruction) show how far the
+	 * completely (see @ref Unit::isConstructionComplete) show how far the
 	 * construction is currently.
 	 **/
 	void slotShowConstructionProgress(Facility* fac);
