@@ -1639,14 +1639,12 @@ bool BosonCanvas::loadEffectsFromXML(const QDomElement& root)
 	}
 
 	BosonEffect* e = prop->newEffect(pos, rot);
-	if(!e)
-	{
-		boWarning() << k_funcinfo << "NULL effect created! id: " << propId << "; owner: " << ownerId << endl;
+	if(!e) {
+		boError() << k_funcinfo << "NULL effect created! id: " << propId << "; owner: " << ownerId << endl;
 		ret = false;
 		continue;
 	}
-	if(!e->loadFromXML(effect))
-	{
+	if(!e->loadFromXML(effect)) {
 		ret = false;
 		delete e;
 		continue;
@@ -1658,7 +1656,7 @@ bool BosonCanvas::loadEffectsFromXML(const QDomElement& root)
 		if (owner) {
 			owner->addEffect(e, false);
 		} else {
-			boWarning() << k_funcinfo << "Can't find owner with id " << e->ownerId() << " for effect!" << endl;
+			boError() << k_funcinfo << "Can't find owner item with id " << e->ownerId() << " for effect!" << endl;
 			e->makeObsolete();  // Maybe delete immediately?
 			ret = false;
 		}
