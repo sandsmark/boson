@@ -98,7 +98,7 @@ BoLight::~BoLight()
   BoLightManager::setIdUsed(mId, false);
 }
 
-void BoLight::setAmbient(BoVector4 a)
+void BoLight::setAmbient(const BoVector4& a)
 {
   if(mAmbient == a)
   {
@@ -109,7 +109,7 @@ void BoLight::setAmbient(BoVector4 a)
   glLightfv(GL_LIGHT0 + mId, GL_AMBIENT, mAmbient.data());
 }
 
-void BoLight::setDiffuse(BoVector4 d)
+void BoLight::setDiffuse(const BoVector4& d)
 {
   if(mDiffuse == d)
   {
@@ -120,7 +120,7 @@ void BoLight::setDiffuse(BoVector4 d)
   glLightfv(GL_LIGHT0 + mId, GL_DIFFUSE, mDiffuse.data());
 }
 
-void BoLight::setSpecular(BoVector4 s)
+void BoLight::setSpecular(const BoVector4& s)
 {
   if(mSpecular == s)
   {
@@ -131,7 +131,7 @@ void BoLight::setSpecular(BoVector4 s)
   glLightfv(GL_LIGHT0 + mId, GL_SPECULAR, mSpecular.data());
 }
 
-void BoLight::setPosition(BoVector4 pos)
+void BoLight::setPosition(const BoVector4& pos)
 {
   if(mPos == pos)
   {
@@ -141,6 +141,52 @@ void BoLight::setPosition(BoVector4 pos)
   mPos = pos;
   boDebug() << k_funcinfo << "Position changed to " << mPos.debugString(3) << endl;
   glLightfv(GL_LIGHT0 + mId, GL_POSITION, mPos.data());
+}
+
+void BoLight::setConstantAttenuation(float a)
+{
+  if(constantAttenuation() == a)
+  {
+    return;
+  }
+
+  mAttenuation.setX(a);
+  glLightf(GL_LIGHT0 + mId, GL_CONSTANT_ATTENUATION, a);
+}
+
+void BoLight::setLinearAttenuation(float a)
+{
+  if(linearAttenuation() == a)
+  {
+    return;
+  }
+
+  mAttenuation.setY(a);
+  glLightf(GL_LIGHT0 + mId, GL_LINEAR_ATTENUATION, a);
+}
+
+void BoLight::setQuadraticAttenuation(float a)
+{
+  if(quadraticAttenuation() == a)
+  {
+    return;
+  }
+
+  mAttenuation.setZ(a);
+  glLightf(GL_LIGHT0 + mId, GL_QUADRATIC_ATTENUATION, a);
+}
+
+void BoLight::setAttenuation(const BoVector3& a)
+{
+  if(attenuation() == a)
+  {
+    return;
+  }
+
+  mAttenuation = a;
+  glLightf(GL_LIGHT0 + mId, GL_CONSTANT_ATTENUATION, a.x());
+  glLightf(GL_LIGHT0 + mId, GL_LINEAR_ATTENUATION, a.y());
+  glLightf(GL_LIGHT0 + mId, GL_QUADRATIC_ATTENUATION, a.z());
 }
 
 void BoLight::setEnabled(bool e)
