@@ -18,6 +18,8 @@
  *                                                                         *
  ***************************************************************************/
 
+#include <stdlib.h>	// rand
+
 #include <assert.h>
 
 //#include <kapp.h>
@@ -138,12 +140,8 @@ void bosonField::shoot(shootMsg_t &m)
 {
 	playerMobUnit	* mob;
 	playerFacility	* fix;
-#if 0
-	static int counter = 5;
-	
-	if (counter<=0) return;
-	counter--;
-#endif
+	QRect		r;
+	int		_z;
 
 	mob = mobile.find(m.target_key);
 	fix = facility.find(m.target_key);
@@ -151,9 +149,20 @@ void bosonField::shoot(shootMsg_t &m)
 		logf(LOG_ERROR, "bosonField::shoot : unexpected target_key in shootMsg_t : %d", m.target_key);
 		return;
 	}
-	if (!mob)
-		new boShot(fix->_x(), fix->_y(), fix->z());
-	else	new boShot(mob->_x(), mob->_y(), mob->z());
+	
+	if (!mob) {
+		r  = fix->rect();
+		_z = fix->z();
+
+	} else {
+		r  = mob->rect();
+		_z = mob->z();
+	}
+
+	new boShot(
+			r.x() + rand()%r.width(),
+			r.y() + rand()%r.height(),
+			_z );
 }
 
 
