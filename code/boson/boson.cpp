@@ -283,6 +283,13 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 		}
 		emit signalStartScenario();
 		break;
+	case BosonMessage::IdGameIsStarted:
+		if (!isRunning()) {
+			kdError() << "Received IdGameIstarted but it isn't" << endl;
+			return;
+		}
+		emit signalGameStarted();
+		break;
 	case BosonMessage::ChangeSpecies:
 	{
 		Q_UINT32 id;

@@ -45,8 +45,6 @@ public:
 	virtual ~TopBase();
 
 protected:
-
-protected:
 	/**
 	 * This function is called when it is time for the app to save its
 	 * properties for session management purposes.

@@ -83,6 +83,8 @@ public:
 
 	QCanvasText* mMinerals;
 	QCanvasText* mOil;
+
+	bool mIsModified; // for editor mode
 };
 
 BosonBigDisplay::BosonBigDisplay(QCanvas* c, QWidget* parent) : QCanvasView(c, parent)
@@ -104,6 +106,8 @@ void BosonBigDisplay::init()
  setHScrollBarMode(AlwaysOff);
  d->mConstruction.unitType = -1; // FIXME: 0 would be better but this is a unit...
  d->mConstruction.groundType = -1;
+
+ d->mIsModified = false;
 
  connect(this, SIGNAL(contentsMoving(int, int)), 
 		this, SLOT(slotContentsMoving(int, int)));
@@ -521,6 +525,7 @@ void BosonBigDisplay::editorActionClicked(const QPoint& pos)
 	
 	emit signalBuildUnit(d->mConstruction.unitType, x, y,
 			d->mConstruction.owner);
+	setModified(true);
  } else if (d->mConstruction.groundType > -1) {
 //	kdDebug() << "place ground " << d->mConstruction.groundType << endl;
 	int version = 0; // FIXME: random()%4;
@@ -533,6 +538,7 @@ void BosonBigDisplay::editorActionClicked(const QPoint& pos)
 		emit signalAddCell(x + 1, y + 1, 
 				d->mConstruction.groundType + 3, version);
 	}
+	setModified(true);
  }
 }
 
@@ -625,4 +631,14 @@ void BosonBigDisplay::slotContentsMoving(int x, int y)
 {
  d->mMinerals->move(x + visibleWidth() - 5 - d->mMinerals->boundingRect().width(), y + 5);
  d->mOil->move     (x + visibleWidth() - 5 - d->mOil->boundingRect().width(), y + 5 + d->mMinerals->boundingRect().height());
+}
+
+bool BosonBigDisplay::isModified() const
+{
+ return d->mIsModified;
+}
+
+void BosonBigDisplay::setModified(bool m)
+{
+ d->mIsModified = m;
 }

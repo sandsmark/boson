@@ -86,6 +86,16 @@ public:
 	bool sound() const;
 	bool music() const;
 
+	/**
+	 * Used by the editor: either display or hide all units. You usually
+	 * don't want to see the units when you edit the map, but sometimes
+	 * (*g*) you need to see the units when you design a scenario...
+	 **/
+	void displayAllItems(bool display);
+
+	bool isModified() const;
+	void setModified(bool);
+
 public slots:
 	void slotDebug();
 	void slotNewGame();
@@ -133,6 +143,8 @@ signals:
 
 	void signalMineralsUpdated(int);
 	void signalOilUpdated(int);
+
+	void signalGameStarted();
 
 protected slots:
 	void slotCommandFramePosition(int);

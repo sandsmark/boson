@@ -186,6 +186,8 @@ void BosonWidget::init()
 		this, SLOT(slotLoadMap(const QString&)));
  connect(d->mBoson, SIGNAL(signalScenarioChanged(const QString&)),
 		this, SLOT(slotLoadScenario(const QString&)));
+ connect(d->mBoson, SIGNAL(signalGameStarted()),
+		this, SIGNAL(signalGameStarted()));
 
 
  connect(d->mBigDisplay, SIGNAL(signalAddCell(int,int, int, unsigned char)),
@@ -454,6 +456,9 @@ void BosonWidget::slotStartScenario()
 //	((Player*)d->mBoson->playerList()->at(i))->loadTheme(species, color);
  }
  d->mBoson->startGame(); // correct here? should be so.
+
+ // as soon as this message is received the game is actually started
+ d->mBoson->sendMessage(0, BosonMessage::IdGameIsStarted);
 }
 
 void BosonWidget::slotGamePreferences()
@@ -716,6 +721,7 @@ void BosonWidget::slotEditorSaveMap(const QString& fileName)
  }
  // TODO: let the user choose - binary or XML.
  d->mMap->saveMap(fileName, false);
+ setModified(false);
 }
 
 void BosonWidget::slotEditorSaveScenario(const QString& fileName)
@@ -727,6 +733,7 @@ void BosonWidget::slotEditorSaveScenario(const QString& fileName)
  // TODO: let the user choose - binary or XML? XML is far better here. binary is
  // probably useless (scenario files are not that big).
  d->mScenario->saveScenario(fileName, false);
+ setModified(false);
 }
 
 void BosonWidget::saveConfig()
@@ -861,3 +868,20 @@ void BosonWidget::slotToggleMusic()
  d->mMusic->setMusic(!d->mMusic->music());
 }
 
+void BosonWidget::displayAllItems(bool display)
+{
+ QCanvasItemList all = d->mCanvas->allItems();
+ for (unsigned int i = 0; i < all.count(); i++) {
+	all[i]->setVisible(display);
+ }
+}
+
+bool BosonWidget::isModified() const
+{
+ return d->mBigDisplay->isModified();
+}
+
+void BosonWidget::setModified(bool m)
+{
+ d->mBigDisplay->setModified(m);
+}

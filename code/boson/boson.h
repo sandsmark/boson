@@ -104,6 +104,12 @@ signals:
 
 	void signalInitFogOfWar();
 
+	/**
+	 * Emitted when the game is started and ready for use - i.e. all units
+	 * are added and so
+	 **/
+	void signalGameStarted();
+
 protected:
 	virtual bool playerInput(QDataStream& stream, KPlayer* player);
 
