@@ -162,10 +162,10 @@ bool playerMobUnit::getWantedMove(state_t &wstate)
 
 		/* choose dx/dy */
 			if ( ( SQ(ldx) + SQ(ldy) ) < SQ(mobileProp[type].speed) ) { ///orzel should be square
-				present_dx = ldx; present_dy = ldy;
+				setXVelocity( ldx); setYVelocity( ldy);
 				}
-			asked.x = x() + present_dx;
-			asked.y = y() + present_dy;
+			asked.x = x() + xVelocity();
+			asked.y = y() + yVelocity();
 
 			wstate = asked;
 
@@ -173,7 +173,7 @@ bool playerMobUnit::getWantedMove(state_t &wstate)
 			asked_state = MUS_MOVING;
 			if (checkMove( asked)) return true;
 
-			if ( abs(present_dx) > abs(present_dy) )  {
+			if ( fabs(xVelocity() ) > fabs(yVelocity() ) )  {
 				/* we are going mainly along x axis, so try that first*/
 				wstate.y = y();
 				if (checkMove(wstate)) return true;
@@ -285,12 +285,12 @@ void playerMobUnit::turnTo(int newdir)
 	assert(newdir>=0); assert(newdir<12);
 	//if (direction==newdir) return;
 	direction = newdir;
-	present_dx =  pos_x[direction];
-	present_dy =  pos_y[direction];
+	setXVelocity( pos_x[direction]);
+	setYVelocity( pos_y[direction]);
 	double factor = (double) mobileProp[type].speed / 100.;
 	if (factor<1.) {
-		present_dx =(int) ((double)present_dx*factor);
-		present_dy =(int) ((double)present_dy*factor);
+		setXVelocity((double)xVelocity()*factor);
+		setYVelocity((double)yVelocity()*factor);
 		}
 	else logf(LOG_ERROR, "turnTo : unexpected mobileProp.speed..."); ///orzel : test should be removed
 
@@ -398,7 +398,7 @@ void playerMobUnit::s_moveTo(state_t ns)
 	if (x()==dest_x && y()==dest_y) {
 		//puts("going to MUS_NONE");
 		state = MUS_NONE;
-		present_dx = present_dy = 0; // so that willBe returns the good position
+		setXVelocity(0.); setYVelocity(0.);
 		logf(LOG_GAME_LOW, "mobile[%p] has stopped\n", this);
 		}
 }
