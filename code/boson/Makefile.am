@@ -89,6 +89,7 @@ BOSON_COMMON_SRC = \
 	bosondata.cpp \
 	bosonlocalplayerinput.cpp \
 	botexmapimportdialog.cpp \
+	bobincoder.cpp \
 	bolight.cpp
 
 

@@ -32,6 +32,7 @@
 #include "bosonpropertyxml.h"
 #include "bosonprofiling.h"
 #include "bodebug.h"
+#include "bobincoder.h"
 
 #include <kgame/kgame.h>
 #include <kgame/kgamemessage.h>
@@ -736,15 +737,7 @@ bool Player::saveFogOfWar(QDomElement& root) const
  // this trouble with strings/xml and e.g. \0
  QDomDocument doc = root.ownerDocument();
  QDomElement fog = doc.createElement(QString::fromLatin1("Fogged"));
- QString text;
- QTextOStream s(&text);
- s << (Q_UINT32)d->mFogged.size();
- s << ' ';
- for (unsigned int i = 0; i < d->mFogged.size(); i++) {
-	s << (char)(d->mFogged.testBit(i) ? '1' : '0');
- }
- QDomCDATASection fow = doc.createCDATASection(text);
- fog.appendChild(fow);
+ fog.appendChild(doc.createTextNode(BoBinCoder::toCoded(d->mFogged)));
  root.appendChild(fog);
  return true;
 }
@@ -763,24 +756,14 @@ bool Player::loadFogOfWar(const QDomElement& root)
 	d->mFogged.fill(true);
 	return false;
  }
- QTextIStream s(&text);
- s.flags(s.flags() & ~QTextStream::skipws);
- Q_UINT32 size;
- s >> size;
-
- QChar space; // note: QTextStream skips whitespaces for char, not for QChar
- s >> space;
- if (space != ' ') {
-	boError() << k_funcinfo << "oops - format error. read: " << space.latin1() << " should be: " << ' ' << endl;
-	// we can not even resize the flog array, because it may be just any
-	// random value. we can't depend on it being correct
-	return false;
- }
- d->mFogged.resize(size);
- for (unsigned int i = 0; i < size; i++) {
-	char bit;
-	s >> bit;
-	d->mFogged.setBit(i, bit == '1');
+ boDebug() << k_funcinfo << "decoding" << endl;
+ d->mFogged = BoBinCoder::toBinary(text);
+ boDebug() << k_funcinfo << "decoded: " << d->mFogged.size() << endl;
+ if (d->mMap) {
+	if (d->mMap->width() * d->mMap->height() != d->mFogged.size()) {
+		boError() << k_funcinfo << "fog of war loaded: " << d->mFogged.size() << " map size: " << d->mMap->width() << "x" << d->mMap->height() << endl;
+		return false;
+	}
  }
  return true;
 }
