@@ -1222,6 +1222,9 @@ void BosonModel::mergeArrays()
 	delete[] d->mVertexArray;
 	delete[] d->mNormalArray;
 	delete[] d->mTexelArray;
+	d->mVertexArray = 0;
+	d->mNormalArray = 0;
+	d->mTexelArray = 0;
  }
 #endif // GL_ARB_vertex_buffer_object
 }
