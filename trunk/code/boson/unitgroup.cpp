@@ -78,7 +78,7 @@ void UnitGroup::leaderStopped()
 
 void UnitGroup::advanceGroupMove()
 {
-  kdDebug() << k_funcinfo << endl;
+//  kdDebug() << k_funcinfo << endl;
   mLeader->advanceMove();
   mLeader->advanceMoveCheck();
   QPtrListIterator<Unit> it(mMembers);

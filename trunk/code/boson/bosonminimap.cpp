@@ -319,7 +319,7 @@ void BosonMiniMap::slotMoveUnit(Unit* unit, double oldX, double oldY)
  if (!mLocalPlayer->isFogged(x, y)) {
 	Cell* c = mMap->cell(x, y);
 	if (!c) {
-		kdError() << k_lineinfo << "NULL cell" << endl;
+		kdError() << k_funcinfo << "NULL cell" << endl;
 		return;
 	}
 	slotAddCell(x, y, c->groundType(), c->version());
