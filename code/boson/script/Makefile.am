@@ -7,3 +7,6 @@ libbosonscript_la_LIBADD = -lkdegames -lqtmcop -lsoundserver_idl -lartskde -lGLU
 libbosonscript_la_SOURCES = bosonscript.cpp pythonscript.cpp
 
 METASOURCES = AUTO
+
+scriptsdir = $(kde_datadir)/boson/scripts
+scripts_DATA = boson-script.py
