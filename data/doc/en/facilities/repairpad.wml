@@ -18,5 +18,5 @@ use get_values;
 get_values->getval("fix", "repairpad");
 :>
     
-#include "nav.wml" before_url="techcenter.html" before_text="Tech Center" after_url="prison.html" after_text="Prison" up_url="index.html"
+#include "nav.wml" before_url="techcenter.html" before_text="Tech Center" after_url="helipad.html" after_text="Helipad" up_url="index.html"
 #include "footer.wml"

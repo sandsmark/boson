@@ -19,5 +19,5 @@ get_values->getval("fix", "helipad");
 :>
     
 
-#include "nav.wml" before_url="prison.html" before_text="Prison" after_url="turret.html" after_text="Turret" up_url="index.html"
+#include "nav.wml" before_url="repairpad.html" before_text="Repair Pad" after_url="turret.html" after_text="Turret" up_url="index.html"
 #include "footer.wml"
