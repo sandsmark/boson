@@ -69,8 +69,6 @@ UnitBase::UnitBase(const UnitProperties* prop)
 		KGamePropertyBase::PolicyLocal, "Damage");
  mRange.registerData(IdRange, dataHandler(), 
 		KGamePropertyBase::PolicyLocal, "Range");
- mReload.registerData(IdReload, dataHandler(), 
-		KGamePropertyBase::PolicyLocal, "ReloadTime");
  mSightRange.registerData(IdSightRange, dataHandler(), 
 		KGamePropertyBase::PolicyLocal, "SightRange");
 
@@ -82,7 +80,6 @@ UnitBase::UnitBase(const UnitProperties* prop)
  d->mId.setLocal(0);
  mDamage.setLocal(0);
  mRange.setLocal(0);
- mReload.setLocal(0);
  mSightRange.setLocal(0);
 }
 
