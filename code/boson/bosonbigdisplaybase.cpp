@@ -4432,7 +4432,7 @@ void BosonBigDisplayBase::makeVisibleEffectsList(BoVisibleEffects* v)
 		//  of the system?
 		if (sphereInFrustum(s->position(), s->boundingSphereRadius())) {
 			if (!s->testFogged() ||
-					(canvas()->onCanvas((int)s->position().x(), -(int)s->position().y()) &&
+					(((s->position().x() < canvas()->mapWidth()) && (-s->position().y() < canvas()->mapHeight())) &&
 					localPlayerIO()->canSee((int)s->position().x(), -(int)s->position().y()))) {
 				v->mParticles.append(s);
 				v->mAll.append(it.current());
