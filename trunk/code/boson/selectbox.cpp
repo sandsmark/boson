@@ -37,12 +37,13 @@
 #define POWER_LEVELS 15// AB: is from common/unit.h - the number of frames for the SelectBox, each with less power
 #define PART_NB (POWER_LEVELS)
 
-SelectBox::SelectBox(int x, int y, int width, int height, int z, QCanvas* canvas) // perhaps replace unit by width,height -> no need for unit.h
+SelectBox::SelectBox(int x, int y, int width, int height, int z, QCanvas* canvas, bool leader)
 	: QCanvasSprite(0, canvas)
 {
  mWidth = width + 2 * SP_H_DISTANCE;
  mHeight = height + 2 * SP_V_DISTANCE;
  setZ(z + 1);
+ mLeader = leader;
 
  init(); // problem: is this efficient for many selections at once? can we use static somehow?
 
@@ -62,43 +63,43 @@ int SelectBox::frames()
  return POWER_LEVELS;
 }
 
-
 /*
  *  Drawing functions
  */
 void SelectBox::drawSelectBox(QPainter &painter, bool mask)
 { // selection corner
 // upper right
+ QColor rectColor = (mLeader == false) ? Qt::white : Qt::red;
  painter.fillRect(boxWidth() - cornerLength(), barHeight() + SP_CORNER_BAR_DISTANCE, 
 		cornerLength(), SP_THICK, 
-		mask ? Qt::color1 : Qt::white);
+		mask ? Qt::color1 : rectColor);
  painter.fillRect(boxWidth() - SP_THICK, barHeight() + SP_CORNER_BAR_DISTANCE, 
 		SP_THICK, cornerLength(), 
-		mask ? Qt::color1 : Qt::white);
+		mask ? Qt::color1 : rectColor);
 
 // upper left
  painter.fillRect(0, barHeight() + SP_CORNER_BAR_DISTANCE,
 		cornerLength(), SP_THICK, 
-		mask ? Qt::color1 : Qt::white);
+		mask ? Qt::color1 : rectColor);
  painter.fillRect(0, barHeight() + SP_CORNER_BAR_DISTANCE,
 		SP_THICK, cornerLength(), 
-		mask ? Qt::color1 : Qt::white);
+		mask ? Qt::color1 : rectColor);
 
 // lower left
  painter.fillRect(0, boxHeight() - cornerLength(),
 		SP_THICK, cornerLength(), 
-		mask ? Qt::color1 : Qt::white);
+		mask ? Qt::color1 : rectColor);
  painter.fillRect(0, boxHeight() - SP_THICK,
 		cornerLength(), SP_THICK,
-		mask ? Qt::color1 : Qt::white);
+		mask ? Qt::color1 : rectColor);
 
 // lower right
  painter.fillRect(boxWidth() - cornerLength(), boxHeight() - SP_THICK,
 		cornerLength(), SP_THICK,
-		mask ? Qt::color1 : Qt::white);
+		mask ? Qt::color1 : rectColor);
  painter.fillRect(boxWidth() - SP_THICK, boxHeight() - cornerLength(),
 		SP_THICK, cornerLength(),
-		mask ? Qt::color1 : Qt::white);
+		mask ? Qt::color1 : rectColor);
 }
 
 void SelectBox::drawHealthBar(QPainter &painter, bool mask, int frame)
@@ -141,7 +142,7 @@ QCanvasPixmapArray* SelectBox::initPixmapArray()
 
 	// now draw the pixmap
 	painter.begin(&pix);
-	pix.fill(Qt::white);
+//	pix.fill(Qt::white);
 	drawSelectBox(painter, false);
 	drawHealthBar(painter, false, i);
 	painter.end();

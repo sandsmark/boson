@@ -78,7 +78,7 @@ void OptionsDialog::initGeneralPage()
 {
  QVBox* vbox = addVBoxPage(i18n("&General"));
 
- d->mArrowSpeed = new KIntNumInput(ARROW_KEY_STEP, vbox);
+ d->mArrowSpeed = new KIntNumInput(10, vbox);
  d->mArrowSpeed->setRange(1, 200);
  d->mArrowSpeed->setLabel(i18n("Arrow Key Steps"));
  connect(d->mArrowSpeed, SIGNAL(valueChanged(int)), 

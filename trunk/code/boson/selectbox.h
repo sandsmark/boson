@@ -38,7 +38,7 @@ public:
 	 * selectbox will be higher!
 	 * @param z See @ref Unit::z
 	 **/
-	SelectBox(int x, int y, int width, int height, int z,QCanvas* canvas);
+	SelectBox(int x, int y, int width, int height, int z, QCanvas* canvas, bool groupLeader = false);
 
 	virtual int rtti() const 
 	{ 
@@ -93,6 +93,8 @@ private:
 
 	int mWidth;
 	int mHeight;
+
+	bool mLeader;
 };
 
 #endif // __SELECTBOX_H__

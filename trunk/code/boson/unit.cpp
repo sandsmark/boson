@@ -96,7 +96,7 @@ void Unit::select()
 	return;
  }
 // put the selection box on the same canvas as the unit and around the unit
- d->mSelectBox = new SelectBox(x(), y(), width(), height(), z(), canvas());
+ d->mSelectBox = new SelectBox(x(), y(), width(), height(), z(), canvas(), d->mLeader);
  updateSelectBox();
 }
 
@@ -216,8 +216,16 @@ void Unit::advance(int phase)
 void Unit::advanceMine()
 {
  if (boCanvas()->cellAt(this)->groundType() == Cell::GroundGrassMineral) {
+	if (!unitProperties()->canMineMinerals()) {
+		kdWarning() << k_funcinfo << "cannot mine minerals" << endl;
+		return;
+	}
 	kdDebug() << "mining... minerals" << endl;
  } else if (boCanvas()->cellAt(this)->groundType() == Cell::GroundGrassOil) {
+	if (!unitProperties()->canMineOil()) {
+		kdWarning() << k_funcinfo << "cannot mine oil" << endl;
+		return;
+	}
 	kdDebug() << "mining... oil" << endl;
  } else {
 	setWork(WorkNone);
@@ -575,6 +583,10 @@ void Unit::moveInGroup()
 void Unit::setGroupLeader(bool leader)
 {
  d->mLeader = leader;
+ if (d->mSelectBox) {
+	unselect();
+	select();
+ }
 }
 
 
@@ -756,6 +768,7 @@ void MobileUnit::advanceGroupMove(Unit* leader)
 {
  setXVelocity(leader->xVelocity());
  setYVelocity(leader->yVelocity());
+ turnTo();
 }
 
 void MobileUnit::advanceMoveCheck()
@@ -1071,7 +1084,6 @@ void Facility::advanceProduction()
 		int ctry; // Current try
 		currentx = tilex - 1;
 		currenty = tiley - 1;
-		int debugnum = 1;
 		for(int i=1; i <= 3; i++) {
 			tries = 2 * i * twidth + 2 * i * theight + 4;
 			currenty++;

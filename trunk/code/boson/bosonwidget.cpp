@@ -111,9 +111,6 @@ public:
 	int mMobilesCount;
 	int mFacilitiesCount;
 	
-	// options:
-	int mArrowKeyStep;
-
 	KGameChat* mChat;
 
 	BosonCursor* mCursor;
@@ -171,7 +168,6 @@ BosonWidget::~BosonWidget()
 void BosonWidget::init()
 {
  d = new BosonWidgetPrivate;
- d->mArrowKeyStep = ARROW_KEY_STEP;
  d->mMobilesCount = 0;
  d->mFacilitiesCount = 0;
  d->mDisplayList.setAutoDelete(true);
@@ -355,16 +351,16 @@ void BosonWidget::keyReleaseEvent(QKeyEvent* e)
 {
  switch (e->key()) {
 	case Key_Left:
-		d->mBigDisplay->scrollBy(-d->mArrowKeyStep, 0);
+		d->mBigDisplay->scrollBy(-boConfig->arrowKeyStep(), 0);
 		break;
 	case Key_Right:
-		d->mBigDisplay->scrollBy(d->mArrowKeyStep, 0);
+		d->mBigDisplay->scrollBy(boConfig->arrowKeyStep(), 0);
 		break;
 	case Key_Up:
-		d->mBigDisplay->scrollBy(0, -d->mArrowKeyStep);
+		d->mBigDisplay->scrollBy(0, -boConfig->arrowKeyStep());
 		break;
 	case Key_Down:
-		d->mBigDisplay->scrollBy(0, d->mArrowKeyStep);
+		d->mBigDisplay->scrollBy(0, boConfig->arrowKeyStep());
 		break;
 	default:
 		break;
@@ -383,7 +379,7 @@ void BosonWidget::slotDebug()
 
 void BosonWidget::slotArrowScrollChanged(int speed)
 {
- d->mArrowKeyStep = speed;
+ boConfig->setArrowKeyStep(speed);
 }
 
 void BosonWidget::slotNewGame()
@@ -519,7 +515,7 @@ void BosonWidget::slotGamePreferences()
  OptionsDialog* dlg = new OptionsDialog(this);
  connect(dlg, SIGNAL(finished()), dlg, SLOT(slotDelayedDestruct())); // seems not to be called if you quit with "cancel"!
  dlg->setGameSpeed(d->mBoson->gameSpeed());
- dlg->setArrowScrollSpeed(d->mArrowKeyStep);
+ dlg->setArrowScrollSpeed(boConfig->arrowKeyStep());
  dlg->setCommandFramePosition(d->mCommandPos);
  dlg->setChatFramePosition(d->mChatPos);
 
@@ -685,7 +681,7 @@ void BosonWidget::startGame()
 
 void BosonWidget::startEditor()
 {
- slotChangeCursor(CursorNormal, boConfig->readCursorDir());
+ slotChangeCursor(CursorKDE, boConfig->readCursorDir());
  connect(d->mBigDisplay, SIGNAL(signalBuildUnit(int,int, int, Player*)),
 		d->mBoson, SLOT(slotSendAddUnit(int, int, int, Player*)));
 	

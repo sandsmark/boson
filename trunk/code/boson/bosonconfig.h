@@ -93,6 +93,8 @@ public:
 	bool music() const;
 	void setCommandButtonsPerRow(int b);
 	int commandButtonsPerRow() const;
+	void setArrowKeyStep(unsigned int k);
+	unsigned int arrowKeyStep() const;
 
 	DebugMode debugMode() const;
 	/**
@@ -113,6 +115,10 @@ protected:
 
 	int readCommandButtonsPerRow(KConfig* conf);
 	void saveCommandButtonsPerRow(KConfig* conf);
+
+	unsigned int readArrowKeyStep(KConfig* conf);
+	void saveArrowKeyStep(KConfig* conf);
+
 private:
 	static BosonConfig* mBosonConfig;
 	
