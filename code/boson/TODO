@@ -26,3 +26,7 @@ General TODOs
   this limited number of orderbuttons.
 - player should select team color in new game dialog
 
+
+Data TODOs
+- replace .bmp files by .png ones
+- fix the pixmap naming: file.00nn.bmp -> file-00nn.png
