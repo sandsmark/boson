@@ -44,14 +44,14 @@ public slots:
 
 protected:
 	//AB: use BoAction as 2nd parameter
-	bool actionMine(QDataStream& stream, const BoVector3& pos);
-	bool actionMove(QDataStream& stream, const BoVector3& pos);
-	bool actionBuild(QDataStream& stream, const BoVector3& pos);
+	bool actionMoveWithAttack(QDataStream& stream, const BoVector3& pos);
+	bool actionMoveWithoutAttack(QDataStream& stream, const BoVector3& pos);
 	bool actionAttack(QDataStream& stream, const BoVector3& pos);
-	bool actionAttackPos(QDataStream& stream, const BoVector3& pos);
+	bool actionBuild(QDataStream& stream, const BoVector3& pos);
+	bool actionFollow(QDataStream& stream, const BoVector3& pos);
 	bool actionRepair(QDataStream& stream, const BoVector3& pos);
 	bool actionRefine(QDataStream& stream, const BoVector3& pos);
-	bool actionFollow(QDataStream& stream, const BoVector3& pos);
+	bool actionMine(QDataStream& stream, const BoVector3& pos);
 
 	CanSelectUnit canSelect(Unit* unit) const;
 

@@ -65,7 +65,7 @@ void BosonBigDisplayInput::actionClicked(const BoAction& action, QDataStream& st
 	switch (actionType()) {
 		case ActionMove:
 		{
-			if (actionMove(stream, action.canvasVector())) {
+			if (actionMoveWithoutAttack(stream, action.canvasVector())) {
 				*send = true;
 			}
 			break;
@@ -78,7 +78,7 @@ void BosonBigDisplayInput::actionClicked(const BoAction& action, QDataStream& st
 					*send = true;
 				}
 			} else {
-				actionAttackPos(stream, action.canvasVector());
+				actionMoveWithAttack(stream, action.canvasVector());
 				*send = true;
 			}
 			break;
@@ -143,12 +143,12 @@ void BosonBigDisplayInput::actionClicked(const BoAction& action, QDataStream& st
 			}
 		}
 
-		if (boConfig->RMBAction() == ActionAttack) {
-			if (!actionAttackPos(stream, action.canvasVector())) {
+		if (boConfig->RMBMovesWithAttack()) {
+			if (!actionMoveWithAttack(stream, action.canvasVector())) {
 				return;
 			}
 		} else {
-			if (!actionMove(stream, action.canvasVector())) {
+			if (!actionMoveWithoutAttack(stream, action.canvasVector())) {
 				return;
 			}
 		}
@@ -236,7 +236,7 @@ bool BosonBigDisplayInput::actionMine(QDataStream& stream, const BoVector3& canv
  return false;
 }
 
-bool BosonBigDisplayInput::actionMove(QDataStream& stream, const BoVector3& canvasVector)
+bool BosonBigDisplayInput::actionMoveWithoutAttack(QDataStream& stream, const BoVector3& canvasVector)
 {
  if (!selection()) {
 	BO_NULL_ERROR(selection());
@@ -269,6 +269,43 @@ bool BosonBigDisplayInput::actionMove(QDataStream& stream, const BoVector3& canv
  }
  if (unit->owner() == localPlayer()) {
 	unit->playSound(SoundOrderMove);
+ }
+ return true;
+}
+
+bool BosonBigDisplayInput::actionMoveWithAttack(QDataStream& stream, const BoVector3& canvasVector)
+{
+ if (!localPlayer()) {
+	BO_NULL_ERROR(localPlayer());
+	return false;
+ }
+ if (!selection()) {
+	BO_NULL_ERROR(selection());
+	return false;
+ }
+ // AB: note that only x and y are relevant from canvasVector !
+ // z is ignored
+ QPtrList<Unit> list = selection()->allUnits();
+ QPtrListIterator<Unit> it(list);
+ // tell the clients we want to move units:
+ stream << (Q_UINT32)BosonMessage::MoveMove;
+ // We want to move with attacking
+ stream << (Q_UINT8)1;
+ // tell them where to move to:
+ stream << QPoint((int)canvasVector.x(), (int)canvasVector.y());
+ // tell them how many units:
+ stream << (Q_UINT32)list.count();
+ Unit* unit = 0;
+ while (it.current()) {
+	if (!unit) {
+		unit = it.current();
+	}
+	// tell them which unit to move:
+	stream << (Q_ULONG)it.current()->id(); // MUST BE UNIQUE!
+	++it;
+ }
+ if (unit->owner() == localPlayer()) {
+	unit->playSound(SoundOrderAttack);
  }
  return true;
 }
@@ -348,43 +385,6 @@ bool BosonBigDisplayInput::actionAttack(QDataStream& stream, const BoVector3& ca
  Unit* u = selection()->leader();
  if (u->owner() == localPlayer()) {
 	u->playSound(SoundOrderAttack);
- }
- return true;
-}
-
-bool BosonBigDisplayInput::actionAttackPos(QDataStream& stream, const BoVector3& canvasVector)
-{
- if (!localPlayer()) {
-	BO_NULL_ERROR(localPlayer());
-	return false;
- }
- if (!selection()) {
-	BO_NULL_ERROR(selection());
-	return false;
- }
- // AB: note that only x and y are relevant from canvasVector !
- // z is ignored
- QPtrList<Unit> list = selection()->allUnits();
- QPtrListIterator<Unit> it(list);
- // tell the clients we want to move units:
- stream << (Q_UINT32)BosonMessage::MoveMove;
- // We want to move with attacking
- stream << (Q_UINT8)1;
- // tell them where to move to:
- stream << QPoint((int)canvasVector.x(), (int)canvasVector.y());
- // tell them how many units:
- stream << (Q_UINT32)list.count();
- Unit* unit = 0;
- while (it.current()) {
-	if (!unit) {
-		unit = it.current();
-	}
-	// tell them which unit to move:
-	stream << (Q_ULONG)it.current()->id(); // MUST BE UNIQUE!
-	++it;
- }
- if (unit->owner() == localPlayer()) {
-	unit->playSound(SoundOrderAttack);
  }
  return true;
 }

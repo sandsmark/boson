@@ -234,8 +234,8 @@ public:
 	void setMipmapMinificationFilter(int f) { mMipmapMinificationFilter->setValue(f); }
 	void setAlignSelectionBoxes(bool enable) { mAlignSelectionBoxes->setValue(enable); }
 	bool alignSelectionBoxes() const { return mAlignSelectionBoxes->value(); }
-	void setRMBAction(UnitAction action) { mRMBAction->setValue((int)action); }
-	UnitAction RMBAction() const { return (UnitAction)(mRMBAction->value()); }
+	void setRMBMovesWithAttack(bool attack) { mRMBMovesWithAttack->setValue(attack); }
+	bool RMBMovesWithAttack() const { return (mRMBMovesWithAttack->value()); }
 	void setMouseWheelAction(CameraAction action) { mMouseWheelAction->setValue((int)action); }
 	CameraAction mouseWheelAction() const { return (CameraAction)(mMouseWheelAction->value()); }
 	void setMouseWheelShiftAction(CameraAction action) { mMouseWheelShiftAction->setValue((int)action); }
@@ -357,7 +357,7 @@ private:
 	BoConfigIntEntry* mMinificationFilter;
 	BoConfigIntEntry* mMipmapMinificationFilter;
 	BoConfigBoolEntry* mAlignSelectionBoxes;
-	BoConfigIntEntry* mRMBAction;
+	BoConfigBoolEntry* mRMBMovesWithAttack;
 	BoConfigIntEntry* mMouseWheelAction;
 	BoConfigIntEntry* mMouseWheelShiftAction;
 	BoConfigBoolEntry* mDeactivateWeaponSounds;
