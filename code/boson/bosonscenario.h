@@ -57,13 +57,25 @@ public:
 	unsigned int minPlayers() const;
 
 	/**
-	 * Load the scenario from node. 
+	 * Load the scenario from node.
 	 *
 	 * Note that this is not actually loaded, but should be fully parsed
 	 * only (errors are reported). Actually we copy the node to a local xml
 	 * document which is loaded in @ref startScenario.
 	 **/
 	bool loadScenario(QDomElement& node);
+
+	/**
+	 * Create a scenario according to the current scenario settings. For
+	 * example this will create @ref maxPlayers player nodes and give them
+	 * the default value of oil/minerals and so on.
+	 *
+	 * This should be used on editor startup (at least currently), when
+	 * creating a new map. See also @ref applyScenario, which should be
+	 * used when saving a scenario.
+	 * @return TRUE on success, otherwise FALSE
+	 **/
+	bool initializeScenario();
 
 	/**
 	 * Save the local xml document (i.e. the scenario) to root.
@@ -105,6 +117,12 @@ protected:
 	static bool loadFacility(QDomElement&, Facility*);
 	static bool saveMobile(QDomElement&, MobileUnit*);
 	static bool loadMobile(QDomElement&, MobileUnit*);
+
+	/**
+	 * Initialize the player node, i.e. set the default values for
+	 * attributes (minerals, oil, ...)
+	 **/
+	void initPlayerNode(QDomElement& player, unsigned int playerNumber);
 
 private:
 	void init();

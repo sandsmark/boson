@@ -140,7 +140,7 @@ bool BosonScenario::saveScenario(QDomElement& root)
 
 bool BosonScenario::saveScenarioSettings(QDomElement& node)
 {
- boDebug(250) << k_funcinfo << endl;
+ boDebug(250) << k_funcinfo << "MinPlayers=" << minPlayers() << " MaxPlayers=" << maxPlayers() << endl;
  QDomDocument doc = node.ownerDocument();
  node.setAttribute("MinPlayers", minPlayers());
  node.setAttribute("MaxPlayers", maxPlayers());
@@ -192,10 +192,6 @@ bool BosonScenario::loadScenarioSettings(QDomElement& node)
 
 bool BosonScenario::isValid() const
 {
- if (d->mMinPlayers != (uint)d->mMaxPlayers) { // FIXME
-	boError(250) << k_funcinfo << "internal error" << endl;
-	return false;
- }
  if (d->mMinPlayers < 1) {
 	boError(250) << "minplayers < " << 1 << endl;
 	return false;
@@ -230,6 +226,9 @@ void BosonScenario::startScenario(Boson* boson)
 
  // no error must happen here anymore!! everything should have been checked in
  // loadScenario()
+ // UPDATE: we also have to support *new* scenario, i.e. where loadScenario()
+ // wasn't used. but errors arent so important then, as it is used by editor
+ // only and not in network.
 
  QDomNodeList l = d->mInternalDoc.documentElement().elementsByTagName("ScenarioPlayers");
  if (l.count() < 1) {
@@ -262,7 +261,7 @@ void BosonScenario::startScenario(Boson* boson)
 	playerOrder.append(playerNumber);
  }
 
- 
+
  boDebug(250) << k_funcinfo << "players done" << endl;
  for (unsigned int i = 0; i < boson->playerList()->count(); i++) {
 	bool ok = false;
@@ -291,6 +290,43 @@ void BosonScenario::startScenario(Boson* boson)
  boDebug(250) << k_funcinfo << "done" << endl;
 }
 
+bool BosonScenario::initializeScenario()
+{
+ if (maxPlayers() < 0) {
+	boError(250) << "Oops - infinite players not yet supported :(" << endl;
+	return false;
+ }
+ if (d->mInternalDoc.hasChildNodes()) {
+	boWarning(250) << k_funcinfo << "oops - should be empty" << endl;
+	return false;
+ }
+ QDomElement root = d->mInternalDoc.createElement("BosonScenario");
+ d->mInternalDoc.appendChild(root);
+
+ boDebug(250) << k_funcinfo << endl;
+ if ((int)d->mMinPlayers > d->mMaxPlayers) {
+	boWarning(250) << k_funcinfo << "minPlayers > playerCount" << endl;
+	d->mMinPlayers = d->mMaxPlayers;
+ }
+
+ QDomElement scenarioSettings = d->mInternalDoc.createElement("ScenarioSettings");
+ root.appendChild(scenarioSettings);
+ boDebug(250) << k_funcinfo << "minplayers=" << minPlayers() << " maxplayers=" << maxPlayers() << endl;
+ if (!saveScenarioSettings(scenarioSettings)) { //FIXME: "save" is not correct. maybe apply.. use a separate function?
+	boError(250) << "Could not apply scenario settings" << endl;
+	return false;
+ }
+
+ QDomElement players = d->mInternalDoc.createElement("ScenarioPlayers");
+ root.appendChild(players);
+ for (unsigned int i = 0; i < (unsigned int)maxPlayers(); i++) {
+	QDomElement playerNode = d->mInternalDoc.createElement("Player");
+	players.appendChild(playerNode);
+	initPlayerNode(playerNode, i);
+ }
+ return true;
+}
+
 void BosonScenario::applyScenario(Boson* boson)
 {
  if (!boson) {
@@ -305,14 +341,25 @@ void BosonScenario::applyScenario(Boson* boson)
  d->mInternalDoc.appendChild(root);
 
  boDebug(250) << k_funcinfo << endl;
- setPlayers(boson->minPlayers(), boson->playerCount());// don't use maxPlayers(), since we cannot save more players than we actually have!
+ // AB: do not use boson->maxPlayers()/minPlayers() here!
+ // we use these as failback only, i.e. boson->maxPlayers() is always
+ // BOSON_MAX_PLAYERS, no matter which scenario is running!
+ setPlayers(1, boson->playerCount());
  if ((int)d->mMinPlayers > d->mMaxPlayers) {
 	boWarning(250) << k_funcinfo << "minPlayers > playerCount" << endl;
+	if (d->mMaxPlayers < 1) {
+		if (d->mMaxPlayers < 0) {
+			boWarning(250) << k_funcinfo << "infinite players are not yet supported" << endl;
+		}
+		boError(250) << k_funcinfo << "Can't have less than 1 player as maximum!" << endl;
+		return;
+	}
 	d->mMinPlayers = d->mMaxPlayers;
  }
 
  QDomElement scenarioSettings = d->mInternalDoc.createElement("ScenarioSettings");
  root.appendChild(scenarioSettings);
+ boDebug(250) << k_funcinfo << "minplayers=" << minPlayers() << " maxplayers=" << maxPlayers() << endl;
  if (!saveScenarioSettings(scenarioSettings)) { //FIXME: "save" is not correct. maybe apply.. use a separate function?
 	boError(250) << "Could not apply scenario settings" << endl;
 	return;
@@ -330,8 +377,8 @@ void BosonScenario::applyScenario(Boson* boson)
 		continue;
 	}
 	QDomElement playerNode = d->mInternalDoc.createElement("Player");
-	playerNode.setAttribute("PlayerNumber", (unsigned int)i);
 	players.appendChild(playerNode);
+	initPlayerNode(playerNode, i);
 	if (!savePlayer(playerNode, p)) {
 		boError(250) << "Error saving player " << i << endl;
 		return;
@@ -339,19 +386,40 @@ void BosonScenario::applyScenario(Boson* boson)
  }
 }
 
+void BosonScenario::initPlayerNode(QDomElement& player, unsigned int playerNumber)
+{
+ QDomDocument doc = player.ownerDocument();
+ player.setAttribute("PlayerNumber", (unsigned int)playerNumber);
 
+ QDomElement m = doc.createElement("Minerals");
+ m.appendChild(doc.createTextNode(QString::number(0)));
+ player.appendChild(m);
+
+ QDomElement o = doc.createElement("Oil");
+ o.appendChild(doc.createTextNode(QString::number(0)));
+ player.appendChild(o);
+}
 
 bool BosonScenario::savePlayer(QDomElement& node, Player* p)
 {
  boDebug(250) << k_funcinfo << endl;
  QDomDocument doc = node.ownerDocument();
- QDomElement m = doc.createElement("Minerals");
- m.appendChild(doc.createTextNode(QString::number(p->minerals())));
- node.appendChild(m);
+ QDomNodeList nodeList = node.elementsByTagName("Minerals");
+ if (nodeList.count() != 1) {
+	boError(250) << k_funcinfo << "Invalid element count for Minerals: " << nodeList.count() << endl;
+	return false;
+ }
+ if (nodeList.item(0).firstChild().isText()) {
+	nodeList.item(0).replaceChild(doc.createTextNode(QString::number(p->minerals())), nodeList.item(0).firstChild());
+ }
 
- QDomElement o = doc.createElement("Oil");
- o.appendChild(doc.createTextNode(QString::number(p->oil())));
- node.appendChild(o);
+ if (nodeList.count() != 1) {
+	boError(250) << k_funcinfo << "Invalid element count for Oil: " << nodeList.count() << endl;
+	return false;
+ }
+ if (nodeList.item(0).firstChild().isText()) {
+	nodeList.item(0).replaceChild(doc.createTextNode(QString::number(p->minerals())), nodeList.item(0).firstChild());
+ }
 
  // now save all units of the player into node
  QPtrList<Unit> list = p->allUnits();
