@@ -39,6 +39,70 @@ static bool workaround_depth_value_enabled = false;
 /*****  BoVector*  *****/
 
 
+bool saveVector2AsXML(const BoVector2Fixed& v, QDomElement& root, const QString& name)
+{
+  root.setAttribute(name + ".x", v[0]);
+  root.setAttribute(name + ".y", v[1]);
+  return true;
+}
+
+bool saveVector2AsXML(const BoVector2Float& v, QDomElement& root, const QString& name)
+{
+  root.setAttribute(name + ".x", v[0]);
+  root.setAttribute(name + ".y", v[1]);
+  return true;
+}
+
+bool loadVector2FromXML(BoVector2Float* v, const QDomElement& root, const QString& name)
+{
+  BoVector2Float backup = *v;
+  bool ok;
+  bool ret = true;
+
+  v->setX(root.attribute(name + ".x").toFloat(&ok));
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading '" << name << ".x' attribute ('" <<
+        root.attribute(name + ".x") << "')" << endl;
+    ret = false;
+    v->setX(backup.x());
+  }
+  v->setY(root.attribute(name + ".y").toFloat(&ok));
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading '" << name << ".y' attribute ('" <<
+        root.attribute(name + ".y") << "')" << endl;
+    ret = false;
+    v->setY(backup.y());
+  }
+  return ret;
+}
+
+bool loadVector2FromXML(BoVector2Fixed* v, const QDomElement& root, const QString& name)
+{
+  BoVector2Fixed backup = *v;
+  bool ok;
+  bool ret = true;
+
+  v->setX(root.attribute(name + ".x").toFloat(&ok));
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading '" << name << ".x' attribute ('" <<
+        root.attribute(name + ".x") << "')" << endl;
+    ret = false;
+    v->setX(backup.x());
+  }
+  v->setY(root.attribute(name + ".y").toFloat(&ok));
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading '" << name << ".y' attribute ('" <<
+        root.attribute(name + ".y") << "')" << endl;
+    ret = false;
+    v->setY(backup.y());
+  }
+  return ret;
+}
+
 QDataStream& operator<<(QDataStream& s, const BoVector2Fixed& v)
 {
   return s << v[0] << v[1];
