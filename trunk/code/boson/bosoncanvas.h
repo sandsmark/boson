@@ -78,6 +78,8 @@ public:
 
 	inline BosonCollisions* collisions() const { return mCollisions; }
 
+	BosonItem* createItem(unsigned long int rtti, unsigned long int type, Player* owner);
+
 	/**
 	 * Test whether the unit can go over rect. This method only tests for
 	 * the ground (see @ref Cell) <em>not</em> for collisions with other
@@ -374,6 +376,8 @@ protected:
 
 	bool loadUnitFromXML(const QDomElement& unit, Player* owner);
 	bool loadShotFromXML(const QDomElement& shot, Player* owner);
+
+	Unit* createUnit(unsigned long int unitType, Player* owner);
 
 private:
 	void init();
