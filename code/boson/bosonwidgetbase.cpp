@@ -159,6 +159,7 @@ BosonWidgetBase::~BosonWidgetBase()
  delete mCursor;
  delete d->mCommandFrame;
  delete d->mChat;
+ delete d->mLocalPlayerScript;
 
  delete d;
  boDebug() << k_funcinfo << "done" << endl;
@@ -1160,6 +1161,7 @@ void BosonWidgetBase::initScripts()
  }
 
  // Init script for local player
+ delete d->mLocalPlayerScript;
  d->mLocalPlayerScript = BosonScript::newScriptParser(BosonScript::Python, localPlayer());
  // No script will be loaded
  d->mLocalPlayerScript->loadScript(locate("data", "boson/scripts/localplayer-script.py"));
