@@ -21,6 +21,7 @@ CanGoOnLand=true
 CanGoOnWater=true
 
 [Weapon_0]
+Name=Cannon
 Range=5
 Reload=10
 CanShootAtAirUnits=true
@@ -31,6 +32,7 @@ DamageRange=1
 HitParticles=2002
 
 [Weapon_1]
+Name=Missiles
 Model=missile.3ds
 Range=6
 Reload=30

@@ -21,6 +21,7 @@ CanGoOnLand=true
 CanGoOnWater=false
 
 [Weapon_0]
+Name=Cannon
 Range=6
 Reload=45
 CanShootAtAirUnits=false
