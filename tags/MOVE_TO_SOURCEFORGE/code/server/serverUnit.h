@@ -1,0 +1,123 @@
+/***************************************************************************
+                         serverUnit.h  -  description                              
+                             -------------------                                         
+
+    version              : $Id$
+    begin                : Sat Jan  9 19:35:36 CET 1999
+                                           
+    copyright            : (C) 1999-2000 by Thomas Capricelli                         
+    email                : orzel@yalbi.com                                     
+ ***************************************************************************/
+
+/***************************************************************************
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   * 
+ *                                                                         *
+ ***************************************************************************/
+
+#ifndef SERVERUNIT_H 
+#define SERVERUNIT_H 
+
+#include "common/unit.h"
+#include "knownBy.h"
+
+#define SEND_TO_KNOWN		(-1)
+
+class boBuffer;
+
+class serverUnit : public knownBy
+{
+public:
+	serverUnit(boBuffer *b, unitMsg_t *msg)
+		{ buffer = b; __x=msg->x; __y=msg->y; state = 0; power = POWER_LEVELS-1; contain = 0; counter = -1; }
+
+protected:
+	boBuffer	*buffer;
+	/** x,y position, grid-wise! */
+	int		__x, __y;
+	int		state;
+	int		power;
+	int		contain;
+	int		counter;
+};
+
+
+/*
+ *  MOBILE
+ */
+class serverMobUnit : public mobUnit, public serverUnit
+{
+public:
+		serverMobUnit(boBuffer *, mobileMsg_t *msg);
+
+	void 	reportCreated(int player = SEND_TO_KNOWN);
+	void 	reportDestroyed(int player = SEND_TO_KNOWN);
+	void 	reportUnHidden(int player = SEND_TO_KNOWN);
+	void 	reportHidden(int player = SEND_TO_KNOWN);
+
+/* request */
+	void	r_moveBy(moveMsg_t &, uint playerId);
+
+	virtual void	getWantedAction(void) {};
+	bool		shooted(void);
+	void		increaseContain(void );
+
+	virtual QRect	rect(void);
+};
+ 
+
+class serverHarvester : public serverMobUnit
+{
+public:
+	serverHarvester(boBuffer *b, mobileMsg_t *msg)
+		:serverMobUnit( b, msg), home(msg->x, msg->y) {}
+	
+	void	emptying(void);
+	virtual void	getWantedAction(void);
+
+private:
+	bool	atHome(void)  { return gridRect().topLeft() == home; }
+	QPoint	home;
+};
+
+
+/*
+ *  FACILITY
+ */
+class serverFacility : public Facility, public serverUnit
+{
+public:
+		serverFacility(boBuffer *, facilityMsg_t *msg);
+
+	void	reportCreated(int player = SEND_TO_KNOWN);
+	void	reportDestroyed(int player = SEND_TO_KNOWN);
+	void 	reportUnHidden(int player = SEND_TO_KNOWN);
+	void 	reportHidden(int player = SEND_TO_KNOWN);
+
+/* request */
+	void	getWantedAction(void);
+	bool	shooted(void);
+
+	virtual QRect	rect(void);
+
+	/* user request */
+	void	u_createMob(mobType);
+	void	u_createFix(facilityType);
+
+	enum {
+		FIX_ACTION_NONE,
+		FIX_ACTION_BUILDING,
+		FIX_ACTION_CONSTRUCT
+	} action;
+
+	union {
+		mobType mob; // FIX_ACTION_CONSTRUCT
+	} action_data;
+};
+ 
+
+#endif // SERVERUNIT_H
+

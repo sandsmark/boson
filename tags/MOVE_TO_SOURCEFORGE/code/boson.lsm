@@ -1,0 +1,14 @@
+Begin3
+Title:          Boson 
+Version:        0.5
+Entered-date:   Dec 1999
+Description:    network real time strategy game (warcraft-like), whithout AI.
+Keywords:       server, warcraft, strategy, game, KDE, X11, Qt, RTS
+Author:         Thomas Capricelli <orzel@yalbi.com> 
+Maintained-by:  Thomas Capricelli <orzel@yalbi.com> 
+Primary-site:   http://boson.eu.org/download/boson-0.5.tar.bz2
+Home-page:      http://boson.eu.org/
+Original-site:  
+Platform:       Linux and other Unices, needs Qt>= 2.2.1 and the KDE>=2.0 libs
+Copying-policy: GNU Public License
+End

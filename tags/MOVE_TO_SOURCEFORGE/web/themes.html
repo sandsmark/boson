@@ -1,0 +1,250 @@
+<HTML>
+
+  <HEAD>
+    <TITLE>Boson HomePage - Themes</TITLE>
+  </HEAD>
+
+<BODY BGCOLOR = "#FFFFFF">
+
+<CENTER>
+
+<TABLE WIDTH = "90%">
+
+  <TR><TD BGCOLOR = "#FFDE00">
+  
+    <FONT FACE="helvetica" SIZE="3">
+
+    <B>Themeability:</B>
+
+    </FONT>
+
+  </TD></TR>
+
+  
+  <TR><TD>
+
+    <BR>
+  
+    <FONT FACE="helvetica" SIZE="2">
+
+    <P>All of Boson's graphics will be completely themeable. That means not only that you can change "skins" whenever you like, but it also means that you can combine different themes in one game.</P>
+
+    <P>There are two kind of themes : ground themes to change the look of the place you're fighting on, and species themes so that every player may choose his specy.</P>
+
+    <P>Currently, only one ground theme ("earth") and one specy theme ("human") is available.</P>
+
+    <P>To give others a possibility to start creating themes before Boson is released as a playable version and to make theme-creation in general easier, this page describes the file formats, directory structures and naming conventions.</P>
+
+    </FONT>
+
+    <BR><BR>
+    
+  </TD></TR>
+
+  
+  <TR><TD BGCOLOR = "#FFDE00">
+  
+    <FONT FACE="helvetica" SIZE="3">
+
+    <B>Directory structure :</B>
+
+    </FONT>
+
+  </TD></TR>
+
+  
+  <TR><TD>
+
+    <BR>
+
+    <FONT FACE="helvetica" SIZE="2">
+
+    <P>The best way to understand the tree structure and the naming convention is of course to download and unzip the boson-pics-*.tgz file and have a look at it.</P>
+  
+    <BR> <BR>
+
+
+	$(KDEDIR)/boson/map : some maps for server and editor (basic.bpf is the default one for server)
+	$(KDEDIR)/boson/pics : generic pictures for boson 
+	$(KDEDIR)/boson/themes : themes as described  now :
+
+	<P>Subdirectories of $(KDEDIR)/share/apps/boson/themes</P>
+
+	There are two kinds of <i>themes</i>
+	<i>grounds</i> In those themes, there are all pixmaps needed to render the battlefield : grass, desert, 
+water and so on..
+	<i>species</i> In those themes, those are the pixmaps used to draw all player's unit : Facilities, mobile units like airplanes, tanks, harvesters.. Different players will usually use different species theme, making it clear to whom each unit belongs to.
+	<p>Presently, there are only one ground theme <i>earth</i>, and one specy theme <i>human</i>. Different users have different colors.
+    
+    <TABLE WIDTH = "90%">
+    
+      <TR>
+    
+        <TD>
+
+          <PRE>
+
+
+grounds/earth/
+	desert_water/desert_water.<b>AA</b>.<b>BB</b>.bmp
+	dwater_water/dwater_water.<b>AA</b>.<b>BB</b>.bmp
+	grass_desert/grass_desert.<b>AA</b>.<b>BB</b>.bmp
+	grass_water/grass_water.<b>AA</b>.<b>BB</b>.bmp
+	desert.<b>BB</b>.bmp :
+	dwater.<b>BB</b>.bmp :
+	grass.<b>BB</b>.bmp :
+	grass_oil.<b>BB</b>.bmp :
+	water.<b>BB</b>.bmp :
+	water_oil.<b>BB</b>.bmp :
+
+desert_water files are the <i>transistions tiles</i>, see a better description later.
+
+<b>AA</b> is from <i>01</i> to <i>28</i>, the meaning is described later.
+<b>BB</b> is in {<i>00, 01, 02, 03</i>}, and are different instances of the same pixmap. (and permits
+smoother ground, with less tile effect)
+
+species/human/
+    units/
+	explosions/
+		big/big.<b>CC</b>.bmp : CC is in [<i>00..15</i>]
+		shot/explosion<b>DD</b>.p<b>E</b>m : DD is in [<i>00..17</i>], <b>E</b> is <b>b</b>(mask) or <b>p</b> (actual image)
+	facilities/
+		aircraft/
+		mineralharvester/
+		oilharvester/
+		quad/
+		ship/
+	units/
+		cmdbunker/
+		helipad/
+		powerplant/
+		repairpad/
+		turret/
+		barracks/
+		comsat/
+		oiltower/
+		refinery/
+		samsite/
+		warfactory /
+           </PRE>
+
+          <FONT FACE="helvetica" SIZE="2">
+
+	In every facilities or units directory (as <i>units/turrert/</i> ), there are two files
+<i>overview.big.bmp</i>(100x100 pixels) and <i>overview.small.bmp</i>(50x50).
+	<br>
+
+	In every facilities directory, we find <i>field.<b>GGG</b>.bmp</i>. GGG is in [<i>000..003</i>]
+	<br>
+	In every units directory, we find <i>field.<b>FF</b>.bmp</i>. FF is in [<i>00..11</i>]
+	<br>
+
+          <P>This tree is still subject to change, so please check back from time to time.</P>
+
+          </FONT>
+    
+        </TD>
+
+      </TR>
+    
+    </TABLE>
+
+    </FONT>
+
+    <BR><BR>
+    
+  </TD></TR>
+
+  
+  <TR><TD BGCOLOR = "#FFDE00">
+  
+    <FONT FACE="helvetica" SIZE="3">
+
+    <B>File formats and other specifications:</B>
+
+    </FONT>
+
+  </TD></TR>
+
+  
+  <TR><TD>
+
+    <BR>
+  
+    <FONT FACE="helvetica" SIZE="2">
+
+    <UL>
+
+    <LI>All images for Boson are made in the Bitmap (*.bmp) format with true color (32 bit).
+
+    <LI>The bitmaps for the terrain all have a size of 48 x 48 pixels (or 96 x 96 pixels for transitions & decorations). There are four different types of terrain: grass, desert, water and deep water.
+
+    <LI>Most buildings have a size of 2x2 sprites, which is 96 x 96 pixels. Other themes have to use the same sizes. Some buildings have different sizes.
+
+    <LI>The size of Unit-bitmaps is pretty much unique and depends solely on the dimensions of the unit.
+
+    <LI>All facilities have four different construction bitmaps. The first bitmap just shows the base of the buildings, in the last bitmap the buildings is completely constructed.
+
+    <LI>All buildings are shown from a 20 degree X / 20 degree Y angle (pseudo - isometric view).
+
+    <LI>For buildings that need to rotate (i.e. SamSite) and all units, there are 12 different bitmaps for each rotational position (0-11 o'clock) with 30 degrees of difference in each. Units are viewed from the pseudo isometric angle, too.
+
+    <LI>For buildings / facilities, the background needs to be transparent, so that they can be placed on any ground. This is achieved by giving the background a predefined color (R: 255 | G: 000 | B: 255), so that Boson can then create transparency-masks on loading.
+
+    <LI>For both buildings and units having a team color, we need to define a color (R: 000 | G: 255 | B: 000) in the bitmaps, which is later replaced by the chosen team-color.
+
+    </UL>
+
+    </FONT>
+
+    <BR><BR>
+    
+  </TD></TR>
+
+  
+  <TR><TD BGCOLOR = "#FFDE00">
+  
+    <FONT FACE="helvetica" SIZE="3">
+
+    <B>Transitions:</B>
+
+    </FONT>
+
+  </TD></TR>
+
+
+  <TR><TD>
+
+    <BR>
+  
+    <FONT FACE="helvetica" SIZE="2">
+
+    <P>Every Boson's theme has four different grounds (grass, desert, water and deep water). To use all these grounds, we need to create transitions between them (beach between grass and water etc.).
+
+    <P>The transitions for the grounds have the following naming : "[GroundA]_[GroundB].[position].[version].bmp"</P>
+
+    <P>For example: grass_desert.01.00.bmp ; grass_water.05.01.bmp ; water_desert.09.02.bmp ; dwater_water.12.03.bmp</P>
+
+    <P>The version is a number between 00 and 03. There are four versions of every transition, to avoid a tiling - effect. The position - numbers are defined in the following pictures:</P>
+
+    <CENTER><IMG SRC = "graphics/1normal.jpg">&nbsp;&nbsp;&nbsp;&nbsp;<IMG SRC = "graphics/1inverted.jpg"></CENTER>
+
+    <P>There are also transitions that use a size of 2x2 sprites (96x96 pixels). Here are the position definitions:</P>
+
+    <CENTER><IMG SRC = "graphics/2x2trans.jpg"></CENTER>
+
+    </FONT>
+
+    <BR><BR>
+    
+  </TD></TR>
+
+</TABLE>
+
+</CENTER>
+
+<BR><BR><BR>
+  
+</BODY>
+
+</HTML>
