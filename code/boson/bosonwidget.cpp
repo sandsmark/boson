@@ -546,12 +546,10 @@ void BosonWidget::slotRemoveUnit(Unit* unit)
  emit signalFacilitiesCount(unit->owner()->facilitiesCount());
 }
 
-void BosonWidget::zoom(const QWMatrix& m)
+void BosonWidget::setZoomFactor(float factor)
 {
  if (displaymanager()->activeDisplay()) {
-#ifdef NO_OPENGL
-	displaymanager()->activeDisplay()->setWorldMatrix(m);
-#endif
+	displaymanager()->activeDisplay()->setZoomFactor(factor);
  }
 }
 
@@ -811,6 +809,10 @@ void BosonWidget::initKeys()
 		SLOT(slotScroll(int)), actionCollection(),
 		QString("scroll_right {%1}").arg(ScrollRight));
 #endif
+ (void)new KAction(i18n("Center &Home Base"), KShortcut(Qt::Key_H), 
+		mDisplayManager, SLOT(slotCenterHomeBase()), actionCollection(), "game_center_base");
+ (void)new KAction(i18n("&Reset View Properties"), KShortcut(Qt::Key_R), 
+		mDisplayManager, SLOT(slotResetViewProperties()), actionCollection(), "game_reset_view_properties");
 }
 
 void BosonWidget::slotDebugRequestIdName(int msgid, bool , QString& name)
@@ -960,3 +962,4 @@ void BosonWidget::slotGameOverDialogFinished()
  d->mGameOverDialog->delayedDestruct();
  emit signalGameOver();
 }
+

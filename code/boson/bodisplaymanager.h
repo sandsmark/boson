@@ -110,6 +110,8 @@ public slots:
 	void slotScroll(int direction);
 
 	void slotUpdateIntervalChanged(unsigned int);
+	void slotCenterHomeBase();
+	void slotResetViewProperties();
 
 	void slotUpdate();
 	void slotUpdateCanvas(); // same as above - but called from the canvas only
