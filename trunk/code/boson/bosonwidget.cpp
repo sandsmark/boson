@@ -385,6 +385,11 @@ void BosonWidget::slotNewGame()
 	}
  }
  quitGame();
+
+ if (BosonPlayField::availablePlayFields().count() == 0) {
+	KMessageBox::sorry(this, i18n("Unable to find any playfield (*.bpf) files. Did you install data??"));
+	return;
+ }
  NewGameDialog* dialog = new NewGameDialog(d->mBoson, d->mLocalPlayer, this);
  connect(dialog, SIGNAL(finished()), dialog, SLOT(slotDelayedDestruct())); // is this called when "cancel"ed?
 
@@ -436,6 +441,7 @@ void BosonWidget::slotNewGame()
 
  // show the dialog
  dialog->show();
+
  bosonConfig->slotPlayFieldChanged(0);
 }
 

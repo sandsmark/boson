@@ -79,7 +79,7 @@ QStringList BosonPlayField::availablePlayFields()
  QStringList list = KGlobal::dirs()->findAllResources("data", 
 		"boson/map/*.desktop");
  if (list.isEmpty()) {
-	kdError() << "Cannot find any playfield?!" << endl;
+	kdError() << k_funcinfo << "Cannot find any playfield?!" << endl;
 	return list;
  }
  QStringList validList;
