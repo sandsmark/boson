@@ -75,6 +75,7 @@
 #include <qvbox.h>
 
 #include <stdlib.h>
+#include <unistd.h>
 #include <config.h>
 
 
@@ -345,6 +346,8 @@ void TopWidget::initKActions()
 		SLOT(slotDebugKGame()), actionCollection(), "debug_kgame");
  (void)new KAction(i18n("Debug &BoDebug log"), KShortcut(), this,
 		SLOT(slotBoDebugLogDialog()), actionCollection(), "debug_bodebuglog");
+ (void)new KAction(i18n("Sleep 1s"), KShortcut(), this,
+		SLOT(slotSleep1s()), actionCollection(), "debug_sleep_1s");
 
  createGUI("topui.rc", false);
 
@@ -1298,5 +1301,10 @@ void TopWidget::slotBoDebugLogDialog()
  connect(dialog, SIGNAL(finished()), dialog, SLOT(deleteLater()));
  dialog->slotUpdate();
  dialog->show();
+}
+
+void TopWidget::slotSleep1s()
+{
+ sleep(1);
 }
 
