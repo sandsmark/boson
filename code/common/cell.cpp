@@ -56,47 +56,47 @@ bool Cell::canGo(uint goFlag)
 {
 
 	if (flags&request_f) {
-		printf("requested cell\n");
+	//	printf("requested cell\n");
 		return false;
 	}
 
 	if (!isKnown()) {
-		printf("unknown cell(1)\n");
+	//	printf("unknown cell(1)\n");
 		return true;
 	}
 
 	// ... in the air
 	if ( BO_GO_AIR == goFlag) { 
-		printf("flying\n");
+	//	printf("flying\n");
 		return flying_unit();
 	}
 
 	// on field
 	if ( building() || field_unit() ) {
-		printf("building/field_unit\n");
+	//	printf("building/field_unit\n");
 		return false;
 	}
 
 	//  nothing ? depends on the ground
 	switch(ground) {
 		case g_unknown:
-			printf("unknown cell\n");
+		//	printf("unknown cell\n");
 			return true;
 			break;
 		case g_dwater:
-			printf("dwater\n");
+		//	printf("dwater\n");
 			return goFlag & BO_GO_DEEP_WATER;
 			break;
 		case g_water:
-			printf("water\n");
+		//	printf("water\n");
 			return goFlag & BO_GO_WATER;
 			break;
 		case g_grass:
-			printf("grass\n");
+		//	printf("grass\n");
 			return goFlag & BO_GO_GRASS;
 			break;
 		case g_desert:
-			printf("desert\n");
+		//	printf("desert\n");
 			return goFlag & BO_GO_DESERT;
 			break;
 	}
