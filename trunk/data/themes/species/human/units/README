@@ -245,6 +245,7 @@ the weapon, starting with 0.
 E.g. if the unit has 3 weapons, it must have groups "Weapon_0", "Weapon_1" and "Weapon_2".
 Note that units may have only one repairing weapon. If you specify multiple
 repairing weapons, only first the one is used.
+For help on soundfiles look under [Sounds]
 -------------------------------------------------------------------------------
 [Weapon_x]
 Name=Text
@@ -296,8 +297,15 @@ ShootParticles=list
         List of ids from the particle system to create the particles
         when the unit is firing the weapon.
         Default is empty list.
-
-
+SoundShoot=soundfile
+        Sound file which is played when the weapon shoots.
+        Default is shoot.
+SoundFly=soundfile
+        Sound file which is played during the weapons flies. (for missiles)
+        Default is missile_fly.
+SoundHit=soundfile
+        Sound file which is played when the weapon hits it's target.
+        Default is hit.
 -------------------------------------------------------------------------------
 
 
@@ -337,11 +345,35 @@ CanMineMinerals=boolean
         Default is false.
 CanMineOil=boolean
         Whether this unit can mine oil.
-        Default is false .
+        Default is false.
 MaxResources=number
         The maximal amount of resourced that can be mined until
         the unit needs to return to a refinery.
         Must be > 0. Default is 100.
+-------------------------------------------------------------------------------
+[Sounds]
+Sounds are stored in $KDEDIR/share/apps/boson/themes/species/${species}/sounds/
+You can add different sounds for different facility actions.
+The value for a sound effect is the filename without extension.
+
+OrderAttack=soundfile
+        When a facility gets the order to attack someone.
+        Default is order_attack.
+OrderMove=soundfile
+        When the facility gets the order to move.
+        Default is order_move.
+OrderSelect=soundfile
+        When a facility gets selected.
+        Default is order_select.
+ReportDestroyed=soundfile
+        When a facility gets destroyed.
+        Default is report_destroyed.
+ReportProduced=soundfile
+        When a facility finished producing something.
+        Default is report_produced.
+ReportUnderAttack=soundfile
+        When a facility comes under attack.
+        Default is report_underattack.
 -------------------------------------------------------------------------------
 [RefinePlugin]
 (not yet supported)
