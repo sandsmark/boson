@@ -70,7 +70,7 @@ main_area_begin();
 
   if($id == "")
   {
-    $id = -1;
+    $id = poll_last_id();
   }
 
   if($action == "vote")
@@ -109,7 +109,16 @@ main_area_begin();
   else
   {
     // show poll
-    poll_show($id);
+    if($HTTP_COOKIE_VARS["voted-$id"] == "yes")
+    {
+      // User has already voted, show results
+      poll_results($id);
+    }
+    else
+    {
+      // Show poll
+      poll_show($id);
+    }
   }
 
   echo "\n<td></tr>";

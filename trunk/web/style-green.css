@@ -316,6 +316,11 @@ img.statsbar {
   font-size: 13px;
 }
 
+.smallpollquestion {
+  font-size: 13px;
+  font-weight: bold;
+}
+
 .pollanswer {
 }
 
