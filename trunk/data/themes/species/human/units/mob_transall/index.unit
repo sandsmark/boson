@@ -49,7 +49,6 @@ Shoot=shoot
 
 [Weapon_0]
 AccelerationSpeed=0.0005
-AutoUse=true
 CanShootAtAirUnits=false
 CanShootAtLandUnits=true
 Damage=600
@@ -68,3 +67,4 @@ SoundFly=missile_fly
 SoundShoot=shoot
 Speed=0.03
 Type=4
+AutoUse=false
