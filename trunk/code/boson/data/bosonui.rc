@@ -8,5 +8,8 @@
     <Action name="game_grab_movie" />
     <Action name="game_grab_profiling" />
   </Menu>
+  <Menu name="debug" group="debugmenu"><text>&amp;Debug</text>
+    <Action name="debug_sync_network" />
+  </Menu>
 </MenuBar>
 </kpartgui>

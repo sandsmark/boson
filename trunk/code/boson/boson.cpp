@@ -455,6 +455,15 @@ BosonPlayField* Boson::playField() const
  return d->mPlayField;
 }
 
+PlayerIO* Boson::findPlayerIO(Q_UINT32 id) const
+{
+ Player* p = (Player*)findPlayer(id);
+ if (p) {
+	return p->playerIO();
+ }
+ return 0;
+}
+
 void Boson::setStartingObject(BosonStarting* s)
 {
  // AB: a NULL starting object unsets the object. it is totally valid
@@ -685,17 +694,53 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 		d->mStartingObject->startingCompletedReceived(buffer, sender);
 		break;
 	}
-	case BosonMessage::IdNetworkSync:
+	case BosonMessage::IdNetworkSyncCheck:
 	{
-		d->mNetworkSynchronizer->receiveNetworkSyncMessage(stream);
+		if (!d->mNetworkSynchronizer->receiveNetworkSyncCheck(stream)) {
+			// the network is not in sync anymore.
+			// note that we don't have to do anything here, it is
+			// done in the network synchronizer class.
+		}
 		break;
 	}
-	case BosonMessage::IdNetworkSyncACK:
+	case BosonMessage::IdNetworkSyncCheckACK:
 	{
 		if (!isAdmin()) {
 			break;
 		}
-		d->mNetworkSynchronizer->receiveNetworkSyncAck(stream, sender);
+		bool inSync = d->mNetworkSynchronizer->receiveNetworkSyncCheckAck(stream, sender);
+		if (inSync) {
+			break;
+		}
+		syncNetwork();
+		break;
+	}
+	case BosonMessage::IdNetworkRequestSync:
+	{
+		if (!d->mNetworkSynchronizer->receiveNetworkRequestSync(stream)) {
+			slotAddChatSystemMessage(i18n("Could not synchronize clients. Cannot fix out-of-sync client. Sorry"));
+			boError() << k_funcinfo << "unable to synchronize clients. cannot fix out-of-sync." << endl;
+			break;
+		}
+		break;
+	}
+	case BosonMessage::IdNetworkSync:
+	{
+		if (!d->mNetworkSynchronizer->receiveNetworkSync(stream)) {
+			slotAddChatSystemMessage(i18n("Could not load from sync stream. Game unusable now (loading error)"));
+
+			// AB: at this point it makes no sense to unlock the
+			// game.
+			// when loading fails, then we aborted somewhere in the
+			// middle of loading a game, so most probably we cannot
+			// use that game anymore anyway.
+			break;
+		}
+		break;
+	}
+	case BosonMessage::IdNetworkSyncUnlockGame:
+	{
+		d->mNetworkSynchronizer->receiveNetworkSyncUnlockGame(stream);
 		break;
 	}
 	default:
@@ -780,6 +825,17 @@ void Boson::slotTogglePause()
  // note that this won't take immediate effect. the variable will change once it
  // is received from network!
  d->mGamePaused = !gamePaused();
+}
+
+void Boson::forcePauseGame()
+{
+ boDebug() << k_funcinfo << endl;
+
+ // this has no effect until the message is received from net
+ d->mGamePaused = true;
+
+ // this takes effect immediately
+ d->mGameTimer->stop();
 }
 
 void Boson::slotPropertyChanged(KGamePropertyBase* p)
@@ -974,6 +1030,12 @@ void Boson::slotReceiveAdvance()
 
 void Boson::networkTransmission(QDataStream& stream, int msgid, Q_UINT32 r, Q_UINT32 s, Q_UINT32 clientId)
 {
+ if (!d->mNetworkSynchronizer->acceptNetworkTransmission(msgid)) {
+	// the game is locked. only certain messages are allowed currently.
+	boDebug() << k_funcinfo << "game is locked for syncing. ignoring message with id=" << msgid << endl;
+	return;
+ }
+
  BoMessage* m = new BoMessage(stream, msgid, r, s, clientId, advanceCallsCount());
 
  if (!d->mMessageDelayer->processMessage(m)) {
@@ -1639,5 +1701,16 @@ void Boson::slotClientLeftGame(int clientId, int oldgamestatus, KGame*)
 	// start the timer if game is not paused
 	slotPropertyChanged(&d->mGamePaused);
  }
+}
+
+void Boson::clearDelayedMessages()
+{
+ d->mMessageDelayer->clearDelayedMessages();
+}
+
+void Boson::syncNetwork()
+{
+ boDebug() << k_funcinfo << endl;
+ d->mNetworkSynchronizer->syncNetwork();
 }
 
