@@ -503,8 +503,8 @@ Texture* TextureOptimizer::combineAllTextures()
 #else
   // Find best positions for the textures
   // Dummy algorithm
-  int hdivisions = (int)floor(sqrt(textures.count()));
-  int vdivisions = (int)ceil(textures.count() / (float)hdivisions);
+  int hdivisions = (int)floorf(sqrtf((float)textures.count()));
+  int vdivisions = (int)ceilf(textures.count() / (float)hdivisions);
   int hdivsize = (int)(mTexSize / (float)hdivisions);
   int vdivsize = (int)(mTexSize / (float)vdivisions);
 
