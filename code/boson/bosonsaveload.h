@@ -148,11 +148,8 @@ public:
 	void setCanvas(BosonCanvas*);
 	void setPlayField(BosonPlayField*);
 
-	// AB: temporary function only, for the scenario-code-replacing process.
-	bool loadNewGame(const QByteArray& playersXML, const QByteArray& canvasXML);
-
 	/**
-	 * Sace the game to @p files.
+	 * Save the game to @p files.
 	 **/
 	bool saveToFiles(QMap<QString, QByteArray>& files);
 
