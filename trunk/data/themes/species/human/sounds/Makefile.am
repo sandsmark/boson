@@ -12,11 +12,8 @@ report_sounds = \
 	report_underattack_0.ogg
 
 sounds_DATA = \
-	fix_destroyed.wav \
-	mobile_attacking.wav \
-	mobile_destroyed.wav \
-	mobile_going.wav \
-	radar_pulse.wav shoot.wav \
+	radar_pulse.wav \
+	shoot.wav \
 	$(order_sounds) \
 	$(report_sounds)
 
