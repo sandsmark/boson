@@ -1668,7 +1668,7 @@ void BoMesh::generateLOD()
 	if (faces.count() > 0) {
 		lod[i]->createFaces(faces.count());
 	}
-	boDebug() << k_funcinfo << "generated LOD " << i << " which has " << faces.count() << " faces" << endl;
+	boDebug(100) << k_funcinfo << "generated LOD " << i << " which has " << faces.count() << " faces" << endl;
 	for (unsigned int j = 0; j < faces.count(); j++) {
 		lod[i]->setFace(j, faces[j]);
 	}
