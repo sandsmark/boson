@@ -103,6 +103,7 @@ void BosonWidget::initPlayer()
  if (!d->mCmdInput) {
 	kdError() << k_funcinfo << "NULL command input" << endl;
  } else {
+	localPlayer()->removeGameIO(d->mCmdInput, false); // in case it was added before
 	localPlayer()->addGameIO(d->mCmdInput);
  }
 

@@ -943,6 +943,8 @@ BosonCommandFrameBase* BosonWidgetBase::cmdFrame() const
 
 void BosonWidgetBase::setLocalPlayer(Player* p, bool init) //AB: probably init = false is obsolete!
 {
+ // FIXME: ensure that d->mCmdInput gets removed in BosonWidget before calling
+ // this! or maybe while calling this!
  setLocalPlayerRecursively(p);
 
  if (init) {
