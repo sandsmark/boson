@@ -91,6 +91,9 @@ void BoUnitEditor::slotEditUnit()
 
 void BoUnitEditor::slotAddTexture()
 {
+    if(mUnitTextureFrom->text().isEmpty() || mUnitTextureTo->text().isEmpty()) {
+	return;
+    }
     (void)new QListViewItem(mUnitTexturesList, mUnitTextureFrom->text(),
 			    mUnitTextureTo->text());
     mUnitTextureFrom->clear();
