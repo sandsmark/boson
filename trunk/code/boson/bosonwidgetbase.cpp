@@ -145,7 +145,7 @@ BosonWidgetBase::~BosonWidgetBase()
 
  delete mCursor;
 
- delete boScript;
+ BosonScript::deleteBosonScript();
 
  delete d;
  boDebug() << k_funcinfo << "done" << endl;
