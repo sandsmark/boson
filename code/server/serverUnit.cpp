@@ -19,6 +19,7 @@
  ***************************************************************************/
 
 #include "../common/log.h"
+#include "../common/map.h"
 #include "../common/bobuffer.h"
 
 #include "serverUnit.h"
@@ -88,6 +89,8 @@ void serverMobUnit::reportDestroyed(int i)
 	data.destroyed.key = key;
 	data.destroyed.x = __x;
 	data.destroyed.y = __y;
+	
+	logf(LOG_WARNING, "MSG_MOBILE_ is %d MOBILE_DESTROYED sent : __x is %d", MSG_MOBILE_DESTROYED, __x);
 
 	sendMsg ( player[i].buffer, MSG_MOBILE_DESTROYED, sizeof(data.destroyed), &data);
 }
@@ -102,7 +105,7 @@ void serverMobUnit::reportDestroyed(int i)
 
 serverFacility::serverFacility(boBuffer *b, facilityMsg_t *msg, QObject* parent, const char *name)
 	:Facility(msg,parent,name)
-	,serverUnit(b,msg->x, msg->y)
+	,serverUnit(b,msg->x * BO_TILE_SIZE, msg->y * BO_TILE_SIZE)
 {
 	counter = BUILDING_SPEED;
 }
@@ -146,6 +149,7 @@ void serverFacility::reportDestroyed(int i)
 	data.destroyed.x = __x;
 	data.destroyed.y = __y;
 
+	logf(LOG_WARNING, "MSG_FACILITY_ is %d FACILITY_DESTROYED sent : __x is %d", MSG_FACILITY_DESTROYED, __x);
 	sendMsg ( player[i].buffer, MSG_FACILITY_DESTROYED, sizeof(data.destroyed), &data);
 }
 

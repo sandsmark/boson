@@ -75,8 +75,8 @@ void bosonField::destroyMob(destroyedMsg_t &m)
 	
 	mob = mobile.find(m.key);
 	if (mob) {
-		boAssert(m.x == mob->x());
-		boAssert(m.y == mob->y());
+		boCheck(m.x, mob->x());
+		boCheck(m.y, mob->y());
 		}
 	else {
 		logf(LOG_ERROR, "bosonField::destroyMob : can't find m.key");
@@ -102,27 +102,35 @@ void bosonField::createFix(facilityMsg_t &m)
 }
 
 
-void bosonField::destroyFix(destroyedMsg_t &m)
+void bosonField::destroyFix(destroyedMsg_t &msg)
 {
 	playerFacility * f;
 	
-	f = facility.find(m.key);
+	f = facility.find(msg.key);
 	if (f) {
-		boAssert(m.x == f->x());
-		boAssert(m.y == f->x());
-		}
+		boCheck(msg.x, f->x());
+		boCheck(msg.y, f->y());
+	}
 	else {
-		logf(LOG_ERROR, "bosonField::destroyFix : can't find m.key");
+		logf(LOG_ERROR, "bosonField::destroyFix : can't find msg.key");
 		return;
-		}
+	}
 
-	boAssert( facility.remove(m.key) == true);
+	boAssert( facility.remove(msg.key) == true);
 }
 
 
-void bosonField::move(moveMsg_t &m)
+void bosonField::move(moveMsg_t &msg)
 {
-	mobile.find(m.key)->s_moveBy(m.dx, m.dy, m.direction);
+	playerMobUnit * m;
+	
+	m = mobile.find(msg.key);
+	if (!m) {
+		logf(LOG_ERROR, "bosonField::move : can't find msg.key");
+		return;
+	}
+
+	m->s_moveBy(msg.dx, msg.dy, msg.direction);
 }
 
 void bosonField::requestAction(void)
