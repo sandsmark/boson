@@ -669,6 +669,11 @@ void BosonWidgetBase::initKActions()
  mapCoordinates->setChecked(false);
  connect(mapCoordinates, SIGNAL(toggled(bool)),
 		displayManager(), SLOT(slotSetDebugMapCoordinates(bool)));
+ KToggleAction* cellGrid = new KToggleAction(i18n("Show Cell &Grid"),
+		KShortcut(), 0, 0, actionCollection(), "debug_cell_grid");
+ cellGrid->setChecked(false);
+ connect(cellGrid, SIGNAL(toggled(bool)),
+		displayManager(), SLOT(slotSetDebugShowCellGrid(bool)));
  KToggleAction* cheating = new KToggleAction(i18n("Enable &Cheating"),
 		KShortcut(), 0, 0, actionCollection(), "debug_enable_cheating");
  connect(cheating, SIGNAL(toggled(bool)), this, SLOT(slotToggleCheating(bool)));

@@ -464,6 +464,7 @@ public:
 	BoGLToolTip* mToolTips;
 
 	bool mDebugMapCoordinates;
+	bool mDebugShowCellGrid;
 	float mDebugMapCoordinatesX;
 	float mDebugMapCoordinatesY;
 	float mDebugMapCoordinatesZ;
@@ -501,6 +502,7 @@ void BosonBigDisplayBase::init()
  d->mParticlesDirty = true;
  d->mCellPlacementTexture = 0;
  d->mDebugMapCoordinates = false;
+ d->mDebugShowCellGrid = false;
  d->mDebugMapCoordinatesX = 0.0f;
  d->mDebugMapCoordinatesY = 0.0f;
  d->mDebugMapCoordinatesZ = 0.0f;
@@ -1276,6 +1278,32 @@ void BosonBigDisplayBase::renderCells()
 		glTexCoord2fv(textureUpperRight);
 		glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos, heightMap[y * heightMapWidth + (x+1)]);
 	glEnd();
+ }
+ if (d->mDebugShowCellGrid) {
+	glDisable(GL_LIGHTING);
+	glDisable(GL_DEPTH_TEST);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glColor3ub(255, 255, 255);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glBegin(GL_QUADS);
+	for (int i = 0; i < d->mRenderCellsCount; i++) {
+		Cell* c = d->mRenderCells[i];
+		int x = c->x();
+		int y = c->y();
+		const float dist = 0.00f;
+		GLfloat cellXPos = (float)x * BO_GL_CELL_SIZE;
+		GLfloat cellYPos = -(float)y * BO_GL_CELL_SIZE;
+			glVertex3f(cellXPos, cellYPos, heightMap[y * heightMapWidth + x] + dist);
+			glVertex3f(cellXPos, cellYPos - BO_GL_CELL_SIZE, heightMap[(y+1) * heightMapWidth + x] + dist);
+			glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos - BO_GL_CELL_SIZE, heightMap[(y+1) * heightMapWidth + (x+1)] + dist);
+			glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos, heightMap[y * heightMapWidth + (x+1)] + dist);
+	}
+	glEnd();
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	glEnable(GL_DEPTH_TEST);
+	if (boConfig->useLight()) {
+		glEnable(GL_LIGHTING);
+	}
  }
 }
 
@@ -2756,6 +2784,11 @@ void BosonBigDisplayBase::slotMoveSelection(int x, int y)
 void BosonBigDisplayBase::setDebugMapCoordinates(bool debug)
 {
  d->mDebugMapCoordinates = debug;
+}
+
+void BosonBigDisplayBase::setDebugShowCellGrid(bool debug)
+{
+ d->mDebugShowCellGrid = debug;
 }
 
 
