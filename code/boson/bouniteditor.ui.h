@@ -346,8 +346,11 @@ void BoUnitEditor::slotUpdateUnitProperties()
     // Mobile/facility properties
     if(mUnitTypeFacility->isChecked()) {
 	mUnit->createFacilityProperties();
+#warning FIXME
+#if 0
 	mUnit->setCanRefineMinerals(mUnitCanRefineMinerals->isChecked());
 	mUnit->setCanRefineOil(mUnitCanRefineOil->isChecked());
+#endif
 	mUnit->setConstructionSteps(mUnitConstructionSteps->value());
     } else {
 	mUnit->createMobileProperties();
@@ -442,8 +445,11 @@ void BoUnitEditor::slotUpdateWidgets()
     mUnitSpeed->setValue(mUnit->speed());
     mUnitCanGoOnLand->setChecked(mUnit->canGoOnLand());
     mUnitCanGoOnWater->setChecked(mUnit->canGoOnWater());
+#warning FIXME
+#if 0
     mUnitCanRefineMinerals->setChecked(mUnit->canRefineMinerals());
     mUnitCanRefineOil->setChecked(mUnit->canRefineOil());
+#endif
     mUnitConstructionSteps->setValue(mUnit->constructionSteps());
     // Weapons
     mWeapons.clear();
