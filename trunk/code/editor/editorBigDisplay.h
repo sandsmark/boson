@@ -22,7 +22,7 @@
 #define EDITORBIGDISPLAY_H 
 
 #include "visualBigDisplay.h"
-#include "editorView.h"
+#include "editorTopLevel.h"
 
 class QPopupMenu;
 class visualCell;
@@ -36,7 +36,7 @@ class editorBigDisplay : public visualBigDisplay
 	Q_OBJECT
 
 public:
-	editorBigDisplay(visualView *v, QWidget *parent=0, const char *name=0L, WFlags f=0);
+	editorBigDisplay(editorTopLevel *v, QWidget *parent=0, const char *name=0L, WFlags f=0);
 
 	virtual void actionClicked(int, int, int state);	// selecting, moving...
 

@@ -27,6 +27,9 @@
 #include "common/log.h"
 #include "common/bobuffer.h"
 
+#include "playerUnit.h"
+#include "bosonTopLevel.h"
+#include "bosonCanvas.h"
 #include "game.h"
 
 
@@ -128,7 +131,12 @@ switch(State) {
 				data->accepted.sizeY);
 			who_am_i	= data->accepted.who_you_are;
 			nb_player	= data->accepted.total_player;
-			initView(data->accepted.sizeX, data->accepted.sizeY);
+
+			/* actual creation of the bocanvas */
+			vcanvas = bocanvas = new bosonCanvas (data->accepted.sizeX, data->accepted.sizeY);
+			(new bosonTopLevel())->show();
+			logf(LOG_INFO, "canvas and TopLevel window created");
+
 			myspecy	= species[data->accepted.who_you_are];
 			break;
 		case MSG_DLG_REFUSED :

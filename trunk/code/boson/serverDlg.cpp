@@ -40,8 +40,8 @@
 #include "serverDlg.h"
 #include "game.h"
 
-serverDlg::serverDlg(QWidget *parent, const char *name)
-	:QDialog(parent,name,true)
+serverDlg::serverDlg(const char *name)
+	:QDialog( 0l, name,true) // parentless
 {
         QPushButton	*button;
 	QLabel		*label;

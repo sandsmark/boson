@@ -32,7 +32,7 @@ bin_PROGRAMS = boeditor
 #boeditor 
 boeditor_METASOURCES = USE_AUTOMOC
 boeditor_LDFLAGS = $(all_libraries) $(KDE_RPATH)
-boeditor_SOURCES = boeditor.cpp editorView.cpp main.cpp mainView.cpp miniDisplay.cpp editorCanvas.cpp editorBigDisplay.cpp newDlg.cpp
+boeditor_SOURCES = main.cpp mainWidget.cpp editorTopLevel.cpp miniDisplay.cpp editorCanvas.cpp editorBigDisplay.cpp newDlg.cpp
 boeditor_LDADD   =  ../visual/libbovisual.a ../common/libboson.a $(LIB_KFILE)
 #$(LIB_KDEUI)
 
@@ -54,5 +54,5 @@ uninstall-local:
 #garbage
 CLEANFILES = $(boeditor_METASOURCES) boson-*.log
 
-EXTRA_DIST = boeditor.cpp editorView.cpp main.cpp mainView.cpp miniDisplay.cpp editorCanvas.cpp editorCanvas.h ressource.h boeditor.h editorView.h mainView.h editorBigDisplay.cpp editorBigDisplay.h newDlg.h
+EXTRA_DIST = main.cpp mainWidget.cpp editorTopLevel.cpp miniDisplay.cpp editorCanvas.cpp editorCanvas.h ressource.h mainWidget.h editorTopLevel.h editorBigDisplay.cpp editorBigDisplay.h newDlg.h
 

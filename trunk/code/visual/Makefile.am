@@ -26,11 +26,11 @@ LDFLAGS =  -s
 
 # libbovisual.a
 noinst_LIBRARIES = libbovisual.a
-libbovisual_a_SOURCES = visualBigDisplay.cpp groundTheme.cpp visualMiniDisplay.cpp visualCanvas.cpp selectPart.cpp speciesTheme.cpp visualView.cpp visualCell.cpp visualUnit.cpp 
+libbovisual_a_SOURCES = visualBigDisplay.cpp groundTheme.cpp visualMiniDisplay.cpp visualCanvas.cpp selectPart.cpp speciesTheme.cpp visualTopLevel.cpp visualCell.cpp visualUnit.cpp 
 libbovisual_a_METASOURCES = USE_AUTOMOC
 
 #garbage
 CLEANFILES = $(libbovisual_a_METASOURCES) boson-*.log
 
-EXTRA_DIST = visualBigDisplay.cpp groundTheme.cpp visualMiniDisplay.cpp visualCanvas.cpp selectPart.cpp speciesTheme.cpp visualView.cpp visualCell.cpp visualUnit.cpp visualBigDisplay.h groundTheme.h visualMiniDisplay.h visualCanvas.h selectPart.h speciesTheme.h sprites.h visualView.h visual.h visualCell.h visualUnit.h
+EXTRA_DIST = visualBigDisplay.cpp groundTheme.cpp visualMiniDisplay.cpp visualCanvas.cpp selectPart.cpp speciesTheme.cpp visualTopLevel.cpp visualCell.cpp visualUnit.cpp visualBigDisplay.h groundTheme.h visualMiniDisplay.h visualCanvas.h selectPart.h speciesTheme.h sprites.h visualTopLevel.h visual.h visualCell.h visualUnit.h
 

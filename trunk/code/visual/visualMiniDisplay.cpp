@@ -23,14 +23,12 @@
 #include "common/log.h"
 
 #include "visualMiniDisplay.h"
-#include "visualView.h"
+#include "visualTopLevel.h"
 
-visualMiniDisplay::visualMiniDisplay(visualView *v, QWidget*parent, const char *name)
+visualMiniDisplay::visualMiniDisplay(visualTopLevel *v, QWidget*parent, const char *name)
 	: QWidget(parent, name)
+	, vtl(v)
 {
-
-/* the visualView */
-	view = v;
 
 /* create the (back)ground pixmap */
 	ground = new QPixmap(v->maxX(), v->maxY());
@@ -42,9 +40,8 @@ visualMiniDisplay::visualMiniDisplay(visualView *v, QWidget*parent, const char *
 	connect(vcanvas, SIGNAL(updateFix(visualFacility *)), this, SLOT(drawFix(visualFacility *)));
 
 // connect(, SIGNAL(), this, SLOT());
-	connect(view, SIGNAL(repaint(bool)), this, SLOT(repaint(bool)));
-	connect(this, SIGNAL(reCenterView(int, int)), view, SLOT(reCenterView(int, int)));
-	connect(this, SIGNAL(reSizeView(int, int)), view, SLOT(reSizeView(int, int)));
+	connect(this, SIGNAL(reCenterView(int, int)), vtl, SLOT(reCenterView(int, int)));
+	connect(this, SIGNAL(reSizeView(int, int)), vtl, SLOT(reSizeView(int, int)));
 }
 
 
@@ -60,7 +57,7 @@ void visualMiniDisplay::paintEvent(QPaintEvent *evt)
 	/* the little rectangle */
 	p.setPen(white);
 	p.setRasterOp(XorROP);
-	p.drawRect(view->X(), view->Y(), view->L()-1, view->H()-1);
+	p.drawRect(vtl->X(), vtl->Y(), vtl->L()-1, vtl->H()-1);
 
 	p.end();
 
@@ -69,8 +66,8 @@ void visualMiniDisplay::paintEvent(QPaintEvent *evt)
 void visualMiniDisplay::newCell(int i, int j, groundType g) //, QPainter *p)
 {
 	QPainter p;
-	boAssert(i<view->maxX());
-	boAssert(j<view->maxY());
+	boAssert(i<vtl->maxX());
+	boAssert(j<vtl->maxY());
 
 	//printf("visualMiniDisplay::newCell : receiving %d\n", (int)g);
 

@@ -32,7 +32,7 @@ SUBDIRS = docs
 #boson
 boson_METASOURCES = USE_AUTOMOC
 boson_LDFLAGS = $(all_libraries) $(KDE_RPATH)
-boson_SOURCES = boson.cpp connect.cpp bosonBigDisplay.cpp game.cpp main.cpp mainView.cpp miniDisplay.cpp bosonCanvas.cpp playerUnit.cpp bosonView.cpp connectDlg.cpp serverDlg.cpp boshot.cpp
+boson_SOURCES = boson.cpp connect.cpp bosonBigDisplay.cpp game.cpp main.cpp mainWidget.cpp miniDisplay.cpp bosonCanvas.cpp playerUnit.cpp connectDlg.cpp serverDlg.cpp boshot.cpp bosonTopLevel.cpp
 boson_LDADD   =  ../visual/libbovisual.a ../common/libboson.a $(LIB_KDEUI)
 
 
@@ -55,5 +55,5 @@ uninstall-local:
 #garbage
 CLEANFILES = $(boson_METASOURCES) boson-*.log
 
-EXTRA_DIST = boson.cpp connect.cpp bosonBigDisplay.cpp game.cpp main.cpp mainView.cpp miniDisplay.cpp bosonCanvas.cpp playerUnit.cpp boson.h connect.h game.h mainView.h orderType.h bosonCanvas.h playerUnit.h ressource.h bosonView.cpp bosonView.h connectDlg.cpp connectDlg.h serverDlg.cpp serverDlg.h boshot.cpp boshot.h
+EXTRA_DIST = boson.cpp connect.cpp bosonBigDisplay.cpp game.cpp main.cpp mainWidget.cpp miniDisplay.cpp bosonCanvas.cpp playerUnit.cpp boson.h connect.h game.h mainWidget.h bosonCanvas.h playerUnit.h ressource.h connectDlg.cpp connectDlg.h serverDlg.cpp serverDlg.h boshot.cpp boshot.h bosonTopLevel.h bosonTopLevel.cpp
 

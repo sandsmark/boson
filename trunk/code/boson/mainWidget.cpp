@@ -1,0 +1,132 @@
+/***************************************************************************
+                       mainWidget.cpp -  description 
+                             -------------------                                         
+
+    version              : $Id$
+    begin                : Mon Apr 19 23:56:00 CET 1999
+                                           
+    copyright            : (C) 1999 by Thomas Capricelli                         
+    email                : orzel@yalbi.com                                     
+ ***************************************************************************/
+
+/***************************************************************************
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   * 
+ *                                                                         *
+ ***************************************************************************/
+
+#include <qkeycode.h>
+#include <qwidgetstack.h>
+#include <qframe.h>
+#include <qscrollview.h>
+#include <qpixmap.h>
+#include <qlabel.h>
+
+#include "common/log.h"
+
+#include "bosonTopLevel.h"
+#include "visualMiniDisplay.h"
+#include "bosonBigDisplay.h"
+#include "game.h"
+
+#include "mainWidget.h"		// myself
+
+
+#define VIEW_ONE	1
+#define VIEW_MANY	2
+
+
+mainWidget::mainWidget( bosonTopLevel *parent, const char *name)
+	:QWidget(parent, name)
+{ 
+	btl = parent;
+
+	mini = new visualMiniDisplay( parent, this);
+	big = new bosonBigDisplay( parent, this);
+
+	mini->setGeometry (   0,   0, 200,200);
+	makeCommandGui();
+	resizeEvent( 0l); // setGeometry
+
+	/* focus handling */
+	setFocusPolicy (StrongFocus);		// accept key event
+	setFocus();
+
+
+}
+
+void mainWidget::resizeEvent ( QResizeEvent * )
+{
+	big->setGeometry  (200,  0, width() - 200, height() );
+	mainFrame->setGeometry (  0,200, 200, height() - 200);
+}
+
+#define ARROW_KEY_STEP	2
+
+void mainWidget::keyReleaseEvent ( QKeyEvent * e )
+{
+	switch (e->key()) {
+		case Key_Left:
+			btl->relativeMoveView(-ARROW_KEY_STEP,0);
+			break;
+		case Key_Right:
+			btl->relativeMoveView(ARROW_KEY_STEP,0);
+			break;
+		case Key_Up:
+			btl->relativeMoveView(0, -ARROW_KEY_STEP);
+			break;
+		case Key_Down:
+			btl->relativeMoveView(0, ARROW_KEY_STEP);
+			break;
+	}
+}
+
+
+void mainWidget::ressourcesUpdated(void)
+{
+	char buffer[1024];
+	
+	sprintf(buffer, "Oil : %d", oil);
+	oil_text->setText(buffer);
+
+	sprintf(buffer, "Mineral : %d", mineral);
+	mineral_text->setText(buffer);
+}
+
+
+void mainWidget::makeCommandGui(void)
+{
+	mainFrame = new QFrame(this);
+
+	mainFrame->setFrameStyle(QFrame::Sunken | QFrame::Panel);
+	mainFrame->setLineWidth(5);
+	
+	/* ressources */
+	oil_text	= new QLabel("Oil : ", mainFrame, "oil_text");
+	oil_text->setGeometry(10,8,80,10);
+	mineral_text	= new QLabel("Mineral : ", mainFrame, "mineral_text");
+	mineral_text->setGeometry(100,8,80,10);
+
+	/* stack */
+	stack = new QWidgetStack(mainFrame, "qwidgetstack");
+	stack->setFrameStyle(QFrame::Raised | QFrame::Panel);
+	stack->setLineWidth(5);
+	stack->setGeometry(10,23,180,110);
+
+	/* stack/one */
+	view_none = new QPixmap(); // XXX legal ? 
+
+	view_one = new QLabel(stack,"preview");
+	view_one->setPixmap(*view_none);
+	stack->addWidget(view_one, VIEW_ONE);
+
+	/* stack/many */
+	view_many = new QScrollView(stack,"scrollview");
+	stack->addWidget(view_many, VIEW_MANY);
+
+	stack->raiseWidget(VIEW_ONE);
+}
+

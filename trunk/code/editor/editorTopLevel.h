@@ -1,5 +1,5 @@
 /***************************************************************************
-                         editorView.h  -  description                              
+                          editorTopLevel.h  -  description                              
                              -------------------                                         
 
     version              : $Id$
@@ -18,25 +18,30 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef EDITORVIEW_H
-#define EDITORVIEW_H
+#ifndef EDITORTOPLEVEL_H 
+#define EDITORTOPLEVEL_H 
 
+#include "mainWidget.h"
+#include "visualTopLevel.h"
 
-#include <visualView.h>
-#include "common/groundType.h"
-
-class QCheckBox;
-class QPushButton;
-class QPixmap;
-class playerFacility;
-class QLabel;
-class QWidgetStack;
-class QScrollView;
-class QVBoxLayout;
-class QComboBox;
 
 #define	TILES_NB	(11)	
 #define	BIG_TILES_NB	(4)
+
+class	editorTopLevel;
+class	visualMiniDisplay;
+class	editorBigDisplay;
+class	QFrame;
+class	QCheckBox;
+class	QPushButton;
+class	QPixmap;
+class	QLabel;
+class	QWidgetStack;
+class	QScrollView;
+class	QVBoxLayout;
+class	QComboBox;
+
+class	mainWidget;
 
 
 enum object_type {
@@ -46,20 +51,40 @@ enum object_type {
 	OT_UNIT
 };
 
-class editorView : public visualView
+
+/** 
+  * This class is the global object concerning a view : where, how large..
+  * It's also the place where selections are handled
+  * 
+  * it inherits from KTMainWindow only because it will _also_ be part of the GUI in boson or boeditor
+  */
+class editorTopLevel : public visualTopLevel
 {
-
 	Q_OBJECT
-
+	
+	friend mainWidget;
 public:
-	editorView(QWidget *parent=0, const char *name=0);
+	editorTopLevel(const char *name = 0L, WFlags f = WDestructiveClose );
 
-	virtual void setSelected(QPixmap *);
-	virtual void setOrders(int what , int who=-1);
+	/*
+         * selection handling
+         */
+	virtual void	setSelected(QPixmap *);
+	virtual void	setOrders(int what , int who=-1);
 
 signals:
 	void setSelectedObject(object_type , int);
 	void setWho(int);
+
+public slots:
+	void slotEditDestroy(void);
+
+protected:
+	/*
+	 * put object 
+	 */
+	virtual void object_put(int, int){}; // not useful for the editor yet
+	virtual	void updateViews(void);
 
 private slots:
 	void setTransRef(int);
@@ -80,23 +105,16 @@ private slots:
 	void bc10(void) { handleButton(10); } // button clicked
 //	void bc11(void) { handleButton(11); } // button clicked
 
-protected:
-	virtual void object_put(int, int){}; // not useful for the editor yet
 
 private:
+	void	makeCommandGui(void);
 	void	redrawTiles(void);
 	void	handleButton(int);
 
-/* state view (for selected items) */
-	QWidgetStack	*stack;
-	QLabel		*view_one;
-	QScrollView	*view_many;
-	QPixmap		*view_none;
+	mainWidget	mw;
 
-/* tiles selection */
-	QComboBox	*qcb_transRef, *qcb_which, *qcb_who;
-	QPushButton	*tiles[TILES_NB];
-	QPushButton	*bigTiles[BIG_TILES_NB];
+	QFrame		*mainFrame;
+
 	bool		inverted;
 	int		trans;
 	enum which_t {
@@ -109,9 +127,27 @@ private:
 	} which;
 	object_type	otype;
 	int		who;
+
+	/*
+	 * GUI
+	 */
+
+	/* state view (for selected items) */
+	QWidgetStack	*stack;
+	QLabel		*view_one;
+	QScrollView	*view_many;
+	QPixmap		*view_none;
 	QCheckBox	*invertBox;
+
+	/* tiles selection */
+	QComboBox	*qcb_transRef, *qcb_which, *qcb_who;
+	QPushButton	*tiles[TILES_NB];
+	QPushButton	*bigTiles[BIG_TILES_NB];
+
+
+
 };
 
+#endif // EDITORTOPLEVEL_H
 
-#endif // EDITORVIEW_H
 

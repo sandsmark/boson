@@ -1,5 +1,5 @@
 /***************************************************************************
-                          visualView.h  -  description                              
+                          visualTopLevel.h  -  description                              
                              -------------------                                         
 
     version              : $Id$
@@ -18,28 +18,26 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef VISUALVIEW_H 
-#define VISUALVIEW_H 
+#ifndef VISUALTOPLEVEL_H 
+#define VISUALTOPLEVEL_H 
 
-#include <qframe.h>
+#include <ktmainwindow.h>
 
 #include <visualUnit.h>
-#include "visual.h"
 
 
 /** 
   * This class is the global object concerning a view : where, how large..
-  * It's used by mainMap and miniMap
   * It's also the place where selections are handled
   * 
-  * it inherits from QFrame only because it will _also_ be part of the GUI in boson or boeditor
+  * it inherits from KTMainWindow only because it will _also_ be part of the GUI in boson or boeditor
   */
-class visualView : public QFrame
+class visualTopLevel : public KTMainWindow
 {
 	Q_OBJECT
 
 public:
-	visualView(QWidget *parent=0, const char *name=0L);
+	visualTopLevel( const char *name = 0L, WFlags f = WDestructiveClose );
 
 	/*
 	 * size / position handling
@@ -60,11 +58,6 @@ public:
 		SELECT_FILL,		/* something is being filled (editor) */
 		SELECT_ 
 		};
-
-
-
-signals:
-	void repaint(bool);
 	
 protected:
 //	void		putSomething(void);
@@ -115,8 +108,10 @@ public: ///orzel : bof...
 protected:
 	selectionMode_t		selectionMode;
 
+	virtual void	updateViews(void)=0;
+
 };
 
-#endif // VISUALVIEW_H
+#endif // VISUALTOPLEVEL_H
 
 
