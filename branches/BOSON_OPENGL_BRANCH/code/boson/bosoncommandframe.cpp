@@ -588,6 +588,17 @@ void BosonCommandFrame::slotSetAction(Unit* unit)
 	ProductionPlugin* production = fac->productionPlugin();
 	if (production) {
 		QValueList<int> produceList = fac->speciesTheme()->productions(prop->producerList());
+		// Filter out things that player can't actually build (requisities aren't
+		//  met yet)
+		QValueList<int>::Iterator it;
+		it = produceList.begin();
+		while(it != produceList.end()) {
+			if(!owner->canBuild(*it)) {
+				it = produceList.remove(it);
+			} else {
+				it++;
+			}
+		}
 		d->mOrderWidget->setOrderButtons(produceList, owner, (Facility*)unit);
 		if (production->hasProduction()) {
 			d->mUpdateTimer.start(UPDATE_TIMEOUT);

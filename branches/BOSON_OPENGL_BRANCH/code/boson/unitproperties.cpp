@@ -126,6 +126,7 @@ void UnitProperties::loadUnitType(const QString& fileName)
  mCanShootAtLandUnits = conf.readBoolEntry("CanShootAtLandUnits", (isLand() || isShip()) && weaponDamage());
  mSupportMiniMap = conf.readBoolEntry("SupportMiniMap", false);
  isFacility = conf.readBoolEntry("IsFacility", false);
+ mRequisities = conf.readIntListEntry("Requisities");
 
  if (isFacility) {
 	mProducer = conf.readUnsignedNumEntry("Producer", (unsigned int)CommandBunker);

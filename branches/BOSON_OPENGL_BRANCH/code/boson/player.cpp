@@ -534,3 +534,33 @@ int Player::facilitiesCount()
 {
  return d->mFacilitiesCount;
 }
+
+bool Player::canBuild(int unitType) const
+{
+ QValueList<int> neededTypes = speciesTheme()->unitProperties(unitType)->requisities();
+ if(neededTypes.isEmpty()) {
+	return true;
+ }
+ QValueList<int>::Iterator it;
+ for(it = neededTypes.begin(); it != neededTypes.end(); ++it) {
+	// FIXME: this is SLOW. Cache values and refresh them when new unit is
+	//  created or destroyed
+	if(!hasUnitWithType(*it)) {
+		return false;
+	}
+ }
+ return true;
+}
+
+bool Player::hasUnitWithType(int type) const
+{
+ QPtrListIterator<Unit> it(d->mUnits);
+ while (it.current()) {
+	if (it.current()->type() == type) {
+		return true;
+	}
+	++it;
+ }
+ return false;
+}
+
