@@ -489,6 +489,7 @@ QByteArray BosonNewEditorWidget::createNewMap()
  for (int i = 0; i < maxPlayers + 1; i++) {
 	QDomElement p = playersDoc.createElement(QString::fromLatin1("Player"));
 	p.setAttribute("PlayerId", i);
+	p.appendChild(playersDoc.createElement(QString::fromLatin1("Upgrades")));
 	playersRoot.appendChild(p);
 
 	QDomElement items = canvasDoc.createElement(QString::fromLatin1("Items"));
@@ -508,6 +509,11 @@ QByteArray BosonNewEditorWidget::createNewMap()
  BPFDescription desc;
  desc.setName(mNewMapName->text());
  files.insert("C/description.xml", desc.toString().utf8());
+ files.insert("scripts/eventlistener/game.py", QByteArray());
+ files.insert("scripts/eventlistener/localplayer.py", QByteArray());
+ for (unsigned int i = 0; i < maxPlayers + 1; i++) {
+	files.insert(QString("scripts/eventlistener/ai-player_%1.py").arg(i), QByteArray());
+ }
 
  QByteArray b = BosonPlayField::streamFiles(files);
  boDebug() << k_funcinfo << "files got streamed" << endl;
