@@ -42,90 +42,133 @@ It has first a common group shared by all units:
 "[Boson Unit]" (without the quotation marks). This group can contain the
 following entries:
 
+The entries marked with * are mandatory.
 -------------------------------------------------------------------------------
 [Boson Unit]
-IsFacility=boolean  - True if this is a facility, false if this is a mobile
-                      unit.
-                      Default is false.
-* Name=Text         - The Name of the unit. Should be short, no more than 2 or 3
-                      words. One if possible.
-                      Default is "Unknown".
-* Id=Number         - A unique (!) ID for this unit. Must be > 0.
-                      No default!
-UnitWidth=Number    - The width of the unit in cells.
-                      You can use floating point numbers - e.g. 1.5 will make
-                      the unit occupy 1.5 cells.
-                      Please don't use values like 1.3333 (might cause rounding
-                      trouble) or 1.23876381687 (nonsense value).
-                      Default is 1.0
-UnitHeight=Number   - The height of the unit in cells.
-                      You can use floating point numbers - e.g. 1.5 will make
-                      the unit occupy 1.5 cells.
-                      Please don't use values like 1.3333 (might cause rounding
-                      trouble) or 1.23876381687 (nonsense value).
-                      Default is 1.0
-UnitDepth=Number    - The height in z-direction of the unit in cells.
-                      You can use floating point numbers - e.g. 1.5 will make
-                      the unit occupy 1.5 cells.
-                      Please don't use values like 1.3333 (might cause rounding
-                      trouble) or 1.23876381687 (nonsense value).
-                      Default is 1.0
-Health=Number       - Health, power, whatever. Make this greater and the unit will
-                      live longer.
-                      Must be > 0. Default is 100.
-Shield=Number       - Not yet supported.
-                      Default is 0.
-Armor=Number        - Not yet supported.
-                      Default is 0.
-MineralCost=Number  - How much mineral do you have to pay if you build this?
-                      Must be >= 0. Default is 100.
-OilCost=Number      - How much oil do you have to pay if you build this?
-                      Must be >= 0. Default is 0.
-SightRange=Number   - The sight range of this unit.
-                      the sight range is how far (in cells!) this unit can see.
-                      Must be >= 0. Default is 5 (currently).
-WeaponDamage=Number - The damage this unit makes to other units when firing. Can
-                      also be negative - the unit repairs then.
-                      Default is 0.
-WeaponRange=Number  - The weapon range of this unit.
-                      Note: when WeaponDamage <= 0 this has no effect!
-                      Must be >= 0. Default is 0.
-Reload=Number       - The time to reload the weapon. "Time" means number of
-                      advance calls (default is 1 per 50ms = 20 calls/sec).
-                      Must be >= 0. Default is 0.
-TerrainType=Number  - The default terrain type of the unit. One of 0 (Land),
-                      1 (Water) or 2 (Air).
-                      You must decide for one - even if the unit is some kind
-                      of mixture. If so you will probably use Land (0).
-                      Must be 0, 1 or 2. The default is 0 (=Land Unit)
-ProductionTime=Number - The number of advance calls needed to produce this unit
-                        Must be >= 0. Default is (currently) 100.
-CanShootAtAirUnits=bool  - Can this unit shoot at aircrafts?
-                           Default true for TerrainType=2, otherwise false.
-CanShootAtLandUnits=bool - Can this unit shoot at ground units? True or False.
-                           Default is true for TerrainType=0 or TerrainType=1,
-                           otherwise false.
-Producer=Number     - Specifies which kind of factory is able to produce this
-                      unit. Possible values are: 0=war factory (heavy land
-                      units, all types of vehicles), 1=shipyard (all ships),
-                      2=airport (all aircrafts), 3=barracks (soldiers,
-                      human units), 10=command bunker (all facilities).
-                      Please note that there is currently only a single factory
-                      for every Producer type, but we might add more one day
-                      (e.g. a mobile factory). The possible productions of those
-                      factories will also depend on the Producer type.
-                      The default is the value of "TerrainType" for mobile units
-                      and 10 (= command bunker) for facilities.
-SupportMiniMap=bool - If true then this player has a minimap when he has a unit
-                      of this type. The minimap disappears when all units of the
-                      player which have SupportMiniMap=true are gone.
-                      Default is false.
-Requirements=List   - List is comma separated list of unit IDs. Player must have
-                      built all those units before he can build this unit.
-                      Default is an empty list.
+IsFacility=boolean
+        True if this is a facility, false if this is a mobile unit.
+        Default is false.
+
+* Name=Text
+        The Name of the unit. Should be short, no more than 2 or 3
+        words. One if possible.
+        Default is "Unknown".
+
+* Id=Number
+        A unique (!) ID for this unit. Must be > 0.
+        No default!
+
+UnitWidth=Number
+        The width of the unit in cells.
+        You can use floating point numbers - e.g. 1.5 will make
+        the unit occupy 1.5 cells.
+        Please don't use values like 1.3333 (might cause rounding
+        trouble) or 1.23876381687 (nonsense value).
+        Default is 1.0
+
+UnitHeight=Number
+        The height of the unit in cells.
+        You can use floating point numbers - e.g. 1.5 will make
+        the unit occupy 1.5 cells.
+        Please don't use values like 1.3333 (might cause rounding
+        trouble) or 1.23876381687 (nonsense value).
+        Default is 1.0
+
+UnitDepth=Number
+        The height in z-direction of the unit in cells.
+        You can use floating point numbers - e.g. 1.5 will make
+        the unit occupy 1.5 cells.
+        Please don't use values like 1.3333 (might cause rounding
+        trouble) or 1.23876381687 (nonsense value).
+        Default is 1.0
+
+Health=Number
+        Health, power, whatever. Make this greater and the unit will
+        live longer.
+        Must be > 0. Default is 100.
+
+Shield=Number
+        Not yet supported.
+        Default is 0.
+
+Armor=Number
+        Not yet supported.
+        Default is 0.
+
+MineralCost=Number
+        How much mineral do you have to pay if you build this?
+        Must be >= 0. Default is 100.
+
+OilCost=Number
+        How much oil do you have to pay if you build this?
+        Must be >= 0. Default is 0.
+
+SightRange=Number
+        The sight range of this unit.
+        the sight range is how far (in cells!) this unit can see.
+        Must be >= 0. Default is 5 (currently).
+
+WeaponDamage=Number
+        The damage this unit makes to other units when firing. Can
+        also be negative - the unit repairs then.
+        Default is 0.
+
+WeaponRange=Number
+        The weapon range of this unit.
+        Note: when WeaponDamage <= 0 this has no effect!
+        Must be >= 0. Default is 0.
+
+Reload=Number
+        The time to reload the weapon. "Time" means number of
+        advance calls (default is 1 per 50ms = 20 calls/sec).
+        Must be >= 0. Default is 0.
+
+TerrainType=Number
+        The default terrain type of the unit. One of 0 (Land),
+        1 (Water) or 2 (Air).
+        You must decide for one - even if the unit is some kind
+        of mixture. If so you will probably use Land (0).
+        Must be 0, 1 or 2. The default is 0 (=Land Unit)
+
+ProductionTime=Number
+        The number of advance calls needed to produce this unit
+        Must be >= 0. Default is (currently) 100.
+
+CanShootAtAirUnits=bool
+        Can this unit shoot at aircrafts?
+        Default true for TerrainType=2, otherwise false.
+
+CanShootAtLandUnits=bool
+        Can this unit shoot at ground units? True or False.
+        Default is true for TerrainType=0 or TerrainType=1,
+        otherwise false.
+
+Producer=Number
+        Specifies which kind of factory is able to produce this
+        unit. Possible values are: 0=war factory (heavy land
+        units, all types of vehicles), 1=shipyard (all ships),
+        2=airport (all aircrafts), 3=barracks (soldiers,
+        human units), 10=command bunker (all facilities).
+        Please note that there is currently only a single factory
+        for every Producer type, but we might add more one day
+        (e.g. a mobile factory). The possible productions of those
+        factories will also depend on the Producer type.
+        The default is the value of "TerrainType" for mobile units
+        and 10 (= command bunker) for facilities.
+
+SupportMiniMap=bool
+        If true then this player has a minimap when he has a unit
+        of this type. The minimap disappears when all units of the
+        player which have SupportMiniMap=true are gone.
+        Default is false.
+
+Requirements=List
+        List is comma separated list of unit IDs. Player must have
+        built all those units before he can build this unit.
+        Default is an empty list.
 -------------------------------------------------------------------------------
 
-The entries marked with * are mandatory.
+
 
 You should provide as many entries as possible although you don't have to.
 
@@ -133,7 +176,6 @@ Also note that all entries support (as of KConfig) the possibility to create
 localized versions. You can e.g. use "Name[de]=German Name" or so. Use this
 feature where it is useful. I doubt this is useful for something like Id ;-)
 (Ahem - "I doubt" means: don't do it under any circumstances!!)
-
 
 Beside this general group there is one group for facilities only ("[Boson
 Facility]") and one for mobile units ("[Boson Mobile Unit]"). Both are not
@@ -143,25 +185,30 @@ speed for a unit).
 
 -------------------------------------------------------------------------------
 [Boson Mobile Unit]
-Speed=Number         - Value of the speed of the unit. A unit will move that many
-                       pixels per advance call. This is a double number so values
-                       like "0.452463" are possible as well.
-                       Must be >= 0. Default is 0
-CanGoOnLand=boolean  - Whether this unit can go over land.
-                       This is true by default for TerrainType = Land or
-                       Aircraft.
-CanGoOnWater=boolean - Whether this unit can go over water.
-                       This is true by default for TerrainType = Water or
-                       Aircraft.
+Speed=Number
+        Value of the speed of the unit. A unit will move that many
+        pixels per advance call. This is a double number so values
+        like "0.452463" are possible as well.
+        Must be >= 0. Default is 0
 
+CanGoOnLand=boolean
+        Whether this unit can go over land.
+        This is true by default for TerrainType = Land or
+        Aircraft.
+
+CanGoOnWater=boolean
+        Whether this unit can go over water.
+        This is true by default for TerrainType = Water or
+        Aircraft.
 -------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------
 [Boson Facility]
-ConstructionSteps=Number  - Time the facility takes to be built. This is more or
-                            less the number of frames displayed in the 
-                            construction animation.
-                            Default is 20
+ConstructionSteps=Number
+        Time the facility takes to be built. This is more or
+        less the number of frames displayed in the 
+        construction animation.
+        Default is 20
 -------------------------------------------------------------------------------
 
 
@@ -173,21 +220,26 @@ entry here it will use the "short name".
 
 -------------------------------------------------------------------------------
 [Textures]
-Textures=List            -  List of textures. Only the "short name" that should
-                           get mapped have to be listed here. All listed files
-                           need to have an entry in this group (if it isn't
-                           there it is ignored. no error).
-                           Defaul is an empty list
-texture.jpg=LongName.jpg - "texture.jpg" is the "short name" of the texture,
-                           i.e. the name as listed in the model (.3ds) file. It
-                           must be listed in the "Textures=" entry (see above).
-                           It must be lowercase! (even if it is uppercase in the
-                           model file)
-                           "LongName.jpg" is the filename that gets used instead
-                           of the "short name". Case sensitve (but doesn't
-                           matter, since filename in boson should be lowercase
-                           anyway).
+Textures=List
+        List of textures. Only the "short name" that should
+        get mapped have to be listed here. All listed files
+        need to have an entry in this group (if it isn't
+        there it is ignored. no error).
+        Defaul is an empty list
+
+texture.jpg=LongName.jpg
+        "texture.jpg" is the "short name" of the texture,
+        i.e. the name as listed in the model (.3ds) file. It
+        must be listed in the "Textures=" entry (see above).
+        It must be lowercase! (even if it is uppercase in the
+        model file)
+        "LongName.jpg" is the filename that gets used instead
+        of the "short name". Case sensitve (but doesn't
+        matter, since filename in boson should be lowercase
+        anyway).
 -------------------------------------------------------------------------------
+
+
 
 The OpenGL group is also shared by all units and not mandatory, but will
 probably be used by most units. In this group you specify e.g. how many frames
@@ -203,25 +255,36 @@ frame every 5 advance calls use this:
 FrameStartIdle=0
 FrameRangeIdle=10
 FrameSpeedIdle=5
+
 -------------------------------------------------------------------------------
 [OpenGL]
-FrameStartIdle=Number     - (see above for general information)
-                            Default is 0.
-FrameRangeIdle=Number     - (see above for general information)
-                            Default is 1.
-FrameSpeedIdle=Number     - (see above for general information)
-                            Default is 1.
-                            The "Idle" action specifies the frames/animation
-                            of the unit when it does nothing, i.e. is idle.
-FrameStartWreckage=Number - (see above for general information)
-                            Default is -1.
-FrameRangeWreckage=Number - (see above for general information)
-                            Default is 0.
-FrameSpeedWreckage=Number - (see above for general information)
-                            Default is 0.
-                            The "Wreckage" action specifies the frames/animation
-                            of the unit when it is destroyed
+FrameStartIdle=Number
+        (see above for general information)
+        Default is 0.
 
+FrameRangeIdle=Number
+        (see above for general information)
+        Default is 1.
+
+FrameSpeedIdle=Number
+        (see above for general information)
+        Default is 1.
+        The "Idle" action specifies the frames/animation
+        of the unit when it does nothing, i.e. is idle.
+
+FrameStartWreckage=Number
+        (see above for general information)
+        Default is -1.
+
+FrameRangeWreckage=Number
+        (see above for general information)
+        Default is 0.
+
+FrameSpeedWreckage=Number
+        (see above for general information)
+        Default is 0.
+        The "Wreckage" action specifies the frames/animation
+        of the unit when it is destroyed
 -------------------------------------------------------------------------------
 
 
@@ -238,38 +301,46 @@ production plugin doesn't make any sense without a list of producable units.
 I'll try to document new plugins here - but for a current list look at
 pluginproperties.h
 
-
 -------------------------------------------------------------------------------
 [ProductionPlugin]
 The production plugin is usually a facility-only plugin. One day we might use
 this for mobile factories, too. Note: this has never been tested, but I
 definitely want to support this!
-ProducerList=List   - The List is a comma separated list of Producer IDs.
-                      The facility will be able to produce all units with the
-                      "Producer" entry that is listed here.
-                      Default is an empty List.
+
+ProducerList=List
+        The List is a comma separated list of Producer IDs.
+        The facility will be able to produce all units with the
+        "Producer" entry that is listed here.
+        Default is an empty List.
 -------------------------------------------------------------------------------
 [RepairPlugin]
 (not yet supported)
 -------------------------------------------------------------------------------
 [HarvesterPlugin]
 For mineral/oil miners. Well - doesn't make any sense for facilities :-)
-CanMineMinerals=boolean - Whether this unit can mine minerals.
-                          Default is false.
-CanMineOil=boolean   - Whether this unit can mine oil.
-                       Default is false .
-MaxResources=number  - The maximal amount of resourced that can be mined until
-                       the unit needs to return to a refinery.
-                       Must be > 0. Default is 100.
 
+CanMineMinerals=boolean
+        Whether this unit can mine minerals.
+        Default is false.
+
+CanMineOil=boolean
+        Whether this unit can mine oil.
+        Default is false .
+
+MaxResources=number
+        The maximal amount of resourced that can be mined until
+        the unit needs to return to a refinery.
+        Must be > 0. Default is 100.
 -------------------------------------------------------------------------------
 [RefinePlugin]
 (not yet supported)
-CanRefineOil=Boolean - True if this is an oilrefinery.
-                      Default is false
-CanRefineMinerals=Boolean - True if this is a mineralrefinery.
-                            Default is false
+CanRefineOil=Boolean
+        True if this is an oilrefinery.
+        Default is false
 
+CanRefineMinerals=Boolean
+        True if this is a mineralrefinery.
+        Default is false
 -------------------------------------------------------------------------------
 
 
