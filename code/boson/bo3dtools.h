@@ -604,12 +604,6 @@ class BoVector3
 
 
     // Conversion from one coordinate system to another.
-    inline void canvasToCell()
-    {
-    }
-    inline void cellToCanvas()
-    {
-    }
     inline void canvasToWorld()
     {
       mData[1] = -mData[1];
