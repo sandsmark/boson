@@ -21,7 +21,7 @@
 #define BOCAMERAWIDGET_H
 
 #include <qwidget.h>
-#include "bopui/bopui.h"
+#include "boufo/boufo.h"
 
 class BoCamera;
 class BoGameCamera;
@@ -30,7 +30,7 @@ class BoLightCamera;
 class BoContext;
 
 class BosonGLWidgetLight;
-class BoPUILightCameraWidget;
+class BoUfoLightCameraWidget;
 
 /**
  * This widget allows configuring all aspects of a light (ambient, diffuse,
@@ -42,7 +42,7 @@ class BoPUILightCameraWidget;
  * This widget does NOT provide a separate camera configuration widget and
  * therefore it is not derived of @ref BoCameraConfigWidgetBase. Instead it
  * <em>uses</em> the other camera widget and therefore it contains a @ref
- * BoPUICameraWidget object.
+ * BoUfoCameraWidget object.
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
 class BoLightCameraWidget1 : public QWidget
@@ -56,25 +56,25 @@ public:
 
 private:
 	BosonGLWidgetLight* mWidget;
-	BoPUILightCameraWidget* mLightWidget;
+	BoUfoLightCameraWidget* mLightWidget;
 };
 
 
-class BoPUICameraConfigWidgetBase;
-class BoPUICameraWidgetPrivate;
+class BoUfoCameraConfigWidgetBase;
+class BoUfoCameraWidgetPrivate;
 /**
  * The camera widget lets the user configure the @ref BoCamera widget in
- * different ways. Every way is defined by a @ref BoPUICameraConfigWidgetBase
+ * different ways. Every way is defined by a @ref BoUfoCameraConfigWidgetBase
  * derived class, some of which may be relevant to the game camera only (such as
- * @ref BoPUIGameCameraWidget).
+ * @ref BoUfoGameCameraWidget).
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class BoPUICameraWidget : public BoPUIWidget
+class BoUfoCameraWidget : public BoUfoWidget
 {
 	Q_OBJECT
 public:
-	BoPUICameraWidget(QObject* parent, const char* name = 0);
-	~BoPUICameraWidget();
+	BoUfoCameraWidget();
+	~BoUfoCameraWidget();
 
 	void setCamera(BoCamera* camera);
 
@@ -82,23 +82,23 @@ public slots:
 	void slotUpdateFromCamera();
 
 protected:
-	void addConfigWidget(const QString& name, BoPUICameraConfigWidgetBase* widget);
+	void addConfigWidget(const QString& name, BoUfoCameraConfigWidgetBase* widget);
 
 
 private:
-	BoPUICameraWidgetPrivate* d;
+	BoUfoCameraWidgetPrivate* d;
 };
 
 /**
  * Base class for all widgets that allow manipulating the camera.
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class BoPUICameraConfigWidgetBase : public BoPUIWidget
+class BoUfoCameraConfigWidgetBase : public BoUfoWidget
 {
 	Q_OBJECT
 public:
-	BoPUICameraConfigWidgetBase(QObject* parent, const char* name = 0);
-	~BoPUICameraConfigWidgetBase()
+	BoUfoCameraConfigWidgetBase();
+	~BoUfoCameraConfigWidgetBase()
 	{
 	}
 	virtual void setCamera(BoCamera* camera)
@@ -165,18 +165,18 @@ private:
 };
 
 
-class BoPUIGLUCameraWidgetPrivate;
+class BoUfoGLUCameraWidgetPrivate;
 /**
  * Direct manipulation of gluLookAt() through the three vectors lookAt,
  * cameraPos and up.
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class BoPUIGLUCameraWidget : public BoPUICameraConfigWidgetBase
+class BoUfoGLUCameraWidget : public BoUfoCameraConfigWidgetBase
 {
 	Q_OBJECT
 public:
-	BoPUIGLUCameraWidget(QObject* parent, const char* name = 0);
-	~BoPUIGLUCameraWidget();
+	BoUfoGLUCameraWidget();
+	~BoUfoGLUCameraWidget();
 
 	virtual int needCameraType() const;
 
@@ -191,10 +191,10 @@ protected:
 	virtual void updateMatrixWidget();
 
 private:
-	BoPUIGLUCameraWidgetPrivate* d;
+	BoUfoGLUCameraWidgetPrivate* d;
 };
 
-class BoPUIPlainCameraWidgetPrivate;
+class BoUfoPlainCameraWidgetPrivate;
 /**
  * This widget consists of glTranslate() and glRotate() calls only.
  *
@@ -212,12 +212,12 @@ class BoPUIPlainCameraWidgetPrivate;
  * gluLookAt() uses)
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class BoPUIPlainCameraWidget : public BoPUICameraConfigWidgetBase
+class BoUfoPlainCameraWidget : public BoUfoCameraConfigWidgetBase
 {
 	Q_OBJECT
 public:
-	BoPUIPlainCameraWidget(QObject* parent, const char* name = 0);
-	~BoPUIPlainCameraWidget();
+	BoUfoPlainCameraWidget();
+	~BoUfoPlainCameraWidget();
 
 	virtual int needCameraType() const;
 
@@ -244,21 +244,21 @@ protected:
 	bool translateFirst() const;
 
 private:
-	BoPUIPlainCameraWidgetPrivate* d;
+	BoUfoPlainCameraWidgetPrivate* d;
 };
 
-class BoPUIGameCameraWidgetPrivate;
+class BoUfoGameCameraWidgetPrivate;
 /**
  * This is the camera configuration as it is used in boson by default.
  * it depends on lookAt vector, radius and rotation only.
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class BoPUIGameCameraWidget : public BoPUICameraConfigWidgetBase
+class BoUfoGameCameraWidget : public BoUfoCameraConfigWidgetBase
 {
 	Q_OBJECT
 public:
-	BoPUIGameCameraWidget(QObject* parent, const char* name = 0);
-	~BoPUIGameCameraWidget();
+	BoUfoGameCameraWidget();
+	~BoUfoGameCameraWidget();
 
 	virtual int needCameraType() const;
 	virtual void updateFromCamera();
@@ -276,17 +276,17 @@ protected slots:
 	void slotToggleGameRestrictions();
 
 private:
-	BoPUIGameCameraWidgetPrivate* d;
+	BoUfoGameCameraWidgetPrivate* d;
 };
 
 
-class BoPUIOrbiterCameraWidgetPrivate;
-class BoPUIOrbiterCameraWidget : public BoPUICameraConfigWidgetBase
+class BoUfoOrbiterCameraWidgetPrivate;
+class BoUfoOrbiterCameraWidget : public BoUfoCameraConfigWidgetBase
 {
 	Q_OBJECT
 public:
-	BoPUIOrbiterCameraWidget(QObject* parent, const char* name = 0);
-	~BoPUIOrbiterCameraWidget();
+	BoUfoOrbiterCameraWidget();
+	~BoUfoOrbiterCameraWidget();
 
 	virtual void setCamera(BoCamera* camera);
 
@@ -301,11 +301,11 @@ protected:
 	virtual void updateMatrixWidget();
 
 private:
-	BoPUIOrbiterCameraWidgetPrivate* d;
+	BoUfoOrbiterCameraWidgetPrivate* d;
 };
 
 
-class BoPUILightCameraWidget : public BoPUIWidget
+class BoUfoLightCameraWidget : public BoUfoWidget
 {
 	Q_OBJECT
 public:
@@ -315,8 +315,8 @@ public:
 	 * should ensure that only one widget is allowed to modify the global
 	 * values, to avoid unsynchronized valus.
 	 **/
-	BoPUILightCameraWidget(QObject* parent = 0, bool showGlobalValues = false);
-	~BoPUILightCameraWidget();
+	BoUfoLightCameraWidget(bool showGlobalValues = false);
+	~BoUfoLightCameraWidget();
 
 	void setLight(BoLight* light, BoContext* context);
 
@@ -326,33 +326,33 @@ private slots:
 
 private:
 	BoLightCamera* mCamera;
-	BoPUICameraWidget* mCameraWidget;
+	BoUfoCameraWidget* mCameraWidget;
 	BoLight* mLight;
 	BoContext* mContext;
 	bool mBlockLightChanges;
 	bool mShowGlobalValues;
 
-	BoPUICheckBox* mDirectional;
-	BoPUINumInput* mConstantAttenuation;
-	BoPUINumInput* mLinearAttenuation;
-	BoPUINumInput* mQuadraticAttenuation;
-	BoPUINumInput* mAmbientR;
-	BoPUINumInput* mAmbientG;
-	BoPUINumInput* mAmbientB;
-	BoPUINumInput* mAmbientA;
-	BoPUINumInput* mDiffuseR;
-	BoPUINumInput* mDiffuseG;
-	BoPUINumInput* mDiffuseB;
-	BoPUINumInput* mDiffuseA;
-	BoPUINumInput* mSpecularR;
-	BoPUINumInput* mSpecularG;
-	BoPUINumInput* mSpecularB;
-	BoPUINumInput* mSpecularA;
+	BoUfoCheckBox* mDirectional;
+	BoUfoNumInput* mConstantAttenuation;
+	BoUfoNumInput* mLinearAttenuation;
+	BoUfoNumInput* mQuadraticAttenuation;
+	BoUfoNumInput* mAmbientR;
+	BoUfoNumInput* mAmbientG;
+	BoUfoNumInput* mAmbientB;
+	BoUfoNumInput* mAmbientA;
+	BoUfoNumInput* mDiffuseR;
+	BoUfoNumInput* mDiffuseG;
+	BoUfoNumInput* mDiffuseB;
+	BoUfoNumInput* mDiffuseA;
+	BoUfoNumInput* mSpecularR;
+	BoUfoNumInput* mSpecularG;
+	BoUfoNumInput* mSpecularB;
+	BoUfoNumInput* mSpecularA;
 
-	BoPUINumInput* mGlobalAmbientR;
-	BoPUINumInput* mGlobalAmbientG;
-	BoPUINumInput* mGlobalAmbientB;
-	BoPUINumInput* mGlobalAmbientA;
+	BoUfoNumInput* mGlobalAmbientR;
+	BoUfoNumInput* mGlobalAmbientG;
+	BoUfoNumInput* mGlobalAmbientB;
+	BoUfoNumInput* mGlobalAmbientA;
 
 };
 

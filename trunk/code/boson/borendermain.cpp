@@ -17,13 +17,6 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#define LIBUFO 0
-#if LIBUFO
-#include <ufo/ufo.hpp>
-#include <ufo/ux/ux.hpp>
-#include "boufo.h"
-#endif
-
 #include "borendermain.h"
 #include "borendermain.moc"
 
@@ -50,8 +43,8 @@
 #include "bomeshrenderermanager.h"
 #include "boglstatewidget.h"
 #include "botexture.h"
-#include "bopui/bopui.h"
-#include "bopui/bopuiaction.h"
+#include "boufo/boufo.h"
+#include "boufo/boufoaction.h"
 #include "info/boinfo.h"
 #ifdef BOSON_USE_BOMEMORY
 #include "bomemory/bomemorydialog.h"
@@ -83,63 +76,10 @@
 #define BORENDER_DEFAULT_LIGHT_ENABLED true
 #define BORENDER_DEFAULT_MATERIALS_ENABLED true
 
-#define PU_USE_NONE
-#include <plib/pu.h>
-
-#if LIBUFO
-ufo::UXContext* g_context = 0;
-ufo::UXDisplay* g_display = 0;
-
 // TODO (libufo):
-// - convertQtModifiersToUfo() (-> modifiers for mouse events)
-// - puseMouseWheelDown()/Up()
-// - pushKeyDown()/Up()
 // - find out whether a mouse event was taken and stop processing it in
 //   mouse*Event()
-// - resize events
 
-
-static ufo::UMod_t convertQtMouseButtonToUfo(int button)
-{
- ufo::UMod_t ubutton = ufo::UMod::NoModifier;
- switch (button) {
-	case QMouseEvent::LeftButton:
-		ubutton = ufo::UMod::LeftButton;
-		break;
-	case QMouseEvent::RightButton:
-		ubutton = ufo::UMod::RightButton;
-		break;
-	case QMouseEvent::MidButton:
-		ubutton = ufo::UMod::MiddleButton;
-		break;
-	default:
-		ubutton = ufo::UMod::NoModifier;
-		break;
- }
- return ubutton;
-}
-
-#endif // LIBUFO
-
-static int convertQtMouseButtonToPUI(int button)
-{
- int puButton = PU_NOBUTTON;
- switch (button) {
-	case Qt::LeftButton:
-		puButton = PU_LEFT_BUTTON;
-		break;
-	case QMouseEvent::RightButton:
-		puButton = PU_RIGHT_BUTTON;
-		break;
-	case QMouseEvent::MidButton:
-		puButton = PU_MIDDLE_BUTTON;
-		break;
-	default:
-		puButton = PU_NOBUTTON;
-		break;
- }
- return puButton;
-}
 
 
 static const char *description =
@@ -211,12 +151,9 @@ ModelPreview::ModelPreview(QWidget* parent) : BosonGLWidget(parent)
 
  mCamera = new BoCamera;
  mLight = 0;
-#if LIBUFO
  mUfoManager = 0;
-#endif
 
- mPUILayout = new BoPUIVLayout(this, "topLayout");
-
+ mFovY = 60.0f;
 
  connect(this, SIGNAL(signalFovYChanged(float)), this, SLOT(slotFovYChanged(float)));
  connect(this, SIGNAL(signalFrameChanged(int)), this, SLOT(slotFrameChanged(int)));
@@ -253,7 +190,7 @@ void ModelPreview::initializeGL()
  recursive = true;
  makeCurrent();
  delete mDefaultFont;
- boDebug() << boConfig->stringValue("GLFont", QString::null) << endl;
+ boDebug() << k_funcinfo << boConfig->stringValue("GLFont", QString::null) << endl;
  BoFontInfo defaultFontInfo;
  defaultFontInfo.fromString(boConfig->stringValue("GLFont", QString::null));
  mDefaultFont = new BosonGLFont(defaultFontInfo);
@@ -283,167 +220,13 @@ void ModelPreview::initializeGL()
  setUpdatesEnabled(false);
  mUpdateTimer->start(GL_UPDATE_TIMER);
 
- initPUIGUI();
  initUfoGUI();
 
  recursive = false;
 }
 
-void ModelPreview::initPUIGUI()
-{
- puInit();
- puSetWindow(winId());
-
-#if LIBUFO
-#warning plib disabled
- return;
-#endif
-
- BoPUINumInput* fovy = new BoPUINumInput(this);
- BoPUINumInput* frame = new BoPUINumInput(this);
- BoPUINumInput* lod = new BoPUINumInput(this);
- connect(this, SIGNAL(signalFovYChanged(float)), fovy, SLOT(setValue(float)));
- connect(fovy, SIGNAL(signalValueChanged(float)), this, SLOT(slotFovYChanged(float)));
- connect(this, SIGNAL(signalLODChanged(float)), lod, SLOT(setValue(float)));
- connect(this, SIGNAL(signalMaxLODChanged(float)), lod, SLOT(slotSetMaxValue(float)));
- connect(lod, SIGNAL(signalValueChanged(float)), this, SLOT(slotLODChanged(float)));
- connect(this, SIGNAL(signalMaxFramesChanged(float)), frame, SLOT(slotSetMaxValue(float)));
- connect(this, SIGNAL(signalFrameChanged(float)), frame, SLOT(setValue(float)));
- connect(frame, SIGNAL(signalValueChanged(float)), this, SLOT(slotFrameChanged(float)));
- fovy->setLabel(i18n("FovY"));
- fovy->setStepSize(1.0f);
- fovy->setRange(MIN_FOVY, MAX_FOVY);
- lod->setLabel(i18n("LOD"));
- lod->setStepSize(1.0f);
- lod->setRange(0.0f, 0.0f);
- frame->setLabel(i18n("Frame"));
- frame->setStepSize(1.0f);
- frame->setRange(0.0f, 0.0f);
-
- BoPUIPushButton* hide = new BoPUIPushButton(i18n("Hide"), this);
- BoPUIPushButton* hideOthers = new BoPUIPushButton(i18n("Hide others"), this);
- BoPUIPushButton* unhideAll = new BoPUIPushButton(i18n("UnHide all"), this);
- connect(hide, SIGNAL(signalClicked()), this, SLOT(slotHideSelectedMesh()));
- connect(hideOthers, SIGNAL(signalClicked()), this, SLOT(slotHideUnSelectedMeshes()));
- connect(unhideAll, SIGNAL(signalClicked()), this, SLOT(slotUnHideAllMeshes()));
-
- BoPUICheckBox* placement = new BoPUICheckBox(i18n("Show placement preview"), this);
- BoPUICheckBox* disallowPlacement= new BoPUICheckBox(i18n("Disallow placement"), this);
- BoPUICheckBox* wireframe = new BoPUICheckBox(i18n("Show wireframe"), this);
- BoPUICheckBox* construction = new BoPUICheckBox(i18n("Show construction"), this);
- BoPUICheckBox* axis = new BoPUICheckBox(i18n("Render axis"), this);
- BoPUICheckBox* grid = new BoPUICheckBox(i18n("Render grid"), this);
- BoPUICheckBox* light = new BoPUICheckBox(i18n("Enable Light"), boConfig->useLight(), this);
- BoPUICheckBox* materials= new BoPUICheckBox(i18n("Enable Materials"), boConfig->useMaterials(), this);
- connect(placement, SIGNAL(signalToggled(bool)), this, SLOT(slotPlacementPreviewChanged(bool)));
- connect(disallowPlacement, SIGNAL(signalToggled(bool)), this, SLOT(slotDisallowPlacementChanged(bool)));
- connect(wireframe, SIGNAL(signalToggled(bool)), this, SLOT(slotWireFrameChanged(bool)));
- connect(construction, SIGNAL(signalToggled(bool)), this, SLOT(slotConstructionChanged(bool)));
- connect(axis, SIGNAL(signalToggled(bool)), this, SLOT(slotRenderAxisChanged(bool)));
- connect(grid, SIGNAL(signalToggled(bool)), this, SLOT(slotRenderGridChanged(bool)));
- connect(light, SIGNAL(signalToggled(bool)), this, SLOT(slotEnableLight(bool)));
- connect(materials, SIGNAL(signalToggled(bool)), this, SLOT(slotEnableMaterials(bool)));
-
- BoPUICameraWidget* camera = new BoPUICameraWidget(this);
- camera->setCamera(mCamera);
- connect(this, SIGNAL(signalCameraChanged()), camera, SLOT(slotUpdateFromCamera()));
-
- BoPUIPushButton* defaults = new BoPUIPushButton(i18n("Reset Defaults"), this);
- connect(defaults, SIGNAL(signalClicked()), this, SLOT(slotResetView()));
-
-
- BoPUIHLayout* hideLayout = new BoPUIHLayout(0, "hideLayout");
- hideLayout->addWidget(hide);
- hideLayout->addWidget(hideOthers);
- hideLayout->addWidget(unhideAll);
-
- BoPUIHLayout* placementLayout = new BoPUIHLayout(0, "placementLayout");
- placementLayout->addWidget(placement);
- placementLayout->addWidget(disallowPlacement);
-
- BoPUIVLayout* layout = new BoPUIVLayout(0, "layout");
- layout->addSpacing(10); // TODO: add spacinghint and marginhint to layouts
- layout->addSpacing(60); // distance from "mesh under cursor" text
- layout->addWidget(fovy);
- layout->addWidget(frame);
- layout->addWidget(lod);
- layout->addSpacing(20);
- layout->addLayout(hideLayout);
- layout->addSpacing(20);
- layout->addLayout(placementLayout);
- layout->addWidget(wireframe);
- layout->addWidget(construction);
- layout->addWidget(axis);
- layout->addWidget(grid);
- layout->addWidget(light);
- layout->addWidget(materials);
- layout->addSpacing(50);
- layout->addWidget(camera);
- layout->addWidget(defaults);
-
- BoPUIActionCollection::initActionCollection(this);
-
-#warning TODO: KToggleAction
-
- // TODO BoPUIStdAction
-#warning FIXME: use KMainWindow::close()
- (void)new BoPUIAction(i18n("Quit"), KShortcut(),
-		this, SLOT(close()),
-		actionCollection(), "file_quit");
- (void)new BoPUIAction(i18n("Vertex point size..."), 0,
-		this, SIGNAL(signalChangeVertexPointSize()),
-		actionCollection(), "options_vertex_point_size");
- (void)new BoPUIAction(i18n("Grid unit size..."), 0,
-		this, SIGNAL(signalChangeGridUnitSize()),
-		actionCollection(), "options_grid_unit_size");
- (void)new BoPUIAction(i18n("Background color..."), 0,
-		this, SIGNAL(signalChangeBackgroundColor()),
-		actionCollection(), "options_background_color");
- (void)new BoPUIAction(i18n("Light..."), 0,
-		this, SIGNAL(signalShowLightWidget()),
-		actionCollection(), "options_light"); // AB: actually this is NOT a setting
- (void)new BoPUIAction(i18n("Materials..."), 0,
-		this, SIGNAL(signalShowMaterialsWidget()),
-		actionCollection(), "options_materials"); // AB: actually this is NOT a setting
- (void)new BoPUIAction(i18n("Font..."), 0,
-		this, SIGNAL(signalShowChangeFont()),
-		actionCollection(), "options_font"); // AB: actually this is NOT a setting
-
-
- (void)new BoPUIAction(i18n("Debug &Models"), 0,
-		this, SIGNAL(signalDebugModels()),
-		actionCollection(), "debug_models");
-#ifdef BOSON_USE_BOMEMORY
- (void)new BoPUIAction(i18n("Debug M&emory"), 0,
-		this, SIGNAL(signalDebugMemory()),
-		actionCollection(), "debug_memory");
-#endif
- (void)new BoPUIAction(i18n("Debug &Species"), 0,
-		this, SIGNAL(signalDebugSpecies()),
-		actionCollection(), "debug_species");
- (void)new BoPUIAction(i18n("Show OpenGL states"), KShortcut(),
-		this, SIGNAL(signalShowGLStates()),
-		actionCollection(), "debug_show_opengl_states");
- (void)new BoPUIAction(i18n("&Reload model textures"), KShortcut(),
-		this, SIGNAL(signalReloadModelTextures()),
-		actionCollection(), "debug_lazy_reload_model_textures");
- (void)new BoPUIAction(i18n("Reload &meshrenderer plugin"), KShortcut(),
-		this, SIGNAL(signalReloadMeshRenderer()),
-		actionCollection(), "debug_lazy_reload_meshrenderer");
-
-
-
- if (!actionCollection()->createGUI(locate("data", "boson/borenderui.rc"))) {
-	boError() << k_funcinfo << "createGUI() failed" << endl;
- }
-
- mPUILayout->addLayout(layout);
- mPUILayout->doLayout();
-}
-
 void ModelPreview::initUfoGUI()
 {
-#if LIBUFO
  static bool initialized = false;
  if (initialized) {
 	boWarning() << k_funcinfo << "called twice" << endl;
@@ -456,14 +239,14 @@ void ModelPreview::initUfoGUI()
  }
 
  mUfoManager = new BoUfoManager(width(), height());
- mUfoManager->contentWidget()->setLayout(new ufo::UFlowLayout());
 
- BoUfoVBox* topWidget = new BoUfoVBox(this);
- mUfoManager->contentWidget()->add(topWidget->contentWidget());
+ BoUfoVBox* topWidget = new BoUfoVBox();
+ mUfoManager->contentWidget()->addWidget(topWidget);
 
- BoUfoNumInput* fovy = new BoUfoNumInput(this);
- BoUfoNumInput* frame = new BoUfoNumInput(this);
- BoUfoNumInput* lod = new BoUfoNumInput(this);
+
+ BoUfoNumInput* fovy = (BoUfoNumInput*)BoUfoFactory::createWidget("BoUfoNumInput");
+ BoUfoNumInput* frame = (BoUfoNumInput*)BoUfoFactory::createWidget("BoUfoNumInput");
+ BoUfoNumInput* lod = (BoUfoNumInput*)BoUfoFactory::createWidget("BoUfoNumInput");
  connect(this, SIGNAL(signalFovYChanged(float)), fovy, SLOT(setValue(float)));
  connect(fovy, SIGNAL(signalValueChanged(float)), this, SLOT(slotFovYChanged(float)));
  connect(this, SIGNAL(signalLODChanged(float)), lod, SLOT(setValue(float)));
@@ -482,11 +265,10 @@ void ModelPreview::initUfoGUI()
  frame->setStepSize(1.0f);
  frame->setRange(0.0f, 0.0f);
 
-
- BoUfoHBox* hideWidget = new BoUfoHBox(topWidget);
- BoUfoPushButton* hide = new BoUfoPushButton(i18n("Hide"), hideWidget);
- BoUfoPushButton* hideOthers = new BoUfoPushButton(i18n("Hide others"), hideWidget);
- BoUfoPushButton* unhideAll = new BoUfoPushButton(i18n("UnHide all"), hideWidget);
+ BoUfoHBox* hideWidget = new BoUfoHBox();
+ BoUfoPushButton* hide = new BoUfoPushButton(i18n("Hide"));
+ BoUfoPushButton* hideOthers = new BoUfoPushButton(i18n("Hide others"));
+ BoUfoPushButton* unhideAll = new BoUfoPushButton(i18n("UnHide all"));
  hideWidget->addWidget(hide);
  hideWidget->addWidget(hideOthers);
  hideWidget->addWidget(unhideAll);
@@ -494,17 +276,19 @@ void ModelPreview::initUfoGUI()
  connect(hideOthers, SIGNAL(signalClicked()), this, SLOT(slotHideUnSelectedMeshes()));
  connect(unhideAll, SIGNAL(signalClicked()), this, SLOT(slotUnHideAllMeshes()));
 
- BoUfoHBox* placementWidget = new BoUfoHBox(topWidget);
- BoUfoCheckBox* placement = new BoUfoCheckBox(i18n("Show placement preview"), placementWidget);
- BoUfoCheckBox* disallowPlacement= new BoUfoCheckBox(i18n("Disallow placement"), placementWidget);
+
+
+ BoUfoHBox* placementWidget = new BoUfoHBox();
+ BoUfoCheckBox* placement = new BoUfoCheckBox(i18n("Show placement preview"));
+ BoUfoCheckBox* disallowPlacement= new BoUfoCheckBox(i18n("Disallow placement"));
  placementWidget->addWidget(placement);
  placementWidget->addWidget(disallowPlacement);
- BoUfoCheckBox* wireframe = new BoUfoCheckBox(i18n("Show wireframe"), this);
- BoUfoCheckBox* construction = new BoUfoCheckBox(i18n("Show construction"), this);
- BoUfoCheckBox* axis = new BoUfoCheckBox(i18n("Render axis"), this);
- BoUfoCheckBox* grid = new BoUfoCheckBox(i18n("Render grid"), this);
- BoUfoCheckBox* light = new BoUfoCheckBox(i18n("Enable Light"), boConfig->useLight(), this);
- BoUfoCheckBox* materials= new BoUfoCheckBox(i18n("Enable Materials"), boConfig->useMaterials(), this);
+ BoUfoCheckBox* wireframe = new BoUfoCheckBox(i18n("Show wireframe"));
+ BoUfoCheckBox* construction = new BoUfoCheckBox(i18n("Show construction"));
+ BoUfoCheckBox* axis = new BoUfoCheckBox(i18n("Render axis"));
+ BoUfoCheckBox* grid = new BoUfoCheckBox(i18n("Render grid"));
+ BoUfoCheckBox* light = new BoUfoCheckBox(i18n("Enable Light"), boConfig->useLight());
+ BoUfoCheckBox* materials = new BoUfoCheckBox(i18n("Enable Materials"), boConfig->useMaterials());
  connect(placement, SIGNAL(signalToggled(bool)), this, SLOT(slotPlacementPreviewChanged(bool)));
  connect(disallowPlacement, SIGNAL(signalToggled(bool)), this, SLOT(slotDisallowPlacementChanged(bool)));
  connect(wireframe, SIGNAL(signalToggled(bool)), this, SLOT(slotWireFrameChanged(bool)));
@@ -515,22 +299,26 @@ void ModelPreview::initUfoGUI()
  connect(materials, SIGNAL(signalToggled(bool)), this, SLOT(slotEnableMaterials(bool)));
 
 
-#if 0
- BoPUICameraWidget* camera = new BoPUICameraWidget(this);
+
+#define UFO CAMERA_WIDGET 0
+#if UFO_CAMERA_WIDGET
+ // AB: atm this causes problems with the camera.
+ BoUfoCameraWidget* camera = new BoUfoCameraWidget();
  camera->setCamera(mCamera);
  connect(this, SIGNAL(signalCameraChanged()), camera, SLOT(slotUpdateFromCamera()));
 #endif
- BoUfoPushButton* defaults = new BoUfoPushButton(i18n("Reset Defaults"), this);
+ BoUfoPushButton* defaults = new BoUfoPushButton(i18n("Reset Defaults"));
  connect(defaults, SIGNAL(signalClicked()), this, SLOT(slotResetView()));
 
  topWidget->addSpacing(10); // TODO: add spacinghint and marginhint to layouts
  topWidget->addSpacing(60); // distance from "mesh under cursor" text
+
  topWidget->addWidget(fovy);
  topWidget->addWidget(frame);
  topWidget->addWidget(lod);
- topWidget->addSpacing(20);
+ topWidget->addSpacing(10);
  topWidget->addWidget(hideWidget);
- topWidget->addSpacing(20);
+ topWidget->addSpacing(10);
  topWidget->addWidget(placementWidget);
  topWidget->addWidget(wireframe);
  topWidget->addWidget(construction);
@@ -539,11 +327,75 @@ void ModelPreview::initUfoGUI()
  topWidget->addWidget(light);
  topWidget->addWidget(materials);
  topWidget->addSpacing(50);
-#if 0
+#if UFO_CAMERA_WIDGET
  topWidget->addWidget(camera);
 #endif
  topWidget->addWidget(defaults);
-#endif // LIBUFO
+
+
+
+
+
+
+
+
+
+ BoUfoActionCollection::initActionCollection(mUfoManager);
+ BoUfoActionCollection* actionCollection = mUfoManager->actionCollection();
+ BO_CHECK_NULL_RET(actionCollection);
+
+#warning TODO: KToggleAction
+
+ // TODO BoUfoStdAction
+#warning FIXME: use KMainWindow::close()
+ (void)new BoUfoAction(i18n("Quit"), KShortcut(),
+		this, SLOT(close()),
+		actionCollection, "file_quit");
+ (void)new BoUfoAction(i18n("Vertex point size..."), 0,
+		this, SIGNAL(signalChangeVertexPointSize()),
+		actionCollection, "options_vertex_point_size");
+ (void)new BoUfoAction(i18n("Grid unit size..."), 0,
+		this, SIGNAL(signalChangeGridUnitSize()),
+		actionCollection, "options_grid_unit_size");
+ (void)new BoUfoAction(i18n("Background color..."), 0,
+		this, SIGNAL(signalChangeBackgroundColor()),
+		actionCollection, "options_background_color");
+ (void)new BoUfoAction(i18n("Light..."), 0,
+		this, SIGNAL(signalShowLightWidget()),
+		actionCollection, "options_light"); // AB: actually thisis NOT a setting
+ (void)new BoUfoAction(i18n("Materials..."), 0,
+		this, SIGNAL(signalShowMaterialsWidget()),
+		actionCollection, "options_materials"); // AB: actually this is NOT a setting
+ (void)new BoUfoAction(i18n("Font..."), 0,
+		this, SIGNAL(signalShowChangeFont()),
+		actionCollection, "options_font"); // AB: actually this is NOT a setting
+
+
+ (void)new BoUfoAction(i18n("Debug &Models"), 0,
+		this, SIGNAL(signalDebugModels()),
+		actionCollection, "debug_models");
+#ifdef BOSON_USE_BOMEMORY
+ (void)new BoUfoAction(i18n("Debug M&emory"), 0,
+		this, SIGNAL(signalDebugMemory()),
+		actionCollection, "debug_memory");
+#endif
+ (void)new BoUfoAction(i18n("Debug &Species"), 0,
+		this, SIGNAL(signalDebugSpecies()),
+		actionCollection, "debug_species");
+ (void)new BoUfoAction(i18n("Show OpenGL states"), KShortcut(),
+		this, SIGNAL(signalShowGLStates()),
+		actionCollection, "debug_show_opengl_states");
+ (void)new BoUfoAction(i18n("&Reload model textures"), KShortcut(),
+		this, SIGNAL(signalReloadModelTextures()),
+		actionCollection, "debug_lazy_reload_model_textures");
+ (void)new BoUfoAction(i18n("Reload &meshrenderer plugin"), KShortcut(),
+		this, SIGNAL(signalReloadMeshRenderer()),
+		actionCollection, "debug_lazy_reload_meshrenderer");
+
+
+ if (!actionCollection->createGUI(locate("data", "boson/borenderui.rc"))) {
+	boError() << k_funcinfo << "createGUI() failed" << endl;
+ }
 }
 
 void ModelPreview::setFont(const BoFontInfo& font)
@@ -567,17 +419,12 @@ void ModelPreview::resizeGL(int w, int h)
  gluPerspective(mFovY, (float)w / (float)h, NEAR, FAR);
  glMatrixMode(GL_MODELVIEW);
 
- if (menuBar()) {
-	menuBar()->createMenu();
- }
- mPUILayout->doLayout();
-
-#if LIBUFO
  if (mUfoManager) {
 	mUfoManager->postResizeEvent(width(), height());
+
+	// AB: is this necessary? if so then it should be in postResizeEvent() !
 	mUfoManager->contentWidget()->invalidate();
  }
-#endif
 }
 
 void ModelPreview::paintGL()
@@ -617,18 +464,14 @@ void ModelPreview::paintGL()
  glDisable(GL_DEPTH_TEST);
 
  renderText();
- puSetWindow(winId());
- puDisplay();
 
-
-#if LIBUFO
  if (mUfoManager) {
 	static int id = boProfiling->requestEventId("libufo-events");
 	static int idEvents = boProfiling->requestEventId("libufo-events");
 	static int idRendering = boProfiling->requestEventId("libufo-rendering");
 	BosonProfiler prof(-id);
 	BosonProfiler profEvents(-idEvents);
-	mUfoManager->display()->dispatchEvents();
+	mUfoManager->dispatchEvents();
 	long int events = profEvents.elapsed();
 	BosonProfiler profRendering(-idRendering);
 	mUfoManager->render();
@@ -641,7 +484,6 @@ void ModelPreview::paintGL()
 
 //	boDebug() << k_funcinfo << "libufo took: " << total << " , events:" << events << " rendering: " << rendering << endl;
  }
-#endif
 }
 
 void ModelPreview::renderAxii()
@@ -1007,7 +849,8 @@ void ModelPreview::slotConstructionChanged(bool on)
  }
  max = QMAX(0, max);
  boDebug() << k_funcinfo << max << endl;
- emit signalMaxFramesChanged(max);
+ emit signalMaxFramesChanged((int)max);
+ emit signalMaxFramesChanged((float)max);
 }
 
 void ModelPreview::resetModel()
@@ -1138,16 +981,8 @@ bool ModelPreview::eventFilter(QObject* o, QEvent* e)
 
 void ModelPreview::mousePressEvent(QMouseEvent* e)
 {
-#if LIBUFO
  if (mUfoManager) {
 	mUfoManager->postMousePressEvent(e);
- }
-#endif
- puSetWindow(winId());
- int puButton = convertQtMouseButtonToPUI(e->button());
- if (puMouse(puButton, PU_DOWN, e->x(), e->y())) {
-	e->accept();
-	return;
  }
  switch (e->button()) {
 	case QMouseEvent::LeftButton:
@@ -1162,16 +997,8 @@ void ModelPreview::mousePressEvent(QMouseEvent* e)
 
 void ModelPreview::mouseReleaseEvent(QMouseEvent* e)
 {
-#if LIBUFO
  if (mUfoManager) {
 	mUfoManager->postMouseReleaseEvent(e);
- }
-#endif
- puSetWindow(winId());
- int puButton = convertQtMouseButtonToPUI(e->button());
- if (puMouse(puButton, PU_UP, e->x(), e->y())) {
-	e->accept();
-	return;
  }
  switch (e->button()) {
 	case QMouseEvent::LeftButton:
@@ -1192,13 +1019,9 @@ void ModelPreview::selectMesh(int mesh)
 
 void ModelPreview::mouseMoveEvent(QMouseEvent* e)
 {
-#if LIBUFO
  if (mUfoManager) {
 	mUfoManager->postMouseMoveEvent(e);
  }
-#endif
- puSetWindow(winId());
- puMouse(e->x(), e->y());
  mMouseMoveDiff->moveEvent(e);
 
 
@@ -1240,11 +1063,9 @@ void ModelPreview::mouseMoveEvent(QMouseEvent* e)
 void ModelPreview::wheelEvent(QWheelEvent* e)
 {
  BO_CHECK_NULL_RET(camera());
-#if LIBUFO
  if (mUfoManager) {
 	mUfoManager->postWheelEvent(e);
  }
-#endif
  float delta = e->delta() / 120;
  if (e->orientation() == Horizontal) {
  } else {
@@ -1268,32 +1089,26 @@ void ModelPreview::wheelEvent(QWheelEvent* e)
 
 void ModelPreview::keyPressEvent(QKeyEvent* e)
 {
-#if LIBUFO
  if (mUfoManager) {
 	mUfoManager->postKeyPressEvent(e);
  }
-#endif
- puSetWindow(winId());
- if (puKeyboard(e->ascii(), PU_DOWN)) {
-	e->accept();
- } else {
+//f (puKeyboard(e->ascii(), PU_DOWN)) {
+//	e->accept();
+// else {
 	BosonGLWidget::keyPressEvent(e);
- }
+//
 }
 
 void ModelPreview::keyReleaseEvent(QKeyEvent* e)
 {
-#if LIBUFO
  if (mUfoManager) {
 	mUfoManager->postKeyReleaseEvent(e);
  }
-#endif
- puSetWindow(winId());
- if (puKeyboard(e->ascii(), PU_UP)) {
-	e->accept();
- } else {
+// if (puKeyboard(e->ascii(), PU_UP)) {
+//	e->accept();
+// } else {
 	BosonGLWidget::keyReleaseEvent(e);
- }
+// }
 }
 
 
@@ -1515,6 +1330,7 @@ RenderMain::RenderMain() : KMainWindow()
 RenderMain::~RenderMain()
 {
  boConfig->save(false);
+ delete mMaterialWidget;
  mSpecies.clear();
  delete mIface;
 }
