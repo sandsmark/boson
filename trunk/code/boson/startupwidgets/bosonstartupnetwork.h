@@ -26,6 +26,7 @@ class Boson;
 class Player;
 class KGamePropertyBase;
 class KPlayer;
+class BosonPlayField;
 
 // does all the network stuff for startup widgets
 class BosonStartupNetwork : public QObject
@@ -42,6 +43,13 @@ public:
 	void sendChangeSpecies(Player* p, const QString& species, const QColor& color);
 	void sendChangePlayerName(Player* p, const QString& name);
 	void sendChangePlayField(const QString& playFieldIdentifier);
+
+	/**
+	 * Conveninece method. Will send out the identifier of the playfield at
+	 * @p index in @ref BosonPlayField::availablePlayFields
+	 **/
+	void sendChangePlayField(int index);
+
 	void sendStartGameClicked();
 
 	/**
@@ -55,9 +63,18 @@ protected slots:
 	void slotPlayerPropertyChanged(KGamePropertyBase*, KPlayer*);
 	void slotPlayerLeftGame(KPlayer*);
 	void slotPlayerJoinedGame(KPlayer*);
+	void slotPlayFieldChanged(const QString& id);
 
 signals:
 	void signalPlayerNameChanged(Player* player);
+	void signalPlayerJoinedGame(KPlayer* player);
+	void signalPlayerLeftGame(KPlayer* player);
+	void signalSpeciesChanged(Player* player);
+	void signalTeamColorChanged(Player* player);
+	void signalPlayFieldChanged(const QString& identifier); // obsolete
+	void signalPlayFieldChanged(BosonPlayField*);
+	void signalStartGameClicked();
+	void signalSetLocalPlayer(Player* p);
 
 private:
 	Boson* mGame;
