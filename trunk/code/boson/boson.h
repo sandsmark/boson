@@ -82,7 +82,7 @@ public slots:
 	 **/
 	void slotSendAddUnit(int unitType, int x, int y, Player* owner);
 
-	void slotAdvanceComputerPlayers();
+	void slotAdvanceComputerPlayers(unsigned int advanceCount);
 
 signals:
 	/**

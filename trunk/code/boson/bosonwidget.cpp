@@ -182,9 +182,6 @@ void BosonWidget::init()
  addBigDisplay();
  initChat();
 
- connect(d->mCanvas, SIGNAL(signalPlaySound(const QString&)), 
-		boMusic, SLOT(slotPlaySound(const QString&)));
-
 // 640*480 is probably not enough (KDE needs at least 800*600) but as a minimum
 // should be ok.
  setMinimumWidth(640);

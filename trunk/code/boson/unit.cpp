@@ -1105,5 +1105,5 @@ void Facility::moveTo(int x, int y)
 
 int Facility::constructionDelay()
 {
- return 50;
+ return 5;
 }

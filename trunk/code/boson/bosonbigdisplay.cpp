@@ -141,7 +141,9 @@ void BosonBigDisplay::init()
  connect(this, SIGNAL(contentsMoving(int, int)), 
 		this, SLOT(slotContentsMoving(int, int)));
 
- d->mMinerals = new QLabel(this, "MineralsLabel", WX11BypassWM|WRepaintNoErase|WStaticContents);
+ d->mMinerals = new QLabel(this, "MineralsLabel", 
+		WX11BypassWM | WRepaintNoErase | WStaticContents |
+		WRepaintNoErase); // does this have effect at all?
  d->mMinerals->hide();
  d->mOil= new QLabel(this, "MineralsLabel", WX11BypassWM);
  d->mOil->hide();

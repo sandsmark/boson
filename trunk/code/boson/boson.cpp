@@ -73,8 +73,8 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
 		this, SLOT(slotPlayerJoinedGame(KPlayer*)));
  connect(this, SIGNAL(signalPlayerLeftGame(KPlayer*)),
 		this, SLOT(slotPlayerLeftGame(KPlayer*)));
- connect(this, SIGNAL(signalAdvance()),
-		this, SLOT(slotAdvanceComputerPlayers()));
+ connect(this, SIGNAL(signalAdvance(unsigned int)),
+		this, SLOT(slotAdvanceComputerPlayers(unsigned int)));
  d->mGameSpeed.registerData(IdGameSpeed, dataHandler(),
 		KGamePropertyBase::PolicyLocal, "GameSpeed"); // PolicyClean?
  d->mNextUnitId.registerData(IdNextUnitId, dataHandler(),
@@ -736,7 +736,7 @@ void Boson::slotPlayerLeftGame(KPlayer* p)
  }
 }
 
-void Boson::slotAdvanceComputerPlayers()
+void Boson::slotAdvanceComputerPlayers(unsigned int /*advanceCount*/)
 {
  // we use this to "advance" the computer player. This is a completely new concept
  // introduced to KGameIO just for boson. See KGaneComputerIO documentation for
