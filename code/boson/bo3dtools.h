@@ -21,6 +21,7 @@
 #define BO3DTOOLS_H
 
 #include <GL/gl.h>
+#include <math.h>
 
 #include "defines.h"
 #include "bomath.h"
@@ -356,7 +357,10 @@ class BoVector3
      * Notice that this function actually uses sqrt(), so it is slow in
      * situations where you use it often!
      **/
-    float length() const;
+    float length() const
+    {
+      return sqrt(dotProduct());
+    }
 
     /**
      * @return The dot product of the two vectors @p v and @p w.

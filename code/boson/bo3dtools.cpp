@@ -66,11 +66,6 @@ QDataStream& operator>>(QDataStream& s, BoVector2Float& v)
 }
 
 
-float BoVector3::length() const
-{
-  return sqrt(dotProduct());
-}
-
 BoVector3 BoVector3::crossProduct(const BoVector3& v, const BoVector3& w)
 {
   BoVector3 r;
