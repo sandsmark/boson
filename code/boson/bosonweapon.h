@@ -183,7 +183,7 @@ class BosonWeapon : public UnitPlugin
     inline const BosonWeaponProperties* properties() const  { return mProp; };
 
     void shoot(Unit* u);
-    void shoot(BoVector3 target);
+    void shoot(const BoVector3& target);
 
   protected:
     inline void reload()  { if(mReloadCounter > 0) { mReloadCounter = mReloadCounter - 1; } }

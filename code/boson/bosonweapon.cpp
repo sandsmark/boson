@@ -132,8 +132,10 @@ QPtrList<BosonParticleSystem> BosonWeaponProperties::newShootParticleSystems(BoV
   while(it.current())
   {
     BosonParticleSystem* s = it.current()->newSystem(pos);
-    s->setRotation(BoVector3(0, 0, -rotation));
-    list.append(s);
+    if (s) {
+      s->setRotation(BoVector3(0, 0, -rotation));
+      list.append(s);
+    }
     ++it;
   }
   return list;
@@ -145,7 +147,10 @@ QPtrList<BosonParticleSystem> BosonWeaponProperties::newFlyParticleSystems(BoVec
   QPtrListIterator<BosonParticleSystemProperties> it(mFlyParticleSystems);
   while(it.current())
   {
-    list.append(it.current()->newSystem(pos));
+    BosonParticleSystem* s = it.current()->newSystem(pos);
+    if (s) {
+      list.append(s);
+    }
     ++it;
   }
   return list;
@@ -157,7 +162,10 @@ QPtrList<BosonParticleSystem> BosonWeaponProperties::newHitParticleSystems(BoVec
   QPtrListIterator<BosonParticleSystemProperties> it(mHitParticleSystems);
   while(it.current())
   {
-    list.append(it.current()->newSystem(pos));
+    BosonParticleSystem* s = it.current()->newSystem(pos);
+    if (s) {
+      list.append(s);
+    }
     ++it;
   }
   return list;
@@ -240,7 +248,7 @@ void BosonWeapon::shoot(Unit* u)
   shoot(BoVector3(u->x() + u->width() / 2, u->y() + u->height() / 2, u->z()));
 }
 
-void BosonWeapon::shoot(BoVector3 target)
+void BosonWeapon::shoot(const BoVector3& target)
 {
   if (!unit())
   {
