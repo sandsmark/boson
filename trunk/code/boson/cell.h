@@ -88,6 +88,12 @@ public:
 	bool canGo(const UnitProperties* unit) const;
 	static bool canGo(const UnitProperties* unit, GroundType ground);
 
+	/**
+	 * @return The moving cost of this cell. Higher value means the unit
+	 * should move slower here.
+	 **/
+	int moveCost() const; // leave signed, maybe we can use negative values for roads one day?
+
 
 	/**
 	 * @return Whether ground is a plain tile
