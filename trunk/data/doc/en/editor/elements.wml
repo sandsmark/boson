@@ -19,13 +19,14 @@
     <p>
     You have to switch between the players. You can only create facilities for one player at one time.
     Don't forget to change the player while building units and buildings.<br>
-    If you change the tiles on map or remove facilities player doesn't matter.    
+    If you change the tiles on map or remove facilities, the player doesn't matter.    
     </p><p>&nbsp;</p>
     
     <h4>Properties</h4>
     <p>
-    Changing of facility, game or map properties is not supported at the moment
+    Changing of facility or game properties is not supported at the moment<br>
+    The map properties are changeable on the startup screen.
     </p>
     
-#include "nav.wml" before_url="overview.html" before_text="Overview" after_url="map.html" after_text="Working with the map" up_url="index.html"
+#include "nav.wml" before_url="index.html" before_text="The Boson editor" after_url="startup.html" after_text="The startup screen" up_url="index.html"
 #include "footer.wml"
