@@ -180,7 +180,7 @@ bool UnitProperties::loadUnitType(const QString& fileName, bool fullmode)
 	d->mExplodingFragmentFlyEffects = BosonEffectProperties::loadEffectProperties(d->mExplodingFragmentFlyEffectIds);
 	d->mExplodingFragmentHitEffects = BosonEffectProperties::loadEffectProperties(d->mExplodingFragmentHitEffectIds);
  }
- d->mHitPoint = BosonConfig::readBoVector3Entry(&conf, "HitPoint");  // FIXME: better name
+ d->mHitPoint = BosonConfig::readBoVector3Entry(&conf, "HitPoint", BoVector3(0, 0, mUnitDepth / 2.0f));  // FIXME: better name
 
  d->mDestroyedEffectIds = BosonConfig::readUnsignedLongNumList(&conf, "DestroyedEffects");
  d->mConstructedEffectIds = BosonConfig::readUnsignedLongNumList(&conf, "ConstructedEffects");

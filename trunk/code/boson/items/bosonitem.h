@@ -243,6 +243,7 @@ public:
 
 	inline bofixed centerX() const { return x() + width() / 2; };
 	inline bofixed centerY() const { return y() + height() / 2; };
+	inline bofixed centerZ() const { return z() + depth() / 2; };
 	BoVector2<bofixed> center() const;
 
 	BoRect<bofixed> boundingRect() const;
