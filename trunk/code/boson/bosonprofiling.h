@@ -100,7 +100,28 @@ public:
 	static void initProfiling();
 	static BosonProfiling* bosonProfiling() { return mProfiling; }
 
+	/**
+	 * Start the timer for profiling. Note that nesting timers <em>are</em>
+	 * possible, as long as you use different events. Example:
+	 * <pre>
+	 * boProfiling->start(0);
+	 * doSomething();
+	 * boProfiling->start(1);
+	 * doMore();
+	 * boProfiling->stop(1);
+	 * doTheRest();
+	 * boProfiling->stop(0);
+	 * </pre>
+	 * The two timers are completely independant of each other. However the
+	 * two timers <em>must</em> have different events.
+	 **/
 	void start(ProfilingEvent event);
+
+	/**
+	 * Stop the event timer and append the resulting time to the list. If
+	 * the list contains more than MAX_ENTRIES the first item is removed.
+	 * See also @ref start
+	 **/
 	void stop(ProfilingEvent event);
 
 	void loadUnit();

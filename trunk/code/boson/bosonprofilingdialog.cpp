@@ -324,15 +324,29 @@ void BosonProfilingDialog::resetEventsPage()
 	event->setText(0, profilingName(it.key()));
 	BosonProfiling::BosonProfilingPrivate::TimesList::Iterator timesIt = (*it).begin();
 	int i = 0;
+	long int sum = 0;
 	for (; timesIt != (*it).end(); ++timesIt, i++) {
 		QListViewItemNumber* item = new QListViewItemNumber(event);
 		item->setText(0, QString::number(i));
 		item->setText(1, QString::number(*timesIt));
 		item->setText(2, QString::number((double)*timesIt / 1000));
 		item->setText(3, QString::number((double)*timesIt / 1000000));
+		sum += *timesIt;
 	}
-	// probably it doesn't make sense to sum all values up
 	event->setOpen(true);
+	if (i) {
+		QListViewItemNumber* s = new QListViewItemNumber(event);
+		s->setText(0, i18n("Sum"));
+		s->setText(1, QString::number(sum));
+		s->setText(2, QString::number((double)sum/ 1000));
+		s->setText(3, QString::number((double)sum/ 1000000));
+
+		QListViewItemNumber* average = new QListViewItemNumber(event);
+		average->setText(0, i18n("Average"));
+		average->setText(1, QString::number(sum / i));
+		average->setText(2, QString::number((double)(sum / i) / 1000));
+		average->setText(3, QString::number((double)(sum / i) / 1000000));
+	}
  }
 }
 
