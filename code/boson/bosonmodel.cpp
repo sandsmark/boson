@@ -202,9 +202,9 @@ void BoMeshSorter::sortByMaxSize(QValueList<BoMeshSorter::Mesh>* meshes)
 	for (listIt = list->begin(); listIt != list->end(); ++listIt) {
 		meshes->prepend(*listIt);
 	}
-	map.remove(mapIt.key());
 	delete list;
  }
+ map.clear(); // all inserted pointers are already deleted
 
  if (meshesCount != meshes->count()) {
 	boError() << k_funcinfo << "invalid result! count=" << meshes->count() << " should be: " << meshesCount << endl;
