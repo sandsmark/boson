@@ -772,6 +772,7 @@ void BosonGLMiniMapRenderer::createMap(unsigned int w, unsigned int h, BosonGrou
 
 void BosonGLMiniMapRenderer::render()
 {
+ glColor3ub(255, 255, 255);
  d->mMiniMapChangesSinceRendering = 0;
  renderGimmicks();
  switch (mType) {
