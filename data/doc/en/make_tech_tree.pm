@@ -1,6 +1,5 @@
 package make_tech_tree;
 use strict;
-use Image::Magick;
 
 # usage: command path_to_facilities [mob]
 #
@@ -11,10 +10,18 @@ use Image::Magick;
 
 sub draw_map() {
 
+if (eval {require Image::Magick})   {
+    }
+else    {
+    print "You need to install the perl \"image magick\" module to get this image generated !";
+    exit(0);    
+}
+
 my $self = shift;
 my $unittype = shift;
 
-my $debug = 0;                #change this to 1 to enable debug output
+#change this to 1 to enable debug output
+my $debug = 0;
 #my $unitpath = $ARGV[0];
 my $unitpath = "$ENV{TOP_SRCDIR}/themes/species/human/units/";
 
