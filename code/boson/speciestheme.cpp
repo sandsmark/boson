@@ -29,6 +29,7 @@
 #ifndef NO_OPENGL
 #include "bosontexturearray.h"
 #include "bosonmodel.h"
+#include <qgl.h>
 #else
 #include <qcanvas.h>
 #endif
@@ -42,15 +43,6 @@
 #include <qbitmap.h>
 #include <qintdict.h>
 #include <qdir.h>
-
-#ifndef NO_GL
-#include <qgl.h>
-
-#define USE_3DS_FILES 1
-
-int SpeciesTheme::mThemeNumber = 0;
-
-#endif
 
 /**
  * By any reason QPixmap uses the alpha mask if existing, even if a custom 
@@ -1003,7 +995,6 @@ void SpeciesTheme::loadUnitTextures(int unitType, QValueList<QImage> list)
 
 void SpeciesTheme::loadUnitModel(const UnitProperties* prop)
 {
-#if USE_3DS_FILES
  BosonModel* m = 0;
  if (QFile::exists(prop->unitPath() + QString::fromLatin1("unit.3ds"))) {
 	m = new BosonModel(prop->unitPath(), QString::fromLatin1("unit.3ds"));
@@ -1013,10 +1004,6 @@ void SpeciesTheme::loadUnitModel(const UnitProperties* prop)
 	GLuint list = createDisplayList(prop->typeId());
 	m = new BosonModel(list, array->width(0), array->height(0));
  }
-#else
- QLuint list = createDisplayList(prop->typeId());
- BosonModel* m = new BosonModel(list);
-#endif
  d->mUnitModels.insert(prop->typeId(), m);
 }
 
