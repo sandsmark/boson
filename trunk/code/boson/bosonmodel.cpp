@@ -736,7 +736,9 @@ void BosonModel::loadModel()
 		continue;
 	}
 	QString tex = cleanTextureName(mat->textureName());
-	modelTextures.append(tex);
+	if (!tex.isEmpty()) {
+		modelTextures.append(tex);
+	}
  }
 
  boProfiling->start(BosonProfiling::LoadModelTextures);
