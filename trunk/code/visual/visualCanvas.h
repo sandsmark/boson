@@ -68,6 +68,9 @@ signals:
 
 //	void	mobileDestroyed( int);
 //	void	fixDestroyed( int);
+
+private:
+	QPixmap		_pm;	// the same as the private QCanvas::pm
 };
 
 #endif // VISUALCANVAS_H
