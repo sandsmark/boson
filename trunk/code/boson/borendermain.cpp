@@ -269,9 +269,9 @@ void ModelPreview::initializeGL()
 	delete mLight;
 	mLight = 0;
  } else {
-	BoVector4 lightDif(1.0f, 1.0f, 1.0f, 1.0f);
-	BoVector4 lightAmb(0.5f, 0.5f, 0.5f, 1.0f);
-	BoVector3 lightPos(-6000.0, 3000.0, 10000.0);
+	BoVector4Float lightDif(1.0f, 1.0f, 1.0f, 1.0f);
+	BoVector4Float lightAmb(0.5f, 0.5f, 0.5f, 1.0f);
+	BoVector3Float lightPos(-6000.0, 3000.0, 10000.0);
 	mLight->setAmbient(lightAmb);
 	mLight->setDiffuse(lightDif);
 	mLight->setSpecular(lightDif);
@@ -985,9 +985,9 @@ void ModelPreview::setModel(BosonModel* model)
 
 void ModelPreview::slotResetView()
 {
- BoVector3 cameraPos(0.0f, 0.0f, 2.0f);
- BoVector3 lookAt(0.0f, 0.0f, 0.0f);
- BoVector3 up(0.0f, 50.0f, 0.0f);
+ BoVector3Float cameraPos(0.0f, 0.0f, 2.0f);
+ BoVector3Float lookAt(0.0f, 0.0f, 0.0f);
+ BoVector3Float up(0.0f, 50.0f, 0.0f);
  updateCamera(cameraPos, lookAt, up);
  emit signalFovYChanged(60.0);
  resizeGL(width(), height());
@@ -1208,7 +1208,7 @@ void ModelPreview::mouseMoveEvent(QMouseEvent* e)
 	int dy = mMouseMoveDiff->dx(); // rotation around y axis
 
 	BoQuaternion q = camera()->quaternion();
-	BoVector3 cameraPos;
+	BoVector3Float cameraPos;
 	q.transform(&cameraPos, &camera()->cameraPos());
 
 	BoQuaternion q2;
@@ -1248,15 +1248,15 @@ void ModelPreview::wheelEvent(QWheelEvent* e)
  if (e->orientation() == Horizontal) {
  } else {
  }
- BoVector3 lookAt = camera()->lookAt();
- BoVector3 eye = camera()->cameraPos();
- BoVector3 up = camera()->up();
+ BoVector3Float lookAt = camera()->lookAt();
+ BoVector3Float eye = camera()->cameraPos();
+ BoVector3Float up = camera()->up();
 
- BoVector3 orientation = eye - lookAt;
+ BoVector3Float orientation = eye - lookAt;
  orientation.normalize();
  if (orientation.isNull()) {
 	// FIXME: this should be disallowed!
-	orientation = BoVector3(1.0f, 0.0f, 0.0f);
+	orientation = BoVector3Float(1.0f, 0.0f, 0.0f);
  }
  // TODO: we should check whether all meshes are still in front of the NEAR plane!
 
@@ -1336,20 +1336,20 @@ void ModelPreview::slotLODChanged(int l)
  mCurrentLOD = l;
 }
 
-void ModelPreview::updateCamera(const BoVector3& cameraPos, const BoQuaternion& q)
+void ModelPreview::updateCamera(const BoVector3Float& cameraPos, const BoQuaternion& q)
 {
  updateCamera(cameraPos, q.matrix());
 }
 
-void ModelPreview::updateCamera(const BoVector3& cameraPos, const BoMatrix& rotationMatrix)
+void ModelPreview::updateCamera(const BoVector3Float& cameraPos, const BoMatrix& rotationMatrix)
 {
- BoVector3 lookAt;
- BoVector3 up;
+ BoVector3Float lookAt;
+ BoVector3Float up;
  rotationMatrix.toGluLookAt(&lookAt, &up, cameraPos);
  updateCamera(cameraPos, lookAt, up);
 }
 
-void ModelPreview::updateCamera(const BoVector3& cameraPos, const BoVector3& lookAt, const BoVector3& up)
+void ModelPreview::updateCamera(const BoVector3Float& cameraPos, const BoVector3Float& lookAt, const BoVector3Float& up)
 {
  BO_CHECK_NULL_RET(camera());
  camera()->setGluLookAt(cameraPos, lookAt, up);
@@ -1527,7 +1527,7 @@ void RenderMain::connectBoth(QObject* o1, QObject* o2, const char* signal, const
 bool RenderMain::loadCamera(KCmdLineArgs* args)
 {
  BoQuaternion quat = mPreview->camera()->quaternion();
- BoVector3 cameraPos = mPreview->camera()->cameraPos();
+ BoVector3Float cameraPos = mPreview->camera()->cameraPos();
 
  // in borender we use a first translate, then rotate approach, whereas the
  // camera does it the other way round. we need to transform the vector first.
@@ -1596,7 +1596,7 @@ bool RenderMain::loadCamera(KCmdLineArgs* args)
  // re-transform to gluLookAt() values
  quat.inverse().transform(&cameraPos, &cameraPos);
 
- BoVector3 lookAt, up;
+ BoVector3Float lookAt, up;
  quat.matrix().toGluLookAt(&lookAt, &up, cameraPos);
 
  mPreview->camera()->setGluLookAt(cameraPos, lookAt, up);

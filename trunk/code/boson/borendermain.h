@@ -44,7 +44,6 @@ class BoCamera;
 class BoCameraWidget;
 class BoMatrix;
 class BoQuaternion;
-class BoVector3;
 class BoFrame;
 class BoLight;
 class BoLightCameraWidget;
@@ -55,6 +54,8 @@ class QCheckBox;
 class BoFontInfo;
 class BoPUILayout;
 class BoUfoManager;
+template<class T> class BoVector3;
+typedef BoVector3<float> BoVector3Float;
 
 class KMyFloatNumInput : public KDoubleNumInput
 {
@@ -227,9 +228,9 @@ protected:
 	void setModel(BosonModel*);
 	BoFrame* frame(unsigned int f) const;
 
-	void updateCamera(const BoVector3& cameraPos, const BoQuaternion& q);
-	void updateCamera(const BoVector3& cameraPos, const BoMatrix& rotationMatrix);
-	void updateCamera(const BoVector3& cameraPos, const BoVector3& lookAt, const BoVector3& up);
+	void updateCamera(const BoVector3Float& cameraPos, const BoQuaternion& q);
+	void updateCamera(const BoVector3Float& cameraPos, const BoMatrix& rotationMatrix);
+	void updateCamera(const BoVector3Float& cameraPos, const BoVector3Float& lookAt, const BoVector3Float& up);
 
 	/**
 	 * Use -1 to select nothing.
