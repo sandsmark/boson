@@ -12,8 +12,6 @@
         name2="mineralrefinery" type2="fix"
 #include "simple_facilities.wml" type="Facilities" name="Oil Refinery" \
         name2="oilrefinery" type2="fix"
-#include "simple_facilities.wml" type="Facilities" name="Oil Tower" \
-        name2="oiltower" type2="fix"
 #include "simple_facilities.wml" type="Facilities" name="Power Plant" \
         name2="powerplant" type2="fix"
 #include "simple_facilities.wml" type="Facilities" name="Weapons Factory" \
