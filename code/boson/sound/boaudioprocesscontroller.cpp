@@ -57,7 +57,7 @@ BoAudioProcessController::~BoAudioProcessController()
 bool BoAudioProcessController::start()
 {
  if (!d->mProcess) {
-	d->mProcess = new KProcess(0, "bosonsoundprocess");
+	d->mProcess = new KProcess();
 	connect(d->mProcess, SIGNAL(receivedStdout(KProcess*, char*, int)),
 			this, SLOT(slotShowStdout(KProcess*, char*, int)));
 	connect(d->mProcess, SIGNAL(receivedStderr(KProcess*, char*, int)),
@@ -74,7 +74,7 @@ bool BoAudioProcessController::start()
 #warning FIXME: check for existance ; use KStandardDirs
  processPath = "bosonaudioprocess"; // will be found in $KDEDIR/bin
 
- *d->mProcess << processPath;
+ *(d->mProcess) << processPath;
 
  boDebug(200) << k_funcinfo << "starting process" << endl;
  return d->mProcess->start(KProcess::NotifyOnExit, KProcess::All);
