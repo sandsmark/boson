@@ -264,6 +264,10 @@ void BosonGLMiniMap::initFogOfWar(PlayerIO* p)
  BO_CHECK_NULL_RET(map());
  boDebug() << k_funcinfo << endl;
 
+ if (mRenderer) {
+	mRenderer->setUpdatesEnabled(false);
+ }
+
  // AB: add a global PlayerIO to the editor. only use non-NULL IOs here then.
  if (!p) {
 	// a NULL playerIO means that we should display the complete map. fog of
@@ -283,6 +287,10 @@ void BosonGLMiniMap::initFogOfWar(PlayerIO* p)
 			}
 		}
 	}
+ }
+
+ if (mRenderer) {
+	mRenderer->setUpdatesEnabled(true);
  }
 }
 
@@ -630,6 +638,8 @@ public:
 	int mMapTextureWidth;
 	int mMapTextureHeight;
 	BoTexture* mGLMapTexture;
+
+	bool mUpdatesEnabled;
 };
 
 BosonGLMiniMapRenderer::BosonGLMiniMapRenderer(const int* viewport)
@@ -646,6 +656,9 @@ BosonGLMiniMapRenderer::BosonGLMiniMapRenderer(const int* viewport)
  mTextureMaxHeight = 1.0f;
  mMiniMapWidth = 0;
  mMiniMapHeight = 0;
+ d->mMapTextureWidth = 0;
+ d->mMapTextureHeight = 0;
+ d->mUpdatesEnabled = true;
 
  mPosX = distanceFromEdge();
  mPosY = distanceFromEdge();
@@ -659,6 +672,18 @@ BosonGLMiniMapRenderer::~BosonGLMiniMapRenderer()
  delete d->mGLMapTexture;
  delete[] d->mMapTexture;
  delete d;
+}
+
+void BosonGLMiniMapRenderer::setUpdatesEnabled(bool e)
+{
+ d->mUpdatesEnabled = e;
+ if (e) {
+	delete d->mGLMapTexture;
+	d->mGLMapTexture = new BoTexture(d->mMapTexture,
+			d->mMapTextureWidth, d->mMapTextureHeight,
+			BoTexture::FilterLinear | BoTexture::FormatRGBA |
+			BoTexture::DontCompress | BoTexture::DontGenMipmaps);
+ }
 }
 
 void BosonGLMiniMapRenderer::setMiniMapSize(unsigned int width, unsigned int height)
@@ -715,10 +740,8 @@ void BosonGLMiniMapRenderer::createMap(unsigned int w, unsigned int h, BosonGrou
 	}
  }
 
- d->mGLMapTexture = new BoTexture(d->mMapTexture,
-		d->mMapTextureWidth, d->mMapTextureHeight,
-		BoTexture::FilterLinear | BoTexture::FormatRGBA |
-		BoTexture::DontCompress | BoTexture::DontGenMipmaps);
+ setUpdatesEnabled(false);
+ setUpdatesEnabled(true);
 }
 
 void BosonGLMiniMapRenderer::render()
@@ -767,6 +790,8 @@ void BosonGLMiniMapRenderer::renderMiniMap()
  BO_CHECK_NULL_RET(d->mGLMapTexture);
  glPushMatrix();
  glLoadIdentity();
+ glPushAttrib(GL_ENABLE_BIT);
+ glEnable(GL_TEXTURE_2D);
  d->mModelviewMatrix.loadIdentity();
  d->mModelviewMatrix.translate((float)mPosX, mPosY, 0.0f);
 
@@ -777,6 +802,7 @@ void BosonGLMiniMapRenderer::renderMiniMap()
 
  renderQuad();
 
+ glPopAttrib();
  glPopMatrix();
 
  renderCamera();
@@ -838,8 +864,7 @@ void BosonGLMiniMapRenderer::setPoint(int x, int y, const QColor& color)
  d->mMapTexture[(y * d->mMapTextureWidth + x) * 4 + 1] = color.green();
  d->mMapTexture[(y * d->mMapTextureWidth + x) * 4 + 2] = color.blue();
  d->mMapTexture[(y * d->mMapTextureWidth + x) * 4 + 3] = 255; // redundant! is already set on initialization
- if (d->mGLMapTexture) {
-	glEnable(GL_TEXTURE_2D);
+ if (d->mGLMapTexture && d->mUpdatesEnabled) {
 	d->mGLMapTexture->bind();
 	glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE,
 			&d->mMapTexture[(y * d->mMapTextureWidth + x) * 4]);
