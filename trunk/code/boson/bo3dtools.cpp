@@ -38,111 +38,6 @@
 #define RAD2DEG (180.0/M_PI)
 
 
-/*****  Misc methods  *****/
-
-float Bo3dTools::rotationToPoint(float x, float y)
-{
-  float add = 0;
-  float arg = 0;
-  if(x > 0)
-  {
-    if(y < 0)
-    {
-      add = 0;
-      arg = x / -y;
-    }
-    else
-    {
-      add = 90;
-      arg = y / x;
-    }
-  }
-  else
-  {
-    if(y > 0)
-    {
-      add = 180;
-      arg = -x / y;
-    }
-    else if(x < 0)
-    {
-      add = 270;
-      arg = -y / -x;
-    }
-    else
-    {
-      return 0;
-    }
-  }
-
-  return (atan(arg) * RAD2DEG) + add;
-}
-
-void Bo3dTools::pointByRotation(float* x, float* y, const float angle, const float radius)
-{
-  // Some quick tests
-  if(angle == 0)
-  {
-    *x = 0;
-    *y = -radius;
-    return;
-  }
-  else if(angle == 90)
-  {
-    *x = radius;
-    *y = 0;
-    return;
-  }
-  else if(angle == 180)
-  {
-    *x = 0;
-    *y = radius;
-    return;
-  }
-  else if(angle == 270)
-  {
-    *x = -radius;
-    *y = 0;
-    return;
-  }
-  double tmpx, tmpy;
-  tmpy = 1.0;
-  tmpx = tan(angle / RAD2DEG);
-  double length = sqrt(tmpx * tmpx + tmpy * tmpy);
-  tmpx = tmpx / length * radius;
-  tmpy = tmpy / length * radius;
-  if(angle < 90)
-  {
-    *x = tmpx;
-    *y = -tmpy;
-  }
-  else if(angle < 180)
-  {
-    *x = -tmpx;
-    *y = tmpy;
-  }
-  else if(angle < 270)
-  {
-    *x = -tmpx;
-    *y = tmpy;
-  }
-  else
-  {
-    *x = tmpx;
-    *y = -tmpy;
-  }
-}
-
-float Bo3dTools::deg2rad(float deg)
-{
-  return deg * DEG2RAD;
-}
-
-float Bo3dTools::rad2deg(float rad)
-{
-  return rad * RAD2DEG;
-}
-
 /*****  BoVector*  *****/
 
 float BoVector3::length() const
@@ -583,6 +478,113 @@ void BoMatrix::debugMatrix(const GLfloat* m)
  }
  boDebug() << k_funcinfo << "done" << endl;
 }
+
+
+/*****  Misc methods  *****/
+
+float Bo3dTools::rotationToPoint(float x, float y)
+{
+  float add = 0;
+  float arg = 0;
+  if(x > 0)
+  {
+    if(y < 0)
+    {
+      add = 0;
+      arg = x / -y;
+    }
+    else
+    {
+      add = 90;
+      arg = y / x;
+    }
+  }
+  else
+  {
+    if(y > 0)
+    {
+      add = 180;
+      arg = -x / y;
+    }
+    else if(x < 0)
+    {
+      add = 270;
+      arg = -y / -x;
+    }
+    else
+    {
+      return 0;
+    }
+  }
+
+  return (atan(arg) * RAD2DEG) + add;
+}
+
+void Bo3dTools::pointByRotation(float* x, float* y, const float angle, const float radius)
+{
+  // Some quick tests
+  if(angle == 0)
+  {
+    *x = 0;
+    *y = -radius;
+    return;
+  }
+  else if(angle == 90)
+  {
+    *x = radius;
+    *y = 0;
+    return;
+  }
+  else if(angle == 180)
+  {
+    *x = 0;
+    *y = radius;
+    return;
+  }
+  else if(angle == 270)
+  {
+    *x = -radius;
+    *y = 0;
+    return;
+  }
+  double tmpx, tmpy;
+  tmpy = 1.0;
+  tmpx = tan(angle / RAD2DEG);
+  double length = sqrt(tmpx * tmpx + tmpy * tmpy);
+  tmpx = tmpx / length * radius;
+  tmpy = tmpy / length * radius;
+  if(angle < 90)
+  {
+    *x = tmpx;
+    *y = -tmpy;
+  }
+  else if(angle < 180)
+  {
+    *x = -tmpx;
+    *y = tmpy;
+  }
+  else if(angle < 270)
+  {
+    *x = -tmpx;
+    *y = tmpy;
+  }
+  else
+  {
+    *x = tmpx;
+    *y = -tmpy;
+  }
+}
+
+float Bo3dTools::deg2rad(float deg)
+{
+  return deg * DEG2RAD;
+}
+
+float Bo3dTools::rad2deg(float rad)
+{
+  return rad * RAD2DEG;
+}
+
 
 /*
  * vim:et sw=2
