@@ -412,6 +412,7 @@ HarvesterPlugin::HarvesterPlugin(Unit* unit)
  mHarvestingType.registerData(Unit::IdMob_HarvestingType, dataHandler(),
 		KGamePropertyBase::PolicyLocal, "HarvestingType");
  mHarvestingType.setLocal(0);
+ mRefinery = 0l;
 }
 
 HarvesterPlugin::~HarvesterPlugin()
@@ -438,6 +439,12 @@ void HarvesterPlugin::advanceMine()
 	unit()->setWork(Unit::WorkNone);
 	return;
  }
+ if((mResourcesX / BO_TILE_SIZE != unit()->x() / BO_TILE_SIZE) || (mResourcesY / BO_TILE_SIZE != unit()->y() / BO_TILE_SIZE))
+ {
+	unit()->moveTo(mResourcesX, mResourcesY);
+	unit()->setAdvanceWork(Unit::WorkMove);
+	return;
+ }
  if (resourcesMined() < prop->maxResources()) {
 	if (canMine(canvas()->cellAt(unit()))) {
 		const int step = (resourcesMined() + 10 <= prop->maxResources()) ? 10 : prop->maxResources() - resourcesMined();
@@ -451,6 +458,7 @@ void HarvesterPlugin::advanceMine()
 	} else {
 		kdDebug() << k_funcinfo << "cannot mine here" << endl;
 		unit()->setWork(Unit::WorkNone);
+		unit()->setAdvanceWork(Unit::WorkNone);
 		return;
 	}
  } else {
@@ -468,6 +476,7 @@ void HarvesterPlugin::advanceRefine()
 		mineAt(QPoint(resourcesX(), resourcesY()));
 	} else {
 		unit()->setWork(Unit::WorkNone);
+		unit()->setAdvanceWork(Unit::WorkNone);
 	}
 	return;
  }
@@ -479,6 +488,7 @@ void HarvesterPlugin::advanceRefine()
 	if (!prop) {
 		kdError() << k_funcinfo << "NULL harvester plugin" << endl;
 		unit()->setWork(Unit::WorkNone);
+		unit()->setAdvanceWork(Unit::WorkNone);
 		return;
 	}
 	Facility* ref = 0; // FIXME: must not depend on Facility! Use a RefineryPlugin
@@ -498,6 +508,7 @@ void HarvesterPlugin::advanceRefine()
 	if (!ref) {
 		kdDebug() << k_funcinfo << "no suitable refinery found" << endl;
 		unit()->setWork(Unit::WorkNone);
+		unit()->setAdvanceWork(Unit::WorkNone);
 	} else {
 		kdDebug() << k_funcinfo << "refinery: " << ref->id() << endl;
 		refineAt(ref);
@@ -521,6 +532,13 @@ void HarvesterPlugin::advanceRefine()
 			player()->statistics()->increaseRefinedOil(step);
 		}
 	} else {
+		if (!unit()->moveTo(refinery()->x(), refinery()->y(), 1)) {
+			kdDebug() << k_funcinfo << "Cannot find way to refinery" << endl;
+			unit()->setWork(Unit::WorkNone);
+			unit()->setAdvanceWork(Unit::WorkNone);
+		} else {
+			unit()->setAdvanceWork(Unit::WorkMove);
+		}
 	}
  }
 }
@@ -535,6 +553,7 @@ void HarvesterPlugin::mineAt(const QPoint& pos)
  mResourcesX = pos.x();
  mResourcesY = pos.y();
  mHarvestingType = 1;
+ mRefinery = 0l;  // This is needed for searching closest refinery in the future
 }
 
 
@@ -557,6 +576,7 @@ void HarvesterPlugin::refineAt(Unit* refinery)
  if (!unit()->moveTo(refinery->x(), refinery->y(), 1)) {
 	kdDebug() << k_funcinfo << "Cannot find way to refinery" << endl;
 	unit()->setWork(Unit::WorkNone);
+	unit()->setAdvanceWork(Unit::WorkNone);
  } else {
 	unit()->setAdvanceWork(Unit::WorkMove);
  }

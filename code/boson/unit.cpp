@@ -985,13 +985,6 @@ void MobileUnit::advanceMoveInternal(unsigned int) // this actually needs to be 
 		}
 		// TODO: make sure that target() hasn't moved!
 		// if it has moved also adjust waypoints
-	} else if (currentPluginType() == UnitPlugin::Harvester) {
-		HarvesterPlugin* h = (HarvesterPlugin*)currentPlugin();
-		if (isNextTo(h->refinery())) {
-			kdDebug() << k_funcinfo << "refinery in range now" << endl;
-			stopMoving();
-			return;
-		}
 	}
  }
 
@@ -1025,16 +1018,18 @@ void MobileUnit::advanceMoveInternal(unsigned int) // this actually needs to be 
 	if (waypointCount() == 0) {
 		kdDebug() << k_funcinfo << "no more waypoints. Stopping moving" << endl;
 		stopMoving();
-		// Turn a bit
-		int turn = (int)rotation() + (owner()->game()->random()->getLong(90) - 45);
-		// Check for overflows
-		if (turn < 0) {
-			turn += 360;
-		} else if (turn > 360) {
-			turn -= 360;
+		if (work() == WorkNone) {
+			// Turn a bit
+			int turn = (int)rotation() + (owner()->game()->random()->getLong(90) - 45);
+			// Check for overflows
+			if (turn < 0) {
+				turn += 360;
+			} else if (turn > 360) {
+				turn -= 360;
+			}
+			Unit::turnTo(int(turn));
+			setWork(WorkTurn);
 		}
-		Unit::turnTo(int(turn));
-		setWork(WorkTurn);
 		return;
 	}
 
