@@ -63,6 +63,8 @@ public:
 
 	void setLocalPlayer(Player* p);
 
+	void loadCursors(const QString& dir);
+
 public slots:
 	/**
 	 * @param pos The new position - cell coordinates! so you have to

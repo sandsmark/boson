@@ -202,9 +202,12 @@ void BosonWidget::init()
 		d->mMiniMap, SLOT(slotUnitDestroyed(Unit*)));
 
 
-
 // tooltips - added in slotAddUnit
  d->mUnitTips = new KSpriteToolTip(d->mBigDisplay);
+
+// load the default theme
+ QString dir = KGlobal::dirs()->findResourceDir("data", "boson/themes/fow.xpm") + QString::fromLatin1("boson/themes");
+ d->mBigDisplay->loadCursors(dir + QString::fromLatin1("/cursors"));
 
 // 640*480 is probably not enough (KDE needs at least 800*600) but as a minimum
 // should be ok.
