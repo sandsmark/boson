@@ -24,6 +24,7 @@
 #include <qintdict.h>
 
 class QImage;
+class QPixmap;
 
 class BosonMap;
 class BosonTextureArray;
@@ -113,6 +114,12 @@ public:
 	 **/
 	QString textureFileName(unsigned int texture) const;
 
+	/**
+	 * @return The filename (relative to the groundTheme directory) of the pixmap
+	 * for @p texture. This pixmap will be used in editor
+	 **/
+	QString texturePixmapFileName(unsigned int texture) const;
+
 	int textureAnimationDelay(unsigned int texture) const;
 
 	QPixmap pixmap(unsigned int texture);
@@ -129,6 +136,7 @@ protected:
 private:
 	BosonGroundThemePrivate* d;
 	QIntDict<BosonTextureArray> mTextures;
+	QIntDict<QPixmap> mPixmaps;
 };
 
 #endif
