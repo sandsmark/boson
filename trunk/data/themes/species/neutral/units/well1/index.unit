@@ -1,0 +1,18 @@
+[Boson Facility]
+ConstructionSteps=0
+
+[Boson Unit]
+Name=Well1
+Health=30
+Id=66
+IsFacility=true
+MineralCost=160
+OilCost=20
+#Producer=10
+#ProductionTime=20
+SupportMiniMap=false
+TerrainType=0
+UnitDepth=0.5
+UnitHeight=0.4
+UnitWidth=0.4
+
