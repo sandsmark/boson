@@ -189,6 +189,7 @@ protected slots:
 	void slotChangeMaxProfilingRenderingEntries();
 	void slotProfiling();
 	void slotDebugKGame();
+	void slotDebugRequestIdName(int msgid, bool userid, QString& name);
 	void slotBoDebugLogDialog();
 	void slotSleep1s();
 	void slotGrabScreenshot();

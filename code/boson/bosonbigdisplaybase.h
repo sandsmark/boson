@@ -444,7 +444,6 @@ protected slots:
 
 	void slotAdvance(unsigned int, bool);
 
-	void slotDebugRequestIdName(int msgid, bool userid, QString& name);
 	void slotAddLineVisualization(const QValueList<BoVector3Fixed>& points, const BoVector4Float& color, bofixed pointSize, int timeout, bofixed zOffset);
 	void slotPreferencesApply();
 	void slotUpdateOpenGLSettings();

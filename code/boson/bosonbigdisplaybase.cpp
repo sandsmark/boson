@@ -1703,19 +1703,6 @@ void BosonBigDisplayBase::initializeGL()
 	return;
  }
  recursive = true;
- // AB: we need at least GLU 1.3 for gluCheckExtension() !
- // TODO: find out if we might be able to run boson with older versions - if yes
- // use the code from http://www.mesa3d.org/brianp/sig97/exten.htm#Compile to
- // check for extensions
- // TODO: check for extensions on configure/compile time, too!
- /*
- const* string = (char*)glGetString(GL_EXTENSIONS);
- if (!gluCheckExtension("GL_EXT_texture_object", string)) { // introduced in OpenGL 1.1 as standard feature
-	KMessageBox::sorry(this, i18n("Your OpenGL implementation seems not to support texture objects - don't even try to run boson without them!"));
-	kapp->exit(1);
-	return;
- }
- */
  glClearColor(0.0, 0.0, 0.0, 0.0);
 
  glDisable(GL_DITHER); // we don't need this (and its enabled by default)
@@ -1738,12 +1725,6 @@ void BosonBigDisplayBase::initializeGL()
  glHint(GL_CLIP_VOLUME_CLIPPING_HINT_EXT, GL_FASTEST);
 
 #endif
-
- // AB: GL_MODULATE is the default and the models don't use it. unortunately the
- // light code seems to have problems with GL_REPLACE. GL_REPLACE would be
- // faster
-// glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-
 
  BoVector4Float lightDif(0.644f, 0.644f, 0.644f, 1.0f);
  BoVector4Float lightAmb(0.502f, 0.502f, 0.502f, 1.0f);
@@ -4185,56 +4166,6 @@ void BosonBigDisplayBase::slotChangeCursor(int mode, const QString& cursorDir)
 	boConfig->setIntValue("CursorMode", d->mCursorCollection->cursorType());
 	boConfig->setStringValue("CursorDir", d->mCursorCollection->cursorDir());
  }
-}
-
-void BosonBigDisplayBase::slotDebugRequestIdName(int msgid, bool , QString& name)
-{
- // we don't use i18n() for debug messages... not worth the work
- switch (msgid) {
-	case BosonMessage::ChangeSpecies:
-		name = "Change Species";
-		break;
-	case BosonMessage::ChangePlayField:
-		name = "Change PlayField";
-		break;
-	case BosonMessage::ChangeTeamColor:
-		name = "Change TeamColor";
-		break;
-	case BosonMessage::AdvanceN:
-		name = "Advance";
-		break;
-	case BosonMessage::IdChat:
-		name = "Chat Message";
-		break;
-	case BosonMessage::IdGameIsStarted:
-		name = "Game is started";
-		break;
-	case BosonMessage::MoveMove:
-		name = "PlayerInput: Move";
-		break;
-	case BosonMessage::MoveAttack:
-		name = "PlayerInput: Attack";
-		break;
-	case BosonMessage::MoveBuild:
-		name = "PlayerInput: Build";
-		break;
-	case BosonMessage::MoveProduce:
-		name = "PlayerInput: Produce";
-		break;
-	case BosonMessage::MoveProduceStop:
-		name = "PlayerInput: Produce Stop";
-		break;
-	case BosonMessage::MoveMine:
-		name = "PlayerInput: Mine";
-		break;
-	case BosonMessage::UnitPropertyHandler:
-	default:
-		// a unit property was changed
-		// all ids > UnitPropertyHandler will be a unit property. we
-		// don't check further...
-		break;
- }
-// boDebug() << name << endl;
 }
 
 void BosonBigDisplayBase::grabMovieFrameAndSave()
