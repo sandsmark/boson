@@ -24,8 +24,8 @@
 #include "playField.h"
 
 #include "../common/groundType.h"
-//#include "../common/cell.h"
-#include "serverCell.h"
+#include "../common/cell.h"
+//#include "serverCell.h"
 
 
 
@@ -39,12 +39,19 @@
 
 playField::playField(const char *name)
 {
-
 filename = name;
-
-stream = 0L;
-
+stream = 0l;
+map.cells = 0l;
 }
+
+
+
+playField::~playField()
+{
+//if (map.cells) delete map.cells;
+}
+
+
 
 bool playField::write(void)
 {
@@ -68,10 +75,11 @@ bool playField::write(void)
 	
 	/* close */
 	f.close();
+	delete stream;
 	return true;
 }
 
-bool playField::load(void)
+bool playField::load(createCellFunc *CCFunc)
 {
 	char *magic;
 	QFile f(filename);
@@ -95,13 +103,12 @@ bool playField::load(void)
 
 	*stream >> nbPlayer;
 
-//	if (!loadMap()) return false;
-//	if (!loadPeople()) return false;
-	is_ok &= loadMap();
+	is_ok &= loadMap(CCFunc);
 	is_ok &= loadPeople();
 
 	/* close */
 	f.close();
+	delete stream;
 	return is_ok;
 }
 
@@ -135,7 +142,7 @@ bool	playField::load(origFacility &o)
 	return true;
 }
 
-bool	playField::load(serverCell  &c)
+bool	playField::load(Cell  &c)
 {
 	int g;
 	*stream >> g;
@@ -146,7 +153,7 @@ bool	playField::load(serverCell  &c)
 	return true;
 }
 
-bool	playField::loadMap()
+bool	playField::loadMap(createCellFunc *CCFunc)
 {
 	int i,j;
 	*stream >> j;
@@ -154,9 +161,10 @@ bool	playField::loadMap()
 	
 	*stream >> map.width >> map.height;
 	
-	map.cells = new (serverCell *)[map.width];
+	map.cells = CCFunc(map.width, map.height);
+/*	map.cells = new (Cell *)[map.width];
 	for (i=0; i< map.width; i++)
-		map.cells[i] = new (serverCell)[map.height];
+		map.cells[i] = new (Cell)[map.height]; */
 		
 	for (i=0; i< map.width; i++)
 		for (j=0; j< map.height; j++)
@@ -202,7 +210,7 @@ void	playField::write(origFacility &o)
 	*stream << (int)o.t << o.x << o.y << o.who;
 }
 
-void	playField::write(serverCell  &c)
+void	playField::write(Cell  &c)
 {
 	*stream << TAG_CELL;
 	*stream << (int)c.getGroundType();

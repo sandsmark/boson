@@ -21,12 +21,10 @@
 #ifndef PLAYFIELD_H 
 #define PLAYFIELD_H 
 
-
-//#include <qdatastream.h>
 #include "../common/unitType.h"
 
 
-class serverCell;
+class Cell;
 class QDataStream;
 
 
@@ -54,18 +52,23 @@ struct origPeople {
 
 
 struct bosonMap {
-	serverCell **cells;
+	Cell **cells;
 	int	width;
 	int	height;
 	};
+
+/* this is the callBack to create the XXXXCell array */
+/* that should, of course, inherits Cell (common/Cell.h )*/
+typedef Cell ** createCellFunc(int width, int height);
 
 class playField //: public  QDataStream
 {
 
  public:
 	playField(const char *name);
+	~playField();
 
-	bool	load	(void);
+	bool	load	(createCellFunc *);
 	bool	write	(void);
 
  private:
@@ -81,12 +84,12 @@ class playField //: public  QDataStream
 
 	bool	load(origMobile &);
 	bool	load(origFacility &);
-	bool	load(serverCell  &);
-	bool	loadMap();
+	bool	load(Cell  &);
+	bool	loadMap(createCellFunc *);
 	bool	loadPeople();
 	void	write(origMobile &);
 	void	write(origFacility &);
-	void	write(serverCell  &);
+	void	write(Cell  &);
 	void	writeMap();
 	void	writePeople();
 
