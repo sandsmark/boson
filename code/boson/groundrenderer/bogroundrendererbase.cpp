@@ -458,7 +458,9 @@ void BoGroundRendererBase::generateCellList(const BosonMap* map)
  }
  setRenderCellsCount(renderCellsCount);
 #if FIX_EDGES
- mCellListBuilder->copyHeightMap(mHeightMap2, map);
+ if (renderCellsCount > 0) {
+	mCellListBuilder->copyHeightMap(mHeightMap2, map);
+ }
 #endif
 }
 
@@ -471,8 +473,8 @@ void CellListBuilder::copyHeightMap(float* heightMap, const BosonMap* map)
 	// (note the we have basically dropped NoTree already)
 	boError() << k_funcinfo << "minx=" << mMinX << " miny=" << mMinY << endl;
 	mMinX = mMinY = 0;
-	mMaxX = map->width();
-	mMaxY = map->height();
+	mMaxX = map->width() - 1;
+	mMaxY = map->height() - 1;
 
 	for (int x = mMinX; x <= mMaxX + 1; x++) { // +1 because we need _corners_ not cells
 		for (int y = mMinY; y <= mMaxY + 1; y++) {
