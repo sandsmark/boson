@@ -40,6 +40,7 @@ class KPlayer;
 class QDataStream;
 template<class T> class QPtrList;
 template<class T> class QValueList;
+template<class T> class QPtrVector;
 
 
 
@@ -169,8 +170,8 @@ public:
 	unsigned int allItemsCount() const;
 
 
-	BoItemList collisionsAtCells(const QPointArray& cells, const BosonItem* item, bool exact) const;
-	BoItemList collisions(const QRect& rect) const;
+	BoItemList collisionsAtCells(const QPtrVector<Cell>* cells, const BosonItem* item, bool exact) const;
+	BoItemList collisions(const QRect& rect, const BosonItem* item = 0, bool exact = true) const; // note: exact == true has n effec for item != 0 ONLY!
 
 	/**
 	 * @param pos Position in <em>canvas</em> coordinates, i.e. not cell

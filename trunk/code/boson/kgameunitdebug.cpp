@@ -19,6 +19,7 @@
 #include "kgameunitdebug.h"
 
 #include "boson.h"
+#include "cell.h"
 #include "unit.h"
 #include "unitplugins.h"
 #include "player.h"
@@ -394,11 +395,15 @@ void KGameUnitDebug::updateCells(QListViewItem* item)
 	boWarning() << k_lineinfo << "id " << id << " not found" << endl;
 	return;
  }
- QPointArray cells = unit->cells();
- for (unsigned int i = 0; i < cells.count(); i++) {
+ const QPtrVector<Cell>* cells = unit->cells();
+ for (unsigned int i = 0; i < cells->count(); i++) {
+	Cell* c = cells->at(i);
+	if (!c) {
+		boError() << k_funcinfo << "invalid cell at " << i << endl;
+	}
 	QListViewItem* item = new QListViewItem(d->mCells);
-	item->setText(0, QString::number(cells[i].x()));
-	item->setText(1, QString::number(cells[i].y()));
+	item->setText(0, QString::number(c->x()));
+	item->setText(1, QString::number(c->y()));
  }
 }
 

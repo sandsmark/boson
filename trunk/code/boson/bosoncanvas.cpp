@@ -751,11 +751,11 @@ void BosonCanvas::killPlayer(Player* player)
 
 void BosonCanvas::removeFromCells(BosonItem* item)
 {
- QPointArray cells = item->cells();
- for (unsigned int i = 0; i < cells.count(); i++) {
-	Cell* c = cell(cells[i].x(), cells[i].y());
+ const QPtrVector<Cell>* cells = item->cells();
+ for (unsigned int i = 0; i < cells->count(); i++) {
+	Cell* c = cells->at(i);
 	if (!c) {
-		boError() << k_funcinfo << "NULL cell - x=" << cells[i].x() << ",y=" << cells[i].y() << endl;
+		boError() << k_funcinfo << "NULL cell at " << i << endl;
 		continue;
 	}
 	c->removeItem(item);
@@ -764,11 +764,11 @@ void BosonCanvas::removeFromCells(BosonItem* item)
 
 void BosonCanvas::addToCells(BosonItem* item)
 {
- QPointArray cells = item->cells();
- for (unsigned int i = 0; i < cells.count(); i++) {
-	Cell* c = cell(cells[i].x(), cells[i].y());
+ const QPtrVector<Cell>* cells = item->cells();
+ for (unsigned int i = 0; i < cells->count(); i++) {
+	Cell* c = cells->at(i);
 	if (!c) {
-		boError() << k_funcinfo << "NULL cell - x=" << cells[i].x() << ",y=" << cells[i].y() << endl;
+		boError() << k_funcinfo << "NULL cell at " << i << endl;
 		continue;
 	}
 	c->addItem(item);
@@ -877,32 +877,27 @@ void BosonCanvas::updateItemCount()
 }
 
 // this is an extremely time-critical function!
-BoItemList BosonCanvas::collisionsAtCells(const QPointArray& cells, const BosonItem* item, bool exact) const
+BoItemList BosonCanvas::collisionsAtCells(const QPtrVector<Cell>* cells, const BosonItem* item, bool exact) const
 {
  // FIXME: if exact is true we assume that cells == item->cells() !!
 // AB: item can be NULL, too!
  BoItemList collisions;
  const BoItemList* cellItems;
- Cell* c = 0;
  BoItemList::ConstIterator it;
  BosonItem* s;
+ if (cells->count() == 0) {
+	return collisions;
+ }
  if (!map()) {
 	BO_NULL_ERROR(map());
 	return collisions;
  }
- Cell* allCells = map()->cells();
- if (!allCells) {
-	BO_NULL_ERROR(allCells);
-	return collisions;
- }
- for (unsigned int i = 0; i < cells.count(); i++) {
-	int x = cells[i].x();
-	int y = cells[i].y();
-	if (!map()->isValidCell(x, y)) {
-		boError() << "invalid cell coordinates: " << x << "," << y << endl;
+ for (unsigned int i = 0; i < cells->count(); i++) {
+	Cell* c = cells->at(i);
+	if (!c) {
+		boError() << "invalid cell at " << i << endl;
 		continue;
 	}
-	c = allCells + map()->cellArrayPos(x, y);
 	cellItems = c->items();
 	for (it = cellItems->begin(); it != cellItems->end(); ++it) {
 		s = *it;
@@ -918,16 +913,20 @@ BoItemList BosonCanvas::collisionsAtCells(const QPointArray& cells, const BosonI
 
 BoItemList BosonCanvas::collisionsAtCell(const QPoint& pos) const
 {
- QPointArray cells(1);
- cells[0] = pos;
- boDebug(310) << k_funcinfo << cells[0].x() << " " << cells[0].y() << endl;
- return collisionsAtCells(cells, 0, true); // FIXME: ecact = true has no effect
+ QPtrVector<Cell> cells(1);
+ Cell* c = cell(pos.x(), pos.y());
+ if (!c) {
+	boWarning() << k_funcinfo << "NULL cell: " << pos.x() << "," << pos.y() << endl;
+	return BoItemList();
+ }
+ cells.insert(0, c);
+ boDebug(310) << k_funcinfo << c->x() << " " << c->y() << endl;
+ return collisionsAtCells(&cells, 0, true); // FIXME: exact = true has no effect
 }
 
-BoItemList BosonCanvas::collisions(const QRect& r) const
+BoItemList BosonCanvas::collisions(const QRect& r, const BosonItem* item, bool exact) const
 {
  // r is canvas coordinates!
- QPointArray cells;
  int left, right, top, bottom;
  left = QMAX(r.left() / BO_TILE_SIZE, 0);
  right = QMIN(r.right() / BO_TILE_SIZE, QMAX((int)mapWidth() - 1, 0));
@@ -937,23 +936,30 @@ BoItemList BosonCanvas::collisions(const QRect& r) const
  if (size <= 0) {
 	return BoItemList();
  }
- cells.resize(size);
+ QPtrVector<Cell> cells(size);
  int n = 0;
+ Cell* allCells = map()->cells();
  for (int i = left; i <= right; i++) {
 	for (int j = top; j <= bottom; j++) {
-		cells[n++] = QPoint(i, j);
+		if (!map()->isValidCell(i, j)) {
+			boError() << k_funcinfo << "not a valid cell: " << i << "," << j << endl;
+			continue;
+		}
+		Cell* c = &allCells[map()->cellArrayPos(i, j)];
+		if (!c) {
+			boError() << k_funcinfo << "NULL cell (although the coordinates should be valid: " << i << "," << j << ")" << endl;
+			continue;
+		}
+		cells.insert(n, c);
+		n++;
 	}
  }
- return collisionsAtCells(cells, 0, true);// FIXME: exact = true has no effect
+ return collisionsAtCells(&cells, item, exact);
 }
 
 BoItemList BosonCanvas::collisions(const QPoint& pos) const
 {
- // pos is canvas coordinates!
- QPointArray cells(1);
- cells[0] = pos / BO_TILE_SIZE;
- boDebug(310) << k_funcinfo << cells[0].x() << " " << cells[0].y() << endl;
- return collisionsAtCells(cells, 0, true); // FIXME: ecact = true has no effect
+ return collisionsAtCell(pos / BO_TILE_SIZE);
 }
 
 int BosonCanvas::particleSystemsCount() const

@@ -819,14 +819,15 @@ void BosonBigDisplayBase::paintGL()
 	// FIXME: we have to copy the complete list of cells here, since it is
 	// calculated on the fly by cells()! nicer version would be to add
 	// BosonPrite::isFogged() and check it there.
-	QPointArray cells = item->cells();
+	const QPtrVector<Cell>* cells = item->cells();
 	bool visible = false;
-	for (unsigned int i = 0; i < cells.count(); i++) {
-		if (!canvas()->cell(cells[i].x(), cells[i].y())) {
-			boError() << k_funcinfo << cells[i].x() << "," << cells[i].y() << " is no valid cell!" << endl;
+	for (unsigned int i = 0; i < cells->count(); i++) {
+		Cell* c = cells->at(i);
+		if (!c) {
+			boError() << k_funcinfo << i << " is no valid cell!" << endl;
 			continue;
 		}
-		if (!localPlayer()->isFogged(cells[i].x(), cells[i].y())) {
+		if (!localPlayer()->isFogged(c->x(), c->y())) {
 			visible = true;
 			// ugly but faster than placing this into the loop
 			// condition

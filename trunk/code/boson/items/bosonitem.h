@@ -23,15 +23,15 @@
 
 #include <GL/gl.h>
 
-#include <qpointarray.h>
+#include <qptrvector.h>
 
 class BosonCanvas;
 class SelectBox;
 class BosonModel;
 class BosonAnimation;
 class BoFrame;
-class QPointArray;
 class QRect;
+class Cell;
 
 
 /**
@@ -148,7 +148,7 @@ public:
 	 * @return TRUE if the object is selected, i.e. a select box should be
 	 * drawn around it. Otherwise FALSE.
 	 **/
-	inline bool isSelected() const { return mSelectBox != 0; }
+	bool isSelected() const { return mSelectBox != 0; }
 
 	/**
 	 * Render the item. This assumes the modelview matrix was already
@@ -214,20 +214,14 @@ public:
 	 * item has moved - so usually it's not slow to call it.
 	 * @return An array of all cells this unit occupies.
 	 **/
-	QPointArray cells();
+	QPtrVector<Cell>* cells();
 
 	/**
 	 * This is a more generic version of the above method. You can use it to
 	 * calculate which cells the unit would occupy if it was at a certain
 	 * position.
-	 *
-	 * WARNING: this method <em>will</em> return invalid cells in the point
-	 * array, if you supply invalid parameters! It has no way to check
-	 * whether left/right/top/bottom are still on the map! Use the
-	 * overloaded method above to avoid this problem!
-	 * @return An array of all cells this unit would occupy.
 	 **/
-	static QPointArray cells(int left, int right, int top, int bottom);
+	static void makeCells(const BosonCanvas* canvas, QPtrVector<Cell>* cells, int left, int right, int top, int bottom);
 
 	bool bosonCollidesWith(BosonItem* item) const;
 
@@ -446,7 +440,7 @@ private:
 	bool mIsAnimated;
 	SelectBox* mSelectBox;
 
-	QPointArray mCells;
+	QPtrVector<Cell> mCells;
 	bool mCellsDirty;
 };
 

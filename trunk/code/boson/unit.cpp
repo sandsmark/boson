@@ -963,34 +963,21 @@ void Unit::shootAt(BosonWeapon* w, Unit* target)
  owner()->statistics()->increaseShots();
 }
 
-BoItemList Unit::unitsInRange(unsigned long int r) const
+BoItemList Unit::unitsInRange(unsigned long int range) const
 {
  // TODO: we use a *rect* for the range this is extremely bad.
  // ever heard about pythagoras ;-) ?
 
- long int range = r; // To get rid of some warnings
- QPointArray cells;
  int left, right, top, bottom;
  leftTopCell(&left, &top);
  rightBottomCell(&right, &bottom);
- left = QMAX(left - range, 0);
- top = QMAX(top - range, 0);
- right = QMIN(right + range, QMAX((int)canvas()->mapWidth() - 1, 0));
- bottom = QMIN(bottom + range, QMAX((int)canvas()->mapHeight() - 1, 0));
- int size = (right - left + 1) * (bottom - top + 1);
- if (size <= 0) {
-	return BoItemList();
- }
- cells.resize(size);
- int n = 0;
- for (int i = left; i <= right; i++) {
-	for (int j = top; j <= bottom; j++) {
-		cells[n++] = QPoint(i, j);
-	}
- }
-
- BoItemList items = canvas()->collisionsAtCells(cells, (BosonItem*)this, false);
+ // AB: note that we don't need to do error checking like left < 0, since
+ // collisions() does this anyway.
+ QRect rect;
+ rect.setCoords(left - range, top - range, right + range, bottom + range);
+ BoItemList items = canvas()->collisions(rect, (BosonItem*)this, false);
  items.remove((BosonItem*)this);
+
  BoItemList inRange;
  BoItemList::Iterator it = items.begin();
  Unit* u;

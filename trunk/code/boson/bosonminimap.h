@@ -25,11 +25,13 @@ class Player;
 class Unit;
 class BosonMap;
 class BosonCanvas;
+class Cell;
 
 class QPixmap;
 class QPainter;
 class QPaintEvent;
 class QMouseEvent;
+template<class T> class QPtrVector;
 
 /**
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
@@ -118,10 +120,10 @@ protected:
 	void createGround();
 
 	/**
-	 * Move a unit. If @p oldX or @p oldY are -1 then they are ignored
+	 * Move a unit. if oldCells is NULL they are ignored.
 	 * (added a unit)
 	 **/
-	void moveUnit(Unit* unit, const QPointArray& newCells, const QPointArray& oldCells);
+	void moveUnit(Unit* unit, const QPtrVector<Cell>* newCells, const QPtrVector<Cell>* oldCells);
 
 	/**
 	 * Update the cell. Checks whether cell is fogged, checks for units on
@@ -161,7 +163,7 @@ protected:
 	 **/
 	BosonMap* map() const;
 
-	QPointArray makeCellList(Unit* unit, float x, float y);
+	void makeCellList(QPtrVector<Cell>* cells, const Unit* unit, float x, float y);
 
 	/**
 	 * @return A pixmap for @p file in the theme @p theme if it is existing.
