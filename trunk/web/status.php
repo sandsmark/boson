@@ -1,7 +1,7 @@
 <?php
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -58,7 +58,6 @@ draw_bigbox_text("What has been changed since 0.9.1:
  meant for civilian units or things like trees and so on.</li>
  <li>Texture compression is used, if available which can reduce texture size an
  therefore improve speed.</li>
- <li>Sound is enabled by default again</li>
  <li>OpenGL minimap</li>
  <li>The path a unit is using is displayed when it is selected</li>
  <li>The menu is properly removed when a game is ended, fixing menu duplication
@@ -72,14 +71,17 @@ draw_bigbox_text("What has been changed since 0.9.1:
  increases speed by a few FPS.</li>
  <li>Sound is played using OpenAL now. Dependancy on arts and kdemultimedia
  removed.</li>
+ <li>Sound is enabled by default again</li>
 </ul>");
 
 draw_bigbox_text("This is a list of features that we consider as
   &quot;to-be-done&quot; for the next release.
   <h2>TODO</h2>
   <ul>
-    <li>Write a configure script that checks for OpenAL presence (and disables
-    sound if it is not available)</li>
+    <li>Convert playfields in data module to use the new file format without
+    conversion on startup</li>
+    <li>Find out whether save/load is still working</li>
+    <li>Find out whether playfield saving is still working</li>
   </ul>");
 draw_bigbox_end();
 main_area_end();
