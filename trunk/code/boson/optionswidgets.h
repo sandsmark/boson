@@ -173,9 +173,6 @@ public:
 
 	void setUpdateInterval(int ms);
 
-signals:
-	void signalUpdateIntervalChanged(unsigned int);
-
 protected:
 	/**
 	 * @return GL_NEAREST or GL_LINEAR for all textures.
@@ -224,6 +221,22 @@ public:
 private:
 	KIntNumInput* mScreenRemoveTime;
 	KIntNumInput* mScreenMaxItems;
+};
+
+class ToolTipOptions : public QVBox, public OptionsWidget
+{
+	Q_OBJECT
+public:
+	ToolTipOptions(QWidget* parent);
+	~ToolTipOptions();
+
+	virtual void apply();
+	virtual void setDefaults();
+	virtual void load();
+
+private:
+	KIntNumInput* mUpdatePeriod;
+	QComboBox* mToolTipCreator;
 };
 
 #endif

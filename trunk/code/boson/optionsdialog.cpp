@@ -58,10 +58,12 @@ OptionsDialog::OptionsDialog(bool editor, QWidget* parent, bool modal)
  }
  initOpenGLPage();
  initChatPage(); // in editor for chat messages
+ initToolTipPage();
 }
 
 OptionsDialog::~OptionsDialog()
 {
+ boDebug(210) << k_funcinfo << endl;
  delete d;
 }
 
@@ -69,8 +71,6 @@ void OptionsDialog::initGeneralPage()
 {
  QVBox* vbox = addVBoxPage(i18n("&General"));
  GeneralOptions* o = new GeneralOptions(vbox);
- connect(o, SIGNAL(signalMiniMapScaleChanged(double)),
-		this, SIGNAL(signalMiniMapScaleChanged(double)));
  connect(o, SIGNAL(signalCmdBackgroundChanged(const QString&)),
 		this, SIGNAL(signalCmdBackgroundChanged(const QString&)));
  addOptions(o);
@@ -104,8 +104,6 @@ void OptionsDialog::initOpenGLPage()
 {
  QVBox* vbox = addVBoxPage(i18n("&OpenGL"));
  OpenGLOptions* o = new OpenGLOptions(vbox);
- connect(o, SIGNAL(signalUpdateIntervalChanged(unsigned int)),
-		this, SIGNAL(signalUpdateIntervalChanged(unsigned int)));
  addOptions(o);
 }
 
@@ -113,6 +111,13 @@ void OptionsDialog::initChatPage()
 {
  QVBox* vbox = addVBoxPage(i18n("C&hat"));
  ChatOptions* o = new ChatOptions(vbox);
+ addOptions(o);
+}
+
+void OptionsDialog::initToolTipPage()
+{
+ QVBox* vbox = addVBoxPage(i18n("&Tool Tips"));
+ ToolTipOptions* o = new ToolTipOptions(vbox);
  addOptions(o);
 }
 
@@ -165,7 +170,6 @@ void OptionsDialog::slotOk()
 {
  boDebug(210) << k_funcinfo << endl;
  slotApply();
- boDebug(210) << k_funcinfo << "calling accept()" << endl;
  accept();
  boDebug(210) << k_funcinfo << "done" << endl;
 }
@@ -177,6 +181,7 @@ void OptionsDialog::slotApply()
  for (; it.current(); ++it) {
 	it.current()->apply();
  }
+ emit signalApply();
  boDebug(210) << k_funcinfo << "done" << endl;
 }
 

@@ -241,6 +241,9 @@ public:
 	 **/
 	void setPlacementCellPreviewData(int groundType, bool canPlace);
 
+	void setToolTipCreator(int type);
+	void setToolTipUpdatePeriod(int ms);
+
 	const QPoint& cursorCanvasPos() const; // obsolete!
 	const BoVector3& cursorCanvasVector() const;
 	BosonBigDisplayInputBase* displayInput() const;

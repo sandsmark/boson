@@ -15,6 +15,7 @@ BOSON_SRC = \
 	boitemlisthandler.cpp \
 	boitemlist.cpp \
 	boselection.cpp \
+	botooltipcreator.cpp \
 	bogltooltip.cpp \
 	bosonmap.cpp \
 	bosonscenario.cpp \

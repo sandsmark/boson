@@ -105,6 +105,9 @@ public:
 	 **/
 	void unlockAction();
 
+	void setToolTipCreator(int type);
+	void setToolTipUpdatePeriod(int ms);
+
 public slots:
 	/**
 	 * Scroll the active display

@@ -226,7 +226,7 @@ protected slots:
 	/**
 	 * See @ref Boson::signalPlayFieldChanged.
 	 *
-	 * This applies the map identifier to the @reg BosonStarting object so
+	 * This applies the map identifier to the @ref BosonStarting object so
 	 * that it can be started
 	 **/
 	void slotPlayFieldChanged(const QString& id);

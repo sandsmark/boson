@@ -25,6 +25,57 @@ class BosonBigDisplayBase;
 class BosonItem;
 class QString;
 class BosonGLFont;
+class BoToolTipCreator;
+
+class BoToolTipCreatorFactoryPrivate;
+/**
+ * This class is used on construction of @ref BoGLToolTips. It just creates an
+ * object of @ref BoToolTipCreator.
+ *
+ * When you subclass @ref BoToolTipCreator you need to
+ *
+ * @li register your new class using @ref registerTipCreator
+ * @li return a new object of your class in @ref tipCreator
+ *
+ * Your subclass of @ref BoToolTipCreator will automatically show up in any
+ * configuration widget.
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+class BoToolTipCreatorFactory
+{
+public:
+	BoToolTipCreatorFactory();
+	~BoToolTipCreatorFactory();
+
+	/**
+	 * @return A list of all type IDs that have been specified to @ref
+	 * registerTipCreator. Use @ref tipCreatorName to get a name for the
+	 * type.
+	 **/
+	QValueList<int> availableTipCreators() const;
+
+	/**
+	 * @return A name for the @ref BoToolTipCreator @p type. This name can
+	 * be used e.g. in a @ref QComboBox.
+	 **/
+	QString tipCreatorName(int type) const;
+
+	/**
+	 * @return A @ref BoToolTipCreator object of the class that is assigned to @p type.
+	 **/
+	BoToolTipCreator* tipCreator(int type) const;
+
+protected:
+	/**
+	 * @param name A short name for your @ref BoToolTipCreator class, as it should
+	 * show up in a configuration widget (e.g. a @ref QComboBox)
+	 **/
+	void registerTipCreator(int type, const QString& name);
+
+private:
+	BoToolTipCreatorFactoryPrivate* d;
+};
+
 
 class BoGLToolTipPrivate;
 /**
@@ -38,6 +89,13 @@ public:
 	virtual ~BoGLToolTip();
 
 	/**
+	 * Set which kind of tooltips will be created. See @ref
+	 * BoToolTipCreatorFactory and @ref BoToolTipCreator for more
+	 * information.
+	 **/
+	void setToolTipCreator(int type);
+
+	/**
 	 * Render the tooltip at the cursor position @p cursorX and @p cursor Y.
 	 * An offset is added to that cursor position and the "best" direction
 	 * (left to the cursor / right to the cursor, ...) is chosen.
@@ -46,7 +104,7 @@ public:
 	 * construcotr.
 	 * @param font The desired font for the tooltip
 	 **/
-	void renderToolTip(int cursorX, int cursorY, int* viewportMatrix, BosonGLFont* font);
+	void renderToolTip(int cursorX, int cursorY, const int* viewportMatrix, BosonGLFont* font);
 
 	/**
 	 * @return TRUE when the @ref currentTip should get displayed in this
@@ -108,6 +166,7 @@ protected slots:
 private:
 	BoGLToolTipPrivate* d;
 	BosonBigDisplayBase* mView;
+	BoToolTipCreator* mCreator;
 	bool mShowTip;
 	int mUpdatePeriod;
 };

@@ -63,7 +63,7 @@ public:
 	 * <em>before</em> your function returns (which is not inended). But
 	 * often they are not executed (when they have not yet reacehed the
 	 * queue for example) and so you have a nice race condition that is
-	 * <em>reall</em> hard to debug.
+	 * <em>really</em> hard to debug.
 	 *
 	 * So think twice before adding a call to this function. It is a good
 	 * idea for long tasks (pixmap loading usually) but for everything else

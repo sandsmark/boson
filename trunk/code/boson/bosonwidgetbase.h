@@ -154,6 +154,8 @@ protected slots:
 	void slotLoadExternalStuff(QDataStream& stream);
 	void slotSaveExternalStuff(QDataStream& stream);
 
+	void slotApplyOptions();
+
 signals:
 	// hmm.. these *never* get emitted?
 	// // hmm.. these *never* get emitted?!!
@@ -200,7 +202,6 @@ protected slots:
 	void slotGrabProfiling();
 
 	void slotCmdBackgroundChanged(const QString& file);
-	void slotMiniMapScaleChanged(double);
 
 
 	void slotUnfog(int x, int y);

@@ -25,6 +25,7 @@
 #include "boson.h"
 #include "defines.h"
 #include "bodebug.h"
+#include "bogltooltip.h"
 
 #include <klocale.h>
 #include <knuminput.h>
@@ -98,7 +99,7 @@ void GeneralOptions::apply()
  if (mGameSpeed->value() != game()->gameSpeed()) {
 	game()->slotSetGameSpeed(mGameSpeed->value());
  }
- emit signalMiniMapScaleChanged(mMiniMapScale->value());
+ boConfig->setMiniMapScale(mMiniMapScale->value());
  QString file;
  if (mCmdBackground->currentItem() > 0) {
 	file = mCmdBackgrounds[mCmdBackground->currentItem() - 1];
@@ -481,7 +482,7 @@ void OpenGLOptions::apply()
  boDebug(210) << k_funcinfo << endl;
  bool reloadModelTextures = false;
  bool resetTexParameter = false;
- emit signalUpdateIntervalChanged((unsigned int)mUpdateInterval->value());
+ boConfig->setUpdateInterval((unsigned int)mUpdateInterval->value());
  if (boConfig->modelTexturesMipmaps() != mModelTexturesMipmaps->isChecked()) {
 	boConfig->setModelTexturesMipmaps(mModelTexturesMipmaps->isChecked());
 	reloadModelTextures = true;
@@ -660,12 +661,12 @@ void OpenGLOptions::setAlignSelectionBoxes(bool align)
 
 ChatOptions::ChatOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
 {
- QHBox* hbox = new QHBox(this);
+// QHBox* hbox = new QHBox(this);
  mScreenRemoveTime = new KIntNumInput(DEFAULT_CHAT_SCREEN_REMOVE_TIME, this);
  mScreenRemoveTime->setRange(0, 400);
  mScreenRemoveTime->setLabel(i18n("Remove from screen after seconds (0 to remove never)"));
 
- hbox = new QHBox(this);
+// hbox = new QHBox(this);
  mScreenMaxItems = new KIntNumInput(DEFAULT_CHAT_SCREEN_REMOVE_TIME, this);
  mScreenMaxItems->setRange(-1, 40);
  mScreenMaxItems->setLabel(i18n("Maximal items on the screen (-1 is unlimited)"));
@@ -704,5 +705,76 @@ void ChatOptions::setScreenRemoveTime(unsigned int s)
 void ChatOptions::setScreenMaxItems(int m)
 {
  mScreenMaxItems->setValue(m);
+}
+
+//////////////////////////////////////////////////////////////////////
+// ToolTip Options
+//////////////////////////////////////////////////////////////////////
+
+ToolTipOptions::ToolTipOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
+{
+ // you could reduce the update period to very low values to monitor changes
+ // that change very often (you may want to use that in combination with pause),
+ // such as waypoints (?), health, reload state, ...
+ mUpdatePeriod = new KIntNumInput(DEFAULT_TOOLTIP_UPDATE_PERIOD, this);
+ mUpdatePeriod->setRange(1, 500);
+ mUpdatePeriod->setLabel(i18n("Update period. Low values lead to more current data. Debugging option - leave this at the default.)"));
+
+ // TODO: the tooltip delay!
+
+ QHBox* hbox = new QHBox(this);
+ (void)new QLabel(i18n("Tooltip kind:"), hbox);
+ mToolTipCreator = new QComboBox(hbox);
+ BoToolTipCreatorFactory factory;
+ QValueList<int> tips = factory.availableTipCreators();
+ for (unsigned int i = 0; i < tips.count(); i++) {
+	mToolTipCreator->insertItem(factory.tipCreatorName(tips[i]));
+ }
+}
+
+ToolTipOptions::~ToolTipOptions()
+{
+ boDebug(210) << k_funcinfo << endl;
+}
+
+void ToolTipOptions::apply()
+{
+ BoToolTipCreatorFactory factory;
+ QValueList<int> tips = factory.availableTipCreators();
+ int index = mToolTipCreator->currentItem();
+ if (index >= 0 && index < tips.count()) {
+	boConfig->setToolTipCreator(tips[index]);
+ } else {
+	boWarning() << k_funcinfo << "invalid tooltip creator index=" << index << endl;
+ }
+ boConfig->setToolTipUpdatePeriod(mUpdatePeriod->value());
+}
+
+void ToolTipOptions::setDefaults()
+{
+ mUpdatePeriod->setValue(DEFAULT_TOOLTIP_UPDATE_PERIOD);
+ BoToolTipCreatorFactory factory;
+ QValueList<int> tips = factory.availableTipCreators();
+ int index = -1;
+ for (unsigned int i = 0; i < tips.count(); i++) {
+	if (tips[i] == DEFAULT_TOOLTIP_CREATOR) {
+		index = i;
+	}
+ }
+ mToolTipCreator->setCurrentItem(index);
+}
+
+void ToolTipOptions::load()
+{
+ mUpdatePeriod->setValue(boConfig->toolTipUpdatePeriod());
+ BoToolTipCreatorFactory factory;
+ QValueList<int> tips = factory.availableTipCreators();
+ int index = -1;
+ for (unsigned int i = 0; i < tips.count(); i++) {
+	if (tips[i] == boConfig->toolTipCreator()) {
+		index = i;
+	}
+ }
+ mToolTipCreator->setCurrentItem(index);
 }
 

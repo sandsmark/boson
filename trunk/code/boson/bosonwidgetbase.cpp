@@ -398,12 +398,6 @@ void BosonWidgetBase::slotProfiling()
  dlg->exec();
 }
 
-void BosonWidgetBase::slotMiniMapScaleChanged(double scale)
-{
- boConfig->setMiniMapScale(scale);
- minimap()->repaint();
-}
-
 void BosonWidgetBase::slotHack1()
 {
  QSize size = displayManager()->activeDisplay()->size();
@@ -1135,11 +1129,23 @@ OptionsDialog* BosonWidgetBase::gamePreferences(bool editor)
 		this, SLOT(slotChangeCursor(int, const QString&)));
  connect(dlg, SIGNAL(signalCmdBackgroundChanged(const QString&)),
 		this, SLOT(slotCmdBackgroundChanged(const QString&)));
- connect(dlg, SIGNAL(signalMiniMapScaleChanged(double)),
-		this, SLOT(slotMiniMapScaleChanged(double)));
- connect(dlg, SIGNAL(signalUpdateIntervalChanged(unsigned int)),
-		displayManager(), SLOT(slotUpdateIntervalChanged(unsigned int)));
+ connect(dlg, SIGNAL(signalApply()),
+		this, SLOT(slotApplyOptions()));
 
  return dlg;
+}
+
+void BosonWidgetBase::slotApplyOptions()
+{
+ // apply all options from boConfig to boson, that need to be applied. all
+ // options that are stored in boConfig only don't need to be touched.
+ // AB: cursor is still a special case and not handled here.
+ // AB: FIXME: cmdbackground is not yet stored in boConfig! that option should
+ // be managed here!
+ boDebug() << k_funcinfo << endl;
+ minimap()->repaint(); // it automatically uses the new scaling factor
+ displayManager()->slotUpdateIntervalChanged(boConfig->updateInterval()); // FIXME: no slot anymore
+ displayManager()->setToolTipCreator(boConfig->toolTipCreator());
+ displayManager()->setToolTipUpdatePeriod(boConfig->toolTipUpdatePeriod());
 }
 
