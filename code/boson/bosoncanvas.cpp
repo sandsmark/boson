@@ -92,7 +92,7 @@ public:
 
 	BosonMap* mMap; // just a pointer - no memory allocated
 
-	QPtrList<BosonItem> mAnimList; // see BosonCanvas::slotAdvance()
+	QPtrList<BosonItem> mAnimList;
 
 	BoItemList mAllItems;
 	QPtrList<BosonEffect> mEffects;
