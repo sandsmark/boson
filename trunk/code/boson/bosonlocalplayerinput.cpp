@@ -41,7 +41,6 @@
 BosonLocalPlayerInput::BosonLocalPlayerInput() : KGameIO()
 {
   boDebug() << k_funcinfo << endl;
-  mCommandFrame = 0;
   mEventListener = 0;
 }
 
@@ -75,12 +74,7 @@ void BosonLocalPlayerInput::initIO(KPlayer* p)
 void BosonLocalPlayerInput::setCommandFrame(BosonCommandFrameInterface* cmdframe)
 {
   boDebug() << k_funcinfo << endl;
-  if(mCommandFrame)
-  {
-    boError() << k_funcinfo << "CMDFRAME ALREADY SET!!!" << endl;
-    return;
-  }
-  mCommandFrame = cmdframe;
+  disconnect(cmdframe, 0, this, 0);
   connect(cmdframe, SIGNAL(signalAction(const BoSpecificAction&)),
       this, SLOT(slotAction(const BoSpecificAction&)));
 }
@@ -97,7 +91,7 @@ void BosonLocalPlayerInput::slotAction(const BoSpecificAction& action)
   switch (action.type())
   {
     case ActionStop:
-      stopUnits(mCommandFrame->selection()->allUnits());
+      stopUnits(action.allUnits());
       break;
     case ActionLayMine:
       layMine(action);

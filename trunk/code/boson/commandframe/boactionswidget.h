@@ -46,8 +46,11 @@ public:
 
 	/**
 	 * Adds buttons of actions unit can do (such as attack, move or stop)
+	 *
+	 * @param allUnits All currently selected units. Actions that should
+	 * apply to all these units will use this.
 	 **/
-	void showUnitActions(Unit* unit);
+	void showUnitActions(Unit* unit, const QPtrList<Unit>& allUnits);
 
 	void resetButton(BosonOrderButton* button);
 

@@ -433,7 +433,11 @@ void BosonCommandFrame::showUnitActions(Unit* unit)
  if (!localPlayerIO() || !localPlayerIO()->ownsUnit(unit)) {
 	d->mUnitActions->hide();
  } else {
-	d->mUnitActions->showUnitActions(unit);
+	if (selection()) {
+		d->mUnitActions->showUnitActions(unit, selection()->allUnits());
+	} else {
+		d->mUnitActions->showUnitActions(unit, QPtrList<Unit>());
+	}
 	d->mUnitActions->show();
  }
 }
