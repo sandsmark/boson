@@ -36,10 +36,13 @@ class visualCell : public Cell, public QwSprite
 
 
 public:
-  visualCell(groundType g, int i, int j);
+	visualCell(groundType g = GROUND_UNKNOWN);
+	visualCell(groundType g, int i, int j);
 
+	void	set(groundType g, int i, int j);
+  
 /* Qw stuff */
-  virtual int rtti() const { return S_GROUND + ground; }
+	virtual int rtti() const { return S_GROUND + ground; }
 
 };
 

@@ -25,12 +25,27 @@
 #include "visual.h"
 
 
+visualCell::visualCell(groundType g)
+	: Cell(g)
+	, QwSprite()
+{
+	// don't do anything until set() has been called, no even a z() !
+}
+
 visualCell::visualCell(groundType g, int i, int j)
 	: Cell(g)
-	, QwSprite(vpp.ground->getPixmap(g))
+	, QwSprite()
 {
 
-	z(Z_GROUND);
-	moveTo(BO_TILE_SIZE * i , BO_TILE_SIZE * j);
+	set(g,i,j);	// To be done first !
 }
+
+void visualCell::set(groundType g, int i, int j)
+{
+	// first of all, call setSequence, else you'll get a segfault
+	if (GROUND_UNKNOWN != g) setSequence(vpp.ground->getPixmap(g));
+	moveTo(BO_TILE_SIZE * i , BO_TILE_SIZE * j);
+	z(Z_GROUND);
+}
+
 
