@@ -27,6 +27,7 @@
 #include "bosoncanvas.h"
 #include "bosonconfig.h"
 #include "bosonscenario.h"
+#include "bosonstatistics.h"
 
 #include <kdebug.h>
 #include <klocale.h>
@@ -808,7 +809,12 @@ bool Boson::buildProducedUnit(Facility* factory, int unitType, int x, int y)
 		return false;
 	}
  }
- addUnit(unitType, p, x, y);
+ Unit* unit = addUnit(unitType, p, x, y);
+ if (unit->isFacility()) {
+	p->statistics()->addProducedFacility((Facility*)unit, factory);
+ } else {
+	p->statistics()->addProducedMobileUnit((MobileUnit*)unit, factory);
+ }
  
  // the current production is done.
  factory->removeProduction();
