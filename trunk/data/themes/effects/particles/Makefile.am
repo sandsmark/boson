@@ -4,6 +4,6 @@ particles_DATA = explosion-old.png smoke.png dirt.png shockwave.png nuke-explosi
 
 # no further editing need here
 
-particlesdir = $(kde_datadir)/boson/themes/species/human/particles
+particlesdir = $(kde_datadir)/boson/themes/effects/particles
 
 EXTRA_DIST = $(particles_DATA)
