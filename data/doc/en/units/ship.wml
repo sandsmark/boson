@@ -15,8 +15,8 @@
 <:
 use get_values;
 
-# ( facility type, facility name, filesystem level )
-get_values->getval("mob", "ship", 2);
+# ( facility type, facility name)
+get_values->getval("mob", "ship");
 :>
 
 #include "nav.wml" before_url="tank.html" before_text="Tank" after_url="aircraft.html" after_text="Aircraft" up_url="index.html"
