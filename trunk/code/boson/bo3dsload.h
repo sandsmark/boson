@@ -115,6 +115,16 @@ public:
 	static void dumpTriangle(BoVector3* v, GLuint texture = 0, Lib3dsTexel* tex = 0);
 	static void dumpTriangle(Lib3dsVector* v, GLuint texture = 0, Lib3dsTexel* tex = 0);
 
+	/**
+	 * Find adjacent faces in @p mesh and place them into @p adjacentFaces.
+	 * The search will start at @p search if @p search is non-NULL,
+	 * otherwise the first face of @p mesh is used.
+	 *
+	 * Once an adjacent face is found this function also searches for
+	 * adjacent faces of the new face and so on.
+	 **/
+	static void findAdjacentFaces(QPtrList<Lib3dsFace>* adjacentFaces, Lib3dsMesh* mesh, Lib3dsFace* search = 0);
+
 private:
 	void init();
 

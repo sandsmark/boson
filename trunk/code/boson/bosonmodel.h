@@ -21,8 +21,6 @@
 
 #include <GL/gl.h>
 
-#include <lib3ds/types.h> // TODO: remove
-
 class BosonModelTextures;
 class KSimpleConfig;
 class QColor;
@@ -31,7 +29,7 @@ class QStringList;
 class BoVector3;
 class BoMatrix;
 class BoMesh;
-template<class T> class QPtrList; //hmm is this working for all compilers? can templates be forwarded safely?
+template<class T> class QPtrList;
 template<class T, class T2> class QMap;
 template<class T> class QIntDict;
 
@@ -258,27 +256,11 @@ public:
 	 **/
 	QString file() const;
 
-	/**
-	 * @return A list of all textures used in this model. Note that these
-	 * are the plain names, i.e. not necessarily the final filenames. Use
-	 * @ref cleanTextureName to receive the final fileName.
-	 **/
-	static QStringList textures(Lib3dsFile* file);
-
 protected:
 	class BoHelper; // for computing width,height,.. of the model. this is a hack!
 
 protected:
 	void loadTextures(const QStringList& textures);
-
-	/**
-	 * Call @ref loadNode for all nodes in this model - also the child
-	 * nodes.
-	 * @param reload Overwrite any existing display lists (i.e. replace
-	 * them) if TRUE, otherwise abort if a display list already exists
-	 * (default)
-	 **/
-	void loadNodes(bool reload = false);
 
 	/**
 	 * Generate the "normal" display lists, for all frames. This includes
@@ -304,26 +286,6 @@ protected:
 	void computeBoundings(BoFrame* frame, BoHelper* helper) const;
 
 	/**
-	 * Generate the display list for this node, including all child nodes.
-	 * The resulting display list will be placed into node->user.d
-	 * @param reload See @ref loadNodes
-	 **/
-	void loadNode(Lib3dsNode* node, bool reload);
-
-	/**
-	 * Render the specified node according to the values for the current
-	 * frame. You should call lib3ds_file_eval(frameNumber) before calling
-	 * renderNode().
-	 *
-	 * Note that only one node (+ all child nodes) will be rendered - you
-	 * should iterate all toplevel nodes and call renderNode() for all of
-	 * them usually.
-	 **/
-	void renderNode(Lib3dsNode* node);
-
-	void computeBoundings(Lib3dsNode* node, BoHelper* helper);
-
-	/**
 	 * Convert a 3ds texture name to a clean name. That means call
 	 * QString::lower() on it, currently. It'll also map the "short name"
 	 * from the .3ds file to the "long name" that can be specified e.g. in
@@ -345,24 +307,6 @@ public:
 	static bool isAdjacent(BoVector3* face1, BoVector3* face2);
 	static int findPoint(const BoVector3& point, const BoVector3* array);
 
-	/**
-	 * Find adjacent faces in @p mesh and place them into @p adjacentFaces.
-	 * The search will start at @p search if @p search is non-NULL,
-	 * otherwise the first face of @p mesh is used.
-	 *
-	 * Once an adjacent face is found this function also searches for
-	 * adjacent faces of the new face and so on.
-	 **/
-	static void findAdjacentFaces(QPtrList<Lib3dsFace>* adjacentFaces, Lib3dsMesh* mesh, Lib3dsFace* search = 0);
-
-	/**
-	 * @param v An array of 3 BoVector3
-	 * @param texture none if 0, otherwise the textue object
-	 * @param tex if texture is non-null this must be the texture
-	 * coordinates (array of 3) as provided for glTexCoord*()
-	 **/
-	static void dumpTriangle(BoVector3* v, GLuint texture = 0, Lib3dsTexel* tex = 0);
-
 private:
 	void init();
 
@@ -374,7 +318,6 @@ private:
 	static BosonModelTextures* mModelTextures;
 
 	Private* d;
-	Lib3dsFile* m3ds;
 
 	QColor* mTeamColor;
 

@@ -24,6 +24,7 @@
 #include "speciestheme.h"
 #include "unitproperties.h"
 #include "bo3dtools.h"
+#include "bo3dsload.h"
 #include "bodebug.h"
 
 #include <qcombobox.h>
@@ -779,7 +780,7 @@ void KGameModelDebug::slotConnectToFace(QListViewItem* item)
 	boError() << k_funcinfo << "NULL mesh" << endl;
 	return;
  }
- BosonModel::findAdjacentFaces(&connected, mesh, face);
+ Bo3DSLoad::findAdjacentFaces(&connected, mesh, face);
  QPtrList<Lib3dsFace> faces;
  for (unsigned int i = 0; i < mesh->faces; i++) {
 	Lib3dsFace* f = &mesh->faceL[i];

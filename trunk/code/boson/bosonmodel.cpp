@@ -37,13 +37,6 @@
 #include <qvaluelist.h>
 #include <qintdict.h>
 
-#include <lib3ds/file.h>
-#include <lib3ds/node.h>
-#include <lib3ds/matrix.h>
-#include <lib3ds/mesh.h>
-#include <lib3ds/vector.h>
-#include <lib3ds/material.h>
-
 // use GL_TRIANGLE_STRIP ? (experimental and not working!)
 // AB: there are 2 different optimizing approaches. one is to use
 // GL_TRIANGLE_STRIP, the other one is using a single glBegin()/glEnd() call (we
@@ -243,7 +236,6 @@ BosonModel::BosonModel(const QString& dir, const QString& file, float width, flo
 void BosonModel::init()
 {
  d = new Private;
- m3ds = 0;
  mTeamColor = 0;
  mWidth = 0;
  mHeight = 0;
@@ -303,28 +295,6 @@ QString BosonModel::cleanTextureName(const char* name) const
 	return d->mTextureNames[s];
  }
  return s;
-}
-
-QStringList BosonModel::textures(Lib3dsFile* file)
-{
- QStringList list;
- if (!file) {
-	boError(100) << k_funcinfo << "NULL file" << endl;
-	return list;
- }
-
- // note that it is not neceassary to loop through all frames, since other
- // frames do *not* (never!) contain other textures
- Lib3dsMaterial* mat;
- for (mat = file->materials; mat; mat = mat->next) {
-	Lib3dsTextureMap* t = &mat->texture1_map;
-	QString texName = t->name;
-	if (texName.isEmpty()) {
-		continue;
-	}
-	list.append(texName);
- }
- return list;
 }
 
 void BosonModel::loadTextures(const QStringList& list)
@@ -537,40 +507,6 @@ void BosonModel::generateConstructionLists()
  }
 }
 
-void BosonModel::renderNode(Lib3dsNode* node)
-{
- {
-	Lib3dsNode* p;
-	for (p = node->childs; p; p = p->next) {
-		renderNode(p);
-	}
- }
- if (node->type != LIB3DS_OBJECT_NODE) {
-	return;
- }
- if (strcmp(node->name, "$$$DUMMY") == 0) {
-	return;
- }
- if (node->user.d) {
-	glPushMatrix();
-	Lib3dsObjectData* d = &node->data.object; // these can get changed in different frames even for the same nodes. so we can't place the following parts into the display lists for the nodes themselves (see loadNode())
-
-	// I assume thats e.g. the rotation of the node. maybe
-	// even scaling.
-	BoMatrix m(&node->matrix[0][0]);
-
-	// the pivot point is the center of the object, I guess.
-	m.translate(-d->pivot[0], -d->pivot[1], -d->pivot[2]);
-
-	glMultMatrixf(m.data());
-
-	// finally call the list, which was created in loadNode()
-	glCallList(node->user.d);
-
-	glPopMatrix();
- }
-}
-
 unsigned int BosonModel::frames() const
 {
  return d->mFrames.count();
@@ -604,34 +540,9 @@ void BosonModel::finishLoading()
  mTeamColor = 0;
  delete d->mLoader;
  d->mLoader = 0;
- if (m3ds) {
-	lib3ds_file_free(m3ds);
-	m3ds = 0;
- }
  delete mTeamColor;
  mTeamColor = 0;
  d->mTextureNames.clear();
-}
-
-void BosonModel::dumpTriangle(BoVector3* v, GLuint texture, Lib3dsTexel* tex)
-{
- QString text = "triangle: ";
- for (int i = 0; i < 3; i++) {
-	text += QString("%1,%2,%3").arg(v[i][0]).arg(v[i][1]).arg(v[i][2]);
-	text += " ; ";
- }
- if (texture && tex) {
-	text += QString("texture=%1-->").arg(texture);
-	for (int i = 0; i < 3; i++) {
-		text += QString("%1,%2").arg(tex[i][0]).arg(tex[i][1]);
-		if (i < 2) {
-			text += " ; ";
-		}
-	}
- } else {
-	text += "(no texture)";
- }
- boDebug(100) << text << endl;
 }
 
 void BosonModel::reloadAllTextures()
@@ -692,52 +603,6 @@ BosonAnimation* BosonModel::animation(int mode) const
 
 
 
-// yes, i know this would be a great function for a recursive algorithm. but i
-// don't like recursion, so i do it with loops.
-void BosonModel::findAdjacentFaces(QPtrList<Lib3dsFace>* adjacentFaces, Lib3dsMesh* mesh, Lib3dsFace* search)
-{
- if (!adjacentFaces || !mesh) {
-	return;
- }
-
- // add all available faces to a list.
- QPtrList<Lib3dsFace> faces;
- for (unsigned int i = 0; i < mesh->faces; i++) {
-	Lib3dsFace* face = &mesh->faceL[i];
-	if (face == search) {
-		// no need to add this to the list of available faces
-		continue;
-	}
-	faces.append(face);
- }
-
- if (!search) {
-	search = &mesh->faceL[0];
- }
- adjacentFaces->append(search); // always adjacent to itself :)
-
- for (unsigned int i = 0; i < adjacentFaces->count(); i++) {
-	QPtrList<Lib3dsFace> found; // these need to get removed from faces list
-	BoVector3 current[3]; // the triangle/face we search for
-	BoVector3::makeVectors(current, mesh, adjacentFaces->at(i));
-
-	QPtrListIterator<Lib3dsFace> it(faces);
-	for (; it.current(); ++it) {
-		BoVector3 v[3];
-		BoVector3::makeVectors(v, mesh, it.current());
-		if (BoVector3::isAdjacent(current, v)) {
-			adjacentFaces->append(it.current());
-			found.append(it.current());
-		}
-	}
-	for (unsigned j = 0; j < found.count(); j++) {
-		faces.removeRef(found.at(j));
-	}
- }
-
- boDebug(100) << k_funcinfo << "adjacent: " << adjacentFaces->count() << " of " << mesh->faces << endl;
-
-}
 
 void BosonModel::addMesh(BoMesh* mesh)
 {

@@ -347,3 +347,47 @@ void debugTex(Lib3dsMaterial* mat, Lib3dsMesh* mesh)
 		<< endl;
 }
 
+void Bo3DSLoad::findAdjacentFaces(QPtrList<Lib3dsFace>* adjacentFaces, Lib3dsMesh* mesh, Lib3dsFace* search)
+{
+ if (!adjacentFaces || !mesh) {
+	return;
+ }
+
+ // add all available faces to a list.
+ QPtrList<Lib3dsFace> faces;
+ for (unsigned int i = 0; i < mesh->faces; i++) {
+	Lib3dsFace* face = &mesh->faceL[i];
+	if (face == search) {
+		// no need to add this to the list of available faces
+		continue;
+	}
+	faces.append(face);
+ }
+
+ if (!search) {
+	search = &mesh->faceL[0];
+ }
+ adjacentFaces->append(search); // always adjacent to itself :)
+
+ for (unsigned int i = 0; i < adjacentFaces->count(); i++) {
+	QPtrList<Lib3dsFace> found; // these need to get removed from faces list
+	BoVector3 current[3]; // the triangle/face we search for
+	BoVector3::makeVectors(current, mesh, adjacentFaces->at(i));
+
+	QPtrListIterator<Lib3dsFace> it(faces);
+	for (; it.current(); ++it) {
+		BoVector3 v[3];
+		BoVector3::makeVectors(v, mesh, it.current());
+		if (BoVector3::isAdjacent(current, v)) {
+			adjacentFaces->append(it.current());
+			found.append(it.current());
+		}
+	}
+	for (unsigned j = 0; j < found.count(); j++) {
+		faces.removeRef(found.at(j));
+	}
+ }
+
+ boDebug() << k_funcinfo << "adjacent: " << adjacentFaces->count() << " of " << mesh->faces << endl;
+}
+
