@@ -1,1 +1,1 @@
-SUBDIRS=cursors
+SUBDIRS=

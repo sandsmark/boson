@@ -27,10 +27,8 @@ HotspotX_n=number    -  The horizontal hotspot of the cursor - file n. Example:
 HotspotY_n=number    -  See above.
 
 
-Note that if we *want* to support x-cursors, too (our animated cursors are
-actally sprites). But at this moment the support is broken. If I ever add it
-again then this will probably be a file in cursors/ directly.
-Probably this will be
-cursors/move.xpm
+X-Cursors (The animated ones are actually sprites) have a very easy filename
+syntax. They are just named like "action.png". E.g.:
+move.png
 where the animated cursors are in
-cursors/move/
+move/

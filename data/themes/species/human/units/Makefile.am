@@ -30,7 +30,7 @@ install-data-local:
 	@for i in $(MOBILE_UNITS) $(FACILITIES); do \
 		if test -d $(DESTDIR)$(unitsdir)/$$i; then \
 			echo "refreshing and removing $$i" ;\
-			rm -rf $(DESTDIR)$(unitsdir)/$$i;\
+			rm -rf $(DESTDIR)$(cursordir)/$$i;\
 		fi ;\
 		echo "installing $$i" ;\
 		mkdir -p $(DESTDIR)$(unitsdir)/$$i ;\
