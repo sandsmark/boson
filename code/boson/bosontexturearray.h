@@ -35,7 +35,7 @@ class QStringList;
 class BosonTextureArray
 {
 public:
-	BosonTextureArray(const QStringList& files, bool useMipmaps, bool useAlpha);
+	BosonTextureArray(const QStringList& files, bool useMipmaps = true, bool useAlpha = false);
 	BosonTextureArray(QValueList<QImage> images, bool useMipmaps = true, bool useAlpha = false);
 	BosonTextureArray();
 
