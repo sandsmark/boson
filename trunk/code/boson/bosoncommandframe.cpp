@@ -157,7 +157,7 @@ void BosonCommandFrame::init()
 {
  d = new BosonCommandFramePrivate;
 
- setSizePolicy(QSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding));
+ setSizePolicy(QSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding));
  setMinimumSize(230, 200); // FIXME hardcoded value
 
  connect(&d->mUpdateTimer, SIGNAL(timeout()), this, SLOT(slotUpdate()));
@@ -566,4 +566,12 @@ void BosonCommandFrame::reparentMiniMap(QWidget* map)
  map->reparent(this, QPoint(0,0));
  map->hide();
  d->mTopLayout->insertWidget(0, map);
+}
+
+void BosonCommandFrame::resizeEvent(QResizeEvent* e)
+{
+ if (minimumSize().width() < sizeHint().width()) {
+	setMinimumWidth(sizeHint().width());
+ }
+ QFrame::resizeEvent(e);
 }

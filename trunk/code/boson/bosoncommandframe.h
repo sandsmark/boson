@@ -158,6 +158,8 @@ protected:
 
 	void resetLayout();
 
+	virtual void resizeEvent(QResizeEvent*);
+
 private:
 	void init();
 	void initEditor();
