@@ -31,8 +31,13 @@
 #define BO_GL_CELL_SIZE 1.0
 
 // both must be > 0.0:
-#define BO_GL_NEAR_PLANE 1.0f // FIXME: should be > 1.0
-#define BO_GL_FAR_PLANE 100.0f
+#define BO_GL_NEAR_PLANE 1.0f
+// AB: the largest possible map is 500x500. if you are at one corner (say
+// topleft) you need to see the opposite corner (bottomright), so we need at
+// least sqrt(500*500+500*500)=707. take the camera z into account (say 100) and
+// you need at least sqrt(707*707+100*100)=714.
+// so a value of 1000 should be sufficient for now. (04/02/11)
+#define BO_GL_FAR_PLANE 1000.0f
 
 
 #define BOSON_COOKIE 992
