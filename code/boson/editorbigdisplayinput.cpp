@@ -173,6 +173,9 @@ bool EditorBigDisplayInput::actionPlace(QDataStream& stream, const QPoint& canva
  bool ret = false;
  int x = canvasPos.x() / BO_TILE_SIZE;
  int y = canvasPos.y() / BO_TILE_SIZE;
+ if (!canvas()->cell(x, y)) {
+	return false;
+ }
  if (d->mPlacement.isUnit()) {
 	if (!d->mPlacement.owner()) { // TODO
 		boError() << k_funcinfo << "NULL owner" << endl;
@@ -186,6 +189,7 @@ bool EditorBigDisplayInput::actionPlace(QDataStream& stream, const QPoint& canva
 	if (!canvas()->canPlaceUnitAt(prop, QPoint(x, y), 0)) {
 		boDebug() << k_funcinfo << "Can't place unit at " << x << " " << y << endl;
 		boGame->slotAddChatSystemMessage(i18n("You can't place a %1 there!").arg(prop->name()));
+		ret = false;
 	} else {
 	
 		boDebug() << "place unit " << d->mPlacement.unitType() << endl;
