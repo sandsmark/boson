@@ -220,6 +220,19 @@ private:
 	BosonNormalCursorPrivate* d;
 };
 
+class BosonKDECursor : public BosonCursor
+{
+public:
+	BosonKDECursor();
+	virtual ~BosonKDECursor();
+	
+	virtual void setCursor(int mode);
+	virtual void setWidgetCursor(QWidget* w);
+	virtual QCursor cursor() const;
+	virtual void insertMode(int mode, QString baseDir, QString cursor);
+};
+
+
 class BosonSpriteCursor : public BosonCursor
 {
 	Q_OBJECT

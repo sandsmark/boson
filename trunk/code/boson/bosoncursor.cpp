@@ -22,7 +22,7 @@
 #include <ksimpleconfig.h>
 #include <kdebug.h>
 
-#include <qcursor.h>
+#include <kcursor.h>
 #include <qpainter.h>
 #include <qwidget.h>
 #include <qcanvas.h>
@@ -156,6 +156,40 @@ QCursor* BosonNormalCursor::loadQCursor(QString baseDir, QString cursor)
 
 
 
+/////////////////////////////////////////
+/////// BosonKDECursor //////////////////
+/////////////////////////////////////////
+
+BosonKDECursor::BosonKDECursor() : BosonCursor()
+{
+}
+
+BosonKDECursor::~BosonKDECursor()
+{
+}
+
+void BosonKDECursor::setCursor(int mode)
+{
+ if (mode == cursorMode()) {
+	return;
+ }
+ BosonCursor::setCursor(mode);
+}
+
+void BosonKDECursor::setWidgetCursor(QWidget* w)
+{
+// kdDebug() << k_funcinfo << endl;
+ w->setCursor(cursor());
+}
+
+QCursor BosonKDECursor::cursor() const
+{
+ return KCursor::arrowCursor();
+}
+
+void BosonKDECursor::insertMode(int , QString , QString )
+{
+}
 
 /////////////////////////////////////////
 /////// BosonSpriteCursor ///////////////
