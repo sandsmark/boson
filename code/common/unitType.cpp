@@ -38,6 +38,7 @@ mobileProperties_t mobileProp[] = {
 	{"ship",	96, 96,  2, 100,	200, 100, 3, BO_GO_SEA},	// MOB_SHIP
 	{"quad",	32, 32,  3, 70,		200, 100, 4, BO_GO_EARTH},	// MOB_QUAD
 	{"aircraft",	72, 72,  3, 100,	200, 100, 6, BO_GO_AIR},	// MOB_AIRCRAFT
+	{"harvester",	32, 32,  4, 0,		200, 100, 4, BO_GO_EARTH},	// MOB_HARVESTER
 	};
 
 /*
