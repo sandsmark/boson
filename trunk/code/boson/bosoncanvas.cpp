@@ -1153,7 +1153,8 @@ bool BosonCanvas::loadItemFromXML(const QDomElement& item, Player* owner)
 	}
 
 	// Create unit with Boson
-	Unit* u = boGame->loadUnit1(type, owner);
+//	Unit* u = boGame->loadUnit(type, owner);
+	Unit* u = createItem(RTTI::UnitStart + type, owner, type);
 
 	// Set additional properties
 	owner->addUnit(u, dataHandlerId);

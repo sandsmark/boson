@@ -126,8 +126,6 @@ public:
 
 	void removeAllPlayers();
 
-	Unit* loadUnit(unsigned long int unitType, Player* owner);
-
 	QValueList<QColor> availableTeamColors() const;
 
 	/**
