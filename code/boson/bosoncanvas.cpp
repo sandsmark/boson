@@ -1226,21 +1226,14 @@ bool BosonCanvas::loadShotFromXML(const QDomElement& shot, Player* owner)
  }
 
  const BosonWeaponProperties* weapon = 0;
- if (type == BosonShot::Bullet || type == BosonShot::Missile) {
-	// Bullet and missile always have properties, others don't
-	if (!shot.hasAttribute(QString::fromLatin1("UnitType"))) {
-		boError(260) << k_funcinfo << "missing attribute: UnitType for Shot tag" << endl;
-		return false;
-	}
-	if (!shot.hasAttribute(QString::fromLatin1("WeaponType"))) {
-		boError(260) << k_funcinfo << "missing attribute: WeaponType for Shot tag" << endl;
-		return false;
-	}
+ if (shot.hasAttribute(QString::fromLatin1("UnitType"))) {
 	unitid = shot.attribute(QString::fromLatin1("UnitType")).toULong(&ok);
 	if (!ok) {
 		boError(260) << k_funcinfo << "Invalid UnitType number for Shot tag" << endl;
 		return false;
 	}
+ }
+ if (shot.hasAttribute(QString::fromLatin1("WeaponType"))) {
 	weaponid = shot.attribute(QString::fromLatin1("WeaponType")).toULong(&ok);
 	if (!ok) {
 		boError(260) << k_funcinfo << "Invalid WeaponType number for Shot tag" << endl;
@@ -1248,23 +1241,11 @@ bool BosonCanvas::loadShotFromXML(const QDomElement& shot, Player* owner)
 	}
  }
 
- BosonShot* s = 0;
- if (type == BosonShot::Bullet) {
-	s = createShot(type, unitid, weaponid, owner);
- } else if(type == BosonShot::Missile) {
-	s = createShot(type, unitid, weaponid, owner);
- } else if(type == BosonShot::Explosion) {
-	// unitid / weaponid are ignored here
-	s = createShot(type, unitid, weaponid, owner);
- } else if(type == BosonShot::Mine) {
-	s = createShot(type, unitid, weaponid, owner);
- } else if(type == BosonShot::Bomb) {
-	s = createShot(type, unitid, weaponid, owner);
- } else {
-	boError() << k_funcinfo << "Invalid type: " << type << endl;
+ BosonShot* s = createShot(type, unitid, weaponid, owner);
+ if (!s) {
+	boError() << k_funcinfo << "Invalid shot - type=" << type << " unitid=" << unitid << " weaponid=" << weaponid << endl;
 	return false;
  }
- // Call shot's loading methods
  if (!s->loadFromXML(shot)) {
 	boWarning(260) << k_funcinfo << "Could not load shot correctly" << endl;
 	delete s;
