@@ -569,6 +569,8 @@ VisualFacility::VisualFacility(int type, Player* owner, QCanvas* canvas) : Visua
  setWork(WorkConstructed);
  setAnimated(true); // construcion animation
  setConstructionDelay(50); // default
+
+ d->mConstructions.setEmittingSignal(false); // just to prevent warning in Player::slotUnitPropertyChanged()
 }
 
 VisualFacility::~VisualFacility()
