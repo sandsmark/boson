@@ -343,7 +343,7 @@ bool BosonMap::loadHeightMapImage(const QByteArray& heightMap)
 	// skip all (including alpha) other values.
 	increment = 4;
  }
- for (unsigned int y = 0; y < width() + 1; y++) {
+ for (unsigned int y = 0; y < height() + 1; y++) {
 	// AB: warning: from Qt docs: "If you are accessing 16-bpp image data,
 	// you must handle endianness yourself."
 	// do we have to care about this? (since we are using 16bpp)
@@ -352,7 +352,7 @@ bool BosonMap::loadHeightMapImage(const QByteArray& heightMap)
 	// then :)
 	int imageX = 0;
 	unsigned char* line = map.scanLine(y);
-	for (unsigned int x = 0; x < height() + 1; x++, imageX += increment) {
+	for (unsigned int x = 0; x < width() + 1; x++, imageX += increment) {
 		mHeightMap[y * (width() + 1) + x] = pixelToHeight(line[imageX]);
 	}
  }
