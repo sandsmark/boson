@@ -890,8 +890,7 @@ void MobileUnit::advanceMoveCheck()
 	setWork(WorkNone);
 	return;
  }
- QValueList<Unit*> l = unitCollisions(true);
- if (!l.isEmpty()) {
+ if (boCanvas()->cellsOccupied(boundingRectAdvanced(), this, false)) {
 //	kdDebug() << k_funcinfo << "collisions" << endl;
 //	kdWarning() << k_funcinfo << "" << id() << " -> " << l.first()->id() 
 //		<< " (count=" << l.count() <<")"  << endl;
