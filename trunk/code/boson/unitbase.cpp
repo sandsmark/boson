@@ -55,6 +55,7 @@ UnitBase::UnitBase(const UnitProperties* prop)
  registerData(&mAdvanceWork, IdAdvanceWork);
  registerData(&mDeletionTimer, IdDeletionTimer);
  mDeletionTimer.setEmittingSignal(false);
+ mShieldReloadCounter.setEmittingSignal(false);
 
  mId = 0;
 
