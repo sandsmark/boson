@@ -79,7 +79,6 @@ Player::Player(bool isNeutralPlayer) : KPlayer()
  boDebug() << k_funcinfo << endl;
  mSpecies = 0;
  d = new PlayerPrivate;
- d->mUnits.setAutoDelete(true);
  setAsyncInput(true);
  connect(this, SIGNAL(signalNetworkData(int, const QByteArray&, Q_UINT32, KPlayer*)),
 		this, SLOT(slotNetworkData(int, const QByteArray&, Q_UINT32, KPlayer*)));

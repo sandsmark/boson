@@ -151,13 +151,21 @@ void BosonCanvas::quitGame()
  for (it = d->mWork2AdvanceList.begin(); it != d->mWork2AdvanceList.end(); ++it) {
 	(*it).clear();
  }
+ deleteItems(d->mAllItems);
  d->mChangeAdvanceList.clear();
  d->mNextItemId = 0;
 }
 
 void BosonCanvas::deleteDestroyed()
 {
- deleteUnits(&d->mDestroyedUnits);
+ QPtrList<BosonItem> items;
+ QPtrListIterator<Unit> it(d->mDestroyedUnits);
+ while (it.current()) {
+	items.append(it.current());
+	++it;
+ }
+ deleteItems(items);
+ d->mDestroyedUnits.clear();
 }
 
 Cell* BosonCanvas::cell(int x, int y) const
@@ -455,7 +463,7 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 	// REMOVE_WRECKAGES_TIME is reached. This way we don't see all wreckages
 	// diappear at once...
 	QPtrListIterator<Unit> deletionIt(d->mDestroyedUnits);
-	QPtrList<Unit> deleteList;
+	QPtrList<BosonItem> deleteList;
 	while (deletionIt.current()) {
 		deletionIt.current()->increaseDeletionTimer();
 		if (deletionIt.current()->deletionTimer() >= REMOVE_WRECKAGES_TIME) {
@@ -465,7 +473,7 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 		++deletionIt;
 	}
 
-	deleteUnits(&deleteList);
+	deleteItems(deleteList);
 
 	boProfiling->advanceDeleteUnusedShots(true);
 	deleteUnusedShots();
@@ -1459,32 +1467,26 @@ bool BosonCanvas::onCanvas(const BoVector3& pos) const
  return onCanvas((int)pos.x(), (int)pos.y());
 }
 
-void BosonCanvas::deleteUnits(QPtrList<Unit>* units)
+void BosonCanvas::deleteItems(BoItemList& items)
 {
- // this is the only place where a unit may be deleted. NEVER delete a unit
- // outside this method!
-
- // ensure that NO unit has one of the deleted units as target.
- QPtrListIterator<Unit> deleteIt(*units);
+ QPtrList<BosonItem> list;
  BoItemList::Iterator it;
- for (it = d->mAllItems.begin(); it != d->mAllItems.end(); ++it) {
-	if (!RTTI::isUnit((*it)->rtti())) {
-		continue;
-	}
-	Unit* u = (Unit*)*it;
-	if (!u->target()) {
-		continue;
-	}
-	for (deleteIt.toFirst(); deleteIt.current(); ++deleteIt) {
-		if (u->target() == deleteIt.current()) {
-			u->setTarget(0);
-		}
-	}
+ for (it = items.begin(); it != items.end(); ++it) {
+	list.append(*it);
  }
- while (units->count() > 0) {
-	Unit* u = units->first();
-	units->removeRef(u);
-	deleteItem(u);
+ deleteItems(list);
+ if (list.count() != 0) {
+	boError() << k_funcinfo << "error on deleting items!" << endl;
+ }
+ items.clear();
+}
+
+void BosonCanvas::deleteItems(QPtrList<BosonItem>& items)
+{
+ while (items.count() > 0) {
+	BosonItem* i = items.first();
+	items.removeRef(i);
+	deleteItem(i);
  }
 }
 
