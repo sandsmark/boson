@@ -87,7 +87,6 @@ libboson_la_SOURCES = \
 	bomaterial.cpp \
 	\
 	bogameproperty.cpp \
-	bosonglchat.cpp \
 	bosonufochat.cpp \
 	bosonprofiling.cpp \
 	bosonprofilingdialog.cpp \
