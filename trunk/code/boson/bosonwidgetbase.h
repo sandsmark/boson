@@ -209,7 +209,6 @@ protected:
 
 	BosonCursor* cursor() const { return mCursor; }
 
-	virtual void initKActions();
 	virtual void initDisplayManager();
 	virtual void initConnections();
 	virtual void setBosonXMLFile();

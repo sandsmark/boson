@@ -130,7 +130,6 @@ void EditorWidget::slotChangeCursor(int , const QString& )
 
 void EditorWidget::initKActions()
 {
- BosonWidgetBase::initKActions();
 // KStdAction::save(this, SLOT(slotSavePlayField()), actionCollection(), "file_save_playfield");
  KStdAction::saveAs(this, SLOT(slotSavePlayFieldAs()), actionCollection(), "file_save_playfield_as");
  KAction* close = KStdAction::close(this, SIGNAL(signalEndGame()), actionCollection());

@@ -184,7 +184,6 @@ void BosonWidget::slotPlayerKilled(Player* p)
 
 void BosonWidget::initKActions()
 {
- BosonWidgetBase::initKActions();
  QSignalMapper* selectMapper = new QSignalMapper(this);
  QSignalMapper* createMapper = new QSignalMapper(this);
  connect(selectMapper, SIGNAL(mapped(int)), displayManager(), SLOT(slotSelectGroup(int)));

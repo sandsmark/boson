@@ -157,7 +157,7 @@ BosonCanvas* BosonWidgetBase::canvas() const
 }
 
 #include <kstandarddirs.h> //locate()
-void BosonWidgetBase::init(KDockWidget* chatDock)
+void BosonWidgetBase::init(KDockWidget* )
 {
  // NOTE: order of init* methods is very important here, so don't change it,
  //  unless you know what you're doing!
@@ -165,12 +165,11 @@ void BosonWidgetBase::init(KDockWidget* chatDock)
 	return;
  }
  d->mInitialized = true;
- initChat(chatDock);
+ initChat(0);
  initDisplayManager();
 
  initConnections();
  actionCollection()->setWidget(this); // needs to be called *before* initKActions()
- initKActions();
  // XMLClient stuff. needs to be called *after* initKActions().
  setBosonXMLFile();
 // setXML(top()->domDocument().toString());
@@ -213,15 +212,14 @@ void BosonWidgetBase::initDisplayManager()
 		display, SLOT(slotUnitChanged(Unit*)));
 }
 
-
-void BosonWidgetBase::initChat(KDockWidget* chatDock)
+void BosonWidgetBase::initChat(KDockWidget* )
 {
- // note: we can use the chat widget even for editor mode, e.g. for status
- // messages!
- d->mChat = new BoGameChatWidget(chatDock, "chatwidget", boGame, BosonMessage::IdChat);
+ // AB: this widget is obsolete. it is just here for technical reasons, as other
+ // classes depend on it currently.
+ d->mChat = new BoGameChatWidget(this, "chatwidget", boGame, BosonMessage::IdChat);
+ d->mChat->hide();
  connect(d->mChat->chatWidget(), SIGNAL(signalScriptCommand(const QString&)),
 		this, SLOT(slotRunScriptLine(const QString&)));
- chatDock->setWidget(d->mChat);
 }
 
 void BosonWidgetBase::initPlayer()
@@ -455,10 +453,6 @@ void BosonWidgetBase::slotCmdBackgroundChanged(const QString& file)
  }
  cmdFrame()->setPaletteBackgroundPixmap(p);
 #endif
-}
-
-void BosonWidgetBase::initKActions()
-{
 }
 
 void BosonWidgetBase::quitGame()
