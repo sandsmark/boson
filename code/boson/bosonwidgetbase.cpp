@@ -43,7 +43,7 @@
 #include "optionsdialog.h"
 #include "boaction.h"
 #include "bosonlocalplayerinput.h"
-#include "commandframe/bosoncommandframe.h"
+#include "commandframe/bosoncommandframebase.h"
 #include "sound/bosonaudiointerface.h"
 
 #include <kapplication.h>
@@ -262,7 +262,7 @@ void BosonWidgetBase::initDisplayManager()
  // dont do the connect()s here, as some objects might not be deleted and
  // therefore we do the same connect twice if an endgame() occurs!
  connect(mDisplayManager, SIGNAL(signalSelectionChanged(BoSelection*)),
-		d->mCommandFrame, SLOT(slotSelectionChanged(BoSelection*)));
+		cmdFrame(), SLOT(slotSelectionChanged(BoSelection*)));
  connect(mDisplayManager, SIGNAL(signalChangeActiveViewport(
 		const QPoint&, const QPoint&, const QPoint&, const QPoint&)),
 		minimap(), SLOT(slotMoveRect(
@@ -325,7 +325,7 @@ void BosonWidgetBase::initPlayer()
 void BosonWidgetBase::initLocalPlayerInput()
 {
  mLocalPlayerInput = new BosonLocalPlayerInput();
- localPlayerInput()->setCommandFrame(d->mCommandFrame);
+ localPlayerInput()->setCommandFrame(cmdFrame());
 
  localPlayer()->removeGameIO(localPlayerInput(), false); // in case it was added before
  localPlayer()->addGameIO(localPlayerInput());
@@ -541,7 +541,7 @@ void BosonWidgetBase::slotAddChatSystemMessage(const QString& fromName, const QS
 
 void BosonWidgetBase::slotSetCommandButtonsPerRow(int b)
 {
- d->mCommandFrame->slotSetButtonsPerRow(b);
+ cmdFrame()->slotSetButtonsPerRow(b);
 }
 
 void BosonWidgetBase::slotUnfogAll(Player* pl)
@@ -598,16 +598,16 @@ void BosonWidgetBase::slotRemoveActiveDisplay()
 void BosonWidgetBase::slotCmdBackgroundChanged(const QString& file)
 {
  if (file.isNull()) {
-	d->mCommandFrame->unsetPalette();
+	cmdFrame()->unsetPalette();
 	return;
  }
  QPixmap p(file);
  if (p.isNull()) {
 	boError() << k_funcinfo << "Could not load " << file << endl;
-	d->mCommandFrame->unsetPalette();
+	cmdFrame()->unsetPalette();
 	return;
  }
- d->mCommandFrame->setPaletteBackgroundPixmap(p);
+ cmdFrame()->setPaletteBackgroundPixmap(p);
 }
 
 void BosonWidgetBase::initKActions()
@@ -971,8 +971,8 @@ void BosonWidgetBase::setLocalPlayerRecursively(Player* p)
 	return;
  }
  boGame->setLocalPlayer(localPlayer());
- if (d->mCommandFrame) {
-	d->mCommandFrame->setLocalPlayer(localPlayer());
+ if (cmdFrame()) {
+	cmdFrame()->setLocalPlayer(localPlayer());
  }
  if (d->mChat) {
 	d->mChat->setFromPlayer(localPlayer());
