@@ -349,6 +349,7 @@ BoWaterManager* BoWaterManager::waterManager()
 {
   if(!mManager)
   {
+#warning TODO: use static deleter
     mManager = new BoWaterManager();
   }
   return mManager;
