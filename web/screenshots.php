@@ -149,6 +149,7 @@ if($HTTP_GET_VARS["page"] != "")
 **  Note that filenames do not contain directory and that files are in JPG AND NOT IN PNG because of the size
 **/
 
+
 add_screenshot("This is Boson's startup screen. Currently, here are only
     buttons to start a new game or quit Boson.",
     "11. June 2002 (Boson 0.6)", "thumb2.jpg", "boson2.jpg");
@@ -236,10 +237,18 @@ add_screenshot("Many units fighting. You can also see tooltip, showing name and
 add_screenshot("Neutral units such as trees are now supported. In the top-left
     corner, you can see new opengl minimap (it's showing only logo because
     player doesn't have radar)",
-    "<b>NEW:</b> 24. Dec. 2003 (CVS)", "0312-1-thumb.jpg", "0312-1.jpg");
+    "24. Dec. 2003 (CVS)", "0312-1-thumb.jpg", "0312-1.jpg");
 add_screenshot("Lonely hut in the mountains, also some trees (including few
     broken ones) - they're also implemented as neutral units",
-    "<b>NEW:</b> 24. Dec. 2003 (CVS)", "0312-2-thumb.jpg", "0312-2.jpg");
+    "24. Dec. 2003 (CVS)", "0312-2-thumb.jpg", "0312-2.jpg");
+
+
+add_screenshot("Harvesters are mining for minerals",
+    "<b>NEW:</b> 29. April 2004 (Boson 0.10-CVS)", "harvesting1-thumb.jpg", "harvesting1.jpg");
+add_screenshot("Just a nice screenshot",
+    "<b>NEW:</b> 29. April 2004 (Boson 0.10-CVS)", "neutral1-thumb.jpg", "neutral1.jpg");
+
+
 
 $ss_count = count($screens);
 
@@ -258,7 +267,7 @@ if($show_ss == -1)
     sidebar_end();
 
     main_area_begin();
-    
+
     // Screenshots stuff
     $last = $ss_count - ($page - 1) * $max_screens_per_page;
     $first = $last - $max_screens_per_page + 1;
@@ -316,9 +325,9 @@ if($show_ss == -1)
     }
     echo "
       </td></tr>";
-    
+
     draw_bigbox_end();
-    
+
     main_area_end();
 
     end_page();
@@ -336,16 +345,16 @@ else
     // No sidebar to save space
 
     main_area_begin();
-    
+
     // Screenshots stuff
     draw_bigbox_begin("Screenshot $ssnum");
     echo "
     <!-- Screenshot -->";
-    
+
     $screens[$show_ss]->draw_big();
-    
+
     draw_bigbox_end();
-    
+
     main_area_end();
 
     end_page();
