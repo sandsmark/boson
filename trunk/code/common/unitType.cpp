@@ -57,15 +57,15 @@ mobileProperties_t mobileProp[] = {
 	
 facilityProperties_t facilityProp[] = {
 	{"comsat"	, EX(2), EX(2), 7,  0,	1000, 40},	// FACILITY_COMSAT
-	{"helipad"	, EX(2), EX(2), 6,  0,	800, 40},	// FACILITY_HELIPAD
-	{"powerplant"	, EX(2), EX(2), 3,  0,	1200, 40},	// FACILITY_POWERPLANT
-	{"warfactory"	, EX(2), EX(2), 3,  0,	3000, 40},	// FACILITY_WAR_FACTORY
-	{"barracks"	, EX(2), EX(2), 3,  0,	800, 40},	// FACILITY_BARRACKS
+	{"helipad"	, EX(2), EX(2), 6,  0,	500, 40},	// FACILITY_HELIPAD
+	{"powerplant"	, EX(2), EX(2), 3,  0,	500, 40},	// FACILITY_POWERPLANT
+	{"warfactory"	, EX(2), EX(2), 3,  0,	1300, 40},	// FACILITY_WAR_FACTORY
+	{"barracks"	, EX(2), EX(2), 3,  0,	500, 40},	// FACILITY_BARRACKS
 	{"cmdbunker"	, EX(3), EX(3), 3,  0,	3000, 40},	// FACILITY_CMDBUNKER
-	{"samsite"	, EX(1), EX(1), 4, 25,	800, 40},	// FACILITY_SAMSITE
+	{"samsite"	, EX(1), EX(1), 4, 10,	500, 40},	// FACILITY_SAMSITE
 	{"oiltower"	, EX(1), EX(1), 2,  0,	100, 40},	// FACILITY_OILTOWER
-	{"refinery"	, EX(2), EX(2), 3,  0,	800, 40},	// FACILITY_REFINERY
-	{"repairpad"	, EX(2), EX(2), 4,  0,	1000, 40},	// FACILITY_REPAIRPAD
+	{"refinery"	, EX(2), EX(2), 3,  0,	500, 40},	// FACILITY_REFINERY
+	{"repairpad"	, EX(2), EX(2), 4,  0,	800, 40},	// FACILITY_REPAIRPAD
 	{"turret"	, EX(1), EX(1), 5,  5,	200, 40},	// FACILITY_TURRET
 	};
 //	                                        mineral
