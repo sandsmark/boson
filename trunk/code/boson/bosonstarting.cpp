@@ -94,16 +94,34 @@ void BosonStarting::setEditorMap(const QByteArray& buffer)
 #endif
 }
 
-// FIXME: add a function that returns bool - emit signalStartingFailed()
-// whenever false is returned.
 void BosonStarting::startNewGame()
 {
  boDebug() << k_funcinfo << endl;
  mLoading = false; // we are starting a new game
 
- // Reset progressbar
  emit signalLoadingShowProgressBar(true);
  emit signalLoadingSetLoading(false);
+
+ // we need to do this with timer because we can't add checkEvents() here. there is a
+ // (more or less) KGame bug in KDE < 3.1 that causes KGame to go into an
+ // infinite loop when calling checkEvents() from a slot that gets called from a
+ // network message (exact: from KMessageDirect::received())
+ QTimer::singleShot(0, this, SLOT(slotStartGame()));
+}
+
+void BosonStarting::slotStartGame()
+{
+ if (!start()) {
+	boError() << k_funcinfo << "game starting failed" << endl;
+	emit signalStartingFailed();
+	return;
+ }
+ boDebug() << k_funcinfo << "game starting succeeded" << endl;
+}
+
+bool BosonStarting::start()
+{
+ // Reset progressbar
  emit signalLoadingReset();
  emit signalLoadingSetAdmin(boGame->isAdmin());
  emit signalLoadingPlayersCount(boGame->playerList()->count());
@@ -111,20 +129,17 @@ void BosonStarting::startNewGame()
  boDebug() << k_funcinfo << endl;
  if (!boGame) {
 	boError() << k_funcinfo << "NULL boson object" << endl;
-	emit signalStartingFailed();
-	return;
+	return false;
  }
  if (boGame->gameStatus() != KGame::Init) {
 	boError() << k_funcinfo
 		<< "Boson must be in init status to receive map!" << endl
 		<< "Current status: " << boGame->gameStatus() << endl;
-	emit signalStartingFailed();
-	return;
+	return false;
  }
  if (!mDestPlayField) {
 	boError() << k_funcinfo << "NULL playfield" << endl;
-	emit signalStartingFailed();
-	return;
+	return false;
  }
  // mDestPlayField should be empty - ensure this by deleting the map
  mDestPlayField->deleteMap();
@@ -136,21 +151,16 @@ void BosonStarting::startNewGame()
  QMap<QString, QByteArray> files;
  if (!BosonPlayField::unstreamFiles(files, mNewGameData)) {
 	boError() << k_funcinfo << "invalid newgame stream" << endl;
-	emit signalStartingFailed();
-	return;
+	return false;
  }
  if (!mDestPlayField->loadPlayField(files)) {
 	boError() << k_funcinfo << "error loading the playfield" << endl;
-	emit signalStartingFailed();
-	return;
+	return false;
  }
  boDebug() << k_funcinfo << "playfield loaded" << endl;
 
  // - the scenario (see BosonScenario::loadScenarioFromDocument())
 
-
-
- // AB: slotReceiveMap():
 
 
  boGame->setPlayField(mDestPlayField);
@@ -163,24 +173,14 @@ void BosonStarting::startNewGame()
 	boDebug() << k_funcinfo << "set local player for loaded games now" << endl;
 	if (!boGame->localPlayer()) {
 		boWarning() << k_funcinfo << "NULL player" << endl;
-		return;
+		return false;
 	}
 #warning FIXME for LOADING code
 //	slotChangeLocalPlayer(boGame->localPlayer());
 	mPlayer = boGame->localPlayer();
  }
 
- // we need to do this with timer because we can't add checkEvents() here. there is a
- // (more or less) KGame bug in KDE < 3.1 that causes KGame to go into an
- // infinite loop when calling checkEvents() from a slot that gets called from a
- // network message (exact: from KMessageDirect::received())
- if (!mLoading) {
-	QTimer::singleShot(0, this, SLOT(slotLoadTiles()));
- } else {
-	// loading code mustn't contain any singleShot()s
-//	slotLoadTiles();
- }
-
+ return loadTiles();
 }
 
 bool BosonStarting::loadGame(const QString& loadingFileName)
@@ -209,8 +209,12 @@ bool BosonStarting::loadGame(const QString& loadingFileName)
  if (!loaded) {
 	return false;
  }
- slotLoadTiles();
+ bool ret = loadTiles();
  boGame->unlock();
+ if (!ret) {
+	boError() << k_funcinfo << "loading failed" << endl;
+	return false;
+ }
 
  mLoading = false;
 
@@ -225,12 +229,7 @@ void BosonStarting::checkEvents()
  }
 }
 
-// obsolete
-void BosonStarting::slotReceiveMap(const QByteArray& )
-{
-}
-
-void BosonStarting::slotLoadTiles()
+bool BosonStarting::loadTiles()
 {
  // Load map tiles.
 
@@ -239,18 +238,15 @@ void BosonStarting::slotLoadTiles()
 
  if (!boGame) {
 	boError() << k_funcinfo << "NULL boson object" << endl;
-	emit signalStartingFailed();
-	return;
+	return false;
  }
  if (!playField()) {
 	boError() << k_funcinfo << "NULL playField" << endl;
-	emit signalStartingFailed();
-	return;
+	return false;
  }
  if (!playField()->map()) {
 	boError() << k_funcinfo << "NULL map" << endl;
-	emit signalStartingFailed();
-	return;
+	return false;
  }
  boGame->lock();
  boProfiling->start(BosonProfiling::LoadTiles);
@@ -266,40 +262,29 @@ void BosonStarting::slotLoadTiles()
 
  boProfiling->stop(BosonProfiling::LoadTiles);
 
- slotLoadGameData3(); // FIXME: not a slot
+ bool ret = loadGameData3();
 
  boGame->unlock();
+
+ if (!ret) {
+	boError() << k_funcinfo << "loading failed" << endl;
+	return false;
+ }
+ return ret;
 }
 
-void BosonStarting::slotLoadGameData3() // FIXME rename!
+bool BosonStarting::loadGameData3() // FIXME rename!
 {
- // this call mostly cares about network messages. It may happen that the ADMIN
- // already sends IdInitFogOfWar (e.g.) while we are still loading. This call
- // ensures that they are *not* delivered when we call checkEvents(). otherwise
- // every checkEvents() call would deliver any messages from the current event
- // loop.
- // TODO: we might still have this problem if the client takes e.g. 10 minutes
- // to load, but the ADMIN only 40 seconds or so. then the client would be in a
- // totally different loading phase. we need to ensure that thos functions are
- // locked/unlocked correctly, too! or at least don't end up in the event loop.
- //
- // the same problem appears with QTimer::singleShot(). We need to ensure that
- // the singleShot message is received first, not the network message
- // UPDATE: it was moved to another method calling this method.
-// boGame->lock();
-
  boProfiling->start(BosonProfiling::LoadGameData3);
 
- loadPlayerData(); // FIXME: most of the stuff below should be in this method, too!
+ if (!loadPlayerData()) { // FIXME: most of the stuff below should be in this method, too!
+	boError() << k_funcinfo << "player loading failed" << endl;
+	return false;
+ }
 
  emit signalLoadingType(BosonLoadingWidget::InitGame);
 
-#warning FIXME
  checkEvents();
-// FIXME this checkEvents() (and those in e.g. loadPlayerData()) are a problem
-// for network games. it may happen (and probably will) that IdInitFogOfWar was
-// already sent!!!
-// we cannot remove them, cause we'd have blocking UI then
 
  if (!mLoading) {
 	// emits a signal using a QTimer only - it returns immediately.
@@ -317,15 +302,21 @@ void BosonStarting::slotLoadGameData3() // FIXME rename!
 
  boDebug() << k_funcinfo << "done" << endl;
  if (!mLoading) {
-	startScenario();
+	if (!startScenario()) {
+		boError() << k_funcinfo << "starting scenario failed" << endl;
+		return false;
+	}
 
 	// load games will do that themselves.
-	startGame();
+	if (!startGame()) {
+		boError() << k_funcinfo << "starting game failed" << endl;
+		return false;
+	}
  }
-// boGame->unlock();
+ return true;
 }
 
-void BosonStarting::loadPlayerData()
+bool BosonStarting::loadPlayerData()
 {
  boDebug() << k_funcinfo << endl;
 
@@ -345,8 +336,7 @@ void BosonStarting::loadPlayerData()
 
  if (!mPlayer) {
 	boError() << k_funcinfo << "NULL player!" << endl;
-	emit signalStartingFailed();
-	return;
+	return false;
  }
 
  // these are sounds like minimap activated.
@@ -356,6 +346,7 @@ void BosonStarting::loadPlayerData()
  emit signalLoadingType(BosonLoadingWidget::LoadGeneralData);
  mPlayer->speciesTheme()->loadGeneralSounds();
  boDebug() << k_funcinfo << "done" << endl;
+ return true;
 }
 
 void BosonStarting::slotLoadPlayerData(Player* p)
@@ -397,28 +388,37 @@ void BosonStarting::loadUnitDatas(Player* p)
 // (return to startup page if starting fails)
 // AB: startScenario should be moved to above, so that we don't have to unstream
 // the files again. but we need a qtimer::singleshot on the way to here..
-void BosonStarting::startScenario()
+bool BosonStarting::startScenario()
 {
- BO_CHECK_NULL_RET(mPlayer);
+ if (!mPlayer) {
+	BO_NULL_ERROR(mPlayer);
+	return false;
+ }
  if (mLoading) {
 	boError() << k_funcinfo << "scenario doesn't need to be started on loading" << endl;
-	return;
+	return false;
  }
- BO_CHECK_NULL_RET(boGame);
- BO_CHECK_NULL_RET(mDestPlayField);
+ if (!boGame) {
+	BO_NULL_ERROR(boGame);
+	return false;
+ }
+ if (!mDestPlayField) {
+	BO_NULL_ERROR(mDestPlayField);
+	return false;
+ }
  QMap<QString, QByteArray> files;
  if (!BosonPlayField::unstreamFiles(files, mNewGameData)) {
 	// oops - it was unstreamed successfully before!
 	boError() << k_funcinfo << "invalid stream??" << endl;
-	return;
+	return false;
  }
  if (!files.contains("players.xml")) {
 	boError() << k_funcinfo << "no players.xml found" << endl;
-	return;
+	return false;
  }
  if (!files.contains("canvas.xml")) {
 	boError() << k_funcinfo << "no canvas.xml found" << endl;
-	return;
+	return false;
  }
  QByteArray playersXML = files["players.xml"];
  QByteArray canvasXML = files["canvas.xml"];
@@ -430,13 +430,13 @@ void BosonStarting::startScenario()
  QDomDocument doc;
  if (!doc.setContent(QCString(playersXML), &errorMsg, &line, &column)) {
 	boError() << k_funcinfo << "unable to load playersXML - parse error at line=" << line << ",column=" << column << " errorMsg=" << errorMsg << endl;
-	return;
+	return false;
  }
  QDomElement root = doc.documentElement();
  QDomNodeList list = root.elementsByTagName("Player");
  if (list.count() < 1) {
 	boError() << k_funcinfo << "no Player tag found" << endl;
-	return;
+	return false;
  }
  QMap<int, int> player2Number;
  for (unsigned int i = 0; i < list.count(); i++) {
@@ -463,7 +463,7 @@ void BosonStarting::startScenario()
  QDomDocument canvasDoc;
  if (!canvasDoc.setContent(QCString(canvasXML))) {
 	boError() << k_funcinfo << "unable to load canvasXML" << endl;
-	return;
+	return false;
  }
  QDomElement canvasRoot = canvasDoc.documentElement();
  QDomNodeList itemsList = canvasRoot.elementsByTagName("Items");
@@ -504,11 +504,12 @@ void BosonStarting::startScenario()
  BosonSaveLoad* load = new BosonSaveLoad(boGame);
  if (!load->loadNewGame(playersXML, canvasXML)) {
 	boError() << k_funcinfo << "failed starting game" << endl;
-	return;
+	return false;
  }
+ return true;
 }
 
-void BosonStarting::startGame()
+bool BosonStarting::startGame()
 {
  boDebug() << k_funcinfo << endl;
  // we do some final initializations here (mostly status changed) and then send
@@ -519,9 +520,10 @@ void BosonStarting::startGame()
  // (i.e. hide the loading progressbar, show the big display, ...)
  boGame->startGame();
  if (!boGame->isAdmin()) {
-	return;
+	return true;
  }
  boGame->sendMessage(0, BosonMessage::IdGameIsStarted);
+ return true;
 }
 
 
