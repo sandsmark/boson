@@ -115,24 +115,24 @@ private:
  * always be connected in a linear way (i.e. face1,face2,face3,...). But we
  * could also connect them so that we use triangle strips.
  **/
-class BoNode
+class BoFaceNode
 {
 public:
 	/**
 	 * Construct a node. Note that a node is 100% unusable without a valid
 	 * @p BoFace object.
 	 **/
-	BoNode(const BoFace* face);
-	~BoNode();
+	BoFaceNode(const BoFace* face);
+	~BoFaceNode();
 
-	void setPrevious(BoNode* previous);
-	void setNext(BoNode* next);
+	void setPrevious(BoFaceNode* previous);
+	void setNext(BoFaceNode* next);
 
-	BoNode* next() const
+	BoFaceNode* next() const
 	{
 		return mNext;
 	}
-	BoNode* previous() const
+	BoFaceNode* previous() const
 	{
 		return mPrevious;
 	}
@@ -191,15 +191,15 @@ public:
 
 	void delNode();
 
-	static bool isAdjacent(BoNode* face1, BoNode* face2);
+	static bool isAdjacent(BoFaceNode* face1, BoFaceNode* face2);
 	QString debugString() const;
 
 private:
 	void init();
 
 private:
-	BoNode* mNext;
-	BoNode* mPrevious;
+	BoFaceNode* mNext;
+	BoFaceNode* mPrevious;
 	int mRelevantPoint;
 	const BoFace* mFace;
 };
@@ -249,7 +249,7 @@ public:
 	unsigned int facesCount() const;
 
 	/**
-	 * @param See @ref BoNode::setFace. Remember to add the actual points to
+	 * @param See @ref BoFaceNode::setFace. Remember to add the actual points to
 	 * this mesh! See especially @ref setVertex
 	 **/
 	void setFace(int index, const int* points);
@@ -331,10 +331,10 @@ public:
 
 	/**
 	 * Delete all nodes starting at @p node. If it has a previous face,
-	 * @ref BoNode::previous is set to 0 before deleting the node.
+	 * @ref BoFaceNode::previous is set to 0 before deleting the node.
 	 * @obsolete
 	 **/
-	void deleteNodes(BoNode* node);
+	void deleteNodes(BoFaceNode* node);
 
 	/**
 	 * Disconnect all nodes to prepare another @ref connectNodes or @ref
@@ -443,14 +443,14 @@ public:
 
 protected:
 	void createFaces(unsigned int faces);
-	bool connectNodes(const BoAdjacentDataBase* database, const QPtrList<BoNode>& nodes, QPtrList<BoNode>* found, BoNode* node) const;
+	bool connectNodes(const BoAdjacentDataBase* database, const QPtrList<BoFaceNode>& nodes, QPtrList<BoFaceNode>* found, BoFaceNode* node) const;
 
 
 	// this is meant to check whether the something on the screen will
 	// change if we draw this mesh now.
 	bool checkVisible();
 
-	BoNode* nodes() const;
+	BoFaceNode* nodes() const;
 
 private:
 	void init();
