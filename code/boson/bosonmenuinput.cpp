@@ -49,6 +49,9 @@
 #include "bomeshrenderermanager.h"
 #include "playerio.h"
 #include "botexmapimportdialog.h"
+#ifdef BOSON_USE_BOMEMORY
+#include "bomemory/bomemorydialog.h"
+#endif
 
 #include <klocale.h>
 #include <kshortcut.h>
