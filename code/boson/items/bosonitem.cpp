@@ -25,7 +25,6 @@
 #include "../cell.h" // for deleteitem. i dont want this. how can we avoid this? don't use qptrvector probably.
 #include "bodebug.h"
 
-#include <qintdict.h>
 #include <qrect.h>
 
 BosonItem::BosonItem(BosonModel* model, BosonCanvas* canvas)

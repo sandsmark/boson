@@ -36,24 +36,17 @@
 #include "bodebug.h"
 
 #include <klocale.h>
-#include <kgame/kgameproperty.h>
-#include <kgame/kgamechat.h>
-#include <ksimpleconfig.h>
 #include <kmessagebox.h>
 #include <klistview.h>
 #include <klistbox.h>
 #include <ktextbrowser.h>
-#include <kgamemisc.h>
 
 #include <qcombobox.h>
-#include <qframe.h>
 #include <qgroupbox.h>
 #include <qlabel.h>
-#include <qlineedit.h>
-#include <qpushbutton.h>
-#include <qlayout.h>
-#include <qpainter.h>
 #include <qslider.h>
+#include <qptrdict.h>
+#include <qvaluelist.h>
 
 class BosonNewEditorWidgetPrivate
 {

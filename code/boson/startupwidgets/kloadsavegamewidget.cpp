@@ -28,7 +28,6 @@
 #include <qlabel.h>
 #include <qpushbutton.h>
 #include <qdatetime.h>
-#include <qlabel.h>
 
 #include <kstandarddirs.h>
 #include <kmessagebox.h>
