@@ -920,6 +920,15 @@ void BoDefaultGroundRenderer::renderCellsNow(Cell** cells, int count, int corner
 	unsigned char* texMapUpperLeft = texMapStart + celloffset;
 	float* heightMapUpperLeft = heightMap + celloffset;
 
+	unsigned char upperLeftAlpha = *texMapUpperLeft;
+	unsigned char upperRightAlpha = *(texMapUpperLeft + 1);
+	unsigned char lowerLeftAlpha = *(texMapUpperLeft + cornersWidth);
+	unsigned char lowerRightAlpha = *(texMapUpperLeft + cornersWidth + 1);
+
+	if ((upperLeftAlpha == 0) && (upperRightAlpha == 0) && (lowerLeftAlpha == 0) && (lowerRightAlpha == 0)) {
+		continue;
+	}
+
 	GLfloat cellXPos = (float)x * BO_GL_CELL_SIZE;
 	GLfloat cellYPos = -(float)y * BO_GL_CELL_SIZE;
 
@@ -927,11 +936,6 @@ void BoDefaultGroundRenderer::renderCellsNow(Cell** cells, int count, int corner
 	float upperRightHeight = *(heightMapUpperLeft + 1);
 	float lowerLeftHeight = *(heightMapUpperLeft + cornersWidth);
 	float lowerRightHeight = *(heightMapUpperLeft + cornersWidth + 1);
-
-	unsigned char upperLeftAlpha = *texMapUpperLeft;
-	unsigned char upperRightAlpha = *(texMapUpperLeft + 1);
-	unsigned char lowerLeftAlpha = *(texMapUpperLeft + cornersWidth);
-	unsigned char lowerRightAlpha = *(texMapUpperLeft + cornersWidth + 1);
 
 	// Map cell's y-coordinate to range (offsetCount - 1) ... 0
 	// FIXME: texy might be a bit confusing since we don't have texx
