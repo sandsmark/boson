@@ -3,6 +3,12 @@ Makefile.in
 *.moc
 boson
 boeditor
+boprofiling
+bounit
 .deps
 .libs
 boson_meta_unload.cpp
+bosonsearchpathswidget.cpp
+bosonsearchpathswidget.h
+bouniteditor.cpp
+bouniteditor.h
