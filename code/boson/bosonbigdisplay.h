@@ -25,7 +25,9 @@
 class KGameIO;
 
 class Unit;
+class UnitBase;
 class Player;
+class KPlayer;
 
 /**
  * This is the "view" of the canvas - the part of the canvas that you can
@@ -84,7 +86,7 @@ public slots:
 	 * Mark the unitType for construction. Inform boson about this and place
 	 * the unit on the screen if in editor mode - otherwise delay.
 	 **/
-	void slotWillConstructUnit(int unitType, Unit* facility, Player* owner);
+	void slotWillConstructUnit(int unitType, UnitBase* facility, KPlayer* owner);
 
 	void slotWillPlaceCell(int groundType);
 

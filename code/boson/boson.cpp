@@ -190,9 +190,40 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 		}
 		break;
 	}
+	case BosonMessage::MoveProduce:
+	{
+		kdDebug() << "MoveProduce" << endl;
+		Q_UINT32 owner;
+		Q_UINT32 factoryId;
+		Q_INT32 unitType;
+		stream >> owner;
+		stream >> factoryId;
+		stream >> unitType;
+		
+		Player* p = (Player*)findPlayer(owner);
+		if (!p) {
+			kdError() << k_lineinfo << "Cannot find player " << owner << endl;
+			break;
+		}
+		Facility* factory = (Facility*)findUnit(factoryId, p);
+		if (!((Unit*)factory)->isFacility()) {
+			kdError() << k_lineinfo << factoryId << " is not a facility" << endl;
+			break;
+		}
+		if (!factory) {
+			kdError() << "Cannot find unit " << factoryId << endl;
+			break;
+		}
+		if (unitType < 0) {
+			kdError() << k_lineinfo << "Invalid unitType " << unitType << endl;
+			break;
+		}
+		factory->addProduction(unitType);
+		break;
+	}
 	case BosonMessage::MoveBuild:
 	{
-		kdDebug() << "moveBuild" << endl;
+		kdDebug() << "MoveBuild" << endl;
 		Q_UINT32 factoryId;
 		Q_UINT32 owner;
 		Q_INT32 x;
@@ -204,13 +235,17 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 		
 		Player* p = (Player*)findPlayer(owner);
 		if (!p) {
-			kdError() << "Cannot build without owner" << endl;
+			kdError() << k_lineinfo << "Cannot find player " << owner << endl;
 			break;
 		}
 		Facility* factory = (Facility*)findUnit(factoryId, p);
 		if (!factory) {
-			kdError() << "Cannot build without factory" << endl;
+			kdError() << "Cannot find unit " << factoryId << endl;
 			break;
+		}
+		if (!((Unit*)factory)->isFacility()) {
+			kdError() << k_lineinfo << factoryId << " is not a facility" << endl;
+			return;
 		}
 		int unitType = factory->completedProduction();
 		kdDebug() << k_lineinfo 

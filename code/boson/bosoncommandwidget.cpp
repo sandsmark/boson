@@ -267,18 +267,18 @@ void BosonCommandWidget::setToolTip(const QString& text)
 
 void BosonCommandWidget::slotClicked()
 {
- switch (d->mCommandType) {
+ switch (commandType()) {
 	case CommandNothing:
 		kdWarning() << "Invalud Command Type \"Nothing\"" << endl;
 		break;
 	case CommandCell:
-		emit signalPlaceCell(d->mTileNumber);
+		emit signalPlaceCell(tile());
 		break;
 	case CommandUnit:
-		emit signalProduceUnit(d->mUnitType);
+		emit signalProduceUnit(unitType());
 		break;
 	case CommandUnitSelected:
-		if (!d->mUnit) {
+		if (!unit()) {
 			kdError() << k_lineinfo << "NULL unit" << endl;
 		} else {
 			// shall we do something here? maybe make this unit the
@@ -288,7 +288,7 @@ void BosonCommandWidget::slotClicked()
 		}
 		break;
 	default:
-		kdError() << "Unknown Command Type " << d->mCommandType << endl;
+		kdError() << "Unknown Command Type " << commandType() << endl;
 		break;
  }
 }
