@@ -47,7 +47,6 @@ Game TODOs
   mineralrefinery-chimney smoke configurable!! less effects==faster
 
 Editor (map, unit, scenario) TODOs
-- don't place units on invalid tiles (e.g. ship on grass)
 - unit editor: add an additional page for the description of the unit (longer
   text - should go into the handbook). Should be able to contain images and so
   on. Maybe use plain docbook or so
