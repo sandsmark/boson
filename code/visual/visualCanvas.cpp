@@ -28,6 +28,7 @@
 
 #include "speciesTheme.h"
 #include "visual.h"
+#include "sprites.h"
   
 
 visualCanvas::visualCanvas( QPixmap p, uint w, uint h)
@@ -100,17 +101,12 @@ void visualCanvas::setCell(int i, int j, cell_t c)
 
 QCanvasItem * visualCanvas::findUnitAt(int x, int y)
 {
-	QCanvasItem *u;
+	QCanvasItemList list = collisions( QPoint(x,y) );
+	QCanvasItemList::Iterator it;
 
-	/* XXXX 
-	for( p = topAt(x,y); p; next(p))
-		if (IS_UNIT(at(p)->rtti()) && exact(p))  {
-			u =  at(p);
-			end(p);
-			return u;
-		}
-
-	*/
+	for( it = list.begin(); it != list.end(); ++it )
+		if ( IS_UNIT( (*it)->rtti() ) )
+			return (*it);
 	return NULL;
 }
 

@@ -171,35 +171,24 @@ void visualTopLevel::selectMob(long key, visualMobUnit *m)
 
 void visualTopLevel::selectArea(int x1, int y1, int x2, int y2)
 {
-	QCanvasItemList qcitl;
+	QCanvasItemList list;
+	QCanvasItemList::Iterator it;
 	visualMobUnit *u;
-	int t;
  
+	// XXX : still neede with QCanvas collisions ? (QRect ?)
 	/* ensure that (x1<=x2 && y1<=y2) */
-	if (x2<x1) {
-		t  = x1; 
-		x1 = x2;
-		x2 = t ;
-        }
-
-	if (y2<y1) {
-		t  = y1; 
-		y1 = y2;
-		y2 = t ;
-        }
+	int t;
+	if (x2<x1) { t  = x1; x1 = x2; x2 = t ; }
+	if (y2<y1) { t  = y1; y1 = y2; y2 = t ; }
 
 	/* selection */
-	qcitl = vcanvas->collisions( QRect(x1,y1,x2-x1,y2-y1) );
+	list = vcanvas->collisions( QRect(x1,y1,x2-x1,y2-y1) );
 
-	/* XXXX  
-	for( p = vcanvas->lookIn(x1,y1,x2-x1,y2-y1); p; vcanvas->next(p))
-		if (IS_MOBILE(vcanvas->at(p)->rtti()) )  { //found one
-//		if (IS_MOBILE(vcanvas->at(p)->rtti()) && vcanvas->exact(p))  { //found one
-//			puts("hop");
-			u =  ((visualMobUnit *) vcanvas->at(p));
-			if (!mobSelected.find(u->key))			// already selected ?
-				selectMob(u->key, u); //, puts("bof");
+	for( it = list.begin(); it != list.end(); ++it )
+		if ( IS_MOBILE( (*it)->rtti() ) ) {
+			u =  (visualMobUnit *) (*it);
+			if (!mobSelected.find(u->key))		// already selected ?
+				selectMob(u->key, u);
 		}
-		*/
 }
 
