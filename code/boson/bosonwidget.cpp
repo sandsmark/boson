@@ -336,6 +336,9 @@ void BosonWidget::slotPlayerJoinedGame(KPlayer* player)
  if (!d->mBoson->isAdmin()) {
 	return;
  }
+ if (!p->speciesTheme()) {
+	return;
+ }
  // check if the color of the new player is already taken
  QPtrListIterator<KPlayer> it(*d->mBoson->playerList());
  QRgb playerColor = p->speciesTheme()->teamColor();

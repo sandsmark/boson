@@ -84,8 +84,9 @@ void TopBase::initKAction()
 
  KStdAction::configureToolbars(this, SLOT(slotConfigureToolbars()), actionCollection());
 
- d->mChatAction = new KToggleAction(i18n("Show &Chat"), 0, this, 
-		SLOT(slotShowChat()), actionCollection(), "options_show_chat");
+ d->mChatAction = new KToggleAction(i18n("Show &Chat"), 
+		KShortcut(Qt::CTRL+Qt::Key_H), this, SLOT(slotShowChat()),
+		actionCollection(), "options_show_chat");
  d->mChatAction->setChecked(false);
  slotShowChat();
 
