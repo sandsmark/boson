@@ -1,4 +1,4 @@
-#include "top.wml" body_args="style=background-image:url($(basedir)bg.png);background-attachment:fixed;background-repeat:no-repeat;background-position:center;"
+#include "top.wml"
 
     <h1>
       Credits
