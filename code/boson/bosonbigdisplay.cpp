@@ -489,7 +489,7 @@ void BosonBigDisplay::updateCursor()
 	if (!selection()->isEmpty()) {
 		if (selection()->leader()->owner() == localPlayer()) {
 			Unit* unit = ((BosonCanvas*)canvas())->findUnitAt(canvasPos);
-			if (unit) {
+			if (unit && (!selection()->leader()->owner()->isFogged(canvasPos.x() / BO_TILE_SIZE, canvasPos.y() / BO_TILE_SIZE))) {
 				if (unit->owner() == localPlayer()) {
 					d->mCursorType = CursorDefault;
 				} else if(selection()->leader()->unitProperties()->canShoot()) {
