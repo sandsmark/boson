@@ -21,11 +21,10 @@
 #include <qlayout.h>
 #include <qkeycode.h>
 
-#include "infoWin.h"
 #include "editorField.h"
 #include "visualMiniDisplay.h"
 #include "editorBigDisplay.h"
-#include "visualView.h"
+#include "editorView.h"
 
 #include "mainView.h"		// myself
 
@@ -40,20 +39,19 @@ mainView::mainView(editorField *field, QWidget *parent=0, const char *name=0)
 
 	topLayout->addLayout(leftLayout,0);
 
-		view = new visualView(field); // the view associated with this window
+		view = new editorView(field, this, "editorView"); // the view associated with this window
+
 		mini = new visualMiniDisplay(view, this);
 		mini->setFixedSize(250,200);
-		leftLayout->addWidget(mini);
 
-		info = new infoWin(this, "infowin");
-		connect (view, SIGNAL(setSelected(QPixmap*)), info, SLOT(setSelected(QPixmap*)));
-		leftLayout->addWidget(info, 10);
+		leftLayout->addWidget(mini);
+		leftLayout->addWidget(view, 10);
 
 /* This is the main map, the game area */
 	big = new editorBigDisplay(view, this);
 	topLayout->addWidget(big,10);
 
-	connect (info, SIGNAL(setSelectedTile(groundType)), big, SLOT(setSelectedTile(groundType)));
+	connect (view, SIGNAL(setSelectedTile(groundType)), big, SLOT(setSelectedTile(groundType)));
 
 /* finish the stuff */
 //	leftLayout->addStretch(10);
