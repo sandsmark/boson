@@ -23,9 +23,9 @@ Id=1002
 Inherits=GeneralExplosion
 MinVelocity=-1.0,-1.0,0
 MaxVelocity=1.0,1.0,0.6
-Normalize=true
-MinScale=0.6
-MaxScale=1.8
+NormalizeVelo=true
+MinVeloScale=0.6
+MaxVeloScale=1.8
 
 [BigExplosion]
 Id=1010
@@ -50,9 +50,9 @@ Texture=explosion
 [BigBallExplosion]
 Id=1011
 Inherits=BigExplosion
-Normalize=true
-MinScale=0.5
-MaxScale=2.5
+NormalizeVelo=true
+MinVeloScale=0.5
+MaxVeloScale=2.5
 
 
 
@@ -171,9 +171,9 @@ MinVelocity=-5,-5,0
 MaxVelocity=5,5,0.05
 MinPos=-0.1,-0.1,0.0
 MaxPos=0.1,0.1,0.05
-Normalize=true
-MinScale=4.5
-MaxScale=5
+NormalizeVelo=true
+MinVeloScale=4.5
+MaxVeloScale=5
 StartColor=1.0,1.0,0.8,0.4
 EndColor=1.0,1.0,0.9,0.3
 MinLife=0.4
@@ -261,9 +261,9 @@ Rate=15
 StartSize=0.9
 EndSize=1.5
 SystemLife=0.6
-Normalize=true
-MinScale=0.3
-MaxScale=2.6
+NormalizeVelo=true
+MinVeloScale=0.3
+MaxVeloScale=2.6
 
 
 
@@ -478,9 +478,9 @@ Texture=nuke-explosion
 Id=11030
 MinVelocity=-1,-1,0
 MaxVelocity=1,1,0
-Normalize=true
-MinScale=8
-MaxScale=9
+NormalizeVelo=true
+MinVeloScale=8
+MaxVeloScale=9
 MinPos=-0.25,-0.25,0.25
 MaxPos=0.25,0.25,0.6
 StartColor=0.7,0.7,0.7,0.7
