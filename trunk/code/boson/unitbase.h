@@ -22,8 +22,7 @@
 #include "rtti.h"
 
 #include <kgame/kgameproperty.h>
-
-class KGamePropertyHandler;
+#include <kgame/kgamepropertyhandler.h>
 
 class QPoint;
 class QRect;
@@ -337,11 +336,13 @@ public:
 
 
 private:
-	class UnitBasePrivate;
-	UnitBasePrivate* d;
-	
 	Player* mOwner;
 
+	KGameProperty<unsigned long int> mArmor;
+	KGameProperty<unsigned long int> mShields;
+	KGameProperty<unsigned long int> mId; // is a KGameProperty clever here?
+	KGameProperty<unsigned int> mDeletionTimer;
+	KGameProperty<unsigned int> mReloadState;
 	KGameProperty<unsigned long int> mHealth;
 	KGameProperty<unsigned long int> mWeaponRange;
 	KGameProperty<unsigned int> mSightRange;
@@ -349,8 +350,11 @@ private:
 	KGamePropertyInt mWork;
 	KGamePropertyInt mAdvanceWork;
 
+	KGamePropertyHandler mProperties;
+
 	const UnitProperties* mUnitProperties;
 
+	friend class UpgradePropertiesBase;
 };
 
 #endif
