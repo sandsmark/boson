@@ -85,9 +85,6 @@ public:
 	static void saveCursorDir(const QString& dir, KConfig* conf = 0);
 	static QString readCursorDir(KConfig* conf = 0);
 
-	static void saveGroupMoveMode(GroupMoveMode mode, KConfig* conf = 0);
-	static GroupMoveMode readGroupMoveMode(KConfig* conf = 0);
-
 	void setSound(bool s) { mSound = s; }
 	bool sound() const { return mSound; }
 	void setMusic(bool m) { mMusic = m; }

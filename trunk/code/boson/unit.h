@@ -187,7 +187,7 @@ public:
 	 * PolicyLocal) otherwise send the command over network (like
 	 * PolicyClean)
 	 **/
-	void clearWaypoints(bool send = false);
+	void clearWaypoints();
 
 	/**
 	 * Remove the first waypoint from the list. Note that this is done
@@ -378,7 +378,7 @@ public:
 	Facility* refinery() const;
 	virtual QRect boundingRect() const;
 
-	virtual void clearWaypoints(bool send = false);
+	virtual void clearWaypoints();
 	virtual void waypointDone();
 
 	virtual bool load(QDataStream& stream);
