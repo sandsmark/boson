@@ -52,20 +52,15 @@ bool found = FALSE;
 x = e->x();
 y = e->y();
 
-if (e->button() & RightButton) {
+
+if (e->button() & MidButton) {
 	emit relativeReCenterView( x/BO_TILE_SIZE , y/BO_TILE_SIZE);
 	return;
-}
+	}
 
 if (e->button() & LeftButton) {	
 	/* Here we transpose coo into the map referential */
 	x += view->X()*BO_TILE_SIZE; y += view->Y()*BO_TILE_SIZE;
-
-
-	if (SELECT_MOVE == view->getSelectionMode()) {
-		view->leftClicked( x, y);
-		return;
-	}
 
 	/* Control -> multiselection, else... */
 	if (! (e->state()&ControlButton)) {

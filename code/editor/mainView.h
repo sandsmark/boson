@@ -35,6 +35,9 @@ class mainView : public QWidget
 public:
 	mainView(editorMap *phys, QWidget *parent=0, const char *name=0);
 
+protected:
+  virtual void keyReleaseEvent (QKeyEvent * e );
+
 private:
 /* the map object we are playing in */
     miniMap		*mini;

@@ -31,7 +31,7 @@
 #include "../common/log.h"
 
 #include "infoWin.h"
-#include "viewMap.h"
+//#include "bosonViewMap.h"
 //#include "fieldMap.h"
 //#include "speciesTheme.h"
 //#include "game.h"
