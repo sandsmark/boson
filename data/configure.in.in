@@ -1,6 +1,6 @@
 #MIN_CONFIG
 
-AM_INIT_AUTOMAKE(boson, 0.6pre)
+AM_INIT_AUTOMAKE(boson, 0.6)
 
 dnl These are common macros that you might or might not want to use
 
