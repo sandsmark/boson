@@ -909,9 +909,11 @@ void Unit::setSmokeParticleSystem(BosonParticleSystem* s)
 
 void Unit::loadWeapons()
 {
- QPtrListIterator<BosonWeaponProperties> it(*(unitProperties()->weaponsList()));
+ QPtrListIterator<PluginProperties> it(*(unitProperties()->plugins()));
  while (it.current()) {
-	d->mWeapons.append(new BosonWeapon(it.current(), this));
+	if(it.current()->pluginType() == PluginProperties::Weapon) {
+		d->mWeapons.append(new BosonWeapon((BosonWeaponProperties*)(it.current()), this));
+	}
 	++it;
  }
 }

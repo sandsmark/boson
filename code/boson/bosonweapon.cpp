@@ -30,7 +30,21 @@
 #include <ksimpleconfig.h>
 
 /*****  BosonWeaponProperties  *****/
-BosonWeaponProperties::BosonWeaponProperties(KSimpleConfig* cfg, SpeciesTheme* theme)
+BosonWeaponProperties::BosonWeaponProperties(const UnitProperties* prop) :
+    PluginProperties(prop)
+{
+}
+
+BosonWeaponProperties::~BosonWeaponProperties()
+{
+}
+
+QString BosonWeaponProperties::name() const
+{
+  return "Weapon";
+}
+
+void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg)
 {
   mRange = cfg->readUnsignedLongNumEntry("Range", 0);
   mReload = cfg->readUnsignedNumEntry("Reload", 0);
@@ -39,16 +53,12 @@ BosonWeaponProperties::BosonWeaponProperties(KSimpleConfig* cfg, SpeciesTheme* t
   mDamageRange = (float)(cfg->readDoubleNumEntry("DamageRange", 1));
   mCanShootAtAirUnits = cfg->readBoolEntry("CanShootAtAirUnits", false);
   mCanShootAtLandUnits = cfg->readBoolEntry("CanShootAtLandUnits", false);
-  mShootParticleSystems = BosonParticleSystemProperties::loadParticleSystemProperties(cfg, "ShootParticles", theme);
-  mFlyParticleSystems = BosonParticleSystemProperties::loadParticleSystemProperties(cfg, "FlyParticles", theme);
-  mHitParticleSystems = BosonParticleSystemProperties::loadParticleSystemProperties(cfg, "HitParticles", theme);
+  mShootParticleSystems = BosonParticleSystemProperties::loadParticleSystemProperties(cfg, "ShootParticles", speciesTheme());
+  mFlyParticleSystems = BosonParticleSystemProperties::loadParticleSystemProperties(cfg, "FlyParticles", speciesTheme());
+  mHitParticleSystems = BosonParticleSystemProperties::loadParticleSystemProperties(cfg, "HitParticles", speciesTheme());
   // We need to have some kind of model even for bullet (though it won't be shown),
   //  because BosonShot will crash otherwise (actually it's BosonItem)
-  mModel = theme->objectModel(cfg->readEntry("Model", "missile.3ds"));
-}
-
-BosonWeaponProperties::~BosonWeaponProperties()
-{
+  mModel = speciesTheme()->objectModel(cfg->readEntry("Model", "missile.3ds"));
 }
 
 BosonShot* BosonWeaponProperties::newShot(Unit* attacker, float x, float y, float z, float tx, float ty, float tz) const
