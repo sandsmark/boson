@@ -147,7 +147,7 @@ BosonParticleSystem* BosonParticleSystemProperties::newSystem(BoVector3 pos) con
   BosonParticleSystem* s = new BosonParticleSystem(mMaxNum, mRate, mAlign,
       5, mTextures, this);
   s->setPosition(BoVector3(pos[0] / BO_TILE_SIZE, -(pos[1] / BO_TILE_SIZE), pos[2] / BO_TILE_SIZE));
-  s->setSize((mStartSize + mEndSize) / 2);  // Average of start and end sizes
+  s->setSize(1.0);
   s->setAge(mAge);
   s->setBlendFunc(GL_SRC_ALPHA, mGLBlendFunc);
   s->createParticles(mInitNum);
@@ -169,6 +169,7 @@ void BosonParticleSystemProperties::initParticle(BosonParticleSystem*, BosonPart
   // Note that particle's position is relative to position of particle system
   particle->pos = BoVector3(getFloat(mMinPos[0], mMaxPos[0]),
       getFloat(mMinPos[1], mMaxPos[1]), getFloat(mMinPos[2], mMaxPos[2]));
+  particle->size = mStartSize;
 }
 
 void BosonParticleSystemProperties::updateParticle(BosonParticleSystem*, BosonParticle* particle) const
