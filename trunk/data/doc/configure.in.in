@@ -1,0 +1,8 @@
+AC_DEFUN(BOSON_SUBST_PROGRAMS,
+[
+  bo_default_bindirs="/usr/bin /usr/local/bin /opt/local/bin /usr/X11R6/bin /opt/kde/bin /opt/kde3/bin /usr/kde/bin /usr/local/kde/bin"
+  KDE_FIND_PATH(wml, WML, [$bo_default_bindirs])
+  AC_SUBST(WML)
+])
+BOSON_SUBST_PROGRAMS
+
