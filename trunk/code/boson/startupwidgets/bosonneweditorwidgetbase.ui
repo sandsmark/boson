@@ -4,6 +4,9 @@
     <property name="name">
         <cstring>BosonNewEditorWidgetBase</cstring>
     </property>
+    <property name="enabled">
+        <bool>true</bool>
+    </property>
     <property name="geometry">
         <rect>
             <x>0</x>
@@ -114,31 +117,7 @@
                                 <string>Max Players:</string>
                             </property>
                         </widget>
-                        <widget class="QSlider" row="2" column="1">
-                            <property name="name">
-                                <cstring>mChangeMaxHeight</cstring>
-                            </property>
-                            <property name="orientation">
-                                <enum>Horizontal</enum>
-                            </property>
-                        </widget>
-                        <widget class="QSlider" row="3" column="1">
-                            <property name="name">
-                                <cstring>mChangeMaxPlayers</cstring>
-                            </property>
-                            <property name="orientation">
-                                <enum>Horizontal</enum>
-                            </property>
-                        </widget>
-                        <widget class="QSlider" row="1" column="1">
-                            <property name="name">
-                                <cstring>mChangeMaxWidth</cstring>
-                            </property>
-                            <property name="orientation">
-                                <enum>Horizontal</enum>
-                            </property>
-                        </widget>
-                        <widget class="QComboBox" row="0" column="1">
+                        <widget class="QComboBox" row="0" column="1" rowspan="1" colspan="2">
                             <property name="name">
                                 <cstring>mChangeTileset</cstring>
                             </property>
@@ -156,6 +135,72 @@
                             </property>
                             <property name="text">
                                 <string>Tileset:</string>
+                            </property>
+                        </widget>
+                        <widget class="QSlider" row="3" column="1">
+                            <property name="name">
+                                <cstring>mChangeMaxPlayers</cstring>
+                            </property>
+                            <property name="orientation">
+                                <enum>Horizontal</enum>
+                            </property>
+                        </widget>
+                        <widget class="QSlider" row="2" column="1">
+                            <property name="name">
+                                <cstring>mChangeMaxHeight</cstring>
+                            </property>
+                            <property name="orientation">
+                                <enum>Horizontal</enum>
+                            </property>
+                        </widget>
+                        <widget class="QSlider" row="1" column="1">
+                            <property name="name">
+                                <cstring>mChangeMaxWidth</cstring>
+                            </property>
+                            <property name="orientation">
+                                <enum>Horizontal</enum>
+                            </property>
+                        </widget>
+                        <widget class="KIntNumInput" row="2" column="2">
+                            <property name="name">
+                                <cstring>mChangeMaxHeightNumInput</cstring>
+                            </property>
+                            <property name="enabled">
+                                <bool>false</bool>
+                            </property>
+                            <property name="minValue">
+                                <number>0</number>
+                            </property>
+                            <property name="maxValue">
+                                <number>9999</number>
+                            </property>
+                        </widget>
+                        <widget class="KIntNumInput" row="1" column="2">
+                            <property name="name">
+                                <cstring>mChangeMaxWeidthNumInput</cstring>
+                            </property>
+                            <property name="enabled">
+                                <bool>false</bool>
+                            </property>
+                            <property name="minValue">
+                                <number>0</number>
+                            </property>
+                            <property name="maxValue">
+                                <number>9999</number>
+                            </property>
+                        </widget>
+                        <widget class="KIntNumInput" row="3" column="2">
+                            <property name="name">
+                                <cstring>mChangeMaxPlayersNumInput</cstring>
+                            </property>
+                            <property name="enabled">
+                                <bool>false</bool>
+                            </property>
+                            <property name="minValue">
+                                <number>0</number>
+                            </property>
+                            <property name="maxValue">
+                                <number>9999</number>
                             </property>
                         </widget>
                     </grid>
@@ -262,6 +307,24 @@
         <receiver>BosonNewEditorWidgetBase</receiver>
         <slot>slotPlayFieldChanged(QListViewItem*)</slot>
     </connection>
+    <connection>
+        <sender>mChangeMaxHeightNumInput</sender>
+        <signal>valueChanged(int)</signal>
+        <receiver>BosonNewEditorWidgetBase</receiver>
+        <slot>slotMaxHeightChanged(int)</slot>
+    </connection>
+    <connection>
+        <sender>mChangeMaxWeidthNumInput</sender>
+        <signal>valueChanged(int)</signal>
+        <receiver>BosonNewEditorWidgetBase</receiver>
+        <slot>slotMaxWidthChanged(int)</slot>
+    </connection>
+    <connection>
+        <sender>mChangeMaxPlayersNumInput</sender>
+        <signal>valueChanged(int)</signal>
+        <receiver>BosonNewEditorWidgetBase</receiver>
+        <slot>slotMaxPlayersChanged(int)</slot>
+    </connection>
 </connections>
 <slots>
     <slot access="protected" specifier="pure virtual">slotPlayFieldChanged(QListViewItem*)</slot>
@@ -273,6 +336,12 @@
 </slots>
 <layoutdefaults spacing="6" margin="11"/>
 <includehints>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
     <includehint>klistview.h</includehint>
     <includehint>ktextbrowser.h</includehint>
 </includehints>
