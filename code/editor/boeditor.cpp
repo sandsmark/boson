@@ -18,6 +18,8 @@
  *                                                                         *
  ***************************************************************************/
 
+#include <qlineedit.h>
+
 #include <klocale.h>
 #include <kstdaction.h>
 #include <kmessagebox.h>
