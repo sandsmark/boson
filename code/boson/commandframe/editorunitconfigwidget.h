@@ -32,13 +32,27 @@ public:
 	EditorUnitConfigWidget(BosonCommandFrameBase* frame, QWidget* parent);
 	~EditorUnitConfigWidget();
 
-	void updateUnit(Unit*);
+	/**
+	 * Update @p unit with values from the widget
+	 **/
+	void updateUnit(Unit* unit);
 
 signals:
 	void signalUpdateUnit();
 
 protected:
+	/**
+	 * Display @p unit in the widget
+	 **/
 	virtual bool display(Unit* unit);
+	void displayProductionPlugin(Unit* unit);
+	void displayHarvesterPlugin(Unit* unit);
+	void displayRessourceMinePlugin(Unit* unit);
+
+	void updateProductionPlugin(Unit* unit);
+	void updateHarvesterPlugin(Unit* unit);
+	void updateRessourceMinePlugin(Unit* unit);
+
 	virtual bool useUpdateTimer() const { return false; }
 
 

@@ -43,6 +43,10 @@ public:
 		mHealth = 0;
 		mShields = 0;
 		mConstructionStep = 0;
+
+		mProductionList = 0;
+		mRessourceMineMinerals = 0;
+		mRessourceMineOil = 0;
 	}
 
 	unsigned long int mUnitId; // used to check whether we actually have values for the selected unit in updateUnit()
@@ -51,6 +55,13 @@ public:
 	KIntNumInput* mHealth;
 	KIntNumInput* mShields;
 	KIntNumInput* mConstructionStep;
+
+	QLabel* mProductionList;
+
+//	KIntNumInput* mHarvesterMinerals; // TODO once the plugin is ready
+//	KIntNumInput* mHarvesterOil; // TODO once the plugin is ready
+	KIntNumInput* mRessourceMineMinerals;
+	KIntNumInput* mRessourceMineOil;
 };
 
 EditorUnitConfigWidget::EditorUnitConfigWidget(BosonCommandFrameBase* frame, QWidget* parent)
@@ -84,6 +95,22 @@ EditorUnitConfigWidget::EditorUnitConfigWidget(BosonCommandFrameBase* frame, QWi
  d->mConstructionStep->setLabel(i18n("Construction step: "), AlignVCenter);
  connect(d->mConstructionStep, SIGNAL(valueChanged(int)), this, SIGNAL(signalUpdateUnit()));
  layout->addWidget(d->mConstructionStep);
+
+ d->mProductionList = new QLabel(i18n("Here would be the production list, if it was implemented"), this);
+ layout->addWidget(d->mProductionList);
+
+ d->mRessourceMineMinerals = new KIntNumInput(this);
+ d->mRessourceMineMinerals->setLabel(i18n("Minerals: "), AlignVCenter);
+ d->mRessourceMineMinerals->setRange(-1, 1000000);
+ connect(d->mRessourceMineMinerals, SIGNAL(valueChanged(int)), this, SIGNAL(signalUpdateUnit()));
+ layout->addWidget(d->mRessourceMineMinerals);
+
+ d->mRessourceMineOil = new KIntNumInput(this);
+ d->mRessourceMineOil->setLabel(i18n("Oil: "), AlignVCenter);
+ connect(d->mRessourceMineOil, SIGNAL(valueChanged(int)), this, SIGNAL(signalUpdateUnit()));
+ d->mRessourceMineOil->setRange(-1, 1000000);
+ layout->addWidget(d->mRessourceMineOil);
+
 
  // AB: some interesting things: configure plugins (e.g. production lists),
  // configure waypoints, configure work (use combobox with real names!)
@@ -133,8 +160,70 @@ bool EditorUnitConfigWidget::display(Unit* unit)
 	d->mShields->hide();
  }
 
+ displayProductionPlugin(unit);
+ displayHarvesterPlugin(unit);
+ displayRessourceMinePlugin(unit);
+
+
  blockSignals(false);
  return true;
+}
+
+void EditorUnitConfigWidget::displayProductionPlugin(Unit* unit)
+{
+ BO_CHECK_NULL_RET(unit);
+ ProductionPlugin* p = (ProductionPlugin*)unit->plugin(UnitPlugin::Production);
+ if (!p) {
+	// hide all widgets related to production
+	d->mProductionList->hide();
+	return;
+ }
+ d->mProductionList->show();
+ // TODO: display production list widget...
+}
+
+void EditorUnitConfigWidget::displayHarvesterPlugin(Unit* unit)
+{
+ BO_CHECK_NULL_RET(unit);
+ HarvesterPlugin* p = (HarvesterPlugin*)unit->plugin(UnitPlugin::Harvester);
+
+ // TODO the HarvesterPlugin will be modified soon, so I dont implement this now
+ // (03/12/14)
+
+ if (!p) {
+	// hide all widgets related to harvesting
+	return;
+ }
+ 
+}
+
+void EditorUnitConfigWidget::displayRessourceMinePlugin(Unit* unit)
+{
+ BO_CHECK_NULL_RET(unit);
+ RessourceMinePlugin* p = (RessourceMinePlugin*)unit->plugin(UnitPlugin::RessourceMine);
+ if (!p) {
+	boDebug() << "no ressource mine plugin" << endl;
+	// hide all widgets related to RessourceMine
+	d->mRessourceMineMinerals->hide();
+	d->mRessourceMineOil->hide();
+	return;
+ }
+ if (p->canProvideMinerals()) {
+	boDebug() << "ok" << endl;
+	d->mRessourceMineMinerals->show();
+	d->mRessourceMineMinerals->setValue(p->minerals());
+ } else {
+	boDebug() << "cant provide minerals" << endl;
+	d->mRessourceMineMinerals->hide();
+	d->mRessourceMineMinerals->setValue(0);
+ }
+ if (p->canProvideOil()) {
+	d->mRessourceMineOil->show();
+	d->mRessourceMineOil->setValue(p->oil());
+ } else {
+	d->mRessourceMineOil->hide();
+	d->mRessourceMineOil->setValue(0);
+ }
 }
 
 void EditorUnitConfigWidget::updateUnit(Unit* unit)
@@ -152,6 +241,48 @@ void EditorUnitConfigWidget::updateUnit(Unit* unit)
 	if (fac->constructionSteps() != 0) {
 		fac->setConstructionStep(d->mConstructionStep->value());
 	}
+ }
+
+ updateProductionPlugin(unit);
+ updateHarvesterPlugin(unit);
+ updateRessourceMinePlugin(unit);
+}
+
+void EditorUnitConfigWidget::updateProductionPlugin(Unit* unit)
+{
+ BO_CHECK_NULL_RET(unit);
+ ProductionPlugin* p = (ProductionPlugin*)unit->plugin(UnitPlugin::Production);
+ if (!p) {
+	return;
+ }
+ // TODO
+}
+
+void EditorUnitConfigWidget::updateHarvesterPlugin(Unit* unit)
+{
+ BO_CHECK_NULL_RET(unit);
+ HarvesterPlugin* p = (HarvesterPlugin*)unit->plugin(UnitPlugin::Harvester);
+
+ // TODO the HarvesterPlugin will be modified soon, so I dont implement this now
+ // (03/12/14)
+
+ if (!p) {
+	return;
+ }
+}
+
+void EditorUnitConfigWidget::updateRessourceMinePlugin(Unit* unit)
+{
+ BO_CHECK_NULL_RET(unit);
+ RessourceMinePlugin* p = (RessourceMinePlugin*)unit->plugin(UnitPlugin::RessourceMine);
+ if (!p) {
+	return;
+ }
+ if (p->canProvideMinerals()) {
+	p->setMinerals(d->mRessourceMineMinerals->value());
+ }
+ if (p->canProvideOil()) {
+	p->setOil(d->mRessourceMineOil->value());
  }
 }
 
