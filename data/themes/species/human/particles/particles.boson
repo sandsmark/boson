@@ -96,19 +96,19 @@ Texture=explosion
 
 [GeneralSmoke]
 Id=3001
-MinVelocity=-0.05,-0.05,0.3
-MaxVelocity=0.05,0.05,0.5
+MinVelocity=-0.05,-0.05,0.5
+MaxVelocity=0.05,0.05,0.7
 MinPos=0,0,0
 MaxPos=0,0,0
-StartColor=0.3,0.3,0.3,1.0
-EndColor=0.4,0.4,0.4,0.0
-MinLife=1.5
-MaxLife=20.0
-MaxNum=120
+StartColor=0.3,0.3,0.3,0.7
+EndColor=0.3,0.3,0.3,0.0
+MinLife=3.0
+MaxLife=8.0
+MaxNum=100
 InitNum=0
 BlendFunc=GL_ONE_MINUS_SRC_ALPHA
-Rate=10
-StartSize=0.15
+Rate=6
+StartSize=0.2
 EndSize=0.8
 SystemLife=10
 Mass=1
@@ -118,13 +118,13 @@ Texture=smoke
 [DarkSmoke]
 Id=3002
 Inherits=GeneralSmoke
-StartColor=0.2,0.2,0.2,1.0
+StartColor=0.2,0.2,0.2,0.7
 EndColor=0.2,0.2,0.2,0.0
 
 [LightSmoke]
 Id=3003
 Inherits=GeneralSmoke
-StartColor=0.4,0.4,0.4,1.0
+StartColor=0.4,0.4,0.4,0.7
 EndColor=0.5,0.5,0.5,0.0
 
 [BigSmoke]
@@ -192,6 +192,7 @@ EndColor=1,1,1,0
 EndSize=4
 MinLife=0.6
 MaxLife=0.8
+
 
 [GeneralSmokeTrace]
 Id=5001
@@ -279,17 +280,17 @@ MinVelocity=-0.05,-0.05,0
 MaxVelocity=0.05,0.05,0.1
 MinPos=-0.3,-0.3,-0.1
 MaxPos=0.3,0.3,0.35
-StartColor=0.3,0.3,0.3,0.5
+StartColor=0.3,0.3,0.3,0.6
 EndColor=0.4,0.4,0.4,0.0
 MinLife=10
 MaxLife=15
-MaxNum=20
+MaxNum=10
 InitNum=0
 BlendFunc=GL_ONE_MINUS_SRC_ALPHA
 Rate=10
-StartSize=0.5
-EndSize=0.7
-SystemLife=2
+StartSize=0.4
+EndSize=0.6
+SystemLife=1
 Align=true
 Mass=0.2
 Texture=smoke
