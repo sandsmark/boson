@@ -73,7 +73,7 @@ void BosonStarting::setEditorMap(const QByteArray& buffer)
 
 void BosonStarting::startNewGame()
 {
- boDebug() << k_funcinfo << endl;
+ boDebug(270) << k_funcinfo << endl;
 
  emit signalLoadingShowProgressBar(true);
  emit signalLoadingSetLoading(false);
