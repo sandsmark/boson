@@ -1342,11 +1342,12 @@ MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, BosonCanvas* c
 
  setWork(WorkNone);
 
- setRotation((float)(owner->game()->random()->getLong(359)));
  ((Boson*)owner->game())->slotUpdateProductionOptions();
 
  setParticleSystems(unitProperties()->newConstructedParticleSystems(x() + width() / 2, y() + height() / 2, z()));
  canvas->addParticleSystems(*particleSystems());
+
+ setRotation((float)(owner->game()->random()->getLong(359)));
 }
 
 MobileUnit::~MobileUnit()
