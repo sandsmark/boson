@@ -15,6 +15,8 @@
     <h4>Game</h4>
       <a href="#game_1">- Where is the menubar ?</a><br>
       <a href="#game_2">- Why is Boson so slow ?</a><br>
+    <h4>Rendering</h4>
+      <a href="#rend_1">- Are there options to improve 3D rendering ?</a><br>
 
 
     <br><br><br>
@@ -24,7 +26,7 @@
     think about starting boson - then we can release 1.0 ;-) &lt;&lt;
     </p>
     <br>
-    
+
     <a name="gen_3">- How can I submit a bug report ?</a>
     <p>
     You can submit a bugreport through <a href="http://bugs.kde.org/wizard.cgi" target="_blank">bugs.kde.org</a>.<br>
@@ -34,12 +36,12 @@
     If you have speed problems, please klick <a href="#game_2">here</a>.
     </p>
     <br>
-    
+
     <a name="gen_98">- Are there other supported languages than english ?</a>
     <p>No, Boson is a game in development, text changes very often. It is hard to maintain different languages yet.
     </p>
     <br>
-    
+
     <a name="gen_99">- Boson crashed my computer, what can I do ?</a>
     <p>It looks like some people have a problem with a Boson/KDE/OpenGL/malloc/driver combination.<br>
     If you have total crashes or kernel memory errors please start Boson under an other window manager like fvwm2 or failsave.<br>
@@ -61,6 +63,7 @@
     - Check your hardware: <a href="started.html">here</a><br>
     - Try resizing the window and/or make it smaller<br>
     - Increase the update interval in the Boson settings<br>
+    - Turn off light and materials<br>
     - Change the color depth of your XServer to 16bit<br>
     - Check the speed of other OpenGL games like tuxkart and tuxracer, maybe they also run slow<br>
     - Start the program called "<a href="game/apps.html">boinfo</a>" and check if the values under this tabs are correct:<br>
@@ -85,6 +88,20 @@
     &nbsp; Send both files with a description of your speed problem to our mailinglist.
     </p>
     <br>
+    <a name="rend_1">- Are there options to improve 3D rendering ?</a>
+    <p>
+    Note, this things will make Boson slower!<br>
+    NVIDIA:<br>
+    <code>__GL_FSAA_MODE=5</code><br>
+    <code>__GL_DEFAULT_LOG_ANISO=3</code><br>
+    Export this as variables on your console before starting Boson.<br>
+    You will have to look at your NVIDIA driver documentation for the
+    correct values since the are different from card to card.<br>
+    Other:<br>
+    If you have informations about other cards/drivers please drop us a note.
+    </p>
+    <br>
+
     <!-- END_FAQ -->
 
 #include "nav.wml" before_url="editor/facilities.html" before_text="Building facilities" after_url="credits.html" after_text="Credits" up_url="index.html"
