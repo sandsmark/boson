@@ -57,8 +57,8 @@ visualMiniDisplay::visualMiniDisplay(visualView *v, QWidget*parent, const char *
 
 /* make the connection */
 	connect(field, SIGNAL(newCell(int,int, groundType)), this, SLOT(newCell(int,int, groundType)));
-	connect(field, SIGNAL(updateMobile(playerMobUnit *)), this, SLOT(drawMobile(playerMobUnit *)));
-	connect(field, SIGNAL(updateFix(playerFacility *)), this, SLOT(drawFix(playerFacility *)));
+	connect(field, SIGNAL(updateMobile(visualMobUnit *)), this, SLOT(drawMobile(visualMobUnit *)));
+	connect(field, SIGNAL(updateFix(visualFacility *)), this, SLOT(drawFix(visualFacility *)));
 
 // connect(, SIGNAL(), this, SLOT());
 	connect(view, SIGNAL(repaint(bool)), this, SLOT(repaint(bool)));
