@@ -260,6 +260,11 @@ void Boson::setPlayField(BosonPlayField* p)
  d->mPlayField = p;
 }
 
+BosonPlayField* Boson::playField() const
+{
+ return d->mPlayField;
+}
+
 Player* Boson::localPlayer()
 {
  return d->mPlayer;
