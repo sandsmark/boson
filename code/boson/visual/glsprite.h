@@ -72,8 +72,7 @@ public:
 
 	inline BosonModel* model() const { return mModel; }
 
-	// FIXME: QCanvasSprite uses image->width() here :-(
-	// note: for GLunit all frames must hace the same width/height
+	// note: for GLunit all frames must have the same width/height
 	inline int width() const { return model() ? model()->width(frame()) : 0; }
 	inline int height() const { return model() ? model()->height(frame()) : 0; }
 
@@ -140,8 +139,8 @@ public:
 	}
 
 private:
-	// AB: we can't use KGameProperty here, since QCanvasSprite doesn't use
-	// it either. Remember to save all of this and especially load it again!
+	// FIXME: use KGameProperty here. We can do so, since we don't use
+	// QCanvasSprite anymore.
 	BosonCanvas* mCanvas;
 	float mX;
 	float mY;

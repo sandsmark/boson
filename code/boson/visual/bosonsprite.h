@@ -68,7 +68,8 @@ public:
 
 	/**
 	 * We reimplement this in Unit anyway. See @ref QCanvasSprite::advance
-	 * for comments on how to use advance methods.
+	 * for comments on how to use advance methods. (note the QCanvas docs on
+	 * this are still valid, even though we don't use QCanvas anymore!)
 	 **/
 	virtual void advance(int ) {}
 

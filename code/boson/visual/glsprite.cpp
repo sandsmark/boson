@@ -17,7 +17,6 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #include "glsprite.h"
-#ifndef NO_OPENGL
 
 #include <kdebug.h>
 
@@ -75,6 +74,3 @@ void GLSprite::setCanvas(BosonCanvas* c)
 }
 
 
-
-
-#endif
