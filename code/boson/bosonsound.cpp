@@ -22,6 +22,7 @@
 #include "defines.h"
 #include "unitproperties.h"
 #include "unit.h"
+#include "bosonconfig.h"
 
 #include <kglobal.h>
 #include <kapplication.h>
@@ -293,6 +294,9 @@ void BosonSound::addEventSound(int unitType, int event, const QString& file)
 void BosonSound::play(int id)
 {
  kdDebug() << k_funcinfo << "id: " << id << endl;
+ if (!boConfig->sound()) {
+	return;
+ }
  BoPlayObject* p = d->mSounds[id];
  if (p && !p->isNull()) {
 	p->playFromBeginning();
@@ -301,6 +305,9 @@ void BosonSound::play(int id)
 
 void BosonSound::play(Unit* unit, int event)
 {
+ if (!boConfig->sound()) {
+	return;
+ }
  kdDebug() << k_funcinfo << "event: " << event << endl;
  // that's really ugly code:
  QPtrList<BoPlayObject>& list =  (d->mUnitSounds[unit->unitProperties()->typeId()])[event];
