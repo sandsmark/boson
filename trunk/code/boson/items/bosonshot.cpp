@@ -859,8 +859,8 @@ void BosonShotBomb::advanceMoveInternal()
 
 #define FRAGMENT_MIN_SPEED 3
 #define FRAGMENT_MAX_SPEED 8
-#define FRAGMENT_MIN_Z_SPEED 0.02
-#define FRAGMENT_MAX_Z_SPEED 0.06
+#define FRAGMENT_MIN_Z_SPEED 0.03
+#define FRAGMENT_MAX_Z_SPEED 0.1
 #define FRAGMENT_GRAVITY -0.006
 
 BosonShotFragment::BosonShotFragment(Player* owner, BosonCanvas* canvas, BosonModel* model, BoVector3 pos,
