@@ -251,7 +251,9 @@ void EditorWidget::slotChangeLocalPlayer(int index)
  p = d->mPlayers.at(index);
  if (p) {
 	emit signalChangeLocalPlayer(p);
-	slotPlace(d->mPlaceAction->currentItem());
+	if (d->mPlaceAction->currentItem() >= 0) {
+		slotPlace(d->mPlaceAction->currentItem());
+	}
  } else {
 	boWarning() << k_funcinfo << "NULL player for index " << index << endl;
  }
