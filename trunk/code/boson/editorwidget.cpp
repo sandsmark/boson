@@ -163,6 +163,8 @@ void EditorWidget::initKActions()
  BosonWidgetBase::initKActions();
 // KStdAction::save(this, SLOT(slotSavePlayField()), actionCollection(), "file_save_playfield");
  KStdAction::saveAs(this, SLOT(slotSavePlayFieldAs()), actionCollection(), "file_save_playfield_as");
+ KAction* close = KStdAction::close(this, SIGNAL(signalEndGame()), actionCollection());
+ close->setText(i18n("&End Editor"));
  KStdAction::quit(this, SIGNAL(signalQuit()), actionCollection());
  (void)KStdAction::preferences(this, SLOT(slotEditorPreferences()), actionCollection());
 
