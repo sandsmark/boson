@@ -68,10 +68,12 @@
 #include "bosonwidgetbase.moc"
 
 #define ID_DEBUG_KILLPLAYER 0
-#define ID_DEBUG_ADD_1000_MINERALS 1
-#define ID_DEBUG_SUB_1000_MINERALS 2
-#define ID_DEBUG_ADD_1000_OIL 3
-#define ID_DEBUG_SUB_1000_OIL 4
+#define ID_DEBUG_ADD_5000_MINERALS 1
+#define ID_DEBUG_ADD_1000_MINERALS 2
+#define ID_DEBUG_SUB_1000_MINERALS 3
+#define ID_DEBUG_ADD_5000_OIL 4
+#define ID_DEBUG_ADD_1000_OIL 5
+#define ID_DEBUG_SUB_1000_OIL 6
 
 class BosonWidgetBase::BosonWidgetBasePrivate
 {
@@ -888,6 +890,10 @@ void BosonWidgetBase::slotDebugPlayer(int index)
 	case ID_DEBUG_KILLPLAYER:
 		boGame->sendMessage(b, BosonMessage::IdKillPlayer);
 		break;
+	case ID_DEBUG_ADD_5000_MINERALS:
+		stream << (Q_INT32)5000;
+		boGame->sendMessage(b, BosonMessage::IdModifyMinerals);
+		break;
 	case ID_DEBUG_ADD_1000_MINERALS:
 		stream << (Q_INT32)1000;
 		boGame->sendMessage(b, BosonMessage::IdModifyMinerals);
@@ -898,6 +904,10 @@ void BosonWidgetBase::slotDebugPlayer(int index)
 		break;
 	case ID_DEBUG_ADD_1000_OIL:
 		stream << (Q_INT32)1000;
+		boGame->sendMessage(b, BosonMessage::IdModifyOil);
+		break;
+	case ID_DEBUG_ADD_5000_OIL:
+		stream << (Q_INT32)5000;
 		boGame->sendMessage(b, BosonMessage::IdModifyOil);
 		break;
 	case ID_DEBUG_SUB_1000_OIL:
@@ -937,8 +947,10 @@ void BosonWidgetBase::slotPlayerJoinedGame(KPlayer* player)
  connect(menu->popupMenu(), SIGNAL(activated(int)),
 		this, SLOT(slotDebugPlayer(int)));
  menu->popupMenu()->insertItem(i18n("Kill Player"), ID_DEBUG_KILLPLAYER);
+ menu->popupMenu()->insertItem(i18n("Minerals += 5000"), ID_DEBUG_ADD_5000_MINERALS);
  menu->popupMenu()->insertItem(i18n("Minerals += 1000"), ID_DEBUG_ADD_1000_MINERALS);
  menu->popupMenu()->insertItem(i18n("Minerals -= 1000"), ID_DEBUG_SUB_1000_MINERALS);
+ menu->popupMenu()->insertItem(i18n("Oil += 5000"), ID_DEBUG_ADD_5000_OIL);
  menu->popupMenu()->insertItem(i18n("Oil += 1000"), ID_DEBUG_ADD_1000_OIL);
  menu->popupMenu()->insertItem(i18n("Oil -= 1000"), ID_DEBUG_SUB_1000_OIL);
 
