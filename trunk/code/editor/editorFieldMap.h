@@ -24,7 +24,7 @@
 #include "fieldMap.h"
 
 class QPopupMenu;
-class Cell;
+class visualCell;
 
 /** 
   * Add all editor-specific 'bells and whistles' to the visual/fieldMap
@@ -48,7 +48,7 @@ private slots:
 
 private:
 	QPopupMenu	*popup;
-	Cell		*selectedCell;
+	visualCell	*selectedCell;
 
 };
 
