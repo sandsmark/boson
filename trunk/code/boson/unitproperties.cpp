@@ -76,12 +76,8 @@ UnitProperties::UnitProperties(const QString& fileName)
 
 UnitProperties::~UnitProperties()
 {
- if (d->mMobileProperties) {
-	delete d->mMobileProperties;
- }
- if (d->mFacilityProperties) {
-	delete d->mFacilityProperties;
- }
+ delete d->mMobileProperties;
+ delete d->mFacilityProperties;
  delete d;
 }
 

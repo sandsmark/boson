@@ -171,9 +171,7 @@ void BosonCommandFrame::initEditor()
 
 BosonCommandFrame::~BosonCommandFrame()
 {
- if (d->mTiles) {
-	delete d->mTiles;
- }
+ delete d->mTiles;
  delete d;
 }
 
@@ -200,9 +198,7 @@ void BosonCommandFrame::initOrderButtons(unsigned int no)
 
 void BosonCommandFrame::resetLayout()
 {
- if (d->mOrderLayout) {
-	delete d->mOrderLayout;
- }
+ delete d->mOrderLayout;
  int buttons = boConfig->commandButtonsPerRow();
  d->mOrderLayout = new QGridLayout(d->mOrderWidget);
  for (unsigned int i = 0; i < d->mOrderButton.count(); i++) {

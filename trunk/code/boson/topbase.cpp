@@ -49,9 +49,7 @@ BosonCommandBar::BosonCommandBar(QMainWindow* parent, QMainWindow::ToolBarDock d
 
 BosonCommandBar::~BosonCommandBar()
 {
- if (mContext) {
-	delete mContext;
- }
+ delete mContext;
 }
 
 void BosonCommandBar::mousePressEvent(QMouseEvent* e)

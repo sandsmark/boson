@@ -47,10 +47,8 @@ public:
 	OverviewPixmap() : QPixmap() {}
 	void killAlphaMask() 
 	{
-		if (data->alphapm) {
-			delete data->alphapm;
-			data->alphapm = 0;
-		}
+		delete data->alphapm;
+		data->alphapm = 0;
 	}
 };
 
@@ -119,10 +117,8 @@ void SpeciesTheme::reset()
  d->mUnitProperties.clear();
  d->mFacilityBigShot.clear();
  d->mMobileBigShot.clear();
- if (mShot) {
-	delete mShot;
-	mShot = 0;
- }
+ delete mShot;
+ mShot = 0;
 }
 
 QColor SpeciesTheme::defaultColor()
@@ -352,9 +348,7 @@ bool SpeciesTheme::loadUnitPixmap(const QString &fileName, QPixmap &pix, bool wi
 	m.convertFromImage(*mask);
 	pix.setMask( m );
  }
- if (mask) {
-	delete mask;
- }
+ delete mask;
  return true;
 }
 

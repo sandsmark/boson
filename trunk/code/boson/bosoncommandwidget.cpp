@@ -220,9 +220,7 @@ BosonCommandWidget::BosonCommandWidget(QWidget* parent) : QWidget(parent)
 
 BosonCommandWidget::~BosonCommandWidget()
 {
- if (d->mPixmap) {
-	delete d->mPixmap;
- }
+ delete d->mPixmap;
  delete d;
 }
 

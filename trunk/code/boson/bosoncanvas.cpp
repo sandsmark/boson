@@ -105,10 +105,7 @@ BosonCanvas::~BosonCanvas()
 {
 kdDebug()<< k_funcinfo << endl;
  quitGame();
- if (d->mFogPixmap) {
-	delete d->mFogPixmap;
-	d->mFogPixmap = 0;
- }
+ delete d->mFogPixmap;
  delete d;
 kdDebug()<< k_funcinfo <<"done"<< endl;
 }
@@ -272,7 +269,8 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount)
 		++it;
 	}
  }
- if (d->mWorkConstructed.count() > 0 && (advanceCount % 30) == 0) {
+// if (d->mWorkConstructed.count() > 0 && (advanceCount % 1) == 0) { // AB: for testing only
+ if (d->mWorkConstructed.count() > 0 && (advanceCount % 30) == 0) {//AB: this should be the correct line!
 	QPtrListIterator<Unit> it(d->mWorkConstructed);
 	while (it.current()) {
 		it.current()->advanceConstruction();

@@ -267,10 +267,8 @@ void BosonWidget::initChat()
 
 void BosonWidget::addLocalPlayer()
 {
- if (d->mLocalPlayer) {
-	d->mIOList.clear();
-	delete d->mLocalPlayer;
- }
+ d->mIOList.clear();
+ delete d->mLocalPlayer;
  Player* p = new Player;
  p->setName(BosonConfig::readLocalPlayerName());
  connect(p, SIGNAL(signalUnfog(int, int)),
@@ -586,10 +584,8 @@ void BosonWidget::quitGame()
  
  d->mLocalPlayer = 0;
 
- if (d->mMap) {
-	delete d->mMap;
-	d->mMap = 0;
- }
+ delete d->mMap;
+ d->mMap = 0;
 
  // now re-add the local player
  addLocalPlayer();
@@ -614,9 +610,7 @@ void BosonWidget::slotEditorConstructionChanged(int index)
 
 void BosonWidget::recreateMap()
 {
- if (d->mMap) {
-	delete d->mMap;
- }
+ delete d->mMap;
  d->mMap = new BosonMap;
  d->mCanvas->setMap(d->mMap);
  d->mMiniMap->setMap(d->mMap);
@@ -941,13 +935,9 @@ void BosonWidget::slotChatFramePosition(int chatPos)
 
 void BosonWidget::recreateLayout(int chatPos)
 {
- if (d->mViewLayout) {
-	delete d->mViewLayout;
-	d->mViewLayout = 0;
- }
- if (d->mTopLayout) {
-	delete d->mTopLayout;
- }
+ delete d->mViewLayout;
+ d->mViewLayout = 0;
+ delete d->mTopLayout;
 // redo layout
  d->mTopLayout = new QHBoxLayout(this, 5); // FIXME: 5 is hardcoded
  d->mViewLayout = new QVBoxLayout();
@@ -1181,9 +1171,7 @@ void BosonWidget::slotChangeCursor(int mode, const QString& cursorDir_)
 		b = new BosonNormalCursor;
 		break;
  }
- if (d->mCursor) {
-	delete d->mCursor;
- }
+ delete d->mCursor;
  d->mCursor = b;
  for (unsigned int i = 0; i < d->mDisplayList.count(); i++) {
 	d->mDisplayList.at(i)->setCursor(d->mCursor);

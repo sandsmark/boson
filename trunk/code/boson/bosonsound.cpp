@@ -48,9 +48,7 @@ public:
 	}
 	~BoPlayObject()
 	{
-		if (mPlayObject) {
-			delete mPlayObject;
-		}
+		delete mPlayObject;
 	}
 	const QString& file() const { return mFile; }
 	KPlayObject* object() const { return mPlayObject; }
@@ -98,9 +96,7 @@ public:
 	void reload()
 	{
 		kdDebug() << k_funcinfo << endl;
-		if (mPlayObject) {
-			delete mPlayObject;
-		}
+		delete mPlayObject;
 		KPlayObjectFactory factory(mParent->server().server());
 		mPlayObject = factory.createPlayObject(file(), true);
 		if (mPlayObject && !mPlayObject->isNull()) {
