@@ -69,6 +69,7 @@ public:
 		IdDamage = KGamePropertyBase::IdUser + 8,
 		IdRange = KGamePropertyBase::IdUser + 9,
 		IdSightRange = KGamePropertyBase::IdUser + 11,
+		IdDeletionTimer = KGamePropertyBase::IdUser + 12,
 		//...
 		IdLast
 	};
@@ -267,6 +268,9 @@ public:
 	 * same as @ref unitProperties()->isAircraft.
 	 **/
 	inline bool isFlying() const;
+
+	void increaseDeletionTimer();
+	unsigned int deletionTimer() const;
 	
 private:
 	class UnitBasePrivate;

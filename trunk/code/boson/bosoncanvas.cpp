@@ -81,8 +81,8 @@ BosonCanvas::BosonCanvas(QPixmap p, unsigned int w, unsigned int h)
 void BosonCanvas::init()
 {
  d = new BosonCanvasPrivate;
- d->mDestroyedUnits.setAutoDelete(true);
  d->mFogOfWar.setAutoDelete(true);
+ d->mDestroyedUnits.setAutoDelete(false);
 }
 
 BosonCanvas::~BosonCanvas()
@@ -104,7 +104,9 @@ void BosonCanvas::quitGame()
 
 void BosonCanvas::deleteDestroyed()
 {
+ d->mDestroyedUnits.setAutoDelete(true);
  d->mDestroyedUnits.clear();
+ d->mDestroyedUnits.setAutoDelete(false);
 }
 
 void BosonCanvas::loadTiles(const QString& name)
@@ -187,6 +189,23 @@ void BosonCanvas::advance()
  while (it.current()) {
 	it.current()->advance(1);
 	++it;
+ }
+ QPtrListIterator<Unit> deletionIt(d->mDestroyedUnits);
+ QPtrList<Unit> deleteList;
+ while (deletionIt.current()) {
+	deletionIt.current()->increaseDeletionTimer();
+	if (deletionIt.current()->deletionTimer() >= REMOVE_WRECKAGES_TIME) { 
+		deleteList.append(deletionIt.current());
+	}
+	++deletionIt;
+ }
+ 
+ while (deleteList.count() > 0) {
+	Unit* u = deleteList.first();
+	deleteList.removeRef(u);
+	kdDebug() << d->mDestroyedUnits.autoDelete() << endl;
+	d->mDestroyedUnits.removeRef(u);
+	delete u;
  }
 
  update();
