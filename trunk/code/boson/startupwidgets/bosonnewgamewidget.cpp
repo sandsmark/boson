@@ -380,7 +380,7 @@ void BosonNewGameWidget::slotLocalPlayerColorChanged(int index)
  networkInterface()->sendChangeTeamColor(localPlayer(), mPlayerColor);
 }
 
-void BosonNewGameWidget::slotLocalPlayerMapChanged(QListViewItem* item)
+void BosonNewGameWidget::slotLocalPlayerPlayFieldChanged(QListViewItem* item)
 {
  BO_CHECK_NULL_RET(item);
  if (!d->mItem2Map.contains(item)) {

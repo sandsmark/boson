@@ -266,7 +266,7 @@
         <sender>mChooseBosonMap</sender>
         <signal>pressed(QListViewItem*)</signal>
         <receiver>BosonNewGameWidgetBase</receiver>
-        <slot>slotLocalPlayerMapChanged(QListViewItem*)</slot>
+        <slot>slotLocalPlayerPlayFieldChanged(QListViewItem*)</slot>
     </connection>
     <connection>
         <sender>mLocalPlayerName</sender>
@@ -296,7 +296,7 @@
 <slots>
     <slot access="protected" specifier="pure virtual">slotLocalPlayerNameChanged()</slot>
     <slot access="protected" specifier="pure virtual">slotLocalPlayerColorChanged(int)</slot>
-    <slot access="protected" specifier="pure virtual">slotLocalPlayerMapChanged(QListViewItem*)</slot>
+    <slot access="protected" specifier="pure virtual">slotLocalPlayerPlayFieldChanged(QListViewItem*)</slot>
     <slot access="protected" specifier="pure virtual">slotLocalPlayerSpeciesChanged(int)</slot>
     <slot access="protected" specifier="pure virtual">slotLocalPlayerHighlightedPlayer(QListBoxItem*)</slot>
     <slot access="protected" specifier="pure virtual">slotLocalPlayerRemovedPlayer()</slot>
