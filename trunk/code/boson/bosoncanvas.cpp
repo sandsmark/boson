@@ -578,8 +578,6 @@ void BosonCanvas::slotAdvance(unsigned int advanceCallsCount, bool advanceFlag)
  static int profilingSlotAdvance = boProfiling->requestEventId("Advance: slotAdvance()");
  BosonProfiler profiler(profilingSlotAdvance);
 
- // AB: note that mAnimList always contains exactly the same items as mAllItems.
- // mAnimItems is just a list that was used in history.
  BoCanvasAdvance a(this);
  a.advance(d->mAnimList, advanceCallsCount, advanceFlag);
 }
@@ -1216,11 +1214,12 @@ QPtrList<BosonEffect>* BosonCanvas::effects() const
 void BosonCanvas::deleteUnusedShots()
 {
  QPtrList<BosonItem> unusedShots;
- for (BosonItem* i = d->mAnimList.first(); i; i = d->mAnimList.next()) {
-	if (RTTI::isShot(i->rtti())) {
-		BosonShot* shot = (BosonShot*)i;
+ BoItemList::Iterator it;
+ for (it = d->mAllItems.begin(); it != d->mAllItems.end(); ++it) {
+	if (RTTI::isShot((*it)->rtti())) {
+		BosonShot* shot = (BosonShot*)*it;
 		if (!shot->isActive()) {
-			unusedShots.append(i);
+			unusedShots.append(*it);
 		}
 	}
  }
@@ -1670,7 +1669,9 @@ bool BosonCanvas::saveItemsAsXML(QDomElement& root) const
 	owner2Items.insert(p->id(), items);
  }
 
- for (BosonItem* i = d->mAnimList.first(); i; i = d->mAnimList.next()) {
+ BoItemList::Iterator it;
+ for (it = d->mAllItems.begin(); it != d->mAllItems.end(); ++it) {
+	BosonItem* i = *it;
 	QDomElement items;
 	if (!i->owner()) {
 		BO_NULL_ERROR(i->owner());
@@ -1873,9 +1874,6 @@ BosonItem* BosonCanvas::createItem(int rtti, Player* owner, const ItemType& type
 		unitMovingStatusChanges((Unit*)item, UnitBase::Moving, UnitBase::Standing);
 	}
 	emit signalItemAdded(item);
- }
- if (d->mAnimList.count() != d->mAllItems.count()) {
-	boError() << k_funcinfo << "animlist.count() (" << d->mAnimList.count() << ") != allitems.count() (" << d->mAllItems.count() << ")" << endl;
  }
  return item;
 }
