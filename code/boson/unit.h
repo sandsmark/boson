@@ -493,14 +493,12 @@ protected:
 	void setSearchPath(int search);
 
 
-#ifdef PATHFINDER_TNG
 	/**
 	 * Resets internal pathfinder's info structure
 	 **/
 	void resetPathInfo();
 
-	BosonPathInfo* pathInfo();
-#endif
+	BosonPathInfo* pathInfo() const;
 
 
 	/**
@@ -607,15 +605,16 @@ public:
 
 	bool attackEnemyUnitsInRangeWhileMoving();
 
-#ifdef PATHFINDER_TNG
 	/**
 	 * Move towards p, going at most maxdist (in canvas coords).
 	 * How much unit should move, will be added to xspeed and yspeed.
 	 * (x; y) marks unit's current position
+	 *
+	 * This does nothing for the old pathfinder (i.e. if PATHFINDER_TNG is
+	 * not defined)
 	 * @return How much is moved (will be <= maxdist)
 	 **/
 	float moveTowardsPoint(const QPoint& p, float x, float y, float maxdist, float &xspeed, float &yspeed);
-#endif
 
 	virtual void newPath();
 
