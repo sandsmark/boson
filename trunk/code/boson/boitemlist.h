@@ -94,6 +94,7 @@ public:
 	// is found
 	unsigned int contains(BosonItem* item) const { return mList.contains(item); } // FIXME: gcc does not accept const BosonItem* item
 	int findIndex(BosonItem* item) const { return mList.findIndex(item); } // FIXME: gcc does not accept const BosonItem* item
+	BosonItem* findItem(unsigned long int id) const;
 	void clear() { mList.clear(); }
 
 
