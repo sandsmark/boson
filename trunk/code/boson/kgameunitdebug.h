@@ -46,13 +46,19 @@ protected:
 
 protected slots:
 	void slotUpdate();
-	void updateWaypoints(QListViewItem*);
-	void updateProduction(QListViewItem*);
-	void updateUnitsInRange(QListViewItem*);
-	void updateUnitCollisions(QListViewItem*);
-	void updateCells(QListViewItem*);
+	void slotUnitSelected(QListViewItem*);
+	void slotUnitListMenu(QListViewItem*, const QPoint&, int);
+	void slotUnitListToggleShowColumn(int);
 
 	void slotUnitPropertyChanged(KGamePropertyBase*);
+
+protected:
+	void updateWaypoints(Unit*);
+	void updateProduction(Unit*);
+	void updateUnitsInRange(Unit*);
+	void updateUnitCollisions(Unit*);
+	void updateCells(Unit*);
+	void updateProperties(Unit*);
 
 private:
 	class KGameUnitDebugPrivate;
