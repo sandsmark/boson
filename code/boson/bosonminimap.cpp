@@ -44,6 +44,9 @@
 #define COLOR_UNKNOWN black // fog of war
 #define ZOOM_STEP 0.5
 
+#define MINIMAP_WIDTH 50
+#define MINIMAP_HEIGHT 50
+
 class BosonMiniMap::BosonMiniMapPrivate
 {
 public:
@@ -73,7 +76,7 @@ public:
 	bool mShowMap;
 };
 
-BosonMiniMap::BosonMiniMap(QWidget* parent) : QWidget(parent)
+BosonMiniMap::BosonMiniMap(QWidget* parent) : QWidget(parent, "minimap")
 {
  d = new BosonMiniMapPrivate;
  mGround = 0;
@@ -93,11 +96,11 @@ BosonMiniMap::BosonMiniMap(QWidget* parent) : QWidget(parent)
  d->mPixmap->installEventFilter(this);
 
  grid->addMultiCellWidget(d->mPixmap, 0, 5, 0, 1);
- d->mZoomIn = new QPushButton(this);
+ d->mZoomIn = new QPushButton(this, "zoomin");
  grid->addWidget(d->mZoomIn, 0, 2);
- d->mZoomDefault = new QPushButton(this);
+ d->mZoomDefault = new QPushButton(this, "zoomdefault");
  grid->addWidget(d->mZoomDefault, 2, 2);
- d->mZoomOut = new QPushButton(this);
+ d->mZoomOut = new QPushButton(this, "zoomout");
  grid->addWidget(d->mZoomOut, 4, 2);
 
  QToolTip::add(d->mZoomIn, i18n("Zoom in"));
@@ -142,15 +145,18 @@ QPixmap* BosonMiniMap::ground() const
 
 void BosonMiniMap::createMap()
 {
- BO_CHECK_NULL_RET(map())
+ BO_CHECK_NULL_RET(map());
  delete mGround;
  mGround = 0;
  mUnZoomedGround = new QPixmap(mapWidth(), mapHeight());
  mUnZoomedGround->fill(COLOR_UNKNOWN);
  createGround();
 
- d->mPixmap->setFixedWidth(mapWidth());
- d->mPixmap->setFixedHeight(mapHeight());
+// AB: the minimap size is meant to display a MINIMAP_WIDTHxMINIMAP_HEIGHT map
+// completely (at default zooming/scaling factor), for all bigger maps we
+// display a part of the map only (and scroll it)
+ d->mPixmap->setFixedWidth(MINIMAP_WIDTH * DEFAULT_MINIMAP_SCALE);
+ d->mPixmap->setFixedHeight(MINIMAP_HEIGHT * DEFAULT_MINIMAP_SCALE);
  updateGeometry();
 }
 
@@ -214,7 +220,7 @@ void BosonMiniMap::changeCell(int x, int y, int groundType, unsigned char)
 
 void BosonMiniMap::setPoint(int x, int y, const QColor& color)
 {
- BO_CHECK_NULL_RET(ground())
+ BO_CHECK_NULL_RET(ground());
  QPainter p;
  QPainter p2;
  p.begin(ground());
@@ -266,7 +272,7 @@ void BosonMiniMap::slotAddUnit(Unit* unit, int x, int y)
 
 void BosonMiniMap::slotMoveUnit(Unit* unit, float oldX, float oldY)
 {
- BO_CHECK_NULL_RET(unit)
+ BO_CHECK_NULL_RET(unit);
  QPointArray newCells = makeCellList(unit, unit->x(), unit->y());
  QPointArray oldCells = makeCellList(unit, oldX, oldY);
  moveUnit(unit, newCells, oldCells);
@@ -278,10 +284,10 @@ void BosonMiniMap::moveUnit(Unit* unit, const QPointArray& newCells, const QPoin
  // note that using unit->x() and unit->y() as well as unit->cells() and such
  // stuff can be undefined at this point! especially when adding units
  // (oldX==oldY==-1)!
- BO_CHECK_NULL_RET(mLocalPlayer)
- BO_CHECK_NULL_RET(mCanvas)
- BO_CHECK_NULL_RET(unit)
- BO_CHECK_NULL_RET(map())
+ BO_CHECK_NULL_RET(mLocalPlayer);
+ BO_CHECK_NULL_RET(mCanvas);
+ BO_CHECK_NULL_RET(unit);
+ BO_CHECK_NULL_RET(map());
  if (newCells.count() == oldCells.count()) {
 	if (!unit->isDestroyed()) {
 		bool moved = false;
@@ -340,9 +346,9 @@ void BosonMiniMap::moveUnit(Unit* unit, const QPointArray& newCells, const QPoin
 
 void BosonMiniMap::updateCell(int x, int y)
 {
- BO_CHECK_NULL_RET(map())
- BO_CHECK_NULL_RET(ground())
- BO_CHECK_NULL_RET(mCanvas)
+ BO_CHECK_NULL_RET(map());
+ BO_CHECK_NULL_RET(ground());
+ BO_CHECK_NULL_RET(mCanvas);
  if (!map()->cell(x, y)) {
 	boError() << k_funcinfo << x << "," << y << " is no valid cell!" << endl;
 	return;
@@ -398,7 +404,7 @@ BosonMap* BosonMiniMap::map() const
 
 void BosonMiniMap::initMap()
 {
- BO_CHECK_NULL_RET(map())
+ BO_CHECK_NULL_RET(map());
  createMap();
  bool oldFog = mUseFog;
  mUseFog = true;
@@ -418,7 +424,7 @@ void BosonMiniMap::slotUnitDestroyed(Unit* unit)
 
 void BosonMiniMap::slotUnfog(int x, int y)
 {
- BO_CHECK_NULL_RET(map())
+ BO_CHECK_NULL_RET(map());
  if (!mUseFog) {
 	return;
  }
@@ -438,7 +444,7 @@ void BosonMiniMap::slotUnfog(int x, int y)
 
 void BosonMiniMap::slotFog(int x, int y)
 {
- BO_CHECK_NULL_RET(map())
+ BO_CHECK_NULL_RET(map());
  if (!mUseFog) {
 	return;
  }
@@ -529,8 +535,6 @@ bool BosonMiniMap::eventFilter(QObject* o, QEvent* e)
 		|| zoom() != boConfig->miniMapZoom()) {
 	d->mScale = boConfig->miniMapScale();
 	d->mZoom = boConfig->miniMapZoom();
-	d->mPixmap->setFixedWidth((int)(mapWidth() * scale()));
-	d->mPixmap->setFixedHeight((int)(mapHeight() * scale()));
 	d->mPixmap->erase();
 
 	// Resize pixmap (slow)
@@ -555,20 +559,15 @@ bool BosonMiniMap::eventFilter(QObject* o, QEvent* e)
  double moveY[4];
  for (int i = 0; i < 8; i += 2) {
 	QPoint p = d->mSelectionRect.point(i);
-	if (p.x() + mapWidth() / zoom() <= mapWidth()) {
-		// the point is outside of the display map. move the displayed
-		// map
+	if (p.x() + MINIMAP_WIDTH / zoom() < mapWidth()) {
 		moveX[i / 2] = -p.x();
 	} else {
-		// hmm.. AB: why not 0 ? // FIXME
-		// 0 doesn't work .. why?
-		moveX[i / 2] = -(mapWidth() - mapWidth() / zoom());
+		moveX[i / 2] = -(mapWidth() - MINIMAP_WIDTH / zoom());
 	}
-	if (p.y() + mapHeight() / zoom() <= mapWidth()) {
-		// see above.
+	if (p.y() + MINIMAP_HEIGHT / zoom() < mapHeight()) {
 		moveY[i / 2] = -p.y();
 	} else {
-		moveY[i / 2]  = -(mapHeight() - mapHeight() / zoom());
+		moveY[i / 2] = -(mapHeight() - MINIMAP_HEIGHT / zoom());
 	}
  }
 
@@ -617,11 +616,11 @@ QPointArray BosonMiniMap::makeCellList(Unit* unit, float x, float y)
 {
  QPointArray array;
  if (!unit) {
-	BO_NULL_ERROR(unit)
+	BO_NULL_ERROR(unit);
 	return QPointArray();
  }
  if (!map()) {
-	BO_NULL_ERROR(map())
+	BO_NULL_ERROR(map());
 	return QPointArray();
  }
  int left, right, top, bottom;
