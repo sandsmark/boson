@@ -69,7 +69,7 @@ inline void BosonPath::PathNode::operator=(const BosonPath::PathNode& a)
   level = a.level;
 }
 
-inline bool operator<(const BosonPath::PathNode& a, const BosonPath::PathNode& b)
+const inline bool operator<(const BosonPath::PathNode& a, const BosonPath::PathNode& b)
 {
   return (a.g + a.h) < (b.g + b.h);
 }
