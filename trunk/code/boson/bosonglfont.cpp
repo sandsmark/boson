@@ -36,6 +36,7 @@ BosonGLFont::BosonGLFont(const QString& family)
 	return;
  }
  mFont = QFont(family);
+ mFont.setStyleHint(QFont::AnyStyle, QFont::PreferBitmap);
  mFontMetrics = new QFontMetrics(mFont);
 
  // FIXME: i18n() support!
