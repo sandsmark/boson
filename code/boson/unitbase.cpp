@@ -20,10 +20,8 @@ class UnitBasePrivate
 public:
 	UnitBasePrivate()
 	{
-		mOwner = 0;
 	}
 
-	Player* mOwner;
 	QString mName;//note: do NOT send over network (i18n)!
 
 	KGamePropertyHandler mProperties;
@@ -46,6 +44,7 @@ public:
 UnitBase::UnitBase(int type)
 {
  d = new UnitBasePrivate;
+ mOwner = 0;
 
 // PolicyLocal?
  d->mHealth.registerData(IdHealth, dataHandler(), 
@@ -150,11 +149,6 @@ void UnitBase::setShields(unsigned long int s)
  d->mShields = s;
 }
 
-Player* UnitBase::owner() const
-{
- return d->mOwner;
-}
-
 KGamePropertyHandler* UnitBase::dataHandler() const
 {
  return &d->mProperties;
@@ -167,7 +161,7 @@ int UnitBase::type() const
 
 void UnitBase::setOwner(Player* owner)
 {
- d->mOwner = owner;
+ mOwner = owner;
 }
 
 void UnitBase::setWork(WorkType work)

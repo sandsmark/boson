@@ -29,7 +29,7 @@ public:
 
 	void addUnit(Unit* unit);
 	void unitDestroyed(Unit* unit);
-	SpeciesTheme* speciesTheme() const;
+	SpeciesTheme* speciesTheme() const { return mSpecies; }
 
 	Unit* findUnit(unsigned long int unitId) const;
 
@@ -66,6 +66,7 @@ public slots:
 
 private:
 	PlayerPrivate* d;
+	SpeciesTheme* mSpecies;
 };
 
 #endif

@@ -30,9 +30,6 @@ public:
 	
 	QString mFileName;
 
-	int mMapWidth;
-	int mMapHeight;
-	
 	Cell* mCells;
 
 	bool mIsChanged;
@@ -239,8 +236,8 @@ bool BosonMap::loadMapGeo(QDataStream& stream)
  }
 
 // map is ok - lets apply
- d->mMapWidth = mapWidth; // horizontal cell count
- d->mMapHeight = mapHeight; // vertical cell count
+ mMapWidth = mapWidth; // horizontal cell count
+ mMapHeight = mapHeight; // vertical cell count
 
  if (d->mCells) {
 //	kdDebug() << "cells created before!! try to delete..." << endl;
@@ -595,16 +592,6 @@ void BosonMap::saveCell(QDataStream& stream, int groundType, unsigned char versi
  stream << (Q_INT32)TAG_CELL;
  stream << (Q_INT32)groundType;
  stream << (Q_INT8)version;
-}
-
-int BosonMap::width() const
-{
- return d->mMapWidth;
-}
-
-int BosonMap::height() const
-{
- return d->mMapHeight;
 }
 
 Cell* BosonMap::cell(int x, int y) const
