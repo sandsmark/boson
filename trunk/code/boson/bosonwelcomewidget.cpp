@@ -78,17 +78,12 @@ BosonWelcomeWidget::BosonWelcomeWidget(QWidget* parent) : QWidget(parent)
   buttonsLayout->addWidget( mLoadGameButton );
   buttonsLayout->addStretch(1);
 
-#ifndef NO_EDITOR
-
   mEditorButton = new QPushButton( buttonWidget, "editorbutton" );
   mEditorButton->setText( i18n( "Start &Editor" ) );
   mEditorButton->setMinimumWidth(120);
   buttonsLayout->addWidget( mEditorButton );
   connect(mEditorButton, SIGNAL(clicked()), this, SIGNAL(signalStartEditor()));
   buttonsLayout->addStretch(1);
-#else
-  mEditorButton = 0;
-#endif
 
   mQuitButton = new QPushButton( buttonWidget, "quitbutton" );
   mQuitButton->setText( i18n( "&Quit Boson" ) );

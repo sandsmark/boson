@@ -21,8 +21,6 @@
 
 #include <config.h>
 
-//#define NO_EDITOR
-
 #define BO_TILE_SIZE 48
 #define BO_GL_CELL_SIZE 1.0
 

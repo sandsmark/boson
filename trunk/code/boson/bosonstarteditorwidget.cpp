@@ -17,12 +17,10 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "defines.h"
-#ifndef NO_EDITOR
-
 #include "bosonstarteditorwidget.h"
 #include "bosonstarteditorwidget.moc"
 
+#include "defines.h"
 #include "bosonconfig.h"
 #include "bosonmessage.h"
 #include "player.h"
@@ -140,6 +138,4 @@ void BosonStartEditorWidget::sendNewGame()
 {
  game()->sendMessage(0, BosonMessage::IdNewEditor);
 }
-
-#endif //!NO_EDITOR
 
