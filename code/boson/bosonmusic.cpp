@@ -28,7 +28,7 @@
 #include <kdebug.h>
 #include <kplayobject.h>
 #include <kplayobjectfactory.h>
-#ifndef BEFORE_BETA_2
+#ifndef BEFORE_BETA2
 #include <kartsserver.h>
 #endif
 
