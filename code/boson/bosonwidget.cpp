@@ -1123,18 +1123,36 @@ void BosonWidget::slotChangeCursor(int mode, const QString& cursorDir_)
 		b = new BosonNormalCursor;
 		break;
  }
- delete d->mCursor;
- d->mCursor = b;
- d->mDisplayManager->setCursor(d->mCursor);
 
  QString cursorDir = cursorDir_;
  if (cursorDir == QString::null) { 
 	cursorDir = BosonCursor::defaultTheme();
  }
 
- d->mCursor->insertMode(CursorMove, cursorDir, QString::fromLatin1("move"));
- d->mCursor->insertMode(CursorAttack, cursorDir, QString::fromLatin1("attack"));
- d->mCursor->insertMode(CursorDefault, cursorDir, QString::fromLatin1("default"));
+ bool ok = true;
+ if (!b->insertMode(CursorMove, cursorDir, QString::fromLatin1("move"))) {
+	ok = false;
+ }
+ if (!b->insertMode(CursorAttack, cursorDir, QString::fromLatin1("attack"))) {
+	ok = false;
+ }
+ if (!b->insertMode(CursorDefault, cursorDir, QString::fromLatin1("default"))) {
+	ok = false;
+ }
+ if (!ok) {
+	kdError() << k_funcinfo << "Could not load cursor mode " << mode << " from " << cursorDir << endl;
+	if (!d->mCursor) {
+		// load fallback cursor
+		slotChangeCursor(CursorKDE, QString::null);
+		return;
+	}
+	// continue to use the old cursor
+	delete b;
+	return;
+ }
+ delete d->mCursor;
+ d->mCursor = b;
+ d->mDisplayManager->setCursor(d->mCursor);
  d->mCursorTheme = cursorDir;
 
  // some cursors need special final initializations. do them now

@@ -161,7 +161,7 @@ public:
 	 * sprite-cursors or the filename for normal-cursors. See class
 	 * documentation for more information.
 	 **/
-	virtual void insertMode(int mode, QString baseDir, QString cursor) = 0;
+	virtual bool insertMode(int mode, QString baseDir, QString cursor) = 0;
 
 	/**
 	 * Hides the cursor. Does nothing if the cursor is no @ref
@@ -210,10 +210,10 @@ public:
 	
 	virtual void setCursor(int mode);
 	virtual void setWidgetCursor(QWidget* w);
-	void insertMode(int mode, QCursor* cursor);
+	bool insertMode(int mode, QCursor* cursor);
 	virtual QCursor cursor() const;
 
-	virtual void insertMode(int mode, QString baseDir, QString cursor);
+	virtual bool insertMode(int mode, QString baseDir, QString cursor);
 
 protected:
 	QCursor* loadQCursor(QString baseDir, QString cursor);
@@ -233,7 +233,7 @@ public:
 	virtual void setCursor(int mode);
 	virtual void setWidgetCursor(QWidget* w);
 	virtual QCursor cursor() const;
-	virtual void insertMode(int mode, QString baseDir, QString cursor);
+	virtual bool insertMode(int mode, QString baseDir, QString cursor);
 };
 
 
@@ -258,13 +258,13 @@ public:
 
 	virtual void move(double x, double y);
 
-	void insertMode(int mode, QCanvasPixmapArray* pixmaps);
+	bool insertMode(int mode, QCanvasPixmapArray* pixmaps);
 
 	virtual void hideCursor();
 
 	virtual void showCursor();
 
-	virtual void insertMode(int mode, QString baseDir, QString cursor);
+	virtual bool insertMode(int mode, QString baseDir, QString cursor);
 
 	/**
 	 * @return The position of the cursor on the canvas
@@ -293,13 +293,13 @@ public:
 	virtual void setWidgetCursor(QWidget* w);
 
 	virtual void move(double x, double y);
-	void insertMode(int mode, QCanvasPixmapArray* pixmaps);
+	bool insertMode(int mode, QCanvasPixmapArray* pixmaps);
 
 	virtual void hideCursor();
 
 	virtual void showCursor();
 
-	virtual void insertMode(int mode, QString baseDir, QString cursor);
+	virtual bool insertMode(int mode, QString baseDir, QString cursor);
 
 
 	virtual void removeOldCursor();
