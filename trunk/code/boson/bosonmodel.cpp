@@ -187,11 +187,27 @@ void BosonModel::createDisplayLists()
  // You can read a frame with lib3ds by calling lib3ds_file_eval() first for
  // every frame.
  for (int i = 0; i < m3ds->frames; i++) {
+	Lib3dsNode* p;
 	m3ds->current_frame = i;
+	// prepare the file for rendering the next frame.
+	// Note: as far as I understund the lib3ds code this does *not* change
+	// the object itself, but rather node->data.object.*
+	// this means for us that we can continue to use the display lists in
+	// node->user.d ; but we *have* to ensure that the new values from
+	// node->data are used, i.e. they are not stored in that display list.
+	// they should reside in the final list.
 	lib3ds_file_eval(m3ds, m3ds->current_frame);
-	Lib3dsNode* p = m3ds->nodes;
-	GLuint list = listBase + m3ds->current_frame;
+
+	// we render the same node twice - the first run creates the display
+	// lists, the second just calls glCallList().
+	// In the second call we store all display lists in a single list, which
+	// gets finally called in boson.
+	for (p = m3ds->nodes; p; p = p->next) {
+		renderNode(p);
+	}
+
 	mPoints = 0;
+	GLuint list = listBase + m3ds->current_frame;
 	glNewList(list, GL_COMPILE);
 		glPushMatrix();
 		glScalef(0.004, 0.004, 0.004); // FIXME
@@ -202,18 +218,8 @@ void BosonModel::createDisplayLists()
 		// A node can have child-nodes, too.
 		// Here we parse all top-level nodes. child nodes get parsed in
 		// renderNode().
-		for (; p; p = p->next) {
-			glPushMatrix();
-			Lib3dsObjectData* d = &p->data.object;
-
-			// I assume thats e.g. the rotation of the node. maybe
-			// even scaling.
-			glMultMatrixf(&p->matrix[0][0]);
-
-			// the pivot point is the center of the object, I guess.
-			glTranslatef(-d->pivot[0], -d->pivot[1], -d->pivot[2]);
+		for (p = m3ds->nodes; p; p = p->next) {
 			renderNode(p);
-			glPopMatrix();
 		}
 		glPopMatrix();
 	glEndList();
@@ -240,26 +246,20 @@ void BosonModel::renderNode(Lib3dsNode* node)
 	if (strcmp(node->name, "$$$DUMMY") == 0) {
 		return;
 	}
-#if 0
-	// the original implementation creates a display list for ALL nodes.
-	// to use this with frames we'd have to re-assign 0 to user.d between
-	// all frames.
-	// I'm not sure which is better - storing all GL calls in a single
-	// display list or using a lot of glCallList() in the main list.
-	//
-	// I am sure that re-rendering every time is slower on loading.. but
-	// what about runtime?
+	// we create a display list for *every single* node.
+	// This might look like a lot of overhead (both memory and speed - we
+	// need to use glCallList() every time which means more function calls)
+	// but it is actually less - e.g. in animations we don't have separate
+	// display lists for node that didn't change at all (less memory!)
+
 	if (!node->user.d) {
-#endif
 		//AB: what exactly is a "mesh" ?
 		Lib3dsMesh* mesh = lib3ds_file_mesh_by_name(m3ds, node->name);
 		if (!mesh) {
 			return;
 		}
-#if 0
 		node->user.d = glGenLists(1);
 		glNewList(node->user.d, GL_COMPILE);
-#endif
 
 		unsigned int p;
 		Lib3dsMatrix invMeshMatrix;
@@ -283,7 +283,7 @@ void BosonModel::renderNode(Lib3dsNode* node)
 				// must be equal to mesh->points
 				Lib3dsTextureMap* t = &mat->texture1_map;
 				if (!mTextures.contains(t->name)) {
-					if (QString(t->name) != "") {
+					if (!QString(t->name).isEmpty()) {
 						kdWarning() << k_funcinfo << "Texture " << t->name << " was not loaded" << endl;
 					}
 					myTex = 0;
@@ -312,6 +312,10 @@ void BosonModel::renderNode(Lib3dsNode* node)
 						tex[i][1] = mesh->texelL[f->points[i]][1];
 					}
 				}
+				if (QString::fromLatin1(mesh->name).lower() == QString::fromLatin1("teamcolor")) {
+					myTex = 0; // teamcolor objects are *not* textured
+//					glColor3f(); // TODO
+				}
 				if (myTex) {
 					glBindTexture(GL_TEXTURE_2D, myTex);
 					glBegin(GL_TRIANGLES);
@@ -328,21 +332,25 @@ void BosonModel::renderNode(Lib3dsNode* node)
 				}
 			}
 		}
-#if 0
 		glEndList();
-#endif
 	}
-#if 0
 	if (node->user.d) {
 		glPushMatrix();
-		Lib3dsObjectData* d = &node->data.object;
+		Lib3dsObjectData* d = &node->data.object; // these can get changed in different frames even for the same nodes. so we can't place the following parts into the display lists for the nodes themselves.
+		
+		// I assume thats e.g. the rotation of the node. maybe
+		// even scaling.
 		glMultMatrixf(&node->matrix[0][0]);
+		
+		// the pivot point is the center of the object, I guess.
 		glTranslatef(-d->pivot[0], -d->pivot[1], -d->pivot[2]);
+
+		// finally call the list
 		glCallList(node->user.d);
+
 		glPopMatrix();
 	}
  }
-#endif
 }
 
 void BosonModel::setFrame(unsigned int frame)
