@@ -591,10 +591,7 @@ Cell* BosonMap::cell(int x, int y) const
 	boError() << k_funcinfo << "Cells not yet created" << endl;
 	return 0;
  }
- if (x < 0 || (unsigned int)x >= width()) {
-	return 0;
- }
- if (y < 0 || (unsigned int)y >= height()) {
+ if (!isValidCell(x, y)) {
 	return 0;
  }
  return mCells + cellArrayPos(x, y);
