@@ -95,7 +95,7 @@ bool UpgradePropertiesBase::canBeResearched(Player* player)
 
 void UpgradePropertiesBase::load(KSimpleConfig* cfg)
 {
-  boDebug() << k_funcinfo << "Loading; isTech: " << isTechnology() << "; id: " << id() << "" << endl;
+//  boDebug() << k_funcinfo << "Loading; isTech: " << isTechnology() << "; id: " << id() << "" << endl;
   // Load basic stuff
   if(mTechnology)
   {
