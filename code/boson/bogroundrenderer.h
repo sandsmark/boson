@@ -185,18 +185,5 @@ private:
 	unsigned int mRenderCellsCount; // actual number of cells in the array
 };
 
-class BoGroundRendererInformation : public QObject
-{
-	Q_OBJECT
-public:
-	BoGroundRendererInformation() : QObject()
-	{
-	}
-	~BoGroundRendererInformation()
-	{
-	}
-	virtual QStringList groundRenderers() const = 0;
-};
-
 #endif
 

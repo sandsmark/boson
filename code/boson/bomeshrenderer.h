@@ -196,26 +196,4 @@ private:
 	BosonModel* mModel;
 };
 
-/**
- * A simple class providing information about what classes a plugin provides.
- * You need to derive from this class for your meshrenderer plugin and list all
- * meshrenderer classnames in @ref meshRenderers.
- *
- * Note that the name of your derived class MUST be
- * BoMeshRendererInformation_plugin, where "plugin" is the name of your library
- * file (e.g. "libbomeshrendererplugin")
- **/
-class BoMeshRendererInformation : public QObject
-{
-	Q_OBJECT
-public:
-	BoMeshRendererInformation() : QObject()
-	{
-	}
-	~BoMeshRendererInformation()
-	{
-	}
-	virtual QStringList meshRenderers() const = 0;
-};
-
 #endif

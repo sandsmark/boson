@@ -21,6 +21,7 @@
 
 #include <klibloader.h>
 #include "../bogroundrenderer.h"
+#include "../bopluginmanager.h"
 
 // AB: we should move this macro to a more generic place
 
@@ -61,18 +62,18 @@ private:
 	static KInstance* mInstance;
 };
 
-class BoGroundRendererInformation_libbogroundrendererplugin : public BoGroundRendererInformation
+class BoPluginInformation_libbogroundrendererplugin : public BoPluginInformation
 {
 	Q_OBJECT
 public:
-	BoGroundRendererInformation_libbogroundrendererplugin() : BoGroundRendererInformation()
+	BoPluginInformation_libbogroundrendererplugin() : BoPluginInformation()
 	{
 	}
-	~BoGroundRendererInformation_libbogroundrendererplugin()
+	~BoPluginInformation_libbogroundrendererplugin()
 	{
 	}
 
-	virtual QStringList groundRenderers() const;
+	virtual QStringList plugins() const;
 
 };
 
