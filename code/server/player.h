@@ -27,7 +27,6 @@
 #include "connect.h"
 
 class KSocket;
-class BosonServer;
 class boBuffer;
 
 
@@ -51,7 +50,6 @@ public :
   serverSocketState	 socketState;
   KSocket		*socket;
   QString		*name;
-  BosonServer		*server;
   int			 id;		// 'id' means that this player is (global)player[id], see game.h
   boBuffer		*buffer;
 
