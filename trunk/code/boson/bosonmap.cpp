@@ -33,6 +33,7 @@
 #include <qdatastream.h>
 #include <qimage.h>
 #include <qvaluevector.h>
+#include <qdom.h>
 
 #include <kapplication.h>
 #include <kglobal.h>
@@ -398,32 +399,67 @@ bool BosonMap::createNewMap(unsigned int width, unsigned int height, BosonGround
  return ret;
 }
 
-bool BosonMap::loadMapFromFile(const QByteArray& map)
+bool BosonMap::loadMapFromFile(const QByteArray& mapXML)
 {
  boDebug() << k_funcinfo << endl;
- QDataStream stream(map, IO_ReadOnly);
- QString magic;
- stream >> magic;
- if (magic != BOSONMAP_MAP_MAGIC_COOKIE) {
-	boError() << k_funcinfo << "invalid magic cookie" << endl;
+ QDomDocument doc(QString::fromLatin1("BosonMap"));
+ QString errorMsg;
+ int line, column;
+ if (!doc.setContent(QString(mapXML), &errorMsg, &line, &column)) {
+	boError() << k_funcinfo << "unable to load from mapXML (error in line " << line << ", column " << column << ", msg=" << errorMsg << ")" << endl;
 	return false;
  }
- Q_UINT32 version;
- stream >> version;
+ QDomElement root = doc.documentElement();
+ if (root.isNull()) {
+	boError() << k_funcinfo << "no root element" << endl;
+	return false;
+ }
+ if (!root.hasAttribute("Version")) {
+	boError() << k_funcinfo << "missing attribute: Version" << endl;
+	return false;
+ }
+ int version = root.attribute("Version").toInt();
  if (version != BOSONMAP_VERSION) {
-	boError() << k_funcinfo << "version " << version << " not supported" << endl;
+	boError() << k_funcinfo << "invalid version " << version << " - need: " << BOSONMAP_VERSION << endl;
 	return false;
  }
- if (!loadMapGeo(stream)) {
+ if (!root.hasAttribute(QString::fromLatin1("GroundTheme"))) {
+	boError() << k_funcinfo << "no GroundTheme attribute in root element" << endl;
+	return false;
+ }
+ QDomElement geometry = root.namedItem(QString::fromLatin1("Geometry")).toElement();
+ if (geometry.isNull()) {
+	boError() << k_funcinfo << "no geometry element" << endl;
+	return false;
+ }
+ if (!geometry.hasAttribute(QString::fromLatin1("Width"))) {
+	boError() << k_funcinfo << "no Width attribute in Geometry element" << endl;
+	return false;
+ }
+ if (!geometry.hasAttribute(QString::fromLatin1("Height"))) {
+	boError() << k_funcinfo << "no Height attribute in Geometry element" << endl;
+	return false;
+ }
+ bool ok = false;
+ QString groundTheme = root.attribute(QString::fromLatin1("GroundTheme"));
+ int width = geometry.attribute(QString::fromLatin1("Width")).toInt(&ok);
+ if (!ok || width < 0) {
+	boError() << k_funcinfo << "width is not a valid number" << endl;
+	return false;
+ }
+ int height = geometry.attribute(QString::fromLatin1("Height")).toInt(&ok);
+ if (!ok || height < 0) {
+	boError() << k_funcinfo << "height is not a valid number" << endl;
+	return false;
+ }
+
+ if (!loadMapGeo((unsigned int)width, (unsigned int)height)) {
 	boError() << k_funcinfo << "Could not load map geo" << endl;
 	return false;
  }
- if (!loadGroundTheme(stream)) {
+ if (!loadGroundTheme(groundTheme)) {
 	boError() << k_funcinfo << "Could not load the ground theme" << endl;
 	return false;
- }
- if (!stream.atEnd()) {
-	boWarning() << k_funcinfo << "stream is not at end after groundTheme!" << endl;
  }
  return true;
 }
@@ -459,23 +495,17 @@ bool BosonMap::loadCompleteMap(QDataStream& stream)
  return true;
 }
 
-bool BosonMap::loadMapGeo(QDataStream& stream)
+bool BosonMap::loadMapGeo(unsigned int width, unsigned int height)
 {
  boDebug() << k_funcinfo << endl;
- Q_UINT32 mapWidth;
- Q_UINT32 mapHeight;
-
- stream >> mapWidth;
- stream >> mapHeight;
-
- if (!isValidMapGeo(mapWidth, mapHeight)) {
-	boError()<< k_funcinfo << "map geo is not valid: " << mapWidth << "x" << mapHeight << endl;
+ if (!isValidMapGeo(width, height)) {
+	boError()<< k_funcinfo << "map geo is not valid: " << width << "x" << height << endl;
 	return false;
  }
 
 // map is ok - lets apply
- mMapWidth = mapWidth; // horizontal cell count
- mMapHeight = mapHeight; // vertical cell count
+ mMapWidth = width; // horizontal cell count
+ mMapHeight = height; // vertical cell count
 
  delete[] mCells;
  mCells = 0;
@@ -489,10 +519,8 @@ bool BosonMap::loadMapGeo(QDataStream& stream)
  return true;
 }
 
-bool BosonMap::loadGroundTheme(QDataStream& stream)
+bool BosonMap::loadGroundTheme(const QString& id)
 {
- QString id;
- stream >> id;
  mGroundTheme = (BosonGroundTheme*)BosonData::bosonData()->groundTheme(id);
  if (!mGroundTheme) {
 	boError() << k_funcinfo << "Cannot find groundTheme with id=" << id << endl;
@@ -683,19 +711,37 @@ bool BosonMap::saveTexMap(QDataStream& stream)
  return mTexMap->save(stream);
 }
 
-bool BosonMap::saveMapToFile(QDataStream& stream)
+QByteArray BosonMap::saveMapToFile()
 {
- stream << BOSONMAP_MAP_MAGIC_COOKIE;
- stream << (Q_UINT32)BOSONMAP_VERSION;
- if (!saveMapGeo(stream)) {
-	boError() << k_funcinfo << "Could not save map geo" << endl;
+ if (!isValidMapGeo(width(), height())) {
+	boError() << k_funcinfo << "Map geo is not valid" << endl;
 	return false;
  }
- if (!saveGroundTheme(stream)) {
-	boError() << k_funcinfo << "Could not save groundTheme" << endl;
+ if (!groundTheme()) {
+	BO_NULL_ERROR(groundTheme());
 	return false;
  }
- return true;
+ if (groundTheme()->identifier().isEmpty()) {
+	// we might use an empty identifier to store the complete theme into the
+	// stream (including textures). Advantage: someone (3rd party) who
+	// designs a map doesn't need to install his custom groundTheme, but can
+	// install a single .bpf file only.
+	boError() << k_funcinfo << "empty groundTheme identifier" << endl;
+	return false;
+ }
+
+ // TODO: add a version attribute?
+ QDomDocument doc(QString::fromLatin1("BosonMap"));
+ QDomElement root = doc.createElement(QString::fromLatin1("BosonMap"));
+ root.setAttribute(QString::fromLatin1("Version"), BOSONMAP_VERSION);
+ doc.appendChild(root);
+ QDomElement geometry = doc.createElement(QString::fromLatin1("Geometry"));
+ root.appendChild(geometry);
+ geometry.setAttribute(QString::fromLatin1("Width"), width());
+ geometry.setAttribute(QString::fromLatin1("Height"), height());
+ root.setAttribute(QString::fromLatin1("GroundTheme"), groundTheme()->identifier());
+
+ return doc.toCString();
 }
 
 bool BosonMap::saveCompleteMap(QDataStream& stream)
@@ -705,8 +751,8 @@ bool BosonMap::saveCompleteMap(QDataStream& stream)
  // we should compress it!
 
  QByteArray buffer;
- QDataStream mapStream(buffer, IO_WriteOnly);
- if (!saveMapToFile(mapStream)) { // AB: bad name. we don't actually save to file - it is just the "map" file in the .bpf file that is created in that function
+ buffer = saveMapToFile();
+ if (buffer.size() == 0) {
 	boError() << k_funcinfo << "Could not save basic map" << endl;
 	return false;
  }
@@ -723,36 +769,6 @@ bool BosonMap::saveCompleteMap(QDataStream& stream)
 	boError() << k_funcinfo << "Could not save map cells" << endl;
 	return false;
  }
- return true;
-}
-
-bool BosonMap::saveMapGeo(QDataStream& stream)
-{
- if (!isValidMapGeo(width(), height())) {
-	boError() << k_funcinfo << "Map geo is not valid" << endl;
-	return false;
- }
-// boDebug() << k_funcinfo << endl;
- stream << (Q_INT32)width();
- stream << (Q_INT32)height();
- return true;
-}
-
-bool BosonMap::saveGroundTheme(QDataStream& stream)
-{
- if (!groundTheme()) {
-	BO_NULL_ERROR(groundTheme());
-	return false;
- }
- if (groundTheme()->identifier().isEmpty()) {
-	// we might use an empty identifier to store the complete theme into the
-	// stream (including textures). Advantage: someone (3rd party) who
-	// designs a map doesn't need to install his custom groundTheme, but can
-	// install a single .bpf file only.
-	boError() << k_funcinfo << "empty groundTheme identifier" << endl;
-	return false;
- }
- stream << groundTheme()->identifier();
  return true;
 }
 
@@ -999,15 +1015,7 @@ void BosonMap::resize(unsigned int width, unsigned int height)
 	return;
  }
 
- QByteArray buffer;
- QDataStream stream(buffer, IO_WriteOnly);
-
- // WARNING: this is close to duplicated code. try to merge with saveMapGeo() !
- stream << (Q_INT32)width;
- stream << (Q_INT32)height;
-
- QDataStream readStream(buffer, IO_ReadOnly);
- loadMapGeo(readStream);
+ loadMapGeo(width, height);
 }
 
 int BosonMap::currentTexture(int texture) const

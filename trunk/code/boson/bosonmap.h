@@ -618,7 +618,7 @@ public:
 
 
 
-	bool saveMapToFile(QDataStream& stream);
+	QByteArray saveMapToFile();
 
 	/**
 	 * Save the complete map into the stream, even the parts that are
@@ -670,14 +670,6 @@ public:
 	bool saveTexMap(QDataStream& stream);
 
 	QByteArray saveTexMapImage(unsigned int texture);
-
-	/**
-	 * Load a @ref groundTheme - see @ref BosonGroundTheme. The groundTheme
-	 * contains the actual textures used by the @ref texMap.
-	 *
-	 * @param theme The groundTheme to be loaded, such as "earth"
-	 **/
-	void loadGroundTheme(const QString& theme);
 
 	void setModified(bool m) { mModified = m; }
 	bool modified() const { return mModified; }
@@ -735,18 +727,6 @@ protected:
 
 	void saveCell(QDataStream& stream, unsigned char amountOfLand, unsigned char amountOfWater);
 
-	/**
-	 * Save the map geo into stream. This creates a stream in the format
-	 * used by @ref loadMapGeo. You can use this to send the map geo to
-	 * another client.
-	 *
-	 * Note that this doesn't add all the units of the player but just the
-	 * basic settings of a map! The units should be loaded by the server
-	 * only.
-	 * @param stream The stream to write to
-	 **/
-	bool saveMapGeo(QDataStream& stream);
-	bool saveGroundTheme(QDataStream& stream);
 	bool saveCells(QDataStream& stream);
 	bool saveHeightMap(QDataStream& stream);
 
@@ -757,26 +737,9 @@ protected:
 	 **/
 	static bool saveHeightMap(QDataStream& stream, unsigned int mapWidth, unsigned int mapHeight, BoHeightMap* heightMap);
 
-	/**
-	 * Read the map geo from stream. This only reads map size, playercount
-	 * and something like this. Use @ref loadCells to load the cells.
-	 *
-	 * This does <em>not</em> read the units
-	 * of the player. Usually you will transmit the geo parts of a map (see
-	 * @ref saveMapGeo) to all clients but only the server loads the units
-	 * which will be added.
-	 **/
-	bool loadMapGeo(QDataStream& stream);
+	bool loadMapGeo(unsigned int width, unsigned int height);
 
-	/**
-	 * Load the groundTheme from the stream. Note that we "load" the
-	 * groundTheme identifier only, not the complete theme. The actual theme
-	 * will be on the disk, in the grounds/ dir. The config of that theme is
-	 * already in memory, but the actual theme will be loaded later.
-	 * @return TRUE on success, FALSE otherwise (e.g. if the requested
-	 * groundTheme is not available)
-	 **/
-	bool loadGroundTheme(QDataStream& stream);
+	bool loadGroundTheme(const QString& id);
 
 	/**
 	 * Load the cells from the stream.

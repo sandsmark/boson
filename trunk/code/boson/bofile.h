@@ -131,7 +131,20 @@ public:
 	virtual bool checkTar() const;
 
 	/**
-	 * @return The content of the map file
+	 * @return Whether the "map" directory is present. In older boson
+	 * versions (<= 0.8) it was not present. From boson 0.9 on all map
+	 * relevant files are in a map directory.
+	 **/
+	bool hasMapDirectory() const
+	{
+		return hasDirectory(QString::fromLatin1("map"));
+	}
+
+	/**
+	 * @return The content of the map file. This is obsolete - the map file
+	 * as used in boson 0.8 got split into several files (see @ref
+	 * BosonFileConverter). The map file as used in 0.8.128 is now stored as
+	 * XML - see @ref mapXMLData.
 	 **/
 	QByteArray mapData() const
 	{
@@ -139,27 +152,42 @@ public:
 	}
 
 	/**
-	 * @return The content of the map.xml file. Note that this file is
-	 * obsolete! Use @ref mapData instead
+	 * @return The content of the map/map.xml file. Note that this will
+	 * always be in the map/ subdir, if present at all.
 	 **/
 	QByteArray mapXMLData() const
 	{
-		return fileData(QString::fromLatin1("map.xml"));
+		return fileData(QString::fromLatin1("map.xml"), QString::fromLatin1("map"));
 	}
 
+	/**
+	 * @return The heightmap, if present. This may either be in the toplevel
+	 * directory (boson < 0.9) or in the map directory, depending on @ref
+	 * hasMapDirectory.
+	 **/
 	QByteArray heightMapData() const
 	{
-		return fileData(QString::fromLatin1("heightmap.png"));
+		QString dir = QString::null;
+		if (hasMapDirectory()) {
+			dir = QString::fromLatin1("map");
+		}
+		return fileData(QString::fromLatin1("heightmap.png"), dir);
 	}
 
 	/**
 	 * @return The content of the binary tex map file. This is
 	 * <em>not</em> an image! This file specifies which corner of a cell will
-	 * have how much percent of which texture.
+	 * have how much percent of which texture. The file will be in the
+	 * toplevel directory for boson < 0.9, otherwise in the map/ directory
+	 * (see @ref hasMapDirectory)
 	 **/
 	QByteArray texMapData() const
 	{
-		return fileData(QString::fromLatin1("texmap"));
+		QString dir = QString::null;
+		if (hasMapDirectory()) {
+			dir = QString::fromLatin1("map");
+		}
+		return fileData(QString::fromLatin1("texmap"), dir);
 	}
 
 	/**
