@@ -29,8 +29,6 @@ visualMiniDisplay::visualMiniDisplay(visualView *v, QWidget*parent, const char *
 	: QWidget(parent, name)
 {
 
-	visualField *field = v -> field;
-
 /* the visualView */
 	view = v;
 
@@ -39,9 +37,9 @@ visualMiniDisplay::visualMiniDisplay(visualView *v, QWidget*parent, const char *
 	ground->fill(black);
 
 /* make the connection */
-	connect(field, SIGNAL(newCell(int,int, groundType)), this, SLOT(newCell(int,int, groundType)));
-	connect(field, SIGNAL(updateMobile(visualMobUnit *)), this, SLOT(drawMobile(visualMobUnit *)));
-	connect(field, SIGNAL(updateFix(visualFacility *)), this, SLOT(drawFix(visualFacility *)));
+	connect(vcanvas, SIGNAL(newCell(int,int, groundType)), this, SLOT(newCell(int,int, groundType)));
+	connect(vcanvas, SIGNAL(updateMobile(visualMobUnit *)), this, SLOT(drawMobile(visualMobUnit *)));
+	connect(vcanvas, SIGNAL(updateFix(visualFacility *)), this, SLOT(drawFix(visualFacility *)));
 
 // connect(, SIGNAL(), this, SLOT());
 	connect(view, SIGNAL(repaint(bool)), this, SLOT(repaint(bool)));

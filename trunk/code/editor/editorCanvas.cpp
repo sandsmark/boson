@@ -1,5 +1,5 @@
 /***************************************************************************
-                          editorField.cpp  -  description                              
+                          editorCanvas.cpp  -  description                              
                              -------------------                                         
 
     version              : $Id$
@@ -20,10 +20,11 @@
 
 #include "common/log.h"
 
-#include "editorField.h"
+#include "editorCanvas.h"
+#include "visualCell.h"
   
-editorField::editorField()
-	: visualField()
+editorCanvas::editorCanvas()
+	: visualCanvas()
 {
 	mobiles.resize(149);
 	facilities.resize(149);
@@ -35,7 +36,7 @@ editorField::editorField()
 }
 
 
-bool editorField::Load(QString filename)
+bool editorCanvas::Load(QString filename)
 {
 	int i,j;
 	mobileMsg_t	mob;
@@ -112,7 +113,7 @@ bool editorField::Load(QString filename)
 }
 
 
-bool editorField::Save(QString filename)
+bool editorCanvas::Save(QString filename)
 {
 	int i,j;
 	mobileMsg_t	mob;
@@ -148,7 +149,7 @@ bool editorField::Save(QString filename)
 }
 
 
-bool editorField::New(groundType fill_ground, uint w, uint h, const QString &name)
+bool editorCanvas::New(groundType fill_ground, uint w, uint h, const QString &name)
 {
 	int i,j;
 
@@ -182,7 +183,7 @@ bool editorField::New(groundType fill_ground, uint w, uint h, const QString &nam
 }
 
 
-void editorField::freeRessources()
+void editorCanvas::freeRessources()
 {
 	int i;
 
@@ -203,7 +204,7 @@ void editorField::freeRessources()
 }
 
 
-void editorField::createMobUnit(mobileMsg_t &msg)
+void editorCanvas::createMobUnit(mobileMsg_t &msg)
 {
 	visualMobUnit *m;
 
@@ -218,7 +219,7 @@ void editorField::createMobUnit(mobileMsg_t &msg)
 
 
 /*
-void editorField::destroyMobUnit(destroyedMsg_t &msg)
+void editorCanvas::destroyMobUnit(destroyedMsg_t &msg)
 {
 	visualMobUnit *mob ;
 	
@@ -228,7 +229,7 @@ void editorField::destroyMobUnit(destroyedMsg_t &msg)
 		boAssert(msg.y == mob->y());
 		}
 	else {
-		logf(LOG_ERROR, "bosonField::destroyMob : can't find msg.key");
+		logf(LOG_ERROR, "editorCanvas::destroyMob : can't find msg.key");
 		return;
 		}
 
@@ -236,7 +237,7 @@ void editorField::destroyMobUnit(destroyedMsg_t &msg)
 }
 */
 
-void editorField::createFixUnit(facilityMsg_t &msg)
+void editorCanvas::createFixUnit(facilityMsg_t &msg)
 {
 	visualFacility *f;
 
@@ -252,7 +253,7 @@ void editorField::createFixUnit(facilityMsg_t &msg)
 
 
 /*
-void editorField::destroyFixUnit(destroyedMsg_t &msg)
+void editorCanvas::destroyFixUnit(destroyedMsg_t &msg)
 {
 	visualFacility * f;
 	
@@ -262,7 +263,7 @@ void editorField::destroyFixUnit(destroyedMsg_t &msg)
 		boAssert(msg.y == f->x());
 		}
 	else {
-		logf(LOG_ERROR, "bosonField::destroyFix : can't find msg.key");
+		logf(LOG_ERROR, "editorCanvas::destroyFix : can't find msg.key");
 		return;
 		}
 
@@ -271,7 +272,7 @@ void editorField::destroyFixUnit(destroyedMsg_t &msg)
 */
 
 
-void editorField::deleteCell(int x, int y)
+void editorCanvas::deleteCell(int x, int y)
 {
 	groundType	oldg =  cells[x][y].getGroundType();
 	
@@ -317,7 +318,7 @@ void editorField::deleteCell(int x, int y)
 	}
 }
 
-void editorField::setCell(int x, int y, groundType g )
+void editorCanvas::setCell(int x, int y, groundType g )
 {
 //	printf ("setting %d,%d at %d\n", x, y, g);
 	modified = true;

@@ -169,19 +169,19 @@ switch(tag) {
 		jiffies ++;
 		boAssert(jiffies == data->jiffies);
 	// let's each object speaks
-		field->requestAction();
+		bocanvas->requestAction();
 	// latest message is MSG_TIME_CONFIRM
 		sendMsg(buffer, MSG_TIME_CONFIRM, sizeof(data->jiffies), data);
 		logf(LOG_COMM, "flush : jiffies++ : %u", jiffies);
 		buffer->flush();
-		field->update();		// QCanvas periodical rendering
+		bocanvas->update();		// QCanvas periodical rendering
 		break;
 
 	case MSG_MAP_DISCOVERED :
 		ASSERT_DATA_BLENGHT(sizeof(data->coo));
 		logf(LOG_GAME_LOW, "received MSG_MAP_DISCOVERED : (%d,%d) = %d",
 			data->coo.x, data->coo.y, (int)data->coo.g );
-		field->setCell(data->coo.x, data->coo.y, data->coo.g);
+		bocanvas->setCell(data->coo.x, data->coo.y, data->coo.g);
 		return;
 		break;
 
@@ -194,22 +194,22 @@ switch(tag) {
 			data->facility.key,
 			data->facility.state
 			);
-		field->createFix(data->facility);
+		bocanvas->createFix(data->facility);
 		break;
 
 	case MSG_FACILITY_UNHIDDEN :
 		ASSERT_DATA_BLENGHT(sizeof(data->facility));
-		field->unHideFix(data->facility);
+		bocanvas->unHideFix(data->facility);
 		break;
 		
 	case MSG_UNIT_POWER:
 		ASSERT_DATA_BLENGHT(sizeof(data->power));
-		field->shooted(data->power);
+		bocanvas->shooted(data->power);
 		break;
 		
 	case MSG_UNIT_RESS:
 		ASSERT_DATA_BLENGHT(sizeof(data->unitRess));
-		field->updateRess(data->unitRess);
+		bocanvas->updateRess(data->unitRess);
 		break;
 
 	case MSG_FACILITY_CHANGED :
@@ -218,7 +218,7 @@ switch(tag) {
 			data->fixChanged.key,
 			data->fixChanged.state
 			);
-		f = field->getFacility(data->fixChanged.key);
+		f = bocanvas->getFacility(data->fixChanged.key);
 		if (f) {
 			f->s_setState(data->fixChanged.state);
 			}
@@ -229,20 +229,20 @@ switch(tag) {
 	case MSG_FACILITY_HIDDEN :
 		ASSERT_DATA_BLENGHT(sizeof(data->destroyed));
 		logf(LOG_GAME_HIGH, "Facility(%d) destroyed", data->destroyed.key);
-		field->hideFix(data->destroyed);
+		bocanvas->hideFix(data->destroyed);
 		break;
 
 
 	case MSG_FACILITY_DESTROYED :
 		ASSERT_DATA_BLENGHT(sizeof(data->destroyed));
 		logf(LOG_GAME_HIGH, "Facility(%d) destroyed", data->destroyed.key);
-		field->destroyFix(data->destroyed);
+		bocanvas->destroyFix(data->destroyed);
 		break;
 
 
 	case MSG_MOBILE_UNHIDDEN :
 		ASSERT_DATA_BLENGHT(sizeof(data->mobile));
-		field->unHideMob(data->mobile);
+		bocanvas->unHideMob(data->mobile);
 		break;
 
 
@@ -255,28 +255,28 @@ switch(tag) {
 			data->mobile.x,
 			data->mobile.y
 			);
-		field->createMob(data->mobile);
+		bocanvas->createMob(data->mobile);
 		break;
 
 	case MSG_MOBILE_HIDDEN :
 		ASSERT_DATA_BLENGHT(sizeof(data->destroyed));
-		field->hideMob(data->destroyed);
+		bocanvas->hideMob(data->destroyed);
 		break;
 
 	case MSG_MOBILE_DESTROYED :
 		ASSERT_DATA_BLENGHT(sizeof(data->destroyed));
 		logf(LOG_GAME_HIGH, "mobile(%d) destroyed", data->destroyed.key);
-		field->destroyMob(data->destroyed);
+		bocanvas->destroyMob(data->destroyed);
 		break;
 
 	case MSG_MOBILE_MOVE_C :
 		ASSERT_DATA_BLENGHT(sizeof(data->move));
-		field->move(data->move);
+		bocanvas->move(data->move);
 		break;
 
 	case MSG_UNIT_SHOOT :
 		ASSERT_DATA_BLENGHT(sizeof(data->shoot));
-		field->shoot(data->shoot);
+		bocanvas->shoot(data->shoot);
 		break;
 
 	case MSG_PERSO_RESSOURCES :

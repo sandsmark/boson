@@ -39,7 +39,7 @@
 // application specific includes
 #include "common/msgData.h"
 
-#include "editorField.h"
+#include "editorCanvas.h"
 #include "mainView.h"
 
 
@@ -167,7 +167,7 @@ private:
 
     void doLoad(QString newname);
 /* The map which handle grouds and units*/
-    editorField		*field;
+    editorCanvas	*field;
     QString		*currentFile;
     mainView		*mainview;
 

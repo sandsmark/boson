@@ -1,9 +1,9 @@
 /***************************************************************************
-                          visualField.h  -  description                              
+                          bosonCanvas.h  -  description                              
                              -------------------                                         
 
     version              : $Id$
-    begin                : Sat Jan  9 19:35:36 CET 1999
+    begin                : Thu Sep  9 01:27:00 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
     email                : orzel@yalbi.com                                     
@@ -18,61 +18,61 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef VISUALFIELD_H 
-#define VISUALFIELD_H 
+#ifndef BOSONFIELD_H 
+#define BOSONFIELD_H 
 
-
-#include <qobject.h>
 #include <qintdict.h>
-#include <qcanvas.h>
 
-#include "common/groundType.h"
+#include "common/msgData.h"
+#include "common/unit.h"	// Facility
 
-#include "visualUnit.h"		// visualMobUnit
-#include "visualCell.h"
+#include "playerUnit.h"		// playerMobUnit
+#include "visualCanvas.h"
 
 class QRect;
 class QPainter;
 class Cell;
-//class Unit;
-class groundTheme;
-class speciesTheme;
-class visualFacility;
-class visualMobUnit;
+class Unit;
+
 
 
 /** 
   * This class encapsulate the "physical" idea of the map : size, contents..
   */
-class visualField : public QCanvas
+class bosonCanvas : public visualCanvas
 {
-
 	Q_OBJECT
 
 public:
-	visualField( uint , uint );
+  bosonCanvas(uint l, uint h);
 
-/* geometry ? , still public */
-	int		maxX, maxY;	// size of the map
-///orzel should be maxX * BO_TILE_SIZE = width(), maxY * BO_TILE_SIZE
+  void createMob(mobileMsg_t &);
+  void unHideMob(mobileMsg_t &);
+  void destroyMob(destroyedMsg_t &);
+  void hideMob(destroyedMsg_t &);
 
-	void setCell(int i, int j, groundType g);
-	/** find the unit at this position */
-	QCanvasItem		*findUnitAt(int x, int y);
-	groundType		findGroundAt(int x, int y);
-	
-	
-	virtual void resize (int, int);
-protected:
-	visualField();		// to be used by editorField
-	void init(void);
+  void createFix(facilityMsg_t &);
+  void unHideFix(facilityMsg_t &);
+  void destroyFix(destroyedMsg_t &);
+  void hideFix(destroyedMsg_t &);
 
+  void move(moveMsg_t &);
+  void shooted(powerMsg_t &);
+  void shoot(shootMsg_t &);
+  void requestAction(void);
+  void updateRess(unitRessMsg_t &);
+
+/* concerning contents */
+  playerFacility *getFacility(long key) { return facility.find(key); }
+
+//private :
+  QIntDict<playerMobUnit>	mobile;
+  QIntDict<playerFacility>	facility;
+  
 signals:
-	void newCell(int,int, groundType g);
-	void updateMobile(visualMobUnit *); // for miniMap
-	void updateFix(visualFacility *); // for miniMap
+	void reCenterView(int x, int y);
+
 };
 
-#endif // VISUALFIELD_H
-
+#endif // BOSONFIELD_H
 

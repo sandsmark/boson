@@ -22,13 +22,13 @@
 #define VISUAL_H 
 
 #include "common/boconfig.h"
+#include "visualCanvas.h"
 
 class groundTheme;
 class speciesTheme;
-class visualField;
-class QCanvas;
+class visualCanvas;
 
-extern	QCanvas		*bocanvas;
+extern	visualCanvas	*vcanvas;
 extern	groundTheme	*ground;
 extern	speciesTheme	*species[BOSON_MAX_PLAYERS];
 extern	int		nb_player;

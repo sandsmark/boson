@@ -47,7 +47,7 @@ FILE *logfile = (FILE *) 0L;
 /*
  * visual/visual.h
  */
-QCanvas			*bocanvas;
+visualCanvas		*vcanvas;
 groundTheme		*ground = 0;
 speciesTheme		*species[BOSON_MAX_PLAYERS] = {0l, 0l};
 int			nb_player;
@@ -455,7 +455,7 @@ void BoEditorApp::slotViewStatusBar()
 void BoEditorApp::slotFileNewWindow()
 {
 /*
-	mainView *mainview = new mainView(field, this, "main_view_0");
+	mainView *mainview = new mainView(this, "main_view_0");
 	setView(mainview);
 */
 }
@@ -474,7 +474,7 @@ void BoEditorApp::slotFileNew()
 	}
 
 	/* the physical map is created when a game is created */
-	bocanvas = field = new editorField();
+	vcanvas = field = new editorCanvas();
 
 	groundType g;
 	switch(newdlg->type) {
@@ -504,7 +504,7 @@ void BoEditorApp::slotFileNew()
 	/* a mainView is each window containing : field, mini, order...
 	   this one is the first one, other can pop up as well */
 
-	mainview = new mainView(field, this, "main_view_0");
+	mainview = new mainView( this, "main_view_0");
 	connect(this, SIGNAL(destroyObjects()), mainview, SLOT(slotEditDestroy()));
 	setView(mainview);
 	resize(800,628);
@@ -545,7 +545,7 @@ void BoEditorApp::doLoad(QString newname)
 
 	slotFileClose();
 	/* the physical map is created when a game is created */
-	bocanvas = field = new editorField();
+	vcanvas = field = new editorCanvas();
 
 	*currentFile = newname;
 	assert (true == field->Load(*currentFile));
@@ -555,7 +555,7 @@ void BoEditorApp::doLoad(QString newname)
 	/* a mainView is each window containing : field, mini, order...
 	   this one is the first one, other can pop up as well */
 
-	mainview = new mainView(field, this, "main_view_0");
+	mainview = new mainView( this, "main_view_0");
 	connect(this, SIGNAL(destroyObjects()), mainview, SLOT(slotEditDestroy()));
 	resize(800,628);
 	setView(mainview);

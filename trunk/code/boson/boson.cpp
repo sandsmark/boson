@@ -239,10 +239,10 @@ void BosonApp::initSocket(char *servername)
 void BosonApp::initView(int w, int h)
 { 
 
-	/* the field is created when a game is created */
-	bocanvas = field = new bosonField(w,h);
+	/* the canvas is created when a game is created */
+	vcanvas = bocanvas = new bosonCanvas(w,h);
 
-	/* a mainView is each window containing : field, mini, order...
+	/* a mainView is each window containing : big, mini
 	   this one is the first one, other can pop up as well */
 
 	mainView *mainview = new mainView(this, "main_view_0");

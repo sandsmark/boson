@@ -28,7 +28,7 @@
 #define SP_W		35
 #define SP_H		(SP_CORNER_LEN+SP_CORNER_POS)
 
-extern QCanvas	*bocanvas;
+extern QCanvas	*vcanvas;
 
 static void drawSelectBox(QPainter &painter, QColor c1, QColor c2, int power);
 static QCanvasPixmapArray *initStatic(selectPart::sp_type type);
@@ -40,7 +40,7 @@ QCanvasPixmapArray * selectPart::qsps_down = 0l;
  *  selectPart
  */
 selectPart::selectPart(int _f, int _z, sp_type type)
-	: QCanvasSprite(0, bocanvas)
+	: QCanvasSprite(0, vcanvas)
 {
 	if (PART_DOWN == type) {
 		if (!qsps_down) qsps_down = initStatic(PART_DOWN);

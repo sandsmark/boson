@@ -20,6 +20,7 @@
 
 #include "common/log.h"
 
+#include "bosonCanvas.h"
 #include "playerUnit.h"
 #include "bosonBigDisplay.h"
 #include "game.h"
@@ -28,7 +29,6 @@
 bosonBigDisplay::bosonBigDisplay(bosonView *v, QWidget *parent, const char *name, WFlags f)
 	:visualBigDisplay(v,parent,name,f)
 {
-	bview = v;
 }
 
 
@@ -43,7 +43,7 @@ void bosonBigDisplay::actionClicked(int mx, int my, int /*state*/)
 	QIntDictIterator<visualMobUnit> mobIt(view->mobSelected);
 
 
-	sfg = view->field->findUnitAt( mx, my);
+	sfg = bocanvas->findUnitAt( mx, my);
 	if (!sfg) {
 		// nothing has been found : it's a ground-click
 		// order all mobiles to go there
@@ -79,7 +79,7 @@ void bosonBigDisplay::actionClicked(int mx, int my, int /*state*/)
 	}
 
 	// should never be reached !
-	logf(LOG_ERROR, "bosonBigDisplay.cpp, unexpeted field->findUnitAt() result");
+	logf(LOG_ERROR, "bosonBigDisplay.cpp, unexpected bocanvas->findUnitAt() result");
 	
 
 } 

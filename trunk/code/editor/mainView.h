@@ -26,13 +26,13 @@
 class	visualMiniDisplay;
 class	editorBigDisplay;
 class	visualView;
-class	editorField;
+class	editorCanvas;
 
 class mainView : public QWidget 
 {
 	Q_OBJECT
 public:
-	mainView(editorField *field, QWidget *parent=0, const char *name=0);
+	mainView(QWidget *parent=0, const char *name=0);
 
 public slots:
 	void slotEditDestroy(void);

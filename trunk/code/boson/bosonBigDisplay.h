@@ -33,9 +33,6 @@ public:
 	/* from display classes */
 	virtual void actionClicked(int, int, int state);	// selecting, moving...
 
-protected:
-	bosonView	*bview;
-
 };
 
 #endif // BOSONBIGDISPLAY_H

@@ -23,14 +23,14 @@
 
 #include "visual/visual.h"
 
-#include "editorField.h"
+#include "editorCanvas.h"
 #include "visualMiniDisplay.h"
 #include "editorBigDisplay.h"
 #include "editorView.h"
 
 #include "mainView.h"		// myself
 
-mainView::mainView(editorField *field, QWidget *parent, const char *name)
+mainView::mainView(QWidget *parent, const char *name)
 	:QWidget(parent, name)
 { 
 	QHBoxLayout	*topLayout = new QHBoxLayout(this);
@@ -41,7 +41,7 @@ mainView::mainView(editorField *field, QWidget *parent, const char *name)
 
 	topLayout->addLayout(leftLayout,0);
 
-		view = new editorView(field, this, "editorView"); // the view associated with this window
+		view = new editorView(this, "editorView"); // the view associated with this window
 
 		mini = new visualMiniDisplay(view, this);
 		mini->setFixedSize(250,200);
@@ -86,23 +86,23 @@ void mainView::keyReleaseEvent ( QKeyEvent * e )
 void mainView::slotEditDestroy(void)
 {
 	int mkey;
-	editorField  *field = (editorField*)bocanvas;
+	editorCanvas  *_canvas = (editorCanvas*)vcanvas;
 
 	if (view->fixSelected) {
 		/* destroy fix */
 		mkey = view->fixSelected->key;
 		view->unSelectFix();
-		field->facilities.remove(mkey);
+		_canvas->facilities.remove(mkey);
 	} else {
 		/* destroy mobiles */
 		QIntDictIterator<visualMobUnit> selIt(view->mobSelected);
 		for (selIt.toFirst(); selIt;) {			// ++ not needed, selIt should be increased
 			mkey = selIt.currentKey(); 		// by the .remove() in unselect
 			view->unSelectMob(mkey);
-			field->mobiles.remove(mkey);
+			_canvas->mobiles.remove(mkey);
 		}
 	}
-	field->update();
+	_canvas->update();
 }
 
 

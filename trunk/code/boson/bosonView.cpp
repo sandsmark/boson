@@ -36,7 +36,7 @@
 
 #include "game.h"
 #include "bosonView.h"
-#include "bosonField.h"
+#include "bosonCanvas.h"
 
 #define VIEW_ONE	1
 #define VIEW_MANY	2
@@ -45,11 +45,11 @@
 
 
 bosonView::bosonView(QWidget *parent, const char *name)
-	:visualView(::field,parent,name)
+	:visualView(parent,name)
 {
 	int i;
 
-	connect(field, SIGNAL(reCenterView(int,int)), SLOT(reCenterView(int,int)));
+	connect(bocanvas, SIGNAL(reCenterView(int,int)), SLOT(reCenterView(int,int)));
 
 	setFrameStyle(QFrame::Sunken | QFrame::Panel);
 	setLineWidth(5);

@@ -1,5 +1,5 @@
 /***************************************************************************
-                          visualField.cpp  -  description                              
+                          visualCanvas.cpp  -  description                              
                              -------------------                                         
 
     version              : $Id$
@@ -27,13 +27,12 @@
 #include "common/boconfig.h"
 #include "common/map.h"
 
-#include "visualField.h"
 #include "speciesTheme.h"
 #include "groundTheme.h"
 #include "visual.h"
   
 
-visualField::visualField(uint w, uint h)
+visualCanvas::visualCanvas(uint w, uint h)
 	: QCanvas (w * BO_TILE_SIZE ,h * BO_TILE_SIZE)
 {
 	/* map geometry */
@@ -44,7 +43,7 @@ visualField::visualField(uint w, uint h)
 
 
 
-visualField::visualField(void)
+visualCanvas::visualCanvas(void)
 	: QCanvas ()
 {
 	/* map geometry */
@@ -55,7 +54,7 @@ visualField::visualField(void)
 	
 	
 	
-void visualField::init(void)
+void visualCanvas::init(void)
 {
 
 
@@ -88,7 +87,7 @@ species[0]	= new speciesTheme("human", qRgb( 0, 255, 0) );
 }
 
 
-void visualField::resize (int w, int h)
+void visualCanvas::resize (int w, int h)
 {
 
 	/* map geometry */
@@ -97,7 +96,7 @@ void visualField::resize (int w, int h)
 }
 
 
-void visualField::setCell(int i, int j, groundType g)
+void visualCanvas::setCell(int i, int j, groundType g)
 {
 	boAssert(i>=0); boAssert(j>=0);
 	boAssert(i<width()); boAssert(j<height());
@@ -110,7 +109,7 @@ void visualField::setCell(int i, int j, groundType g)
 
 
 
-QCanvasItem * visualField::findUnitAt(int x, int y)
+QCanvasItem * visualCanvas::findUnitAt(int x, int y)
 {
 	QCanvasItem *u;
 
@@ -127,7 +126,7 @@ QCanvasItem * visualField::findUnitAt(int x, int y)
 }
 
 
-groundType visualField::findGroundAt(int x, int y)
+groundType visualCanvas::findGroundAt(int x, int y)
 {
 	groundType g;
  
@@ -139,7 +138,7 @@ groundType visualField::findGroundAt(int x, int y)
                         end(p);
 			return g;
 		}
-	logf(LOG_ERROR, "can't find ground in visualField::findGroundAt");
+	logf(LOG_ERROR, "can't find ground in visualCanvas::findGroundAt");
 	*/
 	return GROUND_UNKNOWN;
 }
