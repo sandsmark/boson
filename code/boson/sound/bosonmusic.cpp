@@ -91,7 +91,7 @@ BosonMusic::BosonMusic(QObject* parent) : QObject(parent)
 	Arts::TraderQuery query;
 	query.supports("Interface", "Arts::PlayObject");
 	query.supports("Extension", "ogg");
-	vector<Arts::TraderOffer>* offers = query.query();
+	std::vector<Arts::TraderOffer>* offers = query.query();
 	if (offers->empty()) {
 		kdWarning() << "Your arts installation does not support .ogg files! Disabling sounds now..." << endl;
 		// TODO: message box
@@ -100,7 +100,7 @@ BosonMusic::BosonMusic(QObject* parent) : QObject(parent)
 		boConfig->setDisableSound(true);
 	} else {
 		kdDebug() << k_funcinfo << "ogg support seems to be ok" << endl;
-		vector<Arts::TraderOffer>::iterator it;
+		std::vector<Arts::TraderOffer>::iterator it;
 		for (it = offers->begin(); it != offers->end(); it++) {
 			kdDebug() << "ogg offer: " << it->interfaceName().c_str() << endl;
 		}
