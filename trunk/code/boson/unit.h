@@ -357,6 +357,11 @@ public:
 	 **/
 	bool attackEnemyUnitsInRange();
 
+	/**
+	 * @return Best enemy unit in range to attack
+	 **/
+	Unit* bestEnemyUnitInRange();
+
 protected:
 	void shootAt(BosonWeapon* w, Unit* target);
 
