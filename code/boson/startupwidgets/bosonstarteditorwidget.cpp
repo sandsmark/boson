@@ -21,12 +21,10 @@
 #include "bosonstarteditorwidget.moc"
 
 #include "../defines.h"
-#include "../bosonconfig.h"
 #include "../bosonmessage.h"
 #include "../player.h"
 #include "../speciestheme.h"
 #include "../boson.h"
-#include "../top.h"
 #include "../bosonplayfield.h"
 #include "../bosonmap.h"
 #include "../bosonscenario.h"
@@ -35,11 +33,10 @@
 
 #include <klocale.h>
 #include <knuminput.h>
-#include <ksimpleconfig.h>
 #include <kmessagebox.h>
 
-#include <qframe.h>
 #include <qlabel.h>
+#include <qcombobox.h>
 #include <qpushbutton.h>
 #include <qlayout.h>
 #include <qvgroupbox.h>
@@ -178,6 +175,8 @@ void BosonStartEditorWidget::slotStart()
 
 	boGame->sendMessage(b, BosonMessage::ChangeMap);
 	maxPlayers = mMaxPlayers->value();
+
+	delete map;
  } else {
 	field = BosonPlayField::playField(playFieldIdentifier());
 	if (!field) {
@@ -193,7 +192,7 @@ void BosonStartEditorWidget::slotStart()
  }
 
  QValueList<QColor> availableTeamColors = boGame->availableTeamColors();
- if (availableTeamColors.count() < maxPlayers) {
+ if ((int)availableTeamColors.count() < maxPlayers) {
 	boError() << k_funcinfo << "too many players - not enough team colors!" << endl;
 	KMessageBox::sorry(this, i18n("Too many (max-)players. Not enough colors available (internal error)."));
 	return;
