@@ -1,0 +1,4 @@
+#include "facilities.wml" type="Facilities" name="Sam-Site" \
+        description="A Sam-Site can fire missiles against <a href='../units/tornado.html'>Tornados</a>." \
+        name2="samsite" type2="fix" \
+        before_url="turret.html" before_text="Turret" after_url="../units/index.html" after_text="Units" up_url="index.html"

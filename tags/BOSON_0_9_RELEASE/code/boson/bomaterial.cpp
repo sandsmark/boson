@@ -1,0 +1,104 @@
+/*
+    This file is part of the Boson game
+    Copyright (C) 2003 The Boson Team (boson-devel@lists.sourceforge.net)
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+*/
+
+#include "bomaterial.h"
+
+#include "bosonconfig.h"
+
+#include <GL/gl.h>
+
+BoMaterial* BoMaterial::mCurrentMaterial = 0;
+unsigned int BoMaterial::mCurrentTexture = 0;
+BoMaterial BoMaterial::mDefaultMaterial = BoMaterial();
+
+BoMaterial::BoMaterial()
+{
+ // defaults from lib3ds:
+// mAmbient = BoVector4(0.588235f, 0.588235f, 0.588235f, 0.0f);
+// mDiffuse = BoVector4(0.588235f, 0.588235f, 0.588235f, 0.0f);
+// mSpecular = BoVector4(0.898039f, 0.898039f, 0.898039f, 0.0f);
+// mShininess = 0.1f;
+ mShading = 3;
+ mWireSize = 1.0f;
+
+ // defaults from OpenGL:
+ mAmbient = BoVector4(0.2f, 0.2f, 0.2f, 1.0f);
+ mDiffuse = BoVector4(0.8f, 0.8f, 0.8f, 1.0f);
+ mSpecular = BoVector4(0.0f, 0.0f, 0.0f, 1.0f);
+ mShininess = 0.0f;
+
+ // FIXME: these had no defaults in lib3ds. check whether the values are fine!
+ mShinStrength = 0.0f;
+ mUseBlur = false;
+ mBlur = 0.0f;
+ mTransparency = 0.0f;
+ mFallOff = 0.0f;
+ mAdditive = false;
+ mUseFallOff = false;
+ mSelfIllum = false;
+ mSoften = false;
+ mFaceMap = false;
+ mTwoSided = false;
+ mMapDecal = false;
+ mUseWire = false;
+ mUseWireAbs = false;
+
+ mTextureObject = 0;
+}
+
+BoMaterial::~BoMaterial()
+{
+}
+
+void BoMaterial::activate(BoMaterial* mat)
+{
+ if (mat == mCurrentMaterial) {
+	return;
+ }
+ if (!mat) {
+	activate(&mDefaultMaterial);
+	mCurrentMaterial = mat;
+	return;
+ }
+
+ glBindTexture(GL_TEXTURE_2D, mat->textureObject());
+ mCurrentTexture = mat->textureObject();
+
+ if (boConfig->useLight() && boConfig->useMaterials()) { // useMaterials() is about OpenGL materials, not about the rest of BoMaterial (e.g. textures)
+	// AB: my OpenGL sample code uses GL_FRONT, so I do as well. I think as back
+	// faces are culled anyway we don't need GL_FRONT_AND_BACK.
+	glMaterialfv(GL_FRONT, GL_AMBIENT, mat->mAmbient.data());
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, mat->mDiffuse.data());
+	glMaterialfv(GL_FRONT, GL_SPECULAR, mat->mSpecular.data());
+	glMaterialf(GL_FRONT, GL_SHININESS, mat->mShininess);
+ }
+
+ mCurrentMaterial = mat;
+}
+
+void BoMaterial::setDefaultAlpha(float alpha)
+{
+ mDefaultMaterial.mDiffuse.setW(alpha);
+ mDefaultMaterial.mAmbient.setW(alpha);
+ if (!mCurrentMaterial) {
+	glMaterialfv(GL_FRONT, GL_AMBIENT, mDefaultMaterial.mAmbient.data());
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, mDefaultMaterial.mDiffuse.data());
+ }
+}
+

@@ -1,0 +1,111 @@
+#!/bin/sh
+
+# this script should get run from tools/ subdirectory in a standard cvs tree
+# (i.e. with code/ data/ and tools/ in one dir)
+
+# $ROOTDIR is where code/ data/ and tools/ can be found.
+ROOTDIR="../.."
+
+# The packages will be generated in $ROOTDIR/$TMPDIR.
+TMPDIR="mkdebs.dir"
+
+if [ ! -d $ROOTDIR/code ]; then
+  echo "ERROR: $ROOTDIR/code does not exist"
+  exit 1
+fi
+if [ ! -d $ROOTDIR/data ]; then
+  echo "ERROR: $ROOTDIR/data does not exist"
+  exit 1
+fi
+if [ ! -d $ROOTDIR/tools ]; then
+  echo "ERROR: $ROOTDIR/tools does not exist"
+  exit 1
+fi
+
+cd $ROOTDIR || exit 1
+ROOTDIR=$PWD # this way we support both, absolute and relative dirs in $ROOTDIR
+mkdir -p $TMPDIR || { echo "unable to create $TMPDIR in $ROOTDIR - check permissions!" ; exit 1; }
+cd $TMPDIR || exit 1
+TMPDIR=$PWD # now this one is absolute, too.
+
+DATE=`date +%y%m%d`
+CODEDIR=boson-code-$DATE
+DATADIR=boson-data-$DATE
+
+rm -rf $TMPDIR/$CODEDIR
+rm -rf $TMPDIR/$DATADIR
+
+if [ ! `which fakeroot` ]; then
+  echo "ERROR: fakeroot not installed!"
+  exit 1
+fi
+
+
+echo "*** Generating the Boson deb files"
+rm -f $TMPDIR/boson-code*.tar.gz
+rm -f $TMPDIR/boson-data*.tar.gz
+
+echo "**** Preparing code:"
+#cd $ROOTDIR/code || exit 1
+echo -n "***** Copying..."
+cp -a $ROOTDIR/code $TMPDIR/$CODEDIR
+rm -rf $TMPDIR/$CODEDIR/admin
+cp -a $ROOTDIR/tools/admin $TMPDIR/$CODEDIR/admin || { echo "admin dir could not be copied from tools"; exit 1; }
+echo "done."
+echo -n "***** Cleaning up..."
+cd $TMPDIR/$CODEDIR || exit 1
+make -f admin/Makefile.common cvs-clean > /dev/null 2>&1 || exit 1
+cp -a $ROOTDIR/tools/admin $TMPDIR/$CODEDIR/admin
+echo "done."
+echo "***** Generating Makefiles:"
+make -s -f Makefile.cvs || exit 1
+echo "***** Running ./configure:"
+./configure || exit 1
+
+
+echo "**** Preparing data"
+#cd $ROOTDIR/data || exit 1
+echo -n "***** Copying..."
+cp -a $ROOTDIR/data $TMPDIR/$DATADIR
+rm -rf $TMPDIR/$DATADIR/admin
+cp -a $ROOTDIR/tools/admin $TMPDIR/$DATADIR/admin || { echo "admin dir could not be copied from tools"; exit 1; }
+echo "done."
+echo -n "***** Cleaning up..."
+#rm -rf debian
+cd $TMPDIR/$DATADIR || exit 1
+make -f admin/Makefile.common cvs-clean > /dev/null 2>&1 || exit 1
+cp -a $ROOTDIR/tools/admin $TMPDIR/$DATADIR/admin
+echo "done."
+echo "***** Generating Makefiles..."
+make -s -f Makefile.cvs || exit 1
+echo "***** Running ./configure:"
+./configure || exit 1
+
+# at this point we have $CODEDIR and $DATADIR in $TMPDIR, both completely
+# (cvs-)cleaned, and ./configure'd.
+# we can start the real stuff now.
+
+#echo "**** Generating debian dirs"
+#echo "***** For code:"
+#cd $CODEDIR
+#dh_make -s -e felix.seeger@gmx.de -f ../$CODEDIR.tar.gz
+#cd ..
+
+#echo "***** For data:"
+#cd $DATADIR
+#dh_make -s -e felix.seeger@gmx.de -f ../$DATADIR.tar.gz
+#cd ..
+
+echo "**** Building the code dir"
+cd $TMPDIR/$CODEDIR
+dpkg-buildpackage -rfakeroot
+cd ..
+echo "**** Done."
+echo "Building the data dir"
+cd $TMPDIR/$DATADIR
+dpkg-buildpackage -rfakeroot
+cd ..
+echo "**** Done"
+
+echo "*** Finished."
+

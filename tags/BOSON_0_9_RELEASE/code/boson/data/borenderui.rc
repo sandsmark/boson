@@ -1,0 +1,15 @@
+<!DOCTYPE kpartgui SYSTEM "kpartgui.dtd">
+<kpartgui name="borender" version="2">
+<MenuBar>
+  <Action name="model" />
+  <Menu name="debug" group="debugmenu"><text>&amp;Debug</text>
+    <Action name="debug_models" />
+    <Action name="debug_species" />
+  </Menu>
+  <Menu name="settings" group="settingsmenu"><text>&amp;Settings</text>
+    <Action name="options_show_vertex_points" />
+    <Action name="options_vertex_point_size" />
+    <Action name="options_background_color" />
+  </Menu>
+</MenuBar>
+</kpartgui>
