@@ -64,6 +64,8 @@ static KCmdLineOptions options[] =
     { "unit <unit>", I18N_NOOP("Unit"), 0 },
     { "i", 0, 0 },
     { "unit-id <typeid>", I18N_NOOP("Unit Type ID"), 0 },
+    { "o", 0, 0 },
+    { "object <file>", I18N_NOOP("Object"), 0 },
     { "cx", 0, 0 },
     { "camera-x <number>", I18N_NOOP("X-Position of the camera"), 0 },
     { "cy", 0, 0 },
@@ -150,10 +152,26 @@ void ModelPreview::paintGL()
  // AB: try to keep this basically similar to BosonBigDisplay::paintGL()
  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
  glColor3f(1.0, 1.0, 1.0);
+
+ /*
+ const float infinity = 10000; // damn how long should it be? is there a clean way in opengl for this?
+ glBegin(GL_LINES);
+ for (float x = 0; x < 10; x = x + 0.1) {
+	glVertex3f(-x, -infinity, 0.0f);
+	glVertex3f(-x, infinity, 0.0f);
+	glVertex3f(x, -infinity, 0.0f);
+	glVertex3f(x, infinity, 0.0f);
+ }
+ glEnd();
+ */
+
  glEnable(GL_TEXTURE_2D);
  glEnable(GL_DEPTH_TEST);
- glEnable(GL_CULL_FACE);
- glCullFace(GL_BACK);
+
+#warning FIXME?
+ // AB: fi these are enabled we can't use triangle strips by any reason.
+// glEnable(GL_CULL_FACE);
+// glCullFace(GL_BACK);
 
  if (mModel && mCurrentFrame >= 0) {
 	BoFrame* f = mModel->frame(mCurrentFrame);
@@ -185,7 +203,7 @@ void ModelPreview::paintGL()
 	}
  }
 
- glDisable(GL_CULL_FACE);
+// glDisable(GL_CULL_FACE);
  glDisable(GL_TEXTURE_2D);
  glDisable(GL_DEPTH_TEST);
  GLenum e = glGetError();
@@ -475,6 +493,18 @@ void RenderMain::changeUnit(const QString& theme, unsigned long int type)
  changeUnit(s, prop);
 }
 
+void RenderMain::changeObject(const QString& theme, const QString& object)
+{
+ SpeciesTheme* s = 0;
+
+ s = findTheme(theme);
+ if (!s) {
+	boError() << k_funcinfo << "Could not find theme " << theme << endl;
+	return;
+ }
+ changeObject(s, object);
+}
+
 void RenderMain::changeUnit(SpeciesTheme* s, const UnitProperties* prop)
 {
  BO_CHECK_NULL_RET(s);
@@ -651,6 +681,7 @@ int main(int argc, char **argv)
  QString theme;
  unsigned long int typeId = 0;
  QString unit;
+ QString object;
 
  if (args->isSet("maximized")) {
 	main->showMaximized();
@@ -676,15 +707,23 @@ int main(int argc, char **argv)
 		boError() << k_funcinfo << "unit-id must be a number" << endl;
 		return 1;
 	}
+ } else if (args->isSet("object")) {
+	if (theme.isEmpty()) {
+		boError() << k_funcinfo << "you have to specify both object and species!" << endl;
+		return 1;
+	}
+	object = args->getOption("object");
  }
  if (!theme.isEmpty()) {
-	if (typeId == 0 && unit.isEmpty()) {
-		boError() << k_funcinfo << "you have to specify both unit and species!" << endl;
+	if (typeId == 0 && unit.isEmpty() && object.isEmpty()) {
+		boError() << k_funcinfo << "you have to specify both species and unit/object!" << endl;
 		return 1;
 	} else if (typeId > 0) {
 		main->changeUnit(theme, typeId);
 	} else if (!unit.isEmpty()) {
 		main->changeUnit(theme, unit);
+	} else if (!object.isEmpty()) {
+		main->changeObject(theme, object);
 	} else {
 		boError() << k_funcinfo << "you have to specify both unit and species!" << endl;
 		return 1;
