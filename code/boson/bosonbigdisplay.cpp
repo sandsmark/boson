@@ -519,7 +519,7 @@ void BosonBigDisplay::updateCursor()
 	return;
  }
 
- if (!canvas()->onCanvas(cursorCanvasPos())) {
+ if (!canvas()->onCanvas(cursorCanvasPos()) && !actionLocked()) {  // TODO: show "can't do that" cursor if action is locked
 	d->mCursorType = CursorDefault;
 	c->setCursor(d->mCursorType);
 	c->setWidgetCursor(this);
