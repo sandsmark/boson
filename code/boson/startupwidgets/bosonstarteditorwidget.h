@@ -44,7 +44,7 @@ class BosonStartEditorWidget : public BosonStartWidgetBase
 {
 	Q_OBJECT
 public:
-	BosonStartEditorWidget(TopWidget* top, QWidget* parent);
+	BosonStartEditorWidget(QWidget* parent);
 	~BosonStartEditorWidget();
 
 public slots:
@@ -52,6 +52,7 @@ public slots:
 
 signals:
 	void signalStartGame();
+	void signalSetLocalPlayer(Player*);
 
 protected slots:
 	virtual void slotSendPlayFieldChanged(int index);
@@ -64,7 +65,6 @@ protected:
 
 private:
 	void initKGame();
-	void initPlayer();
 	void initPlayFields();
 	void initTileSets();
 	void initSpecies();
@@ -81,8 +81,6 @@ private:
 
 	QPushButton* mCancelButton;
 	QPushButton* mStartGameButton;
-
-	TopWidget* mTop;
 };
 
 #endif

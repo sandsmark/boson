@@ -42,12 +42,6 @@ class BosonWelcomeWidget : public QWidget
     void signalStartEditor();
     void signalQuit();
 
-  protected slots:
-    void slotReportBug();
-
-  private:
-    KBugReport* mBugReport;
-
 };
 
 #endif // BOSONWELCOMEWIDGET_H

@@ -43,6 +43,7 @@ public:
 
 	// usually withing a game
 		AddUnit = 30, // whenever a unit is added
+		ChangeMap = 40, // editor only (but comparable to AddUnit)
 
 		// advance messages (still the "within a game" section)
 		AdvanceN = 50, // call BosonCanvas::advance() N times

@@ -22,7 +22,6 @@
 
 #include <qobject.h>
 
-class BosonLoadingWidget;
 class BosonPlayField;
 class Player;
 
@@ -34,8 +33,7 @@ class BosonStarting : public QObject
 	Q_OBJECT
 public:
 	BosonStarting(QObject* parent);
-
-	void setLoadingWidget(BosonLoadingWidget* w) { mLoadingWidget = w; }
+	~BosonStarting();
 
 	/**
 	 * The playfield that gets assigned here should be an <em>empty</em>
@@ -48,6 +46,7 @@ public:
 	void setPlayField(BosonPlayField* f) { mPlayField = f; }
 	void setLocalPlayer(Player* p) { mPlayer = p; }
 	void setPlayFieldId(const QString& id) { mPlayFieldId = id; }
+	void setEditorMap(const QByteArray& buffer);
 
 	void startNewGame();
 
@@ -98,6 +97,17 @@ signals:
 	 **/
 	void signalAssignMap();
 
+	/**
+	 * Change the type of data thats currently being loaded. See @ref
+	 * BosonLoadingWidget::LoadingType
+	 **/
+	void signalLoadingType(int type);
+
+	void signalLoadingShowProgressBar(bool show);
+	void signalLoadingProgress(int progress);
+	void signalLoadingTileProgress(int, int);
+	void signalLoadingUnitProgress(int progress, int current, int total);
+
 protected slots:
 	void slotReceiveMap(const QByteArray&);
 	/**
@@ -126,8 +136,8 @@ protected:
 	void loadUnitDatas(Player* player, int progress);
 
 private:
-	BosonLoadingWidget* mLoadingWidget;
 	BosonPlayField* mPlayField;
+	BosonPlayField* mNewPlayField;
 	Player* mPlayer;
 
 	bool mLoading; //AB: find a way around this!

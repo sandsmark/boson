@@ -987,9 +987,11 @@ void BosonWidgetBase::setLocalPlayerRecursively(Player* p)
  if (displayManager()) {
 	displayManager()->setLocalPlayer(localPlayer());
  }
- if (boGame) {
-	boGame->setLocalPlayer(localPlayer());
+ if (!boGame) {
+	boError() << k_funcinfo << "NULL game object" << endl;
+	return;
  }
+ boGame->setLocalPlayer(localPlayer());
  if (d->mCommandFrame) {
 	d->mCommandFrame->setLocalPlayer(localPlayer());
  }

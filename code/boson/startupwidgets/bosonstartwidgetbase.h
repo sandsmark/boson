@@ -23,7 +23,6 @@
 #include <qwidget.h>
 
 class BosonPlayField;
-class TopWidget;
 class Player;
 class KPlayer;
 
@@ -31,7 +30,7 @@ class BosonStartWidgetBase : public QWidget
 {
 	Q_OBJECT
 public:
-	BosonStartWidgetBase(TopWidget* top, QWidget* parent);
+	BosonStartWidgetBase(QWidget* parent);
 	virtual ~BosonStartWidgetBase();
 
 	/**
@@ -74,8 +73,6 @@ protected:
 	 **/
 	virtual void sendNewGame();
 
-	Player* player() const;
-
 protected slots:
 	/**
 	 * Called when the player changes the current map/playfield. This will
@@ -90,7 +87,6 @@ private:
 	void initPlayFields();
 
 private:
-	TopWidget* mTop;
 	QString mMapId;
 };
 

@@ -80,7 +80,7 @@ public:
 	BosonPlayField* playField() const;
 
 	void setLocalPlayer(Player*);
-	Player* localPlayer();
+	Player* localPlayer() const;
 
 	void quitGame();
 	void startGame();
@@ -226,6 +226,11 @@ signals:
 	void signalAdvance(unsigned int advanceCount, bool advanceFlag);
 
 	void signalInitMap(const QByteArray&);
+
+	/**
+	 * Emitted when the editor is meant to change the map.
+	 **/
+	void signalEditorNewMap(const QByteArray&);
 
 	/**
 	 * Emitted when a new playfield in the new game dialog is selected

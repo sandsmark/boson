@@ -401,13 +401,8 @@ bool BosonPlayField::loadMap(QDataStream& stream)
 {
  delete mMap;
  mMap = new BosonMap(this);
- if (!mMap->loadMapGeo(stream)) {
-	return false;
- }
- if (!mMap->loadCells(stream)) {
-	return false;
- }
- if (!mMap->loadHeightMap(stream)) {
+ if (!mMap->loadMap(stream)) {
+	boError() << k_funcinfo << "Unable to load map from stream" << endl;
 	return false;
  }
  emit signalNewMap(mMap);
@@ -420,9 +415,10 @@ void BosonPlayField::saveMap(QDataStream& stream)
 	boError() << k_funcinfo << "NULL map" << endl;
 	return;
  }
- mMap->saveMapGeo(stream);
- mMap->saveCells(stream);
- mMap->saveHeightMap(stream);
+ if (!mMap->saveMap(stream)) {
+	boError() << k_funcinfo << "Unable to save map" << endl;
+	return;
+ }
 }
 
 void BosonPlayField::quit()

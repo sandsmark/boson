@@ -24,17 +24,14 @@
 #include "../bosonconfig.h"
 #include "../bosonmessage.h"
 #include "../boson.h"
-#include "../top.h"
 #include "../bosonplayfield.h"
 #include "bodebug.h"
 
 #include <klocale.h>
 
-BosonStartWidgetBase::BosonStartWidgetBase(TopWidget* top, QWidget* parent)
+BosonStartWidgetBase::BosonStartWidgetBase(QWidget* parent)
     : QWidget(parent)
 {
- mTop = top; // AB: i dislike this
-
  if (!boGame) {
 	boError() << k_funcinfo << "NULL Boson object" << endl;
 	return;
@@ -106,11 +103,6 @@ void BosonStartWidgetBase::slotPlayFieldChanged(const QString& id)
 	field = BosonPlayField::playField(mMapId);
  }
  setCurrentPlayField(field);
-}
-
-Player* BosonStartWidgetBase::player() const
-{
-  return mTop->player();
 }
 
 void BosonStartWidgetBase::sendNewGame()

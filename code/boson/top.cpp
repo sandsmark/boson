@@ -35,13 +35,7 @@
 #include "bosonstarting.h"
 #include "bodebug.h"
 #include "bodebugdcopiface.h"
-#include "startupwidgets/bosonwelcomewidget.h"
-#include "startupwidgets/bosonnewgamewidget.h"
-#include "startupwidgets/bosonloadingwidget.h"
-#include "startupwidgets/bosonstarteditorwidget.h"
-#include "startupwidgets/bosonnetworkoptionswidget.h"
-#include "startupwidgets/bosonstartupbasewidget.h"
-#include "startupwidgets/kloadsavegamewidget.h"
+#include "startupwidgets/bosonstartupwidget.h"
 #include "sound/bosonmusic.h"
 
 #include <kapplication.h>
@@ -68,13 +62,8 @@ class TopWidget::TopWidgetPrivate
 public:
 	TopWidgetPrivate()
 	{
-		mWelcome = 0;
-		mNewGame = 0;
-		mStartEditor = 0;
-		mNetworkOptions = 0;
-		mLoadingWidget = 0;
+		mStartup = 0;
 		mBosonWidget = 0;
-		mLoadSaveWidget = 0;
 
 		mActionStatusbar = 0;
 		mActionMenubar = 0;
@@ -85,13 +74,9 @@ public:
 		mIface = 0;
 	};
 
-	BosonWelcomeWidget* mWelcome;
-	BosonNewGameWidget* mNewGame;
-	BosonStartEditorWidget* mStartEditor;
-	BosonNetworkOptionsWidget* mNetworkOptions;
-	BosonLoadingWidget* mLoadingWidget;
+	BosonStartupWidget* mStartup;
+
 	BosonWidgetBase* mBosonWidget;
-	KLoadSaveGameWidget* mLoadSaveWidget;
 
 	KToggleAction* mActionStatusbar;
 	KToggleAction* mActionMenubar;
@@ -111,7 +96,6 @@ public:
 TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
 {
  d = new TopWidgetPrivate;
- mPlayer = 0;
  mPlayField = 0;
  mCanvas = 0;
 #if KDE_VERSION < 310
@@ -119,10 +103,25 @@ TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
 #endif
 
  mMainDock = createDockWidget("mainDock", 0, this, i18n("Map"));
- mWs = new QWidgetStack(mMainDock);
- mMainDock->setWidget(mWs);
  mMainDock->setDockSite(KDockWidget::DockCorner);
  mMainDock->setEnableDocking(KDockWidget::DockNone);
+
+ d->mStartup = new BosonStartupWidget(mMainDock);
+ connect(d->mStartup, SIGNAL(signalSetLocalPlayer(Player*)),
+		this, SLOT(slotChangeLocalPlayer(Player*)));
+ connect(d->mStartup, SIGNAL(signalAddLocalPlayer()),
+		this, SLOT(slotAddLocalPlayer()));
+ connect(d->mStartup, SIGNAL(signalResetGame()),
+		this, SLOT(slotResetGame()));
+ connect(d->mStartup, SIGNAL(signalQuit()), this, SLOT(close()));
+ connect(d->mStartup, SIGNAL(signalLoadGame(const QString&)),
+		this, SLOT(slotLoadGame(const QString&)));
+ connect(d->mStartup, SIGNAL(signalSaveGame(const QString&, const QString&)),
+		this, SLOT(slotSaveGame(const QString&, const QString&)));
+ connect(d->mStartup, SIGNAL(signalCancelLoadSave()),
+		this, SLOT(slotCancelLoadSave()));
+ d->mStartup->slotShowWelcomeWidget(); // we could skip this using cmd line parameters
+ mMainDock->setWidget(d->mStartup);
 
  setView(mMainDock);
  setMainDockWidget(mMainDock);
@@ -132,9 +131,6 @@ TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
  BosonMusic::initBosonMusic();
  boMusic->setSound(boConfig->sound());
  boMusic->setMusic(boConfig->music());
-
-// setMinimumWidth(640);
-// setMinimumHeight(480);
 
  initKActions();
  initStatusBar();
@@ -155,9 +151,7 @@ TopWidget::~TopWidget()
 	editor = !boGame->gameMode();
  }
  boConfig->save(editor);
- boDebug() << "endGame()" << endl;
  endGame();
- boDebug() << "endGame() done" << endl;
  delete d->mIface;
  delete d;
  boDebug() << k_funcinfo << "done" << endl;
@@ -229,16 +223,22 @@ void TopWidget::initBoson()
  // is emitted and we start here
  connect(boGame, SIGNAL(signalStartNewGame()), this, SLOT(slotStartNewGame()));
  connect(boGame, SIGNAL(signalPlayFieldChanged(const QString&)), this, SLOT(slotPlayFieldChanged(const QString&)));
+ connect(boGame, SIGNAL(signalGameStarted()), this, SLOT(slotGameStarted()));
 
  // this signal gets emitted when starting a game (new games as well as loading
  // games). the admin sends the map and all clients (including admin) will
  // receive and use it.
  connect(boGame, SIGNAL(signalInitMap(const QByteArray&)), d->mStarting, SLOT(slotReceiveMap(const QByteArray&)));
+
+
+ // for editor (new maps)
+ connect(boGame, SIGNAL(signalEditorNewMap(const QByteArray&)),
+		this, SLOT(slotEditorNewMap(const QByteArray&)));
 }
 
 void TopWidget::initPlayer()
 {
- boDebug() << k_funcinfo << endl;
+ boWarning() << k_funcinfo << endl;
  Player* p = new Player;
  slotChangeLocalPlayer(p);
 }
@@ -291,155 +291,6 @@ void TopWidget::enableGameActions(bool enable)
  }
 }
 
-void TopWidget::initStartupWidget(StartupWidgetIds id)
-{
- if (mWs->widget((int)id)) {
-	// already initialized
-	return;
- }
- if (id == IdBosonWidget) {
-	// bosonwidget gets initialized from within game starting, not
-	// from here
-	boError() << k_funcinfo << "BosonWidget must be initialized directly using initBosonWidget() !" << endl;
-	return;
- }
- BosonStartupBaseWidget* startup = new BosonStartupBaseWidget(mWs);
- mWs->addWidget(startup, (int)id);
- QWidget* w = 0;
- switch (id) {
-	case IdWelcome:
-	{
-		d->mWelcome = new BosonWelcomeWidget(startup->plainWidget());
-		w = d->mWelcome;
-		connect(d->mWelcome, SIGNAL(signalNewGame()), this, SLOT(slotNewGame()));
-		connect(d->mWelcome, SIGNAL(signalLoadGame()), this, SLOT(slotLoadGame()));
-		connect(d->mWelcome, SIGNAL(signalStartEditor()), this, SLOT(slotStartEditor()));
-		connect(d->mWelcome, SIGNAL(signalQuit()), this, SLOT(close()));
-		break;
-	}
-	case IdNewGame:
-	{
-		d->mNewGame = new BosonNewGameWidget(this, startup->plainWidget());
-		w = d->mNewGame;
-		connect(d->mNewGame, SIGNAL(signalCancelled()),
-				this, SLOT(slotShowMainMenu()));
-		connect(d->mNewGame, SIGNAL(signalShowNetworkOptions()),
-				this, SLOT(slotShowNetworkOptions()));
-		break;
-	}
-	case IdStartEditor:
-	{
-		d->mStartEditor = new BosonStartEditorWidget(this, startup->plainWidget());
-		w = d->mStartEditor;
-		connect(d->mStartEditor, SIGNAL(signalCancelled()), this, SLOT(slotShowMainMenu()));
-		break;
-	}
-	case IdNetwork:
-	{
-		d->mNetworkOptions = new BosonNetworkOptionsWidget(startup->plainWidget());
-		w = d->mNetworkOptions;
-		connect(d->mNetworkOptions, SIGNAL(signalOkClicked()),
-				this, SLOT(slotHideNetworkOptions()));
-		break;
-	}
-	case IdLoading:
-	{
-		d->mLoadingWidget = new BosonLoadingWidget(startup->plainWidget());
-		w = d->mLoadingWidget;
-
-		// If we're loading game, we don't know number of players here
-		// If game is loaded, we disable progressbar in loading widget, but still set
-		// steps and progress to make code less messy (it's better than having
-		// if (!mLoading) { ... }  everywhere)
-		d->mLoadingWidget->setTotalSteps(3400, boGame->playerCount());
-		d->mLoadingWidget->setProgress(0);
-		break;
-	}
-	case IdLoadSaveGame:
-	{
-		d->mLoadSaveWidget = new KLoadSaveGameWidget(startup->plainWidget());
-		d->mLoadSaveWidget->setSuffix(QString::fromLatin1("bsg"));
-		w = d->mLoadSaveWidget;
-
-		connect(d->mLoadSaveWidget, SIGNAL(signalLoadGame(const QString&)),
-				this, SLOT(slotLoadGame(const QString&)));
-		connect(d->mLoadSaveWidget, SIGNAL(signalSaveGame(const QString&, const QString&)),
-				this, SLOT(slotSaveGame(const QString&, const QString&)));
-		connect(d->mLoadSaveWidget, SIGNAL(signalCancel()),
-				this, SLOT(slotCancelLoadSave()));
-		break;
-	}
-	case IdBosonWidget: // gets loaded elsewhere
-	default:
-	{
-		mWs->removeWidget(startup);
-		delete startup;
-		boWarning() << k_funcinfo << "Invalid id " << id << endl;
-		return;
-	}
- }
- if (!w) {
-	boError() << k_funcinfo << "NULL widget" << endl;
-	return;
- }
- w->installEventFilter(this);
- w->show();
- startup->initBackgroundOrigin();
-}
-
-void TopWidget::showStartupWidget(StartupWidgetIds id)
-{
- initStartupWidget(id);
- raiseWidget(id);
- switch (id) {
-	case IdWelcome:
-	case IdNewGame:
-	case IdStartEditor:
-	case IdBosonWidget:
-	case IdNetwork:
-	case IdLoading:
-		showHideMenubar();
-		break;
-	case IdLoadSaveGame:
-		break;
-	default:
-		boWarning() << k_funcinfo << "Invalid id " << id << endl;
-		break;
- }
-}
-
-void TopWidget::removeStartupWidget(StartupWidgetIds id)
-{
- QWidget* w = mWs->widget((int)id);
- if (!w) {
-	return;
- }
- delete w; // note: this also deletes child widgets, such as e.g. d->mNewGame for IdNewGame
- switch (id) {
-	case IdWelcome:
-		d->mWelcome = 0;
-		break;
-	case IdNewGame:
-		d->mNewGame = 0;
-		break;
-	case IdStartEditor:
-		d->mStartEditor = 0;
-		break;
-	case IdBosonWidget:
-		d->mBosonWidget = 0;
-		break;
-	case IdNetwork:
-		d->mNetworkOptions = 0;
-		break;
-	case IdLoading:
-		d->mLoadingWidget = 0;
-		break;
-	default:
-		boWarning() << k_funcinfo << "Invalid id " << id << endl;
-		break;
- }
-}
-
 void TopWidget::initBosonWidget()
 {
  if (d->mBosonWidget) {
@@ -448,20 +299,28 @@ void TopWidget::initBosonWidget()
 	return;
  }
  if (boGame->gameMode()) {
-	BosonWidget* w = new BosonWidget(this, mWs);
+	BosonWidget* w = new BosonWidget(this, mMainDock);
 	connect(w, SIGNAL(signalSaveGame()), this, SLOT(slotSaveGame()));
 	connect(w, SIGNAL(signalLoadGame()), this, SLOT(slotLoadGame()));
 	connect(w, SIGNAL(signalGameOver()), this, SLOT(slotGameOver()));
 	d->mBosonWidget = w;
  } else {
-	EditorWidget* w = new EditorWidget(this, mWs);
+	EditorWidget* w = new EditorWidget(this, mMainDock);
 	d->mBosonWidget = w;
  }
- changeLocalPlayer(player(), false);
+
+ // at this point the startup widget should already have called
+ // slotChangeLocalPlayer()! if not .. then we're in trouble here...
+ if (!boGame->localPlayer()) {
+	boWarning() << k_funcinfo << "NULL local player - might cause trouble here!" << endl;
+	// do not return, since it might even be allowed for editor (currently
+	// it is not)
+ }
+ changeLocalPlayer(boGame->localPlayer(), false);
  d->mBosonWidget->init(); // this depends on several virtual methods and therefore can't be called in the c'tor
  factory()->addClient(d->mBosonWidget); // XMLClient-stuff. needs to be called *after* creation of KAction objects, so outside BosonWidget might be a good idea :-)
 // createGUI("bosonui.rc", false);
- mWs->addWidget(d->mBosonWidget, IdBosonWidget);
+// mWs->addWidget(d->mBosonWidget, IdBosonWidget);
 
  connect(d->mBosonWidget, SIGNAL(signalChangeLocalPlayer(Player*)), this, SLOT(slotChangeLocalPlayer(Player*)));
  connect(d->mBosonWidget, SIGNAL(signalEndGame()), this, SLOT(slotEndGame()));
@@ -477,16 +336,6 @@ void TopWidget::initBosonWidget()
  d->mBosonWidget->addInitialDisplay();
 }
 
-void TopWidget::slotNewGame()
-{
- showStartupWidget(IdNewGame);
-}
-
-void TopWidget::slotStartEditor()
-{
- showStartupWidget(IdStartEditor);
-}
-
 void TopWidget::slotPlayFieldChanged(const QString& id)
 {
  if (!d->mStarting) {
@@ -498,12 +347,18 @@ void TopWidget::slotPlayFieldChanged(const QString& id)
 
 void TopWidget::slotStartNewGame()
 {
+ if (!d->mStarting) {
+	boError() << k_funcinfo << "NULL starting object!!" << endl;
+	return;
+ }
+ if (!d->mStartup) {
+	boError() << k_funcinfo << "NULL startup widget" << endl;
+	return;
+ }
  boDebug() << k_funcinfo << endl;
- showStartupWidget(IdLoading);
+ d->mStartup->showLoadingWidget();
 
- d->mStarting->setLoadingWidget(d->mLoadingWidget);
  d->mStarting->setPlayField(mPlayField);
- d->mStarting->setLocalPlayer(mPlayer);
 
  initCanvas();
  initBosonWidget();
@@ -514,29 +369,13 @@ void TopWidget::slotStartNewGame()
  d->mStarting->startNewGame();
 }
 
-void TopWidget::slotSaveGame()
-{
- // TODO: pause the game!
-
- showStartupWidget(IdLoadSaveGame);
- d->mLoadSaveWidget->setSaveMode(true);
- d->mLoadSaveWidget->updateGames();
-}
-
-void TopWidget::slotLoadGame()
-{
- showStartupWidget(IdLoadSaveGame);
- d->mLoadSaveWidget->setSaveMode(false);
- d->mLoadSaveWidget->updateGames();
-}
-
 void TopWidget::slotLoadGame(const QString& fileName)
 {
  boDebug() << k_funcinfo << endl;
  if (fileName.isEmpty()) {
 	return;
  }
- showStartupWidget(IdLoading);
+ d->mStartup->showLoadingWidget();
 
  initCanvas();
  initBosonWidget();
@@ -545,16 +384,13 @@ void TopWidget::slotLoadGame(const QString& fileName)
  boGame->setGameMode(true);
 
  // We are loading a saved game
- // Delete mPlayer aka local player because it will be set later by Boson
- //  (It's not known yet)
- Player* old = mPlayer;
- changeLocalPlayer(0, true); // remove player from all classes
- delete old;
- old = 0;
+ changeLocalPlayer(0, true); // remove player from all classes (AB: this should be redundand, as no player should be set currently...)
 
- d->mStarting->setLoadingWidget(d->mLoadingWidget);
+ if (!d->mStarting) {
+	boError() << k_funcinfo << "NULL starting object!!" << endl;
+	return;
+ }
  d->mStarting->setPlayField(mPlayField);
- d->mStarting->setLocalPlayer(mPlayer);
 
 
  // Start loading
@@ -588,9 +424,6 @@ void TopWidget::slotLoadGame(const QString& fileName)
 
 	// We also need to re-init the game (player, ...)
 	reinitGame();
-
-	// Then return to welcome screen
-	showStartupWidget(IdWelcome);
  }
 
  boDebug() << k_funcinfo << "done" << endl;
@@ -637,33 +470,22 @@ void TopWidget::slotCancelLoadSave()
  if (boGame && boGame->gameStatus() != KGame::Init) {
 	// called from a running game - but the player doesn't want to load/save a
 	// game anymore
-	showStartupWidget(IdBosonWidget);
+	if (!d->mBosonWidget) {
+		boError() << k_funcinfo << "NULL bosonwidget" << endl;
+		return;
+	}
+	if (d->mStartup) {
+		d->mStartup->hide();
+	}
+	d->mBosonWidget->show();
+	mMainDock->setWidget(d->mBosonWidget);
  } else {
-	showStartupWidget(IdWelcome);
+	if (!d->mStartup) {
+		boError() << k_funcinfo << "NULL startup widget??" << endl;
+		return;
+	}
+	d->mStartup->slotShowWelcomeWidget();
  }
-}
-
-void TopWidget::slotShowMainMenu()
-{
- removeStartupWidget(IdNewGame);
- removeStartupWidget(IdStartEditor);
-
- // Delete all players to remove added AI players, then re-init local player
- boGame->removeAllPlayers();
- initPlayer();
- showStartupWidget(IdWelcome);
-}
-
-void TopWidget::slotShowNetworkOptions()
-{
- showStartupWidget(IdNetwork);
-}
-
-void TopWidget::slotHideNetworkOptions()
-{
- removeStartupWidget(IdNetwork);
- d->mNewGame->slotSetAdmin(boGame->isAdmin());
- showStartupWidget(IdNewGame);
 }
 
 void TopWidget::slotAssignMap()
@@ -687,26 +509,28 @@ void TopWidget::slotStartGame(const QString& playFieldId)
 // player loading (unit positions, ...)
 
  boDebug() << k_funcinfo << "init player" << endl;
- if (!mPlayer) {
-	// the local player is in boGame for loaded games
-	mPlayer = boGame->localPlayer();
-	if (!mPlayer) {
-		boError() << k_funcinfo << "NULL local player" << endl;
-		return;
-	}
+ if (!boGame->localPlayer()) {
+	boError() << k_funcinfo << "NULL local player" << endl;
+	return;
  }
- changeLocalPlayer(mPlayer);
+ changeLocalPlayer(boGame->localPlayer());
  d->mBosonWidget->initPlayer();
 /*
  boDebug() << k_funcinfo << "init map" << endl;
  d->mBosonWidget->initMap();//AB: see slotAssingMap()!! // FIXME REMOVE
  */
 
+ // now show the bosonwidget and hide the startup widgets.
+ mMainDock->setWidget(d->mBosonWidget);
+ d->mBosonWidget->show();
+ d->mStartup->hide();
+ setMinimumSize(BOSON_MINIMUM_WIDTH, BOSON_MINIMUM_HEIGHT);
+ setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
+
  int progress = 0; // FIXME: wrong value!
- showStartupWidget(IdBosonWidget);
- removeStartupWidget(IdNewGame);
- removeStartupWidget(IdStartEditor);
- removeStartupWidget(IdLoading);
+
+ // we don't need these anymore. lets save the memory.
+ d->mStartup->resetWidgets();
 
  // Init some stuff
  d->mActionStatusbar->setChecked(true); // we do not yet remember user settings here! TODO
@@ -763,7 +587,6 @@ void TopWidget::endGame()
  // Delete all objects
  delete d->mBosonWidget;
  d->mBosonWidget = 0;
- removeStartupWidget(IdBosonWidget); // redundant, btw
  Boson::deleteBoson();  // Easiest way to reset game info
  delete mCanvas;
  mCanvas = 0;
@@ -780,15 +603,25 @@ void TopWidget::reinitGame()
  d->mStarting = new BosonStarting(this); // manages startup of games
  connect(d->mStarting, SIGNAL(signalStartGame(const QString&)), this, SLOT(slotStartGame(const QString&)));
  connect(d->mStarting, SIGNAL(signalAssignMap()), this, SLOT(slotAssignMap()));
+ connect(d->mStarting, SIGNAL(signalLoadingProgress(int)),
+			d->mStartup, SLOT(slotLoadingProgress(int)));
+ connect(d->mStarting, SIGNAL(signalLoadingType(int)),
+			d->mStartup, SLOT(slotLoadingType(int)));
+ connect(d->mStarting, SIGNAL(signalLoadingTileProgress(int, int)),
+			d->mStartup, SLOT(slotLoadingTileProgress(int, int)));
+ connect(d->mStarting, SIGNAL(signalLoadingUnitProgress(int, int, int)),
+			d->mStartup, SLOT(slotLoadingUnitProgress(int, int, int)));
+ connect(d->mStarting, SIGNAL(signalLoadingShowProgressBar(bool)),
+			d->mStartup, SLOT(slotLoadingShowProgressBar(bool)));
 
  initBoson();
- initPlayer();
+ // do NOT add a player here! we do that in newgame widget (using a signal)
+// initPlayer();
  initPlayField();
 
  d->mActionStatusbar->setChecked(false);
  slotToggleStatusbar();
  enableGameActions(false);
- showStartupWidget(IdWelcome);
 }
 
 void TopWidget::slotGameOver()
@@ -836,26 +669,18 @@ void TopWidget::slotToggleStatusbar()
 // d->mActionMenubar status to the actual menubar
 void TopWidget::slotToggleMenubar()
 {
- if (!mWs->visibleWidget()) {
-	return;
- }
- int id = mWs->id(mWs->visibleWidget());
- switch ((StartupWidgetIds)id) {
-	case IdWelcome:
-	case IdNewGame:
-	case IdLoading:
-	case IdNetwork:
-		boConfig->setShowMenubarOnStartup(d->mActionMenubar->isChecked());
-		break;
-	case IdBosonWidget:
+ if (boGame->gameStatus() != KGame::Init) {
+	if (boGame->gameMode()) {
+		// editor without menubar is pretty useless :)
 		boConfig->setShowMenubarInGame(d->mActionMenubar->isChecked());
-		break;
-	case IdStartEditor:
-		// editor without menubar is pretty useless, i guess
-		break;
-	default:
-		boDebug() << k_funcinfo << "unknown id " << id << endl;
-		break;
+	}
+ } else if (mMainDock->getWidget() == d->mStartup) {
+	// note: startup can be on top during the game as well, e.g. when
+	// loading/saving a game.
+	// but at this point it is really a startup widget.
+	boConfig->setShowMenubarOnStartup(d->mActionMenubar->isChecked());
+ } else {
+	boError() << k_funcinfo << "Game in init status but no startup widget on top?!" << endl;
  }
  showHideMenubar();
 }
@@ -941,102 +766,31 @@ bool TopWidget::queryClose()
 
 bool TopWidget::queryExit()
 {
- QWidget* w = mWs->visibleWidget();
- if (!w) {
+ if (boGame->gameStatus() != KGame::Init) {
+	// note that even a startup widget might be on top here (e.g. when
+	// saving a game)!
+	d->mBosonWidget->saveConfig();
+	d->mBosonWidget->quitGame();
+	if (boGame->gameMode()) {
+		saveGameDockConfig();
+	} else {
+		boDebug() << k_funcinfo << "TODO: add saveEditorDockConfig()" << endl;
+	}
 	return true;
  }
- switch ((StartupWidgetIds)mWs->id(w)) {
-	case IdBosonWidget:
-		d->mBosonWidget->saveConfig();
-		d->mBosonWidget->quitGame();
-		saveGameDockConfig();
-		return true;
-	case IdNewGame:
-	case IdLoading:
-	case IdNetwork:
-	case IdWelcome:
-		saveInitialDockConfig();
-		return true;
-	default:
-		return true;
+ if (mMainDock->getWidget() != d->mStartup) {
+	boWarning() << k_funcinfo << "oops! - game in init mode but no startup widget on top!" << endl;
+	return true;
  }
- return true;
-}
 
-void TopWidget::raiseWidget(StartupWidgetIds id)
-{
- switch (id) {
-	case IdWelcome:
-	{
-		QWidget* w = mWs->widget(id);
-		QSize s = w->sizeHint();
-		if (!d->mActionMenubar->isChecked()) {
-		}
-		setMinimumSize(s);
-		setMaximumSize(s);
-		showHideMenubar();
-		break;
-	}
-	case IdNewGame:
-	case IdLoading:
-	case IdNetwork:
-	case IdStartEditor:
-		setMinimumSize(BOSON_MINIMUM_WIDTH, BOSON_MINIMUM_HEIGHT);
-		setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
-		showHideMenubar();
-		break;
-	case IdLoadSaveGame:
-		// do NOT change the size here!
-		// we call it as startup and from game!
-		break;
-	case IdBosonWidget:
-		setMinimumSize(BOSON_MINIMUM_WIDTH, BOSON_MINIMUM_HEIGHT);
-		setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
-		showHideMenubar();
-		break;
-	default:
-		boDebug() << k_funcinfo << "unknown id " << id << endl;
-		break;
- }
- if (!mWs->widget((int)id)) {
-	boWarning() << k_funcinfo << "NULL widget " << id << endl;
-	return;
- }
- mWs->raiseWidget((int)id);
- mWs->widget((int)id)->show();
+ // startup widget on top
+ saveInitialDockConfig();
+ return true;
 }
 
 void TopWidget::slotUpdateFPS()
 {
  emit signalFPSUpdated(d->mBosonWidget->displayManager()->activeDisplay()->fps());// damn this call sucks!
-}
-
-bool TopWidget::eventFilter(QObject* o, QEvent* e)
-{
- // we display the popup widget for startup widgets only
- if (o != d->mWelcome &&
-		o != d->mLoadingWidget &&
-		o != d->mStartEditor &&
-		o != d->mNetworkOptions &&
-		o != d->mNewGame) {
-	return KDockMainWindow::eventFilter(o, e);
- }
- // FIXME: we should display for the BosonStartupBaseWidgets, too
-
- switch (e->type()) {
-	case QEvent::MouseButtonPress:
-		if (((QMouseEvent*)e)->button() == RightButton) {
-			QPopupMenu* p = (QPopupMenu*)factory()->container("welcomepopup", this);
-			if (p) {
-				p->popup(QCursor::pos());
-			}
-			return true;
-		}
-		break;
-	default:
-		break;
- }
- return KDockMainWindow::eventFilter(o, e);
 }
 
 void TopWidget::hideMenubar()
@@ -1053,38 +807,23 @@ void TopWidget::showMenubar()
 
 void TopWidget::showHideMenubar()
 {
- if (!mWs->visibleWidget()) {
+ if (!boGame) {
+	boError() << k_funcinfo << "NULL game object" << endl;
 	return;
  }
- int id = mWs->id(mWs->visibleWidget());
- switch ((StartupWidgetIds)id) {
-	case IdWelcome:
-	case IdNewGame:
-	case IdLoading:
-	case IdNetwork:
-	case IdStartEditor:
-		if (boConfig->showMenubarOnStartup()) {
-			showMenubar();
-		} else {
-			hideMenubar();
-		}
-		break;
-	case IdBosonWidget:
-		// we always display menu in editor mode (pretty useless without
-		// it)
-		if (boConfig->showMenubarInGame() || !boGame->gameMode()) {
-			showMenubar();
-		} else {
-			hideMenubar();
-		}
-		break;
-	case IdLoadSaveGame:
-		// don't touch settings here. can be both, startup and game
-		// widget.
-		break;
-	default:
-		boWarning() << k_funcinfo << "unknown id " << id << endl;
-		break;
+ if (boGame->gameStatus() != KGame::Init) {
+	// we always display menu in editor mode (pretty useless without it)
+	if (boConfig->showMenubarInGame() || !boGame->gameMode()) {
+		showMenubar();
+	} else {
+		hideMenubar();
+	}
+ } else {
+	if (boConfig->showMenubarOnStartup()) {
+		showMenubar();
+	} else {
+		hideMenubar();
+	}
  }
 }
 
@@ -1092,9 +831,22 @@ void TopWidget::showHideMenubar()
 
 void TopWidget::changeLocalPlayer(Player* p, bool init)
 {
- boDebug() << k_funcinfo << endl;
- // AB: note that both, p == 0 AND p == mPlayer are valid and must be executed!
- mPlayer = p;
+ boDebug() << k_funcinfo << p << endl;
+
+ // AB: note that both, p == 0 AND p == currentplayer are valid and must be executed!
+ if (d->mStartup) {
+	d->mStartup->setLocalPlayer(p);
+ }
+ if (d->mStarting) {
+	d->mStarting->setLocalPlayer(p);
+ }
+ if (!boGame) {
+	boError() << k_funcinfo << "NULL game object" << endl;
+	return;
+ }
+ // AB: d->mBosonWidget->setLocalPlayer() also calls Boson::setLocalPlayer(),
+ // but it is NULL when the startup widgets call it
+ boGame->setLocalPlayer(p);
  if (d->mBosonWidget) {
 	d->mBosonWidget->setLocalPlayer(p, init);
  }
@@ -1108,5 +860,97 @@ void TopWidget::slotEndGame()
 	return;
  }
  slotGameOver();
+}
+
+void TopWidget::slotAddLocalPlayer()
+{
+ if (!boGame) {
+	boError() << k_funcinfo << "NULL game object" << endl;
+	return;
+ }
+ if (boGame->localPlayer()) {
+	boError() << k_funcinfo << "already a local player present! remove first!" << endl;// maybe use boWarning() only
+	return;
+ }
+ if (boGame->playerCount() != 0) {
+	boError() << k_funcinfo << "there are already players in the game!" << endl;
+	return;
+ }
+ boDebug() << k_funcinfo << endl;
+ Player* p = new Player;
+ boGame->addPlayer(p);
+ slotChangeLocalPlayer(p);
+}
+
+void TopWidget::slotGameStarted()
+{
+ showHideMenubar(); // depends on boGame->gameStatus()
+}
+
+void TopWidget::slotResetGame()
+{
+ if (!boGame) {
+	return;
+ }
+
+ // Delete all players to remove added AI and local player (will get added by
+ // newgame widget)
+ boGame->removeAllPlayers();
+
+ // AB: is this a good idea?
+ reinitGame();
+}
+
+void TopWidget::slotEditorNewMap(const QByteArray& buffer)
+{
+ if (boGame->gameStatus() != KGame::Init) {
+	boError() << k_funcinfo << "game not in init status anymore" << endl;
+	return;
+ }
+ if (!d->mStarting) {
+	boError() << k_funcinfo << "NULL starting object" << endl;
+	return;
+ }
+ boDebug() << k_funcinfo << endl;
+ d->mStarting->setEditorMap(buffer);
+}
+
+void TopWidget::slotLoadGame()
+{
+ if (!d->mStartup) {
+	boError() << k_funcinfo << "NULL startup widget" << endl;
+	return;
+ }
+ d->mStartup->slotLoadGame();
+ d->mStartup->show();
+ if (d->mBosonWidget) {
+	d->mBosonWidget->hide();
+ }
+ mMainDock->setWidget(d->mStartup);
+}
+
+void TopWidget::slotSaveGame()
+{
+ // TODO: pause the game!
+ if (!d->mStartup) {
+	boError() << k_funcinfo << "NULL startup widget" << endl;
+	return;
+ }
+ d->mStartup->slotSaveGame();
+ d->mStartup->show();
+ if (d->mBosonWidget) {
+	d->mBosonWidget->hide();
+ }
+ mMainDock->setWidget(d->mStartup);
+}
+
+void TopWidget::slotNewGame()
+{
+ // TODO
+}
+
+void TopWidget::slotStartEditor()
+{
+ // TODO
 }
 

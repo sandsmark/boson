@@ -99,6 +99,10 @@ void BosonWidget::initConnections()
 void BosonWidget::initPlayer()
 {
  BosonWidgetBase::initPlayer();
+ if (!localPlayer()) {
+	boError() << k_funcinfo << "NULL local player" << endl;
+	return;
+ }
  if (!d->mCmdInput) {
 	boError() << k_funcinfo << "NULL command input" << endl;
  } else {

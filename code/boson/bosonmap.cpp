@@ -110,6 +110,23 @@ bool BosonMap::loadMap(QDomElement& root)
  return true;
 }
 
+bool BosonMap::loadMap(QDataStream& stream)
+{
+ if (!loadMapGeo(stream)) {
+	boError() << k_funcinfo << "Could not load map geo" << endl;
+	return false;
+ }
+ if (!loadCells(stream)) {
+	boError() << k_funcinfo << "Could not load map cells" << endl;
+	return false;
+ }
+ if (!loadHeightMap(stream)) {
+	boError() << k_funcinfo << "Could not load height map" << endl;
+	return false;
+ }
+ return true;
+}
+
 bool BosonMap::loadMapGeo(QDataStream& stream)
 {
  Q_INT32 mapWidth;
@@ -405,6 +422,23 @@ bool BosonMap::saveCell(QDomElement& node, int x, int y, Cell* cell)
 // or should these be separate elements? I doubt this.
  node.setAttribute("GroundType", cell->groundType());
  node.setAttribute("Version", cell->version());
+ return true;
+}
+
+bool BosonMap::saveMap(QDataStream& stream)
+{
+ if (!saveMapGeo(stream)) {
+	boError() << k_funcinfo << "Could not save map geo" << endl;
+	return false;
+ }
+ if (!saveCells(stream)) {
+	boError() << k_funcinfo << "Could not save map cells" << endl;
+	return false;
+ }
+ if (!saveHeightMap(stream)) {
+	boError() << k_funcinfo << "Could not save height map" << endl;
+	return false;
+ }
  return true;
 }
 

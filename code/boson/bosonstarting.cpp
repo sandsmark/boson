@@ -26,6 +26,7 @@
 #include "player.h"
 #include "bosonplayfield.h"
 #include "bosonmap.h"
+#include "bosonscenario.h" // should not be here!
 #include "bosonmessage.h"
 #include "speciestheme.h"
 #include "bosonprofiling.h"
@@ -39,19 +40,48 @@
 
 BosonStarting::BosonStarting(QObject* parent) : QObject(parent)
 {
- mLoadingWidget = 0;
  mPlayField = 0;
+ mNewPlayField = 0; // in case we are starting a new map
  mLoading = false;
+}
+
+BosonStarting::~BosonStarting()
+{
+ delete mNewPlayField;
+}
+
+void BosonStarting::setEditorMap(const QByteArray& buffer)
+{
+ boDebug() << k_funcinfo << endl;
+ QDataStream stream(buffer, IO_ReadOnly);
+ delete mNewPlayField;
+ mNewPlayField = new BosonPlayField(this);
+ BosonMap* map = new BosonMap(mNewPlayField);
+ map->loadMap(stream);
+ mNewPlayField->changeMap(map);
+
+ // WARNING: this is a hack. See BosonStartEditorWidget class!
+ // this message should contain the map only, *not* the scenario!
+ Q_INT32 maxPlayers;
+ Q_INT32 minPlayers;
+ stream >> maxPlayers;
+ stream >> minPlayers;
+ BosonScenario* scenario = new BosonScenario();
+ scenario->setPlayers(minPlayers, maxPlayers);
+ scenario->initializeScenario();
+ mNewPlayField->changeScenario(scenario);
+
+ mNewPlayField->finalizeLoading(); // do not preload anything or so
 }
 
 void BosonStarting::startNewGame()
 {
  boDebug() << k_funcinfo << endl;
  mLoading = false; // we are starting a new game
- mLoadingWidget->setProgress(0);
- mLoadingWidget->showProgressBar(true);
+ emit signalLoadingShowProgressBar(true);
+ emit signalLoadingProgress(0);
  if (boGame->isAdmin()) {
-	mLoadingWidget->setLoading(BosonLoadingWidget::SendMap);
+	emit signalLoadingType(BosonLoadingWidget::SendMap);
 	QByteArray buffer;
 	QDataStream stream(buffer, IO_WriteOnly);
 
@@ -64,7 +94,11 @@ void BosonStarting::startNewGame()
 	} else {
 		// here we should be in editor mode creating a new map
 		boDebug() << k_funcinfo << "editor mode: create new map" << endl;
-		loadField = mPlayField;
+		loadField = mNewPlayField;
+		if (!mNewPlayField) {
+			boError() << k_funcinfo << "NULL new playfield!" << endl;
+			return;
+		}
 	}
 	if (!loadField) {
 		boError() << k_funcinfo << "NULL playField" << endl;
@@ -73,19 +107,27 @@ void BosonStarting::startNewGame()
 	loadField->loadPlayField(mPlayFieldId);
 	loadField->saveMap(stream);
 
-	mLoadingWidget->setProgress(50);
+	// in case we are starting a new map
+	delete mNewPlayField;
+	mNewPlayField = 0;
+
+	emit signalLoadingProgress(50);
 	// send the loaded map via network
 	boGame->sendMessage(stream, BosonMessage::InitMap);
-	mLoadingWidget->setProgress(100);
+	emit signalLoadingProgress(100);
  }
  boDebug() << k_funcinfo << endl;
+ if (!mPlayField) {
+	boError() << k_funcinfo << "NULL playfield" << endl;
+	return;
+ }
  // mPlayField should be empty - ensure this by deleting the map
  mPlayField->deleteMap();
 
 
  // before actually starting the game we need to wait for the map (which is sent
  // by the ADMIN)
- mLoadingWidget->setLoading(BosonLoadingWidget::ReceiveMap);
+ emit signalLoadingType(BosonLoadingWidget::ReceiveMap);
  boDebug() << k_funcinfo << "done" << endl;
 }
 
@@ -106,8 +148,8 @@ bool BosonStarting::loadGame(const QString& loadingFileName)
  QDataStream s(&f);
 
  // Load game
- mLoadingWidget->setLoading(BosonLoadingWidget::LoadMap);
- mLoadingWidget->showProgressBar(false);
+ emit signalLoadingShowProgressBar(false);
+ emit signalLoadingType(BosonLoadingWidget::LoadMap);
  boGame->lock();
  bool loaded = boGame->load(s, true);
  slotLoadTiles();
@@ -131,7 +173,7 @@ void BosonStarting::checkEvents()
 
 void BosonStarting::slotTilesLoading(int tiles)
 {
- mLoadingWidget->setTileProgress(600, tiles);
+ emit signalLoadingTileProgress(600, tiles);
 }
 
 void BosonStarting::slotReceiveMap(const QByteArray& buffer)
@@ -165,7 +207,7 @@ void BosonStarting::slotReceiveMap(const QByteArray& buffer)
  boGame->setPlayField(mPlayField);
  emit signalAssignMap(); // for the BosonWidgetBase
 
- mLoadingWidget->setProgress(300);
+ emit signalLoadingProgress(300);
 
  // we need to do this with timer because we can't add checkEvents() here. there is a
  // (more or less) KGame bug in KDE < 3.1 that causes KGame to go into an
@@ -181,7 +223,7 @@ void BosonStarting::slotReceiveMap(const QByteArray& buffer)
  // If we're loading game, almost everything except map (players, units...) are
  //  loaded after this method returns. So we set correct loading label
  if (mLoading) {
-	mLoadingWidget->setLoading(BosonLoadingWidget::LoadGame);
+	emit signalLoadingType(BosonLoadingWidget::LoadGame);
  }
 }
 
@@ -210,8 +252,8 @@ void BosonStarting::slotLoadTiles()
  boGame->lock();
  boProfiling->start(BosonProfiling::LoadTiles);
 
- mLoadingWidget->setProgress(600);
- mLoadingWidget->setLoading(BosonLoadingWidget::LoadTiles);
+ emit signalLoadingProgress(600);
+ emit signalLoadingType((int)BosonLoadingWidget::LoadTiles);
  // just in case.. disconnect before connecting. the map should be newly
  // created, bu i don't know if this will stay this way.
  disconnect(playField()->map(), 0, this, 0);
@@ -225,7 +267,7 @@ void BosonStarting::slotLoadTiles()
  //  loading tiles
  playField()->map()->loadTiles(QString("earth"), false);
 
- mLoadingWidget->setProgress(3000);
+ emit signalLoadingProgress(3000);
  boProfiling->stop(BosonProfiling::LoadTiles);
 
  slotLoadGameData3(); // FIXME: not a slot
@@ -256,7 +298,7 @@ void BosonStarting::slotLoadGameData3() // FIXME rename!
 
  int progress = 3000 + boGame->playerList()->count() * BosonLoadingWidget::unitDataLoadingFactor();
 
- mLoadingWidget->setLoading(BosonLoadingWidget::InitGame);
+ emit signalLoadingType(BosonLoadingWidget::InitGame);
 
 #warning FIXME
  checkEvents();
@@ -281,8 +323,8 @@ void BosonStarting::slotLoadGameData3() // FIXME rename!
  boProfiling->stop(BosonProfiling::LoadGameData3);
 
  progress += 100;
- mLoadingWidget->setProgress(progress);
- mLoadingWidget->setLoading(BosonLoadingWidget::StartingGame);
+ emit signalLoadingProgress(progress);
+ emit signalLoadingType(BosonLoadingWidget::StartingGame);
 
  boDebug() << k_funcinfo << "done" << endl;
  if (!mLoading) {
@@ -331,20 +373,27 @@ void BosonStarting::loadPlayerData()
 	}
  }
 
+ if (!mPlayer) {
+	// TODO: loading failed. we have to return to welcome widget now and
+	// display a message box!
+	boError() << k_funcinfo << "NULL player!" << endl;
+	return;
+ }
+
  // these are sounds like minimap activated.
  // FIXME: are there sounds of other player (i.e. non-localplayers) we need,
  // too?
  // FIXME: do we need to support player-independant sounds?
  mPlayer->speciesTheme()->loadGeneralSounds();
- mLoadingWidget->setProgress(progress);
+ emit signalLoadingProgress(progress);
  boDebug() << k_funcinfo << "done" << endl;
 }
 
 void BosonStarting::loadUnitDatas(Player* p, int progress)
 {
  // This loads all unit datas for player p
- mLoadingWidget->setProgress(progress);
- mLoadingWidget->setLoading(BosonLoadingWidget::LoadUnits);
+ emit signalLoadingProgress(progress);
+ emit signalLoadingType(BosonLoadingWidget::LoadUnits);
  checkEvents();
  // First get all id's of units
  QValueList<unsigned long int> unitIds = p->speciesTheme()->allFacilities();
@@ -355,7 +404,7 @@ void BosonStarting::loadUnitDatas(Player* p, int progress)
  for (it = unitIds.begin(); it != unitIds.end(); ++it) {
 	current++;
 	p->speciesTheme()->loadUnit(*it);
-	mLoadingWidget->setUnitProgress(progress, current, total);
+	emit signalLoadingUnitProgress(progress, current, total);
  }
 }
 
