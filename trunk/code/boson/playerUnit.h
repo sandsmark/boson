@@ -33,7 +33,7 @@ enum mobUnitState {
 	MUS_,
 	};
 
-class playerMobUnit : public mobUnit, QwSprite
+class playerMobUnit : public mobUnit, public QwSprite
 {
  Q_OBJECT
 
@@ -50,7 +50,7 @@ class playerMobUnit : public mobUnit, QwSprite
   int	getWantedMove(int &dx, int &dy);
   int	getWantedAction();
 
-  virtual QRect	rect(void);
+//  virtual QRect	rect(void);
   
 /* Server orders */
   void  s_moveBy(int dx, int dy);
@@ -79,7 +79,7 @@ class playerFacility : public Facility, public QwSprite
 
  public:
   playerFacility(facilityMsg_t *msg, QObject* parent=0L, const char *name=0L);
-  virtual QRect	rect(void);
+//  virtual QRect	rect(void);
   virtual	int _x(void) {return x();}
   virtual	int _y(void) {return y();}
 

@@ -75,7 +75,7 @@ static char * button_text[ORDER_BUTTONS_NB] = {
 	};
 for (int i=0; i<ORDER_BUTTONS_NB; i++) {
 	orderButton[i] = new QPushButton(this);
-	orderButton[i]->setText("Move");
+	orderButton[i]->setText(button_text[i]);
 	//orderButton[i]->setFixedSize(100,40);
 	orderButton[i]->setGeometry( 10+(i%2)*91, 42*(i/2) + 130, 89, 40);
 	orderButton[i]->hide();
