@@ -691,9 +691,11 @@ void TopWidget::slotCmdFrameDockHidden()
 void TopWidget::slotConfigureKeys()
 {
  KKeyDialog dlg(true, this);
- dlg.insert(actionCollection());
- if(mGame) {
-	dlg.insert(d->mBosonWidget->actionCollection());
+ QPtrList<KXMLGUIClient> clients = guiFactory()->clients();
+ QPtrListIterator<KXMLGUIClient> it(clients);
+ while (it.current()) {
+	dlg.insert((*it)->actionCollection());
+	++it;
  }
  dlg.configure(true);
 }

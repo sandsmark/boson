@@ -74,7 +74,6 @@ class BosonWidget::BosonWidgetPrivate
 public:
 	BosonWidgetPrivate()
 	{
-		mActionCollection = 0;
 		mMiniMap = 0;
 		mCommandFrame = 0;
 		mCommandFrameDock = 0;
@@ -95,7 +94,6 @@ public:
 		mFacilitiesCount = 0;
 	}
 
-	KActionCollection* mActionCollection;
 	BosonMiniMap* mMiniMap;   /// TODO: init minimap in TopWidget???
 	BosonCommandFrame* mCommandFrame;
 	KDockWidget* mCommandFrameDock;
@@ -123,17 +121,30 @@ public:
 };
 
 BosonWidget::BosonWidget(TopWidget* top, QWidget* parent)
-    : QWidget( parent, "BosonWidget" )
+    : QWidget( parent, "BosonWidget" ), KXMLGUIClient(/*FIXME: clientParent!*/top)
 {
  d = new BosonWidgetPrivate;
  d->mTop = top;
 
+// XMLClient stuff - not all of this is necessary! most cut'n'pasted from
+// elsewhere
+ actionCollection()->setWidget(this);
+ setXMLFile(top->xmlFile());
+// XMLClient stuff end
+
  init();
+
+// again XMLClient stuff - this needs to be called *after* creation of the
+// KAction objects.
+ d->mTop->factory()->addClient(this);
 }
 
 BosonWidget::~BosonWidget()
 {
  kdDebug() << k_funcinfo << endl;
+ if (d->mTop && d->mTop->factory()) {
+	d->mTop->factory()->removeClient(this);
+ }
  delete d->mCommandFrameDock;
  delete d->mChatDock;
 
@@ -237,8 +248,8 @@ void BosonWidget::initConnections()
 void BosonWidget::initDisplayManager()
 {
  d->mDisplayManager = new BoDisplayManager(canvas(), this);
- connect(d->mDisplayManager, SIGNAL(signalActiveDisplay(BosonBigDisplay*,BosonBigDisplay*)),
-		this, SLOT(slotSetActiveDisplay(BosonBigDisplay*,BosonBigDisplay*)));
+ connect(d->mDisplayManager, SIGNAL(signalActiveDisplay(BosonBigDisplayBase*, BosonBigDisplayBase*)),
+		this, SLOT(slotSetActiveDisplay(BosonBigDisplayBase*, BosonBigDisplayBase*)));
  canvas()->setDisplayManager(displaymanager());
  displaymanager()->setLocalPlayer(player());
  initBigDisplay(displaymanager()->addInitialDisplay());
@@ -690,7 +701,7 @@ void BosonWidget::slotRemoveActiveDisplay()
  displaymanager()->removeActiveDisplay();
 }
 
-void BosonWidget::slotSetActiveDisplay(BosonBigDisplay* active, BosonBigDisplay* old)
+void BosonWidget::slotSetActiveDisplay(BosonBigDisplayBase* active, BosonBigDisplayBase* old)
 {
  if (!active) {
 	kdWarning() << k_funcinfo << "NULL display" << endl;
@@ -780,40 +791,33 @@ void BosonWidget::slotCmdBackgroundChanged(const QString& file)
 
 void BosonWidget::initKeys()
 {
- d->mActionCollection = new KActionCollection(this);
 #ifdef OLD_KACTION
  (void)new KAction(i18n("Scroll Up"), Qt::Key_Up, d->mDisplayManager,
-		SLOT(slotScrollUp()), d->mActionCollection,
+		SLOT(slotScrollUp()), actionCollection(),
 		"scroll_up");
  (void)new KAction(i18n("Scroll Down"), Qt::Key_Down, d->mDisplayManager,
-		SLOT(slotScrollDown()), d->mActionCollection,
+		SLOT(slotScrollDown()), actionCollection(),
 		"scroll_down");
  (void)new KAction(i18n("Scroll Left"), Qt::Key_Left, d->mDisplayManager,
-		SLOT(slotScrollLeft()), d->mActionCollection,
+		SLOT(slotScrollLeft()), actionCollection(),
 		"scroll_left");
  (void)new KAction(i18n("Scroll Right"), Qt::Key_Right, d->mDisplayManager,
-		SLOT(slotScrollRight()), d->mActionCollection,
+		SLOT(slotScrollRight()), actionCollection(),
 		"scroll_right");
 #else
  (void)new KAction(i18n("Scroll Up"), Qt::Key_Up, d->mDisplayManager,
-		SLOT(slotScroll(int)), d->mActionCollection,
+		SLOT(slotScroll(int)), actionCollection(),
 		QString("scroll_up {%1}").arg(ScrollUp));
  (void)new KAction(i18n("Scroll Down"), Qt::Key_Down, d->mDisplayManager,
-		SLOT(slotScroll(int)), d->mActionCollection,
+		SLOT(slotScroll(int)), actionCollection(),
 		QString("scroll_down {%1}").arg(ScrollDown));
  (void)new KAction(i18n("Scroll Left"), Qt::Key_Left, d->mDisplayManager,
-		SLOT(slotScroll(int)), d->mActionCollection,
+		SLOT(slotScroll(int)), actionCollection(),
 		QString("scroll_left {%1}").arg(ScrollLeft));
  (void)new KAction(i18n("Scroll Right"), Qt::Key_Right, d->mDisplayManager,
-		SLOT(slotScroll(int)), d->mActionCollection,
+		SLOT(slotScroll(int)), actionCollection(),
 		QString("scroll_right {%1}").arg(ScrollRight));
 #endif
- d->mActionCollection->readShortcutSettings(QString::null, kapp->config());
-}
-
-KActionCollection* BosonWidget::actionCollection() const
-{
- return d->mActionCollection;
 }
 
 void BosonWidget::slotDebugRequestIdName(int msgid, bool , QString& name)
