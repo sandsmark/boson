@@ -91,6 +91,9 @@ void Player::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 sende
 // The entire KGameProperty stuff is also unused as properties of a unit all
 // have PolicyLocal. 
 
+ kdDebug() << k_funcinfo << " is obsolete" << endl;
+
+/*
  QDataStream stream(buffer, IO_ReadOnly);
  bool issender = true;
  if (game()) {
@@ -103,7 +106,6 @@ void Player::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 sende
 	++it;
  }
  Unit* unit = it.current();
-
  if (unit) { // this was a unit property
 	// note this part is completely obsolete!
 	QDataStream stream2(buffer, IO_ReadOnly);
@@ -130,7 +132,7 @@ void Player::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 sende
 			break;
 	}
 	return;
- }
+ }*/
 
  // this wasn't a unit property but a normal message
  switch (msgid) {
@@ -215,9 +217,9 @@ void Player::slotUnitPropertyChanged(KGamePropertyBase* prop)
 	case Unit::IdDirection:
 	case Unit::IdWaypoints:
 	case Unit::IdFix_ConstructionState:
-//	case Unit::IdFix_ConstructionDelay: // obsolete
 	case Unit::IdFix_Productions:
 	case Unit::IdFix_ProductionState:
+	case Unit::IdReloadState: // perhaps emit this as well - display timer "when can unit shoot" or so
 		// these IDs are not to be displayed in BosonUnitView.
 		break;
 	case UnitBase::IdHealth:
@@ -226,8 +228,7 @@ void Player::slotUnitPropertyChanged(KGamePropertyBase* prop)
 	case UnitBase::IdSpeed:
 	case UnitBase::IdCost:
 	case UnitBase::IdRange:
-	case UnitBase::IdSightRange:
-	case Unit::IdReloadState:
+	case UnitBase::IdSightRange: 
 		// update BosonUnitView if the unit is selected.
 		// not all of these IDs are displayed there. But perhaps they
 		// will one day.
