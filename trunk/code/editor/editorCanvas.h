@@ -46,10 +46,10 @@ public:
   ~editorCanvas() { freeRessources(); }
 
   void createMobUnit(mobileMsg_t &);
-  void destroyMobUnit(destroyedMsg_t &);
+  void destroyMobUnit(int key);
 
   void createFixUnit(facilityMsg_t &);
-  void destroyFixUnit(destroyedMsg_t &);
+  void destroyFixUnit(int key);
 
   bool Load(QString filename);
   bool Save(QString filename);
@@ -64,6 +64,9 @@ public:
 
 signals:
 	void	nbPlayerChanged(uint);
+	// need to be 'int' and not 'uint' because the slot is (int)
+	void	mobileNbUpdated(int);
+	void	facilityNbUpdated(int);
 
 protected:
 	void	loadSpecyTheme(uint i);
