@@ -84,6 +84,8 @@ static KCmdLineOptions options[] =
     { "fovy <number>", I18N_NOOP("Field of view (zooming)"), "60.0" },
     { "f", 0, 0 },
     { "frame <number>", I18N_NOOP("Initially displayed frame"), 0 },
+    { "l", 0, 0 },
+    { "lod <number>", I18N_NOOP("Initially displayed LOD"), 0 },
     { 0, 0, 0 }
 };
 
@@ -97,6 +99,7 @@ ModelPreview::ModelPreview(QWidget* parent) : BosonGLWidget(parent)
 
  mCurrentFrame = 0;
  mModel = 0;
+ mCurrentLOD = 0;
 
  mMouseDiffX = 0;
  mMouseDiffY = 0;
@@ -114,6 +117,7 @@ ModelPreview::ModelPreview(QWidget* parent) : BosonGLWidget(parent)
  connect(this, SIGNAL(signalCameraZChanged(float)), this, SLOT(slotCameraZChanged(float)));
  connect(this, SIGNAL(signalFovYChanged(float)), this, SLOT(slotFovYChanged(float)));
  connect(this, SIGNAL(signalFrameChanged(int)), this, SLOT(slotFrameChanged(int)));
+ connect(this, SIGNAL(signalLODChanged(int)), this, SLOT(slotLODChanged(int)));
 
  setMinimumSize(200, 200);
 }
@@ -212,7 +216,7 @@ void ModelPreview::paintGL()
 		// FIXME: this isn't good here...
 		mModel->enablePointer();
 
-		f->renderFrame(0);
+		f->renderFrame(0, mCurrentLOD);
 		if (mPlacementPreview) {
 			// AB: do not reset the actual color - if it will get
 			// used it will be set again anyway.
@@ -280,6 +284,7 @@ void ModelPreview::resetModel()
 {
  mModel = 0;
  mCurrentFrame = 0;
+ mCurrentLOD = 0;
 }
 
 void ModelPreview::mousePressEvent(QMouseEvent* e)
@@ -331,6 +336,21 @@ void ModelPreview::slotFrameChanged(int f)
  mCurrentFrame = f;
 }
 
+void ModelPreview::slotLODChanged(int l)
+{
+ if (l != 0) {
+	if (!mModel || l < 0) {
+		emit signalLODChanged(0);
+		return;
+	}
+	if (l > 1) {
+		emit signalLODChanged(1);
+		return;
+	}
+  }
+ mCurrentLOD = l;
+}
+
 
 RenderMain::RenderMain()
 {
@@ -362,6 +382,7 @@ RenderMain::RenderMain()
  connectBoth(mConfig, mPreview, SIGNAL(signalCameraYChanged(float)), SLOT(slotCameraYChanged(float)));
  connectBoth(mConfig, mPreview, SIGNAL(signalCameraZChanged(float)), SLOT(slotCameraZChanged(float)));
  connectBoth(mConfig, mPreview, SIGNAL(signalFrameChanged(int)), SLOT(slotFrameChanged(int)));
+ connectBoth(mConfig, mPreview, SIGNAL(signalLODChanged(int)), SLOT(slotLODChanged(int)));
  connect(mConfig, SIGNAL(signalResetDefaults()), mPreview, SLOT(slotResetView()));
  connect(mPreview, SIGNAL(signalMaxFramesChanged(int)), mConfig, SLOT(slotMaxFramesChanged(int)));
  connect(mConfig, SIGNAL(signalPlacementPreviewChanged(bool)), mPreview, SLOT(slotPlacementPreviewChanged(bool)));
@@ -678,6 +699,13 @@ PreviewConfig::PreviewConfig(QWidget* parent) : QWidget(parent)
  topLayout->addWidget(mFrame);
  topLayout->addStretch(1);
 
+ mLOD = new KIntNumInput(this);
+ mLOD->setLabel(i18n("LOD"));
+ mLOD->setRange(0, 1);
+ connect(mLOD, SIGNAL(valueChanged(int)), this, SIGNAL(signalLODChanged(int)));
+ topLayout->addWidget(mLOD);
+ topLayout->addStretch(1);
+
  QWidget* placement = new QWidget(this);
  QHBoxLayout* placementLayout = new QHBoxLayout(placement);
  mPlacementPreview = new QCheckBox(i18n("Show placement preview"), placement);
@@ -854,6 +882,15 @@ int main(int argc, char **argv)
 		return 1;
 	}
 	main->emitSignalFrame(f);
+ }
+ if (args->isSet("lod")) {
+	bool ok = false;
+	int l = args->getOption("lod").toInt(&ok);
+	if (!ok) {
+		boError() << k_funcinfo << "lod must be a number" << endl;
+		return 1;
+	}
+	main->emitSignalLOD(l);
  }
 
 
