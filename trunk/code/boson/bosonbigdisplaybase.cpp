@@ -593,6 +593,7 @@ void BosonBigDisplayBase::paintGL()
  }
  if (!localPlayer()) {
 	boError() << k_funcinfo << "NULL local player" << endl;
+	return;
  }
  boProfiling->render(true);
  d->mUpdateTimer.stop();
