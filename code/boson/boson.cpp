@@ -2375,6 +2375,22 @@ void Boson::slotAddChatSystemMessage(const QString& text)
  slotAddChatSystemMessage(i18n("Boson"), text);
 }
 
+void Boson::slotAddChatSystemMessageForLocalPlayer(const Player* p, const QString& fromName, const QString& text)
+{
+ if (p != localPlayer()) {
+	return;
+ }
+ slotAddChatSystemMessage(fromName, text);
+}
+
+void Boson::slotAddChatSystemMessageForLocalPlayer(const Player* p, const QString& text)
+{
+ if (p != localPlayer()) {
+	return;
+ }
+ slotAddChatSystemMessage(text);
+}
+
 void Boson::slotDebugOutput(const QString& area, const char* data, int level)
 {
  slotAddChatSystemMessage(area, data);
