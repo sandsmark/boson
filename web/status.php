@@ -113,6 +113,7 @@ draw_bigbox_text("This is a list of features that we consider as
   
   </blockquote>
   ");
+draw_bigbox_end();
 main_area_end();
 main_table_end();
 
