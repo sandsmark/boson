@@ -1,6 +1,6 @@
 # add your texture to texture_DATA (space separated) to make it install!
 texture_DATA = \
-	airportroadcorner2.jpg \
+	swtchbrd.jpg \
 	concrt1.jpg \
 	concrt2.jpg \
 	concrt3.jpg \
@@ -8,7 +8,6 @@ texture_DATA = \
 	doors2.jpg \
 	doors3.jpg \
 	doors4.jpg \
-	elecpanelstwo.jpg \
 	metal1.jpg \
 	metal2.jpg \
 	metal3.jpg \
