@@ -30,6 +30,8 @@
 #include "bodebug.h"
 #include "bosonconfig.h"
 
+#include <math.h>
+
 
 /*****  BosonEffectPropertiesParticle  *****/
 
@@ -202,6 +204,7 @@ BosonEffect* BosonEffectPropertiesParticleGeneric::newEffect(const BoVector3Fixe
     e->setRotation(rot);
   }
   e->setMoveParticlesWithSystem(mMoveParticlesWithSystem);
+  e->setMaxDelayedUpdates((int)ceilf(mMaxLife * 20));
 
   return e;
 }
@@ -361,6 +364,7 @@ BosonEffect* BosonEffectPropertiesParticleTrail::newEffect(const BoVector3Fixed&
   {
     e->setRotation(rot);
   }
+  e->setMaxDelayedUpdates((int)ceilf(mMaxLife * 20));
 
   return e;
 }

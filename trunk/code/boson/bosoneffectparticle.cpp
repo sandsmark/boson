@@ -137,6 +137,7 @@ BosonEffectParticleGeneric::BosonEffectParticleGeneric(const BosonEffectProperti
   mRotated = false;
   mNum = 0;
   mMaxParticleSize = 0.0;
+  mMaxDelayedUpdates = 60;
 }
 
 BosonEffectParticleGeneric::~BosonEffectParticleGeneric()
@@ -554,6 +555,7 @@ BosonEffectParticleTrail::BosonEffectParticleTrail(const BosonEffectPropertiesPa
   mRotated = false;
   mNum = 0;
   mObsolete = false;
+  mMaxDelayedUpdates = 60;
 
   mLastPos = pos;
   setPosition(pos);

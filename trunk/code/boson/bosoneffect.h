@@ -175,6 +175,11 @@ class BosonEffect
      *  not, reimplement this method to return false.
      **/
     virtual bool supportsDelayedUpdates() const  { return true; }
+    /**
+     * @return Maximum number of delayed updates that will be done when effect
+     *  becomes visible.
+     **/
+    virtual int maxDelayedUpdates() const  { return 40; }
 
     /**
      * Marks effect for delayed update.
@@ -426,6 +431,8 @@ class BosonEffectBulletTrail : public BosonEffect
     const BoVector4Float& color() const;
     float width() const;
 
+
+    virtual int maxDelayedUpdates() const  { return 5; }
 
     /**
      * Make line obsolete (meaning that it will be deleted in the next advance
