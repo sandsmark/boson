@@ -94,7 +94,7 @@ void visualBigDisplay::viewportMouseMoveEvent(QMouseEvent *e)
 	}
 }
 
-void visualBigDisplay::viewportMouseReleaseEvent(QMouseEvent *e)
+void visualBigDisplay::viewportMouseReleaseEvent(QMouseEvent *)
 {
 	QPainter p;
 	QPen pen(green, 2);
