@@ -121,7 +121,7 @@ playerState oldState = State;
 
 if ( tag>MSG_END_DIALOG_LAYER )
 	if ( PS_PLAYING == State) {
-		handleGameMessage(tag,blen,data);
+		bocanvas->handleGameMessage(tag,blen,data);
 		return;
 	}
 	else {
@@ -184,7 +184,27 @@ if (oldState != State)
 }
 
 
-void BosonApp::handleGameMessage(bosonMsgTag tag, int blen, bosonMsgData *data)
+void BosonApp::gameEnd( endMsg_t::endReasonType reason)
+{
+	logf(LOG_ERROR, "gameEnd called");
+	if ( endMsg_t::playerDiedEnd != reason) {
+		logf(LOG_ERROR, "unknown reason for gameEnd from server");
+	}
+
+	delete Socket;
+
+  	KMessageBox::error(0l,
+			"Connection with one of the other player has been lost\n"
+			"Game is over :-(",
+			"Some other player has quitted");
+	
+	socketState	= PSS_CONNECT_DOWN;
+	State		= PS_NO_CONNECT;
+
+}
+
+
+void bosonCanvas::handleGameMessage(bosonMsgTag tag, int blen, bosonMsgData *data)
 {
 playerFacility * f;
 
@@ -203,19 +223,19 @@ switch(tag) {
 		jiffies ++;
 		boAssert(jiffies == data->jiffies);
 	// let's each object speaks
-		bocanvas->requestAction();
+		requestAction();
 	// latest message is MSG_TIME_CONFIRM
 		sendMsg(buffer, MSG_TIME_CONFIRM, MSG(data->jiffies) );
 		logf(LOG_COMM, "flush : jiffies++ : %u", jiffies);
 		buffer->flush();
-		bocanvas->update();		// QCanvas periodical rendering
+		update();		// QCanvas periodical rendering
 		break;
 
 	case MSG_MAP_DISCOVERED :
 		ASSERT_DATA_BLENGHT(sizeof(data->coo));
 		logf(LOG_GAME_LOW, "received MSG_MAP_DISCOVERED : (%d,%d) = %d",
 			data->coo.x, data->coo.y, (int)data->coo.c );
-		bocanvas->setCell(data->coo.x, data->coo.y, data->coo.c);
+		setCell(data->coo.x, data->coo.y, data->coo.c);
 		return;
 		break;
 
@@ -228,7 +248,7 @@ switch(tag) {
 			data->facility.key,
 			data->facility.state
 			);
-		bocanvas->createFix(data->facility);
+		createFix(data->facility);
 
 		/* center all TopLevels on CMDBUNKER creation */
 		if ( FACILITY_CMDBUNKER == data->facility.type && data->facility.who == who_am_i)
@@ -239,17 +259,17 @@ switch(tag) {
 
 	case MSG_FACILITY_UNHIDDEN :
 		ASSERT_DATA_BLENGHT(sizeof(data->facility));
-		bocanvas->unHideFix(data->facility);
+		unHideFix(data->facility);
 		break;
 		
 	case MSG_UNIT_POWER:
 		ASSERT_DATA_BLENGHT(sizeof(data->power));
-		bocanvas->shooted(data->power);
+		shooted(data->power);
 		break;
 		
 	case MSG_UNIT_RESS:
 		ASSERT_DATA_BLENGHT(sizeof(data->unitRess));
-		bocanvas->updateRess(data->unitRess);
+		updateRess(data->unitRess);
 		break;
 
 	case MSG_FACILITY_CHANGED :
@@ -258,7 +278,7 @@ switch(tag) {
 			data->fixChanged.key,
 			data->fixChanged.state
 			);
-		f = bocanvas->getFacility(data->fixChanged.key);
+		f = getFacility(data->fixChanged.key);
 		if (f) {
 			f->s_setState(data->fixChanged.state);
 			}
@@ -269,20 +289,20 @@ switch(tag) {
 	case MSG_FACILITY_HIDDEN :
 		ASSERT_DATA_BLENGHT(sizeof(data->destroyed));
 		logf(LOG_GAME_HIGH, "Facility(%d) destroyed", data->destroyed.key);
-		bocanvas->hideFix(data->destroyed);
+		hideFix(data->destroyed);
 		break;
 
 
 	case MSG_FACILITY_DESTROYED :
 		ASSERT_DATA_BLENGHT(sizeof(data->destroyed));
 		logf(LOG_GAME_HIGH, "Facility(%d) destroyed", data->destroyed.key);
-		bocanvas->destroyFix(data->destroyed);
+		destroyFix(data->destroyed);
 		break;
 
 
 	case MSG_MOBILE_UNHIDDEN :
 		ASSERT_DATA_BLENGHT(sizeof(data->mobile));
-		bocanvas->unHideMob(data->mobile);
+		unHideMob(data->mobile);
 		break;
 
 
@@ -295,28 +315,28 @@ switch(tag) {
 			data->mobile.x,
 			data->mobile.y
 			);
-		bocanvas->createMob(data->mobile);
+		createMob(data->mobile);
 		break;
 
 	case MSG_MOBILE_HIDDEN :
 		ASSERT_DATA_BLENGHT(sizeof(data->destroyed));
-		bocanvas->hideMob(data->destroyed);
+		hideMob(data->destroyed);
 		break;
 
 	case MSG_MOBILE_DESTROYED :
 		ASSERT_DATA_BLENGHT(sizeof(data->destroyed));
 		logf(LOG_GAME_HIGH, "mobile(%d) destroyed", data->destroyed.key);
-		bocanvas->destroyMob(data->destroyed);
+		destroyMob(data->destroyed);
 		break;
 
 	case MSG_MOBILE_MOVE_C :
 		ASSERT_DATA_BLENGHT(sizeof(data->move));
-		bocanvas->move(data->move);
+		move(data->move);
 		break;
 
 	case MSG_UNIT_SHOOT :
 		ASSERT_DATA_BLENGHT(sizeof(data->shoot));
-		bocanvas->shoot(data->shoot);
+		shoot(data->shoot);
 		break;
 
 	case MSG_PERSO_RESSOURCES :
@@ -324,29 +344,11 @@ switch(tag) {
 		/* syncing */
 		oil	= data->ressources.oil;
 		mineral = data->ressources.mineral;
-		emit ressourcesUpdated();
+		emit oilUpdated( oil );
+		emit mineralUpdated( mineral );
 		break;
 
 	} // switch
-}
-
-void BosonApp::gameEnd( endMsg_t::endReasonType reason)
-{
-	logf(LOG_ERROR, "gameEnd called");
-	if ( endMsg_t::playerDiedEnd != reason) {
-		logf(LOG_ERROR, "unknown reason for gameEnd from server");
-	}
-
-	delete Socket;
-
-  	KMessageBox::error(0l,
-			"Connection with one of the other player has been lost\n"
-			"Game is over :-(",
-			"Some other player has quitted");
-	
-	socketState	= PSS_CONNECT_DOWN;
-	State		= PS_NO_CONNECT;
-
 }
 
 
