@@ -96,8 +96,8 @@ BosonParticleSystem::BosonParticleSystem(int maxnum,
     float createrate, bool align, float maxradius, int texture,
     ExternalFunction initFunc, ExternalFunction updateFunc)
 {
-  kdDebug() << k_funcinfo << "CREATING PARTICLE SYSTEM.  maxnum: " <<  maxnum <<
-      "; createrate: " << createrate << endl;
+  //cout << k_funcinfo << "CREATING PARTICLE SYSTEM.  maxnum: " <<  maxnum <<
+      //"; createrate: " << createrate << endl;
   // Set some variables first
   mMaxNum = maxnum;
   mCreateRate = createrate;

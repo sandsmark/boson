@@ -642,14 +642,7 @@ void Unit::shootAt(Unit* target)
 	return;
  }
  kdDebug() << id() << " shoots at unit " << target->id() << endl;
- ((BosonCanvas*)canvas())->shootAtUnit(target, this, weaponDamage());
- if (target->isDestroyed()) {
-	if (target->isFacility()) {
-		owner()->statistics()->addDestroyedFacility((Facility*)target, this);
-	} else {
-		owner()->statistics()->addDestroyedMobileUnit((MobileUnit*)target, this);
-	}
- }
+ ((BosonCanvas*)canvas())->shootAtUnit(target, this);
  owner()->statistics()->increaseShots();
  resetReload();
 }

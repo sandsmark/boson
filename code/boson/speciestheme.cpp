@@ -71,6 +71,7 @@ public:
 	QIntDict<QPixmap> mSmallOverview;
 	QIntDict<QPixmap> mBigOverview;
 	QIntDict<BosonModel> mUnitModels;
+	QIntDict<BosonModel> mObjectModels;
 
 	QIntDict<QPixmap> mActionPixmaps;
 
@@ -103,6 +104,7 @@ SpeciesTheme::SpeciesTheme(const QString& speciesDir, const QColor& teamColor)
  d->mBigOverview.setAutoDelete(true);
  d->mActionPixmaps.setAutoDelete(true);
  d->mUnitModels.setAutoDelete(true);
+ d->mObjectModels.setAutoDelete(true);
  d->mCanChangeTeamColor = true;
  mSound = 0;
 
@@ -123,6 +125,7 @@ SpeciesTheme::~SpeciesTheme()
 void SpeciesTheme::reset()
 {
  d->mUnitModels.clear();
+ d->mObjectModels.clear();
  d->mSmallOverview.clear();
  d->mBigOverview.clear();
  d->mUnitProperties.clear();
@@ -868,4 +871,23 @@ QIntDict<TechnologyProperties> SpeciesTheme::technologyList() const
 void SpeciesTheme::upgradeResearched(unsigned long int unitType, UpgradeProperties* upgrade)
 {
  d->mUnitProperties[unitType]->upgradeResearched(upgrade);
+}
+
+void SpeciesTheme::loadObjectModels()
+{
+ // FIXME: hardcoded stuff
+ kdDebug() << k_funcinfo << "LOADING OBJECT MODELS!" << endl;
+ BosonModel* m = new BosonModel(themePath() + "/objects/", "missile.3ds", 0.3, 0.3);
+ m->setTeamColor(teamColor());
+ m->loadModel();
+ kdDebug() << k_funcinfo << "DONE" << endl;
+ d->mObjectModels.insert(ObjectMissile, m);
+}
+
+BosonModel* SpeciesTheme::objectModel(ObjectType type)
+{
+ if(!d->mObjectModels[type]) {
+	kdError() << k_funcinfo << "No object of type " << type << "found!!!" << endl;
+ }
+ return d->mObjectModels[type];
 }

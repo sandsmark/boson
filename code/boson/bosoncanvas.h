@@ -35,6 +35,7 @@ class BoItemList;
 class BosonItem;
 class ProductionPlugin;
 class BosonParticleSystem;
+class BosonMissile;
 
 class KPlayer;
 
@@ -101,8 +102,22 @@ public:
 
 	/**
 	 * Called by @ref Unit. One unit damages/shoots at another unit.
+	 * All it does is to create new @ref BosonMissile and play shooting sound
 	 **/
-	void shootAtUnit(Unit* target, Unit* damagedBy, long int damage);
+	void shootAtUnit(Unit* target, Unit* damagedBy);
+
+	/**
+	 * Called when missile explodes. This iterates through all unit in damage
+	 * range of the missile and calls @ref unitHit for them.
+	 **/
+	void missileHit(BosonMissile* m);
+
+	/**
+	 * Called when unit is damaged (usually by missile).
+	 * It calculates new health for the unit, creates particle systems if needed
+	 * and marks unit as destoyed if it doesn't have any hitpoints left anymore.
+	 **/
+	void unitHit(Unit* unit, long int damage);
 
 	/**
 	 * Mark the unit as destroyed and play the destroyed sound.
@@ -122,7 +137,7 @@ public:
 	 * Usually you don't need a @ref QCanvasItemList of all units in a
 	 * certain rect but rather a list of all units in a certain circle. This
 	 * function does exactly that. Note that it's speed can be improved as
-	 * it first uses @ref QCanvas::collisions for a rect and then checks for
+	 * it first uses @ref bosonCollisions for a rect and then checks for
 	 * units inside the rect which are also in the circle. Maybe we could
 	 * check for the circle directly.
 	 **/
@@ -199,6 +214,9 @@ public:
 	void updateParticleSystems(float elapsed);
 	void renderParticleSystems();
 	QPtrList<BosonParticleSystem>* particleSystems();
+
+	void updateMissiles();
+	QPtrList<BosonMissile>* missiles();
 
 public slots:
 	/**

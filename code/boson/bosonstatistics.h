@@ -22,6 +22,7 @@
 class UnitBase;
 class ProductionPlugin;
 class QDataStream;
+class Player;
 
 /**
  * Whenever a unit shoots its weapon or whenever a new unit is produced we need
@@ -50,19 +51,17 @@ public:
 
 	/**
 	 * Increase the value returned by @ref destroyedMobileUnits.
-	 * @param destroyed Unused - might get used to show which unit destroyed
-	 * most enemies, or to check whether an enemy or a friend was destroyed
-	 * @param destroyedBy Unused (see above)
+	 * @param destroyed Destroyed unit
+	 * @param destroyedBy Player that destroyed the unit
 	 **/
-	void addDestroyedMobileUnit(UnitBase* destroyed, UnitBase* destroyedBy);
+	void addDestroyedMobileUnit(UnitBase* destroyed, Player* destroyedBy);
 
 	/**
 	 * Increase the value returned by @ref destroyedFacilities.
-	 * @param destroyed Unused - might get used to show which unit destroyed
-	 * most enemies, or to check whether an enemy or a friend was destroyed
-	 * @param destroyedBy Unused (see above)
+	 * @param destroyed Destroyed unit
+	 * @param destroyedBy Player that destroyed the unit
 	 **/
-	void addDestroyedFacility(UnitBase* destroyed, UnitBase* destroyedBy);
+	void addDestroyedFacility(UnitBase* destroyed, Player* destroyedBy);
 			
 	/**
 	 * Increase the value returned by @producedFacility
