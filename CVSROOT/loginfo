@@ -25,4 +25,5 @@
 # or
 #DEFAULT (echo ""; id; echo %{sVv}; date; cat) >> $CVSROOT/CVSROOT/commitlog
 
-CVSROOT $CVSROOT/CVSROOT/syncmail %{sVv} orzel@freehackers.org
+ALL (echo ""; echo %{sVv}; echo "Author: $USER"; date; cat) | $CVSROOT/CVSROOT/loginfo.pl
+
