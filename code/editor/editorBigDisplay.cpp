@@ -43,13 +43,14 @@ void editorBigDisplay::actionClicked(QPoint mp, int state)
 		y		= mp.y() / BO_TILE_SIZE;
 
 
+		//XX is valid in visual, before calling actionClicked
 	if ( x<0 || y<0 || x>= _canvas->maxX || y>=_canvas->maxY ) {
 //		logf(LOG_ERROR, "actionClicked with x,y = %d,%d, aborting", x, y);
 		return;
 	}
 	
 	switch (otype){
-		case OT_NONE:
+		default:
 			return; // nothing is selected
 			break;
 
@@ -70,34 +71,49 @@ void editorBigDisplay::actionClicked(QPoint mp, int state)
 				setVersion(c, random()%4 );
 				_canvas->changeCell( x, y, c); // some kind of randomness in 'c' here
 			}
-
-			vtl->setSelectionMode( editorTopLevel::SELECT_FILL);
-			break;
-
-		case OT_FACILITY:
-			facilityMsg_t	fix;
-			fix.who 	= who;
-			fix.x		= x;
-			fix.y		= y;
-			fix.state	= CONSTRUCTION_STEPS-1;
-			fix.type	= f; 
-			_canvas->createFixUnit(fix);
-			vtl->setSelectionMode( editorTopLevel::SELECT_PUT);
-			break;
-
-		case OT_UNIT:
-			mobileMsg_t	mob;
-			mob.who		= who;
-			mob.x		= x;
-			mob.y		= y;
-			mob.type	= m;
-			_canvas->createMobUnit(mob);
-			vtl->setSelectionMode( editorTopLevel::SELECT_PUT);
 			break;
 	}
 
 	_canvas->update(); // could be smarter.
 }
+
+
+void editorBigDisplay::object_put(QPoint p)
+{
+	editorCanvas *_canvas	= (((editorCanvas*)vcanvas));
+
+	p/= BO_TILE_SIZE;
+	p+= vtl->_pos();
+
+	switch(otype) {
+		default:
+			logf(LOG_ERROR, "object_put : unexpected \"otype\" value");
+			return;
+
+		case OT_FACILITY:
+			facilityMsg_t	fix;
+			fix.who 	= who;
+			fix.x		= p.x();
+			fix.y		= p.y();
+			fix.state	= CONSTRUCTION_STEPS-1;
+			fix.type	= f; 
+			_canvas->createFixUnit(fix);
+			break;
+
+		case OT_UNIT:
+			mobileMsg_t	mob;
+			mob.who		= who;
+			mob.x		= p.x();
+			mob.y		= p.y();
+			mob.type	= m;
+			_canvas->createMobUnit(mob);
+			break;
+	}
+
+	_canvas->update(); // could be smarter.
+}
+
+
 
 void editorBigDisplay::setSelectedObject(object_type t, int n)
 {

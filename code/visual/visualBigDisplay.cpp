@@ -58,8 +58,8 @@ visualBigDisplay::~visualBigDisplay()
 void visualBigDisplay::viewportMouseMoveEvent(QMouseEvent *e)
 {
 	QPainter p;
-	QPen pen(green, 2);
-	
+	QPen pen(red, 2);
+
 	switch( vtl->getSelectionMode()) {
 		default:
 			logf(LOG_WARNING, "visualBigDisplay::viewportMouseMoveEvent : unknown selectionMode(1), mode is %d", vtl->getSelectionMode());
@@ -100,9 +100,12 @@ void visualBigDisplay::viewportMouseReleaseEvent(QMouseEvent *)
 	switch( vtl->getSelectionMode()) {
 		default:
 			logf(LOG_WARNING, "visualBigDisplay::viewportMouseReleaseEvent : unknown selectionMode(2), mode is %d", vtl->getSelectionMode());
+			break;
+
 		case visualTopLevel::SELECT_NONE:
 		case visualTopLevel::SELECT_FILL:
-			break;
+			return;		// keep on filling
+
 		case visualTopLevel::SELECT_RECT:
 			p.begin(this);
 			p.setPen(pen);
@@ -119,7 +122,6 @@ void visualBigDisplay::viewportMouseReleaseEvent(QMouseEvent *)
 
 		case visualTopLevel::SELECT_PUT:
 			break;
-			return;
 
 	}
 	vtl->setSelectionMode( visualTopLevel::SELECT_NONE);
@@ -157,10 +159,16 @@ void visualBigDisplay::viewportMousePressEvent(QMouseEvent *e)
 	/* Now we transpose coo into the map referential */
 	pos += vtl->_pos()*BO_TILE_SIZE;
 	
+	if (e->button() & RightButton) {
+		actionClicked( pos, e->state());
+		oldPos = pos;
+		return;
+		}
+	
 	if (e->button() & LeftButton) {	
 
 		if (vtl->getSelectionMode() == visualTopLevel::SELECT_PUT) {
-			vtl->object_put( QPoint(e->x(), e->y()) );
+			object_put( QPoint(e->x(), e->y()) );
 			return;
 		}
 
@@ -208,12 +216,7 @@ void visualBigDisplay::viewportMousePressEvent(QMouseEvent *e)
 	
 	} // LeftButton 
 
-	if (e->button() & RightButton) {
-		actionClicked( pos, e->state());
-		oldPos = pos;
-		return;
-		}
-	
+
 }
 
 

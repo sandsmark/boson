@@ -65,11 +65,6 @@ public slots:
 
 public:
 	void relativeMoveView(QPoint );
-	/*
-	 * put object 
-	 */
-	virtual void object_put(QPoint)=0;
-
 
 private:
 	void checkMove();

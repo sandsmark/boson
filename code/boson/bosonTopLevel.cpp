@@ -132,7 +132,7 @@ void bosonTopLevel::setOrders( int what, int who)
 }
 
 
-void bosonTopLevel::object_put(QPoint p)
+void bosonTopLevel::_object_put(QPoint p)
 {
 	p/= BO_TILE_SIZE;
 	p+= viewPos;

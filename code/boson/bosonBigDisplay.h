@@ -31,8 +31,19 @@ class bosonBigDisplay : public visualBigDisplay
 
 public:
 	bosonBigDisplay(bosonTopLevel *v, QWidget *parent=0, const char *name=0L, WFlags f=0);
+
+protected:
 	/* from display classes */
 	virtual void actionClicked(QPoint, int state);	// selecting, moving...
+
+	/*
+	 * put object 
+	 */
+	virtual void	object_put(QPoint p);
+
+private:
+	bosonTopLevel *btl;
+
 
 };
 
