@@ -383,7 +383,7 @@ void editorTopLevel::makeCommandGui(void)
 
 /* QComboBoxes */
 	qcb_which = new QComboBox(mainFrame, "qcb_which");
-	qcb_which->setGeometry(130,40,80,30);
+	qcb_which->setGeometry(130,40,90,30);
 
 	qcb_which->insertItem("Plain tiles",	W_SMALL_PLAIN);
 	qcb_which->insertItem("small",		W_SMALL_GROUND);
@@ -395,7 +395,7 @@ void editorTopLevel::makeCommandGui(void)
 	connect(qcb_which, SIGNAL(activated(int)), this, SLOT(setWhich(int)));
 	
 	qcb_transRef = new QComboBox(mainFrame, "qcb_transRef");
-	qcb_transRef->setGeometry(130,82,100,30);
+	qcb_transRef->setGeometry(130,82,90,30);
 
 	qcb_transRef->insertItem("grass/water",		TRANS_GW);
 	qcb_transRef->insertItem("grass/desert",	TRANS_GD);
@@ -405,7 +405,7 @@ void editorTopLevel::makeCommandGui(void)
 	connect(qcb_transRef, SIGNAL(activated(int)), this, SLOT(setTransRef(int)));
 	
 	qcb_who = new QComboBox(mainFrame, "qcb_who");
-	qcb_who->setGeometry(130,82,100,30);
+	qcb_who->setGeometry(130,82,90,30);
 
 	qcb_who->insertItem("User 0", 0);
 	qcb_who->insertItem("User 1", 1);
