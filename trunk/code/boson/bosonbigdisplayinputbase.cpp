@@ -57,6 +57,7 @@ BosonCanvas* BosonBigDisplayInputBase::canvas() const
 
 BosonCollisions* BosonBigDisplayInputBase::collisions() const
 {
+ BO_CHECK_NULL_RET0(canvas());
  return canvas()->collisions();
 }
 
@@ -78,6 +79,7 @@ const BoVector3& BosonBigDisplayInputBase::cursorCanvasVector() const
 void BosonBigDisplayInputBase::selectSingle(Unit* unit, bool replace)
 {
  boDebug() << k_funcinfo << endl;
+ BO_CHECK_NULL_RET(selection());
  switch (canSelect(unit)) {
 	case CanSelectSingleOk:
 		// this should not happen, as it should have been checked before
@@ -94,6 +96,9 @@ void BosonBigDisplayInputBase::selectSingle(Unit* unit, bool replace)
 
 void BosonBigDisplayInputBase::selectArea(BoItemList* itemsInArea, bool replace)
 {
+ BO_CHECK_NULL_RET(localPlayer());
+ BO_CHECK_NULL_RET(canvas());
+ BO_CHECK_NULL_RET(selection());
  BO_CHECK_NULL_RET(itemsInArea);
  if (boConfig->debugMode() == BosonConfig::DebugSelection) {
 	const BoItemList* list = itemsInArea;
@@ -156,6 +161,7 @@ void BosonBigDisplayInputBase::selectArea(BoItemList* itemsInArea, bool replace)
 
 void BosonBigDisplayInputBase::unselectArea(BoItemList* itemsInArea)
 {
+ BO_CHECK_NULL_RET(selection());
  BO_CHECK_NULL_RET(itemsInArea);
  BoItemList::Iterator it;
  for (it = itemsInArea->begin(); it != itemsInArea->end(); ++it) {
@@ -170,6 +176,7 @@ void BosonBigDisplayInputBase::unselectArea(BoItemList* itemsInArea)
 void BosonBigDisplayInputBase::selectUnits(QPtrList<Unit> unitList, bool replace)
 {
  boDebug() << k_funcinfo << endl;
+ BO_CHECK_NULL_RET(selection());
  selection()->selectUnits(unitList, replace);
 }
 

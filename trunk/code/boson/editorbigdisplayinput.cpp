@@ -149,6 +149,7 @@ EditorBigDisplayInput::~EditorBigDisplayInput()
 void EditorBigDisplayInput::actionClicked(const BoAction& action, QDataStream& stream, bool* send)
 {
  boDebug() << k_funcinfo << endl;
+ BO_CHECK_NULL_RET(canvas());
  if (!canvas()->onCanvas(action.canvasVector())) {
 	return;
  }
@@ -312,10 +313,8 @@ void EditorBigDisplayInput::placeCell(int tile)
 
 void EditorBigDisplayInput::deleteSelectedUnits()
 {
- if (!selection()) {
-	boError() << k_funcinfo << "NULL selection" << endl;
-	return;
- }
+ BO_CHECK_NULL_RET(selection());
+ BO_CHECK_NULL_RET(canvas());
  if (selection()->isEmpty()) {
 	boDebug() << k_funcinfo << "no unit selected" << endl;
 	return;
@@ -331,6 +330,7 @@ void EditorBigDisplayInput::deleteSelectedUnits()
 
 void EditorBigDisplayInput::updatePlacementPreviewData()
 {
+ BO_CHECK_NULL_RET(canvas());
  if (!d->mPlacement.isUnit() && !d->mPlacement.isCell()) {
 	bigDisplay()->setPlacementPreviewData(0, false);
 	return;
@@ -394,14 +394,8 @@ bool EditorBigDisplayInput::selectAll(const UnitProperties* prop, bool replace)
 
 void EditorBigDisplayInput::slotMoveSelection(int cellX, int cellY)
 {
- if (!localPlayer()) {
-	boError() << "NULL local player" << endl;
-	return;
- }
- if (!selection()) {
-	boError() << k_funcinfo << "NULL selection" << endl;
-	return;
- }
+ BO_CHECK_NULL_RET(localPlayer());
+ BO_CHECK_NULL_RET(selection());
  if (selection()->isEmpty()) {
 	return;
  }
