@@ -64,8 +64,6 @@ public:
 	 * @ref preLoadPlayField is sufficient for displaying description and
 	 * winning conditions and so on of a game. You need to load it
 	 * completely for starting a playField only.
-	 * @param identifier The filename without suffix. As returned by @ref
-	 * availablePlayFields.
 	 *
 	 * @param file The fileName of the playField. Can be QString::null if
 	 * @ref preLoadPlayField has been called already, i.e. @ref isPreLoaded
@@ -196,6 +194,7 @@ private:
 	bool mLoaded;
 	bool mPreLoaded;
 	BPFFile* mFile;
+	QString mFileName;
 };
 
 #endif
