@@ -33,6 +33,7 @@ class UnitProperties;
 class Camera;
 class BosonBigDisplayInputBase;
 class BoItemList;
+class BosonItem;
 
 class KGameChat;
 class KGameIO;
@@ -297,6 +298,14 @@ protected slots:
 	 * operations (input/output on the local client) only.
 	 **/
 	void slotAdvance(unsigned int advanceCount, bool advanceFlag);
+
+	/**
+	 * Called when @ref BosonCanvas::signalRemovedItem is emitted. Note that
+	 * this usally happens from the @ref BosonItem destructor! So be careful
+	 * with calling function of @p item, they might crash the game (as they
+	 * dont exist anymore / their data doesnt exist anymore)
+	 **/
+	void slotRemovedItemFromCanvas(BosonItem* item);
 
 protected:
 	/**

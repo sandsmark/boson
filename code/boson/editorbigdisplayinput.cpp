@@ -326,8 +326,7 @@ void EditorBigDisplayInput::deleteSelectedUnits()
  for (; it.current(); ++it) {
 	canvas()->removeUnit(it.current());
  }
- units.setAutoDelete(true);
- units.clear();
+ canvas()->deleteUnits(&units);
 }
 
 void EditorBigDisplayInput::updatePlacementPreviewData()

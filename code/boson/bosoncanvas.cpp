@@ -415,16 +415,12 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 		deletionIt.current()->increaseDeletionTimer();
 		if (deletionIt.current()->deletionTimer() >= REMOVE_WRECKAGES_TIME) {
 			deleteList.append(deletionIt.current());
+			d->mDestroyedUnits.removeRef(deletionIt.current());
 		}
 		++deletionIt;
 	}
- 
-	while (deleteList.count() > 0) {
-		Unit* u = deleteList.first();
-		deleteList.removeRef(u);
-		d->mDestroyedUnits.removeRef(u);
-		delete u;
-	}
+
+	deleteUnits(&deleteList);
  }
  boProfiling->advanceMaximalAdvanceCount(false);
  boProfiling->advance(false, advanceCount);
@@ -914,6 +910,7 @@ void BosonCanvas::addItem(BosonItem* item)
 void BosonCanvas::removeItem(BosonItem* item)
 {
  d->mAllItems.remove(item);
+ emit signalRemovedItem(item);
 }
 
 unsigned int BosonCanvas::itemCount(int rtti) const
@@ -1089,7 +1086,7 @@ void BosonCanvas::resetWorkCounts()
  d->mWorkCounts[(int)UnitBase::WorkTurn] = 0;
 }
 
-QMap<int, int>* BosonCanvas::workCounts()
+QMap<int, int>* BosonCanvas::workCounts() const
 {
  return &d->mWorkCounts;
 }
@@ -1097,5 +1094,34 @@ QMap<int, int>* BosonCanvas::workCounts()
 bool BosonCanvas::onCanvas(const BoVector3& pos) const
 {
  return onCanvas((int)pos.x(), (int)pos.y());
+}
+
+void BosonCanvas::deleteUnits(QPtrList<Unit>* units)
+{
+ // this is the only place where a unit may be deleted. NEVER delete a unit
+ // outside this method!
+
+ // ensure that NO unit has one of the deleted units as target.
+ QPtrListIterator<Unit> deleteIt(*units);
+ BoItemList::Iterator it;
+ for (it = d->mAllItems.begin(); it != d->mAllItems.end(); ++it) {
+	if (!RTTI::isUnit((*it)->rtti())) {
+		continue;
+	}
+	Unit* u = (Unit*)*it;
+	if (!u->target()) {
+		continue;
+	}
+	for (deleteIt.toFirst(); deleteIt.current(); ++deleteIt) {
+		if (u->target() == deleteIt.current()->target()) {
+			u->setTarget(0);
+		}
+	}
+ }
+ while (units->count() > 0) {
+	Unit* u = units->first();
+	units->removeRef(u);
+	delete u;
+ }
 }
 
