@@ -13,7 +13,7 @@ BO_DOCS=index.wml aircraft.wml batzen.wml mineral_harvester.wml \
 	oil_harvester.wml quad.wml ship.wml tank.wml
 
 # list additional data here - these files will get installed
-doc_DATA=aircraft.png quad.png tank.png
+doc_DATA=aircraft.png batzen.png mineral_harvester.png oil_harvester.png quad.png tank.png ship.png 
 
 # Condiguration ends here!
 
