@@ -58,14 +58,6 @@ signals:
 	void	reSizeView (int l, int h);
 
 protected:
-
-/* QCanvas virtual functions */
-  virtual QRect viewArea() const;
-  virtual bool preferDoubleBuffering() const {return true;}
-  virtual void beginPainter(QPainter &);
-  virtual void flush(const QRect& area);
-  //virtual void updateGeometries();
-
 	// display
 	void drawRectSelect(int x1, int y1, int x2, int y2, QPainter &qp)
 		{ qp.drawRect(x1, y1, x2-x1, y2-y1); }
