@@ -135,6 +135,8 @@ BosonWidgetBase::~BosonWidgetBase()
  mLocalPlayerInput = 0;
 
  delete mCursor;
+ delete d->mCommandFrame;
+ delete d->mChat;
 
  delete d;
  boDebug() << k_funcinfo << "done" << endl;
