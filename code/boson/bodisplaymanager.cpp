@@ -482,7 +482,7 @@ void BoDisplayManager::slotDeleteSelectedUnits()
 	boError() << k_funcinfo << "NULL active display" << endl;
 	return;
  }
- activeDisplay()->deleteSelectedUnits();
+ activeDisplay()->displayInput()->deleteSelectedUnits();
 }
 
 void BoDisplayManager::addChatMessage(const QString& text)

@@ -125,6 +125,11 @@ public:
 	 **/
 	virtual void placeCell(int tile) { Q_UNUSED(tile); }
 
+	/**
+	 * See @ref EditorBigDisplayInput::deleteSelectedUnits
+	 **/
+	virtual void deleteSelectedUnits() { }
+
 public slots:
 	/**
 	 * Called when the player clicks RMB on the minimap. in game mode the
