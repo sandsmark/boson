@@ -13,17 +13,17 @@ UnitHeight=1.5
 ProductionTime=100
 SightRange=7
 DestroyedParticles=1001
-Weapons=1
+Weapons=2
 
 [Boson Mobile Unit]
 Speed=15
 CanGoOnLand=true
-CanGoOnWater=true
+CanGoOnWater=false
 
 [Weapon_0]
 Range=5
 Reload=10
-CanShootAtAirUnits=true
+CanShootAtAirUnits=false
 CanShootAtLandUnits=true
 Damage=8
 Speed=0

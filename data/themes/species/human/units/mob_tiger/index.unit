@@ -1,7 +1,7 @@
 [Boson Unit]
 IsFacility=false
 TerrainType=0
-Name=Batzen
+Name=Tiger
 Id=10010
 Health=100
 MineralCost=150
@@ -21,7 +21,7 @@ CanGoOnWater=false
 [Weapon_0]
 Range=4
 Reload=8
-CanShootAtAirUnits=true
+CanShootAtAirUnits=false
 CanShootAtLandUnits=true
 Damage=5
 Speed=8
