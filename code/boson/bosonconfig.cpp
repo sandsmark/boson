@@ -210,6 +210,7 @@ BosonConfig::BosonConfig(KConfig* conf)
  mAlignSelectionBoxes = new BoConfigBoolEntry(this, "AlignSelectionBoxes", DEFAULT_ALIGN_SELECTION_BOXES);
  mRMBAction = new BoConfigIntEntry(this, "RMBAction", DEFAULT_RMB_ACTION);
  mMouseWheelAction = new BoConfigIntEntry(this, "MouseWheelAction", DEFAULT_MOUSE_WHEEL_ACTION);
+ mMouseWheelShiftAction = new BoConfigIntEntry(this, "MouseWheelShiftAction", DEFAULT_MOUSE_WHEEL_SHIFT_ACTION);
 
  mDebugMode = DebugNormal;
 
