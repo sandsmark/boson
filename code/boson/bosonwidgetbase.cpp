@@ -165,7 +165,7 @@ void BosonWidgetBase::init()
  initPlayersMenu();
 }
 
-void BosonWidgetBase::initMap(bool initFogOfWar)
+void BosonWidgetBase::initMap()
 {
  kdDebug() << k_funcinfo << endl;
 
@@ -181,12 +181,7 @@ void BosonWidgetBase::initMap(bool initFogOfWar)
 	kdDebug() << "init map for player " << i << endl;
 	Player* p = (Player*)boGame->playerList()->at(i);
 	if (p) {
-		p->setMap(playField()->map());
-		if (initFogOfWar) {
-			// the line below is needed for non-loading code, but
-			// must not be done for loading code :(
-			p->initFogOfWar(playField()->map());
-		}
+		p->initMap(playField()->map(), boGame->gameMode());
 	}
  }
 

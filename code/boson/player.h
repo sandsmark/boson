@@ -45,6 +45,20 @@ public:
 	Player();
 	virtual ~Player();
 
+	/**
+	 * Quit the current game for this player. This will reset some variables
+	 * so that the player can play on a new map.
+	 *
+	 * Note that this does <em>not</em> delete e.g. the species theme of the
+	 * player!
+	 *
+	 * Currently players are deleted for a new map anyway, but maybe this
+	 * behavior will change one day.
+	 * @param destruct TRUE is relevant for the destructor only. Then
+	 * deleted objects won't be new'ed again.
+	 **/
+	void quitGame(bool destruct = false);
+
 	void loadTheme(const QString& species, const QColor& teamColor);
 
 	void addUnit(Unit* unit);
@@ -88,14 +102,18 @@ public:
 	void setMinerals(unsigned long int m);
 	void setOil(unsigned long int o);
 
-	void setMap(BosonMap* map);
-
 	/**
-	 * Initialize The fog of war for this player.
+	 * Initialize the map for this player - this is mostly the fog of war,
+	 * currently.
+	 *
+	 * Note that this function depends on calling @ref quitGame correctly,
+	 * i.e. whenever the map changes.
 	 * @param fogged Whether the map is fogged initially or not. You can
-	 * specify false here for the editor.
+	 * specify false here for the editor. Note that the fog is <em>not</em>
+	 * changed if it was initialized before (i.e. size != 0)! This is
+	 * usually the case for loading games.
 	 **/
-	void initFogOfWar(bool fogged = true);
+	void initMap(BosonMap* map, bool fogged = true);
 
 	/**
 	 * Called by @ref Facility when the construction has been completed.

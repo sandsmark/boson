@@ -1094,8 +1094,7 @@ KPlayer* Boson::createPlayer(int rtti, int io, bool isVirtual)
  p->setGame(this);
  if (d->mPlayField && d->mPlayField->map()) {
 	// AB: this will never be reached. unused. can probably be removed.
-	p->setMap(d->mPlayField->map());
-	p->initFogOfWar();
+	p->initMap(d->mPlayField->map(), boGame->gameMode());
  }
  connect(p, SIGNAL(signalUnitLoaded(Unit*, int, int)),
 		this, SIGNAL(signalAddUnit(Unit*, int, int)));
