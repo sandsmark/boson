@@ -46,6 +46,7 @@ FlyParticles=5001,5010
 Height=0.05
 HitParticles=2001
 MaxHeight=2
+Model=missile
 Name=Surface-to-air missiles
 Offset=0,0,0
 Range=7

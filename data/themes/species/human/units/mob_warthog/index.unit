@@ -66,6 +66,7 @@ SoundFly=
 SoundHit=hit
 SoundShoot=shoot
 Speed=0
+Type=0
 
 [Weapon_1]
 CanShootAtAirUnits=false
