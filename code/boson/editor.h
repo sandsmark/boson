@@ -46,6 +46,7 @@ private slots:
 	void slotSaveMapAs();
 	void slotSaveScenarioAs();
 	void slotCreateUnit();
+	void slotCreateTiles();
 
 	void optionsShowToolbar();
 	void optionsShowStatusbar();

@@ -3,6 +3,7 @@
 #include "bosonunitdialog.h"
 #include "bosonwidget.h"
 #include "player.h"
+#include "bosontiles.h"
 
 #include "bosoncommandframe.h" // necessary cause of BosonCommandFrame::OrderType
 
@@ -21,6 +22,7 @@
 #include <kaction.h>
 #include <kstdaction.h>
 #include <kfiledialog.h>
+#include <kmessagebox.h>
 
 #include <qintdict.h>
 
@@ -189,6 +191,9 @@ void Editor::setupActions()
  (void)new KAction(i18n("&Create Custom Unit"), QKeySequence(), this,
 		  SLOT(slotCreateUnit()), actionCollection(),
 		  "editor_create_unit");
+ (void)new KAction(i18n("&Generate Custom Tiles Ground"), QKeySequence(), this,
+		  SLOT(slotCreateTiles()), actionCollection(),
+		  "editor_create_tiles");
 
  d->mToolbarAction = KStdAction::showToolbar(this, SLOT(optionsShowToolbar()), actionCollection());
  d->mStatusbarAction = KStdAction::showStatusbar(this, SLOT(optionsShowStatusbar()), actionCollection());
@@ -350,3 +355,31 @@ void Editor::slotCreateUnit()
  dlg->exec();
  delete dlg;
 }
+
+void Editor::slotCreateTiles()
+{
+ QString dir = KFileDialog::getExistingDirectory();
+ if (dir.isNull()) {
+	return;
+ }
+ BosonTiles newTiles;
+ if (dir.right(1) != QString::fromLatin1("/")) {
+	dir += QString::fromLatin1("/");
+ }
+ if (!newTiles.loadTiles(dir)) {
+	kdError() << "Could not load tiles from " << dir << endl;
+	KMessageBox::sorry(this, i18n("Error loading tiles from %1").arg(dir));
+	return;
+ }
+ //TODO: display progress widget/window
+
+ QString fileName = KFileDialog::getSaveFileName(QString::null, "*.png", this);
+ if (fileName.isNull()) {
+	return;
+ }
+ if (QFileInfo(fileName).extension().isEmpty()) {
+	fileName += ".png";
+ }
+ newTiles.save(fileName);
+}
+
