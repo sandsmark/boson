@@ -42,12 +42,6 @@ boFile::boFile()
 }
 
 
-boFile::~boFile()
-{
-}
-
-
-
 bool boFile::openRead(const char *filename)
 {
 	char magic[ TAG_FIELD_LEN+4 ];	// paranoiac spaces
