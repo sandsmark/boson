@@ -233,7 +233,7 @@ BoItemList BosonCollisions::collisions(const QRect& rect, const BosonItem* item,
  if (rect.height() % BO_TILE_SIZE != 0) {
 	h++;
  }
- return collisionsAtCells(QRect(rect.left() / BO_TILE_SIZE, rect.right() / BO_TILE_SIZE, w, h), item, exact);
+ return collisionsAtCells(QRect(rect.left() / BO_TILE_SIZE, rect.top() / BO_TILE_SIZE, w, h), item, exact);
 }
 
 BoItemList BosonCollisions::collisionsAtCells(const QRect& rect, const BosonItem* item, bool exact) const
