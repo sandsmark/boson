@@ -212,10 +212,6 @@ void BosonWidgetBase::init(KDockWidget* chatDock, KDockWidget* commandFrameDock)
 
 void BosonWidgetBase::initConnections()
 {
- connect(boGame, SIGNAL(signalLoadExternalStuff(QDataStream&)),
-		this, SLOT(slotLoadExternalStuff(QDataStream&)));
- connect(boGame, SIGNAL(signalSaveExternalStuff(QDataStream&)),
-		this, SLOT(slotSaveExternalStuff(QDataStream&)));
  connect(boGame, SIGNAL(signalLoadExternalStuffFromXML(const QDomElement&)),
 		this, SLOT(slotLoadExternalStuffFromXML(const QDomElement&)));
  connect(boGame, SIGNAL(signalSaveExternalStuffAsXML(QDomElement&)),
@@ -1019,20 +1015,6 @@ void BosonWidgetBase::setActionEnabled(const char* name, bool on)
  } else {
 	a->setEnabled(on);
  }
-}
-
-void BosonWidgetBase::slotLoadExternalStuff(QDataStream& stream)
-{
- boDebug() << k_funcinfo << endl;
- // TODO: load camera
- // TODO: load unitgroups
-}
-
-void BosonWidgetBase::slotSaveExternalStuff(QDataStream& stream)
-{
- boDebug() << k_funcinfo << endl;
- // TODO: save camera  (BosonBigDisplayBase?)
- // TODO: save unitgroups  (BoDisplayManager?)
 }
 
 void BosonWidgetBase::slotLoadExternalStuffFromXML(const QDomElement& root)

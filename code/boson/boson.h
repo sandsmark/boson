@@ -453,8 +453,6 @@ signals:
 
 	void signalAddChatSystemMessage(const QString& fromName, const QString& text, const Player* forPlayer);
 
-	void signalLoadExternalStuff(QDataStream& stream);
-	void signalSaveExternalStuff(QDataStream& stream);
 	void signalLoadExternalStuffFromXML(const QDomElement& root);
 	void signalSaveExternalStuffAsXML(QDomElement& root);
 
