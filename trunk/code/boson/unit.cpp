@@ -828,8 +828,6 @@ void MobileUnit::advanceMove()
 
  // First check if we're at waypoint
  if((x == wp.x()) && (y == wp.y())) {
-	QPoint wp = currentWaypoint(); // where we go to
-
 	kdDebug() << k_funcinfo << "unit is at waypoint" << endl;
  	waypointDone();
 	
