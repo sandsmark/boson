@@ -105,6 +105,10 @@ void UnitProperties::init()
  mTheme = 0;
  mMobileProperties = 0;
  mFacilityProperties = 0;
+ d->mPlugins.setAutoDelete(true);
+ d->mUpgrades.setAutoDelete(true);
+ d->mNotResearchedUpgrades.setAutoDelete(true);
+ d->mDestroyedParticleSystems.setAutoDelete(true);
 }
 
 UnitProperties::~UnitProperties()
@@ -211,7 +215,7 @@ void UnitProperties::loadMobileProperties(KSimpleConfig* conf)
  conf->setGroup("Boson Mobile Unit");
  createMobileProperties();
  mMobileProperties->mSpeed = (float)conf->readDoubleNumEntry("Speed", 0);
- if(mMobileProperties->mSpeed < 0) {
+ if (mMobileProperties->mSpeed < 0) {
 	boWarning() << k_funcinfo << "Invalid Speed value: " << mMobileProperties->mSpeed <<
 			" for unit " << typeId() << ", defaulting to 0" << endl;
 	mMobileProperties->mSpeed = 0;
@@ -296,10 +300,10 @@ void UnitProperties::loadWeapons(KSimpleConfig* conf)
 	BosonWeaponProperties* p = new BosonWeaponProperties(this);
 	p->loadPlugin(conf, mFullMode);
 	d->mPlugins.append(p);
-	if(p->canShootAtAirUnits()) {
+	if (p->canShootAtAirUnits()) {
 		mCanShootAtAirUnits = true;
 	}
-	if(p->canShootAtLandUnits()) {
+	if (p->canShootAtLandUnits()) {
 		mCanShootAtLandUnits = true;
 	}
  }
@@ -326,7 +330,7 @@ void UnitProperties::saveAllPluginProperties(KSimpleConfig* conf)
  int weaponcounter = 0;
  QPtrListIterator<PluginProperties> it(d->mPlugins);
  while (it.current()) {
-	if(it.current()->pluginType() == PluginProperties::Weapon)
+	if (it.current()->pluginType() == PluginProperties::Weapon)
 	{
 		conf->setGroup(QString("Weapon_%1").arg(weaponcounter++));
 	}
@@ -345,7 +349,7 @@ void UnitProperties::saveTextureNames(KSimpleConfig* conf)
  conf->setGroup("Textures");
  QMap<QString, QString>::Iterator it;
  QStringList textures;
- for(it = d->mTextureNames.begin(); it != d->mTextureNames.end(); ++it) {
+ for (it = d->mTextureNames.begin(); it != d->mTextureNames.end(); ++it) {
 	textures.append(it.key());
 	conf->writeEntry(it.key(), it.data());
  }
@@ -518,7 +522,7 @@ QPtrList<BosonParticleSystem> UnitProperties::newDestroyedParticleSystems(float 
 {
  QPtrList<BosonParticleSystem> list;
  QPtrListIterator<BosonParticleSystemProperties> it(d->mDestroyedParticleSystems);
- while(it.current())
+ while (it.current())
  {
 	list.append(it.current()->newSystem(BoVector3(x, y, z)));
 	++it;
@@ -529,11 +533,11 @@ QPtrList<BosonParticleSystem> UnitProperties::newDestroyedParticleSystems(float 
 void UnitProperties::clearPlugins()
 {
  d->mPlugins.clear();
- if(mMobileProperties) {
+ if (mMobileProperties) {
 	delete mMobileProperties;
 	mMobileProperties = 0;
  }
- if(mFacilityProperties) {
+ if (mFacilityProperties) {
 	delete mFacilityProperties;
 	mFacilityProperties = 0;
  }
