@@ -310,19 +310,13 @@ void BosonBigDisplay::actionClicked(const QPoint& pos, QDataStream& stream, bool
 		send = true;
 	} else { // place constructions
 		VisualFacility* fac = (VisualFacility*)selection().first();
-		if (!fac) {
-			kdError() << "huh?" << endl;
-			return;
-		}
 		if (fac->unitProperties()->canProduce() && fac->hasConstruction()) {
 			// create the new unit
-			//TODO: check if unit can be placed here
 			stream << (Q_UINT32)BosonMessage::MoveConstruct;
-			stream << (Q_UINT32)fac->completedConstruction();
+			stream << (Q_UINT32)fac->id();
 			stream << (Q_UINT32)fac->owner()->id();
 			stream << (Q_INT32)pos.x() / BO_TILE_SIZE;
 			stream << (Q_INT32)pos.y() / BO_TILE_SIZE;
-			fac->removeConstruction();
 			send = true;
 		} 
 	}
