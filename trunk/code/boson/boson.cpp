@@ -1766,15 +1766,17 @@ void Boson::slotReceiveAdvance()
  emit signalAdvance(d->mAdvanceCount, flag);
 
  // Log game state
- QByteArray log;
- QTextStream ts(log, IO_WriteOnly);
- writeGameLog(ts);
- boDebug() << k_funcinfo << "Log size: " << log.size() << endl;
- BosonProfiler p(1745);
- QByteArray comp = qCompress(log);
- d->mGameLogs.append(comp);
- boDebug() << k_funcinfo << "Done, elapsed: " << p.stop() << endl;
- boDebug() << k_funcinfo << "Compressed log size: " << comp.size() << endl;
+ if (advanceCallsCount() % boConfig->gameLogInterval() == 0) {
+	QByteArray log;
+	QTextStream ts(log, IO_WriteOnly);
+	writeGameLog(ts);
+	boDebug() << k_funcinfo << "Log size: " << log.size() << endl;
+	BosonProfiler p(1745);
+	QByteArray comp = qCompress(log);
+	d->mGameLogs.append(comp);
+	boDebug() << k_funcinfo << "Done, elapsed: " << p.stop() << endl;
+	boDebug() << k_funcinfo << "Compressed log size: " << comp.size() << endl;
+ }
 
  d->mAdvanceCallsCount = d->mAdvanceCallsCount + 1;
  d->mAdvanceCount = d->mAdvanceCount + 1; // this advance count is important for Unit e.g. - but not used in this function.
@@ -2264,10 +2266,6 @@ void Boson::killPlayer(Player* player)
 void Boson::writeGameLog(QTextStream& log)
 {
  BosonProfiler p(1744);
-
- if (advanceCallsCount() % boConfig->gameLogInterval() != 0) {
-	return;
- }
 
  log << "Advance calls count: " << advanceCallsCount() << endl;
  QPtrListIterator<KPlayer> it(*playerList());
