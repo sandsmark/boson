@@ -225,8 +225,8 @@ if (!f) return; // already done
 repaint(
 	(f->_x()-view->X()) * BO_TILE_SIZE - BO_SELECT_MARGIN,
 	(f->_y()-view->Y()) * BO_TILE_SIZE - BO_SELECT_MARGIN,
-	f->getWidth()* BO_TILE_SIZE + BO_SELECT_MARGIN + BO_SELECT_MARGIN,
-	f->getHeight()* BO_TILE_SIZE + BO_SELECT_MARGIN + BO_SELECT_MARGIN,
+	f->getWidth() + BO_SELECT_MARGIN + BO_SELECT_MARGIN,
+	f->getHeight() + BO_SELECT_MARGIN + BO_SELECT_MARGIN,
 	FALSE);
 }
 

@@ -82,6 +82,7 @@ private:
 
 /* selection handling */
 	selectionMode_t		selectionMode;
+	int			selectionWho; // -1 is nobody
 
 public: ///orzel : bof...
 	playerFacility		*fixSelected;

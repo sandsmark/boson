@@ -17,7 +17,7 @@ class knownBy
 	bool isKnownBy(ulong mask) { return (known & mask); }
 	void setKnown(ulong mask) { known |= mask; }
 
- private :
+// private :
  ulong  known;
 
 };

@@ -97,10 +97,12 @@ if (u->inherits("mobUnit")) {
 //else printf("facility ");
 //printf("at %d,%d\n", x, y);
 
-im = QMAX(0, x-dist)	- x;
-iM = QMIN(map.width-1, x+dist)	- x;
-jm = QMAX(0, y-dist)	- y;
-jM = QMIN(map.height-1, y+dist)	- y;
+im = QMAX(0, x-dist) - x;
+iM = QMIN(map.width-1,	x+dist ) - x;
+//iM = QMIN(map.width-1,	x+dist+u->getWidth()/BO_TILE_SIZE ) - x;
+jm = QMAX(0, y-dist ) - y;
+jM = QMIN(map.height-1,	y+dist ) - y;
+//jM = QMIN(map.height-1	y+dist+u->getHeight()/BO_TILE_SIZE ) - y;
 
 //printf("im iM jm jM : %d %d %d %d\n", im, iM, jm, jM);
 
@@ -135,6 +137,8 @@ void BosonServer::createMobUnit(uint who, uint x, uint y, mobType type)
 {
 bosonMsgData	data;
 serverMobUnit	*u;
+ulong	k = 0l;
+int	i,j, i2,j2;
 
 logf(LOG_GAME_HIGH, "BosonServer::createMobUnit called");
 
@@ -146,9 +150,31 @@ data.mobile.type = type;
 assert(who< BOSON_MAX_CONNECTION);
 assert(player[who].socketState==SSS_CONNECT_OK);
 
-printf("create : who = %d\n", who);
 u = new serverMobUnit(player[who].buffer, &data.mobile);
-printf("create : who = %d\n", who);
+
+/* who is interested in knowing u's arrival */
+x /= BO_TILE_SIZE;
+y /= BO_TILE_SIZE;
+/* puts("hop1");
+printf("type is %d, width is %d\n", type, mobileProp[type].width);
+printf("u= %p\n", u); */
+i2 = (u->getWidth() + BO_TILE_SIZE -1 ) / BO_TILE_SIZE;
+j2 = (u->getHeight() + BO_TILE_SIZE -1 )/ BO_TILE_SIZE;
+/*i2 = j2 = 1; 
+puts("hop2"); */
+k = getPlayerMask(who);
+for (i=0; i<i2; i++)
+	for (j=0; j<j2; j++)
+		k |= map.cells[x+i][y+j].known;
+u->setKnown(k);
+
+/* telling them */
+for ( i=0; k; i++,k>>=1) {
+	boAssert(i<3);
+	if (k&1l) sendMsg (
+		player[i].buffer,	MSG_MOBILE_CREATED,
+		sizeof(data.mobile),	&data);
+	}
 
 mobile.insert ( key++, u);
 checkUnitVisibility(u);
@@ -159,6 +185,8 @@ void BosonServer::createFixUnit(uint who, uint x, uint y, facilityType type)
 {
 bosonMsgData	data;
 serverFacility	*f;
+int		i,j, i2, j2;
+ulong		k;
 
 logf(LOG_GAME_HIGH, "BosonServer::createFixUnit called");
 
@@ -171,6 +199,24 @@ assert(who< BOSON_MAX_CONNECTION);
 assert(player[who].socketState==SSS_CONNECT_OK);
 
 f = new serverFacility(player[who].buffer, &data.facility);
+
+/* who is interested in knowing u's arrival */
+i2 = facilityProp[type].width;
+j2 = facilityProp[type].height;
+
+k = getPlayerMask(who);
+for (i=0; i<i2; i++)
+	for (j=0; j<j2; j++)
+		k |= map.cells[x+i][y+j].known;
+f->setKnown(k);
+
+/* telling them */
+for ( i=0; k; i++,k>>=1) {
+	boAssert(i<4);
+	if (k&1l) sendMsg (
+		player[i].buffer,	MSG_FACILITY_CREATED,
+		sizeof(data.facility),	&data);
+	}
 
 facility.insert ( key++, f);
 checkUnitVisibility(f);
