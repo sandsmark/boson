@@ -12,7 +12,7 @@ UnitWidth=1.5
 UnitHeight=1.5
 ProductionTime=100
 SightRange=7
-DestroyedParticles=1001
+DestroyedParticles=1001,3001
 Weapons=2
 
 [Boson Mobile Unit]

@@ -10,7 +10,7 @@ Producer=10
 UnitWidth=3.0
 UnitHeight=3.0
 ProductionTime=150
-DestroyedParticles=1001
+DestroyedParticles=1010,3011
 
 [Boson Facility]
 ConstructionSteps=22

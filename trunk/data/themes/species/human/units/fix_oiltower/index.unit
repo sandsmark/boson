@@ -9,7 +9,7 @@ OilCost=0
 Producer=10
 Requirements=8
 ProductionTime=50
-DestroyedParticles=1001
+DestroyedParticles=1001,3002
 
 [Boson Facility]
 ConstructionSteps=10

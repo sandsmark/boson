@@ -9,7 +9,7 @@ OilCost=50
 Producer=10
 Requirements=5,14,2
 ProductionTime=70
-DestroyedParticles=1001
+DestroyedParticles=1001,3001
 Weapons=1
 
 [Boson Facility]

@@ -12,7 +12,7 @@ Armor=1
 Shield=10
 ProductionTime=90
 Weapons=1
-DestroyedParticles=1002
+DestroyedParticles=1002,3002,6001
 
 [Boson Mobile Unit]
 Speed=6

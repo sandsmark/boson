@@ -11,7 +11,7 @@ Requirements=5,2
 UnitWidth=2.0
 UnitHeight=2.0
 ProductionTime=70
-DestroyedParticles=1001
+DestroyedParticles=1010,3010
 
 [Boson Facility]
 ConstructionSteps=14
