@@ -207,13 +207,13 @@ public:
 	 * @return A list of all units that have a @ref UnitProperties::producer
 	 * specified in producerList.
 	 **/
-	QValueList<unsigned long int> productions(QValueList<int> producerList) const;
+	QValueList<unsigned long int> productions(QValueList<unsigned long int> producerList) const;
 
 	/**
 	 * @return A list of all technologies that have a producer specified in
 	 * producerList.
 	 **/
-	QValueList<unsigned long int> technologies(QValueList<int> producerList) const;
+	QValueList<unsigned long int> technologies(QValueList<unsigned long int> producerList) const;
 
 	/**
 	 * Reset this theme. Delete all pixmaps, unitProperties, ...

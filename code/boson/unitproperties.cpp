@@ -52,6 +52,7 @@ public:
 	QPtrList<UpgradeProperties> mNotResearchedUpgrades;
 
 	QPtrList<BosonParticleSystemProperties> mDestroyedParticleSystems;
+	QValueList<unsigned long int> mDestroyedParticleSystemIds;
 };
 
 class UnitProperties::MobileProperties
@@ -79,9 +80,10 @@ public:
 };
 
 
-UnitProperties::UnitProperties()
+UnitProperties::UnitProperties(bool fullmode)
 {
  init();
+ mFullMode = fullmode
 }
 
 UnitProperties::UnitProperties(SpeciesTheme* theme)
@@ -146,8 +148,9 @@ void UnitProperties::loadUnitType(const QString& fileName, bool fullmode)
  isFacility = conf.readBoolEntry("IsFacility", false);
  d->mRequirements = BosonConfig::readUnsignedLongNumList(&conf, "Requirements");
 
+ d->mDestroyedParticleSystemIds = BosonConfig::readUnsignedLongNumList(&conf, "DestroyedParticles");
  if (mFullMode) {
-	d->mDestroyedParticleSystems = BosonParticleSystemProperties::loadParticleSystemProperties(&conf, "DestroyedParticles", mTheme);
+	d->mDestroyedParticleSystems = BosonParticleSystemProperties::loadParticleSystemProperties(d->mDestroyedParticleSystemIds, mTheme);
  }
 
  if (isFacility) {
@@ -162,11 +165,12 @@ void UnitProperties::loadUnitType(const QString& fileName, bool fullmode)
  loadTextureNames(&conf);
  loadSoundNames(&conf);
  loadUpgrades(&conf);
-	loadWeapons(&conf);
+ loadWeapons(&conf);
 }
 
 void UnitProperties::saveUnitType(const QString& fileName)
 {
+ d->mUnitPath = fileName.left(fileName.length() - QString("index.unit").length());
  KSimpleConfig conf(fileName);
  conf.setGroup(QString::fromLatin1("Boson Unit"));
 
@@ -188,8 +192,7 @@ void UnitProperties::saveUnitType(const QString& fileName)
  BosonConfig::writeUnsignedLongNumList(&conf, "Requirements", d->mRequirements);
  conf.writeEntry("Producer", mProducer);
 
- /// TODO
-//	d->mDestroyedParticleSystems = BosonParticleSystemProperties::loadParticleSystemProperties(&conf, "DestroyedParticles", mTheme);
+ BosonConfig::writeUnsignedLongNumList(&conf, "DestroyedParticles", d->mDestroyedParticleSystemIds);
 
  if (isFacility()) {
 	saveFacilityProperties(&conf);
@@ -320,8 +323,13 @@ void UnitProperties::saveFacilityProperties(KSimpleConfig* conf)
 
 void UnitProperties::saveAllPluginProperties(KSimpleConfig* conf)
 {
+ int weaponcounter = 0;
  QPtrListIterator<PluginProperties> it(d->mPlugins);
  while (it.current()) {
+	if(it.current()->pluginType() == PluginProperties::Weapon)
+	{
+		conf->setGroup(QString("Weapon_%1").arg(weaponcounter++));
+	}
 	it.current()->savePlugin(conf);
  }
 }
@@ -486,6 +494,8 @@ const PluginProperties* UnitProperties::properties(int pluginType) const
 void UnitProperties::loadUpgrades(KSimpleConfig* conf)
 {
 // boDebug() << k_funcinfo << endl;
+ d->mUpgrades.clear();
+ d->mNotResearchedUpgrades.clear();
  conf->setGroup("Boson Unit");
  int count = conf->readNumEntry("Upgrades", 0);
  if (count == 0) {
@@ -543,42 +553,98 @@ void UnitProperties::addPlugin(PluginProperties* prop)
 
 void UnitProperties::setCanRefineMinerals(bool r)
 {
- if(mFacilityProperties) {
+ if (mFacilityProperties) {
 	mFacilityProperties->mCanRefineMinerals = r;
  }
 }
 
 void UnitProperties::setCanRefineOil(bool r)
 {
- if(mFacilityProperties) {
+ if (mFacilityProperties) {
 	mFacilityProperties->mCanRefineOil = r;
  }
 }
 
 void UnitProperties::setConstructionSteps(unsigned int steps)
 {
- if(mFacilityProperties) {
+ if (mFacilityProperties) {
 	mFacilityProperties->mConstructionFrames = steps;
  }
 }
 
 void UnitProperties::setSpeed(float speed)
 {
- if(mMobileProperties) {
+ if (mMobileProperties) {
 	mMobileProperties->mSpeed = speed;
  }
 }
 
 void UnitProperties::setCanGoOnLand(bool c)
 {
- if(mMobileProperties) {
+ if (mMobileProperties) {
 	mMobileProperties->mCanGoOnLand = c;
  }
 }
 
 void UnitProperties::setCanGoOnWater(bool c)
 {
- if(mMobileProperties) {
+ if (mMobileProperties) {
 	mMobileProperties->mCanGoOnWater = c;
  }
+}
+
+void UnitProperties::addTextureMapping(QString shortname, QString longname)
+{
+ d->mTextureNames.insert(shortname, longname);
+}
+
+void UnitProperties::addSound(int event, QString filename)
+{
+ d->mSounds.insert(event, filename);
+}
+
+void UnitProperties::reset()
+{
+ if (mFullMode) {
+	// UnitProperties should be never reset in full mode (aka game mode)
+	boWarning() << k_funcinfo << "Resetting UnitProperties in full mode!!!" << endl;
+ }
+ clearPlugins();
+ // Set variables to default values
+ d->mUnitPath = "";
+ mTypeId = 0;
+ mTerrain = (TerrainType)0;
+ mUnitWidth = (unsigned int)(1.0 * BO_TILE_SIZE);
+ mUnitHeight = (unsigned int)(1.0 * BO_TILE_SIZE);
+ mUnitDepth = (unsigned int)(1.0 * BO_TILE_SIZE);
+ d->mName = i18n("Unknown");
+ mHealth = 100;
+ mMineralCost = 100;
+ mOilCost = 0;
+ mSightRange = 5;
+ mProductionTime = 100;
+ mShields = 0;
+ mArmor = 0;
+ mSupportMiniMap = false;
+ d->mRequirements.clear();
+ d->mDestroyedParticleSystemIds.clear();
+ mProducer = 0;
+ // Mobile stuff (because unit is mobile by default)
+ createMobileProperties();
+ mMobileProperties->mSpeed = 0; // Hmm, this doesn't make any sense IMO
+ mMobileProperties->mCanGoOnLand = true;
+ mMobileProperties->mCanGoOnWater = false;
+ // Sounds
+ d->mSounds.clear();
+ d->mSounds.insert(SoundShoot, "shoot");
+ d->mSounds.insert(SoundOrderMove, "order_move");
+ d->mSounds.insert(SoundOrderAttack, "order_attack");
+ d->mSounds.insert(SoundOrderSelect, "order_select");
+ d->mSounds.insert(SoundReportProduced, "report_produced");
+ d->mSounds.insert(SoundReportDestroyed, "report_destroyed");
+ d->mSounds.insert(SoundReportUnderAttack, "report_underattack");
+ // Clear other lists
+ d->mTextureNames.clear();
+ d->mUpgrades.clear();
+ d->mNotResearchedUpgrades.clear();
 }

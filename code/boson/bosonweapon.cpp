@@ -47,6 +47,7 @@ QString BosonWeaponProperties::name() const
 
 void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg, bool full)
 {
+  mName = cfg->readEntry("Name", "");
   mRange = cfg->readUnsignedLongNumEntry("Range", 0);
   mReload = cfg->readUnsignedNumEntry("Reload", 0);
   mSpeed = cfg->readLongNumEntry("Speed", 0);
@@ -67,12 +68,26 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg, bool full)
   // We need to have some kind of model even for bullet (though it won't be shown),
   //  because BosonShot will crash otherwise (actually it's BosonItem)
   mModelFileName = cfg->readEntry("Model", "missile.3ds");
-  mModel = speciesTheme()->objectModel(mModelFileName);
+  if(full) 
+  {
+    mModel = speciesTheme()->objectModel(mModelFileName);
+  }
 }
 
 void BosonWeaponProperties::savePlugin(KSimpleConfig* cfg)
 {
-  /// TODO!!!
+  // Group must have been set before
+  cfg->writeEntry("Range", mRange);
+  cfg->writeEntry("Reload", mReload);
+  cfg->writeEntry("Speed", mSpeed);
+  cfg->writeEntry("Damage", mDamage);
+  cfg->writeEntry("DamageRange", mDamageRange);
+  cfg->writeEntry("CanShootAtAirUnits", mCanShootAtAirUnits);
+  cfg->writeEntry("CanShootAtLandUnits", mCanShootAtLandUnits);
+  cfg->writeEntry("MaxHeight", (double)mMaxHeight);
+  BosonConfig::writeUnsignedLongNumList(cfg, "ShootParticles", mShootParticleSystemIds);
+  BosonConfig::writeUnsignedLongNumList(cfg, "FlyParticles", mFlyParticleSystemIds);
+  BosonConfig::writeUnsignedLongNumList(cfg, "HitParticles", mHitParticleSystemIds);
 }
 
 BosonShot* BosonWeaponProperties::newShot(Unit* attacker, float x, float y, float z, float tx, float ty, float tz) const

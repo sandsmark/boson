@@ -74,6 +74,7 @@ class BosonWeaponProperties : public PluginProperties
      **/
     unsigned long int speed() const  { return mSpeed; };
     QString modelFileName() const  { return mModelFileName; };
+    QString weaponName() const  { return mName; };
 
     float maxHeight() const  { return mMaxHeight; };
 
@@ -85,16 +86,32 @@ class BosonWeaponProperties : public PluginProperties
     QPtrList<BosonParticleSystem> newShootParticleSystems(float x, float y, float z) const;
     QPtrList<BosonParticleSystem> newFlyParticleSystems(float x, float y, float z) const;
     QPtrList<BosonParticleSystem> newHitParticleSystems(float x, float y, float z) const;
-    
-    QValueList<unsigned long int> shootParticleSystemIds() const;
-    QValueList<unsigned long int> flyParticleSystemIds() const;
-    QValueList<unsigned long int> hitParticleSystemIds() const;
+
+    QValueList<unsigned long int> shootParticleSystemIds() const  { return mShootParticleSystemIds; };
+    QValueList<unsigned long int> flyParticleSystemIds() const  { return mFlyParticleSystemIds; };
+    QValueList<unsigned long int> hitParticleSystemIds() const  { return mHitParticleSystemIds; };
 
     virtual QString name() const;
     virtual void loadPlugin(KSimpleConfig* config)  { loadPlugin(config, true); };
     virtual void loadPlugin(KSimpleConfig* config, bool full = true);
     virtual void savePlugin(KSimpleConfig* config);
     virtual int pluginType() const  { return Weapon; };
+    
+  protected:
+    void setWeaponName(QString str)  { mName = str; };
+    void setDamage(long int damage)  { mDamage = damage; };
+    void setDamageRange(float range)  { mDamageRange = range; };
+    void setReloadingTime(unsigned int reload)  { mReload = reload; };
+    void setRange(unsigned long int range)  { mRange = range; };
+    void setCanShootAtAirUnits(bool can)  { mCanShootAtAirUnits = can; };
+    void setCanShootAtLandUnits(bool can)  { mCanShootAtLandUnits = can; };
+    void setSpeed(unsigned long int speed)  { mSpeed = speed; };
+    void setModelFileName(QString file)  { mModelFileName = file; };
+    void setShootParticleSystem(QValueList<unsigned long int> ids)  { mShootParticleSystemIds = ids; };
+    void setFlyParticleSystem(QValueList<unsigned long int> ids)  { mFlyParticleSystemIds = ids; };
+    void setHitParticleSystem(QValueList<unsigned long int> ids)  { mHitParticleSystemIds = ids; };
+
+    friend class BoUnitEditor;
 
   private:
     unsigned long int mRange;
@@ -108,6 +125,7 @@ class BosonWeaponProperties : public PluginProperties
     float mMaxHeight;
     BosonModel* mModel;
     QString mModelFileName;
+    QString mName;
     QPtrList<BosonParticleSystemProperties> mShootParticleSystems;
     QPtrList<BosonParticleSystemProperties> mFlyParticleSystems;
     QPtrList<BosonParticleSystemProperties> mHitParticleSystems;

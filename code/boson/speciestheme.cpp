@@ -694,7 +694,7 @@ QValueList<const UnitProperties*> SpeciesTheme::allUnits() const
  return list;
 }
 
-QValueList<unsigned long int> SpeciesTheme::productions(QValueList<int> producers) const
+QValueList<unsigned long int> SpeciesTheme::productions(QValueList<unsigned long int> producers) const
 {
  QValueList<unsigned long int> list;
  QIntDictIterator<UnitProperties> it(d->mUnitProperties);
@@ -727,7 +727,7 @@ QValueList<unsigned long int> SpeciesTheme::productions(QValueList<int> producer
  return list;
 }*/
 
-QValueList<unsigned long int> SpeciesTheme::technologies(QValueList<int> producers) const
+QValueList<unsigned long int> SpeciesTheme::technologies(QValueList<unsigned long int> producers) const
 {
  QValueList<unsigned long int> list;
  QIntDictIterator<TechnologyProperties> it(d->mTechnologies);
