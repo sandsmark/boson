@@ -38,7 +38,6 @@ dnl fi
 dnl ])
 dnl AC_CHECK_KGAMEPROGRESS
 
-KDE_CHECK_STL
 
 dnl TODO: we need to find out which version is installed and which we need
 AC_DEFUN(AC_CHECK_LIB3DS,

@@ -69,6 +69,7 @@ class PathNode
   public:
     PathNode() { x = 0; y = 0; g = 0; h = 0; level = -1; };
     inline void operator=(const PathNode& a);
+    inline bool operator<(const PathNode& a);
     int x; // x-coordinate of cell
     int y; // y-coordinate of cell
 
@@ -86,15 +87,9 @@ inline void PathNode::operator=(const PathNode& a)
   level = a.level;
 }
 
-// AB: that const once was added for g++-3.x -> i am sure it is used for nothing
-// - but please test before removing... sometimes gcc is *really* strange...
-inline const bool operator<(const PathNode& a, const PathNode& b)
+inline bool PathNode::operator<(const PathNode& a)
 {
-  return (a.g + a.h) < (b.g + b.h);
-}
-inline const bool operator>(const PathNode& a, const PathNode& b)
-{
-  return (a.g + a.h) > (b.g + b.h);
+  return (g + h) < (a.g + a.h);
 }
 
 /** Describes found path
@@ -113,10 +108,6 @@ enum PathStyle {
   AlternatePath = 4
 };
 
-/*
-* !!! Please do not make big changes to code in this class unless you really now
-*    what you are doing and if you make any bigger changes, send note to author!
-*/
 
 BosonPath::BosonPath(Unit* unit, int startx, int starty, int goalx, int goaly, int range)
 {
@@ -203,16 +194,13 @@ bool BosonPath::findFastPath()
   int tox, toy;
   bool movebyx, movebyy;
   int steps;
-  // Find path inside unit's sight range only, but at least 4 steps
-  // FIXME: this may couse trouble in certain situations
-  int length = QMAX(4, mUnit->unitProperties()->sightRange());
+  // Find path inside unit's sight range only, but at least 4 steps and not more
+  //  than SEARCH_STEPS in any case
+  int length = QMIN(SEARCH_STEPS, QMAX(4, mUnit->unitProperties()->sightRange()));
 
   lastx = mStartx;
   lasty = mStarty;
 
-  // FIXME: it'd be best if we'd search unit->sightRange() steps here, but we
-  //  don't have unit available here currently and I'm too lazy to change it
-  //  right now...
   for(steps = 0; steps < length; steps++)
   {
     // Calculate, how many steps to go in each direction
@@ -293,18 +281,15 @@ bool BosonPath::findFastPath()
   {
     wp.setX(x[i] * BO_TILE_SIZE + BO_TILE_SIZE / 2);
     wp.setY(y[i] * BO_TILE_SIZE + BO_TILE_SIZE / 2);
-    path.push_back(wp);
+    path.append(wp);
   }
 
   i = steps - 1;
-  if((x[i] != mGoalx) || (y[i] != mGoaly))
+  if((x[i] == mGoalx) && (y[i] == mGoaly))
   {
-    // Only partial path was found
-//    wp.setX(-2);
-//    wp.setY(-2);
-//    path.push_back(wp);
-  } else {
-    path.push_back(QPoint(-1, -1));  // This means that end of path has been reached
+    // Full path was found. If partial path was found, pathfinder will be
+    //  automatically called again when there's no waypoint left.
+    path.append(QPoint(-1, -1));  // This means that end of path has been reached
   }
 
   //gettimeofday(&time2, 0);
@@ -323,11 +308,7 @@ bool BosonPath::findSlowPath()
   mPathLength = 0;
   mPathCost = 0;
   PathStyle pathfound = NoPath;
-#if USE_STL
-  vector<PathNode> open;
-#else
   QValueList<PathNode> open;
-#endif
 
   // Create first (main) node
   PathNode node;
@@ -347,7 +328,7 @@ bool BosonPath::findSlowPath()
   node.h = dist(mStartx, mStarty, mGoalx, mGoaly);
 
   // add node to OPEN
-  open.push_back(node);
+  open.append(node);
 
   // mark values on 'virtual map'
   marking(node.x, node.y).f = node.g + node.h;
@@ -361,7 +342,7 @@ bool BosonPath::findSlowPath()
   nearest = node;
 
   // Main loop
-  while(! open.empty())
+  while(!open.empty())
   {
     // First check if we're at goal already
     if(inRange(node.x, node.y))
@@ -403,11 +384,8 @@ bool BosonPath::findSlowPath()
     {
       boDebug(500) << k_funcinfo << "mNodesRemoved >= ABORTPATH" << endl;
       // Pick best node from OPEN
-#if USE_STL
-      for(vector<PathNode>::iterator i = open.begin(); i != open.end(); ++i)
-#else
-      for(QValueList<PathNode>::iterator i = open.begin(); i != open.end(); ++i)
-#endif
+      QValueList<PathNode>::iterator i;
+      for(i = open.begin(); i != open.end(); ++i)
       {
         if(((*i).g + (*i).h) < (node.g + node.h))
         {
@@ -475,13 +453,8 @@ bool BosonPath::findSlowPath()
         marking(n2.x, n2.y).f = n2.g + n2.h;
         marking(n2.x, n2.y).g = n2.g;
         marking(n2.x, n2.y).level = n2.level;
-        // Push node to OPEN
-        open.push_back(n2);
-#if USE_STL
-        push_heap(open.begin(), open.end(), comp);
-#else
-        qHeapSort(open);
-#endif
+        // Add node to OPEN
+        addNode(open, n2);
       }
       else
       {
@@ -494,12 +467,8 @@ bool BosonPath::findSlowPath()
             // Our current node has lower cost than the one, that was here, so
             //  we modify the path
             // First, find this node in OPEN
-#if USE_STL
-            vector<PathNode>::iterator find = open.begin();
-#else
-            QValueList<PathNode>::iterator find = open.begin();
-#endif
-            for(; find != open.end(); ++find)
+            QValueList<PathNode>::iterator find;
+            for(find = open.begin(); find != open.end(); ++find)
             {
               if(((*find).x == n2.x) && ((*find).y == n2.y))
               {
@@ -508,7 +477,7 @@ bool BosonPath::findSlowPath()
             }
             if (find == open.end()) 
             {
-              boError(500) << "find != open.end()" << endl;
+              boError(500) << "find == open.end()" << endl;
               break; // or what?
             }
             // Mark new direction from this node to previous one
@@ -518,13 +487,8 @@ bool BosonPath::findSlowPath()
             marking(n2.x, n2.y).f = n2.g + n2.h;
             marking(n2.x, n2.y).level = n2.level;
             // Replace cost and level of node that was in OPEN
-            (*find).g = n2.g;
-            (*find).level = n2.level;
-#if USE_STL
-            push_heap(open.begin(), find + 1, comp);
-#else
-            qHeapSort(open.begin(), ++find);
-#endif
+            open.erase(find);
+            addNode(open, n2);
           }
         }
       }
@@ -535,7 +499,6 @@ bool BosonPath::findSlowPath()
 
   // Pathfinding finished, but was the path found
   // We now check value of pathfound to see if path was found
-//  if((node.x == mGoalx) && (node.y == mGoaly) && (node.g < MAX_PATH_COST))
   if(pathfound != NoPath)
   {
     // Something was
@@ -563,12 +526,10 @@ bool BosonPath::findSlowPath()
     {
       counter++;
       // Add waypoint
-      temp.push_back(wp);
+      temp.append(wp);
       mPathLength++;
       d = marking(x, y).dir; // the direction to the next cell
       neighbor(x, y, d);
-//      wp.setX(x * BO_TILE_SIZE + BO_TILE_SIZE / 2);
-//      wp.setY(y * BO_TILE_SIZE + BO_TILE_SIZE / 2);
       wp.setX(x * BO_TILE_SIZE + mUnit->width() / 2);
       wp.setY(y * BO_TILE_SIZE + mUnit->height() / 2);
     }
@@ -578,29 +539,18 @@ bool BosonPath::findSlowPath()
     }
 
     // Write normal-ordered path to path
-    // We first add waypoint with coordinates of center of tile unit currently
-    //  is on. This helps to get rid of some collisions.
-    //wp.setX(mStartx * BO_TILE_SIZE + BO_TILE_SIZE / 2);
-    //wp.setY(mStarty * BO_TILE_SIZE + BO_TILE_SIZE / 2);
-    //path.push_back(wp);
     for(int i = temp.size() - 1; i >= 0; --i)
     {
       wp.setX(temp[i].x());
       wp.setY(temp[i].y());
-      path.push_back(wp);
+      path.append(wp);
     }
 
-    // If no full path was found, then we add another point with coordinates
-    //  -2; -2 to the path, indicating that this is just partial path.
-    if(pathfound != FullPath && pathfound != AlternatePath)
-    {
-//      path.push_back(QPoint(-2, -2));
-    }
-    else
+    if(pathfound == FullPath || pathfound == AlternatePath)
     {
       // Point with coordinates -1; -1 means that end of the path has been
       //  reached and unit should stop
-      path.push_back(QPoint(-1, -1));
+      path.append(QPoint(-1, -1));
     }
     //gettimeofday(&time2, 0);
     //boDebug(500) << k_funcinfo << "Path found (using slow method)! Time elapsed: " <<
@@ -616,7 +566,7 @@ bool BosonPath::findSlowPath()
     // If path wasn't found we add one point with coordinates -1; -1 to path.
     //  In Unit::advanceMove(), there is check for this and if coordinates are
     //  those, then moving is stopped
-    path.push_back(QPoint(-1, -1));
+    path.append(QPoint(-1, -1));
     //gettimeofday(&time2, 0);
     //boDebug(500) << k_funcinfo << "Time elapsed: " << time2.tv_usec - time1.tv_usec << "microsec." << endl;
   }
@@ -836,20 +786,29 @@ float BosonPath::cost(int x, int y)
   return co;
 }
 
-#if USE_STL
-void BosonPath::getFirst(vector<PathNode>& v, PathNode& n)
-#else
 void BosonPath::getFirst(QValueList<PathNode>& v, PathNode& n)
-#endif
 {
-  n = v.front();
-#if USE_STL
-  pop_heap(v.begin(), v.end(), comp);
-  v.pop_back();
-#else
-  qHeapSort(v);
-  v.pop_front();
-#endif
+  // List is already sorted. If we remove first item, it will remain sorted.
+  n = v.first();
+  v.erase(v.begin());
+}
+
+void BosonPath::addNode(QValueList<PathNode>& list, const PathNode& n)
+{
+  // Add n to the correct position in the list, so that list is kept sorted
+  //  (given that it was sorted before)
+  QValueList<PathNode>::iterator i;
+  for(i = list.begin(); i != list.end(); ++i)
+  {
+    if((n.g + n.h) <= ((*i).g + (*i).h))
+    {
+      list.insert(i, n);
+      break;
+    }
+  }
+  if(i == list.end()) {
+    list.append(n);
+  }
 }
 
 Direction BosonPath::reverseDir(Direction d)
@@ -859,21 +818,21 @@ Direction BosonPath::reverseDir(Direction d)
 
 void BosonPath::debug() const
 {
- boDebug() << k_funcinfo << endl;
- if (!mUnit) {
-	boError(500) << "NULL unit" << endl;
-	return;
- }
- boDebug(500) << "unit: " << mUnit->id() << endl;
- boDebug(500) << "startx,starty = " << mStartx << "," << mStarty << endl;
- boDebug(500) << "goalx,goaly = " << mGoalx << "," << mGoaly << endl;
- boDebug(500) << "waypoints: " << path.size() << endl;
- int j = 0;
- for(QValueList<QPoint>::const_iterator i = path.begin(); i != path.end(); ++i, j++) {
-	boDebug(500) << "waypoint " << j << ":" << endl;
-	boDebug(500) << "x,y=" << (*i).x() << "," << (*i).y() << endl;
- }
- boDebug() << k_funcinfo << "(end)" << endl;
+  boDebug() << k_funcinfo << endl;
+  if(!mUnit) {
+    boError(500) << "NULL unit" << endl;
+    return;
+  }
+  boDebug(500) << "unit: " << mUnit->id() << endl;
+  boDebug(500) << "startx,starty = " << mStartx << "," << mStarty << endl;
+  boDebug(500) << "goalx,goaly = " << mGoalx << "," << mGoaly << endl;
+  boDebug(500) << "waypoints: " << path.size() << endl;
+  int j = 0;
+  for(QValueList<QPoint>::const_iterator i = path.begin(); i != path.end(); ++i, j++) {
+    boDebug(500) << "waypoint " << j << ":" << endl;
+    boDebug(500) << "x,y=" << (*i).x() << "," << (*i).y() << endl;
+  }
+  boDebug() << k_funcinfo << "(end)" << endl;
 }
 
 bool BosonPath::inRange(int x, int y)

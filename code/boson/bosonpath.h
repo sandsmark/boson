@@ -23,22 +23,6 @@
 
 #include <qvaluelist.h>
 
-// Defines whether to use STL (Standard Template Library) or QTL (Qt Template Library)
-// If there is no STL implementation for your compiler, you can use QTL, but I
-//  recommend using STL as it is little bit faster (should be at least)
-// AB: I recommend QTL, since there are *many* compiler problems less! speedup
-// with STL is extremely low and QTL is way more stable, concerning compilation
-// (and easier to use).
-#include <config.h>
-#if defined(HAVE_HP_STL) || defined(HAVE_SGI_STL)
- #define USE_STL 0
-#endif
-
-#if USE_STL
- #include <vector>
- using std::vector;
- using std::greater;
-#endif
 
 #define SEARCH_STEPS 25  // How many steps of path to find
 
@@ -101,17 +85,10 @@ class BosonPath
 
   private:
     class Marking;
-    /// TODO: QTL impl.
-#if USE_STL
-    greater<PathNode> comp;
-#endif
     float dist(int ax, int ay, int bx, int by);
     float cost(int x, int y);
-#if USE_STL
-    void getFirst(vector<PathNode>&, PathNode& n);
-#else
-    void getFirst(QValueList<PathNode>&, PathNode& n);
-#endif
+    void getFirst(QValueList<PathNode>& list, PathNode& n);
+    void addNode(QValueList<PathNode>& list, const PathNode& n);
     void neighbor(int& x, int& y, Direction d);
     Direction reverseDir(Direction d);
     bool inRange(int x, int y);
