@@ -26,12 +26,14 @@
 /*
  * mobiles should be from lower to higher
  */
+
+// order matters : the latest, the 'highest', so flyers belongs to the end..
 enum mobType {
 	MOB_SHIP = 0,
 	MOB_QUAD,
-	MOB_AIRCRAFT,
 	MOB_OIL_HARVESTER,
 	MOB_MINERAL_HARVESTER,
+	MOB_AIRCRAFT,
 	MOB_LAST
 	};
 

@@ -41,9 +41,9 @@
 mobileProperties_t mobileProp[] = {
 	{"ship",		96, 96,  2, 100,	200, 100, 3, BO_GO_SEA},	// MOB_SHIP
 	{"quad",		32, 32,  3, 70,		200, 100, 2, BO_GO_EARTH},	// MOB_QUAD
-	{"aircraft",		72, 72,  3, 100,	200, 100, 3, BO_GO_AIR},	// MOB_AIRCRAFT
 	{"oilharvester",	64, 64,  4, 0,		200, 100, 1, BO_GO_EARTH},	// MOB_OIL_HARVESTER
 	{"mineralharvester",	64, 64,  4, 0,		200, 100, 1, BO_GO_EARTH},	// MOB_MINERAL_HARVESTER
+	{"aircraft",		72, 72,  3, 100,	200, 100, 3, BO_GO_AIR},	// MOB_AIRCRAFT
 	};
 //	                        width    visibility     mineral   speed
 //	                            height  range            oil     goFlag
