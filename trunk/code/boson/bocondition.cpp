@@ -21,8 +21,7 @@
 
 #include "boevent.h"
 #include "boeventmatching.h"
-#include "boeventmanager.h"
-#include "boson.h"
+#include "boson.h" // boGame->queueEvent()
 #include "bodebug.h"
 #include "script/bosonscript.h"
 
