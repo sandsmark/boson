@@ -78,12 +78,14 @@ Player::Player() : KPlayer()
 Player::~Player()
 {
  kdDebug() << k_funcinfo << endl;
+ kdDebug() << k_funcinfo << "clearing units" << endl;
  d->mUnits.clear();
+ kdDebug() << k_funcinfo << "units cleared" << endl;
  dataHandler()->clear();
  delete mSpecies;
  delete d->mStatistics;
  delete d;
-// kdDebug() << "~Player done" << endl;
+ kdDebug() << k_funcinfo << "done" << endl;
 }
 
 void Player::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 sender, KPlayer*)
