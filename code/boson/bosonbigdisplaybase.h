@@ -383,10 +383,6 @@ public slots:
 	void slotFog(int x, int y);
 	void slotUnfog(int x, int y);
 
-	void slotShowPlaceFacilities(Player*);
-	void slotShowPlaceMobiles(Player*);
-	void slotShowPlaceGround();
-
 	void slotRotateLeft(float factor = 5);
 	void slotRotateRight(float factor = 5);
 	void slotZoomIn(float factor = 5);
@@ -594,15 +590,6 @@ protected:
 	 * Called by @ref paintGL only to render text on the screen
 	 **/
 	void renderText();
-
-	void updateUfoLabels();
-	void updateUfoLabelPathFinderDebug();
-	void updateUfoLabelMatricesDebug();
-	void updateUfoLabelItemWorkStatistics();
-	void updateUfoLabelOpenGLCamera();
-	void updateUfoLabelRenderCounts();
-	void updateUfoLabelAdvanceCalls();
-	void updateUfoLabelTextureMemory();
 
 	virtual void enterEvent(QEvent*);
 	virtual void leaveEvent(QEvent*);
