@@ -1729,7 +1729,7 @@ void MobileUnit::turnTo()
  float yspeed = yVelocity();
  // Set correct frame
  if ((xspeed == 0) && (yspeed < 0)) { // North
- 	turnTo(North);
+	turnTo(North);
  } else if ((xspeed > 0) && (yspeed < 0)) { // NE
 	turnTo(NorthEast);
  } else if ((xspeed > 0) && (yspeed == 0)) { // East
