@@ -4,16 +4,15 @@ use strict;
 # Script to get the unit/facility information from the .unit files.
 
 sub getval() {
-        # You need the facility type (fix / mod) the name and the filesystem level (root is the doc/language dir)
+        # You need the facility type (fix / mod) and the name 
         my $self = shift;
         my $type = shift or die("Please define a facility type");	
         my $name = shift or die("Please define a facility name");
-        # this must be removed, but every facility file has to be changed too
-
+        
         # debug output
         #print "Facillity Type: $type\n";
         #print "Facility Name: $name\n";
-
+            
         my $path1;
         my $path2;
         $path1 = "$ENV{TOP_SRCDIR}/themes/species/human/units/$type\_$name/index.unit";
@@ -77,7 +76,57 @@ sub getval() {
                                 }
                         }
                 }
-        print "</table></td></tr></table>\n";}
+        print "</table></td></tr></table>\n";
+}
+
+
+
+sub getIndexVals() {
+        # You need the facility type (fix / mod) and the name
+        my $self = shift;
+        my $type = shift or die("Please define a facility type");	
+        my $name = shift or die("Please define a facility name");
+        
+        
+        if ($name ne "map") {
+        my $path1;
+        $path1 = "$ENV{TOP_SRCDIR}/themes/species/human/units/$type\_$name/index.unit";
+
+        # Open index.destop and values.list
+        open( FILE, "<$path1") || die "Cannot open $type\_$name/index.unit $ENV{TOP_SRCDIR}/themes/species/human/units/$type\_$name/index.unit";
+        
+        my @CONTENT;
+
+        @CONTENT = <FILE>;
+        close(FILE);
+
+        my @searchValues;
+        
+        @searchValues = ("Health", "OilCost", "MineralCost");
+
+        print "<table border=\"0\">\n";
+
+        my $line;
+        my $found_value;
+        my $value;
+
+        foreach $line (@CONTENT) {
+                foreach $found_value (@searchValues) {
+                        # remove all spaces and \n
+                        #$line =~ s/\s//g;
+                        $found_value =~ s/\s//g;
+                        $found_value =~ tr/\n//d;
+                        #print "trying: $line <--> $line2\n";
+                        if ($line =~ /^$found_value=\s*(.*)/ ) {
+                                $value = $1;
+                                print "<tr><td>$found_value</td><td>$value</td></tr>\n";
+                                }
+                        }
+                }
+        print "</table>\n";
+        }
+}
+
 
 1;
 
