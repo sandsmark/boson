@@ -63,9 +63,9 @@ BosonData* BosonData::bosonData()
  return BoGlobal::boGlobal()->bosonData();
 }
 
-QStringList BosonData::availableFiles(const QString& searchPattern)
+QStringList BosonData::availableFiles(const QString& searchPattern, bool recursive)
 {
- return KGlobal::dirs()->findAllResources("data", QString::fromLatin1("boson/") + searchPattern);
+ return KGlobal::dirs()->findAllResources("data", QString::fromLatin1("boson/") + searchPattern, recursive);
 }
 
 bool BosonData::insertGroundTheme(BosonDataObject* theme)
