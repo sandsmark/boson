@@ -162,6 +162,10 @@ bool BosonTiles::loadTiles(QString dir, bool debug)
 
 void BosonTiles::generateTextures()
 {
+ if (mTextureImages.count() == 0) {
+	boError() << k_funcinfo << "0 texture images available!" << endl;
+	return;
+ }
  QValueList<QImage> images;
  for (unsigned int i = 0; i < mTextureImages.count(); i++) {
 	images.append(mTextureImages[i]);
