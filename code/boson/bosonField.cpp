@@ -109,14 +109,15 @@ void bosonField::destroyMob(destroyedMsg_t &m)
 	playerMobUnit *mob ;
 	
 	mob = mobile.find(m.key);
-	if (mob) {
-		boCheck(m.x, mob->x());
-		boCheck(m.y, mob->y());
-		}
-	else {
+	if (!mob) {
 		logf(LOG_ERROR, "bosonField::destroyMob : can't find m.key");
 		return;
-		}
+	}
+
+	boCheck(m.x, mob->x());
+	boCheck(m.y, mob->y());
+
+	new boShot( mob->_x(), mob->_y(), mob->z(), true);
 
 	boAssert( mobile.remove(m.key) == true );
 }
@@ -167,14 +168,14 @@ void bosonField::destroyFix(destroyedMsg_t &msg)
 	playerFacility * f;
 	
 	f = facility.find(msg.key);
-	if (f) {
-		boCheck(msg.x, f->x());
-		boCheck(msg.y, f->y());
-	}
-	else {
+	if (!f) {
 		logf(LOG_ERROR, "bosonField::destroyFix : can't find msg.key");
 		return;
 	}
+	boCheck(msg.x, f->x());
+	boCheck(msg.y, f->y());
+
+	new boShot( f->_x(), f->_y(), f->z(), true);
 
 	boAssert( facility.remove(msg.key) == true);
 }
