@@ -488,16 +488,19 @@ QByteArray BosonMap::saveHeightMapImage()
 		for (int x = 0; x < image.width(); x++) {
 			float value = mHeightMap[y * (width() + 1) + x];
 			int v = heightToPixel(value);
-			*p = v;
+			*p = qRgb(v, v, v);
 			p++;
 		}
 	}
  }
 
- // "<<" saves a QImage as png.
  QByteArray array;
  QDataStream stream(array, IO_WriteOnly);
- stream << image;
+ QImageIO io;
+ io.setIODevice(stream.device());
+ io.setFormat("PNG");
+ io.setImage(image);
+ io.write();
  return array;
 }
 
