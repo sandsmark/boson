@@ -541,10 +541,10 @@ bool HarvesterPlugin::canMine(ResourceMinePlugin* p) const
 	boError() << k_funcinfo << "NULL harvester properties" << endl;
 	return false;
  }
- if (prop->canMineMinerals() && p->canProvideMinerals() && p->minerals() > 0) {
+ if (prop->canMineMinerals() && p->canProvideMinerals() && p->minerals() != 0) {
 	return true;
  }
- if (prop->canMineOil() && p->canProvideOil() && p->oil() > 0) {
+ if (prop->canMineOil() && p->canProvideOil() && p->oil() != 0) {
 	return true;
  }
  return false;
