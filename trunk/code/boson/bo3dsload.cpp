@@ -593,6 +593,7 @@ void Bo3DSLoad::loadFaces(BoMesh* boMesh, Lib3dsMesh* mesh)
 	points[1] = f->points[1];
 	points[2] = f->points[2];
 	face.setPointIndex(points);
+	face.setSmoothGroup(f->smoothing);
 	boMesh->setFace(i, face);
  }
 }

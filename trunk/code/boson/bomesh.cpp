@@ -546,11 +546,13 @@ BoFace::BoFace()
  mPointIndex[0] = -1;
  mPointIndex[1] = -1;
  mPointIndex[2] = -1;
+ mSmoothGroup = 0;
 }
 
 BoFace& BoFace::operator=(const BoFace& face)
 {
  setPointIndex(face.pointIndex());
+ setSmoothGroup(face.smoothGroup());
 #if BOMESH_USE_1_NORMAL_PER_FACE
  mNormals[0] = face.mNormals[0];
 #else
@@ -1303,35 +1305,55 @@ void BoMesh::calculateNormals(unsigned int _lod)
 
  BoMeshLOD* lod = levelOfDetail(_lod);
  BO_CHECK_NULL_RET(lod);
+
+ // Normals are calculated in two passes:
+ // First we calculate normals for all faces
+ // Then, we calculate normals for vertices
+ //  If face is not in any smoothing group, it's vertices will have same normal
+ //   as the face (flat smoothing)
+ //  If face is in smoothing group, we take the average of the normals of all
+ //   faces that have this vertex and that are in the same smoothing group. This
+ //   way we don't have to recalculate face normals all the time.
+
+ // Pass 1: calculate face normals
+ BoVector3* facenormals = new BoVector3[lod->facesCount()];
+ BoVector3 a, b, c;
  for (unsigned int face = 0; face < lod->facesCount(); face++) {
-	BoVector3 a(vertex(face, 0, _lod));
-	BoVector3 b(vertex(face, 1, _lod));
-	BoVector3 c(vertex(face, 2, _lod));
-#if AB_DEBUG_1
-	boDebug() << k_funcinfo << face << ": a=" << a.debugString() << endl;
-	boDebug() << k_funcinfo << face << ": b=" << b.debugString() << endl;
-	boDebug() << k_funcinfo << face << ": c=" << c.debugString() << endl;
-#endif
+	a = vertex(face, 0, _lod);
+	b = vertex(face, 1, _lod);
+	c = vertex(face, 2, _lod);
 
-	// AB: we use the same order as lib3ds does. check whether this is the
-	// correct order.
-	BoVector3 p, q;
-	p = c - b;
-	q = a - b;
-#if AB_DEBUG_1
-	boDebug() << k_funcinfo << face << ": p=" << p.debugString() << endl;
-	boDebug() << k_funcinfo << face << ": q=" << q.debugString() << endl;
-#endif
-	BoVector3 normal = BoVector3::crossProduct(p, q);
-#if AB_DEBUG_1
-	boDebug() << k_funcinfo << face << ": normal1=" << normal.debugString() << endl;
-#endif
-	normal.normalize();
-#if AB_DEBUG_1
-	boDebug() << k_funcinfo << face << ": normal2=" << normal.debugString() << endl;
-#endif
+	facenormals[face] = BoVector3::crossProduct(c - b, a - b);
+	facenormals[face].normalize();
+ }
 
-	lod->setNormal(face, -1, normal);
+ // Pass 2: calculate vertex normals. If face is not in any smoothing group,
+ //  it's normal is it's face's normal
+ for (unsigned int face = 0; face < lod->facesCount(); face++) {
+	if (lod->face(face)->smoothGroup()) {
+#if !BOMESH_USE_1_NORMAL_PER_FACE
+		// Face is in some smoothing group. Use smooth shading
+		for (int p = 0; p < 3; p++) {
+			BoVector3 normal;
+			for (unsigned int face2 = 0; face2 < lod->facesCount(); face2++) {
+				if(lod->face(face)->smoothGroup() & lod->face(face2)->smoothGroup()) {
+					// Two faces have same smooth groups
+					if (lod->face(face2)->hasPoint(lod->face(face)->pointIndex()[p])) {
+						// And it has our point
+						normal += facenormals[face2];
+					}
+				}
+			}
+			normal.normalize();
+			lod->setNormal(face, p, normal);
+		}
+#else
+		lod->setNormal(face, -1, facenormals[face]);
+#endif
+	} else {
+		// Face is not in any smoothing group. Use flat shading
+		lod->setNormal(face, -1, facenormals[face]);
+	}
  }
 }
 
