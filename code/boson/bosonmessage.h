@@ -30,6 +30,7 @@ public:
 		ChangeSpecies = 1, // for new game dialog
 		ChangePlayField = 2, // for new game dialog
 		ChangeTeamColor = 4, // for new game dialog
+		IdNewGame = 5, // for new game (no, not dialog anymore ;)) widget
 		IdInitFogOfWar = 10,
 		IdStartScenario = 11,
 		AddUnit = 50, // whenever a unit is added

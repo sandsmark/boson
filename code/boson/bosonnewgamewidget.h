@@ -158,6 +158,9 @@ class BosonNewGameWidget : public QWidget
     void signalCancelled();
     void signalShowServerOptions();
 
+  protected slots:
+    void slotSendNewGame();
+
   protected:
     QVBoxLayout* BosonNewGameWidgetLayout;
     QVBoxLayout* mainlayout;
