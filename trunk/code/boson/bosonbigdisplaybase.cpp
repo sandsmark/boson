@@ -2842,7 +2842,7 @@ void BosonBigDisplayBase::setInputInitialized(bool initialized)
  d->mInputInitialized = initialized;
 }
 
-QByteArray BosonBigDisplayBase::grabMovie()
+QByteArray BosonBigDisplayBase::grabMovieFrame()
 {
  boDebug() << k_funcinfo << "Grabbing movie frame..." << endl;
 
