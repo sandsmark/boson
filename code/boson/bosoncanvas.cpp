@@ -1011,6 +1011,22 @@ float BosonCanvas::heightAtPoint(bofixed x, bofixed y) const
  int cellX = (int)(x);
  int cellY = (int)(y);
 
+ if ((x == cellX) && (y == cellY)) {
+	return heightAtCorner(cellX, cellY) + boWaterManager->waterDepth(cellX, cellY);
+ } else if(x == cellX) {
+	bofixed y2 = (y) - cellY;
+	float h1, h2;
+	h1 = heightAtCorner(cellX, cellY) + boWaterManager->waterDepth(cellX, cellY);
+	h2 = heightAtCorner(cellX, cellY + 1) + boWaterManager->waterDepth(cellX, cellY + 1);
+	return h1 * (1 - y2) + (h2 * y2);
+ } else if(y == cellY) {
+	bofixed x2 = (x) - cellX;
+	float h1, h2;
+	h1 = heightAtCorner(cellX, cellY) + boWaterManager->waterDepth(cellX, cellY);
+	h2 = heightAtCorner(cellX + 1, cellY) + boWaterManager->waterDepth(cellX + 1, cellY);
+	return h1 * (1 - x2) + (h2 * x2);
+ }
+
  // Will be used as factors for blending
  bofixed x2 = (x) - cellX;
  bofixed y2 = (y) - cellY;
@@ -1033,6 +1049,22 @@ float BosonCanvas::terrainHeightAtPoint(bofixed x, bofixed y) const
  // Coordinates of the cell (x; y) is on
  int cellX = (int)(x);
  int cellY = (int)(y);
+
+ if ((x == cellX) && (y == cellY)) {
+	return heightAtCorner(cellX, cellY);
+ } else if(x == cellX) {
+	bofixed y2 = (y) - cellY;
+	float h1, h2;
+	h1 = heightAtCorner(cellX, cellY);
+	h2 = heightAtCorner(cellX, cellY + 1);
+	return h1 * (1 - y2) + (h2 * y2);
+ } else if(y == cellY) {
+	bofixed x2 = (x) - cellX;
+	float h1, h2;
+	h1 = heightAtCorner(cellX, cellY);
+	h2 = heightAtCorner(cellX + 1, cellY);
+	return h1 * (1 - x2) + (h2 * x2);
+ }
 
  // Will be used as factors for blending
  bofixed x2 = (x) - cellX;
