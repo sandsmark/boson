@@ -49,6 +49,7 @@
 #include <qimage.h>
 #include <qtimer.h>
 #include <qcursor.h>
+#include <qpointarray.h>
 
 #if HAVE_SYS_TIME_H
 #include <sys/time.h>
@@ -599,6 +600,24 @@ void BosonBigDisplayBase::paintGL()
 		kdWarning() << k_funcinfo << "NULL display list for item rtti=" << item->rtti() << endl;
 		continue;
 	}
+
+	// FIXME: we have to copy the complete list of cells here, since it is
+	// calculated on the fly by cells()! nicer version would be to add
+	// BosonPrite::isFogged() and check it there.
+	QPointArray cells = item->cells();
+	bool visible = false;
+	for (int i = 0; i < cells.count(); i++) {
+		if (!localPlayer()->isFogged(cells[i].x(), cells[i].y())) {
+			visible = true;
+			// ugly but faster than placing this into the loop
+			// condition
+			break;
+		}
+	}
+	if (!visible) {
+		continue;
+	}
+
 	glTranslatef(x, y, z);
 	glPushMatrix();
 	glRotatef(-(item->rotation()), 0.0, 0.0, 1.0);
@@ -642,34 +661,7 @@ void BosonBigDisplayBase::paintGL()
 
  glDisable(GL_DEPTH_TEST);
 
-
- // Fog Of War
- boProfiling->renderFOW(true);
- glColor3f(0.0, 0.0, 0.0);
- GLfloat cellYPos = -BO_GL_CELL_SIZE;
- GLfloat cellXPos = 0.0;
- BosonMap* map = mCanvas->map();
- glBegin(GL_QUADS);
-	// bah - for() between glBegin()/glEnd() isn't nice. but we can't use
-	// display lists here as we do for cell drawing :-(
-	for (unsigned int cellY = 0; cellY < map->height(); cellY++, cellYPos -= BO_GL_CELL_SIZE) {
-		cellXPos = 0.0;
-		for (unsigned int cellX = 0; cellX < map->width(); cellX++, cellXPos += BO_GL_CELL_SIZE) {
-			if (localPlayer()->isFogged(cellX, cellY)) { // bah - again something between glBegin()/glEnd() !! FIXME!
-				glVertex3f(cellXPos, cellYPos, 0.0);
-				glVertex3f(cellXPos, cellYPos + BO_GL_CELL_SIZE, 0.0);
-				glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos + BO_GL_CELL_SIZE, 0.0);
-				glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos, 0.0);
-			}
-		}
-	}
- glEnd();
- glColor3f(1.0, 1.0, 1.0);
- boProfiling->renderFOW(false);
-
-
  boProfiling->renderText(true); // AB: actually this is text and cursor
-
 
  // cursor and text are drawn in a 2D-matrix, so that we can use window
  // coordinates
@@ -824,6 +816,11 @@ void BosonBigDisplayBase::renderCells()
  int tile = -1;
  for (; cellIt.current(); ++cellIt) {
 	Cell* c = cellIt.current();
+	if (localPlayer()->isFogged(c->x(), c->y())) {
+		// don't draw anything at all. the cell will just be black,
+		// because of the glClear() call.
+		continue;
+	}
 	GLfloat cellXPos = (float)c->x() * BO_GL_CELL_SIZE;
 	GLfloat cellYPos = -(float)c->y() * BO_GL_CELL_SIZE;
 	if (c->tile() != tile) {
