@@ -94,7 +94,7 @@ bosonCanvas::bosonCanvas( QPixmap p, uint w, uint h, uint np)
 
 	if(soundserver->isNull())
 		logf(LOG_ERROR, "can't open artsd connection for sound, SOUND DISABLED");
-	else	logf(LOG_ERROR, "Sound initialised.");
+	else	logf(LOG_INFO, "Sound initialised.");
 }
 
 
