@@ -42,10 +42,17 @@ extern FILE *logfile;
 
 #ifdef NDEBUG
 #define boAssert(a)	do {} while(0);
+#define boCheck(a,b)	do {} while(0);
 #else
+
 #define boAssert(a)	\
 	if (!(a))	\
 	logf(LOG_WARNING, "Assertion failed file %s, line %d", __FILE__, __LINE__)
+
+#define boCheck(a,b)	\
+	if ((a)!=(b))	\
+	logf(LOG_WARNING, "Assertion failed file %s, line %d, \"%d\" is not \"%d\"", __FILE__, __LINE__, (int)(a), (int)(b))
+
 #endif
 
 int logf(boLogLevel level, char *fmt, ...);
