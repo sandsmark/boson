@@ -4547,6 +4547,7 @@ void BosonBigDisplayBase::resetGameMode()
  delete c;
  c = 0;
  BoUfoActionCollection::initActionCollection(ufoManager());
+ ufoManager()->actionCollection()->setAccelWidget(this);
 }
 
 void BosonBigDisplayBase::setGameMode(bool mode)

@@ -43,6 +43,7 @@
 #include <kstdaccel.h>
 #include <kglobal.h>
 #include <kaboutdata.h>
+#include <kaccel.h>
 
 #include <qdict.h>
 #include <qdom.h>
@@ -452,12 +453,15 @@ class BoUfoActionPrivate
 public:
 	BoUfoActionPrivate()
 	{
+		mAccel = 0;
 	}
 	KShortcut mDefaultShortcut;
 	QString mText;
 	KShortcut mShortcut;
 
 	QPtrList<ufo::UWidget> mWidgets;
+
+	KAccel* mAccel;
 };
 
 BoUfoAction::BoUfoAction(const QString& text, const KShortcut& cut, const QObject* receiver, const char* slot, BoUfoActionCollection* parent, const char* name)
@@ -471,12 +475,16 @@ BoUfoAction::~BoUfoAction()
  if (mParentCollection) {
 	mParentCollection->remove(this, false);
  }
+ if (d->mAccel) {
+	d->mAccel->remove(name());
+ }
  delete d;
 }
 
 void BoUfoAction::init(BoUfoActionCollection* parent, const QString& text, const KShortcut& cut, const QObject* receiver, const char* slot)
 {
  d = new BoUfoActionPrivate;
+ mIsEnabled = true;
  mParentCollection = parent;
  d->mDefaultShortcut = cut;
  d->mText = text;
@@ -490,9 +498,51 @@ void BoUfoAction::init(BoUfoActionCollection* parent, const QString& text, const
  }
 
  d->mShortcut = cut;
- // TODO: insert shortcut to actioncollection
- // -> also connect accel
- // --> see KAction::initShortcut()
+ initShortcut();
+}
+
+void BoUfoAction::initShortcut()
+{
+ if (qstrcmp(name(), "unnamed") == 0) {
+	return;
+ }
+ if (!mParentCollection) {
+	return;
+ }
+ if (!mParentCollection->kaccel()) {
+	return;
+ }
+ insertToKAccel(mParentCollection->kaccel());
+}
+
+void BoUfoAction::insertToKAccel(KAccel* accel)
+{
+ if (d->mAccel) {
+	boError() << k_funcinfo << "d->mAccel not NULL" << endl;
+	return;
+ }
+ d->mAccel = mParentCollection->kaccel();
+ d->mAccel->insert(name(), d->mText, QString::null, d->mShortcut,
+		this, SLOT(slotActivated()),
+		true, isEnabled());
+}
+
+void BoUfoAction::setEnabled(bool e)
+{
+ if (mIsEnabled == e) {
+	return;
+ }
+ mIsEnabled = e;
+ if (d->mAccel) {
+	d->mAccel->setEnabled(name(), e);
+ }
+ QPtrListIterator<ufo::UWidget> it(d->mWidgets);
+ while (it.current()) {
+	it.current()->setEnabled(e);
+	++it;
+ }
+
+ emit signalEnabled(e);
 }
 
 const QString& BoUfoAction::text() const
@@ -815,14 +865,18 @@ class BoUfoActionCollectionPrivate
 public:
 	BoUfoActionCollectionPrivate()
 	{
+		mAccel = 0;
 	}
 	QDict<BoUfoAction> mActionDict;
+
+	KAccel* mAccel;
 };
 
 BoUfoActionCollection::BoUfoActionCollection(QObject* parent, const char* name)
 	: QObject(parent, name)
 {
  d = new BoUfoActionCollectionPrivate;
+ d->mAccel = 0;
  d->mActionDict.setAutoDelete(true);
 }
 
@@ -833,7 +887,28 @@ BoUfoActionCollection::~BoUfoActionCollection()
 	m->setMenuBar(0);
  }
  d->mActionDict.clear();
+ delete d->mAccel;
  delete d;
+}
+
+KAccel* BoUfoActionCollection::kaccel() const
+{
+ return d->mAccel;
+}
+
+void BoUfoActionCollection::setAccelWidget(QWidget* widget)
+{
+ if (d->mAccel) {
+	boWarning() << "accel object already constructed. deleting." << endl;
+	delete d->mAccel;
+	d->mAccel = 0;
+ }
+ d->mAccel = new KAccel(widget, this, "BoUfoActionCollection-Accel");
+ QDictIterator<BoUfoAction> it(d->mActionDict);
+ while (it.current()) {
+	it.current()->insertToKAccel(d->mAccel);
+	++it;
+ }
 }
 
 void BoUfoActionCollection::insert(BoUfoAction* action)
