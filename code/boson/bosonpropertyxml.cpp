@@ -95,9 +95,9 @@ void BosonPropertyXML::propertySetValue(KGamePropertyBase* prop, const QString& 
  } else if (*t == typeid(unsigned long int)) {
 	((KGameProperty<unsigned long int>*)prop)->setValue(value.toULong(&ok));
  } else if (*t == typeid(float)) {
-	((KGameProperty<float>*)prop)->setValue(value.toULong(&ok));
+	((KGameProperty<float>*)prop)->setValue(value.toFloat(&ok));
  } else if (*t == typeid(bofixed)) {
-	((KGameProperty<bofixed>*)prop)->setValue(value.toULong(&ok));
+	((KGameProperty<bofixed>*)prop)->setValue(value.toFloat(&ok));
  } else if (*t == typeid(char)) {
 	if (value.length() >= 1) {
 		((KGameProperty<char>*)prop)->setValue(value[0]);
