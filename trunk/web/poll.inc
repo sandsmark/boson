@@ -92,7 +92,7 @@ function poll_show($id = -1)
 
 function poll_vote($id, $answer)
 {
-  global $poll_disable;
+  global $poll_disable, $basedir;
   if($poll_disable)
   {
     return;
@@ -102,10 +102,10 @@ function poll_vote($id, $answer)
   poll_init();
 
   // database lock file
-  $lockfile = ".poll.lock";
+  $lockfile = "${basedir}.poll.lock";
   // acquire database lock
-  $fp = fopen($basedir . $lockfile, "w");
-  flock($fp, LOCK_EX) or die ("Failure accesing $file");
+  $fp = fopen($lockfile, "w");
+  flock($fp, LOCK_EX) or die ("Failure accesing $lockfile");
 
   $query = "SELECT * FROM poll WHERE id = '$id' LIMIT 1";
   $result = mysql_query($query);
@@ -398,7 +398,7 @@ function poll_create()
 function poll_add($question, $answer1, $answer2, $answer3 = "", $answer4 = "", $answer5 = "",
     $answer6 = "", $answer7 = "", $answer8 = "", $answer9 = "", $answer10 = "")
 {
-  global $poll_disable;
+  global $poll_disable, $basedir;
   if($poll_disable)
   {
     return;
@@ -408,12 +408,12 @@ function poll_add($question, $answer1, $answer2, $answer3 = "", $answer4 = "", $
   poll_init();
 
   // database lock file
-  $lockfile = ".poll.lock";
+  $lockfile = "${basedir}.poll.lock";
 
   if(is_writeable($lockfile))
   {
-    $fp = fopen($basedir . $lockfile, "w");
-    flock($fp, LOCK_EX) or die ("Failure accesing $file");
+    $fp = fopen($lockfile, "w");
+    flock($fp, LOCK_EX) or die ("Failure accesing $lockfile");
   }
   else
   {

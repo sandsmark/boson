@@ -81,14 +81,14 @@ function counter2($page)
   // visit timeout (in seconds)
   $visit_timeout = 60 * 60;  // 60 minutes
   // database lock file
-  $lockfile = ".counter.lock";
+  $lockfile = "${basedir}.counter.lock";
 
 
   // acquire database lock
   if(is_writeable($lockfile))
   {
-    $fp = fopen($basedir . $lockfile, "w");
-    flock($fp, LOCK_EX) or die ("Failure accesing $file");
+    $fp = fopen($lockfile, "w");
+    flock($fp, LOCK_EX) or die ("Failure accesing " . $lockfile);
   }
   else
   {
