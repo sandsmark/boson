@@ -85,22 +85,31 @@ recommended. :-) You can download the tarball from
 (16 572 KB) or via SF.net's web interface from
 <a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&release_id=197716\">here</a>.<br><br>");
 
-/*draw_bigbox_subheader("Gentoo");
-draw_bigbox_text("Boson-0.9 is in the official portage tree, unmasked.<br>
+draw_bigbox_subheader("Gentoo");
+draw_bigbox_text("Boson-0.9.1 is in the official portage tree, unmasked.<br>
 To get boson downloaded, compiled and installed, please issue a
 <pre>emerge sync; emerge boson</pre>
 If you're not familiar with <i>emerge</i>, see
 <a href=\"http://www.gentoo.org/doc/en/portage-user.xml\">http://www.gentoo.org/doc/en/portage-user.xml</a>
-for more info.<br><br>");*/
+for more info.<br><br>");
 
-/*draw_bigbox_subheader("Debian");
+draw_bigbox_subheader("Debian");
 draw_bigbox_text("To install Boson on Debian, do this:
 <pre>apt-get update; apt-get install boson</pre>
 This will download and install Boson's binary packages, so you'll have Boson up
 and running in just few minutes.<br>
 Note that you should also have something like
 <pre>deb http://ftp2.de.debian.org/debian sid main</pre>
-in your <i>/etc/apt/sources.list</i> file.<br><br>");*/
+in your <i>/etc/apt/sources.list</i> file.<br><br>");
+
+draw_bigbox_subheader("Redhat");
+draw_bigbox_text("RPM packages are available for Redhat.<br>
+There are separate packages for code, data and music; you need at least code
+and data to be able to run Boson.
+You can download those packages from
+<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&package_id=12379&release_id=197716\">SF.net download page</a>
+(files with .rpm extension).
+<br><br>");
 
 /*draw_bigbox_subheader("RPM/binary releases");
 draw_bigbox_text("Note that RPM packages are not provided by the Boson team and

@@ -221,18 +221,25 @@ add_screenshot("New lighting and terrain rendering code in action. Note that
     camera is very high, so large area is visible",
     "17. Oct. 2003 (CVS)", "0310-4-thumb.jpg", "0310-4.jpg");
 add_screenshot("Updated game starting page",
-    "<b>NEW:</b> 5. Nov. 2003 (Boson 0.9)", "0.9-1-thumb.jpg", "0.9-1.jpg");
+    "5. Nov. 2003 (Boson 0.9)", "0.9-1-thumb.jpg", "0.9-1.jpg");
 add_screenshot("Some units attacking enemy",
-    "<b>NEW:</b> 5. Nov. 2003 (Boson 0.9)", "0.9-2-thumb.jpg", "0.9-2.jpg");
+    "5. Nov. 2003 (Boson 0.9)", "0.9-2-thumb.jpg", "0.9-2.jpg");
 add_screenshot("Fragments flying around after an aircraft was blown up",
-    "<b>NEW:</b> 5. Nov. 2003 (Boson 0.9)", "0.9-3-thumb.jpg", "0.9-3.jpg");
+    "5. Nov. 2003 (Boson 0.9)", "0.9-3-thumb.jpg", "0.9-3.jpg");
 add_screenshot("DaisyCutter bomb dropped by Transall bomber",
-    "<b>NEW:</b> 5. Nov. 2003 (Boson 0.9)", "0.9-4-thumb.jpg", "0.9-4.jpg");
+    "5. Nov. 2003 (Boson 0.9)", "0.9-4-thumb.jpg", "0.9-4.jpg");
 add_screenshot("Close-up of some fighting units",
-    "<b>NEW:</b> 5. Nov. 2003 (Boson 0.9)", "0.9-5-thumb.jpg", "0.9-5.jpg");
+    "5. Nov. 2003 (Boson 0.9)", "0.9-5-thumb.jpg", "0.9-5.jpg");
 add_screenshot("Many units fighting. You can also see tooltip, showing name and
     health of unit under cursor",
-    "<b>NEW:</b> 5. Nov. 2003 (Boson 0.9)", "0.9-6-thumb.jpg", "0.9-6.jpg");
+    "5. Nov. 2003 (Boson 0.9)", "0.9-6-thumb.jpg", "0.9-6.jpg");
+add_screenshot("Neutral units such as trees are now supported. In the top-left
+    corner, you can see new opengl minimap (it's showing only logo because
+    player doesn't have radar)",
+    "<b>NEW:</b> 24. Dec. 2003 (CVS)", "0312-1-thumb.jpg", "0312-1.jpg");
+add_screenshot("Lonely hut in the mountains, also some trees (including few
+    broken ones) - they're also implemented as neutral units",
+    "<b>NEW:</b> 24. Dec. 2003 (CVS)", "0312-2-thumb.jpg", "0312-2.jpg");
 
 $ss_count = count($screens);
 
