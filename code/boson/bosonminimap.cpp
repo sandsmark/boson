@@ -465,7 +465,8 @@ bool BosonMiniMap::eventFilter(QObject* o, QEvent* e)
  }
  // Using bitBlt() is MUCH faster than using QPainter::drawPixmap(), especially
  //  when you scale QPainter (difference may be hundreds of times)
- bitBlt(d->mPixmap, 0, 0, ground(), -(d->mPainterMoveX * scale() * zoom()), -(d->mPainterMoveY * scale() * zoom()),
+ bitBlt(d->mPixmap, 0, 0, ground(), (int)-(d->mPainterMoveX * scale() * zoom()), 
+		(int)-(d->mPainterMoveY * scale() * zoom()),
 		d->mPixmap->width(), d->mPixmap->height());
  
  // the little rectangle
@@ -487,7 +488,7 @@ void BosonMiniMap::createGround()
  if(mGround) {
 	delete mGround;
  }
- mGround = new QPixmap(mapWidth() * zoom() * scale(), mapHeight() * zoom() * scale());
+ mGround = new QPixmap((int)(mapWidth() * zoom() * scale()), (int)(mapHeight() * zoom() * scale()));
  QPainter p;
  p.begin(mGround);
  p.scale(zoom() * scale(), zoom() * scale());
