@@ -24,14 +24,15 @@
 
 #include <kdebug.h>
 #include <ksimpleconfig.h>
+#include <kconfig.h>
 
 #include <GL/gl.h>
 
 #include "bosonparticlesystem.h"
 #include "bosontexturearray.h"
 #include "bosonconfig.h"
-#include "bo.h"
 #include "defines.h"
+#include "speciestheme.h"
 
 
 /*****  BosonParticleManager  *****/
@@ -279,18 +280,18 @@ BosonParticleSystemProperties::BosonParticleSystemProperties(KSimpleConfig* cfg)
   mEndColor = BoVector4((float)(cfg->readDoubleNumEntry("EndColorR", 0)), (float)(cfg->readDoubleNumEntry("EndColorG", 0)),
       (float)(cfg->readDoubleNumEntry("EndColorB", 0)), (float)(cfg->readDoubleNumEntry("EndColorA", 0)));
   */
-  mMinVelo = Bo::readBoVector3(cfg, "MinVelo");
-  mMaxVelo = Bo::readBoVector3(cfg, "MaxVelo");
-  mMinPos = Bo::readBoVector3(cfg, "MinPos");
-  mMaxPos = Bo::readBoVector3(cfg, "MaxPos");
+  mMinVelo = BoVector3::load(cfg, "MinVelo");
+  mMaxVelo = BoVector3::load(cfg, "MaxVelo");
+  mMinPos = BoVector3::load(cfg, "MinPos");
+  mMaxPos = BoVector3::load(cfg, "MaxPos");
   mNormalize = cfg->readBoolEntry("Normalize", false);
   if(mNormalize)
   {
     mMinScale = (float)(cfg->readDoubleNumEntry("MinScale", 1));
     mMaxScale = (float)(cfg->readDoubleNumEntry("MaxScale", 1));
   }
-  mStartColor = Bo::readBoVector4(cfg, "StartColor");
-  mEndColor = Bo::readBoVector4(cfg, "EndColor");
+  mStartColor = BoVector4::load(cfg, "StartColor");
+  mEndColor = BoVector4::load(cfg, "EndColor");
   mMinLife = (float)(cfg->readDoubleNumEntry("MinLife", 0));
   mMaxLife = (float)(cfg->readDoubleNumEntry("MaxLife", 0));
   mMaxNum = cfg->readNumEntry("MaxNum", 100);
@@ -358,4 +359,20 @@ void BosonParticleSystemProperties::updateParticle(BosonParticleSystem*, BosonPa
 {
   float factor = particle->life / particle->maxage;  // This is 1 when particle is born and will be 0 by the time when it dies
   particle->color.setBlended(mStartColor, factor, mEndColor, 1.0 - factor);
+}
+
+QPtrList<BosonParticleSystemProperties> BosonParticleSystemProperties::loadParticleSystemProperties(KConfig* cfg, QString key, SpeciesTheme* theme)
+{
+  QPtrList<BosonParticleSystemProperties> props;
+  if(!cfg->hasKey(key))
+  {
+    return props;
+  }
+  QValueList<unsigned long int> list = BosonConfig::readUnsignedLongNumList(cfg, key);
+  QValueList<unsigned long int>::Iterator it;
+  for(it = list.begin(); it != list.end(); it++)
+  {
+    props.append(theme->particleSystemProperties(*it));
+  }
+  return props;
 }

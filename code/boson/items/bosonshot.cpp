@@ -28,7 +28,6 @@
 #include "../bosoncanvas.h"
 #include "../bosonparticlesystem.h"
 #include "../bosonparticlemanager.h"
-#include "../bo.h"
 #include "../bosonmodel.h"
 
 #include <kdebug.h>
@@ -50,9 +49,9 @@ BosonShotProperties::BosonShotProperties(SpeciesTheme* theme, KSimpleConfig* cfg
   mDamage = cfg->readUnsignedLongNumEntry("Damage", 0);
   mSpeed = cfg->readLongNumEntry("Speed", 0);
   mDamageRange = (float)(cfg->readDoubleNumEntry("DamageRange", 1));
-  mFlyParticleSystems = Bo::loadParticleSystemProperties(cfg, "FlyParticles", theme);
+  mFlyParticleSystems = BosonParticleSystemProperties::loadParticleSystemProperties(cfg, "FlyParticles", theme);
   kdDebug() << "    " << k_funcinfo << "There are " << mFlyParticleSystems.count() << " particle systems in fly list" << endl;
-  mHitParticleSystems = Bo::loadParticleSystemProperties(cfg, "HitParticles", theme);
+  mHitParticleSystems = BosonParticleSystemProperties::loadParticleSystemProperties(cfg, "HitParticles", theme);
   kdDebug() << "    " << k_funcinfo << "There are " << mHitParticleSystems.count() << " particle systems in hit list" << endl;
   // We need to have some kind of model even for bullet (though it won't be shown),
   //  because BosonItem will crash otherwise
@@ -129,9 +128,8 @@ BosonShot::BosonShot(BosonShotProperties* prop, Unit* attacker, float x, float y
 void BosonShot::advance(unsigned int phase)
 {
   BosonItem::advance(phase);
-  float factor = mStep / (float)mTotalSteps - 0.5;
+  float factor = mStep / (float)mTotalSteps - 0.5;  // Factor will be in range -0.25 to 0.25
   float newZ = (-4 * (factor * factor) + 1) * BO_TILE_SIZE;
-  //cout << k_funcinfo << "newZ: " << newZ << "; factor: " << factor << "; mStep: " << mStep << "; mTotalSteps: " << mTotalSteps << endl;
   moveBy(mVelo[0], mVelo[1], mVelo[2] + (newZ - mZ));
   // Move all "fly" particles.
   BoVector3 move(mVelo[0], -(mVelo[1]), mVelo[2] + (newZ - mZ));

@@ -21,7 +21,10 @@
 #define BOSONPARTICLEMANAGER_H
 
 #include <krandomsequence.h>
+
 #include <qmap.h>
+#include <qptrlist.h>
+
 #include <GL/gl.h>
 
 #include "bo3dtools.h"
@@ -31,6 +34,8 @@ class BosonParticleSystem;
 class BosonParticle;
 class QString;
 class KSimpleConfig;
+class KConfig;
+class SpeciesTheme;
 
 /*class BosonParticleManager
 {
@@ -89,6 +94,8 @@ class BosonParticleSystemProperties
     static void init(QString texdir);
     
     unsigned long int id()  { return mId; };
+    
+    static QPtrList<BosonParticleSystemProperties> loadParticleSystemProperties(KConfig* cfg, QString key, SpeciesTheme* theme);
 
   protected:
     static void addTexture(QString name);

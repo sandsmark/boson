@@ -22,6 +22,9 @@
 
 #include <GL/gl.h>
 
+class QString;
+class KConfig;
+
 /**
  * @author Rivo Laks <rivolaks@hot.ee>
  **/
@@ -52,6 +55,10 @@ class BoVector3
     inline void operator=(const GLfloat* v)  { mData[0] = v[0];  mData[1] = v[1];  mData[2] = v[2]; };
     inline GLfloat operator[](int i)  { return mData[i]; };
 
+    /**
+     * Loads BoVector3 from KConfig
+     **/
+    static BoVector3 load(KConfig* cfg, QString key);
 
   private:
     friend class BoMatrix;
@@ -89,6 +96,11 @@ class BoVector4
     inline void operator=(BoVector4 v)  { mData[0] = v.mData[0];  mData[1] = v.mData[1];  mData[2] = v.mData[2];  mData[3] = v.mData[3]; };
     inline void operator=(const GLfloat* v)  { mData[0] = v[0];  mData[1] = v[1];  mData[2] = v[2];  mData[3] = v[3]; };
     inline GLfloat operator[](int i)  { return mData[i]; };
+
+    /**
+     * Loads BoVector4 from KConfig
+     **/
+    static BoVector4 load(KConfig* cfg, QString key);
 
   private:
     friend class BoMatrix;

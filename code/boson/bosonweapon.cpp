@@ -24,7 +24,6 @@
 #include "bosonparticlesystem.h"
 #include "bosonparticlemanager.h"
 #include "unit.h"
-#include "bo.h"
 #include "global.h"
 #include "bosoncanvas.h"
 
@@ -43,7 +42,7 @@ BosonWeaponProperties::BosonWeaponProperties(KSimpleConfig* cfg, SpeciesTheme* t
   mCanShootAtAirUnits = cfg->readBoolEntry("CanShootAtAirUnits", false);
   mCanShootAtLandUnits = cfg->readBoolEntry("CanShootAtLandUnits", false);
   mShotProp = theme->shotProperties(cfg->readUnsignedLongNumEntry("ShotId", 0));
-  mShootParticleSystems = Bo::loadParticleSystemProperties(cfg, "ShootParticles", theme);
+  mShootParticleSystems = BosonParticleSystemProperties::loadParticleSystemProperties(cfg, "ShootParticles", theme);
 }
 
 BosonWeaponProperties::~BosonWeaponProperties()

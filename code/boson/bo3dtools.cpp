@@ -20,14 +20,58 @@
 #include "bo3dtools.h"
 
 #include <kdebug.h>
+#include <kconfig.h>
+
+#include <qstring.h>
+#include <qptrlist.h>
 
 #include <math.h>
 
+#include "bosonconfig.h"
+
+
+/*****  BoVector*  *****/
 
 float BoVector3::length()
 {
  return sqrt(mData[0] * mData[0] + mData[1] * mData[1] + mData[2] * mData[2]);
 }
+
+BoVector3 BoVector3::load(KConfig* cfg, QString key)
+{
+  QValueList<float> list = BosonConfig::readFloatNumList(cfg, key);
+  if(list.count() == 0)
+  {
+    // Probably value wasn't specified. Default to 0;0;0
+    return BoVector3();
+  }
+  else if(list.count() != 3)
+  {
+    kdError() << k_funcinfo << "BoVector3 entry must have 3 floats, not " << list.count() << endl;
+    return BoVector3();
+  }
+  return BoVector3(list[0], list[1], list[2]);
+}
+
+BoVector4 BoVector4::load(KConfig* cfg, QString key)
+{
+  QValueList<float> list = BosonConfig::readFloatNumList(cfg, key);
+  if(list.count() == 0)
+  {
+    // Probably value wasn't specified. Default to 0;0;0;0
+    return BoVector4();
+  }
+  else if(list.count() != 4)
+  {
+    kdError() << k_funcinfo << "BoVector4 entry must have 4 floats, not " << list.count() << endl;
+    return BoVector4();
+  }
+  return BoVector4(list[0], list[1], list[2], list[3]);
+}
+
+
+
+/*****  BoMatrix  *****/
 
 void BoMatrix::loadMatrix(const GLfloat* m)
 {
