@@ -56,7 +56,7 @@ draw_bigbox_subheader("If you downloaded code, data and music separately");
 draw_bigbox_text("<pre>$ tar xjvf boson-code-0.7.tar.bz2
 $ cd code$ ./configure
 $ make
-$ su<
+$ su
 # make install</pre>
   <pre>$ tar xjvf boson-data-0.7.tar.bz2
 $ cd data

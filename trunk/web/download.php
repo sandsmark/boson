@@ -117,10 +117,16 @@ draw_bigbox_text("You can get both code and data from CVS using the procedure be
 First, login to the CVS-server by issuing
 <pre>$ cvs -d:pserver:anonymous@cvs.boson.sourceforge.net:/cvsroot/boson login</pre>
 When asked for a password, just press enter. Now, download the code and data by typing
-<pre>$ cvs -z3 -d:pserver:anonymous@cvs.boson.sourceforge.net:/cvsroot/boson co -P code
-$ cvs -z3 -d:pserver:anonymous@cvs.boson.sourceforge.net:/cvsroot/boson co -P data</pre>
-Now you need to link the admin dir from the code directory:
-<pre>$ cd data && ln -s ../code/admin admin</pre>
+<pre>
+$ cvs -z3 -d:pserver:anonymous@cvs.boson.sourceforge.net:/cvsroot/boson co -P code
+$ cvs -z3 -d:pserver:anonymous@cvs.boson.sourceforge.net:/cvsroot/boson co -P data
+$ cvs -z3 -d:pserver:anonymous@cvs.boson.sourceforge.net:/cvsroot/boson co -P tools
+</pre>
+Now you need to link the admin dir from the tools directory:
+<pre>
+$ cd code && ln -s ../tools/admin admin
+$ cd data && ln -s ../tools/admin admin
+</pre>
 Since these files are from CVS, you need to create the makefiles in both the
 code and data directory first by doing
 <pre>$ make -f Makefile.cvs</pre> Finally, you can configure, compile and
