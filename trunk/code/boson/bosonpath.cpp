@@ -1044,6 +1044,7 @@ const int yoffsets[] = { -1, -1,  0,  1,  1,  1,  0, -1};
 #define TNG_NEAREST_G_FACTOR 0.2f
 #define TNG_LOW_BASE_COST 1.5f
 #define TNG_FLYING_STEPS 15
+#define TNG_RANGE_STEPS TNG_FLYING_STEPS
 
 #define REVERSEDIR(d) ((d + 4) % 8)
 
@@ -1505,7 +1506,19 @@ void BosonPath2::findPath(BosonPathInfo* info)
   if(info->flying)
   {
     // Flying units are special and have their own pathfinding function
-    findFlyingUnitPath(info);
+    // First use range-check method
+    if(rangeCheck(info))
+    {
+      findFlyingUnitPath(info);
+    }
+    else
+    {
+      // Not possible to get any closer to destination
+      info->passable = false;
+      info->llpath.clear();
+      info->llpath.reserve(1);
+      info->llpath.append(QPoint(PF_END_CODE, PF_END_CODE));
+    }
   }
   else
   {
@@ -2254,6 +2267,110 @@ void BosonPath2::findFlyingUnitPath(BosonPathInfo* info)
 #undef VISITED
 #undef INOPEN
 #undef PARENTDIR
+}
+
+bool BosonPath2::rangeCheck(BosonPathInfo* info)
+{
+  // This method checks if it's possible to go to better place than where unit
+  //  currently is.
+  // It returns true if it is possible to get to better place, otherwise false
+  // First check if unit is in range
+  int dist = QMAX(QABS(info->dest.x() - info->start.x()), QABS(info->dest.y() - info->start.y())) / BO_TILE_SIZE;
+  if(dist <= info->range)
+  {
+    return false;
+  }
+
+  // If unit's not in range, it might still be possible that it can't get closer
+  //  to goal than it already is. This is usually the case when you move many
+  //  units at once. Then one unit will go to goal, but others will try to find path to
+  //  goal and waste time.
+  // First quick check if goal is occupied if range is 0
+  // If distance to goal is more than TNG_RANGE_STEPS, we won't search complete
+  //  path and we don't need this method
+  if(dist > TNG_RANGE_STEPS)
+  {
+    return true;
+  }
+  // Destination in cell coordinates
+  int destCellX = info->dest.x() / BO_TILE_SIZE;
+  int destCellY = info->dest.y() / BO_TILE_SIZE;
+  if(info->range == 0)
+  {
+    if(lowLevelCostAir(destCellX, destCellY, info) < PF_TNG_COST_STANDING_UNIT)
+    {
+      // It is still possible to get to destination point
+      return true;
+    }
+    else if(dist == 1)
+    {
+      // Goal is occupied and unit's next to it - can't get any closer
+      return false;
+    }
+  }
+
+  int w = mMap->width();
+  int h = mMap->height();
+  int x, y;
+  for(int range = 1; range < dist; range++)
+  {
+    // We must not look too far, otherwise we have crash, because marking array
+    //  isn't big enough
+    if(dist + range > TNG_RANGE_STEPS)
+    {
+      return true;
+    }
+    // Bad duplicated code. But it's faster this way
+    // First check upper and lower sides of "rectangle"
+    for(x = destCellX - range; x <= destCellX + range; x++)
+    {
+      if((x < 0) || (x >= w))
+      {
+        continue;
+      }
+      if(destCellY - range >= 0)
+      {
+        if(lowLevelCostAir(x, destCellY - range, info) < PF_TNG_COST_STANDING_UNIT)
+        {
+          info->range = QMAX(info->range, range);
+          return true;
+        }
+      }
+      if(destCellY + range < h)
+      {
+        if(lowLevelCostAir(x, destCellY + range, info) < PF_TNG_COST_STANDING_UNIT)
+        {
+          info->range = QMAX(info->range, range);
+          return true;
+        }
+      }
+    }
+    // Then right and left sides. Note that corners are already checked
+    for(y = destCellY - range + 1; y < destCellY + range; y++)
+    {
+      if((y < 0) || (y >= h))
+      {
+        continue;
+      }
+      if(destCellX - range >= 0)
+      {
+        if(lowLevelCostAir(destCellX - range, y, info) < PF_TNG_COST_STANDING_UNIT)
+        {
+          info->range = QMAX(info->range, range);
+          return true;
+        }
+      }
+      if(destCellX + range < w)
+      {
+        if(lowLevelCostAir(destCellX + range, y, info) < PF_TNG_COST_STANDING_UNIT)
+        {
+          info->range = QMAX(info->range, range);
+          return true;
+        }
+      }
+    }
+  }
+  return false;
 }
 
 void BosonPath2::cellsOccupiedStatusChanged(int x1, int y1, int x2, int y2)
