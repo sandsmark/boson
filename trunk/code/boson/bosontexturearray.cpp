@@ -21,6 +21,7 @@
 #include "bosonconfig.h"
 #include "bosonglwidget.h"
 #include "bodebug.h"
+#include "info/boinfo.h"
 
 #include <qimage.h>
 
@@ -150,7 +151,18 @@ bool BosonTextureArray::createTexture(const QImage& image, GLuint texture, bool 
  // could replace the first GL_RGBA parameter by GL_RGB (leave the second at
  // GL_RGBA!). note that at least the cursor needs alpha!
 
- int internalFormat = useAlpha ? GL_RGBA : GL_RGB;
+ int internalFormat;
+ // Check if tex compression is supported
+#ifdef GL_EXT_texture_compression_s3tc
+ if (BoInfo::boInfo()->openGLExtensions().contains("GL_EXT_texture_compression_s3tc")) {
+	boDebug() << k_funcinfo << "Using compressed format" << endl;
+	internalFormat = useAlpha ? GL_COMPRESSED_RGBA_S3TC_DXT5_EXT : GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
+ } else
+#endif
+ {
+	internalFormat = useAlpha ? GL_RGBA : GL_RGB;
+ }
+
  if (useMipmaps) {
 	resetMipmapTexParameter();
 	int error = gluBuild2DMipmaps(GL_TEXTURE_2D, internalFormat,
