@@ -474,6 +474,7 @@ void playerMobUnit::targetMoveTo(QPoint npos)
 
 void playerMobUnit::shooted(int _power)
 {
+	power = _power;
 	if (sp_up) sp_up->setFrame(_power);
 }
   
@@ -526,6 +527,7 @@ void playerFacility::getWantedAction()
 
 void playerFacility::shooted(int _power)
 {
+	power = _power;
 	if (sp_up) sp_up->setFrame(_power);
 }
   
