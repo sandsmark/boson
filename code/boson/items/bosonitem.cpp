@@ -89,15 +89,20 @@ BosonItem::~BosonItem()
 
 QPointArray BosonItem::cells() const
 {
- QPointArray c;
  int left, right, top, bottom;
- int n = 0;
  leftTopCell(&left, &top);
  rightBottomCell(&right, &bottom);
- left = QMAX(left, 0);
- top = QMAX(top, 0);
  right = QMIN(right, QMAX((int)canvas()->mapWidth() - 1, 0));
  bottom = QMIN(bottom, QMAX((int)canvas()->mapHeight() - 1, 0));
+ return cells(left, right, top, bottom, canvas());
+}
+
+QPointArray BosonItem::cells(int left, int right, int top, int bottom)
+{
+ left = QMAX(left, 0);
+ top = QMAX(top, 0);
+ QPointArray c;
+ int n = 0;
  int size = (right - left + 1) * (bottom - top + 1);
  if (size <= 0) {
 	return c;
