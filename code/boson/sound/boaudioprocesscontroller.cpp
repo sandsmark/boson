@@ -152,9 +152,6 @@ void BoAudioProcessController::sendCommand(BoAudioCommand* command)
  } else {
 	buffer += command->dataString2();
  }
- if (command->type() == 52) {
-	 boError() << "will send: " << buffer << endl;
- }
 
 // boDebug(200) << k_funcinfo << "sending: " << buffer << endl;
  buffer += '\n';
