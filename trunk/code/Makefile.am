@@ -1,4 +1,3 @@
-####### kdevelop will overwrite this part!!! (begin)##########
 
 SUBDIRS = common map server boson
 
@@ -18,7 +17,4 @@ orzel.clean : maintainer-clean
 	rm -f `find -name boson-server.log`
 #	cd .. && tar cvf /work/save/boson/
 
-####### kdevelop will overwrite this part!!! (end)############
-# not a GNU package. You can remove this line, if 
-# have all needed files, that a GNU package needs
 AUTOMAKE_OPTIONS = foreign 
