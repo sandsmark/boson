@@ -162,7 +162,7 @@ bool BosonStarting::start()
  }
  emit signalLoadingType(BosonLoadingWidget::InitGame); // obsolete
  emit signalLoadingType(BosonLoadingWidget::StartingGame);
- if (!startScenario()) {
+ if (!startScenario(files)) {
 	boError(270) << k_funcinfo << "starting scenario failed" << endl;
 	boGame->unlock();
 	return false;
@@ -320,7 +320,7 @@ void BosonStarting::loadUnitDatas(Player* p)
 // (return to startup page if starting fails)
 // AB: startScenario should be moved to above, so that we don't have to unstream
 // the files again. but we need a qtimer::singleshot on the way to here..
-bool BosonStarting::startScenario()
+bool BosonStarting::startScenario(const QMap<QString, QByteArray>& files)
 {
  if (!mPlayer) {
 	BO_NULL_ERROR(mPlayer);
@@ -332,12 +332,6 @@ bool BosonStarting::startScenario()
  }
  if (!mDestPlayField) {
 	BO_NULL_ERROR(mDestPlayField);
-	return false;
- }
- QMap<QString, QByteArray> files;
- if (!BosonPlayField::unstreamFiles(files, mNewGameData)) {
-	// oops - it was unstreamed successfully before!
-	boError(270) << k_funcinfo << "invalid stream??" << endl;
 	return false;
  }
  if (!files.contains("players.xml")) {
