@@ -22,7 +22,6 @@
 
 #include <kapplication.h>
 #include <klocale.h>
-#include <kkeydialog.h>
 #include <kstatusbar.h>
 #include <kstdaction.h>
 #include <kstdgameaction.h>
@@ -93,13 +92,5 @@ void Top::readProperties(KConfig *config)
 void Top::slotGameNew()
 {
  bosonWidget()->slotNewGame();
-}
-
-void Top::slotConfigureKeys()
-{
- KKeyDialog dlg(this);
- dlg.insert(actionCollection());
- dlg.insert(bosonWidget()->actionCollection());
- dlg.configure(true);
 }
 

@@ -30,7 +30,6 @@
 #include <kaboutdata.h>
 #include <kglobal.h>
 #include <klocale.h>
-#include <kkeydialog.h>
 #include <kconfig.h>
 #include <kstatusbar.h>
 #include <kaction.h>
@@ -243,14 +242,6 @@ void Editor::slotSavePlayFieldAs()
 	}
 	bosonWidget()->editorSavePlayField(fileName);
  }
-}
-
-void Editor::slotConfigureKeys()
-{
- KKeyDialog::configure(actionCollection());
- KKeyDialog dlg(this);
- dlg.insert(actionCollection());
- dlg.insert(bosonWidget()->actionCollection());
 }
 
 void Editor::slotFileNew()

@@ -106,6 +106,7 @@ protected:
 protected slots:
 	virtual void slotPlayerJoinedGame(KPlayer*);
 	virtual void slotPlayerLeftGame(KPlayer*);
+	void slotConfigureKeys();
 
 private slots:
 	void slotZoom(int index);
