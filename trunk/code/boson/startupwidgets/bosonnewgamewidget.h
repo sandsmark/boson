@@ -162,7 +162,6 @@ public slots:
 
 signals:
 	void signalStartGame();
-	void signalCancelled();
 	void signalShowNetworkOptions();
 
 protected:
