@@ -921,37 +921,21 @@ void TopWidget::raiseWidget(StartupWidgetIds id)
 		QWidget* w = mWs->widget(id);
 		setMinimumSize(w->size());
 		setMaximumSize(w->size());
-		if (boConfig->showMenubarOnStartup()) {
-			showMenubar();
-		} else {
-			hideMenubar();
-		}
+		showHideMenubar();
 		break;
 	}
 	case IdNewGame:
 	case IdLoading:
 	case IdNetwork:
+	case IdStartEditor:
 		setMinimumSize(BOSON_MINIMUM_WIDTH, BOSON_MINIMUM_HEIGHT);
 		setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
-		if (boConfig->showMenubarOnStartup()) {
-			showMenubar();
-		} else {
-			hideMenubar();
-		}
+		showHideMenubar();
 		break;
 	case IdBosonWidget:
-		if (boConfig->showMenubarInGame()) {
-			showMenubar();
-		} else {
-			hideMenubar();
-		}
 		setMinimumSize(BOSON_MINIMUM_WIDTH, BOSON_MINIMUM_HEIGHT);
 		setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
-		break;
-	case IdStartEditor:
-		showMenubar();
-		setMinimumSize(BOSON_MINIMUM_WIDTH, BOSON_MINIMUM_HEIGHT);
-		setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
+		showHideMenubar();
 		break;
 	default:
 		boDebug() << k_funcinfo << "unknown id " << id << endl;
@@ -1021,6 +1005,7 @@ void TopWidget::showHideMenubar()
 	case IdNewGame:
 	case IdLoading:
 	case IdNetwork:
+	case IdStartEditor:
 		if (boConfig->showMenubarOnStartup()) {
 			showMenubar();
 		} else {
@@ -1028,15 +1013,13 @@ void TopWidget::showHideMenubar()
 		}
 		break;
 	case IdBosonWidget:
-		if (boConfig->showMenubarInGame()) {
+		// we always display menu in editor mode (pretty useless without
+		// it)
+		if (boConfig->showMenubarInGame() || !boGame->gameMode()) {
 			showMenubar();
 		} else {
 			hideMenubar();
 		}
-		break;
-	case IdStartEditor:
-		// editor without menubar is pretty useless, i guess
-		showMenubar();
 		break;
 	default:
 		boDebug() << k_funcinfo << "unknown id " << id << endl;
