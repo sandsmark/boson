@@ -272,20 +272,6 @@ void BosonNewGameWidget::initKGame()
 
 void BosonNewGameWidget::initPlayer()
 {
-//  player() = new Player;
-  /*player()->setName(boConfig->readLocalPlayerName());
-  if(player()->speciesTheme())
-  {
-    boDebug() << "Speciestheme loaded, id: " << player()->speciesTheme()->identifier() << endl;
-    mPlayercolor = player()->teamColor();
-  }
-  else
-  {
-    mPlayercolor = boConfig->readLocalPlayerColor();
-    player()->loadTheme(SpeciesTheme::speciesDirectory(SpeciesTheme::defaultSpecies()), mPlayercolor);
-  }
-  boGame->addPlayer(player());*/
-
   boDebug() << k_funcinfo << "playerCount(): " << boGame->playerCount() << endl;
   player()->setName(boConfig->readLocalPlayerName());
   if(player()->speciesTheme())
@@ -534,6 +520,7 @@ void BosonNewGameWidget::slotAddAIPlayer()
   {
     return;
   }
+  boDebug() << k_funcinfo << endl;
   Player* p = new Player();
   p->setName(mAddAIName->text());
   QColor color = boGame->availableTeamColors().first();
