@@ -205,7 +205,6 @@ bool BosonPlayFieldInformation::loadMapInformation(const QByteArray& xml)
  QString errorMsg;
  int line = 0, column = 0;
  QDomDocument doc(QString::fromLatin1("BosonMap"));
-#warning FIXME
  if (!doc.setContent(QString(xml), &errorMsg, &line, &column)) {
 	boError() << k_funcinfo << "unable to set XML content - error in line=" << line << ",column=" << column << " errorMsg=" << errorMsg << endl;
 	boDebug() << QString(xml) << endl;
