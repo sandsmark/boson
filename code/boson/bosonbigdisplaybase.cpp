@@ -1012,7 +1012,8 @@ void BosonBigDisplayBase::renderText()
  glEnable(GL_BLEND);
  glColor4f(0.0, 0.0, 0.0, 0.5);
  glRecti(x - alphaborder, d->mViewport[3] - border + alphaborder,
-		d->mViewport[2] - border + alphaborder, d->mViewport[3] - (2 * d->mDefaultFont->height()) - border - alphaborder);
+		d->mViewport[2] - border + alphaborder,
+		d->mViewport[3] - (2 * d->mDefaultFont->height()) - border - alphaborder);
  glColor3f(1.0, 1.0, 1.0);
  glRasterPos2i(x, y);
  glCallLists(minerals.length(), GL_UNSIGNED_BYTE, (GLubyte*)minerals.latin1());
@@ -1022,6 +1023,14 @@ void BosonBigDisplayBase::renderText()
 
 // now the chat messages
  d->mChat->renderMessages(border, border, d->mDefaultFont);
+
+// display a paused label if game is paused
+ if (boGame->gamePaused()) {
+	QString pause = i18n("The game is paused");
+	w = d->mDefaultFont->width(pause);
+	glRasterPos2i(d->mViewport[2] / 2 - w / 2, d->mViewport[3] / 2);
+	glCallLists(pause.length(), GL_UNSIGNED_BYTE, (GLubyte*)pause.latin1());
+ }
 
  glColor3f(1.0, 1.0, 1.0);
  glDisable(GL_BLEND);
