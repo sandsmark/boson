@@ -130,7 +130,7 @@ class BoMatrix
       for (i = 0; i < 16; i++) {
         mData[i] = 0.0;
       }
-      mData[i] = mData[5] = mData[10] = mData[15] = 1.0;
+      mData[0] = mData[5] = mData[10] = mData[15] = 1.0;
     }
 
     /**
@@ -184,6 +184,11 @@ class BoMatrix
      **/
     void transform(BoVector3* v, BoVector3* input);
     void transform(BoVector4* v, BoVector4* input);
+
+    /**
+     * Invert this matrix and place the result into @p inverse
+     **/
+    bool invert(BoMatrix* inverse) const;
 
     static void debugMatrix(const GLfloat* matrix);
 
