@@ -29,6 +29,20 @@
 
 #define  POWER_LEVELS 15
 
+
+// duration of some facilities actions :
+#define DURATION_BUILDING		(40)
+#define DURATION_CONSTRUCT		(30)
+
+// duration of some mobiles actions :
+#define DURATION_EMPTYING	(40)
+
+// other mobiles constant
+#define OIL_HARVESTER_CONTENT		50
+#define MINERAL_HARVESTER_CONTENT	50
+
+
+
 enum workType {
 	WORK_NONE =0, 
 	WORK_TRAINING, 
