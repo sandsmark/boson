@@ -39,6 +39,7 @@ class BoVector3
     BoVector3()  { reset(); }
     BoVector3(GLfloat x, GLfloat y, GLfloat z)  { set(x, y, z); }
     BoVector3(const GLfloat* data) { set(data[0], data[1], data[2]); }
+    BoVector3(const BoVector3& v) { set(v[0], v[1], v[2]); }
     ~BoVector3() {}
 
     /**
@@ -440,6 +441,7 @@ class BoVector4
     BoVector4()  { reset(); };
     BoVector4(GLfloat x, GLfloat y, GLfloat z, GLfloat w)  { set(x, y, z, w); };
     BoVector4(const GLfloat* data) { set(data[0], data[1], data[2], data[3]); }
+    BoVector4(const BoVector4& v) { set(v[0], v[1], v[2], v[3]); }
     ~BoVector4() {};
 
     /**
@@ -913,6 +915,14 @@ class BoMatrix
      * Dump @p matrix onto the console as debug output.
      **/
     static void debugMatrix(const GLfloat* matrix);
+
+    /**
+     * See @ref loadMatrix
+     **/
+    inline void operator=(const BoMatrix& m)
+    {
+      loadMatrix(m);
+    }
 
   private:
     /**
