@@ -156,7 +156,7 @@ void UnitProperties::loadFacilityProperties(KSimpleConfig* conf)
  mFacilityProperties->mCanRefineMinerals = conf->readBoolEntry("CanRefineMinerals",
 		false);
  mFacilityProperties->mCanRefineOil= conf->readBoolEntry("CanRefineOil", false);
- mFacilityProperties->mConstructionFrames= conf->readUnsignedNumEntry("ConstructionSteps", FACILITY_CONSTRUCTION_STEPS);
+ mFacilityProperties->mConstructionFrames= conf->readUnsignedNumEntry("ConstructionSteps", 20);
 }
 
 void UnitProperties::loadAllPluginProperties(KSimpleConfig* conf)
