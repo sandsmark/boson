@@ -133,6 +133,8 @@ public:
 	 **/
 	bool cellOccupied(int x, int y);
 
+	void play(const QString& fileName);
+
 public slots:
 	/**
 	 * The game (@ref Boson) reports that a unit shall be added - lets do
@@ -151,7 +153,6 @@ signals:
 
 protected:
 	void loadTiles(const QString&);
-	void play(const QString& fileName); // perhaps in public
 
 protected slots:
 
