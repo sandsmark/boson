@@ -50,7 +50,15 @@ class BosonShot : public BosonItem
     /**
      * Type of the shot
      **/
-    enum Type { Bullet = 0, Missile, Explosion, Mine, Bomb, Fragment };
+    enum Type
+    {
+      Bullet = 0,
+      Missile,
+      Explosion,
+      Mine,
+      Bomb,
+      Fragment
+    };
 
     /**
      * @param owner The player that shot. This is usually @ref Unit::owner of
@@ -78,7 +86,7 @@ class BosonShot : public BosonItem
      * Note that it's perfectly legal to return NULL pointer here, so you should
      * always check it before doing anything with it.
      **/
-    inline const BosonWeaponProperties* properties() const  { return mProp; };
+    inline const BosonWeaponProperties* properties() const  { return mProp; }
 
     /**
      * @return Damage made by this shot when it explodes.
@@ -104,7 +112,7 @@ class BosonShot : public BosonItem
      * Once shot has exploded, it becomes inactive. Inactive shots can be
      * deleted.
      **/
-    inline bool isActive() const  { return mActive; };
+    inline bool isActive() const  { return mActive; }
 
     inline virtual int rtti() const  { return RTTI::Shot; }
     virtual int type() const = 0;
@@ -115,7 +123,10 @@ class BosonShot : public BosonItem
      **/
     inline virtual void advanceFunction(unsigned int)
     {
-      if(!isActive()) { return; }
+      if(!isActive())
+      {
+        return;
+      }
       advanceMoveInternal();
       advanceMoveCheck();
     }
@@ -124,7 +135,10 @@ class BosonShot : public BosonItem
      **/
     inline virtual void advanceFunction2(unsigned int)
     {
-      if(!isActive()) { return; }
+      if(!isActive())
+      {
+        return;
+      }
       advanceMoveInternal();
       advanceMoveCheck();
     }
@@ -139,13 +153,13 @@ class BosonShot : public BosonItem
   protected:
     virtual const QColor* teamColor() const;
 
-    inline void setActive(bool a)  { mActive = a; };
-    inline void setProperties(const BosonWeaponProperties* p)  { mProp = p; };
+    inline void setActive(bool a)  { mActive = a; }
+    inline void setProperties(const BosonWeaponProperties* p)  { mProp = p; }
 
-    virtual void advanceMoveInternal() {};
+    virtual void advanceMoveInternal() {}
     virtual void advanceMoveCheck();
 
-    virtual void moveToTarget() {};
+    virtual void moveToTarget() {}
 
   private:
     void init();
@@ -171,12 +185,20 @@ class BosonShotBullet : public BosonShot
 
     // Bullets won't be saved becaused they will immediately "explode" and
     //  become inactive
-    virtual bool saveAsXML(QDomElement&) { return true; };
-    virtual bool loadFromXML(const QDomElement&) { setActive(false); return true; };
+    virtual bool saveAsXML(QDomElement&) { return true; }
+    virtual bool loadFromXML(const QDomElement&)
+    {
+      setActive(false);
+      return true;
+    }
     virtual bool save(QDataStream&) { return true; }
-    virtual bool load(QDataStream&) { setActive(false); return true; }
+    virtual bool load(QDataStream&)
+    {
+      setActive(false);
+      return true;
+    }
 
-    inline virtual int type() const { return BosonShot::Bullet; };
+    inline virtual int type() const { return BosonShot::Bullet; }
 
   protected:
     virtual void moveToTarget();
@@ -204,9 +226,9 @@ class BosonShotMissile : public BosonShot
     virtual bool save(QDataStream& stream);
     virtual bool load(QDataStream& stream);
 
-    virtual QPtrList<BosonParticleSystem>* particleSystems() const  { return mFlyParticleSystems; };
+    virtual QPtrList<BosonParticleSystem>* particleSystems() const  { return mFlyParticleSystems; }
 
-    inline virtual int type() const { return BosonShot::Missile; };
+    inline virtual int type() const { return BosonShot::Missile; }
 
   protected:
     virtual void advanceMoveInternal();
@@ -245,11 +267,11 @@ class BosonShotExplosion : public BosonShot
     virtual bool save(QDataStream& stream);
     virtual bool load(QDataStream& stream);
 
-    inline virtual int type() const { return BosonShot::Explosion; };
+    inline virtual int type() const { return BosonShot::Explosion; }
 
-    virtual long int damage() const  { return mDamage; };
-    virtual float damageRange() const  { return mDamageRange; };
-    virtual float fullDamageRange() const  { return mFullDamageRange; };
+    virtual long int damage() const  { return mDamage; }
+    virtual float damageRange() const  { return mDamageRange; }
+    virtual float fullDamageRange() const  { return mFullDamageRange; }
 
   protected:
     virtual void advanceMoveInternal();
@@ -281,7 +303,7 @@ class BosonShotMine : public BosonShot
     virtual bool save(QDataStream& stream);
     virtual bool load(QDataStream& stream);
 
-    inline virtual int type() const { return BosonShot::Mine; };
+    inline virtual int type() const { return BosonShot::Mine; }
 
   protected:
     virtual void advanceMoveInternal();
@@ -310,7 +332,7 @@ class BosonShotBomb : public BosonShot
     virtual bool save(QDataStream& stream);
     virtual bool load(QDataStream& stream);
 
-    inline virtual int type() const { return BosonShot::Bomb; };
+    inline virtual int type() const { return BosonShot::Bomb; }
 
   protected:
     virtual void advanceMoveInternal();
@@ -343,9 +365,9 @@ class BosonShotFragment : public BosonShot
     virtual float damageRange() const;
     virtual float fullDamageRange() const;
 
-    inline virtual int type() const { return BosonShot::Fragment; };
+    inline virtual int type() const { return BosonShot::Fragment; }
 
-    virtual QPtrList<BosonParticleSystem>* particleSystems() const  { return mParticleSystems; };
+    virtual QPtrList<BosonParticleSystem>* particleSystems() const  { return mParticleSystems; }
 
     virtual void explode();
 
