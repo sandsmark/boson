@@ -54,8 +54,10 @@ public:
   serverMobUnit(boBuffer *, mobileMsg_t *msg, QObject* parent = 0L, const char *name=0L);
  virtual	int _x(void) {return __x;}
  virtual	int _y(void) {return __y;}
- void 	reportCreated(boBuffer *);
- void 	reportDestroyed(boBuffer *);
+ void 	reportCreated(int player);
+ void 	reportDestroyed(int player);
+// void 	reportCreated(boBuffer *);
+// void 	reportDestroyed(boBuffer *);
 
 /* request */
  void	r_moveBy(moveMsg_t &, int playerId, boBuffer *);
@@ -75,8 +77,10 @@ class serverFacility : public Facility, public serverUnit, public knownBy
   serverFacility(boBuffer *, facilityMsg_t *msg, QObject* parent = 0L, const char *name=0L);
  virtual	int _x(void) {return __x;}
  virtual	int _y(void) {return __y;}
- void 	reportCreated(boBuffer *);
- void 	reportDestroyed(boBuffer *);
+ void 	reportCreated(int player);
+ void 	reportDestroyed(int player);
+// void 	reportCreated(int player);
+// void 	reportDestroyed(boBuffer *);
 
 /* request */
  void getWantedAction();
