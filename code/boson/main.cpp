@@ -49,6 +49,7 @@ static KCmdLineOptions options[] =
 };
 
 // FIXME: I don't like static vars
+#warning FIXME!!!
 extern float aidelay;
 
 int main(int argc, char **argv)

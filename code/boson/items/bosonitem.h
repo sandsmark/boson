@@ -325,17 +325,17 @@ public:
 	 * floating point operations!
 	 **/
 	inline float rotation() const { return mRotation; }
-	virtual void setRotation(float r) { rotateParticleSystems(r - mRotation, 0.0, 0.0, 1.0); mRotation = r; }
+	void setRotation(float r) { rotateParticleSystems(r - mRotation, 0.0, 0.0, 1.0); mRotation = r; }
 
 	inline float xRotation() const { return mXRotation; }
-	virtual void setXRotation(float r) { rotateParticleSystems(r - mXRotation, 1.0, 0.0, 0.0); mXRotation = r; }
+	void setXRotation(float r) { rotateParticleSystems(r - mXRotation, 1.0, 0.0, 0.0); mXRotation = r; }
 
 	inline float yRotation() const { return mYRotation; }
-	virtual void setYRotation(float r) { rotateParticleSystems(r - mYRotation, 0.0, 1.0, 0.0); mYRotation = r; }
+	void setYRotation(float r) { rotateParticleSystems(r - mYRotation, 0.0, 1.0, 0.0); mYRotation = r; }
 
 
-	virtual void moveParticleSystems(float x, float y, float z);
-	virtual void rotateParticleSystems(float angle, float x, float y, float z);
+	void moveParticleSystems(float x, float y, float z);
+	void rotateParticleSystems(float angle, float x, float y, float z);
 
 	virtual QPtrList<BosonParticleSystem>* particleSystems();
 

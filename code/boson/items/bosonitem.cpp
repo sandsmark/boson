@@ -371,7 +371,7 @@ void BosonItem::moveParticleSystems(float x, float y, float z)
 {
  if (particleSystems() && particleSystems()->count() > 0) {
 	BoVector3 pos(x + width() / 2, y + height() / 2, z);
-	pos.canvasToOGL();
+	pos.canvasToWorld();
 	QPtrListIterator<BosonParticleSystem> it(*particleSystems());
 	for (; it.current(); ++it) {
 		it.current()->setPosition(pos);
