@@ -19,6 +19,174 @@
 
 #include "selectbox.h"
 
+#include "bosontexturearray.h"
+
+#include <kdebug.h>
+#include <kimageeffect.h>
+
+#include <qimage.h>
+#include <qgl.h>
+
+#define POWER_LEVELS 15
+
+SelectBoxData* SelectBox::mBoxData = 0;
+
+SelectBoxData::SelectBoxData()
+{
+ mTextures = 0;
+}
+
+SelectBoxData::~SelectBoxData()
+{
+ // TODO: free the display lists?
+}
+
+GLuint SelectBoxData::list(double factor)
+{
+ int list = (int)((POWER_LEVELS - 1) * factor);
+ if (!mDisplayLists.contains(factor)) {
+	loadBoxes();
+	if (!mDisplayLists.contains(factor)) {
+		kdError() << k_funcinfo << "Unable to generate a SelectBox for " << factor << endl;
+		return 0;
+	}
+	return mDisplayLists[factor];
+ }
+ return mDisplayLists[factor];
+}
+
+void SelectBoxData::loadBoxes()
+{
+ // TODO: we might want to use mipmaps here - interesting for big units, as well as for zooming
+ GLuint list = glGenLists(POWER_LEVELS);
+ if (mTextures) {
+	kdWarning() << k_funcinfo << "textures loaded before" << endl;
+	delete mTextures;
+	mTextures = 0;
+ }
+ QValueList<QImage> textureImages;
+ glEnable(GL_TEXTURE_2D); // should already be enabled, cause we need it for units. just to be sure...
+
+ for (int i = 0; i < POWER_LEVELS; i++) {
+	QImage image(BO_TILE_SIZE, 6, 32); // AB: the sizes are hardcoded. mipmaps might be VERY useful here!
+
+/*
+	// "scrollbar" - or rather "health bar"
+//	KPixmap pix(QPixmap(barWidth(3), barHeight())); // not working by any reason
+	KPixmap pix(QPixmap((int)barWidth(frames() - 1), barHeight()));
+	pix.fill(Qt::green);
+	KPixmapEffect::gradient(pix, Qt::red, Qt::green, 
+			KPixmapEffect::HorizontalGradient);
+	painter.drawPixmap(1, 1, pix);
+	*/
+
+	KImageEffect::gradient(image.size(), Qt::red, Qt::green, KImageEffect::HorizontalGradient);
+	image = QGLWidget::convertToGLFormat(image);
+	textureImages.append(image);
+ }
+
+ mTextures = new BosonTextureArray(textureImages);
+ if (!mTextures->texture(0)) {
+	kdWarning() << k_funcinfo << "textures got loaded improperly" << endl;
+ }
+
+ for (unsigned int i = 0; i < POWER_LEVELS; i++) {
+	glNewList(list + i, GL_COMPILE);
+//		glPushMatrix();
+		glColor3f(1.0, 1.0, 1.0);
+		glDisable(GL_TEXTURE_2D);
+		glDisable(GL_BLEND);
+		
+		drawCube();
+
+		glColor3f(1.0, 1.0, 1.0);
+		glEnable(GL_TEXTURE_2D);
+		glEnable(GL_BLEND);
+		glBindTexture(GL_TEXTURE_2D, mTextures->texture(i));
+		glBegin(GL_QUADS);
+			glTexCoord2f(0.0, 0.0); glVertex3f(0.0, 0.0, 1.0);
+			glTexCoord2f(0.0, 1.0); glVertex3f(0.0, 0.5, 1.0);
+			glTexCoord2f(1.0, 1.0); glVertex3f(0.5, 0.5, 1.0);
+			glTexCoord2f(1.0, 0.0); glVertex3f(0.5, 0.0, 1.0);
+		glEnd();
+//		glPopMatrix();
+	glEndList();
+	mDisplayLists.insert(i, list+i);
+ }
+}
+
+void SelectBoxData::drawCube()
+{
+// FIXME: a lot of redundant vertices here!
+
+ // bottom
+ glBegin(GL_LINE_LOOP);
+	glVertex3f(0.0, 0.0, 0.0);
+	glVertex3f(0.0, 1.0, 0.0);
+	glVertex3f(1.0, 1.0, 0.0);
+	glVertex3f(1.0, 0.0, 0.0);
+ glEnd();
+ 
+ // top
+ glBegin(GL_LINE_LOOP);
+	glVertex3f(0.0, 0.0, 1.0);
+	glVertex3f(0.0, 1.0, 1.0);
+	glVertex3f(1.0, 1.0, 1.0);
+	glVertex3f(1.0, 0.0, 1.0);
+ glEnd();
+
+ // left
+ glBegin(GL_LINE_LOOP);
+	glVertex3f(0.0, 0.0, 0.0);
+	glVertex3f(0.0, 1.0, 0.0);
+	glVertex3f(0.0, 1.0, 1.0);
+	glVertex3f(0.0, 0.0, 1.0);
+ glEnd();
+
+ //right
+ glBegin(GL_LINE_LOOP);
+	glVertex3f(1.0, 0.0, 0.0);
+	glVertex3f(1.0, 1.0, 0.0);
+	glVertex3f(1.0, 1.0, 1.0);
+	glVertex3f(1.0, 0.0, 1.0);
+ glEnd();
+
+ // front
+ glBegin(GL_LINE_LOOP);
+	glVertex3f(0.0, 1.0, 0.0);
+	glVertex3f(1.0, 1.0, 0.0);
+	glVertex3f(1.0, 1.0, 1.0);
+	glVertex3f(0.0, 1.0, 1.0);
+ glEnd();
+
+ // back
+ glBegin(GL_LINE_LOOP);
+	glVertex3f(0.0, 0.0, 0.0);
+	glVertex3f(0.0, 1.0, 0.0);
+	glVertex3f(1.0, 1.0, 0.0);
+	glVertex3f(1.0, 0.0, 0.0);
+ glEnd();
+}
+
+SelectBox::SelectBox(BosonSprite*, BosonCanvas*, bool groupLeader)
+{
+ mDisplayList = 0;
+ if (!mBoxData) {
+	mBoxData = new SelectBoxData;
+ }
+}
+
+SelectBox::~SelectBox()
+{
+}
+
+void SelectBox::update(double div)
+{
+ mDisplayList = mBoxData->list(div);
+ kdDebug() << k_funcinfo << mDisplayList << endl;
+}
+
+
 //#ifdef NO_OPENGL // AB: FIXME
 #if 0
 #include <qpainter.h>

@@ -32,6 +32,10 @@
 class BosonModel
 {
 public:
+	/**
+	 * Construct a model using an already created display list
+	 **/
+	BosonModel(GLuint list);
 	BosonModel(const QString& file);
 	~BosonModel();
 
@@ -41,6 +45,7 @@ public:
 	}
 
 	void renderNode(Lib3dsNode* node);
+
 private:
 	GLuint mDisplayList;
 	Lib3dsFile* m3ds;

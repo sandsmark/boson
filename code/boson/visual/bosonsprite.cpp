@@ -20,6 +20,7 @@
 
 #include "../bosoncanvas.h"
 #include "../rtti.h"
+#include "../selectbox.h"
 
 #include <kdebug.h>
 
@@ -35,10 +36,12 @@ BosonSprite::BosonSprite(QCanvasPixmapArray* array, BosonCanvas* canvas)
 	canvas->addItem(this);
  }
  mIsAnimated = false;
+ mSelectBox = 0;
 }
 
 BosonSprite::~BosonSprite()
 {
+ unselect();
  if (boCanvas()) {
 	boCanvas()->removeItem(this);
 	boCanvas()->removeAnimation(this);
@@ -171,3 +174,18 @@ void BosonSprite::setAnimated(bool a)
  }
 }
 
+void BosonSprite::select(bool markAsLeader)
+{
+ if (mSelectBox) {
+	// already selected
+	return;
+ }
+ mSelectBox = new SelectBox(this, boCanvas(), markAsLeader);
+ 
+}
+
+void BosonSprite::unselect()
+{
+ delete mSelectBox;
+ mSelectBox = 0;
+}

@@ -29,6 +29,7 @@
 
 class BosonCanvas;
 class QPointArray;
+class SelectBox;
 
 #ifndef NO_OPENGL
 class BosonSprite : public GLSprite
@@ -43,6 +44,11 @@ public:
 	BosonSprite(QCanvasPixmapArray* array, BosonCanvas*);
 #endif
 	virtual ~BosonSprite();
+
+	inline bool isSelected() const { return mSelectBox != 0; }
+	inline SelectBox* selectBox() const { return mSelectBox; }
+	virtual void select(bool markAsLeader = false);
+	virtual void unselect();
 
 	virtual void setCanvas(BosonCanvas* c);
 
@@ -104,6 +110,7 @@ public:
 
 private:
 	bool mIsAnimated;
+	SelectBox* mSelectBox;
 };
 
 #endif

@@ -123,25 +123,13 @@ Unit::~Unit()
  delete d;
 }
 
-void Unit::select()
+void Unit::select(bool markAsLeader)
 {
  if (isDestroyed()) {
 	return; // shall we really return?
  }
- if (d->mSelectBox) {
-	// the box was already created
-	return;
- }
-// put the selection box on the same canvas as the unit and around the unit
-// d->mSelectBox = new SelectBox(x(), y(), width(), height(), z(), canvas(), d->mLeader);
- d->mSelectBox = new SelectBox(this, (BosonCanvas*)canvas(), d->mLeader);
+ BosonSprite::select(markAsLeader);
  updateSelectBox();
-}
-
-void Unit::unselect()
-{
- delete d->mSelectBox;
- d->mSelectBox = 0;
 }
 
 int Unit::destinationX() const
@@ -205,11 +193,11 @@ void Unit::setHealth(unsigned long int h)
 
 void Unit::updateSelectBox()
 {
- if (d->mSelectBox) {
+ if (selectBox()) {
 	unsigned long int maxHealth = unitProperties()->health();
 	double div = (double)health() / maxHealth;
-	d->mSelectBox->update(div);
-	d->mSelectBox->setVisible(true);
+	selectBox()->update(div);
+	selectBox()->setVisible(true);
  }
 }
 
@@ -236,9 +224,9 @@ void Unit::moveBy(float moveX, float moveY, float moveZ)
  boCanvas()->removeFromCells(this);
  BosonSprite::moveBy(moveX, moveY, moveZ);
 #ifdef NO_OPENGL
- if (d->mSelectBox) {
+ if (selectBox()) {
 	// im pretty sure we won't need moveZ in the select box.. not yet ;)
-	d->mSelectBox->moveBy(moveX, moveY, 0.0);
+	selectBox()->moveBy(moveX, moveY, 0.0);
  }
 #endif
  boCanvas()->addToCells(this);
@@ -677,7 +665,7 @@ void Unit::moveInGroup()
 void Unit::setGroupLeader(bool leader)
 {
  d->mLeader = leader;
- if (d->mSelectBox) {
+ if (isSelected()) {
 	unselect();
 	select();
  }
