@@ -23,39 +23,16 @@
 #include "../defines.h"
 #include "../bosonconfig.h"
 #include "../bosonmessage.h"
-#include "../player.h"
-#include "../speciestheme.h"
-#include "../bosoncomputerio.h"
 #include "../boson.h"
 #include "../top.h"
 #include "../bosonplayfield.h"
-#include "../bosonscenario.h"
 #include "bodebug.h"
 
 #include <klocale.h>
-#include <kgame/kgameproperty.h>
-#include <kgame/kgamechat.h>
-#include <ksimpleconfig.h>
-#include <kmessagebox.h>
 
-#include <qcombobox.h>
-#include <qframe.h>
-#include <qgroupbox.h>
-#include <qlabel.h>
-#include <qlineedit.h>
-#include <qlistbox.h>
-#include <qpushbutton.h>
-#include <qlayout.h>
-#include <qpainter.h>
-
-// AB: FIXME: the code design here is BAAAD. lots of strange names for the
-// layouts, strange names for the spacers (which might be replaced by normal
-// stretches).
-// short: qt designer code
 BosonStartWidgetBase::BosonStartWidgetBase(TopWidget* top, QWidget* parent)
     : QWidget(parent)
 {
-// FIXME: add a "widget" to class name
  mTop = top; // AB: i dislike this
 
  if (!boGame) {
@@ -89,19 +66,9 @@ void BosonStartWidgetBase::initKGame()
 void BosonStartWidgetBase::initPlayFields()
 {
  BosonPlayField::preLoadAllPlayFields();
- QStringList list = BosonPlayField::availablePlayFields();
- QString mapId = boConfig->readLocalPlayerMap();
- if (mapId.isNull() || !list.contains(mapId)) {
-	mapId = BosonPlayField::defaultPlayField();
- }
- int mapIndex = list.findIndex(mapId);
-#warning use it!
-// TODO: make mapIndex the current index!
-/*
- if (boGame->isAdmin()) {
-	slotSendPlayFieldChanged(mapIndex);
- }
- */
+ // AB: not much to do here, since we use BosonPlayField::availablePlayFields()
+ // everywhere. if we manage something like mIndex2Identifier one day we should
+ // init it here (not in derived classes)
 }
 
 void BosonStartWidgetBase::slotSendPlayFieldChanged(int index)
