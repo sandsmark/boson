@@ -340,6 +340,9 @@ public:
 
 	void playSound(UnitSoundEvent event);
 
+	BosonParticleSystem* smokeParticleSystem() const;
+	void setSmokeParticleSystem(BosonParticleSystem* s);
+
 protected:
 	void shootAt(Unit* target);
 
@@ -528,8 +531,6 @@ public:
 
 	BosonParticleSystem* flamesParticleSystem() const;
 	void setFlamesParticleSystem(BosonParticleSystem* s);
-	BosonParticleSystem* smokeParticleSystem() const;
-	void setSmokeParticleSystem(BosonParticleSystem* s);
 	void deleteParticleSystems();
 
 private:

@@ -134,6 +134,11 @@ class BosonParticleSystem
      * blending functions after calling this.
      **/
     virtual void draw();
+    
+    /**
+     * Moves all active particles by v
+     **/
+    void moveParticles(BoVector3 v);
 
     /**
      * Sets current position of this system. Position of particles are relative

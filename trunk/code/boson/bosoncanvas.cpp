@@ -238,9 +238,9 @@ void BosonCanvas::removeAnimation(BosonItem* item)
 void BosonCanvas::unitMoved(Unit* unit, float oldX, float oldY)
 {
  updateSight(unit, oldX, oldY);
-	
-// test if any unit has this unit as target. If sou then adjust the destination. 
-//TODO 
+ 
+// test if any unit has this unit as target. If sou then adjust the destination.
+//TODO
 
 // used to adjust the mini map
  emit signalUnitMoved(unit, oldX, oldY);
@@ -341,12 +341,25 @@ void BosonCanvas::shootAtUnit(Unit* target, Unit* attackedBy, long int damage)
 			target->z() * BO_GL_CELL_SIZE / BO_TILE_SIZE);
 	d->mParticles.append(BosonParticleManager::newShot(pos));
 
-	if(target->isFacility()) {
-		float factor = 2.0 - target->health() / (target->unitProperties()->health() / 2.0);
-//		if(target->health() <= (target->unitProperties()->health() / 2.0)) {
-		if(factor >= 1.0) {
-			// If facility has less than 50% hitpoints, it's burning
-			BosonParticleSystem* s;
+	float factor = 2.0 - target->health() / (target->unitProperties()->health() / 2.0);
+//	if(target->health() <= (target->unitProperties()->health() / 2.0)) {
+	if(factor >= 1.0) {
+		// If unit has less than 50% hitpoints, it's smoking
+		BosonParticleSystem* s;
+		if(!target->smokeParticleSystem()) {
+			s = BosonParticleManager::newSmallSmoke(pos);
+			target->setSmokeParticleSystem(s);
+			d->mParticles.append(s);
+		}
+		s = target->smokeParticleSystem();
+		// FIXME: maybe move this to BosonParticleManager?
+		s->setCreateRate(factor * 25);
+//		s->setVelocity(BoVector3(0, 0, factor * 0.5));  // This is only hint for BosonParticleManager
+		float c = 0.8 - factor * 0.4;
+		s->setColor(BoVector4(c, c, c, 0.25));
+
+		// Facilities are burning too
+		if(target->isFacility()) {
 			if(!((Facility*)target)->flamesParticleSystem()) {
 				s = BosonParticleManager::newFire(pos);
 				((Facility*)target)->setFlamesParticleSystem(s);
@@ -356,26 +369,16 @@ void BosonCanvas::shootAtUnit(Unit* target, Unit* attackedBy, long int damage)
 			// FIXME: maybe move this to BosonParticleManager?
 			s->setCreateRate(factor * 30);
 			s->setVelocity(BoVector3(0, 0, factor * 0.5));  // This is only hint for BosonParticleManager
-
-			if(!((Facility*)target)->smokeParticleSystem()) {
-				s = BosonParticleManager::newSmallSmoke(pos);
-				((Facility*)target)->setSmokeParticleSystem(s);
-				d->mParticles.append(s);
-			}
-			s = ((Facility*)target)->smokeParticleSystem();
-			// FIXME: maybe move this to BosonParticleManager?
-			s->setCreateRate(factor * 25);
-//			s->setVelocity(BoVector3(0, 0, factor * 0.5));  // This is only hint for BosonParticleManager
-			float c = 0.8 - factor * 0.4;
-			s->setColor(BoVector4(c, c, c, 0.25));
-		} else {
-			// If it has more hitpoints, it's not burning ;-)
+		}
+	} else {
+		// If it has more hitpoints, it's not burning ;-)
+		if(target->isFacility()) {
 			if(((Facility*)target)->flamesParticleSystem()) {
 				((Facility*)target)->flamesParticleSystem()->setAge(0);
 			}
-			if(((Facility*)target)->smokeParticleSystem()) {
-				((Facility*)target)->smokeParticleSystem()->setAge(0);
-			}
+		}
+		if(target->smokeParticleSystem()) {
+			target->smokeParticleSystem()->setAge(0);
 		}
 	}
  }
@@ -399,9 +402,9 @@ void BosonCanvas::destroyUnit(Unit* unit)
 		if(((Facility*)unit)->flamesParticleSystem()) {
 			((Facility*)unit)->flamesParticleSystem()->setAge(0);
 		}
-		if(((Facility*)unit)->smokeParticleSystem()) {
-			((Facility*)unit)->smokeParticleSystem()->setAge(0);
-		}
+	}
+	if(unit->smokeParticleSystem()) {
+		unit->smokeParticleSystem()->setAge(0);
 	}
 
 	// the unit is added to a list - now displayed as a wreckage only.

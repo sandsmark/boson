@@ -22,6 +22,7 @@
 #include "bo3dtools.h"
 
 #include <kdebug.h>
+#include <iostream.h>
 
 #include <GL/gl.h>
 
@@ -163,7 +164,7 @@ void BosonParticleSystem::update(float elapsed)
 
   mNum = 0;
   mAge -= elapsed;
-  
+
   // Update particles
   for(int i = 0; i < mMaxNum; i++)
   {
@@ -291,5 +292,25 @@ void BosonParticleSystem::initParticle(BosonParticle* particle)
   if(mInitFunc)
   {
     (*mInitFunc)(this, particle);
+  }
+}
+
+void BosonParticleSystem::moveParticles(BoVector3 v)
+{
+  //cout << k_funcinfo << "Moving by " << v[0] << "; " << v[1] << "; " << v[2] << endl;
+  //cout << k_funcinfo << "Pos before moving: " << mPos[0] << "; " << mPos[1] << "; " << mPos[2] << endl;
+  mPos.add(v);
+  //cout << k_funcinfo << "Pos after moving: " << mPos[0] << "; " << mPos[1] << "; " << mPos[2] << endl;
+  // Update particles
+  BoVector3 inv(-v[0], -v[1], -v[2]);
+  //cout << k_funcinfo << "Particles will be moved by " << inv[0] << "; " << inv[1] << "; " << inv[2] << endl;
+  for(int i = 0; i < mMaxNum; i++)
+  {
+    if(mParticles[i].life > 0.0)
+    {
+      //cout << k_funcinfo << "PARTICLE[" << i << "]: before adding: " << mParticles[i].pos[0] << "; " << mParticles[i].pos[1] << "; " << mParticles[i].pos[2] << endl;
+      mParticles[i].pos.add(inv);
+      //cout << k_funcinfo << "PARTICLE[" << i << "]: after adding: " << mParticles[i].pos[0] << "; " << mParticles[i].pos[1] << "; " << mParticles[i].pos[2] << endl;
+    }
   }
 }
