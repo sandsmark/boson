@@ -57,8 +57,8 @@ UnitBase::UnitBase(const UnitProperties* prop, Player* owner, BosonCanvas* canva
  mDeletionTimer.setEmittingSignal(false);
  mShieldReloadCounter.setEmittingSignal(false);
 
- mWork.setLocal((int)WorkNone);
- mAdvanceWork.setLocal((int)WorkNone);
+ mWork.setLocal((int)WorkIdle);
+ mAdvanceWork.setLocal((int)WorkIdle);
  mMovingStatus.setLocal((int)Standing);
  mHealth.setLocal(0); // initially destroyed
  mShields.setLocal(0); // doesn't have any shields

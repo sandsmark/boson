@@ -75,7 +75,7 @@ public:
 	 * What is this unit currently doing
 	 *
 	 * Possible value are
-	 * @li WorkNone - The unit does nothing
+	 * @li WorkIdle - The unit does nothing
 	 * @li WorkMove A unit is currently moving
 	 * @li WorkAttack - Currently attacks a unit
 	 * @li WorkConstructed - Is <em>being</em> constructed
@@ -85,7 +85,7 @@ public:
 	 * @li WorkTurn - is turning
 	 **/
 	enum WorkType {
-		WorkNone = 0,
+		WorkIdle = 0,
 		WorkMove = 2,
 		WorkAttack = 4,
 		WorkConstructed = 5,

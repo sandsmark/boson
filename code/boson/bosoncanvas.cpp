@@ -281,7 +281,7 @@ void BoCanvasAdvance::advanceFunctionAndMove(unsigned int advanceCallsCount, boo
 			// *always* execute this!
 			skip = false;
 			break;
-		case (int)UnitBase::WorkNone:
+		case (int)UnitBase::WorkIdle:
 			if (advanceCallsCount % 10 != 0) {
 				skip = true;
 			}

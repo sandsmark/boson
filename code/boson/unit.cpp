@@ -678,7 +678,7 @@ void Unit::advanceAttack(unsigned int advanceCallsCount)
 		range--;
 	}
 	if (!moveTo(target()->x(), target()->y(), range)) {
-		setWork(WorkNone);
+		setWork(WorkIdle);
 	} else {
 		addWaypoint(BoVector2Fixed(target()->x(), target()->y()));
 		setAdvanceWork(WorkMove);
@@ -736,7 +736,7 @@ void Unit::advancePlugin(unsigned int advanceCallsCount)
 {
  if (!currentPlugin()) {
 	boWarning() << k_funcinfo << "NULL plugin!" << endl;
-	setWork(WorkNone);
+	setWork(WorkIdle);
  } else {
 	currentPlugin()->advance(advanceCallsCount);
  }
@@ -784,7 +784,7 @@ void Unit::advanceTurn(unsigned int)
 	/**
 	 * AFAICS there are 3 possibilities:
 	 * 1. The user explicitly wanted the unit to turn.
-	 *    -> we are done now, set work to WorkNone
+	 *    -> we are done now, set work to WorkIdle
 	 *       (work also includes advanceWork!)
 	 * 2. The user wanted to do something else (move, shoot, ...) and for
 	 *    this the unit had to turn.
@@ -794,7 +794,7 @@ void Unit::advanceTurn(unsigned int)
 	 *    -> continue moving, i.e. set advanceWork to WorkMove
 	 **/
 	if (work() == WorkTurn) {
-		setWork(WorkNone);
+		setWork(WorkIdle);
 	} else if (advanceWork() != work()) {
 		if (pathPointCount() != 0 || waypointCount() != 0) {
 			// this is probably case 3 (but case 2 is possible, too)
@@ -862,7 +862,7 @@ void Unit::moveTo(const BoVector2Fixed& pos, bool attack)
 	setWork(WorkMove);
  } else {
 	boDebug() << k_funcinfo << "unit " << id() << ": CANNOT move to (" << x << "; " << y << ")" << endl;
-	setWork(WorkNone);
+	setWork(WorkIdle);
 	stopMoving();
  }
 }
@@ -1038,7 +1038,7 @@ void Unit::stopMoving()
  // Call this only if we are only moving - stopMoving() is also called e.g. on
  // WorkAttack, when the unit is not yet in range.
  if (work() == WorkMove) {
-	setWork(WorkNone);
+	setWork(WorkIdle);
  } else if (advanceWork() != work()) {
 	setAdvanceWork(work());
  }
@@ -1051,7 +1051,7 @@ void Unit::stopAttacking()
  stopMoving(); // FIXME not really intuitive... nevertheless its currently useful.
  setMovingStatus(Standing);
  setTarget(0);
- setWork(WorkNone);
+ setWork(WorkIdle);
 }
 
 bool Unit::saveAsXML(QDomElement& root)
@@ -1425,7 +1425,7 @@ void Unit::setAdvanceWork(WorkType w)
 
  // we even do this if nothing changed - just in case...
  switch (w) {
-	case WorkNone:
+	case WorkIdle:
 		setAdvanceFunction(&Unit::advanceNone, owner()->advanceFlag());
 		break;
 	case WorkMove:
@@ -1687,7 +1687,7 @@ bool MobileUnit::init()
 	 return ret;
   }
 
- setWork(WorkNone);
+ setWork(WorkIdle);
 
  ((Boson*)owner()->game())->slotUpdateProductionOptions();
 
@@ -1963,7 +1963,7 @@ void MobileUnit::advanceMoveCheck()
 				// Enough of waiting (30 secs). Give up.
 				setMovingStatus(Standing);
 				stopMoving();
-				setWork(WorkNone);
+				setWork(WorkIdle);
 				return;
 			} else if (pathInfo()->waiting % (20 + QMIN(pathInfo()->pathrecalced * 20, 80)) == 0) {
 				// First wait 20 adv. calls (1 sec) before recalculating path, then 40
@@ -2018,7 +2018,7 @@ void MobileUnit::advanceMoveCheck()
 			<< boundingRect().topLeft().y() << ")" << endl;
 	setMovingStatus(Standing);
 	stopMoving();
-	setWork(WorkNone);
+	setWork(WorkIdle);
 	return;
  }
  // Check if bottom-right point of the unit will be on canvas after moving
@@ -2053,7 +2053,7 @@ void MobileUnit::advanceMoveCheck()
 			<< boundingRect().bottomRight().y() << ")" << endl;
 	setMovingStatus(Standing);
 	stopMoving();
-	setWork(WorkNone);
+	setWork(WorkIdle);
 	return;
  }
 
@@ -2071,7 +2071,7 @@ void MobileUnit::advanceMoveCheck()
 	boError(401) << k_funcinfo << "NULL cell " << (int)currentPathPoint().x() << "," << (int)currentPathPoint().y() << endl;
 	setMovingStatus(Standing);
 	stopMoving();
-	setWork(WorkNone);
+	setWork(WorkIdle);
 	return;
  }
 
@@ -2263,7 +2263,7 @@ void MobileUnit::advanceFollow(unsigned int advanceCallsCount)
 	}
 	boDebug(401) << k_funcinfo << "unit (" << target()->id() << ") not in range - moving..." << endl;
 	if (!moveTo(target()->x(), target()->y(), 1)) {
-		setWork(WorkNone);
+		setWork(WorkIdle);
 	} else {
 		setAdvanceWork(WorkMove);
 	}
@@ -2371,7 +2371,7 @@ bool MobileUnit::checkPathPoint(const BoVector2Fixed& p)
 		// No more waypoints. Unit should stop moving
 		setMovingStatus(Standing);
 		stopMoving();
-		if (work() == WorkNone) {
+		if (work() == WorkIdle) {
 			// If we were just moving, turn to random direction
 			boDebug() << k_funcinfo << id() << ": stopping moving. Turning" << endl;
 			// Turn a bit
@@ -2534,7 +2534,7 @@ void Facility::setConstructionStep(unsigned int step)
  }
  d->mConstructionStep = step;
  if (step == constructionSteps()) {
-	setWork(WorkNone);
+	setWork(WorkIdle);
 	owner()->facilityCompleted(this);
 	((Boson*)owner()->game())->slotUpdateProductionOptions();
 	if (itemRenderer()) {
