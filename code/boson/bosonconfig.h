@@ -276,6 +276,8 @@ public:
 	 **/
 	static QValueList<float> readFloatNumList(KConfig* cfg, QString key);
 
+	static void writeUnsignedLongNumList(KConfig* cfg, QString key, QValueList<unsigned long int> list);
+
 
 protected:
 	int readCommandButtonsPerRow(KConfig* conf);

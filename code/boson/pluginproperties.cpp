@@ -69,6 +69,12 @@ void RepairProperties::loadPlugin(KSimpleConfig* config)
  config->setGroup(propertyGroup());
 }
 
+void RepairProperties::savePlugin(KSimpleConfig* config)
+{
+ config->setGroup(propertyGroup());
+ // KConfig automatically deletes empty groups
+ config->writeEntry("Dummy", "This entry is here just to prevent KConfig from deleting this group");
+}
 
 ProductionProperties::ProductionProperties(const UnitProperties* parent)
 		: PluginProperties(parent)
@@ -99,6 +105,13 @@ void ProductionProperties::loadPlugin(KSimpleConfig* config)
  mProducerList = config->readIntListEntry("ProducerList");
 }
 
+void ProductionProperties::savePlugin(KSimpleConfig* config)
+{
+ config->setGroup(propertyGroup());
+ config->writeEntry("ProducerList", mProducerList);
+}
+
+
 HarvesterProperties::HarvesterProperties(const UnitProperties* parent)
 		: PluginProperties(parent)
 {
@@ -128,13 +141,19 @@ void HarvesterProperties::loadPlugin(KSimpleConfig* config)
 	return;
  }
  config->setGroup(propertyGroup());
- config->setGroup("HarvesterPlugin");
  mCanMineMinerals = config->readBoolEntry("CanMineMinerals", false);
  mCanMineOil = config->readBoolEntry("CanMineOil", false);
  if (mCanMineMinerals && mCanMineOil) {
 	boWarning() << k_funcinfo << "units can't mine minerals *and* oil" << endl;
 	mCanMineOil = false;
  }
- mMaxResources= config->readUnsignedNumEntry("MaxResources", 100);
+ mMaxResources = config->readUnsignedNumEntry("MaxResources", 100);
 }
 
+void HarvesterProperties::savePlugin(KSimpleConfig* config)
+{
+ config->setGroup(propertyGroup());
+ config->writeEntry("CanMineMinerals", mCanMineMinerals);
+ config->writeEntry("CanMineOil", mCanMineOil);
+ config->writeEntry("MaxResources", mMaxResources);
+}

@@ -444,6 +444,17 @@ QValueList<unsigned long int> BosonConfig::readUnsignedLongNumList(KConfig* cfg,
   return list;
 }
 
+void BosonConfig::writeUnsignedLongNumList(KConfig* cfg, QString key, QValueList<unsigned long int> list)
+{
+  QValueList<int> tmplist;
+  QValueList<unsigned long int>::Iterator it;
+  for(it = list.begin(); it != list.end(); it++)
+  {
+    tmplist.append((int)(*it));
+  }
+	cfg->writeEntry(key, tmplist);
+}
+
 QValueList<float> BosonConfig::readFloatNumList(KConfig* cfg, QString key)
 {
   QStringList strlist = cfg->readListEntry(key);

@@ -337,6 +337,11 @@ void UpgradeProperties::loadPlugin(KSimpleConfig* cfg)
   mApplyToTypes.append(unitProperties()->typeId());
 }
 
+void UpgradeProperties::savePlugin(KSimpleConfig* cfg)
+{
+  /// TODO!!!
+}
+
 /**********  TechnologyProperties  **********/
 
 TechnologyProperties::TechnologyProperties() : UpgradePropertiesBase(true)

@@ -62,6 +62,7 @@ public:
 	 **/
 	virtual QString name() const = 0;
 	virtual void loadPlugin(KSimpleConfig* config) = 0;
+	virtual void savePlugin(KSimpleConfig* config) = 0;
 
 	/**
 	 * @return A unique ID for the plugin. See @ref PluginPropertiesTypes
@@ -82,9 +83,14 @@ public:
 
 	virtual QString name() const;
 	virtual void loadPlugin(KSimpleConfig* config);
+	virtual void savePlugin(KSimpleConfig* config);
 	virtual int pluginType() const { return Production; }
 
 	QValueList<int> producerList() const { return mProducerList; }
+
+protected:
+	void setProducerList(QValueList<int> list)  { mProducerList = list; }
+	friend class BoUnitEditor;
 
 private:
 	QValueList<int> mProducerList;
@@ -100,6 +106,7 @@ public:
 
 	virtual QString name() const;
 	virtual void loadPlugin(KSimpleConfig* config);
+	virtual void savePlugin(KSimpleConfig* config);
 	virtual int pluginType() const { return Repair; }
 
 private:
@@ -115,6 +122,7 @@ public:
 
 	virtual QString name() const;
 	virtual void loadPlugin(KSimpleConfig* config);
+	virtual void savePlugin(KSimpleConfig* config);
 	virtual int pluginType() const { return Harvester; }
 
 	/**
@@ -134,6 +142,12 @@ public:
 	 * can be true)
 	 **/
 	unsigned int maxResources() const { return mMaxResources; }
+
+protected:
+	friend class BoUnitEditor;
+	void setCanMineMinerals(bool canMineMinerals)  { mCanMineMinerals = canMineMinerals; };
+	void setCanMineOil(bool canMineOil)  { mCanMineOil = canMineOil; };
+	void setMaxResources(unsigned int maxResources)  { mMaxResources = maxResources; }
 
 private:
 	bool mCanMineMinerals;

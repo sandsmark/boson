@@ -185,6 +185,7 @@ class UpgradeProperties : public UpgradePropertiesBase, public PluginProperties
     virtual QString name() const;
     virtual int pluginType() const { return Upgrade; };
     virtual void loadPlugin(KSimpleConfig* cfg);
+    virtual void savePlugin(KSimpleConfig* cfg);
 };
 
 class TechnologyProperties : public UpgradePropertiesBase
