@@ -698,14 +698,6 @@ public:
 
 	QByteArray saveMapToFile();
 
-	/**
-	 * Save the complete map into the stream, even the parts that are
-	 * usually stored in different files, such as the height map.
-	 *
-	 * Use this to send the map over network, but remember that there will
-	 * be a lot of data! (probably more a few MB for 500x500 maps!)
-	 **/
-	bool saveCompleteMap(QDataStream& stream);
 
 	/**
 	 * Load the "main" map, i.e. the map geo (it's size) and it's cells from
@@ -847,6 +839,15 @@ protected:
 	 * Create the map array accordint to @ref width and @ref height.
 	 **/
 	void createCells();
+
+	/**
+	 * Save the complete map into the stream, even the parts that are
+	 * usually stored in different files, such as the height map.
+	 *
+	 * Use this to send the map over network, but remember that there will
+	 * be a lot of data! (probably more a few MB for 500x500 maps!)
+	 **/
+	bool saveCompleteMap(QDataStream& stream);
 
 private:
 	void init();
