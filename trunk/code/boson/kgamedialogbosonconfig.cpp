@@ -126,7 +126,7 @@ void KGameDialogBosonConfig::slotPlayFieldChanged(int index)
  game()->sendMessage(buffer, BosonMessage::ChangePlayField);
 }
 
-void KGameDialogBosonConfig::slotPlayFieldChanged(const QString& /*identifier*/)
+void KGameDialogBosonConfig::slotPlayFieldChanged(const QString& identifier)
 {
  // update possible species:
  d->mPlayerSpecies->clear();
@@ -192,7 +192,7 @@ boDebug() << "?? is " << c.rgb() << endl;
  emit signalTeamColorChanged(c);
 }
 
-void KGameDialogBosonConfig::slotTeamColorChanged(Player* /*p*/)
+void KGameDialogBosonConfig::slotTeamColorChanged(Player* p)
 {
  boDebug() << k_funcinfo << endl;
  regenerateColors();
