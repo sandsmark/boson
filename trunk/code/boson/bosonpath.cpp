@@ -445,7 +445,7 @@ float BosonPath::cost(int x, int y)
       if(RTTI::isUnit((*it)->rtti()))
       {
         Unit* unit = (Unit*)*it;
-        if(unit != mUnit && unit->isFlying() == flying && !unit->isDestroyed() && unit->work() != UnitBase::WorkMove)
+        if(unit != mUnit && unit->isFlying() == flying && !unit->isDestroyed() && !unit->isMoving())
         {
           //kdDebug() << k_lineinfo << ": unit on cell " << x << "," << y << ": " << unit->id() << endl;
           return ERROR_COST;

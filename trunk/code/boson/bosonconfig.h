@@ -81,6 +81,9 @@ public:
 	static void saveCursorMode(CursorMode mode, KConfig* conf = 0);
 	static CursorMode readCursorMode(KConfig* conf = 0);
 
+	static void saveGroupMoveMode(GroupMoveMode mode, KConfig* conf = 0);
+	static GroupMoveMode readGroupMoveMode(KConfig* conf = 0);
+
 	void setSound(bool s);
 	bool sound() const;
 	void setMusic(bool m);
