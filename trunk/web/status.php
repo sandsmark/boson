@@ -71,7 +71,7 @@ draw_bigbox_text("What has been changed since 0.9.1:
  <ul>
     <li>Use vertex arrays and vertex buffer objects by default if possible,
     increases speed by a few FPS</li>
-    <li>First steps for transparent textures (transparent surfaces support), doesn't work yet</li>
+    <li>First steps for transparent textures (transparent surfaces support), this not completed</li>
     <li>New effects system which replaces particle systems. At the moment this is an
     internal change only</li>
     <li>Units are correctly rotated, depending on the slope of the terrain that
@@ -103,7 +103,7 @@ draw_bigbox_text("What has been changed since 0.9.1:
 
  <h3>Editor</h3>
  <ul>
-     <li>Change height icon</li>
+     <li>Added height icon</li>
      <li>Bugfixes</li>
  </ul>
 
@@ -114,7 +114,6 @@ draw_bigbox_text("What has been changed since 0.9.1:
      <li>Two textured fonts added</li>
      <li>Scaled down a texture</li>
      <li>General map changes</li>
-     <li>New map: Canyon</li>
      <li>New map: We are under attack</li>
      <li>Documentation updates</li>
  </ul>
