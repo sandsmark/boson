@@ -1564,7 +1564,7 @@ void BosonPath2::findPath(BosonPathInfo* info)
   long int elapsed = profiler.stop();
   totalelapsed += elapsed;
   boDebug(500) << k_funcinfo << "ELAPSED (success!!!): " << elapsed << " microsec." << endl;
-  boDebug() << k_funcinfo << "ENDm Total time elapsed: " << totalelapsed / 1000000.0 << " sec; calls: " << totalcalls << endl;
+//  boDebug() << k_funcinfo << "ENDm Total time elapsed: " << totalelapsed / 1000000.0 << " sec; calls: " << totalcalls << endl;
 }
 
 void BosonPath2::findHighLevelPath(BosonPathInfo* info)
@@ -1936,7 +1936,7 @@ void BosonPath2::findFlyingUnitPath(BosonPathInfo* info)
 {
   if(!info->flying)
   {
-    boDebug() << k_funcinfo << "Called for non-flying unit" << endl;
+//    boDebug() << k_funcinfo << "Called for non-flying unit" << endl;
     return;
   }
 
@@ -3281,7 +3281,7 @@ void BosonPath2::findHighLevelGoal(BosonPathInfo* info)
   if(!info->flying && info->canMoveOnLand && info->canMoveOnWater)
   {
     // TODO: add support for such units
-    boDebug() << k_funcinfo << "Took " << pr.stop() << " usec" << endl;
+//    boDebug() << k_funcinfo << "Took " << pr.stop() << " usec" << endl;
     boError(510) << k_funcinfo << "Land units that can move on both water and land aren't supported yet!!!" << endl;
     return;
   }
@@ -3311,7 +3311,7 @@ void BosonPath2::findHighLevelGoal(BosonPathInfo* info)
   }
   if(!connected)
   {
-    boDebug() << k_funcinfo << "Took " << pr.stop() << " usec" << endl;
+//    boDebug() << k_funcinfo << "Took " << pr.stop() << " usec" << endl;
     boDebug(510) << k_funcinfo << "No path to destination area found!" << endl;
     return;
   }
@@ -3322,7 +3322,7 @@ void BosonPath2::findHighLevelGoal(BosonPathInfo* info)
     info->possibleDestRegions.insert(info->possibleDestRegions.count(), it.current());
     ++it;
   }
-  boDebug() << k_funcinfo << "Took " << pr.stop() << " usec" << endl;
+//  boDebug() << k_funcinfo << "Took " << pr.stop() << " usec" << endl;
   boDebug(510) << k_funcinfo << "Found " << info->possibleDestRegions.count() << " possible dest regions" << endl;
 }
 
