@@ -43,9 +43,7 @@ void bosonBigDisplay::actionClicked(QPoint mp, int /*state*/)
 	/*
 	 * FIX HANDLING
 	 */
-	puts("actionClicked(2)");
 	if (vtl->fixSelected) {
-		puts("actionClicked for fixSelected");
 		// fix Selected
 		if ( IS_MOBILE(sfg->rtti()))
 			((playerFacility*)vtl->fixSelected)->u_attack( (playerMobUnit*)sfg );
