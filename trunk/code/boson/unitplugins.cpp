@@ -278,7 +278,7 @@ void ProductionPlugin::advance(unsigned int)
 				}
 			}
 		}
-		boDebug() << "Cannot find free cell around facility :-(" << endl;
+		boDebug() << k_funcinfo << "Cannot find free cell around facility :-(" << endl;
 		if (player() == boGame->localPlayer()) {
 			game()->slotAddChatSystemMessage(i18n("%1 could not be placed on the map - no free cell found. Place it manuall!").arg(prop->name()));
 		}
@@ -309,14 +309,14 @@ void RepairPlugin::repair(Unit* u)
  boDebug() << k_funcinfo << endl;
  if (unit()->isFacility()) {
 	if (!u->moveTo(unit()->x(), unit()->y(), 1)) {
-		boDebug() << u->id() << " cannot find a way to repairyard" << endl;
+		boDebug() << k_funcinfo << u->id() << " cannot find a way to repairyard" << endl;
 		u->setWork(Unit::WorkNone);
 	} else {
 		u->setWork(Unit::WorkMove);
 	}
  } else {
 	if (!unit()->moveTo(u->x(), u->y(), 1)) {
-		boDebug() << "Cannot find way to " << u->id() << endl;
+		boDebug() << k_funcinfo << "Cannot find way to " << u->id() << endl;
 		unit()->setWork(Unit::WorkNone);
 	} else {
 		unit()->setAdvanceWork(Unit::WorkMove);
@@ -338,7 +338,7 @@ void RepairPlugin::repairInRange()
 		continue;
 	}
 	if (!player()->isEnemy(u->owner())) {
-		boDebug() << "repair " << u->id() << endl;
+		boDebug() << k_funcinfo << "repair " << u->id() << endl;
 		int diff = u->health() - u->unitProperties()->health();
 		if (diff > 0) {
 			boError() << k_funcinfo << "health > maxhealth" << endl;
@@ -413,7 +413,7 @@ void HarvesterPlugin::advanceMine()
 		} else if (prop->canMineOil()) {
 			player()->statistics()->increaseMinedOil(step);
 		}
-		boDebug() << "resources mined: " << resourcesMined() << endl;
+		boDebug() << k_funcinfo << "resources mined: " << resourcesMined() << endl;
 	} else {
 		// This unit cannot mine at this cell
 		boDebug() << k_funcinfo << "cannot mine here" << endl;
