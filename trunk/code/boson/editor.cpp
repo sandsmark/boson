@@ -227,7 +227,7 @@ void Editor::initKAction()
  KStdAction::keyBindings(this, SLOT(slotConfigureKeys()), actionCollection());
  KStdAction::preferences(bosonWidget(), SLOT(slotGamePreferences()), actionCollection()); // FIXME: slotEditorPreferences()
 
- createGUI("bosoneditorui.rc");
+ createGUI("boson/bosoneditorui.rc");
 }
 
 void Editor::initStatusBar()
