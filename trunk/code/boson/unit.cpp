@@ -808,7 +808,7 @@ void Unit::addWaypoint(const BoVector2& pos)
 void Unit::waypointDone()
 {
  if (d->mWaypoints.count() == 0) {
-	boError() << k_funcinfo << "no waypoints" << endl;
+	boError() << k_funcinfo << id() << ": no waypoints" << endl;
 	return;
  }
  d->mWaypoints.remove(d->mWaypoints.at(0));
