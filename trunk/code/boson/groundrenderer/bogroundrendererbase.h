@@ -30,12 +30,13 @@ class BoMatrix;
 class BoVector3;
 
 class QRect;
+class CellListBuilder;
 
 class BoGroundRendererBase : public BoGroundRenderer
 {
 	Q_OBJECT
 public:
-	BoGroundRendererBase();
+	BoGroundRendererBase(bool useCellTree);
 	virtual ~BoGroundRendererBase();
 
 
@@ -46,9 +47,8 @@ public:
 	 **/
 	virtual void generateCellList(const BosonMap* map);
 
-protected:
-	void calculateWorldRect(const QRect& rect, int mapWidth, int mapHeight, float* minX, float* minY, float* maxX, float* maxY);
-
+private:
+	CellListBuilder* mCellListBuilder;
 };
 
 #endif

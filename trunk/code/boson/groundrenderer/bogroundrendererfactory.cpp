@@ -51,9 +51,13 @@ QObject* BoGroundRendererFactory::createObject(QObject* parent, const char* name
 	// note: the _libbomeshrendererplugin is NOT part of the string
 	o = new BoPluginInformation_libbogroundrendererplugin;
  } else if (qstrcmp(className, "BoDefaultGroundRenderer") == 0) {
-	o = new BoDefaultGroundRenderer;
+	o = new BoDefaultGroundRenderer();
  } else if (qstrcmp(className, "BoFastGroundRenderer") == 0) {
-	o = new BoFastGroundRenderer;
+	o = new BoFastGroundRenderer();
+ } else if (qstrcmp(className, "BoDefaultGroundRendererNoTree") == 0) {
+	o = new BoDefaultGroundRendererNoTree();
+ } else if (qstrcmp(className, "BoFastGroundRendererNoTree") == 0) {
+	o = new BoFastGroundRendererNoTree();
  } else {
 	boError() << k_funcinfo << "no such class available: " << className << endl;
 	return 0;
@@ -69,6 +73,8 @@ QStringList BoPluginInformation_libbogroundrendererplugin::plugins() const
  QStringList list;
  list.append("BoFastGroundRenderer");
  list.append("BoDefaultGroundRenderer");
+ list.append("BoFastGroundRendererNoTree");
+ list.append("BoDefaultGroundRendererNoTree");
  return list;
 }
 
