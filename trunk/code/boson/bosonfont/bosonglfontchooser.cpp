@@ -48,24 +48,24 @@
 
 class BosonGLFontPreview : public BosonGLWidget
 {
-//	Q_OBJECT
+//  Q_OBJECT
 public:
-	BosonGLFontPreview(QWidget* parent);
-	~BosonGLFontPreview();
+    BosonGLFontPreview(QWidget* parent);
+    ~BosonGLFontPreview();
 
-	virtual void paintGL();
-	BoFontInfo setFont(const BoFontInfo& font);
+    virtual void paintGL();
+    BoFontInfo setFont(const BoFontInfo& font);
 
 protected:
-	virtual void initializeGL();
-	virtual void resizeGL(int w, int h);
+    virtual void initializeGL();
+    virtual void resizeGL(int w, int h);
 
 private:
-	BosonGLFont* mFont;
+    BosonGLFont* mFont;
 };
 
 BosonGLFontPreview::BosonGLFontPreview(QWidget* parent)
-	: BosonGLWidget(parent, true)
+    : BosonGLWidget(parent, true)
 {
  mFont = 0;
 }
@@ -81,22 +81,22 @@ BoFontInfo BosonGLFontPreview::setFont(const BoFontInfo& font)
  boDebug() << k_funcinfo << font.guiName() << endl;
  QString errorString, errorName;
  if (Bo3dTools::checkError(0, &errorString, &errorName)) {
-	boError() << k_funcinfo << "OpenGL error before setFont(): string=" << errorString << " name=" << errorName << endl;
+    boError() << k_funcinfo << "OpenGL error before setFont(): string=" << errorString << " name=" << errorName << endl;
  }
  makeCurrent();
  delete mFont;
  mFont = new BosonGLFont();
  if (!mFont->loadFont(font)) {
-	boError() << k_funcinfo << "Unable to load font" << endl;
-	return BoFontInfo();
+    boError() << k_funcinfo << "Unable to load font" << endl;
+    return BoFontInfo();
  }
 
  if (Bo3dTools::checkError(0, &errorString, &errorName)) {
-	boError() << k_funcinfo << "OpenGL error at the end of setFont() before slotUpdateGL(): string=" << errorString << " name=" << errorName << endl;
+    boError() << k_funcinfo << "OpenGL error at the end of setFont() before slotUpdateGL(): string=" << errorString << " name=" << errorName << endl;
  }
  slotUpdateGL();
  if (Bo3dTools::checkError(0, &errorString, &errorName)) {
-	boError() << k_funcinfo << "OpenGL error at the end of setFont(): string=" << errorString << " name=" << errorName << endl;
+    boError() << k_funcinfo << "OpenGL error at the end of setFont(): string=" << errorString << " name=" << errorName << endl;
  }
  return mFont->fontInfo();
 }
@@ -104,27 +104,27 @@ BoFontInfo BosonGLFontPreview::setFont(const BoFontInfo& font)
 void BosonGLFontPreview::initializeGL()
 {
  if (isInitialized()) {
-	return;
+    return;
  }
  QString errorString, errorName;
  if (Bo3dTools::checkError(0, &errorString, &errorName)) {
-	boError() << k_funcinfo << "OpenGL error before initializeGL(): string=" << errorString << " name=" << errorName << endl;
+    boError() << k_funcinfo << "OpenGL error before initializeGL(): string=" << errorString << " name=" << errorName << endl;
  }
  glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
  glDisable(GL_DITHER);
  if (Bo3dTools::checkError(0, &errorString, &errorName)) {
-	boError() << k_funcinfo << "OpenGL error at the end of initializeGL(): string=" << errorString << " name=" << errorName << endl;
+    boError() << k_funcinfo << "OpenGL error at the end of initializeGL(): string=" << errorString << " name=" << errorName << endl;
  }
 }
 
 void BosonGLFontPreview::resizeGL(int w, int h)
 {
  if (!isInitialized()) {
-	initGL();
+    initGL();
  }
  QString errorString, errorName;
  if (Bo3dTools::checkError(0, &errorString, &errorName)) {
-	boError() << k_funcinfo << "OpenGL error before resizeGL(): string=" << errorString << " name=" << errorName << endl;
+    boError() << k_funcinfo << "OpenGL error before resizeGL(): string=" << errorString << " name=" << errorName << endl;
  }
  makeCurrent();
  glMatrixMode(GL_PROJECTION);
@@ -134,21 +134,21 @@ void BosonGLFontPreview::resizeGL(int w, int h)
  glMatrixMode(GL_MODELVIEW);
  glLoadIdentity();
  if (Bo3dTools::checkError(0, &errorString, &errorName)) {
-	boError() << k_funcinfo << "OpenGL error at the end of resizeGL(): string=" << errorString << " name=" << errorName << endl;
+    boError() << k_funcinfo << "OpenGL error at the end of resizeGL(): string=" << errorString << " name=" << errorName << endl;
  }
 }
 
 void BosonGLFontPreview::paintGL()
 {
  if (!mFont) {
-	return;
+    return;
  }
  if (!isInitialized()) {
-	initGL();
+    initGL();
  }
  QString errorString, errorName;
  if (Bo3dTools::checkError(0, &errorString, &errorName)) {
-	boError() << k_funcinfo << "OpenGL error before paintGL(): string=" << errorString << " name=" << errorName << endl;
+    boError() << k_funcinfo << "OpenGL error before paintGL(): string=" << errorString << " name=" << errorName << endl;
  }
  glLoadIdentity();
  glColor3ub(255, 255, 255);
@@ -160,23 +160,23 @@ void BosonGLFontPreview::paintGL()
  mFont->begin();
  mFont->renderText(x, y, text, maxWidth);
  if (Bo3dTools::checkError(0, &errorString, &errorName)) {
-	boError() << k_funcinfo << "OpenGL error at the end of paintGL(): string=" << errorString << " name=" << errorName << endl;
+    boError() << k_funcinfo << "OpenGL error at the end of paintGL(): string=" << errorString << " name=" << errorName << endl;
  }
 }
 
 class BosonGLFontChooserPrivate
 {
 public:
-	BosonGLFontChooserPrivate()
-	{
-		mGLPreview = 0;
-	}
-	QPtrDict<BoFontInfo> mItem2Font;
-	BosonGLFontPreview* mGLPreview;
+    BosonGLFontChooserPrivate()
+    {
+        mGLPreview = 0;
+    }
+    QPtrDict<BoFontInfo> mItem2Font;
+    BosonGLFontPreview* mGLPreview;
 };
 
 BosonGLFontChooser::BosonGLFontChooser(QWidget* parent, const char* name)
-	: BosonGLFontChooserBase(parent, name)
+    : BosonGLFontChooserBase(parent, name)
 {
  d = new BosonGLFontChooserPrivate;
  d->mItem2Font.setAutoDelete(true);
@@ -211,15 +211,15 @@ void BosonGLFontChooser::loadTXFFonts()
  boDebug() << k_funcinfo << endl;
  QStringList list = KGlobal::dirs()->findAllResources("data", "boson/fonts/*.txf");
  if (list.isEmpty()) {
-	boDebug() << k_funcinfo << "no .txf fonts available. can't use textured fonts." << endl;
-	return;
+    boDebug() << k_funcinfo << "no .txf fonts available. can't use textured fonts." << endl;
+    return;
  }
  for (unsigned int i = 0; i < list.count(); i++) {
-	QListBoxText* t = new QListBoxText(mFontNameList, list[i]);
-	BoFontInfo* f = new BoFontInfo();
-	f->setName(list[i]);
-	f->setTextured(true);
-	d->mItem2Font.insert(t, f);
+    QListBoxText* t = new QListBoxText(mFontNameList, list[i]);
+    BoFontInfo* f = new BoFontInfo();
+    f->setName(list[i]);
+    f->setTextured(true);
+    d->mItem2Font.insert(t, f);
  }
 }
 
@@ -232,24 +232,24 @@ void BosonGLFontChooser::loadGLXFonts()
  font.setStyleHint(QFont::AnyStyle, QFont::PreferBitmap);
  font.setFixedPitch(true); // seems to be necessary on some systems. Do NOT remove that unless you know that it works without on such systems. We use textured fonts for non-fixed width
  if (font.handle() == 0) {
-	boWarning() << k_funcinfo << "handle is 0 - trying to find a usable font..." << endl;
-	int handle = font.handle();
-	int count = 0;
-	char** names = XListFonts(QPaintDevice::x11AppDisplay(), "*", 0xffff, &count);
-	for (int i = 0; i < count && handle == 0; i++) {
-		font.setRawName(names[i]);
-		handle = (int)font.handle();
-	}
-	XFreeFontNames(names);
+    boWarning() << k_funcinfo << "handle is 0 - trying to find a usable font..." << endl;
+    int handle = font.handle();
+    int count = 0;
+    char** names = XListFonts(QPaintDevice::x11AppDisplay(), "*.txf", 0xffff, &count);
+    for (int i = 0; i < count && handle == 0; i++) {
+        font.setRawName(names[i]);
+        handle = (int)font.handle();
+    }
+    XFreeFontNames(names);
  }
  if (font.handle() == 0) {
-	boError() << k_funcinfo << "no bitmap font found" << endl;
+    boError() << k_funcinfo << "no bitmap font found" << endl;
  } else {
-	QListBoxText* t = new QListBoxText(mFontNameList, font.family());
-	BoFontInfo* f = new BoFontInfo();
-	f->setName(font.rawName());
-	f->setTextured(false);
-	d->mItem2Font.insert(t, f);
+    QListBoxText* t = new QListBoxText(mFontNameList, font.family());
+    BoFontInfo* f = new BoFontInfo();
+    f->setName(font.rawName());
+    f->setTextured(false);
+    d->mItem2Font.insert(t, f);
  }
 }
 
@@ -274,14 +274,14 @@ void BosonGLFontChooser::slotFontStyleChanged()
 void BosonGLFontChooser::slotFontSizeChanged(QListBoxItem* item)
 {
  if (!item) {
-	return;
+    return;
  }
  QString t = item->text();
  bool ok = false;
  int v = t.toInt(&ok);
  if (!ok) {
-	boError() << k_funcinfo << "invalid number" << endl;
-	return;
+    boError() << k_funcinfo << "invalid number" << endl;
+    return;
  }
  mFontSizeNumInput->setValue(v);
  d->mGLPreview->setFont(font());
@@ -300,13 +300,13 @@ void BosonGLFontChooser::slotFontPreview()
 int BosonGLFontChooser::getFont(BoFontInfo& font, QWidget* parent)
 {
  KDialogBase dlg(parent, "glfontchooserdlg", true, i18n("Select Font"),
-		KDialogBase::Ok | KDialogBase::Cancel);
+        KDialogBase::Ok | KDialogBase::Cancel);
  QVBox* page = dlg.makeVBoxMainWidget();
  BosonGLFontChooser* chooser = new BosonGLFontChooser(page, "glfontchooser");
  chooser->setFont(font);
  int result = dlg.exec();
  if (result == QDialog::Accepted) {
-	font = chooser->font();
+    font = chooser->font();
  }
  return result;
 }
@@ -316,46 +316,46 @@ void BosonGLFontChooser::setFont(const BoFontInfo& requested)
  BoFontInfo font;
  QPtrDictIterator<BoFontInfo> it(d->mItem2Font);
  while (it.current()) {
-	if (it.current()->name() == requested.name()) {
-		mFontNameList->setSelected((QListBoxText*)it.currentKey(), true);
-		font.setName(requested.name());
-		break;
-	}
-	++it;
+    if (it.current()->name() == requested.name()) {
+        mFontNameList->setSelected((QListBoxText*)it.currentKey(), true);
+        font.setName(requested.name());
+        break;
+    }
+    ++it;
  }
  mFontSizeNumInput->setValue(requested.pointSize());
  font.setPointSize(requested.pointSize());
  if (requested.italic()) {
-	// TODO
-	// ...
-	// font.setItalic(true);
+    // TODO
+    // ...
+    // font.setItalic(true);
  }
  if (requested.bold()) {
-	// TODO
-	// ...
-	// font.setBold(true);
+    // TODO
+    // ...
+    // font.setBold(true);
  }
  if (requested.underline()) {
-	// TODO
-	// ...
-	// font.setUnderline(true);
+    // TODO
+    // ...
+    // font.setUnderline(true);
  }
  if (requested.strikeOut()) {
-	// TODO
-	// ...
-	// font.setStrikeOut(true);
+    // TODO
+    // ...
+    // font.setStrikeOut(true);
  }
  BoFontInfo actualFont = d->mGLPreview->setFont(font);
  if (!actualFont.isEqual(font)) {
-	boDebug() << k_funcinfo << "actual font differs - updating settings..." << endl;
-	static bool isRecursive = false;
-	if (isRecursive) {
-		boWarning() << k_funcinfo << "recursive call - updating settings failed?" << endl;
-	} else {
-		isRecursive = true;
-		setFont(actualFont);
-		isRecursive = false;
-	}
+    boDebug() << k_funcinfo << "actual font differs - updating settings..." << endl;
+    static bool isRecursive = false;
+    if (isRecursive) {
+        boWarning() << k_funcinfo << "recursive call - updating settings failed?" << endl;
+    } else {
+        isRecursive = true;
+        setFont(actualFont);
+        isRecursive = false;
+    }
  }
 }
 
@@ -365,14 +365,14 @@ BoFontInfo BosonGLFontChooser::font() const
 
  QListBoxText* item = (QListBoxText*)mFontNameList->selectedItem();
  if (item) {
-	BoFontInfo* font = d->mItem2Font[item];
-	if (!font) {
-		boError() << k_funcinfo << "don't know that font (internal error)" << endl;
-		return f;
-	}
-	f = *font;
+    BoFontInfo* font = d->mItem2Font[item];
+    if (!font) {
+        boError() << k_funcinfo << "don't know that font (internal error)" << endl;
+        return f;
+    }
+    f = *font;
  } else {
-	boWarning() << k_funcinfo << "no font selected ?! -> we will use default font" << endl;
+    boWarning() << k_funcinfo << "no font selected ?! -> we will use default font" << endl;
  }
 
  // TODO
@@ -380,8 +380,8 @@ BoFontInfo BosonGLFontChooser::font() const
  f.setItalic(false);
 
  if (mFontSizeNumInput->isEnabled()) {
-	// AB: might be disabled for GLX fonts
-	f.setPointSize(mFontSizeNumInput->value());
+    // AB: might be disabled for GLX fonts
+    f.setPointSize(mFontSizeNumInput->value());
  }
  return f;
 }
