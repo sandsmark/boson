@@ -49,4 +49,5 @@ Generic :
 #76 f: directon are still not handled after new positionning scheme (0.5)
 #77 f: releasiing some predefined 'templates' for the editor
 #78 b: use checkMove() in boeditor as well
+#79 f: latest facilities from ben aren't used
 
