@@ -9,7 +9,6 @@ Game TODOs
 Editor (map, unit, scenario) TODOs
 - don't place units on invalid tiles (e.g. ship on grass)
 - unit editor (should be quite easy cause of config files) - mostly done
-- map editor: big tiles are currently placed as small ones only
 - unit editor: check if images are in the directory, provide possibility to copy
   them
 

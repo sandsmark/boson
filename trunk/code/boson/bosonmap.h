@@ -36,20 +36,20 @@ class BosonMapPrivate;
 class BosonMap
 {
 public:
-	/*
-	enum PropertyId {
-		IdMaxPlayers = 0,
-		IdMinPlayers = 1,
-		IdMapHeight = 2,
-		IdMapWidth = 3,
-	};*/
-
 	BosonMap();
 	BosonMap(const QString& fileName);
 	~BosonMap();
 
+	/**
+	 * @return vertical cell count
+	 **/
 	int height() const;
+	
+	/**
+	 * @return Horizonatal cell count
+	 **/
 	int width() const;
+
 	int maxPlayers() const;
 	unsigned int minPlayers() const;
 
