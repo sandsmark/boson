@@ -109,6 +109,7 @@ BosonMiniMap::BosonMiniMap(QWidget* parent) : QWidget(parent)
 
 BosonMiniMap::~BosonMiniMap()
 {
+ delete mUnZoomedGround;
  delete mGround;
  delete d;
 }
