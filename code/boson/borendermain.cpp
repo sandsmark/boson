@@ -332,7 +332,6 @@ PreviewConfig::PreviewConfig(QWidget* parent) : QWidget(parent)
  QVBoxLayout* topLayout = new QVBoxLayout(this);
  mFovY = new KMyFloatNumInput(this);
  mFovY->setRange(MIN_FOVY, MAX_FOVY, 1.0, slider);
- mFovY->setSteps(0.1, 1.0);
  connect(mFovY, SIGNAL(valueChanged(float)), this, SIGNAL(signalFovYChanged(float)));
  mFovY->setLabel(i18n("FovY"));
  topLayout->addWidget(mFovY);
@@ -349,9 +348,6 @@ PreviewConfig::PreviewConfig(QWidget* parent) : QWidget(parent)
  mRotateX->setRange(MIN_ROTATE, MAX_ROTATE, 1, true);
  mRotateY->setRange(MIN_ROTATE, MAX_ROTATE, 1, true);
  mRotateZ->setRange(MIN_ROTATE, MAX_ROTATE, 1, true);
- mRotateX->setSteps(0.5, 2.0);
- mRotateY->setSteps(0.5, 2.0);
- mRotateZ->setSteps(0.5, 2.0);
  connect(mRotateX, SIGNAL(valueChanged(float)), this, SIGNAL(signalRotateXChanged(float)));
  connect(mRotateY, SIGNAL(valueChanged(float)), this, SIGNAL(signalRotateYChanged(float)));
  connect(mRotateZ, SIGNAL(valueChanged(float)), this, SIGNAL(signalRotateZChanged(float)));
@@ -371,9 +367,6 @@ PreviewConfig::PreviewConfig(QWidget* parent) : QWidget(parent)
  mCameraX->setRange(MIN_CAMERA_X, MAX_CAMERA_X, 0.2, slider);
  mCameraY->setRange(MIN_CAMERA_Y, MAX_CAMERA_Y, 0.2, slider);
  mCameraZ->setRange(MIN_CAMERA_Z, MAX_CAMERA_Z, 0.2, slider);
- mCameraX->setSteps(0.1, 0.5);
- mCameraY->setSteps(0.1, 0.5);
- mCameraZ->setSteps(0.1, 0.5);
  connect(mCameraX, SIGNAL(valueChanged(float)), this, SIGNAL(signalCameraXChanged(float)));
  connect(mCameraY, SIGNAL(valueChanged(float)), this, SIGNAL(signalCameraYChanged(float)));
  connect(mCameraZ, SIGNAL(valueChanged(float)), this, SIGNAL(signalCameraZChanged(float)));
