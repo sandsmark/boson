@@ -86,7 +86,7 @@ bool playerMobUnit::getWantedMove(state_t &wstate)
 {
 	int ldx, ldy;
 	int vp1, vp2, vp3;
-	int range;
+	int range = mobileProp[type].range;
 
 
 	asked.x = gridRect().x();
@@ -108,6 +108,10 @@ bool playerMobUnit::getWantedMove(state_t &wstate)
 
 		case MUS_TURNING:
 		case MUS_MOVING:
+			if (target && boGridDist(dx,dy)<=range) {// near enough the target to shot it
+				state = MUS_NONE;
+				return false;
+			}
 			if (dx*dx>dy*dy) {
 				asked.x += (dx>0)?1:-1;
 			} else {
@@ -345,8 +349,7 @@ bool playerMobUnit::getWantedShoot(bosonMsgData *msg)
 	}
 
 	QPoint p = _target->center() - QPoint( x(), y());
-	// XXX should use a unit->distance(QPoint)
-	if (range*range < p.x()*p.x()+p.y()*p.y()) return false; // too far
+	if ( boDist( p.x(), p.y() ) > range) return false; // too far
 
 	shoot_timer--;
 	if (shoot_timer<=0) shoot_timer = 30;
