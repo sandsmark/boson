@@ -176,66 +176,6 @@ void BoDisplayManager::quitGame()
  }
 }
 
-void BoDisplayManager::slotScroll(int dir)
-{
- BosonBigDisplayBase* active = activeDisplay();
- if (!active) {
-	return;
- }
- switch ((ScrollDirection)dir) {
-	case ScrollUp:
-		active->scrollBy(0, -boConfig->arrowKeyStep());
-		break;
-	case ScrollRight:
-		active->scrollBy(boConfig->arrowKeyStep(), 0);
-		break;
-	case ScrollDown:
-		active->scrollBy(0, boConfig->arrowKeyStep());
-		break;
-	case ScrollLeft:
-		active->scrollBy(-boConfig->arrowKeyStep(), 0);
-		break;
-	default:
-		return;
- }
-}
-
-void BoDisplayManager::slotRotateLeft()
-{
- BosonBigDisplayBase* active = activeDisplay();
- if (!active) {
-	return;
- }
- active->rotateLeft();
-}
-
-void BoDisplayManager::slotRotateRight()
-{
- BosonBigDisplayBase* active = activeDisplay();
- if (!active) {
-	return;
- }
- active->rotateRight();
-}
-
-void BoDisplayManager::slotZoomIn()
-{
- BosonBigDisplayBase* active = activeDisplay();
- if (!active) {
-	return;
- }
- active->zoomIn();
-}
-
-void BoDisplayManager::slotZoomOut()
-{
- BosonBigDisplayBase* active = activeDisplay();
- if (!active) {
-	return;
- }
- active->zoomOut();
-}
-
 void BoDisplayManager::slotAdvance(unsigned int, bool)
 {
  BO_CHECK_NULL_RET(d->mActiveDisplay);
@@ -249,20 +189,6 @@ void BoDisplayManager::slotUpdateIntervalChanged(unsigned int ms)
 {
  BO_CHECK_NULL_RET(d->mActiveDisplay);
  d->mActiveDisplay->setUpdateInterval(ms);
-}
-
-void BoDisplayManager::slotCenterHomeBase()
-{
- if (activeDisplay()) {
-	activeDisplay()->slotCenterHomeBase();
- }
-}
-
-void BoDisplayManager::slotResetViewProperties()
-{
- if (activeDisplay()) {
-	activeDisplay()->slotResetViewProperties();
- }
 }
 
 void BoDisplayManager::slotSelectGroup(int number)
