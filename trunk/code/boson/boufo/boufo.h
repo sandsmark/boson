@@ -349,8 +349,10 @@ public:
 	~BoUfoWidget();
 
 	enum LayoutClass {
-		NoLayout = 0, UFlowLayout, UBoxLayout, UHBoxLayout,
-		UVBoxLayout, UBorderLayout
+		NoLayout = 0,
+		UHBoxLayout,
+		UVBoxLayout,
+		UBorderLayout
 	};
 
 	ufo::UWidget* widget() const
