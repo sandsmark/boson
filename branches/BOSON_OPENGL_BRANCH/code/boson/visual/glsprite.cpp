@@ -47,15 +47,15 @@ GLSprite::~GLSprite()
 
 QRect GLSprite::boundingRect() const
 {
- return QRect(leftEdge(), topEdge(), width(), height());
+ return QRect((int)leftEdge(), (int)topEdge(), width(), height());
 }
 
 QRect GLSprite::boundingRectAdvanced() const
 {
- return QRect(leftEdge() + xVelocity(), 
-		topEdge() + yVelocity(), 
-		width() + xVelocity(), 
-		height() + yVelocity());
+ return QRect((int)(leftEdge() + xVelocity()),
+		(int)(topEdge() + yVelocity()),
+		(int)(width() + xVelocity()),
+		(int)(height() + yVelocity()));
 }
 
 void GLSprite::setVisible(bool v)
