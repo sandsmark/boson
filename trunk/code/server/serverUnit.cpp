@@ -111,20 +111,6 @@ void serverMobUnit::r_moveBy(moveMsg_t &msg, int playerId, boBuffer * buffer)
 	sendToKnown( MSG_MOBILE_MOVE_C, sizeof(msg), (bosonMsgData*)(&msg));
 }
 
-void serverMobUnit::reportCreated(void)
-{
-	mobileMsg_t     mobile;
-		
-	mobile.who = who; 
-	mobile.key = key;
-	mobile.x = __x;
-	mobile.y = __y;
-	mobile.type = type;
-
-	sendToKnown( MSG_MOBILE_CREATED, sizeof(mobile), &mobile);
-}
-
-
 void serverMobUnit::reportCreated(int i)
 {
 	mobileMsg_t     mobile;
@@ -135,21 +121,27 @@ void serverMobUnit::reportCreated(int i)
 	mobile.y = __y;
 	mobile.type = type;
 
-	sendMsg ( player[i].buffer, MSG_MOBILE_CREATED, sizeof(mobile), &mobile);
+	if ( SEND_TO_KNOWN == i )
+		sendToKnown( MSG_MOBILE_CREATED, sizeof(mobile), &mobile);
+	else
+		sendMsg( player[i].buffer, MSG_MOBILE_CREATED, sizeof(mobile), &mobile);
 }
 
 
-void serverMobUnit::reportDestroyed(void)
+void serverMobUnit::reportUnHidden(int i)
 {
-	destroyedMsg_t  destroyed;
+	mobileMsg_t     mobile;
+		
+	mobile.who = who; 
+	mobile.key = key;
+	mobile.x = __x;
+	mobile.y = __y;
+	mobile.type = type;
 
-	destroyed.key = key;
-	destroyed.x = __x;
-	destroyed.y = __y;
-
-	logf(LOG_WARNING, "serverUnit::shooted, key = %d", key);
-
-	sendToKnown( MSG_MOBILE_DESTROYED  , sizeof(destroyed), &destroyed);
+	if ( SEND_TO_KNOWN == i )
+		sendToKnown( MSG_MOBILE_UNHIDDEN, sizeof(mobile), &mobile);
+	else
+		sendMsg ( player[i].buffer, MSG_MOBILE_UNHIDDEN, sizeof(mobile), &mobile);
 }
 
 
@@ -160,10 +152,28 @@ void serverMobUnit::reportDestroyed(int i)
 	destroyed.key = key;
 	destroyed.x = __x;
 	destroyed.y = __y;
-	
-	logf(LOG_WARNING, "MSG_MOBILE_ is %d MOBILE_DESTROYED sent : __x is %d", MSG_MOBILE_DESTROYED, __x);
 
-	sendMsg ( player[i].buffer, MSG_MOBILE_DESTROYED, sizeof(destroyed), &destroyed);
+	logf(LOG_WARNING, "serverUnit::shooted, key = %d", key);
+
+	if ( SEND_TO_KNOWN == i )
+		sendToKnown( MSG_MOBILE_DESTROYED  , sizeof(destroyed), &destroyed);
+	else
+		sendMsg( player[i].buffer, MSG_MOBILE_DESTROYED  , sizeof(destroyed), &destroyed);
+}
+
+
+void serverMobUnit::reportHidden(int i)
+{
+	destroyedMsg_t  destroyed;
+
+	destroyed.key = key;
+	destroyed.x = __x;
+	destroyed.y = __y;
+	
+	if ( SEND_TO_KNOWN == i )
+		sendToKnown( MSG_MOBILE_HIDDEN, sizeof(destroyed), &destroyed);
+	else
+		sendMsg ( player[i].buffer, MSG_MOBILE_HIDDEN, sizeof(destroyed), &destroyed);
 }
 
 
@@ -179,7 +189,7 @@ void serverHarvester::getWantedAction(void)
 	if ( ! --counter ) {
 
 		counter = -1; // not needed anymore
-		server->placeMob(this); // replace it
+		reportUnHidden(); // re-appear
 
 		/* actual transfer */
 		switch(type) {
@@ -206,7 +216,7 @@ void serverHarvester::emptying(void)
 		return;
 	}
 	/* destroy (hide) the client harvester */
-	reportDestroyed();
+	reportHidden(who);
 	counter = EMPTYING_DURATION;
 
 }
@@ -259,7 +269,7 @@ void serverFacility::getWantedAction(void)
 		}
 }
 
-void serverFacility::reportCreated(int i)
+void serverFacility::reportUnHidden(int i)
 {
 	facilityMsg_t   facility; 
 		
@@ -270,10 +280,35 @@ void serverFacility::reportCreated(int i)
 	facility.type = type;
 	facility.state = state;
 
-	sendMsg ( player[i].buffer, MSG_FACILITY_CREATED, sizeof(facility), &facility);
+	if ( SEND_TO_KNOWN == i )
+		sendToKnown (  MSG_FACILITY_UNHIDDEN, sizeof(facility), &facility);
+	else
+		sendMsg ( player[i].buffer, MSG_FACILITY_UNHIDDEN, sizeof(facility), &facility);
+
 }
 
-void serverFacility::reportDestroyed(void)
+
+void serverFacility::reportCreated(int i)
+{
+	facilityMsg_t     facility;
+		
+	facility.who	= who; 
+	facility.key	= key;
+	facility.x	= __x;
+	facility.y	= __y;
+	facility.type	= type;
+	facility.state	= state;
+
+
+	if ( SEND_TO_KNOWN == i )
+		sendToKnown( MSG_FACILITY_CREATED, sizeof(facility), &facility);
+	else
+		sendMsg ( player[i].buffer, MSG_FACILITY_CREATED, sizeof(facility), &facility);
+
+}
+
+
+void serverFacility::reportDestroyed(int i)
 {
 
 	destroyedMsg_t  destroyed;
@@ -284,10 +319,14 @@ void serverFacility::reportDestroyed(void)
 
 	logf(LOG_WARNING, "serverUnit::shooted, key = %d", key);
 
-	sendToKnown( MSG_FACILITY_DESTROYED  , sizeof(destroyed), &destroyed);
+
+	if ( SEND_TO_KNOWN == i )
+		sendToKnown( MSG_FACILITY_DESTROYED  , sizeof(destroyed), &destroyed);
+	else
+		sendMsg ( player[i].buffer, MSG_FACILITY_DESTROYED  , sizeof(destroyed), &destroyed);
 }
 
-void serverFacility::reportDestroyed(int i)
+void serverFacility::reportHidden(int i)
 {
 	destroyedMsg_t  destroyed;
 
@@ -295,8 +334,12 @@ void serverFacility::reportDestroyed(int i)
 	destroyed.x = __x;
 	destroyed.y = __y;
 
-	logf(LOG_WARNING, "I'm %d, owned by %d, FACILITY_DESTROYED sent", key, who);
-	sendMsg ( player[i].buffer, MSG_FACILITY_DESTROYED, sizeof(destroyed), &destroyed);
+
+	if ( SEND_TO_KNOWN == i )
+		sendToKnown( MSG_FACILITY_HIDDEN, sizeof(destroyed), &destroyed);
+	else
+		sendMsg ( player[i].buffer, MSG_FACILITY_HIDDEN, sizeof(destroyed), &destroyed);
+
 }
 
 

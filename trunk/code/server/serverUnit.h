@@ -29,6 +29,9 @@
 #define BUILDING_SPEED		(40)
 #define EMPTYING_DURATION	(40)
 
+
+#define SEND_TO_KNOWN		(-1)
+
 class boBuffer;
 
 class serverUnit {
@@ -61,10 +64,10 @@ public:
   serverMobUnit(boBuffer *, mobileMsg_t *msg, QObject* parent = 0L, const char *name=0L);
  virtual	int _x(void) {return __x;}
  virtual	int _y(void) {return __y;}
-	void 	reportCreated(void);
-	void 	reportDestroyed(void);
-	void 	reportCreated(int player);
-	void 	reportDestroyed(int player);
+	void 	reportCreated(int player = SEND_TO_KNOWN);
+	void 	reportDestroyed(int player = SEND_TO_KNOWN);
+	void 	reportUnHidden(int player = SEND_TO_KNOWN);
+	void 	reportHidden(int player = SEND_TO_KNOWN);
 
 /* request */
 	void	r_moveBy(moveMsg_t &, int playerId, boBuffer *);
@@ -106,9 +109,11 @@ class serverFacility : public Facility, public serverUnit, public knownBy
   serverFacility(boBuffer *, facilityMsg_t *msg, QObject* parent = 0L, const char *name=0L);
  virtual	int _x(void) {return __x;}
  virtual	int _y(void) {return __y;}
-	void	reportDestroyed(void);
-	void 	reportCreated(int player);
-	void 	reportDestroyed(int player);
+
+	void	reportCreated(int player = SEND_TO_KNOWN);
+	void	reportDestroyed(int player = SEND_TO_KNOWN);
+	void 	reportUnHidden(int player = SEND_TO_KNOWN);
+	void 	reportHidden(int player = SEND_TO_KNOWN);
 
 /* request */
 	void	getWantedAction(void);
