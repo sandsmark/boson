@@ -183,8 +183,6 @@ void BosonWidget::init()
 		d->mCanvas, SLOT(slotAddCell(int, int, int, unsigned char)));
  connect(d->mBigDisplay, SIGNAL(signalAddCell(int,int, int, unsigned char)),
 		d->mMiniMap, SLOT(slotAddCell(int, int, int, unsigned char)));
- connect(d->mBigDisplay, SIGNAL(signalAddCell(int,int, int, unsigned char)),
-		this, SLOT(slotAddCell(int, int, int, unsigned char)));
 		
  connect(d->mMiniMap, SIGNAL(signalReCenterView(const QPoint&)),
 		d->mBigDisplay, SLOT(slotReCenterView(const QPoint&)));
@@ -478,6 +476,8 @@ void BosonWidget::recreateMap()
  d->mMap = new BosonMap;
  d->mCanvas->setMap(d->mMap);
  d->mMiniMap->setMap(d->mMap);
+ connect(d->mBigDisplay, SIGNAL(signalAddCell(int,int, int, unsigned char)),
+		d->mMap, SLOT(slotAddCell(int, int, int, unsigned char)));
 }
 
 void BosonWidget::addEditorCommandFrame()
@@ -632,15 +632,6 @@ void BosonWidget::slotEditorSaveScenario(const QString& fileName)
  // TODO: let the user choose - binary or XML? XML is far better here. binary is
  // probably useless (scenario files are not that big).
  d->mScenario->saveScenario(fileName, false);
-}
-
-void BosonWidget::slotAddCell(int x, int y, int type, unsigned char b)
-{
- if (!d->mMap) {
-	kdError() << k_funcinfo << ": NULL map" << endl;
-	return;
- }
- d->mMap->changeCell(x, y, type, b);
 }
 
 void BosonWidget::saveConfig()

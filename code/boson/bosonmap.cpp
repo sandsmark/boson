@@ -35,6 +35,8 @@
 
 #include "defines.h"
 
+#include "bosonmap.moc"
+
 #define TAG_FIELD "boeditor_magic_0_6"
 #define TAG_FIELD_LEN 18 // len of above
 #define TAG_CELL (0xde)
@@ -54,12 +56,12 @@ public:
 	bool mIsChanged;
 };
 
-BosonMap::BosonMap()
+BosonMap::BosonMap(QObject* parent) : QObject(parent)
 {
  init();
 }
 
-BosonMap::BosonMap(const QString& fileName)
+BosonMap::BosonMap(const QString& fileName, QObject* parent) : QObject(parent)
 {
  init();
  loadMap(fileName);
