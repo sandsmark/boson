@@ -170,6 +170,7 @@ signals:
 protected slots:
 	void slotChatFramePosition(int);
 	void slotCommandFramePosition(int);
+	void slotCmdBackgroundChanged(const QString& file);
 	
 	void slotStartScenario();
 	void slotSendChangeSpecies(const QString& species);
@@ -230,7 +231,6 @@ protected:
 	void normalizeVPositions();
 	void normalizeHPositions(int vpos);
 
-//	void addBigDisplay();
 	void initBigDisplay(BosonBigDisplay*);
 	void addMiniMap();
 

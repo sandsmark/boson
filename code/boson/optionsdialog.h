@@ -65,6 +65,8 @@ signals:
 	void signalCursorChanged(int index, const QString& cursorDir);
 	void signalGroupMoveChanged(int index);
 
+	void signalCmdBackgroundChanged(const QString& file);
+
 protected slots:
 	/**
 	 * @param ms The new game speed in ms
@@ -73,6 +75,8 @@ protected slots:
 
 	void slotCursorChanged(int index);
 	void slotCursorThemeChanged(int index);
+
+	void slotCmdBackgroundChanged(int index);
 
 protected:
 	void initGeneralPage();

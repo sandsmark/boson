@@ -25,6 +25,7 @@
 #include <klocale.h>
 #include <knuminput.h>
 #include <ksimpleconfig.h>
+#include <kstandarddirs.h>
 #include <kdebug.h>
 
 #include <qlayout.h>
@@ -43,6 +44,7 @@ public:
 		mGameSpeed = 0;
 		mCommandFrame = 0;
 		mChat = 0;
+		mCmdBackground = 0;
 		mCursor = 0;
 		mCursorTheme = 0;
 	}
@@ -51,11 +53,13 @@ public:
 	KIntNumInput* mGameSpeed;
 	QComboBox* mCommandFrame;
 	QComboBox* mChat;
+	QComboBox* mCmdBackground;
 	QComboBox* mGroupmove;
 	
 	QComboBox* mCursor;
 	QComboBox* mCursorTheme;
 	QStringList mCursorThemes;
+	QStringList mCmdBackgrounds;
 };
 
 OptionsDialog::OptionsDialog(QWidget* parent, bool modal)
@@ -106,6 +110,16 @@ void OptionsDialog::initGeneralPage()
  d->mChat->insertItem(i18n("Bottom"), ChatFrameBottom);
  connect(d->mChat, SIGNAL(activated(int)), 
 		this, SIGNAL(signalChatFramePositionChanged(int)));
+ 
+ hbox = new QHBox(vbox);
+ (void)new QLabel(i18n("Command Frame Background Pixmap"), hbox);
+ d->mCmdBackground = new QComboBox(hbox);
+ d->mCmdBackgrounds = KGlobal::dirs()->findAllResources("data", "boson/themes/ui/*/cmdpanel*.png");
+ d->mCmdBackground->insertItem(i18n("None"));
+ //TODO: display filename only... - not the complete path
+ d->mCmdBackground->insertStringList(d->mCmdBackgrounds);
+ connect(d->mCmdBackground, SIGNAL(activated(int)), 
+		this, SLOT(slotCmdBackgroundChanged(int)));
 
  setCommandFramePosition(CmdFrameLeft);
  setChatFramePosition(ChatFrameBottom);
@@ -238,3 +252,13 @@ void OptionsDialog::slotCursorThemeChanged(int index)
  emit signalCursorChanged(d->mCursor->currentItem(), d->mCursorThemes[index]);
 }
 
+void OptionsDialog::slotCmdBackgroundChanged(int index)
+{
+ QString file;
+ if (index <= 0) {
+	emit signalCmdBackgroundChanged(file);
+	return;
+ }
+ index--;
+ emit signalCmdBackgroundChanged(d->mCmdBackgrounds[index]);
+}

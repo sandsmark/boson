@@ -536,6 +536,9 @@ void BosonWidget::slotGamePreferences()
  connect(dlg, SIGNAL(signalGroupMoveChanged(int)),
 		this, SLOT(slotChangeGroupMove(int)));
 
+ connect(dlg, SIGNAL(signalCmdBackgroundChanged(const QString&)),
+		this, SLOT(slotCmdBackgroundChanged(const QString&)));
+
  dlg->show();
 }
 
@@ -1286,3 +1289,19 @@ void BosonWidget::debugKillPlayer(KPlayer* p)
 {
  d->mCanvas->killPlayer((Player*)p);
 }
+
+void BosonWidget::slotCmdBackgroundChanged(const QString& file)
+{
+ if (file == QString::null) {
+	d->mCommandFrame->unsetPalette();
+	return;
+ }
+ QPixmap p(file);
+ if (p.isNull()) {
+	kdError() << k_funcinfo << "Could not load " << file << endl;
+	d->mCommandFrame->unsetPalette();
+	return;
+ }
+ d->mCommandFrame->setPaletteBackgroundPixmap(p);
+}
+
