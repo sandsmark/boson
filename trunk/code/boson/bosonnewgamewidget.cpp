@@ -352,7 +352,10 @@ void BosonNewGameWidget::initColors()
 
 void BosonNewGameWidget::slotMyNameChanged()
 {
-  player()->setName(mNameEdit->text());
+  if (mNameEdit->text() != player()->name()) 
+  {
+    player()->setName(mNameEdit->text());
+  }
 }
 
 void BosonNewGameWidget::slotMyColorChanged(int index)
@@ -620,8 +623,9 @@ BosonPlayField* BosonNewGameWidget::playField() const
   return mTop->playField();
 }
 
-void BosonNewGameWidget::sendNewGame() 
+void BosonNewGameWidget::sendNewGame()
 {
+  slotMyNameChanged();
   game()->sendMessage(0, BosonMessage::IdNewGame);
 }
 
