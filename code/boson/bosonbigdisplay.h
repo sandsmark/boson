@@ -31,6 +31,8 @@ class KPlayer;
 class KGame;
 class KGameChat;
 
+class QLabel;
+
 /**
  * This is the "view" of the canvas - the part of the canvas that you can
  * actually see on the screen. See @ref QCanvasView documentation for more on
@@ -227,6 +229,15 @@ protected:
 
 	virtual void enterEvent(QEvent*);
 	virtual void leaveEvent(QEvent*);
+
+	/**
+	 * Write text on the label.
+	 *
+	 * The label will have a mask using @ref QWidget::setMask so that only
+	 * the text is displayed.
+	 **/
+	void updateLabel(QLabel* label, const QString& text);
+
 
 protected slots:
 	void slotMouseEvent(KGameIO*, QDataStream& stream, QMouseEvent* e, bool *eatevent);
