@@ -56,12 +56,12 @@ void BoUnitEditor::slotTypeChanged()
 {
     if(mUnitTypeFacility->isChecked()) {
 	// Type is facility
-	mUnitHarvestGroup->setEnabled(false);
+	mUnitCanHarvest->setEnabled(false);
 	mMobileOptions->setEnabled(false);
 	mFacilityOptions->setEnabled(true);
     } else {
 	// Type is mobile
-	mUnitHarvestGroup->setEnabled(true);
+	mUnitCanHarvest->setEnabled(true);
 	mMobileOptions->setEnabled(true);
 	mFacilityOptions->setEnabled(false);
     }
@@ -191,6 +191,12 @@ QStringList BoUnitEditor::verifyProperties()
     if(mUnitHarvestMinerals->isChecked() && mUnitHarvestOil->isChecked()) {
 	errors += i18n("* Unit cannot mine *both* oil and minerals");
     }
+    if(mUnitRefineMinerals->isChecked() && mUnitRefineOil->isChecked()) {
+	errors += i18n("* Unit cannot refine *both* oil and minerals");
+    }
+    if(mUnitCanHarvest->isChecked() && mUnitCanRefine->isChecked()) {
+	errors += i18n("* Unit cannot mine *and* harvest");
+    }
     return errors;
 }
 
@@ -232,6 +238,7 @@ void BoUnitEditor::init()
     mUnitProducerList->setValidator(v);
     mUnitRequirements->setValidator(v);
     mUnitDestroyedParticles->setValidator(v);
+    mUnitConstructedParticles->setValidator(v);
     mWeaponShootParticles->setValidator(v);
     mWeaponFlyParticles->setValidator(v);
     mWeaponHitParticles->setValidator(v);
@@ -346,11 +353,6 @@ void BoUnitEditor::slotUpdateUnitProperties()
     // Mobile/facility properties
     if(mUnitTypeFacility->isChecked()) {
 	mUnit->createFacilityProperties();
-#warning FIXME
-#if 0
-	mUnit->setCanRefineMinerals(mUnitCanRefineMinerals->isChecked());
-	mUnit->setCanRefineOil(mUnitCanRefineOil->isChecked());
-#endif
 	mUnit->setConstructionSteps(mUnitConstructionSteps->value());
     } else {
 	mUnit->createMobileProperties();
@@ -366,7 +368,6 @@ void BoUnitEditor::slotUpdateUnitProperties()
     mUnit->setOilCost(mUnitOilCost->value());
     mUnit->setSightRange(mUnitSight->value());
     mUnit->setTerrainType((UnitProperties::TerrainType)(mUnitTerrain->currentItem()));
-    mUnit->setDestroyedParticleSystemIds(stringToList(mUnitDestroyedParticles->text()));
     mUnit->setSupportMiniMap(mUnitSupportMiniMap->isChecked());
     // Weapons page
     // Sync current weapon first
@@ -387,6 +388,14 @@ void BoUnitEditor::slotUpdateUnitProperties()
 	p->setCanMineMinerals(mUnitHarvestMinerals->isChecked());
 	p->setCanMineOil(mUnitHarvestOil->isChecked());
 	p->setMaxResources(mUnitMaxResource->value());
+	p->setMiningSpeed(mUnitMiningSpeed->value());
+	p->setUnloadingSpeed(mUnitUnloadingSpeed->value());
+	mUnit->addPlugin(p);
+    }
+    if(mUnitCanRefine->isChecked()) {
+	RefineryProperties* p = new RefineryProperties(mUnit);
+	p->setCanRefineMinerals(mUnitRefineMinerals->isChecked());
+	p->setCanRefineOil(mUnitRefineOil->isChecked());
 	mUnit->addPlugin(p);
     }
     if(mUnitCanRepair->isChecked()) {
@@ -412,6 +421,14 @@ void BoUnitEditor::slotUpdateUnitProperties()
     mUnit->addSound(SoundReportProduced, mUnitSoundReportProduced->text());
     mUnit->addSound(SoundReportDestroyed, mUnitSoundReportDestroyed->text());
     mUnit->addSound(SoundReportUnderAttack, mUnitSoundReportUnderAttack->text());
+    // Other page
+    mUnit->setDestroyedParticleSystemIds(stringToList(mUnitDestroyedParticles->text()));
+    mUnit->setConstructedParticleSystemIds(stringToList(mUnitConstructedParticles->text()));
+    mUnit->setExplodingDamageRange(mUnitExplodingDamageRange->value());
+    mUnit->setExplodingDamage(mUnitExplodingDamage->value());
+    BoVector3 hitpoint(mUnitHitPointX->value(), mUnitHitPointY->value(), mUnitHitPointZ->value());
+    hitpoint.cellToCanvas();
+    mUnit->setHitPoint(hitpoint);
 }
 
 
@@ -437,7 +454,6 @@ void BoUnitEditor::slotUpdateWidgets()
     mUnitSight->setValue(mUnit->sightRange());
     int terrain = (int)(mUnit->terrainType());
     mUnitTerrain->setCurrentItem(terrain);
-    mUnitDestroyedParticles->setText(listToString(mUnit->destroyedParticleSystemIds()));
     mUnitSupportMiniMap->setChecked(mUnit->supportMiniMap());
     // FIXME: UnitProperties only saves mobile *or* facility properties, but
     //  I'd like to have them both saved
@@ -445,11 +461,6 @@ void BoUnitEditor::slotUpdateWidgets()
     mUnitSpeed->setValue(mUnit->speed());
     mUnitCanGoOnLand->setChecked(mUnit->canGoOnLand());
     mUnitCanGoOnWater->setChecked(mUnit->canGoOnWater());
-#warning FIXME
-#if 0
-    mUnitCanRefineMinerals->setChecked(mUnit->canRefineMinerals());
-    mUnitCanRefineOil->setChecked(mUnit->canRefineOil());
-#endif
     mUnitConstructionSteps->setValue(mUnit->constructionSteps());
     // Weapons
     mWeapons.clear();
@@ -483,6 +494,16 @@ void BoUnitEditor::slotUpdateWidgets()
 	mUnitHarvestMinerals->setChecked(harvesterProp->canMineMinerals());
 	mUnitHarvestOil->setChecked(harvesterProp->canMineOil());
 	mUnitMaxResource->setValue(harvesterProp->maxResources());
+	mUnitMiningSpeed->setValue(harvesterProp->miningSpeed());
+	mUnitUnloadingSpeed->setValue(harvesterProp->unloadingSpeed());
+    }
+    const RefineryProperties* refineryProp = (RefineryProperties*)(mUnit->properties(PluginProperties::Refinery));
+    bool canRefine = (refineryProp != 0l);
+    mUnitCanRefine->setChecked(canRefine);
+    mUnitRefineGroup->setEnabled(canRefine);
+    if(canRefine) {
+	mUnitRefineMinerals->setChecked(refineryProp->canRefineMinerals());
+	mUnitRefineOil->setChecked(refineryProp->canRefineOil());
     }
     bool canRepair = (mUnit->properties(PluginProperties::Repair) != 0l);
     mUnitCanRepair->setChecked(canRepair);
@@ -504,6 +525,16 @@ void BoUnitEditor::slotUpdateWidgets()
     mUnitSoundReportProduced->setText(mUnit->sound(SoundReportProduced));
     mUnitSoundReportDestroyed->setText(mUnit->sound(SoundReportDestroyed));
     mUnitSoundReportUnderAttack->setText(mUnit->sound(SoundReportUnderAttack));
+    // Other page
+    mUnitDestroyedParticles->setText(listToString(mUnit->destroyedParticleSystemIds()));
+    mUnitConstructedParticles->setText(listToString(mUnit->constructedParticleSystemIds()));
+    mUnitExplodingDamageRange->setValue(mUnit->explodingDamageRange());
+    mUnitExplodingDamage->setValue(mUnit->explodingDamage());
+    BoVector3 hitpoint = mUnit->hitPoint();
+    hitpoint.canvasToCell();
+    mUnitHitPointX->setValue(hitpoint.x());
+    mUnitHitPointY->setValue(hitpoint.y());
+    mUnitHitPointZ->setValue(hitpoint.z());
 }
 
 void BoUnitEditor::slotUpdateWeaponProps()
@@ -521,9 +552,9 @@ void BoUnitEditor::slotUpdateWeaponProps()
     w->setCanShootAtLandUnits(mWeaponCanShootAtLandUnits->isChecked());
     w->setSpeed((long unsigned int)mWeaponSpeed->value());
     w->setModelFileName(mWeaponModel->text());
-    w->setHeight(mWeaponMaxHeight->value());
+    w->setHeight(mWeaponHeight->value());
     BoVector3 offset(mWeaponOffsetX->value(), mWeaponOffsetY->value(), mWeaponOffsetZ->value());
-    offset.scale(BO_TILE_SIZE);
+    offset.cellToCanvas();
     w->setOffset(offset);
     w->setShootParticleSystemIds(stringToList(mWeaponShootParticles->text()));
     w->setFlyParticleSystemIds(stringToList(mWeaponFlyParticles->text()));
@@ -587,11 +618,12 @@ void BoUnitEditor::slotUpdateWeaponWidgets()
     mWeaponCanShootAtLandUnits->setChecked(w->canShootAtLandUnits());
     mWeaponSpeed->setValue(w->speed());
     mWeaponModel->setText(w->modelFileName());
-    mWeaponMaxHeight->setValue(w->height());
+    mWeaponHeight->setValue(w->height());
     BoVector3 o = w->offset();
-    mWeaponOffsetX->setValue(o[0] / BO_TILE_SIZE);
-    mWeaponOffsetY->setValue(o[1] / BO_TILE_SIZE);
-    mWeaponOffsetZ->setValue(o[2] / BO_TILE_SIZE);
+    o.canvasToCell();
+    mWeaponOffsetX->setValue(o.x());
+    mWeaponOffsetY->setValue(o.y());
+    mWeaponOffsetZ->setValue(o.z());
     mWeaponShootParticles->setText(listToString(w->shootParticleSystemIds()));
     mWeaponFlyParticles->setText(listToString(w->flyParticleSystemIds()));
     mWeaponHitParticles->setText(listToString(w->hitParticleSystemIds()));

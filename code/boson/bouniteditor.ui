@@ -10,8 +10,8 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>892</width>
-            <height>553</height>
+            <width>882</width>
+            <height>620</height>
         </rect>
     </property>
     <property name="caption">
@@ -563,7 +563,7 @@ Unit name will be visible for user, it should be descriptive and not very long a
                                 <cstring>mAboutLabel</cstring>
                             </property>
                             <property name="text">
-                                <string>&lt;b&gt;Boson Unit Editor&lt;/b&gt;version 0.8pre</string>
+                                <string>&lt;b&gt;Boson Unit Editor&lt;/b&gt;  version 0.8pre</string>
                             </property>
                         </widget>
                         <widget class="QLabel">
@@ -744,214 +744,30 @@ It clears all values to their default values</string>
                                 </property>
                                 <widget class="QLayoutWidget">
                                     <property name="name">
-                                        <cstring>Layout20</cstring>
+                                        <cstring>layout21</cstring>
                                     </property>
                                     <grid>
                                         <property name="name">
                                             <cstring>unnamed</cstring>
                                         </property>
-                                        <property name="margin">
-                                            <number>0</number>
-                                        </property>
-                                        <property name="spacing">
-                                            <number>6</number>
-                                        </property>
-                                        <spacer row="7" column="1">
+                                        <widget class="KIntNumInput" row="2" column="2">
                                             <property name="name">
-                                                <cstring>Spacer54</cstring>
-                                            </property>
-                                            <property name="orientation">
-                                                <enum>Horizontal</enum>
-                                            </property>
-                                            <property name="sizeType">
-                                                <enum>Fixed</enum>
-                                            </property>
-                                            <property name="sizeHint">
-                                                <size>
-                                                    <width>20</width>
-                                                    <height>20</height>
-                                                </size>
-                                            </property>
-                                        </spacer>
-                                        <widget class="KIntNumInput" row="5" column="2">
-                                            <property name="name">
-                                                <cstring>mUnitSight</cstring>
-                                            </property>
-                                            <property name="value">
-                                                <number>5</number>
+                                                <cstring>mUnitShields</cstring>
                                             </property>
                                             <property name="minValue">
                                                 <number>0</number>
                                             </property>
                                             <property name="toolTip" stdset="0">
-                                                <string>Sight range of this units</string>
+                                                <string>Maximum shields of this unit</string>
                                             </property>
                                             <property name="whatsThis" stdset="0">
-                                                <string>&lt;p&gt;How far can your unit see?&lt;/p&gt;
-&lt;p&gt;Please note that this is &lt;b&gt;not&lt;/b&gt; a pixel value, but a &lt;b&gt;cell number&lt;/b&gt;, or tile number! A value of 1 means that 1 field of fog of war is removed around your unit, 2 means 2 fields of fog of war are removed and so on.&lt;/p&gt;
-&lt;p&gt;A value of 5 (default) is ok - use higher values for rangers&lt;/p&gt;</string>
+                                                <string>Maximum shields of this unit&lt;br&gt;
+When some unit shoots your unit and your unit has any shields, then amount of shields you have will be substracted from shooter's damage value and shields count will be decreased accordingly. If your unit has enough shields, it may not be hurt at all!</string>
                                             </property>
                                         </widget>
-                                        <widget class="QLabel" row="6" column="0">
+                                        <spacer row="2" column="1">
                                             <property name="name">
-                                                <cstring>mUnitTerrainLabel</cstring>
-                                            </property>
-                                            <property name="text">
-                                                <string>Terrain:</string>
-                                            </property>
-                                        </widget>
-                                        <widget class="KIntNumInput" row="4" column="2">
-                                            <property name="name">
-                                                <cstring>mUnitOilCost</cstring>
-                                            </property>
-                                            <property name="minValue">
-                                                <number>0</number>
-                                            </property>
-                                            <property name="toolTip" stdset="0">
-                                                <string>How much oil this unit costs</string>
-                                            </property>
-                                            <property name="whatsThis" stdset="0">
-                                                <string>How much oil a player has to pay to produce this unit.</string>
-                                            </property>
-                                        </widget>
-                                        <spacer row="5" column="1">
-                                            <property name="name">
-                                                <cstring>mUnitSightSpacer</cstring>
-                                            </property>
-                                            <property name="orientation">
-                                                <enum>Horizontal</enum>
-                                            </property>
-                                            <property name="sizeType">
-                                                <enum>Fixed</enum>
-                                            </property>
-                                            <property name="sizeHint">
-                                                <size>
-                                                    <width>20</width>
-                                                    <height>20</height>
-                                                </size>
-                                            </property>
-                                        </spacer>
-                                        <widget class="QLabel" row="5" column="0">
-                                            <property name="name">
-                                                <cstring>mUnitSightLabel</cstring>
-                                            </property>
-                                            <property name="text">
-                                                <string>Sight range:</string>
-                                            </property>
-                                        </widget>
-                                        <widget class="KIntNumInput" row="1" column="2">
-                                            <property name="name">
-                                                <cstring>mUnitArmor</cstring>
-                                            </property>
-                                            <property name="minValue">
-                                                <number>0</number>
-                                            </property>
-                                            <property name="toolTip" stdset="0">
-                                                <string>Armor of this unit</string>
-                                            </property>
-                                            <property name="whatsThis" stdset="0">
-                                                <string>Armor of this unit.&lt;br&gt;
-When other unit shoots at your unit, armor value is substracted from shooter's damage value.</string>
-                                            </property>
-                                        </widget>
-                                        <widget class="QLabel" row="1" column="0">
-                                            <property name="name">
-                                                <cstring>mUnitArmorLabel</cstring>
-                                            </property>
-                                            <property name="text">
-                                                <string>Armor:</string>
-                                            </property>
-                                        </widget>
-                                        <widget class="QLabel" row="7" column="0">
-                                            <property name="name">
-                                                <cstring>mDestroyedParticlesLabel</cstring>
-                                            </property>
-                                            <property name="text">
-                                                <string>Destroyed particles:</string>
-                                            </property>
-                                        </widget>
-                                        <widget class="QComboBox" row="6" column="2">
-                                            <item>
-                                                <property name="text">
-                                                    <string>Land</string>
-                                                </property>
-                                            </item>
-                                            <item>
-                                                <property name="text">
-                                                    <string>Water</string>
-                                                </property>
-                                            </item>
-                                            <item>
-                                                <property name="text">
-                                                    <string>Air</string>
-                                                </property>
-                                            </item>
-                                            <property name="name">
-                                                <cstring>mUnitTerrain</cstring>
-                                            </property>
-                                            <property name="toolTip" stdset="0">
-                                                <string>Terrain type of this unit</string>
-                                            </property>
-                                            <property name="whatsThis" stdset="0">
-                                                <string>The main terrain your unit is thought to use. You can use only one. For facilities the terrain type is the only terrain it can be placed on. Mobile units use rather the &lt;i&gt;Can go on Land&lt;/i&gt; / &lt;i&gt;Can go on Water&lt;/i&gt; values.</string>
-                                            </property>
-                                        </widget>
-                                        <widget class="QLabel" row="3" column="0">
-                                            <property name="name">
-                                                <cstring>mUnitMineralCostLabel</cstring>
-                                            </property>
-                                            <property name="text">
-                                                <string>Mineral Cost:</string>
-                                            </property>
-                                        </widget>
-                                        <widget class="QLabel" row="2" column="0">
-                                            <property name="name">
-                                                <cstring>mUnitShieldsLabel</cstring>
-                                            </property>
-                                            <property name="text">
-                                                <string>Shields:</string>
-                                            </property>
-                                        </widget>
-                                        <widget class="KIntNumInput" row="0" column="2">
-                                            <property name="name">
-                                                <cstring>mUnitHealth</cstring>
-                                            </property>
-                                            <property name="value">
-                                                <number>100</number>
-                                            </property>
-                                            <property name="minValue">
-                                                <number>0</number>
-                                            </property>
-                                            <property name="toolTip" stdset="0">
-                                                <string>Maximum health of this unit</string>
-                                            </property>
-                                            <property name="whatsThis" stdset="0">
-                                                <string>Maximum health aka hitpoints, simply how much damage your unit can take during battle. Higher values mean (surprise) your unit can take more - 0 means your unit is destroyed (so don't use this ;-)).</string>
-                                            </property>
-                                        </widget>
-                                        <widget class="QLineEdit" row="7" column="2">
-                                            <property name="name">
-                                                <cstring>mUnitDestroyedParticles</cstring>
-                                            </property>
-                                            <property name="toolTip" stdset="0">
-                                                <string>Ids of particle systems created when unit will be destroyed</string>
-                                            </property>
-                                            <property name="whatsThis" stdset="0">
-                                                <string>Here you can specify ids of particle systems that will be created when unit will be destroyed.
-You must specify list of numbers separated by commas, e.g. 1001,3001</string>
-                                            </property>
-                                        </widget>
-                                        <widget class="QLabel" row="4" column="0">
-                                            <property name="name">
-                                                <cstring>mUnitOilCostLabel</cstring>
-                                            </property>
-                                            <property name="text">
-                                                <string>Oil Cost:</string>
-                                            </property>
-                                        </widget>
-                                        <spacer row="1" column="1">
-                                            <property name="name">
-                                                <cstring>mUnitArmorSpacer</cstring>
+                                                <cstring>mUnitShieldsSpacer</cstring>
                                             </property>
                                             <property name="orientation">
                                                 <enum>Horizontal</enum>
@@ -983,9 +799,110 @@ You must specify list of numbers separated by commas, e.g. 1001,3001</string>
                                                 </size>
                                             </property>
                                         </spacer>
+                                        <spacer row="1" column="1">
+                                            <property name="name">
+                                                <cstring>mUnitArmorSpacer</cstring>
+                                            </property>
+                                            <property name="orientation">
+                                                <enum>Horizontal</enum>
+                                            </property>
+                                            <property name="sizeType">
+                                                <enum>Fixed</enum>
+                                            </property>
+                                            <property name="sizeHint">
+                                                <size>
+                                                    <width>20</width>
+                                                    <height>20</height>
+                                                </size>
+                                            </property>
+                                        </spacer>
+                                        <widget class="QLabel" row="4" column="0">
+                                            <property name="name">
+                                                <cstring>mUnitOilCostLabel</cstring>
+                                            </property>
+                                            <property name="text">
+                                                <string>Oil Cost:</string>
+                                            </property>
+                                        </widget>
+                                        <widget class="QLabel" row="1" column="0">
+                                            <property name="name">
+                                                <cstring>mUnitArmorLabel</cstring>
+                                            </property>
+                                            <property name="text">
+                                                <string>Armor:</string>
+                                            </property>
+                                        </widget>
+                                        <spacer row="3" column="1">
+                                            <property name="name">
+                                                <cstring>mUnitMineralCostSpacer</cstring>
+                                            </property>
+                                            <property name="orientation">
+                                                <enum>Horizontal</enum>
+                                            </property>
+                                            <property name="sizeType">
+                                                <enum>Fixed</enum>
+                                            </property>
+                                            <property name="sizeHint">
+                                                <size>
+                                                    <width>20</width>
+                                                    <height>20</height>
+                                                </size>
+                                            </property>
+                                        </spacer>
+                                        <widget class="QLabel" row="3" column="0">
+                                            <property name="name">
+                                                <cstring>mUnitMineralCostLabel</cstring>
+                                            </property>
+                                            <property name="text">
+                                                <string>Mineral Cost:</string>
+                                            </property>
+                                        </widget>
+                                        <widget class="QComboBox" row="6" column="2">
+                                            <item>
+                                                <property name="text">
+                                                    <string>Land</string>
+                                                </property>
+                                            </item>
+                                            <item>
+                                                <property name="text">
+                                                    <string>Water</string>
+                                                </property>
+                                            </item>
+                                            <item>
+                                                <property name="text">
+                                                    <string>Air</string>
+                                                </property>
+                                            </item>
+                                            <property name="name">
+                                                <cstring>mUnitTerrain</cstring>
+                                            </property>
+                                            <property name="toolTip" stdset="0">
+                                                <string>Terrain type of this unit</string>
+                                            </property>
+                                            <property name="whatsThis" stdset="0">
+                                                <string>The main terrain your unit is thought to use. You can use only one. For facilities the terrain type is the only terrain it can be placed on. Mobile units use rather the &lt;i&gt;Can go on Land&lt;/i&gt; / &lt;i&gt;Can go on Water&lt;/i&gt; values.</string>
+                                            </property>
+                                        </widget>
                                         <spacer row="6" column="1">
                                             <property name="name">
                                                 <cstring>mUnitTerrainSpacer</cstring>
+                                            </property>
+                                            <property name="orientation">
+                                                <enum>Horizontal</enum>
+                                            </property>
+                                            <property name="sizeType">
+                                                <enum>Fixed</enum>
+                                            </property>
+                                            <property name="sizeHint">
+                                                <size>
+                                                    <width>20</width>
+                                                    <height>20</height>
+                                                </size>
+                                            </property>
+                                        </spacer>
+                                        <spacer row="5" column="1">
+                                            <property name="name">
+                                                <cstring>mUnitSightSpacer</cstring>
                                             </property>
                                             <property name="orientation">
                                                 <enum>Horizontal</enum>
@@ -1017,23 +934,54 @@ You must specify list of numbers separated by commas, e.g. 1001,3001</string>
                                                 <string>How many minerals a player has to pay to produce this unit.</string>
                                             </property>
                                         </widget>
-                                        <spacer row="2" column="1">
+                                        <widget class="KIntNumInput" row="1" column="2">
                                             <property name="name">
-                                                <cstring>mUnitShieldsSpacer</cstring>
+                                                <cstring>mUnitArmor</cstring>
                                             </property>
-                                            <property name="orientation">
-                                                <enum>Horizontal</enum>
+                                            <property name="minValue">
+                                                <number>0</number>
                                             </property>
-                                            <property name="sizeType">
-                                                <enum>Fixed</enum>
+                                            <property name="toolTip" stdset="0">
+                                                <string>Armor of this unit</string>
                                             </property>
-                                            <property name="sizeHint">
-                                                <size>
-                                                    <width>20</width>
-                                                    <height>20</height>
-                                                </size>
+                                            <property name="whatsThis" stdset="0">
+                                                <string>Armor of this unit.&lt;br&gt;
+When other unit shoots at your unit, armor value is substracted from shooter's damage value.</string>
                                             </property>
-                                        </spacer>
+                                        </widget>
+                                        <widget class="KIntNumInput" row="0" column="2">
+                                            <property name="name">
+                                                <cstring>mUnitHealth</cstring>
+                                            </property>
+                                            <property name="value">
+                                                <number>100</number>
+                                            </property>
+                                            <property name="minValue">
+                                                <number>0</number>
+                                            </property>
+                                            <property name="toolTip" stdset="0">
+                                                <string>Maximum health of this unit</string>
+                                            </property>
+                                            <property name="whatsThis" stdset="0">
+                                                <string>Maximum health aka hitpoints, simply how much damage your unit can take during battle. Higher values mean (surprise) your unit can take more - 0 means your unit is destroyed (so don't use this ;-)).</string>
+                                            </property>
+                                        </widget>
+                                        <widget class="QLabel" row="6" column="0">
+                                            <property name="name">
+                                                <cstring>mUnitTerrainLabel</cstring>
+                                            </property>
+                                            <property name="text">
+                                                <string>Terrain:</string>
+                                            </property>
+                                        </widget>
+                                        <widget class="QLabel" row="2" column="0">
+                                            <property name="name">
+                                                <cstring>mUnitShieldsLabel</cstring>
+                                            </property>
+                                            <property name="text">
+                                                <string>Shields:</string>
+                                            </property>
+                                        </widget>
                                         <widget class="QLabel" row="0" column="0">
                                             <property name="name">
                                                 <cstring>mUnitHealthLabel</cstring>
@@ -1059,36 +1007,45 @@ You must specify list of numbers separated by commas, e.g. 1001,3001</string>
                                                 </size>
                                             </property>
                                         </spacer>
-                                        <spacer row="3" column="1">
+                                        <widget class="QLabel" row="5" column="0">
                                             <property name="name">
-                                                <cstring>mUnitMineralCostSpacer</cstring>
+                                                <cstring>mUnitSightLabel</cstring>
                                             </property>
-                                            <property name="orientation">
-                                                <enum>Horizontal</enum>
+                                            <property name="text">
+                                                <string>Sight range:</string>
                                             </property>
-                                            <property name="sizeType">
-                                                <enum>Fixed</enum>
-                                            </property>
-                                            <property name="sizeHint">
-                                                <size>
-                                                    <width>20</width>
-                                                    <height>20</height>
-                                                </size>
-                                            </property>
-                                        </spacer>
-                                        <widget class="KIntNumInput" row="2" column="2">
+                                        </widget>
+                                        <widget class="KIntNumInput" row="5" column="2">
                                             <property name="name">
-                                                <cstring>mUnitShields</cstring>
+                                                <cstring>mUnitSight</cstring>
+                                            </property>
+                                            <property name="value">
+                                                <number>5</number>
                                             </property>
                                             <property name="minValue">
                                                 <number>0</number>
                                             </property>
                                             <property name="toolTip" stdset="0">
-                                                <string>Maximum shields of this unit</string>
+                                                <string>Sight range of this units</string>
                                             </property>
                                             <property name="whatsThis" stdset="0">
-                                                <string>Maximum shields of this unit&lt;br&gt;
-When some unit shoots your unit and your unit has any shields, then amount of shields you have will be substracted from shooter's damage value and shields count will be decreased accordingly. If your unit has enough shields, it may not be hurt at all!</string>
+                                                <string>&lt;p&gt;How far can your unit see?&lt;/p&gt;
+&lt;p&gt;Please note that this is &lt;b&gt;not&lt;/b&gt; a pixel value, but a &lt;b&gt;cell number&lt;/b&gt;, or tile number! A value of 1 means that 1 field of fog of war is removed around your unit, 2 means 2 fields of fog of war are removed and so on.&lt;/p&gt;
+&lt;p&gt;A value of 5 (default) is ok - use higher values for rangers&lt;/p&gt;</string>
+                                            </property>
+                                        </widget>
+                                        <widget class="KIntNumInput" row="4" column="2">
+                                            <property name="name">
+                                                <cstring>mUnitOilCost</cstring>
+                                            </property>
+                                            <property name="minValue">
+                                                <number>0</number>
+                                            </property>
+                                            <property name="toolTip" stdset="0">
+                                                <string>How much oil this unit costs</string>
+                                            </property>
+                                            <property name="whatsThis" stdset="0">
+                                                <string>How much oil a player has to pay to produce this unit.</string>
                                             </property>
                                         </widget>
                                     </grid>
@@ -1245,36 +1202,6 @@ When some unit shoots your unit and your unit has any shields, then amount of sh
                                         <property name="spacing">
                                             <number>6</number>
                                         </property>
-                                        <widget class="QCheckBox">
-                                            <property name="name">
-                                                <cstring>mUnitCanRefineMinerals</cstring>
-                                            </property>
-                                            <property name="text">
-                                                <string>Can refine minerals</string>
-                                            </property>
-                                            <property name="toolTip" stdset="0">
-                                                <string>Whether this unit can refine minerals</string>
-                                            </property>
-                                            <property name="whatsThis" stdset="0">
-                                                <string>Whether this unit can refine minerals&lt;br&gt;
-Check this if your unit is some kind of refinery</string>
-                                            </property>
-                                        </widget>
-                                        <widget class="QCheckBox">
-                                            <property name="name">
-                                                <cstring>mUnitCanRefineOil</cstring>
-                                            </property>
-                                            <property name="text">
-                                                <string>Can refine oil</string>
-                                            </property>
-                                            <property name="toolTip" stdset="0">
-                                                <string>Whether this unit can refine oil</string>
-                                            </property>
-                                            <property name="whatsThis" stdset="0">
-                                                <string>Whether this unit can refine oil&lt;br&gt;
-Check this if your unit is some kind of refinery</string>
-                                            </property>
-                                        </widget>
                                         <widget class="QLayoutWidget">
                                             <property name="name">
                                                 <cstring>Layout9</cstring>
@@ -1367,12 +1294,6 @@ Construction steps are used to get feeling that your unit is constructed step by
                     <hbox>
                         <property name="name">
                             <cstring>unnamed</cstring>
-                        </property>
-                        <property name="margin">
-                            <number>11</number>
-                        </property>
-                        <property name="spacing">
-                            <number>6</number>
                         </property>
                         <widget class="QLayoutWidget">
                             <property name="name">
@@ -1475,378 +1396,40 @@ Construction steps are used to get feeling that your unit is constructed step by
                             <property name="sizeHint">
                                 <size>
                                     <width>16</width>
-                                    <height>4</height>
+                                    <height>16</height>
                                 </size>
                             </property>
                         </spacer>
-                        <widget class="QGroupBox">
+                        <widget class="QLayoutWidget">
                             <property name="name">
-                                <cstring>mWeaponGroup</cstring>
-                            </property>
-                            <property name="title">
-                                <string>Selected weapon's properties</string>
+                                <cstring>layout23</cstring>
                             </property>
                             <vbox>
                                 <property name="name">
                                     <cstring>unnamed</cstring>
                                 </property>
-                                <property name="margin">
-                                    <number>11</number>
-                                </property>
-                                <property name="spacing">
-                                    <number>6</number>
-                                </property>
-                                <widget class="QLayoutWidget">
+                                <widget class="QGroupBox">
                                     <property name="name">
-                                        <cstring>Layout22</cstring>
+                                        <cstring>mWeaponGroup</cstring>
                                     </property>
-                                    <grid>
+                                    <property name="title">
+                                        <string>Selected weapon's properties</string>
+                                    </property>
+                                    <vbox>
                                         <property name="name">
                                             <cstring>unnamed</cstring>
                                         </property>
                                         <property name="margin">
-                                            <number>0</number>
+                                            <number>11</number>
                                         </property>
                                         <property name="spacing">
                                             <number>6</number>
                                         </property>
-                                        <widget class="QLabel" row="5" column="0">
+                                        <widget class="QLayoutWidget">
                                             <property name="name">
-                                                <cstring>mWeaponSpeedLabel</cstring>
+                                                <cstring>Layout22</cstring>
                                             </property>
-                                            <property name="text">
-                                                <string>Speed:</string>
-                                            </property>
-                                        </widget>
-                                        <widget class="KIntSpinBox" row="3" column="2">
-                                            <property name="name">
-                                                <cstring>mWeaponReload</cstring>
-                                            </property>
-                                            <property name="maxValue">
-                                                <number>1000000</number>
-                                            </property>
-                                            <property name="lineStep">
-                                                <number>5</number>
-                                            </property>
-                                            <property name="toolTip" stdset="0">
-                                                <string>The time to reload the weapon.</string>
-                                            </property>
-                                            <property name="whatsThis" stdset="0">
-                                                <string>The time to reload the weapon. "Time" means number of advance calls (default is 1 per 50ms = 20 calls/sec).</string>
-                                            </property>
-                                        </widget>
-                                        <spacer row="1" column="1">
-                                            <property name="name">
-                                                <cstring>Spacer79</cstring>
-                                            </property>
-                                            <property name="orientation">
-                                                <enum>Horizontal</enum>
-                                            </property>
-                                            <property name="sizeType">
-                                                <enum>Fixed</enum>
-                                            </property>
-                                            <property name="sizeHint">
-                                                <size>
-                                                    <width>20</width>
-                                                    <height>20</height>
-                                                </size>
-                                            </property>
-                                        </spacer>
-                                        <spacer row="4" column="1">
-                                            <property name="name">
-                                                <cstring>Spacer80</cstring>
-                                            </property>
-                                            <property name="orientation">
-                                                <enum>Horizontal</enum>
-                                            </property>
-                                            <property name="sizeType">
-                                                <enum>Fixed</enum>
-                                            </property>
-                                            <property name="sizeHint">
-                                                <size>
-                                                    <width>20</width>
-                                                    <height>20</height>
-                                                </size>
-                                            </property>
-                                        </spacer>
-                                        <widget class="QLabel" row="4" column="0">
-                                            <property name="name">
-                                                <cstring>mWeaponRangeLabel</cstring>
-                                            </property>
-                                            <property name="text">
-                                                <string>Range:</string>
-                                            </property>
-                                        </widget>
-                                        <widget class="QLineEdit" row="0" column="2">
-                                            <property name="name">
-                                                <cstring>mWeaponName</cstring>
-                                            </property>
-                                            <property name="toolTip" stdset="0">
-                                                <string>Name of current weapon</string>
-                                            </property>
-                                            <property name="whatsThis" stdset="0">
-                                                <string>Here you can set name of current weapon.
-Note that names of weapons won't be visible in game, they are only hints for unit editors.</string>
-                                            </property>
-                                        </widget>
-                                        <spacer row="0" column="1">
-                                            <property name="name">
-                                                <cstring>Spacer84_2</cstring>
-                                            </property>
-                                            <property name="orientation">
-                                                <enum>Horizontal</enum>
-                                            </property>
-                                            <property name="sizeType">
-                                                <enum>Fixed</enum>
-                                            </property>
-                                            <property name="sizeHint">
-                                                <size>
-                                                    <width>20</width>
-                                                    <height>20</height>
-                                                </size>
-                                            </property>
-                                        </spacer>
-                                        <spacer row="5" column="1">
-                                            <property name="name">
-                                                <cstring>Spacer82</cstring>
-                                            </property>
-                                            <property name="orientation">
-                                                <enum>Horizontal</enum>
-                                            </property>
-                                            <property name="sizeType">
-                                                <enum>Fixed</enum>
-                                            </property>
-                                            <property name="sizeHint">
-                                                <size>
-                                                    <width>20</width>
-                                                    <height>20</height>
-                                                </size>
-                                            </property>
-                                        </spacer>
-                                        <widget class="QLabel" row="0" column="0">
-                                            <property name="name">
-                                                <cstring>mWeaponNameLabel</cstring>
-                                            </property>
-                                            <property name="text">
-                                                <string>Name:</string>
-                                            </property>
-                                        </widget>
-                                        <widget class="KIntSpinBox" row="4" column="2">
-                                            <property name="name">
-                                                <cstring>mWeaponRange</cstring>
-                                            </property>
-                                            <property name="maxValue">
-                                                <number>500</number>
-                                            </property>
-                                            <property name="toolTip" stdset="0">
-                                                <string>Range of this weapon.</string>
-                                            </property>
-                                            <property name="whatsThis" stdset="0">
-                                                <string>Range of this weapon aka how far this weapon can shoot.</string>
-                                            </property>
-                                        </widget>
-                                        <widget class="KDoubleNumInput" row="5" column="2">
-                                            <property name="name">
-                                                <cstring>mWeaponSpeed</cstring>
-                                            </property>
-                                            <property name="maxValue">
-                                                <number>100</number>
-                                            </property>
-                                            <property name="toolTip" stdset="0">
-                                                <string>Speed of the shot aka missile of this weapon</string>
-                                            </property>
-                                            <property name="whatsThis" stdset="0">
-                                                <string>Speed of the shot aka missile of this weapon. If it's 0, the shot will hit the target immediately (speed is infinite).</string>
-                                            </property>
-                                        </widget>
-                                        <widget class="QLabel" row="3" column="0">
-                                            <property name="name">
-                                                <cstring>mWeaponReloadLabel</cstring>
-                                            </property>
-                                            <property name="text">
-                                                <string>Reload:</string>
-                                            </property>
-                                        </widget>
-                                        <widget class="QLabel" row="2" column="0">
-                                            <property name="name">
-                                                <cstring>mWeaponDamageRangeLabel</cstring>
-                                            </property>
-                                            <property name="text">
-                                                <string>Damage range:</string>
-                                            </property>
-                                        </widget>
-                                        <spacer row="3" column="1">
-                                            <property name="name">
-                                                <cstring>Spacer81</cstring>
-                                            </property>
-                                            <property name="orientation">
-                                                <enum>Horizontal</enum>
-                                            </property>
-                                            <property name="sizeType">
-                                                <enum>Fixed</enum>
-                                            </property>
-                                            <property name="sizeHint">
-                                                <size>
-                                                    <width>20</width>
-                                                    <height>20</height>
-                                                </size>
-                                            </property>
-                                        </spacer>
-                                        <spacer row="2" column="1">
-                                            <property name="name">
-                                                <cstring>Spacer83</cstring>
-                                            </property>
-                                            <property name="orientation">
-                                                <enum>Horizontal</enum>
-                                            </property>
-                                            <property name="sizeType">
-                                                <enum>Fixed</enum>
-                                            </property>
-                                            <property name="sizeHint">
-                                                <size>
-                                                    <width>21</width>
-                                                    <height>20</height>
-                                                </size>
-                                            </property>
-                                        </spacer>
-                                        <widget class="QLabel" row="1" column="0">
-                                            <property name="name">
-                                                <cstring>mWeaponDamageLabel</cstring>
-                                            </property>
-                                            <property name="text">
-                                                <string>Damage:</string>
-                                            </property>
-                                        </widget>
-                                        <widget class="KDoubleNumInput" row="2" column="2">
-                                            <property name="name">
-                                                <cstring>mWeaponDamageRange</cstring>
-                                            </property>
-                                            <property name="maxValue">
-                                                <number>100</number>
-                                            </property>
-                                            <property name="toolTip" stdset="0">
-                                                <string>In how big range this weapon's shot can damages other units?</string>
-                                            </property>
-                                            <property name="whatsThis" stdset="0">
-                                                <string>In how big range this weapon's shot can damages other units? E.g. if it's 2, all units two or less cells away from the explosion will get damaged.</string>
-                                            </property>
-                                        </widget>
-                                        <widget class="KIntSpinBox" row="1" column="2">
-                                            <property name="name">
-                                                <cstring>mWeaponDamage</cstring>
-                                            </property>
-                                            <property name="maxValue">
-                                                <number>1000000</number>
-                                            </property>
-                                            <property name="toolTip" stdset="0">
-                                                <string>How much damage this weapon does</string>
-                                            </property>
-                                            <property name="whatsThis" stdset="0">
-                                                <string>The damage this unit makes to other units when firing.</string>
-                                            </property>
-                                        </widget>
-                                    </grid>
-                                </widget>
-                                <widget class="QCheckBox">
-                                    <property name="name">
-                                        <cstring>mWeaponCanShootAtAirUnits</cstring>
-                                    </property>
-                                    <property name="text">
-                                        <string>Can shoot at air units</string>
-                                    </property>
-                                    <property name="toolTip" stdset="0">
-                                        <string>Can this unit shoot at aircrafts?</string>
-                                    </property>
-                                    <property name="whatsThis" stdset="0">
-                                        <string>Can this unit shoot at aircrafts?</string>
-                                    </property>
-                                </widget>
-                                <widget class="QCheckBox">
-                                    <property name="name">
-                                        <cstring>mWeaponCanShootAtLandUnits</cstring>
-                                    </property>
-                                    <property name="text">
-                                        <string>Can shoot at land units</string>
-                                    </property>
-                                    <property name="toolTip" stdset="0">
-                                        <string>Can this unit shoot at ground units?</string>
-                                    </property>
-                                    <property name="whatsThis" stdset="0">
-                                        <string>Can this unit shoot at ground units?</string>
-                                    </property>
-                                </widget>
-                                <widget class="QLayoutWidget">
-                                    <property name="name">
-                                        <cstring>Layout25</cstring>
-                                    </property>
-                                    <grid>
-                                        <property name="name">
-                                            <cstring>unnamed</cstring>
-                                        </property>
-                                        <property name="margin">
-                                            <number>0</number>
-                                        </property>
-                                        <property name="spacing">
-                                            <number>6</number>
-                                        </property>
-                                        <spacer row="0" column="1">
-                                            <property name="name">
-                                                <cstring>Spacer84</cstring>
-                                            </property>
-                                            <property name="orientation">
-                                                <enum>Horizontal</enum>
-                                            </property>
-                                            <property name="sizeType">
-                                                <enum>Fixed</enum>
-                                            </property>
-                                            <property name="sizeHint">
-                                                <size>
-                                                    <width>20</width>
-                                                    <height>20</height>
-                                                </size>
-                                            </property>
-                                        </spacer>
-                                        <widget class="QLabel" row="5" column="0">
-                                            <property name="name">
-                                                <cstring>mWeaponHitParticlesLabel</cstring>
-                                            </property>
-                                            <property name="text">
-                                                <string>Hit particles:</string>
-                                            </property>
-                                        </widget>
-                                        <widget class="QLineEdit" row="3" column="2">
-                                            <property name="name">
-                                                <cstring>mWeaponShootParticles</cstring>
-                                            </property>
-                                            <property name="toolTip" stdset="0">
-                                                <string>Ids of particle systems created when you shoot from this weapon</string>
-                                            </property>
-                                            <property name="whatsThis" stdset="0">
-                                                <string>Comma-separated list of ids of particle systems created when you shoot from this weapon</string>
-                                            </property>
-                                        </widget>
-                                        <widget class="KDoubleNumInput" row="2" column="2">
-                                            <property name="name">
-                                                <cstring>mWeaponMaxHeight</cstring>
-                                            </property>
-                                            <property name="minValue">
-                                                <number>-3</number>
-                                            </property>
-                                            <property name="maxValue">
-                                                <number>500</number>
-                                            </property>
-                                            <property name="toolTip" stdset="0">
-                                                <string>Maximum height of the missile of this weapon when it flies</string>
-                                            </property>
-                                            <property name="whatsThis" stdset="0">
-                                                <string>Maximum height of the missile of this weapon when it flies. If you increase this, your missiles will fly with bigger arc</string>
-                                            </property>
-                                        </widget>
-                                        <widget class="QLayoutWidget" row="1" column="2">
-                                            <property name="name">
-                                                <cstring>Layout20</cstring>
-                                            </property>
-                                            <hbox>
+                                            <grid>
                                                 <property name="name">
                                                     <cstring>unnamed</cstring>
                                                 </property>
@@ -1856,33 +1439,324 @@ Note that names of weapons won't be visible in game, they are only hints for uni
                                                 <property name="spacing">
                                                     <number>6</number>
                                                 </property>
-                                                <widget class="QLabel">
+                                                <widget class="QLabel" row="5" column="0">
                                                     <property name="name">
-                                                        <cstring>mOffsetXLabel</cstring>
-                                                    </property>
-                                                    <property name="sizePolicy">
-                                                        <sizepolicy>
-                                                            <hsizetype>1</hsizetype>
-                                                            <vsizetype>5</vsizetype>
-                                                            <horstretch>0</horstretch>
-                                                            <verstretch>0</verstretch>
-                                                        </sizepolicy>
+                                                        <cstring>mWeaponSpeedLabel</cstring>
                                                     </property>
                                                     <property name="text">
-                                                        <string>x:</string>
+                                                        <string>Speed:</string>
                                                     </property>
                                                 </widget>
-                                                <widget class="KDoubleNumInput">
+                                                <widget class="KIntSpinBox" row="3" column="2">
                                                     <property name="name">
-                                                        <cstring>mWeaponOffsetX</cstring>
+                                                        <cstring>mWeaponReload</cstring>
                                                     </property>
-                                                    <property name="sizePolicy">
-                                                        <sizepolicy>
-                                                            <hsizetype>1</hsizetype>
-                                                            <vsizetype>0</vsizetype>
-                                                            <horstretch>0</horstretch>
-                                                            <verstretch>0</verstretch>
-                                                        </sizepolicy>
+                                                    <property name="maxValue">
+                                                        <number>1000000</number>
+                                                    </property>
+                                                    <property name="lineStep">
+                                                        <number>5</number>
+                                                    </property>
+                                                    <property name="toolTip" stdset="0">
+                                                        <string>The time to reload the weapon.</string>
+                                                    </property>
+                                                    <property name="whatsThis" stdset="0">
+                                                        <string>The time to reload the weapon. "Time" means number of advance calls (default is 1 per 50ms = 20 calls/sec).</string>
+                                                    </property>
+                                                </widget>
+                                                <spacer row="1" column="1">
+                                                    <property name="name">
+                                                        <cstring>Spacer79</cstring>
+                                                    </property>
+                                                    <property name="orientation">
+                                                        <enum>Horizontal</enum>
+                                                    </property>
+                                                    <property name="sizeType">
+                                                        <enum>Fixed</enum>
+                                                    </property>
+                                                    <property name="sizeHint">
+                                                        <size>
+                                                            <width>20</width>
+                                                            <height>20</height>
+                                                        </size>
+                                                    </property>
+                                                </spacer>
+                                                <spacer row="4" column="1">
+                                                    <property name="name">
+                                                        <cstring>Spacer80</cstring>
+                                                    </property>
+                                                    <property name="orientation">
+                                                        <enum>Horizontal</enum>
+                                                    </property>
+                                                    <property name="sizeType">
+                                                        <enum>Fixed</enum>
+                                                    </property>
+                                                    <property name="sizeHint">
+                                                        <size>
+                                                            <width>20</width>
+                                                            <height>20</height>
+                                                        </size>
+                                                    </property>
+                                                </spacer>
+                                                <widget class="QLabel" row="4" column="0">
+                                                    <property name="name">
+                                                        <cstring>mWeaponRangeLabel</cstring>
+                                                    </property>
+                                                    <property name="text">
+                                                        <string>Range:</string>
+                                                    </property>
+                                                </widget>
+                                                <widget class="QLineEdit" row="0" column="2">
+                                                    <property name="name">
+                                                        <cstring>mWeaponName</cstring>
+                                                    </property>
+                                                    <property name="toolTip" stdset="0">
+                                                        <string>Name of current weapon</string>
+                                                    </property>
+                                                    <property name="whatsThis" stdset="0">
+                                                        <string>Here you can set name of current weapon.
+Note that names of weapons won't be visible in game, they are only hints for unit editors.</string>
+                                                    </property>
+                                                </widget>
+                                                <spacer row="0" column="1">
+                                                    <property name="name">
+                                                        <cstring>Spacer84_2</cstring>
+                                                    </property>
+                                                    <property name="orientation">
+                                                        <enum>Horizontal</enum>
+                                                    </property>
+                                                    <property name="sizeType">
+                                                        <enum>Fixed</enum>
+                                                    </property>
+                                                    <property name="sizeHint">
+                                                        <size>
+                                                            <width>20</width>
+                                                            <height>20</height>
+                                                        </size>
+                                                    </property>
+                                                </spacer>
+                                                <spacer row="5" column="1">
+                                                    <property name="name">
+                                                        <cstring>Spacer82</cstring>
+                                                    </property>
+                                                    <property name="orientation">
+                                                        <enum>Horizontal</enum>
+                                                    </property>
+                                                    <property name="sizeType">
+                                                        <enum>Fixed</enum>
+                                                    </property>
+                                                    <property name="sizeHint">
+                                                        <size>
+                                                            <width>20</width>
+                                                            <height>20</height>
+                                                        </size>
+                                                    </property>
+                                                </spacer>
+                                                <widget class="QLabel" row="0" column="0">
+                                                    <property name="name">
+                                                        <cstring>mWeaponNameLabel</cstring>
+                                                    </property>
+                                                    <property name="text">
+                                                        <string>Name:</string>
+                                                    </property>
+                                                </widget>
+                                                <widget class="KIntSpinBox" row="4" column="2">
+                                                    <property name="name">
+                                                        <cstring>mWeaponRange</cstring>
+                                                    </property>
+                                                    <property name="maxValue">
+                                                        <number>500</number>
+                                                    </property>
+                                                    <property name="toolTip" stdset="0">
+                                                        <string>Range of this weapon.</string>
+                                                    </property>
+                                                    <property name="whatsThis" stdset="0">
+                                                        <string>Range of this weapon aka how far this weapon can shoot.</string>
+                                                    </property>
+                                                </widget>
+                                                <widget class="KDoubleNumInput" row="5" column="2">
+                                                    <property name="name">
+                                                        <cstring>mWeaponSpeed</cstring>
+                                                    </property>
+                                                    <property name="maxValue">
+                                                        <number>100</number>
+                                                    </property>
+                                                    <property name="toolTip" stdset="0">
+                                                        <string>Speed of the shot aka missile of this weapon</string>
+                                                    </property>
+                                                    <property name="whatsThis" stdset="0">
+                                                        <string>Speed of the shot aka missile of this weapon. If it's 0, the shot will hit the target immediately (speed is infinite).</string>
+                                                    </property>
+                                                </widget>
+                                                <widget class="QLabel" row="3" column="0">
+                                                    <property name="name">
+                                                        <cstring>mWeaponReloadLabel</cstring>
+                                                    </property>
+                                                    <property name="text">
+                                                        <string>Reload:</string>
+                                                    </property>
+                                                </widget>
+                                                <widget class="QLabel" row="2" column="0">
+                                                    <property name="name">
+                                                        <cstring>mWeaponDamageRangeLabel</cstring>
+                                                    </property>
+                                                    <property name="text">
+                                                        <string>Damage range:</string>
+                                                    </property>
+                                                </widget>
+                                                <spacer row="3" column="1">
+                                                    <property name="name">
+                                                        <cstring>Spacer81</cstring>
+                                                    </property>
+                                                    <property name="orientation">
+                                                        <enum>Horizontal</enum>
+                                                    </property>
+                                                    <property name="sizeType">
+                                                        <enum>Fixed</enum>
+                                                    </property>
+                                                    <property name="sizeHint">
+                                                        <size>
+                                                            <width>20</width>
+                                                            <height>20</height>
+                                                        </size>
+                                                    </property>
+                                                </spacer>
+                                                <spacer row="2" column="1">
+                                                    <property name="name">
+                                                        <cstring>Spacer83</cstring>
+                                                    </property>
+                                                    <property name="orientation">
+                                                        <enum>Horizontal</enum>
+                                                    </property>
+                                                    <property name="sizeType">
+                                                        <enum>Fixed</enum>
+                                                    </property>
+                                                    <property name="sizeHint">
+                                                        <size>
+                                                            <width>21</width>
+                                                            <height>20</height>
+                                                        </size>
+                                                    </property>
+                                                </spacer>
+                                                <widget class="QLabel" row="1" column="0">
+                                                    <property name="name">
+                                                        <cstring>mWeaponDamageLabel</cstring>
+                                                    </property>
+                                                    <property name="text">
+                                                        <string>Damage:</string>
+                                                    </property>
+                                                </widget>
+                                                <widget class="KDoubleNumInput" row="2" column="2">
+                                                    <property name="name">
+                                                        <cstring>mWeaponDamageRange</cstring>
+                                                    </property>
+                                                    <property name="maxValue">
+                                                        <number>100</number>
+                                                    </property>
+                                                    <property name="toolTip" stdset="0">
+                                                        <string>In how big range this weapon's shot can damages other units?</string>
+                                                    </property>
+                                                    <property name="whatsThis" stdset="0">
+                                                        <string>In how big range this weapon's shot can damages other units? E.g. if it's 2, all units two or less cells away from the explosion will get damaged.</string>
+                                                    </property>
+                                                </widget>
+                                                <widget class="KIntSpinBox" row="1" column="2">
+                                                    <property name="name">
+                                                        <cstring>mWeaponDamage</cstring>
+                                                    </property>
+                                                    <property name="maxValue">
+                                                        <number>1000000</number>
+                                                    </property>
+                                                    <property name="toolTip" stdset="0">
+                                                        <string>How much damage this weapon does</string>
+                                                    </property>
+                                                    <property name="whatsThis" stdset="0">
+                                                        <string>The damage this unit makes to other units when firing.</string>
+                                                    </property>
+                                                </widget>
+                                            </grid>
+                                        </widget>
+                                        <widget class="QCheckBox">
+                                            <property name="name">
+                                                <cstring>mWeaponCanShootAtAirUnits</cstring>
+                                            </property>
+                                            <property name="text">
+                                                <string>Can shoot at air units</string>
+                                            </property>
+                                            <property name="toolTip" stdset="0">
+                                                <string>Can this unit shoot at aircrafts?</string>
+                                            </property>
+                                            <property name="whatsThis" stdset="0">
+                                                <string>Can this unit shoot at aircrafts?</string>
+                                            </property>
+                                        </widget>
+                                        <widget class="QCheckBox">
+                                            <property name="name">
+                                                <cstring>mWeaponCanShootAtLandUnits</cstring>
+                                            </property>
+                                            <property name="text">
+                                                <string>Can shoot at land units</string>
+                                            </property>
+                                            <property name="toolTip" stdset="0">
+                                                <string>Can this unit shoot at ground units?</string>
+                                            </property>
+                                            <property name="whatsThis" stdset="0">
+                                                <string>Can this unit shoot at ground units?</string>
+                                            </property>
+                                        </widget>
+                                        <widget class="QLayoutWidget">
+                                            <property name="name">
+                                                <cstring>Layout25</cstring>
+                                            </property>
+                                            <grid>
+                                                <property name="name">
+                                                    <cstring>unnamed</cstring>
+                                                </property>
+                                                <property name="margin">
+                                                    <number>0</number>
+                                                </property>
+                                                <property name="spacing">
+                                                    <number>6</number>
+                                                </property>
+                                                <spacer row="0" column="1">
+                                                    <property name="name">
+                                                        <cstring>Spacer84</cstring>
+                                                    </property>
+                                                    <property name="orientation">
+                                                        <enum>Horizontal</enum>
+                                                    </property>
+                                                    <property name="sizeType">
+                                                        <enum>Fixed</enum>
+                                                    </property>
+                                                    <property name="sizeHint">
+                                                        <size>
+                                                            <width>20</width>
+                                                            <height>20</height>
+                                                        </size>
+                                                    </property>
+                                                </spacer>
+                                                <widget class="QLabel" row="5" column="0">
+                                                    <property name="name">
+                                                        <cstring>mWeaponHitParticlesLabel</cstring>
+                                                    </property>
+                                                    <property name="text">
+                                                        <string>Hit particles:</string>
+                                                    </property>
+                                                </widget>
+                                                <widget class="QLineEdit" row="3" column="2">
+                                                    <property name="name">
+                                                        <cstring>mWeaponShootParticles</cstring>
+                                                    </property>
+                                                    <property name="toolTip" stdset="0">
+                                                        <string>Ids of particle systems created when you shoot from this weapon</string>
+                                                    </property>
+                                                    <property name="whatsThis" stdset="0">
+                                                        <string>Comma-separated list of ids of particle systems created when you shoot from this weapon</string>
+                                                    </property>
+                                                </widget>
+                                                <widget class="KDoubleNumInput" row="2" column="2">
+                                                    <property name="name">
+                                                        <cstring>mWeaponHeight</cstring>
                                                     </property>
                                                     <property name="minValue">
                                                         <number>-10</number>
@@ -1891,260 +1765,317 @@ Note that names of weapons won't be visible in game, they are only hints for uni
                                                         <number>10</number>
                                                     </property>
                                                     <property name="toolTip" stdset="0">
-                                                        <string>X-coordinate of the offset of this weapon</string>
+                                                        <string>Height of the missile of this weapon when it flies</string>
                                                     </property>
                                                     <property name="whatsThis" stdset="0">
-                                                        <string>&lt;p&gt;X-coordinate of the offset of this weapon. Offset specifies weapon's relative position to the unit. If offset is (0;0;0) then weapon is in the middle of the unit. If weapon is located in the front of the unit, offset may be something like (0.5;0;0).&lt;/p&gt;
+                                                        <string>Height of the missile of this weapon when it flies. If you increase this, your missiles will fly with bigger arc. Note that this value is per-cell, actual biggest height of missile will be calculated by multiplying this with distance between attacker and target.</string>
+                                                    </property>
+                                                </widget>
+                                                <widget class="QLayoutWidget" row="1" column="2">
+                                                    <property name="name">
+                                                        <cstring>Layout20</cstring>
+                                                    </property>
+                                                    <hbox>
+                                                        <property name="name">
+                                                            <cstring>unnamed</cstring>
+                                                        </property>
+                                                        <property name="margin">
+                                                            <number>0</number>
+                                                        </property>
+                                                        <property name="spacing">
+                                                            <number>6</number>
+                                                        </property>
+                                                        <widget class="QLabel">
+                                                            <property name="name">
+                                                                <cstring>mOffsetXLabel</cstring>
+                                                            </property>
+                                                            <property name="sizePolicy">
+                                                                <sizepolicy>
+                                                                    <hsizetype>1</hsizetype>
+                                                                    <vsizetype>5</vsizetype>
+                                                                    <horstretch>0</horstretch>
+                                                                    <verstretch>0</verstretch>
+                                                                </sizepolicy>
+                                                            </property>
+                                                            <property name="text">
+                                                                <string>x:</string>
+                                                            </property>
+                                                        </widget>
+                                                        <widget class="KDoubleNumInput">
+                                                            <property name="name">
+                                                                <cstring>mWeaponOffsetX</cstring>
+                                                            </property>
+                                                            <property name="sizePolicy">
+                                                                <sizepolicy>
+                                                                    <hsizetype>1</hsizetype>
+                                                                    <vsizetype>0</vsizetype>
+                                                                    <horstretch>0</horstretch>
+                                                                    <verstretch>0</verstretch>
+                                                                </sizepolicy>
+                                                            </property>
+                                                            <property name="minValue">
+                                                                <number>-10</number>
+                                                            </property>
+                                                            <property name="maxValue">
+                                                                <number>10</number>
+                                                            </property>
+                                                            <property name="toolTip" stdset="0">
+                                                                <string>X-coordinate of the offset of this weapon</string>
+                                                            </property>
+                                                            <property name="whatsThis" stdset="0">
+                                                                <string>&lt;p&gt;X-coordinate of the offset of this weapon. Offset specifies weapon's relative position to the unit. If offset is (0;0;0) then weapon is in the middle of the unit. If weapon is located in the front of the unit, offset may be something like (0.5;0;0).&lt;/p&gt;
 &lt;p&gt;Offset is used to calculate starting point of missile and position of shooting particle systems&lt;/p&gt;</string>
-                                                    </property>
+                                                            </property>
+                                                        </widget>
+                                                        <widget class="QLabel">
+                                                            <property name="name">
+                                                                <cstring>mOffsetYLabel</cstring>
+                                                            </property>
+                                                            <property name="sizePolicy">
+                                                                <sizepolicy>
+                                                                    <hsizetype>1</hsizetype>
+                                                                    <vsizetype>5</vsizetype>
+                                                                    <horstretch>0</horstretch>
+                                                                    <verstretch>0</verstretch>
+                                                                </sizepolicy>
+                                                            </property>
+                                                            <property name="text">
+                                                                <string>y:</string>
+                                                            </property>
+                                                        </widget>
+                                                        <widget class="KDoubleNumInput">
+                                                            <property name="name">
+                                                                <cstring>mWeaponOffsetY</cstring>
+                                                            </property>
+                                                            <property name="sizePolicy">
+                                                                <sizepolicy>
+                                                                    <hsizetype>1</hsizetype>
+                                                                    <vsizetype>0</vsizetype>
+                                                                    <horstretch>0</horstretch>
+                                                                    <verstretch>0</verstretch>
+                                                                </sizepolicy>
+                                                            </property>
+                                                            <property name="minValue">
+                                                                <number>-10</number>
+                                                            </property>
+                                                            <property name="maxValue">
+                                                                <number>10</number>
+                                                            </property>
+                                                            <property name="toolTip" stdset="0">
+                                                                <string>Y-coordinate of the offset of this weapon</string>
+                                                            </property>
+                                                            <property name="whatsThis" stdset="0">
+                                                                <string>&lt;p&gt;X-coordinate of the offset of this weapon. Offset specifies weapon's relative position to the unit. If offset is (0;0;0) then weapon is in the middle of the unit. If weapon is located in the front of the unit, offset may be something like (0.5;0;0).&lt;/p&gt; &lt;p&gt;Offset is used to calculate starting point of missile and position of shooting particle systems&lt;/p&gt;</string>
+                                                            </property>
+                                                        </widget>
+                                                        <widget class="QLabel">
+                                                            <property name="name">
+                                                                <cstring>mOffsetZLabel</cstring>
+                                                            </property>
+                                                            <property name="sizePolicy">
+                                                                <sizepolicy>
+                                                                    <hsizetype>1</hsizetype>
+                                                                    <vsizetype>5</vsizetype>
+                                                                    <horstretch>0</horstretch>
+                                                                    <verstretch>0</verstretch>
+                                                                </sizepolicy>
+                                                            </property>
+                                                            <property name="text">
+                                                                <string>z:</string>
+                                                            </property>
+                                                        </widget>
+                                                        <widget class="KDoubleNumInput">
+                                                            <property name="name">
+                                                                <cstring>mWeaponOffsetZ</cstring>
+                                                            </property>
+                                                            <property name="sizePolicy">
+                                                                <sizepolicy>
+                                                                    <hsizetype>1</hsizetype>
+                                                                    <vsizetype>0</vsizetype>
+                                                                    <horstretch>0</horstretch>
+                                                                    <verstretch>0</verstretch>
+                                                                </sizepolicy>
+                                                            </property>
+                                                            <property name="minValue">
+                                                                <number>-10</number>
+                                                            </property>
+                                                            <property name="maxValue">
+                                                                <number>10</number>
+                                                            </property>
+                                                            <property name="toolTip" stdset="0">
+                                                                <string>Z-coordinate of the offset of this weapon</string>
+                                                            </property>
+                                                            <property name="whatsThis" stdset="0">
+                                                                <string>&lt;p&gt;X-coordinate of the offset of this weapon. Offset specifies weapon's relative position to the unit. If offset is (0;0;0) then weapon is in the middle of the unit. If weapon is located in the front of the unit, offset may be something like (0.5;0;0).&lt;/p&gt; &lt;p&gt;Offset is used to calculate starting point of missile and position of shooting particle systems&lt;/p&gt;</string>
+                                                            </property>
+                                                        </widget>
+                                                    </hbox>
                                                 </widget>
-                                                <widget class="QLabel">
+                                                <spacer row="1" column="1">
                                                     <property name="name">
-                                                        <cstring>mOffsetYLabel</cstring>
+                                                        <cstring>Spacer53_2</cstring>
                                                     </property>
-                                                    <property name="sizePolicy">
-                                                        <sizepolicy>
-                                                            <hsizetype>1</hsizetype>
-                                                            <vsizetype>5</vsizetype>
-                                                            <horstretch>0</horstretch>
-                                                            <verstretch>0</verstretch>
-                                                        </sizepolicy>
+                                                    <property name="orientation">
+                                                        <enum>Horizontal</enum>
+                                                    </property>
+                                                    <property name="sizeType">
+                                                        <enum>Fixed</enum>
+                                                    </property>
+                                                    <property name="sizeHint">
+                                                        <size>
+                                                            <width>20</width>
+                                                            <height>20</height>
+                                                        </size>
+                                                    </property>
+                                                </spacer>
+                                                <widget class="KLineEdit" row="0" column="2">
+                                                    <property name="name">
+                                                        <cstring>mWeaponModel</cstring>
                                                     </property>
                                                     <property name="text">
-                                                        <string>y:</string>
-                                                    </property>
-                                                </widget>
-                                                <widget class="KDoubleNumInput">
-                                                    <property name="name">
-                                                        <cstring>mWeaponOffsetY</cstring>
-                                                    </property>
-                                                    <property name="sizePolicy">
-                                                        <sizepolicy>
-                                                            <hsizetype>1</hsizetype>
-                                                            <vsizetype>0</vsizetype>
-                                                            <horstretch>0</horstretch>
-                                                            <verstretch>0</verstretch>
-                                                        </sizepolicy>
-                                                    </property>
-                                                    <property name="minValue">
-                                                        <number>-10</number>
-                                                    </property>
-                                                    <property name="maxValue">
-                                                        <number>10</number>
+                                                        <string>missile.3ds</string>
                                                     </property>
                                                     <property name="toolTip" stdset="0">
-                                                        <string>Y-coordinate of the offset of this weapon</string>
+                                                        <string>Model of this weapon</string>
                                                     </property>
                                                     <property name="whatsThis" stdset="0">
-                                                        <string>&lt;p&gt;X-coordinate of the offset of this weapon. Offset specifies weapon's relative position to the unit. If offset is (0;0;0) then weapon is in the middle of the unit. If weapon is located in the front of the unit, offset may be something like (0.5;0;0).&lt;/p&gt; &lt;p&gt;Offset is used to calculate starting point of missile and position of shooting particle systems&lt;/p&gt;</string>
+                                                        <string>Filename of model of shot aka missile of this weapon. If your weapon's speed is 0, you won't need it.</string>
                                                     </property>
                                                 </widget>
-                                                <widget class="QLabel">
+                                                <spacer row="3" column="1">
                                                     <property name="name">
-                                                        <cstring>mOffsetZLabel</cstring>
+                                                        <cstring>Spacer85</cstring>
                                                     </property>
-                                                    <property name="sizePolicy">
-                                                        <sizepolicy>
-                                                            <hsizetype>1</hsizetype>
-                                                            <vsizetype>5</vsizetype>
-                                                            <horstretch>0</horstretch>
-                                                            <verstretch>0</verstretch>
-                                                        </sizepolicy>
+                                                    <property name="orientation">
+                                                        <enum>Horizontal</enum>
+                                                    </property>
+                                                    <property name="sizeType">
+                                                        <enum>Fixed</enum>
+                                                    </property>
+                                                    <property name="sizeHint">
+                                                        <size>
+                                                            <width>20</width>
+                                                            <height>20</height>
+                                                        </size>
+                                                    </property>
+                                                </spacer>
+                                                <widget class="QLabel" row="4" column="0">
+                                                    <property name="name">
+                                                        <cstring>mWeaponFlyParticlesLabel</cstring>
                                                     </property>
                                                     <property name="text">
-                                                        <string>z:</string>
+                                                        <string>Fly particles:</string>
                                                     </property>
                                                 </widget>
-                                                <widget class="KDoubleNumInput">
+                                                <widget class="QLineEdit" row="5" column="2">
                                                     <property name="name">
-                                                        <cstring>mWeaponOffsetZ</cstring>
-                                                    </property>
-                                                    <property name="sizePolicy">
-                                                        <sizepolicy>
-                                                            <hsizetype>1</hsizetype>
-                                                            <vsizetype>0</vsizetype>
-                                                            <horstretch>0</horstretch>
-                                                            <verstretch>0</verstretch>
-                                                        </sizepolicy>
-                                                    </property>
-                                                    <property name="minValue">
-                                                        <number>-10</number>
-                                                    </property>
-                                                    <property name="maxValue">
-                                                        <number>10</number>
+                                                        <cstring>mWeaponHitParticles</cstring>
                                                     </property>
                                                     <property name="toolTip" stdset="0">
-                                                        <string>Z-coordinate of the offset of this weapon</string>
+                                                        <string>Ids of particle systems used when shot of this weapon hits it's target</string>
                                                     </property>
                                                     <property name="whatsThis" stdset="0">
-                                                        <string>&lt;p&gt;X-coordinate of the offset of this weapon. Offset specifies weapon's relative position to the unit. If offset is (0;0;0) then weapon is in the middle of the unit. If weapon is located in the front of the unit, offset may be something like (0.5;0;0).&lt;/p&gt; &lt;p&gt;Offset is used to calculate starting point of missile and position of shooting particle systems&lt;/p&gt;</string>
+                                                        <string>Comma-separated list of ids of particle systems created when shot of this weapon hits it's target</string>
                                                     </property>
                                                 </widget>
-                                            </hbox>
-                                        </widget>
-                                        <spacer row="1" column="1">
-                                            <property name="name">
-                                                <cstring>Spacer53_2</cstring>
-                                            </property>
-                                            <property name="orientation">
-                                                <enum>Horizontal</enum>
-                                            </property>
-                                            <property name="sizeType">
-                                                <enum>Fixed</enum>
-                                            </property>
-                                            <property name="sizeHint">
-                                                <size>
-                                                    <width>20</width>
-                                                    <height>20</height>
-                                                </size>
-                                            </property>
-                                        </spacer>
-                                        <widget class="KLineEdit" row="0" column="2">
-                                            <property name="name">
-                                                <cstring>mWeaponModel</cstring>
-                                            </property>
-                                            <property name="text">
-                                                <string>missile.3ds</string>
-                                            </property>
-                                            <property name="toolTip" stdset="0">
-                                                <string>Model of this weapon</string>
-                                            </property>
-                                            <property name="whatsThis" stdset="0">
-                                                <string>Filename of model of shot aka missile of this weapon. If your weapon's speed is 0, you won't need it.</string>
-                                            </property>
-                                        </widget>
-                                        <spacer row="3" column="1">
-                                            <property name="name">
-                                                <cstring>Spacer85</cstring>
-                                            </property>
-                                            <property name="orientation">
-                                                <enum>Horizontal</enum>
-                                            </property>
-                                            <property name="sizeType">
-                                                <enum>Fixed</enum>
-                                            </property>
-                                            <property name="sizeHint">
-                                                <size>
-                                                    <width>20</width>
-                                                    <height>20</height>
-                                                </size>
-                                            </property>
-                                        </spacer>
-                                        <widget class="QLabel" row="4" column="0">
-                                            <property name="name">
-                                                <cstring>mWeaponFlyParticlesLabel</cstring>
-                                            </property>
-                                            <property name="text">
-                                                <string>Fly particles:</string>
-                                            </property>
-                                        </widget>
-                                        <widget class="QLineEdit" row="5" column="2">
-                                            <property name="name">
-                                                <cstring>mWeaponHitParticles</cstring>
-                                            </property>
-                                            <property name="toolTip" stdset="0">
-                                                <string>Ids of particle systems used when shot of this weapon hits it's target</string>
-                                            </property>
-                                            <property name="whatsThis" stdset="0">
-                                                <string>Comma-separated list of ids of particle systems created when shot of this weapon hits it's target</string>
-                                            </property>
-                                        </widget>
-                                        <widget class="QLineEdit" row="4" column="2">
-                                            <property name="name">
-                                                <cstring>mWeaponFlyParticles</cstring>
-                                            </property>
-                                            <property name="toolTip" stdset="0">
-                                                <string>Ids of particle systems used when missile of this weapon flies</string>
-                                            </property>
-                                            <property name="whatsThis" stdset="0">
-                                                <string>&lt;p&gt;Comma-separated list of ids of particle systems used when missile of this weapon flies. These particle systems are aligned to the missile and are moved when missile moved. You can create e.g. smoke with it.&lt;/p&gt;
+                                                <widget class="QLineEdit" row="4" column="2">
+                                                    <property name="name">
+                                                        <cstring>mWeaponFlyParticles</cstring>
+                                                    </property>
+                                                    <property name="toolTip" stdset="0">
+                                                        <string>Ids of particle systems used when missile of this weapon flies</string>
+                                                    </property>
+                                                    <property name="whatsThis" stdset="0">
+                                                        <string>&lt;p&gt;Comma-separated list of ids of particle systems used when missile of this weapon flies. These particle systems are aligned to the missile and are moved when missile moved. You can create e.g. smoke with it.&lt;/p&gt;
 &lt;p&gt;If your weapon's speed is 0, you don't need this, because particles will never be created nor used&lt;/p&gt;</string>
-                                            </property>
+                                                    </property>
+                                                </widget>
+                                                <spacer row="5" column="1">
+                                                    <property name="name">
+                                                        <cstring>Spacer87</cstring>
+                                                    </property>
+                                                    <property name="orientation">
+                                                        <enum>Horizontal</enum>
+                                                    </property>
+                                                    <property name="sizeType">
+                                                        <enum>Fixed</enum>
+                                                    </property>
+                                                    <property name="sizeHint">
+                                                        <size>
+                                                            <width>20</width>
+                                                            <height>20</height>
+                                                        </size>
+                                                    </property>
+                                                </spacer>
+                                                <spacer row="4" column="1">
+                                                    <property name="name">
+                                                        <cstring>Spacer86</cstring>
+                                                    </property>
+                                                    <property name="orientation">
+                                                        <enum>Horizontal</enum>
+                                                    </property>
+                                                    <property name="sizeType">
+                                                        <enum>Fixed</enum>
+                                                    </property>
+                                                    <property name="sizeHint">
+                                                        <size>
+                                                            <width>20</width>
+                                                            <height>20</height>
+                                                        </size>
+                                                    </property>
+                                                </spacer>
+                                                <widget class="QLabel" row="2" column="0">
+                                                    <property name="name">
+                                                        <cstring>mWeaponHeightLabel</cstring>
+                                                    </property>
+                                                    <property name="text">
+                                                        <string>Height:</string>
+                                                    </property>
+                                                </widget>
+                                                <widget class="QLabel" row="1" column="0">
+                                                    <property name="name">
+                                                        <cstring>mOffsetLabel</cstring>
+                                                    </property>
+                                                    <property name="text">
+                                                        <string>Offset:</string>
+                                                    </property>
+                                                </widget>
+                                                <spacer row="2" column="1">
+                                                    <property name="name">
+                                                        <cstring>Spacer54_2</cstring>
+                                                    </property>
+                                                    <property name="orientation">
+                                                        <enum>Horizontal</enum>
+                                                    </property>
+                                                    <property name="sizeType">
+                                                        <enum>Fixed</enum>
+                                                    </property>
+                                                    <property name="sizeHint">
+                                                        <size>
+                                                            <width>20</width>
+                                                            <height>20</height>
+                                                        </size>
+                                                    </property>
+                                                </spacer>
+                                                <widget class="QLabel" row="3" column="0">
+                                                    <property name="name">
+                                                        <cstring>mWeaponShootParticlesLabel</cstring>
+                                                    </property>
+                                                    <property name="text">
+                                                        <string>Shoot particles:</string>
+                                                    </property>
+                                                </widget>
+                                                <widget class="QLabel" row="0" column="0">
+                                                    <property name="name">
+                                                        <cstring>mWeaponModelLabel</cstring>
+                                                    </property>
+                                                    <property name="text">
+                                                        <string>Model file:</string>
+                                                    </property>
+                                                </widget>
+                                            </grid>
                                         </widget>
-                                        <spacer row="5" column="1">
-                                            <property name="name">
-                                                <cstring>Spacer87</cstring>
-                                            </property>
-                                            <property name="orientation">
-                                                <enum>Horizontal</enum>
-                                            </property>
-                                            <property name="sizeType">
-                                                <enum>Fixed</enum>
-                                            </property>
-                                            <property name="sizeHint">
-                                                <size>
-                                                    <width>20</width>
-                                                    <height>20</height>
-                                                </size>
-                                            </property>
-                                        </spacer>
-                                        <spacer row="4" column="1">
-                                            <property name="name">
-                                                <cstring>Spacer86</cstring>
-                                            </property>
-                                            <property name="orientation">
-                                                <enum>Horizontal</enum>
-                                            </property>
-                                            <property name="sizeType">
-                                                <enum>Fixed</enum>
-                                            </property>
-                                            <property name="sizeHint">
-                                                <size>
-                                                    <width>20</width>
-                                                    <height>20</height>
-                                                </size>
-                                            </property>
-                                        </spacer>
-                                        <widget class="QLabel" row="2" column="0">
-                                            <property name="name">
-                                                <cstring>mWeaponMaxHeightLabel</cstring>
-                                            </property>
-                                            <property name="text">
-                                                <string>Max height:</string>
-                                            </property>
-                                        </widget>
-                                        <widget class="QLabel" row="1" column="0">
-                                            <property name="name">
-                                                <cstring>mOffsetLabel</cstring>
-                                            </property>
-                                            <property name="text">
-                                                <string>Offset:</string>
-                                            </property>
-                                        </widget>
-                                        <spacer row="2" column="1">
-                                            <property name="name">
-                                                <cstring>Spacer54_2</cstring>
-                                            </property>
-                                            <property name="orientation">
-                                                <enum>Horizontal</enum>
-                                            </property>
-                                            <property name="sizeType">
-                                                <enum>Fixed</enum>
-                                            </property>
-                                            <property name="sizeHint">
-                                                <size>
-                                                    <width>20</width>
-                                                    <height>20</height>
-                                                </size>
-                                            </property>
-                                        </spacer>
-                                        <widget class="QLabel" row="3" column="0">
-                                            <property name="name">
-                                                <cstring>mWeaponShootParticlesLabel</cstring>
-                                            </property>
-                                            <property name="text">
-                                                <string>Shoot particles:</string>
-                                            </property>
-                                        </widget>
-                                        <widget class="QLabel" row="0" column="0">
-                                            <property name="name">
-                                                <cstring>mWeaponModelLabel</cstring>
-                                            </property>
-                                            <property name="text">
-                                                <string>Model file:</string>
-                                            </property>
-                                        </widget>
-                                    </grid>
+                                    </vbox>
                                 </widget>
                                 <spacer>
                                     <property name="name">
@@ -2159,7 +2090,7 @@ Note that names of weapons won't be visible in game, they are only hints for uni
                                     <property name="sizeHint">
                                         <size>
                                             <width>20</width>
-                                            <height>20</height>
+                                            <height>81</height>
                                         </size>
                                     </property>
                                 </spacer>
@@ -2177,12 +2108,6 @@ Note that names of weapons won't be visible in game, they are only hints for uni
                     <vbox>
                         <property name="name">
                             <cstring>unnamed</cstring>
-                        </property>
-                        <property name="margin">
-                            <number>11</number>
-                        </property>
-                        <property name="spacing">
-                            <number>6</number>
                         </property>
                         <widget class="QCheckBox">
                             <property name="name">
@@ -2270,7 +2195,7 @@ Note that names of weapons won't be visible in game, they are only hints for uni
                             <property name="sizeHint">
                                 <size>
                                     <width>20</width>
-                                    <height>20</height>
+                                    <height>16</height>
                                 </size>
                             </property>
                         </spacer>
@@ -2340,19 +2265,29 @@ Note that names of weapons won't be visible in game, they are only hints for uni
                                 </widget>
                                 <widget class="QLayoutWidget">
                                     <property name="name">
-                                        <cstring>Layout9</cstring>
+                                        <cstring>layout22</cstring>
                                     </property>
-                                    <hbox>
+                                    <grid>
                                         <property name="name">
                                             <cstring>unnamed</cstring>
                                         </property>
-                                        <property name="margin">
-                                            <number>0</number>
-                                        </property>
-                                        <property name="spacing">
-                                            <number>6</number>
-                                        </property>
-                                        <widget class="QLabel">
+                                        <widget class="QLabel" row="2" column="0">
+                                            <property name="name">
+                                                <cstring>mUnitUnloadingSpeedLabel</cstring>
+                                            </property>
+                                            <property name="text">
+                                                <string>Unloading speed:</string>
+                                            </property>
+                                        </widget>
+                                        <widget class="QLabel" row="1" column="0">
+                                            <property name="name">
+                                                <cstring>mUnitMiningSpeedLabel</cstring>
+                                            </property>
+                                            <property name="text">
+                                                <string>Mining speed:</string>
+                                            </property>
+                                        </widget>
+                                        <widget class="QLabel" row="0" column="0">
                                             <property name="name">
                                                 <cstring>mUnitMaxResourceLabel</cstring>
                                             </property>
@@ -2360,9 +2295,26 @@ Note that names of weapons won't be visible in game, they are only hints for uni
                                                 <string>Max resources:</string>
                                             </property>
                                         </widget>
-                                        <spacer>
+                                        <widget class="KIntNumInput" row="1" column="2">
                                             <property name="name">
-                                                <cstring>mUnitMaxResourceSpacer</cstring>
+                                                <cstring>mUnitMiningSpeed</cstring>
+                                            </property>
+                                            <property name="value">
+                                                <number>10</number>
+                                            </property>
+                                            <property name="minValue">
+                                                <number>0</number>
+                                            </property>
+                                            <property name="toolTip" stdset="0">
+                                                <string>How fast this unit mines resources</string>
+                                            </property>
+                                            <property name="whatsThis" stdset="0">
+                                                <string>How fast this unit mines resources (per advance call).</string>
+                                            </property>
+                                        </widget>
+                                        <spacer row="1" column="1">
+                                            <property name="name">
+                                                <cstring>mUnitMaxResourceSpacer_3</cstring>
                                             </property>
                                             <property name="orientation">
                                                 <enum>Horizontal</enum>
@@ -2377,7 +2329,24 @@ Note that names of weapons won't be visible in game, they are only hints for uni
                                                 </size>
                                             </property>
                                         </spacer>
-                                        <widget class="KIntNumInput">
+                                        <spacer row="2" column="1">
+                                            <property name="name">
+                                                <cstring>mUnitMaxResourceSpacer_3_2</cstring>
+                                            </property>
+                                            <property name="orientation">
+                                                <enum>Horizontal</enum>
+                                            </property>
+                                            <property name="sizeType">
+                                                <enum>Fixed</enum>
+                                            </property>
+                                            <property name="sizeHint">
+                                                <size>
+                                                    <width>20</width>
+                                                    <height>20</height>
+                                                </size>
+                                            </property>
+                                        </spacer>
+                                        <widget class="KIntNumInput" row="0" column="2">
                                             <property name="name">
                                                 <cstring>mUnitMaxResource</cstring>
                                             </property>
@@ -2394,7 +2363,41 @@ Note that names of weapons won't be visible in game, they are only hints for uni
                                                 <string>The number of resources your unit can mine before it has to return to a refinery.</string>
                                             </property>
                                         </widget>
-                                    </hbox>
+                                        <spacer row="0" column="1">
+                                            <property name="name">
+                                                <cstring>mUnitMaxResourceSpacer</cstring>
+                                            </property>
+                                            <property name="orientation">
+                                                <enum>Horizontal</enum>
+                                            </property>
+                                            <property name="sizeType">
+                                                <enum>Fixed</enum>
+                                            </property>
+                                            <property name="sizeHint">
+                                                <size>
+                                                    <width>20</width>
+                                                    <height>20</height>
+                                                </size>
+                                            </property>
+                                        </spacer>
+                                        <widget class="KIntNumInput" row="2" column="2">
+                                            <property name="name">
+                                                <cstring>mUnitUnloadingSpeed</cstring>
+                                            </property>
+                                            <property name="value">
+                                                <number>10</number>
+                                            </property>
+                                            <property name="minValue">
+                                                <number>0</number>
+                                            </property>
+                                            <property name="toolTip" stdset="0">
+                                                <string>How fast this unit unloads resources</string>
+                                            </property>
+                                            <property name="whatsThis" stdset="0">
+                                                <string>How fast this unit unloads resources at the refinery (per advance call)</string>
+                                            </property>
+                                        </widget>
+                                    </grid>
                                 </widget>
                             </vbox>
                         </widget>
@@ -2411,7 +2414,90 @@ Note that names of weapons won't be visible in game, they are only hints for uni
                             <property name="sizeHint">
                                 <size>
                                     <width>20</width>
-                                    <height>20</height>
+                                    <height>16</height>
+                                </size>
+                            </property>
+                        </spacer>
+                        <widget class="QCheckBox">
+                            <property name="name">
+                                <cstring>mUnitCanRefine</cstring>
+                            </property>
+                            <property name="text">
+                                <string>Unit can refine minerals or oil</string>
+                            </property>
+                            <property name="toolTip" stdset="0">
+                                <string>Whether this unit can refine (retrieve) anything</string>
+                            </property>
+                            <property name="whatsThis" stdset="0">
+                                <string>Whether this unit can refine (retrieve) anything (usually minerals or oil)</string>
+                            </property>
+                        </widget>
+                        <widget class="QGroupBox">
+                            <property name="name">
+                                <cstring>mUnitRefineGroup</cstring>
+                            </property>
+                            <property name="enabled">
+                                <bool>false</bool>
+                            </property>
+                            <property name="title">
+                                <string>Harvesting options</string>
+                            </property>
+                            <vbox>
+                                <property name="name">
+                                    <cstring>unnamed</cstring>
+                                </property>
+                                <property name="margin">
+                                    <number>11</number>
+                                </property>
+                                <property name="spacing">
+                                    <number>6</number>
+                                </property>
+                                <widget class="QCheckBox">
+                                    <property name="name">
+                                        <cstring>mUnitRefineMinerals</cstring>
+                                    </property>
+                                    <property name="text">
+                                        <string>Unit can refine minerals</string>
+                                    </property>
+                                    <property name="toolTip" stdset="0">
+                                        <string>Whether this unit can refine minerals</string>
+                                    </property>
+                                    <property name="whatsThis" stdset="0">
+                                        <string>&lt;p&gt;Whether this unit refine minerals. You usually need only one unit per species theme that can refine minerals (the minerals refinery).&lt;/p&gt;
+&lt;p&gt;Please note that one unit can only refine minerals &lt;b&gt;or&lt;/b&gt; oil, not both!&lt;/p&gt;</string>
+                                    </property>
+                                </widget>
+                                <widget class="QCheckBox">
+                                    <property name="name">
+                                        <cstring>mUnitRefineOil</cstring>
+                                    </property>
+                                    <property name="text">
+                                        <string>Unit can refine oil</string>
+                                    </property>
+                                    <property name="toolTip" stdset="0">
+                                        <string>Whether this unit can refine oil</string>
+                                    </property>
+                                    <property name="whatsThis" stdset="0">
+                                        <string>&lt;p&gt;Whether this unit refine oil. You usually need only one unit per species theme that can refine oil (the oil refinery).&lt;/p&gt;
+&lt;p&gt;Please note that one unit can only refine minerals &lt;b&gt;or&lt;/b&gt; oil, not both!&lt;/p&gt;</string>
+                                    </property>
+                                </widget>
+                            </vbox>
+                        </widget>
+                        <spacer>
+                            <property name="name">
+                                <cstring>Spacer29_2_3</cstring>
+                            </property>
+                            <property name="orientation">
+                                <enum>Vertical</enum>
+                            </property>
+                            <property name="sizeType">
+                                <enum>Fixed</enum>
+                            </property>
+                            <property name="sizeHint">
+                                <size>
+                                    <width>20</width>
+                                    <height>16</height>
                                 </size>
                             </property>
                         </spacer>
@@ -2443,7 +2529,7 @@ Note that you must also use weapon damage &lt; 0 to repair (because at the momen
                             <property name="sizeHint">
                                 <size>
                                     <width>20</width>
-                                    <height>20</height>
+                                    <height>16</height>
                                 </size>
                             </property>
                         </spacer>
@@ -3042,6 +3128,421 @@ Note that you must also use weapon damage &lt; 0 to repair (because at the momen
                         </widget>
                     </vbox>
                 </widget>
+                <widget class="QWidget">
+                    <property name="name">
+                        <cstring>tab</cstring>
+                    </property>
+                    <attribute name="title">
+                        <string>Other</string>
+                    </attribute>
+                    <vbox>
+                        <property name="name">
+                            <cstring>unnamed</cstring>
+                        </property>
+                        <widget class="QGroupBox">
+                            <property name="name">
+                                <cstring>mUnitParticleGroup</cstring>
+                            </property>
+                            <property name="title">
+                                <string>Particle systems</string>
+                            </property>
+                            <grid>
+                                <property name="name">
+                                    <cstring>unnamed</cstring>
+                                </property>
+                                <spacer row="0" column="1">
+                                    <property name="name">
+                                        <cstring>Spacer54</cstring>
+                                    </property>
+                                    <property name="orientation">
+                                        <enum>Horizontal</enum>
+                                    </property>
+                                    <property name="sizeType">
+                                        <enum>Fixed</enum>
+                                    </property>
+                                    <property name="sizeHint">
+                                        <size>
+                                            <width>20</width>
+                                            <height>20</height>
+                                        </size>
+                                    </property>
+                                </spacer>
+                                <widget class="QLabel" row="1" column="0">
+                                    <property name="name">
+                                        <cstring>mDestroyedParticlesLabel</cstring>
+                                    </property>
+                                    <property name="text">
+                                        <string>Destroyed particles:</string>
+                                    </property>
+                                </widget>
+                                <widget class="QLineEdit" row="0" column="2">
+                                    <property name="name">
+                                        <cstring>mUnitConstructedParticles</cstring>
+                                    </property>
+                                    <property name="toolTip" stdset="0">
+                                        <string>Ids of particle systems created when unit will be constructed</string>
+                                    </property>
+                                    <property name="whatsThis" stdset="0">
+                                        <string>Here you can specify ids of particle systems that will be created when unit will be constructed. You must specify list of numbers separated by commas, e.g. 1001,3001</string>
+                                    </property>
+                                </widget>
+                                <spacer row="1" column="1">
+                                    <property name="name">
+                                        <cstring>Spacer54_3</cstring>
+                                    </property>
+                                    <property name="orientation">
+                                        <enum>Horizontal</enum>
+                                    </property>
+                                    <property name="sizeType">
+                                        <enum>Fixed</enum>
+                                    </property>
+                                    <property name="sizeHint">
+                                        <size>
+                                            <width>20</width>
+                                            <height>20</height>
+                                        </size>
+                                    </property>
+                                </spacer>
+                                <widget class="QLineEdit" row="1" column="2">
+                                    <property name="name">
+                                        <cstring>mUnitDestroyedParticles</cstring>
+                                    </property>
+                                    <property name="toolTip" stdset="0">
+                                        <string>Ids of particle systems created when unit will be destroyed</string>
+                                    </property>
+                                    <property name="whatsThis" stdset="0">
+                                        <string>Here you can specify ids of particle systems that will be created when unit will be destroyed.
+You must specify list of numbers separated by commas, e.g. 1001,3001</string>
+                                    </property>
+                                </widget>
+                                <widget class="QLabel" row="0" column="0">
+                                    <property name="name">
+                                        <cstring>mConstructedParticlesLabel</cstring>
+                                    </property>
+                                    <property name="text">
+                                        <string>Constructed particles:</string>
+                                    </property>
+                                </widget>
+                            </grid>
+                        </widget>
+                        <spacer>
+                            <property name="name">
+                                <cstring>spacer60</cstring>
+                            </property>
+                            <property name="orientation">
+                                <enum>Vertical</enum>
+                            </property>
+                            <property name="sizeType">
+                                <enum>Fixed</enum>
+                            </property>
+                            <property name="sizeHint">
+                                <size>
+                                    <width>20</width>
+                                    <height>16</height>
+                                </size>
+                            </property>
+                        </spacer>
+                        <widget class="QGroupBox">
+                            <property name="name">
+                                <cstring>mUnitExplodingGroup</cstring>
+                            </property>
+                            <property name="title">
+                                <string>Exploding</string>
+                            </property>
+                            <grid>
+                                <property name="name">
+                                    <cstring>unnamed</cstring>
+                                </property>
+                                <spacer row="0" column="1">
+                                    <property name="name">
+                                        <cstring>spacer59_2</cstring>
+                                    </property>
+                                    <property name="orientation">
+                                        <enum>Horizontal</enum>
+                                    </property>
+                                    <property name="sizeType">
+                                        <enum>Fixed</enum>
+                                    </property>
+                                    <property name="sizeHint">
+                                        <size>
+                                            <width>20</width>
+                                            <height>20</height>
+                                        </size>
+                                    </property>
+                                </spacer>
+                                <widget class="QLabel" row="0" column="0">
+                                    <property name="name">
+                                        <cstring>mUnitExplodingDamageRangeLabel</cstring>
+                                    </property>
+                                    <property name="text">
+                                        <string>Damage range:</string>
+                                    </property>
+                                </widget>
+                                <widget class="QLabel" row="1" column="0">
+                                    <property name="name">
+                                        <cstring>mUnitExplodingDamageLabel</cstring>
+                                    </property>
+                                    <property name="text">
+                                        <string>Damage:</string>
+                                    </property>
+                                </widget>
+                                <spacer row="1" column="1">
+                                    <property name="name">
+                                        <cstring>spacer60_2</cstring>
+                                    </property>
+                                    <property name="orientation">
+                                        <enum>Horizontal</enum>
+                                    </property>
+                                    <property name="sizeType">
+                                        <enum>Fixed</enum>
+                                    </property>
+                                    <property name="sizeHint">
+                                        <size>
+                                            <width>20</width>
+                                            <height>20</height>
+                                        </size>
+                                    </property>
+                                </spacer>
+                                <widget class="KDoubleNumInput" row="0" column="2">
+                                    <property name="name">
+                                        <cstring>mUnitExplodingDamageRange</cstring>
+                                    </property>
+                                    <property name="maxValue">
+                                        <number>500</number>
+                                    </property>
+                                    <property name="toolTip" stdset="0">
+                                        <string>In how big range other units will be damaged when this unit explodes</string>
+                                    </property>
+                                    <property name="whatsThis" stdset="0">
+                                        <string>In how big radius nearby units will be damaged when this unit explodes.</string>
+                                    </property>
+                                </widget>
+                                <widget class="KIntSpinBox" row="1" column="2">
+                                    <property name="name">
+                                        <cstring>mUnitExplodingDamage</cstring>
+                                    </property>
+                                    <property name="maxValue">
+                                        <number>1000000</number>
+                                    </property>
+                                    <property name="toolTip" stdset="0">
+                                        <string>How much other units will be damaged when this unit explodes</string>
+                                    </property>
+                                    <property name="whatsThis" stdset="0">
+                                        <string>How much damage is applied to nearby units when this unit explodes (is destroyed)</string>
+                                    </property>
+                                </widget>
+                            </grid>
+                        </widget>
+                        <spacer>
+                            <property name="name">
+                                <cstring>spacer58</cstring>
+                            </property>
+                            <property name="orientation">
+                                <enum>Vertical</enum>
+                            </property>
+                            <property name="sizeType">
+                                <enum>Fixed</enum>
+                            </property>
+                            <property name="sizeHint">
+                                <size>
+                                    <width>20</width>
+                                    <height>16</height>
+                                </size>
+                            </property>
+                        </spacer>
+                        <widget class="QLayoutWidget">
+                            <property name="name">
+                                <cstring>layout22_2</cstring>
+                            </property>
+                            <hbox>
+                                <property name="name">
+                                    <cstring>unnamed</cstring>
+                                </property>
+                                <widget class="QLabel">
+                                    <property name="name">
+                                        <cstring>mUnitHitPointLabel_2</cstring>
+                                    </property>
+                                    <property name="text">
+                                        <string>Hitpoint:</string>
+                                    </property>
+                                </widget>
+                                <spacer>
+                                    <property name="name">
+                                        <cstring>Spacer53_2_2_2</cstring>
+                                    </property>
+                                    <property name="orientation">
+                                        <enum>Horizontal</enum>
+                                    </property>
+                                    <property name="sizeType">
+                                        <enum>Fixed</enum>
+                                    </property>
+                                    <property name="sizeHint">
+                                        <size>
+                                            <width>20</width>
+                                            <height>20</height>
+                                        </size>
+                                    </property>
+                                </spacer>
+                                <widget class="QLayoutWidget">
+                                    <property name="name">
+                                        <cstring>Layout20_2_2</cstring>
+                                    </property>
+                                    <hbox>
+                                        <property name="name">
+                                            <cstring>unnamed</cstring>
+                                        </property>
+                                        <property name="margin">
+                                            <number>0</number>
+                                        </property>
+                                        <property name="spacing">
+                                            <number>6</number>
+                                        </property>
+                                        <widget class="QLabel">
+                                            <property name="name">
+                                                <cstring>mUnitHitPointXLabel</cstring>
+                                            </property>
+                                            <property name="sizePolicy">
+                                                <sizepolicy>
+                                                    <hsizetype>1</hsizetype>
+                                                    <vsizetype>5</vsizetype>
+                                                    <horstretch>0</horstretch>
+                                                    <verstretch>0</verstretch>
+                                                </sizepolicy>
+                                            </property>
+                                            <property name="text">
+                                                <string>x:</string>
+                                            </property>
+                                        </widget>
+                                        <widget class="KDoubleNumInput">
+                                            <property name="name">
+                                                <cstring>mUnitHitPointX</cstring>
+                                            </property>
+                                            <property name="sizePolicy">
+                                                <sizepolicy>
+                                                    <hsizetype>1</hsizetype>
+                                                    <vsizetype>0</vsizetype>
+                                                    <horstretch>0</horstretch>
+                                                    <verstretch>0</verstretch>
+                                                </sizepolicy>
+                                            </property>
+                                            <property name="minValue">
+                                                <number>-10</number>
+                                            </property>
+                                            <property name="maxValue">
+                                                <number>10</number>
+                                            </property>
+                                            <property name="toolTip" stdset="0">
+                                                <string>X-coordinate of the hitpoint of this unit</string>
+                                            </property>
+                                            <property name="whatsThis" stdset="0">
+                                                <string>X-coordinate of the hitpoint of this unit. Hitpoint is used for shooting, all units will shoot at this point when attacking this unit. It should be point on the unit's surface.</string>
+                                            </property>
+                                        </widget>
+                                        <widget class="QLabel">
+                                            <property name="name">
+                                                <cstring>mUnitHitPointYLabel</cstring>
+                                            </property>
+                                            <property name="sizePolicy">
+                                                <sizepolicy>
+                                                    <hsizetype>1</hsizetype>
+                                                    <vsizetype>5</vsizetype>
+                                                    <horstretch>0</horstretch>
+                                                    <verstretch>0</verstretch>
+                                                </sizepolicy>
+                                            </property>
+                                            <property name="text">
+                                                <string>y:</string>
+                                            </property>
+                                        </widget>
+                                        <widget class="KDoubleNumInput">
+                                            <property name="name">
+                                                <cstring>mUnitHitPointY</cstring>
+                                            </property>
+                                            <property name="sizePolicy">
+                                                <sizepolicy>
+                                                    <hsizetype>1</hsizetype>
+                                                    <vsizetype>0</vsizetype>
+                                                    <horstretch>0</horstretch>
+                                                    <verstretch>0</verstretch>
+                                                </sizepolicy>
+                                            </property>
+                                            <property name="minValue">
+                                                <number>-10</number>
+                                            </property>
+                                            <property name="maxValue">
+                                                <number>10</number>
+                                            </property>
+                                            <property name="toolTip" stdset="0">
+                                                <string>Y-coordinate of the hitpoint of this unit</string>
+                                            </property>
+                                            <property name="whatsThis" stdset="0">
+                                                <string>Y--coordinate of the hitpoint of this unit. Hitpoint is used for shooting, all units will shoot at this point when attacking this unit. It should be point on the unit's surface.</string>
+                                            </property>
+                                        </widget>
+                                        <widget class="QLabel">
+                                            <property name="name">
+                                                <cstring>mUnitHitPointZLabel</cstring>
+                                            </property>
+                                            <property name="sizePolicy">
+                                                <sizepolicy>
+                                                    <hsizetype>1</hsizetype>
+                                                    <vsizetype>5</vsizetype>
+                                                    <horstretch>0</horstretch>
+                                                    <verstretch>0</verstretch>
+                                                </sizepolicy>
+                                            </property>
+                                            <property name="text">
+                                                <string>z:</string>
+                                            </property>
+                                        </widget>
+                                        <widget class="KDoubleNumInput">
+                                            <property name="name">
+                                                <cstring>mUnitHitPointZ</cstring>
+                                            </property>
+                                            <property name="sizePolicy">
+                                                <sizepolicy>
+                                                    <hsizetype>1</hsizetype>
+                                                    <vsizetype>0</vsizetype>
+                                                    <horstretch>0</horstretch>
+                                                    <verstretch>0</verstretch>
+                                                </sizepolicy>
+                                            </property>
+                                            <property name="minValue">
+                                                <number>-10</number>
+                                            </property>
+                                            <property name="maxValue">
+                                                <number>10</number>
+                                            </property>
+                                            <property name="toolTip" stdset="0">
+                                                <string>Z-coordinate of the hitpoint of this unit</string>
+                                            </property>
+                                            <property name="whatsThis" stdset="0">
+                                                <string>Z--coordinate of the hitpoint of this unit. Hitpoint is used for shooting, all units will shoot at this point when attacking this unit. It should be point on the unit's surface.</string>
+                                            </property>
+                                        </widget>
+                                    </hbox>
+                                </widget>
+                            </hbox>
+                        </widget>
+                        <spacer>
+                            <property name="name">
+                                <cstring>spacer59</cstring>
+                            </property>
+                            <property name="orientation">
+                                <enum>Vertical</enum>
+                            </property>
+                            <property name="sizeType">
+                                <enum>Expanding</enum>
+                            </property>
+                            <property name="sizeHint">
+                                <size>
+                                    <width>20</width>
+                                    <height>140</height>
+                                </size>
+                            </property>
+                        </spacer>
+                    </vbox>
+                </widget>
             </widget>
         </widget>
     </vbox>
@@ -3143,6 +3644,12 @@ Note that you must also use weapon damage &lt; 0 to repair (because at the momen
         <receiver>BoUnitEditor</receiver>
         <slot>slotSaveUnit()</slot>
     </connection>
+    <connection>
+        <sender>mUnitCanRefine</sender>
+        <signal>toggled(bool)</signal>
+        <receiver>mUnitRefineGroup</receiver>
+        <slot>setEnabled(bool)</slot>
+    </connection>
 </connections>
 <includes>
     <include location="global" impldecl="in implementation">qptrlist.h</include>
@@ -3198,9 +3705,6 @@ Note that you must also use weapon damage &lt; 0 to repair (because at the momen
     <includehint>knuminput.h</includehint>
     <includehint>knuminput.h</includehint>
     <includehint>klineedit.h</includehint>
-    <includehint>kdoublenuminput.h</includehint>
-    <includehint>kdoublenuminput.h</includehint>
-    <includehint>kdoublenuminput.h</includehint>
     <includehint>knuminput.h</includehint>
     <includehint>knuminput.h</includehint>
     <includehint>knuminput.h</includehint>
@@ -3213,20 +3717,32 @@ Note that you must also use weapon damage &lt; 0 to repair (because at the momen
     <includehint>knuminput.h</includehint>
     <includehint>knuminput.h</includehint>
     <includehint>knuminput.h</includehint>
-    <includehint>kdoublenuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
     <includehint>knuminput.h</includehint>
     <includehint>knuminput.h</includehint>
     <includehint>klistbox.h</includehint>
     <includehint>knuminput.h</includehint>
     <includehint>knuminput.h</includehint>
-    <includehint>kdoublenuminput.h</includehint>
-    <includehint>kdoublenuminput.h</includehint>
     <includehint>knuminput.h</includehint>
-    <includehint>kdoublenuminput.h</includehint>
-    <includehint>kdoublenuminput.h</includehint>
-    <includehint>kdoublenuminput.h</includehint>
-    <includehint>kdoublenuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
     <includehint>klineedit.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
     <includehint>knuminput.h</includehint>
     <includehint>knuminput.h</includehint>
     <includehint>knuminput.h</includehint>
