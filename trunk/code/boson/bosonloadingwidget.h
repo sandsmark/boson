@@ -26,6 +26,7 @@ class BosonLoadingWidget : public QWidget
         ReceiveMap,
         InitClasses,
         LoadTiles,
+        LoadUnits,
         InitGame,
         StartingGame,
         LoadingDone
