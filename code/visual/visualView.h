@@ -31,6 +31,7 @@ enum selectionMode_t {
 /*	SELECT_FACILITY, 
 	SELECT_MOBILE, */
 	SELECT_RECT,		/* is drawing a selection rect */
+	SELECT_PUT,		/* something is being put on the field */
 //	SELECT_ACTION,		// something is selected
 /*	SELECT_, 
 	SELECT_, 
@@ -68,6 +69,9 @@ public:
 
 signals:
 	void repaint(bool);
+	
+protected:
+//	void		putSomething(void);
 
 public slots:
 	void reCenterView(int x, int y);
@@ -76,6 +80,11 @@ public slots:
 
 public:
 	void relativeMoveView(int dx, int dy);
+	/*
+	 * put object 
+	 */
+	virtual void object_put(int, int)=0;
+
 
 private:
 	void checkMove();

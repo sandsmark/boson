@@ -47,6 +47,8 @@ struct mobileMsg_t	{ int who, key, x, y; mobType type; };
 struct moveMsg_t	{ int key, dx, dy, direction ;};
 /* MSG_*_DESTROYED */
 struct destroyedMsg_t	{ int key, x, y; }; // x and y are for checking 
+/* MSG_*_CONSTRUCT */
+struct constructMsg_t	{ int x, y; union {mobType mob; facilityType fix;} type;}; // where and what
 
 typedef union {
 /* Dialog layer */
@@ -60,6 +62,7 @@ typedef union {
 	mobileMsg_t	mobile;
 	moveMsg_t	move;
 	destroyedMsg_t  destroyed;
+	constructMsg_t  construct;
 /* MSG_TIME */
 	unsigned int	jiffies;
 /* used by  {send,recv}Msg */
@@ -153,7 +156,8 @@ enum bosonMsgTag {
 
 /* Facility management */
 
-	MSG_FACILITY_CREATED,
+	MSG_FACILITY_CONSTRUCT,		// request construction
+	MSG_FACILITY_CREATED,		// confirm construction for you, advise for others
 	MSG_FACILITY_DESTROYED,
 	MSG_FACILITY_CHANGED,
 	MSG_FACILITY_,
@@ -161,6 +165,7 @@ enum bosonMsgTag {
 /* General units management */
 	MSG_MOBILE_MOVE_R,	// Request
 	MSG_MOBILE_MOVE_C,	// confirm
+	MSG_MOBILE_CONSTRUCT,
 	MSG_MOBILE_CREATED,
 	MSG_MOBILE_DESTROYED,
 

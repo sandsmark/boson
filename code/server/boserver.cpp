@@ -265,8 +265,11 @@ if (oldState != state)
 
 void BosonServer::handleGameMessage(int playerId, bosonMsgTag tag, int blen, bosonMsgData *data)
 {
-uint i;
-serverMobUnit *mob;
+	uint i;
+	serverMobUnit *mob;
+	/* static to cut off heap allocation overhead */
+	static facilityMsg_t	_facility;
+	static mobileMsg_t	_mobile;
 
 if ( ! tag>MSG_END_DIALOG_LAYER) {
 	logf(LOG_ERROR, "handleGameMessage : unexpected tag received(1), ignored\n");
@@ -276,6 +279,25 @@ if ( ! tag>MSG_END_DIALOG_LAYER) {
 switch(tag) {
 	default :
 		UNKNOWN_TAG(-3535);
+
+	case MSG_MOBILE_CONSTRUCT :
+		ASSERT_DATA_BLENGHT(sizeof(data->construct));
+		_mobile.who	= playerId;
+		_mobile.x	= data->construct.x;
+		_mobile.y	= data->construct.y;
+		_mobile.type	= data->construct.type.mob;
+		createMobUnit(_mobile);
+		break;
+		
+	case MSG_FACILITY_CONSTRUCT :
+		ASSERT_DATA_BLENGHT(sizeof(data->construct));
+		_facility.who	= playerId;
+		_facility.x	= data->construct.x;
+		_facility.y	= data->construct.y;
+		_facility.type	= data->construct.type.fix;
+		createFixUnit(_facility);
+		break;
+
 	case MSG_MOBILE_MOVE_R :
 		ASSERT_DATA_BLENGHT(sizeof(data->move));
 		mob = mobile.find(data->move.key);
@@ -285,6 +307,7 @@ switch(tag) {
 			}
 		else logf(LOG_ERROR, "handleGameMessage : unexpected mobile key in moveMsg_t : %d", data->move.key);
 		break;
+
 	case MSG_TIME_CONFIRM :
 		ASSERT_DATA_BLENGHT(sizeof(data->jiffies));
 		boAssert(gpp.player[playerId].lastConfirmedJiffies == (gpp.jiffies-1));

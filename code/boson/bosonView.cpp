@@ -50,9 +50,9 @@ bosonView::bosonView(visualField *p, QWidget *parent, const char *name=0L)
 	QString path(kapp->kde_datadir() + "/boson/themes/panels/standard/overview_none.xpm" );
 
 	connect(p, SIGNAL(reCenterView(int,int)), SLOT(reCenterView(int,int)));
+
 	setFrameStyle(QFrame::Sunken | QFrame::Panel);
 	setLineWidth(5);
-
 
 	/* stack */
 	stack = new QWidgetStack(this, "qwidgetstack");
@@ -99,7 +99,6 @@ bosonView::bosonView(visualField *p, QWidget *parent, const char *name=0L)
 void bosonView::setSelected(QPixmap *p)
 {
 	view_one->setPixmap( p?*p:*view_none);
-	setOrders( OT_NONE, -1);
 }
 
 
@@ -112,8 +111,12 @@ void bosonView::handleOrder(int order)
 			return;
 			break;
 		case OT_FACILITY:
+			construct.type.fix = (facilityType) order;
+			setSelectionMode( SELECT_PUT);
 			break;
 		case OT_MOBILE:
+			construct.type.mob = (mobType) order;
+			setSelectionMode( SELECT_PUT);
 			break;
 	}
 }
@@ -150,3 +153,24 @@ void bosonView::setOrders( int what, int who)
 			logf(LOG_ERROR, "bosonView::setOrders : unexpected 'what' argument");
 	}
 }
+
+
+void bosonView::object_put(int x, int y)
+{
+	switch(orderType) {
+		case OT_FACILITY:
+			construct.x = X() + (x / BO_TILE_SIZE) ;
+			construct.y = Y() + (y / BO_TILE_SIZE) ;
+			sendMsg(buffer, MSG_FACILITY_CONSTRUCT, sizeof(construct), (bosonMsgData*)&construct);
+			break;
+		case OT_MOBILE:
+			construct.x = X() * BO_TILE_SIZE + x;
+			construct.y = Y() * BO_TILE_SIZE + y;
+			sendMsg(buffer, MSG_MOBILE_CONSTRUCT, sizeof(construct), (bosonMsgData*)&construct);
+			break;
+		default:
+			logf(LOG_ERROR, "object_put : unexpected \"orderType\" value");
+	}
+}
+
+

@@ -44,6 +44,9 @@ public:
 	virtual void setSelected(QPixmap *);
 	virtual void setOrders(int what , int who=-1);
 
+protected:
+	virtual void object_put(int, int);
+
 private slots:
 	void bc0(void) { handleOrder(0); } // button clicked
 	void bc1(void) { handleOrder(1); } // button clicked
@@ -71,6 +74,7 @@ private:
 /* GUI */
 	QPushButton	*orderButton[11];
 	orderType_t	orderType;
+	constructMsg_t	construct;
 };
 
 #endif // BOSONVIEW_H

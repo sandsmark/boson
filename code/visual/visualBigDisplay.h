@@ -60,12 +60,11 @@ public:
 
 
 	/* from display classes */
-	virtual void actionClicked(int, int);		// selecting, moving...
+	virtual void	actionClicked(int, int);		// selecting, moving...
 
 signals:
-  void  relativeReCenterView(int x, int y);
-//  void	reCenterView(int x, int y);
-  void  reSizeView(int l, int h);
+	void	relativeReCenterView (int x, int y);
+	void	reSizeView (int l, int h);
 
 protected:
 
