@@ -1186,6 +1186,7 @@ void Unit::loadWeapons()
  // since we use an array and not a list we need to count the weapons first.
  int count = 0;
  bool hasbomb = false;
+ bool hasmine = false;
  QPtrListIterator<PluginProperties> it(*(unitProperties()->plugins()));
  for (; it.current(); ++it) {
 	if (it.current()->pluginType() == PluginProperties::Weapon) {
@@ -1194,6 +1195,11 @@ void Unit::loadWeapons()
 		if (!hasbomb && ((BosonWeaponProperties*)it.current())->shotType() == BosonShot::Bomb) {
 			d->mPlugins.append(new BombingPlugin(this));
 			hasbomb = true;
+		}
+		// Check for mine weapons and create mining plugin if necessary
+		if (!hasmine && ((BosonWeaponProperties*)it.current())->shotType() == BosonShot::Mine) {
+			d->mPlugins.append(new MiningPlugin(this));
+			hasmine = true;
 		}
 	}
  }
