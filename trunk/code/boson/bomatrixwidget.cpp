@@ -34,6 +34,7 @@ public:
 	{
 		mLayout = 0;
 	}
+	BoMatrix mMatrix;
 	QGridLayout* mLayout;
 	QIntDict<QLabel> mLabel;
 };
@@ -53,14 +54,20 @@ BoMatrixWidget::~BoMatrixWidget()
  delete d;
 }
 
-void BoMatrixWidget::setMatrix(BoMatrix* m)
+void BoMatrixWidget::setMatrix(const BoMatrix* m)
 {
  if (!m) {
 	boError() << k_funcinfo << "NULL matrix" << endl;
 	return;
  }
+ setMatrix(*m);
+}
+
+void BoMatrixWidget::setMatrix(const BoMatrix& m)
+{
+ d->mMatrix = m;
  for (int i = 0; i < 4; i++) {
-	const float* data = m->data();
+	const float* data = d->mMatrix.data();
 	d->mLabel[i + 0]->setText(QString::number(data[i + 0]));
 	d->mLabel[i + 4]->setText(QString::number(data[i + 4]));
 	d->mLabel[i + 8]->setText(QString::number(data[i + 8]));
@@ -87,9 +94,61 @@ void BoMatrixWidget::setIdentity()
 
 void BoMatrixWidget::clear()
 {
+ d->mMatrix.loadIdentity();
+ setMatrix(d->mMatrix);
  for (int i = 0; i < 16; i++) {
-	d->mLabel[i]->setText("");
+	unmark(i);
  }
 }
 
+const BoMatrix& BoMatrixWidget::matrix() const
+{
+ return d->mMatrix;
+}
+
+void BoMatrixWidget::mark(unsigned int i)
+{
+ if (i >= 16) {
+	return;
+ }
+ QPalette p(palette());
+ p.setColor(QColorGroup::Text, Qt::red);
+// p.setColor(QColorGroup::ForeGround, Qt::red);
+ d->mLabel[i]->setPalette(p);
+ d->mLabel[i]->setPaletteForegroundColor(Qt::red);
+}
+
+void BoMatrixWidget::unmark(unsigned int i)
+{
+ if (i >= 16) {
+	return;
+ }
+ d->mLabel[i]->unsetPalette();
+}
+
+bool BoMatrixWidget::compareMatrices(const BoMatrix& m, float diff)
+{
+ bool ok = true;
+ for (unsigned int i = 0; i < 16; i++) {
+	if (fabs(d->mMatrix[i] - m[i]) <= diff) {
+		unmark(i);
+	} else {
+		mark(i);
+		ok = false;
+	}
+ }
+ return ok;
+}
+
+bool BoMatrixWidget::compareMatrices(BoMatrixWidget* widget, float diff)
+{
+ if (!widget) {
+	return false;
+ }
+ // remember that the right part of && is not evaluated, if the left part is
+ // false! but we want to mark them in all cases!
+ bool ok = compareMatrices(widget->matrix(), diff);
+ bool ok2 = widget->compareMatrices(matrix(), diff);
+ return (ok && ok2);
+}
 
