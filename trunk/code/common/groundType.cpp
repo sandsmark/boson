@@ -20,12 +20,10 @@
 
 #include "groundType.h"
 
-const groundProperties_t noGroundProp =
-	{"no_pixmap", };
-
 /*
-	GROUND_DEEP_WATER = 0,
-	GROUND_WATER = 1,
+	GROUND_UNKNOWN = 0
+	GROUND_DEEP_WATER,
+	GROUND_WATER,
 	GROUND_GRASS,
 	GROUND_DESERT,
 
@@ -34,13 +32,14 @@ const groundProperties_t noGroundProp =
 */
 
 const groundProperties_t groundProp[] = {
+	{"hidden", },
 	{"dwater", },
 	{"water", },
 	{"grass", },
 	{"desert", },
 	{"water_oil", },
 	{"grass_oil", },
-	};
+	};		// XXX this one could be moved to  map/createGround.cpp
 
 const groundTransProperties_t groundTransProp[] = {
 	{"grass->water",  GROUND_GRASS,		GROUND_WATER},		// TRANS_GW,
