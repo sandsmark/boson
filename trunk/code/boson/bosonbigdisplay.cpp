@@ -543,7 +543,7 @@ void BosonBigDisplay::editorActionClicked(const QPoint& pos)
 }
 
 
-void BosonBigDisplay::slotWillConstructUnit(int unitType, Unit* factory, Player* owner)
+void BosonBigDisplay::slotWillConstructUnit(int unitType, UnitBase* factory, KPlayer* owner)
 {
  if (!owner) {
 	kdDebug() << k_funcinfo << ": NULL owner" << endl;
@@ -552,13 +552,18 @@ void BosonBigDisplay::slotWillConstructUnit(int unitType, Unit* factory, Player*
 	return;
  }
 // kdDebug() << unitType << endl;
- d->mConstruction.unitType = unitType;
- d->mConstruction.factory = factory;
- d->mConstruction.owner = owner;
- d->mConstruction.groundType = -1;
- if (factory) {
-	kdDebug() << "there is a factory " << endl;
+ if (factory) { // usual production
+//	kdDebug() << "there is a factory " << endl;
+	return;
+	// this MUST be sent over network - therefore use CommandInput!
 	((Facility*)factory)->addProduction(unitType);
+ } else { // we are in editor mode!
+	//FIXME
+	// should be sent over network
+	d->mConstruction.unitType = unitType;
+	d->mConstruction.factory = (Unit*)factory;
+	d->mConstruction.owner = (Player*)owner;
+	d->mConstruction.groundType = -1;
  }
 }
 

@@ -47,7 +47,8 @@ COMMON_SRC = \
 	topbase.cpp \
 	bosoncommandwidget.cpp \
 	bosonmusic.cpp \
-	selectbox.cpp
+	selectbox.cpp \
+	commandinput.cpp
 
 boson_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 boson_LDADD = -lkdegames -lqtmcop -lsoundserver_idl -lartskde $(LIB_KDEUI)

@@ -23,9 +23,12 @@
 #include <qvaluelist.h>
 
 class Unit;
+class UnitBase;
 class Player;
+class CommandInput;
 
 class QPixmap;
+class KPlayer;
 
 /**
  * @short The frame where you can order units
@@ -88,18 +91,9 @@ public slots:
 
 signals:
 	/**
-	 * Emitted when an order button is clicked. This unit is marked for
-	 * construction, i.e. the construction should be started if possible.
-	 * @param unitType The unit to construct
-	 * @param factory Where to construct
-	 * @param owner The owner of the factory (i.e. the local player)
-	 **/
-	void signalUnitSelected(int unitType, Unit* factory, Player* owner);
-
-	/**
 	 * Emitted when a unit should be produced.
 	 **/
-	void signalProduceUnit(int unitType, Unit* factory, Player* owner);
+	void signalProduceUnit(int unitType, UnitBase* factory, KPlayer* owner);
 
 	/**
 	 * @param groundType The tile number. See @ref BosonTiles::tile to get

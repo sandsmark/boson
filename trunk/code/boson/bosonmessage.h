@@ -40,7 +40,8 @@ public:
 	// Player Moves:
 		MoveMove = 100, // Unit(s) is/are moved
 		MoveAttack = 101, // a unit is being attacked
-		MoveBuild = 102, // build a unit
+		MoveBuild = 102, // build a unit - better name: MovePlace. This is used when the unit was produces and is now placed on the ground
+		MoveProduce = 103, // start to produce a unit. Sent when a cmd widget is clicked
 
 
 		// the last message ID:

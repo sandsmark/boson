@@ -427,3 +427,4 @@ void BosonCommandFrame::slotProductionAdvanced(Unit* factory, double percentage)
  }
 
 }
+

@@ -40,6 +40,7 @@
 #include "kgamedialogcomputerconfig.h"
 #include "kgameunitdebug.h"
 #include "bosonmusic.h"
+#include "commandinput.h"
 
 #include "defines.h"
 
@@ -274,6 +275,13 @@ void BosonWidget::addLocalPlayer()
 		this, SLOT(slotFog(int, int)));
  p->addGameIO(bigDisplayIO);
  d->mBoson->addPlayer(p);
+
+ CommandInput* cmdInput = new CommandInput;
+ connect(d->mCommandFrame, SIGNAL(signalProduceUnit(int, UnitBase*, KPlayer*)),
+		cmdInput, SLOT(slotProduceUnit(int, UnitBase*, KPlayer*)));
+ connect(d->mCommandFrame, SIGNAL(signalCellSelected(int)),
+		cmdInput, SLOT(slotPlaceCell(int)));
+ p->addGameIO(cmdInput);
 
  changeLocalPlayer(p);
 }
@@ -567,14 +575,18 @@ void BosonWidget::addEditorCommandFrame()
 { // remember to call this *after* init() - otherwise connect()s won't work
  d->mCommandFrame = new BosonCommandFrame(this, true);
 
- connect(d->mCommandFrame, SIGNAL(signalProduceUnit(int, Unit*, Player*)), 
-		d->mBigDisplay, SLOT(slotWillConstructUnit(int, Unit*, Player*))); // in addEditorCommandFrame()
  connect(d->mBigDisplay, SIGNAL(signalSingleUnitSelected(Unit*)), 
 		d->mCommandFrame, SLOT(slotShowSingleUnit(Unit*)));
  connect(d->mCommandFrame, SIGNAL(signalCellSelected(int)), 
 		d->mBigDisplay, SLOT(slotWillPlaceCell(int)));
  connect(this, SIGNAL(signalEditorLoadTiles(const QString&)), 
 		d->mCommandFrame, SLOT(slotEditorLoadTiles(const QString&)));
+
+// note: this signal should be connected to something like a CommandInput. But
+// we need the values in BosonBigDisplay. So as a temporary solution we have
+// this connect here.
+ connect(d->mCommandFrame, SIGNAL(signalProduceUnit(int, UnitBase*, KPlayer*)), 
+		d->mBigDisplay, SLOT(slotWillConstructUnit(int, UnitBase*, KPlayer*)));
 
  // AB???
  connect(d->mBigDisplay, SIGNAL(signalSelectUnit(Unit*)), 
@@ -588,8 +600,8 @@ void BosonWidget::addGameCommandFrame()
 { // remember to call this *after* init() - otherwise connect()s won't work
  d->mCommandFrame = new BosonCommandFrame(this, false);
 
- connect(d->mCommandFrame, SIGNAL(signalProduceUnit(int, Unit*, Player*)),
-		d->mBigDisplay, SLOT(slotWillConstructUnit(int, Unit*, Player*))); // in addEditorCommandFrame()
+// connect(d->mCommandFrame, SIGNAL(signalProduceUnit(int, Unit*, Player*)),
+//		d->mBigDisplay, SLOT(slotWillConstructUnit(int, Unit*, Player*))); // in addEditorCommandFrame()
  connect(d->mBigDisplay, SIGNAL(signalSingleUnitSelected(Unit*)),
 		d->mCommandFrame, SLOT(slotShowSingleUnit(Unit*)));
  connect(d->mBigDisplay, SIGNAL(signalSingleUnitSelected(Unit*)),
