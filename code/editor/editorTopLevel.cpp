@@ -87,12 +87,13 @@ editorTopLevel::editorTopLevel( BoEditorApp *app,  const char *name, WFlags f)
 	/* application wide actions */
 	*actionCollection() +=  app->actions();
 
+	/* widgets */
+	makeCommandGui();
+	setCentralWidget(&mw);
+
 	/* actual building */
 	createGUI("boeditorui.rc");
 
-	/* widgets */
-	makeCommandGui();
-	setView(&mw, false);
 }
 #undef ADD_ACTION
 
@@ -481,5 +482,27 @@ void editorTopLevel::updateViews(void)
 	mw.big->update();
 	mw.mini->repaint(FALSE);
 }
+
+
+
+bool editorTopLevel::queryExit()
+{
+	logf(LOG_INFO, "queryExit called");
+	BoEditorApp *app = (BoEditorApp *) kapp;
+	return app->slot_close();
+}
+
+
+bool editorTopLevel::queryClose()
+{
+	logf(LOG_INFO, "queryClose called");
+/*	
+	BoEditorApp *app = (BoEditorApp *) kapp;
+	return app->slot_close(this);
+*/
+	return true;
+}
+
+
 
 
