@@ -21,6 +21,7 @@
 #include "bosonsaveload.moc"
 
 #include "boson.h"
+#include "boversion.h"
 #include "bosonprofiling.h"
 #include "bosonplayfield.h"
 #include "bosonpropertyxml.h"

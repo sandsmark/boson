@@ -19,15 +19,6 @@
 #ifndef BOSONSAVELOAD_H
 #define BOSONSAVELOAD_H
 
-#define BOSON_MAKE_SAVEGAME_FORMAT_VERSION( a,b,c ) ( ((a) << 16) | ((b) << 8) | (c) )
-
-// version from boson 0.8
-#define BOSON_SAVEGAME_FORMAT_VERSION_0_8 \
-	( BOSON_MAKE_SAVEGAME_FORMAT_VERSION (0x00, 0x01, 0x12) )
-
-// version from boson 0.8.128 (development version that got never released)
-#define BOSON_SAVEGAME_FORMAT_VERSION_0_8_128 \
-	( BOSON_MAKE_SAVEGAME_FORMAT_VERSION (0x00, 0x02, 0x00) )
 
 #define BOSON_SAVEGAME_END_COOKIE 1718
 
