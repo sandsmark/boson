@@ -109,7 +109,7 @@ public:
 				false); // false as we connect it to the soundcard ourselfes
 		if (result.isNull()) {
 			kdError() << k_funcinfo << "NULL playobject - file="
-					<< file() << "mimetype="
+					<< file() << " mimetype="
 					<< mimeType->name() << endl;
 			return;
 		}
