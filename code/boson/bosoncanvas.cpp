@@ -96,7 +96,7 @@ BosonCanvas::~BosonCanvas()
 }
 
 
-void BosonCanvas::slotLoadTiles(const QString& name)
+void BosonCanvas::loadTiles(const QString& name)
 {
  QString themePath = locate("data", QString("boson/themes/grounds/%1").arg(name));
  QPixmap p(themePath);
@@ -229,7 +229,7 @@ void BosonCanvas::initMap(const QString& tileFile)
 	return;
  }
  resize(d->mMap->width() * BO_TILE_SIZE, d->mMap->height() * BO_TILE_SIZE);
- slotLoadTiles(tileFile); // FIXME: rename: loadTiles
+ loadTiles(tileFile);
  for (int i = 0; i < d->mMap->width(); i++) {
 	for (int j = 0; j < d->mMap->height(); j++) {
 		Cell* c = d->mMap->cell(i, j);
@@ -250,10 +250,7 @@ void BosonCanvas::slotAddCell(int x, int y, int groundType, unsigned char versio
 	kdWarning() << "Invalid tile " << tile << endl;
 	return;
  }
-// kdDebug() << "g=" << c->groundType() << ",v=" << c->version() <<
-//		"==>tile=" << tile << endl;
  setTile(x, y, tile);
-
 }
 
 void BosonCanvas::addAnimation(QCanvasItem* item)
