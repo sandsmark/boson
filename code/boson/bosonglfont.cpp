@@ -39,7 +39,7 @@ BosonGLFont::BosonGLFont(const QString& family)
 
  // FIXME: i18n() support!
  mFontDisplayList = glGenLists(256);
- glXUseXFont(mFont.handle(), 0, 256, mFontDisplayList);
+ glXUseXFont((Font)mFont.handle(), 0, 256, mFontDisplayList);
 }
 
 BosonGLFont::~BosonGLFont()
