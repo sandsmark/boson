@@ -48,6 +48,7 @@ class BoVector3;
 class BoFrame;
 class BoLight;
 class BoLightCameraWidget;
+class BoMaterialWidget;
 class KCmdLineArgs;
 class QCheckBox;
 
@@ -107,6 +108,7 @@ public:
 
 	BoCamera* camera() const { return mCamera; }
 	BoLight* light() const { return mLight; }
+	BosonModel* model() const { return mModel; }
 
 signals:
 	void signalFovYChanged(float);
@@ -343,6 +345,7 @@ protected slots:
 	void slotShowVertexPoints(bool);
 	void slotBackgroundColor();
 	void slotShowLightWidget();
+	void slotShowMaterialsWidget();
 
 private:
 	PreviewConfig* mConfig;
@@ -352,6 +355,7 @@ private:
 	BoDebugDCOPIface* mIface;
 
 	BoLightCameraWidget* mLightWidget;
+	BoMaterialWidget* mMaterialWidget;
 };
 
 #endif

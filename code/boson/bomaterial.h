@@ -68,7 +68,10 @@ public:
 	void setUseWireAbs(bool v) { mUseWireAbs = v; }
 	void setWireSize(float s) { mWireSize = s; }
 
+	const BoVector4& ambient() const { return mAmbient; }
 	const BoVector4& diffuse() const { return mDiffuse; }
+	const BoVector4& specular() const { return mSpecular; }
+	float shininess() const { return mShininess; }
 
 	/**
 	 * Set the (file-)name of the primary texture map. In boson we use this
