@@ -124,6 +124,7 @@
 #include <qdialog.h>
 #include <qcombobox.h>
 #include <qpushbutton.h>
+#include <qvaluestack.h>
 
 #if HAVE_SYS_TIME_H
 #include <sys/time.h>
@@ -4807,7 +4808,7 @@ void BosonBigDisplayBase::slotSyncNetwork()
 void BosonBigDisplayBase::slotEditConditions()
 {
  KDialogBase* dialog = new KDialogBase(KDialogBase::Plain, i18n("Conditions"),
-		KDialogBase::Ok | KDialogBase::Cancel, KDialogBase::Cancel, 0,
+		KDialogBase::Ok | KDialogBase::Cancel, KDialogBase::Ok, 0,
 		"editconditions", true, true);
  QVBoxLayout* layout = new QVBoxLayout(dialog->plainPage());
  BoConditionWidget* widget = new BoConditionWidget(dialog->plainPage());
@@ -4817,12 +4818,37 @@ void BosonBigDisplayBase::slotEditConditions()
 	QDomDocument doc;
 	QDomElement root = doc.createElement("Conditions");
 	doc.appendChild(root);
+
 	if (!boGame->saveCanvasConditions(root)) {
 		boError() << k_funcinfo << "unable to save canvas conditions from game" << endl;
 		KMessageBox::information(this, i18n("Canvas conditions could not be imported to the widget"));
 	} else {
+		QValueStack<QDomElement> stack;
+		stack.push(root);
+		while (!stack.isEmpty()) {
+			QDomElement e = stack.pop();
+			for (QDomNode n = e.firstChild(); !n.isNull(); n = n.nextSibling()) {
+				QDomElement e2 = n.toElement();
+				if (e2.isNull()) {
+					continue;
+				}
+				stack.push(e2);
+			}
+			if (e.hasAttribute("PlayerId")) {
+				bool ok = false;
+				int index = e.attribute("PlayerId").toInt(&ok);
+				if (!ok) {
+					boError() << k_funcinfo << "PlayerId attribute not a valid number" << endl;
+					continue;
+				}
+				KPlayer* p = boGame->playerList()->at(index);
+				e.setAttribute("PlayerId", p->id());
+			}
+		}
+
 		widget->loadConditions(root);
 	}
+;
  }
 
  int ret = dialog->exec();
