@@ -909,10 +909,10 @@ void BoTrackWidget::configureKey(QListViewItem* item, Bo3DSTrackKey* key, int ty
  }
 }
 
-class BoMaterialWidget : public QWidget
+class BoMaterialDataWidget : public QWidget
 {
 public:
-	BoMaterialWidget(QWidget* parent) : QWidget(parent)
+	BoMaterialDataWidget(QWidget* parent) : QWidget(parent)
 	{
 		QVBoxLayout* l = new QVBoxLayout(this);
 		QGrid* grid = new QGrid(2, this);
@@ -989,7 +989,7 @@ public:
 		mWireSize = new QLabel(grid);
 	}
 
-	~BoMaterialWidget()
+	~BoMaterialDataWidget()
 	{
 	}
 
@@ -1474,7 +1474,7 @@ public:
 	QWidget* mNodePage;
 
 	KListBox* mMaterialBox;
-	BoMaterialWidget* mMaterialData;
+	BoMaterialDataWidget* mMaterialData;
 	QPtrDict<Lib3dsMaterial> mListItem2Material;
 	KListView* mTextureView;
 
@@ -1556,7 +1556,7 @@ void KGameModelDebug::initMaterialPage()
  connect(d->mMaterialBox, SIGNAL(executed(QListBoxItem*)), this, SLOT(slotDisplayMaterial(QListBoxItem*)));
  QFontMetrics metrics(font());
 
- d->mMaterialData = new BoMaterialWidget(splitter);
+ d->mMaterialData = new BoMaterialDataWidget(splitter);
 
  d->mTextureView = new KListView(splitter);
  d->mTextureView->setAllColumnsShowFocus(true);
