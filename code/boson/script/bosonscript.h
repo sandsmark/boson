@@ -27,6 +27,7 @@ class Player;
 class Boson;
 class BosonCanvas;
 class Boson;
+class BoEvent;
 template<class T> class BoVector2;
 template<class T> class BoVector3;
 template<class T> class BoVector4;
@@ -126,8 +127,16 @@ class BosonScript
      **/
     virtual void execLine(const QString& line) = 0;
 
+    virtual void callEventHandler(const BoEvent* e, const QString& function, const QString& args) = 0;
+
     Player* player() const  { return mPlayer; }
     int playerId() const;
+
+
+    /**
+     * @return Path where script files are (ending with boson/themes/scripts/)
+     **/
+    static QString scriptsPath();
 
 
     static void setGame(Boson* g)  { mGame = g; }
@@ -137,6 +146,32 @@ class BosonScript
 
     static BosonCanvas* canvas()  { return mCanvas; }
 
+
+    // Events
+    /**
+     * Add an event handler.
+     * @param eventname name of the event
+     * @param functionname name of the function which will be called when
+     *  specified event happens
+     * @param args arguments that will be given to the function
+     *
+     * args can consist of 0 or more letters, every letter will be replaced
+     *  with corresponding argument. Those letters can be:
+     *  @li p - player id
+     *  @li u - unit id
+     *  @li l - location
+     *  @li n - name of the event
+     *  @li a - custom data 1
+     *  @li b - custom data 2
+     *
+     * @return id of the event handler. This can be used to remove the event
+     *  handler later.
+     **/
+    int addEventHandler(const QString& eventname, const QString& functionname, const QString& args);
+    /**
+     * Removes event handler with given id.
+     **/
+    void removeEventHandler(int id);
 
     // Players
     /**

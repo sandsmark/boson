@@ -44,6 +44,9 @@
 #include "pythonscript.h"
 
 #include <kgame/kgamemessage.h>
+#include <kglobal.h>
+#include <kstandarddirs.h>
+
 
 #include <qdatastream.h>
 
@@ -118,8 +121,33 @@ int BosonScript::playerId() const
   return player()->id();
 }
 
-/*****  Player methods  *****/
+QString BosonScript::scriptsPath()
+{
+  QString path = KGlobal::dirs()->findResourceDir("data", "boson/themes/scripts/ai.py");
+  if(path.isNull())
+  {
+    boWarning() << k_funcinfo << "No ai.py script file found!" << endl;
+    return QString::null;
+  }
+  path += "boson/themes/scripts/";
+  return path;
+  // TODO: maybe cache the path?
+}
 
+
+/*****  Event methods  *****/
+int BosonScript::addEventHandler(const QString& eventname, const QString& functionname, const QString& args)
+{
+  return interface()->addEventHandler(eventname, functionname, args);
+}
+
+void BosonScript::removeEventHandler(int id)
+{
+  interface()->removeEventHandler(id);
+}
+
+
+/*****  Player methods  *****/
 bool BosonScript::areEnemies(int playerId1, int playerId2)
 {
   if(!game())

@@ -40,8 +40,6 @@ public:
 	virtual int rtti() const { return KGameIO::ComputerIO; }
 	virtual void initIO(KPlayer*);
 
-	void initScript();
-
 protected:
 	virtual void reaction();
 	Player* boPlayer() const { return (Player*)player(); }
