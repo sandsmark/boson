@@ -51,12 +51,16 @@
 #include <kconfig.h>
 #include <kstandarddirs.h>
 #include <kfiledialog.h>
+#include <kglobal.h>
 
 #include <qcursor.h>
 #include <qwidgetstack.h>
 #include <qtimer.h>
 #include <qhbox.h>
 #include <qfile.h>
+
+#include <config.h>
+
 
 class TopWidget::TopWidgetPrivate
 {
@@ -106,6 +110,8 @@ TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
  mMainDock = createDockWidget("mainDock", 0, this, i18n("Map"));
  mMainDock->setDockSite(KDockWidget::DockCorner);
  mMainDock->setEnableDocking(KDockWidget::DockNone);
+
+ KGlobal::dirs()->addPrefix(BOSON_PREFIX);
 
  d->mStartup = new BosonStartupWidget(mMainDock);
  connect(d->mStartup, SIGNAL(signalSetLocalPlayer(Player*)),
