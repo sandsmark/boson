@@ -17,6 +17,7 @@ Weapons=1
 ConstructionSteps=12
 
 [Weapon_0]
+Name=Cannon
 Range=5
 Reload=5
 CanShootAtAirUnits=false
