@@ -302,7 +302,7 @@ void BosonScenario::applyScenario(Boson* boson)
  boDebug(250) << k_funcinfo << endl;
  d->mMaxPlayers = boson->playerCount(); // we cannot save more players than we actually have!
  d->mMinPlayers = boson->minPlayers();
- if (d->mMinPlayers > d->mMaxPlayers) {
+ if ((int)d->mMinPlayers > d->mMaxPlayers) {
 	boWarning(250) << k_funcinfo << "minPlayers > playerCount" << endl;
 	d->mMinPlayers = d->mMaxPlayers;
  }
