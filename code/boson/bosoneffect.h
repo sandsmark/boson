@@ -31,6 +31,7 @@ class BosonEffectProperties;
 class BosonEffectPropertiesFade;
 class BosonEffectPropertiesFog;
 class BosonEffectPropertiesLight;
+class BosonEffectPropertiesBulletTrail;
 class BoLight;
 
 
@@ -48,7 +49,7 @@ class BosonEffect
     /**
      * Describes type of the effect
      */
-    enum Type { Fog, Fade, Collection, Light,
+    enum Type { Fog, Fade, Collection, Light, BulletTrail,
         // All particle effect subtypes _must_ come after Particle!
         Particle, ParticleGeneric, ParticleTrail };
 
@@ -349,6 +350,58 @@ class BosonEffectLight : public BosonEffect
     const BosonEffectPropertiesLight* mProperties;
     float mTimeLeft;
     BoLight* mLight;
+};
+
+
+
+/**
+ * @short Effect for rendering bullet trails.
+ *
+ * Bullet trails are rendered as short lines, which have random length
+ *
+ * @author Rivo Laks <rivolaks@hot.ee>
+ **/
+class BosonEffectBulletTrail : public BosonEffect
+{
+  public:
+    /**
+     * Construct new line effect using specified properties
+     **/
+    BosonEffectBulletTrail(const BosonEffectPropertiesBulletTrail* prop, const BoVector3& pos);
+    virtual ~BosonEffectBulletTrail();
+
+
+    virtual Type type() const  { return BulletTrail; }
+
+
+    virtual void update(float elapsed);
+
+
+    const BoVector3& startPoint() const  { return mStart; }
+    const BoVector3& endPoint() const  { return mEnd; }
+    const BoVector4& color() const;
+    float width() const;
+
+
+    /**
+     * Make line obsolete (meaning that it will be deleted in the next advance
+     *  call).
+     * Note that this only has effect for effects with infinite lifetime (-1),
+     *  for others, it does nothing.
+     **/
+    virtual void makeObsolete();
+
+    virtual bool saveAsXML(QDomElement& root) const;
+    virtual bool loadFromXML(const QDomElement& root);
+
+
+  protected:
+    const BosonEffectPropertiesBulletTrail* mProperties;
+    BoVector3 mLastPos;
+    short int mAdvanced;
+    bool mShouldMakeObsolete;
+    BoVector3 mStart;
+    BoVector3 mEnd;
 };
 
 #endif  //BOSONEFFECT_H

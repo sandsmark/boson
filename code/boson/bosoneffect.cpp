@@ -269,9 +269,9 @@ void BosonEffectLight::makeObsolete()
   {
     return;
   }
-  mActive = false;
   delete mLight;
   mLight = 0;
+  BosonEffect::makeObsolete();
 }
 
 bool BosonEffectLight::saveAsXML(QDomElement& root) const
@@ -280,6 +280,102 @@ bool BosonEffectLight::saveAsXML(QDomElement& root) const
 }
 
 bool BosonEffectLight::loadFromXML(const QDomElement& root)
+{
+  return true;
+}
+
+
+
+/*****  BosonEffectBulletTrail  *****/
+
+BosonEffectBulletTrail::BosonEffectBulletTrail(const BosonEffectPropertiesBulletTrail* prop, const BoVector3& pos) : BosonEffect(prop)
+{
+  mProperties = prop;
+  mLastPos = pos;
+  setPosition(pos);
+  mAdvanced = 0;
+  mShouldMakeObsolete = false;
+}
+
+BosonEffectBulletTrail::~BosonEffectBulletTrail()
+{
+}
+
+void BosonEffectBulletTrail::update(float elapsed)
+{
+  BosonEffect::update(elapsed);
+  if(!hasStarted())
+  {
+    return;
+  }
+
+  BoVector3 movevector = mPosition - mLastPos;
+  float movelength = movevector.length();
+  movevector.scale(1 / movelength); // Normalize movevector
+  float length = getFloat(mProperties->minLength(), mProperties->maxLength());  // Line's length
+  if(length > movelength)
+  {
+    length = movelength;
+  }
+
+  if(length == movelength)
+  {
+    mStart = mLastPos;
+    mEnd = mPosition;
+  }
+  else
+  {
+    // Distance of start from mLastPos
+    float pos = getFloat(0, movelength - length);
+    mStart = mLastPos + movevector * pos;
+//    mEnd = mPosition - movevector * (pos - (movelength - length));
+    mEnd = mLastPos + movevector * (pos + length);
+  }
+
+  mLastPos = mPosition;
+
+  if(mAdvanced < 2)
+  {
+    mAdvanced++;
+    if(mShouldMakeObsolete && mAdvanced >= 2)
+    {
+      // Make effect obsolete now
+      makeObsolete();
+    }
+  }
+}
+
+void BosonEffectBulletTrail::makeObsolete()
+{
+  // For bullet trails, line will be made obsolete even before update() is
+  //  called, which would result in effect being immediately deleted. So we
+  //  don't make it obsolete unless update() has been called at least 2 times
+  //  already.
+  if(mAdvanced < 2)
+  {
+    mShouldMakeObsolete = true;
+    return;
+  }
+
+  BosonEffect::makeObsolete();
+}
+
+const BoVector4& BosonEffectBulletTrail::color() const
+{
+  return mProperties->color();
+}
+
+float BosonEffectBulletTrail::width() const
+{
+  return mProperties->width();
+}
+
+bool BosonEffectBulletTrail::saveAsXML(QDomElement& root) const
+{
+  return true;
+}
+
+bool BosonEffectBulletTrail::loadFromXML(const QDomElement& root)
 {
   return true;
 }
