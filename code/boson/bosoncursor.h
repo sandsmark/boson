@@ -27,7 +27,7 @@ class QPoint;
 class QWidget;
 class QCursor;
 class BosonCanvas;
-class BosonTextureArray;
+class BoTextureArray;
 
 /**
  * Note: the docs are partially obsolete. I updated some parts, but not all.
@@ -38,7 +38,7 @@ class BosonTextureArray;
  *
  * Then there are animated and colored cursors. X does not support colored
  * cursors, but only black and white. So we render a simple textured rectangle
- * using OpenGL instead instead of real cursor and just set the cursor to 
+ * using OpenGL instead instead of real cursor and just set the cursor to
  * @ref Qt::BlankCursor. This way enables us to use full colored, transparent
  * and even animated cursors of any size. This is what BosonCursor is for.
  *
@@ -92,7 +92,7 @@ public:
 	 * hide the cursor
 	 **/
 	virtual void setCursor(int mode);
-	
+
 	/**
 	 * Change the @ref QCursor cursor of the specified widget. E.g. in case
 	 * an OpenGL cursor is used this will hide the usual cursor for this
@@ -112,12 +112,12 @@ public:
 	 * game for the mode id, like "Attack" and "Move" and so on.
 	 *
 	 * The two QString parameters specify the location of the files to be
-	 * loaded. 
+	 * loaded.
 	 *
 	 * You must implement this in your cursor class.
-	 * @param mode The ID of the inserted mode 
+	 * @param mode The ID of the inserted mode
 	 * @param baseDir specifies the directory where the file are to be
-	 * searched. 
+	 * searched.
 	 * @param cursor specifies the cursor itself - this is the directoy for
 	 * opengl-cursors. See class documentation for more information.
 	 **/
@@ -148,7 +148,7 @@ class BosonKDECursor : public BosonCursor
 public:
 	BosonKDECursor();
 	virtual ~BosonKDECursor();
-	
+
 	virtual void setCursor(int mode);
 	virtual void setWidgetCursor(QWidget* w);
 	virtual QCursor cursor() const;
@@ -169,24 +169,15 @@ public:
 	}
 
 	/**
-	 * Compute a display lists for every image in @p images. The list will
-	 * display a rectangular cursor (you'll want to render it with alpha
-	 * blending enabled).
-	 *
-	 * Note that the hotspot must already be applied when you call this.
-	 * @param images Use these images as textures. Note that a @ref
-	 * BosonTextureArray object will get generated for this.
+	 * Loads textures from all files in @p files.
 	 **/
-	bool computeDisplayLists(QValueList<QImage> images);
+	bool loadTextures(QStringList files);
 
-	GLuint* mDisplayLists;
-	GLuint mDisplayListCount;
+	unsigned int  mTextureCount;
 	bool mAnimated;
 	unsigned int mAnimationSpeed;
 	int mRotateDegree;
-
-private:
-	BosonTextureArray* mTextureArray;
+	BoTextureArray* mTextureArray;
 	unsigned int mHotspotX;
 	unsigned int mHotspotY;
 };
@@ -197,14 +188,14 @@ class BosonOpenGLCursor : public BosonCursor
 public:
 	BosonOpenGLCursor();
 	virtual ~BosonOpenGLCursor();
-	
+
 	virtual void setCursor(int mode);
 	virtual void setWidgetCursor(QWidget* w);
 
 	virtual bool insertMode(int mode, QString baseDir, QString cursor);
 
 	bool insertMode(int mode, BosonOpenGLCursorData* data);
-	void setCurrentTextureArray(BosonTextureArray* array);
+	void setCurrentTextureArray(BoTextureArray* array);
 	void setCurrentData(BosonOpenGLCursorData* data);
 
 	virtual void renderCursor(GLfloat x, GLfloat y);
@@ -220,7 +211,6 @@ private:
 	BosonOpenGLCursorPrivate* d;
 
 	BosonOpenGLCursorData* mCurrentData;
-	GLuint mCurrentDisplayList;
 };
 
 

@@ -65,6 +65,7 @@
 #include "bofullscreen.h"
 #include "speciesdata.h"
 #include "bowater.h"
+#include "botexture.h"
 
 #include <kgame/kgameio.h>
 
@@ -92,7 +93,6 @@
 #include <stdlib.h>
 
 
-#include "bosontexturearray.h"
 #include "bosonfont/bosonglfont.h"
 
 #include <GL/glu.h>
@@ -367,6 +367,11 @@ public:
 	unsigned int mRenderedItems;  // units rendered when paintGL was last called
 	unsigned int mRenderedCells;  // same, but for cells
 	unsigned int mRenderedParticles;
+
+	int mTextureBindsCells;
+	int mTextureBindsItems;
+	int mTextureBindsWater;
+	int mTextureBindsParticles;
 
 	BosonGLMiniMap* mGLMiniMap;
 
@@ -649,6 +654,7 @@ void BosonBigDisplayBase::initializeGL()
 	BoInfo::boInfo()->update(this);
  }
 
+ boTextureManager->initOpenGL();
  boWaterManager->initOpenGL();
 
  connect(kapp->eventLoop(), SIGNAL(signalUpdateGL()), this, SLOT(slotUpdateGL()));
@@ -764,6 +770,7 @@ void BosonBigDisplayBase::paintGL()
  d->mRenderedItems = 0;
  d->mRenderedCells = 0;
  d->mRenderedParticles = 0;
+ boTextureManager->clearStatistics();
 
  glColor3ub(255, 255, 255);
 
@@ -780,8 +787,8 @@ void BosonBigDisplayBase::paintGL()
  // with depth testing disabled. so it makes a lot of sense to start with cell
  // rendering.
  boProfiling->renderCells(true);
+ d->mTextureBindsCells = boTextureManager->textureBinds();
  glEnable(GL_DEPTH_TEST);
- glEnable(GL_TEXTURE_2D);
  if (boConfig->useLight()) {
 	glEnable(GL_LIGHTING);
 	glEnable(GL_COLOR_MATERIAL);
@@ -790,6 +797,7 @@ void BosonBigDisplayBase::paintGL()
 	glDisable(GL_COLOR_MATERIAL);
  }
  renderCells();
+ d->mTextureBindsCells = boTextureManager->textureBinds() - d->mTextureBindsCells;
  boProfiling->renderCells(false);
 
  if (checkError()) {
@@ -797,12 +805,10 @@ void BosonBigDisplayBase::paintGL()
  }
 
  boProfiling->renderUnits(true);
+ d->mTextureBindsItems = boTextureManager->textureBinds();
 
  if (boConfig->wireFrames()) {
-	glDisable(GL_TEXTURE_2D);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
- } else {
-	glEnable(GL_TEXTURE_2D);
  }
  glEnable(GL_DEPTH_TEST);
  if (boConfig->useLight()) {
@@ -817,6 +823,7 @@ void BosonBigDisplayBase::paintGL()
  if (boConfig->wireFrames()) {
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
  }
+ d->mTextureBindsItems = boTextureManager->textureBinds() - d->mTextureBindsItems;
  boProfiling->renderUnits(false, d->mRenderedItems);
 
  if (checkError()) {
@@ -832,12 +839,16 @@ void BosonBigDisplayBase::paintGL()
 
  // Render water
  boProfiling->renderWater(true);
+ d->mTextureBindsWater = boTextureManager->textureBinds();
  boWaterManager->render();
+ d->mTextureBindsWater = boTextureManager->textureBinds() - d->mTextureBindsWater;
  boProfiling->renderWater(false);
 
  // Render particle systems
  boProfiling->renderParticles(true);
+ d->mTextureBindsParticles = boTextureManager->textureBinds();
  renderParticles(d->mVisibleEffects);
+ d->mTextureBindsParticles = boTextureManager->textureBinds() - d->mTextureBindsParticles;
  boProfiling->renderParticles(false);
 
  glDisable(GL_DEPTH_TEST);
@@ -846,7 +857,7 @@ void BosonBigDisplayBase::paintGL()
 
 
  // Render lineviz's
- glDisable(GL_TEXTURE_2D);
+ boTextureManager->disableTexturing();
  QValueList<BoLineVisualization>::iterator it;
  for (it = d->mLineVisualizationList.begin(); it != d->mLineVisualizationList.end(); ++it) {
 	glColor4fv((*it).color.data());
@@ -860,7 +871,6 @@ void BosonBigDisplayBase::paintGL()
  }
 
  renderBulletTrailEffects(d->mVisibleEffects);
- glEnable(GL_TEXTURE_2D);
 
  glDisable(GL_FOG);
  boProfiling->renderText(true); // AB: actually this is text and cursor and selectionrect and minimap
@@ -878,7 +888,6 @@ void BosonBigDisplayBase::paintGL()
  // alpha blending is used for cursor/text/...
  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
- glEnable(GL_TEXTURE_2D);
 // glEnable(GL_BLEND);
  renderMiniMap();
 
@@ -886,7 +895,7 @@ void BosonBigDisplayBase::paintGL()
 
  renderCursor();
 
- glDisable(GL_TEXTURE_2D);
+ boTextureManager->disableTexturing();
  renderSelectionRect();
  renderText();
 
@@ -979,7 +988,7 @@ void BosonBigDisplayBase::renderItems()
 		c1.canvasToWorld();
 		BoVector3Float c2(item->x() + item->width(), item->y() + item->height(), item->z() + item->depth());
 		c2.canvasToWorld();
-		glDisable(GL_TEXTURE_2D);
+		boTextureManager->disableTexturing();
 		glLineWidth(1.0);
 		glBegin(GL_LINES);
 			glVertex3f(c1.x(), c1.y(), c1.z());  glVertex3f(c2.x(), c1.y(), c1.z());
@@ -997,10 +1006,9 @@ void BosonBigDisplayBase::renderItems()
 			glVertex3f(c2.x(), c2.y(), c1.z());  glVertex3f(c2.x(), c2.y(), c2.z());
 			glVertex3f(c1.x(), c2.y(), c1.z());  glVertex3f(c1.x(), c2.y(), c2.z());
 		glEnd();
-		glEnable(GL_TEXTURE_2D);
 	}
  }
- glPushAttrib(GL_ENABLE_BIT);
+ glPushAttrib(GL_ENABLE_BIT | GL_TEXTURE_BIT);
  glDisable(GL_LIGHTING);
  glDisable(GL_NORMALIZE);
  it = selectedItems->begin();
@@ -1073,6 +1081,7 @@ void BosonBigDisplayBase::renderItems()
  delete selectedItems;
  selectedItems = 0;
  glPopAttrib();
+ boTextureManager->invalidateCache();
  d->mRenderedItems += d->mRenderItemList->count();
  d->mRenderItemList->clear();
 }
@@ -1085,7 +1094,7 @@ void BosonBigDisplayBase::renderPathLines(QValueList<QPoint>& path, bool isFlyin
  // problem with heightmaps, when a line goes through mountains.
  // speed is hardly relevant at this point (rendering a few small
  // lines is fast).
- glDisable(GL_TEXTURE_2D);
+ boTextureManager->disableTexturing();
  glBegin(GL_LINE_STRIP);
  QValueList<QPoint>::Iterator it;
  bool done = false;
@@ -1294,6 +1303,7 @@ void BosonBigDisplayBase::renderText()
  if (checkError()) {
 	boError() << k_funcinfo << "OpenGL error" << endl;
  }
+ boTextureManager->invalidateCache();
 }
 
 int BosonBigDisplayBase::renderTextMapCoordinates(int x, int y, int w, int border)
@@ -1533,6 +1543,10 @@ int BosonBigDisplayBase::renderTextRenderCounts(int x, int y)
  text += boWaterManager->currentRenderStatisticsData();
  y -= d->mDefaultFont->renderText(x, y, text, width() - x);
 
+ text = i18n("Texture binds: %1 (C: %2; I: %3; W: %4; P: %5)\n")
+		.arg(boTextureManager->textureBinds()).arg(d->mTextureBindsCells).arg(d->mTextureBindsItems).arg(d->mTextureBindsWater).arg(d->mTextureBindsParticles);
+ y -= d->mDefaultFont->renderText(x, y, text, width() - x);
+
  return y;
 }
 
@@ -1646,7 +1660,6 @@ void BosonBigDisplayBase::renderParticles(BoVisibleEffects& visible)
  glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_CURRENT_BIT);
  glEnable(GL_DEPTH_TEST);
  glDepthMask(GL_FALSE);
- glEnable(GL_TEXTURE_2D);
  glEnable(GL_BLEND);
  glDisable(GL_LIGHTING);
  glDisable(GL_NORMALIZE);
@@ -1657,7 +1670,7 @@ void BosonBigDisplayBase::renderParticles(BoVisibleEffects& visible)
 
  // Some cache variables
  int blendfunc = -1;
- GLuint texture = 0;
+ BoTexture* texture = 0;
  bool betweenbeginend = false;  // If glBegin has been called, but glEnd() hasn't. Very hackish.
  BoVector3Fixed a, b, c, e;  // Vertex positions. e is used instead of d which clashes with private class
 
@@ -1681,7 +1694,7 @@ void BosonBigDisplayBase::renderParticles(BoVisibleEffects& visible)
 			glEnd();
 			betweenbeginend = false;
 		}
-		glBindTexture(GL_TEXTURE_2D, p->tex);
+		p->tex->bind();
 		texture = p->tex;
 	}
 	if (!betweenbeginend) {
@@ -1730,6 +1743,7 @@ void BosonBigDisplayBase::renderParticles(BoVisibleEffects& visible)
  glColor4ub(255, 255, 255, 255);
  glDepthMask(GL_TRUE);
  glPopAttrib();
+ boTextureManager->invalidateCache();
 
  if (checkError()) {
 	boError() << k_funcinfo << "OpenGL error" << endl;
@@ -1794,7 +1808,7 @@ void BosonBigDisplayBase::renderFadeEffects(BoVisibleEffects& visible)
 	float xscale = (GLfloat)d->mViewport[2];
 	float yscale = (GLfloat)d->mViewport[3];
 	glEnable(GL_BLEND);
-	glDisable(GL_TEXTURE_2D);
+	boTextureManager->disableTexturing();
 	QPtrListIterator<BosonEffectFade> it(visible.mFadeEffects);
 	while (it.current()) {
 		f = it.current();
@@ -1805,7 +1819,6 @@ void BosonBigDisplayBase::renderFadeEffects(BoVisibleEffects& visible)
 		++it;
 	}
 	glDisable(GL_BLEND);
-	glEnable(GL_TEXTURE_2D);
 	glColor3ub(255, 255, 255);
 //	glPopMatrix();
 //	glMatrixMode(GL_MODELVIEW);

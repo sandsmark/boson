@@ -19,9 +19,9 @@
 
 #include "bosonmodeltextures.h"
 
-#include "bosontexturearray.h"
 #include "bosonconfig.h"
 #include "bodebug.h"
+#include "botexture.h"
 
 #include <qimage.h>
 #include <qgl.h>
@@ -39,8 +39,8 @@ public:
 	BosonModelTexturesPrivate()
 	{
 	}
-	QMap<QString, GLuint> mName2Texture;
-	QMap<GLuint, QValueList<BosonModel*> > mModels;
+	QMap<QString, BoTexture*> mName2Texture;
+	QMap<BoTexture*, QValueList<BosonModel*> > mModels;
 
 	QString mTexturePath;
 };
@@ -87,16 +87,15 @@ BosonModelTextures::~BosonModelTextures()
  boDebug(110) << k_funcinfo << "done" << endl;
 }
 
-GLuint BosonModelTextures::insert(BosonModel* model, const QString& textureName)
+BoTexture* BosonModelTextures::insert(BosonModel* model, const QString& textureName)
 {
  if (!model) {
 	boError(110) << k_funcinfo << "NULL model" << endl;
 	return 0;
  }
- GLuint tex = 0;
+ BoTexture* tex = 0;
  if (!d->mName2Texture.contains(textureName)) {
-	glGenTextures(1, &tex);
-	loadTexture(textureName, tex);
+	tex = new BoTexture(texturePath() + textureName, BoTexture::Model);
 	d->mName2Texture.insert(textureName, tex);
  } else {
 	tex = texture(textureName);
@@ -105,31 +104,14 @@ GLuint BosonModelTextures::insert(BosonModel* model, const QString& textureName)
  return tex;
 }
 
-void BosonModelTextures::loadTexture(const QString& textureName, GLuint tex)
-{
- QImage image(texturePath() + textureName);
- if (image.isNull()) {
-	boError(110) << k_funcinfo << "Could not load " << textureName << " from " << texturePath() << endl;
-	image = QImage(64, 64, 32);
-	image.fill(Qt::red.rgb());
- }
- bool useAlpha = false;
- bool mipmap = boConfig->modelTexturesMipmaps();
- if (image.hasAlphaBuffer()) {
-	useAlpha = true;
-	mipmap = false; // the alpha test seems to have problems with mipmapping
- }
- BosonTextureArray::createTexture(image, tex, mipmap, useAlpha);
-}
-
 void BosonModelTextures::removeModel(BosonModel* model)
 {
  if (!model) {
 	boError(110) << k_funcinfo << "NULL model" << endl;
 	return;
  }
- QValueList<GLuint> remove;
- QMap<GLuint, QValueList<BosonModel*> >::Iterator it(d->mModels.begin());
+ QValueList<BoTexture*> remove;
+ QMap<BoTexture*, QValueList<BosonModel*> >::Iterator it(d->mModels.begin());
  for (; it != d->mModels.end(); ++it) {
 	(*it).remove(model);
 	if ((*it).count() == 0) {
@@ -146,42 +128,29 @@ void BosonModelTextures::removeModel(BosonModel* model)
 
 }
 
-void BosonModelTextures::removeTexture(GLuint tex)
+void BosonModelTextures::removeTexture(BoTexture* tex)
 {
  if (d->mModels[tex].count() != 0) {
 	boError(110) << k_funcinfo << "There are still models referencing this texture! Deleting anyway..." << endl;
  }
  d->mModels.remove(tex);
- QMap<QString, GLuint>::Iterator it = d->mName2Texture.begin();
+ QMap<QString, BoTexture*>::Iterator it = d->mName2Texture.begin();
  for (; it != d->mName2Texture.end() && it.data() != tex; ++it) {
 	// nothing else to do
  }
  if (it != d->mName2Texture.end()) {
 	d->mName2Texture.remove(it);
  }
- glDeleteTextures(1, &tex);
- boDebug(110) << k_funcinfo << tex << " has been deleted" << endl;
+ delete tex;
+ boDebug(110) << k_funcinfo << "texture has been deleted" << endl;
 }
 
-GLuint BosonModelTextures::texture(const QString& texName) const
+BoTexture* BosonModelTextures::texture(const QString& texName) const
 {
  if (!d->mName2Texture.contains(texName)) {
 	return 0;
  }
  return d->mName2Texture[texName];
-}
-
-void BosonModelTextures::reloadTextures()
-{
- QMap<QString, GLuint>::Iterator it = d->mName2Texture.begin();
- for (; it != d->mName2Texture.end(); ++it) {
-	QString textureName = it.key();
-	GLuint texture = it.data();
-	// note: the texture must be deleted, but the newly generated texture
-	// mast have the *same* number as before!
-	glDeleteTextures(1, &texture);
-	loadTexture(textureName, texture);
- }
 }
 
 const QString& BosonModelTextures::texturePath() const

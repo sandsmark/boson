@@ -27,6 +27,7 @@
 #include "../bosongroundtheme.h"
 #include "../bomaterial.h"
 #include "../boson.h"
+#include "../botexture.h"
 #include <bodebug.h>
 
 #include <GL/gl.h>
@@ -84,7 +85,8 @@ void BoFastGroundRenderer::renderVisibleCells(int* renderCells, unsigned int cel
  unsigned int renderedQuads = 0;
  int count = 0;
  for (unsigned int i = 0; i < groundTheme->textureCount(); i++) {
-	glBindTexture(GL_TEXTURE_2D, map->currentTexture(i, boGame->advanceCallsCount()));
+	BoTexture* tex = map->currentTexture(i, boGame->advanceCallsCount());
+	tex->bind();
 
 	const int offsetCount = 5;
 	const float offset = 1.0f / (float)offsetCount;
@@ -121,17 +123,16 @@ void BoFastGroundRenderer::renderVisibleCells(int* renderCells, unsigned int cel
 		// Map cell's y-coordinate to range (offsetCount - 1) ... 0
 		y = offsetCount - (y % offsetCount) - 1;
 
-		glTexCoord2f(texOffsets[x % offsetCount], texOffsets[y % offsetCount] + offset);
+		glTexCoord2f(texOffsets[x % offsetCount], texOffsets[y % offsetCount] + offset * h);
 		glVertex3f(cellXPos, cellYPos, upperLeftHeight);
 
-#warning see default ground renderer - do we have to take w,h into account for the offsets?
 		glTexCoord2f(texOffsets[x % offsetCount], texOffsets[y % offsetCount]);
 		glVertex3f(cellXPos, cellYPos - h, lowerLeftHeight);
 
-		glTexCoord2f(texOffsets[x % offsetCount] + offset, texOffsets[y % offsetCount]);
+		glTexCoord2f(texOffsets[x % offsetCount] + offset * w, texOffsets[y % offsetCount]);
 		glVertex3f(cellXPos + w, cellYPos - h, lowerRightHeight);
 
-		glTexCoord2f(texOffsets[x % offsetCount] + offset, texOffsets[y % offsetCount] + offset);
+		glTexCoord2f(texOffsets[x % offsetCount] + offset * w, texOffsets[y % offsetCount] + offset * h);
 		glVertex3f(cellXPos + w, cellYPos, upperRightHeight);
 		quads++;
 	}

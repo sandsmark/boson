@@ -25,7 +25,7 @@
 #include <qdir.h>
 #include <qstringlist.h>
 
-#include "bosontexturearray.h"
+#include "botexture.h"
 #include "bosoneffectparticle.h"
 #include "bodebug.h"
 #include "bosonconfig.h"
@@ -34,7 +34,7 @@
 /*****  BosonEffectPropertiesParticle  *****/
 
 #warning this is never freed!
-QDict<BosonTextureArray> BosonEffectPropertiesParticle::mTextureArrays;
+QDict<BoTextureArray> BosonEffectPropertiesParticle::mTextureArrays;
 QString BosonEffectPropertiesParticle::mTexturePath;
 
 BosonEffectPropertiesParticle::BosonEffectPropertiesParticle() :
@@ -59,7 +59,7 @@ void BosonEffectPropertiesParticle::initStatic(const QString& texdir)
   mTexturePath = texdir;
 }
 
-const BosonTextureArray* BosonEffectPropertiesParticle::getTextures(const QString& name)
+const BoTextureArray* BosonEffectPropertiesParticle::getTextures(const QString& name)
 {
   if(!mTextureArrays.find(name))
   {
@@ -72,7 +72,7 @@ const BosonTextureArray* BosonEffectPropertiesParticle::getTextures(const QStrin
     {
       absFiles.append(mTexturePath + "/" + *it);
     }
-    BosonTextureArray* t = new BosonTextureArray(absFiles, boConfig->modelTexturesMipmaps(), true);
+    BoTextureArray* t = new BoTextureArray(absFiles, BoTexture::Particle);
 
     mTextureArrays.insert(name, t);
     mTextureArrays.setAutoDelete(true);
@@ -292,7 +292,7 @@ void BosonEffectPropertiesParticleTrail::reset()
   mParticleDist = 0;
   mMinLife = 1.0;
   mMaxLife = 1.0;
-  mMaxSpeed = 30.0 / 48.0f;  // in canvas coords
+  mMaxSpeed = 30.0 / 48.0f;
   mTextureName = "smoke";
   mGLBlendFuncStr = "GL_ONE_MINUS_SRC_ALPHA";
   mGLSrcBlendFuncStr = "GL_SRC_ALPHA";

@@ -291,9 +291,11 @@ void BoLake::findWater(int x, int y, const QRect& searcharea)
     {
       // Less than 4 corners isn't valid either because you need at least 4
       //  corners to render a cell.
-      boWarning() << k_funcinfo << "Removing chunk with " << chunk->corners << " corners" << endl;
+      boDebug() << k_funcinfo << "Removing chunk with " << chunk->corners << " corners" << endl;
       invalidchunks.append(chunk);
     }
+    //boDebug() << "        " << k_funcinfo << "Chunk (" << chunk->minx << "; " << chunk->miny <<
+    //    ")-(" << chunk->maxx << "; " << chunk->maxy << ") has " << chunk->corners << " corners" << endl;
   }
   // Delete chunks with no valid corners.
   while(invalidchunks.count() > 0)
@@ -612,16 +614,6 @@ void BoWaterManager::initOpenGL()
   QStringList extensions = BoInfo::boInfo()->openGLExtensions();
 
   // TODO: some of these are part of the core in later OpenGL versions.
-#ifdef GL_ARB_texture_cube_map
-  mSupports_cubemap = extensions.contains("GL_ARB_texture_cube_map");
-#else
-#warning GL_ARB_texture_cube_map not supported at compile time!
-  mSupports_cubemap = false;
-#endif
-  if(!mSupports_cubemap)
-  {
-    boDebug() << k_funcinfo << "GL_ARB_texture_cube_map not supported!" << endl;
-  }
 
 #ifdef GL_EXT_texture_lod_bias
   mSupports_texlod = extensions.contains("GL_EXT_texture_lod_bias");
@@ -654,18 +646,6 @@ void BoWaterManager::initOpenGL()
   if(!mSupports_env_dot3)
   {
     boDebug() << k_funcinfo << "GL_ARB_texture_env_dot3 not supported!" << endl;
-  }
-
-  // This one is required by Boson anyway...
-#ifdef GL_ARB_multitexture
-  mSupports_multitexture = extensions.contains("GL_ARB_multitexture");
-#else
-#warning GL_ARB_multitexture not supported at compile time!
-  mSupports_multitexture = false;
-#endif
-  if(!mSupports_multitexture)
-  {
-    boDebug() << k_funcinfo << "GL_ARB_multitexture not supported!" << endl;
   }
 
 #ifdef GL_ARB_imaging
@@ -716,17 +696,6 @@ void BoWaterManager::initOpenGL()
     bo_glUnmapBufferARB = (_bo_glUnmapBufferARB)glXGetProcAddressARB((const GLubyte*)"glUnmapBufferARB");
   }
 
-#ifdef GL_EXT_texture3D
-  mSupports_texture3d = extensions.contains("GL_EXT_texture3D");
-#else
-#warning GL_EXT_texture3D not supported at compile time!
-  mSupports_texture3d = false;
-#endif
-  if(!mSupports_texture3d)
-  {
-    boDebug() << k_funcinfo << "GL_EXT_texture3D not supported!" << endl;
-  }
-
   boDebug() << k_funcinfo << "Extensions checking done" << endl;
 
 
@@ -751,19 +720,19 @@ void BoWaterManager::initOpenGL()
   // Check if loaded config is actually supported
   // Note that we can't use supports*() methods here because opengl stuff isn't
   //  fully inited yet.
-  if(mEnableReflections && !(mSupports_multitexture && mSupports_env_combine))
+  if(mEnableReflections && !((boTextureManager->textureUnits() > 1) && boTextureManager->supportsTextureCube() && mSupports_env_combine))
   {
     boWarning() << k_funcinfo << "Reflections are enabled, but not supported. Disabling." << endl;
     mEnableReflections = false;
     boConfig->setWaterReflections(false);
   }
-  if(mEnableBumpmapping && !(mSupports_multitexture && mSupports_env_combine && mSupports_env_dot3 && (mSupports_blendcolor || mSupports_blendcolor_ext)))
+  if(mEnableBumpmapping && !((boTextureManager->textureUnits() > 1) && mSupports_env_combine && mSupports_env_dot3 && (mSupports_blendcolor || mSupports_blendcolor_ext)))
   {
     boWarning() << k_funcinfo << "Bumpmapping is enabled, but not supported. Disabling." << endl;
     mEnableBumpmapping = false;
     boConfig->setWaterBumpmapping(false);
   }
-  if(mEnableTranslucency && !(mSupports_multitexture && mSupports_env_combine))
+  if(mEnableTranslucency && !((boTextureManager->textureUnits() > 1) && mSupports_env_combine))
   {
     boWarning() << k_funcinfo << "Translucency is enabled, but not supported. Disabling." << endl;
     mEnableTranslucency = false;
@@ -865,7 +834,7 @@ bool BoWaterManager::supportsReflections() const
     return false;
   }
 
-  return mSupports_multitexture && mSupports_env_combine;
+  return (boTextureManager->textureUnits() > 1) && boTextureManager->supportsTextureCube() && mSupports_env_combine;
 }
 
 bool BoWaterManager::supportsTranslucency() const
@@ -875,7 +844,7 @@ bool BoWaterManager::supportsTranslucency() const
     return false;
   }
 
-  return mSupports_multitexture && mSupports_env_combine;
+  return (boTextureManager->textureUnits() > 1) && mSupports_env_combine;
 }
 
 bool BoWaterManager::supportsBumpmapping() const
@@ -885,7 +854,7 @@ bool BoWaterManager::supportsBumpmapping() const
     return false;
   }
 
-  return mSupports_multitexture && mSupports_env_combine && mSupports_env_dot3 && (mSupports_blendcolor || mSupports_blendcolor_ext);
+  return (boTextureManager->textureUnits() > 1) && mSupports_env_combine && mSupports_env_dot3 && (mSupports_blendcolor || mSupports_blendcolor_ext);
 }
 
 void BoWaterManager::setMap(BosonMap* map)
@@ -1039,7 +1008,6 @@ void BoWaterManager::render()
 
     glDisable(GL_LIGHTING);
 
-    mEnvMap->enable();
     mEnvMap->bind();
     // We have z-axis pointing upwards, but most cubemaps are made for programs
     //  where y-axis points upwards. So we rotate texture matrix to get correct
@@ -1096,8 +1064,8 @@ void BoWaterManager::render()
     glPopMatrix();
     glMatrixMode(GL_MODELVIEW);
     glPopMatrix();
-    mEnvMap->disable();
     glPopAttrib();
+    boTextureManager->invalidateCache();
   }*/
 
   // Textures (and other OpenGL stuff) will be inited when they will be used
@@ -1116,9 +1084,9 @@ void BoWaterManager::render()
   {
     // Something was drawn and textures (and other OpenGL stuff was inited).
     // Pop attributes.
-    if(mEnableReflections && mSupports_multitexture && !mEnableBumpmapping)
+    if(mEnableReflections && !mEnableBumpmapping)
     {
-      glActiveTextureARB(GL_TEXTURE1_ARB);
+      boTextureManager->activateTextureUnit(1);
 #ifdef GL_EXT_texture_lod_bias
       if(mSupports_texlod)
       {
@@ -1126,10 +1094,10 @@ void BoWaterManager::render()
       }
 #endif
       glPopMatrix();
-      mEnvMap->disable();
-      glActiveTextureARB(GL_TEXTURE0_ARB);
+      boTextureManager->activateTextureUnit(0);
     }
     glPopAttrib();
+    boTextureManager->invalidateCache();
     glDisable(GL_BLEND);
     glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
   }
@@ -1209,22 +1177,19 @@ void BoWaterManager::renderChunk(BoLake* lake, BoLake::WaterChunk* chunk, float 
 
   // If nothing has been rendered yet, OpenGL stuff (e.g. textures) are
   //  uninited. Init them now.
-  if(!mRenderEnvironmentSetUp)
-  {
-    initRenderEnvironment();
-  }
+  initRenderEnvironment();
 
   // Set texture matrices. They make textures move slowly to create an illusion
   //  that water surface is moving.
   BoMatrix texMatrix = lake->textureMatrix;
   texMatrix.translate(0, mTime * 0.04, 0);
   glMatrixMode(GL_TEXTURE);
-  glActiveTextureARB(GL_TEXTURE0_ARB);  // Either diffuse or bump
+  boTextureManager->activateTextureUnit(0);  // Either diffuse or bump
   glPushMatrix();
   glLoadMatrixf(texMatrix.data());
   if(mEnableBumpmapping)
   {
-    glActiveTextureARB(GL_TEXTURE1_ARB);  // Diffuse
+    boTextureManager->activateTextureUnit(1);  // Diffuse
     glPushMatrix();
     glLoadMatrixf(texMatrix.data());
   }
@@ -1500,14 +1465,13 @@ void BoWaterManager::renderChunk(BoLake* lake, BoLake::WaterChunk* chunk, float 
     // Push attribute stack
     glPushAttrib(/*GL_COLOR_BUFFER_BIT | GL_LIGHTING_BIT | GL_TEXTURE_BIT | */GL_ALL_ATTRIB_BITS);
 
-    setupDiffuseTexture(GL_TEXTURE0_ARB);
+    setupDiffuseTexture(0);
     // Modulate with primary color
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
     if(mEnableReflections)
     {
-      glActiveTextureARB(GL_TEXTURE1_ARB);
-      setupEnvMapTexture(GL_TEXTURE1_ARB);
+      setupEnvMapTexture(1);
     }
 
     // Amount of ambient light water will receive.
@@ -1605,21 +1569,25 @@ void BoWaterManager::renderChunk(BoLake* lake, BoLake::WaterChunk* chunk, float 
     {
       // Texture matrix was push()ed for envmap. Pop it now
       glMatrixMode(GL_TEXTURE);
-      glActiveTextureARB(GL_TEXTURE1_ARB);
+      boTextureManager->activateTextureUnit(1);
       glPopMatrix();
     }
-    // Diffuse texture's matrix was also pushed. Pop this one as well.
-    glMatrixMode(GL_TEXTURE);
-    glActiveTextureARB(GL_TEXTURE1_ARB);
-    glPopMatrix();
 
     // Enable depth writes and pop attributes.
     glDepthMask(GL_TRUE);
     glPopAttrib();
+    boTextureManager->invalidateCache();
+  }
+  if(mEnableBumpmapping)
+  {
+    // Diffuse texture's matrix was also pushed. Pop this one as well.
+    glMatrixMode(GL_TEXTURE);
+    boTextureManager->activateTextureUnit(1);
+    glPopMatrix();
   }
 
   glMatrixMode(GL_TEXTURE);
-  glActiveTextureARB(GL_TEXTURE0_ARB);
+  boTextureManager->activateTextureUnit(0);
   glPopMatrix();
 
   delete info;
@@ -2208,14 +2176,13 @@ void BoWaterManager::calculateIndices(RenderInfo* info)
   }
 }
 
-void BoWaterManager::setupEnvMapTexture(GLenum unit)
+void BoWaterManager::setupEnvMapTexture(int unit)
 {
 #ifdef GL_ARB_texture_cube_map
   // Activate given texture unit
-  glActiveTextureARB(unit);
+  boTextureManager->activateTextureUnit(unit);
 
   // Bind envmap texture
-  mEnvMap->enable();
   mEnvMap->bind();
 
   // Load texture matrix
@@ -2255,29 +2222,24 @@ void BoWaterManager::setupEnvMapTexture(GLenum unit)
 #endif // GL_ARB_texture_cube_map
 }
 
-void BoWaterManager::setupBumpMapTexture(GLenum unit)
+void BoWaterManager::setupBumpMapTexture(int unit)
 {
-  glActiveTextureARB(unit);
+  boTextureManager->activateTextureUnit(unit);
 
   if(mEnableAnimBumpmaps)
   {
     // TODO: 3d texture support!
-#ifdef GL_EXT_texture3D
-    /*if(mSupports_texture3d)
+    /*if(boTextureManager->supportsTexture3D())
     {
-      waterbump_anim_3d->enable();
       waterbump_anim_3d->bind();
     }
     else*/
-#endif
     {
-      mWaterAnimBump.at((int)mWaterAnimBumpCurrent)->enable();
       mWaterAnimBump.at((int)mWaterAnimBumpCurrent)->bind();
     }
   }
   else
   {
-    mWaterBump->enable();
     mWaterBump->bind();
   }
 
@@ -2314,11 +2276,10 @@ void BoWaterManager::setupBumpMapTexture(GLenum unit)
 #endif
 }
 
-void BoWaterManager::setupDiffuseTexture(GLenum unit)
+void BoWaterManager::setupDiffuseTexture(int unit)
 {
-  glActiveTextureARB(unit);
+  boTextureManager->activateTextureUnit(unit);
 
-  mWaterTex->enable();
   mWaterTex->bind();
 
   // Use OpenGL's automatic texture coordinate generation.
@@ -2334,6 +2295,42 @@ void BoWaterManager::setupDiffuseTexture(GLenum unit)
 
 void BoWaterManager::initRenderEnvironment()
 {
+  if(mRenderEnvironmentSetUp)
+  {
+    // Rebind textures, because they may have been disabled.
+    if(mEnableReflections && !mEnableBumpmapping)
+    {
+      boTextureManager->activateTextureUnit(1);
+      mEnvMap->bind();
+
+      boTextureManager->activateTextureUnit(0);
+      mWaterTex->bind();
+    }
+    else if(mEnableBumpmapping)
+    {
+      boTextureManager->activateTextureUnit(0);
+      if(mEnableAnimBumpmaps)
+      {
+        mWaterAnimBump.at((int)mWaterAnimBumpCurrent)->bind();
+      }
+      else
+      {
+        mWaterBump->bind();
+      }
+
+      boTextureManager->activateTextureUnit(1);
+      mWaterTex->bind();
+
+      boTextureManager->activateTextureUnit(0);
+    }
+    else
+    {
+      boTextureManager->activateTextureUnit(0);
+      mWaterTex->bind();
+    }
+    return;
+  }
+
   // Attributes will be popped at the end of render().
   glPushAttrib(/*GL_LIGHTING_BIT | GL_TEXTURE_BIT | GL_ENABLE_BIT | GL_TRANSFORM_BIT | GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT*/GL_ALL_ATTRIB_BITS);
   if(mEnableReflections && !mEnableBumpmapping)
@@ -2342,9 +2339,9 @@ void BoWaterManager::initRenderEnvironment()
     //  * tex0: water texture
     //  * tex1: environment cubemap
 
-    setupEnvMapTexture(GL_TEXTURE1_ARB);
+    setupEnvMapTexture(1);
 
-    setupDiffuseTexture(GL_TEXTURE0_ARB);
+    setupDiffuseTexture(0);
   }
   else if(mEnableBumpmapping)
   {
@@ -2355,9 +2352,9 @@ void BoWaterManager::initRenderEnvironment()
 
     glDisable(GL_LIGHTING);
 
-    setupBumpMapTexture(GL_TEXTURE0_ARB);
+    setupBumpMapTexture(0);
 
-    setupDiffuseTexture(GL_TEXTURE1_ARB);
+    setupDiffuseTexture(1);
 
 #ifdef GL_ARB_texture_env_combine
     // Water surface texture will be modulated with the result of previous
@@ -2378,12 +2375,12 @@ void BoWaterManager::initRenderEnvironment()
       glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_ALPHA_ARB, GL_SRC_ALPHA);
     }
 #endif
-    glActiveTextureARB(GL_TEXTURE0_ARB);
+    boTextureManager->activateTextureUnit(0);
   }
   else
   {
     // No reflections, no bumpmapping. Boring :-)
-    setupDiffuseTexture(GL_TEXTURE0_ARB);
+    setupDiffuseTexture(0);
   }
 
   if(!mEnableBumpmapping)
@@ -2442,14 +2439,14 @@ void BoWaterManager::loadNecessaryTextures()
       QStringList files = d.entryList("water-animbumpmap-*.png", QDir::Files, QDir::Name);
       for(QStringList::Iterator it = files.begin(); it != files.end(); it++)
       {
-        BoTexture* tex = new BoTexture(path + *it, BoTexture::Terrain);
+        BoTexture* tex = new BoTexture(path + *it, BoTexture::NormalMap);
         mWaterAnimBump.append(tex);
       }
       mWaterAnimBumpCurrent = 0.0f;
     }
     else if(!mWaterBump)
     {
-      mWaterBump = new BoTexture(path + "water-bumpmap.png", BoTexture::Terrain);
+      mWaterBump = new BoTexture(path + "water-bumpmap.png", BoTexture::NormalMap);
     }
   }
 }

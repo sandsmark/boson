@@ -29,7 +29,7 @@ class Boson;
 class QStringList;
 class QDataStream;
 class BosonGroundTheme;
-class BosonTextureArray;
+class BoTexture;
 
 /**
  * @short abstract class for data operating of the corners of the cells (like
@@ -620,7 +620,7 @@ public:
 		return BoMapCornerArray::arrayPos(x, y, width() + 1);
 	}
 
-	int currentTexture(int texture, int advanceCallsCount) const;
+	BoTexture* currentTexture(int texture, int advanceCallsCount) const;
 	inline const float* heightMap() const { return mHeightMap->heightMap(); }
 	inline const float* normalMap() const { return mNormalMap->normalMap(); }
 	inline BoColorMap* colorMap() const { return mColorMap; }

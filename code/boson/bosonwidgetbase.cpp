@@ -1190,8 +1190,9 @@ void BosonWidgetBase::slotShowLight0Widget()
 
 void BosonWidgetBase::slotReloadModelTextures()
 {
- BO_CHECK_NULL_RET(BosonModelTextures::modelTextures());
- BosonModelTextures::modelTextures()->reloadTextures();
+#warning FIXME!
+ //BO_CHECK_NULL_RET(BosonModelTextures::modelTextures());
+ //BosonModelTextures::modelTextures()->reloadTextures();
 }
 
 void BosonWidgetBase::slotReloadMeshRenderer()

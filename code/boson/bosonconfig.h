@@ -312,14 +312,6 @@ public:
 	unsigned int chatScreenRemoveTime() const { return mChatScreenRemoveTime->value(); }
 	void setChatScreenMaxItems(int max) { mChatScreenMaxItems->setValue(max); }
 	int chatScreenMaxItems() const { return mChatScreenMaxItems->value(); }
-	void setModelTexturesMipmaps(bool enable) { mModelTexturesMipmaps->setValue(enable); }
-	bool modelTexturesMipmaps() const { return mModelTexturesMipmaps->value(); }
-	int magnificationFilter() const { return mMagnificationFilter->value(); }
-	void setMagnificationFilter(int f) { mMagnificationFilter->setValue(f); }
-	int minificationFilter() const { return mMinificationFilter->value(); }
-	void setMinificationFilter(int f) { mMinificationFilter->setValue(f); }
-	int mipmapMinificationFilter() const { return mMipmapMinificationFilter->value(); }
-	void setMipmapMinificationFilter(int f) { mMipmapMinificationFilter->setValue(f); }
 	void setAlignSelectionBoxes(bool enable) { mAlignSelectionBoxes->setValue(enable); }
 	bool alignSelectionBoxes() const { return mAlignSelectionBoxes->value(); }
 	void setRMBMovesWithAttack(bool attack) { mRMBMovesWithAttack->setValue(attack); }
@@ -344,6 +336,12 @@ public:
 	bool waterBumpmapping() const { return mWaterBumpmapping->value(); }
 	void setWaterAnimatedBumpmaps(bool on) { mWaterAnimatedBumpmaps->setValue(on); }
 	bool waterAnimatedBumpmaps() const { return mWaterAnimatedBumpmaps->value(); }
+	int textureFilter() const { return mTextureFilter->value(); }
+	void setTextureFilter(int f) { mTextureFilter->setValue(f); }
+	void setTextureCompression(bool on) { mTextureCompression->setValue(on); }
+	bool textureCompression() const { return mTextureCompression->value(); }
+	void setTextureColorMipmaps(bool on) { mTextureColorMipmaps->setValue(on); }
+	bool textureColorMipmaps() const { return mTextureColorMipmaps->value(); }
 
 
 	void setUnitSoundActivated(UnitSoundEvent e, bool activated);
@@ -605,9 +603,6 @@ private:
 	BoConfigDoubleEntry* mMiniMapScale;
 	BoConfigDoubleEntry* mMiniMapZoom;
 	BoConfigIntListEntry* mUnitSoundsDeactivated;
-	BoConfigIntEntry* mMagnificationFilter;
-	BoConfigIntEntry* mMinificationFilter;
-	BoConfigIntEntry* mMipmapMinificationFilter;
 	BoConfigBoolEntry* mAlignSelectionBoxes;
 	BoConfigBoolEntry* mRMBMovesWithAttack;
 	BoConfigIntEntry* mMouseWheelAction;
@@ -627,6 +622,9 @@ private:
 	BoConfigBoolEntry* mWaterTranslucency;
 	BoConfigBoolEntry* mWaterBumpmapping;
 	BoConfigBoolEntry* mWaterAnimatedBumpmaps;
+	BoConfigIntEntry* mTextureFilter;
+	BoConfigBoolEntry* mTextureCompression;
+	BoConfigBoolEntry* mTextureColorMipmaps;
 
 	// NOT stored to config file!
 	bool mDisableSound;

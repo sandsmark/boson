@@ -27,6 +27,7 @@
 #include "../bosongroundtheme.h"
 #include "../bomaterial.h"
 #include "../boson.h"
+#include "../botexture.h"
 #include <bodebug.h>
 
 #include <GL/gl.h>
@@ -71,7 +72,8 @@ void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int 
 	if (i == 1) {
 		glEnable(GL_BLEND);
 	}
-	glBindTexture(GL_TEXTURE_2D, map->currentTexture(i, boGame->advanceCallsCount()));
+	BoTexture* tex = map->currentTexture(i, boGame->advanceCallsCount());
+	tex->bind();
 	unsigned int quads = renderCellsNow(renderCells, cellsCount, map->width() + 1, mHeightMap2, map->normalMap(), map->texMap(i));
 	if (quads != 0) {
 		usedTextures++;
@@ -82,9 +84,9 @@ void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int 
  statistics()->setUsedTextures(usedTextures);
 
  if (boConfig->enableColormap()) {
+	boTextureManager->disableTexturing();
 	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_LIGHTING);
-	glDisable(GL_TEXTURE_2D);
 	renderCellColors(renderCells, cellsCount, map->width(), map->colorMap()->colorMap(), mHeightMap2);
 	glPopAttrib();
 
@@ -141,9 +143,9 @@ unsigned int BoDefaultGroundRenderer::renderCellsNow(int* cells, int count, int 
 	float lowerRightHeight = *(heightMapUpperLeft + lowerRightOffset);
 
 	const float* upperLeftNormal = normalMap + (y * cornersWidth + x) * 3;
-	const float* lowerLeftNormal = normalMap + ((y + 1) * cornersWidth + x) * 3;
-	const float* lowerRightNormal = normalMap + ((y + 1) * cornersWidth + (x + 1)) * 3;
-	const float* upperRightNormal = normalMap + (y * cornersWidth + (x + 1)) * 3;
+	const float* lowerLeftNormal = normalMap + ((y + h) * cornersWidth + x) * 3;
+	const float* lowerRightNormal = normalMap + ((y + h) * cornersWidth + (x + w)) * 3;
+	const float* upperRightNormal = normalMap + (y * cornersWidth + (x + w)) * 3;
 
 	// Map cell's y-coordinate to range (offsetCount - 1) ... 0
 	// FIXME: texy might be a bit confusing since we don't have texx
@@ -154,8 +156,7 @@ unsigned int BoDefaultGroundRenderer::renderCellsNow(int* cells, int count, int 
 	BoMaterial::setDefaultAlpha((float)upperLeftAlpha / 255.0f);
 	glColor4ub(255, 255, 255, upperLeftAlpha);
 	glNormal3fv(upperLeftNormal);
-#warning FIXME: do we have to take w,h into account for the texture offsets? what do they do anyway?
-	glTexCoord2f(texOffsets[x % offsetCount], texOffsets[texy % offsetCount] + offset);
+	glTexCoord2f(texOffsets[x % offsetCount], texOffsets[texy % offsetCount] + offset * h);
 	glVertex3f(cellXPos, cellYPos, upperLeftHeight);
 
 	BoMaterial::setDefaultAlpha((float)lowerLeftAlpha / 255.0f);
@@ -167,13 +168,13 @@ unsigned int BoDefaultGroundRenderer::renderCellsNow(int* cells, int count, int 
 	BoMaterial::setDefaultAlpha((float)lowerRightAlpha / 255.0f);
 	glColor4ub(255, 255, 255, lowerRightAlpha);
 	glNormal3fv(lowerRightNormal);
-	glTexCoord2f(texOffsets[x % offsetCount] + offset, texOffsets[texy % offsetCount]);
+	glTexCoord2f(texOffsets[x % offsetCount] + offset * w, texOffsets[texy % offsetCount]);
 	glVertex3f(cellXPos + w, cellYPos - h, lowerRightHeight);
 
 	BoMaterial::setDefaultAlpha((float)upperRightAlpha / 255.0f);
 	glColor4ub(255, 255, 255, upperRightAlpha);
 	glNormal3fv(upperRightNormal);
-	glTexCoord2f(texOffsets[x % offsetCount] + offset, texOffsets[texy % offsetCount] + offset);
+	glTexCoord2f(texOffsets[x % offsetCount] + offset * w, texOffsets[texy % offsetCount] + offset * h);
 	glVertex3f(cellXPos + w, cellYPos, upperRightHeight);
 
 	renderedQuads++;

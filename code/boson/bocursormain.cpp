@@ -30,6 +30,7 @@
 #include "boversion.h"
 #include "boapplication.h"
 #include "boglobal.h"
+#include "botexture.h"
 
 #include <kcmdlineargs.h>
 #include <kaboutdata.h>
@@ -75,7 +76,6 @@ void CursorPreview::initializeGL()
  glShadeModel(GL_FLAT);
  glDisable(GL_DITHER);
  resizeGL(width(), height());
- glEnable(GL_TEXTURE_2D);
  glEnable(GL_BLEND);
  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
  mUpdateTimer->start(30);
@@ -104,7 +104,7 @@ void CursorPreview::paintGL()
  cursor()->renderCursor(x, y);
 
  // display the hotspot
- glBindTexture(GL_TEXTURE_2D, 0);
+ boTextureManager->disableTexturing();
  glBegin(GL_LINES);
 	glVertex3f(x, 0.0, 0.0);
 	glVertex3f(x, height(), 0.0);
@@ -211,6 +211,8 @@ int main(int argc, char **argv)
  w->show();
 
  args->clear();
+
+ boTextureManager->initOpenGL();
 
  BoDebugDCOPIface* iface = new BoDebugDCOPIface();
  int r = app.exec();

@@ -31,7 +31,8 @@
 class BosonEffectPropertiesParticle;
 class QDomElement;
 class BosonEffectPropertiesParticleGeneric;
-class BosonTextureArray;
+class BoTextureArray;
+class BoTexture;
 class BosonEffectParticle;
 class BosonEffectPropertiesParticleTrail;
 
@@ -95,9 +96,9 @@ class BosonParticle
      **/
     float life;
     /**
-     * Current texture id. This is cached here for performance reasons.
+     * Current texture. This is cached here for performance reasons.
      **/
-    GLuint tex;
+    BoTexture* tex;
     /**
      * Parent effect of this particle.
      **/
@@ -238,7 +239,7 @@ class BosonEffectParticleGeneric : public BosonEffectParticle
      * @param textures Texture array for this effect.
      **/
     BosonEffectParticleGeneric(const BosonEffectPropertiesParticleGeneric* prop, int maxnum,
-        const BosonTextureArray* textures);
+        const BoTextureArray* textures);
     virtual ~BosonEffectParticleGeneric();
 
 
@@ -372,7 +373,7 @@ class BosonEffectParticleGeneric : public BosonEffectParticle
     float mRate;  // Number of particles created per second
     float mCreateCache;  // Number of particles to create during next update
     bool mMoveParticlesWithSystem;  // Particles are moved with system if true
-    const BosonTextureArray* mTextures;  // Textures of particles
+    const BoTextureArray* mTextures;  // Textures of particles
     bool mRotated;
     float mAge;
     float mMass;
@@ -429,7 +430,7 @@ class BosonEffectParticleTrail : public BosonEffectParticle
      * @param pos Initial position for this effect.
      **/
     BosonEffectParticleTrail(const BosonEffectPropertiesParticleTrail* prop, int maxnum,
-        const BosonTextureArray* textures, const BoVector3Fixed& pos);
+        const BoTextureArray* textures, const BoVector3Fixed& pos);
     virtual ~BosonEffectParticleTrail();
 
 
@@ -540,7 +541,7 @@ class BosonEffectParticleTrail : public BosonEffectParticle
     BosonTrailParticle* mParticles;  // Array of particles
     int mNum;  // Current number of particles (aka number of active particles)
     float mCreateCache;  // Number of particles to create during next update
-    const BosonTextureArray* mTextures;  // Textures of particles
+    const BoTextureArray* mTextures;  // Textures of particles
     bool mRotated;
     float mMass;
     float mMaxParticleSize;

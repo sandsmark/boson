@@ -26,7 +26,7 @@
 
 #include <kmdcodec.h>
 
-#include "bosontexturearray.h"
+#include "botexture.h"
 #include "bosoneffectpropertiesparticle.h"
 #include "bodebug.h"
 
@@ -118,7 +118,7 @@ bool BosonEffectParticle::loadFromXML(const QDomElement& root)
 /*****  BosonEffectParticleGeneric  *****/
 
 BosonEffectParticleGeneric::BosonEffectParticleGeneric(const BosonEffectPropertiesParticleGeneric* prop,
-    int maxnum, const BosonTextureArray* textures) :
+    int maxnum, const BoTextureArray* textures) :
     BosonEffectParticle(prop)
 {
   mParticles = new BosonGenericParticle[maxnum];
@@ -335,10 +335,6 @@ void BosonEffectParticleGeneric::initParticle(BosonGenericParticle* particle)
   {
     boError(150) << k_funcinfo << "NULL textures" << endl;
   }
-  else if(!mTextures->isValid())
-  {
-    boError(150) << k_funcinfo << "invalid texture array" << endl;
-  }
   else
   {
     particle->tex = mTextures->texture(0);
@@ -541,7 +537,7 @@ bool BosonEffectParticleGeneric::loadFromXML(const QDomElement& root)
 /*****  BosonEffectParticleTrail  *****/
 
 BosonEffectParticleTrail::BosonEffectParticleTrail(const BosonEffectPropertiesParticleTrail* prop,
-    int maxnum, const BosonTextureArray* textures, const BoVector3Fixed& pos) :
+    int maxnum, const BoTextureArray* textures, const BoVector3Fixed& pos) :
     BosonEffectParticle(prop)
 {
   mParticles = new BosonTrailParticle[maxnum];
@@ -684,10 +680,6 @@ void BosonEffectParticleTrail::initParticle(BosonTrailParticle* particle, const 
   if(!mTextures)
   {
     boError(150) << k_funcinfo << "NULL textures" << endl;
-  }
-  else if(!mTextures->isValid())
-  {
-    boError(150) << k_funcinfo << "invalid texture array" << endl;
   }
   else
   {

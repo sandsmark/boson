@@ -519,7 +519,7 @@ public:
 		mMaxZ = 0.0;
 		mMinZ = 0.0;
 	}
-	
+
 	void addPoint(const BoVector3Float& v)
 	{
 		addPoint(v[0], v[1], v[2]);
@@ -808,7 +808,7 @@ void BosonModel::loadModel()
 		continue;
 	}
 	QString tex = cleanTextureName(mat->textureName());
-	GLuint myTex = 0;
+	BoTexture* myTex = 0;
 	if (!tex.isEmpty()) {
 		myTex = BosonModelTextures::modelTextures()->texture(tex);
 	}
@@ -1055,7 +1055,7 @@ void BosonModel::computeBoundings(BoFrame* frame, BoHelper* helper) const
 		m->transform(&v, &vector);
 		helper->addPoint(v);
 	}
-	
+
  }
 }
 

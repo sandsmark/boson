@@ -25,7 +25,7 @@ class BosonCanvas;
 
 #include <GL/gl.h>
 
-class BosonTextureArray;
+class BoTexture;
 
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
@@ -47,7 +47,7 @@ protected:
 	static void drawHealthBar(int frame, int displayListCount);
 
 private:
-	BosonTextureArray* mTextures;
+	BoTexture* mTexture;
 	GLuint mDisplayListBase;
 	GLsizei mDisplayListCount;
 };
