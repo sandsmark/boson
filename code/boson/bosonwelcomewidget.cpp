@@ -24,6 +24,7 @@
 
 #include <klocale.h>
 #include <kstandarddirs.h>
+#include <kdebug.h>
 
 #include <qlabel.h>
 #include <qpushbutton.h>
@@ -40,6 +41,10 @@ BosonWelcomeWidget::BosonWelcomeWidget(QWidget* parent) : QWidget(parent)
   mMainLayout = new QVBoxLayout( 0, 0, 6, "mainlayout"); 
 
   QPixmap startupPix(locate("data", "boson/pics/startup.png"));
+  if (startupPix.isNull()) {
+	 kdFatal() << "Unable to find startup pixmap - please install the data package!" << endl;
+	 return;
+  }
   setErasePixmap(startupPix);
   setFixedSize(startupPix.size());
   QSpacerItem* spacer_1 = new QSpacerItem( 20, 420, QSizePolicy::Preferred, QSizePolicy::Minimum );
