@@ -1089,7 +1089,7 @@ BoItemList BosonCanvas::bosonCollisions(const QPointArray& cells, const BosonSpr
  BoItemList collisions;
  BoItemList seen;
  const BoItemList* cellItems;
- Cell* c;
+ Cell* c = 0;
  for (unsigned int i = 0; i < cells.count(); i++) {
 	c = cell(cells[i].x(), cells[i].y());
 	if (!c) {
