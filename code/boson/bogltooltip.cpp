@@ -361,6 +361,7 @@ void BoGLToolTip::updateLabel()
  }
  mLabel->setVisible(showTip());
  mLabel->setText(d->mToolTip.tip());
+ mLabel->setSize(mLabel->preferredWidth(), mLabel->preferredHeight());
 }
 
 void BoGLToolTip::setCursorPos(const QPoint& pos)
