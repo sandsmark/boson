@@ -109,6 +109,8 @@ public:
 	unsigned char amountOfWater(unsigned int texture) const;
 	QRgb miniMapColor(unsigned int texture) const;
 
+	QPixmap pixmap(unsigned int texture);
+
 	/**
 	 * This value is intended for the texturing code only (although it could
 	 * be used for pathfinding, too - see below). We need the type of the
