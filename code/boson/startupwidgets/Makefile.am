@@ -10,7 +10,8 @@ libbosonstartupwidgets_la_SOURCES = \
 	bosonstartwidgetbase.cpp \
 	bosonnewgamewidget.cpp \
 	bosonstarteditorwidget.cpp \
-	kloadsavegamewidget.cpp
+	kloadsavegamewidget.cpp \
+	bosonprefixchecker.cpp
 
 METASOURCES = AUTO
 
