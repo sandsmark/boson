@@ -20,6 +20,7 @@
 #define BOSON_H
 
 #include <kgame/kgame.h>
+#include <sys/time.h>
 
 class Player;
 class Unit;
