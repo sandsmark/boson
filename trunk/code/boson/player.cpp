@@ -705,7 +705,7 @@ bool Player::saveAsXML(QDomElement& root)
  QDomDocument doc = root.ownerDocument();
 
  // store the dataHandler()
- BosonPropertyXML propertyXML;
+ BosonCustomPropertyXML propertyXML;
  QDomElement handler = doc.createElement(QString::fromLatin1("DataHandler"));
  if (!propertyXML.saveAsXML(handler, dataHandler())) {
 	boError() << k_funcinfo << "Unable to save datahandler of player " << id() << endl;
@@ -772,7 +772,7 @@ bool Player::loadFromXML(const QDomElement& root)
 
  boDebug(260) << k_funcinfo << "load data handler" << endl;
  // load the data handler
- BosonPropertyXML propertyXML;
+ BosonCustomPropertyXML propertyXML;
  QDomElement handler = root.namedItem(QString::fromLatin1("DataHandler")).toElement();
  if (!propertyXML.loadFromXML(handler, dataHandler())) {
 	boError(260) << k_funcinfo << "unable to load player data handler (player=" << this->id() << ")" << endl;

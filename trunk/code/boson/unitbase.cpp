@@ -188,7 +188,7 @@ bool UnitBase::saveAsXML(QDomElement& root)
  root.setAttribute(QString::fromLatin1("Id"), (unsigned int)id());
 
  // the data handler
- BosonPropertyXML propertyXML;
+ BosonCustomPropertyXML propertyXML;
  QDomElement handler = doc.createElement(QString::fromLatin1("DataHandler"));
  if (!propertyXML.saveAsXML(handler, dataHandler())) {
 	boError() << k_funcinfo << "Unable to save datahandler of unit " << id() << endl;
@@ -230,7 +230,7 @@ bool UnitBase::loadFromXML(const QDomElement& root)
 	return false;
  }
  // load the data handler
- BosonPropertyXML propertyXML;
+ BosonCustomPropertyXML propertyXML;
  QDomElement handler = root.namedItem(QString::fromLatin1("DataHandler")).toElement();
  if (handler.isNull()) {
 	boError(260) << k_funcinfo << "No DataHandler tag found for Unit" << endl;
