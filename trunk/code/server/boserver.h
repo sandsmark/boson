@@ -65,11 +65,14 @@ class BosonServer : public KMainWindow, public boFile
   void	handleDialogMessage(uint playerId, bosonMsgTag, int, bosonMsgData *);
   void	playerHasDied(uint playerId);
 
-	void		placeMob(serverMobUnit *);
-	void		placeFix(serverFacility *);
+	void		reportMob(serverMobUnit *);
+	void		reportFix(serverFacility *);
 	groundType	groundAt(QPoint pos) {return cell(pos.x(), pos.y()).ground(); }
 	int		maxX() { return map_width; }
 	int		maxY() { return map_height; }
+
+	void	createMobUnit(mobileMsg_t &);
+	void	createFixUnit(facilityMsg_t &);
 
   protected:
   void	initLog(void);
@@ -78,8 +81,6 @@ class BosonServer : public KMainWindow, public boFile
 
   void	initMap(const char *);
 
-  void	createMobUnit(mobileMsg_t &);
-  void	createFixUnit(facilityMsg_t &);
 
   void  checkUnitVisibility(Unit *u);
 
@@ -99,6 +100,9 @@ class BosonServer : public KMainWindow, public boFile
   bool		loadGround();
   bool		loadUnits();
 	serverCell	&cell(int x, int y) {return cells[ x + y * map_width ]; }
+	bool		isValid(int x, int y) { return x>=0 && y>=0 && x<map_width && y<map_height; }
+	bool		findFreePos(int &x, int &y, mobType t);
+	bool		testFreePos(int x, int y, mobType t);
   
   serverState	state;
   KServerSocket	*socket;
