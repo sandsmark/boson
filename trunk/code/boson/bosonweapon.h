@@ -81,6 +81,11 @@ class BosonWeaponProperties : public PluginProperties
      **/
     float damageRange() const  { return mDamageRange; };
     /**
+     * @return Full damage range of missile of this unit, e.g. range in what
+     *  units will be damaged by damage value (farther they'll be damaged less)
+     **/
+    float fullDamageRange() const  { return mFullDamageRange; };
+    /**
      * @return Speed of missile of this unit (per second) or 0 if speed is infinite
      **/
     unsigned long int speed() const  { return mSpeed; };
@@ -148,6 +153,7 @@ class BosonWeaponProperties : public PluginProperties
     void setWeaponName(QString str)  { mName = str; };
     void setDamage(long int damage)  { mDamage = damage; };
     void setDamageRange(float range)  { mDamageRange = range; };
+    void setFullDamageRange(float range)  { mFullDamageRange = range; };
     void setReloadingTime(unsigned int reload)  { mReload = reload; };
     void setRange(unsigned long int range)  { mRange = range; };
     void setCanShootAtAirUnits(bool can)  { mCanShootAtAirUnits = can; };
@@ -170,6 +176,7 @@ class BosonWeaponProperties : public PluginProperties
     unsigned long int mRange;
     long int mDamage;
     float mDamageRange;
+    float mFullDamageRange;
     bool mCanShootAtAirUnits;
     bool mCanShootAtLandUnits;
     unsigned int mReload;

@@ -41,6 +41,8 @@
 #include <qpointarray.h>
 #include <qdatastream.h>
 
+#include <math.h>
+
 #include "bosoncanvas.moc"
 
 
@@ -395,16 +397,26 @@ void BosonCanvas::shotHit(BosonShot* s)
  // Play hit sound
  s->properties()->playSound(SoundWeaponHit);
 
- explosion(BoVector3(s->x(), s->y(), s->z()), s->properties()->damage(), s->properties()->damageRange(), s->owner());
+ explosion(BoVector3(s->x(), s->y(), s->z()), s->properties()->damage(), s->properties()->damageRange(),
+		s->properties()->fullDamageRange(), s->owner());
 }
 
-void BosonCanvas::explosion(const BoVector3& pos, long int damage, float range, Player* owner)
+void BosonCanvas::explosion(const BoVector3& pos, long int damage, float range, float fullrange, Player* owner)
 {
  // Decrease health of all units within damaging range of explosion
  float r = QMAX(0, range * BO_TILE_SIZE - 1);  // - 1 is needed to prevent units on next cells from also being damaged
+ float fr = QMAX(0, fullrange * BO_TILE_SIZE - 1);
+ long int d;
+ int dist;
  QValueList<Unit*> l = unitCollisionsInSphere(pos, r);
  for (unsigned int i = 0; i < l.count(); i++) {
-	unitDamaged(l[i], damage);
+	dist = l[i]->distance(pos);
+	if (dist <= fr * fr || r == fr) {
+		d = damage;
+	} else {
+		d = (long int)((1 - (sqrt(dist) - fr) / (r - fr)) * damage);
+	}
+	unitDamaged(l[i], d);
 	if (l[i]->isDestroyed() && owner) {
 		if (l[i]->isFacility()) {
 			owner->statistics()->addDestroyedFacility(l[i], owner);
@@ -538,7 +550,8 @@ void BosonCanvas::destroyUnit(Unit* unit)
 	pos += unit->unitProperties()->hitPoint();
 	addParticleSystems(unit->unitProperties()->newDestroyedParticleSystems(pos[0], pos[1], pos[2]));
 	if(unit->unitProperties()->explodingDamage() > 0) {
-		explosion(pos, unit->unitProperties()->explodingDamage(), unit->unitProperties()->explodingDamageRange(), unit->owner());
+		// Do we want ability to set fullDamageRange here?
+		explosion(pos, unit->unitProperties()->explodingDamage(), unit->unitProperties()->explodingDamageRange(), 0, unit->owner());
 	}
 	if (owner->checkOutOfGame()) {
 		killPlayer(owner);
@@ -652,12 +665,8 @@ QValueList<Unit*> BosonCanvas::unitCollisionsInSphere(const BoVector3& pos, int 
 		continue;
 	}
 //	boDebug(310) << "unit at x=" << u->x() << ",y=" << u->y() << ",pos=" << pos.x() << "," << pos.y() << endl;
-	int x = (int)(pos.x() - (u->x() + u->width() / 2));
-	int y = (int)(pos.y() - (u->y() + u->height() / 2));
-	int z = (int)(pos.z() - (u->z()));
-//	boDebug(310) << "w*w=" << w*w << ",h*h=" << h*h << " <= r*r=" << radius*radius<< endl;
 
-	if (x * x + y * y + z * z <= radius * radius) {
+	if (u->distance(pos) <= radius * radius) {
 //		boDebug() << k_funcinfo << "adding " << u->id() << endl;
 		list.append(u);
 	}

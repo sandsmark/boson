@@ -34,6 +34,7 @@ class UnitPlugin;
 class RepairPlugin;
 class BosonParticleSystem;
 class BosonWeapon;
+class BoVector3;
 template<class T> class QValueList;
 template<class T> class QPtrList;
 
@@ -357,6 +358,16 @@ public:
 	 * @return Best enemy unit in range to attack
 	 **/
 	Unit* bestEnemyUnitInRange();
+
+	/**
+	 * @return Square of distance between center points of this unit and u
+	 **/
+	int distance(const Unit* u) const;
+	/**
+	 * @return Square of distance between center point of this unit and pos
+	 **/
+	int distance(const BoVector3& pos) const;
+
 
 protected:
 	void shootAt(BosonWeapon* w, Unit* target);

@@ -198,7 +198,7 @@ public:
 	 * @param range Radius of explosion. All units range or less cells away will be damaged
 	 * @param owner Player who caused the explosion. Used for statistics. May be null
 	 **/
-	void explosion(const BoVector3& pos, long int damage, float range, Player* owner);
+	void explosion(const BoVector3& pos, long int damage, float range, float fullrange, Player* owner);
 
 	/**
 	 * Called when unit is damaged (usually by missile).

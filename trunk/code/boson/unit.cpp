@@ -1190,6 +1190,24 @@ int Unit::moveAttacking() const
  return d->mMoveAttacking;
 }
 
+int Unit::distance(const Unit* u) const
+{
+ // !!! This method returns square of actual distance. You may want to use sqrt() !!!
+ int dx = (int)((x() + width() / 2) - (u->x() + u->width() / 2));
+ int dy = (int)((y() + height() / 2) - (u->y() + u->height() / 2));
+ int dz = (int)(z() - u->z());
+ return dx*dx + dy*dy + dz*dz;
+}
+
+int Unit::distance(const BoVector3& pos) const
+{
+ // !!! This method returns square of actual distance. You may want to use sqrt() !!!
+ int dx = (int)(pos.x() - (x() + width() / 2));
+ int dy = (int)(pos.y() - (y() + height() / 2));
+ int dz = (int)(pos.z() - z());
+ return dx*dx + dy*dy + dz*dz;
+}
+
 
 /////////////////////////////////////////////////
 // MobileUnit
