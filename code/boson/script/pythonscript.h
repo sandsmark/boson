@@ -22,10 +22,13 @@
 
 #include "bosonscript.h"
 
+#include <qstring.h>
+#include <qdatastream.h>
+
 typedef struct _object PyObject;
 struct PyMethodDef;
 typedef struct _ts PyThreadState;
-class QString;
+
 
 class PythonScript : public BosonScript
 {
@@ -38,6 +41,9 @@ class PythonScript : public BosonScript
 
     virtual void advance();
     virtual void init();
+
+    virtual bool load(QDataStream& stream);
+    virtual bool save(QDataStream& stream) const;
 
     virtual void callFunction(const QString& function);
     void callFunction(const QString& function, PyObject* args);
@@ -162,6 +168,7 @@ class PythonScript : public BosonScript
   private:
     PyObject* mDict;
     PyThreadState* mInterpreter;
+    QString mLoadedScripts;
 
     static PyMethodDef mCallbacks[];
     static bool mScriptingInited;

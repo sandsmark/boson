@@ -20,6 +20,8 @@
 #include "pythonscript.h"
 
 #include <Python.h>
+#include <marshal.h>
+#include <compile.h>
 
 #include <qstring.h>
 #include <qfileinfo.h>
@@ -229,45 +231,6 @@ void PythonScript::loadScript(QString file)
   contents += "sys.path.insert(0, '')\n";
   contents += f.readAll();
   loadScriptFromString(contents);
-
-#if 0
-  QString filePath = fi.dirPath(true);
-  //boDebug() << k_funcinfo << "filePath: " << filePath << endl;
-  QString fileName = fi.baseName();
-  //boDebug() << k_funcinfo << "fileName: " << fileName << endl;
-
-  getPythonLock();
-
-  char pypath[4096];
-  sprintf(pypath, "sys.path.insert(0, '%s')", filePath.ascii());
-  PyRun_SimpleString((char*)"import sys");
-  PyRun_SimpleString(pypath);
-  PyRun_SimpleString((char*)"sys.path.insert(0, '')");
-
-
-  PyObject* pName = PyString_FromString(fileName.ascii());
-  if(!pName)
-  {
-    boError() << k_funcinfo << "pName is NULL" << endl;
-    Py_DECREF(pName);
-    freePythonLock();
-    return;
-  }
-  PyObject* pModule = PyImport_Import(pName);
-  Py_DECREF(pName);
-  if(!pModule)
-  {
-    PyErr_Print();
-    boError() << k_funcinfo << "pModule is NULL" << endl;
-    boError() << k_funcinfo << "Probably there's a parse error in the script. Aborting." << endl;
-    boError() << k_funcinfo << "File was: '" << fi.absFilePath() << "'" << endl;
-    freePythonLock();
-    return;
-  }
-  mDict = PyModule_GetDict(pModule);
-
-  freePythonLock();
-#endif
 }
 
 void PythonScript::loadScriptFromString(const QString& string)
@@ -287,6 +250,9 @@ void PythonScript::loadScriptFromString(const QString& string)
     return;
   }
   mDict = PyModule_GetDict(m);
+
+  mLoadedScripts += string;
+  mLoadedScripts += '\n';
 
   freePythonLock();
 }
@@ -327,6 +293,20 @@ void PythonScript::callFunction(const QString& function, PyObject* args)
   {
     Py_DECREF(pValue);
   }
+
+  /*static int callscount = 0;
+  callscount++;
+  if((callscount % 10) == 0)
+  {
+    QFile f(QString("boscript-%1.save").arg(callscount));
+    f.open(IO_WriteOnly);
+    QDataStream stream(&f);
+    if(!save(stream))
+    {
+      boError() << k_funcinfo  << "Couldn't save!" << endl;
+    }
+    f.close();
+  }*/
 
   freePythonLock();
 }
@@ -399,6 +379,91 @@ void PythonScript::init()
   PyObject* args = PyTuple_New(1);
   PyTuple_SetItem(args, 0, PyInt_FromLong(playerId()));
   callFunction("init", args);
+}
+
+bool PythonScript::save(QDataStream& stream) const
+{
+  boDebug() << k_funcinfo << endl;
+  // Create a dict containing only variables (not functions)
+  PyObject* savedict = PyDict_New();
+  PyObject* key;
+  PyObject* value;
+  int pos = 0;
+  while(PyDict_Next(mDict, &pos, &key, &value))
+  {
+    // Check if value is any of the known types
+    // Note that I'm using Andi's coding style here to keep the code small
+    // This is basically taken from w_object() in Python/marshal.c
+    if(value == NULL) {
+    } else if(value == Py_None) {
+    } else if(value == PyExc_StopIteration) {
+    } else if(value == Py_Ellipsis) {
+    } else if(value == Py_False) {
+    } else if(value == Py_True) {
+    } else if(PyInt_Check(value)) {
+    } else if(PyLong_Check(value)) {
+    } else if(PyFloat_Check(value)) {
+    } else if(PyString_Check(value)) {
+    } else if(PyTuple_Check(value)) {
+    } else if(PyList_Check(value)) {
+    } else if(PyCode_Check(value)) {
+    } else if(PyObject_CheckReadBuffer(value)) {
+    } else {
+      // This is unknown type (most likely a function)
+      // Note that we also don't support complex and unicode objects because
+      //  they might be not supported by Python.
+      continue;
+    }
+    // Add the object to dict
+    boDebug() << k_funcinfo << "Saving object '" << PyString_AsString(key) << "'" << endl;
+    PyDict_SetItem(savedict, key, value);
+  }
+
+  // Save all items in savedict
+  PyObject* data = PyMarshal_WriteObjectToString(savedict);
+  if(!data)
+  {
+    boError() << k_funcinfo << "null data!" << endl;
+    PyErr_Print();
+    return false;
+  }
+
+  boDebug() << k_funcinfo << "Data string length is " << PyString_Size(data) << endl;
+
+  stream << mLoadedScripts;
+  // We can't just stream PyString_AsString(data), because it might contain
+  //  NULL bytes.
+  stream.writeBytes(PyString_AsString(data), PyString_Size(data));
+
+  boDebug() << k_funcinfo << "END" << endl;
+  return true;
+}
+
+bool PythonScript::load(QDataStream& stream)
+{
+  // TODO: make sure no script is loaded
+
+  stream >> mLoadedScripts;
+  char* data;
+  unsigned int datalen;
+  stream.readBytes(data, datalen);
+
+  // Load dict object from data
+  PyObject* dict = PyMarshal_ReadObjectFromString(data, datalen);
+  if(!dict)
+  {
+    boError() << k_funcinfo << "Could not load dict!" << endl;
+    return false;
+  }
+
+  // Load script
+  loadScriptFromString(mLoadedScripts);
+  // Load dict
+  PyDict_Merge(mDict, dict, true);
+
+  delete[] data;
+
+  return true;
 }
 
 /*****  Player functions  *****/

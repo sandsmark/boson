@@ -101,6 +101,15 @@ class BosonScript
     virtual void init() = 0;
 
     /**
+     * Loads script and variables from stream.
+     **/
+    virtual bool load(QDataStream& stream) = 0;
+    /**
+     * Saves script and variables to specified stream.
+     **/
+    virtual bool save(QDataStream& stream) const = 0;
+
+    /**
      * Calls function with given name in the script
      **/
     virtual void callFunction(const QString& function) = 0;
