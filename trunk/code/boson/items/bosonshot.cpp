@@ -81,7 +81,7 @@ BosonShot::BosonShot(const BosonWeaponProperties* prop, Player* owner, BosonCanv
   move(pos[0], pos[1], pos[2]);
   setAnimated(true);
   setRotation(rotationToPoint(mVelo[0], mVelo[1]));
-  mZ = pos.z();
+  mZ = 0; // For parable calculations only, must be 0 at the beginning
   // Particle systems
   mFlyParticleSystems = prop->newFlyParticleSystems(pos, -rotation());
   canvas->addParticleSystems(mFlyParticleSystems);
@@ -90,16 +90,19 @@ BosonShot::BosonShot(const BosonWeaponProperties* prop, Player* owner, BosonCanv
 
 void BosonShot::advance(unsigned int phase)
 {
+  // Call BosonItem advance method
   BosonItem::advance(phase);
-  float factor = mStep / (float)mTotalSteps - 0.5;  // Factor will be in range -0.25 to 0.25
+  // Calculate parable height at current step
+  float factor = mStep / (float)mTotalSteps - 0.5;  // Factor will be in range -0.5 to 0.5
   factor = -4 * (factor * factor) + 1;  // Factor is now  0 ... 1 ... 0  depending of current step
-  float newZ = (mProp->maxHeight() * factor) * BO_TILE_SIZE;
-  moveBy(mVelo[0], mVelo[1], mVelo[2] + (newZ - mZ));
-  setXRotation(rotationToPoint(mLength / mTotalSteps, newZ - mZ + mVelo[2]) - 90 );
+  // How much will be added to current z position
+  float addZ = (mProp->maxHeight() * factor) * BO_TILE_SIZE;
+  moveBy(mVelo[0], mVelo[1], mVelo[2] + (addZ - mZ));
+  setXRotation(rotationToPoint(mLength / mTotalSteps, addZ - mZ + mVelo[2]) - 90 );
   // Move all "fly" particles.
-  BoVector3 move(mVelo[0], -(mVelo[1]), mVelo[2] + (newZ - mZ));
+  BoVector3 move(mVelo[0], -(mVelo[1]), mVelo[2] + (addZ - mZ));
   move.scale(1 / (float)BO_TILE_SIZE);
-  mZ = newZ;
+  mZ = addZ;
   QPtrListIterator<BosonParticleSystem> it(mFlyParticleSystems);
   while(it.current())
   {

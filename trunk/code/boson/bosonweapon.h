@@ -36,11 +36,20 @@ class QString;
 
 
 /**
+ * @short This class holds properties for @ref BosonWeapon
+ *
+ * Properties stored here include weapon's range, damage, what it can shoot at
+ * etc.
+ *
  * @author Rivo Laks <rivolaks@hot.ee>
  **/
 class BosonWeaponProperties : public PluginProperties
 {
   public:
+    /**
+     * Constructs new BosonWeaponProperties. You must call @ref loadPlugin
+     * before doing anything
+     **/
     BosonWeaponProperties(const UnitProperties* prop);
     ~BosonWeaponProperties();
 
@@ -64,7 +73,7 @@ class BosonWeaponProperties : public PluginProperties
     /**
      * The damage this unit makes to other units. Negative values means
      * repairing
-    **/
+     **/
     long int damage() const  { return mDamage; };
     /**
      * @return Damage range of missile of this unit, e.g. range in what units will be damaged
@@ -74,14 +83,37 @@ class BosonWeaponProperties : public PluginProperties
      * @return Speed of missile of this unit (per second) or 0 if speed is infinite
      **/
     unsigned long int speed() const  { return mSpeed; };
+    /**
+     * @return Filename of 3d model of shot of this weapon.
+     * Only used in unit editor
+     **/
     QString modelFileName() const  { return mModelFileName; };
+    /**
+     * @return Name of unit. You can show it to user
+     **/
     QString weaponName() const  { return mName; };
+    /**
+     * @return Offset of this weapon
+     * Offset is relative to the center point of unit and is used when creating
+     * new shot.
+     **/
     BoVector3 offset() const  { return mOffset;};
+    /**
+     * @return Height of parable that shot of this weapon flies along
+     **/
     float maxHeight() const  { return mMaxHeight; };
 
     inline SpeciesTheme* theme() const  { return mTheme; };
     inline BosonModel* model() const  { return mModel; };
 
+    
+    /**
+     * Creates new shot
+     * @param attacker Unit that fired this shot
+     * @param pos Position (center point) of attacker. Note that offset is added to this value
+     * @param target Position of shot's target point
+     * @return Created shot. Note that it's not added to canvas.
+     **/
     BosonShot* newShot(Unit* attacker, BoVector3 pos, BoVector3 target) const;
 
     QPtrList<BosonParticleSystem> newShootParticleSystems(BoVector3 pos, float rotation) const;
@@ -143,6 +175,11 @@ class BosonWeaponProperties : public PluginProperties
 
 
 /**
+ * @short Represents a weapon of an unit
+ *
+ * This class represents one weapon of unit. It's specific to unit, so you have
+ * to create one BosonWeapon object for every weapon in every unit.
+ *
  * @author Rivo Laks <rivolaks@hot.ee>
  **/
 class BosonWeapon : public UnitPlugin
@@ -177,7 +214,13 @@ class BosonWeapon : public UnitPlugin
       reload();
     }
 
+    /**
+     * @return Whether this weapon can shoot at unit u
+     **/
     bool canShootAt(Unit* u) const;
+    /**
+     * @return Whether this weapon is reloaded (ready to fire)
+     **/
     inline bool reloaded() const  { return (mReloadCounter == 0); };
 
     inline const BosonWeaponProperties* properties() const  { return mProp; };
