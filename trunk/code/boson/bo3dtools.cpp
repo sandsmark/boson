@@ -34,6 +34,8 @@
 
 // Degrees to radians conversion (AB: from mesa/src/macros.h)
 #define DEG2RAD (M_PI/180.0)
+// And radians to degrees conversion
+#define RAD2DEG (180.0/M_PI)
 
 
 /*****  Misc methods  *****/
@@ -73,7 +75,7 @@ float rotationToPoint(float x, float y)
     }
   }
 
-  return (atan(arg) * (360 / 6.2831853)) + add;
+  return (atan(arg) * RAD2DEG) + add;
 }
 
 void pointByRotation(float* x, float* y, const float angle, const float radius)
@@ -105,7 +107,7 @@ void pointByRotation(float* x, float* y, const float angle, const float radius)
   }
   double tmpx, tmpy;
   tmpy = 1.0;
-  tmpx = tan(angle / (360 / 6.2831853));
+  tmpx = tan(angle / RAD2DEG);
   double length = sqrt(tmpx * tmpx + tmpy * tmpy);
   tmpx = tmpx / length * radius;
   tmpy = tmpy / length * radius;

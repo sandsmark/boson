@@ -776,6 +776,7 @@ void BosonBigDisplayBase::paintGL()
 
 	BosonItem* item = *it;
 
+	// FIXME: can't we use BoVector3 and it's conversion methods here?
 	GLfloat x = (item->x() + item->width() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE;
 	GLfloat y = -((item->y() + item->height() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE);
 	GLfloat z = item->z(); // this is already in the correct format!

@@ -24,6 +24,8 @@
 
 #include <lib3ds/types.h>
 
+#include "defines.h"
+
 class QString;
 class KConfig;
 class QDataStream;
@@ -72,15 +74,21 @@ class BoVector3
     inline void operator+=(BoVector3 v)  { mData[0] += v.mData[0]; mData[1] += v.mData[1]; mData[2] += v.mData[2]; };
     inline GLfloat operator[](int i) const  { return mData[i]; };
 
-    inline BoVector3 operator+(const BoVector3& v)  { return BoVector3(mData[0] + v.mData[0], mData[1] + v.mData[1], mData[2] + v.mData[2]); };
-    inline BoVector3 operator-(const BoVector3& v)  { return BoVector3(mData[0] - v.mData[0], mData[1] - v.mData[1], mData[2] - v.mData[2]); };
-    inline BoVector3 operator*(float f)  { return BoVector3(mData[0] * f, mData[1] * f, mData[2] * f); };
-    inline BoVector3 operator-()  { return BoVector3(-mData[0], -mData[1], -mData[2]); };
+    inline BoVector3 operator+(const BoVector3& v) const  { return BoVector3(mData[0] + v.mData[0], mData[1] + v.mData[1], mData[2] + v.mData[2]); };
+    inline BoVector3 operator-(const BoVector3& v) const  { return BoVector3(mData[0] - v.mData[0], mData[1] - v.mData[1], mData[2] - v.mData[2]); };
+    inline BoVector3 operator*(float f) const  { return BoVector3(mData[0] * f, mData[1] * f, mData[2] * f); };
+    inline BoVector3 operator/(float f) const  { return BoVector3(mData[0] / f, mData[1] / f, mData[2] / f); };
+    inline BoVector3 operator-() const  { return BoVector3(-mData[0], -mData[1], -mData[2]); };
+
+    // Conversion from one coordinate system to another. Should we use BO_GL_CELL_SIZE here?
+    inline void canvasToCell()  { mData[0] /= (float)BO_TILE_SIZE; mData[1] /= (float)BO_TILE_SIZE; };
+    inline void cellToCanvas()  { mData[0] *= (float)BO_TILE_SIZE; mData[1] *= (float)BO_TILE_SIZE; };
+    inline void canvasToOGL()  { mData[0] /= (float)BO_TILE_SIZE; mData[1] = -(mData[1] / (float)BO_TILE_SIZE); };
 
     /**
      * @return Whether all components of this vector are zeros
      **/
-    inline bool isNull()  { return ((mData[0] == 0.0) && (mData[1] == 0.0) && (mData[2] == 0.0)); };
+    inline bool isNull() const  { return ((mData[0] == 0.0) && (mData[1] == 0.0) && (mData[2] == 0.0)); };
 
     /**
      * Create 3 vectors from @p face in @p mesh and place them into @p v.

@@ -75,6 +75,7 @@ BosonShot::BosonShot(const BosonWeaponProperties* prop, Player* owner, BosonCanv
   // First set the velocity to length of whole trip (for calculations)
   mVelo = target - pos;
   mLength = mVelo.length();
+  mMaxHeight = prop->height() * (mLength / BO_TILE_SIZE);
   //boDebug(350) << "MISSILE: " << k_funcinfo << "    Length of trip: " << length << endl;
   // Calculate number of steps
   mTotalSteps = (int)ceilf(mLength / prop->speed()) - 1;
@@ -114,14 +115,15 @@ void BosonShot::advanceMoveInternal()
   float factor = mStep / (float)mTotalSteps - 0.5;  // Factor will be in range -0.5 to 0.5
   factor = -4 * (factor * factor) + 1;  // Factor is now  0 ... 1 ... 0  depending of current step
   // How much will be added to current z position
-  float addZ = (mProp->maxHeight() * factor) * BO_TILE_SIZE;
-  setVelocity(mVelo[0], mVelo[1], mVelo[2] + (addZ - mZ));
-  setXRotation(rotationToPoint(mLength / mTotalSteps, addZ - mZ + mVelo[2]) - 90 );
+  float addZ = (mMaxHeight * factor);
+  float zvelo = mVelo[2] + (addZ - mZ);
+  mZ = addZ;
+  setVelocity(mVelo[0], mVelo[1], zvelo);
+  setXRotation(rotationToPoint(mParticleVelo, zvelo) - 90 );
   //AB: maybe reimplement moveBy() for this?
   // Move all "fly" particles.
-  BoVector3 move(mVelo[0], -(mVelo[1]), mVelo[2] + (addZ - mZ));
-  move.scale(1 / (float)BO_TILE_SIZE);
-  mZ = addZ;
+  BoVector3 move(mVelo[0], mVelo[1], zvelo);
+  move.canvasToOGL();
   QPtrListIterator<BosonParticleSystem> it(mFlyParticleSystems);
   while(it.current())
   {
@@ -132,7 +134,7 @@ void BosonShot::advanceMoveInternal()
     }
     BoVector3 newpos(it.current()->position());
     newpos.add(move);
-    it.current()->setPosition(newpos);
+    it.current()->setPosition(it.current()->position() + move);
     ++it;
   }
   if(mStep >= mTotalSteps)

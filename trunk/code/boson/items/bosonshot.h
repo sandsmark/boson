@@ -92,6 +92,7 @@ class BosonShot : public BosonItem
     float mLength;
     float mZ;
     float mParticleVelo;
+    float mMaxHeight;
     Player* mOwner;
     const BosonWeaponProperties* mProp;
     QPtrList<BosonParticleSystem> mFlyParticleSystems;

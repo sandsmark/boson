@@ -57,9 +57,9 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg, bool full)
   mDamageRange = (float)(cfg->readDoubleNumEntry("DamageRange", 1));
   mCanShootAtAirUnits = cfg->readBoolEntry("CanShootAtAirUnits", false);
   mCanShootAtLandUnits = cfg->readBoolEntry("CanShootAtLandUnits", false);
-  mMaxHeight = (float)(cfg->readDoubleNumEntry("MaxHeight", 1));
+  mHeight = (float)(cfg->readDoubleNumEntry("Height", 0.25));
   mOffset = BoVector3::load(cfg, "Offset");
-  mOffset.scale(BO_TILE_SIZE);
+  mOffset.cellToCanvas();
   mShootParticleSystemIds = BosonConfig::readUnsignedLongNumList(cfg, "ShootParticles");
   mFlyParticleSystemIds = BosonConfig::readUnsignedLongNumList(cfg, "FlyParticles");
   mHitParticleSystemIds = BosonConfig::readUnsignedLongNumList(cfg, "HitParticles");
@@ -93,9 +93,9 @@ void BosonWeaponProperties::savePlugin(KSimpleConfig* cfg)
   cfg->writeEntry("DamageRange", mDamageRange);
   cfg->writeEntry("CanShootAtAirUnits", mCanShootAtAirUnits);
   cfg->writeEntry("CanShootAtLandUnits", mCanShootAtLandUnits);
-  cfg->writeEntry("MaxHeight", (double)mMaxHeight);
+  cfg->writeEntry("Height", (double)mHeight);
   BoVector3 offset(mOffset);
-  offset.scale(1 / (float)BO_TILE_SIZE);
+  offset.canvasToCell();
   offset.save(cfg, "Offset");
   BosonConfig::writeUnsignedLongNumList(cfg, "ShootParticles", mShootParticleSystemIds);
   BosonConfig::writeUnsignedLongNumList(cfg, "FlyParticles", mFlyParticleSystemIds);
@@ -115,7 +115,7 @@ void BosonWeaponProperties::reset()
  mDamageRange = 1;
  mCanShootAtAirUnits = false;
  mCanShootAtLandUnits = false;
- mMaxHeight = 1;
+ mHeight = 0.25;
  mOffset = BoVector3();
  mShootParticleSystemIds.clear();
  mFlyParticleSystemIds.clear();
