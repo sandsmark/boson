@@ -27,7 +27,7 @@ UnitWidth=1.5
 Weapons=1
 
 [OpenGL]
-FrameRangeIdle=50
+FrameRangeIdle=49
 FrameSpeedIdle=1
 FrameStartIdle=0
 
