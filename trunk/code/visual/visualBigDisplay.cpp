@@ -64,7 +64,7 @@ void visualBigDisplay::viewportMouseMoveEvent(QMouseEvent *e)
 		case visualTopLevel::SELECT_NONE:
 			break;
 		case visualTopLevel::SELECT_RECT:
-			p.begin(this);
+			p.begin( viewport() );
 			p.setPen(pen);
 			p.setRasterOp(XorROP);
 			/* erase previous rect */
