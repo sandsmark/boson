@@ -700,6 +700,10 @@ void BosonBigDisplayBase::paintGL()
  glEnable(GL_TEXTURE_2D);
  if (boConfig->useLight()) {
 	glEnable(GL_LIGHTING);
+	glEnable(GL_COLOR_MATERIAL);
+	glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
+ } else {
+	glDisable(GL_COLOR_MATERIAL);
  }
  renderCells();
  boProfiling->renderCells(false);
@@ -3307,7 +3311,7 @@ QImage BosonBigDisplayBase::screenShot()
  glReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
  QImage image(w, h, 32);
  for (int y = 0; y < h; y++) {
-	QRgb* line = (QRgb*)image.scanLine(y);
+	QRgb* line = (QRgb*)image.scanLine(y); // AB: use setPixel() instead of scanLine() ! -> endianness must be handled
 	int opengl_y = h - y;
 	for (int x = 0; x < w; x++) {
 		unsigned char* pixel = &buffer[(opengl_y * w + x) * 4];
