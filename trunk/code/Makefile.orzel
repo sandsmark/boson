@@ -3,6 +3,11 @@
 all: Makefile
 	make all
 
+re: re_pre all
+
+re_pre:
+	rm -f config.cache configure Makefile.in Makefile
+
 Makefile: configure
 	./configure --with-qt-dir=/opt/be/qt --with-kde-dir=/opt/be  --prefix=/opt/be
 
