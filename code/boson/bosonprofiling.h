@@ -41,14 +41,20 @@ class BosonProfiling
 {
 public:
 	enum ProfilingEvent {
-		LoadGameData1, // currently unused
-		LoadTiles,
-		LoadGameData3,
-		LoadModel,
-		LoadModelTextures,
-		LoadModelDisplayLists,
-		LoadModelDummy,
-		AddUnitsXML
+		LoadGameData1 = 0, // currently unused
+		LoadTiles = 1,
+		LoadGameData3 = 2,
+		LoadModel = 3,
+		LoadModelTextures = 4,
+		LoadModelDisplayLists = 5,
+		LoadModelDummy = 6,
+		AddUnitsXML = 7,
+		SaveGameToXML = 20,
+		SaveKGameToXML = 21,
+		SavePlayersToXML = 22,
+		SavePlayerToXML = 23,
+		SavePlayFieldToXML = 24,
+		SaveGameToXMLWriteFile = 25
 	};
 	BosonProfiling();
 	BosonProfiling(const BosonProfiling& profiling);
@@ -187,6 +193,64 @@ QDataStream& operator>>(QDataStream& s, RenderGLTimes& t);
 QDataStream& operator<<(QDataStream& s, const ProfileSlotAdvance& t);
 QDataStream& operator>>(QDataStream& s, ProfileSlotAdvance& t);
 
+
+/**
+ * This class can help you to profile certaint events. You provide the number of
+ * the event, just like you would do with @ref BosonProfiling::start. The
+ * constructor of this class then calls @ref BosonProfiling::start and the
+ * destructor will call @ref BosonProfiling::stop.
+ *
+ * This can be helpful if you have a few return statements in that function and
+ * don't want to call @ref BosonProfiling::stop on your own whenever the
+ * function returns. Create an object on the stack and it will get destroyed
+ * once the functions returns. Example:
+ * <pre>
+ * void profileMe()
+ * {
+ *  BosonProfiler profiler(MyProfilingEvent);
+ *  doFunnyStuff();
+ *  doEvenMoreStuff();
+ *  if (weWantToReturn()) {
+ *      return;
+ *  }
+ *  doAgainALotOfStuff();
+ * }
+ * </pre>
+ * The event MyProfilingEvent will now give useful data on the time spent in
+ * profileMe().
+ *
+ * If you have a better name for this class: feel free to tell me!
+ **/
+class BosonProfiler
+{
+public:
+	BosonProfiler(int event)
+		: mEvent(event),
+		mEventStopped(false)
+	{
+		boProfiling->start(mEvent);
+	}
+	~BosonProfiler()
+	{
+		if (!mEventStopped) {
+			boProfiling->stop(mEvent);
+		}
+	}
+
+	/**
+	 * This stops profiling the event immediately. The destructor will do
+	 * nothing when you call this.
+	 **/
+	void stop()
+	{
+		boProfiling->stop(mEvent);
+		mEventStopped = true;
+	}
+
+private:
+	int mEvent;
+	bool mEventStopped;
+};
 
 
 #endif

@@ -540,6 +540,24 @@ QString BosonProfilingDialog::profilingName(int profilingEvent) const
 	case BosonProfiling::AddUnitsXML:
 		name = i18n("AddUnitsXML");
 		break;
+	case BosonProfiling::SaveGameToXML:
+		name = i18n("SaveGameToXML");
+		break;
+	case BosonProfiling::SaveKGameToXML:
+		name = i18n("SaveKGameToXML");
+		break;
+	case BosonProfiling::SavePlayersToXML:
+		name = i18n("SavePlayersToXML");
+		break;
+	case BosonProfiling::SavePlayerToXML:
+		name = i18n("SavePlayerToXML");
+		break;
+	case BosonProfiling::SavePlayFieldToXML:
+		name = i18n("SavePlayFieldToXML");
+		break;
+	case BosonProfiling::SaveGameToXMLWriteFile:
+		name = i18n("SaveGameToXMLWriteFile");
+		break;
 	default:
 		name = i18n("Unknown %1").arg(profilingEvent);
 		break;

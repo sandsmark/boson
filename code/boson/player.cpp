@@ -29,6 +29,7 @@
 #include "upgradeproperties.h"
 #include "unitpropertyhandler.h"
 #include "bosonpropertyxml.h"
+#include "bosonprofiling.h"
 #include "bodebug.h"
 
 #include <kgame/kgame.h>
@@ -682,6 +683,8 @@ bool Player::advanceFlag() const
 
 bool Player::saveAsXML(QDomElement& root)
 {
+ BosonProfiler profiler(BosonProfiling::SavePlayerToXML);
+
  // AB: probably we'll never use this... (KGame should take care of the id)
  root.setAttribute(QString::fromLatin1("Id"), id());
 
