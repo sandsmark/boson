@@ -62,7 +62,8 @@ public:
 		IdHealth = KGamePropertyBase::IdUser + 0,
 		IdArmor = KGamePropertyBase::IdUser + 1,
 		IdShields = KGamePropertyBase::IdUser + 2,
-		IdSightRange = KGamePropertyBase::IdUser + 3,
+		IdShieldReloadCounter = KGamePropertyBase::IdUser + 3,
+		IdSightRange = KGamePropertyBase::IdUser + 5,
 		IdWork = KGamePropertyBase::IdUser + 10,
 		IdAdvanceWork = KGamePropertyBase::IdUser + 11,
 		IdDeletionTimer = KGamePropertyBase::IdUser + 15,
@@ -354,6 +355,16 @@ public:
 	 **/
 	virtual bool saveScenario(QDomElement& node);
 
+protected:
+	/**
+	 * Should get called in every @ref Unit::advance call. This counts the
+	 * calls and when the count exceed a certain value (currently 10) the
+	 * @ref shields will be increased by 1.
+	 * @param by How much the advance counter should get increased. can be
+	 * used to allow faster shield reloading times.
+	 **/
+	void reloadShields(int by = 1);
+
 private:
 	Player* mOwner;
 	unsigned long int mId; // not a KGameProperty, to make saving to XML (i.e. scenario files) more easy.
@@ -362,6 +373,7 @@ private:
 
 	KGameProperty<unsigned long int> mArmor;
 	KGameProperty<unsigned long int> mShields;
+	KGameProperty<unsigned long int> mShieldReloadCounter;
 	KGameProperty<unsigned int> mDeletionTimer;
 	KGameProperty<unsigned long int> mHealth;
 	KGameProperty<unsigned int> mSightRange;

@@ -55,7 +55,6 @@ public:
 	UnitPrivate()
 	{
 		mTarget = 0;
-		shieldReloadCounter = 0;
 		mSmokeParticleSystem = 0;
 		mActiveWeapon = 0;
 	}
@@ -72,8 +71,7 @@ public:
 	// network game.
 	Unit* mTarget;
 
-	int shieldReloadCounter; // FIXME: should be a KGameProperty! And in UnitBase...
-	int wantedDirection;
+	int wantedDirection;//AB: KGameProperty?
 
 	QPtrList<UnitPlugin> mPlugins; // you don't need to save/load this - gets constructed in the c'tor anyway.
 
@@ -341,15 +339,10 @@ void Unit::advance(unsigned int advanceCount)
 	++it;
  }
 // Reload shields
- if (d->shieldReloadCounter >= 10) {
-	if (shields() < unitProperties()->shields()) {
-		setShields(shields() + 1);  // Maybe increase by more than 1. Or make configurable (ShieldsReload=xxx)
-	}
-	d->shieldReloadCounter = 0;
- } else {
-	d->shieldReloadCounter++;
- }
- BosonItem::advance(advanceCount); // animation
+ reloadShields(); // AB: maybe we make that method inline one day.
+
+// Mostly animation:
+ BosonItem::advance(advanceCount);
 }
 
 void Unit::advanceNone(unsigned int advanceCount)

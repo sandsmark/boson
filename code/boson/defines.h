@@ -36,6 +36,7 @@
 #define MIN_GAME_SPEED 2 // the advance period - higher means slower
 
 #define REMOVE_WRECKAGES_TIME 10 // remove wreckages after a certain time (after 10 secs with normal game speed)
+#define MAX_SHIELD_RELOAD_COUNT 10 // number of advance calls after that shield get reloaded by 1
 
 #define BUILD_RANGE 5 * BO_TILE_SIZE // units can be placed within 10 tiles from its factory
 
