@@ -43,7 +43,7 @@ main_area_begin();
 // Contacts
 draw_bigbox_begin("Status");
 draw_bigbox_text("Most recent version, 0.9.1, was released on 16th November 2003.<br>
-  Next version will be 0.10, but release date it not yet set.
+  Next version, which should be released in one or two weeks will be 0.10.
   <br><br>");
 
 //draw_bigbox_subheader("<a name=\"features\"></a>Feature list");
@@ -143,10 +143,7 @@ draw_bigbox_text("What has been changed since 0.9.1:
 draw_bigbox_text("This is a list of features that we consider as
   &quot;to-be-done&quot; for the next release.
   <h2>TODO</h2>
-  <ul>
-    <li>Convert playfields in data module to use the new file format without
-    conversion on startup</li>
-  </ul>");
+ ");
 draw_bigbox_end();
 main_area_end();
 
