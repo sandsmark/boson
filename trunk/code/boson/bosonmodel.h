@@ -124,8 +124,6 @@ public:
 		return mHidden[index];
 	}
 
-	void setDisplayList(GLuint l) { mDisplayList = l; }
-	GLuint displayList() const { return mDisplayList; }
 	float depthMultiplier() const { return mDepthMultiplier; }
 	void setDepthMultiplier(float d) { mDepthMultiplier = d; }
 	void setRadius(float r) { mRadius = r; }
@@ -149,7 +147,6 @@ private:
 	void copyMeshes(const BoFrame& frame, unsigned int* meshes, unsigned int count);
 
 private:
-	GLuint mDisplayList;
 	float mDepthMultiplier;
 	float mRadius; // TODO
 
@@ -224,16 +221,6 @@ public:
 	 * constructed.
 	 **/
 	void generateConstructionFrames();
-
-	/**
-	 * Create all display lists for all frames in this model (including the
-	 * construction steps, if any).
-	 *
-	 * This should get called <em>after</em> all other loading methods (e.g.
-	 * @ref generateConstructionFrames) have been called.
-	 **/
-	void createDisplayLists(const QColor* teamColor);
-
 
 	/**
 	 * @return The frame @p frame that resideds in the .3ds file. These are

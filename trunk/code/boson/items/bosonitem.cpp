@@ -127,7 +127,6 @@ BosonItem::BosonItem(Player* owner, BosonModel* model, BosonCanvas* canvas)
  mXRotation = 0.0f;
  mYRotation = 0.0f;
  mGLDepthMultiplier = 1.0f;
- mDisplayList = 0;
  mFrame = 0;
  mGLConstructionStep = 0;
  mAnimationCounter = 0;
@@ -270,7 +269,7 @@ bool BosonItem::bosonCollidesWith(BosonItem* item) const
  //  check if this item's center isn't inside other item's bounding rect
  // FIXME: maybe we need same for items. ATM, units can't diagonally cross tiles
  //  with mines
- return item->boundingRectAdvanced().contains(QPoint(x() + xVelocity() + width() / 2, y() + yVelocity() + height() / 2), true);
+ return item->boundingRectAdvanced().contains(QPoint((int)(x() + xVelocity() + width() / 2), (int)(y() + yVelocity() + height() / 2)), true);
 }
 
 void BosonItem::setAnimated(bool a)
@@ -380,11 +379,6 @@ void BosonItem::setCurrentFrame(BoFrame* frame)
  // inline functions (or with direct access). otherwise we'd have to #include
  // bosonmodel.h in bosonitem.h (-> bad)
 
-
- // TODO: BoFrame should support display lists with teamcolor! we call
- // frame->displayList(teamColor()) and BoFrame returns the list for the desired
- // color.
- setDisplayList(frame->displayList());
  setGLDepthMultiplier(frame->depthMultiplier());
 }
 
@@ -457,16 +451,7 @@ void BosonItem::renderItem(unsigned int lod)
  BO_CHECK_NULL_RET(mModel);
  BO_CHECK_NULL_RET(mCurrentFrame);
  mModel->enablePointer();
- if (displayList() != 0) {
-#warning FIXME: displaylists and teamcolor!
-	// AB: we should pick the correct displaylist from a map
-	// teamcolor->displaylist!
-	// not here, but in setDisplayList() or friends
-	// FIXME: LOD
-	glCallList(displayList());
- } else {
-	mCurrentFrame->renderFrame(teamColor(), lod);
- }
+ mCurrentFrame->renderFrame(teamColor(), lod);
 }
 
 BosonCollisions* BosonItem::collisions() const
