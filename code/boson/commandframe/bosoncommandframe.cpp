@@ -171,20 +171,14 @@ void BosonCommandFrame::init()
 {
  d = new BosonCommandFramePrivate;
 
-// the construction progress
- d->mConstructionProgress = new BoConstructionProgress(this, unitDisplayBox());
+ d->mUnitActions = new BoActionsWidget(unitActionsBox());
+ unitActionsBox()->show();
 
-// the miner display (minerals/oil)
- d->mMinerWidget = new BoHarvesterWidget(this, unitDisplayBox());
+ initPlugins();
 
-
-// this should be at the end of unitDisplayBox():
- d->mUnitActions = new BoActionsWidget(unitDisplayBox());
-
-// the order buttons
- connect(orderWidget(), SIGNAL(signalProduce(ProductionType, unsigned long int)),
+ connect(selectionWidget(), SIGNAL(signalProduce(ProductionType, unsigned long int)),
 		this, SLOT(slotProduce(ProductionType, unsigned long int)));
- connect(orderWidget(), SIGNAL(signalStopProduction(ProductionType, unsigned long int)),
+ connect(selectionWidget(), SIGNAL(signalStopProduction(ProductionType, unsigned long int)),
 		this, SLOT(slotStopProduction(ProductionType, unsigned long int)));
  connect(d->mUnitActions, SIGNAL(signalAction(int)),
 		this, SIGNAL(signalAction(int)));
@@ -195,11 +189,21 @@ BosonCommandFrame::~BosonCommandFrame()
  delete d;
 }
 
-void BosonCommandFrame::setAction(Unit* unit)
+void BosonCommandFrame::initPlugins()
+{
+// the construction progress
+ d->mConstructionProgress = new BoConstructionProgress(this, unitDisplayBox());
+
+// the miner display (minerals/oil)
+ d->mMinerWidget = new BoHarvesterWidget(this, unitDisplayBox());
+}
+
+void BosonCommandFrame::setSelectedUnit(Unit* unit)
 {
  boDebug() << k_funcinfo << endl;
- BosonCommandFrameBase::setAction(unit);
+ BosonCommandFrameBase::setSelectedUnit(unit);
  if (!selectedUnit()) {
+	// all plugin widgets have been hidden already. same about unit actions.
 	return;
  }
  if (selectedUnit() != unit) {
@@ -209,6 +213,10 @@ void BosonCommandFrame::setAction(Unit* unit)
  Player* owner = unit->owner();
 
  if (d->mConstructionProgress->showUnit(unit)) {
+	// still constructing - hide everything except construction progress
+	hidePluginWidgets();
+	showUnitActions(0);
+	d->mConstructionProgress->show();
 	startStopUpdateTimer();
 	return;
  }
@@ -217,53 +225,79 @@ void BosonCommandFrame::setAction(Unit* unit)
  // TODO: these can be displayed (at least most of them) for groups, too!
  showUnitActions(unit);
 
+ d->mMinerWidget->showUnit(selectedUnit());
+ startStopUpdateTimer();
+}
+
+void BosonCommandFrame::setProduction(Unit* unit)
+{
  boDebug() << k_funcinfo << endl;
 
- if (selectedUnit()->plugin(UnitPlugin::Production)) {
-	if (!selectedUnit()->properties(PluginProperties::Production)) {
-		// must not happen if the units has the production
-		// plugin
-		boError() << k_funcinfo << "no production properties!" << endl;
-		return;
-	}
-	ProductionProperties* pp = (ProductionProperties*)selectedUnit()->properties(PluginProperties::Production);
-	QValueList<QPair<ProductionType, unsigned long int> > produceList;
-
-	// Add units to production list
-	QValueList<unsigned long int> unitsList = selectedUnit()->speciesTheme()->productions(pp->producerList());
-	// Filter out things that player can't actually build (requirements aren't
-	//  met yet)
-	QValueList<unsigned long int>::Iterator it;
-	it = unitsList.begin();
-	while(it != unitsList.end()) {
-		if(owner->canBuild(*it)) {
-			QPair<ProductionType, unsigned long int> pair;
-			pair.first = ProduceUnit;
-			pair.second = *it;
-			produceList.append(pair);
-		}
-		it++;
-	}
-
-	// Add technologies to production list
-	QValueList<unsigned long int> techList = selectedUnit()->speciesTheme()->technologies(pp->producerList());
-	// Filter out things that player can't actually build (requirements aren't
-	//  met yet)
-	QValueList<unsigned long int>::Iterator tit;  // tit = Technology ITerator ;-)
-	for(tit = techList.begin(); tit != techList.end(); tit++) {
-		if((!selectedUnit()->speciesTheme()->technology(*tit)->isResearched()) && (owner->canResearchTech(*tit))) {
-			QPair<ProductionType, unsigned long int> pair;
-			pair.first = ProduceTech;
-			pair.second = *tit;
-			produceList.append(pair);
-		}
-	}
-
-	// Set buttons
-	orderWidget()->setOrderButtons(produceList, owner, (Facility*)unit);
-	orderWidget()->show();
+ BosonCommandFrameBase::setProduction(unit);
+ if (!unit) {
+	return;
  }
- d->mMinerWidget->showUnit(selectedUnit());
+ Player* owner = unit->owner();
+ SpeciesTheme* speciesTheme = unit->speciesTheme();
+ if (!owner) {
+	boError() << k_funcinfo << "NULL owner" << endl;
+	return;
+ }
+ if (!speciesTheme) {
+	boError() << k_funcinfo << "NULL speciestheme" << endl;
+	return;
+ }
+
+ // don't display production items of other players
+ if (localPlayer() != owner) {
+	return;
+ }
+
+ // this unit cannot produce.
+ if (!unit->plugin(UnitPlugin::Production)) {
+	selectionWidget()->hideOrderButtons();
+	return;
+ }
+ ProductionProperties* pp = (ProductionProperties*)unit->properties(PluginProperties::Production);
+ if (!pp) {
+	// must not happen if the units has the production
+	// plugin
+	boError() << k_funcinfo << "no production properties!" << endl;
+	return;
+ }
+ QValueList<QPair<ProductionType, unsigned long int> > produceList;
+
+ // Add units to production list
+ QValueList<unsigned long int> unitsList = speciesTheme->productions(pp->producerList());
+ // Filter out things that player can't actually build (requirements aren't met yet)
+ QValueList<unsigned long int>::Iterator it;
+ it = unitsList.begin();
+ for (; it != unitsList.end(); ++it) {
+	if (owner->canBuild(*it)) {
+		QPair<ProductionType, unsigned long int> pair;
+		pair.first = ProduceUnit;
+		pair.second = *it;
+		produceList.append(pair);
+	}
+ }
+
+ // Add technologies to production list
+ QValueList<unsigned long int> techList = speciesTheme->technologies(pp->producerList());
+ // Filter out things that player can't actually build (requirements aren't met yet)
+ QValueList<unsigned long int>::Iterator tit;  // tit = Technology ITerator ;-)
+ for (tit = techList.begin(); tit != techList.end(); tit++) {
+	if ((!speciesTheme->technology(*tit)->isResearched()) && (owner->canResearchTech(*tit))) {
+		QPair<ProductionType, unsigned long int> pair;
+		pair.first = ProduceTech;
+		pair.second = *tit;
+		produceList.append(pair);
+	}
+ }
+
+ // Set buttons
+ selectionWidget()->setOrderButtons(produceList, owner, (Facility*)unit);
+ selectionWidget()->show();
+
  startStopUpdateTimer();
 }
 
@@ -282,16 +316,16 @@ void BosonCommandFrame::slotUpdate()
 			return;
 		}
 	} else {
-		// construction has been completed=!
-		setAction(selectedUnit());
+		// construction has been completed!
+		setSelectedUnit(selectedUnit());
+		setProduction(selectedUnit());
 	}
  }
- if (!orderWidget()->isHidden()) {
-	ProductionPlugin* production = (ProductionPlugin*)selectedUnit()->plugin(UnitPlugin::Production);
-	if (production && production->hasProduction()) {
-//		slotUpdateProduction(selectedUnit());
-		orderWidget()->productionAdvanced(selectedUnit(), production->productionProgress());
-	}
+
+ ProductionPlugin* production = (ProductionPlugin*)selectedUnit()->plugin(UnitPlugin::Production);
+ if (production && production->hasProduction()) {
+//	slotUpdateProduction(selectedUnit());
+	selectionWidget()->productionAdvanced(selectedUnit(), production->productionProgress());
  }
 }
 
@@ -303,11 +337,10 @@ bool BosonCommandFrame::checkUpdateTimer() const
  if (BosonCommandFrameBase::checkUpdateTimer()) {
 	return true;
  }
- if (!orderWidget()->isHidden()) {
-	ProductionPlugin* production = (ProductionPlugin*)selectedUnit()->plugin(UnitPlugin::Production);
-	if (production && production->hasProduction()) {
-		return true;
-	}
+
+ ProductionPlugin* production = (ProductionPlugin*)selectedUnit()->plugin(UnitPlugin::Production);
+ if (production && production->hasProduction()) {
+	return true;
  }
  return false;
 }

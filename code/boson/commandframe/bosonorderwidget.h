@@ -30,6 +30,7 @@ class Facility;
 class Player;
 class BosonOrderButton;
 class BosonTiles;
+template<class T> class QPtrList;
 
 /**
  * This is scrollable widget in the commandframe that contains buttons of unit
@@ -56,6 +57,7 @@ public:
 	void setOrderButtons(ProductionType type, QValueList<unsigned long int> idList, Player* owner, Facility* factory = 0);
 	void setOrderButtons(QValueList<QPair<ProductionType, unsigned long int> > produceList, Player* owner, Facility* factory = 0);
 
+	void showUnits(QPtrList<Unit> units);
 	void showUnit(Unit* unit); // TODO if this is the only unit -> use slotShowSingleUnit
 
 	void productionAdvanced(Unit* factory, double percentage);

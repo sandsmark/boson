@@ -257,24 +257,28 @@ void BosonOrderWidget::initEditor()
  connect(d->mInverted, SIGNAL(toggled(bool)), this, SLOT(slotRedrawTiles()));
 }
 
-void BosonOrderWidget::showUnit(Unit* unit)
+void BosonOrderWidget::showUnits(QPtrList<Unit> units)
 {
- for (unsigned int i = 0; i < d->mOrderButton.count(); i++) {
-	if (d->mOrderButton[i]->commandType() == BosonOrderButton::CommandUnitSelected) {
-		if (d->mOrderButton[i]->unit() == unit) {
-			boDebug() << "unit already displayed - update..." << endl;
-			d->mOrderButton[i]->slotUnitChanged(unit);
-			return;
-		}
-	} else if (d->mOrderButton[i]->commandType() == BosonOrderButton::CommandNothing) {
-//		boDebug() << "show unit at " << i << endl;
-		d->mOrderButton[i]->setUnit(unit);
-		return;
+ ensureButtons(units.count());
+ unsigned int i;
+ if (d->mOrderButton.count() > units.count()) {
+	for (i = units.count(); i < d->mOrderButton.count(); i++) {
+		d->mOrderButton[i]->setUnit(0);
 	}
  }
- ensureButtons(d->mOrderButton.count() + 1);
-// boDebug() << "display unit" << endl;
- d->mOrderButton[d->mOrderButton.count() - 1]->setUnit(unit);
+ i = 0;
+ QPtrListIterator<Unit> it(units);
+ for (; it.current(); ++it, i++) {
+	if (d->mOrderButton[i]->commandType() == BosonOrderButton::CommandUnitSelected) {
+		if (d->mOrderButton[i]->unit() == it.current()) {
+			boDebug() << "unit already displayed - update..." << endl;
+			d->mOrderButton[i]->slotUnitChanged(it.current());
+		}
+	} else {
+//		boDebug() << "show unit at " << i << endl;
+		d->mOrderButton[i]->setUnit(it.current());
+	}
+ }
 }
 
 void BosonOrderWidget::productionAdvanced(Unit* factory, double percentage)

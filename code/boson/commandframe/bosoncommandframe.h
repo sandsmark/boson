@@ -48,15 +48,26 @@ public slots:
 
 protected:
 	/**
-	 * Sets e.g. the order buttons of possible production items, if this is
-	 * a factory.
+	 * Mostly sets the plugin widget, such as the construction progress bar.
+	 * See also @ref BosonCommandFrameBase::setSelectedUnit.
 	 * @param unit The selected unit
 	 **/
-	virtual void setAction(Unit* unit); // FIXME: set"Action" conflicts with showUnitActions. this is totally different!
+	virtual void setSelectedUnit(Unit* unit);
+
+	/**
+	 * Note: a NULL unit is valid, but will hide all order buttons, i.e.
+	 * don't call this if there are multiple units selected, as they won't
+	 * be shown anymore.
+	 **/
+	virtual void setProduction(Unit* unit);
 
 	virtual void showUnitActions(Unit* unit);
 
 
+	/**
+	 * See @ref BosonCommandFrameBase::checkUpdateTimer. Additionally all
+	 * plugins are checked, whether they want to be updated.
+	 **/
 	virtual bool checkUpdateTimer() const;
 
 protected slots:
@@ -72,6 +83,7 @@ protected slots:
 
 private:
 	void init();
+	void initPlugins();
 
 private:
 	class BosonCommandFramePrivate;

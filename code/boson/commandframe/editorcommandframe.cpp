@@ -34,16 +34,18 @@
 #include <kgameprogress.h>
 
 #include <qlayout.h>
-#include <qlabel.h>
 #include <qvbox.h>
+#include <qscrollview.h>
 
 class EditorCommandFrame::EditorCommandFramePrivate
 {
 public:
 	EditorCommandFramePrivate()
 	{
+		mPlacementWidget = 0;
 	}
 
+	BosonOrderWidget* mPlacementWidget;
 };
 
 EditorCommandFrame::EditorCommandFrame(QWidget* parent) : BosonCommandFrameBase(parent)
@@ -54,12 +56,17 @@ EditorCommandFrame::EditorCommandFrame(QWidget* parent) : BosonCommandFrameBase(
 void EditorCommandFrame::init()
 {
  d = new EditorCommandFramePrivate;
- orderWidget()->initEditor();
+
+ QScrollView* scrollView = addPlacementView();
+ d->mPlacementWidget = new BosonOrderWidget(scrollView->viewport());
+ d->mPlacementWidget->setBackgroundOrigin(WindowOrigin);
+ d->mPlacementWidget->initEditor();
+ scrollView->addChild(d->mPlacementWidget);
 
 // the order buttons
- connect(orderWidget(), SIGNAL(signalProduce(ProductionType, unsigned long int)),
+ connect(d->mPlacementWidget, SIGNAL(signalProduce(ProductionType, unsigned long int)),
 		this, SLOT(slotPlaceUnit(ProductionType, unsigned long int)));
- connect(orderWidget(), SIGNAL(signalPlaceCell(int)),
+ connect(d->mPlacementWidget, SIGNAL(signalPlaceCell(int)),
 		this, SIGNAL(signalPlaceCell(int)));
 }
 
@@ -68,10 +75,33 @@ EditorCommandFrame::~EditorCommandFrame()
  delete d;
 }
 
-void EditorCommandFrame::setAction(Unit* unit)
+void EditorCommandFrame::showUnitActions(Unit* unit)
 {
+ // currently unused in editor mode.
+ // we might display configuration buttons (e.g. for health) here
+ // (maybe they'd fit best in setSelectedUnit() as plugins)
+ if (!unit) {
+	return;
+ }
+}
+
+void EditorCommandFrame::setProduction(Unit* unit)
+{
+ // same as above - we might use this for configuration widgets. but we'll
+ // better use plugins (see setSelectedUnit())
  boDebug() << k_funcinfo << endl;
- BosonCommandFrameBase::setAction(unit);
+ BosonCommandFrameBase::setProduction(0); // will hide all order buttons
+ if (!unit) {
+	return;
+ }
+}
+
+void EditorCommandFrame::setSelectedUnit(Unit* unit)
+{
+ // currently we don't provide any plugins here. just like above we might
+ // provide plugins for configurations.
+ boDebug() << k_funcinfo << endl;
+ BosonCommandFrameBase::setSelectedUnit(unit);
  if (!selectedUnit()) {
 	return;
  }
@@ -79,45 +109,6 @@ void EditorCommandFrame::setAction(Unit* unit)
 	boError() << k_funcinfo << "selectedUnit() != unit" << endl;
 	return;
  }
- Player* owner = unit->owner();
-/*
- if (d->mConstructionProgress->showUnit(unit)) {
-	startStopUpdateTimer();
-	return;
- }
-
- // Show unit's actions (move, attack, stop...
- // TODO: these can be displayed (at least most of them) for groups, too!
- showUnitActions(unit);
-
- boDebug() << k_funcinfo << endl;
-
- if (selectedUnit()->plugin(UnitPlugin::Production)) {
-	if (!selectedUnit()->properties(PluginProperties::Production)) {
-		// must not happen if the units has the production
-		// plugin
-		boError() << k_funcinfo << "no production properties!" << endl;
-		return;
-	}
-	ProductionProperties* pp = (ProductionProperties*)selectedUnit()->properties(PluginProperties::Production);
-	QValueList<unsigned long int> produceList = selectedUnit()->speciesTheme()->productions(pp->producerList());
-	// Filter out things that player can't actually build (requirements aren't
-	//  met yet)
-	QValueList<unsigned long int>::Iterator it;
-	it = produceList.begin();
-	while(it != produceList.end()) {
-		if(!owner->canBuild(*it)) {
-			it = produceList.remove(it);
-		} else {
-			it++;
-		}
-	}
-	orderWidget()->setOrderButtons(produceList, owner, (Facility*)unit);
-	orderWidget()->show();
- }
- d->mMinerWidget->showUnit(selectedUnit());
- startStopUpdateTimer();
- */
 }
 
 void EditorCommandFrame::slotUpdate()
@@ -126,27 +117,6 @@ void EditorCommandFrame::slotUpdate()
  if (!selectedUnit()) {
 	return;
  }
- /*
- if (!d->mConstructionProgress->isHidden()) {
-	if (d->mConstructionProgress->showUnit(selectedUnit())) {
-		if (!selectedUnit()->isFacility()) {
-			// can't happen, since d->mConstructionProgress already
-			// checks this
-			boError() << k_funcinfo << "No facility" << endl;
-			return;
-		}
-	} else {
-		// construction has been completed=!
-		setAction(selectedUnit());
-	}
- }
- if (!orderWidget()->isHidden()) { // FIXME
-	ProductionPlugin* production = (ProductionPlugin*)selectedUnit()->plugin(UnitPlugin::Production);
-	if (!production || !production->hasProduction()) {
-		slotUpdateProduction(selectedUnit());
-	}
- }
- */
 }
 
 bool EditorCommandFrame::checkUpdateTimer() const
@@ -160,32 +130,21 @@ bool EditorCommandFrame::checkUpdateTimer() const
  return false;
 }
 
-void EditorCommandFrame::showUnitActions(Unit* unit)
-{
-}
-
 void EditorCommandFrame::slotSetButtonsPerRow(int b)
 {
  BosonCommandFrameBase::slotSetButtonsPerRow(b);
-// d->mUnitActions->setButtonsPerRow(b);
-}
-
-void EditorCommandFrame::placeCells(CellType type)
-{
- if (!orderWidget()) {
-	boError() << k_funcinfo << "NULL orderwidget" << endl;
-	return;
- }
- hideActions();
-// orderWidget()->hideOrderButtons();
- orderWidget()->setCellType(type);
- orderWidget()->slotRedrawTiles();
- orderWidget()->show();
+ d->mPlacementWidget->setButtonsPerRow(b);
 }
 
 void EditorCommandFrame::setTileSet(BosonTiles* t)
 {
- orderWidget()->setTileSet(t);
+ d->mPlacementWidget->setTileSet(t);
+}
+
+void EditorCommandFrame::placeCells(CellType type)
+{
+ d->mPlacementWidget->setCellType(type);
+ d->mPlacementWidget->slotRedrawTiles();
 }
 
 void EditorCommandFrame::placeMobiles(Player* owner)
@@ -199,9 +158,7 @@ void EditorCommandFrame::placeMobiles(Player* owner)
 	boError() << k_funcinfo << "NULL speciestheme" << endl;
 	return;
  }
- hideActions();
- orderWidget()->setOrderButtons(ProduceUnit, theme->allMobiles(), owner);
- orderWidget()->show();
+ d->mPlacementWidget->setOrderButtons(ProduceUnit, theme->allMobiles(), owner);
 }
 
 void EditorCommandFrame::placeFacilities(Player* owner)
@@ -215,8 +172,6 @@ void EditorCommandFrame::placeFacilities(Player* owner)
 	boError() << k_funcinfo << "NULL speciestheme" << endl;
 	return;
  }
- hideActions();
- orderWidget()->setOrderButtons(ProduceUnit, theme->allFacilities(), owner);
- orderWidget()->show();
+ d->mPlacementWidget->setOrderButtons(ProduceUnit, theme->allFacilities(), owner);
 }
 
