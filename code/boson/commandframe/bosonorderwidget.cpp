@@ -60,14 +60,14 @@ public:
 	QComboBox* mTransRef;
 	QCheckBox* mInverted;
 	BosonTiles* mTiles;
-	QString mTilesDir;
 
-	OrderType mOrderType; // plain tiles, facilities, mob units, ...
+	CellType mCellType; // plain tiles, small tiles, ...
 };
 
 BosonOrderWidget::BosonOrderWidget(QWidget* parent) : QWidget(parent)
 {
  d = new BosonOrderWidgetPrivate;
+ d->mCellType = CellPlain;
 }
 
 BosonOrderWidget::~BosonOrderWidget()
@@ -178,11 +178,12 @@ void BosonOrderWidget::hideOrderButtons()
 void BosonOrderWidget::slotRedrawTiles()
 {
  bool inverted = d->mInverted->isChecked();
+ kdDebug() << k_funcinfo << endl;
  Cell::TransType trans = (Cell::TransType)d->mTransRef->currentItem();
  // trans is one of TRANS_GW, TRANS_GD, TRANS_DW, TRANS_DWD ans specifies the
  // tile type (desert/water and so on)
- switch (d->mOrderType) {
-	case OrderPlainTiles:
+ switch (d->mCellType) {
+	case CellPlain:
 		hideOrderButtons();
 		ensureButtons(Cell::GroundLast - 1);
 		for (int i = 0; i < 5; i++) {
@@ -190,7 +191,7 @@ void BosonOrderWidget::slotRedrawTiles()
 			d->mOrderButton[i]->setCell(groundType, d->mTiles);
 		}
 		break;
-	case OrderSmall:
+	case CellSmall:
 		hideOrderButtons();
 		ensureButtons(9);
 		for (int i = 0; i < 9; i++) {
@@ -198,7 +199,7 @@ void BosonOrderWidget::slotRedrawTiles()
 			d->mOrderButton[i]->setCell(tile, d->mTiles);
 		}
 		break;
-	case OrderBig1:
+	case CellBig1:
 		hideOrderButtons();
 		ensureButtons(4);
 		for (int i = 0; i < 4; i++) {
@@ -207,7 +208,7 @@ void BosonOrderWidget::slotRedrawTiles()
 					d->mTiles);
 		}
 		break;
-	case OrderBig2:
+	case CellBig2:
 		hideOrderButtons();
 		ensureButtons(4);
 		for (int i = 0; i < 4; i++) {
@@ -216,18 +217,15 @@ void BosonOrderWidget::slotRedrawTiles()
 					d->mTiles);
 		}
 		break;
-	case OrderFacilities:
-	case OrderMobiles:
-		break;
 	default:
-		kdError() << "unexpected production index " << d->mOrderType << endl;
+		kdError() << "unexpected production index " << d->mCellType << endl;
 		break;
  }
 }
 
-void BosonOrderWidget::setOrderType(int index)
+void BosonOrderWidget::setCellType(CellType index)
 {
- d->mOrderType = (OrderType)index;
+ d->mCellType = index;
 }
 
 void BosonOrderWidget::initEditor()
@@ -289,24 +287,9 @@ void BosonOrderWidget::productionAdvanced(Unit* factory, double percentage)
  }
 }
 
-void BosonOrderWidget::editorLoadTiles(const QString& tiles)
+void BosonOrderWidget::setTileSet(BosonTiles* tiles)
 {
- QString themePath = KGlobal::dirs()->findResourceDir("data", QString("boson/themes/grounds/%1/index.desktop").arg(tiles)) + QString("boson/themes/grounds/%1").arg(tiles);
- d->mTilesDir = themePath;
- if (d->mTilesDir == QString::null) {
-	kdError() << k_funcinfo << "Cannot find " << tiles << endl;
- } else {
-	QTimer::singleShot(0, this, SLOT(slotEditorLoadTiles()));
- }
-}
-
-void BosonOrderWidget::slotEditorLoadTiles()
-{
- d->mTiles = new BosonTiles();
- if (!d->mTiles->loadTiles(d->mTilesDir)) {
-	kdError() << k_funcinfo << "Could not load " << d->mTilesDir << endl;
-	return;
- }
+ d->mTiles = tiles;
 }
 
 void BosonOrderWidget::resetButton(BosonOrderButton* button)

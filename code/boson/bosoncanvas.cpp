@@ -725,7 +725,10 @@ bool BosonCanvas::canPlaceUnitAt(const UnitProperties* prop, const QPoint& pos, 
 
 BosonTiles* BosonCanvas::tileSet() const
 {
- return d->mLoader->tileSet();
+ if (!d->mMap) {
+	return 0;
+ }
+ return d->mMap->tileSet();
 }
 
 BoItemList BosonCanvas::allBosonItems() const

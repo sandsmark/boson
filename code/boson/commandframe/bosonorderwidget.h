@@ -21,11 +21,13 @@
 
 #include <qwidget.h>
 #include <qvaluelist.h>
+#include "../global.h"
 
 class Unit;
 class Facility;
 class Player;
 class BosonOrderButton;
+class BosonTiles;
 
 /**
  * This is scrollable widget in the commandframe that contains buttons of unit
@@ -56,8 +58,8 @@ public:
 	void productionAdvanced(Unit* factory, double percentage);
 
 	void initEditor();
-	void editorLoadTiles(const QString& dirName);
-	void setOrderType(int);
+	void setCellType(CellType type);
+	void setTileSet(BosonTiles* tileSet);
 
 	/**
 	 * Resets button by setting it's production count to 0 and making it
@@ -70,9 +72,6 @@ public slots:
 
 protected:
 	void resetLayout();
-
-protected slots:
-	void slotEditorLoadTiles();
 
 signals:
 	void signalProduceUnit(unsigned long int unitType);

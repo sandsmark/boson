@@ -28,6 +28,7 @@ class KActionCollection;
 class BosonCursor;
 class BosonCanvas;
 class BosonCommandFrameBase;
+class EditorCommandFrame;
 class BosonBigDisplay;
 class BosonBigDisplayBase;
 class Unit;
@@ -37,6 +38,7 @@ class BoDisplayManager;
 class Boson;
 class BosonMiniMap;
 class BosonPlayField;
+class BosonTiles;
 
 /**
  * This is the actual main widget of boson for the game
@@ -70,6 +72,7 @@ public:
 
 	virtual void saveConfig();
 
+	virtual void initMap();
 	virtual void initPlayer();
 
 public slots:
@@ -82,6 +85,8 @@ protected slots:
 	virtual void slotPlayerLeftGame(KPlayer*);
 
 	void slotOutOfGame(Player* p);
+
+	void slotTileSetChanged(BosonTiles*);
 
 	void slotSavePlayFieldAs();
 	void slotSavePlayField();
@@ -99,6 +104,8 @@ protected:
 	virtual void initKActions();
 	virtual void initConnections();
 	virtual void setBosonXMLFile();
+
+	EditorCommandFrame* editorCmdFrame() const;
 
 private:
 	class EditorWidgetPrivate;

@@ -171,3 +171,22 @@ void EditorCommandFrame::slotSetButtonsPerRow(int b)
  BosonCommandFrameBase::slotSetButtonsPerRow(b);
 // d->mUnitActions->setButtonsPerRow(b);
 }
+
+void EditorCommandFrame::placeCells(CellType type)
+{
+ if (!orderWidget()) {
+	kdError() << k_funcinfo << "NULL orderwidget" << endl;
+	return;
+ }
+ orderWidget()->hideOrderButtons();
+ orderWidget()->setCellType(type);
+ orderWidget()->slotRedrawTiles();
+ orderWidget()->show();
+}
+
+void EditorCommandFrame::setTileSet(BosonTiles* t)
+{
+ orderWidget()->setTileSet(t);
+}
+
+
