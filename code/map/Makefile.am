@@ -29,7 +29,7 @@ noinst_PROGRAMS = createGround boeditor
 #boeditor
 #boeditor_METASOURCES = USE_AUTOMOC
 boeditor_SOURCES = boeditor.cpp
-boeditor_LDADD   = ../common/libboson.a -lkdecore -lkde-qt-addon -lqt
+boeditor_LDADD   = ../common/libboson.a -lkdecore -lqt
 boeditor_LDFLAGS = $(all_libraries) $(KDE_RPATH)
 
 
