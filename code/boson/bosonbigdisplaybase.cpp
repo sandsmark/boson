@@ -565,10 +565,11 @@ void BosonBigDisplayBase::initializeGL()
 // glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
 
+#ifdef BO_LIGHT
  float lightAmb[] = {0.6, 0.6, 0.6, 1.0};
  float lightDif[] = {1.0, 1.0, 1.0, 1.0};
  float lightPos[] = {-500.0, 300.0, 200.0, 1.0};
-#ifdef BO_LIGHT
+
  glLightfv(GL_LIGHT0, GL_AMBIENT, lightAmb);
  glLightfv(GL_LIGHT0, GL_DIFFUSE, lightDif);
  glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
@@ -1379,6 +1380,22 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
  QPoint canvasPos;
  worldToCanvas(posX, posY, posZ, &canvasPos);
 
+ BoAction action;
+ action.setCanvasPos(canvasPos);
+ action.setWorldPos(posX, posY, posZ);
+ if (e->type() != QEvent::Wheel) {
+	action.setWidgetPos(e->pos());
+	action.setControlButton(e->state() & ControlButton);
+	action.setShiftButton(e->state() & ShiftButton);
+	action.setAltButton(e->state() & AltButton);
+ } else {
+	QWheelEvent* w = (QWheelEvent*)e;
+	action.setWidgetPos(w->pos());
+	action.setControlButton(w->state() & ControlButton);
+	action.setShiftButton(w->state() & ShiftButton);
+	action.setAltButton(w->state() & AltButton);
+ }
+
  // our actions are done on Button*Release*, not Press. That conflicts with
  // DblClick, so we store whether the last Press event was an actual press event
  // or a double click.
@@ -1388,135 +1405,36 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 	case QEvent::Wheel:
 	{
 		QWheelEvent* wheel = (QWheelEvent*)e;
+		bool send = false;
 		float delta = -wheel->delta() / 120;//120: see QWheelEvent::delta()
-		int action;
-		if (wheel->state() & ShiftButton) {
-			action = boConfig->mouseWheelShiftAction();
-		} else {
-			action = boConfig->mouseWheelAction();
-		}
-		switch (action) {
-			case CameraMove:
-			{
-				int scrollX, scrollY;
-				if (wheel->state() & ControlButton) {
-					scrollX = width();
-					scrollY = height();
-				} else {
-					scrollX = 20;
-					scrollY = 20;
-					delta *= QApplication::wheelScrollLines();
-				}
-				if (wheel->orientation() == Horizontal) {
-					scrollX *= (int)delta;
-					scrollY = 0;
-				} else {
-					scrollX = 0;
-					scrollY *= (int)delta;
-				}
-				scrollBy(scrollX, scrollY);
-				break;
-			}
-			case CameraZoom:
-				if (wheel->state() & ControlButton) {
-					delta *= 3;
-				} else {
-					delta *= 1; // no effect, btw
-				}
-				camera()->changeZ(delta);
-				cameraChanged();
-				break;
-			case CameraRotate:
-				if (wheel->state() & ControlButton) {
-					delta *= 30;
-				} else {
-					delta *= 10;
-				}
-				camera()->changeRotation(delta);
-				cameraChanged();
-				break;
-			default:
-			{
-				boWarning() << k_funcinfo << "invalid wheel action: " << action << endl;
-				break;
-			}
+		mouseEventWheel(delta, wheel->orientation(), action, stream, &send);
+		if (send) {
+			*eatevent = true;
 		}
 		wheel->accept();
 		break;
 	}
 	case QEvent::MouseMove:
 	{
-		d->mMouseMoveDiff.moveToPos(e->pos());
+		bool send = false;
 		isDoubleClick = NoButton; // when the mouse was pressed twice but the second press is hold down and moved then it isn't a double click anymore.
-		if (e->state() & AltButton) {
-			// The Alt button is the camera modifier in boson.
-			// Better don't do important stuff (like unit movement
-			// or selections) here, since a single push on Alt gives
-			// the focus to the mneu which might be very confusing
-			// during a game.
-			if (e->state() & LEFT_BUTTON) {
-				camera()->changeZ(d->mMouseMoveDiff.dy());
-				cameraChanged();
-			} else if (e->state() & RIGHT_BUTTON) {
-				camera()->changeRotation(d->mMouseMoveDiff.dx());
-				camera()->changeRadius(d->mMouseMoveDiff.dy());
-				cameraChanged();
-			}
-		} else if (e->state() & LEFT_BUTTON) {
-			if (e->state() & ControlButton) {
-				// not yet used
-			} else {
-				// selection rect gets drawn for both - shift
-				// down and no modifier pressed.
-				d->mSelectionRect.setVisible(true);
-				moveSelectionRect(posX, posY, posZ);
-			}
-		} else if (e->state() & RIGHT_BUTTON) {
-			// RMB+MouseMove does *not* depend on CTRL or Shift. the
-			// map is moved in all cases (currently - we have some
-			// free buttons here :))
-			if (boConfig->rmbMove()) {
-				// problem is that QCursor::setPos() also causes
-				// a mouse move event. we can use this hack in
-				// order to check whether it is a real mouse
-				// move event or we caused it here.
-				// TODO: use d->mMouseMoveDiff.x()/y() in
-				// paintGL() for the cursor, not QCursor::pos()
-//				static bool a = false;
-//				if (a) {
-//					a = false;
-//					break;
-//				}
-//				a = true;
-//				QPoint pos = mapToGlobal(QPoint(d->mMouseMoveDiff.oldX(), d->mMouseMoveDiff.oldY()));
-//				QCursor::setPos(pos);
-				d->mMouseMoveDiff.startRMBMove();
-				GLdouble dx, dy;
-				int moveX = d->mMouseMoveDiff.dx();
-				int moveY = d->mMouseMoveDiff.dy();
-				mapDistance(moveX, moveY, &dx, &dy);
-				camera()->moveLookAtBy(dx, dy, 0);
-				cameraChanged();
-			} else {
-				d->mMouseMoveDiff.stop();
-			}
+		mouseEventMove(e->state(), action, stream, &send);
+		if (send) {
+			*eatevent = true;
 		}
-		QPoint widgetPos = mapFromGlobal(QCursor::pos());
-		GLdouble x = 0.0, y = 0.0, z = 0.0;
-		mapCoordinates(widgetPos, &x, &y, &z);
-		worldToCanvas(x, y, z, &(d->mCanvasPos));
-		displayInput()->updatePlacementPreviewData();
-		displayInput()->updateCursor();
 		e->accept();
 		break;
 	}
 	case QEvent::MouseButtonDblClick:
+	{
 		makeActive();
 		isDoubleClick = e->button();
 		// actual actions will happen on ButtonRelease!
 		e->accept();
 		break;
+	}
 	case QEvent::MouseButtonPress:
+	{
 		makeActive();
 		// no action should happen here!
 		isDoubleClick = NoButton;
@@ -1532,81 +1450,229 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 		}
 		e->accept();
 		break;
+	}
 	case QEvent::MouseButtonRelease:
+	{
+		bool send = false;
 		if (e->button() == isDoubleClick) {
-			if (e->button() == LEFT_BUTTON) {
-				// we ignore UnitAction is locked here
-				// currently!
-				Unit* unit = canvas()->findUnitAt(canvasPos);
-				bool replace = !(e->state() & ControlButton);
-				bool onScreenOnly = (e->state() & ShiftButton);
-				if (unit) {
-					if (onScreenOnly) {
-						boDebug() << "TODO: select only those that are currently on the screen!" << endl;
-					}
-					if (!displayInput()->selectAll(unit->unitProperties(), replace)) {
-						displayInput()->selectSingle(unit, replace);
-					}
-				}
-			} else {
-				// we ignore all other (RMB, MMB) for now. we
-				// might use this one day.
-			}
+			mouseEventReleaseDouble(e->button(), action, stream, &send);
 		} else {
-			if (e->button() == LEFT_BUTTON) {
-				if (displayInput()->actionLocked()) {
-					// basically the same as a normal RMB
-					bool send = false;
-					BoAction action;
-					action.setCanvasPos(canvasPos);
-					action.setWorldPos(posX, posY, posZ);
-					displayInput()->actionClicked(action, stream, &send);
-					if (send) {
-						*eatevent = true;
-					}
-				} else if (e->state() & ShiftButton) {
-					// unused
-				} else if (e->state() & ControlButton) {
-					removeSelectionRect(false);
-				} else {
-					removeSelectionRect(true);
-				}
-			} else if (e->button() == MidButton) {
-				// we ignore all modifiers here, currently.
-				if (boConfig->mmbMove()) {
-					int cellX, cellY;
-					cellX = (int)(posX / BO_GL_CELL_SIZE);
-					cellY = (int)(-posY / BO_GL_CELL_SIZE);
-					slotReCenterDisplay(QPoint(cellX, cellY));
-					displayInput()->updateCursor();
-				}
-			} else if (e->button() == RIGHT_BUTTON) {
-				if (d->mMouseMoveDiff.isRMBMove()) {
-					d->mMouseMoveDiff.stop();
-				} else if (displayInput()->actionLocked()) {
-					displayInput()->unlockAction();
-					displayInput()->updateCursor();
-				} else {
-					bool send = false;
-					BoAction action;
-					action.setCanvasPos(canvasPos);
-					action.setWorldPos(posX, posY, posZ);
-					if (e->state() & ControlButton) {
-						action.setForceAttack(true);
-					}
-					displayInput()->actionClicked(action, stream, &send);
-					if (send) {
-						*eatevent = true;
-					}
-				}
-			}
+			mouseEventRelease(e->button(), action, stream, &send);
+		}
+		if (send) {
+			*eatevent = true;
 		}
 		e->accept();
 		break;
+	}
 	default:
 		boWarning() << "unexpected mouse event " << e->type() << endl;
 		e->ignore();
 		return;
+ }
+}
+
+void BosonBigDisplayBase::mouseEventWheel(float delta, Orientation orientation, const BoAction& boAction, QDataStream&, bool*)
+{
+ int action;
+ if (boAction.shiftButton()) {
+	action = boConfig->mouseWheelShiftAction();
+ } else {
+	action = boConfig->mouseWheelAction();
+ }
+ switch (action) {
+	case CameraMove:
+	{
+		int scrollX, scrollY;
+		if (boAction.controlButton()) {
+			scrollX = width();
+			scrollY = height();
+		} else {
+			scrollX = 20;
+			scrollY = 20;
+			delta *= QApplication::wheelScrollLines();
+		}
+		if (orientation == Horizontal) {
+			scrollX *= (int)delta;
+			scrollY = 0;
+		} else {
+			scrollX = 0;
+			scrollY *= (int)delta;
+		}
+		scrollBy(scrollX, scrollY);
+		break;
+	}
+	case CameraZoom:
+		if (boAction.controlButton()) {
+			delta *= 3;
+		} else {
+			delta *= 1; // no effect, btw
+		}
+		camera()->changeZ(delta);
+		cameraChanged();
+		break;
+	case CameraRotate:
+		if (boAction.controlButton()) {
+			delta *= 30;
+		} else {
+			delta *= 10;
+		}
+		camera()->changeRotation(delta);
+		cameraChanged();
+		break;
+	default:
+	{
+		boWarning() << k_funcinfo << "invalid wheel action: " << action << endl;
+		break;
+	}
+ }
+}
+
+void BosonBigDisplayBase::mouseEventMove(int buttonState, const BoAction& action, QDataStream&, bool*)
+{
+ float posX, posY, posZ;
+ action.worldPos(&posX, &posY, &posZ);
+ d->mMouseMoveDiff.moveToPos(action.widgetPos());
+ if (action.altButton()) {
+	// The Alt button is the camera modifier in boson.
+	// Better don't do important stuff (like unit movement
+	// or selections) here, since a single push on Alt gives
+	// the focus to the mneu which might be very confusing
+	// during a game.
+	if (buttonState & LEFT_BUTTON) {
+		camera()->changeZ(d->mMouseMoveDiff.dy());
+		cameraChanged();
+	} else if (buttonState & RIGHT_BUTTON) {
+		camera()->changeRotation(d->mMouseMoveDiff.dx());
+		camera()->changeRadius(d->mMouseMoveDiff.dy());
+		cameraChanged();
+	}
+ } else if (buttonState & LEFT_BUTTON) {
+	if (action.controlButton()) {
+		// not yet used
+	} else {
+		// selection rect gets drawn for both - shift
+		// down and no modifier pressed.
+		d->mSelectionRect.setVisible(true);
+		moveSelectionRect(posX, posY, posZ);
+	}
+ } else if (buttonState & RIGHT_BUTTON) {
+	// RMB+MouseMove does *not* depend on CTRL or Shift. the
+	// map is moved in all cases (currently - we have some
+	// free buttons here :))
+	if (boConfig->rmbMove()) {
+		// problem is that QCursor::setPos() also causes
+		// a mouse move event. we can use this hack in
+		// order to check whether it is a real mouse
+		// move event or we caused it here.
+		// TODO: use d->mMouseMoveDiff.x()/y() in
+		// paintGL() for the cursor, not QCursor::pos()
+//		static bool a = false;
+//		if (a) {
+//			a = false;
+//			break;
+//		}
+//		a = true;
+//		QPoint pos = mapToGlobal(QPoint(d->mMouseMoveDiff.oldX(), d->mMouseMoveDiff.oldY()));
+//		QCursor::setPos(pos);
+		d->mMouseMoveDiff.startRMBMove();
+		GLdouble dx, dy;
+		int moveX = d->mMouseMoveDiff.dx();
+		int moveY = d->mMouseMoveDiff.dy();
+		mapDistance(moveX, moveY, &dx, &dy);
+		camera()->moveLookAtBy(dx, dy, 0);
+		cameraChanged();
+	} else {
+		d->mMouseMoveDiff.stop();
+	}
+ }
+ QPoint widgetPos = mapFromGlobal(QCursor::pos());
+ GLdouble x = 0.0, y = 0.0, z = 0.0;
+ mapCoordinates(widgetPos, &x, &y, &z);
+ worldToCanvas(x, y, z, &(d->mCanvasPos));
+ displayInput()->updatePlacementPreviewData();
+ displayInput()->updateCursor();
+}
+
+void BosonBigDisplayBase::mouseEventRelease(ButtonState button,const BoAction& action, QDataStream& stream, bool* send)
+{
+ switch (button) {
+	case LEFT_BUTTON:
+	{
+		if (displayInput()->actionLocked()) {
+			// basically the same as a normal RMB
+			displayInput()->actionClicked(action, stream, send);
+		} else if (action.shiftButton()) {
+			// unused
+		} else if (action.controlButton()) {
+			removeSelectionRect(false);
+		} else {
+			removeSelectionRect(true);
+		}
+		break;
+	}
+	case MidButton:
+	{
+		// we ignore all modifiers here, currently.
+		if (boConfig->mmbMove()) {
+			float posX, posY, posZ;
+			action.worldPos(&posX, &posY, &posZ);
+			int cellX, cellY;
+			cellX = (int)(posX / BO_GL_CELL_SIZE);
+			cellY = (int)(-posY / BO_GL_CELL_SIZE);
+			slotReCenterDisplay(QPoint(cellX, cellY));
+			displayInput()->updateCursor();
+		}
+		break;
+	}
+	case RIGHT_BUTTON:
+	{
+		if (d->mMouseMoveDiff.isRMBMove()) {
+			d->mMouseMoveDiff.stop();
+		} else if (displayInput()->actionLocked()) {
+			displayInput()->unlockAction();
+			displayInput()->updateCursor();
+		} else {
+			displayInput()->actionClicked(action, stream, send);
+		}
+		break;
+	}
+	default:
+		boError() << k_funcinfo << "invalid mouse button " << button << endl;
+		break;
+ }
+}
+
+void BosonBigDisplayBase::mouseEventReleaseDouble(ButtonState button, const BoAction& action, QDataStream& , bool* )
+{
+ switch (button) {
+	case LEFT_BUTTON:
+	{
+		// we ignore UnitAction is locked here
+		// currently!
+		bool replace = !(action.controlButton());
+		bool onScreenOnly = (action.shiftButton());
+		Unit* unit = canvas()->findUnitAt(action.canvasPos());
+		if (unit) {
+			if (onScreenOnly) {
+				boDebug() << "TODO: select only those that are currently on the screen!" << endl;
+			}
+			if (!displayInput()->selectAll(unit->unitProperties(), replace)) {
+				displayInput()->selectSingle(unit, replace);
+			}
+		}
+		break;
+	}
+	case MidButton:
+	case RIGHT_BUTTON:
+	{
+		// we ignore all other (RMB, MMB) for now. we
+		// might use this one day.
+		break;
+	}
+	default:
+		boError() << k_funcinfo << "invalid mouse button " << button << endl;
+		break;
  }
 }
 
@@ -2594,4 +2660,5 @@ void BosonBigDisplayBase::setDebugMapCoordinates(bool debug)
 {
  d->mDebugMapCoordinates = debug;
 }
+
 

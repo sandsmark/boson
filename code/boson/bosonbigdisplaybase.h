@@ -48,13 +48,23 @@ public:
 		mX = 0.0;
 		mY = 0.0;
 		mZ = 0.0;
-		mForceAttack = false;
+		mControlButton = false;
+		mShiftButton = false;
+		mAltButton = false;
 	}
 
 	~BoAction()
 	{
 	}
 
+	void setWidgetPos(const QPoint& pos)
+	{
+		mWidgetPos = pos;
+	}
+	const QPoint& widgetPos() const
+	{
+		return mWidgetPos;
+	}
 	void setCanvasPos(const QPoint& pos)
 	{
 		mCanvasPos = pos;
@@ -72,30 +82,54 @@ public:
 		mZ = z;
 	}
 
-	void worldPos(GLfloat* x, GLfloat* y, GLfloat* z)
+	void worldPos(GLfloat* x, GLfloat* y, GLfloat* z) const
 	{
 		*x = mX;
 		*y = mY;
 		*z = mZ;
 	}
 
-	void setForceAttack(bool f)
+	void setControlButton(bool b)
 	{
-		mForceAttack = f;
+		mControlButton = b;
+	}
+	bool controlButton() const
+	{
+		return mControlButton;
+	}
+	void setShiftButton(bool b)
+	{
+		mShiftButton = b;
+	}
+	bool shiftButton() const
+	{
+		return mShiftButton;
+	}
+	void setAltButton(bool b)
+	{
+		mAltButton = b;
+	}
+	bool altButton() const
+	{
+		return mAltButton;
 	}
 
 	bool forceAttack() const
 	{
-		return mForceAttack;
+		// TODO: make configurable
+		return mControlButton;
 	}
 
 private:
+	QPoint mWidgetPos;
 	QPoint mCanvasPos;
 	GLfloat mX;
 	GLfloat mY;
 	GLfloat mZ;
 
-	bool mForceAttack;
+	bool mControlButton;
+	bool mShiftButton;
+	bool mAltButton;
 };
 
 /**
@@ -239,6 +273,62 @@ protected slots:
 	void slotAdvance(unsigned int advanceCount, bool advanceFlag);
 
 protected:
+	/**
+	 * Here the defined action for a wheel event should happen. See
+	 * docs/mouse-big_display.txt for a list of actions that are allowed
+	 * here.
+	 * @param delta See QWheelEvent::delta. This is how much the wheel was
+	 * moved.
+	 * @param orientation Guess what? Yes! Horizontal or Vertical wheel.
+	 * @param action Information about the event (position, modifiers, ...).
+	 * See @ref BoAction
+	 * @param stream You won't need this here.
+	 * @param send You won't need this here.
+	 **/
+	void mouseEventWheel(float delta, Orientation orientation, const BoAction& action, QDataStream& stream, bool* send);
+
+	/**
+	 * @param buttonState See @ref QMouseEvent::state. This tells you which
+	 * buttons are currently pressed.
+	 * @param action Information about the event (position, modifiers, ...).
+	 * See @ref BoAction
+	 * @param stream You won't need this here.
+	 * @param send You won't need this here.
+	 **/
+	void mouseEventMove(int buttonState, const BoAction& action, QDataStream& stream, bool* send);
+
+	/**
+	 * This is the main event for actual actions. When a player clicks RMB
+	 * on an enemy unit and expects his selection to attack that unit, then
+	 * this action is started here. No action is allowed in mouse press
+	 * events.
+	 *
+	 * See docs/mouse-big_display.txt for further description and a list of
+	 * allowed actions here.
+	 * @param button Which button produced this event.
+	 * @param action Information about the event (position, modifiers, ...).
+	 * See @ref BoAction
+	 * @param stream Stream your action here, if it is network (i.e.
+	 * game-)relevant. Actions like zooming, rotating (i.e. chaging the
+	 * camera) or selecting units can be done immediately, but all that
+	 * requires units to do something must be streamed and sent using a
+	 * message.
+	 * @param send Set this to TRUE in order to actually send the @p stream
+	 **/
+	void mouseEventRelease(ButtonState button, const BoAction& action, QDataStream& stream, bool* send);
+
+	/**
+	 * @param button Which button produced this event.
+	 * @param action Information about the event (position, modifiers, ...).
+	 * See @ref BoAction
+	 * @param stream Stream your action here, if it is network (i.e.
+	 * game-)relevant. Actions like zooming, rotating (i.e. chaging the
+	 * camera) or selecting units can be done immediately, but all that
+	 * requires units to do something must be streamed and sent using a
+	 * message.
+	 * @param send Set this to TRUE in order to actually send the @p stream
+	 **/
+	void mouseEventReleaseDouble(ButtonState button, const BoAction& action, QDataStream& stream, bool* send);
 
 protected:
 	virtual void initializeGL();
