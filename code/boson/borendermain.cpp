@@ -28,6 +28,7 @@
 #include "kgamemodeldebug.h"
 #include "bodebug.h"
 #include "sound/bosonmusic.h"
+#include "boversion.h"
 
 #include <kapplication.h>
 #include <kcmdlineargs.h>
@@ -52,7 +53,7 @@
 static const char *description =
     I18N_NOOP("Rendering tester for Boson");
 
-static const char *version = "v0.8pre";
+static const char *version = BOSON_VERSION_STRING;
 
 static KCmdLineOptions options[] =
 {
