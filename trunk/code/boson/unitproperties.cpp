@@ -119,8 +119,8 @@ void UnitProperties::loadUnitType(const QString& fileName)
  mProductionTime = conf.readUnsignedNumEntry("ProductionTime", 100);
  d->mShields = conf.readUnsignedLongNumEntry("Shield", 0); 
  d->mArmor = conf.readUnsignedLongNumEntry("Armor", 0);
- mCanShootAtAirUnits = conf.readBoolEntry("CanShootAtAirUnits", isAircraft());
- mCanShootAtLandUnits = conf.readBoolEntry("CanShootAtLandUnits", (isLand() || isShip()));
+ mCanShootAtAirUnits = conf.readBoolEntry("CanShootAtAirUnits", isAircraft() && weaponDamage());
+ mCanShootAtLandUnits = conf.readBoolEntry("CanShootAtLandUnits", (isLand() || isShip()) && weaponDamage());
  mSupportMiniMap = conf.readBoolEntry("SupportMiniMap", false);
  isFacility = conf.readBoolEntry("IsFacility", false);
 
