@@ -34,24 +34,18 @@
 #include "boserver.h" 
 #include "game.h" 
 
+static KCmdLineOptions options[] = {
+	{ "p", 0, 0 }, 
+	{ "port <port>", 
+		I18N_NOOP("The TCP/IP port the server is listening to. Must be >1000 "),
+		BOSON_DEFAULT_PORT_CHAR },
+	KCmdLineLastOption
+};
 
-void usage(void)
-{
-	char buffer[3000];
-
-	sprintf(buffer, 
-		"boserver (c) 1999-2000 Thomas Capricelli <orzel@yalbi.com>\n"
-		"\nusage : boserver [Port]\n\n"
-		"\tPort is the TCP/IP port the server is listening to (default to %d)\n"
-		"\tThe port number should be > 1000\n"
-		"\t\n", BOSON_DEFAULT_PORT);
- 	KMessageBox::information(0l, buffer, "boserver usage");
-	exit(1);
-}
  
 int main(int argc, char* argv[])
 { 
-	int		port;
+	// AboutData
 	KAboutData aboutData(
 		"boserver"
 		, I18N_NOOP("Server for boson")
@@ -66,20 +60,25 @@ int main(int argc, char* argv[])
 	aboutData.addAuthor("Thomas Capricelli", I18N_NOOP("Game Design & Coding"), "orzel@yalbi.com", "http://aquila.rezel.enst.fr/thomas/");
 	aboutData.addAuthor("Benjamin Adler", I18N_NOOP("Graphics & Homepage Design"), "benadler@bigfoot.de");
 		                                                              
+	// arguments handling
 	KCmdLineArgs::init( argc, argv, &aboutData );
+	KCmdLineArgs::addCmdLineOptions(options);
+	KCmdLineArgs* args = KCmdLineArgs::parsedArgs();
 
+	int		port;
+	if (args->isSet("port")) {
+		bool ok = true;
+		port = args->getOption("port").toInt(&ok);
+		if (!ok || port <= 1000)
+			KCmdLineArgs::usage();
+	} else
+		port = BOSON_DEFAULT_PORT;
+
+	// actual server
 	KApplication	app;  
-
-	port = (argc>1)?atoi(argv[1]): BOSON_DEFAULT_PORT;
-	if (! (port>1000) ) usage ();
 	
-/*	if (app.isRestored()) 
-		RESTORE(BosonServer);
-	else { */
-
 	server = new BosonServer (port, locate ("data", "boson/map/basic.bpf"));
 	server->show();
-//}  
 	return app.exec();
 }  
  
