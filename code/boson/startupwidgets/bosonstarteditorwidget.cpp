@@ -42,9 +42,6 @@
 #include <qvgroupbox.h>
 #include <qhbox.h>
 
-// AB: this class is a complete fast hack!
-// not meant for public use yet
-
 BosonStartEditorWidget::BosonStartEditorWidget(QWidget* parent)
     : BosonStartWidgetBase(parent)
 {

@@ -51,7 +51,6 @@ public slots:
 	void slotStart();
 
 signals:
-	void signalStartGame();
 	void signalSetLocalPlayer(Player*);
 
 protected slots:
@@ -59,7 +58,7 @@ protected slots:
 
 protected:
 	virtual void setCurrentPlayField(BosonPlayField* field);
-	void sendNewGame();
+	virtual void sendNewGame();
 
 	void initNewMap();
 
