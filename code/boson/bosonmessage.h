@@ -69,8 +69,10 @@ public:
 		MoveFollow = 109,  // Follow another unit
 
 		MoveLayMine = 120,
+		MoveDropBomb = 121,
 
 		MoveTeleport = 150,  // Immediately move unit (set it's position)
+		MoveRotate = 151,  // Set unit's rotation
 
 	// Player Input in Editor mode
 		MoveEditor = 200, // all editor moves/inputs are prefixed with this
