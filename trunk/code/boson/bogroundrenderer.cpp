@@ -221,21 +221,9 @@ void BoGroundRenderer::renderCells(const BosonMap* map)
  int heightMapWidth = map->width() + 1;
  d->mRenderedCells = 0;
 
- Cell** renderCells = new Cell*[d->mRenderCellsCount]; // FIXME: store two arrays. one with x, one with y coordinate (or both in one array). don't store pointers to Cell
  int cellsCount = 0;
- for (int i = 0; i < d->mRenderCellsCount; i++) {
-	Cell* c = d->mRenderCells[i];
-
-	// AB: better solution: check *before* the cells get assigned to this
-	// class. localPlayerIO() is *very* ugly in this class
-	if (localPlayer()->isFogged(c->x(), c->y())) {
-		// don't draw anything at all. the cell will just be black,
-		// because of the glClear() call.
-		continue;
-	}
-	renderCells[cellsCount] = c;
-	cellsCount++;
- }
+ Cell** renderCells = createVisibleCellList(&cellsCount, localPlayer());
+ BO_CHECK_NULL_RET(renderCells);
 
  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -256,12 +244,27 @@ void BoGroundRenderer::renderCells(const BosonMap* map)
 	glBindTexture(GL_TEXTURE_2D, tex);
 	renderCellsNow(renderCells, cellsCount, map->width() + 1, heightMap, map->texMap(i));
  }
- delete[] renderCells;
  d->mRenderedCells += cellsCount;
 
  glDisable(GL_BLEND);
  glEnable(GL_DEPTH_TEST);
 
+ renderCellGrid(renderCells, cellsCount, heightMap, heightMapWidth);
+
+ delete[] renderCells;
+}
+
+void BoGroundRenderer::renderCellGrid(Cell** cells, int cellsCount, float* heightMap, int heightMapWidth)
+{
+ BO_CHECK_NULL_RET(cells);
+ BO_CHECK_NULL_RET(heightMap);
+ if (heightMapWidth <= 0) {
+	boError() << k_funcinfo << "invalid heightmap width " << heightMapWidth << endl;
+	return;
+ }
+ if (cellsCount <= 0) {
+	return;
+ }
  if (boConfig->debugShowCellGrid()) {
 	glDisable(GL_LIGHTING);
 	glDisable(GL_NORMALIZE);
@@ -270,8 +273,8 @@ void BoGroundRenderer::renderCells(const BosonMap* map)
 	glColor3ub(255, 255, 255);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glBegin(GL_QUADS);
-	for (int i = 0; i < d->mRenderCellsCount; i++) {
-		Cell* c = d->mRenderCells[i];
+	for (int i = 0; i < cellsCount; i++) {
+		Cell* c = cells[i];
 		int x = c->x();
 		int y = c->y();
 		const float dist = 0.0f;
@@ -292,6 +295,32 @@ void BoGroundRenderer::renderCells(const BosonMap* map)
  }
 }
 
+
+Cell** BoGroundRenderer::createVisibleCellList(int* cells, Player* player)
+{
+ BO_CHECK_NULL_RET0(player);
+ BO_CHECK_NULL_RET0(cells);
+ Cell** renderCells = new Cell*[d->mRenderCellsCount]; // FIXME: store two arrays. one with x, one with y coordinate (or both in one array). don't store pointers to Cell
+ int cellsCount = 0;
+ for (int i = 0; i < d->mRenderCellsCount; i++) {
+	Cell* c = d->mRenderCells[i];
+	if (!c) {
+		continue;
+	}
+
+	// AB: better solution: check *before* the cells get assigned to this
+	// class. localPlayerIO() is *very* ugly in this class
+	if (player->isFogged(c->x(), c->y())) {
+		// don't draw anything at all. the cell will just be black,
+		// because of the glClear() call.
+		continue;
+	}
+	renderCells[cellsCount] = c;
+	cellsCount++;
+ }
+ *cells = cellsCount;
+ return renderCells;
+}
 
 void BoGroundRenderer::generateCellList(const BosonMap* map)
 {

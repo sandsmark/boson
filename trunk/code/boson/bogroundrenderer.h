@@ -19,6 +19,7 @@
 #ifndef BOGROUNDRENDERER_H
 #define BOGROUNDRENDERER_H
 
+class Cell;
 class Player;
 class PlayerIO;
 
@@ -50,6 +51,14 @@ public:
 	virtual void renderCells(const BosonMap* map);
 
 	/**
+	 * Render a grid for all cells in @p cells.
+	 *
+	 * It does render the grid only if @ref BosonConfig::debugShowCellGrid
+	 * returns true.
+	 **/
+	void renderCellGrid(Cell** cells, int cellsCount, float* heightMap, int heightMapWidth);
+
+	/**
 	 * @return The number of cells rendered by the last @ref renderCells
 	 * call
 	 **/
@@ -66,6 +75,17 @@ public:
 		return 0;
 	}
 #endif
+
+	/**
+	 * This generates an array of visible cells for the @p player. It works
+	 * on the list previously created by @ref generateCellList.
+	 *
+	 * This mainly checks for whether the cells are fogged.
+	 *
+	 * Note that you _MUST_ delete[] the array when you are done using it!
+	 * @param cellCount The number of cells in the array is returned here.
+	 **/
+	Cell** createVisibleCellList(int* cellCount, Player* player); // TODO: replace by a PlayerIO
 
 	/**
 	 * Generate a list of cells that are (or may) be visible at the moment.
