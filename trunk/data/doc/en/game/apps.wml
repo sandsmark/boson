@@ -16,6 +16,7 @@
     <tr><td>boprofiling</td><td>View saved profiling data</td></tr>
     <tr><td>borender</td><td>For viewing models</td></tr>
     <tr><td>bounit</td><td>Settings editor for facilities</td></tr>
+    <tr><td>boinfo</td><td>Shows some system information. Useful for users and developers</td></tr>
     </table>
 
 #include "nav.wml" before_url="index.html" before_text="In the game" after_url="scrolling.html" after_text="Scrolling" up_url="index.html"
