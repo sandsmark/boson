@@ -25,6 +25,7 @@ Comment=Text        - A text about your scenario. Just like the Name this can be
 Map=Map Identifier  - The Identifier of the map file this scenario if for. This
                       must (!) be a unique identifier (see the maps .desktop 
                       files for possible values)
+Identifier=Text     - A unique identifier for this scenario file.
 
 Note that a scenario file depends on a map and therefore the "Map=" entry is the
 most important one. Your file won't work without it. Here an example .desktop
@@ -34,6 +35,7 @@ file for the default Scenario "Basic":
 Name=Basic
 Comment=None yet
 Map=Basic
+Identifier=Basic
 
 
 Now some words about the actual scenario file (.bsc):
