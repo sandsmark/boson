@@ -518,7 +518,7 @@ void BosonBigDisplayBase::initializeGL()
  glLightfv(GL_LIGHT0, GL_DIFFUSE, lightDif);
  glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
  glEnable(GL_LIGHT0);
- //glEnable(GL_LIGHTING);
+ glEnable(GL_LIGHTING);
 
  if (checkError()) {
 	boError() << k_funcinfo << endl;
