@@ -25,6 +25,7 @@
 
 #include "common/unit.h"
 #include "sprites.h"
+#include "visualCanvas.h"
 #include "visual.h"
 
 
@@ -34,7 +35,7 @@ class selectPart;
 class visualUnit : public QCanvasSprite
 {
 public:
-	visualUnit(int k, QCanvasPixmapArray* s) : QCanvasSprite(s, bocanvas), key(k)
+	visualUnit(int k, QCanvasPixmapArray* s) : QCanvasSprite(s, vcanvas), key(k)
 		{ power = MAX_POWER; sp_down = 0l; sp_up = 0l; contain = 0; }
 	
 	void	unSelect();

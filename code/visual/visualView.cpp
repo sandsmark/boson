@@ -21,10 +21,9 @@
 #include "visualView.h"
 #include "common/log.h"
 #include "speciesTheme.h"
-#include "visual.h"
 
 
-visualView::visualView(visualField *f, QWidget *parent, const char *name=0L)
+visualView::visualView(QWidget *parent, const char *name=0L)
 	: QFrame(parent, name)
 	,fixSelected( 0L )
 	,selectionMode(SELECT_NONE)
@@ -32,7 +31,6 @@ visualView::visualView(visualField *f, QWidget *parent, const char *name=0L)
 	/* map geometry */
 	viewL = viewH = 5; ///orzel : senseless, will be set by mainMap later
 	viewX = viewY = 0;
-	field = f;
 }
 
 
@@ -78,8 +76,8 @@ void visualView::relativeMoveView(int dx, int dy)
 
 void visualView::checkMove()
 {
-	viewX = QMIN(viewX, field->maxX - viewL);
-	viewY = QMIN(viewY, field->maxY - viewH);
+	viewX = QMIN(viewX, vcanvas->maxX - viewL);
+	viewY = QMIN(viewY, vcanvas->maxY - viewH);
 
 	viewX = QMAX(viewX, 0);
 	viewY = QMAX(viewY, 0);
@@ -191,14 +189,14 @@ void visualView::selectArea(int x1, int y1, int x2, int y2)
         }
 
 	/* selection */
-	qcitl = field->collisions( QRect(x1,y1,x2-x1,y2-y1) );
+	qcitl = vcanvas->collisions( QRect(x1,y1,x2-x1,y2-y1) );
 
 	/* XXXX  
-	for( p = field->lookIn(x1,y1,x2-x1,y2-y1); p; field->next(p))
-		if (IS_MOBILE(field->at(p)->rtti()) )  { //found one
-//		if (IS_MOBILE(field->at(p)->rtti()) && field->exact(p))  { //found one
+	for( p = vcanvas->lookIn(x1,y1,x2-x1,y2-y1); p; vcanvas->next(p))
+		if (IS_MOBILE(vcanvas->at(p)->rtti()) )  { //found one
+//		if (IS_MOBILE(vcanvas->at(p)->rtti()) && vcanvas->exact(p))  { //found one
 //			puts("hop");
-			u =  ((visualMobUnit *) field->at(p));
+			u =  ((visualMobUnit *) vcanvas->at(p));
 			if (!mobSelected.find(u->key))			// already selected ?
 				selectMob(u->key, u); //, puts("bof");
 		}

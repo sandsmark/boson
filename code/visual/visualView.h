@@ -24,7 +24,7 @@
 #include <qframe.h>
 
 #include <visualUnit.h>
-#include "visualField.h"
+#include "visual.h"
 
 
 /** 
@@ -39,7 +39,7 @@ class visualView : public QFrame
 	Q_OBJECT
 
 public:
-	visualView(visualField *, QWidget *parent=0, const char *name=0L);
+	visualView(QWidget *parent=0, const char *name=0L);
 
 	/*
 	 * size / position handling
@@ -50,16 +50,13 @@ public:
 	int L(void) { return viewL; }
 	int H(void) { return viewH; }
 
-	int maxX(void) { return (field)?field->maxX:0; }
-	int maxY(void) { return (field)?field->maxY:0; }
-
-	///orzel : should be moved private ?
-	visualField	*field;
+	int maxX(void) { return (vcanvas)?vcanvas->maxX:0; }
+	int maxY(void) { return (vcanvas)?vcanvas->maxY:0; }
 
 	enum selectionMode_t {
 		SELECT_NONE, 		/* is doing nothing */
 		SELECT_RECT,		/* is drawing a selection rect */
-		SELECT_PUT,		/* something is being put on the field */
+		SELECT_PUT,		/* something is being put on the canvas */
 		SELECT_FILL,		/* something is being filled (editor) */
 		SELECT_ 
 		};

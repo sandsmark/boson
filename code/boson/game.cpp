@@ -24,7 +24,7 @@
 /*
  * visual/visual.h
  */
-QCanvas			*bocanvas=0;
+visualCanvas		*vcanvas=0;
 groundTheme		*ground = 0;
 speciesTheme		*species[BOSON_MAX_PLAYERS] = {0l, 0l};
 int			nb_player;
@@ -35,7 +35,7 @@ int			nb_player;
 speciesTheme		*myspecy	= 0l;
 int			who_am_i	= 0;
 /* The map which handle grouds and units*/
-bosonField		*field		= 0l;
+bosonCanvas		*bocanvas	= 0l;
 /* synchronization */
 uint			jiffies		= 0l;
 /* deal with the communication layer */

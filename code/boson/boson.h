@@ -39,7 +39,7 @@
 // application specific includes
 #include "common/msgData.h"
 
-#include "bosonField.h"
+#include "bosonCanvas.h"
 #include "mainView.h"
 #include "connect.h"
 

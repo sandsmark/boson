@@ -32,7 +32,7 @@
   
 
 visualBigDisplay::visualBigDisplay(/*orderWin *o,*/ visualView *v, QWidget*parent, const char *name, WFlags f)
-	: QCanvasView(bocanvas,parent,name,f)
+	: QCanvasView(vcanvas,parent,name,f)
 {
 
 //setBackgroundColor(black);
@@ -173,7 +173,7 @@ void visualBigDisplay::mouseReleaseEvent(QMouseEvent *e)
 			oldY	+= BO_TILE_SIZE * view->Y();
 			
 			view->selectArea(selectX, selectY, oldX, oldY);
-			view->field->update();
+			vcanvas->update();
 
 			break;
 		case visualView::SELECT_PUT:
@@ -229,7 +229,7 @@ void visualBigDisplay::mousePressEvent(QMouseEvent *e)
 			view->unSelectAll();
 			}
 	
-		QCanvasItem *sfg = view->field->findUnitAt( x, y);
+		QCanvasItem *sfg = vcanvas->findUnitAt( x, y);
 
 		if (!sfg) {
 			// nothing has been found : it's a ground-click
@@ -251,7 +251,7 @@ void visualBigDisplay::mousePressEvent(QMouseEvent *e)
 			else
 				view->selectMob(m->key, m);
 
-			view->field->update();
+			vcanvas->update();
 			return;
 		}
 
@@ -260,12 +260,12 @@ void visualBigDisplay::mousePressEvent(QMouseEvent *e)
 			view->unSelectAll();		// anyway 
 			view->selectFix(f);
 
-			view->field->update();
+			vcanvas->update();
 			return;
 		}
 
 		// should never be reached !
-		logf(LOG_ERROR, "visual/fieldEvent.c, unexpeted field->findUnitAt() result");
+		logf(LOG_ERROR, "visual/fieldEvent.c, unexpeted vcanvas->findUnitAt() result");
 	
 	} // LeftButton 
 

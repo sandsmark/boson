@@ -27,14 +27,14 @@
 
 visualCell::visualCell(groundType g)
 	: Cell(g)
-	, QCanvasSprite(0, bocanvas)
+	, QCanvasSprite(0, vcanvas)
 {
 	// don't do anything until set() has been called, no even a z() !
 }
 
 visualCell::visualCell(groundType g, int i, int j)
 	: Cell(g)
-	, QCanvasSprite(0, bocanvas)
+	, QCanvasSprite(0, vcanvas)
 {
 
 	set(g,i,j);	// To be done first !

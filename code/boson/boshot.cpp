@@ -43,7 +43,7 @@ static bool loadPixmap(const QString &path, QPixmap **pix);
  *  boshot
  */
 boShot::boShot(int _x, int _y, int _z, bool isBig)
-	: QCanvasSprite (0, bocanvas)
+	: QCanvasSprite (0, vcanvas)
 {
 
 	if (isBig) {
@@ -72,7 +72,7 @@ boShot::boShot(int _x, int _y, int _z, bool isBig)
 
 
 	counter = 0; setFrame( 0);		// position the first image of the animation
-	move(_x, _y); setZ( _z + 1);	// position in the field
+	move(_x, _y); setZ( _z + 1);	// position in the canvas
 	startTimer(60);			// begin animation, 60 ms/frame
 }
 

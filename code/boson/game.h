@@ -24,7 +24,7 @@
 #include "visual.h"
 #include "connect.h"
 
-class bosonField;
+class bosonCanvas;
 class KSocket;
 class boBuffer;
 
@@ -35,7 +35,7 @@ typedef unsigned int uint;
 	extern speciesTheme		*myspecy;
 	extern int			who_am_i;
 /* The map which handle grouds and units*/
-	extern bosonField		*field;
+	extern bosonCanvas		*bocanvas;
 /* synchronization */
 	extern uint			jiffies;
 /* deal with the communication layer */

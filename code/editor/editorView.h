@@ -52,7 +52,7 @@ class editorView : public visualView
 	Q_OBJECT
 
 public:
-	editorView(visualField *,QWidget *parent=0, const char *name=0);
+	editorView(QWidget *parent=0, const char *name=0);
 
 	virtual void setSelected(QPixmap *);
 	virtual void setOrders(int what , int who=-1);

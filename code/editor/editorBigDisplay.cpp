@@ -23,7 +23,7 @@
 
 #include "editorBigDisplay.h"
 #include "visualCell.h"
-#include "editorField.h"
+#include "editorCanvas.h"
 
 editorBigDisplay::editorBigDisplay(visualView *v, QWidget *p, const char *n, WFlags f)
 	:visualBigDisplay(v,p,n,f)
@@ -37,12 +37,12 @@ editorBigDisplay::editorBigDisplay(visualView *v, QWidget *p, const char *n, WFl
 
 void editorBigDisplay::actionClicked(int mx, int my, int state)
 {
-	editorField *field	= (((editorField*)(view->field)));
+	editorCanvas *_canvas	= (((editorCanvas*)vcanvas));
 	int	x		= mx / BO_TILE_SIZE,
 		y		= my / BO_TILE_SIZE;
 
 
-	if ( x<0 || y<0 || x>= field->maxX || y>=field->maxY ) {
+	if ( x<0 || y<0 || x>= _canvas->maxX || y>=_canvas->maxY ) {
 		logf(LOG_ERROR, "actionClicked with x,y = %d,%d, aborting", x, y);
 		return;
 	}
@@ -54,17 +54,17 @@ void editorBigDisplay::actionClicked(int mx, int my, int state)
 
 		case OT_GROUND:
 			if ( IS_BIG_TRANS(g) )
-			       if ( x+1>=field->maxX || y+1>=field->maxY) return;
+			       if ( x+1>=_canvas->maxX || y+1>=_canvas->maxY) return;
 
 			if ( IS_PLAIN(g) && (state&ShiftButton) ) {
 				int i,j;
 				for (i=-2; i< 3; i++)
-					if (x+i>=0 && x+i<field->maxX)
+					if (x+i>=0 && x+i<_canvas->maxX)
 						for (j=-2; j< 3; j++)
-							if (y+j>=0 && y+j<field->maxY)
-								field->changeCell( x+i, y+j, g);
+							if (y+j>=0 && y+j<_canvas->maxY)
+								_canvas->changeCell( x+i, y+j, g);
 			} else
-				field->changeCell( x, y, g);
+				_canvas->changeCell( x, y, g);
 
 			view->setSelectionMode( visualView::SELECT_FILL);
 			break;
@@ -76,7 +76,7 @@ void editorBigDisplay::actionClicked(int mx, int my, int state)
 			fix.y		= y;
 			fix.state	= CONSTRUCTION_STEP-1;
 			fix.type	= f; 
-			field->createFixUnit(fix);
+			_canvas->createFixUnit(fix);
 			view->setSelectionMode( visualView::SELECT_PUT);
 			break;
 
@@ -86,12 +86,12 @@ void editorBigDisplay::actionClicked(int mx, int my, int state)
 			mob.x		= mx;
 			mob.y		= my;
 			mob.type	= m;
-			field->createMobUnit(mob);
+			_canvas->createMobUnit(mob);
 			view->setSelectionMode( visualView::SELECT_PUT);
 			break;
 	}
 
-	view->field->update();
+	_canvas->update();
 }
 
 void editorBigDisplay::setSelectedObject(object_type t, int n)

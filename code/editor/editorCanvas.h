@@ -1,5 +1,5 @@
 /***************************************************************************
-                          editorField.h  -  description                              
+                          editorCanvas.h  -  description                              
                              -------------------                                         
 
     version              : $Id$
@@ -26,24 +26,25 @@
 #include "common/boFile.h"
 
 #include "visualUnit.h"		// visualMobUnit
-#include "visualField.h"
+#include "visualCanvas.h"
 
 class QRect;
 class QPainter;
 class Cell;
+class visualCell;
 class Unit;
 
 
 /** 
   * This class encapsulate the "physical" idea of the map : size, contents..
   */
-class editorField : public visualField, public boFile
+class editorCanvas : public visualCanvas, public boFile
 {
 	Q_OBJECT
 
 public:
-  editorField();
-  ~editorField() { freeRessources(); }
+  editorCanvas();
+  ~editorCanvas() { freeRessources(); }
 
   void createMobUnit(mobileMsg_t &);
   void destroyMobUnit(destroyedMsg_t &);

@@ -21,7 +21,6 @@
 #include <qlayout.h>
 #include <qkeycode.h>
 
-#include "bosonField.h"
 #include "visualMiniDisplay.h"
 #include "bosonBigDisplay.h"
 #include "bosonView.h"

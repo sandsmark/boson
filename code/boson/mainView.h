@@ -26,7 +26,6 @@
 class	visualMiniDisplay;
 class	bosonBigDisplay;
 class	bosonView;
-class	bosonField;
 
 class mainView : public QWidget 
 {

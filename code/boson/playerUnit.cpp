@@ -26,9 +26,9 @@
 
 #include "visualCell.h"
 
+#include "bosonCanvas.h"
 #include "selectPart.h"
 #include "playerUnit.h"
-#include "bosonField.h"
 #include "game.h"
 
 
@@ -568,7 +568,7 @@ void harvesterUnit::u_goto(int mx, int my)
 
 groundType harvesterUnit::underlyingGround(void)
 {
-	return field->findGroundAt( _x()+10,_y()+10);
+	return bocanvas->findGroundAt( _x()+10,_y()+10);
 }
 
 
