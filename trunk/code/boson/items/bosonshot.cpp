@@ -70,7 +70,7 @@ BosonShot::BosonShot(const BosonWeaponProperties* prop, Player* owner, BosonCanv
   mLength = mVelo.length();
   //boDebug(350) << "MISSILE: " << k_funcinfo << "    Length of trip: " << length << endl;
   // Calculate number of steps
-  mTotalSteps = (int)ceilf(mLength / prop->speed());
+  mTotalSteps = (int)ceilf(mLength / prop->speed()) - 1;
   // Current step
   mStep = 0;
   //boDebug(350) << "MISSILE: " << k_funcinfo << "    Steps: " << mSteps << endl;
@@ -91,6 +91,7 @@ BosonShot::BosonShot(const BosonWeaponProperties* prop, Player* owner, BosonCanv
 
 void BosonShot::advance(unsigned int phase)
 {
+  mStep++;
   // Call BosonItem advance method
   BosonItem::advance(phase);
   // Calculate parable height at current step
@@ -118,7 +119,6 @@ void BosonShot::advance(unsigned int phase)
     it.current()->setPosition(newpos);
     ++it;
   }
-  mStep++;
   if(mStep >= mTotalSteps)
   {
     mActive = false;

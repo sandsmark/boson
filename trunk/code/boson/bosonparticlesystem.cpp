@@ -157,6 +157,7 @@ void BosonParticleSystem::update(float elapsed)
   mNum = 0;
   mRadius = 0.0;
   mAge -= elapsed;
+  bool createnew = (mCreateCache >= 1.0) && (mAge >= 0.0);
 
   // Update particles
   for(int i = 0; i < mMaxNum; i++)
@@ -173,20 +174,13 @@ void BosonParticleSystem::update(float elapsed)
         mNum++;
       }
     }
-  }
-
-  // Create some new ones if needed
-  if((mCreateCache >= 1.0) && (mAge >= 0.0))
-  {
-    for(int i = 0; (i < mMaxNum) && (mCreateCache >= 1.0); i++)
+    else if(createnew)
     {
-      if(mParticles[i].life <= 0.0)
-      {
-        // Dead particle, re-create it
-        initParticle(&mParticles[i]);
-        mCreateCache -= 1.0;
-        mNum++;
-      }
+      // Dead particle, re-create it
+      initParticle(&mParticles[i]);
+      mCreateCache -= 1.0;
+      mNum++;
+      createnew = (mCreateCache >= 1.0);
     }
   }
 
