@@ -117,7 +117,12 @@ signals:
 	/**
 	 * Emitted when the number of units of the local player changes.
 	 **/
-	void signalUnitCount(int mobileUnits, int facilities);
+	void signalMobilesCount(int mobileUnits);
+
+	/**
+	 * Emitted when the number of units of the local player changes.
+	 **/
+	void signalFacilitiesCount(int facilities);
 
 protected slots:
 	void slotStartScenario();
@@ -146,6 +151,7 @@ protected slots:
 	void slotPlayerJoinedGame(KPlayer* p);
 	void slotArrowScrollChanged(int speed);
 	void slotAddUnit(Unit* unit, int x, int y);
+	void slotRemoveUnit(Unit* unit);
 	void slotStartGame();
 
 	void slotReceiveMap(const QByteArray& map);

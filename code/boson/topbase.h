@@ -69,8 +69,6 @@ private slots:
 	void slotShowStatusbar();
 	void slotConfigureToolbars();
 
-	void slotUnitCount(int mobiles, int facilities);
-
 private:
 	void initStatusBar();
 

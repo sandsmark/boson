@@ -88,6 +88,10 @@ public:
 	KSpriteToolTip* mUnitTips;
 
 	QVBoxLayout* mFrameLayout; // minimap and command frame
+
+	// performance variables:
+	int mMobilesCount;
+	int mFacilitiesCount;
 	
 	// options:
 	int mArrowKeyStep;
@@ -126,6 +130,8 @@ void BosonWidget::init()
 {
  d = new BosonWidgetPrivate;
  d->mArrowKeyStep = ARROW_KEY_STEP;
+ d->mMobilesCount = 0;
+ d->mFacilitiesCount = 0;
 
  d->mCanvas = new BosonCanvas(this);
 
@@ -188,8 +194,8 @@ void BosonWidget::init()
 
  connect(d->mCanvas, SIGNAL(signalUnitMoved(Unit*, double, double)),
 		d->mMiniMap, SLOT(slotMoveUnit(Unit*, double, double)));
-// connect(d->mCanvas, SIGNAL(signalUnitDestroyed(Unit*)), 
-//		d->mBigDisplay, SLOT(slotUnitDestroyed(Unit*)));
+ connect(d->mCanvas, SIGNAL(signalUnitDestroyed(Unit*)), 
+		this, SLOT(slotRemoveUnit(Unit*)));
  connect(d->mCanvas, SIGNAL(signalUnitDestroyed(Unit*)), 
 		d->mMiniMap, SLOT(slotUnitDestroyed(Unit*)));
 
@@ -432,21 +438,31 @@ void BosonWidget::slotAddUnit(Unit* unit, int, int)
 	kdError() << k_funcinfo << ": NULL owner" << endl;
 	return;
  }
- d->mUnitTips->add(unit->type(), player->speciesTheme()->unitProperties(unit)->name()); // doesn't add if this tip was added before
- QPtrList<Unit> units = player->allUnits();
- int mobiles = 0;
- int facilities = 0;
- QPtrListIterator<Unit> it(units);
- while (it.current()) {
-	if ((*it)->unitProperties()->isMobile()) {
-		mobiles++;
-	} else {
-		facilities++;
-	}
-	++it;
+ d->mUnitTips->add(unit->type(), player->speciesTheme()->unitProperties(unit)->name());
+ if (unit->owner() != d->mLocalPlayer) {
+	return;
  }
- emit signalUnitCount(mobiles, facilities);
- // TODO: also emit when a unit is destroyed!
+ if (unit->unitProperties()->isMobile()) {
+	d->mMobilesCount++;
+ } else {
+	d->mFacilitiesCount++;
+ }
+ emit signalMobilesCount(d->mMobilesCount);
+ emit signalFacilitiesCount(d->mFacilitiesCount);
+}
+
+void BosonWidget::slotRemoveUnit(Unit* unit)
+{
+ if (unit->owner() != d->mLocalPlayer) {
+	return;
+ }
+ if (unit->unitProperties()->isMobile()) {
+	d->mMobilesCount--;
+ } else {
+	d->mFacilitiesCount--;
+ }
+ emit signalMobilesCount(d->mMobilesCount);
+ emit signalFacilitiesCount(d->mFacilitiesCount);
 }
 
 void BosonWidget::quitGame()

@@ -23,7 +23,6 @@
 #include "cell.h"
 #include "unit.h"
 #include "bosonmap.h"
-#include "speciestheme.h"
 #include "unitproperties.h"
 #include "boshot.h"
 
@@ -185,7 +184,7 @@ void BosonCanvas::advance()
 	while (destroyedIt.current()) {
 		Unit* unit = destroyedIt.current();
 		kdDebug() << "destroy unit " << unit->id() << endl;
-		emit signalUnitDestroyed(unit); // currently unused
+		emit signalUnitDestroyed(unit);
 		unit->owner()->unitDestroyed(unit); // remove from player without deleting
 		d->mDestroyedUnits.append(unit); // delete it in destructor - maybe remove the wreckage after a timerevent?
 		++destroyedIt;
@@ -302,7 +301,7 @@ void BosonCanvas::shootAtUnit(Unit* target, Unit* attackedBy, long int damage)
  } else {
 	(void) new BoShot(target, attackedBy, this);
  }
- play(attackedBy->owner()->speciesTheme()->themePath() + "sounds/shoot.wav");
+ play(attackedBy->soundShoot());
 }
 
 void BosonCanvas::play(const QString& fileName)
