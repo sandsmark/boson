@@ -367,11 +367,26 @@ public slots:
 	 **/
 	void slotAddChatSystemMessage(const QString& fromName, const QString& text);
 
+
 	/**
 	 * Convinence method for the above slot. Simply uses "Boson" as
 	 * fromName.
 	 **/
 	void slotAddChatSystemMessage(const QString& text);
+
+	/**
+	 * Just like @ref slotAddChatSystemMessage, but the message is
+	 * displayed only if @p player is the local player. Otherwise it is
+	 * ignored.
+	 **/
+	void slotAddChatSystemMessageForLocalPlayer(const Player* player, const QString& fromName, const QString& text);
+
+	/**
+	 * Just like @ref slotAddChatSystemMessage, but the message is
+	 * displayed only if @p player is the local player. Otherwise it is
+	 * ignored.
+	 **/
+	void slotAddChatSystemMessageForLocalPlayer(const Player*, const QString& text);
 
 signals:
 	/**

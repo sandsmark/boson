@@ -238,14 +238,10 @@ void ProductionPlugin::advance(unsigned int)
 			return;
 		}
 		if (speciesTheme()->unitProperties(id)->isFacility()) {
-			if (player() == boGame->localPlayer()) {
-				game()->slotAddChatSystemMessage(i18n("A %1 has been produced - place it on the map to start construction!").arg(prop->name()));
-			}
+			game()->slotAddChatSystemMessageForLocalPlayer(player(), i18n("A %1 has been produced - place it on the map to start construction!").arg(prop->name()));
 			return;
 		} else {
-			if (player() == boGame->localPlayer()) {
-				game()->slotAddChatSystemMessage(i18n("A %1 has been produced and will be placed on the map now").arg(prop->name()));
-			}
+			game()->slotAddChatSystemMessageForLocalPlayer(player(), i18n("A %1 has been produced and will be placed on the map now").arg(prop->name()));
 		}
 		int tilex, tiley; // Position of lower-left corner of facility in tiles
 		int theight, twidth; // height and width of facility in tiles
@@ -285,9 +281,7 @@ void ProductionPlugin::advance(unsigned int)
 			}
 		}
 		boDebug() << k_funcinfo << "Cannot find free cell around facility :-(" << endl;
-		if (player() == boGame->localPlayer()) {
-			game()->slotAddChatSystemMessage(i18n("%1 could not be placed on the map - no free cell found. Place it manuall!").arg(prop->name()));
-		}
+		game()->slotAddChatSystemMessageForLocalPlayer(player(), i18n("%1 could not be placed on the map - no free cell found. Place it manuall!").arg(prop->name()));
 	} else {
 		mProductionState = mProductionState + 1;
 	}
