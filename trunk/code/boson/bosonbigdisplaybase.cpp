@@ -1365,20 +1365,22 @@ void BosonBigDisplayBase::renderPlacementPreview()
 	x = ((rintf(pos.x()) + w / 2));
 	y = ((rintf(pos.y()) + h / 2));
  }
- // Calculate z. This code is taken from Unit::updateZ()
- float z;
- if (d->mPlacementPreview.unitProperties()->isAircraft() ||
-		d->mPlacementPreview.unitProperties()->canGoOnWater()) {
-	z = canvas()->heightAtPoint(x, y);
-	if (!d->mPlacementPreview.unitProperties()->isAircraft()) {
-		z -= 0.05;
+ // Calculate z for units. This code is taken from Unit::updateZ()
+ float z = 0;
+ if (modelPreview) {
+	if (d->mPlacementPreview.unitProperties()->isAircraft() ||
+			d->mPlacementPreview.unitProperties()->canGoOnWater()) {
+		z = canvas()->heightAtPoint(x, y);
+		if (!d->mPlacementPreview.unitProperties()->isAircraft()) {
+			z -= 0.05;
+		}
+	} else
+	{
+		z = canvas()->terrainHeightAtPoint(x, y);
 	}
- } else
- {
-	z = canvas()->terrainHeightAtPoint(x, y);
- }
- if (d->mPlacementPreview.unitProperties()->isAircraft()) {
-	z += 2.0f;  // Flying units are always 2 units above the ground
+	if (d->mPlacementPreview.unitProperties()->isAircraft()) {
+		z += 2.0f;  // Flying units are always 2 units above the ground
+	}
  }
  glTranslatef(x, -y, z);
  if (modelPreview) {
