@@ -320,6 +320,8 @@ protected slots:
 
 	void slotReceiveAdvance();
 
+	void slotDebugOutput(const QString& area, const char* data, int level);
+
 private:
 	class BosonPrivate;
 	BosonPrivate* d;

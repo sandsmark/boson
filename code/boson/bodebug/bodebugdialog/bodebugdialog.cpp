@@ -68,6 +68,7 @@ BoDebugDialog::BoDebugDialog( QStringList areaList, QWidget *parent, const char 
   destList.append( i18n("Shell") );
   destList.append( i18n("Syslog") );
   destList.append( i18n("None") );
+  destList.append( i18n("Application dependant output") );
 
   //
   // Upper left frame

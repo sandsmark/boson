@@ -23,6 +23,7 @@
 // here).
 
 #include "bodebug.h"
+#include "bodebug.moc"
 
 #ifdef NDEBUG
 #undef boDebug
@@ -146,13 +147,6 @@ static QString getDescrFromNum(unsigned int _num)
   return QString::null;
 }
 
-enum DebugLevels {
-    KDEBUG_INFO=    0,
-    KDEBUG_WARN=    1,
-    KDEBUG_ERROR=   2,
-    KDEBUG_FATAL=   3
-};
-
 
 struct boDebugPrivate {
   boDebugPrivate() : 
@@ -206,22 +200,22 @@ static void kDebugBackend( unsigned short nLevel, unsigned int nArea, const char
     QString key;
     switch( nLevel )
       {
-      case KDEBUG_INFO:
+      case BoDebug::KDEBUG_INFO:
 	key = "InfoOutput";
 	aCaption = "Info";
 	nPriority = LOG_INFO;
 	break;
-      case KDEBUG_WARN:
+      case BoDebug::KDEBUG_WARN:
 	key = "WarnOutput";
 	aCaption = "Warning";
 	nPriority = LOG_WARNING;
 	break;
-      case KDEBUG_FATAL:
+      case BoDebug::KDEBUG_FATAL:
 	key = "FatalOutput";
 	aCaption = "Fatal Error";
 	nPriority = LOG_CRIT;
 	break;
-      case KDEBUG_ERROR:
+      case BoDebug::KDEBUG_ERROR:
       default:
 	/* Programmer error, use "Error" as default */
 	key = "ErrorOutput";
@@ -245,16 +239,16 @@ static void kDebugBackend( unsigned short nLevel, unsigned int nArea, const char
                 QString aKey;
                 switch( nLevel )
                 {
-                    case KDEBUG_INFO:
+                    case BoDebug::KDEBUG_INFO:
                         aKey = "InfoFilename";
                         break;
-                    case KDEBUG_WARN:
+                    case BoDebug::KDEBUG_WARN:
                         aKey = "WarnFilename";
                         break;
-                    case KDEBUG_FATAL:
+                    case BoDebug::KDEBUG_FATAL:
                         aKey = "FatalFilename";
                         break;
-                    case KDEBUG_ERROR:
+                    case BoDebug::KDEBUG_ERROR:
                     default:
                         aKey = "ErrorFilename";
                         break;
@@ -303,28 +297,41 @@ static void kDebugBackend( unsigned short nLevel, unsigned int nArea, const char
         case 3: // syslog
           {
 	      syslog( nPriority, data);
+	      break;
           }
         case 4: // nothing
           {
+	      break;
+          }
+        case 5: // emit signal
+          {
+	      // we won't emit anything unless BoDebug::mDebug is non-NULL.
+	      // the user will need to call BoDebug::self() in order to connect
+	      // any signal to BoDebug. So if it is NULL, the signal won't be
+	      // used anyway.
+	      if (BoDebug::selfNonCreate()) {
+	        emit BoDebug::self()->emitSignal(boDebug_data->aAreaName, data, (BoDebug::DebugLevels)nLevel);
+	      }
+	      break;
           }
         }
 
   // check if we should abort
-  if( ( nLevel == KDEBUG_FATAL )
+  if( ( nLevel == BoDebug::KDEBUG_FATAL )
       && ( !boDebug_data->config || boDebug_data->config->readNumEntry( "AbortFatal", 1 ) ) )
         abort();
 }
 
 bodbgstream &perror( bodbgstream &s) { return s << QString::fromLocal8Bit(strerror(errno)); }
-bodbgstream boDebug(int area) { return bodbgstream(area, KDEBUG_INFO); }
-bodbgstream boDebug(bool cond, int area) { if (cond) return bodbgstream(area, KDEBUG_INFO); else return bodbgstream(0, 0, false); }
+bodbgstream boDebug(int area) { return bodbgstream(area, BoDebug::KDEBUG_INFO); }
+bodbgstream boDebug(bool cond, int area) { if (cond) return bodbgstream(area, BoDebug::KDEBUG_INFO); else return bodbgstream(0, 0, false); }
 
-bodbgstream boError(int area) { return bodbgstream("ERROR: ", area, KDEBUG_ERROR); }
-bodbgstream boError(bool cond, int area) { if (cond) return bodbgstream("ERROR: ", area, KDEBUG_ERROR); else return bodbgstream(0,0,false); }
-bodbgstream boWarning(int area) { return bodbgstream("WARNING: ", area, KDEBUG_WARN); }
-bodbgstream boWarning(bool cond, int area) { if (cond) return bodbgstream("WARNING: ", area, KDEBUG_WARN); else return bodbgstream(0,0,false); }
-bodbgstream boFatal(int area) { return bodbgstream("FATAL: ", area, KDEBUG_FATAL); }
-bodbgstream boFatal(bool cond, int area) { if (cond) return bodbgstream("FATAL: ", area, KDEBUG_FATAL); else return bodbgstream(0,0,false); }
+bodbgstream boError(int area) { return bodbgstream("ERROR: ", area, BoDebug::KDEBUG_ERROR); }
+bodbgstream boError(bool cond, int area) { if (cond) return bodbgstream("ERROR: ", area, BoDebug::KDEBUG_ERROR); else return bodbgstream(0,0,false); }
+bodbgstream boWarning(int area) { return bodbgstream("WARNING: ", area, BoDebug::KDEBUG_WARN); }
+bodbgstream boWarning(bool cond, int area) { if (cond) return bodbgstream("WARNING: ", area, BoDebug::KDEBUG_WARN); else return bodbgstream(0,0,false); }
+bodbgstream boFatal(int area) { return bodbgstream("FATAL: ", area, BoDebug::KDEBUG_FATAL); }
+bodbgstream boFatal(bool cond, int area) { if (cond) return bodbgstream("FATAL: ", area, BoDebug::KDEBUG_FATAL); else return bodbgstream(0,0,false); }
 
 void bodbgstream::flush() {
     if (output.isEmpty() || !print)
@@ -418,6 +425,32 @@ void boClearDebugConfig()
 {
     delete boDebug_data->config;
     boDebug_data->config = 0;
+}
+
+
+static KStaticDeleter<BoDebug> sd;
+BoDebug* BoDebug::mDebug = 0;
+
+BoDebug::BoDebug() : QObject(0)
+{
+}
+
+BoDebug::~BoDebug()
+{
+}
+
+BoDebug* BoDebug::self()
+{
+ if (!mDebug) {
+   mDebug = new BoDebug();
+   sd.setObject(mDebug);
+ }
+ return mDebug;
+}
+
+BoDebug* BoDebug::selfNonCreate()
+{
+ return mDebug;
 }
 
 // Needed for --enable-final
