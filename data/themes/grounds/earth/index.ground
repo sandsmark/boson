@@ -20,11 +20,11 @@ MiniMapColor=4278190335
 [Texture_3]
 File=mud.jpg
 AmountOfWater=100
-AmountOfLand=130
+AmountOfLand=155
 MiniMapColor=4278190335
 
 [Texture_4]
 File=snow.jpg
-AmountOfWater=100
+AmountOfWater=125
 AmountOfLand=130
 MiniMapColor=4278190335
