@@ -5,6 +5,7 @@
     <Action name="debug_mode" />
     <Action name="show_resources" />
     <Action name="debug_map_coordinates" />
+    <Action name="debug_pf_data" />
     <Action name="debug_cell_grid" />
     <Action name="debug_matrices" />
     <Action name="debug_works" />
@@ -19,6 +20,9 @@
     <Action name="debug_gamelog" />
     <Menu name="debug_lazy"><text>&amp;Lazyness</text>
       <Action name="debug_lazy_reload_model_textures" />
+    </Menu>
+    <Menu name="debug_colormap"><text>&amp;Color map</text>
+      <Action name="debug_colormap_enable" />
     </Menu>
   </Menu>
   <Menu name="settings" group="settingsmenu"><text>&amp;Settings</text>

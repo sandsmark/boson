@@ -146,6 +146,16 @@ private:
 	bool mAltButton;
 };
 
+class BoLineVisualization
+{
+  public:
+    BoLineVisualization()  { color.set(1.0f, 1.0f, 1.0f, 1.0f); timeout = 60; pointsize = 1.0f; }
+    QValueList<BoVector3> points;
+    BoVector4 color;
+    int timeout;
+    float pointsize;
+};
+
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
@@ -178,6 +188,9 @@ public:
 	 * Do NOT call directly!
 	 **/
 	void setActive(bool a);
+
+	void addLineVisualization(BoLineVisualization v);
+	void advanceLineVisualization();
 
 	BosonCursor* cursor() const { return mCursor; }
 	void setCursor(BosonCursor* c) { mCursor = c; }

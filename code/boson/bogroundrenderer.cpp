@@ -896,6 +896,16 @@ void BoDefaultGroundRenderer::renderVisibleCells(Cell** renderCells, unsigned in
 	renderCellsNow(renderCells, cellsCount, map->width() + 1, map->heightMap(), map->normalMap(), map->texMap(i));
  }
 
+ if (boConfig->enableColormap()) {
+	glDisable(GL_LIGHTING);
+	glDisable(GL_TEXTURE_2D);
+	renderCellColors(renderCells, cellsCount, map->width(), map->colorMap()->colorMap(), map->heightMap());
+	if (boConfig->useLight()) {
+		glEnable(GL_LIGHTING);
+	}
+	glEnable(GL_TEXTURE_2D);
+ }
+
  glDisable(GL_BLEND);
 }
 
@@ -970,6 +980,48 @@ void BoDefaultGroundRenderer::renderCellsNow(Cell** cells, int count, int corner
  }
  glEnd();
  BoMaterial::setDefaultAlpha(1.0f);
+}
+
+void BoDefaultGroundRenderer::renderCellColors(Cell** cells, int count, int width, const unsigned char* colorMap, const float* heightMap)
+{
+ const unsigned char alpha = 128;
+ int cornersWidth = width + 1;
+
+ glBegin(GL_QUADS);
+
+ for (int i = 0; i < count; i++) {
+	Cell* c = cells[i];
+	int x = c->x();
+	int y = c->y();
+
+	int coloroffset = y * width + x;
+	int heightoffset = y * cornersWidth + x;
+	const unsigned char* color = colorMap + coloroffset * 3;
+	const float* heightMapUpperLeft = heightMap + heightoffset;
+
+	GLfloat cellXPos = (float)x * BO_GL_CELL_SIZE;
+	GLfloat cellYPos = -(float)y * BO_GL_CELL_SIZE;
+
+	float upperLeftHeight = *heightMapUpperLeft;
+	float upperRightHeight = *(heightMapUpperLeft + 1);
+	float lowerLeftHeight = *(heightMapUpperLeft + cornersWidth);
+	float lowerRightHeight = *(heightMapUpperLeft + cornersWidth + 1);
+
+	glColor4ub(color[0], color[1], color[2], alpha);
+	glVertex3f(cellXPos, cellYPos, upperLeftHeight + 0.05);
+
+	glColor4ub(color[0], color[1], color[2], alpha);
+	glVertex3f(cellXPos, cellYPos - BO_GL_CELL_SIZE, lowerLeftHeight + 0.05);
+
+	glColor4ub(color[0], color[1], color[2], alpha);
+	glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos - BO_GL_CELL_SIZE, lowerRightHeight + 0.05);
+
+	glColor4ub(color[0], color[1], color[2], alpha);
+	glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos, upperRightHeight + 0.05);
+	glstat_terrain_faces++;
+	glstat_terrain_vertices += 4;
+ }
+ glEnd();
 }
 
 

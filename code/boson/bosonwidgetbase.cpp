@@ -639,6 +639,11 @@ void BosonWidgetBase::initKActions()
  mapCoordinates->setChecked(false);
  connect(mapCoordinates, SIGNAL(toggled(bool)),
 		this, SLOT(slotSetDebugMapCoordinates(bool)));
+ KToggleAction* PFData = new KToggleAction(i18n("Debug pathfinder data"),
+		KShortcut(), 0, 0, actionCollection(), "debug_pf_data");
+ PFData->setChecked(false);
+ connect(PFData, SIGNAL(toggled(bool)),
+		this, SLOT(slotSetDebugPFData(bool)));
  KToggleAction* cellGrid = new KToggleAction(i18n("Show Cell &Grid"),
 		KShortcut(), 0, 0, actionCollection(), "debug_cell_grid");
  cellGrid->setChecked(false);
@@ -686,6 +691,13 @@ void BosonWidgetBase::initKActions()
 		SLOT(slotUnfogAll()), actionCollection(), "debug_unfog");
  (void)new KAction(i18n("Dump game &log"), KShortcut(), this,
 		SLOT(slotDumpGameLog()), actionCollection(), "debug_gamelog");
+ (void)new KAction(i18n("Dump game &log"), KShortcut(), this,
+		SLOT(slotDumpGameLog()), actionCollection(), "debug_gamelog");
+ KToggleAction* enablecolormap = new KToggleAction(i18n("Enable colormap"),
+		KShortcut(), 0, 0, actionCollection(), "debug_colormap_enable");
+ enablecolormap->setChecked(false);
+ connect(enablecolormap, SIGNAL(toggled(bool)),
+		this, SLOT(slotSetEnableColormap(bool)));
 
 
  KSelectAction* debugMode = new KSelectAction(i18n("Mode"), KShortcut(),
@@ -1087,6 +1099,11 @@ void BosonWidgetBase::slotSetDebugMapCoordinates(bool debug)
  boConfig->setDebugMapCoordinates(debug);
 }
 
+void BosonWidgetBase::slotSetDebugPFData(bool debug)
+{
+ boConfig->setDebugPFData(debug);
+}
+
 void BosonWidgetBase::slotSetDebugShowCellGrid(bool debug)
 {
  boConfig->setDebugShowCellGrid(debug);
@@ -1125,6 +1142,11 @@ void BosonWidgetBase::slotSetDebugFPS(bool debug)
 void BosonWidgetBase::slotSetShowResources(bool show)
 {
  boConfig->setShowResources(show);
+}
+
+void BosonWidgetBase::slotSetEnableColormap(bool enable)
+{
+ boConfig->setEnableColormap(enable);
 }
 
 void BosonWidgetBase::slotRunScriptLine(const QString& line)

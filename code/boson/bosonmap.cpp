@@ -325,6 +325,7 @@ BosonMap::BosonMap(QObject* parent) : QObject(parent)
 BosonMap::~BosonMap()
 {
  delete[] mCells;
+ delete mColorMap;
  delete mNormalMap;
  delete mHeightMap;
  delete mTexMap;
@@ -335,6 +336,7 @@ void BosonMap::init()
 {
  d = new BosonMapPrivate;
  mCells = 0;
+ mColorMap = 0;
  mHeightMap = 0;
  mNormalMap = 0;
  mGroundTheme = 0;
@@ -492,6 +494,10 @@ bool BosonMap::loadCompleteMap(QDataStream& stream)
 	boError() << k_funcinfo << "Could not load map cells" << endl;
 	return false;
  }
+ // should this be done somewhere else?
+ boDebug() << k_funcinfo << "creating colormap" << endl;
+ createColorMap();
+ boDebug() << k_funcinfo << "created colormap" << endl;
  return true;
 }
 
@@ -513,6 +519,9 @@ bool BosonMap::loadMapGeo(unsigned int width, unsigned int height)
  mHeightMap = 0;
  delete mNormalMap;
  mNormalMap = 0;
+ boDebug() << k_funcinfo << "deleting colormap" << endl;
+ delete mColorMap;
+ mColorMap = 0;
  delete mTexMap;
  mTexMap = 0;
 
@@ -1388,4 +1397,29 @@ int BosonMap::mapFileFormatVersion()
 {
  return BOSONMAP_VERSION;
 }
+
+void BosonMap::createColorMap()
+{
+ boDebug() << k_funcinfo << "" << endl;
+ if (mColorMap) {
+	// Old normal map should already be deleted
+	boWarning() << k_funcinfo << "Old color map not deleted!" << endl;
+	delete mColorMap;
+	mColorMap = 0;
+ }
+
+ boDebug() << k_funcinfo << "creating map" << endl;
+ mColorMap = new BoColorMap(width(), height());
+
+ boDebug() << k_funcinfo << "initing map" << endl;
+ // Init colormap to gray
+ unsigned char color[] = { 128, 128, 128 };
+ for (unsigned int y = 0; y < height(); y++) {
+	for (unsigned int x = 0; x < width(); x++) {
+		mColorMap->setColorAt(x, y, color);
+	}
+ }
+ boDebug() << k_funcinfo << "done" << endl;
+}
+
 

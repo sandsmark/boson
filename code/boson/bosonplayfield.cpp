@@ -468,6 +468,9 @@ bool BosonPlayField::loadMapFromFile(const QByteArray& mapXML, const QByteArray&
 	return false;
  }
 
+ // Create color map
+ mMap->createColorMap();
+
 
  boDebug() << k_funcinfo << "map loaded. emitting signal" << endl;
  emit signalNewMap(mMap);
