@@ -133,7 +133,7 @@ public:
 	BosonTiles* tileSet() const { return mTiles; }
 
 public slots:
-	void changeCell(int x, int y, int groundType, unsigned char b);
+	void slotChangeCell(int x, int y, int groundType, unsigned char b);
 
 signals:
 	void signalTileSetChanged(BosonTiles*);

@@ -536,7 +536,7 @@ Cell* BosonMap::cell(int x, int y) const
  return &mCells[ x + y * width() ];
 }
 
-void BosonMap::changeCell(int x, int y, int groundType, unsigned char b)
+void BosonMap::slotChangeCell(int x, int y, int groundType, unsigned char b)
 {
 //kdDebug() << x << " -> " << y << endl;
 //kdDebug() << width() << " " << height() << endl;
