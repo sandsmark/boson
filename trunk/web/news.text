@@ -2,25 +2,25 @@
 date=October 27th 2002 20:40
 title=Dynamic news
 text=We have now dynamic news!<br>
-    This means that main page now has fixed number (currently 5) articles and
-    older articles are in "Older news" sidebar box. There is also
+    This means that the main page now has a fixed number (currently 5) of articles and
+    older articles are in the "Older News" sidebar box. There is also
     <a href="all-news.php">a page that contains all news articles</a>. Many
-    thanks to brad for this feature!<br>
+    thanks to Brad for this feature!<br>
     About Boson, version 0.7 will most probaly be released in November, so we
-    encourage everybody to get <a href="download.php#cvs">CVS copy of Boson</a>
+    encourage everybody to get <a href="download.php#cvs">a CVS copy of Boson</a>
     and test it. If you find any bugs, please <a href="contact.php#bugs">report
     them</a> so we can fix them before release.<br>
-    Biggest changes since last update include updated unit editor which now
-    supports editing of all current unit properties including weapons and
-    new starting widget for map editor where you can choose existing map to edit
-    or create new one (and select it's size). And, as always, many bugs have
-    been fixed and many smaller things have been changed.
+    Biggest changes since the last update include a updated unit editor which now
+    supports editing of all current unit properties including weapons.<br>
+    A new starting widget for the map editor where you can choose existing maps to edit
+    or create new a one (and select it's size).<br>
+    And, as always, many bugs have been fixed and many smaller things have been changed.
     <br><br>
 
 [article]
 date=October 14th 2002 17:54
 title=Another update
-text=Again, much has changed during last weeks. I wanted to take some
+text=Again, much has changed during the last weeks. I wanted to take some
     screenshots and update our screenshots page, but things just kept changing
     (and they still do :-)) and I didn't want outdated screenies, so they'll
     come later ;-)<br>
@@ -28,14 +28,14 @@ text=Again, much has changed during last weeks. I wanted to take some
     <ul>
     <li>Missiles are properly rotated</li>
     <li>New map: Basic 2 which is modified version of Basic map</li>
-    <li>Added menu entry and shortcut to grab screenshots. Just press Ctrl+G</li>
+    <li>Added a menu entry and shortcut to grab screenshots. Just press Ctrl+G</li>
     <li>.desktop files were renamed. They now have better suffixes like .boson
       and .unit</li>
     <li>New camera system.</li>
     <li>New loading/saving widget</li>
     <li>Updated units README and added README about particle systems</li>
     <li>Some new units and some updated unit models</li>
-    <li>and, of course, bugfixes and many smaller things</li>
+    <li>And, of course, bugfixes and many smaller things</li>
     </ul>
     And finally, some statistics: since 1st September or so, our homepage has
     been visited almost 9500 times, more than 200 times a day on average :-)
