@@ -363,8 +363,13 @@ bool playerMobUnit::getWantedShoot(bosonMsgData *msg)
 /* actually do the job, used by different functions */
 void playerMobUnit::do_moveTo(state_t ns)
 {
-	int dx = ns.x - x();
-	int dy = ns.y - y();
+	// XXX  simplify this stuff
+	QRect r = gridRect();
+	int dx = (ns.x - r.x()) * BO_TILE_SIZE;
+	int dy = (ns.y - r.y()) * BO_TILE_SIZE;
+
+	boAssert(int(x())%BO_TILE_SIZE==0);
+	boAssert(int(y())%BO_TILE_SIZE==0);
 
 	move(BO_TILE_SIZE*ns.x, BO_TILE_SIZE*ns.y);
 	emit sig_moveTo(ns.x, ns.y);
