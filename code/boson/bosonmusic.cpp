@@ -20,9 +20,6 @@
 #include "bosonmusic.h"
 
 #include "defines.h"
-#include "unit.h"
-#include "unitproperties.h"
-#include "speciestheme.h"
 #include "bosonsound.h"
 #include "bosonconfig.h"
 
@@ -31,6 +28,7 @@
 #include <kapplication.h>
 #include <kstaticdeleter.h>
 #include <kdebug.h>
+
 #include <arts/kplayobject.h>
 #include <arts/kplayobjectfactory.h>
 #include <arts/kartsserver.h>
@@ -234,22 +232,6 @@ bool BosonMusic::isLoop() const
  return d->mLoop;
 }
 
-void BosonMusic::playSound(const QString& species, int id)
-{
- if (boConfig->disableSound()) {
-	return;
- }
- bosonSound(species)->play(id);
-}
-
-void BosonMusic::playSound(Unit* unit, int event)
-{
- if (boConfig->disableSound()) {
-	return;
- }
- bosonSound(unit->speciesTheme()->themePath())->play(unit->unitProperties()->sound(event));
-}
-
 bool BosonMusic::sound() const
 {
  return d->mPlaySound;
@@ -281,11 +263,12 @@ void BosonMusic::setSound(bool sound_)
  d->mPlaySound = sound_;
 }
 
-void BosonMusic::addSounds(const QString& species)
+BosonSound* BosonMusic::addSounds(const QString& species)
 {
  if (!d->mBosonSound.find(species)) {
 	d->mBosonSound.insert(species, new BosonSound);
  }
+ return d->mBosonSound[species];
 }
 
 BosonSound* BosonMusic::bosonSound(const QString& species) const
@@ -297,3 +280,4 @@ KArtsServer& BosonMusic::server() const
 {
  return d->mServer;
 }
+

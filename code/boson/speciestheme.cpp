@@ -23,6 +23,7 @@
 #include "unitbase.h"
 #include "unitproperties.h"
 #include "bosonmusic.h"
+#include "bosonconfig.h"
 #include "bosonsound.h"
 #include "bosonprofiling.h"
 #include "bosonmodel.h"
@@ -100,6 +101,7 @@ SpeciesTheme::SpeciesTheme(const QString& speciesDir, const QColor& teamColor)
  d->mActionPixmaps.setAutoDelete(true);
  d->mUnitModels.setAutoDelete(true);
  d->mCanChangeTeamColor = true;
+ mSound = 0;
 
  if (!loadTheme(speciesDir, teamColor)) {
 	kdError() << "Theme " << speciesDir << " not properly loaded" << endl;
@@ -140,7 +142,7 @@ bool SpeciesTheme::loadTheme(const QString& speciesDir, const QColor& teamColor)
  mThemePath = speciesDir;
  kdDebug() << "theme path: " << themePath() << endl;
 
- boMusic->addSounds(themePath());
+ mSound = boMusic->addSounds(themePath());
 
  // the initial values for the units - config files :-)
  readUnitConfigs();
@@ -212,8 +214,7 @@ bool SpeciesTheme::loadUnit(unsigned long int type)
 	boProfiling->loadUnitDone(type);
 	return false;
  }
- BosonSound* sound = boMusic->bosonSound(themePath());
- sound->addUnitSounds(prop);
+ mSound->addUnitSounds(prop);
  boProfiling->loadUnitDone(type);
  return true;
 }
@@ -720,5 +721,16 @@ void SpeciesTheme::loadUnitModel(const UnitProperties* prop)
  m->setLongNames(prop->longTextureNames());
  m->loadModel();
  d->mUnitModels.insert(prop->typeId(), m);
+}
+
+void SpeciesTheme::playSound(UnitBase* unit, UnitSoundEvent event)
+{
+ if (boConfig->disableSound()) {
+	return;
+ }
+ if (!sound()) {
+	return;
+ }
+ sound()->play(unit->unitProperties()->sound(event));
 }
 

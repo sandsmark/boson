@@ -89,11 +89,8 @@ public:
 	void setMusic(bool);
 	void setSound(bool);
 
-	void playSound(Unit* unit, int event);
-	void playSound(const QString& species, int id);
-
 	BosonSound* bosonSound(const QString& species) const;
-	void addSounds(const QString& species);
+	BosonSound* addSounds(const QString& species);
 
 	KArtsServer& server() const;
 
