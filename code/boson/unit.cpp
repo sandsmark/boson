@@ -1047,6 +1047,11 @@ void Unit::setAdvanceWork(WorkType w)
  // missing by any reason
  setVelocity(0.0, 0.0, 0.0);
 
+ if (advanceWork() != w) {
+	// we change the list only if work() actually changed (in favor of
+	// performance). but do not return here!
+	canvas()->changeAdvanceList((BosonItem*)this);
+ }
  UnitBase::setAdvanceWork(w);
 
  // we even do this if nothing changed - just in case...
