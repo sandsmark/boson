@@ -37,7 +37,7 @@ public:
 
 	void createStatistics(Boson* boson, Player* winner, Player* localPlayer);
 	
-private:
+public:
 	class PlayerBox;
 
 protected:
