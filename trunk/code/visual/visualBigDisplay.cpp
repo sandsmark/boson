@@ -133,10 +133,10 @@ void visualBigDisplay::mouseMoveEvent(QMouseEvent *e)
 				return;
 			oldX = selectX; oldY = selectY;
 			actionClicked( oldX, oldY);
-			return;
+			break;
 
 		case SELECT_PUT:
-			return;
+			break;
 	}
 }
 
@@ -171,6 +171,7 @@ void visualBigDisplay::mouseReleaseEvent(QMouseEvent *e)
 
 			break;
 		case SELECT_PUT:
+			break;
 			return;
 	}
 	view->setSelectionMode( SELECT_NONE);
