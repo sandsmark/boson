@@ -129,65 +129,6 @@ private:
 };
 
 
-class FogTexture
-{
-public:
-	FogTexture()
-	{
-		mFogTexture = 0;
-		mFogTextureData = 0;
-		mFogTextureDataW = 0;
-		mFogTextureDataH = 0;
-		mLastMapWidth = 0;
-		mLastMapHeight = 0;
-		mFogTextureDirty = false;
-		mFogTextureDirtyAreaX1 = 0;
-		mFogTextureDirtyAreaX2 = 0;
-		mFogTextureDirtyAreaY1 = 0;
-		mFogTextureDirtyAreaY2 = 0;
-	}
-	~FogTexture()
-	{
-		delete mFogTextureData;
-		delete mFogTexture;
-	}
-
-	void start(const BosonMap* map);
-	void stop(const BosonMap* map);
-	void cellChanged(int x, int y);
-	void setLocalPlayerIO(PlayerIO* io)
-	{
-		mLocalPlayerIO = io;
-	}
-	PlayerIO* localPlayerIO() const
-	{
-		return mLocalPlayerIO;
-	}
-
-protected:
-	void initFogTexture(const BosonMap* map);
-
-	/**
-	 * Updates fog texture if it's dirty
-	 **/
-	void updateFogTexture();
-
-private:
-	BoTexture* mFogTexture;
-	unsigned char* mFogTextureData;
-	int mFogTextureDataW;
-	int mFogTextureDataH;
-	unsigned int mLastMapWidth;
-	unsigned int mLastMapHeight;
-	bool mFogTextureDirty;
-	int mFogTextureDirtyAreaX1;
-	int mFogTextureDirtyAreaY1;
-	int mFogTextureDirtyAreaX2;
-	int mFogTextureDirtyAreaY2;
-
-	PlayerIO* mLocalPlayerIO;
-};
-
 
 /**
  * This class uses a tree find out whether cells are visible. Whenever @ref
@@ -556,6 +497,12 @@ float BoGroundRendererCellListLOD::distanceFromPlane(const float* plane, const B
 }
 
 
+FogTexture::~FogTexture()
+{
+ delete mFogTextureData;
+ delete mFogTexture;
+}
+
 void FogTexture::start(const BosonMap* map)
 {
  if (boConfig->boolValue("TextureFOW")) {
@@ -629,7 +576,9 @@ void FogTexture::initFogTexture(const BosonMap* map)
 		for (unsigned int x = 1; x <= mLastMapWidth; x++) {
 			unsigned char value = 0;
 			if (!localPlayerIO()->isFogged(x - 1, y - 1)) {
-				value = 255;
+				if (!mSmoothEdges || (x > 1 && y > 1 && x < mLastMapWidth && y < mLastMapHeight)) {
+					value = 255;
+				}
 			}
 			mFogTextureData[(y * w + x) * 4 + 0] = value;
 			mFogTextureData[(y * w + x) * 4 + 1] = value;
@@ -713,6 +662,10 @@ void FogTexture::cellChanged(int x, int y)
  if (!mFogTextureData) {
 	return;
  }
+ if(x == 0 || y == 0 || x == ((int)mLastMapWidth - 1) || y == ((int)mLastMapHeight - 1)) {
+	return;
+ }
+
  unsigned char value = 0;
  if (!localPlayerIO()->isFogged(x, y)) {
 	value = 255;

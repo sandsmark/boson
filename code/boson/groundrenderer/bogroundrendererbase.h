@@ -33,9 +33,66 @@ typedef BoVector3<float> BoVector3Float;
 
 class QRect;
 class CellListBuilder;
-class FogTexture;
 class BoQuadTreeNode;
 class BoGroundRendererCellListLOD;
+
+
+class FogTexture
+{
+public:
+	FogTexture(bool smoothedges = true)
+	{
+		mFogTexture = 0;
+		mFogTextureData = 0;
+		mFogTextureDataW = 0;
+		mFogTextureDataH = 0;
+		mLastMapWidth = 0;
+		mLastMapHeight = 0;
+		mFogTextureDirty = false;
+		mFogTextureDirtyAreaX1 = 0;
+		mFogTextureDirtyAreaX2 = 0;
+		mFogTextureDirtyAreaY1 = 0;
+		mFogTextureDirtyAreaY2 = 0;
+		mSmoothEdges = smoothedges;
+	}
+	~FogTexture();
+
+	void start(const BosonMap* map);
+	void stop(const BosonMap* map);
+	void cellChanged(int x, int y);
+	void setLocalPlayerIO(PlayerIO* io)
+	{
+		mLocalPlayerIO = io;
+	}
+	PlayerIO* localPlayerIO() const
+	{
+		return mLocalPlayerIO;
+	}
+
+protected:
+	void initFogTexture(const BosonMap* map);
+
+	/**
+	 * Updates fog texture if it's dirty
+	 **/
+	void updateFogTexture();
+
+private:
+	BoTexture* mFogTexture;
+	unsigned char* mFogTextureData;
+	int mFogTextureDataW;
+	int mFogTextureDataH;
+	unsigned int mLastMapWidth;
+	unsigned int mLastMapHeight;
+	bool mFogTextureDirty;
+	int mFogTextureDirtyAreaX1;
+	int mFogTextureDirtyAreaY1;
+	int mFogTextureDirtyAreaX2;
+	int mFogTextureDirtyAreaY2;
+	bool mSmoothEdges;
+
+	PlayerIO* mLocalPlayerIO;
+};
 
 
 class BoGroundRendererBase : public BoGroundRenderer
