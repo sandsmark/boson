@@ -20,15 +20,20 @@
 #include "bosoncursor.h"
 #include "defines.h"
 
-#include <qcanvas.h>
-#include <qbitmap.h>
-
 #include <kcursor.h>
 #include <kstandarddirs.h>
 #include <ksimpleconfig.h>
 #include <kdebug.h>
 
+#include <qcanvas.h>
+#include <qbitmap.h>
+#include <qtimer.h>
+#include <qintdict.h>
+
+#include "bosoncursor.moc"
+
 #define PIXMAP_CURSOR 1 // support for pixmaps as cursor
+
 
 class BosonCursor::BosonCursorPrivate
 {
@@ -38,8 +43,6 @@ public:
 		mQCursor = 0;
 		mCursor = 0;
 		
-		mCursorPixmaps = 0;
-
 		mCanvas = 0;
 	}
 
@@ -48,26 +51,31 @@ public:
 	QCursor* mQCursor;
 	QCanvasSprite* mCursor;
 
-	QCanvasPixmapArray* mCursorPixmaps;
+	QIntDict<QCanvasPixmapArray> mCursorPixmaps;
 
 	QCanvas* mCanvas;
 
 	QPixmap mCursorDefault;
 	QPixmap mCursorMove;
 	QPixmap mCursorAttack;
+
+	QTimer mAnimateTimer;
 };
 
 
 BosonCursor::BosonCursor()
 {
  d = new BosonCursorPrivate;
+ connect(&d->mAnimateTimer, SIGNAL(timeout()), this, SLOT(slotAdvance()));
+
+ d->mCursorPixmaps.setAutoDelete(true);
 }
 
 BosonCursor::~BosonCursor()
 {
  delete d->mQCursor;
  delete d->mCursor;
- delete d->mCursorPixmaps;
+ d->mCursorPixmaps.clear();
  delete d;
 }
 
@@ -79,21 +87,36 @@ void BosonCursor::setCursor(CursorMode mode)
  d->mMode = mode;
 #ifdef PIXMAP_CURSOR
  switch (d->mMode) {
-	case Hide:
-//	case Default: // we do not (yet) have a pixmap for this
-		d->mCursor->hide();
+	case Move:
+	case Attack:
+	case Default:
+		d->mCursor->setSequence(d->mCursorPixmaps[(int)d->mMode]);
 		break;
+	case Hide:
 	default:
-		d->mCursor->setFrame((int)mode);
-		d->mCursor->show();
+		d->mCursor->hide();
 		break;
 
  }
+ if (d->mMode != Hide) { 
+	d->mCursor->show();
+	if (d->mCursor->frameCount() > 1) {
+		d->mAnimateTimer.stop();
+		d->mAnimateTimer.start(100);
+	}
+
+ }
+
+// do NOT use QCanvasSprite::setAnimated(true)! we need to use
+// our own stuff!
+ d->mCursor->setAnimated(false);
 #endif
+
  if (d->mQCursor) {
 	delete d->mQCursor;
  }
  switch (d->mMode) {
+	// TODO: hotspots!!
 	case Attack:
 		d->mQCursor = new QCursor(d->mCursorAttack);
 		break;
@@ -176,49 +199,58 @@ void BosonCursor::loadCursors()
 
 
 #ifdef PIXMAP_CURSOR
- QValueList<QPixmap> pixmaps;
- QPointArray points;
  for (unsigned int i = 0; i < Hide; i++) {
+	QString cursorDir;
 	switch ((CursorMode)i) {
 		case Attack:
 		{
-			pixmaps.append(d->mCursorAttack);
-			points.resize(i + 1);
-			KSimpleConfig c(dir + "/move.desktop");
-			c.setGroup("Boson Cursor");
-			points.setPoint(i, QPoint(
-					c.readNumEntry("HotspotX", 0), 
-					c.readNumEntry("HotspotY", 0)));
+			cursorDir = dir + QString::fromLatin1("/attack/");
 			break;
 		}
 		case Move:
 		{
-			pixmaps.append(d->mCursorMove);
-			points.resize(i + 1);
-			KSimpleConfig c(dir + "/move.desktop");
-			c.setGroup("Boson Cursor");
-			points.setPoint(i, QPoint(
-					c.readNumEntry("HotspotX", 0),
-					c.readNumEntry("HotspotY", 0)));
+			cursorDir = dir + QString::fromLatin1("/move/");
 			break;
 		}
 		case Default:
 		{
-			pixmaps.append(d->mCursorDefault);
-			KSimpleConfig c(dir + "/default.desktop");
-			c.setGroup("Boson Cursor");
-			points.resize(i + 1);
-			points.setPoint(i, QPoint(
-					c.readNumEntry("HotspotX, 0"),
-					c.readNumEntry("HotspotY, 0")));
+			cursorDir = dir + QString::fromLatin1("/default/");
 			break;
 		}
 		case Hide:
 			break;
 	}
+	if (cursorDir == QString::null) {
+		continue;
+	}
+
+	KSimpleConfig c(cursorDir + QString::fromLatin1("index.desktop"));
+	c.setGroup("Boson Cursor");
+	QString filePrefix = c.readEntry("FilePrefix", QString::fromLatin1("cursor-"));
+	unsigned int frames = c.readUnsignedNumEntry("FrameCount", 1);
+	unsigned int hotspotX = 0;
+	unsigned int hotspotY = 0;
+	QValueList<QPixmap> pixmaps;
+	QPointArray points(frames);
+	for (unsigned int j = 0; j < frames; j++) {
+		hotspotX = c.readUnsignedNumEntry(QString("HotspotX_%1").arg(j), hotspotX);
+		hotspotY = c.readUnsignedNumEntry(QString("HotspotY_%1").arg(j), hotspotY);
+		points.setPoint(j, hotspotX, hotspotY);
+		QPixmap p;
+		QString number;
+		number.sprintf("%04d", j);
+		QString file = cursorDir + filePrefix + number + QString::fromLatin1(".png");
+		if (p.load(file)) {
+			QBitmap mask(file);
+			p.setMask(mask);
+		} else {
+			kdError() << k_funcinfo << "Could not load " << file << endl;
+		}
+		pixmaps.append(p);
+	}
+	d->mCursorPixmaps.insert(i, new QCanvasPixmapArray(pixmaps, points));
  }
- d->mCursorPixmaps = new QCanvasPixmapArray(pixmaps, points);
- d->mCursor = new QCanvasSprite(d->mCursorPixmaps, d->mCanvas);
+ d->mCursor = new QCanvasSprite(d->mCursorPixmaps[Default], d->mCanvas);
  d->mCursor->setZ(Z_CANVAS_CURSOR);
 #endif
 }
@@ -230,3 +262,8 @@ void BosonCursor::move(double x, double y)
 #endif
 }
 
+
+void BosonCursor::slotAdvance()
+{
+ d->mCursor->setFrame((d->mCursor->frame() + 1 + d->mCursor->frameCount()) % d->mCursor->frameCount());
+}
