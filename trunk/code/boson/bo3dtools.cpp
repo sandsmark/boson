@@ -148,6 +148,15 @@ BoVector3 BoVector3::load(KConfig* cfg, QString key)
   return BoVector3(list[0], list[1], list[2]);
 }
 
+void BoVector3::save(KConfig* cfg, QString key)
+{
+  QValueList<float> list;
+  list.append(mData[0]);
+  list.append(mData[1]);
+  list.append(mData[2]);
+  BosonConfig::writeFloatNumList(list, cfg, key);
+}
+
 BoVector4 BoVector4::load(KConfig* cfg, QString key)
 {
   QValueList<float> list = BosonConfig::readFloatNumList(cfg, key);

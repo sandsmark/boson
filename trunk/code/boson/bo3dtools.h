@@ -62,10 +62,18 @@ class BoVector3
     inline void operator=(const GLfloat* v)  { mData[0] = v[0];  mData[1] = v[1];  mData[2] = v[2]; };
     inline GLfloat operator[](int i) const  { return mData[i]; };
 
+    inline BoVector3 operator+(const BoVector3& v) { return BoVector3(mData[0] + v.mData[0], mData[1] + v.mData[1], mData[2] + v.mData[2]); };
+    inline BoVector3 operator-(const BoVector3& v) { return BoVector3(mData[0] - v.mData[0], mData[1] - v.mData[1], mData[2] - v.mData[2]); };
+
     /**
      * Loads BoVector3 from KConfig
      **/
     static BoVector3 load(KConfig* cfg, QString key);
+
+    /**
+     * Saves BoVector3 to KConfig
+     **/
+    void save(KConfig* cfg, QString key);
 
     /**
      * @return TRUE when @p v is at the same position (x,y,z are all equal).

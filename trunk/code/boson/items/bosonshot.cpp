@@ -34,7 +34,7 @@
 #include <math.h>
 
 
-BosonShot::BosonShot(const BosonWeaponProperties* prop, Player* owner, BosonCanvas* canvas, float x, float y, float z, float tx, float ty, float tz) :
+BosonShot::BosonShot(const BosonWeaponProperties* prop, Player* owner, BosonCanvas* canvas, BoVector3 pos, BoVector3 target) :
     BosonItem(prop ? prop->model() : 0, canvas)
 {
   boDebug() << "MISSILE: " << k_funcinfo << "Creating new shot" << endl;
@@ -60,12 +60,12 @@ BosonShot::BosonShot(const BosonWeaponProperties* prop, Player* owner, BosonCanv
     // This shot is bullet, not missile - it has infinite speed and it reaches
     //  it's target immideately. No need to calculate anything.
     boDebug() << "MISSILE: " << k_funcinfo << "    Attacker's shot is bullet (infinite speed). Returning" << endl;
-    move(tx, ty, tz);
+    move(target[0], target[1], target[2]);
     mActive = false;
     return;
   }
   // First set the velocity to length of whole trip (for calculations)
-  mVelo.set(tx - x, ty - y, tz - z);
+  mVelo = target - pos;
   mLength = mVelo.length();
   //boDebug() << "MISSILE: " << k_funcinfo << "    Length of trip: " << length << endl;
   // Calculate number of steps
@@ -78,12 +78,12 @@ BosonShot::BosonShot(const BosonWeaponProperties* prop, Player* owner, BosonCanv
   //boDebug() << "MISSILE: " << k_funcinfo << "    Normalized & scaled (final) velocity: (" << mVelo[0] << "; " << mVelo[1] << "; " << mVelo[2] << ")" << endl;
   // Initialization
   mActive = true;
-  move(x, y, z);
+  move(pos[0], pos[1], pos[2]);
   setAnimated(true);
   setRotation(rotationToPoint(mVelo[0], mVelo[1]));
   mZ = 0;
   // Particle systems
-  mFlyParticleSystems = prop->newFlyParticleSystems(x, y, z);
+  mFlyParticleSystems = prop->newFlyParticleSystems(pos);
   canvas->addParticleSystems(mFlyParticleSystems);
   mParticleVelo = sqrt(mVelo[0] * mVelo[0] + mVelo[1] * mVelo[1]) / (float)BO_TILE_SIZE;
   // Initialize particle systems
