@@ -167,6 +167,16 @@ public:
 	BPFDescription* description() const { return mDescription; }
 	const QString& identifier() const { return mIdentifier; }
 
+	/**
+	 * @return The @ref BosonPlayFieldInformation object of this playfield
+	 * (always non-NULL). Use @ref isPreLoaded to find out whether it
+	 * already contains useful information.
+	 **/
+	const BosonPlayFieldInformation* information() const
+	{
+		return mPlayFieldInformation;
+	}
+
 	void applyScenario(Boson* boson);
 
 	/**

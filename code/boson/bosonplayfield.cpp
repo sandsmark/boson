@@ -102,8 +102,8 @@ BosonPlayFieldInformation::BosonPlayFieldInformation()
 {
  mMapWidth = 0;
  mMapHeight = 0;
- mMinPlayers = 0;
- mMaxPlayers = 0;
+ mMinPlayers = 1;
+ mMaxPlayers = 1;
 }
 
 BosonPlayFieldInformation::~BosonPlayFieldInformation()
@@ -184,6 +184,14 @@ bool BosonPlayFieldInformation::loadPlayersInformation(const QByteArray& xml)
  }
  QDomElement root = doc.documentElement();
 
+ // AB: atm there is no usable way to retrieve a minplayers value. also atm we
+ // don't have any use for minplayers anyway, as we don't have scenarios (i.e.
+ // winning conditions) yet. so we use 1 as default.
+ mMinPlayers = 1;
+
+ mMaxPlayers = root.elementsByTagName("Player").count();
+
+
  return true;
 }
 
@@ -197,7 +205,22 @@ bool BosonPlayFieldInformation::loadMapInformation(const QByteArray& xml)
 	return false;
  }
  QDomElement root = doc.documentElement();
-
+ QDomElement geometry = root.namedItem("Geometry").toElement();
+ if (geometry.isNull()) {
+	boError() << k_funcinfo << "no Geometry tag found" << endl;
+	return false;
+ }
+ bool ok = false;
+ mMapWidth = geometry.attribute("Width").toUInt(&ok);
+ if (!ok) {
+	boError() << k_funcinfo << "invalid number for Width" << endl;
+	return false;
+ }
+ mMapHeight = geometry.attribute("Height").toUInt(&ok);
+ if (!ok) {
+	boError() << k_funcinfo << "invalid number for Width" << endl;
+	return false;
+ }
  return true;
 }
 
