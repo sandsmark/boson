@@ -527,6 +527,7 @@ void BosonNewGameWidget::slotNetSpeciesChanged(Player* p)
 	for (it = d->mSpeciesIndex2Identifier.begin(); it != d->mSpeciesIndex2Identifier.end(); it++) {
 		if (it.data() == p->speciesTheme()->identifier()) {
 			mPlayerSpecies->setCurrentItem(it.key());
+			break;
 		}
 	}
  }
@@ -561,6 +562,7 @@ void BosonNewGameWidget::slotNetPlayFieldChanged(BosonPlayField* field)
  for (it = d->mItem2Map.begin(); it != d->mItem2Map.end() && !item; ++it) {
 	if (it.data() == field->identifier()) {
 		item = it.key();
+		break;
 	}
  }
  if (!item) {
@@ -576,6 +578,7 @@ void BosonNewGameWidget::slotNetPlayFieldChanged(BosonPlayField* field)
 	} else {
 		mSelectMap->setSelected(item, true);
 	}
+  mSelectMap->ensureItemVisible(item);
  }
  mMinPlayers = field->scenario()->minPlayers();
  mMaxPlayers = field->scenario()->maxPlayers();
@@ -828,6 +831,7 @@ void BosonNewGameWidget::slotPlayerSelected(QListBoxItem* item)
  for (it = d->mSpeciesIndex2Identifier.begin(); it != d->mSpeciesIndex2Identifier.end(); it++) {
 	if (it.data() == mSelectedPlayer->speciesTheme()->identifier()) {
 		mPlayerSpecies->setCurrentItem(it.key());
+		break;
 	}
  }
 
@@ -924,5 +928,14 @@ void BosonNewGameWidget::slotConnectedToServer()
  boDebug() << k_funcinfo << endl;
  mChat->chatWidget()->addSystemMessage("Boson", i18n("You are now connected to the server %1:%2").arg(boGame->bosonHostName()).arg(boGame->bosonPort()));
  mInited = true;
+ // Select localplayer
+ QPtrDictIterator<KPlayer> it(d->mItem2Player);
+ while (it.current()) {
+	if (it.current() == (KPlayer*)localPlayer()) {
+		mPlayers->setSelected((QListBoxItem*)it.currentKey(), true);
+		break;
+	}
+ }
+ mPlayers->ensureCurrentVisible();
 }
 
