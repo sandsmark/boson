@@ -28,6 +28,8 @@ Game TODOs
   repaint for setGrayOut() and setProductionCount()
 - BosonSpriteCursor::slotAdvance() calls canvas->update(). it should not as it
   hurts performance. But it is necessary for slow game speed :(
+- refine minerals/oil
+- mine/harvest minerals/oil is only at an experimantal state
 
 
 Editor (map, unit, scenario) TODOs

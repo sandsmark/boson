@@ -24,6 +24,7 @@
 #include "unitproperties.h"
 #include "bosonmessage.h"
 #include "bosonmap.h"
+#include "bosonstatistics.h"
 
 #include <kgame/kgamepropertyhandler.h>
 #include <kgame/kgame.h>
@@ -51,12 +52,15 @@ public:
 	QBitArray mFogged; // TODO: use KGameProperty
 	KGameProperty<unsigned long int> mMinerals;
 	KGameProperty<unsigned long int> mOil;
+
+	BosonStatistics* mStatistics;
 };
 
 Player::Player() : KPlayer()
 {
  mSpecies = 0;
  d = new PlayerPrivate;
+ d->mStatistics = new BosonStatistics;
  d->mUnits.setAutoDelete(true);
  mOutOfGame = false;
  setAsyncInput(true);
@@ -77,6 +81,7 @@ Player::~Player()
  d->mUnits.clear();
  dataHandler()->clear();
  delete mSpecies;
+ delete d->mStatistics;
  delete d;
 // kdDebug() << "~Player done" << endl;
 }
@@ -423,3 +428,7 @@ bool Player::checkOutOfGame()
  return isOutOfGame();
 }
 
+BosonStatistics* Player::statistics() const
+{
+ return d->mStatistics;
+}

@@ -28,6 +28,7 @@ class Facility;
 class SpeciesTheme;
 class UnitProperties;
 class BosonMap;
+class BosonStatistics;
 
 /**
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
@@ -116,6 +117,8 @@ public:
 	 * @return @ref isOutOfGame after it was updated.
 	 **/
 	bool checkOutOfGame();
+
+	BosonStatistics* statistics() const;
 
 signals:
 	void signalLoadUnit(int unitType, unsigned long int id, Player* owner);

@@ -27,6 +27,7 @@
 #include "bosonpath.h"
 #include "selectbox.h"
 #include "bosonmessage.h"
+#include "bosonstatistics.h"
 
 #include <kgame/kgamepropertylist.h>
 #include <kgame/kgame.h>
@@ -463,8 +464,20 @@ void Unit::shootAt(Unit* target)
 		return;
 	}
  }
+ if (target->isDestroyed()) {
+	kdWarning() << k_funcinfo << target->id() << " is already destroyed" << endl;
+	return;
+ }
  kdDebug() << id() << " shoots at unit " << target->id() << endl;
  ((BosonCanvas*)canvas())->shootAtUnit(target, this, weaponDamage());
+ if (target->isDestroyed()) {
+	if (target->isFacility()) {
+		owner()->statistics()->addDestroyedFacility((Facility*)target, this);
+	} else {
+		owner()->statistics()->addDestroyedMobileUnit((MobileUnit*)target, this);
+	}
+ }
+ owner()->statistics()->increaseShots();
  resetReload();
 }
 
@@ -921,6 +934,11 @@ void MobileUnit::advanceMine()
 
  if (canMine(boCanvas()->cellAt(this))) {
 	d->mResourcesMined = d->mResourcesMined + 1;
+	if (unitProperties()->canMineMinerals()) {
+		owner()->statistics()->increaseMinedMinerals(1);
+	} else if (unitProperties()->canMineOil()) {
+		owner()->statistics()->increaseMinedOil(1);
+	}
 	kdDebug() << "resources mined: " << d->mResourcesMined << endl;
  } else {
 	kdDebug() << k_funcinfo << "cannot mine here" << endl;

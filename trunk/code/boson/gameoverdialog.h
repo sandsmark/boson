@@ -52,8 +52,10 @@ public:
 	void setWinner(bool);
 
 private:
-	QLabel* mMinerals;
-	QLabel* mOil;
+	QLabel* mMinedMinerals;
+	QLabel* mMinedOil;
+	QLabel* mRefinedMinerals;
+	QLabel* mRefinedOil;
 	QLabel* mProducedUnits;
 	QLabel* mShots;
 	QLabel* mDestroyedUnits;

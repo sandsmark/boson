@@ -22,6 +22,7 @@
 
 #include "boson.h"
 #include "player.h"
+#include "bosonstatistics.h"
 
 #include <klocale.h>
 
@@ -108,10 +109,14 @@ GameOverDialog::PlayerBox::PlayerBox(Player* p, QWidget* parent) : QFrame(parent
  QLabel* name = new QLabel(p->name(), this);
  l->addWidget(name);
 
- mMinerals = new QLabel(this);
- l->addWidget(mMinerals);
- mOil = new QLabel(this);
- l->addWidget(mOil);
+ mMinedMinerals = new QLabel(this);
+ l->addWidget(mMinedMinerals);
+ mMinedOil = new QLabel(this);
+ l->addWidget(mMinedOil);
+ mRefinedMinerals = new QLabel(this);
+ l->addWidget(mRefinedMinerals);
+ mRefinedOil = new QLabel(this);
+ l->addWidget(mRefinedOil);
  mProducedUnits = new QLabel(this);
  l->addWidget(mProducedUnits);
  mDestroyedUnits = new QLabel(this);
@@ -122,11 +127,17 @@ GameOverDialog::PlayerBox::PlayerBox(Player* p, QWidget* parent) : QFrame(parent
  l->addWidget(mStatus);
 
 
- mMinerals->setText(i18n("Mined Minerals: %1 (TODO)").arg(0));
- mOil->setText(i18n("Mined Oil: %1 (TODO)").arg(0));
- mProducedUnits->setText(i18n("Produced Units: %1 (TODO)").arg(0));
- mDestroyedUnits->setText(i18n("Destroyed Units: %1 (TODO)").arg(0));
- mShots->setText(i18n("Shots: %1 (TODO)").arg(0));
+ BosonStatistics* statistics = p->statistics();
+ mMinedMinerals->setText(i18n("Mined Minerals: %1").arg(statistics->minedMinerals()));
+ mMinedOil->setText(i18n("Mined Oil: %1").arg(statistics->minedOil()));
+ mRefinedMinerals->setText(i18n("Refined Minerals: %1").arg(statistics->refinedMinerals()));
+ mRefinedOil->setText(i18n("Refined Oil: %1").arg(statistics->refinedOil()));
+ mProducedUnits->setText(i18n("Produced Units: %1").arg(statistics->producedUnits()));
+ mDestroyedUnits->setText(i18n("Destroyed Units: %1").arg(statistics->destroyedUnits()));
+
+ // FIXME: this might be > 4 billion and therefore greater than unsigned long
+ // int!!
+ mShots->setText(i18n("Shots: %1").arg(statistics->shots()));
 
  setWinner(false);
 }
