@@ -30,44 +30,45 @@
             </dl>
           </dd>
           
-	  <dd>&nbsp;</dd>
+    <dd>&nbsp;</dd>
           <dt>2 <a href="game/index.html">In the game</a></dt>
           <dd>
             <dl>
-	      <dt>2.1 <a href="game/configure.html">Configure Boson</a></dt>
-              <dt>2.2 <a href="game/scrolling.html">Scrolling</a></dt>
-	      <dt>2.3 <a href="game/cursor.html">The cursor</a></dt>
-              <dt>2.4 <a href="game/buildfac.html">Building facilities</a></dt>
-              <dt>2.5 <a href="game/buildunit.html">Building units</a></dt>
-              <dt>2.6 <a href="game/moving.html">Selecting and moving Units</a></dt>
-              <dt>2.7 <a href="game/equipment.html">Unit equipment</a></dt>
-              <dt>2.8 <a href="game/attacking.html">Attacking</a></dt>
-              <dt>2.9 <a href="game/repairing.html">Repairing</a></dt>
-	      <dt>2.10 <a href="game/technologies.html">Technologies</a></dt>
+            <!-- <dt>2.1 <a href="game/configure.html">Configure Boson</a></dt> -->
+            <dt>2.1 <a href="game/apps.html">Programs and tools</a></dt>
+            <dt>2.2 <a href="game/scrolling.html">Scrolling</a></dt>
+            <dt>2.3 <a href="game/cursor.html">The cursor</a></dt>
+            <dt>2.4 <a href="game/buildfac.html">Building facilities</a></dt>
+            <dt>2.5 <a href="game/buildunit.html">Building units</a></dt>
+            <dt>2.6 <a href="game/moving.html">Selecting and moving Units</a></dt>
+            <dt>2.7 <a href="game/equipment.html">Unit equipment</a></dt>
+            <dt>2.8 <a href="game/attacking.html">Attacking</a></dt>
+            <dt>2.9 <a href="game/repairing.html">Repairing</a></dt>
+            <dt>2.10 <a href="game/technologies.html">Technologies</a></dt>
             </dl>
           </dd>
           
-	  <dd>&nbsp;</dd>
-          <dt>3 <a href="facilities/index.html">Facilities</a></dt>
-          <dd>
+    <dd>&nbsp;</dd>
+        <dt>3 <a href="facilities/index.html">Facilities</a></dt>
+        <dd>
             <dl>
-	      <dt>3.1 <a href="facilities/map.html">Facilities dependency tree</a></dt>
-              <dt>3.2 <a href="facilities/commandbunker.html">Command Bunker</a></dt>
-	      <dt>3.3 <a href="facilities/mineralrefinery.html">Mineral Refinery</a></dt>
-	      <dt>3.4 <a href="facilities/oilrefinery.html">Oil Refinery</a></dt>
-              <dt>3.5 <a href="facilities/oiltower.html">Oil Tower</a></dt>
-              <dt>3.6 <a href="facilities/powerplant.html">Power Plant</a></dt>
-              <dt>3.7 <a href="facilities/warfactory.html">War Factory</a></dt>
-              <dt>3.8 <a href="facilities/comsat.html">Comsat</a></dt>
-              <dt>3.9 <a href="facilities/techcenter.html">Techcenter</a></dt>
-              <dt>3.10 <a href="facilities/repairpad.html">Repair Pad</a></dt>
-              <dt>3.11 <a href="facilities/helipad.html">Helipad</a></dt>
-              <dt>3.12 <a href="facilities/turret.html">Turret</a></dt>
-              <dt>3.13 <a href="facilities/samsite.html">Sam-Site</a></dt>
+            <dt>3.1 <a href="facilities/map.html">Facilities dependency tree</a></dt>
+            <dt>3.2 <a href="facilities/commandbunker.html">Command Bunker</a></dt>
+            <dt>3.3 <a href="facilities/mineralrefinery.html">Mineral Refinery</a></dt>
+            <dt>3.4 <a href="facilities/oilrefinery.html">Oil Refinery</a></dt>
+            <dt>3.5 <a href="facilities/oiltower.html">Oil Tower</a></dt>
+            <dt>3.6 <a href="facilities/powerplant.html">Power Plant</a></dt>
+            <dt>3.7 <a href="facilities/warfactory.html">War Factory</a></dt>
+            <dt>3.8 <a href="facilities/comsat.html">Comsat</a></dt>
+            <dt>3.9 <a href="facilities/techcenter.html">Techcenter</a></dt>
+            <dt>3.10 <a href="facilities/repairpad.html">Repair Pad</a></dt>
+            <dt>3.11 <a href="facilities/helipad.html">Helipad</a></dt>
+            <dt>3.12 <a href="facilities/turret.html">Turret</a></dt>
+            <dt>3.13 <a href="facilities/samsite.html">Sam-Site</a></dt>
             </dl>
-          </dd>
+        </dd>
           
-	  <dd>&nbsp;</dd>
+    <dd>&nbsp;</dd>
           <dt>4 <a href="units/index.html">Units</a></dt>
           <dd>
             <dl>
