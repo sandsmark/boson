@@ -110,11 +110,12 @@ BosonShot::BosonShot(BosonShotProperties* prop, Unit* attacker, float x, float y
     return;
   }
   mVelo.set(tx - x, ty - y, tz - z);
-  float length = mVelo.length();
+  mLength = mVelo.length();
   //kdDebug() << "MISSILE: " << k_funcinfo << "    Length of trip: " << length << endl;
-  mSteps = (int)ceilf(length / prop->speed());
+  mTotalSteps = (int)ceilf(mLength / prop->speed());
+  mStep = 0;
   //kdDebug() << "MISSILE: " << k_funcinfo << "    Steps: " << mSteps << endl;
-  mVelo.scale(prop->speed() / length);
+  mVelo.scale(prop->speed() / mLength);
   //kdDebug() << "MISSILE: " << k_funcinfo << "    Normalized & scaled (final) velocity: (" << mVelo[0] << "; " << mVelo[1] << "; " << mVelo[2] << ")" << endl;
   mActive = true;
   move(x, y, z);
@@ -122,24 +123,28 @@ BosonShot::BosonShot(BosonShotProperties* prop, Unit* attacker, float x, float y
   setRotation(rotationToPoint(mVelo[0], mVelo[1]));
   mFlyParticleSystems = prop->newFlyParticleSystems(x, y, z);
   attacker->canvas()->addParticleSystems(mFlyParticleSystems);
+  mZ = z;
 }
 
 void BosonShot::advance(unsigned int phase)
 {
   BosonItem::advance(phase);
-  moveBy(mVelo[0], mVelo[1], mVelo[2]);
+  float factor = mStep / (float)mTotalSteps - 0.5;
+  float newZ = (-4 * (factor * factor) + 1) * BO_TILE_SIZE;
+  //cout << k_funcinfo << "newZ: " << newZ << "; factor: " << factor << "; mStep: " << mStep << "; mTotalSteps: " << mTotalSteps << endl;
+  moveBy(mVelo[0], mVelo[1], mVelo[2] + (newZ - mZ));
   // Move all "fly" particles.
-  BoVector3 move(mVelo);
+  BoVector3 move(mVelo[0], -(mVelo[1]), mVelo[2] + (newZ - mZ));
   move.scale(1 / (float)BO_TILE_SIZE);
-  move.setY(-(move[1]));
+  mZ = newZ;
   QPtrListIterator<BosonParticleSystem> it(mFlyParticleSystems);
   while(it.current())
   {
     it.current()->moveParticles(move);
     ++it;
   }
-  mSteps--;
-  if(mSteps <= 0)
+  mStep++;
+  if(mStep >= mTotalSteps)
   {
     mActive = false;
   }
