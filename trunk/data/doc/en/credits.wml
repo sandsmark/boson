@@ -19,9 +19,9 @@
                 <tr><td>&nbsp;</td></tr>
 
                 <th align="left">Other</th>
-                <tr><td>Webmaster, mailing-list maintainer</td><td><a href="mailto:orzel@kde.org">Thomas Capricelli</a></td></tr>
-                <tr><td>Homepage design</td><td><a href="mailto:BenniAdler@bigfoot.de">Benjamin Adler</a></td></tr>
-                <tr><td>Documentation</td><td><a href="mailto:felix.seeger@gmx.de">Felix Seeger</a></td></tr>
+                <tr><td>Webmaster, initial homepage, mailing-list maintainer</td><td><a href="mailto:orzel@kde.org">Thomas Capricelli</a></td></tr>
+                <tr><td>Homepage design</td><td><a href="mailto:BenniAdler@bigfoot.de">Benjamin Adler</a> and <a href="mailto:rivolaks@hot.ee">Rivo Laks</a></td></tr>
+                <tr><td>Boson Handbook</td><td><a href="mailto:felix.seeger@gmx.de">Felix Seeger</a></td></tr>
 
         </table>
 #include "nav.wml" before_url="faq.html" before_text="FAQ"
