@@ -2,7 +2,7 @@
                          sprites.h  -  description                              
                              -------------------                                         
 
-    version              :                                   
+    version              : $Id$
     begin                : Sat Apr 24 20:42:00 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
@@ -21,17 +21,15 @@
 #ifndef SPRITES_H 
 #define SPRITES_H 
 
-#define	S_BASE		1234
+#define	S_BASE		1000
+#define	S_PART_UP	(S_BASE+10)
+#define	S_PART_DOWN	(S_BASE+20)
 #define	S_GROUND	(S_BASE+100)
 #define	S_MOBILE	(S_BASE+200)
 #define	S_FACILITY	(S_BASE+300)
 
-
-#define Z_SELECT	(+20)
-#define Z_FLYING	(+10)
-#define Z_MOBILE	(+5)
-#define Z_SAILING	(+2)
-#define Z_FACILITY	(+0)
-#define Z_GROUND	(-1)
+#define Z_MOBILE	(+100)
+#define Z_FACILITY	(+50)
+#define Z_GROUND	(+10)
 
 #endif // SPRITES_H

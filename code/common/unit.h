@@ -50,13 +50,13 @@ class Unit : public QObject
   Unit(QObject* parent=0, const char *name=0L);
   ~Unit();
 
-  //virtual getType(void) = 0;
-  virtual	uint	getVisibility(void)=0;
-  virtual	QRect	rect(void)=0;
   virtual	int	_x(void)=0;
   virtual	int	_y(void)=0;
+
   virtual	int	getWidth(void)=0;
   virtual	int	getHeight(void)=0;
+  virtual	uint	getVisibility(void)=0;
+  virtual	QRect	rect(void)=0;
 
   int		who;		// who is the owner ?
   protected:
@@ -79,6 +79,8 @@ class mobUnit : public Unit
 
   void		getPos(uint &xx, uint &yy) {xx = _x(); yy = _y(); }
   mobType	getType(void) {return type;}
+
+  		int	goFlag(void) { return mobileProp[type].goFlag;}
 
   virtual	int	getWidth(void) { return mobileProp[type].width;}
   virtual	int	getHeight(void) { return mobileProp[type].height;}

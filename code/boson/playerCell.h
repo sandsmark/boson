@@ -40,7 +40,7 @@ class playerCell : public Cell, public QwSprite
 
 //  void setGroundType(groundType g, int i, int j);
 /* Qw stuff */
-  virtual int rtti() { return S_GROUND + ground; }
+  virtual int rtti() const { return S_GROUND + ground; }
 
  // void setGroundType(groundType g) { ground = g; }
   protected:

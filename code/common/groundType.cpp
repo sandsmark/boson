@@ -23,15 +23,22 @@
 const groundProperties_t noGroundProp =
 	{"no_pixmap", };
 
+/*
+	GROUND_DEEP_WATER = 0,
+	GROUND_WATER = 1,
+	GROUND_GRASS,
+	GROUND_DESERT,
+*/
 const groundProperties_t groundProp[] = {
-	{"grass", },
+//	{"deep_water", },
 	{"water", },
+	{"grass", },
 	{"desert", },
 	};
 
 const groundTransProperties_t groundTransProp[] = {
 	{"grass->water", GROUND_GRASS, GROUND_WATER},		// TRANS_GW,
-	{"grass->desert", GROUND_GRASS, GROUND_DESERT, },		// TRANS_GD,
+	{"grass->desert", GROUND_GRASS, GROUND_DESERT, },	// TRANS_GD,
 	};
 
 const int groundPropNb = (sizeof(groundProp)/sizeof(groundProp [0]));

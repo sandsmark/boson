@@ -62,8 +62,8 @@ assert(j<view->maxY());
 //printf("miniMap::newCell : receiving %d\n", (int)g);
 
 
-if (g>= GROUND_LAST)
-	g = groundTransProp[(g-GROUND_LAST)/TILES_PER_TRANSITION].from;
+if (IS_TRANS(g))
+	g = groundTransProp[ GET_TRANS_REF(g) ].from;
 
 p.begin(ground);
 switch(g) {

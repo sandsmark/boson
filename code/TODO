@@ -6,14 +6,12 @@ TODO:
 0.1 release :
 =============
 
-mobiles can go only on the ground they are allowed to.
 make a toolbar with concerned buttons (move, stop, etc..)
 take out the menu
 DND of the map onto the minimap
 how to handle non 1x1 tiles ? 
 does units::rect need to be virtual anymore ?
 when clicking (no box) on two mobiles, both are selected, but shouldn't
-	then -> client units : shouldn't move over each other
 server : check that each unit does max 1 move each jiffie
 version check whithin the ask_connect msg
 
@@ -46,6 +44,8 @@ check that loading of pixmap has been done well
 #use different pixmap according to 'direction'
 #new web page (ben ?)
 #bug : select mobile, move, somewhere, can't move somewhere else...
+#mobiles can go only on the ground they are allowed to.
+#client units : shouldn't move over each other
 
 check Makefile.am for installation "make install"
 
@@ -81,6 +81,7 @@ what about drag and dropping units ? :-)
 
 smooth  known-unknown transition
 see again "virtual(?) Unit::getWidth" and checkUnitDiscovered badly centered
+different subclass for my_units and other_units in client
 
 black background ??
 
@@ -94,7 +95,9 @@ mailing list ?
 then:
 =====
 
-	forgotten fog of war
+kind of acceleration to make starting moves smoother ?
+forgotten fog of war
+player*Unit::map should be put global
 
 
 1.0 release :

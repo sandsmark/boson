@@ -25,14 +25,16 @@
 	uint	orders;		// which orders it's able to understand
 	int	width;		// pixel-size
 	int	height;		// pixel-size
+
 	int	visibility;	// how far it can see
-	uint 	speed;		// how far it may travel (in pixels) during one jiffie
+	int 	speed;		// how far it may travel (in pixels) during one jiffie
+	uint	goFlag;		// where can it go ? 
 */
 
 mobileProperties_t mobileProp[] = {
-	{"Quad", 0, 32, 32, 3, 4},	// MOB_QUAD
-	{"Aircraft", 0, 72, 72, 3, 6},	// MOB_AIRCRAFT
-	{"Ship", 0, 96, 96, 2, 3},	// MOB_SHIP
+	{"Ship",	0, 96, 96,  2, 3, BO_GO_SEA},	// MOB_SHIP
+	{"Quad",	0, 32, 32,  3, 4, BO_GO_EARTH},	// MOB_QUAD
+	{"Aircraft",	0, 72, 72,  3, 6, BO_GO_AIR},	// MOB_AIRCRAFT
 	};
 
 facilityProperties_t facilityProp[] = {
