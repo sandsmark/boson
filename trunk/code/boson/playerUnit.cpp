@@ -598,7 +598,7 @@ bool playerFacility::getWantedShoot(bosonMsgData *msg)
 	return true;
 }
 
-#define underlyingGround() vcanvas->groundAt( gridRect().topLeft() )
+#define underlyingGround() bocanvas->groundAt( gridRect().topLeft() )
 
 /*
  * harvester 
