@@ -4,11 +4,12 @@ noinst_LTLIBRARIES = libboufo.la
 
 METASOURCES = AUTO
 
+KDE_CXXFLAGS = $(UFO_CFLAGS)
+
 libboufo_la_SOURCES = \
 	boufo.cpp \
 	boufoaction.cpp
 
-# TODO: use $(LIB_UFO)
 libboufo_la_LIBADD = \
-	-lufo
+	$(UFO_LIBS)
 
