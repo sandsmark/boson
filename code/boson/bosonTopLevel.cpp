@@ -67,6 +67,7 @@ bosonTopLevel::bosonTopLevel(BosonApp * /*parent*/, const char *name, WFlags f)
 	qhb   = new QHBox(ksb, "pingInfoBox");
 	label = new QLabel(" Server Ping : ", qhb);
 	label = new QLabel("?", qhb);
+	connect(bocanvas , SIGNAL(pingUpdated(int)), label, SLOT(setNum(int)));
 	ksb->addWidget(qhb);
 
 

@@ -43,6 +43,10 @@ bosonCanvas::bosonCanvas( QPixmap p, uint w, uint h)
 //	mobile.setAutoDelete(TRUE);
 //	facility.setAutoDelete(TRUE);   
 
+
+	// ping initialisation, not relevant
+	last_sync = time(NULL);
+
 	cells = new Cell[w*h];
 }
 

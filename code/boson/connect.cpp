@@ -222,13 +222,19 @@ switch(tag) {
 		ASSERT_DATA_BLENGHT(sizeof(data->jiffies));
 		jiffies ++;
 		boAssert(jiffies == data->jiffies);
-	// let's each object speaks
+		// let's each object speaks
 		requestAction();
-	// latest message is MSG_TIME_CONFIRM
+		// latest message is MSG_TIME_CONFIRM
 		sendMsg(buffer, MSG_TIME_CONFIRM, MSG(data->jiffies) );
 		logf(LOG_COMM, "flush : jiffies++ : %u", jiffies);
 		buffer->flush();
 		update();		// QCanvas periodical rendering
+
+		// ping handling 
+		{ time_t t = time(NULL);
+		ping = t - last_sync;
+		last_sync = t; }
+		emit pingUpdated((int)ping);
 		break;
 
 	case MSG_MAP_DISCOVERED :
