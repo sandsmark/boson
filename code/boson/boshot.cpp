@@ -102,7 +102,7 @@ BoShot::BoShot(Unit* target, Unit* attacker, BosonCanvas* c, bool destroyed)
  */
 
  setFrame(0);
- setVisible(true);
+// setVisible(true);
  setAnimated(true);
 }
 
@@ -133,6 +133,6 @@ void BoShot::deleteMe()
  kdDebug() << k_funcinfo << endl;
  ((BosonCanvas*)canvas())->deleteShot(this);
  setAnimated(false);
- setVisible(false);
+// setVisible(false);
 }
 
