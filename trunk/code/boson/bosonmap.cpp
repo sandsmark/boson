@@ -180,6 +180,7 @@ bool BosonMap::loadMapGeo(QDataStream& stream)
  if (mHeightMap) {
 	delete[] mHeightMap;
  }
+
  mCells = new Cell[width() * height()];
  mHeightMap = new float[(width() + 1) * (height() + 1)];
  for (unsigned int x = 0; x < width(); x++) {
@@ -304,10 +305,10 @@ bool BosonMap::loadCells(QDomElement& node)
 
 bool BosonMap::loadHeightMapImage(const QByteArray& heightMap)
 {
- boDebug() << k_funcinfo << endl;
+// boDebug() << k_funcinfo << endl;
  if (heightMap.size() == 0) {
 	// initialize the height map with 0.0
-	boDebug() << k_funcinfo << "loading dummy height map" << endl;
+//	boDebug() << k_funcinfo << "loading dummy height map" << endl;
 	for (unsigned int x = 0; x < width() + 1; x++) {
 		for (unsigned int y = 0; y < height() + 1; y++) {
 			mHeightMap[y * (width() + 1) + x] = 0.0;
@@ -315,7 +316,7 @@ bool BosonMap::loadHeightMapImage(const QByteArray& heightMap)
 	}
 	return true;
  }
- boDebug() << k_funcinfo << "loading real height map" << endl;
+// boDebug() << k_funcinfo << "loading real height map" << endl;
  QImage map(heightMap);
  if (!map.isGrayscale()) {
 	// we load a valid height map (i.e. a dummy height map) but still return
