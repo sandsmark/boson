@@ -280,7 +280,7 @@ QPtrList<BosonEffectProperties> BosonEffectProperties::loadEffectProperties(QVal
 }
 
 QPtrList<BosonEffect> BosonEffectProperties::newEffects(const QPtrList<BosonEffectProperties>* properties,
-    const BoVector3& pos, const BoVector3& rot)
+    const BoVector3Fixed& pos, const BoVector3Fixed& rot)
 {
   QPtrList<BosonEffect> list;
   QPtrListIterator<BosonEffectProperties> it(*properties);
@@ -310,7 +310,7 @@ QPtrList<BosonEffect> BosonEffectProperties::newEffects(const QPtrList<BosonEffe
 }
 
 QPtrList<BosonEffect> BosonEffectProperties::newEffects(const BosonEffectProperties* properties,
-    const BoVector3& pos, const BoVector3& rot)
+    const BoVector3Fixed& pos, const BoVector3Fixed& rot)
 {
   QPtrList<BosonEffect> list;
   // FIXME: bad? maybe make newEffect() return QPtrList for all effect properties?
@@ -359,16 +359,16 @@ bool BosonEffectPropertiesFog::load(KSimpleConfig* cfg, const QString& group, bo
     return false;
   }
 
-  mColor = BosonConfig::readBoVector4Entry(cfg, "Color", mColor);
+  mColor = BosonConfig::readBoVector4FloatEntry(cfg, "Color", mColor);
   mStart = (float)(cfg->readDoubleNumEntry("Start", mStart));
   mEnd = (float)(cfg->readDoubleNumEntry("End", mEnd));
   mRadius = (float)(cfg->readDoubleNumEntry("Radius", mRadius));
   return true;
 }
 
-BosonEffect* BosonEffectPropertiesFog::newEffect(const BoVector3& pos, const BoVector3&) const
+BosonEffect* BosonEffectPropertiesFog::newEffect(const BoVector3Fixed& pos, const BoVector3Fixed&) const
 {
-  BoVector3 worldpos = pos;
+  BoVector3Fixed worldpos = pos;
   worldpos.canvasToWorld();
   BosonEffectFog* fog = new BosonEffectFog(this);
   fog->setPosition(worldpos);
@@ -402,9 +402,9 @@ bool BosonEffectPropertiesFade::load(KSimpleConfig* cfg, const QString& group, b
     return false;
   }
 
-  mStartColor = BosonConfig::readBoVector4Entry(cfg, "StartColor", mStartColor);
-  mEndColor = BosonConfig::readBoVector4Entry(cfg, "EndColor", mEndColor);
-  mGeometry = BosonConfig::readBoVector4Entry(cfg, "Geometry", mGeometry);
+  mStartColor = BosonConfig::readBoVector4FloatEntry(cfg, "StartColor", mStartColor);
+  mEndColor = BosonConfig::readBoVector4FloatEntry(cfg, "EndColor", mEndColor);
+  mGeometry = BosonConfig::readBoVector4FixedEntry(cfg, "Geometry", mGeometry);
   mTime = (float)(cfg->readDoubleNumEntry("Time", mTime));
   int glblendfunc = Bo3dTools::string2GLBlendFunc(cfg->readEntry("BlendFunc", QString::null));
   if(glblendfunc != GL_INVALID_ENUM)
@@ -419,7 +419,7 @@ bool BosonEffectPropertiesFade::load(KSimpleConfig* cfg, const QString& group, b
   return true;
 }
 
-BosonEffect* BosonEffectPropertiesFade::newEffect(const BoVector3& pos, const BoVector3&) const
+BosonEffect* BosonEffectPropertiesFade::newEffect(const BoVector3Fixed& pos, const BoVector3Fixed&) const
 {
   BosonEffectFade* fade = new BosonEffectFade(this);
   fade->setPosition(pos);
@@ -457,22 +457,22 @@ bool BosonEffectPropertiesLight::load(KSimpleConfig* cfg, const QString& group, 
     return false;
   }
 
-  mStartAmbientColor = BosonConfig::readBoVector4Entry(cfg, "StartAmbient", mStartAmbientColor);
-  mStartDiffuseColor = BosonConfig::readBoVector4Entry(cfg, "StartDiffuse", mStartDiffuseColor);
-  mStartSpecularColor = BosonConfig::readBoVector4Entry(cfg, "StartSpecular", mStartSpecularColor);
-  mEndAmbientColor = BosonConfig::readBoVector4Entry(cfg, "EndAmbient", mEndAmbientColor);
-  mEndDiffuseColor = BosonConfig::readBoVector4Entry(cfg, "EndDiffuse", mEndDiffuseColor);
-  mEndSpecularColor = BosonConfig::readBoVector4Entry(cfg, "EndSpecular", mEndSpecularColor);
-  mStartAttenuation = BosonConfig::readBoVector3Entry(cfg, "StartAttenuation", mStartAttenuation);
-  mEndAttenuation = BosonConfig::readBoVector3Entry(cfg, "EndAttenuation", mEndAttenuation);
-  mPosition = BosonConfig::readBoVector3Entry(cfg, "Position", mPosition);
+  mStartAmbientColor = BosonConfig::readBoVector4FloatEntry(cfg, "StartAmbient", mStartAmbientColor);
+  mStartDiffuseColor = BosonConfig::readBoVector4FloatEntry(cfg, "StartDiffuse", mStartDiffuseColor);
+  mStartSpecularColor = BosonConfig::readBoVector4FloatEntry(cfg, "StartSpecular", mStartSpecularColor);
+  mEndAmbientColor = BosonConfig::readBoVector4FloatEntry(cfg, "EndAmbient", mEndAmbientColor);
+  mEndDiffuseColor = BosonConfig::readBoVector4FloatEntry(cfg, "EndDiffuse", mEndDiffuseColor);
+  mEndSpecularColor = BosonConfig::readBoVector4FloatEntry(cfg, "EndSpecular", mEndSpecularColor);
+  mStartAttenuation = BosonConfig::readBoVector3FloatEntry(cfg, "StartAttenuation", mStartAttenuation);
+  mEndAttenuation = BosonConfig::readBoVector3FloatEntry(cfg, "EndAttenuation", mEndAttenuation);
+  mPosition = BosonConfig::readBoVector3FixedEntry(cfg, "Position", mPosition);
   mLife = (float)(cfg->readDoubleNumEntry("Life", mLife));
   return true;
 }
 
-BosonEffect* BosonEffectPropertiesLight::newEffect(const BoVector3& pos, const BoVector3&) const
+BosonEffect* BosonEffectPropertiesLight::newEffect(const BoVector3Fixed& pos, const BoVector3Fixed&) const
 {
-  BoVector3 worldpos = pos;
+  BoVector3Fixed worldpos = pos;
   worldpos.canvasToWorld();
   BosonEffectLight* light = new BosonEffectLight(this);
   light->setPosition(worldpos);
@@ -505,7 +505,7 @@ bool BosonEffectPropertiesBulletTrail::load(KSimpleConfig* cfg, const QString& g
     return false;
   }
 
-  mColor = BosonConfig::readBoVector4Entry(cfg, "Color", mColor);
+  mColor = BosonConfig::readBoVector4FloatEntry(cfg, "Color", mColor);
   mMinLength = (float)(cfg->readDoubleNumEntry("MinLength", mMinLength));
   mMaxLength = (float)(cfg->readDoubleNumEntry("MaxLength", mMaxLength));
   mWidth = (float)(cfg->readDoubleNumEntry("Width", mWidth));
@@ -514,7 +514,7 @@ bool BosonEffectPropertiesBulletTrail::load(KSimpleConfig* cfg, const QString& g
   return true;
 }
 
-BosonEffect* BosonEffectPropertiesBulletTrail::newEffect(const BoVector3& pos, const BoVector3&) const
+BosonEffect* BosonEffectPropertiesBulletTrail::newEffect(const BoVector3Fixed& pos, const BoVector3Fixed&) const
 {
   if(mProbability < 1.0f)
   {
@@ -524,7 +524,7 @@ BosonEffect* BosonEffectPropertiesBulletTrail::newEffect(const BoVector3& pos, c
     }
   }
 
-  BoVector3 worldpos = pos;
+  BoVector3Fixed worldpos = pos;
   worldpos.canvasToWorld();
   BosonEffectBulletTrail* line = new BosonEffectBulletTrail(this, worldpos);
   return line;
@@ -572,7 +572,7 @@ bool BosonEffectPropertiesCollection::finishLoading(const BosonEffectPropertiesM
   return true;
 }
 
-BosonEffect* BosonEffectPropertiesCollection::newEffect(const BoVector3& pos, const BoVector3&) const
+BosonEffect* BosonEffectPropertiesCollection::newEffect(const BoVector3Fixed& pos, const BoVector3Fixed&) const
 {
   // BosonEffectPropertiesCollection is special, newEffectsList() should be used
   //  instead of this method
@@ -580,7 +580,7 @@ BosonEffect* BosonEffectPropertiesCollection::newEffect(const BoVector3& pos, co
   return 0;
 }
 
-QPtrList<BosonEffect> BosonEffectPropertiesCollection::newEffectsList(const BoVector3& pos, const BoVector3& rot) const
+QPtrList<BosonEffect> BosonEffectPropertiesCollection::newEffectsList(const BoVector3Fixed& pos, const BoVector3Fixed& rot) const
 {
   QPtrList<BosonEffect> list;
   QPtrListIterator<BosonEffectProperties> it(mEffects);

@@ -89,47 +89,47 @@ class BoCamera
     /**
      * Set the gluLookAt() paremeters directly.
      **/
-    virtual void setGluLookAt(const BoVector3& cameraPos, const BoVector3& lookAt, const BoVector3& up);
+    virtual void setGluLookAt(const BoVector3Float& cameraPos, const BoVector3Float& lookAt, const BoVector3Float& up);
 
 
     /**
      * @return The point we are looking at. This is the lookAt vector, as it
      * can get used by gluLookAt().
      **/
-    const BoVector3& lookAt() const  { return mLookAt; }
+    const BoVector3Float& lookAt() const  { return mLookAt; }
 
     /**
      * @return The eye vector (camera position), as it can get used by
      * gluLookAt().
      **/
-    virtual const BoVector3& cameraPos();
+    virtual const BoVector3Float& cameraPos();
 
     /**
      * @return The up vector, as it can get used by gluLookAt(). The up
      * vector is the vector pointing straight "up" from the position of the
      * camera. it can change when the camera is rotated.
      **/
-    virtual const BoVector3& up();
+    virtual const BoVector3Float& up();
 
 
     // These will _move_ given things by given values
-    void changeCameraPos(const BoVector3& diff);
-    void changeLookAt(const BoVector3& diff);
-    void changeUp(const BoVector3& diff);
+    void changeCameraPos(const BoVector3Float& diff);
+    void changeLookAt(const BoVector3Float& diff);
+    void changeUp(const BoVector3Float& diff);
 
     // these will change the up and cameraPos vectors!
     /**
      * Set lookAt point of camera (where the camera is looking at)
      **/
-    virtual void setLookAt(const BoVector3& lookat);
+    virtual void setLookAt(const BoVector3Float& lookat);
     /**
      * Set position of the camera
      **/
-    virtual void setCameraPos(const BoVector3& pos);
+    virtual void setCameraPos(const BoVector3Float& pos);
     /**
      * Set up vector of the camera (vector pointing straight up in the viewport)
      **/
-    virtual void setUp(const BoVector3& up);
+    virtual void setUp(const BoVector3Float& up);
 
 
     virtual bool loadFromXML(const QDomElement& root);
@@ -175,9 +175,9 @@ class BoCamera
     friend class BoAutoCamera;
     BoAutoCamera* mAutoCamera;
 
-    BoVector3 mLookAt;
-    BoVector3 mUp;
-    BoVector3 mCameraPos;
+    BoVector3Float mLookAt;
+    BoVector3Float mUp;
+    BoVector3Float mCameraPos;
 
     bool mPosDirty;
     bool mChanged;
@@ -231,10 +231,10 @@ class BoGameCamera : public BoCamera
     void changeRadius(GLfloat diff);
     void changeRotation(GLfloat diff);
 
-    virtual void setLookAt(const BoVector3& pos);
-    virtual void setCameraPos(const BoVector3& pos);
-    virtual const BoVector3& cameraPos();
-    virtual const BoVector3& up();
+    virtual void setLookAt(const BoVector3Float& pos);
+    virtual void setCameraPos(const BoVector3Float& pos);
+    virtual const BoVector3Float& cameraPos();
+    virtual const BoVector3Float& up();
 
     // these will change the up and cameraPos vectors!
     /**
@@ -366,8 +366,8 @@ class BoLightCamera : public BoCamera
     ~BoLightCamera();
     virtual int cameraType() const { return LightCamera; }
 
-    void setLightPos(const BoVector3& pos);
-    virtual void setGluLookAt(const BoVector3& c, const BoVector3& l, const BoVector3& u);
+    void setLightPos(const BoVector3Float& pos);
+    virtual void setGluLookAt(const BoVector3Float& c, const BoVector3Float& l, const BoVector3Float& u);
 
   private:
     BoContext* mContext;

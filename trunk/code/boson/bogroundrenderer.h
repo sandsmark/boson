@@ -24,10 +24,12 @@
 class Cell;
 class PlayerIO;
 class QString;
-
 class BosonMap;
 class BoMatrix;
-class BoVector3;
+class bofixed;
+template<class T> class BoVector3;
+typedef BoVector3<bofixed> BoVector3Fixed;
+typedef BoVector3<float> BoVector3Float;
 
 class QRect;
 
@@ -164,7 +166,7 @@ public:
 		return mStatistics;
 	}
 
-	virtual QString debugStringForPoint(const BoVector3& pos) const
+	virtual QString debugStringForPoint(const BoVector3Fixed& pos) const
 	{
 		return QString::null;
 	}

@@ -259,7 +259,7 @@ void BosonShotBullet::moveToTarget()
   move(mTarget.x(), mTarget.y(), mTarget.z());
 }
 
-void BosonShotBullet::setTarget(const BoVector3& target)
+void BosonShotBullet::setTarget(const BoVector3Fixed& target)
 {
   mTarget = target;
 }
@@ -269,7 +269,7 @@ void BosonShotBullet::explode()
   // We need to create fly effects here, because atm, our position is shooter's
   //  (weapon's) position and BosonShot::explode() moves us to target position,
   //  so fly effects will then get correctly moved as well.
-  setEffects(properties()->newFlyEffects(BoVector3(x(), y(), z()), 0));
+  setEffects(properties()->newFlyEffects(BoVector3Fixed(x(), y(), z()), 0));
 
   BosonShot::explode();
 
@@ -288,7 +288,7 @@ BosonShotMissile::~BosonShotMissile()
 {
 }
 
-void BosonShotMissile::init(const BoVector3& pos, const BoVector3& target)
+void BosonShotMissile::init(const BoVector3Fixed& pos, const BoVector3Fixed& target)
 {
   boDebug(350) << "MISSILE: " << k_funcinfo << "Creating new shot" << endl;
   mTarget = target;
@@ -354,7 +354,7 @@ void BosonShotMissile::advanceMoveInternal()
   setXRotation(Bo3dTools::rotationToPoint(mEffectVelo * speed(), zvelo) - 90 );
 
   // Check if missile is still active
-  BoVector3 dist = mTarget - BoVector3(x() + xVelocity(), y() + yVelocity(), z() + zVelocity());
+  BoVector3Fixed dist = mTarget - BoVector3Fixed(x() + xVelocity(), y() + yVelocity(), z() + zVelocity());
   if(dist.dotProduct() <= speed() * speed())
   {
     explode();
@@ -505,7 +505,7 @@ BosonShotExplosion::BosonShotExplosion(Player* owner, BosonCanvas* canvas) :
   mDelay = 0;
 }
 
-void BosonShotExplosion::activate(const BoVector3& pos, long int damage, bofixed damagerange, bofixed fulldamagerange, int delay)
+void BosonShotExplosion::activate(const BoVector3Fixed& pos, long int damage, bofixed damagerange, bofixed fulldamagerange, int delay)
 {
   mDamage = damage;
   mDamageRange = damagerange;
@@ -584,7 +584,7 @@ BosonShotMine::BosonShotMine(Player* owner, BosonCanvas* canvas, const BosonWeap
 {
 }
 
-void BosonShotMine::init(const BoVector3& pos)
+void BosonShotMine::init(const BoVector3Fixed& pos)
 {
   mActivated = false;
   move(pos.x(), pos.y(), pos.z());
@@ -669,7 +669,7 @@ BosonShotBomb::BosonShotBomb(Player* owner, BosonCanvas* canvas, const BosonWeap
   setMaxSpeed(properties()->speed());
 }
 
-void BosonShotBomb::init(const BoVector3& pos)
+void BosonShotBomb::init(const BoVector3Fixed& pos)
 {
   // TODO: BosonShotBomb and BosonShotMine share quite a lot code. Maybe make
   //  bomb inherit from mine (bomb is basically a falling mine)
@@ -798,7 +798,7 @@ BosonModel* BosonShotFragment::getModelForItem() const
   return owner()->speciesTheme()->objectModel("fragment");
 }
 
-void BosonShotFragment::activate(const BoVector3& pos, const UnitProperties* unitproperties)
+void BosonShotFragment::activate(const BoVector3Fixed& pos, const UnitProperties* unitproperties)
 {
   mUnitProperties = unitproperties;
 
@@ -915,7 +915,7 @@ void BosonShotFragment::explode()
 {
   BosonShot::explode();
 
-  BoVector3 pos(centerX(), centerY(), z());
+  BoVector3Fixed pos(centerX(), centerY(), z());
   canvas()->addEffects(mUnitProperties->newExplodingFragmentHitEffects(pos));
 }
 

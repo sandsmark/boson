@@ -53,32 +53,32 @@ void BoAutoCamera::init()
   resetDifferences();
 }
 
-void BoAutoCamera::changeLookAt(const BoVector3& diff)
+void BoAutoCamera::changeLookAt(const BoVector3Float& diff)
 {
   mLookAtDiff = diff;
 }
 
-void BoAutoCamera::changeUp(const BoVector3& diff)
+void BoAutoCamera::changeUp(const BoVector3Float& diff)
 {
   mUpDiff = diff;
 }
 
-void BoAutoCamera::changeCameraPos(const BoVector3& diff)
+void BoAutoCamera::changeCameraPos(const BoVector3Float& diff)
 {
   mCameraPosDiff = diff;
 }
 
-void BoAutoCamera::setLookAt(const BoVector3& pos)
+void BoAutoCamera::setLookAt(const BoVector3Float& pos)
 {
   mLookAtDiff = pos - camera()->lookAt();
 }
 
-void BoAutoCamera::setUp(const BoVector3& pos)
+void BoAutoCamera::setUp(const BoVector3Float& pos)
 {
   mUpDiff = pos - camera()->up();
 }
 
-void BoAutoCamera::setCameraPos(const BoVector3& pos)
+void BoAutoCamera::setCameraPos(const BoVector3Float& pos)
 {
   mCameraPosDiff = pos - camera()->cameraPos();
 }
@@ -174,7 +174,7 @@ bool BoAutoCamera::advance2()
   if(!mLookAtDiff.isNull())
   {
     // How much lookAt point will move
-    BoVector3 lookAtChange(mLookAtDiff * factor);
+    BoVector3Float lookAtChange(mLookAtDiff * factor);
     // Change lookAt point and difference
     camera()->setLookAt(camera()->mLookAt + lookAtChange);
     changed = true;
@@ -182,7 +182,7 @@ bool BoAutoCamera::advance2()
   if(!mUpDiff.isNull())
   {
     // How much lookAt point will move
-    BoVector3 upChange(mUpDiff * factor);
+    BoVector3Float upChange(mUpDiff * factor);
     // Change lookAt point and difference
     camera()->setUp(camera()->mUp + upChange);
     changed = true;
@@ -190,7 +190,7 @@ bool BoAutoCamera::advance2()
   if(!mCameraPosDiff.isNull())
   {
     // How much lookAt point will move
-    BoVector3 cameraPosChange(mCameraPosDiff * factor);
+    BoVector3Float cameraPosChange(mCameraPosDiff * factor);
     // Change lookAt point and difference
     camera()->setCameraPos(camera()->mCameraPos + cameraPosChange);
     changed = true;

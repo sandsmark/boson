@@ -93,7 +93,7 @@ public:
 	 * hasLocation and @ref location.
 	 * @param pos The location in canvas coordinates
 	 **/
-	void setLocation(const BoVector3 pos)
+	void setLocation(const BoVector3Fixed pos)
 	{
 		mHasLocation = true;
 		mLocation = pos;
@@ -118,7 +118,7 @@ public:
 	 * @return The location where the event has been raised. This only valid
 	 * if @ref hasLocation is TRUE. The location is in canvas coordinates.
 	 **/
-	const BoVector3& location() const
+	const BoVector3Fixed& location() const
 	{
 		return mLocation;
 	}
@@ -199,7 +199,7 @@ private:
 	QCString mName;
 	unsigned long int mDelayedDelivery;
 	bool mHasLocation;
-	BoVector3 mLocation;
+	BoVector3Fixed mLocation;
 	unsigned long int mUnitId;
 	bool mHasPlayerId;
 	unsigned long int mPlayerId;

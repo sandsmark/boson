@@ -24,11 +24,12 @@ class Cell;
 class Unit;
 class BoItemList;
 class BosonItem;
-class BoVector3;
 class bofixed;
 template<class T> class BoVector2;
+template<class T> class BoVector3;
 template<class T> class BoRect;
 typedef BoVector2<bofixed> BoVector2Fixed;
+typedef BoVector3<bofixed> BoVector3Fixed;
 typedef BoRect<bofixed> BoRectFixed;
 
 template<class T> class QPtrList;
@@ -59,9 +60,9 @@ public:
 	 * @return The unit on this coordinates of the canvas. Won't return a
 	 * destroyed unit (wreckage)
 	 **/
-	Unit* findUnitAt(const BoVector3& pos) const;
+	Unit* findUnitAt(const BoVector3Fixed& pos) const;
 
-	BosonItem* findItemAt(const BoVector3& pos) const;
+	BosonItem* findItemAt(const BoVector3Fixed& pos) const;
 
 	/**
 	 * See @ref findItemAtCell.
@@ -121,7 +122,7 @@ public:
 	 * Same as @ref unitCollisionInRange, but also checks for z-coordinate and
 	 * operates in 3d space
 	 **/
-	QValueList<Unit*> unitCollisionsInSphere(const BoVector3& pos, bofixed radius) const;
+	QValueList<Unit*> unitCollisionsInSphere(const BoVector3Fixed& pos, bofixed radius) const;
 
 	/**
 	 * Returns whether cell is occupied (there is non-destroyed mobile or
@@ -145,7 +146,7 @@ public:
 	 **/
 	bool cellsOccupied(const BoRectFixed& rect) const;
 
-	QValueList<Unit*> collisionsInBox(const BoVector3& v1, const BoVector3& v2, BosonItem* exclude) const;
+	QValueList<Unit*> collisionsInBox(const BoVector3Fixed& v1, const BoVector3Fixed& v2, BosonItem* exclude) const;
 
 private:
 	void init();

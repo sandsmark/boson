@@ -865,8 +865,8 @@ bool BosonGLMiniMapRenderer::windowToCell(const QPoint& pos, QPoint* cell) const
 
  BoMatrix invModelviewMatrix;
  d->mModelviewMatrix.invert(&invModelviewMatrix);
- BoVector3 v(pos.x(), realy, 0.0f);
- BoVector3 v2;
+ BoVector3Float v(pos.x(), realy, 0.0f);
+ BoVector3Float v2;
  invModelviewMatrix.transform(&v2, &v);
  v2.setX(v2.x() * ((float)mapWidth() / (float)miniMapWidth()));
  v2.setY(v2.y() * ((float)mapHeight() / (float)miniMapHeight()));

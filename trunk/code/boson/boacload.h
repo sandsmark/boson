@@ -26,12 +26,13 @@
 class KSimpleConfig;
 class QString;
 class QStringList;
-class BoVector3;
 class BoMesh;
 class BoFrame;
 class BosonModelLoaderData;
 class ACObject;
 class ACFace;
+template<class T> class BoVector3;
+typedef BoVector3<float> BoVector3Float;
 
 /**
  * @author Rivo Laks <rivolaks@hot.ee>
@@ -61,7 +62,7 @@ class BoACLoad
 
     void countObjects(ACObject* obj, int* count);
 
-    void translateObject(ACObject* obj, const BoVector3& trans);
+    void translateObject(ACObject* obj, const BoVector3Float& trans);
 
 
     /**

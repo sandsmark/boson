@@ -30,20 +30,20 @@ BoMaterial BoMaterial::mDefaultMaterial = BoMaterial();
 void BoMaterial::init()
 {
  // defaults from lib3ds:
-// mAmbient = BoVector4(0.588235f, 0.588235f, 0.588235f, 0.0f);
-// mDiffuse = BoVector4(0.588235f, 0.588235f, 0.588235f, 0.0f);
-// mSpecular = BoVector4(0.898039f, 0.898039f, 0.898039f, 0.0f);
+// mAmbient = BoVector4Float(0.588235f, 0.588235f, 0.588235f, 0.0f);
+// mDiffuse = BoVector4Float(0.588235f, 0.588235f, 0.588235f, 0.0f);
+// mSpecular = BoVector4Float(0.898039f, 0.898039f, 0.898039f, 0.0f);
 // mShininess = 0.1f;
  mShading = 3;
  mWireSize = 1.0f;
 
  // defaults from OpenGL:
-// mAmbient = BoVector4(0.2f, 0.2f, 0.2f, 1.0f);
+// mAmbient = BoVector4Float(0.2f, 0.2f, 0.2f, 1.0f);
  // 0.2 for ambient is way too little, you totally depend only on diffuse light
  //  then. So we use 0.8 (same as diffuse)
- mAmbient = BoVector4(0.8f, 0.8f, 0.8f, 1.0f);
- mDiffuse = BoVector4(0.8f, 0.8f, 0.8f, 1.0f);
- mSpecular = BoVector4(0.0f, 0.0f, 0.0f, 1.0f);
+ mAmbient = BoVector4Float(0.8f, 0.8f, 0.8f, 1.0f);
+ mDiffuse = BoVector4Float(0.8f, 0.8f, 0.8f, 1.0f);
+ mSpecular = BoVector4Float(0.0f, 0.0f, 0.0f, 1.0f);
  mShininess = 0.0f;
 
  // FIXME: these had no defaults in lib3ds. check whether the values are fine!

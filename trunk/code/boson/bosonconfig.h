@@ -25,9 +25,17 @@
 class QColor;
 class KConfig;
 class BosonConfig;
-class BoVector3;
-class BoVector4;
+class bofixed;
 template<class T> class QValueList;
+template<class T> class BoVector2;
+template<class T> class BoVector3;
+template<class T> class BoVector4;
+typedef BoVector2<float> BoVector2Float;
+typedef BoVector2<bofixed> BoVector2Fixed;
+typedef BoVector3<float> BoVector3Float;
+typedef BoVector3<bofixed> BoVector3Fixed;
+typedef BoVector4<float> BoVector4Float;
+typedef BoVector4<bofixed> BoVector4Fixed;
 
 #define boConfig BosonConfig::bosonConfig()
 
@@ -232,7 +240,8 @@ public:
 	 * Read and return a @ref BoVector3. Will return @p aDefault if @p key
 	 * is not found.
 	 **/
-	static BoVector3 readBoVector3Entry(const KConfig* cfg, const QString& key, const BoVector3& aDefault);
+	static BoVector3Float readBoVector3FloatEntry(const KConfig* cfg, const QString& key, const BoVector3Float& aDefault);
+	static BoVector3Fixed readBoVector3FixedEntry(const KConfig* cfg, const QString& key, const BoVector3Fixed& aDefault);
 
 	/**
 	 * @overload
@@ -241,13 +250,18 @@ public:
 	 * default. We don't use a default value in the parameter, as we would
 	 * have to include bo3dtools.h for that.
 	 **/
-	static BoVector3 readBoVector3Entry(const KConfig* cfg, const QString& key);
+	static BoVector3Float readBoVector3FloatEntry(const KConfig* cfg, const QString& key);
+	static BoVector3Fixed readBoVector3FixedEntry(const KConfig* cfg, const QString& key);
 
-	static BoVector4 readBoVector4Entry(const KConfig* cfg, const QString& key, const BoVector4& aDefault);
-	static BoVector4 readBoVector4Entry(const KConfig* cfg, const QString& key);
+	static BoVector4Float readBoVector4FloatEntry(const KConfig* cfg, const QString& key, const BoVector4Float& aDefault);
+	static BoVector4Float readBoVector4FloatEntry(const KConfig* cfg, const QString& key);
+	static BoVector4Fixed readBoVector4FixedEntry(const KConfig* cfg, const QString& key, const BoVector4Fixed& aDefault);
+	static BoVector4Fixed readBoVector4FixedEntry(const KConfig* cfg, const QString& key);
 
-	static void writeEntry(KConfig* cfg, const QString& key, const BoVector3& value);
-	static void writeEntry(KConfig* cfg, const QString& key, const BoVector4& value);
+	static void writeEntry(KConfig* cfg, const QString& key, const BoVector3Float& value);
+	static void writeEntry(KConfig* cfg, const QString& key, const BoVector3Fixed& value);
+	static void writeEntry(KConfig* cfg, const QString& key, const BoVector4Float& value);
+	static void writeEntry(KConfig* cfg, const QString& key, const BoVector4Fixed& value);
 
 
 	static QString readLocalPlayerName(KConfig* conf = 0);

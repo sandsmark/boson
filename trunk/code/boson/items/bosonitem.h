@@ -35,10 +35,13 @@ class Cell;
 class BosonEffect;
 class BosonItemPropertyHandler;
 class Player;
-class BoVector3;
 class BosonItemRenderer;
 template<class T> class BoVector2;
+template<class T> class BoVector3;
 template<class T> class BoRect;
+typedef BoRect<bofixed> BoRectFixed;
+typedef BoVector2<bofixed> BoVector2Fixed;
+typedef BoVector3<bofixed> BoVector3Fixed;
 
 class KGamePropertyHandler;
 class KGamePropertyBase;
@@ -244,10 +247,10 @@ public:
 	inline bofixed centerX() const { return x() + width() / 2; };
 	inline bofixed centerY() const { return y() + height() / 2; };
 	inline bofixed centerZ() const { return z() + depth() / 2; };
-	BoVector2<bofixed> center() const;
+	BoVector2Fixed center() const;
 
-	BoRect<bofixed> boundingRect() const;
-	BoRect<bofixed> boundingRectAdvanced() const;
+	BoRectFixed boundingRect() const;
+	BoRectFixed boundingRectAdvanced() const;
 
 	/**
 	 * Move the item to @p nx, @p ny, @p nz. Note that it is moved without
@@ -404,7 +407,7 @@ public:
 	/**
 	 * Same as above, but uses box with given coords instead of actual item.
 	 **/
-	bool bosonCollidesWith(const BoVector3& v1, const BoVector3& v2) const;
+	bool bosonCollidesWith(const BoVector3Fixed& v1, const BoVector3Fixed& v2) const;
 
 	inline bofixed xVelocity() const { return mXVelocity; }
 	inline bofixed yVelocity() const { return mYVelocity; }

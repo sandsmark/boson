@@ -137,7 +137,7 @@ BoLight::~BoLight()
   BoLightManager::setLight(mId, 0);
 }
 
-void BoLight::setAmbient(const BoVector4& a)
+void BoLight::setAmbient(const BoVector4Float& a)
 {
   if(mAmbient == a)
   {
@@ -148,7 +148,7 @@ void BoLight::setAmbient(const BoVector4& a)
   glLightfv(GL_LIGHT0 + mId, GL_AMBIENT, mAmbient.data());
 }
 
-void BoLight::setDiffuse(const BoVector4& d)
+void BoLight::setDiffuse(const BoVector4Float& d)
 {
   if(mDiffuse == d)
   {
@@ -159,7 +159,7 @@ void BoLight::setDiffuse(const BoVector4& d)
   glLightfv(GL_LIGHT0 + mId, GL_DIFFUSE, mDiffuse.data());
 }
 
-void BoLight::setSpecular(const BoVector4& s)
+void BoLight::setSpecular(const BoVector4Float& s)
 {
   if(mSpecular == s)
   {
@@ -170,7 +170,7 @@ void BoLight::setSpecular(const BoVector4& s)
   glLightfv(GL_LIGHT0 + mId, GL_SPECULAR, mSpecular.data());
 }
 
-void BoLight::setPosition(const BoVector4& pos)
+void BoLight::setPosition(const BoVector4Float& pos)
 {
   if(mPos == pos)
   {
@@ -214,7 +214,7 @@ void BoLight::setQuadraticAttenuation(float a)
   glLightf(GL_LIGHT0 + mId, GL_QUADRATIC_ATTENUATION, a);
 }
 
-void BoLight::setAttenuation(const BoVector3& a)
+void BoLight::setAttenuation(const BoVector3Float& a)
 {
   if(attenuation() == a)
   {

@@ -123,7 +123,7 @@ bool PlayerIO::isFogged(const Cell* c) const
  return isFogged(c->x(), c->y());
 }
 
-bool PlayerIO::isFogged(const BoVector3& vector) const
+bool PlayerIO::isFogged(const BoVector3Fixed& vector) const
 {
  return isFogged((int)(vector.x()), (int)(vector.y()));
 }
@@ -220,7 +220,7 @@ QPoint PlayerIO::homeBase() const
 		(int)commandCenter->y());
 }
 
-Unit* PlayerIO::findUnitAt(const BosonCanvas* canvas, const BoVector3& canvasVector) const
+Unit* PlayerIO::findUnitAt(const BosonCanvas* canvas, const BoVector3Fixed& canvasVector) const
 {
  BO_CHECK_NULL_RET0(canvas);
  if (canSee(canvasVector)) {

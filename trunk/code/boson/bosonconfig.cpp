@@ -353,7 +353,7 @@ void BosonConfig::setPostInitFunction(void (*func)())
  globalConfig.setPostInitFunction(func);
 }
 
-BoVector3 BosonConfig::readBoVector3Entry(const KConfig* cfg, const QString& key, const BoVector3& aDefault)
+BoVector3Float BosonConfig::readBoVector3FloatEntry(const KConfig* cfg, const QString& key, const BoVector3Float& aDefault)
 {
  QValueList<float> list = BosonConfig::readFloatNumList(cfg, key);
  if (list.count() != 3) {
@@ -364,20 +364,39 @@ BoVector3 BosonConfig::readBoVector3Entry(const KConfig* cfg, const QString& key
 	}
 	return aDefault;
  }
- return BoVector3(list[0], list[1], list[2]);
+ return BoVector3Float(list[0], list[1], list[2]);
 }
 
-BoVector3 BosonConfig::readBoVector3Entry(const KConfig* cfg, const QString& key)
+BoVector3Float BosonConfig::readBoVector3FloatEntry(const KConfig* cfg, const QString& key)
 {
- return readBoVector3Entry(cfg, key, BoVector3());
+ return readBoVector3FloatEntry(cfg, key, BoVector3Float());
 }
 
-BoVector4 BosonConfig::readBoVector4Entry(const KConfig* cfg, const QString& key)
+BoVector3Fixed BosonConfig::readBoVector3FixedEntry(const KConfig* cfg, const QString& key, const BoVector3Fixed& aDefault)
 {
- return readBoVector4Entry(cfg, key, BoVector4());
+ QValueList<float> list = BosonConfig::readFloatNumList(cfg, key);
+ if (list.count() != 3) {
+	if (list.count() != 0) {
+		boError() << k_funcinfo
+				<< "BoVector3 entry must have 3 floats, not "
+				<< list.count() << endl;
+	}
+	return aDefault;
+ }
+ return BoVector3Fixed(list[0], list[1], list[2]);
 }
 
-BoVector4 BosonConfig::readBoVector4Entry(const KConfig* cfg, const QString& key, const BoVector4& aDefault)
+BoVector3Fixed BosonConfig::readBoVector3FixedEntry(const KConfig* cfg, const QString& key)
+{
+ return readBoVector3FixedEntry(cfg, key, BoVector3Fixed());
+}
+
+BoVector4Float BosonConfig::readBoVector4FloatEntry(const KConfig* cfg, const QString& key)
+{
+ return readBoVector4FloatEntry(cfg, key, BoVector4Float());
+}
+
+BoVector4Float BosonConfig::readBoVector4FloatEntry(const KConfig* cfg, const QString& key, const BoVector4Float& aDefault)
 {
  QValueList<float> list = BosonConfig::readFloatNumList(cfg, key);
  if (list.count() != 4) {
@@ -388,10 +407,29 @@ BoVector4 BosonConfig::readBoVector4Entry(const KConfig* cfg, const QString& key
 	}
 	return aDefault;
  }
- return BoVector4(list[0], list[1], list[2], list[3]);
+ return BoVector4Float(list[0], list[1], list[2], list[3]);
 }
 
-void BosonConfig::writeEntry(KConfig* cfg, const QString& key, const BoVector3& value)
+BoVector4Fixed BosonConfig::readBoVector4FixedEntry(const KConfig* cfg, const QString& key)
+{
+ return readBoVector4FixedEntry(cfg, key, BoVector4Fixed());
+}
+
+BoVector4Fixed BosonConfig::readBoVector4FixedEntry(const KConfig* cfg, const QString& key, const BoVector4Fixed& aDefault)
+{
+ QValueList<float> list = BosonConfig::readFloatNumList(cfg, key);
+ if (list.count() != 4) {
+	if (list.count() != 0) {
+		boError() << k_funcinfo
+				<< "BoVector4 entry must have 4 floats, not "
+				<< list.count() << endl;
+	}
+	return aDefault;
+ }
+ return BoVector4Fixed(list[0], list[1], list[2], list[3]);
+}
+
+void BosonConfig::writeEntry(KConfig* cfg, const QString& key, const BoVector3Float& value)
 {
   QValueList<float> list;
   list.append(value[0]);
@@ -400,7 +438,26 @@ void BosonConfig::writeEntry(KConfig* cfg, const QString& key, const BoVector3& 
   BosonConfig::writeFloatNumList(list, cfg, key);
 }
 
-void BosonConfig::writeEntry(KConfig* cfg, const QString& key, const BoVector4& value)
+void BosonConfig::writeEntry(KConfig* cfg, const QString& key, const BoVector3Fixed& value)
+{
+  QValueList<float> list;
+  list.append(value[0]);
+  list.append(value[1]);
+  list.append(value[2]);
+  BosonConfig::writeFloatNumList(list, cfg, key);
+}
+
+void BosonConfig::writeEntry(KConfig* cfg, const QString& key, const BoVector4Float& value)
+{
+  QValueList<float> list;
+  list.append(value[0]);
+  list.append(value[1]);
+  list.append(value[2]);
+  list.append(value[3]);
+  BosonConfig::writeFloatNumList(list, cfg, key);
+}
+
+void BosonConfig::writeEntry(KConfig* cfg, const QString& key, const BoVector4Fixed& value)
 {
   QValueList<float> list;
   list.append(value[0]);

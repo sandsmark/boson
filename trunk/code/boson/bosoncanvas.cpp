@@ -717,17 +717,17 @@ void BosonCanvas::shotHit(BosonShot* s)
  }
  if (s->properties()) {
 	// Add hit effects
-	addEffects(s->properties()->newHitEffects(BoVector3(s->x(), s->y(), s->z())));
+	addEffects(s->properties()->newHitEffects(BoVector3Fixed(s->x(), s->y(), s->z())));
 
 	// Play hit sound
 	s->properties()->playSound(SoundWeaponHit);
  }
 
- explosion(BoVector3(s->x(), s->y(), s->z()), s->damage(), s->damageRange(),
+ explosion(BoVector3Fixed(s->x(), s->y(), s->z()), s->damage(), s->damageRange(),
 		s->fullDamageRange(), s->owner());
 }
 
-void BosonCanvas::explosion(const BoVector3& pos, long int damage, bofixed range, bofixed fullrange, Player* owner)
+void BosonCanvas::explosion(const BoVector3Fixed& pos, long int damage, bofixed range, bofixed fullrange, Player* owner)
 {
  // Decrease health of all units within damaging range of explosion
  long int d;
@@ -798,7 +798,7 @@ void BosonCanvas::unitDamaged(Unit* unit, long int damage)
 //	if (unit->health() <= (unit->unitProperties()->health() / 2.0)) {
 	if (factor >= 1.0) {
 		// If unit has less than 50% hitpoints, it's smoking
-		BoVector3 pos((unit->x() + unit->width() / 2),
+		BoVector3Fixed pos((unit->x() + unit->width() / 2),
 				-((unit->y() + unit->height() / 2)),
 				unit->z());
 		BosonParticleSystem* s;
@@ -810,7 +810,7 @@ void BosonCanvas::unitDamaged(Unit* unit, long int damage)
 		s = unit->smokeParticleSystem();
 		// FIXME: maybe move this to BosonParticleManager?
 		s->setCreateRate(factor * 25);
-//		s->setVelocity(BoVector3(0, 0, factor * 0.5));  // This is only hint for BosonParticleManager
+//		s->setVelocity(BoVector3Fixed(0, 0, factor * 0.5));  // This is only hint for BosonParticleManager
 		bofixed c = 0.8 - factor * 0.4;
 		s->setColor(BoVector4(c, c, c, 0.25));
 
@@ -824,7 +824,7 @@ void BosonCanvas::unitDamaged(Unit* unit, long int damage)
 			s = ((Facility*)unit)->flamesParticleSystem();
 			// FIXME: maybe move this to BosonParticleManager?
 			s->setCreateRate(factor * 30);
-			s->setVelocity(BoVector3(0, 0, factor * 0.5));  // This is only hint for BosonParticleManager
+			s->setVelocity(BoVector3Fixed(0, 0, factor * 0.5));  // This is only hint for BosonParticleManager
 		}
 	} else {
 		// If it has more hitpoints, it's not burning ;-)
@@ -870,7 +870,7 @@ void BosonCanvas::destroyUnit(Unit* unit)
 	removeUnit(unit);
 	unit->playSound(SoundReportDestroyed);
 	// Pos is center of unit
-	BoVector3 pos(unit->x() + unit->width() / 2, unit->y() + unit->height() / 2, unit->z());
+	BoVector3Fixed pos(unit->x() + unit->width() / 2, unit->y() + unit->height() / 2, unit->z());
 	//pos += unit->unitProperties()->hitPoint();
 	// Add destroyed effects
 	addEffects(unit->unitProperties()->newDestroyedEffects(pos[0], pos[1], pos[2]));
@@ -1393,7 +1393,7 @@ BosonItem* BosonCanvas::createItemFromXML(const QDomElement& item, Player* owner
 	return 0;
  }
 
- BoVector3 pos;
+ BoVector3Fixed pos;
  pos.setX(item.attribute("x").toFloat(&ok));
  if (!ok) {
 	boError() << k_funcinfo << "x attribute for Item tag missing or invalid" << endl;
@@ -1528,7 +1528,7 @@ bool BosonCanvas::loadEffectsFromXML(const QDomElement& root)
 		continue;
 	}
 
-	BoVector3 pos, rot;
+	BoVector3Fixed pos, rot;
 	if (!pos.loadFromXML(effect, "Position")) {
 		ret = false;
 		continue;
@@ -1704,7 +1704,7 @@ bool BosonCanvas::onCanvas(const BoVector2Fixed& pos) const
  return onCanvas(pos.x(), pos.y());
 }
 
-bool BosonCanvas::onCanvas(const BoVector3& pos) const
+bool BosonCanvas::onCanvas(const BoVector3Fixed& pos) const
 {
  return onCanvas(pos.x(), pos.y());
 }
@@ -1753,7 +1753,7 @@ void BosonCanvas::deleteItems(QPtrList<BosonItem>& items)
  }
 }
 
-BosonItem* BosonCanvas::createNewItem(int rtti, Player* owner, const ItemType& type, const BoVector3& pos)
+BosonItem* BosonCanvas::createNewItem(int rtti, Player* owner, const ItemType& type, const BoVector3Fixed& pos)
 {
  BosonItem* item = createItem(rtti, owner, type, pos, nextItemId());
  if (!item) {
@@ -1789,11 +1789,11 @@ BosonItem* BosonCanvas::createNewItem(int rtti, Player* owner, const ItemType& t
  return item;
 }
 
-BosonItem* BosonCanvas::createItem(int rtti, Player* owner, const ItemType& type, const BoVector3& pos, unsigned long int id)
+BosonItem* BosonCanvas::createItem(int rtti, Player* owner, const ItemType& type, const BoVector3Fixed& pos, unsigned long int id)
 {
  BosonItem* item = 0;
  if (!onCanvas(pos)) {
-	boError() << k_funcinfo << pos.debugString() << " is not on the canvas" << endl;
+	boError() << k_funcinfo << "(" << pos[0] << "," << pos[1] << "," << pos[2] << ") is not on the canvas" << endl;
 	return 0;
  }
  if (id == 0) {

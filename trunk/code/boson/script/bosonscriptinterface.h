@@ -20,7 +20,6 @@
 #ifndef BOSONSCRIPTINTERFACE_H
 #define BOSONSCRIPTINTERFACE_H
 
-class BoVector3;
 class BosonBigDisplayBase;
 class Player;
 class BoGameCamera;
@@ -28,7 +27,13 @@ class BoAutoGameCamera;
 class BosonCanvas;
 class Boson;
 class BoLight;
-class BoVector4;
+class bofixed;
+template<class T> class BoVector3;
+template<class T> class BoVector4;
+typedef BoVector3<bofixed> BoVector3Fixed;
+typedef BoVector3<float> BoVector3Float;
+typedef BoVector4<bofixed> BoVector4Fixed;
+typedef BoVector4<float> BoVector4Float;
 
 class QString;
 class QDataStream;
@@ -60,23 +65,23 @@ class BosonScriptInterface : public QObject
       **/
     int addLight();
     void removeLight(int id);
-    BoVector4 lightPos(int id);
-    BoVector4 lightAmbient(int id);
-    BoVector4 lightDiffuse(int id);
-    BoVector4 lightSpecular(int id);
-    BoVector3 lightAttenuation(int id);
+    BoVector4Float lightPos(int id);
+    BoVector4Float lightAmbient(int id);
+    BoVector4Float lightDiffuse(int id);
+    BoVector4Float lightSpecular(int id);
+    BoVector3Float lightAttenuation(int id);
     bool lightEnabled(int id);
-    void setLightPos(int id, const BoVector4&);
-    void setLightAmbient(int id, const BoVector4&);
-    void setLightDiffuse(int id, const BoVector4&);
-    void setLightSpecular(int id, const BoVector4&);
-    void setLightAttenuation(int id, const BoVector3&);
+    void setLightPos(int id, const BoVector4Float&);
+    void setLightAmbient(int id, const BoVector4Float&);
+    void setLightDiffuse(int id, const BoVector4Float&);
+    void setLightSpecular(int id, const BoVector4Float&);
+    void setLightAttenuation(int id, const BoVector3Float&);
     void setLightEnabled(int id, bool);
 
     /*  Camera  */
-    BoVector3 cameraPos();
-    BoVector3 cameraUp();
-    BoVector3 cameraLookAt();
+    BoVector3Float cameraPos();
+    BoVector3Float cameraUp();
+    BoVector3Float cameraLookAt();
     float cameraRotation();
     float cameraRadius();
     float cameraZ();
@@ -88,9 +93,9 @@ class BosonScriptInterface : public QObject
     void setCameraRadius(float);
     void setCameraZ(float);
     void setCameraMoveMode(int mode);
-    void setCameraPos(const BoVector3&);
-    void setCameraLookAt(const BoVector3&);
-    void setCameraUp(const BoVector3&);
+    void setCameraPos(const BoVector3Float&);
+    void setCameraLookAt(const BoVector3Float&);
+    void setCameraUp(const BoVector3Float&);
     void commitCameraChanges(int ticks);
 
 
@@ -98,23 +103,23 @@ class BosonScriptInterface : public QObject
     /*  Light  */
     void signalAddLight(int* id);
     void signalRemoveLight(int id);
-    void signalGetLightPos(int id, BoVector4*);
-    void signalGetLightAmbient(int id, BoVector4*);
-    void signalGetLightDiffuse(int id, BoVector4*);
-    void signalGetLightSpecular(int id, BoVector4*);
-    void signalGetLightAttenuation(int id, BoVector3*);
+    void signalGetLightPos(int id, BoVector4Float*);
+    void signalGetLightAmbient(int id, BoVector4Float*);
+    void signalGetLightDiffuse(int id, BoVector4Float*);
+    void signalGetLightSpecular(int id, BoVector4Float*);
+    void signalGetLightAttenuation(int id, BoVector3Float*);
     void signalGetLightEnabled(int id, bool*);
-    void signalSetLightPos(int id, const BoVector4&);
-    void signalSetLightAmbient(int id, const BoVector4&);
-    void signalSetLightDiffuse(int id, const BoVector4&);
-    void signalSetLightSpecular(int id, const BoVector4&);
-    void signalSetLightAttenuation(int id, const BoVector3&);
+    void signalSetLightPos(int id, const BoVector4Float&);
+    void signalSetLightAmbient(int id, const BoVector4Float&);
+    void signalSetLightDiffuse(int id, const BoVector4Float&);
+    void signalSetLightSpecular(int id, const BoVector4Float&);
+    void signalSetLightAttenuation(int id, const BoVector3Float&);
     void signalSetLightEnabled(int id, bool);
 
     /*  Camera */
-    void signalGetCameraPos(BoVector3*);
-    void signalGetCameraUp(BoVector3*);
-    void signalGetCameraLookAt(BoVector3*);
+    void signalGetCameraPos(BoVector3Float*);
+    void signalGetCameraUp(BoVector3Float*);
+    void signalGetCameraLookAt(BoVector3Float*);
     void signalGetCameraRotation(float*);
     void signalGetCameraRadius(float*);
     void signalGetCameraZ(float*);
@@ -122,9 +127,9 @@ class BosonScriptInterface : public QObject
     void signalSetCameraFreeMovement(bool);
 
     /*  AutoCamera */
-    void signalSetCameraPos(const BoVector3&);
-    void signalSetCameraLookAt(const BoVector3&);
-    void signalSetCameraUp(const BoVector3&);
+    void signalSetCameraPos(const BoVector3Float&);
+    void signalSetCameraLookAt(const BoVector3Float&);
+    void signalSetCameraUp(const BoVector3Float&);
     void signalSetCameraRotation(float);
     void signalSetCameraRadius(float);
     void signalSetCameraZ(float);

@@ -20,16 +20,22 @@
 #ifndef BOSONSCRIPT_H
 #define BOSONSCRIPT_H
 
-class BoVector3;
+
+#include "../bomath.h"
+
 class Player;
 class Boson;
 class BosonCanvas;
 class Boson;
-class BoVector4;
-class bofixed;
 template<class T> class BoVector2;
+template<class T> class BoVector3;
+template<class T> class BoVector4;
 template<class T> class BoRect;
 typedef BoVector2<bofixed> BoVector2Fixed;
+typedef BoVector3<bofixed> BoVector3Fixed;
+typedef BoVector3<float> BoVector3Float;
+typedef BoVector4<bofixed> BoVector4Fixed;
+typedef BoVector4<float> BoVector4Float;
 typedef BoRect<bofixed> BoRectFixed;
 
 class QString;
@@ -313,34 +319,34 @@ class BosonScript
     void setCameraRadius(float r);
     void setCameraZ(float z);
     void setCameraMoveMode(int mode);
-    void setCameraLookAt(const BoVector3& pos);
-    void setCameraPos(const BoVector3& pos);
-    void setCameraUp(const BoVector3& up);
+    void setCameraLookAt(const BoVector3Float& pos);
+    void setCameraPos(const BoVector3Float& pos);
+    void setCameraUp(const BoVector3Float& up);
     void setCameraLimits(bool on);
     void setCameraFreeMode(bool on);
     void commitCameraChanges(int ticks);
 
-    BoVector3 cameraLookAt();
-    BoVector3 cameraPos();
-    BoVector3 cameraUp();
+    BoVector3Float cameraLookAt();
+    BoVector3Float cameraPos();
+    BoVector3Float cameraUp();
     float cameraRotation();
     float cameraRadius();
     float cameraZ();
 
 
     // Lights
-    BoVector4 lightPos(int id);
-    BoVector4 lightAmbient(int id);
-    BoVector4 lightDiffuse(int id);
-    BoVector4 lightSpecular(int id);
-    BoVector3 lightAttenuation(int id);
+    BoVector4Float lightPos(int id);
+    BoVector4Float lightAmbient(int id);
+    BoVector4Float lightDiffuse(int id);
+    BoVector4Float lightSpecular(int id);
+    BoVector3Float lightAttenuation(int id);
     bool lightEnabled(int id);
 
-    void setLightPos(int id, BoVector4 pos);
-    void setLightAmbient(int id, BoVector4 a);
-    void setLightDiffuse(int id, BoVector4 a);
-    void setLightSpecular(int id, BoVector4 a);
-    void setLightAttenuation(int id, BoVector3 a);
+    void setLightPos(int id, BoVector4Float pos);
+    void setLightAmbient(int id, BoVector4Float a);
+    void setLightDiffuse(int id, BoVector4Float a);
+    void setLightSpecular(int id, BoVector4Float a);
+    void setLightAttenuation(int id, BoVector3Float a);
     void setLightEnabled(int id, bool enable);
 
     int addLight();
@@ -356,7 +362,7 @@ class BosonScript
     static void endBenchmark(const QString& name);
     static void setRandomSeed(long int seed);
     static void findPath(int x1, int y1, int x2, int y2);
-    static void addEffect(unsigned int id, BoVector3 pos, float zrot = 0.0f);
+    static void addEffect(unsigned int id, BoVector3Fixed pos, bofixed zrot = 0);
 
 
   protected:

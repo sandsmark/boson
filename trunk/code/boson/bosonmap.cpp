@@ -1215,8 +1215,8 @@ void BosonMap::recalculateNormalsInRect(int x1, int y1, int x2, int y2)
 	boWarning() << k_funcinfo << "w*h <= 0 is not valid" << endl;
 	return;
  }
- BoVector3 a, b, c, n;
- BoVector3* normals = new BoVector3[w * h];
+ BoVector3Float a, b, c, n;
+ BoVector3Float* normals = new BoVector3Float[w * h];
 #define NORM(x, y) normals[(y - cy1) * w + (x - cx1)]
  // FIXME: this is not entirely correct: our cells consist of a single quad atm,
  //  however, they can be "folded" so that it seems to consist of two triangles.
@@ -1226,7 +1226,7 @@ void BosonMap::recalculateNormalsInRect(int x1, int y1, int x2, int y2)
 		a.set(x, y, heightAtCorner(x, y));
 		b.set(x + 1, y, heightAtCorner(x + 1, y));
 		c.set(x, y + 1, heightAtCorner(x, y + 1));
-		n = BoVector3::crossProduct(c - b, a - b);
+		n = BoVector3Float::crossProduct(c - b, a - b);
 		n.normalize();
 		NORM(x, y) = n;
 	}

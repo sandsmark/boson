@@ -29,11 +29,12 @@
 class KSimpleConfig;
 class QString;
 class QStringList;
-class BoVector3;
 class BoMatrix;
 class BoMesh;
 class BoFrame;
 class BosonModelLoaderData;
+template<class T> class BoVector3;
+typedef BoVector3<float> BoVector3Float;
 template<class T> class QPtrList;
 template<class T, class T2> class QMap;
 
@@ -106,14 +107,14 @@ public:
 	 * @param tex if texture is non-null this must be the texture
 	 * coordinates (array of 3) as provided for glTexCoord*()
 	 **/
-	static void dumpTriangle(BoVector3* v, GLuint texture = 0, Lib3dsTexel* tex = 0);
+	static void dumpTriangle(BoVector3Float* v, GLuint texture = 0, Lib3dsTexel* tex = 0);
 	static void dumpTriangle(Lib3dsVector* v, GLuint texture = 0, Lib3dsTexel* tex = 0);
 
 	/**
 	 * Create 3 vectors from @p face in @p mesh and place them into @p v.
 	 * @param v An array of size 3 which will contain the vectors of the face.
 	**/
-	static void makeVectors(BoVector3* v, const Lib3dsMesh* mesh, const Lib3dsFace* face);
+	static void makeVectors(BoVector3Float* v, const Lib3dsMesh* mesh, const Lib3dsFace* face);
 
 	/**
 	 * Find adjacent faces in @p mesh and place them into @p adjacentFaces.

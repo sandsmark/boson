@@ -239,7 +239,7 @@ void BoLake::findWater(int x, int y, const QRect& searcharea)
       chunk->miny = cy;
       chunk->maxx = QMIN(maxx, cx + CHUNK_SIZE);
       chunk->maxy = QMIN(maxy, cy + CHUNK_SIZE);
-      chunk->center = BoVector3((chunk->minx + chunk->maxx) / 2.0f, -(chunk->miny + chunk->maxy) / 2.0f, level);
+      chunk->center = BoVector3Float((chunk->minx + chunk->maxx) / 2.0f, -(chunk->miny + chunk->maxy) / 2.0f, level);
       chunk->lastdetail = -1.0f;
 //      boDebug() << "        " << k_funcinfo << "Create chunk, coords: ("
 //          << chunk->minx << "; " << chunk->miny << ")-(" << chunk->maxx << "; " << chunk->maxy << ")" << endl;
@@ -984,7 +984,7 @@ void BoWaterManager::modelviewMatrixChanged(const BoMatrix& modelview)
   setDirty(true);
 }
 
-float BoWaterManager::sphereInFrustum(const BoVector3& pos, float radius) const
+float BoWaterManager::sphereInFrustum(const BoVector3Float& pos, float radius) const
 {
  return Bo3dTools::sphereInFrustum(mViewFrustum, pos, radius);
 }
@@ -1147,8 +1147,8 @@ void BoWaterManager::renderLake(BoLake* lake)
     return;
   }
   // Box test is slower than sphere test, but often more accurate
-  BoVector3 lakemin(lake->minx, -lake->miny, lake->level - lake->waveHeightMax);
-  BoVector3 lakemax(lake->maxx, -lake->maxy, lake->level + lake->waveHeightMax);
+  BoVector3Float lakemin(lake->minx, -lake->miny, lake->level - lake->waveHeightMax);
+  BoVector3Float lakemax(lake->maxx, -lake->maxy, lake->level + lake->waveHeightMax);
   if(!Bo3dTools::boxInFrustum(mViewFrustum, lakemin, lakemax))
   {
     return;
@@ -1166,8 +1166,8 @@ void BoWaterManager::renderLake(BoLake* lake)
       continue;
     }
     // Test with more accurate box-in-frustum test
-    BoVector3 chunkmin(chunk->minx, -chunk->miny, lake->level - lake->waveHeightMax);
-    BoVector3 chunkmax(chunk->maxx, -chunk->maxy, lake->level + lake->waveHeightMax);
+    BoVector3Float chunkmin(chunk->minx, -chunk->miny, lake->level - lake->waveHeightMax);
+    BoVector3Float chunkmax(chunk->maxx, -chunk->maxy, lake->level + lake->waveHeightMax);
     if(!Bo3dTools::boxInFrustum(mViewFrustum, chunkmin, chunkmax))
     {
       continue;
@@ -1362,7 +1362,7 @@ void BoWaterManager::renderChunk(BoLake* lake, BoLake::WaterChunk* chunk, float 
     else
     {
       // This will clamp result to range [0; mWaterDiffuseColor * light.diffuse()]
-      BoVector4 diffusecolor = mSun ? mSun->diffuse() : BoVector4(1.0f, 1.0f, 1.0f, 1.0f);
+      BoVector4Float diffusecolor = mSun ? mSun->diffuse() : BoVector4Float(1.0f, 1.0f, 1.0f, 1.0f);
       diffusecolor.scale(mWaterDiffuseColor);
       diffusecolor.setW(1.0f);
       glEnable(GL_BLEND);
@@ -1511,12 +1511,12 @@ void BoWaterManager::renderChunk(BoLake* lake, BoLake::WaterChunk* chunk, float 
     }
 
     // Amount of ambient light water will receive.
-    BoVector4 ambientcolor = mSun ? mSun->ambient() : BoVector4(1.0f, 1.0f, 1.0f, 1.0f);
+    BoVector4Float ambientcolor = mSun ? mSun->ambient() : BoVector4Float(1.0f, 1.0f, 1.0f, 1.0f);
     ambientcolor.scale(mWaterAmbientColor);
     ambientcolor.setW(1.0f);
 
     // Amount of reflections water will receive.
-    BoVector4 reflectioncolor;
+    BoVector4Float reflectioncolor;
     if(mEnableReflections)
     {
       reflectioncolor.set(mReflectionStrength, mReflectionStrength, mReflectionStrength, 1.0f);
@@ -1526,7 +1526,7 @@ void BoWaterManager::renderChunk(BoLake* lake, BoLake::WaterChunk* chunk, float 
     //    diffusetex * ambientcolor + reflectiontex * reflectioncolor
     //  (note that both ambient and diffuse lighting use same texture)
 
-    BoVector4 resultcolor = ambientcolor;
+    BoVector4Float resultcolor = ambientcolor;
     if(mEnableReflections)
     {
       // If reflections are used, then we use:
@@ -1538,7 +1538,7 @@ void BoWaterManager::renderChunk(BoLake* lake, BoLake::WaterChunk* chunk, float 
       // TODO: actually sky will get darker with dim light, compensate for this
       //  (e.g. by multiplying reflection color with light's ambient (diffuse?)
       //  color).
-      BoVector4 reflectioncolor(mReflectionStrength, mReflectionStrength, mReflectionStrength, 1.0f);
+      BoVector4Float reflectioncolor(mReflectionStrength, mReflectionStrength, mReflectionStrength, 1.0f);
       glTexEnvfv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR, reflectioncolor.data());
 
       resultcolor = ambientcolor;
@@ -1680,73 +1680,73 @@ void BoWaterManager::calculatePerCellStuff(RenderInfo* info)
       }
       if(!info->lake->hasAnyCorner(x, y, x + info->detail, y + info->detail))
       {
-        NORM(xi, yi) = BoVector3();
+        NORM(xi, yi) = BoVector3Float();
         if(mEnableBumpmapping)
         {
-          TANGENTLIGHT(xi, yi) = BoVector3();
-          HALFVECTOR(xi, yi) = BoVector3();
+          TANGENTLIGHT(xi, yi) = BoVector3Float();
+          HALFVECTOR(xi, yi) = BoVector3Float();
         }
         continue;
       }
       // Calculate normal for this cell
-      BoVector3 a, b, c;
+      BoVector3Float a, b, c;
       float x2 = QMIN(x + info->detail, info->cellmaxx);
       float y2 = QMIN(y + info->detail, info->cellmaxy);
-      a = BoVector3(x, y, info->lake->height(x, y));
-      b = BoVector3(x2, y, info->lake->height(x2, y));
-      c = BoVector3(x, y2, info->lake->height(x, y2));
-      NORM(xi, yi) = BoVector3::crossProduct(c - b, a - b);
+      a = BoVector3Float(x, y, info->lake->height(x, y));
+      b = BoVector3Float(x2, y, info->lake->height(x2, y));
+      c = BoVector3Float(x, y2, info->lake->height(x, y2));
+      NORM(xi, yi) = BoVector3Float::crossProduct(c - b, a - b);
       NORM(xi, yi).normalize();
       if(mEnableBumpmapping)
       {
         // Calculate tangent space light position
         // Calculate tangents of the quad
         /*** Original equation  (for triangle abc):
-        BoVector3 side0 = b - a;
-        BoVector3 side1 = c - a;
+        BoVector3Float side0 = b - a;
+        BoVector3Float side1 = c - a;
         float deltaT0 = y / texrepeat - y / texrepeat;  // b.texcoord.y - a.texcoord.y
         float deltaT1 = y2 / texrepeat - y / texrepeat;  // c.texcoord.y - a.texcoord.y
-        BoVector3 sTangent = deltaT1*side0-deltaT0*side1;
+        BoVector3Float sTangent = deltaT1*side0-deltaT0*side1;
         sTangent.normalize();
 
         //Calculate t tangent
         float deltaS0 = x2 / texrepeat - x / texrepeat;  // b.texcoord.x - a.texcoord.x
         float deltaS1 = x / texrepeat - x / texrepeat;  // c.texcoord.x - a.texcoord.x
-        BoVector3 tTangent = deltaS1*side0-deltaS0*side1;
+        BoVector3Float tTangent = deltaS1*side0-deltaS0*side1;
         tTangent.normalize();*/
         // Simplified & optimized:
-        BoVector3 side0 = b - a;
-        BoVector3 side1 = a - c;
-        BoVector3 sTangent = side0 * ((x2 - x) / info->texrepeat);
+        BoVector3Float side0 = b - a;
+        BoVector3Float side1 = a - c;
+        BoVector3Float sTangent = side0 * ((x2 - x) / info->texrepeat);
         sTangent.normalize();
-        BoVector3 tTangent = (side1 * ((y2 - y) / info->texrepeat));
+        BoVector3Float tTangent = (side1 * ((y2 - y) / info->texrepeat));
         tTangent.normalize();
         // reverse tangents if necessary
-        BoVector3 tangentCross = BoVector3::crossProduct(sTangent, tTangent);
-        if(BoVector3::dotProduct(tangentCross, NORM(xi, yi)) < 0.0f)
+        BoVector3Float tangentCross = BoVector3Float::crossProduct(sTangent, tTangent);
+        if(BoVector3Float::dotProduct(tangentCross, NORM(xi, yi)) < 0.0f)
         {
           sTangent = -sTangent;
           tTangent = -tTangent;
         }
         // Calculate base tangent space light vector (real vector depends on
         //  surface normal and thus differs for each corner)
-        BoVector3 tangentSpaceLight;
-        tangentSpaceLight.setX(BoVector3::dotProduct(sTangent, info->lightvector));
-        tangentSpaceLight.setY(BoVector3::dotProduct(tTangent, info->lightvector));
-        tangentSpaceLight.setZ(BoVector3::dotProduct(NORM(xi, yi), info->lightvector));
+        BoVector3Float tangentSpaceLight;
+        tangentSpaceLight.setX(BoVector3Float::dotProduct(sTangent, info->lightvector));
+        tangentSpaceLight.setY(BoVector3Float::dotProduct(tTangent, info->lightvector));
+        tangentSpaceLight.setZ(BoVector3Float::dotProduct(NORM(xi, yi), info->lightvector));
         tangentSpaceLight.normalize();
         TANGENTLIGHT(xi, yi) = tangentSpaceLight;
 
         // Calculate H (half-angle vector)
         // H is average of light and view vectors
-        BoVector3 viewvector = mCameraPos - a;
+        BoVector3Float viewvector = mCameraPos - a;
         viewvector.normalize();
-        BoVector3 halfvector = viewvector + info->lightvector;
+        BoVector3Float halfvector = viewvector + info->lightvector;
         halfvector.normalize();
-        BoVector3 tangenthalfvector;
-        tangenthalfvector.setX(BoVector3::dotProduct(sTangent, halfvector));
-        tangenthalfvector.setY(BoVector3::dotProduct(tTangent, halfvector));
-        tangenthalfvector.setZ(BoVector3::dotProduct(NORM(xi, yi), halfvector));
+        BoVector3Float tangenthalfvector;
+        tangenthalfvector.setX(BoVector3Float::dotProduct(sTangent, halfvector));
+        tangenthalfvector.setY(BoVector3Float::dotProduct(tTangent, halfvector));
+        tangenthalfvector.setZ(BoVector3Float::dotProduct(NORM(xi, yi), halfvector));
         HALFVECTOR(xi, yi) = tangenthalfvector;
         HALFVECTOR(xi, yi).normalize();
       }
@@ -1772,33 +1772,33 @@ void BoWaterManager::calculatePerCornerStuff(RenderInfo* info)
       {
         // Reset all variables, just in case...
         // TODO: find out if this is really needed or is it just waste of time
-        ARRAY_CORNER(info->vertices_p, x, y) = BoVector3(posx, -posy, 10);  // 10 is random
-        ARRAY_CORNER(info->normals_p, x, y) = BoVector3(0, 0, 1);
+        ARRAY_CORNER(info->vertices_p, x, y) = BoVector3Float(posx, -posy, 10);  // 10 is random
+        ARRAY_CORNER(info->normals_p, x, y) = BoVector3Float(0, 0, 1);
         if(mEnableBumpmapping)
         {
           if(mEnableTranslucency)
           {
-            ARRAY_CORNER(info->tangentlights_p4, x, y) = BoVector4(0, 0, 1, 0);
+            ARRAY_CORNER(info->tangentlights_p4, x, y) = BoVector4Float(0, 0, 1, 0);
           }
           else
           {
-            ARRAY_CORNER(info->tangentlights_p, x, y) = BoVector3(0, 0, 1);
+            ARRAY_CORNER(info->tangentlights_p, x, y) = BoVector3Float(0, 0, 1);
           }
-          ARRAY_CORNER(info->halfvectors_p, x, y) = BoVector3(0, 0, 1);
+          ARRAY_CORNER(info->halfvectors_p, x, y) = BoVector3Float(0, 0, 1);
         }
         else if(mEnableTranslucency)
         {
-          ARRAY_CORNER(info->colors_p, x, y) = BoVector4(1, 1, 1, 1);
+          ARRAY_CORNER(info->colors_p, x, y) = BoVector4Float(1, 1, 1, 1);
         }
         continue;
       }
 
       // Corner's normal
-      BoVector3 n;
+      BoVector3Float n;
       // Corner's Tangent-Space Light vector
-      BoVector3 tsl;
+      BoVector3Float tsl;
       // Corner's half-angle vector (also tangent-space)
-      BoVector3 halfv;
+      BoVector3Float halfv;
 
       if(info->flat)
       {
@@ -1809,7 +1809,7 @@ void BoWaterManager::calculatePerCornerStuff(RenderInfo* info)
           // When surface's normal points upwards (is (0; 0; 1)), then
           //  tangent-space is same as world-space.
           tsl = info->lightvector;
-          BoVector3 viewvector = mCameraPos - BoVector3(posx, posy, posz);
+          BoVector3Float viewvector = mCameraPos - BoVector3Float(posx, posy, posz);
           viewvector.normalize();
           halfv = viewvector + info->lightvector;
           // halfv will be normalized later
@@ -1822,7 +1822,7 @@ void BoWaterManager::calculatePerCornerStuff(RenderInfo* info)
         float derivation = cos(((posx * info->lake->waveVector.x()) + (posy * info->lake->waveVector.y())) + info->lake->waveSpeed * time()) *
             QMAX(info->lake->waveHeightMin, QMIN(info->lake->waveHeightMax, (groundHeightAt(posx, posy) - info->lake->level) * info->lake->waveVector.z()));
         // Calculate point's normal on 2d plane (xz plane), by rotating it 90 degrees cw or ccw
-        BoVector3 planenormal(-derivation, 0, 1);
+        BoVector3Float planenormal(-derivation, 0, 1);
         // Now rotate 2dnormal around z axis, according to direction of waves, to get real normal
         // Z will remain same
         n.setZ(planenormal.z());
@@ -1837,7 +1837,7 @@ void BoWaterManager::calculatePerCornerStuff(RenderInfo* info)
           // Both tangents are perpendicular to normal and their either x- or
           //  y-component is 0.
           // Calculate s-tangent (y=0). x*nx + z*nz = 0
-          BoVector3 sTangent;
+          BoVector3Float sTangent;
           if(n.x() == 0)
           {
             // Special case. Tangent's z is also 0, x can be anything, but we
@@ -1856,7 +1856,7 @@ void BoWaterManager::calculatePerCornerStuff(RenderInfo* info)
             sTangent.normalize();
           }
           // Calculate t-tangent (x=0). y*ny + z*nz = 0
-          BoVector3 tTangent;
+          BoVector3Float tTangent;
           if(n.y() == 0)
           {
             // Special case. Tangent's z is also 0, y can be anything, but we
@@ -1876,20 +1876,20 @@ void BoWaterManager::calculatePerCornerStuff(RenderInfo* info)
           }
 
           // Calculate tangent-space light vector.
-          tsl.setX(BoVector3::dotProduct(sTangent, info->lightvector));
-          tsl.setY(BoVector3::dotProduct(tTangent, info->lightvector));
-          tsl.setZ(BoVector3::dotProduct(n, info->lightvector));
+          tsl.setX(BoVector3Float::dotProduct(sTangent, info->lightvector));
+          tsl.setY(BoVector3Float::dotProduct(tTangent, info->lightvector));
+          tsl.setZ(BoVector3Float::dotProduct(n, info->lightvector));
           // Will be normalized later
 
           // Calculate H (half-angle vector).
           // H is average of light and view vectors (vector which is between them).
-          BoVector3 viewvector = mCameraPos - BoVector3(posx, posy, posz);
+          BoVector3Float viewvector = mCameraPos - BoVector3Float(posx, posy, posz);
           viewvector.normalize();
-          BoVector3 halfvector = viewvector + info->lightvector;
+          BoVector3Float halfvector = viewvector + info->lightvector;
           //halfvector.normalize();
-          halfv.setX(BoVector3::dotProduct(sTangent, halfvector));
-          halfv.setY(BoVector3::dotProduct(tTangent, halfvector));
-          halfv.setZ(BoVector3::dotProduct(n, halfvector));
+          halfv.setX(BoVector3Float::dotProduct(sTangent, halfvector));
+          halfv.setY(BoVector3Float::dotProduct(tTangent, halfvector));
+          halfv.setZ(BoVector3Float::dotProduct(n, halfvector));
           // halfv will also be normalized later
         }
       }
@@ -1944,7 +1944,7 @@ void BoWaterManager::calculatePerCornerStuff(RenderInfo* info)
         if(n.x() * n.x() + n.y() * n.y() + n.z() * n.z() < 0.05)
         {
           printf("WARNING: vec(%f, %f, %f) has length %f\n", n.x(), n.y(), n.z(), n.length());
-          info->chunk->normals[y * info->chunkcornerw + x] = BoVector3(0, 0, 1);
+          info->chunk->normals[y * info->chunkcornerw + x] = BoVector3Float(0, 0, 1);
           //continue;
         }
         if(n.z() < 0.1)
@@ -1955,7 +1955,7 @@ void BoWaterManager::calculatePerCornerStuff(RenderInfo* info)
       }
 
 
-      ARRAY_CORNER(info->vertices_p, x, y) = BoVector3(posx, -posy, posz);
+      ARRAY_CORNER(info->vertices_p, x, y) = BoVector3Float(posx, -posy, posz);
       ARRAY_CORNER(info->normals_p, x, y) = n;
 
       if(mEnableBumpmapping)
@@ -1964,11 +1964,11 @@ void BoWaterManager::calculatePerCornerStuff(RenderInfo* info)
         tsl.normalize();
         // Convert it from range [-1; 1] into [0; 1] ...
         tsl.scale(0.5);
-        tsl += BoVector3(0.5, 0.5, 0.5);
-        BoVector4 tsl4;
+        tsl += BoVector3Float(0.5, 0.5, 0.5);
+        BoVector4Float tsl4;
         if(mEnableTranslucency)
         {
-          tsl4 = BoVector4(tsl.x(), tsl.y(), tsl.z(), waterAlphaAt(info->lake, posx, posy));
+          tsl4 = BoVector4Float(tsl.x(), tsl.y(), tsl.z(), waterAlphaAt(info->lake, posx, posy));
           ARRAY_CORNER(info->tangentlights_p4, x, y) = tsl4;
         }
         else
@@ -1980,12 +1980,12 @@ void BoWaterManager::calculatePerCornerStuff(RenderInfo* info)
         halfv.normalize();
         // Convert it from range [-1; 1] into [0; 1] ...
         halfv.scale(0.5);
-        halfv += BoVector3(0.5, 0.5, 0.5);
+        halfv += BoVector3Float(0.5, 0.5, 0.5);
         ARRAY_CORNER(info->halfvectors_p, x, y) = halfv;
       }
       else if(mEnableTranslucency)
       {
-        ARRAY_CORNER(info->colors_p, x, y) = BoVector4(1, 1, 1, waterAlphaAt(info->lake, posx, posy));
+        ARRAY_CORNER(info->colors_p, x, y) = BoVector4Float(1, 1, 1, waterAlphaAt(info->lake, posx, posy));
       }
     }
   }
@@ -2011,34 +2011,34 @@ void BoWaterManager::initDataBuffersForStorage(RenderInfo* info)
     }
 #define WATER_VBO_MODE GL_DYNAMIC_DRAW_ARB
     bo_glBindBufferARB(GL_ARRAY_BUFFER_ARB, info->chunk->vbo_vertex);
-    bo_glBufferDataARB(GL_ARRAY_BUFFER_ARB, corners * sizeof(BoVector3), 0, WATER_VBO_MODE);
-    info->vertices_p = (BoVector3*)bo_glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY_ARB);
+    bo_glBufferDataARB(GL_ARRAY_BUFFER_ARB, corners * sizeof(BoVector3Float), 0, WATER_VBO_MODE);
+    info->vertices_p = (BoVector3Float*)bo_glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY_ARB);
     bo_glBindBufferARB(GL_ARRAY_BUFFER_ARB, info->chunk->vbo_normal);
-    bo_glBufferDataARB(GL_ARRAY_BUFFER_ARB, corners * sizeof(BoVector3), 0, WATER_VBO_MODE);
-    info->normals_p = (BoVector3*)bo_glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY_ARB);
+    bo_glBufferDataARB(GL_ARRAY_BUFFER_ARB, corners * sizeof(BoVector3Float), 0, WATER_VBO_MODE);
+    info->normals_p = (BoVector3Float*)bo_glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY_ARB);
     if(mEnableBumpmapping)
     {
       if(mEnableTranslucency)
       {
         bo_glBindBufferARB(GL_ARRAY_BUFFER_ARB, info->chunk->vbo_tangentlight4);
-        bo_glBufferDataARB(GL_ARRAY_BUFFER_ARB, corners * sizeof(BoVector4), 0, WATER_VBO_MODE);
-        info->tangentlights_p4 = (BoVector4*)bo_glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY_ARB);
+        bo_glBufferDataARB(GL_ARRAY_BUFFER_ARB, corners * sizeof(BoVector4Float), 0, WATER_VBO_MODE);
+        info->tangentlights_p4 = (BoVector4Float*)bo_glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY_ARB);
       }
       else
       {
         bo_glBindBufferARB(GL_ARRAY_BUFFER_ARB, info->chunk->vbo_tangentlight);
-        bo_glBufferDataARB(GL_ARRAY_BUFFER_ARB, corners * sizeof(BoVector3), 0, WATER_VBO_MODE);
-        info->tangentlights_p = (BoVector3*)bo_glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY_ARB);
+        bo_glBufferDataARB(GL_ARRAY_BUFFER_ARB, corners * sizeof(BoVector3Float), 0, WATER_VBO_MODE);
+        info->tangentlights_p = (BoVector3Float*)bo_glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY_ARB);
       }
       bo_glBindBufferARB(GL_ARRAY_BUFFER_ARB, info->chunk->vbo_halfvector);
-      bo_glBufferDataARB(GL_ARRAY_BUFFER_ARB, corners * sizeof(BoVector3), 0, WATER_VBO_MODE);
-      info->halfvectors_p = (BoVector3*)bo_glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY_ARB);
+      bo_glBufferDataARB(GL_ARRAY_BUFFER_ARB, corners * sizeof(BoVector3Float), 0, WATER_VBO_MODE);
+      info->halfvectors_p = (BoVector3Float*)bo_glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY_ARB);
     }
     else if(mEnableTranslucency)
     {
       bo_glBindBufferARB(GL_ARRAY_BUFFER_ARB, info->chunk->vbo_color);
-      bo_glBufferDataARB(GL_ARRAY_BUFFER_ARB, corners * sizeof(BoVector4), 0, WATER_VBO_MODE);
-      info->colors_p = (BoVector4*)bo_glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY_ARB);
+      bo_glBufferDataARB(GL_ARRAY_BUFFER_ARB, corners * sizeof(BoVector4Float), 0, WATER_VBO_MODE);
+      info->colors_p = (BoVector4Float*)bo_glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY_ARB);
     }
     // Buffer for indices
     bo_glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, info->chunk->vbo_index);
@@ -2054,21 +2054,21 @@ void BoWaterManager::initDataBuffersForStorage(RenderInfo* info)
       // Reallocate arrays
       delete[] info->chunk->vertices;
       delete[] info->chunk->normals;
-      info->chunk->vertices = new BoVector3[info->chunkcornerw * info->chunkcornerh];
-      info->chunk->normals = new BoVector3[info->chunkcornerw * info->chunkcornerh];
+      info->chunk->vertices = new BoVector3Float[info->chunkcornerw * info->chunkcornerh];
+      info->chunk->normals = new BoVector3Float[info->chunkcornerw * info->chunkcornerh];
       if(mEnableBumpmapping)
       {
         delete[] info->chunk->tangentlight;
         delete[] info->chunk->tangentlight4;
         delete[] info->chunk->halfvector;
-        info->chunk->tangentlight = new BoVector3[info->chunkcornerw * info->chunkcornerh];
-        info->chunk->tangentlight4 = new BoVector4[info->chunkcornerw * info->chunkcornerh];
-        info->chunk->halfvector = new BoVector3[info->chunkcornerw * info->chunkcornerh];
+        info->chunk->tangentlight = new BoVector3Float[info->chunkcornerw * info->chunkcornerh];
+        info->chunk->tangentlight4 = new BoVector4Float[info->chunkcornerw * info->chunkcornerh];
+        info->chunk->halfvector = new BoVector3Float[info->chunkcornerw * info->chunkcornerh];
       }
       else if(mEnableTranslucency)
       {
         delete[] info->chunk->colors;
-        info->chunk->colors = new BoVector4[info->chunkcornerw * info->chunkcornerh];
+        info->chunk->colors = new BoVector4Float[info->chunkcornerw * info->chunkcornerh];
       }
       delete[] info->chunk->indices;
       info->chunk->indices = new unsigned int[(info->chunkcornerw - 1) * (info->chunkcornerh - 1) * 4];
@@ -2095,9 +2095,9 @@ void BoWaterManager::initDataBuffersForStorage(RenderInfo* info)
       delete[] info->chunk->cellnormals;
       delete[] info->chunk->celltangentlight;
       delete[] info->chunk->cellhalfvector;
-      info->chunk->cellnormals = new BoVector3[info->chunkcellw * info->chunkcellh];
-      info->chunk->celltangentlight = new BoVector3[info->chunkcellw * info->chunkcellh];
-      info->chunk->cellhalfvector = new BoVector3[info->chunkcellw * info->chunkcellh];
+      info->chunk->cellnormals = new BoVector3Float[info->chunkcellw * info->chunkcellh];
+      info->chunk->celltangentlight = new BoVector3Float[info->chunkcellw * info->chunkcellh];
+      info->chunk->cellhalfvector = new BoVector3Float[info->chunkcellw * info->chunkcellh];
     }
     info->chunk->lastdetail = info->detail;
   }

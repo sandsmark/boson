@@ -22,6 +22,7 @@
 
 
 #include "bosoneffect.h"
+#include "bo3dtools.h"
 
 #include <qptrlist.h>
 #include <qvaluelist.h>
@@ -31,7 +32,6 @@
 class BosonEffectProperties;
 class KSimpleConfig;
 class QString;
-class BoVector3;
 class SpeciesTheme;
 class SpeciesData;
 
@@ -127,7 +127,7 @@ class BosonEffectProperties
      * Note that if effect doesn't support position and/or rotation, they'll be
      *  ignored
      **/
-    virtual BosonEffect* newEffect(const BoVector3& pos, const BoVector3& rot = BoVector3()) const = 0;
+    virtual BosonEffect* newEffect(const BoVector3Fixed& pos, const BoVector3Fixed& rot = BoVector3Fixed()) const = 0;
 
 
     virtual BosonEffect::Type type() const = 0;
@@ -167,7 +167,7 @@ class BosonEffectProperties
      *  given position and rotation and finally returns list of created effects.
      **/
     static QPtrList<BosonEffect> newEffects(const QPtrList<BosonEffectProperties>* properties,
-        const BoVector3& pos = BoVector3(), const BoVector3& rot = BoVector3());
+        const BoVector3Fixed& pos = BoVector3Fixed(), const BoVector3Fixed& rot = BoVector3Fixed());
     /**
      * Same as above, but takes single BosonEffectProperties object as an
      *  argument instead of a list.
@@ -175,7 +175,7 @@ class BosonEffectProperties
      *  effects.
      **/
     static QPtrList<BosonEffect> newEffects(const BosonEffectProperties* properties,
-        const BoVector3& pos = BoVector3(), const BoVector3& rot = BoVector3());
+        const BoVector3Fixed& pos = BoVector3Fixed(), const BoVector3Fixed& rot = BoVector3Fixed());
 
 
   protected:
@@ -202,10 +202,10 @@ class BosonEffectPropertiesFog : public BosonEffectProperties
     virtual bool load(KSimpleConfig* cfg, const QString& group, bool inherited = false);
 
 
-    virtual BosonEffect* newEffect(const BoVector3& pos, const BoVector3& rot = BoVector3()) const;
+    virtual BosonEffect* newEffect(const BoVector3Fixed& pos, const BoVector3Fixed& rot = BoVector3Fixed()) const;
 
 
-    const BoVector4& color() const  { return mColor; }
+    const BoVector4Float& color() const  { return mColor; }
     float start() const  { return mStart; }
     float end() const  { return mEnd; }
     float radius() const  { return mRadius; }
@@ -214,7 +214,7 @@ class BosonEffectPropertiesFog : public BosonEffectProperties
   protected:
     void reset();
 
-    BoVector4 mColor;
+    BoVector4Float mColor;
     float mStart;
     float mEnd;
     float mRadius;
@@ -239,12 +239,12 @@ class BosonEffectPropertiesFade : public BosonEffectProperties
     virtual bool load(KSimpleConfig* cfg, const QString& group, bool inherited = false);
 
 
-    virtual BosonEffect* newEffect(const BoVector3& pos, const BoVector3& rot = BoVector3()) const;
+    virtual BosonEffect* newEffect(const BoVector3Fixed& pos, const BoVector3Fixed& rot = BoVector3Fixed()) const;
 
 
-    const BoVector4& startColor() const  { return mStartColor; }
-    const BoVector4& endColor() const  { return mEndColor; }
-    const BoVector4& geometry() const  { return mGeometry; }
+    const BoVector4Float& startColor() const  { return mStartColor; }
+    const BoVector4Float& endColor() const  { return mEndColor; }
+    const BoVector4Fixed& geometry() const  { return mGeometry; }
     float time() const  { return mTime; }
     const int* blendFunc() const  { return mBlendFunc; }
 
@@ -253,9 +253,9 @@ class BosonEffectPropertiesFade : public BosonEffectProperties
     void reset();
 
 
-    BoVector4 mStartColor;
-    BoVector4 mEndColor;
-    BoVector4 mGeometry;  // geometry: x, y, w, h
+    BoVector4Float mStartColor;
+    BoVector4Float mEndColor;
+    BoVector4Fixed mGeometry;  // geometry: x, y, w, h
     float mTime;
     int mBlendFunc[2];
 };
@@ -279,18 +279,18 @@ class BosonEffectPropertiesLight : public BosonEffectProperties
     virtual bool load(KSimpleConfig* cfg, const QString& group, bool inherited = false);
 
 
-    virtual BosonEffect* newEffect(const BoVector3& pos, const BoVector3& rot = BoVector3()) const;
+    virtual BosonEffect* newEffect(const BoVector3Fixed& pos, const BoVector3Fixed& rot = BoVector3Fixed()) const;
 
 
-    const BoVector4& startAmbient() const  { return mStartAmbientColor; }
-    const BoVector4& startDiffuse() const  { return mStartDiffuseColor; }
-    const BoVector4& startSpecular() const  { return mStartSpecularColor; }
-    const BoVector4& endAmbient() const  { return mEndAmbientColor; }
-    const BoVector4& endDiffuse() const  { return mEndDiffuseColor; }
-    const BoVector4& endSpecular() const  { return mEndSpecularColor; }
-    const BoVector3& startAttenuation() const  { return mStartAttenuation; }
-    const BoVector3& endAttenuation() const  { return mEndAttenuation; }
-    const BoVector3& position() const  { return mPosition; }
+    const BoVector4Float& startAmbient() const  { return mStartAmbientColor; }
+    const BoVector4Float& startDiffuse() const  { return mStartDiffuseColor; }
+    const BoVector4Float& startSpecular() const  { return mStartSpecularColor; }
+    const BoVector4Float& endAmbient() const  { return mEndAmbientColor; }
+    const BoVector4Float& endDiffuse() const  { return mEndDiffuseColor; }
+    const BoVector4Float& endSpecular() const  { return mEndSpecularColor; }
+    const BoVector3Float& startAttenuation() const  { return mStartAttenuation; }
+    const BoVector3Float& endAttenuation() const  { return mEndAttenuation; }
+    const BoVector3Fixed& position() const  { return mPosition; }
     float life() const  { return mLife; }
 
 
@@ -298,15 +298,15 @@ class BosonEffectPropertiesLight : public BosonEffectProperties
     void reset();
 
 
-    BoVector4 mStartAmbientColor;
-    BoVector4 mStartDiffuseColor;
-    BoVector4 mStartSpecularColor;
-    BoVector4 mEndAmbientColor;
-    BoVector4 mEndDiffuseColor;
-    BoVector4 mEndSpecularColor;
-    BoVector3 mStartAttenuation;
-    BoVector3 mEndAttenuation;
-    BoVector3 mPosition;
+    BoVector4Float mStartAmbientColor;
+    BoVector4Float mStartDiffuseColor;
+    BoVector4Float mStartSpecularColor;
+    BoVector4Float mEndAmbientColor;
+    BoVector4Float mEndDiffuseColor;
+    BoVector4Float mEndSpecularColor;
+    BoVector3Float mStartAttenuation;
+    BoVector3Float mEndAttenuation;
+    BoVector3Fixed mPosition;
     float mLife;
 };
 
@@ -329,10 +329,10 @@ class BosonEffectPropertiesBulletTrail : public BosonEffectProperties
     virtual bool load(KSimpleConfig* cfg, const QString& group, bool inherited = false);
 
 
-    virtual BosonEffect* newEffect(const BoVector3& pos, const BoVector3& rot = BoVector3()) const;
+    virtual BosonEffect* newEffect(const BoVector3Fixed& pos, const BoVector3Fixed& rot = BoVector3Fixed()) const;
 
 
-    const BoVector4& color() const  { return mColor; }
+    const BoVector4Float& color() const  { return mColor; }
     float minLength() const  { return mMinLength; }
     float maxLength() const  { return mMaxLength; }
     float width() const  { return mWidth; }
@@ -341,7 +341,7 @@ class BosonEffectPropertiesBulletTrail : public BosonEffectProperties
   protected:
     void reset();
 
-    BoVector4 mColor;
+    BoVector4Float mColor;
     float mMinLength;
     float mMaxLength;
     float mWidth;
@@ -382,8 +382,8 @@ class BosonEffectPropertiesCollection : public BosonEffectProperties
      * Use @ref newEffectsList instead.
      * @return 0
      **/
-    virtual BosonEffect* newEffect(const BoVector3& pos, const BoVector3& rot = BoVector3()) const;
-    QPtrList<BosonEffect> newEffectsList(const BoVector3& pos, const BoVector3& rot = BoVector3()) const;
+    virtual BosonEffect* newEffect(const BoVector3Fixed& pos, const BoVector3Fixed& rot = BoVector3Fixed()) const;
+    QPtrList<BosonEffect> newEffectsList(const BoVector3Fixed& pos, const BoVector3Fixed& rot = BoVector3Fixed()) const;
 
 
   protected:

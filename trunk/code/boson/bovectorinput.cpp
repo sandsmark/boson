@@ -124,16 +124,16 @@ float BoVector3Input::maxValue() const
  return d->mX->maxValue();
 }
 
-void BoVector3Input::setValue3(const BoVector3& v)
+void BoVector3Input::setValue3(const BoVector3Float& v)
 {
  d->mX->setValue(v.x());
  d->mY->setValue(v.y());
  d->mZ->setValue(v.z());
 }
 
-BoVector3 BoVector3Input::value3() const
+BoVector3Float BoVector3Input::value3() const
 {
- return BoVector3(d->mX->value(), d->mY->value(), d->mZ->value());
+ return BoVector3Float(d->mX->value(), d->mY->value(), d->mZ->value());
 }
 
 void BoVector3Input::slotValueChanged(float)
@@ -172,16 +172,16 @@ BoVector4Input::~BoVector4Input()
  delete d;
 }
 
-void BoVector4Input::setValue4(const BoVector4& v)
+void BoVector4Input::setValue4(const BoVector4Float& v)
 {
- BoVector3Input::setValue3(BoVector3(v.x(), v.y(), v.z()));
+ BoVector3Input::setValue3(BoVector3Float(v.x(), v.y(), v.z()));
  d->mW->setValue(v.w());
 }
 
-BoVector4 BoVector4Input::value4() const
+BoVector4Float BoVector4Input::value4() const
 {
- BoVector3 v = value3();
- return BoVector4(v.x(), v.y(), v.z(), d->mW->value());
+ BoVector3Float v = value3();
+ return BoVector4Float(v.x(), v.y(), v.z(), d->mW->value());
 }
 
 void BoVector4Input::setRange(float min, float max, float step)

@@ -24,10 +24,12 @@
 class Cell;
 class PlayerIO;
 class QString;
-
 class BosonMap;
 class BoMatrix;
-class BoVector3;
+class bofixed;
+template<class T> class BoVector3;
+typedef BoVector3<bofixed> BoVector3Fixed;
+typedef BoVector3<float> BoVector3Float;
 
 class QRect;
 class CellListBuilder;
@@ -46,7 +48,7 @@ public:
 	 **/
 	virtual void generateCellList(const BosonMap* map);
 
-	virtual QString debugStringForPoint(const BoVector3& pos) const;
+	virtual QString debugStringForPoint(const BoVector3Fixed& pos) const;
 
 protected:
 	float* mHeightMap2;

@@ -183,7 +183,7 @@ class BosonShotBullet : public BosonShot
       return true;
     }
 
-    void setTarget(const BoVector3& target);
+    void setTarget(const BoVector3Fixed& target);
 
     inline virtual int type() const { return BosonShot::Bullet; }
 
@@ -193,7 +193,7 @@ class BosonShotBullet : public BosonShot
     virtual void moveToTarget();
 
   private:
-    BoVector3 mTarget;
+    BoVector3Fixed mTarget;
 };
 
 
@@ -213,7 +213,7 @@ class BosonShotMissile : public BosonShot
     virtual bool saveAsXML(QDomElement& root);
     virtual bool loadFromXML(const QDomElement& root);
 
-    void init(const BoVector3& pos, const BoVector3& target);
+    void init(const BoVector3Fixed& pos, const BoVector3Fixed& target);
 
     inline virtual int type() const { return BosonShot::Missile; }
 
@@ -223,8 +223,8 @@ class BosonShotMissile : public BosonShot
     virtual void moveToTarget();
 
   private:
-    BoVector3 mVelo;
-    BoVector3 mTarget;
+    BoVector3Fixed mVelo;
+    BoVector3Fixed mTarget;
     bofixed mTotalDist;
     bofixed mPassedDist;
     bofixed mZ;
@@ -247,7 +247,7 @@ class BosonShotExplosion : public BosonShot
   public:
     BosonShotExplosion(Player* owner, BosonCanvas* canvas);
 
-    void activate(const BoVector3& pos, long int damange, bofixed damageRange, bofixed fulldamagerange, int delay);
+    void activate(const BoVector3Fixed& pos, long int damange, bofixed damageRange, bofixed fulldamagerange, int delay);
 
     virtual bool saveAsXML(QDomElement& root);
     virtual bool loadFromXML(const QDomElement& root);
@@ -285,7 +285,7 @@ class BosonShotMine : public BosonShot
     virtual bool saveAsXML(QDomElement& root);
     virtual bool loadFromXML(const QDomElement& root);
 
-    void init(const BoVector3& pos);
+    void init(const BoVector3Fixed& pos);
 
     inline virtual int type() const { return BosonShot::Mine; }
 
@@ -313,7 +313,7 @@ class BosonShotBomb : public BosonShot
     virtual bool saveAsXML(QDomElement& root);
     virtual bool loadFromXML(const QDomElement& root);
 
-    void init(const BoVector3& pos);
+    void init(const BoVector3Fixed& pos);
 
     inline virtual int type() const { return BosonShot::Bomb; }
 
@@ -340,7 +340,7 @@ class BosonShotFragment : public BosonShot
 
     virtual BosonModel* getModelForItem() const;
 
-    void activate(const BoVector3& pos, const UnitProperties* unitProperties);
+    void activate(const BoVector3Fixed& pos, const UnitProperties* unitProperties);
 
     virtual bool saveAsXML(QDomElement& root);
     virtual bool loadFromXML(const QDomElement& root);
@@ -357,7 +357,7 @@ class BosonShotFragment : public BosonShot
     virtual void advanceMoveInternal();
 
   private:
-    BoVector3 mVelo;
+    BoVector3Fixed mVelo;
     const UnitProperties* mUnitProperties;
 };
 

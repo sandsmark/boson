@@ -22,11 +22,12 @@
 
 class BoMesh;
 class BoMeshLOD;
-class BoVector3;
 class BoFace;
 class BoLODVertex;
 class BoLODFace;
 class BoLODHeap;
+template<class T> class BoVector3;
+typedef BoVector3<float> BoVector3Float;
 
 template<class T> class QValueList;
 
@@ -135,13 +136,13 @@ protected:
 	 * pointCount
 	 * * @return The vertex with index @p index in the vertex pool.
 	 **/
-	BoVector3 vertex(unsigned int index) const;
+	BoVector3Float vertex(unsigned int index) const;
 
 	/**
 	 * Note: this takes a _face_ as paremeter, @ref vertex an index!
 	 * @param vertex See @ref BoFace::normal.
 	 **/
-	BoVector3 normal(unsigned int face, unsigned int vertex) const;
+	BoVector3Float normal(unsigned int face, unsigned int vertex) const;
 
 	unsigned int pointCount() const;
 	unsigned int facesCount() const;

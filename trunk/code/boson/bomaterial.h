@@ -60,9 +60,9 @@ public:
 	const QString& name() const { return mName; }
 
 	// AB: we don't use all of these, but provide them for future use.
-	void setAmbient(const BoVector4& v) { mAmbient = v; }
-	void setDiffuse(const BoVector4& v) { mDiffuse = v; }
-	void setSpecular(const BoVector4& v) { mSpecular = v; }
+	void setAmbient(const BoVector4Float& v) { mAmbient = v; }
+	void setDiffuse(const BoVector4Float& v) { mDiffuse = v; }
+	void setSpecular(const BoVector4Float& v) { mSpecular = v; }
 	void setShininess(float s) { mShininess = s; }
 	void setShinStrength(float s) { mShinStrength = s; }
 	void setBlur(float b) { mBlur = b; }
@@ -80,9 +80,9 @@ public:
 	void setUseWireAbs(bool v) { mUseWireAbs = v; }
 	void setWireSize(float s) { mWireSize = s; }
 
-	const BoVector4& ambient() const { return mAmbient; }
-	const BoVector4& diffuse() const { return mDiffuse; }
-	const BoVector4& specular() const { return mSpecular; }
+	const BoVector4Float& ambient() const { return mAmbient; }
+	const BoVector4Float& diffuse() const { return mDiffuse; }
+	const BoVector4Float& specular() const { return mSpecular; }
 	float shininess() const { return mShininess; }
 	bool twoSided() const { return mTwoSided; }
 
@@ -135,9 +135,9 @@ private:
 	// note that we don't use them all!
 	// see lib3ds/material.h for a listing (no, no further info, as lib3ds
 	// isn't documented)
-	BoVector4 mAmbient;
-	BoVector4 mDiffuse;
-	BoVector4 mSpecular;
+	BoVector4Float mAmbient;
+	BoVector4Float mDiffuse;
+	BoVector4Float mSpecular;
 	float mShininess;
 	float mShinStrength;
 	bool mUseBlur;

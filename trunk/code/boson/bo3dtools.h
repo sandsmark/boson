@@ -31,7 +31,50 @@ class KConfig;
 class QDataStream;
 class QPoint;
 class QDomElement;
+template<class T> class BoRect;
+template<class T> class BoVector2;
+template<class T> class BoVector3;
+template<class T> class BoVector4;
+typedef BoRect<bofixed> BoRectFixed;
+typedef BoRect<float> BoRectFloat;
+typedef BoVector2<bofixed> BoVector2Fixed;
+typedef BoVector2<float> BoVector2Float;
+typedef BoVector3<bofixed> BoVector3Fixed;
+typedef BoVector3<float> BoVector3Float;
+typedef BoVector4<bofixed> BoVector4Fixed;
+typedef BoVector4<float> BoVector4Float;
 
+QDataStream& operator<<(QDataStream& s, const BoVector2Float& v);
+QDataStream& operator>>(QDataStream& s, BoVector2Float& v);
+QDataStream& operator<<(QDataStream& s, const BoVector2Fixed& v);
+QDataStream& operator>>(QDataStream& s, BoVector2Fixed& v);
+
+QDataStream& operator<<(QDataStream& s, const BoVector3Float& v);
+QDataStream& operator<<(QDataStream& s, const BoVector3Fixed& v);
+QDataStream& operator>>(QDataStream& s, BoVector3Float& v);
+QDataStream& operator>>(QDataStream& s, BoVector3Fixed& v);
+
+QDataStream& operator<<(QDataStream& s, const BoVector4Float& v);
+QDataStream& operator<<(QDataStream& s, const BoVector4Fixed& v);
+QDataStream& operator>>(QDataStream& s, BoVector4Float& v);
+QDataStream& operator>>(QDataStream& s, BoVector4Fixed& v);
+
+
+bool saveVector3AsXML(const BoVector3Float&, QDomElement& root, const QString& name);
+bool saveVector3AsXML(const BoVector3Fixed&, QDomElement& root, const QString& name);
+bool loadVector3FromXML(BoVector3Float*, const QDomElement& root, const QString& name);
+bool loadVector3FromXML(BoVector3Fixed*, const QDomElement& root, const QString& name);
+
+bool saveVector4AsXML(const BoVector4Float&, QDomElement& root, const QString& name);
+bool saveVector4AsXML(const BoVector4Fixed&, QDomElement& root, const QString& name);
+bool loadVector4FromXML(BoVector4Float*, const QDomElement& root, const QString& name);
+bool loadVector4FromXML(BoVector4Fixed*, const QDomElement& root, const QString& name);
+
+// convenience function to convert a BoVector into a string for debugging
+QString debugStringVector(const BoVector3Float&, int prec);
+QString debugStringVector(const BoVector3Fixed&, int prec);
+QString debugStringVector(const BoVector4Float&, int prec);
+QString debugStringVector(const BoVector4Fixed&, int prec);
 
 /**
  * @short Vector with 2 components.
@@ -157,14 +200,6 @@ template<class T> class BoVector2
     T mData[2];
 };
 
-typedef BoVector2<float> BoVector2Float;
-typedef BoVector2<bofixed> BoVector2Fixed;
-
-QDataStream& operator<<(QDataStream& s, const BoVector2Float& v);
-QDataStream& operator>>(QDataStream& s, BoVector2Float& v);
-QDataStream& operator<<(QDataStream& s, const BoVector2Fixed& v);
-QDataStream& operator>>(QDataStream& s, BoVector2Fixed& v);
-
 
 /**
  * @short Rectangle class
@@ -219,103 +254,93 @@ template<class T> class BoRect
     BoVector2<T> mBottomRight;
 };
 
-typedef BoRect<float> BoRectFloat;
-typedef BoRect<bofixed> BoRectFixed;
-
 /**
  * @author Rivo Laks <rivolaks@hot.ee>
  **/
-class BoVector3
+template<class T> class BoVector3
 {
   public:
     BoVector3()  { reset(); }
-    BoVector3(GLfloat x, GLfloat y, GLfloat z)  { set(x, y, z); }
-    BoVector3(const GLfloat* data) { set(data[0], data[1], data[2]); }
-    BoVector3(const BoVector3& v) { set(v[0], v[1], v[2]); }
+    BoVector3(T x, T y, T z)  { set(x, y, z); }
+    BoVector3(const T* data) { set(data[0], data[1], data[2]); }
+    BoVector3(const BoVector3<T>& v) { set(v[0], v[1], v[2]); }
     ~BoVector3() {}
+
+    BoVector3<float> toFloat() const
+    {
+      return BoVector3<float>(mData[0], mData[1], mData[2]);
+    }
+    BoVector3<bofixed> toFixed() const
+    {
+      return BoVector3<bofixed>(mData[0], mData[1], mData[2]);
+    }
 
     /**
      * Make this vector a null vector.
      **/
-    inline void reset()  { mData[0] = mData[1] = mData[2] = 0.0f; }
+    inline void reset()  { mData[0] = mData[1] = mData[2] = 0; }
 
     /**
      * @return The first (x) coordinate of the vector.
      **/
-    inline GLfloat x() const { return mData[0]; }
+    inline T x() const { return mData[0]; }
     /**
      * @return The second (y) coordinate of the vector.
      **/
-    inline GLfloat y() const { return mData[1]; }
+    inline T y() const { return mData[1]; }
     /**
      * @return The third (z) coordinate of the vector.
      **/
-    inline GLfloat z() const { return mData[2]; }
+    inline T z() const { return mData[2]; }
 
     /**
      * Assign the values @p x, @p y, @p z to the vector.
      **/
-    inline void set(GLfloat x, GLfloat y, GLfloat z)
+    inline void set(T x, T y, T z)
     {
       mData[0] = x;  mData[1] = y;  mData[2] = z;
     }
     /**
      * @overload
      **/
-    inline void set(const BoVector3& v) { set(v.data()); }
+    inline void set(const BoVector3<T>& v) { set(v.data()); }
     /**
      * @overload
      **/
-    inline void set(const float* v) { set(v[0], v[1], v[2]); }
+    inline void set(const T* v) { set(v[0], v[1], v[2]); }
 
     /**
      * Assign the x coordinate to the vector.
      **/
-    inline void setX(GLfloat x) { mData[0] = x; }
+    inline void setX(T x) { mData[0] = x; }
     /**
      * Assign the y coordinate to the vector.
      **/
-    inline void setY(GLfloat y) { mData[1] = y; }
+    inline void setY(T y) { mData[1] = y; }
     /**
      * Assign the z coordinate to the vector.
      **/
-    inline void setZ(GLfloat z) { mData[2] = z; }
+    inline void setZ(T z) { mData[2] = z; }
 
     /**
      * Scale @p v by s and then add it to this vector.
      **/
-    inline void addScaled(const BoVector3& v, GLfloat s)
+    inline void addScaled(const BoVector3<T>& v, T s)
     {
       mData[0] += v.mData[0] * s;  mData[1] += v.mData[1] * s;  mData[2] += v.mData[2] * s;
     }
 
-    inline void setBlended(const BoVector3& a, float af, const BoVector3& b, float bf)
+    inline void setBlended(const BoVector3<T>& a, T af, const BoVector3<T>& b, T bf)
     {
       mData[0] = a.mData[0] * af + b.mData[0] * bf;
       mData[1] = a.mData[1] * af + b.mData[1] * bf;
       mData[2] = a.mData[2] * af + b.mData[2] * bf;
     }
 
-#if 0
-    // AB: this function is NOT used all over boson's code and I find it very
-    // confusing. The name looks like it would scale both vertices and add the
-    // result together, but it scales b only.
-    // So I am removing this code for now - do we actually need it? I don't
-    // think so!
-    /**
-     * Scale the vector @p b by @p s, add the vector @p a to the result and
-     * assign the result to this vector.
-     **/
-    inline void setScaledSum(const BoVector3& a, const BoVector3& b,  GLfloat s)
-    {
-      mData[0] = a.mData[0] + b.mData[0] * s;   mData[1] = a.mData[1] + b.mData[1] * s;   mData[2] = a.mData[2] + b.mData[2] * s;
-    }
-#endif
-
     /**
      * Add @p v to this vector.
      **/
-    inline void add(const BoVector3& v)
+    inline void add(const BoVector3<T>& v)
     {
       mData[0] += v.mData[0]; mData[1] += v.mData[1]; mData[2] += v.mData[2];
     }
@@ -331,7 +356,7 @@ class BoVector3
      **/
     inline void normalize()
     {
-      float l = length();
+      T l = length();
       if (l != 0.0f) {
         scale(1.0f / l);
       }
@@ -341,7 +366,7 @@ class BoVector3
      * Scale the vector by @p s. This is just scalar multiplication, i.e. all
      * elements/coordinates of the vector are multiplied by @p s.
      **/
-    inline void scale(float s)
+    inline void scale(T s)
     {
       mData[0] = mData[0] * s;  mData[1] = mData[1] * s;  mData[2] = mData[2] * s;
     }
@@ -357,7 +382,7 @@ class BoVector3
      * Notice that this function actually uses sqrt(), so it is slow in
      * situations where you use it often!
      **/
-    float length() const
+    T length() const
     {
       return sqrt(dotProduct());
     }
@@ -368,7 +393,7 @@ class BoVector3
      * The dot product v*w is equal to |v|*|w|*cos(alpha), where alpha is the
      * angle between both vectors and |v| is the length of v.
      **/
-    static inline float dotProduct(const BoVector3& v, const BoVector3& w)
+    static inline T dotProduct(const BoVector3<T>& v, const BoVector3<T>& w)
     {
       return v[0] * w[0] + v[1] * w[1] + v[2] * w[2];
     }
@@ -381,7 +406,7 @@ class BoVector3
      * of the length (which is calculated very fast) instead of the actual
      * length (which needs a call to sqrt()).
      **/
-    inline float dotProduct() const
+    inline T dotProduct() const
     {
       return dotProduct(*this, *this);
     }
@@ -389,17 +414,24 @@ class BoVector3
     /**
      * @return The cross product of v and w.
      **/
-    static BoVector3 crossProduct(const BoVector3& v, const BoVector3& w);
+    static BoVector3<T> crossProduct(const BoVector3<T>& v, const BoVector3<T>& w)
+    {
+      BoVector3<T> r;
+      r.setX((v.y() * w.z()) - (v.z() * w.y()));
+      r.setY((v.z() * w.x()) - (v.x() * w.z()));
+      r.setZ((v.x() * w.y()) - (v.y() * w.x()));
+      return r;
+ }
 
     /**
      * @return A pointer to the internal array.
      **/
-    inline const GLfloat* data() const { return mData; }
+    inline const T* data() const { return mData; }
 
     /**
      * See @ref set
      **/
-    inline void operator=(const BoVector3& v)
+    inline void operator=(const BoVector3<T>& v)
     {
       set(v);
     }
@@ -407,7 +439,7 @@ class BoVector3
     /**
      * @overload
      **/
-    inline void operator=(const GLfloat* v)
+    inline void operator=(const T* v)
     {
       set(v);
     }
@@ -415,7 +447,7 @@ class BoVector3
     /**
      * See @ref add
      **/
-    inline void operator+=(const BoVector3& v)
+    inline void operator+=(const BoVector3<T>& v)
     {
       add(v);
     }
@@ -423,7 +455,7 @@ class BoVector3
     /**
      * @return The component / coordinate at @p i of this vector
      **/
-    inline GLfloat operator[](int i) const
+    inline T operator[](int i) const
     {
       return mData[i];
     }
@@ -431,7 +463,7 @@ class BoVector3
     /**
      * @return A copy of this vector with @p v added.
      **/
-    inline BoVector3 operator+(const BoVector3& v) const
+    inline BoVector3<T> operator+(const BoVector3<T>& v) const
     {
       return BoVector3(mData[0] + v.mData[0], mData[1] + v.mData[1], mData[2] + v.mData[2]);
     }
@@ -439,7 +471,7 @@ class BoVector3
     /**
      * @return A copy of this vector, @p v subtracted.
      **/
-    inline BoVector3 operator-(const BoVector3& v) const
+    inline BoVector3<T> operator-(const BoVector3<T>& v) const
     {
       return BoVector3(mData[0] - v.mData[0], mData[1] - v.mData[1], mData[2] - v.mData[2]);
     }
@@ -447,7 +479,7 @@ class BoVector3
     /**
      * @return A copy of this vector, scaled by @p f.
      **/
-    inline BoVector3 operator*(float f) const
+    inline BoVector3<T> operator*(T f) const
     {
       return BoVector3(mData[0] * f, mData[1] * f, mData[2] * f);
     }
@@ -455,7 +487,7 @@ class BoVector3
     /**
      * @return See @ref crossProduct. Cross product of this vector with @p v
      **/
-    inline BoVector3 operator*(const BoVector3& v) const
+    inline BoVector3<T> operator*(const BoVector3<T>& v) const
     {
       return crossProduct(*this, v);
     }
@@ -463,7 +495,7 @@ class BoVector3
     /**
      * @return A copy of this vector, scaled by 1 / @p f
      **/
-    inline BoVector3 operator/(float f) const
+    inline BoVector3<T> operator/(T f) const
     {
       return BoVector3(mData[0] / f, mData[1] / f, mData[2] / f);
     }
@@ -471,7 +503,7 @@ class BoVector3
     /**
      * @return A copy of this vector scaled by -1
      **/
-    inline BoVector3 operator-() const
+    inline BoVector3<T> operator-() const
     {
       return BoVector3(-mData[0], -mData[1], -mData[2]);
     }
@@ -481,7 +513,7 @@ class BoVector3
      **/
     inline bool isNull() const
     {
-      return ((mData[0] == 0.0f) && (mData[1] == 0.0f) && (mData[2] == 0.0f));
+      return ((mData[0] == 0) && (mData[1] == 0) && (mData[2] == 0));
     }
 
     /**
@@ -490,7 +522,25 @@ class BoVector3
      * @return TRUE if the two triangles are adjacent, i.e. if they share at
      * least two points. also returns TRUE if the triangles are equal!
      **/
-    static bool isAdjacent(const BoVector3* v1, const BoVector3* v2);
+    static bool isAdjacent(const BoVector3<T>* v1, const BoVector3<T>* v2)
+    {
+      if (!v1 || !v2)
+      {
+        return false;
+      }
+      int equal = 0;
+      for (int i = 0; i < 3; i++)
+      {
+        if (v1[i].isEqual(v2[0]) || v1[i].isEqual(v2[1]) || v1[i].isEqual(v2[2]))
+        {
+          equal++;
+        }
+      }
+
+      // v1 is adjacent to v2 if at least 2 points are equal.
+      // equal vectors (i.e. all points are equal) are possible, too.
+      return (equal >= 2);
+    }
 
     /**
      * @param point The point to search for
@@ -498,12 +548,22 @@ class BoVector3
      * @return the index of the point @p point in @p array, or -1 if @p point is
      * not in @p array.
      **/
-    static int findPoint(const BoVector3& point, const BoVector3* array);
+    static int findPoint(const BoVector3<T>& point, const BoVector3<T>* array)
+    {
+      for (int i = 0; i < 3; i++)
+      {
+        if (array[i].isEqual(point))
+        {
+          return i;
+        }
+      }
+      return -1;
+    }
 
     /**
      * Convenience method for BoVector3::findPoint(*this, array);
      **/
-    int findPoint(const BoVector3* array) const
+    int findPoint(const BoVector3<T>* array) const
     {
       return findPoint(*this, array);
     }
@@ -511,7 +571,7 @@ class BoVector3
     /**
      * Convenience method for BoVector3::isAdjacent(this, v);
      **/
-    bool isAdjacent(const BoVector3* v) const
+    bool isAdjacent(const BoVector3<T>* v) const
     {
       return isAdjacent(this, v);
     }
@@ -523,13 +583,13 @@ class BoVector3
      * treated as "equal". note that 0.0 is a bad idea, since rounding errors
      * are _very_ probable!
      **/
-    inline bool isEqual(float x, float y, float z, float diff = 0.001) const
+    inline bool isEqual(T x, T y, T z, T diff = 0.001) const
     {
-      float v2[3];
+      T v2[3];
       v2[0] = x;
       v2[1] = y;
       v2[2] = z;
-      return BoVector3::isEqual(mData, v2);
+      return BoVector3<T>::isEqual(mData, v2);
       return true;
     }
 
@@ -539,17 +599,17 @@ class BoVector3
      * Same as above, except that it takes an array of 3 floats, such as e.g.
      * Lib3dsVector.
      **/
-    inline bool isEqual(const float* v, float diff = 0.001) const { return isEqual(v[0], v[1], v[2], diff); }
+    inline bool isEqual(const T* v, T diff = 0.001) const { return isEqual(v[0], v[1], v[2], diff); }
 
     /**
      * @overload
      **/
-    inline bool isEqual(const BoVector3& v, float diff = 0.001) const
+    inline bool isEqual(const BoVector3<T>& v, T diff = 0.001) const
     {
       return isEqual(v.data(), diff);
     }
 
-    inline bool operator==(const BoVector3& v) const { return isEqual(v); }
+    inline bool operator==(const BoVector3<T>& v) const { return isEqual(v); }
     /**
      * @overload
      *
@@ -557,12 +617,12 @@ class BoVector3
      * this static method without a BoVector3 instance - useful for comparing
      * Lib3dsVectors.
      **/
-    static bool isEqual(const float* v1, const float* v2, float diff = 0.001)
+    static bool isEqual(const T* v1, const T* v2, T diff = 0.001)
     {
       // avoid fabsf() as we don't include math.h
-      float d1 = v1[0] - v2[0];
-      float d2 = v1[1] - v2[1];
-      float d3 = v1[2] - v2[2];
+      T d1 = v1[0] - v2[0];
+      T d2 = v1[1] - v2[1];
+      T d3 = v1[2] - v2[2];
       if (d1 < 0.0f)
       {
         d1 = -d1;
@@ -590,99 +650,94 @@ class BoVector3
       return true;
     }
 
-    /**
-     * @return A string that contains the vector @p v. This string can be used
-     * for debugging.
-     **/
-    static QString debugString(const BoVector3& v, int prec = 6);
-
-    /**
-     * Dump this vector onto the console. See also @ref debugString
-     **/
-    static void debugVector(const BoVector3& v, int prec = 6);
-
-    /**
-     * Convenience method for BoVector3::debugString(*this)
-     **/
-    QString debugString(int prec = 6) const;
-
-
     // Conversion from one coordinate system to another.
     inline void canvasToWorld()
     {
       mData[1] = -mData[1];
     }
 
-    bool saveAsXML(QDomElement& root, const QString& name) const;
-    bool loadFromXML(const QDomElement& root, const QString& name);
+    bool saveAsXML(QDomElement& root, const QString& name) const
+    {
+      return saveVector3AsXML(*this, root, name);
+    }
+    bool loadFromXML(const QDomElement& root, const QString& name)
+    {
+      return loadVector3FromXML(this, root, name);
+    }
 
 
   private:
     friend class BoMatrix;
 
-    GLfloat mData[3];
+    T mData[3];
 };
-
-QDataStream& operator<<(QDataStream& s, const BoVector3& v);
-QDataStream& operator>>(QDataStream& s, BoVector3& v);
 
 /**
  * @author Rivo Laks <rivolaks@hot.ee>
  **/
-class BoVector4
+template<class T> class BoVector4
 {
   public:
 
     BoVector4()  { reset(); };
-    BoVector4(GLfloat x, GLfloat y, GLfloat z, GLfloat w)  { set(x, y, z, w); };
-    BoVector4(const GLfloat* data) { set(data[0], data[1], data[2], data[3]); }
-    BoVector4(const BoVector4& v) { set(v[0], v[1], v[2], v[3]); }
+    BoVector4(T x, T y, T z, T w)  { set(x, y, z, w); };
+    BoVector4(const T* data) { set(data[0], data[1], data[2], data[3]); }
+    BoVector4(const BoVector4<T>& v) { set(v[0], v[1], v[2], v[3]); }
     ~BoVector4() {};
+
+    BoVector4<float> toFloat() const
+    {
+      return BoVector4<float>(mData[0], mData[1], mData[2], mData[3]);
+    }
+    BoVector4<bofixed> toFixed() const
+    {
+      return BoVector4<bofixed>(mData[0], mData[1], mData[2], mData[3]);
+    }
 
     /**
      * Make this vector a null vector.
      **/
     inline void reset()
     {
-      mData[0] = mData[1] = mData[2] = mData[3] = 0.0f;
+      mData[0] = mData[1] = mData[2] = mData[3] = 0;
     }
 
     /**
      * @return The first (x) coordinate of the vector.
      **/
-    inline GLfloat x() const { return mData[0]; }
+    inline T x() const { return mData[0]; }
     /**
      * @return The second (y) coordinate of the vector.
      **/
-    inline GLfloat y() const { return mData[1]; }
+    inline T y() const { return mData[1]; }
     /**
      * @return The third (z) coordinate of the vector.
      **/
-    inline GLfloat z() const { return mData[2]; }
+    inline T z() const { return mData[2]; }
     /**
      * @return The fourth (w) coordinate of the vector.
      **/
-    inline GLfloat w() const { return mData[3]; }
+    inline T w() const { return mData[3]; }
 
 
     /**
      * Assign the values @p x, @p y, @p z, @p w to the vector.
      **/
-    inline void set(GLfloat x, GLfloat y, GLfloat z, GLfloat w)
+    inline void set(T x, T y, T z, T w)
     {
       mData[0] = x;  mData[1] = y;  mData[2] = z; mData[3] = w;
     }
     /**
      * @overload
      **/
-    inline void set(const float* v)
+    inline void set(const T* v)
     {
       set(v[0], v[1], v[2], v[3]);
     }
     /**
      * @overload
      **/
-    inline void set(const BoVector4& v)
+    inline void set(const BoVector4<T>& v)
     {
       set(v.data());
     }
@@ -690,35 +745,32 @@ class BoVector4
     /**
      * Assign the x coordinate to the vector.
      **/
-    inline void setX(GLfloat x) { mData[0] = x; }
+    inline void setX(T x) { mData[0] = x; }
     /**
      * Assign the y coordinate to the vector.
      **/
-    inline void setY(GLfloat y) { mData[1] = y; }
+    inline void setY(T y) { mData[1] = y; }
     /**
      * Assign the z coordinate to the vector.
      **/
-    inline void setZ(GLfloat z) { mData[2] = z; }
+    inline void setZ(T z) { mData[2] = z; }
     /**
      * Assign the w coordinate to the vector.
      **/
-    inline void setW(GLfloat w) { mData[3] = w; }
+    inline void setW(T w) { mData[3] = w; }
 
     /**
      * Scale @p v by s and then add it to this vector.
      **/
-    inline void addScaled(const BoVector4& v, GLfloat s)
+    inline void addScaled(const BoVector4<T>& v, T s)
     {
-      mData[0] += v.mData[0] * s;  mData[1] += v.mData[1] * s;  mData[2] += v.mData[2] * s;  mData[3] += v.mData[3] * s;
+      mData[0] += v.mData[0] * s;
+      mData[1] += v.mData[1] * s;
+      mData[2] += v.mData[2] * s;
+      mData[3] += v.mData[3] * s;
     }
 
-#if 0
-    // AB: see BoVector3::setScaledSum()
-    inline void setScaledSum(BoVector4 a, BoVector4 b,  GLfloat s)
-        { mData[0] = a.mData[0] + b.mData[0] * s;   mData[1] = a.mData[1] + b.mData[1] * s;   mData[2] = a.mData[2] + b.mData[2] * s;   mData[3] = a.mData[3] + b.mData[3] * s; };
-#endif
-
-    inline void setBlended(const BoVector4& a, float af, const BoVector4& b, float bf)
+    inline void setBlended(const BoVector4<T>& a, T af, const BoVector4<T>& b, T bf)
     {
       mData[0] = a.mData[0] * af + b.mData[0] * bf;
       mData[1] = a.mData[1] * af + b.mData[1] * bf;
@@ -729,20 +781,24 @@ class BoVector4
     /**
      * Add @p v to this vector.
      **/
-    inline void add(const BoVector4& v)
+    inline void add(const BoVector4<T>& v)
     {
-      mData[0] += v.mData[0]; mData[1] += v.mData[1]; mData[2] += v.mData[2]; mData[3] += v.mData[3];
+      mData[0] += v.mData[0];
+      mData[1] += v.mData[1];
+      mData[2] += v.mData[2];
+      mData[3] += v.mData[3];
     }
 
     /**
      * Scale the vector by @p s. This is just scalar multiplication, i.e. all
      * elements/coordinates of the vector are multiplied by @p s.
      **/
-    inline void scale(float s)
+    inline void scale(T s)
     {
       mData[0] *= s; mData[1] *= s; mData[2] *= s; mData[3] *= s;
     }
-    inline void scale(const BoVector4& v)
+
+    inline void scale(const BoVector4<T>& v)
     {
       mData[0] *= v.mData[0]; mData[1] *= v.mData[1]; mData[2] *= v.mData[2]; mData[3] *= v.mData[3];
     }
@@ -750,52 +806,52 @@ class BoVector4
     /**
      * @return A pointer to the internal array.
      **/
-    inline const GLfloat* data() const { return mData; }
+    inline const T * data() const { return mData; }
 
     /**
      * See @ref set
      **/
-    inline void operator=(const BoVector4& v)
+    inline void operator=(const BoVector4<T>& v)
     {
       set(v);
     }
     /**
      * See @ref set
      **/
-    inline void operator=(const GLfloat* v)
+    inline void operator=(const T* v)
     {
       set(v);
     }
-    inline BoVector4 operator/(const BoVector4& v) const
+    inline BoVector4<T> operator/(const BoVector4<T>& v) const
     {
-      return BoVector4(mData[0] / v.mData[0], mData[1] / v.mData[1], mData[2] / v.mData[2], mData[3] / v.mData[3]);
+      return BoVector4<T>(mData[0] / v.mData[0], mData[1] / v.mData[1], mData[2] / v.mData[2], mData[3] / v.mData[3]);
     }
-    inline BoVector4 operator+(const BoVector4& v) const
+    inline BoVector4<T> operator+(const BoVector4<T>& v) const
     {
-      return BoVector4(mData[0] + v.mData[0], mData[1] + v.mData[1], mData[2] + v.mData[2], mData[3] + v.mData[3]);
+      return BoVector4<T>(mData[0] + v.mData[0], mData[1] + v.mData[1], mData[2] + v.mData[2], mData[3] + v.mData[3]);
     }
-    inline BoVector4 operator-(const BoVector4& v) const
+    inline BoVector4<T> operator-(const BoVector4<T>& v) const
     {
-      return BoVector4(mData[0] - v.mData[0], mData[1] - v.mData[1], mData[2] - v.mData[2], mData[3] - v.mData[3]);
+      return BoVector4<T>(mData[0] - v.mData[0], mData[1] - v.mData[1], mData[2] - v.mData[2], mData[3] - v.mData[3]);
     }
     /**
      * @return The component / coordinate at @p i of this vector
      **/
-    inline GLfloat operator[](int i) const { return mData[i]; }
+    inline T operator[](int i) const { return mData[i]; }
 
-    inline bool operator==(const BoVector4& v) const { return isEqual(v); }
+    inline bool operator==(const BoVector4<T>& v) const { return isEqual(v); }
 
-    inline bool isEqual(const BoVector4& v, float diff = 0.001) const
+    inline bool isEqual(const BoVector4<T>& v, T diff = 0.001) const
     {
       return isEqual(v.data(), mData, diff);
     }
-    static bool isEqual(const float* v1, const float* v2, float diff = 0.001)
+    static bool isEqual(const T* v1, const T* v2, T diff = 0.001)
     {
       // avoid fabsf() as we don't include math.h
-      float d1 = v1[0] - v2[0];
-      float d2 = v1[1] - v2[1];
-      float d3 = v1[2] - v2[2];
-      float d4 = v1[3] - v2[3];
+      T d1 = v1[0] - v2[0];
+      T d2 = v1[1] - v2[1];
+      T d3 = v1[2] - v2[2];
+      T d4 = v1[3] - v2[3];
       if (d1 < 0.0f)
       {
         d1 = -d1;
@@ -835,29 +891,27 @@ class BoVector4
      * @return A string that contains the vector @p v. This string can be used
      * for debugging.
      **/
-    static QString debugString(const BoVector4& v, int prec = 6);
+    static QString debugString(const BoVector4<T>& v, int prec = 6);
 
     /**
      * Dump this vector onto the console. See also @ref debugString
      **/
-    static void debugVector(const BoVector4& v, int prec = 6);
+    static void debugVector(const BoVector4<T>& v, int prec = 6);
 
-    /**
-     * Convenience method for BoVector4::debugString(*this)
-     **/
-    QString debugString(int prec = 6) const;
-
-    bool saveAsXML(QDomElement& root, const QString& name) const;
-    bool loadFromXML(const QDomElement& root, const QString& name);
+    bool saveAsXML(QDomElement& root, const QString& name) const
+    {
+      return saveVector4AsXML(*this, root, name);
+    }
+    bool loadFromXML(const QDomElement& root, const QString& name)
+    {
+      return loadVector4FromXML(this, root, name);
+    }
 
 
   private:
     friend class BoMatrix;
-    GLfloat mData[4];
+    T mData[4];
 };
-
-QDataStream& operator<<(QDataStream& s, const BoVector4& v);
-QDataStream& operator>>(QDataStream& s, BoVector4& v);
 
 /**
  * an OpenGL 4x4 matrix. note that we use (just like mesa) column major order to
@@ -947,7 +1001,7 @@ class BoMatrix
      * @overload
      * The three vectors get interpreted as <em>row</em> vectors
      **/
-    void loadMatrix(const BoVector3& row1, const BoVector3& row2, const BoVector3& row3);
+    void loadMatrix(const BoVector3Float& row1, const BoVector3Float& row2, const BoVector3Float& row3);
 
     /**
      * Change the element at @p row, @p column to @p value. See also @ref
@@ -1012,7 +1066,7 @@ class BoMatrix
     /**
      * @overload
      **/
-    inline void translate(const BoVector3& v)
+    inline void translate(const BoVector3Float& v)
     {
       translate(v.x(), v.y(), v.z());
     }
@@ -1051,7 +1105,7 @@ class BoMatrix
      * Generate a matrix from the three vectors, just as gluLookAt() does. Note
      * that the origin will remain at (0,0,0), it is not translated.
      **/
-    void setLookAtRotation(const BoVector3& cameraPos, const BoVector3& lookAt, const BoVector3& up);
+    void setLookAtRotation(const BoVector3Float& cameraPos, const BoVector3Float& lookAt, const BoVector3Float& up);
 
     /**
      * Transform the vector @p input according to this matrix and put the result
@@ -1059,12 +1113,12 @@ class BoMatrix
      *
      * This calculates simply does v = M * input, where M is this matrix.
      **/
-    void transform(BoVector3* v, const BoVector3* input) const;
+    void transform(BoVector3Float* v, const BoVector3Float* input) const;
 
     /**
      * @overload
      **/
-    void transform(BoVector4* v, const BoVector4* input) const;
+    void transform(BoVector4Float* v, const BoVector4Float* input) const;
 
     /**
      * Invert this matrix and place the result into @p inverse.
@@ -1120,7 +1174,7 @@ class BoMatrix
      * develop the algorithm on my own. A good mathematician may develop a
      * faster way but that doesn't matter for us.
      **/
-    void toGluLookAt(BoVector3* lookAt, BoVector3* up, const BoVector3& cameraPos) const;
+    void toGluLookAt(BoVector3Float* lookAt, BoVector3Float* up, const BoVector3Float& cameraPos) const;
 
     /**
      * @return The index of the element @p row, @p column of the matrix in the
@@ -1156,7 +1210,7 @@ class BoMatrix
      * Used by @ref toGluLookAt. Extract the up vector from the two row vectors
      * @p x and @p z.
      **/
-    void extractUp(BoVector3& up, const BoVector3& x, const BoVector3& z) const;
+    void extractUp(BoVector3Float& up, const BoVector3Float& x, const BoVector3Float& z) const;
 
   private:
     GLfloat mData[16];
@@ -1230,7 +1284,7 @@ class BoQuaternion
       *this = quat;
     }
 
-    BoQuaternion(float w, const BoVector3& v)
+    BoQuaternion(float w, const BoVector3Float& v)
     {
       set(w, v);
     }
@@ -1258,7 +1312,7 @@ class BoQuaternion
     /**
      * @return The vector part of this quaternion
      **/
-    const BoVector3& v() const
+    const BoVector3Float& v() const
     {
       return mV;
     }
@@ -1312,7 +1366,7 @@ class BoQuaternion
      **/
     inline BoQuaternion conjugate() const
     {
-      return BoQuaternion(mW, BoVector3(-mV[0], -mV[1], -mV[2]));
+      return BoQuaternion(mW, BoVector3Float(-mV[0], -mV[1], -mV[2]));
     }
 
     /**
@@ -1336,7 +1390,7 @@ class BoQuaternion
      * Of course we assume that this quaternion is normalized (see @ref
      * normalize), as only normalized quaternions represent rotations.
      **/
-    void transform(BoVector3* v, const BoVector3* input) const;
+    void transform(BoVector3Float* v, const BoVector3Float* input) const;
 
     float length() const;
 
@@ -1372,7 +1426,7 @@ class BoQuaternion
       return isEqual(quat);
     }
 
-    void set(float w, const BoVector3& v)
+    void set(float w, const BoVector3Float& v)
     {
       mW = w;
       mV = v;
@@ -1386,7 +1440,7 @@ class BoQuaternion
     /**
     * @param angle The angle around @p axis, given in degree.
      **/
-    void setRotation(float angle, const BoVector3& axis);
+    void setRotation(float angle, const BoVector3Float& axis);
 
     /**
      * The so-called "euler rotation". This creates a quaternion for as if
@@ -1415,18 +1469,18 @@ class BoQuaternion
      *
      * The direction is the (camera - lookat) vector.
     **/
-    void setRotation(const BoVector3& direction, const BoVector3& up);
+    void setRotation(const BoVector3Float& direction, const BoVector3Float& up);
 
     /**
      * Convenience method for the version above. This takes exactly the
      * arguments that gluLookAt() takes.
     **/
-    void setRotation(const BoVector3& cameraPos, const BoVector3& lookAt, const BoVector3& up)
+    void setRotation(const BoVector3Float& cameraPos, const BoVector3Float& lookAt, const BoVector3Float& up)
     {
       setRotation(cameraPos - lookAt, up);
     }
 
-    void toRotation(float* angle, BoVector3* axis); // see Q 57 in quat faq
+    void toRotation(float* angle, BoVector3Float* axis); // see Q 57 in quat faq
 
     /**
      * See @ref BoMatrix::toRotation
@@ -1437,7 +1491,7 @@ class BoQuaternion
 
   private:
     float mW;
-    BoVector3 mV;
+    BoVector3Float mV;
 };
 
 /**
@@ -1489,7 +1543,8 @@ class Bo3dTools
      * @param viewFrustum This is the viewFrustum, as it is used by @ref
      * BosonBigDisplayBase. The view frustum is a 6x4 matrix
      **/
-    static float sphereInFrustum(const float* viewFrustum, const BoVector3&, float radius);
+    static float sphereInFrustum(const float* viewFrustum, const BoVector3Float&, float radius);
+    static bofixed sphereInFrustum(const float* viewFrustum, const BoVector3Fixed&, bofixed radius);
 
     /**
      * See @ref BosonBigDisplayBase::extractFrustum for more information about this stuff.
@@ -1497,7 +1552,7 @@ class Bo3dTools
      * @param viewFrustum This is the viewFrustum, as it is used by @ref
      * BosonBigDisplayBase. The view frustum is a 6x4 matrix
      **/
-    static bool boxInFrustum(const float* viewFrustum, const BoVector3& min, const BoVector3& max);
+    static bool boxInFrustum(const float* viewFrustum, const BoVector3Float& min, const BoVector3Float& max);
 
     /**
      * This is similar to @ref sphereInFrustum, but will test whether the sphere
@@ -1506,14 +1561,15 @@ class Bo3dTools
      * @return 0 if the sphere is not in the frustum at all, 1 if it is
      * partially in the frustum and 2 if the complete sphere is in the frustum.
      **/
-    static int sphereCompleteInFrustum(const float* viewFrustum, const BoVector3&, float radius);
+    static int sphereCompleteInFrustum(const float* viewFrustum, const BoVector3Float&, float radius);
+    static int sphereCompleteInFrustum(const float* viewFrustum, const BoVector3Fixed&, bofixed radius);
 
     /**
      * @overload
      **/
     inline static float sphereInFrustum(const float* viewFrustum, float x, float y, float z, float radius)
     {
-      BoVector3 pos(x,y,z);
+      BoVector3Float pos(x,y,z);
       return sphereInFrustum(viewFrustum, pos, radius);
     }
 
@@ -1535,7 +1591,7 @@ class Bo3dTools
      **/
     static bool boProject(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, GLfloat x, GLfloat y, GLfloat z, QPoint* pos);
 
-    static bool boUnProject(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, const QPoint& pos, BoVector3* v, float z = -1.0);
+    static bool boUnProject(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, const QPoint& pos, BoVector3Float* v, float z = -1.0);
 
     /**
      * This is a frontend to @ref boUnProject. It calculates the world-(aka

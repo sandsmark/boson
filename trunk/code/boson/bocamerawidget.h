@@ -25,7 +25,6 @@
 
 class BoCamera;
 class BoGameCamera;
-class BoVector3;
 class BoLight;
 class BoLightCamera;
 class BoContext;

@@ -191,7 +191,7 @@ void EditorBigDisplayInput::actionClicked(const BoMouseEvent& event)
  }
 }
 
-bool EditorBigDisplayInput::actionPlace(const BoVector3& canvasVector)
+bool EditorBigDisplayInput::actionPlace(const BoVector3Fixed& canvasVector)
 {
  boDebug() << k_funcinfo << endl;
  if (!canvas()) {
@@ -315,7 +315,7 @@ bool EditorBigDisplayInput::actionPlace(const BoVector3& canvasVector)
  return ret;
 }
 
-bool EditorBigDisplayInput::actionChangeHeight(const BoVector3& canvasVector, bool up)
+bool EditorBigDisplayInput::actionChangeHeight(const BoVector3Fixed& canvasVector, bool up)
 {
  boDebug() << k_funcinfo << endl;
  if (!localPlayerInput()) {
@@ -479,7 +479,7 @@ void EditorBigDisplayInput::slotMoveSelection(int cellX, int cellY)
 	return;
  }
  BoMouseEvent event;
- event.setCanvasVector(BoVector3((float)(cellX + 1.0f / 2),
+ event.setCanvasVector(BoVector3Fixed((float)(cellX + 1.0f / 2),
 		(float)(cellY + 1.0f / 2),
 		0.0f));
  actionClicked(event);

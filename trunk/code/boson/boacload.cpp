@@ -107,10 +107,10 @@ class ACObject
     float texoffX;
     float texoffY;
 
-    BoVector3 loc;
+    BoVector3Float loc;
 
     int numvert;
-    BoVector3* vertices;
+    BoVector3Float* vertices;
 
     int numfaces;
     ACFace* faces;
@@ -282,7 +282,7 @@ bool BoACLoad::loadModel()
   frame->allocMeshes(numobjects);
 
 
-  translateObject(obj, BoVector3());
+  translateObject(obj, BoVector3Float());
 
   int index = 0;
   convertIntoMesh(frame, &index, obj);
@@ -387,7 +387,7 @@ bool BoACLoad::loadObject(QTextStream& stream, ACObject* obj)
       }
       else
       {
-        obj->loc = BoVector3(tokens[1].toFloat(), tokens[2].toFloat(), tokens[3].toFloat());
+        obj->loc = BoVector3Float(tokens[1].toFloat(), tokens[2].toFloat(), tokens[3].toFloat());
       }
     }
     else if(tokens[0].lower() == "numvert")
@@ -399,7 +399,7 @@ bool BoACLoad::loadObject(QTextStream& stream, ACObject* obj)
       else
       {
         obj->numvert = tokens[1].toInt();
-        obj->vertices = new BoVector3[obj->numvert];
+        obj->vertices = new BoVector3Float[obj->numvert];
         for(int i = 0; i < obj->numvert; i++)
         {
           float x, y, z;
@@ -565,7 +565,7 @@ bool BoACLoad::loadMaterial(const QString& line)
   else
   {
     mData->addMaterial();
-    BoVector4 color;
+    BoVector4Float color;
     BoMaterial* mat = mData->material(mData->materialCount() - 1);
     mat->setName(tokens[1]);
     color.set(tokens[3].toFloat(), tokens[4].toFloat(), tokens[5].toFloat(), 1.0);
@@ -637,8 +637,8 @@ bool BoACLoad::convertIntoMesh(BoFrame* f, int* index, ACObject* obj)
   // FIXME: properly handle points with same texel and vertex coords
   boMesh->allocatePoints(obj->numfaces * 3);
   int pointindex = 0;
-  QValueVector<BoVector3> vertices(obj->numfaces * 3);
-  QValueVector<BoVector3> texels(obj->numfaces * 3);
+  QValueVector<BoVector3Float> vertices(obj->numfaces * 3);
+  QValueVector<BoVector3Float> texels(obj->numfaces * 3);
 
   for(int i = 0; i < obj->numfaces; i++)
   {
@@ -651,13 +651,13 @@ bool BoACLoad::convertIntoMesh(BoFrame* f, int* index, ACObject* obj)
     }
 
     vertices[pointindex] = obj->vertices[obj->faces[i].vertexindex[0]];
-    texels[pointindex] = BoVector3(obj->faces[i].texu[0], obj->faces[i].texv[0], 0);
+    texels[pointindex] = BoVector3Float(obj->faces[i].texu[0], obj->faces[i].texv[0], 0);
     points[0] = pointindex++;
     vertices[pointindex] = obj->vertices[obj->faces[i].vertexindex[1]];
-    texels[pointindex] = BoVector3(obj->faces[i].texu[1], obj->faces[i].texv[1], 0);
+    texels[pointindex] = BoVector3Float(obj->faces[i].texu[1], obj->faces[i].texv[1], 0);
     points[1] = pointindex++;
     vertices[pointindex] = obj->vertices[obj->faces[i].vertexindex[2]];
-    texels[pointindex] = BoVector3(obj->faces[i].texu[2], obj->faces[i].texv[2], 0);
+    texels[pointindex] = BoVector3Float(obj->faces[i].texu[2], obj->faces[i].texv[2], 0);
     points[2] = pointindex++;
 
     face.setPointIndex(points);
@@ -694,7 +694,7 @@ void BoACLoad::countObjects(ACObject* obj, int* count)
   }
 }
 
-void BoACLoad::translateObject(ACObject* obj, const BoVector3& trans)
+void BoACLoad::translateObject(ACObject* obj, const BoVector3Float& trans)
 {
   // Add trans to our loc
   obj->loc += trans;

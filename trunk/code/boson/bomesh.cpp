@@ -87,7 +87,7 @@ protected:
 	}
 
 private:
-	BoVector3 mVectors[24];
+	BoVector3Float mVectors[24];
 };
 
 // this should be able to generate bounding boxes, spheres or maybe just
@@ -766,7 +766,7 @@ public:
 	 *
 	 * This method is safe - it won't crash on invalid @p index values.
 	 **/
-	void setVertex(unsigned int index, const BoVector3& vertex)
+	void setVertex(unsigned int index, const BoVector3Float& vertex)
 	{
 		BO_CHECK_NULL_RET(mPoints);
 		if (index >= points()) {
@@ -784,7 +784,7 @@ public:
 	 *
 	 * This method is safe - it won't crash on invalid @p index values.
 	 **/
-	void setTexel(unsigned int index, const BoVector3& texel)
+	void setTexel(unsigned int index, const BoVector3Float& texel)
 	{
 		BO_CHECK_NULL_RET(mPoints);
 		if (index >= points()) {
@@ -804,32 +804,32 @@ public:
 	 * Note that this method is somewhat slow for using it in mesh
 	 * rendering. It creates a @ref BoVector3 object that is returned then.
 	 **/
-	BoVector3 vertex(unsigned int p) const
+	BoVector3Float vertex(unsigned int p) const
 	{
 		if (!mPoints) {
 			boError() << k_funcinfo << "no points allocated" << endl;
-			return BoVector3();
+			return BoVector3Float();
 		}
 		if (p >= points()) {
 			boError() << k_funcinfo << "invalid point " << p
 					<< " max=" << points() - 1 << endl;
-			return BoVector3();
+			return BoVector3Float();
 		}
-		return BoVector3(&mPoints[p * pointSize() + vertexPos()]);
+		return BoVector3Float(&mPoints[p * pointSize() + vertexPos()]);
 	}
 
-	BoVector3 texel(unsigned int p) const
+	BoVector3Float texel(unsigned int p) const
 	{
 		if (!mPoints) {
 			boError() << k_funcinfo << "no points allocated" << endl;
-			return BoVector3();
+			return BoVector3Float();
 		}
 		if (p >= points()) {
 			boError() << k_funcinfo << "invalid point " << p
 					<< " max=" << points() - 1 << endl;
-			return BoVector3();
+			return BoVector3Float();
 		}
-		BoVector3 tex;
+		BoVector3Float tex;
 		tex.setX(mPoints[p * pointSize() + texelPos() + 0]);
 		tex.setY(mPoints[p * pointSize() + texelPos() + 1]);
 		tex.setZ(0.0f);  // not used
@@ -1023,7 +1023,7 @@ const BoFace* BoMeshLOD::face(unsigned int f) const
  return &d->mAllFaces[f];
 }
 
-void BoMeshLOD::setNormal(unsigned int face, int vertex, const BoVector3& normal)
+void BoMeshLOD::setNormal(unsigned int face, int vertex, const BoVector3Float& normal)
 {
  if (face >= facesCount()) {
 	boError() << k_funcinfo << "invalid face " << face
@@ -1352,7 +1352,7 @@ void BoMesh::allocatePoints(unsigned int points)
  d->mMeshPoints.allocatePoints(points);
 }
 
-void BoMesh::setVertices(const QValueVector<BoVector3>& vertices)
+void BoMesh::setVertices(const QValueVector<BoVector3Float>& vertices)
 {
  if (d->mVerticesApplied) {
 	// calling this twice might cause trouble with e.g. calculateMaxMin()
@@ -1379,26 +1379,26 @@ void BoMesh::setVertices(const QValueVector<BoVector3>& vertices)
  calculateMaxMin();
 }
 
-BoVector3 BoMesh::vertex(unsigned int p) const
+BoVector3Float BoMesh::vertex(unsigned int p) const
 {
  return d->mMeshPoints.vertex(p);
 }
 
-BoVector3 BoMesh::texel(unsigned int p) const
+BoVector3Float BoMesh::texel(unsigned int p) const
 {
  return d->mMeshPoints.texel(p);
 }
 
-BoVector3 BoMesh::vertex(unsigned int face, unsigned int i, unsigned int _lod) const
+BoVector3Float BoMesh::vertex(unsigned int face, unsigned int i, unsigned int _lod) const
 {
  BoMeshLOD* lod = levelOfDetail(_lod);
  if (!lod) {
 	boError() << k_funcinfo << "NULL LOD " << _lod << endl;
-	return BoVector3();
+	return BoVector3Float();
  }
  if (face >= lod->facesCount()) {
 	boError() << k_funcinfo << "invalid face " << face << " have only " << lod->facesCount() << endl;
-	return BoVector3();
+	return BoVector3Float();
  }
  if (i >= 3) {
 	boError() << k_funcinfo << " vertex index must be 0..2, not " << i << endl;
@@ -1407,12 +1407,12 @@ BoVector3 BoMesh::vertex(unsigned int face, unsigned int i, unsigned int _lod) c
  const BoFace* f = lod->face(face);
  if (!f) {
 	boError(100) << k_funcinfo << "NULL face " << face << endl;
-	return BoVector3();
+	return BoVector3Float();
  }
  return vertex(f->pointIndex()[i] - d->mMeshPoints.pointsMovedBy());
 }
 
-void BoMesh::setTexels(const QValueVector<BoVector3>& texels)
+void BoMesh::setTexels(const QValueVector<BoVector3Float>& texels)
 {
  if (d->mTexelsApplied) {
 	boError() << k_funcinfo << "called twice. this is not allowed" << endl;
@@ -1460,14 +1460,14 @@ void BoMesh::calculateNormals(unsigned int _lod)
  //   way we don't have to recalculate face normals all the time.
 
  // Pass 1: calculate face normals
- BoVector3* facenormals = new BoVector3[lod->facesCount()];
- BoVector3 a, b, c;
+ BoVector3Float* facenormals = new BoVector3Float[lod->facesCount()];
+ BoVector3Float a, b, c;
  for (unsigned int face = 0; face < lod->facesCount(); face++) {
 	a = vertex(face, 0, _lod);
 	b = vertex(face, 1, _lod);
 	c = vertex(face, 2, _lod);
 
-	facenormals[face] = BoVector3::crossProduct(c - b, a - b);
+	facenormals[face] = BoVector3Float::crossProduct(c - b, a - b);
 	facenormals[face].normalize();
  }
 
@@ -1477,7 +1477,7 @@ void BoMesh::calculateNormals(unsigned int _lod)
 	if (lod->face(face)->smoothGroup()) {
 		// Face is in some smoothing group. Use smooth shading
 		for (int p = 0; p < 3; p++) {
-			BoVector3 normal;
+			BoVector3Float normal;
 			for (unsigned int face2 = 0; face2 < lod->facesCount(); face2++) {
 				if(lod->face(face)->smoothGroup() & lod->face(face2)->smoothGroup()) {
 					// Two faces have same smooth groups
@@ -1550,11 +1550,11 @@ void BoMesh::renderVertexPoints(unsigned int _lod)
 	while (node) {
 		const BoFace* face = node->face();
 		const int* points = face->pointIndex();
-		BoVector3 v1 = vertex(points[0] - d->mMeshPoints.pointsMovedBy());
+		BoVector3Float v1 = vertex(points[0] - d->mMeshPoints.pointsMovedBy());
 		glVertex3f(v1[0], v1[1], v1[2]);
-		BoVector3 v2 = vertex(points[1] - d->mMeshPoints.pointsMovedBy());
+		BoVector3Float v2 = vertex(points[1] - d->mMeshPoints.pointsMovedBy());
 		glVertex3f(v2[0], v2[1], v2[2]);
-		BoVector3 v3 = vertex(points[2] - d->mMeshPoints.pointsMovedBy());
+		BoVector3Float v3 = vertex(points[2] - d->mMeshPoints.pointsMovedBy());
 		glVertex3f(v3[0], v3[1], v3[2]);
 		node = node->next();
 	}
@@ -1588,7 +1588,7 @@ void BoMesh::createPointCache()
 void BoMesh::calculateMaxMin()
 {
  // NOT time critical! (called on startup only)
- BoVector3 v = vertex(0);
+ BoVector3Float v = vertex(0);
  d->mMinZ = v.z();
  d->mMaxZ = v.z();
  d->mMinX = v.x();
@@ -1859,7 +1859,7 @@ void BoMesh::getBoundingBox(float* _minX, float* _maxX, float* _minY, float* _ma
  *_maxZ = maxZ();
 }
 
-void BoMesh::getBoundingBox(BoVector3* vertices) const
+void BoMesh::getBoundingBox(BoVector3Float* vertices) const
 {
  float minX, minY, minZ;
  float maxX, maxY, maxZ;
@@ -1876,8 +1876,8 @@ void BoMesh::getBoundingBox(BoVector3* vertices) const
 
 void BoMesh::getBoundingBox(const BoMatrix& matrix, float* minX, float* maxX, float* minY, float* maxY, float* minZ, float* maxZ) const
 {
- BoVector3 _vertices[8];
- BoVector3 vertices[8];
+ BoVector3Float _vertices[8];
+ BoVector3Float vertices[8];
  getBoundingBox(_vertices);
  for (int i = 0 ; i < 8; i++) {
 	matrix.transform(&vertices[i], &_vertices[i]);

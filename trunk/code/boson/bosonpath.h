@@ -34,11 +34,14 @@
 #define PF_CANNOT_GO -3
 
 class BosonPathInfo;
-class BoVector3;
-class BoVector4;
 template<class T> class BoVector2;
+template<class T> class BoVector3;
+template<class T> class BoVector4;
 template<class T> class BoRect;
 typedef BoVector2<bofixed> BoVector2Fixed;
+typedef BoVector3<bofixed> BoVector3Fixed;
+typedef BoVector4<bofixed> BoVector4Fixed;
+typedef BoVector4<float> BoVector4Float;
 typedef BoRect<bofixed> BoRectFixed;
 
 
@@ -695,16 +698,16 @@ class BosonPathVisualization : public QObject
      * @param points The points of the line visualization. Note that the z
      * coordinates are overwritten later, you do not have to specify them!
      **/
-    void addLineVisualization(const QValueList<BoVector3>& points, const BoVector4& color, bofixed pointSize = 1.0f, int timeout = 60, bofixed zOffset = 0.5f);
+    void addLineVisualization(const QValueList<BoVector3Fixed>& points, const BoVector4Float& color, bofixed pointSize = 1.0f, int timeout = 60, bofixed zOffset = 0.5f);
 
     /**
      * @overload
      * Just like above, but with a default color
      **/
-    void addLineVisualization(const QValueList<BoVector3>& points, bofixed pointSize = 1.0f, int timeout = 60, bofixed zOffset = 0.5f);
+    void addLineVisualization(const QValueList<BoVector3Fixed>& points, bofixed pointSize = 1.0f, int timeout = 60, bofixed zOffset = 0.5f);
 
   signals:
-    void signalAddLineVisualization(const QValueList<BoVector3>& points, const BoVector4& color, bofixed pointSize, int timeout, bofixed zOffset);
+    void signalAddLineVisualization(const QValueList<BoVector3Fixed>& points, const BoVector4Float& color, bofixed pointSize, int timeout, bofixed zOffset);
 
   private:
     BosonPathVisualization(QObject* parent);

@@ -24,12 +24,14 @@ class Cell;
 class BosonItem;
 class Unit;
 class UnitProperties;
-class BoVector3;
 class BoItemList;
 class BosonCanvas;
 class BosonStatistics;
 class SpeciesTheme;
 class KGameIO;
+class bofixed;
+template<class T> class BoVector3;
+typedef BoVector3<bofixed> BoVector3Fixed;
 
 template<class T> class QPtrVector;
 template<class T> class QPtrList;
@@ -112,7 +114,7 @@ public:
 	/**
 	 * Like @ref isFogged, but takes a vector of canvas coordinates
 	 **/
-	bool isFogged(const BoVector3& canvasVector) const;
+	bool isFogged(const BoVector3Fixed& canvasVector) const;
 
 	/**
 	 * @return The cell at @p x, @p y (see @ref BosonMap::cell) if that cell
@@ -143,7 +145,7 @@ public:
 	/**
 	 * @overload
 	 **/
-	bool canSee(const BoVector3& canvasVector) const
+	bool canSee(const BoVector3Fixed& canvasVector) const
 	{
 		return !isFogged(canvasVector);
 	}
@@ -213,7 +215,7 @@ public:
 	 * that is visible to this player, also a unit that is not owned by this
 	 * player.
 	 **/
-	Unit* findUnitAt(const BosonCanvas* canvas, const BoVector3& canvasVector) const;
+	Unit* findUnitAt(const BosonCanvas* canvas, const BoVector3Fixed& canvasVector) const;
 
 	BoItemList* unitsAtCells(const QPtrVector<Cell>* cells) const;
 

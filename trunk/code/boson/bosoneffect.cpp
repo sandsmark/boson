@@ -191,7 +191,7 @@ BosonEffectFog::BosonEffectFog(const BosonEffectPropertiesFog* prop) : BosonEffe
   mRadius = prop->radius();
 }
 
-BosonEffectFog::BosonEffectFog(const BoVector4& color, float start, float end, float radius) :
+BosonEffectFog::BosonEffectFog(const BoVector4Float& color, float start, float end, float radius) :
     BosonEffect()
 {
   mProperties = 0;
@@ -382,8 +382,8 @@ void BosonEffectLight::update(float elapsed)
   }
 
   float factor = mTimeLeft / mProperties->life();  // This goes from 1 to 0 during effect's lifetime
-  BoVector4 ambient, diffuse, specular;
-  BoVector3 attenuation;
+  BoVector4Float ambient, diffuse, specular;
+  BoVector3Float attenuation;
   ambient.setBlended(mProperties->startAmbient(), factor, mProperties->endAmbient(), 1.0 - factor);
   diffuse.setBlended(mProperties->startDiffuse(), factor, mProperties->endDiffuse(), 1.0 - factor);
   specular.setBlended(mProperties->startSpecular(), factor, mProperties->endSpecular(), 1.0 - factor);
@@ -412,18 +412,18 @@ void BosonEffectLight::start()
   {
     mLight->setEnabled(true);
     mLight->setDirectional(false);
-    mLight->setPosition3(position());
+    mLight->setPosition3(position().toFloat());
   }
 }
 
-void BosonEffectLight::setPosition(const BoVector3& pos)
+void BosonEffectLight::setPosition(const BoVector3Fixed& pos)
 {
   // Add properties->position() to given pos
-  BoVector3 newpos = pos + mProperties->position();
+  BoVector3Fixed newpos = pos + mProperties->position();
   BosonEffect::setPosition(newpos);
   if(mLight)
   {
-    mLight->setPosition3(newpos);
+    mLight->setPosition3(newpos.toFloat());
   }
 }
 
@@ -476,8 +476,8 @@ bool BosonEffectLight::loadFromXML(const QDomElement& root)
   if(!mLight)
   {
     float factor = mTimeLeft / mProperties->life();  // This goes from 1 to 0 during effect's lifetime
-    BoVector4 ambient, diffuse, specular;
-    BoVector3 attenuation;
+    BoVector4Float ambient, diffuse, specular;
+    BoVector3Float attenuation;
     ambient.setBlended(mProperties->startAmbient(), factor, mProperties->endAmbient(), 1.0 - factor);
     diffuse.setBlended(mProperties->startDiffuse(), factor, mProperties->endDiffuse(), 1.0 - factor);
     specular.setBlended(mProperties->startSpecular(), factor, mProperties->endSpecular(), 1.0 - factor);
@@ -495,7 +495,7 @@ bool BosonEffectLight::loadFromXML(const QDomElement& root)
 
 /*****  BosonEffectBulletTrail  *****/
 
-BosonEffectBulletTrail::BosonEffectBulletTrail(const BosonEffectPropertiesBulletTrail* prop, const BoVector3& pos) : BosonEffect(prop)
+BosonEffectBulletTrail::BosonEffectBulletTrail(const BosonEffectPropertiesBulletTrail* prop, const BoVector3Fixed& pos) : BosonEffect(prop)
 {
   mProperties = prop;
   mLastPos = pos;
@@ -516,7 +516,7 @@ void BosonEffectBulletTrail::update(float elapsed)
     return;
   }
 
-  BoVector3 movevector = mPosition - mLastPos;
+  BoVector3Fixed movevector = mPosition - mLastPos;
   float movelength = movevector.length();
   movevector.scale(1 / movelength); // Normalize movevector
   float length = getFloat(mProperties->minLength(), mProperties->maxLength());  // Line's length
@@ -567,7 +567,7 @@ void BosonEffectBulletTrail::makeObsolete()
   BosonEffect::makeObsolete();
 }
 
-const BoVector4& BosonEffectBulletTrail::color() const
+const BoVector4Float& BosonEffectBulletTrail::color() const
 {
   return mProperties->color();
 }

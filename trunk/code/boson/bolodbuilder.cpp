@@ -64,17 +64,17 @@ BoLODBuilder::~BoLODBuilder()
 {
 }
 
-BoVector3 BoLODBuilder::vertex(unsigned int index) const
+BoVector3Float BoLODBuilder::vertex(unsigned int index) const
 {
  return mMesh->vertex(index);
 }
 
-BoVector3 BoLODBuilder::normal(unsigned int _face, unsigned int vertex) const
+BoVector3Float BoLODBuilder::normal(unsigned int _face, unsigned int vertex) const
 {
  const BoFace* f = face(_face);
  if (!f) {
 	boError(120) << k_funcinfo << "NULL face " << _face << endl;
-	return BoVector3();
+	return BoVector3Float();
  }
  return f->normal(vertex);
 }
@@ -189,7 +189,7 @@ class BoLODFace
 {
 public:
 	BoLODVertex* vertex[3];
-	BoVector3 normal;
+	BoVector3Float normal;
 	unsigned long int smoothGroup;
 
 	BoLODFace(BoLODVertex* v0, BoLODVertex* v1, BoLODVertex* v2, unsigned long int smoothgroup = 0);
@@ -204,14 +204,14 @@ public:
 class BoLODVertex
 {
 public:
-	BoLODVertex(BoVector3 v, unsigned int id);
+	BoLODVertex(BoVector3Float v, unsigned int id);
 	~BoLODVertex();
 
 	void removeIfNonNeighbor(BoLODVertex* n);
 	bool isBorder();
 	bool isManifoldEdgeWith(BoLODVertex* n);
 
-	BoVector3 position;
+	BoVector3Float position;
 	unsigned int id;
 	// adjacent vertices
 	BoLODVector<BoLODVertex> neighbor;
@@ -273,10 +273,10 @@ bool BoLODFace::hasVertex(BoLODVertex* v)
 
 void BoLODFace::computeNormal()
 {
- BoVector3 v0 = vertex[0]->position;
- BoVector3 v1 = vertex[1]->position;
- BoVector3 v2 = vertex[2]->position;
- normal = BoVector3::crossProduct(v1 - v0, v2 - v1);
+ BoVector3Float v0 = vertex[0]->position;
+ BoVector3Float v1 = vertex[1]->position;
+ BoVector3Float v2 = vertex[2]->position;
+ normal = BoVector3Float::crossProduct(v1 - v0, v2 - v1);
  normal.normalize();
 }
 
@@ -332,7 +332,7 @@ void BoLODFace::replaceVertex(BoLODVertex* vold, BoLODVertex* vnew)
 
 
 
-BoLODVertex::BoLODVertex(BoVector3 v, unsigned int _id)
+BoLODVertex::BoLODVertex(BoVector3Float v, unsigned int _id)
 {
  position = v;
  id = _id;
@@ -494,7 +494,7 @@ void BoLODBuilder::buildLOD()
  //boDebug(120) << k_funcinfo << "adding vertices" << endl;
  // Make BoLODVertex objects for all vertices
  for (unsigned int i = 0; i < pointCount(); i++) {
-	BoVector3 p(vertex(i));
+	BoVector3Float p(vertex(i));
 	BoLODVertex* v = new BoLODVertex(p, i);
 	mVertices.insert(i, v);
 	//boDebug(120) << k_funcinfo << "added vertex " << i << " at " << v << " with pos (" <<
@@ -568,7 +568,7 @@ QValueList<BoFace> BoLODBuilder::getLOD(float percent, float maxcost)
  mVertices.resize(pointCount());
  mFaces.resize(facesCount());
  for (i = 0; i < pointCount(); i++) {
-	BoVector3 p(vertex(i));
+	BoVector3Float p(vertex(i));
 	BoLODVertex* v = new BoLODVertex(p, i);
 	mVertices.insert(i, v);
  }
@@ -687,8 +687,8 @@ float BoLODBuilder::computeEdgeCollapseCost(BoLODVertex* u, BoLODVertex* v)
 	} else {
 		// Collapsing along border -> not that bad, but not too good either
 		// Code for this is taken from Ogre engine - http://ogre.sourceforge.net
-		BoVector3 collapseEdge, otherBorderEdge;
-		BoVector3 edgeVector = v->position - u->position;
+		BoVector3Float collapseEdge, otherBorderEdge;
+		BoVector3Float edgeVector = v->position - u->position;
 		edgeVector.normalize();
 		collapseEdge = edgeVector;
 		float kinkiness, maxkinkiness;
@@ -699,7 +699,7 @@ float BoLODBuilder::computeEdgeCollapseCost(BoLODVertex* u, BoLODVertex* v)
 				otherBorderEdge.normalize();
 				// This time, the closer dot is to -1, the better, because that means
 				//  the edges are opposite to each other
-				kinkiness = BoVector3::dotProduct(collapseEdge, otherBorderEdge);
+				kinkiness = BoVector3Float::dotProduct(collapseEdge, otherBorderEdge);
 				maxkinkiness = QMAX(maxkinkiness, (1.002f + kinkiness) * 0.5f);
 			}
 		}
@@ -714,7 +714,7 @@ float BoLODBuilder::computeEdgeCollapseCost(BoLODVertex* u, BoLODVertex* v)
 		float mincurv = 1.0f; // curve for face i and closer side to it
 		for (unsigned int j = 0; j < sides.count(); j++) {
 			// use dot product of face normals.
-			float dotprod = BoVector3::dotProduct(u->face[i]->normal, sides[j]->normal);
+			float dotprod = BoVector3Float::dotProduct(u->face[i]->normal, sides[j]->normal);
 			mincurv = QMIN(mincurv, (1.002f - dotprod) * 0.5f);
 		}
 		curvature = QMAX(curvature, mincurv);

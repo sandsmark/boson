@@ -151,7 +151,7 @@ void BoOrbiterWidget::paintGL()
  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
  glEnable(GL_DEPTH_TEST);
  BoMatrix M;
- BoVector3 cameraPos(camera()->cameraPos());
+ BoVector3Float cameraPos(camera()->cameraPos());
  camera()->rotationMatrix().invert(&M);
 
  glPushMatrix();
@@ -241,7 +241,7 @@ void BoOrbiterWidget::mouseMoveEvent(QMouseEvent* e)
  int dy = mMouseMoveDiff->dy();
  if (e->state() & LeftButton) {
 	BoQuaternion q = camera()->quaternion();
-	BoVector3 cameraPos;
+	BoVector3Float cameraPos;
 	q.transform(&cameraPos, &camera()->cameraPos());
 
 	BoQuaternion q2;
@@ -258,7 +258,7 @@ void BoOrbiterWidget::mouseMoveEvent(QMouseEvent* e)
 	updateOrbiterPosition(cameraPos, q2);
  } else if (e->state() & RightButton) {
 	BoQuaternion q = camera()->quaternion();
-	BoVector3 cameraPos;
+	BoVector3Float cameraPos;
 	q.transform(&cameraPos, &camera()->cameraPos());
 
 	BoQuaternion q2;
@@ -276,14 +276,14 @@ void BoOrbiterWidget::mouseMoveEvent(QMouseEvent* e)
  }
 }
 
-void BoOrbiterWidget::updateOrbiterPosition(const BoVector3& cameraPos, const BoQuaternion& q)
+void BoOrbiterWidget::updateOrbiterPosition(const BoVector3Float& cameraPos, const BoQuaternion& q)
 {
- BoVector3 lookAt, up;
+ BoVector3Float lookAt, up;
  q.matrix().toGluLookAt(&lookAt, &up, cameraPos);
  updateOrbiterPosition(cameraPos, lookAt, up);
 }
 
-void BoOrbiterWidget::updateOrbiterPosition(const BoVector3& cameraPos, const BoVector3& lookAt, const BoVector3& up)
+void BoOrbiterWidget::updateOrbiterPosition(const BoVector3Float& cameraPos, const BoVector3Float& lookAt, const BoVector3Float& up)
 {
  BO_CHECK_NULL_RET(camera());
  camera()->setGluLookAt(cameraPos, lookAt, up);

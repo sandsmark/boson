@@ -222,7 +222,7 @@ void BosonEffectParticleGeneric::start()
   createParticles(((BosonEffectPropertiesParticleGeneric*)properties())->initialParticles());
 }
 
-void BosonEffectParticleGeneric::setRotation(const BoVector3& rotation)
+void BosonEffectParticleGeneric::setRotation(const BoVector3Fixed& rotation)
 {
   if(!mRotated && rotation.isNull())
   {
@@ -266,14 +266,17 @@ void BosonEffectParticleGeneric::setRotation(const BoVector3& rotation)
     transformmatrix.rotate(rotation.x(), 1.0f, 0.0f, 0.0f);
     transformmatrix.rotate(rotation.y(), 0.0f, 1.0f, 0.0f);
 
-    BoVector3 newpos, oldpos;
+    BoVector3Fixed newpos, oldpos;
     // Rotate all particles
     for(unsigned int i = 0; i < mParticleCount; i++)
     {
       if(mParticles[i].life > 0.0)
       {
         oldpos = mParticles[i].pos - mPosition;
-        transformmatrix.transform(&newpos, &oldpos);
+        BoVector3Float _newpos, _oldpos;
+        _oldpos = oldpos.toFloat();
+        transformmatrix.transform(&_newpos, &_oldpos);
+        newpos = _newpos.toFixed();
         mParticles[i].pos = newpos + mPosition;
       }
     }
@@ -284,16 +287,16 @@ void BosonEffectParticleGeneric::setRotation(const BoVector3& rotation)
   mMatrix.rotate(rotation.x(), 1.0f, 0.0f, 0.0f);
   mMatrix.rotate(rotation.y(), 0.0f, 1.0f, 0.0f);
 
-  BosonEffect::setRotation(rotation);
+  BosonEffect::setRotation(rotation.toFixed());
 
   mRotated = true;
 }
 
-void BosonEffectParticleGeneric::setPosition(const BoVector3& pos)
+void BosonEffectParticleGeneric::setPosition(const BoVector3Fixed& pos)
 {
   if(mMoveParticlesWithSystem)
   {
-    BoVector3 diff = pos - mPosition;
+    BoVector3Fixed diff = pos - mPosition;
     // Move all particles by diff
     for(unsigned int i = 0; i < mParticleCount; i++)
     {
@@ -345,7 +348,7 @@ void BosonEffectParticleGeneric::initParticle(BosonGenericParticle* particle)
   {
     ((BosonEffectPropertiesParticleGeneric*)properties())->initParticle(this, particle);
   }
-  mBoundingSphereRadius = QMAX(mBoundingSphereRadius, (particle->pos - mPosition).dotProduct());
+  mBoundingSphereRadius = QMAX(mBoundingSphereRadius, (float)(particle->pos - mPosition).dotProduct());
 }
 
 void BosonEffectParticleGeneric::updateParticle(BosonGenericParticle* particle, float elapsed)
@@ -356,7 +359,7 @@ void BosonEffectParticleGeneric::updateParticle(BosonGenericParticle* particle, 
   if(properties())
   {
     ((BosonEffectPropertiesParticleGeneric*)properties())->updateParticle(this, particle);
-    mBoundingSphereRadius = QMAX(mBoundingSphereRadius, (particle->pos - mPosition).dotProduct());
+    mBoundingSphereRadius = QMAX(mBoundingSphereRadius, (float)(particle->pos - mPosition).dotProduct());
   }
 }
 
@@ -538,7 +541,7 @@ bool BosonEffectParticleGeneric::loadFromXML(const QDomElement& root)
 /*****  BosonEffectParticleTrail  *****/
 
 BosonEffectParticleTrail::BosonEffectParticleTrail(const BosonEffectPropertiesParticleTrail* prop,
-    int maxnum, const BosonTextureArray* textures, const BoVector3& pos) :
+    int maxnum, const BosonTextureArray* textures, const BoVector3Fixed& pos) :
     BosonEffectParticle(prop)
 {
   mParticles = new BosonTrailParticle[maxnum];
@@ -576,7 +579,7 @@ void BosonEffectParticleTrail::update(float elapsed)
       " to create cache (total will be = " << mCreateCache + (elapsed * mRate) << ")" << endl;*/
 
   // How much and how have we moved since last update?
-  BoVector3 movevector = mPosition - mLastPos;
+  BoVector3Fixed movevector = mPosition - mLastPos;
   float movedlength = movevector.length();
   //boDebug() << k_funcinfo << "movedlength: " << movedlength << "(" << mParticleCount << " particles)" << endl;
 
@@ -656,7 +659,7 @@ void BosonEffectParticleTrail::update(float elapsed)
   mLastPos = mPosition;
 }
 
-void BosonEffectParticleTrail::setRotation(const BoVector3& rotation)
+void BosonEffectParticleTrail::setRotation(const BoVector3Fixed& rotation)
 {
   mRotated = true;
 
@@ -668,12 +671,12 @@ void BosonEffectParticleTrail::setRotation(const BoVector3& rotation)
   BosonEffect::setRotation(rotation);
 }
 
-void BosonEffectParticleTrail::setPosition(const BoVector3& pos)
+void BosonEffectParticleTrail::setPosition(const BoVector3Fixed& pos)
 {
   BosonEffect::setPosition(pos);
 }
 
-void BosonEffectParticleTrail::initParticle(BosonTrailParticle* particle, const BoVector3& pos)
+void BosonEffectParticleTrail::initParticle(BosonTrailParticle* particle, const BoVector3Fixed& pos)
 {
   // Note that most stuff isn't initialized here, it's done in
   //  BosonParticleSystemProperties
@@ -695,7 +698,7 @@ void BosonEffectParticleTrail::initParticle(BosonTrailParticle* particle, const 
   {
     ((BosonEffectPropertiesParticleTrail*)properties())->initParticle(this, particle);
   }
-  mBoundingSphereRadius = QMAX(mBoundingSphereRadius, (particle->pos - mPosition).dotProduct());
+  mBoundingSphereRadius = QMAX(mBoundingSphereRadius, (float)(particle->pos.toFixed() - mPosition).dotProduct());
 }
 
 void BosonEffectParticleTrail::updateParticle(BosonTrailParticle* particle, float elapsed)
@@ -707,7 +710,7 @@ void BosonEffectParticleTrail::updateParticle(BosonTrailParticle* particle, floa
   {
     ((BosonEffectPropertiesParticleTrail*)properties())->updateParticle(this, particle);
   }
-  mBoundingSphereRadius = QMAX(mBoundingSphereRadius, (particle->pos - mPosition).dotProduct());
+  mBoundingSphereRadius = QMAX(mBoundingSphereRadius, (float)(particle->pos - mPosition).dotProduct());
 }
 
 bool BosonEffectParticleTrail::saveAsXML(QDomElement& root) const

@@ -39,16 +39,16 @@
 #define FIX_EDGES_1 0
 
 // a couple of helper functions. these should be in Bo3dTools.
-static bool isInFrontOfPlane(const float* plane, const BoVector3& vector);
-static bool lineIntersects(const float* plane, const BoVector3& pos, const BoVector3& direction, BoVector3* intersection);
-static bool lineIntersects_points(const float* plane, const BoVector3& start, const BoVector3& end, BoVector3* intersection);
-static bool lineSegmentIntersects(const float* plane, const BoVector3& start, const BoVector3& end, BoVector3* intersection);
+static bool isInFrontOfPlane(const float* plane, const BoVector3Float& vector);
+static bool lineIntersects(const float* plane, const BoVector3Float& pos, const BoVector3Float& direction, BoVector3Float* intersection);
+static bool lineIntersects_points(const float* plane, const BoVector3Float& start, const BoVector3Float& end, BoVector3Float* intersection);
+static bool lineSegmentIntersects(const float* plane, const BoVector3Float& start, const BoVector3Float& end, BoVector3Float* intersection);
 #define EPSILON 0.0001f // zero for floating point numbers
 
 static int g_cellsVisibleCalls = 0;
 
 class CellTreeNode;
-static float distanceFromPlane(const float* plane, const BoVector3& pos);
+static float distanceFromPlane(const float* plane, const BoVector3Float& pos);
 static float distanceFromPlane(const float* plane, const CellTreeNode* node, const BosonMap* map);
 
 
@@ -343,7 +343,7 @@ BoGroundRendererBase::~BoGroundRendererBase()
 #endif
 }
 
-static bool isInFrontOfPlane(const float* plane, const BoVector3& vector)
+static bool isInFrontOfPlane(const float* plane, const BoVector3Float& vector)
 {
  float d = vector[0] * plane[0] + vector[1] * plane[1] + vector[2] * plane[2] + plane[3];
  if (d >= 0.0f) {
@@ -361,10 +361,10 @@ static bool isInFrontOfPlane(const float* plane, const BoVector3& vector)
  * line segment.
  * @param t internal
  **/
-static bool lineIntersects(const float* plane, const BoVector3& pos, const BoVector3& direction, BoVector3* intersection)
+static bool lineIntersects(const float* plane, const BoVector3Float& pos, const BoVector3Float& direction, BoVector3Float* intersection)
 {
  const float planeDistance = plane[3];
- const BoVector3 planeNormal = BoVector3(plane[0], plane[1], plane[2]);
+ const BoVector3Float planeNormal = BoVector3Float(plane[0], plane[1], plane[2]);
 
  // see count 2.1.0, base/SbPlane.cpp
  if (fabsf(planeDistance) <= EPSILON) {
@@ -375,7 +375,7 @@ static bool lineIntersects(const float* plane, const BoVector3& pos, const BoVec
  // we will _always_ have an intersection of line and plane if the line is not
  // parallel to the plane.
  // (AB: note that I said _line_ not line segment)
- if (fabsf(BoVector3::dotProduct(direction, planeNormal)) <= EPSILON) {
+ if (fabsf(BoVector3Float::dotProduct(direction, planeNormal)) <= EPSILON) {
 	return false;
  }
 
@@ -383,7 +383,7 @@ static bool lineIntersects(const float* plane, const BoVector3& pos, const BoVec
  // is documented there very well.
  // AB: to me this looks like an error in coin. plib1.5 uses a slightly
  // different version and this seems to work better
- float t = -(planeDistance + BoVector3::dotProduct(planeNormal, pos)) / BoVector3::dotProduct(planeNormal, direction);
+ float t = -(planeDistance + BoVector3Float::dotProduct(planeNormal, pos)) / BoVector3Float::dotProduct(planeNormal, direction);
 
  *intersection = pos + direction * t;
 
@@ -394,14 +394,14 @@ static bool lineIntersects(const float* plane, const BoVector3& pos, const BoVec
 }
 
 // just like above, but takes 2 points on the line, not 1 point and a direction
-static bool lineIntersects_points(const float* plane, const BoVector3& start, const BoVector3& end, BoVector3* intersection)
+static bool lineIntersects_points(const float* plane, const BoVector3Float& start, const BoVector3Float& end, BoVector3Float* intersection)
 {
- const BoVector3 pos = start;
- BoVector3 direction = end - start;
+ const BoVector3Float pos = start;
+ BoVector3Float direction = end - start;
  return lineIntersects(plane, pos, direction, intersection);
 }
 
-static bool lineSegmentIntersects(const float* plane, const BoVector3& start, const BoVector3& end, BoVector3* intersection)
+static bool lineSegmentIntersects(const float* plane, const BoVector3Float& start, const BoVector3Float& end, BoVector3Float* intersection)
 {
  bool ret = lineIntersects_points(plane, start, end, intersection);
 
@@ -641,7 +641,7 @@ int* CellListBuilderNoTree::generateCellList(const BosonMap* map, int* origRende
 		}
 		z = (maxz - minz) / 2;
 
-		if (Bo3dTools::sphereInFrustum(viewFrustum(), BoVector3(glX, glY, (minz + maxz) / 2), sqrt(2 * (1.0f / 2) * (1.0f / 2) + z * z))) {
+		if (Bo3dTools::sphereInFrustum(viewFrustum(), BoVector3Float(glX, glY, (minz + maxz) / 2), sqrt(2 * (1.0f / 2) * (1.0f / 2) + z * z))) {
 			// AB: instead of storing the cell here we should store
 			// cell coordinates and create a vertex array with that
 			BoGroundRenderer::setCell(renderCells, count, c->x(), c->y(), 1, 1);
@@ -778,8 +778,8 @@ void CellListBuilderNoTree::calculateWorldRect(const QRect& rect, int mapWidth, 
 	}
 #endif
 
-	BoVector3 mStart;
-	BoVector3 mEnd;
+	BoVector3Float mStart;
+	BoVector3Float mEnd;
 	LineSegment* mNext;
 	LineSegment* mPrevious;
 	int id;
@@ -864,7 +864,7 @@ void CellListBuilderNoTree::calculateWorldRect(const QRect& rect, int mapWidth, 
 		}
 #endif
 		bool intersects = false;
-		BoVector3 intersection; // point where the line intersects
+		BoVector3Float intersection; // point where the line intersects
 		intersects = lineSegmentIntersects(plane, l->mStart, l->mEnd, &intersection);
 		if (!l->mNext || !l->mPrevious) {
 			boError() << k_funcinfo << "oops null next/previous pointer (pass1)" << endl;
@@ -917,7 +917,7 @@ void CellListBuilderNoTree::calculateWorldRect(const QRect& rect, int mapWidth, 
 	l = first;
 	do {
 		bool intersects = false;
-		BoVector3 intersection; // point where the line intersects
+		BoVector3Float intersection; // point where the line intersects
 		intersects = lineSegmentIntersects(plane, l->mStart, l->mEnd, &intersection);
 		if (!intersects) {
 //			boDebug() << "no intersection - line start=" << l->mStart.debugString() << " end=" << l->mEnd.debugString() << endl;
@@ -1219,20 +1219,20 @@ bool CellListBuilderTree::cellsVisible(const CellTreeNode* node, bool* partially
  // corners. the greatest distance is our radius.
  // note that we use the dotProduct() instead of length(), as it is
  // faster. sqrt(dotProduct()) is exactly the length.
- float r1 = BoVector3(hmid - (float)x,
+ float r1 = BoVector3Float(hmid - (float)x,
 		vmid - (float)y, z - topLeftZ).dotProduct();
- float r2 = BoVector3(hmid - ((float)x + (float)w),
+ float r2 = BoVector3Float(hmid - ((float)x + (float)w),
 		vmid - (float)y, z - topRightZ).dotProduct();
- float r3 = BoVector3(hmid - ((float)x + (float)w),
+ float r3 = BoVector3Float(hmid - ((float)x + (float)w),
 		vmid - ((float)y + (float)h), z - bottomRightZ).dotProduct();
- float r4 = BoVector3(hmid - (float)x,
+ float r4 = BoVector3Float(hmid - (float)x,
 		vmid - ((float)y + (float)h), z - bottomLeftZ).dotProduct();
 
  float radius = QMAX(r1, r2);
  radius = QMAX(radius, r3);
  radius = QMAX(radius, r4);
  radius = sqrtf(radius); // turn dotProduct() into length()
- BoVector3 center(hmid, -vmid, z);
+ BoVector3Float center(hmid, -vmid, z);
 
  int ret = Bo3dTools::sphereCompleteInFrustum(viewFrustum(), center, radius);
  if (ret == 0) {
@@ -1274,7 +1274,7 @@ void CellListBuilderTree::recreateTree(const BosonMap* map)
  mRoot->createChilds(map);
 }
 
-static float distanceFromPlane(const float* plane, const BoVector3& pos)
+static float distanceFromPlane(const float* plane, const BoVector3Float& pos)
 {
  return pos.x() * plane[0] + pos.y() * plane[1] + pos.z() * plane[2] + plane[3];
 }
@@ -1292,17 +1292,17 @@ static float distanceFromPlane(const float* plane, const CellTreeNode* node, con
  const float zTopRight = map->heightAtCorner(r + 1, t);
  const float zBottomLeft = map->heightAtCorner(l, b + 1);
  const float zBottomRight = map->heightAtCorner(r + 1, b + 1);
- const float d1 = distanceFromPlane(plane, BoVector3(x, y, zTopLeft));
- const float d2 = distanceFromPlane(plane, BoVector3(x2, y, zTopRight));
- const float d3 = distanceFromPlane(plane, BoVector3(x, y2, zBottomLeft));
- const float d4 = distanceFromPlane(plane, BoVector3(x2, y2, zBottomRight));
+ const float d1 = distanceFromPlane(plane, BoVector3Float(x, y, zTopLeft));
+ const float d2 = distanceFromPlane(plane, BoVector3Float(x2, y, zTopRight));
+ const float d3 = distanceFromPlane(plane, BoVector3Float(x, y2, zBottomLeft));
+ const float d4 = distanceFromPlane(plane, BoVector3Float(x2, y2, zBottomRight));
  float d = QMAX(d1, d2);
  d = QMAX(d, d3);
  d = QMAX(d, d4);
  return d;
 }
 
-QString BoGroundRendererBase::debugStringForPoint(const BoVector3& pos) const
+QString BoGroundRendererBase::debugStringForPoint(const BoVector3Fixed& pos) const
 {
  QString s;
  s += QString("Mouse pos: (%1,%2,%3) ").
@@ -1333,7 +1333,7 @@ QString BoGroundRendererBase::debugStringForPoint(const BoVector3& pos) const
  s += QString("\n");
 
 // s += QString("distance from BOTTOM plane: %1\n").arg(distanceFromPlane(bottomPlane, pos), 6, 'f', 3);
- s += QString("distance from NEAR plane: %1\n").arg(distanceFromPlane(nearPlane, pos), 6, 'f', 3);
+ s += QString("distance from NEAR plane: %1\n").arg(distanceFromPlane(nearPlane, pos.toFloat()), 6, 'f', 3);
 // s += QString("distance from FAR plane: %1\n").arg(distanceFromPlane(farPlane, pos), 6, 'f', 3);
 
  return s;

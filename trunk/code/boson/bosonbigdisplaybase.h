@@ -75,7 +75,7 @@ public:
 	{
 		return mWidgetPos;
 	}
-	void setCanvasVector(const BoVector3& pos)
+	void setCanvasVector(const BoVector3Fixed& pos)
 	{
 		mCanvasVector = pos;
 		mCanvasPos = QPoint((int)pos.x(), (int)pos.y());
@@ -85,7 +85,7 @@ public:
 	{
 		return mCanvasPos;
 	}
-	const BoVector3& canvasVector() const
+	const BoVector3Fixed& canvasVector() const
 	{
 		return mCanvasVector;
 	}
@@ -138,7 +138,7 @@ public:
 private:
 	QPoint mWidgetPos;
 	QPoint mCanvasPos;
-	BoVector3 mCanvasVector;
+	BoVector3Fixed mCanvasVector;
 	GLfloat mX;
 	GLfloat mY;
 	GLfloat mZ;
@@ -152,8 +152,8 @@ class BoLineVisualization
 {
   public:
     BoLineVisualization()  { color.set(1.0f, 1.0f, 1.0f, 1.0f); timeout = 60; pointsize = 1.0f; }
-    QValueList<BoVector3> points;
-    BoVector4 color;
+    QValueList<BoVector3Fixed> points;
+    BoVector4Float color;
     int timeout;
     float pointsize;
 };
@@ -222,7 +222,7 @@ public:
 
 
 	bool boProject(GLfloat x, GLfloat y, GLfloat z, QPoint* pos) const;
-	bool boUnProject(const QPoint& pos, BoVector3* v, float z = -1.0) const;
+	bool boUnProject(const QPoint& pos, BoVector3Float* v, float z = -1.0) const;
 
 	// we should probably make these 4 methods protected. i cant imagine any
 	// useful public use
@@ -236,7 +236,7 @@ public:
 	bool mapCoordinatesToCell(const QPoint& pos, QPoint* cell);
 	bool mapDistance(int windowDistanceX, int windowDistanceY, GLfloat* dx, GLfloat* dy) const;
 	void worldToCanvas(GLfloat x, GLfloat y, GLfloat z, QPoint* pos) const;
-	void worldToCanvas(GLfloat x, GLfloat y, GLfloat z, BoVector3* pos) const;
+	void worldToCanvas(GLfloat x, GLfloat y, GLfloat z, BoVector3Fixed* pos) const;
 	void canvasToWorld(int x, int y, float z, GLfloat* glx, GLfloat* gly, GLfloat* glz) const;
 
 	double fps() const;
@@ -262,7 +262,7 @@ public:
 
 	void setParticlesDirty(bool dirty);
 
-	const BoVector3& cursorCanvasVector() const;
+	const BoVector3Fixed& cursorCanvasVector() const;
 	BosonBigDisplayInputBase* displayInput() const;
 
 	void saveAsXML(QDomElement& root);
@@ -344,7 +344,7 @@ protected slots:
 
 	void slotInitMiniMapFogOfWar();
 
-	void slotAddLineVisualization(const QValueList<BoVector3>& points, const BoVector4& color, bofixed pointSize, int timeout, bofixed zOffset);
+	void slotAddLineVisualization(const QValueList<BoVector3Fixed>& points, const BoVector4Float& color, bofixed pointSize, int timeout, bofixed zOffset);
 
 protected:
 	/**
@@ -511,10 +511,10 @@ protected:
 	 * otherwise the distance from the near plane. We might use this for the
 	 * level of detail.
 	 **/
-	float sphereInFrustum(const BoVector3& pos, float radius) const;
+	float sphereInFrustum(const BoVector3Fixed& pos, float radius) const;
 	inline float sphereInFrustum(float x, float y, float z, float radius) const
 	{
-		BoVector3 pos(x,y,z);
+		BoVector3Fixed pos(x,y,z);
 		return sphereInFrustum(pos, radius);
 	}
 
@@ -591,23 +591,23 @@ protected slots:
 	/*  Light  */
 	void slotAddLight(int* id);
 	void slotRemoveLight(int id);
-	void slotGetLightPos(int id, BoVector4*);
-	void slotGetLightAmbient(int id, BoVector4*);
-	void slotGetLightDiffuse(int id, BoVector4*);
-	void slotGetLightSpecular(int id, BoVector4*);
-	void slotGetLightAttenuation(int id, BoVector3*);
+	void slotGetLightPos(int id, BoVector4Float*);
+	void slotGetLightAmbient(int id, BoVector4Float*);
+	void slotGetLightDiffuse(int id, BoVector4Float*);
+	void slotGetLightSpecular(int id, BoVector4Float*);
+	void slotGetLightAttenuation(int id, BoVector3Float*);
 	void slotGetLightEnabled(int id, bool*);
-	void slotSetLightPos(int id, const BoVector4&);
-	void slotSetLightAmbient(int id, const BoVector4&);
-	void slotSetLightDiffuse(int id, const BoVector4&);
-	void slotSetLightSpecular(int id, const BoVector4&);
-	void slotSetLightAttenuation(int id, const BoVector3&);
+	void slotSetLightPos(int id, const BoVector4Float&);
+	void slotSetLightAmbient(int id, const BoVector4Float&);
+	void slotSetLightDiffuse(int id, const BoVector4Float&);
+	void slotSetLightSpecular(int id, const BoVector4Float&);
+	void slotSetLightAttenuation(int id, const BoVector3Float&);
 	void slotSetLightEnabled(int id, bool);
 
 	/*  Camera  */
-	void slotGetCameraPos(BoVector3*);
-	void slotGetCameraLookAt(BoVector3*);
-	void slotGetCameraUp(BoVector3*);
+	void slotGetCameraPos(BoVector3Float*);
+	void slotGetCameraLookAt(BoVector3Float*);
+	void slotGetCameraUp(BoVector3Float*);
 	void slotGetCameraRotation(float*);
 	void slotGetCameraRadius(float*);
 	void slotGetCameraZ(float*);
@@ -615,9 +615,9 @@ protected slots:
 	void slotSetCameraFreeMovement(bool);
 
 	/*  AutoCamera  */
-	void slotSetCameraPos(const BoVector3&);
-	void slotSetCameraLookAt(const BoVector3&);
-	void slotSetCameraUp(const BoVector3&);
+	void slotSetCameraPos(const BoVector3Float&);
+	void slotSetCameraLookAt(const BoVector3Float&);
+	void slotSetCameraUp(const BoVector3Float&);
 	void slotSetCameraRotation(float);
 	void slotSetCameraRadius(float);
 	void slotSetCameraZ(float);

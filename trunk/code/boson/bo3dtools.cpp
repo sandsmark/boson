@@ -66,109 +66,111 @@ QDataStream& operator>>(QDataStream& s, BoVector2Float& v)
 }
 
 
-BoVector3 BoVector3::crossProduct(const BoVector3& v, const BoVector3& w)
-{
-  BoVector3 r;
-  r.setX((v.y() * w.z()) - (v.z() * w.y()));
-  r.setY((v.z() * w.x()) - (v.x() * w.z()));
-  r.setZ((v.x() * w.y()) - (v.y() * w.x()));
-  return r;
-}
-
-bool BoVector3::isAdjacent(const BoVector3* v1, const BoVector3* v2)
-{
-  if (!v1 || !v2)
-  {
-    return false;
-  }
-  int equal = 0;
-  for (int i = 0; i < 3; i++)
-  {
-    if (v1[i].isEqual(v2[0]) || v1[i].isEqual(v2[1]) || v1[i].isEqual(v2[2]))
-    {
-      equal++;
-    }
-  }
-
-  // v1 is adjacent to v2 if at least 2 points are equal.
-  // equal vectors (i.e. all points are equal) are possible, too.
-  return (equal >= 2);
-}
-
-int BoVector3::findPoint(const BoVector3& point, const BoVector3* array)
-{
-  for (int i = 0; i < 3; i++)
-  {
-    if (array[i].isEqual(point))
-    {
-      return i;
-    }
-  }
-  return -1;
-}
-
-QString BoVector3::debugString(const BoVector3& v, int prec)
+QString debugStringVector(const BoVector3Float& v, int prec)
 {
   return QString("%1,%2,%3").arg(v.x(), 0, 'f', prec).arg(v.y(), 0, 'f', prec).arg(v.z(), 0, 'f', prec);
 }
 
-QString BoVector3::debugString(int prec) const
+QString debugStringVector(const BoVector3Fixed& v, int prec)
 {
-  return BoVector3::debugString(*this, prec);
+  BoVector3Float v2;
+  v2.set(v[0], v[1], v[2]);
+  return debugStringVector(v2, prec);
 }
 
-void BoVector3::debugVector(const BoVector3& v, int prec)
+bool saveVector3AsXML(const BoVector3Fixed& v, QDomElement& root, const QString& name)
 {
-  boDebug() << "vector: " << debugString(v, prec) << endl;
-}
-
-bool BoVector3::saveAsXML(QDomElement& root, const QString& name) const
-{
-  root.setAttribute(name + ".x", mData[0]);
-  root.setAttribute(name + ".y", mData[1]);
-  root.setAttribute(name + ".z", mData[2]);
+  root.setAttribute(name + ".x", v[0]);
+  root.setAttribute(name + ".y", v[1]);
+  root.setAttribute(name + ".z", v[2]);
   return true;
 }
 
-bool BoVector3::loadFromXML(const QDomElement& root, const QString& name)
+bool saveVector3AsXML(const BoVector3Float& v, QDomElement& root, const QString& name)
 {
-  BoVector3 backup = *this;
+  root.setAttribute(name + ".x", v[0]);
+  root.setAttribute(name + ".y", v[1]);
+  root.setAttribute(name + ".z", v[2]);
+  return true;
+}
+
+bool loadVector3FromXML(BoVector3Float* v, const QDomElement& root, const QString& name)
+{
+  BoVector3Float backup = *v;
   bool ok;
   bool ret = true;
 
-  mData[0] = root.attribute(name + ".x").toFloat(&ok);
+  v->setX(root.attribute(name + ".x").toFloat(&ok));
   if(!ok)
   {
     boError() << k_funcinfo << "Error loading '" << name << ".x' attribute ('" <<
         root.attribute(name + ".x") << "')" << endl;
     ret = false;
-    mData[0] = backup.x();
+    v->setX(backup.x());
   }
-  mData[1] = root.attribute(name + ".y").toFloat(&ok);
+  v->setY(root.attribute(name + ".y").toFloat(&ok));
   if(!ok)
   {
     boError() << k_funcinfo << "Error loading '" << name << ".y' attribute ('" <<
         root.attribute(name + ".y") << "')" << endl;
     ret = false;
-    mData[1] = backup.y();
+    v->setY(backup.y());
   }
-  mData[2] = root.attribute(name + ".z").toFloat(&ok);
+  v->setZ(root.attribute(name + ".z").toFloat(&ok));
   if(!ok)
   {
     boError() << k_funcinfo << "Error loading '" << name << ".z' attribute ('" <<
         root.attribute(name + ".z") << "')" << endl;
     ret = false;
-    mData[2] = backup.z();
+    v->setZ(backup.z());
   }
   return ret;
 }
 
-QDataStream& operator<<(QDataStream& s, const BoVector3& v)
+bool loadVector3FromXML(BoVector3Fixed* v, const QDomElement& root, const QString& name)
+{
+  BoVector3Fixed backup = *v;
+  bool ok;
+  bool ret = true;
+
+  v->setX(root.attribute(name + ".x").toFloat(&ok));
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading '" << name << ".x' attribute ('" <<
+        root.attribute(name + ".x") << "')" << endl;
+    ret = false;
+    v->setX(backup.x());
+  }
+  v->setY(root.attribute(name + ".y").toFloat(&ok));
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading '" << name << ".y' attribute ('" <<
+        root.attribute(name + ".y") << "')" << endl;
+    ret = false;
+    v->setY(backup.y());
+  }
+  v->setZ(root.attribute(name + ".z").toFloat(&ok));
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading '" << name << ".z' attribute ('" <<
+        root.attribute(name + ".z") << "')" << endl;
+    ret = false;
+    v->setZ(backup.z());
+  }
+  return ret;
+}
+
+QDataStream& operator<<(QDataStream& s, const BoVector3Float& v)
 {
   return s << (float)v[0] << (float)v[1] << (float)v[2];
 }
 
-QDataStream& operator>>(QDataStream& s, BoVector3& v)
+QDataStream& operator<<(QDataStream& s, const BoVector3Fixed& v)
+{
+  return s << v[0] << v[1] << v[2];
+}
+
+QDataStream& operator>>(QDataStream& s, BoVector3Float& v)
 {
   float x, y, z;
   s >> x >> y >> z;
@@ -176,79 +178,147 @@ QDataStream& operator>>(QDataStream& s, BoVector3& v)
   return s;
 }
 
-QString BoVector4::debugString(const BoVector4& v, int prec)
+QDataStream& operator>>(QDataStream& s, BoVector3Fixed& v)
+{
+  bofixed x, y, z;
+  s >> x >> y >> z;
+  v.set(x, y, z);
+  return s;
+}
+
+QString debugStringVector(const BoVector4Float& v, int prec)
 {
   return QString("%1,%2,%3,%4").arg(v.x(), 0, 'f', prec).arg(v.y(), 0, 'f', prec).arg(v.z(), 0, 'f', prec).arg(v.w(), 0, 'f', prec);
 }
 
-void BoVector4::debugVector(const BoVector4& v, int prec)
+QString debugStringVector(const BoVector4Fixed& v, int prec)
 {
-  boDebug() << "vector: " << debugString(v, prec) << endl;
+  BoVector4Float v2;
+  v2.set(v[0], v[1], v[2], v[3]);
+  return debugStringVector(v2, prec);
 }
 
-QString BoVector4::debugString(int prec) const
+bool saveVector4AsXML(const BoVector4Float& v, QDomElement& root, const QString& name)
 {
-  return BoVector4::debugString(*this, prec);
-}
-
-bool BoVector4::saveAsXML(QDomElement& root, const QString& name) const
-{
-  root.setAttribute(name + ".x", mData[0]);
-  root.setAttribute(name + ".y", mData[1]);
-  root.setAttribute(name + ".z", mData[2]);
-  root.setAttribute(name + ".w", mData[3]);
+  root.setAttribute(name + ".x", v[0]);
+  root.setAttribute(name + ".y", v[1]);
+  root.setAttribute(name + ".z", v[2]);
+  root.setAttribute(name + ".w", v[3]);
   return true;
 }
 
-bool BoVector4::loadFromXML(const QDomElement& root, const QString& name)
+bool saveVector4AsXML(const BoVector4Fixed& v, QDomElement& root, const QString& name)
 {
-  BoVector4 backup = *this;
+  root.setAttribute(name + ".x", v[0]);
+  root.setAttribute(name + ".y", v[1]);
+  root.setAttribute(name + ".z", v[2]);
+  root.setAttribute(name + ".w", v[3]);
+  return true;
+}
+
+bool loadVector4FromXML(BoVector4Float* v, const QDomElement& root, const QString& name)
+{
+  BoVector4Float backup = *v;
   bool ok;
   bool ret = true;
 
-  mData[0] = root.attribute(name + ".x").toFloat(&ok);
+  v->setX(root.attribute(name + ".x").toFloat(&ok));
   if(!ok)
   {
     boError() << k_funcinfo << "Error loading '" << name << ".x' attribute ('" <<
         root.attribute(name + ".x") << "')" << endl;
     ret = false;
-    mData[0] = backup.x();
+    v->setX(backup.x());
   }
-  mData[1] = root.attribute(name + ".y").toFloat(&ok);
+  v->setY(root.attribute(name + ".y").toFloat(&ok));
   if(!ok)
   {
     boError() << k_funcinfo << "Error loading '" << name << ".y' attribute ('" <<
         root.attribute(name + ".y") << "')" << endl;
     ret = false;
-    mData[1] = backup.y();
+    v->setY(backup.y());
   }
-  mData[2] = root.attribute(name + ".z").toFloat(&ok);
+  v->setZ(root.attribute(name + ".z").toFloat(&ok));
   if(!ok)
   {
     boError() << k_funcinfo << "Error loading '" << name << ".z' attribute ('" <<
         root.attribute(name + ".z") << "')" << endl;
     ret = false;
-    mData[2] = backup.z();
+    v->setZ(backup.z());
   }
-  mData[3] = root.attribute(name + ".w").toFloat(&ok);
+  v->setW(root.attribute(name + ".w").toFloat(&ok));
   if(!ok)
   {
     boError() << k_funcinfo << "Error loading '" << name << ".w' attribute ('" <<
         root.attribute(name + ".w") << "')" << endl;
     ret = false;
-    mData[3] = backup.w();
+    v->setW(backup.w());
   }
   return ret;
 }
 
-QDataStream& operator<<(QDataStream& s, const BoVector4& v)
+bool loadVector4FromXML(BoVector4Fixed* v, const QDomElement& root, const QString& name)
+{
+  BoVector4Fixed backup = *v;
+  bool ok;
+  bool ret = true;
+
+  v->setX(root.attribute(name + ".x").toFloat(&ok));
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading '" << name << ".x' attribute ('" <<
+        root.attribute(name + ".x") << "')" << endl;
+    ret = false;
+    v->setX(backup.x());
+  }
+  v->setY(root.attribute(name + ".y").toFloat(&ok));
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading '" << name << ".y' attribute ('" <<
+        root.attribute(name + ".y") << "')" << endl;
+    ret = false;
+    v->setY(backup.y());
+  }
+  v->setZ(root.attribute(name + ".z").toFloat(&ok));
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading '" << name << ".z' attribute ('" <<
+        root.attribute(name + ".z") << "')" << endl;
+    ret = false;
+    v->setZ(backup.z());
+  }
+  v->setW(root.attribute(name + ".w").toFloat(&ok));
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading '" << name << ".w' attribute ('" <<
+        root.attribute(name + ".w") << "')" << endl;
+    ret = false;
+    v->setW(backup.w());
+  }
+  return ret;
+}
+
+QDataStream& operator<<(QDataStream& s, const BoVector4Float& v)
 {
   return s << (float)v[0] << (float)v[1] << (float)v[2] << (float)v[3];
 }
 
-QDataStream& operator>>(QDataStream& s, BoVector4& v)
+QDataStream& operator<<(QDataStream& s, const BoVector4Fixed& v)
+{
+  return s << v[0] << v[1] << v[2] << v[3];
+}
+
+QDataStream& operator>>(QDataStream& s, BoVector4Float& v)
 {
   float x, y, z, w;
+  s >> x >> y >> z >> w;
+  v.set(x, y, z, w);
+  return s;
+}
+
+QDataStream& operator>>(QDataStream& s, BoVector4Fixed& v)
+{
+  bofixed x, y, z, w;
   s >> x >> y >> z >> w;
   v.set(x, y, z, w);
   return s;
@@ -280,7 +350,7 @@ void BoMatrix::loadMatrix(GLenum matrix)
  glGetFloatv(matrix, mData);
 }
 
-void BoMatrix::loadMatrix(const BoVector3& x, const BoVector3& y, const BoVector3& z)
+void BoMatrix::loadMatrix(const BoVector3Float& x, const BoVector3Float& y, const BoVector3Float& z)
 {
   setElement(0, 0, x[0]);
   setElement(0, 1, x[1]);
@@ -303,7 +373,7 @@ void BoMatrix::loadMatrix(const BoVector3& x, const BoVector3& y, const BoVector
   setElement(3, 3, 1.0f);
 }
 
-void BoMatrix::transform(BoVector3* vector, const BoVector3* input) const
+void BoMatrix::transform(BoVector3Float* vector, const BoVector3Float* input) const
 {
  // v = m * i, m is a 4x4 OpenGL matrix, r and v are both a 3x1 column vector.
  // the forth element is unused in boson and therefore we use silently 0.
@@ -318,7 +388,7 @@ void BoMatrix::transform(BoVector3* vector, const BoVector3* input) const
 #undef M
 }
 
-void BoMatrix::transform(BoVector4* vector, const BoVector4* input) const
+void BoMatrix::transform(BoVector4Float* vector, const BoVector4Float* input) const
 {
  // v = m * i, m is a 4x4 OpenGL matrix, r and v are both a 3x1 column vector.
  // the forth element is unused in boson and therefore we use silently 0.
@@ -553,12 +623,12 @@ void BoMatrix::rotate(GLfloat angle, GLfloat x, GLfloat y, GLfloat z)
 
 }
 
-void BoMatrix::setLookAtRotation(const BoVector3& cameraPos, const BoVector3& lookAt, const BoVector3& up)
+void BoMatrix::setLookAtRotation(const BoVector3Float& cameraPos, const BoVector3Float& lookAt, const BoVector3Float& up)
 {
-  BoVector3 z = cameraPos - lookAt;
+  BoVector3Float z = cameraPos - lookAt;
   z.normalize();
-  BoVector3 x = BoVector3::crossProduct(up, z);
-  BoVector3 y = BoVector3::crossProduct(z, x);
+  BoVector3Float x = BoVector3<float>::crossProduct(up, z);
+  BoVector3Float y = BoVector3<float>::crossProduct(z, x);
   x.normalize();
   y.normalize();
   loadMatrix(x, y, z);
@@ -623,9 +693,9 @@ void BoMatrix::toRotation(float* alpha, float* beta, float* gamma)
  *gamma = Bo3dTools::rad2deg(*gamma);
 }
 
-void BoMatrix::toGluLookAt(BoVector3* lookAt, BoVector3* up, const BoVector3& cameraPos) const
+void BoMatrix::toGluLookAt(BoVector3Float* lookAt, BoVector3Float* up, const BoVector3Float& cameraPos) const
 {
- BoVector3 x, z;
+ BoVector3Float x, z;
  x.setX(element(0, 0));
  x.setY(element(0, 1));
  x.setZ(element(0, 2));
@@ -637,7 +707,7 @@ void BoMatrix::toGluLookAt(BoVector3* lookAt, BoVector3* up, const BoVector3& ca
  extractUp(*up, x, z);
 }
 
-void BoMatrix::extractUp(BoVector3& up, const BoVector3& x, const BoVector3& z) const
+void BoMatrix::extractUp(BoVector3Float& up, const BoVector3Float& x, const BoVector3Float& z) const
 {
 // keep these formulas in mind:
 // (you can get them from x := up cross z , (we assume that no normalizing necessary!)
@@ -788,14 +858,14 @@ float BoQuaternion::length() const
  return (float)sqrt(mW * mW + mV[0] * mV[0] + mV[1] * mV[1] + mV[2] * mV[2]);
 }
 
-void BoQuaternion::setRotation(const BoVector3& direction_, const BoVector3& up_)
+void BoQuaternion::setRotation(const BoVector3Float& direction_, const BoVector3Float& up_)
 {
- BoVector3 dir(direction_);
- BoVector3 up(up_);
+ BoVector3Float dir(direction_);
+ BoVector3Float up(up_);
  dir.normalize();
 
- BoVector3 x = BoVector3::crossProduct(up, dir);
- BoVector3 y = BoVector3::crossProduct(dir, x);
+ BoVector3Float x = BoVector3Float::crossProduct(up, dir);
+ BoVector3Float y = BoVector3Float::crossProduct(dir, x);
  x.normalize();
  y.normalize();
 
@@ -815,9 +885,9 @@ void BoQuaternion::setRotation(const BoVector3& direction_, const BoVector3& up_
  setRotation(M);
 }
 
-void BoQuaternion::setRotation(float angle, const BoVector3& axis)
+void BoQuaternion::setRotation(float angle, const BoVector3Float& axis)
 {
- BoVector3 normAxis = axis;
+ BoVector3Float normAxis = axis;
  normAxis.normalize();
  float sina = sin(Bo3dTools::deg2rad(angle / 2));
  mW = cos(Bo3dTools::deg2rad(angle / 2));
@@ -829,9 +899,9 @@ void BoQuaternion::setRotation(float angleX, float angleY, float angleZ)
 {
  BoQuaternion x, y, z;
  // one quaternion per axis
- x.set((float)cos(Bo3dTools::deg2rad(angleX/2)), BoVector3((float)sin(Bo3dTools::deg2rad(angleX/2)), 0.0f, 0.0f));
- y.set((float)cos(Bo3dTools::deg2rad(angleY/2)), BoVector3(0.0f, (float)sin(Bo3dTools::deg2rad(angleY/2)), 0.0f));
- z.set((float)cos(Bo3dTools::deg2rad(angleZ/2)), BoVector3(0.0f, 0.0f, (float)sin(Bo3dTools::deg2rad(angleZ/2))));
+ x.set((float)cos(Bo3dTools::deg2rad(angleX/2)), BoVector3Float((float)sin(Bo3dTools::deg2rad(angleX/2)), 0.0f, 0.0f));
+ y.set((float)cos(Bo3dTools::deg2rad(angleY/2)), BoVector3Float(0.0f, (float)sin(Bo3dTools::deg2rad(angleY/2)), 0.0f));
+ z.set((float)cos(Bo3dTools::deg2rad(angleZ/2)), BoVector3Float(0.0f, 0.0f, (float)sin(Bo3dTools::deg2rad(angleZ/2))));
  x.multiply(y);
  x.multiply(z);
  set(x);
@@ -882,7 +952,7 @@ void BoQuaternion::setRotation(const BoMatrix& rotationMatrix)
  mV.set(x, y, z);
 }
 
-void BoQuaternion::toRotation(float* angle, BoVector3* axis)
+void BoQuaternion::toRotation(float* angle, BoVector3Float* axis)
 {
  // see Q 57 in quat faq on http://www.j3d.org/matrix_faq/matrfaq_latest.html
  if (!angle || !axis)
@@ -912,7 +982,7 @@ void BoQuaternion::toRotation(float* alpha, float* beta, float* gamma)
 }
 
 
-void BoQuaternion::transform(BoVector3* v, const BoVector3* input) const
+void BoQuaternion::transform(BoVector3Float* v, const BoVector3Float* input) const
 {
  BoQuaternion q = BoQuaternion(0, *input);
  BoQuaternion tmp = BoQuaternion::multiply(*this, q);
@@ -924,7 +994,7 @@ void BoQuaternion::transform(BoVector3* v, const BoVector3* input) const
 
 QString BoQuaternion::debugString(int prec) const
 {
- return QString("(%1,(%2))").arg(mW, 0, 'f', prec).arg(mV.debugString(prec));
+ return QString("(%1,(%2))").arg(mW, 0, 'f', prec).arg(debugStringVector(mV, prec));
 }
 
 
@@ -1049,7 +1119,7 @@ bofixed Bo3dTools::rad2deg(bofixed rad)
   return rad * RAD2DEG;
 }
 
-float Bo3dTools::sphereInFrustum(const float* viewFrustum, const BoVector3& pos, float radius)
+float Bo3dTools::sphereInFrustum(const float* viewFrustum, const BoVector3Float& pos, float radius)
 {
   // FIXME: performance: we might unroll the loop and then make this function
   // inline. We call it pretty often!
@@ -1069,7 +1139,27 @@ float Bo3dTools::sphereInFrustum(const float* viewFrustum, const BoVector3& pos,
   return distance + radius;
 }
 
-int Bo3dTools::sphereCompleteInFrustum(const float* viewFrustum, const BoVector3& pos, float radius)
+bofixed Bo3dTools::sphereInFrustum(const float* viewFrustum, const BoVector3Fixed& pos, bofixed radius)
+{
+  // FIXME: performance: we might unroll the loop and then make this function
+  // inline. We call it pretty often!
+  bofixed distance;
+  for(int p = 0; p < 6; p++)
+  {
+    distance = viewFrustum[p * 4 + 0] * pos[0] + viewFrustum[p * 4 + 1] * pos[1] +
+        viewFrustum[p * 4 + 2] * pos[2] + viewFrustum[p * 4 + 3];
+    if(distance <= -radius)
+    {
+      return 0;
+    }
+  }
+
+  // we return distance from near plane + radius, which is how far the object is
+  // away from the camera!
+  return distance + radius;
+}
+
+int Bo3dTools::sphereCompleteInFrustum(const float* viewFrustum, const BoVector3Float& pos, float radius)
 {
   float distance;
   int c = 0;
@@ -1093,7 +1183,31 @@ int Bo3dTools::sphereCompleteInFrustum(const float* viewFrustum, const BoVector3
   return 1;
 }
 
-bool Bo3dTools::boxInFrustum(const float* viewFrustum, const BoVector3& min, const BoVector3& max)
+int Bo3dTools::sphereCompleteInFrustum(const float* viewFrustum, const BoVector3Fixed& pos, bofixed radius)
+{
+  bofixed distance;
+  int c = 0;
+  for(int p = 0; p < 6; p++)
+  {
+    distance = viewFrustum[p * 4 + 0] * pos[0] + viewFrustum[p * 4 + 1] * pos[1] +
+        viewFrustum[p * 4 + 2] * pos[2] + viewFrustum[p * 4 + 3];
+    if(distance <= -radius)
+    {
+      return 0;
+    }
+    if(distance > radius)
+    {
+      c++;
+    }
+  }
+  if(c == 6)
+  {
+    return 2;
+  }
+  return 1;
+}
+
+bool Bo3dTools::boxInFrustum(const float* viewFrustum, const BoVector3Float& min, const BoVector3Float& max)
 {
   for(int p = 0; p < 6; p++)
   {
@@ -1145,13 +1259,13 @@ bool Bo3dTools::boxInFrustum(const float* viewFrustum, const BoVector3& min, con
 bool Bo3dTools::boProject(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, GLfloat x, GLfloat y, GLfloat z, QPoint* pos)
 {
   // AB: once again - most credits go to mesa :)
-  BoVector4 v;
+  BoVector4Float v;
   v.setX(x);
   v.setY(y);
   v.setZ(z);
   v.setW(1.0f);
 
-  BoVector4 v2;
+  BoVector4Float v2;
   modelviewMatrix.transform(&v2, &v);
   projectionMatrix.transform(&v, &v2);
 
@@ -1172,7 +1286,7 @@ bool Bo3dTools::boProject(const BoMatrix& modelviewMatrix, const BoMatrix& proje
   return true;
 }
 
-bool Bo3dTools::boUnProject(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, const QPoint& pos, BoVector3* ret, float z)
+bool Bo3dTools::boUnProject(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, const QPoint& pos, BoVector3Float* ret, float z)
 {
   // AB: most code is from mesa's gluUnProject().
   BoMatrix A(projectionMatrix);
@@ -1207,8 +1321,8 @@ bool Bo3dTools::boUnProject(const BoMatrix& modelviewMatrix, const BoMatrix& pro
   }
 
 
-  BoVector4 v;
-  BoVector4 result;
+  BoVector4Float v;
+  BoVector4Float result;
   v.setX( ((GLfloat)((pos.x() - viewport[0]) * 2)) / viewport[2] - 1.0f);
   v.setY( ((GLfloat)((realy - viewport[1]) * 2)) / viewport[3] - 1.0f);
 #if 0
@@ -1240,7 +1354,7 @@ bool Bo3dTools::mapCoordinates(const BoMatrix& modelviewMatrix, const BoMatrix& 
   // and then find the point that is on z=0.0
   GLdouble nearX, nearY, nearZ;
   GLdouble farX, farY, farZ;
-  BoVector3 near, far;
+  BoVector3Float near, far;
   if(!boUnProject(modelviewMatrix, projectionMatrix, viewport, pos, &near, 0.0f))
   {
     return false;
@@ -1270,7 +1384,7 @@ bool Bo3dTools::mapCoordinates(const BoMatrix& modelviewMatrix, const BoMatrix& 
   // AB: 0.0f is reached when we have a point that is outside the actual window!
   if(useRealDepth && depth != 1.0f && depth != 0.0f) {
     // retrieve z
-    BoVector3 v;
+    BoVector3Float v;
     if(!boUnProject(modelviewMatrix, projectionMatrix, viewport, pos, &v))
     {
       return false;

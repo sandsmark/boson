@@ -77,12 +77,12 @@ class BosonParticle
     /**
      * Current color of particle.
      */
-    BoVector4 color;
+    BoVector4Float color;
     /**
      * Current position of particle in OpenGL (world) coordinates (absolute
      *  coordinates).
      **/
-    BoVector3 pos;
+    BoVector3Fixed pos;
     /**
      * Current size (diameter) of particle. When it's 1.0, particle is as big as
      *  one cell.
@@ -151,13 +151,13 @@ class BosonEffectParticle : public BosonEffect
      * This must be precalculated and set using @ref setParticleDistVector every
      *  time position of camera or particle system changes.
      **/
-    const BoVector3& particleDistVector() const  { return mParticleDistVector; }
+    const BoVector3Fixed& particleDistVector() const  { return mParticleDistVector; }
     /**
      * Sets particle distance vector (specifies how much particles are "pulled")
      *  towards the camera.
      * @see particleDistVector
      **/
-    void setParticleDistVector(const BoVector3& v)  { mParticleDistVector = v; }
+    void setParticleDistVector(const BoVector3Fixed& v)  { mParticleDistVector = v; }
 
     /**
      * @return Particle at position i in the particles list.
@@ -183,7 +183,7 @@ class BosonEffectParticle : public BosonEffect
     float mBoundingSphereRadius;
     int mBlendFunc[2];
     float mParticleDist;
-    BoVector3 mParticleDistVector;
+    BoVector3Fixed mParticleDistVector;
     unsigned int mParticleCount;
     const BosonEffectPropertiesParticle* mProperties;
     bool mAlign;  // Whether to align particles to camera
@@ -209,7 +209,7 @@ class BosonGenericParticle : public BosonParticle
     /**
      * Current velocity i.e. how much particle moves per second.
      **/
-    BoVector3 velo;
+    BoVector3Fixed velo;
     /**
      * Maximum lifetime of this particle.
      * @see life
@@ -261,9 +261,9 @@ class BosonEffectParticleGeneric : public BosonEffectParticle
      *
      * @see matrix
      **/
-    virtual void setRotation(const BoVector3& rotation);
+    virtual void setRotation(const BoVector3Fixed& rotation);
 
-    virtual void setPosition(const BoVector3& pos);
+    virtual void setPosition(const BoVector3Fixed& pos);
 
 
     /**
@@ -399,7 +399,7 @@ class BosonTrailParticle : public BosonParticle
     /**
      * Current velocity i.e. how much particle moves per second
      **/
-    BoVector3 velo;
+    BoVector3Fixed velo;
     /**
      * Maximum lifetime of this particle
      * @see life
@@ -429,7 +429,7 @@ class BosonEffectParticleTrail : public BosonEffectParticle
      * @param pos Initial position for this effect.
      **/
     BosonEffectParticleTrail(const BosonEffectPropertiesParticleTrail* prop, int maxnum,
-        const BosonTextureArray* textures, const BoVector3& pos);
+        const BosonTextureArray* textures, const BoVector3Fixed& pos);
     virtual ~BosonEffectParticleTrail();
 
 
@@ -450,7 +450,7 @@ class BosonEffectParticleTrail : public BosonEffectParticle
      *
      * @see matrix
      **/
-    virtual void setRotation(const BoVector3& rotation);
+    virtual void setRotation(const BoVector3Fixed& rotation);
 
     /**
      * Set new position for this effect.
@@ -459,7 +459,7 @@ class BosonEffectParticleTrail : public BosonEffectParticle
      *  effect several times between two @ref update calls, only one "line of
      *  particles" is drawn.
      **/
-    virtual void setPosition(const BoVector3& pos);
+    virtual void setPosition(const BoVector3Fixed& pos);
 
 
     /**
@@ -505,8 +505,8 @@ class BosonEffectParticleTrail : public BosonEffectParticle
      *  we want to place them. You can use it to e.g. place a smoke trail behind
      *  the missile.
      **/
-    const BoVector3& offset() const  { return mOffset; }
-    void setOffset(const BoVector3& o)  { mOffset = o; }
+    const BoVector3Fixed& offset() const  { return mOffset; }
+    void setOffset(const BoVector3Fixed& o)  { mOffset = o; }
 
     void setMaxParticleSize(float size)  { mMaxParticleSize = size; }
 
@@ -529,7 +529,7 @@ class BosonEffectParticleTrail : public BosonEffectParticle
     /**
      * Called when new particle is made active and needs to be initialized
      **/
-    virtual void initParticle(BosonTrailParticle* particle, const BoVector3& pos);
+    virtual void initParticle(BosonTrailParticle* particle, const BoVector3Fixed& pos);
     /**
      * Called when particle has to be updated. Called from @ref update
      **/
@@ -548,9 +548,9 @@ class BosonEffectParticleTrail : public BosonEffectParticle
     bool mObsolete;  // If true, new particles won't be created anymore
     float mSpacing;
 
-    BoVector3 mOffset;
+    BoVector3Fixed mOffset;
 
-    BoVector3 mLastPos;
+    BoVector3Fixed mLastPos;
 };
 
 
