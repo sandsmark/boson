@@ -19,6 +19,7 @@
 
 #include "bosonaudio.h"
 
+#include "boaudiocommand.h"
 #include "bodebug.h"
 
 #include <config.h>
