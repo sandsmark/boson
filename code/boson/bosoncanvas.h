@@ -80,10 +80,9 @@ public:
 	unsigned int mapWidth() const;
 
 	/**
-	 * Load the tileset. Note that you <em>must not</em> call @ref
-	 * slotAddCell before the tileset has been loaded completely!
+	 * Load the tileset - see @ref BosonTiles
 	 *
-	 * Also note that the actual loading happens in @ref slotLoadTiles using
+	 * Note that the actual loading happens in @ref slotLoadTiles using
 	 * a @ref QTimer::singleShot. This gives us a non-blocking UI as we can
 	 * use @ref QApplication::processEvents
 	 * @param tileFile currently always "earth.png
@@ -180,15 +179,6 @@ public:
 	void quitGame();
 
 	/**
-	 * Called from another threead to set the tileset. Note that until this
-	 * was called there is <em>no</em> cell and <em>no</em> tile on the
-	 * canvas!
-	 *
-	 * You should not call @ref QCanvas::update before this is completed!
-	 **/
-	void setTileSet(QPixmap* tileSet);
-
-	/**
 	 * Remove all remaining units of player (if any). After this point the
 	 * player is not able to do anything!
 	 **/
@@ -206,16 +196,13 @@ public:
 
 	BosonTiles* tileSet() const;
 
-	void resize(int w, int h);
-	int width() const { return mWidth; }
-	int height() const { return mHeight; }
 	bool onCanvas(const QPoint& pos) const
 	{
 		return onCanvas(pos.x(), pos.y());
 	}
 	bool onCanvas(int x, int y) const
 	{
-		return x >= 0 && y >= 0 && x < width() && y < height();
+		return x >= 0 && y >= 0 && (unsigned int)x < mapWidth() * BO_TILE_SIZE && (unsigned int)y < mapHeight() * BO_TILE_SIZE;
 	}
 
 	bool advanceFunctionLocked() const { return mAdvanceFunctionLocked; }
@@ -232,8 +219,6 @@ public slots:
 	 **/
 	void slotAdvance(unsigned int advanceCount, bool advanceFlag);
 	
-	void slotAddCell(int x, int y, int groundType, unsigned char b);
-
 signals:
 	void signalUnitMoved(Unit* unit, float oldX, float oldY);
 	void signalUnitDestroyed(Unit* unit);
@@ -260,9 +245,6 @@ private:
 	BosonCanvasPrivate* d;
 
 	bool mAdvanceFunctionLocked;
-
-	int mWidth;
-	int mHeight;
 };
 
 #endif
