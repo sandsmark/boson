@@ -67,8 +67,10 @@ struct mobileMsg_t:public unitMsg_t { mobType type; };
 struct moveMsg_t	{ int key, newx, newy;};
 /* MSG_*_DESTROYED */
 struct destroyedMsg_t	{ int key, x, y; }; // x and y are for checking 
-/* MSG_*_CONSTRUCT */
-struct constructMsg_t	{ int x, y; union {mobType mob; facilityType fix;} type;}; // where and what
+/* MSG_MOBILE_CONSTRUCT */
+struct mobConstrMsg_t	{ int key_constructor; mobType type;}; // who, what, (automatic where)
+/* MSG_FACILITY_CONSTRUCT */
+struct fixConstrMsg_t	{ int key_constructor; facilityType type; int x, y;}; // who, what, where
 /* MSG_UNIT_SHOOT */
 struct shootMsg_t	{ int key, target_key; };
 /* MSG_PERSO_RESSOURCES */
@@ -95,7 +97,8 @@ typedef union {
 	mobileMsg_t	mobile;
 	moveMsg_t	move;
 	destroyedMsg_t  destroyed;
-	constructMsg_t  construct;
+	mobConstrMsg_t	mobConstruct;
+	fixConstrMsg_t	fixConstruct;
 	shootMsg_t	shoot;
 	ressMsg_t	ressources;
 	powerMsg_t	power;
