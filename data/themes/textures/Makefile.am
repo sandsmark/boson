@@ -1,5 +1,21 @@
 # add your texture to texture_DATA (space separated) to make it install!
 texture_DATA = \
+        black.jpg \
+        camo1.jpg \
+        camo2.jpg \
+        camo3.jpg \
+        camo4.jpg \
+        camo5.jpg \
+        camo6.jpg \
+        camo7.jpg \
+        camo8.jpg \
+        camo9.jpg \
+        camo10.jpg \
+        grid2.jpg \
+        metal16.jpg \
+        metal17.jpg \
+        steel3.jpg \
+        steel4.jpg \
 	concrt1.jpg \
 	concrt2.jpg \
 	concrt3.jpg \
