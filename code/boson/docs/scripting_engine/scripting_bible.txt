@@ -151,6 +151,8 @@ The game engine should tell the scripting engine how much memory it has
 available and the scripting engine will work within the parameters passed by the
 gaming engine.
 
+Scripts should be able to be read both in text form and in a compiled form.
+
 2c) Types of scripts acceptable
 AI Personality
 Tactical
