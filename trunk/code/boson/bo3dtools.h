@@ -670,9 +670,9 @@ class BoMatrix
 
     /**
      * @overload
-     * The three vectors get interpreted as <em>column</em> vectors
+     * The three vectors get interpreted as <em>row</em> vectors
      **/
-    void loadMatrix(const BoVector3& column1, const BoVector3& column2, const BoVector3& column3);
+    void loadMatrix(const BoVector3& row1, const BoVector3& row2, const BoVector3& row3);
 
     /**
      * Change the element at @p row, @p column to @p value. See also @ref
@@ -1118,6 +1118,15 @@ class Bo3dTools
      **/
     // FIXME: we should use float* instead of double*
     static float sphereInFrustum(const double* viewFrustum, const BoVector3&, float radius);
+
+    /**
+     * This is similar to @ref sphereInFrustum, but will test whether the sphere
+     * is completely in the frustum.
+     *
+     * @return 0 if the sphere is not in the frustum at all, 1 if it is
+     * partially in the frsutum and 2 if the complete sphere is in the frustum.
+     **/
+    static int sphereCompleteInFrustum(const double* viewFrustum, const BoVector3&, float radius);
 
     /**
      * @overload
