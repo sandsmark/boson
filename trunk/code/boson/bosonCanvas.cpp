@@ -190,7 +190,7 @@ void bosonCanvas::destroyMob(destroyedMsg_t &m)
 	if (mob->who == who_am_i)
 		emit mobileNbUpdated(--my_mobiles);
 
-	mob->destroy();
+	mob->s_destroy();
 	boAssert( mobile.remove(m.key) == true );
 
 }
@@ -255,7 +255,7 @@ void bosonCanvas::destroyFix(destroyedMsg_t &msg)
 	if (f->who == who_am_i)
 		emit facilityNbUpdated(--my_fix);
 
-	f->destroy();
+	f->s_destroy();
 	boAssert( facility.remove(msg.key) == true);
 }
 
@@ -294,10 +294,10 @@ void bosonCanvas::shooted(powerMsg_t &m)
 
 	if (mob) {
 		/* shooting a mobile */
-		mob->shooted(m.power);
+		mob->s_shooted(m.power);
 	} else if (fix) {
 		/* shooting a facility */
-		fix->shooted(m.power);
+		fix->s_shooted(m.power);
 	} else	logf(LOG_ERROR, "bosonCanvas::shooted : unexpected key in powerMsg_t : %d", m.key);
 
 }

@@ -35,16 +35,30 @@ bosonBigDisplay::bosonBigDisplay(bosonTopLevel *btl, QWidget *parent, const char
 
 void bosonBigDisplay::actionClicked(QPoint mp, int /*state*/)
 {
-	QCanvasItem *sfg;
 
-	/* is there any mobiles of my own selected ? */
-	if (vtl->mobSelected.isEmpty()) return;	// nothing to do
+	if (vtl->mobSelected.isEmpty() && !vtl->fixSelected) return;	// nothing to do
+
+	QCanvasItem *sfg = bocanvas->findUnitAt( mp);
+
+	/*
+	 * FIX HANDLING
+	 */
+	puts("actionClicked(2)");
+	if (vtl->fixSelected) {
+		puts("actionClicked for fixSelected");
+		// fix Selected
+		if ( IS_MOBILE(sfg->rtti()))
+			((playerFacility*)vtl->fixSelected)->u_attack( (playerMobUnit*)sfg );
+		else if ( IS_FACILITY(sfg->rtti()))
+			((playerFacility*)vtl->fixSelected)->u_attack( (playerFacility*)sfg );
+		else return;
+	}
+		
+	/*
+	 * MOBILE HANDLING
+	 */
 	if ((int)who_am_i != vtl->selectionWho) return;	// nothing to do
-
 	QIntDictIterator<visualMobUnit> mobIt(vtl->mobSelected);
-
-
-	sfg = bocanvas->findUnitAt( mp);
 	if (!sfg) {
 		// nothing has been found : it's a ground-click
 		// order all mobiles to go there

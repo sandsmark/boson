@@ -73,7 +73,7 @@ void bosonUnit::u_attack(bosonUnit *u)
 
 	if (u == this) {
 		/* attacking myself */
-//		logf(LOG_WARNING, "(bosonUnit::u_attack()) %p attacking itself, aborting", this);
+		logf(LOG_WARNING, "(bosonUnit::u_attack()) %p attacking itself, aborting", this);
 		return;
 	}
 
@@ -86,6 +86,25 @@ void bosonUnit::u_attack(bosonUnit *u)
 
 	connect( u, SIGNAL(dying(bosonUnit*)), this, SLOT(targetDying(bosonUnit*)) );
 }
+
+bool bosonUnit::_getWantedShoot(Unit *&_target)
+{
+	if (!target) return false;		// no target
+	shoot_timer--;
+	if (shoot_timer<=0) shoot_timer = 30;
+		else return false;		// not yet
+
+	if (target->inherits("playerMobUnit"))
+		_target = ((playerMobUnit*)target);
+	else if (target->inherits("playerFacility"))
+		_target = ((playerFacility*)target);
+	else {
+		logf(LOG_ERROR, "_getWantedShoot, what's this bosonUnit ???");
+		return false;
+	}
+	return true;
+}
+
 
 /*
  * playerMobUnit
@@ -322,26 +341,15 @@ bool playerMobUnit::getWantedShoot(bosonMsgData *msg)
 {
 	int	range = mobileProp[type].range;
 
-	if (!target) return false;		// no target
 	if (range<=0) return false;		// Unit can't shoot
 
-	Unit * _target;
 
-	if (target->inherits("playerMobUnit"))
-		_target = ((playerMobUnit*)target);
-	else if (target->inherits("playerFacility"))
-		_target = ((playerFacility*)target);
-	else {
-		logf(LOG_ERROR, "getWantedShoot, what's this bosonUnit ???");
-		return false;
-	}
+	// how far are we ? 
+	Unit *_target;
+	if (!_getWantedShoot(_target)) return false;
 
-	QPoint p = _target->center() - QPoint( x(), y());
+	QPoint p = _target->center()  - QPoint( x(), y());
 	if ( boDist(p) > range) return false; // too far
-
-	shoot_timer--;
-	if (shoot_timer<=0) shoot_timer = 30;
-		else return false;		// not yet
 
 	// ok, let's shoot it
 	msg->shoot.target_key = _target->key;
@@ -481,14 +489,14 @@ void playerMobUnit::targetMoveTo(QPoint npos)
 }
 
 
-void playerMobUnit::shooted(int _power)
+void playerMobUnit::s_shooted(int _power)
 {
 	power = _power;
 	bocanvas->play("shoot.wav");
 	if (sp_up) sp_up->setFrame(_power);
 }
   
-void playerMobUnit::destroy(void)
+void playerMobUnit::s_destroy(void)
 {
 	setFrame(PIXMAP_MOBILE_DESTROYED);
 	setZ( Z_DESTROYED_MOBILE );
@@ -525,18 +533,26 @@ void playerFacility::s_setState(int s)
 
 void playerFacility::getWantedAction()
 {
+	bosonMsgData	data;
+
 	if (who != who_am_i) return;
+	if ( !visible() ) return;
+
+	if (getWantedShoot(&data)) {
+		data.shoot.key		= key;
+		sendMsg(buffer, MSG_UNIT_SHOOT, MSG(data.shoot) );
+	}
 }
 
 
-void playerFacility::shooted(int _power)
+void playerFacility::s_shooted(int _power)
 {
 	power = _power;
 	bocanvas->play("shoot.wav");
 	if (sp_up) sp_up->setFrame(_power);
 }
   
-void playerFacility::destroy(void)
+void playerFacility::s_destroy(void)
 {
 	setFrame(PIXMAP_FIX_DESTROYED);
 	setZ( Z_DESTROYED_FACILITY );
@@ -547,6 +563,40 @@ void playerFacility::destroy(void)
 	emit dying(this);
 }
 
+
+void playerFacility::u_attack(bosonUnit *u)
+{
+	if (facilityProp[type].range<=0) return;	// Unit can't shoot
+
+	bosonUnit *that = this;
+	if (u == that) { /* attacking myself */
+//		logf(LOG_WARNING, "(playerFacility::u_attack()) %p attacking itself, aborting", this);
+		return;
+	}
+
+	bosonUnit::u_attack(u);
+
+	connect( u, SIGNAL(sig_moveTo(QPoint)), this, SLOT(targetMoveTo(QPoint)) );
+}
+
+
+bool playerFacility::getWantedShoot(bosonMsgData *msg)
+{
+	int	range = facilityProp[type].range;
+
+	if (range<=0) return false;		// Unit can't shoot
+
+	// how far are we ? 
+	Unit *_target;
+	if (!_getWantedShoot(_target)) return false;
+
+	QPoint p = _target->center()  - QPoint( x(), y());
+	if ( boDist(p) > range) return false; // too far
+
+	// ok, let's shoot it
+	msg->shoot.target_key = _target->key;
+	return true;
+}
 
 #define underlyingGround() vcanvas->groundAt( gridRect().topLeft() )
 
