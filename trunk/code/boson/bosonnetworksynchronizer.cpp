@@ -189,7 +189,7 @@ protected:
 		s1 >> random1;
 		s2 >> random2;
 		if (random1 != random2) {
-			return i18n("Random numbers differ. Found: %1 should be: %2").arg(random2).arg(random2);
+			return i18n("Random numbers differ. Found: %1 should be: %2").arg(random).arg(random2);
 		}
 		return i18n("There is an error in the game (i.e. the Boson class) log (MD5 sums don't match), but it could not be found.");
 	}
