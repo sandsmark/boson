@@ -33,7 +33,8 @@
 #include <math.h>
 
 
-BoDefaultGroundRenderer::BoDefaultGroundRenderer() : BoGroundRendererBase()
+BoDefaultGroundRenderer::BoDefaultGroundRenderer(bool useCellTree)
+	: BoGroundRendererBase(useCellTree)
 {
 }
 

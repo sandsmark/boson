@@ -31,7 +31,8 @@
 #include <GL/gl.h>
 #include <math.h>
 
-BoFastGroundRenderer::BoFastGroundRenderer() : BoGroundRendererBase()
+BoFastGroundRenderer::BoFastGroundRenderer(bool useCellTree)
+	: BoGroundRendererBase(useCellTree)
 {
 }
 

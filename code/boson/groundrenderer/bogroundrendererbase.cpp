@@ -24,16 +24,13 @@
 #include "../defines.h"
 #include "../cell.h"
 #include "../bo3dtools.h"
+#include "../bosonprofiling.h"
 #include <bodebug.h>
 
 // not nice in this file. we need it for boGame->status() == KGame::Init
 // maybe we should require KGame not to be in init state before constructin the
 // class
 #include "../boson.h"
-
-
-
-#include <klocale.h>
 
 #include <GL/gl.h>
 #include <math.h>
@@ -45,12 +42,142 @@ static bool lineIntersects_points(const float* plane, const BoVector3& start, co
 static bool lineSegmentIntersects(const float* plane, const BoVector3& start, const BoVector3& end, BoVector3* intersection);
 #define EPSILON 0.0001f // zero for floating point numbers
 
-BoGroundRendererBase::BoGroundRendererBase()
+
+/**
+ * This class takes care of building a list (an array in this case) of cells
+ * that are visible in the current @ref viewFrustum.
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+class CellListBuilder
 {
+public:
+	CellListBuilder()
+	{
+		mViewFrustum = 0;
+		mViewport = 0;
+	}
+	virtual ~CellListBuilder() {}
+
+	void setViewport(const int* p) { mViewport = p; }
+	const int* viewport() const { return mViewport; }
+	void setViewFrustum(const float* f) { mViewFrustum = f; }
+	const float* viewFrustum() const { return mViewFrustum; }
+
+	/**
+	 * @param renderCells The original list of cells. You should use this
+	 * if @p renderCellsSize is big enough for your needs. Return this
+	 * pointer, if you use this array
+	 * @param renderCellsSize The size of the @p renderCells array. Set it
+	 * to the new value, if you return a pointer which is not equal to @p
+	 * renderCells.
+	 * @param renderCellsCount Set this to the number of cells in @p
+	 * renderCells that are used (starting from 0), i.e. should be rendered.
+	 **/
+	virtual Cell** generateCellList(const BosonMap* map, Cell** renderCells, int* renderCellsSize, unsigned int* renderCellsCount) = 0;
+
+private:
+	const float* mViewFrustum;
+	const int* mViewport;
+};
+
+/**
+ * This class uses a tree find out whether cells are visible. Whenever @ref
+ * checkCells is called on a valid rect, it calls itself again 4 times. Once for
+ * the top-left quarter, the top-right, bottom-left and bottom-right quarter of
+ * the rect.
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+class CellListBuilderTree : public CellListBuilder
+{
+public:
+	CellListBuilderTree() : CellListBuilder()
+	{
+		mCount = 0;
+		mMap = 0;
+	}
+	~CellListBuilderTree() {}
+
+	virtual Cell** generateCellList(const BosonMap* map, Cell** renderCells, int* renderCellsSize, unsigned int* renderCellsCount);
+
+protected:
+	/**
+	 * This is the main method of this class. It checks (recursively)
+	 * whether the cells in ((x,y),(x2,y2)) are visible and adds all visible
+	 * cells to @p cells.
+	 **/
+	void checkCells(Cell** cells, int x, int y, int x2, int y2);
+
+	/**
+	 * @return Whether the cells in the rect (x,y) to (x2,y2) are visible.
+	 * If they are visible, @p partially is set to FALSE, when all cells are
+	 * visible, otherwise to TRUE (rect is partially visible only). If no
+	 * cell is visible (i.e. this returns FALSE) @p partially is set to
+	 * FALSE.
+	 **/
+	bool cellsVisible(int x, int y, int x2, int y2, bool* partially) const;
+
+	/**
+	 * Add all cells in the rect (x, y) to (x2, y2) to @p cells
+	 **/
+	void addCells(Cell** cells, int x, int y, int x2, int y2);
+
+private:
+	// these variables are valid only while we are in generateCellList() !
+	const BosonMap* mMap;
+	unsigned int mCount;
+};
+
+/**
+ * This class is the "mathematical" way of doing this task. In a perfect world
+ * this should be the most efficient way (since we need only a formula, not a
+ * loop) and the best way (no false positives) to do this.
+ *
+ * But unfortunately, it isn't this easy. The mathematical formulas for this
+ * aren't really easy and retrieving the correct z values for the correct cells
+ * isn't so easy either.
+ *
+ * Therefore this class contains more code than the tree version, is slower and
+ * is probably less dependable. It is not recommended and provided only for
+ * experiments. Feel free to make it work correctly if you can, but I believe it
+ * is removed sooner or later.
+ *
+ * On performance: on the day of adding the tree version, the tree version took
+ * about 20% of the time of generating a "realistic" cell list (zoomed out a bit
+ * for getting overview, but not far). For "unrealistic" maps (zoomed out to the
+ * maximum, even beyond the FAR plane) the difference is even greater (iirc the
+ * tree took about 10-15% of the non-tree version only!)
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+class CellListBuilderNoTree : public CellListBuilder
+{
+public:
+	CellListBuilderNoTree() : CellListBuilder()
+	{
+	}
+	~CellListBuilderNoTree() {}
+
+	virtual Cell** generateCellList(const BosonMap* map, Cell** renderCells, int* renderCellsSize, unsigned int* renderCellsCount);
+
+protected:
+	void calculateWorldRect(const QRect& rect,
+			int mapWidth, int mapHeight,
+			float* minX, float* minY,
+			float* maxX, float* maxY);
+};
+
+BoGroundRendererBase::BoGroundRendererBase(bool useCellTree)
+{
+ mCellListBuilder = 0;
+ if (useCellTree) {
+	mCellListBuilder = new CellListBuilderTree();
+ } else {
+	mCellListBuilder = new CellListBuilderNoTree();
+ }
 }
 
 BoGroundRendererBase::~BoGroundRendererBase()
 {
+ delete mCellListBuilder;
 }
 
 static bool isInFrontOfPlane(const float* plane, const BoVector3& vector)
@@ -133,11 +260,137 @@ static bool lineSegmentIntersects(const float* plane, const BoVector3& start, co
  return true;
 }
 
-void BoGroundRendererBase::calculateWorldRect(const QRect& rect, int mapWidth, int mapHeight, float* minX, float* minY, float* maxX, float* maxY)
+void BoGroundRendererBase::generateCellList(const BosonMap* map)
+{
+ // we need to regenerate the cell list whenever the modelview or the projection
+ // matrix changes. then the displayed cells have most probably changed.
+
+ if (!map) {
+	setRenderCells(0, 0);
+	setRenderCellsCount(0);
+	return;
+ }
+
+ if (boGame->gameStatus() == KGame::Init) {
+	// we construct the display before the map is received
+	return;
+ }
+ int renderCellsSize = 0;
+ unsigned int renderCellsCount = 0;
+ Cell** originalList = renderCells();
+ mCellListBuilder->setViewFrustum(viewFrustum());
+ mCellListBuilder->setViewport(viewport());
+ Cell** renderCells = mCellListBuilder->generateCellList(map, originalList, &renderCellsSize, &renderCellsCount);
+ if (renderCells != originalList) {
+	setRenderCells(renderCells, renderCellsSize);
+ }
+ setRenderCellsCount(renderCellsCount);
+}
+
+Cell** CellListBuilderNoTree::generateCellList(const BosonMap* map, Cell** origRenderCells, int* renderCellsSize, unsigned int* renderCellsCount)
+{
+ BosonProfiler profiler(777893);
+ if (!viewport()) {
+	BO_NULL_ERROR(viewport());
+	return origRenderCells;
+ }
+ if (!viewFrustum()) {
+	BO_NULL_ERROR(viewFrusutm());
+	return origRenderCells;
+ }
+ // re-generate the list of to-be-rendered cells:
+ Cell* allCells = map->cells();
+ if (!allCells) {
+	boError() << k_funcinfo << "NULL cells!" << endl;
+	return origRenderCells;
+ }
+ float maxX = 0.0f, maxY = 0.0f;
+ float minX = 0.0f, minY = 0.0f;
+ calculateWorldRect(
+		QRect(QPoint(0, 0), QPoint(viewport()[2], viewport()[3])),
+		map->width(), map->height(),
+		&minX, &minY, &maxX, &maxY);
+// boDebug() << "world rect: minX=" << minX << " maxX=" << maxX << " minY=" << minY << " maxY=" << maxY << endl;
+ minY *= -1;
+ maxY *= -1;
+
+ // if everything went fine we need to add those cells that are in the
+ // ((minX,minY),(maxX,maxY)) rectangle only.
+
+ int cellMinX = (int)(minX / BO_GL_CELL_SIZE); // AB: *no* +1 for min values!
+ int cellMaxX = (int)(maxX / BO_GL_CELL_SIZE) + 1; // +1 because of a modulo (very probably at this point)
+ int cellMinY = (int)(minY / BO_GL_CELL_SIZE);
+ int cellMaxY = (int)(maxY / BO_GL_CELL_SIZE) + 1;
+
+ // finally we ensure that the cell values are valid, too.
+ // after these lines we mustn't modify cellM* anymore!
+ cellMinX = QMAX(cellMinX, 0);
+ cellMinY = QMAX(cellMinY, 0);
+ cellMaxX = QMAX(cellMaxX, 0);
+ cellMaxY = QMAX(cellMaxY, 0);
+ cellMinX = QMIN(cellMinX, (int)map->width() - 1);
+ cellMinY = QMIN(cellMinY, (int)map->height() - 1);
+ cellMaxX = QMIN(cellMaxX, (int)map->width() - 1);
+ cellMaxY = QMIN(cellMaxY, (int)map->height() - 1);
+
+ Cell** renderCells = origRenderCells;
+ int size = (cellMaxX - cellMinX + 1) * (cellMaxY - cellMinY + 1);
+ size = QMIN((int)(map->width() * map->height()), size);
+ if (size > *renderCellsSize) {
+	renderCells = new Cell*[size];
+	*renderCellsSize = size;
+ }
+
+ // all cells between those min/max values above might be visible. unfortunately
+ // we need to add *all* visible cells to our list, but we need to add as *few*
+ // as possible.
+ // we could improve speed (important for big maps!) here if we would group
+ // several cells into a single sphereInFrustum() call for example.
+ //
+ // note that the current implementation is very fast at default zoom, but if
+ // you zoom out (and therefore there are lots of cells visible) it is still too
+ // slow.
+
+ int count = 0;
+ Cell* c;
+ GLfloat glX, glY, minz, maxz, z;
+ for (int x = cellMinX; x <= cellMaxX; x++) {
+	for (int y = cellMinY; y <= cellMaxY; y++) {
+		// WARNING: x,y MUST be valid!!! there is *no* additional check
+		// here!
+		c = &allCells[map->cellArrayPos(x, y)];
+
+		glX = (float)c->x() * BO_GL_CELL_SIZE + BO_GL_CELL_SIZE / 2;
+		glY = -((float)c->y() * BO_GL_CELL_SIZE + BO_GL_CELL_SIZE / 2);
+
+		// Calculate average height and radius of bounding sphere of the cell
+		// Reset variables
+		minz = 1000.0f;
+		maxz = -1000.0f;
+
+		for (int i = x; i <= x + 1; i++) {
+			for (int j = y; j <= y + 1; j++) {
+				minz = QMIN(minz, map->heightAtCorner(i, j));
+				maxz = QMAX(maxz, map->heightAtCorner(i, j));
+			}
+		}
+		z = (maxz - minz) / 2;
+
+		if (Bo3dTools::sphereInFrustum(viewFrustum(), BoVector3(glX, glY, (minz + maxz) / 2), sqrt(2 * (BO_GL_CELL_SIZE/2) * (BO_GL_CELL_SIZE/2) + z * z))) {
+			// AB: instead of storing the cell here we should store
+			// cell coordinates and create a vertex array with that
+			renderCells[count] = c;
+			count++;
+		}
+	}
+ }
+ *renderCellsCount = count;
+ return renderCells;
+}
+
+void CellListBuilderNoTree::calculateWorldRect(const QRect& rect, int mapWidth, int mapHeight, float* minX, float* minY, float* maxX, float* maxY)
 {
  BO_CHECK_NULL_RET(viewFrustum());
- GLfloat posX, posY;
- GLfloat posZ;
 
  // AB: fallback. if everything fails, _nothing_ is visible at all.
  *minX = *minY = *maxX = *maxY = 0.0f;
@@ -561,106 +814,123 @@ void BoGroundRendererBase::calculateWorldRect(const QRect& rect, int mapWidth, i
 
 }
 
-void BoGroundRendererBase::generateCellList(const BosonMap* map)
+Cell** CellListBuilderTree::generateCellList(const BosonMap* map, Cell** origRenderCells, int* renderCellsSize, unsigned int* renderCellsCount)
 {
- // we need to regenerate the cell list whenever the modelview or the projection
- // matrix changes. then the displayed cells have most probably changed.
-
+ BosonProfiler profiler(777894);
  if (!map) {
-	setRenderCells(0, 0);
-	setRenderCellsCount(0);
-	return;
+	BO_NULL_ERROR(map);
+	return origRenderCells;
  }
-
- if (boGame->gameStatus() == KGame::Init) {
-	// we construct the display before the map is received
-	return;
+ Cell** renderCells = origRenderCells;
+ if (*renderCellsSize < (int)(map->width() * map->height())) {
+	// we don't know in advance how many cells we might need, so we allocate
+	// width * height
+	*renderCellsSize = map->width() * map->height();
+	renderCells = new Cell*[*renderCellsSize];
  }
+ mMap = map;
+ mCount = 0;
 
- // re-generate the list of to-be-rendered cells:
- Cell* allCells = map->cells();
- if (!allCells) {
-	boError() << k_funcinfo << "NULL cells!" << endl;
-	return;
- }
- float maxX = 0.0f, maxY = 0.0f;
- float minX = 0.0f, minY = 0.0f;
- calculateWorldRect(QRect(QPoint(0, 0), QPoint(viewport()[2], viewport()[3])),
-		map->width(), map->height(),
-		&minX, &minY, &maxX, &maxY);
-// boDebug() << "world rect: minX=" << minX << " maxX=" << maxX << " minY=" << minY << " maxY=" << maxY << endl;
- minY *= -1;
- maxY *= -1;
+ checkCells(renderCells, 0, 0, map->width() - 1, map->height() - 1);
 
- // if everything went fine we need to add those cells that are in the
- // ((minX,minY),(maxX,maxY)) rectangle only.
-
- int cellMinX = (int)(minX / BO_GL_CELL_SIZE); // AB: *no* +1 for min values!
- int cellMaxX = (int)(maxX / BO_GL_CELL_SIZE) + 1; // +1 because of a modulo (very probably at this point)
- int cellMinY = (int)(minY / BO_GL_CELL_SIZE);
- int cellMaxY = (int)(maxY / BO_GL_CELL_SIZE) + 1;
-
- // finally we ensure that the cell values are valid, too.
- // after these lines we mustn't modify cellM* anymore!
- cellMinX = QMAX(cellMinX, 0);
- cellMinY = QMAX(cellMinY, 0);
- cellMaxX = QMAX(cellMaxX, 0);
- cellMaxY = QMAX(cellMaxY, 0);
- cellMinX = QMIN(cellMinX, (int)map->width() - 1);
- cellMinY = QMIN(cellMinY, (int)map->height() - 1);
- cellMaxX = QMIN(cellMaxX, (int)map->width() - 1);
- cellMaxY = QMIN(cellMaxY, (int)map->height() - 1);
-
- int size = (cellMaxX - cellMinX + 1) * (cellMaxY - cellMinY + 1);
- size = QMIN((int)(map->width() * map->height()), size);
- if (size > renderCellsSize()) {
-	setRenderCells(new Cell*[size], size);
- }
-
- // all cells between those min/max values above might be visible. unfortunately
- // we need to add *all* visible cells to our list, but we need to add as *few*
- // as possible.
- // we could improve speed (important for big maps!) here if we would group
- // several cells into a single sphereInFrustum() call for example.
- //
- // note that the current implementation is very fast at default zoom, but if
- // you zoom out (and therefore there are lots of cells visible) it is still too
- // slow.
-
- int count = 0;
- Cell* c;
- GLfloat glX, glY, minz, maxz, z;
- for (int x = cellMinX; x <= cellMaxX; x++) {
-	for (int y = cellMinY; y <= cellMaxY; y++) {
-		// WARNING: x,y MUST be valid!!! there is *no* additional check
-		// here!
-		c = &allCells[map->cellArrayPos(x, y)];
-
-		glX = (float)c->x() * BO_GL_CELL_SIZE + BO_GL_CELL_SIZE / 2;
-		glY = -((float)c->y() * BO_GL_CELL_SIZE + BO_GL_CELL_SIZE / 2);
-
-		// Calculate average height and radius of bounding sphere of the cell
-		// Reset variables
-		minz = 1000.0f;
-		maxz = -1000.0f;
-
-		for (int i = x; i <= x + 1; i++) {
-			for (int j = y; j <= y + 1; j++) {
-				minz = QMIN(minz, map->heightAtCorner(i, j));
-				maxz = QMAX(maxz, map->heightAtCorner(i, j));
-			}
-		}
-		z = (maxz - minz) / 2;
-
-		if (Bo3dTools::sphereInFrustum(viewFrustum(), BoVector3(glX, glY, (minz + maxz) / 2), sqrt(2 * (BO_GL_CELL_SIZE/2) * (BO_GL_CELL_SIZE/2) + z * z))) {
-			// AB: instead of storing the cell here we should store
-			// cell coordinates and create a vertex array with that
-			renderCells()[count] = c;
-			count++;
-		}
-	}
- }
- setRenderCellsCount(count);
+ *renderCellsCount = mCount;
+ mMap = 0;
+ mCount = 0;
+ return renderCells;
 }
 
+void CellListBuilderTree::addCells(Cell** cells, int l, int t, int r, int b)
+{
+// boDebug() << k_funcinfo << "l=" << l << ",t=" << t << ",r=" << r << ",b=" << b << endl;
+ for (int x = l; x <= r; x++) {
+	for (int y = t; y <= b; y++) {
+		cells[mCount] = mMap->cell(x, y);
+		mCount++;
+	}
+ }
+}
+
+bool CellListBuilderTree::cellsVisible(int x, int y, int x2, int y2, bool* partially) const
+{
+ if (x2 < x || y2 < y) {
+	*partially = false;
+	return false;
+ }
+
+ // TODO
+ // AB: maybe we should use average z, at least if cell count is <= 4.
+ // (for larger values the radius will cover it anyway i guess)
+ float z = 0.0f;
+
+ int w = (x2 + 1) - x; // + 1 because we need the right border of the cell!
+ int h = (y2 + 1) - y;
+ float hmid = (float)x + ((float)w) / 2.0f;
+ float vmid = (float)y + ((float)h) / 2.0f;
+
+ BoVector3 center(hmid, -vmid, z);
+
+ float radius = sqrtf((float)(w * w + h * h));
+ int ret = Bo3dTools::sphereCompleteInFrustum(viewFrustum(), center, radius);
+ if (ret == 0) {
+	*partially = false;
+	return false;
+ } else if (ret == 2 || (w == 1 && h == 1)) {
+	*partially = false;
+ } else {
+	*partially = true;
+ }
+ return true;
+}
+
+void CellListBuilderTree::checkCells(Cell** cells, int l, int t, int r, int b)
+{
+ if (l == r && b == t) {
+	return;
+ }
+ if (l > r || t > b || l < 0 || t < 0) {
+	boError() << k_funcinfo << "invalid values: left="
+			<< l << ", top=" << t
+			<< ", right=" << r
+			<< ", bottom=" << b << endl;
+	return;
+ }
+ bool partially = false;
+ int hmid = l + (r - l) / 2;
+ int vmid = t + (b - t) / 2;
+ if (cellsVisible(l, t, hmid, vmid, &partially)) {
+	// top-left rect
+	if (!partially) {
+		// all cells visible
+		addCells(cells, l, t, hmid, vmid);
+	} else {
+		checkCells(cells, l, t, hmid, vmid);
+	}
+ }
+ if (cellsVisible(l, vmid + 1, hmid, b, &partially)) {
+	// bottom-left rect
+	if (!partially) {
+		addCells(cells, l, vmid + 1, hmid, b);
+	} else {
+		checkCells(cells, l, vmid + 1, hmid, b);
+	}
+ }
+ if (cellsVisible(hmid + 1, t, r, vmid, &partially)) {
+	// top-right rect
+	if (!partially) {
+		// all cells visible
+		addCells(cells, hmid + 1, t, r, vmid);
+	} else {
+		checkCells(cells, hmid + 1, t, r, vmid);
+	}
+ }
+ if (cellsVisible(hmid + 1, vmid + 1, r, b, &partially)) {
+	// bottom-right rect
+	if (!partially) {
+		// all cells visible
+		addCells(cells, hmid + 1, vmid + 1, r, b);
+	} else {
+		checkCells(cells, hmid + 1, vmid + 1, r, b);
+	}
+ }
+}
 
