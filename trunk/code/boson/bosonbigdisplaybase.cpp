@@ -36,7 +36,6 @@
 #include "boselection.h"
 #include "bosonconfig.h"
 #include "selectbox.h"
-#include "bosonglchat.h"
 #include "bosonprofiling.h"
 #include "bosoneffect.h"
 #include "bosoneffectparticle.h"
@@ -107,8 +106,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-
-#include "bosonfont/bosonglfont.h"
 
 #include <GL/glu.h>
 
@@ -1437,9 +1434,8 @@ public:
 
 		mGameGLMatrices = 0;
 
-		mDefaultFont = 0;
-
 		mToolTips = 0;
+		mToolTipLabel = 0;
 
 		mControlPressed = false;
 		mShiftPressed = false;
@@ -1475,8 +1471,6 @@ public:
 	GLfloat mFovY; // see gluPerspective
 	GLfloat mAspect; // see gluPerspective
 
-	BosonGLFont* mDefaultFont;// AB: maybe we should support several fonts
-
 	bool mGrabMovie;
 
 	SelectionRect mSelectionRect;
@@ -1489,6 +1483,7 @@ public:
 
 	PlacementPreview mPlacementPreview;
 	BoGLToolTip* mToolTips;
+	BoUfoLabel* mToolTipLabel;
 
 	bool mInputInitialized;
 
@@ -1534,7 +1529,6 @@ BosonBigDisplayBase::~BosonBigDisplayBase()
  BoMeshRendererManager::manager()->unsetCurrentRenderer();
  BoGroundRendererManager::manager()->unsetCurrentRenderer();
  delete mSelection;
- delete d->mDefaultFont;
  delete d->mToolTips;
  delete d->mGLMiniMap;
  delete d->mCanvasRenderer;
@@ -1753,11 +1747,6 @@ void BosonBigDisplayBase::initializeGL()
 
  d->mFPSCounter.reset();
 
- // this needs to be done in initializeGL():
- BoFontInfo font;
- font.fromString(boConfig->stringValue("GLFont"));
- setFont(font);
-
  updateOpenGLSettings();
 
  if (!context()->deviceIsPixmap()) {
@@ -1810,6 +1799,16 @@ void BosonBigDisplayBase::initUfoGUI()
  d->mUfoGameWidget = new BosonUfoGameWidget(d->mModelviewMatrix, d->mProjectionMatrix, d->mViewFrustum, d->mViewport, this);
  d->mUfoGameWidget->setGLMiniMap(d->mGLMiniMap);
  contentWidget->addWidget(d->mUfoGameWidget);
+
+#warning FIXME: we dont call addWidget() on this - is this still deleted?
+ d->mToolTipLabel = new BoUfoLabel();
+ boDebug() << k_funcinfo << "1" << endl;
+ d->mToolTips->setLabel(d->mToolTipLabel);
+ boDebug() << k_funcinfo << "2" << endl;
+ BO_CHECK_NULL_RET(ufoManager()->layeredPaneWidget());
+ // AB: without the layer and position parameters this seems to crash!
+ ufoManager()->layeredPaneWidget()->addLayer(d->mToolTipLabel, 101, 1);
+ boDebug() << k_funcinfo << "3" << endl;
 
  // TODO: tooltips ?
 
@@ -2159,21 +2158,6 @@ void BosonBigDisplayBase::renderCursor()
 
 void BosonBigDisplayBase::renderText()
 {
- BO_CHECK_NULL_RET(d->mDefaultFont);
- BO_CHECK_NULL_RET(localPlayerIO());
- d->mDefaultFont->begin();
-
- // TODO: port to libufo and remove this code.
- if (d->mToolTips->showTip()) {
-	QPoint pos = mapFromGlobal(QCursor::pos());
-	d->mToolTips->renderToolTip(pos.x(), pos.y(), d->mViewport, d->mDefaultFont);
- }
-
-
- if (Bo3dTools::checkError()) {
-	boError() << k_funcinfo << "OpenGL error" << endl;
- }
- boTextureManager->invalidateCache();
 }
 
 // one day we might support swapping LMB and RMB so let's use defines already to
@@ -2541,6 +2525,7 @@ void BosonBigDisplayBase::setLocalPlayerIO(PlayerIO* io)
  d->mLocalPlayerIO = io;
  boDebug() << k_funcinfo << "d->mLocalPlayerIO now: " << d->mLocalPlayerIO << endl;
 
+ d->mToolTips->setPlayerIO(localPlayerIO());
  BoGroundRendererManager::manager()->setLocalPlayerIO(localPlayerIO());
 
  delete d->mMouseIO;
@@ -3616,11 +3601,318 @@ void BosonBigDisplayBase::advanceLineVisualization()
 
 void BosonBigDisplayBase::setFont(const BoFontInfo& font)
 {
- makeCurrent();
- delete d->mDefaultFont;
- boDebug() << k_funcinfo << font.name() << " " << font.pointSize() << endl;
- d->mDefaultFont = new BosonGLFont(font);
 }
+
+void BosonBigDisplayBase::slotFog(int x, int y)
+{
+ BoGroundRenderer* r = BoGroundRendererManager::manager()->currentRenderer();
+ if (r) {
+	r->cellChanged(x, y);
+ }
+}
+
+void BosonBigDisplayBase::slotUnfog(int x, int y)
+{
+ BoGroundRenderer* r = BoGroundRendererManager::manager()->currentRenderer();
+ if (r) {
+	r->cellChanged(x, y);
+ }
+}
+
+static void updateEffects(BoVisibleEffects& v)
+{
+ static int id = boProfiling->requestEventId("updateEffects(): doDelayedUpdates");
+ BosonProfiler prof(id);
+ QPtrListIterator<BosonEffect> it(v.mAll);
+ while (it.current()) {
+	it.current()->doDelayedUpdates();
+	++it;
+ }
+}
+
+void BosonBigDisplayBase::resetGameMode()
+{
+ BO_CHECK_NULL_RET(ufoManager());
+
+ slotChangeCursor(boConfig->intValue("CursorMode"), boConfig->stringValue("CursorDir"));
+
+ d->mUfoGameWidget->setGameMode(true);
+
+ if (localPlayerIO()) {
+	KGameIO* io = localPlayerIO()->findRttiIO(BosonMenuInput::RTTI);
+	if (io) {
+		localPlayerIO()->removeGameIO(io, true);
+	}
+ }
+
+ BoUfoActionCollection* c = ufoManager()->actionCollection();
+ ufoManager()->setActionCollection(0);
+ delete c;
+ c = 0;
+ BoUfoActionCollection::initActionCollection(ufoManager());
+ ufoManager()->actionCollection()->setAccelWidget(this);
+}
+
+void BosonBigDisplayBase::setGameMode(bool mode)
+{
+ BO_CHECK_NULL_RET(ufoManager());
+ resetGameMode();
+ d->mUfoGameWidget->setGameMode(mode);
+
+ if (localPlayerIO()) {
+	KGameIO* oldIO = localPlayerIO()->findRttiIO(BosonMenuInput::RTTI);
+	if (oldIO) {
+		boError() << k_funcinfo << "still an old menuinput IO around!" << endl;
+		localPlayerIO()->removeGameIO(oldIO, true);
+	}
+
+	BosonMenuInput* io = new BosonMenuInput(mode);
+	io->setCamera(camera());
+	io->setPlayerIO(localPlayerIO());
+	io->setActionCollection(ufoManager()->actionCollection());
+	localPlayerIO()->addGameIO(io);
+
+	connect(io, SIGNAL(signalToggleStatusbar(bool)),
+			this, SIGNAL(signalToggleStatusbar(bool)));
+	connect(io, SIGNAL(signalToggleChatVisible()),
+			this, SIGNAL(signalToggleChatVisible()));
+	connect(io, SIGNAL(signalResetViewProperties()),
+			this, SLOT(slotResetViewProperties()));
+	connect(io, SIGNAL(signalShowLight0Widget()),
+			this, SLOT(slotShowLight0Widget()));
+	connect(io, SIGNAL(signalSelectSelectionGroup(int)),
+			d->mSelectionGroups, SLOT(slotSelectSelectionGroup(int)));
+	connect(io, SIGNAL(signalCreateSelectionGroup(int)),
+			d->mSelectionGroups, SLOT(slotCreateSelectionGroup(int)));
+	connect(io, SIGNAL(signalPreferencesApply()),
+			this, SLOT(slotPreferencesApply()));
+	connect(io, SIGNAL(signalUpdateOpenGLSettings()),
+			this, SLOT(slotUpdateOpenGLSettings()));
+	connect(io, SIGNAL(signalChangeCursor(int, const QString&)),
+			this, SLOT(slotChangeCursor(int, const QString&)));
+	connect(io, SIGNAL(signalEndGame()),
+			this, SIGNAL(signalEndGame()));
+	connect(io, SIGNAL(signalQuit()),
+			this, SIGNAL(signalQuit()));
+	connect(io, SIGNAL(signalSaveGame()),
+			this, SIGNAL(signalSaveGame()));
+	connect(io, SIGNAL(signalEditorChangeLocalPlayer(Player*)),
+			this, SIGNAL(signalEditorChangeLocalPlayer(Player*)));
+	connect(io, SIGNAL(signalEditorShowPlaceFacilities()),
+			this, SLOT(slotEditorShowPlaceFacilities()));
+	connect(io, SIGNAL(signalEditorShowPlaceMobiles()),
+			this, SLOT(slotEditorShowPlaceMobiles()));
+	connect(io, SIGNAL(signalEditorShowPlaceGround()),
+			this, SLOT(slotEditorShowPlaceGround()));
+	connect(io, SIGNAL(signalEditorDeleteSelectedUnits()),
+			this, SLOT(slotEditorDeleteSelectedUnits()));
+	connect(io, SIGNAL(signalEditorEditHeight(bool)),
+			this, SLOT(slotEditorEditHeight(bool)));
+
+ }
+}
+
+
+void BosonBigDisplayBase::slotScroll(int dir)
+{
+ switch ((ScrollDirection)dir) {
+	case ScrollUp:
+		scrollBy(0, -boConfig->uintValue("ArrowKeyStep"));
+		break;
+	case ScrollRight:
+		scrollBy(boConfig->uintValue("ArrowKeyStep"), 0);
+		break;
+	case ScrollDown:
+		scrollBy(0, boConfig->uintValue("ArrowKeyStep"));
+		break;
+	case ScrollLeft:
+		scrollBy(-boConfig->uintValue("ArrowKeyStep"), 0);
+		break;
+	default:
+		return;
+ }
+}
+
+
+void BosonBigDisplayBase::slotPreferencesApply()
+{
+ // apply all options from boConfig to boson, that need to be applied. all
+ // options that are stored in boConfig only don't need to be touched.
+ // AB: cursor is still a special case and not handled here.
+ boDebug() << k_funcinfo << endl;
+ setUpdateInterval(boConfig->uintValue("GLUpdateInterval"));
+ setToolTipCreator(boConfig->intValue("ToolTipCreator"));
+ setToolTipUpdatePeriod(boConfig->intValue("ToolTipUpdatePeriod"));
+}
+
+void BosonBigDisplayBase::slotUpdateOpenGLSettings()
+{
+ updateOpenGLSettings();
+}
+
+void BosonBigDisplayBase::slotChangeCursor(int mode, const QString& cursorDir)
+{
+ boDebug() << k_funcinfo << endl;
+ if (boGame) {
+	if (!boGame->gameMode()) {
+		// editor mode
+		mode = CursorKDE;
+	}
+ }
+ if (d->mCursorCollection->changeCursor(mode, cursorDir)) {
+	// TODO: rename setCursorMode() to setCursorType()
+	boConfig->setIntValue("CursorMode", d->mCursorCollection->cursorType());
+	boConfig->setStringValue("CursorDir", d->mCursorCollection->cursorDir());
+ }
+}
+
+void BosonBigDisplayBase::grabMovieFrameAndSave()
+{
+ if (!d->mGrabMovie) {
+	return;
+ }
+ QByteArray shot = grabMovieFrame();
+
+ if (shot.size() == 0) {
+	return;
+ }
+
+ // Save frame
+ static int frame = -1;
+ QString file;
+ if (frame == -1) {
+	int i;
+	for (i = 0; i <= 10000; i++) {
+		file.sprintf("%s-%04d.%s", "boson-movie", i, "jpg");
+		if (!QFile::exists(file)) {
+			frame = i;
+			break;
+		}
+	}
+	if (i == 10000) {
+		boWarning() << k_funcinfo << "Can't find free filename???" << endl;
+		frame = 50000;
+	}
+ }
+ file.sprintf("%s-%04d.%s", "boson-movie", frame++, "jpg");
+ file = QFileInfo(file).absFilePath();
+
+ //boDebug() << k_funcinfo << "Saving movie frame to " << file << endl;
+ bool ok = QPixmap(shot).save(file, "JPEG", 90);
+ if (!ok) {
+	boError() << k_funcinfo << "Error saving screenshot to " << file << endl;
+	return;
+ }
+ boDebug() << k_funcinfo << "Movie frame saved to file " << file << endl;
+
+#if 0
+ static QValueList<QByteArray> allMovieFrames;
+ allMovieFrames.append(shot);
+
+
+ // TODO: use a shortcut for this. do not do this after a certain number of
+ // frames, but when a key was pressed.
+ if (allMovieFrames.count() == 10) {
+	boDebug() << k_funcinfo << "generating " << allMovieFrames.count() << " frames" << endl;
+	d->mActiveDisplay->generateMovieFrames(allMovieFrames, "./11/");
+	allMovieFrames.clear();
+ }
+#endif
+}
+
+void BosonBigDisplayBase::slotAdvance(unsigned int, bool)
+{
+ // AB: note that in the big display no game logic must be done!
+ // -> this slotAdvance() is here for certain optimizations on rendering, not
+ //    for advancing the game itself
+ setParticlesDirty(true);
+ advanceCamera();
+ advanceLineVisualization();
+ grabMovieFrameAndSave();
+}
+
+void BosonBigDisplayBase::slotAction(const BoSpecificAction& action)
+{
+ if (!displayInput()) {
+	return;
+ }
+ displayInput()->action(action);
+}
+
+void BosonBigDisplayBase::updateCursorCanvasVector()
+{
+ QPoint widgetPos = mapFromGlobal(QCursor::pos());
+ GLfloat x = 0.0, y = 0.0, z = 0.0;
+ mapCoordinates(widgetPos, &x, &y, &z);
+ d->mCanvasVector = BoVector3Fixed(x, -y, z); // AB: are these already real z coordinates?
+}
+
+
+
+
+
+
+
+void BosonBigDisplayBase::slotResetViewProperties()
+{
+ BO_CHECK_NULL_RET(canvas());
+ d->mFovY = 60.0;
+ d->mAspect = 1.0;
+ setCamera(BoGameCamera(canvas()));
+ resizeGL(d->mViewport[2], d->mViewport[3]);
+}
+
+void BosonBigDisplayBase::slotShowLight0Widget()
+{
+ delete d->mLightWidget;
+ d->mLightWidget = new BoLightCameraWidget1(this, true);
+ d->mLightWidget->show();
+ d->mLightWidget->setLight(light(0), context());
+}
+
+void BosonBigDisplayBase::slotEditorDeleteSelectedUnits()
+{
+ displayInput()->deleteSelectedUnits();
+}
+
+void BosonBigDisplayBase::slotEditorEditHeight(bool on)
+{
+ BO_CHECK_NULL_RET(displayInput());
+ if (on) {
+	BoSpecificAction action;
+	action.setType(ActionChangeHeight);
+	displayInput()->action(action);
+ } else {
+	displayInput()->unlockAction();
+ }
+}
+
+void BosonBigDisplayBase::slotEditorShowPlaceFacilities()
+{
+ d->mUfoGameWidget->slotShowPlaceFacilities(localPlayerIO());
+}
+
+void BosonBigDisplayBase::slotEditorShowPlaceMobiles()
+{
+ d->mUfoGameWidget->slotShowPlaceMobiles(localPlayerIO());
+}
+
+void BosonBigDisplayBase::slotEditorShowPlaceGround()
+{
+ d->mUfoGameWidget->slotShowPlaceGround();
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 BosonBigDisplayScriptConnector::BosonBigDisplayScriptConnector(BosonBigDisplayBase* parent)
 	: QObject(parent, "script_to_display_connector")
@@ -4003,304 +4295,5 @@ void BosonBigDisplayScriptConnector::slotSetAcceptUserInput(bool accept)
 	(*it)->blockSignals(!accept);
 	++it;
  }
-}
-
-void BosonBigDisplayBase::slotFog(int x, int y)
-{
- BoGroundRenderer* r = BoGroundRendererManager::manager()->currentRenderer();
- if (r) {
-	r->cellChanged(x, y);
- }
-}
-
-void BosonBigDisplayBase::slotUnfog(int x, int y)
-{
- BoGroundRenderer* r = BoGroundRendererManager::manager()->currentRenderer();
- if (r) {
-	r->cellChanged(x, y);
- }
-}
-
-static void updateEffects(BoVisibleEffects& v)
-{
- static int id = boProfiling->requestEventId("updateEffects(): doDelayedUpdates");
- BosonProfiler prof(id);
- QPtrListIterator<BosonEffect> it(v.mAll);
- while (it.current()) {
-	it.current()->doDelayedUpdates();
-	++it;
- }
-}
-
-void BosonBigDisplayBase::resetGameMode()
-{
- BO_CHECK_NULL_RET(ufoManager());
-
- slotChangeCursor(boConfig->intValue("CursorMode"), boConfig->stringValue("CursorDir"));
-
- d->mUfoGameWidget->setGameMode(true);
-
- if (localPlayerIO()) {
-	KGameIO* io = localPlayerIO()->findRttiIO(BosonMenuInput::RTTI);
-	if (io) {
-		localPlayerIO()->removeGameIO(io, true);
-	}
- }
-
- BoUfoActionCollection* c = ufoManager()->actionCollection();
- ufoManager()->setActionCollection(0);
- delete c;
- c = 0;
- BoUfoActionCollection::initActionCollection(ufoManager());
- ufoManager()->actionCollection()->setAccelWidget(this);
-}
-
-void BosonBigDisplayBase::setGameMode(bool mode)
-{
- BO_CHECK_NULL_RET(ufoManager());
- resetGameMode();
- d->mUfoGameWidget->setGameMode(mode);
-
- if (localPlayerIO()) {
-	KGameIO* oldIO = localPlayerIO()->findRttiIO(BosonMenuInput::RTTI);
-	if (oldIO) {
-		boError() << k_funcinfo << "still an old menuinput IO around!" << endl;
-		localPlayerIO()->removeGameIO(oldIO, true);
-	}
-
-	BosonMenuInput* io = new BosonMenuInput(mode);
-	io->setCamera(camera());
-	io->setPlayerIO(localPlayerIO());
-	io->setActionCollection(ufoManager()->actionCollection());
-	localPlayerIO()->addGameIO(io);
-
-	connect(io, SIGNAL(signalToggleStatusbar(bool)),
-			this, SIGNAL(signalToggleStatusbar(bool)));
-	connect(io, SIGNAL(signalToggleChatVisible()),
-			this, SIGNAL(signalToggleChatVisible()));
-	connect(io, SIGNAL(signalResetViewProperties()),
-			this, SLOT(slotResetViewProperties()));
-	connect(io, SIGNAL(signalShowLight0Widget()),
-			this, SLOT(slotShowLight0Widget()));
-	connect(io, SIGNAL(signalSelectSelectionGroup(int)),
-			d->mSelectionGroups, SLOT(slotSelectSelectionGroup(int)));
-	connect(io, SIGNAL(signalCreateSelectionGroup(int)),
-			d->mSelectionGroups, SLOT(slotCreateSelectionGroup(int)));
-	connect(io, SIGNAL(signalPreferencesApply()),
-			this, SLOT(slotPreferencesApply()));
-	connect(io, SIGNAL(signalUpdateOpenGLSettings()),
-			this, SLOT(slotUpdateOpenGLSettings()));
-	connect(io, SIGNAL(signalChangeCursor(int, const QString&)),
-			this, SLOT(slotChangeCursor(int, const QString&)));
-	connect(io, SIGNAL(signalEndGame()),
-			this, SIGNAL(signalEndGame()));
-	connect(io, SIGNAL(signalQuit()),
-			this, SIGNAL(signalQuit()));
-	connect(io, SIGNAL(signalSaveGame()),
-			this, SIGNAL(signalSaveGame()));
-	connect(io, SIGNAL(signalEditorChangeLocalPlayer(Player*)),
-			this, SIGNAL(signalEditorChangeLocalPlayer(Player*)));
-	connect(io, SIGNAL(signalEditorShowPlaceFacilities()),
-			this, SLOT(slotEditorShowPlaceFacilities()));
-	connect(io, SIGNAL(signalEditorShowPlaceMobiles()),
-			this, SLOT(slotEditorShowPlaceMobiles()));
-	connect(io, SIGNAL(signalEditorShowPlaceGround()),
-			this, SLOT(slotEditorShowPlaceGround()));
-	connect(io, SIGNAL(signalEditorDeleteSelectedUnits()),
-			this, SLOT(slotEditorDeleteSelectedUnits()));
-	connect(io, SIGNAL(signalEditorEditHeight(bool)),
-			this, SLOT(slotEditorEditHeight(bool)));
-
- }
-}
-
-
-void BosonBigDisplayBase::slotScroll(int dir)
-{
- switch ((ScrollDirection)dir) {
-	case ScrollUp:
-		scrollBy(0, -boConfig->uintValue("ArrowKeyStep"));
-		break;
-	case ScrollRight:
-		scrollBy(boConfig->uintValue("ArrowKeyStep"), 0);
-		break;
-	case ScrollDown:
-		scrollBy(0, boConfig->uintValue("ArrowKeyStep"));
-		break;
-	case ScrollLeft:
-		scrollBy(-boConfig->uintValue("ArrowKeyStep"), 0);
-		break;
-	default:
-		return;
- }
-}
-
-
-void BosonBigDisplayBase::slotPreferencesApply()
-{
- // apply all options from boConfig to boson, that need to be applied. all
- // options that are stored in boConfig only don't need to be touched.
- // AB: cursor is still a special case and not handled here.
- boDebug() << k_funcinfo << endl;
- setUpdateInterval(boConfig->uintValue("GLUpdateInterval"));
- setToolTipCreator(boConfig->intValue("ToolTipCreator"));
- setToolTipUpdatePeriod(boConfig->intValue("ToolTipUpdatePeriod"));
-}
-
-void BosonBigDisplayBase::slotUpdateOpenGLSettings()
-{
- updateOpenGLSettings();
-}
-
-void BosonBigDisplayBase::slotChangeCursor(int mode, const QString& cursorDir)
-{
- boDebug() << k_funcinfo << endl;
- if (boGame) {
-	if (!boGame->gameMode()) {
-		// editor mode
-		mode = CursorKDE;
-	}
- }
- if (d->mCursorCollection->changeCursor(mode, cursorDir)) {
-	// TODO: rename setCursorMode() to setCursorType()
-	boConfig->setIntValue("CursorMode", d->mCursorCollection->cursorType());
-	boConfig->setStringValue("CursorDir", d->mCursorCollection->cursorDir());
- }
-}
-
-void BosonBigDisplayBase::grabMovieFrameAndSave()
-{
- if (!d->mGrabMovie) {
-	return;
- }
- QByteArray shot = grabMovieFrame();
-
- if (shot.size() == 0) {
-	return;
- }
-
- // Save frame
- static int frame = -1;
- QString file;
- if (frame == -1) {
-	int i;
-	for (i = 0; i <= 10000; i++) {
-		file.sprintf("%s-%04d.%s", "boson-movie", i, "jpg");
-		if (!QFile::exists(file)) {
-			frame = i;
-			break;
-		}
-	}
-	if (i == 10000) {
-		boWarning() << k_funcinfo << "Can't find free filename???" << endl;
-		frame = 50000;
-	}
- }
- file.sprintf("%s-%04d.%s", "boson-movie", frame++, "jpg");
- file = QFileInfo(file).absFilePath();
-
- //boDebug() << k_funcinfo << "Saving movie frame to " << file << endl;
- bool ok = QPixmap(shot).save(file, "JPEG", 90);
- if (!ok) {
-	boError() << k_funcinfo << "Error saving screenshot to " << file << endl;
-	return;
- }
- boDebug() << k_funcinfo << "Movie frame saved to file " << file << endl;
-
-#if 0
- static QValueList<QByteArray> allMovieFrames;
- allMovieFrames.append(shot);
-
-
- // TODO: use a shortcut for this. do not do this after a certain number of
- // frames, but when a key was pressed.
- if (allMovieFrames.count() == 10) {
-	boDebug() << k_funcinfo << "generating " << allMovieFrames.count() << " frames" << endl;
-	d->mActiveDisplay->generateMovieFrames(allMovieFrames, "./11/");
-	allMovieFrames.clear();
- }
-#endif
-}
-
-void BosonBigDisplayBase::slotAdvance(unsigned int, bool)
-{
- // AB: note that in the big display no game logic must be done!
- // -> this slotAdvance() is here for certain optimizations on rendering, not
- //    for advancing the game itself
- setParticlesDirty(true);
- advanceCamera();
- advanceLineVisualization();
- grabMovieFrameAndSave();
-}
-
-void BosonBigDisplayBase::slotAction(const BoSpecificAction& action)
-{
- if (!displayInput()) {
-	return;
- }
- displayInput()->action(action);
-}
-
-void BosonBigDisplayBase::updateCursorCanvasVector()
-{
- QPoint widgetPos = mapFromGlobal(QCursor::pos());
- GLfloat x = 0.0, y = 0.0, z = 0.0;
- mapCoordinates(widgetPos, &x, &y, &z);
- d->mCanvasVector = BoVector3Fixed(x, -y, z); // AB: are these already real z coordinates?
-}
-
-
-
-
-
-
-
-void BosonBigDisplayBase::slotResetViewProperties()
-{
- BO_CHECK_NULL_RET(canvas());
- d->mFovY = 60.0;
- d->mAspect = 1.0;
- setCamera(BoGameCamera(canvas()));
- resizeGL(d->mViewport[2], d->mViewport[3]);
-}
-
-void BosonBigDisplayBase::slotShowLight0Widget()
-{
- delete d->mLightWidget;
- d->mLightWidget = new BoLightCameraWidget1(this, true);
- d->mLightWidget->show();
- d->mLightWidget->setLight(light(0), context());
-}
-
-void BosonBigDisplayBase::slotEditorDeleteSelectedUnits()
-{
- displayInput()->deleteSelectedUnits();
-}
-
-void BosonBigDisplayBase::slotEditorEditHeight(bool on)
-{
- BO_CHECK_NULL_RET(displayInput());
- if (on) {
-	BoSpecificAction action;
-	action.setType(ActionChangeHeight);
-	displayInput()->action(action);
- } else {
-	displayInput()->unlockAction();
- }
-}
-
-void BosonBigDisplayBase::slotEditorShowPlaceFacilities()
-{
- d->mUfoGameWidget->slotShowPlaceFacilities(localPlayerIO());
-}
-
-void BosonBigDisplayBase::slotEditorShowPlaceMobiles()
-{
- d->mUfoGameWidget->slotShowPlaceMobiles(localPlayerIO());
-}
-
-void BosonBigDisplayBase::slotEditorShowPlaceGround()
-{
- d->mUfoGameWidget->slotShowPlaceGround();
 }
 

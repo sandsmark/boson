@@ -23,12 +23,14 @@
 #include "bodebug.h"
 #include "bosonbigdisplaybase.h"
 #include "bosoncanvas.h"
-#include "bosonfont/bosonglfont.h"
 #include "items/bosonitem.h"
 #include "bosonconfig.h"
+#include "boufo/boufo.h"
+#include "playerio.h"
 
 #include <qmap.h>
 #include <qtimer.h>
+#include <qcursor.h>
 
 #include <kapplication.h>
 #include <klocale.h>
@@ -218,6 +220,8 @@ BoGLToolTip::BoGLToolTip(BosonBigDisplayBase* v) : QObject(v)
  mShowTip = false;
  mUpdatePeriod = 0;
  mCreator = 0;
+ mPlayerIO = 0;
+ mLabel = 0;
 
  kapp->setGlobalMouseTracking(true);
  kapp->installEventFilter(this);
@@ -232,6 +236,17 @@ BoGLToolTip::~BoGLToolTip()
 {
  kapp->setGlobalMouseTracking(false);
  delete d;
+}
+
+void BoGLToolTip::setPlayerIO(PlayerIO* io)
+{
+ mPlayerIO = io;
+}
+
+void BoGLToolTip::setLabel(BoUfoLabel* l)
+{
+ mLabel = l;
+ updateLabel();
 }
 
 bool BoGLToolTip::eventFilter(QObject* o, QEvent* event)
@@ -250,6 +265,8 @@ bool BoGLToolTip::eventFilter(QObject* o, QEvent* event)
 		hideTip();
 		d->mTimer.stop();
 		d->mTimer.start(toolTipDelay());
+		setCursorPos(mView->mapFromGlobal(QCursor::pos()));
+//		setCursorPos(QPoint(50, 50));
 		break;
 	// AB: well .. do we need to catch other events?
 	// such as when window lost focus? maybe hide tips then? or when the
@@ -263,19 +280,23 @@ bool BoGLToolTip::eventFilter(QObject* o, QEvent* event)
 void BoGLToolTip::slotTimeOut()
 {
  BO_CHECK_NULL_RET(mView);
+ if (!mPlayerIO) {
+	return;
+ }
+ BO_CHECK_NULL_RET(mLabel);
  if (!mView->canvas()) {
 	// this is NOT an error
 	return;
  }
- BO_CHECK_NULL_RET(mView->canvas()->collisions());
  if (!mView->hasMouse() || !mView->canvas()->onCanvas(mView->cursorCanvasVector())) {
 	hideTip();
 	return;
  }
  mShowTip = true;
 
- BosonCollisions* c = mView->canvas()->collisions();
- BosonItem* item = c->findItemAt(mView->cursorCanvasVector());
+ // TODO: find out whether there is actually the canvas below the cursor and not
+ // e.g. the command frame!
+ BosonItem* item = mPlayerIO->findItemAt(mView->canvas(), mView->cursorCanvasVector());
  if (!item) {
 	hideTip();
 	return;
@@ -286,12 +307,13 @@ void BoGLToolTip::slotTimeOut()
 	hideTip();
 	return;
  }
+ updateLabel();
 }
 
 void BoGLToolTip::unsetItem(BosonItem* item)
 {
  if (d->mToolTip.item() == item) {
-	d->mToolTip.setItem(0);
+	hideTip();
  }
 }
 
@@ -304,68 +326,13 @@ void BoGLToolTip::hideTip()
 {
  mShowTip = false;
  d->mToolTip.clear();
-}
-
-void BoGLToolTip::renderToolTip(int cursorX, int cursorY, const int* viewport, BosonGLFont* font)
-{
- const int cursorOffset = 15;
- const int minToolTipWidth = 100;
- const int viewportWidth = viewport[2];
- const int viewportHeight = viewport[3];
- QString tip = d->mToolTip.tip();
- if (tip.isNull()) {
-	return;
- }
- BO_CHECK_NULL_RET(font);
- font->begin();
-
- int tipWidth = font->width(tip);
- tipWidth = QMIN(tipWidth, minToolTipWidth);
- int x;
- int y;
-
- int w = 0;
- // we try to show the tip to the right of the cursor, if we have at least
- // tipWidth space, otherwise to the left if we have enough space there.
- // if both doesn't apply, we just pick the direction where we have most space
- if (viewportWidth - (cursorX + cursorOffset) >= tipWidth) {
-	// to the right of the cursor
-	x = cursorX + cursorOffset;
-	w = viewportWidth - x;
- } else if (cursorX - cursorOffset >= tipWidth) {
-	// to the left of the cursor
-	x = cursorX - cursorOffset - tipWidth;
-	w = tipWidth;
- } else {
-	// not enough space anyway - pick where we can get most space
-	if (cursorX > viewportWidth / 2) {
-		x = cursorX + cursorOffset;
-		w = viewportWidth - x;
-	} else {
-		x = QMAX(0, cursorX - cursorOffset - tipWidth);
-		w = cursorX - cursorOffset;
-	}
- }
-
- int h = font->height(tip, w);
- if (cursorY + cursorOffset + h < viewportHeight) {
-	y = viewportHeight - (cursorY + cursorOffset);
- } else if (cursorY >= h + cursorOffset) {
-	y = viewportHeight - (cursorY - (cursorOffset + h));
- } else {
-	if (cursorY < viewportHeight / 2) {
-		y = viewportHeight - (cursorY + cursorOffset);
-	} else {
-		y = viewportHeight - (cursorY - (cursorOffset + h));
-	}
- }
-
- font->renderText(x, y, tip, w);
+ updateLabel();
 }
 
 void BoGLToolTip::slotUpdate()
 {
  d->mToolTip.update();
+ updateLabel();
 }
 
 void BoGLToolTip::setUpdatePeriod(int ms)
@@ -386,4 +353,58 @@ void BoGLToolTip::setToolTipCreator(int type)
  BoToolTipCreator* creator = factory.tipCreator(type);
  d->mToolTip.setToolTipCreator(creator);
 }
+
+void BoGLToolTip::updateLabel()
+{
+ if (!mLabel) {
+	return;
+ }
+ mLabel->setVisible(showTip());
+ mLabel->setText(d->mToolTip.tip());
+}
+
+void BoGLToolTip::setCursorPos(const QPoint& pos)
+{
+ const int cursorOffset = 15;
+ const int viewportWidth = mView->width();
+ const int viewportHeight = mView->height();
+ int width = mLabel->width();
+ int height = mLabel->height();
+ int x;
+ int y;
+
+ if (viewportWidth - (pos.x() + cursorOffset) >= width) {
+	// to the right of the cursor
+	x = pos.x() + cursorOffset;
+ } else if (pos.x() - cursorOffset >= width) {
+	// to the left of the cursor
+	x = pos.x() - cursorOffset - width;
+ } else {
+	// not enough space anyway - pick where we can get most space
+	if (pos.x() > viewportWidth / 2) {
+		x = pos.x() + cursorOffset;
+	} else {
+		x = QMAX(0, pos.x() - cursorOffset - width);
+	}
+ }
+
+ if (pos.y() + cursorOffset + height < viewportHeight) {
+	y = viewportHeight - (pos.y() + cursorOffset);
+ } else if (pos.y() >= height + cursorOffset) {
+	y = viewportHeight - (pos.y() - (cursorOffset + height));
+ } else {
+	if (pos.y() < viewportHeight / 2) {
+		y = viewportHeight - (pos.y() + cursorOffset);
+	} else {
+		y = viewportHeight - (pos.y() - (cursorOffset + height));
+	}
+ }
+
+ // AB: the code above still assumes that y is flipped, is it is with normal
+ // OpenGL. however libufo expects "normal" widget coordinates again.
+ y = viewportHeight - y;
+
+ mLabel->setPos(x, y);
+}
+
 

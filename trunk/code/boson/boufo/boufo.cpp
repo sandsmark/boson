@@ -495,6 +495,7 @@ BoUfoManager::BoUfoManager(int w, int h, bool opaque)
  }
 
  mRootPane = mContext->getRootPane();
+ mLayeredPaneWidget = 0;
  mContentPane = 0;
  mContentWidget = 0;
  mMenuBar = 0;
@@ -504,10 +505,17 @@ BoUfoManager::BoUfoManager(int w, int h, bool opaque)
  if (!mRootPane) {
 	BO_NULL_ERROR(mRootPane);
  } else {
+	if (mRootPane->getLayeredPane()) {
+		mLayeredPaneWidget = new BoUfoLayeredPane(mRootPane->getLayeredPane());
+	} else {
+		BO_NULL_ERROR(mRootPane->getLayeredPane());
+	}
 	mContentPane = mRootPane->getContentPane();
 	if (mContentPane) {
 		mContentWidget = new BoUfoWidget(mContentPane);
 		mContentWidget->setLayoutClass(BoUfoWidget::UVBoxLayout);
+	} else {
+		BO_NULL_ERROR(mContentPane);
 	}
  }
 
@@ -905,6 +913,15 @@ void BoUfoWidget::addWidget(BoUfoWidget* w)
  widget()->add(w->widget());
 }
 
+void BoUfoWidget::render(BoUfoManager* ufoManager)
+{
+ BO_CHECK_NULL_RET(widget());
+ BO_CHECK_NULL_RET(ufoManager);
+ BO_CHECK_NULL_RET(ufoManager->context());
+ BO_CHECK_NULL_RET(ufoManager->context()->getGraphics());
+ widget()->paint(ufoManager->context()->getGraphics());
+}
+
 void BoUfoWidget::addSpacing(int spacing)
 {
  BO_CHECK_NULL_RET(widget());
@@ -1024,6 +1041,21 @@ bool BoUfoWidget::opaque() const
 void BoUfoWidget::setSize(int w, int h)
 {
  widget()->setSize(w, h);
+}
+
+void BoUfoWidget::setPos(int x, int y)
+{
+ widget()->setLocation(x, y);
+}
+
+int BoUfoWidget::width() const
+{
+ return widget()->getWidth();
+}
+
+int BoUfoWidget::height() const
+{
+ return widget()->getHeight();
 }
 
 void BoUfoWidget::setMinimumWidth(int w)
@@ -2317,6 +2349,48 @@ QStringList BoUfoFactory::widgets()
  list.append("BoUfoListBox");
  return list;
 }
+
+BoUfoLayeredPane::BoUfoLayeredPane()
+	: BoUfoWidget(new ufo::ULayeredPane())
+{
+ boDebug() << k_funcinfo << endl;
+}
+
+BoUfoLayeredPane::BoUfoLayeredPane(ufo::ULayeredPane* p)
+	: BoUfoWidget(p)
+{
+ boDebug() << k_funcinfo << endl;
+}
+
+BoUfoLayeredPane::~BoUfoLayeredPane()
+{
+}
+
+// AB: this seems to crash when layer == 0 and pos == -1 ?
+// (though this should even be the default!)
+void BoUfoLayeredPane::addLayer(BoUfoWidget* w, int layer, int pos)
+{
+ BO_CHECK_NULL_RET(w);
+ BO_CHECK_NULL_RET(widget());
+ boDebug() << k_funcinfo << endl;
+ addWidget(w);
+ setLayer(w, layer, pos);
+ boDebug() << k_funcinfo << "done" << endl;
+}
+
+void BoUfoLayeredPane::setLayer(BoUfoWidget* w, int layer, int pos)
+{
+ BO_CHECK_NULL_RET(w);
+ BO_CHECK_NULL_RET(widget());
+ boDebug() << k_funcinfo << endl;
+ if (!dynamic_cast<ufo::ULayeredPane*>(widget())) {
+	boError() << k_funcinfo << "oops - not a ULayeredPane" << endl;
+	return;
+ }
+ dynamic_cast<ufo::ULayeredPane*>(widget())->setLayer(w->widget(), layer, pos);
+ boDebug() << k_funcinfo << "done" << endl;
+}
+
 
 BoUfoInternalFrame::BoUfoInternalFrame(BoUfoManager* manager, const QString& title)
 	: BoUfoWidget(new ufo::UInternalFrame())
