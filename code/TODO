@@ -76,6 +76,7 @@ check the .bfp format (no binary changes should be allowed after 0.5)
 	-> check for 'version' 'author' and other meta-information especially
 
 
+test 'yellow' team colorization with ben's examples..
 0.8 release: (first public release)
 ============
 
