@@ -520,3 +520,12 @@ void BoDisplayManager::slotSetDebugMapCoordinates(bool debug)
  }
 }
 
+void BoDisplayManager::unlockAction()
+{
+ QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
+ while (it.current()) {
+	it.current()->displayInput()->unlockAction();
+	++it;
+ }
+}
+
