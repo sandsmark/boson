@@ -110,6 +110,9 @@ class BoVector3
      **/
     bool isEqual(float x, float y, float z) const { return mData[0] == x && mData[1] == y && mData[2] == z; }
 
+    static QString debugString(const BoVector3& v);
+    static void debugVector(const BoVector3& v);
+
     /**
      * @overload
      *
@@ -148,6 +151,11 @@ class BoVector4
     inline void setZ(GLfloat z) { mData[2] = z; }
     inline void setW(GLfloat w) { mData[3] = w; }
 
+    inline GLfloat x() const { return mData[0]; };
+    inline GLfloat y() const { return mData[1]; };
+    inline GLfloat z() const { return mData[2]; };
+    inline GLfloat w() const { return mData[3]; };
+
     inline void addScaled(BoVector4 v, GLfloat s)
         { mData[0] += v.mData[0] * s;  mData[1] += v.mData[1] * s;  mData[2] += v.mData[2] * s;  mData[3] += v.mData[3] * s; };
     inline void setScaledSum(BoVector4 a, BoVector4 b,  GLfloat s)
@@ -166,6 +174,9 @@ class BoVector4
      * Loads BoVector4 from KConfig
      **/
     static BoVector4 load(KConfig* cfg, QString key);
+
+    static QString debugString(const BoVector4& v);
+    static void debugVector(const BoVector4& v);
 
   private:
     friend class BoMatrix;
