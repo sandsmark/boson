@@ -142,6 +142,7 @@ bool BoItemList::isOccupied(bool includeMoving) const
  // AB: this is basically the same as the above isOccupied, but it doesn't take
  // a forUnit param. we have even more code duplication here, but this is
  // necessary, since isOccupied is used by pathfinding and must be fast.
+ // rivol: this method is never used by pathfinder.
 
  for (ConstIterator it = begin(); it != end(); ++it) {
 	if (RTTI::isUnit((*it)->rtti())) {
@@ -156,5 +157,32 @@ bool BoItemList::isOccupied(bool includeMoving) const
  }
 
  return false;
+}
+
+void BoItemList::isOccupied(Unit* forUnit, bool& hasmoving, bool& hasany) const
+{
+ // TODO: those values could be cached
+
+ bool flying = forUnit->isFlying();
+ hasmoving = false;
+ hasany = false;
+
+ for (ConstIterator it = begin(); it != end(); ++it) {
+	if (RTTI::isUnit((*it)->rtti())) {
+		Unit* u = (Unit*)*it;
+		if (forUnit == u) {
+			continue;
+		}
+		if (u->isFlying() != flying) {
+			continue;
+		}
+		if (u->isMoving()) {
+			hasmoving = true;
+			hasany = true;
+			return;
+		}
+		hasany = true;
+	}
+ }
 }
 

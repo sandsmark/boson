@@ -105,6 +105,15 @@ public:
 	bool isOccupied(Unit* forUnit, bool includeMoving = true) const;
 
 	/**
+	 * @param forUnit the unit for which we test whether this is occupied.
+	 * If non-null then it gets removed from the list of units.
+	 * @param hasmoving Will be set to true if this list has any moving units
+	 * @param hasany Will be set to true if this list has any units whose flying
+	 *  status is same as forUnit's
+	 **/
+	void isOccupied(Unit* forUnit, bool& hasmoving, bool& hasany) const;
+
+	/**
 	 * Basically the same as the above, but this one returns true whenever a
 	 * unit is on the cell, even if it is flying.
 	 * @param includeMoving Consider moving units as collisions, if TRUE,
