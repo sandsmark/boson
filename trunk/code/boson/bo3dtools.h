@@ -936,162 +936,172 @@ class BoMatrix
  **/
 class BoQuaternion
 {
-public:
-	BoQuaternion()
-	: mW(1.0f)
-	{
-	}
-	BoQuaternion(const BoQuaternion& quat)
-	{
-		*this = quat;
-	}
-	BoQuaternion(float w, const BoVector3& v)
-	{
-		set(w, v);
-	}
-	BoQuaternion& operator=(const BoQuaternion& quat)
-	{
-		set(quat);
-		return *this;
-	}
+  public:
+    BoQuaternion()
+        : mW(1.0f)
+    {
+    }
 
-	void loadIdentity()
-	{
-		mW = 1.0f;
-		mV.set(0.0f, 0.0f, 0.0f);
-	}
+    BoQuaternion(const BoQuaternion& quat)
+    {
+      *this = quat;
+    }
 
-	/**
-	 * @return The scalar part of this quaternion
-	 **/
-	float w() const
-	{
-		return mW;
-	}
+    BoQuaternion(float w, const BoVector3& v)
+    {
+      set(w, v);
+    }
 
-	/**
-	 * @return The vector part of this quaternion
-	 **/
-	const BoVector3& v() const
-	{
-		return mV;
-	}
+    BoQuaternion& operator=(const BoQuaternion& quat)
+    {
+      set(quat);
+      return *this;
+    }
 
-	/**
-	 * @return The quaternion converted into a rotation matrix
-	 **/
-	BoMatrix matrix() const;
+    void loadIdentity()
+    {
+      mW = 1.0f;
+      mV.set(0.0f, 0.0f, 0.0f);
+    }
 
-	/**
-	 * Multiply this quaternion by another one. The identity quaternion
-	 * (i.e. a quat doesnt get changed if you multiply it by this one) is
-	 * (1,(0,0,0)), i.e. w is 1 and the vector is (0,0,0).
-	 *
-	 * This way of combining two rotations does not suffer from gimbal lock.
-	 **/
-	void multiply(const BoQuaternion& quat)
-	{
-		float w = mW * quat.mW    - mV[0] * quat.mV[0] - mV[1] * quat.mV[1] - mV[2] * quat.mV[2];
-		float x = mW * quat.mV[0] + mV[0] * quat.mW    + mV[1] * quat.mV[2] - mV[2] * quat.mV[1];
-		float y = mW * quat.mV[1] + mV[1] * quat.mW    + mV[2] * quat.mV[0] - mV[0] * quat.mV[2];
-		float z = mW * quat.mV[2] + mV[2] * quat.mW    + mV[0] * quat.mV[1] - mV[1] * quat.mV[0];
-		mW = w;
-		mV.set(x, y, z);
-	}
-	static BoQuaternion multiply(const BoQuaternion& q1, const BoQuaternion& q2)
-	{
-		BoQuaternion q(q1);
-		q.multiply(q2);
-		return q;
-	}
-	void operator*=(const BoQuaternion& quat)
-	{
-		multiply(quat);
-	}
-	BoQuaternion operator+(const BoQuaternion& q) const
-	{
-		return BoQuaternion(mW + q.mW, mV + q.mV);
-	}
+    /**
+     * @return The scalar part of this quaternion
+     **/
+    float w() const
+    {
+      return mW;
+    }
 
-	float length() const;
-	void normalize()
-	{
-		float l = length();
-		mW /= l;
-		mV.scale(1.0f / l);
-	}
+    /**
+     * @return The vector part of this quaternion
+     **/
+    const BoVector3& v() const
+    {
+      return mV;
+    }
 
-	bool isEqual(const BoQuaternion& quat) const
-	{
-		return ((mW == quat.mW) && (mV.isEqual(quat.mV)));
-	}
-	bool operator==(const BoQuaternion& quat) const
-	{
-		return isEqual(quat);
-	}
+    /**
+     * @return The quaternion converted into a rotation matrix
+     **/
+    BoMatrix matrix() const;
 
-	void set(float w, const BoVector3& v)
-	{
-		mW = w;
-		mV = v;
-	}
-	inline void set(const BoQuaternion& quat)
-	{
-		set(quat.mW, quat.mV);
-	}
+    /**
+     * Multiply this quaternion by another one. The identity quaternion
+     * (i.e. a quat doesnt get changed if you multiply it by this one) is
+     * (1,(0,0,0)), i.e. w is 1 and the vector is (0,0,0).
+     *
+     * This way of combining two rotations does not suffer from gimbal lock.
+     **/
+    void multiply(const BoQuaternion& quat)
+    {
+      float w = mW * quat.mW    - mV[0] * quat.mV[0] - mV[1] * quat.mV[1] - mV[2] * quat.mV[2];
+      float x = mW * quat.mV[0] + mV[0] * quat.mW    + mV[1] * quat.mV[2] - mV[2] * quat.mV[1];
+      float y = mW * quat.mV[1] + mV[1] * quat.mW    + mV[2] * quat.mV[0] - mV[0] * quat.mV[2];
+      float z = mW * quat.mV[2] + mV[2] * quat.mW    + mV[0] * quat.mV[1] - mV[1] * quat.mV[0];
+      mW = w;
+      mV.set(x, y, z);
+    }
 
-	/**
-	 * @param angle The angle around @p axis, given in degree.
-	 **/
-	void setRotation(float angle, const BoVector3& axis);
+    static BoQuaternion multiply(const BoQuaternion& q1, const BoQuaternion& q2)
+    {
+      BoQuaternion q(q1);
+      q.multiply(q2);
+      return q;
+    }
 
-	/**
-	 * The so-called "euler rotation". This creates a quaternion for as if
-	 * <pre>
-	 * glRotatef(angleX, 1, 0, 0);
-	 * glRotatef(angleY, 0, 1, 0);
-	 * glRotatef(angleZ, 0, 0, 1);
-	 * </pre>
-	 * was called (in this order).
-	 * @param angleX The (euler-)angle around the x-axis. given in degree.
-	 * @param angleY The (euler-)angle around the y-axis. given in degree.
-	 * @param angleZ The (euler-)angle around the z-axis. given in degree.
-	 **/
-	void setRotation(float angleX, float angleY, float angleZ);
+    void operator*=(const BoQuaternion& quat)
+    {
+      multiply(quat);
+    }
 
-	/**
-	 * Convert a rotation matrix to the quaternion. A rotation matrix is
-	 * simply a matrix that describes a rotation.
-	 **/
-	void setRotation(const BoMatrix& rotationMatrix); // See Q55 in the quat faq
+    BoQuaternion operator+(const BoQuaternion& q) const
+    {
+      return BoQuaternion(mW + q.mW, mV + q.mV);
+    }
 
-	/**
-	 * Set the rotation according to the @p direction and the @p up vector.
-	 * These are compatible to the parameters used in gluLookAt, but note
-	 * that the @p direction differs from the lookat (aka center) vector.
-	 *
-	 * The direction is the (camera - lookat) vector.
-	 **/
-	void setRotation(const BoVector3& direction, const BoVector3& up);
-	/**
-	 * Convenience method for the version above. This takes exactly the
-	 * arguments that gluLookAt() takes.
-	 **/
-	void setRotation(const BoVector3& cameraPos, const BoVector3& lookAt, const BoVector3& up)
-	{
-		setRotation(cameraPos - lookAt, up);
-	}
+    float length() const;
 
-	void toRotation(float* angle, BoVector3* axis); // see Q 57 in quat faq
+    void normalize()
+    {
+      float l = length();
+      mW /= l;
+      mV.scale(1.0f / l);
+    }
 
-        /**
-         * See @ref BoMatrix::toRotation
-         **/
-	void toRotation(float* angleX, float* angleY, float* angleZ);
+    bool isEqual(const BoQuaternion& quat) const
+    {
+      return ((mW == quat.mW) && (mV.isEqual(quat.mV)));
+    }
 
-private:
-	float mW;
-	BoVector3 mV;
+    bool operator==(const BoQuaternion& quat) const
+    {
+      return isEqual(quat);
+    }
+
+    void set(float w, const BoVector3& v)
+    {
+      mW = w;
+      mV = v;
+    }
+
+    inline void set(const BoQuaternion& quat)
+    {
+      set(quat.mW, quat.mV);
+    }
+
+    /**
+    * @param angle The angle around @p axis, given in degree.
+     **/
+    void setRotation(float angle, const BoVector3& axis);
+
+    /**
+     * The so-called "euler rotation". This creates a quaternion for as if
+     * <pre>
+     * glRotatef(angleX, 1, 0, 0);
+     * glRotatef(angleY, 0, 1, 0);
+     * glRotatef(angleZ, 0, 0, 1);
+     * </pre>
+     * was called (in this order).
+     * @param angleX The (euler-)angle around the x-axis. given in degree.
+     * @param angleY The (euler-)angle around the y-axis. given in degree.
+     * @param angleZ The (euler-)angle around the z-axis. given in degree.
+     **/
+    void setRotation(float angleX, float angleY, float angleZ);
+
+    /**
+     * Convert a rotation matrix to the quaternion. A rotation matrix is
+     * simply a matrix that describes a rotation.
+     **/
+    void setRotation(const BoMatrix& rotationMatrix); // See Q55 in the quat faq
+
+    /**
+     * Set the rotation according to the @p direction and the @p up vector.
+     * These are compatible to the parameters used in gluLookAt, but note
+     * that the @p direction differs from the lookat (aka center) vector.
+     *
+     * The direction is the (camera - lookat) vector.
+    **/
+    void setRotation(const BoVector3& direction, const BoVector3& up);
+
+    /**
+     * Convenience method for the version above. This takes exactly the
+     * arguments that gluLookAt() takes.
+    **/
+    void setRotation(const BoVector3& cameraPos, const BoVector3& lookAt, const BoVector3& up)
+    {
+      setRotation(cameraPos - lookAt, up);
+    }
+
+    void toRotation(float* angle, BoVector3* axis); // see Q 57 in quat faq
+
+    /**
+     * See @ref BoMatrix::toRotation
+    **/
+    void toRotation(float* angleX, float* angleY, float* angleZ);
+
+  private:
+    float mW;
+    BoVector3 mV;
 };
 
 /**
