@@ -238,11 +238,11 @@ void BosonWidgetBase::initChat()
 {
  // note: we can use the chat widget even for editor mode, e.g. for status
  // messages!
- d->mChatDock = mTop->createDockWidget("chat_dock", 0, this, i18n("Chat"));
+ d->mChatDock = mTop->createDockWidget("chat_dock", 0, 0, i18n("Chat"));
  d->mChatDock->setEnableDocking(KDockWidget::DockTop | KDockWidget::DockBottom);
+ d->mChatDock->setDockSite(KDockWidget::DockNone);
  d->mChat = new KGameChat(boGame, BosonMessage::IdChat, d->mChatDock);
  d->mChatDock->setWidget(d->mChat);
- d->mChatDock->hide();
 
  connect(d->mChatDock, SIGNAL(iMBeingClosed()), this, SLOT(slotChatDockHidden()));
  connect(d->mChatDock, SIGNAL(hasUndocked()), this, SLOT(slotChatDockHidden()));
@@ -296,12 +296,11 @@ void BosonWidgetBase::initBigDisplay(BosonBigDisplayBase* b)
 
 void BosonWidgetBase::initCommandFrame()
 {
- d->mCommandFrameDock = mTop->createDockWidget("cmdframe_dock", 0, this, i18n("Command Frame"));
+ d->mCommandFrameDock = mTop->createDockWidget("cmdframe_dock", 0, 0, i18n("Command Frame"));
  d->mCommandFrameDock->setEnableDocking(KDockWidget::DockLeft | KDockWidget::DockRight);
  d->mCommandFrameDock->setDockSite(KDockWidget::DockNone);
  d->mCommandFrame = createCommandFrame(d->mCommandFrameDock);
  d->mCommandFrameDock->setWidget(d->mCommandFrame);
- d->mCommandFrameDock->hide();
  d->mCommandFrame->reparentMiniMap(minimap());
 
  connect(d->mCommandFrameDock, SIGNAL(iMBeingClosed()), this, SLOT(slotCmdFrameDockHidden()));
@@ -315,20 +314,25 @@ void BosonWidgetBase::initCommandFrame()
 void BosonWidgetBase::initLayout()
 {
  boDebug() << k_funcinfo << endl;
- d->mCommandFrameDock->manualDock(mTop->getMainDockWidget(), KDockWidget::DockLeft, 30);
- d->mChatDock->manualDock(mTop->getMainDockWidget(), KDockWidget::DockBottom, 80);
 
  QVBoxLayout* topLayout = new QVBoxLayout(this);
  topLayout->addWidget(displayManager());
 
+ d->mCommandFrameDock->manualDock(mTop->getMainDockWidget(), KDockWidget::DockLeft, 30);
+ d->mChatDock->manualDock(mTop->getMainDockWidget(), KDockWidget::DockBottom, 80);
+
  if (!kapp->config()->hasGroup("BosonGameDock")) {
+	boDebug() << k_funcinfo << "dock config does not exist" << endl;
 	// Dock config isn't saved (probably first start). Hide chat dock (we only
 	//  show commandframe by default)
 	d->mChatDock->changeHideShowState();
+	displayManager()->updateGeometry();  // Hack? Bug in BoDisplayManager?
  }
  else {
+	boDebug() << k_funcinfo << "dock config exists, loading" << endl;
 	mTop->loadGameDockConfig();
  }
+ checkDockStatus();
 }
 
 void BosonWidgetBase::changeCursor(BosonCursor* cursor)
