@@ -23,7 +23,7 @@
 #include "pluginproperties.h"
 #include "upgradeproperties.h"
 #include "bosonparticlesystem.h"
-#include "bosonparticlemanager.h"
+#include "bosonparticlesystemproperties.h"
 #include "bosonweapon.h"
 #include "bosonconfig.h"
 #include "bodebug.h"

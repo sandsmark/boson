@@ -17,8 +17,8 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef BOSONPARTICLEMANAGER_H
-#define BOSONPARTICLEMANAGER_H
+#ifndef BOSONPARTICLESYSTEMPROPERTIES_H
+#define BOSONPARTICLESYSTEMPROPERTIES_H
 
 #include <krandomsequence.h>
 
@@ -39,41 +39,6 @@ template<class T, class T2> class QMap;
 template<class T> class QPtrList;
 template<class T> class QValueList;
 
-/*class BosonParticleManager
-{
-  public:
-    static void loadTextures(QString texdir);
-
-    enum Type { None = 0, Explosion = 1, Smoke = 2, Shot = 3, Fire = 4, SmallSmoke = 5, ShockWave = 6, LastType };
-
-    static BosonParticleSystem* newSystem(BoVector3 pos, Type type);
-
-    inline static BosonParticleSystem* newExplosion(BoVector3 pos) { return newSystem(pos, Explosion); };
-    inline static BosonParticleSystem* newSmoke(BoVector3 pos) { return newSystem(pos, Smoke); };
-    inline static BosonParticleSystem* newShot(BoVector3 pos) { return newSystem(pos, Shot); };
-    inline static BosonParticleSystem* newFire(BoVector3 pos) { return newSystem(pos, Fire); };
-    inline static BosonParticleSystem* newSmallSmoke(BoVector3 pos) { return newSystem(pos, SmallSmoke); };
-    inline static BosonParticleSystem* newShockWave(BoVector3 pos) { return newSystem(pos, ShockWave); };
-
-    static void initExplosionParticle(BosonParticleSystem* system, BosonParticle* particle);
-    static void initSmokeParticle(BosonParticleSystem* system, BosonParticle* particle);
-    static void initShotParticle(BosonParticleSystem* system, BosonParticle* particle);
-    static void initFireParticle(BosonParticleSystem* system, BosonParticle* particle);
-    static void initSmallSmokeParticle(BosonParticleSystem* system, BosonParticle* particle);
-    static void initShockWaveParticle(BosonParticleSystem* system, BosonParticle* particle);
-
-    static void updateFadeOutParticle(BosonParticleSystem* system, BosonParticle* particle);
-    static void updateFireParticle(BosonParticleSystem* system, BosonParticle* particle);
-    static void updateExplosionParticle(BosonParticleSystem* system, BosonParticle* particle);
-
-    inline static float getFloat(float min, float max)  { return ((float)(mRandom->getDouble())) * (max - min) + min; };
-
-  protected:
-    static BosonTextureArray* mTextures;
-   static KRandomSequence* mRandom;
-};*/
-
-
 /**
  * @author Rivo Laks <rivolaks@hot.ee>
  **/
@@ -92,18 +57,19 @@ class BosonParticleSystemProperties
     void initParticle(BosonParticleSystem* system, BosonParticle* particle) const;
 
     void updateParticle(BosonParticleSystem* system, BosonParticle* particle) const;
-    
-    static void init(QString texdir);
-    
-    unsigned long int id()  { return mId; };
-    
+
+    static void init(const QString& texdir);
+
+    unsigned long int id() const { return mId; };
+
     static QPtrList<BosonParticleSystemProperties> loadParticleSystemProperties(KSimpleConfig* cfg, QString key, SpeciesTheme* theme);
     static QPtrList<BosonParticleSystemProperties> loadParticleSystemProperties(QValueList<unsigned long int> ids, SpeciesTheme* theme);
 
   protected:
-    static void addTexture(QString name);
-    static GLuint texture(QString name);
+    static void addTexture(const QString& name);
+    static GLuint texture(const QString& name);
 
+  protected:
     static QMap<QString, GLuint> mTextures;
     static KRandomSequence* mRandom;
     static QString mTexturePath;
@@ -125,4 +91,8 @@ class BosonParticleSystemProperties
     unsigned long int mId;
 };
 
-#endif // BOSONPARTICLEMANAGER_H
+#endif
+
+/*
+ * vim: et sw=2
+ */

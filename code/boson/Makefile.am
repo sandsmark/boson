@@ -23,6 +23,7 @@ BOSON_SRC = \
 	bosoncanvas.cpp \
 	boson.cpp \
 	speciestheme.cpp \
+	speciesdata.cpp \
 	player.cpp \
 	kgamedialogbosonconfig.cpp \
 	bo3dtools.cpp \
@@ -59,7 +60,7 @@ BOSON_SRC = \
 	bosonmodeltextures.cpp \
 	upgradeproperties.cpp \
 	bosonparticlesystem.cpp \
-	bosonparticlemanager.cpp \
+	bosonparticlesystemproperties.cpp \
 	bosonstarting.cpp \
 	bosonweapon.cpp
 

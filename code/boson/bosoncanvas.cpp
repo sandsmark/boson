@@ -27,7 +27,7 @@
 #include "speciestheme.h"
 #include "boitemlist.h"
 #include "bosonparticlesystem.h"
-#include "bosonparticlemanager.h"
+#include "bosonparticlesystemproperties.h"
 #include "defines.h"
 #include "items/bosonshot.h"
 #include "bosonweapon.h"

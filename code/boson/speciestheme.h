@@ -35,6 +35,7 @@ class TechnologyProperties;
 class UpgradeProperties;
 class BosonParticleSystemProperties;
 class BosonWeaponProperties;
+class SpeciesData;
 
 class QPixmap;
 class QStringList;
@@ -80,7 +81,7 @@ public:
 	bool loadTheme(const QString& species, const QColor&);
 
 	/**
-	 * Load the unit unitType. This must be done before @ref pixmapArray,
+	 * Load the unit @p unitType. This must be done before @ref pixmapArray,
 	 * @ref bigOverview or @ref smallOverview can return something useful.
 	 * These functions call this automatically so you usually don't need to
 	 * bother about it. @ref unitProperties does not need to load the unit.
@@ -102,7 +103,7 @@ public:
 
 	void loadParticleSystems();
 
-	BosonParticleSystemProperties* particleSystemProperties(long unsigned int id);
+	const BosonParticleSystemProperties* particleSystemProperties(long unsigned int id);
 
 	/**
 	 * @return Pixmap for the specified action
@@ -111,7 +112,7 @@ public:
 
 	QPixmap* techPixmap(unsigned long int techType);
 
-	QPixmap* upgradePixmapByName(QString name);
+	QPixmap* upgradePixmapByName(const QString& name);
 
 	/**
 	 * @return The @ref BosonModel object for the specified unit type in
@@ -125,7 +126,7 @@ public:
 	 **/
 	static QString unitModelFile();
 
-	BosonModel* objectModel(QString file);
+	BosonModel* objectModel(const QString& file);
 
 	/**
 	 * @return The big overview pixmap (the one that is displayed when the
@@ -277,21 +278,11 @@ public:
 	void readUnitConfigs(bool full = true);
 
 protected:
-	bool loadUnitGraphics(const UnitProperties* prop);
-
 	/**
-	 * Load a pixmap from path with mash (or not). This is used for all unit
-	 * pixmaps: small/big overview and sprites. It is <em>not</em> yet used
-	 * fot the shot sprites. Use @ref loadShotPixmap for these.
-	 *
-	 * @param fileName The path to load the pixmap from. Should be an abolute
-	 * filename.
-	 * @param pix The pixmap that is loaded.
+	 * Once this has been called the teamcolor can't be changed anymore.
+	 * Also add the color to @ref SpeciesData
 	 **/
-	bool loadUnitImage(const QString& fileName, QImage &image, bool withMask = true, bool withTeamColor = true);
-
-	void loadUnitTextures(unsigned long int type, QValueList<QImage> list);
-	GLuint createDisplayList(unsigned long int typeId);
+	void finalizeTeamColor();
 
 private:
 	class SpeciesThemePrivate;
@@ -300,6 +291,7 @@ private:
 	QString mThemePath;
 	QColor mTeamColor;
 	BosonSound* mSound;
+	SpeciesData* mData;
 };
 
 #endif
