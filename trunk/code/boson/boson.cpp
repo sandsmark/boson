@@ -163,16 +163,16 @@ void BosonApp::initMenuBar()
   // file_menu entry file_menu_recent  (for recent documents)
 
 
-  QPopupMenu *file_menu_recent = new QPopupMenu();
+/*  QPopupMenu *file_menu_recent = new QPopupMenu();
   for (uint i = 0; i < recentList->count(); i++)
-    file_menu_recent->insertItem(recentList->at(i));
+    file_menu_recent->insertItem(recentList->at(i)); */
 
 
   ///////////////////////////////////////////////////////////////////
   // menuBar entry file_menu
   QPopupMenu *file_menu = new QPopupMenu();
   file_menu->insertItem(Icon("mini/bosonapp.xpm"), i18n("New &Window"), ID_FILE_NEW_WINDOW );
-  file_menu->insertSeparator();
+/*  file_menu->insertSeparator();
   file_menu->insertItem(Icon("filenew.xpm"), i18n("&New"), ID_FILE_NEW );
   file_menu->insertItem(Icon("fileopen.xpm"), i18n("&Open..."), ID_FILE_OPEN );
   file_menu->insertItem(i18n("Open &recent..."), file_menu_recent, ID_FILE_RECENT );
@@ -182,22 +182,23 @@ void BosonApp::initMenuBar()
   file_menu->insertItem(i18n("&Close"), ID_FILE_CLOSE );
   file_menu->insertSeparator();
   file_menu->insertItem(Icon("fileprint.xpm"), i18n("&Print"), ID_FILE_PRINT );
-  file_menu->insertSeparator();
-  file_menu->insertItem(i18n("C&lose Widow"), ID_FILE_CLOSE_WINDOW);
+  file_menu->insertSeparator(); */
+  file_menu->insertItem(i18n("C&lose Window"), ID_FILE_CLOSE_WINDOW);
   file_menu->insertSeparator();
   file_menu->insertItem(i18n("E&xit"), ID_APP_EXIT );
 
   // file_menu key accelerators
-  file_menu->setAccel(CTRL+Key_N, ID_FILE_NEW);
+/*  file_menu->setAccel(CTRL+Key_N, ID_FILE_NEW);
   file_menu->setAccel(CTRL+Key_O, ID_FILE_OPEN);
   file_menu->setAccel(CTRL+Key_S, ID_FILE_SAVE);
   file_menu->setAccel(CTRL+Key_W, ID_FILE_CLOSE);
-  file_menu->setAccel(CTRL+Key_P, ID_FILE_PRINT);
+  file_menu->setAccel(CTRL+Key_P, ID_FILE_PRINT); */
   file_menu->setAccel(CTRL+Key_Q, ID_APP_EXIT);
 
 
   ///////////////////////////////////////////////////////////////////
   // menuBar entry edit_menu
+/*
   QPopupMenu *edit_menu = new QPopupMenu();
   edit_menu->insertItem(Icon("editcut.xpm"), i18n("Cu&t"), ID_EDIT_CUT );
   edit_menu->insertItem(Icon("editcopy.xpm"), i18n("&Copy"), ID_EDIT_COPY );
@@ -207,17 +208,17 @@ void BosonApp::initMenuBar()
   edit_menu->setAccel(CTRL+Key_X, ID_EDIT_CUT);
   edit_menu->setAccel(CTRL+Key_C, ID_EDIT_COPY);
   edit_menu->setAccel(CTRL+Key_V, ID_EDIT_PASTE);
-
+*/
  
   ///////////////////////////////////////////////////////////////////
   // menuBar entry view_menu
-  QPopupMenu *view_menu = new QPopupMenu();
+/*  QPopupMenu *view_menu = new QPopupMenu();
   view_menu->setCheckable(true);
   view_menu->insertItem(i18n("Tool&bar"), ID_VIEW_TOOLBAR_0);
   view_menu->insertItem(i18n("&Statusbar"), ID_VIEW_STATUSBAR );
 
   view_menu->setItemChecked(ID_VIEW_TOOLBAR_0, bViewToolbar_0);
-  view_menu->setItemChecked(ID_VIEW_STATUSBAR, bViewStatusbar);
+  view_menu->setItemChecked(ID_VIEW_STATUSBAR, bViewStatusbar); */
 
   ///////////////////////////////////////////////////////////////////
   // EDIT YOUR APPLICATION SPECIFIC MENUENTRIES HERE
@@ -234,8 +235,8 @@ void BosonApp::initMenuBar()
   // set menu_bar the current menuBar and the position due to config file
   menu_bar = menuBar();
   menu_bar->insertItem(i18n("&File"), file_menu);
-  menu_bar->insertItem(i18n("&Edit"), edit_menu);
-  menu_bar->insertItem(i18n("&View"), view_menu);
+//  menu_bar->insertItem(i18n("&Edit"), edit_menu);
+//  menu_bar->insertItem(i18n("&View"), view_menu);
 
   ///////////////////////////////////////////////////////////////////
   // INSERT YOUR APPLICATION SPECIFIC MENUENTRIES HERE
@@ -248,8 +249,8 @@ void BosonApp::initMenuBar()
   // CONNECT THE SUBMENU SLOTS WITH SIGNALS
 
   CONNECT_CMD(file_menu);
-  CONNECT_CMD(edit_menu);
-  CONNECT_CMD(view_menu);
+//  CONNECT_CMD(edit_menu);
+//  CONNECT_CMD(view_menu);
 
   //connect(file_menu_recent, SIGNAL(activated(int)),SLOT(slotFileRecent(int)));  
 
@@ -266,14 +267,14 @@ void BosonApp::initToolBars()
   // TOOLBAR
   // set tool_bar_0 the current toolBar and the position due to config file
   tool_bar_0 = toolBar(0);
-  tool_bar_0->insertButton(Icon("filenew.xpm"), ID_FILE_NEW, true, i18n("New File"));
-  tool_bar_0->insertButton(Icon("fileopen.xpm"), ID_FILE_OPEN, true, i18n("Open File"));
-  tool_bar_0->insertButton(Icon("filefloppy.xpm"), ID_FILE_SAVE, true, i18n("Save File"));
-  tool_bar_0->insertButton(Icon("editcopy.xpm"), ID_EDIT_COPY, true, i18n("Copy"));
-  tool_bar_0->insertButton(Icon("editpaste.xpm"), ID_EDIT_PASTE, true, i18n("Paste"));
-  tool_bar_0->insertButton(Icon("editcut.xpm"), ID_EDIT_CUT, true, i18n("Cut"));
-  tool_bar_0->insertButton(Icon("fileprint.xpm"), ID_FILE_PRINT, true, i18n("Print"));
+  tool_bar_0->insertButton(Icon("configure.xpm"), ID_FILE_NEW_WINDOW, true, i18n("New window"));
+  tool_bar_0->insertButton(Icon("flag.xpm"), ID_FILE_NEW_WINDOW, true, i18n("Move"));
+  tool_bar_0->insertButton(Icon("stop.xpm"), ID_FILE_NEW_WINDOW, true, i18n("Stop"));
+  tool_bar_0->insertButton(Icon("filedel.xpm"), ID_FILE_NEW_WINDOW, true, i18n("Attack"));
+  tool_bar_0->insertButton(Icon("home.xpm"), ID_FILE_NEW_WINDOW, true, i18n("Go Back"));
+  tool_bar_0->insertButton(Icon("idea.xpm"), ID_FILE_NEW_WINDOW, true, i18n("repair"));
   tool_bar_0->insertSeparator();
+  tool_bar_0->insertButton(Icon("exit.xpm"), ID_APP_EXIT, SIGNAL(pressed()), this, SLOT(slotAppExit()), true, i18n("Exit"));
   tool_bar_0->insertButton(Icon("help.xpm"), ID_HELP, SIGNAL(pressed()), kapp, SLOT(appHelpActivated()), true, i18n("Help"));
 
   ///////////////////////////////////////////////////////////////////
@@ -326,6 +327,7 @@ void BosonApp::resizeEvent(QResizeEvent *evt)
     updateRects();
 }
 
+/*
 void BosonApp::addRecent(const char *filename)
 {
   if(filename && strlen(filename) == 0 || recentList->contains(filename))
@@ -344,6 +346,7 @@ void BosonApp::addRecent(const char *filename)
     file_menu_recent->insertItem(recentList->at(i));
 
 }
+*/
 
 void BosonApp::dlgModified()
 {
@@ -365,6 +368,7 @@ void BosonApp::dlgModified()
 
 bool BosonApp::queryExit()
 {
+
   int exit=KMsgBox::yesNo(this, i18n("Exit"), i18n("Really Quit ?"));
 
   if(exit==1)
@@ -377,13 +381,12 @@ void BosonApp::saveOptions()
 {
   KConfig *config = kapp->getConfig();
 
-  config->setGroup("FILES");
-  config->writeEntry("RecentList", *recentList);
-
   config->setGroup("APPEARANCE");
   config->writeEntry("MainGeometry",rMainGeom);
-  config->writeEntry("ShowToolbar_0",tool_bar_0->isVisible());
-  config->writeEntry("ShowStatusbar",status_bar->isVisible());
+
+//  config->writeEntry("ShowToolbar_0",tool_bar_0->isVisible());
+//  config->writeEntry("ShowStatusbar",status_bar->isVisible());
+
   config->writeEntry("MenuBarPos", (int)menu_bar->menuBarPos());
   config->writeEntry("ToolBar_0_Pos", (int)tool_bar_0->barPos());
 
@@ -394,18 +397,16 @@ void BosonApp::readOptions()
   ///////////////////////////////////////////////////////////////////
   // read the config file entries
   KConfig *config = kapp->getConfig();
-
-  config->setGroup("FILES");
-
-  config->readListEntry("RecentList", *recentList);
-
  
   config->setGroup("APPEARANCE");
-  rMainGeom = config->readRectEntry("MainGeometry",&QRect(0,0,500,450));
-  bViewToolbar_0 = config->readBoolEntry("ShowToolbar_0", true);
-  bViewStatusbar = config->readBoolEntry("ShowStatusbar", true);
+  rMainGeom = config->readRectEntry("MainGeometry",&QRect(0,0,700,600));
+
+//  bViewToolbar_0 = config->readBoolEntry("ShowToolbar_0", true);
+//  bViewStatusbar = config->readBoolEntry("ShowStatusbar", true);
+  bViewToolbar_0 = bViewStatusbar = true;
+
   menu_bar_pos = (KMenuBar::menuPosition)config->readNumEntry("MenuBarPos", KMenuBar::Top); 
-  tool_bar_0_pos = (KToolBar::BarPosition)config->readNumEntry("ToolBar_0_Pos", KToolBar::Top);
+  tool_bar_0_pos = (KToolBar::BarPosition)config->readNumEntry("ToolBar_0_Pos", KToolBar::Right);
 
 }
 
@@ -428,6 +429,7 @@ void BosonApp::slotAppExit()
   else return;
 }
 
+/*
 void BosonApp::slotViewToolBar_0()
 {
   ///////////////////////////////////////////////////////////////////
@@ -447,6 +449,7 @@ void BosonApp::slotViewStatusBar()
   menu_bar->setItemChecked(ID_VIEW_STATUSBAR, bViewStatusbar);
   enableStatusBar();
 }
+*/
 
 
 void BosonApp::slotStatusMsg(const char *text)
@@ -476,11 +479,8 @@ BEGIN_CMD(BosonApp)
 
   ON_CMD(ID_APP_EXIT,                 slotAppExit(),            i18n(""))
 
-
-  
-
-  ON_CMD(ID_VIEW_TOOLBAR_0,           slotViewToolBar_0(),      i18n(""))
-  ON_CMD(ID_VIEW_STATUSBAR,           slotViewStatusBar(),      i18n(""))
+//  ON_CMD(ID_VIEW_TOOLBAR_0,           slotViewToolBar_0(),      i18n(""))
+//  ON_CMD(ID_VIEW_STATUSBAR,           slotViewStatusBar(),      i18n(""))
 END_CMD()
 
 
@@ -489,9 +489,9 @@ END_CMD()
 
 
 BEGIN_STATUS_MSG(BosonApp)
-  ON_STATUS_MSG(ID_FILE_NEW_WINDOW,  i18n("Opens a new application window"))
+  ON_STATUS_MSG(ID_FILE_NEW_WINDOW,  i18n("Opens a new view window"))
 
-  ON_STATUS_MSG(ID_FILE_NEW,         i18n("Creates a new document"))
+/*  ON_STATUS_MSG(ID_FILE_NEW,         i18n("Creates a new document"))
   ON_STATUS_MSG(ID_FILE_OPEN,        i18n("Opens an existing document"))
   ON_STATUS_MSG(ID_FILE_RECENT,      i18n("Opens a recent document"))
 
@@ -499,12 +499,13 @@ BEGIN_STATUS_MSG(BosonApp)
   ON_STATUS_MSG(ID_FILE_SAVE_AS,     i18n("Save the document as..."))
   ON_STATUS_MSG(ID_FILE_CLOSE,       i18n("Closes the actual file"))
 
-  ON_STATUS_MSG(ID_FILE_PRINT,       i18n("Prints the current document"))
+  ON_STATUS_MSG(ID_FILE_PRINT,       i18n("Prints the current document")) */
 
   ON_STATUS_MSG(ID_FILE_CLOSE_WINDOW,i18n("Closes the current window"))
 
-  ON_STATUS_MSG(ID_APP_EXIT,         i18n("Exits the program"))  
+  ON_STATUS_MSG(ID_APP_EXIT,         i18n("Exits Boson"))  
 
+/*
 
   ON_STATUS_MSG(ID_EDIT_CUT,         i18n("Cuts the selected section and puts it to the clipboard"))
   ON_STATUS_MSG(ID_EDIT_COPY,        i18n("Copys the selected section to the clipboard"))
@@ -514,6 +515,6 @@ BEGIN_STATUS_MSG(BosonApp)
 
   ON_STATUS_MSG(ID_VIEW_TOOLBAR_0,   i18n("Enables / disables the actual Toolbar"))
   ON_STATUS_MSG(ID_VIEW_STATUSBAR,   i18n("Enables / disables the Statusbar"))
-  ON_STATUS_MSG(ID_VIEW_OPTIONS,     i18n("Set program options"))
+  ON_STATUS_MSG(ID_VIEW_OPTIONS,     i18n("Set program options")) */
 
 END_STATUS_MSG()
