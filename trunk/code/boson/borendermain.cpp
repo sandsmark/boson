@@ -40,6 +40,7 @@
 #include "bolight.h"
 #include "bomeshrenderermanager.h"
 #include "boglstatewidget.h"
+#include "info/boinfo.h"
 
 #include <kcmdlineargs.h>
 #include <kaboutdata.h>
@@ -1747,6 +1748,11 @@ int main(int argc, char **argv)
 
 
  args->clear();
+
+ // the VBO meshrenderer (which isn't used by borender by default!) requires
+ // this call. otherwise we get an undefined reference on plugin loading.
+ // I have _no_ idea why this is required, as it's basically a noop.
+ (void)BoInfo::boInfo();
  return app.exec();
 }
 
