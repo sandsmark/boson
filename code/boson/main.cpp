@@ -24,6 +24,7 @@
 #include "boapplication.h"
 #include "boversion.h"
 #include "bodebug.h"
+#include "bo3dtools.h"
 
 #include <kaboutdata.h>
 #include <kcmdlineargs.h>
@@ -52,6 +53,8 @@ static KCmdLineOptions options[] =
     { "aidelay <delay>", I18N_NOOP("Set AI delay (in seconds). The less it is, the faster AI will send it's units"), 0 },
     { "noai", I18N_NOOP("Disable AI"), 0 },
     { "indirect", I18N_NOOP("Use Indirect rendering (sloooow!!). debugging only."), 0 },
+    { "ati-depth-workaround", I18N_NOOP("Enable the ATI (proprietary) driver workaround for reading the depth buffer. Will use depth of 0.00390625"), 0 },
+    { "ati-depth-workaround-depth <depth>", I18N_NOOP("Use with --ati-depth-workaround. Supply a depth value for your system (default=0.00390625)"), 0 },
     { 0, 0, 0 }
 };
 
@@ -95,6 +98,22 @@ int main(int argc, char **argv)
  top->show();
 
  KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
+ if (args->isSet("ati-depth-workaround") || args->isSet("ati-depth-workaround-depth")) {
+	// this is the value that a call to
+	// glReadPixels(x,y,1,1,GL_DEPTH_COMPONENT, GL_FLOAT, &depth); returns
+	// when it should return 1.0 (i.e. is freshly cleared with 1.0)
+	float depth = 0.00390625;
+	if (args->isSet("ati-depth-workaround-depth")) {
+		QString s = args->getOption("ati-depth-workaround-depth");
+		bool ok = false;
+		depth = s.toFloat(&ok);
+		if (!ok) {
+			boError() << "depth of " << s << " is not a valid floating point number!" << endl;
+			return 1;
+		}
+	}
+	Bo3dTools::enableReadDepthBufferWorkaround(depth);
+ }
  if (args->isSet("new")) {
 	top->slotNewGame(args);
  } else if (args->isSet("editor")) {
