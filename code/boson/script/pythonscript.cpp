@@ -726,7 +726,7 @@ PyObject* PythonScript::py_unitPosition(PyObject*, PyObject* args)
 
   BoVector2 pos = BosonScript::unitPosition(id);
 
-  return Py_BuildValue((char*)"(ii)", pos.x(), pos.y());
+  return Py_BuildValue((char*)"(ff)", pos.x(), pos.y());
 }
 
 PyObject* PythonScript::py_unitOwner(PyObject*, PyObject* args)
