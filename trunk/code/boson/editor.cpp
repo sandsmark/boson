@@ -126,7 +126,6 @@ public:
 	KRadioAction* mActionCellBig2;
 
 	QIntDict<Player> mPlayers;
-	bool mMapMode;
 };
 
 Editor::Editor() : TopBase()
@@ -342,44 +341,32 @@ void Editor::createTiles(bool debug)
 
 void Editor::slotPlaceFacilities()
 {
- if (!d->mMapMode) {
-	bosonWidget()->slotEditorConstructionChanged(OrderFacilities);
- }
+ bosonWidget()->slotEditorConstructionChanged(OrderFacilities);
 }
 
 void Editor::slotPlaceMobiles()
 {
- if (!d->mMapMode) {
-	bosonWidget()->slotEditorConstructionChanged(OrderMobiles);
- }
+ bosonWidget()->slotEditorConstructionChanged(OrderMobiles);
 }
 
 void Editor::slotPlaceCellSmall()
 {
- if (d->mMapMode) {
-	bosonWidget()->slotEditorConstructionChanged(OrderSmall);
- }
+ bosonWidget()->slotEditorConstructionChanged(OrderSmall);
 }
 
 void Editor::slotPlaceCellPlain()
 {
- if (d->mMapMode) {
-	bosonWidget()->slotEditorConstructionChanged(OrderPlainTiles);
- }
+ bosonWidget()->slotEditorConstructionChanged(OrderPlainTiles);
 }
 
 void Editor::slotPlaceCellBig1()
 {
- if (d->mMapMode) {
-	bosonWidget()->slotEditorConstructionChanged(OrderBig1);
- }
+ bosonWidget()->slotEditorConstructionChanged(OrderBig1);
 }
 
 void Editor::slotPlaceCellBig2()
 {
- if (d->mMapMode) {
-	bosonWidget()->slotEditorConstructionChanged(OrderBig2);
- }
+ bosonWidget()->slotEditorConstructionChanged(OrderBig2);
 }
 
 void Editor::slotGameStarted()
