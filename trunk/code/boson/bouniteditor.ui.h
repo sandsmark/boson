@@ -372,7 +372,7 @@ void BoUnitEditor::slotUpdateUnitProperties()
     mUnit->clearPlugins(false);
     // General page
     mUnit->setName(mUnitName->text());
-    mUnit->setId(mUnitId->value());
+    mUnit->setTypeId(mUnitId->value());
     mUnit->setUnitWidth((unsigned int)(mUnitWidth->value() * BO_TILE_SIZE));
     mUnit->setUnitHeight((unsigned int)(mUnitHeight->value() * BO_TILE_SIZE));
     mUnit->setUnitDepth(mUnitDepth->value());
