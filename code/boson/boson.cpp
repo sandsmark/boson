@@ -151,12 +151,17 @@ void Boson::quitGame()
  d->mNextUnitId = 0;
 
  // remove all players from game
+ removeAllPlayers();
+// kdDebug() << k_funcinfo << " done" <<  endl;
+}
+
+void Boson::removeAllPlayers()
+{
  QPtrList<KPlayer> list = *playerList();
  for (unsigned int i = 0; i < list.count(); i++) {
 	removePlayer(list.at(i)); // might not be necessary - sends remove over network
 	systemRemovePlayer(list.at(i), true); // remove immediately, even before network removing is received.
  }
-// kdDebug() << k_funcinfo << " done" <<  endl;
 }
 
 bool Boson::playerInput(QDataStream& stream, KPlayer* p)
@@ -837,6 +842,7 @@ int Boson::gameSpeed() const
 
 void Boson::slotSetGameSpeed(int speed)
 {
+ kdDebug() << k_funcinfo << " speed = " << speed << endl;
  if (d->mGameSpeed == speed) {
 	return; // do not restart timer
  }
@@ -849,6 +855,7 @@ void Boson::slotSetGameSpeed(int speed)
 	return;
  }
 // kdDebug() << k_funcinfo << ": " << speed << endl;
+ kdDebug() << k_funcinfo << "Setting speed to " << speed << endl;
  d->mGameSpeed = speed;
 }
 
@@ -856,6 +863,7 @@ void Boson::slotPropertyChanged(KGamePropertyBase* p)
 {
  switch (p->id()) {
 	case IdGameSpeed:
+		kdDebug() << k_funcinfo << "speed has changed, new speed: " << gameSpeed() << endl;
 		if (d->mGameTimer->isActive()) {
 			d->mGameTimer->stop();
 			if (d->mGameSpeed != 0) {
