@@ -1192,6 +1192,8 @@ public:
 
 	BosonGLFont* mDefaultFont;// AB: maybe we should support several fonts
 
+	bool mGrabMovie;
+
 	long long int mFpsTime;
 	double mFps;
 	unsigned int mFrameCount;
@@ -1319,6 +1321,7 @@ void BosonBigDisplayBase::init()
  d->mDebugMapCoordinatesY = 0.0f;
  d->mDebugMapCoordinatesZ = 0.0f;
  d->mFovY = 60.0f;
+ d->mGrabMovie = false;
 
  d->mScriptConnector = new BosonBigDisplayScriptConnector(this);
 
@@ -1838,7 +1841,7 @@ void BosonBigDisplayBase::initUfoActions(bool gameMode)
 		KShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_M), 0, 0, actionCollection, "game_grab_movie");
  movie->setChecked(false);
  connect(movie, SIGNAL(signalToggled(bool)),
-		this, SIGNAL(signalSetGrabMovie(bool)));
+		this, SLOT(slotSetGrabMovie(bool)));
 
  BoUfoToggleAction* resources = new BoUfoToggleAction(i18n("Show resources"),
 		KShortcut(), 0, 0, actionCollection, "show_resources");
@@ -6074,4 +6077,81 @@ void BosonBigDisplayBase::slotClearSelectionGroup(int number)
  d->mSelectionGroups[number]->clear();
 }
 
+void BosonBigDisplayBase::slotSetGrabMovie(bool grab)
+{
+ d->mGrabMovie = grab;
+}
+
+void BosonBigDisplayBase::grabMovieFrameAndSave()
+{
+ if (!d->mGrabMovie) {
+	return;
+ }
+ QByteArray shot = grabMovieFrame();
+
+ if (shot.size() == 0) {
+	return;
+ }
+
+ // Save frame
+ static int frame = -1;
+ QString file;
+ if (frame == -1) {
+	int i;
+	for (i = 0; i <= 10000; i++) {
+		file.sprintf("%s-%04d.%s", "boson-movie", i, "jpg");
+		if (!QFile::exists(file)) {
+			frame = i;
+			break;
+		}
+	}
+	if (i == 10000) {
+		boWarning() << k_funcinfo << "Can't find free filename???" << endl;
+		frame = 50000;
+	}
+ }
+ file.sprintf("%s-%04d.%s", "boson-movie", frame++, "jpg");
+ file = QFileInfo(file).absFilePath();
+
+ //boDebug() << k_funcinfo << "Saving movie frame to " << file << endl;
+ bool ok = QPixmap(shot).save(file, "JPEG", 90);
+ if (!ok) {
+	boError() << k_funcinfo << "Error saving screenshot to " << file << endl;
+	return;
+ }
+ boDebug() << k_funcinfo << "Movie frame saved to file " << file << endl;
+
+#if 0
+ static QValueList<QByteArray> allMovieFrames;
+ allMovieFrames.append(shot);
+
+
+ // TODO: use a shortcut for this. do not do this after a certain number of
+ // frames, but when a key was pressed.
+ if (allMovieFrames.count() == 10) {
+	boDebug() << k_funcinfo << "generating " << allMovieFrames.count() << " frames" << endl;
+	d->mActiveDisplay->generateMovieFrames(allMovieFrames, "./11/");
+	allMovieFrames.clear();
+ }
+#endif
+}
+
+void BosonBigDisplayBase::slotAdvance(unsigned int, bool)
+{
+ // AB: note that in the big display no game logic must be done!
+ // -> this slotAdvance() is here for certain optimizations on rendering, not
+ //    for advancing the game itself
+ setParticlesDirty(true);
+ advanceCamera();
+ advanceLineVisualization();
+ grabMovieFrameAndSave();
+}
+
+void BosonBigDisplayBase::slotAction(const BoSpecificAction& action)
+{
+ if (!displayInput()) {
+	return;
+ }
+ displayInput()->action(action);
+}
 

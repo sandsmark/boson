@@ -43,6 +43,7 @@ class BosonScript;
 class BoVisibleEffects;
 class BosonMap;
 class BosonEffect;
+class BoSpecificAction;
 
 class KGameChat;
 class KGameIO;
@@ -361,6 +362,7 @@ public:
 	void generateMovieFrames(const QValueList<QByteArray>& data, const QString& dir);
 
 public slots:
+	void slotAction(const BoSpecificAction&);
 	void slotCenterHomeBase();
 	void slotResetViewProperties();
 
@@ -402,7 +404,6 @@ signals:
 	void signalSelectionChanged(BoSelection* selection);
 
 	void signalToggleChatVisible();
-	void signalSetGrabMovie(bool);
 	void signalToggleStatusbar(bool);
 	void signalSaveGame();
 	void signalEndGame();
@@ -446,6 +447,9 @@ protected slots:
 	 * is the first group and 0 the 10th group.
 	 **/
 	void slotClearSelectionGroup(int number);
+
+	void slotAdvance(unsigned int, bool);
+	void slotSetGrabMovie(bool);
 
 	void slotDebugRequestIdName(int msgid, bool userid, QString& name);
 	void slotAddLineVisualization(const QValueList<BoVector3Fixed>& points, const BoVector4Float& color, bofixed pointSize, int timeout, bofixed zOffset);
@@ -647,6 +651,8 @@ protected:
 	bool checkError() const;
 
 	void calcFPS();
+
+	void grabMovieFrameAndSave();
 
 	/**
 	 * Move the selection rect. @ref selectionStart is still the start point

@@ -29,7 +29,6 @@
 #include "bosoncanvasstatistics.h"
 #include "bosonmessage.h"
 #include "speciestheme.h"
-#include "bodisplaymanager.h"
 #include "bosonbigdisplaybase.h"
 #include "bosonbigdisplayinput.h"
 #include "editorbigdisplayinput.h"
@@ -70,7 +69,7 @@ public:
 	{
 		mStartup = 0;
 
-		mDisplayManager = 0;
+		mDisplay = 0;
 
 		mStarting = 0;
 
@@ -83,7 +82,7 @@ public:
 
 	BosonStartupWidget* mStartup;
 
-	BoDisplayManager* mDisplayManager;
+	BosonBigDisplayBase* mDisplay;
 
 	QTimer mStatusBarTimer;
 
@@ -144,8 +143,8 @@ TopWidget::~TopWidget()
  }
  boConfig->save(editor);
  endGame();
- d->mDisplayManager->activeDisplay()->quitGame();
- delete d->mDisplayManager;
+ d->mDisplay->quitGame();
+ delete d->mDisplay;
  delete d->mIface;
  delete d;
  boDebug() << k_funcinfo << "done" << endl;
@@ -169,30 +168,22 @@ QString TopWidget::checkInstallation()
 
 void TopWidget::initDisplayManager()
 {
- d->mDisplayManager = new BoDisplayManager(0);
+ d->mDisplay = new BosonBigDisplayBase(mMainDock);
 
- // add an initial display. this should happen asap, as we need the OpenGL
- // context for every texture that is to be loaded.
- // the display will not be deleted before the program is quit, so that we don't
- // have to load the textures several times.
- d->mDisplayManager->addInitialDisplay();
-
- connect(d->mDisplayManager->activeDisplay(), SIGNAL(signalToggleStatusbar(bool)),
+ connect(d->mDisplay, SIGNAL(signalToggleStatusbar(bool)),
 		d->mStatusBarHandler, SLOT(slotToggleStatusbar(bool)));
 
- BosonBigDisplayBase* display = d->mDisplayManager->activeDisplay();
- BO_CHECK_NULL_RET(display);
- connect(display, SIGNAL(signalEditorChangeLocalPlayer(Player*)),
+ connect(d->mDisplay, SIGNAL(signalEditorChangeLocalPlayer(Player*)),
 		this, SLOT(slotChangeLocalPlayer(Player*)));
- connect(display, SIGNAL(signalEndGame()),
+ connect(d->mDisplay, SIGNAL(signalEndGame()),
 		this, SLOT(slotEndGame()));
- connect(display, SIGNAL(signalQuit()),
+ connect(d->mDisplay, SIGNAL(signalQuit()),
 		this, SLOT(close()));
- connect(display, SIGNAL(signalSaveGame()),
+ connect(d->mDisplay, SIGNAL(signalSaveGame()),
 		this, SLOT(slotSaveGame()));
 
 
- d->mDisplayManager->hide();
+ d->mDisplay->hide();
 }
 
 void TopWidget::saveProperties(KConfig *config)
@@ -235,7 +226,7 @@ void TopWidget::initBoson()
  connect(boGame, SIGNAL(signalGameStarted()), this, SLOT(slotGameStarted()));
 
  connect(boGame, SIGNAL(signalAdvance(unsigned int, bool)),
-		d->mDisplayManager, SLOT(slotAdvance(unsigned int, bool)));
+		d->mDisplay, SLOT(slotAdvance(unsigned int, bool)));
  connect(boGame, SIGNAL(signalLoadExternalStuffFromXML(const QDomElement&)),
 		this, SLOT(slotLoadExternalStuffFromXML(const QDomElement&)));
  connect(boGame, SIGNAL(signalSaveExternalStuffAsXML(QDomElement&)),
@@ -352,8 +343,8 @@ void TopWidget::slotCancelLoadSave()
 	if (d->mStartup) {
 		d->mStartup->hide();
 	}
-	d->mDisplayManager->show();
-	mMainDock->setWidget(d->mDisplayManager);
+	d->mDisplay->show();
+	mMainDock->setWidget(d->mDisplay);
  } else {
 	if (!d->mStartup) {
 		boError() << k_funcinfo << "NULL startup widget??" << endl;
@@ -369,8 +360,8 @@ void TopWidget::endGame()
  // This must be done before BosonWidget::quitGame() is called, because latter
  //  calls boGame->quitGame() which in turn deletes all players and units and if
  //  something was selected, we would have crash later when trying to unselect them
- if (d->mDisplayManager) {
-	d->mDisplayManager->activeDisplay()->quitGame();
+ if (d->mDisplay) {
+	d->mDisplay->quitGame();
  }
  if (boGame) {
 	boGame->quitGame();
@@ -420,7 +411,7 @@ void TopWidget::slotGameOver()
  // if you replace this by something else you must call slotResetGame()
  // manually!
  d->mStartup->slotShowWelcomeWidget();
- d->mDisplayManager->hide();
+ d->mDisplay->hide();
  mMainDock->setWidget(d->mStartup);
 }
 
@@ -487,11 +478,11 @@ void TopWidget::changeLocalPlayer(Player* p)
  if (d->mLocalPlayer) {
 	BosonLocalPlayerInput* input = new BosonLocalPlayerInput();
 	connect(input, SIGNAL(signalAction(const BoSpecificAction&)),
-			d->mDisplayManager, SLOT(slotAction(const BoSpecificAction&)));
+			d->mDisplay, SLOT(slotAction(const BoSpecificAction&)));
 	d->mLocalPlayer->addGameIO(input);
-	d->mDisplayManager->activeDisplay()->setLocalPlayerIO(d->mLocalPlayer->playerIO());
+	d->mDisplay->setLocalPlayerIO(d->mLocalPlayer->playerIO());
  } else {
-	d->mDisplayManager->activeDisplay()->setLocalPlayerIO(0);
+	d->mDisplay->setLocalPlayerIO(0);
  }
 
  // AB: note: the startup widgets don't need to know the new local player
@@ -611,10 +602,10 @@ void TopWidget::slotGameStarted()
  d->mStatusBarHandler->setLocalPlayer(localPlayer);
 
  d->mStatusBarHandler->setCanvas(boGame->canvas());
- d->mDisplayManager->activeDisplay()->setCanvas(boGame->canvasNonConst());
+ d->mDisplay->setCanvas(boGame->canvasNonConst());
 
- mMainDock->setWidget(d->mDisplayManager);
- d->mDisplayManager->show();
+ mMainDock->setWidget(d->mDisplay);
+ d->mDisplay->show();
  d->mStartup->hide();
  setMinimumSize(BOSON_MINIMUM_WIDTH, BOSON_MINIMUM_HEIGHT);
  setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
@@ -626,26 +617,25 @@ void TopWidget::slotGameStarted()
 
  // Init some stuff
  d->mStatusBarTimer.start(1000);
- BosonBigDisplayBase* display = d->mDisplayManager->activeDisplay();
- if (display->isInputInitialized()) {
+ if (d->mDisplay->isInputInitialized()) {
 	boWarning() << k_funcinfo << "display input is already initialized?! probably quitGame() was not called" << endl;
  } else {
 	if (boGame->gameMode()) {
-		display->setDisplayInput(new BosonBigDisplayInput(display));
+		d->mDisplay->setDisplayInput(new BosonBigDisplayInput(d->mDisplay));
 	} else {
-		display->setDisplayInput(new EditorBigDisplayInput(display));
+		d->mDisplay->setDisplayInput(new EditorBigDisplayInput(d->mDisplay));
 	}
-	display->setInputInitialized(true);
+	d->mDisplay->setInputInitialized(true);
  }
- display->setLocalPlayerIO(d->mLocalPlayer->playerIO());
- display->show();
+ d->mDisplay->setLocalPlayerIO(d->mLocalPlayer->playerIO());
+ d->mDisplay->show();
 
  // Center home base if new game was started. If game is loaded, camera was
  //  already loaded as well
  // FIXME: this is hackish but I don't know any other way of checking if game
  //  is loaded or new one here. Feel free to improve
  if (boGame->loadingStatus() != BosonSaveLoad::LoadingCompleted) {
-	display->slotCenterHomeBase();
+	d->mDisplay->slotCenterHomeBase();
  }
 
  if (boGame->gameMode()) {
@@ -692,7 +682,7 @@ void TopWidget::slotLoadGame(KCmdLineArgs* args)
  }
  d->mStartup->slotLoadGame();
  d->mStartup->show();
- d->mDisplayManager->hide();
+ d->mDisplay->hide();
  mMainDock->setWidget(d->mStartup);
 }
 
@@ -705,7 +695,7 @@ void TopWidget::slotSaveGame()
  }
  d->mStartup->slotSaveGame();
  d->mStartup->show();
- d->mDisplayManager->hide();
+ d->mDisplay->hide();
  mMainDock->setWidget(d->mStartup);
 }
 
@@ -757,12 +747,12 @@ void TopWidget::slotChangeLocalPlayer(Player* p)
 
 void TopWidget::slotLoadExternalStuffFromXML(const QDomElement& root)
 {
- d->mDisplayManager->activeDisplay()->loadFromXML(root);
+ d->mDisplay->loadFromXML(root);
 }
 
 void TopWidget::slotSaveExternalStuffAsXML(QDomElement& root)
 {
- d->mDisplayManager->activeDisplay()->saveAsXML(root);
+ d->mDisplay->saveAsXML(root);
 }
 
 void TopWidget::slotAddChatSystemMessage(const QString& fromName, const QString& text, const Player* forPlayer)
@@ -770,7 +760,7 @@ void TopWidget::slotAddChatSystemMessage(const QString& fromName, const QString&
  if (forPlayer && forPlayer != d->mLocalPlayer) {
 	return;
  }
- d->mDisplayManager->activeDisplay()->addChatMessage(i18n("--- %1: %2").arg(fromName).arg(text));
+ d->mDisplay->addChatMessage(i18n("--- %1: %2").arg(fromName).arg(text));
 }
 
 void TopWidget::saveConfig()
