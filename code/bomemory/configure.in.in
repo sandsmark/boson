@@ -2,7 +2,7 @@ AC_DEFUN([AC_INCLUDE_BOMEMORY_H],
 [
  AC_ARG_ENABLE(
   bomemory,
-  [  --enable-bomemory          enable memory logging (debugging)],
+  [  --enable-bomemory       enable memory logging (debugging)],
   bo_use_bomemory=$enableval,
   bo_use_bomemory=no
  )
