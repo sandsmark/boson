@@ -97,10 +97,10 @@ typedef unsigned int uint;
 // 31013  <= 0 is the center, other figures tells the boDist();
 // 32123
 // 43334
-int	boDist(int, int);
-int	boGridDist(int, int);
-int	boDist(QPoint p ) { return boDist( p.x(), p.y() ); }
-int	boGridDist(QPoint p ) { return boGridDist( p.x(), p.y() ); }
+	int	boDist		(int, int);
+	int	boGridDist	(int, int);
+inline	int	boDist		(QPoint p ) { return boDist( p.x(), p.y() ); }
+inline	int	boGridDist	(QPoint p ) { return boGridDist( p.x(), p.y() ); }
 
 
 
