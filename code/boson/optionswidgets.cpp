@@ -244,13 +244,26 @@ ScrollingOptions::ScrollingOptions(QWidget* parent) : QVBox(parent), OptionsWidg
  mArrowSpeed->setRange(1, 200);
  mArrowSpeed->setLabel(i18n("Arrow key steps"));
 
+ QMap<int, QString> items;
+ items.insert((int)CameraMove, i18n("Move camera"));
+ items.insert((int)CameraZoom, i18n("Zoom camera"));
+ items.insert((int)CameraRotate, i18n("Rotate camera"));
  hbox = new QHBox(this);
  (void)new QLabel(i18n("Mouse wheel action"), hbox);
  mMouseWheelAction = new QComboBox(hbox);
- mMouseWheelAction->insertItem(i18n("Move camera"), (int)CameraMove);
- mMouseWheelAction->insertItem(i18n("Zoom camera"), (int)CameraZoom);
- mMouseWheelAction->insertItem(i18n("Rotate camera"), (int)CameraRotate);
+
+ hbox = new QHBox(this);
+ (void)new QLabel(i18n("Mouse wheel + shift action"), hbox);
+ mMouseWheelShiftAction = new QComboBox(hbox);
+
+ QMap<int, QString>::Iterator it = items.begin();
+ for (; it != items.end(); ++it) {
+	mMouseWheelAction->insertItem(it.data(), it.key());
+	mMouseWheelShiftAction->insertItem(it.data(), it.key());
+ }
+
  mMouseWheelAction->setCurrentItem((int)DEFAULT_MOUSE_WHEEL_ACTION);
+ mMouseWheelShiftAction->setCurrentItem((int)DEFAULT_MOUSE_WHEEL_SHIFT_ACTION);
 }
 
 ScrollingOptions::~ScrollingOptions()
@@ -271,6 +284,7 @@ void ScrollingOptions::apply()
  }
  boConfig->setArrowKeyStep(mArrowSpeed->value());
  boConfig->setMouseWheelAction((CameraAction)(mMouseWheelAction->currentItem()));
+ boConfig->setMouseWheelShiftAction((CameraAction)(mMouseWheelShiftAction->currentItem()));
  boDebug(210) << k_funcinfo << "done" << endl;
 }
 
@@ -281,6 +295,7 @@ void ScrollingOptions::setDefaults()
  setRMBScrolling(DEFAULT_USE_RMB_MOVE);
  setMMBScrolling(DEFAULT_USE_MMB_MOVE);
  mMouseWheelAction->setCurrentItem((int)DEFAULT_MOUSE_WHEEL_ACTION);
+ mMouseWheelShiftAction->setCurrentItem((int)DEFAULT_MOUSE_WHEEL_SHIFT_ACTION);
 }
 
 void ScrollingOptions::load()
@@ -290,6 +305,7 @@ void ScrollingOptions::load()
  setRMBScrolling(boConfig->rmbMove());
  setMMBScrolling(boConfig->mmbMove());
  setMouseWheelAction(boConfig->mouseWheelAction());
+ setMouseWheelShiftAction(boConfig->mouseWheelShiftAction());
 }
 
 void ScrollingOptions::setCursorEdgeSensity(int s)
@@ -315,6 +331,11 @@ void ScrollingOptions::setMMBScrolling(bool on)
 void ScrollingOptions::setMouseWheelAction(CameraAction action)
 {
  mMouseWheelAction->setCurrentItem((int)action);
+}
+
+void ScrollingOptions::setMouseWheelShiftAction(CameraAction action)
+{
+ mMouseWheelShiftAction->setCurrentItem((int)action);
 }
 
 
