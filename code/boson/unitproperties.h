@@ -22,6 +22,7 @@
 #include <qstring.h>
 
 #include <qvaluelist.h>
+#include <qmap.h>
 
 class SpeciesTheme;
 
@@ -285,9 +286,19 @@ public:
 	 **/
 	QValueList<unsigned long int> requisities() const { return mRequisities; };
 
+	/**
+	 * .3ds files seem to support only filenames of 8+3 length. We work
+	 * around this by mapping the "short name" to a longer name.
+	 * @return All map of all texture names that have a longer name assigned
+	 * to.
+	 **/
+	QMap<QString, QString> longTextureNames() const { return mTextureNames; }
+
 protected:
 	void loadMobileProperties(KSimpleConfig* conf);
 	void loadFacilityProperties(KSimpleConfig* conf);
+
+	void loadTextureNames(KSimpleConfig* conf);
 	
 private:
 	SpeciesTheme* mTheme;
@@ -316,6 +327,8 @@ private:
 	class FacilityProperties;
 	MobileProperties* mMobileProperties;
 	FacilityProperties* mFacilityProperties;
+
+	QMap<QString, QString> mTextureNames;
 };
 
 #endif

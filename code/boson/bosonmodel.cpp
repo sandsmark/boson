@@ -53,10 +53,39 @@ BosonModel::BosonModel(GLuint list, int width, int height)
 
 BosonModel::BosonModel(const QString& dir, const QString& file)
 {
- boProfiling->start(BosonProfiling::LoadModel);
  init();
  mDirectory = dir;
- QString fullFile = baseDirectory() + file;
+ mFile = file;
+}
+
+void BosonModel::init()
+{
+ m3ds = 0;
+ mDisplayList = 0;
+ mTextureArray = 0;
+ mWidth = 0;
+ mHeight = 0;
+ mFrame = 0;
+}
+
+BosonModel::~BosonModel()
+{
+ if (m3ds) {
+	lib3ds_file_free(m3ds);
+	m3ds = 0;
+ }
+ mTextures.clear();
+ delete mTextureArray;
+}
+
+void BosonModel::loadModel()
+{
+ if (mFile.isEmpty() || mDirectory.isEmpty()) {
+	kdError() << k_funcinfo << "No file has been specified for loading" << endl;
+	return;
+ }
+ boProfiling->start(BosonProfiling::LoadModel);
+ QString fullFile = baseDirectory() + mFile;
  m3ds = lib3ds_file_load(fullFile);
  if (!m3ds) {
 	kdError() << k_funcinfo << "Can't load " << fullFile << endl;
@@ -94,26 +123,6 @@ BosonModel::BosonModel(const QString& dir, const QString& file)
  boProfiling->stop(BosonProfiling::LoadModel);
 }
 
-void BosonModel::init()
-{
- m3ds = 0;
- mDisplayList = 0;
- mTextureArray = 0;
- mWidth = 0;
- mHeight = 0;
- mFrame = 0;
-}
-
-BosonModel::~BosonModel()
-{
- if (m3ds) {
-	lib3ds_file_free(m3ds);
-	m3ds = 0;
- }
- mTextures.clear();
- delete mTextureArray;
-}
-
 QString BosonModel::textureDirectory() const
 {
  return KGlobal::dirs()->findResourceDir("data", "boson/themes/textures/wheel.jpg") + QString::fromLatin1("boson/themes/textures/");
@@ -122,6 +131,9 @@ QString BosonModel::textureDirectory() const
 QString BosonModel::cleanTextureName(const char* name)
 {
  QString s = QString(name).lower();
+ if (mTextureNames.contains(s)) {
+	return mTextureNames[s];
+ }
  return s;
 }
 

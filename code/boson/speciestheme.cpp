@@ -823,6 +823,8 @@ void SpeciesTheme::loadUnitModel(const UnitProperties* prop)
  BosonModel* m = 0;
  if (QFile::exists(prop->unitPath() + QString::fromLatin1("unit.3ds"))) {
 	m = new BosonModel(prop->unitPath(), QString::fromLatin1("unit.3ds"));
+	m->setLongNames(prop->longTextureNames());
+	m->loadModel();
  } else {
 	// this should get removed!
 	BosonTextureArray* array = textureArray(prop->typeId());
