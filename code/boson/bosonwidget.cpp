@@ -331,17 +331,16 @@ void BosonWidget::slotChangeCursor(int mode, const QString& cursorDir_)
  }
  if (!ok) {
 	kdError() << k_funcinfo << "Could not load cursor mode " << mode << " from " << cursorDir << endl;
-	if (!d->mCursor) {
+	delete b;
+	if (!d->mCursor && mode != CursorKDE) { // loading *never* fails for CursorKDE. we check here anyway.
 		// load fallback cursor
 		slotChangeCursor(CursorKDE, QString::null);
 		return;
 	}
 	// continue to use the old cursor
-	delete b;
 	return;
  }
- if(d->mCursor)
- {
+ if(d->mCursor) {
 	delete d->mCursor;
  }
  d->mCursor = b;
@@ -380,6 +379,10 @@ void BosonWidget::initBigDisplay(BosonBigDisplay* b)
 	return;
  }
  b->setLocalPlayer(player());
+ if (!d->mCursor) {
+	kdWarning() << k_funcinfo << "NULL cursor" << endl;
+	return;
+ }
  b->setCursor(d->mCursor);
  b->setKGameChat(d->mChat);
 
