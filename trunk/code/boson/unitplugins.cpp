@@ -37,6 +37,7 @@
 
 #include <qpair.h>
 #include <qpoint.h>
+#include <qdom.h>
 
 UnitPlugin::UnitPlugin(Unit* unit)
 {
@@ -291,6 +292,16 @@ void ProductionPlugin::advance(unsigned int)
  }
 }
 
+bool ProductionPlugin::saveAsXML(QDomElement& root) const
+{
+ return true;
+}
+
+bool ProductionPlugin::loadFromXML(const QDomElement& root)
+{
+ return true;
+}
+
 bool ProductionPlugin::contains(ProductionType type, unsigned long int id)
 {
  QPair<ProductionType, unsigned long int> pair;
@@ -358,6 +369,19 @@ void RepairPlugin::repairInRange()
  }*/
 }
 
+bool RepairPlugin::saveAsXML(QDomElement& root) const
+{
+ Q_UNUSED(root);
+ return true;
+}
+
+bool RepairPlugin::loadFromXML(const QDomElement& root)
+{
+ Q_UNUSED(root);
+ return true;
+}
+
+
 HarvesterPlugin::HarvesterPlugin(Unit* unit)
 		: UnitPlugin(unit)
 {
@@ -389,6 +413,30 @@ void HarvesterPlugin::advance(unsigned int)
 	advanceRefine();
  }
 }
+
+bool HarvesterPlugin::saveAsXML(QDomElement& root) const
+{
+ unsigned int refineryId = 0;
+ if (mRefinery) {
+	refineryId = mRefinery->id();
+ }
+ root.setAttribute(QString::fromLatin1("Refinery"), refineryId);
+}
+
+bool HarvesterPlugin::loadFromXML(const QDomElement& root)
+{
+ unsigned int refineryId = 0;
+ bool ok = false;
+ refineryId = root.attribute(QString::fromLatin1("Refinery")).toUInt(&ok);
+ if (!ok) {
+	boError() << k_funcinfo << "Invalid number for Refinery attribute" << endl;
+	return false;
+ }
+#warning FIXME
+// mRefinery = ...;
+ return true;
+}
+
 
 void HarvesterPlugin::advanceMine()
 {
@@ -741,6 +789,29 @@ void BombingPlugin::advance(unsigned int)
  }
 }
 
+bool BombingPlugin::saveAsXML(QDomElement& root) const
+{
+ unsigned int weaponId = 0;
+ // TODO
+ root.setAttribute(QString::fromLatin1("Weapon"), weaponId);
+ return true;
+}
+
+bool BombingPlugin::loadFromXML(const QDomElement& root)
+{
+ unsigned int weaponId = 0;
+ bool ok = false;
+ weaponId = root.attribute(QString::fromLatin1("Weapon")).toUInt(&ok);
+ if (!ok) {
+	boError() << k_funcinfo << "Invalid number for Weapon attribute" << endl;
+	return false;
+ }
+ // TODO
+ // mWeapon = ...;
+ return true;
+}
+
+
 
 MiningPlugin::MiningPlugin(Unit* owner) : UnitPlugin(owner)
 {
@@ -855,4 +926,27 @@ void MiningPlugin::advance(unsigned int)
 	boDebug() << k_funcinfo << "Weapon not yet reloaded" << endl;
  }
 }
+
+bool MiningPlugin::saveAsXML(QDomElement& root) const
+{
+ unsigned int weaponId = 0;
+ // TODO
+ root.setAttribute(QString::fromLatin1("Weapon"), weaponId);
+ return true;
+}
+
+bool MiningPlugin::loadFromXML(const QDomElement& root)
+{
+ unsigned int weaponId = 0;
+ bool ok = false;
+ weaponId = root.attribute(QString::fromLatin1("Weapon")).toUInt(&ok);
+ if (!ok) {
+	boError() << k_funcinfo << "Invalid number for Weapon attribute" << endl;
+	return false;
+ }
+ // TODO
+ // mWeapon = ...;
+ return true;
+}
+
 

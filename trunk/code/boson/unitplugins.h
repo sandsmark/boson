@@ -36,6 +36,7 @@ class PluginProperties;
 class Boson;
 class BosonWeapon;
 class QPoint;
+class QDomElement;
 
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
@@ -104,6 +105,32 @@ public:
 	 * gets called!
 	 **/
 	virtual void advance(unsigned int advanceCount) = 0;
+
+	/**
+	 * Save the plugin into @p root. You must implement this in derived
+	 * classes, but usually you will simply return true without touching @p
+	 * root.
+	 *
+	 * Note that you are meant to use @ref KGameProperty for most of the
+	 * properties. Don't use saveAsXML() for integer values or so.
+	 *
+	 * You should save e.g. IDs that help you to identify a pointer (e.g.
+	 * the harvester plugin will save the ID of the refinery it is going
+	 * to).
+	 *
+	 * See also @ref loadFromXML.
+	 **/
+	virtual bool saveAsXML(QDomElement& root) const = 0;
+
+	/**
+	 * See also @ref saveAsXML. You should use @ref KGameProperty for most
+	 * properties.
+	 *
+	 * Here you will usually load pointers - e.g. you could save the ID of a
+	 * target in @ref saveAsXML and here you could set the pointer of the
+	 * target.
+	 **/
+	virtual bool loadFromXML(const QDomElement& root) = 0;
 
 private:
 	Unit* mUnit;
@@ -184,6 +211,9 @@ public:
 
 	virtual void advance(unsigned int);
 
+	virtual bool saveAsXML(QDomElement& root) const;
+	virtual bool loadFromXML(const QDomElement& root);
+
 private:
 //	KGamePropertyList<QPair<ProductionType, unsigned long int> > mProductions;
 	/// TODO: make this KGameProperty
@@ -229,6 +259,9 @@ public:
 
 	// does nothing, yet. plugin is experimental anyway.
 	virtual void advance(unsigned int) {}
+
+	virtual bool saveAsXML(QDomElement& root) const;
+	virtual bool loadFromXML(const QDomElement& root);
 
 private:
 };
@@ -286,6 +319,9 @@ public:
 	 **/
 	unsigned int unloadingSpeed() const;
 
+	virtual bool saveAsXML(QDomElement& root) const;
+	virtual bool loadFromXML(const QDomElement& root);
+
 private:
 	KGameProperty<int> mResourcesX;
 	KGameProperty<int> mResourcesY;
@@ -313,6 +349,9 @@ public:
 
 	virtual void advance(unsigned int);
 
+	virtual bool saveAsXML(QDomElement& root) const;
+	virtual bool loadFromXML(const QDomElement& root);
+
 private:
 	BosonWeapon* mWeapon; // FIXME: must be saved on Unit::save()
 	KGameProperty<int> mPosX;
@@ -336,6 +375,9 @@ public:
 	void mine(int weaponId);
 
 	virtual void advance(unsigned int);
+
+	virtual bool saveAsXML(QDomElement& root) const;
+	virtual bool loadFromXML(const QDomElement& root);
 
 private:
 	BosonWeapon* mWeapon; // FIXME: must be saved in Unit::save()
