@@ -734,6 +734,10 @@ void BosonCanvas::destroyUnit(Unit* unit)
 		new BosonShotFragment(unit->owner(), this, unit->speciesTheme()->objectModel("fragment"),
 				pos, unit->unitProperties());
 	}
+	// Hide unit if wreckage should be removed immediately
+	if (unit->unitProperties()->removeWreckageImmediately()) {
+		unit->setVisible(false);
+	}
 	// Check if owner is out of game
 	if (owner->checkOutOfGame()) {
 		boGame->killPlayer(owner);
