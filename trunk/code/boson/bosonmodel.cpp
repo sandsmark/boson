@@ -758,18 +758,6 @@ void BosonModel::dumpTriangle(Lib3dsVector* v, GLuint texture, Lib3dsTexel* tex)
  kdDebug() << text << endl;
 }
 
-void BosonModel::myTransform(GLfloat* r, const GLfloat* m, const GLfloat* v)
-{
- // r = m * v, m is a 4x4 OpenGL matrix, r and v are both a 3x1 column vector.
- // the forth element is unused in boson and therefore we use silently 0.
-#define M(row, col) m[col * 4 + row] // AB: shamelessy stolen from mesa's math subdir
- // we don't optimize this function for execution speed, so a loop is fine
- for (int i = 0; i < 4; i++) {
-	r[i] = M(i, 0) * v[0] + M(i, 1) * v[1] + M(i, 2) * v[2] + M(i, 3) * v[3];
- }
-#undef M
-}
-
 void BosonModel::reloadAllTextures()
 {
  kdDebug() << k_funcinfo << endl;
