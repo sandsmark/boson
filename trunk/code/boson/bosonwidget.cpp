@@ -53,6 +53,7 @@
 #include <kgame/kgameio.h>
 #include <kgame/kgamedebugdialog.h>
 #include <kgame/kgamepropertyhandler.h>
+#include <kgame/kgamechat.h>
 
 #include <qlayout.h>
 #include <qevent.h>
@@ -83,6 +84,8 @@ public:
 		mFrameLayout = 0;
 
 		mMusic = 0;
+
+		mChat = 0;
 	}
 	
 	BosonBigDisplay* mBigDisplay;
@@ -109,6 +112,8 @@ public:
 	
 	// options:
 	int mArrowKeyStep;
+
+	KGameChat* mChat;
 };
 
 BosonWidget::BosonWidget(QWidget* parent)
@@ -212,6 +217,13 @@ void BosonWidget::init()
 		this, SLOT(slotRemoveUnit(Unit*)));
  connect(d->mCanvas, SIGNAL(signalUnitDestroyed(Unit*)), 
 		d->mMiniMap, SLOT(slotUnitDestroyed(Unit*)));
+
+ d->mChat = new KGameChat(d->mBoson, BosonMessage::IdChat, this);
+ d->mChat->hide();
+ d->mBigDisplay->setKGameChat(d->mChat);
+#ifdef BETA1
+ d->mBigDisplay->setKGame(d->mBoson);
+#endif
 
 
  d->mMusic = new BosonMusic(this);
@@ -726,6 +738,8 @@ void BosonWidget::changeLocalPlayer(Player* localPlayer)
  d->mBigDisplay->setLocalPlayer(d->mLocalPlayer);
  d->mCommandFrame->setLocalPlayer(d->mLocalPlayer);
  d->mMiniMap->setLocalPlayer(d->mLocalPlayer);
+
+ d->mChat->setFromPlayer(d->mLocalPlayer);
 }
 
 void BosonWidget::slotAddComputerPlayer(Player* computer)
@@ -853,11 +867,17 @@ void BosonWidget::slotCommandFramePosition(int pos)
  d->mFrameLayout = new QVBoxLayout();
  d->mFrameLayout->addWidget(d->mMiniMap, 0, AlignHCenter);
  d->mFrameLayout->addWidget(d->mCommandFrame);
+
+ QVBoxLayout* viewLayout = new QVBoxLayout();
+ viewLayout->addWidget(d->mBigDisplay);
+ viewLayout->addWidget(d->mChat);
  if (pos == OptionsDialog::Left) {
 	d->mTopLayout->addLayout(d->mFrameLayout);
-	d->mTopLayout->addWidget(d->mBigDisplay);
+//	d->mTopLayout->addWidget(d->mBigDisplay);
+	d->mTopLayout->addLayout(viewLayout);
  } else if (pos == OptionsDialog::Right) {
-	d->mTopLayout->addWidget(d->mBigDisplay);
+//	d->mTopLayout->addWidget(d->mBigDisplay);
+	d->mTopLayout->addLayout(viewLayout);
 	d->mTopLayout->addLayout(d->mFrameLayout);
  } else {
 	kdError() << k_funcinfo << pos << " not implemented" << endl;
@@ -904,4 +924,13 @@ bool BosonWidget::isModified() const
 void BosonWidget::setModified(bool m)
 {
  d->mBigDisplay->setModified(m);
+}
+
+void BosonWidget::setShowChat(bool s)
+{
+ if (s) {
+	d->mChat->show();
+ } else {
+	d->mChat->hide();
+ }
 }

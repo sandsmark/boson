@@ -24,6 +24,7 @@
 #include <klocale.h>
 #include <kgame/kgame.h>
 #include <kgame/kplayer.h>
+#include <kgame/kgamechat.h>
 
 #include "kgamecanvaschat.moc"
 
@@ -32,38 +33,54 @@ class KGameCanvasChat::KGameCanvasChatPrivate
 public:
 	KGameCanvasChatPrivate()
 	{
-		mFromPlayer = 0;
 		mGame = 0;
+		mChat = 0;
 	}
 
 	int mMaxItems;
-	int mMessageId;
 	int mZ;
+	int mX;
+	int mY;
 	bool mCanSend;
 
-	KGame* mGame;
-	KPlayer* mFromPlayer;
 
 	QPtrList<QCanvasText> mMessages;
+
+	KGame* mGame;
+	KGameChat* mChat;
 };
 
 
-KGameCanvasChat::KGameCanvasChat(QObject* parent, int id) : QObject(parent)
+KGameCanvasChat::KGameCanvasChat(QObject* parent) : QObject(parent)
 {
  d = new KGameCanvasChatPrivate;
 
  mCanvas = 0;
 
  d->mMessages.setAutoDelete(true);
- d->mMessageId = id;
  setMaxItems(5);
- setCanSend(true);
+ move(0, 0);
 }
 
 KGameCanvasChat::~KGameCanvasChat()
 {
  clear();
  delete d;
+}
+
+void KGameCanvasChat::setChat(KGameChat* chat)
+{
+ d->mChat = chat;
+ if (!d->mChat) {
+	return;
+ }
+ if (!d->mChat->game()) {
+	kdError() << k_funcinfo << "oops! the chat widget has no KGame!" << endl;
+	return;
+ }
+#ifndef BETA1
+ setKGame(d->mChat->game());
+#endif
 }
 
 void KGameCanvasChat::setMaxItems(int max)
@@ -78,7 +95,10 @@ int KGameCanvasChat::maxItems() const
 
 int KGameCanvasChat::messageId() const
 {
- return d->mMessageId;
+ if (d->mChat) {
+	return d->mChat->messageId();
+ }
+ return -1;
 }
 
 void KGameCanvasChat::setZ(int z)
@@ -96,24 +116,6 @@ int KGameCanvasChat::z() const
  return d->mZ;
 }
 
-void KGameCanvasChat::setFromPlayer(KPlayer* player)
-{
- d->mFromPlayer = player;
- if (player && !d->mGame) {
-	setKGame(player->game());
- }
-}
-
-void KGameCanvasChat::setCanSend(bool s)
-{
- d->mCanSend = s;
-}
-
-bool KGameCanvasChat::canSend() const
-{
- return d->mCanSend;
-}
-
 void KGameCanvasChat::setKGame(KGame* g)
 {
  if (d->mGame) {
@@ -128,17 +130,6 @@ void KGameCanvasChat::setKGame(KGame* g)
 		this, SLOT(slotReceiveMessage(int, const QByteArray&, Q_UINT32, Q_UINT32)));
 }
 
-KGame* KGameCanvasChat::game() const
-{
- if (d->mGame) {
-	return d->mGame;
- }
- if (d->mFromPlayer) {
-	return d->mFromPlayer->game();
- }
- return 0;
-}
-
 void KGameCanvasChat::slotUnsetKGame()
 {
  if (!d->mGame) {
@@ -147,12 +138,20 @@ void KGameCanvasChat::slotUnsetKGame()
  disconnect(d->mGame, 0, this, 0);
 }
 
+KGame* KGameCanvasChat::game() const
+{
+ return d->mGame;
+}
+
 void KGameCanvasChat::slotReceiveMessage(int msgid, const QByteArray& buffer, Q_UINT32, Q_UINT32 sender)
 {
+ if (!game()) {
+	kdError() << k_funcinfo << "Set a KGame first" << endl;
+	return;
+ }
  if (msgid != messageId()) {
 	return;
  }
- kdDebug() << "receive chat message" << endl;
  QDataStream msg(buffer, IO_ReadOnly);
  QString text;
  msg >> text;
@@ -163,38 +162,35 @@ void KGameCanvasChat::slotReceiveMessage(int msgid, const QByteArray& buffer, Q_
 void KGameCanvasChat::addMessage(unsigned int p, const QString& text)
 {
  if (!game()) {
-	kdError() << k_funcinfo << "must set a KGame first" << endl;
+	kdError() << k_funcinfo << "Set a KGame first" << endl;
 	return;
  }
  addMessage(game()->findPlayer(p), text);
 }
 
-//TODO: add non-kplayer addMessage()
 void KGameCanvasChat::addMessage(KPlayer* p, const QString& text)
 {
  if (!p) {
 	kdError() << k_funcinfo << "NULL player" << endl;
 	return;
  }
- // TODO: move all existings up/down
- QCanvasText* t = new QCanvasText(i18n("%1: %2").arg(p->name()).arg(text), canvas());
- t->setZ(Z_CANVASTEXT);
- t->setColor(DEFAULT_CANVASTEXT_COLOR);
- t->setVisible(true);
- d->mMessages.append(t);
+ if (!d->mChat) {
+	kdError() << k_funcinfo << "NULL chat" << endl;
+ }
+ addMessage(i18n("%1: %2").arg(p->name()).arg(text));
 }
 
-void KGameCanvasChat::sendMessage(const QString& text) // TODO: only to a specific group, only to a specific player
+void KGameCanvasChat::addMessage(const QString& text)
 {
- if (!game()) {
-	kdError() << k_funcinfo << "NULL game" << endl;
-	return;
+ QCanvasText* t = new QCanvasText(text, canvas());
+ t->setZ(Z_CANVASTEXT);
+ t->setColor(DEFAULT_CANVASTEXT_COLOR);
+ if (maxItems() >= 0 && d->mMessages.count() + 1 > (unsigned int)maxItems()) {
+	d->mMessages.removeLast();
  }
- if (!d->mFromPlayer) {
-	kdError() << k_funcinfo << "NULL from-player" << endl;
-	return;
- }
- game()->sendMessage(text, messageId(), 0, d->mFromPlayer->id());
+ d->mMessages.insert(0, t);
+ move(d->mX, d->mY);
+ t->setVisible(true);
 }
 
 void KGameCanvasChat::clear()
@@ -204,21 +200,14 @@ void KGameCanvasChat::clear()
 
 void KGameCanvasChat::move(int x, int y)
 {
+ d->mX = x;
+ d->mY = y;
  QPtrListIterator<QCanvasText> it(d->mMessages);
  while (it.current()) {
 	y -= it.current()->boundingRect().height();
 	it.current()->move(x, y);
-//	kdDebug() << "x=" << x << ",y=" << y << endl;
 	y -= 5;
 	++it;
  }
-}
-
-void KGameCanvasChat::slotAddPlayer(KPlayer* p)
-{
-}
-
-void KGameCanvasChat::slotRemovePlayer(KPlayer* p)
-{
 }
 

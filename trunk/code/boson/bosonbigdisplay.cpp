@@ -128,7 +128,7 @@ void BosonBigDisplay::init()
  d->mOil->setColor(white);
  d->mOil->show();
 
- d->mChat = new KGameCanvasChat(this, BosonMessage::IdChat);
+ d->mChat = new KGameCanvasChat(this);
  d->mChat->setCanvas(canvas());
  d->mChat->setZ(Z_CANVASTEXT);
 }
@@ -406,6 +406,7 @@ void BosonBigDisplay::actionClicked(const QPoint& pos, QDataStream& stream, bool
 // the KGameIO. this way it is very easy (it should be at least) to write a
 // computer player
  if (selection().isEmpty()) {
+//	d->mChat->sendMessage(i18n("hi"));
 	return;
  }
  if (selectionMode() == SelectNone) {
@@ -465,7 +466,7 @@ void BosonBigDisplay::setLocalPlayer(Player* p)
 {
  d->mLocalPlayer = p;
  if (p) {
-	d->mChat->setFromPlayer(p);
+//	d->mChat->setFromPlayer(p);
  }
 }
 
@@ -475,6 +476,7 @@ void BosonBigDisplay::resizeEvent(QResizeEvent* e)
  // FIXME: is width()/height() correct? rather the ones from viewport()!
  // use the same line as im resizeContents()!
  emit signalSizeChanged(width(), height());
+ slotContentsMoving(contentsX(), contentsY());
 }
 
 void BosonBigDisplay::slotEditorMouseEvent(QMouseEvent* e, bool* eatevent)
@@ -654,7 +656,7 @@ void BosonBigDisplay::slotContentsMoving(int x, int y)
  d->mOil->move     (x + visibleWidth() - 5 - d->mOil->boundingRect().width(), y + 5 + d->mMinerals->boundingRect().height());
  QTimer::singleShot(0, this, SLOT(test()));
 
- d->mChat->move(x + 10, y + visibleWidth() - 10); // FIXME: hardcoded!
+ d->mChat->move(x + 10, y + visibleHeight() - 10); // FIXME: hardcoded!
 }
 
 void BosonBigDisplay::test()
@@ -672,4 +674,16 @@ bool BosonBigDisplay::isModified() const
 void BosonBigDisplay::setModified(bool m)
 {
  d->mIsModified = m;
+}
+
+void BosonBigDisplay::setKGameChat(KGameChat* c)
+{
+ d->mChat->setChat(c);
+}
+
+void BosonBigDisplay::setKGame(KGame* g) // remove when kde3.0 beta2 is out
+{
+#ifdef BETA1
+ d->mChat->setKGame(g);
+#endif
 }

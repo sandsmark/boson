@@ -19,6 +19,8 @@
 #ifndef __DEFINES_H__
 #define __DEFINES_H__
 
+#define BETA1 1 // necessary so that boson works with KDE 3.0 Beta 1 // TODO: remove when beta2 or final is out
+
 #define BOSON_COOKIE 992
 
 #define BO_TILE_SIZE 48

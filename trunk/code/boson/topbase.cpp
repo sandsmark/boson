@@ -47,6 +47,7 @@ public:
 
 	KToggleAction* mToolbarAction;
 	KToggleAction* mStatusbarAction;
+	KToggleAction* mChatAction;
 	KSelectAction* mZoomAction;
 };
 
@@ -81,6 +82,12 @@ void TopBase::initKAction()
  d->mStatusbarAction = KStdAction::showStatusbar(this, SLOT(slotShowStatusbar()), actionCollection());
 
  KStdAction::configureToolbars(this, SLOT(slotConfigureToolbars()), actionCollection());
+
+ d->mChatAction = new KToggleAction(i18n("Show &Chat"), 0, this, 
+		SLOT(slotShowChat()), actionCollection(), "options_show_chat");
+ d->mChatAction->setChecked(false);
+ slotShowChat();
+
  KToggleAction* sound = new KToggleAction(i18n("Soun&d"), 0, mBosonWidget, 
 		SLOT(slotToggleSound()), actionCollection(), "options_sound");
  sound->setChecked(mBosonWidget->sound());
@@ -168,6 +175,11 @@ void TopBase::slotShowStatusbar()
  } else {
         statusBar()->hide();
  }
+}
+
+void TopBase::slotShowChat()
+{
+ mBosonWidget->setShowChat(d->mChatAction->isChecked());
 }
 
 void TopBase::slotConfigureToolbars()
