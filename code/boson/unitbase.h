@@ -31,6 +31,7 @@ class QDomElement;
 template<class T, class T2> class QMap;
 
 class Player;
+class PlayerIO;
 class UnitProperties;
 class PluginProperties;
 class SpeciesTheme;
@@ -216,6 +217,11 @@ public:
 	 * @return The owner (player) of the unit
 	 **/
 	inline Player* owner() const { return mOwner; }
+
+	/**
+	 * @return owner()->playerIO()
+	 **/
+	PlayerIO* ownerIO() const;
 
 	/**
 	 * Set the owner of this unit. Note that this should be done on
