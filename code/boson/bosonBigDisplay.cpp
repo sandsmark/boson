@@ -50,10 +50,13 @@ void bosonBigDisplay::actionClicked(QPoint mp, int /*state*/)
 	 * FIX HANDLING
 	 */
 	if (vtl->fixSelected) {
-		// fix Selected
-		if ( IS_MOBILE(sfg->rtti()))
+		if (vtl->fixSelected->who != who_am_i) return;
+		if (!sfg) { // nothing under the mouse
+			((playerFacility*)vtl->fixSelected)->u_stop();
+			return;
+		} else if ( IS_MOBILE(sfg->rtti()))	// attack a mobile
 			((playerFacility*)vtl->fixSelected)->u_attack( (playerMobUnit*)sfg );
-		else if ( IS_FACILITY(sfg->rtti()))
+		else if ( IS_FACILITY(sfg->rtti()))	// attack a fix
 			((playerFacility*)vtl->fixSelected)->u_attack( (playerFacility*)sfg );
 		else return;
 	}
