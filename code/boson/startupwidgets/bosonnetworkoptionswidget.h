@@ -54,6 +54,9 @@ class BosonNetworkOptionsWidget : public QWidget
 
   signals:
     void signalOkClicked();
+    void signalOfferingConnections();
+    void signalConnectingToServer();
+    void signalConnectedToServer();
 
   private:
     QLabel* mHeader;

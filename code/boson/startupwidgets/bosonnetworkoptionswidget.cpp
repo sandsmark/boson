@@ -40,11 +40,14 @@
 BosonNetworkOptionsWidget::BosonNetworkOptionsWidget(QWidget* parent)
     : QWidget(parent)
 {
+  boDebug() << k_funcinfo << endl;
   if (!boGame)
   {
     boError() << k_funcinfo << "NULL Boson object" << endl;
     return;
   }
+
+  setPaletteForegroundColor( QColor( 255, 255, 255 ) );
 
   mBosonNetworkOptionsWidgetLayout = new QVBoxLayout( this, 11, 6, "BosonNetworkOptionsWidgetLayout");
 
@@ -66,19 +69,14 @@ BosonNetworkOptionsWidget::BosonNetworkOptionsWidget(QWidget* parent)
   QSpacerItem* spacer_2 = new QSpacerItem( 20, 20, QSizePolicy::Minimum, QSizePolicy::Fixed );
   mLayout8->addItem( spacer_2 );
 
-  mLayout1 = new QHBoxLayout( 0, 0, 6, "Layout1");
-
   mNetStatusText = new QLabel( this, "netstatustext" );
   mNetStatusText->setText( i18n( "Network Status:" ) );
-  mLayout1->addWidget( mNetStatusText );
-  QSpacerItem* spacer_3 = new QSpacerItem( 31, 31, QSizePolicy::Fixed, QSizePolicy::Minimum );
-  mLayout1->addItem( spacer_3 );
+  mLayout8->addWidget( mNetStatusText );
 
   mNetStatusLabel = new QLabel( this, "netstatuslabel" );
-  mLayout1->addWidget( mNetStatusLabel );
-  mLayout8->addLayout( mLayout1 );
+  mLayout8->addWidget( mNetStatusLabel );
 
-  mLayout2 = new QHBoxLayout( 0, 0, 6, "Layout2"); 
+  mLayout2 = new QHBoxLayout( 0, 0, 6, "Layout2");
   QSpacerItem* spacer_4 = new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum );
   mLayout2->addItem( spacer_4 );
 
@@ -185,6 +183,7 @@ BosonNetworkOptionsWidget::BosonNetworkOptionsWidget(QWidget* parent)
 
 BosonNetworkOptionsWidget::~BosonNetworkOptionsWidget()
 {
+  boDebug() << k_funcinfo << endl;
 }
 
 void BosonNetworkOptionsWidget::slotDisconnect()
@@ -204,10 +203,19 @@ void BosonNetworkOptionsWidget::slotStartNetwork()
     master = true;
     connected = boGame->offerConnections(port);
     setConnected(connected, master);
+    if(connected)
+    {
+      emit signalOfferingConnections();
+    }
+    else
+    {
+      KMessageBox::error(this, i18n("Cannot start server! There might be another server already active."));
+    }
   }
   else
   {
     master = false;
+    emit signalConnectingToServer();
     connected = boGame->connectToServer(host, port);
     // don't call setConnected() here - connectToServer() is asynchron
   }
@@ -229,18 +237,18 @@ void BosonNetworkOptionsWidget::setConnected(bool connected, bool master)
 {
   if(!connected)
   {
-    mNetStatusLabel->setText(i18n("No Network"));
+    mNetStatusLabel->setText(i18n("No Network\n"));
     mNetConfGroupBox->setEnabled(true);
     mDisconnectButton->setEnabled(false);
     return;
   }
   if(master)
   {
-    mNetStatusLabel->setText(i18n("You are MASTER"));
+    mNetStatusLabel->setText(i18n("You are MASTER\nListening at port %1").arg(boGame->bosonPort()));
   }
   else
   {
-    mNetStatusLabel->setText(i18n("You are Connected"));
+    mNetStatusLabel->setText(i18n("You are Connected\nServer: %1:%2").arg(boGame->bosonHostName()).arg(boGame->bosonPort()));
   }
   mNetConfGroupBox->setEnabled(false);
   mDisconnectButton->setEnabled(true);
@@ -256,6 +264,7 @@ void BosonNetworkOptionsWidget::setConnected(bool connected, bool master)
       port = BOSON_PORT;
     }
     mPortEdit->setValue(port);
+    mHostEdit->setText(boGame->bosonHostName());
   }
 }
 
@@ -273,6 +282,10 @@ void BosonNetworkOptionsWidget::slotClientJoinedGame(Q_UINT32 gameId, KGame*)
   if (gameId == boGame->gameId())
   {
     boDebug() << k_funcinfo << "connection succeeded - gameid: " << gameId << endl;
+    if (boGame->isNetwork())
+    {
+      emit signalConnectedToServer();
+    }
     setConnected(boGame->isNetwork(), boGame->isMaster());
   }
 }
