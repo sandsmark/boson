@@ -696,6 +696,7 @@ void TopWidget::loadGameData2() //FIXME rename!
  //  loading tiles
  mCanvas->loadTiles(QString("earth"), false);
 
+ // also loads the cursor and the map display list!
  d->mBosonWidget->addInitialDisplay();
 }
 
@@ -1193,7 +1194,7 @@ void TopWidget::slotSaveGame()
 void TopWidget::slotUpdateFPS()
 {
 #ifndef NO_OPENGL
- emit signalFPSUpdated(d->mBosonWidget->displaymanager()->activeDisplay()->fps());
+ emit signalFPSUpdated(d->mBosonWidget->displayManager()->activeDisplay()->fps());// damn this call sucks!
 #endif
 }
 

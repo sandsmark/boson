@@ -269,6 +269,9 @@ public:
 
 	bool mEvenFlag; // this is used for a nice trick to avoid clearing the depth 
 	                // buffer - see http://www.mesa3d.org/brianp/sig97/perfopt.htm
+
+
+	bool mInitialized;
 #endif // !NO_OPENGL
 
 	SelectionRect mSelectionRect;
@@ -304,6 +307,7 @@ void BosonBigDisplayBase::init()
  mCursor = 0;
  d->mCursorEdgeCounter = 0;
  d->mUpdateInterval = 0;
+ d->mInitialized = false;
 
  mSelection = new BoSelection(this);
  d->mChat = new BosonChat(this);
@@ -323,7 +327,8 @@ void BosonBigDisplayBase::init()
  // and another hack..
 // setMinimumSize(QSize(400,400));
 
-
+ glInit();
+ generateMapDisplayList();
  connect(&d->mUpdateTimer, SIGNAL(timeout()), this, SLOT(updateGL()));
 #else
  setCanvas(c);
@@ -348,6 +353,10 @@ void BosonBigDisplayBase::init()
 #ifndef NO_OPENGL
 void BosonBigDisplayBase::initializeGL()
 {
+ if (d->mInitialized) {
+	// already called initializeGL()
+	return;
+ }
  // AB: we need at least GLU 1.3 for gluCheckExtension() !
  // TODO: find out if we might be able to run boson with older versions - if yes
  // use the code from http://www.mesa3d.org/brianp/sig97/exten.htm#Compile to
@@ -1393,6 +1402,12 @@ void BosonBigDisplayBase::scrollBy(int dx, int dy)
 #ifndef NO_OPENGL
 void BosonBigDisplayBase::generateMapDisplayList()
 {
+ makeCurrent();
+ // some clever guy made QGLContet::initialized() protected - so we need to
+ // implement our own version here :-(
+ if (!d->mInitialized) {
+	glInit();
+ }
  BosonMap* map = mCanvas->map();
  if (!map) {
 	kdError() << k_funcinfo << "NULL map" << endl;

@@ -174,8 +174,6 @@ void BosonWidget::init()
  initConnections();
  initKeys();
 
- slotChangeCursor(boConfig->readCursorMode(), boConfig->readCursorDir());
-
  setFocusPolicy(StrongFocus); // accept key event
  setFocus();
 
@@ -238,13 +236,17 @@ void BosonWidget::initDisplayManager()
  mDisplayManager = new BoDisplayManager(canvas(), this, game()->gameMode());
  connect(mDisplayManager, SIGNAL(signalActiveDisplay(BosonBigDisplayBase*, BosonBigDisplayBase*)),
 		this, SLOT(slotSetActiveDisplay(BosonBigDisplayBase*, BosonBigDisplayBase*)));
- canvas()->setDisplayManager(displaymanager());
- displaymanager()->setLocalPlayer(player()); // this does nothing.
+ canvas()->setDisplayManager(displayManager());
+ displayManager()->setLocalPlayer(player()); // this does nothing.
 
 }
 void BosonWidget::addInitialDisplay()
 {
- initBigDisplay(displaymanager()->addInitialDisplay());
+ initBigDisplay(displayManager()->addInitialDisplay());
+
+ // we need to add the display first (in order to create a valid GL context) and
+ // then load the cursor
+ slotChangeCursor(boConfig->readCursorMode(), boConfig->readCursorDir());
 }
 
 void BosonWidget::initChat()
@@ -271,7 +273,7 @@ void BosonWidget::initPlayer()
  }
 
  minimap()->setLocalPlayer(player());
- displaymanager()->setLocalPlayer(player());
+ displayManager()->setLocalPlayer(player());
  game()->setLocalPlayer(player());
  d->mCommandFrame->setLocalPlayer(player());
  d->mChat->setFromPlayer(player());
@@ -344,7 +346,7 @@ void BosonWidget::slotChangeCursor(int mode, const QString& cursorDir_)
 	delete mCursor;
  }
  mCursor = b;
- displaymanager()->setCursor(mCursor);
+ displayManager()->setCursor(mCursor);
  mCursorTheme = cursorDir;
 
  // some cursors need special final initializations. do them now
@@ -416,9 +418,7 @@ void BosonWidget::initLayout()
  d->mChatDock->manualDock(mTop->getMainDockWidget(), KDockWidget::DockBottom, 80);
 
  QVBoxLayout* topLayout = new QVBoxLayout(this);
- topLayout->addWidget(displaymanager());
-
-// topLayout->addWidget(mGLDisplay);
+ topLayout->addWidget(displayManager());
 
  if(!kapp->config()->hasGroup("BosonGameDock")) {
 	// Dock config isn't saved (probably first start). Hide chat dock (we only
@@ -428,7 +428,6 @@ void BosonWidget::initLayout()
  else {
 	mTop->loadGameDockConfig();
  }
-// topLayout->activate();
 }
 
 void BosonWidget::slotDebug()
@@ -489,9 +488,9 @@ void BosonWidget::slotStartScenario()
 
 void BosonWidget::slotHack1()
 {
- QSize size = mDisplayManager->activeDisplay()->size();
- mDisplayManager->activeDisplay()->resize(size.width() - 1, size.height() - 1);
- mDisplayManager->activeDisplay()->resize(size);
+ QSize size = displayManager()->activeDisplay()->size();
+ displayManager()->activeDisplay()->resize(size.width() - 1, size.height() - 1);
+ displayManager()->activeDisplay()->resize(size);
 }
 
 void BosonWidget::slotGamePreferences()
@@ -531,7 +530,7 @@ void BosonWidget::slotGamePreferences()
  connect(dlg, SIGNAL(signalMiniMapScaleChanged(double)),
 		this, SLOT(slotMiniMapScaleChanged(double)));
  connect(dlg, SIGNAL(signalUpdateIntervalChanged(unsigned int)),
-		mDisplayManager, SLOT(slotUpdateIntervalChanged(unsigned int)));
+		displayManager(), SLOT(slotUpdateIntervalChanged(unsigned int)));
 
  dlg->show();
 }
@@ -567,8 +566,8 @@ void BosonWidget::slotRemoveUnit(Unit* unit)
 
 void BosonWidget::setZoomFactor(float factor)
 {
- if (displaymanager()->activeDisplay()) {
-	displaymanager()->activeDisplay()->setZoomFactor(factor);
+ if (displayManager()->activeDisplay()) {
+	displayManager()->activeDisplay()->setZoomFactor(factor);
  }
 }
 
@@ -664,8 +663,8 @@ void BosonWidget::addChatSystemMessage(const QString& fromName, const QString& t
  d->mChat->addSystemMessage(fromName, text);
 
  // FIXME: only to the current display or to all displays ??
- if (displaymanager()->activeDisplay()) {
-	displaymanager()->activeDisplay()->addChatMessage(i18n("--- %1: %2").arg(fromName).arg(text));
+ if (displayManager()->activeDisplay()) {
+	displayManager()->activeDisplay()->addChatMessage(i18n("--- %1: %2").arg(fromName).arg(text));
  }
 }
 
@@ -698,17 +697,17 @@ void BosonWidget::slotUnfogAll(Player* pl)
 
 void BosonWidget::slotSplitDisplayHorizontal()
 {
- initBigDisplay(displaymanager()->splitActiveDisplayHorizontal());
+ initBigDisplay(displayManager()->splitActiveDisplayHorizontal());
 }
 
 void BosonWidget::slotSplitDisplayVertical()
 {
- initBigDisplay(displaymanager()->splitActiveDisplayVertical());
+ initBigDisplay(displayManager()->splitActiveDisplayVertical());
 }
 
 void BosonWidget::slotRemoveActiveDisplay()
 {
- displaymanager()->removeActiveDisplay();
+ displayManager()->removeActiveDisplay();
 }
 
 void BosonWidget::slotSetActiveDisplay(BosonBigDisplayBase* active, BosonBigDisplayBase* old)
@@ -802,16 +801,16 @@ void BosonWidget::slotCmdBackgroundChanged(const QString& file)
 void BosonWidget::initKeys()
 {
 #if KDE_VERSION < 310 // old kactions
- (void)new KAction(i18n("Scroll Up"), Qt::Key_Up, mDisplayManager,
+ (void)new KAction(i18n("Scroll Up"), Qt::Key_Up, displayManager(),
 		SLOT(slotScrollUp()), actionCollection(),
 		"scroll_up");
- (void)new KAction(i18n("Scroll Down"), Qt::Key_Down, mDisplayManager,
+ (void)new KAction(i18n("Scroll Down"), Qt::Key_Down, displayManager(),
 		SLOT(slotScrollDown()), actionCollection(),
 		"scroll_down");
- (void)new KAction(i18n("Scroll Left"), Qt::Key_Left, mDisplayManager,
+ (void)new KAction(i18n("Scroll Left"), Qt::Key_Left, displayManager(),
 		SLOT(slotScrollLeft()), actionCollection(),
 		"scroll_left");
- (void)new KAction(i18n("Scroll Right"), Qt::Key_Right, mDisplayManager,
+ (void)new KAction(i18n("Scroll Right"), Qt::Key_Right, displayManager(),
 		SLOT(slotScrollRight()), actionCollection(),
 		"scroll_right");
  QString slotSelect = SLOT(slotSelectGroup());
@@ -820,45 +819,45 @@ void BosonWidget::initKeys()
 	QString s = slotSelect;
 	s = s.replace(QRegExp("slotSelectGroup"), QString("slotSelectGroup%1").arg(i));
 	(void)new KAction(i18n("Select Group %1").arg(i == 0 ? 10 : i), 
-			Qt::Key_0 + i, mDisplayManager, 
+			Qt::Key_0 + i, displayManager(), 
 			s, actionCollection(),
 			QString("select_group_%1").arg(i));
 	s = slotCreate;
 	s = s.replace(QRegExp("slotCreateGroup"), QString("slotCreateGroup%1").arg(i));
 	(void)new KAction(i18n("Create Group %1").arg(i == 0 ? 10 : i), 
-			Qt::CTRL + Qt::Key_0 + i, mDisplayManager, 
+			Qt::CTRL + Qt::Key_0 + i, displayManager(), 
 			s, actionCollection(),
 			QString("create_group_%1").arg(i));
  }
 #else 
  // KAction supports slots that take integer parameter :-)
- (void)new KAction(i18n("Scroll Up"), Qt::Key_Up, mDisplayManager,
+ (void)new KAction(i18n("Scroll Up"), Qt::Key_Up, displayManager(),
 		SLOT(slotScroll(int)), actionCollection(),
 		QString("scroll_up {%1}").arg(BoDisplayManager::ScrollUp));
- (void)new KAction(i18n("Scroll Down"), Qt::Key_Down, mDisplayManager,
+ (void)new KAction(i18n("Scroll Down"), Qt::Key_Down, displayManager(),
 		SLOT(slotScroll(int)), actionCollection(),
 		QString("scroll_down {%1}").arg(BoDisplayManager::ScrollDown));
- (void)new KAction(i18n("Scroll Left"), Qt::Key_Left, mDisplayManager,
+ (void)new KAction(i18n("Scroll Left"), Qt::Key_Left, displayManager(),
 		SLOT(slotScroll(int)), actionCollection(),
 		QString("scroll_left {%1}").arg(BoDisplayManager::ScrollLeft));
- (void)new KAction(i18n("Scroll Right"), Qt::Key_Right, mDisplayManager,
+ (void)new KAction(i18n("Scroll Right"), Qt::Key_Right, displayManager(),
 		SLOT(slotScroll(int)), actionCollection(),
 		QString("scroll_right {%1}").arg(BoDisplayManager::ScrollRight));
  for (int i = 0; i < 10; i++) {
 	(void)new KAction(i18n("Select Group %1").arg(i == 0 ? 10 : i), 
-			Qt::Key_0 + i, mDisplayManager, 
+			Qt::Key_0 + i, displayManager(), 
 			SLOT(slotSelectGroup(int)), actionCollection(),
 			QString("select_group {%1}").arg(i));
 	(void)new KAction(i18n("Create Group %1").arg(i == 0 ? 10 : i), 
-			Qt::CTRL + Qt::Key_0 + i, mDisplayManager, 
+			Qt::CTRL + Qt::Key_0 + i, displayManager(), 
 			SLOT(slotSelectGroup(int)), actionCollection(),
 			QString("create_group {%1}").arg(i));
  }
 #endif
  (void)new KAction(i18n("Center &Home Base"), KShortcut(Qt::Key_H), 
-		mDisplayManager, SLOT(slotCenterHomeBase()), actionCollection(), "game_center_base");
+		displayManager(), SLOT(slotCenterHomeBase()), actionCollection(), "game_center_base");
  (void)new KAction(i18n("&Reset View Properties"), KShortcut(Qt::Key_R), 
-		mDisplayManager, SLOT(slotResetViewProperties()), actionCollection(), "game_reset_view_properties");
+		displayManager(), SLOT(slotResetViewProperties()), actionCollection(), "game_reset_view_properties");
 }
 
 void BosonWidget::slotDebugRequestIdName(int msgid, bool , QString& name)
