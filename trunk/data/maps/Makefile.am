@@ -2,6 +2,7 @@
 maps_DATA = \
 	basic.bpf \
 	basic2.bpf \
+	basic3.bpf \
 	bigarmy-test.bpf \
 	bigarmy-test-2.bpf \
 	experimental.bpf \
