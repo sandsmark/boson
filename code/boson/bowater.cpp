@@ -910,6 +910,11 @@ float BoWaterManager::waterAlphaAt(BoLake* lake, float x, float y)
 
 float BoWaterManager::waterDepth(int x, int y)
 {
+  if(!underwater(x, y))
+  {
+    return 0.0f;
+  }
+
   QPtrListIterator<BoLake> it(mLakes);
   for(; it.current(); ++it)
   {
@@ -922,7 +927,10 @@ float BoWaterManager::waterDepth(int x, int y)
       }
     }
   }
+
   // This cell is not under water
+  boWarning() << k_funcinfo << "Cell (" << x << "; " << y <<
+      ") is not underwater, but underwater() returned true!" << endl;
   return 0.0f;
 }
 
