@@ -9,13 +9,11 @@ MOBILE_UNITS = \
 	mob_tiger \
 	mob_tornado
 FACILITIES = \
-	fix_barracks \
 	fix_comsat \
 	fix_commandbunker \
 	fix_helipad \
 	fix_oiltower \
 	fix_powerplant \
-	fix_prison \
 	fix_oilrefinery \
 	fix_repairpad \
 	fix_samsite \
