@@ -196,6 +196,14 @@ void BosonCanvas::quitGame()
  d->mAnimList.clear();
  d->mFogOfWar.clear();
  d->mDeleteShot.clear();
+
+ d->mWorkNone.clear();
+ d->mWorkProduce.clear();
+ d->mWorkMove.clear();
+ d->mWorkMine.clear();
+ d->mWorkAttack.clear();
+ d->mWorkConstructed.clear();
+ d->mGroups.clear();
 }
 
 void BosonCanvas::deleteDestroyed()
