@@ -57,10 +57,7 @@ void drawSelectBox(QPainter &painter, QColor c1, QColor c2, int power)
  */
 selectPart_up::selectPart_up(int _f, int _z)
 {
-	if (!qsps) {
-		logf(LOG_WARNING, "selectPart_up : qsps not loaded");
-		initStatic();
-		}
+	if (!qsps) initStatic();
 	setSequence(qsps);
 	boAssert( _f>=0);
 	boAssert( _f<PART_NB);
@@ -120,10 +117,7 @@ void selectPart_up::initStatic()
  */
 selectPart_down::selectPart_down(int _f, int _z)
 {
-	if (!qsps) {
-		logf(LOG_WARNING, "selectPart_down : qsps not loaded");
-		initStatic();
-		}
+	if (!qsps) initStatic();
 	setSequence(qsps);
 	boAssert(_f>=0);
 	boAssert(_f<PART_NB);
