@@ -2,10 +2,10 @@
 <article>
 <title>The Boson Handbook
 <author>Thomas Capricelli <tt>orzel@yalbi.com</tt>
-<date>Version 0.4 , Wed Dec 22 02:56:26 EST 1999
+<date>Version 0.5 , Tue May 23 02:13:29 EDT 2000
 
 <abstract>
-This Handbook describes Boson Version 0.4
+This Handbook describes Boson Version 0.5
 </abstract>
 
 <toc>
@@ -18,8 +18,6 @@ A <tt/RTS/ (real-time strategy game) was missing under linux, and we felt like
 we could do it.  KDE/Qt appeared to be the best environment under which such a
 game could be done.
 
-We would like to thanx Warwick Allison (<htmlurl url="warwick@troll.no" name="warwick@troll.no">)
-for his wonderful <tt/QwSpriteField/ library, which is used by Boson.  
 We hope you will enjoy this game as much as we did while doing it and 
 we would appreciate any suggestions and comments.
 
@@ -31,12 +29,15 @@ Please contact : <tt/Thomas Capricelli/
 <sect1>Changes
 <p>
 
-Boson 0.4 is the fourth alpha release, it's meant to be the last developper-only release. It's
-still no yet intended for playing.
+Boson 0.5 is the fifth alpha release, it's meant to be one of the last developper-only release. It's
+still no yet intended for playing, though.
 
-New features in this released are : 
+New features in this release are : 
 <itemize>
-	<item>///orzel
+	<item>Port from Qt-1.x to Qt-2.1
+	<item>Port from KDE-1.x to KDE-2.0pre (at least 1.90)
+	<item>Port from QwSpriteField to QCanvas (for rendering)
+	<item>You may open several windows in boson or the editor. Seeing the same map.
 </itemize>
 
 <p>
@@ -61,16 +62,16 @@ Every kind of help is welcome :
 <p>
 
 <bf/Boson/ can be found on <htmlurl
-url="http://aquila.rezel.enst.fr/boson/" name="the boson homepage" >.
+url="http://boson.eu.org" name="the boson homepage" >.
 
-Boson is also available on ftp.kde.org and all its mirrors, in the Incomings directory or in
-the unstable/ tree in the game section. 
+Boson is also available on ftp.kde.org and all its mirrors, in the Incomings/ directory or in
+unstable/game tree.
 
 <sect1>Requirements
 <p>
-In order to successfully compile boson, you need kdelibs-1.0 and kdesupport-1.0, or the latest versions
-of <tt> libkdecore</tt>, <tt> libkdeui</tt>, <tt> libkfile</tt>, <tt> libkfm</tt> and <tt> libQwSpriteField</tt>.
-All required libraries can be found on <url url="ftp://ftp.kde.org/pub/kde/">.
+In order to successfully compile and use boson, you need kde-qt-addon and kdelibs from KDE-2.0.
+Those libraries can be found on <url url="ftp://ftp.kde.org/pub/kde/">.
+You also need Qt-2.1, that can be found either at the KDE site or on <url url="http://www.troll.no">
 
 <sect1>Compilation and installation
 <p>
@@ -85,6 +86,13 @@ the base directory of the Boson distribution:
 </verb></tscreen>
 
 You will probably need to be root for the install stage.
+
+You may need to add those arguments to ./configure if your qt2/kde2 are installed on non-standart
+places
+<itemize>
+	<item>--with-qt-dir=&lt;your-qt-dir&gt;
+	<item>--prefix=&lt;your-kde-dir&gt;
+</itemize>
 
 <p>
 Since Boson uses <tt/autoconf/ you should have not trouble
@@ -132,12 +140,18 @@ on a <tt/friend/ mobile unit, it will follow it, on a <tt/ennemy/, it will attac
 will become the new center of the map. If you click on the center, it will do nothing. If you click on the border, you'll make
 a big jump.
 
+<sect1> The editor <p>
+
+	When using righ-click to put some ground on the map, you may let the mouse clicked while moving the mouse, it will <tt/fill/
+the map with the current ground tile.
+	If you have the <tt/shift/ key pressed while doing so, you will be in a special <tt/big-fill/ mode, that is quiker to fill big
+places.
 
 <sect>Questions and Answers<p>
 
 <sect1>Nothing happens when I click on the K-menu/Games/boson item.
 <p>
-	If you haven't installed the boson-pics-0.4 package, boson will die as soon as launched.
+	If you haven't installed the boson-pics-0.5 package, boson will die as soon as launched.
 Install the package. If it's still won't be launched, do it in a terminal emulator (kvt, konsole, xterm)
 and send me 
 <itemize>

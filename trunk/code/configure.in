@@ -15,7 +15,11 @@ AC_ENABLE_SHARED(yes)
 AC_ENABLE_STATIC(no)
 
 dnl insert here your program name and version number
-KDE_DO_IT_ALL(boson, 0.4)
+KDE_DO_IT_ALL(boson, 0.5)
+
+dnl in this space add everything you want to check for
+dnl examples are specific headers, libraries, etc.
+dnl everything to compile and run a KDE program is already checked
 
 AC_OUTPUT(Makefile \
 	common/Makefile \

@@ -18,6 +18,14 @@
  *                                                                         *
  ***************************************************************************/
 
+//just a local copy with no private, nor protected :-)
+//just a local copy with no private, nor protected :-)
+//just a local copy with no private, nor protected :-)
+//just a local copy with no private, nor protected :-)
+//just a local copy with no private, nor protected :-)
+//just a local copy with no private, nor protected :-)
+
+
 #ifndef BOFILE_H 
 #define BOFILE_H 
 
@@ -31,6 +39,7 @@ class QDataStream;
 class QFile;
 class mobileMsg_t;
 class facilityMsg_t;
+//class QString;
 
 
 #define stateAssert(s)								\
@@ -46,8 +55,6 @@ class boFile
 public:
 	boFile();
 virtual	~boFile();
-
-protected :
 
 	bool	openRead(const char *);
 	bool	openWrite(const char *);
@@ -70,9 +77,6 @@ protected :
 	void	write(facilityMsg_t &f);
 
 	bool	isOk() {return !error; }
-
-
-protected:
 
 	enum {
 		None,		// nothing has happened

@@ -5,7 +5,7 @@
     version              : $Id$
     begin                : Sat Jan  9 19:35:36 CET 1999
                                            
-    copyright            : (C) 1999 by Thomas Capricelli                         
+    copyright            : (C) 1999-2000 by Thomas Capricelli                         
     email                : orzel@yalbi.com                                     
  ***************************************************************************/
 
@@ -116,7 +116,7 @@ void BosonApp::initCanvas(int w, int h)
 	bosonTopLevel *btl = new bosonTopLevel(this);
 	btl->show();
 	topLevels.append(btl);
-	logf(LOG_INFO, "canvas and TopLevel window created");
+	logf(LOG_INFO, "canvas and first TopLevel window created");
 
 }
 

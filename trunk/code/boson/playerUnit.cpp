@@ -5,7 +5,7 @@
     version              : $Id$
     begin                : Sat Jan  9 19:35:36 CET 1999
                                            
-    copyright            : (C) 1999 by Thomas Capricelli                         
+    copyright            : (C) 1999-2000 by Thomas Capricelli                         
     email                : orzel@yalbi.com                                     
  ***************************************************************************/
 
@@ -73,7 +73,7 @@ void bosonUnit::u_attack(bosonUnit *u)
 
 	if (u == this) {
 		/* attacking myself */
-		logf(LOG_WARNING, "(bosonUnit::u_attack()) %p attacking itself, aborting", this);
+//		logf(LOG_WARNING, "(bosonUnit::u_attack()) %p attacking itself, aborting", this);
 		return;
 	}
 
@@ -172,7 +172,7 @@ bool playerMobUnit::getWantedMove(QPoint &wmove)
 			if (failed_move>3) failed_move = 0; // prevent 3-timeunit loop
 			if (!path.addCheckLoop(asked)) {
 				// loop
-				logf(LOG_INFO, "loop detected, stopping");
+//				logf(LOG_INFO, "loop detected, stopping");
 				state = MUS_NONE;
 				return false;
 			}
@@ -453,7 +453,7 @@ void playerMobUnit::u_attack(bosonUnit *u)
 
 	bosonUnit *that = this;
 	if (u == that) { /* attacking myself */
-		logf(LOG_WARNING, "(playerMobUnit::u_attack()) %p attacking itself, aborting", this);
+//		logf(LOG_WARNING, "(playerMobUnit::u_attack()) %p attacking itself, aborting", this);
 		return;
 	}
 

@@ -5,7 +5,7 @@
     version              : $Id$
     begin                : Sat Jan  9 19:35:36 CET 1999
                                            
-    copyright            : (C) 1999 by Thomas Capricelli                         
+    copyright            : (C) 1999-2000 by Thomas Capricelli                         
     email                : orzel@yalbi.com                                     
  ***************************************************************************/
 
@@ -229,10 +229,10 @@ int main (int argc, char **argv)
 			exit(1);
 		}
 	begin("earth");
-	for (i=0; i< GROUND_LAST; i++) // load non-transitions
+	for (i=0; i< GROUND_LAST; i++)		// load non-transitions
 		loadGround(i, themePath + groundProp[i].name);
 		;
-	for (i=0; i< TRANS_LAST; i++) {
+	for (i=0; i< TRANS_LAST; i++) {		// load transitions
 		for (j=0; j< SMALL_TILES_PER_TRANSITION; j++)
 			loadTransition( (groundType) GET_TRANS_NUMBER(i,j) );
 			;

@@ -5,7 +5,7 @@
     version              : $Id$
     begin                : Sat Feb 14 1999
                                            
-    copyright            : (C) 1999 by Thomas Capricelli                         
+    copyright            : (C) 1999-2000 by Thomas Capricelli                         
     email                : orzel@yalbi.com                                     
  ***************************************************************************/
 
@@ -31,7 +31,7 @@
 #define		TAG_CELL	(0xde)
 #define		TAG_MAP		(0xad)
 #define		TAG_PEOPLE	(0xf0)
-#define		TAG_FIELD	"boeditor_magic_0_2"
+#define		TAG_FIELD	"boeditor_magic_0_3"
 
 
 boFile::boFile()
