@@ -233,6 +233,11 @@ public:
 	 **/
 	Cell* cell(int x, int y) const;
 
+	/**
+	 * @return BosonMap::cells. Use with care!
+	 **/
+	Cell* cells() const;
+
 	void deleteDestroyed();
 	void deleteUnusedShots();
 
