@@ -1,6 +1,6 @@
 #MIN_CONFIG
 
-AM_INIT_AUTOMAKE(boson, 0.8)
+AM_INIT_AUTOMAKE(boson, 0.9pre)
 
 dnl These are common macros that you might or might not want to use
 
@@ -13,3 +13,6 @@ AC_HEADER_STDC
 AC_HEADER_TIME
 AC_CHECK_HEADERS(fcntl.h sys/time.h unistd.h stdlib.h paths.h)
 AC_CHECK_FUNCS(usleep)
+
+KDE_INIT_DOXYGEN([Boson API reference], [Version $VERSION])
+
