@@ -220,4 +220,23 @@ a.copyright:hover {
 pre {
   background-color: transparent;
   color: #606060;
+  margin-left: 10px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+
+/** Announcements **/
+
+p.announcement {
+  background-color: transparent;
+  color: #000000;
+  margin-left: 10px;
+  margin-right: 10px;
+  text-align: justify;
+}
+
+h3.announcement {
+  background-color: transparent;
+  text-align: center;
 }

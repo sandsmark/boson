@@ -22,15 +22,15 @@ echo "
 function print_header()
 {
 $image;
-global $style;
+global $style, $basedir;
 if($style == "blue") {
-  $image="pictures/boson.png";
+  $image="${basedir}pictures/boson.png";
 } else {
-  $image="pictures/header.jpg";
+  $image="${basedir}pictures/header.jpg";
 }
 echo "<div align=\"left\"><img src=\"$image\" alt=\"Boson logo\"></div><br>";
 if($style=="green")
-  echo "<div style='position:absolute;right:20px;top:115px;'><img src='pictures/boson-logo.gif' alt=\"Boson logo\"></div><br><br>";
+  echo "<div style='position:absolute;right:20px;top:115px;'><img src='${basedir}pictures/boson-logo.gif' alt=\"Boson logo\"></div><br><br>";
 }
 
 /*****  HTML header & footer  *****/
@@ -45,6 +45,7 @@ echo "
 // title : Title of the page
 function html_print_header($title)
 {
+global $basedir;
 /*global $startsec, $startusec;
 $timearray = gettimeofday();
 $startsec=$timearray["sec"];
@@ -61,9 +62,9 @@ header ("Pragma: no-cache");                          // HTTP/1.0
 global $style;
 $stylesheet;
 if($style == "blue") {
-  $stylesheet="style-blue.css";
+  $stylesheet="${basedir}style-blue.css";
 } else {
-  $stylesheet="style-green.css";
+  $stylesheet="${basedir}style-green.css";
 }
 
 // HTML header
