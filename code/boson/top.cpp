@@ -32,6 +32,7 @@
 #include "bosoncanvas.h"
 #include "bosonmessage.h"
 #include "bosonmap.h"
+#include "speciestheme.h"
 
 #include <kapplication.h>
 #include <klocale.h>
@@ -470,11 +471,11 @@ void TopWidget::loadGameData1()
 	QByteArray buffer;
 	QDataStream stream(buffer, IO_WriteOnly);
 	mMap->saveMap(stream);
-	d->mLoading->setProgress(100);
+	d->mLoading->setProgress(50);
 	checkEvents();
 	// send the loaded map via network
 	mBoson->sendMessage(stream, BosonMessage::InitMap);
-	d->mLoading->setProgress(200);
+	d->mLoading->setProgress(100);
 	checkEvents();
  }
  d->mLoading->setLoading(BosonLoadingWidget::ReceiveMap);
@@ -492,7 +493,7 @@ void TopWidget::loadGameData2()
  initBosonWidget();
 
  // Load map tiles. This takes most time
- d->mLoading->setProgress(800);
+ d->mLoading->setProgress(600);
  d->mLoading->setLoading(BosonLoadingWidget::LoadTiles);
  checkEvents();
  connect(mCanvas, SIGNAL(signalTilesLoading(int)), this, SLOT(slotCanvasTilesLoading(int)));
@@ -503,6 +504,27 @@ void TopWidget::loadGameData2()
 
 void TopWidget::loadGameData3()
 {
+ // Load unit pixmaps
+ d->mLoading->setProgress(4000);
+ d->mLoading->setLoading(BosonLoadingWidget::LoadUnits);
+ checkEvents();
+ // First get all id's of units
+ QValueList<int> unitIds = player()->speciesTheme()->allFacilities();
+ unitIds += player()->speciesTheme()->allMobiles();
+ QValueList<int>::iterator it;
+ int current = 0;
+ int total = unitIds.count();
+ kdDebug() << k_funcinfo << "total units: " << total << endl;
+ for(it = unitIds.begin(); it != unitIds.end(); ++it) {
+	current++;
+	player()->speciesTheme()->loadUnit(*it);
+	kdDebug() << k_funcinfo << " Unit " << current << " of " << total << " loaded, setting progress to " <<
+			3000 + ((double)current / total * 1600) << endl;
+	d->mLoading->setProgress(3000 + ((double)current / total * 1600));
+ }
+
+
+ d->mLoading->setProgress(4600);
  d->mLoading->setLoading(BosonLoadingWidget::InitGame);
  checkEvents();
  if(mBoson->isAdmin()) {
@@ -510,7 +532,7 @@ void TopWidget::loadGameData3()
 	mBoson->sendMessage(0, BosonMessage::IdStartScenario);
  }
 // checkEvents();
- d->mLoading->setProgress(4700); // FIXME: sending 2 messages is not worth 200 progress steps!
+ d->mLoading->setProgress(4700);
  d->mLoading->setLoading(BosonLoadingWidget::StartingGame);
 
  showBosonWidget();
@@ -540,14 +562,14 @@ void TopWidget::loadGameData3()
 
 void TopWidget::slotCanvasTilesLoading(int progress)
 {
- d->mLoading->setProgress(800 + (progress / 1244.0 * 3200));
+ d->mLoading->setProgress(600 + (progress / 1244.0 * 2400));
  // No checkEvents() here as events are already processed in BosonTiles::???
 }
 
 void TopWidget::slotCanvasTilesLoaded()
 {
  checkEvents();
- d->mLoading->setProgress(4500);
+ d->mLoading->setProgress(4000);
  QTimer::singleShot(0, this, SLOT(loadGameData3()));
 }
 
@@ -556,7 +578,7 @@ void TopWidget::slotReceiveMap(const QByteArray& buffer)
  disconnect(mBoson, SIGNAL(signalInitMap(const QByteArray&)), this, SLOT(slotReceiveMap(const QByteArray&)));
  QDataStream stream(buffer, IO_ReadOnly);
  mMap->loadMap(stream);
- d->mLoading->setProgress(500);
+ d->mLoading->setProgress(300);
  checkEvents();
  loadGameData2();
 }

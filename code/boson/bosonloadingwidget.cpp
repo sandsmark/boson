@@ -81,6 +81,8 @@ void BosonLoadingWidget::setLoading(LoadingType load)
     loadinglabel->setText(i18n("Initializing data structures"));
   else if(load == LoadTiles)
     loadinglabel->setText(i18n("Loading map tiles..."));
+  else if(load == LoadUnits)
+    loadinglabel->setText(i18n("Loading units..."));
   else if(load == InitGame)
     loadinglabel->setText(i18n("Initializing game..."));
   else if(load == StartingGame)
