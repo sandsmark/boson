@@ -252,7 +252,7 @@
                     </widget>
                     <widget class="QComboBox">
                         <property name="name">
-                            <cstring>mChangeTileset</cstring>
+                            <cstring>mChangeGroundTheme</cstring>
                         </property>
                         <property name="geometry">
                             <rect>
@@ -265,7 +265,7 @@
                     </widget>
                     <widget class="QLabel">
                         <property name="name">
-                            <cstring>mChangeTilesetLabel</cstring>
+                            <cstring>mChangeGroundThemeLabel</cstring>
                         </property>
                         <property name="geometry">
                             <rect>
@@ -299,7 +299,7 @@
                             </rect>
                         </property>
                         <property name="text">
-                            <string>Filling</string>
+                            <string>Fill with</string>
                         </property>
                     </widget>
                     <widget class="QComboBox">
@@ -412,7 +412,7 @@
         <slot>slotMaxPlayersChanged(int)</slot>
     </connection>
     <connection>
-        <sender>mChangeTileset</sender>
+        <sender>mChangeGroundTheme</sender>
         <signal>activated(int)</signal>
         <receiver>BosonNewEditorWidgetBase</receiver>
         <slot>slotGroundThemeChanged(int)</slot>
