@@ -108,7 +108,7 @@ private slots:
 
 protected:
 	// AB: do NOT move to public!
-	Player* localPlayer() const { return mPlayer; }
+	Player* localPlayer() const;
 
 	BosonStartupNetwork* networkInterface() const { return mNetworkInterface; }
 private:
@@ -125,9 +125,6 @@ private:
 	int mMap;
 	int mMinPlayers;
 	int mMaxPlayers;
-
-
-	Player* mPlayer;
 
 	BosonStartupNetwork* mNetworkInterface;
 };

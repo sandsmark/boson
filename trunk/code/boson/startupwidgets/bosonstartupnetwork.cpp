@@ -99,10 +99,13 @@ void BosonStartupNetwork::slotPlayerJoinedGame(KPlayer* p)
  // players in KGame (i.e. when the local player enters another game and so)
  if (boGame->playerCount() == 1) {
 	boDebug() << k_funcinfo << "first player entered game - this must be the local player!" << endl;
-
-	// first unset any previous local player, then set the new local player
-	emit signalSetLocalPlayer(0);
-	emit signalSetLocalPlayer((Player*)p);
+	if (boGame->localPlayer() && (Player*)p != boGame->localPlayer()) {
+		boWarning() << k_funcinfo << "seems not to be the local player!! expecting another player..." << endl;
+	} else {
+		// first unset any previous local player, then set the new local player
+		emit signalSetLocalPlayer(0);
+		emit signalSetLocalPlayer((Player*)p);
+	}
  }
 
  emit signalPlayerJoinedGame(p);

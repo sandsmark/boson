@@ -75,7 +75,6 @@ BosonNewGameWidget::BosonNewGameWidget(BosonStartupNetwork* interface, QWidget* 
  BO_CHECK_NULL_RET(boGame);
  BO_CHECK_NULL_RET(interface);
  d = new BosonNewGameWidgetPrivate;
- mPlayer = 0;
  mNetworkInterface = interface;
 
  mHighlightedPlayer = 0;
@@ -122,17 +121,17 @@ BosonNewGameWidget::~BosonNewGameWidget()
 void BosonNewGameWidget::initPlayer()
 {
  boDebug() << k_funcinfo << "playerCount(): " << boGame->playerCount() << endl;
- if (!mPlayer) {
+ if (!localPlayer()) {
 	boWarning() << k_funcinfo << "waiting for local player to join first" << endl;
 	return;
  }
- mPlayer->setName(boConfig->readLocalPlayerName());
- mLocalPlayerName->setText(mPlayer->name());
- if (mPlayer->speciesTheme()) {
+ localPlayer()->setName(boConfig->readLocalPlayerName());
+ mLocalPlayerName->setText(localPlayer()->name());
+ if (localPlayer()->speciesTheme()) {
 	boDebug() << k_funcinfo << "Player has speciesTheme already loaded, reloading" << endl;
  }
  mPlayerColor = boConfig->readLocalPlayerColor();
- mPlayer->loadTheme(SpeciesTheme::speciesDirectory(SpeciesTheme::defaultSpecies()), mPlayerColor);
+ localPlayer()->loadTheme(SpeciesTheme::speciesDirectory(SpeciesTheme::defaultSpecies()), mPlayerColor);
 }
 
 void BosonNewGameWidget::initPlayFields()
@@ -312,7 +311,7 @@ void BosonNewGameWidget::slotNetPlayerNameChanged(Player* p)
 {
  BO_CHECK_NULL_RET(p);
  boDebug() << k_funcinfo << endl;
- if (p == mPlayer) {
+ if (p == localPlayer()) {
 	mLocalPlayerName->setText(p->name());
  }
 
@@ -341,10 +340,8 @@ void BosonNewGameWidget::slotNetSetLocalPlayer(Player* p)
  boDebug() << k_funcinfo << endl;
  if (!p) {
 	boDebug() << k_funcinfo << "unset local player" << endl;
-	mPlayer = 0;
 	return;
  }
- mPlayer = (Player*)p;
  initPlayer();
 }
 
@@ -457,6 +454,14 @@ void BosonNewGameWidget::slotLocalPlayerHighlightedPlayer(QListBoxItem* item)
  } else {
 	mRemovePlayer->setEnabled(false);
  }
+}
+
+Player* BosonNewGameWidget::localPlayer() const
+{
+ // AB: I don't like to using boGame->localPlayer(). i consider this unclean,
+ // but it definitely saves a lot of trouble, as we set the localplayer in
+ // boGame anyway. no need to duplicate that stuff here.
+ return boGame->localPlayer();
 }
 
 
