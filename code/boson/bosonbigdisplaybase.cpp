@@ -626,9 +626,22 @@ void BosonBigDisplayBase::paintGL()
 	boError() << k_funcinfo << "NULL local player" << endl;
 	return;
  }
+
+ d->mFrameCount++;
+ calcFPS();
+ if (boGame->delayedMessageCount() >= 10 && d->mFrameCount != 0) {
+	// d->mFrameCount is set to 0 every second. so if we have >= 10 delayed
+	// messages we'll render one frame per second.
+	// now we need to reset the framecount, so that we won't display several
+	// hundred fps although there is only a single frame rendered :)
+	// We incremented by one above, so we decrement here.
+	if (d->mFrameCount > 1) {
+		d->mFrameCount--;
+	}
+	return;
+ }
  boProfiling->render(true);
  d->mUpdateTimer.stop();
- d->mFrameCount++;
 //boDebug() << k_funcinfo << endl;
  // TODO: use 0,0 as lower left, instead of top left
  // AB: I've dalayed this. since we still use canvas-coordinates it is easier
@@ -684,7 +697,6 @@ void BosonBigDisplayBase::paintGL()
 	glDepthRange(1.0, 0.5);
  }
  d->mEvenFlag = !d->mEvenFlag;
- calcFPS();
 
  // note: we don't call gluLookAt() here because of performance. instead we just
  // push the matrix here and pop it at the end of paintGL() again. gluLookAt()

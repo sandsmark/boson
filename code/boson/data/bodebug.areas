@@ -10,6 +10,7 @@
 250	BosonScenario
 300	Boson Advance
 310	Collisions
+350	BosonShot
 
 # Use 400-449 for Unit::advance*()
 401	AdvanceMove
