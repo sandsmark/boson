@@ -227,7 +227,7 @@ void Unit::advance(int phase)
 	} else if (work() == WorkMine) {
 		// TODO
 	} else if (work() == WorkConstructed) {
-		beConstructed();
+		advanceConstruction();
 	} else if (work() == WorkNone) {
 		kdDebug() << k_funcinfo << ": work==WorkNone" << endl;
 	} else {
@@ -260,6 +260,11 @@ void Unit::addWaypoint(const QPoint& pos)
 void Unit::waypointDone()
 {
  d->mWaypoints.remove(d->mWaypoints.at(0));
+}
+
+QValueList<QPoint> Unit::waypointList() const
+{
+ return d->mWaypoints;
 }
 
 unsigned int Unit::waypointCount() const
@@ -668,7 +673,7 @@ public:
 	KGamePropertyInt mConstructionState; // state of *this* unit
 	KGamePropertyInt mConstructionDelay; // delay for *this* unit
 
-	KGamePropertyList<int> mConstructions; // what this unit constructs currently
+	KGamePropertyList<int> mProductions; // what this unit produces currently
 };
 
 Facility::Facility(int type, Player* owner, QCanvas* canvas) : Unit(type, owner, canvas)
@@ -678,15 +683,15 @@ Facility::Facility(int type, Player* owner, QCanvas* canvas) : Unit(type, owner,
 		KGamePropertyBase::PolicyLocal, "Construction State");
  d->mConstructionDelay.registerData(IdFix_ConstructionDelay, dataHandler(), 
 		KGamePropertyBase::PolicyLocal, "Construction Delay");
- d->mConstructions.registerData(IdFix_Constructions, dataHandler(), 
-		KGamePropertyBase::PolicyLocal, "Constructions");
+ d->mProductions.registerData(IdFix_Constructions, dataHandler(), 
+		KGamePropertyBase::PolicyLocal, "Productions");
  d->mConstructionState.setLocal(0);
 
  setWork(WorkConstructed);
  setAnimated(true); // construcion animation
  setConstructionDelay(50); // default
 
- d->mConstructions.setEmittingSignal(false); // just to prevent warning in Player::slotUnitPropertyChanged()
+ d->mProductions.setEmittingSignal(false); // just to prevent warning in Player::slotUnitPropertyChanged()
 }
 
 Facility::~Facility()
@@ -712,7 +717,7 @@ int Facility::constructionDelay() const
  return 1;
 }
 
-void Facility::beConstructed()
+void Facility::advanceConstruction()
 {
  if (d->mConstructionState < (constructionSteps() - 1) * constructionDelay()) {
 	d->mConstructionState = d->mConstructionState + 1;
@@ -724,28 +729,53 @@ void Facility::beConstructed()
  }
 }
 
-bool Facility::hasConstruction() const
+bool Facility::hasProduction() const
 {
- return !d->mConstructions.isEmpty();
+ return (unitProperties()->canProduce() ? !d->mProductions.isEmpty() : false);
 }
 
-int Facility::completedConstruction() const
+bool Facility::canPlaceProductionAt(const QPoint& pos) const
+{
+ if (!hasProduction() || !completedProduction()) {
+	kdDebug() << k_lineinfo << "no completed construction" << endl;
+	return false;
+ }
+ if (pos.x() > x() + width() + BUILD_RANGE ||
+		pos.y() > y() + height() + BUILD_RANGE) {
+	 kdDebug() << "pos.x()=" << pos.x() << ",x+width+BUILD_RANGE=" << x() + width() + BUILD_RANGE << endl;
+	 kdDebug() << "pos.y()=" << pos.y() << ",y+height+BUILD_RANGE=" << y() + height() + BUILD_RANGE << endl;
+	 return false;
+ }
+ if (pos.x() < (x() > BUILD_RANGE ? x() - BUILD_RANGE : 0) || 
+		pos.y() < (y() > BUILD_RANGE ? y() - BUILD_RANGE : 0)) {
+	 kdDebug() << "pos.x()=" << pos.x() << ",x-BUILD_RANGE=" << x() - BUILD_RANGE << endl;
+	 kdDebug() << "pos.y()=" << pos.y() << ",y-BUILD_RANGE=" << y() - BUILD_RANGE << endl;
+	 return false;
+ }
+ return true;
+}
+
+int Facility::completedProduction() const
 {
 //FIXME: currently a construction is always completed.
- return d->mConstructions.first();
+ return d->mProductions.first();
 }
 
-void Facility::addConstruction(int unitType)
+void Facility::addProduction(int unitType)
 {
  if (!unitProperties()->produceList().contains(unitType)) {
 	kdError() << id() << " cannot produce " << unitType << endl;
 	return;
  }
- d->mConstructions.append(unitType);
+ d->mProductions.append(unitType);
 }
 
-void Facility::removeConstruction()
+void Facility::removeProduction()
 {
- d->mConstructions.pop_front();
+ d->mProductions.pop_front();
 }
 
+QValueList<int> Facility::productionList() const
+{
+ return d->mProductions;
+}

@@ -24,7 +24,7 @@
 #define BO_TILE_SIZE 48
 
 #define PIXMAP_PER_MOBILE 9 // 8 different directions + 1 "destroyed" pix
-#define PIXMAP_PER_FIX 5
+#define PIXMAP_PER_FIX 5 // number of construction steps + 1 "destroyed" pix
 #define PIXMAP_FIX_DESTROYED (PIXMAP_PER_FIX - 1)
 #define PIXMAP_MOBILE_DESTROYED (PIXMAP_PER_MOBILE - 1)
 #define FACILITY_CONSTRUCTION_STEPS PIXMAP_FIX_DESTROYED
@@ -52,6 +52,7 @@
 #define Z_DESTROYED_MOBILE 200
 #define Z_DESTROYED_FACILITY 100
 
+#define BUILD_RANGE 10 * BO_TILE_SIZE // units can be placed within 10 tiles from its factory
 
 #define BOSON_PORT 5454
 

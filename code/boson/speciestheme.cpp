@@ -385,6 +385,7 @@ void SpeciesTheme::loadNewUnit(UnitBase* unit)
  unit->setRange(prop->range());
  unit->setDamage(prop->damage());
  unit->setReload(prop->reload());
+ unit->setSightRange(prop->sightRange());
 
  // what will we do with the name?
  // maybe soemthing like unit->setProperties(prop);? so UnitBase::name() 

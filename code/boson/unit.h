@@ -79,7 +79,7 @@ public:
 	 * Move the construction animation one step forward. Does nothing by
 	 * default - reimplemented in Facility
 	 **/
-	virtual void beConstructed() { }
+	virtual void advanceConstruction() { }
 
 	Unit* target() const;
 	void setTarget(Unit* target);
@@ -91,6 +91,11 @@ public:
 	unsigned int waypointCount() const;
 	void clearWaypoints();
 	void waypointDone();
+
+	/**
+	 * @return A list of all waypoints for debugging
+	 **/
+	QValueList<QPoint> waypointList() const;
 
 	/**
 	 * Move this unit to a specified point. Also make sure that previous
@@ -173,6 +178,8 @@ public:
 	virtual ~Facility();
 
 	/**
+	 * The construction steps are the number of frames until the complete
+	 * pixmap of the facility is shown.
 	 * @return The number of available construction steps for a facility.
 	 **/
 	static int constructionSteps();
@@ -188,18 +195,43 @@ public:
 	 * construction step. See @ref constructionDelay
 	 **/
 	void setConstructionDelay(int delay);
-	
-	virtual void beConstructed();
 
 	/**
-	 * @return Whether there are any constructions pending for this unit
+	 * Advance the construction animation. This is usually called when
+	 * placing the unit until thje construction is completed.
 	 **/
-	bool hasConstruction() const;
+	virtual void advanceConstruction();
 
-	int completedConstruction() const;
+	/**
+	 * @return Whether there are any productions pending for this unit.
+	 * Always FALSE if unitProperties()->canProduce() is FALSE.
+	 **/
+	bool hasProduction() const;
 
-	void removeConstruction(); // removes first item
-	void addConstruction(int unitType);
+	/**
+	 * @return Whether the current construction can be placed at pos. FALSE
+	 * if @ref hasConstruction is FALSE.
+	 **/
+	bool canPlaceProductionAt(const QPoint& pos) const;
+
+	/**
+	 * @return The unit type ID (see @ref UnitProperties::typeId) of the
+	 * completed production (if any).
+	 **/
+	int completedProduction() const;
+
+	/**
+	 * Remove the first item from the production list.
+	 **/
+	void removeProduction(); // removes first item
+
+	/**
+	 * Add unitType (see @ref UnitProprties::typeId) to the construction
+	 * list.
+	 **/
+	void addProduction(int unitType);
+
+	QValueList<int> productionList() const;
 
 private:
 	class FacilityPrivate;

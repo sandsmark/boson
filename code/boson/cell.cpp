@@ -24,6 +24,7 @@
 
 Cell::Cell()
 {
+ mFog = 0;
  setGroundType(GroundUnknown);
 }
 
@@ -267,3 +268,17 @@ int Cell::moveCost() const
  }
  return cost;
 }
+
+void Cell::fog(QCanvas* canvas, int x, int y)
+{
+ if (mFog) {
+	return;
+ }
+}
+
+void Cell::unfog()
+{
+// delete mFog;
+ mFog = 0;
+}
+

@@ -20,6 +20,8 @@
 #define __CELL_H__
 
 class UnitProperties;
+class QCanvas;
+class QCanvasSprite;
 
 /**
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
@@ -167,6 +169,21 @@ public:
 
 	static int getTransTile(int g);
 
+	bool isFogged() const { return mFog != 0; }
+	
+	/**
+	 * Place fog of war on this cell
+	 * @param canvas The canvas where to create the fog
+	 * @param x The The horizontal number of this cell
+	 * @param y The The vertical number of this cell
+	 **/
+	void fog(QCanvas* canvas, int x, int y);
+
+	/**
+	 * Remove any fog of war from this cell
+	 **/
+	void unfog();
+
 protected:
 	void setVersion(unsigned char v)
 	{
@@ -178,6 +195,7 @@ protected:
 private:
 	GroundType mType;
 	unsigned char mVersion;
+	QCanvasSprite* mFog;
 };
 
 #endif

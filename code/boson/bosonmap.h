@@ -61,12 +61,12 @@ public:
 	/**
 	 * @return vertical cell count
 	 **/
-	int height() const { return mMapHeight; }
+	unsigned int height() const { return mMapHeight; }
 	
 	/**
 	 * @return Horizonatal cell count
 	 **/
-	int width() const { return mMapWidth; }
+	unsigned int width() const { return mMapWidth; }
 
 	int maxPlayers() const;
 	unsigned int minPlayers() const;
@@ -181,8 +181,8 @@ private:
 	class BosonMapPrivate;
 	BosonMapPrivate* d;
 
-	int mMapWidth;
-	int mMapHeight;
+	unsigned int mMapWidth;
+	unsigned int mMapHeight;
 };
 
 #endif

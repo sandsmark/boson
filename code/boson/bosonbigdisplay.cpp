@@ -337,17 +337,20 @@ void BosonBigDisplay::actionClicked(const QPoint& pos, QDataStream& stream, bool
 		}
 		send = true;
 	} else { // place constructions
+		// FIXME: another option: add the waypoint to the facility and
+		// apply it to any unit that gets constructed by that facility.
+		// For this we'd probably have to use LMB for unit placing
 		Facility* fac = (Facility*)selection().first();
-		if (fac->unitProperties()->canProduce() && fac->hasConstruction()) {
-			// create the new unit
-			stream << (Q_UINT32)BosonMessage::MoveConstruct;
-			stream << (Q_UINT32)fac->id();
-			stream << (Q_UINT32)fac->owner()->id();
-//			kdDebug() << fac->id() << endl;
-			stream << (Q_INT32)pos.x() / BO_TILE_SIZE;
-			stream << (Q_INT32)pos.y() / BO_TILE_SIZE;
-			send = true;
+		if (!fac->hasProduction() || !fac->canPlaceProductionAt(pos)) {
+			return;
 		}
+		// create the new unit
+		stream << (Q_UINT32)BosonMessage::MoveBuild;
+		stream << (Q_UINT32)fac->id();
+		stream << (Q_UINT32)fac->owner()->id();
+		stream << (Q_INT32)pos.x() / BO_TILE_SIZE;
+		stream << (Q_INT32)pos.y() / BO_TILE_SIZE;
+		send = true;
 	}
  } else { // there is a unit - attack it!
 	QPtrListIterator<Unit> it(selection());
@@ -427,7 +430,7 @@ void BosonBigDisplay::editorActionClicked(const QPoint& pos)
 //		return;
 	}
 	
-	emit signalConstructUnit(d->mConstruction.unitType, x, y,
+	emit signalBuildUnit(d->mConstruction.unitType, x, y,
 			d->mConstruction.owner);
  } else if (d->mConstruction.groundType > -1) {
 //	kdDebug() << "place ground " << d->mConstruction.groundType << endl;
@@ -461,7 +464,7 @@ void BosonBigDisplay::slotWillConstructUnit(int unitType, Unit* factory, Player*
  d->mConstruction.groundType = -1;
  if (factory) {
 	kdDebug() << "there is a factory " << endl;
-	((Facility*)factory)->addConstruction(unitType);
+	((Facility*)factory)->addProduction(unitType);
  }
 }
 

@@ -113,7 +113,7 @@ protected:
 	 **/
 	Unit* findUnit(unsigned long int unitId, Player* searchIn) const;
 
-	bool constructUnit(Facility* factory, int unitType, int x, int y);
+	bool buildUnit(Facility* factory, int unitType, int x, int y);
 
 protected slots:
 	/**

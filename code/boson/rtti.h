@@ -42,6 +42,7 @@ public:
 		// currently but we better start at a higher value.
 		SelectPart = 15,
 		BoShot = 16,
+		FogOfWar = 17,
 
 
 		UnitStart = 200 // the IDs of the units start at this value. 
