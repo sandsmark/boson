@@ -2052,6 +2052,12 @@ void BosonPath2::findFlyingUnitPath(BosonPathInfo* info)
       n2.y = n.y + yoffsets[i];
       n2.depth = n.depth + 1;
 
+      // Make sure cell is passable
+      if(!cell(n2.x, n2.y)->passable())
+      {
+        continue;
+      }
+
       // Make sure cell is in search area
       if((n2.x < areax) || (n2.x >= areax + areaw) || (n2.y < areay) || (n2.y >= areay + areah))
       {
