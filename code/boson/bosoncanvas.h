@@ -161,6 +161,15 @@ public:
 	virtual void addView(QCanvasView*);
 	virtual void removeView(QCanvasView*);
 
+	/**
+	 * Called from another threead to set the tileset. Note that until this
+	 * was called there is <em>no</em> cell and <em>no</em> tile on the
+	 * canvas!
+	 *
+	 * You should not call @ref QCanvas::update before this is completed!
+	 **/
+	void setTileSet(QPixmap* tileSet);
+
 public slots:
 	/**
 	 * The game (@ref Boson) reports that a unit shall be added - lets do
@@ -183,13 +192,13 @@ public slots:
 
 	void slotNewGroup(Unit* leader, QPtrList<Unit> members);
 
+	virtual void update();
+
 signals:
 	void signalUnitMoved(Unit* unit, double oldX, double oldY);
 	void signalUnitDestroyed(Unit* unit);
 
 protected:
-	void loadTiles(const QString&);
-
 	/**
 	 * Change the work of all units which have called @ref setWork using
 	 * @ref Unit::setWork. This is used to increase the speed of @ref
