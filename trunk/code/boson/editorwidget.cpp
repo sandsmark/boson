@@ -51,27 +51,13 @@ public:
 		mCmdInput = 0;
 
 		mPlayerAction = 0;
-		mCellsAction = 0;
-
-		mActionFacilities = 0;
-		mActionMobiles = 0;
-		mActionCellPlain = 0;
-		mActionCellSmall = 0;
-		mActionCellBig1 = 0;
-		mActionCellBig2 = 0;
+		mPlaceAction = 0;
 	}
 
 	CommandInput* mCmdInput;
 
 	KSelectAction* mPlayerAction;
-	KSelectAction* mCellsAction;
-
-	KRadioAction* mActionFacilities;
-	KRadioAction* mActionMobiles;
-	KRadioAction* mActionCellPlain;
-	KRadioAction* mActionCellSmall;
-	KRadioAction* mActionCellBig1;
-	KRadioAction* mActionCellBig2;
+	KSelectAction* mPlaceAction;
 
 	QIntDict<Player> mPlayers;
 };
@@ -108,6 +94,8 @@ void EditorWidget::initConnections()
 		this, SLOT(slotPlayerJoinedGame(KPlayer*)));
  connect(boGame, SIGNAL(signalPlayerLeftGame(KPlayer*)),
 		this, SLOT(slotPlayerLeftGame(KPlayer*)));
+ connect(boGame, SIGNAL(signalGameStarted()),
+		this, SLOT(slotGameStarted()));
 }
 
 void EditorWidget::initMap()
@@ -168,38 +156,22 @@ void EditorWidget::initKActions()
  d->mPlayerAction = new KSelectAction(i18n("&Player"), KShortcut(), actionCollection(), "editor_player");
  connect(d->mPlayerAction, SIGNAL(activated(int)),
 		this, SLOT(slotChangeLocalPlayer(int)));
- d->mActionFacilities = new KRadioAction(i18n("&Facilities"), KShortcut(),
-		this, SLOT(slotPlaceFacilities()), actionCollection(),
-		"editor_place_facilities");
- d->mActionFacilities->setExclusiveGroup("Place");
- d->mActionMobiles = new KRadioAction(i18n("&Mobiles"), KShortcut(),
-		this, SLOT(slotPlaceMobiles()), actionCollection(),
-		"editor_place_mobiles");
- d->mActionMobiles->setExclusiveGroup("Place");
- d->mActionCellSmall = new KRadioAction(i18n("&Small"), KShortcut(),
-		this, SLOT(slotPlaceCellSmall()), actionCollection(),
-		"editor_place_cell_small");
- d->mActionCellSmall->setExclusiveGroup("Place");
- d->mActionCellPlain = new KRadioAction(i18n("&Plain"), KShortcut(),
-		this, SLOT(slotPlaceCellPlain()), actionCollection(),
-		"editor_place_cell_plain");
- d->mActionCellPlain->setExclusiveGroup("Place");
- d->mActionCellBig1 = new KRadioAction(i18n("&Big1"), KShortcut(),
-		this, SLOT(slotPlaceCellBig1()),actionCollection(),
-		"editor_place_cell_big1");
- d->mActionCellBig1->setExclusiveGroup("Place");
- d->mActionCellBig2 = new KRadioAction(i18n("B&ig2"), KShortcut(),
-		this, SLOT(slotPlaceCellBig2()),actionCollection(),
-		"editor_place_cell_big2");
- d->mActionCellBig2->setExclusiveGroup("Place");
+
+ QStringList list;
+ list.append(i18n("&Facilities"));
+ list.append(i18n("&Mobiles"));
+ list.append(i18n("&Small"));
+ list.append(i18n("&Plain"));
+ list.append(i18n("&Big1"));
+ list.append(i18n("B&ig1"));
+ d->mPlaceAction = new KSelectAction(i18n("Place"), KShortcut(), actionCollection(), "editor_place");
+ connect(d->mPlaceAction, SIGNAL(activated(int)),
+		this, SLOT(slotPlace(int)));
+ d->mPlaceAction->setItems(list);
 
  (void)new KAction(i18n("Delete selected unit"), KShortcut(Qt::Key_Delete), displayManager(),
 		  SLOT(slotDeleteSelectedUnits()), actionCollection(),
 		  "editor_delete_selected_unit");
-
-// (void)new KAction(i18n("&Create Custom Unit"), KShortcut(), this,
-//		  SLOT(slotCreateUnit()), actionCollection(),
-//		  "editor_create_unit");
 
 // KStdAction::preferences(bosonWidget(), SLOT(slotGamePreferences()), actionCollection()); // FIXME: slotEditorPreferences()
 }
@@ -268,35 +240,36 @@ void EditorWidget::slotChangeLocalPlayer(int index)
  }
 }
 
-void EditorWidget::slotPlaceFacilities()
+void EditorWidget::slotPlace(int index)
 {
- editorCmdFrame()->placeFacilities(localPlayer());
-}
-
-void EditorWidget::slotPlaceMobiles()
-{
- editorCmdFrame()->placeMobiles(localPlayer());
-}
-
-void EditorWidget::slotPlaceCellSmall()
-{
- editorCmdFrame()->placeCells(CellSmall);
-}
-
-void EditorWidget::slotPlaceCellPlain()
-{
-	boDebug() << k_funcinfo << endl;
- editorCmdFrame()->placeCells(CellPlain);
-}
-
-void EditorWidget::slotPlaceCellBig1()
-{
- editorCmdFrame()->placeCells(CellBig1);
-}
-
-void EditorWidget::slotPlaceCellBig2()
-{
- editorCmdFrame()->placeCells(CellBig2);
+ EditorCommandFrame* cmd = editorCmdFrame();
+ if (!cmd) {
+	boError() << k_funcinfo << "NULL cmd frame" << endl;
+	return;
+ }
+ switch (index) {
+	case 0:
+		cmd->placeFacilities(localPlayer());
+		break;
+	case 1:
+		cmd->placeMobiles(localPlayer());
+		break;
+	case 2:
+		cmd->placeCells(CellSmall);
+		break;
+	case 3:
+		cmd->placeCells(CellPlain);
+		break;
+	case 4:
+		cmd->placeCells(CellBig1);
+		break;
+	case 5:
+		cmd->placeCells(CellBig2);
+		break;
+	default:
+		boError() << k_funcinfo << "Invalid index " << index << endl;
+		return;
+ }
 }
 
 void EditorWidget::setBosonXMLFile()
@@ -358,5 +331,11 @@ void EditorWidget::slotTileSetChanged(BosonTiles* t)
 	return;
  }
  editorCmdFrame()->setTileSet(t);
+}
+
+void EditorWidget::slotGameStarted()
+{
+ d->mPlaceAction->setCurrentItem(0);
+ slotPlace(0);
 }
 

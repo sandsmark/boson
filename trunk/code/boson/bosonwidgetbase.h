@@ -161,8 +161,6 @@ signals:
 	void signalMineralsUpdated(int);
 	void signalOilUpdated(int);
 
-	void signalGameStarted();
-
 	void signalMoveCommandFrame(int);
 
 	void signalGameOver();

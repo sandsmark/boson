@@ -91,12 +91,9 @@ protected slots:
 	void slotSavePlayFieldAs();
 	void slotSavePlayField();
 	void slotChangeLocalPlayer(int);
-	void slotPlaceFacilities();
-	void slotPlaceMobiles();
-	void slotPlaceCellSmall();
-	void slotPlaceCellPlain();
-	void slotPlaceCellBig1();
-	void slotPlaceCellBig2();
+	void slotPlace(int index);
+
+	void slotGameStarted();
 
 protected:
 	virtual BosonCommandFrameBase* createCommandFrame(QWidget* parent);

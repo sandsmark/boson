@@ -211,9 +211,6 @@ void BosonWidgetBase::initConnections()
  connect(boGame, SIGNAL(signalAddUnit(Unit*, int, int)),
 		this, SLOT(slotAddUnit(Unit*, int, int)));
 
- connect(boGame, SIGNAL(signalGameStarted()),
-		this, SIGNAL(signalGameStarted()));
-
  connect(boGame, SIGNAL(signalAddChatSystemMessage(const QString&,const QString&)),
 		this, SLOT(slotAddChatSystemMessage(const QString&,const QString&)));
 }
