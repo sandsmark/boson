@@ -215,6 +215,14 @@ class BosonScript
      **/
     static int unitType(int id);
     /**
+     * @return Work of unit with id id
+     * Work shows what unit is currently doing - attacking, moving, etc, or just
+     * standing.
+     * Note that this only returns int "code" of work. Look at unitbase.h to
+     * find out what different values mean.
+     **/
+    static int unitWork(int id);
+    /**
      * @return Whether unit with id id is mobile unit
      **/
     static bool isUnitMobile(int id);

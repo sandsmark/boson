@@ -77,6 +77,7 @@ class PythonScript : public BosonScript
     static PyObject* py_unitPosition(PyObject* self, PyObject* args);
     static PyObject* py_unitOwner(PyObject* self, PyObject* args);
     static PyObject* py_unitType(PyObject* self, PyObject* args);
+    static PyObject* py_unitWork(PyObject* self, PyObject* args);
     static PyObject* py_isUnitMobile(PyObject* self, PyObject* args);
     static PyObject* py_canUnitShoot(PyObject* self, PyObject* args);
     static PyObject* py_canUnitProduce(PyObject* self, PyObject* args);
