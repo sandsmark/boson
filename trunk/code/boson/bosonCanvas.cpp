@@ -90,6 +90,9 @@ bool bosonCanvas::checkMove(QRect r, uint goFlag )
 {
 	int	i,j;
 
+	if ( r.left()<0 || r.top()<0) return false;
+	if ( r.right()>=maxX || r.right()>=maxY ) return false;
+
 	for(i=r.left(); i<=r.right(); i++)
 		for(j=r.top(); j<=r.bottom(); j++)
 			if (!cell(i, j).canGo( goFlag, ground( tile(i,j)))) return false;

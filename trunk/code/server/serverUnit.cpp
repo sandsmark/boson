@@ -121,15 +121,20 @@ void serverMobUnit::r_moveBy(moveMsg_t &msg, uint playerId)
 	// XXX some check here ! no cheat allowed...
 	// speed check:
 
-	//int dx = __x - msg.newx;
-	//int dy = __y - msg.newy;
+	int dx = __x - msg.newx;
+	int dy = __y - msg.newy;
 	//int speed = mobileProp[type].speed;
-	//dx *= dx; dy *= dy; speed *= speed;
-	//boAssert( dx + dy < speed);
+	dx *= dx; dy *= dy; // speed *= speed;
+	boAssert( dx + dy < 2);
 
+	if (msg.newx<0 || msg.newy<0 || msg.newx>=server->maxX() || msg.newy>=server->maxY()) {
+		logf(LOG_ERROR, "client %d asking for (%d,%d) position, refused", playerId, msg.newx, msg.newy);
+		return;
+	}
+
+	// accepted 
 	__x = msg.newx;
 	__y = msg.newy;
-
 	sendToKnown( MSG_MOBILE_MOVE_C, MSG(msg) );
 }
 
