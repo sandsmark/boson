@@ -1,4 +1,21 @@
 [article]
+id=041223
+date=December 23rd 2004 21:30
+title=Happy holidays!
+text=Once again, we wish you all happy holidays!<br>
+    Sorry about the total lack of updates in the last half a year, but we're
+    not dead, we've been working hard and are moving towards Boson 0.11.
+    At this time, we don't have any release dates, but it will probably not
+    come out in next months.<br>
+    We have made many improvements in Boson and added many features, including
+    new <a href="http://libufo.sourceforge.net">LibUFO</a>-based GUI (which is
+    still in very early development phase).<br>
+    We've made a whole <a href="screenshots.php">page of new screenshots</a>
+    showing some of the most important new features.<br> If you're interested, you can
+    take a look at a <a href="status.php">longer list of improvements</a> since
+    0.10.<br><br>
+
+[article]
 id=040502
 date=May 2nd 2004 17:25
 title=0.10 released
