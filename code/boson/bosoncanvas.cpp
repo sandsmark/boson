@@ -342,18 +342,32 @@ void BosonCanvas::shootAtUnit(Unit* target, Unit* attackedBy, long int damage)
 	d->mParticles.append(BosonParticleManager::newShot(pos));
 
 	if(target->isFacility()) {
-		if(target->health() <= (target->unitProperties()->health() / 2.0)) {
+		float factor = 2.0 - target->health() / (target->unitProperties()->health() / 2.0);
+//		if(target->health() <= (target->unitProperties()->health() / 2.0)) {
+		if(factor >= 1.0) {
 			// If facility has less than 50% hitpoints, it's burning
+			BosonParticleSystem* s;
 			if(!((Facility*)target)->flamesParticleSystem()) {
-				BosonParticleSystem* s = BosonParticleManager::newFire(pos);
+				s = BosonParticleManager::newFire(pos);
 				((Facility*)target)->setFlamesParticleSystem(s);
 				d->mParticles.append(s);
 			}
+			s = ((Facility*)target)->flamesParticleSystem();
+			// FIXME: maybe move this to BosonParticleManager?
+			s->setCreateRate(factor * 30);
+			s->setVelocity(BoVector3(0, 0, factor * 0.5));  // This is only hint for BosonParticleManager
+
 			if(!((Facility*)target)->smokeParticleSystem()) {
-				BosonParticleSystem* s = BosonParticleManager::newSmallSmoke(pos);
+				s = BosonParticleManager::newSmallSmoke(pos);
 				((Facility*)target)->setSmokeParticleSystem(s);
 				d->mParticles.append(s);
 			}
+			s = ((Facility*)target)->smokeParticleSystem();
+			// FIXME: maybe move this to BosonParticleManager?
+			s->setCreateRate(factor * 25);
+//			s->setVelocity(BoVector3(0, 0, factor * 0.5));  // This is only hint for BosonParticleManager
+			float c = 0.8 - factor * 0.4;
+			s->setColor(BoVector4(c, c, c, 0.25));
 		} else {
 			// If it has more hitpoints, it's not burning ;-)
 			if(((Facility*)target)->flamesParticleSystem()) {
