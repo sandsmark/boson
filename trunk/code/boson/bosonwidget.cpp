@@ -379,10 +379,6 @@ void BosonWidget::initBigDisplay(BosonBigDisplay* b)
 	return;
  }
  b->setLocalPlayer(player());
- if (!d->mCursor) {
-	kdWarning() << k_funcinfo << "NULL cursor" << endl;
-	return;
- }
  b->setCursor(d->mCursor);
  b->setKGameChat(d->mChat);
 
