@@ -20,32 +20,11 @@
 #define __BOSONPATH_H__
 
 #include <qdatastream.h>
-
-#include <vector.h>
-#include <stl_heap.h>
-
 #include <qvaluelist.h>
 
 class Unit;
-class Node;
+class PathNode;
 class QPoint;
-
-/**
- * Marks direction
- */
-enum Direction 
-{ 
-  DirNorth = 0,
-  DirNE = 1,
-  DirEast = 2,
-  DirSE = 3,
-  DirSouth = 4,
-  DirSW = 5,
-  DirWest = 6,
-  DirNW = 7,
-  DirNone = 100 
-};
-
 
 /**
  * Boson's pathfinder class
@@ -56,6 +35,22 @@ enum Direction
 class BosonPath
 {
   public:
+    /**
+     * Marks direction
+     */
+    enum Direction 
+    { 
+      DirNorth = 0,
+      DirNE = 1,
+      DirEast = 2,
+      DirSE = 3,
+      DirSouth = 4,
+      DirSW = 5,
+      DirWest = 6,
+      DirNW = 7,
+      DirNone = 100 
+    };
+
     /**
      * Constructs BosonPath
      * @param unit Pointer to unit, for what path is searched
@@ -68,7 +63,7 @@ class BosonPath
     ~BosonPath();
     
     /**
-     * Finds path. Path is stored in vector @ref path
+     * Finds path. Path is stored in @ref path
      * Note that if path wasn't found goal may be set to last waypoint
      * @return TRUE if path was found, FALSE otherwise
      */
@@ -82,9 +77,9 @@ class BosonPath
     static QValueList<QPoint> findPath(Unit* unit, int goalx, int goaly);
     
     /**
-     * In this vector are waypoints of path
+     * In this list are waypoints of path
      */
-    vector<QPoint> path;
+    QValueList<QPoint> path;
     
     /**
      * Returns lenght of path (in tiles)
@@ -99,7 +94,7 @@ class BosonPath
   private:
     float dist(int ax, int ay, int bx, int by);
     float cost(int x, int y);
-    inline void getFirst(vector<Node>&, Node& n);
+    inline void getFirst(QValueList<PathNode>&, PathNode& n);
     inline void neighbor(int& x, int& y, Direction d);
     inline Direction reverseDir(Direction d);
 
@@ -112,7 +107,6 @@ class BosonPath
     int mGoaly;
 
     Unit* mUnit;
-    greater<Node> comp;
     
     float mModifier;
     float mCrossDivider;
