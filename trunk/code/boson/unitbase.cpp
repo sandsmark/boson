@@ -30,13 +30,7 @@
 #include <qdom.h>
 #include <qmap.h>
 
-UnitBase::PropertyMap* UnitBase::mPropertyMap = 0;
-
-// this is done this way in order to prevent including qmap.h in the header
-class UnitBase::PropertyMap : public QMap<int, QString>
-{
-};
-
+QMap<int, QString>* UnitBase::mPropertyMap = 0;
 
 UnitBase::UnitBase(const UnitProperties* prop)
 {
@@ -80,7 +74,7 @@ UnitBase::~UnitBase()
 void UnitBase::initStatic()
 {
  delete mPropertyMap;
- mPropertyMap = new PropertyMap;
+ mPropertyMap = new QMap<int, QString>;
  addPropertyId(IdHealth, QString::fromLatin1("Health"));
  addPropertyId(IdArmor, QString::fromLatin1("Armor"));
  addPropertyId(IdShields, QString::fromLatin1("Shields"));

@@ -28,6 +28,7 @@ class QRect;
 class QDataStream;
 class KGamePropertyHandler;
 class QDomElement;
+template<class T, class T2> class QMap;
 
 class Player;
 class UnitProperties;
@@ -357,8 +358,7 @@ private:
 	Player* mOwner;
 	unsigned long int mId; // not a KGameProperty, to make saving to XML (i.e. scenario files) more easy.
 
-	class PropertyMap;
-	static PropertyMap* mPropertyMap;
+	static QMap<int, QString>* mPropertyMap;
 
 	KGameProperty<unsigned long int> mArmor;
 	KGameProperty<unsigned long int> mShields;
