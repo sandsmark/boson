@@ -43,18 +43,6 @@
 #include <qptrqueue.h>
 #include <qvaluelist.h>
 
-// Saving format version
-#define BOSON_SAVEGAME_FORMAT_VERSION_MAJOR 0x00
-#define BOSON_SAVEGAME_FORMAT_VERSION_MINOR 0x02
-#define BOSON_SAVEGAME_FORMAT_VERSION_RELEASE 0x01
-#define BOSON_SAVEGAME_FORMAT_VERSION \
-	BOSON_MAKE_SAVEGAME_FORMAT_VERSION \
-		( \
-		BOSON_SAVEGAME_FORMAT_VERSION_MAJOR, \
-		BOSON_SAVEGAME_FORMAT_VERSION_MINOR, \
-		BOSON_SAVEGAME_FORMAT_VERSION_RELEASE \
-		)
-
 SaveLoadError::SaveLoadError(ErrorType type, const QString& text, const QString& caption)
 {
  mType = type;
@@ -722,7 +710,6 @@ bool BosonSaveLoad::convertSaveGameToPlayField(QMap<QString, QByteArray>& files)
 	boError() << k_funcinfo << "no players in game" << endl;
 	return false;
  }
- QMap<int, int> playerId2Number;
  for (unsigned int i = 0; i < playerList.count(); i++) {
 	QDomElement p = playerList.item(i).toElement();
 	p.removeAttribute("NetworkPriority");
@@ -737,8 +724,13 @@ bool BosonSaveLoad::convertSaveGameToPlayField(QMap<QString, QByteArray>& files)
 		boError() << k_funcinfo << "invalid value for Id attribute of Player tag" << endl;
 		return false;
 	}
-	p.setAttribute("Id", i);
-	playerId2Number.insert(id, i);
+	if (id >= playerList.count()) {
+		boError() << k_funcinfo << "invalid Id for Player tag!" << endl;
+		return false;
+	}
+	if (id != i) {
+		boError() << k_funcinfo << "unexpected Id " << id << " for Player tag - expected " << i << endl;
+	}
 	QDomElement handler = p.namedItem("DataHandler").toElement();
 	if (handler.isNull()) {
 		continue;
@@ -760,16 +752,19 @@ bool BosonSaveLoad::convertSaveGameToPlayField(QMap<QString, QByteArray>& files)
  for (unsigned int i = 0; i < itemsList.count(); i++) {
 	QDomElement items = itemsList.item(i).toElement();
 	bool ok = false;
-	unsigned int id = items.attribute("OwnerId").toUInt(&ok);
+	unsigned int id = items.attribute("Id").toUInt(&ok);
 	if (!ok) {
-		boError() << k_funcinfo << "invalid value for OwnerId attribute of Items tag" << endl;
+		boError() << k_funcinfo << "invalid value for Id attribute of Items tag" << endl;
 		return false;
 	}
-	if (!playerId2Number.contains(id)) {
-		boError() << k_funcinfo << "unknown Id " << id << " for OwnerId attribute of Items tag" << endl;
+	if (id >= itemsList.count()) {
+		boError() << k_funcinfo << "invalid Id for Items tag: " << id << endl;
 		return false;
 	}
-	items.setAttribute("Id", playerId2Number[id]);
+	if (id != i) {
+		boError() << k_funcinfo << "unexpected Id " << id << " for Items tag - expected " << i << endl;
+		return false;
+	}
 	QDomNodeList itemList = items.elementsByTagName("Item");
 	for (unsigned int j = 0; j < itemList.count(); j++) {
 		QDomElement item = itemList.item(j).toElement();

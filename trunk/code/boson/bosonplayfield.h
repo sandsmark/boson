@@ -229,6 +229,29 @@ protected:
 	QByteArray saveTexMapToFile();
 
 	/**
+	 * This takes a set of files, as loaded by @ref loadFromDiskToFiles, and
+	 * checks whether they have the most current file format. If they don't
+	 * have, this method tries to convert them.
+	 *
+	 * @since Boson 0.9.1
+	 **/
+	bool convertFilesToCurrentFormat(QMap<QString, QByteArray>& destFiles);
+
+	/**
+	 * Called by the above method. This one should care about the actual
+	 * conversion.
+	 *
+	 * Here you are meant to place the actual conversion code.
+	 * @param set to TRUE when the @p version has been recognized and (!)
+	 * used to convert the files to a new format (i.e. at least changed
+	 * the version number). Otherwise set to FALSE (i.e. if the files have
+	 * not been touched at all).
+	 * @return FALSE, if the file should have been converted, but we failed
+	 * while doing so. Otherwise TRUE.
+	 **/
+	bool convertFilesToCurrentFormat(QMap<QString, QByteArray>& destFiles, unsigned int version, bool* handled);
+
+	/**
 	 * @return A list of all playfields (.bpf files) that are found on this
 	 * computer. This does not check whether they got already loaded.
 	 **/
