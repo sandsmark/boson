@@ -1958,6 +1958,13 @@ void MobileUnit::advanceMoveCheck()
  if (pathInfo()->waiting) {
 	// We try to move every 5 advance calls
 	if (pathInfo()->waiting % 5 == 0) {
+		if (currentPathPoint().x() == PF_END_CODE && currentPathPoint().y() == PF_END_CODE) {
+			// This is allowed and means that unit will stop after this this advance call
+			//  (there are no more actual pathpoints).
+			pathInfo()->waiting = 0;
+			setMovingStatus(Waiting);  // TODO: is this ok here? maybe set to Moving instead?
+			return;
+		}
 		// Try to move again
 #ifdef USE_NEW_COLLISION_DETECTION
 		// I know, this code is _very_ ugly and unreadable, but once we'll have
