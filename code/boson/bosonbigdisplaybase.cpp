@@ -695,43 +695,22 @@ void BosonBigDisplayBase::paintGL()
  boProfiling->render(true);
  d->mUpdateTimer.stop();
 //boDebug() << k_funcinfo << endl;
- // TODO: use 0,0 as lower left, instead of top left
- // AB: I've dalayed this. since we still use canvas-coordinates it is easier
- // and more logical to use 0,0 as top left.
  // AB: this is the most time-critical function! we need to enhance performance
  // whenever possible. look at
  // http://www.mesa3d.org/brianp/sig97/perfopt.htm
  // for perfomance optimizations
 
- // TODO: e.g. remember than code between glBegin() and glEnd() must be send to
- // the hardware as soon as possible - avaoid any code between them.
-
- // TODO: performance: make textures resident (how to do this?)
+ // TODO: performance: make textures resident
  // maybe use priorities to achieve this
  // TODO: performance: maybe enable depth-buffer/depth-testing after the cells
  // have been drawn - so useless cell-drawings can be discarded. remember to
  // disable it before drawing the background (i.e. cells) !
- // FIXME: remove the glGetError() calls in releases and so on, since they slow
- // rendering down, like all getGet*'s
  // TODO: performance: from the URL above:
  // Transparency may be implemented with stippling instead of blending 
  // If you need simple transparent objects consider using polygon stippling
  // instead of alpha blending. The later is typically faster and may actually
  // look better in some situations. [L,S] 
  // --> what is this "stippling" and can we use it?
- // TODO: performance: we might want to replace QT's makeCurrent() function - it
- // is virtual and we don't use different overlays anyway
- // AB: performance: don't use functions that take double-precision floating
- // point arguments (i.e. GLfloat) if there are single precisions (GLfloat)
- // available. mesa uses float internally and therefore needs to convert...
-
- // TODO: performance: we'll probably need the depth buffer soon - there is a
- // nice trick to avoid clearing it. see
- // http://www.mesa3d.org/brianp/sig97/perfopt.htm
- // in 3.5!
-
- // TODO: performance: sort by z-coordinates. not just the units, but also
- // cells! i.e. render cells *after* units!
 
  boProfiling->renderClear(true);
  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -760,16 +739,14 @@ void BosonBigDisplayBase::paintGL()
  BoItemList::Iterator it = allItems->begin();
  d->mRenderedItems = 0;
 
- // AB: this are problematic for triangle strips! they need to be in a special
+ // AB: these are problematic for triangle strips! they need to be in a special
  // format to make culling work!
  glEnable(GL_CULL_FACE);
  glCullFace(GL_BACK);
+
  glEnableClientState(GL_VERTEX_ARRAY);
  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
  for (; it != allItems->end(); ++it) {
-	//FIXME: order by z-coordinates! first those which are
-	//closer to surface, then flying units
-
 	BosonItem* item = *it;
 
 	// FIXME: can't we use BoVector3 and it's conversion methods here?
@@ -789,9 +766,12 @@ void BosonBigDisplayBase::paintGL()
 	// but note: do *not* use these lists for anything except OpenGL! we
 	// mustn't use them for e.g. pathfinding. the bounding spheres of the
 	// units depend e.g. on the .3ds files and are therefore UI only. If we
-	// depend on it in pathfinding we'd soon have a brolen network (think
+	// depend on it in pathfinding we'd soon have a broken network (think
 	// about differnt CPUs with different rounding values for floating
 	// point calculations)
+	// UPDATE: we could instead use the "sectors" that we are planning to
+	// use for collision detection and pathfinding also for the frustum
+	// tests (they wouldn't do floating point calculations)
 	if (!sphereInFrustum(x, y, z, item->boundingSphereRadius())) {
 		// the unit is not visible, currently. no need to draw anything.
 		continue;
@@ -801,9 +781,6 @@ void BosonBigDisplayBase::paintGL()
 	// width/height.
 	// but concerning z-position they are rendered from bottom to top!
 
-	// FIXME: we have to copy the complete list of cells here, since it is
-	// calculated on the fly by cells()! nicer version would be to add
-	// BosonPrite::isFogged() and check it there.
 	const QPtrVector<Cell>* cells = item->cells();
 	bool visible = false;
 	for (unsigned int i = 0; i < cells->count(); i++) {
@@ -834,10 +811,10 @@ void BosonBigDisplayBase::paintGL()
 	// Units will be tinted accordingly to how much health they have left
 	if (RTTI::isUnit(item->rtti())) {
 		if (((Unit*)item)->isDestroyed()) {
-			glColor3f(0.4, 0.4, 0.4);
+			glColor3f(0.4f, 0.4f, 0.4f);
 		} else {
 			float f = ((Unit*)item)->health() / (float)((Unit*)item)->unitProperties()->health() * 0.3;
-			glColor3f(0.7 + f, 0.7 + f, 0.7 + f);
+			glColor3f(0.7f + f, 0.7f + f, 0.7f + f);
 		}
 	} else {
 		glColor3ub(255, 255, 255);
