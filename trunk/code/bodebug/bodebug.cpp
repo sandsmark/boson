@@ -43,9 +43,9 @@
 #include <qstring.h>
 #include <qtextstream.h>
 
-#include <stdlib.h>	// abort
-#include <unistd.h>	// getpid
-#include <stdarg.h>	// vararg stuff
+#include <stdlib.h> // abort
+#include <unistd.h> // getpid
+#include <stdarg.h> // vararg stuff
 #include <syslog.h>
 #include <errno.h>
 #include <string.h>
@@ -176,7 +176,7 @@ static QString getDescrFromNum(unsigned int _num)
 
 struct boDebugPrivate {
   boDebugPrivate() :
-	oldarea(), config(0) { }
+      oldarea(), config(0) { }
 
   ~boDebugPrivate() { delete config; }
 
@@ -188,7 +188,7 @@ struct boDebugPrivate {
 static boDebugPrivate *boDebug_data = 0;
 static KStaticDeleter<boDebugPrivate> pcd;
 
-static void kDebugBackend( unsigned short nLevel, unsigned int nArea, const char *data)
+static void kDebugBackend( unsigned short nLevel, unsigned int nArea, const QString& _output)
 {
   if ( !boDebug_data )
   {
@@ -227,6 +227,7 @@ static void kDebugBackend( unsigned short nLevel, unsigned int nArea, const char
     }
   }
 
+  QString sOutput;
   int nPriority = 0;
   QString aCaption;
 
@@ -239,16 +240,19 @@ static void kDebugBackend( unsigned short nLevel, unsigned int nArea, const char
       key = "InfoOutput";
       aCaption = "Info";
       nPriority = LOG_INFO;
+      sOutput = "";
       break;
     case BoDebug::KDEBUG_WARN:
       key = "WarnOutput";
       aCaption = "Warning";
       nPriority = LOG_WARNING;
+      sOutput = "WARNING: ";
       break;
     case BoDebug::KDEBUG_FATAL:
       key = "FatalOutput";
       aCaption = "Fatal Error";
       nPriority = LOG_CRIT;
+      sOutput = "FATAL: ";
       break;
     case BoDebug::KDEBUG_ERROR:
     default:
@@ -256,8 +260,13 @@ static void kDebugBackend( unsigned short nLevel, unsigned int nArea, const char
       key = "ErrorOutput";
       aCaption = "Error";
       nPriority = LOG_ERR;
+      sOutput = "ERROR: ";
       break;
   }
+
+  sOutput += _output;
+  QCString local8Bit = sOutput.local8Bit();
+  const char* data = local8Bit.data();
 
   short nOutput = boDebug_data->config ? boDebug_data->config->readNumEntry(key, 2) : 2;
 
@@ -342,12 +351,27 @@ static void kDebugBackend( unsigned short nLevel, unsigned int nArea, const char
       {
         fprintf( output, "%s: ", boDebug_data->aAreaName.ascii() );
       }
-      fputs(  data, output);
+      switch(nLevel)
+      {
+        case BoDebug::KDEBUG_WARN:
+          fprintf(output, "WARNING: ");
+          break;
+        case BoDebug::KDEBUG_FATAL:
+          fprintf(output, "FATAL: ");
+          break;
+        case BoDebug::KDEBUG_ERROR:
+          fprintf(output, "ERROR: ");
+          break;
+        case BoDebug::KDEBUG_INFO:
+        default:
+          break;
+      }
+      fputs(data, output);
       break;
     }
     case 3: // syslog
     {
-      syslog( nPriority, data);
+      syslog( nPriority, "%s", data);
       break;
     }
     case 4: // nothing
@@ -380,12 +404,12 @@ bodbgstream &perror( bodbgstream &s) { return s << QString::fromLocal8Bit(strerr
 bodbgstream boDebug(int area) { return bodbgstream(area, BoDebug::KDEBUG_INFO); }
 bodbgstream boDebug(bool cond, int area) { if (cond) return bodbgstream(area, BoDebug::KDEBUG_INFO); else return bodbgstream(0, 0, false); }
 
-bodbgstream boError(int area) { return bodbgstream("ERROR: ", area, BoDebug::KDEBUG_ERROR); }
-bodbgstream boError(bool cond, int area) { if (cond) return bodbgstream("ERROR: ", area, BoDebug::KDEBUG_ERROR); else return bodbgstream(0,0,false); }
-bodbgstream boWarning(int area) { return bodbgstream("WARNING: ", area, BoDebug::KDEBUG_WARN); }
-bodbgstream boWarning(bool cond, int area) { if (cond) return bodbgstream("WARNING: ", area, BoDebug::KDEBUG_WARN); else return bodbgstream(0,0,false); }
-bodbgstream boFatal(int area) { return bodbgstream("FATAL: ", area, BoDebug::KDEBUG_FATAL); }
-bodbgstream boFatal(bool cond, int area) { if (cond) return bodbgstream("FATAL: ", area, BoDebug::KDEBUG_FATAL); else return bodbgstream(0,0,false); }
+bodbgstream boError(int area) { return bodbgstream(area, BoDebug::KDEBUG_ERROR); }
+bodbgstream boError(bool cond, int area) { if (cond) return bodbgstream(area, BoDebug::KDEBUG_ERROR); else return bodbgstream(0,0,false); }
+bodbgstream boWarning(int area) { return bodbgstream(area, BoDebug::KDEBUG_WARN); }
+bodbgstream boWarning(bool cond, int area) { if (cond) return bodbgstream(area, BoDebug::KDEBUG_WARN); else return bodbgstream(0,0,false); }
+bodbgstream boFatal(int area) { return bodbgstream(area, BoDebug::KDEBUG_FATAL); }
+bodbgstream boFatal(bool cond, int area) { if (cond) return bodbgstream(area, BoDebug::KDEBUG_FATAL); else return bodbgstream(0,0,false); }
 
 void bodbgstream::flush()
 {
@@ -393,7 +417,7 @@ void bodbgstream::flush()
   {
     return;
   }
-  kDebugBackend( level, area, output.local8Bit().data() );
+  kDebugBackend( level, area, output );
   output = QString::null;
 }
 
@@ -402,7 +426,7 @@ bodbgstream &bodbgstream::form(const char *format, ...)
   char buf[4096];
   va_list arguments;
   va_start( arguments, format );
-  vsprintf( buf, format, arguments );
+  vsnprintf( buf, sizeof(buf), format, arguments );
   va_end(arguments);
   *this << buf;
   return *this;
