@@ -27,7 +27,7 @@ class	miniMap;
 class	fieldMap;
 class	viewMap;
 class	playerMap;
-class	orderWin;
+class	infoWin;
 
 class mainView : public QWidget 
 {
@@ -40,8 +40,7 @@ private:
     miniMap		*mini;
     fieldMap		*field;
     viewMap		*view;
-/* Window to send order to the selected unities */
-    orderWin		*order;
+    infoWin		*info;
 };
 
 

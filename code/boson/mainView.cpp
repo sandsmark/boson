@@ -20,7 +20,7 @@
 
 #include <qlayout.h>
 
-#include "orderWin.h"
+#include "infoWin.h"
 #include "playerMap.h"
 #include "miniMap.h"
 #include "fieldMap.h"
@@ -41,12 +41,11 @@ mainView::mainView(playerMap *phys, QWidget *parent=0, const char *name=0)
 		mini->setFixedSize(200,200);
 		leftLayout->addWidget(mini);
 
-/* The order Window : overview and orders buttons */
-		order = new orderWin(this, "orderwin");
-		leftLayout->addWidget(order, 10);
+		info = new infoWin(this, "infowin");
+		leftLayout->addWidget(info, 10);
 
 /* This is the main map, the game area */
-	field = new fieldMap(/*order,*/ view, this);
+	field = new fieldMap(view, this);
 	topLayout->addWidget(field,10);
 
 /* finish the stuff */
