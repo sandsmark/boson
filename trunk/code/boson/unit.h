@@ -349,6 +349,7 @@ public:
 	 * @return NULL if no valid refinery is set, otherwise the refinery.
 	 **/
 	inline Facility* refinery() const;
+	virtual QRect boundingRect() const;
 
 private:
 	// a d pointer is probably not very good here - far too much memory consumption
