@@ -30,7 +30,6 @@ class Player;
 class Unit;
 class UnitProperties;
 class BoShot;
-class BoDisplayManager;
 class BosonTiles;
 class BoItemList;
 class BosonSprite;
@@ -197,8 +196,6 @@ public:
 
 	void addToCells(BosonSprite* u);
 	void removeFromCells(BosonSprite* u);
-
-	void setDisplayManager(BoDisplayManager* m);
 
 	/**
 	 * This is meant to be used instead of QCanvas::allItems, since it also

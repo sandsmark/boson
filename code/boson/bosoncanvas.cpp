@@ -26,7 +26,6 @@
 #include "unitproperties.h"
 #include "boshot.h"
 #include "bosontiles.h"
-#include "bodisplaymanager.h"
 #include "speciestheme.h"
 #include "boitemlist.h"
 
@@ -121,14 +120,11 @@ public:
 		mMap = 0;
 
 		mLoader = 0;
-
-		mDisplayManager = 0;
 	}
 	
 	QPixmap mPix;
 	QPtrList<Unit> mDestroyedUnits;
 	QPtrList<BoShot> mDeleteShot;
-	BoDisplayManager* mDisplayManager;
 
 	BosonMap* mMap; // just a pointer - no memory allocated
 
@@ -667,11 +663,6 @@ void BosonCanvas::addToCells(BosonSprite* item)
 	}
 	c->addItem(item);
  }
-}
-
-void BosonCanvas::setDisplayManager(BoDisplayManager* m)
-{
- d->mDisplayManager = m;
 }
 
 bool BosonCanvas::canPlaceUnitAt(const UnitProperties* prop, const QPoint& pos, ProductionPlugin* factory) const
