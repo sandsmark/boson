@@ -24,7 +24,6 @@
 class QCanvasView;
 class QCanvasItem;
 
-class KSpriteToolTipPrivate;
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
@@ -41,8 +40,10 @@ protected:
 	virtual void maybeTip(const QPoint& pos);
 
 private:
-	QCanvasView* mView;
+	class KSpriteToolTipPrivate;
 	KSpriteToolTipPrivate* d;
+
+	QCanvasView* mView;
 };
 
 #endif

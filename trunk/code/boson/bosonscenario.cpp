@@ -44,7 +44,7 @@ struct ScenarioUnit
 };
 
 
-class BosonScenarioPrivate
+class BosonScenario::BosonScenarioPrivate
 {
 public:
 	BosonScenarioPrivate()

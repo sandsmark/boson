@@ -23,6 +23,7 @@
 
 /**
  * Essentially like @ref KGameIO but doesn't send anything
+ * @author Andreas Beckermann <b_mann@gmx.de>
  **/
 class EditorInput : public QObject
 {

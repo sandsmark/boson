@@ -25,7 +25,9 @@
 
 class Unit;
 
-class BoShotPrivate;
+/**
+ * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
+ **/
 class BoShot : public QCanvasSprite
 {
 public:
@@ -47,6 +49,7 @@ public:
 protected:
 
 private:
+	class BoShotPrivate;
 	BoShotPrivate* d;
 };
 

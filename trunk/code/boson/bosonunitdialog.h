@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2001 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -21,7 +21,9 @@
 
 #include <kdialogbase.h>
 
-class BosonUnitDialogPrivate;
+/**
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
 class BosonUnitDialog : public KDialogBase
 {
 	Q_OBJECT
@@ -42,6 +44,7 @@ private:
 	void initProperties();
 
 private:
+	class BosonUnitDialogPrivate;
 	BosonUnitDialogPrivate* d;
 };
 

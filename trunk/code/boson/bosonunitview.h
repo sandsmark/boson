@@ -23,7 +23,9 @@
 
 class Unit;
 
-class BosonUnitViewPrivate;
+/**
+ * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
+ **/
 class BosonUnitView : public QFrame
 {
 	Q_OBJECT
@@ -53,6 +55,7 @@ protected:
 	void showFacility();
 
 private:
+	class BosonUnitViewPrivate;
 	BosonUnitViewPrivate* d;
 };
 

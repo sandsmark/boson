@@ -35,7 +35,7 @@
 
 #include "boson.moc"
 
-class BosonPrivate
+class Boson::BosonPrivate
 {
 public:
 	BosonPrivate()

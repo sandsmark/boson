@@ -30,7 +30,9 @@ class Player;
 class Unit;
 class UnitProperties;
 
-class BosonCanvasPrivate;
+/**
+ * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
+ **/
 class BosonCanvas : public QCanvas
 {
 	Q_OBJECT
@@ -124,6 +126,7 @@ private:
 	void init();
 
 private:
+	class BosonCanvasPrivate;
 	BosonCanvasPrivate* d;
 };
 

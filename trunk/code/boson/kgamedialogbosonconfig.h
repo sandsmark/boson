@@ -21,7 +21,6 @@
 
 #include <kgame/kgamedialogconfig.h>
 
-class KGameDialogBosonConfigPrivate;
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
@@ -49,6 +48,7 @@ protected slots:
 	void slotSpeciesChanged(int index);
 
 private:
+	class KGameDialogBosonConfigPrivate;
 	KGameDialogBosonConfigPrivate* d;
 };
 #endif

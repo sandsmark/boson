@@ -45,7 +45,7 @@ public:
 	QValueList<int> mProduceList;
 };
 
-class UnitPropertiesPrivate
+class UnitProperties::UnitPropertiesPrivate
 {
 public:
 	UnitPropertiesPrivate()

@@ -34,7 +34,7 @@
 
 #define COLOR_UNKNOWN black // should never appear
 
-class BosonMiniMapPrivate
+class BosonMiniMap::BosonMiniMapPrivate
 {
 public:
 	BosonMiniMapPrivate()

@@ -30,8 +30,9 @@ class BosonCanvas;
 class Unit;
 class Player;
 
-class BosonWidgetPrivate;
-
+/**
+ * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
+ **/
 class BosonWidget : public QWidget 
 {
 	Q_OBJECT
@@ -124,6 +125,7 @@ private:
 	void init();
 
 private:
+	class BosonWidgetPrivate;
 	BosonWidgetPrivate* d;
 };
 

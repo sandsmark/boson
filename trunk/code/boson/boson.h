@@ -26,7 +26,9 @@ class QCanvas;
 class Unit;
 class Facility;
 
-class BosonPrivate;
+/**
+ * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
+ **/
 class Boson : public KGame
 {
 	Q_OBJECT
@@ -137,6 +139,7 @@ protected slots:
 	void slotPlayerLeftGame(KPlayer*);
 
 private:
+	class BosonPrivate;
 	BosonPrivate* d;
 };
 

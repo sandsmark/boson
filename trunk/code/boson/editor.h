@@ -27,8 +27,9 @@
 
 class KPlayer;
 
-class EditorPrivate;
-
+/**
+ * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
+ **/
 class Editor : public KMainWindow
 {
 	Q_OBJECT
@@ -85,6 +86,7 @@ private:
 	void setupStatusBar();
 
 private:
+	class EditorPrivate;
 	EditorPrivate* d;
 };
 

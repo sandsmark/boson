@@ -32,7 +32,7 @@
 
 #include "kgameunitdebug.moc"
 
-class KGameUnitDebugPrivate
+class KGameUnitDebug::KGameUnitDebugPrivate
 {
 public:
 	KGameUnitDebugPrivate()

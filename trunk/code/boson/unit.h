@@ -27,8 +27,6 @@ class Player;
 class BosonCanvas;
 class UnitProperties;
 
-class UnitPrivate;
-
 /**
  * Implementation of the visual parts of a unit. As far as possible all stuff
  * should go to UnitBase directly - except the visual stuff.
@@ -37,6 +35,7 @@ class UnitPrivate;
  *
  * Not that Unit does <em>not</em> inherit @ref QObject! Signals/Slots are
  * therefore not possible!
+ * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
  **/
 class Unit : public UnitBase, public QCanvasSprite
 {
@@ -113,15 +112,11 @@ protected:
 	QValueList<Unit*> unitCollisions(bool exact = false) const;
 
 private:
+	class UnitPrivate;
 	UnitPrivate* d;
-
 };
 
 
-// a d pointer is probably not very good here - far too much memory consumption
-// same apllies to Unit and UnitBase. But it speeds up compiling as we don't
-// have to change the headers every time...
-class MobileUnitPrivate; 
 // if you add class members - ONLY KGameProperties!! otherwise Player::load and
 // Player::save() won't work correctly! - if you add non KGameProperties adjust
 // UnitBase::save() and unit::load()
@@ -134,10 +129,13 @@ public:
 	virtual void advanceMove(); // move one step futher to path
 	
 private:
+	// a d pointer is probably not very good here - far too much memory consumption
+	// same apllies to Unit and UnitBase. But it speeds up compiling as we don't
+	// have to change the headers every time...
+	class MobileUnitPrivate; 
 	MobileUnitPrivate* d;
 };
 
-class FacilityPrivate;
 // if you add class members - ONLY KGameProperties!! otherwise Player::load and
 // Player::save() won't work correctly!
 class Facility : public Unit
@@ -176,6 +174,7 @@ public:
 	void addConstruction(int unitType);
 
 private:
+	class FacilityPrivate;
 	FacilityPrivate* d;
 };
 

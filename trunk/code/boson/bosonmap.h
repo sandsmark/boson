@@ -28,8 +28,6 @@ class Boson;
 class QDomElement;
 class QStringList;
 
-class BosonMapPrivate;
-
 /**
  * This class represents a Boson map file (*.bpf). Use @ref loadMap to load the
  * file and you get the min/max players of the map (currently both have the same
@@ -49,7 +47,7 @@ class BosonMapPrivate;
  * that changes in the binary format and/or XML format result in change of the
  * other format as well, i.e. we don't have broken formats around (ideally at
  * least)
- * @author Andreas Beckermann <b_mann@gmx.de>
+ * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
  **/
 class BosonMap
 {
@@ -177,7 +175,9 @@ private:
 	void init();
 
 private:
+	class BosonMapPrivate;
 	BosonMapPrivate* d;
+
 	int mMapWidth;
 	int mMapHeight;
 };

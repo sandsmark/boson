@@ -41,7 +41,7 @@
 
 #include "top.moc"
 
-class TopPrivate
+class Top::TopPrivate
 {
 public:
 	TopPrivate()

@@ -52,7 +52,7 @@ struct ConstructUnit
 	unsigned char version;
 };
 
-class BosonBigDisplayPrivate
+class BosonBigDisplay::BosonBigDisplayPrivate
 {
 public:
 	BosonBigDisplayPrivate()

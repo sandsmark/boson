@@ -35,7 +35,9 @@ class Player;
 class UnitProperties;
 class SpeciesTheme;
 
-class UnitBasePrivate;
+/**
+ * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
+ **/
 class UnitBase
 {
 public:
@@ -210,7 +212,9 @@ public:
 	bool isMobile() const;
 	
 private:
+	class UnitBasePrivate;
 	UnitBasePrivate* d;
+	
 	Player* mOwner;
 };
 

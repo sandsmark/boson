@@ -28,8 +28,9 @@ class Player;
 class QDomElement;
 class QStringList;
 
-class BosonScenarioPrivate;
-
+/**
+ * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
+ **/
 class BosonScenario
 {
 public:
@@ -129,6 +130,7 @@ private:
 	void init();
 
 private:
+	class BosonScenarioPrivate;
 	BosonScenarioPrivate* d;
 };
 

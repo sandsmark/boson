@@ -34,7 +34,7 @@
 #include <qintdict.h>
 #include <qdir.h>
 
-class SpeciesThemePrivate
+class SpeciesTheme::SpeciesThemePrivate
 {
 public:
 	SpeciesThemePrivate()
@@ -43,7 +43,6 @@ public:
 	}
 
 
-	QString mThemePath;
 	QRgb mTeamColor;
 
 	QIntDict<UnitProperties> mUnitProperties;
@@ -122,11 +121,6 @@ QRgb SpeciesTheme::defaultColor()
  return default_color[defaultColorIndex - 1];
 }
 
-const QString& SpeciesTheme::themePath() const
-{
- return d->mThemePath;
-}
-
 bool SpeciesTheme::loadTheme(const QString& speciesDir, QRgb teamColor)
 {
  if (teamColor == qRgb(0,0,0)) { // no color specified
@@ -134,8 +128,8 @@ bool SpeciesTheme::loadTheme(const QString& speciesDir, QRgb teamColor)
  } else {
 	d->mTeamColor = teamColor;
  }
- d->mThemePath += speciesDir;
- kdDebug() << "theme path: " << d->mThemePath << endl;
+ mThemePath = speciesDir;
+ kdDebug() << "theme path: " << themePath() << endl;
 
  // the initial values for the units - config files :-)
  readUnitConfigs();

@@ -25,6 +25,9 @@
 
 class QImage;
 
+/**
+ * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
+ **/
 class BosonTiles : public QPixmap
 {
 public:

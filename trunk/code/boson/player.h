@@ -28,8 +28,9 @@ class Unit;
 class SpeciesTheme;
 class UnitProperties;
 
-
-class PlayerPrivate;
+/**
+ * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
+ **/
 class Player : public KPlayer
 {
 	Q_OBJECT
@@ -83,7 +84,9 @@ public slots:
 	void slotNetworkData(int msgid, const QByteArray& msg, Q_UINT32 sender, KPlayer*);
 
 private:
+	class PlayerPrivate;
 	PlayerPrivate* d;
+
 	SpeciesTheme* mSpecies;
 };
 

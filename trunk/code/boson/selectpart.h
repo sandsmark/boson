@@ -16,25 +16,6 @@
     the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
     Boston, MA 02111-1307, USA.
 */
-/***************************************************************************
-                         selectPart.h  -  description                              
-                             -------------------                                         
-
-    version              : $Id$
-    begin                : Sat Jun 26 16:23:00 CET 1999
-                                           
-    copyright            : (C) 1999-2000 by Thomas Capricelli                         
-    email                : orzel@yalbi.com                                     
- ***************************************************************************/
-
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   * 
- *                                                                         *
- ***************************************************************************/
 
 #ifndef __SELECTPART_H__
 #define __SELECTPART_H__
@@ -42,6 +23,9 @@
 #include <qcanvas.h>
 #include "rtti.h"
 
+/**
+ * @author Thomas Capricelli <capricel@email.enst.fr>
+ **/
 class SelectPart : public QCanvasSprite
 {
 public:
