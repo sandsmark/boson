@@ -49,6 +49,7 @@ Shoot=shoot
 
 [Weapon_0]
 AccelerationSpeed=0.0005
+AutoUse=false
 CanShootAtAirUnits=false
 CanShootAtLandUnits=true
 Damage=600

@@ -38,6 +38,7 @@ ReportUnderAttack=report_underattack
 Shoot=shoot
 
 [Weapon_0]
+AutoUse=false
 CanShootAtAirUnits=false
 CanShootAtLandUnits=true
 Damage=300
