@@ -26,15 +26,53 @@
 #include "bosonconfig.h"
 #include "boson.h"
 #include "bosondata.h"
+#include "bofullscreen.h"
+#include "bosonprofiling.h"
+#include "bosonprofilingdialog.h"
+#include "bosonconfig.h"
+#include "bodebuglogdialog.h"
+#include "kgameunitdebug.h"
+#include "kgameplayerdebug.h"
+#include "kgameadvancemessagesdebug.h"
+#include "bpfdescriptiondialog.h"
+#include "boconditionwidget.h"
+#include "bosonmessage.h"
+#include "bocamera.h"
+#include "sound/bosonaudiointerface.h"
+#include "boaction.h"
+#include "bosonplayfield.h"
+#include "bosonmap.h"
+#include "bosongroundtheme.h"
+#include "optionsdialog.h"
+#include "boglstatewidget.h"
+#include "bogroundrenderermanager.h"
+#include "bomeshrenderermanager.h"
+#include "playerio.h"
+#include "botexmapimportdialog.h"
 
 #include <klocale.h>
 #include <kshortcut.h>
 #include <kgame/kplayer.h>
+#include <kgame/kgamedebugdialog.h>
+#include <kmessagebox.h>
+#include <kfiledialog.h>
 
 #include <qguardedptr.h>
 #include <qptrdict.h>
 #include <qsignalmapper.h>
 #include <qtimer.h>
+#include <qinputdialog.h>
+#include <qvbox.h>
+#include <qpixmap.h>
+#include <qimage.h>
+#include <qvaluestack.h>
+#include <qlayout.h>
+#include <qdom.h>
+#include <qfile.h>
+#include <qfileinfo.h>
+#include <qpushbutton.h>
+#include <qcombobox.h>
+#include <qlabel.h>
 
 
 #define ID_DEBUG_KILLPLAYER 0
@@ -415,10 +453,10 @@ void BosonMenuInputData::initUfoEditorActions()
 		SIGNAL(signalEditorEditMapDescription()), actionCollection(),
 		"editor_map_description");
  (void)new BoUfoAction(i18n("Edit &Minerals"), KShortcut(), this,
-		SIGNAL(slotEditorEditPlayerMinerals()), actionCollection(),
+		SIGNAL(signalEditorEditPlayerMinerals()), actionCollection(),
 		"editor_player_minerals");
  (void)new BoUfoAction(i18n("Edit &Oil"), KShortcut(), this,
-		SIGNAL(slotEditorEditPlayerOil()), actionCollection(),
+		SIGNAL(signalEditorEditPlayerOil()), actionCollection(),
 		"editor_player_oil");
  d->mActionEditorChangeHeight = new BoUfoToggleAction(i18n("Edit &Height"),
 		KShortcut(), this, 0, actionCollection(), "editor_height");
@@ -657,15 +695,974 @@ void BosonMenuInputData::slotEditorPlace(int index)
 
 
 
-BosonMenuInput::BosonMenuInput()
+static QString findSaveFileName(const QString& prefix, const QString& suffix)
 {
+ QString file;
+ for (int i = 0; i < 1000; i++) {
+	file.sprintf("%s-%03d.%s", prefix.latin1(), i, suffix.latin1());
+	if (!QFile::exists(file)) {
+		return QFileInfo(file).absFilePath();
+		return file;
+	}
+ }
+ return QString::null;
+}
+
+
+BosonMenuInput::BosonMenuInput(bool gameMode)
+{
+ mGameMode = gameMode;
+ mCamera = 0;
+ mPlayerIO = 0;
+ mActionCollection = 0;
+ mData = 0;
 }
 
 BosonMenuInput::~BosonMenuInput()
 {
+ delete mData;
 }
 
-void BosonMenuInput::initIO(KPlayer*)
+void BosonMenuInput::initIO(KPlayer* player)
 {
+ KGameIO::initIO(player);
+
+ // AB: we should retrieve mPlayerIO from the player here, but we don't allow
+ // including player.h in this file currently
+ // (in order to avoid that someone accidentally calls methods in there that
+ // should not be called here)
+ // -> as a workaround we set mPlayerIO manually using setPlayerIO() after
+ // construction of this object
+
+ BO_CHECK_NULL_RET(actionCollection());
+
+ mData = new BosonMenuInputData(actionCollection());
+ mData->initUfoActions(mGameMode);
+
+ connect(mData, SIGNAL(signalRotateLeft()),
+		this, SLOT(slotRotateLeft()));
+ connect(mData, SIGNAL(signalRotateRight()),
+		this, SLOT(slotRotateRight()));
+ connect(mData, SIGNAL(signalZoomIn()),
+		this, SLOT(slotZoomOut()));
+ connect(mData, SIGNAL(signalToggleStatusbar(bool)),
+		this, SIGNAL(signalToggleStatusbar(bool)));
+ connect(mData, SIGNAL(signalToggleSound()),
+		this, SLOT(slotToggleSound()));
+ connect(mData, SIGNAL(signalToggleMusic()),
+		this, SLOT(slotToggleMusic()));
+ connect(mData, SIGNAL(signalToggleFullScreen(bool)),
+		this, SLOT(slotToggleFullScreen(bool)));
+ connect(mData, SIGNAL(signalToggleChatVisible()),
+		this, SIGNAL(signalToggleChatVisible()));
+ connect(mData, SIGNAL(signalChangeMaxProfilingEventEntries()),
+		this, SLOT(slotChangeMaxProfilingEventEntries()));
+ connect(mData, SIGNAL(signalChangeMaxProfilingAdvanceEntries()),
+		this, SLOT(slotChangeMaxProfilingAdvanceEntries()));
+ connect(mData, SIGNAL(signalChangeMaxProfilingRenderingEntries()),
+		this, SLOT(slotChangeMaxProfilingRenderingEntries()));
+ connect(mData, SIGNAL(signalProfiling()),
+		this, SLOT(slotProfiling()));
+ connect(mData, SIGNAL(signalDebugKGame()),
+		this, SLOT(slotDebugKGame()));
+ connect(mData, SIGNAL(signalBoDebugLogDialog()),
+		this, SLOT(slotBoDebugLogDialog()));
+ connect(mData, SIGNAL(signalSleep1s()),
+		this, SLOT(slotSleep1s()));
+ connect(mData, SIGNAL(signalResetViewProperties()),
+		this, SIGNAL(signalResetViewProperties()));
+ connect(mData, SIGNAL(signalGrabScreenshot()),
+		this, SLOT(slotGrabScreenshot()));
+ connect(mData, SIGNAL(signalGrabProfiling()),
+		this, SLOT(slotGrabProfiling()));
+ connect(mData, SIGNAL(signalSetGrabMovie(bool)),
+		this, SLOT(slotSetGrabMovie(bool)));
+ connect(mData, SIGNAL(signalSetShowResources(bool)),
+		this, SLOT(slotSetShowResources(bool)));
+ connect(mData, SIGNAL(signalSetDebugMapCoordinates(bool)),
+		this, SLOT(slotSetDebugMapCoordinates(bool)));
+ connect(mData, SIGNAL(signalSetDebugPFData(bool)),
+		this, SLOT(slotSetDebugPFData(bool)));
+ connect(mData, SIGNAL(signalSetDebugShowCellGrid(bool)),
+		this, SLOT(slotSetDebugShowCellGrid(bool)));
+ connect(mData, SIGNAL(signalSetDebugMatrices(bool)),
+		this, SLOT(slotSetDebugMatrices(bool)));
+ connect(mData, SIGNAL(signalSetDebugItemWorks(bool)),
+		this, SLOT(slotSetDebugItemWorks(bool)));
+ connect(mData, SIGNAL(signalSetDebugCamera(bool)),
+		this, SLOT(slotSetDebugCamera(bool)));
+ connect(mData, SIGNAL(signalSetDebugRenderCounts(bool)),
+		this, SLOT(slotSetDebugRenderCounts(bool)));
+ connect(mData, SIGNAL(signalSetDebugWireFrames(bool)),
+		this, SLOT(slotSetDebugWireFrames(bool)));
+ connect(mData, SIGNAL(signalSetDebugBoundingBoxes(bool)),
+		this, SLOT(slotSetDebugBoundingBoxes(bool)));
+ connect(mData, SIGNAL(signalSetDebugFPS(bool)),
+		this, SLOT(slotSetDebugFPS(bool)));
+ connect(mData, SIGNAL(signalSetDebugAdvanceCalls(bool)),
+		this, SLOT(slotSetDebugAdvanceCalls(bool)));
+ connect(mData, SIGNAL(signalSetDebugTextureMemory(bool)),
+		this, SLOT(slotSetDebugTextureMemory(bool)));
+ connect(mData, SIGNAL(signalSetEnableColorMap(bool)),
+		this, SLOT(slotSetEnableColorMap(bool)));
+ connect(mData, SIGNAL(signalSetDebugMode(int)),
+		this, SLOT(slotSetDebugMode(int)));
+ connect(mData, SIGNAL(signalDebugKillPlayer(Q_UINT32)),
+		this, SLOT(slotDebugKillPlayer(Q_UINT32)));
+ connect(mData, SIGNAL(signalDebugModifyMinerals(Q_UINT32, int)),
+		this, SLOT(slotDebugModifyMinerals(Q_UINT32, int)));
+ connect(mData, SIGNAL(signalDebugModifyOil(Q_UINT32, int)),
+		this, SLOT(slotDebugModifyOil(Q_UINT32, int)));
+ connect(mData, SIGNAL(signalToggleCheating(bool)),
+		this, SLOT(slotToggleCheating(bool)));
+ connect(mData, SIGNAL(signalUnfogAll()),
+		this, SLOT(slotUnfogAll()));
+ connect(mData, SIGNAL(signalDumpGameLog()),
+		this, SLOT(slotDumpGameLog()));
+ connect(mData, SIGNAL(signalEditConditions()),
+		this, SLOT(slotEditConditions()));
+ connect(mData, SIGNAL(signalShowGLStates()),
+		this, SLOT(slotShowGLStates()));
+ connect(mData, SIGNAL(signalReloadMeshRenderer()),
+		this, SLOT(slotReloadMeshRenderer()));
+ connect(mData, SIGNAL(signalReloadGroundRenderer()),
+		this, SLOT(slotReloadGroundRenderer()));
+ connect(mData, SIGNAL(signalShowLight0Widget()),
+		this, SIGNAL(signalShowLight0Widget()));
+ connect(mData, SIGNAL(signalCrashBoson()),
+		this, SLOT(slotCrashBoson()));
+ connect(mData, SIGNAL(signalDebugMemory()),
+		this, SLOT(slotDebugMemory()));
+ connect(mData, SIGNAL(signalEndGame()),
+		this, SIGNAL(signalEndGame()));
+ connect(mData, SIGNAL(signalQuit()),
+		this, SIGNAL(signalQuit()));
+ connect(mData, SIGNAL(signalPreferences()),
+		this, SLOT(slotPreferences()));
+
+ // game signals
+ connect(mData, SIGNAL(signalSaveGame()),
+		this, SIGNAL(signalSaveGame()));
+ connect(mData, SIGNAL(signalCenterHomeBase()),
+		this, SLOT(slotCenterHomeBase()));
+ connect(mData, SIGNAL(signalSyncNetwork()),
+		this, SLOT(slotSyncNetwork()));
+ connect(mData, SIGNAL(signalSelectSelectionGroup(int)),
+		this, SIGNAL(signalSelectSelectionGroup(int)));
+ connect(mData, SIGNAL(signalCreateSelectionGroup(int)),
+		this, SIGNAL(signalCreateSelectionGroup(int)));
+
+ // editor signals
+ connect(mData, SIGNAL(signalEditorSavePlayFieldAs()),
+		this, SLOT(slotEditorSavePlayFieldAs()));
+ connect(mData, SIGNAL(signalEditorChangeLocalPlayer(Player*)),
+		this, SIGNAL(signalEditorChangeLocalPlayer(Player*)));
+ connect(mData, SIGNAL(signalEditorShowPlaceFacilities()),
+		this, SIGNAL(signalEditorShowPlaceFacilities()));
+ connect(mData, SIGNAL(signalEditorShowPlaceMobiles()),
+		this, SIGNAL(signalEditorShowPlaceMobiles()));
+ connect(mData, SIGNAL(signalEditorShowPlaceGround()),
+		this, SIGNAL(signalEditorShowPlaceGround()));
+ connect(mData, SIGNAL(signalEditorDeleteSelectedUnits()),
+		this, SIGNAL(signalEditorDeleteSelectedUnits()));
+ connect(mData, SIGNAL(signalEditorEditMapDescription()),
+		this, SLOT(slotEditorEditMapDescription()));
+ connect(mData, SIGNAL(signalEditorEditPlayerMinerals()),
+		this, SLOT(slotEditorEditPlayerMinerals()));
+ connect(mData, SIGNAL(signalEditorEditPlayerOil()),
+		this, SLOT(slotEditorEditPlayerOil()));
+ connect(mData, SIGNAL(signalEditorEditHeight(bool)),
+		this, SIGNAL(signalEditorEditHeight(bool)));
+ connect(mData, SIGNAL(signalEditorImportHeightMap()),
+		this, SLOT(slotEditorImportHeightMap()));
+ connect(mData, SIGNAL(signalEditorExportHeightMap()),
+		this, SLOT(slotEditorExportHeightMap()));
+ connect(mData, SIGNAL(signalEditorImportTexMap()),
+		this, SLOT(slotEditorImportTexMap()));
+ connect(mData, SIGNAL(signalEditorExportTexMap()),
+		this, SLOT(slotEditorExportTexMap()));
+
 }
+
+
+void BosonMenuInput::setCamera(BoGameCamera* camera)
+{
+ mCamera = camera;
+}
+
+BoGameCamera* BosonMenuInput::camera() const
+{
+ return mCamera;
+}
+
+void BosonMenuInput::setPlayerIO(PlayerIO* io)
+{
+ mPlayerIO = io;
+}
+
+PlayerIO* BosonMenuInput::playerIO() const
+{
+ // TODO: actually return ((Player*)player())->playerIO(); would be nicer!
+ // -> but we disallow including player.h here currently
+ return mPlayerIO;
+}
+
+void BosonMenuInput::setActionCollection(BoUfoActionCollection* a)
+{
+ mActionCollection = a;
+}
+
+BoUfoActionCollection* BosonMenuInput::actionCollection() const
+{
+ return mActionCollection;
+}
+
+void BosonMenuInput::slotRotateLeft()
+{
+ BO_CHECK_NULL_RET(camera());
+ camera()->changeRotation(5);
+}
+
+void BosonMenuInput::slotRotateRight()
+{
+ BO_CHECK_NULL_RET(camera());
+ camera()->changeRotation(-5);
+}
+
+void BosonMenuInput::slotZoomIn()
+{
+ BO_CHECK_NULL_RET(camera());
+
+ float delta = 5;
+
+ camera()->changeZ(-delta);
+}
+
+void BosonMenuInput::slotZoomOut()
+{
+ BO_CHECK_NULL_RET(camera());
+
+ float delta = 5;
+
+ camera()->changeZ(delta);
+}
+
+void BosonMenuInput::slotToggleSound()
+{
+ boAudio->setSound(!boAudio->sound());
+ boConfig->setSound(boAudio->sound());
+}
+
+void BosonMenuInput::slotToggleMusic()
+{
+ boAudio->setMusic(!boAudio->music());
+ boConfig->setMusic(boAudio->music());
+}
+
+void BosonMenuInput::slotToggleFullScreen(bool fullScreen)
+{
+ if (fullScreen) {
+	BoFullScreen::enterMode(-1);
+ } else {
+	BoFullScreen::leaveFullScreen();
+ }
+}
+
+void BosonMenuInput::slotChangeMaxProfilingEventEntries()
+{
+ bool ok = true;
+ unsigned int max = boConfig->maxProfilingEventEntries();
+ max = (unsigned int)QInputDialog::getInteger(i18n("Profiling event entries"),
+		i18n("Maximal number of profiling entries per event"),
+		(int)max, 0, 100000, 1, &ok, 0);
+ if (ok) {
+	boConfig->setMaxProfilingEventEntries(max);
+	boProfiling->setMaxEventEntries(boConfig->maxProfilingEventEntries());
+ }
+}
+
+void BosonMenuInput::slotChangeMaxProfilingAdvanceEntries()
+{
+ bool ok = true;
+ unsigned int max = boConfig->maxProfilingAdvanceEntries();
+ max = (unsigned int)QInputDialog::getInteger(i18n("Profiling advance entries"),
+		i18n("Maximal number of profiled advance calls"),
+		(int)max, 0, 100000, 1, &ok, 0);
+ if (ok) {
+	boConfig->setMaxProfilingAdvanceEntries(max);
+	boProfiling->setMaxAdvanceEntries(boConfig->maxProfilingAdvanceEntries());
+ }
+}
+
+void BosonMenuInput::slotChangeMaxProfilingRenderingEntries()
+{
+ bool ok = true;
+ unsigned int max = boConfig->maxProfilingRenderingEntries();
+ max = (unsigned int)QInputDialog::getInteger(i18n("Profiling rendering entries"),
+		i18n("Maximal number of profiled frames"),
+		(int)max, 0, 100000, 1, &ok, 0);
+ if (ok) {
+	boConfig->setMaxProfilingRenderingEntries(max);
+	boProfiling->setMaxRenderingEntries(boConfig->maxProfilingRenderingEntries());
+ }
+}
+
+void BosonMenuInput::slotProfiling()
+{
+ BosonProfilingDialog* dialog = new BosonProfilingDialog(0, false);
+ connect(dialog, SIGNAL(finished()), dialog, SLOT(deleteLater()));
+ dialog->show();
+}
+
+void BosonMenuInput::slotDebugKGame()
+{
+ if (!boGame) {
+	boError() << k_funcinfo << "NULL game" << endl;
+	return;
+ }
+ KGameDebugDialog* dlg = new KGameDebugDialog(boGame, 0, false);
+
+ QVBox* b = dlg->addVBoxPage(i18n("Debug &Units"));
+ KGameUnitDebug* units = new KGameUnitDebug(b);
+ units->setBoson(boGame);
+
+ b = dlg->addVBoxPage(i18n("Debug &Boson Players"));
+ KGamePlayerDebug* player = new KGamePlayerDebug(b);
+ player->setBoson(boGame);
+
+ b = dlg->addVBoxPage(i18n("Debug &Advance messages"));
+ KGameAdvanceMessagesDebug* messages = new KGameAdvanceMessagesDebug(b);
+ messages->setBoson(boGame);
+
+#if 0
+ if (boGame->playField()) {
+	BosonMap* map = boGame->playField()->map();
+	if (!map) {
+		boError() << k_funcinfo << "NULL map" << endl;
+		return;
+	}
+	b = dlg->addVBoxPage(i18n("Debug &Cells"));
+
+	// AB: this hardly does anything atm (04/04/23), but it takes a lot of
+	// time and memory to be initialized on big maps (on list item per cell,
+	// on a 500x500 map thats a lot)
+	KGameCellDebug* cells = new KGameCellDebug(b);
+	cells->setMap(map);
+ }
+#endif
+
+ connect(dlg, SIGNAL(signalRequestIdName(int,bool,QString&)),
+		this, SLOT(slotDebugRequestIdName(int,bool,QString&)));
+
+ connect(dlg, SIGNAL(finished()), dlg, SLOT(deleteLater()));
+ dlg->show();
+}
+
+void BosonMenuInput::slotBoDebugLogDialog()
+{
+ BoDebugLogDialog* dialog = new BoDebugLogDialog(0);
+ connect(dialog, SIGNAL(finished()), dialog, SLOT(deleteLater()));
+ dialog->slotUpdate();
+ dialog->show();
+#if 0
+ BoUfoDebugLogDialog* dialog = new BoUfoDebugLogDialog(ufoManager());
+ dialog->slotUpdate();
+ dialog->show();
+#endif
+}
+
+void BosonMenuInput::slotSleep1s()
+{
+ sleep(1);
+}
+
+void BosonMenuInput::slotGrabScreenshot()
+{
+ boDebug() << k_funcinfo << "Taking screenshot!" << endl;
+
+ QPixmap shot = QPixmap::grabWindow(qApp->mainWidget()->winId());
+ if (shot.isNull()) {
+	boError() << k_funcinfo << "NULL image returned" << endl;
+	return;
+ }
+ QString file = findSaveFileName("boson", "jpg");
+ if (file.isNull()) {
+	boWarning() << k_funcinfo << "Can't find free filename???" << endl;
+	return;
+ }
+ boDebug() << k_funcinfo << "Saving screenshot to " << file << endl;
+ bool ok = shot.save(file, "JPEG", 90);
+ if (!ok) {
+	boError() << k_funcinfo << "Error saving screenshot to " << file << endl;
+	boGame->slotAddChatSystemMessage(i18n("An error occured while saving screenshot to %1").arg(file));
+ } else {
+	boGame->slotAddChatSystemMessage(i18n("Screenshot saved to %1").arg(file));
+ }
+}
+
+void BosonMenuInput::slotGrabProfiling()
+{
+ QString file = findSaveFileName("boprofiling", "boprof");
+ if (file.isNull()) {
+	boWarning() << k_funcinfo << "Can't find free filename???" << endl;
+	return;
+ }
+ // TODO: chat message about file location!
+ boDebug() << k_funcinfo << "Saving profiling to " << file << endl;
+ bool ok = boProfiling->saveToFile(file);
+ if (!ok) {
+	boError() << k_funcinfo << "Error saving profiling to " << file << endl;
+	boGame->slotAddChatSystemMessage(i18n("An error occured while saving profiling log to %1").arg(file));
+ } else {
+	boGame->slotAddChatSystemMessage(i18n("Profiling log saved to %1").arg(file));
+ }
+}
+
+void BosonMenuInput::slotSetGrabMovie(bool grab)
+{
+#warning fixme
+#if 0
+ d->mGrabMovie = grab;
+#endif
+}
+
+void BosonMenuInput::slotSetShowResources(bool show)
+{
+ boConfig->setShowResources(show);
+}
+
+void BosonMenuInput::slotSetDebugMapCoordinates(bool debug)
+{
+ boConfig->setDebugMapCoordinates(debug);
+}
+
+void BosonMenuInput::slotSetDebugPFData(bool debug)
+{
+ boConfig->setDebugPFData(debug);
+}
+
+void BosonMenuInput::slotSetDebugShowCellGrid(bool debug)
+{
+ boConfig->setDebugShowCellGrid(debug);
+}
+
+void BosonMenuInput::slotSetDebugMatrices(bool debug)
+{
+ boConfig->setDebugOpenGLMatrices(debug);
+}
+
+void BosonMenuInput::slotSetDebugItemWorks(bool debug)
+{
+ boConfig->setDebugItemWorkStatistics(debug);
+}
+
+void BosonMenuInput::slotSetDebugCamera(bool debug)
+{
+ boConfig->setDebugOpenGLCamera(debug);
+}
+
+void BosonMenuInput::slotSetDebugRenderCounts(bool debug)
+{
+ boConfig->setDebugRenderCounts(debug);
+}
+
+void BosonMenuInput::slotSetDebugWireFrames(bool on)
+{
+ boConfig->setWireFrames(on);
+}
+
+void BosonMenuInput::slotSetDebugBoundingBoxes(bool debug)
+{
+ boConfig->setDebugBoundingBoxes(debug);
+}
+
+void BosonMenuInput::slotSetDebugFPS(bool debug)
+{
+ boConfig->setDebugFPS(debug);
+}
+
+void BosonMenuInput::slotSetDebugAdvanceCalls(bool debug)
+{
+ boConfig->setDebugAdvanceCalls(debug);
+}
+
+void BosonMenuInput::slotSetDebugTextureMemory(bool debug)
+{
+ boConfig->setDebugTextureMemory(debug);
+}
+
+void BosonMenuInput::slotSetEnableColorMap(bool enable)
+{
+ boConfig->setEnableColormap(enable);
+}
+
+void BosonMenuInput::slotSetDebugMode(int index)
+{
+ boConfig->setDebugMode((BosonConfig::DebugMode)index);
+}
+
+void BosonMenuInput::slotDebugKillPlayer(Q_UINT32 playerId)
+{
+ QByteArray b;
+ QDataStream stream(b, IO_WriteOnly);
+ stream << (Q_UINT32)playerId;
+ boGame->sendMessage(b, BosonMessage::IdKillPlayer);
+}
+
+void BosonMenuInput::slotDebugModifyMinerals(Q_UINT32 playerId, int amount)
+{
+ QByteArray b;
+ QDataStream stream(b, IO_WriteOnly);
+ stream << (Q_UINT32)playerId;
+ stream << (Q_INT32)amount;
+ boGame->sendMessage(b, BosonMessage::IdModifyMinerals);
+}
+
+void BosonMenuInput::slotDebugModifyOil(Q_UINT32 playerId, int amount)
+{
+ QByteArray b;
+ QDataStream stream(b, IO_WriteOnly);
+ stream << (Q_UINT32)playerId;
+ stream << (Q_INT32)amount;
+ boGame->sendMessage(b, BosonMessage::IdModifyOil);
+}
+
+void BosonMenuInput::slotToggleCheating(bool on)
+{
+ if (!actionCollection()) {
+	return;
+ }
+ actionCollection()->setActionEnabled("debug_unfog", on);
+ actionCollection()->setActionEnabled("debug_players", on);
+}
+
+void BosonMenuInput::slotUnfogAll(Player* pl)
+{
+ // AB: disabled, because we cannot use player.h here.
+ // see also comment in slotEditorEditPlayerMinerals()
+#if 0
+ if (!boGame) {
+	boError() << k_funcinfo << "NULL game" << endl;
+	return;
+ }
+ if (!boGame->playField()) {
+	boError() << k_funcinfo << "NULL playField" << endl;
+	return;
+ }
+ BosonMap* map = boGame->playField()->map();
+ if (!map) {
+	boError() << k_funcinfo << "NULL map" << endl;
+	return;
+ }
+ QPtrList<KPlayer> list;
+ if (!pl) {
+	list = *boGame->playerList();
+ } else {
+	list.append(pl);
+ }
+ for (unsigned int i = 0; i < list.count(); i++) {
+	Player* p = (Player*)list.at(i);
+	for (unsigned int x = 0; x < map->width(); x++) {
+		for (unsigned int y = 0; y < map->height(); y++) {
+			p->unfog(x, y);
+		}
+	}
+	boGame->slotAddChatSystemMessage(i18n("Debug"), i18n("Unfogged player %1 - %2").arg(p->id()).arg(p->name()));
+ }
+#endif
+}
+
+void BosonMenuInput::slotDumpGameLog()
+{
+ boGame->saveGameLogs("boson");
+}
+
+void BosonMenuInput::slotEditConditions()
+{
+ KDialogBase* dialog = new KDialogBase(KDialogBase::Plain, i18n("Conditions"),
+		KDialogBase::Ok | KDialogBase::Cancel, KDialogBase::Ok, 0,
+		"editconditions", true, true);
+ QVBoxLayout* layout = new QVBoxLayout(dialog->plainPage());
+ BoConditionWidget* widget = new BoConditionWidget(dialog->plainPage());
+ layout->addWidget(widget);
+
+ {
+	QDomDocument doc;
+	QDomElement root = doc.createElement("Conditions");
+	doc.appendChild(root);
+
+	if (!boGame->saveCanvasConditions(root)) {
+		boError() << k_funcinfo << "unable to save canvas conditions from game" << endl;
+		KMessageBox::information(0, i18n("Canvas conditions could not be imported to the widget"));
+	} else {
+		QValueStack<QDomElement> stack;
+		stack.push(root);
+		while (!stack.isEmpty()) {
+			QDomElement e = stack.pop();
+			for (QDomNode n = e.firstChild(); !n.isNull(); n = n.nextSibling()) {
+				QDomElement e2 = n.toElement();
+				if (e2.isNull()) {
+					continue;
+				}
+				stack.push(e2);
+			}
+			if (e.hasAttribute("PlayerId")) {
+				bool ok = false;
+				int index = e.attribute("PlayerId").toInt(&ok);
+				if (!ok) {
+					boError() << k_funcinfo << "PlayerId attribute not a valid number" << endl;
+					continue;
+				}
+				KPlayer* p = boGame->playerList()->at(index);
+				e.setAttribute("PlayerId", p->id());
+			}
+		}
+
+		widget->loadConditions(root);
+	}
+;
+ }
+
+ int ret = dialog->exec();
+ QString xml = widget->toString();
+ delete widget;
+ widget = 0;
+ delete dialog;
+ dialog = 0;
+ if (ret == KDialogBase::Accepted) {
+	QDomDocument doc;
+	bool ret = doc.setContent(xml);
+	QDomElement root = doc.documentElement();
+	if (!ret || root.isNull()) {
+		boError() << k_funcinfo << "invalid XML document created" << endl;
+		KMessageBox::sorry(0, i18n("Oops - an invalid XML document was created. Internal error."));
+		return;
+	}
+	boDebug() << k_funcinfo << "applying canvas conditions" << endl;
+	boGame->loadCanvasConditions(root);
+ }
+}
+
+void BosonMenuInput::slotShowGLStates()
+{
+ boDebug() << k_funcinfo << endl;
+ BoGLStateWidget* w = new BoGLStateWidget(0, 0, WDestructiveClose);
+ w->show();
+}
+
+void BosonMenuInput::slotReloadMeshRenderer()
+{
+ bool unusable = false;
+ bool r = BoMeshRendererManager::manager()->reloadPlugin(&unusable);
+ if (r) {
+	return;
+ }
+ boError() << "meshrenderer reloading failed" << endl;
+ if (unusable) {
+	KMessageBox::sorry(0, i18n("Reloading meshrenderer failed, library is now unusable. quitting."));
+	exit(1);
+ } else {
+	KMessageBox::sorry(0, i18n("Reloading meshrenderer failed but library should still be usable"));
+ }
+}
+
+void BosonMenuInput::slotReloadGroundRenderer()
+{
+ bool unusable = false;
+ bool r = BoGroundRendererManager::manager()->reloadPlugin(&unusable);
+ if (r) {
+	return;
+ }
+ boError() << "groundrenderer reloading failed" << endl;
+ if (unusable) {
+	KMessageBox::sorry(0, i18n("Reloading groundrenderer failed, library is now unusable. quitting."));
+	exit(1);
+ } else {
+	KMessageBox::sorry(0, i18n("Reloading groundrenderer failed but library should still be usable"));
+ }
+}
+
+void BosonMenuInput::slotCrashBoson()
+{
+ ((QObject*)0)->name();
+}
+
+void BosonMenuInput::slotDebugMemory()
+{
+#ifdef BOSON_USE_BOMEMORY
+ boDebug() << k_funcinfo << endl;
+ BoMemoryDialog* dialog = new BoMemoryDialog(this);
+ connect(dialog, SIGNAL(finished()), dialog, SLOT(deleteLater()));
+ boDebug() << k_funcinfo << "update data" << endl;
+ dialog->slotUpdate();
+ dialog->show();
+ boDebug() << k_funcinfo << "done" << endl;
+#endif
+}
+
+void BosonMenuInput::slotPreferences()
+{
+ if (!boGame) {
+	boWarning() << k_funcinfo << "NULL boGame object" << endl;
+	return;
+ }
+ OptionsDialog* dlg = new OptionsDialog(!boGame->gameMode(), 0);
+ dlg->setGame(boGame);
+ dlg->setPlayer(playerIO()->player());
+ dlg->slotLoad();
+
+ connect(dlg, SIGNAL(finished()), dlg, SLOT(deleteLater())); // seems not to be called if you quit with "cancel"!
+
+ connect(dlg, SIGNAL(signalCursorChanged(int, const QString&)),
+		this, SIGNAL(signalChangeCursor(int, const QString&)));
+// connect(dlg, SIGNAL(signalCmdBackgroundChanged(const QString&)),
+//		this, SLOT(slotCmdBackgroundChanged(const QString&)));
+ connect(dlg, SIGNAL(signalOpenGLSettingsUpdated()),
+		this, SIGNAL(signalUpdateOpenGLSettings()));
+ connect(dlg, SIGNAL(signalApply()),
+		this, SIGNAL(signalPreferencesApply()));
+// connect(dlg, SIGNAL(signalFontChanged(const BoFontInfo&)),
+//		displayManager(), SLOT(slotChangeFont(const BoFontInfo&)));
+
+ dlg->show();
+}
+
+void BosonMenuInput::slotCenterHomeBase()
+{
+ boDebug() << k_funcinfo << endl;
+ BO_CHECK_NULL_RET(camera());
+ BO_CHECK_NULL_RET(playerIO());
+
+ QPoint pos = playerIO()->homeBase();
+ camera()->setLookAt(BoVector3Float((float)pos.x(), -(float)pos.y(), 0.0));
+}
+
+void BosonMenuInput::slotSyncNetwork()
+{
+ BO_CHECK_NULL_RET(boGame);
+ boGame->syncNetwork();
+}
+
+void BosonMenuInput::slotEditorSavePlayFieldAs()
+{
+ boDebug() << k_funcinfo << endl;
+ QString startIn; // shall we provide this??
+ QString fileName = KFileDialog::getSaveFileName(startIn, "*.bpf", 0);
+ if (fileName.isNull()) {
+	return;
+ }
+ QFileInfo info(fileName);
+ if (info.extension().isEmpty()) {
+	fileName += ".bpf";
+ }
+ if (info.exists()) {
+	int r = KMessageBox::warningYesNoCancel(0, i18n("The file \"%1\" already exists. Are you sure you want to overwrite it?").arg(info.fileName()), i18n("Overwrite File?"));
+	if (r != KMessageBox::Yes) {
+		return;
+	}
+ }
+ bool ret = boGame->savePlayFieldToFile(fileName);
+ if (!ret) {
+	KMessageBox::sorry(0, i18n("An error occurred while saving the playfield. Unable to save."));
+ }
+}
+
+void BosonMenuInput::slotEditorEditMapDescription()
+{
+ BO_CHECK_NULL_RET(boGame);
+ BO_CHECK_NULL_RET(boGame->playField());
+ BO_CHECK_NULL_RET(boGame->playField()->description());
+
+
+// TODO: non-modal might be fine. one could use that for translations (one
+// dialog the original language, one the translated language)
+ BPFDescriptionDialog* dialog = new BPFDescriptionDialog(0, true);
+ dialog->setDescription(boGame->playField()->description());
+ dialog->exec();
+
+ delete dialog;
+}
+
+void BosonMenuInput::slotEditorEditPlayerMinerals()
+{
+ // atm disabled, as we must not include player.h in this file
+ // these methods (e.g. all editor dependent methods) should get moved to a
+ // different file anyway.
+ // maybe all game/editor menu items will be handled by a dedicated KGameIO
+ // class.
+#if 0
+ BO_CHECK_NULL_RET(localPlayer());
+ bool ok = false;
+ QString value = QString::number(localPlayer()->minerals());
+ QIntValidator val(this);
+ val.setBottom(0);
+ val.setTop(1000000); // we need to set a top, because int is limited. this should be enough, i hope (otherwise feel free to increase)
+ value = KLineEditDlg::getText(i18n("Minerals for player %1").arg(localPlayer()->name()), value, &ok, this, &val);
+ if (!ok) {
+	// cancel pressed
+	return;
+ }
+ boDebug() << k_funcinfo << value << endl;
+ unsigned long int v = value.toULong(&ok);
+ if (!ok) {
+	boWarning() << k_funcinfo << "value " << value << " not valid" << endl;
+	return;
+ }
+ localPlayer()->setMinerals(v);
+#endif
+}
+
+void BosonMenuInput::slotEditorEditPlayerOil()
+{
+ // atm disabled, as we must not include player.h in this file
+#if 0
+ BO_CHECK_NULL_RET(localPlayer());
+ bool ok = false;
+ QString value = QString::number(localPlayer()->oil());
+ QIntValidator val(this);
+ val.setBottom(0);
+ val.setTop(1000000); // we need to set a top, because int is limited. this should be enough, i hope (otherwise feel free to increase)
+ value = KLineEditDlg::getText(i18n("Oil for player %1").arg(localPlayer()->name()), value, &ok, this, &val);
+ if (!ok) {
+	return;
+ }
+ boDebug() << k_funcinfo << value << endl;
+ unsigned long int v = value.toULong(&ok);
+ if (!ok) {
+	boWarning() << k_funcinfo << "value " << value << " not valid" << endl;
+	return;
+ }
+ localPlayer()->setOil(v);
+#endif
+}
+
+void BosonMenuInput::slotEditorImportHeightMap()
+{
+ BO_CHECK_NULL_RET(boGame);
+ BO_CHECK_NULL_RET(boGame->playField());
+ BO_CHECK_NULL_RET(boGame->playField()->map());
+ boDebug() << k_funcinfo << endl;
+ QString fileName = KFileDialog::getOpenFileName(QString::null, "*.png", 0);
+ if (fileName.isNull()) {
+	return;
+ }
+ // first load the file as an image. We need it to be in greyscale png in boson,
+ // and we can easily convert that image.
+ QImage image(fileName);
+ if (image.isNull()) {
+	boError() << k_funcinfo << "unbable to load file " << fileName << endl;
+	KMessageBox::sorry(0, i18n("Unable to load %1\nSeems not to be a valid image.").arg(fileName));
+	return;
+ }
+ BosonMap* map = boGame->playField()->map();
+ if ((unsigned int)image.width() != map->width() + 1 ||
+		(unsigned int)image.height() != map->height() + 1) {
+	KMessageBox::sorry(0, i18n("This image can't be used as height map for this map. The map is a %1x%2 map, meaning you need a %3x%4 image.\nThe image selected %5 was %6x%7").
+			arg(map->width()).arg(map->height()).
+			arg(map->width() + 1).arg(map->height() + 1).
+			arg(fileName).
+			arg(image.width()).arg(image.height()));
+	return;
+ }
+ if (!image.isGrayscale()) {
+	KMessageBox::sorry(0, i18n("%1 is not a greyscale image").arg(fileName));
+	return;
+ }
+ boGame->playField()->importHeightMapImage(image);
+ // TODO: update unit positions!
+}
+
+void BosonMenuInput::slotEditorExportHeightMap()
+{
+ BO_CHECK_NULL_RET(boGame);
+ BO_CHECK_NULL_RET(boGame->playField());
+ BO_CHECK_NULL_RET(boGame->playField()->map());
+ boDebug() << k_funcinfo << endl;
+ QString fileName = KFileDialog::getSaveFileName(QString::null, "*.png", 0);
+ if (fileName.isNull()) {
+	return;
+ }
+ QByteArray buffer = boGame->playField()->exportHeightMap();
+ if (buffer.size() == 0) {
+	boError() << k_funcinfo << "Could not export heightMap" << endl;
+	KMessageBox::sorry(0, i18n("Unable to export heightMap"));
+	return;
+ }
+ QImage image(buffer);
+ if (image.isNull()) {
+	boError() << k_funcinfo << "an invalid image has been generated" << endl;
+	KMessageBox::sorry(0, i18n("An invalid heightmop image has been generated."));
+ }
+ if (!image.save(fileName, "PNG")) {
+	boError() << k_funcinfo << "unable to save image to " << fileName << endl;
+	KMessageBox::sorry(0, i18n("Unable to save image to %1.").arg(fileName));
+	return;
+ }
+}
+
+void BosonMenuInput::slotEditorImportTexMap()
+{
+ boDebug() << k_funcinfo << endl;
+ BoTexMapImportDialog* dialog = new BoTexMapImportDialog(0);
+ connect(dialog, SIGNAL(finished()),
+		dialog, SLOT(deleteLater()));
+
+ BosonMap* map = boGame->playField()->map();
+ dialog->setMap(map);
+
+ dialog->show();
+ dialog->slotSelectTexMapImage();
+}
+
+void BosonMenuInput::slotEditorExportTexMap()
+{
+ boDebug() << k_funcinfo << endl;
+ BO_CHECK_NULL_RET(boGame);
+ BO_CHECK_NULL_RET(boGame->playField());
+ BO_CHECK_NULL_RET(boGame->playField()->map());
+ BO_CHECK_NULL_RET(boGame->playField()->map()->groundTheme());
+
+ BosonMap* map = boGame->playField()->map();
+ QStringList textures;
+ for (unsigned int i = 0; i < map->groundTheme()->textureCount(); i++) {
+	textures.append(map->groundTheme()->textureFileName(i));
+ }
+
+ QDialog* d = new QDialog(0, 0, true);
+ QVBoxLayout* layout = new QVBoxLayout(d);
+ QLabel* label = new QLabel(i18n("Select texture to export:"), d);
+ QComboBox* combo = new QComboBox(d);
+ QPushButton* button = new QPushButton(i18n("Ok"), d);
+ connect(button, SIGNAL(clicked()), d, SLOT(accept()));
+ combo->insertStringList(textures);
+ layout->addWidget(label);
+ layout->addWidget(combo);
+ layout->addWidget(button);
+ d->exec();
+ unsigned int tex = (unsigned int)combo->currentItem();
+ boDebug() << k_funcinfo << "tex: " << tex << endl;
+ delete d;
+
+ QString fileName = KFileDialog::getSaveFileName(QString::null, "*.png", 0);
+ if (fileName.isNull()) {
+	return;
+ }
+ QByteArray buffer = boGame->playField()->exportTexMap(tex);
+ if (buffer.size() == 0) {
+	boError() << k_funcinfo << "Could not export texmap" << endl;
+	KMessageBox::sorry(0, i18n("Unable to export texmap"));
+	return;
+ }
+ QImage image(buffer);
+ if (image.isNull()) {
+	boError() << k_funcinfo << "an invalid image has been generated" << endl;
+	KMessageBox::sorry(0, i18n("An invalid texmap image has been generated."));
+ }
+ if (!image.save(fileName, "PNG")) {
+	boError() << k_funcinfo << "unable to save image to " << fileName << endl;
+	KMessageBox::sorry(0, i18n("Unable to save image to %1.").arg(fileName));
+	return;
+ }
+}
+
 

@@ -23,7 +23,9 @@
 
 class BoUfoActionCollection;
 class Player;
+class PlayerIO;
 class KPlayer;
+class BoGameCamera;
 
 class BosonMenuInputDataPrivate;
 class BosonMenuInputData : public QObject
@@ -144,12 +146,115 @@ public:
 		RTTI = 126
 	};
 public:
-	BosonMenuInput();
+	BosonMenuInput(bool gameMode = true);
 	virtual ~BosonMenuInput();
 
 	virtual void initIO(KPlayer*);
 
 	virtual int rtti() const { return RTTI; }
+
+	/**
+	 * This is a workaround for the fact that (currently)
+	 * we don't allow including player.h in this file.
+	 *
+	 * We should somehow make sure, that the IO can access
+	 * player()->playerIO()
+	 **/
+	void setPlayerIO(PlayerIO* io);
+	PlayerIO* playerIO() const;
+
+	void setCamera(BoGameCamera*);
+	BoGameCamera* camera() const;
+
+	void setActionCollection(BoUfoActionCollection* a);
+	BoUfoActionCollection* actionCollection() const;
+
+signals:
+	void signalToggleStatusbar(bool);
+	void signalToggleChatVisible();
+	void signalResetViewProperties();
+	void signalShowLight0Widget();
+	void signalSelectSelectionGroup(int);
+	void signalCreateSelectionGroup(int);
+	void signalPreferencesApply();
+	void signalUpdateOpenGLSettings();
+	void signalChangeCursor(int mode, const QString& cursorDir);
+	void signalEndGame();
+	void signalQuit();
+	void signalSaveGame();
+	void signalEditorChangeLocalPlayer(Player*);
+	void signalEditorShowPlaceFacilities();
+	void signalEditorShowPlaceMobiles();
+	void signalEditorShowPlaceGround();
+	void signalEditorDeleteSelectedUnits();
+	void signalEditorEditHeight(bool);
+
+protected slots:
+	void slotRotateLeft();
+	void slotRotateRight();
+	void slotZoomIn();
+	void slotZoomOut();
+
+	void slotToggleSound();
+	void slotToggleMusic();
+	void slotToggleFullScreen(bool);
+	void slotChangeMaxProfilingEventEntries();
+	void slotChangeMaxProfilingAdvanceEntries();
+	void slotChangeMaxProfilingRenderingEntries();
+	void slotProfiling();
+	void slotDebugKGame();
+	void slotBoDebugLogDialog();
+	void slotSleep1s();
+	void slotGrabScreenshot();
+	void slotGrabProfiling();
+	void slotSetShowResources(bool show);
+	void slotSetDebugMapCoordinates(bool);
+	void slotSetDebugPFData(bool);
+	void slotSetDebugShowCellGrid(bool);
+	void slotSetDebugMatrices(bool);
+	void slotSetDebugItemWorks(bool);
+	void slotSetDebugCamera(bool);
+	void slotSetDebugRenderCounts(bool);
+	void slotSetDebugWireFrames(bool);
+	void slotSetDebugBoundingBoxes(bool);
+	void slotSetDebugFPS(bool);
+	void slotSetDebugAdvanceCalls(bool);
+	void slotSetDebugTextureMemory(bool);
+	void slotSetEnableColorMap(bool enable);
+	void slotSetDebugMode(int);
+	void slotDebugKillPlayer(Q_UINT32 playerId);
+	void slotDebugModifyMinerals(Q_UINT32 playerId, int amount);
+	void slotDebugModifyOil(Q_UINT32 playerId, int amount);
+	void slotToggleCheating(bool);
+	void slotUnfogAll(Player* pl = 0);
+	void slotDumpGameLog();
+	void slotEditConditions();
+	void slotShowGLStates();
+	void slotReloadMeshRenderer();
+	void slotReloadGroundRenderer();
+	void slotCrashBoson();
+	void slotDebugMemory();
+	void slotPreferences();
+	void slotSetGrabMovie(bool);
+
+	void slotCenterHomeBase();
+	void slotSyncNetwork();
+
+	void slotEditorSavePlayFieldAs();
+	void slotEditorEditMapDescription();
+	void slotEditorEditPlayerMinerals();
+	void slotEditorEditPlayerOil();
+	void slotEditorImportHeightMap();
+	void slotEditorImportTexMap();
+	void slotEditorExportHeightMap();
+	void slotEditorExportTexMap();
+
+private:
+	bool mGameMode;
+	BoGameCamera* mCamera;
+	PlayerIO* mPlayerIO;
+	BoUfoActionCollection* mActionCollection;
+	BosonMenuInputData* mData;
 };
 
 #endif
