@@ -132,10 +132,6 @@ public:
 
 	bool savePlayField(const QString& fileName);
 
-	// AB: do we still need these?
-	bool savePlayFieldForRemote(QDataStream& stream) const;
-	bool loadPlayFieldFromRemote(QDataStream& stream);
-
 	/**
 	 * Make @p map the new map of this playfield. Called by the editor
 	 * only.
@@ -231,24 +227,6 @@ protected:
 	QString saveDescriptionToFile();
 	QByteArray saveMapToFile();
 	QByteArray saveTexMapToFile();
-
-	bool saveMap(QDataStream& stream) const;
-	bool saveDescription(QDataStream& stream) const;
-
-	/**
-	 * Load a @ref BosonMap from stream. Create a new BosonMap object if it
-	 * does not yet exist, otherwise load from stream but also compare the
-	 * stream with our locally present @ref BosonMap. Note that there must
-	 * be no difference as we should have been the one who sent the stream!!
-	 *
-	 * But if there is a difference by any reason the network stream will be
-	 * used instead of our locally present one.
-	 *
-	 * @return FALSE if the format was invalid. Note that the map will be
-	 * broken then!
-	 **/
-	bool loadMap(QDataStream& stream);
-	bool loadDescription(QDataStream& stream);
 
 	/**
 	 * @return A list of all playfields (.bpf files) that are found on this
