@@ -366,7 +366,7 @@ inline void BosonPath::neighbor(int& x, int& y, Direction d)
 
 float BosonPath::cost(int x, int y)
 {
-  Cell* c = mUnit->boCanvas()->cellAt(x, y);
+  Cell* c = mUnit->boCanvas()->cell(x, y);
   // Check if we can go to that tile, if we can't, return -1
   if(! c->canGo(mUnit->unitProperties()))
   {

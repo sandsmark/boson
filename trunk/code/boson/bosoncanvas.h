@@ -98,6 +98,7 @@ public:
 
 	Cell* cellAt(Unit* unit) const;
 	Cell* cellAt(double x, double y) const;
+	Cell* cell(int x, int y) const;
 
 public slots:
 	/**
@@ -116,7 +117,6 @@ signals:
 
 protected:
 	void loadTiles(const QString&);
-	Cell* cell(int x, int y) const;
 	void play(const QString& fileName); // perhaps in public
 
 protected slots:
