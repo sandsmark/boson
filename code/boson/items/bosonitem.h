@@ -159,9 +159,8 @@ public:
 	/**
 	 * Render the item. This assumes the modelview matrix was already
 	 * translated and rotated to the correct position.
-	 * @return number of vertices rendered
 	 **/
-	unsigned int renderItem();
+	void renderItem();
 
 	inline GLuint displayList() const
 	{

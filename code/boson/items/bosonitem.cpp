@@ -375,7 +375,7 @@ void BosonItem::setSize(int width, int height)
  addToCells();
 }
 
-unsigned int  BosonItem::renderItem()
+void BosonItem::renderItem()
 {
  mModel->enablePointer();
  if (displayList() != 0) {
@@ -384,9 +384,8 @@ unsigned int  BosonItem::renderItem()
 	// teamcolor->displaylist!
 	// not here, but in setDisplayList() or friends
 	glCallList(displayList());
-	return 0;
  } else {
-	return mCurrentFrame->renderFrame(teamColor());
+	mCurrentFrame->renderFrame(teamColor());
  }
 }
 
