@@ -66,7 +66,8 @@ BOSON_SRC = \
 	bpfdescriptiondialog.cpp \
 	bosonbigdisplayinputbase.cpp \
 	bosonbigdisplayinput.cpp \
-	editorbigdisplayinput.cpp
+	editorbigdisplayinput.cpp \
+	bomesh.cpp
 
 
 BOPROFILING_SRC= \
@@ -100,7 +101,8 @@ bounit_LDADD = \
 		-lkio $(LIB_KDEUI)
 bounit_SOURCES = \
 		$(BOSON_SRC) \
-		bounitmain.cpp bosonsearchpathswidget.ui bouniteditor.ui
+		bounitmain.cpp bosonsearchpathswidget.ui \
+		bouniteditor.ui
 
 boprofiling_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 boprofiling_LDADD = \
