@@ -31,9 +31,11 @@ editorBigDisplay::editorBigDisplay(visualView *v, QWidget *p, const char *n, WFl
 
 	g = GROUND_UNKNOWN;
 	otype = OT_NONE;
+
+	setWho(0);
 }
 
-void editorBigDisplay::actionClicked(int mx, int my)
+void editorBigDisplay::actionClicked(int mx, int my, int state)
 {
 	editorField *field	= (((editorField*)(view->field)));
 	int	x		= mx / BO_TILE_SIZE,
@@ -54,8 +56,16 @@ void editorBigDisplay::actionClicked(int mx, int my)
 		case OT_GROUND:
 			if ( IS_BIG_TRANS(g) )
 			       if ( x+1>=field->maxX || y+1>=field->maxY) return;
-			field->deleteCell(x,y);
-			field->setCell(x,y,g);
+
+			if ( IS_PLAIN(g) && (state&ShiftButton) ) {
+				int i,j;
+				for (i=-2; i< 3; i++)
+					if (x+i>=0 && x+i<field->maxX)
+						for (j=-2; j< 3; j++)
+							if (y+j>=0 && y+j<field->maxY)
+								field->changeCell( x+i, y+j, g);
+			} else
+				field->changeCell( x, y, g);
 
 			view->setSelectionMode( SELECT_FILL);
 			break;

@@ -33,7 +33,7 @@ bosonBigDisplay::bosonBigDisplay(bosonView *v, QWidget *parent=0, const char *na
 }
 
 
-void bosonBigDisplay::actionClicked(int mx, int my)
+void bosonBigDisplay::actionClicked(int mx, int my, int /*state*/)
 {
 	QwSpriteFieldGraphic *sfg;
 

@@ -132,7 +132,7 @@ void visualBigDisplay::mouseMoveEvent(QMouseEvent *e)
 			if (oldX==selectX && oldY==selectY)
 				return;
 			oldX = selectX; oldY = selectY;
-			actionClicked( oldX, oldY);
+			actionClicked( oldX, oldY, e->state());
 			break;
 
 		case SELECT_PUT:
@@ -264,7 +264,7 @@ void visualBigDisplay::mousePressEvent(QMouseEvent *e)
 	} // LeftButton 
 
 	if (e->button() & RightButton) {
-		actionClicked( x, y);
+		actionClicked( x, y, e->state());
 		oldX = x; oldY = y;
 		return;
 		}
