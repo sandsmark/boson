@@ -180,7 +180,8 @@ libboprofiling_la_SOURCES = \
 		boapplication.cpp \
 		boglobal.cpp \
 		bosonprofilingdialog.cpp \
-		bosonprofiling.cpp
+		bosonprofiling.cpp \
+		bosonconfig.cpp
 boprofiling_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 boprofiling_LDADD = \
 		$(top_builddir)/boson/libboprofiling.la \
