@@ -47,19 +47,18 @@ Player::Player(void)
 
 void Player::flush(void)
 {
-	static bosonMsgData	msg;	// static so that no need to reallocate it at every call
+	static ressMsg_t	msg; // static so that no need to reallocate it at every call
 
 	/* ressources have changed ? */
 	if (needFlushing) {
-		msg.ressources.mineral	= mineral;
-		msg.ressources.oil	= oil;
-		sendMsg(buffer, MSG_PERSO_RESSOURCES, sizeof(msg.ressources), &msg);
+		msg.mineral	= mineral;
+		msg.oil		= oil;
+		sendMsg(buffer, MSG_PERSO_RESSOURCES, sizeof(msg), &msg);
 	}
 	
 
 	/* synchro */
-	msg.jiffies = jiffies;
-	sendMsg(buffer, MSG_TIME_INCREASE, sizeof(msg.jiffies), &msg);
+	sendMsg(buffer, MSG_TIME_INCREASE, sizeof(jiffies), &jiffies);
 	boAssert(lastConfirmedJiffies == (jiffies-1));
 
 	buffer->flush();	// actually send datas to the player

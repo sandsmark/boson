@@ -49,9 +49,10 @@ static int computeChkSum(int tag, int ilen, bosonMsgData *data)
 }
 
 
-int sendMsg(boBuffer *buffer, bosonMsgTag tag, int blen, bosonMsgData *data)
+int sendMsg(boBuffer *buffer, bosonMsgTag tag, int blen, void *_data)
 {
 	int ilen = blen / sizeof(int);
+	bosonMsgData *data = (bosonMsgData *) _data;
 
 	if (BOSON_NO_TAG == tag) return 0;
  
@@ -74,9 +75,10 @@ int sendMsg(boBuffer *buffer, bosonMsgTag tag, int blen, bosonMsgData *data)
 }
 
 
-int recvMsg(boBuffer *buffer, bosonMsgTag &tag, int &blen, bosonMsgData *data)
+int recvMsg(boBuffer *buffer, bosonMsgTag &tag, int &blen, void *_data)
 {
 	int i=0, ilen, k, sum;
+	bosonMsgData *data = (bosonMsgData *) _data;
 
 	logf ( LOG_LAYER0, "Receiving msg");
 	assert(buffer->socket>0);

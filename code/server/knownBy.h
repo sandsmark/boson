@@ -42,7 +42,7 @@ class knownBy
 
 // protected:
 	/* implemented in serverUnit.cpp */
-	void sendToKnown(bosonMsgTag tag, int blen, bosonMsgData *data);
+	void sendToKnown(bosonMsgTag tag, int blen, void *data);
 // private :
  	ulong  known;
 
