@@ -358,16 +358,19 @@ void Unit::advanceNone(unsigned int advanceCount)
 // this is called when the unit has nothing specific to do. Usually we just want
 // to fire at every enemy in range.
 
- if (advanceCount % 5 != 0) {
+ if (advanceCount % 10 != 0) {
 	return;
  }
- 
+
+ if (!target() && (advanceCount % 20 != 0)) {
+	return;
+ }
  attackEnemyUnitsInRange();
 }
 
 bool Unit::attackEnemyUnitsInRange()
 {
- if(!unitProperties()->canShoot()) {
+ if (!unitProperties()->canShoot()) {
 	return false;
  }
 
@@ -395,19 +398,19 @@ bool Unit::attackEnemyUnitsInRange()
 
 	// If unit is mobile, rotate to face the target if it isn't facing it yet
 	if (isMobile()) {
-	float rot = rotationToPoint(target()->x() - x(), target()->y() - y());
-	if (rot < rotation() - 5 || rot > rotation() + 5) {
-		// Rotate to face target
-		if (QABS(rotation() - rot) > (2 * speed())) {
-			turnTo((int)rot);
-			setAdvanceWork(WorkTurn);
-			return true;
-		} else {
-			// If we can get wanted rotation with only little turning, then we don't call turnTo()
-			setRotation(rot);
+		float rot = rotationToPoint(target()->x() - x(), target()->y() - y());
+		if (rot < rotation() - 5 || rot > rotation() + 5) {
+			// Rotate to face target
+			if (QABS(rotation() - rot) > (2 * speed())) {
+				turnTo((int)rot);
+				setAdvanceWork(WorkTurn);
+				return true;
+			} else {
+				// If we can get wanted rotation with only little turning, then we don't call turnTo()
+				setRotation(rot);
+			}
 		}
 	}
- }
 
 	// And finally... let it have everything we've got
 	if (w->canShootAt(target()) && inRange(w->properties()->range(), target())) {
@@ -448,11 +451,11 @@ Unit* Unit::bestEnemyUnitInRange()
 	u = ((Unit*)*it);
 	// Quick check if we can shoot at u
 	if (u->isFlying()) {
-		if(!unitProperties()->canShootAtAirUnits()) {
+		if (!unitProperties()->canShootAtAirUnits()) {
 			continue;
 		}
 	} else {
-		if(!unitProperties()->canShootAtLandUnits()) {
+		if (!unitProperties()->canShootAtLandUnits()) {
 			continue;
 		}
 	}
@@ -480,11 +483,11 @@ Unit* Unit::bestEnemyUnitInRange()
  }
 
  // Pick the best unit from the candidates
- if(c1) {
+ if (c1) {
 	best = c1;
- } else if(c2) {
+ } else if (c2) {
 	best = c2;
- } else if(c3) {
+ } else if (c3) {
 	best = c3;
  }
  return best;
@@ -643,12 +646,10 @@ void Unit::moveTo(const QPoint& pos, bool attack)
  } else {
 	setWork(WorkNone);
  }
- boDebug() << k_funcinfo << "unit " << id() << ": DONE, work: " << work() << endl;
 }
 
 bool Unit::moveTo(float x, float y, int range, bool attack)
 {
- boDebug() << k_funcinfo << "unit " << id() << ": x: " << x << "; y: " << y << "; range: " << range << "; attack: " << attack << endl;
 
  stopMoving();
 
@@ -688,13 +689,11 @@ bool Unit::moveTo(float x, float y, int range, bool attack)
 	d->mMoveAttacking = 0;
  }
 
- boDebug() << k_funcinfo << "unit " << id() << ": DONE" << endl;
  return true;
 }
 
 void Unit::newPath()
 {
- boDebug() << k_funcinfo << "unit " << id() << endl;
  if (!canvas()->cell(d->mMoveDestX / BO_TILE_SIZE, d->mMoveDestY / BO_TILE_SIZE)) {
 	boError() << k_funcinfo << "invalid cell " << d->mMoveDestX / BO_TILE_SIZE << "," << d->mMoveDestY / BO_TILE_SIZE << endl;
 	return;
@@ -862,7 +861,7 @@ bool Unit::load(QDataStream& stream)
 
 bool Unit::inRange(unsigned long int r, Unit* target) const
 {
- return (QMAX(QABS((int)(target->x() - x()) / BO_TILE_SIZE), QABS((int)(target->y() - y()) / BO_TILE_SIZE)) <= r);
+ return (QMAX(QABS((int)(target->x() - x()) / BO_TILE_SIZE), QABS((int)(target->y() - y()) / BO_TILE_SIZE)) <= (int)r);
 }
 
 void Unit::shootAt(BosonWeapon* w, Unit* target)
@@ -950,9 +949,6 @@ BoItemList Unit::enemyUnitsInRange(unsigned long int range) const
 QValueList<Unit*> Unit::unitCollisions(bool exact) const
 {
  QValueList<Unit*> units;
- if (isFlying()) { // flying units never collide - different altitudes
-	return units;
- }
  boDebug(310) << k_funcinfo << endl;
  BoItemList collisionList = canvas()->collisionsAtCells(cells(), (BosonItem*)this, exact);
  if (collisionList.isEmpty()) {
@@ -968,7 +964,7 @@ QValueList<Unit*> Unit::unitCollisions(bool exact) const
 	if (unit->isDestroyed()) {
 		continue;
 	}
-	if (unit->isFlying()) {
+	if (unit->isFlying() != isFlying()) {
 		continue;
 	}
 	units.append(unit);
@@ -978,7 +974,6 @@ QValueList<Unit*> Unit::unitCollisions(bool exact) const
 
 void Unit::setAdvanceWork(WorkType w)
 {
- boDebug(300) << k_funcinfo << "unit " << id() << endl;
  // velicities should be 0 anyway - this is the final fallback in case it was 
  // missing by any reason
  setVelocity(0.0, 0.0, 0.0);
@@ -991,7 +986,6 @@ void Unit::setAdvanceWork(WorkType w)
 		setAdvanceFunction(&Unit::advanceNone, owner()->advanceFlag());
 		break;
 	case WorkMove:
-		boDebug(300) << k_funcinfo << "unit " << id() << ": setting work to WorkMove" << endl;
 		setAdvanceFunction(&Unit::advanceMove, owner()->advanceFlag());
 		break;
 	case WorkAttack:
@@ -1013,13 +1007,10 @@ void Unit::setAdvanceWork(WorkType w)
 		setAdvanceFunction(&Unit::advanceTurn, owner()->advanceFlag());
 		break;
  }
- boDebug(300) << k_funcinfo << "unit " << id() << ": DONE" << endl;
 }
 
 void Unit::setAdvanceFunction(MemberFunction func, bool advanceFlag)
 {
- boDebug(300) << k_funcinfo << "unit " << id() << endl;
- boDebug(300) << k_funcinfo << "unit " << id() << ": advanceFlag: " << advanceFlag << "; canvas()->advanceFunctionLocked(): " << canvas()->advanceFunctionLocked() << "; func: " << func << endl;
  if (canvas()->advanceFunctionLocked()) {
 	if (advanceFlag) {
 		mAdvanceFunction = func;
@@ -1030,7 +1021,6 @@ void Unit::setAdvanceFunction(MemberFunction func, bool advanceFlag)
 	mAdvanceFunction = func;
 	mAdvanceFunction2 = func;
  }
- boDebug(300) << k_funcinfo << "unit " << id() << ": DONE" << endl;
 }
 
 bool Unit::isNextTo(Unit* target) const
@@ -1168,7 +1158,6 @@ void MobileUnit::advanceMoveInternal(unsigned int) // this actually needs to be 
  }
 
  if (mSearchPath) {
-	boDebug(401) << k_funcinfo << "unit " << id() << ": searching new path and returning" << endl;
 	newPath();
 	mSearchPath = false;
 	return;
