@@ -134,6 +134,7 @@ QString BoToolTipCreatorDebug::createToolTip(const BosonItem* item) const
  tip += i18n("\nWork: %1").arg(u->work());
  tip += i18n("\nAdvance Work: %1").arg(u->advanceWork());
  tip += i18n("\nTarget: %1").arg(u->target() ? QString::number(u->target()->id()) : i18n("None"));
+ tip += i18n("\nDestination: %1,%2").arg(u->destinationX()).arg(u->destinationY());
 
  // AB: waypoints are important imho
  QValueList<QPoint> waypoints = u->waypointList();
