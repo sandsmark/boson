@@ -202,7 +202,7 @@ Align=true
 Texture=smoke.png
 
 [BigShockWave]
-Id=4001
+Id=4002
 MinVelocity=-5,-5,0  
 MaxVelocity=5,5,0.05
 MinPos=-0.1,-0.1,0.0
