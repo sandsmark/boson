@@ -179,14 +179,14 @@ bool BoCondition::save(QDomElement& root, const QMap<int, int>* playerId2Index) 
 
 bool BoCondition::load(const QDomElement& root)
 {
- QDomElement eventsLeft = root.namedItem("Events").toElement();
- if (eventsLeft.isNull()) {
+ QDomElement events = root.namedItem("Events").toElement();
+ if (events.isNull()) {
 	boError() << k_funcinfo << "No Events tag" << endl;
 	return false;
  }
  d->mEvents.clear();
  d->mEventsLeft.clear();
- QDomNodeList matchings = eventsLeft.elementsByTagName("EventMatching");
+ QDomNodeList matchings = events.elementsByTagName("EventMatching");
  for (unsigned int i = 0; i < matchings.count(); i++) {
 	QDomElement m = matchings.item(i).toElement();
 	if (m.isNull()) {
