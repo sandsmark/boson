@@ -22,6 +22,7 @@
 #define boProfiling BosonProfiling::bosonProfiling()
 
 class QString;
+class QDataStream;
 class BosonProfilingDialog;
 
 /**
@@ -95,6 +96,7 @@ public:
 		ProfilingEnd // must remain the last entry!
 	};
 	BosonProfiling();
+	BosonProfiling(const BosonProfiling& profiling);
 	~BosonProfiling();
 
 	static void initProfiling();
@@ -137,6 +139,9 @@ public:
 
 	bool saveToFile(const QString& fileName);
 	bool loadFromFile(const QString& fileName);
+
+	bool save(QDataStream& stream) const;
+	bool load(QDataStream& stream);
 
 private:
 	class BosonProfilingPrivate;
