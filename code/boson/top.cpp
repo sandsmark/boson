@@ -760,9 +760,11 @@ void TopWidget::slotEndGame()
 
 void TopWidget::endGame()
 {
- d->mBosonWidget->slotEndGame();
- saveGameDockConfig();
- disconnect(d->mBosonWidget, 0, 0, 0);
+ if (d->mBosonWidget) {
+	d->mBosonWidget->slotEndGame();
+	disconnect(d->mBosonWidget, 0, 0, 0);
+	saveGameDockConfig();
+ }
  // Delete all objects
  delete d->mBosonWidget;
  d->mBosonWidget = 0;
