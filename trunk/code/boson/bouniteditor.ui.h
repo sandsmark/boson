@@ -67,26 +67,20 @@ void BoUnitEditor::slotTypeChanged()
     }
 }
 
-void BoUnitEditor::slotUnitSelected( int )
-{
-    mEditUnitButton->setEnabled(true);
-}
-
-void BoUnitEditor::slotEditUnit()
+void BoUnitEditor::slotUnitSelected( int index)
 {
     // Ask is user wants to save current properties
-    // TODO: check if current properties have changed and don't display this
-    //  msgbox if they haven't
-    int answer = KMessageBox::questionYesNoCancel(this,
-						  i18n("Do you want to save current unit properties?"),
-						  i18n("Save current unit?"));
-    if(answer == KMessageBox::Cancel) {
-	return;
-    } else if(answer == KMessageBox::Yes) {
-	slotSaveUnit();
+    if(mUnitLoaded) {
+	int answer = KMessageBox::questionYesNoCancel(this,
+						      i18n("Do you want to save current unit properties?"),
+						      i18n("Save current unit?"));
+	if(answer == KMessageBox::Cancel) {
+	    return;
+	} else if(answer == KMessageBox::Yes) {
+	    slotSaveUnit();
+	}
     }
-    // Open new unit
-    slotLoadUnit(mUnits[mUnitsList->currentItem()]);
+    slotLoadUnit(mUnits[index]);
 }
 
 void BoUnitEditor::slotAddTexture()
@@ -205,6 +199,7 @@ void BoUnitEditor::slotLoadUnit( QString dir )
     mUnit->reset();
     mUnit->loadUnitType(dir + "/index.unit", false);
     slotUpdateWidgets();
+    mUnitLoaded = true;
 }
 
 void BoUnitEditor::slotEditSearchPaths()
@@ -217,6 +212,7 @@ void BoUnitEditor::slotEditSearchPaths()
 
 void BoUnitEditor::init()
 {
+    mUnitLoaded = false; // Bad hack
     mUnit = new UnitProperties(false);
     mSearchPaths = new BosonSearchPathsWidget;
     mWeapons.setAutoDelete(true);

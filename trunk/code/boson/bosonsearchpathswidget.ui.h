@@ -8,6 +8,7 @@
 
 #include <kfiledialog.h>
 #include <klocale.h>
+#include <kdebug.h>
 
 #include <qdir.h>
 
@@ -39,6 +40,7 @@ void BosonSearchPathsWidget::slotAddPath()
 	return;
     }
     mCurrentPaths->insertItem(d.absPath(), 0);
+    mNewPath->setText("");
 }
 
 void BosonSearchPathsWidget::slotBrowse()
@@ -53,4 +55,29 @@ QStringList BosonSearchPathsWidget::currentPaths()
 	paths.append(mCurrentPaths->item(i)->text());
     }
     return paths;
+}
+
+
+void BosonSearchPathsWidget::slotPathSelected( int index )
+{
+    mCurrentPath = index;
+    if(mCurrentPath >= 0) {
+	mNewPath->setText(mCurrentPaths->item(index)->text());
+    }
+}
+
+void BosonSearchPathsWidget::slotCurrentPathChanged(const QString& path)
+{
+    if(mCurrentPath == -1) {
+	return;
+    }
+//    mCurrentPaths->item(mCurrentPath)->setText(path);
+    // QListBoxItem::setText() is protected so we have to use this workaround here
+    mCurrentPaths->changeItem(path, mCurrentPath);
+}
+
+
+void BosonSearchPathsWidget::init()
+{
+ mCurrentPath = -1;
 }
