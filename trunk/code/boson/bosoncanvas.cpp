@@ -136,16 +136,16 @@ public:
 	{
 		mCanvas = c;
 	}
-	void advance(const QPtrList<BosonItem>& animItems, unsigned int advanceCallsCount, bool advanceFlag);
+	void advance(const BoItemList& allItems, const QPtrList<BosonItem>& animItems, unsigned int advanceCallsCount, bool advanceFlag);
 
 protected:
-	void advanceItems(const QPtrList<BosonItem>& animItems, unsigned int advanceCallsCount, bool advanceFlag);
-	void itemAdvance(const QPtrList<BosonItem>& animItems, unsigned int advanceCallsCount); // calls BosonItem::advance()
+	void advanceItems(const BoItemList& allItems, const QPtrList<BosonItem>& animItems, unsigned int advanceCallsCount, bool advanceFlag);
+	void itemAdvance(const BoItemList& allItems, const QPtrList<BosonItem>& animItems, unsigned int advanceCallsCount); // calls BosonItem::advance()
 
 	// AB: note that animItems is not used here currently. we use
 	// mCanvas->d->mWork2AdvanceList.
 	void advanceFunctionAndMove(unsigned int advanceCallsCount, bool advanceFlag);
-	void syncAdvanceFunctions(const QPtrList<BosonItem>& animItems, bool advanceFlag); // MUST be called after advanceFunction() stuff
+	void syncAdvanceFunctions(const BoItemList& allItems, bool advanceFlag); // MUST be called after advanceFunction() stuff
 	void updateWork2AdvanceList();
 	void maximalAdvanceCountTasks(unsigned int advanceCallsCount); // "maximalAdvanceCount" is nonsense here, but the name has historic reasons
 	void updateEffects(QPtrList<BosonEffect>& effects, float elapsed);
@@ -154,7 +154,7 @@ private:
 	BosonCanvas* mCanvas;
 };
 
-void BoCanvasAdvance::advance(const QPtrList<BosonItem>& animItems, unsigned int advanceCallsCount, bool advanceFlag)
+void BoCanvasAdvance::advance(const BoItemList& allItems, const QPtrList<BosonItem>& animItems, unsigned int advanceCallsCount, bool advanceFlag)
 {
  boProfiling->advance(true, advanceCallsCount);
 
@@ -163,7 +163,7 @@ void BoCanvasAdvance::advance(const QPtrList<BosonItem>& animItems, unsigned int
   * the most time consuming part.
   */
  boProfiling->advanceFunction(true);
- advanceItems(animItems, advanceCallsCount, advanceFlag);
+ advanceItems(allItems, animItems, advanceCallsCount, advanceFlag);
  boProfiling->advanceFunction(false);
 
  boProfiling->advanceEffects(true);
@@ -187,7 +187,7 @@ void BoCanvasAdvance::advance(const QPtrList<BosonItem>& animItems, unsigned int
  boProfiling->advance(false, advanceCallsCount);
 }
 
-void BoCanvasAdvance::advanceItems(const QPtrList<BosonItem>& animItems, unsigned int advanceCallsCount, bool advanceFlag)
+void BoCanvasAdvance::advanceItems(const BoItemList& allItems, const QPtrList<BosonItem>& animItems, unsigned int advanceCallsCount, bool advanceFlag)
 {
  static int profilingAdvance = boProfiling->requestEventId("Advance: BosonItem::advance()");
  static int profilingAdvanceFunctionAndMove = boProfiling->requestEventId("Advance: BosonItem::advanceFunction() and move()");
@@ -199,7 +199,7 @@ void BoCanvasAdvance::advanceItems(const QPtrList<BosonItem>& animItems, unsigne
  // collecting for every item advance() here, and below for some items
  // advanceFunction(). those will be listed as *different* items...
  boProfiling->start(profilingAdvance);
- itemAdvance(animItems, advanceCallsCount);
+ itemAdvance(allItems, animItems, advanceCallsCount);
  boProfiling->stop(profilingAdvance);
 
  // now the rest - mainly call BosonItem::advanceFunction().
@@ -211,7 +211,7 @@ void BoCanvasAdvance::advanceItems(const QPtrList<BosonItem>& animItems, unsigne
 
  // now we need to make sure that the correct advance function will be called in
  // the next advance call.
- syncAdvanceFunctions(animItems, advanceFlag);
+ syncAdvanceFunctions(allItems, advanceFlag);
 
  // we completed iterating through the advance lists. now we might have to
  // change the list for some items.
@@ -220,12 +220,13 @@ void BoCanvasAdvance::advanceItems(const QPtrList<BosonItem>& animItems, unsigne
  mCanvas->unlockAdvanceFunction();
 }
 
-void BoCanvasAdvance::itemAdvance(const QPtrList<BosonItem>& animItems, unsigned int advanceCallsCount)
+// FIXME: name is completely wrong now. it doesn't advance anything, but does
+// animate() and reload() only.
+void BoCanvasAdvance::itemAdvance(const BoItemList& allItems, const QPtrList<BosonItem>& animItems, unsigned int advanceCallsCount)
 {
  static int profilingAnimateReload = boProfiling->requestEventId("Advance: BosonItem::animate() and reload() (in itemAdvance() - whole method)");
  static int profilingAnimate = boProfiling->requestEventId("Advance: BosonItem::animate() (in itemAdvance())");
  static int profilingReload = boProfiling->requestEventId("Advance: BosonItem::reload() (in itemAdvance())");
- static int profilingWork = boProfiling->requestEventId("Advance: work count (in itemAdvance())");
  BosonProfiler profAnimateReload(profilingAnimateReload);
 
  BosonProfiler profAnimate(profilingAnimate);
@@ -235,29 +236,13 @@ void BoCanvasAdvance::itemAdvance(const QPtrList<BosonItem>& animItems, unsigned
  }
  profAnimate.stop();
 
- BosonProfiler profWork(profilingWork);
- animIt.toFirst();
- for (; animIt.current(); ++animIt) {
-	unsigned int id;
-	int work;
-	BosonItem* s = animIt.current();
-	if (RTTI::isUnit(s->rtti())) {
-		id = ((Unit*)s)->id();
-		work = (int)((Unit*)s)->advanceWork();
-	} else {
-		id = 0;
-		work = -1;
-	}
-	mCanvas->d->mStatistics->increaseWorkCount(work);
- }
- profWork.stop();
-
  BosonProfiler profReload(profilingReload);
  const unsigned int interval = 5;
  if (advanceCallsCount % interval == 0) {
-	animIt.toFirst();
-	for (; animIt.current(); ++animIt) {
-		animIt.current()->reload(interval);
+	BoItemList::ConstIterator allIt;
+	BoItemList::ConstIterator allItemsEnd = allItems.end();
+	for (allIt = allItems.begin(); allIt != allItemsEnd; ++allIt) {
+		(*allIt)->reload(interval);
 	}
  }
  profReload.stop();
@@ -265,6 +250,7 @@ void BoCanvasAdvance::itemAdvance(const QPtrList<BosonItem>& animItems, unsigned
 
 void BoCanvasAdvance::advanceFunctionAndMove(unsigned int advanceCallsCount, bool advanceFlag)
 {
+ // FIXME: the mWork2AdvanceList map should be a parameter
  QMap<int, QPtrList<BosonItem> >::Iterator it;
  for (it = mCanvas->d->mWork2AdvanceList.begin(); it != mCanvas->d->mWork2AdvanceList.end(); ++it) {
 	int work = it.key();
@@ -317,6 +303,9 @@ void BoCanvasAdvance::advanceFunctionAndMove(unsigned int advanceCallsCount, boo
 			skip = false;
 			break;
 	}
+
+	mCanvas->d->mStatistics->increaseWorkCountBy(work, (*it).count());
+
 	if (skip) {
 		continue;
 	}
@@ -337,17 +326,18 @@ void BoCanvasAdvance::advanceFunctionAndMove(unsigned int advanceCallsCount, boo
  }
 }
 
-void BoCanvasAdvance::syncAdvanceFunctions(const QPtrList<BosonItem>& animItems, bool advanceFlag)
+void BoCanvasAdvance::syncAdvanceFunctions(const BoItemList& allItems, bool advanceFlag)
 {
- QPtrListIterator<BosonItem> animIt(animItems);
+ BoItemList::ConstIterator it;
+ BoItemList::ConstIterator allItemsEnd = allItems.end();
  if (advanceFlag) {
-	for (; animIt.current(); ++animIt) {
-		BosonItem* i = animIt.current();
+	for (it = allItems.begin(); it != allItemsEnd; ++it) {
+		BosonItem* i = *it;
 		i->syncAdvanceFunction();
 	}
  } else {
-	for (; animIt.current(); ++animIt) {
-		BosonItem* i = animIt.current();
+	for (it = allItems.begin(); it != allItemsEnd; ++it) {
+		BosonItem* i = *it;
 		i->syncAdvanceFunction2();
 	}
  }
@@ -552,7 +542,7 @@ void BosonCanvas::slotAdvance(unsigned int advanceCallsCount, bool advanceFlag)
  BosonProfiler profiler(profilingSlotAdvance);
 
  BoCanvasAdvance a(this);
- a.advance(d->mAnimList, advanceCallsCount, advanceFlag);
+ a.advance(d->mAllItems, d->mAnimList, advanceCallsCount, advanceFlag);
 }
 
 bool BosonCanvas::canGo(const UnitProperties* prop, const BoRectFixed& rect) const
@@ -609,9 +599,6 @@ void BosonCanvas::addAnimation(BosonItem* item)
 {
  if (!d->mAnimList.contains(item)) {
 	d->mAnimList.append(item);
-
-	// by default it goes to "work" == -1. units will change this.
-	d->mWork2AdvanceList[-1].append(item);
  } else {
 	boError() << k_funcinfo << item << " has been added before! id=" << item->id() << endl;
  }
@@ -623,13 +610,6 @@ void BosonCanvas::removeAnimation(BosonItem* item)
  if (!ok) {
 	boError() << k_funcinfo << "could not remove animation for " << item << " == " << item->id() << " which is not in the list!" << endl;
  }
-
- // remove from all advance lists
- QMap<int, QPtrList<BosonItem> >::Iterator it;
- for (it = d->mWork2AdvanceList.begin(); it != d->mWork2AdvanceList.end(); ++it) {
-	(*it).removeRef(item);
- }
- d->mChangeAdvanceList.removeRef(item);
 }
 
 void BosonCanvas::unitMoved(Unit* unit, bofixed oldX, bofixed oldY)
@@ -1161,6 +1141,9 @@ unsigned int BosonCanvas::allItemsCount() const
 void BosonCanvas::addItem(BosonItem* item)
 {
  d->mAllItems.append(item);
+
+ // by default it goes to "work" == -1. units will change this.
+ d->mWork2AdvanceList[-1].append(item);
 }
 
 void BosonCanvas::deleteItem(BosonItem* item)
@@ -1202,8 +1185,15 @@ void BosonCanvas::removeItem(BosonItem* item)
 		boError() << k_funcinfo << item << " still in destroyed units list" << endl;
 	}
  }
- emit signalRemovedItem(item);
 
+ // remove from all advance lists
+ QMap<int, QPtrList<BosonItem> >::Iterator it;
+ for (it = d->mWork2AdvanceList.begin(); it != d->mWork2AdvanceList.end(); ++it) {
+	(*it).removeRef(item);
+ }
+ d->mChangeAdvanceList.removeRef(item);
+
+ emit signalRemovedItem(item);
 }
 
 unsigned int BosonCanvas::effectsCount() const
