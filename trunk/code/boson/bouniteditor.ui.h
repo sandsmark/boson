@@ -444,6 +444,7 @@ void BoUnitEditor::slotUpdateWidgets()
     mUnitCanGoOnWater->setChecked(mUnit->canGoOnWater());
     mUnitCanRefineMinerals->setChecked(mUnit->canRefineMinerals());
     mUnitCanRefineOil->setChecked(mUnit->canRefineOil());
+    mUnitConstructionSteps->setValue(mUnit->constructionSteps());
     // Weapons
     mWeapons.clear();
     mWeaponsList->clear();
