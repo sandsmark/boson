@@ -110,6 +110,7 @@ signals:
 	void signalCameraYChanged(float);
 	void signalCameraZChanged(float);
 	void signalFrameChanged(int);
+	void signalLODChanged(int);
 
 	void signalMaxFramesChanged(int);
 
@@ -159,6 +160,7 @@ public slots:
 		}
 	}
 	void slotFrameChanged(int f);
+	void slotLODChanged(int l);
 	void slotPlacementPreviewChanged(bool on)
 	{
 		mPlacementPreview = on;
@@ -182,6 +184,7 @@ private:
 	QTimer* mUpdateTimer;
 	BosonModel* mModel;
 	int mCurrentFrame;
+	int mCurrentLOD;
 
 	float mFovY; // we allow real zooming here!
 	float mCameraX, mCameraY, mCameraZ;
@@ -212,6 +215,7 @@ signals:
 	void signalCameraYChanged(float);
 	void signalCameraZChanged(float);
 	void signalFrameChanged(int);
+	void signalLODChanged(int);
 	void signalResetDefaults();
 	void signalPlacementPreviewChanged(bool); // display preview placement - if false display normal model
 	void signalDisallowPlacementChanged(bool); // only valid of placementpreview is also on. if true display the model that is shown when the unit can't be placed - otherwise the model that is shown if it can be placed.
@@ -226,6 +230,7 @@ protected slots:
 	void slotCameraYChanged(float c) { mCameraY->setValue(c); }
 	void slotCameraZChanged(float c) { mCameraZ->setValue(c); }
 	void slotFrameChanged(int f) { mFrame->setValue(f); }
+	void slotLODChanged(int l) { mFrame->setValue(l); }
 
 	void slotMaxFramesChanged(int max) { mFrame->setRange(0, max); }
 
@@ -238,6 +243,7 @@ private:
 	KMyFloatNumInput* mCameraY;
 	KMyFloatNumInput* mCameraZ;
 	KIntNumInput* mFrame;
+	KIntNumInput* mLOD;
 	QCheckBox* mPlacementPreview;
 	QCheckBox* mDisallowPlacement;
 	QCheckBox* mWireFrame;
@@ -265,6 +271,7 @@ public:
 	void emitSignalCameraY(float c) { emit mPreview->signalCameraYChanged(c); }
 	void emitSignalCameraZ(float c) { emit mPreview->signalCameraZChanged(c); }
 	void emitSignalFrame(int f) { emit mPreview->signalFrameChanged(f); }
+	void emitSignalLOD(int l) { emit mPreview->signalLODChanged(l); }
 
 protected:
 	void initKAction();
