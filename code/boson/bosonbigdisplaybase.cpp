@@ -16,6 +16,7 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
+
 #include "bosonbigdisplaybase.h"
 #include "bosonbigdisplaybase.moc"
 
@@ -220,7 +221,7 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 				// the inverse matrix!
 				BoAction action;
 				action.setPos(pos);
-			 	actionClicked(&action, stream, send);
+				actionClicked(&action, stream, send);
 				if (send) {
 					*eatevent = true;
 				}

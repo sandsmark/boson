@@ -131,7 +131,7 @@ public:
 		mInverted = 0;
 		mTiles = 0;
 
-		mButtonoffset = 0;
+		mButtonOffset = 0;
 	}
 
 	QIntDict<BosonCommandWidget> mOrderButton;
@@ -145,7 +145,7 @@ public:
 
 	OrderType mOrderType; // plain tiles, facilities, mob units, ...
 
-	int mButtonoffset;
+	int mButtonOffset;
 };
 
 BoOrderWidget::BoOrderWidget(bool editor, QWidget* parent) : QWidget(parent)
@@ -218,7 +218,7 @@ void BoOrderWidget::setButtonsPerRow(int b)
 
 void BoOrderWidget::setOrderButtons(QValueList<int> produceList, Player* owner, Facility* factory)
 {
- ensureButtons(produceList.count() + d->mButtonoffset);
+ ensureButtons(produceList.count() + d->mButtonOffset);
  hideOrderButtons();
  int unitType = -1;
  ProductionPlugin* production = 0;
@@ -230,7 +230,7 @@ void BoOrderWidget::setOrderButtons(QValueList<int> produceList, Player* owner, 
 		unitType = production->currentProduction();
 	}
  }
- for (unsigned int i = d->mButtonoffset; i < produceList.count() + d->mButtonoffset; i++) {
+ for (unsigned int i = d->mButtonOffset; i < produceList.count() + d->mButtonOffset; i++) {
 	d->mOrderButton[i]->setUnit(produceList[i], owner);
 	d->mTopLayout->activate();
 	if (unitType >= 0 && production) {
@@ -261,32 +261,32 @@ void BoOrderWidget::hideOrderButtons()
 	it.current()->setUnit(0);
 	++it;
  }
- d->mButtonoffset = 0;
+ d->mButtonOffset = 0;
 }
 
 void BoOrderWidget::showUnitActions(Unit* unit)
 {
  kdDebug() << k_funcinfo << endl;
- d->mButtonoffset = 0;  // Should be 0 anyway...
+ d->mButtonOffset = 0;  // Should be 0 anyway...
  ensureButtons(3); // 3 is maximum number of actions for now
 
  // Order of action buttons: move, attack, stop. Nothing else yet.
  if(unit->isMobile()) {
 	// If it's mobile, it can move
-	d->mOrderButton[d->mButtonoffset]->setAction(ActionMove, unit->owner());
-	d->mButtonoffset++;
+	d->mOrderButton[d->mButtonOffset]->setAction(ActionMove, unit->owner());
+	d->mButtonOffset++;
  }
 
  if(unit->unitProperties()->canShoot()) {
 	// It can shoot
-	d->mOrderButton[d->mButtonoffset]->setAction(ActionAttack, unit->owner());
-	d->mButtonoffset++;
+	d->mOrderButton[d->mButtonOffset]->setAction(ActionAttack, unit->owner());
+	d->mButtonOffset++;
  }
 
  // If it can't move or attack, then there's no sense in having stop
- if(d->mButtonoffset != 0) {
-	d->mOrderButton[d->mButtonoffset]->setAction(ActionStop, unit->owner());
-	d->mButtonoffset++;
+ if(d->mButtonOffset != 0) {
+	d->mOrderButton[d->mButtonOffset]->setAction(ActionStop, unit->owner());
+	d->mButtonOffset++;
  }
 }
 
