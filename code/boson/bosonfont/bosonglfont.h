@@ -251,7 +251,7 @@ protected:
 
 	/**
 	 * @return The position in @p string where to wrap. Currently this
-	 * implementation will wrap at length-1, i.e. the last char.
+	 * implementation will wrap at length, i.e. the last char.
 	 **/
 	int wrapAtPos(const GLubyte* string, int length) const;
 

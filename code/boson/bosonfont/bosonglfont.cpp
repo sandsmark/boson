@@ -424,7 +424,7 @@ int BosonGLFont::width(const QString& text)
 
 int BosonGLFont::wrapAtPos(const GLubyte* string, int length) const
 {
- return length - 1;
+ return length;
 }
 
 int BosonGLFont::makeLine(const GLubyte* string, int len, int width) const
@@ -459,6 +459,10 @@ int BosonGLFont::height(const QString& text, int maxWidth)
  int w = width(text);
  if (w < maxWidth) {
 	return height();
+ }
+ if (maxWidth < widestChar()) {
+	// we can't even render a single char!
+	return 0;
  }
  GLubyte* string = (GLubyte*)text.latin1();
  const int len = text.length();
