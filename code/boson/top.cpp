@@ -645,63 +645,6 @@ void TopWidget::slotLoadGame(const QString& fileName)
 
  // actually start the game
  QTimer::singleShot(0, this, SLOT(slotStartNewGame()));
-
-#if 0
- d->mStartup->showLoadingWidget();
-
- d->mStarting->setDestPlayField(mPlayField);
-
- initCanvas();
- initBosonWidget();
-
-
- boGame->setGameMode(true);
-
- // We are loading a saved game
- changeLocalPlayer(0, true); // remove player from all classes (AB: this should be redundand, as no player should be set currently...)
-
-#endif
-
-#if 0
- // Start loading
- if (!d->mStarting->loadGame(fileName)) {
-	// There was a loading error
-	// Find out what went wrong...
-	BosonSaveLoad::LoadingStatus status = (BosonSaveLoad::LoadingStatus)boGame->loadingStatus();
-	QString text, caption;
-	if (status == BosonSaveLoad::InvalidFileFormat || status == BosonSaveLoad::InvalidCookie) {
-		text = i18n("This file is not a Boson SaveGame!");
-		caption = i18n("Invalid file format!");
-	} else if (status == BosonSaveLoad::InvalidVersion) {
-		text = i18n("This file has unsupported saving format!\n"
-				"Probably it is saved with too old version of Boson");
-		caption = i18n("Unsupported file format version!");
-	} else if (status == BosonSaveLoad::KGameError) {
-		text = i18n("Error loading saved game!");
-		caption = i18n("An error occured while loading saved game!\n"
-				"Probably the game wasn't saved properly");
-	} else if (status == BosonSaveLoad::InvalidXML || status == BosonSaveLoad::BSGFileError) {
-		text = i18n("Error loading saved game!");
-		caption = i18n("An error occured while loading saved game!\n"
-				"Probably the game wasn't saved properly or this file is not a Boson SaveGame!");
-	} else {
-		// This should never be reached
-		// AB: but it will be! I can't provide valid error codes for all
-		// cases at this point of development. feel free to fix all
-		// "return false" at all points in loading code...
-		text = i18n("Error loading saved game!");
-		boError() << k_funcinfo << "Invalid error type or no error (while loading saved game)!!!" << endl;
-	}
-
-	// ... and show messagebox
-	KMessageBox::sorry(this, text, caption);
-
-	// return to the start and reset the game
-	d->mStartup->slotShowWelcomeWidget();
- }
-#endif
-
- boDebug() << k_funcinfo << "done" << endl;
 }
 
 void TopWidget::slotSaveGame(const QString& fileName, const QString& description)

@@ -157,23 +157,9 @@ bool BosonPlayFieldInformation::loadInformation(BPFFile* file)
 			}
 		}
 	}
- } else if (!file->hasMapDirectory() && !file->hasFile("scenario.xml")) {
-	boWarning() << k_funcinfo << "converting from a savegame file from boson < 0.9" << endl;
-	QMap<QString, QByteArray> files;
-	files.insert("kgame.xml", file->kgameData());
-	files.insert("players.xml", file->playersData());
-	files.insert("canvas.xml", file->canvasData());
-	files.insert("external.xml", file->externalData());
-	files.insert("map", file->mapData());
-	BosonFileConverter converter;
-//	if (!converter.convertSaveGame_From_0_8_128_To_0_9(files)) {
-	if (!converter.convertSaveGame_From_0_8_To_0_9(files)) {
-		boError() << k_funcinfo << "unable to convert from savegame format" << endl;
-		return false;
-	}
-	boDebug() << k_funcinfo << "conversion succeeded" << endl;
-	playersXML = files["players.xml"];
-	mapXML = files["map/map.xml"];
+ } else if (!file->hasMapDirectory()) {
+	boError() << k_funcinfo << "file format not supported" << endl;
+	return false;
  } else {
 	boDebug() << k_funcinfo << "file format is current" << endl;
 	mapXML = file->mapXMLData();
@@ -371,23 +357,8 @@ bool BosonPlayField::preLoadPlayField(const QString& file)
  }
  QByteArray descriptionXML = mFile->descriptionData();
  if (descriptionXML.size() == 0 && !mFile->hasMapDirectory()) {
-	// AB: this might be a savegame (.bsg) file from boson < 0.9
-	// the "map" file includes the description.xml here. boson 0.8 used the
-	// same format for that file as boson 0.8.128
-	QMap<QString, QByteArray> files;
-	files.insert("kgame.xml", mFile->kgameData());
-	files.insert("players.xml", mFile->playersData());
-	files.insert("canvas.xml", mFile->canvasData());
-	files.insert("external.xml", mFile->externalData());
-	files.insert("map", mFile->mapData());
-	BosonFileConverter converter;
-	boWarning() << k_funcinfo << "trying to convert a savegame file..." << endl;
-	if (!converter.convertSaveGame_From_0_8_128_To_0_9(files)) {
-		boError() << k_funcinfo << "unable to convert from savegame format" << endl;
-		return false;
-	}
-	boDebug() << k_funcinfo << "conversion succeeded" << endl;
-	descriptionXML = files["C/descriptionXML"];
+	boError() << k_funcinfo << "old savegame format not supported." << endl;
+	return false;
  }
  if (!loadDescriptionFromFile(descriptionXML)) {
 	boError() << k_funcinfo << "Could not load description file" << endl;
