@@ -724,6 +724,7 @@ void ModelPreview::renderMeshSelection()
  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
  glColor3ub(0, 255, 0);
  glDisable(GL_TEXTURE_2D);
+ glDisable(GL_LIGHTING);
  mesh->renderBoundingObject();
  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
