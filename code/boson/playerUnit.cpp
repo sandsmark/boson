@@ -74,19 +74,23 @@ playerMobUnit::playerMobUnit(mobileMsg_t *msg)
 	: visualMobUnit(msg)
 	, state(MUS_NONE)
 {
-	asked_x = asked_y = 0;
 	turnTo(4); ///orzel : should be random
 }
 
 
 #define VECT_PRODUCT(dir)	(pos_x[dir]*(ldy) - pos_y[dir]*(ldx))
 #define SQ(x)			( (x) * (x) )
-bool playerMobUnit::getWantedMove(bosonMsgData *msg)
+
+bool playerMobUnit::getWantedMove(state_t &wstate)
 {
 	int ldx, ldy;
 	int vp1, vp2, vp3;
-	int newdir;
 	int range;
+
+
+	asked.x = x();
+	asked.y = y();
+	asked.dir = direction;
 	
 	switch(state){
 		default:
@@ -103,75 +107,90 @@ bool playerMobUnit::getWantedMove(bosonMsgData *msg)
 			ldx = dest_x - x(); ldy = dest_y - y();
 			vp1 = VECT_PRODUCT(direction);
 			// turning 
-			newdir =  (vp1<0)?getLeft():getRight();
-			vp2 = VECT_PRODUCT( newdir);
+			asked.dir =  (vp1<0)?getLeft():getRight();
+			vp2 = VECT_PRODUCT( asked.dir);
 			//printf("vp1 = %d, vp2 = %d \n", vp1, vp2);
 			if ( (vp1<0 && vp2>0) || (vp1>0 && vp2<0) ) { // it's the end
-				newdir =   (abs(vp1) > abs(vp2))? newdir:direction;
+				/**
+				 * different sign : this is the end of TURNING, go to MOVING
+				 */
+				asked.dir =   (abs(vp1) > abs(vp2))? asked.dir:direction; // choose the more accurate
 				state = MUS_MOVING;
 				//puts("going to MUS_MOVING");
-				}
-			if (newdir != direction) {
-				turnTo(newdir); ///orzel : is this really useful
-				msg->move.newx = x(); msg->move.newy = y(); msg->move.direction = direction;
-				asked_state = MUS_TURNING;
+			} else if (asked.dir != direction) {
+				wstate = asked;
 				return true;
+				/*
+			       	if (checkMove(asked) ) {
+					wstate = asked;
+					return true;
 				}
-			turnTo(newdir); // turning anyway
-			if (state != MUS_MOVING) return false;
+				asked.dir += 6; // XXX big hack
+				asked.dir %= 12;
 
+			       	if (checkMove(asked) ) {
+					wstate = asked;
+					return true;
+				}
+				*/
+			} else {
+				logf(LOG_ERROR, "moving algorithm error #1");
+				return false;
+			}
 		case MUS_MOVING_WAIT:
-			if ( 0 == --countDown ) {
+			if ( 0 >= --countDown ) {
 				state = MUS_MOVING;	// and keep on the next case
 //				logf(LOG_INFO, "MUS_MOVING_WAIT finished, [%p] try again now", this);
 			}
 			else return false;		// nothing, return
 
 		case MUS_MOVING:
+			countDown = 0 ;
 			ldx = dest_x - x() ; ldy = dest_y - y();
 
 			range = mobileProp[type].range;
 			if (target && SQ(range) > SQ(ldx) + SQ(ldy) ) // we are near enough to shoot at the target
 				return false;
 
+		/* choose direction */
 			vp1 = VECT_PRODUCT(getLeft(2));
 			vp2 = VECT_PRODUCT(direction);
 			vp3 = VECT_PRODUCT(getRight(2));
 //			printf("vp1 = %d, ", vp1); printf("vp2 = %d, ", vp2); printf("vp3 = %d\n", vp3);
 			if ( abs(vp2) > abs(vp1) || abs(vp2) > abs(vp3)) // direction isn't optimal
-				turnTo ( ( abs(vp1) < abs(vp3) )? getLeft():getRight() ); // change it
+				asked.dir =  ( ( abs(vp1) < abs(vp3) )? getLeft():getRight() ); // change it
 
+		/* choose dx/dy */
 			if ( ( SQ(ldx) + SQ(ldy) ) < SQ(mobileProp[type].speed) ) { ///orzel should be square
 				present_dx = ldx; present_dy = ldy;
 				}
-			msg->move.newx = asked_x = x() + present_dx;
-			msg->move.newy = asked_y = y() + present_dy;
-			msg->move.direction = direction;
+			asked.x = x() + present_dx;
+			asked.y = y() + present_dy;
 
+			wstate = asked;
+
+		/* try and try again ... */
 			asked_state = MUS_MOVING;
-			if (checkMove( asked_x, asked_y)) return true;
+			if (checkMove( asked)) return true;
 
-			if ( abs(present_dy) > abs(present_dx) )  {
-				/* we are going mainly along y axis, so try that first*/
-				if (asked_y != y() && checkMove( x(), asked_y)) {
-					msg->move.newx = asked_x = x();
-					return true;
-					}
-				if (asked_x != x() && checkMove( asked_x, y())) {
-					msg->move.newy = asked_y = y();
-					return true;
-					}
+			if ( abs(present_dx) > abs(present_dy) )  {
+				/* we are going mainly along x axis, so try that first*/
+				wstate.y = y();
+				if (checkMove(wstate)) return true;
+				wstate = asked;
+
+				wstate.x = x();
+				if (checkMove(wstate)) return true;
+				wstate = asked;
 
 			} else {
-				/* we are going mainly along x axis, so try that first*/
-				if (asked_x != x() && checkMove( asked_x, y())) {
-					msg->move.newy = asked_y = y();
-					return true;
-					}
-				if (asked_y != y() && checkMove( x(), asked_y)) {
-					msg->move.newx = asked_x = x();
-					return true;
-					}
+				/* we are going mainly along y axis, so try that first*/
+				wstate.x = x();
+				if (checkMove(wstate)) return true;
+				wstate = asked;
+
+				wstate.y = y();
+				if (checkMove(wstate)) return true;
 			}
 
 			/* failed : can't move any more */
@@ -189,13 +208,13 @@ bool playerMobUnit::getWantedMove(bosonMsgData *msg)
 }
 
 
-bool playerMobUnit::checkMove(int newx, int newy)
+bool playerMobUnit::checkMove(state_t nstate)
 {
 	int ty;
 	int g;
 
 	/* XXXX  
-	Pix p = neighbourhood( newx, newy);
+	Pix p = neighbourhood( nstate.x, nstate.y, nstate.dir);
 	
 	if (goFlag() == BO_GO_AIR) { // we are a flyer
 		for(; p; next(p) ) {
@@ -282,13 +301,16 @@ void playerMobUnit::turnTo(int newdir)
 void playerMobUnit::getWantedAction()
 {
 	bosonMsgData	data;
+	state_t		ns;
 
 	if (who != who_am_i) return;
-
 	if ( !visible() ) return;
 
-	/* movve ?*/
-	if (getWantedMove(&data)) {
+	/* move ?*/
+	if (getWantedMove(ns)) {
+		data.move.newx		= ns.x;
+		data.move.newy		= ns.y;
+		data.move.direction	= ns.dir;
 		data.move.key		= key;
 		sendMsg(buffer, MSG_MOBILE_MOVE_R, MSG(data.move) );
 	}
@@ -335,48 +357,50 @@ bool playerMobUnit::getWantedShoot(bosonMsgData *msg)
 
 
 /***** server orders *********/
-void playerMobUnit::doMoveTo(int newx, int newy)
+void playerMobUnit::doMoveTo(state_t ns)
 {
-	int dx = newx - x();
-	int dy = newy - y();
+	int dx = ns.x - x();
+	int dy = ns.y - y();
 
-	move(newx,newy);
-	emit sig_moveTo(newx, newy);
+	move(ns.x, ns.y);
+	emit sig_moveTo(ns.x, ns.y);
+
+	turnTo(ns.dir);
+
 
 	if (sp_up) sp_up->moveBy(dx,dy);
 	if (sp_down) sp_down->moveBy(dx,dy);
 }
 
-void playerMobUnit::s_moveTo(int newx, int newy, int dir)
+void playerMobUnit::s_moveTo(state_t ns)
 {
-//orzel : use some kind of fuel
-if ( who!=who_am_i) {
-	/* this not my unit */
-	doMoveTo(newx, newy);
-	direction = dir;
-	setFrame(dir);
-	return;
-	}
 
-/* else */
+	//orzel : use some kind of fuel
+	if ( who!=who_am_i) { /* this not my unit */
+		doMoveTo(ns);
+		return;
+		}
 
-if ( MUS_MOVING != asked_state && (newx!=x() || newy!=y()) ) {
-	logf(LOG_ERROR, "playerMobUnit::s_moveTo while not moving, ignored");
-	return;
-	}
+	/* else */
 
-if (dir != direction)
-	logf(LOG_ERROR, "playerMobUnit::s_moveTo : unexpected direction");
+	if ( MUS_MOVING != asked_state && (ns.x!=x() || ns.y!=y()) ) {
+		logf(LOG_ERROR, "playerMobUnit::s_moveTo while not moving, ignored");
+		return;
+		}
 
-doMoveTo(newx, newy);
+	if (ns.x!=asked.x || ns.y!=asked.y)
+		logf(LOG_ERROR, "playerMobUnit::s_moveTo : unexpected dx,dy");
+	if (ns.dir != asked.dir)
+		logf(LOG_ERROR, "playerMobUnit::s_moveTo : unexpected direction");
 
-if (x()==dest_x && y()==dest_y) {
-	//puts("going to MUS_NONE");
-	state = MUS_NONE;
-	present_dx = present_dy = 0; // so that willBe returns the good position
-	logf(LOG_GAME_LOW, "mobile[%p] has stopped\n", this);
-	}
+	doMoveTo(ns);
 
+	if (x()==dest_x && y()==dest_y) {
+		//puts("going to MUS_NONE");
+		state = MUS_NONE;
+		present_dx = present_dy = 0; // so that willBe returns the good position
+		logf(LOG_GAME_LOW, "mobile[%p] has stopped\n", this);
+		}
 }
 
 
@@ -433,7 +457,6 @@ void playerMobUnit::u_attack(bosonUnit *u)
 		return;
 	}
 
-
 	do_goto(r.x(), r.y());
 }
 
@@ -467,6 +490,12 @@ playerFacility::playerFacility(facilityMsg_t *msg)
 {
 }
 
+playerFacility::~playerFacility()
+{
+	//puts("~playerFacility");
+	emit dying(this);
+}
+
 
 void playerFacility::s_setState(int s)
 {
@@ -493,7 +522,7 @@ void playerFacility::shooted(int _power)
 /*
  * harvester 
  */
-bool harvesterUnit::getWantedMove(bosonMsgData *msg)
+bool harvesterUnit::getWantedMove(state_t &wstate)
 {
 	bool ret = false;
 
@@ -513,10 +542,10 @@ bool harvesterUnit::getWantedMove(bosonMsgData *msg)
 				contain = 0 ;		// emptying
 
 			}
-			return playerMobUnit::getWantedMove(msg);
+			return playerMobUnit::getWantedMove(wstate);
 			break;
 		case goingTo:
-			ret = playerMobUnit::getWantedMove(msg);
+			ret = playerMobUnit::getWantedMove(wstate);
 			if (near (100) && underlyingGround() == GROUND_GRASS_OIL ) {
 				hstate = harvesting;
 //				puts("harvester : change to \"harvesting\" state");
