@@ -41,7 +41,6 @@ BOSON_SRC = \
 	optionsdialog.cpp \
 	optionswidgets.cpp \
 	bosoncomputerio.cpp \
-	kgamedialogcomputerconfig.cpp \
 	bosonpath.cpp \
 	unit.cpp \
 	selectbox.cpp \
