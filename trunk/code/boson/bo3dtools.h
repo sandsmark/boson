@@ -388,8 +388,8 @@ class BoMatrix
      *
      * This calculates simply does v = M * input, where M is this matrix.
      **/
-    void transform(BoVector3* v, BoVector3* input) const;
-    void transform(BoVector4* v, BoVector4* input) const;
+    void transform(BoVector3* v, const BoVector3* input) const;
+    void transform(BoVector4* v, const BoVector4* input) const;
 
     /**
      * Invert this matrix and place the result into @p inverse

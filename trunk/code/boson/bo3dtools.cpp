@@ -290,7 +290,7 @@ void BoMatrix::loadMatrix(GLenum matrix)
  glGetFloatv(matrix, mData);
 }
 
-void BoMatrix::transform(BoVector3* vector, BoVector3* input) const
+void BoMatrix::transform(BoVector3* vector, const BoVector3* input) const
 {
  // v = m * i, m is a 4x4 OpenGL matrix, r and v are both a 3x1 column vector.
  // the forth element is unused in boson and therefore we use silently 0.
@@ -305,7 +305,7 @@ void BoMatrix::transform(BoVector3* vector, BoVector3* input) const
 #undef M
 }
 
-void BoMatrix::transform(BoVector4* vector, BoVector4* input) const
+void BoMatrix::transform(BoVector4* vector, const BoVector4* input) const
 {
  // v = m * i, m is a 4x4 OpenGL matrix, r and v are both a 3x1 column vector.
  // the forth element is unused in boson and therefore we use silently 0.
