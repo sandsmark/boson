@@ -62,7 +62,8 @@ public:
 
 	void setCell(int i, int j, groundType g);
 	/** find the unit at this position */
-	QwSpriteFieldGraphic *findUnitAt(int x, int y);
+	QwSpriteFieldGraphic	*findUnitAt(int x, int y);
+	groundType		findGroundAt(int x, int y);
 
 signals:
 	void newCell(int,int, groundType g);
