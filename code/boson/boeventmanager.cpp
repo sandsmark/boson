@@ -171,6 +171,74 @@ bool BoEventManager::loadFromXML(const QDomElement& root)
  return true;
 }
 
+bool BoEventManager::saveListenerScripts(QMap<QString, QByteArray>* scripts) const
+{
+ if (!scripts->isEmpty()) {
+	boError() << k_funcinfo << "scripts map must be empty" << endl;
+	return false;
+ }
+ QPtrListIterator<BoEventListener> it(d->mEventListeners);
+ for (; it.current(); ++it) {
+	QByteArray script;
+	QByteArray scriptData;
+	if (!it.current()->saveScript(&script)) {
+		boError() << k_funcinfo << "unable to save listener script" << endl;
+		return false;
+	}
+	if (!it.current()->saveScriptData(&scriptData)) {
+		boError() << k_funcinfo << "unable to save listener script data" << endl;
+		return false;
+	}
+
+	QString name = it.current()->scriptFileName();
+	if (name.isEmpty()) {
+		boError() << k_funcinfo << "listener did not return a name" << endl;
+		return false;
+	}
+
+	QString scriptName = QString::fromLatin1("scripts/") + name;
+	QString scriptDataName = QString::fromLatin1("scripts/data/") + name;
+	if (scripts->contains(scriptName)) {
+		boError() << k_funcinfo << "script with name " << scriptName << " already present" << endl;
+		return false;
+	}
+	if (scripts->contains(scriptDataName)) {
+		boError() << k_funcinfo << "script with name " << scriptDataName << " already present" << endl;
+		return false;
+	}
+	scripts->insert(scriptName, script);
+	scripts->insert(scriptDataName, scriptData);
+ }
+ return true;
+}
+
+bool BoEventManager::loadListenerScripts(const QMap<QString, QByteArray>& scripts)
+{
+ QPtrListIterator<BoEventListener> it(d->mEventListeners);
+ for (; it.current(); ++it) {
+	QString name = it.current()->scriptFileName();
+	if (name.isEmpty()) {
+		boError() << k_funcinfo << "script filename is empty" << endl;
+		return false;
+	}
+	QByteArray script = scripts[QString::fromLatin1("scripts/") + name];
+	QByteArray scriptData = scripts[QString::fromLatin1("scripts/data/") + name];
+	if (scriptData.size() == 0) {
+		if (!it.current()->loadScript(script)) {
+			boError() << k_funcinfo << "unable to load listener script" << endl;
+			return false;
+		}
+	} else {
+		if (!it.current()->loadScriptData(scriptData)) {
+			boError() << k_funcinfo << "unable to load listener script data" << endl;
+			return false;
+		}
+	}
+ }
+ return true;
+}
+
+
 bool BoEventManager::queueEvent(BoEvent* event)
 {
  // this is just to avoid typos!
