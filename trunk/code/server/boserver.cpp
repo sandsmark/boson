@@ -344,25 +344,32 @@ switch(tag) {
 		break;
 
 	case MSG_MOBILE_CONSTRUCT :
-		ASSERT_DATA_BLENGHT(sizeof(data->construct));
-		_mobile.who	= playerId;
-		_mobile.x	= data->construct.x;
-		_mobile.y	= data->construct.y;
-		_mobile.type	= data->construct.type.mob;
-		if (player[playerId].changeRessources(
+		ASSERT_DATA_BLENGHT(sizeof(data->mobConstruct));
+		// found constructor
+		fix = facility.find(data->mobConstruct.key_constructor);
+		if (!fix) {
+			logf(LOG_ERROR, "handleGameMessage : unknown key_constructor in MSG_MOBILE_CONSTRUCT: %d", data->mobConstruct.key_constructor);
+			break;
+		}
+		// check who
+		if (fix->who !=playerId) {
+			logf(LOG_ERROR, "handleGameMessage : unexpected owner(%d) sending MSG_MOBILE_CONSTRUCT to (owner:%d) facility", playerId, fix->who);
+			break;
+		}
+		// check ressources
+		if (!player[playerId].changeRessources(
 					- mobileProp[_mobile.type].cost_oil,
 					- mobileProp[_mobile.type].cost_mineral))
-			createMobUnit(_mobile);
-		else logf(LOG_ERROR, "client %d has tried to create a %d mobile without enough ressources (%d,%d)",
-				playerId, _mobile.type, player[playerId].oil, player[playerId].mineral);
+			break;
+		fix->u_createMob(data->mobConstruct.type);
 		break;
 		
 	case MSG_FACILITY_CONSTRUCT :
-		ASSERT_DATA_BLENGHT(sizeof(data->construct));
+		ASSERT_DATA_BLENGHT(sizeof(data->fixConstruct));
 		_facility.who	= playerId;
-		_facility.x	= data->construct.x;
-		_facility.y	= data->construct.y;
-		_facility.type	= data->construct.type.fix;
+		_facility.x	= data->fixConstruct.x;
+		_facility.y	= data->fixConstruct.y;
+		_facility.type	= data->fixConstruct.type;
 		if (player[playerId].changeRessources(
 					- facilityProp[_facility.type].cost_oil,
 					- facilityProp[_facility.type].cost_mineral))
