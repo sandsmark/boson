@@ -23,6 +23,7 @@
 #include "bodebug.h"
 
 #include <qwidget.h>
+#include <qregexp.h>
 
 #include <GL/gl.h>
 #include <GL/glu.h>
@@ -37,11 +38,11 @@ void BoInfo::updateOpenGLInfo(QWidget* widget)
  insert(BoInfo::OpenGLVendorString, (const char*)glGetString(GL_VENDOR));
  insert(BoInfo::OpenGLRendererString, (const char*)glGetString(GL_RENDERER));
  extensions = (const char*)glGetString(GL_EXTENSIONS);
- extensions.replace(' ', '\n');
+ extensions.replace(QRegExp(" "), "\n");
  insert(BoInfo::OpenGLExtensionsString, extensions);
  insert(BoInfo::GLUVersionString, (const char*)gluGetString(GLU_VERSION));
  extensions = (const char*)gluGetString(GLU_EXTENSIONS);
- extensions.replace(' ', '\n');
+ extensions.replace(QRegExp(" "), "\n");
  insert(BoInfo::GLUExtensionsString, extensions);
 
  GLXContext context = glXGetCurrentContext();
@@ -64,11 +65,11 @@ void BoInfo::updateOpenGLInfo(QWidget* widget)
  insert(BoInfo::GLXClientVersionString, (const char*)glXGetClientString(widget->x11Display(), GLX_VERSION));
  insert(BoInfo::GLXClientVendorString, (const char*)glXGetClientString(widget->x11Display(), GLX_VENDOR));
  extensions = (const char*)glXGetClientString(widget->x11Display(), GLX_EXTENSIONS);
- extensions.replace(' ', '\n');
+ extensions.replace(QRegExp(" "), "\n");
  insert(BoInfo::GLXClientExtensionsString, extensions);
  insert(BoInfo::GLXServerVersionString, (const char*)glXQueryServerString(widget->x11Display(), widget->x11Screen(), GLX_VERSION));
  insert(BoInfo::GLXServerVendorString, (const char*)glXQueryServerString(widget->x11Display(), widget->x11Screen(), GLX_VENDOR));
- extensions.replace(' ', '\n');
+ extensions.replace(QRegExp(" "), "\n");
  extensions = (const char*)glXQueryServerString(widget->x11Display(), widget->x11Screen(), GLX_EXTENSIONS);
  insert(GLXServerExtensionsString, extensions);
  insert(BoInfo::IsDirect, (bool)glXIsDirect(widget->x11Display(), context));

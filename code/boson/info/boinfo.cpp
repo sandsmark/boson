@@ -33,6 +33,8 @@
 #include <qmap.h>
 #include <qvariant.h>
 #include <qdom.h>
+#include <qfile.h>
+#include <qregexp.h>
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -53,9 +55,11 @@
 
 // OS dependant stuff
 #ifdef __linux__
-#include <boinfo_linux.cpp>
+#include "boinfo_linux.cpp"
+#elif defined(__FreeBSD__)
+#include "boinfo_freebsd.cpp"
 #else
-#include <boinfo_generic.cpp>
+#include "boinfo_generic.cpp"
 #endif
 
 
@@ -419,7 +423,7 @@ QString BoInfo::osType() const
 	return QString::null;
  }
  QString s = getString(BoInfo::OSTypeString);
- s.replace('\n', "");
+ s.replace(QRegExp("\n"), "");
  return s;
 }
 
@@ -429,7 +433,7 @@ QString BoInfo::osVersion() const
 	return QString::null;
  }
  QString s = getString(BoInfo::OSVersionString);
- s.replace('\n', "");
+ s.replace(QRegExp("\n"), "");
  return s;
 }
 
