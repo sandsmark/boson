@@ -1,0 +1,101 @@
+Particle systems' configuration README.
+
+This README describes keys of particle system configurations.
+Particle systems are used to create effects such as explosions, smoke etc.
+
+Particle system consists of individual particles. Each particle has color,
+velocity, current position and age. Particle's age means how long particle lives
+or is active. When particle dies or becomes inactive, it is not drawn nor
+updated anymore.
+
+
+Entries:
+vector is three floating-point numbers, separated by commas (e.g. 5.7,6.2,-1.2)
+color is four floating-point numbers, separated by commas
+(e.g 1.0, 0.9, 0.3, 0.55). All of these numbers should be in range 0.0 - 1.0
+
+The rest of this file is about the particles.boson
+It contains groups and each group describes one particle system.
+This group can contain following entries:
+
+The entries marked with * are mandatory.
+-------------------------------------------------------------------------------
+[Group]
+* Id=integer
+        ID of this particle system. This must be unique! It is used to identify
+        particle system. It must be > 0
+        No default!
+MinVelocity=vector
+MaxVelocity=vector
+        These two entries specify minimal and maximal velocity of particles.
+        Note that every component in MinVelocity vector should be smaller than
+        corresponding component in MaxVelocity. Actual velocity of particle will
+        be random and between them.
+        Default is 0,0,0 for both.
+MinPos=vector
+MaxPos=vector
+        These entries specify initial position of particle.
+        Default is 0,0,0 for both.
+Normalize=bool
+        Whether to normalize velocity vector. If you normalize velocities,
+        particle system's shape will be sphere, otherwise they might look like
+        boxes, but normalizing takes some time. It's usually good to leave it
+        to false for little effects like missile hits or little explosions and
+        to set it to true for bigger effects like big explosions or shockwaves.
+        Default is false.
+MinScale=float
+MaxScale=float
+        How much to scale vector after normalizing. This has any effect only
+        when Normalize is set to true.
+        Default is 1 for both.
+StartColor=color
+EndColor=color
+        Specifies color of particle when it borns and when it dies. During
+        particle's life, color is dynamically changed from StartColor to
+        EndColor.
+        Default is 0,0,0,0 for both
+MinLife=float
+MaxLife=float
+        Specifies minimal and maximal lifetime of particle i.e. how long
+        particle lives. This is in seconds for normal game speed.
+        Default is 0 for both.
+MaxNum=integer
+        How many particles this particle system may have?
+        If this value is too big, particle systems will use too much memory, but
+        when it's too little, some particles are not created.
+        Usually, good value is InitNum + (Rate * MaxLife)
+        Default is 100.
+InitNum=integer
+        How many particles to create when particle system is created?
+        Usually, for explosions, you create all particles or at least most
+        particles initially and for smoke you don't create any initial
+        particles.
+        Default is 0.
+BlendFunc=string
+        What OpenGL blending function to use? This must be either
+        "GL_ONE_MINUS_SRC_ALPHA" or "GL_ONE".
+        Default is "GL_ONE_MINUS_SRC_ALPHA".
+Rate=float
+        How many particles to create per second (with default game speed) when
+        particle system is active.
+        Default is 0.
+Size=float
+        Specifies sizes of particles. The bigger this number is, the bigger the
+        particles are.
+        Default is 1.
+SystemLife=float
+        Specifies how much particle system lives (in seconds with normal game
+        speed). When this time passes, particle system doesn't create any new
+        particles.
+        If you create all particles initially (Rate is 0), this doesn't have any
+        effect
+        Default is 0.
+Align=bool
+        Whether to align particles to camera. If you don't align them, they will
+        be aligned to x-y plane (like cells).
+        Default is true.
+Texture=string
+        Texture to use for particles. Textures will be tinted with particles'
+        colors.
+        Default is "default.png"
+
