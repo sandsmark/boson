@@ -77,6 +77,7 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg, bool full)
 void BosonWeaponProperties::savePlugin(KSimpleConfig* cfg)
 {
   // Group must have been set before
+  cfg->writeEntry("Name", mName);
   cfg->writeEntry("Range", mRange);
   cfg->writeEntry("Reload", mReload);
   cfg->writeEntry("Speed", mSpeed);
@@ -88,6 +89,23 @@ void BosonWeaponProperties::savePlugin(KSimpleConfig* cfg)
   BosonConfig::writeUnsignedLongNumList(cfg, "ShootParticles", mShootParticleSystemIds);
   BosonConfig::writeUnsignedLongNumList(cfg, "FlyParticles", mFlyParticleSystemIds);
   BosonConfig::writeUnsignedLongNumList(cfg, "HitParticles", mHitParticleSystemIds);
+}
+
+void BosonWeaponProperties::reset()
+{
+ mName = "";
+ mRange = 0;
+ mReload = 0;
+ mSpeed = 0;
+ mDamage = 0;
+ mDamageRange = 1;
+ mCanShootAtAirUnits = false;
+ mCanShootAtLandUnits = false;
+ mMaxHeight = 1;
+ mShootParticleSystemIds.clear();
+ mFlyParticleSystemIds.clear();
+ mHitParticleSystemIds.clear();
+ mModelFileName = "missile.3ds";
 }
 
 BosonShot* BosonWeaponProperties::newShot(Unit* attacker, float x, float y, float z, float tx, float ty, float tz) const

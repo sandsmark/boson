@@ -310,6 +310,7 @@ public:
 	void upgradeResearched(UpgradeProperties* upgrade);
 
 	QPtrList<BosonParticleSystem> newDestroyedParticleSystems(float x, float y, float z) const;
+	QValueList<unsigned long int> destroyedParticleSystemIds() const;
 
 	const QPtrList<PluginProperties>* plugins() const;
 
@@ -349,6 +350,7 @@ protected:
 	void setRequirements(QValueList<unsigned long int> requirements);
 	void setArmor(unsigned long int armor)  { mArmor = armor; };
 	void setShields(unsigned long int shields)  { mShields = shields; };
+	void setDestroyedParticleSystemIds(QValueList<unsigned long int> ids);
 
 	// These only have effect if there is mobile or facility properties
 	void setCanRefineMinerals(bool r);
