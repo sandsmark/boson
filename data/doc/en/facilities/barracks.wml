@@ -11,13 +11,6 @@
         </tr>
     </table>
     
-<:
-use get_values;
-
-# ( facility type, facility name)
-get_values->getval("fix", "barracks");
-:>
-
 #include "nav.wml" before_url="powerplant.html" before_text="Power Plant" after_url="warfactory.html" after_text="War Factory" up_url="index.html"
 #include "footer.wml"
 

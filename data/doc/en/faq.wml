@@ -10,6 +10,7 @@
       <li><a href="#1">- When is Boson finished ?</a></li>
       <li><a href="#2">- Why is Boson so slow ?</a></li>
       <li><a href="#3">- Are there other supported languages than english ?</a></li>
+      <li><a href="#4">- Boson crashes my computer, what can I do ?</a></li>
     </ol>
     
     <p>&nbsp;</p>
@@ -28,9 +29,15 @@
 
     <p>&nbsp;</p>
     <a name="3">- Are there other supported languages than english ?</a>
-    <p>No, Boson is a game in development, text changes very often. It is to hard to maintain diffrent languages yet.
+    <p>No, Boson is a game in development, text changes very often. It is to hard to maintain different languages yet.
     </p>
 
+    <p>&nbsp;</p>
+    <a name="4">- Boson crashes my computer, what can I do ?</a>
+    <p>It looks like sometimes there is a problem with Boson/KDE/OpenGL/malloc/driver combination.<br>
+    If you have total crashes or kernel memory errors please start boson under an other window manager like fvwm2 or failsave.
+    If that doesn't solve the problem please contact us.    
+    </p>
 
 #include "nav.wml" before_url="units/aircraft.html" before_text="Aircraft" after_url="credits.html" after_text="Credits" up_url="index.html"
 #include "footer.wml"
