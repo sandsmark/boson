@@ -63,7 +63,7 @@ protected:
 	static int big_h();
 
 	bool loadGround(int j, const QString& path);
-	bool loadTransition(int gt);
+	bool loadTransition(const QString& dir, int gt);
 	void putOne(int z, QImage& p, int xoffset = 0, int yoffset = 0);
 
 	/**

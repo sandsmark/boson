@@ -10,6 +10,7 @@
     <Action name="editor_build" />
     <Action name="editor_player" />
     <Action name="editor_create_unit" />
+    <Action name="editor_create_tiles" />
   </Menu>
 </MenuBar>
 <ToolBar>

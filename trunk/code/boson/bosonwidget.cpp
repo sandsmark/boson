@@ -432,7 +432,7 @@ void BosonWidget::slotEditorConstructionChanged(int index)
 // FIXME
  kdDebug() << "slotEditorConstructionChanged()" << endl;
  if (d->mLocalPlayer) {
-	kdDebug() << d->mLocalPlayer->id() << endl;
+	kdDebug() << "local player: " << d->mLocalPlayer->id() << endl;
  }
  d->mCommandFrame->slotEditorConstruction(index, d->mLocalPlayer);
 }
