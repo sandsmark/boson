@@ -497,6 +497,11 @@ public:
 	unsigned int lodCount() const;
 
 	/**
+	 * @return See @ref BosonModel::PreferredLod
+	 **/
+	unsigned int preferredLod(float distanceFromCamera) const;
+
+	/**
 	 * @return unit's current rotation around z-axis. This is used for rotating
 	 * unit to correct direction when moving. Note that this value
 	 * <em>mustn't</em> be used for pathfinding and similar actions, as of

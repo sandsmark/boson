@@ -300,14 +300,15 @@ public:
 	void enablePointer();
 
 	/**
-	 * @return How many LOD levels model has by default
-	 */
-	static unsigned int defaultLodCount();
-
-	/**
 	 * @return How many LOD levels this model has
 	 **/
 	unsigned int lodCount() const;
+
+	/**
+	 * @return The level of detail that is preferred for the @p
+	 * distanceFromCamera.
+	 **/
+	unsigned int preferredLod(float distanceFromCamera) const;
 
 protected:
 	class BoHelper; // for computing width,height,.. of the model. this is a hack!
