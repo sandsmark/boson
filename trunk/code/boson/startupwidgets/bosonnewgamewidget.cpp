@@ -287,6 +287,10 @@ void BosonNewGameWidget::initPlayer()
 void BosonNewGameWidget::initMaps()
 {
   QString mapid = boConfig->readLocalPlayerMap();
+  if (mapid.isNull())
+  {
+    mapid = BosonPlayField::defaultPlayField();
+  }
   QStringList list = BosonPlayField::availablePlayFields();
   for (unsigned int i = 0; i < list.count(); i++)
   {
@@ -623,3 +627,6 @@ void BosonNewGameWidget::sendNewGame()
   boGame->sendMessage(0, BosonMessage::IdNewGame);
 }
 
+/*
+ * vim: et sw=2
+ */

@@ -18,7 +18,6 @@
 */
 #include "bosonconfig.h"
 #include "defines.h"
-#include "bosonplayfield.h"
 //#include "bodebug.h"
 
 #include <kconfig.h>
@@ -316,7 +315,7 @@ QString BosonConfig::readLocalPlayerMap(KConfig* conf)
  }
  QString oldGroup = conf->group();
  conf->setGroup("Boson");
- QString name = conf->readEntry("LocalPlayerMap", BosonPlayField::defaultPlayField());
+ QString name = conf->readEntry("LocalPlayerMap", QString::null);
  conf->setGroup(oldGroup);
  return name;
 }
