@@ -182,9 +182,7 @@ void Player::addUnit(Unit* unit)
  unit->setOwner(this); // already done in c'tor of Unit
  unit->dataHandler()->registerHandler(BosonMessage::UnitPropertyHandler + d->mUnitPropID, this,
 		SLOT(sendProperty(int, QDataStream&, bool*)),
-		SIGNAL(signalUnitPropertyChanged(KGamePropertyBase*)));
- connect(unit->dataHandler(), SIGNAL(signalPropertyChanged(KGamePropertyBase*)), 
-		this, SLOT(slotUnitPropertyChanged(KGamePropertyBase*)));
+		SLOT(slotUnitPropertyChanged(KGamePropertyBase*)));
 
  if (unit->isMobile()) {
 	d->mMobilesCount++;
@@ -221,6 +219,39 @@ void Player::slotUnitPropertyChanged(KGamePropertyBase* prop)
 	return;
  }
 
+ bool emitSignalUnitChanged = false;
+ // first check for prop->id() - we don't have to search for the unit, if we
+ // won't do anything anyway.
+ switch (prop->id()) {
+	case UnitBase::IdHealth:
+	case UnitBase::IdArmor:
+	case UnitBase::IdShields:
+	case UnitBase::IdSightRange:
+		// update BosonUnitView if the unit is selected.
+		// not all of these IDs are displayed there. But perhaps they
+		// will one day.
+		emitSignalUnitChanged = true;
+		break;
+	default:
+		// all other Unit IDs are not displayed in BosonUnitView so
+		// there is no need to emit a signal for them.
+		break;
+ }
+ if (!emitSignalUnitChanged) {
+	// nothing to do, here - no need to search for the unit.
+	return;
+ }
+
+#warning FIXME
+ // The following hack is a major speed problem.
+ // This slot is called for *every* unit property except those that have called
+ // setEmittingSignal(false) (I think so at least).
+ // But since we are searching through every unit in the list of the player, it
+ // will take *very* long if there are many units.
+ // UPDATE: this should have become better since I've moved the switch
+ // (prop->id()) to *above* the search for the unit. So we won't even start
+ // searching the unit for most properties.
+
 // VERY EVIL HACK!!!
  Unit* unit;
  bool found = false;
@@ -238,21 +269,8 @@ void Player::slotUnitPropertyChanged(KGamePropertyBase* prop)
 	boDebug() << "player=" << id() << ",propId=" << prop->id() << ",units=" << d->mUnits.count() << endl;
 	return;
  }
-
- switch(prop->id()) {
-	case UnitBase::IdHealth:
-	case UnitBase::IdArmor:
-	case UnitBase::IdShields:
-	case UnitBase::IdSightRange:
-		// update BosonUnitView if the unit is selected.
-		// not all of these IDs are displayed there. But perhaps they
-		// will one day.
-		emit signalUnitChanged(unit);
-		break;
-	default:
-		// all other Unit IDs are not displayed in BosonUnitView so
-		// there is no need to emit a signal for them.
-		break;
+ if (emitSignalUnitChanged) {
+	emit signalUnitChanged(unit);
  }
 }
 
@@ -388,9 +406,7 @@ bool Player::loadUnits(QDataStream& stream)
 	d->mUnits.append(unit);
 	unit->dataHandler()->registerHandler(dataHandlerID, this,
 			SLOT(sendProperty(int, QDataStream&, bool*)),
-			SIGNAL(signalUnitPropertyChanged(KGamePropertyBase*)));
-	connect(unit->dataHandler(), SIGNAL(signalPropertyChanged(KGamePropertyBase*)),
-			this, SLOT(slotUnitPropertyChanged(KGamePropertyBase*)));
+			SLOT(slotUnitPropertyChanged(KGamePropertyBase*)));
 	unit->setId(id);
 
 	// Emit signal for canvas and minimap and BosonWidget
