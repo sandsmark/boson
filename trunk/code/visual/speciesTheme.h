@@ -26,8 +26,8 @@
 #include "../common/unitType.h"
 #include "../common/unit.h"
 
-//#include "playerUnit.h"
-
+class QString;
+class QBitArray;
 class QPixmap;
 class QwSpritePixmapSequence;
 
@@ -36,52 +36,43 @@ class QwSpritePixmapSequence;
   */
 class speciesTheme
 {
- public:
-  speciesTheme(char *themeName);
-  ~speciesTheme();
+public:
+	speciesTheme(char *themeName);
+	~speciesTheme();
 
-  QwSpritePixmapSequence
-	*getPixmap(facilityType unit) { return fixSprite[unit]; }
+	QwSpritePixmapSequence *getPixmap(mobType unit);
+	QwSpritePixmapSequence *getPixmap(facilityType unit);
 
-  QwSpritePixmapSequence
-	*getPixmap(mobType unit) { return mobSprite[unit]; }
+	QPixmap		*getBigOverview(mobType unit);
+	QPixmap		*getBigOverview(facilityType unit);
 
-  QPixmap	*getBigOverview(mobType unit) { return mobBigOverview[unit]; }
-  QPixmap	*getBigOverview(facilityType unit) { return fixBigOverview[unit];}
+	QPixmap		*getBigOverview(mobUnit *u) { return getBigOverview(u->getType()); }
+	QPixmap		*getBigOverview(Facility *u) { return getBigOverview(u->getType()); }
 
-  QPixmap	*getBigOverview(mobUnit *u) { return getBigOverview(u->getType()); }
-  QPixmap	*getBigOverview(Facility *u) { return getBigOverview(u->getType()); }
 
-  QPixmap	*getSmallOverview(mobType unit) { return mobSmallOverview[unit]; }
-  QPixmap	*getSmallOverview(facilityType unit) { return fixSmallOverview[unit];}
+	QPixmap		*getSmallOverview(mobType unit);
+	QPixmap		*getSmallOverview(facilityType unit);
 
-  QPixmap	*getSmallOverview(mobUnit *u) { return getSmallOverview(u->getType()); }
-  QPixmap	*getSmallOverview(Facility *u) { return getSmallOverview(u->getType()); }
+	QPixmap		*getSmallOverview(mobUnit *u) { return getSmallOverview(u->getType()); }
+	QPixmap		*getSmallOverview(Facility *u) { return getSmallOverview(u->getType()); }
 
-  bool		isOk(void) { return allLoaded; }
+protected:
+	bool 		loadMob(int index);
+	bool		loadFix(int index);
 
-  protected:
-  bool 		loadMob(int index, QString const &path);
-  bool		loadFix(int i, QString const &path);
+private:
+	QString		*themePath;
 
-  private:
-  bool		allLoaded;
+	QBitArray	*mobiles, *facilities;
 
-///orzel: ugly, will be moved with dynamic allocation in constructors for those tabs
-#define mobilePropNb	20
-#define facilityPropNb	20
+	QPixmap		**mobBigOverview;	// pixmaps for the control panel
+	QPixmap		**fixBigOverview;	// pixmaps for the control panel
+	QPixmap		**mobSmallOverview;	// pixmaps for the control panel
+	QPixmap		**fixSmallOverview;	// pixmaps for the control panel
 
-  QPixmap	*mobBigOverview[mobilePropNb];		// pixmaps for the control panel
-  QPixmap	*fixBigOverview[facilityPropNb];	// pixmaps for the control panel
-  QPixmap	*mobSmallOverview[mobilePropNb];	// pixmaps for the control panel
-  QPixmap	*fixSmallOverview[facilityPropNb];	// pixmaps for the control panel
-
-  QwSpritePixmapSequence
-		*mobSprite[mobilePropNb],	// a mobile
-		*fixSprite[facilityPropNb];	// facilities
-
-#undef mobilePropNb
-#undef facilityPropNb
+	QwSpritePixmapSequence
+			**mobSprite,		// all sprites for a given mobile
+			**fixSprite;		// all sprites for a giver facility
 
 };
 

@@ -42,22 +42,28 @@ maxX = w; maxY = h;
 
 /* Themes selection (should be moved thereafter) */
 vpp.ground	= new groundTheme("earth");
+/*
 	if (!vpp.ground->isOk()) KMsgBox::message(0l,
 		i18n("Pixmap loading error"),
 		i18n("Error while loading groundTheme,\nsome images will show up awfully"),
 		KMsgBox::EXCLAMATION);
+*/
 
 vpp.species[1]	= new speciesTheme("blue_human");
+/*
 	if (!vpp.species[1]->isOk()) KMsgBox::message(0l,
 		i18n("Pixmap loading error"),
 		i18n("Error while loading \"blue\" specie theme,\nsome images will show up awfully"),
 		KMsgBox::EXCLAMATION);
+*/
 
 vpp.species[0]	= new speciesTheme("red_human");
+/*
 	if (!vpp.species[0]->isOk()) KMsgBox::message(0l,
 		i18n("Pixmap loading error"),
 		i18n("Error while loading \"red\" specie theme,\nsome images will show up awfully"),
 		KMsgBox::EXCLAMATION);
+*/
 
 
 }
