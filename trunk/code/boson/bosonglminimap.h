@@ -230,6 +230,14 @@ public:
 
 	void setPoint(int x, int y, const QColor& color);
 
+	/**
+	 * Disable updates before calling @ref setPoint (e.g. using @ref
+	 * setFogged or @ref unfog) many times. After you've called them, enable
+	 * updates again. Before enabling updates again, previous updates are
+	 * incorporated into the minimap then.
+	 **/
+	void setUpdatesEnabled(bool);
+
 protected:
 	void renderMiniMap();
 	void renderCamera();
