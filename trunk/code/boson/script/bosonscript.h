@@ -75,13 +75,13 @@ class BosonScript
     /**
      * Calls function with given name in the script
      **/
-    virtual void callFunction(QString function) = 0;
+    virtual void callFunction(const QString& function) = 0;
+    virtual int callFunctionWithReturn(const QString& function) = 0;
 
     /**
      * Executes given script line
      **/
-     virtual void execLine(const QString& line) = 0;
-
+    virtual void execLine(const QString& line) = 0;
 
     Player* player() const  { return mPlayer; }
     int playerId() const;
