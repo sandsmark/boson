@@ -25,6 +25,7 @@
 
 #include "common/msgData.h"
 #include "common/unit.h"	// Facility
+#include "common/cell.h"
 
 #include "playerUnit.h"		// playerMobUnit
 #include "visualCanvas.h"
@@ -32,13 +33,6 @@
 class QRect;
 class QPainter;
 class Unit;
-
-
-class bosonCell {
-	public:
-	private:
-	int  flags;
-} ;
 
 
 /** 
@@ -68,6 +62,14 @@ public:
   void requestAction(void);
   void updateRess(unitRessMsg_t &);
 
+	/** configure the cell at the given point (i,j) */
+  	void	setCell(int i, int j, cell_t c);	// not virtual !
+	/** return the cell at (x,y) */
+	Cell	&cell(int x, int y)
+			{return cells[ x + y * maxX ]; }
+	/** convenient function */
+	Cell	&cell(QPoint p ) { return cell(p.x(), p.y()); }
+
 /* concerning contents */
   playerFacility *getFacility(long key) { return facility.find(key); }
 
@@ -75,12 +77,11 @@ public:
   QIntDict<playerMobUnit>	mobile;
   QIntDict<playerFacility>	facility;
 
-protected:
-	bosonCell	&cell(int x, int y) {return cells[ x + y * maxX ]; }
-	bosonCell	*cells;
-  
 signals:
 	void reCenterView(int x, int y);
+
+private:
+	Cell	*cells;
 
 };
 

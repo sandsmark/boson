@@ -30,6 +30,10 @@
 #include "boshot.h"
 #include "game.h" 	// who_am_i
   
+
+/*
+ *  BOSON CANVAS
+ */
 bosonCanvas::bosonCanvas( QPixmap p, uint w, uint h)
 	: visualCanvas(p,w,h)
 {
@@ -38,7 +42,7 @@ bosonCanvas::bosonCanvas( QPixmap p, uint w, uint h)
 //	mobile.setAutoDelete(TRUE);
 //	facility.setAutoDelete(TRUE);   
 
-	cells = new bosonCell[w*h];
+	cells = new Cell[w*h];
 }
 
 
@@ -267,4 +271,9 @@ void bosonCanvas::shoot(shootMsg_t &m)
 			boShot::SHOT_SHOT);
 }
 
+void bosonCanvas::setCell(int i, int j, cell_t c)
+{
+	visualCanvas::setCell(i,j,c);
+	cell(i,j).setGround( ground(c) );
+}
 
