@@ -469,6 +469,7 @@ protected:
 	 * Used by @ref loadFromXML.
 	 **/
 	bool loadItemsFromXML(const QDomElement& root);
+	bool loadParticlesFromXML(const QDomElement& root);
 
 	/**
 	 * Parses @p item and will create a @ref BosonItem correspoding to the

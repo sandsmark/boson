@@ -383,13 +383,13 @@ bool BosonStarting::startScenario()
  // thefore this playersXML) only the player _number_
  QString errorMsg;
  int line = 0, column = 0;
- QDomDocument playersDoc;
- if (!playersDoc.setContent(QString(playersXML), &errorMsg, &line, &column)) {
+ QDomDocument doc;
+ if (!doc.setContent(QString(playersXML), &errorMsg, &line, &column)) {
 	boError() << k_funcinfo << "unable to load playersXML - parse error at line=" << line << ",column=" << column << " errorMsg=" << errorMsg << endl;
 	return false;
  }
- QDomElement playersRoot = playersDoc.documentElement();
- QDomNodeList playersList = playersRoot.elementsByTagName("Player");
+ QDomElement root = doc.documentElement();
+ QDomNodeList playersList = root.elementsByTagName("Player");
  if (playersList.count() < 1) {
 	boError() << k_funcinfo << "no Player tag found" << endl;
 	return false;
@@ -410,8 +410,8 @@ bool BosonStarting::startScenario()
  }
 
  QDomDocument canvasDoc;
- if (!canvasDoc.setContent(QString(canvasXML), &errorMsg, &line, &column)) {
-	boError() << k_funcinfo << "unable to load canvasXML - parse error at line=" << line << ",column=" << column << " errorMsg=" << errorMsg << endl;
+ if (!canvasDoc.setContent(QString(canvasXML))) {
+	boError() << k_funcinfo << "unable to load canvasXML" << endl;
 	return false;
  }
  QDomElement canvasRoot = canvasDoc.documentElement();
@@ -457,8 +457,8 @@ bool BosonStarting::startScenario()
 	e.setAttribute("Id", actualId);
 
  }
- playersRoot.setAttribute("LocalPlayerId", mPlayer->id());
- playersXML = playersDoc.toCString();
+ root.setAttribute("LocalPlayerId", mPlayer->id());
+ playersXML = doc.toCString();
  canvasXML = canvasDoc.toCString();
 
  // AB: note that the player list can (and very often will) contain more players

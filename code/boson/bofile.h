@@ -26,7 +26,7 @@ class KTar;
 class KArchiveDirectory;
 
 /**
- * This is the base class for BPFFile. It acts as an interface
+ * This is the base class for @ref BSGFile and BPFFile. It acts as an interface
  * to @ref KTar which allows loading from a .tar.gz file.
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
@@ -117,9 +117,6 @@ private:
 
 /**
  * @short A BosonPlayField (.bpf) File.
- *
- * UPDATE: we use this for .bsg files as well now. Both share the same file
- * format since boson 0.9
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
 class BPFFile : public BoFile
@@ -253,6 +250,40 @@ public:
 
 private:
 	QString mIdentifier;
+};
+
+/**
+ * @short A Boson SaveGame (.bsg) File.
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+class BSGFile : public BoFile
+{
+public:
+	BSGFile(const QString& file, bool readOnly);
+	~BSGFile();
+
+	virtual bool checkTar() const;
+
+	QByteArray mapData() const
+	{
+		return fileData(QString::fromLatin1("map"));
+	}
+	QByteArray kgameData() const
+	{
+		return fileData(QString::fromLatin1("kgame.xml"));
+	}
+	QByteArray playersData() const
+	{
+		return fileData(QString::fromLatin1("players.xml"));
+	}
+	QByteArray canvasData() const
+	{
+		return fileData(QString::fromLatin1("canvas.xml"));
+	}
+	QByteArray externalData() const
+	{
+		return fileData(QString::fromLatin1("external.xml"));
+	}
 };
 
 #endif

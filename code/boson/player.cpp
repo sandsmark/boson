@@ -494,14 +494,7 @@ bool Player::hasMiniMap() const
  QPtrListIterator<Unit> it(d->mUnits);
  while (it.current()) {
 	if (it.current()->unitProperties()->supportMiniMap()) {
-		if (!it.current()->isFacility()) {
-			return true;
-		} else {
-			Facility* f = (Facility*)it.current();
-			if (f->isConstructionComplete()) {
-				return true;
-			}
-		}
+		return true;
 	}
 	++it;
  }

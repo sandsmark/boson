@@ -1,17 +1,9 @@
-This package was debianized by Mickael Marchand <marchand@kde.org> on
-Mon, 12 May 2003 23:25:02 +0200.
+This package was debianized by Felix Seeger <felix.seeger@gmx.de> on
+Sun, 20 Oct 2002 12:18:55 +0200.
 
-It was downloaded from http://boson.eu.org
+It was downloaded from http://boson.sourceforge.net
 
-Upstream Authors: 
-	Thomas Capricelli <orzel@freehackers.org>
-	Andreas Beckermann <b_mann@gmx.de>
-	Rivo Laks <rivolaks@hot.ee>
-	Benjamin Adler <BenniAdler@bigfoot.de>
-	Nils Trzebin <>
-	Ludovic Grossar <>
-	Timo Huebel <t.h@gmxpro.de>
-	Felix Seeger <felix.seeger@gmx.de>
+Upstream Author(s): see /usr/share/doc/HTML/en/boson/credits.html
 
-Copyright:
-See /usr/share/common-licenses/GPL-2
+
+Copyright: see /usr/share/common-licenses/GPL

@@ -520,13 +520,9 @@ private:
 	BoDebugPrivate* d;
 };
 
-#if 0
-// AB: when you remove this #if 0, remove it from the .cpp as well (next to
-// NDEBUG)
 #ifdef NDEBUG
 #define boDebug bondDebug
 #define boBacktrace bondBacktrace
-#endif
 #endif
 
 #endif

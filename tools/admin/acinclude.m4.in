@@ -1528,9 +1528,8 @@ AC_PATH_QT_1_3
 
 AC_DEFUN(KDE_CHECK_FINAL,
 [
-dnl AB: --enable-final doesnt work atm and i dont want to support it
-dnl  AC_ARG_ENABLE(final, [  --enable-final          build size optimized apps (experimental - needs lots of memory)],
-dnl	kde_use_final=$enableval, kde_use_final=no)
+  AC_ARG_ENABLE(final, [  --enable-final          build size optimized apps (experimental - needs lots of memory)],
+	kde_use_final=$enableval, kde_use_final=no)
 
   KDE_COMPILER_REPO
   if test "x$kde_use_final" = "xyes"; then
@@ -3310,8 +3309,8 @@ AC_DEFUN(AC_HAVE_GL,
  test -z "$GL_LDFLAGS" && GL_LDFLAGS=
  test -z "$GL_INCLUDE" && GL_INCLUDE=
 
-# AC_ARG_WITH(gl, [  --without-gl            disable 3D GL modes],
-#	gl_test=$withval, gl_test="yes")
+ AC_ARG_WITH(gl, [  --without-gl            disable 3D GL modes],
+	gl_test=$withval, gl_test="yes")
  if test "x$kde_use_qt_emb" = "xyes"; then
    # GL and Qt Embedded is a no-go for now.
    ac_cv_have_gl=no
