@@ -1100,6 +1100,9 @@ Unit* Boson::createUnit(unsigned long int unitType, Player* owner)
  }
  owner->addUnit(unit); // can also be in Unit c'tor - is this clean?
  theme->loadNewUnit(unit);
+ if (unit->isFlying()) {
+	unit->moveBy(0.0f, 0.0f, 2.0 * BO_TILE_SIZE / BO_GL_CELL_SIZE);
+ }
 
  return unit;
 }

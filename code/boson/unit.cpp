@@ -119,12 +119,6 @@ Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
 	return;
  }
 
- if (isFlying()) {
-	// FIXME i guess we can store z-position as opengl coordinates
-	// instead...
-	moveBy(0.0, 0.0, 2.0 * BO_TILE_SIZE / BO_GL_CELL_SIZE); // FIXME - hardcoded
- }
-
 // create the plugins
 // note: we use fixed KGame-property IDs, so we can't add any plugin twice. if
 // we ever want to support this, we need to use dynamically assigned (see
@@ -308,7 +302,6 @@ void Unit::updateSelectBox()
 void Unit::moveBy(float moveX, float moveY, float moveZ)
 {
 // time critical function
-
  if (!moveX && !moveY && !moveZ || isDestroyed()) {
 	return;
  }
