@@ -258,6 +258,10 @@ void BosonSpriteCursor::setCursor(int mode)
  if (mode == cursorMode()) {
 	return;
  }
+ if (!d->mCursor) {
+	kdError() << k_funcinfo << "NULL cursor sprite" << endl;
+	return;
+ }
  BosonCursor::setCursor(mode);
  d->mAnimateTimer.stop();
  if (mode >= 0) {
