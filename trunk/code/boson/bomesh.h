@@ -30,6 +30,8 @@ class BoMeshRendererMeshData;
 class BoMeshRendererMeshLODData;
 class QColor;
 
+template<class T> class QValueVector;
+
 class BoFace
 {
 public:
@@ -355,24 +357,33 @@ public:
 
 	/**
 	 * You must call @ref allocatePoints before calling this!
-	 * @param index The index of the vertex in the vertex pool (relative to
-	 * this mesh). It must be < @ref points.
 	 *
-	 * Note that this changes the vertex at @p index for all LODs that
-	 * reference that index!
+	 * This methods sets the list of available vertices for this mesh. The
+	 * faces (see @ref BoFace) may reference these.
+	 *
+	 * You are not allowed to call this twice!
+	 * -> Some pre-parsing may occur at this point already (or on demand
+	 *  after this point), and other methods/classes that use the generated
+	 *  data might not know about later changes.
+	 * @param vertices A value vector containing all vertices. The size of the
+	 * vector must match exactly the size that was allocated using @ref
+	 * allocatePoints.
 	 **/
-	void setVertex(unsigned int index, const BoVector3&);
+	// AB: if BoLODBuilder ever needs to add points/vertices, we should add
+	// a addVertex() method, which _appends_ a vertex to the internal array.
+	// existing vertices should not be removed.
+	void setVertices(const QValueVector<BoVector3>& vertices);
 
 	void calculateNormals();
 
 	/**
-	 * The third coordinate is discarded.
-	 * @param index See @ref setVertex.
+	 * Just like @ref setVertices, just for texels. All rules for the
+	 * @ref setVertices are valid here, too, but a zero size vector is
+	 * valid.
 	 *
-	 * Note that this changes the texel at @p index for all LODs that
-	 * reference that index!
+	 * Note that the third component of every texel is discarded.
 	 **/
-	void setTexel(unsigned int index, const BoVector3&);
+	void setTexels(const QValueVector<BoVector3>& texels);
 
 	/**
 	 * Try to connect all faces in the mesh, so that we can use
@@ -467,18 +478,6 @@ public:
 	unsigned int points() const;
 
 	/**
-	 * Calculate values for @ref maxZPoint and similar functions. This needs
-	 * to get called whenever the values might change!
-	 *
-	 * @param matrix The matrix of the first frame. Note that the max/min
-	 * values can change when the frames changes, but we will always use the
-	 * values from the _first_ frame only. UPDATE: this parameter is most
-	 * probably obsolete. Use the identity matrix here. if you know a
-	 * reason for why you want to use something else - please tell me.
-	 **/
-	void calculateMaxMin(const BoMatrix* matrix);
-
-	/**
 	 * @return The maximal x value in this mesh. Call @ref calculateMaxMin
 	 * before you use this
 	 **/
@@ -513,6 +512,45 @@ public:
 	 * before you use this
 	 **/
 	float minZ() const;
+
+	/**
+	 * Return the bounding box in the specified parameters.
+	 *
+	 * The bounding box consists of the 8 points that are made by the
+	 * possible combinations of the min/max x/y/z values.
+	 *
+	 * Note that the bounding box is axis aligned in all cases and might
+	 * therefore be bigger than necessary.
+	 *
+	 * This method is equivalent to calling @ref minX, @ref maxX, ... for
+	 * all specified parameters.
+	 **/
+	void getBoundingBox(float* minX, float* maxX, float* minY, float* maxY, float* minZ, float* maxZ);
+
+	/**
+	 * @overloaded
+	 * This version behaves just like the above method, but it returns all
+	 * combinations of min/max x/y/z in @p vertices. These 8 vertices are
+	 * all vertices of the bounding box.
+	 * @param vertices Must be an array of 8. The vertices of the bounding
+	 * box are returned here.
+	 **/
+	void getBoundingBox(BoVector3* vertices);
+
+	/**
+	 * Return the bounding box after transforming the mesh by @p matrix. See
+	 * the above version for more information.
+	 *
+	 * Note that the returned bounding box is still axis aligned and
+	 * therefore is probably bigger than necessary!
+	 *
+	 * Also note that this bounding box is retrieved by transforming the
+	 * bounding box returned by the above method by @p matrix, and therefore
+	 * is probably <em>much</em> larger than necessary. For better results
+	 * you should transform all vertices (see @ref vertex) by @ref matrix
+	 * and find the min/max values from all resulting vertices.
+	 **/
+	void getBoundingBox(const BoMatrix& matrix, float* minX, float* maxX, float* minY, float* maxY, float* minZ, float* maxZ);
 
 	/**
 	 * Compute a bounding object (usually a box) for the mesh.
@@ -558,6 +596,13 @@ protected:
 	void calculateNormals(unsigned int lod);
 
 	void setNormal(unsigned int face, int vertex, const BoVector3& normal);
+
+	/**
+	 * Calculate values for @ref maxZPoint and similar functions.
+	 *
+	 * Called by @ref setVertices
+	 **/
+	void calculateMaxMin();
 
 private:
 	void init();

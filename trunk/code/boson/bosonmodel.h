@@ -438,7 +438,6 @@ private:
 	float mWidth;
 	float mHeight;
 	BoMeshRendererModelData* mMeshRendererModelData;
-	static bool mUseVBO; // obsolete
 };
 
 /**

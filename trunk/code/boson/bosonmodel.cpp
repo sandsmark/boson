@@ -135,22 +135,13 @@ protected:
 		}
 	}
 	/**
-	 * @return The volume of the bounding box of this mesh
+	 * @return The volume of the box with the specified values
 	 **/
-	static float volume(BoMesh* mesh)
+	static float volume(float minX, float maxX, float minY, float maxY, float minZ, float maxZ)
 	{
-		if (!mesh) {
-			return 0.0f;
-		}
-		// AB: this is a naive implementation.
-		// we just use min/max x/y/z. but imagine a perfect cube which
-		// is rotated by 45 degree - it's actual volume would be still
-		// the same, but here we would generate a different box which
-		// the original cube fits in (and isn't rotated). that volume
-		// would be a lot bigger than...
-		float dx = mesh->maxX() - mesh->minX();
-		float dy = mesh->maxY() - mesh->minY();
-		float dz = mesh->maxZ() - mesh->minZ();
+		float dx = maxX - minX;
+		float dy = maxY - minY;
+		float dz = maxZ - minZ;
 		float volume = dx * dy * dz;
 		if (volume < 0.0f) {
 			return -volume;
@@ -169,7 +160,7 @@ void BoMeshSorter::sortByMaxSize(QValueList<BoMeshSorter::Mesh>* meshes)
  if (meshes->count() == 1) {
 	return;
  }
- QValueList<BoMeshSorter::Mesh> list;
+ QMap<float, QValueList<BoMeshSorter::Mesh>* > map;
 
  QValueList<BoMeshSorter::Mesh>::Iterator it;
  for (it = meshes->begin(); it != meshes->end(); ++it) {
@@ -181,27 +172,42 @@ void BoMeshSorter::sortByMaxSize(QValueList<BoMeshSorter::Mesh>* meshes)
 	}
 
 	// do some necessary calculations
-	mesh.mesh->calculateMaxMin(mesh.matrix);
+	// AB: this is a naive implementation.
+	// we just use min/max x/y/z. but imagine a perfect cube which
+	// is rotated by 45 degree - it's actual volume would be still
+	// the same, but here we would generate a different box which
+	// the original cube fits in (and isn't rotated). that volume
+	// would be a lot bigger than...
+	float minX, maxX, minY, maxY, minZ, maxZ;
+	mesh.mesh->getBoundingBox(*mesh.matrix, &minX, &maxX, &minY, &maxY, &minZ, &maxZ);
+	float v = volume(minX, maxX, minY, maxY, minZ, maxZ);
 
-	float v = volume(mesh.mesh);
-	bool found = false;
-	QValueList<BoMeshSorter::Mesh>::Iterator it2;
-	for (it2 = list.begin(); it2 != list.end() && !found; ++it2) {
-		if (v >= volume((*it2).mesh)) {
-			list.insert(it2, mesh);
-			found = true;
-		}
+	QValueList<BoMeshSorter::Mesh>* list = 0;
+	if (!map.contains(v)) {
+		list = new QValueList<BoMeshSorter::Mesh>();
+		map.insert(v, list);
+	} else {
+		list = map[v];
 	}
-	if (!found) {
-		list.append(mesh);
-	}
+	list->append(mesh);
  }
 
- if (list.count() != meshes->count()) {
-	boError() << k_funcinfo << "invalid result! count=" << list.count() << " should be: " << meshes->count() << endl;
-	return;
+ unsigned int meshesCount = meshes->count();
+ meshes->clear();
+ QMap<float, QValueList<BoMeshSorter::Mesh>* >::Iterator mapIt;
+ for (mapIt = map.begin(); mapIt != map.end(); ++mapIt) {
+	QValueList<BoMeshSorter::Mesh>* list = mapIt.data();
+	QValueList<BoMeshSorter::Mesh>::Iterator listIt;
+	for (listIt = list->begin(); listIt != list->end(); ++listIt) {
+		meshes->prepend(*listIt);
+	}
+	map.remove(mapIt.key());
+	delete list;
  }
- *meshes = list;
+
+ if (meshesCount != meshes->count()) {
+	boError() << k_funcinfo << "invalid result! count=" << meshes->count() << " should be: " << meshesCount << endl;
+ }
 }
 
 void BoMeshSorter::sortByZ(QValueList<BoMeshSorter::Mesh>* meshes, bool byMaxZ)
@@ -221,14 +227,16 @@ void BoMeshSorter::sortByZ(QValueList<BoMeshSorter::Mesh>* meshes, bool byMaxZ)
 	BoMeshSorter::Mesh mesh = *it;
 
 	// do some necessary calculations
-	mesh.mesh->calculateMaxMin(mesh.matrix);
+	float tmp, minZ, maxZ;
+	mesh.mesh->getBoundingBox(*mesh.matrix, &tmp, &tmp, &tmp, &tmp, &minZ, &maxZ);
 
 	float z = 0.0f;
 	if (byMaxZ) {
-		z = mesh.mesh->maxZ();
+		z = maxZ;
 	} else {
-		z = mesh.mesh->minZ();
+		z = minZ;
 	}
+
 	QValueList<BoMeshSorter::Mesh>* list = 0;
 	if (!map.contains(z)) {
 		list = new QValueList<BoMeshSorter::Mesh>();
@@ -236,7 +244,7 @@ void BoMeshSorter::sortByZ(QValueList<BoMeshSorter::Mesh>* meshes, bool byMaxZ)
 	} else {
 		list = map[z];
 	}
-	map[z]->append(mesh);
+	list->append(mesh);
  }
 
  unsigned int meshesCount = meshes->count();
@@ -247,12 +255,12 @@ void BoMeshSorter::sortByZ(QValueList<BoMeshSorter::Mesh>* meshes, bool byMaxZ)
 	if (byMaxZ) {
 		QValueList<BoMeshSorter::Mesh>::Iterator listIt;
 		for (listIt = list->begin(); listIt != list->end(); ++listIt) {
-			meshes->append(*listIt);
+			meshes->prepend(*listIt);
 		}
 	} else {
 		QValueList<BoMeshSorter::Mesh>::Iterator listIt;
 		for (listIt = list->begin(); listIt != list->end(); ++listIt) {
-			meshes->prepend(*listIt);
+			meshes->append(*listIt);
 		}
 	}
 	map.remove(mapIt.key());
@@ -552,12 +560,30 @@ public:
 	float lengthY() const { return (mMaxY - mMinY); }
 	float lengthZ() const { return (mMaxZ - mMinZ); }
 
+	/**
+	 * @return the scaling factor required for the data in this object to
+	 * fit a width of @p w and a height of @p h. When all points added using
+	 * @ref addPoints are scaled by that value, the model won't be higher
+	 * than @p h * and won't be wider than @p w.
+	 **/
 	float scale(float w, float h) const
 	{
+		if (fabsf(lengthX() < 0.0001)) {
+			boWarning() << k_funcinfo << "invalid length in x direction: " << lengthX() << endl;
+			return 1.0f;
+		}
+		if (fabsf(lengthY() < 0.0001)) {
+			boWarning() << k_funcinfo << "invalid length in y direction: " << lengthY() << endl;
+			return 1.0f;
+		}
 		float scaleX = w / lengthX();
 		float scaleY = h / lengthY();
 		// we don't care about z-size here!
-		return QMIN(scaleX, scaleY);
+		float scale = QMIN(scaleX, scaleY);
+		if (fabsf(scale) < 0.0001) {
+			return 1.0f;
+		}
+		return scale;
 	}
 
 
@@ -744,6 +770,8 @@ void BosonModel::loadModel()
  mergeMeshesInFrames();
  sortByDepth();
 
+ // scale the model to mWidth * mHeight. vertices are not touched, the scaling
+ // factor is integrated into the mesh matrices.
  applyMasterScale();
  computeBoundingObjects();
 
@@ -1055,6 +1083,10 @@ void BosonModel::applyMasterScale()
 		// we render from bottom to top - but for x and y in the center!
 		// FIXME: this doesn't work 100% correctly - the quad e.g. is
 		// still partially (parts of the wheels) in the grass.
+		// FIXME:do we actually have to multiply mMinZ by scale? scale
+		// is already in m... AB: I do not change this as I am not
+		// totally sure and we dont have models that behave incorrectly
+		// atm
 		m.translate(0.0, 0.0, -helper.mMinZ * scale);
 
 		m.multiply(matrix);
