@@ -243,6 +243,32 @@ class BosonParticleSystem
      void setMass(float m)  { mMass = m; };
 
     /**
+     * Return distance from camera for the particles of this system.
+     * It defines how much the particles are moved towards the camera.
+     **/
+    inline float particleDist()  { return mParticleDist; };
+
+    /**
+     * Set the distance from camera for the particles of this system
+     * @see particleDist
+     **/
+     void setParticleDist(float d)  { mParticleDist = d; };
+
+    /**
+     * Return vector that defines how much to move particles so that they will
+     * be closer to camera.
+     * This is just used to cache this vector and shouldn't be used outside of
+     * BosonBigDisplayBase
+     **/
+    inline const BoVector3& particleDistVector()  { return mParticleDistVector; };
+
+    /**
+     * Set how much to move particles so that they'll be closer to camera
+     * @see particleDistVector
+     **/
+     void setParticleDistVector(const BoVector3& v)  { mParticleDistVector = v; };
+
+    /**
      * @return Current creation rate of particles (per second)
      **/
 //    float createRate() const { return mCreateRate; };
@@ -325,6 +351,8 @@ class BosonParticleSystem
     bool mRotated;
     float mAge;
     float mMass;
+    float mParticleDist;
+    BoVector3 mParticleDistVector;
     int mBlendFunc[2];
 
     const BosonParticleSystemProperties* mProp;
