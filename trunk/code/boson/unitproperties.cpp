@@ -252,15 +252,15 @@ void UnitProperties::loadMobileProperties(KSimpleConfig* conf)
 {
  conf->setGroup("Boson Mobile Unit");
  createMobileProperties();
- mMobileProperties->mSpeed = (float)conf->readDoubleNumEntry("Speed", 0);
+ mMobileProperties->mSpeed = (float)conf->readDoubleNumEntry("Speed", 0) / 48.0f;
  if (mMobileProperties->mSpeed < 0) {
 	boWarning() << k_funcinfo << "Invalid Speed value: " << mMobileProperties->mSpeed <<
 			" for unit " << typeId() << ", defaulting to 0" << endl;
 	mMobileProperties->mSpeed = 0;
  }
- mMobileProperties->mAccelerationSpeed = (float)conf->readDoubleNumEntry("AccelerationSpeed", 0.1);
- mMobileProperties->mDecelerationSpeed = (float)conf->readDoubleNumEntry("DecelerationSpeed", 0.2);
- mMobileProperties->mRotationSpeed = conf->readNumEntry("RotationSpeed", (int)(mMobileProperties->mSpeed * 2));
+ mMobileProperties->mAccelerationSpeed = (float)conf->readDoubleNumEntry("AccelerationSpeed", 0.1) / 48.0f;
+ mMobileProperties->mDecelerationSpeed = (float)conf->readDoubleNumEntry("DecelerationSpeed", 0.2) / 48.0f;
+ mMobileProperties->mRotationSpeed = conf->readNumEntry("RotationSpeed", (int)(mMobileProperties->mSpeed * 48.0f * 2));
  mMobileProperties->mCanGoOnLand = conf->readBoolEntry("CanGoOnLand",
 		(isLand() || isAircraft()));
  mMobileProperties->mCanGoOnWater = conf->readBoolEntry("CanGoOnWater",
