@@ -275,12 +275,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			kdWarning() << k_lineinfo << "not yet completed" << endl;
 			break;
 		}
-		if (buildUnit(factory, unitType, x, y)) {
-			factory->removeProduction();
-		}
-		if (!factory->hasProduction()) {
-			emit signalCompletedProduction(factory);
-		}
+		buildProducedUnit(factory, unitType, x, y);
 		break;
 	}
 	default:
@@ -565,7 +560,7 @@ void Boson::slotReplacePlayerIO(KPlayer* player, bool* remove)
 // kdDebug() << k_funcinfo << endl;
 }
 
-bool Boson::buildUnit(Facility* factory, int unitType, int x, int y)
+bool Boson::buildProducedUnit(Facility* factory, int unitType, int x, int y)
 {
  if (!factory) {
 	kdError() << k_funcinfo << ": NULL factory cannot produce" << endl;
@@ -603,12 +598,18 @@ bool Boson::buildUnit(Facility* factory, int unitType, int x, int y)
 		continue; // this item is not interesting here
 	}
 	Unit* unit = (Unit*)*it;
-	if (!unit->isDestroyed()) {
+	if (!unit->isDestroyed() && !unit->isFlying()) {
 		kdDebug() << "Cannot create unit here" << endl;
 		return false;
 	}
  }
  addUnit(unitType, p, x, y);
+ 
+ // the current production is done.
+ factory->removeProduction();
+ if (!factory->hasProduction()) {
+	emit signalCompletedProduction(factory);
+ }
  return true;
 }
 

@@ -20,6 +20,7 @@
 #include "unit.h"
 #include "player.h"
 #include "bosoncanvas.h"
+#include "boson.h"
 #include "cell.h"
 #include "speciestheme.h"
 #include "unitproperties.h"
@@ -838,6 +839,12 @@ void Facility::advanceProduction()
 	d->mProductionState = 0;
 	return;
  }
+
+
+
+ // FIXME: this code is broken!
+ // it gets executed on *every* client but sendInput() should be used on *one*
+ // client only!
  // a unit is completed as soon as d->mProductionState == owner()->unitProperties(type)->productionTime()
  unsigned int productionTime = owner()->unitProperties(type)->productionTime();
  if (d->mProductionState <= productionTime) {
@@ -849,8 +856,13 @@ void Facility::advanceProduction()
 		// facility's lower-left tile, are tested counter-clockwise. Unit is placed
 		// to first free tile.
 		// No auto-placing for facilities
-		if(owner()->unitProperties(type)->isFacility())
+		if(!owner()->unitProperties(type)) {
+			kdError() << k_lineinfo << "Unknown type " << type << endl;
 			return;
+		}
+		if(owner()->unitProperties(type)->isFacility()) {
+			return;
+		}
 		int tilex, tiley; // Position of lower-left corner of facility in tiles
 		int theight, twidth; // height and width of facility in tiles
 		int currentx, currenty; // Position of tile currently tested
@@ -867,49 +879,41 @@ void Facility::advanceProduction()
 		int debugnum = 1;
 		kdDebug() << "********** Start of unit auto-placement search **********" << endl;
 		kdDebug() << "Pre-search currents: currentx: " << currentx << "; currenty: " << currenty << endl;
-		for(int i=1; i <= 3; i++)
-		{
+		for(int i=1; i <= 3; i++) {
 			kdDebug() << "  Round is now " << i << endl;
 			tries = 2 * i * twidth + 2 * i * theight + 4;
 			kdDebug() << "      Tries is now " << tries << endl;
 			currenty++;
 			kdDebug() << "      Currents are: currentx: " << currentx << "; currenty: " << currenty << endl;
-			for(ctry = 1; ctry <= tries; ctry++)
-			{
+			for(ctry = 1; ctry <= tries; ctry++) {
 				kdDebug() << "    Try " << ctry << " of " << tries << endl;
-				if(ctry <= twidth + i)
+				if(ctry <= twidth + i) {
 					currentx++;
-				else if(ctry <= twidth + i + theight + 2 * i - 1)
+				} else if(ctry <= twidth + i + theight + 2 * i - 1) {
 					currenty--;
-				else if(ctry <= twidth + i + 2 * (theight + 2 * i - 1))
+				} else if(ctry <= twidth + i + 2 * (theight + 2 * i - 1)) {
 					currentx--;
-				else if(ctry <= twidth + i + 3 * (theight + 2 * i - 1))
+				} else if(ctry <= twidth + i + 3 * (theight + 2 * i - 1)) {
 					currenty++;
-				else
+				} else {
 					currentx++;
-/*				if(ctry <= twidth + i)
+				}
+/*				if(ctry <= twidth + i) {
 					currentx++;
-				else if(ctry <= twidth + theight + 2 * i)
+				} else if(ctry <= twidth + theight + 2 * i) {
 					currenty--;
-				else if(ctry <= twidth + theight + twidth + 3)
+				} else if(ctry <= twidth + theight + twidth + 3) {
 					currentx--;
-				else
-					currenty++;*/
+				} else {
+					currenty++;
+				}*/
 				
 				kdDebug() << "      Search tile no " << debugnum++ << ": currentx: " << currentx << "; currenty: " << currenty << endl;
-				if(! boCanvas()->cellOccupied(currentx, currenty))
-				{
+				if(! boCanvas()->cellOccupied(currentx, currenty)) {
 					kdDebug() << "      Cell not occupied - proceeding" << endl;
 					// Free cell - place unit at it
 					d->mProductionState = d->mProductionState + 1;
-					QByteArray b;
-					QDataStream stream(b, IO_WriteOnly);
-					stream << (Q_UINT32)BosonMessage::MoveBuild;
-					stream << (Q_UINT32)id();
-					stream << (Q_UINT32)owner()->id();
-					stream << (Q_INT32)currentx;
-					stream << (Q_INT32)currenty;
-					owner()->game()->sendPlayerInput(stream, this->owner());
+					((Boson*)owner()->game())->buildProducedUnit(this, type, currentx, currenty);
 					return;
 				}
 			}
