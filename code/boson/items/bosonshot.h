@@ -75,6 +75,7 @@ class BosonShot : public BosonItem
     BosonShot(Player* owner, BosonCanvas* canvas, BosonModel* model);
 
     BosonShot(Player* owner, BosonCanvas* canvas);
+    ~BosonShot();
 
     /**
      * @return Weapon properties of this shot if it has one.

@@ -164,10 +164,14 @@ BosonShot* BosonWeaponProperties::newShot(Unit* attacker, BoVector3 pos, BoVecto
     boError() << k_funcinfo << "NULL attacker" << endl;
     return 0;
   }
-  BosonShot* s;
+  BosonShot* s = 0;
+  BosonCanvas* canvas = attacker->canvas();
+  BO_CHECK_NULL_RET0(canvas);
+  BO_CHECK_NULL_RET0(attacker->owner());
   if(shotType() == BosonShot::Bullet)
   {
-    s = new BosonShotBullet(attacker->owner(), attacker->canvas(), this, target);
+    ItemType type(BosonShot::Bullet, unitProperties()->typeId(), id());
+    s = (BosonShot*)canvas->createNewItem(RTTI::Shot, attacker->owner(), type, pos);
   }
   else if(shotType() == BosonShot::Missile)
   {
@@ -176,11 +180,13 @@ BosonShot* BosonWeaponProperties::newShot(Unit* attacker, BoVector3 pos, BoVecto
     m.rotate(attacker->rotation(), 0, 0, 1);
     m.transform(&realpos, &mOffset);
     realpos += pos;
-    s = new BosonShotMissile(attacker->owner(), attacker->canvas(), this, realpos, target);
+    ItemType type(BosonShot::Missile, unitProperties()->typeId(), id());
+    s = (BosonShot*)canvas->createNewItem(RTTI::Shot, attacker->owner(), type, realpos);
   }
   else if(shotType() == BosonShot::Mine)
   {
-    s = new BosonShotMine(attacker->owner(), attacker->canvas(), this, pos);
+    ItemType type(BosonShot::Mine, unitProperties()->typeId(), id());
+    s = (BosonShot*)canvas->createNewItem(RTTI::Shot, attacker->owner(), type, pos);
   }
   else if(shotType() == BosonShot::Bomb)
   {
@@ -189,7 +195,8 @@ BosonShot* BosonWeaponProperties::newShot(Unit* attacker, BoVector3 pos, BoVecto
     m.rotate(attacker->rotation(), 0, 0, 1);
     m.transform(&realpos, &mOffset);
     realpos += pos;
-    s = new BosonShotBomb(attacker->owner(), attacker->canvas(), this, realpos);
+    ItemType type(BosonShot::Bomb, unitProperties()->typeId(), id());
+    s = (BosonShot*)canvas->createNewItem(RTTI::Shot, attacker->owner(), type, pos);
   }
   else
   {

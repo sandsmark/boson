@@ -119,6 +119,7 @@ BosonItem::BosonItem(Player* owner, BosonModel* model, BosonCanvas* canvas)
  mCanvas = canvas;
  mModel = model;
 
+ mId = 0;
  mCurrentAnimation = 0;
  mX = mY = mZ = 0.0f;
  mWidth = mHeight = 0;
@@ -147,7 +148,7 @@ BosonItem::BosonItem(Player* owner, BosonModel* model, BosonCanvas* canvas)
  // 1.732 == sqrt(3) i.e. lenght of vector whose all components are 1
  mBoundingSphereRadius = 1.732f; // TODO: can we extract this from the model? this probably needs to change with different frames!
 
- mIsAnimated = false;
+ mIsAnimated = true; // obsolete! remove!
  mSelectBox = 0;
 
  mCells = new QPtrVector<Cell>();
@@ -155,7 +156,7 @@ BosonItem::BosonItem(Player* owner, BosonModel* model, BosonCanvas* canvas)
  if (mCanvas) {
 	mCanvas->addItem(this);
  } else {
-	boWarning() << k_funcinfo << "NULL canvas" << endl;
+	BO_NULL_ERROR(mCanvas);
  }
 
  if (!mModel) {
@@ -306,14 +307,7 @@ bool BosonItem::bosonCollidesWith(const BoVector3& v1, const BoVector3& v2) cons
 
 void BosonItem::setAnimated(bool a)
 {
- if (mIsAnimated != a) {
-	mIsAnimated = a;
-	if (a) {
-		canvas()->addAnimation(this);
-	} else {
-		canvas()->removeAnimation(this);
-	}
- }
+	// obsolete!! remove!!
 }
 
 void BosonItem::select(bool markAsLeader)
