@@ -177,7 +177,6 @@ void BoCanvasAdvance::advance(const QPtrList<BosonItem> animItems, unsigned int 
  boProfiling->advanceEffects(false);
  boWaterManager->update(0.05);
  boProfiling->advanceWater(false);
-#warning FIXME!!! is this ok here?
 
  /*
   * This contains some things that need to be done "sometimes" only - currently
