@@ -43,8 +43,7 @@ int main(int argc, char **argv)
 		KAboutData::License_GPL,
 		"(C) 1999-2000,2001-2002 The Boson team",
 		0,
-		"http://boson.eu.org",
-		"b_mann@gmx.de");
+		"http://boson.eu.org");
  about.addAuthor("Thomas Capricelli", I18N_NOOP("Initial Game Design & Coding"), "orzel@kde.org", "http://orzel.freehackers.org");
  about.addAuthor("Benjamin Adler", I18N_NOOP("Graphics & Homepage Design"), "benadler@bigfoot.de");
  about.addAuthor( "Andreas Beckermann", I18N_NOOP("Coding & Current Maintainer"), "b_mann@gmx.de" );
