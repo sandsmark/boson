@@ -100,7 +100,7 @@ Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
 
  // note: these width and height can be used for e.g. pathfinding. It does not
  // depend in any way on the .3ds file or another OpenGL thing.
- setSize(prop->unitWidth(), prop->unitHeight(), prop->unitDepth() / BO_TILE_SIZE);
+ setSize(prop->unitWidth(), prop->unitHeight(), prop->unitDepth());
 
  registerData(&d->mWaypoints, IdWaypoints);
  registerData(&d->mMoveDestX, IdMoveDestX);
@@ -1499,10 +1499,11 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCount) // this actually
  // If we're close to destination, decelerate, otherwise accelerate
  // TODO: we should also slow down when turning at waypoint.
  if (QMAX(QABS(x - destinationX()), QABS(y - destinationY())) <= decelerationDistance()) {
-	boDebug(401) << "MOVING: " << "decelerating; pos: (" << x << ", " << y << "); dest: (" <<
+/*	boDebug(401) << "MOVING: " << "decelerating; pos: (" << x << ", " << y << "); dest: (" <<
 			destinationX() << ", " << destinationY() << "); dist: " <<
 			QMAX(QABS(x - destinationX()), QABS(y - destinationY())) << "; decel. dist: " <<
-			decelerationDistance() << ";  speed: " << speed() << endl;
+			decelerationDistance() << ";  speed: " << speed() << ";  acc/dec/max speed: " << accelerationSpeed() <<
+			"/" << decelerationSpeed() << "/" << maxSpeed() << endl;*/
 	decelerate();
  } else {
 	accelerate();
