@@ -164,6 +164,13 @@ class OpenGLOptions : public QVBox, public OptionsWidget
 {
 	Q_OBJECT
 public:
+	enum RenderingSpeed {
+		Defaults = 0,
+		Fastest = 10,
+		BestQuality = 100
+	};
+
+public:
 	OpenGLOptions(QWidget* parent);
 	~OpenGLOptions();
 
@@ -197,10 +204,37 @@ protected:
 
 	void setAlignSelectionBoxes(bool align);
 
+	/**
+	 * Set the rendering speed. This is preset collection of rendering
+	 * settings, so that users don't have to play around with GL_LINEAR,
+	 * GL_NEAREST and all that.
+	 * @param speed See @ref RenderingSpeed
+	 **/
+	void setRenderingSpeed(int speed);
+
+	/**
+	 * @return See @ref RenderingSpeed
+	 **/
+	int renderingSpeed() const;
+
+	/**
+	 * Create a @ref RenderingSpeed value from an index of the combo box
+	 * (see @ref slotRenderingSpeedChanged)
+	 **/
+	static int indexToRenderingSpeed(int index);
+	static int renderingSpeedToIndex(int speed);
+
+protected slots:
+	void slotRenderingSpeedChanged(int);
+	void slotShowDetails(bool);
+
 signals:
 	void signalGroundRendererChanged(int);
 
 private:
+	QComboBox* mRenderingSpeed;
+	QVBox* mAdvanced;
+
 	KIntNumInput* mUpdateInterval;
 	QCheckBox* mModelTexturesMipmaps;
 	QComboBox* mMagnificationFilter;
