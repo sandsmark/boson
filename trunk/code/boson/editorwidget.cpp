@@ -31,7 +31,6 @@
 #include "bpfdescriptiondialog.h"
 #include "optionsdialog.h"
 #include "boaction.h"
-#include "bosonlocalplayerinput.h"
 #include "botexmapimportdialog.h"
 #include "bosongroundtheme.h"
 #include "commandframe/bosoncommandframebase.h"
@@ -58,14 +57,10 @@ class EditorWidget::EditorWidgetPrivate
 public:
 	EditorWidgetPrivate()
 	{
-		mLocalPlayerInput = 0;
-
 		mPlayerAction = 0;
 		mPlaceAction = 0;
 		mChangeHeight = 0;
 	}
-
-	BosonLocalPlayerInput* mLocalPlayerInput;
 
 	KSelectAction* mPlayerAction;
 	KSelectAction* mPlaceAction;
