@@ -65,19 +65,16 @@ BosonNewGameWidget::BosonNewGameWidget(TopWidget* top, QWidget* parent)
 
   mMainLayout = new QVBoxLayout( 0, 0, 6, "mainlayout");
 
-  //FIXME!
-  /*
-  QLabel* header = new QLabel( this, "header" );
-  QFont header_font(  header->font() );
+  mHeader = new QLabel( this, "header" );
+  QFont header_font(  mHeader->font() );
   header_font.setPointSize( 30 );
   header_font.setBold( TRUE );
-  header->setFont( header_font ); 
-  header->setText( i18n( "Start New Game" ) );
-  header->setAlignment( int( QLabel::AlignCenter ) );
-  mMainLayout->addWidget( header );
+  mHeader->setFont( header_font ); 
+  mHeader->setText( i18n( "Start New Game" ) );
+  mHeader->setAlignment( int( QLabel::AlignCenter ) );
+  mMainLayout->addWidget( mHeader );
   QSpacerItem* spacer = new QSpacerItem( 20, 20, QSizePolicy::Minimum, QSizePolicy::Preferred );
   mMainLayout->addItem( spacer );
-  */
 
   mUpperLayout = new QHBoxLayout( 0, 0, 6, "upperlayout"); 
 

@@ -37,22 +37,18 @@ class BosonWelcomeWidget : public QWidget
 
   signals:
     void signalNewGame();
-    void signalLoadGame();
     void signalStartEditor();
     void signalQuit();
 
   protected:
     QVBoxLayout* mBosonWelcomeWidgetLayout;
     QVBoxLayout* mMainLayout;
+    QHBoxLayout* mLowerLayout;
 
   private:
     QPushButton* mNewGameButton;
-    QPushButton* mLoadGameButton;
     QPushButton* mEditorButton;
     QPushButton* mQuitButton;
-
-    QLabel* mBanner;
-    QLabel* mTextFrame;
 
 };
 

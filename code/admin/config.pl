@@ -179,11 +179,14 @@ foreach $ac_file (@ac_files) {
 }
 
 sub patch_file {
-    my ($outf, $infiles, $identline) = @_;
+    my ($outf, $infiles, $firstline) = @_;
     my $filedata;
     my @infiles=split(' ', $infiles);
     my $i=0;
 
+    if ($firstline) {
+	$filedata = $firstline;
+    }
     foreach my $name (@infiles) {
 	if (open(CF, "< $name")) {
 	    while (<CF>) {
@@ -193,10 +196,6 @@ sub patch_file {
 	} else {
 	    print STDERR "can't open $name: $!"."\n";
 	}
-    }
-    if ($identline) {
-	# Put the ident in the second line.  For shitty automake 1.6x.
-	$filedata =~ s%\n%\n$identline%;
     }
 
     $filedata =~ s%\@configure_input\@%$configure_input%g;

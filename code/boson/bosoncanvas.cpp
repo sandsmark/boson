@@ -274,7 +274,7 @@ void BosonCanvas::slotAddUnit(Unit* unit, int x, int y)
 	z = Z_MOBILE;
  }
  unit->setZ(z);
- unit->move(x, y);
+ unit->move( BO_TILE_SIZE * x, BO_TILE_SIZE * y );
  unit->show();
 
  update();
@@ -472,7 +472,7 @@ void BosonCanvas::setMap(BosonMap* map)
  d->mMap = map;
 }
 
-void BosonCanvas::loadTiles(const QString& tiles, bool withtimer)
+void BosonCanvas::loadTiles(const QString& tiles)
 {
  QString dir = KGlobal::dirs()->findResourceDir("data", QString("boson/themes/grounds/%1/index.desktop").arg(tiles)) + QString("boson/themes/grounds/%1").arg(tiles);
  if (dir == QString::null) {
@@ -480,12 +480,7 @@ void BosonCanvas::loadTiles(const QString& tiles, bool withtimer)
 	return;
  }
  d->mLoader->setDir(dir);
- if(withtimer) {
-	QTimer::singleShot(0, this, SLOT(slotLoadTiles()));
- }
- else {
-	slotLoadTiles();
- }
+ QTimer::singleShot(0, this, SLOT(slotLoadTiles()));
 }
 
 void BosonCanvas::slotLoadTiles()
@@ -727,6 +722,8 @@ void BosonCanvas::unfogLocal(int x, int y)
  if (s) {
 	s->hide();
 	delete s;
+ } else {
+	kdDebug() << "cannot remove fog on " << x << "," << y << endl;
  }
 }
 

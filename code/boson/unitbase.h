@@ -268,7 +268,7 @@ public:
 	 * in the constructor. Note that if you get NULL here you don't have to
 	 * care about crashes as the game will crash anyway.
 	 **/
-	const UnitProperties* unitProperties() const { return mUnitProperties; }
+	inline const UnitProperties* unitProperties() const { return mUnitProperties; }
 
 	/**
 	 * Convenience method for owner()->speciesTheme().

@@ -64,7 +64,7 @@ BosonStartEditorWidget::BosonStartEditorWidget(TopWidget* top, QWidget* parent)
  mStartGameLayout->addItem( spacer_9 );
 
  mStartGameButton = new QPushButton( this, "startgamebutton" );
- mStartGameButton->setText( i18n( "S&tart Editor" ) );
+ mStartGameButton->setText( i18n( "S&tart Game" ) );
  mStartGameLayout->addWidget( mStartGameButton );
  mMainLayout->addLayout( mStartGameLayout );
  mBosonStartEditorWidgetLayout->addLayout( mMainLayout );
@@ -142,4 +142,3 @@ void BosonStartEditorWidget::sendNewGame()
 }
 
 #endif //!NO_EDITOR
-

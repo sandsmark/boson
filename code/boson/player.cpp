@@ -25,7 +25,6 @@
 #include "bosonmessage.h"
 #include "bosonmap.h"
 #include "bosonstatistics.h"
-#include "boson.h"
 
 #include <kgame/kgamepropertyhandler.h>
 #include <kgame/kgame.h>
@@ -43,9 +42,6 @@ public:
 	{
 		mUnitPropID = 0;
 		mMap = 0;
-
-		mMobilesCount = 0;
-		mFacilitiesCount = 0;
 	}
 
 	QPtrList<Unit> mUnits;
@@ -58,9 +54,6 @@ public:
 	KGameProperty<unsigned long int> mOil;
 
 	BosonStatistics* mStatistics;
-
-	int mMobilesCount;
-	int mFacilitiesCount;
 };
 
 Player::Player() : KPlayer()
@@ -178,12 +171,6 @@ void Player::addUnit(Unit* unit)
  connect(unit->dataHandler(), SIGNAL(signalPropertyChanged(KGamePropertyBase*)), 
 		this, SLOT(slotUnitPropertyChanged(KGamePropertyBase*)));
 
- if(unit->isMobile()) {
-	d->mMobilesCount++;
- }
- else {
-	d->mFacilitiesCount++;
- }
 }
 
 void Player::unitDestroyed(Unit* unit)
@@ -195,10 +182,8 @@ void Player::unitDestroyed(Unit* unit)
  d->mUnits.take(d->mUnits.findRef(unit));
  if (unit->isFacility()) {
 	statistics()->addLostFacility(unit);
-	d->mFacilitiesCount--;
  } else {
 	statistics()->addLostMobileUnit(unit);
-	d->mMobilesCount--;
  }
  if (!hasMiniMap()) {
 	emit signalShowMiniMap(false);
@@ -272,11 +257,9 @@ bool Player::save(QDataStream& stream)
 // unused, only the species theme should be necessary.
  kdDebug() << k_funcinfo << endl;
  if (!KPlayer::save(stream)) {
-	kdError() << k_funcinfo << "Couldn't save KPlayer" << endl;
+	kdError() << "Couldn't save player" << endl;
 	return false;
  }
-
- // Save speciestheme
  if (speciesTheme()) {
 	stream << speciesTheme()->identifier();
 	stream << speciesTheme()->teamColor();
@@ -285,47 +268,30 @@ bool Player::save(QDataStream& stream)
 	 stream << QColor(0, 0, 0);
  }
 
- // Save unitpropID
- Q_UINT32 unitPropId = d->mUnitPropID;
- stream << unitPropId;
-
- // Save units
+// the stuff below this should (!) be unused.
  Q_UINT32 unitCount = d->mUnits.count();
  stream << unitCount;
  for (unsigned int i = 0; i < unitCount; i++) {
+//	kdDebug() << "save unit " << i << endl;
 	Unit* unit = d->mUnits.at(i);
 	// we need the type first!
 	stream << (int)unit->type();
 	stream << (unsigned long int)unit->id();
-	stream << (double)unit->x();
-	stream << (double)unit->y();
+//	stream << (double)unit->x();
+//	stream << (double)unit->y();
 
-	stream << (int)unit->dataHandler()->id();
-
-	if(!unit->save(stream)) {
-		kdError() << k_funcinfo << "Error while saving unit with id=" << unit->id() << endl;
-		return false;
-	}
+	unit->save(stream);
  }
-
- // Save fog
- stream << d->mFogged;
-
- // Save statistics
- d->mStatistics->save(stream);
-
  return true;
 }
 
 bool Player::load(QDataStream& stream)
 {
- kdDebug() << k_funcinfo << endl;
+// kdDebug() << k_funcinfo < endl;
  if (!KPlayer::load(stream)) {
-	kdError() << k_funcinfo << "Couldn't load KPlayer" << endl;
+	kdError() << "Couldn't load player" << endl;
 	return false;
  }
-
- // Load speciestheme
  QString themeIdentifier;
  QColor teamColor;
  stream >> themeIdentifier;
@@ -334,59 +300,21 @@ bool Player::load(QDataStream& stream)
 	loadTheme(SpeciesTheme::speciesDirectory(themeIdentifier), teamColor);
  }
 
- // Load unitpropID
- Q_UINT32 unitPropId;
- stream >> unitPropId;
-
- // Load units
  Q_UINT32 unitCount;
  stream >> unitCount;
- d->mUnitPropID = unitPropId;
+ //perhaps:
+ d->mUnitPropID = 0;
  for (unsigned int i = 0; i < unitCount; i++) {
+//	kdDebug() << "load unit " << i << endl;
 	int type;
 	unsigned long int id;
-	double x, y;
-	int dataHandlerID;
 	stream >> type;
 	stream >> id;
-	stream >> x;
-	stream >> y;
-	stream >> dataHandlerID;
 
-	// Create unit with Boson
-	Unit* unit = ((Boson*)game())->loadUnit(type, this);
-	// Set additional properties
-	d->mUnits.append(unit);
-	unit->dataHandler()->registerHandler(dataHandlerID, this,
-			SLOT(sendProperty(int, QDataStream&, bool*)),
-			SIGNAL(signalUnitPropertyChanged(KGamePropertyBase*)));
-	connect(unit->dataHandler(), SIGNAL(signalPropertyChanged(KGamePropertyBase*)),
-			this, SLOT(slotUnitPropertyChanged(KGamePropertyBase*)));
-	unit->setId(id);
-
-	// Emit signal for canvas and minimap and BosonWidget
-	emit signalUnitLoaded(unit, x, y);
-	// Call unit's loading methods
-	if(!unit->load(stream)) {
-		kdError() << k_funcinfo << "Error while loading unit with id=" << id << endl;
-		return false;
-	}
-
-	// Increase unit count
-	if(unit->isMobile()) {
-		d->mMobilesCount++;
-	}
-	else {
-		d->mFacilitiesCount++;
-	}
+	emit signalLoadUnit(type, id, this);
+	Unit* unit = findUnit(id);
+	unit->load(stream);
  }
-
- // Load fog
- stream >> d->mFogged;
-
- // Save statistics
- d->mStatistics->load(stream);
-
  return true;
 }
 
@@ -535,12 +463,3 @@ bool Player::isEnemy(Player* p) const
  return true;
 }
 
-int Player::mobilesCount()
-{
- return d->mMobilesCount;
-}
-
-int Player::facilitiesCount()
-{
- return d->mFacilitiesCount;
-}

@@ -45,134 +45,134 @@ BosonNetworkOptionsWidget::BosonNetworkOptionsWidget(TopWidget* top, QWidget* pa
 {
   mTop = top;
 
-  mBosonNetworkOptionsWidgetLayout = new QVBoxLayout( this, 11, 6, "BosonNetworkOptionsWidgetLayout"); 
+  BosonNetworkOptionsWidgetLayout = new QVBoxLayout( this, 11, 6, "BosonNetworkOptionsWidgetLayout"); 
 
-  mHeader = new QLabel( this, "header" );
-  QFont header_font(  mHeader->font() );
+  header = new QLabel( this, "header" );
+  QFont header_font(  header->font() );
   header_font.setPointSize( 30 );
   header_font.setBold( TRUE );
-  mHeader->setFont( header_font ); 
-  mHeader->setText( i18n( "Network Settings" ) );
-  mHeader->setAlignment( int( QLabel::AlignCenter ) );
-  mBosonNetworkOptionsWidgetLayout->addWidget( mHeader );
+  header->setFont( header_font ); 
+  header->setText( i18n( "Network Settings" ) );
+  header->setAlignment( int( QLabel::AlignCenter ) );
+  BosonNetworkOptionsWidgetLayout->addWidget( header );
 
-  mLayout10 = new QHBoxLayout( 0, 0, 6, "Layout10"); 
+  Layout10 = new QHBoxLayout( 0, 0, 6, "Layout10"); 
   QSpacerItem* spacer = new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum );
-  mLayout10->addItem( spacer );
+  Layout10->addItem( spacer );
 
-  mLayout8 = new QVBoxLayout( 0, 0, 6, "Layout8"); 
+  Layout8 = new QVBoxLayout( 0, 0, 6, "Layout8"); 
   QSpacerItem* spacer_2 = new QSpacerItem( 20, 20, QSizePolicy::Minimum, QSizePolicy::Fixed );
-  mLayout8->addItem( spacer_2 );
+  Layout8->addItem( spacer_2 );
 
-  mLayout1 = new QHBoxLayout( 0, 0, 6, "Layout1"); 
+  Layout1 = new QHBoxLayout( 0, 0, 6, "Layout1"); 
 
-  mNetStatusText = new QLabel( this, "netstatustext" );
-  mNetStatusText->setText( i18n( "Network Status:" ) );
-  mLayout1->addWidget( mNetStatusText );
+  netstatustext = new QLabel( this, "netstatustext" );
+  netstatustext->setText( i18n( "Network Status:" ) );
+  Layout1->addWidget( netstatustext );
   QSpacerItem* spacer_3 = new QSpacerItem( 31, 31, QSizePolicy::Fixed, QSizePolicy::Minimum );
-  mLayout1->addItem( spacer_3 );
+  Layout1->addItem( spacer_3 );
 
-  mNetStatusLabel = new QLabel( this, "netstatuslabel" );
-  mLayout1->addWidget( mNetStatusLabel );
-  mLayout8->addLayout( mLayout1 );
+  netstatuslabel = new QLabel( this, "netstatuslabel" );
+  Layout1->addWidget( netstatuslabel );
+  Layout8->addLayout( Layout1 );
 
-  mLayout2 = new QHBoxLayout( 0, 0, 6, "Layout2"); 
+  Layout2 = new QHBoxLayout( 0, 0, 6, "Layout2"); 
   QSpacerItem* spacer_4 = new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum );
-  mLayout2->addItem( spacer_4 );
+  Layout2->addItem( spacer_4 );
 
-  mDisconnectButton = new QPushButton( this, "disconnectbutton" );
-  mDisconnectButton->setEnabled( FALSE );
-  mDisconnectButton->setText( i18n( "Dis&connect" ) );
-  mLayout2->addWidget( mDisconnectButton );
-  mLayout8->addLayout( mLayout2 );
+  disconnectbutton = new QPushButton( this, "disconnectbutton" );
+  disconnectbutton->setEnabled( FALSE );
+  disconnectbutton->setText( i18n( "Dis&connect" ) );
+  Layout2->addWidget( disconnectbutton );
+  Layout8->addLayout( Layout2 );
   QSpacerItem* spacer_5 = new QSpacerItem( 31, 20, QSizePolicy::Minimum, QSizePolicy::Fixed );
-  mLayout8->addItem( spacer_5 );
+  Layout8->addItem( spacer_5 );
 
-  mNetConfGroupBox = new QGroupBox( this, "netconfgroupbox" );
-  mNetConfGroupBox->setTitle( i18n( "Network Configuration" ) );
-  mNetConfGroupBox->setColumnLayout(0, Qt::Vertical );
-  mNetConfGroupBox->layout()->setSpacing( 6 );
-  mNetConfGroupBox->layout()->setMargin( 11 );
-  mNetConfGroupBoxLayout = new QVBoxLayout( mNetConfGroupBox->layout() );
-  mNetConfGroupBoxLayout->setAlignment( Qt::AlignTop );
+  netconfgroupbox = new QGroupBox( this, "netconfgroupbox" );
+  netconfgroupbox->setTitle( i18n( "Network Configuration" ) );
+  netconfgroupbox->setColumnLayout(0, Qt::Vertical );
+  netconfgroupbox->layout()->setSpacing( 6 );
+  netconfgroupbox->layout()->setMargin( 11 );
+  netconfgroupboxLayout = new QVBoxLayout( netconfgroupbox->layout() );
+  netconfgroupboxLayout->setAlignment( Qt::AlignTop );
 
-  mLayout7 = new QVBoxLayout( 0, 0, 6, "Layout7"); 
+  Layout7 = new QVBoxLayout( 0, 0, 6, "Layout7"); 
 
-  mConnectionStyleGroup = new QButtonGroup( mNetConfGroupBox, "connectionstylegroup" );
-  mConnectionStyleGroup->setTitle( i18n( "What would you like to do" ) );
-  mConnectionStyleGroup->setColumnLayout(0, Qt::Vertical );
-  mConnectionStyleGroup->layout()->setSpacing( 6 );
-  mConnectionStyleGroup->layout()->setMargin( 11 );
-  mConnectionStyleGroupLayout = new QVBoxLayout( mConnectionStyleGroup->layout() );
-  mConnectionStyleGroupLayout->setAlignment( Qt::AlignTop );
+  connectionstylegroup = new QButtonGroup( netconfgroupbox, "connectionstylegroup" );
+  connectionstylegroup->setTitle( i18n( "What would you like to do" ) );
+  connectionstylegroup->setColumnLayout(0, Qt::Vertical );
+  connectionstylegroup->layout()->setSpacing( 6 );
+  connectionstylegroup->layout()->setMargin( 11 );
+  connectionstylegroupLayout = new QVBoxLayout( connectionstylegroup->layout() );
+  connectionstylegroupLayout->setAlignment( Qt::AlignTop );
 
-  mCreateGameButton = new QRadioButton( mConnectionStyleGroup, "creategamebutton" );
-  mCreateGameButton->setText( i18n( "Create Network Game" ) );
-  mCreateGameButton->setChecked( TRUE );
-  mConnectionStyleGroupLayout->addWidget( mCreateGameButton );
+  creategamebutton = new QRadioButton( connectionstylegroup, "creategamebutton" );
+  creategamebutton->setText( i18n( "Create Network Game" ) );
+  creategamebutton->setChecked( TRUE );
+  connectionstylegroupLayout->addWidget( creategamebutton );
 
-  mJoinGameButton = new QRadioButton( mConnectionStyleGroup, "joingamebutton" );
-  mJoinGameButton->setText( i18n( "Join Network Game" ) );
-  mConnectionStyleGroupLayout->addWidget( mJoinGameButton );
-  mLayout7->addWidget( mConnectionStyleGroup );
+  joingamebutton = new QRadioButton( connectionstylegroup, "joingamebutton" );
+  joingamebutton->setText( i18n( "Join Network Game" ) );
+  connectionstylegroupLayout->addWidget( joingamebutton );
+  Layout7->addWidget( connectionstylegroup );
 
-  mLayout6 = new QGridLayout( 0, 1, 1, 0, 6, "Layout6"); 
+  Layout6 = new QGridLayout( 0, 1, 1, 0, 6, "Layout6"); 
 
-  mPortLabel = new QLabel( mNetConfGroupBox, "portlabel" );
-  mPortLabel->setText( i18n( "Port to Connect to:" ) );
+  portlabel = new QLabel( netconfgroupbox, "portlabel" );
+  portlabel->setText( i18n( "Port to Connect to:" ) );
 
-  mLayout6->addWidget( mPortLabel, 0, 0 );
+  Layout6->addWidget( portlabel, 0, 0 );
 
-  mHostEdit = new QLineEdit( mNetConfGroupBox, "hostedit" );
+  hostedit = new QLineEdit( netconfgroupbox, "hostedit" );
 
-  mLayout6->addWidget( mHostEdit, 2, 2 );
+  Layout6->addWidget( hostedit, 2, 2 );
 
-  mPortEdit = new KIntNumInput( mNetConfGroupBox, "portedit" );
+  portedit = new KIntNumInput( netconfgroupbox, "portedit" );
 
-  mLayout6->addMultiCellWidget( mPortEdit, 0, 1, 2, 2 );
+  Layout6->addMultiCellWidget( portedit, 0, 1, 2, 2 );
   QSpacerItem* spacer_6 = new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum );
-  mLayout6->addItem( spacer_6, 2, 1 );
+  Layout6->addItem( spacer_6, 2, 1 );
 
-  mHostLabel = new QLabel( mNetConfGroupBox, "hostlabel" );
-  mHostLabel->setText( i18n( "Host to Connect to:" ) );
+  hostlabel = new QLabel( netconfgroupbox, "hostlabel" );
+  hostlabel->setText( i18n( "Host to Connect to:" ) );
 
-  mLayout6->addMultiCellWidget( mHostLabel, 1, 2, 0, 0 );
+  Layout6->addMultiCellWidget( hostlabel, 1, 2, 0, 0 );
   QSpacerItem* spacer_7 = new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum );
-  mLayout6->addItem( spacer_7, 0, 1 );
-  mLayout7->addLayout( mLayout6 );
+  Layout6->addItem( spacer_7, 0, 1 );
+  Layout7->addLayout( Layout6 );
 
-  mStartNetworkButton = new QPushButton( mNetConfGroupBox, "startnetworkbutton" );
-  mStartNetworkButton->setText( i18n( "S&tart Network" ) );
-  mLayout7->addWidget( mStartNetworkButton );
-  mNetConfGroupBoxLayout->addLayout( mLayout7 );
-  mLayout8->addWidget( mNetConfGroupBox );
+  startnetworkbutton = new QPushButton( netconfgroupbox, "startnetworkbutton" );
+  startnetworkbutton->setText( i18n( "S&tart Network" ) );
+  Layout7->addWidget( startnetworkbutton );
+  netconfgroupboxLayout->addLayout( Layout7 );
+  Layout8->addWidget( netconfgroupbox );
   QSpacerItem* spacer_8 = new QSpacerItem( 20, 20, QSizePolicy::Minimum, QSizePolicy::Expanding );
-  mLayout8->addItem( spacer_8 );
-  mLayout10->addLayout( mLayout8 );
+  Layout8->addItem( spacer_8 );
+  Layout10->addLayout( Layout8 );
   QSpacerItem* spacer_9 = new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum );
-  mLayout10->addItem( spacer_9 );
-  mBosonNetworkOptionsWidgetLayout->addLayout( mLayout10 );
+  Layout10->addItem( spacer_9 );
+  BosonNetworkOptionsWidgetLayout->addLayout( Layout10 );
 
-  mLayout13 = new QHBoxLayout( 0, 0, 6, "Layout13"); 
+  Layout13 = new QHBoxLayout( 0, 0, 6, "Layout13"); 
 
   QSpacerItem* spacer_10 = new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum );
-  mLayout13->addItem( spacer_10 );
+  Layout13->addItem( spacer_10 );
 
-  mOkButton = new QPushButton( this, "okbutton" );
-  mOkButton->setText( i18n( "&Ok" ) );
-  mOkButton->setMinimumWidth(50);  // Looks too small without it
-  mLayout13->addWidget( mOkButton );
-  mBosonNetworkOptionsWidgetLayout->addLayout( mLayout13 );
+  okbutton = new QPushButton( this, "okbutton" );
+  okbutton->setText( i18n( "&Ok" ) );
+  okbutton->setMinimumWidth(50);  // Looks too small without it
+  Layout13->addWidget( okbutton );
+  BosonNetworkOptionsWidgetLayout->addLayout( Layout13 );
   
-  connect(mDisconnectButton, SIGNAL(clicked()), this, SLOT(slotDisconnect()));
-  connect(mStartNetworkButton, SIGNAL(clicked()), this, SLOT(slotStartNetwork()));
-  connect(mConnectionStyleGroup, SIGNAL(clicked(int)), this, SLOT(slotConnectionTypeChanged(int)));
+  connect(disconnectbutton, SIGNAL(clicked()), this, SLOT(slotDisconnect()));
+  connect(startnetworkbutton, SIGNAL(clicked()), this, SLOT(slotStartNetwork()));
+  connect(connectionstylegroup, SIGNAL(clicked(int)), this, SLOT(slotConnectionTypeChanged(int)));
   connect(game(), SIGNAL(signalConnectionBroken()), this, SLOT(slotConnectionBroken()));
-  connect(mOkButton, SIGNAL(clicked()), this, SIGNAL(signalOkClicked()));
+  connect(okbutton, SIGNAL(clicked()), this, SIGNAL(signalOkClicked()));
   
-  mHostEdit->setText("localhost");
-  mPortEdit->setValue(BOSON_PORT);
-  mConnectionStyleGroup->setButton(0);
+  hostedit->setText("localhost");
+  portedit->setValue(BOSON_PORT);
+  connectionstylegroup->setButton(0);
   slotConnectionTypeChanged(0);
   setConnected(game()->isNetwork(), game()->isMaster());
 }
@@ -195,9 +195,9 @@ void BosonNetworkOptionsWidget::slotStartNetwork()
 {
   bool connected = false;
   bool master = true;
-  unsigned short int port = mPortEdit->value();
-  QString host = mHostEdit->text();
-  if(! mHostEdit->isEnabled())
+  unsigned short int port = portedit->value();
+  QString host = hostedit->text();
+  if(! hostedit->isEnabled())
   {
     master = true;
     connected = game()->offerConnections(port);
@@ -213,34 +213,26 @@ void BosonNetworkOptionsWidget::slotStartNetwork()
 void BosonNetworkOptionsWidget::slotConnectionTypeChanged(int type)
 {
   if(type == 0)  // Create network game
-  {
-    mHostEdit->setEnabled(false);
-  }
+    hostedit->setEnabled(false);
   else  // Join network game
-  {
-    mHostEdit->setEnabled(true);
-  }
+    hostedit->setEnabled(true);
 }
 
 void BosonNetworkOptionsWidget::setConnected(bool connected, bool master)
 {
   if(!connected)
   {
-    mNetStatusLabel->setText(i18n("No Network"));
-    mNetConfGroupBox->setEnabled(true);
-    mDisconnectButton->setEnabled(false);
+    netstatuslabel->setText(i18n("No Network"));
+    netconfgroupbox->setEnabled(true);
+    disconnectbutton->setEnabled(false);
     return;
   }
   if(master)
-  {
-    mNetStatusLabel->setText(i18n("You are MASTER"));
-  }
+    netstatuslabel->setText(i18n("You are MASTER"));
   else
-  {
-    mNetStatusLabel->setText(i18n("You are Connected"));
-  }
-  mNetConfGroupBox->setEnabled(false);
-  mDisconnectButton->setEnabled(true);
+    netstatuslabel->setText(i18n("You are Connected"));
+  netconfgroupbox->setEnabled(false);
+  disconnectbutton->setEnabled(true);
 }
 
 void BosonNetworkOptionsWidget::slotConnectionBroken()
@@ -253,4 +245,3 @@ Boson* BosonNetworkOptionsWidget::game()
 {
   return mTop->game();
 }
-

@@ -23,43 +23,44 @@
 BosonLoadingWidget::BosonLoadingWidget(QWidget* parent)
     : QWidget(parent)
 {
-  mBosonLoadingWidgetLayout = new QVBoxLayout( this, 11, 6, "BosonLoadingWidgetLayout");
+  BosonLoadingWidgetLayout = new QVBoxLayout( this, 11, 6, "BosonLoadingWidgetLayout");
 
-  mHeader = new QLabel( this, "header" );
-  QFont header_font(  mHeader->font() );
+  header = new QLabel( this, "header" );
+  QFont header_font(  header->font() );
   header_font.setPointSize( 30 );
   header_font.setBold( TRUE );
-  mHeader->setFont( header_font ); 
-  mHeader->setText( i18n( "Loading game data..." ) );
-  mHeader->setAlignment( int( QLabel::AlignCenter ) );
-  mBosonLoadingWidgetLayout->addWidget( mHeader );
+  header->setFont( header_font ); 
+  header->setText( i18n( "Loading game data..." ) );
+  header->setAlignment( int( QLabel::AlignCenter ) );
+  BosonLoadingWidgetLayout->addWidget( header );
   QSpacerItem* spacer = new QSpacerItem( 31, 20, QSizePolicy::Minimum, QSizePolicy::Fixed );
-  mBosonLoadingWidgetLayout->addItem( spacer );
+  BosonLoadingWidgetLayout->addItem( spacer );
 
-  QHBoxLayout* layout5 = new QHBoxLayout( 0, 0, 6, "Layout5"); 
+  Layout5 = new QHBoxLayout( 0, 0, 6, "Layout5"); 
   QSpacerItem* spacer_2 = new QSpacerItem( 30, 20, QSizePolicy::Fixed, QSizePolicy::Minimum );
-  layout5->addItem( spacer_2 );
+  Layout5->addItem( spacer_2 );
 
-  QVBoxLayout* layout4 = new QVBoxLayout( 0, 0, 6, "Layout4"); 
+  Layout4 = new QVBoxLayout( 0, 0, 6, "Layout4"); 
 
-  mPleaseWaitLabel = new QLabel( this, "pleasewaitlabel" );
-  mPleaseWaitLabel->setText( i18n( "Please wait while Boson's data is being loaded. This may take some time..." ) );
-  layout4->addWidget( mPleaseWaitLabel );
+  pleasewaitlabel = new QLabel( this, "pleasewaitlabel" );
+  pleasewaitlabel->setText( i18n( "Please wait while Boson's data is being loaded. This may take some time..." ) );
+  Layout4->addWidget( pleasewaitlabel );
   QSpacerItem* spacer_3 = new QSpacerItem( 20, 20, QSizePolicy::Minimum, QSizePolicy::Preferred );
-  layout4->addItem( spacer_3 );
+  Layout4->addItem( spacer_3 );
 
-  mLoadingLabel = new QLabel( this, "loadinglabel" );
-  layout4->addWidget( mLoadingLabel );
+  loadinglabel = new QLabel( this, "loadinglabel" );
+  loadinglabel->setText( i18n( "Loading ..." ) );
+  Layout4->addWidget( loadinglabel );
 
-  mProgress = new QProgressBar( this, "progress" );
-  mProgress->setProgress( 0 );
-  layout4->addWidget( mProgress );
-  layout5->addLayout( layout4 );
+  progress = new QProgressBar( this, "progress" );
+  progress->setProgress( 0 );
+  Layout4->addWidget( progress );
+  Layout5->addLayout( Layout4 );
   QSpacerItem* spacer_4 = new QSpacerItem( 30, 20, QSizePolicy::Fixed, QSizePolicy::Minimum );
-  layout5->addItem( spacer_4 );
-  mBosonLoadingWidgetLayout->addLayout( layout5 );
+  Layout5->addItem( spacer_4 );
+  BosonLoadingWidgetLayout->addLayout( Layout5 );
   QSpacerItem* spacer_5 = new QSpacerItem( 20, 20, QSizePolicy::Minimum, QSizePolicy::Expanding );
-  mBosonLoadingWidgetLayout->addItem( spacer_5 );
+  BosonLoadingWidgetLayout->addItem( spacer_5 );
 }
 
 /*  
@@ -73,65 +74,29 @@ BosonLoadingWidget::~BosonLoadingWidget()
 void BosonLoadingWidget::setLoading(LoadingType load)
 {
   if(load == SendMap)
-  {
-    mLoadingLabel->setText(i18n("Sending map over network..."));
-  }
+    loadinglabel->setText(i18n("Sending map over network..."));
   else if(load == ReceiveMap)
-  {
-    mLoadingLabel->setText(i18n("Receiving map..."));
-  }
-  else if(load == LoadMap)
-  {
-    mLoadingLabel->setText(i18n("Loading map..."));
-  }
+    loadinglabel->setText(i18n("Receiving map..."));
   else if(load == InitClasses)
-  {
-    mLoadingLabel->setText(i18n("Initializing data structures"));
-  }
+    loadinglabel->setText(i18n("Initializing data structures"));
   else if(load == LoadTiles)
-  {
-    mLoadingLabel->setText(i18n("Loading map tiles..."));
-  }
+    loadinglabel->setText(i18n("Loading map tiles..."));
   else if(load == LoadUnits)
-  {
-    mLoadingLabel->setText(i18n("Loading units..."));
-  }
-  else if(load == LoadGame)
-  {
-    mLoadingLabel->setText(i18n("Loading saved game..."));
-  }
+    loadinglabel->setText(i18n("Loading units..."));
   else if(load == InitGame)
-  {
-    mLoadingLabel->setText(i18n("Initializing game..."));
-  }
+    loadinglabel->setText(i18n("Initializing game..."));
   else if(load == StartingGame)
-  {
-    mLoadingLabel->setText(i18n("Starting game..."));
-  }
+    loadinglabel->setText(i18n("Starting game..."));
   else if(load == LoadingDone)
-  {
-    mLoadingLabel->setText(i18n("Loading completed, starting game..."));
-  }
+    loadinglabel->setText(i18n("Loading completed, starting game..."));
 }
 
 void BosonLoadingWidget::setProgress(int prog)
 {
-  mProgress->setProgress(prog);
+  progress->setProgress(prog);
 }
 
 void BosonLoadingWidget::setSteps(int steps)
 {
-  mProgress->setTotalSteps(steps);
-}
-
-void BosonLoadingWidget::showProgressBar(bool show)
-{
-  if(show)
-  {
-    mProgress->show();
-  }
-  else
-  {
-    mProgress->hide();
-  }
+  progress->setTotalSteps(steps);
 }

@@ -26,7 +26,6 @@ class Unit;
 class Facility;
 class QCanvas;
 class QDomElement;
-class BosonPlayField;
 
 /**
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
@@ -40,27 +39,13 @@ public:
 		IdNextUnitId = 10001,
 		IdAdvanceCount = 10002
 	};
-
-	enum LoadingStatus {
-		NotLoaded = 1,
-		LoadingInProgress,
-		LoadingCompleted,
-		InvalidFileFormat,
-		InvalidCookie,
-		InvalidVersion,
-		KGameError
-	};
-
+	
 	Boson(QObject* parent);
 	Boson(QObject* parent, const QString& fileName);
 	~Boson();
 
-	void setCanvas(QCanvas*);
-	void setMap(BosonPlayField*);
-
-	void setLocalPlayer(Player*);
-	Player* localPlayer();
-
+	void setCanvas(QCanvas*); 
+	
 	void quitGame();
 	void startGame();
 
@@ -71,7 +56,6 @@ public:
 	void removeAllPlayers();
 
 	Unit* createUnit(int unitType, Player* owner); // public for Player::load
-	Unit* loadUnit(int unitType, Player* owner);
 
 	QValueList<QColor> availableTeamColors() const;
 
@@ -106,11 +90,6 @@ public:
 	{
 		return mGameMode;
 	}
-
-	virtual bool save(QDataStream& stream, bool saveplayers = true);
-	virtual bool load(QDataStream& stream, bool reset = true);
-
-	LoadingStatus loadingStatus();
 
 public slots:
 	void slotSetGameSpeed(int speed);

@@ -24,7 +24,6 @@
 #include "bosonnewgamewidget.h"
 #include "bosonserveroptionswidget.h" // TODO rename: bosonnetworkoptionswidget
 #include "bosonloadingwidget.h"
-#include "bosonstartupbasewidget.h"
 #include "bosonmusic.h"
 #include "bosonconfig.h"
 #include "boson.h"
@@ -48,16 +47,12 @@
 #include <kpopupmenu.h>
 #include <kmessagebox.h>
 #include <kconfig.h>
-#include <kstandarddirs.h>
-#include <kfiledialog.h>
 
 #include <qwidgetstack.h>
 #include <qtimer.h>
 #include <qwmatrix.h>
 #include <qhbox.h>
 #include <qptrdict.h>
-#include <qobjectlist.h>
-#include <qfile.h>
 
 #define ID_DEBUG_KILLPLAYER 0
 #define ID_WIDGETSTACK_WELCOME 1
@@ -74,8 +69,7 @@
 class TopWidget::TopWidgetPrivate
 {
 public:
-	TopWidgetPrivate() 
-	{
+	TopWidgetPrivate() {
 		mWelcome = 0;
 		mNewGame = 0;
 #ifndef NO_EDITOR
@@ -113,17 +107,10 @@ public:
 TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
 {
  d = new TopWidgetPrivate;
- mBoson = 0;
- mPlayer = 0;
- mMap = 0;
- mCanvas = 0;
- mGame = false;
 #if KDE_VERSION < 310
  d->mLoadingDockConfig = false;
 #endif
  mGame = false;
- mLoading = false;
-
  mMainDock = createDockWidget("mainDock", 0, this, i18n("Map"));
  mWs = new QWidgetStack(mMainDock);
  mMainDock->setWidget(mWs);
@@ -135,29 +122,25 @@ TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
 
  BosonConfig::initBosonConfig();
 
+ initMusic();
+ initBoson();
+ initPlayer();
+ initMap();
+
  setMinimumWidth(640);
  setMinimumHeight(480);
 
- initMusic();
-
  initActions();
+ enableGameActions(false);
  initStatusBar();
-
- // "re" is not entirely correct ;)
- reinitGame();
-
+ showWelcomeWidget();
  loadInitialDockConfig();
 }
 
 TopWidget::~TopWidget()
 {
- kdDebug() << k_funcinfo << endl;
- kdDebug() << "endGame()" << endl;
- endGame();
- kdDebug() << "endGame() done" << endl;
  d->mPlayers.clear();
  delete d;
- kdDebug() << k_funcinfo << "done" << endl;
 }
 
 void TopWidget::saveProperties(KConfig *config)
@@ -183,15 +166,13 @@ void TopWidget::readProperties(KConfig *config)
 
 void TopWidget::initActions()
 {
- // note: mBoson and similar are *not* yet constructed!
  // Main actions: Game start/end and quit
  d->mGameActions = new KActionCollection(this); // actions that are available in game mode only
 
  //FIXME: slotNewGame() is broken - endGame() is enough for now.
 // (void)KStdGameAction::gameNew(this, SLOT(slotNewGame()), actionCollection()); //AB: game action?
  (void)KStdGameAction::end(this, SLOT(slotEndGame()), d->mGameActions);
- (void)KStdGameAction::save(this, SLOT(slotSaveGame()), d->mGameActions);
-// (void)KStdGameAction::pause(mBoson, SLOT(slotTogglePause()), d->mGameActions); // FIXME: NO! mBoson is not yet constructed!
+// (void)KStdGameAction::pause(mBoson, SLOT(slotTogglePause()), d->mGameActions);
  (void)KStdGameAction::quit(this, SLOT(close()), actionCollection());
 
  // Settings
@@ -356,14 +337,11 @@ void TopWidget::initWelcomeWidget()
  if(d->mWelcome) {
 	return;
  }
- BosonStartupBaseWidget* startup = new BosonStartupBaseWidget(mWs);
- mWs->addWidget(startup, ID_WIDGETSTACK_WELCOME);
- d->mWelcome = new BosonWelcomeWidget(startup->plainWidget());
- startup->initBackgroundOrigin();
+ d->mWelcome = new BosonWelcomeWidget(mWs);
  connect(d->mWelcome, SIGNAL(signalNewGame()), this, SLOT(slotNewGame()));
- connect(d->mWelcome, SIGNAL(signalLoadGame()), this, SLOT(slotLoadGame()));
  connect(d->mWelcome, SIGNAL(signalStartEditor()), this, SLOT(slotStartEditor()));
  connect(d->mWelcome, SIGNAL(signalQuit()), this, SLOT(close()));
+ mWs->addWidget(d->mWelcome, ID_WIDGETSTACK_WELCOME);
 }
 
 void TopWidget::showWelcomeWidget()
@@ -379,13 +357,10 @@ void TopWidget::initNewGameWidget()
  if(d->mNewGame) {
 	return;
  }
- BosonStartupBaseWidget* startup = new BosonStartupBaseWidget(mWs);
- mWs->addWidget(startup, ID_WIDGETSTACK_NEWGAME);
- d->mNewGame = new BosonNewGameWidget(this, startup->plainWidget());
- startup->initBackgroundOrigin();
+ d->mNewGame = new BosonNewGameWidget(this, mWs);
  connect(d->mNewGame, SIGNAL(signalCancelled()), this, SLOT(slotShowMainMenu()));
  connect(d->mNewGame, SIGNAL(signalShowNetworkOptions()), this, SLOT(slotShowNetworkOptions()));
- d->mNewGame->show();
+ mWs->addWidget(d->mNewGame, ID_WIDGETSTACK_NEWGAME);
 }
 
 void TopWidget::showNewGameWidget()
@@ -402,11 +377,9 @@ void TopWidget::initStartEditorWidget()
  if(d->mStartEditor) {
 	return;
  }
- BosonStartupBaseWidget* startup = new BosonStartupBaseWidget(mWs);
- mWs->addWidget(startup, ID_WIDGETSTACK_STARTEDITOR);
- d->mStartEditor = new BosonStartEditorWidget(this, startup->plainWidget());
- startup->initBackgroundOrigin();
+ d->mStartEditor = new BosonStartEditorWidget(this, mWs);
  connect(d->mStartEditor, SIGNAL(signalCancelled()), this, SLOT(slotShowMainMenu()));
+ mWs->addWidget(d->mStartEditor, ID_WIDGETSTACK_STARTEDITOR);
 #endif
 }
 
@@ -420,20 +393,13 @@ void TopWidget::showStartEditorWidget()
 #endif
 }
 
-void TopWidget::initBosonWidget(bool loading)
+void TopWidget::initBosonWidget()
 {
  if(d->mBosonWidget) {
-	//should not happen!
-	kdWarning() << k_funcinfo << "widget already allocated!" << endl;
 	return;
  }
- d->mBosonWidget = new BosonWidget(this, mWs, loading);
+ d->mBosonWidget = new BosonWidget(this, mWs);
  mWs->addWidget(d->mBosonWidget, ID_WIDGETSTACK_BOSONWIDGET);
-
- connect(d->mBosonWidget, SIGNAL(signalMobilesCount(int)), this, SIGNAL(signalSetMobilesCount(int)));
- connect(d->mBosonWidget, SIGNAL(signalFacilitiesCount(int)), this, SIGNAL(signalSetFacilitiesCount(int)));
- connect(d->mBosonWidget, SIGNAL(signalOilUpdated(int)), this, SIGNAL(signalOilUpdated(int)));
- connect(d->mBosonWidget, SIGNAL(signalMineralsUpdated(int)), this, SIGNAL(signalMineralsUpdated(int)));
 }
 
 void TopWidget::showBosonWidget()
@@ -450,11 +416,9 @@ void TopWidget::initNetworkOptions()
  if(d->mNetworkOptions) {
 	return;
  }
- BosonStartupBaseWidget* startup = new BosonStartupBaseWidget(mWs);
- mWs->addWidget(startup, ID_WIDGETSTACK_NETWORK);
- d->mNetworkOptions = new BosonNetworkOptionsWidget(this, startup->plainWidget());
- startup->initBackgroundOrigin();
+ d->mNetworkOptions = new BosonNetworkOptionsWidget(this, mWs);
  connect(d->mNetworkOptions, SIGNAL(signalOkClicked()), this, SLOT(slotHideNetworkOptions()));
+ mWs->addWidget(d->mNetworkOptions, ID_WIDGETSTACK_NETWORK);
 }
 
 void TopWidget::showNetworkOptions()
@@ -471,10 +435,8 @@ void TopWidget::initLoadingWidget()
  if(d->mLoading) {
 	return;
  }
- BosonStartupBaseWidget* startup = new BosonStartupBaseWidget(mWs);
- mWs->addWidget(startup, ID_WIDGETSTACK_LOADING);
- d->mLoading = new BosonLoadingWidget(startup->plainWidget());
- startup->initBackgroundOrigin();
+ d->mLoading = new BosonLoadingWidget(mWs);
+ mWs->addWidget(d->mLoading, ID_WIDGETSTACK_LOADING);
 }
 
 void TopWidget::showLoadingWidget()
@@ -500,33 +462,8 @@ void TopWidget::slotStartEditor()
 
 void TopWidget::slotStartGame()
 {
- mLoading = false;
  showLoadingWidget();
  loadGameData1();
-}
-
-void TopWidget::slotLoadGame()
-{
- kdDebug() << k_funcinfo << " START" << endl;
-
- // Get filename
- mLoadingFileName = KFileDialog::getOpenFileName(QString::null, "*.bsg|Boson SaveGame", this);
- if(mLoadingFileName == QString::null) {
-	return;
- }
-
- // If mLoading is true, then we're loading saved game; if it's false, we're
- //  starting new game
- mLoading = true;
- showLoadingWidget();
-
- // This must be called manually as we don't send IdNewGame message
- mBoson->setGameMode(true);
-
- // Start loading
- loadGameData1();
-
- kdDebug() << k_funcinfo << "END" << endl;
 }
 
 void TopWidget::slotShowMainMenu()
@@ -564,109 +501,37 @@ void TopWidget::slotHideNetworkOptions()
 
 void TopWidget::loadGameData1() // FIXME rename!
 {
- // FIXME: all loadGameData*() methods are very messy and complex (partially
- //  because of loading support). Clean them up!
-
- // If we're loading game, we don't know number of players here
- // If game is loaded, we disable progressbar in loading widget, but still set
- //  steps and progress to make code less messy (it's better than having
- //  if(!mLoading) { ... }  everywhere)
- d->mLoading->setSteps(3400 + mBoson->playerCount() * UNITDATAS_LOADINGFACTOR);
+ d->mLoading->setSteps(5000);
  d->mLoading->setProgress(0);
  checkEvents();
-
+ // Receive map (first send it if we're admin)
  connect(mBoson, SIGNAL(signalInitMap(const QByteArray&)), this, SLOT(slotReceiveMap(const QByteArray&)));
- if(!mLoading) {
-	// If we're starting new game, receive map (first send it if we're admin)
-	if(mBoson->isAdmin()) {
-		d->mLoading->setLoading(BosonLoadingWidget::SendMap);
-		checkEvents();
-		QByteArray buffer;
-		QDataStream stream(buffer, IO_WriteOnly);
-		mMap->saveMap(stream);
-		d->mLoading->setProgress(50);
-		checkEvents();
-		// send the loaded map via network
-		mBoson->sendMessage(stream, BosonMessage::InitMap);
-		d->mLoading->setProgress(100);
-		checkEvents();
-	}
-	d->mLoading->setLoading(BosonLoadingWidget::ReceiveMap);
+ if(mBoson->isAdmin()) {
+	d->mLoading->setLoading(BosonLoadingWidget::SendMap);
+	checkEvents();
+	QByteArray buffer;
+	QDataStream stream(buffer, IO_WriteOnly);
+	mMap->saveMap(stream);
+	d->mLoading->setProgress(50);
+	checkEvents();
+	// send the loaded map via network
+	mBoson->sendMessage(stream, BosonMessage::InitMap);
+	d->mLoading->setProgress(100);
+	checkEvents();
  }
- else {
-	// We are loading a saved game
-	// Delete mPlayer aka local player because it will be set later by Boson
-	//  (It's not known yet)
-	delete mPlayer;
-	mPlayer = 0;
-
-	// Open file and QDataStream on it
-	QFile f(mLoadingFileName);
-	f.open(IO_ReadOnly);
-	QDataStream s(&f);
-
-	// Load game
-	d->mLoading->setLoading(BosonLoadingWidget::LoadMap);
-	d->mLoading->showProgressBar(false);
-	bool loaded = mBoson->load(s, true);
-
-	// Close file
-	f.close();
-
-	// Check if loading was completed without errors
-	if(!loaded) {
-		// There was a loading error
-		// Find out what went wrong...
-		Boson::LoadingStatus status = mBoson->loadingStatus();
-		QString text, caption;
-		if(status == Boson::InvalidFileFormat || status == Boson::InvalidCookie) {
-			text = i18n("This file is not Boson SaveGame!");
-			caption = i18n("Invalid file format!");
-		}
-		else if(status == Boson::InvalidVersion) {
-			text = i18n("This file has unsupported saving format!\n"
-					"Probably it is saved with too old version of Boson");
-			caption = i18n("Unsupported file format version!");
-		}
-		else if(status == Boson::KGameError) {
-			text = i18n("Error loading saved game!");
-			caption = i18n("An error occured while loading saved game!\n"
-					"Probably the game wasn't saved properly");
-		}
-		else {
-			// This should never be reached
-			kdError() << k_funcinfo << "Invalid error type or no error (while loading saved game)!!!" << endl;
-		}
-
-		// ... and show messagebox
-		KMessageBox::sorry(this, text, caption);
-
-		// We also need to re-init player
-		initPlayer();
-
-		// Then return to welcome screen
-		showWelcomeWidget();
-		return;
-	}
- }
+ d->mLoading->setLoading(BosonLoadingWidget::ReceiveMap);
+ checkEvents();
 }
 
 void TopWidget::loadGameData2() //FIXME rename!
 {
- // This method is called from slotInitMap(), which in turn is called when map
- //  is received in Boson class
- // When map is received then, when we're starting new game, loadGameData1()
- //  has already returned, if we're loading saved game, then it hasn't, because
- //  map is initialized immediately when it's loaded from file
-
- // Init canvas
+ // Init some data structures
  d->mLoading->setLoading(BosonLoadingWidget::InitClasses);
  checkEvents();
  mCanvas = new BosonCanvas(this);
  mBoson->setCanvas(mCanvas);
-
  // Init BosonWidget
- initBosonWidget(mLoading);
+ initBosonWidget();
 
  // Load map tiles. This takes most time
  d->mLoading->setProgress(600);
@@ -675,72 +540,54 @@ void TopWidget::loadGameData2() //FIXME rename!
  connect(mCanvas, SIGNAL(signalTilesLoading(int)), this, SLOT(slotCanvasTilesLoading(int)));
  connect(mCanvas, SIGNAL(signalTilesLoaded()), this, SLOT(slotCanvasTilesLoaded()));
  checkEvents();
- // Note that next call doesn't return before tiles are fully loaded (because
- //  second argument is false; if it would be true, then it would return
- //  immediately). This is needed for loading saved game. GUI is
- //  still non-blocking though, because qApp->processEvents() is called while
- //  loading tiles
- mCanvas->loadTiles(QString("earth"), false);
+ mCanvas->loadTiles(QString("earth"));
 }
 
 void TopWidget::loadGameData3() // FIXME rename!
 {
- // If we're loading saved game, local player isn't set and inited, because it
- //  was not known (not loaded) when BosonWidget was constructed. Set and init
- //  it now
- if(mLoading) {
-	mPlayer = mBoson->localPlayer();
-	d->mBosonWidget->initPlayer();
+ // Load unit pixmaps
+ // FIXME: load for *all* players
+ d->mLoading->setProgress(3000);
+ d->mLoading->setLoading(BosonLoadingWidget::LoadUnits);
+ checkEvents();
+ // First get all id's of units
+ QValueList<int> unitIds = player()->speciesTheme()->allFacilities();
+ unitIds += player()->speciesTheme()->allMobiles();
+ QValueList<int>::iterator it;
+ int current = 0;
+ int total = unitIds.count();
+ for(it = unitIds.begin(); it != unitIds.end(); ++it) {
+	current++;
+	player()->speciesTheme()->loadUnit(*it);
+	d->mLoading->setProgress(3000 + ((double)current / total * 1600));
  }
 
- int progress = 0;
 
- // Load unit datas (pixmaps and sounds), but only if we're starting new game,
- //  because if we're loading saved game, then units are already constructed
- //  and unit datas loaded
- if(!mLoading) {
-	QPtrListIterator<KPlayer> it(*(mBoson->playerList()));
-	progress = 3000;
-	while (it.current()) {
-		loadUnitDatas(((Player*)it.current()), progress);
-		++it;
-		progress += UNITDATAS_LOADINGFACTOR;
-	}
- }
-
- d->mLoading->setProgress(progress);
+ d->mLoading->setProgress(4600);
  d->mLoading->setLoading(BosonLoadingWidget::InitGame);
  checkEvents();
- if(mBoson->isAdmin() && !mLoading) {
-	// Send InitFogOfWar and StartScenario messages if we're starting new game
+ if(mBoson->isAdmin()) {
 	if (mBoson->gameMode()) {
 		mBoson->sendMessage(0, BosonMessage::IdInitFogOfWar);
 	}
 	mBoson->sendMessage(0, BosonMessage::IdStartScenario);
  }
- else if(mLoading) {
-	// If we're loading saved game, init fog of war for local player
-	d->mBosonWidget->slotInitFogOfWar();
- }
-
- progress += 100;
- d->mLoading->setProgress(progress);
+ d->mLoading->setProgress(4700);
  d->mLoading->setLoading(BosonLoadingWidget::StartingGame);
  checkEvents();
 
- // Show BosonWidget
+ connect(d->mBosonWidget, SIGNAL(signalMobilesCount(int)), this, SIGNAL(signalSetMobilesCount(int)));
+ connect(d->mBosonWidget, SIGNAL(signalFacilitiesCount(int)), this, SIGNAL(signalSetFacilitiesCount(int)));
+ connect(d->mBosonWidget, SIGNAL(signalOilUpdated(int)), this, SIGNAL(signalOilUpdated(int)));
+ connect(d->mBosonWidget, SIGNAL(signalMineralsUpdated(int)), this, SIGNAL(signalMineralsUpdated(int)));
+
  showBosonWidget();
- if(d->mNewGame) {
-	delete d->mNewGame;
-	d->mNewGame = 0;
- }
+ delete d->mNewGame;
+ d->mNewGame = 0;
 #ifndef NO_EDITOR
- if(d->mStartEditor) {
-	delete d->mStartEditor;
-	d->mStartEditor = 0;
- }
+ delete d->mStartEditor;
+ d->mStartEditor = 0;
 #endif
- // Init some stuff
  statusBar()->show();
  d->mBosonWidget->initGameMode();
  enableGameActions(true);
@@ -751,26 +598,15 @@ void TopWidget::loadGameData3() // FIXME rename!
  connect(d->mBosonWidget, SIGNAL(signalCmdFrameDockHidden()), this, SLOT(slotCmdFrameDockHidden()));
  connect(d->mBosonWidget, SIGNAL(signalGameOver()), this, SLOT(slotGameOver()));
 
- progress += 300;
- d->mLoading->setProgress(progress);
+ d->mLoading->setProgress(5000);
  d->mLoading->setLoading(BosonLoadingWidget::LoadingDone);  // FIXME: This is probably meaningless
 
- if(mLoading) {
-	// These are from BosonWidget::slotStartScenario() which can't be used when
-	//  we're loading saved game
-	mBoson->startGame();
-	mBoson->sendMessage(0, BosonMessage::IdGameIsStarted);
-	mBoson->slotSetGameSpeed(BosonConfig::readGameSpeed());
- }
-
- // mGame indicates that game is running (and BosonWidget shown and game game
- //  actions enabled etc.)
  mGame = true;
 }
 
 void TopWidget::slotCanvasTilesLoading(int progress)
 {
- d->mLoading->setProgress((int)(600 + (progress / 1244.0 * MAPTILES_LOADINGFACTOR)));
+ d->mLoading->setProgress(600 + (progress / 1244.0 * 2200));
  // No checkEvents() here as events are already processed in BosonTiles::???
 }
 
@@ -781,42 +617,14 @@ void TopWidget::slotCanvasTilesLoaded()
  QTimer::singleShot(0, this, SLOT(loadGameData3()));
 }
 
-void TopWidget::loadUnitDatas(Player* p, int progress)
-{
- // This loads all unit datas for player p
- d->mLoading->setProgress(progress);
- d->mLoading->setLoading(BosonLoadingWidget::LoadUnits);
- checkEvents();
- // First get all id's of units
- QValueList<int> unitIds = p->speciesTheme()->allFacilities();
- unitIds += p->speciesTheme()->allMobiles();
- QValueList<int>::iterator it;
- int current = 0;
- int total = unitIds.count();
- for(it = unitIds.begin(); it != unitIds.end(); ++it) {
-	current++;
-	p->speciesTheme()->loadUnit(*it);
-	d->mLoading->setProgress((int)(progress + ((double)current / total * UNITDATAS_LOADINGFACTOR)));
- }
-}
-
 void TopWidget::slotReceiveMap(const QByteArray& buffer)
 {
  disconnect(mBoson, SIGNAL(signalInitMap(const QByteArray&)), this, SLOT(slotReceiveMap(const QByteArray&)));
  QDataStream stream(buffer, IO_ReadOnly);
  mMap->loadMap(stream);
- mBoson->setMap(mMap);
-
  d->mLoading->setProgress(300);
-
  checkEvents();
  loadGameData2();
-
- // If we're loading game, almost everything except map (players, units...) are
- //  loaded after this method returns. So we set correct loading label
- if(mLoading) {
-	d->mLoading->setLoading(BosonLoadingWidget::LoadGame);
- }
 }
 
 void TopWidget::checkEvents()
@@ -869,11 +677,9 @@ void TopWidget::slotCmdFrameDockHidden()
 void TopWidget::slotConfigureKeys()
 {
  KKeyDialog dlg(true, this);
- QPtrList<KXMLGUIClient> clients = guiFactory()->clients();
- QPtrListIterator<KXMLGUIClient> it(clients);
- while (it.current()) {
-	dlg.insert((*it)->actionCollection());
-	++it;
+ dlg.insert(actionCollection());
+ if(mGame) {
+	dlg.insert(d->mBosonWidget->actionCollection());
  }
  dlg.configure(true);
 }
@@ -909,33 +715,26 @@ void TopWidget::slotEndGame()
  if(answer == KMessageBox::No) {
 	return;
  }
- slotGameOver();
+ endGame();
 }
 
 void TopWidget::endGame()
 {
- if (d->mBosonWidget) {
-	d->mBosonWidget->slotEndGame();
-	disconnect(d->mBosonWidget, 0, 0, 0);
-	saveGameDockConfig();
- }
+ d->mBosonWidget->slotEndGame();
+ saveGameDockConfig();
+ disconnect(d->mBosonWidget, 0, 0, 0);
  // Delete all objects
  delete d->mBosonWidget;
  d->mBosonWidget = 0;
  delete mBoson;  // Easiest way to reset game info
- mBoson = 0;
  delete mCanvas;
- mCanvas = 0;
  delete mMap;
- mMap = 0;
-}
 
-void TopWidget::reinitGame()
-{
+ // Then re-init needed stuff
  initBoson();
  initPlayer();
  initMap();
- 
+
  // Change menus and show welcome widget
  mGame = false;
  d->mActionStatusbar->setChecked(false);
@@ -947,7 +746,6 @@ void TopWidget::reinitGame()
 void TopWidget::slotGameOver()
 {
  endGame();
- reinitGame();
 }
 
 void TopWidget::slotGamePreferences()
@@ -980,8 +778,6 @@ void TopWidget::slotRemoveActiveDisplay()
  d->mBosonWidget->slotRemoveActiveDisplay();
 }
 
-// FIXME: nonsense name. this doesn't toggle anything, but it applies the
-// d->mActionStatusbar status to the actual statusbar
 void TopWidget::slotToggleStatusbar()
 {
  if(d->mActionStatusbar->isChecked()) {
@@ -1150,18 +946,4 @@ void TopWidget::raiseWidget(int id)
 		break;
  }
  mWs->raiseWidget(id);
-}
-
-void TopWidget::slotSaveGame()
-{
- QString file = KFileDialog::getSaveFileName(QString::null, "*.bsg|Boson SaveGame", this);
- if(file == QString::null) {
-	return;
- }
-
- QFile f(file);
- f.open(IO_WriteOnly);
- QDataStream s(&f);
- mBoson->save(s, true);
- f.close();
 }

@@ -19,19 +19,15 @@
 #ifndef BOSONWIDGET_H
 #define BOSONWIDGET_H
 
-#include <kxmlguiclient.h>
-
 #include <qwidget.h>
 
 class KPlayer;
 class KGamePropertyBase;
 class KActionCollection;
 
-class BosonCursor;
 class BosonCanvas;
 class BosonCommandFrame;
 class BosonBigDisplay;
-class BosonBigDisplayBase;
 class Unit;
 class Player;
 class TopWidget;
@@ -67,14 +63,14 @@ class BosonPlayField;
  * Boson.
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
  **/
-class BosonWidget : public QWidget, virtual public KXMLGUIClient
+class BosonWidget : public QWidget 
 {
 	Q_OBJECT
 public:
 	/**
 	 * Default Constructor
 	 **/
-	BosonWidget(TopWidget* top, QWidget* parent, bool loading = false);
+	BosonWidget(TopWidget* top, QWidget* parent);
 
 	/**
 	 * Default Destructor
@@ -82,8 +78,8 @@ public:
 	virtual ~BosonWidget();
 
 	inline BosonCanvas* canvas() const;
-	inline BosonMiniMap* minimap() const { return mMiniMap; }
-	inline BoDisplayManager* displaymanager() const { return mDisplayManager; }
+	inline BosonMiniMap* minimap() const;
+	inline BoDisplayManager* displaymanager() const;
 	inline Boson* game() const;
 	inline BosonPlayField* map() const;
 	inline Player* player() const;
@@ -109,7 +105,7 @@ public:
 	void debugKillPlayer(KPlayer* p);
 
 	void initKeys();
-	void initPlayer();
+	KActionCollection* actionCollection() const;
 
 	bool isCmdFrameVisible() const;
 	bool isChatVisible() const;
@@ -139,8 +135,6 @@ public slots:
 	void slotSplitDisplayHorizontal();
 	void slotSplitDisplayVertical();
 	void slotRemoveActiveDisplay();
-
-	void slotInitFogOfWar();
 
 signals:
 	void signalPlayerJoinedGame(KPlayer* p); // used by the map editor (and debug)
@@ -181,6 +175,8 @@ protected slots:
 
 	void slotPlayerPropertyChanged(KGamePropertyBase*, KPlayer*);
 
+	void slotInitFogOfWar();
+
 	void slotNotEnoughMinerals(Player*);
 	void slotNotEnoughOil(Player*);
 
@@ -196,7 +192,7 @@ protected slots:
 	 * @param active The new active display.
 	 * @param old The previously active display, if non-NULL
 	 **/
-	void slotSetActiveDisplay(BosonBigDisplayBase* display, BosonBigDisplayBase* old);
+	void slotSetActiveDisplay(BosonBigDisplay* display, BosonBigDisplay* old);
 
 	void slotOutOfGame(Player* p);
 
@@ -207,32 +203,38 @@ protected slots:
 protected:
 	void addChatSystemMessage(const QString& fromName, const QString& text);
 	
-	void initBigDisplay(BosonBigDisplayBase*);
+	void sendChangeTeamColor(Player* player, const QColor& color);
+	void changeSpecies(const QString& species);
+	void addLocalPlayer();
 
-private:
-	void init();
-	void initChat();
+	void addDummyComputerPlayer(const QString& name); // used by editor only
+
+	void quitGame();
+
+
+	void normalizeVPositions();
+	void normalizeHPositions(int vpos);
+
+	void initBigDisplay(BosonBigDisplay*);
 
 	void initMap();
 	void initMiniMap();
 	void initConnections();
 	void initDisplayManager();
+	void initPlayer();
 	void initGameCommandFrame();
 	void initLayout();
 
+	void addMouseIO(BosonBigDisplay*);
+
+
+private:
+	void init();
+	void initChat();
 
 private:
 	class BosonWidgetPrivate;
 	BosonWidgetPrivate* d;
-
-	BosonCursor* mCursor;
-	QString mCursorTheme; // path to cursor pixmaps
-
-	TopWidget* mTop;
-	BosonMiniMap* mMiniMap;
-	BoDisplayManager* mDisplayManager;
-
-	bool mLoading;
 };
 
 #endif

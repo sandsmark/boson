@@ -23,7 +23,7 @@
 #include <qptrlist.h>
 
 class BoBox;
-class BosonBigDisplayBase;
+class BosonBigDisplay;
 class UnitBase;
 class BosonCursor;
 class Player;
@@ -52,26 +52,21 @@ class BoDisplayManager : public QWidget
 {
 	Q_OBJECT
 public:
-	/**
-	 * @param gameMode controls whether to create @ref BosonBigDisplay or
-	 * @ref EditorBigDisplay widgets in @ref addDisplay. @ref
-	 * BosonBigDisplay widgets are the default (TRUE)
-	 **/
-	BoDisplayManager(QCanvas* canvas, QWidget* parent, bool gameMode = true);
+	BoDisplayManager(QCanvas* canvas, QWidget* parent);
 	~BoDisplayManager();
 
-	BosonBigDisplayBase* addInitialDisplay();
+	BosonBigDisplay* addInitialDisplay();
 
 	/**
 	 * @return The currently active display. Use @ref
-	 * BosonBigDisplayBase::makeActive to change it
+	 * BosonBigDisplay::makeActive to change it
 	 **/
-	BosonBigDisplayBase* activeDisplay() const;
+	BosonBigDisplay* activeDisplay() const;
 
 	/**
 	 * @return A list containing ALL displays. Try to avoid this function.
 	 **/
-	QPtrList<BosonBigDisplayBase> displays() const;
+	QPtrList<BosonBigDisplay> displays() const;
 
 	/**
 	 * Set the cursor for all displays
@@ -86,8 +81,8 @@ public:
 	void quitGame();
 
 	void removeActiveDisplay();
-	BosonBigDisplayBase* splitActiveDisplayVertical();
-	BosonBigDisplayBase* splitActiveDisplayHorizontal();
+	BosonBigDisplay* splitActiveDisplayVertical();
+	BosonBigDisplay* splitActiveDisplayHorizontal();
 
 	void paintResources();
 	void paintChatMessages();
@@ -118,7 +113,7 @@ signals:
 	 * @param old The previously active display (if any) or NULL if
 	 * there was no.
 	 **/
-	void signalActiveDisplay(BosonBigDisplayBase* active, BosonBigDisplayBase* old);
+	void signalActiveDisplay(BosonBigDisplay* active, BosonBigDisplay* old);
 
 protected:
 	enum ScrollDirection {
@@ -128,21 +123,16 @@ protected:
 		ScrollLeft = 3
 	};
 
-	BosonBigDisplayBase* addDisplay(QWidget* parent);
-	BoBox* findBox(BosonBigDisplayBase*) const;
+	BosonBigDisplay* addDisplay(QWidget* parent);
+	BoBox* findBox(BosonBigDisplay*) const;
 	void recreateLayout();
 
 protected slots:
-	void slotMakeActiveDisplay(BosonBigDisplayBase*);
-
-private:
-	void markActive(BosonBigDisplayBase* display, bool active);
+	void slotMakeActiveDisplay(BosonBigDisplay*);
 
 private:
 	class BoDisplayManagerPrivate;
 	BoDisplayManagerPrivate* d;
-
-	bool mGameMode;
 };
 
 #endif

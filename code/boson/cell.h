@@ -97,7 +97,7 @@ public:
 	 * This has nothing to do with @ref GroundType! While @ref GroundType
 	 * contains the basic plain tiles only this can also be a transtition!!
 	 **/
-	inline int groundType() const
+	int groundType() const
 	{
 		return mType;
 	}
@@ -105,16 +105,10 @@ public:
 	/**
 	 * @return The version of the groundType. 
 	 **/
-	inline unsigned char version() const
+	unsigned char version() const
 	{
 		return mVersion;
 	}
-
-	inline int tile() const
-	{
-		return tile(groundType(), version());
-	}
-		
 
 	/**
 	 * @return The number of different groundTypes.

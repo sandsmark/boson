@@ -16,11 +16,6 @@ class QHBoxLayout;
 class QLabel;
 class QProgressBar;
 
-// Loading units datas for one player takes so many loading steps
-#define UNITDATAS_LOADINGFACTOR 1600
-// Loading map tiles takes so many loading steps
-#define MAPTILES_LOADINGFACTOR 2200
-
 class BosonLoadingWidget : public QWidget
 { 
   Q_OBJECT
@@ -29,11 +24,9 @@ class BosonLoadingWidget : public QWidget
       {
         SendMap = 0,
         ReceiveMap,
-        LoadMap,
         InitClasses,
         LoadTiles,
         LoadUnits,
-        LoadGame,
         InitGame,
         StartingGame,
         LoadingDone
@@ -45,17 +38,17 @@ class BosonLoadingWidget : public QWidget
     void setLoading(LoadingType load);
     void setProgress(int prog);
     void setSteps(int steps);
-    
-    void showProgressBar(bool show = true);
 
   protected:
-    QVBoxLayout* mBosonLoadingWidgetLayout;
+    QVBoxLayout* BosonLoadingWidgetLayout;
+    QHBoxLayout* Layout5;
+    QVBoxLayout* Layout4;
 
   private:
-    QLabel* mHeader;
-    QLabel* mPleaseWaitLabel;
-    QLabel* mLoadingLabel;
-    QProgressBar* mProgress;
+    QLabel* header;
+    QLabel* pleasewaitlabel;
+    QLabel* loadinglabel;
+    QProgressBar* progress;
 };
 
 #endif // BOSONLOADINGWIDGET_H

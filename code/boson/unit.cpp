@@ -36,16 +36,6 @@
 
 #include "defines.h"
 
-// If NEW_MOVING_STYLE is defined, then:
-// * Path is searched locally for every unit and not transferred over network
-// * Units should start to move immideately (no more "waypoints not arrived
-//   yet" messages) :-)
-// * And biggest change: path is recalculated _every_ time waypoint is reached.
-//   This enables unit to react much more quickly when it can't move to next
-//   waypoint. However, it probably requires more powerful CPU so if you
-//   experience speed problems, maybe you should try commenting this out.
-#define NEW_MOVING_STYLE
-
 class Unit::UnitPrivate
 {
 public:
@@ -53,7 +43,6 @@ public:
 	{
 		mSelectBox = 0;
 		mLeader = false;
-		mTarget = 0;
 	}
 	KGamePropertyInt mDirection;
 
@@ -80,14 +69,9 @@ Unit::Unit(const UnitProperties* prop, Player* owner, QCanvas* canvas)
 
  d->mDirection.registerData(IdDirection, dataHandler(), 
 		KGamePropertyBase::PolicyLocal, "Direction");
-#ifdef NEW_MOVING_STYLE
- d->mWaypoints.registerData(IdWaypoints, dataHandler(),
-		KGamePropertyBase::PolicyLocal, "Waypoints");
-#else
- d->mWaypoints.registerData(IdWaypoints, dataHandler(),
+ d->mWaypoints.registerData(IdWaypoints, dataHandler(), 
 		KGamePropertyBase::PolicyClean, "Waypoints");
-#endif
- d->mMoveDestX.registerData(IdMoveDestX, dataHandler(),
+ d->mMoveDestX.registerData(IdMoveDestX, dataHandler(), 
 		KGamePropertyBase::PolicyLocal, "MoveDestX");
  d->mMoveDestY.registerData(IdMoveDestY, dataHandler(), 
 		KGamePropertyBase::PolicyLocal, "MoveDestY");
@@ -322,13 +306,9 @@ void Unit::waypointDone()
 // kind of ugly but this way we can ensure that only one client has to calculate
 // the path but every client uses the path.
 // Try to avoid this concept! Do NOT copy it!
-#ifdef NEW_MOVING_STYLE
- d->mWaypoints.remove(d->mWaypoints.at(0));
-#else
  d->mWaypoints.setPolicy(KGamePropertyBase::PolicyLocal);
  d->mWaypoints.remove(d->mWaypoints.at(0));
  d->mWaypoints.setPolicy(KGamePropertyBase::PolicyClean);
-#endif
 }
 
 QValueList<QPoint> Unit::waypointList() const
@@ -379,14 +359,12 @@ bool Unit::moveTo(double x, double y, int range)
 void Unit::newPath()
 {
  kdDebug() << k_funcinfo << endl;
-#ifndef NEW_MOVING_STYLE
  if (owner()->isVirtual()) {
 	// only the owner of the unit calculates the path and then transmits it
 	// over network. a "virtual" player is one which is duplicated on
 	// another client - but the actual player is on another client.
 	return;
  }
-#endif
  if(!owner()->isFogged(d->mMoveDestX / BO_TILE_SIZE, d->mMoveDestY / BO_TILE_SIZE)) {
 	Cell* destCell = boCanvas()->cell(d->mMoveDestX / BO_TILE_SIZE,
 			d->mMoveDestY / BO_TILE_SIZE);
@@ -405,15 +383,6 @@ void Unit::newPath()
  for (int unsigned i = 0; i < path.count(); i++) {
 	addWaypoint(path[i]);
  }
- if((currentWaypoint().x() == x() + width() / 2) && (currentWaypoint().y() == y() + height() / 2))
- {
-	kdDebug() << k_funcinfo << "!!!!! First waypoint is unit's current pos! Removing" << endl;
-	waypointDone();
- }
- if(waypointCount() == 0)
- {
-	addWaypoint(QPoint(-1, -1));
- }
  return;
 }
 
@@ -423,15 +392,11 @@ void Unit::clearWaypoints(bool send)
 // kind of ugly but this way we can ensure that only one client has to calculate
 // the path but every client uses the path.
 // Try to avoid this concept! Do NOT copy it!
-#ifdef NEW_MOVING_STYLE
- d->mWaypoints.clear();
-#else
  if (!send) {
 	d->mWaypoints.setPolicy(KGamePropertyBase::PolicyLocal);
  }
  d->mWaypoints.clear();
  d->mWaypoints.setPolicy(KGamePropertyBase::PolicyClean);
-#endif
 }
 
 const QPoint& Unit::currentWaypoint() const
@@ -738,7 +703,6 @@ public:
 	MobileUnitPrivate()
 	{
 		mHarvesterProperties = 0;
-		mTargetCellMarked = false;
 	}
 
 	KGameProperty<double> mSpeed;
@@ -778,6 +742,7 @@ MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, QCanvas* canva
 	d->mHarvesterProperties->mResourcesY.setLocal(0);
  }
  setWork(WorkNone);
+ d->mTargetCellMarked = false;
 }
 
 MobileUnit::~MobileUnit()
@@ -861,12 +826,6 @@ void MobileUnit::advanceMove()
 		stopMoving();
 		return;
 	}
-
-
-#ifdef NEW_MOVING_STYLE
-	// New style - we recalc path _every_ time we reach waypoint
-	newPath();
-#endif
 
 	wp = currentWaypoint();
  }
@@ -1231,26 +1190,6 @@ void MobileUnit::waypointDone()
 {
  Unit::waypointDone();
  d->mTargetCellMarked = false;
-}
-
-bool MobileUnit::load(QDataStream& stream)
-{
- if(!Unit::load(stream)) {
-	kdError() << "Unit not loaded properly" << endl;
-	return false;
- }
-
- return true;
-}
-
-bool MobileUnit::save(QDataStream& stream)
-{
- if(!Unit::save(stream)) {
-	kdError() << "Unit not loaded properly" << endl;
-	return false;
- }
-
- return true;
 }
 
 /////////////////////////////////////////////////

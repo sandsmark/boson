@@ -21,8 +21,6 @@
 
 #include "unitbase.h"
 
-#include <qdatastream.h>
-
 BosonStatistics::BosonStatistics()
 {
  mShots = 0;
@@ -202,38 +200,3 @@ unsigned int BosonStatistics::winningPoints()
  return 5000;
 }
 
-void BosonStatistics::load(QDataStream& stream)
-{
- stream >> mShots;
- stream >> mMinedMinerals;
- stream >> mMinedOil;
- stream >> mRefinedMinerals;
- stream >> mRefinedOil;
- stream >> mProducedMobileUnits;
- stream >> mProducedFacilities;
- stream >> mDestroyedMobileUnits;
- stream >> mDestroyedFacilities;
- stream >> mDestroyedOwnMobileUnits;
- stream >> mDestroyedOwnFacilities;
- stream >> mLostMobileUnits;
- stream >> mLostFacilities;
- stream >> mPoints;
-}
-
-void BosonStatistics::save(QDataStream& stream)
-{
- stream << (Q_UINT32)mShots;
- stream << (Q_UINT32)mMinedMinerals;
- stream << (Q_UINT32)mMinedOil;
- stream << (Q_UINT32)mRefinedMinerals;
- stream << (Q_UINT32)mRefinedOil;
- stream << (Q_UINT32)mProducedMobileUnits;
- stream << (Q_UINT32)mProducedFacilities;
- stream << (Q_UINT32)mDestroyedMobileUnits;
- stream << (Q_UINT32)mDestroyedFacilities;
- stream << (Q_UINT32)mDestroyedOwnMobileUnits;
- stream << (Q_UINT32)mDestroyedOwnFacilities;
- stream << (Q_UINT32)mLostMobileUnits;
- stream << (Q_UINT32)mLostFacilities;
- stream << (Q_INT32)mPoints;
-}

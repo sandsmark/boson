@@ -30,9 +30,7 @@ Game TODOs
 - display "filling" status of harvesters instead of firepower. use different
   colors!
 - TopWidget::slotNewGame() is broken
-- "welcome to Boson" text in startup screen should be translateable (we can use
-  QPainter to paint it to pixmap)
-- Do not start game before all players has loaded their data
+- chat widget should be hidden by default
 
 Editor (map, unit, scenario) TODOs
 - totally broken, currently
@@ -77,19 +75,7 @@ General TODOs
   unremovable
 - canvas text: we want a static non-moving text in the upper right corner
   displaying the resources of the player. up to now all implementations flicker
-  in any way...  update: do we need it anyway? We have same labels on statusbar
-  and they're ok for me...
-- use KDock for the dispalys
-- color combobox should have same width as other comboboxes
-- hostname lineedit in BosonNetworkOptionsWidget seems to have wrong
-  BackgroundOrigin  update: it's not wrong, it's disabled-color
-- BsoonPath::PathNode needs to be public to compile in gcc 2.96
-  Why? It is used internally only... Failing e.g. here:
-  inline bool operator<(const BosonPath::PathNode& a, const BosonPath::PathNode& b)
-- pixmaps on startup widgets should be centered horizontally
-- Use KMD5 to calculate checksum of map and unitProperties at the beginning of
-  game and transfer only needed things over network. Saves some traffic
-- Minimap doesn't support units with width or height not equal to BO_TILE_SIZE
+  in any way...
 
 Data TODOs
 - sound for minimap activated/deactivated
@@ -100,7 +86,3 @@ Data TODOs
 - rewrite installation code:
   -> when a dir is renamed currently the old remains on disk and therefore is
      read by the game
-- the text on the startup pixmap should be translatable. maybe we can use a
-  QPainter to paint on it?
-- can we use a coded gradient instead of the startup-bg pix? would allow every
-  size then

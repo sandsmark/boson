@@ -22,10 +22,7 @@
 #include <kdockwidget.h>
 #include <kdeversion.h>
 
-//#include <qstring.h>
-
 class QWidgetStack;
-class QString;
 class Boson;
 class Player;
 class BosonPlayField;
@@ -66,9 +63,7 @@ public slots:
 	void slotNewGame();
 
 	void slotStartEditor();
-
-	void slotLoadGame();
-
+	
 	/**
 	 * Starts loading new game. Called when user clicks "Start game" button in
 	 * BosonStartGameWidget
@@ -97,10 +92,7 @@ public slots:
 	void slotConfigureKeys();
 	/** Toggles if Boson is shown fullscreen or normally */
 	void slotToggleFullScreen();
-	/** 
-	 * Ends current game and reinits all game data, so that a new game can
-	 * be started.
-	 * */
+	/** Ends current game */
 	void slotEndGame();
 	/** Shows game preferences dialog */
 	void slotGamePreferences();
@@ -112,7 +104,6 @@ public slots:
 	void slotRemoveActiveDisplay();
 
 	void slotGameOver();
-	void slotSaveGame();
 
 #if KDE_VERSION < 310
 	virtual void setGeometry(const QRect&);
@@ -141,25 +132,7 @@ protected:
 	virtual bool queryClose();
 	virtual bool queryExit();
 
-	/**
-	 * End the game. All relevant classes are deleted. You
-	 * may want to call @ref reinitGame after @ref endGame so that you can
-	 * start a new game now.
-	 **/
 	void endGame();
-
-	/**
-	 * Initialize all classes and member vars so that a new game can be
-	 * started. Also show the welcome widget.
-	 *
-	 * Note that you <em>must</em> call @ref endGame before - otherwise
-	 * you'll experience a <em>big</em> memory hole (and probably a lot of
-	 * instability).
-	 *
-	 * You may want to call @ref slotGameOver instead, which calls both @ref
-	 * endGame and @ref reinitGame
-	 **/
-	void reinitGame();
 
 protected slots:
 	void slotCanvasTilesLoading(int);
@@ -198,7 +171,7 @@ private:
 	void initStartEditorWidget();
 	void showNewGameWidget();
 	void showStartEditorWidget();
-	void initBosonWidget(bool loading = false);
+	void initBosonWidget();
 	void showBosonWidget();
 	void initNetworkOptions();
 	void showNetworkOptions();
@@ -207,19 +180,15 @@ private:
 
 	void raiseWidget(int id);
 
-	// Game data preloading methods
-	void loadUnitDatas(Player* p, int progress);
-
 private:
 	QWidgetStack* mWs;
 	Boson* mBoson;
 	Player* mPlayer;
 	BosonPlayField* mMap;
 	BosonCanvas* mCanvas;
+	bool mMapReceived;
 	KDockWidget* mMainDock;
 	bool mGame;
-	bool mLoading;
-	QString mLoadingFileName;
 
 	class TopWidgetPrivate;
 	TopWidgetPrivate* d;

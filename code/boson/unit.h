@@ -381,9 +381,6 @@ public:
 	virtual void clearWaypoints(bool send = false);
 	virtual void waypointDone();
 
-	virtual bool load(QDataStream& stream);
-	virtual bool save(QDataStream& stream);
-
 private:
 	// a d pointer is probably not very good here - far too much memory consumption
 	// same apllies to Unit and UnitBase. But it speeds up compiling as we don't

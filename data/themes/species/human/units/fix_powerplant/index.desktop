@@ -1,8 +1,0 @@
-[Boson Unit]
-IsFacility=true
-TerrainType=0
-Name=Power Plant
-Id=2
-Health=150
-MineralCost=200
-Producer=10

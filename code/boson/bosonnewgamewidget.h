@@ -63,6 +63,7 @@ class BosonNewGameWidget : public QWidget
     QString& playfield();
 
   private:
+    QLabel* mHeader;
     QLabel* mColorLabel;
     QLabel* mMapLabel;
     //KColorCombo* colorcombo;
