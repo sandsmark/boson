@@ -27,18 +27,21 @@
 #include "bosonTopLevel.h"
 #include "visualMiniDisplay.h"
 #include "bosonBigDisplay.h"
+#include "bosonCanvas.h"
 #include "speciesTheme.h"
 #include "boson.h"
 
 #include "game.h"
 
 
-bosonTopLevel::bosonTopLevel(BosonApp *parent, const char *name, WFlags f)
+bosonTopLevel::bosonTopLevel(BosonApp * /*parent*/, const char *name, WFlags f)
 	: visualTopLevel(name,f)
 	, mw(this)
 {
 
-	/* init the statusBar */
+	/* init the statusBar
+	 * remember that bocanvas has been initialised before any bosonTopLevel is created
+	 */
 	QLabel *label;
 	QHBox *qhb;
 	KStatusBar *ksb = statusBar();
@@ -53,8 +56,10 @@ bosonTopLevel::bosonTopLevel(BosonApp *parent, const char *name, WFlags f)
 	qhb   = new QHBox(ksb, "ressourcesInfoBox");
 	label = new QLabel(" Oil : ", qhb);
 	label = new QLabel("?", qhb);
+	connect(bocanvas , SIGNAL(oilUpdated(int)), label, SLOT(setNum(int)));
 	label = new QLabel("  Minerals : ", qhb);
 	label = new QLabel("?", qhb);
+	connect(bocanvas , SIGNAL(mineralUpdated(int)), label, SLOT(setNum(int)));
 	ksb->addWidget(qhb);
 
 	ksb->insertItem( "Boson beginning", 0, 100);
@@ -69,7 +74,6 @@ bosonTopLevel::bosonTopLevel(BosonApp *parent, const char *name, WFlags f)
 	/* .. */
 	orderType = OT_NONE;
 	setView(&mw, false);
-	connect(parent, SIGNAL(ressourcesUpdated(void)), &mw, SLOT(ressourcesUpdated(void)));
 
 	/* orders buttons */
 	for (int i=0; i< 11; i++) { ///orzel : why 11, use *Nb
