@@ -63,6 +63,7 @@ draw_bigbox_text("What has been changed since 0.9.1:
  <li>The path a unit is using is displayed when it is selected</li>
  <li>The menu is properly removed when a game is ended, fixing menu duplication
  (see <a href=\"http://bugs.kde.org/show_bug.cgi?id=66715\">66715</a>)</li>
+ <li>The game starts only once all clients have loaded their game data</li>
 </ul>");
 /*
 draw_bigbox_text("This is a list of features that we consider as
