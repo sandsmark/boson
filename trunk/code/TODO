@@ -38,18 +38,11 @@ mouse handling :
 	on the right window.
 
 
-0.3 release:
-============
-source documentation
-client and server should be peer-killed proof
-attack feature
-handling of 2x2 tiles
-construction feature
-
-
 0.4 release:
 ============
 fog of war ?
+source documentation
+client and server should be peer-killed proof
 
 
 0.5 release: (first public release)
