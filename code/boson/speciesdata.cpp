@@ -276,8 +276,11 @@ bool SpeciesData::loadUnitOverview(const UnitProperties* prop, const QColor& tea
 	QImage image;
 	if (!loadUnitImage(teamColor, path + "overview-big.png", image)) {
 		boError() << k_funcinfo << "Can't load " << path + "overview-big.png" << endl;
-		return false;
+		image = QImage(100, 100, 32);
+		image.fill(Qt::red.rgb());
 	}
+	// we use 100x100 images for big overviews.
+	image = image.smoothScale(100, 100, QImage::ScaleMin);
 	QPixmap* p = new QPixmap(image);
 	data->mBigOverview.insert(type, p);
  }
@@ -289,8 +292,10 @@ bool SpeciesData::loadUnitOverview(const UnitProperties* prop, const QColor& tea
 	QImage image;
 	if (!loadUnitImage(teamColor, path + "overview-small.png", image)) {
 		boError() << k_funcinfo << "Can't load " << path + "overview-small.png" << endl;
-		return false;
+		image = QImage(50, 50, 32);
+		image.fill(Qt::red.rgb());
 	}
+	image = image.smoothScale(50, 50, QImage::ScaleMin);
 	OverviewPixmap* p = new OverviewPixmap(image);
 	p->killAlphaMask();
 	data->mSmallOverview.insert(type, p);
