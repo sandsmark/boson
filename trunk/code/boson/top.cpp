@@ -455,19 +455,29 @@ void TopWidget::initBosonWidget()
 	d->mBosonWidget = w;
  }
 
- connect(d->mBosonWidget, SIGNAL(signalLoadBosonGameDock()), this, SLOT(slotLoadBosonGameDock()));
- connect(d->mBosonWidget, SIGNAL(signalToggleChatVisible()), this, SLOT(slotToggleChatDockVisible()));
- connect(d->mBosonWidget, SIGNAL(signalToggleCmdFrameVisible()), this, SLOT(slotToggleCmdFrameDockVisible()));
- connect(d->mBosonWidget, SIGNAL(signalCheckDockStatus()), this, SLOT(slotCheckGameDockStatus()));
- connect(d->mBosonWidget, SIGNAL(signalChangeLocalPlayer(Player*)), this, SLOT(slotChangeLocalPlayer(Player*)));
- connect(d->mBosonWidget, SIGNAL(signalEndGame()), this, SLOT(slotEndGame()));
- connect(d->mBosonWidget, SIGNAL(signalQuit()), this, SLOT(close()));
- connect(d->mBosonWidget, SIGNAL(signalMobilesCount(int)), this, SIGNAL(signalSetMobilesCount(int)));
- connect(d->mBosonWidget, SIGNAL(signalFacilitiesCount(int)), this, SIGNAL(signalSetFacilitiesCount(int)));
- connect(d->mBosonWidget, SIGNAL(signalOilUpdated(int)), this, SIGNAL(signalOilUpdated(int)));
- connect(d->mBosonWidget, SIGNAL(signalMineralsUpdated(int)), this, SIGNAL(signalMineralsUpdated(int)));
+ connect(d->mBosonWidget, SIGNAL(signalLoadBosonGameDock()),
+		this, SLOT(slotLoadBosonGameDock()));
+ connect(d->mBosonWidget, SIGNAL(signalToggleChatVisible()),
+		this, SLOT(slotToggleChatDockVisible()));
+ connect(d->mBosonWidget, SIGNAL(signalToggleCmdFrameVisible()),
+		this, SLOT(slotToggleCmdFrameDockVisible()));
+ connect(d->mBosonWidget, SIGNAL(signalCheckDockStatus()),
+		this, SLOT(slotCheckGameDockStatus()));
+ connect(d->mBosonWidget, SIGNAL(signalChangeLocalPlayer(Player*)),
+		this, SLOT(slotChangeLocalPlayer(Player*)));
+ connect(d->mBosonWidget, SIGNAL(signalEndGame()),
+		this, SLOT(slotEndGame()));
+ connect(d->mBosonWidget, SIGNAL(signalQuit()),
+		this, SLOT(close()));
+ connect(d->mBosonWidget, SIGNAL(signalMobilesCount(int)),
+		this, SIGNAL(signalSetMobilesCount(int)));
+ connect(d->mBosonWidget, SIGNAL(signalFacilitiesCount(int)),
+		this, SIGNAL(signalSetFacilitiesCount(int)));
+ connect(d->mBosonWidget, SIGNAL(signalOilUpdated(int)),
+		this, SIGNAL(signalOilUpdated(int)));
+ connect(d->mBosonWidget, SIGNAL(signalMineralsUpdated(int)),
+		this, SIGNAL(signalMineralsUpdated(int)));
 
- initGameDockWidgets(false);
  d->mBosonWidget->setDisplayManager(d->mDisplayManager);
 
  // at this point the startup widget should already have called
@@ -483,8 +493,6 @@ void TopWidget::initBosonWidget()
  factory()->addClient(d->mBosonWidget); // XMLClient-stuff. needs to be called *after* creation of KAction objects, so outside BosonWidget might be a good idea :-)
 // createGUI("bosonui.rc", false);
 
- // FIXME: rename. only the cursor is loaded here, the display was added before!
- d->mBosonWidget->addInitialDisplay();
 }
 
 void TopWidget::slotPlayFieldChanged(const QString& id)
@@ -517,6 +525,7 @@ void TopWidget::slotStartNewGame()
  d->mStarting->setDestPlayField(mPlayField);
 
  initCanvas();
+ initGameDockWidgets(false); // dock the widgets to their default location and hide them
  initBosonWidget();
 
  changeLocalPlayer(boGame->localPlayer());
@@ -968,6 +977,15 @@ void TopWidget::changeLocalPlayer(Player* p, bool init)
 
  // AB: note that both, p == 0 AND p == currentplayer are valid and must be executed!
  if (d->mStarting) {
+	// AB: 04/04/01: this is useless.
+	// the local player in BosonStarting is used for loading the general
+	// sounds only, the LocalPlayerId, which is set in the players.xml file,
+	// is read by BosonStarting (but not used there) and BosonSaveLoad only.
+	// the latter uses it to find the local player object, but never uses
+	// that.
+	// so all that this does, is to make us pass some NULL checks. if we
+	// would remove the NULL checks and then remove the local player here
+	// completely, we would still have the same functionality.
 	d->mStarting->setLocalPlayer(p);
  }
  if (!boGame) {

@@ -162,6 +162,8 @@ void BosonWidgetBase::setDisplayManager(BoDisplayManager* displayManager)
 	}
 	mDisplayManager->reparent(this, QPoint(0, 0));
 	mDisplayManager->show();
+
+	changeToConfigCursor();
  }
 }
 
@@ -260,9 +262,6 @@ void BosonWidgetBase::initConnections()
 
  connect(boGame, SIGNAL(signalAddChatSystemMessage(const QString&, const QString&)),
 		this, SLOT(slotAddChatSystemMessage(const QString&, const QString&)));
-
- connect(boGame, SIGNAL(signalInitFogOfWar()),
-		this, SLOT(slotInitFogOfWar()));
 }
 
 void BosonWidgetBase::initDisplayManager()
@@ -285,16 +284,6 @@ void BosonWidgetBase::initDisplayManager()
 		mDisplayManager, SLOT(slotUnitChanged(Unit*)));
 }
 
-
-// FIXME: rename! only the cursor is loaded here!
-void BosonWidgetBase::addInitialDisplay()
-{
-// displayManager()->addInitialDisplay();
-
- // we need to add the display first (in order to create a valid GL context) and
- // then load the cursor
- slotChangeCursor(boConfig->cursorMode(), boConfig->cursorDir());
-}
 
 void BosonWidgetBase::initChat(KDockWidget* chatDock)
 {
@@ -493,10 +482,6 @@ void BosonWidgetBase::slotPlayerPropertyChanged(KGamePropertyBase* prop, KPlayer
 	default:
 		break;
  }
-}
-
-void BosonWidgetBase::slotInitFogOfWar()
-{
 }
 
 bool BosonWidgetBase::sound() const
@@ -1270,5 +1255,10 @@ void BosonWidgetBase::slotShowGLStates()
  boDebug() << k_funcinfo << endl;
  BoGLStateWidget* w = new BoGLStateWidget(0, 0, WDestructiveClose);
  w->show();
+}
+
+void BosonWidgetBase::changeToConfigCursor()
+{
+ slotChangeCursor(boConfig->cursorMode(), boConfig->cursorDir());
 }
 
