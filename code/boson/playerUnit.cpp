@@ -350,7 +350,7 @@ void playerMobUnit::u_attack(Unit *u)
 	}
 
 	target		= u;
-	shoot_timer	= 30;
+	shoot_timer	= -1;
 	//puts("assigning target");
 
 	connect( u, SIGNAL(dying(Unit*)), this, SLOT(targetDying(Unit*)) );

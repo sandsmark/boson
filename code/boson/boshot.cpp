@@ -44,7 +44,10 @@ boShot::boShot(int _x, int _y, int _z)
 void  boShot::timerEvent( QTimerEvent * )
 {
 	counter++;
-	if (counter<SHOT_FRAMES)
+	if (counter<SHOT_FRAMES) {
 		frame(counter);
-	else delete this;
+		return;
+	}
+	killTimers();
+	delete this;
 }
