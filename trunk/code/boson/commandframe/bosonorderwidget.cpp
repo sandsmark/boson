@@ -144,6 +144,7 @@ void BosonOrderWidget::setOrderButtons(ProductionType type, QValueList<unsigned 
 
 void BosonOrderWidget::setOrderButtons(QValueList<QPair<ProductionType, unsigned long int> > produceList, Player* owner, Facility* factory)
 {
+ hideCellConfigWidgets();
  ensureButtons(produceList.count());
  hideOrderButtons();
  unsigned long int id = 0;
@@ -192,6 +193,7 @@ void BosonOrderWidget::hideOrderButtons()
 
 void BosonOrderWidget::slotRedrawTiles()
 {
+ showCellConfigWidgets();
  bool inverted = d->mInverted->isChecked();
  boDebug() << k_funcinfo << endl;
  Cell::TransType trans = (Cell::TransType)d->mTransRef->currentItem();
@@ -255,6 +257,26 @@ void BosonOrderWidget::initEditor()
  d->mInverted = new QCheckBox(this);
  d->mInverted->setText(i18n("Invert"));
  connect(d->mInverted, SIGNAL(toggled(bool)), this, SLOT(slotRedrawTiles()));
+}
+
+void BosonOrderWidget::hideCellConfigWidgets()
+{
+ // don't excute anything if initEditor() has not been called
+ if (!d->mTransRef || !d->mInverted) {
+	return;
+ }
+ d->mTransRef->hide();
+ d->mInverted->hide();
+}
+
+void BosonOrderWidget::showCellConfigWidgets()
+{
+ // don't excute anything if initEditor() has not been called
+ if (!d->mTransRef || !d->mInverted) {
+	return;
+ }
+ d->mTransRef->show();
+ d->mInverted->show();
 }
 
 void BosonOrderWidget::showUnits(QPtrList<Unit> units)
