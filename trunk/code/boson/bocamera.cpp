@@ -200,8 +200,8 @@ bool BoCamera::saveAsXML(QDomElement& root)
   root.setAttribute("LookAtZ", lookAt().z());
 
   root.setAttribute("CameraPosX", cameraPos().x());
-  root.setAttribute("CameraPosX", cameraPos().y());
-  root.setAttribute("CameraPosX", cameraPos().z());
+  root.setAttribute("CameraPosY", cameraPos().y());
+  root.setAttribute("CameraPosZ", cameraPos().z());
 
   root.setAttribute("UpX", up().x());
   root.setAttribute("UpY", up().y());
