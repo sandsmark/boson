@@ -39,7 +39,7 @@
 #include <kdeversion.h>
 #include <kmessagebox.h>
 
-#include <qintdict.h>
+#include <qptrlist.h>
 
 #include "editorwidget.moc"
 
@@ -59,7 +59,7 @@ public:
 	KSelectAction* mPlayerAction;
 	KSelectAction* mPlaceAction;
 
-	QIntDict<Player> mPlayers;
+	QPtrList<Player> mPlayers;
 };
 
 EditorWidget::EditorWidget(TopWidget* top, QWidget* parent, bool loading)
@@ -232,7 +232,7 @@ void EditorWidget::slotSavePlayField()
 void EditorWidget::slotChangeLocalPlayer(int index)
 {
  Player* p = 0;
- p = d->mPlayers[index];
+ p = d->mPlayers.at(index);
  if (p) {
 	emit signalChangeLocalPlayer(p);
  } else {
@@ -287,7 +287,7 @@ void EditorWidget::slotPlayerJoinedGame(KPlayer* player)
  BosonWidgetBase::slotPlayerJoinedGame(player);
  Player* p = (Player*)player;
  QStringList players = d->mPlayerAction->items();
- d->mPlayers.insert(players.count(), p);
+ d->mPlayers.append(p);
  players.append(p->name());
  d->mPlayerAction->setItems(players);
 
@@ -307,20 +307,21 @@ void EditorWidget::slotPlayerLeftGame(KPlayer* player)
  if (!player) {
 	return;
  }
+ boDebug() << k_funcinfo << player->id() << endl;
  BosonWidgetBase::slotPlayerLeftGame(player);
  Player* p = (Player*)p;
- QIntDictIterator<Player> it(d->mPlayers);
- while (it.current() && it.current() != player) {
-	++it;
+ if (d->mPlayers.count() == 0) {
+	return;
  }
- if (!it.current()) {
-	boError() << k_funcinfo << ": player not found" << endl;
+ int index = d->mPlayers.find((Player*)player);
+ if (index < 0) {
+	boError() << k_funcinfo << "player not found" << endl;
 	return;
  }
  QStringList players = d->mPlayerAction->items();
 
- players.remove(players.at(it.currentKey()));
- d->mPlayers.remove(it.currentKey());
+ players.remove(players.at(index));
+ d->mPlayers.removeRef((Player*)player);
 
  d->mPlayerAction->setItems(players);
 }

@@ -72,7 +72,6 @@ BosonOrderWidget::BosonOrderWidget(QWidget* parent) : QWidget(parent)
 
 BosonOrderWidget::~BosonOrderWidget()
 {
- delete d->mTiles;
  delete d;
 }
 
