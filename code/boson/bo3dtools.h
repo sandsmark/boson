@@ -25,6 +25,10 @@
 class QString;
 class KConfig;
 
+float rotationToPoint(float x, float y);
+void pointByRotation(float &x, float &y, const float angle, const float radius);
+
+
 /**
  * @author Rivo Laks <rivolaks@hot.ee>
  **/
@@ -90,7 +94,7 @@ class BoVector3
      * Lib3dsVectors.
      **/
    static bool isEqual(float* v1, float* v2) { return v1[0] == v2[0] && v1[1] == v2[1] && v1[2] && v2[2]; }
-
+   
   private:
     friend class BoMatrix;
     GLfloat mData[3];

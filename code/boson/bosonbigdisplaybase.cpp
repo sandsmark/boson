@@ -41,6 +41,7 @@
 #include "bosonparticlesystem.h"
 #include "boson.h"
 #include "bodebug.h"
+#include "items/bosonshot.h"
 
 #include <kgame/kgameio.h>
 
@@ -79,12 +80,11 @@ class Camera
 public:
 	Camera()
 	{
-		mPosX = 0.0;
-		mPosY = 0.0;
+		mCenterX = 0.0;
+		mCenterY = 0.0;
 		mPosZ = 10.0;
-		mCenterDiffX = 0.0;
-		mCenterDiffY = 0.0;
-		mZoomFactor = 1.0;
+		mRot = 0.0;
+		mRadius = 0.0;
 	}
 	Camera(const Camera& c)
 	{
@@ -92,43 +92,38 @@ public:
 	}
 	Camera& operator=(const Camera& c)
 	{
-		mPosX = c.mPosX;
-		mPosY = c.mPosY;
+		mCenterX = c.mCenterX;
+		mCenterY = c.mCenterY;
 		mPosZ = c.mPosZ;
-		mCenterDiffX = c.mCenterDiffX;
-		mCenterDiffY = c.mCenterDiffY;
-		mZoomFactor= c.mZoomFactor;
+		mRot = c.mRot;
+		mRadius = c.mRadius;
 		return *this;
 	}
-	
+
 	void setPos(GLfloat x, GLfloat y, GLfloat z)
 	{
-		mPosX = x;
-		mPosY = y;
+		mCenterX = x;
+		mCenterY = y;
 		mPosZ = QMAX(NEAR + 1.0, QMIN(FAR - 15.0, z));
 	}
-	void setX(GLfloat x) { setPos(x, mPosY, mPosZ); }
-	void setY(GLfloat y) { setPos(mPosX, y, mPosZ); }
-	void setZ(GLfloat z) { setPos(mPosX, mPosY, z); }
-	GLfloat x() const { return mPosX; }
-	GLfloat y() const { return mPosY; }
+	void setX(GLfloat x) { setPos(x, mCenterY, mPosZ); }
+	void setY(GLfloat y) { setPos(mCenterX, y, mPosZ); }
+	void setZ(GLfloat z) { setPos(mCenterX, mCenterY, z); }
+	void setRotation(GLfloat r) { mRot = r; }
+	void setRadius(GLfloat r) { mRadius = r; }
+	GLfloat x() const { return mCenterX; }
+	GLfloat y() const { return mCenterY; }
 	GLfloat z() const { return mPosZ; }
-	GLfloat centerX() const { return x() + mCenterDiffX; }
-	GLfloat centerY() const { return y() + mCenterDiffY; }
+	GLfloat rotation() const { return mRot; }
+	GLfloat radius() const { return mRadius; }
 
-	void setZoomFactor(GLfloat f) { mZoomFactor = f; }
-	GLfloat zoomFactor() const { return mZoomFactor; }
-
-	void increaseCenterDiffXBy(GLfloat d) { mCenterDiffX += d; }
-	void increaseCenterDiffYBy(GLfloat d) { mCenterDiffY += d; }
 private:
-	GLfloat mPosX;
-	GLfloat mPosY;
+	GLfloat mCenterX;
+	GLfloat mCenterY;
 	GLfloat mPosZ;
-	GLfloat mZoomFactor; // we probably won't use this. mPosZ has the same effect and doesn't cause a "fish eye" perspective
 
-	GLfloat mCenterDiffX;
-	GLfloat mCenterDiffY;
+	GLfloat mRot;
+	GLfloat mRadius;
 };
 //int a1, a2;
 
@@ -918,13 +913,29 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 			// during a game.
 			if (e->state() & LeftButton) {
 				Camera camera = d->mCamera;
-				camera.setZ(cameraZ() + d->mMouseMoveDiff.dy());
+				float diff = d->mMouseMoveDiff.dy();
+				float factor = cameraZ() / (cameraZ() + diff);
+				camera.setZ(cameraZ() * factor);
+				camera.setRadius(camera.radius() * factor);
 				setCamera(camera);
 				boDebug() << "posZ: " << d->mCamera.z() << endl;
 			} else if (e->state() & RightButton) {
 				Camera camera = d->mCamera;
-				camera.increaseCenterDiffXBy(d->mMouseMoveDiff.dx());
-				camera.increaseCenterDiffYBy(-d->mMouseMoveDiff.dy());
+				float radius, rot;
+				radius = camera.radius() + camera.z() / 20 * d->mMouseMoveDiff.dy();
+				if(radius < 0) {
+					radius = 0;
+				} else if(radius > camera.z()) {
+					radius = camera.z();
+				}
+				rot = camera.rotation() + d->mMouseMoveDiff.dx();
+				if(rot < 0) {
+					rot += 360;
+				} else if(rot > 360) {
+					rot -= 360;
+				}
+				camera.setRotation(rot);
+				camera.setRadius(radius);
 //				a1 += d->mMouseMoveDiff.dx();
 //				a2 += d->mMouseMoveDiff.dy();
 				setCamera(camera);
@@ -963,8 +974,8 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 				int moveY = d->mMouseMoveDiff.dy();
 				mapDistance(moveX, moveY, &dx, &dy);
 				Camera camera = d->mCamera;
-				camera.setX(cameraX() + dx);
-				camera.setY(cameraY() + dy);
+				camera.setX(centerX() + dx);
+				camera.setY(centerY() + dy);
 				setCamera(camera);
 			} else {
 				d->mMouseMoveDiff.stop();
@@ -1518,8 +1529,8 @@ void BosonBigDisplayBase::slotCursorEdgeTimeout()
 	d->mCursorEdgeCounter++;
 	if (d->mCursorEdgeCounter > 30) {
 		Camera camera = d->mCamera;
-		camera.setX(cameraX() + x);
-		camera.setY(cameraY() + y);
+		camera.setX(centerX() + x);
+		camera.setY(centerY() + y);
 		setCamera(camera);
 	}
  }
@@ -1531,8 +1542,8 @@ void BosonBigDisplayBase::scrollBy(int dx, int dy)
  GLdouble x, y;
  mapDistance(dx, dy, &x, &y);
  Camera camera = d->mCamera;
- camera.setX(cameraX() + x);
- camera.setY(cameraY() + y);
+ camera.setX(centerX() + x);
+ camera.setY(centerY() + y);
  setCamera(camera);
 }
 
@@ -1587,20 +1598,30 @@ void BosonBigDisplayBase::setCamera(const Camera& camera)
  glMatrixMode(GL_MODELVIEW); // default matrix mode anyway ; redundant!
  glLoadIdentity();
 
- float upX, upY, upZ;
- upX = 0.0;
- upY = 1.0;
+ float diffX, diffY;
+ float radius = d->mCamera.radius();
+ if(radius <= 0.02) {
+	// If radius is 0, up vector will be wrong so we change it
+	radius = 0.02;
+ }
+ pointByRotation(diffX, diffY, d->mCamera.rotation(), radius);
+ float lookatX, lookatY, lookatZ;  // Point that we look at
+ lookatX = centerX();
+ lookatY = centerY();
+ lookatZ = 0.0;
+ float eyeX, eyeY, eyeZ;  // Position of camera
+ eyeX = lookatX + diffX;
+ eyeY = lookatY + diffY;
+ eyeZ = lookatZ + cameraZ();
+ float upX, upY, upZ;  // up vector (points straight up in viewport)
+ upX = -diffX;
+ upY = -diffY;
  upZ = 0.0;
- float centerX, centerY, centerZ;
- centerX = d->mCamera.centerX();
- centerY = d->mCamera.centerY();
- centerZ = -100.0;
-// centerZ = d->mPosZ;
-// glRotatef(a1, 0.0, 0.0, 1.0);
-// glRotatef(a2, 1.0, 0.0, 0.0);
- gluLookAt(cameraX(), cameraY(), cameraZ(), 
-		centerX, centerY, centerZ, 
+
+ gluLookAt(eyeX, eyeY, eyeZ,
+		lookatX, lookatY, lookatZ,
 		upX, upY, upZ);
+
  if (checkError()) {
 	boError() << k_funcinfo << "after gluLookAt()" << endl;
  }
@@ -1623,12 +1644,12 @@ void BosonBigDisplayBase::setCamera(const Camera& camera)
  emit signalChangeViewport(cellTL, cellTR, cellBL, cellBR);
 }
 
-GLfloat BosonBigDisplayBase::cameraX() const
+GLfloat BosonBigDisplayBase::centerX() const
 {
  return d->mCamera.x();
 }
 
-GLfloat BosonBigDisplayBase::cameraY() const
+GLfloat BosonBigDisplayBase::centerY() const
 {
  return d->mCamera.y();
 }
@@ -1704,13 +1725,6 @@ float BosonBigDisplayBase::calcFPS()
 double BosonBigDisplayBase::fps() const
 {
   return d->mFps;
-}
-
-void BosonBigDisplayBase::setZoomFactor(float f)
-{
- boDebug() << k_funcinfo << f << endl;
- d->mCamera.setZoomFactor(f); // no need to call setCamera(), since resizeGL() does it
- resizeGL(d->mViewport[2], d->mViewport[3]);
 }
 
 void BosonBigDisplayBase::setViewport(int x, int y, GLsizei w, GLsizei h)

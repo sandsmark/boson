@@ -26,6 +26,7 @@
 #include "../bosonparticlesystem.h"
 #include "../bosonweapon.h"
 #include "bodebug.h"
+#include "../bo3dtools.h"
 
 #include <ksimpleconfig.h>
 
@@ -91,38 +92,4 @@ void BosonShot::advance(unsigned int phase)
   {
     mActive = false;
   }
-}
-
-float BosonShot::rotationToPoint(float x, float y)
-{
-  float add = 0;
-  float arg = 0;
-  if(x > 0)
-  {
-    if(y < 0)
-    {
-      add = 0;
-      arg = x / -y;
-    }
-    else
-    {
-      add = 90;
-      arg = y / x;
-    }
-  }
-  else
-  {
-    if(y > 0)
-    {
-      add = 180;
-      arg = -x / y;
-    }
-    else
-    {
-      add = 270;
-      arg = -y / -x;
-    }
-  }
-
-  return (atan(arg) * (360 / 6.2831853)) + add;
 }

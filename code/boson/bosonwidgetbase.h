@@ -86,8 +86,6 @@ public:
 
 	virtual void saveConfig();
 
-	void setZoomFactor(float factor);
-
 	bool sound() const;
 	bool music() const;
 
@@ -184,7 +182,6 @@ protected slots:
 	void slotDebugMode(int);
 	void slotDebugPlayer(int);
 	void slotProfiling();
-	void slotZoom(int);
 	void slotToggleCmdFrameVisible();
 	void slotToggleChatVisible();
 	void slotGrabScreenshot();

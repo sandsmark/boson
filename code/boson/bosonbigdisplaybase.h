@@ -158,8 +158,6 @@ public:
 
 	void setUpdateInterval(unsigned int ms);
 
-	void setZoomFactor(float factor);
-
 	/**
 	 * Scroll by a certain distance.
 	 *
@@ -262,8 +260,8 @@ protected:
 	float sphereInFrustum(float x, float y, float z, float radius) const;
 
 	void setCamera(const Camera& c);
-	GLfloat cameraX() const;
-	GLfloat cameraY() const;
+	GLfloat centerX() const;
+	GLfloat centerY() const;
 	GLfloat cameraZ() const;
 
 	bool checkError() const;
