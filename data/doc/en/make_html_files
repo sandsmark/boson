@@ -1,6 +1,8 @@
 #!/bin/bash
 # making html files from WML files
 
+export PERLLIB=`pwd`
+export TOP_SRCDIR=`pwd`/../../
 
 case "$1" in
  help|-help|--help)
@@ -24,7 +26,7 @@ case "$1" in
 	echo "Generating html files from wml source"
 	echo "*************************************"
 	echo ""
-	wmk -F includes -a --include `pwd`/includes
+	wmk -D basedir~./ -F includes -a --include `pwd`/includes
 	echo ""
 	echo "*************************************"
 	;;
