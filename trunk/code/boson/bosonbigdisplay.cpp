@@ -214,7 +214,7 @@ void BosonBigDisplay::actionClicked(const BoAction& action, QDataStream& stream,
 				return;
 			}
 			*send = true;
-		} else if(selection()->hasMobileUnit() && unit->isMobile()) {
+		} else if (selection()->hasMobileUnit() && unit->isMobile()) {
 			// Follow
 			if (!actionFollow(stream, action.canvasPos())) {
 				return;
