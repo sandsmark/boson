@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -279,6 +279,9 @@ public:
 	 **/
 	inline virtual float speed() const { return 0.0; }
 	virtual void setSpeed(float ) { }
+
+	virtual bool saveAsXML(QDomElement& root);
+	virtual bool loadFromXML(const QDomElement& root);
 
 	/**
 	 * Save the unit to a stream. You can use @ref load to load the same

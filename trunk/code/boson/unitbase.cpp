@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 #include "unitpropertyhandler.h" // not related to unitproperties!
 #include "player.h"
 #include "speciestheme.h"
+#include "bosonpropertyxml.h"
 #include "bodebug.h"
 
 #include <kstaticdeleter.h>
@@ -180,6 +181,34 @@ void UnitBase::setOwner(Player* owner)
  mOwner = owner;
 }
 
+bool UnitBase::saveAsXML(QDomElement& root)
+{
+ QDomDocument doc = root.ownerDocument();
+ root.setAttribute(QString::fromLatin1("UnitType"), (unsigned int)type());
+ root.setAttribute(QString::fromLatin1("Id"), (unsigned int)id());
+
+ // the data handler
+ BosonPropertyXML propertyXML;
+ QDomElement handler = doc.createElement(QString::fromLatin1("DataHandler"));
+ if (!propertyXML.saveAsXML(handler, dataHandler())) {
+	boError() << k_funcinfo << "Unable to save datahandler of unit " << id() << endl;
+	return false;
+ }
+ root.setAttribute(QString::fromLatin1("DataHandlerId"), dataHandler()->id());
+ root.appendChild(handler);
+
+
+ if (mWeaponProperties) {
+	QDomElement weaponHandler = doc.createElement(QString::fromLatin1("WeaponDataHandler"));
+	if (!propertyXML.saveAsXML(weaponHandler, weaponDataHandler())) {
+		boError() << k_funcinfo << "Unable to save weapon datahandler of unit " << id() << endl;
+		return false;
+	}
+	root.appendChild(weaponHandler);
+ }
+ return true;
+}
+
 bool UnitBase::save(QDataStream& stream)
 {
  // TODO: we need to save and load Unit::mCurrentPlugin->pluginType() !!
@@ -192,6 +221,35 @@ bool UnitBase::save(QDataStream& stream)
 	ret = ret && weaponDataHandler()->save(stream);
  }
  return ret;
+}
+
+bool UnitBase::loadFromXML(const QDomElement& root)
+{
+ if (root.isNull()) {
+	boError() << k_funcinfo << "NULL root node" << endl;
+	return false;
+ }
+ // load the data handler
+ BosonPropertyXML propertyXML;
+ QDomElement handler = root.namedItem(QString::fromLatin1("DataHandler")).toElement();
+ if (handler.isNull()) {
+	boError(260) << k_funcinfo << "No DataHandler tag found for Unit" << endl;
+	return false;
+ }
+ if (!propertyXML.loadFromXML(handler, dataHandler())) {
+	boError(260) << k_funcinfo << "unable to load unit data handler (unit=" << this->id() << ")" << endl;
+	return false;
+ }
+
+ // the weapon data handler
+ QDomElement weaponHandler = root.namedItem(QString::fromLatin1("WeaponDataHandler")).toElement();
+ if (!weaponHandler.isNull()) {
+	if (!propertyXML.loadFromXML(weaponHandler, weaponDataHandler())) {
+		boError(260) << k_funcinfo << "unable to load unit weapon data handler (unit=" << this->id() << ")" << endl;
+		return false;
+	}
+ }
+ return true;
 }
 
 bool UnitBase::load(QDataStream& stream)

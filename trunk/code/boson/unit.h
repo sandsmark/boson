@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -37,6 +37,7 @@ class BosonWeapon;
 class BoVector3;
 template<class T> class QValueList;
 template<class T> class QPtrList;
+class QDomElement;
 
 class KGameUnitDebug;
 
@@ -299,6 +300,8 @@ public:
 	virtual void stopMoving();
 	void stopAttacking();
 
+	virtual bool saveAsXML(QDomElement& root);
+	virtual bool loadFromXML(const QDomElement& root);
 	virtual bool save(QDataStream& stream);
 	virtual bool load(QDataStream& stream);
 
@@ -482,6 +485,8 @@ public:
 
 	virtual QRect boundingRect() const;
 
+	virtual bool saveAsXML(QDomElement& root);
+	virtual bool loadFromXML(const QDomElement& root);
 	virtual bool load(QDataStream& stream);
 	virtual bool save(QDataStream& stream);
 
@@ -574,6 +579,8 @@ public:
 	BosonParticleSystem* flamesParticleSystem() const;
 	void setFlamesParticleSystem(BosonParticleSystem* s);
 
+	virtual bool saveAsXML(QDomElement& root);
+	virtual bool loadFromXML(const QDomElement& root);
 	virtual bool load(QDataStream& stream);
 	virtual bool save(QDataStream& stream);
 
