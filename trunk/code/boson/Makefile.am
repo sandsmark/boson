@@ -41,6 +41,7 @@ BOSON_SRC = \
 	editorwidget.cpp \
 	bosonglwidget.cpp \
 	bosonbigdisplaybase.cpp \
+	bogroundrenderer.cpp \
 	bocamera.cpp \
 	bosongroundtheme.cpp \
 	bosonconfig.cpp \
