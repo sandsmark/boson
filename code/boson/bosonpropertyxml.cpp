@@ -130,7 +130,7 @@ bool BosonPropertyXML::saveAsXML(QDomElement& root, const KGamePropertyHandler* 
 	return QString::null;
  }
  QDomDocument doc = root.ownerDocument();
- QIntDict<KGamePropertyBase> dict = dataHandler->dict();
+ QIntDict<KGamePropertyBase>& dict = dataHandler->dict();
  QIntDictIterator<KGamePropertyBase> it(dict);
  for (; it.current(); ++it) {
 	QString value = propertyValue(it.current());
