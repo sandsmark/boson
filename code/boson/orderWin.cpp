@@ -104,7 +104,8 @@ mobSelected.remove(key);
 if (mobSelected.isEmpty()) {
 	view_one->setPixmap(*view_none);
 	orderButton[0]->hide();
-/*	QObject::*/disconnect(orderButton[0]);
+printf("disconnect button 0\n");
+	orderButton[0]->disconnect(this);
 	}
 /**/
 
@@ -114,9 +115,10 @@ return m;
 void orderWin::unSelectAll(void)
 {
 /* */
+selectionWho =  -1; ///orzel : should be a WHO_NOBOCY;
 for (int i=0; i<ORDER_BUTTONS_NB; i++) {
 	orderButton[i]->hide();
-	disconnect(orderButton[i]);
+	orderButton[i]->disconnect(this);
 	}
 }
 
@@ -132,9 +134,23 @@ logf(LOG_GAME_LOW, "select facility");
 void orderWin::selectMob(long key, playerMobUnit *m)
 {
 if (mobSelected.isEmpty()) {
-	connect(orderButton[0], SIGNAL(clicked()), this, SLOT(u_goto()));
-	orderButton[0]->show();
+	boAssert( selectionWho = -1);
+/*	connect(orderButton[1], SIGNAL(clicked()), this, SLOT(u_stop()));
+	orderButton[1]->show(); */
+	selectionWho = m->who;
+	if (selectionWho == gameProperties.who_am_i) {
+printf("connect button 0\n");
+		connect(orderButton[0], SIGNAL(clicked()), this, SLOT(u_goto()));
+		orderButton[0]->show();
+		}
 	}
+else {
+	boAssert( selectionWho>=0 );
+	if (m->who != selectionWho)
+		return;
+	}
+
+//setSelectionMode(SELECT_MOVE);
 
 mobSelected.insert(key, m);
 view_one->setPixmap(*gameProperties.myspecies->getBigOverview(m)); ///orzel 0 is not 0, it's my_number_in_the_game
@@ -146,6 +162,7 @@ void orderWin::u_goto(void)
 {
 printf("selection is : %d\n", getSelectionMode());
 boAssert( SELECT_NONE == getSelectionMode() );
+boAssert(selectionWho == gameProperties.who_am_i);
 ///orzel : should change the cursor over fieldMap
 setSelectionMode(SELECT_MOVE);
 }
@@ -162,12 +179,17 @@ if (SELECT_MOVE != getSelectionMode()) {
 	}
 if (mobSelected.isEmpty()) {
 	logf(LOG_ERROR,"orderWin::leftClicked : unexpected empty mobSelected");
+	setSelectionMode(SELECT_NONE);
 	return;
 	}
 
-for (mobIt.toFirst(); mobIt; ++mobIt)
+for (mobIt.toFirst(); mobIt; ++mobIt) {
+	boAssert(mobIt.current()->who == gameProperties.who_am_i);
 	mobIt.current()->u_goto(mx,my);
+	}
 
+printf("disconnect button 0\n");
+orderButton[0]->disconnect(this);
 setSelectionMode(SELECT_NONE);
 } 
 

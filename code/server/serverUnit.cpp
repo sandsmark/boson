@@ -32,19 +32,28 @@ serverMobUnit::serverMobUnit(boBuffer *b, mobileMsg_t *msg, QObject* parent, con
 	,buffer(b)
 {
 
-/* envoyer un message de creation d'unite */
-printf("sizeof(msg) = %d\n", sizeof(*msg));
-printf("serverMobUnit : who = %d\n", msg->who);
-sendMsg ( buffer, MSG_MOBILE_CREATED, sizeof(*msg), (bosonMsgData*)(msg));
+
+/* envoyer un message de creation d'unite au prop*/
+//printf("sizeof(msg) = %d\n", sizeof(*msg));
+//printf("serverMobUnit : who = %d\n", msg->who);
+
+//sendMsg ( buffer, MSG_MOBILE_CREATED, sizeof(*msg), (bosonMsgData*)(msg));
 state = 0;
 
-setKnown( getPlayerMask(msg->who) );
+//setKnown( getPlayerMask(msg->who) );
 }
 
 void serverMobUnit::r_moveBy(moveMsg_t &msg, int playerId, boBuffer * buffer)
 {
+/* owner check */
+if (who!=playerId) {
+	logf(LOG_ERROR, "Player %d asking to move player's %d unit, dismissed", playerId, who);
+	return;
+	}
+
 __x += msg.dx;
 __y += msg.dy;
+
 sendMsg(buffer, MSG_MOBILE_MOVE_C, sizeof(msg), (bosonMsgData*)(&msg));
 }
 
@@ -59,10 +68,10 @@ serverFacility::serverFacility(boBuffer *b, facilityMsg_t *msg, QObject* parent,
 	,buffer(b)
 {
 /* envoyer un message de creation d'unite */
-sendMsg ( buffer, MSG_FACILITY_CREATED, sizeof(*msg), (bosonMsgData*)(msg));
+//sendMsg ( buffer, MSG_FACILITY_CREATED, sizeof(*msg), (bosonMsgData*)(msg));
 state = 0;
 counter = BUILDING_SPEED;
-setKnown( getPlayerMask(msg->who) );
+//setKnown( getPlayerMask(msg->who) );
 }
 
 

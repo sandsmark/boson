@@ -51,8 +51,7 @@ facility.setAutoDelete(TRUE);
 /* Themes selection (should be moved thereafter) */
 gameProperties.ground		= new groundTheme("ben");
 
-gameProperties.species[1]	=
-gameProperties.myspecies	= ///orzel : hum....
+gameProperties.species[1]	= new speciesTheme("Blue");
 gameProperties.species[0]	= new speciesTheme("Red");
 
 }
