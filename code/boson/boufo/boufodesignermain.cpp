@@ -308,7 +308,7 @@ void FormPreview::resizeGL(int w, int h)
 {
  makeCurrent();
  if (mUfoManager) {
-	mUfoManager->postResizeEvent(w, h);
+	mUfoManager->sendResizeEvent(w, h);
  }
 }
 
@@ -328,7 +328,7 @@ bool FormPreview::eventFilter(QObject* o, QEvent* e)
 void FormPreview::mouseMoveEvent(QMouseEvent* e)
 {
  if (mUfoManager) {
-	mUfoManager->postMouseMoveEvent(e);
+	mUfoManager->sendMouseMoveEvent(e);
  }
 }
 
@@ -339,7 +339,7 @@ void FormPreview::mousePressEvent(QMouseEvent* e)
  // AB: we display the ufo widgets only, we don't use them. so don't deliver
  // this event.
  if (mUfoManager) {
-	mUfoManager->postMousePressEvent(e);
+	mUfoManager->sendMousePressEvent(e);
  }
 #endif
 
@@ -365,7 +365,7 @@ void FormPreview::mouseReleaseEvent(QMouseEvent* e)
  // AB: we display the ufo widgets only, we don't use them. so don't deliver
  // this event.
  if (mUfoManager) {
-	mUfoManager->postMouseReleaseEvent(e);
+	mUfoManager->sendMouseReleaseEvent(e);
  }
 #endif
 }
@@ -373,14 +373,14 @@ void FormPreview::mouseReleaseEvent(QMouseEvent* e)
 void FormPreview::wheelEvent(QWheelEvent* e)
 {
  if (mUfoManager) {
-	mUfoManager->postWheelEvent(e);
+	mUfoManager->sendWheelEvent(e);
  }
 }
 
 void FormPreview::keyPressEvent(QKeyEvent* e)
 {
  if (mUfoManager) {
-	mUfoManager->postKeyPressEvent(e);
+	mUfoManager->sendKeyPressEvent(e);
  }
  QGLWidget::keyPressEvent(e);
 }
@@ -388,7 +388,7 @@ void FormPreview::keyPressEvent(QKeyEvent* e)
 void FormPreview::keyReleaseEvent(QKeyEvent* e)
 {
  if (mUfoManager) {
-	mUfoManager->postKeyReleaseEvent(e);
+	mUfoManager->sendKeyReleaseEvent(e);
  }
  QGLWidget::keyReleaseEvent(e);
 }

@@ -37,7 +37,6 @@
 #include "bosonconfig.h"
 #include "selectbox.h"
 #include "bosonglchat.h"
-#include "bosonufochat.h"
 #include "bosonprofiling.h"
 #include "bosoneffect.h"
 #include "bosoneffectparticle.h"
@@ -58,7 +57,6 @@
 #include "bomeshrenderermanager.h"
 #include "bolight.h"
 #include "bosonglminimap.h"
-#include "bosonufominimap.h"
 #include "bomaterial.h"
 #include "info/boinfo.h"
 #include "script/bosonscript.h"
@@ -69,6 +67,8 @@
 #include "bowater.h"
 #include "botexture.h"
 #include "boufo/boufo.h"
+#include "bosonufochat.h"
+#include "bosonufominimap.h"
 
 #include <kgame/kgameio.h>
 
@@ -475,6 +475,7 @@ BosonBigDisplayBase::~BosonBigDisplayBase()
 void BosonBigDisplayBase::init()
 {
  d = new BosonBigDisplayBasePrivate;
+ setSendEventsToUfo(false); // we handle libufo events manually
  mCanvas = 0;
  mCursor = 0;
  d->mCursorEdgeCounter = 0;
@@ -859,6 +860,9 @@ void BosonBigDisplayBase::resizeGL(int w, int h)
 {
  boDebug() << k_funcinfo << w << " " << h << endl;
  BosonUfoGLWidget::resizeGL(w, h);
+ if (ufoManager()) {
+	ufoManager()->sendResizeEvent(w, h);
+ }
  setViewport(0, 0, (GLsizei)w, (GLsizei)h);
  glMatrixMode(GL_PROJECTION);
  glLoadIdentity();
@@ -1753,7 +1757,6 @@ void BosonBigDisplayBase::renderText()
  BO_CHECK_NULL_RET(d->mDefaultFont);
  BO_CHECK_NULL_RET(localPlayerIO());
  d->mDefaultFont->begin();
- const int border = 5;
 
  // TODO: port to libufo and remove this code.
  if (d->mToolTips->showTip()) {
@@ -2036,22 +2039,6 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* io, QDataStream& stream, QMous
 {
 // AB: maybe we could move this function to the displayInput directly!
  BO_CHECK_NULL_RET(displayInput());
- if (e->type() != QEvent::Wheel) {
-	bool send = false;
-	bool taken = false;
-#if 0
-	// AB: we use libufo here, now.
-	if (!taken && d->mGLMiniMap) {
-		taken = d->mGLMiniMap->mouseEvent(io, stream, e, &send);
-	}
-#endif
-	if (taken) {
-		if (send) {
-			*eatevent = true;
-		}
-		return;
-	}
- }
  GLfloat posX = 0.0;
  GLfloat posY = 0.0;
  GLfloat posZ = 0.0;
@@ -2083,6 +2070,10 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* io, QDataStream& stream, QMous
  // DblClick, so we store whether the last Press event was an actual press event
  // or a double click.
  static ButtonState isDoubleClick = NoButton;
+
+ if (ufoManager()->sendEvent((QEvent*)e)) {
+	return;
+ }
 
  switch (e->type()) {
 	case QEvent::Wheel:
@@ -2155,7 +2146,6 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* io, QDataStream& stream, QMous
 
 void BosonBigDisplayBase::mouseEventWheel(float delta, Orientation orientation, const BoMouseEvent& boEvent, QDataStream&, bool*)
 {
-
 #warning FIXME: d->mCanvasPos/Vector are not fixed when zooming with wheel
 
  int action;
@@ -2441,6 +2431,7 @@ void BosonBigDisplayBase::setLocalPlayerIO(PlayerIO* io)
 	}
 	d->mGLMiniMap->setLocalPlayerIO(localPlayerIO());
  }
+
  if (!localPlayerIO()) {
 	return;
  }
@@ -2602,6 +2593,9 @@ bool BosonBigDisplayBase::eventFilter(QObject* o, QEvent* e)
 	case QEvent::KeyRelease:
 		d->mControlPressed = (((QKeyEvent*)e)->stateAfter() & Qt::ControlButton);
 		d->mShiftPressed = (((QKeyEvent*)e)->stateAfter() & Qt::ShiftButton);
+
+		// key events are sent to ufo here, mouse events elsewhere
+		ufoManager()->sendEvent(e);
 		break;
 	default:
 		break;

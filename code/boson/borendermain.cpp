@@ -250,8 +250,10 @@ void ModelPreview::initUfoGUI()
  }
  initialized = true;
  initUfo();
+// ufoManager()->contentWidget()->setOpaque(true);
 
  BoUfoVBox* topWidget = new BoUfoVBox();
+// topWidget->setOpaque(true);
  ufoManager()->contentWidget()->addWidget(topWidget);
 
 
@@ -510,11 +512,8 @@ void ModelPreview::paintGL()
 
  if (ufoManager()) {
 	ufoManager()->dispatchEvents();
+	glEnable(GL_BLEND);
 	ufoManager()->render();
-
-	// AB: libufo resets our viewport, but doesn't fix it again
-	// FIXME: is this still required for current libufo?
-	glViewport(0, 0, width(), height());
  }
 }
 
@@ -1356,12 +1355,16 @@ bool ModelPreview::eventFilter(QObject* o, QEvent* e)
 	default:
 		break;
  }
- return QObject::eventFilter(o, e);
+ return BosonUfoGLWidget::eventFilter(o, e);
 }
 
 void ModelPreview::mousePressEvent(QMouseEvent* e)
 {
  BosonUfoGLWidget::mousePressEvent(e);
+ if (e->isAccepted()) {
+	return;
+ }
+ e->accept();
  switch (e->button()) {
 	case QMouseEvent::LeftButton:
 		break;
@@ -1376,6 +1379,10 @@ void ModelPreview::mousePressEvent(QMouseEvent* e)
 void ModelPreview::mouseReleaseEvent(QMouseEvent* e)
 {
  BosonUfoGLWidget::mouseReleaseEvent(e);
+ if (e->isAccepted()) {
+	return;
+ }
+ e->accept();
  switch (e->button()) {
 	case QMouseEvent::LeftButton:
 		selectMesh(mMeshUnderMouse);
@@ -1397,6 +1404,10 @@ void ModelPreview::selectMesh(int mesh)
 void ModelPreview::mouseMoveEvent(QMouseEvent* e)
 {
  BosonUfoGLWidget::mouseMoveEvent(e);
+ if (e->isAccepted()) {
+	return;
+ }
+ e->accept();
  mMouseMoveDiff->moveEvent(e);
 
 
@@ -1439,6 +1450,10 @@ void ModelPreview::wheelEvent(QWheelEvent* e)
 {
  BO_CHECK_NULL_RET(camera());
  BosonUfoGLWidget::wheelEvent(e);
+ if (e->isAccepted()) {
+	return;
+ }
+ e->accept();
  float delta = e->delta() / 120;
  if (e->orientation() == Horizontal) {
  } else {

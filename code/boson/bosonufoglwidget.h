@@ -48,6 +48,20 @@ public:
 	virtual void resizeGL(int, int);
 	virtual void makeCurrent();
 
+	/**
+	 * If enabled, the events to this widget (see @ref mouseMoveEvent, @ref
+	 * mousePressEvent, ...) are sent to the @ref ufoManager
+	 * automatically.
+	 *
+	 * If @p send is FALSE, this feature is disabled.
+	 *
+	 * By default events are sent , i.e. @p send is TRUE.
+	 **/
+	void setSendEventsToUfo(bool send)
+	{
+		mSendEvents = send;
+	}
+
 
 protected:
 	virtual void mouseMoveEvent(QMouseEvent*);
@@ -62,6 +76,7 @@ protected:
 
 private:
 	BoUfoManager* mUfoManager;
+	bool mSendEvents;
 };
 
 
