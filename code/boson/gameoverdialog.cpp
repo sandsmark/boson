@@ -80,22 +80,27 @@ void GameOverDialog::createStatistics(Boson* boson, Player* winner, Player* p)
  QPtrList<KPlayer> players = *d->mBoson->playerList();
  QPtrListIterator<KPlayer> it(players);
  while (it.current()) {
-	addPlayer((Player*)it.current());
+	PlayerBox* winnerBox = addPlayer((Player*)it.current());
+	if ((Player*)it.current() == winner) {
+		winnerBox->setFrameStyle(QFrame::Box | QFrame::Raised);
+		winnerBox->setWinner(true);
+	} else {
+		winnerBox->setWinner(false);
+	 }
 	++it;
  }
- d->mPlayers[winner]->setFrameStyle(QFrame::Box | QFrame::Raised);
- d->mPlayers[winner]->setWinner(true);
 }
 
-void GameOverDialog::addPlayer(Player* p)
+GameOverDialog::PlayerBox* GameOverDialog::addPlayer(Player* p)
 {
  if (d->mPlayers[p]) {
-	return;
+	return d->mPlayers[p];
  }
  PlayerBox* box = new PlayerBox(p, plainPage());
  d->mPlayerLayout->addWidget(box);
  box->show();
  d->mPlayers.insert(p, box);
+ return box;
 }
 
 GameOverDialog::PlayerBox::PlayerBox(Player* p, QWidget* parent) : QFrame(parent)
@@ -121,10 +126,16 @@ GameOverDialog::PlayerBox::PlayerBox(Player* p, QWidget* parent) : QFrame(parent
  l->addWidget(mProducedUnits);
  mDestroyedUnits = new QLabel(this);
  l->addWidget(mDestroyedUnits);
+ mDestroyedOwnUnits = new QLabel(this);
+ l->addWidget(mDestroyedOwnUnits);
+ mLostUnits = new QLabel(this);
+ l->addWidget(mLostUnits);
  mShots = new QLabel(this);
  l->addWidget(mShots);
  mStatus = new QLabel(this);
  l->addWidget(mStatus);
+ mPoints = new QLabel(this);
+ l->addWidget(mPoints);
 
 
  BosonStatistics* statistics = p->statistics();
@@ -134,12 +145,12 @@ GameOverDialog::PlayerBox::PlayerBox(Player* p, QWidget* parent) : QFrame(parent
  mRefinedOil->setText(i18n("Refined Oil: %1").arg(statistics->refinedOil()));
  mProducedUnits->setText(i18n("Produced Units: %1").arg(statistics->producedUnits()));
  mDestroyedUnits->setText(i18n("Destroyed Units: %1").arg(statistics->destroyedUnits()));
+ mDestroyedOwnUnits->setText(i18n("Own Units Destroyed: %1").arg(statistics->destroyedOwnUnits()));
+ mLostUnits->setText(i18n("Lost Units: %1").arg(statistics->lostUnits()));
 
  // FIXME: this might be > 4 billion and therefore greater than unsigned long
  // int!!
  mShots->setText(i18n("Shots: %1").arg(statistics->shots()));
-
- setWinner(false);
 }
 
 GameOverDialog::PlayerBox::~PlayerBox()
@@ -148,9 +159,19 @@ GameOverDialog::PlayerBox::~PlayerBox()
 
 void GameOverDialog::PlayerBox::setWinner(bool w)
 {
+ BosonStatistics* statistics = mPlayer->statistics();
+ long int winnerPoints;
  if (w) {
 	mStatus->setText(i18n("Won"));
+	winnerPoints = BosonStatistics::winningPoints();
  } else {
 	mStatus->setText(i18n("Defeated"));
+	winnerPoints = 0;
  }
+ // TODO: ranking!
+ // e.g.:
+ // player achieved 2nd place out of 8 -> the inverse is 7, so he received 7000
+ // (or so) points. 
+ mPoints->setText(i18n("Points: %1").arg(statistics->points() + winnerPoints));
 }
+

@@ -178,6 +178,11 @@ void Player::unitDestroyed(Unit* unit)
 	return;
  }
  d->mUnits.take(d->mUnits.findRef(unit));
+ if (unit->isFacility()) {
+	statistics()->addLostFacility(unit);
+ } else {
+	statistics()->addLostMobileUnit(unit);
+ }
  if (!hasMiniMap()) {
 	emit signalShowMiniMap(false);
  }
