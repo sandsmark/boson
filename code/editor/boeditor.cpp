@@ -30,6 +30,7 @@
 #include "boeditor.h"
 #include "editorTopLevel.h"
 #include "editorCanvas.h"
+#include "newDlg.h"
 #include "visual.h"
 
 /*
@@ -101,7 +102,37 @@ void BoEditorApp::slot_newWindow()
 
 void BoEditorApp::slot_openNew()
 {
+	if (!filename.isNull() && !slot_close()) return;
+
+	newDlg	*newdlg = new newDlg(0, "New Scenario"); // 0 -> centered
+	if (newdlg->exec() != QDialog::Accepted) {
+		delete newdlg;
+		return;
+	}
+
+	groundType g;
+	switch(newdlg->type) {
+		default:
+			g =  GROUND_WATER;
+			break;
+		case 1:
+			g =  GROUND_GRASS;
+			break;
+		case 2:
+			g =  GROUND_DESERT;
+			break;
+	};
+	if (!ecanvas->New(g, newdlg->scb_width->value(), newdlg->scb_height->value(), newdlg->qle_name->text() ) ) {
+		delete newdlg;
+  		KMessageBox::sorry(0, i18n("Creation of new scenario failed :-((("), i18n("Creaton failed") );
+		return;
+	}
+
+	delete newdlg;
+
 	filename = UNKNOWN_NAME;
+
+	ecanvas->update();
 }
 
 void BoEditorApp::slot_open()
