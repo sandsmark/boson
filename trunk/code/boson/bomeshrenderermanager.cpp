@@ -285,11 +285,16 @@ bool BoMeshRendererManager::unloadLibrary()
  boDebug() << k_funcinfo << "deleting factory" << endl;
  delete d->mLibraryFactory;
  d->mLibraryFactory = 0;
+ bool ret = true;
  if (d->mLibrary) {
-	d->mLibrary->unload();
+	if (!d->mLibrary->unload()) {
+		boError() << k_funcinfo << "unloading lib failed!" << endl;
+		ret = false;
+	}
  }
  delete d->mLibrary;
  d->mLibrary = 0;
+ return ret;
 }
 
 bool BoMeshRendererManager::makeRendererCurrent(BoMeshRenderer* renderer)
