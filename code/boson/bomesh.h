@@ -268,6 +268,9 @@ public:
 	void setFace(int index, const BoFace& face);
 	const BoFace* face(unsigned int f) const;
 
+	void setArrayIndex(unsigned int index);
+	unsigned int arrayIndex() const;
+
 	/**
 	 * @param vertex The vertex in the face this normal applies to. This
 	 * must be 0..2 or -1 for all vertices.
@@ -353,7 +356,7 @@ public:
 	 * @return The number of points (!) that have been used. Note: a single
 	 * point consists of @ref pointSize floats!
 	 **/
-	unsigned int movePoints(float* array, int index);
+	unsigned int movePoints(float* vertexarray, float* normalarray, float* texelarray, int index);
 
 	/**
 	 * Use material @p mat when rendering this mesh.
@@ -481,6 +484,11 @@ public:
 	 * @return The number of points in this mesh. See also @ref facesCount
 	 **/
 	unsigned int points() const;
+
+	/**
+	 * @return The total number of elements (point indices) in all lods of this mesh
+	 **/
+	unsigned int elements() const;
 
 	/**
 	 * Calculate values for @ref maxZPoint and similar functions. This needs

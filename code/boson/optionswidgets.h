@@ -199,6 +199,9 @@ protected:
 	void setUseLOD(bool l);
 	bool useLOD() const;
 
+	void setUseVBO(bool v);
+	bool useVBO() const;
+
 	void setDefaultLOD(unsigned int l);
 	unsigned int defaultLOD() const;
 
@@ -264,6 +267,7 @@ private:
 	BoFontInfo* mFontInfo;
 	bool mFontChanged;
 	QCheckBox* mSmoothShading;
+	QCheckBox* mUseVBO;
 };
 
 class ChatOptions : public QVBox, public OptionsWidget

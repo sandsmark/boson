@@ -823,6 +823,24 @@ public:
 		return BoVector3(&mPoints[p * pointSize() + vertexPos()]);
 	}
 
+	inline BoVector3 texel(unsigned int p) const
+	{
+		if (!mPoints) {
+			boError() << k_funcinfo << "no points allocated" << endl;
+			return BoVector3();
+		}
+		if (p >= points()) {
+			boError() << k_funcinfo << "invalid point " << p
+					<< " max=" << points() - 1 << endl;
+		return BoVector3();
+		}
+		BoVector3 tex;
+		tex.setX(mPoints[p * pointSize() + texelPos() + 0]);
+		tex.setY(mPoints[p * pointSize() + texelPos() + 1]);
+		tex.setZ(0.0f);  // not used
+		return tex;
+	}
+
 	inline unsigned int points() const
 	{
 		return mPointCount;
@@ -940,9 +958,12 @@ class BoMeshLODPrivate
 public:
 	BoMeshLODPrivate()
 	{
+		mArrayIndex = 0;
 	}
 	QValueVector<BoFace> mAllFaces;
 	QPtrList<BoFaceNode> mAllNodes;
+
+	unsigned int mArrayIndex;
 };
 
 BoMeshLOD::BoMeshLOD()
@@ -1003,6 +1024,16 @@ const BoFace* BoMeshLOD::face(unsigned int f) const
 	return 0;
  }
  return &d->mAllFaces[f];
+}
+
+void BoMeshLOD::setArrayIndex(unsigned int index)
+{
+ d->mArrayIndex = index;
+}
+
+unsigned int BoMeshLOD::arrayIndex() const
+{
+ return d->mArrayIndex;
 }
 
 void BoMeshLOD::setNormal(unsigned int face, int vertex, const BoVector3& normal)
@@ -1419,16 +1450,7 @@ void BoMesh::renderMesh(const QColor* teamColor, unsigned int _lod)
 	BO_NULL_ERROR(lod);
 	return;
  }
- unsigned int* pointsCache = lod->pointsCache();
- unsigned int pointsCacheCount = lod->pointsCacheCount();
  int type = lod->type();
- BoFaceNode* nodes = lod->nodes();
-
- if (!nodes) {
-	// nothing to do.
-	return;
- }
-
 
  bool resetColor = false; // needs to be true after we changed the current color
 
@@ -1461,45 +1483,19 @@ void BoMesh::renderMesh(const QColor* teamColor, unsigned int _lod)
 #endif
  {
 //	boDebug() << k_funcinfo << "not culled" << endl;
-	if (!pointsCache || pointsCacheCount == 0) {
-		boError() << k_funcinfo << "no point cache!" << endl;
-	} else {
-		glBegin(type);
+//	boDebug() << k_funcinfo << "Drawing " << lod->facesCount() * 3 << " elements, starting from " << lod->arrayIndex() << endl;
+	// FIXME: only type == GL_TRIANGLES is supported atm. OTOH, that's also the only one we use atm.
+	glDrawArrays(type, lod->arrayIndex(), lod->facesCount() * 3);
+//	boDebug() << k_funcinfo << "Drawing completed" << endl;
 
-		BoFaceNode* node = nodes;
-		while (node) {
-			const BoFace* face = node->face();
-			const int* points = face->pointIndex();
-#if BOMESH_USE_1_NORMAL_PER_FACE
-			// here we assume that the same normal is used for all
-			// vertices of this face. this is the default.
-			glNormal3fv(face->normal(0).data());
-			glArrayElement(points[0]);
-			glArrayElement(points[1]);
-			glArrayElement(points[2]);
-#else
-			glNormal3fv(face->normal(0).data());
-			glArrayElement(points[0]);
-			glNormal3fv(face->normal(1).data());
-			glArrayElement(points[1]);
-			glNormal3fv(face->normal(2).data());
-			glArrayElement(points[2]);
-#endif
+	glstat_item_vertices += lod->facesCount() * 3;
+	glstat_item_faces += lod->facesCount();
 
-			glstat_item_vertices += 3;
-			glstat_item_faces++;
-
-			node = node->next();
-		}
-
-		glEnd();
-
-		// reset the normal...
-		// (better solution: don't enable light when rendering
-		// selection rect!)
-		const float n[] = { 0.0f, 0.0f, 1.0f };
-		glNormal3fv(n);
-	}
+	// reset the normal...
+	// (better solution: don't enable light when rendering
+	// selection rect!)
+	const float n[] = { 0.0f, 0.0f, 1.0f };
+	glNormal3fv(n);
  }
 
 
@@ -1563,6 +1559,15 @@ unsigned int BoMesh::points() const
  return d->mMeshPoints.points();
 }
 
+unsigned int BoMesh::elements() const
+{
+ unsigned int e = 0;
+ for (unsigned int i = 0; i < d->mLODCount; i++) {
+	e += d->mLODs[i]->facesCount() * 3;
+ }
+ return e;
+}
+
 bool BoMesh::isTeamColor() const
 {
  return d->mIsTeamColor;
@@ -1573,21 +1578,61 @@ void BoMesh::setIsTeamColor(bool c)
  d->mIsTeamColor = c;
 }
 
-unsigned int BoMesh::movePoints(float* array, int index)
+unsigned int BoMesh::movePoints(float* vertexarray, float* normalarray, float* texelarray, int index)
 {
- // move all points to the new array
- unsigned int pointsMoved = d->mMeshPoints.movePoints(array, index);
+ boDebug() << k_funcinfo << endl;
+ unsigned int i = 0;  // How many points have been added
 
- // now we fix the (point-)indices of all faces in all LODs.
- for (unsigned int i = 0; i < d->mLODCount; i++) {
-	if (!d->mLODs[i]) {
-		boError(100) << k_funcinfo << "NULL LOD " << i << endl;
+ // Create vertex list for each lod
+ for (unsigned int j = 0; j < d->mLODCount; j++) {
+	boDebug() << k_funcinfo << "trying to create array for lod " << j << endl;
+	if (!d->mLODs[j]) {
+		boError(100) << k_funcinfo << "NULL LOD " << j << endl;
 		continue;
 	}
-	d->mLODs[i]->movePointIndices(index);
+
+	BoMeshLOD* lod = levelOfDetail(j);
+	if (!lod) {
+		BO_NULL_ERROR(lod);
+		return i;
+	}
+
+	lod->setArrayIndex(index + i);
+
+	int lodi = 0;  // n'th vertex in this lod
+	BoVector3 vertex, normal, texel;
+
+	// Add all faces for this lod
+	for (unsigned int facei = 0; facei < lod->facesCount(); facei++) {
+		const BoFace* face = lod->face(facei);
+		const int* points = face->pointIndex();
+
+		// Add all 3 vertices for this face
+		for (int v = 0; v <= 2; v++) {
+			// Store them in temporary variables for easier access
+			vertex = d->mMeshPoints.vertex(points[v]);
+			normal = face->normal(v);
+			texel = d->mMeshPoints.texel(points[v]);
+
+			// And copy them to corresponding arrays
+			vertexarray[(index + i) * 3 + 0] = vertex[0];
+			vertexarray[(index + i) * 3 + 1] = vertex[1];
+			vertexarray[(index + i) * 3 + 2] = vertex[2];
+			normalarray[(index + i) * 3 + 0] = normal[0];
+			normalarray[(index + i) * 3 + 1] = normal[1];
+			normalarray[(index + i) * 3 + 2] = normal[2];
+			texelarray[(index + i) * 2 + 0] = texel[0];
+			texelarray[(index + i) * 2 + 1] = texel[1];
+
+			lodi++;
+			i++;
+		}
+	}
+	boDebug() << k_funcinfo << "Got " << lodi << " vertices for lod " << j << " at " << lod << "; indices at: " << lod->arrayIndex() << endl;
  }
 
- return pointsMoved;
+ boDebug() << k_funcinfo << "Total points used: " << i << endl;
+ return i;
 }
 
 void BoMesh::createPointCache()

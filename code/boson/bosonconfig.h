@@ -318,6 +318,8 @@ public:
 	bool deactivateWeaponSounds() const { return mDeactivateWeaponSounds->value(); }
 	void setUseLOD(bool use) { mUseLOD->setValue(use); }
 	bool useLOD() const { return mUseLOD->value(); }
+	void setUseVBO(bool use) { mUseVBO->setValue(use); }
+	bool useVBO() const { return mUseVBO->value(); }
 
 	void setUnitSoundActivated(UnitSoundEvent e, bool activated);
 	bool unitSoundActivated(UnitSoundEvent e) const;
@@ -588,6 +590,7 @@ private:
 	BoConfigIntEntry* mToolTipCreator;
 	BoConfigIntEntry* mGameLogInterval;
 	BoConfigBoolEntry* mUseLOD;
+	BoConfigBoolEntry* mUseVBO;
 
 	// NOT stored to config file!
 	bool mDisableSound;
