@@ -34,7 +34,7 @@ class serverCell : public knownBy
 	friend	BosonServer; /* to write in _cell */
 
 public:
-	serverCell() { _cell = cell(GROUND_UNKNOWN); }
+	serverCell() { _cell = makeCell(GROUND_UNKNOWN); }
 
 	groundType	ground(void) { return ::ground(_cell); }
 //	byte		version(void) { return version(_cell); }

@@ -150,7 +150,7 @@ bool editorCanvas::New(groundType fill_ground, uint w, uint h, const QString &na
 	/* initialisation */
 	for (i=0; i< map_width; i++)
 		for (j=0; j< map_height; j++)
-			setCell( i, j, cell ( fill_ground, random()%4 ));
+			setCell( i, j, makeCell ( fill_ground, random()%4 ));
 
 	modified = true;
 	return true;

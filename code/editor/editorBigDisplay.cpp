@@ -30,7 +30,7 @@ editorBigDisplay::editorBigDisplay(editorTopLevel *v, QWidget *p, const char *n,
 	:visualBigDisplay(v,p,n,f)
 {
 
-	c = cell(GROUND_UNKNOWN, 0);
+	c = makeCell(GROUND_UNKNOWN, 0);
 	otype = OT_NONE;
 
 	setWho(0);
@@ -107,7 +107,7 @@ void editorBigDisplay::setSelectedObject(object_type t, int n)
 		case OT_NONE:
 			break;
 		case OT_GROUND:
-			c = cell ( (groundType) n, 0);
+			c = makeCell ( (groundType) n, 0);
 			break;
 		case OT_FACILITY:
 			f = (facilityType)n;
