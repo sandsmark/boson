@@ -109,6 +109,7 @@ public:
 
 	virtual bool save(QDataStream& stream, bool saveplayers = true);
 	virtual bool load(QDataStream& stream, bool reset = true);
+	virtual bool loadgame(QDataStream& stream, bool network, bool reset);
 
 	LoadingStatus loadingStatus();
 
