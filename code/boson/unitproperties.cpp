@@ -530,9 +530,24 @@ QPtrList<BosonParticleSystem> UnitProperties::newDestroyedParticleSystems(float 
  return list;
 }
 
-void UnitProperties::clearPlugins()
+void UnitProperties::clearPlugins(bool deleteweapons)
 {
- d->mPlugins.clear();
+ // FIXME: deleteweapons is very ugly hack here. In unit editor, we store
+ //  pointers to units, so we must not delete weapons here
+ if (!deleteweapons) {
+	d->mPlugins.setAutoDelete(false);
+	PluginProperties* p = d->mPlugins.first();
+	while (p) {
+		if (p->pluginType() != PluginProperties::Weapon) {
+			delete p;
+		}
+		d->mPlugins.remove();
+		p = d->mPlugins.current();
+	}
+	d->mPlugins.setAutoDelete(true);
+ } else {
+	d->mPlugins.clear();
+ }
  if (mMobileProperties) {
 	delete mMobileProperties;
 	mMobileProperties = 0;
@@ -626,7 +641,7 @@ void UnitProperties::reset()
 	// UnitProperties should be never reset in full mode (aka game mode)
 	boWarning() << k_funcinfo << "Resetting UnitProperties in full mode!!!" << endl;
  }
- clearPlugins();
+ clearPlugins(false); // reset() is only used by unit editor (this far), so don't delete weapons
  // Set variables to default values
  d->mUnitPath = "";
  mTypeId = 0;

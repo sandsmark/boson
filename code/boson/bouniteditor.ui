@@ -34,6 +34,12 @@
             <property name="name">
                 <cstring>splitter1</cstring>
             </property>
+            <property name="frameShape">
+                <enum>NoFrame</enum>
+            </property>
+            <property name="frameShadow">
+                <enum>Plain</enum>
+            </property>
             <property name="orientation">
                 <enum>Horizontal</enum>
             </property>
@@ -3118,6 +3124,24 @@ Note that you must also use weapon damage &lt; 0 to repair (because at the momen
         <signal>clicked()</signal>
         <receiver>BoUnitEditor</receiver>
         <slot>slotEditSearchPaths()</slot>
+    </connection>
+    <connection>
+        <sender>mNewUnitButton_2</sender>
+        <signal>clicked()</signal>
+        <receiver>BoUnitEditor</receiver>
+        <slot>slotNewUnit()</slot>
+    </connection>
+    <connection>
+        <sender>mOpenUnitButton_2</sender>
+        <signal>clicked()</signal>
+        <receiver>BoUnitEditor</receiver>
+        <slot>slotOpenUnit()</slot>
+    </connection>
+    <connection>
+        <sender>mUnitSaveButton_2</sender>
+        <signal>clicked()</signal>
+        <receiver>BoUnitEditor</receiver>
+        <slot>slotSaveUnit()</slot>
     </connection>
 </connections>
 <includes>

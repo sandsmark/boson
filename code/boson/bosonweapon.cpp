@@ -88,7 +88,9 @@ void BosonWeaponProperties::savePlugin(KSimpleConfig* cfg)
   cfg->writeEntry("CanShootAtAirUnits", mCanShootAtAirUnits);
   cfg->writeEntry("CanShootAtLandUnits", mCanShootAtLandUnits);
   cfg->writeEntry("MaxHeight", (double)mMaxHeight);
-  mOffset.save(cfg, "Offset");
+  BoVector3 offset(mOffset);
+  offset.scale(1 / (float)BO_TILE_SIZE);
+  offset.save(cfg, "Offset");
   BosonConfig::writeUnsignedLongNumList(cfg, "ShootParticles", mShootParticleSystemIds);
   BosonConfig::writeUnsignedLongNumList(cfg, "FlyParticles", mFlyParticleSystemIds);
   BosonConfig::writeUnsignedLongNumList(cfg, "HitParticles", mHitParticleSystemIds);

@@ -360,7 +360,7 @@ protected:
 	void setCanGoOnLand(bool c);
 	void setCanGoOnWater(bool c);
 
-	void clearPlugins();
+	void clearPlugins(bool deleteweapons = true);
 
 	void createMobileProperties();
 	void createFacilityProperties();
