@@ -388,14 +388,10 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			boWarning() << k_lineinfo << "no unit to move" << endl;
 			break;
 		}
-		QPtrListIterator<Unit> it(unitsToMove);
-		while (it.current()) {
-			it.current()->stopMoving();
-			++it;
-		}
 		if (unitsToMove.count() == 1) {
 			unitsToMove.first()->moveTo(pos, attack);
 		} else {
+  		QPtrListIterator<Unit> it(unitsToMove);
 			it.toFirst();
 			while (it.current()) {
 				it.current()->moveTo(pos, attack);
@@ -922,6 +918,42 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 
 		break;
 	}
+	case BosonMessage::MoveDropBomb:
+	{
+		boDebug() << k_funcinfo << "MoveDropBomb action" << endl;
+		Q_UINT32 unitCount;
+		Q_INT32 x, y;
+		Q_UINT32 unitId, weaponId;
+
+		stream >> x;
+		stream >> y;
+		stream >> unitCount;
+
+		for (unsigned int i = 0; i < unitCount; i++) {
+			stream >> unitId;
+			stream >> weaponId;
+			boDebug() << k_funcinfo << "unit: " << unitId << "; weapon: " << weaponId << endl;
+
+			Unit* unit = findUnit(unitId, 0);
+			if (!unit) {
+				boWarning() << "unit " << unitId << " not found" << endl;
+				continue;
+			}
+			if (unit->isDestroyed()) {
+				boWarning() << "cannot do anything with destroyed units" << endl;
+				continue;
+			}
+			BombingPlugin* b = (BombingPlugin*)unit->plugin(UnitPlugin::Bomb);
+			if (!b) {
+				boError() << k_lineinfo << "This unit has no bombing plugin" << endl;
+				break;
+			}
+			b->bomb(weaponId, x, y);
+		}
+		boDebug() << k_funcinfo << "done" << endl;
+
+		break;
+	}
 	case BosonMessage::MoveTeleport:
 	{
 		Q_UINT32 unitId;
@@ -946,6 +978,31 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 		}
 
 		u->moveBy(x - u->x(), y - u->y(), 0);
+
+		break;
+	}
+	case BosonMessage::MoveRotate:
+	{
+		Q_UINT32 unitId;
+		Q_UINT32 owner;
+		float rot;
+
+		stream >> owner;
+		stream >> unitId;
+		stream >> rot;
+
+		Player* p = (Player*)findPlayer(owner);
+		if (!p) {
+			boError() << k_lineinfo << "Cannot find player " << owner << endl;
+			break;
+		}
+		Unit* u = findUnit(unitId, p);
+		if (!u) {
+			boError() << "Cannot find unit " << unitId << endl;
+			break;
+		}
+
+		u->setRotation(rot);
 
 		break;
 	}
