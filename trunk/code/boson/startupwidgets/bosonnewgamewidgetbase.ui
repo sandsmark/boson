@@ -8,8 +8,8 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>714</width>
-            <height>349</height>
+            <width>726</width>
+            <height>439</height>
         </rect>
     </property>
     <property name="minimumSize">
@@ -27,7 +27,10 @@
         </property>
         <widget class="QGroupBox" row="0" column="0">
             <property name="name">
-                <cstring>mNewGameGroupBox</cstring>
+                <cstring>mChooseMapGroupBox</cstring>
+            </property>
+            <property name="enabled">
+                <bool>true</bool>
             </property>
             <property name="paletteForegroundColor">
                 <color>
@@ -37,96 +40,153 @@
                 </color>
             </property>
             <property name="title">
-                <string>New Game</string>
+                <string>Choose Map</string>
             </property>
             <grid>
                 <property name="name">
                     <cstring>unnamed</cstring>
                 </property>
-                <widget class="QGroupBox" row="0" column="0">
+                <widget class="KListView" row="0" column="0" rowspan="2" colspan="1">
+                    <column>
+                        <property name="text">
+                            <string>Map</string>
+                        </property>
+                        <property name="clickable">
+                            <bool>false</bool>
+                        </property>
+                        <property name="resizable">
+                            <bool>false</bool>
+                        </property>
+                    </column>
                     <property name="name">
-                        <cstring>mChooseMapGroupBox</cstring>
+                        <cstring>mChooseBosonMap</cstring>
                     </property>
-                    <property name="enabled">
+                    <property name="fullWidth">
                         <bool>true</bool>
                     </property>
-                    <property name="paletteForegroundColor">
-                        <color>
-                            <red>255</red>
-                            <green>255</green>
-                            <blue>255</blue>
-                        </color>
+                    <property name="toolTip" stdset="0">
+                        <string></string>
                     </property>
-                    <property name="title">
-                        <string>Choose Map</string>
-                    </property>
-                    <grid>
-                        <property name="name">
-                            <cstring>unnamed</cstring>
-                        </property>
-                        <widget class="KListView" row="0" column="0" rowspan="2" colspan="1">
-                            <column>
-                                <property name="text">
-                                    <string>Map</string>
-                                </property>
-                                <property name="clickable">
-                                    <bool>false</bool>
-                                </property>
-                                <property name="resizable">
-                                    <bool>false</bool>
-                                </property>
-                            </column>
-                            <property name="name">
-                                <cstring>mChooseBosonMap</cstring>
-                            </property>
-                            <property name="fullWidth">
-                                <bool>true</bool>
-                            </property>
-                            <property name="toolTip" stdset="0">
-                                <string></string>
-                            </property>
-                        </widget>
-                        <widget class="KTextBrowser" row="0" column="1">
-                            <property name="name">
-                                <cstring>mMapPropertiesTextBrowser</cstring>
-                            </property>
-                            <property name="text">
-                                <string></string>
-                            </property>
-                            <property name="wordWrap">
-                                <enum>WidgetWidth</enum>
-                            </property>
-                        </widget>
-                        <spacer row="1" column="1">
-                            <property name="name">
-                                <cstring>mMapImageSpacer</cstring>
-                            </property>
-                            <property name="orientation">
-                                <enum>Horizontal</enum>
-                            </property>
-                            <property name="sizeType">
-                                <enum>Expanding</enum>
-                            </property>
-                            <property name="sizeHint">
-                                <size>
-                                    <width>140</width>
-                                    <height>140</height>
-                                </size>
-                            </property>
-                        </spacer>
-                    </grid>
                 </widget>
-                <widget class="QGroupBox" row="0" column="1">
+                <widget class="KTextBrowser" row="0" column="1">
                     <property name="name">
-                        <cstring>mPlayersGroupBox</cstring>
+                        <cstring>mMapPropertiesTextBrowser</cstring>
                     </property>
-                    <property name="sizePolicy">
-                        <sizepolicy>
-                            <hsizetype>5</hsizetype>
-                            <vsizetype>5</vsizetype>
-                            <horstretch>0</horstretch>
-                            <verstretch>0</verstretch>
-                        </sizepolicy>
+                    <property name="text">
+                        <string></string>
+                    </property>
+                    <property name="wordWrap">
+                        <enum>WidgetWidth</enum>
+                    </property>
+                </widget>
+                <spacer row="1" column="1">
+                    <property name="name">
+                        <cstring>mMapImageSpacer</cstring>
+                    </property>
+                    <property name="orientation">
+                        <enum>Horizontal</enum>
+                    </property>
+                    <property name="sizeType">
+                        <enum>Expanding</enum>
+                    </property>
+                    <property name="sizeHint">
+                        <size>
+                            <width>140</width>
+                            <height>140</height>
+                        </size>
+                    </property>
+                </spacer>
+            </grid>
+        </widget>
+        <widget class="QGroupBox" row="0" column="1">
+            <property name="name">
+                <cstring>mPlayersGroupBox</cstring>
+            </property>
+            <property name="sizePolicy">
+                <sizepolicy>
+                    <hsizetype>5</hsizetype>
+                    <vsizetype>5</vsizetype>
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                </sizepolicy>
+            </property>
+            <property name="paletteForegroundColor">
+                <color>
+                    <red>255</red>
+                    <green>255</green>
+                    <blue>255</blue>
+                </color>
+            </property>
+            <property name="title">
+                <string>Players</string>
+            </property>
+            <grid>
+                <property name="name">
+                    <cstring>unnamed</cstring>
+                </property>
+                <widget class="QLabel" row="1" column="0">
+                    <property name="name">
+                        <cstring>mYourNameTextLabel</cstring>
+                    </property>
+                    <property name="paletteForegroundColor">
+                        <color>
+                            <red>255</red>
+                            <green>255</green>
+                            <blue>255</blue>
+                        </color>
+                    </property>
+                    <property name="text">
+                        <string>Your Name:</string>
+                    </property>
+                </widget>
+                <widget class="QComboBox" row="2" column="1">
+                    <property name="name">
+                        <cstring>mLocalColor</cstring>
+                    </property>
+                </widget>
+                <widget class="QLineEdit" row="1" column="1">
+                    <property name="name">
+                        <cstring>mLocalPlayerName</cstring>
+                    </property>
+                </widget>
+                <widget class="QComboBox" row="0" column="1">
+                    <property name="name">
+                        <cstring>mChangeSpecies</cstring>
+                    </property>
+                </widget>
+                <widget class="QLabel" row="2" column="0">
+                    <property name="name">
+                        <cstring>mYourColorTextLabel</cstring>
+                    </property>
+                    <property name="paletteForegroundColor">
+                        <color>
+                            <red>255</red>
+                            <green>255</green>
+                            <blue>255</blue>
+                        </color>
+                    </property>
+                    <property name="text">
+                        <string>Your Color:</string>
+                    </property>
+                </widget>
+                <widget class="QLabel" row="0" column="0">
+                    <property name="name">
+                        <cstring>mTextLabelSpecies</cstring>
+                    </property>
+                    <property name="paletteForegroundColor">
+                        <color>
+                            <red>255</red>
+                            <green>255</green>
+                            <blue>255</blue>
+                        </color>
+                    </property>
+                    <property name="text">
+                        <string>Species:</string>
+                    </property>
+                </widget>
+                <widget class="QGroupBox" row="3" column="0" rowspan="1" colspan="2">
+                    <property name="name">
+                        <cstring>groupBox10</cstring>
                     </property>
                     <property name="paletteForegroundColor">
                         <color>
@@ -136,118 +196,38 @@
                         </color>
                     </property>
                     <property name="title">
-                        <string>Players</string>
+                        <string>Connected Players</string>
                     </property>
                     <grid>
                         <property name="name">
                             <cstring>unnamed</cstring>
                         </property>
-                        <widget class="QLabel" row="1" column="0">
+                        <widget class="KListBox" row="0" column="0" rowspan="1" colspan="2">
                             <property name="name">
-                                <cstring>mYourNameTextLabel</cstring>
+                                <cstring>mConnectPlayers</cstring>
                             </property>
-                            <property name="paletteForegroundColor">
-                                <color>
-                                    <red>255</red>
-                                    <green>255</green>
-                                    <blue>255</blue>
-                                </color>
+                        </widget>
+                        <widget class="QPushButton" row="1" column="0">
+                            <property name="name">
+                                <cstring>mAddComputerPlayer</cstring>
+                            </property>
+                            <property name="backgroundOrigin">
+                                <enum>WidgetOrigin</enum>
                             </property>
                             <property name="text">
-                                <string>Your Name:</string>
+                                <string>&amp;Add AI Player</string>
                             </property>
                         </widget>
-                        <widget class="QComboBox" row="2" column="1">
+                        <widget class="QPushButton" row="1" column="1">
                             <property name="name">
-                                <cstring>mLocalColor</cstring>
+                                <cstring>mRemovePlayer</cstring>
                             </property>
-                        </widget>
-                        <widget class="QLineEdit" row="1" column="1">
-                            <property name="name">
-                                <cstring>mLocalPlayerName</cstring>
-                            </property>
-                        </widget>
-                        <widget class="QComboBox" row="0" column="1">
-                            <property name="name">
-                                <cstring>mChangeSpecies</cstring>
-                            </property>
-                        </widget>
-                        <widget class="QLabel" row="2" column="0">
-                            <property name="name">
-                                <cstring>mYourColorTextLabel</cstring>
-                            </property>
-                            <property name="paletteForegroundColor">
-                                <color>
-                                    <red>255</red>
-                                    <green>255</green>
-                                    <blue>255</blue>
-                                </color>
+                            <property name="backgroundOrigin">
+                                <enum>WidgetOrigin</enum>
                             </property>
                             <property name="text">
-                                <string>Your Color:</string>
+                                <string>&amp;Remove Player</string>
                             </property>
-                        </widget>
-                        <widget class="QLabel" row="0" column="0">
-                            <property name="name">
-                                <cstring>mTextLabelSpecies</cstring>
-                            </property>
-                            <property name="paletteForegroundColor">
-                                <color>
-                                    <red>255</red>
-                                    <green>255</green>
-                                    <blue>255</blue>
-                                </color>
-                            </property>
-                            <property name="text">
-                                <string>Species:</string>
-                            </property>
-                        </widget>
-                        <widget class="QGroupBox" row="3" column="0" rowspan="1" colspan="2">
-                            <property name="name">
-                                <cstring>groupBox10</cstring>
-                            </property>
-                            <property name="paletteForegroundColor">
-                                <color>
-                                    <red>255</red>
-                                    <green>255</green>
-                                    <blue>255</blue>
-                                </color>
-                            </property>
-                            <property name="title">
-                                <string>Connected Players</string>
-                            </property>
-                            <grid>
-                                <property name="name">
-                                    <cstring>unnamed</cstring>
-                                </property>
-                                <widget class="KListBox" row="0" column="0" rowspan="1" colspan="2">
-                                    <property name="name">
-                                        <cstring>mConnectPlayers</cstring>
-                                    </property>
-                                </widget>
-                                <widget class="QPushButton" row="1" column="0">
-                                    <property name="name">
-                                        <cstring>mAddComputerPlayer</cstring>
-                                    </property>
-                                    <property name="backgroundOrigin">
-                                        <enum>WidgetOrigin</enum>
-                                    </property>
-                                    <property name="text">
-                                        <string>&amp;Add AI Player</string>
-                                    </property>
-                                </widget>
-                                <widget class="QPushButton" row="1" column="1">
-                                    <property name="name">
-                                        <cstring>mRemovePlayer</cstring>
-                                    </property>
-                                    <property name="backgroundOrigin">
-                                        <enum>WidgetOrigin</enum>
-                                    </property>
-                                    <property name="text">
-                                        <string>&amp;Remove Player</string>
-                                    </property>
-                                </widget>
-                            </grid>
                         </widget>
                     </grid>
                 </widget>
