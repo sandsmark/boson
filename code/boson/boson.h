@@ -29,6 +29,7 @@ class BosonPlayField;
 class QDomElement;
 class QDomDocument;
 class QDataStream;
+class BosonSaveLoad;
 
 #define boGame Boson::boson()
 
@@ -49,33 +50,6 @@ public:
 		IdNextUnitId = 10005,
 		IdAdvanceCount = 10010,
 		IdAdvanceFlag = 10011
-	};
-
-	/**
-	 * Describes current status when loading saved game
-	 * This is mostly used for error checking
-	 *
-	 * Possible values:
-	 * @li NotLoaded - Game is not yet loaded (loading method isn't called yet)
-	 * @li LoadingInProgress - Loading is in progress
-	 * @li LoadingCompleted - Loading is completed (successfully)
-	 * @li BSGFileError - Error in BSGFile. Most likely it wasn't Boson savegame
-	 * @li InvalidXML - Error in one of XML files.
-	 * @li InvalidFileFormat - File format was invalid (error)
-	 * @li InvalidCookie - Cookie in the file header was invalid (error)
-	 * @li InvalidVersion - SaveGame version was invalid. Probably the game was saved with too old version of Boson (error)
-	 * @li KGameError - Error while loading KGame stuff
-	 **/
-	enum LoadingStatus {
-		NotLoaded = 1,
-		LoadingInProgress,
-		LoadingCompleted,
-		BSGFileError,
-		InvalidXML,
-		InvalidFileFormat,
-		InvalidCookie,
-		InvalidVersion,
-		KGameError
 	};
 
 protected:
@@ -124,6 +98,11 @@ public:
 
 	void setLocalPlayer(Player*);
 	Player* localPlayer() const;
+
+	/**
+	 * Initialize a @ref BosonSaveLoad object with the relevant data.
+	 **/
+	void initSaveLoad(BosonSaveLoad*);
 
 	void quitGame();
 	void startGame();
@@ -206,7 +185,10 @@ public:
 	virtual bool savegame(QDataStream& stream, bool network, bool saveplayers = true);
 	virtual bool loadgame(QDataStream& stream, bool network, bool reset);
 
-	LoadingStatus loadingStatus() const;
+	/**
+	 * @return See @ref BosonSaveLoad::LoadingStatus
+	 **/
+	int loadingStatus() const;
 
 	/**
 	 * See @ref Unit::advanceFunction2 for more info about this.
@@ -226,12 +208,6 @@ public:
 	 * be a big delay before additional player input can be executed.
 	 **/
 	unsigned int delayedMessageCount() const;
-
-	/**
-	 * @return Latest Boson savegame format version
-	 **/
-	unsigned long int latestSavegameVersion();
-
 
 public: // small KGame extenstions for boson
 	/**
@@ -261,6 +237,22 @@ public: // small KGame extenstions for boson
 	 **/
 	Q_UINT16 bosonPort();
 	bool isServer() const;
+
+	/**
+	 * Dummy systemAddPlayer function. This is meant to grant access to
+	 * systemAddPlayer to @ref BosonSaveLoad, without making the class a
+	 * friend of Boson (i.e. granting access to whole Boson).
+	 *
+	 * A method BosonSaveLoad::systemAddPlayer that is friend of Boson would
+	 * have been better (a lot!) but requires us to include bosonsaveload.h
+	 * here.
+	 **/
+	void systemAddPlayer_(BosonSaveLoad* b, KPlayer* player)
+	{
+		if (b) {
+			systemAddPlayer(player);
+		}
+	}
 
 public slots:
 	void slotSetGameSpeed(int speed);
@@ -443,14 +435,6 @@ protected:
 	 **/
 	Unit* addUnit(QDomElement& node, Player* owner);
 
-	QString saveKGameAsXML();
-	QString savePlayersAsXML();
-	QString saveCanvasAsXML();
-	QString saveExternalAsXML();
-	bool loadKGameFromXML(const QString&);
-	bool loadCanvasFromXML(const QString&);
-	bool loadExternalFromXML(const QString&);
-
 	/**
 	 * Load the XML file in @p xml into @p doc and display an error message
 	 * if an error occured.
@@ -495,3 +479,4 @@ private:
 };
 
 #endif
+
