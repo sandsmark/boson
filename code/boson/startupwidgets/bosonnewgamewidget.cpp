@@ -46,7 +46,6 @@
 #include <klistbox.h>
 #include <ktextbrowser.h>
 #include <kcombobox.h> // can we use qcombobox instead?
-#include <kgamemisc.h>
 
 #include <qcombobox.h>
 #include <qframe.h>
@@ -796,7 +795,11 @@ void BosonNewGameWidget::slotAddComputerPlayer()
 
  Player* p = new Player();
 
- p->setName(KGameMisc::randomName());
+ // AB: we don't have access to libkdegames anymore. one day we will have
+ // computer players with names that fit to the story (if we'll ever have one).
+ // so the randomName() isn't required anyway.
+// p->setName(KGameMisc::randomName());
+ p->setName(i18n("Player %1").arg(boGame->playerCount()));
 
  // the color is dangerous concerning network and so!
  // it'd be better to first add the player and then change the color using a
