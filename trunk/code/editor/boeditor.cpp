@@ -25,6 +25,7 @@
 #include "common/log.h"
 
 #include "boeditor.h"
+#include "editorTopLevel.h"
 #include "visual.h"
 
 /*
@@ -62,19 +63,10 @@ BoEditorApp::~BoEditorApp()
 void BoEditorApp::init()
 { 
 	/* customs actions */
-	puts("new_window...");
 	(void) new KAction(
-		i18n("&New Window"), 0,
+		i18n("New &Window"), 0,
 		this, SLOT(slot_newWindow()),
 		&m_actions, "new_window");
-	puts("ok");
-
-	/*ark one :
-	(void) new KAction(
-	   	i18n("New &Window"), 0,
-		this, SLOT(file_newWindow()),
-		actionCollection(), "new_window");
-	*/
 
 	/* standard actions */
 	ADD_ACTION(openNew);
@@ -83,10 +75,6 @@ void BoEditorApp::init()
 	ADD_ACTION(save);
 	ADD_ACTION(saveAs);
 	ADD_ACTION(quit);
-	// those should go to KTMW
-//	ADD_ACTION(close);
-//	ADD_ACTION(showToolbar);
-	puts("kapp : end of init()");
 }
 #undef ADD_ACTION
 
@@ -98,6 +86,7 @@ void BoEditorApp::init()
 
 void BoEditorApp::slot_newWindow()
 {
+	( new editorTopLevel(this) )->show();
 }
 
 void BoEditorApp::slot_openNew()
