@@ -22,6 +22,7 @@
 #include "cell.h"
 #include "bosonmap.h"
 #include "bosoncanvas.h"
+#include "bosonconfig.h"
 #include "unit.h"
 #include "player.h"
 #include "defines.h"
@@ -43,7 +44,6 @@ public:
 		mMapWidth = -1;
 		mMapHeight = -1;
 
-		mPointSize = 0;
 	}
 
 	int mMapWidth;
@@ -52,7 +52,7 @@ public:
 	QSize mSize;
 	QPoint mPos;
 
-	int mPointSize;
+	double mScale;
 };
 
 BosonMiniMap::BosonMiniMap(QWidget* parent) : QWidget(parent)
@@ -63,9 +63,9 @@ BosonMiniMap::BosonMiniMap(QWidget* parent) : QWidget(parent)
  mLocalPlayer = 0;
  mCanvas = 0;
  mUseFog = false;
+ d->mScale = 1.0;
 
  setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
- setPointSize(2);
 }
 
 BosonMiniMap::~BosonMiniMap()
@@ -91,13 +91,14 @@ QPixmap* BosonMiniMap::ground() const
 
 void BosonMiniMap::slotCreateMap(int w, int h)
 {
- if (w == mapWidth() && h == mapHeight()) {
+ if (!w && !h) {
 	return;
  }
  delete mGround;
  d->mMapWidth = w;
  d->mMapHeight = h;
- mGround = new QPixmap(mapWidth() * pointSize(), mapHeight() * pointSize());
+// mGround = new QPixmap(mapWidth() * scale(), mapHeight() * scale());
+ mGround = new QPixmap(mapWidth(), mapHeight());
  mGround->fill(COLOR_UNKNOWN);
 
  setMinimumWidth(mGround->width() + 5);
@@ -145,11 +146,13 @@ void BosonMiniMap::setPoint(int x, int y, const QColor& color)
  }
  QPainter p;
  p.begin(ground());
+ p.setPen(color);
  if (color.isValid()) {
-	p.fillRect(x*pointSize(), y*pointSize(), pointSize(), pointSize(), QBrush(color));
+	p.drawPoint(x, y);
  } else {
 	kdWarning() << k_funcinfo << "invalid color" << endl;
-	p.fillRect(x*pointSize(), y*pointSize(), pointSize(), pointSize(), QBrush(COLOR_UNKNOWN));
+	p.setPen(COLOR_UNKNOWN);
+	p.drawPoint(x, y);
  }
  p.end();
 }
@@ -159,8 +162,15 @@ void BosonMiniMap::paintEvent(QPaintEvent*)
  if (!ground()) {
 	return;
  }
+ if (scale() != boConfig->miniMapScale()) {
+	d->mScale = boConfig->miniMapScale();
+	setMinimumWidth(mGround->width() * scale() + 5);
+	setMinimumHeight(mGround->height() * scale() + 5);
+ }
  QPainter p;
  p.begin(this);
+ p.scale(scale(), scale());
+// p.scale(zoom(), zoom()); // TODO
  p.drawPixmap(0, 0, *ground());
  
  // the little rectangle
@@ -169,7 +179,7 @@ void BosonMiniMap::paintEvent(QPaintEvent*)
  // be at the border (frame?).
  p.setPen(white);
  p.setRasterOp(XorROP);
- p.drawRect( QRect( d->mPos * pointSize(), d->mSize * pointSize()) );
+ p.drawRect( QRect(d->mPos, d->mSize) );
 
  p.end();
 }
@@ -180,12 +190,12 @@ void BosonMiniMap::mousePressEvent(QMouseEvent *e)
 	return;
  }
  if (e->button() == LeftButton) {
-	emit signalReCenterView( e->pos() / pointSize() );
+	emit signalReCenterView( e->pos() / scale() );
 	e->accept();
 	return;
  } else if (e->button() == RightButton) {
-	emit signalMoveSelection(e->pos().x() / pointSize(), 
-			e->pos().y() / pointSize());
+	emit signalMoveSelection(e->pos().x() / scale(), 
+			e->pos().y() / scale());
  }
 }
 
@@ -337,19 +347,9 @@ void BosonMiniMap::initFogOfWar(Player* p)
  }
 }
 
-void BosonMiniMap::setPointSize(int p)
+double BosonMiniMap::scale() const
 {
- if (d->mPointSize == p) {
-	return;
- }
- d->mPointSize = p;
- //TODO: regenerate the current map!!
- 
-}
-
-int BosonMiniMap::pointSize() const
-{
- return d->mPointSize;
+ return d->mScale;
 }
 
 void BosonMiniMap::slotShowMap(bool s)

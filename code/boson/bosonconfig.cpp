@@ -35,7 +35,6 @@ public:
 	}
 
 	int mCommandButtonsPerRow;
-	unsigned int mArrowKeyStep;
 
 	// don't save this to the config
 	DebugMode mDebugMode;
@@ -50,7 +49,8 @@ BosonConfig::BosonConfig(KConfig* conf)
  mMusic = true;
  d->mCommandButtonsPerRow = 3;
  d->mDebugMode = DebugNormal;
- d->mArrowKeyStep = 10;
+ mArrowKeyStep = 10;
+ mMiniMapScale = 1.0;
 
  mDisableSound = false;
 
@@ -258,24 +258,17 @@ bool BosonConfig::readMusic(KConfig* conf)
  return m;
 }
 
-void BosonConfig::setMusic(bool m)
+void BosonConfig::saveMiniMapScale(KConfig* conf)
 {
- mMusic = m;
+ conf->setGroup("Boson");
+ conf->writeEntry("MiniMapScale", miniMapScale());
 }
 
-bool BosonConfig::music() const
+double BosonConfig::readMiniMapScale(KConfig* conf)
 {
- return mMusic;
-}
-
-void BosonConfig::setSound(bool s)
-{
- mSound = s;
-}
-
-bool BosonConfig::sound() const
-{
- return mSound;
+ conf->setGroup("Boson");
+ double s = conf->readDoubleNumEntry("MiniMapScale", miniMapScale());
+ return s;
 }
 
 void BosonConfig::saveArrowKeyStep(KConfig* conf)
@@ -290,17 +283,6 @@ unsigned int BosonConfig::readArrowKeyStep(KConfig* conf)
  unsigned int k = conf->readUnsignedNumEntry("ArrowKeyStep", arrowKeyStep());
  return k;
 }
-
-void BosonConfig::setArrowKeyStep(unsigned int k)
-{
- d->mArrowKeyStep = k;
-}
-
-unsigned int BosonConfig::arrowKeyStep() const
-{
- return d->mArrowKeyStep;
-}
-
 
 int BosonConfig::readCommandButtonsPerRow(KConfig* conf)
 {
@@ -337,6 +319,7 @@ void BosonConfig::reset(KConfig* conf)
  setSound(readSound(conf));
  setCommandButtonsPerRow(readCommandButtonsPerRow(conf));
  setArrowKeyStep(readArrowKeyStep(conf));
+ setMiniMapScale(readMiniMapScale(conf));
 
  conf->setGroup(oldGroup);
 }
@@ -353,6 +336,7 @@ void BosonConfig::save(bool editor, KConfig* conf)
  saveSound(conf);
  saveCommandButtonsPerRow(conf);
  saveArrowKeyStep(conf);
+ saveMiniMapScale(conf);
  if (!editor) {
 	// place configs here that should not be saved in editor mode
  }

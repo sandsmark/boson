@@ -87,14 +87,16 @@ public:
 	static void saveGroupMoveMode(GroupMoveMode mode, KConfig* conf = 0);
 	static GroupMoveMode readGroupMoveMode(KConfig* conf = 0);
 
-	void setSound(bool s);
-	bool sound() const;
-	void setMusic(bool m);
-	bool music() const;
+	void setSound(bool s) { mSound = s; }
+	bool sound() const { return mSound; }
+	void setMusic(bool m) { mMusic = m; }
+	bool music() const { return mMusic; }
+	void setArrowKeyStep(unsigned int k) { mArrowKeyStep = k; }
+	unsigned int arrowKeyStep() const { return mArrowKeyStep; }
+	void setMiniMapScale(double s) { mMiniMapScale = s; }
+	double miniMapScale() const { return mMiniMapScale; }
 	void setCommandButtonsPerRow(int b);
 	int commandButtonsPerRow() const;
-	void setArrowKeyStep(unsigned int k);
-	unsigned int arrowKeyStep() const;
 
 	DebugMode debugMode() const;
 	/**
@@ -131,6 +133,9 @@ protected:
 	unsigned int readArrowKeyStep(KConfig* conf);
 	void saveArrowKeyStep(KConfig* conf);
 
+	void saveMiniMapScale(KConfig* conf);
+	double readMiniMapScale(KConfig* conf);
+
 private:
 	static BosonConfig* mBosonConfig;
 	
@@ -140,6 +145,8 @@ private:
 	bool mSound;
 	bool mMusic;
 	bool mDisableSound;
+	double mMiniMapScale;
+	unsigned int mArrowKeyStep;
 };
 
 #endif
