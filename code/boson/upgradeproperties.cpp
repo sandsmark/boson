@@ -255,7 +255,7 @@ template<class TYPE> void UpgradePropertiesValue<TYPE>::applyProperty(QValueList
   {
     boDebug() << "    " << k_funcinfo << "Applying to prop with id " << *it << endl;
     UnitProperties* prop = player->speciesTheme()->nonConstUnitProperties(*it);
-    boDebug() << "      " << k_funcinfo << "Unit id: " << prop->id() << "; name: " << prop->name() << endl;
+    boDebug() << "      " << k_funcinfo << "Unit id: " << prop->typeId() << "; name: " << prop->name() << endl;
     switch(type)
     {
       case Health:
