@@ -47,7 +47,6 @@ draw_bigbox_text("This is a list of features that I consider as
 	the list of features for the next release, but just a TODO list!
 	<h2>TODO</h2>
 	<ul>
-	  <li>Rename all .desktop files to .boson</li>
 	  <li>Make map/scenario editor work. Maps should at least be modifyable,
 	  optionally you should be able to create new maps. Loading/Saving code
 	  is necessary for this.</li>
@@ -72,6 +71,7 @@ draw_bigbox_text("This is a list of features that I consider as
 	  applied only, not immediately. There are also defaults for every entry.</li>
 	  <li>Experimental support for unit animations (currenlty comsat only)</li>
 	  <li>Support for multiple weapons per unit (experimental)</li>
+	  <li>Rename all index.desktop files to appropriate names</li>
 	</ul>
 	");
 
