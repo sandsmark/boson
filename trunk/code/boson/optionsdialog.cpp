@@ -104,6 +104,8 @@ void OptionsDialog::initOpenGLPage()
 {
  QVBox* vbox = addVBoxPage(i18n("&OpenGL"));
  OpenGLOptions* o = new OpenGLOptions(vbox);
+ connect(o, SIGNAL(signalGroundRendererChanged(int)),
+		this, SIGNAL(signalGroundRendererChanged(int)));
  addOptions(o);
 }
 

@@ -46,6 +46,7 @@ public:
 signals:
 	void signalCursorChanged(int index, const QString& cursorDir);
 	void signalCmdBackgroundChanged(const QString& file);
+	void signalGroundRendererChanged(int);
 
 	/**
 	 * Emitted when apply or ok is clicked. At this point all options

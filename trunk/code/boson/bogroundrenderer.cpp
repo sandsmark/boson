@@ -38,6 +38,8 @@
 #include "player.h"
 //#include "playerio.h"
 
+#include <klocale.h>
+
 #include <GL/gl.h>
 #include <math.h>
 
@@ -75,13 +77,26 @@ BoGroundRenderer::BoGroundRenderer()
 {
  d = new BoGroundRendererPrivate;
  d->mRenderCellsSize = 0;
- d->mRenderCellsCount = 0;
+ mRenderCellsCount = 0;
 }
 
 BoGroundRenderer::~BoGroundRenderer()
 {
  delete[] d->mRenderCells;
  delete d;
+}
+
+QString BoGroundRenderer::rttiToName(int rtti)
+{
+ switch ((Renderer)rtti) {
+	case Default:
+		return i18n("Default");
+	case Fast:
+		return i18n("Fast");
+	case Last:
+		return i18n("Invalid entry - please report a bug");
+ }
+ return i18n("Unknwon (%1)").arg(rtti);
 }
 
 void BoGroundRenderer::setMatrices(const BoMatrix* modelviewMatrix, const BoMatrix* projectionMatrix, const int* viewport)
@@ -113,64 +128,11 @@ Player* BoGroundRenderer::localPlayer() const
  return d->mLocalPlayer;
 }
 
-void BoGroundRenderer::renderCellsNow(Cell** cells, int count, int cornersWidth, float* heightMap, unsigned char* texMapStart)
-{
- // Texture offsets
- const int offsetCount = 5;
- const float offset = 1 / (float)offsetCount;
- const float texOffsets[] = { 0.0f, 0.2f, 0.4f, 0.6f, 0.8f };  // texOffsets[x] = offset * x
-
- glBegin(GL_QUADS);
- for (int i = 0; i < count; i++) {
-	Cell* c = cells[i];
-	int x = c->x();
-	int y = c->y();
-
-	int celloffset = y * cornersWidth + x;
-	unsigned char* texMapUpperLeft = texMapStart + celloffset;
-	float* heightMapUpperLeft = heightMap + celloffset;
-
-	GLfloat cellXPos = (float)x * BO_GL_CELL_SIZE;
-	GLfloat cellYPos = -(float)y * BO_GL_CELL_SIZE;
-
-	float upperLeftHeight = *heightMapUpperLeft;
-	float upperRightHeight = *(heightMapUpperLeft + 1);
-	float lowerLeftHeight = *(heightMapUpperLeft + cornersWidth);
-	float lowerRightHeight = *(heightMapUpperLeft + cornersWidth + 1);
-
-	unsigned char upperLeftAlpha = *texMapUpperLeft;
-	unsigned char upperRightAlpha = *(texMapUpperLeft + 1);
-	unsigned char lowerLeftAlpha = *(texMapUpperLeft + cornersWidth);
-	unsigned char lowerRightAlpha = *(texMapUpperLeft + cornersWidth + 1);
-
-	// Map cell's y-coordinate to range (offsetCount - 1) ... 0
-	y = offsetCount - (y % offsetCount) - 1;
-
-	glColor4ub(255, 255, 255, upperLeftAlpha);
-	glTexCoord2f(texOffsets[x % offsetCount], texOffsets[y % offsetCount] + offset);
-	glVertex3f(cellXPos, cellYPos, upperLeftHeight);
-
-	glColor4ub(255, 255, 255, lowerLeftAlpha);
-	glTexCoord2f(texOffsets[x % offsetCount], texOffsets[y % offsetCount]);
-	glVertex3f(cellXPos, cellYPos - BO_GL_CELL_SIZE, lowerLeftHeight);
-
-	glColor4ub(255, 255, 255, lowerRightAlpha);
-	glTexCoord2f(texOffsets[x % offsetCount] + offset, texOffsets[y % offsetCount]);
-	glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos - BO_GL_CELL_SIZE, lowerRightHeight);
-
-	glColor4ub(255, 255, 255, upperRightAlpha);
-	glTexCoord2f(texOffsets[x % offsetCount] + offset, texOffsets[y % offsetCount] + offset);
-	glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos, upperRightHeight);
- }
- glEnd();
-}
-
-
 unsigned int BoGroundRenderer::renderCells(const BosonMap* map)
 {
  BO_CHECK_NULL_RET0(map);
 
- if (d->mRenderCellsCount == 0) {
+ if (renderCellsCount() == 0) {
 	// this happens either when we have to generate the list first or if no
 	// cell is visible at all. The latter case isn't speed relevant, so we
 	// can simply re-generate then.
@@ -180,47 +142,18 @@ unsigned int BoGroundRenderer::renderCells(const BosonMap* map)
  BO_CHECK_NULL_RET0(localPlayer());
 
  BO_CHECK_NULL_RET0(map);
- BO_CHECK_NULL_RET0(map->texMap());
  BO_CHECK_NULL_RET0(map->heightMap());
- BO_CHECK_NULL_RET0(map->groundTheme());
- BO_CHECK_NULL_RET0(map->textures());
 
- BosonGroundTheme* groundTheme = map->groundTheme();
  float* heightMap = map->heightMap();
- BosonTextureArray* textures = map->textures();
-
- // AB: we can increase performance even more here. lets replace d->mRenderCells
- // by two array defining the coordinates of cells and the heightmap values.
- // we could use that as vertex array for example.
  int heightMapWidth = map->width() + 1;
 
  int cellsCount = 0;
  Cell** renderCells = createVisibleCellList(&cellsCount, localPlayer());
  BO_CHECK_NULL_RET0(renderCells);
 
- glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+ renderVisibleCells(renderCells, cellsCount, map);
 
- // we draw the cells in different stages. the depth test must get enabled
- // before the last stage, so that the new information (i.e. the z pos of the
- // cells) get into the depth buffer.
- // we can safely disable the test completely for all other stages, as cells are
- // the first objects we render.
- glDisable(GL_DEPTH_TEST);
-
- for (unsigned int i = 0; i < groundTheme->textureCount(); i++) {
-	GLuint tex = textures->texture(i);
-	if (i == 1) {
-		glEnable(GL_BLEND);
-	} else if (i == groundTheme->textureCount() - 1) {
-		glEnable(GL_DEPTH_TEST);
-	}
-	glBindTexture(GL_TEXTURE_2D, tex);
-	renderCellsNow(renderCells, cellsCount, map->width() + 1, heightMap, map->texMap(i));
- }
-
- glDisable(GL_BLEND);
  glEnable(GL_DEPTH_TEST);
-
  renderCellGrid(renderCells, cellsCount, heightMap, heightMapWidth);
 
  delete[] renderCells;
@@ -274,9 +207,16 @@ Cell** BoGroundRenderer::createVisibleCellList(int* cells, Player* player)
 {
  BO_CHECK_NULL_RET0(player);
  BO_CHECK_NULL_RET0(cells);
- Cell** renderCells = new Cell*[d->mRenderCellsCount]; // FIXME: store two arrays. one with x, one with y coordinate (or both in one array). don't store pointers to Cell
+ Cell** renderCells = 0; // FIXME: store two arrays. one with x, one with y coordinate (or both in one array). don't store pointers to Cell
+ if (renderCellsCount() > 0) {
+	renderCells = new Cell*[renderCellsCount()];
+ } else {
+	// an array of size 0 isn't good.
+	renderCells = new Cell*[1];
+	renderCells[0] = 0;
+ }
  int cellsCount = 0;
- for (int i = 0; i < d->mRenderCellsCount; i++) {
+ for (unsigned int i = 0; i < renderCellsCount(); i++) {
 	Cell* c = d->mRenderCells[i];
 	if (!c) {
 		continue;
@@ -305,7 +245,7 @@ void BoGroundRenderer::generateCellList(const BosonMap* map)
 	delete[] d->mRenderCells;
 	d->mRenderCells = 0;
 	d->mRenderCellsSize = 0;
-	d->mRenderCellsCount = 0;
+	mRenderCellsCount = 0;
 	return;
  }
 
@@ -398,7 +338,7 @@ void BoGroundRenderer::generateCellList(const BosonMap* map)
 		}
 	}
  }
- d->mRenderCellsCount = count;
+ mRenderCellsCount = count;
 }
 
 void BoGroundRenderer::calculateWorldRect(const QRect& rect, int mapWidth, int mapHeight, float* minX, float* minY, float* maxX, float* maxY)
@@ -436,4 +376,211 @@ void BoGroundRenderer::calculateWorldRect(const QRect& rect, int mapWidth, int m
  *maxY *= -1;
 }
 
+BoDefaultGroundRenderer::BoDefaultGroundRenderer() : BoGroundRenderer()
+{
+}
+
+BoDefaultGroundRenderer::~BoDefaultGroundRenderer()
+{
+}
+
+void BoDefaultGroundRenderer::renderVisibleCells(Cell** renderCells, unsigned int cellsCount, const BosonMap* map)
+{
+ BO_CHECK_NULL_RET(renderCells);
+ BO_CHECK_NULL_RET(map);
+ BO_CHECK_NULL_RET(map->texMap());
+ BO_CHECK_NULL_RET(map->heightMap());
+ BO_CHECK_NULL_RET(map->groundTheme());
+ BO_CHECK_NULL_RET(map->textures());
+
+ BosonGroundTheme* groundTheme = map->groundTheme();
+ float* heightMap = map->heightMap();
+ BosonTextureArray* textures = map->textures();
+
+ // AB: we can increase performance even more here. lets replace d->mRenderCells
+ // by two array defining the coordinates of cells and the heightmap values.
+ // we could use that as vertex array for example.
+
+ glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+ // we draw the cells in different stages. the depth test must get enabled
+ // before the last stage, so that the new information (i.e. the z pos of the
+ // cells) get into the depth buffer.
+ // we can safely disable the test completely for all other stages, as cells are
+ // the first objects we render.
+ glDisable(GL_DEPTH_TEST);
+
+ for (unsigned int i = 0; i < groundTheme->textureCount(); i++) {
+	GLuint tex = textures->texture(i);
+	if (i == 1) {
+		glEnable(GL_BLEND);
+	} else if (i == groundTheme->textureCount() - 1) {
+		glEnable(GL_DEPTH_TEST);
+	}
+	glBindTexture(GL_TEXTURE_2D, tex);
+	renderCellsNow(renderCells, cellsCount, map->width() + 1, heightMap, map->texMap(i));
+ }
+
+ glDisable(GL_BLEND);
+}
+
+void BoDefaultGroundRenderer::renderCellsNow(Cell** cells, int count, int cornersWidth, float* heightMap, unsigned char* texMapStart)
+{
+ // Texture offsets
+ const int offsetCount = 5;
+ const float offset = 1.0f / (float)offsetCount;
+ const float texOffsets[] = { 0.0f, 0.2f, 0.4f, 0.6f, 0.8f };  // texOffsets[x] = offset * x
+
+ glBegin(GL_QUADS);
+ for (int i = 0; i < count; i++) {
+	Cell* c = cells[i];
+	int x = c->x();
+	int y = c->y();
+
+	int celloffset = y * cornersWidth + x;
+	unsigned char* texMapUpperLeft = texMapStart + celloffset;
+	float* heightMapUpperLeft = heightMap + celloffset;
+
+	GLfloat cellXPos = (float)x * BO_GL_CELL_SIZE;
+	GLfloat cellYPos = -(float)y * BO_GL_CELL_SIZE;
+
+	float upperLeftHeight = *heightMapUpperLeft;
+	float upperRightHeight = *(heightMapUpperLeft + 1);
+	float lowerLeftHeight = *(heightMapUpperLeft + cornersWidth);
+	float lowerRightHeight = *(heightMapUpperLeft + cornersWidth + 1);
+
+	unsigned char upperLeftAlpha = *texMapUpperLeft;
+	unsigned char upperRightAlpha = *(texMapUpperLeft + 1);
+	unsigned char lowerLeftAlpha = *(texMapUpperLeft + cornersWidth);
+	unsigned char lowerRightAlpha = *(texMapUpperLeft + cornersWidth + 1);
+
+	// Map cell's y-coordinate to range (offsetCount - 1) ... 0
+	y = offsetCount - (y % offsetCount) - 1;
+
+	glColor4ub(255, 255, 255, upperLeftAlpha);
+	glTexCoord2f(texOffsets[x % offsetCount], texOffsets[y % offsetCount] + offset);
+	glVertex3f(cellXPos, cellYPos, upperLeftHeight);
+
+	glColor4ub(255, 255, 255, lowerLeftAlpha);
+	glTexCoord2f(texOffsets[x % offsetCount], texOffsets[y % offsetCount]);
+	glVertex3f(cellXPos, cellYPos - BO_GL_CELL_SIZE, lowerLeftHeight);
+
+	glColor4ub(255, 255, 255, lowerRightAlpha);
+	glTexCoord2f(texOffsets[x % offsetCount] + offset, texOffsets[y % offsetCount]);
+	glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos - BO_GL_CELL_SIZE, lowerRightHeight);
+
+	glColor4ub(255, 255, 255, upperRightAlpha);
+	glTexCoord2f(texOffsets[x % offsetCount] + offset, texOffsets[y % offsetCount] + offset);
+	glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos, upperRightHeight);
+ }
+ glEnd();
+}
+
+
+
+BoFastGroundRenderer::BoFastGroundRenderer() : BoGroundRenderer()
+{
+}
+
+BoFastGroundRenderer::~BoFastGroundRenderer()
+{
+}
+
+void BoFastGroundRenderer::renderVisibleCells(Cell** renderCells, unsigned int cellsCount, const BosonMap* map)
+{
+ BO_CHECK_NULL_RET(renderCells);
+ BO_CHECK_NULL_RET(map);
+ BO_CHECK_NULL_RET(map->texMap());
+ BO_CHECK_NULL_RET(map->heightMap());
+ BO_CHECK_NULL_RET(map->groundTheme());
+ BO_CHECK_NULL_RET(map->textures());
+
+ BosonGroundTheme* groundTheme = map->groundTheme();
+ float* heightMap = map->heightMap();
+ BosonTextureArray* textures = map->textures();
+
+ unsigned int* cellTextures = new unsigned int[cellsCount];
+ for (unsigned int i = 0; i < cellsCount; i++) {
+	Cell* c = renderCells[i];
+	if (!c) {
+		boError() << k_funcinfo << "NULL cell" << endl;
+		continue;
+	}
+	cellTextures[i] = 0;
+	unsigned int maxValue = 0;
+	for (unsigned int j = 0; j < groundTheme->textureCount(); j++) {
+		unsigned int v = 0;
+		v += (int)map->texMapAlpha(j, c->x(), c->y());
+		v += (int)map->texMapAlpha(j, c->x() + 1, c->y());
+		v += (int)map->texMapAlpha(j, c->x(), c->y() + 1);
+		v += (int)map->texMapAlpha(j, c->x() + 1, c->y() + 1);
+		if (v > maxValue) {
+			maxValue = v;
+
+			// this texture has highest alpha values in the four
+			// corners
+			cellTextures[i] = j;
+		}
+
+	}
+ }
+
+ glDisable(GL_DEPTH_TEST);
+ int count = 0;
+ for (unsigned int i = 0; i < groundTheme->textureCount(); i++) {
+	GLuint tex = textures->texture(i);
+	glBindTexture(GL_TEXTURE_2D, tex);
+
+	const int offsetCount = 5;
+	const float offset = 1.0f / (float)offsetCount;
+	const float texOffsets[] = { 0.0f, 0.2f, 0.4f, 0.6f, 0.8f };
+
+	const int cornersWidth = map->width() + 1;
+
+
+	// AB: this is a cutnpaste implementation from BoGroundRenderer. don't
+	// expect it to be totally correct.
+	glBegin(GL_QUADS);
+	for (unsigned int j = 0; j < cellsCount; j++) {
+		if (cellTextures[j] != i) {
+			continue;
+		}
+		Cell* c = renderCells[j];
+		count++;
+
+		int x = c->x();
+		int y = c->y();
+
+		int celloffset = y * cornersWidth + x;
+		float* heightMapUpperLeft = heightMap + celloffset;
+
+		GLfloat cellXPos = (float)x * BO_GL_CELL_SIZE;
+		GLfloat cellYPos = -(float)y * BO_GL_CELL_SIZE;
+
+		float upperLeftHeight = *heightMapUpperLeft;
+		float upperRightHeight = *(heightMapUpperLeft + 1);
+		float lowerLeftHeight = *(heightMapUpperLeft + cornersWidth);
+		float lowerRightHeight = *(heightMapUpperLeft + cornersWidth + 1);
+
+
+		// Map cell's y-coordinate to range (offsetCount - 1) ... 0
+		y = offsetCount - (y % offsetCount) - 1;
+
+		glTexCoord2f(texOffsets[x % offsetCount], texOffsets[y % offsetCount] + offset);
+		glVertex3f(cellXPos, cellYPos, upperLeftHeight);
+
+		glTexCoord2f(texOffsets[x % offsetCount], texOffsets[y % offsetCount]);
+		glVertex3f(cellXPos, cellYPos - BO_GL_CELL_SIZE, lowerLeftHeight);
+
+		glTexCoord2f(texOffsets[x % offsetCount] + offset, texOffsets[y % offsetCount]);
+		glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos - BO_GL_CELL_SIZE, lowerRightHeight);
+
+		glTexCoord2f(texOffsets[x % offsetCount] + offset, texOffsets[y % offsetCount] + offset);
+		glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos, upperRightHeight);
+	}
+	glEnd();
+ }
+
+ glDisable(GL_BLEND);
+}
 

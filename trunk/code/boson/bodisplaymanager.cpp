@@ -700,3 +700,12 @@ QPtrList<BosonBigDisplayBase>* BoDisplayManager::displayList()
  return &d->mDisplayList;
 }
 
+void BoDisplayManager::slotChangeGroundRenderer(int g)
+{
+ QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
+ while (it.current()) {
+	it.current()->changeGroundRenderer(g);
+	++it;
+ }
+}
+

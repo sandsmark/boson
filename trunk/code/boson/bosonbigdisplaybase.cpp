@@ -465,9 +465,8 @@ void BosonBigDisplayBase::init()
 	}
  }
 
- d->mGroundRenderer = new BoGroundRenderer;
- d->mGroundRenderer->setMatrices(&d->mModelviewMatrix, &d->mProjectionMatrix, d->mViewport);
- d->mGroundRenderer->setViewFrustum(d->mViewFrustum);
+ d->mGroundRenderer = 0;
+ changeGroundRenderer(boConfig->uintValue("GroundRenderer", DEFAULT_GROUND_RENDERER));
 
  setUpdatesEnabled(false);
 
@@ -2828,3 +2827,32 @@ void BosonBigDisplayBase::advanceCamera()
 	cameraChanged();
  }
 }
+
+void BosonBigDisplayBase::changeGroundRenderer(int renderer)
+{
+ if (d->mGroundRenderer && d->mGroundRenderer->rtti() == renderer) {
+	return;
+ }
+ delete d->mGroundRenderer;
+ d->mGroundRenderer = 0;
+
+ switch (renderer) {
+	default:
+	case BoGroundRenderer::Last:
+		boWarning() << k_funcinfo << "unknwon renderer: " << renderer << endl;
+	case BoGroundRenderer::Default:
+		d->mGroundRenderer = new BoDefaultGroundRenderer();
+		break;
+	case BoGroundRenderer::Fast:
+		d->mGroundRenderer = new BoFastGroundRenderer();
+		break;
+ }
+ d->mGroundRenderer->setMatrices(&d->mModelviewMatrix, &d->mProjectionMatrix, d->mViewport);
+ d->mGroundRenderer->setViewFrustum(d->mViewFrustum);
+#if PLAYERIO
+ d->mGroundRenderer->setLocalPlayerIO(localPlayerIO());
+#else
+ d->mGroundRenderer->setLocalPlayer(localPlayer());
+#endif
+}
+

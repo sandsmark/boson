@@ -28,6 +28,7 @@ class BosonCanvas;
 class BosonCursor;
 class BoSelection;
 class Player;
+class PlayerIO;
 class Unit;
 class UnitProperties;
 class BoCamera;
@@ -227,6 +228,7 @@ public:
 	void mapChanged();
 
 	Player* localPlayer() const;
+	PlayerIO* localPlayerIO() const;
 
 	/**
 	 * @param prop The unit that should get placed or NULL if none.
@@ -256,6 +258,8 @@ public:
 
 	BoCamera* camera() const;
 	void advanceCamera();
+
+	void changeGroundRenderer(int renderer);
 
 public slots:
 	void slotCenterHomeBase();
