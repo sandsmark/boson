@@ -1,7 +1,7 @@
 <!doctype linuxdoc system>
 <article>
 <title>Boson internals
-<author>Thomas Capricelli <tt>capricel@enst.fr</tt>
+<author>Thomas Capricelli <tt>orzel@yalbi.com</tt>
 <date>Version 0.1 , Mon Oct 25 15:44:00 CEST 1999
 
 <abstract>
@@ -17,7 +17,7 @@ This Handbook describes the internal structure of the Boson code.
 This document describes the internals of the boson souce code. My wish is that developers will
 keep it up-to-date while changing the code.
 
-Please contact <htmlurl url="mailto:capricel@enst.fr" name="capricel@enst.fr"> for any boson code 
+Please contact <htmlurl url="mailto:orzel@yalbi.com" name="orzel@yalbi.com"> for any boson code 
 related topic.
 <p>
 
@@ -127,13 +127,13 @@ not really done yet.
 <p>
 
 Please contact :
-<htmlurl url="mailto:capricel@enst.fr" name="Thomas Capricelli"> if
+<htmlurl url="mailto:orzel@yalbi.com" name="Thomas Capricelli"> if
 you have any questions related to the code, I will be happy to add it here if it's a frequently 
 asked one.
 
 <sect>Copyright<p>
 
-Boson Copyright 1999 Thomas Capricelli , capricel@enst.fr<p>
+Boson Copyright 1999 Thomas Capricelli , orzel@yalbi.com<p>
 Boson-pics Copyright 1999 Benjamin Adler , benAdler@gmx.net
 
 
