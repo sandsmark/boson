@@ -32,6 +32,7 @@
 #include "../bosonmap.h"
 #include "../bosongroundtheme.h"
 #include "../bosondata.h"
+#include "../bosonsaveload.h"
 #include "../bosonwidgets/bosonplayfieldview.h"
 #include "bosonstartupnetwork.h"
 #include "bodebug.h"
@@ -173,6 +174,7 @@ void BosonNewEditorWidget::initGroundThemes()
 
 void BosonNewEditorWidget::slotNetStart()
 {
+ BO_CHECK_NULL_RET(boGame);
  boDebug() << k_funcinfo << endl;
  BosonPlayField* field = 0;
  int maxPlayers = 0;
@@ -184,83 +186,24 @@ void BosonNewEditorWidget::slotNetStart()
  // start the old one.
  // We should use the actual playfield from the network here!!
 
+ if (boGame->playerCount() > 0) {
+	boError() << k_funcinfo << "playerCount must be 0! trying to clear" << endl;
+	boGame->quitGame();
+ }
+ if (boGame->playerCount() > 0) {
+	boError() << k_funcinfo << "playerCount must be 0! clearning did not succeed" << endl;
+	return;
+ }
+
+ QByteArray newMap;
  if (mCreateNewMap->isChecked()) {
-	// We're creating new map
-	unsigned int width = mWidth->value();
-	unsigned int height = mHeight->value();
-	if (!BosonMap::isValidMapGeo(width, height)) {
-		boError() << k_funcinfo << "invalid map geo" << endl;
-		KMessageBox::sorry(this, i18n("The desired map geo is not valid\nWidth=%1\nHeight=%2").arg(width).arg(height));
-		return;
-	}
-	QStringList groundThemes = BosonData::bosonData()->availableGroundThemes();
-	int themeIndex = mGroundTheme->currentItem();
-	if (themeIndex < 0 || (unsigned int)themeIndex >= groundThemes.count()) {
-		boError() << k_funcinfo << "invalid theme index " << themeIndex << endl;
-		if (themeIndex < 0) {
-			KMessageBox::sorry(this, i18n("Please select a ground theme first"));
-		} else {
-			KMessageBox::sorry(this, i18n("The selected groundTheme at index %1 could not be found. %2 themes are available").arg(themeIndex).arg(groundThemes.count()));
-		}
-		return;
-	}
-	QString themeId = boData->availableGroundThemes()[themeIndex];
-	BosonGroundTheme* theme = boData->groundTheme(themeId);
-	if (!theme) {
-		BO_NULL_ERROR(theme);
-		KMessageBox::sorry(this, i18n("An error occured while loading the selected groundtheme"));
-		return;
-	}
-	BosonMap* map = new BosonMap(0);
-	if (!map->createNewMap(width, height, theme)) {
-		boError() << k_funcinfo << "map could not be created" << endl;
+	newMap = createNewMap();
+	if (newMap.size() == 0) {
+		boError() << k_funcinfo << "could not create new map" << endl;
 		KMessageBox::sorry(this, i18n("An error occured while creating a new map"));
-		delete map;
 		return;
 	}
-
-	unsigned int texture = mFilling->currentItem();
-	if (texture >= theme->textureCount()) {
-		boError() << k_funcinfo << "invalid texture " << texture << endl;
-		KMessageBox::sorry(this, i18n("Could not fill the map with texture %1 - only %2 textures in groundTheme %3").arg(texture).arg(theme->textureCount()).arg(themeId));
-		delete map;
-		return;
-	}
-	map->fill(texture);
-
-	QByteArray b;
-	QDataStream stream(b, IO_WriteOnly);
-	if (!map->saveCompleteMap(stream)) {
-		boError() << k_funcinfo << "could not save new map to stream" << endl;
-		KMessageBox::sorry(this, i18n("An error occured while saving the new map to a stream"));
-		delete map;
-		return;
-	}
-
-#warning broken due to file format change (not binary anymore)
-	// WARNING: this is a hack! the message should contain the *map* only,
-	// not the scenario. I do not yet know how the scenario will be handled
-	// and if the maxplayers input will remain in this widget (we could
-	// start with a single player and further players in the editor itself).
 	maxPlayers = mMaxPlayers->value();
-	stream << (Q_INT32)maxPlayers;
-	stream << (Q_INT32)maxPlayers;
-	// Send description and name of the map
-	if (mNewMapName->edited()) {
-		stream << mNewMapName->text();
-	} else {
-		stream << QString("");
-	}
-	if (mMapDescription->text() != i18n("Enter description here")) {
-		// FIXME: this check-if-description-has-been-modified method _sucks_
-		stream << mMapDescription->text();
-	} else {
-		stream << QString("");
-	}
-
-	boGame->sendMessage(b, BosonMessage::ChangeMap);
-
-	delete map;
  } else {
 	// Editing old map
 	if (!mSelectMap->currentItem()) {
@@ -282,14 +225,7 @@ void BosonNewEditorWidget::slotNetStart()
 	KMessageBox::sorry(this, i18n("Too many (max-)players. Not enough colors available (internal error)."));
 	return;
  }
- if (boGame->playerCount() > 0) {
-	boError() << k_funcinfo << "playerCount must be 0! trying to clear" << endl;
-	boGame->quitGame();
- }
- if (boGame->playerCount() > 0) {
-	boError() << k_funcinfo << "playerCount must be 0! clearning did not succeed" << endl;
-	return;
- }
+ boDebug() << k_funcinfo << "adding " << maxPlayers << " players" << endl;
  for (int i = 0; i < maxPlayers; i++) {
 	// add dummy computer player
 	Player* p = new Player;
@@ -300,7 +236,7 @@ void BosonNewEditorWidget::slotNetStart()
 	boGame->bosonAddPlayer(p);
  }
 
- networkInterface()->sendNewGame(field, true);
+ networkInterface()->sendNewGame(field, true, &newMap);
 }
 
 
@@ -469,3 +405,87 @@ void BosonNewEditorWidget::slotEditExistingToggled(bool checked)
  mCreateNewMap->setChecked(!checked);
  slotNewMapToggled(!checked);
 }
+
+QByteArray BosonNewEditorWidget::createNewMap()
+{
+ unsigned int width = mWidth->value();
+ unsigned int height = mHeight->value();
+ if (!BosonMap::isValidMapGeo(width, height)) {
+	boError() << k_funcinfo << "invalid map geo" << endl;
+	KMessageBox::sorry(this, i18n("The desired map geo is not valid\nWidth=%1\nHeight=%2").arg(width).arg(height));
+	return QByteArray();
+ }
+ QStringList groundThemes = BosonData::bosonData()->availableGroundThemes();
+ int themeIndex = mGroundTheme->currentItem();
+ if (themeIndex < 0 || (unsigned int)themeIndex >= groundThemes.count()) {
+	boError() << k_funcinfo << "invalid theme index " << themeIndex << endl;
+	if (themeIndex < 0) {
+		KMessageBox::sorry(this, i18n("Please select a ground theme first"));
+	} else {
+		KMessageBox::sorry(this, i18n("The selected groundTheme at index %1 could not be found. %2 themes are available").arg(themeIndex).arg(groundThemes.count()));
+	}
+	return QByteArray();
+ }
+ QString themeId = boData->availableGroundThemes()[themeIndex];
+ BosonGroundTheme* theme = boData->groundTheme(themeId);
+ if (!theme) {
+	BO_NULL_ERROR(theme);
+	KMessageBox::sorry(this, i18n("An error occured while loading the selected groundtheme"));
+	return QByteArray();
+ }
+ BosonPlayField playField;
+ BosonMap* map = new BosonMap(0);
+ playField.changeMap(map); // takes ownership and will delete it!
+ if (!map->createNewMap(width, height, theme)) {
+	boError() << k_funcinfo << "map could not be created" << endl;
+	return QByteArray();
+ }
+ unsigned int texture = mFilling->currentItem();
+ if (texture >= theme->textureCount()) {
+	boError() << k_funcinfo << "invalid texture " << texture << endl;
+	KMessageBox::sorry(this, i18n("Could not fill the map with texture %1 - only %2 textures in groundTheme %3").arg(texture).arg(theme->textureCount()).arg(themeId));
+	return QByteArray();
+ }
+ map->fill(texture);
+
+ // we add dummy players in order to save them into the bytearray.
+ int maxPlayers = mMaxPlayers->value();
+ if (maxPlayers < 2) {
+	boError() << k_funcinfo << "maxPlayers < 2 does not make sense" << endl;
+	KMessageBox::sorry(this, i18n("Max Players is an invalid value: %1").arg(maxPlayers));
+	return QByteArray();
+ }
+ if (maxPlayers > BOSON_MAX_PLAYERS) {
+	boError() << k_funcinfo << "maxPlayers > " << BOSON_MAX_PLAYERS << " is not allowed" << endl;
+	KMessageBox::sorry(this, i18n("Max Players is an invalid value: %1 (must be < %2)").arg(maxPlayers).arg(BOSON_MAX_PLAYERS));
+	return QByteArray();
+ }
+
+ BosonSaveLoad* save = new BosonSaveLoad(boGame);
+ save->setPlayField(&playField);
+ boDebug() << k_funcinfo << "saving to playfield completed" << endl;
+ QMap<QString, QByteArray> files;
+ if (!save->saveToFiles(files, 0)) {
+	delete save;
+	boError() << k_funcinfo << "error occured while saving" << endl;
+	KMessageBox::sorry(this, i18n("An error occured while saving the a game to a stream"));
+	return QByteArray();
+ }
+ boDebug() << k_funcinfo << "saving completed" << endl;
+ playField.changeMap(0); // deletes the map!
+
+ QDomDocument playersDoc("Players");
+ QDomElement playersRoot = playersDoc.createElement("Players");
+ playersDoc.appendChild(playersRoot);
+ for (int i = 0; i < maxPlayers; i++) {
+	QDomElement p = playersDoc.createElement("Player");
+	playersRoot.appendChild(p);
+ }
+// playersRoot.setAttribute("LocalPlayerId", );
+ files.insert("players.xml", playersDoc.toCString());
+
+ QByteArray b = BosonPlayField::streamFiles(files);
+ boDebug() << k_funcinfo << "files got streamed" << endl;
+ return BosonPlayField::streamFiles(files);
+}
+

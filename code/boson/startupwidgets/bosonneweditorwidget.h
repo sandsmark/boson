@@ -41,6 +41,13 @@ public:
 public slots:
 	virtual void slotStartClicked();
 
+protected:
+	/**
+	 * Create a new map, according to the settings in the widget (such as
+	 * width/height, groundtype, ...)
+	 **/
+	QByteArray createNewMap();
+
 protected slots: // implementations for the .ui slots
 	// these slots describe actions that the local player has executed in
 	// his widget. nearly all must be transferred over network before the
