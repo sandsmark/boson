@@ -523,7 +523,10 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			kdError() << k_lineinfo << factory->id() << "cannot produce?!" << endl;
 			break;
 		}
-
+		if (!production->contains(unitType)) {
+			kdDebug() << unitType << " is not in production queue" << endl;
+			return;
+		}
 		if (production->currentProduction() == unitType) {
 			if (factory->work() == Unit::WorkProduce) {
 				// do not abort but just pause
@@ -536,6 +539,8 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 				emit signalUpdateProduction(factory);
 			}
 		} else {
+			// not the current, but a queued production is stopped.
+
 			//FIXME: money should be paid when the production is
 			//actually started! (currently it is paid as soon as an
 			//item is added to the queue)

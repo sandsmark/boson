@@ -92,11 +92,6 @@ void ProductionPlugin::removeProduction(int unitType)
  }
 }
 
-QValueList<int> ProductionPlugin::productionList() const
-{
- return mProductions;
-}
-
 double ProductionPlugin::productionProgress() const
 {
  unsigned int productionTime = unit()->owner()->unitProperties(currentProduction())->productionTime();
