@@ -173,7 +173,6 @@ void BosonWidget::init()
  initKeys();
 
  slotChangeCursor(boConfig->readCursorMode(), boConfig->readCursorDir());
- slotChangeGroupMove(boConfig->readGroupMoveMode());
 
  setFocusPolicy(StrongFocus); // accept key event
  setFocus();
@@ -359,11 +358,6 @@ void BosonWidget::slotChangeCursor(int mode, const QString& cursorDir_)
  }
 }
 
-void BosonWidget::slotChangeGroupMove(int mode)
-{
- boConfig->saveGroupMoveMode((GroupMoveMode)mode);
-}
-
 void BosonWidget::initGameMode()//FIXME: rename! we don't have a difference to initEditorMode anymore. maybe just initGame() or so??
 {
  initLayout();
@@ -525,8 +519,6 @@ void BosonWidget::slotGamePreferences()
 
  connect(dlg, SIGNAL(signalCursorChanged(int, const QString&)),
 		this, SLOT(slotChangeCursor(int, const QString&)));
- connect(dlg, SIGNAL(signalGroupMoveChanged(int)),
-		this, SLOT(slotChangeGroupMove(int)));
  connect(dlg, SIGNAL(signalCmdBackgroundChanged(const QString&)),
 		this, SLOT(slotCmdBackgroundChanged(const QString&)));
  connect(dlg, SIGNAL(signalMiniMapScaleChanged(double)),

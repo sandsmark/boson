@@ -43,7 +43,6 @@ public:
 		mArrowSpeed = 0;
 		mGameSpeed = 0;
 		mCmdBackground = 0;
-		mGroupMove = 0;
 		mMiniMapScale = 0;
 		
 		mCursor = 0;
@@ -58,7 +57,6 @@ public:
 	KIntNumInput* mGameSpeed;
 	KIntNumInput* mUpdateInterval;
 	QComboBox* mCmdBackground;
-	QComboBox* mGroupMove;
 	KDoubleNumInput* mMiniMapScale;
 	
 	QComboBox* mCursor;
@@ -79,7 +77,6 @@ OptionsDialog::OptionsDialog(QWidget* parent, bool modal)
  
  initGeneralPage();
  initCursorPage();
- initPathfindingPage();
  initScrollingPage();
 
  connect(this, SIGNAL(defaultClicked()), this, SLOT(slotSetDefaults()));
@@ -167,21 +164,6 @@ void OptionsDialog::initCursorPage()
  setCursor(CursorSprite);
 }
 
-void OptionsDialog::initPathfindingPage()
-{
- QVBox* vbox = addVBoxPage(i18n("&Pathfinding"));
- QHBox* hbox = new QHBox(vbox);
- (void)new QLabel(i18n("Group Movement"), hbox);
- d->mGroupMove = new QComboBox(hbox);
- d->mGroupMove->insertItem(i18n("Old Style (All units move to same position)"), GroupMoveOld);
-// d->mGroupMove->insertItem(i18n("Experimental follow-style (units follow leader)"), GroupMoveFollow);
- d->mGroupMove->insertItem(i18n("New style (much better, but not fully working yet)"), GroupMoveNew);
- connect(d->mGroupMove, SIGNAL(activated(int)),
-		this, SIGNAL(signalGroupMoveChanged(int)));
-
- setGroupMove(boConfig->readGroupMoveMode());
-}
-
 void OptionsDialog::initScrollingPage()
 {
  QVBox* vbox = addVBoxPage(i18n("&Scrolling"));
@@ -232,11 +214,6 @@ void OptionsDialog::setArrowScrollSpeed(int value)
 void OptionsDialog::setCursor(CursorMode mode)
 {
  d->mCursor->setCurrentItem(mode);
-}
-
-void OptionsDialog::setGroupMove(GroupMoveMode mode)
-{
- d->mGroupMove->setCurrentItem(mode);
 }
 
 void OptionsDialog::setMiniMapScale(double scale)
@@ -330,5 +307,4 @@ void OptionsDialog::slotSetDefaults()
  setCursor(CursorSprite);
  slotCursorChanged((int)CursorSprite);
  setCursorEdgeSensity(20);
- setGroupMove(GroupMoveOld);
 }

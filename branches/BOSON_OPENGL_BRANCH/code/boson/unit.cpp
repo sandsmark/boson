@@ -37,16 +37,6 @@
 
 #include "defines.h"
 
-// If NEW_MOVING_STYLE is defined, then:
-// * Path is searched locally for every unit and not transferred over network
-// * Units should start to move immideately (no more "waypoints not arrived
-//   yet" messages) :-)
-// * And biggest change: path is recalculated _every_ time waypoint is reached.
-//   This enables unit to react much more quickly when it can't move to next
-//   waypoint. However, it probably requires more powerful CPU so if you
-//   experience speed problems, maybe you should try commenting this out.
-#define NEW_MOVING_STYLE
-
 class Unit::UnitPrivate
 {
 public:
@@ -86,13 +76,8 @@ Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
 
  d->mDirection.registerData(IdDirection, dataHandler(), 
 		KGamePropertyBase::PolicyLocal, "Direction");
-#ifdef NEW_MOVING_STYLE
  d->mWaypoints.registerData(IdWaypoints, dataHandler(),
 		KGamePropertyBase::PolicyLocal, "Waypoints");
-#else
- d->mWaypoints.registerData(IdWaypoints, dataHandler(),
-		KGamePropertyBase::PolicyClean, "Waypoints");
-#endif
  d->mMoveDestX.registerData(IdMoveDestX, dataHandler(),
 		KGamePropertyBase::PolicyLocal, "MoveDestX");
  d->mMoveDestY.registerData(IdMoveDestY, dataHandler(), 
@@ -301,7 +286,7 @@ void Unit::advanceAttack()
 		stopAttacking();
 		return;
 	}
-	kdDebug() << "unit not in range - moving..." << endl;
+	kdDebug() << "unit (" << target()->id() << ") not in range - moving..." << endl;
 	if (!moveTo(target()->x(), target()->y(), weaponRange())) {
 		setWork(WorkNone);
 	} else {
@@ -323,17 +308,7 @@ void Unit::addWaypoint(const QPoint& pos)
 
 void Unit::waypointDone()
 {
-// waypoints are added with PolicyClean, but removed with PolicyLocal. That is
-// kind of ugly but this way we can ensure that only one client has to calculate
-// the path but every client uses the path.
-// Try to avoid this concept! Do NOT copy it!
-#ifdef NEW_MOVING_STYLE
  d->mWaypoints.remove(d->mWaypoints.at(0));
-#else
- d->mWaypoints.setPolicy(KGamePropertyBase::PolicyLocal);
- d->mWaypoints.remove(d->mWaypoints.at(0));
- d->mWaypoints.setPolicy(KGamePropertyBase::PolicyClean);
-#endif
 }
 
 QValueList<QPoint> Unit::waypointList() const
@@ -389,14 +364,6 @@ bool Unit::moveTo(float x, float y, int range)
 void Unit::newPath()
 {
  kdDebug() << k_funcinfo << endl;
-#ifndef NEW_MOVING_STYLE
- if (owner()->isVirtual()) {
-	// only the owner of the unit calculates the path and then transmits it
-	// over network. a "virtual" player is one which is duplicated on
-	// another client - but the actual player is on another client.
-	return;
- }
-#endif
  if(!owner()->isFogged(d->mMoveDestX / BO_TILE_SIZE, d->mMoveDestY / BO_TILE_SIZE)) {
 	Cell* destCell = boCanvas()->cell(d->mMoveDestX / BO_TILE_SIZE,
 			d->mMoveDestY / BO_TILE_SIZE);
@@ -404,14 +371,14 @@ void Unit::newPath()
 		// If we can't move to destination, then we add waypoint with coordinates
 		//  -1; -1 and in MobileUnit::advanceMove(), if currentWaypoint()'s
 		//  coordinates are -1; -1 then we stop moving.
-		clearWaypoints(true);
+		clearWaypoints();
 		addWaypoint(QPoint(-1, -1));
 		return;
 	}
  }
  // Only go until enemy is in range if we are attacking
  QValueList<QPoint> path = BosonPath::findPath(this, d->mMoveDestX, d->mMoveDestY, d->mMoveRange);
- clearWaypoints(true); // send it over network. the list is cleared just before the addWaypoints() below take effect
+ clearWaypoints();
  for (int unsigned i = 0; i < path.count(); i++) {
 	addWaypoint(path[i]);
  }
@@ -427,21 +394,9 @@ void Unit::newPath()
  return;
 }
 
-void Unit::clearWaypoints(bool send)
+void Unit::clearWaypoints()
 {
-// waypoints are added with PolicyClean, but removed with PolicyLocal. That is
-// kind of ugly but this way we can ensure that only one client has to calculate
-// the path but every client uses the path.
-// Try to avoid this concept! Do NOT copy it!
-#ifdef NEW_MOVING_STYLE
  d->mWaypoints.clear();
-#else
- if (!send) {
-	d->mWaypoints.setPolicy(KGamePropertyBase::PolicyLocal);
- }
- d->mWaypoints.clear();
- d->mWaypoints.setPolicy(KGamePropertyBase::PolicyClean);
-#endif
 }
 
 const QPoint& Unit::currentWaypoint() const
@@ -774,11 +729,11 @@ void MobileUnit::advanceMove()
  }
 
  if(waypointCount() == 0) {
-	// waypoints are PolicyClean - so they might need some advanceMove()
-	// calls until they are actually here
-	kdDebug() << "waypoints have not yet arrived" << endl;
-	setXVelocity(0);
-	setYVelocity(0);
+	// Waypoints were PolicyClean previously but are now PolicyLocal so they
+	//  should arrive immediately. If there are no waypoints but advanceMove is
+	//  called, then probably there's an error somewhere
+	kdError() << k_funcinfo << "No waypoints" << endl;
+	stopMoving();
 	return;
  }
 
@@ -811,8 +766,8 @@ void MobileUnit::advanceMove()
 	return;
  }
 
- // If both waypoint's coordinates are -2, then it means that path was partial
- //  and we have to search new one
+ // FIXME: as path is now recalculated every time waypoint is reached, this
+ //  should never be called
  if((wp.x() == -2) &&(wp.y() == -2)) {
 	clearWaypoints();
 	newPath();
@@ -841,23 +796,25 @@ void MobileUnit::advanceMove()
 		return;
 	}
 
-
-#ifdef NEW_MOVING_STYLE
-	// New style - we recalc path _every_ time we reach waypoint
+	// We now recalc path _every_ time we reach waypoint
+	//  Units will then react more quickly when other units move and block their
+	//  way for example
 	newPath();
-#endif
 
 	wp = currentWaypoint();
  }
 
  // Check if we can actually go to waypoint (maybe it was fogged)
+ // FIXME: currentWaypoint should have been unfogged when path was calculated
+ //  because we now recalc path after every waypoint (see ~5 lines above)
  if(!boCanvas()->cell(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE) ||
 		!boCanvas()->cell(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE)->canGo(unitProperties())) {
-	kdDebug() << "cannot go to waypoint, finding new path" << endl;
+	kdWarning() << "cannot go to waypoint, finding new path" << endl;
 	setXVelocity(0);
 	setYVelocity(0);
 	// We have to clear waypoints first to make sure that they aren't used next
 	//  advance() call (when new waypoints haven't arrived yet)
+	// FIXME: no need to clear them anymore
 	clearWaypoints();
 	newPath();
 	return;
@@ -1202,9 +1159,9 @@ QRect MobileUnit::boundingRect() const
  return QRect((int)x(), (int)y(), BO_TILE_SIZE, BO_TILE_SIZE);
 }
 
-void MobileUnit::clearWaypoints(bool send)
+void MobileUnit::clearWaypoints()
 {
- Unit::clearWaypoints(send);
+ Unit::clearWaypoints();
  d->mTargetCellMarked = false;
 }
 
