@@ -3,6 +3,9 @@ This is a copy of libufo cvs with a couple of patches applied.
 Patches applied currently (this list may not be complete):
 - getHeightForWidth(), see http://sourceforge.net/mailarchive/forum.php?thread_id=5943335&forum_id=6384
 - compiler warnings, see http://sourceforge.net/mailarchive/forum.php?thread_id=5956139&forum_id=6384
+- UFlowLayout fixes, see http://sourceforge.net/mailarchive/forum.php?thread_id=5982657&forum_id=6384
+- UXDisplay dispatch*() methods, see http://sourceforge.net/mailarchive/forum.php?thread_id=5996624&forum_id=6384
+- getPreferredSize() fix, see http://sourceforge.net/mailarchive/forum.php?thread_id=6018246&forum_id=6384
 
 Use
  make_ufo_dir.sh ufo_dir code/ufo
