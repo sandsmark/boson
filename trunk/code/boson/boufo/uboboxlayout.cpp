@@ -31,8 +31,18 @@ UBoBoxLayout::UBoBoxLayout(bool horizontal)
 	: ULayoutManager()
 {
  mHorizontal = horizontal;
- mHGap = 2;
- mVGap = 2;
+
+ // AB: libufo uses 2 as default
+ mHGap = 0;
+ mVGap = 0;
+}
+
+UBoBoxLayout::UBoBoxLayout(bool horizontal, int hgap, int vgap)
+	: ULayoutManager()
+{
+ mHorizontal = horizontal;
+ mHGap = hgap;
+ mVGap = vgap;
 }
 
 UDimension UBoBoxLayout::getPreferredLayoutSize(const UWidget* parent) const
@@ -342,3 +352,4 @@ int UBoBoxLayout::getLayoutHeightForWidth(const UWidget* parent, int width) cons
  }
  return height;
 }
+
