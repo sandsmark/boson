@@ -16,18 +16,18 @@ td {
 
 /** Links **/
 a {
-  color: #40FF40;
+  color: #40d040;
   background-color: transparent;
   text-decoration: none;
 }
 a:visited {
-  color: #40FF40;
+  color: #40d040;
   background-color: transparent;
   text-decoration: none;
 }
 a:hover {
   background-color: #204020;
-  color: #00ff00;
+  color: #40d040;
   text-decoration: none;
 }
 

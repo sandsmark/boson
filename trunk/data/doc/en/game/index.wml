@@ -1,28 +1,14 @@
-#include "top.wml"
-    <h1>
-      The game
-    </h1>
-    <p>&nbsp;</p>
-    <h3>
-      Contents:
-    </h3>
-    <dl>
-      <dd>
-        <dl>
-		<dt>2.1 <a href="configure.html">Configure Boson</a></dt>
-		<dt>2.2 <a href="scrolling.html">Scrolling</a></dt>
-		<dt>2.3 <a href="cursor.html">The cursors</a></dt>
-		<dt>2.4 <a href="buildfac.html">Building facilities</a></dt>
-		<dt>2.5 <a href="buildunit.html">Building units</a></dt>
-		<dt>2.6 <a href="moving.html">Selecting and moving Units</a></dt>
-                <dt>2.7 <a href="equipment.html">Unit equipment</a></dt>
-                <dt>2.8 <a href="attacking.html">Attacking</a></dt>
-		<dt>2.9 <a href="repairing.html">Repairing</a></dt>
-		<dt>2.10 <a href="technologies.html">Technologies</a></dt>
+#include "indexes.wml" title="The game" description=""
+                
+<dt>2.1 <a href="configure.html">Configure Boson</a></dt>
+<dt>2.2 <a href="scrolling.html">Scrolling</a></dt>
+<dt>2.3 <a href="cursor.html">The cursors</a></dt>
+<dt>2.4 <a href="buildfac.html">Building facilities</a></dt>
+<dt>2.5 <a href="buildunit.html">Building units</a></dt>
+<dt>2.6 <a href="moving.html">Selecting and moving Units</a></dt>
+<dt>2.7 <a href="equipment.html">Unit equipment</a></dt>
+<dt>2.8 <a href="attacking.html">Attacking</a></dt>
+<dt>2.9 <a href="repairing.html">Repairing</a></dt>
+<dt>2.10 <a href="technologies.html">Technologies</a></dt>
 
-        </dl>
-      </dd>
-    </dl>
-    
-#include "nav.wml" before_url="../installation.html" before_text="Installation" after_url="configure.html" after_text="Configure Boson" up_url="../index.html"
-#include "footer.wml"
+#include "indexes_footer.wml" before_url="../installation.html" before_text="Installation" after_url="configure.html" after_text="Configure Boson" up_url="../index.html"

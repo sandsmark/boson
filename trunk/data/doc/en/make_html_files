@@ -11,7 +11,7 @@ case "$1" in
 	echo "$0 -d dir - Make only one directory"
 	;;
  -f)	
-	wmk -D basedir~`pwd`/ -f $2.wml --include `pwd`/includes
+	wmk -D basedir~./ -f $2.wml --include `pwd`/includes
 	;;
  -d)
 	clear
@@ -27,7 +27,7 @@ case "$1" in
 	echo "Generating html files from wml source"
 	echo "*************************************"
 	echo ""
-	wmk -D basedir~`pwd`/ -F includes -a --include `pwd`/includes
+	wmk -F includes -a --include `pwd`/includes
 	echo ""
 	echo "*************************************"
 	;;
