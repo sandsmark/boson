@@ -365,10 +365,9 @@ void BosonUfoGameWidget::updateUfoLabels()
  if (boConfig->boolValue("debug_map_coordinates")) {
 	QPoint widgetPos;
 	GLfloat x = 0.0f, y = 0.0f, z = 0.0f;
-	BoVector3Fixed canvasVector;
 	display()->mapFromGlobal(QCursor::pos());
 	display()->mapCoordinates(widgetPos, &x, &y, &z);
-	display()->worldToCanvas(x, y, z, &(canvasVector));
+	BoVector3Fixed canvasVector(x, -y, z);
 
 	QString world = QString::fromLatin1("World:  (%1,%2,%2)").
 			arg((double)x, 6, 'f', 3).

@@ -327,9 +327,6 @@ public:
 	bool mapCoordinates(const QPoint& pos, GLfloat* posX, GLfloat* posY, GLfloat* posZ, bool useRealDepth = true) const;
 	bool mapCoordinatesToCell(const QPoint& pos, QPoint* cell);
 	bool mapDistance(int windowDistanceX, int windowDistanceY, GLfloat* dx, GLfloat* dy) const;
-	void worldToCanvas(GLfloat x, GLfloat y, GLfloat z, QPoint* pos) const;
-	void worldToCanvas(GLfloat x, GLfloat y, GLfloat z, BoVector3Fixed* pos) const;
-	void canvasToWorld(int x, int y, float z, GLfloat* glx, GLfloat* gly, GLfloat* glz) const;
 
 	double fps() const;
 
@@ -539,7 +536,6 @@ protected:
 	 **/
 	void renderPathLines(QValueList<QPoint>& path, bool isFlying = false, float z = 0.05f);
 	void renderCursor();
-	void renderSelectionRect();
 	void renderPlacementPreview();
 	/**
 	 * Called by @ref paintGL only to render text on the screen

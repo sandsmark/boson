@@ -588,10 +588,8 @@ void BosonCanvasRenderer::renderGround(const BosonMap* map)
 void BosonCanvasRenderer::renderBoundingBox(const BosonItem* item)
 {
  // Corners of bb of item
- BoVector3Float c1(item->x(), item->y(), item->z());
- c1.canvasToWorld();
- BoVector3Float c2(item->x() + item->width(), item->y() + item->height(), item->z() + item->depth());
- c2.canvasToWorld();
+ BoVector3Float c1(item->x(), -item->y(), item->z());
+ BoVector3Float c2(item->x() + item->width(), -(item->y() + item->height()), item->z() + item->depth());
  renderBoundingBox(c1, c2);
 }
 
@@ -1131,6 +1129,10 @@ public:
 	{
 		mVisible = false;
 	}
+	void setMatrices(const BoGLMatrices* m)
+	{
+		mMatrices = m;
+	}
 
 	void widgetRect(QRect* rect) const
 	{
@@ -1173,7 +1175,10 @@ public:
 	 **/
 	BoItemList* items(const PlayerIO* localPlayerIO, const BosonCanvas* canvas, const BoGLMatrices& gameGLMatrices) const;
 
+	void render();
+
 private:
+	const BoGLMatrices* mMatrices;
 	QPoint mStartPos;
 	QPoint mEndPos;
 	bool mVisible;
@@ -1281,6 +1286,33 @@ BoItemList* SelectionRect::items(const PlayerIO* localPlayerIO, const BosonCanva
  return localPlayerIO->unitsAtCells(&cellVector);
 }
 
+void SelectionRect::render()
+{
+ if (!isVisible()) {
+	return;
+ }
+ glPushMatrix();
+
+ glColor3ub(255, 0, 0); // FIXME hardcoded
+
+ QRect rect;
+ widgetRect(&rect);
+
+ int x = rect.left();
+ int w = rect.width();
+ int y = mMatrices->viewport()[3] - rect.top();
+ int h = rect.height();
+
+ glBegin(GL_LINE_LOOP);
+	glVertex3f(x, y, 0.0f);
+	glVertex3f(x + w, y, 0.0f);
+	glVertex3f(x + w, y - h, 0.0f);
+	glVertex3f(x, y - h, 0.0f);
+ glEnd();
+
+ glColor3ub(255, 255, 255);
+ glPopMatrix();
+}
 
 
 class PlacementPreview
@@ -1528,6 +1560,7 @@ void BosonBigDisplayBase::init()
  d->mCursorEdgeScrolling = new BoCursorEdgeScrolling(this);
  d->mCursorEdgeScrolling->setCamera(camera());
  d->mCursorEdgeScrolling->setMatrices(d->mGameGLMatrices);
+ d->mSelectionRect.setMatrices(d->mGameGLMatrices);
 
  d->mScriptConnector = new BosonBigDisplayScriptConnector(this);
 
@@ -1559,7 +1592,6 @@ void BosonBigDisplayBase::init()
  BoGroundRendererManager::manager()->makeRendererCurrent(QString::null);
 
  setUpdatesEnabled(false);
-
  setFocusPolicy(WheelFocus);
 
  if (!isValid()) {
@@ -1958,7 +1990,7 @@ void BosonBigDisplayBase::paintGL()
  renderCursor();
 
  boTextureManager->disableTexturing();
- renderSelectionRect();
+ d->mSelectionRect.render();
  renderText();
 
  glMatrixMode(GL_PROJECTION);
@@ -2144,33 +2176,6 @@ void BosonBigDisplayBase::renderCursor()
  }
 }
 
-void BosonBigDisplayBase::renderSelectionRect()
-{
- if (d->mSelectionRect.isVisible()) {
-	glPushMatrix();
-
-	glColor3ub(255, 0, 0); // FIXME hardcoded
-
-	QRect rect;
-	d->mSelectionRect.widgetRect(&rect);
-
-	int x = rect.left();
-	int w = rect.width();
-	int y = d->mViewport[3] - rect.top();
-	int h = rect.height();
-
-	glBegin(GL_LINE_LOOP);
-		glVertex3f(x, y, 0.0f);
-		glVertex3f(x + w, y, 0.0f);
-		glVertex3f(x + w, y - h, 0.0f);
-		glVertex3f(x, y - h, 0.0f);
-	glEnd();
-
-	glColor3ub(255, 255, 255);
-	glPopMatrix();
- }
-}
-
 void BosonBigDisplayBase::renderText()
 {
  BO_CHECK_NULL_RET(d->mDefaultFont);
@@ -2207,8 +2212,7 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* io, QDataStream& stream, QMous
 	return;
  }
 // boDebug() << posZ << endl;
- BoVector3Fixed canvasVector;
- worldToCanvas(posX, posY, posZ, &canvasVector);
+ BoVector3Fixed canvasVector(posX, -posY, posZ);
 
  BoMouseEvent event;
  event.setCanvasVector(canvasVector);
@@ -2643,25 +2647,6 @@ void BosonBigDisplayBase::slotReCenterDisplay(const QPoint& pos)
  camera()->setLookAt(BoVector3Float(((float)pos.x()), -((float)pos.y()), 0));
 }
 
-void BosonBigDisplayBase::worldToCanvas(GLfloat x, GLfloat y, GLfloat /*z*/, QPoint* pos) const
-{
- pos->setX((int)(x));
- pos->setY((int)(-y));
- // AB: z remains as-is
-}
-
-void BosonBigDisplayBase::worldToCanvas(GLfloat x, GLfloat y, GLfloat z, BoVector3Fixed* pos) const
-{
- pos->set(x, -y, z);
-}
-
-void BosonBigDisplayBase::canvasToWorld(int x, int y, float z, GLfloat* glx, GLfloat* gly, GLfloat* glz) const
-{
- *glx = (((GLfloat)x));
- *gly = (((GLfloat)-y));
- *glz = z;
-}
-
 bool BosonBigDisplayBase::mapCoordinates(const QPoint& pos, GLfloat* posX, GLfloat* posY, GLfloat* posZ, bool useRealDepth) const
 {
  return Bo3dTools::mapCoordinates(d->mModelviewMatrix, d->mProjectionMatrix, d->mViewport,
@@ -2819,8 +2804,7 @@ void BosonBigDisplayBase::removeSelectionRect(bool replace)
 		boError() << k_funcinfo << "Cannot map coordinates" << endl;
 		return;
 	}
-	BoVector3Fixed canvasVector;
-	worldToCanvas(x, y, z, &canvasVector);
+	BoVector3Fixed canvasVector(x, -y, z);
 	Unit* unit = 0;
 	if (!canvas()->onCanvas(canvasVector)) {
 		return;
@@ -4331,7 +4315,7 @@ void BosonBigDisplayBase::updateCursorCanvasVector()
  QPoint widgetPos = mapFromGlobal(QCursor::pos());
  GLfloat x = 0.0, y = 0.0, z = 0.0;
  mapCoordinates(widgetPos, &x, &y, &z);
- worldToCanvas(x, y, z, &(d->mCanvasVector)); // AB: are these already real z coordinates?
+ d->mCanvasVector = BoVector3Fixed(x, -y, z); // AB: are these already real z coordinates?
 }
 
 
