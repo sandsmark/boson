@@ -227,6 +227,8 @@ protected slots:
 
 	void slotOutOfGame(Player* p);
 
+	void slotDebugRequestIdName(int msgid, bool userid, QString& name);
+
 protected:
 	enum ScrollDirection {
 		ScrollUp = 0,
