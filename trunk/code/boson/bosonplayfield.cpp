@@ -723,16 +723,6 @@ bool BosonPlayField::loadFromDiskToFiles(QMap<QString, QByteArray>& destFiles)
 	converter.convertScenario_From_0_8_To_0_9(scenario, &playersXML, &canvasXML, &kgameXML);
 	boDebug() << k_funcinfo << "conversion completed" << endl;
  }
- if (waterXML.size() == 0) {
-	boDebug() << k_funcinfo << "Adding dummy water.xml file" << endl;
-	// Old file format - add dummy water.xml file
-	BosonFileConverter converter;
-	if(!converter.addDummyWaterXML(waterXML))
-	{
-		boError() << k_funcinfo << "Couldn't add dummy water.xml file" << endl;
-		return false;
-	}
- }
 
  if (texMap.size() == 0) {
 	boError() << k_funcinfo << "empty texmap" << endl;
