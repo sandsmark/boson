@@ -50,7 +50,6 @@ General TODOs
 - transmit everything on startup over network (== map, unitProperties). This
   saves us from a cheating player who (maybe just accidently) changed the files
   (units/*/index.desktop especially).
-- OptionsDialog: default position of commandframe
 - QCanvas::collisions(QRect(x,y,w,h)); returns a wrong list! it returns the
   collisions on the rect QRect(x,y,w+1,h+1). This is fixed all over boson by
   using collisions(QRect(x,y,w-1,h-1)) ; a bug report has been sent. Remember to

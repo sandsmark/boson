@@ -149,7 +149,7 @@ void BosonBigDisplay::init()
  d->mCursor->insertMode(CursorMove, cursorDir, QString::fromLatin1("move"));
  d->mCursor->insertMode(CursorAttack, cursorDir, QString::fromLatin1("attack"));
  d->mCursor->insertMode(CursorDefault, cursorDir, QString::fromLatin1("default"));
- d->mCursor->setCanvas(canvas(), CursorAttack, Z_CANVAS_CURSOR);
+ d->mCursor->setCanvas(canvas(), CursorDefault, Z_CANVAS_CURSOR);
 }
 
 BosonBigDisplay::~BosonBigDisplay()
@@ -203,18 +203,24 @@ void BosonBigDisplay::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseEvent
 				kdWarning() << "mode=" << selectionMode() << " but nothing selected" << endl;
 				break;
 			}
-			Unit* unit = ((BosonCanvas*)canvas())->findUnitAt(pos);
-			if (unit && !unit->isDestroyed()) {
-				if (unit->owner() == d->mLocalPlayer) {
-					d->mCursor->setCursor(CursorDefault);
-					d->mCursor->setWidgetCursor(this);
-				} else {
-					d->mCursor->setCursor(CursorAttack);
+			if (selection().first()->owner() == d->mLocalPlayer) {
+				Unit* unit = ((BosonCanvas*)canvas())->findUnitAt(pos);
+				if (unit && !unit->isDestroyed()) {
+					if (unit->owner() == d->mLocalPlayer) {
+						d->mCursor->setCursor(CursorDefault);
+						d->mCursor->setWidgetCursor(this);
+					} else {
+						kdDebug() << "a" << endl;
+						d->mCursor->setCursor(CursorAttack);
+						d->mCursor->setWidgetCursor(this);
+					}
+				} else if (selection().first()->isMobile()) {
+					d->mCursor->setCursor(CursorMove);
+					d->mCursor->cursorSprite()->show();
 					d->mCursor->setWidgetCursor(this);
 				}
-			} else if (selection().first()->isMobile()) {
-//				kdDebug() << "change cursor" << endl;
-				d->mCursor->setCursor(CursorMove);
+			} else {
+				d->mCursor->setCursor(CursorDefault);
 				d->mCursor->setWidgetCursor(this);
 			}
 		}
