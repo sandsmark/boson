@@ -946,11 +946,19 @@ void TopWidget::slotSaveGame()
 
 void TopWidget::slotNewGame()
 {
- // TODO
+ if (!d->mStartup) {
+	boError() << k_funcinfo << "NULL startup widget" << endl;
+	return;
+ }
+ d->mStartup->slotNewGame();
 }
 
 void TopWidget::slotStartEditor()
 {
- // TODO
+ if (!d->mStartup) {
+	boError() << k_funcinfo << "NULL startup widget" << endl;
+	return;
+ }
+ d->mStartup->slotStartEditor();
 }
 

@@ -58,9 +58,38 @@ public slots:
 	void slotLoadingTileProgress(int, int);
 	void slotLoadingUnitProgress(int progress, int current, int total);
 
+	/**
+	 * Show the welcome widget and reset all previous widget, i.e. delete
+	 * all widgets except the welcome widget.
+	 *
+	 * See also @ref resetWidgets
+	 **/
 	void slotShowWelcomeWidget();
+
+	/**
+	 * Display the @ref KLoadSaveGameWidget in save status, i.e. when this
+	 * is called the player can save a game.
+	 **/
 	void slotSaveGame();
+
+	/**
+	 * Display the @ref KLoadSaveGameWidget in load status, i.e. when this
+	 * is called the player can select a game to be loaded.
+	 **/
 	void slotLoadGame();
+
+	/**
+	 * Mainly used internally. This will display the new game widget (see
+	 * @ref BosonNewGameWidget) where the player can select the playfield.
+	 **/
+	void slotNewGame();
+
+	/**
+	 * Mainly used internally. This will display the start editor widget
+	 * (see @ref BosonStartEditorWidget) where player can select the
+	 * playfield to be edited.
+	 **/
+	void slotStartEditor();
 
 signals:
 	/**
@@ -113,9 +142,6 @@ protected:
 	BosonLoadingWidget* loadingWidget() const;
 
 protected slots:
-	void slotNewGame();
-	void slotStartEditor();
-
 	void slotShowNetworkOptions();
 	void slotHideNetworkOptions();
 
