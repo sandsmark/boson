@@ -162,8 +162,6 @@ public slots:
 	void slotSplitDisplayVertical();
 	void slotRemoveActiveDisplay();
 
-	void slotInitFogOfWar();
-
 	/**
 	 * Sends signals to update mobiles/facilities count for player p
 	 **/
@@ -315,6 +313,11 @@ protected:
 	void setActionEnabled(const char* name, bool enabled);
 
 	OptionsDialog* gamePreferences(bool editor);
+
+	/**
+	 * Call @ref slotChangeCursor with the config values
+	 **/
+	void changeToConfigCursor();
 
 private:
 	void initChat(KDockWidget* chatDock);
