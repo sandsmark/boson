@@ -250,6 +250,7 @@ void BosonLoadingWidget::update()
       text = i18n("Loading completed.");
       break;
     }
+#warning FIXME: LoadActions
   }
   mLoadingLabel->setText(text);
   mLoadingLabel->setPaletteForegroundColor( QColor( 255, 255, 255 ));
