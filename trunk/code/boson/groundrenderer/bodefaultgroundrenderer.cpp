@@ -24,7 +24,6 @@
 #include "../bosonmap.h"
 #include "../bosonconfig.h"
 #include "../defines.h"
-#include "../cell.h"
 #include "../bosongroundtheme.h"
 #include "../bomaterial.h"
 #include "../boson.h"
@@ -97,7 +96,6 @@ void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int 
 
 unsigned int BoDefaultGroundRenderer::renderCellsNow(int* cells, int count, int cornersWidth, const float* heightMap, const float* normalMap, const unsigned char* texMapStart)
 {
- // Texture offsets
  const int offsetCount = 5;
  const float offset = 1.0f / (float)offsetCount;
  const float texOffsets[] = { 0.0f, 0.2f, 0.4f, 0.6f, 0.8f };  // texOffsets[x] = offset * x
@@ -108,16 +106,27 @@ unsigned int BoDefaultGroundRenderer::renderCellsNow(int* cells, int count, int 
  for (int i = 0; i < count; i++) {
 	int x;
 	int y;
-	BoGroundRenderer::getCell(cells, i, &x, &y);
+	int w;
+	int h;
+	BoGroundRenderer::getCell(cells, i, &x, &y, &w, &h);
+	if (x < 0 || y < 0 || w < 0 || h < 0) {
+		boError() << k_funcinfo << x << " " << y << " " << w << " " << h << endl;
+		continue;
+	}
 
-	int celloffset = y * cornersWidth + x;
-	const unsigned char* texMapUpperLeft = texMapStart + celloffset;
-	const float* heightMapUpperLeft = heightMap + celloffset;
+	const int cellOffset = y * cornersWidth + x;
+	const unsigned char* texMapUpperLeft = texMapStart + cellOffset;
+	const float* heightMapUpperLeft = heightMap + cellOffset;
+
+	// offsets for corner arrays. just for convenience.
+	const int upperRightOffset = w;
+	const int lowerLeftOffset = cornersWidth * h;
+	const int lowerRightOffset = cornersWidth * h + w;
 
 	unsigned char upperLeftAlpha = *texMapUpperLeft;
-	unsigned char upperRightAlpha = *(texMapUpperLeft + 1);
-	unsigned char lowerLeftAlpha = *(texMapUpperLeft + cornersWidth);
-	unsigned char lowerRightAlpha = *(texMapUpperLeft + cornersWidth + 1);
+	unsigned char upperRightAlpha = *(texMapUpperLeft + upperRightOffset);
+	unsigned char lowerLeftAlpha = *(texMapUpperLeft + lowerLeftOffset);
+	unsigned char lowerRightAlpha = *(texMapUpperLeft + lowerRightOffset);
 
 	if ((upperLeftAlpha == 0) && (upperRightAlpha == 0) && (lowerLeftAlpha == 0) && (lowerRightAlpha == 0)) {
 		continue;
@@ -127,9 +136,14 @@ unsigned int BoDefaultGroundRenderer::renderCellsNow(int* cells, int count, int 
 	GLfloat cellYPos = -(float)y * BO_GL_CELL_SIZE;
 
 	float upperLeftHeight = *heightMapUpperLeft;
-	float upperRightHeight = *(heightMapUpperLeft + 1);
-	float lowerLeftHeight = *(heightMapUpperLeft + cornersWidth);
-	float lowerRightHeight = *(heightMapUpperLeft + cornersWidth + 1);
+	float upperRightHeight = *(heightMapUpperLeft + upperRightOffset);
+	float lowerLeftHeight = *(heightMapUpperLeft + lowerLeftOffset);
+	float lowerRightHeight = *(heightMapUpperLeft + lowerRightOffset);
+
+	const float* upperLeftNormal = normalMap + (y * cornersWidth + x) * 3;
+	const float* lowerLeftNormal = normalMap + ((y + 1) * cornersWidth + x) * 3;
+	const float* lowerRightNormal = normalMap + ((y + 1) * cornersWidth + (x + 1)) * 3;
+	const float* upperRightNormal = normalMap + (y * cornersWidth + (x + 1)) * 3;
 
 	// Map cell's y-coordinate to range (offsetCount - 1) ... 0
 	// FIXME: texy might be a bit confusing since we don't have texx
@@ -139,27 +153,28 @@ unsigned int BoDefaultGroundRenderer::renderCellsNow(int* cells, int count, int 
 	// ignored when light enabled.
 	BoMaterial::setDefaultAlpha((float)upperLeftAlpha / 255.0f);
 	glColor4ub(255, 255, 255, upperLeftAlpha);
-	glNormal3fv(normalMap + (y * cornersWidth + x) * 3);
+	glNormal3fv(upperLeftNormal);
+#warning FIXME: do we have to take w,h into account for the texture offsets? what do they do anyway?
 	glTexCoord2f(texOffsets[x % offsetCount], texOffsets[texy % offsetCount] + offset);
 	glVertex3f(cellXPos, cellYPos, upperLeftHeight);
 
 	BoMaterial::setDefaultAlpha((float)lowerLeftAlpha / 255.0f);
 	glColor4ub(255, 255, 255, lowerLeftAlpha);
-	glNormal3fv(normalMap + ((y + 1) * cornersWidth + x) * 3);
+	glNormal3fv(lowerLeftNormal);
 	glTexCoord2f(texOffsets[x % offsetCount], texOffsets[texy % offsetCount]);
-	glVertex3f(cellXPos, cellYPos - BO_GL_CELL_SIZE, lowerLeftHeight);
+	glVertex3f(cellXPos, cellYPos - h * BO_GL_CELL_SIZE, lowerLeftHeight);
 
 	BoMaterial::setDefaultAlpha((float)lowerRightAlpha / 255.0f);
 	glColor4ub(255, 255, 255, lowerRightAlpha);
-	glNormal3fv(normalMap + ((y + 1) * cornersWidth + (x + 1)) * 3);
+	glNormal3fv(lowerRightNormal);
 	glTexCoord2f(texOffsets[x % offsetCount] + offset, texOffsets[texy % offsetCount]);
-	glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos - BO_GL_CELL_SIZE, lowerRightHeight);
+	glVertex3f(cellXPos + w * BO_GL_CELL_SIZE, cellYPos - h * BO_GL_CELL_SIZE, lowerRightHeight);
 
 	BoMaterial::setDefaultAlpha((float)upperRightAlpha / 255.0f);
 	glColor4ub(255, 255, 255, upperRightAlpha);
-	glNormal3fv(normalMap + (y * cornersWidth + (x + 1)) * 3);
+	glNormal3fv(upperRightNormal);
 	glTexCoord2f(texOffsets[x % offsetCount] + offset, texOffsets[texy % offsetCount] + offset);
-	glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos, upperRightHeight);
+	glVertex3f(cellXPos + w * BO_GL_CELL_SIZE, cellYPos, upperRightHeight);
 
 	renderedQuads++;
  }
@@ -179,7 +194,9 @@ void BoDefaultGroundRenderer::renderCellColors(int* cells, int count, int width,
  for (int i = 0; i < count; i++) {
 	int x;
 	int y;
-	BoGroundRenderer::getCell(cells, i, &x, &y);
+	int w;
+	int h;
+	BoGroundRenderer::getCell(cells, i, &x, &y, &w, &h);
 
 	int coloroffset = y * width + x;
 	int heightoffset = y * cornersWidth + x;
@@ -190,21 +207,21 @@ void BoDefaultGroundRenderer::renderCellColors(int* cells, int count, int width,
 	GLfloat cellYPos = -(float)y * BO_GL_CELL_SIZE;
 
 	float upperLeftHeight = *heightMapUpperLeft;
-	float upperRightHeight = *(heightMapUpperLeft + 1);
-	float lowerLeftHeight = *(heightMapUpperLeft + cornersWidth);
-	float lowerRightHeight = *(heightMapUpperLeft + cornersWidth + 1);
+	float upperRightHeight = *(heightMapUpperLeft + w);
+	float lowerLeftHeight = *(heightMapUpperLeft + cornersWidth * h);
+	float lowerRightHeight = *(heightMapUpperLeft + cornersWidth * h + w);
 
 	glColor4ub(color[0], color[1], color[2], alpha);
 	glVertex3f(cellXPos, cellYPos, upperLeftHeight + 0.05);
 
 	glColor4ub(color[0], color[1], color[2], alpha);
-	glVertex3f(cellXPos, cellYPos - BO_GL_CELL_SIZE, lowerLeftHeight + 0.05);
+	glVertex3f(cellXPos, cellYPos - h * BO_GL_CELL_SIZE, lowerLeftHeight + 0.05);
 
 	glColor4ub(color[0], color[1], color[2], alpha);
-	glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos - BO_GL_CELL_SIZE, lowerRightHeight + 0.05);
+	glVertex3f(cellXPos + w * BO_GL_CELL_SIZE, cellYPos - h * BO_GL_CELL_SIZE, lowerRightHeight + 0.05);
 
 	glColor4ub(color[0], color[1], color[2], alpha);
-	glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos, upperRightHeight + 0.05);
+	glVertex3f(cellXPos + w * BO_GL_CELL_SIZE, cellYPos, upperRightHeight + 0.05);
  }
  glEnd();
 }

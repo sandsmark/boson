@@ -169,14 +169,16 @@ void BoGroundRenderer::renderCellGrid(int* cells, int cellsCount, const float* h
 	for (int i = 0; i < cellsCount; i++) {
 		int x;
 		int y;
-		BoGroundRenderer::getCell(cells, i, &x, &y);
+		int w;
+		int h;
+		BoGroundRenderer::getCell(cells, i, &x, &y, &w, &h);
 		const float dist = 0.0f;
 		GLfloat cellXPos = (float)x * BO_GL_CELL_SIZE;
 		GLfloat cellYPos = -(float)y * BO_GL_CELL_SIZE;
 			glVertex3f(cellXPos, cellYPos, heightMap[y * heightMapWidth + x] + dist);
-			glVertex3f(cellXPos, cellYPos - BO_GL_CELL_SIZE, heightMap[(y+1) * heightMapWidth + x] + dist);
-			glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos - BO_GL_CELL_SIZE, heightMap[(y+1) * heightMapWidth + (x+1)] + dist);
-			glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos, heightMap[y * heightMapWidth + (x+1)] + dist);
+			glVertex3f(cellXPos, cellYPos - h * BO_GL_CELL_SIZE, heightMap[(y+h) * heightMapWidth + x] + dist);
+			glVertex3f(cellXPos + w * BO_GL_CELL_SIZE, cellYPos - h * BO_GL_CELL_SIZE, heightMap[(y+h) * heightMapWidth + (x+w)] + dist);
+			glVertex3f(cellXPos + w * BO_GL_CELL_SIZE, cellYPos, heightMap[y * heightMapWidth + (x+w)] + dist);
 	}
 	glEnd();
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -195,21 +197,26 @@ int* BoGroundRenderer::createVisibleCellList(int* cells, PlayerIO* playerIO)
  BO_CHECK_NULL_RET0(cells);
  int* renderCells = 0;
  if (renderCellsCount() > 0) {
-	renderCells = new int[renderCellsCount() * 2];
+	renderCells = makeCellArray(renderCellsCount());
  } else {
 	// an array of size 0 isn't good.
-	renderCells = new int [2];
-	setCell(renderCells, 0, 0, 0);
+	renderCells = makeCellArray(1);
+	setCell(renderCells, 0, 0, 0, 1, 1);
  }
  int cellsCount = 0;
  for (unsigned int i = 0; i < renderCellsCount(); i++) {
 	int x;
 	int y;
-	getCell(this->renderCells(), i, &x, &y);
+	int w;
+	int h;
+	getCell(this->renderCells(), i, &x, &y, &w, &h);
 	if (x < 0 || y < 0) {
 		continue;
 	}
 
+#warning FIXME: w,h
+	// FIXME: if w,h are not both 1, then there are 3 possible cases (see
+	// below, at isFogged()).
 	if (!boWaterManager->cellVisible(x, y)) {
 		// don't draw anything at all. the cell won't be visible
 
@@ -218,6 +225,20 @@ int* BoGroundRenderer::createVisibleCellList(int* cells, PlayerIO* playerIO)
 		continue;
 	}
 
+#warning FIXME: w,h
+	// FIXME: w,h are not used. there are 3 cases possible:
+	// 1. the whole rect ((x,y),(x+w,y+h)) is fogged. ignore all cells (i.e.
+	//    "continue").
+	// 2. the whole rect is visible. leave cells in the array (i.e. do not
+	//    "continue").
+	// 3. parts of the rect are visible, other parts are not. in this case
+	//    we must split the rect up, probably into separate cells (i.e.
+	//    chunks with w==h==1). however then the renderCells array may get
+	//    _larger_ than it was before!
+	//    -> we must make sure that it can actually take all items (can
+	//       easily be done if it is at least as large as the number of
+	//       containing cells, not the number of its elements).
+
 	// AB: better solution: check *before* the cells get assigned to this
 	// class. localPlayerIO() is *very* ugly in this class
 	if (playerIO->isFogged(x, y)) {
@@ -225,7 +246,7 @@ int* BoGroundRenderer::createVisibleCellList(int* cells, PlayerIO* playerIO)
 		// because of the glClear() call.
 		continue;
 	}
-	setCell(renderCells, cellsCount, x, y);
+	setCell(renderCells, cellsCount, x, y, w, h);
 	cellsCount++;
  }
  *cells = cellsCount;
@@ -240,21 +261,25 @@ QString BoGroundRenderer::statisticsData() const
  return mStatistics->statisticsData();
 }
 
-void BoGroundRenderer::setCell(int* renderCells, unsigned int cellCount, int x, int y)
+void BoGroundRenderer::setCell(int* renderCells, unsigned int cellCount, int x, int y, int w, int h)
 {
- renderCells[cellCount * 2 + 0] = x;
- renderCells[cellCount * 2 + 1] = y;
+ renderCells[cellCount * 4 + 0] = x;
+ renderCells[cellCount * 4 + 1] = y;
+ renderCells[cellCount * 4 + 2] = w;
+ renderCells[cellCount * 4 + 3] = h;
 }
 
-void BoGroundRenderer::getCell(int* renderCells, unsigned int cellCount, int *x, int *y)
+void BoGroundRenderer::getCell(int* renderCells, unsigned int cellCount, int *x, int *y, int* w, int* h)
 {
- *x = renderCells[cellCount * 2 + 0];
- *y = renderCells[cellCount * 2 + 1];
+ *x = renderCells[cellCount * 4 + 0];
+ *y = renderCells[cellCount * 4 + 1];
+ *w = renderCells[cellCount * 4 + 2];
+ *h = renderCells[cellCount * 4 + 3];
 }
 
 int* BoGroundRenderer::makeCellArray(unsigned int count)
 {
- return new int[count * 2];
+ return new int[count * 4];
 }
 
 QString BoGroundRendererStatistics::statisticsData() const

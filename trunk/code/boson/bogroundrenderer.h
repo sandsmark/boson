@@ -171,8 +171,8 @@ public:
 
 // helper function that sets the cell @p cellCount in @p renderCells to @p x, @p
 // y.
-	static void setCell(int* renderCells, unsigned int cellCount, int x, int y);
-	static void getCell(int* renderCells, unsigned int cellCount, int* x, int* y);
+	static void setCell(int* renderCells, unsigned int cellCount, int x, int y, int w, int h);
+	static void getCell(int* renderCells, unsigned int cellCount, int* x, int* y, int* w, int* h);
 	static int* makeCellArray(unsigned int count);
 
 protected:
