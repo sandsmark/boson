@@ -299,7 +299,11 @@ void BosonModel::createDisplayLists()
 		if (i == 0) {
 			// we compute scaling for the first frame only.
 			scale = helper.scale(mWidth, mHeight);
+			kdDebug() << "master scale: " << scale << endl;
 		}
+
+		// FIXME: can we do our own calculations here, instead of OpenGL
+		// scaling? i.e. try to use lib3ds scaling!
 		glScalef(scale, scale, scale);
 
 		// we render from bottom to top - but for x and y in the center!
@@ -459,35 +463,82 @@ void BosonModel::renderNode(Lib3dsNode* node)
 		GLuint myTex = 0;
 		bool resetColor = false; // needs to be true after we changed the current color
 
+		// AB: we have *lots* of faces! in numbers the maximum i found
+		// so far (only a short look) was about 25 toplevel nodes and
+		// rarely child nodes. sometimes 2 child nodes or so - maybe 10
+		// per model (if at all).
+		// but we have up to (short look only) 116 faces *per node*
+		// usually it's about 10-20 faces (minimum) per node!
+		//
+		// so optimization should happen here - if possible at all...
+
+
+		// AB: WARNING: from now on we demand that all faces in a mesh
+		// use the same material and therefore the same texture!
+		// --> maybe we want to change this one day in order to provide
+		// more details or so. but i hope for now we gain some speed of
+		// it. so we can group all faces into a single glBegin() call!
+		Lib3dsMaterial* mat = 0;
 		for (p = 0; p < mesh->faces; ++p) {
 			Lib3dsFace* f = &mesh->faceL[p];
-			Lib3dsMaterial* mat = 0;
+			Lib3dsMaterial* mat2 = 0;
 			if (f->material[0]) {
-				mat = lib3ds_file_material_by_name(m3ds, f->material);
-			}
-			if (mat) {
-				// this is the texture map of the object.
-				// t->name is the (file-)name and in
-				// mesh->texelL you can find the texture
-				// coordinates for glTexCoord*()
-				// note that mesh->texels can be 0 - then the
-				// mesh doesn't have any texture. otherwise it
-				// must be equal to mesh->points
-				Lib3dsTextureMap* t = &mat->texture1_map;
-				QString texName = cleanTextureName(t->name);
-				if (texName.isEmpty()) {
-					myTex = 0;
-				} else {
-					myTex = mModelTextures->texture(texName);
-					if (!myTex) {
-						kdWarning() << k_funcinfo << "Texture " << t->name << " was not loaded" << endl;
-					}
+				mat2 = lib3ds_file_material_by_name(m3ds, f->material);
+				if (p == 0) {
+					mat = mat2;
 				}
-			} else {
-				//...
-				myTex = 0;
+				if (mat != mat2) {
+					kdWarning() << "face " << p << " uses different material than previous faces" << endl;
+				}
 			}
-	
+		}
+
+		if (mat) {
+			// this is the texture map of the object.
+			// t->name is the (file-)name and in
+			// mesh->texelL you can find the texture
+			// coordinates for glTexCoord*()
+			// note that mesh->texels can be 0 - then the
+			// mesh doesn't have any texture. otherwise it
+			// must be equal to mesh->points
+			Lib3dsTextureMap* t = &mat->texture1_map;
+			QString texName = cleanTextureName(t->name);
+			if (texName.isEmpty()) {
+				myTex = 0;
+			} else {
+				myTex = mModelTextures->texture(texName);
+				if (!myTex) {
+					kdWarning() << k_funcinfo << "Texture " << t->name << " was not loaded" << endl;
+				}
+			}
+		} else {
+			//...
+			myTex = 0;
+		}
+
+		glBindTexture(GL_TEXTURE_2D, myTex);
+		if (mat && myTex) {
+			Lib3dsTextureMap* t = &mat->texture1_map;
+			glMatrixMode(GL_TEXTURE);
+			glPushMatrix();
+			if (t->scale[0] || t->scale[1]) {
+				glScalef(t->scale[0], t->scale[1], 1.0);
+			}
+			glTranslatef(t->offset[0], t->offset[1], 0.0);
+			if (t->rotation != 0.0) {
+				glRotatef(t->rotation, 0.0, 0.0, 1.0);
+			}
+			glTranslatef(mesh->map_data.pos[0], mesh->map_data.pos[1], mesh->map_data.pos[2]);
+			float scale = mesh->map_data.scale;
+			if (scale != 0.0 && scale != 1.0) {
+				// doesn't seem to be used in our models
+				glScalef(scale, scale, 1.0);
+			}
+		}
+
+		glBegin(GL_TRIANGLES); // note: you shouldn't do calculations after a glBegin() but we compile a display list only, so its ok
+		for (p = 0; p < mesh->faces; p++) {
+			Lib3dsFace* f = &mesh->faceL[p];
 			Lib3dsVector v[3];
 			Lib3dsTexel tex[3];
 			for (int i = 0; i < 3; i++) {
@@ -510,37 +561,21 @@ void BosonModel::renderNode(Lib3dsNode* node)
 					resetColor = true;
 				}
 			}
-			glBindTexture(GL_TEXTURE_2D, myTex);
 			if (myTex) {
-				Lib3dsTextureMap* t = &mat->texture1_map;
-				glMatrixMode(GL_TEXTURE);
-				glPushMatrix();
-				if (t->scale[0] || t->scale[1]) {
-					glScalef(t->scale[0], t->scale[1], 1.0);
-				}
-				glTranslatef(t->offset[0], t->offset[1], 0.0);
-				if (t->rotation != 0.0) {
-					glRotatef(t->rotation, 0.0, 0.0, 1.0);
-				}
-				glTranslatef(mesh->map_data.pos[0], mesh->map_data.pos[1], mesh->map_data.pos[2]);
-				float scale = mesh->map_data.scale;
-				if (scale != 0.0 && scale != 1.0) {
-					glScalef(scale, scale, 1.0);
-				}
-				glBegin(GL_TRIANGLES);
-					glTexCoord2fv(tex[0]); glVertex3fv(v[0]);
-					glTexCoord2fv(tex[1]); glVertex3fv(v[1]);
-					glTexCoord2fv(tex[2]); glVertex3fv(v[2]);
-				glEnd();
-				glPopMatrix();
-				glMatrixMode(GL_MODELVIEW);
+				glTexCoord2fv(tex[0]); glVertex3fv(v[0]);
+				glTexCoord2fv(tex[1]); glVertex3fv(v[1]);
+				glTexCoord2fv(tex[2]); glVertex3fv(v[2]);
 			} else {
-				glBegin(GL_TRIANGLES);
-					glVertex3fv(v[0]);
-					glVertex3fv(v[1]);
-					glVertex3fv(v[2]);
-				glEnd();
+				glVertex3fv(v[0]);
+				glVertex3fv(v[1]);
+				glVertex3fv(v[2]);
 			}
+			
+		}
+		glEnd();
+		if (mat && myTex) {
+			glPopMatrix();
+			glMatrixMode(GL_MODELVIEW);
 		}
 		if (resetColor) {
 			glColor3f(1.0, 1.0, 1.0);
@@ -596,5 +631,31 @@ void BosonModel::finishLoading()
  delete mTeamColor;
  mTeamColor = 0;
  mTextureNames.clear();
+}
+
+void BosonModel::dumpVector(Lib3dsVector v)
+{
+ kdDebug() << "Vector: " << v[0] << "," << v[1] << "," << v[2] << endl;
+}
+
+void BosonModel::dumpTriangle(Lib3dsVector* v, GLuint texture, Lib3dsTexel* tex)
+{
+ QString text = "triangle: ";
+ for (int i = 0; i < 3; i++) {
+	text += QString("%1,%2,%3").arg(v[i][0]).arg(v[i][1]).arg(v[i][2]);
+	text += " ; ";
+ }
+ if (texture && tex) {
+	text += QString("texture=%1-->").arg(texture);
+	for (int i = 0; i < 3; i++) {
+		text += QString("%1,%2").arg(tex[i][0]).arg(tex[i][1]);
+		if (i < 2) {
+			text += " ; ";
+		}
+	}
+ } else {
+	text += "(no texture)";
+ }
+ kdDebug() << text << endl;
 }
 

@@ -123,6 +123,19 @@ protected:
 	 **/
 	const QString& baseDirectory() const { return mDirectory; }
 
+	/**
+	 * @param v A single vector
+	 **/
+	void dumpVector(Lib3dsVector v);
+
+	/**
+	 * @param v An array of 3 Lib3dsVector
+	 * @param texture none if 0, otherwise the textue object
+	 * @param tex if texture is non-null this must be the texture
+	 * coordinates (array of 3) as provided for glTexCoord*()
+	 **/
+	void dumpTriangle(Lib3dsVector* v, GLuint texture = 0, Lib3dsTexel* tex = 0);
+
 private:
 	void init();
 	void setCurrentFrame(BoFrame* frame);
