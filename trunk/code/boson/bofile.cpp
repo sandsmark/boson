@@ -31,6 +31,9 @@ BoFile::BoFile(const QString& file, bool readOnly)
 {
  mTar = new KTar(file, QString::fromLatin1("application/x-gzip"));
  // by default we keep the file open until destruction!!
+ //
+ // AB: open() parses the directory and file entries, but it does NOT read the
+ // entire files.
  if (readOnly) {
 	mTar->open(IO_ReadOnly);
  } else {
