@@ -2,7 +2,7 @@
 
 SUBDIRS = data bosonwidgets items commandframe startupwidgets sound info script
 
-bin_PROGRAMS = boson bounit boprofiling bocursor borender boinfo
+bin_PROGRAMS = boson bounit boprofiling bocursor borender boinfo bo3dsdebug
 
 INCLUDES = -I$(kde_includes)/arts -I$(top_srcdir)/bodebug $(all_includes)
 
@@ -35,6 +35,7 @@ BOSON_COMMON_SRC = \
 	bo3dtools.cpp \
 	bomatrixwidget.cpp \
 	bosonminimap.cpp \
+	bosonglminimap.cpp \
 	kgameunitdebug.cpp \
 	kgameplayerdebug.cpp \
 	kgamecelldebug.cpp \
@@ -44,6 +45,7 @@ BOSON_COMMON_SRC = \
 	editorwidget.cpp \
 	bosonglwidget.cpp \
 	bosonbigdisplaybase.cpp \
+	bopixmaprenderer.cpp \
 	bogroundrenderer.cpp \
 	bocamera.cpp \
 	boautocamera.cpp \
@@ -189,6 +191,19 @@ boinfo_SOURCES = \
 		boglobal.cpp \
 		bosonglwidget.cpp \
 		boinfomain.cpp
+
+bo3dsdebug_LDFLAGS = $(KDE_RPATH) $(all_libraries)
+bo3dsdebug_LDADD = \
+		$(top_builddir)/bodebug/libbodebug.la \
+		-l3ds \
+		-lkio $(LIB_KDEUI)
+bo3dsdebug_SOURCES = \
+		boapplication.cpp \
+		boglobal.cpp \
+		bo3dtools.cpp \
+		kgamemodeldebug.cpp \
+		bomatrixwidget.cpp \
+		bo3dsdebugmain.cpp
 
 METASOURCES = AUTO
 

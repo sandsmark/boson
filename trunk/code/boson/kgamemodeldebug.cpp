@@ -20,12 +20,9 @@
 #include "kgamemodeldebug.h"
 #include "kgamemodeldebug.moc"
 
-#include "speciestheme.h"
-#include "unitproperties.h"
 #include "bo3dtools.h"
-#include "bo3dsload.h"
-#include "bodebug.h"
 #include "bomatrixwidget.h"
+#include "bodebug.h"
 
 #include <qcombobox.h>
 #include <qcheckbox.h>
@@ -42,6 +39,7 @@
 #include <qvbox.h>
 #include <qstringlist.h>
 #include <qtooltip.h>
+#include <qdir.h>
 
 #include <ksimpleconfig.h>
 #include <klistbox.h>
@@ -60,6 +58,13 @@
 #include <lib3ds/quat.h>
 
 #include <math.h>
+
+// not working anyway and just adds a dependancy to bo3dsload
+#define ALLOW_FACE_CONNECTIONS 0
+
+#if ALLOW_FACE_CONNECTIONS
+#include "bo3dsload.h"
+#endif
 
 class BoMaterialWidget : public QWidget
 {
@@ -844,6 +849,9 @@ void KGameModelDebug::initMeshPage()
  connect(d->mHideConnectableWidgets, SIGNAL(toggled(bool)), this, SLOT(slotHideConnectableWidgets(bool)));
  slotHideConnectableWidgets(d->mHideConnectableWidgets->isChecked());
  QToolTip::add(d->mHideConnectableWidgets, i18n("The \"connectable\" widgets show which faces of a mesh are connectable to a certain face. This is important to make GL_TRIANGLE_STRIPs, but the code used here is obsolete."));
+#if !ALLOW_FACE_CONNECTIONS
+ d->mHideConnectableWidgets->hide();
+#endif
 
 
  QVBox* matrixBox = new QVBox(splitter);
@@ -909,7 +917,7 @@ void KGameModelDebug::initNodePage()
  d->mTabWidget->addTab(d->mNodePage, i18n("&Nodes"));
 }
 
-void KGameModelDebug::addModel(const QString& file, const QString& _name)
+void KGameModelDebug::addFile(const QString& file, const QString& _name)
 {
  unsigned int i = d->mModelBox->count();
  QString name = _name.isEmpty() ? QString::number(i) : _name;
@@ -917,38 +925,41 @@ void KGameModelDebug::addModel(const QString& file, const QString& _name)
  d->mModelBox->insertItem(name);
 }
 
-void KGameModelDebug::addTheme(SpeciesTheme* theme)
+void KGameModelDebug::addFiles(const QString& _dir)
 {
- if (!theme) {
-	boError() << k_funcinfo << "NULL theme" << endl;
-	return;
- }
- QValueList<const UnitProperties*> prop = theme->allUnits();
- QValueList<const UnitProperties*>::Iterator it;
- for (it = prop.begin(); it != prop.end(); ++it) {
-	QString file = (*it)->unitPath() + SpeciesTheme::unitModelFile();
-	addModel(file, (*it)->name());
- }
- 
- // FIXME: duplicated code
- QString fileName = theme->themePath() + QString::fromLatin1("objects/objects.boson");
- if (!KStandardDirs::exists(fileName)) {
-	boDebug() << k_funcinfo << "no objects.boson file found" << endl;
-	// We assume that this theme has no objects and don't complain
-	return;
+ QStringList allDirs;
+ QStringList allFiles;
+ allDirs.append(_dir);
+ for (unsigned int i = 0; i < allDirs.count(); i++) {
+	QDir dir(allDirs[i]);
+	QStringList dirs = dir.entryList(QDir::Dirs | QDir::Readable | QDir::Executable);
+	dirs.remove(".");
+	dirs.remove("..");
+	for (unsigned int j = 0; j < dirs.count(); j++) {
+		if (allDirs.contains(dirs[j]) == 0) {
+			allDirs.append(dir.absFilePath(dirs[j]));
+		}
+	}
+
+	QStringList files = dir.entryList(QString::fromLatin1("*.3ds"), QDir::Files | QDir::Readable);
+	for (unsigned int j = 0; j < files.count(); j++) {
+		if (allFiles.contains(files[j]) == 0) {
+			allFiles.append(dir.absFilePath(files[j]));
+		}
+	}
  }
 
- KSimpleConfig cfg(fileName);
- QStringList objects = cfg.groupList();
- QStringList::Iterator oit;
- for (oit = objects.begin(); oit != objects.end(); ++oit) {
-	cfg.setGroup(*oit);
-	float width, height;
-	QString file;
-	width = (float)cfg.readDoubleNumEntry("Width", 1.0);
-	height = (float)cfg.readDoubleNumEntry("Height", 1.0);
-	file = cfg.readEntry("File", "missile.3ds");
-	addModel(theme->themePath() + QString::fromLatin1("objects/") + file, *oit);
+ // throw away any files that we know already
+ QMap<int, QString>::Iterator it;
+ for (it = d->mModelFiles.begin(); it != d->mModelFiles.end(); ++it) {
+	if (allFiles.contains(it.data()) != 0) {
+		allFiles.remove(it.data());
+	}
+ }
+
+ // add remaining files
+ for (unsigned int i = 0; i < allFiles.count(); i++) {
+	addFile(allFiles[i], allFiles[i]);
  }
 }
 
@@ -1265,6 +1276,7 @@ void KGameModelDebug::addTextureMap(const QString& name, _Lib3dsTextureMap* t)
 
 void KGameModelDebug::slotConnectToFace(QListViewItem* item)
 {
+#if ALLOW_FACE_CONNECTIONS
  Lib3dsFace* face = d->mListItem2Face[item];
  d->mConnectedFacesList->clear();
  d->mUnconnectedFacesList->clear();
@@ -1289,6 +1301,7 @@ void KGameModelDebug::slotConnectToFace(QListViewItem* item)
 		d->mUnconnectedFacesList->addFace(i, f, mesh, d->mUseLib3dsCoordinates->isChecked());
 	}
  }
+#endif
 }
 
 void KGameModelDebug::slotHideConnectableWidgets(bool h)

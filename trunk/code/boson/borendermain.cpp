@@ -978,7 +978,26 @@ void RenderMain::slotDebugModels()
 
  QPtrListIterator<SpeciesTheme> it(mSpecies);
  for (; it.current(); ++it) {
-	models->addTheme(it.current());
+	SpeciesTheme* theme = it.current();
+
+	// units
+	QValueList<const UnitProperties*> prop = it.current()->allUnits();
+	QValueList<const UnitProperties*>::Iterator propIt;
+	for (propIt = prop.begin(); propIt != prop.end(); ++propIt) {
+		QString file = (*propIt)->unitPath() + SpeciesTheme::unitModelFile();
+		models->addFile(file, QString("%1/%2").arg(theme->identifier()).arg((*propIt)->name()));
+	}
+
+	// objects
+	QStringList objectFiles;
+	QStringList objects = theme->allObjects(&objectFiles);
+	for (unsigned int i = 0; i < objects.count(); i++) {
+		QString file = theme->themePath() + QString::fromLatin1("objects/") + objectFiles[i];
+		models->addFile(file, objects[i]);
+	}
+
+	// add any files that we might have missed
+	models->addFiles(theme->themePath());
  }
  models->slotUpdate();
 
