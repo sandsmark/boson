@@ -129,7 +129,7 @@ void BosonMiniMap::slotAddCell(int x, int y, int groundType, unsigned char)
 	case Cell::GroundGrass:
 	case Cell::GroundGrassOil:
 	case Cell::GroundGrassMineral:
-		setPoint(x, y, green);
+		setPoint(x, y, darkGreen);
 		break;
 	case Cell::GroundDesert:
 		setPoint(x, y, darkYellow);
@@ -197,9 +197,6 @@ void BosonMiniMap::slotAddUnit(Unit* unit, int x, int y)
 	color = COLOR_UNKNOWN;
  } else {
 	color = theme->teamColor();
- }
- if (color == green) { // green on gren ...
-	color = darkGreen;
  }
  if (unit->isFacility()) {
 	setPoint(x, y, color);
