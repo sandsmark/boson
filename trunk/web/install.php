@@ -59,7 +59,7 @@ $ make
 $ su
 # make install</pre><br><p class=\"bigboxtext\">");
 
-draw_bigbox_subheader("If you downloaded code, data and music separately");
+draw_bigbox_subheader("If you downloaded code, data and music separately do all of the following");
 
 draw_bigbox_text("</p><pre>$ tar xjvf boson-code-0.10.tar.bz2
 $ cd code$ ./configure
