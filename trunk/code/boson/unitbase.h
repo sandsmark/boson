@@ -282,15 +282,6 @@ public:
 	void increaseDeletionTimer();
 	unsigned int deletionTimer() const;
 
-	/**
-	 * @return true if unit is moving
-	 **/
-	inline bool isMoving() const
-	{
-		return mIsMoving;
-	}
-
-	inline void setMoving(bool moving) { mIsMoving = moving; };
 
 	virtual void setMovingStatus(MovingStatus m) { mMovingStatus = m; }
 
@@ -326,8 +317,6 @@ private:
 	static void initStatic();
 
 private:
-	bool mIsMoving;
-
 	KGameProperty<unsigned long int> mArmor;
 	KGameProperty<unsigned long int> mShields;
 	KGameProperty<unsigned long int> mShieldReloadCounter;

@@ -39,7 +39,6 @@ UnitBase::UnitBase(const UnitProperties* prop, Player* owner, BosonCanvas* canva
  initStatic();
  mWeaponProperties = 0; // created on the fly in weaponDataHandler()
  mUnitProperties = prop; // WARNING: this might be 0 at this point! MUST be != 0 for Unit, but ScenarioUnit uses 0 here
- mIsMoving = false;
 
 // PolicyLocal?
  registerData(&mHealth, IdHealth);

@@ -32,6 +32,7 @@
 #include "upgradeproperties.h"
 #include "bodebug.h"
 #include "bosonweapon.h"
+#include "bosonpath.h"
 
 #include <klocale.h>
 
@@ -858,16 +859,13 @@ void BombingPlugin::advance(unsigned int)
 // if ((x() != d->mMoveDestX) || (y() != d->mMoveDestY)) {
 // if (dist > 2) {
 	boDebug() << k_funcinfo << "not at drop point - moving..." << endl;
-#warning FIXME!!! NEW_PF!!!
-#ifndef PATHFINDER_TNG
-	if (!unit()->moveTo(mPosX, mPosY, 0, false, false)) {
+	if (!unit()->moveTo(mPosX, mPosY, 0)) {
 		boWarning() << k_funcinfo << "Moving failed. Now what?" << endl;
 		unit()->setWork(Unit::WorkNone);
 	} else {
-		//d->mSlowDownAtDestination = 0;
+		unit()->pathInfo()->slowDownAtDest = false;
 		unit()->setAdvanceWork(Unit::WorkMove);
 	}
-#endif
 	return;
  }
 
