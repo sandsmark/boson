@@ -45,6 +45,7 @@
 #include <qvaluelist.h>
 #include <qfileinfo.h>
 #include <qptrvector.h>
+#include <qgl.h>
 
 #include <GL/glu.h>
 #include <GL/gl.h>
@@ -660,15 +661,19 @@ public:
 	{
 		mMapTexture = 0;
 		mGLMapTexture = 0;
+
+		mLogoTexture = 0;
 	}
 	BoMatrix mModelviewMatrix;
-	QImage mOrigLogo; // original size
-	QImage mLogo; // scaled size
+	QImage mOrigLogo;
 
 	GLubyte* mMapTexture;
 	int mMapTextureWidth;
 	int mMapTextureHeight;
 	BoTexture* mGLMapTexture;
+
+	BoTexture* mLogoTexture;
+
 
 	bool mUpdatesEnabled;
 	int mMiniMapChangesSinceRendering;
@@ -704,6 +709,7 @@ BosonGLMiniMapRenderer::~BosonGLMiniMapRenderer()
 {
  delete d->mGLMapTexture;
  delete[] d->mMapTexture;
+ delete d->mLogoTexture;
  delete d;
 }
 
@@ -723,19 +729,6 @@ void BosonGLMiniMapRenderer::setMiniMapSize(unsigned int width, unsigned int hei
 {
  mMiniMapWidth = width;
  mMiniMapHeight = height;
- scaleImages();
-}
-
-void BosonGLMiniMapRenderer::scaleImages()
-{
- // note: textures don't have to be scaled.
- // note: at this point _only_ the original versions of the images need to be
- // valid (eg d->mOrigLogo). the scaled versions (d->mLogo) can be invalid!
- QImage tmp;
- if (!d->mOrigLogo.isNull()) {
-	tmp = d->mOrigLogo.smoothScale(mMiniMapWidth, mMiniMapHeight, QImage::ScaleMin);
-	d->mLogo = BosonGLWidget::convertToGLFormat(tmp);
- }
 }
 
 void BosonGLMiniMapRenderer::createMap(unsigned int w, unsigned int h, BosonGroundTheme* theme)
@@ -797,24 +790,28 @@ void BosonGLMiniMapRenderer::renderGimmicks()
 {
 }
 
-#warning FIXME: renderLogo in libufo
 void BosonGLMiniMapRenderer::renderLogo()
 {
- if (d->mLogo.width() * d->mLogo.height() <= 0 || d->mLogo.isNull()) {
-	return;
- }
- if (d->mLogo.width() != (int)mMiniMapWidth) {
-	boError() << k_funcinfo << "logo width != minimap width" << endl;
-	return;
- }
- if (d->mLogo.height() != (int)mMiniMapHeight) {
-	boError() << k_funcinfo << "logo height != minimap height" << endl;
-	return;
- }
+ BO_CHECK_NULL_RET(d->mLogoTexture);
  glPushAttrib(GL_ENABLE_BIT);
- boTextureManager->disableTexturing();
- glRasterPos2i(mPosX, mPosY);
- glDrawPixels(d->mLogo.width(), d->mLogo.height(), GL_RGBA, GL_UNSIGNED_BYTE, d->mLogo.bits());
+ glEnable(GL_TEXTURE_2D);
+ d->mLogoTexture->bind();
+
+ // AB: note that renderQuad() is for renderMiniMap() only, not for this one.
+ glBegin(GL_QUADS);
+	glTexCoord2f(0.0f, 0.0f);
+	glVertex2i(0, 0);
+
+	glTexCoord2f(1.0f, 0.0f);
+	glVertex2i(miniMapWidth(), 0);
+
+	glTexCoord2f(1.0f, 1.0f);
+	glVertex2i(miniMapWidth(), miniMapHeight());
+
+	glTexCoord2f(0.0f, 1.0f);
+	glVertex2i(0, miniMapHeight());
+ glEnd();
+
  glPopAttrib();
  boTextureManager->invalidateCache();
 }
@@ -981,7 +978,14 @@ void BosonGLMiniMapRenderer::setLogo(const QImage& image)
  QImage image_ = image;
  image_.setAlphaBuffer(true);
  d->mOrigLogo = image_;
- scaleImages();
+
+ QImage gl = QGLWidget::convertToGLFormat(d->mOrigLogo);
+
+ delete d->mLogoTexture;
+ d->mLogoTexture = new BoTexture(gl.bits(),
+		gl.width(), gl.height(),
+		BoTexture::FilterLinear | BoTexture::FormatRGBA |
+		BoTexture::DontCompress | BoTexture::DontGenMipmaps);
 }
 
 void BosonGLMiniMapRenderer::setZoomImages(const QImage& in_, const QImage& out_, const QImage& defaultZoom_)

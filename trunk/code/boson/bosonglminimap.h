@@ -268,13 +268,6 @@ protected:
 		return 5;
 	}
 
-protected:
-	/**
-	 * Scale all images in this class according to the new minimap size (see
-	 * @ref setMiniMapSize)
-	 **/
-	void scaleImages();
-
 private:
 	void renderQuad();
 
