@@ -400,7 +400,35 @@ void Unit::updateZ(float moveByX, float moveByY, float* moveByZ, float* rotateX,
 	}
  }
 #else
- float newZ = canvas()->heightAtPoint(x() + moveByX + width() / 2, y() + moveByY + height() / 2);
+ float centerx = x() + moveByX + width() / 2;
+ float centery = y() + moveByY + height() / 2;
+
+ float newZ = canvas()->heightAtPoint(centerx, centery);
+
+ // Calculate rotation stuff
+ float realx = 0.0f, realy = 0.0f;
+ // Calculate x rotation
+ Bo3dTools::pointByRotation(&realx, &realy, rotation(), height() / 2);
+ float rearz, frontz;
+ frontz = canvas()->heightAtPoint(centerx + realx, centery + realy);
+ rearz = canvas()->heightAtPoint(centerx - realx, centery - realy);
+ // Calculate angle from frontz to rearz
+ float xrot = Bo3dTools::rad2deg(atan(QABS(frontz - rearz) * BO_TILE_SIZE / height()));
+ *rotateX = (frontz >= rearz) ? xrot : -xrot;
+
+ // Calculate y rotation
+ float myrot = rotation() + 90;
+ if (myrot > 360) {
+	myrot -= 360;
+ }
+ Bo3dTools::pointByRotation(&realx, &realy, myrot, width() / 2);
+ float rightz, leftz;
+ rightz = canvas()->heightAtPoint(centerx + realx, centery + realy);
+ leftz = canvas()->heightAtPoint(centerx - realx, centery - realy);
+ // Calculate angle from leftz to rightz
+ float yrot = Bo3dTools::rad2deg(atan(QABS(rightz - leftz) * BO_TILE_SIZE / width()));
+ *rotateY = (leftz >= rightz) ? yrot : -yrot;
+
 #endif
 
  if (isFlying()) {
@@ -494,6 +522,7 @@ bool Unit::attackEnemyUnitsInRange()
 			} else {
 				// If we can get wanted rotation with only little turning, then we don't call turnTo()
 				setRotation(rot);
+				updateRotation();
 			}
 		}
 	}
@@ -639,6 +668,7 @@ void Unit::advanceAttack(unsigned int advanceCount)
 			return;
 		} else {
 			setRotation(rot);
+			updateRotation();
 		}
 	}
  }
@@ -716,6 +746,7 @@ void Unit::advanceTurn(unsigned int)
  }
 
  setRotation((float)dir);
+ updateRotation();
 
  if (d->mWantedRotation == dir) {
 	if (work() == WorkTurn) {
@@ -1027,6 +1058,7 @@ bool Unit::loadFromXML(const QDomElement& root)
 	}
  }
  setRotation(rotation);
+ updateRotation();
  setAdvanceWork(advanceWork());
  return true;
 }
@@ -1359,6 +1391,16 @@ BosonWeapon* Unit::weapon(unsigned long int id) const
  return 0;
 }
 
+void Unit::updateRotation()
+{
+ float rotateX = 0.0f;
+ float rotateY = 0.0f;
+ float moveZ = 0.0f;
+ updateZ(0.0f, 0.0f, &moveZ, &rotateX, &rotateY);
+ setXRotation(rotateX);
+ setYRotation(rotateY);
+}
+
 
 /////////////////////////////////////////////////
 // MobileUnit
@@ -1406,6 +1448,7 @@ MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, BosonCanvas* c
  setParticleSystems(unitProperties()->newConstructedParticleSystems(x() + width() / 2, y() + height() / 2, z()));
 
  setRotation((float)(owner->game()->random()->getLong(359)));
+ updateRotation();
  setMaxSpeed(prop->speed());
  setAccelerationSpeed(prop->accelerationSpeed());
  setDecelerationSpeed(prop->decelerationSpeed());

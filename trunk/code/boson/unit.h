@@ -320,6 +320,12 @@ public:
 	virtual void turnTo(int degrees);
 
 	/**
+	 * Updates unit's x- and y-rotation, so that it will be rotated accordingly to
+	 * to the slope of the terrain it's on
+	 **/
+	void updateRotation();
+
+	/**
 	 * Just stop moving. Don't call this if you don't want to stop attacking
 	 * as well! This sets @ref work to @ref WorkNone
 	 **/

@@ -270,7 +270,7 @@ bool BosonItem::bosonCollidesWith(BosonItem* item) const
  //  check if this item's center isn't inside other item's bounding rect
  // FIXME: maybe we need same for items. ATM, units can't diagonally cross tiles
  //  with mines
- return item->boundingRectAdvanced().contains(boundingRectAdvanced().center(), true);
+ return item->boundingRectAdvanced().contains(QPoint(x() + xVelocity() + width() / 2, y() + yVelocity() + height() / 2), true);
 }
 
 void BosonItem::setAnimated(bool a)
@@ -494,7 +494,7 @@ void BosonItem::rotateParticleSystems(float angle, float x, float y, float z)
  if (particleSystems() && particleSystems()->count() > 0) {
 	QPtrListIterator<BosonParticleSystem> it(*particleSystems());
 	for (; it.current(); ++it) {
-		it.current()->setRotation(-angle, x, y, z);
+		it.current()->setRotation(angle, x, y, z);
 	}
  }
 }
