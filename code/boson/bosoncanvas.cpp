@@ -1381,7 +1381,7 @@ Unit* BosonCanvas::createUnit(unsigned long int unitType, Player* owner)
 {
  BO_CHECK_NULL_RET0(owner);
  SpeciesTheme* theme = owner->speciesTheme();
- BO_CHECK_NULL_RET0(owner); // BAAAAD - will crash
+ BO_CHECK_NULL_RET0(theme); // BAAAAD - will crash
 
  const UnitProperties* prop = theme->unitProperties(unitType);
  if (!prop) {
