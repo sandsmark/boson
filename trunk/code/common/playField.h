@@ -21,6 +21,8 @@
 #ifndef PLAYFIELD_H 
 #define PLAYFIELD_H 
 
+#include <qstring.h>
+
 #include "../common/unitType.h"
 #include "../common/groundType.h"
 
@@ -60,7 +62,7 @@ class playField //: public  QDataStream
 {
 
  public:
-	playField(const char *name);
+	playField(const QString name);
 	~playField();
 
 	bool	load	(void);
@@ -90,7 +92,7 @@ class playField //: public  QDataStream
 	void	writePeople();
 
 	QDataStream	*stream;
-	const char	*filename;
+	QString		filename;
 
 public :
 	int		nbPlayer;

@@ -19,8 +19,12 @@
  ***************************************************************************/
 
 #include <assert.h>
+
 #include <qdatastream.h>
 #include <qfile.h>
+
+#include <kapp.h>
+
 #include "playField.h"
 
 #include "../common/groundType.h"
@@ -34,8 +38,9 @@
 #define		TAG_FIELD	"boeditor_magic_0_1"
 
 
-playField::playField(const char *name)
+playField::playField(const QString name)
 {
+//	filename	= kapp->kde_datadir() + "/boson/map/" + name;
 	filename	= name;
 	stream		= 0l;
 	map.cells	= 0l;
@@ -52,7 +57,7 @@ playField::~playField()
 
 bool playField::write(void)
 {
-	QFile f(filename);
+	QFile f(filename.data());
 
 	/* open  stream */
 	if (!f.open(IO_WriteOnly)){
@@ -80,7 +85,7 @@ bool playField::load()
 //bool playField::load(createCellFunc *CCFunc)
 {
 	char *magic;
-	QFile f(filename);
+	QFile f(filename.data());
 	bool is_ok = true;
 
 	/* open  stream */
