@@ -82,7 +82,7 @@ void BosonShot::init()
   //  be wrong until missile is advanced.
   setVisible(false);
 
-  if(!mOwner)
+  if(!owner())
   {
     boError(350) << k_funcinfo << "NULL owner!" << endl;
     setActive(false);
@@ -136,7 +136,7 @@ void BosonShot::advanceMoveCheck()
 
 const QColor* BosonShot::teamColor() const
 {
-  return mOwner ? &mOwner->teamColor() : 0;
+  return owner() ? &owner()->teamColor() : 0;
 }
 
 bool BosonShot::saveAsXML(QDomElement& root)
