@@ -502,7 +502,7 @@ bool BosonItem::initItemRenderer()
  if (itemRenderer()) {
 	return itemRenderer()->setModel(getModelForItem());
  }
- return false;
+ return true;
 }
 
 bool BosonItem::itemInFrustum(const float* frustum) const
