@@ -31,6 +31,8 @@ Game TODOs
   seldom only)
 - don't display the firepower-bar (i.e. reload bar) when the unit/facility
   cannot shoot
+- display "filling" status of harvesters instead of firepower. use different
+  colors!
 
 
 Editor (map, unit, scenario) TODOs
