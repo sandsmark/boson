@@ -215,17 +215,17 @@ void BosonShot::explode()
 long int BosonShot::damage() const
 {
   return properties() ? properties()->damage() : 0;
-};
+}
 
 float BosonShot::damageRange() const
 {
   return properties() ? properties()->damageRange() : 0;
-};
+}
 
 float BosonShot::fullDamageRange() const
 {
   return properties() ? properties()->fullDamageRange() : 0;
-};
+}
 
 
 
