@@ -1,8 +1,0 @@
-<!DOCTYPE kpartgui SYSTEM "kpartgui.dtd">
-<kpartgui name="bosongame" version="1">
-<MenuBar>
-  <Menu name="game"><text>&amp;Game</text>
-    <Action name="game_center_base" />
-  </Menu>
-</MenuBar>
-</kpartgui>

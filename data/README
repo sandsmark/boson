@@ -1,5 +1,0 @@
-First check out the code (beside this dir). Then do a
-ln -s ../code/admin admin
-And finally start 
-make -f Makefile.cvs && ./configure && make && make install
-to install the data.

@@ -1,8 +1,0 @@
-Makefile
-Makefile.in
-.deps
-.libs
-*.moc
-*.lo
-bodebugdialog
-bodebugdialog_meta_unload.cpp
