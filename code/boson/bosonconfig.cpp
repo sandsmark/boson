@@ -489,3 +489,14 @@ QValueList<float> BosonConfig::readFloatNumList(KConfig* cfg, QString key)
   }
   return list;
 }
+
+void BosonConfig::writeFloatNumList(QValueList<float> list, KConfig* cfg, QString key)
+{
+  QStringList strlist;
+  QString str;
+  for(QValueList<float>::Iterator it = list.begin(); it != list.end(); it++)
+  {
+    strlist.append(str.setNum(*it));
+  }
+  cfg->writeEntry(key, strlist);
+}

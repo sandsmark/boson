@@ -56,6 +56,8 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg, bool full)
   mCanShootAtAirUnits = cfg->readBoolEntry("CanShootAtAirUnits", false);
   mCanShootAtLandUnits = cfg->readBoolEntry("CanShootAtLandUnits", false);
   mMaxHeight = (float)(cfg->readDoubleNumEntry("MaxHeight", 1));
+  mShootParticleSystemOffset = BoVector3::load(cfg, "Offset");
+  mShootParticleSystemOffset.scale(BO_TILE_SIZE);
   mShootParticleSystemIds = BosonConfig::readUnsignedLongNumList(cfg, "ShootParticles");
   mFlyParticleSystemIds = BosonConfig::readUnsignedLongNumList(cfg, "FlyParticles");
   mHitParticleSystemIds = BosonConfig::readUnsignedLongNumList(cfg, "HitParticles");
@@ -86,6 +88,7 @@ void BosonWeaponProperties::savePlugin(KSimpleConfig* cfg)
   cfg->writeEntry("CanShootAtAirUnits", mCanShootAtAirUnits);
   cfg->writeEntry("CanShootAtLandUnits", mCanShootAtLandUnits);
   cfg->writeEntry("MaxHeight", (double)mMaxHeight);
+  mShootParticleSystemOffset.save(cfg, "Offset");
   BosonConfig::writeUnsignedLongNumList(cfg, "ShootParticles", mShootParticleSystemIds);
   BosonConfig::writeUnsignedLongNumList(cfg, "FlyParticles", mFlyParticleSystemIds);
   BosonConfig::writeUnsignedLongNumList(cfg, "HitParticles", mHitParticleSystemIds);
@@ -108,47 +111,50 @@ void BosonWeaponProperties::reset()
  mModelFileName = "missile.3ds";
 }
 
-BosonShot* BosonWeaponProperties::newShot(Unit* attacker, float x, float y, float z, float tx, float ty, float tz) const
+BosonShot* BosonWeaponProperties::newShot(Unit* attacker, BoVector3 pos, BoVector3 target) const
 {
   if(!attacker)
   {
     boError() << k_funcinfo << "NULL attacker" << endl;
     return 0;
   }
-  return new BosonShot(this, attacker->owner(), attacker->canvas(), x, y, z, tx, ty, tz);
+  return new BosonShot(this, attacker->owner(), attacker->canvas(), pos + mShootParticleSystemOffset, target);
 }
 
-QPtrList<BosonParticleSystem> BosonWeaponProperties::newShootParticleSystems(float x, float y, float z) const
+QPtrList<BosonParticleSystem> BosonWeaponProperties::newShootParticleSystems(BoVector3 pos, float rotation) const
 {
+  BoVector3 realpos = pos + mShootParticleSystemOffset;
   QPtrList<BosonParticleSystem> list;
   QPtrListIterator<BosonParticleSystemProperties> it(mShootParticleSystems);
   while(it.current())
   {
-    list.append(it.current()->newSystem(x, y, z));
+    BosonParticleSystem* s = it.current()->newSystem(pos);
+    s->setRotation(BoVector3(0, 0, -rotation));
+    list.append(s);
     ++it;
   }
   return list;
 }
 
-QPtrList<BosonParticleSystem> BosonWeaponProperties::newFlyParticleSystems(float x, float y, float z) const
+QPtrList<BosonParticleSystem> BosonWeaponProperties::newFlyParticleSystems(BoVector3 pos) const
 {
   QPtrList<BosonParticleSystem> list;
   QPtrListIterator<BosonParticleSystemProperties> it(mFlyParticleSystems);
   while(it.current())
   {
-    list.append(it.current()->newSystem(x, y, z));
+    list.append(it.current()->newSystem(pos));
     ++it;
   }
   return list;
 }
 
-QPtrList<BosonParticleSystem> BosonWeaponProperties::newHitParticleSystems(float x, float y, float z) const
+QPtrList<BosonParticleSystem> BosonWeaponProperties::newHitParticleSystems(BoVector3 pos) const
 {
   QPtrList<BosonParticleSystem> list;
   QPtrListIterator<BosonParticleSystemProperties> it(mHitParticleSystems);
   while(it.current())
   {
-    list.append(it.current()->newSystem(x, y, z));
+    list.append(it.current()->newSystem(pos));
     ++it;
   }
   return list;
@@ -228,10 +234,10 @@ bool BosonWeapon::canShootAt(Unit* u) const
 
 void BosonWeapon::shoot(Unit* u)
 {
-  shoot(u->x() + u->width() / 2, u->y() + u->height() / 2, u->z());
+  shoot(BoVector3(u->x() + u->width() / 2, u->y() + u->height() / 2, u->z()));
 }
 
-void BosonWeapon::shoot(float x, float y, float z)
+void BosonWeapon::shoot(BoVector3 target)
 {
   if (!unit())
   {
@@ -239,8 +245,8 @@ void BosonWeapon::shoot(float x, float y, float z)
     return;
   }
   BoVector3 pos(unit()->x() + unit()->width() / 2, unit()->y() + unit()->height() / 2, unit()->z());
-  canvas()->newShot(mProp->newShot(unit(), pos[0], pos[1], pos[2], x, y, z));
-  canvas()->addParticleSystems(mProp->newShootParticleSystems(pos[0], pos[1], pos[2]));
+  canvas()->newShot(mProp->newShot(unit(), pos, target));
+  canvas()->addParticleSystems(mProp->newShootParticleSystems(pos, unit()->rotation()));
   unit()->playSound(SoundShoot);  // TODO: weapon-specific sounds
   mReloadCounter = mProp->reloadingTime();
 }

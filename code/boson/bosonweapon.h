@@ -81,11 +81,11 @@ class BosonWeaponProperties : public PluginProperties
     inline SpeciesTheme* theme() const  { return mTheme; };
     inline BosonModel* model() const  { return mModel; };
 
-    BosonShot* newShot(Unit* attacker, float x, float y, float z, float tx, float ty, float tz) const;
+    BosonShot* newShot(Unit* attacker, BoVector3 pos, BoVector3 target) const;
 
-    QPtrList<BosonParticleSystem> newShootParticleSystems(float x, float y, float z) const;
-    QPtrList<BosonParticleSystem> newFlyParticleSystems(float x, float y, float z) const;
-    QPtrList<BosonParticleSystem> newHitParticleSystems(float x, float y, float z) const;
+    QPtrList<BosonParticleSystem> newShootParticleSystems(BoVector3 pos, float rotation) const;
+    QPtrList<BosonParticleSystem> newFlyParticleSystems(BoVector3 pos) const;
+    QPtrList<BosonParticleSystem> newHitParticleSystems(BoVector3 pos) const;
 
     QValueList<unsigned long int> shootParticleSystemIds() const  { return mShootParticleSystemIds; };
     QValueList<unsigned long int> flyParticleSystemIds() const  { return mFlyParticleSystemIds; };
@@ -135,6 +135,7 @@ class BosonWeaponProperties : public PluginProperties
     QValueList<unsigned long int> mShootParticleSystemIds;
     QValueList<unsigned long int> mFlyParticleSystemIds;
     QValueList<unsigned long int> mHitParticleSystemIds;
+    BoVector3 mShootParticleSystemOffset;
 };
 
 
@@ -179,7 +180,7 @@ class BosonWeapon : public UnitPlugin
     inline const BosonWeaponProperties* properties() const  { return mProp; };
 
     void shoot(Unit* u);
-    void shoot(float x, float y, float z);
+    void shoot(BoVector3 target);
 
   protected:
     inline void reload()  { if(mReloadCounter > 0) { mReloadCounter = mReloadCounter - 1; } }

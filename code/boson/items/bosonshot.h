@@ -43,7 +43,7 @@ class BosonShot : public BosonItem
      * the unit that is attacking.
      * @param canvas The @ref BosonCanvas object
      **/
-    BosonShot(const BosonWeaponProperties* prop, Player* owner, BosonCanvas* canvas, float x, float y, float z, float tx, float ty, float tz);
+    BosonShot(const BosonWeaponProperties* prop, Player* owner, BosonCanvas* canvas, BoVector3 pos, BoVector3 target);
 
     virtual void advance(unsigned int phase);
 

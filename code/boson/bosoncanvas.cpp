@@ -319,7 +319,7 @@ void BosonCanvas::shotHit(BosonShot* s)
 	++it;
  }
  // Add hit particle systems
- addParticleSystems(s->properties()->newHitParticleSystems(s->x(), s->y(), s->z()));
+ addParticleSystems(s->properties()->newHitParticleSystems(BoVector3(s->x(), s->y(), s->z())));
  // Decrease health of all units within damaging range of missile
  QValueList<Unit*> l = unitCollisionsInRange(QPoint(s->x(), s->y()),
 		s->properties()->damageRange() * BO_TILE_SIZE - 10);  // - 2 is needed to prevent units on next cells from also being damaged

@@ -475,7 +475,6 @@ void HarvesterPlugin::advanceRefine()
 	return;
  }
  if (!refinery()) {
-	// TODO: pick closest refinery
 	QPtrList<Unit> list = player()->allUnits();
 	QPtrListIterator<Unit> it(list);
 	const HarvesterProperties* prop = (HarvesterProperties*)unit()->properties(PluginProperties::Harvester);
@@ -486,16 +485,19 @@ void HarvesterPlugin::advanceRefine()
 		return;
 	}
 	Facility* ref = 0; // FIXME: must not depend on Facility! Use a RefineryPlugin
-	while (it.current() && !ref) {
+	float refdist = 0;
+	while (it.current()) {
 		const UnitProperties* unitProp = it.current()->unitProperties();
 		if (!it.current()->isFacility()) {
 			++it;
 			continue;
 		}
-		if (prop->canMineMinerals() && unitProp->canRefineMinerals()) {
-			ref = (Facility*)it.current();
-		} else if (prop->canMineOil() && unitProp->canRefineOil()) {
-			ref = (Facility*)it.current();
+		if ((prop->canMineMinerals() && unitProp->canRefineMinerals()) || (prop->canMineOil() && unitProp->canRefineOil())) {
+			float dist = QMAX(QABS(unit()->x() - it.current()->x()), QABS(unit()->y() - it.current()->y()));
+			if((dist < refdist) || (refdist == 0)) {
+				refdist = dist;
+				ref = (Facility*)it.current();
+			}
 		}
 		++it;
 	}

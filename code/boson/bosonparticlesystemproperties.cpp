@@ -75,18 +75,6 @@ BosonParticleSystemProperties::BosonParticleSystemProperties(KSimpleConfig* cfg)
   {
     boError() << k_funcinfo << "Invalid id in group " << cfg->group() << endl;
   }
-  /** Veeery ugly code
-  mMinXVelo = (float)(cfg->readDoubleNumEntry("MinXVelo", 0));
-  mMinYVelo = (float)(cfg->readDoubleNumEntry("MinYVelo", 0));
-  mMinZVelo = (float)(cfg->readDoubleNumEntry("MinZVelo", 0));
-  mMaxXVelo = (float)(cfg->readDoubleNumEntry("MaxXVelo", 0));
-  mMaxYVelo = (float)(cfg->readDoubleNumEntry("MaxYVelo", 0));
-  mMaxZVelo = (float)(cfg->readDoubleNumEntry("MaxZVelo", 0));
-  mStartColor = BoVector4((float)(cfg->readDoubleNumEntry("StartColorR", 0)), (float)(cfg->readDoubleNumEntry("StartColorG", 0)),
-      (float)(cfg->readDoubleNumEntry("StartColorB", 0)), (float)(cfg->readDoubleNumEntry("StartColorA", 0)));
-  mEndColor = BoVector4((float)(cfg->readDoubleNumEntry("EndColorR", 0)), (float)(cfg->readDoubleNumEntry("EndColorG", 0)),
-      (float)(cfg->readDoubleNumEntry("EndColorB", 0)), (float)(cfg->readDoubleNumEntry("EndColorA", 0)));
-  */
   mMinVelo = BoVector3::load(cfg, "MinVelocity");
   mMaxVelo = BoVector3::load(cfg, "MaxVelocity");
   mMinPos = BoVector3::load(cfg, "MinPos");
@@ -133,11 +121,11 @@ BosonParticleSystemProperties::~BosonParticleSystemProperties()
 {
 }
 
-BosonParticleSystem* BosonParticleSystemProperties::newSystem(float x, float y, float z) const
+BosonParticleSystem* BosonParticleSystemProperties::newSystem(BoVector3 pos) const
 {
   BosonParticleSystem* s = new BosonParticleSystem(mMaxNum, mRate, mAlign,
       5, texture(mTextureName), this);
-  s->setPosition(BoVector3(x / BO_TILE_SIZE, -(y / BO_TILE_SIZE), z / BO_TILE_SIZE));
+  s->setPosition(BoVector3(pos[0] / BO_TILE_SIZE, -(pos[1] / BO_TILE_SIZE), pos[2] / BO_TILE_SIZE));
   s->setSize(mSize);
   s->setAge(mAge);
   s->setBlendFunc(GL_SRC_ALPHA, mGLBlendFunc);
