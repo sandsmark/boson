@@ -31,6 +31,8 @@
  * @short List of particles
  * This is simply QPtrList of particles. Only reimplemented method is
  * compareItems, which enables you to sort the list by distance from camera.
+ * Note that you must set @ref BosonParticle::distance values first, they are
+ * not automatically calculated.
  *
  * @see BosonParticle
  * @see BosonParticleSystem
@@ -48,10 +50,13 @@ class BoParticleList : public QPtrList<BosonParticle>
 /**
  * @short This class represents a single particle.
  * Particle is part of particle system. Each particle has individual color,
- * position, velocity, size and age.
+ * position, velocity, size, age, maximum age, texture, it's parent system and
+ * current distance from camera.
  * In BosonParticle, all these are public variables which means that you can
  * easily access them.
- * Note that velocity is velocity per second and life and maxage are also in seconds
+ * Note that velocity is velocity per second and life and maxage are also in
+ * seconds. Position, velocity and size are in OpenGL coordinates
+ *
  * @see BosonParticleSystem
  * @author Rivo Laks <rivolaks@hot.ee>
  **/
@@ -72,82 +77,93 @@ class BosonParticle
      **/
     void update(float elapsed);
     /**
-     * Resets all variables. Usually there is no need to call this
+     * Resets all variables. Usually there is no need to call this.
      **/
     void reset();
 
-    BoVector4 color;  // Current color of particle
-    BoVector3 pos;  // Current pos
-    BoVector3 velo;  // Velocity per second
-    float size;  // Current size
-    float life;  // How many remaining seconds particles has left to live, before it dies
+    /**
+     * Current color of particle
+     */
+    BoVector4 color;
+    /**
+     * Current position of particle in OpenGL coordinates
+     **/
+    BoVector3 pos;
+    /**
+     * Current velocity i.e. how much particle moves per second
+     **/
+    BoVector3 velo;
+    /**
+     * Current size of particle. When it's 1.0, particle is as big as one cell
+     **/
+    float size;
+    /**
+     * How many remaining seconds particles has left to live, before it dies
+     * If it is -1.0, particle is already dead (inactive).
+     * @see maxage
+     **/
+    float life;
+    /**
+     * Maximum lifetime of this particle
+     * @see life
+     **/
     float maxage;
-    GLuint tex;  // Current texture. This is cached here for performance reasons
-    BosonParticleSystem* system;  // Parent of this particle
-    float distance;  // Distance from camera. This is cached here to improve performance
+    /**
+     * Current texture. This is cached here for performance reasons
+     **/
+    GLuint tex;
+    /**
+     * Parent system of this particle
+     **/
+    BosonParticleSystem* system;
+    /**
+     * Square of distance of particle from the camera. This is cached here to
+     * improve performance
+     **/
+    float distance;
 };
+
 
 /**
  * @short This class takes care of entire particle system (collection of similar particles)
+ *
  * When should you use one particle system and when more? One particle system
  * should only hold similar particles. This means that if you e.g. have a unit
  * burning and smoking, you should use two particle systems, because smoke and
  * flames are very different things. It doesn't matter that both are used for
  * the same unit.
  * 
- * BosonParticleSystem should be very flexible. You can specify your own init 
- * and update functions for particles. They are called every time when particle
- * is updated or initialized (resetted). If you want even more flexibility, then
- * you can write you own subclass; most important methods are virtual, so you
- * can change them if you really want to.
+ * BosonParticleSystem uses @ref BosonParticleSystemProperties to initialize
+ * and update particles. This should provide enough flexibility for normal
+ * usage. If you want even more flexibility, then you can write you own
+ * subclass; most important methods are virtual, so you can change them if you
+ * really want to.
  *
- * FIXME: some docus here are obsolete
+ * Note that this class uses OpenGL coordinates.
  *
+ * @see BosonParticle
  * @author Rivo Laks <rivolaks@hot.ee>
  **/
 class BosonParticleSystem
 {
   public:
     /**
-     * Constructs new BosonParticleSystem. Use this constructor if you don't
-     * want to use update- and init-functions feature.
-     * @param maxnum Maximum number of particles this system may have
-     * @param initialnum This number of initial particles are created
-     * @param size Size of particle
-     * @param createrate How many additional particles are created each second
-     * @param align Whether to align particles to camera
-     * @param maxradius Radius of bounding sphere of this system (not used yet)
-     * @param texture Id of particle texture
-     * @param color Color of particle
-     * @param particleage How long (in seconds) each particle lives
-     * @param age Age of this system (for how long it creates new particles)
-     * @param pos Position of this system
-     * @param velo Velocity of each particle
-     * @param initFunc This function, if specified, is called every time particle is inited
-     * @param updateFunc This function, if specified, is called every time particle is updated
-     **/
-    BosonParticleSystem(int maxnum, int initialnum, float size,
-        float createrate, bool align, float maxradius, BosonParticleTextureArray textures,
-        BoVector4 color, float particleage, float age, BoVector3 pos, BoVector3 velo,
-        const BosonParticleSystemProperties* prop = 0);
-    /**
-     * Constructs new BosonParticleSystem. This constructor is often enough if
-     * you use functions for initing and updating particles.
-     * If you use this constructor, use accessor methods to set different
-     * variables and then @ref createParticles to create initial particles
-     * @param maxnum Maximum number of particles this system may have
-     * @param createrate How many additional particles are created each second
-     * @param align Whether to align particles to camera
-     * @param maxradius Radius of bounding sphere of this system (not used yet)
-     * @param texture Id of particle texture
-     * @param initFunc This function, if specified, is called every time particle is inited
-     * @param updateFunc This function, if specified, is called every time particle is updated
+     * Constructs new BosonParticleSystem.
+     * @param maxnum Maximum number of particles this system may have. Note that
+     *   if you specify too big number, BosonParticleSystem will create too big
+     *   array of particles which is bad for both performance and memory usage.
+     * @param createrate How many additional particles are created each second.
+     * @param align Whether to align particles to camera. If false, particles
+     *   are aligned to XY plane.
+     * @param textures @ref BosonParticleTextureArray containing all textures
+     *   that will be used by this particle system.
+     * @param prop Properties of this system.
      **/
     BosonParticleSystem(int maxnum, float createrate,
-        bool align, float maxradius, BosonParticleTextureArray textures,
+        bool align, BosonParticleTextureArray textures,
         const BosonParticleSystemProperties* prop);
     /**
-     * Destructs BosonParticleSystem. This deleted all particles
+     * Destructs BosonParticleSystem. This deletes all particles
      **/
     virtual ~BosonParticleSystem();
 
@@ -158,64 +174,47 @@ class BosonParticleSystem
     virtual void update(float elapsed);
 
     /**
-     * Moves all active particles by v
-     **/
-    void moveParticles(BoVector3 v);
-
-    /**
      * Sets current position of this system.
      *
-     * WARNING this class uses <em>OpenGL</em> Coordinates!
-     * @param p New position of this system
+     * @param p New position of this system in OpenGL coordinates
      **/
-    void setPosition(BoVector3 p)  { mPos = p; };
+    inline void setPosition(BoVector3 p)  { mPos = p; };
     /**
-     * WARNING this class uses <em>OpenGL</em> Coordinates!
-     * @return Current position of this system
+     * @return Current position of this system in OpenGL coordinates
      **/
-    inline const BoVector3 position()  { return mPos; };
+    inline const BoVector3& position()  { return mPos; };
 
+    /**
+     * @return x-coordinate of this system in cell coordinates
+     **/
+     inline int x() const  { return (int)(mPos[0]); };
+    /**
+     * @return y-coordinate of this system in cell coordinates
+     **/
+     inline int y() const  { return (int)(-mPos[1]); };
+
+    /**
+     * Modifies rotation matrix of this particle system.
+     *
+     * @param angle How much to rotate
+     * @param x, y, z  Around which angle to rotate
+     *
+     * @see matrix
+     **/
     void setRotation(GLfloat angle, GLfloat x, GLfloat y, GLfloat z)
         { mRotated = true; mMatrix.rotate(angle, x, y, z); };
+    /**
+     * @return If rotation matrix of this system has been modified e.g. if
+     *   @ref setRotation has been called.
+     **/
     inline bool isRotated()  { return mRotated; };
 
+    /**
+     * @return Rotation matrix of this system.
+     * Rotation matrix is used to calculate initial position and velocity of
+     * particle when it's initialized. This feature is used by missile traces.
+     **/
     inline const BoMatrix& matrix()  { return mMatrix;};
-
-    /**
-     * Sets current velocity of particles in this system.
-     * Note that if you use custom update or init functions you can specify
-     * velocity for each particle directly and this may not have any effect
-     * then.
-     * @param v New velocity of particles in this system
-     **/
-//    void setVelocity(BoVector3 v) { mVelo = v; };
-    /**
-     * @return Current velocity of particles in this system
-     **/
-//    const BoVector3& velocity() const { return mVelo; };
-
-    /**
-     * Sets color of particles in this system.
-     * Note that new color is only applied to particles which will be inited
-     * after calling this method, it doesn't change color of active particles.
-     * @param v New color of particles in this system
-     **/
-//    void setColor(BoVector4 c) { mColor = c; };
-    /**
-     * @return Color of particles in this system
-     **/
-//    const BoVector4& color() const { return mColor; };
-
-    /**
-     * @return Average size of particles in this system
-     **/
-//    float size() { return mSize; };
-    /** 
-     * Sets average size of particles in this system. This is used for some
-     * drawing calculations.
-     * @param s New average size of particles
-     **/
-    void setSize(float s) { mSize = s; };
 
     /**
      * @return Current age of this system
@@ -241,15 +240,17 @@ class BosonParticleSystem
 //    void setCreateRate(float r) { mCreateRate = r; };
 
     /**
-     * @return Radius of bounding sphere of this system. This can be used for culling
+     * @return Radius of bounding sphere of this system. This can be used for
+     * culling.
      **/
     float boundingSphereRadius() const { return mRadius; };
 
     /**
      * @return Whether this system is active
-     * Active means that this system has at least 1 living particle
+     * Active means that either this system has at least 1 living (active)
+     * particle or it's age is more than 0 (can create more particles)
      **/
-    bool isActive()  { return (mNum > 0); };
+    bool isActive()  { return ((mNum > 0) || (mAge > 0)); };
 
     /**
      * Sets OpenGL blending function of this system. This function is used in
@@ -272,33 +273,38 @@ class BosonParticleSystem
     void createParticles(int count);
 
   protected:
+    /**
+     * Initializes particle system (resets variables) and creates some new
+     * particles
+     *
+     * @param initialnum Number of particles to create
+     **/
     virtual void init(int initialnum);
 
+    /**
+     * Called when new particle is made active and needs to be initialized
+     **/
     virtual void initParticle(BosonParticle* particle);
+    /**
+     * Called when particle has to be updated. Called from @ref update
+     **/
     virtual void updateParticle(BosonParticle* particle);
 
   protected:
     BosonParticle* mParticles;  // Array of particles
     int mMaxNum;  // Maximum number of particles
     int mNum;  // Current number of particle (aka number of active particles)
-    float mSize;  // Size of particles
     float mCreateRate;  // Number of particles created per second
     float mCreateCache;  // Number of particles to create during next update
     bool mAlign;  // Whether to align particles to camera
     float mRadius;  // Radius of bounding sphere
     BosonParticleTextureArray mTextures;  // Textures of particles
     BoVector3 mPos;
-    BoVector3 mVelo;
     bool mRotated;
     float mAge;
     int mBlendFunc[2];
 
-    BoVector4 mColor;  // Color of particle
-    float mParticleAge;  // How many seconds particles live
-
     const BosonParticleSystemProperties* mProp;
-
-    BoVector3 nw, ne, sw, se;  // Coordinates of particle base vertexes
 
     BoMatrix mMatrix;  // Rotation matrix. Used to calculate position and
         //  velocity of particles when they're initialized. Stored here for

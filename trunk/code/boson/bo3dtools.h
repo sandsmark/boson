@@ -60,6 +60,7 @@ class BoVector3
 
     //AB: this calls sqrt() and therefore is slow!
     float length() const;
+    inline float dotProduct() const  { return mData[0] * mData[0] + mData[1] * mData[1] + mData[2] * mData[2]; };
 
     inline const GLfloat* data() const { return mData; }
     inline void operator=(BoVector3 v)  { mData[0] = v.mData[0];  mData[1] = v.mData[1];  mData[2] = v.mData[2]; };

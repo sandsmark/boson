@@ -28,7 +28,6 @@
 
 /*****  BoParticleManager  *****/
 
-
 int BoParticleList::compareItems(QPtrCollection::Item item1, QPtrCollection::Item item2)
 {
   float d1, d2;
@@ -81,48 +80,19 @@ void BosonParticle::update(float elapsed)
   pos.addScaled(velo, elapsed);
 }
 
+
+
 /*****  BosonParticleSystem  *****/
 
-BosonParticleSystem::BosonParticleSystem(int maxnum, int initialnum, float size,
-    float createrate, bool align, float maxradius, BosonParticleTextureArray textures,
-    BoVector4 color, float particleage, float age, BoVector3 pos, BoVector3 velo,
-    const BosonParticleSystemProperties* prop)
-{
-  // Set some variables first
-  mMaxNum = maxnum;
-  if(initialnum > maxnum)
-  {
-    initialnum = maxnum;
-  }
-  mSize = size;
-  mCreateRate = createrate;
-  mAlign = align;
-  mRadius = maxradius;
-  mTextures = textures;
-  mColor = color;
-  mPos = pos;
-  mParticleAge = particleage;
-  mAge = age;
-  mVelo = velo;
-  mProp = prop;
-
-  init(initialnum);
-}
-
 BosonParticleSystem::BosonParticleSystem(int maxnum,
-    float createrate, bool align, float maxradius, BosonParticleTextureArray textures,
+    float createrate, bool align, BosonParticleTextureArray textures,
     const BosonParticleSystemProperties* prop)
 {
-  //cout << k_funcinfo << "CREATING PARTICLE SYSTEM.  maxnum: " <<  maxnum <<
-      //"; createrate: " << createrate << endl;
   // Set some variables first
   mMaxNum = maxnum;
   mCreateRate = createrate;
   mAlign = align;
-  mRadius = maxradius;
   mTextures = textures;
-  mSize = 0;
-  mParticleAge = 0;
   mAge = 3600;
   mProp = prop;
 
@@ -132,6 +102,7 @@ BosonParticleSystem::BosonParticleSystem(int maxnum,
 void BosonParticleSystem::init(int initialnum)
 {
   // Some variables
+  mRadius = 0.0;
   mCreateCache = 0.0;
   mBlendFunc[0] = GL_SRC_ALPHA;
   mBlendFunc[1] = GL_ONE_MINUS_SRC_ALPHA;
@@ -146,7 +117,6 @@ void BosonParticleSystem::init(int initialnum)
   {
     createParticles(initialnum);
   }
-//  boDebug(150) << k_funcinfo << "Created " << mNum << " initial particles" << endl;
 }
 
 void BosonParticleSystem::createParticles(int count)
@@ -163,6 +133,7 @@ void BosonParticleSystem::createParticles(int count)
       mNum++;
     }
   }
+  mRadius = sqrt(mRadius);
 }
 
 BosonParticleSystem::~BosonParticleSystem()
@@ -183,6 +154,7 @@ void BosonParticleSystem::update(float elapsed)
   }
 
   mNum = 0;
+  mRadius = 0.0;
   mAge -= elapsed;
 
   // Update particles
@@ -193,12 +165,9 @@ void BosonParticleSystem::update(float elapsed)
       mParticles[i].update(elapsed);
       updateParticle(&mParticles[i]);
       // Check for death
-      if(mParticles[i].life <= 0.0)
-      {
-        // For performance reasons we actually don't create/delete particles. We just mark them dead
-        //uninitParticle(&mParticles[i]);
-      }
-      else
+      // For performance reasons particles aren't actually created/deleted.
+      //  They're just marked as dead (aka inactive)
+      if(mParticles[i].life > 0.0)
       {
         mNum++;
       }
@@ -208,7 +177,6 @@ void BosonParticleSystem::update(float elapsed)
   // Create some new ones if needed
   if((mCreateCache >= 1.0) && (mAge >= 0.0))
   {
-//    boDebug(150) << k_funcinfo << "createCache >= 1.0 (" << mCreateCache << "); trying to create new particles" << endl;
     for(int i = 0; (i < mMaxNum) && (mCreateCache >= 1.0); i++)
     {
       if(mParticles[i].life <= 0.0)
@@ -219,23 +187,25 @@ void BosonParticleSystem::update(float elapsed)
         mNum++;
       }
     }
-//    boDebug(150) << k_funcinfo << "Created " << created << " new particles; createCache is now " << mCreateCache << endl;
   }
+
+  // Particle update and init methods set mRadius to dot product for performance
+  //  reasons. Convert it here.
+  mRadius = sqrt(mRadius);
 }
 
 void BosonParticleSystem::initParticle(BosonParticle* particle)
 {
-  particle->color = mColor;
-  particle->life = mParticleAge;
+  // Note that most stuff isn't initialized here, it's done in
+  //  BosonParticleSystemProperties
   particle->pos = mPos;
-  particle->size = mSize;
-  particle->velo = mVelo;
   particle->tex = mTextures.mTextureIds[0];
   particle->system = this;
   if(mProp)
   {
     mProp->initParticle(this, particle);
   }
+  mRadius = QMAX(mRadius, (particle->pos - mPos).dotProduct());
 }
 
 void BosonParticleSystem::updateParticle(BosonParticle* particle)
@@ -243,19 +213,7 @@ void BosonParticleSystem::updateParticle(BosonParticle* particle)
   if(mProp)
   {
     mProp->updateParticle(this, particle);
-  }
-}
-
-void BosonParticleSystem::moveParticles(BoVector3 v)
-{
-  // Move particles by inverse of v (to have effect of them staying in same place)
-  BoVector3 inv(-v[0], -v[1], -v[2]);
-  for(int i = 0; i < mMaxNum; i++)
-  {
-    if(mParticles[i].life > 0.0)
-    {
-      mParticles[i].pos.add(inv);
-    }
+    mRadius = QMAX(mRadius, (particle->pos - mPos).dotProduct());
   }
 }
 

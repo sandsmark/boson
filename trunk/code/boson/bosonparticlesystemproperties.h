@@ -52,23 +52,40 @@ class BosonParticleTextureArray
 };
 
 /**
+ * @short Class that holds properties for a particle system and loads them from config file
+ *
+ * This class loads properties such as minimum and maximum velocity, size,
+ * textures etc. for a particle system from the config file and stores them.
+ * It also has method to create new particle system using those properties.
+ *
  * @author Rivo Laks <rivolaks@hot.ee>
  **/
 class BosonParticleSystemProperties
 {
   public:
+    /**
+     * Constructs BosonParticleSystemProperties and loads all values from given
+     * config file. Group must have been set previously
+     * @param cfg KSimpleConfig object used for loading values
+     **/
     BosonParticleSystemProperties(KSimpleConfig* cfg);
-    ~BosonParticleSystemProperties();
+    virtual ~BosonParticleSystemProperties();
 
-    BosonParticleSystem* newSystem(BoVector3 pos, float rotation = 0.0) const;
+    /**
+     * Constructs and returns new particle system which will use this properties
+     * object.
+     * @param pos Position where system will be created to (in item coordinates)
+     * @param rotation How much new system will be rotated around Z-axis
+     **/
+    virtual BosonParticleSystem* newSystem(BoVector3 pos, float rotation = 0.0) const;
 
     inline static float getFloat(float min, float max)  { return ((float)(mRandom->getDouble())) * (max - min) + min; };
 
     inline static BoVector3 wind()  { return BoVector3(0.25, 0.15, 0); };
 
-    void initParticle(BosonParticleSystem* system, BosonParticle* particle) const;
+    virtual void initParticle(BosonParticleSystem* system, BosonParticle* particle) const;
 
-    void updateParticle(BosonParticleSystem* system, BosonParticle* particle) const;
+    virtual void updateParticle(BosonParticleSystem* system, BosonParticle* particle) const;
 
     static void init(const QString& texdir);
 
