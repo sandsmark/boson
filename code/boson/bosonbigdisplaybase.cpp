@@ -667,7 +667,13 @@ void BosonBigDisplayBase::paintGL()
 //	kdDebug() << k_funcinfo << "rendering " << count << " particle systems (elapsed: " << elapsed << ")" << endl;
 	glEnable(GL_BLEND);
 	glDisable(GL_DEPTH_TEST);
-	canvas()->renderParticleSystems();
+	//canvas()->renderParticleSystems();
+	QPtrListIterator<BosonParticleSystem> it(*(canvas()->particleSystems()));
+	BosonParticleSystem* s;
+	while((s = it.current()) != 0) {
+		++it;
+		s->draw();
+	}
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDisable(GL_BLEND);
  }
