@@ -502,6 +502,10 @@ QByteArray BosonNewEditorWidget::createNewMap()
  files.insert("players.xml", playersDoc.toCString());
  files.insert("canvas.xml", canvasDoc.toCString());
 
+ BPFDescription desc;
+ desc.setName(mNewMapName->text());
+ files.insert("C/description.xml", desc.toString().utf8());
+
  QByteArray b = BosonPlayField::streamFiles(files);
  boDebug() << k_funcinfo << "files got streamed" << endl;
  return b;
