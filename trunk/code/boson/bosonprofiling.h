@@ -37,6 +37,7 @@ public:
 		mClear = 0;
 		mCells = 0;
 		mUnits = 0;
+		mFOW = 0;
 		mText = 0;
 		mFunction = 0;
 	}
@@ -49,6 +50,7 @@ public:
 		mClear = c.mClear;
 		mCells = c.mCells;
 		mUnits = c.mUnits;
+		mFOW = c.mFOW;
 		mText = c.mText;
 		mFunction = c.mFunction;
 		return *this;
@@ -60,6 +62,7 @@ public:
 	long int mClear;
 	long int mCells;
 	long int mUnits;
+	long int mFOW;
 	long int mText;
 	long int mFunction;
 
@@ -105,6 +108,7 @@ public:
 	void renderClear(bool start);
 	void renderCells(bool start);
 	void renderUnits(bool start);
+	void renderFOW(bool start);
 	void renderText(bool start);
 	void debugRender();
 
