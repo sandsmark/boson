@@ -63,15 +63,17 @@ class BosonWeaponProperties : public PluginProperties
      * The damage this unit makes to other units. Negative values means
      * repairing
     **/
-    long int damage() const { return mDamage; };
+    long int damage() const  { return mDamage; };
     /**
      * @return Damage range of missile of this unit, e.g. range in what units will be damaged
      **/
-    float damageRange() const { return mDamageRange; };
+    float damageRange() const  { return mDamageRange; };
     /**
      * @return Speed of missile of this unit (per second) or 0 if speed is infinite
      **/
     unsigned long int speed() const  { return mSpeed; };
+
+    float maxHeight() const  { return mMaxHeight; };
 
     inline SpeciesTheme* theme() const  { return mTheme; };
     inline BosonModel* model() const  { return mModel; };
@@ -96,12 +98,11 @@ class BosonWeaponProperties : public PluginProperties
     unsigned int mReload;
     SpeciesTheme* mTheme;
     unsigned long int mSpeed;
+    float mMaxHeight;
     BosonModel* mModel;
     QPtrList<BosonParticleSystemProperties> mShootParticleSystems;
     QPtrList<BosonParticleSystemProperties> mFlyParticleSystems;
     QPtrList<BosonParticleSystemProperties> mHitParticleSystems;
-
-
 };
 
 
