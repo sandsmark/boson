@@ -402,6 +402,10 @@ signals:
 	 **/
 	void signalSelectionChanged(BoSelection* selection);
 
+	void signalToggleChatVisible();
+	void signalUnfogAll();
+	void signalSetGrabMovie(bool);
+
 protected slots:
 	void slotMouseEvent(KGameIO* , QDataStream& stream, QMouseEvent* e, bool *eatevent);
 	void slotCursorEdgeTimeout();
@@ -419,6 +423,10 @@ protected slots:
 	void slotInitMiniMapFogOfWar();
 
 	void slotAddLineVisualization(const QValueList<BoVector3Fixed>& points, const BoVector4Float& color, bofixed pointSize, int timeout, bofixed zOffset);
+	void slotToggleCheating(bool);
+	void slotShowLight0Widget();
+	void slotDebugMemory();
+	void slotDebugPlayer(int);
 
 protected:
 	/**
@@ -486,6 +494,7 @@ protected slots:
 	void slotBoDebugLogDialog();
 	void slotSleep1s();
 	void slotGrabProfiling();
+	void slotGrabScreenshot();
 	void slotSetShowResources(bool show);
 	void slotSetEnableColorMap(bool enable);
 	void slotShowGLStates();
@@ -620,6 +629,8 @@ protected:
 	void generateMovieFrame(const QByteArray& data, BoPixmapRenderer* renderer);
 	void resetGameMode();
 	void setGameMode(bool);
+
+	void createDebugPlayersMenu();
 
 private:
 	void init();

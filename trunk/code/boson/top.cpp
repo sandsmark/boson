@@ -242,14 +242,6 @@ void TopWidget::slotLoadBosonGameDock()
 	boDebug() << k_funcinfo << "dock config exists, loading" << endl;
 	loadGameDockConfig();
  }
- slotCheckGameDockStatus();
-}
-
-void TopWidget::slotCheckGameDockStatus()
-{
- if (d->mBosonWidget) {
-	d->mBosonWidget->setActionChat(d->mChatDock->isVisible());
- }
 }
 
 void TopWidget::hideGameDockWidgets(bool deinit)
@@ -259,12 +251,6 @@ void TopWidget::hideGameDockWidgets(bool deinit)
  if (deinit) {
 	d->mChatDock->setWidget(0);
  }
-}
-
-void TopWidget::slotToggleChatDockVisible()
-{
- d->mChatDock->changeHideShowState();
- slotCheckGameDockStatus();
 }
 
 void TopWidget::saveProperties(KConfig *config)
@@ -418,10 +404,6 @@ void TopWidget::initBosonWidget()
 
  connect(d->mBosonWidget, SIGNAL(signalLoadBosonGameDock()),
 		this, SLOT(slotLoadBosonGameDock()));
- connect(d->mBosonWidget, SIGNAL(signalToggleChatVisible()),
-		this, SLOT(slotToggleChatDockVisible()));
- connect(d->mBosonWidget, SIGNAL(signalCheckDockStatus()),
-		this, SLOT(slotCheckGameDockStatus()));
  connect(d->mBosonWidget, SIGNAL(signalChangeLocalPlayer(Player*)),
 		this, SLOT(slotChangeLocalPlayer(Player*)));
  connect(d->mBosonWidget, SIGNAL(signalEndGame()),

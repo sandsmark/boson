@@ -261,16 +261,6 @@ protected slots:
 	 **/
 	void slotLoadBosonGameDock();
 
-	void slotToggleChatDockVisible();
-
-	/**
-	 * Check whether the game dock widgets (see @ref initGameDockWidgets)
-	 * are currently visible or not. According to that set the @ref KAction
-	 * (probably @ref KToggleAction) objects of @ref BosonWidgetBase.
-	 **/
-	void slotCheckGameDockStatus();
-
-
 	void slotChangeMaxProfilingEventEntries();
 	void slotChangeMaxProfilingAdvanceEntries();
 	void slotChangeMaxProfilingRenderingEntries();

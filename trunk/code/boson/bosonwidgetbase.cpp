@@ -54,9 +54,6 @@
 #include "boconditionwidget.h"
 #include "bocamerawidget.h"
 #include "boeventlistener.h"
-#ifdef BOSON_USE_BOMEMORY
-#include "bomemory/bomemorydialog.h"
-#endif
 #include "bowater.h"
 #include "bo3dtools.h"
 
@@ -84,14 +81,6 @@
 
 #include <stdlib.h>
 
-#define ID_DEBUG_KILLPLAYER 0
-#define ID_DEBUG_ADD_10000_MINERALS 1
-#define ID_DEBUG_ADD_1000_MINERALS 2
-#define ID_DEBUG_SUB_1000_MINERALS 3
-#define ID_DEBUG_ADD_10000_OIL 4
-#define ID_DEBUG_ADD_1000_OIL 5
-#define ID_DEBUG_SUB_1000_OIL 6
-
 class BosonWidgetBase::BosonWidgetBasePrivate
 {
 public:
@@ -99,28 +88,16 @@ public:
 	{
 		mChat = 0;
 
-		mActionDebugPlayers = 0;
-		mActionZoom = 0;
-		mActionChat = 0;
-
 		mCanvas = 0;
-
-		mLightWidget = 0;
 	}
 
 	BoGameChatWidget* mChat;
-
-	KActionMenu* mActionDebugPlayers;
-	KSelectAction* mActionZoom;
-	KToggleAction* mActionChat;
 
 	QPtrDict<KPlayer> mPlayers; // needed for debug only
 
 	bool mInitialized;
 
 	BosonCanvas* mCanvas;
-
-	BoLightCameraWidget1* mLightWidget;
 };
 
 BosonWidgetBase::BosonWidgetBase(QWidget* parent)
@@ -138,7 +115,6 @@ BosonWidgetBase::BosonWidgetBase(QWidget* parent)
 BosonWidgetBase::~BosonWidgetBase()
 {
  boDebug() << k_funcinfo << endl;
- delete d->mLightWidget;
  if (factory()) {
 	// remove the bosonwidget-specific menus from the XML GUI (menubar,
 	// toolbar, ...)
@@ -205,8 +181,6 @@ void BosonWidgetBase::init(KDockWidget* chatDock)
  setFocusPolicy(StrongFocus); // accept key event
 // setFocus(); // nonsense, since its still hidden
 
- initPlayersMenu();
-
  BosonScript::setGame(boGame);
 }
 
@@ -248,9 +222,6 @@ void BosonWidgetBase::initChat(KDockWidget* chatDock)
  connect(d->mChat->chatWidget(), SIGNAL(signalScriptCommand(const QString&)),
 		this, SLOT(slotRunScriptLine(const QString&)));
  chatDock->setWidget(d->mChat);
-
- connect(chatDock, SIGNAL(iMBeingClosed()), this, SLOT(slotChatDockHidden()));
- connect(chatDock, SIGNAL(hasUndocked()), this, SLOT(slotChatDockHidden()));
 }
 
 void BosonWidgetBase::initPlayer()
@@ -316,6 +287,10 @@ void BosonWidgetBase::initBigDisplay(BosonBigDisplayBase* b)
  }
  connect(b->displayInput(), SIGNAL(signalLockAction(bool)),
 		displayManager(), SIGNAL(signalLockAction(bool)));
+ connect(b, SIGNAL(signalUnfogAll()),
+		this, SLOT(slotUnfogAll()));
+ connect(b, SIGNAL(signalSetGrabMovie(bool)),
+		displayManager(), SLOT(slotSetGrabMovie(bool)));
  b->setCanvas(canvas());
 
  // FIXME: this should be done by this->setLocalPlayer(), NOT here!
@@ -484,113 +459,16 @@ void BosonWidgetBase::slotCmdBackgroundChanged(const QString& file)
 
 void BosonWidgetBase::initKActions()
 {
-#if 0
- QSignalMapper* scrollMapper = new QSignalMapper(this);
- connect(scrollMapper, SIGNAL(mapped(int)), this, SLOT(slotScroll(int)));
- KAction* a;
- KShortcut scrollUp(Qt::Key_Up);
- scrollUp.append(KKeySequence(KKey(Qt::Key_W)));
- a = new KAction(i18n("Scroll Up"), scrollUp, scrollMapper,
-		SLOT(map()), actionCollection(),
-		"scroll_up");
- scrollMapper->setMapping(a, ScrollUp);
- KShortcut scrollDown(Qt::Key_Down);
- scrollDown.append(KKeySequence(KKey(Qt::Key_S)));
- a = new KAction(i18n("Scroll Down"), scrollDown, scrollMapper,
-		SLOT(map()), actionCollection(),
-		"scroll_down");
- scrollMapper->setMapping(a, ScrollDown);
- KShortcut scrollLeft(Qt::Key_Left);
- scrollLeft.append(KKeySequence(KKey(Qt::Key_A)));
- a = new KAction(i18n("Scroll Left"), scrollLeft, scrollMapper,
-		SLOT(map()), actionCollection(),
-		"scroll_left");
- scrollMapper->setMapping(a, ScrollLeft);
- KShortcut scrollRight(Qt::Key_Right);
- scrollRight.append(KKeySequence(KKey(Qt::Key_D)));
- a = new KAction(i18n("Scroll Right"), scrollRight, scrollMapper,
-		SLOT(map()), actionCollection(),
-		"scroll_right");
- scrollMapper->setMapping(a, ScrollRight);
- KShortcut rotateLeft(Qt::Key_Q);
- a = new KAction(i18n("Rotate Left"), rotateLeft, this,
-		SLOT(slotRotateLeft()), actionCollection(),
-		"rotate_left");
- KShortcut rotateRight(Qt::Key_E);
- a = new KAction(i18n("Rotate Right"), rotateRight, this,
-		SLOT(slotRotateRight()), actionCollection(),
-		"rotate_right");
- KShortcut zoomIn(Qt::Key_F);
- a = new KAction(i18n("Zoom In"), zoomIn, this,
-		SLOT(slotZoomIn()), actionCollection(),
-		"zoom_in");
- KShortcut zoomOut(Qt::Key_V);
- a = new KAction(i18n("Zoom out"), zoomOut, this,
-		SLOT(slotZoomOut()), actionCollection(),
-		"zoom_out");
-#endif
-
-
- // FIXME: the editor should not have a "game" menu, so what to do with this?
-
- // Dockwidgets show/hide
- d->mActionChat = new KToggleAction(i18n("Show Cha&t"),
-		KShortcut(Qt::CTRL+Qt::Key_C), this, SIGNAL(signalToggleChatVisible()),
-		actionCollection(), "options_show_chat");
-
- (void)new KAction(i18n("&Grab Screenshot"), KShortcut(Qt::CTRL + Qt::Key_G),
-		this, SLOT(slotGrabScreenshot()), actionCollection(), "game_grab_screenshot");
- KToggleAction* movie = new KToggleAction(i18n("Grab &Movie"),
-		KShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_M), 0, 0, actionCollection(), "game_grab_movie");
- movie->setChecked(false);
- connect(movie, SIGNAL(toggled(bool)),
-		displayManager(), SLOT(slotSetGrabMovie(bool)));
-
- // Debug
- (void)new KAction(i18n("&Unfog"), KShortcut(), this,
-		SLOT(slotUnfogAll()), actionCollection(), "debug_unfog");
- KToggleAction* cheating = new KToggleAction(i18n("Enable &Cheating"),
-		KShortcut(), 0, 0, actionCollection(), "debug_enable_cheating");
- connect(cheating, SIGNAL(toggled(bool)), this, SLOT(slotToggleCheating(bool)));
- (void)new KAction(i18n("&Unfog"), KShortcut(), this,
-		SLOT(slotUnfogAll()), actionCollection(), "debug_unfog");
-
-
- d->mActionDebugPlayers = new KActionMenu(i18n("Players"),
-		actionCollection(), "debug_players");
-
- (void)new KAction(i18n("&Reload model textures"), KShortcut(), this,
-		SLOT(slotReloadModelTextures()), actionCollection(), "debug_lazy_reload_model_textures");
- (void)new KAction(i18n("Light0..."), KShortcut(), this,
-		SLOT(slotShowLight0Widget()), actionCollection(),
-		"debug_light0");
-#ifdef BOSON_USE_BOMEMORY
- (void)new KAction(i18n("Debug M&emory"), KShortcut(), this,
-		SLOT(slotDebugMemory()), actionCollection(),
-		"debug_memory");
-#endif
-
- cheating->setChecked(DEFAULT_CHEAT_MODE);
- slotToggleCheating(DEFAULT_CHEAT_MODE);
- emit signalCheckDockStatus();
 }
 
 void BosonWidgetBase::quitGame()
 {
 // this needs to be done first, before the players are removed
  boDebug() << k_funcinfo << endl;
- delete d->mLightWidget;
- d->mLightWidget = 0;
  boGame->quitGame();
  d->mCanvas = 0;
  boDebug() << k_funcinfo << "done" << endl;
 }
-
-void BosonWidgetBase::setActionChat(bool chatVisible)
-{
- d->mActionChat->setChecked(chatVisible);
-}
-
 
 void BosonWidgetBase::saveConfig()
 {
@@ -622,138 +500,11 @@ void BosonWidgetBase::startScenarioAndGame()
  }
 }
 
-void BosonWidgetBase::slotDebugMemory()
-{
-#ifdef BOSON_USE_BOMEMORY
- boDebug() << k_funcinfo << endl;
- BoMemoryDialog* dialog = new BoMemoryDialog(this);
- connect(dialog, SIGNAL(finished()), dialog, SLOT(deleteLater()));
- boDebug() << k_funcinfo << "update data" << endl;
- dialog->slotUpdate();
- dialog->show();
- boDebug() << k_funcinfo << "done" << endl;
-#endif
-}
-
-void BosonWidgetBase::initPlayersMenu()
-{
- QPtrListIterator<KPlayer> it(*(boGame->playerList()));
- while (it.current()) {
-	slotPlayerJoinedGame(it.current());
-	++it;
- }
-}
-
-void BosonWidgetBase::slotDebugPlayer(int index)
-{
- QPtrDictIterator<KPlayer> it(d->mPlayers);
- KPopupMenu* menu = (KPopupMenu*)sender();
- KPlayer* p = 0;
- while (it.current() && !p) {
-	KActionMenu* m = (KActionMenu*)it.currentKey();
-	if (m->popupMenu() == menu) {
-		p = it.current();
-	}
-	++it;
- }
-
- if (!p) {
-	boError() << k_funcinfo << "player not found" << endl;
-	return;
- }
-
- QByteArray b;
- QDataStream stream(b, IO_WriteOnly);
- stream << (Q_UINT32)p->id();
- switch (index) {
-	case ID_DEBUG_KILLPLAYER:
-		boGame->sendMessage(b, BosonMessage::IdKillPlayer);
-		break;
-	case ID_DEBUG_ADD_10000_MINERALS:
-		stream << (Q_INT32)10000;
-		boGame->sendMessage(b, BosonMessage::IdModifyMinerals);
-		break;
-	case ID_DEBUG_ADD_1000_MINERALS:
-		stream << (Q_INT32)1000;
-		boGame->sendMessage(b, BosonMessage::IdModifyMinerals);
-		break;
-	case ID_DEBUG_SUB_1000_MINERALS:
-		stream << (Q_INT32)-1000;
-		boGame->sendMessage(b, BosonMessage::IdModifyMinerals);
-		break;
-	case ID_DEBUG_ADD_1000_OIL:
-		stream << (Q_INT32)1000;
-		boGame->sendMessage(b, BosonMessage::IdModifyOil);
-		break;
-	case ID_DEBUG_ADD_10000_OIL:
-		stream << (Q_INT32)10000;
-		boGame->sendMessage(b, BosonMessage::IdModifyOil);
-		break;
-	case ID_DEBUG_SUB_1000_OIL:
-		stream << (Q_INT32)-1000;
-		boGame->sendMessage(b, BosonMessage::IdModifyOil);
-		break;
-	default:
-		boError() << k_funcinfo << "unknown index " << index << endl;
-		break;
- }
-}
-
-void BosonWidgetBase::slotChatDockHidden()
-{
- d->mActionChat->setChecked(false);
- setFocus();
-}
-
 void BosonWidgetBase::setBosonXMLFile()
 {
  QString file = locate("config", "ui/ui_standards.rc", instance());
  setXMLFile(file);
  setXMLFile("bosonbaseui.rc", true);
-}
-
-void BosonWidgetBase::slotPlayerJoinedGame(KPlayer* player)
-{
- if (!player) {
-	return;
- }
- // note: NOT listed in the *ui.rc files! we create it dynamically when the player enters ; not using the xml framework
- KActionMenu* menu = new KActionMenu(player->name(), this, QString("debug_players_%1").arg(player->name()));
-
- connect(menu->popupMenu(), SIGNAL(activated(int)),
-		this, SLOT(slotDebugPlayer(int)));
- menu->popupMenu()->insertItem(i18n("Kill Player"), ID_DEBUG_KILLPLAYER);
- menu->popupMenu()->insertItem(i18n("Minerals += 10000"), ID_DEBUG_ADD_10000_MINERALS);
- menu->popupMenu()->insertItem(i18n("Minerals += 1000"), ID_DEBUG_ADD_1000_MINERALS);
- menu->popupMenu()->insertItem(i18n("Minerals -= 1000"), ID_DEBUG_SUB_1000_MINERALS);
- menu->popupMenu()->insertItem(i18n("Oil += 10000"), ID_DEBUG_ADD_10000_OIL);
- menu->popupMenu()->insertItem(i18n("Oil += 1000"), ID_DEBUG_ADD_1000_OIL);
- menu->popupMenu()->insertItem(i18n("Oil -= 1000"), ID_DEBUG_SUB_1000_OIL);
-
- d->mActionDebugPlayers->insert(menu);
- d->mPlayers.insert(menu, player);
-}
-
-void BosonWidgetBase::slotPlayerLeftGame(KPlayer* player)
-{
- if (!player) {
-	return;
- }
- boDebug() << k_funcinfo << endl;
- KActionMenu* menu = 0;
- QPtrDictIterator<KPlayer> it(d->mPlayers);
- for (; it.current() && !menu; ++it) {
-	if (it.current() == player) {
-		menu = (KActionMenu*)it.currentKey();
-	}
- }
- if (!menu) {
-	boWarning() << k_funcinfo << "NULL player debug menu" << endl;
-	return;
- }
- d->mActionDebugPlayers->remove(menu);
- d->mPlayers.remove(player);
- delete menu;
 }
 
 void BosonWidgetBase::setLocalPlayer(Player* p)
@@ -785,66 +536,10 @@ void BosonWidgetBase::setLocalPlayer(Player* p)
  boWaterManager->setLocalPlayerIO(localPlayer()->playerIO());
 }
 
-void BosonWidgetBase::slotGrabScreenshot()
-{
- BO_CHECK_NULL_RET(displayManager());
- BO_CHECK_NULL_RET(displayManager()->activeDisplay());
- boDebug() << k_funcinfo << "Taking screenshot!" << endl;
-
-// QImage image = displayManager()->activeDisplay()->screenShot();
- QPixmap shot = QPixmap::grabWindow(parentWidget()->winId());
- if (shot.isNull()) {
-	boError() << k_funcinfo << "NULL image returned" << endl;
-	return;
- }
- QString file = findSaveFileName("boson", "jpg");
- if (file.isNull()) {
-	boWarning() << k_funcinfo << "Can't find free filename???" << endl;
-	return;
- }
- boDebug() << k_funcinfo << "Saving screenshot to " << file << endl;
- bool ok = shot.save(file, "JPEG", 90);
- if (!ok) {
-	boError() << k_funcinfo << "Error saving screenshot to " << file << endl;
-	boGame->slotAddChatSystemMessage(i18n("An error occured while saving screenshot to %1").arg(file));
- } else {
-	boGame->slotAddChatSystemMessage(i18n("Screenshot saved to %1").arg(file));
- }
-}
-
-QString BosonWidgetBase::findSaveFileName(const QString& prefix, const QString& suffix)
-{
- QString file;
- for (int i = 0; i < 1000; i++) {
-	file.sprintf("%s-%03d.%s", prefix.latin1(), i, suffix.latin1());
-	if (!QFile::exists(file)) {
-		return QFileInfo(file).absFilePath();
-		return file;
-	}
- }
- return QString::null;
-}
-
 void BosonWidgetBase::slotUnitCountChanged(Player* p)
 {
  emit signalMobilesCount(p->mobilesCount());
  emit signalFacilitiesCount(p->facilitiesCount());
-}
-
-void BosonWidgetBase::slotToggleCheating(bool on)
-{
- setActionEnabled("debug_unfog", on);
- setActionEnabled("debug_players", on);
-}
-
-void BosonWidgetBase::setActionEnabled(const char* name, bool on)
-{
- KAction* a = actionCollection()->action(name);
- if (!a) {
-	boError() << k_funcinfo << "NULL " << name << " action" << endl;
- } else {
-	a->setEnabled(on);
- }
 }
 
 void BosonWidgetBase::slotLoadExternalStuffFromXML(const QDomElement& root)
@@ -911,25 +606,6 @@ void BosonWidgetBase::slotAdvance(unsigned int, bool)
 void BosonWidgetBase::initScripts()
 {
  displayManager()->activeDisplay()->setLocalPlayerScript(mLocalPlayerInput->eventListener()->script());
-}
-
-void BosonWidgetBase::slotShowLight0Widget()
-{
- BO_CHECK_NULL_RET(displayManager());
- BO_CHECK_NULL_RET(displayManager()->activeDisplay());
- BosonBigDisplayBase* display = displayManager()->activeDisplay();
- delete d->mLightWidget;
- d->mLightWidget = new BoLightCameraWidget1(0, true);
- d->mLightWidget->show();
- d->mLightWidget->setLight(display->light(0), display->context());
-
-}
-
-void BosonWidgetBase::slotReloadModelTextures()
-{
-#warning FIXME!
- //BO_CHECK_NULL_RET(BosonModelTextures::modelTextures());
- //BosonModelTextures::modelTextures()->reloadTextures();
 }
 
 void BosonWidgetBase::changeToConfigCursor()
