@@ -93,10 +93,11 @@ void BosonStartWidgetBase::slotSendPlayFieldChanged(int index)
 
 void BosonStartWidgetBase::sendPlayFieldChanged(const QString& identifier)
 {
- if (!BosonPlayField::availablePlayFields().contains(identifier)) {
+ if (!identifier.isNull() && !BosonPlayField::availablePlayFields().contains(identifier)) {
 	boError() << k_funcinfo << "Invalid playfield identifier " << identifier << endl;
 	return;
  }
+ // a NULL identifier means "new map", for the start editor widget
  QByteArray buffer;
  QDataStream stream(buffer, IO_WriteOnly);
  // transmit the identifier/name so that the remote newgame dialogs will be able
