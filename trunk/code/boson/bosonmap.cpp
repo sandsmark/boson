@@ -12,6 +12,7 @@
 
 #include <kdebug.h>
 #include <kstandarddirs.h>
+#include <kfilterdev.h>
 
 #include "defines.h"
 
@@ -69,15 +70,22 @@ bool BosonMap::loadMap(const QString& fileName)
 {
  kdDebug() << "BosonMap::loadMap " << fileName << endl;
  d->mFileName = fileName; // probably obsolete?
+ 
  // open stream 
- QFile f(fileName);
- if (!f.open(IO_ReadOnly)){
-	kdError() << "BosonMap: Can't open file " << fileName << endl;
+ QIODevice* dev = KFilterDev::deviceForFile(fileName);
+ if (!dev) {
+	kdError() << "No file " << fileName << endl;
 	return false;
  }
- QByteArray buffer = f.readAll();
- f.close();
+ if (!dev->open(IO_ReadOnly)){
+	kdError() << "BosonMap: Can't open file " << fileName << endl;
+	delete dev;
+	return false;
+ }
+ QByteArray buffer = dev->readAll();
+ delete dev;
  QDataStream stream(buffer, IO_ReadOnly);
+ 
  bool binary = false;
  if (verifyMap(stream)) { // check if this is binary
 	binary = true;
@@ -124,33 +132,33 @@ bool BosonMap::loadMap(const QByteArray& buffer, bool binary)
  QDomElement root = doc.documentElement();
  list = root.elementsByTagName("MapGeo");
  if (list.count() != 1) {
-	kdError() << "XML parsing error: cannot have tag Map Geo " 
+	kdError() << "XML error: cannot have tag MapGeo " 
 			<< list.count() << " times" << endl;
 	return false;
  }
  QDomElement geo = list.item(0).toElement();
  if (geo.isNull()) {
-	kdError() << "XML parsing error: geo is not an QDomElement" << endl;
+	kdError() << "XML error: geo is not an QDomElement" << endl;
 	return false;
  }
  if (!loadMapGeo(geo)) {
-	kdError() << "XML parsing error: failed loading map geo" << endl;
+	kdError() << "XML error: failed loading map geo" << endl;
 	return false;
  }
 
  list = root.elementsByTagName("MapCells");
  if (list.count() != 1) {
-	kdError() << "XML parsing error: cannot have tag Map Geo " 
+	kdError() << "XML error: cannot have tag Map Geo " 
 			<< list.count() << " times" << endl;
 	return false;
  }
  QDomElement cells = list.item(0).toElement();
  if (geo.isNull()) {
-	kdError() << "XML parsing error: cells is not an QDomElement" << endl;
+	kdError() << "XML error: cells is not an QDomElement" << endl;
 	return false;
  }
  if (!loadCells(cells)) {
-	kdError() << "XML parsing error: failed loading map geo" << endl;
+	kdError() << "XML error: failed loading map geo" << endl;
 	return false;
  }
 
@@ -275,21 +283,29 @@ bool BosonMap::saveMap(const QString& fileName, bool binary)
 	kdError() << "Cannot save invalid file" << endl;
 	return false;
  }
- QFile file(fileName);
+// QFile file(fileName);
  if (binary) { // write a binary file
-	if (!file.open(IO_WriteOnly)){
-		kdError() << "BosonMap: Can't open file " << fileName << endl;
+	QIODevice* dev = KFilterDev::deviceForFile(fileName, "application/x-gzip");
+	if (!dev) {
+		kdError() << "No file " << fileName << endl;
 		return false;
 	}
-	QDataStream stream(&file);
+	if (!dev->open(IO_WriteOnly)){
+		kdError() << "BosonMap: Can't open file " << fileName << endl;
+		delete dev;
+		return false;
+	}
+	QDataStream stream(dev);
  
 	saveValidityHeader(stream);
 	bool ret = saveMapGeo(stream);
 	if (ret) {
 		ret = saveCells(stream);
 	}
-	file.close();
+//	file.close();
+	dev->close();
 	kdDebug() << "BosonMap::saveMap() done" << endl;
+	delete dev;
 	return ret;
  }
 
@@ -314,13 +330,20 @@ bool BosonMap::saveMap(const QString& fileName, bool binary)
  }
 
 // now save the file
- if (!file.open(IO_WriteOnly)){
+ QIODevice* dev = KFilterDev::deviceForFile(fileName, "application/x-gzip");
+ if (!dev) {
+	kdError() << "No file " << fileName << endl;
+	return false;
+ }
+ if (!dev->open(IO_WriteOnly)){
 	kdError() << "BosonMap: Can't open file " << fileName << endl;
+	delete dev;
 	return false;
  }
  QString xml = doc.toString();
- file.writeBlock(xml.data(), xml.length()); // is this ok? is there a better way??
- file.close();
+ dev->writeBlock(xml.data(), xml.length()); // is this ok? is there a better way??
+ dev->close();
+ delete dev;
  return true;
 }
 
@@ -335,11 +358,11 @@ bool BosonMap::saveMapGeo(QDomElement& node)
 bool BosonMap::loadMapGeo(QDomElement& node)
 {
  if (!node.hasAttribute("Width")) {
-	kdError() << "XML parsing: Map width is mandatory!" << endl;
+	kdError() << "Map width is mandatory!" << endl;
 	return false;
  }
  if (!node.hasAttribute("Height")) {
-	kdError() << "XML parsing: Map height is mandatory!" << endl;
+	kdError() << "Map height is mandatory!" << endl;
 	return false;
  }
  Q_INT32 width = node.attribute("Width").toInt();
