@@ -32,49 +32,16 @@
 
 void BosonServer::initMap(const char *mapfile)
 {
-int i,j;
-playField field(mapfile);
-
 mobile.resize(149);
 facility.resize(149);
 mobile.setAutoDelete(TRUE);
 facility.setAutoDelete(TRUE);
 key = 127; // why not ?
 
-assert(true == field.load() );
-///orzel, was ugly.. should handle load()==false correctly 
-
-map.width = field.map.width;
-map.height = field.map.height;
-
-/* creation of the ground map */
-map.cells = new (serverCell *)[map.width];
-for (i=0; i< map.width; i++)
-	map.cells[i] = new (serverCell)[map.height];
-
-/* initialisation */
-for (i=0; i< map.width; i++)
-	for (j=0; j< map.height; j++)
-		map.cells[i][j].setGroundType( field.map.cells[i][j]);
-
-
-/* freeing of field.map.cells */
-for (i=0; i< map.width; i++)
-	delete [] field.map.cells[i];
-delete [] field.map.cells;
-
-/* checking */
-for (int i=0; i< 3; i++)
-	for (int j=0; j< 3; j++)
-		boAssert(map.cells[i][j].known == 0l);
-
-
-people	= field.people;
-gpp.nbPlayer= field.nbPlayer;
-
-assert(gpp.nbPlayer < 11);
-assert(gpp.nbPlayer > 1);
-
+	assert (openRead(mapfile));
+	///orzel, was ugly.. should handle openRead()==false correctly 
+	gpp.nbPlayer= nbPlayer;
+	assert (loadGround());
 }
 
 
@@ -97,11 +64,9 @@ if (u->inherits("mobUnit")) {
 	}
 
 im = QMAX(0, x-dist) - x;
-iM = QMIN(map.width-1,	x+dist ) - x;
-//iM = QMIN(map.width-1,	x+dist+u->getWidth()/BO_TILE_SIZE ) - x;
+iM = QMIN(map_width-1,	x+dist ) - x;
 jm = QMAX(0, y-dist ) - y;
-jM = QMIN(map.height-1,	y+dist ) - y;
-//jM = QMIN(map.height-1	y+dist+u->getHeight()/BO_TILE_SIZE ) - y;
+jM = QMIN(map_height-1,	y+dist ) - y;
 
 //printf("im iM jm jM : %d %d %d %d\n", im, iM, jm, jM);
 
@@ -110,9 +75,9 @@ dist *= dist;
 for (i=im ; i<=iM; i++)
     for (j=jm ; j<=jM; j++)
 	if ( i*i+j*j < dist) {
-		assert(i+x<map.width);
-		assert(j+y<map.height);
-		c = &map.cells[i+x][j+y];
+		assert(i+x<map_width);
+		assert(j+y<map_height);
+		c = &cells[i+x][j+y];
 		if ( ! c->isKnownBy(mask)) {
 			c->setKnown(mask);
 			/* here, send a message for every changed state */
@@ -127,28 +92,24 @@ for (i=im ; i<=iM; i++)
 		}
 }
 
-void BosonServer::createMobUnit(uint who, uint x, uint y, mobType type)
+void BosonServer::createMobUnit(mobileMsg_t &data)
 {
-bosonMsgData	data;
 serverMobUnit	*u;
 ulong	k = 0l;
 int	i,j, i2,j2;
+int	xx, yy;
 
 logf(LOG_GAME_HIGH, "BosonServer::createMobUnit called");
 
-data.mobile.who = who; 
-data.mobile.key = key;
-data.mobile.x = x;
-data.mobile.y = y;
-data.mobile.type = type;
-assert(who< BOSON_MAX_CONNECTION);
-assert(gpp.player[who].socketState==SSS_CONNECT_OK);
+data.key = key;
+assert(data.who< BOSON_MAX_CONNECTION);
+assert(gpp.player[data.who].socketState==SSS_CONNECT_OK);
 
-u = new serverMobUnit(gpp.player[who].buffer, &data.mobile);
+u = new serverMobUnit(gpp.player[data.who].buffer, &data);
 
 /* who is interested in knowing u's arrival */
-x /= BO_TILE_SIZE;
-y /= BO_TILE_SIZE;
+xx = data.x / BO_TILE_SIZE;
+yy = data.y / BO_TILE_SIZE;
 /* puts("hop1");
 printf("type is %d, width is %d\n", type, mobileProp[type].width);
 printf("u= %p\n", u); */
@@ -156,14 +117,14 @@ i2 = (u->getWidth() + BO_TILE_SIZE -1 ) / BO_TILE_SIZE;
 j2 = (u->getHeight() + BO_TILE_SIZE -1 )/ BO_TILE_SIZE;
 /*i2 = j2 = 1; 
 puts("hop2"); */
-k = getPlayerMask(who);
+k = getPlayerMask(data.who);
 for (i=0; i<i2; i++)
 	for (j=0; j<j2; j++)
-		k |= map.cells[x+i][y+j].known;
+		k |= cells[xx+i][yy+j].known;
 u->setKnown(k);
 
 /* telling them */
-u->sendToKnown(MSG_MOBILE_CREATED, sizeof(data.mobile), &data);
+u->sendToKnown(MSG_MOBILE_CREATED, sizeof(data), (bosonMsgData *)&data);
 
 mobile.insert ( key++, u);
 checkUnitVisibility(u);
@@ -171,43 +132,33 @@ checkUnitVisibility(u);
 
 
 
-void BosonServer::createFixUnit(uint who, uint x, uint y, facilityType type)
+void BosonServer::createFixUnit(facilityMsg_t &data)
 {
-bosonMsgData	data;
 serverFacility	*f;
 int		i,j, i2, j2;
 ulong		k;
 
 logf(LOG_GAME_HIGH, "BosonServer::createFixUnit called");
 
-data.facility.who	= who;
-data.facility.key	= key;
-data.facility.x		= x;
-data.facility.y		= y;
-data.facility.type	= type;
-data.facility.state	= 0;
-assert(who< BOSON_MAX_CONNECTION);
-assert(gpp.player[who].socketState==SSS_CONNECT_OK);
+data.key	= key;
+data.state	= 0;
+assert(data.who< BOSON_MAX_CONNECTION);
+assert(gpp.player[data.who].socketState==SSS_CONNECT_OK);
 
-f = new serverFacility(gpp.player[who].buffer, &data.facility);
+f = new serverFacility(gpp.player[data.who].buffer, &data);
 
 /* who is interested in knowing u's arrival */
-i2 = facilityProp[type].width;
-j2 = facilityProp[type].height;
+i2 = facilityProp[data.type].width;
+j2 = facilityProp[data.type].height;
 
-k = getPlayerMask(who);
+k = getPlayerMask(data.who);
 for (i=0; i<i2; i++)
 	for (j=0; j<j2; j++)
-		k |= map.cells[x+i][y+j].known;
+		k |= cells[data.x+i][data.y+j].known;
 f->setKnown(k);
 
 /* telling them */
-for ( i=0; k; i++,k>>=1) {
-	boAssert(i<4);
-	if (k&1l) sendMsg (
-		gpp.player[i].buffer,	MSG_FACILITY_CREATED,
-		sizeof(data.facility),	&data);
-	}
+f->sendToKnown(MSG_FACILITY_CREATED, sizeof(data), (bosonMsgData *)&data);
 
 facility.insert ( key++, f);
 checkUnitVisibility(f);
@@ -251,7 +202,7 @@ void BosonServer::checkFixKnown(serverFacility *f)
 
 	for (i=0; i<i2; i++)
 		for (j=0; j<j2; j++)
-			k |= map.cells[x+i][y+j].known;
+			k |= cells[x+i][y+j].known;
 
 	i=0;
 	k2 = f->known;
@@ -292,7 +243,7 @@ void BosonServer::checkMobileKnown(serverMobUnit *m)
 
 	for (i=0; i<i2; i++)
 		for (j=0; j<j2; j++)
-			k |= map.cells[x+i][y+j].known;
+			k |= cells[x+i][y+j].known;
 
 	i=0;
 	k2 = m->known;
@@ -317,6 +268,51 @@ void BosonServer::checkMobileKnown(serverMobUnit *m)
 		} /* while */
 
 }
+
+bool BosonServer::loadGround()
+{
+	int i,j;
+
+	/* creation of the ground map */
+	cells = new (serverCell *)[map_width];
+	for (i=0; i< map_width; i++)
+		cells[i] = new (serverCell)[map_height];
+	
+	/* initialisation */
+	for (i=0; i< map_width; i++)
+		for (j=0; j< map_height; j++)
+			cells[i][j].setGroundType( load() );
+	
+	/* checking */
+	for (int i=0; i< 3; i++)
+		for (int j=0; j< 3; j++)
+			boAssert(0 <= cells[i][j].getGroundType());
+
+	return isOk();
+}
+
+
+bool BosonServer::loadUnits()
+{
+	
+	int		i;
+	mobileMsg_t	mob;
+	facilityMsg_t	fix;
+
+	for (i=0; i<nbMobiles; i++) {
+		load(mob);
+		createMobUnit(mob);
+	}
+
+	for (i=0; i<nbFacilities; i++) {
+		load(fix);
+		createFixUnit(fix);
+	}
+
+	Close();
+	return isOk();
+}
+
 
 
 

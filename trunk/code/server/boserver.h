@@ -35,7 +35,7 @@
 #include "../common/boconfig.h"
 #include "../common/unitType.h"
 #include "../common/log.h"
-#include "../common/playField.h"
+#include "../common/boFile.h"
 
 #include "serverUnit.h"		// for Facility
 #include "connect.h"
@@ -47,17 +47,10 @@ class Facility;
 class mobUnit;
 
 
-struct serverMap {
-	serverCell	**cells;
-	int		width;
-	int		height;
-	};
-
-
 /** 
   * This is the main widget of the Boson Server GUI
   */
-class BosonServer : public KTMainWindow
+class BosonServer : public KTMainWindow, public boFile
 {
   Q_OBJECT
 
@@ -74,13 +67,8 @@ class BosonServer : public KTMainWindow
 
   void	initMap(const char *);
 
-  void	createMobUnit(uint who, uint x, uint y, mobType);
-  void	createFixUnit(uint who, uint x, uint y, facilityType);
-	
-/* initialization of playfield */ 
-  void	initPeople(void);
-  void	createMobUnit(origMobile o) {createMobUnit(o.who, o.x, o.y, o.t);}
-  void	createFixUnit(origFacility o) {createFixUnit(o.who, o.x, o.y, o.t);}
+  void	createMobUnit(mobileMsg_t &);
+  void	createFixUnit(facilityMsg_t &);
 
   void  checkUnitVisibility(Unit *u);
 
@@ -98,12 +86,14 @@ class BosonServer : public KTMainWindow
 
   private:
 
+  bool		loadGround();
+  bool		loadUnits();
+
   serverState	state;
   KServerSocket	*socket;
   uint		confirmedJiffies;
 
-  serverMap 	map;
-  origPeople	people;
+  serverCell	**cells;
 
   QIntDict<serverMobUnit>	mobile;
   QIntDict<serverFacility>	facility;
