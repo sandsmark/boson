@@ -75,7 +75,8 @@ public:
 	 * What is this unit currently doing
 	 *
 	 * Possible value are
-	 * @li WorkIdle - The unit does nothing
+	 * @li WorkIdle - The unit has no specific orders
+	 * @li WorkNone - The unit does nothing
 	 * @li WorkMove A unit is currently moving
 	 * @li WorkAttack - Currently attacks a unit
 	 * @li WorkConstructed - Is <em>being</em> constructed
@@ -85,6 +86,9 @@ public:
 	 * @li WorkTurn - is turning
 	 **/
 	enum WorkType {
+		// AB: only _append_ new numbers, do not insert something (when
+		// numbers get removed they still may be referenced by
+		// savegames)
 		WorkIdle = 0,
 		WorkMove = 2,
 		WorkAttack = 4,
@@ -92,7 +96,8 @@ public:
 		WorkDestroyed = 6,
 		WorkFollow = 8,
 		WorkPlugin = 9,
-		WorkTurn = 10
+		WorkTurn = 10,
+		WorkNone = 11
 	};
 
 	/**

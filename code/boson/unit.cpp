@@ -137,8 +137,8 @@ Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
  }
  d = new UnitPrivate;
  mCurrentPlugin = 0;
- mAdvanceFunction = &Unit::advanceNone;
- mAdvanceFunction2 = &Unit:: advanceNone;
+ mAdvanceFunction = &Unit::advanceIdle;
+ mAdvanceFunction2 = &Unit:: advanceIdle;
  d->mPlugins.setAutoDelete(true);
  d->mPlugins.clear();
 
@@ -476,7 +476,13 @@ void Unit::reload(unsigned int count)
  }
 }
 
-void Unit::advanceNone(unsigned int advanceCallsCount)
+void Unit::advanceNone(unsigned int)
+{
+ // do NOT do anything here!
+ // usually it won't be called anyway.
+}
+
+void Unit::advanceIdle(unsigned int advanceCallsCount)
 {
 // this is called when the unit has nothing specific to do. Usually we just want
 // to fire at every enemy in range.
@@ -486,6 +492,13 @@ void Unit::advanceNone(unsigned int advanceCallsCount)
 		return;
 	}
  } else if (advanceCallsCount % 10 != 0) {
+	return;
+ }
+
+ if (!unitProperties()->canShoot() ||!d->mWeapons[0]) {
+	// this unit does not have any weapons, so it will never shoot anyway.
+	// no need to call advanceIdle() again
+//	setAdvanceWork(WorkNone);
 	return;
  }
 
@@ -1426,6 +1439,9 @@ void Unit::setAdvanceWork(WorkType w)
  // we even do this if nothing changed - just in case...
  switch (w) {
 	case WorkIdle:
+		setAdvanceFunction(&Unit::advanceIdle, owner()->advanceFlag());
+		break;
+	case WorkNone:
 		setAdvanceFunction(&Unit::advanceNone, owner()->advanceFlag());
 		break;
 	case WorkMove:
