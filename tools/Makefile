@@ -4,10 +4,13 @@
 CC = gcc
 CXX = g++
 
-all: checktextures fixtexturesize
+all: checktextures fixtexturesize modelstatistics
 
 checktextures: checktextures.c
 	$(CC) checktextures.c -o checktextures -l3ds -lm
+
+modelstatistics: modelstatistics.c
+	$(CC) modelstatistics.c -o modelstatistics -l3ds -lm
 
 fixtexturesize: fixtexturesize.cpp
 	$(CXX) fixtexturesize.cpp -o fixtexturesize -I$(QTDIR)/include -L$(QTDIR)/lib -lqt-mt
