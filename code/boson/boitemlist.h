@@ -51,6 +51,8 @@ class BoItemList
 public:
 	typedef QValueList<BosonItem*>::Iterator Iterator;
 	typedef QValueList<BosonItem*>::ConstIterator ConstIterator;
+	typedef QValueList<BosonItem*>::iterator iterator;
+	typedef QValueList<BosonItem*>::const_iterator const_iterator;
 	BoItemList();
 
 	/**
