@@ -218,7 +218,7 @@ void BosonNewGameWidget::slotNetStart()
  if ((int)boGame->playerCount() > mMaxPlayers) {
 	KMessageBox::sorry(this, i18n("There are too many players in game.\n"
 			"Current map supports only %1 players, currently, there are %2 players in the game.\n"
-			"Please remove some players.").arg(mMinPlayers).arg(boGame->playerCount()),
+			"Please remove some players.").arg(mMaxPlayers).arg(boGame->playerCount()),
 			i18n("Too many players"));
  } else if ((int)boGame->playerCount() < mMinPlayers) {
 	KMessageBox::sorry(this, i18n("There are too few players in game.\n"
