@@ -15,8 +15,8 @@
 <:
 use get_values;
 
-# ( facility type, facility name, filesystem level )
-get_values->getval("fix", "comsat", 2);
+# ( facility type, facility name)
+get_values->getval("fix", "comsat");
 :>
     
 
