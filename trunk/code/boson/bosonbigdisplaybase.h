@@ -181,11 +181,6 @@ public:
 	 **/
 	void quitGame();
 
-	/**
-	 * See @ref BosonBigDisplayInputBase::unitAction
-	 **/
-	void unitAction(int);
-
 	void setKGameChat(KGameChat* chat);
 	void addChatMessage(const QString& message);
 
