@@ -53,7 +53,7 @@ QValueList<Unit*> BoItemList::units(bool collidingOnly, bool includeMoving, Unit
 			continue;
 		}
 		if (collidingOnly) {
-			if (includeMoving && u->isMoving()) {
+			if (!includeMoving && u->isMoving()) {
 				continue;
 			}
 			if (!forUnit || (!forUnit->isFlying() && !u->isFlying())) {
