@@ -5,7 +5,7 @@
 SUBDIRS = data visual
 #boson editor
 
-bin_PROGRAMS = boson bounit 
+bin_PROGRAMS = boson bounit boprofiling
 #boeditor 
 
 INCLUDES = -I$(kde_includes)/arts $(all_includes)
@@ -83,6 +83,11 @@ BOUNIT_SRC = \
 	bosonunitdialog.cpp \
 	bounitmain.cpp
 
+BOPROFILING_SRC= \
+	bosonprofilingdialog.cpp \
+	bosonprofiling.cpp \
+	boprofilingmain.cpp
+
 boson_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 boson_LDADD = $(top_builddir)/boson/visual/libbosonvisual.la -lkdegames -lqtmcop -lsoundserver_idl -lartskde -lGLU -l3ds $(LIB_KDEUI)
 boson_SOURCES = $(BOSON_SRC) $(COMMON_SRC)
@@ -92,8 +97,12 @@ boson_SOURCES = $(BOSON_SRC) $(COMMON_SRC)
 #boeditor_SOURCES = $(BOEDITOR_SRC) $(COMMON_SRC)
 
 bounit_LDFLAGS = $(KDE_RPATH) $(all_libraries)
-bounit_LDADD = -lkio $(LIB_KDEUI) 
-bounit_SOURCES = $(BOUNIT_SRC) 
+bounit_LDADD = -lkio $(LIB_KDEUI)
+bounit_SOURCES = $(BOUNIT_SRC)
+
+boprofiling_LDFLAGS = $(KDE_RPATH) $(all_libraries)
+boprofiling_LDADD = -lkio $(LIB_KDEUI)
+boprofiling_SOURCES = $(BOPROFILING_SRC)
 
 METASOURCES = AUTO
 
