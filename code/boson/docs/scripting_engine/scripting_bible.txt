@@ -72,6 +72,8 @@ This documented is located in the CVS repository under code/boson/docs/scripting
 
 IRC Contacts for boson are irc.openprojects.net:6667  #boson
 
+Beta copy of the scripting engine is to be ready by 5/23/03... ie my birthday
+
 1b) Purpose
 To provide a blueprint for the programmers of boson that will provide level
 creators, ai programers and game designers the tools they need.
