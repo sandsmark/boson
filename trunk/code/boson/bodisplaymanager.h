@@ -27,6 +27,7 @@ class BosonBigDisplayBase;
 class UnitBase;
 class BosonCursor;
 class Player;
+class Unit;
 
 class KPlayer;
 
@@ -154,6 +155,8 @@ public slots:
 	void slotUpdateIntervalChanged(unsigned int);
 	void slotCenterHomeBase();
 	void slotResetViewProperties();
+
+	void slotUnitRemoved(Unit* u);
 
 signals:
 	/**
