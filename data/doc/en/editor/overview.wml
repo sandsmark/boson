@@ -10,6 +10,8 @@
     Choose your ground theme, main ground tileset, size and required players.<br>
     Note that you need to create a complete new map if you like to change this settings. Now you can start the editor.<br>
     </p><p>&nbsp;</p>
+
+
     <h4>The map</h4>
     <p>
     After the default map is created you will find your tools on the left site in the command frame and the menu bar.<br>
@@ -45,20 +47,34 @@
         </td>
     </tr>
     </table>
-
     </p><p>&nbsp;</p>
 
-    <h4>The player</h4>
+
+    <h4>The ground</h4>
     <p>
-    You have to switch between the players. You can only create facilities for one player at one time.
-    Don't forget to change the player while building units and buildings.<br>
-    If you change the tiles on map or remove facilities, the player doesn't matter.
+    You can change the ground tiles if you select <i>Ground</i> from the second dropdown box. Just select
+    one, hold down the left mouse button and "draw" the tiles on the ground. Note that it is not possible to get
+    realistic water like you can see it in some maps through the editor. That needs to be done out of Boson
+    and is not yet supported nor documented.<br><br>
+
+    You can also export an image of the map with shows the usage of one tile (here texture) and edit the map
+    like a heightmap. You can e.g. blur the transitions between grass and other tiles.<br>
+    Just try it out if you like, but it is a little difficult and not documented.
     </p><p>&nbsp;</p>
 
-    <h4>Resources and Map properties</h4>
+
+    <h4>Map properties</h4>
     <p>
-    Under the "Editor" menu you can change the map description and the available resources.<br>
+    Under the "Editor" menu you can change the map description and the available resources for each player.<br>
+    Note that you will always es the currently active player.
     </p><p>&nbsp;</p>
+
+    <h4>The neutral player</h4>
+    <p>
+    The neutral player is used for neutral objects like trees. But also resources like mines and oil towers are here available.<br>
+    Place some trees on the map to give it a more realistic look.
+    </p><p>&nbsp;</p>
+
 
     <h4>Conditions</h4>
     <p>
