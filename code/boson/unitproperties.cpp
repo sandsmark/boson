@@ -193,16 +193,6 @@ bool UnitProperties::isFacility() const
  return (mFacilityProperties != 0);
 }
 
-unsigned long int UnitProperties::mineralCost() const
-{
- return mMineralCost;
-}
-
-unsigned long int UnitProperties::oilCost() const
-{
- return mOilCost;
-}
-
 float UnitProperties::speed() const
 {
  if (!mMobileProperties) {
@@ -241,11 +231,6 @@ QValueList<int> UnitProperties::producerList() const
 	return QValueList<int>();
  }
  return mFacilityProperties->mProducerList;
-}
-
-unsigned int UnitProperties::productionTime() const
-{
- return mProductionTime;
 }
 
 bool UnitProperties::canMineMinerals() const

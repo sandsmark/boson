@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2002 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -33,6 +33,14 @@ class KSimpleConfig;
  * type, such as unit's maximum health, damage it causes or armor it has.
  *
  * See themes/species/human/units/README in the data directory for infos.
+ *
+ * Note that the entire class is <em>not</em> memory critical in any way. You
+ * can add as many member variables as necessary - there is always only a single
+ * instance of this class per unit type.
+ *
+ * There are also only very few methods which are speed critical. @ref
+ * health might be such a method, since it is used as max health in @ref Unit.
+ * But most other methods are used only once to initialize a method.
  *
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
  **/
@@ -95,12 +103,12 @@ public:
 	/**
 	 * @return How much this unit costs (of your mineral account)
 	 **/
-	unsigned long int mineralCost() const;
+	unsigned long int mineralCost() const { return mMineralCost; }
 
 	/**
 	 * @return How much this unit costs (of your oil account)
 	 **/
-	unsigned long int oilCost() const;
+	unsigned long int oilCost() const { return mOilCost; }
 
 	/**
 	 * @return The weapon range of this unit. It's a number of cells, so multiply
@@ -266,7 +274,7 @@ public:
 	 * @return The number of @ref Unit::advance calls this unit needs 
 	 * (usually) to be produced.
 	 **/
-	unsigned int productionTime() const;
+	unsigned int productionTime() const { return mProductionTime; }
 
 	/**
 	 * @return TRUE if this unittype gives you the ability to show a
