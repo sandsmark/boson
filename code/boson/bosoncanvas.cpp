@@ -136,6 +136,7 @@ BosonCanvas::~BosonCanvas()
 {
  boDebug()<< k_funcinfo << endl;
  quitGame();
+ delete d->mPathfinder;
  delete d->mStatistics;
  delete mCollisions;
  delete d;
