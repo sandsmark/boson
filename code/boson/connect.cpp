@@ -37,7 +37,7 @@ bosonMsgTag	tag;
 bosonMsgData	data;
 int		blen;
 
-assert ( s == socket);
+assert ( s == Socket);
 recvMsg (buffer, tag, blen, &data);
 
 if ( tag == MSG_END_SOCKET_LAYER) {
@@ -69,7 +69,7 @@ switch(socketState) {
 	
 	case PSS_WAIT_CONFIRM_INIT :
 		if (MSG_HS_INIT_OK == tag ) {
-			state = PS_WAIT_ANSWER;
+			State = PS_WAIT_ANSWER;
 			sendMsg(buffer, MSG_DLG_ASK, BOSON_NO_DATA);
 			}
 		TRANSITION(MSG_HS_INIT_OK, PSS_CONNECT_OK, BOSON_NO_TAG);
@@ -93,10 +93,10 @@ if (oldState != socketState)
 
 void BosonApp::handleDialogMessage(bosonMsgTag tag, int blen, bosonMsgData *data)
 {
-playerState oldState = state;
+playerState oldState = State;
 
 if ( tag>MSG_END_DIALOG_LAYER )
-    if ( PS_PLAYING == state) {
+    if ( PS_PLAYING == State) {
 	handleGameMessage(tag,blen,data);
 	return;
 	}
@@ -110,9 +110,9 @@ if ( ! (tag>MSG_END_SOCKET_LAYER && tag<MSG_END_DIALOG_LAYER)) {
 	return;
 	}
 
-switch(state) {
+switch(State) {
 	default:
-		UNKNOWN_TAG(state);
+		UNKNOWN_TAG(State);
 
 	case PS_NO_CONNECT :
 		logf(LOG_WARNING, "handleDialogMessage : tag received while in PS_NO_CONNECT, ignored");
@@ -121,31 +121,31 @@ switch(state) {
 	case PS_WAIT_ANSWER :
 		switch(tag) {
 		case MSG_DLG_ACCEPTED :
-			state = PS_WAIT_BEGIN;
+			State = PS_WAIT_BEGIN;
 			boAssert(sizeof(data->accepted) == blen);
 			logf(LOG_INFO, "Server has accepted our request, map is (%d,%d)",
 				data->accepted.sizeX,
 				data->accepted.sizeY);
-			gpp.who_am_i	= data->accepted.who_you_are;
+			who_am_i	= data->accepted.who_you_are;
 			vpp.nb_player	= data->accepted.total_player;
-			gpp.myspecy	= vpp.species[data->accepted.who_you_are];
+			myspecy	= vpp.species[data->accepted.who_you_are];
 			break;
 		case MSG_DLG_REFUSED :
-			state = PS_NO_CONNECT;
+			State = PS_NO_CONNECT;
 			logf(LOG_INFO, "Connection refused by server");
 			break;
 		default:
-			UNKNOWN_TAG(state);
+			UNKNOWN_TAG(State);
 		};
 		break;
 
 	case PS_WAIT_BEGIN :
 		TRANSITION2(MSG_DLG_BEGIN, PS_PLAYING, BOSON_NO_TAG);
-		UNKNOWN_TAG(state);
+		UNKNOWN_TAG(State);
 	}
 
-if (oldState != state)
-	logf(LOG_LAYER2, "Player : state has changed from %d to %d", oldState, state);
+if (oldState != State)
+	logf(LOG_LAYER2, "Player : State has changed from %d to %d", oldState, State);
 }
 
 

@@ -84,7 +84,7 @@ test made on LinuxPPC on february 3rd 1999 :
 
 #define TRANSITION2(signal,newState,emit)	\
 	if (signal == tag) {			\
-	state = newState;			\
+	State = newState;			\
 	if ( BOSON_NO_TAG != emit )		\
 		sendMsg(buffer, emit, BOSON_NO_DATA);  \
 	break;  }

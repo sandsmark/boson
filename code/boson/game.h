@@ -22,18 +22,26 @@
 #define BOSON_GAME_H 
 
 #include "visual.h"
+#include "connect.h"
 
+class bosonField;
+class KSocket;
+class boBuffer;
 
-//class bosonProperties_t : public visualProperties_t {
-class bosonProperties_t {
+#ifndef uint
+typedef unsigned int uint;
+#endif
 
-public:
-	speciesTheme	*myspecy;
-	int		who_am_i;
-};
-
-
-extern bosonProperties_t gpp;
-
+	extern speciesTheme		*myspecy;
+	extern int			who_am_i;
+/* The map which handle grouds and units*/
+	extern bosonField		*field;
+/* synchronization */
+	extern uint			jiffies;
+/* deal with the communication layer */
+	extern KSocket			*Socket;
+	extern playerSocketState	socketState;
+	extern playerState		State;
+	extern boBuffer			*buffer;
 
 #endif // BOSON_GAME_H 

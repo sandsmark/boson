@@ -26,7 +26,15 @@ visualProperties_t vpp = {
 	{0l, 0l}
 	};
 
-bosonProperties_t gpp = {
-	0l,
-	0
-	};
+speciesTheme		*myspecy	= 0l;
+int			who_am_i	= 0;
+/* The map which handle grouds and units*/
+bosonField		*field		= 0l;
+/* synchronization */
+uint			jiffies		= 0l;
+/* deal with the communication layer */
+KSocket			*Socket		= 0l;
+playerSocketState	socketState	= PSS_INIT;
+playerState		State		= PS_INIT;
+boBuffer		*buffer		= 0l;
+

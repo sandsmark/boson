@@ -152,15 +152,6 @@ private:
     KToolBar::BarPosition tool_bar_0_pos; 
 
 
-/* The map which handle grouds and units*/
-    bosonField		*field;
-/* synchronization */
-    uint		jiffies;
-/* deal with the communication layer */
-    KSocket		*socket;
-    playerSocketState	socketState;
-    playerState		state;
-    boBuffer		*buffer;
 };   
  
 #endif // BOSON_H

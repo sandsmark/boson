@@ -223,7 +223,7 @@ void playerMobUnit::s_moveBy(int dx, int dy, int dir)
 {
 //orzel : use some kind of fuel
 //printf("Moved  : d(%d.%d)\n", dx, dy);
-if ( who!=gpp.who_am_i) {
+if ( who!=who_am_i) {
 	/* this not my unit */
 	doMoveBy(dx,dy);
 	direction = dir;

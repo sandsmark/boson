@@ -33,11 +33,11 @@ void visualBigDisplay::actionClicked(int mx, int my)
 		return;
 		}
 
-	if (gpp.who_am_i != view->selectionWho)
+	if (who_am_i != view->selectionWho)
 		return; 		// nothing to do
 
 	for (mobIt.toFirst(); mobIt; ++mobIt) {
-		boAssert(mobIt.current()->who == gpp.who_am_i);
+		boAssert(mobIt.current()->who == who_am_i);
 		((playerMobUnit *)mobIt.current())->u_goto(mx,my);
 		}
 
