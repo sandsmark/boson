@@ -1,4 +1,6 @@
 [Boson Mobile Unit]
+AccelerationSpeed=0.4
+DecelerationSpeed=0.8
 CanGoOnLand=true
 CanGoOnWater=true
 Speed=2.2
@@ -14,18 +16,18 @@ ExplodingFragmentDamage=35
 ExplodingFragmentHitEffects=2001
 ExplodingFragmentFlyEffects=5101,5110
 RemoveWreckageImmediately=true
-Health=300
+Health=200
 HitPoint=0,0,0.47
 Id=10007
 IsFacility=false
-MineralCost=750
+MineralCost=800
 Name=Transall
 OilCost=400
 Producer=2
-ProductionTime=45
+ProductionTime=40
 Requirements=1,14
 Shield=0
-SightRange=9
+SightRange=11
 SupportMiniMap=false
 TerrainType=2
 UnitDepth=0.46
@@ -48,13 +50,13 @@ ReportUnderAttack=report_underattack
 Shoot=shoot
 
 [Weapon_0]
-AccelerationSpeed=0.01
+AccelerationSpeed=0.15
 CanShootAtAirUnits=false
 CanShootAtLandUnits=true
-Damage=600
-DamageRange=7
+Damage=850
+DamageRange=9
 FlyEffects=20110,20120
-FullDamageRange=3
+FullDamageRange=2
 Height=0.25
 HitEffects=20025,20030,20040,20050,20051,20010
 Model=daisycutter

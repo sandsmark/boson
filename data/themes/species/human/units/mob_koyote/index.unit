@@ -1,10 +1,12 @@
 [Boson Mobile Unit]
+AccelerationSpeed=0.5
+DecelerationSpeed=0.8
 CanGoOnLand=true
 CanGoOnWater=true
-Speed=2.5
+Speed=2.2
 
 [Boson Unit]
-Armor=7
+Armor=5
 ConstructedEffects=
 DestroyedEffects=1001,6100
 ExplodingDamage=0
@@ -17,20 +19,20 @@ Health=200
 HitPoint=0,0,0.4
 Id=10034
 IsFacility=false
-MineralCost=800
+MineralCost=600
 Name=Koyote
-OilCost=350
+OilCost=300
 Producer=2
 ProductionTime=30
 Requirements=1,14
 Shield=0
-SightRange=6
+SightRange=12
 SupportMiniMap=false
 TerrainType=2
 UnitDepth=0.25
 UnitHeight=1
 UnitWidth=1
-Weapons=1
+Weapons=2
 
 [OpenGL]
 FrameRangeIdle=199
@@ -47,20 +49,39 @@ ReportUnderAttack=report_underattack
 Shoot=shoot
 
 [Weapon_0]
-CanShootAtAirUnits=true
+CanShootAtAirUnits=false
 CanShootAtLandUnits=true
-Damage=18
-DamageRange=1
+Damage=20
+DamageRange=0.5
 FlyEffects=9001
 Height=1
 HitEffects=2010
 Name=Cannon
 Offset=0,0,0
 Range=5
-Reload=1.1
+Reload=0.5
 ShootEffects=12030
 SoundFly=
 SoundHit=hit
 SoundShoot=shoot
 Speed=0
 Type=Bullet
+
+[Weapon_1]
+CanShootAtAirUnits=true
+CanShootAtLandUnits=true
+Damage=70
+DamageRange=1.5
+FlyEffects=5001
+Height=0
+HitEffects=2010
+Name=Missiles
+Offset=-0.2,0,0
+Range=11
+Reload=4.5
+ShootEffects=12030
+SoundFly=
+SoundHit=hit
+SoundShoot=shoot
+Speed=8
+Type=Rocket

@@ -4,7 +4,7 @@ CanRefineOil=false
 ConstructionSteps=25
 
 [Boson Unit]
-Armor=0
+Armor=10
 ConstructedEffects=
 DestroyedEffects=1010,3001,6001,7010
 ExplodingDamage=0
@@ -17,14 +17,14 @@ Health=600
 HitPoint=-0.5,-0.2,0.99
 Id=3
 IsFacility=true
-MineralCost=650
+MineralCost=800
 Name=Weapons Factory
-OilCost=300
+OilCost=550
 Producer=10
-ProductionTime=25
+ProductionTime=30
 Requirements=5,2
 Shield=0
-SightRange=5
+SightRange=8
 SupportMiniMap=false
 TerrainType=0
 UnitDepth=0.98

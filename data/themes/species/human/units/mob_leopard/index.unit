@@ -1,10 +1,11 @@
 [Boson Mobile Unit]
+AccelerationSpeed=0.8
 CanGoOnLand=true
 CanGoOnWater=false
 Speed=1.5
 
 [Boson Unit]
-Armor=2
+Armor=15
 ConstructedEffects=
 DestroyedEffects=1002,3002,6002,7001,4003
 ExplodingDamage=0
@@ -19,14 +20,14 @@ Health=200
 HitPoint=0,0,0.35
 Id=10008
 IsFacility=false
-MineralCost=450
+MineralCost=500
 Name=Leopard
-OilCost=150
+OilCost=200
 Producer=0
 ProductionTime=15
 Requirements=3,12
 Shield=0
-SightRange=5
+SightRange=8
 SupportMiniMap=false
 TerrainType=0
 UnitDepth=0.35
@@ -44,22 +45,23 @@ ReportUnderAttack=report_underattack
 Shoot=shoot
 
 [Weapon_0]
-AccelerationSpeed=3
+AccelerationSpeed=12
 CanShootAtAirUnits=false
 CanShootAtLandUnits=true
-Damage=40
-DamageRange=1
+Damage=110
+DamageRange=1.5
 FlyEffects=
-Height=0.05
+Height=0.02
 HitEffects=2001
 Name=Cannon
 Offset=0,-0.6,0.2
-Range=5
-Reload=2.5
+Range=9
+Reload=4
 ShootEffects=12010
 SoundFly=
 SoundHit=hit
 SoundShoot=shoot
-Speed=6
-Model=bullet
+Speed=8
+TakeTargetVeloIntoAccount=true
 Type=Rocket
+Model=bullet
