@@ -228,7 +228,7 @@ void UnitProperties::loadMobileProperties(KSimpleConfig* conf)
 {
  conf->setGroup("Boson Mobile Unit");
  // We divide speeds with 20, because speeds in config files are cells/second,
- //  but we want cells/advance calls
+ //  but we want cells/advance call
  m_speed.init(conf->readDoubleNumEntry("Speed", 0) / 20.0f);
  if (speed() < 0) {
 	boWarning() << k_funcinfo << "Invalid Speed value: " << speed() <<
@@ -371,7 +371,7 @@ void UnitProperties::saveMobileProperties(KSimpleConfig* conf)
 {
  conf->setGroup("Boson Mobile Unit");
  // We multiply speeds with 20 because speeds in config files are cells/second,
- //  but here we have cells/advance calls
+ //  but here we have cells/advance call
  conf->writeEntry("Speed", speed() * 20.0f);
  conf->writeEntry("AccelerationSpeed", (double)mAccelerationSpeed * 20.0f);
  conf->writeEntry("DecelerationSpeed", (double)mDecelerationSpeed * 20.0f);
