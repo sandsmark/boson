@@ -313,13 +313,13 @@ public:
 	 * Note that it doesn't include units on cells that are not visible
 	 * (e.g. fogged) for local player.
 	 **/
-	BoItemList unitsInRange(unsigned long int range) const;
+	BoItemList* unitsInRange(unsigned long int range) const;
 
 	/**
 	 * @return Just like @ref unitsInRange but only enemy units.
 	 * Note that it doesn't include units on fogged cells (see @ref unitsInRange)
 	 **/
-	BoItemList enemyUnitsInRange(unsigned long int range) const;
+	BoItemList* enemyUnitsInRange(unsigned long int range) const;
 
 	/**
 	 * Calls @ref BosonCanvas setWorkChanged

@@ -54,10 +54,10 @@ Unit* BosonCollisions::findUnitAtCell(int x, int y)
 
 BosonItem* BosonCollisions::findItemAtCell(int x, int y, bool unitOnly)
 {
- BoItemList list = collisionsAtCell(QPoint(x, y));
+ BoItemList* list = collisionsAtCell(QPoint(x, y));
  BoItemList::Iterator it;
 
- for (it = list.begin(); it != list.end(); ++it) {
+ for (it = list->begin(); it != list->end(); ++it) {
 	if (RTTI::isUnit((*it)->rtti())) {
 		Unit* u = (Unit*)*it;
 		if (!u->isDestroyed()) {
@@ -88,19 +88,20 @@ Unit* BosonCollisions::findUnitAt(const QPoint& pos)
 
 QValueList<Unit*> BosonCollisions::unitCollisionsInRange(const QPoint& pos, int radius) const
 {
- BoItemList l = collisions(QRect(
+ BoItemList* l = collisions(QRect(
 		(pos.x() - radius > 0) ? pos.x() - radius : 0,
 		(pos.y() - radius > 0) ? pos.y() - radius : 0,
 		pos.x() + radius,
 		pos.y() + radius));
 			
  QValueList<Unit*> list;
- for (unsigned int i = 0; i < l.count(); i++) {
-	if (!RTTI::isUnit(l[i]->rtti())) {
+ BoItemList::Iterator it;
+ for (it = l->begin(); it != l->end(); ++it) {
+	if (!RTTI::isUnit((*it)->rtti())) {
 		// this item is not important for us here
 		continue;
 	}
-	Unit* u = (Unit*)l[i];
+	Unit* u = (Unit*)*it;
 	if (u->isDestroyed()) {
 		// this item is not important for us here
 		continue;
@@ -123,19 +124,20 @@ QValueList<Unit*> BosonCollisions::unitCollisionsInSphere(const BoVector3& pos, 
  radius -= 10;  // hack, but prevents nearby units from getting damaged in some conditions
  // FIXME: code duplicated from unitCollisionsInRange
  boDebug(310) << k_funcinfo << endl;
- BoItemList l = collisions(QRect(
+ BoItemList* l = collisions(QRect(
 		(pos.x() - radius > 0) ? (int)pos.x() - radius : 0,
 		(pos.y() - radius > 0) ? (int)pos.y() - radius : 0,
 		(int)pos.x() + radius,
 		(int)pos.y() + radius));
 			
  QValueList<Unit*> list;
- for (unsigned int i = 0; i < l.count(); i++) {
-	if (!RTTI::isUnit(l[i]->rtti())) {
+ BoItemList::Iterator it;
+ for (it = l->begin(); it != l->end(); ++it) {
+	if (!RTTI::isUnit((*it)->rtti())) {
 		// this item is not important for us here
 		continue;
 	}
-	Unit* u = (Unit*)l[i];
+	Unit* u = (Unit*)*it;
 	if (u->isDestroyed()) {
 		// this item is not important for us here
 		continue;
@@ -188,11 +190,11 @@ bool BosonCollisions::cellsOccupied(const QRect& rect) const
 }
 
 // this is an extremely time-critical function!
-BoItemList BosonCollisions::collisionsAtCells(const QPtrVector<Cell>* cells, const BosonItem* item, bool exact) const
+BoItemList* BosonCollisions::collisionsAtCells(const QPtrVector<Cell>* cells, const BosonItem* item, bool exact) const
 {
  // FIXME: if exact is true we assume that cells == item->cells() !!
 // AB: item can be NULL, too!
- BoItemList collisions;
+ BoItemList* collisions = new BoItemList(); // will get deleted by BoItemListHandler
  const BoItemList* cellItems;
  BoItemList::ConstIterator it;
  BosonItem* s;
@@ -213,8 +215,8 @@ BoItemList BosonCollisions::collisionsAtCells(const QPtrVector<Cell>* cells, con
 	for (it = cellItems->begin(); it != cellItems->end(); ++it) {
 		s = *it;
 		if (s != item) {
-			if (collisions.findIndex(s) < 0 && (!item || !exact || item->bosonCollidesWith(s))) {
-				collisions.append(s);
+			if (collisions->findIndex(s) < 0 && (!item || !exact || item->bosonCollidesWith(s))) {
+				collisions->append(s);
 			}
 		}
 	}
@@ -222,7 +224,7 @@ BoItemList BosonCollisions::collisionsAtCells(const QPtrVector<Cell>* cells, con
  return collisions;
 }
 
-BoItemList BosonCollisions::collisions(const QRect& rect, const BosonItem* item, bool exact) const
+BoItemList* BosonCollisions::collisions(const QRect& rect, const BosonItem* item, bool exact) const
 {
  // rect is canvas coordinates!
  int w = rect.width() / BO_TILE_SIZE;
@@ -236,11 +238,11 @@ BoItemList BosonCollisions::collisions(const QRect& rect, const BosonItem* item,
  return collisionsAtCells(QRect(rect.left() / BO_TILE_SIZE, rect.top() / BO_TILE_SIZE, w, h), item, exact);
 }
 
-BoItemList BosonCollisions::collisionsAtCells(const QRect& rect, const BosonItem* item, bool exact) const
+BoItemList* BosonCollisions::collisionsAtCells(const QRect& rect, const BosonItem* item, bool exact) const
 {
  if (!map()) {
 	BO_NULL_ERROR(map());
-	return BoItemList();
+	return new BoItemList();
  }
  int left, right, top, bottom;
  left = QMAX(rect.left(), 0);
@@ -249,7 +251,7 @@ BoItemList BosonCollisions::collisionsAtCells(const QRect& rect, const BosonItem
  bottom = QMIN(rect.bottom(), QMAX((int)map()->height() - 1, 0));
  int size = (right - left + 1) * (bottom - top + 1);
  if (size <= 0) {
-	return BoItemList();
+	return new BoItemList();
  }
  QPtrVector<Cell> cells(size);
  int n = 0;
@@ -272,20 +274,20 @@ BoItemList BosonCollisions::collisionsAtCells(const QRect& rect, const BosonItem
  return collisionsAtCells(&cells, item, exact);
 }
 
-BoItemList BosonCollisions::collisionsAtCell(const QPoint& pos) const
+BoItemList* BosonCollisions::collisionsAtCell(const QPoint& pos) const
 {
  QPtrVector<Cell> cells(1);
  Cell* c = cell(pos.x(), pos.y());
  if (!c) {
 	boWarning(310) << k_funcinfo << "NULL cell: " << pos.x() << "," << pos.y() << endl;
-	return BoItemList();
+	return new BoItemList();
  }
  cells.insert(0, c);
  boDebug(310) << k_funcinfo << c->x() << " " << c->y() << endl;
  return collisionsAtCells(&cells, 0, true); // FIXME: exact = true has no effect
 }
 
-BoItemList BosonCollisions::collisions(const QPoint& pos) const
+BoItemList* BosonCollisions::collisions(const QPoint& pos) const
 {
  return collisionsAtCell(pos / BO_TILE_SIZE);
 }

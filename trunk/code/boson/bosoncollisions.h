@@ -80,20 +80,20 @@ public:
 	void setMap(BosonMap* map) { mMap = map; }
 	inline BosonMap* map() const { return mMap; }
 
-	BoItemList collisionsAtCells(const QPtrVector<Cell>* cells, const BosonItem* item, bool exact) const;
-	BoItemList collisions(const QRect& rect, const BosonItem* item = 0, bool exact = true) const; // note: exact == true has n effec for item != 0 ONLY!
-	BoItemList collisionsAtCells(const QRect& rect, const BosonItem* item = 0, bool exact = true) const; // note: exact == true has n effec for item != 0 ONLY!
+	BoItemList* collisionsAtCells(const QPtrVector<Cell>* cells, const BosonItem* item, bool exact) const;
+	BoItemList* collisions(const QRect& rect, const BosonItem* item = 0, bool exact = true) const; // note: exact == true has n effec for item != 0 ONLY!
+	BoItemList* collisionsAtCells(const QRect& rect, const BosonItem* item = 0, bool exact = true) const; // note: exact == true has n effec for item != 0 ONLY!
 
 	/**
 	 * @param pos Position in <em>cell</em>-coordinates.
 	 **/
-	BoItemList collisionsAtCell(const QPoint& pos) const;
+	BoItemList* collisionsAtCell(const QPoint& pos) const;
 
 	/**
 	 * @param pos Position in <em>canvas</em> coordinates, i.e. not cell
 	 * values
 	 **/
-	BoItemList collisions(const QPoint& pos) const;
+	BoItemList* collisions(const QPoint& pos) const;
 
 	/**
 	 * Usually you don't need a @ref QCanvasItemList of all units in a

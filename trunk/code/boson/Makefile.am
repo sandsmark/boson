@@ -14,6 +14,7 @@ BOSON_SRC = \
 	unitproperties.cpp \
 	pluginproperties.cpp \
 	unitbase.cpp \
+	boitemlisthandler.cpp \
 	boitemlist.cpp \
 	boselection.cpp \
 	bogltooltip.cpp \

@@ -23,6 +23,7 @@
 #include "bodebug.h"
 
 Cell::Cell()
+	: mItems(BoItemList(2, false))
 {
  setGroundType(GroundUnknown);
  mX = 0;

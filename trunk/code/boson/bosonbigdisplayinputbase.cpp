@@ -90,12 +90,11 @@ void BosonBigDisplayInputBase::selectSingle(Unit* unit, bool replace)
 void BosonBigDisplayInputBase::selectArea(const QRect& rect, bool replace)
 {
  if (boConfig->debugMode() == BosonConfig::DebugSelection) {
-	BoItemList list;
 	QRect r = rect;
-	list = collisions()->collisions(r);
+	BoItemList* list = collisions()->collisions(r);
 	BoItemList::Iterator it;
-	boDebug() << "Selection count: " << list.count() << endl;
-	for (it = list.begin(); it != list.end(); ++it) {
+	boDebug() << "Selection count: " << list->count() << endl;
+	for (it = list->begin(); it != list->end(); ++it) {
 		QString s = QString("Selected: RTTI=%1").arg((*it)->rtti());
 		if (RTTI::isUnit((*it)->rtti())) {
 			Unit* u = (Unit*)*it;
@@ -109,12 +108,11 @@ void BosonBigDisplayInputBase::selectArea(const QRect& rect, bool replace)
  }
 
  QRect r = rect;
- BoItemList list;
  QPtrList<Unit> unitList;
  Unit* fallBackUnit= 0; // in case no localplayer mobile unit can be found we'll select this instead
  BoItemList::Iterator it;
- list = collisions()->collisions(r);
- for (it = list.begin(); it != list.end(); ++it) {
+ BoItemList* list = collisions()->collisions(r);
+ for (it = list->begin(); it != list->end(); ++it) {
 	if (!RTTI::isUnit((*it)->rtti())) {
 		continue;
 	}
@@ -154,10 +152,9 @@ void BosonBigDisplayInputBase::selectArea(const QRect& rect, bool replace)
 
 void BosonBigDisplayInputBase::unselectArea(const QRect& rect)
 {
- BoItemList list;
- list = collisions()->collisions(rect);
+ BoItemList* list = collisions()->collisions(rect);
  BoItemList::Iterator it;
- for (it = list.begin(); it != list.end(); ++it) {
+ for (it = list->begin(); it != list->end(); ++it) {
 	if (!RTTI::isUnit((*it)->rtti())) {
 		continue;
 	}
