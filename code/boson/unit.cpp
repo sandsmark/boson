@@ -858,7 +858,7 @@ bool Unit::moveTo(float x, float y, int range)
  pathInfo()->dest.setX((int)x);
  pathInfo()->dest.setY((int)y);
  pathInfo()->range = range;
-	boDebug() << k_funcinfo << "unit " << id() << ": dest: (" << (int)x << "; " << (int)y << "); range: " << range << endl;
+ boDebug() << k_funcinfo << "unit " << id() << ": dest: (" << (int)x << "; " << (int)y << "); range: " << range << endl;
 
  // Remove old way/pathpoints
  // TODO: maybe call stopMoving() instead and remove setMovingStatus(Standing)
@@ -877,6 +877,7 @@ bool Unit::moveTo(float x, float y, int range)
 
 void Unit::newPath()
 {
+ boDebug(401) << k_funcinfo << "unit " << id() << endl;
  // Check if we can still go to cell (it may be that cell was fogged previously,
  //  so we couldn't check, but now it's unfogged)
  // FIXME: don't check if cell is valid/invalid if range > 0
