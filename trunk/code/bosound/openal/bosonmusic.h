@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2004 Andreas Beckermann <b_mann@gmx.de>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,33 +19,23 @@
 #ifndef BOSONMUSIC_H
 #define BOSONMUSIC_H
 
-#include "bosonabstractaudiointerface.h"
+#include "../bosonabstractaudiointerface.h"
 
 #include <qobject.h>
 
-class QStringList;
-class BosonSound;
-class BosonAudio;
-class Unit;
+class BosonAudioAL;
 
 /**
  * Music support. Not much to describe here...
  *
- * A lot of code is from kaboodle (as I know nearly nothing about sound in
- * KDE). Just call @ref startLoop to start playing.
  * @author Andreas Beckermann <b_mann@gmx.de>
  * @short Music support
  **/
 class BosonMusic : public QObject, public BosonAbstractMusicInterface
 {
 	Q_OBJECT
-	// AB: note that QObject derived classes in threads other the GUI thread
-	// are possible, even if they are not a perfect solution. we must take
-	// care that no events are sent/received.
-	// this isn't a problem for us, since we only use the slot mechanism
-	// from QObject here.
 public:
-	BosonMusic(BosonAudio* parent);
+	BosonMusic(BosonAudioAL* parent);
 	virtual ~BosonMusic();
 
 	bool checkALError();

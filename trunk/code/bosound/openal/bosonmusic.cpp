@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2001-2004 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2004 Andreas Beckermann <b_mann@gmx.de>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,9 +18,10 @@
 */
 
 #include "bosonmusic.h"
+#include "bosonmusic.moc"
 
 #include "bodebug.h"
-#include "bosonaudio.h"
+#include "bosonaudioal.h"
 
 #include <kapplication.h>
 
@@ -29,10 +30,6 @@
 #include <qtimer.h>
 
 #include <qstringlist.h>
-#include <qdict.h>
-
-#include "bosonmusic.moc"
-
 
 #define TICKER_VALUE 500 // same as in kaboodle
 
@@ -46,7 +43,7 @@ public:
 		mTicker = 0;
 	}
 
-	BosonAudio* mParent;
+	BosonAudioAL* mParent;
 
 	QTimer* mTicker;
 
@@ -58,7 +55,7 @@ public:
 	ALuint mMusicSource;
 };
 
-BosonMusic::BosonMusic(BosonAudio* parent) : QObject(0, "bosonmusic")
+BosonMusic::BosonMusic(BosonAudioAL* parent) : QObject(0, "bosonmusic")
 {
  d = new BosonMusicPrivate;
  d->mParent = parent;

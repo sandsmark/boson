@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2004 Andreas Beckermann <b_mann@gmx.de>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 #ifndef BOSONSOUND_H
 #define BOSONSOUND_H
 
-#include "bosonabstractaudiointerface.h"
+#include "../bosonabstractaudiointerface.h"
 
 #include <qptrlist.h>
 #include <qmap.h>
@@ -27,10 +27,8 @@
 #include <AL/altypes.h>
 
 class BoPlayObject;
-class BosonAudio;
+class BosonAudioAL;
 class QString;
-class QStringList;
-class QDir;
 
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
@@ -39,7 +37,7 @@ class BosonSound : public BosonAbstractSoundInterface
 {
 public:
 	// warning: parent does NOT take ownership
-	BosonSound(BosonAudio* parent);
+	BosonSound(BosonAudioAL* parent);
 	virtual ~BosonSound();
 
 	// obsolete. remove.

@@ -1,6 +1,6 @@
 INCLUDES = -I$(top_srcdir)/bodebug $(all_includes)
 
-SUBDIRS = test
+SUBDIRS = openal
 
 noinst_LTLIBRARIES = libbosonsoundcommon.la libbosonsound.la
 bin_PROGRAMS = bosonaudioprocess
@@ -13,11 +13,10 @@ libbosonsoundcommon_la_SOURCES = \
 libbosonsound_la_SOURCES = \
 	boaudiocommand.cpp \
 	boaudiothread.cpp \
-	bosonaudio.cpp \
-	bosonsound.cpp \
-	bosonmusic.cpp
+	bosonaudio.cpp
 libbosonsound_la_LIBADD = \
-		$(top_builddir)/bosound/libbosonsoundcommon.la
+		$(top_builddir)/bosound/libbosonsoundcommon.la \
+		$(top_builddir)/bosound/openal/libbosonsoundal.la
 
 bosonaudioprocess_LDFLAGS = $(all_libraries)
 bosonaudioprocess_LDADD = \

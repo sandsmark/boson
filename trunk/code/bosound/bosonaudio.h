@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2003-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,32 +19,30 @@
 #ifndef BOSONAUDIO_H
 #define BOSONAUDIO_H
 
-#include <AL/altypes.h>
-
 class QStringList;
-class BosonMusic;
-class BosonSound;
 class QString;
+class BoAudioCommand;
 
 class BosonAudioPrivate;
 
 /**
- * This class lives inside the audio thread only. Nothing outside of the audio
- * thread can access it.
+ * This is the central audio class in boson. When boson is compiled without
+ * OpenAL support, this is simply a dummy class that is ignoring all audio
+ * commands. If OpenAL is compiled in, the @ref BosonAudioAL class is used,
+ * which is derived from this class. It manages both, the music and the sound
+ * objects.
  *
- * Here the sound server is managed (@ref server), as well as the @ref
- * bosonMusic object and all @ref bosonSound objects.
+ * The BosonAudio class also takes care of initializing the audio device (e.g.
+ * initializing OpenAL).
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
 class BosonAudio
 {
 public:
-	~BosonAudio();
+	virtual ~BosonAudio();
 
 	/**
-	 * Create a BosonAudio object. You can call this exactly once only -
-	 * this is the instance for the audio thread. You must not call this
-	 * outside of the audio thread.
+	 * Create a BosonAudio object. You can call this exactly once only.
 	 *
 	 * If this is called a 2nd time, it will return NULL (except if the
 	 * previously created object has been deleted meanwhile)
@@ -52,40 +50,28 @@ public:
 	static BosonAudio* create();
 
 	/**
-	 * @return The @ref BosonMusic object of this application. This can be
-	 * NULL e.g. if user started with --nosound. See also @ref bosonSound
+	 * Execute an audio command.
+	 *
+	 * Any audio operations should be done through this.
 	 **/
-	BosonMusic* bosonMusic() const;
-
-	BosonSound* bosonSound(const QString& species) const;
-	BosonSound* addSounds(const QString& species);
-
+	virtual void executeCommand(BoAudioCommand* command);
 
 	/**
 	 * @return TRUE if an initialization error occured.
 	 **/
-	bool isNull() const;
+	virtual bool isNull() const;
 
 	bool music() const;
 	bool sound() const;
 	void setMusic(bool m);
 	void setSound(bool s);
 
-	bool checkALError();
-
-	bool loadFileToBuffer(ALuint buffer, const QString& file);
-
-private:
+protected:
 	BosonAudio();
 
 private:
 	BosonAudioPrivate* d;
 	static bool mCreated;
-
-private:
-	// see OpenAL source, linux/src/extenstions/al_ext_mp3.c and al_ext_vorbis.c
-	ALboolean (*alutLoadMP3_LOKI)(ALuint, ALvoid*, ALint);
-	ALboolean (*alutLoadVorbis_LOKI)(ALuint, ALvoid*, ALint);
 };
 
 #endif

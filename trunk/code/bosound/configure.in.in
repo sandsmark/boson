@@ -1,5 +1,3 @@
-dnl TODO: check for OpenAL
-
 AC_DEFUN(AC_BOSON_HAVE_OGG,
 [
 VORBISLIBS=""
@@ -62,8 +60,6 @@ if test "x$boson_enable_openal" = "xyes"; then
   AC_MSG_CHECKING([for libopenal])
   LDFLAGS="$LDFLAGS $bo_lib_openal"
   CXXFLAGS="$CFLAGS"
-dnl  LDFLAGS="$LDFLAGS $X_LDFLAGS $all_libraries -lGL -lX11"
-dnl  CXXFLAGS="$CFLAGS $X_INCLUDES"
   AC_TRY_LINK(
 	[
 #include <AL/al.h>

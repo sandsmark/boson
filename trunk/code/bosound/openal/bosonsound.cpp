@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2004 Andreas Beckermann <b_mann@gmx.de>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,15 +20,11 @@
 #include "bosonsound.h"
 
 #include "bodebug.h"
-#include "bosonaudio.h"
+#include "bosonaudioal.h"
 
 #include <kapplication.h>
 
-#include <qstringlist.h>
 #include <qintdict.h>
-#include <qdict.h>
-#include <qdir.h>
-#include <qregexp.h>
 
 #include <AL/al.h>
 
@@ -153,14 +149,14 @@ public:
 		mParent = 0;
 	}
 
-	BosonAudio* mParent;
+	BosonAudioAL* mParent;
 
 	QIntDict<BoPlayObject> mSounds;
 
 	QMap<QString, QPtrList<BoPlayObject> > mUnitSounds;
 };
 
-BosonSound::BosonSound(BosonAudio* parent)
+BosonSound::BosonSound(BosonAudioAL* parent)
 {
  d = new BosonSoundPrivate;
  d->mParent = parent;

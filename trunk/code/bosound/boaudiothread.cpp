@@ -22,8 +22,6 @@
 
 #include "boaudiocommand.h"
 #include "bosonaudio.h"
-#include "bosonmusic.h"
-#include "bosonsound.h"
 #include "bodebug.h"
 
 #include <qptrqueue.h>
@@ -97,127 +95,14 @@ void BoAudioThread::processCommand()
 	BO_NULL_ERROR(command);
 	return;
  }
- BosonSound* sound = 0;
- BosonMusic* music = 0;
- if (command->species().isEmpty()) {
-	// most probably this is a music command
-	if (command->type() != BoAudioCommand::CreateMusicObject) {
-		music = audio()->bosonMusic();
-		if (!music) {
-			// happens e.g. for --nosound
-			delete command;
-			command = 0;
-		}
-	}
- } else {
-	// this must be a sound command for a species.
-	if (command->type() != BoAudioCommand::CreateSoundObject) {
-		sound = audio()->bosonSound(command->species());
-		if (!sound) {
-			// happens e.g. for --nosound
-			delete command;
-			command = 0;
-		}
-	}
- }
-
- if (!command) {
-	// we don't want to continue with this command by any reason
-	return;
- }
- executeCommand(command, audio(), music, sound);
- delete command;
+ executeCommand(command);
 }
 
-void BoAudioThread::executeCommand(BoAudioCommand* command, BosonAudio* audio, BosonMusic* music, BosonSound* sound)
+void BoAudioThread::executeCommand(BoAudioCommand* command)
 {
- if (!command) {
-	return;
- }
- switch (command->type()) {
-	case BoAudioCommand::CreateMusicObject:
-		boDebug(200) << k_funcinfo << "music object is created on startup. nothing to do" << endl;
-		break;
-	case BoAudioCommand::CreateSoundObject:
-		if (!command->species().isEmpty()) {
-			boDebug(200) << k_funcinfo << "create sound object for " << command->species() << endl;
-			audio->addSounds(command->species());
-		} else {
-			boError(200) << k_funcinfo << "Cannot add a BosonSound object for an empty species string" << endl;
-		}
-		break;
-	case BoAudioCommand::EnableSound:
-		if (audio) {
-			audio->setSound((bool)command->dataInt());
-		}
-		break;
-	case BoAudioCommand::EnableMusic:
-		if (audio) {
-			audio->setMusic((bool)command->dataInt());
-		}
-		break;
-	case BoAudioCommand::PlayMusic:
-		if (music) {
-			boDebug(200) << k_funcinfo << "start music playing" << endl;
-			music->playMusic();
-		}
-		break;
-	case BoAudioCommand::StopMusic:
-		if (music) {
-			boDebug(200) << k_funcinfo << "stop music playing" << endl;
-			music->stopMusic();
-		}
-		break;
-	case BoAudioCommand::ClearMusicList:
-		if (music) {
-			boDebug(200) << k_funcinfo << "clear music list" << endl;
-			music->clearMusicList();
-		}
-		break;
-	case BoAudioCommand::AddToMusicList:
-		if (music) {
-			QString file = command->dataString1();
-//				boDebug(200) << k_funcinfo << "adding to music list: " << file << endl;
-			music->addToMusicList(file);
-		}
-		break;
-	case BoAudioCommand::StartMusicLoop:
-		if (music) {
-			boDebug(200) << k_funcinfo << "looping music list" << endl;
-			music->startMusicLoop();
-		}
-		break;
-	case BoAudioCommand::PlaySound:
-		if (sound) {
-			QString name = command->dataString1();
-			int id = command->dataInt();
-			if (!name.isEmpty()) {
-				sound->playSound(name);
-			} else {
-				sound->playSound(id);
-			}
-		}
-		break;
-	case BoAudioCommand::AddUnitSound:
-		if (sound) {
-			QString name = command->dataString1();
-			QString file = command->dataString2();
-//			boDebug(200) << k_funcinfo << "adding sound " << name << "->" << file << endl;
-			sound->addEventSound(name, file);
-		}
-		break;
-	case BoAudioCommand::AddGeneralSound:
-		if (sound) {
-			QString file = command->dataString2();
-			int id = command->dataInt();
-//			boDebug(200) << k_funcinfo << "adding sound " << id << "->" << file << endl;
-			sound->addEventSound(id, file);
-		}
-		break;
-	default:
-		boError() << k_funcinfo << "invalid type: " << command->type() << endl;
-		break;
- }
+ BO_CHECK_NULL_RET(command);
+
+ audio()->executeCommand(command);
 }
 
 void BoAudioThread::enqueueCommand(BoAudioCommand* command)
