@@ -29,7 +29,7 @@
 #define PIXMAP_PER_FIX 5 // number of construction steps + 1 "destroyed" pix
 #define PIXMAP_FIX_DESTROYED (PIXMAP_PER_FIX - 1)
 #define PIXMAP_MOBILE_DESTROYED (PIXMAP_PER_MOBILE - 1)
-#define FACILITY_CONSTRUCTION_STEPS PIXMAP_FIX_DESTROYED
+#define FACILITY_CONSTRUCTION_STEPS (PIXMAP_PER_FIX - 1)
 
 #define MAXIMAL_ADVANCE_COUNT 200 // maximal value of advanceCount param emitted by Boson::signalAdvance
 
