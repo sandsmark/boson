@@ -202,11 +202,11 @@ void BosonParticleSystem::initParticle(BosonParticle* particle)
   particle->pos = mPos;
   if(!mTextures)
   {
-    boError() << k_funcinfo << "NULL textures" << endl;
+    boError(150) << k_funcinfo << "NULL textures" << endl;
   }
   else if(!mTextures->mTextureIds)
   {
-    boError() << k_funcinfo << "NULL texture array" << endl;
+    boError(150) << k_funcinfo << "NULL texture array" << endl;
   }
   else
   {
