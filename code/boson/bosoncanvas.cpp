@@ -436,7 +436,9 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount)
 	d->mDeleteShot.clear();
  }
 
- update();
+ // note we do *not* call update() here anymore! it is done in in Boson, after
+ // signalAdvance() was emitted. This way we are able to call slotAdvance()
+ // twice in a loop without the need to update before all calls are done
 }
 
 bool BosonCanvas::canGo(const UnitProperties* prop, const QRect& rect) const

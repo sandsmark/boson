@@ -102,7 +102,7 @@ void OptionsDialog::initGeneralPage()
 		this, SIGNAL(signalArrowScrollChanged(int)));
 
  d->mGameSpeed = new KIntNumInput(10, vbox);
- d->mGameSpeed->setRange(MAX_GAME_SPEED, MIN_GAME_SPEED);
+ d->mGameSpeed->setRange(MIN_GAME_SPEED, MAX_GAME_SPEED);
  d->mGameSpeed->setLabel(i18n("Game Speed"));
  connect(d->mGameSpeed, SIGNAL(valueChanged(int)), 
 		this, SLOT(slotSpeedChanged(int)));
@@ -219,23 +219,12 @@ void OptionsDialog::initScrollingPage()
 
 void OptionsDialog::slotSpeedChanged(int value)
 {
-// value is not actually the new speed but the value supplied by the input
-// (1=very slow).
-// the actual speed is the value for the QTimer, where 1 would be 1ms and
-// therefore *veery* fast. So lets change the value:
- if (value == 0) {
-	kdError() << "cannot use speed=0" << endl;
-	return;
- }
-
- int newSpeed = (MIN_GAME_SPEED + MAX_GAME_SPEED) - value;
- emit signalSpeedChanged(newSpeed);
+ emit signalSpeedChanged(value);
 }
 
-void OptionsDialog::setGameSpeed(int ms)
+void OptionsDialog::setGameSpeed(int speed)
 {
- int value = (MIN_GAME_SPEED + MAX_GAME_SPEED) - ms;
- d->mGameSpeed->setValue(value);
+ d->mGameSpeed->setValue(speed);
 }
 
 void OptionsDialog::setArrowScrollSpeed(int value)

@@ -29,6 +29,7 @@ Game TODOs
   KGameProperty with PolicyClean, since it *must* be *exactly* the same value on
   every client. A frontend with settings like "best performance" == call
   advance methods seldom and stuff like this would also be nice
+- pause
 
 
 Editor (map, unit, scenario) TODOs
