@@ -440,6 +440,7 @@ void ModelPreview::renderMeshSelection()
  if (!matrix) {
 	return;
  }
+ glPushAttrib(GL_POLYGON_BIT | GL_ENABLE_BIT | GL_CURRENT_BIT);
  glPushMatrix();
  glMultMatrixf(matrix->data());
  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -447,18 +448,17 @@ void ModelPreview::renderMeshSelection()
  glDisable(GL_TEXTURE_2D);
  mesh->renderBoundingObject();
  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
- glColor3ub(0, 255, 0);
 
  if (boConfig->boolValue("ShowVertexPoints")) {
+	glColor3ub(0, 255, 0);
 	float size = (float)boConfig->uintValue("VertexPointSize", 3);
 	glPointSize(size);
 	glDisable(GL_DEPTH_TEST);
 	mesh->renderVertexPoints();
-	glEnable(GL_DEPTH_TEST);
  }
 
- glEnable(GL_TEXTURE_2D);
  glPopMatrix();
+ glPopAttrib();
  glColor3ub(255, 255, 255);
 }
 
