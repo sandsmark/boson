@@ -11,6 +11,7 @@ configure
 config.log
 config.h
 config.status
+libtool
 stamp-h
 pics
 /opt/kde/share/apps/boson/pics
