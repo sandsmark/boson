@@ -413,7 +413,7 @@ class BoVector3
     QString debugString(int prec = 6) const;
 
 
-    // Conversion from one coordinate system to another. Should we use BO_GL_CELL_SIZE here?
+    // Conversion from one coordinate system to another.
     inline void canvasToCell()
     {
       mData[0] /= (float)BO_TILE_SIZE; mData[1] /= (float)BO_TILE_SIZE;

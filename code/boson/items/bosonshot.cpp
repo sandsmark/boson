@@ -77,7 +77,7 @@ bool BosonShot::init()
   }
   boDebug(350) << "MISSILE: " << k_funcinfo << "Creating new shot" << endl;
   // FIXME: can't we use values from objects config file here?
-  setSize(BO_TILE_SIZE / 2, BO_TILE_SIZE / 2, BO_GL_CELL_SIZE / 2); // AB: pretty much a random value
+  setSize(BO_TILE_SIZE / 2, BO_TILE_SIZE / 2, 1.0f / 2); // AB: pretty much a random value
 
   // At first shot is invisible. It will be set visible when it's advanced. This
   //  is needed because x rotation isn't calculated in constructor and it would
