@@ -239,6 +239,13 @@ public:
 	// some modes the BoNode::relevantPoint() will have to be used though)
 	unsigned int* mPointsCache;
 	unsigned int mPointsCacheCount;
+
+	float mMinX;
+	float mMaxX;
+	float mMinY;
+	float mMaxY;
+	float mMinZ;
+	float mMaxZ;
 };
 
 BoMesh::BoMesh(unsigned int faces)
@@ -269,6 +276,13 @@ void BoMesh::init()
  d->mTexture = 0;
  d->mDisplayList = 0;
  d->mPointCount = 0;
+
+ d->mMinX = 0.0f;
+ d->mMaxX = 0.0f;
+ d->mMinY = 0.0f;
+ d->mMaxY = 0.0f;
+ d->mMinZ = 0.0f;
+ d->mMaxZ = 0.0f;
 }
 
 void BoMesh::createNodes(unsigned int faces)
@@ -947,5 +961,65 @@ void BoMesh::createPointCache()
  } else {
 	boError() << k_funcinfo << "Invalid type: " << type() << endl;
  }
+}
+
+void BoMesh::calculateMaxMin()
+{
+ // NOT time critical! (called on startup only)
+ BoVector3 v = point(0);
+ d->mMinZ = v.z();
+ d->mMaxZ = v.z();
+ d->mMinX = v.x();
+ d->mMaxX = v.x();
+ d->mMinY = v.y();
+ d->mMaxY = v.y();
+ for (unsigned int i = 0; i < points(); i++) {
+	v = point(i);
+	if (v.x() < d->mMinX) {
+		d->mMinX = v.x();
+	} else if (v.x() > d->mMaxX) {
+		d->mMaxX = v.x();
+	}
+	if (v.y() < d->mMinY) {
+		d->mMinY = v.y();
+	} else if (v.y() > d->mMaxY) {
+		d->mMaxY = v.y();
+	}
+	if (v.z() < d->mMinZ) {
+		d->mMinZ = v.z();
+	} else if (v.z() > d->mMaxZ) {
+		d->mMaxZ = v.z();
+	}
+ }
+}
+
+float BoMesh::minX() const
+{
+ return d->mMinX;
+}
+
+float BoMesh::maxX() const
+{
+ return d->mMaxX;
+}
+
+float BoMesh::minY() const
+{
+ return d->mMinY;
+}
+
+float BoMesh::maxY() const
+{
+ return d->mMaxY;
+}
+
+float BoMesh::minZ() const
+{
+ return d->mMinZ;
+}
+
+float BoMesh::maxZ() const
+{
+ return d->mMaxZ;
 }
 

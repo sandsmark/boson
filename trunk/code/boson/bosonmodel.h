@@ -71,7 +71,7 @@ public:
 	 * This can be used for the construction animations. Remember to set the
 	 * correct display lists!
 	 **/
-	BoFrame(const BoFrame& frame, int meshCount);
+	BoFrame(const BoFrame& frame, int firstMesh, int meshCount);
 	~BoFrame();
 
 	/**
@@ -113,6 +113,9 @@ public:
 
 	void renderFrame();
 
+	void mergeMeshes();
+	void sortByDepth();
+
 private:
 	void init();
 
@@ -122,8 +125,8 @@ private:
 	float mRadius; // TODO
 
 	int mMeshCount;
-	BoMatrix* mMatrices;
-	BoMesh** mMeshes; // AB: WARNING! double pointer! probably bad code!
+	BoMatrix** mMatrices;
+	BoMesh** mMeshes;
 };
 
 /**
@@ -324,6 +327,9 @@ protected:
 	 * for all models in the game.
 	 **/
 	void mergeArrays();
+
+	void mergeMeshesInFrames();
+	void sortByDepth();
 
 public:
 	/**
