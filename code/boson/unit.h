@@ -366,7 +366,6 @@ public:
 	 * This may include e.g. smoke for factories.
 	 **/
 	virtual QPtrList<BosonParticleSystem>* particleSystems() const;
-	void setParticleSystems(QPtrList<BosonParticleSystem> list);
 
 	void loadWeapons();
 
@@ -399,6 +398,8 @@ public:
 
 
 protected:
+	void setParticleSystems(QPtrList<BosonParticleSystem> list);
+
 	void shootAt(BosonWeapon* w, Unit* target);
 
 	/**
