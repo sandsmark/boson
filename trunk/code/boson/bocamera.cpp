@@ -32,6 +32,8 @@
 
 #include <GL/glu.h>
 
+#include <math.h>
+
 BoCamera::BoCamera()
 {
   init();
@@ -60,6 +62,9 @@ BoCamera& BoCamera::operator=(const BoCamera& c)
   mRotationDiff = c.mRotationDiff;
   mRadiusDiff = c.mRadiusDiff;
   mCommitTime = c.mCommitTime;
+  mRemainingTime = c.mRemainingTime;
+  mMoveMode = c.mMoveMode;
+  mMovedAmount = c.mMovedAmount;
 
   setPositionDirty();
 
@@ -74,6 +79,7 @@ void BoCamera::init()
   mPosZ = 8.0f;
   mRotation = 0.0f;
   mRadius = 5.0f;
+  mMoveMode = Linear;
 
   resetDifferences();
 
@@ -425,40 +431,47 @@ void BoCamera::setMoveRect(GLfloat minX, GLfloat maxX, GLfloat minY, GLfloat max
 void BoCamera::commitChanges(int ticks)
 {
   mCommitTime = ticks;
+  mRemainingTime = ticks;
+  mMovedAmount = 0.0f;
   if(ticks <= 0)
   {
     // Advance immediately. commitTime still has to be at least 1
     mCommitTime = 1;
+    mRemainingTime = 1;
     advance();
   }
 }
 
+void BoCamera::setMoveMode(MoveMode mode)
+{
+  boDebug() << k_funcinfo << "mode: " << mode << endl;
+  mMoveMode = mode;
+}
+
 void BoCamera::advance()
 {
-  if(mCommitTime <= 0)
+  if(mRemainingTime <= 0)
   {
     return;
   }
 
-  boDebug() << k_funcinfo << "mCommitTime: " << mCommitTime << endl;
-
-  if(mCommitTime == 1)
-  {
-    boDebug() << k_funcinfo << "commitTime is 1" << endl;
-    // Special case, can be done quickly
-    mLookAt.add(mLookAtDiff);
-    mPosZ += mPosZDiff;
-    mRotation += mRotationDiff;
-    mRadius += mRadiusDiff;
-    checkRotation();
-    setPositionDirty();
-    resetDifferences();
-    return;
-  }
+  boDebug() << k_funcinfo << "mRemainingTime: " << mRemainingTime << endl;
 
   // How much of differences to add
-  float factor = 1.0 / mCommitTime;
-  boDebug() << k_funcinfo << "factor: " << factor << endl;
+  float factor;
+  if(mMoveMode == Sinusoidal)
+  {
+    // FIXME: make this more simple!
+    factor = (-cos((mCommitTime - mRemainingTime + 1) / (float)mCommitTime * M_PI) + 1) / 2 - mMovedAmount;
+    boDebug() << k_funcinfo << "Sinusoidal movement; mCommitTime: " << mCommitTime << "; factor: " << factor << endl;
+  }
+  else
+  {
+    factor = 1.0 / mCommitTime;
+    boDebug() << k_funcinfo << "Linear movement; mCommitTime: " << mCommitTime << "; factor: " << factor << endl;
+  }
+  mMovedAmount += factor;
+  boDebug() << k_funcinfo << "factor: " << factor << ";  movedAmount: " << mMovedAmount << endl;
   bool changed = false;
 
   if(!mLookAtDiff.isNull())
@@ -467,7 +480,6 @@ void BoCamera::advance()
     BoVector3 lookAtChange(mLookAtDiff * factor);
     // Change lookAt point and difference
     mLookAt.add(lookAtChange);
-    mLookAtDiff += -lookAtChange;
     checkPosition();
     changed = true;
   }
@@ -476,7 +488,6 @@ void BoCamera::advance()
   {
     float diff = (mPosZDiff * factor);
     mPosZ += diff;
-    mPosZDiff -= diff;
     changed = true;
   }
 
@@ -484,7 +495,6 @@ void BoCamera::advance()
   {
     float diff = (mRotationDiff * factor);
     mRotation += diff;
-    mRotationDiff -= diff;
     checkRotation();
     changed = true;
   }
@@ -493,20 +503,21 @@ void BoCamera::advance()
   {
     float diff = (mRadiusDiff * factor);
     mRadius += diff;
-    mRadiusDiff -= diff;
     changed = true;
   }
 
   if(!changed)
   {
-    boError() << k_funcinfo << "commitTime: " << mCommitTime << ", but no changes ?!" << endl;
+    boError() << k_funcinfo << "remainingTime: " << mRemainingTime << ", but no changes ?!" << endl;
+    mRemainingTime = 0;
     mCommitTime = 0;
+    mMovedAmount = 0.0f;
   }
   else
   {
     setPositionDirty();
-    mCommitTime--;
-    if(mCommitTime == 0)
+    mRemainingTime--;
+    if(mRemainingTime == 0)
     {
       // Failsafe
       resetDifferences();
@@ -521,4 +532,6 @@ void BoCamera::resetDifferences()
   mRotationDiff = 0;
   mRadiusDiff = 0;
   mCommitTime = 0;
+  mRemainingTime = 0;
+  mMovedAmount = 0.0f;
 }
