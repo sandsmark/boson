@@ -239,7 +239,8 @@ void TopWidget::slotLoadBosonGameDock()
 	boDebug() << k_funcinfo << "dock config does not exist" << endl;
 	// Dock config isn't saved (probably first start). Hide chat dock (we only
 	//  show commandframe by default)
-	d->mChatDock->changeHideShowState();
+	makeDockInvisible(d->mChatDock);
+	makeDockVisible(d->mCommandFrameDock);
 	if (d->mDisplayManager) {
 		d->mDisplayManager->updateGeometry();  // Hack? Bug in BoDisplayManager?
 	}
