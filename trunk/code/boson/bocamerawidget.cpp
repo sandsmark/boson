@@ -1284,7 +1284,7 @@ void BoUfoLightCameraWidget::slotLightModelChanged()
 class BosonGLWidgetLight : public BosonUfoGLWidget
 {
 public:
-	BosonGLWidgetLight(QWidget* parent) : BosonUfoGLWidget(parent)
+	BosonGLWidgetLight(QWidget* parent) : BosonUfoGLWidget(parent, "lightwidget")
 	{
 		mTopWidget = 0;
 
@@ -1336,6 +1336,12 @@ protected:
 		mTopWidget = ufoManager()->contentWidget();
 //		mTopWidget->setLayoutClass(BoUfoWidget::UVBoxLayout);
 		recursive = false;
+	}
+
+	virtual void resizeGL(int w, int h)
+	{
+		glViewport(0, 0, w, h);
+		BosonUfoGLWidget::resizeGL(w, h);
 	}
 };
 
