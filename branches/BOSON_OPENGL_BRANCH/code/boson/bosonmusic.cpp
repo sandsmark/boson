@@ -90,6 +90,19 @@ BosonMusic::BosonMusic(QObject* parent) : QObject(parent)
 	d->mPlayMusic = false;
 	d->mPlaySound = false;
 	boConfig->setDisableSound(true);
+ } else {
+	 Arts::TraderQuery query;
+	query.supports("Interface", "Arts::PlayObject");
+	query.supports("Extension", "ogg");
+	vector<Arts::TraderOffer>* offers = query.query();
+	if (offers->empty()) {
+		kdWarning() << "Your arts installation does not support .ogg files! Disabling sounds now..." << endl;
+		// TODO: message box
+		d->mPlayMusic = false;
+		d->mPlaySound = false;
+		boConfig->setDisableSound(true);
+	}
+	delete offers;
  }
 }
 
