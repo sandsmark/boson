@@ -61,10 +61,10 @@
 #include "info/boinfo.h"
 #include "script/bosonscript.h"
 #include "script/bosonscriptinterface.h"
-#include "bosonpath.h"
 #include "bofullscreen.h"
 #include "speciesdata.h"
 #include "bowater.h"
+#include "bosonpath.h"
 #include "botexture.h"
 #include "boufo/boufo.h"
 #include "boufo/boufoaction.h"
@@ -73,59 +73,28 @@
 #include "commandframe/bosoncommandframe.h"
 #include "bosonufogamewidget.h"
 #include "bosonlocalplayerinput.h"
-#include "bofullscreen.h"
-#include "sound/bosonaudiointerface.h"
-#include "bodebuglogdialog.h"
-#include "bosonprofilingdialog.h"
 #include "bosonplayfield.h"
-#include "boglstatewidget.h"
 #include "bosondata.h"
-#include "boconditionwidget.h"
 #include "bocamerawidget.h"
 #include "bosonmessage.h"
-#include "kgameunitdebug.h"
-#include "kgameplayerdebug.h"
-#include "kgameadvancemessagesdebug.h"
-#include "bpfdescriptiondialog.h"
-#include "botexmapimportdialog.h"
-#include "optionsdialog.h"
 #include "boaction.h"
 #include "boeventlistener.h"
-#ifdef BOSON_USE_BOMEMORY
-#include "bomemory/bomemorydialog.h"
-#endif
 #include "bosonmenuinput.h"
 
 #include <kgame/kgameio.h>
 #include <kgame/kplayer.h>
-#include <kgame/kgamedebugdialog.h>
 
 #include <klocale.h>
 #include <kmessagebox.h>
 #include <kapplication.h>
-#include <kshortcut.h>
-#include <kfiledialog.h>
 #include "boeventloop.h"
 
 #include <qtimer.h>
 #include <qcursor.h>
-#include <qpointarray.h>
 #include <qbuffer.h>
 #include <qimage.h>
 #include <qdir.h>
 #include <qdom.h>
-#include <qguardedptr.h>
-#include <qsignalmapper.h>
-#include <qlayout.h>
-#include <qptrdict.h>
-#include <qinputdialog.h>
-#include <qvbox.h>
-#include <qlayout.h>
-#include <qlabel.h>
-#include <qdialog.h>
-#include <qcombobox.h>
-#include <qpushbutton.h>
-#include <qvaluestack.h>
 
 #if HAVE_SYS_TIME_H
 #include <sys/time.h>
