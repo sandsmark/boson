@@ -37,6 +37,8 @@
 #include <qvgroupbox.h>
 #include <qgrid.h>
 #include <qheader.h>
+#include <qsplitter.h>
+#include <qvbox.h>
 
 #include <klistbox.h>
 #include <klistview.h>
@@ -470,16 +472,16 @@ void KGameModelDebug::initMaterialPage()
 {
  d->mMaterialPage = new QWidget(d->mTabWidget);
  QHBoxLayout* l = new QHBoxLayout(d->mMaterialPage, 10, 10);
- d->mMaterialBox = new KListBox(d->mMaterialPage);
+ QSplitter* splitter = new QSplitter(d->mMaterialPage);
+ l->addWidget(splitter, 0);
+
+ d->mMaterialBox = new KListBox(splitter);
  connect(d->mMaterialBox, SIGNAL(executed(QListBoxItem*)), this, SLOT(slotDisplayMaterial(QListBoxItem*)));
- l->addWidget(d->mMaterialBox, 0);
  QFontMetrics metrics(font());
 
- d->mMaterialData = new BoMaterialWidget(d->mMaterialPage);
- l->addWidget(d->mMaterialData, 1);
+ d->mMaterialData = new BoMaterialWidget(splitter);
 
- d->mTextureView = new KListView(d->mMaterialPage);
- l->addWidget(d->mTextureView, 1);
+ d->mTextureView = new KListView(splitter);
  d->mTextureView->addColumn(i18n("Map"));
  d->mTextureView->addColumn(i18n("Name"));
  d->mTextureView->addColumn(i18n("Flags"), metrics.width(QString::number(111)));
@@ -502,11 +504,12 @@ void KGameModelDebug::initMeshPage()
 {
  d->mMeshPage = new QWidget(d->mTabWidget);
  QHBoxLayout* l = new QHBoxLayout(d->mMeshPage, 10, 10);
+ QSplitter* splitter = new QSplitter(d->mMeshPage);
+ l->addWidget(splitter);
  QFontMetrics metrics(font());
 
- QVBoxLayout* meshViewLayout = new QVBoxLayout();
- l->addLayout(meshViewLayout, 0);
- d->mMeshView = new KListView(d->mMeshPage);
+ QVBox* meshView = new QVBox(splitter);
+ d->mMeshView = new KListView(meshView);
  d->mMeshView->addColumn(i18n("Name"), metrics.width(i18n("Name")));
  d->mMeshView->addColumn(i18n("Color"), metrics.width(QString::number(111)));
  d->mMeshView->addColumn(i18n("Points count"), metrics.width(QString::number(111)));
@@ -514,27 +517,17 @@ void KGameModelDebug::initMeshPage()
  d->mMeshView->addColumn(i18n("Faces count"), metrics.width(QString::number(111)));
  d->mMeshView->addColumn(i18n("Flags count"), metrics.width(QString::number(11)));
  connect(d->mMeshView, SIGNAL(executed(QListViewItem*)), this, SLOT(slotDisplayMesh(QListViewItem*)));
- meshViewLayout->addWidget(d->mMeshView);
  d->mMeshView->resize(d->mMeshView->height(), 150);
 
- QVBoxLayout* faceLayout = new QVBoxLayout();
- l->addLayout(faceLayout, 1);
- d->mFaceList = new BoFaceView(d->mMeshPage);
+ QVBox* faceView = new QVBox(splitter);
+ d->mFaceList = new BoFaceView(faceView);
  connect(d->mFaceList, SIGNAL(executed(QListViewItem*)), this, SLOT(slotConnectToFace(QListViewItem*)));
- QLabel* connectableLabel = new QLabel(i18n("Connectable to selected face:"), d->mMeshPage);
- d->mConnectedFacesList = new BoFaceView(d->mMeshPage);
- QLabel* unconnectableLabel = new QLabel(i18n("Unconnectable to selected face:"), d->mMeshPage);
- d->mUnconnectedFacesList = new BoFaceView(d->mMeshPage);
- faceLayout->addWidget(d->mFaceList);
- faceLayout->addWidget(connectableLabel);
- faceLayout->addWidget(d->mConnectedFacesList);
- faceLayout->addWidget(unconnectableLabel);
- faceLayout->addWidget(d->mUnconnectedFacesList);
+ (void)new QLabel(i18n("Connectable to selected face:"), faceView);
+ d->mConnectedFacesList = new BoFaceView(faceView);
+ (void)new QLabel(i18n("Unconnectable to selected face:"), faceView);
+ d->mUnconnectedFacesList = new BoFaceView(faceView);
 
- QVBoxLayout* meshDataLayout = new QVBoxLayout();
- l->addLayout(meshDataLayout);
- QVGroupBox* meshMatrixBox = new QVGroupBox(i18n("Matrix"), d->mMeshPage);
- meshDataLayout->addWidget(meshMatrixBox);
+ QVGroupBox* meshMatrixBox = new QVGroupBox(i18n("Matrix"), splitter);
  d->mMeshMatrix = new BoMatrixWidget(meshMatrixBox);
 
  d->mTabWidget->addTab(d->mMeshPage, i18n("&Meshes"));
