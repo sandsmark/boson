@@ -9,3 +9,5 @@ boson-client.log
 
 *.la
 .libs
+diff
+
