@@ -1194,50 +1194,6 @@ void BoMesh::connectNodes()
  }
 }
 
-/*
-void findConnectable(const QPtrList<Lib3dsFace>& nodes, QPtrList<Lib3dsFace>* connected, Lib3dsFace* face, Lib3dsMesh* mesh)
-{
- BO_CHECK_NULL_RET(face)
- BO_CHECK_NULL_RET(connected)
- if (nodes.isEmpty()) {
-	connected->append(face);
-	return;
- }
- if (nodes.containsRef(face)) {
-	boError() << k_funcinfo << "list must not contain the face that we search connectables for" << endl;
-	return;
- }
- BoVector3 searchFace[3]; // the vectors of the face we search connectables for
- BoVector3::makeVectors(searchFace, mesh, face);
-
- BoVector3 v[3];
- QPtrList<Lib3dsFace> found;
- QPtrList<Lib3dsFace> nodesLeft;
-
- QPtrListIterator<Lib3dsFace> it(nodes);
- for (; it.current(); ++it) {
-	BoVector3::makeVectors(v, mesh, it.current());
-	if (BoVector3::isAdjacent(searchFace, v)) {
-		found.clear();
-		nodesLeft = nodes;
-		nodesLeft.removeRef(it.current());
-		findConnectable(nodesLeft, &found, it.current(), mesh);
-		if (nodesLeft.count() + 1 == found.count()) {
-			// all faces could be connected. first append the face
-			// that we searched for to the list, then the faces that
-			// have been found for that face.
-			connected->append(face);
-			QPtrListIterator<Lib3dsFace> foundIt(found);
-			for (; foundIt.current(); ++foundIt) {
-				connected->append(foundIt.current());
-			}
-			break;
-		}
-	}
- }
-}
-*/
-
 GLuint BoMesh::textureObject() const
 {
  if (material()) {

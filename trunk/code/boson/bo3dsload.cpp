@@ -344,6 +344,15 @@ void Bo3DSLoad::dumpTriangle(Lib3dsVector* v, GLuint texture, Lib3dsTexel* tex)
  dumpTriangle(vector, texture, tex);
 }
 
+void Bo3DSLoad::makeVectors(BoVector3* v, const Lib3dsMesh* mesh, const Lib3dsFace* face)
+{
+  // Lib3dsFace stores only the position (index) of the
+  // actual point. the actual points are in mesh->pointL
+  v[0].set(mesh->pointL[ face->points[0] ].pos);
+  v[1].set(mesh->pointL[ face->points[1] ].pos);
+  v[2].set(mesh->pointL[ face->points[2] ].pos);
+}
+
 void Bo3DSLoad::dumpTriangle(BoVector3* v, GLuint texture, Lib3dsTexel* tex)
 {
  QString text = "triangle: ";
@@ -409,12 +418,12 @@ void Bo3DSLoad::findAdjacentFaces(QPtrList<Lib3dsFace>* adjacentFaces, Lib3dsMes
  for (unsigned int i = 0; i < adjacentFaces->count(); i++) {
 	QPtrList<Lib3dsFace> found; // these need to get removed from faces list
 	BoVector3 current[3]; // the triangle/face we search for
-	BoVector3::makeVectors(current, mesh, adjacentFaces->at(i));
+	makeVectors(current, mesh, adjacentFaces->at(i));
 
 	QPtrListIterator<Lib3dsFace> it(faces);
 	for (; it.current(); ++it) {
 		BoVector3 v[3];
-		BoVector3::makeVectors(v, mesh, it.current());
+		makeVectors(v, mesh, it.current());
 		if (BoVector3::isAdjacent(current, v)) {
 			adjacentFaces->append(it.current());
 			found.append(it.current());

@@ -50,15 +50,6 @@ BoVector3 BoVector3::crossProduct(const BoVector3& v, const BoVector3& w)
   return r;
 }
 
-void BoVector3::makeVectors(BoVector3* v, const Lib3dsMesh* mesh, const Lib3dsFace* face)
-{
-  // Lib3dsFace stores only the position (index) of the
-  // actual point. the actual points are in mesh->pointL
-  v[0].set(mesh->pointL[ face->points[0] ].pos);
-  v[1].set(mesh->pointL[ face->points[1] ].pos);
-  v[2].set(mesh->pointL[ face->points[2] ].pos);
-}
-
 bool BoVector3::isAdjacent(const BoVector3* v1, const BoVector3* v2)
 {
   if (!v1 || !v2)

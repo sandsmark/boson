@@ -32,12 +32,9 @@
 
 #include <ksimpleconfig.h>
 
-#include <qimage.h>
-#include <qptrlist.h>
 #include <qstringlist.h>
 #include <qvaluelist.h>
 #include <qintdict.h>
-#include <qvaluevector.h>
 #include <qptrvector.h>
 
 // use GL_TRIANGLE_STRIP ? (experimental and not working!)

@@ -110,6 +110,12 @@ public:
 	static void dumpTriangle(Lib3dsVector* v, GLuint texture = 0, Lib3dsTexel* tex = 0);
 
 	/**
+	 * Create 3 vectors from @p face in @p mesh and place them into @p v.
+	 * @param v An array of size 3 which will contain the vectors of the face.
+	**/
+	static void makeVectors(BoVector3* v, const Lib3dsMesh* mesh, const Lib3dsFace* face);
+
+	/**
 	 * Find adjacent faces in @p mesh and place them into @p adjacentFaces.
 	 * The search will start at @p search if @p search is non-NULL,
 	 * otherwise the first face of @p mesh is used.
