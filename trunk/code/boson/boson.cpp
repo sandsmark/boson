@@ -286,7 +286,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 		break;
 	}
 	default:
-		kdWarning() << "unexpected playerInput " << msgid << endl;
+		kdWarning() << k_funcinfo << "unexpected playerInput " << msgid << endl;
 		break;
  }
  return true;
@@ -376,8 +376,12 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 		emit signalScenarioChanged(scenario);
 		break;
 	}
+	case BosonMessage::IdChat:
+	{
+		break;
+	}
 	default:
-		kdWarning() << "unhandled msgid " << msgid << endl;
+		kdWarning() << k_funcinfo << "unhandled msgid " << msgid << endl;
 		break;
  }
 }
