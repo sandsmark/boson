@@ -37,6 +37,7 @@
 #include "bosonconfig.h"
 #include "optionsdialog.h"
 #include "kgamedialogcomputerconfig.h"
+#include "newgamedialog.h"
 
 #include "defines.h"
 
@@ -45,10 +46,9 @@
 #include <kapplication.h>
 #include <kdebug.h>
 #include <kstandarddirs.h>
+#include <kmessagebox.h>
 #include <kgame/kgameio.h>
 #include <kgame/kgamedebugdialog.h>
-#include <kmessagebox.h>
-#include <kgame/kgamedialog.h>
 
 #include <qlayout.h>
 #include <qevent.h>
@@ -305,8 +305,7 @@ void BosonWidget::slotNewGame()
 	}
  }
  quitGame();
- KGameDialog* dialog = new KGameDialog(d->mBoson, d->mLocalPlayer, i18n("New Game"),
-		this, false);
+ NewGameDialog* dialog = new NewGameDialog(d->mBoson, d->mLocalPlayer, this);
  connect(dialog, SIGNAL(finished()), dialog, SLOT(slotDelayedDestruct())); // is this called when "cancel"ed?
 
  // add our costum game config widget
@@ -318,6 +317,8 @@ void BosonWidget::slotNewGame()
 		bosonConfig, SLOT(slotScenarioChanged(const QString&)));
  connect(bosonConfig, SIGNAL(signalSpeciesChanged(const QString&)),
 		this, SLOT(slotSendChangeSpecies(const QString&)));
+ connect(dialog, SIGNAL(signalStartGame()), 
+		bosonConfig, SIGNAL(signalStartGame()));
  // Note: KGameDialogBosonConfig does not emit signals for the important things,
  // but rather sends a message over the network (see BosonMessage). 
  // This is done to provide network transparency in the dialog - when the admin

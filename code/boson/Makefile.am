@@ -43,7 +43,8 @@ COMMON_SRC = \
 	bosoncomputerio.cpp \
 	kgamedialogcomputerconfig.cpp \
 	bosonpath.cpp \
-	unit.cpp
+	unit.cpp \
+	newgamedialog.cpp
 
 boson_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 boson_LDADD = -lkdegames -lqtmcop -lsoundserver_idl $(LIB_KDEUI)
