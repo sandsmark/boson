@@ -227,7 +227,8 @@ bool EditorBigDisplayInput::actionPlace(QDataStream& stream, const BoVector3& ca
 		stream << (Q_UINT32)BosonMessage::MovePlaceCell;
 		stream << (Q_INT32)d->mPlacement.cell();
 		stream << (Q_UINT8)version;
-		stream << (Q_INT8)Cell::isBigTrans(d->mPlacement.cell());
+//		stream << (Q_INT8)Cell::isBigTrans(d->mPlacement.cell());
+		stream << (Q_INT8)false; // never a big trans
 		stream << (Q_INT32)x;
 		stream << (Q_INT32)y;
 		ret = true;
