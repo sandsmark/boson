@@ -271,6 +271,10 @@ class BoMatrix
     {
       loadMatrix(matrix);
     }
+    BoMatrix(const BoMatrix& m)
+    {
+      loadMatrix(m);
+    }
 
     /**
      * Load the identity matrix (the "1" for matrices - M * identity = M)
@@ -292,6 +296,7 @@ class BoMatrix
      **/
     void loadMatrix(GLenum matrix);
     void loadMatrix(const GLfloat* m);
+    void loadMatrix(const BoMatrix& m) { loadMatrix(m.data()); }
 
     void setElement(int row, int column, float value)
     {
