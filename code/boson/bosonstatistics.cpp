@@ -210,7 +210,7 @@ void BosonStatistics::saveULong(QDomElement& root, const QString& tagName, unsig
  QDomDocument doc = root.ownerDocument();
  QDomElement element = doc.createElement(tagName);
  QDomText text = doc.createTextNode(QString::number(value));
- element.appendChild(element);
+ element.appendChild(text);
  root.appendChild(element);
 }
 
@@ -219,7 +219,7 @@ void BosonStatistics::saveLong(QDomElement& root, const QString& tagName, long i
  QDomDocument doc = root.ownerDocument();
  QDomElement element = doc.createElement(tagName);
  QDomText text = doc.createTextNode(QString::number(value));
- element.appendChild(element);
+ element.appendChild(text);
  root.appendChild(element);
 }
 
