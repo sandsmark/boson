@@ -524,7 +524,7 @@ bool BosonSaveLoad::loadFromFile(const QMap<QString, QByteArray>& fileList)
  mapXML = QString(fileList["map/mapXML"]);
  heightMap = fileList["map/heightmap.png"];
  texMap = fileList["map/texmap"];
- descriptionXML = QString(fileList["map/C/descriptionXML"]);
+ descriptionXML = QString(fileList["C/descriptionXML"]);
 
  if (playersXML.isEmpty()) {
 	boError(260) << k_funcinfo << "Empty playersXML" << endl;
@@ -564,7 +564,7 @@ bool BosonSaveLoad::loadFromFile(const QMap<QString, QByteArray>& fileList)
  }
  if (descriptionXML.isEmpty()) {
 	boError(260) << k_funcinfo << "Empty description" << endl;
-	addLoadError(SaveLoadError::LoadBSGFileError, i18n("empty file: map/C/description.xml"));
+	addLoadError(SaveLoadError::LoadBSGFileError, i18n("empty file: C/description.xml"));
 	d->mLoadingStatus = BSGFileError;
 	return false;
  }
