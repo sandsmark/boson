@@ -45,28 +45,28 @@
 #define USE_COLORMAP 1
 
 #if USE_COLORMAP
-struct CMapEntry {
-    CMapEntry();
-   ~CMapEntry();
+struct _CMapEntry {
+    _CMapEntry();
+   ~_CMapEntry();
     Colormap		cmap;
     bool		alloc;
     XStandardColormap	scmap;
 };
 
-CMapEntry::CMapEntry()
+_CMapEntry::_CMapEntry()
 {
     cmap = 0;
     alloc = FALSE;
     scmap.colormap = 0;
 }
 
-CMapEntry::~CMapEntry()
+_CMapEntry::~_CMapEntry()
 {
     if ( alloc )
 	XFreeColormap( QPaintDevice::x11AppDisplay(), cmap );
 }
 
-static QIntDict<CMapEntry> *cmap_dict = 0;
+static QIntDict<_CMapEntry> *cmap_dict = 0;
 static bool		    mesa_gl   = FALSE;
 
 static void cleanup_cmaps()
@@ -81,7 +81,7 @@ static void cleanup_cmaps()
 static Colormap choose_cmap( Display *dpy, XVisualInfo *vi )
 {
  if ( !cmap_dict ) {
-	cmap_dict = new QIntDict<CMapEntry>;
+	cmap_dict = new QIntDict<_CMapEntry>;
 	const char *v = glXQueryServerString(dpy, vi->screen, GLX_VERSION);
 	if ( v ) {
 		mesa_gl = strstr(v,"Mesa") != 0;
@@ -89,12 +89,12 @@ static Colormap choose_cmap( Display *dpy, XVisualInfo *vi )
 	qAddPostRoutine( cleanup_cmaps );
  }
 
- CMapEntry *x = cmap_dict->find( (long) vi->visualid + ( vi->screen * 256 ) );
+ _CMapEntry *x = cmap_dict->find( (long) vi->visualid + ( vi->screen * 256 ) );
  if ( x ) {					// found colormap for visual
 	return x->cmap;
  }
 
-    x = new CMapEntry();
+    x = new _CMapEntry();
 
     XStandardColormap *c;
     int n, i;
