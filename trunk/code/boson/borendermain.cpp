@@ -159,7 +159,7 @@ void ModelPreview::paintGL()
 		if (mPlacementPreview) {
 			glEnable(GL_BLEND);
 			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-			unsigned char r, g, b, a;
+			GLubyte r, g, b, a;
 			a = PLACEMENTPREVIEW_ALPHA;
 			r = 255;
 			if (mDisallowPlacement) {
