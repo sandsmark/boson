@@ -93,7 +93,7 @@ class BosonPath
      */
     float pathCost() const { return mPathCost; };
 
-  public:
+  protected:
     class PathNode;
 
     /**
