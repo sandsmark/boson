@@ -484,6 +484,41 @@ private:
 };
 
 
+class UMyDrawable : public ufo::UDrawable
+{
+public:
+	UMyDrawable(BoUfoDrawable* drawable)
+	{
+		mDrawable = drawable;
+	}
+
+	virtual void paintDrawable(ufo::UGraphics*, int x, int y, int w, int h)
+	{
+		mDrawable->render(x, y, w, h);
+	}
+	virtual int getDrawableWidth() const
+	{
+		return mDrawable->drawableWidth();
+	}
+	virtual int getDrawableHeight() const
+	{
+		return mDrawable->drawableHeight();
+	}
+
+private:
+	BoUfoDrawable* mDrawable;
+};
+
+BoUfoDrawable::BoUfoDrawable()
+{
+ mDrawable = new UMyDrawable(this);
+}
+
+BoUfoDrawable::~BoUfoDrawable()
+{
+ delete mDrawable;
+}
+
 
 BoUfoWidget::BoUfoWidget() : QObject(0, 0)
 {
@@ -678,6 +713,16 @@ void BoUfoWidget::loadPropertiesFromXML(const QDomNamedNodeMap& map)
 	properties.insert(a.name(), a.value());
  }
  loadProperties(properties);
+}
+
+void BoUfoWidget::setBackground(BoUfoDrawable* drawable)
+{
+ mBackground = drawable;
+ if (mBackground) {
+	widget()->setBackground(mBackground->drawable());
+ } else {
+	widget()->setBackground(0);
+ }
 }
 
 void BoUfoWidget::setForegroundColor(const QColor& c)

@@ -42,6 +42,7 @@ namespace ufo {
 	class UObject;
 	class ULayoutManager;
 	class UDimension;
+	class UDrawable;
 
 	class UWidget;
 	class UButton;
@@ -209,6 +210,27 @@ private:
 };
 
 
+class BoUfoDrawable
+{
+public:
+	BoUfoDrawable();
+	virtual ~BoUfoDrawable();
+
+	ufo::UDrawable* drawable() const
+	{
+		return mDrawable;
+	}
+
+	virtual void render(int x, int y, int w, int h) = 0;
+
+	virtual int drawableWidth() const = 0;
+	virtual int drawableHeight() const = 0;
+
+private:
+	ufo::UDrawable* mDrawable;
+};
+
+
 /**
  * This class is an interface between libufo and Qt/boson.
  *
@@ -256,6 +278,13 @@ public:
 	{
 		return mWidget;
 	}
+
+	/**
+	 * @param drawable The object used for rendering the background. Note
+	 * that this is ignored if @ref opaque is FALSE. Also note that you have
+	 * to take care about deleting this yourself!
+	 **/
+	void setBackground(BoUfoDrawable* drawable);
 
 	/**
 	 * Equivalent to widget()->setLayout(layout);
@@ -367,6 +396,7 @@ private:
 private:
 	ufo::UWidget* mWidget;
 	LayoutClass mLayoutClass;
+	BoUfoDrawable* mBackground;
 };
 
 class BoUfoLabel : public BoUfoWidget
