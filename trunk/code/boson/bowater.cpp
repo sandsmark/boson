@@ -21,6 +21,8 @@
 #define GL_GLEXT_PROTOTYPES
 #define GLX_GLXEXT_PROTOTYPES
 
+#define QT_CLEAN_NAMESPACE
+
 #include "bowater.h"
 
 #include "bosonmap.h"
@@ -48,6 +50,9 @@
 #include <stdio.h>
 #include <sys/time.h>
 
+#ifndef GLAPI
+#define GLAPI
+#endif
 #include <GL/glext.h>
 #include <GL/glx.h>
 
@@ -2127,7 +2132,7 @@ void BoWaterManager::uninitDataBuffersForStorage(RenderInfo* info)
     }
     else if(mEnableTranslucency)
     {
-      bo_glBindBufferARB(GL_ARRAY_BUFFER_ARB, info->chunk->vbo_colo);
+      bo_glBindBufferARB(GL_ARRAY_BUFFER_ARB, info->chunk->vbo_color);
       if(!bo_glUnmapBufferARB(GL_ARRAY_BUFFER_ARB))
       {
         boError() << k_funcinfo << "can't unmap colors' vbo!" << endl;
