@@ -20,7 +20,6 @@
 #include "bosonnetworkoptionswidget.h"
 #include "bosonnetworkoptionswidget.moc"
 
-#include "../top.h"
 #include "../boson.h"
 #include "../defines.h"
 
@@ -41,10 +40,9 @@
  *  Constructs a BosonNetworkOptionsWidget which is a child of 'parent', with the 
  *  name 'name' and widget flags set to 'f'.
  */
-BosonNetworkOptionsWidget::BosonNetworkOptionsWidget(TopWidget* top, QWidget* parent)
+BosonNetworkOptionsWidget::BosonNetworkOptionsWidget(QWidget* parent)
     : QWidget(parent)
 {
-  mTop = top;
   if (!boGame)
   {
     kdError() << k_funcinfo << "NULL Boson object" << endl;

@@ -33,14 +33,13 @@ class QLineEdit;
 class QPushButton;
 class QRadioButton;
 
-class TopWidget;
 class Boson;
 
 class BosonNetworkOptionsWidget : public QWidget
 {
   Q_OBJECT
   public:
-    BosonNetworkOptionsWidget(TopWidget* top, QWidget* parent);
+    BosonNetworkOptionsWidget(QWidget* parent);
     ~BosonNetworkOptionsWidget();
 
   public slots:
@@ -82,8 +81,6 @@ class BosonNetworkOptionsWidget : public QWidget
 
   private:
     void setConnected(bool connected, bool master);
-
-    TopWidget* mTop;
 };
 
 #endif // BOSONNETWORKOPTIONSWIDGET_H

@@ -114,19 +114,19 @@ void EditorWidget::initConnections()
 		this, SLOT(slotPlayerJoinedGame(KPlayer*)));
  connect(boGame, SIGNAL(signalPlayerLeftGame(KPlayer*)),
 		this, SLOT(slotPlayerLeftGame(KPlayer*)));
- connect(boGame, SIGNAL(signalChangeCell(int,int,int,unsigned char)),
-		playField()->map(), SLOT(slotChangeCell(int,int,int,unsigned char)));
 }
 
-void EditorWidget::initMap()
+void EditorWidget::initMap(bool initFogOfWar)
 {
- BosonWidgetBase::initMap();
+ BosonWidgetBase::initMap(initFogOfWar);
  if (!playField() || !playField()->map()) {
 	kdError() << k_funcinfo << endl;
 	return;
  }
  connect(playField()->map(), SIGNAL(signalTileSetChanged(BosonTiles*)),
 		this, SLOT(slotTileSetChanged(BosonTiles*)));
+ connect(boGame, SIGNAL(signalChangeCell(int,int,int,unsigned char)),
+		playField()->map(), SLOT(slotChangeCell(int,int,int,unsigned char)));
 }
 
 void EditorWidget::initPlayer()

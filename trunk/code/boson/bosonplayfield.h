@@ -61,8 +61,20 @@ public:
 	 *
 	 * But if there is a difference by any reason the network stream will be
 	 * used instead of our locally present one.
+	 *
+	 * @return FALSE if the format was invalid. Note that the map will be
+	 * broken then!
 	 **/
-	void loadMap(QDataStream& stream);
+	bool loadMap(QDataStream& stream);
+
+	/**
+	 * This simply deletes the map. This may be useful for game starting, as
+	 * the ADMIN already has the map, but all other players don't. So the
+	 * ADMIN might send the map over network and delete his local copy, so
+	 * that it is ensured the entire loading code is the same on all
+	 * clients, i.e. without a map until it is received.
+	 **/
+	void deleteMap();
 	
 	void saveMap(QDataStream& stream);
 

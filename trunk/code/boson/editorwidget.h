@@ -72,7 +72,7 @@ public:
 
 	virtual void saveConfig();
 
-	virtual void initMap();
+	virtual void initMap(bool initFogOfWar);
 	virtual void initPlayer();
 
 public slots:

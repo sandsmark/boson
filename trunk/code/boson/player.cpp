@@ -169,7 +169,7 @@ void Player::addUnit(Unit* unit)
  connect(unit->dataHandler(), SIGNAL(signalPropertyChanged(KGamePropertyBase*)), 
 		this, SLOT(slotUnitPropertyChanged(KGamePropertyBase*)));
 
- if(unit->isMobile()) {
+ if (unit->isMobile()) {
 	d->mMobilesCount++;
  }
  else {
@@ -281,6 +281,19 @@ bool Player::save(QDataStream& stream)
  Q_UINT32 unitPropId = d->mUnitPropID;
  stream << unitPropId;
 
+ // Save fog
+ stream << d->mFogged;
+
+ // Save statistics
+ d->mStatistics->save(stream);
+
+ /// TODO: save researched technologies!!!
+
+ return true;
+}
+
+bool Player::saveUnits(QDataStream& stream)
+{
  // Save units
  Q_UINT32 unitCount = d->mUnits.count();
  stream << unitCount;
@@ -294,20 +307,11 @@ bool Player::save(QDataStream& stream)
 
 	stream << (int)unit->dataHandler()->id();
 
-	if(!unit->save(stream)) {
+	if (!unit->save(stream)) {
 		kdError() << k_funcinfo << "Error while saving unit with id=" << unit->id() << endl;
 		return false;
 	}
  }
-
- // Save fog
- stream << d->mFogged;
-
- // Save statistics
- d->mStatistics->save(stream);
-
- /// TODO: save researched technologies!!!
-
  return true;
 }
 
@@ -331,11 +335,22 @@ bool Player::load(QDataStream& stream)
  // Load unitpropID
  Q_UINT32 unitPropId;
  stream >> unitPropId;
+ d->mUnitPropID = unitPropId;
 
+ // Load fog
+ stream >> d->mFogged;
+
+ // Save statistics
+ d->mStatistics->load(stream);
+
+ return true;
+}
+
+bool Player::loadUnits(QDataStream& stream)
+{
  // Load units
  Q_UINT32 unitCount;
  stream >> unitCount;
- d->mUnitPropID = unitPropId;
  for (unsigned int i = 0; i < unitCount; i++) {
 	unsigned long int type;
 	unsigned long int id;
@@ -361,26 +376,19 @@ bool Player::load(QDataStream& stream)
 	// Emit signal for canvas and minimap and BosonWidget
 	emit signalUnitLoaded(unit, (int)x, (int)y);
 	// Call unit's loading methods
-	if(!unit->load(stream)) {
+	if (!unit->load(stream)) {
 		kdError() << k_funcinfo << "Error while loading unit with id=" << id << endl;
 		return false;
 	}
 
 	// Increase unit count
-	if(unit->isMobile()) {
+	if (unit->isMobile()) {
 		d->mMobilesCount++;
 	}
 	else {
 		d->mFacilitiesCount++;
 	}
  }
-
- // Load fog
- stream >> d->mFogged;
-
- // Save statistics
- d->mStatistics->load(stream);
-
  return true;
 }
 
@@ -404,14 +412,18 @@ const UnitProperties* Player::unitProperties(unsigned long int unitType) const
  return speciesTheme()->unitProperties(unitType);
 }
 
-void Player::initMap(BosonMap* map, bool fogged)
+void Player::setMap(BosonMap* map)
 {
  d->mMap = map;
- if (!map) {
+}
+
+void Player::initFogOfWar(bool fogged)
+{
+ if (!d->mMap) {
 	d->mFogged.resize(0);
 	return;
  }
- d->mFogged.fill(fogged, map->width() * map->height());
+ d->mFogged.fill(fogged, d->mMap->width() * d->mMap->height());
 }
 
 void Player::fog(int x, int y)
@@ -543,14 +555,14 @@ int Player::facilitiesCount()
 bool Player::canBuild(unsigned long int unitType) const
 {
  QValueList<unsigned long int> neededTypes = speciesTheme()->unitProperties(unitType)->requirements();
- if(neededTypes.isEmpty()) {
+ if (neededTypes.isEmpty()) {
 	return true;
  }
  QValueList<unsigned long int>::Iterator it;
- for(it = neededTypes.begin(); it != neededTypes.end(); ++it) {
+ for (it = neededTypes.begin(); it != neededTypes.end(); ++it) {
 	// FIXME: this is SLOW. Cache values and refresh them when new unit is
 	//  created or destroyed
-	if(!hasUnitWithType(*it)) {
+	if (!hasUnitWithType(*it)) {
 		return false;
 	}
  }
@@ -561,10 +573,10 @@ bool Player::canResearchTech(unsigned long int id) const
 {
  // Check for technologies
  QValueList<unsigned long int> neededTechs = speciesTheme()->technology(id)->requiredTechnologies();
- if(!neededTechs.isEmpty()) {
+ if (!neededTechs.isEmpty()) {
 	QValueList<unsigned long int>::Iterator it;
-	for(it = neededTechs.begin(); it != neededTechs.end(); ++it) {
-		if(!hasTechnology(*it)) {
+	for (it = neededTechs.begin(); it != neededTechs.end(); ++it) {
+		if (!hasTechnology(*it)) {
 			return false;
 		}
 	}
@@ -572,10 +584,10 @@ bool Player::canResearchTech(unsigned long int id) const
 
  // Check for units
  QValueList<unsigned long int> neededUnits = speciesTheme()->technology(id)->requiredUnits();
- if(!neededUnits.isEmpty()) {
+ if (!neededUnits.isEmpty()) {
 	QValueList<unsigned long int>::Iterator it;
-	for(it = neededUnits.begin(); it != neededUnits.end(); ++it) {
-		if(!hasUnitWithType(*it)) {
+	for (it = neededUnits.begin(); it != neededUnits.end(); ++it) {
+		if (!hasUnitWithType(*it)) {
 			return false;
 		}
 	}
@@ -601,10 +613,10 @@ bool Player::hasUnitWithType(unsigned long int type) const
 bool Player::hasTechnology(unsigned long int id) const
 {
  TechnologyProperties* tech = speciesTheme()->technologyList().find(id);
- if(!tech) {
+ if (!tech) {
 	return false;
  }
- if(!tech->isResearched()) {
+ if (!tech->isResearched()) {
 	return false;
  }
  return true;
@@ -631,11 +643,11 @@ void Player::technologyResearched(ProductionPlugin*, unsigned long int id)
  QValueList<unsigned long int> unitIds = speciesTheme()->allFacilities();  // FIXME: this is dirty
  unitIds += speciesTheme()->allMobiles();
  QValueList<unsigned long int>::iterator pit;
- for(pit = unitIds.begin(); pit != unitIds.end(); pit++) {
+ for (pit = unitIds.begin(); pit != unitIds.end(); pit++) {
 	UpgradeProperties* upgrade;
 	QPtrList<UpgradeProperties> ulist = speciesTheme()->nonConstUnitProperties(*pit)->unresearchedUpgrades();
-	for(upgrade = ulist.first(); upgrade; upgrade = ulist.next()) {
-		if(upgrade->canBeResearched(this)) {
+	for (upgrade = ulist.first(); upgrade; upgrade = ulist.next()) {
+		if (upgrade->canBeResearched(this)) {
 			kdDebug() << k_funcinfo << "    Applying upgrade for UP " << *pit << " with id " << upgrade->id() << endl;
 			upgrade->setResearched(true);
 			upgrade->apply(this);
