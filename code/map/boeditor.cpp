@@ -88,7 +88,8 @@ mobileMsg_t mobile[] = {
 
 int main(void)
 {
-int i, j;
+int	i, j;
+Cell	c;
 
 boFile *field = new boFile(); /// basic BosonPlayField...
 
@@ -111,8 +112,11 @@ field->openWrite(PF_NAME);
 
 	/* initialisation */
 	for (i=0; i< MAP_WIDTH; i++)
-		for (j=0; j< MAP_HEIGHT; j++)
-			field->write(cells[i][j]);
+		for (j=0; j< MAP_HEIGHT; j++) {
+			c.setGroundType(cells[i][j]);
+			c.setItem( ((i+7*j)%4));
+			field->write(c);
+		}
 	
 	for (i=0; i< field->nbMobiles; i++)
 		field->write(mobile[i]);
@@ -143,8 +147,10 @@ field->openRead(PF_NAME);
 			ncells[i] = new (groundType)[field->map_height];
 	/* initialisation */
 	for (i=0; i< field->map_width; i++)
-		for (j=0; j< field->map_height; j++)
-			ncells[i][j] = field->load ();
+		for (j=0; j< field->map_height; j++) {
+			field->load (c);
+			ncells[i][j] = c.getGroundType();
+		}
 	
 	for (i=0; i< field->nbMobiles; i++)
 		field->load(nmobile[i]);

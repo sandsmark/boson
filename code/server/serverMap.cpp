@@ -280,8 +280,9 @@ bool BosonServer::loadGround()
 	
 	/* initialisation */
 	for (i=0; i< map_width; i++)
-		for (j=0; j< map_height; j++)
-			cells[i][j].setGroundType( load() );
+		for (j=0; j< map_height; j++) {
+			load ( cells[i][j]);
+		}
 	
 	/* checking */
 	for (int i=0; i< 3; i++)
