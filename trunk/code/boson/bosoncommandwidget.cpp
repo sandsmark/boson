@@ -20,6 +20,8 @@
 #include "bosoncommandwidget.h"
 
 #include <kprogress.h>
+#include <kpixmap.h>
+#include <kpixmapeffect.h>
 
 #include <qpixmap.h>
 #include <qpainter.h>
@@ -37,6 +39,21 @@
 #include "bosoncommandwidget.moc"
 
 #define BAR_WIDTH 10 // FIXME hardcoded value
+
+class BoProgress : public KProgress
+{
+	public:
+		BoProgress(QWidget* p) : KProgress(p) { }
+
+		virtual void setGeometry(int x, int y, int w, int h)
+		{
+			KPixmap pix(QPixmap(w, h));
+			pix.fill(green);
+			KPixmapEffect::gradient(pix, green, red, KPixmapEffect::VerticalGradient);
+			setBarPixmap(pix);
+			KProgress::setGeometry(x, y, w, h);
+		}
+};
 
 class BosonCommandWidget::BosonCommandWidgetPrivate
 {
@@ -67,8 +84,8 @@ public:
 
 	QVBoxLayout* mTopLayout;
 
-	KProgress* mHealth; // problem: we want a gradient here...
-	KProgress* mReload;
+	BoProgress* mHealth;
+	BoProgress* mReload;
 };
 
 BosonCommandWidget::BosonCommandWidget(QWidget* parent) : QWidget(parent)
@@ -83,25 +100,20 @@ BosonCommandWidget::BosonCommandWidget(QWidget* parent) : QWidget(parent)
  connect(d->mPixmap, SIGNAL(clicked()), this, SLOT(slotClicked()));
  displayLayout->addWidget(d->mPixmap);
 
- d->mHealth = new KProgress(display);
-// mHealth->setBarStyle(KProgress::Solid);
+ d->mHealth = new BoProgress(display);
  d->mHealth->setOrientation(Vertical);
  d->mHealth->setTextEnabled(false);
  d->mHealth->setFixedWidth(BAR_WIDTH);
-// mHealth->setBarColor(QColor::Green);
- d->mHealth->setBarColor(green);
  displayLayout->addWidget(d->mHealth);
 
- d->mReload = new KProgress(display);
+ d->mReload = new BoProgress(display);
  d->mReload->setOrientation(Vertical);
  d->mReload->setTextEnabled(false);
  d->mReload->setFixedWidth(BAR_WIDTH);
- d->mReload->setBarColor(green);
  displayLayout->addWidget(d->mReload);
 
  d->mHealth->setValue(0);
  d->mReload->setValue(0);
-
  
 }
 
@@ -131,12 +143,8 @@ void BosonCommandWidget::setUnit(Unit* unit)
 		 SLOT(slotUnitChanged(Unit*)));
  slotUnitChanged(d->mUnit);
 
- // TODO: connect to changes on that unit! maybe 
- // connec(unit->owner(), SIGNAL(signalUnitPropertyChanged()), this,
- // SLOT(slotUpdateSelectedUnit()));
- // or so
-
-
+ d->mHealth->show();
+ d->mReload->show();
 
  show();
 }
@@ -163,6 +171,10 @@ void BosonCommandWidget::setUnit(int unitType, Player* owner)
  
  d->mUnitType = unitType;
  d->mCommandType = CommandUnit;
+ 
+ d->mHealth->hide();
+ d->mReload->hide();
+
  show();
 }
 
@@ -176,6 +188,10 @@ void BosonCommandWidget::setCell(int tileNo, BosonTiles* tileSet)
  d->mTileNumber = tileNo;
  setPixmap(tileSet->tile(d->mTileNumber));
  d->mCommandType = CommandCell;
+
+ d->mHealth->hide();
+ d->mReload->hide();
+
  show();
 }
 
