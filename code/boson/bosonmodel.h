@@ -139,7 +139,6 @@ protected:
 
 private:
 	void init();
-	void setCurrentFrame(BoFrame* frame);
 
 private:
 	static BosonModelTextures* mModelTextures;
