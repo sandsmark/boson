@@ -31,6 +31,4 @@
   <Action name="editor_build" />
   <Action name="editor_player" />
 </ToolBar>
-<ToolBar name="CommandFrame">
-</ToolBar>
 </kpartgui>
