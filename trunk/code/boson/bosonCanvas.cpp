@@ -136,6 +136,11 @@ void bosonCanvas::createMob(mobileMsg_t &m)
 
 	assert( m.who < nb_player);
 
+	// if now who_am_i, it's a ennemy mobile appearing on our 'known' space
+	// during first jiffies, all current map is downloaded from server, you don't want
+	// a beep for every new stuff, hu ?
+	if (m.who == who_am_i && jiffies > 3) play("mobile_created.wav");
+
 	switch (m.type) {
 		default:
 			u = new playerMobUnit(&m);
