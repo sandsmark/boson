@@ -55,6 +55,8 @@ selectPart::selectPart(int _f, int _z, sp_type type)
 	if (_f>= PART_NB ) _f = PART_NB-1;
 	setFrame(_f);
 	setZ ( _z + 1);
+
+	show();
 }
 
 
