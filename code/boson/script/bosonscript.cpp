@@ -39,6 +39,8 @@
 
 #include "pythonscript.h"
 
+#include <kgame/kgamemessage.h>
+
 #include <qdatastream.h>
 #include <qpoint.h>
 
@@ -726,11 +728,15 @@ float BosonScript::aiDelay()
 /*****  Other methods  *****/
 void BosonScript::startBenchmark()
 {
- boProfiling->startBenchmark();
+  boProfiling->startBenchmark();
 }
 
 void BosonScript::endBenchmark()
 {
- boProfiling->endBenchmark();
+  boProfiling->endBenchmark();
 }
 
+void BosonScript::setRandomSeed(long int seed)
+{
+  boGame->sendSystemMessage(seed, KGameMessage::IdSyncRandom);
+}

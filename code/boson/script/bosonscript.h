@@ -250,6 +250,7 @@ class BosonScript
     // Other
     static void startBenchmark();
     static void endBenchmark();
+    static void setRandomSeed(long int seed);
 
 
   protected:

@@ -83,6 +83,7 @@ PyMethodDef PythonScript::mCallbacks[] = {
   // Other
   { (char*)"startBenchmark", py_startBenchmark, METH_VARARGS, 0 },
   { (char*)"endBenchmark", py_endBenchmark, METH_VARARGS, 0 },
+  { (char*)"setRandomSeed", py_setRandomSeed, METH_VARARGS, 0 },
   //{ (char*)"", py_, METH_VARARGS, 0 },
   { 0, 0, 0, 0 }
 };
@@ -767,6 +768,18 @@ PyObject* PythonScript::py_startBenchmark(PyObject* self, PyObject* args)
 PyObject* PythonScript::py_endBenchmark(PyObject* self, PyObject* args)
 {
   BosonScript::endBenchmark();
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+PyObject* PythonScript::py_setRandomSeed(PyObject* self, PyObject* args)
+{
+  int seed;
+  if(!PyArg_ParseTuple(args, (char*)"i", &seed))
+  {
+    return 0;
+  }
+  BosonScript::setRandomSeed(seed);
   Py_INCREF(Py_None);
   return Py_None;
 }
