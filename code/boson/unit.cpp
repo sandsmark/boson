@@ -25,8 +25,10 @@
 #include "unitproperties.h"
 #include "bosonpath.h"
 #include "selectbox.h"
+#include "bosonmessage.h"
 
 #include <kgame/kgamepropertylist.h>
+#include <kgame/kgame.h>
 
 #include "defines.h"
 
@@ -462,11 +464,13 @@ QCanvasItemList Unit::unitsInRange() const
  QCanvasItemList inRange;
  QCanvasItemList::Iterator it = items.begin();
  for (; it != items.end(); ++it) {
-	if (RTTI::isUnit((*it)->rtti())) {
-		// TODO: remove the items from inRange which are not actually in range (hint:
-		// pythagoras)
-		inRange.append(*it);
-	}
+	if (! RTTI::isUnit((*it)->rtti()))
+		continue;
+	if(((Unit*)(*it))->isDestroyed())
+		continue;
+	// TODO: remove the items from inRange which are not actually in range (hint:
+	// pythagoras)
+	inRange.append(*it);
  }
  return inRange;
 }
@@ -840,6 +844,55 @@ void Facility::advanceProduction()
 	if (d->mProductionState == productionTime) {
 		kdDebug() << "unit " << type << " completed :-)" << endl;
 		d->mProductionState = d->mProductionState + 1;
+		// Auto-place unit
+		// Unit positioning scheme: all tiles starting with tile that is below
+		// facility's lower-left tile, are tested counter-clockwise. Unit is placed
+		// to first free tile.
+		// No auto-placing for facilities
+		if(owner()->unitProperties(type)->isFacility())
+			return;
+		int tilex, tiley; // Position of lower-left corner of facility in tiles
+		int theight, twidth; // height and width of facility in tiles
+		int currentx, currenty; // Position of tile currently tested
+		theight = height() / BO_TILE_SIZE;
+		twidth = width() / BO_TILE_SIZE;
+		tilex = (int)(x() / BO_TILE_SIZE);
+		tiley = (int)(y() / BO_TILE_SIZE + theight);
+		kdDebug() << "Guessed position in tiles: " << tilex << ", " << tiley << endl;
+		kdDebug() << "Guessed size in tiles: " << twidth << "x" << theight << endl;
+		int tries; // Tiles to try for free space
+		tries = 2 * twidth + 2* theight + 4;
+		int ctry; // Current try
+		currentx = tilex - 1;
+		currenty = tiley;
+		bool found = false; // Whether free cell was found
+		for(ctry = 1; ctry <= tries; ctry++)
+		{
+			if(ctry <= twidth + 1)
+				currentx++;
+			else if(ctry <= twidth + theight + 2)
+				currenty--;
+			else if(ctry <= twidth + theight + twidth + 3)
+				currentx--;
+			else
+				currenty++;
+			if(! boCanvas()->cellOccupied(currentx, currenty))
+			{
+				// Free cell - place unit at it
+				d->mProductionState = d->mProductionState + 1;
+				QByteArray b;
+				QDataStream stream(b, IO_WriteOnly);
+				stream << (Q_UINT32)BosonMessage::MoveBuild;
+				stream << (Q_UINT32)id();
+				stream << (Q_UINT32)owner()->id();
+				stream << (Q_INT32)currentx;
+				stream << (Q_INT32)currenty;
+				owner()->game()->sendPlayerInput(stream, this->owner());
+				found = true;
+				return;
+			}
+		}
+		kdDebug() << "Cannot find free cell around facility :-(" << endl;
 	} else {
 		d->mProductionState = d->mProductionState + 1;
 		double percentage = (double)(d->mProductionState * 100) / (double)productionTime;
