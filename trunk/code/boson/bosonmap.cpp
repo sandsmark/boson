@@ -200,6 +200,7 @@ bool BosonMap::loadGroundTheme(QDataStream& stream)
 	boError() << k_funcinfo << "Cannot find groundTheme with id=" << id << endl;
 	return false;
  }
+ emit signalGroundThemeChanged(mGroundTheme);
  return true;
 }
 
@@ -764,12 +765,6 @@ void BosonMap::slotChangeCell(int x, int y, unsigned char amountOfLand, unsigned
  c->makeCell(amountOfLand, amountOfWater);
 }
 
-void BosonMap::loadGroundTheme(const QString& theme)
-{
- BosonData::bosonData()->loadGroundTheme(theme);
- mGroundTheme = (BosonGroundTheme*)BosonData::bosonData()->groundTheme(theme);
-}
-
 void BosonMap::resize(unsigned int width, unsigned int height)
 {
  if (!width || !height) {
@@ -1049,7 +1044,7 @@ void BosonMap::recalculateCell(int x, int y)
  c->makeCell(amountOfLand, amountOfWater);
 }
 
-void BosonMap::slotChangeTexMap(int x, int y, unsigned int texture, unsigned char alpha)
+void BosonMap::slotChangeTexMap(int x, int y, unsigned int texCount, unsigned int* textures, unsigned char* alpha)
 {
  // AB: this is an ugly hack, we shouldn't connect any signals in game mode to
  // this slot at all.
@@ -1069,11 +1064,20 @@ void BosonMap::slotChangeTexMap(int x, int y, unsigned int texture, unsigned cha
 	boError() << k_funcinfo << "invalid y coordinate: " << y << endl;
 	return;
  }
- if (texture >= textureCount()) {
-	boError() << k_funcinfo << "invalid texture " << texture << " must be < " << textureCount() << endl;
+ if (texCount > textureCount()) {
+	boError() << k_funcinfo << "invalid textureCount " << texCount << " must be <= " << textureCount() << endl;
 	return;
  }
- mTexMap[texMapArrayPos(texture, x, y)] = alpha;
+ BO_CHECK_NULL_RET(alpha);
+ BO_CHECK_NULL_RET(textures);
+ for (unsigned int i = 0; i < texCount; i++) {
+	unsigned int texture = textures[i];
+	if (texture >= textureCount()) {
+		boError() << k_funcinfo << "invalid texture " << texture << endl;
+		continue;
+	}
+	mTexMap[texMapArrayPos(texture, x, y)] = alpha[i];
+ }
 
  // now we update up to 4 cells.
  if (x == 0) { // left border

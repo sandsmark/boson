@@ -245,7 +245,7 @@ public:
 	 * Same as above - but this will make a cell placement preview, instead
 	 * of a unit placement preview.
 	 **/
-	void setPlacementCellPreviewData(int groundType, bool canPlace);
+	void setPlacementCellPreviewData(unsigned int textureCount, unsigned char* alpha, bool canPlace);
 
 	void setToolTipCreator(int type);
 	void setToolTipUpdatePeriod(int ms);

@@ -46,12 +46,7 @@ public:
 
 	void setGroundTheme(BosonGroundTheme* theme);
 
-	/**
-	 * @param owner necessary for units (mobile and facilities) only.
-	 **/
-	void placeCells(CellType type);// obsolete
 	void placeGround();
-
 	void placeMobiles(Player* owner);
 	void placeFacilities(Player* owner);
 

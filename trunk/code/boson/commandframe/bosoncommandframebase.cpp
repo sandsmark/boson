@@ -313,16 +313,9 @@ void BosonCommandFrameBase::slotPlaceUnit(ProductionType t, unsigned long int un
  emit signalAction(ActionBuild); // placement preview
 }
 
-void BosonCommandFrameBase::slotPlaceCell(int groundType)
+void BosonCommandFrameBase::slotPlaceGround(unsigned int textureCount, unsigned char* alpha)
 {
- emit signalPlaceCell(groundType);
- emit signalAction(ActionBuild); // placement preview
-}
-
-void BosonCommandFrameBase::slotPlaceGround()
-{
-#warning TODO
-// emit signalPlaceCell(groundType); // hmmm
+ emit signalPlaceGround(textureCount, alpha);
  emit signalAction(ActionBuild); // placement preview
 }
 

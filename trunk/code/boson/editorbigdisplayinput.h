@@ -41,11 +41,7 @@ public:
 	 **/
 	virtual void placeUnit(unsigned long int unitType, Player* owner);
 
-	/**
-	 * The specified cell is marked to be placed whenever the user
-	 * clicks on the map.
-	 **/
-	virtual void placeCell(int);
+	virtual void placeGround(unsigned int textureCount, unsigned char* alpha);
 
 	/**
 	 * Delete the currently selected units

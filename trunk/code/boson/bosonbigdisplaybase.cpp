@@ -414,7 +414,8 @@ public:
 		mPlacementPreviewProperties = 0;
 		mPlacementPreviewModel = 0;
 		mCanPlace = false;
-		mCellPlacementTexture = 0;
+		mGroundTextureCount = 0;
+		mGroundTextureAlpha = 0;
 	}
 	~PlacementPreview()
 	{
@@ -423,23 +424,24 @@ public:
 
 	bool hasPreview() const
 	{
-		if (mPlacementPreviewModel != 0 && mPlacementPreviewProperties) {
+		if (isModelPreview()) {
 			return true;
-		} else if (mCellPlacementTexture) {
+		} else if (isGroundPreview()) {
 			return true;
 		}
 		return false;
 	}
 	bool isModelPreview() const
 	{
-		if (mPlacementPreviewModel && mPlacementPreviewModel->frame(0)) {
+		if (mPlacementPreviewModel && mPlacementPreviewModel->frame(0) &&
+				mPlacementPreviewProperties) {
 			return true;
 		}
 		return false;
 	}
-	bool isCellPreview() const
+	bool isGroundPreview() const
 	{
-		if (mCellPlacementTexture != 0) {
+		if (mGroundTextureCount > 0 && mGroundTextureAlpha) {
 			return true;
 		}
 		return false;
@@ -467,9 +469,14 @@ public:
 		mPlacementPreviewProperties = prop;
 		mPlacementPreviewModel = model;
 	}
-	void setData(GLuint cellTexture)
+	void setData(unsigned int texCount, unsigned char* alpha)
 	{
-		mCellPlacementTexture = cellTexture;
+		mGroundTextureCount = texCount;
+		delete[] mGroundTextureAlpha;
+		mGroundTextureAlpha = new unsigned char[texCount];
+		for (unsigned int i = 0; i < texCount; i++) {
+			mGroundTextureAlpha[i] = alpha[i];
+		}
 	}
 	const UnitProperties* unitProperties() const
 	{
@@ -479,17 +486,16 @@ public:
 	{
 		return mPlacementPreviewModel;
 	}
-	GLuint cellTexture() const
-	{
-		return mCellPlacementTexture;
-	}
 
 	void clear()
 	{
-		mCellPlacementTexture = 0;
+//		mGroundPlacementTexture = 0;
 		mPlacementPreviewProperties = 0;
 		mPlacementPreviewModel = 0;
 		mCanPlace = false;
+		mGroundTextureCount = 0;
+		delete[] mGroundTextureAlpha;
+		mGroundTextureAlpha = 0;
 	}
 
 private:
@@ -497,7 +503,9 @@ private:
 	BosonModel* mPlacementPreviewModel;
 	bool mCanPlace;
 	QPoint mCanvasPos;
-	GLuint mCellPlacementTexture;
+//	GLuint mCellPlacementTexture;
+	unsigned int mGroundTextureCount;
+	unsigned char* mGroundTextureAlpha;
 };
 
 
@@ -1105,7 +1113,7 @@ void BosonBigDisplayBase::renderPlacementPreview()
 
 #warning FIXME: z value!
  bool modelPreview = d->mPlacementPreview.isModelPreview();
- bool cellPreview = d->mPlacementPreview.isCellPreview();
+ bool groundPreview = d->mPlacementPreview.isGroundPreview();
  const float z = 0.1;
  QPoint pos(d->mPlacementPreview.canvasPos());
  int w = 0;
@@ -1137,7 +1145,9 @@ void BosonBigDisplayBase::renderPlacementPreview()
 	f->renderFrame(&localPlayer()->teamColor());
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
- } else if (cellPreview) {
+ } else if (groundPreview) {
+#warning TODO: cell placement preview
+#if 0
 	glBindTexture(GL_TEXTURE_2D, d->mPlacementPreview.cellTexture());
 	glBegin(GL_QUADS);
 		glTexCoord2fv(textureUpperLeft);
@@ -1152,6 +1162,7 @@ void BosonBigDisplayBase::renderPlacementPreview()
 		glTexCoord2fv(textureUpperRight);
 		glVertex3f(BO_GL_CELL_SIZE, 0.0f, 0.0f);
 	glEnd();
+#endif
  }
  glTranslatef(-x, y, -z);
  glColor4ub(255, 255, 255, 255);
@@ -1382,7 +1393,7 @@ void BosonBigDisplayBase::renderCells()
  BosonTextureArray* textures = map->textures();
  if (!textures) {
 	makeCurrent();
-#warning TODO: load a default theme
+	// TODO: load a default theme
 #if 0
 	tiles->generateTextures();
 	textures = tiles->textures();
@@ -3156,31 +3167,25 @@ void BosonBigDisplayBase::setPlacementPreviewData(const UnitProperties* prop, bo
  d->mPlacementPreview.setCanvasPos(cursorCanvasPos());
 }
 
-void BosonBigDisplayBase::setPlacementCellPreviewData(int groundType, bool canPlace)
+void BosonBigDisplayBase::setPlacementCellPreviewData(unsigned int textureCount, unsigned char* alpha, bool canPlace)
 {
  // we clear anyway - the new texture will be set below
  d->mPlacementPreview.clear();
- boWarning() << k_funcinfo << "placement preview has not yet been updated to new texturing code!" << endl;
-#if 0
- if (!Cell::isValidGround(groundType)) {
-	boWarning() << k_funcinfo << "no valid ground " << groundType << endl;
-	return;
- }
  BO_CHECK_NULL_RET(canvas());
- BosonTiles* tiles = canvas()->tileSet();
- if (!tiles) {
-	boError() << k_funcinfo << "NULL tiles" << endl;
+ BO_CHECK_NULL_RET(canvas()->map());
+ BO_CHECK_NULL_RET(canvas()->map()->texMap());
+ BO_CHECK_NULL_RET(canvas()->map()->groundTheme());
+ if (textureCount != canvas()->map()->textureCount()) {
+	boError() << k_funcinfo << "texture count is invalid - doesn't fit to groundTheme" << endl;
 	return;
  }
- BosonTextureArray* textures = tiles->textures();
- if (!textures) {
-	boError() << k_funcinfo << "no cell textures available" << endl;
+ if (textureCount == 0) {
+	boError() << k_funcinfo << "no textures" << endl;
 	return;
  }
- d->mPlacementPreview.setData(textures->texture(Cell::tile(groundType, 0)));
+ d->mPlacementPreview.setData(textureCount, alpha);
  d->mPlacementPreview.setCanPlace(canPlace);
  d->mPlacementPreview.setCanvasPos(cursorCanvasPos());
-#endif
 }
 
 void BosonBigDisplayBase::setDisplayInput(BosonBigDisplayInputBase* input)

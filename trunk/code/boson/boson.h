@@ -349,7 +349,7 @@ signals:
 	 *
 	 * This is for editor use only!
 	 **/
-	void signalChangeTexMap(unsigned int x, unsigned int y, unsigned int textureCount, unsigned int* textures, unsigned char* alpha);
+	void signalChangeTexMap(int x, int y, unsigned int textureCount, unsigned int* textures, unsigned char* alpha);
 
 	void signalAddChatSystemMessage(const QString& fromName, const QString& text);
 

@@ -48,8 +48,6 @@ public:
 		mTopLayout = 0;
 		mOrderLayout = 0;
 
-		mTransRef = 0;
-		mInverted = 0;
 		mGroundTheme = 0;
 	}
 
@@ -57,8 +55,6 @@ public:
 	QVBoxLayout* mTopLayout;
 	QGridLayout* mOrderLayout;
 	
-	QComboBox* mTransRef;
-	QCheckBox* mInverted;
 	BosonGroundTheme* mGroundTheme;
 
 	CellType mCellType; // plain tiles, small tiles, ...
@@ -66,7 +62,7 @@ public:
 	OrderType mOrderType;
 };
 
-BosonOrderWidget::BosonOrderWidget(QWidget* parent) : QWidget(parent)
+BosonOrderWidget::BosonOrderWidget(QWidget* parent, const char* name) : QWidget(parent, name)
 {
  d = new BosonOrderWidgetPrivate;
  d->mCellType = CellPlain;
@@ -89,8 +85,8 @@ void BosonOrderWidget::ensureButtons(unsigned int number)
 		b->hide();
 		b->setBackgroundOrigin(WindowOrigin);
 		d->mOrderButton.insert(i, b);
-		connect(b, SIGNAL(signalPlaceCell(int)),
-				this, SIGNAL(signalPlaceCell(int)));
+		connect(b, SIGNAL(signalPlaceGround(unsigned int)),
+				this, SLOT(slotPlaceGround(unsigned int)));
 		connect(b, SIGNAL(signalProduce(ProductionType, unsigned long int)),
 				this, SIGNAL(signalProduce(ProductionType, unsigned long int)));
 		connect(b, SIGNAL(signalStopProduction(ProductionType, unsigned long int)),
@@ -107,12 +103,6 @@ void BosonOrderWidget::resetLayout()
  delete d->mOrderLayout;
  delete d->mTopLayout;
  d->mTopLayout = new QVBoxLayout(this);
- if (d->mTransRef) {
-	d->mTopLayout->addWidget(d->mTransRef);
- }
- if (d->mInverted) {
-	d->mTopLayout->addWidget(d->mInverted);
- }
  int buttons = boConfig->commandButtonsPerRow();
  d->mOrderLayout = new QGridLayout(d->mTopLayout, -1, -1);
  d->mTopLayout->addStretch(1);
@@ -195,59 +185,16 @@ void BosonOrderWidget::hideOrderButtons()
  d->mOrderType = OrderNothing;
 }
 
-void BosonOrderWidget::slotRedrawTiles()
+void BosonOrderWidget::setOrderButtonsGround()
 {
- showCellConfigWidgets();
-// bool inverted = d->mInverted->isChecked();
  boDebug() << k_funcinfo << endl;
-#if 0
- Cell::TransType trans = (Cell::TransType)d->mTransRef->currentItem();
-#endif
- // trans is one of TRANS_GW, TRANS_GD, TRANS_DW, TRANS_DWD ans specifies the
- // tile type (desert/water and so on)
- switch (d->mCellType) {
-	case CellPlain:
-		hideOrderButtons();
-		ensureButtons(Cell::GroundLast - 1);
-#if 0
-		for (int i = 0; i < 5; i++) {
-			int groundType = i + 1;
-			d->mOrderButton[i]->setCell(groundType, d->mTiles);
-		}
-#endif
-		break;
-#if 0
-	case CellSmall:
-		hideOrderButtons();
-		ensureButtons(9);
-		for (int i = 0; i < 9; i++) {
-			int tile = Cell::smallTileNumber(i, trans, inverted);
-			d->mOrderButton[i]->setCell(tile, d->mTiles);
-		}
-		break;
-	case CellBig1:
-		hideOrderButtons();
-		ensureButtons(4);
-		for (int i = 0; i < 4; i++) {
-			d->mOrderButton[i]->setCell(Cell::getBigTransNumber(
-					trans, (inverted ? 4 : 0) + i),
-					d->mTiles);
-		}
-		break;
-	case CellBig2:
-		hideOrderButtons();
-		ensureButtons(4);
-		for (int i = 0; i < 4; i++) {
-			d->mOrderButton[i]->setCell(Cell::getBigTransNumber(
-					trans, (inverted ? 12 : 8) + i),
-					d->mTiles);
-		}
-		break;
-#endif
-	default:
-		boError() << "unexpected production index " << d->mCellType << endl;
-		break;
+ BO_CHECK_NULL_RET(d->mGroundTheme);
+ showCellConfigWidgets();
+ hideOrderButtons();
+ for (unsigned int i = 0; i < d->mGroundTheme->textureCount(); i++) {
+	d->mOrderButton[i]->setGround(i, d->mGroundTheme);
  }
+
  d->mOrderType = OrderCell;
 }
 
@@ -258,40 +205,17 @@ void BosonOrderWidget::setCellType(CellType index)
 
 void BosonOrderWidget::initEditor()
 {
- d->mTransRef = new QComboBox(this);
-#if 0
- connect(d->mTransRef, SIGNAL(activated(int)), this, SLOT(slotRedrawTiles()));
- d->mTransRef->insertItem(i18n("Grass/Water"), (int)Cell::TransGrassWater);
- d->mTransRef->insertItem(i18n("Grass/Desert"), (int)Cell::TransGrassDesert);
- d->mTransRef->insertItem(i18n("Desert/Water"), (int)Cell::TransDesertWater);
- d->mTransRef->insertItem(i18n("Deep Water"), (int)Cell::TransDeepWater);
-#endif
-
- d->mInverted = new QCheckBox(this);
-#if 0
- d->mInverted->setText(i18n("Invert"));
- connect(d->mInverted, SIGNAL(toggled(bool)), this, SLOT(slotRedrawTiles()));
-#endif
+ // old code new'ed mInverted and mTransRef here
 }
 
 void BosonOrderWidget::hideCellConfigWidgets()
 {
- // don't excute anything if initEditor() has not been called
- if (!d->mTransRef || !d->mInverted) {
-	return;
- }
- d->mTransRef->hide();
- d->mInverted->hide();
+ // we should hide widgets for groundtexture mixing here (if they are created)
 }
 
 void BosonOrderWidget::showCellConfigWidgets()
 {
- // don't excute anything if initEditor() has not been called
- if (!d->mTransRef || !d->mInverted) {
-	return;
- }
- d->mTransRef->show();
- d->mInverted->show();
+ // we should show widgets for groundtexture mixing here (if they are created)
 }
 
 void BosonOrderWidget::showUnits(QPtrList<Unit> units)
@@ -358,5 +282,23 @@ void BosonOrderWidget::resetButton(BosonOrderButton* button)
 OrderType BosonOrderWidget::orderType() const
 {
  return d->mOrderType;
+}
+
+void BosonOrderWidget::slotPlaceGround(unsigned int texture)
+{
+ boDebug() << k_funcinfo << endl;
+ BO_CHECK_NULL_RET(d->mGroundTheme);
+ if (texture >= d->mGroundTheme->textureCount()) {
+	boError() << k_funcinfo << "invalid texture " << texture << " textureCount="
+			<< d->mGroundTheme->textureCount() << endl;
+	return;
+ }
+ unsigned char* alpha = new unsigned char[d->mGroundTheme->textureCount()];
+ for (unsigned int i = 0; i < d->mGroundTheme->textureCount(); i++) {
+	alpha[i] = 0;
+ }
+ alpha[texture] = 255;
+ emit signalPlaceGround(d->mGroundTheme->textureCount(), alpha);
+ delete[] alpha;
 }
 

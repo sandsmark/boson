@@ -87,8 +87,8 @@ void EditorWidget::initDisplayManager()
  BosonWidgetBase::initDisplayManager();
  connect(cmdFrame(), SIGNAL(signalPlaceUnit(unsigned long int, Player*)),
 		displayManager(), SLOT(slotPlaceUnit(unsigned long int, Player*)));
- connect(cmdFrame(), SIGNAL(signalPlaceCell(int)),
-		displayManager(), SLOT(slotPlaceCell(int)));
+ connect(cmdFrame(), SIGNAL(signalPlaceGround(unsigned int, unsigned char*)),
+		displayManager(), SLOT(slotPlaceGround(unsigned int, unsigned char*)));
 
  connect(displayManager(), SIGNAL(signalLockAction(bool)),
 		this, SLOT(slotLockAction(bool)));
@@ -118,10 +118,24 @@ void EditorWidget::initMap()
  BosonMap* map = boGame->playField()->map();
  connect(map, SIGNAL(signalGroundThemeChanged(BosonGroundTheme*)),
 		this, SLOT(slotGroundThemeChanged(BosonGroundTheme*)));
- connect(boGame, SIGNAL(signalChangeCellCorner(int,int,int,unsigned char,unsigned char)),
-		map, SLOT(slotChangeCellCorner(int,int,int,unsigned char, unsigned char)));
+
  connect(boGame, SIGNAL(signalChangeCell(int,int,int,unsigned char)),
 		minimap(), SLOT(slotChangeCell(int,int,int,unsigned char)));
+#warning TODO: update minimap
+#if 0
+ connect(boGame, SIGNAL(signalChangeTexMap(int,int,unsigned int,unsigned int*,unsigned char*)),
+		minimap(), SLOT(slotChangeCell(int,int,unsigned int,unsigned int*,unsigned char*)));
+#endif
+ connect(boGame, SIGNAL(signalChangeTexMap(int,int,unsigned int,unsigned int*,unsigned char*)),
+		map, SLOT(slotChangeTexMap(int,int,unsigned int,unsigned int*,unsigned char*)));
+
+ // AB: maybe we don't need the connect() above concerning groundtheme. it can't
+ // be changed once the map is started
+ if (!map->groundTheme()) {
+	BO_NULL_ERROR(map->groundTheme());
+ } else {
+	slotGroundThemeChanged(map->groundTheme());
+ }
 }
 
 void EditorWidget::initPlayer()

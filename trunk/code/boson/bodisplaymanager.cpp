@@ -487,12 +487,12 @@ void BoDisplayManager::slotPlaceUnit(unsigned long int unitType, Player* owner)
  activeDisplay()->displayInput()->placeUnit(unitType, owner);
 }
 
-void BoDisplayManager::slotPlaceCell(int tile)
+void BoDisplayManager::slotPlaceGround(unsigned int textureCount, unsigned char* alpha)
 {
  BO_CHECK_NULL_RET(activeDisplay());
  BO_CHECK_NULL_RET(activeDisplay()->displayInput());
 
- activeDisplay()->displayInput()->placeCell(tile);
+ activeDisplay()->displayInput()->placeGround(textureCount, alpha);
 }
 
 void BoDisplayManager::slotMoveActiveSelection(int x, int y)

@@ -59,11 +59,11 @@ public:
 	 **/
 	void setAction(UnitAction action, Player* owner);
 
-	void setCell(int tileNo, BosonGroundTheme* theme);
+	void setGround(unsigned int texture, BosonGroundTheme* theme);
 
 	/**
 	 * @return The displayed unit or 0 if no unit is displayed. See also
-	 * @ref tile and @ref unitType
+	 * @ref texture and @ref unitType
 	 **/
 	Unit* unit() const
 	{
@@ -72,7 +72,7 @@ public:
 
 	/**
 	 * @return The production id that is displayed or 0 if none. See also @ref
-	 * tile and @ref unit
+	 * texture and @ref unit
 	 **/
 	unsigned long int productionId() const
 	{
@@ -100,17 +100,17 @@ public:
 	 * here.
 	 **/
 	Player* productionOwner() const
-	{ 
+	{
 		return (orderType() == OrderProduce) ? mProductionOwner : 0;
 	}
 
 	/**
-	 * @return The displayed tilenumber or -1 if none is displayed. See also
+	 * @return The displayed texturenumber or -1 if none is displayed. See also
 	 * @ref unit and @ref unitType
 	 **/
-	int tile() const
-	{ 
-		return (orderType() == OrderCell) ? mTileNumber : -1;
+	int texture() const
+	{
+		return (orderType() == OrderCell) ? (int)mTextureNumber : -1;
 	}
 
 	OrderType orderType() const { return mOrderType; }
@@ -141,10 +141,9 @@ public slots:
 
 signals:
 	/**
-	 * Emitted when the player clicks on this widget and it is a cell. See
-	 * @ref setCell
+	 * Emitted when the player clicks on this widget and it is a cell.
 	 **/
-	void signalPlaceCell(int tileNumber);
+	void signalPlaceGround(unsigned int textureNumber);
 
 	/**
 	 * Emitted when the player clicks on this widget and it is an order
@@ -191,7 +190,7 @@ private:
 	// FIXME: use only one int for all order modes
 	unsigned long int mProductionId;
 	ProductionType mProductionType;
-	int mTileNumber;
+	unsigned int mTextureNumber;
 	int mAction;
 	OrderType mOrderType;
 
