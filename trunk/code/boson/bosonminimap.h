@@ -100,12 +100,14 @@ protected:
 	void setPoint(int x, int y, const QColor& color);
 	virtual void mousePressEvent(QMouseEvent*);
 	virtual bool eventFilter(QObject* o, QEvent* e);
-	
+	void createGround();
+
 private:
 	class BosonMiniMapPrivate;
 	BosonMiniMapPrivate* d;
 
 	QPixmap* mGround;
+	QPixmap* mUnZoomedGround;
 	bool mUseFog; // useful for the editor to disable the fog of war
 	
 	BosonMap* mMap;
