@@ -30,31 +30,31 @@
      <tr>
       <td>  
        <form method="POST" action="http://aquila.rezel.enst.fr/cgi-bin/guestbook.pl">
-        <input type="hidden" name="user" value="guestbook">
         <center>
          <font size="3">
           <table border="0">
            <tr>
-            <td align="right" width="100">*Name:</td>
-            <td><input type="text" size="40" name=realname></td>
+		<td align="right" width="100">(*) Your Name:</td>
+		<td><input type=text name=realname size=30></td>
            </tr>
            <tr>
-            <td align="right" width="100">Email:</td>
-            <td><input type="text" size="40" name=username></td>
+		<td align="right" width="100">E-Mail: </td>
+		<td><input type=text name=username size=40></td>
            </tr>
            <tr>
-            <td align="right" width="100">Homepage:</td>
-            <td><input type="text" size="40" name=url></td>
+		<td align="right" width="100">Home Page: </td>
+		<td><input type=text name=url size=50></td>
+           </tr>
+           <tr>
+		<td align="right" width="100">City: </td>
+		<td><input type=text name=city size=15></td>
            </tr>
            <tr>
             <td align="right" width="100">*Comment:</td>
             <td><textarea name="comments" rows="10" cols="40"></textarea></td>
            </tr>
            <tr>
-            <td align="right" width="100"></td>
-            <td><input type="submit" value="Submit"> <input type="reset" value="Reset"></td>
-
-
+	    <input type=submit> * <input type=reset>
            </tr>
           </table>
          </font>
