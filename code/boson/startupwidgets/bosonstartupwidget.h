@@ -62,7 +62,6 @@ public slots:
 	void slotLoadingPlayer(int current);
 	void slotLoadingUnitsCount(int count);
 	void slotLoadingUnit(int current);
-	void slotLoadingTile(int);
 
 	/**
 	 * Show the welcome widget and reset all previous widget, i.e. delete

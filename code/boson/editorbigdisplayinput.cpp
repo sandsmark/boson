@@ -27,6 +27,7 @@
 #include "bosonconfig.h"
 #include "bosonmessage.h"
 #include "boson.h"
+#include "bosonmap.h"
 #include "bosoncursor.h"
 #include "player.h"
 #include "unitproperties.h"
@@ -49,12 +50,17 @@ public:
 	enum PlacementType {
 		PlaceNothing = 0,
 		PlaceUnit = 1,
-		PlaceCell = 2
+		PlaceCell = 2, // obsolete!
+		PlaceCellCorners = 3
 	};
 
 	Placement()
 	{
+		mTextureAlpha = 0;
 		reset();
+	}
+	~Placement()
+	{
 	}
 	void reset()
 	{
@@ -62,6 +68,8 @@ public:
 		mUnitType = 0;
 		mGroundType = -1;
 		mOwner = 0;
+		delete mTextureAlpha;
+		mTextureAlpha = 0;
 	}
 
 	void placeUnit(unsigned long int t, Player* owner)
@@ -77,6 +85,15 @@ public:
 		reset();
 		mType = PlaceCell;
 		mGroundType = t;
+	}
+	void placeCellCorner(unsigned int texCount, unsigned char* alpha)
+	{
+		reset();
+		mType = PlaceCellCorners;
+		mTextureAlpha = new unsigned char[texCount];
+		for (unsigned int i = 0; i < texCount; i++) {
+			mTextureAlpha[i] = alpha[i];
+		}
 	}
 
 	/**
@@ -123,7 +140,8 @@ private:
 	PlacementType mType;
 	unsigned long int mUnitType;
 	Player* mOwner;
-	int mGroundType;
+	int mGroundType; // obsolete
+	unsigned char* mTextureAlpha;
 };
 
 class EditorBigDisplayInputPrivate
@@ -212,6 +230,7 @@ bool EditorBigDisplayInput::actionPlace(QDataStream& stream, const BoVector3& ca
 		ret = true;
 	}
  } else if (d->mPlacement.isCell()) {
+#if 0
 	if (canvas()->cellOccupied(x, y)) {
 		// AB: this is not very user friendly.
 		// we should check whether a unit can go on the new cell type
@@ -233,6 +252,41 @@ bool EditorBigDisplayInput::actionPlace(QDataStream& stream, const BoVector3& ca
 		stream << (Q_INT32)y;
 		ret = true;
 	}
+#endif
+	// AB: we should convert this to be corner based.
+	// also the canvas()->cellOccupied() check must check adjacent cells,
+	// too as all surrounding cells are affected when the corners are
+	// changed.
+
+	BosonMap* map = canvas()->map();
+	if (!map) {
+		BO_NULL_ERROR(map);
+		return false;
+	}
+
+	stream << (Q_UINT32)BosonMessage::MoveEditor;
+	stream << (Q_UINT32)BosonMessage::MoveChangeTexMap;
+
+	// we modify 4 corners (hardcoded at the moment)
+	stream << (Q_UINT32)4;
+
+	unsigned int cornersX[4] = { x, x + 1, x + 1,     x };
+	unsigned int cornersY[4] = { y,     y, y + 1, y + 1 };
+	for (unsigned int i = 0; i < 4; i++) {
+		stream << (Q_UINT32)cornersX[i];
+		stream << (Q_UINT32)cornersY[i];
+		stream << (Q_UINT32)map->textureCount();
+		for (unsigned int j = 0; j < map->textureCount(); j++) {
+			unsigned char alpha = 0;
+#warning TODO
+#if 0
+			alpha = d->mPlacement.alpha(j);
+#endif
+			stream << (Q_UINT32)j;
+			stream << (Q_UINT8)alpha;
+		}
+	}
+
  }
  if (ret) {
 	// TODO: in BosonPlayField (call it when the message is received?

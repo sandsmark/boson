@@ -341,7 +341,15 @@ signals:
 	 * have been updated yet, since we can't safely predict the order in which
 	 * slots get called.
 	 **/
-	void signalChangeCell(int x, int y, int groundType, unsigned char version );
+//	void signalChangeCell(int x, int y, int groundType, unsigned char version ); // obsolete
+
+	/**
+	 * Tell the map to change @ref BosonMap::texMap at coordinates @p x, @p
+	 * y.
+	 *
+	 * This is for editor use only!
+	 **/
+	void signalChangeTexMap(unsigned int x, unsigned int y, unsigned int textureCount, unsigned int* textures, unsigned char* alpha);
 
 	void signalAddChatSystemMessage(const QString& fromName, const QString& text);
 

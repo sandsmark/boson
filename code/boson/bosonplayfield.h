@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -76,6 +76,8 @@ public:
 	 **/
 	bool loadPlayField(const QString& file);
 
+	bool importHeightMapImage(const QImage& image);
+
 	/**
 	 * Load the important data (description for example) from the playField.
 	 * Use @ref loadPlayField to load <em>all</em> data. preLoadPlayField is
@@ -111,21 +113,6 @@ public:
 	static QString playFieldComment(const QString& identifier);
 
 	/**
-	 * Load a @ref BosonMap from stream. Create a new BosonMap object if it
-	 * does not yet exist, otherwise load from stream but also compare the
-	 * stream with our locally present @ref BosonMap. Note that there must
-	 * be no difference as we should have been the one who sent the stream!!
-	 *
-	 * But if there is a difference by any reason the network stream will be
-	 * used instead of our locally present one.
-	 *
-	 * @return FALSE if the format was invalid. Note that the map will be
-	 * broken then!
-	 **/
-	bool loadMap(QDataStream& stream);
-	bool loadDescription(QDataStream& stream);
-
-	/**
 	 * This simply deletes the map. This may be useful for game starting, as
 	 * the ADMIN already has the map, but all other players don't. So the
 	 * ADMIN might send the map over network and delete his local copy, so
@@ -134,8 +121,8 @@ public:
 	 **/
 	void deleteMap();
 	
-	void saveMap(QDataStream& stream);
-	void saveDescription(QDataStream& stream);
+	bool savePlayFieldForRemote(QDataStream& stream);
+	bool loadPlayFieldFromRemote(QDataStream& stream);
 
 	BosonMap* map() const { return mMap; }
 	BosonScenario* scenario() const { return mScenario; }
@@ -190,12 +177,31 @@ signals:
 
 protected:
 	bool loadDescriptionFromFile(const QByteArray& xml);
-	bool loadMapFromFile(const QByteArray& xml, const QByteArray& heightMapImage);
+	bool loadMapFromFile(const QByteArray& xml, const QByteArray& heightMapImage, const QByteArray& texMap);
 	bool loadScenarioFromFile(const QByteArray& xml);
 
 	QString saveDescriptionToFile();
 	QByteArray saveMapToFile();
+	QByteArray saveTexMapToFile();
 	QString saveScenarioToFile();
+
+	bool saveMap(QDataStream& stream);
+	bool saveDescription(QDataStream& stream);
+
+	/**
+	 * Load a @ref BosonMap from stream. Create a new BosonMap object if it
+	 * does not yet exist, otherwise load from stream but also compare the
+	 * stream with our locally present @ref BosonMap. Note that there must
+	 * be no difference as we should have been the one who sent the stream!!
+	 *
+	 * But if there is a difference by any reason the network stream will be
+	 * used instead of our locally present one.
+	 *
+	 * @return FALSE if the format was invalid. Note that the map will be
+	 * broken then!
+	 **/
+	bool loadMap(QDataStream& stream);
+	bool loadDescription(QDataStream& stream);
 
 private:
 	static void initStatic();

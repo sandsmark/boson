@@ -29,7 +29,6 @@ class Cell;
 class Player;
 class Unit;
 class UnitProperties;
-class BosonTiles;
 class BoItemList;
 class BosonItem;
 class ProductionPlugin;
@@ -316,8 +315,6 @@ public:
 
 	void addToCells(BosonItem* u);
 	void removeFromCells(BosonItem* u);
-
-	BosonTiles* tileSet() const;
 
 	bool onCanvas(const QPoint& pos) const
 	{

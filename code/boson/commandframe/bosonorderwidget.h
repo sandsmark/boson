@@ -29,7 +29,7 @@ class Unit;
 class Facility;
 class Player;
 class BosonOrderButton;
-class BosonTiles;
+class BosonGroundTheme;
 template<class T> class QPtrList;
 
 /**
@@ -103,7 +103,7 @@ public:
 	void productionAdvanced(Unit* factory, double percentage);
 
 	void setCellType(CellType type);
-	void setTileSet(BosonTiles* tileSet);
+	void setGroundTheme(BosonGroundTheme* theme);
 
 	/**
 	 * @return TRUE if the widget display production options (.e. order

@@ -22,7 +22,6 @@
 
 #include "defines.h"
 #include "bosonwidget.h"
-#include "bosontiles.h"
 #include "bosoncanvas.h"
 #include "bosonmap.h"
 #include "cell.h"
@@ -87,10 +86,12 @@ static float lightPos[] = {-6000.0, 3000.0, 10000.0, 1.0};
 
 #include <GL/glu.h>
 
-float textureUpperLeft[2] = { 0.0, 1.0 };
-float textureLowerLeft[2] = { 0.0, 0.0 };
-float textureLowerRight[2] = { 1.0, 0.0 };
-float textureUpperRight[2] = { 1.0, 1.0 };
+float textureUpperLeft[2] = { 0.0f, 1.0f };
+float textureLowerLeft[2] = { 0.0f, 0.0f };
+float textureLowerRight[2] = { 1.0f, 0.0f };
+float textureUpperRight[2] = { 1.0f, 1.0f };
+
+void renderCellsNow(Cell** cells, int count, int mapCorners, float* heightMap, unsigned char* texMapStart);
 
 // Maybe camera class should be put to it's own file
 class Camera
@@ -690,6 +691,13 @@ void BosonBigDisplayBase::initializeGL()
 	boError() << k_funcinfo << "NULL context" << endl;
 	return;
  }
+ static bool recursive = false;
+ if (recursive) {
+	// this can happen e.g. when a paint event occurs while we are in this
+	// function (e.g. because of a messagebox)
+	return;
+ }
+ recursive = true;
  // AB: we need at least GLU 1.3 for gluCheckExtension() !
  // TODO: find out if we might be able to run boson with older versions - if yes
  // use the code from http://www.mesa3d.org/brianp/sig97/exten.htm#Compile to
@@ -735,8 +743,8 @@ void BosonBigDisplayBase::initializeGL()
 // glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
 
- float lightAmb[] = {0.8, 0.8, 0.8, 1.0};
- float lightDif[] = {1.0, 1.0, 1.0, 1.0};
+ float lightAmb[] = {0.8f, 0.8f, 0.8f, 1.0f};
+ float lightDif[] = {1.0f, 1.0f, 1.0f, 1.0f};
 
  glLightfv(GL_LIGHT0, GL_AMBIENT, lightAmb);
  glLightfv(GL_LIGHT0, GL_DIFFUSE, lightDif);
@@ -756,6 +764,7 @@ void BosonBigDisplayBase::initializeGL()
  if (!directRendering()) {
 	// baad.
 	boWarning() << k_funcinfo << "direct rendering has NOT been enabled!" << endl;
+	KMessageBox::information(this, i18n("Direct rendering is NOT enabled - boson will run very slow. You should ensure that direct rendering is enabled!"));
  }
 
  // this needs to be done in initializeGL():
@@ -817,6 +826,10 @@ void BosonBigDisplayBase::paintGL()
  BO_CHECK_NULL_RET(localPlayer());
  BO_CHECK_NULL_RET(displayInput());
 
+ if (checkError()) {
+	boError() << k_funcinfo << "OpenGL error at start of paintGL" << endl;
+ }
+
  d->mFrameCount++;
  calcFPS();
  if (boGame->delayedMessageCount() >= 10 && d->mFrameCount != 0) {
@@ -832,7 +845,6 @@ void BosonBigDisplayBase::paintGL()
  }
  boProfiling->render(true);
  d->mUpdateTimer.stop();
-//boDebug() << k_funcinfo << endl;
  // AB: this is the most time-critical function! we need to enhance performance
  // whenever possible. look at
  // http://www.mesa3d.org/brianp/sig97/perfopt.htm
@@ -840,9 +852,6 @@ void BosonBigDisplayBase::paintGL()
 
  // TODO: performance: make textures resident
  // maybe use priorities to achieve this
- // TODO: performance: maybe enable depth-buffer/depth-testing after the cells
- // have been drawn - so useless cell-drawings can be discarded. remember to
- // disable it before drawing the background (i.e. cells) !
  // TODO: performance: from the URL above:
  // Transparency may be implemented with stippling instead of blending 
  // If you need simple transparent objects consider using polygon stippling
@@ -860,6 +869,17 @@ void BosonBigDisplayBase::paintGL()
  // push the matrix here and pop it at the end of paintGL() again. gluLookAt()
  // is called only whenever cameraChanged() is called.
  glPushMatrix();
+
+
+ // first render the cells.
+ // we use blending a lot here and render in different stages, most of the time
+ // with depth testing disabled. so it makes a lot of sense to start with cell
+ // rendering.
+ boProfiling->renderCells(true);
+ glEnable(GL_DEPTH_TEST);
+ glEnable(GL_TEXTURE_2D);
+ renderCells();
+ boProfiling->renderCells(false);
 
  if (checkError()) {
 	boError() << k_funcinfo << "before unit rendering" << endl;
@@ -896,21 +916,11 @@ void BosonBigDisplayBase::paintGL()
  glDisable(GL_CULL_FACE);
  if (boConfig->wireFrames()) {
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	glEnable(GL_TEXTURE_2D);
  }
  boProfiling->renderUnits(false, d->mRenderedItems);
 
  if (checkError()) {
 	boError() << k_funcinfo << "after unit rendering" << endl;
- }
-
- boProfiling->renderCells(true);
- glEnable(GL_DEPTH_TEST);
- renderCells();
- boProfiling->renderCells(false);
-
- if (checkError()) {
-	boError() << k_funcinfo << "cells rendered" << endl;
  }
 
  // Facility-placing preview code
@@ -924,10 +934,6 @@ void BosonBigDisplayBase::paintGL()
  boProfiling->renderParticles(true);
  renderParticles();
  boProfiling->renderParticles(false);
-
- if (checkError()) {
-	boError() << k_funcinfo << "when particles rendered" << endl;
- }
 
 
  glDisable(GL_DEPTH_TEST);
@@ -950,9 +956,6 @@ void BosonBigDisplayBase::paintGL()
  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
  renderCursor();
- if (checkError()) {
-	boError() << k_funcinfo << "GL error when cursor rendered" << endl;
- }
 
  glDisable(GL_TEXTURE_2D);
  renderSelectionRect();
@@ -965,10 +968,6 @@ void BosonBigDisplayBase::paintGL()
  glPopMatrix();
  boProfiling->renderText(false);
 
- if (checkError()) {
-	boError() << k_funcinfo << "text rendered" << endl;
- }
-
  glPopMatrix();
 
  bool showProfilingMessage = boProfiling->renderEntries() < MAX_PROFILING_ENTRIES;
@@ -979,6 +978,9 @@ void BosonBigDisplayBase::paintGL()
 
  if (d->mUpdateInterval) {
 	d->mUpdateTimer.start(d->mUpdateInterval);
+ }
+ if (checkError()) {
+	boError() << k_funcinfo << "OpenGL error at end of paintGL" << endl;
  }
 }
 
@@ -1167,6 +1169,10 @@ void BosonBigDisplayBase::renderCursor()
 	GLfloat x = (GLfloat)pos.x();
 	GLfloat y = (GLfloat)d->mViewport[3] - (GLfloat)pos.y();
 	cursor()->renderCursor(x, y);
+ }
+
+ if (checkError()) {
+	boError() << k_funcinfo << "OpenGL error" << endl;
  }
 }
 
@@ -1361,25 +1367,30 @@ void BosonBigDisplayBase::renderText()
 	QPoint pos = mapFromGlobal(QCursor::pos());
 	d->mToolTips->renderToolTip(pos.x(), pos.y(), d->mViewport, d->mDefaultFont);
  }
+
+
+ if (checkError()) {
+	boError() << k_funcinfo << "OpenGL error" << endl;
+ }
 }
 
 void BosonBigDisplayBase::renderCells()
 {
  BO_CHECK_NULL_RET(canvas());
- BosonTiles* tiles = canvas()->tileSet();
- if (!tiles) {
-	boError() << k_funcinfo << "NULL tiles" << endl;
-	return;
- }
- BosonTextureArray* textures = tiles->textures();
+ BO_CHECK_NULL_RET(canvas()->map());
+ BosonMap* map = canvas()->map();
+ BosonTextureArray* textures = map->textures();
  if (!textures) {
 	makeCurrent();
+#warning TODO: load a default theme
+#if 0
 	tiles->generateTextures();
 	textures = tiles->textures();
 	if (!textures) {
 		boWarning() << k_funcinfo << "NULL textures for cells" << endl;
 		return;
 	}
+#endif
  }
 
  if (d->mRenderCellsCount == 0) {
@@ -1390,59 +1401,61 @@ void BosonBigDisplayBase::renderCells()
  }
 
  BO_CHECK_NULL_RET(localPlayer());
- BosonMap* map = canvas()->map();
- BO_CHECK_NULL_RET(map);
+ BO_CHECK_NULL_RET(map->texMap());
+ BO_CHECK_NULL_RET(map->heightMap());
  float* heightMap = map->heightMap();
- BO_CHECK_NULL_RET(heightMap);
 
+ if (map->textureCount() != 3) {
+	boError() << k_funcinfo << "only 3 texturemaps supported!" << endl;
+	return;
+ }
 
  // AB: we can increase performance even more here. lets replace d->mRenderCells
  // by two array defining the coordinates of cells and the heightmap values.
  // we could use that as vertex array for example.
- GLuint texture = 0;
- int tile = -1;
  int heightMapWidth = map->width() + 1;
  d->mRenderedCells = 0;
+
+ Cell** renderCells = new Cell*[d->mRenderCellsCount]; // FIXME: store two arrays. one with x, one with y coordinate (or both in one array). don't store pointers to Cell
+ int cellsCount = 0;
  for (int i = 0; i < d->mRenderCellsCount; i++) {
 	Cell* c = d->mRenderCells[i];
-	int x = c->x();
-	int y = c->y();
-	if (localPlayer()->isFogged(x, y)) {
+	if (localPlayer()->isFogged(c->x(), c->y())) {
 		// don't draw anything at all. the cell will just be black,
 		// because of the glClear() call.
 		continue;
 	}
-	GLfloat cellXPos = (float)x * BO_GL_CELL_SIZE;
-	GLfloat cellYPos = -(float)y * BO_GL_CELL_SIZE;
-	if (c->tile() != tile) {
-		texture = textures->texture(c->tile());
-		tile = c->tile();
-		glBindTexture(GL_TEXTURE_2D, texture);
-
-	}
-	// FIXME: performance: only a single glBegin(GL_QUADS)!
-//	boDebug() << heightMap[y * heightMapWidth + x] << endl;
-	float* heightMapUpperLeft = &heightMap[y * heightMapWidth + x];
-	float upperLeftHeight = *heightMapUpperLeft;
-	float upperRightHeight = *(heightMapUpperLeft + 1);
-	float lowerLeftHeight = *(heightMapUpperLeft + heightMapWidth);
-	float lowerRightHeight = *(heightMapUpperLeft + heightMapWidth + 1);
-	glBegin(GL_QUADS);
-		glTexCoord2fv(textureUpperLeft);
-		glVertex3f(cellXPos, cellYPos, upperLeftHeight);
-
-		glTexCoord2fv(textureLowerLeft);
-		glVertex3f(cellXPos, cellYPos - BO_GL_CELL_SIZE, lowerLeftHeight);
-
-		glTexCoord2fv(textureLowerRight);
-		glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos - BO_GL_CELL_SIZE, lowerRightHeight);
-
-		glTexCoord2fv(textureUpperRight);
-		glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos, upperRightHeight);
-	glEnd();
-
-	d->mRenderedCells++;
+	renderCells[cellsCount] = c;
+	cellsCount++;
  }
+
+ glEnable(GL_BLEND);
+ glBlendFunc(GL_ONE, GL_ZERO);
+ glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
+ // we draw the cells in different stages. the depth test must get enabled
+ // before the last stage, so that the new information (i.e. the z pos of the
+ // cells) get into the depth buffer.
+ // we can safely disable the test completely for all other stages, as cells are
+ // the first objects we render.
+ glDisable(GL_DEPTH_TEST);
+
+ for (unsigned int i = 0; i < map->textureCount(); i++) {
+	GLuint tex = textures->texture(i);
+	if (i == 1) {
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+	} else if (i == map->textureCount() - 1) {
+		glEnable(GL_DEPTH_TEST);
+	}
+	glBindTexture(GL_TEXTURE_2D, tex);
+	renderCellsNow(renderCells, cellsCount, map->width() + 1, map->heightMap(), map->texMap(i));
+ }
+ delete[] renderCells;
+ d->mRenderedCells += cellsCount;
+
+ glDisable(GL_BLEND);
+ glEnable(GL_DEPTH_TEST);
+
  if (d->mDebugShowCellGrid) {
 	glDisable(GL_LIGHTING);
 	glDisable(GL_NORMALIZE);
@@ -1471,8 +1484,55 @@ void BosonBigDisplayBase::renderCells()
 		glEnable(GL_NORMALIZE);
 	}
  }
+
+ if (checkError()) {
+	boError() << k_funcinfo << "OpenGL error" << endl;
+ }
 }
 
+void renderCellsNow(Cell** cells, int count, int cornersWidth, float* heightMap, unsigned char* texMapStart)
+{
+ glBegin(GL_QUADS);
+ for (int i = 0; i < count; i++) {
+	Cell* c = cells[i];
+	int x = c->x();
+	int y = c->y();
+
+	int offset = y * cornersWidth + x;
+	unsigned char* texMapUpperLeft = texMapStart + offset;
+	float* heightMapUpperLeft = heightMap + offset;
+
+	GLfloat cellXPos = (float)x * BO_GL_CELL_SIZE;
+	GLfloat cellYPos = -(float)y * BO_GL_CELL_SIZE;
+
+	float upperLeftHeight = *heightMapUpperLeft;
+	float upperRightHeight = *(heightMapUpperLeft + 1);
+	float lowerLeftHeight = *(heightMapUpperLeft + cornersWidth);
+	float lowerRightHeight = *(heightMapUpperLeft + cornersWidth + 1);
+
+	unsigned char upperLeftAlpha = *texMapUpperLeft;
+	unsigned char upperRightAlpha = *(texMapUpperLeft + 1);
+	unsigned char lowerLeftAlpha = *(texMapUpperLeft + cornersWidth);
+	unsigned char lowerRightAlpha = *(texMapUpperLeft + cornersWidth + 1);
+
+	glColor4ub(255, 255, 255, upperLeftAlpha);
+	glTexCoord2fv(textureUpperLeft);
+	glVertex3f(cellXPos, cellYPos, upperLeftHeight);
+
+	glColor4ub(255, 255, 255, lowerLeftAlpha);
+	glTexCoord2fv(textureLowerLeft);
+	glVertex3f(cellXPos, cellYPos - BO_GL_CELL_SIZE, lowerLeftHeight);
+
+	glColor4ub(255, 255, 255, lowerRightAlpha);
+	glTexCoord2fv(textureLowerRight);
+	glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos - BO_GL_CELL_SIZE, lowerRightHeight);
+
+	glColor4ub(255, 255, 255, upperRightAlpha);
+	glTexCoord2fv(textureUpperRight);
+	glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos, upperRightHeight);
+ }
+ glEnd();
+}
 
 void BosonBigDisplayBase::renderParticles()
 {
@@ -1512,7 +1572,7 @@ void BosonBigDisplayBase::renderParticles()
  // This sorts all particles by distance from camera and may be pretty slow, so
  //  we don't resort the list if there hasn't been any advance() calls and
  //  camera hasn't changed either
- BosonParticle* p;
+ BosonParticle* p = 0;
  //bool wassorted = d->mParticlesDirty;  // only for debug, commented because of compiler warning
  if (d->mParticlesDirty) {
 	BosonParticleSystem* s;
@@ -1619,6 +1679,10 @@ void BosonBigDisplayBase::renderParticles()
  glDepthMask(GL_TRUE);
  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
  glDisable(GL_BLEND);
+
+ if (checkError()) {
+	boError() << k_funcinfo << "OpenGL error" << endl;
+ }
 }
 
 int BosonBigDisplayBase::renderMatrix(int x, int y, const BoMatrix* matrix, const QString& text)
@@ -3096,6 +3160,8 @@ void BosonBigDisplayBase::setPlacementCellPreviewData(int groundType, bool canPl
 {
  // we clear anyway - the new texture will be set below
  d->mPlacementPreview.clear();
+ boWarning() << k_funcinfo << "placement preview has not yet been updated to new texturing code!" << endl;
+#if 0
  if (!Cell::isValidGround(groundType)) {
 	boWarning() << k_funcinfo << "no valid ground " << groundType << endl;
 	return;
@@ -3114,6 +3180,7 @@ void BosonBigDisplayBase::setPlacementCellPreviewData(int groundType, bool canPl
  d->mPlacementPreview.setData(textures->texture(Cell::tile(groundType, 0)));
  d->mPlacementPreview.setCanPlace(canPlace);
  d->mPlacementPreview.setCanvasPos(cursorCanvasPos());
+#endif
 }
 
 void BosonBigDisplayBase::setDisplayInput(BosonBigDisplayInputBase* input)

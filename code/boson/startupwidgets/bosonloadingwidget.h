@@ -26,7 +26,7 @@ class BosonLoadingWidget : public QWidget
         SendMap,  // Map stream is sent to network (admin only)
         ReceiveMap,  // Map is being received over the net
         LoadMap,  // Map has been received and is being loaded
-        LoadTiles,  // Map tiles (textures)
+        LoadTiles,  // Map tiles (textures) // AB: obsolete!
         LoadParticleSystems,  // Loading particle systems for a player
         LoadUnitConfigs,  // Loading unit config files for a player
         LoadUnits,  // Loading unit models and textures for a player

@@ -102,9 +102,15 @@ void KGameCellDebug::setMap(BosonMap* m)
 		QListViewItem* item = new QListViewItem(d->mCellList);
 		item->setText(d->mCellXId, QString::number(i));
 		item->setText(d->mCellYId, QString::number(j));
+#if 0
 		item->setText(d->mCellGroundTypeId, QString::number(c->groundType()));
 		item->setText(d->mCellVersionId, QString::number(c->version()));
 		item->setText(d->mCellTileId, QString::number(c->tile()));
+#else
+		item->setText(d->mCellTileId, i18n("TileId is obsolete"));
+		item->setText(d->mCellGroundTypeId, i18n("GroundType is obsolete"));
+		item->setText(d->mCellVersionId, i18n("version is obsolete"));
+#endif
 		d->mCells.insert(c, item);
 	}
  }

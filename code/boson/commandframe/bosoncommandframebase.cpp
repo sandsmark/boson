@@ -319,6 +319,13 @@ void BosonCommandFrameBase::slotPlaceCell(int groundType)
  emit signalAction(ActionBuild); // placement preview
 }
 
+void BosonCommandFrameBase::slotPlaceGround()
+{
+#warning TODO
+// emit signalPlaceCell(groundType); // hmmm
+ emit signalAction(ActionBuild); // placement preview
+}
+
 void BosonCommandFrameBase::slotProduce(ProductionType type, unsigned long int id)
 {
  boDebug() << k_funcinfo << endl;

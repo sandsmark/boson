@@ -20,6 +20,7 @@
 #include "bosonplayfield.h"
 
 #include "bosonmap.h"
+#include "bosonfileconverter.h"
 #include "bosonscenario.h"
 #include "bodebug.h"
 #include "bofile.h"
@@ -220,7 +221,7 @@ bool BosonPlayField::loadPlayField(const QString& file)
 	return false;
  }
 
- if (!loadMapFromFile(mFile->mapData(), mFile->heightMapData())) {
+ if (!loadMapFromFile(mFile->mapData(), mFile->heightMapData(), mFile->texMapData())) {
 	boError() << k_funcinfo << "Error loading map from " << file << endl;
 	return false;
  }
@@ -241,9 +242,25 @@ bool BosonPlayField::loadDescriptionFromFile(const QByteArray& xml)
  return true;
 }
 
-bool BosonPlayField::loadMapFromFile(const QByteArray& map, const QByteArray& heightMapImage)
+bool BosonPlayField::loadMapFromFile(const QByteArray& map, const QByteArray& heightMapImage, const QByteArray& texMap)
 {
  boDebug() << k_funcinfo << endl;
+ if (texMap.size() == 0) {
+	// there is no texmap in the file. Probably a map from boson <= 0.8
+	// convert it to our new format first.
+	boDebug() << k_funcinfo << "no texmap in file. trying to convert from boson 0.8 file format..." << endl;
+	QByteArray newMap;
+	QByteArray newTexMap;
+
+	BosonFileConverter converter;
+	converter.convertMapFile_From_0_8_To_0_9(map, &newMap, &newTexMap);
+
+	if (newTexMap.size() == 0) {
+		boError() << k_funcinfo << "empty texmap" << endl;
+		return false;
+	}
+	return loadMapFromFile(newMap, heightMapImage, newTexMap);
+ }
  if (map.size() == 0) {
 	boError() << k_funcinfo << "empty byte array for map" << endl;
 	return false;
@@ -252,19 +269,39 @@ bool BosonPlayField::loadMapFromFile(const QByteArray& map, const QByteArray& he
 	boError() << k_funcinfo << "empty height map array" << endl;
 	return false;
  }
+ // note: an empty texMap is fine - we will generate one (compatibility mode
+ // for boson < 0.9)
  delete mMap;
  mMap = new BosonMap(this);
- QDataStream stream(map, IO_ReadOnly);
- bool ret = mMap->loadMapFromFile(stream);
+ bool ret = mMap->loadMapFromFile(map);
  if (!ret) {
 	boError() << k_funcinfo << "Could not load map" << endl;
 	return false;
  }
+// boDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << "loading tex map" << endl;
+ QDataStream texMapStream(texMap, IO_ReadOnly);
+ ret = mMap->loadTexMap(texMapStream);
+ if (!ret) {
+	boError() << k_funcinfo << "Could not load map (texmap failed)" << endl;
+	return false;
+ }
+ boDebug() << k_funcinfo << "generating cells" << endl;
+ ret = mMap->generateCellsFromTexMap();
+ if (!ret) {
+	boError() << k_funcinfo << "Could not load map (cell generation failed)" << endl;
+	return false;
+ }
+
+ boDebug() << k_funcinfo << "loading height map image" << endl;
  ret = mMap->loadHeightMapImage(heightMapImage);
  if (!ret) {
 	boError() << k_funcinfo << "Could not load map (height map failed)" << endl;
 	return false;
  }
+
+
+ boDebug() << k_funcinfo << "map loaded. emitting signal" << endl;
  emit signalNewMap(mMap);
  return ret;
 }
@@ -342,9 +379,15 @@ bool BosonPlayField::savePlayField(const QString& fileName)
 	return false;
  }
  boDebug() << k_funcinfo << "Save height map done" << endl;
+ QByteArray texMap = saveTexMapToFile();
+ if (map.isEmpty()) {
+	boError() << k_funcinfo << "Unable to save texmap" << endl;
+	return false;
+ }
 
  BPFFile f(fileName, false);
  f.writeFile(QString::fromLatin1("map"), map);
+ f.writeFile(QString::fromLatin1("texmap"), texMap);
  f.writeFile(QString::fromLatin1("scenario.xml"), scenario);
  f.writeFile(QString::fromLatin1("heightmap.png"), heightMap);
  f.writeFile(QString::fromLatin1("description.xml"), description, QString::fromLatin1("C"));
@@ -378,6 +421,21 @@ QByteArray BosonPlayField::saveMapToFile()
  return file;
 }
 
+QByteArray BosonPlayField::saveTexMapToFile()
+{
+ if (!mMap) {
+	boError() << k_funcinfo << "NULL map" << endl;
+	return QByteArray();
+ }
+ QByteArray file;
+ QDataStream stream(file, IO_WriteOnly);
+ if (!mMap->saveTexMap(stream)) {
+	boError() << k_funcinfo << "Error saving texmap" << endl;
+	return QByteArray();
+ }
+ return file;
+}
+
 QString BosonPlayField::saveScenarioToFile()
 {
  if (!mScenario) {
@@ -396,6 +454,7 @@ QString BosonPlayField::saveScenarioToFile()
 
 bool BosonPlayField::loadMap(QDataStream& stream)
 {
+ boDebug() << k_funcinfo << endl;
  delete mMap;
  mMap = new BosonMap(this);
  if (!mMap->loadCompleteMap(stream)) {
@@ -406,27 +465,63 @@ bool BosonPlayField::loadMap(QDataStream& stream)
  return true;
 }
 
-void BosonPlayField::saveMap(QDataStream& stream)
+bool BosonPlayField::savePlayFieldForRemote(QDataStream& stream)
+{
+ if (!saveMap(stream)) {
+	boError() << k_funcinfo << "Could not save map" << endl;
+	return false;
+ }
+
+ // I'm not too happy about saving the complete description
+ // (including translations...) but i'm afraid we need them. in case of
+ // conflicting maps the network version will be used, then we should be
+ // able to provide the correct description, too
+ if (!saveDescription(stream)) {
+	boError() << k_funcinfo << "Could not save description" << endl;
+	return false;
+ }
+ return true;
+}
+
+bool BosonPlayField::loadPlayFieldFromRemote(QDataStream& stream)
+{
+ if (!loadMap(stream)) {
+	boError() << k_funcinfo << "Could not load map from stream" << endl;
+	return false;
+ }
+ if (!loadDescription(stream)) {
+	boError() << k_funcinfo << "Could not load description from stream" << endl;
+	return false;
+ }
+ return true;
+}
+
+bool BosonPlayField::saveMap(QDataStream& stream)
 {
  if (!mMap) {
 	boError() << k_funcinfo << "NULL map" << endl;
-	return;
+	return false;
  }
  if (!mMap->saveCompleteMap(stream)) {
 	boError() << k_funcinfo << "Unable to save map" << endl;
-	return;
+	return false;
  }
+ return true;
 }
 
-void BosonPlayField::saveDescription(QDataStream& stream)
+bool BosonPlayField::saveDescription(QDataStream& stream)
 {
- BO_CHECK_NULL_RET(mDescription);
+ if (!mDescription) {
+	BO_NULL_ERROR(mDescription);
+	return false;
+ }
  QString xml = mDescription->toString();
  if (xml.isEmpty()) {
 	boError() << k_funcinfo << "empty description string!!" << endl;
 	// don't return! this is *not* fatal!
  }
  stream << xml;
+ return true;
 }
 
 bool BosonPlayField::loadDescription(QDataStream& stream)
@@ -507,3 +602,13 @@ QString BosonPlayField::playFieldComment() const
  }
  return mDescription->comment();
 }
+
+bool BosonPlayField::importHeightMapImage(const QImage& image)
+{
+ if (!mMap) {
+	BO_NULL_ERROR(mMap);
+	return false;
+ }
+ return mMap->importHeightMapImage(image);
+}
+

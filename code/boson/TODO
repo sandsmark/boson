@@ -19,7 +19,6 @@ Game TODOs
 - "welcome to Boson" text in startup screen should be translateable (we can use
   QPainter to paint it to pixmap)
 - Do not start game before all players have loaded their data
-- BosonTiles::mTilesImage is unused in game mode. free memory
 - mark selected units, i.e. display the group number in the selectbox (and also
   in the cmd frame for every unit)
 - maybe provide UnitGroups without keyboard, too. select units, click on a
@@ -58,7 +57,6 @@ General TODOs
   version. We need the revision number of each file - how to do add this
   automatically?
   We can do this using static const char filename_id = "$Id:";
-- BosonTiles: pehaps use KPixmapSplitter (kdelibs/kdefx)
 - transmit everything on startup over network (== map, unitProperties). This
   saves us from a cheating player who (maybe just accidently) changed the files
   (units/*/index.unit especially).

@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -99,7 +99,6 @@ signals:
 	void signalLoadingPlayer(int current);
 	void signalLoadingUnitsCount(int count);
 	void signalLoadingUnit(int current);
-	void signalLoadingTile(int);
 
 protected slots:
 	void slotReceiveMap(const QByteArray&);

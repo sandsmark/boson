@@ -153,15 +153,23 @@ void EditorCommandFrame::slotSetButtonsPerRow(int b)
  d->mPlacementWidget->setButtonsPerRow(b);
 }
 
-void EditorCommandFrame::setTileSet(BosonTiles* t)
+void EditorCommandFrame::setGroundTheme(BosonGroundTheme* theme)
 {
- d->mPlacementWidget->setTileSet(t);
+#warning FIXME
+#if 0
+ d->mPlacementWidget->setTileSet(theme);
+#endif
 }
 
 void EditorCommandFrame::placeCells(CellType type)
 {
  d->mPlacementWidget->setCellType(type);
  d->mPlacementWidget->slotRedrawTiles();
+}
+
+void EditorCommandFrame::placeGround()
+{
+#warning TODO
 }
 
 void EditorCommandFrame::placeMobiles(Player* owner)

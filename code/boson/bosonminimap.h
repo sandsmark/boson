@@ -139,7 +139,8 @@ protected:
 	 * @param groundType The type of the cell. See @ref Cell::GroundType
 	 * @param version Unused
 	 **/
-	void changeCell(int x, int y, int groundType, unsigned char version);
+	void changeCell(int x, int y, int groundType, unsigned char version); // obsolete
+	void changeCell(int x, int y, Cell* cell);
 
 	/**
 	 * @return Number of horizontal cells on this map

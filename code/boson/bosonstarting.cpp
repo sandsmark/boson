@@ -37,7 +37,7 @@
 
 #include <qtimer.h>
 
-BosonStarting::BosonStarting(QObject* parent) : QObject(parent)
+BosonStarting::BosonStarting(QObject* parent) : QObject(parent, "bosonstarting")
 {
  mPlayField = 0;
  mNewPlayField = 0; // in case we are starting a new map
@@ -101,21 +101,22 @@ void BosonStarting::startNewGame()
 		loadField = mNewPlayField;
 		if (!mNewPlayField) {
 			boError() << k_funcinfo << "NULL new playfield!" << endl;
+			emit signalStartingFailed();
 			return;
 		}
 	}
 	if (!loadField) {
 		boError() << k_funcinfo << "NULL playField" << endl;
+		emit signalStartingFailed();
 		return;
 	}
-	loadField->loadPlayField(mPlayFieldId);
-	loadField->saveMap(stream);
+	if (!loadField->loadPlayField(mPlayFieldId)) {
+		boError() << k_funcinfo << "unable to load playfield " << mPlayFieldId << endl;
+		emit signalStartingFailed();
+		return;
+	}
 
-	// I'm not too happy about tranmsmitting the complete description
-	// (including translations...) but i'm afraid we need them. in case of
-	// conflicting maps the network version will be used, then we should be
-	// able to provide the correct description, too
-	loadField->saveDescription(stream);
+	loadField->savePlayFieldForRemote(stream);
 
 	// in case we are starting a new map
 	delete mNewPlayField;
@@ -183,6 +184,7 @@ void BosonStarting::slotReceiveMap(const QByteArray& buffer)
 {
  boDebug() << k_funcinfo << endl;
  if (!boGame) {
+	emit signalStartingFailed(); // TODO: display welcome widget or so
 	boError() << k_funcinfo << "NULL boson object" << endl;
 	return;
  }
@@ -203,12 +205,9 @@ void BosonStarting::slotReceiveMap(const QByteArray& buffer)
 
  emit signalLoadingType(BosonLoadingWidget::LoadMap);
  QDataStream stream(buffer, IO_ReadOnly);
- if (!mPlayField->loadMap(stream)) {
-	boError() << k_funcinfo << "Broken map file at this point?!" << endl;
-	return;
- }
- if (!mPlayField->loadDescription(stream)) {
-	boError() << k_funcinfo << "broken description" << endl;
+ if (!mPlayField->loadPlayFieldFromRemote(stream)) {
+	boError() << k_funcinfo << "Remote has sent a broken playfield stream" << endl;
+	emit signalStartingFailed(); // TODO: display welcome widget or so
 	return;
  }
  boGame->setPlayField(mPlayField);
@@ -269,15 +268,9 @@ void BosonStarting::slotLoadTiles()
  // just in case.. disconnect before connecting. the map should be newly
  // created, but i don't know if this will stay this way.
  disconnect(playField()->map(), 0, this, 0);
- connect(playField()->map(), SIGNAL(signalTilesLoading(int)), this, SIGNAL(signalLoadingTile(int)));
  checkEvents();
 
- // Note that next call doesn't return before tiles are fully loaded (because
- //  second argument is false; if it would be true, then it would return
- //  immediately). This is needed for loading saved game. GUI is
- //  still non-blocking though, because qApp->processEvents() is called while
- //  loading tiles
- playField()->map()->loadTiles(QString("earth"), false);
+ playField()->map()->loadGroundTheme(QString("earth"));
 
  boProfiling->stop(BosonProfiling::LoadTiles);
 

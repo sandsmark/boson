@@ -48,7 +48,6 @@ static KCmdLineOptions options[] =
     { "playfield <identifier>", I18N_NOOP("Playfield identifier for newgame/start editor widget"), 0 },
     { "computer <count>", I18N_NOOP("Add (currently dummy) computer player"), 0 },
     { "start", I18N_NOOP("Start the game"), 0},
-    { "noloadtiles", I18N_NOOP("Do not load tiles (debugging only)"), 0},
     { "aidelay <delay>", I18N_NOOP("Set AI delay (in seconds). The less it is, the faster AI will send it's units"), 0 },
     { "noai", I18N_NOOP("Disable AI"), 0 },
     { "indirect", I18N_NOOP("Use Indirect rendering (sloooow!!). debugging only."), 0 },
@@ -86,9 +85,6 @@ int main(int argc, char **argv)
  KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
  if (!args->isSet("sound")) {
 	boConfig->setDisableSound(true);
- }
- if (!args->isSet("loadtiles")) {
-	boConfig->setLoadTiles(false);
  }
  if (!args->isSet("ai")) {
 	boDebug() << k_funcinfo << "ai arg is not set" << endl;

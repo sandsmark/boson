@@ -173,6 +173,7 @@ void BosonMiniMap::createMap()
 
 void BosonMiniMap::slotChangeCell(int x, int y, int groundType, unsigned char version)
 {
+ boWarning() << k_funcinfo << "is obsolete" << endl;
  if (!ground()) {
 	boError() << k_funcinfo << "map not yet created" << endl;
 	return;
@@ -196,8 +197,67 @@ void BosonMiniMap::slotChangeCell(int x, int y, int groundType, unsigned char ve
  changeCell(x, y, groundType, version);
 }
 
+void BosonMiniMap::changeCell(int x, int y, Cell* cell)
+{
+ if (!cell) {
+	return;
+ }
+ BO_CHECK_NULL_RET(ground());
+ BO_CHECK_NULL_RET(map());
+ BO_CHECK_NULL_RET(map()->texMap());
+ if (x < 0 || x >= mapWidth()) {
+	return;
+ }
+ if (y < 0 || y >= mapHeight()) {
+	return;
+ }
+
+ // every cell has four corners - we mix them together to get the actual minimap
+ // color.
+ unsigned int cornerX[4] = { x, x + 1, x + 1,     x };
+ unsigned int cornerY[4] = { y,     y, y + 1, y + 1 };
+ int r = 0;
+ int g = 0;
+ int b = 0;
+ for (int j = 0; j < 4; j++) {
+	int alphaSum = 0; // sum of all textures
+	int cornerRed = 0;
+	int cornerGreen = 0;
+	int cornerBlue = 0;
+	for (unsigned int i = 0; i < map()->textureCount(); i++) {
+		int alpha = (int)map()->texMapAlpha(i, cornerX[j], cornerY[j]);
+		alphaSum += alpha;
+
+		int red = qRed(map()->miniMapColor(i));
+		int green = qGreen(map()->miniMapColor(i));
+		int blue = qBlue(map()->miniMapColor(i));
+		cornerRed += red * alpha / 255;
+		cornerGreen += green * alpha / 255;
+		cornerBlue += blue * alpha / 255;
+	}
+	if (alphaSum == 0) {
+		// nothing to do for this corner.
+		continue;
+	}
+	cornerRed = cornerRed * 255 / alphaSum;
+	cornerGreen = cornerGreen * 255 / alphaSum;
+	cornerBlue = cornerBlue * 255 / alphaSum;
+
+	r += cornerRed;
+	g += cornerGreen;
+	b += cornerBlue;
+ }
+
+ r /= 4;
+ g /= 4;
+ b /= 4;
+
+ setPoint(x, y, QColor(r, g, b));
+}
+
 void BosonMiniMap::changeCell(int x, int y, int groundType, unsigned char)
 {
+boWarning() << k_funcinfo << "is obsolete" << endl;
  if (!ground()) {
 	boError() << k_funcinfo << "map not yet created" << endl;
 	return;
@@ -388,7 +448,7 @@ void BosonMiniMap::updateCell(int x, int y)
  }
  QValueList<Unit*> list = cell->items()->units(false);
  if (list.isEmpty()) {
-	changeCell(x, y, cell->groundType(), cell->version());
+	changeCell(x, y, cell);
  } else {
 	Unit* u = list.first();
 	QPtrVector<Cell> cells;
@@ -467,7 +527,7 @@ void BosonMiniMap::slotUnfog(int x, int y)
 	makeCellList(&cells, u, u->x(), u->y());
 	moveUnit(u, &cells, 0);
  } else {
-	changeCell(x, y, cell->groundType(), cell->version());
+	changeCell(x, y, cell);
  }
 }
 
@@ -496,7 +556,9 @@ void BosonMiniMap::initFogOfWar(Player* p)
 
  // a few performance tricks...
  setUpdatesEnabled(false);
+ delete d->mGroundPainter;
  d->mGroundPainter = new QPainter(ground());
+ delete d->mUnZoomedGroundPainter;
  d->mUnZoomedGroundPainter = new QPainter(mUnZoomedGround);
  if (!p) {
 	// a NULL player means that we should display the complete map. fog of

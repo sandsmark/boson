@@ -18,6 +18,7 @@ BOSON_SRC = \
 	botooltipcreator.cpp \
 	bogltooltip.cpp \
 	bosonmap.cpp \
+	bosonfileconverter.cpp \
 	bosonscenario.cpp \
 	bosonplayfield.cpp \
 	bosoncanvas.cpp \
@@ -37,7 +38,7 @@ BOSON_SRC = \
 	editorwidget.cpp \
 	bosonglwidget.cpp \
 	bosonbigdisplaybase.cpp \
-	bosontiles.cpp \
+	bosongroundtheme.cpp \
 	bosonconfig.cpp \
 	optionsdialog.cpp \
 	optionswidgets.cpp \

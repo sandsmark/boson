@@ -897,25 +897,30 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 		addUnit(unitType, (Player*)p, x, y);
 		break;
 	}
-	case BosonMessage::MovePlaceCell:
+	case BosonMessage::MoveChangeTexMap:
 	{
-		Q_INT32 tile;
-		Q_UINT8 version;
-		Q_INT8 isBigTrans;
-		Q_INT32 x;
-		Q_INT32 y;
-
-		stream >> tile;
-		stream >> version;
-		stream >> isBigTrans;
-		stream >> x;
-		stream >> y;
-		
-		emit signalChangeCell(x, y, tile, (unsigned char)version);
-		if (isBigTrans) {
-			emit signalChangeCell(x + 1, y, tile + 1, (unsigned char)version);
-			emit signalChangeCell(x, y + 1, tile + 2, (unsigned char)version);
-			emit signalChangeCell(x + 1, y + 1, tile + 3, (unsigned char)version);
+		Q_UINT32 count;
+		stream >> count;
+		for (unsigned int i = 0; i < count; i++) {
+			Q_UINT32 x;
+			Q_UINT32 y;
+			Q_UINT32 texCount;
+			stream >> x;
+			stream >> y;
+			stream >> texCount;
+			if (texCount > 200) {
+				boError() << k_funcinfo << "more than 200 textures? invalid!" << endl;
+				break;
+			}
+			Q_UINT32* textures = new Q_UINT32[texCount];
+			Q_UINT8* alpha = new Q_UINT8[texCount];
+			for (unsigned int j = 0; j < texCount; j++) {
+				stream >> textures[j];
+				stream >> alpha[j];
+			}
+			emit signalChangeTexMap(x, y, texCount, textures, alpha);
+			delete[] textures;
+			delete[] alpha;
 		}
 		break;
 	}
@@ -1757,8 +1762,7 @@ bool Boson::saveToFile(const QString& file)
  QByteArray map;
  QDataStream stream(map, IO_WriteOnly);
  boProfiling->start(BosonProfiling::SavePlayFieldToXML);
- d->mPlayField->saveMap(stream);
- d->mPlayField->saveDescription(stream);
+ d->mPlayField->savePlayFieldForRemote(stream); // we emulate a network stream.
  boProfiling->stop(BosonProfiling::SavePlayFieldToXML);
 
  BosonProfiler writeProfiler(BosonProfiling::SaveGameToXMLWriteFile);
@@ -2151,9 +2155,10 @@ bool Boson::savegame(QDataStream& stream, bool network, bool saveplayers)
  if (gameStatus() != KGame::Init) {
 	boDebug() << k_funcinfo << "Saveing started game" << endl;
 	stream << (Q_INT8)true;
+
 	// Save map
-	d->mPlayField->saveMap(stream);
-	d->mPlayField->saveDescription(stream);
+	// We are emulating a network (remote) stream.
+	d->mPlayField->savePlayFieldForRemote(stream);
 
 	// Save local player (only id)
 	stream << d->mPlayer->id();
@@ -2254,17 +2259,14 @@ bool Boson::loadgame(QDataStream& stream, bool network, bool reset)
 	boDebug() << k_funcinfo << "Loading a previously saved game" << endl;
 	// Load map
 	BosonPlayField* f = new BosonPlayField;
-	if (!f->loadMap(stream)) {
-		boError() << k_funcinfo << "Could not load map" << endl;
-		return false;
-	}
-	if (!f->loadDescription(stream)) {
-		boError() << k_funcinfo << "Could not load map description" << endl;
+
+	// AB: we are emulating a network stream.
+	if (!f->loadPlayFieldFromRemote(stream)) {
+		boError() << k_funcinfo << "Could not load map from stream" << endl;
 		return false;
 	}
 	QDataStream mapstream(mapBuffer, IO_WriteOnly);
-	f->saveMap(mapstream);
-	f->saveDescription(mapstream);
+	f->savePlayFieldForRemote(mapstream);
 	delete f;
 
 	// Load local player's id

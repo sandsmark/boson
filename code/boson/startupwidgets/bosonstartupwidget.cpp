@@ -387,13 +387,6 @@ void BosonStartupWidget::slotLoadingUnit(int current)
  }
 }
 
-void BosonStartupWidget::slotLoadingTile(int tile)
-{
- if (loadingWidget()) {
-	loadingWidget()->setCurrentTile(tile);
- }
-}
-
 void BosonStartupWidget::slotShowNetworkOptions()
 {
  showWidget(IdNetwork);

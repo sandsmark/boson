@@ -905,14 +905,6 @@ bool BosonCanvas::canPlaceUnitAtCell(const UnitProperties* prop, const QPoint& p
  return false;
 }
 
-BosonTiles* BosonCanvas::tileSet() const
-{
- if (!d->mMap) {
-	return 0;
- }
- return d->mMap->tileSet();
-}
-
 BoItemList* BosonCanvas::allItems() const
 {
  return &d->mAllItems;
