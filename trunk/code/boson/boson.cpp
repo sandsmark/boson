@@ -157,26 +157,23 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 				unitsToMove.append(unit);
 			}
 		}
-		if(mode == GroupMoveFollow)
-		{
-			if(unitsToMove.count() == 1)
+		if(mode == GroupMoveFollow) {
+			if(unitsToMove.count() == 1) {
 				unitsToMove.first()->moveTo(pos);
-			else
-			{
+			} else {
 				Unit* unit = unitsToMove.take(0);
 				unit->moveTo(pos);
 				unit->setGroupLeader(true);
 				emit signalNewGroup(unit, unitsToMove);
 			}
-		}
-		else if(mode == GroupMoveOld)
-		{
+		} else if(mode == GroupMoveOld) {
 			Unit* unit;
-			for(unit = unitsToMove.first(); unit; unit = unitsToMove.next())
+			for(unit = unitsToMove.first(); unit; unit = unitsToMove.next()) {
 				unit->moveTo(pos);
-		}
-		else
+			}
+		} else {
 			kdError() << k_funcinfo << " : wrong GroupMoveMode : " << mode << endl;
+		}
 	}
 	case BosonMessage::MoveAttack:
 	{
@@ -472,7 +469,6 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 			kdError() << k_lineinfo << "NULL speciesTheme for " << id << endl;
 			return;
 		}
-		QColor c(color);
 		if (p->speciesTheme()->setTeamColor(QColor(color))) {
 			emit signalTeamColorChanged(p);
 		} else {
