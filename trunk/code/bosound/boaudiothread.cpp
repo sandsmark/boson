@@ -23,7 +23,6 @@
 #include "bosonaudio.h"
 #include "bosonmusic.h"
 #include "bosonsound.h"
-#include "bosonaudiointerface.h"
 #include "bodebug.h"
 
 #include <qptrqueue.h>

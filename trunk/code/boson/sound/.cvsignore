@@ -4,5 +4,5 @@ Makefile.in
 .libs
 *.moc
 *.lo
-libbosonsound.la
-libbosonsound_la_meta_unload.*
+libbosonsoundinterface.la
+libbosonsoundinterface_la_meta_unload.*

@@ -1,5 +1,5 @@
 
-COMPILE_FIRST = bodebug
+COMPILE_FIRST = bodebug bosound
 
 SUBDIRS = $(TOPSUBDIRS)
 

@@ -19,7 +19,7 @@
 #ifndef BOSONMUSIC_H
 #define BOSONMUSIC_H
 
-#include "bosonaudiointerface.h"
+#include "bosonabstractaudiointerface.h"
 
 #include <qobject.h>
 

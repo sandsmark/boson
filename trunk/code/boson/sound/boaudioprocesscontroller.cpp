@@ -21,7 +21,8 @@
 #include "boaudioprocesscontroller.moc"
 
 #include "bodebug.h"
-#include "boaudiocommand.h"
+
+#include <boaudiocommand.h>
 
 #include <kprocess.h>
 
