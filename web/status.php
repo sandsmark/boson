@@ -66,6 +66,10 @@ draw_bigbox_text("What has been changed since 0.9.1:
  <li>The game starts only once all clients have loaded their game data</li>
  <li>Units are correctly rotated, depending on the slope of the terrain that
  they're on</li>
+ <li>New pathfinding code</li>
+ <li>Resolution changing using Xrandr supported</li>
+ <li>Use vertex arrays and vertex buffer objects by default if possible. This
+ increases speed by a few FPS.</li>
 </ul>");
 /*
 draw_bigbox_text("This is a list of features that we consider as
