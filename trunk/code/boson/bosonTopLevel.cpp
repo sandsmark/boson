@@ -19,6 +19,7 @@
  ***************************************************************************/
 
 #include <qpushbutton.h>
+#include <qhbox.h>
 
 #include "common/log.h"
 #include "common/bomap.h"
@@ -36,14 +37,42 @@ bosonTopLevel::bosonTopLevel(BosonApp *parent, const char *name, WFlags f)
 	: visualTopLevel(name,f)
 	, mw(this)
 {
+
+	/* init the statusBar */
+	QLabel *label;
+	QHBox *qhb;
+	KStatusBar *ksb = statusBar();
+
+	qhb   = new QHBox(ksb, "unitsInfoBox");
+	label = new QLabel(" Mobiles : ", qhb);
+	label = new QLabel("?", qhb);
+	label = new QLabel("  Facilities : ", qhb);
+	label = new QLabel("?", qhb);
+	ksb->addWidget(qhb);
+
+	qhb   = new QHBox(ksb, "ressourcesInfoBox");
+	label = new QLabel(" Oil : ", qhb);
+	label = new QLabel("?", qhb);
+	label = new QLabel("  Minerals : ", qhb);
+	label = new QLabel("?", qhb);
+	ksb->addWidget(qhb);
+
+	ksb->insertItem( "Boson beginning", 0, 100);
+
+	qhb   = new QHBox(ksb, "pingInfoBox");
+	label = new QLabel(" Server Ping : ", qhb);
+	label = new QLabel("?", qhb);
+	ksb->addWidget(qhb);
+
+
+
+	/* .. */
 	orderType = OT_NONE;
-
 	setView(&mw, false);
-
 	connect(parent, SIGNAL(ressourcesUpdated(void)), &mw, SLOT(ressourcesUpdated(void)));
 
 	/* orders buttons */
-	for (int i=0; i< 11; i++) {
+	for (int i=0; i< 11; i++) { ///orzel : why 11, use *Nb
 		orderButton[i] = new QPushButton(mw.mainFrame, "orderButtons");
 		orderButton[i]->setGeometry( 10+(i%3)*60, 141+(i/3)*60, 55, 55);
 		orderButton[i]->hide();
