@@ -217,7 +217,7 @@ void Player::unitDestroyed(Unit* unit)
 	statistics()->addLostMobileUnit(unit);
 	d->mMobilesCount--;
  }
- if (!hasMiniMap()) {
+ if (unit->unitProperties()->supportMiniMap() && !hasMiniMap()) {
 	speciesTheme()->playSound(SoundReportMinimapDeactivated);
 	emit signalShowMiniMap(false);
  }

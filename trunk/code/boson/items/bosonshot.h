@@ -30,7 +30,7 @@ class Player;
 class BosonParticleSystem;
 class BosonWeaponProperties;
 
-class QDataStream;
+class QDomElement;
 
 
 /**
@@ -47,9 +47,10 @@ class BosonShot : public BosonItem
      **/
     BosonShot(const BosonWeaponProperties* prop, Player* owner, BosonCanvas* canvas, BoVector3 pos, BoVector3 target);
     /**
-     * Constructs new BosonShot and loads variables from stream
+     * Constructs new BosonShot without initializing it.
+     * You should call @ref loadFromXML after it.
      **/
-    BosonShot(const BosonWeaponProperties* prop, Player* owner, BosonCanvas* canvas, QDataStream& stream);
+    BosonShot(const BosonWeaponProperties* prop, Player* owner, BosonCanvas* canvas);
 
 //    inline BoVector3 pos()  { return mPos; }
 
@@ -80,6 +81,8 @@ class BosonShot : public BosonItem
     void advanceMoveInternal();
     void advanceMoveCheck();
 
+    bool saveAsXML(QDomElement& root);
+    bool loadFromXML(const QDomElement& root);
     void save(QDataStream& stream);
     void load(QDataStream& stream);
 

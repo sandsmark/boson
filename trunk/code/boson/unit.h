@@ -62,6 +62,7 @@ public:
 		IdMoveRange = UnitBase::IdLast + 5,
 		IdWantedRotation = UnitBase::IdLast + 6,
 		IdMoveAttacking = UnitBase::IdLast + 7,
+		IdSearchPath = UnitBase::IdLast + 8,
 
 		// properties in MobileUnit
 		IdSpeed = UnitBase::IdLast + 50,
@@ -407,6 +408,12 @@ protected:
 	int moveAttacking() const;
 
 	/**
+	 * @return Whether new path should be searched
+	 **/
+	int searchPath() const;
+	void setSearchPath(int search);
+
+	/**
 	 * Called when the unit wants to move to another position. It may be
 	 * possible that the heights of the cells at the new position are
 	 * different and therefore the unit needs to move in z direction and
@@ -442,13 +449,6 @@ private:
 
 	// will save us some trouble :)
 	friend class KGameUnitDebug;
-
-
-protected:
-	// FIXME: do we really need this? should it be a KGameProperty?
-	// if we really need it we should write get/set methods and not use this
-	// directly.
-	bool mSearchPath;
 };
 
 

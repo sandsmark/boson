@@ -66,6 +66,7 @@ public:
 	KGameProperty<int> mMoveRange;
 	KGameProperty<int> mWantedRotation;
 	KGameProperty<int> mMoveAttacking;
+	KGameProperty<int> mSearchPath;
 
 	// be *very* careful with those - NewGameDialog uses Unit::save() which
 	// saves all KGameProperty objects. If non-KGameProperty properties are
@@ -107,13 +108,15 @@ Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
  registerData(&d->mMoveRange, IdMoveRange);
  registerData(&d->mWantedRotation, IdWantedRotation);
  registerData(&d->mMoveAttacking, IdMoveAttacking);
-
- setAnimated(true);
+ registerData(&d->mSearchPath, IdSearchPath);
  d->mMoveDestX.setLocal(0);
  d->mMoveDestY.setLocal(0);
  d->mMoveRange.setLocal(0);
  d->mWantedRotation.setLocal(0);
  d->mMoveAttacking.setLocal(0);
+ d->mSearchPath.setLocal(0);
+
+ setAnimated(true);
 
  if (!model()) {
 	boError() << k_funcinfo << "NULL model - this will most probably crash!" << endl;
@@ -166,6 +169,7 @@ void Unit::initStatic()
  addPropertyId(IdMoveRange, QString::fromLatin1("MoveRange"));
  addPropertyId(IdWantedRotation, QString::fromLatin1("WantedRotation"));
  addPropertyId(IdMoveAttacking, QString::fromLatin1("MoveAttacking"));
+ addPropertyId(IdSearchPath, QString::fromLatin1("SearchPath"));
 
  // MobileUnit
  addPropertyId(IdSpeed, QString::fromLatin1("Speed"));
@@ -762,7 +766,7 @@ bool Unit::moveTo(float x, float y, int range, bool attack)
 
  // Do not find path here!!! It would break pathfinding for groups. Instead, we
  //  set mSearchPath to true and find path in MobileUnit::advanceMove()
- mSearchPath = true;
+ setSearchPath(1);
  setMoving(true);
 
  if (attack) {
@@ -864,6 +868,8 @@ bool Unit::saveAsXML(QDomElement& root)
  root.setAttribute(QString::fromLatin1("x"), x());
  root.setAttribute(QString::fromLatin1("y"), y());
  root.setAttribute(QString::fromLatin1("z"), z());
+ root.setAttribute(QString::fromLatin1("Rotation"), rotation());
+ // No need to store x and y rotations
 
  // store the current plugin:
  if (currentPlugin()) {
@@ -879,6 +885,8 @@ bool Unit::saveAsXML(QDomElement& root)
 	targetId = target()->id();
  }
  root.setAttribute(QString::fromLatin1("Target"), (unsigned int)targetId);
+
+ // TODO: somehow save active particle systems
 
  return true;
 }
@@ -924,21 +932,32 @@ bool Unit::loadFromXML(const QDomElement& root)
  float x;
  float y;
  float z;
+ float rotation;
  x = root.attribute(QString::fromLatin1("x")).toFloat(&ok);
  if (!ok) {
 	boError() << k_funcinfo << "Invalid value for x tag" << endl;
+	x = 0;
 	// don't stop (will be broken, but unit won't get deleted)
  }
  y = root.attribute(QString::fromLatin1("y")).toFloat(&ok);
  if (!ok) {
 	boError() << k_funcinfo << "Invalid value for y tag" << endl;
+	y = 0;
 	// don't stop (will be broken, but unit won't get deleted)
  }
  z = root.attribute(QString::fromLatin1("z")).toFloat(&ok);
  if (!ok) {
 	boError() << k_funcinfo << "Invalid value for z tag" << endl;
+	z = 0;
 	// don't stop (will be broken, but unit won't get deleted)
  }
+ rotation = root.attribute(QString::fromLatin1("Rotation")).toFloat(&ok);
+ if (!ok) {
+	boError() << k_funcinfo << "Invalid value for Rotation tag" << endl;
+	rotation = 0;
+	// don't stop (will be broken, but unit won't get deleted)
+ }
+
  int pluginIndex = 0;
  if (root.hasAttribute(QString::fromLatin1("CurrentPlugin"))) {
 	pluginIndex = root.attribute(QString::fromLatin1("CurrentPlugin")).toInt(&ok);
@@ -946,12 +965,14 @@ bool Unit::loadFromXML(const QDomElement& root)
 		boError() << k_funcinfo << "Invalid value for CurrentPlugin tag" << endl;
 		pluginIndex = 0;
 	}
+	if ((unsigned int)pluginIndex >= d->mPlugins.count()) {
+		boWarning(260) << k_funcinfo << "Invalid current plugin index: " << pluginIndex << endl;
+		pluginIndex = 0;
+	}
+	mCurrentPlugin = d->mPlugins.at(pluginIndex);
+ } else {
+	mCurrentPlugin = 0;
  }
- if ((unsigned int)pluginIndex >= d->mPlugins.count()) {
-	boWarning(260) << k_funcinfo << "Invalid current plugin index: " << pluginIndex << endl;
-	pluginIndex = 0;
- }
- mCurrentPlugin = d->mPlugins.at(pluginIndex);
 
  // note: don't use setTarget() here, as it does some additional calculations
  unsigned int targetId = 0;
@@ -972,6 +993,7 @@ bool Unit::loadFromXML(const QDomElement& root)
  }
 
  move(x, y, z);
+ setRotation(rotation);
  setAdvanceWork(advanceWork());
  return true;
 }
@@ -1300,6 +1322,16 @@ const QColor* Unit::teamColor() const
  return &owner()->teamColor();
 }
 
+int Unit::searchPath() const
+{
+ return d->mSearchPath;
+}
+
+void Unit::setSearchPath(int search)
+{
+ d->mSearchPath = search;
+}
+
 
 /////////////////////////////////////////////////
 // MobileUnit
@@ -1362,7 +1394,7 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCount) // this actually
 	return;
  }
 
- if (mSearchPath) {
+ if (searchPath()) {
 	// If we're moving with attacking, first check for any enemies in the range
 	//  This prevents units from moving on when you order them to move somewhere
 	//  but there are still enemies in the range.
@@ -1374,9 +1406,7 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCount) // this actually
 	}
 	newPath();
 	d->mPathAge = 0;
-	mSearchPath = false;
-	// Do we have to return here?
-	//return;
+	setSearchPath(0);
  }
 
  if (waypointCount() == 0) {

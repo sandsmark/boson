@@ -39,6 +39,7 @@ class BoVector3;
 
 class KPlayer;
 class QDataStream;
+class QDomElement;
 template<class T> class QPtrList;
 template<class T> class QValueList;
 template<class T> class QPtrVector;
@@ -335,8 +336,10 @@ public:
 	QMap<int, int>* workCounts() const;
 	void resetWorkCounts();
 
-	void load(QDataStream& stream);
-	void save(QDataStream& stream);
+	bool load(QDataStream& stream);
+	bool save(QDataStream& stream);
+	bool loadFromXML(const QDomElement& root);
+	bool saveAsXML(QDomElement& root);
 
 public slots:
 	/**
