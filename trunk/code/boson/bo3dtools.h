@@ -551,6 +551,19 @@ class BoVector4
     }
 
     /**
+     * Scale the vector by @p s. This is just scalar multiplication, i.e. all
+     * elements/coordinates of the vector are multiplied by @p s.
+     **/
+    inline void scale(float s)
+    {
+      mData[0] *= s; mData[1] *= s; mData[2] *= s; mData[3] *= s;
+    }
+    inline void scale(const BoVector4& v)
+    {
+      mData[0] *= v.mData[0]; mData[1] *= v.mData[1]; mData[2] *= v.mData[2]; mData[3] *= v.mData[3];
+    }
+
+    /**
      * @return A pointer to the internal array.
      **/
     inline const GLfloat* data() const { return mData; }
@@ -568,6 +581,18 @@ class BoVector4
     inline void operator=(const GLfloat* v)
     {
       set(v);
+    }
+    inline BoVector4 operator/(const BoVector4& v) const
+    {
+      return BoVector4(mData[0] / v.mData[0], mData[1] / v.mData[1], mData[2] / v.mData[2], mData[3] / v.mData[3]);
+    }
+    inline BoVector4 operator+(const BoVector4& v) const
+    {
+      return BoVector4(mData[0] + v.mData[0], mData[1] + v.mData[1], mData[2] + v.mData[2], mData[3] + v.mData[3]);
+    }
+    inline BoVector4 operator-(const BoVector4& v) const
+    {
+      return BoVector4(mData[0] - v.mData[0], mData[1] - v.mData[1], mData[2] - v.mData[2], mData[3] - v.mData[3]);
     }
     /**
      * @return The component / coordinate at @p i of this vector
@@ -1282,6 +1307,14 @@ class Bo3dTools
      * BosonBigDisplayBase. The view frustum is a 6x4 matrix
      **/
     static float sphereInFrustum(const float* viewFrustum, const BoVector3&, float radius);
+
+    /**
+     * See @ref BosonBigDisplayBase::extractFrustum for more information about this stuff.
+     *
+     * @param viewFrustum This is the viewFrustum, as it is used by @ref
+     * BosonBigDisplayBase. The view frustum is a 6x4 matrix
+     **/
+    static bool boxInFrustum(const float* viewFrustum, const BoVector3& min, const BoVector3& max);
 
     /**
      * This is similar to @ref sphereInFrustum, but will test whether the sphere

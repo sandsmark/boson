@@ -1059,6 +1059,39 @@ int Bo3dTools::sphereCompleteInFrustum(const float* viewFrustum, const BoVector3
   return 1;
 }
 
+bool Bo3dTools::boxInFrustum(const float* viewFrustum, const BoVector3& min, const BoVector3& max)
+{
+  for(int p = 0; p < 6; p++)
+  {
+    if(viewFrustum[p*4 + 0] * min.x() + viewFrustum[p*4 + 1] * min.y() +
+        viewFrustum[p*4 + 2] * min.z() + viewFrustum[p*4 + 3] > 0)
+      continue;
+    if(viewFrustum[p*4 + 0] * max.x() + viewFrustum[p*4 + 1] * min.y() +
+        viewFrustum[p*4 + 2] * min.z() + viewFrustum[p*4 + 3] > 0)
+      continue;
+    if(viewFrustum[p*4 + 0] * min.x() + viewFrustum[p*4 + 1] * max.y() +
+        viewFrustum[p*4 + 2] * min.z() + viewFrustum[p*4 + 3] > 0)
+      continue;
+    if(viewFrustum[p*4 + 0] * max.x() + viewFrustum[p*4 + 1] * max.y() +
+        viewFrustum[p*4 + 2] * min.z() + viewFrustum[p*4 + 3] > 0)
+      continue;
+    if(viewFrustum[p*4 + 0] * min.x() + viewFrustum[p*4 + 1] * min.y() +
+        viewFrustum[p*4 + 2] * max.z() + viewFrustum[p*4 + 3] > 0)
+      continue;
+    if(viewFrustum[p*4 + 0] * max.x() + viewFrustum[p*4 + 1] * min.y() +
+        viewFrustum[p*4 + 2] * max.z() + viewFrustum[p*4 + 3] > 0)
+      continue;
+    if(viewFrustum[p*4 + 0] * min.x() + viewFrustum[p*4 + 1] * max.y() +
+        viewFrustum[p*4 + 2] * max.z() + viewFrustum[p*4 + 3] > 0)
+      continue;
+    if(viewFrustum[p*4 + 0] * max.x() + viewFrustum[p*4 + 1] * max.y() +
+        viewFrustum[p*4 + 2] * max.z() + viewFrustum[p*4 + 3] > 0)
+      continue;
+    return false;
+  }
+  return true;
+}
+
 bool Bo3dTools::boProject(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, GLfloat x, GLfloat y, GLfloat z, QPoint* pos)
 {
   // AB: once again - most credits go to mesa :)
