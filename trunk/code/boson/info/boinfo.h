@@ -194,7 +194,8 @@ public:
 	void debug() const;
 
 	/**
-	 * @return A i18n'ed name for @p key
+	 * @return A i18n'ed name for @p key. If there is no name string for @p
+	 * key available i18n("(Unknown)") or something similar will be returned
 	 **/
 	static QString keyToName(int key);
 

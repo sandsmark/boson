@@ -563,6 +563,7 @@ void BoInfoDialog::resetCompleteDataPage()
  for (; it != data.end(); ++it) {
 	// FIXME: values on multiple lines are broken
 	QListViewItem* item = new QListViewItem(d->mCompleteData);
+	item->setMultiLinesEnabled(true);
 	item->setText(0, QString::number(it.key()));
 	item->setText(1, d->data()->keyToName(it.key()));
 	item->setText(2, d->data()->valueToString(it.key()));
