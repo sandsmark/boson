@@ -72,7 +72,7 @@ AC_DEFUN(AC_BOSON_HAVE_GL,
 [
 AC_HAVE_GL
 if test "$ac_cv_have_gl" = "no"; then
-  AC_MSG_ERROR([Cannot find OpenGL on your system!])
+  AC_MSG_ERROR([Cannot find OpenGL on your system! Maybe you need to install the development packages?])
 fi
 ])
 AC_BOSON_HAVE_GL
