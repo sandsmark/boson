@@ -177,6 +177,7 @@ public:
 	// we should probably make these 2 methods protected. i cant imagine any
 	// useful public use
 	bool mapCoordinates(const QPoint& pos, GLdouble* posX, GLdouble* posY, GLdouble* posZ) const;
+	bool mapDistance(int windowDistanceX, int windowDistanceY, GLdouble* dx, GLdouble* dy) const;
 	void worldToCanvas(GLfloat x, GLfloat y, GLfloat z, QPoint* pos) const;
 
 	/**
@@ -187,7 +188,7 @@ public:
 	 **/
 	void updateGLCursor();
   
-  double fps();
+	double fps() const;
 #endif
 
 public slots:
