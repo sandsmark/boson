@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -721,7 +721,7 @@ void Player::technologyResearched(ProductionPlugin*, unsigned long int id)
  // units)
  prop->applyToUnits(this);
 
- prop->apply(this);
+ applyUpgrades();
 
  ((Boson*)game())->slotUpdateProductionOptions();
  // TODO: also update unit view
@@ -849,11 +849,8 @@ bool Player::loadFromXML(const QDomElement& root)
 			continue;
 		}
 		d->mResearchedUpgrades.append(id);
-
-		// AB: note that this doesn't apply to units. they already have
-		// the correct values.
-		u->apply(this);
 	}
+	applyUpgrades();
  }
 
  if (root.hasAttribute(QString::fromLatin1("UnitPropId"))) {
@@ -957,5 +954,22 @@ void Player::emitSignalShowMiniMap(bool show)
 unsigned int Player::foggedCells() const
 {
  return d->mFoggedCount;
+}
+
+void Player::applyUpgrades()
+{
+ BO_CHECK_NULL_RET(speciesTheme());
+ boDebug(600) << k_funcinfo << endl;
+
+ // revert the effect of previous upgrade->apply() calls.
+ UpgradeProperties::resetUpgradeableUnitProperties(this);
+ UpgradeProperties::resetUpgradeableWeaponProperties(this);
+
+ // re-apply all upgrades
+ QValueList<unsigned long int>::Iterator it = d->mResearchedUpgrades.begin();
+ for (; it != d->mResearchedUpgrades.end(); ++it) {
+	UpgradeProperties* upgrade = speciesTheme()->technology(*it);
+	upgrade->apply(this);
+ }
 }
 

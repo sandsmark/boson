@@ -40,6 +40,40 @@ typedef BoVector3<bofixed> BoVector3Fixed;
 class KSimpleConfig;
 
 /**
+ * @internal
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+template<class T> class BoUpgradeableProperty
+{
+public:
+	/**
+	 * Equivalent to @ref setBaseValue
+	 **/
+	void init(T v) { setBaseValue(v); }
+
+	/**
+	 * Set the base value. This is the value that is found in the index.unit
+	 * file and should never change in the game.
+	 **/
+	void setBaseValue(T v) { mBaseValue = v; setValue(baseValue()); }
+
+	/**
+	 * Set the value of this property. It may differ from the @ref
+	 * baseValue, e.g. because of upgrades.
+	 **/
+	void setValue(T v) { mValue = v; }
+
+	T baseValue() const { return mBaseValue; }
+	T value() const { return mValue; }
+
+	operator T() const { return value(); }
+
+private:
+	T mBaseValue;
+	T mValue;
+};
+
+/**
  * Represents the config file of a unit. This holds all information about unit
  * type, such as unit's maximum health, damage it causes or armor it has.
  *
@@ -141,32 +175,32 @@ public:
 	/**
 	 * @return Default health aka power aka hitpoints of this unit.
 	 **/
-	unsigned long int health() const { return mHealth; }
+	unsigned long int health() const { return m_health; }
 
 	/**
 	 * @return The default shields value of this unit.
 	 **/
-	unsigned long int shields() const { return mShields; }
+	unsigned long int shields() const { return m_shields; }
 
 	/**
 	 * @return The default armor value of this unit.
 	 **/
-	unsigned long int armor() const { return mArmor; }
+	unsigned long int armor() const { return m_armor; }
 
 	/**
 	 * @return How much this unit costs (of your mineral account)
 	 **/
-	unsigned long int mineralCost() const { return mMineralCost; }
+	unsigned long int mineralCost() const { return m_mineralCost; }
 
 	/**
 	 * @return How much this unit costs (of your oil account)
 	 **/
-	unsigned long int oilCost() const { return mOilCost; }
+	unsigned long int oilCost() const { return m_oilCost; }
 
 	/**
 	 * return How far this unit can see. Is a number of cells
 	 **/
-	unsigned int sightRange() const { return mSightRange; }
+	unsigned int sightRange() const { return m_sightRange; }
 
 	/**
 	 * @return The Type ID of the unit. This ID is unique for this
@@ -186,12 +220,12 @@ public:
 	/**
 	 * @return If this is a mobile unit. Better use @ref Unit::isMobile()
 	 **/
-	bool isMobile() const;
+	bool isMobile() const { return !mIsFacility; }
 
 	/**
 	 * @return If this is a facility. Better use @ref Unit::isFacility()
 	 **/
-	bool isFacility() const;
+	bool isFacility() const { return mIsFacility; }
 
 	/**
 	 * @return Maximal speed of the mobile unit. 0 if this is a facility. See
@@ -282,7 +316,7 @@ public:
 	 * @return The number of @ref Unit::advance calls this unit needs
 	 * (usually) to be produced.
 	 **/
-	unsigned int productionTime() const { return mProductionTime; }
+	unsigned int productionTime() const { return m_productionTime; }
 
 	/**
 	 * @return TRUE if this unittype gives you the ability to show a
@@ -397,24 +431,18 @@ protected:
 	void saveTextureNames(KSimpleConfig* conf);
 	void saveSoundNames(KSimpleConfig* conf);
 
-	// Methods to set values. They are only meant to be used by upgrades and unit
+	// Methods to set values. They are only meant to be used by unit
 	//  editor. Don't use them unless you know what you are doing
 	void setName(const QString& name);
 	void setTypeId(unsigned long int id)  { mTypeId = id; };
 	void setUnitWidth(bofixed unitWidth)  { mUnitWidth = unitWidth; };
 	void setUnitHeight(bofixed unitHeight)  { mUnitHeight = unitHeight; };
 	void setUnitDepth(bofixed unitDepth)  { mUnitDepth = unitDepth; };
-	void setHealth(unsigned long int health)  { mHealth = health; };
-	void setSightRange(unsigned int sightRange)  { mSightRange = sightRange; };
+
 	void setProducer(unsigned int producer)  { mProducer = producer; };
-	void setProductionTime(unsigned int productionTime)  { mProductionTime = productionTime; };
-	void setMineralCost(unsigned long int mineralCost)  { mMineralCost = mineralCost; };
-	void setOilCost(unsigned long int oilCost)  { mOilCost = oilCost; };
 	void setTerrainType(TerrainType terrain)  { mTerrain = terrain; };
 	void setSupportMiniMap(bool supportMiniMap)  { mSupportMiniMap = supportMiniMap; };
 	void setRequirements(QValueList<unsigned long int> requirements);
-	void setArmor(unsigned long int armor)  { mArmor = armor; };
-	void setShields(unsigned long int shields)  { mShields = shields; };
 	void setDestroyedEffectIds(QValueList<unsigned long int> ids);
 	void setConstructedEffectIds(QValueList<unsigned long int> ids);
 	void setExplodingDamageRange(bofixed range)  { mExplodingDamageRange = range; };
@@ -424,7 +452,6 @@ protected:
 
 	// These only have effect if there is mobile or facility properties
 	void setConstructionSteps(unsigned int steps);
-	void setSpeed(bofixed speed);
 	void setAccelerationSpeed(bofixed speed);
 	void setDecelerationSpeed(bofixed speed);
 	void setRotationSpeed(int speed);
@@ -432,9 +459,6 @@ protected:
 	void setCanGoOnWater(bool c);
 
 	void clearPlugins(bool deleteweapons = true);
-
-	void createMobileProperties();
-	void createFacilityProperties();
 
 	void reset();
 
@@ -460,22 +484,30 @@ private:
 	SpeciesTheme* mTheme;
 	bool mFullMode;
 
+#define DECLAREUPGRADEABLE(type, name) \
+	public: \
+		void setUpgradedValue_##name(type value) { m_##name.setValue(value); } \
+		void resetUpgradedValue_##name() { m_##name.setValue(m_##name.baseValue()); } \
+	private: \
+		void setBaseValue_##name(type value) { m_##name.setBaseValue(value); } /* for unit editor */ \
+		BoUpgradeableProperty<type> m_##name;
+
 	unsigned long int mTypeId; // note: 0 is invalid!
 	bofixed mUnitWidth;
 	bofixed mUnitHeight;
 	bofixed mUnitDepth;
-	unsigned long int mHealth;
-	unsigned int mSightRange;
 	unsigned int mProducer;
-	unsigned int mProductionTime;
-	unsigned long int mMineralCost;
-	unsigned long int mOilCost;
 	TerrainType mTerrain;
 	bool mSupportMiniMap;
-	unsigned long int mArmor;
-	unsigned long int mShields;
 	bool mCanShootAtAirUnits;
 	bool mCanShootAtLandUnits;
+	DECLAREUPGRADEABLE(unsigned long int, health);
+	DECLAREUPGRADEABLE(unsigned long int, sightRange);
+	DECLAREUPGRADEABLE(unsigned int, productionTime);
+	DECLAREUPGRADEABLE(unsigned long int, mineralCost);
+	DECLAREUPGRADEABLE(unsigned long int, oilCost);
+	DECLAREUPGRADEABLE(unsigned long int, armor);
+	DECLAREUPGRADEABLE(unsigned long int, shields);
 	unsigned long int mMaxWeaponRange;
 	unsigned long int mMaxLandWeaponRange;
 	unsigned long int mMaxAirWeaponRange;
@@ -487,6 +519,20 @@ private:
 	bofixed mExplodingFragmentDamageRange;
 	bool mRemoveWreckageImmediately;
 
+	// for mobile units only
+	DECLAREUPGRADEABLE(bofixed, speed);
+	bofixed mAccelerationSpeed;
+	bofixed mDecelerationSpeed;
+	int mRotationSpeed;
+	bool mCanGoOnLand;
+	bool mCanGoOnWater;
+
+	// for facilities only
+	unsigned int mConstructionFrames;
+
+#undef DECLAREUPGRADEABLE
+
+	bool mIsFacility;
 	MobileProperties* mMobileProperties;
 	FacilityProperties* mFacilityProperties;
 };

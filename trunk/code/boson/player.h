@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -148,6 +148,8 @@ public:
 	unsigned long int oil() const;
 	void setMinerals(unsigned long int m);
 	void setOil(unsigned long int o);
+
+	void applyUpgrades();
 
 	/**
 	 * Initialize the map for this player - this is mostly the fog of war,

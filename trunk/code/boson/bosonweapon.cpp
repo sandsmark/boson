@@ -53,22 +53,22 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg, bool full)
   // FIXME: don't load all values for all weapon types
   mName = cfg->readEntry("Name", "");
   mShotType = (BosonShot::Type)(cfg->readNumEntry("Type", (int)BosonShot::Missile));
-  mRange = cfg->readUnsignedLongNumEntry("Range", 0);
-  mReload = cfg->readUnsignedNumEntry("Reload", 0);
-  mSpeed = (cfg->readDoubleNumEntry("Speed", 0)) / 48.0f;
-  if(mSpeed == 0 && mShotType == BosonShot::Missile)
+  m_range.init(cfg->readUnsignedLongNumEntry("Range", 0));
+  m_reloadingTime.init(cfg->readUnsignedNumEntry("Reload", 0));
+  m_speed.init((cfg->readDoubleNumEntry("Speed", 0)) / 48.0f);
+  if(speed() == 0 && mShotType == BosonShot::Missile)
   {
     boWarning() << k_funcinfo << "Type is missile, but speed is 0, setting type to bullet" << endl;
     mShotType = BosonShot::Bullet;
   }
   mAccelerationSpeed = (cfg->readDoubleNumEntry("AccelerationSpeed", 0.2)) / 48.0f;
-  mDamage = cfg->readUnsignedLongNumEntry("Damage", 0);
-  mDamageRange = cfg->readDoubleNumEntry("DamageRange", 1);
-  mFullDamageRange = cfg->readDoubleNumEntry("FullDamageRange", 0.25 * mDamageRange);
-  if(mFullDamageRange > mDamageRange)
+  m_damage.init(cfg->readUnsignedLongNumEntry("Damage", 0));
+  m_damageRange.init(cfg->readDoubleNumEntry("DamageRange", 1));
+  m_fullDamageRange.init(cfg->readDoubleNumEntry("FullDamageRange", 0.25 * m_damageRange));
+  if(m_fullDamageRange > m_damageRange)
   {
     boWarning() << k_funcinfo << "FullDamageRange must not be bigger than DamageRange!" << endl;
-    mFullDamageRange = mDamageRange;
+    m_fullDamageRange.init(m_damageRange);
   }
   mCanShootAtAirUnits = cfg->readBoolEntry("CanShootAtAirUnits", false);
   mCanShootAtLandUnits = cfg->readBoolEntry("CanShootAtLandUnits", false);
@@ -114,12 +114,12 @@ void BosonWeaponProperties::savePlugin(KSimpleConfig* cfg)
 {
   // Group must have been set before
   cfg->writeEntry("Name", mName);
-  cfg->writeEntry("Range", mRange);
-  cfg->writeEntry("Reload", mReload);
-  cfg->writeEntry("Speed", mSpeed * 48.0f);
+  cfg->writeEntry("Range", range());
+  cfg->writeEntry("Reload", reloadingTime());
+  cfg->writeEntry("Speed", speed() * 48.0f);
   cfg->writeEntry("AccelerationSpeed", mAccelerationSpeed * 48.0f);
-  cfg->writeEntry("Damage", mDamage);
-  cfg->writeEntry("DamageRange", mDamageRange);
+  cfg->writeEntry("Damage", damage());
+  cfg->writeEntry("DamageRange", damageRange());
   cfg->writeEntry("CanShootAtAirUnits", mCanShootAtAirUnits);
   cfg->writeEntry("CanShootAtLandUnits", mCanShootAtLandUnits);
   cfg->writeEntry("Height", (double)mHeight);
@@ -135,13 +135,13 @@ void BosonWeaponProperties::savePlugin(KSimpleConfig* cfg)
 void BosonWeaponProperties::reset()
 {
   mName = "";
-  mRange = 0;
-  mReload = 0;
-  mSpeed = 0;
+  m_range.init(0);
+  m_reloadingTime.init(0);
+  m_speed.init(0);
   mAccelerationSpeed = 0;
-  mDamage = 0;
-  mDamageRange = 1;
-  mFullDamageRange = 0.25 * mDamageRange;
+  m_damage.init(0);
+  m_damageRange.init(1);
+  m_fullDamageRange.init(0.25 * m_damageRange);
   mCanShootAtAirUnits = false;
   mCanShootAtLandUnits = false;
   mHeight = 0.25;
