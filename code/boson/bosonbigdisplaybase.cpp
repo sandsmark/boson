@@ -1551,11 +1551,11 @@ void BosonBigDisplayBase::removeSelectionRect(bool replace)
 	QPoint canvasPos;
 	worldToCanvas(x, y, z, &canvasPos);
 	Unit* unit = 0l;
-	if (!localPlayer()->isFogged(canvasPos.x() / BO_TILE_SIZE, canvasPos.x() / BO_TILE_SIZE)) {
-	unit = canvas()->findUnitAt(canvasPos);
+	if (!localPlayer()->isFogged(canvasPos.x() / BO_TILE_SIZE, canvasPos.y() / BO_TILE_SIZE)) {
+		unit = canvas()->findUnitAt(canvasPos);
 	}
 	if (unit) {
-		boDebug() << k_funcinfo << "unit" << endl;
+		boDebug() << k_funcinfo << "select unit at " << canvasPos.x() << "," << canvasPos.y() << " (canvas)" << endl;
 		selectSingle(unit, replace);
 		// cannot be placed into selection() cause we don't have localPlayer
 		// there
