@@ -18,7 +18,7 @@ sub getval() {
 	#print "Facility Name: $name\n";
 	#print "Filesystem Level: $level\n";
 	
-	# I know that is not good, but it is enough for now
+	# I know that this is not the best way, but it is enough for now
 	if ($level == 1) {
 		$data_level_addon = "../../";
 		$doc_level_addon = "./";
@@ -58,8 +58,6 @@ sub getval() {
 			$line =~ s/\s//g;
 			$line2 =~ s/\s//g;
 			$line2 =~ tr/\n//d;
-			#print $line2;
-			#print $line;
 			#print "trying: $line <--> $line2\n";
 			if ($line =~ /^$line2=\s*(\w+)/ ) {
 				$value = $1;

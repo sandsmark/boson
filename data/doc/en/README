@@ -28,9 +28,9 @@ footer.wml
 
 
 ----------
-Perl
+eperl
 ----------
-Some parts of the handbook are using perl to get some "live data"
+Some parts of the handbook are using perl to get "live data"
 This is also done through wml. You can add perl simply like this:
 <:
 $test = "<tr><td>TEST</td></tr>";
@@ -39,6 +39,25 @@ print $test
 Everything that goes to stdout will be included in the html file.
 Stderr will end in a wml error.
 
+
+----------
+facilities
+----------
+We use wml and perl to get the properties of the buildings and units.
+You can find the call of perl in every facilitiy doc file:
+<:
+use get_values;
+
+# ( facility type, facility name, filesystem level )
+get_values->getval("fix", "warfactory", 2);
+:>
+We import get_values (get_values.pm) and than we call the getval method.
+The first param is the facility type, fix == building | mob == unit
+The name, you need to enter the name that is used for the folder where the index.desktop file is
+The filesystem level is needed to add some ../ to the path. A maximum of 3 is supported at the moment, 1 is ./
+
+You can define the values which will be writen to the html files in values.list.
+If you wonder where we set @INC: bmann hacked am_edit, we set $PERLLIB during make.
 
 
 
