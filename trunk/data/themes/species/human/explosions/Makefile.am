@@ -13,7 +13,7 @@ install-data-local:
 			rm -rf $(DESTDIR)$(explosionsdir)/$$i;\
 		fi ;\
 		echo "installing $$i" ;\
-		mkdir $(DESTDIR)$(explosionsdir)/$$i ;\
+		mkdir -p $(DESTDIR)$(explosionsdir)/$$i ;\
 		files=`cd $(srcdir)/$$i && ls -1d *` ;\
 		for f in $$files; do \
 			if test -f $(srcdir)/$$i/$$f; then \
