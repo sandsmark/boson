@@ -64,8 +64,6 @@ protected:
 	unsigned int pointCount() const;
 	unsigned int facesCount() const;
 
-	static float angle(const BoFace& face1, const BoFace& face2);
-
 	/**
 	 * @return The face @p _face from the full-detailed LOD.
 	 **/
