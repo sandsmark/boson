@@ -32,6 +32,51 @@ class QPixmap;
 class KPlayer;
 
 /**
+ * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
+ **/
+class BoOrderWidget : public QWidget
+{
+	Q_OBJECT
+public:
+	BoOrderWidget(bool editor, QWidget* parent);
+	~BoOrderWidget();
+
+	void ensureButtons(unsigned int number);
+
+	/**
+	 * Hide all buttons
+	 **/
+	void hideOrderButtons();
+	void setButtonsPerRow(int);
+
+	void setOrderButtons(QValueList<int> produceList, Player* owner, Facility* factory = 0);
+
+	void showUnit(Unit* unit); // TODO if this is the only unit -> use slotShowSingleUnit
+
+	void productionAdvanced(Unit* factory, double percentage);
+
+
+	void initEditor();
+	void editorLoadTiles(const QString& fileName);
+	void setOrderType(int);
+
+protected:
+	void resetLayout();
+
+public slots:
+	void slotRedrawTiles();
+
+signals:
+	void signalProduceUnit(int unitType);
+	void signalStopProduction(int unitType);
+	void signalPlaceCell(int groundType);
+
+private:
+	class BoOrderWidgetPrivate;
+	BoOrderWidgetPrivate* d;
+};
+
+/**
  * @short The frame where you can order units
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
  **/
@@ -68,11 +113,11 @@ public slots:
 	void slotShowSingleUnit(Unit* unit);
 
 	/**
-	 * Set the orderbuttons to display the possible production of this
-	 * unit. Hide all buttons if none are possible
+	 * Sets e.g. the order buttons of possible production items, if this is
+	 * a factory.
 	 * @param unit The selected unit
 	 **/
-	void slotSetProduction(Unit* unit);
+	void slotSetAction(Unit* unit);
 
 	/**
 	 * Called by @ref Editor when selecting a menu entry. Uses @ref
@@ -122,43 +167,15 @@ signals:
 	void signalCellSelected(int groundType);
 
 protected slots:
-	/**
-	 * If the order buttons should currently display tiles (cells) this
-	 * updates the buttons.
-	 **/
-	void slotRedrawTiles();
-
 	void slotProduceUnit(int unitType);
 	void slotStopProduction(int unitType);
 
 	void slotUpdate();
 
 protected:
-	void productionAdvanced(Unit* factory, double percentage);
-
-	/**
-	 * Set the orderbuttons to containt a list of producable units.
-	 * @param produceList A list containing UnitTypeIDs.
-	 * @param owner The owner of the producable units
-	 * @param factory if NULL all buttons will be enabled. if non-NULL only
-	 * the producable items are enabled. So if the factory already produces,
-	 * e.g. item #2, then all except #2 are disabled.
-	 **/
-	void setOrderButtons(QValueList<int> produceList, Player* owner, Facility* factory = 0);
-
-	/**
-	 * Make sure that at least @p count order buttons exist. 
-	 **/
-	void initOrderButtons(unsigned int count);
-
-	/**
-	 * Hide all buttons
-	 **/
-	void hideOrderButtons();
-
-	void resetLayout();
-
 	virtual void resizeEvent(QResizeEvent*);
+
+	void hideActions();
 
 private:
 	void init();

@@ -1050,7 +1050,6 @@ void BosonWidget::initBigDisplay(BosonBigDisplay* b)
 	kdError() << k_funcinfo << "NULL display" << endl;
 	return;
  }
-// BosonBigDisplay* b = new BosonBigDisplay(d->mCanvas, d->mDisplayManager);
  connect(b, SIGNAL(signalMakeActive(BosonBigDisplay*)), 
 		this, SLOT(slotSetActiveDisplay(BosonBigDisplay*)));
  b->setLocalPlayer(d->mLocalPlayer);
@@ -1069,8 +1068,8 @@ void BosonWidget::initBigDisplay(BosonBigDisplay* b)
 	connect(input, SIGNAL(signalMouseEvent(QMouseEvent*, bool*)), 
 			b, SLOT(slotEditorMouseEvent(QMouseEvent*, bool*)));
  } else {
-	connect(b, SIGNAL(signalSingleUnitSelected(Unit*)),
-			d->mCommandFrame, SLOT(slotSetProduction(Unit*)));
+//	connect(b, SIGNAL(signalSingleUnitSelected(Unit*)),
+//			d->mCommandFrame, SLOT(slotSetAction(Unit*)));
 	addMouseIO(b);
  }
 		
@@ -1237,9 +1236,13 @@ void BosonWidget::slotSetActiveDisplay(BosonBigDisplay* display)
 	if (old) {
 		disconnect(d->mMiniMap, SIGNAL(signalMoveSelection(int, int)),
 				old, SLOT(slotMoveSelection(int, int)));
+		disconnect(old, SIGNAL(signalSingleUnitSelected(Unit*)),
+				d->mCommandFrame, SLOT(slotSetAction(Unit*)));
 	}
 	connect(d->mMiniMap, SIGNAL(signalMoveSelection(int, int)),
 			display, SLOT(slotMoveSelection(int, int)));
+	connect(display, SIGNAL(signalSingleUnitSelected(Unit*)),
+			d->mCommandFrame, SLOT(slotSetAction(Unit*)));
  }
 
 
