@@ -88,6 +88,11 @@ static QString getDescrFromNum(unsigned int _num)
     return QString::null;
 
   QString filename(locate("config","bodebug.areas"));
+  if (filename.isEmpty()) {
+    qDebug("oops - bodebug.areas not found! check your installation!");
+    QMessageBox::critical( 0L, i18n("Fatal error"), i18n("bodebug.areas not found!\nCheck your installation!"));
+    exit(1);
+  }
   QFile file(filename);
   if (!file.open(IO_ReadOnly)) {
     qWarning("Couldn't open %s", filename.local8Bit().data());
