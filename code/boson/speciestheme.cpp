@@ -434,8 +434,11 @@ QValueList<const UnitProperties*> SpeciesTheme::allUnits() const
  return list;
 }
 
-QStringList SpeciesTheme::allObjects() const
+QStringList SpeciesTheme::allObjects(QStringList* files) const
 {
+ if (files) {
+	*files = QStringList();
+ }
  QString fileName = themePath() + QString::fromLatin1("objects/objects.boson");
  if (!KStandardDirs::exists(fileName)) {
 	boDebug() << k_funcinfo << "no objects.boson file found" << endl;
@@ -444,7 +447,22 @@ QStringList SpeciesTheme::allObjects() const
  }
 
  KSimpleConfig cfg(fileName);
- QStringList objects = cfg.groupList();
+ QStringList groups = cfg.groupList();
+
+ // all groups must have a File entry
+ QStringList objects;
+ for (unsigned int i = 0; i < groups.count(); i++) {
+		cfg.setGroup(groups[i]);
+		if (!cfg.hasKey(QString::fromLatin1("File"))) {
+			boError() << k_funcinfo << "group " << groups[i] << " has no File key" << endl;
+		} else {
+			objects.append(groups[i]);
+			if (files) {
+				QString file = cfg.readEntry(QString::fromLatin1("File"));
+				files->append(file);
+			}
+		}
+ }
  if (objects.isEmpty()) {
 	boWarning() << k_funcinfo << "No objects found in objects file (" << fileName << ")" << endl;
  }
