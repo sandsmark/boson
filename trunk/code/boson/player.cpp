@@ -72,6 +72,13 @@ Player::Player() : KPlayer()
  setAsyncInput(true);
  connect(this, SIGNAL(signalNetworkData(int, const QByteArray&, Q_UINT32, KPlayer*)),
 		this, SLOT(slotNetworkData(int, const QByteArray&, Q_UINT32, KPlayer*)));
+
+ KGamePropertyBase* propName = dataHandler()->find(KGamePropertyBase::IdName);
+ if (propName) {
+	propName->setPolicy(KGamePropertyBase::PolicyClean);
+ } else {
+	boError() << k_funcinfo << "can't find name property" << endl;
+ }
 // TODO d->mFogged.registerData() or something like this
  d->mMinerals.registerData(IdMinerals, dataHandler(),
 		KGamePropertyBase::PolicyLocal, "MineralCost");
