@@ -714,8 +714,6 @@ void BosonBigDisplayBase::paintGL()
  glPushMatrix();
 
 
-
- // Render fog
  renderFog();
 
  // first render the cells.
@@ -798,8 +796,6 @@ void BosonBigDisplayBase::paintGL()
  }
  glEnable(GL_TEXTURE_2D);
 
-
- // Disable fog
  glDisable(GL_FOG);
  boProfiling->renderText(true); // AB: actually this is text and cursor and selectionrect and minimap
 
@@ -1508,11 +1504,12 @@ void BosonBigDisplayBase::renderParticles()
  }
 
  /// Draw particles
+ glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_CURRENT_BIT);
  glEnable(GL_DEPTH_TEST);
  glDepthMask(GL_FALSE);
  glEnable(GL_TEXTURE_2D);
  glEnable(GL_BLEND);
- glDisable(GL_LIGHTING); // warning: this functions leaves light at *disabled* !
+ glDisable(GL_LIGHTING);
  glDisable(GL_NORMALIZE);
 
  // Matrix stuff for aligned particles
@@ -1590,10 +1587,10 @@ void BosonBigDisplayBase::renderParticles()
  }
  glEnd();
 
- glColor4ub(255, 255, 255, 255); // Reset color
+ // reset values
+ glColor4ub(255, 255, 255, 255);
  glDepthMask(GL_TRUE);
- glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
- glDisable(GL_BLEND);
+ glPopAttrib();
 
  if (checkError()) {
 	boError() << k_funcinfo << "OpenGL error" << endl;
@@ -1611,7 +1608,7 @@ void BosonBigDisplayBase::renderFog()
 		fogeffects.append((BosonEffectFog*)allIt.current());
 	}
  }
- if(!fogeffects.isEmpty()) {
+ if (!fogeffects.isEmpty()) {
 	BosonEffectFog* f = fogeffects.first();
 	glEnable(GL_FOG);
 	glFogfv(GL_FOG_COLOR, f->color().data());
