@@ -57,7 +57,6 @@
 #include <kstdgameaction.h>
 #include <kaction.h>
 #include <kkeydialog.h>
-#include <kmenubar.h>
 #include <kmessagebox.h>
 #include <kconfig.h>
 #include <kstandarddirs.h>
@@ -87,7 +86,6 @@ public:
 		mBosonWidget = 0;
 
 		mActionStatusbar = 0;
-		mActionMenubar = 0;
 
 		mStarting = 0;
 
@@ -102,7 +100,6 @@ public:
 	BosonWidgetBase* mBosonWidget;
 
 	KToggleAction* mActionStatusbar;
-	KToggleAction* mActionMenubar;
 
 	QTimer mStatusBarTimer;
 
@@ -274,8 +271,6 @@ void TopWidget::initKActions()
 // (void)KStdGameAction::quit(this, SLOT(close()), actionCollection());
 
  // Settings
- (void)KStdAction::keyBindings(this, SLOT(slotConfigureKeys()), actionCollection());
- d->mActionMenubar = KStdAction::showMenubar(this, SLOT(slotToggleMenubar()), actionCollection());
  d->mActionStatusbar = KStdAction::showStatusbar(this, SLOT(slotToggleStatusbar()), actionCollection());
  (void)new KAction(i18n("Maximal entries per event..."), KShortcut(), this,
 		SLOT(slotChangeMaxProfilingEventEntries()), actionCollection(), "options_profiling_max_event_entries");
@@ -289,8 +284,6 @@ void TopWidget::initKActions()
 		SLOT(slotDebugKGame()), actionCollection(), "debug_kgame");
 
  createGUI("topui.rc", false);
-
- hideMenubar();
 }
 
 void TopWidget::initBoson()
@@ -612,7 +605,6 @@ void TopWidget::reinitGame()
  d->mActionStatusbar->setChecked(false);
  slotToggleStatusbar();
  enableGameActions(false);
- showHideMenubar();
 }
 
 void TopWidget::slotGameOver()
@@ -635,26 +627,6 @@ void TopWidget::slotToggleStatusbar()
  } else {
 	statusBar()->hide();
  }
-}
-
-// FIXME: nonsense name. this doesn't toggle anything, but it applies the
-// d->mActionMenubar status to the actual menubar
-void TopWidget::slotToggleMenubar()
-{
- if (boGame->gameStatus() != KGame::Init) {
-	if (boGame->gameMode()) {
-		// editor without menubar is pretty useless :)
-		boConfig->setShowMenubarInGame(d->mActionMenubar->isChecked());
-	}
- } else if (mMainDock->getWidget() == d->mStartup) {
-	// note: startup can be on top during the game as well, e.g. when
-	// loading/saving a game.
-	// but at this point it is really a startup widget.
-	boConfig->setShowMenubarOnStartup(d->mActionMenubar->isChecked());
- } else {
-	boError() << k_funcinfo << "Game in init status but no startup widget on top?!" << endl;
- }
- showHideMenubar();
 }
 
 bool TopWidget::queryClose()
@@ -721,41 +693,6 @@ void TopWidget::slotUpdateStatusBar()
  emit signalUnitsUpdated(stat->itemCount(RTTI::UnitStart));
  emit signalShotsUpdated(stat->itemCount(RTTI::Shot));
 }
-
-void TopWidget::hideMenubar()
-{
- d->mActionMenubar->setChecked(false);
- menuBar()->hide();
-}
-
-void TopWidget::showMenubar()
-{
- d->mActionMenubar->setChecked(true);
- menuBar()->show();
-}
-
-void TopWidget::showHideMenubar()
-{
- if (!boGame) {
-	boError() << k_funcinfo << "NULL game object" << endl;
-	return;
- }
- if (boGame->gameStatus() != KGame::Init) {
-	// we always display menu in editor mode (pretty useless without it)
-	if (boConfig->showMenubarInGame() || !boGame->gameMode()) {
-		showMenubar();
-	} else {
-		hideMenubar();
-	}
- } else {
-	if (boConfig->showMenubarOnStartup()) {
-		showMenubar();
-	} else {
-		hideMenubar();
-	}
- }
-}
-
 
 
 void TopWidget::changeLocalPlayer(Player* p)
@@ -912,8 +849,6 @@ void TopWidget::slotGameStarted()
  enableGameActions(true);
  d->mStatusBarTimer.start(1000);
  d->mBosonWidget->initGameMode();
-
- showHideMenubar(); // depends on boGame->gameStatus()
 }
 
 void TopWidget::slotResetGame()
