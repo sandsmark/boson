@@ -8,6 +8,7 @@ class Cell;
 class Unit;
 class Boson;
 class QDomElement;
+class QStringList;
 
 class BosonMapPrivate;
 
@@ -52,6 +53,11 @@ public:
 	int maxPlayers() const;
 	unsigned int minPlayers() const;
 	QString worldName() const;
+
+	/**
+	 * @return All valid map files. The list contains the .desktop files.
+	 **/
+	static QStringList availableMaps();
 
 	/**
 	 * Load the specified map from a file

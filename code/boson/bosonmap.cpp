@@ -49,6 +49,9 @@ BosonMap::BosonMap(const QString& fileName)
 
 BosonMap::~BosonMap()
 {
+ if (d->mCells) {
+	delete[] d->mCells;
+ }
  delete d;
 }
 
@@ -621,5 +624,24 @@ Cell* BosonMap::cell(int x, int y) const
 	return 0;
  }
  return &d->mCells[ x + y * width() ];
+}
+
+QStringList BosonMap::availableMaps()
+{
+ QStringList list = KGlobal::dirs()->findAllResources("data", 
+		"boson/map/*.desktop");
+ if (list.isEmpty()) {
+	kdError() << "Cannot find any map?!" << endl;
+	return list;
+ }
+ QStringList validList;
+ for (unsigned int i = 0; i < list.count(); i++) {
+	QString fileName = list[i].left(list[i].length() -  strlen(".desktop"));
+	fileName += QString::fromLatin1(".bpf");
+	if (QFile::exists(fileName)) {
+		validList.append(list[i]);
+	}
+ }
+ return validList;
 }
 

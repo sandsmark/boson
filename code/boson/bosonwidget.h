@@ -28,20 +28,16 @@ public:
 	 **/
 	virtual ~BosonWidget();
 
-//	void setLocalPlayer(Player* p);
-
 	void addLocalPlayer();
 	void addComputerPlayer(const QString& name);
 
 	void startEditor();
-	void startGame();
 
 public slots:
 	void slotDebug();
 	void slotNewGame();
 	void slotPreferences();
 	void slotEndGame();
-//	void slotConnect();
 
 	void slotLoadMap(const QString& map);
 	void slotLoadScenario(const QString& scenario);
@@ -58,6 +54,7 @@ signals:
 	void signalPlayerLeftGame(KPlayer* p); // used by the map editor
 
 protected:
+	void startScenario();
 	void changeLocalPlayer(Player* p);
 	virtual void keyReleaseEvent(QKeyEvent* e);
 
@@ -67,7 +64,7 @@ protected:
 	 * Delete an existing @ref BosonMap object and create a new one. You
 	 * will have to call @ref BosonMap::loadMap before using it!
 	 **/
-	void clearMap();
+	void recreateMap();
 
 	void addEditorCommandFrame();
 	void addGameCommandFrame();

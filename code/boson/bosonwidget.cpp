@@ -219,7 +219,7 @@ void BosonWidget::addComputerPlayer(const QString& name)
 void BosonWidget::slotPlayerJoinedGame(KPlayer* p)
 {
  if (!p) {
-	kdError() << "NULL player" << endl;
+	kdError() << "BosonWidget::slotPlayerJoinedGame(): NULL player" << endl;
 	return;
  }
  // BosonBigDisplay knows whether a unit was selected. If a unit changed forward
@@ -280,6 +280,10 @@ void BosonWidget::slotNewGame()
  connect(bosonConfig, SIGNAL(signalStartGame()), this, SLOT(slotStartGame()));
  connect(bosonConfig, SIGNAL(signalAddComputerPlayer()), 
 		this, SLOT(slotAddComputerPlayer()));
+ connect(bosonConfig, SIGNAL(signalMapChanged(const QString&)), 
+		this, SLOT(slotLoadMap(const QString&)));
+ connect(bosonConfig, SIGNAL(signalScenarioChanged(const QString&)), 
+		this, SLOT(slotLoadScenario(const QString&)));
 
  // add a chat widget
  dialog->addGameConfig(bosonConfig);
@@ -299,41 +303,55 @@ void BosonWidget::slotNewGame()
 
  // show the dialog
  dialog->show();
+ bosonConfig->slotMapChanged(0);
 }
 
 void BosonWidget::slotStartGame()
 {
- if (!d->mBoson->isServer()) {
-	kdWarning() << "not server" << endl;
+ if (!d->mBoson->isAdmin()) {
+	KMessageBox::sorry(this, i18n("Only ADMIN can start the game"));
+	kdWarning() << "not admin" << endl;
 	return;
  }
- if (d->mBoson->gameStatus() == KGame::Run) {
+ if (d->mBoson->isRunning()) {
+	KMessageBox::sorry(this, i18n("The game is already running"));
 	kdWarning() << "game already running" << endl;
 	return;
  }
- // it would be great this way:
- // - new game dialog gives the possibility to select a map. The selected map is
- // first shown as a preview
- // - as soon as a map is actually selected (by the admin aka server) it is also
- // loaded. The dialog is not yet closed (non-modal!).
- // - the player can now scroll on the final map and decide whether he actually
- // wants to play this map
- // - then he selects "start game" which calls this slot. Here the selected map
- // is transmitted over network (we assume that the tileset is available on all
- // clients!!)
- // - as soon as all clients receive the map they load it. The local
- // (admin/server) client should not load the map again - but it wouldn't hurt
- // as long as the already loaded one is being unloaded.
- // - then the game is actually started.
- // load default map
+ if (d->mBoson->playerCount() < d->mBoson->minPlayers()) { 
+	KMessageBox::sorry(this, i18n("Need at least %1 players").arg(d->mBoson->minPlayers()));
+	kdError() << "not enough players" << endl;
+	return;
+ }
+ if (d->mBoson->maxPlayers() > 0 && (int)d->mBoson->playerCount() > d->mBoson->maxPlayers()) { 
+	KMessageBox::sorry(this, i18n("Maximal %1 players").arg(d->mBoson->maxPlayers()));
+	kdError() << "too many players" << endl;
+	return;
+ }
 
- // first step - load the map. We don't provide several maps to be selected in
- // our newgame dialog so this here must be enough. Should be replaced by a
- // signal in newgamedialog.
- kdDebug() << "BosonWidget::slotStartGame(): load default map" << endl;
- slotLoadMap(BosonMap::defaultMap()); // also sends over network
- slotLoadScenario(BosonScenario::defaultScenario()); // perhaps this should load the map as well - as it depends on the map...
+ startScenario();
+ d->mBoson->startGame();
+}
 
+void BosonWidget::startScenario()
+{
+ kdDebug() << "start scenario" << endl;
+ d->mScenario->startScenario(d->mBoson);
+
+ // TODO as soon as it is implemented the map file should also contain the
+ // species of the player. The NewGameDialog should enable the player to choose
+ // the desired species and especially the color. This selection should be
+ // stored as a KGameProperty. When this (slotReceiveMap()) is called we can
+ // read (1) the map-specie and (2) the player's selection. And according to
+ // these settings the correct theme should be loaded. 
+ // We have to ensure that the files are actually available *before* the game 
+ // is started!!
+ // UPDATE (01/11/19): should be in scenario file!
+ for (unsigned int i = 0; i < d->mBoson->playerCount(); i++) {
+	QRgb color = SpeciesTheme::defaultColor();
+	QString species = "human";
+	((Player*)d->mBoson->playerList()->at(i))->loadTheme(species, color);
+ }
 }
 
 void BosonWidget::slotPreferences()
@@ -355,16 +373,15 @@ void BosonWidget::slotPreferences()
 void BosonWidget::slotAddUnit(VisualUnit* unit, int, int)
 {
  if (!unit) {
-	kdError() << "NULL unit" << endl;
+	kdError() << "BosonWidget::slotAddUnit(): NULL unit" << endl;
 	return;
  }
  Player* player = unit->owner();
  if (!player) {
-	kdError() << "NULL owner" << endl;
+	kdError() << "BosonWidget::slotAddUnit(): NULL owner" << endl;
 	return;
  }
  d->mUnitTips->add(unit->type(), player->speciesTheme()->unitProperties(unit)->name()); // doesn't add if this tip was added before
-
 }
 
 void BosonWidget::quitGame()
@@ -400,7 +417,7 @@ void BosonWidget::slotEditorConstructionChanged(int index)
  d->mCommandFrame->slotEditorConstruction(index, d->mLocalPlayer);
 }
 
-void BosonWidget::clearMap() // TODO: rename - recreate map or so
+void BosonWidget::recreateMap()
 {
  if (d->mMap) {
 	delete d->mMap;
@@ -435,14 +452,6 @@ void BosonWidget::addGameCommandFrame()
 		d->mCommandFrame, SLOT(slotSetConstruction(VisualUnit*)));
 }
 
-void BosonWidget::startGame()
-{
-//TODO
- kdDebug() << "BosonWidget::startGame()" << endl;
- addLocalPlayer();
-
-}
-
 void BosonWidget::startEditor()
 {
  // this manages the mouse input for bosonBigDisplay. In non-editor mode this is
@@ -461,27 +470,30 @@ void BosonWidget::startEditor()
  // load default map
  // FIXME: should be loaded by a dialog!
  slotLoadMap(BosonMap::defaultMap());
- 
+ slotLoadScenario(BosonScenario::defaultScenario()); // perhaps this should load the map as well - as it depends on the map...
+
+ // TODO: d->mScenario->startScenario(d->mBoson); // wait for map from network
+ d->mBoson->startGame(); // AB: working here?
 }
 
 void BosonWidget::slotLoadMap(const QString& map)
 {
- if (!d->mBoson->isServer()) {
-	kdWarning() << "BosonWidget::slotLoadMap(): not server" << endl;
+// the map is first loaded locally from the file. Then the data is sent over
+// network. It is initialized (i.e. the cells are shown in the canvas) when the
+// data is received from network, in slotReceiveMap()
+ if (!d->mBoson->isAdmin()) {
+	kdWarning() << "BosonWidget::slotLoadMap(): not ADMIN" << endl;
 	return;
  }
- if (!d->mMap) {
-	clearMap();
- }
+ recreateMap();
  // load the map into d->mMap
- kdDebug() << "load default map" << endl;
+ kdDebug() << "load map " << map << endl;
  if (!d->mMap->loadMap(map)) {
 	return;
  }
 
  QByteArray buffer;
  QDataStream stream(buffer, IO_WriteOnly);
- stream << QString("earth.png"); // FIXME: don't send a QString!! -> i18n!!
  d->mMap->saveMapGeo(stream);
  d->mMap->saveCells(stream);
 
@@ -494,26 +506,24 @@ void BosonWidget::slotLoadMap(const QString& map)
 
 void BosonWidget::slotLoadScenario(const QString& scenario)
 {
- if (!d->mBoson->isServer()) {
-	kdWarning() << "BosonWidget::slotLoadScenario(): not server" << endl;
+ if (!d->mBoson->isAdmin()) {
+	kdWarning() << "BosonWidget::slotLoadScenario(): not ADMIN" << endl;
 	return;
  }
  if (d->mScenario) {
-	kdWarning() << "already loaded a scenario! delete it ... " << endl;
 	delete d->mScenario;
  }
  d->mScenario = new BosonScenario;
  d->mScenario->loadScenario(scenario);
+ d->mBoson->setMinPlayers(d->mScenario->minPlayers());
+ d->mBoson->setMaxPlayers(d->mScenario->maxPlayers());
 }
 
 void BosonWidget::slotReceiveMap(const QByteArray& buffer)
 {
  QDataStream stream(buffer, IO_ReadOnly);
- QString tiles;
- stream >> tiles; // FIXME: don't send as QString!
- if (!d->mMap) {
-	clearMap();
- }
+ recreateMap();
+ QString tiles = "earth.png"; // TODO: should be selectable
  d->mMap->loadMapGeo(stream);
  d->mMap->loadCells(stream);
 
@@ -521,32 +531,10 @@ void BosonWidget::slotReceiveMap(const QByteArray& buffer)
  kdDebug() << "Editor mode: load tiles" << endl;
  d->mCommandFrame->slotEditorLoadTiles(tiles); // FIXME: do not load if not in editor mode
 
- // TODO as soon as it is implemented the map file should also contain the
- // species of the player. The NewGameDialog should enable the player to choose
- // the desired species and especially the color. This selection should be
- // stored as a KGameProperty. When this (slotReceiveMap()) is called we can
- // read (1) the map-specied and (2) the player's selection. And according to
- // these settings the correct theme should be loaded. 
- // We have to ensure that the files are actually available *before* the game 
- // is started!!
- for (unsigned int i = 0; i < d->mBoson->playerCount(); i++) {
-	QRgb color = SpeciesTheme::defaultColor();
-	((Player*)d->mBoson->playerList()->at(i))->loadTheme("human", color);
- }
-
  kdDebug() << "init map" << endl;
  d->mMiniMap->initMap();
  d->mCanvas->initMap(tiles);
 
- if (d->mBoson->isServer()) {
-	// add player units
-	kdDebug() << "start scenario" << endl;
-	d->mScenario->startScenario(d->mBoson);
-
-	// FIXME: we have too many functions called "startGame"!
-	// now start the game
-	d->mBoson->startGame();
- }
  kdDebug() << "slotReceiveMap done" << endl;
 }
 
