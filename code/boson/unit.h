@@ -265,6 +265,12 @@ public:
 	void removeProduction(); // removes first item
 
 	/**
+	 * Remove first occurance of unitType in the production list. Does not
+	 * remove anything if unitType is not in the list.
+	 **/
+	void removeProduction(int unitType);
+
+	/**
 	 * Add unitType (see @ref UnitProprties::typeId) to the construction
 	 * list.
 	 **/

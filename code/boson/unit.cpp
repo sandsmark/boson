@@ -918,6 +918,17 @@ void Facility::removeProduction()
  d->mProductionState = 0; // start next production (if any)
 }
 
+void Facility::removeProduction(int unitType)
+{
+ for (unsigned int i = 0; i < d->mProductions.count(); i++) {
+	if (d->mProductions[i] == unitType) {
+		kdDebug() << k_funcinfo << "remove " << unitType << endl;
+		d->mProductions.remove(d->mProductions.at(i));
+		return;
+	}
+ }
+}
+
 QValueList<int> Facility::productionList() const
 {
  return d->mProductions;

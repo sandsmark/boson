@@ -19,7 +19,8 @@
 
 #include "commandinput.h"
 
-#include "bosoncommandwidget.h"
+//#include "bosoncommandwidget.h"
+#include "bosoncommandframe.h"
 #include "bosonmessage.h"
 #include "unitbase.h"
 
@@ -27,17 +28,6 @@
 #include <kgame/kplayer.h>
 
 #include "commandinput.moc"
-
-class CommandInput::CommandInputPrivate
-{
-public:
-	CommandInputPrivate()
-	{
-	}
-	
-	
-};
-
 
 CommandInput::CommandInput() : KGameIO()
 {
@@ -48,6 +38,16 @@ CommandInput::CommandInput(KPlayer* player) : KGameIO(player)
 
 CommandInput::~CommandInput()
 {
+}
+
+void CommandInput::setCommandFrame(BosonCommandFrame* f)
+{
+ connect(f, SIGNAL(signalProduceUnit(int, UnitBase*, KPlayer*)),
+		this, SLOT(slotProduceUnit(int, UnitBase*, KPlayer*)));
+ connect(f, SIGNAL(signalStopProduction(int, UnitBase*, KPlayer*)),
+		this, SLOT(slotStopProduction(int, UnitBase*, KPlayer*)));
+// connect(d->mCommandFrame, SIGNAL(signalCellSelected(int)),
+//		this, SLOT(slotPlaceCell(int)));
 }
 
 void CommandInput::slotProduceUnit(int unitType, UnitBase* factory, KPlayer* owner)
@@ -65,7 +65,6 @@ void CommandInput::slotProduceUnit(int unitType, UnitBase* factory, KPlayer* own
 	return;
  }
  if (!factory) {
-	// FIXME: this is possible if we use CommandInput for Editor mode!
 	kdError() << k_funcinfo << "NULL factory" << endl;
 	return;
  }
@@ -81,6 +80,34 @@ void CommandInput::slotProduceUnit(int unitType, UnitBase* factory, KPlayer* own
  sendInput(msg);
 }
 
-void CommandInput::slotPlaceCell(int) // obsolete
+void CommandInput::slotStopProduction(int unitType, UnitBase* factory, KPlayer* owner)
 {
+ if (!player()) {
+	kdError() << k_funcinfo << "NULL player" << endl;
+	return;
+ }
+ if (!game()) {
+	kdError() << k_funcinfo << "NULL game" << endl;
+	return;
+ }
+ if (!owner) {
+	kdError() << k_funcinfo << "NULL owner" << endl;
+	return;
+ }
+ if (!factory) {
+	kdError() << k_funcinfo << "NULL factory" << endl;
+	return;
+ }
+ kdDebug() << k_funcinfo << endl;
+ QByteArray b;
+ QDataStream stream(b, IO_WriteOnly);
+ stream << (Q_UINT32)BosonMessage::MoveProduceStop;
+ stream << (Q_UINT32)owner->id();
+ stream << (Q_UINT32)factory->id();
+ stream << (Q_INT32)unitType;
+
+ QDataStream msg(b, IO_ReadOnly);
+ sendInput(msg);
+
 }
+

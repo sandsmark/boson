@@ -43,6 +43,7 @@ public:
 		MoveAttack = 101, // a unit is being attacked
 		MoveBuild = 102, // build a unit - better name: MovePlace. This is used when the unit was produces and is now placed on the ground
 		MoveProduce = 103, // start to produce a unit. Sent when a cmd widget is clicked
+		MoveProduceStop = 104, // stop a production. Either pause it or abort it completely
 
 
 		// the last message ID:

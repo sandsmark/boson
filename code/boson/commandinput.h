@@ -22,6 +22,7 @@
 #include <kgame/kgameio.h>
 
 class UnitBase;
+class BosonCommandFrame;
 
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
@@ -34,18 +35,14 @@ public:
 	CommandInput();
 	virtual ~CommandInput();
 
+	void setCommandFrame(BosonCommandFrame*);
+
 	virtual int rtti() const { return 125; } // just any unique number
 
-//	void addCommandWidget(BosonCommandWidget* w);
-//	void removeCommandWidget(BosonCommandWidget* w);
-	
 protected slots:
-	void slotPlaceCell(int tile); // do we use CommandInput for the editor?
+//	void slotPlaceCell(int tile); // we don't use CommandInput for the editor
 	void slotProduceUnit(int unitType, UnitBase* factory, KPlayer* owner);
-
-private:
-	class CommandInputPrivate;
-	CommandInputPrivate* d;
+	void slotStopProduction(int unitType, UnitBase* factory, KPlayer* owner);
 };
 
 #endif

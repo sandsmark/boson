@@ -97,6 +97,7 @@ signals:
 	 * Emitted when a unit should be produced.
 	 **/
 	void signalProduceUnit(int unitType, UnitBase* factory, KPlayer* owner);
+	void signalStopProduction(int unitType, UnitBase* factory, KPlayer* owner);
 
 	/**
 	 * @param groundType The tile number. See @ref BosonTiles::tile to get
@@ -112,6 +113,7 @@ protected slots:
 	void slotRedrawTiles();
 
 	void slotProduceUnit(int unitType);
+	void slotStopProduction(int unitType);
 
 	void slotProductionAdvanced(Unit* factory, double percentage);
 

@@ -58,84 +58,86 @@ class BoProgress : public KGameProgress
 		}
 };
 
-class BoButton : public QPushButton
+
+QSize BoButton::sizeHint() const
 {
-public:
-	BoButton(QWidget* p) : QPushButton(p)
-	{
-		mGrayOut = false;
-		mProductionCount = 0;
-	}
+ // there is a *lot* of code in the QPushButton implementation
+ // -> hope this is enough for our needs...
+ if (!pixmap()) {
+	return QSize(0, 0);
+ }
+ return QSize(pixmap()->width(), pixmap()->height());
+}
 
-	virtual QSize sizeHint() const
-	{
-		// there is a *lot* of code in the QPushButton implementation
-		// -> hope this is enough for our needs...
-		if (!pixmap()) {
-			return QSize(0, 0);
-		}
-		return QSize(pixmap()->width(), pixmap()->height());
-	}
-	void setGrayOut(bool g)
-	{
-		mGrayOut = g;
-		setPixmap(mPixmap);
-	}
+void BoButton::setGrayOut(bool g)
+{
+ mGrayOut = g;
+ setPixmap(mPixmap);
+}
 
-	virtual void setPixmap(const QPixmap& pix)
-	{
-		mPixmap = pix;
-		if (mGrayOut) {
-			KPixmap p(pix);
-			KPixmapEffect::desaturate(p, 1.0);
-			if (mProductionCount > 0) {
-				addProductionCount(&p);
-			}
-			QPushButton::setPixmap(p);
-		} else {
-			QPixmap p(pix);
-			if (mProductionCount > 0) {
-				addProductionCount(&p);
-			}
-			QPushButton::setPixmap(p);
-		}
+void BoButton::setPixmap(const QPixmap& pix)
+{
+ mPixmap = pix;
+ if (mGrayOut) {
+	KPixmap p(pix);
+	KPixmapEffect::desaturate(p, 1.0);
+	if (mProductionCount > 0) {
+		addProductionCount(&p);
 	}
+	QPushButton::setPixmap(p);
+ } else {
+	QPixmap p(pix);
+	if (mProductionCount > 0) {
+		addProductionCount(&p);
+	}
+	QPushButton::setPixmap(p);
+ }
+}
 
-	void setProductionCount(int c)
-	{
-		mProductionCount = c;
-		QPixmap p(mPixmap);
-		if (mProductionCount > 0) {
-			addProductionCount(&p);
-		}
-		QPushButton::setPixmap(p);
-	}
-protected:
-	virtual void drawButton(QPainter* p)
-	{
-		// we want to have a *visible* pixmap - not just a gray pixmap!
-		bool e = isEnabled();
-		clearWState(WState_Disabled);
-		drawButtonLabel(p);
-		if (!e) {
-			setWState(WState_Disabled);
-		}
-	}
+void BoButton::setProductionCount(int c)
+{
+ mProductionCount = c;
+ QPixmap p(mPixmap);
+ if (mProductionCount > 0) {
+	addProductionCount(&p);
+ }
+ QPushButton::setPixmap(p);
+}
 
-	void addProductionCount(QPixmap* pix)
-	{
-		QPainter painter(pix);
-		painter.setPen(black);
-		painter.setBrush(black);
-		painter.drawText(5, 5 + painter.fontMetrics().height(), QString::number(mProductionCount));
-		painter.end();
-	}
+void BoButton::drawButton(QPainter* p)
+{
+ // we want to have a *visible* pixmap - not just a gray pixmap!
+ bool e = isEnabled();
+ clearWState(WState_Disabled);
+ drawButtonLabel(p);
+ if (!e) {
+	setWState(WState_Disabled);
+ }
+}
 
-private:
-	bool mGrayOut;
-	int mProductionCount;
-	QPixmap mPixmap; // FIXME: this means addiditional memory space for *every* command button!!!
-};
+void BoButton::mouseReleaseEvent(QMouseEvent* e)
+{
+ QPushButton::mouseReleaseEvent(e);
+ if (e->isAccepted()) {
+	return;
+ }
+ if (e->button() == RightButton) {
+	if (hitButton(e->pos())) {
+		emit rightClicked();
+	}
+ }
+}
+
+void BoButton::addProductionCount(QPixmap* pix)
+{
+ QPainter painter(pix);
+ painter.setPen(black);
+ painter.setBrush(black);
+ painter.drawText(5, 5 + painter.fontMetrics().height(),
+		QString::number(mProductionCount));
+ painter.end();
+}
+
 
 class BosonCommandWidget::BosonCommandWidgetPrivate
 {
@@ -184,6 +186,7 @@ BosonCommandWidget::BosonCommandWidget(QWidget* parent) : QWidget(parent)
  QHBoxLayout* displayLayout = new QHBoxLayout(display);
  d->mPixmap = new BoButton(display);
  connect(d->mPixmap, SIGNAL(clicked()), this, SLOT(slotClicked()));
+ connect(d->mPixmap, SIGNAL(rightClicked()), this, SLOT(slotRightClicked()));
  displayLayout->addWidget(d->mPixmap);
 
  d->mHealth = new BoProgress(display);
@@ -350,6 +353,17 @@ void BosonCommandWidget::slotClicked()
 		break;
 	default:
 		kdError() << "Unknown Command Type " << commandType() << endl;
+		break;
+ }
+}
+
+void BosonCommandWidget::slotRightClicked()
+{
+ switch (commandType()) {
+	case CommandUnit:
+		emit signalStopProduction(unitType());
+		break;
+	default:
 		break;
  }
 }

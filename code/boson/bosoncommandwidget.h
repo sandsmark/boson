@@ -20,6 +20,7 @@
 #define __BOSONCOMMANDWIDGET_H__
 
 #include <qwidget.h>
+#include <qpushbutton.h>
 
 class Unit;
 class Player;
@@ -107,6 +108,8 @@ signals:
 	 **/
 	void signalProduceUnit(int unitType);
 
+	void signalStopProduction(int unitType);
+
 protected:
 	virtual void displayUnitPixmap(Unit* unit);
 	virtual void displayUnitPixmap(int unitType, Player* owner);
@@ -115,10 +118,43 @@ protected:
 
 protected slots:
 	void slotClicked();
+	void slotRightClicked();
 	
 private:
 	class BosonCommandWidgetPrivate;
 	BosonCommandWidgetPrivate* d;
+};
+
+class BoButton : public QPushButton
+{
+	Q_OBJECT
+public:
+	BoButton(QWidget* p) : QPushButton(p)
+	{
+		mGrayOut = false;
+		mProductionCount = 0;
+	}
+	
+	virtual QSize sizeHint() const;
+
+	virtual void setPixmap(const QPixmap& p);
+
+	void setProductionCount(int c);
+	void setGrayOut(bool g);
+
+signals:
+	void rightClicked();
+
+protected:
+	virtual void drawButton(QPainter*);
+	virtual void mouseReleaseEvent(QMouseEvent*);
+
+	void addProductionCount(QPixmap* pix);
+	
+private:
+	bool mGrayOut;
+	int mProductionCount;
+	QPixmap mPixmap; // FIXME: this means addiditional memory space for *every* command button!!!
 };
 
 #endif
