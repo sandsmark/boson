@@ -39,6 +39,18 @@ template<class T, class T2> class QMap;
 template<class T> class QPtrList;
 template<class T> class QValueList;
 
+
+/**
+ * Little helper class to store all textures and number of them for particle system
+ * @author Rivo Laks <rivolaks@hot.ee>
+ **/
+class BosonParticleTextureArray
+{
+  public:
+    int mTextureCount;
+    GLuint* mTextureIds;
+};
+
 /**
  * @author Rivo Laks <rivolaks@hot.ee>
  **/
@@ -66,13 +78,12 @@ class BosonParticleSystemProperties
     static QPtrList<BosonParticleSystemProperties> loadParticleSystemProperties(QValueList<unsigned long int> ids, SpeciesTheme* theme);
 
   protected:
-    static void addTexture(const QString& name);
-    static GLuint texture(const QString& name);
-
-  protected:
-    static QMap<QString, GLuint> mTextures;
+    static QMap<QString, BosonParticleTextureArray> mTextureArrays;
     static KRandomSequence* mRandom;
     static QString mTexturePath;
+
+  protected:
+    static BosonParticleTextureArray getTextures(const QString& name);
 
   private:
     /*float mMinXVelo, mMinYVelo, mMinZVelo;
@@ -85,9 +96,9 @@ class BosonParticleSystemProperties
     float mMinLife, mMaxLife;
     int mMaxNum, mInitNum;
     int mGLBlendFunc;
-    float mRate, mSize, mAge;
+    float mRate, mStartSize, mEndSize, mAge;
     bool mAlign;
-    QString mTextureName;
+    BosonParticleTextureArray mTextures;
     unsigned long int mId;
 };
 

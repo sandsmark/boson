@@ -65,7 +65,7 @@ void BosonParticle::update(float elapsed)
 /*****  BosonParticleSystem  *****/
 
 BosonParticleSystem::BosonParticleSystem(int maxnum, int initialnum, float size,
-    float createrate, bool align, float maxradius, int texture,
+    float createrate, bool align, float maxradius, BosonParticleTextureArray textures,
     BoVector4 color, float particleage, float age, BoVector3 pos, BoVector3 velo,
     const BosonParticleSystemProperties* prop)
 {
@@ -79,7 +79,7 @@ BosonParticleSystem::BosonParticleSystem(int maxnum, int initialnum, float size,
   mCreateRate = createrate;
   mAlign = align;
   mRadius = maxradius;
-  mTexture = texture;
+  mTextures = textures;
   mColor = color;
   mPos = pos;
   mParticleAge = particleage;
@@ -91,7 +91,7 @@ BosonParticleSystem::BosonParticleSystem(int maxnum, int initialnum, float size,
 }
 
 BosonParticleSystem::BosonParticleSystem(int maxnum,
-    float createrate, bool align, float maxradius, int texture,
+    float createrate, bool align, float maxradius, BosonParticleTextureArray textures,
     const BosonParticleSystemProperties* prop)
 {
   //cout << k_funcinfo << "CREATING PARTICLE SYSTEM.  maxnum: " <<  maxnum <<
@@ -101,7 +101,7 @@ BosonParticleSystem::BosonParticleSystem(int maxnum,
   mCreateRate = createrate;
   mAlign = align;
   mRadius = maxradius;
-  mTexture = texture;
+  mTextures = textures;
   mSize = 0;
   mParticleAge = 0;
   mAge = 3600;
@@ -200,6 +200,8 @@ void BosonParticleSystem::update(float elapsed)
   }
 }
 
+//#define NEW_TRANFORM_CODE
+
 void BosonParticleSystem::draw()
 {
 //  boDebug() << "PARTICLE:" << "        " << k_funcinfo << "drawing " << mNum << " particles" << endl;
@@ -212,7 +214,6 @@ void BosonParticleSystem::draw()
 
   // Some variables first
   BoVector3 nw, ne, sw, se;  // Coordinates of particle vertexes
-  float size = mSize / 2.0;
   
   // Matrix transformations first
   glPushMatrix();
@@ -222,6 +223,10 @@ void BosonParticleSystem::draw()
   glRotatef(mRot[2], 0.0, 0.0, 1.0);
 
   // Align if needed
+#ifdef NEW_TRANFORM_CODE
+  BoMatrix matrix(GL_MODELVIEW_MATRIX);
+#else
+  float size = mSize / 2.0;
   if(mAlign)
   {
     float mat[4][4];
@@ -243,17 +248,18 @@ void BosonParticleSystem::draw()
     se.set(size, size, 0);
     sw.set(-size, size, 0);
   }
+#endif
 
   // Update particles
 //  int num = 0;
 //  boDebug() << "PARTICLE:" << "        " << k_funcinfo << "translating by (" << mPos[0] << ", " << mPos[1] << ", " << mPos[2] << ")" << endl;
-  glBindTexture(GL_TEXTURE_2D, mTexture);
   glBlendFunc(mBlendFunc[0], mBlendFunc[1]);
   
   // FIXME: between glBegin() and glEnd() there should be as little code as
   // possible, i.e. try to get around the loop and so.
   // FIXME: can't we use a display list here?
   // FIXME: maybe we can use vertex arrays here?
+  GLuint lasttex = 0;
   glBegin(GL_QUADS);
   for(int i = 0; i < mMaxNum; i++)
   {
@@ -265,11 +271,28 @@ void BosonParticleSystem::draw()
 
     BoVector3 a, b, c, d;  // Vertex positions
 
+#ifdef NEW_TRANFORM_CODE
+    BoVector3 center;
+    matrix.transform(&center, &(mParticles[i].pos));
+
+    a = center + BoVector3(-mParticles[i].size, mParticles[i].size, 0);
+    b = center + BoVector3(mParticles[i].size, mParticles[i].size, 0);
+    c = center + BoVector3(mParticles[i].size, -mParticles[i].size, 0);
+    d = center + BoVector3(-mParticles[i].size, -mParticles[i].size, 0);
+#else
     a.setScaledSum(mParticles[i].pos, nw, mParticles[i].size);
     b.setScaledSum(mParticles[i].pos, ne, mParticles[i].size);
     c.setScaledSum(mParticles[i].pos, se, mParticles[i].size);
     d.setScaledSum(mParticles[i].pos, sw, mParticles[i].size);
+#endif
 
+    if(lasttex != mParticles[i].tex)
+    {
+      // This is ugly but it makes things faster
+      glEnd();
+      glBindTexture(GL_TEXTURE_2D, mParticles[i].tex);  // FIXME: multiple textures support!!!
+      glBegin(GL_QUADS);
+    }
     glColor4fv(mParticles[i].color.data());
     glTexCoord2f(0.0, 1.0);  glVertex3fv(a.data());
     glTexCoord2f(1.0, 1.0);  glVertex3fv(b.data());
@@ -291,6 +314,7 @@ void BosonParticleSystem::initParticle(BosonParticle* particle)
   particle->pos.reset();
   particle->size = mSize;
   particle->velo = mVelo;
+  particle->tex = mTextures.mTextureIds[0];
   if(mProp)
   {
     mProp->initParticle(this, particle);
