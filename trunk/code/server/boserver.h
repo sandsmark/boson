@@ -65,8 +65,9 @@ class BosonServer : public KMainWindow, public boFile
   void	handleDialogMessage(uint playerId, bosonMsgTag, int, bosonMsgData *);
   void	playerHasDied(uint playerId);
 
-  void		placeMob(serverMobUnit *);
-  void		placeFix(serverFacility *);
+	void		placeMob(serverMobUnit *);
+	void		placeFix(serverFacility *);
+	groundType	groundAt(QPoint pos) {return cell(pos.x(), pos.y()).ground(); }
 
   protected:
   void	initLog(void);
@@ -95,7 +96,7 @@ class BosonServer : public KMainWindow, public boFile
 
   bool		loadGround();
   bool		loadUnits();
-  serverCell	&cell(int x, int y) {return cells[ x + y * map_width ]; }
+	serverCell	&cell(int x, int y) {return cells[ x + y * map_width ]; }
   
   serverState	state;
   KServerSocket	*socket;
