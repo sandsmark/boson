@@ -474,6 +474,13 @@ public:
 	 **/
 	void renderBoundingObject();
 
+	/**
+	 * Render a point for every vertex. The points are not connected
+	 * and can therefore be used to see where vertices are, while the
+	 * mesh is rendered as usual using @ref renderMesh.
+	 **/
+	void renderVertexPoints(unsigned int lod = 0);
+
 	void loadDisplayList(const QColor* teamColor, bool reload = false);
 	GLuint displayList(unsigned int lod) const;
 

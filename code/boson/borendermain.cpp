@@ -43,6 +43,7 @@
 #include <kpopupmenu.h>
 #include <kstandarddirs.h>
 #include <kdialogbase.h>
+#include <kinputdialog.h>
 
 #include <qtimer.h>
 #include <qhbox.h>
@@ -127,6 +128,9 @@ ModelPreview::ModelPreview(QWidget* parent) : BosonGLWidget(parent)
  connect(this, SIGNAL(signalLODChanged(int)), this, SLOT(slotLODChanged(int)));
 
  setMinimumSize(200, 200);
+
+ boConfig->addDynamicEntry(new BoConfigBoolEntry(boConfig, "ShowVertexPoints", true));
+ boConfig->addDynamicEntry(new BoConfigUIntEntry(boConfig, "VertexPointSize", 3));
 }
 
 ModelPreview::~ModelPreview()
@@ -433,11 +437,15 @@ void ModelPreview::renderMeshSelection()
  mesh->renderBoundingObject();
  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
  glColor3ub(0, 255, 0);
-#if 0
- glDisable(GL_DEPTH_TEST);
- mesh->renderVertexRects();
- glEnable(GL_DEPTH_TEST);
-#endif
+
+ if (boConfig->boolValue("ShowVertexPoints")) {
+	float size = (float)boConfig->uintValue("VertexPointSize", 3);
+	glPointSize(size);
+	glDisable(GL_DEPTH_TEST);
+	mesh->renderVertexPoints();
+	glEnable(GL_DEPTH_TEST);
+ }
+
  glEnable(GL_TEXTURE_2D);
  glPopMatrix();
  glColor3ub(255, 255, 255);
@@ -1019,6 +1027,22 @@ void RenderMain::slotDebugSpecies()
  dialog->show();
 }
 
+void RenderMain::slotVertexPointSize()
+{
+ bool ok = false;
+ unsigned int size = boConfig->uintValue("VertexPointSize");
+ size = (unsigned int)KInputDialog::getInteger(i18n("Vertex point size"),
+		i18n("Vertex point size (in pixels)"),
+		(int)size, 0, 500, 1, 10, &ok, this);
+ if (ok) {
+	boConfig->setUIntValue("VertexPointSize", size);
+ }
+}
+
+void RenderMain::slotShowVertexPoints(bool s)
+{
+ boConfig->setBoolValue("ShowVertexPoints", s);
+}
 
 SpeciesTheme* RenderMain::findTheme(const QString& theme) const
 {
@@ -1140,6 +1164,14 @@ void RenderMain::initKAction()
 	selectObject->setItems(s->allObjects());
  }
 
+ KToggleAction* vertexPoints = new KToggleAction(i18n("Show vertex points"),
+		0, 0, 0,
+		actionCollection(), "options_show_vertex_points");
+ connect(vertexPoints, SIGNAL(toggled(bool)), this, SLOT(slotShowVertexPoints(bool)));
+ vertexPoints->setChecked(boConfig->boolValue("ShowVertexPoints"));
+ (void)new KAction(i18n("Vertex point size..."), 0, this,
+		SLOT(slotVertexPointSize()),
+		actionCollection(), "options_vertex_point_size");
  (void)new KAction(i18n("Debug &Models"), 0, this, SLOT(slotDebugModels()),
 		actionCollection(), "debug_models");
  (void)new KAction(i18n("Debug &Species"), 0, this, SLOT(slotDebugSpecies()),

@@ -278,6 +278,8 @@ protected slots:
 	void slotObjectChanged(int);
 	void slotDebugModels();
 	void slotDebugSpecies();
+	void slotVertexPointSize();
+	void slotShowVertexPoints(bool);
 
 private:
 	PreviewConfig* mConfig;
