@@ -215,7 +215,6 @@ protected:
 	void setViewport(int x, int y, GLsizei w, GLsizei h);
 
 	void setCamera(const Camera& c);
-	void setCameraPos(GLfloat x, GLfloat y, GLfloat z);
 	GLfloat cameraX() const;
 	GLfloat cameraY() const;
 	GLfloat cameraZ() const;
