@@ -1071,7 +1071,7 @@ void BosonBigDisplayBase::renderParticles()
  BosonParticleSystem* s;
  while ((s = it.current()) != 0) {
 	++it;
-	boDebug(150) << k_funcinfo << "System: " << s << "; radius: " << s->boundingSphereRadius() << endl;
+	//boDebug(150) << k_funcinfo << "System: " << s << "; radius: " << s->boundingSphereRadius() << endl;
 	if (sphereInFrustum(s->position(), s->boundingSphereRadius())) {
 #warning FIXME
 		// FIXME: this is wrong: parts of particle system may be visible even if it's center point isn't
@@ -1176,10 +1176,17 @@ void BosonBigDisplayBase::renderParticles()
 		betweenbeginend = true;
 	}
 
-	a = p->pos + ((-x + y) * p->size);
-	b = p->pos + (( x + y) * p->size);
-	c = p->pos + (( x - y) * p->size);
-	e = p->pos + ((-x - y) * p->size);
+  if (p->system->mAlign) {
+		a = p->pos + ((-x + y) * p->size);
+		b = p->pos + (( x + y) * p->size);
+		c = p->pos + (( x - y) * p->size);
+		e = p->pos + ((-x - y) * p->size);
+	} else {
+		a = p->pos + (BoVector3(-0.5, 0.5, 0.0) * p->size);
+		b = p->pos + (BoVector3(0.5, 0.5, 0.0) * p->size);
+		c = p->pos + (BoVector3(0.5, -0.5, 0.0) * p->size);
+		e = p->pos + (BoVector3(-0.5, -0.5, 0.0) * p->size);
+	}
 
 	glColor4fv(p->color.data());  // Is it worth to cache color as well?
 	glTexCoord2f(0.0, 1.0);  glVertex3fv(a.data());
