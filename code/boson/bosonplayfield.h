@@ -45,16 +45,11 @@ public:
 	~BosonPlayField();
 
 	/**
-	 * Preload all playFields into memory. Note that this will consume pretty much
-	 * memory, so once a map is started all other maps should be cleared
-	 * again.
+	 * Load the important data (description for example) from the playField.
+	 * Use @ref loadPlayField to load <em>all</em> data. preLoadPlayField is
+	 * much faster than @ref loadPlayField.
 	 **/
-	static bool preLoadAllPlayFields();
-
-	/**
-	 * Clear all preloaded playfields (see @ref preLoadAllPlayFields)
-	 **/
-	static void clearAllPreLoadedPlayFields();
+	bool preLoadPlayField(const QString& identifier);
 
 	/**
 	 * Load all data from the playField. Needs to be done only once - when
@@ -88,35 +83,11 @@ public:
 	QByteArray exportTexMap(unsigned int texture) const;
 
 	/**
-	 * Load the important data (description for example) from the playField.
-	 * Use @ref loadPlayField to load <em>all</em> data. preLoadPlayField is
-	 * much faster than @ref loadPlayField.
-	 **/
-	bool preLoadPlayField(const QString& identifier);
-
-	/**
 	 * Remember to call @ref applyScenario first! The @ref
 	 * BosonMap is updated automatically whenever a cell is added, but the
 	 * unit list is not.
 	 **/
 	bool savePlayField(const QString& fileName);
-
-	void applyScenario(Boson* boson);
-
-	/**
-	 * @return The default playfield which is meant to be used if the player
-	 * didn't select a playfield at all
-	 **/
-	static QString defaultPlayField();
-
-	/**
-	 * This simply deletes the map. This may be useful for game starting, as
-	 * the ADMIN already has the map, but all other players don't. So the
-	 * ADMIN might send the map over network and delete his local copy, so
-	 * that it is ensured the entire loading code is the same on all
-	 * clients, i.e. without a map until it is received.
-	 **/
-	void deleteMap();
 
 	// AB: rename to savePlayFieldForRemote() if possible
 	bool saveAdminPlayField(QDataStream& stream) const;
@@ -125,15 +96,6 @@ public:
 	// AB: do we still need these?
 	bool savePlayFieldForRemote(QDataStream& stream) const;
 	bool loadPlayFieldFromRemote(QDataStream& stream);
-
-	BosonMap* map() const { return mMap; }
-	BosonScenario* scenario() const { return mScenario; }
-	BPFDescription* description() const { return mDescription; }
-	const QString& identifier() const { return mIdentifier; }
-
-	void quit();
-
-	bool modified() const;
 
 	/**
 	 * Make @p map the new map of this playfield. Called by the editor
@@ -152,6 +114,26 @@ public:
 	 * only.
 	 **/
 	void changeDescription(BPFDescription* d);
+
+	BosonMap* map() const { return mMap; }
+	BosonScenario* scenario() const { return mScenario; }
+	BPFDescription* description() const { return mDescription; }
+	const QString& identifier() const { return mIdentifier; }
+
+	void applyScenario(Boson* boson);
+
+	/**
+	 * This simply deletes the map. This may be useful for game starting, as
+	 * the ADMIN already has the map, but all other players don't. So the
+	 * ADMIN might send the map over network and delete his local copy, so
+	 * that it is ensured the entire loading code is the same on all
+	 * clients, i.e. without a map until it is received.
+	 **/
+	void deleteMap();
+
+	void quit();
+
+	bool modified() const;
 
 	QString playFieldName() const;
 	QString playFieldComment() const;
@@ -176,6 +158,25 @@ public:
 	 * new map!
 	 **/
 	void finalizeLoading();
+
+public:
+	/**
+	 * Preload all playFields into memory. Note that this will consume pretty much
+	 * memory, so once a map is started all other maps should be cleared
+	 * again.
+	 **/
+	static bool preLoadAllPlayFields();
+
+	/**
+	 * Clear all preloaded playfields (see @ref preLoadAllPlayFields)
+	 **/
+	static void clearAllPreLoadedPlayFields();
+
+	/**
+	 * @return The default playfield which is meant to be used if the player
+	 * didn't select a playfield at all
+	 **/
+	static QString defaultPlayField();
 
 signals:
 	/**
