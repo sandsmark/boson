@@ -127,7 +127,6 @@ TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
 		this, SLOT(slotSaveGame(const QString&, const QString&)));
  connect(d->mStartup, SIGNAL(signalCancelLoadSave()),
 		this, SLOT(slotCancelLoadSave()));
- d->mStartup->slotShowWelcomeWidget(); // we could skip this using cmd line parameters
 
  connect(&d->mStatusBarTimer, SIGNAL(timeout()), this, SLOT(slotUpdateStatusBar()));
 
@@ -145,8 +144,8 @@ TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
  initKActions();
  initStatusBar();
 
- // "re" is not entirely correct ;)
- reinitGame();
+ // this will also call slotResetGame() and therefore init the game
+ d->mStartup->slotShowWelcomeWidget();
 
  loadInitialDockConfig();
 
@@ -260,6 +259,7 @@ void TopWidget::initPlayField()
 
 void TopWidget::initCanvas()
 {
+ BO_CHECK_NULL_RET(boGame);
  mCanvas = new BosonCanvas(this);
  boGame->setCanvas(mCanvas);
 }
@@ -375,6 +375,7 @@ void TopWidget::slotPlayFieldChanged(const QString& id)
 
 void TopWidget::slotStartNewGame()
 {
+ BO_CHECK_NULL_RET(boGame);
  if (!d->mStarting) {
 	boError() << k_funcinfo << "NULL starting object!!" << endl;
 	return;
@@ -400,8 +401,12 @@ void TopWidget::slotStartNewGame()
 void TopWidget::slotLoadGame(const QString& fileName)
 {
  boDebug() << k_funcinfo << endl;
+ BO_CHECK_NULL_RET(boGame);
  if (fileName.isEmpty()) {
 	return;
+ }
+ if (!boGame) {
+//	reinitGame();
  }
  d->mStartup->showLoadingWidget();
 
@@ -450,8 +455,8 @@ void TopWidget::slotLoadGame(const QString& fileName)
 	// ... and show messagebox
 	KMessageBox::sorry(this, text, caption);
 
-	// We also need to re-init the game (player, ...)
-	reinitGame();
+	// return to the start and reset the game
+	d->mStartup->slotShowWelcomeWidget();
  }
 
  boDebug() << k_funcinfo << "done" << endl;
@@ -529,6 +534,7 @@ void TopWidget::slotAssignMap()
 void TopWidget::slotStartGame(const QString& playFieldId)
 {
  boDebug() << k_funcinfo << endl;
+ BO_CHECK_NULL_RET(boGame);
  if (boGame->gameStatus() != KGame::Init) {
 	boWarning() << k_funcinfo << "not in Init status" << endl;
 	return;
@@ -664,7 +670,11 @@ void TopWidget::reinitGame()
 void TopWidget::slotGameOver()
 {
  endGame();
- reinitGame();
+
+ // this also resets the game!
+ // if you replace this by something else you must call slotResetGame()
+ // manually!
+ d->mStartup->slotShowWelcomeWidget();
 }
 
 void TopWidget::slotSplitDisplayHorizontal()
@@ -939,15 +949,11 @@ void TopWidget::slotGameStarted()
 
 void TopWidget::slotResetGame()
 {
- if (!boGame) {
-	return;
+ if (boGame) {
+	// Delete all players to remove added AI and local player (will get
+	// added by newgame widget)
+	boGame->removeAllPlayers();
  }
-
- // Delete all players to remove added AI and local player (will get added by
- // newgame widget)
- boGame->removeAllPlayers();
-
- // AB: is this a good idea?
  reinitGame();
 }
 
@@ -965,7 +971,7 @@ void TopWidget::slotEditorNewMap(const QByteArray& buffer)
  d->mStarting->setEditorMap(buffer);
 }
 
-void TopWidget::slotLoadGame()
+void TopWidget::slotLoadGame(KCmdLineArgs* args)
 {
  if (!d->mStartup) {
 	boError() << k_funcinfo << "NULL startup widget" << endl;
@@ -1005,6 +1011,7 @@ void TopWidget::slotNewGame(KCmdLineArgs* args)
 
 void TopWidget::slotStartEditor(KCmdLineArgs* args)
 {
+ BO_CHECK_NULL_RET(boGame);
  if (!d->mStartup) {
 	boError() << k_funcinfo << "NULL startup widget" << endl;
 	return;
