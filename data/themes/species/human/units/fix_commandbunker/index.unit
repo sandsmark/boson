@@ -1,22 +1,37 @@
-[Boson Unit]
-IsFacility=true
-TerrainType=0
-Name=Command Bunker
-Id=5
-Health=400
-MineralCost=600
-OilCost=0
-Producer=10
-UnitWidth=3.0
-UnitHeight=3.0
-ProductionTime=150
-DestroyedParticles=1010,3011
-
 [Boson Facility]
+CanRefineMinerals=false
+CanRefineOil=false
 ConstructionSteps=22
+
+[Boson Unit]
+Armor=2
+DestroyedParticles=1010,3011
+Health=700
+Id=5
+IsFacility=true
+MineralCost=1000
+Name=Command Bunker
+OilCost=200
+Producer=10
+ProductionTime=600
+Requirements=2,12
+Shield=0
+SightRange=5
+SupportMiniMap=false
+TerrainType=0
+UnitDepth=1
+UnitHeight=3
+UnitWidth=3
+Weapons=0
 
 [ProductionPlugin]
 ProducerList=10
 
 [Sounds]
+OrderAttack=order_attack
+OrderMove=order_move
 OrderSelect=order_select_cmdbunker
+ReportDestroyed=report_destroyed
+ReportProduced=report_produced
+ReportUnderAttack=report_underattack
+Shoot=shoot

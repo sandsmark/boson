@@ -1,16 +1,34 @@
-[Boson Unit]
-IsFacility=true
-TerrainType=0
-Name=Oil Tower
-Id=7
-Health=50
-MineralCost=100
-OilCost=0
-Producer=10
-Requirements=8
-ProductionTime=50
-DestroyedParticles=1001,3002
-
 [Boson Facility]
+CanRefineMinerals=false
+CanRefineOil=false
 ConstructionSteps=10
 
+[Boson Unit]
+Armor=0
+DestroyedParticles=1001,3002
+Health=50
+Id=7
+IsFacility=true
+MineralCost=100
+Name=Oil Tower
+OilCost=0
+Producer=10
+ProductionTime=100
+Requirements=8
+Shield=0
+SightRange=5
+SupportMiniMap=false
+TerrainType=0
+UnitDepth=1
+UnitHeight=1
+UnitWidth=1
+Weapons=0
+
+[Sounds]
+OrderAttack=order_attack
+OrderMove=order_move
+OrderSelect=order_select
+ReportDestroyed=report_destroyed
+ReportProduced=report_produced
+ReportUnderAttack=report_underattack
+Shoot=shoot
