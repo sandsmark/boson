@@ -277,7 +277,7 @@ BosonEffectPropertiesParticleTrail::BosonEffectPropertiesParticleTrail() :
 void BosonEffectPropertiesParticleTrail::reset()
 {
   // Reset all variables to their default values
-  mSpacing = 10;  // distance between 2 particles
+  mSpacing = 10 / 48.0f;  // distance between 2 particles
   mMass = 0.5;
   mMinOffset.reset();
   mMaxOffset.reset();
@@ -290,7 +290,7 @@ void BosonEffectPropertiesParticleTrail::reset()
   mParticleDist = 0;
   mMinLife = 1.0;
   mMaxLife = 1.0;
-  mMaxSpeed = 30.0;  // in canvas coords
+  mMaxSpeed = 30.0 / 48.0f;  // in canvas coords
   mTextureName = "smoke";
   mGLBlendFuncStr = "GL_ONE_MINUS_SRC_ALPHA";
   mGLSrcBlendFuncStr = "GL_SRC_ALPHA";
@@ -303,7 +303,7 @@ bool BosonEffectPropertiesParticleTrail::load(KSimpleConfig* cfg, const QString&
     return false;
   }
 
-  mSpacing = (float)(cfg->readDoubleNumEntry("Spacing", mSpacing));
+  mSpacing = (float)(cfg->readDoubleNumEntry("Spacing", mSpacing)) / 48.0f;
   mMass = (float)(cfg->readDoubleNumEntry("Mass", mMass));
   mMinOffset = BosonConfig::readBoVector3Entry(cfg, "MinOffset", mMinOffset);
   mMaxOffset = BosonConfig::readBoVector3Entry(cfg, "MaxOffset", mMaxOffset);
@@ -314,7 +314,7 @@ bool BosonEffectPropertiesParticleTrail::load(KSimpleConfig* cfg, const QString&
   mStartSize = (float)(cfg->readDoubleNumEntry("StartSize", mStartSize));
   mEndSize = (float)(cfg->readDoubleNumEntry("EndSize", mEndSize));
   // * 20  because in units' config files is speed/tick, but here we want speed/sec
-  mMaxSpeed = (float)(cfg->readDoubleNumEntry("MaxSpeed", mMaxSpeed)) * 20;
+  mMaxSpeed = (float)(cfg->readDoubleNumEntry("MaxSpeed", mMaxSpeed)) * 20 / 48.0f;
   mMinLife = (float)(cfg->readDoubleNumEntry("MinLife", mMinLife));
   mMaxLife = (float)(cfg->readDoubleNumEntry("MaxLife", mMaxLife));
   mParticleDist = (float)(cfg->readDoubleNumEntry("ParticleDist", mParticleDist));
