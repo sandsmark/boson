@@ -124,6 +124,11 @@ void BosonCanvas::slotAddUnit(Unit* unit, int x, int y)
 
 Unit* BosonCanvas::findUnitAtCell(int x, int y)
 {
+ return (Unit*)findItemAtCell(x, y, true);
+}
+
+BosonItem* BosonCanvas::findItemAtCell(int x, int y, bool unitOnly)
+{
  BoItemList list = collisionsAtCell(QPoint(x, y));
  BoItemList::Iterator it;
 
@@ -131,11 +136,24 @@ Unit* BosonCanvas::findUnitAtCell(int x, int y)
 	if (RTTI::isUnit((*it)->rtti())) {
 		Unit* u = (Unit*)*it;
 		if (!u->isDestroyed()) {
-			return u;
+			return *it;
 		}
+	} else if (!unitOnly) {
+		// AB: we could improve performance slightly by using a separate
+		// function instead of this additional check. BUT:
+		// a) we won't gain much (probably a few ns only)
+		// b) we shouldn't do a bad design for that little speedups.
+		//    good design is more important than optimizing, cause good
+		//    design leads usually to faster code
+		return *it;
 	}
  }
  return 0;
+}
+
+BosonItem* BosonCanvas::findItemAt(const QPoint& pos)
+{
+ return findItemAtCell(pos.x() / BO_TILE_SIZE, pos.y() / BO_TILE_SIZE, false);
 }
 
 Unit* BosonCanvas::findUnitAt(const QPoint& pos)
