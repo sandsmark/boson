@@ -10,3 +10,5 @@ MineralCost=100
 Speed=3
 CanGoOnLand=true
 CanGoOnWater=false
+CanMineMinerals=false
+CanMineOil=true
