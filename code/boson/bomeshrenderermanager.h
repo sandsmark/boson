@@ -19,7 +19,7 @@
 #ifndef BOMESHRENDERERMANAGER_H
 #define BOMESHRENDERERMANAGER_H
 
-#include <qobject.h>
+#include "bopluginmanager.h"
 
 class BosonModel;
 class BoMesh;
@@ -39,19 +39,12 @@ class BoMeshRendererManagerPrivate;
  * @short Managing of @ref BoMeshRenderer classes
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class BoMeshRendererManager
+class BoMeshRendererManager : public BoPluginManager
 {
 public:
 	~BoMeshRendererManager();
 
 	static void initStatic();
-
-	/**
-	 * @param unusable If non-null this is set to TRUE, when reloading
-	 * failed and the library is unusable now, or to FALSE if it still can
-	 * be used. If reloading succeeded, this is always set to FALSE.
-	 **/
-	bool reloadPlugin(bool* unusable);
 
 	/**
 	 * @return The BoMeshRendererManager object.
@@ -72,9 +65,15 @@ public:
 	 * @param className The name of the renderer, or @ref QString::null for
 	 * the first renderer found
 	 **/
-	bool makeRendererCurrent(const QString& className);
+	bool makeRendererCurrent(const QString& className)
+	{
+		return makePluginCurrent(className);
+	}
 
-	void unsetCurrentRenderer();
+	void unsetCurrentRenderer()
+	{
+		unsetCurrentPlugin();
+	}
 
 	/**
 	 * Check for @ref currentRenderer being NULL and try to load a default
@@ -82,21 +81,30 @@ public:
 	 * @return TRUE when we have a current renderer, FALSE if no current
 	 * renderer is set and no default renderer could get loaded.
 	 **/
-	static bool checkCurrentRenderer();
+	static bool checkCurrentRenderer()
+	{
+		if (!manager()) {
+			return false;
+		}
+		return manager()->checkCurrentPlugin();
+	}
 
 	/**
 	 * @return The @ref QObject::className of the @ref currentRenderer or
 	 * @ref QString::null if none is set. This name can be used in @ref
 	 * makeRendererCurrent.
 	 **/
-	QString currentRendererName() const;
+	inline QString currentRendererName() const
+	{
+		return currentPluginName();
+	}
 
 	/**
 	 * @return The currently used renderer. See @ref makeRendererCurrent
 	 **/
 	BoMeshRenderer* currentRenderer() const
 	{
-		return mCurrentRenderer;
+		return (BoMeshRenderer*)currentPlugin();
 	}
 
 	/**
@@ -115,10 +123,13 @@ public:
 	void removeModel(BosonModel*);
 
 protected:
-	bool loadLibrary();
-	bool unloadLibrary();
 	BoMeshRenderer* createRenderer(const QString& name);
-	bool makeRendererCurrent(BoMeshRenderer* renderer);
+
+	virtual QString configKey() const;
+	virtual QString libname() const;
+
+	virtual void initializePlugin();
+	virtual void deinitializePlugin();
 
 private:
 	BoMeshRendererManager();
@@ -126,8 +137,6 @@ private:
 private:
 	BoMeshRendererManagerPrivate* d;
 	static BoMeshRendererManager* mManager;
-
-	BoMeshRenderer* mCurrentRenderer;
 };
 
 #endif

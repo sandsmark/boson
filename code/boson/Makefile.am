@@ -99,6 +99,7 @@ BOSON_COMMON_SRC = \
 	botexmapimportdialog.cpp \
 	bobincoder.cpp \
 	bolight.cpp \
+	bopluginmanager.cpp \
 	bofullscreen.cpp
 
 
