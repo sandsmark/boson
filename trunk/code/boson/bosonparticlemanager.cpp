@@ -254,7 +254,7 @@ GLuint BosonParticleSystemProperties::texture(QString name)
 void BosonParticleSystemProperties::init(QString texdir)
 {
   mTexturePath = texdir;
-  mRandom = new KRandomSequence(123456789);
+  mRandom = new KRandomSequence(123456789); // AB: this isn't random, but that won't matter for particles.
 }
 /// End of static initialization stuff (below this is real code ;-))
 

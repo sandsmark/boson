@@ -673,7 +673,7 @@ void BosonBigDisplayBase::paintGL()
 
  // Render particle systems
  boProfiling->renderParticles(true);
- canvas()->updateParticleSystems(elapsed);
+ canvas()->updateParticleSystems(elapsed); // this sucks. we should use advance calls, i.e. the number of advance calls elapsed.
  int count = canvas()->particleSystemsCount();
  if (count > 0) {
 	glEnable(GL_BLEND);

@@ -148,11 +148,11 @@ class BosonParticleSystem
      * particles with this method
      * @param p New position of this system
      **/
-    inline void setPosition(BoVector3 p) { mPos = p; };
+    void setPosition(BoVector3 p) { mPos = p; };
     /**
      * @return Current position of this system
      **/
-    inline BoVector3 position() { return mPos; };
+//    const BoVector3& position() { return mPos; };
 
     /**
      * Sets current velocity of particles in this system.
@@ -161,11 +161,11 @@ class BosonParticleSystem
      * then.
      * @param v New velocity of particles in this system
      **/
-    inline void setVelocity(BoVector3 v) { mVelo = v; };
+//    void setVelocity(BoVector3 v) { mVelo = v; };
     /**
      * @return Current velocity of particles in this system
      **/
-    inline BoVector3 velocity() { return mVelo; };
+//    const BoVector3& velocity() { return mVelo; };
 
     /**
      * Sets color of particles in this system.
@@ -173,56 +173,56 @@ class BosonParticleSystem
      * after calling this method, it doesn't change color of active particles.
      * @param v New color of particles in this system
      **/
-    inline void setColor(BoVector4 c) { mColor = c; };
+//    void setColor(BoVector4 c) { mColor = c; };
     /**
      * @return Color of particles in this system
      **/
-    inline BoVector4 color() { return mColor; };
+//    BoVector4 color() { return mColor; };
 
     /**
      * @return Average size of particles in this system
      **/
-    inline float size() { return mSize; };
+//    float size() { return mSize; };
     /** 
      * Sets average size of particles in this system. This is used for some
      * drawing calculations.
      * @param s New average size of particles
      **/
-    inline void setSize(float s) { mSize = s; };
+    void setSize(float s) { mSize = s; };
 
     /**
      * @return Current age of this system
      **/
-    inline float age() { return mAge; };
+//    float age() { return mAge; };
     /**
      * Sets age of this system (in seconds).
      * Age is decreased every time @ref update is called and if it's 0, no new
      * particles are created anymore
      * @param a New age of this system
      **/
-    inline void setAge(float a) { mAge = a; };
+    void setAge(float a) { mAge = a; };
 
     /**
      * @return Current creation rate of particles (per second)
      **/
-    inline float createRate() { return mCreateRate; };
+//    float createRate() { return mCreateRate; };
     /**
      * Sets current creation rate of particles (per second).
      * New particles are periodically created every @ref update call.
      * @param r New creation rate of particles
      **/
-    inline void setCreateRate(float r) { mCreateRate = r; };
+//    void setCreateRate(float r) { mCreateRate = r; };
 
     /**
      * @return Radius of bounding sphere of this system. This can be used for culling
      **/
-    inline float boundingSphereRadius()  { return mRadius; };
-    
+//    float boundingSphereRadius()  { return mRadius; };
+
     /**
      * @return Whether this system is active
      * Active means that this system has at least 1 living particle
      **/
-    inline bool isActive()  { return (mNum > 0); };
+    bool isActive()  { return (mNum > 0); };
 
     /**
      * Sets OpenGL blending function of this system. This function is used in
@@ -231,12 +231,12 @@ class BosonParticleSystem
      * @param sf Source blend function
      * @param df Destination blend function
      **/
-    inline void setBlendFunc(int sf, int df) { mBlendFunc[0] = sf; mBlendFunc[1] = df; };
+    void setBlendFunc(int sf, int df) { mBlendFunc[0] = sf; mBlendFunc[1] = df; };
 
     /**
      * @return Number of living (active) particles in this system
      **/
-    inline int particleCount() { return mNum; };
+//    int particleCount() { return mNum; };
 
     /**
      * Creates specified number of new particles.
@@ -272,3 +272,4 @@ class BosonParticleSystem
 };
 
 #endif // BOSONPARTICLESYSTEM_H
+
