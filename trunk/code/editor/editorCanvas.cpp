@@ -25,7 +25,7 @@
 #include "editorCanvas.h"
 
 editorCanvas::editorCanvas(QPixmap p)
-	: visualCanvas(p, 50, 50) // XXXX hardcoded until QCanvas allow on-the-fly creation
+	: visualCanvas(p, 2, 2) // fake values, will be changed by either Load() or New()
 {
 	mobiles.resize(149);
 	facilities.resize(149);
@@ -47,7 +47,10 @@ bool editorCanvas::Load(QString filename)
 	freeRessources();
 
 	if (!openRead(filename.data())) return false;
-	
+
+	/* QCanvas configuratoin */
+	resize(map_width, map_height);
+	emit syncMini();	// let the miniMap synchronized with the new parameters
 
 	/* initialisation */
 	for (i=0; i< map_width; i++)
@@ -132,7 +135,6 @@ bool editorCanvas::New(groundType fill_ground, uint w, uint h, const QString &na
 
 	/* QCanvas configuratoin */
 	resize(w,h);
-	
 	emit syncMini();	// let the miniMap synchronized with the new parameters
 
 	/* initialisation */

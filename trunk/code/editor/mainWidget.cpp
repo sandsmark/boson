@@ -45,7 +45,7 @@ mainWidget::mainWidget( editorTopLevel *parent, const char *name)
 	mainFrame = new QFrame(vb);
 
 	connect (etl, SIGNAL(setSelectedObject(object_type, int)), big, SLOT(setSelectedObject(object_type, int)));
-	connect (etl, SIGNAL(setWho(int)), big, SLOT(setWho(int)));
+	connect (etl, SIGNAL(setWho(uint)), big, SLOT(setWho(uint)));
 
 	/* focus handling */
 	setFocusPolicy (StrongFocus);		// accept key event

@@ -33,7 +33,7 @@ editorBigDisplay::editorBigDisplay(editorTopLevel *v, QWidget *p, const char *n,
 	c = makeCell(GROUND_UNKNOWN, 0);
 	otype = OT_NONE;
 
-	setWho(0);
+	setWho(0u);
 }
 
 void editorBigDisplay::actionClicked(int mx, int my, int state)
@@ -44,7 +44,7 @@ void editorBigDisplay::actionClicked(int mx, int my, int state)
 
 
 	if ( x<0 || y<0 || x>= _canvas->maxX || y>=_canvas->maxY ) {
-		logf(LOG_ERROR, "actionClicked with x,y = %d,%d, aborting", x, y);
+//		logf(LOG_ERROR, "actionClicked with x,y = %d,%d, aborting", x, y);
 		return;
 	}
 	

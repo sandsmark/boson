@@ -102,7 +102,6 @@ editorTopLevel::editorTopLevel( BoEditorApp *app,  const char *name, WFlags f)
 
 void editorTopLevel::setSelected(QPixmap *p)
 {
-	boAssert(p);
 	view_one->setPixmap( p?*p:*view_none);
 	emit setSelectedObject (OT_NONE, 0);
 }
@@ -110,8 +109,8 @@ void editorTopLevel::setSelected(QPixmap *p)
 
 void editorTopLevel::_setWho(int w)
 {
-	who = w;
-	emit setWho(w);
+	who = (uint)w;
+	emit setWho(who);
 	redrawTiles();
 }
 

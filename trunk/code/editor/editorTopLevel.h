@@ -72,7 +72,7 @@ public:
 
 signals:
 	void setSelectedObject(object_type , int);
-	void setWho(int);
+	void setWho(uint);
 
 public slots:
 	void slot_editDestroy(void);
