@@ -323,6 +323,7 @@ BosonMap::BosonMap(QObject* parent) : QObject(parent)
 BosonMap::~BosonMap()
 {
  delete[] mCells;
+ delete mNormalMap;
  delete mHeightMap;
  delete mTexMap;
  delete d;
@@ -333,6 +334,7 @@ void BosonMap::init()
  d = new BosonMapPrivate;
  mCells = 0;
  mHeightMap = 0;
+ mNormalMap = 0;
  mGroundTheme = 0;
  mTexMap = 0;
  mMapWidth = 0;
@@ -478,6 +480,8 @@ bool BosonMap::loadMapGeo(QDataStream& stream)
  mCells = 0;
  delete mHeightMap;
  mHeightMap = 0;
+ delete mNormalMap;
+ mNormalMap = 0;
  delete mTexMap;
  mTexMap = 0;
 
@@ -636,7 +640,11 @@ bool BosonMap::loadHeightMap(QDataStream& stream)
  }
  mHeightMap = new BoHeightMap(width() + 1, height() + 1);
  boDebug() << k_funcinfo << "loading height map from network stream" << endl;
- return mHeightMap->load(stream);
+ bool ret = mHeightMap->load(stream);
+ if (ret) {
+	recalculateNormalMap();
+ }
+ return ret;
 }
 
 bool BosonMap::loadTexMap(QDataStream& stream)
@@ -949,7 +957,16 @@ float BosonMap::heightAtCorner(int x, int y) const
 void BosonMap::setHeightAtCorner(int x, int y, float h)
 {
  BO_CHECK_NULL_RET(mHeightMap);
+ BO_CHECK_NULL_RET(mNormalMap);
+ boDebug() << k_funcinfo << endl;
  mHeightMap->setHeightAt(x, y, h);
+ // Update affected normals
+ // Whenever a corner's height changes, normals of four cells, that have this
+ //  corner, also changes and every corner that these cells have must be updated
+ //  If changed corner is not at the edge of the map, 9 corners have to be
+ //  updated.
+ recalculateNormalsInRect(QMAX(0, x - 1), QMAX(0, y - 1),
+		QMIN((int)width(), x + 1), QMIN((int)height(), y + 1));
 }
 
 void BosonMap::slotChangeCell(int x, int y, unsigned char amountOfLand, unsigned char amountOfWater)
@@ -1264,6 +1281,92 @@ void BosonMap::slotChangeTexMap(int x, int y, unsigned int texCount, unsigned in
  }
 }
 
+void BosonMap::recalculateNormalMap()
+{
+ boDebug() << k_funcinfo << endl;
+ if (mNormalMap) {
+	// Old normal map should already be deleted
+	boWarning() << k_funcinfo << "Old normal map not deleted!" << endl;
+	delete mNormalMap;
+	mNormalMap = 0;
+ }
+
+ mNormalMap = new BoNormalMap(width() + 1, height() + 1);
+
+ recalculateNormalsInRect(0, 0, width(), height());
+}
+
+void BosonMap::recalculateNormalsInRect(int x1, int y1, int x2, int y2)
+{
+ boDebug() << k_funcinfo << "Rect: (" << x1 << "; " << y1 << ")-(" << x2 << "; " << y2 << ")" << endl;
+ // FIXME: simplify this method? Is it possible?
+
+ int w = x2 - x1;  // Width and height of the rect
+ int h = y2 - y1;
+ // First calculate plane normals for all cells in rect
+ BoVector3 a, b, c, n;
+ BoVector3* normals = new BoVector3[w * h];
+#define NORM(x, y) normals[(y - y1) * h + (x - x1)]
+ // We need to have additional 1-cell border to correctly calculate normals at
+ //  the border of given rect.
+ // Here we calculate rect for cells, taking this border and map size into
+ //  account
+ int cx1 = QMAX(0, x1 - 1);
+ int cy1 = QMAX(0, y1 - 1);
+ int cx2 = QMIN((int)width() - 1, x2 + 1);
+ int cy2 = QMIN((int)height() - 1, y2 + 1);
+ // FIXME: this is not entirely correct: our cells consist of a single quad atm,
+ //  however, they can be "folded" so that it seems to consist of two triangles.
+ //  In this case, the cell actually has two planes - one for each half.
+ for (int y = cy1; y <= cy2; y++) {
+	for (int x = cx1; x <= cx2; x++) {
+		a.set(x, y, heightAtCorner(x, y));
+		b.set(x + 1, y, heightAtCorner(x + 1, y));
+		c.set(x, y + 1, heightAtCorner(x, y + 1));
+		n = BoVector3::crossProduct(c - b, a - b);
+		n.normalize();
+		NORM(x, y) = n;
+	}
+ }
+
+
+ // Pass 2: calculate normal for each corner by taking average of normals of all
+ //  cells that have this corner.
+ int count = 0;
+ for (int y = y1; y <= y2; y++) {
+	for (int x = x1; x <= x2; x++) {
+		// Add all cell normals to n
+		n.reset();
+		count = 0;
+		// upper-left cell
+		if (x > cx1 && y > cy1) {
+			n.add(NORM(x - 1, y - 1));
+			count++;
+		}
+		// upper-right cell
+		if (x <= cx2 && y > cy1) {
+			n.add(NORM(x, y - 1));
+			count++;
+		}
+		// lower-right cell
+		if (x <= cx2 && y <= cy2) {
+			n.add(NORM(x, y));
+			count++;
+		}
+		// lower-left cell
+		if (x > cx1 && y <= cy2) {
+			n.add(NORM(x - 1, y));
+			count++;
+		}
+		n.scale(1.0f / count);
+		n.normalize();
+		mNormalMap->setNormalAt(x, y, n);
+	}
+ }
+#undef NORM
+ delete[] normals;
+ boDebug() << k_funcinfo << "done" << endl;
+}
 
 
 int BosonMap::mapFileFormatVersion()
