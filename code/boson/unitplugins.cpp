@@ -289,17 +289,17 @@ void ProductionPlugin::advance(unsigned int)
 		int ctry; // Current try
 		currentx = tilex - 1;
 		currenty = tiley - 1;
-		for(int i=1; i <= BUILD_RANGE; i++) {
+		for (int i = 1; i <= BUILD_RANGE; i++) {
 			tries = 2 * i * twidth + 2 * i * theight + 4;
 			currenty++;
-			for(ctry = 1; ctry <= tries; ctry++) {
-				if(ctry <= twidth + i) {
+			for (ctry = 1; ctry <= tries; ctry++) {
+				if (ctry <= twidth + i) {
 					currentx++;
-				} else if(ctry <= twidth + i + theight + 2 * i - 1) {
+				} else if (ctry <= twidth + i + theight + 2 * i - 1) {
 					currenty--;
-				} else if(ctry <= twidth + i + 2 * (theight + 2 * i - 1)) {
+				} else if (ctry <= twidth + i + 2 * (theight + 2 * i - 1)) {
 					currentx--;
-				} else if(ctry <= twidth + i + 3 * (theight + 2 * i - 1)) {
+				} else if (ctry <= twidth + i + 3 * (theight + 2 * i - 1)) {
 					currenty++;
 				} else {
 					currentx++;
