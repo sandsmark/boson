@@ -479,7 +479,7 @@ public:
 	bool mWantDirect;
 };
 
-BosonGLWidget::BosonGLWidget(QWidget* parent, bool direct) : QWidget(parent)
+BosonGLWidget::BosonGLWidget(QWidget* parent, const char* name, bool direct) : QWidget(parent, name)
 {
  boDebug() << k_funcinfo << endl;
  d = new BosonGLWidgetPrivate;

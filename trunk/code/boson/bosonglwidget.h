@@ -112,7 +112,7 @@ public:
 	 * will tell you whether your request for a direct/non-direct context
 	 * succeeded.
 	 **/
-	BosonGLWidget(QWidget* parent, bool direct = true);
+	BosonGLWidget(QWidget* parent, const char* name = 0, bool direct = true);
 	~BosonGLWidget();
 
 	virtual void paintGL() {}
