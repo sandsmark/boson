@@ -59,27 +59,30 @@ class Unit : public UnitBase
 {
 public:
 	enum PropertyIds {
-		// properties in Unit
-		IdWaypoints = UnitBase::IdLast + 2,
-		IdWantedRotation = UnitBase::IdLast + 6,
-		IdPathPoints = UnitBase::IdLast + 10,
+		// properties in Unit. IDs from 1024 to 1279 may be used here
+		// (1024+0 .. 1024+255)
+		IdWaypoints = 1024 + 2,
+		IdWantedRotation = 1024 + 6,
+		IdPathPoints = 1024 + 10,
 
-		// properties in MobileUnit
-
-		// properties in Facility
-		IdConstructionStep = UnitBase::IdLast + 100,
+		// properties in MobileUnit or Facility.
+		// IDs from 1280 to 1535 may be used here
+		// (1280+0 .. 1280+255)
+		IdConstructionStep = 1280 + 100,
 
 		// properties in UnitPlugins and derived classes
-		IdProductionState = UnitBase::IdLast + 300,
-		IdResourcesMined = UnitBase::IdLast + 301,
-		IdResourcesX = UnitBase::IdLast + 302,
-		IdResourcesY = UnitBase::IdLast + 303,
-		IdHarvestingType = UnitBase::IdLast + 304,
-		IdBombingPosX = UnitBase::IdLast + 305,
-		IdBombingPosY = UnitBase::IdLast + 306,
-		IdMinePlacingCounter = UnitBase::IdLast + 307,
-		IdResourceMineMinerals = UnitBase::IdLast + 308,
-		IdResourceMineOil = UnitBase::IdLast + 309
+		// IDs from 1536 to 4095 may be used here
+		// (1536+0 .. 1536+3071)
+		IdProductionState = 1536 + 0,
+		IdResourcesMined = 1536 + 1,
+		IdResourcesX = 1536 + 2,
+		IdResourcesY = 1536 + 3,
+		IdHarvestingType = 1536 + 4,
+		IdBombingPosX = 1536 + 5,
+		IdBombingPosY = 1536 + 6,
+		IdMinePlacingCounter = 1536 + 7,
+		IdResourceMineMinerals = 1536 + 8,
+		IdResourceMineOil = 1536 + 9
 	};
 
 	Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas);

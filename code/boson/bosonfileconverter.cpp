@@ -788,7 +788,7 @@ bool BosonFileConverter::addDummyWaterXML_From_0_10_To_0_10_80(QByteArray& water
  return true;
 }
 
-bool BosonFileConverter::convertPlayField_From_0_10_80_To_0_11(QMap<QString, QByteArray>& files)
+bool BosonFileConverter::convertPlayField_From_0_10_80_To_0_10_81(QMap<QString, QByteArray>& files)
 {
  QDomDocument kgameDoc(QString::fromLatin1("Boson"));
  QDomDocument canvasDoc(QString::fromLatin1("Canvas"));
@@ -804,9 +804,7 @@ bool BosonFileConverter::convertPlayField_From_0_10_80_To_0_11(QMap<QString, QBy
  QDomElement kgameRoot = kgameDoc.documentElement();
  QDomElement canvasRoot = canvasDoc.documentElement();
 
-#if BOSON_VERSION_MICRO < 0x80 || BOSON_VERSION_MINOR >= 0x11
-#error replace the following by BOSON_SAVEGAME_FORMAT_VERSION_0_11
-#endif
+ // 0.10.81 development version
 #define BO_VERSION BOSON_MAKE_SAVEGAME_FORMAT_VERSION(0x00, 0x02, 0x05)
  kgameRoot.setAttribute("Version", BO_VERSION);
 #undef BO_VERSION
@@ -850,6 +848,110 @@ bool BosonFileConverter::convertPlayField_From_0_10_80_To_0_11(QMap<QString, QBy
  files.insert("canvas.xml", canvasDoc.toString().utf8());
  return true;
 }
+
+bool BosonFileConverter::convertPlayField_From_0_10_81_To_0_11(QMap<QString, QByteArray>& files)
+{
+ QDomDocument kgameDoc(QString::fromLatin1("Boson"));
+ QDomDocument canvasDoc(QString::fromLatin1("Canvas"));
+ if (!loadXMLDoc(&kgameDoc, files["kgame.xml"])) {
+	boError() << k_funcinfo << "could not load kgame.xml" << endl;
+	return false;
+ }
+ if (!loadXMLDoc(&canvasDoc, files["canvas.xml"])) {
+	boError() << k_funcinfo << "could not load canvas.xml" << endl;
+	return false;
+ }
+ QDomElement kgameRoot = kgameDoc.documentElement();
+ QDomElement canvasRoot = canvasDoc.documentElement();
+
+#if BOSON_VERSION_MICRO < 0x80 || BOSON_VERSION_MINOR >= 0x11
+#error replace the following by BOSON_SAVEGAME_FORMAT_VERSION_0_11
+#endif
+#define BO_VERSION BOSON_MAKE_SAVEGAME_FORMAT_VERSION(0x00, 0x02, 0x06)
+ kgameRoot.setAttribute("Version", BO_VERSION);
+#undef BO_VERSION
+
+ for (QDomNode node = canvasRoot.firstChild(); !node.isNull(); node = node.nextSibling()) {
+	QDomElement items = node.toElement();
+	if (items.isNull()) {
+		continue;
+	}
+	if (items.tagName() != "Items") {
+		continue;
+	}
+
+	// prior to boson 0.11 the KGameProperty IDs of the units were
+	// broken. they must be unique among different versions, however they
+	// did depend (partially) on the number of properties in the Unit.
+	// this is being fixed here now.
+	for (QDomNode itemNode = items.firstChild(); !itemNode.isNull(); itemNode = itemNode.nextSibling()) {
+		QDomElement item = itemNode.toElement();
+		if (item.isNull()) {
+			continue;
+		}
+		if (item.tagName() != "Item") {
+			continue;
+		}
+		QDomElement dataHandler = item.namedItem("DataHandler").toElement();
+		if (dataHandler.isNull()) {
+			continue;
+		}
+		for (QDomNode n = dataHandler.firstChild(); !n.isNull(); n = n.nextSibling()) {
+			QDomElement e = n.toElement();
+			if (e.isNull()) {
+				continue;
+			}
+			if (e.tagName() != "KGameProperty") {
+				continue;
+			}
+			bool ok = false;
+			unsigned int id = e.attribute("Id").toUInt(&ok);
+			if (!ok) {
+				boError() << k_funcinfo << "Id attribute in KGameProperty tag is not a valid number" << endl;
+				return false;
+			}
+			if (id < 256) {
+				// KGame property. no need to fix it.
+				continue;
+			}
+			if (id < 272) {
+				// UnitBase property. UnitBase now uses IDs from 512 to
+				// 1023.
+				id -= 256;
+				id += 512;
+			} else if (id < 582) {
+				// Unit, UnitPlugins or derived classes property.
+				if (id <= 282) {
+					// Unit property
+					// Unit now uses IDs from 1024 to 1279
+					id -= 272;
+					id += 1024;
+				} else if (id < 572) {
+					// properties in MobileUnit or Facility
+					// (only IdConstructionStep == 372 here atm)
+					// we use IDs from 1280 to 1535
+					id -= 272;
+					id += 1280;
+				} else {
+					// UnitPlugins or derived classes.
+					// IDs from 1536 to 4095 may be used here
+					id -= 572;
+					id += 1536;
+				}
+			} else {
+				boError() << k_funcinfo << "unexpected KGameProperty Id " << id << endl;
+				return false;
+			}
+			e.setAttribute("Id", id);
+		}
+	}
+
+ }
+ files.insert("kgame.xml", kgameDoc.toString().utf8());
+ files.insert("canvas.xml", canvasDoc.toString().utf8());
+ return true;
+}
+
 
 void BosonFileConverter::removePropertyIds_0_9_1(const QDomNodeList& itemsList, const QStringList& ids)
 {
