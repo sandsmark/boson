@@ -86,6 +86,17 @@ static float lightPos[] = {-6000.0, 3000.0, 10000.0, 1.0};
 #include <GL/glu.h>
 
 
+/**
+ * @return A string that displays @p plane. The plane consists of a normal
+ * vector in the first 3 numbers and the distance from the origin in the 4th
+ * number.
+ **/
+static QString planeDebugString(const double* plane)
+{
+ return QString("((%1,%2,%3),%4)").arg(plane[0]).arg(plane[1]).arg(plane[2]).arg(plane[3]);
+}
+
+
 //#define TEST_LOD
 
 float textureUpperLeft[2] = { 0.0f, 1.0f };
@@ -1022,13 +1033,8 @@ void BosonBigDisplayBase::renderText()
 	// changes!
 	proj.invert(&inverse); // invert (proj*model)
 	y -= renderMatrix(x, y, &inverse, i18n("(Projection * Modelview)^(-1):"));
-	y -= d->mDefaultFont->height();
 
-	BoMatrix identity(inverse);
-	identity.multiply(proj.data());
-	y -= renderMatrix(x, y, &identity, i18n("Should be close to identity:"));
 	y -= d->mDefaultFont->height();
-
 
 	// some kind of d->mDebugMapCoordinates... but we do our own
 	// calculations instead of gluUnProject.
@@ -1046,7 +1052,7 @@ void BosonBigDisplayBase::renderText()
 	inverse.transform(&result, &v);
 
 	// it is a column vector, but we display as a row (so ^T)
-	QString text = i18n("(Projection * Modelview)^(-1) * (%1 , %2 , %3 , %3)^T:").
+	QString text = i18n("CursorPos = (Projection * Modelview)^(-1) * (%1 , %2 , %3 , %3)^T:").
 			arg(v[0], 6, 'f', 3).
 			arg(v[1], 6, 'f', 3).
 			arg(v[2], 6, 'f', 3).
@@ -1068,6 +1074,24 @@ void BosonBigDisplayBase::renderText()
 	y -= d->mDefaultFont->renderText(x, y, text, width() - x);
 	y -= d->mDefaultFont->renderText(x, y, resultText, width() - x);
 	y -= d->mDefaultFont->renderText(x, y, realCoords, width() - x);
+
+	y -= d->mDefaultFont->height();
+
+	// display the planes. they consist of the normal vector and the
+	// distance from the origin
+	y -= d->mDefaultFont->renderText(x, y,
+			i18n("Right Plane: %1").arg(planeDebugString(&d->mViewFrustum[0 * 4])), width() - x);
+	y -= d->mDefaultFont->renderText(x, y,
+			i18n("Left Plane: %1").arg(planeDebugString(&d->mViewFrustum[1 * 4])), width() - x);
+	y -= d->mDefaultFont->renderText(x, y,
+			i18n("Bottom Plane: %1").arg(planeDebugString(&d->mViewFrustum[2 * 4])), width() - x);
+	y -= d->mDefaultFont->renderText(x, y,
+			i18n("Top Plane: %1").arg(planeDebugString(&d->mViewFrustum[3 * 4])), width() - x);
+	y -= d->mDefaultFont->renderText(x, y,
+			i18n("Far Plane: %1").arg(planeDebugString(&d->mViewFrustum[4 * 4])), width() - x);
+	y -= d->mDefaultFont->renderText(x, y,
+			i18n("Near Plane: %1").arg(planeDebugString(&d->mViewFrustum[5 * 4])), width() - x);
+
  }
  x = border;
  y = d->mViewport[3] - border;
@@ -2469,10 +2493,10 @@ void BosonBigDisplayBase::extractFrustum()
  d->mViewFrustum[3 * 4 + 3] /= t;
 
  // Extract the FAR plane
-d->mViewFrustum[4 * 4 + 0] = clip[3] - clip[2];
-d->mViewFrustum[4 * 4 + 1] = clip[7] - clip[6];
-d->mViewFrustum[4 * 4 + 2] = clip[11] - clip[10];
-d->mViewFrustum[4 * 4 + 3] = clip[15] - clip[14];
+ d->mViewFrustum[4 * 4 + 0] = clip[3] - clip[2];
+ d->mViewFrustum[4 * 4 + 1] = clip[7] - clip[6];
+ d->mViewFrustum[4 * 4 + 2] = clip[11] - clip[10];
+ d->mViewFrustum[4 * 4 + 3] = clip[15] - clip[14];
 
  // Normalize the result
  t = sqrt(d->mViewFrustum[4 * 4 + 0] * d->mViewFrustum[4 * 4 + 0] +
