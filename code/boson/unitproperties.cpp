@@ -136,7 +136,7 @@ void UnitProperties::loadUnitType(const QString& fileName, bool fullmode)
  }
  mUnitWidth = (unsigned int)(conf.readDoubleNumEntry("UnitWidth", 1.0) * BO_TILE_SIZE);
  mUnitHeight = (unsigned int)(conf.readDoubleNumEntry("UnitHeight", 1.0) * BO_TILE_SIZE);
- mUnitDepth = (unsigned int)(conf.readDoubleNumEntry("UnitDepth", 1.0) * BO_TILE_SIZE);
+ mUnitDepth = (float)conf.readDoubleNumEntry("UnitDepth", 1.0);
  d->mName = conf.readEntry("Name", i18n("Unknown"));
  mHealth = conf.readUnsignedLongNumEntry("Health", 100);
  mMineralCost = conf.readUnsignedLongNumEntry("MineralCost", 100);
@@ -184,7 +184,7 @@ void UnitProperties::saveUnitType(const QString& fileName)
  conf.writeEntry("TerrainType", (int)mTerrain);
  conf.writeEntry("UnitWidth", (double)mUnitWidth / BO_TILE_SIZE);
  conf.writeEntry("UnitHeight", (double)mUnitHeight / BO_TILE_SIZE);
- conf.writeEntry("UnitDepth", (double)mUnitDepth / BO_TILE_SIZE);
+ conf.writeEntry("UnitDepth", (double)mUnitDepth);
  conf.writeEntry("Name", d->mName);
  conf.writeEntry("Health", mHealth);
  conf.writeEntry("MineralCost", mMineralCost);
@@ -672,7 +672,7 @@ void UnitProperties::reset()
  mTerrain = (TerrainType)0;
  mUnitWidth = (unsigned int)(1.0 * BO_TILE_SIZE);
  mUnitHeight = (unsigned int)(1.0 * BO_TILE_SIZE);
- mUnitDepth = (unsigned int)(1.0 * BO_TILE_SIZE);
+ mUnitDepth = 1.0;
  d->mName = i18n("Unknown");
  mHealth = 100;
  mMineralCost = 100;

@@ -120,10 +120,9 @@ public:
 	unsigned int unitHeight() const { return mUnitHeight; }
 
 	/**
-	 * @return The unrotated height in z-direction of the unit. The value
-	 * is number of cells this unit occupies * BO_TILE_SIZE
+	 * @return The unrotated height in z-direction of the unit.
 	 **/
-	unsigned int unitDepth() const { return mUnitDepth; }
+	float unitDepth() const { return mUnitDepth; }
 
 	/**
 	 * @return Default health aka power aka hitpoints of this unit.
@@ -369,7 +368,7 @@ protected:
 	void setId(unsigned long int id)  { mTypeId = id; };
 	void setUnitWidth(unsigned int unitWidth)  { mUnitWidth = unitWidth; };
 	void setUnitHeight(unsigned int unitHeight)  { mUnitHeight = unitHeight; };
-	void setUnitDepth(unsigned int unitDepth)  { mUnitDepth = unitDepth; };
+	void setUnitDepth(float unitDepth)  { mUnitDepth = unitDepth; };
 	void setHealth(unsigned long int health)  { mHealth = health; };
 	void setSightRange(unsigned int sightRange)  { mSightRange = sightRange; };
 	void setProducer(unsigned int producer)  { mProducer = producer; };
@@ -428,7 +427,7 @@ private:
 	unsigned long int mTypeId; // note: 0 is invalid!
 	unsigned int mUnitWidth;
 	unsigned int mUnitHeight;
-	unsigned int mUnitDepth;
+	float mUnitDepth;
 	unsigned long int mHealth;
 	unsigned int mSightRange;
 	unsigned int mProducer;
