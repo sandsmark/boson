@@ -649,6 +649,9 @@ void BosonWidgetBase::initKActions()
  fps->setChecked(false);
  connect(fps, SIGNAL(toggled(bool)),
 		this, SLOT(slotSetDebugFPS(bool)));
+ KToggleAction* debugAdvanceCalls = new KToggleAction(i18n("Debug &Advance calls"),
+		KShortcut(), 0, 0, actionCollection(), "debug_advance_calls");
+ connect(debugAdvanceCalls, SIGNAL(toggled(bool)), this, SLOT(slotSetDebugAdvanceCalls(bool)));
  (void)new KAction(i18n("&Unfog"), KShortcut(), this,
 		SLOT(slotUnfogAll()), actionCollection(), "debug_unfog");
  (void)new KAction(i18n("Dump game &log"), KShortcut(), this,
@@ -1116,6 +1119,11 @@ void BosonWidgetBase::slotSetDebugBoundingBoxes(bool debug)
 void BosonWidgetBase::slotSetDebugFPS(bool debug)
 {
  boConfig->setDebugFPS(debug);
+}
+
+void BosonWidgetBase::slotSetDebugAdvanceCalls(bool debug)
+{
+ boConfig->setDebugAdvanceCalls(debug);
 }
 
 void BosonWidgetBase::slotSetShowResources(bool show)

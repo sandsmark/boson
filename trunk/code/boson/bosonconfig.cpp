@@ -306,6 +306,7 @@ BosonConfig::BosonConfig(KConfig* conf)
  mDebugRenderCounts = false;
  mDebugBoundingBoxes = false;
  mDebugFPS = false;
+ mDebugAdvanceCalls = false;
  mShowResources = true;
  mEnableColormap = false;
  mDefaultLodCount = 5;
