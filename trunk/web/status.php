@@ -71,7 +71,7 @@ draw_bigbox_text("This is a list of features that I consider as
   </ul>
   <h4>Data</h4>
   <ul>
-    <li>New facility: Ferry</li>
+    <li>New unit: Ferry</li>
     <li>Unit models improvements</li>
     <li>Warfactory is now Weapons Factory</li>
     <li>Handbook switched from png images to jpg</li>
