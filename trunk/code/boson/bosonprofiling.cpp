@@ -395,7 +395,10 @@ int BosonProfiling::requestEventId(const QString& name)
 {
  int id = BosonProfiling::LastFixedEventId + d->mNextDynamicEventId;
  d->mNextDynamicEventId++;
- d->mDynamicEventId2Name.insert(id, name);
+ if (!name.isEmpty()) {
+	// note: this ID can NOT be used in the profiling dialog!
+	d->mDynamicEventId2Name.insert(id, name);
+ }
  return id;
 }
 
