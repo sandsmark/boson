@@ -1,0 +1,25 @@
+All texture files are published under the terms of the GNU GPL.
+
+Here you can sources of the files - or most of them (we'll probably forget to
+add newly added files here. mail boson-devel@lists.sourceforge.net if a file is
+missing here).
+Some files were under a less restrictive license (meaning: it allows
+re-licensing) or even under the public domain. They got relicensed by us. Feel
+free to use either the original license or the GPL. If the files were modified
+by us you *have* to use GPL (or mail us:)).
+
+Most files are from golgotha - which was developed by crack.com, but never
+finished and then released to the public domain. You can find the original files
+here: http://jonathanclark.com/golgotha/browse.html
+They were *really* released as public domain - meaning you can do just
+everything with it - relicense, sell, use, ...
+
+Texture Name		Original Name (if any)		Source
+airportr.jpg		airportroadcorner2.jpg		golgotha files
+elecpane.jpg		elecpanelstwo.jpg		golgotha files
+rome_str.jpg		rome_streets1.jpg		golgotha files
+vehlcamo.jpg		vehlcamotop.jpg			golgotha files
+vehlcamotop.jpg						golgotha files AB: oops this seems to be duplicated!
+wheel.jpg						golgotha files
+
+
