@@ -57,6 +57,9 @@ public:
 
 	void renderMiniMap();
 
+	unsigned int miniMapWidth() const;
+	unsigned int miniMapHeight() const;
+
 	BosonMap* map() const { return mMap; }
 	PlayerIO* localPlayerIO() const { return mLocalPlayerIO; }
 	float zoom() const;

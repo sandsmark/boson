@@ -503,6 +503,22 @@ void BosonGLMiniMap::renderMiniMap()
  mRenderer->render();
 }
 
+unsigned int BosonGLMiniMap::miniMapWidth() const
+{
+ if (!mRenderer) {
+	return 0;
+ }
+ return mRenderer->miniMapWidth();
+}
+
+unsigned int BosonGLMiniMap::miniMapHeight() const
+{
+ if (!mRenderer) {
+	return 0;
+ }
+ return mRenderer->miniMapHeight();
+}
+
 void BosonGLMiniMap::slotUnfog(int x, int y)
 {
  if (!localPlayerIO()) {
