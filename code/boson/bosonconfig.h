@@ -405,7 +405,7 @@ private:
 	bool mDebugOpenGLCamera;
 	bool mDebugRenderCounts;
 	bool mDebugBoundingBoxes;
-  bool mDebugFPS;
+	bool mDebugFPS;
 };
 
 #endif
