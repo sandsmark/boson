@@ -344,15 +344,7 @@ void BosonItem::setSize(int width, int height)
 
 void BosonItem::renderItem()
 {
- // TODO: performance:
- // we should manage a single (giantic) array, which contains the of ALL models.
- // then we could set the pointers once only and can render after that.
- // additionally we could search for redundant indices - i.e. if there are
- // different points with exactly the same coordinates (vertices and texture)
- // then we could replace the index of one of them by the index of the other one
- // and store only one of them
- glVertexPointer(3, GL_FLOAT, 5 * sizeof(float), mModel->pointArray());
- glTexCoordPointer(2, GL_FLOAT, 5 * sizeof(float), mModel->pointArray() + 3);
+ mModel->enablePointer();
  if (displayList() != 0) {
 	glCallList(displayList());
  } else {

@@ -263,7 +263,7 @@ void ProductionPlugin::advance(unsigned int)
 					currentx++;
 				}
 
-				if (canvas()->canPlaceUnitAt(speciesTheme()->unitProperties(id), QPoint(currentx, currenty), this)) {
+				if (canvas()->canPlaceUnitAtCell(speciesTheme()->unitProperties(id), QPoint(currentx, currenty), this)) {
 					// Free cell - place unit at it
 					mProductionState = mProductionState + 1;
 					//FIXME: buildProduction should not

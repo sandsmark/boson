@@ -376,7 +376,7 @@ public:
 		mDefaultFont = 0;
 
 		mPlacementPreviewProperties = 0;
-		mPlacementPreviewDisplayList = 0;
+		mPlacementPreviewModel = 0;
 		mPlacementPreviewCanPlace = false;
 
 		mInput = 0;
@@ -438,7 +438,7 @@ public:
 	bool mParticlesDirty;
 
 	const UnitProperties* mPlacementPreviewProperties;
-	GLuint mPlacementPreviewDisplayList;
+	BosonModel* mPlacementPreviewModel;
 	bool mPlacementPreviewCanPlace;
 	QPoint mPlacementCanvasPos;
 	GLuint mCellPlacementTexture;
@@ -877,7 +877,7 @@ void BosonBigDisplayBase::paintGL()
 
  // Facility-placing preview code
  if (displayInput()->actionLocked() && displayInput()->actionType() == ActionBuild &&
-		((d->mPlacementPreviewDisplayList != 0 && d->mPlacementPreviewProperties) ||
+		((d->mPlacementPreviewModel != 0 && d->mPlacementPreviewProperties) ||
 		d->mCellPlacementTexture != 0)) {
 	// AB: GL_MODULATE is currently default. if we every change it to
 	// GL_REPLACE we should change it here:
@@ -893,15 +893,33 @@ void BosonBigDisplayBase::paintGL()
 
 #warning FIXME: z value!
 	const float z = 0.1;
-	QPoint pos(d->mPlacementCanvasPos / BO_TILE_SIZE);
-	if (d->mPlacementPreviewDisplayList) {
-		int w = d->mPlacementPreviewProperties->unitWidth() / BO_TILE_SIZE;
-		int h = d->mPlacementPreviewProperties->unitHeight() / BO_TILE_SIZE;
-		float x = ((float)(pos.x() + w / 2)) * BO_GL_CELL_SIZE;
-		float y = ((float)(pos.y() + h / 2)) * BO_GL_CELL_SIZE;
+	QPoint pos(d->mPlacementCanvasPos);
+	if (d->mPlacementPreviewModel && d->mPlacementPreviewModel->frame(0)) {
+		BoFrame* f = d->mPlacementPreviewModel->frame(0);
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+		int w = d->mPlacementPreviewProperties->unitWidth();
+		int h = d->mPlacementPreviewProperties->unitHeight();
+		float x = ((pos.x() + w / 2)) * BO_GL_CELL_SIZE;
+		float y = ((pos.y() + h / 2)) * BO_GL_CELL_SIZE;
+		if (pos.x() >= 0) {
+			x = x - pos.x() % BO_TILE_SIZE;
+		} else {
+			x = x - (BO_TILE_SIZE + pos.x() % BO_TILE_SIZE);
+		}
+		if (pos.y() >= 0) {
+			y = y - pos.y() % BO_TILE_SIZE;
+		} else {
+			y = y - (BO_TILE_SIZE + pos.y() % BO_TILE_SIZE);
+		}
+		x /= BO_TILE_SIZE;
+		y /= BO_TILE_SIZE;
 		glTranslatef(x, -y, z);
-		glCallList(d->mPlacementPreviewDisplayList);
+		d->mPlacementPreviewModel->enablePointer();
+		f->renderFrame();
 		glTranslatef(-x, y, -z);
+		glDisableClientState(GL_VERTEX_ARRAY);
+		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	} else if (d->mCellPlacementTexture) {
 		float x = ((float)pos.x()) * BO_GL_CELL_SIZE;
 		float y = ((float)pos.y()) * BO_GL_CELL_SIZE;
@@ -2487,7 +2505,7 @@ void BosonBigDisplayBase::setPlacementPreviewData(const UnitProperties* prop, bo
  d->mCellPlacementTexture = 0;
  if (!prop) {
 	d->mPlacementPreviewProperties = 0;
-	d->mPlacementPreviewDisplayList = 0;
+	d->mPlacementPreviewModel = 0;
 	d->mPlacementPreviewCanPlace = false;
 	return;
  }
@@ -2499,6 +2517,7 @@ void BosonBigDisplayBase::setPlacementPreviewData(const UnitProperties* prop, bo
  if (!localPlayer()->speciesTheme()) {
 	boError() << k_funcinfo << "NULL theme" << endl;
 	setPlacementPreviewData(0, false);
+	return;
  }
  if (d->mPlacementPreviewProperties != prop) {
 	BosonModel* m = localPlayer()->speciesTheme()->unitModel(prop->typeId()); // AB: this does a lookup in a list and therefore should be avoided (this method gets called at least whenever the mouse is moved!)
@@ -2514,7 +2533,7 @@ void BosonBigDisplayBase::setPlacementPreviewData(const UnitProperties* prop, bo
 		return;
 	}
 	d->mPlacementPreviewProperties = prop;
-	d->mPlacementPreviewDisplayList = f->displayList();
+	d->mPlacementPreviewModel = m;
  }
  d->mPlacementPreviewCanPlace = canPlace;
  d->mPlacementCanvasPos = cursorCanvasPos();
@@ -2542,7 +2561,7 @@ void BosonBigDisplayBase::setPlacementCellPreviewData(int groundType, bool canPl
  d->mCellPlacementTexture = textures->texture(Cell::tile(groundType, 0));
  d->mPlacementPreviewCanPlace = canPlace;
  d->mPlacementCanvasPos = cursorCanvasPos();
- d->mPlacementPreviewDisplayList = 0;
+ d->mPlacementPreviewModel = 0;
 }
 
 void BosonBigDisplayBase::setDisplayInput(BosonBigDisplayInputBase* input)

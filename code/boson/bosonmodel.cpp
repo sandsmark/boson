@@ -413,8 +413,7 @@ void BosonModel::createDisplayLists()
  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
  // a display list makes our vertex pointer totally useless! the data are
  // evaluated *now* when we compile the list - not later anymore!
- glVertexPointer(3, GL_FLOAT, 5 * sizeof(float), pointArray());
- glTexCoordPointer(2, GL_FLOAT, 5 * sizeof(float), pointArray() + 3);
+ enablePointer();
 
 
  // AB: instead of creating display lists for every mesh we could generate a
@@ -747,5 +746,19 @@ void BosonModel::mergeArrays()
 float* BosonModel::pointArray() const
 {
  return d->mPoints;
+}
+
+void BosonModel::enablePointer()
+{
+ // TODO: performance:
+ // we should manage a single (giantic) array, which contains the of ALL models.
+ // then we could set the pointers once only and can render after that.
+ // additionally we could search for redundant indices - i.e. if there are
+ // different points with exactly the same coordinates (vertices and texture)
+ // then we could replace the index of one of them by the index of the other one
+ //
+ // TODO: performance: interleaved arrays
+ glVertexPointer(3, GL_FLOAT, 5 * sizeof(float), d->mPoints);
+ glTexCoordPointer(2, GL_FLOAT, 5 * sizeof(float), d->mPoints + 3);
 }
 
