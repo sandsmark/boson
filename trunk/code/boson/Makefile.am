@@ -35,7 +35,6 @@ BOSON_COMMON_SRC = \
 	bo3dtools.cpp \
 	bomatrixwidget.cpp \
 	bosonminimap.cpp \
-	bosonglminimap.cpp \
 	kgameunitdebug.cpp \
 	kgameplayerdebug.cpp \
 	kgamecelldebug.cpp \
@@ -45,7 +44,6 @@ BOSON_COMMON_SRC = \
 	editorwidget.cpp \
 	bosonglwidget.cpp \
 	bosonbigdisplaybase.cpp \
-	bopixmaprenderer.cpp \
 	bogroundrenderer.cpp \
 	bocamera.cpp \
 	boautocamera.cpp \
