@@ -155,6 +155,7 @@ BosonItem::BosonItem(Player* owner, BosonCanvas* canvas)
 
 BosonItem::~BosonItem()
 {
+ clearEffects();
  unselect();
  if (canvas()) {
 	canvas()->removeFromCells(this);
@@ -381,7 +382,7 @@ const QPtrList<BosonEffect>* BosonItem::effects() const
 
 void BosonItem::setEffects(const QPtrList<BosonEffect>& effects, bool addtocanvas)
 {
- // FIXME: do we need to do anything with old effects?
+ clearEffects();
  delete mEffects;
  mEffects = new QPtrList<BosonEffect>(effects);
  // Make effects owned by us
@@ -401,6 +402,7 @@ void BosonItem::addEffect(BosonEffect* e, bool addtocanvas)
  if (!mEffects) {
 	mEffects = new QPtrList<BosonEffect>;
  }
+ e->setOwnerId(id());
  mEffects->append(e);
  // Add effect to canvas if necessary
  if (addtocanvas) {
@@ -410,9 +412,16 @@ void BosonItem::addEffect(BosonEffect* e, bool addtocanvas)
 
 void BosonItem::clearEffects()
 {
- if (mEffects) {
-	mEffects->clear();
+ if (!mEffects) {
+	return;
  }
+ // Set ownerid of all effects to 0
+ QPtrListIterator<BosonEffect> it(*mEffects);
+ while (it.current()) {
+	it.current()->setOwnerId(0);
+	++it;
+ }
+ mEffects->clear();
 }
 
 bool BosonItem::saveAsXML(QDomElement& root)
