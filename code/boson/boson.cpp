@@ -50,8 +50,6 @@ Boson* Boson::mBoson = 0;
 
 #define ADVANCE_INTERVAL 250 // ms
 
-#define NO_ADVANCE_DEBUG
-
 // Saving format version (000005 = 00.00.05)
 #define BOSON_SAVEGAME_FORMAT_VERSION 000007
 
@@ -959,11 +957,9 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 		d->mAdvanceDivider = n;
 		d->mAdvanceDividerCount = 0;
 		lock();
-#ifndef NO_ADVANCE_DEBUG
-		boDebug() << "Advance - speed (calls per " << ADVANCE_INTERVAL 
+		boDebug(300) << "Advance - speed (calls per " << ADVANCE_INTERVAL 
 				<< "ms)=" << gameSpeed() << " elapsed: " 
 				<< d->mAdvanceReceived.elapsed() << endl;
-#endif
 		d->mAdvanceReceived.restart();
 		slotReceiveAdvance();
 		break;
@@ -1451,10 +1447,8 @@ void Boson::slotReceiveAdvance()
  // Please remember that there are several additional tasks that need to be done
  // - e.g. unit moving, OpenGL rendering, ... so 
  if (d->mAdvanceDividerCount + 1 == d->mAdvanceDivider)  {
-#ifndef NO_ADVANCE_DEBUG
-	boDebug() << k_funcinfo << "delayed messages: "
+	boDebug(300) << k_funcinfo << "delayed messages: "
 			<< d->mDelayedMessages.count() << endl;
-#endif
 	unlock();
  } else if (d->mAdvanceDividerCount + 1 < d->mAdvanceDivider) {
 	int next;
@@ -1504,17 +1498,13 @@ void Boson::networkTransmission(QDataStream& stream, int msgid, Q_UINT32 r, Q_UI
 
 void Boson::lock()
 {
-#ifndef NO_ADVANCE_DEBUG
- boDebug() << k_funcinfo << endl;
-#endif
+ boDebug(300) << k_funcinfo << endl;
  d->mIsLocked = true;
 }
 
 void Boson::unlock()
 {
-#ifndef NO_ADVANCE_DEBUG
- boDebug() << k_funcinfo << endl;
-#endif
+ boDebug(300) << k_funcinfo << endl;
  d->mIsLocked = false;
  while (!d->mDelayedMessages.isEmpty() && !d->mIsLocked) {
 	slotProcessDelayed();
