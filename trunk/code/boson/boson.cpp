@@ -108,7 +108,7 @@ void BosonApp::initCanvas(int w, int h)
 	/* the canvas is created when a game is created */
 	vcanvas = bocanvas = new bosonCanvas(*p, w, h);
 
-	(new bosonTopLevel() )->show();
+	(new bosonTopLevel(this) )->show();
 	logf(LOG_INFO, "canvas and TopLevel window created");
 
 }

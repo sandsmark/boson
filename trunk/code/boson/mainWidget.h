@@ -43,6 +43,7 @@ class mainWidget : public QWidget
 public:
 	mainWidget( bosonTopLevel *parent=0, const char *name=0);
 
+public slots:
 	void	ressourcesUpdated(void);
 protected:
 	virtual void keyReleaseEvent (QKeyEvent * e );

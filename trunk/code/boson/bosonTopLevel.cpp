@@ -27,17 +27,20 @@
 #include "visualMiniDisplay.h"
 #include "bosonBigDisplay.h"
 #include "speciesTheme.h"
+#include "boson.h"
 
 #include "game.h"
 
 
-bosonTopLevel::bosonTopLevel( const char *name, WFlags f)
+bosonTopLevel::bosonTopLevel(BosonApp *parent, const char *name, WFlags f)
 	: visualTopLevel(name,f)
 	, mw(this)
 {
 	orderType = OT_NONE;
 
 	setView(&mw, false);
+
+	connect(parent, SIGNAL(ressourcesUpdated(void)), &mw, SLOT(ressourcesUpdated(void)));
 
 	/* orders buttons */
 	for (int i=0; i< 11; i++) {

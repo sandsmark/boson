@@ -25,6 +25,8 @@
 #include "visualTopLevel.h"
 
 
+class BosonApp;
+
 /** 
   * This class is the global object concerning a view : where, how large..
   * It's also the place where selections are handled
@@ -36,7 +38,7 @@ class bosonTopLevel : public visualTopLevel
 	Q_OBJECT
 	
 public:
-	bosonTopLevel(const char *name = 0L, WFlags f = WDestructiveClose );
+	bosonTopLevel(BosonApp *parent, const char *name = 0L, WFlags f = WDestructiveClose );
 
 	enum orderType_t { OT_NONE =-1 , OT_FACILITY=10, OT_MOBILE=11};
 
