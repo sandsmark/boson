@@ -40,15 +40,20 @@
     </p>
 
     <p>
-      <h4>5. Cursor at the Edge of the window</h4>
+      <h4>5. Mouse wheel scrolling</h4>
+      You can scroll with the mouse wheel, hold the Alt key for horizontal scrolling.
+    </p>
+    
+    <p>
+      <h4>6. Cursor at the Edge of the window</h4>
       <i>(Currently at an experimental state!)</i><br>
       You can also scroll by moving the cursor at the edge of the window. Move
-      the
-      cursor at the edge of the main window and wait a moment. That's it.
-      Please note that you you may have some problems with this if you are not
-      playing
-      in fullscreen mode. We recommend to play in fullscreen mode!
+      the cursor at the edge of the main window and wait a moment. That's it.<br>
+      Please note that you may have some problems with this if you are not
+      playing in fullscreen mode. We recommend to play in fullscreen mode!
     </p>
+    
 
-#include "footer.wml" before_url="index.html" before_text="In the game" after_url="buildfac.html" after_text="Building facilities"    
+#include "nav.wml" before_url="configure.html" before_text="Configure Boson" after_url="buildfac.html" after_text="Building facilities"    
+#include "footer.wml"
 

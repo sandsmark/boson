@@ -41,5 +41,5 @@
       Now boson should be installed on your system.
     </p>
     
-#include "footer.wml" before_url="started.html" before_text="Getting started" after_url="game/index.html" after_text="In the game"
-
+#include "nav.wml" before_url="started.html" before_text="Getting started" after_url="game/index.html" after_text="In the game"
+#include "footer.wml"

@@ -17,4 +17,5 @@
     </table>
     
 
-#include "footer.wml" before_url="oiltower.html" before_text="Oil tower" after_url="barracks.html" after_text="Barracks"        
+#include "nav.wml" before_url="oiltower.html" before_text="Oil Tower" after_url="barracks.html" after_text="Barracks"        
+#include "footer.wml"

@@ -6,7 +6,7 @@
 	<tr>
 		<td><img src="comsat.png" border="0">&nbsp;</td>
 		<td valign="top"><img src="../none.png" border="0" height="30"><br>
-		A comsat is needed for the mini map.
+		A Comsat is needed for the Mini Map.
 	</tr>
 	<tr><td><br>&nbsp</td></tr>
     </table>
@@ -18,4 +18,5 @@
     </table>
     
 
-#include "footer.wml" before_url="warfactory.html" before_text="War factory" after_url="techcenter.html" after_text="Tech center"        
+#include "nav.wml" before_url="warfactory.html" before_text="War Factory" after_url="techcenter.html" after_text="Tech Center"        
+#include "footer.wml"

@@ -22,4 +22,5 @@
 	<tr><td>Shoot at air units</td><td>Yes</td></tr>
     </table>
 
-#include "footer.wml" before_url="ship.html" before_text="Ship" after_url="../faq.html" after_text="FAQ"    
+#include "nav.wml" before_url="ship.html" before_text="Ship" after_url="../faq.html" after_text="FAQ"    
+#include "footer.wml"

@@ -6,7 +6,8 @@
 	<tr>
 		<td><img src="turret.png" border="0">&nbsp;</td>
 		<td valign="top"><img src="../none.png" border="0" height="30"><br>
-		Nothing yet.
+		A revolving tower constructed of thick iron plates, within which cannon are mounted.<br>
+		Turrets are used on vessels of war and on land.
 	</tr>
 	<tr><td><br>&nbsp</td></tr>
     </table>
@@ -22,4 +23,5 @@
     </table>
     
 
-#include "footer.wml" before_url="helipad.html" before_text="Helipad" after_url="samsite.html" after_text="Sam-Site"        
+#include "nav.wml" before_url="helipad.html" before_text="Helipad" after_url="samsite.html" after_text="Sam-Site"        
+#include "footer.wml"

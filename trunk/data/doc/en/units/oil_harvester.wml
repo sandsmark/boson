@@ -18,4 +18,5 @@
 	<tr><td>Resources</td><td>100</td></tr>
     </table>
 
-#include "footer.wml" before_url="mineral_harvester.html" before_text="Mineral Harvester" after_url="quad.html" after_text="Quad"
+#include "nav.wml" before_url="mineral_harvester.html" before_text="Mineral Harvester" after_url="quad.html" after_text="Quad"
+#include "footer.wml"

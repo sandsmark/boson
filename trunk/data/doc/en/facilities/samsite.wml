@@ -22,4 +22,5 @@
     </table>
     
 
-#include "footer.wml" before_url="turret.html" before_text="Turret" after_url="../units/index.html" after_text="Units"        
+#include "nav.wml" before_url="turret.html" before_text="Turret" after_url="../units/index.html" after_text="Units"        
+#include "footer.wml"

@@ -1,13 +1,13 @@
 #include "top.wml"
     <h1>
-      Facilities - Oil tower
+      Facilities - Oil Tower
     </h1>
     <table border="0">
 	<tr>
 		<td><img src="oiltower.png" border="0">&nbsp;</td>
 		<td valign="top"><img src="../none.png" border="0" height="30"><br>
-		You send your <a href="../units/oilharvester.html">oil harvesters</a> to the oil towers to to fill them up.
-		Than you can send it to your <a href="refinery.html">oil refinery</a> to increase your oil value.</td>
+		You send your <a href="../units/oilharvester.html">Oil Harvesters</a> to the oil towers to to fill them up.
+		Than you can send it to your <a href="refinery.html">Oil Refinery</a> to increase your oil value.</td>
 	</tr>
 	<tr><td><br>&nbsp</td></tr>
     </table>
@@ -18,4 +18,5 @@
     </table>
     
 
-#include "footer.wml" before_url="refinery.html" before_text="Oil refinery" after_url="powerplant.html" after_text="Powerplant"        
+#include "nav.wml" before_url="refinery.html" before_text="Oil Refinery" after_url="powerplant.html" after_text="Powerplant"        
+#include "footer.wml"

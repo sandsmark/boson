@@ -1,0 +1,8 @@
+The Boson handbook uses wml.
+
+Things you should know:
+
+- If you edit the wml file you should use the "make_html_files" script
+  because make doesn't rebuild the wml files if you change something.
+  
+- Don't commit html files ;)

@@ -7,7 +7,7 @@ case "$1" in
 	echo -f "file.wml - Make only one file"
 	;;
  -f)	
-	wmk -f $2 -I includes -F includes
+	wmk -f $2 --include `pwd`/includes
 	;;
  *)	
 	clear

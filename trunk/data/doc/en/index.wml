@@ -1,9 +1,10 @@
 #include "top.wml"
+<img src="$(basedir)boson.png" border="0" alt="Boson Header Image" /><br>
     <h1>
       The Boson Handbook
     </h1>
     <p>
-      Revision 0.02 - 11th of August, 2002
+      Revision 0.03 - 17th of August, 2002
     </p>
     <h3>
       What is this?
@@ -33,12 +34,12 @@
           <dt>2 <a href="game/index.html">In the game</a></dt>
           <dd>
             <dl>
-<!--              <dt>2.1 <a href="game/setup.html">Setting up a game</a></dt> -->
-              <dt>2.1 <a href="game/scrolling.html">Scrolling</a></dt>
+	      <dt>2.1 <a href="game/configure.html">Configure Boson</a></dt>
+              <dt>2.2 <a href="game/scrolling.html">Scrolling</a></dt>
               <dt>2.3 <a href="game/buildfac.html">Building facilities</a></dt>
               <dt>2.4 <a href="game/buildunit.html">Building units</a></dt>
-<!--              <dt>2.5 <a href="game/moving.html">Moving Units</a></dt>
-              <dt>2.6 <a href="game/attack.html">Attacking</a></dt>
+              <dt>2.5 <a href="game/moving.html">Moving Units</a></dt>
+<!--              <dt>2.6 <a href="game/attack.html">Attacking</a></dt>
               <dt>2.7 <a href="game/repair.html">Repairing</a></dt>-->
             </dl>
           </dd>
@@ -90,5 +91,5 @@
       </dd>
     </dl>
     
-#include "footer.wml" after_url="intr.html" after_text="Introduction"      
- 
+#include "nav.wml" after_url="intr.html" after_text="Introduction"      
+#include "footer.wml"

@@ -21,4 +21,5 @@
 		<tr><td>Documentation</td><td><a href="mailto:felix.seeger@gmx.de">Felix Seeger</a></td></tr>
 
 	</table>
-#include "footer.wml" before_url="faq.html" before_text="FAQ"
+#include "nav.wml" before_url="faq.html" before_text="FAQ"
+#include "footer.wml"

@@ -1,0 +1,57 @@
+#include "top.wml"
+
+    <h1>
+      Configure Boson
+    </h1>
+    <p>
+	You can configure Boson if you select Settings, Configure Boson in the menu while the game is running.<br>
+    </p>
+<h3>General</h3>
+    <p><h5>Arrow Key Steps</h5>
+    Here you can configure the sensity of the arrow keys of your keyboard.
+    </p>
+<!--
+    <p><h5>Game Speed</h5>
+    Game speed.
+    </p>
+    <p><h5>Update Interval</h5>
+    Update
+    </p>
+    <p><h5>Command Frame Background Pixmap</h5>
+    lkkll
+    </p>
+    <p><h5>Mini Map Scale Factor</h5>
+    98998
+    </p>
+
+
+<h3>Cursor</h3>
+    <p><h5>Cursor</h5>
+    lklk
+    </p>
+    <p><h5>Cursor Theme</h5>
+    sadksajd sadjsakd
+    </p>
+-->
+
+
+<h3>Scrolling</h3>
+<!--    <p><h5>Enable Right Mouse Button Scrolling</h5>
+    lkjlkjklj
+    </p>
+    <p><h5>Enable Middle Mouse Button Scrolling</h5>
+    sdsdsd
+    </p>-->
+    <p><h5>Sensity of cursor at edge of window Scrolling</h5>
+    <p>
+    You can scroll if you move the cursor at the edge of the main window.
+    Here you can configure the time boson waits until the scrolling starts.
+    </p>
+<!--
+<h3>Sounds</h3>
+     <p><h5>Disable unit sounds</h5>
+     Disable sounds
+     </p>
+-->
+#include "nav.wml" before_url="index.html" before_text="In the game" after_url="scrolling.html" after_text="Scrolling"
+#include "footer.wml"
