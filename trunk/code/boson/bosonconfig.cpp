@@ -21,6 +21,7 @@
 #include <kconfig.h>
 #include <kapplication.h>
 #include <klocale.h>
+#include <kdebug.h>
 
 QString BosonConfig::localPlayerName(KConfig* conf)
 {
@@ -68,3 +69,25 @@ int BosonConfig::gameSpeed(KConfig* conf)
  return speed;
 }
 
+int BosonConfig::commandFramePosition(KConfig* conf)
+{
+ if (!conf) {
+	conf = kapp->config();
+ }
+ QString oldGroup = conf->group();
+ conf->setGroup("Boson");
+ int pos = conf->readNumEntry("CommandFramePosition", 0);
+ conf->setGroup(oldGroup);
+ return pos;
+}
+
+void BosonConfig::saveCommandFramePosition(int pos, KConfig* conf)
+{
+ if (!conf) {
+	conf = kapp->config();
+ }
+ QString oldGroup = conf->group();
+ conf->setGroup("Boson");
+ conf->writeEntry("CommandFramePosition", pos);
+ conf->setGroup(oldGroup);
+}

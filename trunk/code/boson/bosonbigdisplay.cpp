@@ -51,7 +51,6 @@ struct ConstructUnit
 	Unit* factory; // facility that constructs the unit (or NULL in editor mode)
 	Player* owner; // the owner of the unit - probably only for editor mode.
 	int groundType;
-	unsigned char version;
 };
 
 class BosonBigDisplay::BosonBigDisplayPrivate
@@ -495,7 +494,6 @@ void BosonBigDisplay::editorActionClicked(const QPoint& pos)
  } else if (d->mConstruction.groundType > -1) {
 //	kdDebug() << "place ground " << d->mConstruction.groundType << endl;
 	int version = 0; // FIXME: random()%4;
-	// int version = d->mConstruction.version; // one of these lines - random here or in command frame?
 	emit signalAddCell(x, y, d->mConstruction.groundType, version);
 	if (Cell::isBigTrans(d->mConstruction.groundType)) {
 		emit signalAddCell(x + 1, y, 
@@ -528,11 +526,10 @@ void BosonBigDisplay::slotWillConstructUnit(int unitType, Unit* factory, Player*
  }
 }
 
-void BosonBigDisplay::slotWillPlaceCell(int groundType, unsigned char version)
+void BosonBigDisplay::slotWillPlaceCell(int groundType)
 {
  d->mConstruction.unitType = -1;
  d->mConstruction.groundType = groundType;
- d->mConstruction.version = version;
 }
 
 void BosonBigDisplay::slotUnitChanged(Unit* unit)

@@ -19,14 +19,14 @@
 #ifndef __BOSONUNITVIEW_H__
 #define __BOSONUNITVIEW_H__
 
-#include <qframe.h>
+#include "bosoncommandwidget.h"
 
 class Unit;
 
 /**
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
  **/
-class BosonUnitView : public QFrame
+class BosonUnitView : public BosonCommandWidget
 {
 	Q_OBJECT
 public:
@@ -36,7 +36,7 @@ public:
 	/**
 	 * @param unit The unit to be shown or 0 for none
 	 **/
-	void setUnit(Unit* unit);
+	virtual void setUnit(Unit* unit);
 
 protected:
 
@@ -46,13 +46,10 @@ protected:
 	 **/
 	void setOverview(QPixmap* p);
 
-
 	void hideAll();
-	void hideMobile();
-	void hideFacility();
 	void showGeneral();
-	void showMobile();
-	void showFacility();
+
+	virtual void displayUnitPixmap(int unitType, Player* owner);
 
 private:
 	class BosonUnitViewPrivate;

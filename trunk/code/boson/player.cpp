@@ -213,15 +213,15 @@ void Player::slotUnitPropertyChanged(KGamePropertyBase* prop)
 	case UnitBase::IdWork:
 	case UnitBase::IdId:
 	case UnitBase::IdDamage:
-	case UnitBase::IdReload:
+//	case UnitBase::IdReload:
 	case Unit::IdDirection:
 	case Unit::IdWaypoints:
 	case Unit::IdFix_ConstructionState:
 	case Unit::IdFix_Productions:
 	case Unit::IdFix_ProductionState:
-	case Unit::IdReloadState: // perhaps emit this as well - display timer "when can unit shoot" or so
 		// these IDs are not to be displayed in BosonUnitView.
 		break;
+	case Unit::IdReloadState: // perhaps emit this as well - display timer "when can unit shoot" or so
 	case UnitBase::IdHealth:
 	case UnitBase::IdArmor:
 	case UnitBase::IdShields:

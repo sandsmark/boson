@@ -78,7 +78,7 @@ public slots:
 	 **/
 	void slotWillConstructUnit(int unitType, Unit* facility, Player* owner);
 
-	void slotWillPlaceCell(int groundType, unsigned char version);
+	void slotWillPlaceCell(int groundType);
 
 	void slotUnitChanged(Unit* unit);
 

@@ -38,6 +38,9 @@ public:
 	static void saveGameSpeed(int speed, KConfig* conf = 0);
 	static int gameSpeed(KConfig* conf = 0);
 
+	static void saveCommandFramePosition(int pos, KConfig* conf = 0);
+	static int commandFramePosition(KConfig* conf = 0);
+
 protected:
 	static void changeGroupGeneral(KConfig* conf);
 };

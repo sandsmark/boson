@@ -94,55 +94,43 @@ signals:
 	 **/
 	void signalUnitSelected(int unitType, Unit* factory, Player* owner);
 
-	void signalCellSelected(int groundType, unsigned char version);
+	/**
+	 * Emitted when a unit should be produced.
+	 **/
+	void signalProduceUnit(int unitType, Unit* factory, Player* owner);
+
+	/**
+	 * @param groundType The tile number. See @ref BosonTiles::tile to get
+	 * the actual pixmap.
+	 **/
+	void signalCellSelected(int groundType);
 
 protected slots:
-	/**
-	 * A button has been clicked. Emit the correct signal.
-	 **/
-	void slotHandleOrder(int button);
-
 	/**
 	 * If the order buttons should currently display tiles (cells) this
 	 * updates the buttons.
 	 **/
 	void slotRedrawTiles();
 
+	void slotProduceUnit(int unitType);
+
 protected:
 	/**
-	 * Set the orderbutton button to produce unitType
-	 **/
-	void setOrderButton(unsigned int button, int unitType, Player* owner);
-
-	/**
-	 * Call @ref setOrderButton for a list of unitTypes
+	 * Set the orderbuttons to containt a list of producable units.
 	 * @param produceList A list containing UnitTypeIDs.
 	 **/
 	void setOrderButtons(QValueList<int> produceList, Player* owner);
 
 	/**
-	 * Make sure that at least no order buttons exist. Create order buttons
-	 * if not.
+	 * Make sure that at least @p count order buttons exist. 
 	 **/
-	void initOrderButtons(unsigned int no);
+	void initOrderButtons(unsigned int count);
 
 	/**
-	 * @param id The order button to hide or -1 for all
+	 * Hide all buttons
 	 **/
 	void hideOrderButtons();
 	
-	/**
-	 * Set the pixmap of the order button. See @ref
-	 * SpeciesTheme::smallOverview
-	 **/
-	void setOrderPixmap(unsigned int id, const QPixmap& p);
-
-	/**
-	 * Set the tooltip of the button. The tooltip should show the name of
-	 * the unit that can be constructed with this button.
-	 **/
-	void setOrderTooltip(unsigned int id, const QString& text);
-
 private:
 	void init();
 	void initEditor();

@@ -74,6 +74,11 @@ public:
 		mLocalPlayer = 0;
 		mMap = 0;
 		mScenario = 0;
+
+		mUnitTips = 0;
+
+		mTopLayout = 0;
+		mFrameLayout = 0;
 	}
 	
 	BosonBigDisplay* mBigDisplay;
@@ -105,11 +110,14 @@ BosonWidget::BosonWidget(QWidget* parent)
 {
  init();
 
+ /*
  d->mTopLayout = new QHBoxLayout(this, 5); // FIXME: 5 is hardcoded
  d->mFrameLayout = new QVBoxLayout();
  d->mTopLayout->addWidget(d->mBigDisplay);
  d->mTopLayout->addLayout(d->mFrameLayout);
  d->mFrameLayout->addWidget(d->mMiniMap, 0, AlignHCenter);
+ */
+ slotCommandFramePosition(BosonConfig::commandFramePosition());
 
 // the map is also found here. This is currently only used on startup to load
 // the cells (aka map - they contain the groundtypes) and the initial units.
@@ -451,7 +459,8 @@ void BosonWidget::slotGamePreferences()
  connect(dlg, SIGNAL(finished()), dlg, SLOT(slotDelayedDestruct())); // seems not to be called if you quit with "cancel"!
  dlg->setGameSpeed(d->mBoson->gameSpeed());
  dlg->setArrowScrollSpeed(d->mArrowKeyStep);
-// dlg->setCommandFramePosition(); // TODO
+ dlg->setCommandFramePosition((d->mTopLayout->findWidget(d->mBigDisplay) == 0) ?
+		OptionsDialog::Right : OptionsDialog::Left);
 
  connect(dlg, SIGNAL(signalArrowScrollChanged(int)),
 		this, SLOT(slotArrowScrollChanged(int)));
@@ -549,12 +558,12 @@ void BosonWidget::addEditorCommandFrame()
 { // remember to call this *after* init() - otherwise connect()s won't work
  d->mCommandFrame = new BosonCommandFrame(this, true);
 
- connect(d->mCommandFrame, SIGNAL(signalUnitSelected(int,Unit*, Player*)), 
+ connect(d->mCommandFrame, SIGNAL(signalProduceUnit(int, Unit*, Player*)), 
 		d->mBigDisplay, SLOT(slotWillConstructUnit(int, Unit*, Player*))); // in addEditorCommandFrame()
  connect(d->mBigDisplay, SIGNAL(signalSingleUnitSelected(Unit*)), 
 		d->mCommandFrame, SLOT(slotShowSingleUnit(Unit*)));
- connect(d->mCommandFrame, SIGNAL(signalCellSelected(int,unsigned char)), 
-		d->mBigDisplay, SLOT(slotWillPlaceCell(int, unsigned char))); // in addEditorCommandFrame()
+ connect(d->mCommandFrame, SIGNAL(signalCellSelected(int)), 
+		d->mBigDisplay, SLOT(slotWillPlaceCell(int)));
  connect(this, SIGNAL(signalEditorLoadTiles(const QString&)), 
 		d->mCommandFrame, SLOT(slotEditorLoadTiles(const QString&)));
  insertCommandFrame(d->mCommandFrame);
@@ -564,7 +573,7 @@ void BosonWidget::addGameCommandFrame()
 { // remember to call this *after* init() - otherwise connect()s won't work
  d->mCommandFrame = new BosonCommandFrame(this, false);
 
- connect(d->mCommandFrame, SIGNAL(signalUnitSelected(int,Unit*, Player*)),
+ connect(d->mCommandFrame, SIGNAL(signalProduceUnit(int, Unit*, Player*)),
 		d->mBigDisplay, SLOT(slotWillConstructUnit(int, Unit*, Player*))); // in addEditorCommandFrame()
  connect(d->mBigDisplay, SIGNAL(signalSingleUnitSelected(Unit*)),
 		d->mCommandFrame, SLOT(slotShowSingleUnit(Unit*)));
@@ -722,6 +731,8 @@ void BosonWidget::saveConfig()
  }
  BosonConfig::saveLocalPlayerName(d->mLocalPlayer->name());
  BosonConfig::saveGameSpeed(d->mBoson->gameSpeed());
+ BosonConfig::saveCommandFramePosition((d->mTopLayout->findWidget(d->mBigDisplay) == 0) ?
+		 (int)OptionsDialog::Right : (int)OptionsDialog::Left);
 }
 
 void BosonWidget::slotSendChangeSpecies(const QString& species)
@@ -790,9 +801,13 @@ void BosonWidget::slotInitFogOfWar()
 
 void BosonWidget::slotCommandFramePosition(int pos)
 {
+ if (d->mFrameLayout) {
+	delete d->mFrameLayout;
+ }
+ if (d->mTopLayout) {
+	delete d->mTopLayout;
+ }
 // redo layout
- delete d->mFrameLayout;
- delete d->mTopLayout;
  d->mTopLayout = new QHBoxLayout(this, 5); // FIXME: 5 is hardcoded
  d->mFrameLayout = new QVBoxLayout();
  d->mFrameLayout->addWidget(d->mMiniMap, 0, AlignHCenter);
