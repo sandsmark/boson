@@ -59,6 +59,7 @@ public:
 	void initFogOfWar(Player* p);
 
 	double scale() const;
+	double zoom() const;
 
 signals:
 	void signalReCenterView(const QPoint& pos);
@@ -89,6 +90,11 @@ public slots:
 	 * the radar station is constructed or destroyed.
 	 **/
 	void slotShowMap(bool show);
+
+protected slots:
+	void slotZoomIn();
+	void slotZoomOut();
+	void slotZoomDefault();
 
 protected:
 	void setPoint(int x, int y, const QColor& color);

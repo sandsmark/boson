@@ -28,13 +28,17 @@
 #include "defines.h"
 
 #include <kdebug.h>
+#include <klocale.h>
 
 #include <qpixmap.h>
 #include <qpainter.h>
+#include <qpushbutton.h>
+#include <qlayout.h>
 
 #include "bosonminimap.moc"
 
 #define COLOR_UNKNOWN black // fog of war
+#define ZOOM_STEP 0.5
 
 class BosonMiniMap::BosonMiniMapPrivate
 {
@@ -44,15 +48,27 @@ public:
 		mMapWidth = -1;
 		mMapHeight = -1;
 
+		mPixmap = 0;
+		mZoomIn = 0;
+		mZoomOut = 0;
+		mZoomDefault = 0;
 	}
 
 	int mMapWidth;
 	int mMapHeight;
 
-	QSize mSize;
-	QPoint mPos;
+	QSize mSelectionSize;
+	QPoint mSelectionPos;
 
 	double mScale;
+	double mZoom;
+	double mPainterMoveX;
+	double mPainterMoveY;
+
+	QWidget* mPixmap;
+	QPushButton* mZoomIn;
+	QPushButton* mZoomOut;
+	QPushButton* mZoomDefault;
 };
 
 BosonMiniMap::BosonMiniMap(QWidget* parent) : QWidget(parent)
@@ -64,8 +80,28 @@ BosonMiniMap::BosonMiniMap(QWidget* parent) : QWidget(parent)
  mCanvas = 0;
  mUseFog = false;
  d->mScale = 1.0;
+ d->mZoom = 1.0;
+ d->mPainterMoveX = 0;
+ d->mPainterMoveY = 0;
 
  setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
+
+ QGridLayout* grid  = new QGridLayout(this, 5, 3);
+ d->mPixmap = new QWidget(this);
+ grid->addMultiCellWidget(d->mPixmap, 0, 5, 0, 1);
+ d->mZoomIn = new QPushButton(this);
+ d->mZoomIn->setText(i18n("Zoom In"));
+ grid->addWidget(d->mZoomIn, 0, 2);
+ d->mZoomOut = new QPushButton(this);
+ d->mZoomOut->setText(i18n("Zoom Out"));
+ grid->addWidget(d->mZoomOut, 2, 2);
+ d->mZoomDefault = new QPushButton(this);
+ d->mZoomDefault->setText(i18n("Zoom Default"));
+ grid->addWidget(d->mZoomDefault, 4, 2);
+
+ connect(d->mZoomIn, SIGNAL(clicked()), this, SLOT(slotZoomIn()));
+ connect(d->mZoomOut, SIGNAL(clicked()), this, SLOT(slotZoomOut()));
+ connect(d->mZoomDefault, SIGNAL(clicked()), this, SLOT(slotZoomDefault()));
 }
 
 BosonMiniMap::~BosonMiniMap()
@@ -97,12 +133,11 @@ void BosonMiniMap::slotCreateMap(int w, int h)
  delete mGround;
  d->mMapWidth = w;
  d->mMapHeight = h;
-// mGround = new QPixmap(mapWidth() * scale(), mapHeight() * scale());
  mGround = new QPixmap(mapWidth(), mapHeight());
  mGround->fill(COLOR_UNKNOWN);
 
- setMinimumWidth(mGround->width() + 5);
- setMinimumHeight(mGround->height() + 5);
+ d->mPixmap->setFixedWidth(mGround->width());
+ d->mPixmap->setFixedHeight(mGround->height());
  updateGeometry();
 }
 
@@ -162,15 +197,28 @@ void BosonMiniMap::paintEvent(QPaintEvent*)
  if (!ground()) {
 	return;
  }
- if (scale() != boConfig->miniMapScale()) {
+ if (scale() != boConfig->miniMapScale()
+		|| zoom() != boConfig->miniMapZoom()) {
 	d->mScale = boConfig->miniMapScale();
-	setMinimumWidth(mGround->width() * scale() + 5);
-	setMinimumHeight(mGround->height() * scale() + 5);
+	d->mZoom = boConfig->miniMapZoom();
+	d->mPixmap->setFixedWidth(mGround->width() * scale());
+	d->mPixmap->setFixedHeight(mGround->height() * scale());
+	d->mPixmap->erase();
  }
+ QRect selectionRect(d->mSelectionPos, d->mSelectionSize);
  QPainter p;
- p.begin(this);
+ p.begin(d->mPixmap);
  p.scale(scale(), scale());
-// p.scale(zoom(), zoom()); // TODO
+ p.scale(zoom(), zoom());
+ if (zoom() > 1.0) {
+	d->mPainterMoveX = d->mSelectionPos.x() + mGround->width() / zoom() <= mGround->width() ?
+			-d->mSelectionPos.x() :
+			-(mGround->width() - mGround->width() / zoom());
+	d->mPainterMoveY = d->mSelectionPos.y() + mGround->height() / zoom() <= mGround->height() ?
+			-d->mSelectionPos.y() :
+			-(mGround->height() - mGround->height() / zoom());
+	p.translate(d->mPainterMoveX, d->mPainterMoveY);
+ }
  p.drawPixmap(0, 0, *ground());
  
  // the little rectangle
@@ -179,7 +227,7 @@ void BosonMiniMap::paintEvent(QPaintEvent*)
  // be at the border (frame?).
  p.setPen(white);
  p.setRasterOp(XorROP);
- p.drawRect( QRect(d->mPos, d->mSize) );
+ p.drawRect(selectionRect);
 
  p.end();
 }
@@ -190,12 +238,12 @@ void BosonMiniMap::mousePressEvent(QMouseEvent *e)
 	return;
  }
  if (e->button() == LeftButton) {
-	emit signalReCenterView( e->pos() / scale() );
+	emit signalReCenterView( QPoint(e->pos().x() / (scale() * zoom()) - d->mPainterMoveX, e->pos().y() / (scale() * zoom()) - d->mPainterMoveY) );
 	e->accept();
 	return;
  } else if (e->button() == RightButton) {
-	emit signalMoveSelection(e->pos().x() / scale(), 
-			e->pos().y() / scale());
+	emit signalMoveSelection(e->pos().x() / (scale() * zoom()) - d->mPainterMoveX, 
+			e->pos().y() / (scale() * zoom()) - d->mPainterMoveY);
  }
 }
 
@@ -219,13 +267,13 @@ void BosonMiniMap::slotAddUnit(Unit* unit, int x, int y)
 
 void BosonMiniMap::slotMoveRect(int x, int y)
 {
- d->mPos = QPoint(x / BO_TILE_SIZE, y / BO_TILE_SIZE);
+ d->mSelectionPos = QPoint(x / BO_TILE_SIZE, y / BO_TILE_SIZE);
  repaint(false);
 }
 
 void BosonMiniMap::slotResizeRect(int w, int h)
 {
- d->mSize = QSize(w / BO_TILE_SIZE, h / BO_TILE_SIZE);
+ d->mSelectionSize = QSize(w / BO_TILE_SIZE, h / BO_TILE_SIZE);
  repaint(false);
 }
 
@@ -352,6 +400,11 @@ double BosonMiniMap::scale() const
  return d->mScale;
 }
 
+double BosonMiniMap::zoom() const
+{
+ return d->mZoom;
+}
+
 void BosonMiniMap::slotShowMap(bool s)
 {
  if (s) {
@@ -359,5 +412,29 @@ void BosonMiniMap::slotShowMap(bool s)
  } else {
 	hide();
  }
+}
+
+void BosonMiniMap::slotZoomIn()
+{
+ if (boConfig->miniMapZoom() + ZOOM_STEP >= 3.0) {
+	return;
+ }
+ boConfig->setMiniMapZoom(boConfig->miniMapZoom() + ZOOM_STEP);
+ repaint();
+}
+
+void BosonMiniMap::slotZoomOut()
+{
+ if (boConfig->miniMapZoom() - ZOOM_STEP <= 0.1) {
+	return;
+ }
+ boConfig->setMiniMapZoom(boConfig->miniMapZoom() - ZOOM_STEP);
+ repaint();
+}
+
+void BosonMiniMap::slotZoomDefault()
+{
+ boConfig->setMiniMapZoom(1.0);
+ repaint();
 }
 

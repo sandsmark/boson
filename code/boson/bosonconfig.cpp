@@ -51,6 +51,7 @@ BosonConfig::BosonConfig(KConfig* conf)
  d->mDebugMode = DebugNormal;
  mArrowKeyStep = 10;
  mMiniMapScale = 2.0;
+ mMiniMapZoom = 1.0;
 
  mDisableSound = false;
 
@@ -271,6 +272,19 @@ double BosonConfig::readMiniMapScale(KConfig* conf)
  return s;
 }
 
+void BosonConfig::saveMiniMapZoom(KConfig* conf)
+{
+ conf->setGroup("Boson");
+ conf->writeEntry("MiniMapZoom", miniMapZoom());
+}
+
+double BosonConfig::readMiniMapZoom(KConfig* conf)
+{
+ conf->setGroup("Boson");
+ double z = conf->readDoubleNumEntry("MiniMapZoom", miniMapZoom());
+ return z;
+}
+
 void BosonConfig::saveArrowKeyStep(KConfig* conf)
 {
  conf->setGroup("Boson");
@@ -320,6 +334,7 @@ void BosonConfig::reset(KConfig* conf)
  setCommandButtonsPerRow(readCommandButtonsPerRow(conf));
  setArrowKeyStep(readArrowKeyStep(conf));
  setMiniMapScale(readMiniMapScale(conf));
+ setMiniMapZoom(readMiniMapZoom(conf));
 
  conf->setGroup(oldGroup);
 }
@@ -337,6 +352,7 @@ void BosonConfig::save(bool editor, KConfig* conf)
  saveCommandButtonsPerRow(conf);
  saveArrowKeyStep(conf);
  saveMiniMapScale(conf);
+ saveMiniMapZoom(conf);
  if (!editor) {
 	// place configs here that should not be saved in editor mode
  }
