@@ -620,6 +620,7 @@ public:
 	BosonGLMiniMapRendererPrivate()
 	{
 		mMapTexture = 0;
+		mGLMapTexture = 0;
 	}
 	BoMatrix mModelviewMatrix;
 	QImage mOrigLogo; // original size
@@ -628,6 +629,7 @@ public:
 	GLubyte* mMapTexture;
 	int mMapTextureWidth;
 	int mMapTextureHeight;
+	BoTexture* mGLMapTexture;
 };
 
 BosonGLMiniMapRenderer::BosonGLMiniMapRenderer(const int* viewport)
@@ -654,6 +656,7 @@ BosonGLMiniMapRenderer::BosonGLMiniMapRenderer(const int* viewport)
 
 BosonGLMiniMapRenderer::~BosonGLMiniMapRenderer()
 {
+ delete d->mGLMapTexture;
  delete[] d->mMapTexture;
  delete d;
 }
@@ -712,6 +715,10 @@ void BosonGLMiniMapRenderer::createMap(unsigned int w, unsigned int h, BosonGrou
 	}
  }
 
+ d->mGLMapTexture = new BoTexture(d->mMapTexture,
+		d->mMapTextureWidth, d->mMapTextureHeight,
+		BoTexture::FilterLinear | BoTexture::FormatRGBA |
+		BoTexture::DontCompress | BoTexture::DontGenMipmaps);
 }
 
 void BosonGLMiniMapRenderer::render()
@@ -757,6 +764,7 @@ void BosonGLMiniMapRenderer::renderLogo()
 void BosonGLMiniMapRenderer::renderMiniMap()
 {
  BO_CHECK_NULL_RET(d->mMapTexture);
+ BO_CHECK_NULL_RET(d->mGLMapTexture);
  glPushMatrix();
  glLoadIdentity();
  d->mModelviewMatrix.loadIdentity();
@@ -765,9 +773,7 @@ void BosonGLMiniMapRenderer::renderMiniMap()
  d->mModelviewMatrix.scale(mZoom, mZoom, 1.0f); // AB: maybe do this on the texture matrix stack
 // glScalef(mZoom, mZoom, 1.0f); // AB: maybe do this on the texture matrix stack
 
- BoTexture tex(d->mMapTexture, d->mMapTextureWidth, d->mMapTextureHeight,
-     BoTexture::FilterLinear | BoTexture::FormatRGBA);
- tex.bind();
+ d->mGLMapTexture->bind();
 
  renderQuad();
 
@@ -832,6 +838,12 @@ void BosonGLMiniMapRenderer::setPoint(int x, int y, const QColor& color)
  d->mMapTexture[(y * d->mMapTextureWidth + x) * 4 + 1] = color.green();
  d->mMapTexture[(y * d->mMapTextureWidth + x) * 4 + 2] = color.blue();
  d->mMapTexture[(y * d->mMapTextureWidth + x) * 4 + 3] = 255; // redundant! is already set on initialization
+ if (d->mGLMapTexture) {
+	glEnable(GL_TEXTURE_2D);
+	d->mGLMapTexture->bind();
+	glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE,
+			&d->mMapTexture[(y * d->mMapTextureWidth + x) * 4]);
+ }
 }
 
 void BosonGLMiniMapRenderer::setAlignment(int f)
