@@ -29,7 +29,8 @@
 #include <qcombobox.h>
 #include <qcheckbox.h>
 
-#include <klocale.h>
+#include <klocale.h>		// i18n()
+#include <kmessagebox.h>	// KMessageBox::information()
 #include <kstdaction.h>
 
 #include "common/log.h"
@@ -42,15 +43,11 @@
 
 #include "editorBigDisplay.h"
 #include "visualMiniDisplay.h"
-#include "visual.h"
+#include "game.h"
 
 #define VIEW_ONE	1
 #define VIEW_MANY	2
 
-/*
- * editor/main.cpp
- */
-QPixmap			*bigBackground; 
 
 #define BITBLT(_x,_y) bitBlt(p, (_x), (_y) , bigBackground, GET_BIG_X(g), GET_BIG_Y(g), BO_TILE_SIZE, BO_TILE_SIZE)
 static void fillGroundPixmap( QPixmap *p, int g)
@@ -470,6 +467,17 @@ void editorTopLevel::makeCommandGui(void)
 
 void editorTopLevel::slot_addPlayer(void)
 {
+	uint np = ecanvas->nb_player();
+
+	if (np>=BOSON_MAX_PLAYERS-1) {
+  		KMessageBox::sorry(0, i18n("You can't have more than 10 players in this version"), i18n("too much player") );
+		logf(LOG_ERROR, "too much player asked, should not be possible (grayed menu)");
+		return;
+	}
+	who = np; ecanvas->addPlayer();
+	if (np>=BOSON_MAX_PLAYERS-1) {
+		// XXX todo : gray the menu item
+	}
 	otype = OT_FACILITY;
 	setSelected( species[who]->getBigOverview(FACILITY_CMDBUNKER) );
 	emit setSelectedObject (otype, FACILITY_CMDBUNKER);	// need to be after the setSelected
