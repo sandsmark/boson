@@ -145,7 +145,7 @@ class BosonPath
         float c; // Cost of cell
         short int level;
     };
-    Marking mark[SEARCH_STEPS * 2 + 1][SEARCH_STEPS * 2 + 1];
+    Marking mMark[SEARCH_STEPS * 2 + 1][SEARCH_STEPS * 2 + 1];
 };
 
 
