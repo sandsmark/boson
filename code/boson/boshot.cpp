@@ -174,7 +174,7 @@ bool boShot::loadBig(shot_style style, int version)
 			return false;
 		}
 		pix_l.append(p);
-		pp = new QPoint( 0, 0);
+		pp = new QPoint( p->width() >> 1, p->height() >> 1); // hotspot in the center
 		point_l.append(pp);
 	}
 
