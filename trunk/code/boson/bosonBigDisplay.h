@@ -1,9 +1,9 @@
 /***************************************************************************
-                          editorBigDisplay.cpp  -  description                              
+                          bosonBigDisplay.h  -  description                              
                              -------------------                                         
 
     version              : $Id$
-    begin                : Tue Sep 21 01:18:00 CET 1999
+    begin                : Sat Jan  9 19:35:36 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
     email                : capricel@enst.fr                                     
@@ -18,42 +18,26 @@
  *                                                                         *
  ***************************************************************************/
 
-#include "../common/log.h"
+#ifndef BOSONBIGDISPLAY_H 
+#define BOSONBIGDISPLAY_H 
 
-#include "editorBigDisplay.h"
-#include "visualView.h"
-#include "visualCell.h"
-#include "editorField.h"
+#include "visualBigDisplay.h"
+#include "bosonView.h"
 
-editorBigDisplay::editorBigDisplay(visualView *v, QWidget *p, const char *n, WFlags f)
-	:visualBigDisplay(v,p,n,f)
+class bosonBigDisplay : public visualBigDisplay
 {
+  Q_OBJECT
 
-	g = GROUND_UNKNOWN;
-}
+public:
+	bosonBigDisplay(bosonView *v, QWidget *parent=0, const char *name=0L, WFlags f=0);
+	/* from display classes */
+	virtual void actionClicked(int, int);		// selecting, moving...
 
-void editorBigDisplay::actionClicked(int mx, int my)
-{
-	editorField *field	= (((editorField*)(view->field)));
-	int	x		= mx / BO_TILE_SIZE,
-		y		= my / BO_TILE_SIZE;
+protected:
+	bosonView	*bview;
 
+};
 
-	boAssert(x>=0);
-	boAssert(x<field->width());
-	boAssert(y>=0);
-	boAssert(y<field->height());
-
-	if (GROUND_UNKNOWN == g) return; // no ground is selected
-
-	if (IS_BIG_TRANS(g) )
-	       if ( x+1>=field->maxX || y+1>=field->maxY) return;
-
-	
-	field->deleteCell(x,y);
-	field->setCell(x,y,g);
-
-	view->field->update();
-}
+#endif // BOSONBIGDISPLAY_H
 
 

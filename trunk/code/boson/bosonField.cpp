@@ -87,7 +87,7 @@ void bosonField::createFix(facilityMsg_t &m)
 {
 	playerFacility *f;
 
-	assert(m.who < BOSON_MAX_PLAYERS);
+	assert(m.who < vpp.nb_player);
 
 	f = new playerFacility(&m);
 	facility.insert(m.key, f);
@@ -122,20 +122,15 @@ void bosonField::move(moveMsg_t &m)
 	mobile.find(m.key)->s_moveBy(m.dx, m.dy, m.direction);
 }
 
-void bosonField::requestAction(boBuffer *buffer)
+void bosonField::requestAction(void)
 {
 	QIntDictIterator<playerMobUnit> mobIt(mobile);
-	//QIntDictIterator<playerFacility> fixIt(facility);
-	int		dx, dy, dir;
-	bosonMsgData	data;
+	QIntDictIterator<playerFacility> fixIt(facility);
 
-	for (mobIt.toFirst(); mobIt; ++mobIt) {
-		if (mobIt.current()->getWantedMove(dx,dy,dir)){
-			data.move.key	= mobIt.currentKey();
-			data.move.dx	= dx;
-			data.move.dy	= dy;
-			data.move.direction = dir;
-			sendMsg(buffer, MSG_MOBILE_MOVE_R, sizeof(data.move), &data);
-			}
-		}
+	for (mobIt.toFirst(); mobIt; ++mobIt)
+		mobIt.current()->getWantedAction();
+	for (fixIt.toFirst(); fixIt; ++fixIt)
+		fixIt.current()->getWantedAction();
 }
+
+

@@ -29,6 +29,8 @@
 //#include "speciesTheme.h"
 #include "game.h"
 
+
+
 /*
  * playerMobUnit
  */
@@ -44,17 +46,22 @@ playerMobUnit::playerMobUnit(mobileMsg_t *msg, QObject* parent=0, const char *na
 {
 	asked_dx = asked_dy = 0;
 	turnTo(4); ///orzel : should be random
+	target = 0l;
 }
 
+playerMobUnit::~playerMobUnit()
+{
+	emit dying(this);
+}
 
 #define VECT_PRODUCT(dir) (pos_x[dir]*(ldy) - pos_y[dir]*(ldx))
 
-int playerMobUnit::getWantedMove(int &dx, int &dy, int &dir)
+bool playerMobUnit::getWantedMove(bosonMsgData *msg)
 {
 	int ldx, ldy;
 	int vp1, vp2, vp3;
 	int newdir;
-
+	
 	switch(state){
 		default:
 			logf(LOG_ERROR, "playerMobUnit::getWantedMove : unknown state");
@@ -80,12 +87,11 @@ int playerMobUnit::getWantedMove(int &dx, int &dy, int &dir)
 				}
 			if (newdir != direction) {
 				turnTo(newdir); ///orzel : is this really useful
-				dx = dy = 0; dir = direction;
+				msg->move.dx = msg->move.dy = 0; msg->move.direction = direction;
 				return 1;
 				}
 			turnTo(newdir); // turning anyway
-			return 0; // no move asked
-			break;
+			if (state != MUS_MOVING) return 0;
 
 		case MUS_MOVING:
 			ldx = dest_x - x() ; ldy= dest_y - y();
@@ -99,16 +105,16 @@ int playerMobUnit::getWantedMove(int &dx, int &dy, int &dir)
 			if ( ( abs(ldx) + abs(ldy) ) < abs (mobileProp[type].speed) ) { ///orzel should be square
 				asked_dx = ldx; asked_dy = ldy;
 				}
-			dx = asked_dx ; dy = asked_dy; dir = direction;
+			msg->move.dx = asked_dx ; msg->move.dy = asked_dy; msg->move.direction = direction;
 
 			if (checkMove( asked_dx, asked_dy)) return 1;
 
 			if (asked_dy && checkMove( 0, asked_dy)) {
-				dx = asked_dx = 0;
+				msg->move.dx = asked_dx = 0;
 				return 1;
 				}
 			if (asked_dx && checkMove( asked_dx, 0)) {
-				dy = asked_dy = 0;
+				msg->move.dy = asked_dy = 0;
 				return 1;
 				}
 
@@ -204,17 +210,49 @@ void playerMobUnit::turnTo(int newdir)
 }
 
 
-int playerMobUnit::getWantedAction()
+void playerMobUnit::getWantedAction()
 {
-	return 0; // no action
+	bosonMsgData	data;
+
+	if (who != who_am_i) return;
+
+	/* movve ?*/
+	if (getWantedMove(&data)) {
+		data.move.key		= key;
+		sendMsg(buffer, MSG_MOBILE_MOVE_R, sizeof(data.move), &data);
+	}
+
+	if (getWantedShoot(&data)) {
+		data.shoot.key		= key;
+		sendMsg(buffer, MSG_UNIT_SHOOT, sizeof(data.shoot), &data);
+	}
 }
 
+
+bool playerMobUnit::getWantedShoot(bosonMsgData *msg)
+{
+	int dx, dy;
+	int range = mobileProp[type].range;
+
+	if (!target) return false;		// no target
+	if (range<=0) return false;		// Unit can't shoot
+
+	dx = x() - target->_x(); dy = y() - target->_y();
+
+	if (range*range < dx*dx + dy*dy) return false; // too far
+
+	// ok, let's shoot it
+	msg->shoot.target_key = target->key;
+	return true;
+}
 
 
 /***** server orders *********/
 void playerMobUnit::doMoveBy(int dx, int dy)
 {
 	moveBy(dx,dy);
+
+	emit sig_move(dx, dy);
 	if (sp_up) sp_up->moveBy(dx,dy);
 	if (sp_down) sp_down->moveBy(dx,dy);
 }
@@ -240,8 +278,11 @@ if ( MUS_MOVING != state && (dx!=0 || dy!=0) ) {
 
 //printf("      dx = %d,       dy = %d\n", dx, dy);
 //printf("asked_dx = %d, asked_dy = %d\n", asked_dx, asked_dy);
+
+/*
 if (asked_dx !=0 && asked_dy !=0 && (dx != asked_dx || dy != asked_dy) )
 	logf(LOG_ERROR, "playerMobUnit::s_moveBy : unexpected dx,dy");
+*/
 if (dir != direction)
 	logf(LOG_ERROR, "playerMobUnit::s_moveBy : unexpected direction");
 
@@ -265,6 +306,18 @@ if (x()==dest_x && y()==dest_y) {
 
 void playerMobUnit::u_goto(int mx, int my) // not the same as QwSprite::moveTo
 {
+	if (target) {
+		disconnect(target, 0, this, 0); // target isn't connected to 'this' anymore
+		target = 0l;
+		//puts("u_goto disconnecting target");
+	}
+	do_goto(mx, my);
+}
+	
+	
+void playerMobUnit::do_goto(int mx, int my)
+{
+
 	dest_x = mx; dest_y = my;
 	if (x()==dest_x || y()==dest_y) return;
 
@@ -281,6 +334,38 @@ void playerMobUnit::u_stop(void)
 }
 
 
+void playerMobUnit::u_attack(Unit *u)
+{
+	if (target) {
+		disconnect(target, 0, this, 0); // target isn't connected to 'this' anymore
+	}
+
+	target = u;
+	//puts("assigning target");
+
+	connect( u, SIGNAL(dying(Unit*)), this, SLOT(targetDying(Unit*)) );
+	connect( u, SIGNAL(sig_move(int,int)), this, SLOT(targetMoveBy(int,int)) );
+
+	do_goto(u->_x(), u->_y());
+
+}
+
+
+void playerMobUnit::targetDying(Unit *t)
+{
+	boAssert (target == t);
+	//puts("target = 0l");
+	target = 0l;
+	// disconnection is handled by target destructor (in Qt)
+}
+
+
+void playerMobUnit::targetMoveBy(int dx, int dy)
+{
+	do_goto(dest_x+dx, dest_y+dy);
+}
+
+
 /*
  * playerFacility
  */
@@ -289,11 +374,43 @@ playerFacility::playerFacility(facilityMsg_t *msg, QObject* parent=0L, const cha
 {
 }
 
+playerFacility::~playerFacility()
+{
+	//puts("~playerFacility");
+	emit dying(this);
+}
+
 
 void playerFacility::s_setState(int s)
 {
 	boAssert(frame()==s-1);
 	frame(s);
+}
+
+
+void playerFacility::getWantedAction()
+{
+
+	if (who != who_am_i) return;
+/*
+	bosonMsgData	data;
+
+	if (getWantedShoot(&data) {
+		data.shoot.key		= key;
+		sendMsg(buffer, MSG_UNIT_SHOOT, sizeof(data.shoot), &data);
+	}
+*/
+}
+
+
+void playerFacility::targetDying(Unit*)
+{
+//	target = 0l;
+}
+
+
+void playerFacility::targetMoveBy(int dx, int dy)
+{
 }
 
 

@@ -53,18 +53,18 @@ enum facilityType {
 
 
 /*
-	GROUND_WATER = 0,
-//	GROUND_DEEP_WATER = 1,
+	GROUND_DEEP_WATER = 0,
+	GROUND_WATER = 1,
 	GROUND_GRASS,
 	GROUND_DESERT,
 */
-#define GET_BIT(bb)	(1l<<(bb))
+#define GET_BIT(bb)		(1l<<(bb))
 #define BO_GO_WATER		GET_BIT(GROUND_WATER)
-//#define BO_GO_DEEP_WATER	GET_BIT(GROUND_DEEP_WATER)
+#define BO_GO_DEEP_WATER	GET_BIT(GROUND_DEEP_WATER)
 #define BO_GO_GRASS		GET_BIT(GROUND_GRASS)
 #define BO_GO_DESERT		GET_BIT(GROUND_DESERT)
 
-#define BO_GO_SEA		(BO_GO_WATER/* | BO_GO_DEEP_WATER*/)
+#define BO_GO_SEA		(BO_GO_WATER | BO_GO_DEEP_WATER)
 #define BO_GO_EARTH		(BO_GO_GRASS | BO_GO_DESERT)
 #define BO_GO_AIR		(0xfffff)
 
@@ -100,6 +100,7 @@ struct mobileProperties_t {
 	int	width;		// pixel-size
 	int	height;		// pixel-size
 	int	visibility;	// how far it can see
+	int	range;		// how far it can send weapons
 /* ... to here : shoudn't be changed, as general type assume this is here, in this order */
 
 	int 	speed;		// how far it may travel (in pixels) during one jiffie
@@ -134,6 +135,7 @@ struct facilityProperties_t  {
 	int	width;		// tile-size
 	int	height;		// tile-size
 	int	visibility;	// how far it can see
+	int	range;		// how far it can send weapons
 /* ... to here : shoudn't be changed, as general type assume this is here, in this order */
 
 	};
