@@ -191,7 +191,6 @@ signals:
 protected:
 	bool loadDescriptionFromFile(const QByteArray& xml);
 	bool loadMapFromFile(const QByteArray& xml, const QByteArray& heightMapImage);
-	bool loadMapFromXML(const QByteArray& xml, BosonMap* map);
 	bool loadScenarioFromFile(const QByteArray& xml);
 
 	QString saveDescriptionToFile();
