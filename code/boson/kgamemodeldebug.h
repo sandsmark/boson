@@ -69,8 +69,8 @@ private:
  * This widget is most useful in borender, but could also be used in the main
  * boson debug dialog.
  *
- * Here the user can select a model from a list (see @ref addModel and @ref
- * addTheme). For this model pretty much all available data are displayed.
+ * Here the user can select a model from a list (see @ref addFile).
+ * For this model pretty much all available data are displayed.
  * Currently we only re-parse the .3ds file. In the future wi might also display
  * additional data from @ref BosonModel.
  *
@@ -94,13 +94,16 @@ public:
 	 * BosonModel, so we need to do so.
 	 * @param name The text for the combo box. QString::null for the index.
 	 **/
-	void addModel(const QString& file, const QString& name = QString::null);
+	void addFile(const QString& file, const QString& name = QString::null);
 
 	/**
-	 * Calls @ref addModel for all units in this theme. (maybe for
-	 * non-units, too, don't know yet
+	 * Add all .3ds files found in @p dir (recursively).
+	 *
+	 * Files that were added previously using @ref addFile are discarded,
+	 * you can use this function to add any files that might have been
+	 * missed.
 	 **/
-	void addTheme(SpeciesTheme* theme);
+	void addFiles(const QString& dir);
 
 	/**
 	 * @return A text displaying the compontents of the RGBA argument
