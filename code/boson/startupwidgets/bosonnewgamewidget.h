@@ -52,7 +52,7 @@ class BosonNewGameWidget : public BosonStartWidgetBase
 {
 	Q_OBJECT
 public:
-	BosonNewGameWidget(QWidget* parent);
+	BosonNewGameWidget(BosonStartupNetwork* interface, QWidget* parent);
 	~BosonNewGameWidget();
 
 private:
@@ -81,7 +81,7 @@ public slots:
 	 * Called when user clicks on "Start game" button. Sends a message to
 	 * @ref Boson which emits a signal, which @ref slotStart is connected to
 	 **/
-	virtual void slotStartGameClicked();
+//	virtual void slotStartGameClicked();
 
 	virtual void slotStart();
 
@@ -168,7 +168,6 @@ signals:
 	void signalSetLocalPlayer(Player* player);
 
 protected:
-	virtual void sendNewGame();
 	virtual void setCurrentPlayField(BosonPlayField* field);
 
 	// AB: do NOT move to public!
@@ -188,7 +187,7 @@ private:
 private:
 	QPtrDict<KPlayer> mItem2Player;
 	KPlayer* mHighlightedPlayer;
-	QColor mPlayercolor;
+	QColor mPlayerColor;
 	QValueList<QColor> mAvailableColors;
 	bool mAdmin;
 	int mMap;

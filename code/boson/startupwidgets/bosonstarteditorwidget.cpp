@@ -29,6 +29,7 @@
 #include "../bosonmap.h"
 #include "../bosonscenario.h"
 #include "../cell.h"
+#include "bosonstartupnetwork.h"
 #include "bodebug.h"
 
 #include <klocale.h>
@@ -42,8 +43,8 @@
 #include <qvgroupbox.h>
 #include <qhbox.h>
 
-BosonStartEditorWidget::BosonStartEditorWidget(QWidget* parent)
-    : BosonStartWidgetBase(parent)
+BosonStartEditorWidget::BosonStartEditorWidget(BosonStartupNetwork* interface, QWidget* parent)
+    : BosonStartWidgetBase(interface, parent)
 {
  if (!boGame) {
 	boError() << k_funcinfo << "NULL game" << endl;
@@ -206,12 +207,7 @@ void BosonStartEditorWidget::slotStart()
 		emit signalSetLocalPlayer(p);
 	}
  }
- sendNewGame();
-}
-
-void BosonStartEditorWidget::sendNewGame()
-{
- boGame->sendMessage(0, BosonMessage::IdNewEditor);
+ networkInterface()->sendNewGame(true);
 }
 
 void BosonStartEditorWidget::initPlayFields()

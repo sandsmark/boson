@@ -39,12 +39,13 @@ class KPlayer;
 class KGamePropertyBase;
 class TopWidget;
 class BosonPlayField;
+class BosonStartupNetwork;
 
 class BosonStartEditorWidget : public BosonStartWidgetBase
 {
 	Q_OBJECT
 public:
-	BosonStartEditorWidget(QWidget* parent);
+	BosonStartEditorWidget(BosonStartupNetwork* interface, QWidget* parent);
 	~BosonStartEditorWidget();
 
 public slots:
@@ -58,7 +59,7 @@ protected slots:
 
 protected:
 	virtual void setCurrentPlayField(BosonPlayField* field);
-	virtual void sendNewGame();
+//	virtual void sendNewGame();
 
 	void initNewMap();
 

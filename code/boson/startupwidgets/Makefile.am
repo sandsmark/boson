@@ -3,6 +3,7 @@ INCLUDES = -I$(top_srcdir)/boson/bodebug $(all_includes)
 noinst_LTLIBRARIES = libbosonstartupwidgets.la
 
 libbosonstartupwidgets_la_SOURCES = \
+	bosonstartupnetwork.cpp \
 	bosonstartupwidget.cpp \
 	bosonwelcomewidget.cpp\
 	bosonnetworkoptionswidget.cpp \

@@ -29,6 +29,7 @@
 #include "../boson.h"
 #include "../bosonplayfield.h"
 #include "../bosonscenario.h"
+#include "bosonstartupnetwork.h"
 #include "bodebug.h"
 
 #include <klocale.h>
@@ -51,8 +52,8 @@
 // layouts, strange names for the spacers (which might be replaced by normal
 // stretches).
 // short: qt designer code
-BosonNewGameWidget::BosonNewGameWidget(QWidget* parent)
-    : BosonStartWidgetBase(parent)
+BosonNewGameWidget::BosonNewGameWidget(BosonStartupNetwork* interface, QWidget* parent)
+    : BosonStartWidgetBase(interface, parent)
 {
  if (!boGame) {
 	boError() << k_funcinfo << "NULL Boson object" << endl;
@@ -203,7 +204,7 @@ BosonNewGameWidget::BosonNewGameWidget(QWidget* parent)
  connect(mRemovePlayerButton, SIGNAL(clicked()), this, SLOT(slotRemovePlayer()));
  connect(mCancelButton, SIGNAL(clicked()), this, SIGNAL(signalCancelled()));
  connect(mNetworkButton, SIGNAL(clicked()), this, SLOT(slotNetworkOptions()));
- connect(mStartGameButton, SIGNAL(clicked()), this, SLOT(slotStart()));
+ connect(mStartGameButton, SIGNAL(clicked()), this, SLOT(slotStartGameClicked()));
  connect(mAddAIButton, SIGNAL(clicked()), this, SLOT(slotAddAIPlayer()));
  connect(mPlayersList, SIGNAL(highlighted(QListBoxItem*)), this, SLOT(slotPlayerSelected(QListBoxItem*)));
 
@@ -217,7 +218,8 @@ BosonNewGameWidget::~BosonNewGameWidget()
 {
  // Save stuff like player name, color etc.
  boConfig->saveLocalPlayerName(mNameEdit->text());
- boConfig->saveLocalPlayerColor(mPlayercolor);
+ boConfig->saveLocalPlayerColor(mPlayerColor);
+ boConfig->saveLocalPlayerMap(playFieldIdentifier());
 
  boConfig->saveComputerPlayerName(mAddAIName->text());
 }
@@ -241,8 +243,8 @@ void BosonNewGameWidget::initPlayer()
  if (mPlayer->speciesTheme()) {
 	boDebug() << k_funcinfo << "Player has speciesTheme already loaded, reloading" << endl;
  }
- mPlayercolor = boConfig->readLocalPlayerColor();
- mPlayer->loadTheme(SpeciesTheme::speciesDirectory(SpeciesTheme::defaultSpecies()), mPlayercolor);
+ mPlayerColor = boConfig->readLocalPlayerColor();
+ mPlayer->loadTheme(SpeciesTheme::speciesDirectory(SpeciesTheme::defaultSpecies()), mPlayerColor);
  mChatWidget->setFromPlayer(mPlayer);
 }
 
@@ -312,48 +314,29 @@ void BosonNewGameWidget::initColors()
 
 void BosonNewGameWidget::slotMyNameChanged()
 {
- if (!localPlayer()) {
-	boError() << k_funcinfo << "NULL local player" << endl;
-	return;
- }
+ BO_CHECK_NULL_RET(localPlayer());
  if (mNameEdit->text() != localPlayer()->name()) {
-	localPlayer()->setName(mNameEdit->text());
+	networkInterface()->sendChangePlayerName(localPlayer(), mNameEdit->text());
  }
 }
 
 void BosonNewGameWidget::slotMyColorChanged(int index)
 {
- if (!localPlayer()) {
-	boError() << k_funcinfo << "NULL local player" << endl;
-	return;
- }
+ BO_CHECK_NULL_RET(localPlayer());
+ mPlayerColor = mAvailableColors[index];
 
- mPlayercolor = mAvailableColors[index];
-
- QByteArray buffer;
- QDataStream stream(buffer, IO_WriteOnly);
- stream << (Q_UINT32)localPlayer()->id();
- stream << (Q_UINT32)mPlayercolor.rgb();
- boGame->sendMessage(buffer, BosonMessage::ChangeTeamColor);
+ networkInterface()->sendChangeTeamColor(localPlayer(), mPlayerColor);
 }
 
 void BosonNewGameWidget::slotMySpeciesChanged(int index)
 {
- if (!localPlayer()) {
-	boError() << k_funcinfo << "NULL local player" << endl;
-	return;
- }
+ BO_CHECK_NULL_RET(localPlayer());
 
  if (index >= (int)mSpeciesIndex2Identifier.count()) {
 	boError() << k_funcinfo << "invalid index " << index << endl;
 	return;
  }
- QByteArray buffer;
- QDataStream stream(buffer, IO_WriteOnly);
- stream << (Q_UINT32)localPlayer()->id();
- stream << mSpeciesIndex2Identifier[index];
- stream << mPlayercolor; //d->boGame->availableTeamColors().first().rgb();
- boGame->sendMessage(buffer, BosonMessage::ChangeSpecies);
+ networkInterface()->sendChangeSpecies(localPlayer(), mSpeciesIndex2Identifier[index], mPlayerColor);
 }
 
 void BosonNewGameWidget::slotPlayerJoinedGame(KPlayer* p)
@@ -448,14 +431,6 @@ void BosonNewGameWidget::slotColorChanged(Player*)
  initColors();
 }
 
-void BosonNewGameWidget::slotStartGameClicked()
-{
- if (!boGame->isAdmin()) {
-	KMessageBox::sorry(this, i18n("Only ADMIN can start a game"));
-	return;
- }
- BosonStartWidgetBase::slotStartGameClicked();
-}
 void BosonNewGameWidget::slotStart()
 {
  if (!boGame->isAdmin()) {
@@ -467,30 +442,35 @@ void BosonNewGameWidget::slotStart()
         "Current map supports only %1 players, currently, there are %2 players in the game.\n"
         "Please remove some players.").arg(mMinPlayers).arg(boGame->playerCount()),
         i18n("Too many players"));
-  }
- else if ((int)boGame->playerCount() < mMinPlayers) {
+ } else if ((int)boGame->playerCount() < mMinPlayers) {
 	KMessageBox::sorry(this, i18n("There are too few players in game.\n"
 			"Current map requires at least %1 players, currently, there are only %2 players in the game.\n"
 			"Please add some players.").arg(mMinPlayers).arg(boGame->playerCount()),
 			i18n("Too few players"));
  } else {
-	sendNewGame();
+	slotMyNameChanged();
+	networkInterface()->sendNewGame(false);
  }
 }
 
 void BosonNewGameWidget::slotAddAIPlayer()
 {
-  if ((int)boGame->playerCount() >= mMaxPlayers) {
+ BO_CHECK_NULL_RET(boGame);
+ boDebug() << k_funcinfo << endl;
+ if ((int)boGame->playerCount() >= mMaxPlayers) {
 	KMessageBox::sorry(this, i18n("There are too many players in the game.\n"
 			"Current map supports only %1 players.\n").arg(mMaxPlayers),
 			i18n("Too many players"));
-            return;
+	return;
  }
- 
- BO_CHECK_NULL_RET(boGame);
- boDebug() << k_funcinfo << endl;
+
  Player* p = new Player();
  p->setName(mAddAIName->text());
+
+ // the color is dangerous concerning network and so!
+ // it'd be better to first add the player and then change the color using a
+ // network message. unfortunately we can't send a message, since we do not yet
+ // have the ID of the new player.
  QColor color = boGame->availableTeamColors().first();
  p->loadTheme(SpeciesTheme::speciesDirectory(SpeciesTheme::defaultSpecies()), color);
 
@@ -510,7 +490,7 @@ void BosonNewGameWidget::slotRemovePlayer()
  if (mHighlightedPlayer == localPlayer()) {
 	emit signalCancelled();
  } else {
-	boGame->removePlayer(mHighlightedPlayer);
+	networkInterface()->removePlayer(mHighlightedPlayer);
  }
 }
 
@@ -552,10 +532,4 @@ void BosonNewGameWidget::slotSetAdmin(bool admin)
  mAdmin = admin;
 }
 
-void BosonNewGameWidget::sendNewGame()
-{
-// emit signalSetLocalPlayer(mPlayer); // AB: might be obsolete because of signalAddLocalPlayer(). removed for now.
- slotMyNameChanged();
- boGame->sendMessage(0, BosonMessage::IdNewGame);
-}
 
