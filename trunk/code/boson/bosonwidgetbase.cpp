@@ -37,7 +37,6 @@
 #include "editorbigdisplayinput.h"
 #include "boselection.h"
 #include "global.h"
-#include "top.h"
 #include "bodebug.h"
 #include "bosonprofiling.h"
 #include "optionsdialog.h"
@@ -57,6 +56,7 @@
 #include <kgame/kgamedebugdialog.h>
 #include <kgame/kgamepropertyhandler.h>
 #include <klineedit.h>
+#include <kdockwidget.h>
 
 #include <qlayout.h>
 #include <qptrlist.h>
@@ -84,19 +84,18 @@ public:
 	BosonWidgetBasePrivate()
 	{
 		mCommandFrame = 0;
-		mCommandFrameDock = 0;
-
 		mChat = 0;
-		mChatDock = 0;
+
+		mActionDebugPlayers = 0;
+		mActionZoom = 0;
+		mActionChat = 0;
+		mActionCmdFrame = 0;
 
 		mScript = 0;
 	}
 
 	BosonCommandFrameBase* mCommandFrame;
-	KDockWidget* mCommandFrameDock;
-
 	BoGameChatWidget* mChat;
-	KDockWidget* mChatDock;
 
 	KActionMenu* mActionDebugPlayers;
 	KSelectAction* mActionZoom;
@@ -110,12 +109,11 @@ public:
 	BosonScript* mScript;
 };
 
-BosonWidgetBase::BosonWidgetBase(TopWidget* top, QWidget* parent)
-    : QWidget( parent, "BosonWidgetBase" ), KXMLGUIClient(/*FIXME: clientParent!*/)
+BosonWidgetBase::BosonWidgetBase(QWidget* parent)
+    : QWidget( parent, "BosonWidgetBase" )
 {
  d = new BosonWidgetBasePrivate;
  d->mInitialized = false;
- mTop = top;
 
  mMiniMap = 0;
  mDisplayManager = 0;
@@ -134,11 +132,6 @@ BosonWidgetBase::~BosonWidgetBase()
  d->mPlayers.clear();
  // LocalPlayerInput has been deleted already
  mLocalPlayerInput = 0;
- if (mTop && mTop->factory()) {
-	mTop->factory()->removeClient(this);
- }
- delete d->mCommandFrameDock;
- delete d->mChatDock;
 
  delete mCursor;
 
@@ -164,11 +157,11 @@ void BosonWidgetBase::setDisplayManager(BoDisplayManager* displayManager)
 
 BosonCanvas* BosonWidgetBase::canvas() const
 {
- return mTop->canvas();
+ return boGame->canvasNonConst();
 }
 
 #include <kstandarddirs.h> //locate()
-void BosonWidgetBase::init()
+void BosonWidgetBase::init(KDockWidget* chatDock, KDockWidget* commandFrameDock)
 {
  // NOTE: order of init* methods is very important here, so don't change it,
  //  unless you know what you're doing!
@@ -177,8 +170,8 @@ void BosonWidgetBase::init()
  }
  d->mInitialized = true;
  initMiniMap();
- initChat();
- initCommandFrame();
+ initChat(chatDock);
+ initCommandFrame(commandFrameDock);
  initDisplayManager();
 
  initConnections();
@@ -243,10 +236,8 @@ void BosonWidgetBase::initMiniMap()
 void BosonWidgetBase::initConnections()
 {
  connect(canvas(), SIGNAL(signalUnitRemoved(Unit*)),
-		this, SLOT(slotRemoveUnit(Unit*)));
+		this, SLOT(slotUnitRemoved(Unit*)));
 
- connect(boGame, SIGNAL(signalAddUnit(Unit*, int, int)),
-		canvas(), SLOT(slotAddUnit(Unit*, int, int)));
  connect(boGame, SIGNAL(signalAddUnit(Unit*, int, int)),
 		this, SLOT(slotAddUnit(Unit*, int, int)));
 
@@ -301,20 +292,17 @@ void BosonWidgetBase::addInitialDisplay()
  slotChangeCursor(boConfig->cursorMode(), boConfig->cursorDir());
 }
 
-void BosonWidgetBase::initChat()
+void BosonWidgetBase::initChat(KDockWidget* chatDock)
 {
  // note: we can use the chat widget even for editor mode, e.g. for status
  // messages!
- d->mChatDock = mTop->createDockWidget("chat_dock", 0, 0, i18n("Chat"));
- d->mChatDock->setEnableDocking(KDockWidget::DockTop | KDockWidget::DockBottom);
- d->mChatDock->setDockSite(KDockWidget::DockNone);
- d->mChat = new BoGameChatWidget(d->mChatDock, "chatwidget", boGame, BosonMessage::IdChat);
- connect (d->mChat->chatWidget(), SIGNAL(signalScriptCommand(const QString&)),
+ d->mChat = new BoGameChatWidget(chatDock, "chatwidget", boGame, BosonMessage::IdChat);
+ connect(d->mChat->chatWidget(), SIGNAL(signalScriptCommand(const QString&)),
 		this, SLOT(slotRunScriptLine(const QString&)));
- d->mChatDock->setWidget(d->mChat);
+ chatDock->setWidget(d->mChat);
 
- connect(d->mChatDock, SIGNAL(iMBeingClosed()), this, SLOT(slotChatDockHidden()));
- connect(d->mChatDock, SIGNAL(hasUndocked()), this, SLOT(slotChatDockHidden()));
+ connect(chatDock, SIGNAL(iMBeingClosed()), this, SLOT(slotChatDockHidden()));
+ connect(chatDock, SIGNAL(hasUndocked()), this, SLOT(slotChatDockHidden()));
 }
 
 void BosonWidgetBase::initPlayer()
@@ -400,17 +388,14 @@ void BosonWidgetBase::initBigDisplay(BosonBigDisplayBase* b)
  b->setInputInitialized(true);
 }
 
-void BosonWidgetBase::initCommandFrame()
+void BosonWidgetBase::initCommandFrame(KDockWidget* commandFrameDock)
 {
- d->mCommandFrameDock = mTop->createDockWidget("cmdframe_dock", 0, 0, i18n("Command Frame"));
- d->mCommandFrameDock->setEnableDocking(KDockWidget::DockLeft | KDockWidget::DockRight);
- d->mCommandFrameDock->setDockSite(KDockWidget::DockNone);
- d->mCommandFrame = createCommandFrame(d->mCommandFrameDock);
- d->mCommandFrameDock->setWidget(d->mCommandFrame);
+ d->mCommandFrame = createCommandFrame(commandFrameDock);
+ commandFrameDock->setWidget(d->mCommandFrame);
  d->mCommandFrame->reparentMiniMap(minimap());
 
- connect(d->mCommandFrameDock, SIGNAL(iMBeingClosed()), this, SLOT(slotCmdFrameDockHidden()));
- connect(d->mCommandFrameDock, SIGNAL(hasUndocked()), this, SLOT(slotCmdFrameDockHidden()));
+ connect(commandFrameDock, SIGNAL(iMBeingClosed()), this, SLOT(slotCmdFrameDockHidden()));
+ connect(commandFrameDock, SIGNAL(hasUndocked()), this, SLOT(slotCmdFrameDockHidden()));
 }
 
 void BosonWidgetBase::initLayout()
@@ -420,21 +405,7 @@ void BosonWidgetBase::initLayout()
  QVBoxLayout* topLayout = new QVBoxLayout(this);
  topLayout->addWidget(displayManager());
 
- d->mCommandFrameDock->manualDock(mTop->getMainDockWidget(), KDockWidget::DockLeft, 30);
- d->mChatDock->manualDock(mTop->getMainDockWidget(), KDockWidget::DockBottom, 80);
-
- if (!kapp->config()->hasGroup("BosonGameDock")) {
-	boDebug() << k_funcinfo << "dock config does not exist" << endl;
-	// Dock config isn't saved (probably first start). Hide chat dock (we only
-	//  show commandframe by default)
-	d->mChatDock->changeHideShowState();
-	displayManager()->updateGeometry();  // Hack? Bug in BoDisplayManager?
- }
- else {
-	boDebug() << k_funcinfo << "dock config exists, loading" << endl;
-	mTop->loadGameDockConfig();
- }
- checkDockStatus();
+ emit signalLoadBosonGameDock();
 }
 
 void BosonWidgetBase::changeCursor(BosonCursor* cursor)
@@ -473,7 +444,7 @@ void BosonWidgetBase::slotAddUnit(Unit* unit, int, int)
  slotUnitCountChanged(p);
 }
 
-void BosonWidgetBase::slotRemoveUnit(Unit* unit)
+void BosonWidgetBase::slotUnitRemoved(Unit* unit)
 {
  if (unit->owner() != localPlayer()) {
 	return;
@@ -654,10 +625,10 @@ void BosonWidgetBase::initKActions()
 
  // Dockwidgets show/hide
  d->mActionChat = new KToggleAction(i18n("Show Cha&t"),
-		KShortcut(Qt::CTRL+Qt::Key_C), this, SLOT(slotToggleChatVisible()),
+		KShortcut(Qt::CTRL+Qt::Key_C), this, SIGNAL(signalToggleChatVisible()),
 		actionCollection(), "options_show_chat");
  d->mActionCmdFrame = new KToggleAction(i18n("Show C&ommandframe"),
-		KShortcut(Qt::CTRL+Qt::Key_F), this, SLOT(slotToggleCmdFrameVisible()),
+		KShortcut(Qt::CTRL+Qt::Key_F), this, SIGNAL(signalToggleCmdFrameVisible()),
 		actionCollection(), "options_show_cmdframe");
 
  (void)new KAction(i18n("&Grab Screenshot"), KShortcut(Qt::CTRL + Qt::Key_G),
@@ -738,62 +709,25 @@ void BosonWidgetBase::initKActions()
 
  cheating->setChecked(DEFAULT_CHEAT_MODE);
  slotToggleCheating(DEFAULT_CHEAT_MODE);
- checkDockStatus();
+ emit signalCheckDockStatus();
 }
 
 void BosonWidgetBase::quitGame()
 {
 // this needs to be done first, before the players are removed
  boDebug() << k_funcinfo << endl;
- canvas()->deleteDestroyed();
  boGame->quitGame();
  boDebug() << k_funcinfo << "done" << endl;
 }
 
-bool BosonWidgetBase::isCmdFrameVisible() const
+void BosonWidgetBase::setActionChat(bool chatVisible)
 {
- return d->mCommandFrameDock->isVisible();
+ d->mActionChat->setChecked(chatVisible);
 }
 
-bool BosonWidgetBase::isChatVisible() const
+void BosonWidgetBase::setActionCmdFrame(bool cmdFrameVisible)
 {
- return d->mChatDock->isVisible();
-}
-
-void BosonWidgetBase::setCmdFrameVisible(bool visible)
-{
- if (visible && d->mCommandFrameDock->mayBeShow()) {
-	d->mCommandFrameDock->show();
- } else if (! visible && d->mCommandFrameDock->mayBeHide()) {
-	d->mCommandFrameDock->hide();
- }
-}
-
-void BosonWidgetBase::setChatVisible(bool visible)
-{
- if (visible && d->mChatDock->mayBeShow()) {
-	d->mChatDock->show();
- } else if (! visible && d->mChatDock->mayBeHide()) {
-	d->mChatDock->hide();
- }
-}
-
-void BosonWidgetBase::slotToggleCmdFrameVisible()
-{
- d->mCommandFrameDock->changeHideShowState();
- checkDockStatus();
-}
-
-void BosonWidgetBase::slotToggleChatVisible()
-{
- d->mChatDock->changeHideShowState();
- checkDockStatus();
-}
-
-void BosonWidgetBase::checkDockStatus()
-{
- d->mActionChat->setChecked(isChatVisible());
- d->mActionCmdFrame->setChecked(isCmdFrameVisible());
+ d->mActionCmdFrame->setChecked(cmdFrameVisible);
 }
 
 
@@ -1008,10 +942,8 @@ void BosonWidgetBase::slotGrabScreenshot()
 {
  boDebug() << k_funcinfo << "Taking screenshot!" << endl;
 
-#warning FIXME
- // this should NOT do a reference to mTop!
- // use either parent() or a signal (i.e. move the code to TopWidget)
- QPixmap shot = QPixmap::grabWindow(mTop->winId());
+ // FIXME: maybe use a signal (i.e. move the code to TopWidget)
+ QPixmap shot = QPixmap::grabWindow(parentWidget()->winId());
  QString file = findSaveFileName("boson", "jpg");
  if (file.isNull()) {
 	boWarning() << k_funcinfo << "Can't find free filename???" << endl;
