@@ -16,7 +16,10 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#define GL_GLEXT_PROTOTYPES 1
+
+
+#define GLX_GLXEXT_PROTOTYPES 1
+#define QT_CLEAN_NAMESPACE
 #include "bomeshrenderervbo.h"
 #include "bomeshrenderervbo.moc"
 
@@ -26,12 +29,31 @@
 #include "../bomaterial.h"
 #include "../info/boinfo.h"
 
-#if HAVE_GL_GLEXT_H
-#include <GL/glext.h>
-#endif
-#include <GL/gl.h>
-
 #include <bodebug.h>
+
+#include <GL/gl.h>
+#include <GL/glx.h>
+
+#ifndef GLsizeiptrARB
+typedef int GLsizeiptrARB; // AB: hm?
+#endif
+
+typedef void (*_bo_glDeleteBuffersARB)(GLsizei, const GLuint*);
+typedef void (*_bo_glGenBuffersARB)(GLsizei, GLuint*);
+typedef void (*_bo_glBindBufferARB)(GLenum, GLuint);
+typedef void (*_bo_glBufferDataARB)(GLenum, GLsizeiptrARB, const GLvoid*, GLenum);
+
+static _bo_glDeleteBuffersARB bo_glDeleteBuffersARB = 0;
+static _bo_glGenBuffersARB bo_glGenBuffersARB = 0;
+static _bo_glBindBufferARB bo_glBindBufferARB = 0;
+static _bo_glBufferDataARB bo_glBufferDataARB = 0;
+
+#ifndef GL_ARRAY_BUFFER_ARB
+#define GL_ARRAY_BUFFER_ARB 0x8892
+#endif
+#ifndef GL_STATIC_DRAW_ARB
+#define GL_STATIC_DRAW_ARB 0x88E4
+#endif
 
 class BoMeshRendererModelDataVBO : public BoMeshRendererModelDataVA
 {
@@ -44,9 +66,11 @@ public:
 	~BoMeshRendererModelDataVBO()
 	{
 		if (mVBO) {
-#ifdef GL_ARB_vertex_buffer_object
-			glDeleteBuffersARB(1, &mVBO);
-#endif
+			if (!bo_glDeleteBuffersARB) {
+				BO_NULL_ERROR(bo_glDeleteBuffersARB);
+			} else {
+				bo_glDeleteBuffersARB(1, &mVBO);
+			}
 		}
 	}
 	unsigned int mVBO;
@@ -54,6 +78,21 @@ public:
 
 BoMeshRendererVBO::BoMeshRendererVBO() : BoMeshRendererVertexArray()
 {
+ // try to find the necessary functions
+#ifdef GLX_ARB_get_proc_address
+ bo_glDeleteBuffersARB = (_bo_glDeleteBuffersARB)glXGetProcAddressARB((const GLubyte*)"glDeleteBuffersARB");
+ bo_glGenBuffersARB = (_bo_glGenBuffersARB)glXGetProcAddressARB((const GLubyte*)"glGenBuffersARB");
+ bo_glBindBufferARB = (_bo_glBindBufferARB)glXGetProcAddressARB((const GLubyte*)"glBindBufferARB");
+ bo_glBufferDataARB = (_bo_glBufferDataARB)glXGetProcAddressARB((const GLubyte*)"glBufferDataARB");
+ if (hasVBOExtension()) { // also tests whether the above functions are valid
+	boDebug() << k_funcinfo << "VBO is available" << endl;
+ } else {
+	boDebug() << k_funcinfo << "VBO is NOT available" << endl;
+ }
+#else
+#warning cannot find GLX_ARB_get_proc_address - cant use vbo extension
+ boWarning() << k_funcinfo << "GLX_ARB_get_proc_address not available. please report this with information about your system!" << endl;
+#endif
 }
 
 BoMeshRendererVBO::~BoMeshRendererVBO()
@@ -84,20 +123,18 @@ void BoMeshRendererVBO::initModelData(BosonModel* model)
  BO_CHECK_NULL_RET(data);
 
  const unsigned int pointSize = 8;
-#ifdef GL_ARB_vertex_buffer_object
- if (BoInfo::boInfo()->openGLExtensions().contains("GL_ARB_vertex_buffer_object")) {
-	glGenBuffersARB(1, &data->mVBO);
+ if (hasVBOExtension()) {
+	bo_glGenBuffersARB(1, &data->mVBO);
 	if (data->mVBO == 0) {
 		boError() << k_funcinfo << "no VBO??" << endl;
 	} else {
-		glBindBufferARB(GL_ARRAY_BUFFER_ARB, data->mVBO);
-		glBufferDataARB(GL_ARRAY_BUFFER_ARB,
+		bo_glBindBufferARB(GL_ARRAY_BUFFER_ARB, data->mVBO);
+		bo_glBufferDataARB(GL_ARRAY_BUFFER_ARB,
 				data->mPointCount * pointSize * sizeof(float),
 				data->mPoints,
 				GL_STATIC_DRAW_ARB);
 	}
  }
-#endif // GL_ARB_vertex_buffer_object
 }
 
 void BoMeshRendererVBO::initMeshData(BoMesh* mesh, unsigned int meshIndex)
@@ -136,7 +173,11 @@ void BoMeshRendererVBO::setModel(BosonModel* model)
 	BoMeshRenderer::setModel(model);
 	return;
  }
-#ifdef GL_ARB_vertex_buffer_object
+ if (!hasVBOExtension()) {
+	// if we don't use VBO, we use usual vertex arrays.
+	BoMeshRendererVertexArray::setModel(model);
+	return;
+ }
  BoMeshRendererModelDataVBO* data = (BoMeshRendererModelDataVBO*)model->meshRendererModelData();
  BO_CHECK_NULL_RET(data);
  if (data->mVBO) { // VBO activated
@@ -147,7 +188,7 @@ void BoMeshRendererVBO::setModel(BosonModel* model)
 	void* texelPtr = 0;
 
 	void* startPtr = 0;
-	glBindBufferARB(GL_ARRAY_BUFFER_ARB, data->mVBO);
+	bo_glBindBufferARB(GL_ARRAY_BUFFER_ARB, data->mVBO);
 	// AB: endianness problem?
 #define OFFSET(i) ((i) * sizeof(float))
 	const int stride = 8 * sizeof(float);
@@ -169,10 +210,7 @@ void BoMeshRendererVBO::setModel(BosonModel* model)
 	// must not access data->mPoints anymore then
 	return;
  }
-#endif
 
- // if we don't use VBO, we use usual vertex arrays.
- BoMeshRendererVertexArray::setModel(model);
 }
 
 void BoMeshRendererVBO::render(const QColor* teamColor, BoMesh* mesh, BoMeshLOD* lod)
@@ -185,6 +223,27 @@ void BoMeshRendererVBO::render(const QColor* teamColor, BoMesh* mesh, BoMeshLOD*
 bool BoMeshRendererVBO::useVBO() const
 {
  // TODO: remove
+ return true;
+}
+
+bool BoMeshRendererVBO::hasVBOExtension() const
+{
+ if (!BoInfo::boInfo()->openGLExtensions().contains("GL_ARB_vertex_buffer_object")) {
+	return false;
+ }
+ // AB: testing one of these function should be sufficient
+ if (!bo_glDeleteBuffersARB) {
+	return false;
+ }
+ if (!bo_glGenBuffersARB) {
+	return false;
+ }
+ if (!bo_glBindBufferARB) {
+	return false;
+ }
+ if (!bo_glBufferDataARB) {
+	return false;
+ }
  return true;
 }
 
