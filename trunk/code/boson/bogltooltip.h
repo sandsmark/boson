@@ -137,7 +137,6 @@ public:
 	 **/
 	void unsetItem(BosonItem* item);
 
-protected:
 	void hideTip();
 
 protected slots:

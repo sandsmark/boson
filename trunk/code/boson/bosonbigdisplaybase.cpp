@@ -405,6 +405,100 @@ private:
 	int mOldY;
 };
 
+class PlacementPreview
+{
+public:
+	PlacementPreview()
+	{
+		mPlacementPreviewProperties = 0;
+		mPlacementPreviewModel = 0;
+		mCanPlace = false;
+		mCellPlacementTexture = 0;
+	}
+	~PlacementPreview()
+	{
+		clear();
+	}
+
+	bool hasPreview() const
+	{
+		if (mPlacementPreviewModel != 0 && mPlacementPreviewProperties) {
+			return true;
+		} else if (mCellPlacementTexture) {
+			return true;
+		}
+		return false;
+	}
+	bool isModelPreview() const
+	{
+		if (mPlacementPreviewModel && mPlacementPreviewModel->frame(0)) {
+			return true;
+		}
+		return false;
+	}
+	bool isCellPreview() const
+	{
+		if (mCellPlacementTexture != 0) {
+			return true;
+		}
+		return false;
+	}
+	const QPoint& canvasPos() const
+	{
+		return mCanvasPos;
+	}
+	void setCanvasPos(const QPoint& pos)
+	{
+		mCanvasPos = pos;
+	}
+
+	void setCanPlace(bool canPlace)
+	{
+		mCanPlace = canPlace;
+	}
+	bool canPlace() const
+	{
+		return mCanPlace;
+	}
+
+	void setData(const UnitProperties* prop, BosonModel* model)
+	{
+		mPlacementPreviewProperties = prop;
+		mPlacementPreviewModel = model;
+	}
+	void setData(GLuint cellTexture)
+	{
+		mCellPlacementTexture = cellTexture;
+	}
+	const UnitProperties* unitProperties() const
+	{
+		return mPlacementPreviewProperties;
+	}
+	BosonModel* model() const
+	{
+		return mPlacementPreviewModel;
+	}
+	GLuint cellTexture() const
+	{
+		return mCellPlacementTexture;
+	}
+
+	void clear()
+	{
+		mCellPlacementTexture = 0;
+		mPlacementPreviewProperties = 0;
+		mPlacementPreviewModel = 0;
+		mCanPlace = false;
+	}
+
+private:
+	const UnitProperties* mPlacementPreviewProperties;
+	BosonModel* mPlacementPreviewModel;
+	bool mCanPlace;
+	QPoint mCanvasPos;
+	GLuint mCellPlacementTexture;
+};
+
 
 class BosonBigDisplayBase::BosonBigDisplayBasePrivate
 {
@@ -419,10 +513,6 @@ public:
 		mFps = 0;
 		mFpsTime = 0;
 		mDefaultFont = 0;
-
-		mPlacementPreviewProperties = 0;
-		mPlacementPreviewModel = 0;
-		mPlacementPreviewCanPlace = false;
 
 		mInput = 0;
 		mToolTips = 0;
@@ -480,11 +570,7 @@ public:
 	BoParticleList mParticleList;
 	bool mParticlesDirty;
 
-	const UnitProperties* mPlacementPreviewProperties;
-	BosonModel* mPlacementPreviewModel;
-	bool mPlacementPreviewCanPlace;
-	QPoint mPlacementCanvasPos;
-	GLuint mCellPlacementTexture;
+	PlacementPreview mPlacementPreview;
 
 	BosonBigDisplayInputBase* mInput;
 	BoGLToolTip* mToolTips;
@@ -532,7 +618,6 @@ void BosonBigDisplayBase::init()
  d->mUpdateInterval = 0;
  d->mIsQuit = false;
  d->mParticlesDirty = true;
- d->mCellPlacementTexture = 0;
  d->mDebugMapCoordinates = false;
  d->mDebugShowCellGrid = false;
  d->mDebugMatrices = false;
@@ -903,13 +988,12 @@ void BosonBigDisplayBase::paintGL()
 
  // Facility-placing preview code
  if (displayInput()->actionLocked() && displayInput()->actionType() == ActionBuild &&
-		((d->mPlacementPreviewModel != 0 && d->mPlacementPreviewProperties) ||
-		d->mCellPlacementTexture != 0)) {
+		d->mPlacementPreview.hasPreview()) {
 	// AB: GL_MODULATE is currently default. if we every change it to
 	// GL_REPLACE we should change it here:
 //	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	GLubyte color;
-	if (d->mPlacementPreviewCanPlace) {
+	if (d->mPlacementPreview.canPlace()) {
 		color = 255;
 	} else {
 		color = PLACEMENTPREVIEW_DISALLOW_COLOR;
@@ -918,21 +1002,15 @@ void BosonBigDisplayBase::paintGL()
 	glColor4ub(255, color, color, PLACEMENTPREVIEW_ALPHA);
 
 #warning FIXME: z value!
-	bool modelPreview = false;
-	bool cellPreview = false;
-	if (d->mPlacementPreviewModel && d->mPlacementPreviewModel->frame(0)) {
-		modelPreview = true;
-	}
-	if (d->mCellPlacementTexture != 0) {
-		cellPreview = true;
-	}
+	bool modelPreview = d->mPlacementPreview.isModelPreview();
+	bool cellPreview = d->mPlacementPreview.isCellPreview();
 	const float z = 0.1;
-	QPoint pos(d->mPlacementCanvasPos);
+	QPoint pos(d->mPlacementPreview.canvasPos());
 	int w = 0;
 	int h = 0;
 	if (modelPreview) {
-		w = d->mPlacementPreviewProperties->unitWidth();
-		h = d->mPlacementPreviewProperties->unitHeight();
+		w = d->mPlacementPreview.unitProperties()->unitWidth();
+		h = d->mPlacementPreview.unitProperties()->unitHeight();
 	}
 	float x = ((pos.x() + w / 2)) * BO_GL_CELL_SIZE;
 	float y = ((pos.y() + h / 2)) * BO_GL_CELL_SIZE;
@@ -950,15 +1028,15 @@ void BosonBigDisplayBase::paintGL()
 	y /= BO_TILE_SIZE;
 	glTranslatef(x, -y, z);
 	if (modelPreview) {
-		BoFrame* f = d->mPlacementPreviewModel->frame(0);
+		BoFrame* f = d->mPlacementPreview.model()->frame(0);
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-		d->mPlacementPreviewModel->enablePointer();
+		d->mPlacementPreview.model()->enablePointer();
 		f->renderFrame(&localPlayer()->teamColor());
 		glDisableClientState(GL_VERTEX_ARRAY);
 		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	} else if (cellPreview) {
-		glBindTexture(GL_TEXTURE_2D, d->mCellPlacementTexture);
+		glBindTexture(GL_TEXTURE_2D, d->mPlacementPreview.cellTexture());
 		glBegin(GL_QUADS);
 			glTexCoord2fv(textureUpperLeft);
 			glVertex3f(0.0f, 0.0f, 0.0f);
@@ -2203,7 +2281,14 @@ void BosonBigDisplayBase::leaveEvent(QEvent*)
 void BosonBigDisplayBase::quitGame()
 {
  selection()->clear();
+ d->mToolTips->hideTip();
  d->mIsQuit = true; // don't call paintGL() anymore
+
+ delete[] d->mRenderCells;
+ d->mRenderCellsSize = 0;
+ d->mRenderCellsCount = 0;
+ setCursor(0);
+ d->mPlacementPreview.clear();
 }
 
 bool BosonBigDisplayBase::eventFilter(QObject* o, QEvent* e)
@@ -2989,67 +3074,57 @@ void BosonBigDisplayBase::slotAdvance(unsigned int /*advanceCount*/, bool)
 
 void BosonBigDisplayBase::setPlacementPreviewData(const UnitProperties* prop, bool canPlace)
 {
- d->mCellPlacementTexture = 0;
+ d->mPlacementPreview.clear();
  if (!prop) {
-	d->mPlacementPreviewProperties = 0;
-	d->mPlacementPreviewModel = 0;
-	d->mPlacementPreviewCanPlace = false;
 	return;
  }
  if (!localPlayer()) {
 	boError() << k_funcinfo << "NULL local player" << endl;
-	setPlacementPreviewData(0, false);
 	return;
  }
  if (!localPlayer()->speciesTheme()) {
 	boError() << k_funcinfo << "NULL theme" << endl;
-	setPlacementPreviewData(0, false);
 	return;
  }
- if (d->mPlacementPreviewProperties != prop) {
+ if (d->mPlacementPreview.unitProperties() != prop) {
 	BosonModel* m = localPlayer()->speciesTheme()->unitModel(prop->typeId()); // AB: this does a lookup in a list and therefore should be avoided (this method gets called at least whenever the mouse is moved!)
 	if (!m) {
 		boError() << k_funcinfo << "NULL model for " << prop->typeId() << endl;
-		setPlacementPreviewData(0, false);
 		return;
 	}
 	BoFrame* f = m->frame(0);
 	if (!f) {
 		boError() << k_funcinfo << "NULL frame 0" << endl;
-		setPlacementPreviewData(0, false);
 		return;
 	}
-	d->mPlacementPreviewProperties = prop;
-	d->mPlacementPreviewModel = m;
+	d->mPlacementPreview.setData(prop, m);
  }
- d->mPlacementPreviewCanPlace = canPlace;
- d->mPlacementCanvasPos = cursorCanvasPos();
+ d->mPlacementPreview.setCanPlace(canPlace);
+ d->mPlacementPreview.setCanvasPos(cursorCanvasPos());
 }
 
 void BosonBigDisplayBase::setPlacementCellPreviewData(int groundType, bool canPlace)
 {
+ // we clear anyway - the new texture will be set below
+ d->mPlacementPreview.clear();
  if (!Cell::isValidGround(groundType)) {
 	boWarning() << k_funcinfo << "no valid ground " << groundType << endl;
-	setPlacementPreviewData(0, false);
 	return;
  }
  BO_CHECK_NULL_RET(canvas());
  BosonTiles* tiles = canvas()->tileSet();
  if (!tiles) {
 	boError() << k_funcinfo << "NULL tiles" << endl;
-	setPlacementPreviewData(0, false);
 	return;
  }
  BosonTextureArray* textures = tiles->textures();
  if (!textures) {
 	boError() << k_funcinfo << "no cell textures available" << endl;
-	setPlacementPreviewData(0, false);
 	return;
  }
- d->mCellPlacementTexture = textures->texture(Cell::tile(groundType, 0));
- d->mPlacementPreviewCanPlace = canPlace;
- d->mPlacementCanvasPos = cursorCanvasPos();
- d->mPlacementPreviewModel = 0;
+ d->mPlacementPreview.setData(textures->texture(Cell::tile(groundType, 0)));
+ d->mPlacementPreview.setCanPlace(canPlace);
+ d->mPlacementPreview.setCanvasPos(cursorCanvasPos());
 }
 
 void BosonBigDisplayBase::setDisplayInput(BosonBigDisplayInputBase* input)
