@@ -52,13 +52,14 @@ public:
 	BosonBigDisplayPrivate()
 	{
 		mMouseIO = 0;
-		mLockCursor = false;
+		mLockAction = false;
 		mCursorType = CursorDefault;
 	}
 
 	KGameMouseIO* mMouseIO;
-	bool mLockCursor;
+	bool mLockAction;
 	CursorType mCursorType;
+	UnitAction mActionType;
 };
 
 BosonBigDisplay::BosonBigDisplay(BosonCanvas* c, QWidget* parent) 
@@ -93,32 +94,55 @@ void BosonBigDisplay::actionClicked(const BoAction& action, QDataStream& stream,
 	return;
  }
 
- if (d->mLockCursor) {
-	switch (d->mCursorType) {
-		case CursorMove:
-			if (selection()->hasMobileUnit()) {
-				if (!actionMove(stream, action.canvasPos())) {
-					return;
-				}
+ if (d->mLockAction) {
+	switch (d->mActionType) {
+		case ActionMove:
+		{
+			if (actionMove(stream, action.canvasPos())) {
 				*send = true;
 			}
 			break;
-		case CursorAttack:
+		}
+		case ActionAttack:
 		{
 			Unit* unit = canvas()->findUnitAt(action.canvasPos());
 			if (unit) {
-				if (!actionAttack(stream, action.canvasPos())) {
-					return;
+				if (actionAttack(stream, action.canvasPos())) {
+					*send = true;
 				}
+			}
+			break;
+		}
+		case ActionFollow:
+		{
+			Unit* unit = canvas()->findUnitAt(action.canvasPos());
+			if (unit) {
+				if (actionFollow(stream, action.canvasPos())) {
+					*send = true;
+				}
+			}
+			break;
+		}
+		case ActionMine:
+		{
+			// TODO check if player clicked on oil/minerals
+			if (actionMine(stream, action.canvasPos())) {
+				*send = true;
+			}
+			break;
+		}
+		case ActionRepair:
+		{
+			if (actionRepair(stream, action.canvasPos())) {
 				*send = true;
 			}
 			break;
 		}
 		default:
-			kdError() << k_funcinfo << "Unknown cursortype for locked cursor: " << d->mCursorType << endl;
+			kdError() << k_funcinfo << "Unknown actiontype for locked action: " << d->mActionType << endl;
 			break;
 	}
-	d->mLockCursor = false;
+	d->mLockAction = false;
 	return;
  }
 
@@ -460,7 +484,7 @@ void BosonBigDisplay::updateCursor()
 	return;
  }
 
- if (!d->mLockCursor) {
+ if (!d->mLockAction) {
 	if (!selection()->isEmpty()) {
 		if (selection()->leader()->owner() == localPlayer()) {
 			Unit* unit = ((BosonCanvas*)canvas())->findUnitAt(canvasPos);
@@ -514,6 +538,9 @@ void BosonBigDisplay::addMouseIO(Player* p)
 void BosonBigDisplay::unitAction(int actionType)
 {
  switch ((UnitAction)actionType) {
+	case ActionFollow:
+	case ActionMine:
+	case ActionRepair:
 	case ActionMove:
 		d->mCursorType = CursorMove;
 		break;
@@ -546,18 +573,19 @@ void BosonBigDisplay::unitAction(int actionType)
 
 		QDataStream msg(b, IO_WriteOnly);
 		localPlayer()->forwardInput(msg);
-		d->mLockCursor = false;
+		d->mLockAction = false;
 		return;
 	}
 	default:
 		kdError() << k_funcinfo << "Unknown actionType: " << actionType << endl;
 		return;
  }
- d->mLockCursor = true;
+ d->mActionType = (UnitAction)actionType;
+ d->mLockAction = true;
 }
 
 bool BosonBigDisplay::actionLocked() const
 {
- return d->mLockCursor;
+ return d->mLockAction;
 }
 

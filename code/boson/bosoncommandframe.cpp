@@ -267,7 +267,7 @@ void BoOrderWidget::showUnitActions(Unit* unit)
 {
  kdDebug() << k_funcinfo << endl;
  d->mButtonOffset = 0;  // Should be 0 anyway...
- ensureButtons(3); // 3 is maximum number of actions for now
+ ensureButtons(6); // 6 is maximum number of actions for now
 
  // Order of action buttons: move, attack, stop. Nothing else yet.
  if(unit->isMobile()) {
@@ -275,12 +275,24 @@ void BoOrderWidget::showUnitActions(Unit* unit)
 	resetButton(d->mOrderButton[d->mButtonOffset]);
 	d->mOrderButton[d->mButtonOffset]->setAction(ActionMove, unit->owner());
 	d->mButtonOffset++;
+	// and if it can move, it can follow other units
+	resetButton(d->mOrderButton[d->mButtonOffset]);
+	d->mOrderButton[d->mButtonOffset]->setAction(ActionFollow, unit->owner());
+	d->mButtonOffset++;
  }
 
- if(unit->unitProperties()->canShoot()) {
+ if(unit->unitProperties()->canShoot() && unit->weaponDamage() > 0) {
 	// It can shoot
 	resetButton(d->mOrderButton[d->mButtonOffset]);
 	d->mOrderButton[d->mButtonOffset]->setAction(ActionAttack, unit->owner());
+	d->mButtonOffset++;
+ }
+
+ if(unit->plugin(UnitPlugin::Harvester)) {
+	// it can harvest
+	/// IDEA: maybe have different icons for mine oil and mine minerals
+	resetButton(d->mOrderButton[d->mButtonOffset]);
+	d->mOrderButton[d->mButtonOffset]->setAction(ActionMine, unit->owner());
 	d->mButtonOffset++;
  }
 
@@ -290,6 +302,15 @@ void BoOrderWidget::showUnitActions(Unit* unit)
 	d->mOrderButton[d->mButtonOffset]->setAction(ActionStop, unit->owner());
 	d->mButtonOffset++;
  }
+
+ if(unit->plugin(UnitPlugin::Repair)) {
+	// it can harvest
+	/// IDEA: maybe have different icons for mine oil and mine minerals
+	resetButton(d->mOrderButton[d->mButtonOffset]);
+	d->mOrderButton[d->mButtonOffset]->setAction(ActionRepair, unit->owner());
+	d->mButtonOffset++;
+ }
+
  d->mTopLayout->activate();
 }
 

@@ -254,6 +254,30 @@ bool SpeciesTheme::loadActionGraphics()
  }
  d->mActionPixmaps.insert((int)ActionStop, stop);
 
+ QPixmap* follow = new QPixmap(actionPath + "follow.png");
+ if (follow->isNull()) {
+	kdError() << k_funcinfo << "NULL follow pixmap!" << endl;
+	delete follow;
+	return false;
+ }
+ d->mActionPixmaps.insert((int)ActionFollow, follow);
+
+ QPixmap* mine = new QPixmap(actionPath + "mine.png");
+ if (mine->isNull()) {
+	kdError() << k_funcinfo << "NULL mine pixmap!" << endl;
+	delete mine;
+	return false;
+ }
+ d->mActionPixmaps.insert((int)ActionMine, mine);
+
+ QPixmap* repair = new QPixmap(actionPath + "repair.png");
+ if (repair->isNull()) {
+	kdError() << k_funcinfo << "NULL repair pixmap!" << endl;
+	delete repair;
+	return false;
+ }
+ d->mActionPixmaps.insert((int)ActionRepair, repair);
+
  return true;
 }
 

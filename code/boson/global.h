@@ -75,7 +75,10 @@ enum CursorType {
 enum UnitAction {
 	ActionAttack = 0,
 	ActionMove = 1,
-	ActionStop = 2
+	ActionStop = 2,
+	ActionFollow = 3,
+	ActionMine = 4,
+	ActionRepair = 5
 };
 
 enum UnitSoundEvent {
