@@ -69,9 +69,6 @@ public:
 	 **/
 	inline unsigned int width() const { return mMapWidth; }
 
-	int maxPlayers() const;
-	unsigned int minPlayers() const;
-
 	bool loadMap(QDomElement& node);
 	
 	/**
