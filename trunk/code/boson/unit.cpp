@@ -925,9 +925,9 @@ void Unit::newPath()
  //  a ship
  int cellX = pathInfo()->dest.x() / BO_TILE_SIZE;
  int cellY = pathInfo()->dest.y() / BO_TILE_SIZE;
- if (!owner()->isFogged(cellX, cellY)) {
+ if (!ownerIO()->isFogged(cellX, cellY)) {
 	Cell* destCell = canvas()->cell(cellX, cellY);
-	if (!destCell || (!destCell->canGo(unitProperties()))) {
+	if (!destCell || (!ownerIO()->canGo(this, destCell))) {
 		// If we can't move to destination, then we add special pathpoint with
 		//  coordinates (PF_CANNOT_GO; PF_CANNOT_GO) and in
 		//  MobileUnit::advanceMove(), we check for these special codes
