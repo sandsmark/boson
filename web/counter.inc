@@ -414,7 +414,7 @@ function counter2_statspage($pagelink)
   $result = mysql_query($query);
   $row = mysql_fetch_assoc($result);
   $total = $row['count'];
-  $dayscount = (time() - mktime(0, 0, 0, 9, 2, 2003)) / 86400;  // Number of days passed since counter2 was installed
+  $dayscount = (time() - mktime(0, 0, 0, 8, 2, 2003)) / 86400;  // Number of days passed since counter2 was installed
   echo "\n<font class=\"stats_views\">Total views: ".$total."</font>
     <font class=\"stats_views_average\">&nbsp;&nbsp;(average is ".(int)($total / $dayscount)." visits per day)</font><br>";
 
