@@ -20,6 +20,8 @@
 #include "bosonchat.h"
 #include "bosonchat.moc"
 
+#include "../bosonconfig.h"
+
 #include <klocale.h>
 #include <kgame/kgame.h>
 #include <kgame/kplayer.h>
@@ -48,9 +50,7 @@ BosonChat::BosonChat(QObject* parent) : QObject(parent)
  mGame = 0;
  d->mTimes.setAutoDelete(true);
  connect(&d->mRemoveTimer, SIGNAL(timeout()), this, SLOT(slotTimeout()));
-
- setMaxItems(5);
- setRemoveTime(10); // 10s is default
+ d->mRemoveTimer.start(1000);
 }
 
 BosonChat::~BosonChat()
@@ -70,11 +70,6 @@ void BosonChat::setChat(KGameChat* chat)
 	return;
  }
  setKGame(mChat->game());
-}
-
-void BosonChat::setMaxItems(int max)
-{
- mMaxItems = max;
 }
 
 int BosonChat::messageId() const
@@ -149,23 +144,20 @@ void BosonChat::addMessage(KPlayer* p, const QString& text)
 
 void BosonChat::addMessage(const QString& text)
 {
- if (maxItems() >= 0 && d->mMessages.count() + 1 > (unsigned int)maxItems()) {
+ if (boConfig->chatScreenMaxItems() >= 0 &&
+		d->mMessages.count() + 1 > (unsigned int)boConfig->chatScreenMaxItems()) {
 	removeFirstMessage();
  }
  d->mMessages.append(text);
  unsigned int* time = new unsigned int;
  *time = 0;
  d->mTimes.append(time);
- startTimer();
 }
 
 void BosonChat::removeFirstMessage()
 {
  d->mMessages.remove(d->mMessages.begin());
  d->mTimes.removeFirst();
- if (d->mMessages.count() == 0) {
-	d->mRemoveTimer.stop();
- }
 }
 
 void BosonChat::clear()
@@ -180,34 +172,15 @@ const QStringList& BosonChat::messages() const
  return d->mMessages;
 }
 
-void BosonChat::startTimer()
-{
- if (!d->mRemoveTimer.isActive()) {
-	d->mRemoveTimer.start(1000);
- }
-}
-
-void BosonChat::setRemoveTime(unsigned int s)
-{
- mRemoveTime = s;
- if (removeTime() == 0) {
-	d->mRemoveTimer.stop();
- }
-}
-
 void BosonChat::slotTimeout()
 {
- if (removeTime() == 0) {
-	d->mRemoveTimer.stop();
-	return;
- }
- if (removeTime() > 0) {
+ if (boConfig->chatScreenRemoveTime() > 0) {
 	QPtrListIterator<unsigned int> it(d->mTimes);
 	for (; it.current(); ++it) {
 		(*it.current())++;
 	}
 
-	while (d->mTimes.count() > 0 && *d->mTimes.first() >= removeTime()) {
+	while (d->mTimes.count() > 0 && *d->mTimes.first() > boConfig->chatScreenRemoveTime()) {
 		removeFirstMessage();
 	}
  }

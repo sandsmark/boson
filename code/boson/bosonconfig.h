@@ -216,6 +216,10 @@ public:
 	double miniMapZoom() const { return mMiniMapZoom->value(); }
 	void setCommandButtonsPerRow(int b) { mCommandButtonsPerRow->setValue(b); }
 	int commandButtonsPerRow() const { return mCommandButtonsPerRow->value(); }
+	void setChatScreenRemoveTime(unsigned int s) { mChatScreenRemoveTime->setValue(s); }
+	unsigned int chatScreenRemoveTime() const { return mChatScreenRemoveTime->value(); }
+	void setChatScreenMaxItems(int max) { mChatScreenMaxItems->setValue(max); }
+	int chatScreenMaxItems() const { return mChatScreenMaxItems->value(); }
 	void setUnitSoundActivated(UnitSoundEvent e, bool activated);
 	bool unitSoundActivated(UnitSoundEvent e) const;
 
@@ -270,6 +274,8 @@ private:
 	BoConfigBoolEntry* mShowMenubarInGame;
 	BoConfigBoolEntry* mShowMenubarOnStartup;
 	BoConfigIntEntry* mCommandButtonsPerRow;
+	BoConfigIntEntry* mChatScreenMaxItems;
+	BoConfigUIntEntry* mChatScreenRemoveTime;
 	BoConfigUIntEntry* mArrowKeyStep;
 	BoConfigUIntEntry* mCursorEdgeSensity;
 	BoConfigUIntEntry* mUpdateInterval;
