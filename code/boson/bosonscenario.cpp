@@ -61,6 +61,12 @@ void BosonScenario::init()
  setModified(false);
 }
 
+void BosonScenario::setPlayers(unsigned int min, int max)
+{
+ d->mMinPlayers = min;
+ d->mMaxPlayers = max;
+}
+
 bool BosonScenario::loadScenario(QDomElement& root)
 {
  // TODO: check for syntax errors
@@ -178,8 +184,7 @@ bool BosonScenario::loadScenarioSettings(QDomElement& node)
 	return false;
  }
 
- d->mMinPlayers = min;
- d->mMaxPlayers = max;
+ setPlayers(min, max);
 
  return true;
 }
@@ -300,8 +305,7 @@ void BosonScenario::applyScenario(Boson* boson)
  d->mInternalDoc.appendChild(root);
 
  boDebug(250) << k_funcinfo << endl;
- d->mMaxPlayers = boson->playerCount(); // we cannot save more players than we actually have!
- d->mMinPlayers = boson->minPlayers();
+ setPlayers(boson->minPlayers(), boson->playerCount());// don't use maxPlayers(), since we cannot save more players than we actually have!
  if ((int)d->mMinPlayers > d->mMaxPlayers) {
 	boWarning(250) << k_funcinfo << "minPlayers > playerCount" << endl;
 	d->mMinPlayers = d->mMaxPlayers;

@@ -41,7 +41,19 @@ public:
 	BosonScenario();
 	~BosonScenario();
 
+	/**
+	 * Set the minimal/maximal player numbers. Mostly used by the editor.
+	 **/
+	void setPlayers(unsigned int min, int max);
+
+	/**
+	 * @return The maximal number of players or -1 for unlimited.
+	 **/
 	int maxPlayers() const;
+
+	/**
+	 * @return The minimal number of players for this scenario.
+	 **/
 	unsigned int minPlayers() const;
 
 	/**
@@ -70,7 +82,6 @@ public:
 	void startScenario(Boson* boson);
 
 	bool isValid() const;
-
 
 
 	static bool saveUnit(QDomElement& node, Unit* unit);
