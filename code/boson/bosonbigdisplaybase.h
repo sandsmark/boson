@@ -31,6 +31,7 @@ class Player;
 class Unit;
 class UnitProperties;
 class Camera;
+class BosonBigDisplayInputBase;
 
 class KGameChat;
 class KGameIO;
@@ -107,6 +108,8 @@ public:
 	BosonBigDisplayBase(BosonCanvas* canvas, QWidget* parent);
 	virtual ~BosonBigDisplayBase();
 
+	void setDisplayInput(BosonBigDisplayInputBase* input);
+
 	void setLocalPlayer(Player* p);
 
 	BosonCanvas* canvas() const { return mCanvas; }
@@ -131,36 +134,14 @@ public:
 	BoSelection* selection() const { return mSelection; }
 
 	/**
-	 * Select a single unit. You should prefer this to a direct @ref
-	 * BoSelection::selectUnit
-	 **/
-	void selectSingle(Unit* unit, bool replace);
-
-	/**
-	 * Select a list of units. You should prefer this to a direct @ref
-	 * BoSelection::selectUnits
-	 **/
-	void selectUnits(QPtrList<Unit>, bool replace);
-
-	/**
 	 * Final cleanups. Mainly clear the selection.
 	 **/
 	void quitGame();
 
 	/**
-	 * See @ref BosonBigDisplay::unitAction
+	 * See @ref BosonBigDisplayInputBase::unitAction
 	 **/
-	virtual void unitAction(int) {}
-
-	/**
-	 * See @ref EditorBigDisplay::placeUnit
-	 **/
-	virtual void placeUnit(unsigned long int, Player*) {}
-
-	/**
-	 * See @ref EditorBigDisplay::placeCell
-	 **/
-	virtual void placeCell(int) {}
+	void unitAction(int);
 
 	/**
 	 * See @ref EditorBigDisplay::deleteSelectedUnits
@@ -192,6 +173,24 @@ public:
 
 	void mapChanged();
 
+	Player* localPlayer() const;
+
+	/**
+	 * @param prop The unit that should get placed or NULL if none.
+	 * @param canPlace Whether @p prop can be placed at the current cursor
+	 * position (current == the moment when @ref BosonBigDisplayInputBase::updatePlacementPreviewData
+	 * has been called)
+	 **/
+	void setPlacementPreviewData(const UnitProperties* prop, bool canPlace);
+
+	/**
+	 * Same as above - but this will make a cell placement preview, instead
+	 * of a unit placement preview.
+	 **/
+	void setPlacementCellPreviewData(int groundType, bool canPlace);
+
+	const QPoint& cursorCanvasPos() const;
+	BosonBigDisplayInputBase* displayInput() const;
 
 public slots:
 	void slotCenterHomeBase();
@@ -210,6 +209,13 @@ public slots:
 	 * functionality in the future
 	 **/
 	void slotUnitChanged(Unit* unit);
+
+	/**
+	 * Called when the player clicks (RMB) on the minimap. When there is a
+	 * unit selected it should move to that point in game mode. See @ref
+	 * BosonBigDisplayInputBase::slotMoveSelection
+	 **/
+	void slotMoveSelection(int x, int y);
 
 signals:
 	void signalMakeActive(BosonBigDisplayBase*);
@@ -235,12 +241,6 @@ protected slots:
 	void slotAdvance(unsigned int advanceCount, bool advanceFlag);
 
 protected:
-	enum CanSelectUnit {
-		CanSelectMultipleOk = 0, // the unit can be selected - multiple selections allowed
-		CanSelectSingleOk = 1, // the unit can be selected - only single selection allowed (e.g. for facilities)
-		CanSelectDestroyed = 2, // can't be selected - is destroyed
-		CanSelectError = 3 // can't be selected - unknown reason
-	};
 
 protected:
 	virtual void initializeGL();
@@ -265,11 +265,6 @@ protected:
 	virtual void enterEvent(QEvent*);
 	virtual void leaveEvent(QEvent*);
 	virtual bool eventFilter(QObject* o, QEvent* e);
-
-	virtual void updateCursor() = 0;
-	virtual void actionClicked(const BoAction& action, QDataStream& stream, bool* send) = 0;
-
-	const QPoint& cursorCanvasPos() const;
 
 	void generateCellList();
 
@@ -323,21 +318,6 @@ protected:
 	void calcFPS();
 
 	/**
-	 * Select all units of the specified type.
-	 *
-	 * The editor implementation will select <em>all</em> units of this
-	 * type, the game implementation only the units of the local player.
-	 * @return TRUE if the selection was successful, otherwise FALSE (e.g.
-	 * if the unit type is a facility in game mode)
-	 **/
-	virtual bool selectAll(const UnitProperties* prop, bool replace) = 0;
-
-	/**
-	 * Select units in the curren selection rect
-	 **/
-	void selectArea(bool replace);
-
-	/**
 	 * Start the selection at x,y,z. Either select the unit at this position
 	 * or start to draw the selection rect.
 	 **/
@@ -367,38 +347,7 @@ protected:
 	QRect selectionRectCanvas() const;
 
 
-	Player* localPlayer() const;
-
 	void addMouseIO(Player* p);
-
-	virtual bool actionLocked() const = 0;
-	virtual void unlockAction() = 0;
-	virtual UnitAction actionType() const = 0;
-	virtual CanSelectUnit canSelect(Unit* unit) const = 0;
-
-	/**
-	 * Called when the placement preview should get updated. Note that you
-	 * need to check whether a facility is actually selected and that it can
-	 * actually place a unit.
-	 *
-	 * Note that this gets called (at least) whenever the mouse is moved, so
-	 * don't do expensive calculations here.
-	 **/
-	virtual void updatePlacementPreviewData() = 0;
-
-	/**
-	 * @param prop The unit that should get placed or NULL if none.
-	 * @param canPlace Whether @p prop can be placed at the current cursor
-	 * position (current == the moment when @ref updatePlacementPreviewData
-	 * has been called)
-	 **/
-	void setPlacementPreviewData(const UnitProperties* prop, bool canPlace);
-
-	/**
-	 * Same as above - but this will make a cell placement preview, instead
-	 * of a unit placement preview.
-	 **/
-	void setPlacementCellPreviewData(int groundType, bool canPlace);
 
 private:
 	void init();

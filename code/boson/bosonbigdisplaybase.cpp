@@ -45,6 +45,7 @@
 #include "unitplugins.h"
 #include "bosonmodel.h"
 #include "bo3dtools.h"
+#include "bosonbigdisplayinputbase.h"
 
 #include <kgame/kgameio.h>
 
@@ -376,6 +377,8 @@ public:
 		mPlacementPreviewProperties = 0;
 		mPlacementPreviewDisplayList = 0;
 		mPlacementPreviewCanPlace = false;
+
+		mInput = 0;
 	}
 
 	Player* mLocalPlayer;
@@ -427,6 +430,8 @@ public:
 	bool mPlacementPreviewCanPlace;
 	QPoint mPlacementCanvasPos;
 	GLuint mCellPlacementTexture;
+
+	BosonBigDisplayInputBase* mInput;
 };
 
 BosonBigDisplayBase::BosonBigDisplayBase(BosonCanvas* c, QWidget* parent)
@@ -624,10 +629,8 @@ void BosonBigDisplayBase::paintGL()
  if (boGame->gameStatus() == KGame::Init) {
 	return;
  }
- if (!localPlayer()) {
-	boError() << k_funcinfo << "NULL local player" << endl;
-	return;
- }
+ BO_CHECK_NULL_RET(localPlayer());
+ BO_CHECK_NULL_RET(displayInput());
 
  d->mFrameCount++;
  calcFPS();
@@ -835,7 +838,7 @@ void BosonBigDisplayBase::paintGL()
  }
 
  // Facility-placing preview code
- if (actionLocked() && actionType() == ActionBuild &&
+ if (displayInput()->actionLocked() && displayInput()->actionType() == ActionBuild &&
 		((d->mPlacementPreviewDisplayList != 0 && d->mPlacementPreviewProperties) ||
 		d->mCellPlacementTexture != 0)) {
 	// AB: GL_MODULATE is currently default. if we every change it to
@@ -1291,6 +1294,8 @@ void BosonBigDisplayBase::renderParticles()
 
 void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseEvent* e, bool *eatevent)
 {
+// AB: maybe we could move this function to the displayInput directly!
+ BO_CHECK_NULL_RET(displayInput());
  GLdouble posX = 0.0;
  GLdouble posY = 0.0;
  GLdouble posZ = 0.0;
@@ -1427,8 +1432,8 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 		GLdouble x = 0.0, y = 0.0, z = 0.0;
 		mapCoordinates(widgetPos, &x, &y, &z);
 		worldToCanvas(x, y, z, &(d->mCanvasPos));
-		updatePlacementPreviewData();
-		updateCursor();
+		displayInput()->updatePlacementPreviewData();
+		displayInput()->updateCursor();
 		e->accept();
 		break;
 	}
@@ -1466,8 +1471,8 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 					if (onScreenOnly) {
 						boDebug() << "TODO: select only those that are currently on the screen!" << endl;
 					}
-					if (!selectAll(unit->unitProperties(), replace)) {
-						selectSingle(unit, replace);
+					if (!displayInput()->selectAll(unit->unitProperties(), replace)) {
+						displayInput()->selectSingle(unit, replace);
 					}
 				}
 			} else {
@@ -1476,13 +1481,13 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 			}
 		} else {
 			if (e->button() == LEFT_BUTTON) {
-				if (actionLocked()) {
+				if (displayInput()->actionLocked()) {
 					// basically the same as a normal RMB
 					bool send = false;
 					BoAction action;
 					action.setCanvasPos(canvasPos);
 					action.setWorldPos(posX, posY, posZ);
-					actionClicked(action, stream, &send);
+					displayInput()->actionClicked(action, stream, &send);
 					if (send) {
 						*eatevent = true;
 					}
@@ -1500,14 +1505,14 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 					cellX = (int)(posX / BO_GL_CELL_SIZE);
 					cellY = (int)(-posY / BO_GL_CELL_SIZE);
 					slotReCenterDisplay(QPoint(cellX, cellY));
-					updateCursor();
+					displayInput()->updateCursor();
 				}
 			} else if (e->button() == RIGHT_BUTTON) {
 				if (d->mMouseMoveDiff.isRMBMove()) {
 					d->mMouseMoveDiff.stop();
-				} else if (actionLocked()) {
-					unlockAction();
-					updateCursor();
+				} else if (displayInput()->actionLocked()) {
+					displayInput()->unlockAction();
+					displayInput()->updateCursor();
 				} else {
 					bool send = false;
 					BoAction action;
@@ -1516,7 +1521,7 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 					if (e->state() & ControlButton) {
 						action.setForceAttack(true);
 					}
-					actionClicked(action, stream, &send);
+					displayInput()->actionClicked(action, stream, &send);
 					if (send) {
 						*eatevent = true;
 					}
@@ -1796,10 +1801,12 @@ void BosonBigDisplayBase::moveSelectionRect(GLfloat x, GLfloat y, GLfloat z)
 
 void BosonBigDisplayBase::removeSelectionRect(bool replace)
 {
+ BO_CHECK_NULL_RET(displayInput());
  if (d->mSelectionRect.isVisible()) {
 	// here as there is a performance problem in
 	// mousemove:
-	selectArea(replace);
+	QRect rect = selectionRectCanvas();
+	displayInput()->selectArea(rect, replace);
 
 	d->mSelectionRect.setVisible(false);
 	if (!selection()->isEmpty()) {
@@ -1830,7 +1837,7 @@ void BosonBigDisplayBase::removeSelectionRect(bool replace)
 	}
 	if (unit) {
 		boDebug() << k_funcinfo << "select unit at " << canvasPos.x() << "," << canvasPos.y() << " (canvas)" << endl;
-		selectSingle(unit, replace);
+		displayInput()->selectSingle(unit, replace);
 		// cannot be placed into selection() cause we don't have localPlayer
 		// there
 		if (localPlayer() == unit->owner()) {
@@ -1840,75 +1847,6 @@ void BosonBigDisplayBase::removeSelectionRect(bool replace)
 		if (replace) {
 			selection()->clear();
 		}
-	}
- }
-}
-
-void BosonBigDisplayBase::selectArea(bool replace)
-{
- if (!d->mSelectionRect.isVisible()) {
-	boDebug() << k_funcinfo << "no rect" << endl;
-	return;
- }
- if (boConfig->debugMode() == BosonConfig::DebugSelection) {
-	BoItemList list;
-	QRect r = selectionRectCanvas();
-	list = canvas()->collisions(r);
-	BoItemList::Iterator it;
-	boDebug() << "Selection count: " << list.count() << endl;
-	for (it = list.begin(); it != list.end(); ++it) {
-		QString s = QString("Selected: RTTI=%1").arg((*it)->rtti());
-		if (RTTI::isUnit((*it)->rtti())) {
-			Unit* u = (Unit*)*it;
-			s += QString(" Unit ID=%1").arg(u->id());
-			if (u->isDestroyed()) {
-				s += QString("(destroyed)");
-			}
-		}
-		boDebug() << s << endl;
-	}
- }
-
- QRect r = selectionRectCanvas();
- BoItemList list;
- QPtrList<Unit> unitList;
- Unit* fallBackUnit= 0; // in case no localplayer mobile unit can be found we'll select this instead
- BoItemList::Iterator it;
- list = canvas()->collisions(r);
- for (it = list.begin(); it != list.end(); ++it) {
-	if (!RTTI::isUnit((*it)->rtti())) {
-		continue;
-	}
-	if (!canvas()->onCanvas((*it)->x(), (*it)->y())) {
-		boError() << k_funcinfo << "item is not on the canvas" << endl;
-		continue;
-	}
-	if (localPlayer()->isFogged((*it)->x() / BO_TILE_SIZE, (*it)->y() / BO_TILE_SIZE)) {
-		continue;
-	}
-	Unit* unit = (Unit*)*it;
-	CanSelectUnit s = canSelect(unit);
-	switch (s) {
-		case CanSelectSingleOk:
-			fallBackUnit = unit;
-			break;
-		case CanSelectMultipleOk:
-			unitList.append(unit);
-			break;
-		case CanSelectDestroyed:
-		case CanSelectError:
-			break;
-	}
- }
-
- if (unitList.count() > 0) {
-	boDebug() << "select " << unitList.count() << " units" << endl;
-	selectUnits(unitList, replace);
- } else if (fallBackUnit && selection()->count() == 0) {
-	selectSingle(fallBackUnit, replace);
- } else {
-	if (replace) {
-		selection()->clear();
 	}
  }
 }
@@ -2355,28 +2293,6 @@ float BosonBigDisplayBase::sphereInFrustum(const BoVector3& pos, float radius) c
  return distance + radius;
 }
 
-void BosonBigDisplayBase::selectUnits(QPtrList<Unit> unitList, bool replace)
-{
- boDebug() << k_funcinfo << endl;
- selection()->selectUnits(unitList, replace);
-}
-
-void BosonBigDisplayBase::selectSingle(Unit* unit, bool replace)
-{
- boDebug() << k_funcinfo << endl;
- switch (canSelect(unit)) {
-	case CanSelectSingleOk:
-		// this should not happen, as it should have been checked before
-		// already.
-		replace = true;
-		break;
-	case CanSelectMultipleOk:
-		break;
-	default:
-		return;
- }
- selection()->selectUnit(unit, replace);
-}
 
 void BosonBigDisplayBase::mapChanged()
 {
@@ -2455,5 +2371,31 @@ void BosonBigDisplayBase::setPlacementCellPreviewData(int groundType, bool canPl
  d->mPlacementPreviewCanPlace = canPlace;
  d->mPlacementCanvasPos = cursorCanvasPos();
  d->mPlacementPreviewDisplayList = 0;
+}
+
+void BosonBigDisplayBase::setDisplayInput(BosonBigDisplayInputBase* input)
+{
+ if (d->mInput) {
+	boWarning() << k_funcinfo << "input non-NULL" << endl;
+	delete d->mInput;
+ }
+ d->mInput = input;
+}
+
+void BosonBigDisplayBase::unitAction(int unitType)
+{
+ BO_CHECK_NULL_RET(displayInput());
+ displayInput()->unitAction(unitType);
+}
+
+BosonBigDisplayInputBase* BosonBigDisplayBase::displayInput() const
+{
+ return d->mInput;
+}
+
+void BosonBigDisplayBase::slotMoveSelection(int x, int y)
+{
+ BO_CHECK_NULL_RET(displayInput());
+ displayInput()->slotMoveSelection(x, y);
 }
 

@@ -22,8 +22,8 @@
 
 #include "defines.h"
 #include "bosonbigdisplaybase.h"
-#include "bosonbigdisplay.h"
-#include "editorbigdisplay.h"
+#include "bosonbigdisplayinput.h"
+#include "editorbigdisplayinput.h"
 #include "bosonconfig.h"
 #include "player.h"
 #include "boselection.h"
@@ -297,10 +297,11 @@ BosonBigDisplayBase* BoDisplayManager::addDisplay(QWidget* parent)
  boDebug() << k_funcinfo << endl;
  //TODO: what about editor widgets??
  BosonBigDisplayBase* b = 0;
+ b = new BosonBigDisplayBase(d->mCanvas, parent);
  if (mGameMode) {
-	b = new BosonBigDisplay(d->mCanvas, parent);
+	b->setDisplayInput(new BosonBigDisplayInput(b));
  } else {
-	b = new EditorBigDisplay(d->mCanvas, parent);
+	b->setDisplayInput(new EditorBigDisplayInput(b));
  }
  d->mDisplayList.append(b);
  connect(b, SIGNAL(signalMakeActive(BosonBigDisplayBase*)), 
@@ -463,20 +464,18 @@ void BoDisplayManager::slotUnitAction(int action)
 
 void BoDisplayManager::slotPlaceUnit(unsigned long int unitType, Player* owner)
 {
- if (!activeDisplay()) {
-	boError() << k_funcinfo << "NULL active display" << endl;
-	return;
- }
- activeDisplay()->placeUnit(unitType, owner);
+ BO_CHECK_NULL_RET(activeDisplay());
+ BO_CHECK_NULL_RET(activeDisplay()->displayInput());
+
+ activeDisplay()->displayInput()->placeUnit(unitType, owner);
 }
 
 void BoDisplayManager::slotPlaceCell(int tile)
 {
- if (!activeDisplay()) {
-	boError() << k_funcinfo << "NULL active display" << endl;
-	return;
- }
- activeDisplay()->placeCell(tile);
+ BO_CHECK_NULL_RET(activeDisplay());
+ BO_CHECK_NULL_RET(activeDisplay()->displayInput());
+
+ activeDisplay()->displayInput()->placeCell(tile);
 }
 
 void BoDisplayManager::slotDeleteSelectedUnits()
