@@ -1,11 +1,14 @@
 [Boson Mobile Unit]
+AccelerationSpeed=0.2
 CanGoOnLand=true
 CanGoOnWater=true
-Speed=5
+DecelerationSpeed=0.5
+RotationSpeed=7
+Speed=7
 
 [Boson Unit]
 Armor=4
-ConstructedParticles=
+ConstructedParticles=21010,21011
 DestroyedParticles=1001,3001,6001
 ExplodingDamage=0
 ExplodingDamageRange=0
@@ -26,7 +29,7 @@ TerrainType=2
 UnitDepth=0.25
 UnitHeight=1
 UnitWidth=1
-Weapons=1
+Weapons=2
 
 [OpenGL]
 FrameRangeIdle=1
@@ -44,7 +47,7 @@ Shoot=shoot
 
 [Weapon_0]
 CanShootAtAirUnits=true
-CanShootAtLandUnits=true
+CanShootAtLandUnits=false
 Damage=15
 DamageRange=1
 FlyParticles=
@@ -59,3 +62,23 @@ SoundFly=missile_fly
 SoundHit=hit
 SoundShoot=shoot
 Speed=0
+
+[Weapon_1]
+CanShootAtAirUnits=false
+CanShootAtLandUnits=true
+AccelerationSpeed=0.8
+Damage=250
+DamageRange=3
+FlyParticles=5001,5010
+FullDamageRange=1
+Height=0.1
+HitParticles=21200
+Name=Missiles
+Offset=0.10,0.5,0
+Range=7
+Reload=100
+ShootParticles=21100
+SoundFly=missile_fly
+SoundHit=hit
+SoundShoot=shoot
+Speed=25
