@@ -1104,6 +1104,36 @@ bool Unit::saveAsXML(QDomElement& root)
 	}
  }
 
+
+ // Save pathinfo
+ QDomDocument doc = root.ownerDocument();
+ QDomElement pathinfoxml = doc.createElement(QString::fromLatin1("PathInfo"));
+ root.appendChild(pathinfoxml);
+ // Save start/dest points and range
+ pathInfo()->start.saveAsXML(pathinfoxml, "start");
+ pathInfo()->dest.saveAsXML(pathinfoxml, "dest");
+ pathinfoxml.setAttribute("range", pathInfo()->range);
+ // Save hlpath
+ if (pathInfo()->hlpath) {
+	pathinfoxml.setAttribute("hlpathid", pathInfo()->hlpath->id);
+	pathinfoxml.setAttribute("hlstep", pathInfo()->hlstep);
+ } else {
+	pathinfoxml.setAttribute("hlpathid", 0);
+ }
+ // Save llpath
+ pathinfoxml.setAttribute("llpathlength", pathInfo()->llpath.count());
+ for (unsigned int i = 0; i < pathInfo()->llpath.count(); i++) {
+	pathInfo()->llpath[i].saveAsXML(pathinfoxml, QString("llpath-%1").arg(i));
+ }
+ // Save passable flag
+ pathinfoxml.setAttribute("passable", pathInfo()->passable ? 1 : 0);
+ // Save misc stuff
+ pathinfoxml.setAttribute("moveAttacking", pathInfo()->moveAttacking ? 1 : 0);
+ pathinfoxml.setAttribute("slowDownAtDest", pathInfo()->slowDownAtDest ? 1 : 0);
+ pathinfoxml.setAttribute("waiting", pathInfo()->waiting);
+ pathinfoxml.setAttribute("pathrecalced", pathInfo()->pathrecalced);
+
+
  return true;
 }
 
@@ -1194,6 +1224,83 @@ bool Unit::loadFromXML(const QDomElement& root)
  setRotation(rotation);
  updateRotation();
  setAdvanceWork(advanceWork());
+
+ // Load pathinfo
+ pathInfo()->reset();
+ QDomElement pathinfoxml = root.namedItem("PathInfo").toElement();
+ if (!pathinfoxml.isNull()) {
+	pathInfo()->start.loadFromXML(pathinfoxml, "start");
+	pathInfo()->dest.loadFromXML(pathinfoxml, "dest");
+	pathInfo()->range = pathinfoxml.attribute("range").toInt(&ok);
+	if (!ok) {
+		boError() << k_funcinfo << "Error loading range attribute ('" << pathinfoxml.attribute("range") << "')" << endl;
+		return false;
+	}
+	pathInfo()->hlstep = 0;
+	pathInfo()->hlpath = 0;
+	int hlpathid = pathinfoxml.attribute("hlpathid").toInt(&ok);
+	if (!ok) {
+		boError() << k_funcinfo << "Error loading hlpathid attribute ('" << pathinfoxml.attribute("hlpathid") << "')" << endl;
+		return false;
+	}
+	if (hlpathid > 0) {
+		pathInfo()->hlpath = canvas()->pathfinder()->highLevelPath(hlpathid);
+		pathInfo()->hlstep = pathinfoxml.attribute("hlstep").toInt(&ok);
+		if (!ok) {
+			boError() << k_funcinfo << "Error loading hlstep attribute ('" << pathinfoxml.attribute("hlstep") << "')" << endl;
+			return false;
+		}
+	}
+	// llpath
+	unsigned int llpathlength = pathinfoxml.attribute("llpathlength").toInt(&ok);
+	if (!ok) {
+		boError() << k_funcinfo << "Error loading llpathlength attribute ('" << pathinfoxml.attribute("llpathlength") << "')" << endl;
+		return false;
+	}
+	pathInfo()->llpath.reserve(llpathlength);
+	for(unsigned int i = 0; i < llpathlength; i++) {
+		pathInfo()->llpath[i].loadFromXML(pathinfoxml, QString("llpath-%1").arg(i));
+	}
+	// regions aren't saved/loaded
+	pathInfo()->startRegion = 0;
+	pathInfo()->destRegion = 0;
+	pathInfo()->possibleDestRegions.resize(0);
+	// misc
+	pathInfo()->passable = (pathinfoxml.attribute("passable").toInt(&ok));
+	if (!ok) {
+		boError() << k_funcinfo << "Error loading passable attribute ('" << pathinfoxml.attribute("passable") << "')" << endl;
+		return false;
+	}
+	pathInfo()->moveAttacking = (pathinfoxml.attribute("moveAttacking").toInt(&ok));
+	if (!ok) {
+		boError() << k_funcinfo << "Error loading moveAttacking attribute ('" << pathinfoxml.attribute("moveAttacking") << "')" << endl;
+		return false;
+	}
+	pathInfo()->slowDownAtDest = (pathinfoxml.attribute("slowDownAtDest").toInt(&ok));
+	if (!ok) {
+		boError() << k_funcinfo << "Error loading slowDownAtDest attribute ('" << pathinfoxml.attribute("slowDownAtDest") << "')" << endl;
+		return false;
+	}
+	pathInfo()->waiting = pathinfoxml.attribute("waiting").toInt(&ok);
+	if (!ok) {
+		boError() << k_funcinfo << "Error loading waiting attribute ('" << pathinfoxml.attribute("waiting") << "')" << endl;
+		return false;
+	}
+	pathInfo()->pathrecalced = pathinfoxml.attribute("pathrecalced").toInt(&ok);
+	if (!ok) {
+		boError() << k_funcinfo << "Error loading pathrecalced attribute ('" << pathinfoxml.attribute("pathrecalced") << "')" << endl;
+		return false;
+	}
+	// These aren't saved
+	pathInfo()->unit = this;
+	pathInfo()->canMoveOnLand = unitProperties()->canGoOnLand();
+	pathInfo()->canMoveOnWater = unitProperties()->canGoOnWater();
+	pathInfo()->flying = unitProperties()->isAircraft();
+ }
+ // Null pathinfoxml is valid too: in this case, we're loading from playfield
+ //  file, not from savegame
+
+
  return true;
 }
 

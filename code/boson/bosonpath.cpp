@@ -33,8 +33,10 @@
 #include "bowater.h"
 
 #include <qptrqueue.h>
+#include <qdom.h>
 
 #include <kstaticdeleter.h>
+#include <kmdcodec.h>
 
 
 //#include <sys/time.h> // only for debug
@@ -237,7 +239,9 @@ QValueList<BoVector2Fixed> BosonPath::findLocations(Player* player, int x, int y
       }
 
       // Make sure that position is valid
-      if(!canvas->onCanvas(n2.x, n2.y))
+      // Note that we check for the center of cell, because e.g. on 50x50 map,
+      //  (50; 50) is still on canvas (at edge), but such cell doesn't exist.
+      if(!canvas->onCanvas(n2.x + 0.5, n2.y + 0.5))
       {
         //boWarning() << k_lineinfo << "not on canvas" << endl;
         continue;
@@ -1104,6 +1108,12 @@ BosonPathSector::BosonPathSector()
   pathfinder = 0;
 }
 
+BosonPathSector::~BosonPathSector()
+{
+  // Delete all regions
+  regions.clear();
+}
+
 void BosonPathSector::setPathfinder(BosonPath2* pf)
 {
   pathfinder = pf;
@@ -1198,6 +1208,20 @@ BosonPathRegion::BosonPathRegion(BosonPathSector* s)
   group = 0;
   parent = 0;
   id = sector->pathfinder->addRegion(this);
+}
+
+BosonPathRegion::BosonPathRegion(BosonPathSector* s, int _id)
+{
+  sector = s;
+  neighbors.reserve(8);
+  passabilityType = BosonPath2::NotPassable;
+  cellsCount = 0;
+  cost = 0.0f;
+  centerx = 0.0f;
+  centery = 0.0f;
+  group = 0;
+  parent = 0;
+  id = _id;
 }
 
 BosonPathRegion::~BosonPathRegion()
@@ -1530,7 +1554,9 @@ BosonPath2::BosonPath2(BosonMap* map)
   mSectors = 0;
   mSectorWidth = 0;
   mSectorHeight = 0;
+  mLastHLPathId = 0;
   mRegionIdUsed = 0;
+  mDataLocked = false;
   boDebug(510) << k_funcinfo << "END" << endl;
 }
 
@@ -2480,6 +2506,10 @@ bool BosonPath2::rangeCheck(BosonPathInfo* info)
 
 void BosonPath2::cellsOccupiedStatusChanged(int x1, int y1, int x2, int y2)
 {
+  if(mDataLocked)
+  {
+    return;
+  }
   boDebug(510) << k_funcinfo << "area: (" << x1 << "x" << y1 << "-" << x2 << "x" << y2 << ")" << endl;
   long int tm_calcsectorarea, tm_regionlist, tm_hlpathinvalidate, tm_regionreinit, tm_recalcneighbor,
       tm_regionlists2, tm_recalcregioncosts, tm_regiongroups, tm_end;
@@ -2662,13 +2692,13 @@ void BosonPath2::releaseHighLevelPath(BosonPathHighLevelPath* hlpath)
   }
 }
 
-void BosonPath2::initSectors()
+void BosonPath2::initSectors(unsigned int sectorwidth, unsigned int sectorheight)
 {
 //  boDebug(510) << k_funcinfo << endl;
   // Calculate number of sectors we'll have
   // TODO: make dynamic, depending on the map size
-  mSectorWidth = 10;
-  mSectorHeight = 10;
+  mSectorWidth = (sectorwidth > 0) ? sectorwidth : 10;
+  mSectorHeight = (sectorheight > 0) ? sectorheight : 10;
   // this is not the best approach, but works
   int sectorscount = ((mMap->width() / mSectorWidth) + 1) * ((mMap->height() / mSectorHeight) + 1);
 //  boDebug(510) << k_funcinfo << "there will be " << sectorscount << " sectors (map is " <<
@@ -3296,7 +3326,9 @@ void BosonPath2::searchHighLevelPath(BosonPathInfo* info)
     path->startRegion = info->startRegion;
     path->destRegion = n.region;
     path->valid = true;
+    path->id = ++mLastHLPathId;
     path->users = 1;
+    path->passability = info->passability;
     // Copy temp path to real path vector
     path->path.resize(temp.count());
     QPtrListIterator<BosonPathRegion> it(temp);
@@ -3536,6 +3568,25 @@ BosonPathRegion* BosonPath2::cellRegion(int x, int y)
   return mMap->cell(x, y)->region();
 }
 
+BosonPathRegion* BosonPath2::region(unsigned int id)
+{
+  return mRegions[id];
+}
+
+BosonPathHighLevelPath* BosonPath2::highLevelPath(unsigned int id)
+{
+  QPtrListIterator<BosonPathHighLevelPath> it(mHLPathCache);
+  while(it.current())
+  {
+    if(it.current()->id == id)
+    {
+      return it.current();
+    }
+    ++it;
+  }
+  return 0;
+}
+
 BosonPath2::PassabilityType BosonPath2::cellPassability(int x, int y)
 {
   if(!cell(x, y)->passable())
@@ -3610,6 +3661,401 @@ void BosonPath2::removeRegion(BosonPathRegion* r)
   }
   // We have new free id
 //  mRegions.count()--;
+}
+
+bool BosonPath2::saveAsXML(QDomElement& root) const
+{
+  // Sectors
+  QDomDocument doc = root.ownerDocument();
+  QDomElement sectorsxml = doc.createElement(QString::fromLatin1("Sectors"));
+  root.appendChild(sectorsxml);
+  sectorsxml.setAttribute("sectorwidth", mSectorWidth);
+  sectorsxml.setAttribute("sectorheight", mSectorHeight);
+  /*for(unsigned int y = 0; y * mSectorHeight < mMap->height(); y++)
+  {
+    for(unsigned int x = 0; x * mSectorWidth < mMap->width(); x++)
+    {
+    }
+  }*/
+
+  // Regions
+  QDomElement regionsxml = doc.createElement(QString::fromLatin1("Regions"));
+  root.appendChild(regionsxml);
+  for(unsigned int i = 0; i < mRegions.count(); i++)
+  {
+    BosonPathRegion* reg = mRegions[i];
+    QDomElement regxml = doc.createElement(QString::fromLatin1("Region"));
+    regionsxml.appendChild(regxml);
+    // Save this region
+    regxml.setAttribute("id", reg->id);
+    regxml.setAttribute("cost", reg->cost);
+    regxml.setAttribute("centerx", reg->centerx);
+    regxml.setAttribute("centery", reg->centery);
+    regxml.setAttribute("cellsCount", reg->cellsCount);
+    regxml.setAttribute("passabilityType", (int)reg->passabilityType);
+    // TODO: make sure that order of neighbors doesn't matter
+    for(unsigned int j = 0; j < reg->neighbors.count(); j++)
+    {
+      QDomElement neighborxml = doc.createElement(QString::fromLatin1("Neighbor"));
+      regxml.appendChild(neighborxml);
+      neighborxml.setAttribute("regid", reg->neighbors[j].region->id);
+      neighborxml.setAttribute("cost", reg->neighbors[j].cost);
+      neighborxml.setAttribute("bordercells", reg->neighbors[j].bordercells);
+    }
+  }
+
+  // Save which region each cell is in
+  // Init byte array and data stream
+  QByteArray ba;
+  QDataStream stream(ba, IO_WriteOnly);
+  for(unsigned int y = 0; y < mMap->height(); y++)
+  {
+    for(unsigned int x = 0; x < mMap->width(); x++)
+    {
+      BosonPathRegion* reg = mMap->cell(x, y)->region();
+      int regid = -1;
+      if(reg)
+      {
+        regid = reg->id;
+      }
+      stream << (Q_INT32)regid;
+    }
+  }
+  // Encode ba to base64
+  QString base64data = KCodecs::base64Encode(ba);
+  // Save as QDomText
+  QDomElement cellregionsxml = doc.createElement("CellRegions");
+  QDomText cellregionsdata = doc.createTextNode(base64data);
+  cellregionsxml.appendChild(cellregionsdata);
+  root.appendChild(cellregionsxml);
+
+  // Highlevel paths
+  QDomElement hlpathsxml = doc.createElement(QString::fromLatin1("HLPaths"));
+  root.appendChild(hlpathsxml);
+  hlpathsxml.setAttribute("lastid", mLastHLPathId);
+  QPtrListIterator<BosonPathHighLevelPath> it(mHLPathCache);
+  while(it.current())
+  {
+    BosonPathHighLevelPath* path = it.current();
+    QDomElement pathxml = doc.createElement(QString::fromLatin1("HLPath"));
+    hlpathsxml.appendChild(pathxml);
+    // Save this path
+    pathxml.setAttribute("valid", path->valid ? 1 : 0);
+    pathxml.setAttribute("id", path->id);
+    pathxml.setAttribute("passability", (int)path->passability);
+    pathxml.setAttribute("users", path->users);
+    // We don't save any regions for invalid paths, because they have been
+    //  deleted (that's why path is invalid).
+    if(path->valid)
+    {
+      pathxml.setAttribute("startregion", path->startRegion->id);
+      pathxml.setAttribute("destregion", path->destRegion->id);
+      // Save path nodes (regions)
+      pathxml.setAttribute("length", path->path.count());
+      for(unsigned int i = 0; i < path->path.count(); i++)
+      {
+        pathxml.setAttribute(QString("region-%1").arg(i), path->path[i]->id);
+      }
+    }
+    ++it;
+  }
+
+  return true;
+}
+
+bool BosonPath2::loadFromXML(const QDomElement& root)
+{
+  // Clean up current datastructures
+  mHLPathCache.setAutoDelete(true);
+  mHLPathCache.clear();
+  mHLPathCache.setAutoDelete(false);
+  delete[] mSectors;  // This also deletes regions, as they are owned by sectors
+  mSectors = 0;
+  mSectorWidth = 0;
+  mSectorHeight = 0;
+  mLastHLPathId = 0;
+  delete[] mRegionIdUsed;
+  mRegionIdUsed = 0;
+
+  // Loading
+  // Load sectors
+  QDomElement sectorsxml = root.namedItem("Sectors").toElement();
+  if(sectorsxml.isNull())
+  {
+    boError() << k_funcinfo << "Sectors element not found!" << endl;
+    return false;
+  }
+  bool ok = true;
+  unsigned int swidth = sectorsxml.attribute("sectorwidth").toUInt(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading sectorwidth attribute ('" << root.attribute("sectorwidth") << "')" << endl;
+    return false;
+  }
+  unsigned int sheight = sectorsxml.attribute("sectorheight").toUInt(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading sectorheight attribute ('" << root.attribute("sectorheight") << "')" << endl;
+    return false;
+  }
+  // Init sectors
+  initSectors(swidth, sheight);
+
+  // Load regions
+  // FIXME: code duplication
+  // Init region ids pool
+  // It should be possible to have height*width / 4 regions at most
+  // +1 is because of possible modulo
+  int maxregcount = mMap->width() * mMap->height() / 4 + 1;
+  mRegionIdUsed = new bool[maxregcount];
+  for(int i = 0; i < maxregcount; i++)
+  {
+    mRegionIdUsed[i] = false;
+  }
+  QDomElement regionsxml = root.namedItem("Regions").toElement();
+  if(regionsxml.isNull())
+  {
+    boError() << k_funcinfo << "Regions element not found!" << endl;
+    return false;
+  }
+  QDomNodeList reglist = regionsxml.elementsByTagName(QString::fromLatin1("Region"));
+  // Allocate enough space in regions list (and some extra space too)
+  mRegions.resize(reglist.count() + 5);
+  // Pass 1: load all regions
+  for (unsigned int i = 0; i < reglist.count(); i++)
+  {
+    QDomElement regxml = reglist.item(i).toElement();
+    if (regxml.isNull())
+    {
+      continue;
+    }
+    int id = regxml.attribute("id").toInt(&ok);
+    if(!ok)
+    {
+      boError() << k_funcinfo << "Error loading id attribute ('" << regxml.attribute("id") << "')" << endl;
+      return false;
+    }
+    int cellsCount = regxml.attribute("cellsCount").toInt(&ok);
+    if(!ok)
+    {
+      boError() << k_funcinfo << "Error loading cellsCount attribute ('" << regxml.attribute("cellsCount") << "')" << endl;
+      return false;
+    }
+    int passabilityType = regxml.attribute("passabilityType").toInt(&ok);
+    if(!ok)
+    {
+      boError() << k_funcinfo << "Error loading passabilityType attribute ('" << regxml.attribute("passabilityType") << "')" << endl;
+      return false;
+    }
+    bofixed cost = regxml.attribute("cost").toFloat(&ok);
+    if(!ok)
+    {
+      boError() << k_funcinfo << "Error loading cost attribute ('" << regxml.attribute("cost") << "')" << endl;
+      return false;
+    }
+    bofixed centerx = regxml.attribute("centerx").toFloat(&ok);
+    if(!ok)
+    {
+      boError() << k_funcinfo << "Error loading centerx attribute ('" << regxml.attribute("centerx") << "')" << endl;
+      return false;
+    }
+    bofixed centery = regxml.attribute("centery").toFloat(&ok);
+    if(!ok)
+    {
+      boError() << k_funcinfo << "Error loading centery attribute ('" << regxml.attribute("centery") << "')" << endl;
+      return false;
+    }
+
+    // Create new region object
+    BosonPathSector* s = sector((int)(centerx / mSectorWidth), (int)(centery / mSectorHeight));
+    BosonPathRegion* region = new BosonPathRegion(s, id);
+    region->cellsCount = cellsCount;
+    region->passabilityType = (BosonPath2::PassabilityType)passabilityType;
+    region->cost = cost;
+    region->centerx = centerx;
+    region->centery = centery;
+    // Add it to regions list
+    mRegionIdUsed[id] = true;
+    mRegions.insert(id, region);
+  }
+  // Pass 2: load region neighbors. Regions have to be already loaded for this.
+  for (unsigned int i = 0; i < reglist.count(); i++)
+  {
+    QDomElement regxml = reglist.item(i).toElement();
+    if (regxml.isNull())
+    {
+      continue;
+    }
+    int id = regxml.attribute("id").toInt();
+    QDomNodeList neighborlist = regxml.elementsByTagName(QString::fromLatin1("Neighbor"));
+    for (unsigned int j = 0; j < neighborlist.count(); j++)
+    {
+      QDomElement neighborxml = neighborlist.item(j).toElement();
+      if (neighborxml.isNull())
+      {
+        continue;
+      }
+      bofixed cost = neighborxml.attribute("cost").toFloat(&ok);
+      if(!ok)
+      {
+        boError() << k_funcinfo << "Error loading cost attribute ('" << neighborxml.attribute("cost") << "')" << endl;
+        return false;
+      }
+      int bordercells = neighborxml.attribute("bordercells").toInt(&ok);
+      if(!ok)
+      {
+        boError() << k_funcinfo << "Error loading bordercells attribute ('" << neighborxml.attribute("bordercells") << "')" << endl;
+        return false;
+      }
+      int regid = neighborxml.attribute("regid").toInt(&ok);
+      if(!ok)
+      {
+        boError() << k_funcinfo << "Error loading regid attribute ('" << neighborxml.attribute("regid") << "')" << endl;
+        return false;
+      }
+      // Create neighbor object
+      BosonPathRegion::Neighbor n;
+      n.region = mRegions[regid];
+      n.cost = cost;
+      n.bordercells = bordercells;
+      mRegions[id]->neighbors.append(n);
+    }
+  }
+  // Recreate region groups
+  initRegionGroups(mRegions);
+
+  // Load cell regions
+  QDomElement cellregionsxml = root.namedItem("CellRegions").toElement();
+  if(cellregionsxml.isNull())
+  {
+    boError() << k_funcinfo << "CellRegions element not found!" << endl;
+    return false;
+  }
+  QString base64data = cellregionsxml.text();
+  if(base64data.isEmpty())
+  {
+    boDebug() << k_funcinfo << "Empty or invalid text in CellRegions element!" << endl;
+    return false;
+  }
+  QByteArray ba;
+  KCodecs::base64Decode(base64data.utf8(), ba);  // Is utf8() safe to use here?
+
+  // Init data stream
+  QDataStream stream(ba, IO_ReadOnly);
+  for(unsigned int y = 0; y < mMap->height(); y++)
+  {
+    for(unsigned int x = 0; x < mMap->width(); x++)
+    {
+      int regid;
+      BosonPathRegion* r = 0;
+      stream >> regid;
+      if(regid >= 0)
+      {
+        r = mRegions[regid];
+      }
+      cell(x, y)->setRegion(r);
+    }
+  }
+
+
+  // Load highlevel paths
+  QDomElement hlpathsxml = root.namedItem("HLPaths").toElement();
+  if(hlpathsxml.isNull())
+  {
+    boError() << k_funcinfo << "HLPaths element not found!" << endl;
+    return false;
+  }
+  mLastHLPathId = hlpathsxml.attribute("lastid").toUInt(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading lastid attribute ('" << hlpathsxml.attribute("lastid") << "')" << endl;
+    return false;
+  }
+  QDomNodeList hlpathlist = hlpathsxml.elementsByTagName(QString::fromLatin1("HLPath"));
+  for (unsigned int i = 0; i < hlpathlist.count(); i++)
+  {
+    QDomElement hlpathxml = hlpathlist.item(i).toElement();
+    if (hlpathxml.isNull())
+    {
+      continue;
+    }
+    unsigned int id = hlpathxml.attribute("id").toUInt(&ok);
+    if(!ok)
+    {
+      boError() << k_funcinfo << "Error loading id attribute ('" << hlpathxml.attribute("id") << "')" << endl;
+      return false;
+    }
+    bool valid = (hlpathxml.attribute("valid").toInt(&ok));
+    if(!ok)
+    {
+      boError() << k_funcinfo << "Error loading valid attribute ('" << hlpathxml.attribute("valid") << "')" << endl;
+      return false;
+    }
+    int passability = hlpathxml.attribute("passability").toInt(&ok);
+    if(!ok)
+    {
+      boError() << k_funcinfo << "Error loading passability attribute ('" << hlpathxml.attribute("passability") << "')" << endl;
+      return false;
+    }
+    int users = hlpathxml.attribute("users").toInt(&ok);
+    if(!ok)
+    {
+      boError() << k_funcinfo << "Error loading users attribute ('" << hlpathxml.attribute("users") << "')" << endl;
+      return false;
+    }
+    // Create hlpath object
+    BosonPathHighLevelPath* hlpath = new BosonPathHighLevelPath;
+    hlpath->id = id;
+    hlpath->valid = valid;
+    hlpath->passability = (BosonPath2::PassabilityType)passability;
+    hlpath->users = users;
+
+    // Regions are saved only for valid paths
+    if(valid)
+    {
+      int startregionid = hlpathxml.attribute("startregion").toInt(&ok);
+      if(!ok)
+      {
+        boError() << k_funcinfo << "Error loading startregion attribute ('" << hlpathxml.attribute("startregion") << "')" << endl;
+        return false;
+      }
+      int destregionid = hlpathxml.attribute("destregion").toInt(&ok);
+      if(!ok)
+      {
+        boError() << k_funcinfo << "Error loading destregion attribute ('" << hlpathxml.attribute("destregion") << "')" << endl;
+        return false;
+      }
+      hlpath->startRegion = mRegions[startregionid];
+      hlpath->destRegion = mRegions[destregionid];
+
+      unsigned int length = hlpathxml.attribute("length").toUInt(&ok);
+      if(!ok)
+      {
+        boError() << k_funcinfo << "Error loading length attribute ('" << hlpathxml.attribute("length") << "')" << endl;
+        return false;
+      }
+      hlpath->path.resize(length);
+      for(unsigned int j = 0; j < length; j++)
+      {
+        int regid = hlpathxml.attribute(QString("region-%1").arg(j)).toInt(&ok);
+        if(!ok)
+        {
+          boError() << k_funcinfo << "Error loading region-" << j << " attribute ('" << hlpathxml.attribute(QString("region-%1").arg(j)) << "')" << endl;
+          return false;
+        }
+        hlpath->path.insert(j, mRegions[regid]);
+      }
+    }
+    else
+    {
+      hlpath->startRegion = 0;
+      hlpath->destRegion = 0;
+    }
+    // Add it to highlevel paths list
+    mHLPathCache.append(hlpath);
+  }
+
+  return true;
 }
 
 

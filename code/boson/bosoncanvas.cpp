@@ -1254,6 +1254,15 @@ bool BosonCanvas::loadFromXML(const QDomElement& root)
 	return false;
  }
 
+ QDomElement pathfinderxml = root.namedItem("Pathfinder").toElement();
+ bool loadpathfinder = !pathfinderxml.isNull();
+ if (loadpathfinder) {
+	initPathfinder();
+	pathfinder()->loadFromXML(pathfinderxml);
+	pathfinder()->setDataLocked(true);
+ }
+
+
  if (!loadEventListenerFromXML(root)) {
 	boError(260) << k_funcinfo << "unable to load EventListener from XML" << endl;
 	return false;
@@ -1276,6 +1285,12 @@ bool BosonCanvas::loadFromXML(const QDomElement& root)
  if (!propertyXML.loadFromXML(handler, d->mProperties)) {
 	boError(260) << k_funcinfo << "unable to load the datahandler" << endl;
 	return false;
+ }
+
+ if (loadpathfinder) {
+	pathfinder()->setDataLocked(true);
+ } else {
+	initPathfinder();
  }
  boDebug(260) << k_funcinfo << "done" << endl;
  return true;
@@ -1637,7 +1652,15 @@ bool BosonCanvas::saveAsXML(QDomElement& root) const
 	return false;
  }
 
+ // Save pathfinder
  QDomDocument doc = root.ownerDocument();
+ QDomElement pathfinderxml = doc.createElement(QString::fromLatin1("Pathfinder"));
+ root.appendChild(pathfinderxml);
+ if (d->mPathfinder) {
+	d->mPathfinder->saveAsXML(pathfinderxml);
+ }
+
+ // Save datahandler
  BosonPropertyXML propertyXML;
  QDomElement handler = doc.createElement(QString::fromLatin1("DataHandler"));
  root.appendChild(handler);

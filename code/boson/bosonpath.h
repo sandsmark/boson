@@ -204,6 +204,7 @@ class Cell;
 class BosonBigDisplayBase;
 class BosonCanvas;
 
+class QDomElement;
 
 
 /**
@@ -261,6 +262,12 @@ class BosonPath2
     void releaseHighLevelPath(BosonPathHighLevelPath* hlpath);
 
 
+    bool saveAsXML(QDomElement& root) const;
+    bool loadFromXML(const QDomElement& root);
+
+    void setDataLocked(bool lock)  { mDataLocked = lock; }
+
+
     /**
      * Initializes all necessary data structures
      **/
@@ -268,7 +275,7 @@ class BosonPath2
     /**
      * Constructs and inits sectors
      **/
-    void initSectors();
+    void initSectors(unsigned int sectorwidth = 0, unsigned int sectorheight = 0);
     /**
      * Constructs and inits regions
      **/
@@ -302,6 +309,7 @@ class BosonPath2
      * @return found path, or 0 if there was no suitable path in cache
      **/
     BosonPathHighLevelPath* findCachedHighLevelPath(BosonPathInfo* info);
+    BosonPathHighLevelPath* highLevelPath(unsigned int id);
     /**
      * Adds given gigh-level path to cache
      **/
@@ -335,6 +343,7 @@ class BosonPath2
      **/
     BosonPathRegion* cellRegion(int x, int y);
     BosonPathRegion* cellRegion(const BoVector2Fixed& p)  { return cellRegion((int)p.x(), (int)p.y()); }
+    BosonPathRegion* region(unsigned int id);
     /**
      * @return passability type of given cell
      **/
@@ -374,8 +383,10 @@ class BosonPath2
     unsigned int mSectorWidth;
     unsigned int mSectorHeight;
     QPtrList<BosonPathHighLevelPath> mHLPathCache;
+    unsigned int mLastHLPathId;
     bool* mRegionIdUsed;
     QPtrVector<BosonPathRegion> mRegions;
+    bool mDataLocked;
 };
 
 /**
@@ -389,6 +400,7 @@ class BosonPathSector
 {
   public:
     BosonPathSector();
+    ~BosonPathSector();
 
     void setPathfinder(BosonPath2* pf);
 
@@ -419,7 +431,7 @@ class BosonPathRegion
     class Neighbor
     {
       public:
-        Neighbor()  {region = 0; cost = 0.0f; bordercells = 0; }
+        Neighbor()  { region = 0; cost = 0.0f; bordercells = 0; }
 
         BosonPathRegion* region;
         bofixed cost;
@@ -427,6 +439,8 @@ class BosonPathRegion
     };
 
     BosonPathRegion(BosonPathSector* sector);
+    // Use this only for loading
+    BosonPathRegion(BosonPathSector* sector, int id);
     ~BosonPathRegion();
 
     void findCells(int x, int y);
@@ -600,6 +614,11 @@ class BosonPathInfo
     //  find path (if it isn't possible)
     int range;
 
+    // NOTE: all these region pointers are meant to be used _only_ by the
+    //  pathfinder. They can (and often will) become invalid during the game.
+    //  Every time pathfinder is run, it updates them and uses valid updated
+    //  pointers (so you don't need to worry about them). Just don't save/load
+    //  them.
     // Regions containing start and dest points
     BosonPathRegion* startRegion;
     // Note that this is the real destination region where we're going to. It
@@ -638,7 +657,7 @@ class BosonPathHighLevelPath
   public:
     BosonPathHighLevelPath()
     {
-      startRegion = 0; destRegion = 0; valid = false; users = 0;
+      startRegion = 0; destRegion = 0; valid = false; id = 0; users = 0;
       passability = BosonPath2::NotPassable;
     }
     // Starting region
@@ -651,6 +670,9 @@ class BosonPathHighLevelPath
 
     // Is this path still valid?
     bool valid;
+
+    // Unique id of the path, used for saving/loading
+    unsigned int id;
 
     // Passability of this path. I.e. if it's land, then this path is passable
     //  for land units
