@@ -22,7 +22,7 @@
 #include "cell.h"
 
 #include <qobject.h>
-#include <qvaluelist.h>
+#include <qmap.h>
 
 class QImage;
 class QPixmap;
@@ -113,7 +113,7 @@ signals:
 
 private:
 	QImage* mTilesImage;
-	QValueList<QImage> mTextureImages;
+	QMap<int, QImage> mTextureImages;
 	BosonTextureArray* mTextures;
 
 	bool mDebug; // used in putOne()
