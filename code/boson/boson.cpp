@@ -1341,7 +1341,7 @@ void Boson::slotReceiveAdvance()
  emit signalAdvance(d->mAdvanceCount, flag);
 
  d->mAdvanceCount = d->mAdvanceCount + 1;
- if (d->mAdvanceCount >= MAXIMAL_ADVANCE_COUNT) {
+ if (d->mAdvanceCount > MAXIMAL_ADVANCE_COUNT) {
 	d->mAdvanceCount = 0;
  }
  if (d->mAdvanceDividerCount + 1 == d->mAdvanceDivider)  {
