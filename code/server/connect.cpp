@@ -28,6 +28,16 @@
 #include "game.h"
 
 #include "common/bobuffer.h"
+#include "common/msgData.h"
+
+
+void Player::connectionLost(KSocket *s)
+{
+	assert ( s == socket);
+	socketState = SSS_CONNECT_DOWN;
+	server->playerHasDied(id);
+}
+
 
 void Player::handleSocketMessage(KSocket *s)
 {
@@ -93,29 +103,35 @@ if (oldState != socketState)
 	logf(LOG_LAYER1, "[%d] socketState has changed from %d to %d", id, oldState, socketState);
 }
 
-void BosonServer::clientClose(KSocket *s)
+void BosonServer::playerHasDied(uint playerId)
 {
-int i;
-QString buf;
+	uint i;
+	endMsg_t end;
+	QString buf;
 
-for(i=0; i<BOSON_MAX_CONNECTION; i++)
-   if (player[i].socket == s) {
+	end.endReason = endMsg_t::playerDiedEnd;
+	logf( LOG_INFO, "Connection[%u] has closed", playerId);
 
-	player[i].socketState = SSS_NO_CONNECT;
-	delete player[i].buffer;
-	delete s;
+	// closing connections
+	for(i= 0; i < nbPlayer; i++) {
+		if (i!=playerId) sendMsg(player[i].buffer, MSG_DLG_END,  MSG(end) );
+		player[i].socketState = SSS_CONNECT_DOWN;
+		delete player[i].socket;
+		delete player[i].buffer;
+	}
+
+	// gui
 	assert(nbConnected>0);
-
 	buf.sprintf("%d players connected", --nbConnected);
 	l_connected->setText(buf);
+
 	if (nbConnected<1) {
 		state = SS_INIT ;
   		l_state->setText("Waiting for first connection");
+	} else {
+		state = SS_DOWN ;
+  		l_state->setText("Server is down. Stopped");
 	}
-	logf( LOG_INFO, "Connection[%d] has closed", i);
-	return;
 
-	}
-logf(LOG_FATAL, "Unknown client has closed.");
-delete s;
 }
+

@@ -43,6 +43,7 @@ class Player : public QObject
 
 public slots :
   void handleSocketMessage(KSocket *);
+  void connectionLost(KSocket *);
 
 public :
   Player(void);

@@ -62,7 +62,8 @@ class BosonServer : public KTMainWindow, public boFile
   BosonServer(int port, const char *mapfile, const char *name=0L);
   ~BosonServer();
 
-  void	handleDialogMessage(int playerId, bosonMsgTag, int, bosonMsgData *);
+  void	handleDialogMessage(uint playerId, bosonMsgTag, int, bosonMsgData *);
+  void	playerHasDied(uint playerId);
 
   void		placeMob(serverMobUnit *);
   void		placeFix(serverFacility *);
@@ -70,7 +71,7 @@ class BosonServer : public KTMainWindow, public boFile
   protected:
   void	initLog(void);
   void	initSocket(int port);
-  void	handleGameMessage(int playerId, bosonMsgTag, int, bosonMsgData *);
+  void	handleGameMessage(uint playerId, bosonMsgTag, int, bosonMsgData *);
 
   void	initMap(const char *);
 
@@ -85,7 +86,6 @@ class BosonServer : public KTMainWindow, public boFile
 
   public slots:
   void handleNewConnection(KSocket *);
-  void clientClose(KSocket *);
 
 /* playing utilities */
   void requestAction();

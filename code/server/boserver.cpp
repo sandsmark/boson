@@ -179,13 +179,10 @@ for(i=0; i<BOSON_MAX_CONNECTION; i++)
 			newConnection->socket(), newConnection->ipv4_addr());
 
 	/* Signal handling */
-	connect(
-		newConnection, SIGNAL(closeEvent(KSocket *)),
-		this, SLOT(clientClose(KSocket*)) );
-
-	connect(
-		newConnection, SIGNAL(readEvent(KSocket *)),
+	connect( newConnection, SIGNAL(readEvent(KSocket *)),
 		&player[i], SLOT(handleSocketMessage(KSocket*)) );
+	connect( newConnection, SIGNAL(closeEvent(KSocket *)),
+		&player[i], SLOT(connectionLost(KSocket*)) );
 	newConnection->enableRead(TRUE);
 
 	return;
@@ -195,7 +192,7 @@ delete newConnection;
 }
 
 
-void BosonServer::handleDialogMessage(int playerId, bosonMsgTag tag, int len, bosonMsgData *data)
+void BosonServer::handleDialogMessage(uint playerId, bosonMsgTag tag, int len, bosonMsgData *data)
 {
 serverState oldState = state;
 uint i;
@@ -282,7 +279,7 @@ if (oldState != state)
 
 
 
-void BosonServer::handleGameMessage(int playerId, bosonMsgTag tag, int blen, bosonMsgData *data)
+void BosonServer::handleGameMessage(uint playerId, bosonMsgTag tag, int blen, bosonMsgData *data)
 {
 	uint i;
 	serverMobUnit	*mob;
