@@ -62,8 +62,22 @@ Boson* Boson::mBoson = 0;
 
 #define ADVANCE_INTERVAL 250 // ms
 
-// Saving format version (0x123456 = 12.34.56)
-#define BOSON_SAVEGAME_FORMAT_VERSION 0x000112
+// Saving format version
+#define BOSON_SAVEGAME_FORMAT_VERSION_MAJOR 0x00
+#define BOSON_SAVEGAME_FORMAT_VERSION_MINOR 0x01
+#define BOSON_SAVEGAME_FORMAT_VERSION_RELEASE 0x12
+#define BOSON_MAKE_SAVEGAME_FORMAT_VERSION( a,b,c ) ( ((a) << 16) | ((b) << 8) | (c) )
+#define BOSON_SAVEGAME_FORMAT_VERSION \
+	BOSON_MAKE_SAVEGAME_FORMAT_VERSION \
+		( \
+		BOSON_SAVEGAME_FORMAT_VERSION_MAJOR, \
+		BOSON_SAVEGAME_FORMAT_VERSION_MINOR, \
+		BOSON_SAVEGAME_FORMAT_VERSION_RELEASE \
+		)
+
+// version from boson 0.8
+#define BOSON_SAVEGAME_FORMAT_VERSION_0_8 \
+	( BOSON_MAKE_SAVEGAME_FORMAT_VERSION (0x00, 0x01, 0x12) )
 
 #define BOSON_SAVEGAME_END_COOKIE 1718
 
@@ -1093,7 +1107,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 
 		boProfiling->start(BosonProfiling::AddUnitsXML);
 		QDomDocument doc;
-		doc.setContent(xmlDocument);
+		loadXMLDoc(&doc, xmlDocument);
 		QDomElement root = doc.documentElement();
 		QDomNodeList list = root.elementsByTagName("Unit");
 		for (unsigned int i = 0; i < list.count(); i++) {
@@ -1963,23 +1977,28 @@ bool Boson::loadFromFile(const QString& file)
 	d->mLoadingStatus = BSGFileError;
 	return false;
  }
+
+ // kgame.xml is mandatory in all boson savegame versions. We can get the
+ // savegame format version from there (which is also mandatory) so we load this
+ // first.
  QString kgameXML;
- QString playersXML;
- QString canvasXML;
- QString externalXML;
- QByteArray map;
-
  kgameXML = QString(f.kgameData());
- playersXML = QString(f.playersData());
- canvasXML = QString(f.canvasData());
- externalXML = QString(f.externalData());
- map = f.mapData();
-
  if (kgameXML.isEmpty()) {
 	boError(260) << k_funcinfo << "Empty kgameXML" << endl;
 	d->mLoadingStatus = BSGFileError;
 	return false;
  }
+
+ QString playersXML;
+ QString canvasXML;
+ QString externalXML;
+ QByteArray map;
+
+ playersXML = QString(f.playersData());
+ canvasXML = QString(f.canvasData());
+ externalXML = QString(f.externalData());
+ map = f.mapData();
+
  if (playersXML.isEmpty()) {
 	boError(260) << k_funcinfo << "Empty playersXML" << endl;
 	d->mLoadingStatus = BSGFileError;
