@@ -186,7 +186,7 @@ signals:
 
 protected:
 	bool loadDescriptionXML(const QByteArray& xml);
-	bool loadMapXML(const QByteArray& xml);
+	bool loadMapXML(const QByteArray& xml, const QByteArray& heightMapImage);
 	bool loadScenarioXML(const QByteArray& xml);
 
 	QString saveDescriptionXML();
