@@ -357,7 +357,7 @@ void BosonCanvas::newShot(BosonShot* shot)
 	//iterating!)
 	removeAnimation(shot);
 	removeItem(shot);
-	delete shot;
+	delete shot; // AB: is this a good idea? maybe prefer deleteUnusedShots() instead! (note that deleteUnusedShots() depends on the item still being in the animation list!!
  }
 }
 
@@ -375,7 +375,7 @@ void BosonCanvas::shotHit(BosonShot* s)
  }
  // Add hit particle systems
  addParticleSystems(s->properties()->newHitParticleSystems(BoVector3(s->x(), s->y(), s->z())));
- 
+
  explosion(BoVector3(s->x(), s->y(), s->z()), s->properties()->damage(), s->properties()->damageRange(), s->owner());
 }
 
@@ -698,11 +698,7 @@ void BosonCanvas::removeFromCells(BosonItem* item)
  for (unsigned int i = 0; i < cells.count(); i++) {
 	Cell* c = cell(cells[i].x(), cells[i].y());
 	if (!c) {
-		QString error = QString("NULL cell - x=%1,y=%2 for item rtti=%3").arg(cells[i].x()).arg(cells[i].y()).arg(item->rtti());
-		if (RTTI::isUnit(item->rtti())) {
-			error += QString(" unit id=%1").arg(((Unit*)item)->id());
-		}
-		boError() << k_funcinfo << error << endl;
+		boError() << k_funcinfo << "NULL cell - x=" << cells[i].x() << ",y=" << cells[i].y() << endl;
 		continue;
 	}
 	c->removeItem(item);
@@ -715,11 +711,7 @@ void BosonCanvas::addToCells(BosonItem* item)
  for (unsigned int i = 0; i < cells.count(); i++) {
 	Cell* c = cell(cells[i].x(), cells[i].y());
 	if (!c) {
-		QString error = QString("NULL cell - x=%1,y=%2 for item rtti=%3").arg(cells[i].x()).arg(cells[i].y()).arg(item->rtti());
-		if (RTTI::isUnit(item->rtti())) {
-			error += QString(" unit id=%1").arg(((Unit*)item)->id());
-		}
-		boError() << k_funcinfo << error << endl;
+		boError() << k_funcinfo << "NULL cell - x=" << cells[i].x() << ",y=" << cells[i].y() << endl;
 		continue;
 	}
 	c->addItem(item);
@@ -913,8 +905,9 @@ void BosonCanvas::deleteUnusedShots()
 {
  for (BosonItem* i = d->mAnimList.first(); i; i = d->mAnimList.next()) {
 	if (RTTI::isShot(i->rtti())) {
-		if (!((BosonShot*)i)->isActive()) {
-			shotHit((BosonShot*)i);
+		BosonShot* shot = (BosonShot*)i;
+		if (!shot->isActive()) {
+			shotHit(shot);
 #warning FIXME ?
 			// AB: this gets called in the d'tor.
 			// do we *really* need this here??
