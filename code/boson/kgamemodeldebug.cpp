@@ -372,7 +372,8 @@ public:
 		mMorphSmooth = (QLabel*)addWidget(i18n("morph_smooth"), new QLabel(this));
 		mMorph = (QLabel*)addWidget(i18n("morph"), new QLabel(this));
 
-		mHide = (QCheckBox*)addWidget(i18n("morph"), new QCheckBox(this));
+		mHide = (QCheckBox*)addWidget(i18n("Hide"), new QCheckBox(this));
+		mHide->setEnabled(false);
 	}
 
 	void setNodeObjectData(Lib3dsObjectData* d)
@@ -415,7 +416,7 @@ public:
 
 			scl = QString("(%1,%2,%3)").arg(d->scl[0]).arg(d->scl[1]).arg(d->scl[2]);
 			morphSmooth = QString::number(d->morph_smooth);
-			morphSmooth = QString(d->morph_smooth);
+			morph = QString(d->morph);
 			hide = d->hide;
 		}
 
