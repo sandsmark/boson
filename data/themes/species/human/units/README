@@ -144,6 +144,9 @@ CanRefineOil=Boolean - True if this is an oilrefinery.
                       Default is false
 CanRefineMinerals=Boolean - True if this is a mineralrefinery.
                             Default is false
+ConstructionSteps=Number  - Number of frames for the construction (when the
+                            facility is built) animation.
+                            Default is 0
 -------------------------------------------------------------------------------
 
 
