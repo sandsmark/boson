@@ -60,109 +60,151 @@
 
 <tr><td bgcolor="#aaaaaa" align="left"><img src="./pictures/pixel.png" width="1" height="1" alt="" border="0" /></td></tr></table></td></tr></table></table>
 
-<br /><br /> <font size="3" color="#505050">
+<br /><br /> 
 
 <h3><i>
+<font size="3" color="#505050">
 RPM / binary releases
+</font>
 </i></h3>
 
+<font size="3" color="#505050">
 None yet, and unlikely to exist soon. We don't expect any RPM/binary release until the 1.0. Anyway,
 if you feel like building a RPM for boson, we'll be happy to put a link here.
 <a href="mailto:orzel@kde.org">Contact me</a>
+</font>
 
 
 <h3><i>
+<font size="3" color="#505050">
 Tarballs
+</font>
 </i></h3>
 
+<font size="3" color="#505050">
 No tarballs are released yet, you'll have to wait for the next official release (labelled 0.6)
+</font>
 
 
-<h3><i>
+<h3><i><font size="3" color="#505050">
 CVS - Bleeding edge development version
-</i></h3>
+</font></i></h3>
+<font size="3" color="#505050">
 You can get the code using these commands: 
+</font>
 
 <center><table border=1>
 <tr> <td>
+<font size="3" color="#505050">
 	cvs -d:pserver:anonymous@cvs.boson.sourceforge.net:/cvsroot/boson login <br />
 	cvs -z3 -d:pserver:anonymous@cvs.boson.sourceforge.net:/cvsroot/boson co code <br />
+</font>
 </td> </tr>
 </table></center>
  
+<font size="3" color="#505050">
 Please just press the Enter key when you are prompted for a password. 
 As soon as you have checked out the sources you can simply do a 
+</font>
 
 <center><table border=1>
 <tr> <td>
+<font size="3" color="#505050">
 	cd code <br />
 	cvs -z3 up -Pd <br />
+</font>
 </td> </tr>
 </table></center>
 
+<font size="3" color="#505050">
 to update the sources. No need to login again.
+</font>
 
 
 
-<h3><i>
+<h3><i><font size="3" color="#505050">
 Compilation
-</i></h3>
+</font></i></h3>
+
+<font size="3" color="#505050">
 To compile boson use something like 
-
-
+</font>
 
 <center><table border=1>
-<tr> <td>
+<tr> <td><font size="3" color="#505050">
 
 	cd code <br />
 	./configure --prefix=/opt/kde3  <br />
 	make  <br />
 
-</td> </tr>
+</font></td> </tr>
 </table></center>
  
+<font size="3" color="#505050">
 You need to be root to install boson: 
+</font>
  
 <center><table border=1>
 <tr> <td>
+<font size="3" color="#505050">
 	su  <br />
 	make install  <br />
+</font>
 </td> </tr>
 </table></center>
  
 
 
 
-<h3><i>
+<h3><i><font size="3" color="#505050">
 Graphics
-</i></h3> 
+</font></i></h3> 
 
+<font size="3" color="#505050">
 The graphics packages for Boson provide all the neccessary graphics files to
 play boson, including ground, species and GUI graphics. Just like for the
 sources we use CVS for these so-called data files. We don't provide packages at
 this time as there are quite often (very small) changes to some files and you would
 have to download the entire package again.  So please use CVS for this as well. When
 there are changes to the packages, CVS will only updates the changed parts.
+</font>
 
-<p>To checkout the data files (veery big package! currently about 24MB).
-(you need to be already logged, see the <i>cvs section</i>) : 
+<p> <font size="3" color="#505050">
+To checkout the data files (veery big package! currently about 24MB)
+(you need to be already logged in, see the <i>cvs section</i>) : 
+</font>
 <center><table border=1>
-<tr> <td>
+<tr> <td><font size="3" color="#505050">
 	cvs -z3 -d:pserver:anonymous@cvs.boson.sourceforge.net:/cvsroot/boson co data <br />
-</td> </tr>
+</font></td> </tr>
 </table></center>
 
-<p>Installing the graphics follow exactly the same rules as the code :
+ <p><font size="3" color="#505050">
+ First you need to link the admin dir from the code directory:
+ </font>
+<center><table border=1>
+<tr> <td><font size="3" color="#505050">
+ cd data &amp;&amp; ln -s ../code/admin admin
+</font></td> </tr>
+</table></center>
+ 
+<p><font size="3" color="#505050">
+Now install the graphics following exactly the same rules as for the code :
+</font>
 <center><table border=1>
 <tr> <td>
+<font size="3" color="#505050">
  ./configure --prefix=/opt/kde3 
 	make <br />
 	su <br />
 	make install <br />
+</font>
 </td> </tr>
 </table></center>
  
+<font size="3" color="#505050">
 See Sources for details - and don't forget to read the README file! 
+</font>
  
 
 
@@ -170,7 +212,6 @@ See Sources for details - and don't forget to read the README file!
 
 <!-- /MAIN BODY -->
 <br /><br />
-</font>
 </td> </tr>
 </table>
 
