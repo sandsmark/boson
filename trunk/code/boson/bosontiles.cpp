@@ -128,6 +128,11 @@ bool BosonTiles::loadTiles(QString dir, bool debug)
 	emit signalTilesLoaded();
 	return true;
  }
+ if (mTextures) {
+	boWarning() << k_funcinfo << "already loaded ?!" << endl;
+ }
+ delete mTextures;
+ mTextures = 0;
  mTilesDir = dir;
  mDebug = debug;
  // Variables for progress information
@@ -164,11 +169,12 @@ bool BosonTiles::loadTiles(QString dir, bool debug)
 		}
 	}
 
-	delete mTextures;
  } else {
 	QImage img(64, 64, 32);
 	mTextureImages.insert(0, img);
  }
+
+ generateTextures();
 
  // AB: tiles are loaded - but the texturs cannot yet be generated! must be done
  // after construction of the gl-context, aka the BosonGLWidget
@@ -183,21 +189,22 @@ void BosonTiles::generateTextures()
 	return;
  }
  QValueList<QImage> images;
- for (unsigned int i = 0; i < mTextureImages.count(); i++) {
-	images.append(mTextureImages[i]);
+ QMap<int, QImage>::Iterator it;
+ for (it = mTextureImages.begin(); it != mTextureImages.end(); ++it) {
+	images.append(it.data());
  }
  mTextures = new BosonTextureArray(images);
+ images.clear();
  mTextureImages.clear(); // free some space - we won't need it anymore, except for reloading the game/map.
 }
 
 bool BosonTiles::loadGround(int j, const QString& path)
 {
- QString tile;
- QImage p;
  for (int i = 0; i < 4; i++) {
+	QString tile;
 	tile.sprintf("-%.2d.png", i);
 	QString file = path + tile;
-	p.load(file);
+	QImage p(file);
 	if (p.isNull()) {
 		boError() << k_funcinfo << "couldn't load image " << file << endl;
 		return false;
@@ -211,7 +218,7 @@ bool BosonTiles::loadGround(int j, const QString& path)
 		mLoaded += 3;
 	}
  }
- if((mLoaded % 10) == 0) {
+ if ((mLoaded % 10) == 0) {
 	emit signalTilesLoading(mLoaded);
  }
  return true;
@@ -225,89 +232,13 @@ void BosonTiles::putOne(int z, QImage& p, int xoffset, int yoffset)
  int x = BosonTiles::big_x(z);
  int y = BosonTiles::big_y(z);
 
+ if (mTextureImages.contains(z)) {
+	boError() << k_funcinfo << z << " is already there" << endl;
+	return;
+ }
  QImage small(BO_TILE_SIZE, BO_TILE_SIZE, 32);
  bitBlt(&small, 0, 0, &p, xoffset, yoffset, BO_TILE_SIZE, BO_TILE_SIZE);
  mTextureImages.insert(z, small);
-
- 
- #define SETPIXEL(x,y) p.setPixel( xoffset+(x) , yoffset+(y) , 0x00ff0000 )
- #define SETPIXEL2(x,y) \
-	SETPIXEL(2*(x), 2*(y));		\
-	SETPIXEL(2*(x)+1, 2*(y));	\
-	SETPIXEL(2*(x), 2*(y)+1);	\
-	SETPIXEL(2*(x)+1, 2*(y)+1)
- #define SETPIXEL3(x,y) \
-	SETPIXEL2(2*(x), 2*(y));	\
-	SETPIXEL2(2*(x)+1, 2*(y));	\
-	SETPIXEL2(2*(x), 2*(y)+1);	\
-	SETPIXEL2(2*(x)+1, 2*(y)+1)
- 
- if (mDebug) {
-	int i;
-	for(i = 0; i < BO_TILE_SIZE; i++) {
-		SETPIXEL(0,i);
-		SETPIXEL(BO_TILE_SIZE-1,i);
-		SETPIXEL(i,0);
-		SETPIXEL(i,BO_TILE_SIZE-1);
-	}	// print the # version
-	switch(z%4) {
-		case 0:
-			SETPIXEL3(3,4);
-			SETPIXEL3(4,3);
-			SETPIXEL3(5,3);
-			SETPIXEL3(5,4);
-			SETPIXEL3(5,5);
-			SETPIXEL3(5,6);
-			SETPIXEL3(5,7);
-			break;
-		case 1:
-			SETPIXEL3(4,4);
-			SETPIXEL3(5,3);
-			SETPIXEL3(6,3);
-			SETPIXEL3(7,4);
-			SETPIXEL3(6,5);
-			SETPIXEL3(5,6);
-			SETPIXEL3(4,7);
-			SETPIXEL3(5,7);
-			SETPIXEL3(6,7);
-			SETPIXEL3(7,7);
-			break;
-		case 2:
-			SETPIXEL3(4,3);
-			SETPIXEL3(5,3);
-
-			SETPIXEL3(4,5);
-			SETPIXEL3(5,5);
-
-			SETPIXEL3(4,7);
-			SETPIXEL3(5,7);
-
-			SETPIXEL3(6,4);
-			SETPIXEL3(6,5);
-			SETPIXEL3(6,6);
-			break;
-		case 3:
-			SETPIXEL3(6,3);
-			SETPIXEL3(5,4);
-			SETPIXEL3(4,5);
-			SETPIXEL3(4,6);
-			SETPIXEL3(5,6);
-			SETPIXEL3(6,6);
-			SETPIXEL3(7,6);
-
-			SETPIXEL3(7,5);
-			SETPIXEL3(7,7);
-			break;
-		default:
-			boError() << k_funcinfo << "Unexpected value" << endl;
-			return;
-	}
-
- }
-
- #undef SETPIXEL3
- #undef SETPIXEL2
- #undef SETPIXEL
 
  bitBlt(mTilesImage, x, y, &p, xoffset, yoffset, BO_TILE_SIZE, BO_TILE_SIZE);
  if (qApp->hasPendingEvents()) {
