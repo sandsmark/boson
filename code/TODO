@@ -5,6 +5,8 @@ Generic :
 =========
 
 
+nmap makes the server crashes. should logDD("new attempt rejected");
+
 check if qcanvas can handle png's transparency
 redo icon/.desktop stuff into makefile.am's
 
