@@ -30,20 +30,6 @@ class BoMeshRendererMeshData;
 class BoMeshRendererMeshLODData;
 class QColor;
 
-// AB: there are two different ways for normals: store one normal per face
-// ("surface normal") or store one normal per vertex, i.e. 3 per face ("vertex
-// normal").
-// the "surface normal" is said to produce objects that appear "flat", whereas
-// the "vertex normals" are used for "curved" objects. so vertex normals would
-// be nicer, but take three times as much memory.
-// i seriously think that we don't need vertex normals. our camera rarely moves
-// *that* close that you can see whether the mesh appears slightly more flat or
-// not.
-// atm we don't have code for vertex normals anyway.
-//
-// use 0 here to use vertex normals.
-#define BOMESH_USE_1_NORMAL_PER_FACE 0
-
 class BoFace
 {
 public:
@@ -80,33 +66,20 @@ public:
 	 **/
 	void setAllNormals(const BoVector3 normal)
 	{
-#if BOMESH_USE_1_NORMAL_PER_FACE
-		setNormal(0, normal);
-#else
 		setNormal(0, normal);
 		setNormal(1, normal);
 		setNormal(2, normal);
-#endif
 	}
 	void setNormal(unsigned int i, const BoVector3 normal)
 	{
-#if BOMESH_USE_1_NORMAL_PER_FACE
-		i = 0;
-#else
 		// values > 2 are not allowed
 		i = i % 3;
-#endif
 		mNormals[i] = normal;
 	}
 	inline const BoVector3& normal(unsigned int i) const
 	{
-#if BOMESH_USE_1_NORMAL_PER_FACE
-		Q_UNUSED(i);
-		return mNormals[0];
-#else
 		// we don't do i = i % 3; as of performance reasons
 		return mNormals[i];
-#endif
 	}
 
 	void setSmoothGroup(unsigned long int group)
@@ -123,11 +96,7 @@ private:
 
 	unsigned long int mSmoothGroup;
 
-#if BOMESH_USE_1_NORMAL_PER_FACE
-	BoVector3 mNormals[1];
-#else
 	BoVector3 mNormals[3];
-#endif
 };
 
 /**

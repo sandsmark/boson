@@ -598,13 +598,9 @@ BoFace& BoFace::operator=(const BoFace& face)
 {
  setPointIndex(face.pointIndex());
  setSmoothGroup(face.smoothGroup());
-#if BOMESH_USE_1_NORMAL_PER_FACE
- mNormals[0] = face.mNormals[0];
-#else
  mNormals[0] = face.mNormals[0];
  mNormals[1] = face.mNormals[1];
  mNormals[2] = face.mNormals[2];
-#endif
  return *this;
 }
 
@@ -1421,7 +1417,6 @@ void BoMesh::calculateNormals(unsigned int _lod)
  //  it's normal is it's face's normal
  for (unsigned int face = 0; face < lod->facesCount(); face++) {
 	if (lod->face(face)->smoothGroup()) {
-#if !BOMESH_USE_1_NORMAL_PER_FACE
 		// Face is in some smoothing group. Use smooth shading
 		for (int p = 0; p < 3; p++) {
 			BoVector3 normal;
@@ -1437,9 +1432,6 @@ void BoMesh::calculateNormals(unsigned int _lod)
 			normal.normalize();
 			lod->setNormal(face, p, normal);
 		}
-#else
-		lod->setNormal(face, -1, facenormals[face]);
-#endif
 	} else {
 		// Face is not in any smoothing group. Use flat shading
 		lod->setNormal(face, -1, facenormals[face]);
