@@ -60,12 +60,20 @@ BosonPlayField::~BosonPlayField()
 
 QString BosonPlayField::defaultPlayField()
 {
- QStringList list = availablePlayFields();
- QString defaultField = list.grep(QString::fromLatin1("Basic")).first();
- if (defaultField == QString::null) {
-	return list.first();
+ QString identifier;
+ QStringList l = availablePlayFields();
+ for (unsigned int i = 0; i < l.count(); i++) {
+	KSimpleConfig cfg(l[i]);
+	cfg.setGroup("Boson PlayField");
+	QString ident = cfg.readEntry("Identifier");
+	if (ident == QString::fromLatin1("Basic")) {
+		return ident;
+	} else if (identifier == QString::null) {
+		identifier = ident;
+	}
  }
- return defaultField;
+ kdWarning() << "cannot find Basic map - using " << identifier << " instead" << endl;
+ return QString::null;
 }
 
 QStringList BosonPlayField::availablePlayFields()
