@@ -964,6 +964,52 @@ void BosonBigDisplayBase::renderItems()
 	}
 	glCallList(item->selectBox()->displayList());
 	glPopMatrix();
+	Unit* u = 0;
+	if (RTTI::isUnit(item->rtti())) {
+		u = (Unit*)item;
+	}
+	if (u && u ->waypointList().count() > 0) {
+		// render a line from the current position of the unit to the
+		// point it is moving to.
+		// TODO: render one vertex per cell or so. this would fix
+		// problem with heightmaps, when a line goes through mountains.
+		// speed is hardly relevant at this point (rendering a few small
+		// lines is fast).
+		glColor3ub(0, 255, 0);
+		glDisable(GL_TEXTURE_2D);
+		glBegin(GL_LINE_STRIP);
+		glVertex3f(x, y, z);
+		QValueList<QPoint> list = u->waypointList();
+		QValueList<QPoint>::Iterator it;
+		bool done = false;
+		for (it = list.begin(); it != list.end(); ++it) {
+			if ((*it).x() < 0 || (*it).y() < 0) {
+				done = true;
+				break;
+			}
+			float x = ((float)(*it).x()) / BO_TILE_SIZE;
+			float y = -((float)(*it).y()) / BO_TILE_SIZE;
+			float z = 0.05f;
+			if (u->isFlying()) {
+				z += item->z();
+			} else {
+				z += canvas()->heightAtPoint(x, y);
+			}
+			glVertex3f(x, y, z);
+		}
+		if (!done) {
+			float x = ((float)(u->destinationX())) / BO_TILE_SIZE;
+			float y = -((float)(u->destinationY())) / BO_TILE_SIZE;
+			float z = 0.05f;
+			if (u->isFlying()) {
+				z += item->z();
+			} else {
+				z += canvas()->heightAtPoint(x, y);
+			}
+			glVertex3f(x, y, z);
+		}
+		glEnd();
+	}
 	glColor3ub(255, 255, 255);
 
 	++it;
@@ -1368,9 +1414,9 @@ void BosonBigDisplayBase::renderParticles()
 				p = &(s->mParticles[i]);
 				// Calculate distance from camera. Note that for performance reasons,
 				//  we don't calculate actual distance, but square of it.
-				x = p->pos.x() - d->mCamera.cameraPos().x();
-				y = p->pos.y() - d->mCamera.cameraPos().y();
-				z = p->pos.z() - d->mCamera.cameraPos().z();
+				x = p->pos.x() - camera()->cameraPos().x();
+				y = p->pos.y() - camera()->cameraPos().y();
+				z = p->pos.z() - camera()->cameraPos().z();
 				p->distance = (x*x + y*y + z*z);
 				// Append to list
 				d->mParticleList.append(p);
