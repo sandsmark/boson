@@ -194,6 +194,11 @@ public:
 	QValueList<unsigned long int> allMobiles() const;
 
 	/**
+	 * @return A list of all unit properties in this theme
+	 **/
+	QValueList<const UnitProperties*> allUnits() const;
+
+	/**
 	 * @return A list of all units that have a @ref UnitProperties::producer
 	 * specified in producerList.
 	 **/
