@@ -1436,6 +1436,18 @@ void Boson::slotProcessDelayed() // TODO: rename: processDelayed()
  delete m;
 }
 
+bool Boson::save(QDataStream& stream, bool saveplayers)
+{
+#if HAVE_KGAME_SAVEGAME
+ return KGame::save(stream, saveplayers);
+#else
+// KDE 3.0 didn't have KGame::savegame() - we provide our own savegame()
+// version, but the KGame code is in KGame::save(). we need to call that from
+// Boson::save(), instead of savegame()
+ return savegame(stream, false, saveplayers);
+#endif
+}
+
 bool Boson::savegame(QDataStream& stream, bool network, bool saveplayers)
 {
  kdDebug() << k_funcinfo << endl;
@@ -1466,7 +1478,12 @@ bool Boson::savegame(QDataStream& stream, bool network, bool saveplayers)
  }
 
  // Save KGame stuff
+#if !HAVE_KGAME_SAVEGAME
+ kdWarning() << k_funcinfo << "Saving without KGame::savegame() is untested! (KDE 3.1 has KGame::savegame())" << endl;
+ if(!KGame::save(stream, saveplayers)) {
+#else
  if(!KGame::savegame(stream, network, saveplayers)) {
+#endif
 	kdError() << k_funcinfo << "Can't save KGame!" << endl;
 	return false;
  }
