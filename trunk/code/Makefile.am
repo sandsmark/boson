@@ -6,6 +6,9 @@ EXTRA_DIST = AUTHORS COPYING ChangeLog INSTALL README TODO
 
 MAKE = nice -20 make -j 3
 
+api :
+	kdoc -p -dapi/ -ufile:/home/orzel/c/boson/api/ boson */*h
+
 orzel.clean : maintainer-clean
 	rm -f configure Makefile{,.in}
 	rm -Rf */.deps
@@ -19,4 +22,3 @@ orzel.clean : maintainer-clean
 # not a GNU package. You can remove this line, if 
 # have all needed files, that a GNU package needs
 AUTOMAKE_OPTIONS = foreign 
-
