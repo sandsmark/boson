@@ -282,6 +282,14 @@ void BosonNewEditorWidget::slotNetStart()
 	KMessageBox::sorry(this, i18n("Too many (max-)players. Not enough colors available (internal error)."));
 	return;
  }
+ if (boGame->playerCount() > 0) {
+	boError() << k_funcinfo << "playerCount must be 0! trying to clear" << endl;
+	boGame->quitGame();
+ }
+ if (boGame->playerCount() > 0) {
+	boError() << k_funcinfo << "playerCount must be 0! clearning did not succeed" << endl;
+	return;
+ }
  for (int i = 0; i < maxPlayers; i++) {
 	// add dummy computer player
 	Player* p = new Player;
@@ -292,8 +300,6 @@ void BosonNewEditorWidget::slotNetStart()
 	boGame->bosonAddPlayer(p);
  }
 
-#warning FIXME
- field = 0;
  networkInterface()->sendNewGame(field, true);
 }
 
