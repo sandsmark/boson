@@ -36,6 +36,7 @@ BosonItem::BosonItem(BosonModel* model, BosonCanvas* canvas)
  mX = mY = mZ = 0.0;
  mWidth = mHeight = 0;
  mRotation = 0;
+ mXRotation = 0;
  mGLDepthMultiplier = 1.0;
  mDisplayList = 0;
  mFrame = 0;
