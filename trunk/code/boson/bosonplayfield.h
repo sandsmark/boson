@@ -117,7 +117,7 @@ public:
 	 * clients, i.e. without a map until it is received.
 	 **/
 	void deleteMap();
-	
+
 	bool savePlayFieldForRemote(QDataStream& stream);
 	bool loadPlayFieldFromRemote(QDataStream& stream);
 
@@ -199,6 +199,12 @@ protected:
 	 **/
 	bool loadMap(QDataStream& stream);
 	bool loadDescription(QDataStream& stream);
+
+	/**
+	 * @return A list of all playfields (.bpf files) that are found on this
+	 * computer. This does not check whether they got already loaded.
+	 **/
+	static QStringList findAvailablePlayFields();
 
 private:
 	BosonMap* mMap;
