@@ -38,7 +38,26 @@ public:
 	 **/
 	const QString& playFieldIdentifier() const { return mMapId; }
 
+	/**
+	 * Send the new playfield identifier through network, so that all
+	 * clients can display the new playfield.
+	 *
+	 * Note that this method can safely be called directly, as it cares
+	 * about network (in contrary to @ref slotPlayFieldChanged).
+	 **/
+	void sendPlayFieldChanged(const QString& identifier);
+
 public slots:
+	/**
+	 * Called when the player changes the current map/playfield. This will
+	 * send the new map/playfield (identifier) through network, so that 
+	 * the changed map is displayed in the widget of all clients.
+	 * See also @ref sendPlayFieldChanged and @ef slotPlayFieldChanged
+	 *
+	 * Note that you can safely call this directly. It cares about network.
+	 **/
+	virtual void slotSendPlayFieldChanged(int index);
+
 	/**
 	 * Called when user clicks on "Start game" button.
 	 * This widget should then be hidden and game should be started. Must be
@@ -47,13 +66,6 @@ public slots:
 	 * You should call @ref sendNewGame at the end of your implementation.
 	 **/
 	virtual void slotStart() = 0;
-
-	/**
-	 * Called when the ADMIN changes the map. See @ref
-	 * Boson::signalPlayFieldChanged.
-	 **/
-	void slotPlayFieldChanged(const QString& playFieldIdentifier);
-
 
 signals:
 	/**
@@ -75,12 +87,13 @@ protected:
 
 protected slots:
 	/**
-	 * Called when the player changes the current map/playfield. This will
-	 * send the new map/playfield (identifier) through network, so that 
-	 * the changed map is displayed in the widget of all clients.
-	 * See also @ef slotPlayFieldChanged
+	 * Called when the ADMIN changes the map. See @ref
+	 * Boson::signalPlayFieldChanged.
+	 *
+	 * Note that this gets called after a <em>network</em> message! Do
+	 * <em>not</em> call this directly!
 	 **/
-	virtual void slotSendPlayFieldChanged(int index);
+	void slotPlayFieldChanged(const QString& playFieldIdentifier);
 
 private:
 	void initKGame();
