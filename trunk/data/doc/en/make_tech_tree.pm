@@ -222,7 +222,7 @@ my $small_file = "map_small.jpg";
 print_mesg("Write to $file\n");
 $image->Write($file);
 
-$image->Resize(geometry=>'120x75');
+$image->Resize(geometry=>'130');
 $image->Write($small_file);
 
 
