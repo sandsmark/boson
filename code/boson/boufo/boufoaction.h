@@ -41,6 +41,9 @@ namespace ufo {
 class BoUfoActionPrivate;
 /**
  * @short A simple @ref KAction like class that for libufo
+ *
+ * Note that in contrast to the classes derived of @ref BoUfoWidget you can
+ * delete objects of this class yourself.
  * @autor Andreas Beckermann <b_mann@gmx.de>
  **/
 class BoUfoAction : public QObject
@@ -53,6 +56,14 @@ public:
 	const QString& text() const;
 
 	virtual void plug(ufo::UWidget*);
+
+	/**
+	 * @internal
+	 **/
+	void setParentCollection(BoUfoActionCollection* parent)
+	{
+		mParentCollection = parent;
+	}
 
 public slots:
 	/**
@@ -91,7 +102,7 @@ public:
 	virtual void plug(ufo::UWidget*);
 
 	void setChecked(bool);
-	bool checked() const
+	bool isChecked() const
 	{
 		return mChecked;
 	}
@@ -182,16 +193,86 @@ public:
 	~BoUfoActionCollection();
 
 	void insert(BoUfoAction* action);
+	void remove(BoUfoAction* action, bool deleteIt = true);
 	bool hasAction(const QString& name) const;
 	BoUfoAction* action(const QString& name) const;
 
 	bool createGUI(const QString& file);
+	bool createGUI(const QStringList& fileList);
 
 	static void initActionCollection(BoUfoManager* m);
 
 private:
 	BoUfoActionCollectionPrivate* d;
 };
+
+
+// AB: heavily based on KStdAction/KStdGameAction
+class BoUfoStdAction
+{
+public:
+	enum StdAction {
+		// File menu
+		FileNew = 1, FileOpen, FileSave, FileSaveAs,
+		FileQuit,
+
+		// Game menu
+		GameNew, GameLoad, GameSave, GameSaveAs,
+		GameEnd, GamePause, GameQuit,
+
+		// Settings menu
+		ShowMenubar, ShowToolbar, ShowStatusbar,
+		KeyBindings, Preferences,
+		
+		FullScreen,
+		ActionNone
+	};
+
+	static BoUfoAction* create(StdAction id,
+			const QObject* receiver, const char* slot,
+			BoUfoActionCollection* parent, const char* name);
+	static const char* name(StdAction id);
+
+
+	static BoUfoAction* fileNew(const QObject* receiver = 0, const char* slot = 0,
+			BoUfoActionCollection* parent = 0, const char* name = 0);
+	static BoUfoAction* fileOpen(const QObject* receiver = 0, const char* slot = 0,
+			BoUfoActionCollection* parent = 0, const char* name = 0);
+	static BoUfoAction* fileSave(const QObject* receiver = 0, const char* slot = 0,
+			BoUfoActionCollection* parent = 0, const char* name = 0);
+	static BoUfoAction* fileSaveAs(const QObject* receiver = 0, const char* slot = 0,
+			BoUfoActionCollection* parent = 0, const char* name = 0);
+	static BoUfoAction* fileQuit(const QObject* receiver = 0, const char* slot = 0,
+			BoUfoActionCollection* parent = 0, const char* name = 0);
+
+	static BoUfoAction* gameNew(const QObject* receiver = 0, const char* slot = 0,
+			BoUfoActionCollection* parent = 0, const char* name = 0);
+	static BoUfoAction* gameLoad(const QObject* receiver = 0, const char* slot = 0,
+			BoUfoActionCollection* parent = 0, const char* name = 0);
+	static BoUfoAction* gameSave(const QObject* receiver = 0, const char* slot = 0,
+			BoUfoActionCollection* parent = 0, const char* name = 0);
+	static BoUfoAction* gameSaveAs(const QObject* receiver = 0, const char* slot = 0,
+			BoUfoActionCollection* parent = 0, const char* name = 0);
+	static BoUfoAction* gameEnd(const QObject* receiver = 0, const char* slot = 0,
+			BoUfoActionCollection* parent = 0, const char* name = 0);
+	static BoUfoToggleAction* gamePause(const QObject* receiver = 0, const char* slot = 0,
+			BoUfoActionCollection* parent = 0, const char* name = 0);
+	static BoUfoAction* gameQuit(const QObject* receiver = 0, const char* slot = 0,
+			BoUfoActionCollection* parent = 0, const char* name = 0);
+	static BoUfoToggleAction* showMenubar(const QObject* receiver = 0, const char* slot = 0,
+			BoUfoActionCollection* parent = 0, const char* name = 0);
+	static BoUfoToggleAction* showToolbar(const QObject* receiver = 0, const char* slot = 0,
+			BoUfoActionCollection* parent = 0, const char* name = 0);
+	static BoUfoToggleAction* showStatusbar(const QObject* receiver = 0, const char* slot = 0,
+			BoUfoActionCollection* parent = 0, const char* name = 0);
+	static BoUfoToggleAction* fullScreen(const QObject* receiver = 0, const char* slot = 0,
+			BoUfoActionCollection* parent = 0, const char* name = 0);
+	static BoUfoAction* keyBindings(const QObject* receiver = 0, const char* slot = 0,
+			BoUfoActionCollection* parent = 0, const char* name = 0);
+	static BoUfoAction* preferences(const QObject* receiver = 0, const char* slot = 0,
+			BoUfoActionCollection* parent = 0, const char* name = 0);
+};
+
 
 /**
  * @internal

@@ -40,6 +40,9 @@
 #include <kshortcut.h>
 #include <kstandarddirs.h>
 #include <klocale.h>
+#include <kstdaccel.h>
+#include <kglobal.h>
+#include <kaboutdata.h>
 
 #include <qdict.h>
 #include <qdom.h>
@@ -465,6 +468,9 @@ BoUfoAction::BoUfoAction(const QString& text, const KShortcut& cut, const QObjec
 
 BoUfoAction::~BoUfoAction()
 {
+ if (mParentCollection) {
+	mParentCollection->remove(this, false);
+ }
  delete d;
 }
 
@@ -566,12 +572,11 @@ BoUfoToggleAction::~BoUfoToggleAction()
 
 void BoUfoToggleAction::plug(ufo::UWidget* w)
 {
-#if UFO_VERSION_ATLEAST(0,7,3)
  ufo::UMenuBar* menuBar = dynamic_cast<ufo::UMenuBar*>(w);
  ufo::UMenu* menu = dynamic_cast<ufo::UMenu*>(w);
  if (menuBar || menu) {
 	ufo::UCheckBoxMenuItem* menuItem = new ufo::UCheckBoxMenuItem(text().latin1());
-	menuItem->setSelected(checked());
+	menuItem->setSelected(isChecked());
 	menuItem->sigActivated().connect(slot(*((BoUfoAction*)this), &BoUfoAction::uslotActivated));
 	menuItem->sigHighlighted().connect(slot(*((BoUfoAction*)this), &BoUfoAction::uslotHighlighted));
 
@@ -582,12 +587,6 @@ void BoUfoToggleAction::plug(ufo::UWidget* w)
 	w->add(menuItem);
 	addWidget(menuItem);
  }
-#else
- #warning checkbox menuitems not supported with libufo < 0.7.3
- // AB: libufo <= 0.7.2 had a broken UCheckBoxMenuItem
- // implementation.
- BoUfoAction::plug(w);
-#endif
 }
 
 void BoUfoToggleAction::slotActivated()
@@ -602,7 +601,7 @@ void BoUfoToggleAction::slotActivated()
 
  recursive = false;
  BoUfoAction::slotActivated();
- emit signalToggled(checked());
+ emit signalToggled(isChecked());
 }
 
 void BoUfoToggleAction::setChecked(bool c)
@@ -618,8 +617,8 @@ void BoUfoToggleAction::setChecked(bool c)
  while (it.current()) {
 	ufo::UCheckBoxMenuItem* checkBox = dynamic_cast<ufo::UCheckBoxMenuItem*>(it.current());
 	if (checkBox) {
-		if (checkBox->isSelected() != checked()) {
-			checkBox->setSelected(checked());
+		if (checkBox->isSelected() != isChecked()) {
+			checkBox->setSelected(isChecked());
 		}
 	} else {
 		boError() << k_funcinfo << "widget is not a checkbox" << endl;
@@ -799,11 +798,11 @@ void BoUfoSelectAction::setCurrentItem(int index)
 	}
 	BoUfoToggleAction* t = (BoUfoToggleAction*)it.current();
 	if (i == index) {
-		if (!t->checked()) {
+		if (!t->isChecked()) {
 			t->setChecked(true);
 		}
 	} else {
-		if (t->checked()) {
+		if (t->isChecked()) {
 			t->setChecked(false);
 		}
 	}
@@ -829,6 +828,10 @@ BoUfoActionCollection::BoUfoActionCollection(QObject* parent, const char* name)
 
 BoUfoActionCollection::~BoUfoActionCollection()
 {
+ if (parent() && parent()->inherits("BoUfoManager")) {
+	BoUfoManager* m = (BoUfoManager*)parent();
+	m->setMenuBar(0);
+ }
  d->mActionDict.clear();
  delete d;
 }
@@ -848,6 +851,23 @@ void BoUfoActionCollection::insert(BoUfoAction* action)
  d->mActionDict.insert(name, action);
 }
 
+void BoUfoActionCollection::remove(BoUfoAction* action, bool deleteIt)
+{
+ char unnamed[100];
+ const char* name = action->name();
+ if (qstrcmp(name, "unnamed") == 0) {
+	sprintf(unnamed, "unnamed-%p", (void*)action);
+	name = unnamed;
+ }
+ if (!d->mActionDict[name]) {
+	return;
+ }
+ BoUfoAction* a = d->mActionDict.take(name);
+ if (deleteIt) {
+	delete a;
+ }
+}
+
 BoUfoAction* BoUfoActionCollection::action(const QString& name) const
 {
  return d->mActionDict[name];
@@ -862,6 +882,13 @@ bool BoUfoActionCollection::hasAction(const QString& name) const
 }
 
 bool BoUfoActionCollection::createGUI(const QString& file)
+{
+ QStringList list;
+ list.append(file);
+ return createGUI(list);
+}
+
+bool BoUfoActionCollection::createGUI(const QStringList& fileList)
 {
  if (!parent()) {
 	BO_NULL_ERROR(parent());
@@ -882,9 +909,12 @@ bool BoUfoActionCollection::createGUI(const QString& file)
 	boError() << k_funcinfo << "builder reset failed" << endl;
 	return false;
  }
- if (!builder.mergeFile(file)) {
-	boError() << k_funcinfo << "merging of file " << file << " failed" << endl;
-	return false;
+ QStringList::const_iterator it = fileList.begin();
+ for (; it != fileList.end(); ++it) {
+	if (!builder.mergeFile(*it)) {
+		boError() << k_funcinfo << "merging of file " << *it << " failed" << endl;
+		return false;
+	}
  }
  if (!builder.cleanDoc()) {
 	boError() << k_funcinfo << "failed cleaning the xml doc" << endl;
@@ -1070,4 +1100,130 @@ BoUfoMenuBarItem::~BoUfoMenuBarItem()
 {
 }
 
+
+struct BoUfoStdActionInfo
+{
+	BoUfoStdAction::StdAction id;
+	KStdAccel::StdAccel globalAccel;
+	int shortcut;
+	const char* name;
+	const char* label;
+	const char* whatsThis;
+	const char* iconName;
+};
+
+const BoUfoStdActionInfo g_actionInfo[] = {
+	// File menu
+	{ BoUfoStdAction::FileNew, KStdAccel::New, 0, "file_new", I18N_NOOP("&New"), 0, "filenew"},
+	{ BoUfoStdAction::FileOpen, KStdAccel::Open, 0, "file_open", I18N_NOOP("&Open..."), 0, "fileopen"},
+	{ BoUfoStdAction::FileSave, KStdAccel::Save, 0, "file_save", I18N_NOOP("&Save"), 0, "filesave"},
+	{ BoUfoStdAction::FileSaveAs, KStdAccel::AccelNone, 0, "file_save_as", I18N_NOOP("Save &As..."), 0, "filesaveas"},
+	{ BoUfoStdAction::FileQuit, KStdAccel::Quit, 0, "file_quit", I18N_NOOP("&Quit"), 0, "filequit"},
+
+	// Game menu
+	{ BoUfoStdAction::GameNew, KStdAccel::New, 0, "game_new", I18N_NOOP("&New"), 0, "filenew"},
+	{ BoUfoStdAction::GameLoad, KStdAccel::Open, 0, "game_load", I18N_NOOP("&Load..."), 0, "fileopen"},
+	{ BoUfoStdAction::GameSave, KStdAccel::Save, 0, "game_save", I18N_NOOP("&Save"), 0, "filesave"},
+	{ BoUfoStdAction::GameSaveAs, KStdAccel::AccelNone, 0, "game_save_as", I18N_NOOP("Save &As..."), 0, "filesaveas"},
+	{ BoUfoStdAction::GameEnd, KStdAccel::End, 0, "game_end", I18N_NOOP("&End Game"), 0, "fileclose"},
+	{ BoUfoStdAction::GamePause, KStdAccel::AccelNone, Qt::Key_P, "game_pause", I18N_NOOP("Pa&use"), 0, "player_pause"},
+	{ BoUfoStdAction::GameQuit, KStdAccel::Quit, 0, "game_quit", I18N_NOOP("&Quit"), 0, "exit"},
+
+	// Settings menu
+	{ BoUfoStdAction::ShowMenubar, KStdAccel::ShowMenubar, 0, "options_show_menubar", I18N_NOOP("Show &Menubar"), 0, "showmenu"},
+	{ BoUfoStdAction::ShowToolbar, KStdAccel::AccelNone, 0, "options_show_toolbar", I18N_NOOP("Show &Toolbar"), 0, 0},
+	{ BoUfoStdAction::ShowStatusbar, KStdAccel::AccelNone, 0, "options_show_statusbar", I18N_NOOP("Show St&atusbar"), 0, 0},
+	{ BoUfoStdAction::KeyBindings, KStdAccel::AccelNone, 0, "options_configure_keybinding", I18N_NOOP("Configure S&hortcuts..."), 0, "configure_shortcuts"},
+	{ BoUfoStdAction::Preferences, KStdAccel::AccelNone, 0, "options_configure", I18N_NOOP("&Configure %1..."), 0, "configure"},
+
+	{ BoUfoStdAction::FullScreen, KStdAccel::FullScreen, 0, "fullscreen", I18N_NOOP("F&ull Screen Mode"), 0, "window_fullscreen"},
+};
+
+const BoUfoStdActionInfo* infoPtr(BoUfoStdAction::StdAction id)
+{
+ for (unsigned int i = 0; g_actionInfo[i].id != BoUfoStdAction::ActionNone; i++) {
+	if (g_actionInfo[i].id == id) {
+		return &g_actionInfo[i];
+	}
+ }
+ return 0;
+}
+
+BoUfoAction* BoUfoStdAction::create(StdAction id, const QObject* receiver, const char* slot, BoUfoActionCollection* parent, const char* name)
+{
+ BoUfoAction* action = 0;
+ const BoUfoStdActionInfo* info = infoPtr(id);
+ if (!info) {
+	boError() << k_funcinfo << "no info about " << (int)id << endl;
+	return 0;
+ }
+ QString label;
+ KShortcut cut = (info->globalAccel == KStdAccel::AccelNone
+		? KShortcut(info->shortcut)
+		: KStdAccel::shortcut(info->globalAccel));
+ const char* n = name ? name : info->name;
+ switch (id) {
+	case Preferences:
+	{
+		const KAboutData* aboutData = KGlobal::instance()->aboutData();
+		QString appName = (aboutData) ? aboutData->programName() : QString::fromLatin1(qApp->name());
+		label = i18n(info->label).arg(appName);
+	}
+	default:
+		label = i18n(info->label);
+		break;
+ }
+ switch (id) {
+	case ShowMenubar:
+	case ShowToolbar:
+	case ShowStatusbar:
+	case GamePause:
+	case FullScreen:
+		// TODO: iconName
+		action = new BoUfoToggleAction(label, cut, receiver, slot, parent, n);
+		break;
+	default:
+		// TODO: iconName
+		action = new BoUfoAction(label, cut, receiver, slot, parent, n);
+		break;
+ }
+ return action;
+}
+
+const char* BoUfoStdAction::name(BoUfoStdAction::StdAction id)
+{
+ const BoUfoStdActionInfo* info = infoPtr(id);
+ if (info) {
+	return info->name;
+ }
+ return 0;
+}
+
+#define ACTION(name1, name2, ret) \
+	ret* BoUfoStdAction::name1(const QObject* receiver, const char* slot, BoUfoActionCollection* parent, const char* name) \
+	{ return (ret*)BoUfoStdAction::create(name2, receiver, slot, parent, name); }
+
+ACTION(fileNew, FileNew, BoUfoAction)
+ACTION(fileOpen, FileOpen, BoUfoAction)
+ACTION(fileSave, FileSave, BoUfoAction)
+ACTION(fileSaveAs, FileSaveAs, BoUfoAction)
+ACTION(fileQuit, FileQuit, BoUfoAction)
+
+ACTION(gameNew, GameNew, BoUfoAction)
+ACTION(gameLoad, GameLoad, BoUfoAction)
+ACTION(gameSave, GameSave, BoUfoAction)
+ACTION(gameSaveAs, GameSaveAs, BoUfoAction)
+ACTION(gameEnd, GameEnd, BoUfoAction)
+ACTION(gamePause, GamePause, BoUfoToggleAction)
+ACTION(gameQuit, GameQuit, BoUfoAction)
+
+ACTION(showMenubar, ShowMenubar, BoUfoToggleAction)
+ACTION(showToolbar, ShowToolbar, BoUfoToggleAction)
+ACTION(showStatusbar, ShowStatusbar, BoUfoToggleAction)
+ACTION(keyBindings, KeyBindings, BoUfoAction)
+ACTION(preferences, Preferences, BoUfoAction)
+
+ACTION(fullScreen, FullScreen, BoUfoToggleAction)
+
+#undef ACTION
 
