@@ -58,7 +58,8 @@ COMMON_SRC = \
 	bosonsound.cpp \
 	unitgroup.cpp \
 	bosonstatistics.cpp \
-	gameoverdialog.cpp
+	gameoverdialog.cpp \
+	unitplugins.cpp
 
 BOUNIT_SRC = \
 	unitproperties.cpp \

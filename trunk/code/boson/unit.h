@@ -29,6 +29,8 @@ class BosonCanvas;
 class UnitProperties;
 class Cell;
 class Facility;
+class ProductionPlugin;
+class RepairPlugin;
 
 /**
  * Implementation of the visual parts of a unit. As far as possible all stuff
@@ -53,10 +55,15 @@ public:
 		IdMob_ResourcesX= UnitBase::IdLast + 7,
 		IdMob_ResourcesY= UnitBase::IdLast + 8,
 		IdFix_ConstructionState = UnitBase::IdLast + 20,
-		IdFix_Productions = UnitBase::IdLast + 21,
-		IdFix_ProductionState = UnitBase::IdLast + 22,
 
 		IdUnitPropertyLast
+	};
+	enum PluginPropertyIds {
+		IdPlugin_Productions = IdUnitPropertyLast + 1,
+		IdPlugin_ProductionState = IdUnitPropertyLast + 2,
+		IdPlugin_RepairList = IdUnitPropertyLast + 3,
+
+		IdPluginProperyLast
 	};
 
 	enum UnitSound {
@@ -141,9 +148,14 @@ public:
 	virtual void advanceConstruction() { }
 
 	/**
-	 * Produce a unit. Reimplemented in @ref Facility.
+	 * @return the @ref ProductionPlugin if this unit is able to produce
+	 * units (this means: the @ref UnitProperties allow productions and the
+	 * unit is e.g. fully constructed). Note that a @ref MobileUnit can not
+	 * yet have such a plugin, since a log of @ref isFacility tests are in
+	 * the code :-(
 	 **/
-	virtual void advanceProduction() { }
+	virtual ProductionPlugin* productionPlugin() const { return 0; }
+	virtual RepairPlugin* repairPlugin() const { return 0; }
 
 	inline Unit* target() const;
 	virtual void setTarget(Unit* target);
@@ -313,6 +325,7 @@ public:
 	virtual void advanceGroupMove(Unit* leader);
 	virtual void advanceMoveCheck();
 
+
 	/**
 	 * @return The number of resources that have been mined by this unit.
 	 * Always 0 if this unit can't mine oil/minerals
@@ -341,6 +354,11 @@ public:
 	 **/
 	void mineAt(const QPoint& pos);
 	void refineAt(Facility* refinery);
+
+	/**
+	 * Move this unit to the repairYard and repair it there.
+	 **/
+	void repairAt(Facility* repairYard);
 
 	void setRefinery(Facility* refinery);
 
@@ -406,55 +424,6 @@ public:
 	unsigned int currentConstructionStep() const;
 
 	/**
-	 * @return Whether there are any productions pending for this unit.
-	 * Always FALSE if unitProperties()->canProduce() is FALSE.
-	 **/
-	inline bool hasProduction() const;
-
-	/**
-	 * @return Whether the current construction can be placed at pos. FALSE
-	 * if @ref hasConstruction is FALSE.
-	 **/
-	bool canPlaceProductionAt(const QPoint& pos) const;
-
-	/**
-	 * @return The unit type ID (see @ref UnitProperties::typeId) of the
-	 * completed production (if any).
-	 **/
-	inline int completedProduction() const;
-
-	/**
-	 * @return The unit type ID of the current production. -1 if there is no
-	 * production.
-	 **/
-	inline int currentProduction() const;
-
-	/**
-	 * Remove the first item from the production list.
-	 **/
-	void removeProduction(); // removes first item
-
-	/**
-	 * Remove first occurance of unitType in the production list. Does not
-	 * remove anything if unitType is not in the list.
-	 **/
-	void removeProduction(int unitType);
-
-	/**
-	 * Add unitType (see @ref UnitProprties::typeId) to the construction
-	 * list.
-	 **/
-	void addProduction(int unitType);
-
-	QValueList<int> productionList() const;
-
-	/**
-	 * @return The percentage of the production progress. 0 means the
-	 * production just started, 100 means the production is completed.
-	 **/
-	inline double productionProgress() const;
-
-	/**
 	 * Reimplemented. Does nothing if @ref isConstructionComplete is false -
 	 * otherwise the same as @ref Unit::setTarget
 	 **/
@@ -466,14 +435,15 @@ public:
 	 **/
 	virtual void moveTo(int x, int y);
 
-	virtual void advanceProduction();
-
 	/**
 	 * Advance the construction animation. This is usually called when
 	 * placing the unit until the construction is completed. See @ref
 	 * isConstructionComplete
 	 **/
 	virtual void advanceConstruction();
+
+	virtual ProductionPlugin* productionPlugin() const;
+	virtual RepairPlugin* repairPlugin() const;
 
 protected:
 
