@@ -44,23 +44,13 @@ public:
 		IdDirection = UnitBase::IdLast + 1,
 		IdWaypoints = UnitBase::IdLast + 2,
 		IdFix_ConstructionState = UnitBase::IdLast + 3,
-//		IdFix_ConstructionDelay = UnitBase::IdLast + 4,
-		IdReloadState = UnitBase::IdLast + 5,
-		IdFix_Productions = UnitBase::IdLast + 6,
-		IdFix_ProductionState = UnitBase::IdLast + 7
+		IdReloadState = UnitBase::IdLast + 4,
+		IdFix_Productions = UnitBase::IdLast + 5,
+		IdFix_ProductionState = UnitBase::IdLast + 6
 
 	};
 
 	enum Direction {
-/*		North = 0,
-		NorthEast = 1,
-		East = 2, // and 3 as well...
-		SouthEast = 4,
-		South = 5, // and 6 as well (but slightly to west)
-		SouthWest = 7,
-		West = 7,// FIXME
-		NorthWest = 7 // FIXME*/
-// The data files are currently completely broken on this. need to fix them // TODO
 		North = 0,
 		NorthEast = 1,
 		East = 2, 
@@ -69,7 +59,6 @@ public:
 		SouthWest = 5,
 		West = 6,
 		NorthWest = 7
-		
 	};
 
 	enum UnitSound {
@@ -85,13 +74,13 @@ public:
 	Unit(const UnitProperties* prop, Player* owner, QCanvas* canvas);
 	virtual ~Unit();
 
-	virtual int rtti() const { return UnitBase::rtti(); }
+	inline virtual int rtti() const { return UnitBase::rtti(); }
 
-	void turnTo(int direction);
+	inline void turnTo(int direction);
 
-	virtual void setHealth(unsigned long int h);
+	inline virtual void setHealth(unsigned long int h);
 
-	BosonCanvas* boCanvas() const { return (BosonCanvas*)canvas(); }
+	inline BosonCanvas* boCanvas() const { return (BosonCanvas*)canvas(); }
 
 	void select();
 	void unselect();
@@ -102,7 +91,7 @@ public:
 
 	void attackUnit(Unit* target);
 	
-	Unit* target() const;
+	inline Unit* target() const;
 	void setTarget(Unit* target);
 	bool inRange(Unit* unit) const;
 
@@ -154,7 +143,7 @@ public:
 	QCanvasItemList enemyUnitsInRange() const;
 
 
-	unsigned int reloadState() const;
+	inline unsigned int reloadState() const;
 
 protected:
 	void shootAt(Unit* target);
@@ -199,7 +188,7 @@ public:
 	virtual ~MobileUnit();
 
 	virtual void setSpeed(double s);
-	virtual double speed() const;
+	inline virtual double speed() const;
 
 protected:
 	virtual void advanceMove(); // move one step futher to path
@@ -238,7 +227,7 @@ public:
 	 * @return Whether there are any productions pending for this unit.
 	 * Always FALSE if unitProperties()->canProduce() is FALSE.
 	 **/
-	bool hasProduction() const;
+	inline bool hasProduction() const;
 
 	/**
 	 * @return Whether the current construction can be placed at pos. FALSE
@@ -250,13 +239,13 @@ public:
 	 * @return The unit type ID (see @ref UnitProperties::typeId) of the
 	 * completed production (if any).
 	 **/
-	int completedProduction() const;
+	inline int completedProduction() const;
 
 	/**
 	 * @return The unit type ID of the current production. -1 if there is no
 	 * production.
 	 **/
-	int currentProduction() const;
+	inline int currentProduction() const;
 	 
 
 	/**

@@ -100,18 +100,18 @@ public:
 	/**
 	 * Change what this unit is currently doing.
 	 **/
-	void setWork(WorkType w) { mWork= w; }
+	inline void setWork(WorkType w) { mWork= w; }
 
 	/**
 	 * @return What this unit is currently doing. See @ref WorkTyp on
 	 * information what this can be.
 	 **/
-	WorkType work() const { return (WorkType)mWork.value(); }
+	inline WorkType work() const { return (WorkType)mWork.value(); }
 
 	/**
 	 * @return Guess what? See @ref UnitProperties::name
 	 **/
-	const QString& name() const;
+	inline const QString& name() const;
 
 	/**
 	 * Health aka hitpoints
@@ -123,14 +123,14 @@ public:
 	 * armor?
 	 * @return The health of the unit.
 	 **/
-	virtual unsigned long int health() const { return mHealth; };
+	inline virtual unsigned long int health() const { return mHealth; };
 
 	/**
 	 * Change the health/power of this unit.
 	 **/
-	virtual void setHealth(unsigned long int h) { mHealth = h; }
+	inline virtual void setHealth(unsigned long int h) { mHealth = h; }
 
-	bool isDestroyed() const
+	inline bool isDestroyed() const
 	{
 		return (health() == 0);
 	}
@@ -138,7 +138,7 @@ public:
 	/**
 	 * @return The owner (player) of the unit
 	 **/
-	Player* owner() const { return mOwner; }
+	inline Player* owner() const { return mOwner; }
 
 	/**
 	 * Set the owner of this unit. Note that this should be done on
@@ -146,13 +146,13 @@ public:
 	 **/
 	void setOwner(Player* owner);
 
-	KGamePropertyHandler* dataHandler() const;
+	inline KGamePropertyHandler* dataHandler() const;
 
 	/**
 	 * The ID of the unit. This ID is unique for this game.
 	 * @return The uniuque ID of the unit
 	 **/
-	unsigned long int id() const;
+	inline unsigned long int id() const;
 
 	/**
 	 * Set the ID of this unit. A ID must be unique for the owner, so it
@@ -161,11 +161,11 @@ public:
 	 **/
 	void setId(unsigned long int id);
 
-	unsigned long int shields() const;
-	void setShields(unsigned long int shields);
+	inline unsigned long int shields() const;
+	inline void setShields(unsigned long int shields);
 
-	unsigned long int armor() const;
-	void setArmor(unsigned long int armor);
+	inline unsigned long int armor() const;
+	inline void setArmor(unsigned long int armor);
 
 	/**
 	 * The type of the unit as described in the index.desktop file of this
@@ -177,13 +177,13 @@ public:
 	 * @return The RTTI of this unit. You can use @ref RTTI::isUnit to find
 	 * out if a @ref QCanvasSprite is a unit.
 	 **/
-	virtual int rtti() const { return RTTI::UnitStart + (int)type(); }
+	inline virtual int rtti() const { return RTTI::UnitStart + (int)type(); }
 
 	/**
 	 * @return How much damage the weapon can make to other units. Note that
 	 * a negative value means that this unit can repair!
 	 **/
-	long int damage() const { return mDamage; }
+	inline long int damage() const { return mDamage; }
 
 	/**
 	 * Change the damage this unit can do to other units
@@ -193,7 +193,7 @@ public:
 	/**
 	 * @return The weapon range of this unit
 	 **/
-	unsigned long int range() const { return mRange; }
+	inline unsigned long int range() const { return mRange; }
 
 	/**
 	 * Change the weapong range of this unit
@@ -204,14 +204,14 @@ public:
 	 * @return How far this unit can see. This is a number of cells, so you
 	 * must *= BO_TILE_SIZE to use this on the canvas.
 	 **/
-	unsigned int sightRange() const { return mSightRange; }
+	inline unsigned int sightRange() const { return mSightRange; }
 	void setSightRange(unsigned int r) { mSightRange = r; }
 
 	/**
 	 * @return The speed of the unit. Must be replaced in derived classes to
 	 * be of use as this just return 0.
 	 **/
-	virtual double speed() const { return 0.0; }
+	inline virtual double speed() const { return 0.0; }
 	virtual void setSpeed(double ) { }
 
 	/**
@@ -238,7 +238,7 @@ public:
 	 * in the constructor. Note that if you get NULL here you don't have to
 	 * care about crashes as the game will crash anyway.
 	 **/
-	const UnitProperties* unitProperties() const { return mUnitProperties; }
+	inline const UnitProperties* unitProperties() const { return mUnitProperties; }
 
 	/**
 	 * Convenience method for owner()->speciesTheme().
@@ -269,8 +269,8 @@ public:
 	 **/
 	inline bool isFlying() const;
 
-	void increaseDeletionTimer();
-	unsigned int deletionTimer() const;
+	inline void increaseDeletionTimer();
+	inline unsigned int deletionTimer() const;
 	
 private:
 	class UnitBasePrivate;
