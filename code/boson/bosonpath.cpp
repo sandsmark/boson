@@ -56,6 +56,29 @@ BosonPath::~BosonPath()
 {
 }
 
+QValueList<QPoint> BosonPath::findPath(Unit* unit, int goalx, int goaly)
+{
+  QValueList<QPoint> points;
+  if (!unit) 
+  {
+    kdError() << k_funcinfo << "NULL unit" << endl;
+    return points;
+  }
+  QPoint p = unit->boundingRect().center();
+  BosonPath path(unit, p.x() / BO_TILE_SIZE, p.y() / BO_TILE_SIZE, 
+        goalx / BO_TILE_SIZE, goaly / BO_TILE_SIZE);
+  if (!path.findPath())
+  {
+    kdWarning() << "no path found" << endl;
+    return points;
+  }
+  for (vector<QPoint>::iterator it = path.path.begin(); it != path.path.end(); ++it)
+  {
+    points.append(*it);
+  }
+  return points;
+}
+
 bool BosonPath::findPath()
 {
   mNodesRemoved = 0;
@@ -259,21 +282,16 @@ bool BosonPath::findPath()
     {
       kdError() << k_lineinfo << "oops - counter >= 100" << endl;
     }
+//    kdDebug() << "loop done" << endl;
 
     // Write normal-ordered path to path
-    vector<QPoint>::iterator i;
-    for(i = temp.end() - 1; i != temp.begin(); --i)
+    for(int i = temp.size() - 1; i >= 0; --i)
     {
 //      kdDebug() << "add path" << endl;
-      wp.setX((*i).x());
-      wp.setY((*i).y());
+      wp.setX(temp[i].x());
+      wp.setY(temp[i].y());
       path.push_back(wp);
     }
-    // Add begin() too
-    i = temp.begin();
-    wp.setX((*i).x());
-    wp.setY((*i).y());
-    path.push_back(wp);
   }
   else
   {
@@ -284,7 +302,7 @@ bool BosonPath::findPath()
     // Path wasn't found
   }
 
-  kdDebug() << k_funcinfo << "end" << endl;
+//  kdDebug() << k_funcinfo << "end" << endl;
 //  debug();
   return pathfound;
 }
