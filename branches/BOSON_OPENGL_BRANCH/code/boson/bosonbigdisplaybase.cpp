@@ -49,7 +49,8 @@
 
 
 #ifdef NO_OPENGL
-#include <qwmatrix.h>
+#include <qwmatri.h>
+
 
 #else
 
@@ -60,7 +61,8 @@
 #define FAR 100.0
 
 
-#define PLIB 0
+#define USE_3DS_FILES 0
+#define PLIB 0 // obsolete - we use Lib3ds
 
 #if PLIB
 #include <plib/ssg.h>
@@ -274,6 +276,7 @@ public:
 
 
 	QTimer mUpdateTimer;
+	int mUpdateInterval;
 
 #ifndef NO_OPENGL
 #if PLIB
@@ -290,6 +293,7 @@ BosonBigDisplayBase::BosonBigDisplayBase(BosonCanvas* c, QWidget* parent)
  mCursor = 0;
  d->mCursorEdgeCounter = 0;
  mCanvas = c;
+ d->mUpdateInterval = 0;
 
  mSelection = new BoSelection(this);
 
@@ -386,6 +390,7 @@ void BosonBigDisplayBase::resizeGL(int w, int h)
 
 void BosonBigDisplayBase::paintGL()
 {
+ d->mUpdateTimer.stop();
 //kdDebug() << k_funcinfo << endl;
  // TODO: use 0,0 as lower left, instead of top left
  // AB: I've dalayed this. since we still use canvas-coordinates it is easier
@@ -477,7 +482,22 @@ void BosonBigDisplayBase::paintGL()
 	//closer to surface, then flying units
 		
 	BosonSprite* item = *it;
-/*	GLuint tex = item->currentTexture();
+#if USE_3DS_FILES
+	// FIXME!!! don't apply here, don't cast here
+	Unit* u = (Unit*)item;
+	// FIXME: dont push matrix here
+	glPushMatrix();
+	glTranslatef(u->x() / BO_TILE_SIZE * BO_GL_CELL_SIZE, 
+			-u->y() / BO_TILE_SIZE * BO_GL_CELL_SIZE, 
+			u->z() / BO_TILE_SIZE * BO_GL_CELL_SIZE);
+	if (item->displayList() == 0) {
+		GLuint list = u->speciesTheme()->displayList(u->type());
+		item->setDisplayList(list);
+	}
+	glCallList(item->displayList());
+	glPopMatrix();
+#else
+	GLuint tex = item->currentTexture();
 	if (tex == 0) {
 		kdWarning() << k_funcinfo << "invalid texture" << endl;
 		if (!item->textures()) {
@@ -494,39 +514,11 @@ void BosonBigDisplayBase::paintGL()
 	// FIXME: performance: we could combine all units with the same texture
 	glTexCoordPointer(2, GL_FLOAT, 0, textureCoordPointer); 
 	glVertexPointer(3, GL_FLOAT, 0, item->vertexPointer());
-*/
-	// FIXME!!! don't apply here, don't cast here
-	Unit* u = (Unit*)item;
-	// FIXME: dont push matrix here
-	glPushMatrix();
-	glTranslatef(u->x() / BO_TILE_SIZE * BO_GL_CELL_SIZE, 
-			-u->y() / BO_TILE_SIZE * BO_GL_CELL_SIZE, 
-			u->z() / BO_TILE_SIZE * BO_GL_CELL_SIZE);
-	if (item->displayList() == 0) {
-		GLuint list = u->speciesTheme()->displayList(u->type());
-		kdDebug() << k_funcinfo << "set list to " << list << endl;
-		item->setDisplayList(list);
-	}
-	glCallList(item->displayList());
-	glPopMatrix();
-	
-	/*
-#warning FIXME REMOVE!!
-	if (((Unit*)item)->id() == 37) {
-		kdDebug() << "x=" << item->x() << endl;
-		kdDebug() << "y=" << item->y() << endl;
-		kdDebug()<< "vertices:"<<endl;
-		for (int i = 0; i < 3*4; i++) {
-			kdDebug() << item->vertexPointer()[i] << endl;
-		}
-		kdDebug()<< "verticesdone"<<endl;
-	}
-	glDrawElements(GL_QUADS, 4, GL_UNSIGNED_BYTE, unitIndices);
-	*/
-			
+
+#endif
  }
  if (checkError()) {
-	kdError() << k_funcinfo << "units rendered" << endl;
+	kdError() << k_funcinfo << "when units rendered" << endl;
  }
 
 //TODO: cursor must always be on top!
@@ -597,6 +589,9 @@ void BosonBigDisplayBase::paintGL()
 	kdError() << k_funcinfo << "selection rect rendered" << endl;
  }
 
+ if (d->mUpdateInterval) {
+	d->mUpdateTimer.start(d->mUpdateInterval);
+ }
 }
 
 #endif // !NO_OPENGL
@@ -1394,8 +1389,8 @@ bool BosonBigDisplayBase::checkError()
 void BosonBigDisplayBase::setUpdateInterval(unsigned int ms)
 {
  kdDebug() << k_funcinfo << ms << endl;
- d->mUpdateTimer.stop();
- d->mUpdateTimer.start(ms);
+ d->mUpdateInterval = ms;
+ QTimer::singleShot(d->mUpdateInterval, this, SLOT(updateGL()));
 }
 
 void BosonBigDisplayBase::calcFPS()
