@@ -35,6 +35,7 @@
 #include "optionsdialog.h"
 #include "kgameunitdebug.h"
 #include "kgameplayerdebug.h"
+#include "kgamecelldebug.h"
 #include "bosonmusic.h"
 #include "bosoncursor.h"
 #include "commandinput.h"
@@ -139,7 +140,7 @@ inline BosonCanvas* BosonWidget::canvas() const
  return mTop->canvas();
 }
 
-inline BosonPlayField* BosonWidget::map() const
+inline BosonPlayField* BosonWidget::playField() const
 {
  return mTop->playField();
 }
@@ -182,10 +183,10 @@ void BosonWidget::initMap()
 {
  kdDebug() << k_funcinfo << endl;
 
- canvas()->setMap(map()->map());
- minimap()->setMap(map()->map());
+ canvas()->setMap(playField()->map());
+ minimap()->setMap(playField()->map());
  minimap()->initMap();
- game()->setMap(map());
+ game()->setMap(playField());
 }
 
 void BosonWidget::initMiniMap()
@@ -259,7 +260,7 @@ void BosonWidget::initPlayer()
 	for (unsigned int i = 0; i < game()->playerCount(); i++) {
 		Player* p = (Player*)game()->playerList()->at(i);
 		if (p) {
-			p->initMap(map()->map());
+			p->initMap(playField()->map());
 		}
 	}
  }
@@ -436,6 +437,11 @@ void BosonWidget::slotDebug()
  b = dlg->addVBoxPage(i18n("Debug &Boson Players"));
  KGamePlayerDebug* player = new KGamePlayerDebug(b);
  player->setBoson(game());
+ 
+ b = dlg->addVBoxPage(i18n("Debug &Cells"));
+ KGameCellDebug* cells = new KGameCellDebug(b);
+ cells->setMap(playField()->map());
+ 
  connect(dlg, SIGNAL(finished()), dlg, SLOT(slotDelayedDestruct()));
  connect(dlg, SIGNAL(signalRequestIdName(int,bool,QString&)),
 		this, SLOT(slotDebugRequestIdName(int,bool,QString&)));
@@ -455,7 +461,7 @@ void BosonWidget::slotMiniMapScaleChanged(double scale)
 
 void BosonWidget::slotStartScenario()
 {
- map()->scenario()->startScenario(game());
+ playField()->scenario()->startScenario(game());
  boMusic->startLoop();
 
  // This DOES NOT work correctly
@@ -649,7 +655,7 @@ void BosonWidget::slotSetCommandButtonsPerRow(int b)
 
 void BosonWidget::slotUnfogAll(Player* pl)
 {
- if (!map()->map()) {
+ if (!playField()->map()) {
 	kdError() << k_funcinfo << "NULL map" << endl;
 	return;
  }
@@ -661,8 +667,8 @@ void BosonWidget::slotUnfogAll(Player* pl)
  }
  for (unsigned int i = 0; i < list.count(); i++) {
 	Player* p = (Player*)list.at(i);
-	for (unsigned int x = 0; x < map()->map()->width(); x++) {
-		for (unsigned int y = 0; y < map()->map()->height(); y++) {
+	for (unsigned int x = 0; x < playField()->map()->width(); x++) {
+		for (unsigned int y = 0; y < playField()->map()->height(); y++) {
 			p->unfog(x, y);
 		}
 	}
