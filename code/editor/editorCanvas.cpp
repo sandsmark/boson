@@ -124,27 +124,16 @@ bool editorCanvas::New(groundType fill_ground, uint w, uint h, const QString &na
 
 	freeRessources();
 
-	/* QCanvas configuratoin */
-
-/*
-	// XXX orzel : temp, until GUI is really functionnal 
-	QString themePath = KGlobal::instance()->dirs()->findResourceDir("data", "boson/map/basic.bpf");
-	themePath	+= "boson/themes/grounds/earth.bmp";
-	printf("loading groundTheme : %s\n", themePath.latin1() );
-	QPixmap *p = new QPixmap(themePath);
-	if (p->isNull() ) {
-		printf("can't load earth.png\n");
-		exit(1);
-	}
-
-	::visualCanvas(*p,w,h);
-*/
-	
 	/* boFile configuration */
 	nbPlayer = 2;  // XXX still hardcoded .......
 	map_width = w;
 	map_height = h;
 	_worldName = name;
+
+	/* QCanvas configuratoin */
+	resize(w,h);
+	
+	emit syncMini();	// let the miniMap synchronized with the new parameters
 
 	/* initialisation */
 	for (i=0; i< map_width; i++)
