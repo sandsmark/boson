@@ -43,9 +43,17 @@ visualCell::visualCell(groundType g, int i, int j)
 void visualCell::set(groundType g, int i, int j)
 {
 	// first of all, call setSequence, else you'll get a segfault
-	if (GROUND_UNKNOWN != g) setSequence(vpp.ground->getPixmap(g));
+	set(g);
 	moveTo(BO_TILE_SIZE * i , BO_TILE_SIZE * j);
 	z(Z_GROUND);
 }
+
+
+void visualCell::set(groundType g)
+{
+	if (GROUND_UNKNOWN != g) setSequence(vpp.ground->getPixmap(g));
+}
+
+
 
 

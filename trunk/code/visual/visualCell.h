@@ -40,6 +40,7 @@ public:
 	visualCell(groundType g, int i, int j);
 
 	void	set(groundType g, int i, int j);
+	void	set(groundType g);
   
 /* Qw stuff */
 	virtual int rtti() const { return S_GROUND + ground; }
