@@ -57,7 +57,6 @@ public:
 	
 	QPixmap mPix;
 	QPtrList<QCanvasItem> mAnimList; // see BosonCanvas::advance()
-	QPtrList<Unit> mDestroyUnits;
 	QPtrList<Unit> mDestroyedUnits;
 	QPtrDict<QCanvasSprite> mFogOfWar;
 	QCanvasPixmapArray* mFogPixmap;
@@ -105,7 +104,6 @@ void BosonCanvas::quitGame()
 
 void BosonCanvas::deleteDestroyed()
 {
- d->mDestroyUnits.clear();
  d->mDestroyedUnits.clear();
 }
 
@@ -191,20 +189,6 @@ void BosonCanvas::advance()
 	++it;
  }
 
- // a unit must not be deleted in QCanvasItem::advance (see QT docs). Therefore
- // we add them to d->mDestroyUnits and delete them all here now.
- if (!d->mDestroyUnits.isEmpty()) {
-	QPtrListIterator<Unit> destroyedIt(d->mDestroyUnits);
-	while (destroyedIt.current()) {
-		Unit* unit = destroyedIt.current();
-		kdDebug() << "destroy unit " << unit->id() << endl;
-		emit signalUnitDestroyed(unit);
-		unit->owner()->unitDestroyed(unit); // remove from player without deleting
-		d->mDestroyedUnits.append(unit); // delete it in destructor - maybe remove the wreckage after a timerevent?
-		++destroyedIt;
-	}
-	d->mDestroyUnits.clear();
- }
  update();
 }
 
@@ -346,9 +330,7 @@ void BosonCanvas::shootAtUnit(Unit* target, Unit* attackedBy, long int damage)
  }
  
  if (target->isDestroyed()) {
-	// we cannot delete it here!
-	// called from Unit::advance() so we must delay
-	destroyUnit(target);
+	destroyUnit(target); // display the explosion ; not the shoot
  } else {
 	(void) new BoShot(target, attackedBy, this);
  }
@@ -357,15 +339,19 @@ void BosonCanvas::shootAtUnit(Unit* target, Unit* attackedBy, long int damage)
 
 void BosonCanvas::destroyUnit(Unit* unit)
 {
+ // please note: you MUST NOT delete the unit here!!
+ // we call it from advance() and items must not be deleted from there!
  if (!unit) {
 	return;
  }
- if (!d->mDestroyUnits.contains(unit)) {
-	// dunno if this is correct - should it be delete immediately?
-	// what about e.g. a wreckage?
-	d->mDestroyUnits.append(unit);
-	(void) new BoShot(unit, 0, this, true);
+ // the unit is added to a list - now displayed as a wreckage only.
+ if (!d->mDestroyedUnits.contains(unit)) {
+	d->mDestroyedUnits.append(unit);
+	unit->owner()->unitDestroyed(unit); // remove from player without deleting
+	kdDebug() << "destroy unit " << unit->id() << endl;
 	boMusic->playSound(unit, Unit::SoundReportDestroyed);
+	(void) new BoShot(unit, 0, this, true);
+	emit signalUnitDestroyed(unit);
  }
 }
 
