@@ -145,6 +145,23 @@ bool BosonScenario::saveScenario(QDomElement& root)
 bool BosonScenario::saveScenarioSettings(QDomElement& node)
 {
  boDebug(250) << k_funcinfo << "MinPlayers=" << minPlayers() << " MaxPlayers=" << maxPlayers() << endl;
+ if (maxPlayers() > 0) {
+	if (minPlayers() > (unsigned int)maxPlayers()) {
+		boError(250) << k_funcinfo << "minPlayers() > maxPlayers()" << endl;
+		return false;
+	}
+ } else if (maxPlayers() == 0) {
+	boError() << k_funcinfo << "maxPlayers()==0 !" << endl;
+	return false;
+ }
+ if (maxPlayers() > BOSON_MAX_PLAYERS) {
+	boError() << k_funcinfo << "maxPlayers can't be greater than " << BOSON_MAX_PLAYERS << endl;
+	return false;
+ }
+ if (minPlayers() > BOSON_MAX_PLAYERS) {
+	boError() << k_funcinfo << "minPlayers can't be greazer than " << BOSON_MAX_PLAYERS << endl;
+	return false;
+ }
  QDomDocument doc = node.ownerDocument();
  node.setAttribute("MinPlayers", minPlayers());
  node.setAttribute("MaxPlayers", maxPlayers());
