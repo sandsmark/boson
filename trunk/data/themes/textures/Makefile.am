@@ -71,6 +71,14 @@ texture_DATA = \
 	wheel1.jpg \
 	window1.jpg \
 	window2.jpg \
+	rock1.jpg \
+	rock2.jpg \
+	wood1.jpg \
+	wood2.jpg \
+	wood3.jpg \
+	wood4.jpg \
+	hay1.jpg \
+	hay2.jpg \
 	water1.jpg
 
 # no further editing need here
