@@ -317,6 +317,8 @@ void BosonModel::loadModel()
  // TODO: add a profiling entry for this
  d->mLoader->loadModel();
 
+ applyMasterScale();
+
  boProfiling->start(BosonProfiling::LoadModelTextures);
  loadTextures(d->mLoader->textures());
  boProfiling->stop(BosonProfiling::LoadModelTextures);
@@ -374,18 +376,8 @@ void BosonModel::createDisplayLists()
 	return;
  }
 
- // note: all frame must share the same scaling factor. this means that the model mustn't grow in x or y direction (width or height). It can grow/shrink in z-direction however.
- float scale = generateMasterScale();
- boDebug(100) << "master scale: " << scale << endl;
-
  for (unsigned int i = 0; i < frames(); i++) {
 	BoFrame* f = frame(i);
-
-	BoHelper helper;
-	// AB: not efficient - very slow and the *results* (not all the data!)
-	// in the helper should get stored somewhere - we may use it for
-	// construction lists. anyway, it is startup work only.
-	computeBoundings(f, &helper);
 
 	GLuint list = listBase + i;
 	glNewList(list, GL_COMPILE);
@@ -403,17 +395,8 @@ void BosonModel::createDisplayLists()
 			boError() << k_funcinfo << "NULL mesh at " << j << endl;
 			continue;
 		}
-		BoMatrix matrix;
-		matrix.scale(scale, scale, scale);
-			
-		// we render from bottom to top - but for x and y in the center!
-		// FIXME: this doesn't work 100% correctly - the quad e.g. is
-		// still partially (parts of the wheels) in the grass.
-		matrix.translate(0.0, 0.0, -helper.mMinZ * scale);
 
-		matrix.multiply(m);
-
-		glMultMatrixf(matrix.data());
+		glMultMatrixf(m->data());
 
 		// AB: try to merge the meshes into the frame display list. -->
 		// bigger lists, but might be faster.
@@ -440,7 +423,6 @@ void BosonModel::createDisplayLists()
 	glEndList();
 
 	f->setDisplayList(list);
-	f->setDepthMultiplier(helper.lengthZ() * scale / BO_GL_CELL_SIZE);
  }
 }
 
@@ -455,14 +437,6 @@ void BosonModel::generateConstructionLists()
  unsigned int nodes = frame0->meshCount();
  boDebug(100) << k_funcinfo << "Generating " << nodes << " construction lists" << endl;
 
- // again this iterating... it is exactly the same as it was for the first frame
- // in createDisplayLists() but I don't want to store it somewhere. Especially
- // not for *all* frames - would take quite same memory. after startup we don't
- // need this helper anymore!
- BoHelper helper;
- computeBoundings(frame0, &helper);
-
- float scale = helper.scale(mWidth, mHeight);
  GLuint base = glGenLists(nodes);
  if (base == 0) {
 	boError(100) << k_funcinfo << "NULL display lists created" << endl;
@@ -491,11 +465,7 @@ void BosonModel::generateConstructionLists()
 			continue;
 		}
 
-		BoMatrix matrix;
-		matrix.scale(scale, scale, scale);
-		matrix.translate(0.0, 0.0, -helper.mMinZ * scale);
-		matrix.multiply(m);
-		glMultMatrixf(matrix.data());
+		glMultMatrixf(m->data());
 
 		glCallList(mesh->displayList());
 
@@ -673,17 +643,42 @@ void BosonModel::computeBoundings(BoFrame* frame, BoHelper* helper) const
  }
 }
 
-float BosonModel::generateMasterScale() const
+void BosonModel::applyMasterScale()
 {
- BoHelper helper;
- BoFrame* f = frame(0);
- if (!f) {
-	boError() << k_funcinfo << "NULL frame 0" << endl;
-	return 1.0; // don't scale
+ // note: all frame must share the same scaling factor. this means that the model mustn't grow in x or y direction (width or height). It can grow/shrink in z-direction however.
+ float scale = 1.0f;
+ boDebug(100) << k_funcinfo << scale << endl;
+
+ if (frames() < 1) {
+	boWarning() << k_funcinfo << "no frames found!" << endl;
+	return;
  }
- computeBoundings(f, &helper);
- float scale = helper.scale(mWidth, mHeight);
- return scale;
+
+ for (unsigned int i = 0; i < frames(); i++) {
+	BoFrame* f = frame(i);
+
+	BoHelper helper;
+	computeBoundings(f, &helper);
+	if (i == 0) {
+		scale = helper.scale(mWidth, mHeight);
+	}
+
+	for (int j = 0; j < f->meshCount(); j++) {
+		BoMesh* mesh = f->mesh(j);
+		BoMatrix* matrix = f->matrix(j);
+		BoMatrix m;
+		m.scale(scale,scale,scale);
+
+		// we render from bottom to top - but for x and y in the center!
+		// FIXME: this doesn't work 100% correctly - the quad e.g. is
+		// still partially (parts of the wheels) in the grass.
+		m.translate(0.0, 0.0, -helper.mMinZ * scale);
+
+		m.multiply(matrix);
+		matrix->loadMatrix(m);
+	}
+	f->setDepthMultiplier(helper.lengthZ() * scale / BO_GL_CELL_SIZE);
+ }
 }
 
 
