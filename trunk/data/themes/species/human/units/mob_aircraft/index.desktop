@@ -14,6 +14,7 @@ Producer=2
 Requirements=1
 UnitWidth=1.5
 UnitHeight=1.5
+ProductionTime=100
 
 [Boson Mobile Unit]
 Speed=6

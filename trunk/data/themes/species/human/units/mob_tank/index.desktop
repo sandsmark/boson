@@ -11,6 +11,7 @@ Reload=30
 Producer=0
 Requirements=12,3
 Armor=3
+ProductionTime=90
 
 [Boson Mobile Unit]
 Speed=3

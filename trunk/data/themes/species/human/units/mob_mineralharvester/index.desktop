@@ -9,6 +9,7 @@ Producer=0
 CanShootAtAirUnits=false
 CanShootAtLandUnits=false
 Requirements=13,3
+ProductionTime=50
 
 [Boson Mobile Unit]
 Speed=3
