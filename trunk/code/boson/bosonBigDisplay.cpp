@@ -39,7 +39,7 @@ void bosonBigDisplay::actionClicked(int mx, int my, int /*state*/)
 
 	/* is there any mobiles of my own selected ? */
 	if (vtl->mobSelected.isEmpty()) return;	// nothing to do
-	if (who_am_i != vtl->selectionWho) return;	// nothing to do
+	if ((int)who_am_i != vtl->selectionWho) return;	// nothing to do
 
 	QIntDictIterator<visualMobUnit> mobIt(vtl->mobSelected);
 
