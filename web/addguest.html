@@ -1,73 +1,68 @@
-<html><head><title>Add to our guestbook</title></head>
+<HTML>
 
+  <HEAD>
+    <TITLE>Boson HomePage - Guestbook</TITLE>
+  </HEAD>
 
+<BODY BACKGROUND = "graphics/bg.jpg">
 
-<BODY BACKGROUND="graphics/bg.jpg">
-<TABLE WIDTH=100% BORDER=0 CELLPADDING=0 CELLSPACING=0>
-	<COL WIDTH=256*>
-	<TR>
-		<TD WIDTH=100% VALIGN=TOP>
-			<P ALIGN=CENTER><IMG SRC="graphics/biglogo.jpg" NAME="logo" ALIGN=ABSMIDDLE WIDTH=372 HEIGHT=114 BORDER=0>
-			
-		</TD>
-	</TR>
-</TABLE>
-<P><BR>
 <CENTER>
-	<TABLE WIDTH=236 BORDER=0 CELLPADDING=0 CELLSPACING=0>
-		<COL WIDTH=236>
-		<TR>
-			<TD WIDTH=236 VALIGN=TOP BGCOLOR="#808080">
-				<P ALIGN=CENTER><FONT COLOR="#ffffff"><FONT FACE="helvetica"><FONT SIZE=4><B>Add to our guestbook</B></FONT></FONT></FONT></TD>
-		</TR>
-	</TABLE>
-</CENTER>
-<DL>
+
+<TABLE WIDTH= "90%">
+
+  <TR><TD>
+
+    <CENTER><IMG SRC = "graphics/logo-guestbook.jpg"></CENTER>
+
+    <BR><BR>
+
+  </TD></TR>
 
 
-<center>
-   <table border="1">
-     <tr>
-      <td>  
-       <form method="POST" action="http://aquila.rezel.enst.fr/cgi-bin/guestbook.pl">
-        <center>
-         <font size="3">
-          <table border="0">
-           <tr>
-		<td align="right" width="100">(*) Your Name:</td>
-		<td><input type=text name=realname size=30></td>
-           </tr>
-           <tr>
-		<td align="right" width="100">E-Mail: </td>
-		<td><input type=text name=username size=40></td>
-           </tr>
-           <tr>
-		<td align="right" width="100">Home Page: </td>
-		<td><input type=text name=url size=50></td>
-           </tr>
-           <tr>
-		<td align="right" width="100">City: </td>
-		<td><input type=text name=city size=15></td>
-           </tr>
-           <tr>
-            <td align="right" width="100">(*) Comment:</td>
-            <td><textarea name="comments" rows="10" cols="40"></textarea></td>
-           </tr>
-           <tr>
-            <td align="right" width="100"></td>
-            <td><input type="submit" value="Submit">&nbsp;&nbsp;&nbsp;&nbsp;<input type="reset" value="Reset"></td>
-           </tr>
-          </table>
-         </font>
-        </center>
-       </form> 
-      </td>
-     </tr>
-    </table>  
-   </center>
-  </td>
-  </tr>
- </table>
-</center>
-</body>
-</html>
+  <TR><TD COLSPAN = "2" BGCOLOR = "#FFDE00">
+  
+    <FONT FACE="helvetica" SIZE="3">
+
+    <B>Please fill out this form to sign our guestbook:</B>
+
+    </FONT>
+
+  </TD></TR>
+
+  <TR><TD ALIGN = "CENTER">
+
+    <BR><BR>
+
+    <CENTER>
+
+      <TABLE WIDTH = "80%">
+
+	  <FORM METHOD="POST" ACTION="http://aquila.rezel.enst.fr/cgi-bin/guestbook.pl">
+
+	  <TR>	<TD BGCOLOR = "#FFDE00"><FONT FACE="helvetica" SIZE="3">&nbsp;</FONT>		</TD><TD BGCOLOR = "#FFDE00">	&nbsp;</TD><TD BGCOLOR = "#FFDE00">	&nbsp;</TD></TR>
+
+	  <TR>	<TD BGCOLOR = "#CCCCCC"><FONT FACE="helvetica" SIZE="3">Your Name:</FONT>	</TD><TD BGCOLOR = "#CCCCCC">	<CENTER><INPUT TYPE=TEXT NAME=realname SIZE=40></CENTER>	</TD><TD BGCOLOR = "#CCCCCC"><FONT FACE="helvetica" SIZE="3"><CENTER>Required</CENTER></FONT></TD>	</TR>
+
+	  <TR>	<TD BGCOLOR = "#CCCCCC"><FONT FACE="helvetica" SIZE="3">E-Mail:</FONT>	</TD><TD BGCOLOR = "#CCCCCC">	<CENTER><INPUT TYPE=TEXT NAME=username SIZE=40></CENTER>	</TD><TD BGCOLOR = "#CCCCCC"><FONT FACE="helvetica" SIZE="3"><CENTER>Optional</CENTER></FONT></TD>	</TR>
+
+	  <TR>	<TD BGCOLOR = "#CCCCCC"><FONT FACE="helvetica" SIZE="3">Home Page:</FONT>	</TD><TD BGCOLOR = "#CCCCCC">	<CENTER><INPUT TYPE=TEXT NAME=url SIZE=40></CENTER>		</TD><TD BGCOLOR = "#CCCCCC"><FONT FACE="helvetica" SIZE="3"><CENTER>Optional</CENTER></FONT></TD>	</TR>
+
+	  <TR>	<TD BGCOLOR = "#CCCCCC"><FONT FACE="helvetica" SIZE="3">City:</FONT>		</TD><TD BGCOLOR = "#CCCCCC">	<CENTER><INPUT TYPE=TEXT NAME=city SIZE=40></CENTER>		</TD><TD BGCOLOR = "#CCCCCC"><FONT FACE="helvetica" SIZE="3"><CENTER>Optional</CENTER></FONT></TD>	</TR>
+
+	  <TR>	<TD BGCOLOR = "#CCCCCC"><FONT FACE="helvetica" SIZE="3">Comment:</FONT>	</TD><TD BGCOLOR = "#CCCCCC">	<CENTER><TEXTAREA NAME="comments" ROWS="10" COLS="38"></TEXTAREA></CENTER></TD><TD BGCOLOR = "#CCCCCC"><FONT FACE="helvetica" SIZE="3"><CENTER>Required</CENTER></FONT></TD>	</TR>
+
+	  <TR>	<TD ALIGN = "LEFT" BGCOLOR = "#CCCCCC"><INPUT TYPE="Submit">	</TD><TD BGCOLOR = "#CCCCCC">&nbsp;</TD><TD ALIGN = "RIGHT" BGCOLOR = "#CCCCCC">	<INPUT TYPE="Reset"></TD></TR>
+
+	  </FORM> 
+
+      </TABLE>
+
+      </CENTER>
+
+  </TD></TR>
+
+</TABLE>
+
+</BODY>
+
+</HTML>
