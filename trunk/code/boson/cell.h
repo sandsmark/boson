@@ -69,6 +69,10 @@ public:
 	Cell();
 	~Cell();
 
+	void setPosition(int x, int y);
+	inline int x() const { return mX; }
+	inline int y() const { return mY; }
+
 	/**
 	 * Use this to initialize the cell. You should call this only once in
 	 * the game (when creating the map). In the editor this is called
@@ -206,6 +210,8 @@ protected:
 private:
 	GroundType mType;
 	unsigned char mVersion;
+	int mX;
+	int mY;
 
 	BoItemList mItems;
 };
