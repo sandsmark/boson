@@ -41,13 +41,7 @@ BosonStartupNetwork::~BosonStartupNetwork()
 void BosonStartupNetwork::setGame(Boson* game)
 {
  if (mGame) {
-	// disconnect game and players
 	disconnect(mGame, 0, this, 0);
-	QPtrList<KPlayer> list = *mGame->playerList();
-	QPtrListIterator<KPlayer> it(list);;
-	for (; it.current(); ++it) {
-		slotPlayerLeftGame(it.current());
-	}
  }
  mGame = game;
  if (!mGame) {
@@ -55,6 +49,18 @@ void BosonStartupNetwork::setGame(Boson* game)
  }
 // connect(mGame, SIGNAL(signalStartupWidgetMessage(const QByteArray&)),
 //		this, SLOT(slotNetworkMessage(const QByteArray&)));
+ connect(mGame, SIGNAL(signalPlayerJoinedGame(KPlayer*)),
+		this, SLOT(slotPlayerJoinedGame(KPlayer*)));
+ connect(mGame, SIGNAL(signalPlayerLeftGame(KPlayer*)),
+		this, SLOT(slotPlayerLeftGame(KPlayer*)));
+ connect(mGame, SIGNAL(signalSpeciesChanged(Player*)),
+		this, SIGNAL(signalSpeciesChanged(Player*)));
+ connect(mGame, SIGNAL(signalTeamColorChanged(Player*)),
+		this, SIGNAL(signalTeamColorChanged(Player*)));
+ connect(mGame, SIGNAL(signalPlayFieldChanged(const QString&)),
+		this, SLOT(slotPlayFieldChanged(const QString&)));
+ connect(mGame, SIGNAL(signalStartGameClicked()),
+		this, SIGNAL(signalStartGameClicked()));
 
  QPtrList<KPlayer> list = *mGame->playerList();
  QPtrListIterator<KPlayer> it(list);;
@@ -69,7 +75,7 @@ void BosonStartupNetwork::slotNetworkMessage(const QByteArray& buffer)
 
 void BosonStartupNetwork::slotPlayerPropertyChanged(KGamePropertyBase* prop, KPlayer* p)
 {
- // TODO: make sure this doesn't get called during the game anymore! 
+ // TODO: make sure this doesn't get called during the game anymore!
  // -> performance
  switch (prop->id()) {
 	case KGamePropertyBase::IdName:
@@ -82,13 +88,30 @@ void BosonStartupNetwork::slotPlayerPropertyChanged(KGamePropertyBase* prop, KPl
 
 void BosonStartupNetwork::slotPlayerJoinedGame(KPlayer* p)
 {
+ boDebug() << k_funcinfo << "there are " << boGame->playerList()->count() << " players in game now" << endl;
  connect(p, SIGNAL(signalPropertyChanged(KGamePropertyBase*, KPlayer*)),
-		this, SLOT(slotPlayerPropertyChanged(KGamePropertyBase, KPlayer*)));
+		this, SLOT(slotPlayerPropertyChanged(KGamePropertyBase*, KPlayer*)));
+
+ // warning: we are assuming here that if playerCount() == 1 then the *local*
+ // player just entered the game.
+ // currently we can safely assume this, but it might be dangerous for network
+ // games. im not really sure how playerCount() gets handled for deactivated
+ // players in KGame (i.e. when the local player enters another game and so)
+ if (boGame->playerCount() == 1) {
+	boDebug() << k_funcinfo << "first player entered game - this must be the local player!" << endl;
+
+	// first unset any previous local player, then set the new local player
+	emit signalSetLocalPlayer(0);
+	emit signalSetLocalPlayer((Player*)p);
+ }
+
+ emit signalPlayerJoinedGame(p);
 }
 
 void BosonStartupNetwork::slotPlayerLeftGame(KPlayer* p)
 {
  disconnect(p, 0, this, 0);
+ emit signalPlayerLeftGame(p);
 }
 
 void BosonStartupNetwork::sendNewGame(bool editor)
@@ -135,6 +158,10 @@ void BosonStartupNetwork::sendChangePlayerName(Player* p, const QString& name)
 void BosonStartupNetwork::sendChangePlayField(const QString& identifier)
 {
  BO_CHECK_NULL_RET(mGame);
+ if (!mGame->isAdmin()) {
+	boError() << k_funcinfo << "not ADMIN" << endl;
+	return;
+ }
  if (!identifier.isNull() && !BosonPlayField::availablePlayFields().contains(identifier)) {
 	boError() << k_funcinfo << "Invalid playfield identifier " << identifier << endl;
 	return;
@@ -159,5 +186,34 @@ void BosonStartupNetwork::sendStartGameClicked()
 {
  BO_CHECK_NULL_RET(mGame);
  mGame->sendMessage(0, BosonMessage::IdStartGameClicked);
+}
+
+void BosonStartupNetwork::sendChangePlayField(int index)
+{
+ QStringList list = BosonPlayField::availablePlayFields();
+ QString identifier;
+ if (index < 0) {
+	// warning: valid in editor mode only!
+	identifier = QString::null;
+ } else {
+	QStringList list = BosonPlayField::availablePlayFields();
+	if (index >= (int)list.count()) {
+		boError() << k_funcinfo << "invalid index " << index << endl;
+		return;
+	}
+	identifier = list[index];
+ }
+ sendChangePlayField(identifier);
+}
+
+void BosonStartupNetwork::slotPlayFieldChanged(const QString& id)
+{
+ BosonPlayField* field = 0;
+ if (!id.isEmpty()) {
+	field = BosonPlayField::playField(id);
+ }
+
+ emit signalPlayFieldChanged(id);
+ emit signalPlayFieldChanged(field);
 }
 
