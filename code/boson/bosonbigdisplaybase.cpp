@@ -49,7 +49,7 @@
 
 
 #ifdef NO_OPENGL
-#include <qwmatri.h>
+#include <qwmatrix.h>
 
 
 #else
@@ -649,11 +649,14 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 	case QEvent::MouseMove:
 		d->mMouseMoveDiff.moveToPos(e->pos());
 		if (e->state() & AltButton) {
+#ifndef NO_OPENGL
 			// zooming
 			d->mZoomFactor += ((float)d->mMouseMoveDiff.dy()) / 10;
 			kdDebug() << "zoom factor: " << d->mZoomFactor << endl;
 			resizeGL(d->mW, d->mH);
+#endif
 		} else if (e->state() & LeftButton) {
+#ifndef NO_OPENGL
 			if (e->state() & ControlButton) {
 				d->mCenterDiffX += d->mMouseMoveDiff.dx();
 				d->mCenterDiffY -= d->mMouseMoveDiff.dy();
@@ -664,7 +667,9 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 				kdDebug() << "posZ: " << d->mPosZ << endl;
 			} else if (e->state() & AltButton) {
 				// we can't use Alt+LMB since KDE already uses it to move the window :(
-			} else {
+			} else 
+#endif
+			{
 				d->mSelectionRect.setVisible(true);
 				moveSelectionRect(posX, posY, posZ);
 			}
@@ -1393,6 +1398,7 @@ void BosonBigDisplayBase::setUpdateInterval(unsigned int ms)
  QTimer::singleShot(d->mUpdateInterval, this, SLOT(updateGL()));
 }
 
+#ifndef NO_OPENGL
 void BosonBigDisplayBase::calcFPS()
 {
  long long int now;
@@ -1413,6 +1419,7 @@ double BosonBigDisplayBase::fps() const
 {
   return d->mFps;
 }
+#endif
 
 void BosonBigDisplayBase::setZoomFactor(float f)
 {
