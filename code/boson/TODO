@@ -72,6 +72,7 @@ General TODOs
   a nice idea!
 - make sure that kdemultimedia is installed - perhaps disable .ogg support
   somehow if it isn't
+- save BosonWidget::actionCollection() after KKeyDialog::actionCollection()
 
 Data TODOs
 - sound for minimap activated/deactivated
