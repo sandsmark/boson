@@ -327,7 +327,12 @@ QPixmap BosonGroundTheme::pixmap(unsigned int texture)
 {
  QPixmap pix;
  if (texture < textureCount()) {
-	if (!pix.load(textureFileName(texture))) {
+	// Find first name*.png or name*.jpg file
+	QString name = textureFileName(texture);
+	QDir dir(d->mGroundThemeDir);
+	QStringList files = dir.entryList(name + "*.png " + name + "*.jpg", QDir::Files, QDir::Name);
+	boDebug() << k_funcinfo << "Loading from " << d->mGroundThemeDir + "/" + files.first() << endl;
+	if (!pix.load(d->mGroundThemeDir + "/" + files.first())) {
 		pix = QPixmap();
 	}
  } else {
