@@ -190,11 +190,10 @@ void ModelPreview::paintGL()
  glColor3ub(255, 255, 255);
 
  renderModel();
+ renderMeshSelection();
 // renderGrid();
 
  glDisable(GL_DEPTH_TEST);
-
- renderMeshSelection();
 
  renderText();
 
@@ -417,8 +416,34 @@ void ModelPreview::renderGrid()
 
 void ModelPreview::renderMeshSelection()
 {
- if (mSelectedMesh >= 0) {
+ if (!haveModel()) {
+	return;
  }
+ if (mSelectedMesh < 0) {
+	return;
+ }
+ BoMesh* mesh = 0;
+ BoFrame* f = mModel->frame(mCurrentFrame);
+ if ((unsigned int)mSelectedMesh >= f->meshCount()) {
+	f = 0;
+	mesh = 0;
+ } else {
+	mesh = f->mesh(mSelectedMesh);
+ }
+ if (!mesh) {
+	return;
+ }
+ BoMatrix* matrix = f->matrix(mSelectedMesh);
+ if (!matrix) {
+	return;
+ }
+ glPushMatrix();
+ glMultMatrixf(matrix->data());
+ glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+ glColor3ub(0, 255, 0);
+ mesh->renderBoundingObject();
+ glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+ glPopMatrix();
 }
 
 void ModelPreview::renderText()
@@ -518,16 +543,14 @@ void ModelPreview::resetModel()
 void ModelPreview::updateCursorDisplay(const QPoint& pos)
 {
  mMeshUnderMouse = -1;
- // AB: maybe we should return the mesh itself?
- int picked = pickObject(pos);
- if (picked < 0) {
-//	boDebug() << k_funcinfo << "no mesh under cursor" << endl;
+ if (!haveModel()) {
 	return;
  }
- BoFrame* f = 0;
- if (mModel && mCurrentFrame >= 0) {
-	f = mModel->frame(mCurrentFrame);
+ int picked = pickObject(pos);
+ if (picked < 0) {
+	return;
  }
+ BoFrame* f = mModel->frame(mCurrentFrame);
  if (!f) {
 	return;
  }
@@ -541,9 +564,10 @@ void ModelPreview::updateCursorDisplay(const QPoint& pos)
 int ModelPreview::pickObject(const QPoint& cursor)
 {
  BoFrame* f = 0;
- if (mModel && mCurrentFrame >= 0) {
-	f = mModel->frame(mCurrentFrame);
+ if (!haveModel()) {
+	return -1;
  }
+ f = mModel->frame(mCurrentFrame);
  if (!f) {
 	return -1;
  }
@@ -608,7 +632,7 @@ int ModelPreview::pickObject(const QPoint& cursor)
 	}
 	unsigned int name = buffer[pos];
 	BoMesh* m = 0;
-	if (name <= f->meshCount()) {
+	if (name < f->meshCount()) {
 		m = f->mesh(name);
 	}
 	if (m) {
@@ -655,6 +679,8 @@ void ModelPreview::mouseReleaseEvent(QMouseEvent* )
  delete mMouseDiffY;
  mMouseDiffX = 0;
  mMouseDiffY = 0;
+
+ mSelectedMesh = mMeshUnderMouse;
 }
 
 void ModelPreview::mouseMoveEvent(QMouseEvent* e)
