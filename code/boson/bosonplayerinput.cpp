@@ -769,7 +769,7 @@ bool BosonPlayerInput::playerInput(QDataStream& stream, Player* player)
 		//  because everything else should be checked before placing anything. But
 		//  occupied status of cell might have changed already.
 		const UnitProperties* prop = p->speciesTheme()->unitProperties(unitType);
-		bofixed width = prop->unitWidth();
+		/*bofixed width = prop->unitWidth();
 		bofixed height = prop->unitHeight();
 		BoRectFixed r(pos, pos + BoVector2Fixed(width, height));
 		if (!canvas()->canGo(prop, r)) {
@@ -779,7 +779,7 @@ bool BosonPlayerInput::playerInput(QDataStream& stream, Player* player)
 		if (canvas()->collisions()->cellsOccupied(r)) {
 			boWarning() << k_funcinfo << "Cells at (" << pos.x() << "; " << pos.y() << ") are occupied" << endl;
 			break;
-		}
+		}*/
 
 		BoVector3Fixed pos3(pos.x(), pos.y(), 0.0f);
 		Unit* u = (Unit*)canvas()->createNewItem(RTTI::UnitStart + unitType, p, ItemType(unitType), pos3);
