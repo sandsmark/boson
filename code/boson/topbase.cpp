@@ -299,7 +299,6 @@ kdDebug() << k_funcinfo << endl;
  d->mCommandBar->setTitle(i18n("Command Frame"));
  d->mCommandBar->setEnableContextMenu(false);
  d->mCommandFrame = new QVBox(d->mCommandBar);
- mBosonWidget->reparentMiniMap(d->mCommandFrame);
 
  setDockEnabled(d->mCommandBar, DockTop, false);
  setDockEnabled(d->mCommandBar, DockBottom, false);

@@ -246,6 +246,7 @@ void BosonWidget::addMiniMap()
  d->mMiniMap = new BosonMiniMap(0);
  d->mMiniMap->hide();
  d->mMiniMap->setCanvas(d->mCanvas);
+ d->mMiniMap->setBackgroundOrigin(WindowOrigin);
  connect(d->mBoson, SIGNAL(signalAddUnit(Unit*, int, int)),
 		d->mMiniMap, SLOT(slotAddUnit(Unit*, int, int)));
  connect(d->mCanvas, SIGNAL(signalUnitMoved(Unit*, double, double)),
@@ -253,12 +254,6 @@ void BosonWidget::addMiniMap()
  connect(d->mCanvas, SIGNAL(signalUnitDestroyed(Unit*)), 
 		d->mMiniMap, SLOT(slotUnitDestroyed(Unit*)));
 
-}
-
-void BosonWidget::reparentMiniMap(QWidget* parent)
-{
- d->mMiniMap->reparent(parent, QPoint(0, 0));
- d->mMiniMap->hide();
 }
 
 void BosonWidget::initChat()
@@ -639,6 +634,7 @@ void BosonWidget::slotNewMap(BosonMap* map)
 void BosonWidget::addEditorCommandFrame(QWidget* parent)
 { // remember to call this *after* init() - otherwise connect()s won't work
  d->mCommandFrame = new BosonCommandFrame(parent, true);
+ d->mCommandFrame->reparentMiniMap(d->mMiniMap);
 
  connect(d->mCommandFrame, SIGNAL(signalCellSelected(int)), 
 		d->mDisplayManager, SLOT(slotEditorWillPlaceCell(int)));
@@ -659,12 +655,13 @@ void BosonWidget::addEditorCommandFrame(QWidget* parent)
 void BosonWidget::addGameCommandFrame(QWidget* parent)
 { // remember to call this *after* init() - otherwise connect()s won't work
  d->mCommandFrame = new BosonCommandFrame(parent, false);
+ d->mCommandFrame->reparentMiniMap(d->mMiniMap);
 
  connect(d->mBoson, SIGNAL(signalUpdateProduction(Facility*)),
 		d->mCommandFrame, SLOT(slotFacilityProduces(Facility*)));
  connect(d->mBoson, SIGNAL(signalCompletedProduction(Facility*)),
 		d->mCommandFrame, SLOT(slotProductionCompleted(Facility*)));
- 
+
  slotChatFramePosition(BosonConfig::readChatFramePosition());
 }
 

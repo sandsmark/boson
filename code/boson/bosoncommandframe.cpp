@@ -71,6 +71,7 @@ public:
 	{
 		mScrollView = 0;
 		mOrderWidget = 0;
+		mTopLayout = 0;
 		mOrderLayout = 0;
 
 		mUnitView = 0;
@@ -89,6 +90,7 @@ public:
 
 	QIntDict<BosonCommandWidget> mOrderButton;
 	QWidget* mOrderWidget;
+	QVBoxLayout* mTopLayout;
 	QGridLayout* mOrderLayout; 
 	OrderScrollView* mScrollView;
 
@@ -120,28 +122,34 @@ BosonCommandFrame::BosonCommandFrame(QWidget* parent, bool editor) : QFrame(pare
 	initEditor();
  }
 
- QVBoxLayout* layout = new QVBoxLayout(this, 5, 5); // FIXME: hardcoded - maybe use KDialog::marginHint(), KDialog::spacingHint()  -> but might be a problem cause we use setLineWidth(5)
+ d->mTopLayout = new QVBoxLayout(this, 5, 5); // FIXME: hardcoded - maybe use KDialog::marginHint(), KDialog::spacingHint()  -> but might be a problem cause we use setLineWidth(5)
 
  d->mUnitView = new BosonUnitView(this);
- layout->addWidget(d->mUnitView, 0, AlignHCenter);
+ d->mTopLayout->addWidget(d->mUnitView, 0, AlignHCenter);
 
  if (d->mTransRef) {
-	layout->addWidget(d->mTransRef);
+	d->mTopLayout->addWidget(d->mTransRef);
  }
  if (d->mInverted) {
-	layout->addWidget(d->mInverted);
+	d->mTopLayout->addWidget(d->mInverted);
  }
 
 
 // the order buttons
  d->mScrollView = new OrderScrollView(this);
- layout->addWidget(d->mScrollView, 1);
+ d->mTopLayout->addWidget(d->mScrollView, 1);
  d->mOrderWidget = new QWidget(d->mScrollView->viewport());
  d->mScrollView->addChild(d->mOrderWidget);
  d->mScrollView->viewport()->setBackgroundMode(backgroundMode());
  d->mConstructionProgress = new KGameProgress(d->mOrderWidget);
  d->mConstructionProgress->hide();
  
+ setBackgroundOrigin(WindowOrigin);
+ d->mScrollView->setBackgroundOrigin(WindowOrigin);
+ d->mScrollView->viewport()->setBackgroundOrigin(WindowOrigin);
+ d->mOrderWidget->setBackgroundOrigin(WindowOrigin);
+ d->mUnitView->setBackgroundOrigin(WindowOrigin);
+ d->mConstructionProgress->setBackgroundOrigin(WindowOrigin);
  show();
 }
 
@@ -184,6 +192,7 @@ void BosonCommandFrame::initOrderButtons(unsigned int no)
 	if (!d->mOrderButton[i]) {
 		BosonCommandWidget* b = new BosonCommandWidget(d->mOrderWidget);
 		b->hide();
+		b->setBackgroundOrigin(WindowOrigin);
 		d->mOrderButton.insert(i, b);
 		connect(b, SIGNAL(signalPlaceCell(int)), 
 				this, SIGNAL(signalCellSelected(int)));
@@ -546,4 +555,15 @@ void BosonCommandFrame::slotUpdate()
  } else {
 	d->mUpdateTimer.stop();
  }
+}
+
+void BosonCommandFrame::reparentMiniMap(QWidget* map)
+{
+ if (!map) {
+	kdError() << k_funcinfo << "NULL map" << endl;
+	return;
+ }
+ map->reparent(this, QPoint(0,0));
+ map->hide();
+ d->mTopLayout->insertWidget(0, map);
 }
