@@ -6,9 +6,10 @@ Id=10003
 Health=60
 MineralCost=80
 OilCost=5
-Producer=3
+Producer=0
 Requirements=13,3
 ProductionTime=50
+SightRange=5
 DestroyedParticles=1001,3001
 
 [Boson Mobile Unit]
