@@ -152,8 +152,8 @@ void OptionsDialog::initCursorPage()
  (void)new QLabel(i18n("Cursor"), hbox);
  d->mCursor = new QComboBox(hbox);
  d->mCursor->insertItem(i18n("Sprite Cursor"), CursorSprite);
- d->mCursor->insertItem(i18n("Normal (X) Cursor"), CursorNormal);
- d->mCursor->insertItem(i18n("KDE Cursor"), CursorKDE);
+ d->mCursor->insertItem(i18n("B/W Cursor"), CursorNormal);
+ d->mCursor->insertItem(i18n("KDE Standard Cursor"), CursorKDE);
  d->mCursor->insertItem(i18n("Experimental Cursor (*Very* Unstable)"), 
 		CursorExperimental);
  connect(d->mCursor, SIGNAL(activated(int)), 
