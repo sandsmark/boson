@@ -264,9 +264,11 @@ void Bo3DSLoad::loadFrameNode(BoFrame* frame, int* index, Lib3dsNode* node)
  }
  Lib3dsMesh* mesh3ds = lib3ds_file_mesh_by_name(m3ds, node->name);
  if (!mesh3ds) {
+	boWarning(100) << k_funcinfo << "NULL mesh for node " << node->name << endl;
 	return;
  }
  if (mesh3ds->faces < 1) {
+	boWarning(100) << k_funcinfo << "no faces in node " << node->name << endl;
 	return;
  }
  BoMesh* mesh = mMesh2Mesh[mesh3ds];
