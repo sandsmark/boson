@@ -30,8 +30,9 @@
 
 BosonModel::BosonModel(const QString& f)
 {
-// QString file = f;
- QString file = "/home/guest/3ds/3ds/andi3d/sphere.3DS";
+return; //AB: we don't provide any files currently anyway...
+ QString file = f;
+// QString file = "/home/guest/3ds/3ds/andi3d/sphere.3DS"; // AB: temporary for debugging
  m3ds = lib3ds_file_load(file);
  if (!m3ds) {
 	kdError() << k_funcinfo << "Can't load " << file << endl;
