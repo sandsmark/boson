@@ -156,9 +156,9 @@ SpeciesData::SpeciesData(const QString& speciesPath)
  d->mActionPixmaps.setAutoDelete(true);
  d->mParticleProperties.setAutoDelete(true);
  d->mTeamData.setAutoDelete(true);
- d->mThemePath = speciesPath;
  d->mUnitModels.setAutoDelete(true);
  d->mObjectModels.setAutoDelete(true);
+ d->mThemePath = speciesPath;
 }
 
 SpeciesData::~SpeciesData()
@@ -515,7 +515,7 @@ void SpeciesData::loadObjects(const QColor& teamColor)
 {
  QString fileName = themePath() + QString::fromLatin1("objects/objects.boson");
  if (!KStandardDirs::exists(fileName)) {
-	boDebug() << k_funcinfo << "no objects.boson file found" << endl;
+	boDebug() << k_funcinfo << "no objects.boson file found at " << fileName << endl;
 	// We assume that this theme has no objects and don't complain
 	return;
  }
