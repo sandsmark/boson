@@ -181,8 +181,6 @@ class BosonNewGameWidget : public QWidget
     inline Player* player();
     inline BosonPlayField* map();
 
-    Boson* mBoson;
-    Player* mPlayer;
     QPtrDict<KPlayer> mItem2Player;
     KPlayer* mHighlightedPlayer;
     TopWidget* mTop;
