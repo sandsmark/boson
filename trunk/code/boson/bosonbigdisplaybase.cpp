@@ -47,6 +47,7 @@
 #include "bosonbigdisplayinputbase.h"
 #include "bogltooltip.h"
 #include "bosongroundtheme.h"
+#include "bocamera.h"
 #include "info/boinfo.h"
 
 #include <kgame/kgameio.h>
@@ -71,11 +72,6 @@
 #include "bosontexturearray.h"
 #include "bosonglfont.h"
 
-// Camera limits
-#define CAMERA_MIN_Z BO_GL_NEAR_PLANE + 3
-#define CAMERA_MAX_Z BO_GL_FAR_PLANE - 50
-#define CAMERA_MAX_RADIUS 80
-
 #define CLEAR_DEPTH 1.0f
 
 #warning move to class !
@@ -89,183 +85,6 @@ float textureLowerRight[2] = { 1.0f, 0.0f };
 float textureUpperRight[2] = { 1.0f, 1.0f };
 
 void renderCellsNow(Cell** cells, int count, int mapCorners, float* heightMap, unsigned char* texMapStart);
-
-// Maybe camera class should be put to it's own file
-class Camera
-{
-public:
-	Camera()
-	{
-		init();
-	}
-	// AB: IMHO its a bad idea to place the map width/height into camera
-	// code
-	Camera(GLfloat mapWidth, GLfloat mapHeight)
-	{
-		init();
-		mMapWidth = mapWidth;
-		mMapHeight = mapHeight;
-	}
-	Camera(const Camera& c)
-	{
-		*this = c;
-	}
-	Camera& operator=(const Camera& c)
-	{
-		mLookAt = c.mLookAt;
-		mPosZ = c.mPosZ;
-		mRotation = c.mRotation;
-		mRadius = c.mRadius;
-		mMapWidth = c.mMapWidth;
-		mMapHeight = c.mMapHeight;
-		return *this;
-	}
-	void init()
-	{
-		mLookAt.set(0, 0, 0);
-		mPosZ = 8.0;
-		mRotation = 0.0;
-		mRadius = 5.0;
-		mMapWidth = 0.0;
-		mMapHeight = 0.0;
-	}
-
-	void setLookAt(const BoVector3& pos)
-	{
-		mLookAt = pos;
-		checkPosition();
-	}
-	const BoVector3& lookAt()
-	{
-		return mLookAt;
-	}
-	void changeZ(GLfloat diff)
-	{
-		float newz = mPosZ + diff;
-		if (newz < CAMERA_MIN_Z) {
-			newz = CAMERA_MIN_Z;
-		} else if (newz > CAMERA_MAX_Z) {
-			newz = CAMERA_MAX_Z;
-		}
-		float factor = newz / mPosZ;
-		mPosZ = newz;
-		mRadius = mRadius * factor;
-	}
-	void changeRadius(GLfloat diff)
-	{
-		float radius = mRadius + mPosZ / CAMERA_MAX_RADIUS * diff;  // How much radius is changed depends on z position
-		if (radius < 0.0) {
-			radius = 0.0;
-		} else if (radius > mPosZ) {
-			radius = mPosZ;
-		}
-		mRadius = radius;
-	}
-	void changeRotation(GLfloat diff)
-	{
-		float rotation = mRotation + diff;
-		if (rotation < 0.0) {
-			rotation += 360.0;
-		} else if (rotation > 360.0) {
-			rotation -= 360.0;
-		}
-		mRotation = rotation;
-	}
-	void moveLookAtBy(GLfloat x, GLfloat y, GLfloat z)
-	{
-		mLookAt.add(BoVector3(x, y, z));
-		checkPosition();
-	}
-	void setMapSize(GLfloat w, GLfloat h)
-	{
-		mMapWidth = w;
-		mMapHeight = h;
-	}
-
-	void loadFromXML(const QDomElement& root)
-	{
-		bool ok;
-		float lookatx, lookaty, lookatz;
-		lookatx = root.attribute("LookAtX").toFloat(&ok);
-		if (!ok) {
-			boError() << k_funcinfo << "Invalid value for LookAtX tag" << endl;
-			lookatx = 0;
-		}
-		lookaty = root.attribute("LookAtY").toFloat(&ok);
-		if (!ok) {
-			boError() << k_funcinfo << "Invalid value for LookAtY tag" << endl;
-			lookaty = 0;
-		}
-		lookatz = root.attribute("LookAtZ").toFloat(&ok);
-		if (!ok) {
-			boError() << k_funcinfo << "Invalid value for LookAtZ tag" << endl;
-			mPosZ = 0;
-		}
-		mPosZ = root.attribute("PosZ").toFloat(&ok);
-		if (!ok) {
-			boError() << k_funcinfo << "Invalid value for PosZ tag" << endl;
-			mPosZ = 0;
-		}
-		mRotation = root.attribute("Rotation").toFloat(&ok);
-		if (!ok) {
-			boError() << k_funcinfo << "Invalid value for Rotation tag" << endl;
-			mRotation = 0;
-		}
-		mRadius = root.attribute("Radius").toFloat(&ok);
-		if (!ok) {
-			boError() << k_funcinfo << "Invalid value for Radius tag" << endl;
-			mRadius = 0;
-		}
-		boDebug(260) << k_funcinfo << "Setting lookat to (" << lookatx << ", " << lookaty << ", " << lookatz << ")" << endl;
-		mLookAt.set(lookatx, lookaty, lookatz);
-		boDebug(260) << k_funcinfo << "lookat is now (" << mLookAt.x() << ", " << mLookAt.y() << ", " << mLookAt.z() << ")" << endl;
-	}
-	void saveAsXML(QDomElement& root)
-	{
-		root.setAttribute("LookAtX", mLookAt.x());
-		root.setAttribute("LookAtY", mLookAt.y());
-		root.setAttribute("LookAtZ", mLookAt.z());
-		root.setAttribute("PosZ", mPosZ);
-		root.setAttribute("Rotation", mRotation);
-		root.setAttribute("Radius", mRadius);
-	}
-
-	void setZ(GLfloat z) { mPosZ = z; }
-	void setRotation(GLfloat r) { mRotation = r; }
-	void setRadius(GLfloat r) { mRadius = r; }
-	GLfloat z() const { return mPosZ; }
-	GLfloat rotation() const { return mRotation; }
-	GLfloat radius() const { return mRadius; }
-
-protected:
-	void checkPosition()
-	{
-		if (!mMapWidth || !mMapHeight) {
-			return;
-		}
-		if (mLookAt.x() < 0.0) {
-			mLookAt.setX(0.0);
-		} else if (mLookAt.x() > mMapWidth) {
-			mLookAt.setX(mMapWidth);
-		}
-		if (mLookAt.y() > 0.0) {
-			mLookAt.setY(0.0);
-		} else if (mLookAt.y() < -mMapHeight) {
-			mLookAt.setY(-mMapHeight);
-		}
-	}
-
-private:
-	BoVector3 mLookAt;
-	GLfloat mPosZ;
-
-	GLfloat mRotation;
-	GLfloat mRadius;
-
-	// AB: why float?
-	GLfloat mMapWidth;
-	GLfloat mMapHeight;
-};
 
 class SelectionRect
 {
@@ -539,7 +358,7 @@ public:
 
 	BosonGLChat* mChat;
 
-	Camera mCamera;
+	BoCamera mCamera;
 
 	GLint mViewport[4]; // x,y,w,h of the viewport. see setViewport
 	BoMatrix mProjectionMatrix;
@@ -1864,8 +1683,8 @@ void BosonBigDisplayBase::mouseEventWheel(float delta, Orientation orientation, 
 		}
 		camera()->changeZ(delta);
 		z = canvas()->map()->cellAverageHeight((int)(camera()->lookAt().x()), (int)-(camera()->lookAt().y()));
-		if (camera()->z() < z + CAMERA_MIN_Z) {
-			camera()->changeZ(z + CAMERA_MIN_Z - camera()->z());
+		if (camera()->z() < z + BoCamera::minCameraZ()) {
+			camera()->changeZ(z + BoCamera::minCameraZ() - camera()->z());
 		}
 		cameraChanged();
 		break;
@@ -1901,8 +1720,8 @@ void BosonBigDisplayBase::mouseEventMove(int buttonState, const BoMouseEvent& ev
 		d->mMouseMoveDiff.startZoom();
 		camera()->changeZ(d->mMouseMoveDiff.dy());
 		float z = canvas()->map()->cellAverageHeight((int)(camera()->lookAt().x()), (int)-(camera()->lookAt().y()));
-		if (camera()->z() < z + CAMERA_MIN_Z) {
-			camera()->changeZ(z + CAMERA_MIN_Z - camera()->z());
+		if (camera()->z() < z + BoCamera::minCameraZ()) {
+			camera()->changeZ(z + BoCamera::minCameraZ() - camera()->z());
 		}
 		cameraChanged();
 	} else if (buttonState & RIGHT_BUTTON) {
@@ -1953,8 +1772,8 @@ void BosonBigDisplayBase::mouseEventMove(int buttonState, const BoMouseEvent& ev
 		//  cells go through near clip.
 		camera()->moveLookAtBy(dx, dy, 0);
 		float z = canvas()->map()->cellAverageHeight((int)(camera()->lookAt().x()), (int)-(camera()->lookAt().y()));
-		if (camera()->z() < z + CAMERA_MIN_Z) {
-			camera()->changeZ(z + CAMERA_MIN_Z - camera()->z());
+		if (camera()->z() < z + BoCamera::minCameraZ()) {
+			camera()->changeZ(z + BoCamera::minCameraZ() - camera()->z());
 		}
 		cameraChanged();
 	} else {
@@ -2167,7 +1986,7 @@ void BosonBigDisplayBase::slotResetViewProperties()
  BO_CHECK_NULL_RET(canvas());
  d->mFovY = 60.0;
  d->mAspect = 1.0;
- setCamera(Camera(canvas()->mapWidth(), canvas()->mapHeight()));
+ setCamera(BoCamera(canvas()->mapWidth(), canvas()->mapHeight()));
  resizeGL(d->mViewport[2], d->mViewport[3]);
 }
 
@@ -2355,8 +2174,8 @@ void BosonBigDisplayBase::quitGame()
  d->mMouseMoveDiff.moveToPos(0, 0);
  d->mRenderedItems = 0;
  d->mRenderedCells = 0;
-// setCamera(Camera()); do not do this! it calls cameraChanged() which generates cell list and all that stuff
- d->mCamera = Camera();
+// setCamera(BoCamera()); do not do this! it calls cameraChanged() which generates cell list and all that stuff
+ d->mCamera = BoCamera();
 
  setInputInitialized(false);
 }
@@ -2844,7 +2663,7 @@ void BosonBigDisplayBase::generateCellList()
  d->mRenderCellsCount = count;
 }
 
-void BosonBigDisplayBase::setCamera(const Camera& camera)
+void BosonBigDisplayBase::setCamera(const BoCamera& camera)
 {
  d->mCamera = camera;
  cameraChanged();
@@ -2914,7 +2733,7 @@ void BosonBigDisplayBase::cameraChanged()
  emit signalChangeViewport(this, cellTL, cellTR, cellBL, cellBR);
 }
 
-Camera* BosonBigDisplayBase::camera() const
+BoCamera* BosonBigDisplayBase::camera() const
 {
  return &d->mCamera;
 }
