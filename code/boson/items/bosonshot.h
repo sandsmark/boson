@@ -49,7 +49,7 @@ class BosonShot : public BosonItem
 
 //    inline BoVector3 pos()  { return mPos; }
 
-    Player* owner()  { return mOwner; };
+    Player* owner() const { return mOwner; }
     inline const BosonWeaponProperties* properties() const  { return mProp; };
     QPtrList<BosonParticleSystem>* flyParticleSystems()  { return &mFlyParticleSystems; };
 
