@@ -45,7 +45,6 @@
 #include "bosonprofilingdialog.h"
 #include "bosondata.h"
 #include "bosongroundtheme.h"
-#include "bofullscreen.h"
 #include "bosonlocalplayerinput.h"
 
 #include <kgamedebugdialog.h>
@@ -89,7 +88,6 @@ public:
 
 		mActionStatusbar = 0;
 		mActionMenubar = 0;
-		mActionFullScreen = 0;
 
 		mStarting = 0;
 
@@ -105,15 +103,10 @@ public:
 
 	KToggleAction* mActionStatusbar;
 	KToggleAction* mActionMenubar;
-	KToggleAction* mActionFullScreen;
 
 	QTimer mStatusBarTimer;
 
 	BosonStarting* mStarting;
-
-#if KDE_VERSION < 310
-	bool mLoadingDockConfig;
-#endif
 
 	BoDebugDCOPIface* mIface;
 
@@ -123,9 +116,6 @@ public:
 TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
 {
  d = new TopWidgetPrivate;
-#if KDE_VERSION < 310
- d->mLoadingDockConfig = false;
-#endif
 
  mMainDock = createDockWidget("mainDock", 0, this, i18n("Map"));
  mMainDock->setDockSite(KDockWidget::DockCorner);
@@ -239,8 +229,8 @@ void TopWidget::slotLoadBosonGameDock()
 		d->mDisplayManager->updateGeometry();  // Hack? Bug in BoDisplayManager?
 	}
  } else {
-	boDebug() << k_funcinfo << "dock config exists, loading" << endl;
-	loadGameDockConfig();
+//	boDebug() << k_funcinfo << "dock config exists, loading" << endl;
+	// AB: obsolete
  }
 }
 
@@ -293,11 +283,6 @@ void TopWidget::initKActions()
 		SLOT(slotChangeMaxProfilingAdvanceEntries()), actionCollection(), "options_profiling_max_advance_entries");
  (void)new KAction(i18n("Maximal rendering entries..."), KShortcut(), this,
 		SLOT(slotChangeMaxProfilingRenderingEntries()), actionCollection(), "options_profiling_max_rendering_entries");
-
- // Display
- d->mActionFullScreen = new KToggleAction(i18n("&Fullscreen Mode"), CTRL+SHIFT+Key_F,
-		this, SLOT(slotToggleFullScreen()), actionCollection(), "window_fullscreen");
- d->mActionFullScreen->setChecked(false);
 
  // Debug
  (void)new KAction(i18n("&Debug KGame..."), KShortcut(), this,
@@ -455,9 +440,6 @@ void TopWidget::slotStartNewGame()
  // is NULL and gets applied at the end only.
  slotChangeLocalPlayer(0);
 
- // Save initial dock config
- saveInitialDockConfig();
-
  d->mStartup->showLoadingWidget();
 
  initGameDockWidgets(false); // dock the widgets to their default location and hide them
@@ -576,15 +558,6 @@ void TopWidget::slotConfigureKeys()
  dlg.configure(true);
 }
 
-void TopWidget::slotToggleFullScreen()
-{
- if (d->mActionFullScreen->isChecked()) {
-	BoFullScreen::enterMode(-1);
- } else {
-	BoFullScreen::leaveFullScreen();
- }
-}
-
 void TopWidget::endGame()
 {
  boDebug() << k_funcinfo << endl;
@@ -597,10 +570,6 @@ void TopWidget::endGame()
  if (d->mBosonWidget) {
 	d->mBosonWidget->quitGame();
 	d->mStatusBarTimer.stop();
-	// This prevent wrong dock config from getting saved when loading fails
-	if (boGame->gameStatus() != KGame::Init) {
-		saveGameDockConfig();
-	}
  }
  delete d->mBosonWidget;
  d->mBosonWidget = 0;
@@ -655,7 +624,6 @@ void TopWidget::slotGameOver()
  // manually!
  d->mStartup->slotShowWelcomeWidget();
  mMainDock->setWidget(d->mStartup);
- loadInitialDockConfig();
 }
 
 // FIXME: nonsense name. this doesn't toggle anything, but it applies the
@@ -689,78 +657,6 @@ void TopWidget::slotToggleMenubar()
  showHideMenubar();
 }
 
-void TopWidget::loadGameDockConfig()
-{
- boDebug() << k_funcinfo << endl;
- // readDockConfig() is broken.
- // it uses frameGeometry() to save the geometry which is correct. but then it
- // uses setGeometry() to load it again, and since this doesn't work correctly
- // with titlebar and frame we need to adjust here
-#if KDE_VERSION < 310
- d->mLoadingDockConfig = true;
-#endif
- KConfig* conf = kapp->config();
- conf->setGroup("BosonGameDock");
- bool fs = conf->readBoolEntry("FullScreen", false);
- d->mActionFullScreen->setChecked(fs);
- readDockConfig(kapp->config(), "BosonGameDock");
- slotToggleFullScreen();
-#if KDE_VERSION < 310
- d->mLoadingDockConfig = false;
-#endif
-}
-
-void TopWidget::loadInitialDockConfig()
-{
- boDebug() << k_funcinfo << endl;
-#if KDE_VERSION < 310
- d->mLoadingDockConfig = true;
-#endif
- KConfig* conf = kapp->config();
- conf->setGroup("BosonInitialDock");
- bool fs = conf->readBoolEntry("FullScreen", false);
- d->mActionFullScreen->setChecked(fs);
-
- if (isVisible()) {
-	slotToggleFullScreen();
-	readDockConfig(kapp->config(), "BosonInitialDock");
- } else {
-	readDockConfig(kapp->config(), "BosonInitialDock");
-	slotToggleFullScreen();
- }
-#if KDE_VERSION < 310
- d->mLoadingDockConfig = false;
-#endif
-}
-
-void TopWidget::saveGameDockConfig()
-{
- boDebug() << k_funcinfo << endl;
- writeDockConfig(kapp->config(), "BosonGameDock");
- KConfig* conf = kapp->config();
- conf->setGroup("BosonGameDock");
- conf->writeEntry("FullScreen", d->mActionFullScreen->isChecked());
-}
-
-void TopWidget::saveInitialDockConfig()
-{
- boDebug() << k_funcinfo << endl;
- writeDockConfig(kapp->config(), "BosonInitialDock");
- KConfig* conf = kapp->config();
- conf->setGroup("BosonInitialDock");
- conf->writeEntry("FullScreen", d->mActionFullScreen->isChecked());
-}
-
-#if KDE_VERSION < 310
-void TopWidget::setGeometry(const QRect& r)
-{
- if (d->mLoadingDockConfig) {
-	move(r.topLeft());
-	resize(r.size());
- }
-}
-#endif
-
 bool TopWidget::queryClose()
 {
  boDebug() << k_funcinfo << endl;
@@ -791,11 +687,6 @@ bool TopWidget::queryExit()
 	d->mBosonWidget->saveConfig();
 	d->mDisplayManager->quitGame();
 	d->mBosonWidget->quitGame();
-	if (boGame->gameMode()) {
-		saveGameDockConfig();
-	} else {
-		boDebug() << k_funcinfo << "TODO: add saveEditorDockConfig()" << endl;
-	}
 	return true;
  }
  if (mMainDock->getWidget() != d->mStartup) {
@@ -805,8 +696,6 @@ bool TopWidget::queryExit()
 	return true;
  }
 
- // startup widget on top
- saveInitialDockConfig();
  return true;
 }
 

@@ -76,11 +76,6 @@ public:
 	 **/
 	static QString checkInstallation();
 
-	void loadGameDockConfig();
-	void loadInitialDockConfig();
-	void saveGameDockConfig();
-	void saveInitialDockConfig();
-
 public slots:
 	/**
 	 * Called when user clicks "start new game" button
@@ -111,21 +106,12 @@ public slots:
 	void slotConfigureKeys();
 
 	/**
-	 * Toggles if Boson is shown fullscreen or normally
-	 **/
-	void slotToggleFullScreen();
-
-	/**
 	 * Ends current game and reinits all game data, so that a new game can
 	 * be started.
 	 * */
 	void slotEndGame();
 
 	void slotGameOver();
-
-#if KDE_VERSION < 310
-	virtual void setGeometry(const QRect&);
-#endif
 
 signals:
 	void signalSetMobilesCount(int);// mobiles of the local player
