@@ -40,6 +40,7 @@ enum serverState {
 	SS_INIT,
 	SS_WAITING,
 	SS_PLAYING,
+	SS_DOWN,
 	SS_
 	};
 
