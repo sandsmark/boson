@@ -62,19 +62,19 @@ public:
 	BosonBigDisplayPrivate()
 	{
 		mSelectionMode = BosonBigDisplay::SelectNone;
-		mIsSelecting = false;
 		mIsRMBMove = false;
 
 		mLocalPlayer = 0;
 
 		mChat = 0;
+
+		mSelectionRect = 0;
 	}
 
 	BosonBigDisplay::SelectionMode mSelectionMode;
 	QPtrList<Unit> mSelectionList;
 	QPoint mSelectionStart;
 	QPoint mSelectionEnd;
-	bool mIsSelecting;
 	bool mIsRMBMove;
 	QPoint mRMBMove; // position where RMB move started
 
@@ -92,6 +92,9 @@ public:
 
 
 	KGameCanvasChat* mChat;
+
+
+	QCanvasRectangle* mSelectionRect;
 };
 
 BosonBigDisplay::BosonBigDisplay(QCanvas* c, QWidget* parent) : QCanvasView(c,
@@ -141,6 +144,7 @@ void BosonBigDisplay::init()
 
 BosonBigDisplay::~BosonBigDisplay()
 {
+ delete d->mSelectionRect;
  delete d->mChat;
  delete d;
 }
@@ -248,11 +252,6 @@ void BosonBigDisplay::startSelection(const QPoint& pos)
 void BosonBigDisplay::moveSelectionRect(const QPoint& newEnd)
 {
  if (selectionMode() == SelectRect) {
-	// remove an old selection rect
-	if (d->mIsSelecting) {
-		drawSelectionRect();
-	}
-
 	d->mSelectionEnd = newEnd;
 
 	// draw the new selection rect
@@ -266,12 +265,14 @@ void BosonBigDisplay::moveSelectionRect(const QPoint& newEnd)
 void BosonBigDisplay::removeSelectionRect()
 {
  if (selectionMode() == SelectRect) {
-	if (d->mIsSelecting) { // AB: might be redundant
-		// remove the rect:
-		drawSelectionRect();
-		// here as there is a performance problem in
-		// mousemove:
-		selectArea(QRect(selectionStart(), selectionEnd()));
+	// here as there is a performance problem in
+	// mousemove:
+	selectArea();
+
+	// remove the rect:
+	if (d->mSelectionRect) {
+		delete d->mSelectionRect;
+		d->mSelectionRect = 0;
 	}
 	if (selection().isEmpty()) {
 		setSelectionMode(SelectNone);
@@ -344,18 +345,25 @@ QPtrList<Unit>& BosonBigDisplay::selection() const
  return d->mSelectionList;
 }
 
-void BosonBigDisplay::selectArea(const QRect& rect)
+void BosonBigDisplay::selectArea()
 {
+ if (!d->mSelectionRect) {
+	return;
+ }
  QCanvasItemList list;
  QCanvasItemList unitList;
  QCanvasItemList::Iterator it;
- list = canvas()->collisions(rect.normalize());
+ list = d->mSelectionRect->collisions(true);
  for (it = list.begin(); it != list.end(); ++it) {
-	if (RTTI::isUnit((*it)->rtti())) {
-		Unit* unit = (Unit*)*it;
-		if (unit->unitProperties()->isMobile()) {
-			unitList.append(*it);
-		}
+	if (!RTTI::isUnit((*it)->rtti())) {
+		continue;
+	}
+	Unit* unit = (Unit*)*it;
+	if (unit->isDestroyed()) {
+		continue;
+	}
+	if (unit->unitProperties()->isMobile()) {
+		unitList.append(*it);
 	}
 	
  }
@@ -371,33 +379,19 @@ void BosonBigDisplay::selectArea(const QRect& rect)
 void BosonBigDisplay::drawSelectionRect()
 {
 // kdDebug() << k_funcinfo << endl;
- d->mIsSelecting = !d->mIsSelecting;
  QPen pen(red, 2); // FIXME: hardcoded
- QPainter painter;
- if (!painter.begin(viewport())) {
-	kdError() << k_funcinfo << ": Cannot begin" << endl;
-	return;
- }
- painter.setPen(pen);
- painter.setRasterOp(XorROP);
+ 
 
-// might cause problems when viewport is moved:
- QPoint pos1 = contentsToViewport(selectionStart());
- QPoint pos2 = contentsToViewport(selectionEnd());
- QWMatrix wm = worldMatrix(); // for zooming
- wm.map(pos1.x(), pos1.y(), &pos1.rx(), &pos1.ry());
- wm.map(pos2.x(), pos2.y(), &pos2.rx(), &pos2.ry());
- QRect r(pos1, pos2);
- r.normalize();
- if (d->mIsSelecting) {
-//	kdDebug() << "draw:   " << r.left() << " " << r.top() << " -> " <<
-//			r.right() << " " << r.bottom() << endl;
- } else {
-//	kdDebug() << "remove: " << r.left() << " " << r.top() << " -> " <<
-//			r.right() << " " << r.bottom() << endl;
+
+ if (!d->mSelectionRect) {
+	d->mSelectionRect = new QCanvasRectangle(QRect(selectionStart(), selectionEnd()), canvas());
+	d->mSelectionRect->setPen(pen);
+	d->mSelectionRect->setZ(Z_CANVASTEXT); // canvas text is always top so we can use it here, too
  }
- painter.drawRect(r);
- painter.end();
+ d->mSelectionRect->setVisible(true);
+ d->mSelectionRect->setSize(selectionEnd().x() - selectionStart().x(),
+		selectionEnd().y() - selectionStart().y());
+
 }
 
 void BosonBigDisplay::slotReCenterView(const QPoint& pos)
