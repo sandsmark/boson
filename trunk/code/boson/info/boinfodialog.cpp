@@ -172,7 +172,7 @@ public:
 	QLabel* mCurrentFile;
 };
 
-BoInfoDialog::BoInfoDialog(QWidget* parent, bool modal) 
+BoInfoDialog::BoInfoDialog(QWidget* parent, bool modal)
 		: KDialogBase(Tabbed, i18n("BoInfo"), Ok, Ok, parent,
 		"boinfodialog", modal, true)
 {
@@ -428,22 +428,22 @@ void BoInfoDialog::reset()
 void BoInfoDialog::resetBosonPage()
 {
  d->mBosonVersionString->setText(d->data()->bosonVersionString());
- d->mBosonVersionCode->setText(QString::number(d->data()->bosonVersion()));
+ d->mBosonVersionCode->setText("0x" + QString::number(d->data()->bosonVersion(), 16));
 }
 
 void BoInfoDialog::resetQtPage()
 {
  d->mCompileQtVersionString->setText(d->data()->qtVersionString(false));
  d->mRuntimeQtVersionString->setText(d->data()->qtVersionString(true));
- d->mCompileQtVersionCode->setText(QString::number(d->data()->qtVersion()));
+ d->mCompileQtVersionCode->setText("0x" + QString::number(d->data()->qtVersion(), 16));
 }
 
 void BoInfoDialog::resetKDEPage()
 {
  d->mCompileKDEVersionString->setText(d->data()->kdeVersionString(false));
  d->mRuntimeKDEVersionString->setText(d->data()->kdeVersionString(true));
- d->mCompileKDEVersionCode->setText(QString::number(d->data()->kdeVersion(false)));
- d->mRuntimeKDEVersionCode->setText(QString::number(d->data()->kdeVersion(true)));
+ d->mCompileKDEVersionCode->setText("0x" + QString::number(d->data()->kdeVersion(false), 16));
+ d->mRuntimeKDEVersionCode->setText("0x" + QString::number(d->data()->kdeVersion(true), 16));
 }
 
 void BoInfoDialog::resetOpenGLPage()
