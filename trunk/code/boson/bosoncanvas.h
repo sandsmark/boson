@@ -156,7 +156,7 @@ public:
 
 	void quitGame();
 
-	void setWorkChanged(Unit* u, int);
+	void setWorkChanged(Unit* u);
 
 
 	virtual void addView(QCanvasView*);

@@ -560,7 +560,7 @@ QValueList<Unit*> Unit::unitCollisions(bool exact) const
 void Unit::setAdvanceWork(WorkType w)
 {
  if (w != advanceWork() || isDestroyed()) {
-	boCanvas()->setWorkChanged(this, work());
+	boCanvas()->setWorkChanged(this);
  }
  UnitBase::setAdvanceWork(w);
 }

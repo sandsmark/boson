@@ -148,7 +148,7 @@ public:
 
 	BosonMap* mMap; // just a pointer - no memory allocated
 
-	QMap<Unit*, int> mWorkChanged; // Unit::setAdvanceWork() has been called on these units. FIXME: the int parameter is obsolete
+	QPtrList<Unit> mWorkChanged; // Unit::setAdvanceWork() has been called on these units.
 
 	QPtrList<QCanvasItem> mAnimList; // see BosonCanvas::slotAdvance()
 	QPtrList<Unit> mWorkNone;
@@ -370,7 +370,7 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount)
 		(*groupIt).advanceGroupMove();
 	}
  }
- if (d->mWorkMine.count() > 0 && (advanceCount % 1) == 0) {
+ if (d->mWorkMine.count() > 0 && (advanceCount % 40) == 0) {
 	QPtrListIterator<Unit> it(d->mWorkMine);
 	while (it.current()) {
 		it.current()->advanceMine();
@@ -880,12 +880,12 @@ bool BosonCanvas::cellOccupied(int x, int y, Unit* unit, bool excludemoving)
 }
 
 
-void BosonCanvas::setWorkChanged(Unit* u, int oldWork) // FIXME: oldWork is obsolete
+void BosonCanvas::setWorkChanged(Unit* u)
 {
  if (d->mWorkChanged.contains(u)) {
 	d->mWorkChanged.remove(u);
  }
- d->mWorkChanged.insert(u, oldWork); // FIXME: use a QPtrList or so. oldWork is obsolete
+ d->mWorkChanged.append(u);
 }
 
 void BosonCanvas::changeWork()
@@ -893,9 +893,9 @@ void BosonCanvas::changeWork()
  if (d->mWorkChanged.count() == 0) {
 	return;
  }
- QMap<Unit*, int>::Iterator it;
- for (it = d->mWorkChanged.begin(); it != d->mWorkChanged.end(); ++it) {
-	Unit* u = it.key();
+ QPtrListIterator<Unit> it(d->mWorkChanged);
+ for (; it.current(); ++it) {
+	Unit* u = it.current();
 
 	// remove from all lists.
 	d->mWorkNone.removeRef(u);
