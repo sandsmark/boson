@@ -51,9 +51,10 @@ developers to further enhance the game with special effects.
 
 <p class=\"announcement\">
 Boson currently requires a minimum of 2 players due to lack of an artificial
-intelligence. We are in need of more developers and graphics artists. If you
-have any spare time and the ability to code in Qt/C++ or you know your way
-around a graphics editor, we would appreciate the help.
+intelligence and is not yet playable. We are in need of more developers and
+graphics artists. If you have any spare time and the ability to code in
+Qt/C++ or you know your way around a graphics editor, we would appreciate
+the help.
 </p>
 
 <p class=\"announcement\">
@@ -86,8 +87,8 @@ To compile and install Boson, you will need the following:<br>
 </p>
 
 <p class=\"announcement\">
-note: You need at minimum kdelibs, kdebase, arts, kdegames, and kdemultimedia
-are required. If you are using precompiled packages (such as rpms and debs),
+note: You need at minimum kdelibs, kdebase, arts, kdegames, and kdemultimedia.
+If you are using precompiled packages (such as rpms and debs),
 make sure you have the devel- packages for each.
 </p>
 
