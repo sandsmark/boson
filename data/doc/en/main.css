@@ -32,10 +32,12 @@ H3 {
 
 A {
 	color: #0000CC;
+	background-color: #FFFFFF;
 	text-decoration: none;
 }
 
 A:HOVER {
 	color: #0000CC;
-	text-decoration: underline;
+	background-color: #EFEFEF;
+	text-decoration: none;
 }
