@@ -88,44 +88,6 @@ void BosonLoadingWidget::setLoading(LoadingType load)
 {
   mLoadingType = load;
   update();
-  /*QString text;
-  if(load == SendMap)
-  {
-    text = i18n("Sending map over network...");
-  }
-  else if(load == ReceiveMap)
-  {
-    text = i18n("Receiving map...");
-  }
-  else if(load == LoadMap)
-  {
-    text = i18n("Loading map...");
-  }
-  else if(load == LoadTiles)
-  {
-    text = i18n("Loading map tiles...");
-  }
-  else if(load == LoadUnits)
-  {
-    text = i18n("Loading units...");
-  }
-  else if(load == LoadSavedGame)
-  {
-    text = i18n("Loading saved game...");
-  }
-  else if(load == InitGame)
-  {
-    text = i18n("Initializing game...");
-  }
-  else if(load == StartingGame)
-  {
-    text = i18n("Starting game...");
-  }
-  else if(load == LoadingDone)
-  {
-    text = i18n("Loading completed, starting game...");
-  }
-  mLoadingLabel->setText(text);*/
 }
 
 void BosonLoadingWidget::setProgress(int prog)
@@ -188,37 +150,37 @@ void BosonLoadingWidget::update()
     case LoadActions:
     {
       setProgress(700 + (mCurrentPlayer * 2000));
-      text = i18n("Loading datas for player %1 of %2 (actions)...").arg(mCurrentPlayer + 1).arg(mTotalPlayers);
+      text = i18n("%1 (actions)...").arg(mLoadingPlayerText);
       break;
     }
     case LoadObjects:
     {
       setProgress(700 + (mCurrentPlayer * 2000) + 25);
-      text = i18n("Loading datas for player %1 of %2 (objects)...").arg(mCurrentPlayer + 1).arg(mTotalPlayers);
+      text = i18n("%1 (objects)...").arg(mLoadingPlayerText);
       break;
     }
     case LoadEffects:
     {
       setProgress(700 + (mCurrentPlayer * 2000) + 75);
-      text = i18n("Loading datas for player %1 of %2 (effects)...").arg(mCurrentPlayer + 1).arg(mTotalPlayers);
+      text = i18n("%1 (effects)...").arg(mLoadingPlayerText);
       break;
     }
     case LoadUnitConfigs:
     {
       setProgress(700 + (mCurrentPlayer * 2000) + 150);
-      text = i18n("Loading datas for player %1 of %2 (unit config files)...").arg(mCurrentPlayer + 1).arg(mTotalPlayers);
+      text = i18n("%1 (unit config files)...").arg(mLoadingPlayerText);
       break;
     }
     case LoadUnits:
     {
       setProgress((int)(700 + (mCurrentPlayer * 2000) + 250 + (mCurrentUnit / (float)mTotalUnits * 1650)));
-      text = i18n("Loading datas for player %1 of %2 (unit model %3 of %4)...").arg(mCurrentPlayer + 1).arg(mTotalPlayers).arg(mCurrentUnit + 1).arg(mTotalUnits);
+      text = i18n("%1 (unit model %3 of %4)...").arg(mLoadingPlayerText).arg(mCurrentUnit + 1).arg(mTotalUnits);
       break;
     }
     case LoadTechnologies:
     {
       setProgress(700 + (mCurrentPlayer * 2000) + 1950);
-      text = i18n("Loading datas for player %1 of %2 (technologies)...").arg(mCurrentPlayer + 1).arg(mTotalPlayers);
+      text = i18n("%1 (technologies)...").arg(mLoadingPlayerText);
       break;
     }
     case LoadGeneralData:
@@ -277,6 +239,17 @@ void BosonLoadingWidget::setTotalPlayers(int players)
 void BosonLoadingWidget::setCurrentPlayer(int playerindex)
 {
   mCurrentPlayer = playerindex;
+  if(mCurrentPlayer == mTotalPlayers - 1)
+  {
+    // We're loading neutral player
+    mLoadingPlayerText = i18n("Loading datas for neutral player");
+  }
+  else
+  {
+    // Loading ordinary player. There's  mTotalPlayers - 1  such players (last
+    //  one is neutral player)
+    mLoadingPlayerText = i18n("Loading datas for player %1 of %2").arg(mCurrentPlayer + 1).arg(mTotalPlayers - 1);
+  }
   update();
 }
 

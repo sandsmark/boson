@@ -25,6 +25,7 @@ class QVBoxLayout;
 class QHBoxLayout;
 class QLabel;
 class QProgressBar;
+class QString;
 
 class BosonLoadingWidget : public QWidget
 {
@@ -107,6 +108,7 @@ class BosonLoadingWidget : public QWidget
     bool mAdmin;
     bool mLoading;
     LoadingType mLoadingType;
+    QString mLoadingPlayerText;
 };
 
 #endif // BOSONLOADINGWIDGET_H
