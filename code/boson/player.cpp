@@ -443,7 +443,7 @@ void Player::facilityCompleted(Facility* fac)
 bool Player::checkOutOfGame()
 {
  // TODO: make more clever.
- // e.g. currently ever small unit, like harvesters, needs to be destroyed...
+ // e.g. currently every small unit, like harvesters, needs to be destroyed...
  mOutOfGame = (d->mUnits.count() == 0);
  return isOutOfGame();
 }
