@@ -89,6 +89,9 @@ bool BoPluginManager::makePluginCurrent(const QString& name)
 	boError() << k_funcinfo << "class " << name << " not available" << endl;
 	return false;
  }
+ if (currentPluginName() == name) {
+	return true;
+ }
 
  QObject* plugin = createPlugin(name);
  if (plugin) {
@@ -281,6 +284,8 @@ bool BoPluginManager::makePluginCurrent(QObject* plugin)
  mCurrentPlugin = plugin;
 
  initializePlugin();
+
+ boConfig->setStringValue(configKey(), currentPluginName());
  return true;
 }
 
