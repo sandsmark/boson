@@ -108,7 +108,7 @@ void visualBigDisplay::mouseMoveEvent(QMouseEvent *e)
 	
 	switch( view->getSelectionMode()) {
 		default:
-			logf(LOG_WARNING, "visualBigDisplay::mouseMoveEvent : unknown selectionMode");
+			logf(LOG_WARNING, "visualBigDisplay::mouseMoveEvent : unknown selectionMode(1)");
 		case SELECT_NONE:
 			break;
 		case SELECT_RECT:
@@ -138,7 +138,7 @@ void visualBigDisplay::mouseReleaseEvent(QMouseEvent *e)
 
 	switch( view->getSelectionMode()) {
 		default:
-			logf(LOG_WARNING, "visualBigDisplay::mouseReleaseEvent : unknown selectionMode");
+			logf(LOG_WARNING, "visualBigDisplay::mouseReleaseEvent : unknown selectionMode(2)");
 		case SELECT_NONE:
 			break;
 		case SELECT_RECT:

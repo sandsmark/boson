@@ -47,7 +47,7 @@ void visualMiniDisplay::drawFix(visualFacility *fix)
 {
 	QPainter p;
 	p.begin(ground);
-	setPoint(fix->_x(), fix->_y(), (fix->who==who_am_i)?magenta:darkMagenta, &p);
+	setPoint(fix->_x()/BO_TILE_SIZE, fix->_y()/BO_TILE_SIZE, (fix->who==who_am_i)?magenta:darkMagenta, &p);
 	p.end();
 	repaint(FALSE);
 }

@@ -55,14 +55,8 @@ bosonMsgData	data;
 int		dist = u->getVisibility();
 ulong		mask = getPlayerMask(u->who);
 
-int		x = u->_x(),
-		y = u->_y();
-
-/* mobile don't need to fit the grid-layout */
-if (u->inherits("mobUnit")) {
-	x /= BO_TILE_SIZE;
-	y /= BO_TILE_SIZE;
-	}
+int		x = u->_x() / BO_TILE_SIZE,
+		y = u->_y() / BO_TILE_SIZE;
 
 im = QMAX(0, x-dist) - x;
 iM = QMIN(map_width-1,	x+dist ) - x;
@@ -196,8 +190,8 @@ void BosonServer::checkFixKnown(serverFacility *f)
 	int i,j, i2, j2;
 	ulong	k = 0l, k2;
 
-	x = f->_x();
-	y = f->_y();
+	x = f->_x() / BO_TILE_SIZE;;
+	y = f->_y() / BO_TILE_SIZE;;
 	///orzel : ugly
 	i2 = f->getWidth() / BO_TILE_SIZE;
 	j2 = f->getHeight() / BO_TILE_SIZE;
@@ -206,7 +200,7 @@ void BosonServer::checkFixKnown(serverFacility *f)
 		for (j=0; j<j2; j++)
 			k |= cells[x+i][y+j].known;
 
-	i=0;
+	i=0; // 'i' is now the player index
 	k2 = f->known;
 	while ( k != k2) {
 		boAssert(i<3);
@@ -221,6 +215,7 @@ void BosonServer::checkFixKnown(serverFacility *f)
 			f->setKnown(getPlayerMask(i));
 			}
 		else {
+			boAssert( k2&1l );
 			/* the unit isn't known anymore */
 			f->reportDestroyed(i);
 			f->unSetKnown(getPlayerMask(i));
@@ -262,6 +257,7 @@ void BosonServer::checkMobileKnown(serverMobUnit *m)
 			m->setKnown(getPlayerMask(i));
 			}
 		else {
+			boAssert( k2&1l );
 			/* the unit isn't known anymore */
 			m->reportDestroyed(i);
 			m->unSetKnown(getPlayerMask(i));
