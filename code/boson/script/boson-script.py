@@ -21,8 +21,8 @@ def method3(arg):
 def advance():
   global cycle;
   cycle = cycle + 1;
-  if (cycle % 10) == 0:
-    print "advance method called, cycle: ", cycle;
+  #if (cycle % 10) == 0:
+  #  print "advance method called, cycle: ", cycle;
   #advanceBigCircle(cycle);
   advanceA10Game(cycle);
 
