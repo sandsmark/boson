@@ -7,12 +7,13 @@
       <ul>
        <li>500 MHz Ix86 Prozessor (don't know anything about other machines)</li>
        <li>256 MB RAM</li>
-       <li>3D accelerator card (this is the most important part!!)</li>
+       <li>3D accelerator card (a driver from the vendor is recommended because they are those which give the best 
+performance)
        <li>Optional: Sound card</li>
      </ul>
      Minimum software requirements:
      <ul>
-       <li><a href="http://www.xfree86.org" target="_blank">XFree 4.x server</a> (with OpenGL support)</li>
+        <li><a href="http://www.xfree86.org" target="_blank">XFree 4.x server</a> (with OpenGL support)</li>
         <li><a href="http://www.trolltech.com" target="_blank">QT</a> (at least version 3)</li>
         <li><a href="http://www.kde.org" target="_blank">KDE</a> (at least version 3.0)</li>
         <li>kdegames/libkdegames - usually shipped with KDE</li>
@@ -22,11 +23,7 @@
         <li><a href="http://www.xfree86.org" target="_blank">OpenGL</a> - The OpenGL library (should be included in your XFree server or graphics card driver)</li>
         <li><a href="http://www.thewml.org" target="_blank">WML</a> - For the handbook, if you don't use a package or an official release</li>
     </ul>
-    <!--
-    Works on:
-     Athlon 750 Mhz, 256, Geforce2 MX, X4.2, kde3.1
-     PIII 450; 512; voodoo3; X4.2; kde3.0.2
-     -->
+
     <p>
       Please note that since we do not yet provide precompiled binaries you will
       need to install the development packages of these libraries as well (the
