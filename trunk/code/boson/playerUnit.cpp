@@ -41,11 +41,11 @@ const static int pos_y[12] =
 	{ -94, -64, -17, +34, +77, +98, +94, +64, +17, -34, -77, -98};
 
 playerMobUnit::playerMobUnit(mobileMsg_t *msg, QObject* parent=0, const char *name=0L)
-	:mobUnit(msg,parent,name)
+	: mobUnit(msg,parent,name)
 	, QwSprite(gpp.species[msg->who]->getPixmap(msg->type))
 	, state(MUS_NONE)
 {
-	z(Z_MOBILE);
+	z(Z_MOBILE + 3 * type);
 	moveTo(msg->x, msg->y);
 
 	asked_dx = asked_dy = 0;
@@ -110,15 +110,93 @@ switch(state){
 		if ( abs(vp2) > abs(vp1) || abs(vp2) > abs(vp3)) // direction isn't optimal
 			turnTo ( ( abs(vp1) < abs(vp3) )? getLeft():getRight() ); // change it
 
-		if ( ( abs(ldx) + abs(ldy) ) < abs (mobileProp[type].speed) ) {
+		if ( ( abs(ldx) + abs(ldy) ) < abs (mobileProp[type].speed) ) { ///orzel should be square
 			asked_dx = ldx; asked_dy = ldy;
 			}
 		dx = asked_dx ; dy = asked_dy; dir = direction;
-		return 1;
+
+		if (checkMove( asked_dx, asked_dy)) return 1;
+
+		if (asked_dy && checkMove( 0, asked_dy)) {
+			dx = asked_dx = 0;
+			return 1;
+			}
+		if (asked_dx && checkMove( asked_dx, 0)) {
+			dy = asked_dy = 0;
+			return 1;
+			}
+
+		/* failed : can't move any more */
+		state = MUS_NONE;
+		asked_dx = asked_dy = 0; // so that willBe returns the good position
+		//logf(LOG_GAME_LOW, "ckeckMove failed stopping: mobile[%p] has stopped\n", this);
+		logf(LOG_WARNING, "ckeckMove failed : mobile[%p] has stopped\n", this);
+		return 0; 
+
 		break;
 	}
 }
 
+
+bool playerMobUnit::checkMove(int dx, int dy)
+{
+	int ty;
+	int g;
+
+	if (goFlag() == BO_GO_AIR) return true; // flyers can go everywhere...
+
+	Pix p = neighbourhood( x()+dx, y()+dy);
+
+//	printf("%p would hit :", this);
+	for(; p; next(p) )
+		if (exact(p)) {
+			// p is what would be hit if ....
+			ty = at(p)->rtti();
+			if (ty < S_GROUND) continue;	// S_PART
+			if (ty < S_MOBILE) {		// S_GROUND
+				g = ty - S_GROUND;
+//printf("\ng = %d\n", g); fflush(stdout);
+				if (IS_PLAIN(g))
+					if ( !(GET_BIT(g) & goFlag()) ) {
+						end(p);
+						return false;
+						}
+					else continue;
+//puts("e"); fflush(stdout);
+//printf("\ntrans = %d\n", GET_TRANS_REF(g)); fflush(stdout);
+//printf("\ngetbit 1 = %d\n", GET_BIT( groundTransProp[ GET_TRANS_REF(g) ].from ) );
+//printf("\ngetbit 2 = %d\n", GET_BIT( groundTransProp[ GET_TRANS_REF(g) ].to ) );
+//printf("\ngoFlag = %d\n", goFlag() );
+				// is TRANS
+					if ( !(GET_BIT( groundTransProp[ GET_TRANS_REF(g) ].from ) & goFlag()) ||
+					     !(GET_BIT( groundTransProp[ GET_TRANS_REF(g) ].to ) & goFlag()) )  {
+						end(p);
+						return false;
+						}
+					else continue;
+				/*printf("%s, ", (IS_PLAIN(g))?
+					groundProp[g].name:
+					groundTransProp[ GET_TRANS_REF(g) ].name); */
+				continue;// unreachable ?
+				}
+			if (ty < S_FACILITY) {		// S_MOBILE
+				if (BO_GO_AIR == mobileProp[ty-S_MOBILE].goFlag)// smthg that can fly
+					continue;
+				end(p);					// anything else
+				return false;
+				//printf("%s, ", mobileProp[ty-S_MOBILE].name);
+				}
+			if (ty < S_FACILITY+FACILITY_) { // S_FACILITY
+				return false;
+				//printf("%s, ", facilityProp[ty-S_FACILITY].name);
+				continue;// unreachable ?
+				}
+			logf(LOG_ERROR, "playerMobUnit::checkMove : type is %d, ", ty);
+			}
+	end(p);
+
+	return true;
+}
 
 void playerMobUnit::turnTo(int newdir)
 {
@@ -155,9 +233,9 @@ void playerMobUnit::select()
 	boAssert(!sp_up);
 	boAssert(!sp_down);
 
-	sp_up = new selectPart_up(5);
+	sp_up = new selectPart_up(5, z());
 	sp_up->moveTo(r.right(), r.top());
-	sp_down = new selectPart_down(4);
+	sp_down = new selectPart_down(4, z());
 	sp_down->moveTo(r.left(), r.bottom());
 }
 
@@ -277,9 +355,9 @@ void playerFacility::select()
 	boAssert(!sp_up);
 	boAssert(!sp_down);
 
-	sp_up = new selectPart_up(3);
+	sp_up = new selectPart_up(3, z());
 	sp_up->moveTo(r.right() - PF_DELTA, r.top() + PF_DELTA);
-	sp_down = new selectPart_down(2);
+	sp_down = new selectPart_down(2, z());
 	sp_down->moveTo(r.left() + PF_DELTA, r.bottom() - PF_DELTA);
 }
 

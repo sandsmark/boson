@@ -23,6 +23,7 @@
 
 
 #include <QwSpriteField.h>
+#include "sprites.h"
 
 
 #define PART_NB		10
@@ -31,8 +32,11 @@
 class selectPart_up : public QwSprite
 {
 public:
-		selectPart_up(int a);
+		selectPart_up(int frame, int z);
   static void	initStatic();
+
+/* Qw stuff */
+  virtual int	rtti() const { return S_PART_UP; }
 
 private:
   static QwSpritePixmapSequence  *qsps;
@@ -44,8 +48,11 @@ private:
 class selectPart_down : public QwSprite
 {
 public:
-		selectPart_down(int);
+		selectPart_down(int frame, int z);
   static void	initStatic();
+
+/* Qw stuff */
+  virtual int	rtti() const { return S_PART_DOWN; }
 
 private:
   static QwSpritePixmapSequence  *qsps;

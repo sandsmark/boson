@@ -53,16 +53,16 @@ QPen pen(red);
 /*
  *  selectPart_up
  */
-selectPart_up::selectPart_up(int f)
+selectPart_up::selectPart_up(int _f, int _z)
 {
 	if (!qsps) {
 		logf(LOG_ERROR, "selectPart_up : qsps not loaded");
 		initStatic();
 		}
 	setSequence(qsps);
-	boAssert(f>=0); boAssert(f<PART_NB);
-	frame(f);
-	z(Z_SELECT);
+	boAssert( _f>=0); boAssert( _f<PART_NB);
+	frame( _f);
+	z( _z + 1);
 }
 
 void selectPart_up::initStatic()
@@ -106,16 +106,16 @@ void selectPart_up::initStatic()
 /*
  *  selectPart_down
  */
-selectPart_down::selectPart_down(int fff)
+selectPart_down::selectPart_down(int _f, int _z)
 {
 	if (!qsps) {
 		logf(LOG_ERROR, "selectPart_down : qsps not loaded");
 		initStatic();
 		}
 	setSequence(qsps);
-	boAssert(fff>=0); boAssert(fff<PART_NB);
-	frame(fff);
-	z(Z_SELECT);
+	boAssert(_f>=0); boAssert(_f<PART_NB);
+	frame(_f);
+	z( _z + 1);
 }
 
 

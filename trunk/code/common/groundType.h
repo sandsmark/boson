@@ -25,8 +25,9 @@ enum groundType {
 	GROUND_FACILITY = -2,
 	GROUND_UNKNOWN = -1,
 
-	GROUND_GRASS = 0,
-	GROUND_WATER = 1,
+//	GROUND_DEEP_WATER = 0,
+	GROUND_WATER = 0,
+	GROUND_GRASS,
 	GROUND_DESERT,
 
 	GROUND_LAST,
@@ -75,6 +76,9 @@ enum transition_t {
 
 #define TILES_PER_TRANSITION 12
 #define GET_TRANS_NUMBER(transNb,transPart)  ((groundType)(GROUND_LAST+(TILES_PER_TRANSITION*(transNb)) + (transPart)))
+#define GET_TRANS_REF(g)	(((g)-GROUND_LAST)/TILES_PER_TRANSITION )
+#define IS_TRANS(g)		( (g) >= GROUND_LAST)
+#define IS_PLAIN(g)		( (g) >= 0 && (g) < GROUND_LAST)
 
 /* Transition description */
 struct groundTransProperties_t {
@@ -93,6 +97,7 @@ extern const int groundPropNb;
 
 
 /* destroyed type */
+///orzel : still unused...
 enum destroyedType {
 	DESTROYED_NONE,
 	DESTROYED_WEAK,
