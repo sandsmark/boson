@@ -135,7 +135,7 @@ protected:
 	void collapse(BoLODVertex* u, BoLODVertex* v, bool recompute = true);
 
 	void buildLOD();
-	QValueList<BoFace> getLOD(float factor);
+	QValueList<BoFace> getLOD(float percent, float maxcost);
 
 private:
 	const BoMesh* mMesh;

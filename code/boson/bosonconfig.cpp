@@ -289,6 +289,7 @@ BosonConfig::BosonConfig(KConfig* conf)
  mToolTipUpdatePeriod = new BoConfigIntEntry(this, "ToolTipUpdatePeriod", DEFAULT_TOOLTIP_UPDATE_PERIOD);
  mToolTipCreator = new BoConfigIntEntry(this, "ToolTipCreator", DEFAULT_TOOLTIP_CREATOR);
  mGameLogInterval = new BoConfigIntEntry(this, "GameLogInterval", 10);
+ mUseLOD = new BoConfigBoolEntry(this, "UseLOD", DEFAULT_USE_LOD);
 
  mDebugMode = DebugNormal;
 

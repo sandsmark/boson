@@ -28,16 +28,18 @@
 #include <qptrvector.h>
 #include <qvaluevector.h>
 
-// If you define this, all vertices with cost less or equal to predefined cost
-//  will be removed for each lod, otherwise constant percent of vertices will
-//  be removed
-#define USE_COST_FACTORS
+
+#define COLLAPSE_ALONG_EDGE_PENALTY 0.3f
+
 
 
 BoLODBuilder::BoLODBuilder(const BoMesh* mesh, const BoMeshLOD* fullDetail)
 {
  mMesh = mesh;
  mFullDetail = fullDetail;
+
+ boDebug(120) << k_funcinfo << "mesh has " << pointCount() << " vertices in " << facesCount() <<
+		" faces" << endl;
 
  BosonProfiler profiler(703);
 
@@ -83,27 +85,27 @@ const BoFace* BoLODBuilder::face(unsigned int f) const
 
 QValueList<BoFace> BoLODBuilder::generateLOD(unsigned int lod)
 {
+ boDebug(121) << k_funcinfo << lod << endl;
+
  if (lod >= 5) {
 	boWarning(120) << k_funcinfo << "Only 5 LOD levels are supported!" << endl;
 	lod = 4;
  }
 
- // Factors for LOD levels
-#ifdef USE_COST_FACTORS
- // all vertices with cost less or equal to factors[lod] will be removed
- const float factors[] = { 0.000, 0.500, 1.00, 3.00, 100.0 };
-#else
  // factor defines how many vertices (of original number) will be in the lod
  // Each LOD has 2/3 vertices of the last one
- const float factors[] = { 1.000, 0.666, 0.444, 0.296, 0.197 };
-#endif
+// const float percents[] = { 1.000, 0.666, 0.444, 0.296, 0.197 };
+ const float percents[] = { 1.000, 0.700, 0.500, 0.300, 0.150 };
+// const float factors[] = { 1.000, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1 };
+ // maxcost defines maximum cost for vertices removed in the lod. No vertices
+ //  with higher cost will be removed
+ //  The higher cost is, the more model will change
+ const float maxcosts[] = { 0.000, 0.200, 0.500, 0.750, 0.900 };
+// const float maxcosts[] = { 0.000, 0.400, 0.600, 0.800, 0.900 };
 
-#ifdef USE_COST_FACTORS
- boDebug(120) << k_funcinfo << "factor is " << factors[lod] << endl;
-#else
- boDebug(120) << k_funcinfo << "factor is " << factors[lod] << "; target is " << (int)(pointCount() * factors[lod]) <<
-		" of " << pointCount() << " vertices" << endl;
-#endif
+ boDebug(120) << k_funcinfo << "factor is " << percents[lod] <<
+		"; target is " << (int)(pointCount() * percents[lod]) << " of " << pointCount() << " vertices" <<
+		"; max cost is " << maxcosts[lod] << endl;
  BosonProfiler profiler(702);
  QValueList<BoFace> faceList;
  if (lod == 0) {
@@ -114,7 +116,7 @@ QValueList<BoFace> BoLODBuilder::generateLOD(unsigned int lod)
 	return faceList;
  }
 
- faceList = getLOD(factors[lod]);
+ faceList = getLOD(percents[lod], maxcosts[lod]);
 
  long int elapsed = profiler.stop();
  boDebug(120) << k_funcinfo << "lod: " << lod << "; took " << elapsed << "us" << endl;
@@ -123,8 +125,9 @@ QValueList<BoFace> BoLODBuilder::generateLOD(unsigned int lod)
 }
 
 /**
- * Level Of Detail code is based on code written by Stan Melax
- * <melax@cs.ualberta.ca> which is available at http://www.melax.com/polychop/
+ * Level Of Detail code is based on an article written by Stan Melax
+ * <melax@cs.ualberta.ca> which is available at
+ * http://www.melax.com/polychop/gdmag.pdf
  **/
 
 class BoLODFace;
@@ -153,6 +156,7 @@ public:
 
 	void removeIfNonNeighbor(BoLODVertex* n);
 	bool isBorder();
+	bool isManifoldEdgeWith(BoLODVertex* n);
 
 	BoVector3 position;
 	unsigned int id;
@@ -324,6 +328,19 @@ void BoLODVertex::removeIfNonNeighbor(BoLODVertex* n)
  neighbor.removeItem(n);
 }
 
+bool BoLODVertex::isManifoldEdgeWith(BoLODVertex* n)
+{
+ // If there's only 1 edge involving both these vertices, then it's a manifold
+ //  edge
+ int sidescount = 0;
+ for (unsigned int i = 0; i < face.count(); i++) {
+	if (face[i]->hasVertex(n)) {
+		sidescount++;
+	}
+ }
+ return (sidescount == 1);
+}
+
 
 class BoLODHeap : public QPtrList<BoLODVertex>
 {
@@ -454,9 +471,12 @@ void BoLODBuilder::buildLOD()
  //boDebug(120) << k_funcinfo << "cost calculated" << endl;
 
  //boDebug(120) << k_funcinfo << "generating lists" << endl;
+ int count = 1;
  while (mVertices.count()) {
 	// get the next vertex to collapse
 	BoLODVertex* mn = mHeap->heapPop();
+	boDebug(121) << k_funcinfo << "Collapsing " << count++ << ". vertex with id " << mn->id << " and cost "
+			<< mn->cost << " to " << ((mn->collapse) ? (int)(mn->collapse->id) : -1) << endl;
 	// Collapse this edge
 	mOrder[mVertices.count() - 1] = mn->id;
 	mMap[mn->id] = (mn->collapse) ? (int)(mn->collapse->id) : -1;
@@ -476,13 +496,11 @@ void BoLODBuilder::buildLOD()
  delete mHeap;
 }
 
-QValueList<BoFace> BoLODBuilder::getLOD(float factor)
+QValueList<BoFace> BoLODBuilder::getLOD(float percent, float maxcost)
 {
-#ifndef USE_COST_FACTORS
- unsigned int target = (unsigned int)(factor * pointCount());
+ unsigned int target = (unsigned int)(percent * pointCount());
  //boDebug(120) << k_funcinfo << "factor is " << factor << "; target is " << target << " of " <<
 //		pointCount() << " vertices" << endl;
-#endif
 
  if (mOrder.count() != pointCount()) {
 	boError(120) << k_funcinfo << "mOrder has only " << mOrder.count() << " of " << pointCount() << " elements!" << endl;
@@ -513,28 +531,28 @@ QValueList<BoFace> BoLODBuilder::getLOD(float factor)
  }
 
  int count = 1;
-#ifdef USE_COST_FACTORS
- while (vclist.count() > 0) {
-#else
+ // Main loop: collapse vertices as long as we have at most target vertices. At
+ //  the same time, do _not_ remove vertices with cost higher than maxcost
  while (vclist.count() > target) {
-#endif
-	// Hard stop if there's less than 12 faces left
-	if (mFaces.count() <= 12) {
+	// Hard stop if there's only 6 faces left
+	if (mFaces.count() <= 6) {
 		boDebug(120) << k_funcinfo << "Only " << mFaces.count() << " faces left. Stop." << endl;
 		break;
 	}
 
 	// get the next vertex to collapse
 	BoLODVertex* mn = vclist.take(vclist.count() - 1);
-#ifdef USE_COST_FACTORS
-	if (mCost[mn->id] > factor) {
-		boDebug(120) << k_funcinfo << count++ << ". vertex with id " << mn->id << " has cost (" <<
-				mCost[mn->id] << ") bigger than limit (" << factor << "). Break." << endl;
+
+	// Check if enough vertices have been removed
+	if (mCost[mn->id] > maxcost) {
+		// Vertex has too high cost. Don't remove it
+		boDebug(120) << k_funcinfo << count << ". vertex with id " << mn->id <<
+				" has cost (" << mCost[mn->id] << ") bigger than limit (" << maxcost << "). Break." << endl;
 		break;
 	}
-#endif
-	boDebug(120) << "Removing " << count++ << ". vertex with id " << mn->id << " and cost " << mCost[mn->id] << endl;
+
 	// Collapse this edge
+	boDebug(121) << "Removing " << count++ << ". vertex with id " << mn->id << " and cost " << mCost[mn->id] << endl;
 	collapse(mn, mn->collapse, false);
  }
 
@@ -589,23 +607,12 @@ void BoLODBuilder::computeEdgeCostAtVertex(BoLODVertex* v)
 
 float BoLODBuilder::computeEdgeCollapseCost(BoLODVertex* u, BoLODVertex* v)
 {
- // Settings. Tune and test
- bool usecurvature = true;
- bool lockborder = true;
-
  // if we collapse edge uv by moving u to v then how
  // much different will the model change, i.e. how much "error".
- // Texture, vertex normal, and border vertex code was removed
- // to keep this demo as simple as possible.
  // The method of determining cost was designed in order
  // to exploit small and coplanar regions for
  // effective polygon reduction.
- // Is is possible to add some checks here to see if "folds"
- // would be generated.  i.e. normal of a remaining face gets
- // flipped.  I never seemed to run into this problem and
- // therefore never added code to detect this case.
- float edgelength = 1.0f;
- edgelength = (v->position - u->position).length();
+
  float curvature = 0.001f;
 
  // find the "sides" triangles that are on the edge uv
@@ -615,32 +622,50 @@ float BoLODBuilder::computeEdgeCollapseCost(BoLODVertex* u, BoLODVertex* v)
 		sides.appendItem(u->face[i]);
 	}
  }
- if (usecurvature) {
+
+ // Check how we're collapsing
+ if (u->isBorder()) {
+	// u is border vertex
+	if (sides.count() > 1) {
+		// Collapsing from border to interior -> very bad
+		curvature = 1;
+	} else {
+		// Collapsing along border -> not that bad, but not too good either
+		// Code for this is taken from Ogre engine - http://ogre.sourceforge.net
+		BoVector3 collapseEdge, otherBorderEdge;
+		BoVector3 edgeVector = v->position - u->position;
+		edgeVector.normalize();
+		collapseEdge = edgeVector;
+		float kinkiness, maxkinkiness;
+		maxkinkiness = 0.0f;
+		for (unsigned int i = 0; i < u->neighbor.count(); i++) {
+			if ((u->neighbor[i] != v) && (u->neighbor[i]->isManifoldEdgeWith(u))) {
+				otherBorderEdge = u->position - u->neighbor[i]->position;
+				otherBorderEdge.normalize();
+				// This time, the closer dot is to -1, the better, because that means
+				//  the edges are opposite to each other
+				kinkiness = BoVector3::dotProduct(collapseEdge, otherBorderEdge);
+				maxkinkiness = QMAX(maxkinkiness, (1.002f + kinkiness) * 0.5f);
+			}
+		}
+		// curvature will be between COLLAPSE_ALONG_EDGE_PENALTY and 1
+		curvature = COLLAPSE_ALONG_EDGE_PENALTY + (maxkinkiness * (1 - COLLAPSE_ALONG_EDGE_PENALTY));
+	}
+ } else {
 	// use the triangle facing most away from the sides
 	// to determine our curvature term
 	for (unsigned int i = 0; i < u->face.count(); i++) {
-		float mincurv = 1; // curve for face i and closer side to it
+		float mincurv = 1.0f; // curve for face i and closer side to it
 		for (unsigned int j = 0; j < sides.count(); j++) {
 			// use dot product of face normals.
 			float dotprod = BoVector3::dotProduct(u->face[i]->normal, sides[j]->normal);
-			mincurv = QMIN(mincurv, (1.002f - dotprod) / 2.0f);
+			mincurv = QMIN(mincurv, (1.002f - dotprod) * 0.5f);
 		}
 		curvature = QMAX(curvature, mincurv);
 	}
  }
- // check for border to interior collapses
- if (u->isBorder() && sides.count() > 1) {
-	curvature = 1;
- }
- // LockDown border edges (i.e. try not to touch them at all)
- // this is done by locking any border vertex.
- // i.e. even if uv isn't a border edge we dont want to callapse u to any vertex
- // if u is on a border
- if (lockborder && u->isBorder()) {
-	curvature = 9999.9f;
- }
 
- return edgelength * curvature;
+ return curvature;
 }
 
 void BoLODBuilder::collapse(BoLODVertex* u, BoLODVertex* v, bool recompute)

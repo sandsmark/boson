@@ -318,6 +318,8 @@ public:
 	CameraAction mouseWheelShiftAction() const { return (CameraAction)(mMouseWheelShiftAction->value()); }
 	void setDeactivateWeaponSounds(bool deactivate) { mDeactivateWeaponSounds->setValue(deactivate); }
 	bool deactivateWeaponSounds() const { return mDeactivateWeaponSounds->value(); }
+	void setUseLOD(bool use) { mUseLOD->setValue(use); }
+	bool useLOD() const { return mUseLOD->value(); }
 
 	void setUnitSoundActivated(UnitSoundEvent e, bool activated);
 	bool unitSoundActivated(UnitSoundEvent e) const;
@@ -583,6 +585,7 @@ private:
 	BoConfigIntEntry* mToolTipUpdatePeriod;
 	BoConfigIntEntry* mToolTipCreator;
 	BoConfigIntEntry* mGameLogInterval;
+	BoConfigBoolEntry* mUseLOD;
 
 	// NOT stored to config file!
 	bool mDisableSound;
