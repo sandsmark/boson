@@ -23,6 +23,7 @@ sub getval() {
         open( FILE2, "<$path2") || die "Cannot open values.list: $ENV{TOP_SRCDIR}/doc/en/values.list";
         my @CONTENT;
         my @CONTENT2;
+        my @CONTENT_SORTED;
 
         @CONTENT = <FILE>;
         close(FILE);
@@ -39,46 +40,127 @@ sub getval() {
         my $upgrade;
         my $passed;
 
-        foreach $line (@CONTENT) {
-                # parse [Boson Units]
-                if ($line =~ /^\[Boson\sMobile\sUnit\]\s*/) {
-                        print "<tr><td colspan=\"2\"><b>Unit Properties</b></td></tr>\n";
-                        $passed=1;
-                        }
-                if ($passed != 1) {
-                        if ($line =~ /^\[Boson\sUnit\]\s*/) {
-                                print "<tr><td colspan=\"2\"><b>Unit Properties</b></td></tr>\n";
-                                }
-                        }
-                if ($line =~ /^\[Weapon_\s*(\w+)/) {
-                        $weapon = $1;
-                        print "</table></td><td>\n";
-                        print "<table border=\"0\">\n";
-                        print "<tr><td colspan=\"2\"><b>Weapon $weapon</b></td></tr>\n";
-                }
-                
-                if ($line =~ /^\[Upgrade_\s*(\w+)/) {
-                        $upgrade = $1;
-                        print "</table></td><td>\n";
-                        print "<table border=\"0\">\n";
-                        print "<tr><td colspan=\"2\"><b>Upgrade $upgrade</b></td></tr>\n";
-                }
-                
-                foreach $line2 (@CONTENT2) {
-                        # remove all spaces and \n
-                        #$line =~ s/\s//g;
-                        $line2 =~ s/\s//g;
-                        $line2 =~ tr/\n//d;
-                        #print "trying: $line <--> $line2\n";
-                        if ($line =~ /^$line2=\s*(.*)/ ) {
-                                $value = $1;
-                                print "<tr><td width=\"110\">$line2</td><td>$value</td></tr>\n";
-                                }
-                        }
-                }
-        print "</table></td></tr></table>\n";
-}
+        my $in_loop;
+        my @boson_unit;
+        my @weapon1;
+        my @weapon2;
+        my @weapon3;
 
+        foreach $line (@CONTENT) {
+            if ($line =~ /^\[Boson\sMobile\sUnit\]\s*/ or $in_loop eq 1) {
+                if ($line =~ /^\[.*/ and $in_loop eq 1) { last; }
+                if ($in_loop eq 1) {
+                    @boson_unit = (@boson_unit, "$line\n");
+                }
+                $in_loop = 1;
+            }
+        }
+        $in_loop = 0;
+        foreach $line (@CONTENT) {
+            if ($line =~ /^\[Boson\sUnit\]\s*/ or $in_loop eq 1) {
+                if ($line =~ /^\[.*/ and $in_loop eq 1) { last; }
+                if ($in_loop eq 1) {
+                    @boson_unit = (@boson_unit, "$line\n");
+                }
+                $in_loop = 1;
+            }
+        }
+        $in_loop = 0;
+        foreach $line (@CONTENT) {
+            if ($line =~ /^\[Weapon_0.*\]\s*/ or $in_loop eq 1) {
+                if ($line =~ /^\[.*/ and $in_loop eq 1) { last; }
+                if ($in_loop eq 1) {
+                    @weapon1 = (@weapon1, "$line\n");
+                }
+                $in_loop = 1;
+            }
+        }
+        $in_loop = 0;
+        foreach $line (@CONTENT) {
+            if ($line =~ /^\[Weapon_1.*\]\s*/ or $in_loop eq 1) {
+                if ($line =~ /^\[.*/ and $in_loop eq 1) { last; }
+                if ($in_loop eq 1) {
+                    @weapon2 = (@weapon2, "$line\n");
+                }
+                $in_loop = 1;
+            }
+        }
+        $in_loop = 0;
+        foreach $line (@CONTENT) {
+            if ($line =~ /^\[Weapon_2.*\]\s*/ or $in_loop eq 1) {
+                if ($line =~ /^\[.*/ and $in_loop eq 1) { last; }
+                if ($in_loop eq 1) {
+                    @weapon3 = (@weapon3, "$line\n");
+                }
+                $in_loop = 1;
+            }
+        }
+        #print @boson_unit;
+        #print @weapon1;
+        #print @weapon2;
+        #print @weapon3;
+
+
+
+        if (@boson_unit >= 1) {
+            print "<tr><td colspan=\"2\"><b>Unit Properties</b></td></tr>\n";
+            foreach $line (@boson_unit) {
+                foreach $line2 (@CONTENT2) {
+                    $line2 =~ s/\s//g;
+                    $line2 =~ tr/\n//d;
+                    if ($line =~ /^$line2=\s*(.*)/ ) {
+                        $value = $1;
+                        print "<tr><td width=\"110\">$line2</td><td>$value</td></tr>\n";
+                    }
+                }
+            }
+        }
+        if (@weapon1 >= 1) {
+            print "</table></td><td><table>";
+            print "<tr><td colspan=\"2\"><b>Weapon 1</b></td></tr>\n";
+            foreach $line (@weapon1) {
+                foreach $line2 (@CONTENT2) {
+                    $line2 =~ s/\s//g;
+                    $line2 =~ tr/\n//d;
+                    if ($line =~ /^$line2=\s*(.*)/ ) {
+                        $value = $1;
+                        print "<tr><td width=\"110\">$line2</td><td>$value</td></tr>\n";
+                    }
+                }
+            }
+        }
+        if (@weapon2 >= 1) {
+            print "</table></td><td><table>";
+            print "<tr><td colspan=\"2\"><b>Weapon 2</b></td></tr>\n";
+            foreach $line (@weapon2) {
+                foreach $line2 (@CONTENT2) {
+                    $line2 =~ s/\s//g;
+                    $line2 =~ tr/\n//d;
+                    if ($line =~ /^$line2=\s*(.*)/ ) {
+                        $value = $1;
+                        print "<tr><td width=\"110\">$line2</td><td>$value</td></tr>\n";
+                    }
+                }
+            }
+        }
+        if (@weapon3 >= 1) {
+            print "</table></td><td><table>";
+            print "<tr><td colspan=\"2\"><b>Weapon 3</b></td></tr>\n";
+            foreach $line (@weapon3) {
+                foreach $line2 (@CONTENT2) {
+                    $line2 =~ s/\s//g;
+                    $line2 =~ tr/\n//d;
+                    if ($line =~ /^$line2=\s*(.*)/ ) {
+                        $value = $1;
+                        print "<tr><td width=\"110\">$line2</td><td>$value</td></tr>\n";
+                    }
+                }
+            }
+        }
+
+print "</table></td></tr></table>";
+
+}                
 
 
 sub getIndexVals() {
