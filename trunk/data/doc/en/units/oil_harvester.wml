@@ -14,8 +14,6 @@
     </table>
         
 <:
-# add the parent directory to @INC and load the module
-use lib '../';
 use get_values;
 
 # ( facility type, facility name, filesystem level )
