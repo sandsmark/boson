@@ -525,7 +525,6 @@ void BoFastGroundRenderer::renderVisibleCells(Cell** renderCells, unsigned int c
 	}
  }
 
- glDisable(GL_DEPTH_TEST);
  int count = 0;
  for (unsigned int i = 0; i < groundTheme->textureCount(); i++) {
 	GLuint tex = textures->texture(i);
