@@ -340,7 +340,7 @@ void Unit::updateZ(float moveByX, float moveByY, float* moveByZ, float* rotateX,
  *rotateX = 0.0f;
  *rotateY = 0.0f;
 
- float* heightMap = canvas()->heightMap();
+ const float* heightMap = canvas()->heightMap();
  BO_CHECK_NULL_RET(heightMap);
  int heightMapWidth = canvas()->mapWidth() + 1;
 
@@ -1898,10 +1898,6 @@ void Facility::moveTo(float x, float y, int range)
 
 void Facility::setConstructionStep(unsigned int step)
 {
- if (isDestroyed()) {
-	boError() << k_funcinfo << "unit is already destroyed" << endl;
-	return;
- }
  if (step > constructionSteps()) {
 	step = constructionSteps();
  }
