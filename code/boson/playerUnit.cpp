@@ -73,7 +73,7 @@ playerMobUnit::playerMobUnit(mobileMsg_t *msg)
 	turnTo(random()%DIRECTION_STEPS);
 
 	// CELLS
-	bocanvas->setCellFlag ( gridRect(), (BO_GO_AIR&goFlag())? Cell::flying_unit_f:Cell::field_unit_f );
+	bocanvas->setCellFlag ( gridRect(), (BO_GO_AIR==goFlag())? Cell::flying_unit_f:Cell::field_unit_f );
 }
 
 
@@ -94,9 +94,10 @@ bool playerMobUnit::getWantedMove(QPoint &wstate)
 	int range = mobileProp[type].range;
 
 
-	asked = gridRect().topLeft();	// destinaton asked, let's begin where we already are
-	QPoint dv = dest - asked;	// delta do the destination
-	QPoint local = asked;		// temporory variable
+	asked	= gridRect().topLeft();	// destinaton asked, let's begin where we already are
+	QPoint	dv = dest - asked;	// delta do the destination
+	QPoint	local = asked;		// temporory variable
+	bool	ret;
 
 	if ( dv == QPoint(0,0) ) state = MUS_NONE;
 
@@ -117,28 +118,31 @@ bool playerMobUnit::getWantedMove(QPoint &wstate)
 			//
 			// "Raw" move algorithm
 			//
+			bocanvas->unsetCellFlag ( gridRect(), (BO_GO_AIR==goFlag())? Cell::flying_unit_f:Cell::field_unit_f );
+			ret = true;
 			if ( abs(dv.x()) > abs(dv.y()) ) {
 				// x is greater
 				local = asked + QPoint( (dv.x()>0)?1:-1, 0); // try first along the x axis
-				if (!checkMove(asked))  {
+				if (!checkMove(local))  {
 					local = asked + QPoint( 0, (dv.y()>0)?1:-1); // the along the y axis
-					if (!checkMove(asked))
-						return false;
+					if (!checkMove(local))
+						ret = false;
 				}
 
 			} else {
 				// y is greater
 				local = asked + QPoint( 0, (dv.y()>0)?1:-1); // try first along the y axis
-				if (!checkMove(asked)) {
+				if (!checkMove(local)) {
 					local = asked + QPoint( (dv.x()>0)?1:-1, 0); // then along the x axis
-					if (!checkMove(asked))
-						return false;
+					if (!checkMove(local))
+						ret = false;
 				}
 			}
+			bocanvas->setCellFlag ( gridRect(), (BO_GO_AIR==goFlag())? Cell::flying_unit_f:Cell::field_unit_f );
 			wstate = asked = local;
 			wstate = asked;
 			asked_state = MUS_MOVING;
-			return true;
+			return ret;
 	}
 
 	// dead code : should not be reached :
@@ -320,11 +324,11 @@ void playerMobUnit::do_moveTo(QPoint npos)
 	boAssert(int(y())%BO_TILE_SIZE==0);
 
 
-	bocanvas->unsetCellFlag ( gridRect(), (BO_GO_AIR&goFlag())? Cell::flying_unit_f:Cell::field_unit_f );
+	bocanvas->unsetCellFlag ( gridRect(), (BO_GO_AIR==goFlag())? Cell::flying_unit_f:Cell::field_unit_f );
 
 	move(BO_TILE_SIZE*npos.x() , BO_TILE_SIZE*npos.y() );
 
-	bocanvas->setCellFlag ( gridRect(), (BO_GO_AIR&goFlag())? Cell::flying_unit_f:Cell::field_unit_f );
+	bocanvas->setCellFlag ( gridRect(), (BO_GO_AIR==goFlag())? Cell::flying_unit_f:Cell::field_unit_f );
 
 	// CELLS
 
