@@ -102,6 +102,7 @@ void BosonUnitView::setUnit(VisualUnit* unit)
  if (!unit) {
 	// hide all labels
 	hideAll();
+	setOverview(0);
 	return;
  }
  if (!unit->owner()) {

@@ -34,6 +34,8 @@ public:
 	int mMapHeight;
 	
 	Cell* mCells;
+
+	bool mIsChanged;
 };
 
 BosonMap::BosonMap()
@@ -604,11 +606,6 @@ int BosonMap::height() const
  return d->mMapHeight;
 }
 
-QString BosonMap::worldName() const // FIXME?
-{
- //return d->mWorldName;
-}
-
 Cell* BosonMap::cell(int x, int y) const
 {
  if (!d->mCells) {
@@ -645,3 +642,15 @@ QStringList BosonMap::availableMaps()
  return validList;
 }
 
+void BosonMap::changeCell(int x, int y, int groundType, unsigned char b)
+{
+ Cell* c = cell(x, y);
+ if (!c) {
+	kdError() << "Invalid cell x=" << x << ",y=" << y << endl;
+	return;
+ }
+ if (c->groundType() != groundType || c->version() != b) {
+	d->mIsChanged = false;
+	c->makeCell(groundType, b);
+ }
+}

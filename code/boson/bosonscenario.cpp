@@ -8,6 +8,7 @@
 #include <kdebug.h>
 #include <kstandarddirs.h>
 #include <kfilterdev.h>
+#include <ksimpleconfig.h>
 
 #include <qfile.h>
 #include <qdatastream.h>
@@ -32,13 +33,15 @@ public:
 	BosonScenarioPrivate()
 	{
 		mUnits = 0;
+
+		mMaxPlayers = 0;
+		mMinPlayers = 0;
 	}
 	
 	QString mFileName;
 
 	int mMaxPlayers; // -1 == unlimited
 	unsigned int mMinPlayers;
-//	QString mWorldName; // TODO: i18n - see TODO file
 
 	QValueList<ScenarioUnit>* mUnits;
 };
@@ -77,7 +80,7 @@ bool BosonScenario::loadScenario(const QString& fileName)
 {
  kdDebug() << "BosonScenario::loadScenario " << fileName << endl;
 
- // open stream 
+ // open stream
  QIODevice* dev = KFilterDev::deviceForFile(fileName);
  if (!dev) {
 	kdError() << "BosonScenario: NULL device for " << fileName << endl;
@@ -540,7 +543,6 @@ bool BosonScenario::loadPlayer(QDataStream& stream, unsigned int playerNumber)
 
 bool BosonScenario::savePlayer(QDataStream& stream, unsigned int playerNumber)
 {
- // TODO
  if (!d->mUnits) {
 	kdError() << "NULL units" << endl;
 	return false;
@@ -592,11 +594,6 @@ int BosonScenario::maxPlayers() const
 {
  return d->mMaxPlayers;
 }
-/*
-QString BosonScenario::worldName() const
-{
- return d->mWorldName;
-}*/
 
 void BosonScenario::addPlayerUnits(Boson* boson, int playerNumber)
 {
@@ -652,7 +649,7 @@ void BosonScenario::startScenario(Boson* boson)
 
 QStringList BosonScenario::availableScenarios()
 {
- QStringList list = KGlobal::dirs()->findAllResources("data", 
+ QStringList list = KGlobal::dirs()->findAllResources("data",
 		"boson/scenario/*.desktop");
  if (list.isEmpty()) {
 	kdError() << "Cannot find any scenario?!" << endl;
@@ -672,5 +669,14 @@ QStringList BosonScenario::availableScenarios()
 QStringList BosonScenario::availableScenarios(const QString& mapIdentifier)
 {
  QStringList list = availableScenarios();
- return list; // FIXME
+ QStringList validScenarios; // scenarios for mapIdentifier
+ for (unsigned int i = 0; i < list.count(); i++) {
+	KSimpleConfig cfg(list[i]);
+	cfg.setGroup("Boson Scenario");
+	if (cfg.readEntry("Map", "Unknown") == mapIdentifier) {
+		validScenarios.append(list[i]);
+	}
+ }
+ return validScenarios;
 }
+

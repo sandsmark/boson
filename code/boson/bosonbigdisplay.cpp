@@ -136,6 +136,8 @@ void BosonBigDisplay::startSelection(const QPoint& pos)
 	d->mSelectionStart = pos;
 	d->mSelectionEnd = pos;
 	// the box is drawn on mouse move
+
+	emit signalSingleUnitSelected(0);
 	return;
  }
 
@@ -315,10 +317,11 @@ void BosonBigDisplay::actionClicked(const QPoint& pos, QDataStream& stream, bool
 			stream << (Q_UINT32)BosonMessage::MoveConstruct;
 			stream << (Q_UINT32)fac->id();
 			stream << (Q_UINT32)fac->owner()->id();
+			kdDebug() << fac->id() << endl;
 			stream << (Q_INT32)pos.x() / BO_TILE_SIZE;
 			stream << (Q_INT32)pos.y() / BO_TILE_SIZE;
 			send = true;
-		} 
+		}
 	}
  } else { // there is a unit - attack it!
 	QPtrListIterator<VisualUnit> it(selection());
@@ -334,7 +337,6 @@ void BosonBigDisplay::actionClicked(const QPoint& pos, QDataStream& stream, bool
 		++it;
 	}
 	send = true;
-	
  }
 }
 
@@ -345,6 +347,7 @@ void BosonBigDisplay::setLocalPlayer(Player* p)
 
 void BosonBigDisplay::resizeEvent(QResizeEvent* e)
 {
+ kdDebug() << "resizeEvent" << endl;
  QCanvasView::resizeEvent(e);
  emit signalSizeChanged(width(), height());
 }

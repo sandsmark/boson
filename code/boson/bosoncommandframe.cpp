@@ -192,8 +192,8 @@ void BosonCommandFrame::initOrderButtons(unsigned int no)
 void BosonCommandFrame::slotShowSingleUnit(VisualUnit* unit)
 {
  if (!unit) {
-	kdError() << "BosonCommandFrame::slotShowSingleUnit: NULL unit "
-			<< "selected" << endl;
+	// display nothing
+	d->mUnitView->setUnit(0);
 	return;
  }
  if (unit->isDestroyed()) {
@@ -227,8 +227,7 @@ void BosonCommandFrame::slotSetConstruction(VisualUnit* unit)
  hideOrderButtons(); // this makes sure that they are even hidden if the unit 
                      // cannot produce
  if (!unit) {
-	kdError() << "BosonCommandFrame::slotSetConstruction(): NULL unit"
-			<< endl;
+	// display nothing
 	return;
  }
  Player* owner = unit->owner();

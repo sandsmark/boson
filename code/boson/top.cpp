@@ -52,8 +52,7 @@ Top::Top()
  // and a status bar
  setupStatusBar();
 
- // a local player is always needed for a game (not for editor)
-// d->mBosonWidget->addLocalPlayer();
+ showMaximized();
 
  d->mBosonWidget->slotNewGame(); // adds a local player, too
 }
@@ -73,14 +72,14 @@ void Top::setupActions()
 // (void)new KAction(i18n("Connect To localhost"), 0, d->mBosonWidget, SLOT(slotConnect()), actionCollection(), "game_connect");
 
 // Debug - no i18n!
- (void)new KAction("Debug", 0, d->mBosonWidget, SLOT(slotDebug()), actionCollection(), "game_debug");
+ (void)new KAction("Debug", QKeySequence(), d->mBosonWidget, SLOT(slotDebug()), actionCollection(), "game_debug");
 
  d->mToolbarAction = KStdAction::showToolbar(this, SLOT(optionsShowToolbar()), actionCollection());
  d->mStatusbarAction = KStdAction::showStatusbar(this, SLOT(optionsShowStatusbar()), actionCollection());
 
  KStdAction::keyBindings(this, SLOT(optionsConfigureKeys()), actionCollection());
  KStdAction::configureToolbars(this, SLOT(optionsConfigureToolbars()), actionCollection());
- KStdAction::preferences(d->mBosonWidget, SLOT(slotPreferences()), actionCollection());
+ KStdAction::preferences(d->mBosonWidget, SLOT(slotGamePreferences()), actionCollection()); // FIXME: for game only - not editor!
 
  createGUI();
 }
