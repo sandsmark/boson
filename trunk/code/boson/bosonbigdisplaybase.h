@@ -36,6 +36,7 @@ class BoAutoGameCamera;
 class BosonBigDisplayInputBase;
 class BoItemList;
 class BosonItem;
+class BoPixmapRenderer;
 
 class KGameChat;
 class KGameIO;
@@ -271,6 +272,18 @@ public:
 	 **/
 	QByteArray grabMovieFrame();
 
+	/**
+	 * Generate a movie frame for every @ref QByteArray object in @ref data.
+	 * The frames will be placed into @p dir. You should be able to create a
+	 * movie from this using something like
+	 * <pre>
+	 * 'mencoder -mf on:fps=20 -ovc lavc -lavcopts
+	 *    vcodec=mpeg4:vbitrate=2000
+	 *    -o boson-movie.avi boson-movie-\*.jpg'
+	 * </pre>
+	 **/
+	void generateMovieFrames(const QValueList<QByteArray>& data, const QString& dir);
+
 public slots:
 	void slotCenterHomeBase();
 	void slotResetViewProperties();
@@ -450,10 +463,6 @@ protected:
 	}
 
 	void setCamera(const BoGameCamera& c);
-	/**
-	 * @return Point that the camera is looking at
-	 **/
-	const BoVector3& cameraLookAtPos() const;
 	void cameraChanged();
 
 	bool checkError() const;
@@ -487,6 +496,7 @@ protected:
 
 	void addMouseIO(Player* p);
 
+	void generateMovieFrame(const QByteArray& data, BoPixmapRenderer* renderer);
 private:
 	void init();
 
