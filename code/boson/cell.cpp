@@ -20,7 +20,6 @@ void Cell::setGroundType(GroundType t)
 
 void Cell::makeCell(int groundType, unsigned char version)
 {
-// kdDebug() << "Cell::makeCell() " <<  endl;
  setGroundType((GroundType)groundType);
  setVersion(version);
  if (groundType == GroundUnknown) {
@@ -129,7 +128,7 @@ Cell::GroundType Cell::to(TransType trans)
 {
  switch (trans) {
 	case TransGrassWater:
-		return GroundDesert;
+		return GroundWater;
 	case TransGrassDesert:
 		return GroundDesert;
 	case TransDesertWater:
