@@ -8,8 +8,8 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>750</width>
-            <height>437</height>
+            <width>746</width>
+            <height>442</height>
         </rect>
     </property>
     <property name="minimumSize">
@@ -21,231 +21,280 @@
     <property name="caption">
         <string>BosonNewGameWidgetBase</string>
     </property>
-    <widget class="QGroupBox">
+    <grid>
         <property name="name">
-            <cstring>mNewGameGroupBox</cstring>
+            <cstring>unnamed</cstring>
         </property>
-        <property name="geometry">
-            <rect>
-                <x>0</x>
-                <y>0</y>
-                <width>728</width>
-                <height>421</height>
-            </rect>
-        </property>
-        <property name="title">
-            <string>New Game</string>
-        </property>
-        <grid>
+        <widget class="QGroupBox" row="0" column="0">
             <property name="name">
-                <cstring>unnamed</cstring>
+                <cstring>mNewGameGroupBox</cstring>
             </property>
-            <widget class="QGroupBox" row="0" column="0">
+            <property name="paletteForegroundColor">
+                <color>
+                    <red>255</red>
+                    <green>255</green>
+                    <blue>255</blue>
+                </color>
+            </property>
+            <property name="title">
+                <string>New Game</string>
+            </property>
+            <grid>
                 <property name="name">
-                    <cstring>mChooseMapGroupBox</cstring>
+                    <cstring>unnamed</cstring>
                 </property>
-                <property name="title">
-                    <string>Choose Map</string>
-                </property>
-                <widget class="KListView">
-                    <column>
-                        <property name="text">
-                            <string>Map</string>
-                        </property>
-                        <property name="clickable">
-                            <bool>false</bool>
-                        </property>
-                        <property name="resizable">
-                            <bool>false</bool>
-                        </property>
-                    </column>
+                <widget class="QGroupBox" row="0" column="0">
                     <property name="name">
-                        <cstring>mChooseBosonMap</cstring>
+                        <cstring>mChooseMapGroupBox</cstring>
                     </property>
-                    <property name="geometry">
-                        <rect>
-                            <x>10</x>
-                            <y>20</y>
-                            <width>190</width>
-                            <height>350</height>
-                        </rect>
+                    <property name="enabled">
+                        <bool>true</bool>
                     </property>
-                </widget>
-                <widget class="KTextBrowser">
-                    <property name="name">
-                        <cstring>mMapPropertiesTextBrowser</cstring>
-                    </property>
-                    <property name="geometry">
-                        <rect>
-                            <x>210</x>
-                            <y>160</y>
-                            <width>200</width>
-                            <height>210</height>
-                        </rect>
-                    </property>
-                    <property name="text">
-                        <string></string>
-                    </property>
-                </widget>
-            </widget>
-            <widget class="QGroupBox" row="0" column="1">
-                <property name="name">
-                    <cstring>mPlayersGroupBox</cstring>
-                </property>
-                <property name="title">
-                    <string>Players</string>
-                </property>
-                <widget class="QGroupBox">
-                    <property name="name">
-                        <cstring>groupBox10</cstring>
-                    </property>
-                    <property name="geometry">
-                        <rect>
-                            <x>10</x>
-                            <y>130</y>
-                            <width>260</width>
-                            <height>200</height>
-                        </rect>
+                    <property name="paletteForegroundColor">
+                        <color>
+                            <red>255</red>
+                            <green>255</green>
+                            <blue>255</blue>
+                        </color>
                     </property>
                     <property name="title">
-                        <string>Connected Players</string>
+                        <string>Choose Map</string>
                     </property>
-                    <widget class="KListBox">
+                    <widget class="KTextBrowser">
                         <property name="name">
-                            <cstring>mConnectPlayers</cstring>
+                            <cstring>mMapPropertiesTextBrowser</cstring>
+                        </property>
+                        <property name="geometry">
+                            <rect>
+                                <x>210</x>
+                                <y>160</y>
+                                <width>200</width>
+                                <height>210</height>
+                            </rect>
+                        </property>
+                        <property name="text">
+                            <string></string>
+                        </property>
+                    </widget>
+                    <widget class="KListView">
+                        <column>
+                            <property name="text">
+                                <string>Map</string>
+                            </property>
+                            <property name="clickable">
+                                <bool>false</bool>
+                            </property>
+                            <property name="resizable">
+                                <bool>false</bool>
+                            </property>
+                        </column>
+                        <property name="name">
+                            <cstring>mChooseBosonMap</cstring>
                         </property>
                         <property name="geometry">
                             <rect>
                                 <x>10</x>
                                 <y>20</y>
-                                <width>240</width>
-                                <height>170</height>
+                                <width>190</width>
+                                <height>350</height>
                             </rect>
                         </property>
                     </widget>
                 </widget>
-                <widget class="QLabel">
+                <widget class="QGroupBox" row="0" column="1">
                     <property name="name">
-                        <cstring>mTextLabelSpecies</cstring>
+                        <cstring>mPlayersGroupBox</cstring>
                     </property>
-                    <property name="geometry">
-                        <rect>
-                            <x>20</x>
-                            <y>24</y>
-                            <width>60</width>
-                            <height>20</height>
-                        </rect>
+                    <property name="paletteForegroundColor">
+                        <color>
+                            <red>255</red>
+                            <green>255</green>
+                            <blue>255</blue>
+                        </color>
                     </property>
-                    <property name="text">
-                        <string>Species</string>
+                    <property name="title">
+                        <string>Players</string>
                     </property>
+                    <widget class="QLineEdit">
+                        <property name="name">
+                            <cstring>mLocalPlayerName</cstring>
+                        </property>
+                        <property name="geometry">
+                            <rect>
+                                <x>110</x>
+                                <y>59</y>
+                                <width>130</width>
+                                <height>20</height>
+                            </rect>
+                        </property>
+                    </widget>
+                    <widget class="QComboBox">
+                        <property name="name">
+                            <cstring>mChangeSpecies</cstring>
+                        </property>
+                        <property name="geometry">
+                            <rect>
+                                <x>110</x>
+                                <y>20</y>
+                                <width>130</width>
+                                <height>30</height>
+                            </rect>
+                        </property>
+                    </widget>
+                    <widget class="QPushButton">
+                        <property name="name">
+                            <cstring>mRemovePlayer</cstring>
+                        </property>
+                        <property name="geometry">
+                            <rect>
+                                <x>160</x>
+                                <y>340</y>
+                                <width>110</width>
+                                <height>30</height>
+                            </rect>
+                        </property>
+                        <property name="text">
+                            <string>Remove Player</string>
+                        </property>
+                    </widget>
+                    <widget class="QPushButton">
+                        <property name="name">
+                            <cstring>mAddComputerPlayer</cstring>
+                        </property>
+                        <property name="geometry">
+                            <rect>
+                                <x>10</x>
+                                <y>340</y>
+                                <width>140</width>
+                                <height>30</height>
+                            </rect>
+                        </property>
+                        <property name="text">
+                            <string>&amp;Add Computer Player</string>
+                        </property>
+                    </widget>
+                    <widget class="QComboBox">
+                        <property name="name">
+                            <cstring>mLocalColor</cstring>
+                        </property>
+                        <property name="geometry">
+                            <rect>
+                                <x>110</x>
+                                <y>90</y>
+                                <width>130</width>
+                                <height>30</height>
+                            </rect>
+                        </property>
+                    </widget>
+                    <widget class="QLabel">
+                        <property name="name">
+                            <cstring>mTextLabelSpecies</cstring>
+                        </property>
+                        <property name="geometry">
+                            <rect>
+                                <x>20</x>
+                                <y>24</y>
+                                <width>60</width>
+                                <height>20</height>
+                            </rect>
+                        </property>
+                        <property name="paletteForegroundColor">
+                            <color>
+                                <red>255</red>
+                                <green>255</green>
+                                <blue>255</blue>
+                            </color>
+                        </property>
+                        <property name="text">
+                            <string>Species</string>
+                        </property>
+                    </widget>
+                    <widget class="QLabel">
+                        <property name="name">
+                            <cstring>mYourNameTextLabel</cstring>
+                        </property>
+                        <property name="geometry">
+                            <rect>
+                                <x>20</x>
+                                <y>59</y>
+                                <width>91</width>
+                                <height>21</height>
+                            </rect>
+                        </property>
+                        <property name="paletteForegroundColor">
+                            <color>
+                                <red>255</red>
+                                <green>255</green>
+                                <blue>255</blue>
+                            </color>
+                        </property>
+                        <property name="text">
+                            <string>Your Name</string>
+                        </property>
+                    </widget>
+                    <widget class="QLabel">
+                        <property name="name">
+                            <cstring>mYourColorTextLabel</cstring>
+                        </property>
+                        <property name="geometry">
+                            <rect>
+                                <x>20</x>
+                                <y>94</y>
+                                <width>91</width>
+                                <height>21</height>
+                            </rect>
+                        </property>
+                        <property name="paletteForegroundColor">
+                            <color>
+                                <red>255</red>
+                                <green>255</green>
+                                <blue>255</blue>
+                            </color>
+                        </property>
+                        <property name="text">
+                            <string>Your Color</string>
+                        </property>
+                    </widget>
+                    <widget class="QGroupBox">
+                        <property name="name">
+                            <cstring>groupBox10</cstring>
+                        </property>
+                        <property name="geometry">
+                            <rect>
+                                <x>10</x>
+                                <y>130</y>
+                                <width>260</width>
+                                <height>200</height>
+                            </rect>
+                        </property>
+                        <property name="paletteForegroundColor">
+                            <color>
+                                <red>255</red>
+                                <green>255</green>
+                                <blue>255</blue>
+                            </color>
+                        </property>
+                        <property name="title">
+                            <string>Connected Players</string>
+                        </property>
+                        <widget class="KListBox">
+                            <property name="name">
+                                <cstring>mConnectPlayers</cstring>
+                            </property>
+                            <property name="geometry">
+                                <rect>
+                                    <x>10</x>
+                                    <y>20</y>
+                                    <width>240</width>
+                                    <height>170</height>
+                                </rect>
+                            </property>
+                        </widget>
+                    </widget>
                 </widget>
-                <widget class="QLabel">
-                    <property name="name">
-                        <cstring>mYourColorTextLabel</cstring>
-                    </property>
-                    <property name="geometry">
-                        <rect>
-                            <x>20</x>
-                            <y>94</y>
-                            <width>91</width>
-                            <height>21</height>
-                        </rect>
-                    </property>
-                    <property name="text">
-                        <string>Your Color</string>
-                    </property>
-                </widget>
-                <widget class="QLineEdit">
-                    <property name="name">
-                        <cstring>mLocalPlayerName</cstring>
-                    </property>
-                    <property name="geometry">
-                        <rect>
-                            <x>110</x>
-                            <y>59</y>
-                            <width>130</width>
-                            <height>20</height>
-                        </rect>
-                    </property>
-                </widget>
-                <widget class="QLabel">
-                    <property name="name">
-                        <cstring>mYourNameTextLabel</cstring>
-                    </property>
-                    <property name="geometry">
-                        <rect>
-                            <x>20</x>
-                            <y>59</y>
-                            <width>91</width>
-                            <height>21</height>
-                        </rect>
-                    </property>
-                    <property name="text">
-                        <string>Your Name</string>
-                    </property>
-                </widget>
-                <widget class="QComboBox">
-                    <property name="name">
-                        <cstring>mChangeSpecies</cstring>
-                    </property>
-                    <property name="geometry">
-                        <rect>
-                            <x>110</x>
-                            <y>20</y>
-                            <width>130</width>
-                            <height>30</height>
-                        </rect>
-                    </property>
-                </widget>
-                <widget class="QPushButton">
-                    <property name="name">
-                        <cstring>mRemovePlayer</cstring>
-                    </property>
-                    <property name="geometry">
-                        <rect>
-                            <x>160</x>
-                            <y>340</y>
-                            <width>110</width>
-                            <height>30</height>
-                        </rect>
-                    </property>
-                    <property name="text">
-                        <string>Remove Player</string>
-                    </property>
-                </widget>
-                <widget class="QPushButton">
-                    <property name="name">
-                        <cstring>mAddComputerPlayer</cstring>
-                    </property>
-                    <property name="geometry">
-                        <rect>
-                            <x>10</x>
-                            <y>340</y>
-                            <width>140</width>
-                            <height>30</height>
-                        </rect>
-                    </property>
-                    <property name="text">
-                        <string>&amp;Add Computer Player</string>
-                    </property>
-                </widget>
-                <widget class="QComboBox">
-                    <property name="name">
-                        <cstring>mLocalColor</cstring>
-                    </property>
-                    <property name="geometry">
-                        <rect>
-                            <x>110</x>
-                            <y>90</y>
-                            <width>130</width>
-                            <height>30</height>
-                        </rect>
-                    </property>
-                </widget>
-            </widget>
-        </grid>
-    </widget>
+            </grid>
+        </widget>
+    </grid>
 </widget>
 <connections>
     <connection>
@@ -302,8 +351,8 @@
 </slots>
 <layoutdefaults spacing="6" margin="11"/>
 <includehints>
-    <includehint>klistview.h</includehint>
     <includehint>ktextbrowser.h</includehint>
+    <includehint>klistview.h</includehint>
     <includehint>klistbox.h</includehint>
 </includehints>
 </UI>
