@@ -772,6 +772,11 @@ void BosonBigDisplayBase::initializeGL()
  // update system information (we initializeGL() must have been called before
  // this makes sense)
  BoInfo::boInfo()->update(this);
+
+ // Is this safe here?
+ // If recursive is not set back to false, OGL won't be initialized next time
+ //  BosonBigDisplay is created
+ recursive = false;
 }
 
 void BosonBigDisplayBase::resizeGL(int w, int h)
