@@ -277,6 +277,13 @@ public: // small KGame extenstions for boson
 	QString bosonHostName();
 
 	/**
+	 * Workaround for a KGame bug in KDE < 3.2. This just calls @ref
+	 * KGame::addPlayer directly in KDE >= 3.2, otherwise it will first
+	 * assign a correct ID to the player and then call it.
+	 **/
+	void bosonAddPlayer(KPlayer* player);
+
+	/**
 	 * Dummy systemAddPlayer function. This is meant to grant access to
 	 * systemAddPlayer to @ref BosonSaveLoad, without making the class a
 	 * friend of Boson (i.e. granting access to whole Boson).
@@ -515,6 +522,7 @@ protected slots:
 
 private:
 	friend class BoAdvance;
+
 private:
 	class BosonPrivate;
 	BosonPrivate* d;

@@ -294,7 +294,7 @@ void BosonNewEditorWidget::slotNetStart()
 	QColor color = availableTeamColors.first();
 	availableTeamColors.pop_front();
 	p->loadTheme(SpeciesTheme::speciesDirectory(SpeciesTheme::defaultSpecies()), color);
-	boGame->addPlayer(p);
+	boGame->bosonAddPlayer(p);
  }
  networkInterface()->sendNewGame(true);
 }

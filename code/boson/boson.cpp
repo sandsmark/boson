@@ -2433,6 +2433,56 @@ QString Boson::bosonHostName()
 #endif
 }
 
+void Boson::bosonAddPlayer(KPlayer* player)
+{
+ if (player->id() != 0) {
+	// we don't have a problem.
+	KGame::addPlayer(player);
+	return;
+ }
+
+#ifndef KGAME_HAVE_FIXED_ADDPLAYER_ID
+ // this is going to be ugly.
+ // in KDE < 3.2 KGame::addPlayer() did not set a player ID, but sent the player
+ // out directly. KGame::systemAddPlayer() would set the ID then on all clients,
+ // but as they have different client IDs, this ID would be broken.
+ // in KDE 3.2 addPlayer() does this correctly.
+ //
+ // as a workaround we call systemAddPlayer() directly here and revert
+ // everything that is done beyond the call to player->setId().
+ // note that this is possibe, as we already _do_ know what is done in
+ // systemAddPlayer() and that it can _not_ change in the future, as this refers
+ // to KDE < 3.2 _only_
+ //
+ // also note that simply setting the ID on our own is even more dangerous. e.g.
+ // the state of the ID counter is saved together with KGame and we can get very
+ // undefined results if it is invalid!
+
+ // first prevent signalPlayerJoinedGame() from being emitted.
+ bool blocks = signalsBlocked();
+ blockSignals(true);
+
+ // save the old KGame pointer of the player. probably NULL.
+ KGame* oldGame = player->game();
+
+ // now do the dangerous call.
+ systemAddPlayer(player);
+
+ // remove the player from the player list. will be added once systemAddPlayer()
+ // is called from a valid point.
+ playerList()->removeRef(player);
+
+ // revert to the old KGame pointer
+ player->setGame(oldGame);
+
+ // allow signals again, if they were before. we are done now.
+ blockSignals(blocks);
+#else
+ // we can safely call KGame::addPlayer() directly
+ KGame::addPlayer(player);
+#endif
+}
+
 void Boson::killPlayer(Player* player)
 {
  if (d->mCanvas) {
