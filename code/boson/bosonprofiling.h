@@ -204,6 +204,7 @@ public:
 	void renderWater(bool start);
 	void renderFOW(bool start);
 	void renderText(bool start);
+	void renderUfo(bool start);
 
 	/**
 	 * @return The number of recoreded frames
