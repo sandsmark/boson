@@ -705,6 +705,8 @@ QPixmap BosonMiniMap::pixmapFromTheme(const QString& file, const QString& theme)
 void BosonMiniMap::repaintMiniMapPixmap()
 {
  if (isUpdatesEnabled()) {
-	d->mPixmap->repaint(false);
+	// Do not repaint immediately, but post an event instead
+	// This code is taken from QWidget::update()
+	QApplication::postEvent(d->mPixmap, new QPaintEvent(d->mPixmap->visibleRect(), false));
  }
 }
