@@ -445,7 +445,7 @@ void BoUnitEditor::slotUpdateWidgets()
     // TODO: This MUST be double, but Designer knows nothing about KDoubleNumInput
     mUnitSpeed->setValue(mUnit->speed());
     mUnitCanGoOnLand->setChecked(mUnit->canGoOnLand());
-    mUnitCanGoOnWater->setChecked(mUnit->canGoOnLand());
+    mUnitCanGoOnWater->setChecked(mUnit->canGoOnWater());
     mUnitCanRefineMinerals->setChecked(mUnit->canRefineMinerals());
     mUnitCanRefineOil->setChecked(mUnit->canRefineOil());
     // Weapons
