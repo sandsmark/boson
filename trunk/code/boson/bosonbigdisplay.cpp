@@ -154,6 +154,7 @@ void BosonBigDisplay::actionClicked(const BoAction& action, QDataStream& stream,
 			break;
 	}
 	if (*send) {
+		// TODO: also play "cannot do that" sound
 		unlockAction();
 	}
 	return;
@@ -534,11 +535,12 @@ void BosonBigDisplay::updateCursor()
 
  if (!canvas()->onCanvas(cursorCanvasPos())) {
 	if (actionLocked()) {  // TODO: show "can't do that" cursor if action is locked
+	} else {
+		d->mCursorType = CursorDefault;
+		c->setCursor(d->mCursorType);
+		c->setWidgetCursor(this);
+		return;
 	}
-	d->mCursorType = CursorDefault;
-	c->setCursor(d->mCursorType);
-	c->setWidgetCursor(this);
-	return;
  }
  if (actionLocked()) {
 	c->setCursor(d->mCursorType);

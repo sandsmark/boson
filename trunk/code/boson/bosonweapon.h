@@ -33,6 +33,7 @@ class BosonParticleSystem;
 class BosonParticleSystemProperties;
 class Unit;
 class QString;
+template<class T1, class T2> class QMap;
 
 
 /**
@@ -103,9 +104,18 @@ class BosonWeaponProperties : public PluginProperties
      **/
     float maxHeight() const  { return mMaxHeight; };
 
-    inline SpeciesTheme* theme() const  { return mTheme; };
     inline BosonModel* model() const  { return mModel; };
 
+    /**
+     * @return First part of the sound filename - e.g. "shoot" if the file
+     * name should be "shoot_00.ogg". the _00 is added dynamically (randomly)
+     * by @ref BosonSound
+     **/
+    QString sound(int soundEvent) const;
+
+    void playSound(WeaponSoundEvent event) const;
+
+    QMap<int, QString> sounds() const;
     
     /**
      * Creates new shot
@@ -145,6 +155,7 @@ class BosonWeaponProperties : public PluginProperties
     void setHitParticleSystemIds(QValueList<unsigned long int> ids)  { mHitParticleSystemIds = ids; };
     void setOffset(BoVector3 o)  { mOffset = o; };
     void setMaxHeight(float maxheight)  { mMaxHeight = maxheight; };
+    void setSound(int event, QString filename);
 
     void reset();
 
@@ -157,7 +168,6 @@ class BosonWeaponProperties : public PluginProperties
     bool mCanShootAtAirUnits;
     bool mCanShootAtLandUnits;
     unsigned int mReload;
-    SpeciesTheme* mTheme;
     unsigned long int mSpeed;
     float mMaxHeight;
     BosonModel* mModel;
@@ -171,6 +181,7 @@ class BosonWeaponProperties : public PluginProperties
     QValueList<unsigned long int> mFlyParticleSystemIds;
     QValueList<unsigned long int> mHitParticleSystemIds;
     BoVector3 mOffset;
+    QMap<int, QString> mSounds;
 };
 
 

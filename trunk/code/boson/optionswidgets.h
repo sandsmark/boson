@@ -156,6 +156,7 @@ public:
 
 private:
 	QMap<QCheckBox*, UnitSoundEvent> mCheckBox2UnitSoundEvent;
+  QCheckBox* weaponsounds;
 };
 
 

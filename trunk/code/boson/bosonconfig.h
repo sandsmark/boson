@@ -240,6 +240,8 @@ public:
 	CameraAction mouseWheelAction() const { return (CameraAction)(mMouseWheelAction->value()); }
 	void setMouseWheelShiftAction(CameraAction action) { mMouseWheelShiftAction->setValue((int)action); }
 	CameraAction mouseWheelShiftAction() const { return (CameraAction)(mMouseWheelShiftAction->value()); }
+	void setDeactivateWeaponSounds(bool deactivate) { mDeactivateWeaponSounds->setValue(deactivate); }
+	bool deactivateWeaponSounds() const { return mDeactivateWeaponSounds->value(); }
 
 	void setUnitSoundActivated(UnitSoundEvent e, bool activated);
 	bool unitSoundActivated(UnitSoundEvent e) const;
@@ -325,6 +327,7 @@ private:
 	BoConfigIntEntry* mRMBAction;
 	BoConfigIntEntry* mMouseWheelAction;
 	BoConfigIntEntry* mMouseWheelShiftAction;
+	BoConfigBoolEntry* mDeactivateWeaponSounds;
 
 	// NOT stored to config file!
 	bool mDisableSound;

@@ -293,7 +293,6 @@ void UnitProperties::loadSoundNames(KSimpleConfig* conf)
 {
  d->mSounds.clear();
  conf->setGroup("Sounds");
- d->mSounds.insert(SoundShoot, conf->readEntry("Shoot", "shoot"));
  d->mSounds.insert(SoundOrderMove, conf->readEntry("OrderMove", "order_move"));
  d->mSounds.insert(SoundOrderAttack, conf->readEntry("OrderAttack", "order_attack"));
  d->mSounds.insert(SoundOrderSelect, conf->readEntry("OrderSelect", "order_select"));
@@ -376,7 +375,6 @@ void UnitProperties::saveTextureNames(KSimpleConfig* conf)
 void UnitProperties::saveSoundNames(KSimpleConfig* conf)
 {
  conf->setGroup("Sounds");
- conf->writeEntry("Shoot", d->mSounds[SoundShoot]);
  conf->writeEntry("OrderMove", d->mSounds[SoundOrderMove]);
  conf->writeEntry("OrderAttack", d->mSounds[SoundOrderAttack]);
  conf->writeEntry("OrderSelect", d->mSounds[SoundOrderSelect]);
@@ -711,7 +709,6 @@ void UnitProperties::reset()
  mMobileProperties->mCanGoOnWater = false;
  // Sounds
  d->mSounds.clear();
- d->mSounds.insert(SoundShoot, "shoot");
  d->mSounds.insert(SoundOrderMove, "order_move");
  d->mSounds.insert(SoundOrderAttack, "order_attack");
  d->mSounds.insert(SoundOrderSelect, "order_select");

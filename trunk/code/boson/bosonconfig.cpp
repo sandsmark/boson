@@ -211,6 +211,7 @@ BosonConfig::BosonConfig(KConfig* conf)
  mRMBAction = new BoConfigIntEntry(this, "RMBAction", DEFAULT_RMB_ACTION);
  mMouseWheelAction = new BoConfigIntEntry(this, "MouseWheelAction", DEFAULT_MOUSE_WHEEL_ACTION);
  mMouseWheelShiftAction = new BoConfigIntEntry(this, "MouseWheelShiftAction", DEFAULT_MOUSE_WHEEL_SHIFT_ACTION);
+ mDeactivateWeaponSounds = new BoConfigBoolEntry(this, "DeactivateWeaponSounds", DEFAULT_DEACTIVATE_WEAPON_SOUNDS);
 
  mDebugMode = DebugNormal;
 
