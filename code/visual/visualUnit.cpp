@@ -82,6 +82,8 @@ void visualMobUnit::select()
 {
 	QRect	r = rect();
 
+	if (_destroyed) return;
+
 	boAssert(!sp_up);
 	boAssert(!sp_down);
 
@@ -126,6 +128,8 @@ visualFacility::~visualFacility()
 void visualFacility::select()
 {
 	QRect	r = rect();
+
+	if (_destroyed) return;
 
 	boAssert(!sp_up);
 	boAssert(!sp_down);

@@ -104,7 +104,7 @@ void bosonCanvas::destroyMob(destroyedMsg_t &m)
 	QPoint p  = mob->center();
 	new boShot ( p.x(), p.y(), mob->z(), boShot::SHOT_UNIT);
 
-	mob->destroyed();
+	mob->destroy();
 	boAssert( mobile.remove(m.key) == true );
 }
 
@@ -164,7 +164,7 @@ void bosonCanvas::destroyFix(destroyedMsg_t &msg)
 	QPoint p = f->center();
 	new boShot ( p.x(), p.y(), f->z(), boShot::SHOT_FACILITY);
 
-	f->destroyed();
+	f->destroy();
 	boAssert( facility.remove(msg.key) == true);
 }
 
