@@ -31,11 +31,16 @@ $all_news_max=25;
 
 $style="green";
 
-$visitcount;
-$lastupdate;
+$visitcount=0;
+$lastupdate=0;
 
-$startsec;
-$startusec;
+$startsec=0;
+$startusec=0;
+
+if(!isset($basedir))
+{
+  $basedir="";
+}
 
 /*****  Easy page start/end  *****/
 
@@ -78,7 +83,7 @@ echo "
 
 function print_header()
 {
-$image;
+$image="";
 global $style, $basedir;
 if($style == "blue") {
   $image="${basedir}pictures/boson.png";
@@ -117,7 +122,7 @@ header ("Pragma: no-cache");                          // HTTP/1.0
 
 // Select stylesheet
 global $style;
-$stylesheet;
+$stylesheet="";
 if($style == "blue") {
   $stylesheet="${basedir}style-blue.css";
 } else {
