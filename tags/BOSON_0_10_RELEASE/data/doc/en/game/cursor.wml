@@ -1,0 +1,14 @@
+#include "top.wml"
+    <h1>
+      The cursors
+    </h1>
+    <p>&nbsp;</p>
+    <table border="0" cellpadding="20">
+    The default cursor is yellow, you can see if a target is
+    attackable if the cursor changes to red while you have
+    selected the unit(s) you like to use for an attack<br>
+    </table>
+
+
+#include "nav.wml" before_url="scrolling.html" before_text="Scrolling" after_url="buildfac.html" after_text="Building facilities" up_url="index.html"
+#include "footer.wml"

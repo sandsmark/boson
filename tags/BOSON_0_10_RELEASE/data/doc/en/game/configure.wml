@@ -1,0 +1,77 @@
+#include "top.wml"
+
+    <h1>
+      Configure Boson
+    </h1>
+    <p>
+    You can configure Boson if you select Settings, Configure Boson in the menu while the game is running.<br>
+    </p>
+
+
+    <h3>General</h3>
+    <p>
+    
+    </p>
+    <h5>Game Speed</h5>
+    <p>
+    Game speed.
+    </p>
+    <h5>Command Frame Background Pixmap</h5>
+    <p>
+    lkkll
+    </p>
+    <h5>Mini Map Scale Factor</h5>
+    <p>
+    98998
+    </p>
+
+
+<h3>Cursor</h3>
+    <h5>Cursor</h5>
+    <p>
+    lklk
+    </p>
+    <h5>Cursor Theme</h5>
+    <p>
+    sadksajd sadjsakd
+    </p>
+
+
+<h3>Scrolling</h3>
+    <h5>Enable Right Mouse Button Scrolling</h5>
+    <p>
+    lkjlkjklj
+    </p>
+    <h5>Enable Middle Mouse Button Scrolling</h5>
+    <p>
+    sdsdsd
+    </p>
+    <h5>Sensity of cursor at edge of window Scrolling</h5>
+    <p>
+    You can scroll if you move the cursor at the edge of the main window.
+    Here you can configure the time boson waits until the scrolling starts.
+    </p>
+    <h5>Arrow Key Steps</h5>
+    <p>
+    Here you can configure the sensity of the arrow keys of your keyboard.
+    </p>
+
+<h3>Sounds</h3>
+     <p><h5>Disable unit sounds</h5>
+     Disable sounds
+     </p>
+    
+<h3>OpenGL</h3>
+    <h5>Update Interval</h5>
+    <p>
+    Update
+    </p>
+
+<h3>Chat</h3>
+    <h5>Update Interval</h5>
+    <p>
+    Update
+    </p>
+
+#include "nav.wml" before_url="index.html" before_text="In the game" after_url="scrolling.html" after_text="Scrolling" up_url="index.html"
+#include "footer.wml"

@@ -1,0 +1,4 @@
+#include "facilities.wml" type="Facilities" name="Oil Refinery" \
+        description="The Oil Refinery produces oil ;) You can send a <a href='../units/oilharvester.html'>Oil Harvester</a> to them to get more oil." \
+        name2="oilrefinery" type2="fix" \
+        before_url="mineralrefinery.html" before_text="Mineral Refinery" after_url="powerplant.html" after_text="Power Plant" up_url="index.html"

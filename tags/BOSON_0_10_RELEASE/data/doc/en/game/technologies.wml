@@ -1,0 +1,19 @@
+#include "top.wml"
+
+    <h1>
+      Technologies
+    </h1>
+    <p>&nbsp;</p>
+    <p>
+    Technologies are techniques for which you can search for.
+    Technology upgrades can enclose many things like amor, weapon power or a speacial weapon addon.<br>
+    Here is a list of available upgrades:<br><br>
+    <table border="1" style="border-width:0;" cellpadding="7">
+    <tr><td>Samsite missile upgrade</td><td>Weapon damage +5 / Weapon speed +5</td></tr>
+    <tr><td>Turret upgrade</td><td>Weapon damage +5</td></tr>
+    <tr><td>Grizzly missiles upgrade</td><td>Weapon damage +5 / Weapon speed +4</td></tr>
+    <tr><td>Amor 2 for facilities</td><td>+2</td></tr>
+    </table>
+
+#include "nav.wml" before_url="repairing.html" before_text="Repairing" after_url="../facilities/index.html" after_text="Facilities" up_url="index.html"
+#include "footer.wml"

@@ -1,0 +1,3 @@
+# changes to am_edit (for boson):
+- added sub tag_BOSONDOCFILES() which gets called after tag_DOCFILES().
+  we need this to support .wml files for docs.

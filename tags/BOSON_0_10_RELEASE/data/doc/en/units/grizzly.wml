@@ -1,0 +1,5 @@
+#include "facilities.wml" type="Units" name="Grizzly" \
+        description="The Grizzly is a big armored tank. He is loaded with powerfull land to air/land to land missiles.<br> \
+        The land/air combination makes it a powerful unit which is worth the price." \
+        name2="grizzly" type2="mob" \
+        before_url="oilharvester.html" before_text="Oil Harvester" after_url="leopard.html" after_text="Leopard" up_url="index.html"

@@ -1,0 +1,12 @@
+<cell>
+<div class="thumb_header">
+$(name)
+</div>
+    <a href="$(name2).html"><img src="$(name2)_small.jpg" border="0"></a>
+<:
+use get_values;
+
+# ( facility type, facility name)
+get_values->getIndexVals("$(type2)", "$(name2)");
+:>
+</cell>

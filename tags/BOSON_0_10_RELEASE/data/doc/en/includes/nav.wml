@@ -1,0 +1,20 @@
+    <!-- Navigation -->
+    <table width="100%" border="0" class="nav">
+      <tr>
+        <td align="left" width="33%">
+                $(before_url:*&lt;--<br>)
+                $(before_url:+<a href="$(before_url)">&lt;--</a><br>)
+                $(before_text)
+        </td>
+        <td align="center" width="33%">
+                $(up_url:*&#94;<br>)
+                $(up_url:+<a href="$(up_url)">&#94;</a><br>)
+                Up
+        <td align="right" width="33%">
+                $(after_url:*--&gt;<br>)
+                $(after_url:+<a href="$(after_url)">--&gt;</a><br>)
+          $(after_text)
+        </td>
+      </tr>
+    </table>
+    <!-- /Navigation -->
