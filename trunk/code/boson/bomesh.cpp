@@ -117,7 +117,8 @@ public:
 		// have bad bounding boxes - they could easily be smaller.
 		// but that would be harder to code...
 		float v[3];
-		mesh->calculateMaxMin(); // probably redundant! we need to ensure that these values are final!
+		BoMatrix matrix; // TODO use first frame matrix.
+		mesh->calculateMaxMin(&matrix); // probably redundant! we need to ensure that these values are final!
 
 		v[0] = mesh->maxX();
 		v[1] = mesh->maxY();
@@ -1551,10 +1552,17 @@ void BoMesh::createPointCache()
  }
 }
 
-void BoMesh::calculateMaxMin()
+void BoMesh::calculateMaxMin(const BoMatrix* matrix)
 {
  // NOT time critical! (called on startup only)
- BoVector3 v = vertex(0);
+ if (!matrix) {
+	BoMatrix m;
+	calculateMaxMin(&m);
+	return;
+ }
+ BoVector3 v1 = vertex(0);
+ BoVector3 v;
+ matrix->transform(&v, &v1);
  d->mMinZ = v.z();
  d->mMaxZ = v.z();
  d->mMinX = v.x();
