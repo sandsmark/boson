@@ -16,10 +16,10 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef BOGROUNDRENDERERBASE_H
-#define BOGROUNDRENDERERBASE_H
+#ifndef BODEFAULTGROUNDRENDERER_H
+#define BODEFAULTGROUNDRENDERER_H
 
-#include "../bogroundrenderer.h"
+#include "bogroundrendererbase.h"
 
 class Cell;
 class PlayerIO;
@@ -31,24 +31,30 @@ class BoVector3;
 
 class QRect;
 
-class BoGroundRendererBase : public BoGroundRenderer
+class BoDefaultGroundRenderer : public BoGroundRendererBase
 {
 	Q_OBJECT
 public:
-	BoGroundRendererBase();
-	virtual ~BoGroundRendererBase();
+	BoDefaultGroundRenderer();
+	virtual ~BoDefaultGroundRenderer();
 
-
-	/**
-	 * Generate a list of cells that are (or may) be visible at the moment.
-	 * @param map The map that contains the @ref Cell pointers. Use 0 to
-	 * delete the current list of cells.
-	 **/
-	virtual void generateCellList(const BosonMap* map);
+	virtual int rtti() const { return Default; }
 
 protected:
-	void calculateWorldRect(const QRect& rect, int mapWidth, int mapHeight, float* minX, float* minY, float* maxX, float* maxY);
+	virtual void renderVisibleCells(Cell** cells, unsigned int cellsCount, const BosonMap* map);
 
+private:
+	/**
+	 * Render the @p cells with the current texture.
+	 *
+	 * This is used for texture mixing (blending must be enabled) - first
+	 * the cells are rendered with the first texture, then with the
+	 * second, ...
+	 *
+	 * One could optimize this by using multitexturing for example!
+	 **/
+	void renderCellsNow(Cell** cells, int count, int cornersWidth, const float* heightMap, const float* normalMap, const unsigned char* texMapStart);
+	void renderCellColors(Cell** cells, int count, int width, const unsigned char* colorMap, const float* heightMap);
 };
 
 #endif
