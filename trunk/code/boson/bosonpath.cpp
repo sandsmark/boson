@@ -309,7 +309,7 @@ bool BosonPath::findFastPath()
   int steps;
   // Find path inside unit's sight range only, but at least 4 steps and not more
   //  than SEARCH_STEPS in any case
-  int length = QMIN(SEARCH_STEPS, QMAX(4, mUnit->unitProperties()->sightRange()));
+  int length = QMIN(SEARCH_STEPS, QMAX(4, mUnit->sightRange()));
 
   lastx = mStartx;
   lasty = mStarty;
