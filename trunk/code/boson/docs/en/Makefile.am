@@ -1,5 +1,23 @@
-####### kdevelop will overwrite this part!!! (begin)##########
 
-SUBDIRS =  
+EXTRA_DIST = 
 
-####### kdevelop will overwrite this part!!! (end)############
+#install-data-local:
+#	$(mkinstalldirs) $(DESTDIR)$(kde_htmldir)/en/boson/
+#	$(INSTALL_DATA) $(HTML_DOCS) $(DESTDIR)$(kde_htmldir)/en/boson/
+#
+#uninstall-local:
+#	-rm -f $(kde_htmldir)/en/boson/*.html
+
+
+HTML_DOCS = index-1.html index-2.html index-3.html index-4.html index-5.html index-6.html index.html
+
+# help files
+data_DATA = $(HTML_DOCS)
+datadir = $(DESTDIR)$(kde_htmldir)/en/boson
+
+$(HTML_DOCS) : index.sgml
+	sgml2html index.sgml
+
+CLEANFILES = $(HTML_DOCS)
+
+
