@@ -538,7 +538,7 @@ void BosonProfiling::startBenchmark()
  boDebug() << k_funcinfo << "benchmark is now " << d->mBenchmark << endl;
 }
 
-void BosonProfiling::endBenchmark()
+void BosonProfiling::endBenchmark(const QString& name)
 {
  boDebug() << k_funcinfo << endl;
  if (!d->mBenchmark) {
@@ -548,7 +548,11 @@ void BosonProfiling::endBenchmark()
 
  d->mBenchmark->mInterval.stop();
 
- boDebug() << k_funcinfo << "BENCHMARK RESULTS:" << endl << endl;
+ if (name == QString::null) {
+	boDebug() << k_funcinfo << "BENCHMARK RESULTS:" << endl << endl;
+ } else {
+	boDebug() << k_funcinfo << "BENCHMARK RESULTS for " << name << ":" << endl << endl;
+ }
 
  // Advance stuff
  boDebug() << "ADVANCE RESULTS:" << endl;

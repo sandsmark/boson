@@ -434,7 +434,6 @@ void BosonScript::produceUnit(int player, int factory, int production)
 
 void BosonScript::spawnUnit(int player, int type, int x, int y)
 {
-#if 0
   if(!game())
   {
     boError() << k_funcinfo << "NULL game" << endl;
@@ -443,13 +442,14 @@ void BosonScript::spawnUnit(int player, int type, int x, int y)
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
 
+  stream << (Q_UINT32)BosonMessage::MovePlaceUnit;
   stream << (Q_UINT32)player;
   stream << (Q_UINT32)type;
   stream << (Q_INT32)x;
   stream << (Q_INT32)y;
 
-  game()->sendMessage(b, BosonMessage::AddUnit);
-#endif
+  QDataStream msg(b, IO_ReadOnly);
+  sendInput(player, msg);
 }
 
 void BosonScript::teleportUnit(int player, int id, int x, int y)
@@ -929,9 +929,9 @@ void BosonScript::startBenchmark()
   boProfiling->startBenchmark();
 }
 
-void BosonScript::endBenchmark()
+void BosonScript::endBenchmark(const QString& name)
 {
-  boProfiling->endBenchmark();
+  boProfiling->endBenchmark(name);
 }
 
 void BosonScript::setRandomSeed(long int seed)
