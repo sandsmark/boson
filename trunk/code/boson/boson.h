@@ -78,10 +78,27 @@ public:
 		KGameError
 	};
 
+protected:
 	Boson(QObject* parent);
-	Boson(QObject* parent, const QString& fileName);
 	~Boson();
 
+public:
+	/**
+	 * @return The global Boson object
+	 **/
+	static Boson* boson() { return mBoson; }
+
+	/**
+	 * Initialize the global Boson object. See also @ref boson.
+	 **/
+	static void initBoson();
+
+	/**
+	 * Clean up the global Boson object.
+	 **/
+	static void deleteBoson();
+
+public:
 	void setCanvas(BosonCanvas*);
 	void setPlayField(BosonPlayField*);
 	BosonPlayField* playField() const;
@@ -170,21 +187,6 @@ public:
 	 * be a big delay before additional player input can be executed.
 	 **/
 	unsigned int delayedMessageCount() const;
-
-	/**
-	 * @return The global Boson object
-	 **/
-	static Boson* boson() { return mBoson; }
-
-	/**
-	 * Initialize the global Boson object. See also @ref boson.
-	 **/
-	static void initBoson();
-
-	/**
-	 * Clean up the global Boson object.
-	 **/
-	static void deleteBoson();
 
 	/**
 	 * @return Latest Boson savegame format version
