@@ -165,6 +165,12 @@ public:
 			boDebug(300) << k_funcinfo << mBoson->advanceCallsCount() << "message has already been sent, returning" << endl;
 			return;
 		}
+		// Also don't send advance message if we're in locked() state.
+		// Otherwise, scripted sequences may broke
+		if (mBoson->isLocked() && !mBoson->isNetwork()) {
+			boDebug(300) << k_funcinfo << mBoson->advanceCallsCount() << "message delivery locked, returning" << endl;
+			return;
+		}
 		boDebug(300) << k_funcinfo << mBoson->advanceCallsCount() << "sending advance msg" << endl;
 		mBoson->sendMessage(0, BosonMessage::AdvanceN);
 		mAdvanceMessageSent = true;
@@ -406,6 +412,11 @@ public:
 		while (!mDelayedMessages.isEmpty() && !mIsLocked) {
 			processDelayed();
 		}
+	}
+
+	bool isLocked() const
+	{
+		return mIsLocked;
 	}
 
 	unsigned int delayedMessageCount() const
@@ -1987,6 +1998,11 @@ void Boson::lock()
 void Boson::unlock()
 {
  d->mMessageDelayer->unlock();
+}
+
+bool Boson::isLocked() const
+{
+ return d->mMessageDelayer->isLocked();
 }
 
 // obsolete.
