@@ -222,18 +222,31 @@ BoItemList BosonCollisions::collisionsAtCells(const QPtrVector<Cell>* cells, con
  return collisions;
 }
 
-BoItemList BosonCollisions::collisions(const QRect& r, const BosonItem* item, bool exact) const
+BoItemList BosonCollisions::collisions(const QRect& rect, const BosonItem* item, bool exact) const
 {
- // r is canvas coordinates!
+ // rect is canvas coordinates!
+ int w = rect.width() / BO_TILE_SIZE;
+ int h = rect.height() / BO_TILE_SIZE;
+ if (rect.width() % BO_TILE_SIZE != 0) {
+	w++;
+ }
+ if (rect.height() % BO_TILE_SIZE != 0) {
+	h++;
+ }
+ return collisionsAtCells(QRect(rect.left() / BO_TILE_SIZE, rect.right() / BO_TILE_SIZE, w, h), item, exact);
+}
+
+BoItemList BosonCollisions::collisionsAtCells(const QRect& rect, const BosonItem* item, bool exact) const
+{
  if (!map()) {
 	BO_NULL_ERROR(map());
 	return BoItemList();
  }
  int left, right, top, bottom;
- left = QMAX(r.left() / BO_TILE_SIZE, 0);
- right = QMIN(r.right() / BO_TILE_SIZE, QMAX((int)map()->width() - 1, 0));
- top = QMAX(r.top() / BO_TILE_SIZE, 0);
- bottom = QMIN(r.bottom() / BO_TILE_SIZE, QMAX((int)map()->height() - 1, 0));
+ left = QMAX(rect.left(), 0);
+ right = QMIN(rect.right(), QMAX((int)map()->width() - 1, 0));
+ top = QMAX(rect.top(), 0);
+ bottom = QMIN(rect.bottom(), QMAX((int)map()->height() - 1, 0));
  int size = (right - left + 1) * (bottom - top + 1);
  if (size <= 0) {
 	return BoItemList();
