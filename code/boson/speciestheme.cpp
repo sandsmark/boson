@@ -232,9 +232,9 @@ void SpeciesTheme::loadObjects()
  mData->loadObjects(teamColor());
 }
 
-QString SpeciesTheme::unitModelFile()
+QStringList SpeciesTheme::unitModelFiles()
 {
- return SpeciesData::unitModelFile();
+ return SpeciesData::unitModelFiles();
 }
 
 BosonModel* SpeciesTheme::unitModel(unsigned long int unitType)

@@ -1200,7 +1200,21 @@ void RenderMain::slotDebugModels()
 	QValueList<const UnitProperties*> prop = it.current()->allUnits();
 	QValueList<const UnitProperties*>::Iterator propIt;
 	for (propIt = prop.begin(); propIt != prop.end(); ++propIt) {
-		QString file = (*propIt)->unitPath() + SpeciesTheme::unitModelFile();
+		QStringList fileNames = SpeciesTheme::unitModelFiles();
+		bool found = false;
+		QString file;
+		for (QStringList::Iterator fit = fileNames.begin(); fit != fileNames.end(); ++fit) {
+			if (KStandardDirs::exists((*propIt)->unitPath() + *fit)) {
+				file = *fit;
+				found = true;
+				break;
+			}
+		}
+		if (!found) {
+			boError() << k_funcinfo << "Cannot find model file file for " << (*propIt)->typeId() << endl;
+			continue;
+		}
+		file = (*propIt)->unitPath() + file;
 		models->addFile(file, QString("%1/%2").arg(theme->identifier()).arg((*propIt)->name()));
 	}
 

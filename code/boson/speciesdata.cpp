@@ -44,13 +44,13 @@ public:
 	BosonModelFactory() { }
 	~BosonModelFactory() { }
 
-	BosonModel* createUnitModel(const UnitProperties* prop);
+	BosonModel* createUnitModel(const UnitProperties* prop, const QString& file);
 	BosonModel* createObjectModel(const KSimpleConfig* config, const QString& themePath);
 };
 
-BosonModel* BosonModelFactory::createUnitModel(const UnitProperties* prop)
+BosonModel* BosonModelFactory::createUnitModel(const UnitProperties* prop, const QString& file)
 {
- BosonModel* m = new BosonModel(prop->unitPath(), SpeciesData::unitModelFile(),
+ BosonModel* m = new BosonModel(prop->unitPath(), file,
 		((float)prop->unitWidth()) * BO_GL_CELL_SIZE / BO_TILE_SIZE,
 		((float)prop->unitHeight()) * BO_GL_CELL_SIZE / BO_TILE_SIZE);
  m->setLongNames(prop->longTextureNames());
@@ -216,16 +216,26 @@ QString SpeciesData::themePath() const
 void SpeciesData::loadUnitModel(const UnitProperties* prop, const QColor& teamColor)
 {
  BO_CHECK_NULL_RET(prop);
- QString fileName = prop->unitPath() + unitModelFile();
- if (!KStandardDirs::exists(fileName)) {
-	boError() << k_funcinfo << "Cannot find " << unitModelFile() << " file for " << prop->typeId() << endl;
-	return;
- }
  BosonModel* m = d->mUnitModels[prop->typeId()];
 
  if (!m) {
+	QStringList fileNames = unitModelFiles();
+	bool found = false;
+	QString file;
+	for (QStringList::Iterator it = fileNames.begin(); it != fileNames.end(); ++it) {
+		if (KStandardDirs::exists(prop->unitPath() + *it)) {
+			file = *it;
+			found = true;
+			break;
+		}
+	}
+	if (!found) {
+		boError() << k_funcinfo << "Cannot find model file file for " << prop->typeId() << endl;
+		return;
+	}
+
 	BosonModelFactory factory;
-	m = factory.createUnitModel(prop);
+	m = factory.createUnitModel(prop, file);
 	d->mUnitModels.insert(prop->typeId(), m);
  } else {
 //	boDebug() << "model already loaded - loading an additional teamcolor only..." << endl;
@@ -239,9 +249,12 @@ BosonModel* SpeciesData::unitModel(unsigned long int unitType) const
  return d->mUnitModels[unitType];
 }
 
-QString SpeciesData::unitModelFile()
+QStringList SpeciesData::unitModelFiles()
 {
- return QString::fromLatin1("unit.3ds");
+ QStringList list;
+ list.append("unit.3ds");
+ list.append("unit.ac");
+ return list;
 }
 
 SpeciesData::TeamColorData* SpeciesData::teamColorData(const QColor& color) const
