@@ -730,7 +730,6 @@ QByteArray BosonMap::saveMapToFile()
 	return false;
  }
 
- // TODO: add a version attribute?
  QDomDocument doc(QString::fromLatin1("BosonMap"));
  QDomElement root = doc.createElement(QString::fromLatin1("BosonMap"));
  root.setAttribute(QString::fromLatin1("Version"), BOSONMAP_VERSION);
