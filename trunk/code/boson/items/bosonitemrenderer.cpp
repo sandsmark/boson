@@ -252,7 +252,12 @@ void BosonItemModelRenderer::setCurrentFrame(BoFrame* frame)
 
 void BosonItemModelRenderer::setAnimationMode(int mode)
 {
- BO_CHECK_NULL_RET(model());
+ BO_CHECK_NULL_RET(item());
+ if (!model()) {
+	boError() << k_funcinfo << "in item id=" << item()->id() << " rtti=" << item()->rtti() << endl;
+	BO_NULL_ERROR(model());
+	return;
+ }
  if (mGLConstructionStep < glConstructionSteps()) {
 	return;
  }
@@ -313,7 +318,12 @@ unsigned int BosonItemModelRenderer::preferredLod(float dist) const
 
 void BosonItemModelRenderer::setShowGLConstructionSteps(bool s)
 {
- BO_CHECK_NULL_RET(model());
+ BO_CHECK_NULL_RET(item());
+ if (!model()) {
+	boError() << k_funcinfo << "in item id=" << item()->id() << " rtti=" << item()->rtti() << endl;
+	BO_NULL_ERROR(model());
+	return;
+ }
  BosonItemRenderer::setShowGLConstructionSteps(s);
  if (showGLConstructionSteps()) {
 	setGLConstructionStep(mGLConstructionStep);
