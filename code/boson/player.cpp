@@ -650,6 +650,10 @@ void Player::technologyResearched(ProductionPlugin*, unsigned long int id)
  }
 
  UpgradeProperties* prop = speciesTheme()->technology(id);
+ if (!prop) {
+	boError() << k_funcinfo << "NULL technology " << id << endl;
+	return;
+ }
  prop->setResearched(true);
  prop->apply(this);
 
@@ -665,7 +669,8 @@ bool Player::advanceFlag() const
 bool Player::saveAsXML(QDomElement& root)
 {
  BosonProfiler profiler(BosonProfiling::SavePlayerToXML);
- if (!game() || game()->playerList()) {
+ if (!game() || !game()->playerList()) {
+	boError() << k_funcinfo << "NULL game/playerlist" << endl;
 	return false;
  }
 
@@ -698,6 +703,21 @@ bool Player::saveAsXML(QDomElement& root)
 	boWarning() << k_funcinfo << "NULL speciestheme while saving into XML" << endl;
  }
 
+ QDomElement upgrades = doc.createElement("Upgrades");
+ if (speciesTheme()) {
+	QIntDict<UpgradeProperties> list = speciesTheme()->technologyList();
+	QIntDictIterator<UpgradeProperties> it(speciesTheme()->technologyList());
+	for (; it.current(); ++it) {
+		if (!it.current()->isResearched()) {
+			continue;
+		}
+		QDomElement e = doc.createElement("Researched");
+		e.setAttribute("Id", QString::number(it.current()->id()));
+		upgrades.appendChild(e);
+	}
+ }
+ root.appendChild(upgrades);
+
  // Save unitpropID
  root.setAttribute(QString::fromLatin1("UnitPropId"), (unsigned int)d->mUnitPropID);
 
@@ -719,6 +739,7 @@ bool Player::loadFromXML(const QDomElement& root)
 
  bool ok = false;
  if (!game() || !game()->playerList()) {
+	boError() << k_funcinfo << "NULL game/playerlist" << endl;
 	return false;
  }
  if (root.hasAttribute("IsNeutral")) {
@@ -738,6 +759,31 @@ bool Player::loadFromXML(const QDomElement& root)
  if (!propertyXML.loadFromXML(handler, dataHandler())) {
 	boError(260) << k_funcinfo << "unable to load player data handler (player=" << this->id() << ")" << endl;
 	return false;
+ }
+
+ QDomElement upgrades = root.namedItem("Upgrades").toElement();
+ if (!upgrades.isNull() && speciesTheme()) {
+	QDomNodeList researched = upgrades.elementsByTagName("Researched");
+	for (unsigned int i = 0; i < researched.count(); i++) {
+		QDomElement e = researched.item(i).toElement();
+		bool ok = false;
+		unsigned int id = e.attribute("Id").toUInt(&ok);
+		if (!ok) {
+			boError() << k_funcinfo << "Id attribute of Researched tag is not a valid number" << endl;
+			continue;
+		}
+		UpgradeProperties* u = speciesTheme()->technology(id);
+		if (!u) {
+			boWarning() << k_funcinfo << "technology " << id << " not found" << endl;
+			continue;
+		}
+		if (u->isResearched()) {
+			boWarning() << k_funcinfo << "technology " << id << " already researched" << endl;
+			continue;
+		}
+		u->setResearched(true);
+		u->apply(this);
+	}
  }
 
  if (root.hasAttribute(QString::fromLatin1("UnitPropId"))) {
