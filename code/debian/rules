@@ -80,7 +80,7 @@ clean:
 		make distclean; \
 	fi
 
-	rm -f debian/files debian/boson-base.substvars debian/*.6
+	rm -f debian/files debian/boson-base.substvars debian/bo3dsdebug.6 debian/bocursor.6 debian/bodebugdialog.6 debian/boinfo.6 debian/boprofiling.6 debian/borender.6 debian/bosonaudioprocess.6 debian/bounit.6
 
 	dh_clean 
 

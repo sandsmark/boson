@@ -1,9 +1,20 @@
+boson-base (0.9.1-2) unstable; urgency=low
+
+  * Fix libtool (again ?) following Luk's commands for arm (Closes: #217071)
+  * Add automake1.6 to Build-depends (Closes: #230253)
+  * Add a cool manpage for boson (Closes: #225815)
+  * Remove useless README.Debian, NEWS and fix copyright (Closes: #225818)
+
+ -- Mickael Marchand <marchand@kde.org>  Sun,  1 Feb 2004 12:17:45 +0000
+
 boson-base (0.9.1-1) unstable; urgency=low
 
   * New upstream release
   * Enable debug
+  * Work done by Mickael Marchand <marchand@kde.org>  Sun, 16 Nov 2003 12:23:48 +0100
+  * Changes uploaders address to myself to see bug reports.
 
- -- Mickael Marchand <marchand@kde.org>  Sun, 16 Nov 2003 12:23:48 +0100
+ -- Michael Meskes <meskes@debian.org>  Sun, 25 Jan 2004 14:51:48 +0100
 
 boson-base (0.9-1) unstable; urgency=low
 
