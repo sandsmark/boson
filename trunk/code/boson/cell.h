@@ -46,15 +46,29 @@ public:
 	Cell();
 	~Cell();
 
+	/**
+	 * Use this to initialize the cell. You should call this only once in
+	 * the game (when creating the map). In the editor this is called
+	 * whenever the cell changes.
+	 **/
 	void makeCell(int groundType, unsigned char version);
 
 	/**
-	 * @return The number of different groundTypes.
+	 * @return Whether the specified unit can go over this ground. Note
+	 * that this does <em>not</em> check whether the cell is occupied.
 	 **/
-	static int groundTypeCount()
-	{
-		return GroundLast;
-	}
+	bool canGo(const UnitProperties* unit) const;
+	static bool canGo(const UnitProperties* unit, GroundType ground);
+
+	/**
+	 * The moving cost of a cell is the value that should influence the
+	 * speed of a unit. A unit should move fastter in grass while it should
+	 * get slower on desert. Note that aircrafts should ignore this value!
+	 * @return The moving cost of this cell. Higher value means the unit
+	 * should move slower here, 0 means not to touch the speed.
+	 **/
+	int moveCost() const; // leave signed, maybe we can use negative values for roads one day?
+
 
 	/**
 	 * This has nothing to do with @ref GroundType! While @ref GroundType
@@ -74,6 +88,14 @@ public:
 	}
 
 	/**
+	 * @return The number of different groundTypes.
+	 **/
+	static int groundTypeCount()
+	{
+		return GroundLast;
+	}
+
+	/**
 	 * @return The number of the tile in the tile file (earth.png)
 	 **/
 	static int tile(int groundType, unsigned char version)
@@ -82,25 +104,13 @@ public:
 	}
 
 	/**
-	 * @return Whether the specified unit can go over this ground. Note
-	 * that this does <em>not</em> check whether the cell is occupied.
-	 **/
-	bool canGo(const UnitProperties* unit) const;
-	static bool canGo(const UnitProperties* unit, GroundType ground);
-
-	/**
-	 * @return The moving cost of this cell. Higher value means the unit
-	 * should move slower here.
-	 **/
-	int moveCost() const; // leave signed, maybe we can use negative values for roads one day?
-
-
-	/**
 	 * @return Whether ground is a plain tile
 	 **/
 	static bool isPlain(int ground);
 	static bool isValidGround(int ground);
 	static bool isTrans(int ground);
+	static bool isSmallTrans(int g);
+	static bool isBigTrans(int g);
 
 	/**
 	 * @return How many tiles of every transition exist.
@@ -124,10 +134,6 @@ public:
 
 	static int smallTileNumber(int smallNo, TransType trans, bool inverted);
 
-
-	static bool isSmallTrans(int g);
-	static bool isBigTrans(int g);
-
 	/**
 	 * @return With which groundtype this transition starts.
 	 **/
@@ -141,7 +147,6 @@ public:
 	static int getTransTile(int g);
 
 protected:
-
 	void setVersion(unsigned char v)
 	{
 		mVersion = v;
