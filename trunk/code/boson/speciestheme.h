@@ -127,7 +127,7 @@ public:
 	 **/
 	static QString unitModelFile();
 
-	BosonModel* objectModel(const QString& name);
+	BosonModel* objectModel(const QString& name) const;
 
 	/**
 	 * @return The big overview pixmap (the one that is displayed when the

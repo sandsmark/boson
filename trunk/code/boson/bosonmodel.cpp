@@ -160,7 +160,7 @@ BoMatrix* BoFrame::matrix(int index) const
  return mMatrices[index];
 }
 
-void BoFrame::renderFrame()
+void BoFrame::renderFrame(const QColor* teamColor)
 {
  for (int i = 0; i < mMeshCount; i++) {
 	BoMatrix* m = mMatrices[i];
@@ -181,7 +181,7 @@ void BoFrame::renderFrame()
 	} else
 #endif
 	{
-		mesh->renderMesh();
+		mesh->renderMesh(teamColor);
 	}
 	glPopMatrix();
  }
@@ -364,7 +364,6 @@ BosonModel::BosonModel(const QString& dir, const QString& file, float width, flo
 void BosonModel::init()
 {
  d = new Private;
- mTeamColor = 0;
  mWidth = 0;
  mHeight = 0;
  d->mMeshes.setAutoDelete(true);
@@ -460,7 +459,7 @@ void BosonModel::loadModel()
 	boError(100) << k_funcinfo << "NULL current context" << endl;
 	return;
  }
- boProfiling->start(BosonProfiling::LoadModelDisplayLists);
+
  QMap<BoMesh*, QString>::Iterator it = d->mTextures.begin();
  for (; it != d->mTextures.end(); ++it) {
 	BoMesh* mesh = it.key();
@@ -484,12 +483,6 @@ void BosonModel::loadModel()
 	mesh->createPointCache();
  }
 
-
-#if USE_DISPLAYLISTS
- createDisplayLists();
-#endif
- boProfiling->stop(BosonProfiling::LoadModelDisplayLists);
-
  delete d->mLoader;
  d->mLoader = 0;
  boDebug(100) << k_funcinfo << "loaded from " << file() << endl;
@@ -497,8 +490,17 @@ void BosonModel::loadModel()
  boProfiling->stop(BosonProfiling::LoadModel);
 }
 
-void BosonModel::createDisplayLists()
+void BosonModel::createDisplayLists(const QColor* teamColor)
 {
+#if !USE_DISPLAYLISTS
+ return;
+#endif
+
+#warning TODO: different teamcolors!
+ // we need to maintain an internal map for the displaylists and the teamcolor!
+ // createDisplayLists() will get called several times with different teamColor
+ // params!
+
  if (d->mFrames.isEmpty()) {
 	boWarning() << k_funcinfo << "no frames" << endl;
 	return;
@@ -518,28 +520,41 @@ void BosonModel::createDisplayLists()
  boDebug(100) << k_funcinfo << "creating lists for " << d->mMeshes.count() << " meshes" << endl;
  QIntDictIterator<BoMesh> it(d->mMeshes);
  for (; it.current(); ++it) {
-	it.current()->loadDisplayList();
+	it.current()->loadDisplayList(teamColor);
  }
 
  boDebug(100) << k_funcinfo << "creating " << d->mFrames.count() << " lists" << endl;
- GLuint listBase = glGenLists(d->mFrames.count());
+ GLuint listBase = glGenLists(d->mFrames.count() + d->mConstructionSteps.count());
  if (listBase == 0) {
 	boError(100) << k_funcinfo << "NULL display lists created" << endl;
 	return;
  }
 
+ GLuint list = listBase;
  for (unsigned int i = 0; i < frames(); i++) {
 	BoFrame* f = frame(i);
 
-	GLuint list = listBase + i;
 	glNewList(list, GL_COMPILE);
-	f->renderFrame();
+	f->renderFrame(teamColor);
 	glEndList();
-
 	f->setDisplayList(list);
+
+	list++;
  }
+ for (unsigned int i = 0; i < constructionSteps(); i++) {
+	BoFrame* step = constructionStep(i);
+
+	glNewList(list, GL_COMPILE);
+	step->renderFrame(teamColor);
+	glEndList();
+	step->setDisplayList(list);
+
+	list++;
+ }
+
  glDisableClientState(GL_VERTEX_ARRAY);
  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+
 }
 
 void BosonModel::generateConstructionFrames()
@@ -564,25 +579,6 @@ void BosonModel::generateConstructionFrames()
 	BoFrame* step = new BoFrame(*frame0, start, i + 1);
 	d->mConstructionSteps.insert(i, step);
  }
-#if !USE_DISPLAYLISTS
- return;
-#endif
- GLuint base = glGenLists(nodes);
- if (base == 0) {
-	boError(100) << k_funcinfo << "NULL display lists created" << endl;
-	return;
- }
- QIntDictIterator<BoFrame> it(d->mConstructionSteps);
- int i = 0;
- for (; it.current(); ++it, i++) {
-	GLuint list = base + i;
-	BoFrame* step = it.current();
-
-	glNewList(list, GL_COMPILE);
-	step->renderFrame();
-	glEndList();
-	step->setDisplayList(list);
- }
 }
 
 unsigned int BosonModel::frames() const
@@ -603,23 +599,10 @@ unsigned int BosonModel::constructionSteps() const
  return d->mConstructionSteps.count();
 }
 
-void BosonModel::setTeamColor(const QColor& c)
-{
- delete mTeamColor;
- mTeamColor = new QColor(c);
- for (unsigned int i = 0; i < meshCount(); i++) {
-	mesh(i)->setTeamColor(*mTeamColor);
- }
-}
-
 void BosonModel::finishLoading()
 {
- delete mTeamColor;
- mTeamColor = 0;
  delete d->mLoader;
  d->mLoader = 0;
- delete mTeamColor;
- mTeamColor = 0;
  d->mTextureNames.clear();
 }
 
@@ -685,9 +668,6 @@ BosonAnimation* BosonModel::animation(int mode) const
 void BosonModel::addMesh(BoMesh* mesh)
 {
  d->mMeshes.insert(d->mMeshes.count(), mesh);
- if (mTeamColor) {
-	mesh->setTeamColor(*mTeamColor);
- }
 }
 
 BoMesh* BosonModel::mesh(int index) const

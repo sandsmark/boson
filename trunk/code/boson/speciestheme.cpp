@@ -239,7 +239,7 @@ QString SpeciesTheme::unitModelFile()
 
 BosonModel* SpeciesTheme::unitModel(unsigned long int unitType)
 {
- return mData->unitModel(unitType, teamColor());
+ return mData->unitModel(unitType);
 }
 
 QPixmap* SpeciesTheme::bigOverview(unsigned long int unitType)
@@ -601,10 +601,9 @@ const BosonParticleSystemProperties* SpeciesTheme::particleSystemProperties(unsi
  return mData->particleSystemProperties(id);
 }
 
-BosonModel* SpeciesTheme::objectModel(const QString& name)
+BosonModel* SpeciesTheme::objectModel(const QString& name) const
 {
- finalizeTeamColor();
- return mData->objectModel(name, teamColor());
+ return mData->objectModel(name);
 }
 
 void SpeciesTheme::finalizeTeamColor()

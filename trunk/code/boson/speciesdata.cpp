@@ -37,6 +37,56 @@
 static KStaticDeleter< QDict<SpeciesData> > sd;
 QDict<SpeciesData>* SpeciesData::mSpeciesData = 0;
 
+class BosonModelFactory
+{
+public:
+	BosonModelFactory() { }
+	~BosonModelFactory() { }
+
+	BosonModel* createUnitModel(const UnitProperties* prop);
+	BosonModel* createObjectModel(const KSimpleConfig* config, const QString& themePath);
+};
+
+BosonModel* BosonModelFactory::createUnitModel(const UnitProperties* prop)
+{
+ BosonModel* m = new BosonModel(prop->unitPath(), SpeciesData::unitModelFile(),
+		((float)prop->unitWidth()) * BO_GL_CELL_SIZE / BO_TILE_SIZE,
+		((float)prop->unitHeight()) * BO_GL_CELL_SIZE / BO_TILE_SIZE);
+ m->setLongNames(prop->longTextureNames());
+ m->loadModel();
+ if (prop->isFacility()) {
+	m->generateConstructionFrames();
+ }
+
+
+ // now we load animation information. this is just which frame is used for
+ // which animation mode - no frame/node/display list modifying needs to be
+ // made.
+ KSimpleConfig cfg(prop->unitPath() + QString::fromLatin1("index.unit"));
+ cfg.setGroup("OpenGL");
+ m->loadAnimationMode(UnitAnimationIdle, &cfg, QString::fromLatin1("Idle"));
+ m->loadAnimationMode(UnitAnimationWreckage, &cfg, QString::fromLatin1("Wreckage"));
+
+
+ m->finishLoading();
+
+ return m;
+}
+
+BosonModel* BosonModelFactory::createObjectModel(const KSimpleConfig* config, const QString& themePath)
+{
+ float width = (float)config->readDoubleNumEntry(QString::fromLatin1("Width"), 1.0f);
+ float height = (float)config->readDoubleNumEntry(QString::fromLatin1("Height"), 1.0f);
+ QString file = config->readEntry(QString::fromLatin1("File"), QString::fromLatin1("missile.3ds"));
+
+
+ BosonModel* m = new BosonModel(themePath + QString::fromLatin1("/objects/"), file, width, height);
+ m->loadModel();
+
+ return m;
+}
+
+
 /**
  * By any reason QPixmap uses the alpha mask if existing, even if a custom 
  * mask using setMask() is supplied. We use this hack to delete the alpha mask 
@@ -70,6 +120,9 @@ public:
 	QIntDict<TeamColorData> mTeamData;
 	QIntDict<BosonParticleSystemProperties> mParticleProperties;
 	QDict<QPixmap> mUpgradePixmaps;
+
+	QIntDict<BosonModel> mUnitModels;
+	QDict<BosonModel> mObjectModels;
 };
 
 class SpeciesData::TeamColorData
@@ -77,25 +130,17 @@ class SpeciesData::TeamColorData
 public:
 	TeamColorData()
 	{
-		mUnitModels.setAutoDelete(true);
 		mSmallOverview.setAutoDelete(true);
 		mBigOverview.setAutoDelete(true);
-		mObjectModels.setAutoDelete(true);
 	}
 	~TeamColorData()
 	{
-		boDebug() << k_funcinfo << endl;
-		mUnitModels.clear();
 		mSmallOverview.clear();
 		mBigOverview.clear();
-		mObjectModels.clear();
-		boDebug() << k_funcinfo << "done" << endl;
 	}
 
-	QIntDict<BosonModel> mUnitModels;
 	QIntDict<QPixmap> mSmallOverview;
 	QIntDict<QPixmap> mBigOverview;
-	QDict<BosonModel> mObjectModels;
 };
 
 SpeciesData::SpeciesData(const QString& speciesPath)
@@ -112,6 +157,8 @@ SpeciesData::SpeciesData(const QString& speciesPath)
  d->mParticleProperties.setAutoDelete(true);
  d->mTeamData.setAutoDelete(true);
  d->mThemePath = speciesPath;
+ d->mUnitModels.setAutoDelete(true);
+ d->mObjectModels.setAutoDelete(true);
 }
 
 SpeciesData::~SpeciesData()
@@ -120,6 +167,8 @@ SpeciesData::~SpeciesData()
  d->mActionPixmaps.clear();
  d->mParticleProperties.clear();
  d->mTeamData.clear();
+ d->mUnitModels.clear();
+ d->mObjectModels.clear();
  delete d;
  boDebug() << k_funcinfo << "done" << endl;
 }
@@ -217,53 +266,31 @@ QPixmap* SpeciesData::actionPixmap(UnitAction action) const
  return d->mActionPixmaps[action];
 }
 
-void SpeciesData::loadUnitModel(const UnitProperties* prop, const QColor& color)
+void SpeciesData::loadUnitModel(const UnitProperties* prop, const QColor& teamColor)
 {
- TeamColorData* data = teamColorData(color);
- if (!data) {
-	boError() << k_funcinfo << "NULL teamcolor data" << endl;
-	return;
- }
- if (data->mUnitModels[prop->typeId()]) {
-	boWarning() << k_funcinfo << "Model already loaded" << endl;
-	return;
- }
+ BO_CHECK_NULL_RET(prop);
  QString fileName = prop->unitPath() + unitModelFile();
  if (!KStandardDirs::exists(fileName)) {
 	boError() << k_funcinfo << "Cannot find " << unitModelFile() << " file for " << prop->typeId() << endl;
 	return;
  }
- BosonModel* m = new BosonModel(prop->unitPath(), unitModelFile(),
-		((float)prop->unitWidth()) * BO_GL_CELL_SIZE / BO_TILE_SIZE,
-		((float)prop->unitHeight()) * BO_GL_CELL_SIZE / BO_TILE_SIZE);
- m->setLongNames(prop->longTextureNames());
- m->setTeamColor(color);
- m->loadModel();
- if (prop->isFacility()) {
-	m->generateConstructionFrames();
+ BosonModel* m = d->mUnitModels[prop->typeId()];
+
+ if (!m) {
+	BosonModelFactory factory;
+	m = factory.createUnitModel(prop);
+	d->mUnitModels.insert(prop->typeId(), m);
+ } else {
+//	boDebug() << "model already loaded - loading an additional teamcolor only..." << endl;
+	// we only need to load the display lists here, as everything else
+	// doesn't depend on the teamcolor :)
  }
-
- // now we load animation information. this is just which frame is used for
- // which animation mode - no frame/node/display list modifying needs to be
- // made.
- KSimpleConfig cfg(prop->unitPath() + QString::fromLatin1("index.unit"));
- cfg.setGroup("OpenGL");
- m->loadAnimationMode(UnitAnimationIdle, &cfg, QString::fromLatin1("Idle"));
- m->loadAnimationMode(UnitAnimationWreckage, &cfg, QString::fromLatin1("Wreckage"));
-
-
- m->finishLoading();
- data->mUnitModels.insert(prop->typeId(), m);
+ m->createDisplayLists(&teamColor);
 }
 
-BosonModel* SpeciesData::unitModel(unsigned long int unitType, const QColor& teamColor) const
+BosonModel* SpeciesData::unitModel(unsigned long int unitType) const
 {
- TeamColorData* data = teamColorData(teamColor);
- if (!data) {
-	boError() << k_funcinfo << "NULL teamcolor data" << endl;
-	return 0;
- }
- return data->mUnitModels[unitType];
+ return d->mUnitModels[unitType];
 }
 
 QString SpeciesData::unitModelFile()
@@ -474,18 +501,14 @@ QPixmap* SpeciesData::upgradePixmapByName(const QString& name)
  return d->mUpgradePixmaps[name];
 }
 
-BosonModel* SpeciesData::objectModel(const QString& name, const QColor& color)
+BosonModel* SpeciesData::objectModel(const QString& name) const
 {
- TeamColorData* data = teamColorData(color);
- if (!data) {
-	boError() << k_funcinfo << "NULL teamcolor data" << endl;
-	return 0;
- }
- if (!data->mObjectModels[name]) {
+ BosonModel* m = d->mObjectModels[name];
+ if (!m) {
 	boError() << k_funcinfo << "No object with name " << name << endl;
 	return 0;
  }
- return data->mObjectModels[name];
+ return m;
 }
 
 void SpeciesData::loadObjects(const QColor& teamColor)
@@ -504,12 +527,6 @@ void SpeciesData::loadObjects(const QColor& teamColor)
 	return;
  }
 
- TeamColorData* data = teamColorData(teamColor);
- if (!data) {
-	boError() << k_funcinfo << "NULL teamcolor data" << endl;
-	return;
- }
-
  boDebug() << k_funcinfo << "Loading " << objects.count()
 		<< " objects from config file" << endl;
  QStringList::Iterator it;
@@ -517,20 +534,17 @@ void SpeciesData::loadObjects(const QColor& teamColor)
 	boDebug() << k_funcinfo << "Loading object from group " << *it << endl;
 
 	cfg.setGroup(*it);
-	float width, height;
-	QString file;
-	width = (float)cfg.readDoubleNumEntry("Width", 1.0);
-	height = (float)cfg.readDoubleNumEntry("Height", 1.0);
-	file = cfg.readEntry("File", "missile.3ds");
 
-	BosonModel* m = new BosonModel(themePath() + QString::fromLatin1("/objects/"), file, width, height);
-	m->setTeamColor(teamColor);
-	m->loadModel();
-
-	if (!data->mObjectModels.find(*it)) {
-		data->mObjectModels.insert(*it, m);
+	BosonModel* m = d->mObjectModels.find(*it);
+	if (!m) {
+		BosonModelFactory factory;
+		m = factory.createObjectModel(&cfg, themePath());
+		d->mObjectModels.insert(*it, m);
 	} else {
-		boError() << k_funcinfo << "object with id " << *it << " already there!" << endl;
+		// nothing special to do here - just load the additional display
+		// lists for the new teamcolor.
 	}
+	m->createDisplayLists(&teamColor);
  }
 }
+
