@@ -94,9 +94,13 @@
     <ul>
         <li>Add an event matching rule with the "Add" button.</li>
         <li>Change the event name from "AllUnitsDestroyed" to "UnitWithTypeDestroyed".</li>
-        <li>Set the "Unit Id" to the Id of a unit in your map (you can see the id in the command frame when you select a unit)
+        <li>Set the "Unit Id" to the Id of a unit in your map (you can see the id in the Command Frame when you select a unit)
         this can also be a facility, e.g. the Command Bunker.</li>
-        <li>Now change the Event name of the Condition to "PlayerLost" and remove the "Foobar" from Data1.</li>
+        <li>Change the Event name of the Condition to "PlayerLost" and remove the "Foobar" from Data1.</li>
+        <li>Now you need to add the Player Id for which player this event should apply. Unfortunately you cannot see this id
+        in the Command Frame on the right or in the menu (<a href="http://bugs.kde.org/show_bug.cgi?id=92865" target="_blank">BR #92865</a>).
+        To get the Player Id go to the "Debug" menu and select "Debug KGame...". Under "Debug Players" you can see the
+        available player ids on the left, select them and find your player through "Player Name".</li>
      </ul><br>
 
     There are move events available, the Boson website has an overview of them in different versions
