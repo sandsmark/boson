@@ -230,6 +230,9 @@ void BosonWidget::init()
 
 void BosonWidget::addMiniMap()
 {
+// FIXME: we have several big displays now (several views) so i we must connect
+// the signals always to the *currently active* view, not to d->mBigDisplay!
+
  d->mMiniMap = new BosonMiniMap(0);
  d->mMiniMap->hide();
  d->mMiniMap->setCanvas(d->mCanvas);
@@ -666,6 +669,10 @@ void BosonWidget::addGameCommandFrame(QWidget* parent)
 void BosonWidget::startGame()
 {
  d->mBoson->slotSetGameSpeed(BosonConfig::readGameSpeed());
+ 
+// FIXME: not usable with several views!! (see addMiniMap() comment)
+ connect(d->mMiniMap, SIGNAL(signalMoveSelection(int, int)),
+		d->mBigDisplay, SLOT(slotMoveSelection(int, int)));
 }
 
 void BosonWidget::startEditor()
@@ -673,6 +680,7 @@ void BosonWidget::startEditor()
  slotChangeCursor(CursorKDE, boConfig->readCursorDir());
  connect(d->mBigDisplay, SIGNAL(signalBuildUnit(int,int, int, Player*)),
 		d->mBoson, SLOT(slotSendAddUnit(int, int, int, Player*)));
+
 	
  // this manages the mouse input for bosonBigDisplay. In non-editor mode this is
  // done by KGameMouseIO

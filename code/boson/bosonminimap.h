@@ -63,6 +63,7 @@ public:
 
 signals:
 	void signalReCenterView(const QPoint& pos);
+	void signalMoveSelection(int cellX, int cellY);
 
 public slots:
 	void slotCreateMap(int w, int h);

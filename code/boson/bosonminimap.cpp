@@ -176,10 +176,16 @@ void BosonMiniMap::paintEvent(QPaintEvent*)
 
 void BosonMiniMap::mousePressEvent(QMouseEvent *e)
 {
- if (e->button() & LeftButton) {
-	
-	emit signalReCenterView( e->pos() / pointSize() );
+ if (e->type() != QEvent::MouseButtonPress) {
 	return;
+ }
+ if (e->button() == LeftButton) {
+	emit signalReCenterView( e->pos() / pointSize() );
+	e->accept();
+	return;
+ } else if (e->button() == RightButton) {
+	emit signalMoveSelection(e->pos().x() / pointSize(), 
+			e->pos().y() / pointSize());
  }
 }
 
@@ -354,3 +360,4 @@ void BosonMiniMap::slotShowMap(bool s)
 	hide();
  }
 }
+
