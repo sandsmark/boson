@@ -48,6 +48,7 @@ OptionsWidget::OptionsWidget()
 
 OptionsWidget::~OptionsWidget()
 {
+ boDebug(210) << k_funcinfo << endl;
 }
 
 
@@ -84,6 +85,7 @@ GeneralOptions::GeneralOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
 
 GeneralOptions::~GeneralOptions()
 {
+ boDebug(210) << k_funcinfo << endl;
 }
 
 void GeneralOptions::apply()
@@ -183,6 +185,7 @@ CursorOptions::CursorOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
 
 CursorOptions::~CursorOptions()
 {
+ boDebug(210) << k_funcinfo << endl;
 }
 
 void CursorOptions::apply()
@@ -268,6 +271,7 @@ ScrollingOptions::ScrollingOptions(QWidget* parent) : QVBox(parent), OptionsWidg
 
 ScrollingOptions::~ScrollingOptions()
 {
+ boDebug(210) << k_funcinfo << endl;
 }
 
 void ScrollingOptions::apply()
@@ -364,6 +368,7 @@ SoundOptions::SoundOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
 
 SoundOptions::~SoundOptions()
 {
+ boDebug(210) << k_funcinfo << endl;
 }
 
 void SoundOptions::apply()
@@ -456,6 +461,7 @@ OpenGLOptions::OpenGLOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
 
 OpenGLOptions::~OpenGLOptions()
 {
+ boDebug(210) << k_funcinfo << endl;
 }
 
 void OpenGLOptions::apply()
@@ -655,6 +661,7 @@ ChatOptions::ChatOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
 
 ChatOptions::~ChatOptions()
 {
+ boDebug(210) << k_funcinfo << endl;
 }
 
 void ChatOptions::apply()
