@@ -246,9 +246,8 @@ protected:
 	 *
 	 * This is in Unit instead of @ref MobileUnit so that we can apply a
 	 * path to newly constructed units of factories.
-	 * @return true if path was found, false otherwise
 	 **/
-	bool newPath();
+	void newPath();
 
 	bool searchpath;
 
