@@ -48,7 +48,12 @@ public:
 	void setViewFrustum(const double* viewFrustum);
 
 
-	virtual void renderCells(const BosonMap* map);
+	/**
+	 * @return How many cells got actually rendered. (note: a single cell
+	 * could have been rendered three times, always with a different
+	 * texture, but will occur only once here!)
+	 **/
+	virtual unsigned int renderCells(const BosonMap* map);
 
 	/**
 	 * Render a grid for all cells in @p cells.
@@ -57,12 +62,6 @@ public:
 	 * returns true.
 	 **/
 	void renderCellGrid(Cell** cells, int cellsCount, float* heightMap, int heightMapWidth);
-
-	/**
-	 * @return The number of cells rendered by the last @ref renderCells
-	 * call
-	 **/
-	unsigned int renderedCells() const;
 
 	// AB: replace by localPlayerIO()
 	void setLocalPlayer(Player* p);
@@ -94,10 +93,22 @@ public:
 	 **/
 	void generateCellList(const BosonMap* map);
 
-	const double* viewFrustum() const;
-
 protected:
 	void calculateWorldRect(const QRect& rect, int mapWidth, int mapHeight, float* minX, float* minY, float* maxX, float* maxY);
+
+	const double* viewFrustum() const;
+
+private:
+	/**
+	 * Render the @p cells with the current texture.
+	 *
+	 * This is used for texture mixing (blending must be enabled) - first
+	 * the cells are rendered with the first texture, then with the
+	 * second, ...
+	 *
+	 * One could optimize this by using multitexturing for example!
+	 **/
+	void renderCellsNow(Cell** cells, int count, int cornersWidth, float* heightMap, unsigned char* texMapStart);
 
 private:
 	BoGroundRendererPrivate* d;
