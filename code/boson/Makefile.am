@@ -5,7 +5,8 @@
 SUBDIRS = data 
 #boson editor
 
-bin_PROGRAMS = boson boeditor bounit
+bin_PROGRAMS = boson bounit 
+#boeditor 
 
 INCLUDES = -I$(kde_includes)/arts $(all_includes)
 
