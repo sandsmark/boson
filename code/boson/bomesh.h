@@ -357,6 +357,11 @@ public:
 	void setFace(int index, const BoFace& face);
 
 	/**
+	 * @return BoMeshLOD::face for LOD 0 (i.e. full detailed mesh).
+	 **/
+	const BoFace* face(unsigned int f) const;
+
+	/**
 	 * You must call @ref allocatePoints before calling this!
 	 *
 	 * This methods sets the list of available vertices for this mesh. The
@@ -471,6 +476,7 @@ public:
 	 * this method uses indices that are local to this mesh.
 	 **/
 	BoVector3 vertex(unsigned int p) const;
+	BoVector3 texel(unsigned int p) const;
 
 
 	/**
