@@ -88,6 +88,7 @@ draw_bigbox_text("This is a list of features that I consider as
     <li>Damaged units are getting darker</li>
     <li>Save screenshots as jpg and show the full path as a chat message</li>
     <li>New minimap zooming buttons</li>
+    <li>Fixed texture coordinates bug (meaning: it looks better)</li>
   </ul>
   <h4>Data</h4>
   <ul>
