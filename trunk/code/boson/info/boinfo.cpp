@@ -677,6 +677,14 @@ QString BoInfo::valueToString(int key) const
 	case QVariant::CString:
 		string = v.toCString();
 		break;
+#if QT_VERSION >= 0x030200
+	case QVariant::LongLong:
+		string = v.toLongLong();
+		break;
+	case QVariant::ULongLong:
+		string = v.toULongLong();
+		break;
+#endif
  }
  return string;
 }
