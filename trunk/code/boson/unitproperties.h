@@ -97,7 +97,13 @@ public:
 	 * @return The unrotated height of the unit. The value is number of cells
 	 * this unit occupies * BO_TILE_SIZE
 	 **/
-	unsigned int unitHeight() const { return mUnitWidth; }
+	unsigned int unitHeight() const { return mUnitHeight; }
+
+	/**
+	 * @return The unrotated height in z-direction of the unit. The value
+	 * is number of cells this unit occupies * BO_TILE_SIZE
+	 **/
+	unsigned int unitDepth() const { return mUnitDepth; }
 	
 	/**
 	 * @return Default health aka power aka hitpoints of this unit.
@@ -311,6 +317,7 @@ private:
 	unsigned long int mTypeId; // note: 0 is invalid!
 	unsigned int mUnitWidth;
 	unsigned int mUnitHeight;
+	unsigned int mUnitDepth;
 	unsigned long int mHealth;
 	unsigned long int mWeaponRange;
 	unsigned int mSightRange;
