@@ -3,6 +3,8 @@
  <ScenarioSettings MaxPlayers="2" MinPlayers="2" />
  <ScenarioPlayers>
   <Player PlayerNumber="0" >
+   <Minerals>10000</Minerals>
+   <Oil>10000</Oil>
    <Unit x="1" y="1" UnitType="5" />
    <Unit x="1" y="6" UnitType="0" />
    <Unit x="1" y="8" UnitType="1" />
@@ -46,6 +48,10 @@
    <Unit x="9" y="11" UnitType="10004" />
   </Player>
   <Player PlayerNumber="1" >
+   <Resources>
+    <Minerals>10000</Minerals>
+    <Oil>10000</Oil>
+   </Resources>
    <Unit x="46" y="33" UnitType="7" />
    <Unit x="47" y="34" UnitType="7" />
    <Unit x="47" y="33" UnitType="7" />
