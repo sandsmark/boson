@@ -87,6 +87,18 @@ public:
 
 	bool modified() const;
 
+	/**
+	 * Make @p map the new map of this playfield. Called by the editor
+	 * only.
+	 **/
+	void changeMap(BosonMap* map);
+
+	/**
+	 * Make @p s the new scenario of this playfield. Called by the editor
+	 * only.
+	 **/
+	void changeScenario(BosonScenario* s);
+
 signals:
 	/**
 	 * Emitted when the map changes. Note that this can even be 0!
