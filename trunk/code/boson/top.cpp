@@ -45,6 +45,7 @@
 #include "bosonprofilingdialog.h"
 #include "bosondata.h"
 #include "bosongroundtheme.h"
+#include "bofullscreen.h"
 
 #include <kapplication.h>
 #include <klocale.h>
@@ -639,9 +640,9 @@ void TopWidget::slotConfigureKeys()
 void TopWidget::slotToggleFullScreen()
 {
  if (d->mActionFullScreen->isChecked()) {
-	showFullScreen();
+	BoFullScreen::enterMode(-1);
  } else {
-	showNormal();
+	BoFullScreen::leaveFullScreen();
  }
 }
 

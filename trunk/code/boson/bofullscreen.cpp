@@ -26,6 +26,9 @@
 #include <kstaticdeleter.h>
 
 #include <qstringlist.h>
+#include <qapplication.h>
+#include <qwidget.h>
+#include <qdesktopwidget.h>
 
 #include <stdlib.h>
 #include <config.h>
@@ -58,8 +61,6 @@
 static void bo_enter_orig_mode();
 
 #ifdef HAVE_XFREE86_VIDMODE
-#include <qapplication.h>
-#include <qwidget.h>
 #include <X11/Xlib.h>
 #include <X11/extensions/xf86vmode.h>
 
@@ -74,13 +75,12 @@ static bool gVidOriginalModeValid = false;
 #ifdef HAVE_XFREE86_XRANDR
 // TODO: use QLibrary instead of linking to Xrandr!
 // -> no need for the #ifdef, less trouble for packagers, ...
-#include <qapplication.h>
-#include <qwidget.h>
 #include <X11/Xlib.h>
 #include <X11/extensions/Xrandr.h>
 
 static bool gUseXrandr = true;
 static bool gXRROriginalModeValid = false;
+static bool gXRRUseOriginalMode = false;
 static SizeID gXRROriginalMode;
 static Rotation gXRROriginalRotation;
 XRRScreenConfiguration* gXRRScreenConfig = 0;
@@ -226,6 +226,38 @@ QStringList BoFullScreen::availableModes()
  return QStringList();
 }
 
+void BoFullScreen::resizeToFullScreen(QWidget* w, int width, int height)
+{
+ BO_CHECK_NULL_RET(w);
+ if (!w->isTopLevel()) {
+	boError() << k_funcinfo << "w must be a toplevel widget" << endl;
+	return;
+ }
+ w->reparent(0, QWidget::WType_TopLevel |
+		QWidget::WStyle_Customize |
+		QWidget::WStyle_NoBorder
+		/* | w->getWFlags() & 0xffff0000*/,
+		w->mapToGlobal(QPoint(0, 0)));
+ w->resize(width, height);
+ w->raise();
+ w->show();
+ w->setActiveWindow();
+}
+
+void BoFullScreen::leaveFullScreen()
+{
+ BO_CHECK_NULL_RET(qApp);
+ QWidget* w = qApp->mainWidget();
+ BO_CHECK_NULL_RET(w);
+ if (!w->isTopLevel()) {
+	boError() << k_funcinfo << "w must be a toplevel widget" << endl;
+	return;
+ }
+ BoFullScreen::enterOriginalMode();
+ w->reparent(0, 0, QPoint(0, 0)); // TODO: wflags?
+ w->show();
+}
+
 bool BoFullScreen::enterMode(int index)
 {
  boDebug() << k_funcinfo << index << endl;
@@ -275,10 +307,29 @@ QStringList BoFullScreen::availableModeList()
 
 bool BoFullScreen::enterModeInList(int index)
 {
- if (index < 0) {
-	return false;
- }
  initModes();
+ if (index < 0) {
+	// go into "usual" QWidget::showFullScreen() mode
+	// -> even if we cannot change resolution
+	BoFullScreen::enterOriginalMode();
+	if (!qApp) {
+		BO_NULL_ERROR(qApp);
+		return false;
+	}
+	if (!qApp->desktop()) {
+		BO_NULL_ERROR(qApp->desktop());
+		return false;
+	}
+	QWidget* w = qApp->mainWidget();
+	if (!w) {
+		BO_NULL_ERROR(w);
+		return false;
+	}
+	QRect r = qApp->desktop()->screenGeometry(qApp->desktop()->screenNumber(w));
+
+	resizeToFullScreen(w, r.width(), r.height());
+	return true;
+ }
 #ifdef HAVE_XFREE86_XRANDR
  if (!gUseXrandr) {
 	return false;
@@ -399,10 +450,15 @@ static void bo_deinit_xrandr()
 
 static void bo_xrr_enter_orig_mode()
 {
- if (gXRROriginalModeValid) {
-	boDebug() << k_funcinfo << "entering mode " << gXRROriginalMode << endl;
-	bo_xrr_enter_mode(gXRROriginalMode, gXRRScreenConfig);
+ if (!gXRROriginalModeValid) {
+	return;
  }
+ if (!gXRRUseOriginalMode) {
+	// we never changed the original mode, or already changed back!
+	return;
+ }
+ boDebug() << k_funcinfo << "entering mode " << gXRROriginalMode << endl;
+ bo_xrr_enter_mode(gXRROriginalMode, gXRRScreenConfig);
 }
 
 static bool bo_xrr_enter_mode(int mode, XRRScreenConfiguration* sc)
@@ -454,12 +510,19 @@ static bool bo_xrr_enter_mode(int mode, XRRScreenConfiguration* sc)
  }
  if (stat == BadValue) {
 	boError() << k_funcinfo << "unable to switch mode" << endl;
+	gXRRUseOriginalMode = true;
 	return false;
  }
+ if (gXRROriginalMode == mode) {
+	gXRRUseOriginalMode = false;
+ } else {
+	gXRRUseOriginalMode = true;
+ }
  if (w) {
-	// make it "fullscreen" as in w->showFullScreen(), i.e. make it fill the
-	// entire screen (but no more!)
-
+	// make it "fullscreen" as in w->showFullScreen(), i.e. make it
+	// fill the entire screen (but no more!)
+	// AB: we cannot use showFullScreen() directly here, as maybe
+	// Qt/KDE doesn't support Xrandr
 
 	int count;
 	XRRScreenSize* sizes = XRRConfigSizes(sc, &count);
@@ -471,15 +534,7 @@ static bool bo_xrr_enter_mode(int mode, XRRScreenConfiguration* sc)
 	int width = sizes[mode].width;
 	int height = sizes[mode].height;
 
-	w->reparent(0, QWidget::WType_TopLevel |
-			QWidget::WStyle_Customize |
-			QWidget::WStyle_NoBorder
-			/* | w->getWFlags() & 0xffff0000*/,
-			w->mapToGlobal(QPoint(0, 0)));
-	w->resize(width, height);
-	w->raise();
-	w->show();
-	w->setActiveWindow();
+	BoFullScreen::resizeToFullScreen(w, width, height);
  }
  return true;
 }
