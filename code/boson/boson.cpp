@@ -952,7 +952,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 	{
 		Q_UINT32 owner;
 		stream >> owner;
-		boDebug() << k_lineinfo << "AddUnisXML for " << owner << endl;
+		boDebug() << k_lineinfo << "AddUnitsXML for " << owner << endl;
 
 		QString xmlDocument;
 		stream >> xmlDocument;
@@ -978,7 +978,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 			addUnit(e, (Player*)p);
 		}
 		boProfiling->stop(BosonProfiling::AddUnitsXML);
-		boDebug() << k_lineinfo << "AddUnisXML done" << endl;
+		boDebug() << k_lineinfo << "AddUnitsXML done" << endl;
 		break;
 	}
 	case BosonMessage::AdvanceN:
@@ -1444,7 +1444,7 @@ Unit* Boson::addUnit(QDomElement& node, Player* p)
 	// the player will never know that we had a problem here. Just a few
 	// (non-critical) values were not loaded.
  }
- 
+
  emit signalAddUnit(unit, x * BO_TILE_SIZE, y * BO_TILE_SIZE);
  if (!gameMode()) {
 	// editor won't display the construction, but always completed
