@@ -446,21 +446,6 @@ protected:
 	void updateUfoLabelAdvanceCalls();
 
 	/**
-	 * Part of @ref renderText.
-	 * This just renders the chat messages.
-	 **/
-	void renderTextChat(int x, int y);
-
-	int renderTextMapCoordinates(int x, int y, int w, int border);
-	int renderTextPFData(int x, int y, int w, int border);
-	int renderTextOpenGLMatrices(int x, int y);
-	int renderTextItemWorkStatistics(int x, int y);
-	int renderTextOpenGLCamera(int x, int y);
-	int renderTextRenderCounts(int x, int y);
-	int renderTextAdvanceCalls(int x, int y);
-	void renderTextGamePaused();
-
-	/**
 	 * Called by @ref paintGL only to render the cells on the screen
 	 **/
 	void renderCells();
