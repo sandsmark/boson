@@ -310,14 +310,11 @@ void BoSelection::loadFromXML(const QDomElement& root, bool activate)
 void BoSelection::slotRemoveItem(BosonItem* item)
 {
  BO_CHECK_NULL_RET(item);
- if (!RTTI::isUnit(item->rtti())) {
-	return;
- }
- Unit* u = (Unit*)item;
-
  // AB: do _not_ call remove()/removeUnit(), as it calls unit->unselect() which
  // doesn't exist anymore, when called from BosonItem d'tor
- mSelection.removeRef(u);
+ // also note that we cast to Unit, but it might NOT be a Unit!
+ // -> we can't access rtti() anymore
+ mSelection.removeRef((Unit*)u);
 }
 
 
