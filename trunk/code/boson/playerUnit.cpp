@@ -258,6 +258,8 @@ void playerMobUnit::getWantedAction()
 
 	if (who != who_am_i) return;
 
+	if ( !visible() ) return;
+
 	/* movve ?*/
 	if (getWantedMove(&data)) {
 		data.move.key		= key;
@@ -500,8 +502,10 @@ bool harvesterUnit::getWantedMove(bosonMsgData *msg)
 				harvestEndMsg_t    he;
 				he.key = key;
 				sendMsg(buffer, MSG_UNIT_HARVEST_END, sizeof(he), &he);
-				hstate = standBy;	// we should be hidden() by server,
-						  	//but we mark ourselves as 'standBy'
+				hstate = goingTo;
+				playerMobUnit::u_goto(harvest_x, harvest_y); // go to base station
+				contain = 0 ;		// emptying
+
 			}
 			return playerMobUnit::getWantedMove(msg);
 			break;
@@ -543,6 +547,7 @@ bool harvesterUnit::getWantedShoot(bosonMsgData *)
 
 void harvesterUnit::u_goto(int mx, int my)
 {
+	harvest_x = mx; harvest_y = my;
 	hstate = goingTo;
 //	puts("harvester : change to \"goingTo\" state");
 	playerMobUnit::u_goto(mx, my);
