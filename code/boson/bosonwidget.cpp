@@ -169,17 +169,6 @@ void BosonWidget::slotChangeCursor(int mode, const QString& cursorDir_)
  changeCursor(b);
 
  mCursorTheme = cursorDir;
-
- // some cursors need special final initializations. do them now
- switch (mode) {
-	case CursorSprite:
-		break;
-	case CursorExperimental:
-		break;
-	case CursorNormal:
-	default:
-		break;
- }
 }
 
 void BosonWidget::slotStartScenario()
@@ -194,8 +183,6 @@ void BosonWidget::slotGamePreferences()
  if (cursor()) {
 	if (cursor()->isA("BosonSpriteCursor")) {
 		mode = CursorSprite;
-	} else if (cursor()->isA("BosonExperimentalCursor")) {
-		mode = CursorExperimental;
 	} else if (cursor()->isA("BosonKDECursor")) {
 		mode = CursorKDE;
 	} else {
@@ -327,8 +314,6 @@ void BosonWidget::saveConfig()
  if (cursor()) {
 	if (cursor()->isA("BosonSpriteCursor")) {
 		boConfig->saveCursorMode(CursorSprite);
-	} else if (cursor()->isA("BosonExperimentalCursor")) {
-		boConfig->saveCursorMode(CursorExperimental);
 	} else if (cursor()->isA("BosonKDECursor")) {
 		boConfig->saveCursorMode(CursorKDE);
 	} else {

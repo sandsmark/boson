@@ -140,8 +140,6 @@ void OptionsDialog::initCursorPage()
  d->mCursor->insertItem(i18n("Sprite Cursor"), CursorSprite);
  d->mCursor->insertItem(i18n("B/W Cursor"), CursorNormal);
  d->mCursor->insertItem(i18n("KDE Standard Cursor"), CursorKDE);
- d->mCursor->insertItem(i18n("Experimental Cursor (*Very* Unstable)"),
-		CursorExperimental);
  connect(d->mCursor, SIGNAL(activated(int)),
 		this, SLOT(slotCursorChanged(int)));
 

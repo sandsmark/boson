@@ -32,8 +32,7 @@
 enum CursorMode {
 	CursorSprite = 0,
 	CursorNormal = 1,
-	CursorKDE = 2,
-	CursorExperimental = 3
+	CursorKDE = 2
 };
 
 enum Direction {
