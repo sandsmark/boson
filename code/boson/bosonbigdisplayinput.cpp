@@ -253,7 +253,7 @@ bool BosonBigDisplayInput::actionHarvest(const BoVector3& canvasVector)
 		continue;
 	}
 	boDebug() << u->id() << " is a harvester" << endl;
-	if (h->canMine(resource)) {
+	if (resource->isUsableTo(h)) {
 		boDebug() << k_funcinfo << u->id() << " will harvest at " << resource->unit()->id() << "," << canvasVector.y() << " which is " << h->unit()->id() << endl;
 		localPlayerInput()->harvest(h, resource);
 		taken = true;
