@@ -227,6 +227,6 @@ void boFile::write(cell_t c)
 
 	*stream << TAG_CELL;
 	*stream << (int) ground(c);
-	*stream << (byte) tile(c);
+	*stream << (byte) version(c);
 }
 
