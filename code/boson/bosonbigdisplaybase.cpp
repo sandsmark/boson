@@ -80,8 +80,12 @@
 #define CAMERA_MAX_Z FAR - 50
 #define CAMERA_MAX_RADIUS 80
 
-// #define BO_LIGHT 1
-// #define CLEAR_DEPTH_FULL 1
+//#define BO_LIGHT 1
+//#define CLEAR_DEPTH_FULL 1
+
+#ifdef BO_LIGHT
+static float lightPos[] = {10.0, -10.0, 3.0, 1.0};
+#endif
 
 #include <GL/glu.h>
 
@@ -584,7 +588,6 @@ void BosonBigDisplayBase::initializeGL()
 #ifdef BO_LIGHT
  float lightAmb[] = {0.6, 0.6, 0.6, 1.0};
  float lightDif[] = {1.0, 1.0, 1.0, 1.0};
- float lightPos[] = {-500.0, 300.0, 200.0, 1.0};
 
  glLightfv(GL_LIGHT0, GL_AMBIENT, lightAmb);
  glLightfv(GL_LIGHT0, GL_DIFFUSE, lightDif);
@@ -862,6 +865,7 @@ void BosonBigDisplayBase::paintGL()
 
 	if (item->isSelected()) {
 		// FIXME: performance: create a display lists in the SelectBox which also contains the scale!
+		// FIXME: should selection boxes be drawn with lighting disabled?
 		GLfloat w = ((float)item->width()) * BO_GL_CELL_SIZE / BO_TILE_SIZE;
 		GLfloat h = ((float)item->height()) * BO_GL_CELL_SIZE / BO_TILE_SIZE;
 		GLfloat depth = item->glDepthMultiplier();
@@ -2342,6 +2346,11 @@ void BosonBigDisplayBase::cameraChanged()
  gluLookAt(eyeX, eyeY, eyeZ,
 		lookatX, lookatY, lookatZ,
 		upX, upY, upZ);
+
+#ifdef BO_LIGHT
+ // Reposition light 
+ glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
+#endif
 
  if (checkError()) {
 	boError() << k_funcinfo << "after gluLookAt()" << endl;
