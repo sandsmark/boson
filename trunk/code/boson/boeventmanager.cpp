@@ -176,11 +176,6 @@ bool BoEventManager::loadFromXML(const QDomElement& root)
 
 bool BoEventManager::saveListenerScripts(QMap<QString, QByteArray>* scripts) const
 {
- if (!scripts->isEmpty()) {
-	boError() << k_funcinfo << "scripts map must be empty" << endl;
-	return false;
- }
-
  // save in 2 steps.
  // 1. save the actual scripts (d->mAvailableScripts)
  // 2. save the current script data (i.e. the variable values).
