@@ -34,14 +34,9 @@ sidebar_end();
 main_area_begin();
 
 // About
-draw_box("About Boson");
-echo "
-Boson is an OpenGL real-time strategy game, with the feeling of
-Command&amp;Conquer(tm) or StarCraft(tm) and OpenGL support. It is designed to run
-on Unix (Linux) computers, and is built on top of the libkdegames, kde and Qt
-libraries.<br>
-A minimum of two players is required, since there is no artificial intelligence yet.<br>
-<br>";
+draw_bigbox_begin("About Boson");
+echo "<tr><td>Boson is an OpenGL real-time strategy game, with the feeling of Command&amp;Conquer(tm) or StarCraft(tm) and OpenGL support. It is designed to run on Unix (Linux) computers, and is built on top of the libkdegames, kde and Qt libraries.<br> A minimum of two players is required, since there is no artificial intelligence yet.<br><br></td></tr>";
+draw_bigbox_end();
 
 // Print news
 news_box_begin();
@@ -49,7 +44,7 @@ news_box_begin();
 **  To add an article, call
 **  news_article(<title>, <date added>, <full text>);
 **/
-news_article("New features!", "2nd September 2002 18:08",
+news_article("New features!", "September 2nd 2002 18:08",
     "I promised to add new features and here comes the first one: you can now
     change style of this homepage. Just go to <a href=\"options.php\">options
     page</a> and select style you like most!<br>
@@ -57,14 +52,14 @@ news_article("New features!", "2nd September 2002 18:08",
     can write one yourself! All you need to do is to write new stylesheet that
     specifies colors used. It's not hard! You can use style-blue.css as
     template. When you're done, send them to
-    <a href=\"mailto:rivolaks@hot.ee\">me</a>, I'm happy to put them up here!");
-news_article("New homepage", "1st September 2002 19:22",
+    <a href=\"mailto:rivolaks@hot.ee\">me</a>, I'm happy to put them up here!<br><br>");
+news_article("New homepage", "September 1st 2002 19:22",
     "Boson has now new homepage! This homepage should be much better than old
     one, but it's new, so it may contain some errors (I hope it doesn't though).
     If you find an error, please report it to
     <a href=\"mailto:boson-devel@lists.sourceforge.net\">our mailinglist</a><br>
     This is not modification of our old homepage, it's written from scratch in
-    PHP, which hopefully makes it easier to maintain than old one.<br>
+    PHP, which hopefully makes it easier to maintain than the old one.<br>
     What has changed compared to the old page? It has new look which reminds
     look of <a href=\"http://www.kde.org/\">KDE homepage</a>. Also, we have
     couple of new pages (<a href=\"install.php\">page with installation
@@ -72,7 +67,7 @@ news_article("New homepage", "1st September 2002 19:22",
     <a href=\"links.php\">links page</a>) and all pages have now valid HTML and
     CSS.<br>
     This page is still under development and we're adding new features, so come
-    back soon!");//'
+    back soon!<br><br>");
 news_box_end();
 
 main_area_end();

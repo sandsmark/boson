@@ -59,9 +59,7 @@ function draw_bigbox_text($text, $style = "bigboxtext")
 {
 echo "
       <tr><td>
-        <br>
-        <font class=\"$style\">$text</font>
-        <br><br>
+        <p class=\"$style\">$text</p>
       </td></tr>";
 }
 

@@ -9,7 +9,6 @@ function print_footer()
 {
 // Copyright
 echo "
-<hr>
 <font class=\"copyright\">(C) 2002  <a class=\"copyright\" href=\"mailto:boson-devel@lists.sourceforge.net\">
 The Boson Team</a></font><br>";
 
@@ -34,8 +33,9 @@ if($style == "blue") {
 } else {
   $image="pictures/header.jpg";
 }
-echo "
-<h1 align=\"center\"><img src=\"$image\" alt=\"Boson logo\"></h1><br>";
+echo "<div align=\"left\"><img src=\"$image\" alt=\"Boson logo\"></div><br>";
+if($style=="green")
+  echo "<div style='position:absolute;right:20px;top:115px;'><img src='pictures/boson-logo.gif' alt=\"Boson logo\"></div><br><br>";
 }
 
 /*****  HTML header & footer  *****/

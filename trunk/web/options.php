@@ -56,24 +56,15 @@ sidebar_end();
 main_area_begin();
 
 // Contacts
-draw_box("Options");
-echo "
-    Here you can change style, or color scheme, of this homepage.<br>
-    Currently, there are 2 different styles: blue, which looks
-    like style of KDE homepages and green (default) which has green and black colors and
-    looks cooler.<br>
-    Note that your browser must have cookies enabled for this site for this to
-    work.<br>
-    Your style: <form class=\"style\" action=\"$filename\" method=\"get\">
-    <select size=\"1\" name=\"style\">";
-draw_option("green", "Green/black style (default)");
-draw_option("blue", "Blue style");
-echo "
-    </select>
-    &nbsp;&nbsp;
-    <input type=\"submit\" value=\"Change!\">
+draw_bigbox_begin("Options");
+draw_bigbox_text("Here you can change the color scheme of this homepage. Currently, there are two different styles: blue, which looks like the KDE homepages and green (default) which has green and black colors and looks cooler.<br><br>Note that your browser must have cookies enabled for this site for this to work.<br><br>");
 
-";
+draw_bigbox_text("Your style:");
+
+draw_bigbox_text(" <form class=\"style\" action=\"$filename\" method=\"get\"><select size=\"1\" name=\"style\"><option value='green'>Green/black style (default)</option><option value='blue'>Blue style</option></select><input type=\"submit\" value=\"Change!\">");
+
+draw_bigbox_end();
+
 main_area_end();
 main_table_end();
 
