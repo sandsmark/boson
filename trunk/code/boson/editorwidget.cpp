@@ -359,9 +359,9 @@ void EditorWidget::slotGameStarted()
  slotPlace(0);
 }
 
-void EditorWidget::startScenario(const QString& playFieldId)
+void EditorWidget::startScenarioAndGame()
 {
- BosonWidgetBase::startScenario(playFieldId);
+ BosonWidgetBase::startScenarioAndGame();
  slotChangeLocalPlayer(0);
  d->mPlayerAction->setCurrentItem(0);
 }

@@ -104,7 +104,7 @@ protected:
 	virtual void initDisplayManager();
 	virtual void initConnections();
 	virtual void setBosonXMLFile();
-	virtual void startScenario(const QString& playFieldId);
+	virtual void startScenarioAndGame();
 
 	void savePlayField(const QString& fileName);
 
