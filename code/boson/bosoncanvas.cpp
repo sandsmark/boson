@@ -545,18 +545,20 @@ void BosonCanvas::explosion(const BoVector3& pos, long int damage, float range, 
  float dist;
  QValueList<Unit*> l = collisions()->unitCollisionsInSphere(pos, (int)r);
  for (unsigned int i = 0; i < l.count(); i++) {
-	dist = l[i]->distance(pos);
+	Unit* u = l[i];
+	// We substract unit's size from actual distance
+	dist = QMAX(u->distance(pos) - QMIN(u->width(), u->height()), 0);
 	if (dist <= fr * fr || r == fr) {
 		d = damage;
 	} else {
 		d = (long int)((1 - (sqrt(dist) - fr) / (r - fr)) * damage);
 	}
-	unitDamaged(l[i], d);
-	if (l[i]->isDestroyed() && owner) {
-		if (l[i]->isFacility()) {
-			owner->statistics()->addDestroyedFacility(l[i], owner);
+	unitDamaged(u, d);
+	if (u->isDestroyed() && owner) {
+		if (u->isFacility()) {
+			owner->statistics()->addDestroyedFacility(u, owner);
 		} else {
-			owner->statistics()->addDestroyedMobileUnit(l[i], owner);
+			owner->statistics()->addDestroyedMobileUnit(u, owner);
 		}
 	}
  }
