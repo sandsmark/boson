@@ -2,13 +2,10 @@
 #include "bosonminimap.h"
 
 #include "cell.h"
-#include "defines.h"
-#include "unitbase.h"
-#include "player.h"
+#include "bosonmap.h"
 #include "speciestheme.h"
 #include "unit.h"
-#include "bosonmap.h"
-#include "unitproperties.h"
+#include "defines.h"
 
 #include <kdebug.h>
 
@@ -164,29 +161,18 @@ void BosonMiniMap::slotAddUnit(Unit* unit, int x, int y)
 	kdError() << k_funcinfo << ": NULL unit" << endl;
 	return;
  }
- Player* owner = unit->owner();
- if (!owner) {
-	kdError() << k_funcinfo << ": NULL owner" << endl;
-	return;
- }
- SpeciesTheme* theme = owner->speciesTheme();
+ SpeciesTheme* theme = unit->speciesTheme();
  QColor color;
  if (!theme) {
 	kdError() << k_funcinfo << ": NULL species theme" << endl;
 	color = COLOR_UNKNOWN;
  } else {
-	color = unit->owner()->speciesTheme()->teamColor();
+	color = theme->teamColor();
  }
  if (color == green) { // green on gren ...
 	color = darkGreen;
  }
- const UnitProperties* prop = unit->unitProperties();
- if (!prop) {
-	kdError() << k_funcinfo << ": NULL unitProperties" << endl;
-	setPoint(x, y, color); // let's hope..
-	return;
- }
- if (prop->isFacility()) {
+ if (unit->isFacility()) {
 	setPoint(x, y, color);
  } else {
 	setPoint(x, y, color);
