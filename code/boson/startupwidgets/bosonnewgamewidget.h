@@ -124,8 +124,6 @@ private:
 	BosonNewGameWidgetPrivate* d;
 	KPlayer* mHighlightedPlayer;
 	QColor mPlayerColor;
-	QValueList<QColor> mAvailableColors;
-	int mMap;
 	int mMinPlayers;
 	int mMaxPlayers;
 

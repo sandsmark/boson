@@ -80,6 +80,8 @@ BosonNewGameWidget::BosonNewGameWidget(BosonStartupNetwork* interface, QWidget* 
  mNetworkInterface = interface;
 
  mHighlightedPlayer = 0;
+ mMaxPlayers = 0;
+ mMinPlayers = 0;
 
  initSpecies();
  initPlayFields();
@@ -255,14 +257,14 @@ void BosonNewGameWidget::initColors()
 	boError() << k_funcinfo << "local player has NULL species theme" << endl;
 	return;
  }
- mAvailableColors.clear();
- mAvailableColors = boGame->availableTeamColors();
- mAvailableColors.prepend(localPlayer()->speciesTheme()->teamColor());
+
+ QValueList<QColor> availableColors = boGame->availableTeamColors();
+ availableColors.prepend(localPlayer()->speciesTheme()->teamColor());
 
  // first set all taken, then make those available, that are still available
  mLocalColor->setAllTaken(true);
- for(unsigned int i = 0; i < mAvailableColors.count(); i++) {
-	mLocalColor->setTaken(mAvailableColors[i], false);
+ for(unsigned int i = 0; i < availableColors.count(); i++) {
+	mLocalColor->setTaken(availableColors[i], false);
  }
 }
 
