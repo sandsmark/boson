@@ -93,6 +93,7 @@ BoMeshRendererVBO::BoMeshRendererVBO() : BoMeshRendererVertexArray()
 #warning cannot find GLX_ARB_get_proc_address - cant use vbo extension
  boWarning() << k_funcinfo << "GLX_ARB_get_proc_address not available. please report this with information about your system!" << endl;
 #endif
+ mPreviousModel = 0;
 }
 
 BoMeshRendererVBO::~BoMeshRendererVBO()
@@ -178,6 +179,10 @@ void BoMeshRendererVBO::setModel(BosonModel* model)
 	BoMeshRendererVertexArray::setModel(model);
 	return;
  }
+ if (model == mPreviousModel) {
+	return;
+ }
+ mPreviousModel = model;
  BoMeshRendererModelDataVBO* data = (BoMeshRendererModelDataVBO*)model->meshRendererModelData();
  BO_CHECK_NULL_RET(data);
  if (data->mVBO) { // VBO activated
@@ -245,5 +250,16 @@ bool BoMeshRendererVBO::hasVBOExtension() const
 	return false;
  }
  return true;
+}
+
+void BoMeshRendererVBO::initFrame()
+{
+ BoMeshRendererVertexArray::initFrame();
+ mPreviousModel = 0;
+}
+
+void BoMeshRendererVBO::deinitFrame()
+{
+ BoMeshRendererVertexArray::deinitFrame();
 }
 
