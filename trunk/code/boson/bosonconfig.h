@@ -20,12 +20,120 @@
 #define BOSONCONFIG_H
 
 #include "global.h"
+#include <qstring.h>
 
 class QColor;
-class QString;
 class KConfig;
+class BosonConfig;
 
 #define boConfig BosonConfig::bosonConfig()
+
+
+class BoConfigEntry
+{
+public:
+	BoConfigEntry(BosonConfig* parent, const QString& key);
+	virtual ~BoConfigEntry();
+
+	/**
+	 * Set the current group.
+	 * By default just conf->setGroup("Boson")
+	 *
+	 * Replace this to create config entries e.g. for the editor only which
+	 * go to a separate group.
+	 **/
+	virtual void activate(KConfig* conf);
+
+	virtual void save(KConfig* conf) = 0;
+	virtual void load(KConfig* conf) = 0;
+
+	const QString& key() const { return mKey; }
+
+private:
+	QString mKey;
+};
+
+//AB: we can't use a template because of KConfig::readEntry()
+class BoConfigBoolEntry : public BoConfigEntry
+{
+public:
+	BoConfigBoolEntry(BosonConfig* parent, const QString& key, bool defaultValue);
+	virtual ~BoConfigBoolEntry() {}
+
+	bool value() const { return mValue; }
+	void setValue(bool v) { mValue = v; }
+
+	virtual void save(KConfig* conf);
+	virtual void load(KConfig* conf);
+
+private:
+	bool mValue;
+};
+
+class BoConfigIntEntry : public BoConfigEntry
+{
+public:
+	BoConfigIntEntry(BosonConfig* parent, const QString& key, int defaultValue);
+	virtual ~BoConfigIntEntry() {}
+
+	unsigned int value() const { return mValue; }
+	void setValue(int v) { mValue = v; }
+
+	virtual void save(KConfig* conf);
+	virtual void load(KConfig* conf);
+
+private:
+	int mValue;
+};
+
+
+class BoConfigUIntEntry : public BoConfigEntry
+{
+public:
+	BoConfigUIntEntry(BosonConfig* parent, const QString& key, unsigned int defaultValue);
+	virtual ~BoConfigUIntEntry() {}
+
+	unsigned int value() const { return mValue; }
+	void setValue(unsigned int v) { mValue = v; }
+
+	virtual void save(KConfig* conf);
+	virtual void load(KConfig* conf);
+
+private:
+	unsigned int mValue;
+};
+
+class BoConfigDoubleEntry : public BoConfigEntry
+{
+public:
+	BoConfigDoubleEntry(BosonConfig* parent, const QString& key, double defaultValue);
+	virtual ~BoConfigDoubleEntry() {}
+
+	double value() const { return mValue; }
+	void setValue(double v) { mValue = v; }
+
+	virtual void save(KConfig* conf);
+	virtual void load(KConfig* conf);
+
+private:
+	double mValue;
+};
+
+class BoConfigStringEntry : public BoConfigEntry
+{
+public:
+	BoConfigStringEntry(BosonConfig* parent, const QString& key, QString defaultValue);
+	virtual ~BoConfigStringEntry() {}
+
+	const QString& value() const { return mValue; }
+	void setValue(const QString& v) { mValue = v; }
+
+	virtual void save(KConfig* conf);
+	virtual void load(KConfig* conf);
+
+private:
+	QString mValue;
+};
 
 /**
  * Boson has two different types of config entries, you can find both of them in
@@ -84,37 +192,38 @@ public:
 	static void saveCursorDir(const QString& dir, KConfig* conf = 0);
 	static QString readCursorDir(KConfig* conf = 0);
 
-	void setSound(bool s) { mSound = s; }
-	bool sound() const { return mSound; }
-	void setMusic(bool m) { mMusic = m; }
-	bool music() const { return mMusic; }
-	void setArrowKeyStep(unsigned int k) { mArrowKeyStep = k; }
-	unsigned int arrowKeyStep() const { return mArrowKeyStep; }
-	void setMiniMapScale(double s) { mMiniMapScale = s; }
-	double miniMapScale() const { return mMiniMapScale; }
-	void setMiniMapZoom(double z) { mMiniMapZoom= z; }
-	double miniMapZoom() const { return mMiniMapZoom; }
-	void setCommandButtonsPerRow(int b);
-	int commandButtonsPerRow() const;
-	void setRMBMove(bool m) { mRMBMove = m; }
-	bool rmbMove() const { return mRMBMove; }
-	void setMMBMove(bool m) { mMMBMove = m; }
-	bool mmbMove() const { return mMMBMove; }
-	void setUpdateInterval(unsigned int i) { mUpdateInterval = i; }
-	unsigned int updateInterval() const { return mUpdateInterval; }
-	void setShowMenubarInGame(bool s) { mShowMenubarInGame = s; }
-	bool showMenubarInGame() const { return mShowMenubarInGame; }
-	void setShowMenubarOnStartup(bool s) { mShowMenubarOnStartup = s; }
-	bool showMenubarOnStartup() const { return mShowMenubarOnStartup; }
+	void setSound(bool s) { mSound->setValue(s); }
+	bool sound() const { return mSound->value(); }
+	void setMusic(bool m) { mMusic->setValue(m); }
+	bool music() const { return mMusic->value(); }
+	void setRMBMove(bool m) { mRMBMove->setValue(m); }
+	bool rmbMove() const { return mRMBMove->value(); }
+	void setMMBMove(bool m) { mMMBMove->setValue(m); }
+	bool mmbMove() const { return mMMBMove->value(); }
+	void setShowMenubarInGame(bool s) { mShowMenubarInGame->setValue(s); }
+	bool showMenubarInGame() const { return mShowMenubarInGame->value(); }
+	void setShowMenubarOnStartup(bool s) { mShowMenubarOnStartup->setValue(s); }
+	bool showMenubarOnStartup() const { return mShowMenubarOnStartup->value(); }
+	void setArrowKeyStep(unsigned int k) { mArrowKeyStep->setValue(k); }
+	unsigned int arrowKeyStep() const { return mArrowKeyStep->value(); }
+	void setUpdateInterval(unsigned int i) { mUpdateInterval->setValue(i); }
+	unsigned int updateInterval() const { return mUpdateInterval->value(); }
+	void setMiniMapScale(double s) { mMiniMapScale->setValue(s); }
+	double miniMapScale() const { return mMiniMapScale->value(); }
+	void setMiniMapZoom(double z) { mMiniMapZoom->setValue(z); }
+	double miniMapZoom() const { return mMiniMapZoom->value(); }
+	void setCommandButtonsPerRow(int b) { mCommandButtonsPerRow->setValue(b); }
+	int commandButtonsPerRow() const { return mCommandButtonsPerRow->value(); }
 
 	/**
 	 * @param m How "sensitive" the edge is. I.e. the number the cursor must
 	 * be in range of m pixels to an edge of the window. 0 to disable
 	 **/
-	void setCursorEdgeSensity(unsigned int m) { mCursorEdgeSensity = m; }
-	unsigned int cursorEdgeSensity() const { return mCursorEdgeSensity; }
+	void setCursorEdgeSensity(unsigned int m) { mCursorEdgeSensity->setValue(m); }
+	unsigned int cursorEdgeSensity() const { return mCursorEdgeSensity->value(); }
 
 	DebugMode debugMode() const;
+
 	/**
 	 * Change the debugging mode. Note that this isn't saved to the config,
 	 * so this is lost on quit.
@@ -136,42 +245,11 @@ public:
 	void save(bool editor = false, KConfig* conf = 0);
 	void reset(KConfig* conf = 0);
 
+	void addConfigEntry(BoConfigEntry*);
+
 protected:
-	bool readSound(KConfig* conf);
-	void saveSound(KConfig* conf);
-
-	bool readMusic(KConfig* conf);
-	void saveMusic(KConfig* conf);
-
 	int readCommandButtonsPerRow(KConfig* conf);
 	void saveCommandButtonsPerRow(KConfig* conf);
-
-	unsigned int readArrowKeyStep(KConfig* conf);
-	void saveArrowKeyStep(KConfig* conf);
-
-	void saveMiniMapScale(KConfig* conf);
-	double readMiniMapScale(KConfig* conf);
-
-	void saveMiniMapZoom(KConfig* conf);
-	double readMiniMapZoom(KConfig* conf);
-
-	void saveRMBMove(KConfig* conf);
-	bool readRMBMove(KConfig* conf);
-
-	void saveMMBMove(KConfig* conf);
-	bool readMMBMove(KConfig* conf);
-
-	void saveCursorEdgeSensity(KConfig* conf);
-	unsigned int readCursorEdgeSensity(KConfig* conf);
-
-	unsigned int readUpdateInterval(KConfig* conf);
-	void saveUpdateInterval(KConfig* conf);
-
-	void saveShowMenubarInGame(KConfig* conf);
-	bool readShowMenubarInGame(KConfig* conf);
-
-	void saveShowMenubarOnStartup(KConfig* conf);
-	bool readShowMenubarOnStartup(KConfig* conf);
 
 private:
 	static BosonConfig* mBosonConfig;
@@ -179,18 +257,24 @@ private:
 	class BosonConfigPrivate;
 	BosonConfigPrivate* d;
 
-	bool mSound;
-	bool mMusic;
+	// note that ALL BoConfigEntry objects must be new'ed in the
+	// BosonConfig c'tor !
+	BoConfigBoolEntry* mSound;
+	BoConfigBoolEntry* mMusic;
+	BoConfigBoolEntry* mMMBMove;
+	BoConfigBoolEntry* mRMBMove;
+	BoConfigBoolEntry* mShowMenubarInGame;
+	BoConfigBoolEntry* mShowMenubarOnStartup;
+	BoConfigIntEntry* mCommandButtonsPerRow;
+	BoConfigUIntEntry* mArrowKeyStep;
+	BoConfigUIntEntry* mCursorEdgeSensity;
+	BoConfigUIntEntry* mUpdateInterval;
+	BoConfigDoubleEntry* mMiniMapScale;
+	BoConfigDoubleEntry* mMiniMapZoom;
+
+	// NOT stored to config file!
 	bool mDisableSound;
-	double mMiniMapScale;
-	double mMiniMapZoom;
-	unsigned int mArrowKeyStep;
-	bool mRMBMove;
-	bool mMMBMove;
-	unsigned int mCursorEdgeSensity;
-	unsigned int mUpdateInterval;
-	bool mShowMenubarInGame;
-	bool mShowMenubarOnStartup;
+	DebugMode mDebugMode;
 };
 
 #endif

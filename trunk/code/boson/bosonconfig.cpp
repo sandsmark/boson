@@ -27,6 +27,113 @@
 static KStaticDeleter<BosonConfig> sd;
 BosonConfig* BosonConfig::mBosonConfig = 0;
 
+BoConfigEntry::BoConfigEntry(BosonConfig* parent, const QString& key)
+{
+ mKey = key;
+ parent->addConfigEntry(this);
+}
+
+BoConfigEntry::~BoConfigEntry()
+{
+}
+
+void BoConfigEntry::activate(KConfig* conf)
+{
+ conf->setGroup("Boson");
+}
+
+BoConfigBoolEntry::BoConfigBoolEntry(BosonConfig* parent, const QString& key, bool defaultValue)
+		: BoConfigEntry(parent, key)
+{
+ mValue = defaultValue;
+}
+
+void BoConfigBoolEntry::save(KConfig* conf)
+{
+ activate(conf);
+ conf->writeEntry(key(), mValue);
+}
+
+void BoConfigBoolEntry::load(KConfig* conf)
+{
+ activate(conf);
+ mValue = conf->readBoolEntry(key(), mValue);
+}
+
+BoConfigIntEntry::BoConfigIntEntry(BosonConfig* parent, const QString& key, int defaultValue)
+		: BoConfigEntry(parent, key)
+{
+ mValue = defaultValue;
+}
+
+void BoConfigIntEntry::save(KConfig* conf)
+{
+ activate(conf);
+ conf->writeEntry(key(), mValue);
+}
+
+void BoConfigIntEntry::load(KConfig* conf)
+{
+ activate(conf);
+ mValue = conf->readNumEntry(key(), mValue);
+}
+
+BoConfigUIntEntry::BoConfigUIntEntry(BosonConfig* parent, const QString& key, unsigned int defaultValue)
+		: BoConfigEntry(parent, key)
+{
+ mValue = defaultValue;
+}
+
+void BoConfigUIntEntry::save(KConfig* conf)
+{
+ activate(conf);
+ conf->writeEntry(key(), mValue);
+}
+
+void BoConfigUIntEntry::load(KConfig* conf)
+{
+ activate(conf);
+ mValue = conf->readUnsignedNumEntry(key(), mValue);
+}
+
+BoConfigDoubleEntry::BoConfigDoubleEntry(BosonConfig* parent, const QString& key, double defaultValue)
+		: BoConfigEntry(parent, key)
+{
+ mValue = defaultValue;
+}
+
+void BoConfigDoubleEntry::save(KConfig* conf)
+{
+ activate(conf);
+ conf->writeEntry(key(), mValue);
+}
+
+void BoConfigDoubleEntry::load(KConfig* conf)
+{
+ activate(conf);
+ mValue = conf->readDoubleNumEntry(key(), mValue);
+}
+
+BoConfigStringEntry::BoConfigStringEntry(BosonConfig* parent, const QString& key, QString defaultValue)
+		: BoConfigEntry(parent, key)
+{
+ mValue = defaultValue;
+}
+
+void BoConfigStringEntry::save(KConfig* conf)
+{
+ activate(conf);
+ conf->writeEntry(key(), mValue);
+}
+
+void BoConfigStringEntry::load(KConfig* conf)
+{
+ activate(conf);
+ mValue = conf->readEntry(key(), mValue);
+}
+
+
+
 class BosonConfig::BosonConfigPrivate
 {
 public:
@@ -34,30 +141,28 @@ public:
 	{
 	}
 
-	int mCommandButtonsPerRow;
-
-	// don't save this to the config
-	DebugMode mDebugMode;
+	QPtrList<BoConfigEntry> mConfigEntries;
 };
 
 BosonConfig::BosonConfig(KConfig* conf)
 {
  d = new BosonConfigPrivate;
- 
- // set the initial defaults
- mSound = true;
- mMusic = true;
- d->mCommandButtonsPerRow = 3;
- d->mDebugMode = DebugNormal;
- mArrowKeyStep = 10;
- mMiniMapScale = 2.0;
- mMiniMapZoom = 1.0;
- mRMBMove = true;
- mMMBMove = true;
- mCursorEdgeSensity = 20;
- mUpdateInterval = 25;
- mShowMenubarInGame = true;
- mShowMenubarOnStartup = false;
+ d->mConfigEntries.setAutoDelete(true);
+
+ mSound = new BoConfigBoolEntry(this, "Sound", true);
+ mMusic = new BoConfigBoolEntry(this, "Music", true);
+ mMMBMove = new BoConfigBoolEntry(this, "MMBMove", true);
+ mRMBMove = new BoConfigBoolEntry(this, "RMBMove", true);
+ mShowMenubarInGame = new BoConfigBoolEntry(this, "ShowMenubarInGame", true);
+ mShowMenubarOnStartup = new BoConfigBoolEntry(this, "ShowMenubarOnStartup", false);
+ mCommandButtonsPerRow = new BoConfigIntEntry(this, "CommandButtonsPerRow", 3);
+ mArrowKeyStep = new BoConfigUIntEntry(this, "ArrowKeyStep", 10);
+ mCursorEdgeSensity = new BoConfigUIntEntry(this, "CursorEdgeSensity", 20);
+ mUpdateInterval = new BoConfigUIntEntry(this, "GLUpdateInterval", 25);
+ mMiniMapScale = new BoConfigDoubleEntry(this, "MiniMapScale", 2.0);
+ mMiniMapZoom = new BoConfigDoubleEntry(this, "MiniMapZoom", 1.0);
+
+ mDebugMode = DebugNormal;
 
  mDisableSound = false;
 
@@ -67,6 +172,7 @@ BosonConfig::BosonConfig(KConfig* conf)
 
 BosonConfig::~BosonConfig()
 {
+ d->mConfigEntries.clear();
  delete d;
 }
 
@@ -76,6 +182,14 @@ void BosonConfig::initBosonConfig()
 	return;
  }
  sd.setObject(mBosonConfig, new BosonConfig);
+}
+
+void BosonConfig::addConfigEntry(BoConfigEntry* c)
+{
+ if (!c) {
+	return;
+ }
+ d->mConfigEntries.append(c);
 }
 
 QString BosonConfig::readLocalPlayerName(KConfig* conf)
@@ -216,172 +330,6 @@ void BosonConfig::saveCursorDir(const QString& dir, KConfig* conf)
  conf->setGroup(oldGroup);
 }
 
-void BosonConfig::saveSound(KConfig* conf)
-{
- conf->setGroup("Boson");
- conf->writeEntry("Sound", sound());
-}
-
-bool BosonConfig::readSound(KConfig* conf)
-{
- conf->setGroup("Boson");
- bool s = conf->readBoolEntry("Sound", sound());
- return s;
-}
-
-void BosonConfig::saveMusic(KConfig* conf)
-{
- conf->setGroup("Boson");
- conf->writeEntry("Music", music());
-}
-
-bool BosonConfig::readMusic(KConfig* conf)
-{
- conf->setGroup("Boson");
- bool m = conf->readBoolEntry("Music", music());
- return m;
-}
-
-void BosonConfig::saveMiniMapScale(KConfig* conf)
-{
- conf->setGroup("Boson");
- conf->writeEntry("MiniMapScale", miniMapScale());
-}
-
-double BosonConfig::readMiniMapScale(KConfig* conf)
-{
- conf->setGroup("Boson");
- double s = conf->readDoubleNumEntry("MiniMapScale", miniMapScale());
- return s;
-}
-
-void BosonConfig::saveMiniMapZoom(KConfig* conf)
-{
- conf->setGroup("Boson");
- conf->writeEntry("MiniMapZoom", miniMapZoom());
-}
-
-double BosonConfig::readMiniMapZoom(KConfig* conf)
-{
- conf->setGroup("Boson");
- double z = conf->readDoubleNumEntry("MiniMapZoom", miniMapZoom());
- return z;
-}
-
-void BosonConfig::saveArrowKeyStep(KConfig* conf)
-{
- conf->setGroup("Boson");
- conf->writeEntry("ArrowKeyStep", arrowKeyStep());
-}
-
-unsigned int BosonConfig::readArrowKeyStep(KConfig* conf)
-{
- conf->setGroup("Boson");
- unsigned int k = conf->readUnsignedNumEntry("ArrowKeyStep", arrowKeyStep());
- return k;
-}
-
-int BosonConfig::readCommandButtonsPerRow(KConfig* conf)
-{
- conf->setGroup("Boson");
- int b = conf->readNumEntry("CommandButtonsPerRow", commandButtonsPerRow());
- return b;
-}
-
-void BosonConfig::saveCommandButtonsPerRow(KConfig* conf)
-{
- conf->setGroup("Boson");
- conf->writeEntry("CommandButtonsPerRow", commandButtonsPerRow());
-}
-
-bool BosonConfig::readRMBMove(KConfig* conf)
-{
- conf->setGroup("Boson");
- bool m = conf->readBoolEntry("RMBMove", true);
- return m;
-}
-
-void BosonConfig::saveRMBMove(KConfig* conf)
-{
- conf->setGroup("Boson");
- conf->writeEntry("RMBMove", rmbMove());
-}
-
-bool BosonConfig::readMMBMove(KConfig* conf)
-{
- conf->setGroup("Boson");
- bool m = conf->readBoolEntry("MMBMove", true);
- return m;
-}
-
-void BosonConfig::saveMMBMove(KConfig* conf)
-{
- conf->setGroup("Boson");
- conf->writeEntry("MMBMove", mmbMove());
-}
-
-bool BosonConfig::readShowMenubarInGame(KConfig* conf)
-{
- conf->setGroup("Boson");
- bool m = conf->readBoolEntry("ShowMenubarInGame", true);
- return m;
-}
-
-void BosonConfig::saveShowMenubarInGame(KConfig* conf)
-{
- conf->setGroup("Boson");
- conf->writeEntry("ShowMenubarInGame", showMenubarInGame());
-}
-
-bool BosonConfig::readShowMenubarOnStartup(KConfig* conf)
-{
- conf->setGroup("Boson");
- bool m = conf->readBoolEntry("ShowMenubarOnStartup", false);
- return m;
-}
-
-void BosonConfig::saveShowMenubarOnStartup(KConfig* conf)
-{
- conf->setGroup("Boson");
- conf->writeEntry("ShowMenubarOnStartup", showMenubarOnStartup());
-}
-
-unsigned int BosonConfig::readCursorEdgeSensity(KConfig* conf)
-{
- conf->setGroup("Boson");
- unsigned int s = conf->readUnsignedNumEntry("CursorEdgeSensity", 20);
- return s;
-}
-
-void BosonConfig::saveCursorEdgeSensity(KConfig* conf)
-{
- conf->setGroup("Boson");
- conf->writeEntry("CursorEdgeSensity", cursorEdgeSensity());
-}
-
-void BosonConfig::setCommandButtonsPerRow(int b)
-{
- d->mCommandButtonsPerRow = b;
-}
-
-int BosonConfig::commandButtonsPerRow() const
-{
- return d->mCommandButtonsPerRow;
-}
-
-void BosonConfig::saveUpdateInterval(KConfig* conf)
-{
- conf->setGroup("Boson");
- conf->writeEntry("GLUpdateInterval", updateInterval());
-}
-
-unsigned int BosonConfig::readUpdateInterval(KConfig* conf)
-{
- conf->setGroup("Boson");
- unsigned int i = conf->readUnsignedNumEntry("GLUpdateInterval", updateInterval());
- return i;
-}
-
 void BosonConfig::reset(KConfig* conf)
 {
  if (!conf) {
@@ -390,23 +338,15 @@ void BosonConfig::reset(KConfig* conf)
  QString oldGroup = conf->group();
  // the old group is already stored here so we don't have to re-set it in every
  // read function
- setMusic(readMusic(conf));
- setSound(readSound(conf));
- setCommandButtonsPerRow(readCommandButtonsPerRow(conf));
- setArrowKeyStep(readArrowKeyStep(conf));
- setMiniMapScale(readMiniMapScale(conf));
- setMiniMapZoom(readMiniMapZoom(conf));
- setRMBMove(readRMBMove(conf));
- setMMBMove(readMMBMove(conf));
- setCursorEdgeSensity(readCursorEdgeSensity(conf));
- setUpdateInterval(readUpdateInterval(conf));
- setShowMenubarInGame(readShowMenubarInGame(conf));
- setShowMenubarOnStartup(readShowMenubarOnStartup(conf));
+ QPtrListIterator<BoConfigEntry> it(d->mConfigEntries);
+ for (; it.current(); ++it) {
+	it.current()->load(conf);
+ }
 
  conf->setGroup(oldGroup);
 }
 
-void BosonConfig::save(bool editor, KConfig* conf)
+void BosonConfig::save(bool /*editor*/, KConfig* conf)
 {
  if (!conf) {
 	conf = kapp->config();
@@ -414,20 +354,9 @@ void BosonConfig::save(bool editor, KConfig* conf)
  QString oldGroup = conf->group();
  // the old group is already stored here so we don't have to re-set it in every
  // save function
- saveMusic(conf);
- saveSound(conf);
- saveCommandButtonsPerRow(conf);
- saveArrowKeyStep(conf);
- saveMiniMapScale(conf);
- saveMiniMapZoom(conf);
- saveRMBMove(conf);
- saveMMBMove(conf);
- saveCursorEdgeSensity(conf);
- saveUpdateInterval(conf);
- saveShowMenubarInGame(conf);
- saveShowMenubarOnStartup(conf);
- if (!editor) {
-	// place configs here that should not be saved in editor mode
+ QPtrListIterator<BoConfigEntry> it(d->mConfigEntries);
+ for (; it.current(); ++it) {
+	it.current()->save(conf);
  }
 
  conf->setGroup(oldGroup);
@@ -435,10 +364,11 @@ void BosonConfig::save(bool editor, KConfig* conf)
 
 void BosonConfig::setDebugMode(DebugMode m)
 {
- d->mDebugMode = m;
+ mDebugMode = m;
 }
 
 BosonConfig::DebugMode BosonConfig::debugMode() const
 {
- return d->mDebugMode;
+ return mDebugMode;
 }
+
