@@ -292,7 +292,7 @@ BosonConfig::BosonConfig(KConfig* conf)
 
  mDebugMode = DebugNormal;
 
- mDisableSound = false;
+ mDisableSound = true; // disabled by default, to make bounit and other non-sound applications work correctly, without calling setDisableSound(true) explicitly.
  mAIDelay = 3.0;
  mWantDirect = true;
  mWireFrames = false;
