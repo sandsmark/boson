@@ -109,7 +109,7 @@ global $filename;
 global $basedir;
 global $style;
 
-sidebar_box_begin("<a class=\"statslink\" href=\"${basedir}stats.php\">Statistics</a>");
+sidebar_box_begin("<a href=\"${basedir}stats.php\">Statistics</a>");
 
 // Last update
 echo "
