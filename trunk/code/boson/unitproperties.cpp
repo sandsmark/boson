@@ -129,6 +129,8 @@ void UnitProperties::loadUnitType(const QString& fileName)
 	mProducer = conf.readUnsignedNumEntry("Producer", (unsigned int)mTerrain);
 	loadMobileProperties(&conf);
  }
+
+ loadTextureNames(&conf);
 }
 
 void UnitProperties::loadMobileProperties(KSimpleConfig* conf)
@@ -162,6 +164,23 @@ void UnitProperties::loadFacilityProperties(KSimpleConfig* conf)
 		false);
  mFacilityProperties->mCanRefineOil= conf->readBoolEntry("CanRefineOil", false);
  mFacilityProperties->mConstructionFrames= conf->readUnsignedNumEntry("ConstructionSteps", FACILITY_CONSTRUCTION_STEPS);
+}
+
+void UnitProperties::loadTextureNames(KSimpleConfig* conf)
+{
+ if (!conf->hasGroup("Textures")) {
+	return;
+ }
+ mTextureNames.clear();
+ conf->setGroup("Textures");
+ QStringList textures = conf->readListEntry("Textures");
+ for (unsigned int i = 0; i < textures.count(); i++) {
+	QString longName = conf->readEntry(textures[i], QString::null);
+	if (!longName.isEmpty()) {
+		mTextureNames.insert(textures[i], longName);
+		kdDebug() << "mapping " << textures[i] << "->" << longName << endl;
+	}
+ }
 }
 
 bool UnitProperties::isMobile() const

@@ -39,6 +39,8 @@ public:
 	BosonModel(const QString& dir, const QString& file);
 	~BosonModel();
 
+	void loadModel();
+
 	void setFrame(unsigned int frame);
 	unsigned int frame() const { return mFrame; }
 
@@ -57,6 +59,12 @@ public:
 	inline int height(int /*frame*/) const { return mHeight; }
 	inline unsigned int frames() const { return mFrames.count(); }
 
+	/**
+	 * Since .3ds files seem to supprt filenames of 8+3 chars only you can
+	 * provide a map which assigns longer names here.
+	 **/
+	void setLongNames(QMap<QString, QString> names) { mTextureNames = names; }
+
 protected:
 	void loadTextures();
 	void createDisplayLists();
@@ -64,9 +72,11 @@ protected:
 
 	/**
 	 * Convert a 3ds texture name to a clean name. That means call
-	 * QString::lower() on it, currently.
+	 * QString::lower() on it, currently. It'll also map the "short name"
+	 * from the .3ds file to the "long name" that can be specified e.g. in
+	 * units index.desktop files. See setLongNames
 	 **/
-	QString cleanTextureName(const char*);
+	QString cleanTextureName(const char* name);
 
 	/**
 	 * @return The directory that contains the .3ds file. Usually the unit
@@ -80,12 +90,14 @@ private:
 	void init();
 
 private:
+	QMap<QString, QString> mTextureNames;
 	GLuint mDisplayList;
 	Lib3dsFile* m3ds;
 	QMap<QString, GLuint> mTextures;
 	QMap<int, GLuint> mFrames;
 	BosonTextureArray* mTextureArray;
 	QString mDirectory;
+	QString mFile;
 	unsigned int mFrame;
 
 	// warning! width and height are still in canvas sizes!
