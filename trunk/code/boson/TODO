@@ -44,7 +44,6 @@ General TODOs
   automatically?
 - BosonTiles: use KPixmapSplitter (kdelibs/kdefx)
 - MiniMap: darker green
-- emit signalSingleUnitSelected when selectRect contains only 1 unit
 - IdReloadState also makes Player emit signalUnitChanged() - this might become a
   performance problem!! we need it for BosonCommandWidget
 
