@@ -563,6 +563,54 @@ class BoVector4
      **/
     inline GLfloat operator[](int i) const { return mData[i]; }
 
+    inline bool operator==(const BoVector4& v) const { return isEqual(v); }
+
+    inline bool isEqual(const BoVector4& v, float diff = 0.001) const
+    {
+      return isEqual(v.data(), mData, diff);
+    }
+    static bool isEqual(const float* v1, const float* v2, float diff = 0.001)
+    {
+      // avoid fabsf() as we don't include math.h
+      float d1 = v1[0] - v2[0];
+      float d2 = v1[1] - v2[1];
+      float d3 = v1[2] - v2[2];
+      float d4 = v1[3] - v2[3];
+      if (d1 < 0.0f)
+      {
+        d1 = -d1;
+      }
+      if (d2 < 0.0f)
+      {
+        d2 = -d2;
+      }
+      if (d3 < 0.0f)
+      {
+        d3 = -d3;
+      }
+      if (d4 < 0.0f)
+      {
+        d4 = -d4;
+      }
+      if (d1 > diff)
+      {
+        return false;
+      }
+      if (d2 > diff)
+      {
+        return false;
+      }
+      if (d3 > diff)
+      {
+        return false;
+      }
+      if (d4 > diff)
+      {
+        return false;
+      }
+      return true;
+    }
+
     /**
      * @return A string that contains the vector @p v. This string can be used
      * for debugging.
