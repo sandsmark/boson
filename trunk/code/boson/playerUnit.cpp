@@ -47,7 +47,7 @@ playerMobUnit::playerMobUnit(mobileMsg_t *msg, QObject* parent=0, const char *na
 	: visualMobUnit(msg,parent,name)
 	, state(MUS_NONE)
 {
-	asked_dx = asked_dy = 0;
+	asked_x = asked_y = 0;
 	turnTo(4); ///orzel : should be random
 	target = 0l;
 }
@@ -57,7 +57,8 @@ playerMobUnit::~playerMobUnit()
 	emit dying(this);
 }
 
-#define VECT_PRODUCT(dir) (pos_x[dir]*(ldy) - pos_y[dir]*(ldx))
+#define VECT_PRODUCT(dir)	(pos_x[dir]*(ldy) - pos_y[dir]*(ldx))
+#define SQ(x)			( (x) * (x) )
 
 bool playerMobUnit::getWantedMove(bosonMsgData *msg)
 {
@@ -91,7 +92,7 @@ bool playerMobUnit::getWantedMove(bosonMsgData *msg)
 				}
 			if (newdir != direction) {
 				turnTo(newdir); ///orzel : is this really useful
-				msg->move.dx = msg->move.dy = 0; msg->move.direction = direction;
+				msg->move.newx = x(); msg->move.newy = y(); msg->move.direction = direction;
 				asked_state = MUS_TURNING;
 				return true;
 				}
@@ -109,7 +110,7 @@ bool playerMobUnit::getWantedMove(bosonMsgData *msg)
 			ldx = dest_x - x() ; ldy = dest_y - y();
 
 			range = mobileProp[type].range;
-			if (target && range*range > ldx*ldx + ldy*ldy) // we are near enough to shoot at the target
+			if (target && SQ(range) > SQ(ldx) + SQ(ldy) ) // we are near enough to shoot at the target
 				return false;
 
 			vp1 = VECT_PRODUCT(getLeft(2));
@@ -119,32 +120,35 @@ bool playerMobUnit::getWantedMove(bosonMsgData *msg)
 			if ( abs(vp2) > abs(vp1) || abs(vp2) > abs(vp3)) // direction isn't optimal
 				turnTo ( ( abs(vp1) < abs(vp3) )? getLeft():getRight() ); // change it
 
-			if ( ( abs(ldx) + abs(ldy) ) < abs (mobileProp[type].speed) ) { ///orzel should be square
+			if ( ( SQ(ldx) + SQ(ldy) ) < SQ(mobileProp[type].speed) ) { ///orzel should be square
 				present_dx = ldx; present_dy = ldy;
 				}
-			msg->move.dx = asked_dx = present_dx ; msg->move.dy = asked_dy = present_dy; msg->move.direction = direction;
+			msg->move.newx = asked_x = x() + present_dx;
+			msg->move.newy = asked_y = y() + present_dy;
+			msg->move.direction = direction;
 
 			asked_state = MUS_MOVING;
-			if (checkMove( asked_dx, asked_dy)) return true;
+			if (checkMove( asked_x, asked_y)) return true;
 
-			if (asked_dy > asked_dx) {
+			if ( abs(present_dy) > abs(present_dx) )  {
 				/* we are going mainly along y axis, so try that first*/
-				if (asked_dy && checkMove( 0, asked_dy)) {
-					msg->move.dx = asked_dx = 0;
+				if (asked_y != y() && checkMove( x(), asked_y)) {
+					msg->move.newx = asked_x = x();
 					return true;
 					}
-				if (asked_dx && checkMove( asked_dx, 0)) {
-					msg->move.dy = asked_dy = 0;
+				if (asked_x != x() && checkMove( asked_x, y())) {
+					msg->move.newy = asked_y = y();
 					return true;
 					}
+
 			} else {
 				/* we are going mainly along x axis, so try that first*/
-				if (asked_dx && checkMove( asked_dx, 0)) {
-					msg->move.dy = asked_dy = 0;
+				if (asked_x != x() && checkMove( asked_x, y())) {
+					msg->move.newy = asked_y = y();
 					return true;
 					}
-				if (asked_dy && checkMove( 0, asked_dy)) {
-					msg->move.dx = asked_dx = 0;
+				if (asked_y != y() && checkMove( x(), asked_y)) {
+					msg->move.newx = asked_x = x();
 					return true;
 					}
 			}
@@ -164,12 +168,12 @@ bool playerMobUnit::getWantedMove(bosonMsgData *msg)
 }
 
 
-bool playerMobUnit::checkMove(int dx, int dy)
+bool playerMobUnit::checkMove(int newx, int newy)
 {
 	int ty;
 	int g;
 
-	Pix p = neighbourhood( x()+dx, y()+dy);
+	Pix p = neighbourhood( newx, newy);
 	
 	if (goFlag() == BO_GO_AIR) { // we are a flyer
 		for(; p; next(p) ) {
@@ -297,38 +301,40 @@ bool playerMobUnit::getWantedShoot(bosonMsgData *msg)
 
 
 /***** server orders *********/
-void playerMobUnit::doMoveBy(int dx, int dy)
+void playerMobUnit::doMoveTo(int newx, int newy)
 {
-	moveBy(dx,dy);
+	int dx = newx - x();
+	int dy = newy - y();
 
-	emit sig_move(dx, dy);
+	moveTo(newx,newy);
+	emit sig_moveTo(newx, newy);
+
 	if (sp_up) sp_up->moveBy(dx,dy);
 	if (sp_down) sp_down->moveBy(dx,dy);
 }
 
-void playerMobUnit::s_moveBy(int dx, int dy, int dir)
+void playerMobUnit::s_moveTo(int newx, int newy, int dir)
 {
 //orzel : use some kind of fuel
-//printf("Moved  : d(%d.%d)\n", dx, dy);
 if ( who!=who_am_i) {
 	/* this not my unit */
-	doMoveBy(dx,dy);
+	doMoveTo(newx, newy);
 	direction = dir;
-	frame(direction);
+	frame(dir);
 	return;
 	}
 
 /* else */
 
-if ( MUS_MOVING != asked_state && (dx!=0 || dy!=0) ) {
-	logf(LOG_ERROR, "playerMobUnit::s_moveBy while not moving, ignored");
+if ( MUS_MOVING != asked_state && (newx!=x() || newy!=y()) ) {
+	logf(LOG_ERROR, "playerMobUnit::s_moveTo while not moving, ignored");
 	return;
 	}
 
 if (dir != direction)
-	logf(LOG_ERROR, "playerMobUnit::s_moveBy : unexpected direction");
+	logf(LOG_ERROR, "playerMobUnit::s_moveTo : unexpected direction");
 
-doMoveBy(dx,dy);
+doMoveTo(newx, newy);
 
 if (x()==dest_x && y()==dest_y) {
 	//puts("going to MUS_NONE");
@@ -392,7 +398,7 @@ void playerMobUnit::u_attack(Unit *u)
 	shoot_timer	= -1;
 
 	connect( u, SIGNAL(dying(Unit*)), this, SLOT(targetDying(Unit*)) );
-	connect( u, SIGNAL(sig_move(int,int)), this, SLOT(targetMoveBy(int,int)) );
+	connect( u, SIGNAL(sig_moveTo(int,int)), this, SLOT(targetMoveTo(int,int)) );
 
 	do_goto(u->_x(), u->_y());
 
@@ -408,9 +414,9 @@ void playerMobUnit::targetDying(Unit *t)
 }
 
 
-void playerMobUnit::targetMoveBy(int dx, int dy)
+void playerMobUnit::targetMoveTo(int newx, int newy)
 {
-	do_goto(dest_x+dx, dest_y+dy);
+	do_goto(newx, newy);
 }
 
 
@@ -472,7 +478,7 @@ void playerFacility::targetDying(Unit*)
 }
 
 
-void playerFacility::targetMoveBy(int dx, int dy)
+void playerFacility::targetMoveTo(int newx, int newy)
 {
 }
 

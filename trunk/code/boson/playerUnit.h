@@ -47,8 +47,8 @@ class playerMobUnit : public visualMobUnit
  
   void	shooted(int _power);
 /* Server orders */
-	void  doMoveBy(int dx, int dy);
-  void  s_moveBy(int dx, int dy, int direction);
+	void  doMoveTo(int newx, int newy);
+  void  s_moveTo(int newx, int newy, int direction);
 
  protected:
   int	getLeft(int a=1) {return (direction+12-a)%12; }
@@ -62,7 +62,7 @@ class playerMobUnit : public visualMobUnit
 	
 signals:
 	void dying(Unit *);
-	void sig_move(int dx, int dy);
+	void sig_moveTo(int newx, int newy);
 
 public slots:
 	/* orders from user */
@@ -70,7 +70,7 @@ public slots:
   void  u_stop(void);	
   void  u_attack(Unit *);
   	void targetDying(Unit *);
-  	void targetMoveBy(int, int);
+  	void targetMoveTo(int, int);
 
  private :
   void	do_goto(int, int);
@@ -79,7 +79,7 @@ public slots:
 
 /* moving */
 	int 	dest_x, dest_y;
-	int	asked_dx, asked_dy;
+	int	asked_x, asked_y;
 	int	present_dx, present_dy;
 	mobUnitState	asked_state;
 
@@ -133,7 +133,7 @@ class playerFacility : public visualFacility
 
 public slots:
   	void	targetDying(Unit *);
-  	void	targetMoveBy(int, int);
+  	void	targetMoveTo(int, int);
 signals:
 	void	dying(Unit *);
 };

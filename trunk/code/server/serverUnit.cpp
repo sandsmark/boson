@@ -100,13 +100,15 @@ void serverMobUnit::r_moveBy(moveMsg_t &msg, int playerId, boBuffer * buffer)
 		return;
 		}
 	
-	boAssert(msg.dx >-200);
-	boAssert(msg.dy >-200);
-	boAssert(msg.dx < 200);
-	boAssert(msg.dy < 200);
+	int dx = __x - msg.newx;
+	int dy = __y - msg.newy;
+	int speed = mobileProp[type].speed;
+	dx *= dx; dy *= dy; speed *= speed;
+	boAssert( dx + dy < speed);
 
-	__x += msg.dx;
-	__y += msg.dy;
+	// XXX some check here ! no cheat allowed...
+	__x = msg.newx;
+	__y = msg.newy;
 
 	sendToKnown( MSG_MOBILE_MOVE_C, sizeof(msg), (bosonMsgData*)(&msg));
 }
