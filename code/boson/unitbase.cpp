@@ -61,12 +61,12 @@ UnitBase::UnitBase(const UnitProperties* prop)
 		KGamePropertyBase::PolicyLocal, "Shields");
  d->mId.registerData(IdId, dataHandler(), 
 		KGamePropertyBase::PolicyLocal, "ID"); // perhaps use dataHandler()->id() instead
- mRange.registerData(IdRange, dataHandler(), 
-		KGamePropertyBase::PolicyLocal, "Range");
+ mWeaponRange.registerData(IdWeaponRange, dataHandler(), 
+		KGamePropertyBase::PolicyLocal, "WeaponRange");
  mSightRange.registerData(IdSightRange, dataHandler(), 
 		KGamePropertyBase::PolicyLocal, "SightRange");
- mDamage.registerData(IdDamage, dataHandler(), 
-		KGamePropertyBase::PolicyLocal, "Damage");
+ mWeaponDamage.registerData(IdWeaponDamage, dataHandler(), 
+		KGamePropertyBase::PolicyLocal, "WeaponDamage");
  mWork.registerData(IdWork, dataHandler(), 
 		KGamePropertyBase::PolicyLocal, "Work");
  d->mReloadState.registerData(IdReloadState, dataHandler(), 
@@ -81,8 +81,8 @@ UnitBase::UnitBase(const UnitProperties* prop)
  d->mShields.setLocal(0); // doesn't have any shields
  d->mArmor.setLocal(0); // doesn't have any armor
  d->mId.setLocal(0);
- mDamage.setLocal(0);
- mRange.setLocal(0);
+ mWeaponDamage.setLocal(0);
+ mWeaponRange.setLocal(0);
  mSightRange.setLocal(0);
  d->mReloadState.setLocal(0);
  d->mDeletionTimer.setLocal(0);

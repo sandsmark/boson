@@ -441,8 +441,8 @@ void SpeciesTheme::loadNewUnit(UnitBase* unit)
  unit->setHealth(prop->health());
  unit->setArmor(prop->armor());
  unit->setShields(prop->shields());
- unit->setRange(prop->range());
- unit->setDamage(prop->damage());
+ unit->setWeaponRange(prop->range());
+ unit->setWeaponDamage(prop->damage());
  unit->setSightRange(prop->sightRange());
 
  // what will we do with the name?

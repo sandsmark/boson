@@ -777,6 +777,7 @@ void BosonWidget::slotAddComputerPlayer(Player* computer)
 
 void BosonWidget::editorSavePlayField(const QString& fileName)
 {
+ d->mPlayField->applyScenario(d->mBoson);
  if (d->mPlayField->savePlayField(fileName)) {
 	setModified(false);
  }

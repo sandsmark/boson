@@ -20,6 +20,8 @@
 #include "bosonscenario.h"
 
 #include "player.h"
+#include "unit.h"
+#include "unitproperties.h"
 #include "boson.h"
 
 #include <kdebug.h>
@@ -71,6 +73,57 @@ public:
 
 		mNode = node.cloneNode(true).toElement(); 
 		return true;
+	}
+
+	void copy(Unit* unit)
+	{
+		// these are absolutely mandatory
+		mNode.setAttribute("x", (unsigned int)unit->x());
+		mNode.setAttribute("y", (unsigned int)unit->y());
+		mNode.setAttribute("UnitType", (int)unit->type());
+		
+		// the rest is only meant to get into the xml file if they
+		// differ from the defaults
+		const UnitProperties* prop = unit->unitProperties();
+		if (unit->health() != prop->health()) {
+			mNode.setAttribute("Health", (unsigned int)unit->health());
+		}
+		if (unit->armor() != prop->armor()) {
+//			mNode.setAttribute("Armor", (unsigned int)unit->armor()); // currently unused
+		}
+		if (unit->shields() != prop->shields()) {
+//			mNode.setAttribute("Shields", (unsigned int)unit->shields()); // currently unused
+		}
+		if (unit->work() != UnitBase::WorkNone) {
+			mNode.setAttribute("Work", (unsigned int)unit->work());
+		}
+		if (unit->reloadState() != 0) {
+			mNode.setAttribute("ReloadState", (unsigned int)unit->reloadState());
+		}
+
+
+		// TODO: MobileUnit properties
+		// TODO: Facility properties
+
+		
+
+
+		// these entries are *meant* to be changeable during the game.
+		// but currently they are not. they will never appear in the xml
+		// file, as they don't differ from the default (howver if that
+		// ever gets implemented it can be used immediately)
+		if (unit->weaponDamage() != prop->damage()) {
+			mNode.setAttribute("Damage", (int)unit->weaponDamage());
+		}
+		if (unit->speed() != prop->speed()) {
+			mNode.setAttribute("Speed", (double)unit->speed());
+		}
+		if (unit->weaponRange() != prop->range()) {
+			mNode.setAttribute("Range", (unsigned int)unit->weaponRange());
+		}
+		if (unit->sightRange() != prop->sightRange()) {
+			mNode.setAttribute("SightRange", (unsigned int)unit->sightRange());
+		}
 	}
 
 private:
@@ -181,6 +234,22 @@ public:
 		 }
 
 		boson->sendAddUnits(doc.toString(), p);
+	}
+
+	void copy(Player* player)
+	{
+		mMinerals = player->minerals();
+		mOil = player->oil();
+		if (mUnits.count() > 0) {
+			mUnits.clear();
+		}
+		QPtrListIterator<Unit> it(player->allUnits());
+		while (it.current()) {
+			ScenarioUnit* s = new ScenarioUnit();
+			s->copy(it.current());
+			mUnits.append(s);
+			++it;
+		}
 	}
 
 protected:
@@ -487,18 +556,18 @@ int BosonScenario::maxPlayers() const
 void BosonScenario::initPlayer(Boson* boson, int playerNumber)
 {
  if (!boson) {
-	kdError() << k_funcinfo << ": NULL game" << endl;
+	kdError() << k_funcinfo << "NULL game" << endl;
 	return;
  }
  Player* p = (Player*)boson->playerList()->at(playerNumber);
  if (!p) {
-	kdError() << k_funcinfo << ": NULL player" << endl;
+	kdError() << k_funcinfo << "NULL player" << endl;
 	return;
  }
  kdDebug() << k_funcinfo << " player " << playerNumber << "==" << p->id() 
 		<< endl;
  if (playerNumber >= (int)d->mPlayers.count()) {
-	kdError() << k_funcinfo << ": don't have player " << playerNumber 
+	kdError() << k_funcinfo << "don't have player " << playerNumber 
 			<< endl;
 	return;
  }
@@ -511,11 +580,26 @@ void BosonScenario::startScenario(Boson* boson)
 	return;
  }
  if (!boson) {
-	kdError() << k_funcinfo << ": NULL game" << endl;
+	kdError() << k_funcinfo << "NULL game" << endl;
 	return;
  }
  for (int i = 0; i < maxPlayers(); i++) {
 	initPlayer(boson, i);
+ }
+}
+
+void BosonScenario::applyScenario(Boson* boson)
+{
+ if (!boson) {
+	kdError() << k_funcinfo << "NULL game" << endl;
+	return;
+ }
+ d->mMaxPlayers = boson->maxPlayers();
+ d->mMinPlayers = boson->minPlayers();
+
+ for (int i = 0; i < d->mMaxPlayers; i++) {
+	d->mPlayers.append(ScenarioPlayer());
+	d->mPlayers[i].copy((Player*)boson->playerList()->at(i));
  }
 }
 

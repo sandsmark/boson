@@ -45,6 +45,8 @@ public:
 	bool loadScenario(QDomElement& node);
 
 	bool saveScenario(QDomElement& root);
+
+	void applyScenario(Boson* boson);
 	
 	/**
 	 * Add all available player units to the game, add minerals, ...

@@ -61,12 +61,11 @@ public:
 		IdHealth = KGamePropertyBase::IdUser + 0,
 		IdArmor = KGamePropertyBase::IdUser + 1,
 		IdShields = KGamePropertyBase::IdUser + 2,
-		IdId = KGamePropertyBase::IdUser + 3, // useful? perhaps use dataHandler()->id() instead
-		IdCost = KGamePropertyBase::IdUser + 4,
+		IdId = KGamePropertyBase::IdUser + 3,
 		IdWork = KGamePropertyBase::IdUser + 6,
 		IdSpeed = KGamePropertyBase::IdUser + 7,
-		IdDamage = KGamePropertyBase::IdUser + 8,
-		IdRange = KGamePropertyBase::IdUser + 9,
+		IdWeaponDamage = KGamePropertyBase::IdUser + 8,
+		IdWeaponRange = KGamePropertyBase::IdUser + 9,
 		IdSightRange = KGamePropertyBase::IdUser + 11,
 		IdDeletionTimer = KGamePropertyBase::IdUser + 12,
 		IdReloadState = KGamePropertyBase::IdUser + 13,
@@ -185,22 +184,22 @@ public:
 	 * @return How much damage the weapon can make to other units. Note that
 	 * a negative value means that this unit can repair!
 	 **/
-	inline long int damage() const { return mDamage; }
+	inline long int weaponDamage() const { return mWeaponDamage; }
 
 	/**
 	 * Change the damage this unit can do to other units
 	 **/
-	void setDamage(long int d) { mDamage = d; }
+	void setWeaponDamage(long int d) { mWeaponDamage = d; }
 	
 	/**
 	 * @return The weapon range of this unit
 	 **/
-	inline unsigned long int range() const { return mRange; }
+	inline unsigned long int weaponRange() const { return mWeaponRange; }
 
 	/**
 	 * Change the weapong range of this unit
 	 **/
-	void setRange(unsigned long int r) { mRange = r; }
+	void setWeaponRange(unsigned long int r) { mWeaponRange = r; }
 	
 	/**
 	 * @return How far this unit can see. This is a number of cells, so you
@@ -303,9 +302,9 @@ private:
 	Player* mOwner;
 
 	KGameProperty<unsigned long int> mHealth;
-	KGameProperty<unsigned long int> mRange;
+	KGameProperty<unsigned long int> mWeaponRange;
 	KGameProperty<unsigned int> mSightRange;
-	KGameProperty<long int> mDamage; // can also be repair (negative value)
+	KGameProperty<long int> mWeaponDamage; // can also be repair (negative value)
 	KGamePropertyInt mWork;
 
 	const UnitProperties* mUnitProperties;

@@ -208,8 +208,7 @@ void Player::slotUnitPropertyChanged(KGamePropertyBase* prop)
 	case UnitBase::IdArmor:
 	case UnitBase::IdShields:
 	case UnitBase::IdSpeed:
-	case UnitBase::IdCost:
-	case UnitBase::IdRange:
+	case UnitBase::IdWeaponRange:
 	case UnitBase::IdSightRange: 
 		// update BosonUnitView if the unit is selected.
 		// not all of these IDs are displayed there. But perhaps they
