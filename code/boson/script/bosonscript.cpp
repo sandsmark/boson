@@ -35,9 +35,12 @@
 #include "../bosonpath.h"
 #include "../speciestheme.h"
 #include "../bosoneffectproperties.h"
+#include "../bosoneffect.h"
 #include "../playerio.h"
 #include "../pluginproperties.h"
 #include "../unitbase.h"
+#include "../bosonplayfield.h"
+#include "../bosonmap.h"
 #include "bosonscriptinterface.h"
 #include "bodebug.h"
 
@@ -1259,6 +1262,146 @@ void BosonScript::addEffect(unsigned int id, BoVector3Fixed pos, bofixed zrot)
   BosonCanvas* c = boGame->canvasNonConst();
   c->addEffects(list);
 }
+
+void BosonScript::addEffectToUnit(int unitid, unsigned int effectid)
+{
+  addEffectToUnit(unitid, effectid, BoVector3Fixed());
+}
+
+void BosonScript::addEffectToUnit(int unitid, unsigned int effectid, BoVector3Fixed offset, bofixed zrot)
+{
+  if(!game())
+  {
+    boError() << k_funcinfo << "NULL game" << endl;
+    return;
+  }
+
+  Unit* u = game()->findUnit(unitid, 0);
+  if(!u)
+  {
+    boError() << k_funcinfo << "No unit with id" << unitid << endl;
+    return;
+  }
+
+  const BosonEffectProperties* prop = boEffectPropertiesManager->effectProperties(effectid);
+  if(!prop)
+  {
+    boError() << k_funcinfo << "No effect properties with id " << effectid << endl;
+    return;
+  }
+  BoVector3Fixed pos(u->centerX(), u->centerY(), u->z());
+  pos += offset;
+  BoVector3Fixed rot(u->xRotation(), u->yRotation(), u->rotation());
+  rot.setZ(rot.z() + zrot);
+  QPtrList<BosonEffect> list = BosonEffectProperties::newEffects(prop, pos, rot);
+  QPtrListIterator<BosonEffect> it(list);
+  while(it.current())
+  {
+    u->addEffect(*it);
+    ++it;
+  }
+}
+
+void BosonScript::advanceEffects(int ticks)
+{
+  if(!game())
+  {
+    boError() << k_funcinfo << "NULL game" << endl;
+    return;
+  }
+
+  QPtrListIterator<BosonEffect> it(*game()->canvas()->effects());
+  while(it.current())
+  {
+    BosonEffect* e = it.current();
+    for(int i = 0; i < ticks; i++)
+    {
+      // This code is taken from BoCanvasAdvance::updateEffects()
+      if(!e->hasStarted())
+      {
+        e->update(0.05f);
+      }
+      else
+      {
+        e->markUpdate(0.05f);
+      }
+    }
+    ++it;
+  }
+}
+
+void BosonScript::unfogPlayer(int playerid)
+{
+  if(!game())
+  {
+    boError() << k_funcinfo << "NULL game" << endl;
+    return;
+  }
+  if(!game()->playField())
+  {
+    boError() << k_funcinfo << "NULL playField" << endl;
+    return;
+  }
+  BosonMap* map = game()->playField()->map();
+  if(!map)
+  {
+    boError() << k_funcinfo << "NULL map" << endl;
+    return;
+  }
+
+  Player* p = (Player*)(game()->findPlayer(playerid));
+
+  if(!p)
+  {
+    boError() << k_funcinfo << "No player with id " << playerid << endl;
+    return;
+  }
+  for(unsigned int x = 0; x < map->width(); x++)
+  {
+    for(unsigned int y = 0; y < map->height(); y++)
+    {
+      p->unfog(x, y);
+    }
+  }
+}
+
+void BosonScript::unfogAllPlayers()
+{
+  if(!game())
+  {
+    boError() << k_funcinfo << "NULL game" << endl;
+    return;
+  }
+  if(!game()->playField())
+  {
+    boError() << k_funcinfo << "NULL playField" << endl;
+    return;
+  }
+  BosonMap* map = game()->playField()->map();
+  if(!map)
+  {
+    boError() << k_funcinfo << "NULL map" << endl;
+    return;
+  }
+  QPtrList<KPlayer> list = *game()->playerList();
+  for(unsigned int i = 0; i < list.count(); i++)
+  {
+    Player* p = (Player*)list.at(i);
+    for(unsigned int x = 0; x < map->width(); x++)
+    {
+      for(unsigned int y = 0; y < map->height(); y++)
+      {
+        p->unfog(x, y);
+      }
+    }
+  }
+}
+
+void BosonScript::setAcceptUserInput(bool accept)
+{
+  interface()->setAcceptUserInput(accept);
+}
+
 
 /*
  * vim: et sw=2

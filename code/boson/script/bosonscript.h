@@ -425,6 +425,13 @@ class BosonScript
     static void setRandomSeed(long int seed);
     static void findPath(int x1, int y1, int x2, int y2);
     static void addEffect(unsigned int id, BoVector3Fixed pos, bofixed zrot = 0);
+    // To prevent including bo3dtools.h here
+    static void addEffectToUnit(int unitid, unsigned int effectid);
+    static void addEffectToUnit(int unitid, unsigned int effectid, BoVector3Fixed offset, bofixed zrot = 0);
+    static void advanceEffects(int ticks);
+    static void unfogPlayer(int playerid);
+    static void unfogAllPlayers();
+    void setAcceptUserInput(bool accept);
 
 
   protected:
