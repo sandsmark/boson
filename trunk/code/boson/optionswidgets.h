@@ -230,6 +230,9 @@ protected:
 	static int indexToRenderingSpeed(int index);
 	static int renderingSpeedToIndex(int speed);
 
+	void setCurrentMeshRenderer(const QString&);
+	void setCurrentGroundRenderer(const QString&);
+
 protected slots:
 	void slotRenderingSpeedChanged(int);
 	void slotEnableATIDepthWorkaround(bool);
@@ -238,7 +241,6 @@ protected slots:
 	void slotChangeFont();
 
 signals:
-	void signalGroundRendererChanged(int);
 	void signalFontChanged(const BoFontInfo& font);
 	void signalOpenGLSettingsUpdated();
 

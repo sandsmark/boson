@@ -313,14 +313,14 @@ BosonConfig::BosonConfig(KConfig* conf)
  // these are dynamic entries. usually they are added in the class where they
  // get used, but sometimes it is also handy to add them here (e.g. when it
  // isn't 100% clear which class will reference it first).
- addDynamicEntry(new BoConfigUIntEntry(this, "GroundRenderer", DEFAULT_GROUND_RENDERER));
+ addDynamicEntry(new BoConfigUIntEntry(this, "GroundRenderer", 0)); // obsolete
  addDynamicEntry(new BoConfigUIntEntry(this, "DefaultLOD", 0));
  addDynamicEntry(new BoConfigBoolEntry(this, "EnableATIDepthWorkaround", false));
  addDynamicEntry(new BoConfigDoubleEntry(this, "ATIDepthWorkaroundValue", 0.00390625));
  addDynamicEntry(new BoConfigStringEntry(this, "GLFont", QString::null));
  addDynamicEntry(new BoConfigBoolEntry(this, "SmoothShading", true));
  addDynamicEntry(new BoConfigStringEntry(this, "MeshRenderer", "BoMeshRendererVBO"));
- addDynamicEntry(new BoConfigStringEntry(this, "GroundRendererClass", "BoDefaultGroundRenderer"));
+ addDynamicEntry(new BoConfigStringEntry(this, "GroundRendererClass", DEFAULT_GROUND_RENDERER));
 
  // load from config
  reset(conf);
