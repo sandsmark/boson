@@ -753,8 +753,8 @@ void BosonBigDisplayBase::paintGL()
 void BosonBigDisplayBase::renderText()
 {
  glListBase(d->mDefaultFont->displayList()); // AB: this is a redundant call, since we don't change it somewhere in paintGL(). but we might support different fonts one day and so we need it anyway.
- glColor3f(1.0, 1.0, 1.0);
  const int border = 5;
+ const int alphaborder = 2;
 
 // first the resource display
  // AB: we can avoid these calls to i18n() here! e.g. cache it somewhere and
@@ -765,17 +765,34 @@ void BosonBigDisplayBase::renderText()
  int w = QMAX(d->mDefaultFont->metrics()->width(minerals), d->mDefaultFont->metrics()->width(oil));
  int x = d->mViewport[2] - w - border;
  int y = d->mViewport[3] - d->mDefaultFont->height() - border;
+
+ // Alpha-blended rectangle
+ glEnable(GL_BLEND);
+ glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+ glColor4f(0.0, 0.0, 0.0, 0.5);
+ glRecti(x - alphaborder, d->mViewport[3] - border + alphaborder,
+		d->mViewport[2] - border + alphaborder, d->mViewport[3] - (2 * d->mDefaultFont->height()) - border - alphaborder);
+ glColor3f(1.0, 1.0, 1.0);
  glRasterPos2i(x, y);
  glCallLists(minerals.length(), GL_UNSIGNED_BYTE, (GLubyte*)minerals.latin1());
  y -= d->mDefaultFont->height();
  glRasterPos2i(x, y);
  glCallLists(oil.length(), GL_UNSIGNED_BYTE, (GLubyte*)oil.latin1());
 
+ // fps
+ QString fpsstr = i18n("FPS: %1").arg(fps());
+ glColor4f(0.0, 0.0, 0.0, 0.5);
+ glRecti(border - alphaborder, d->mViewport[3] - border + alphaborder,
+		d->mDefaultFont->metrics()->width(fpsstr) + border + alphaborder, d->mViewport[3] - border - d->mDefaultFont->height() - alphaborder);
+ glColor3f(1.0, 1.0, 1.0);
+ glRasterPos2i(border, d->mViewport[3] - d->mDefaultFont->height() - border);
+ glCallLists(fpsstr.length(), GL_UNSIGNED_BYTE, (GLubyte*)fpsstr.latin1());
+
 // now the chat messages
 // TODO: line break?
  x = border;
  y = border;
- QStringList list = d->mChat->messages(); 
+ QStringList list = d->mChat->messages();
  QStringList::Iterator it = list.end();
  --it;
  for (; it != list.begin(); --it) {
