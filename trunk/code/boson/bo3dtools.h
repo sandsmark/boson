@@ -789,7 +789,7 @@ template<class T> class BoVector4
       mData[0] = a.mData[0] * af + b.mData[0] * bf;
       mData[1] = a.mData[1] * af + b.mData[1] * bf;
       mData[2] = a.mData[2] * af + b.mData[2] * bf;
-      mData[3] = a.mData[3] * af + b.mData[3] * af;
+      mData[3] = a.mData[3] * af + b.mData[3] * bf;
     }
 
     /**
