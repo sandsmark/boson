@@ -3,6 +3,7 @@
 <MenuBar>
   <Menu name="debug" group="debugmenu"><text>&amp;Debug</text>
     <Action name="debug_mode" />
+    <Action name="show_resources" />
     <Action name="debug_map_coordinates" />
     <Action name="debug_cell_grid" />
     <Action name="debug_matrices" />

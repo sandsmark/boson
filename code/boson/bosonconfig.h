@@ -474,6 +474,9 @@ public:
 	void setDebugFPS(bool debug) { mDebugFPS = debug; }
 	bool debugFPS() const { return mDebugFPS; }
 
+	void setShowResources(bool show) { mShowResources = show; }
+	bool showResources() const { return mShowResources; }
+
 public:
 	void save(bool editor = false, KConfig* conf = 0);
 	void reset(KConfig* conf = 0);
@@ -549,6 +552,7 @@ private:
 	bool mDebugRenderCounts;
 	bool mDebugBoundingBoxes;
 	bool mDebugFPS;
+	bool mShowResources;
 };
 
 #endif

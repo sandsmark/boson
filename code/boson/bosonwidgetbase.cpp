@@ -643,6 +643,11 @@ void BosonWidgetBase::initKActions()
 		displayManager(), SLOT(slotSetGrabMovie(bool)));
 
  // Debug
+ KToggleAction* resources = new KToggleAction(i18n("Show resources"),
+		KShortcut(), 0, 0, actionCollection(), "show_resources");
+ resources->setChecked(true);
+ connect(resources, SIGNAL(toggled(bool)),
+		this, SLOT(slotSetShowResources(bool)));
  (void)new KAction(i18n("&Unfog"), KShortcut(), this,
 		SLOT(slotUnfogAll()), actionCollection(), "debug_unfog");
  KToggleAction* mapCoordinates = new KToggleAction(i18n("Debug &map coordinates"),
@@ -1122,6 +1127,11 @@ void BosonWidgetBase::slotSetDebugBoundingBoxes(bool debug)
 void BosonWidgetBase::slotSetDebugFPS(bool debug)
 {
  boConfig->setDebugFPS(debug);
+}
+
+void BosonWidgetBase::slotSetShowResources(bool show)
+{
+ boConfig->setShowResources(show);
 }
 
 void BosonWidgetBase::slotRunScriptLine(const QString& line)

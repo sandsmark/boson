@@ -1056,7 +1056,11 @@ void BosonBigDisplayBase::renderText()
  int w = QMAX(d->mDefaultFont->width(minerals), d->mDefaultFont->width(oil));
  int x = d->mViewport[2] - w - border;
  int y = d->mViewport[3] - border;
- y -= d->mDefaultFont->renderText(x, y, text, width() - x);
+ if(boConfig->showResources()) {
+	// FIXME: shouldn't get those strings if resources aren't shown... but it's
+	//  the only way to get x coord.
+	y -= d->mDefaultFont->renderText(x, y, text, width() - x);
+ }
 
  if (boConfig->debugFPS()) {
 	y -= 5;
@@ -1374,7 +1378,7 @@ void BosonBigDisplayBase::renderParticles()
 		betweenbeginend = true;
 	}
 
- if (p->system->mAlign) {
+	if (p->system->mAlign) {
 		a = p->pos + ((-x + y) * p->size);
 		b = p->pos + (( x + y) * p->size);
 		c = p->pos + (( x - y) * p->size);
@@ -2853,6 +2857,15 @@ QByteArray BosonBigDisplayBase::grabMovieFrame()
 
  // Repaint
  slotUpdateGL();
+
+ // Slots in Qt can be called in any order, so it is possible that particle
+ //  systems haven't been advanced yet. If particles' dirty flag would remain
+ //  false, then if some particles or particle systems would be deleted, we'd
+ //  have 0 pointers in particle list next time.
+ // No need to do this before repainting, because it has already been done in
+ //  BoDisplayManager (setParticlesDirty() is called before grabbing movie
+ //  frame)
+ setParticlesDirty(true);
 
  // WARNING this is NOT dependable! e.g. if boson has the focus, but another
  // window is in front of it, then the other window will be grabbed as well!

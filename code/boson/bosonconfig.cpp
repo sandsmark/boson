@@ -273,6 +273,7 @@ BosonConfig::BosonConfig(KConfig* conf)
  mDebugRenderCounts = false;
  mDebugBoundingBoxes = false;
  mDebugFPS = false;
+ mShowResources = true;
 
  // these are dynamic entries. usually they are added in the class where they
  // get used, but sometimes it is also handy to add them here (e.g. when it
