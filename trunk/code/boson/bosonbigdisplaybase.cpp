@@ -2474,7 +2474,7 @@ BoItemList* BosonBigDisplayBase::selectionRectItems()
 		// top left corner of cell
 		glx = x * BO_GL_CELL_SIZE;
 		gly = -y * BO_GL_CELL_SIZE;
-		glz = 0.0f;
+		glz = canvas()->map()->heightAtCorner(x, y);
 		boProject(glx, gly, glz, &win);
 		if (widgetRect.contains(win)) {
 			if (debugMe) {
@@ -2486,6 +2486,7 @@ BoItemList* BosonBigDisplayBase::selectionRectItems()
 		// top right corner of cell
 		glx = (x + 1) * BO_GL_CELL_SIZE;
 		gly = -y * BO_GL_CELL_SIZE;
+		glz = canvas()->map()->heightAtCorner(x + 1, y);
 		boProject(glx, gly, glz, &win);
 		if (widgetRect.contains(win)) {
 			if (debugMe) {
@@ -2497,6 +2498,7 @@ BoItemList* BosonBigDisplayBase::selectionRectItems()
 		// bottom left corner of cell
 		glx = x * BO_GL_CELL_SIZE;
 		gly = -(y + 1) * BO_GL_CELL_SIZE;
+		glz = canvas()->map()->heightAtCorner(x, y + 1);
 		boProject(glx, gly, glz, &win);
 		if (widgetRect.contains(win)) {
 			if (debugMe) {
@@ -2508,6 +2510,7 @@ BoItemList* BosonBigDisplayBase::selectionRectItems()
 		// bottom right corner of cell
 		glx = (x + 1) * BO_GL_CELL_SIZE;
 		gly = -(y + 1) * BO_GL_CELL_SIZE;
+		glz = canvas()->map()->heightAtCorner(x + 1, y + 1);
 		boProject(glx, gly, glz, &win);
 		if (widgetRect.contains(win)) {
 			if (debugMe) {
@@ -3311,14 +3314,14 @@ void BosonBigDisplayBase::loadFromXML(const QDomElement& root)
 	camera()->loadFromXML(cam);
 	cameraChanged();
  } else {
-	boWarning(260) << k_funcinfo << "no camera" << endl;
+	boError(260) << k_funcinfo << "no camera" << endl;
  }
  // Load selection
  QDomElement sel = root.namedItem(QString::fromLatin1("Selection")).toElement();
  if (!sel.isNull()) {
 	selection()->loadFromXML(sel, true);
  } else {
-	boWarning(260) << k_funcinfo << "no selection" << endl;
+	boError(260) << k_funcinfo << "no selection" << endl;
 	selection()->clear(); // just in case...
  }
 }
