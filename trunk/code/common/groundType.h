@@ -30,7 +30,7 @@ enum groundType {
 	GROUND_GRASS,
 	GROUND_DESERT,
 
-	GROUND_LAST,
+	GROUND_LAST
 
 	};
 
@@ -39,6 +39,7 @@ enum transType {
 	TRANS_GD,
 	TRANS_WD,
 	TRANS_DWD,
+	TRANS_LAST
 	};
 
 
@@ -79,8 +80,9 @@ enum transition_t {
 #define TILES_PER_TRANSITION 12
 #define GET_TRANS_NUMBER(transNb,transPart)  ((groundType)(GROUND_LAST+(TILES_PER_TRANSITION*(transNb)) + (transPart)))
 #define GET_TRANS_REF(g)	(((g)-GROUND_LAST)/TILES_PER_TRANSITION )
-#define IS_TRANS(g)		( (g) >= GROUND_LAST)
+#define IS_TRANS(g)		( (g) >= GROUND_LAST && (g)< GROUND_LAST + TRANS_LAST * TILES_PER_TRANSITION)
 #define IS_PLAIN(g)		( (g) >= 0 && (g) < GROUND_LAST)
+#define IS_GROUND(g)		( IS_TRANS(g) || IS_PLAIN(g))
 
 
 /* Transition description */
