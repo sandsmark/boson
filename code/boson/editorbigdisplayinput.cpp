@@ -222,7 +222,7 @@ bool EditorBigDisplayInput::actionPlace(const BoVector3& canvasVector)
 		boError() << k_funcinfo << "invalid unittype " << d->mPlacement.unitType() << endl;
 		return false;
 	}
-	if (!canvas()->canPlaceUnitAtCell(prop, QPoint(x, y), 0)) {
+	if (!canvas()->canPlaceUnitAt(prop, BoVector2(x, y), 0)) {
 		boDebug() << k_funcinfo << "Can't place unit at " << x << " " << y << endl;
 		boGame->slotAddChatSystemMessage(i18n("You can't place a %1 there!").arg(prop->name()));
 		ret = false;

@@ -35,6 +35,7 @@
 class BosonPathInfo;
 class BoVector3;
 class BoVector4;
+class BoVector2;
 
 
 /***  OLD PATHFINDER  ***/
@@ -56,6 +57,7 @@ class Unit;
 class Player;
 class BosonBigDisplayBase;
 class BosonCanvas;
+class BoVector2;
 
 class PathNode;
 
@@ -95,10 +97,10 @@ class BosonPath
      * @param goalx the x <em>coordinate</em> of the goal. Not the cell!
      * @param goaly the y <em>coordinate</em> of the goal. Not the cell!
      **/
-    static QValueList<QPoint> findPath(BosonPathInfo* info);
+    static QValueList<BoVector2> findPath(BosonPathInfo* info);
 
     enum ResourceType { Minerals, Oil, EnemyBuilding, EnemyUnit };
-    static QValueList<QPoint> findLocations(Player* player, int x, int y, int n, int radius, ResourceType type);
+    static QValueList<BoVector2> findLocations(Player* player, int x, int y, int n, int radius, ResourceType type);
 
     /**
      * Returns lenght of path (in tiles)
@@ -114,7 +116,7 @@ class BosonPath
     /**
      * In this list are waypoints of path
      */
-    QValueList<QPoint> path;
+    QValueList<BoVector2> path;
 
   private:
     class Marking;
@@ -169,7 +171,8 @@ class BosonPath
 #include <qvaluevector.h>
 #include <qptrlist.h>
 #include <qvaluelist.h>
-#include <qpoint.h>
+
+#include "bo3dtools.h"
 
 
 // Cell passage costs
@@ -325,7 +328,7 @@ class BosonPath2
      *  region has this cell (usually because cell is occupied or not passable)
      **/
     BosonPathRegion* cellRegion(int x, int y);
-    inline BosonPathRegion* cellRegion(const QPoint& p)  { return cellRegion(p.x(), p.y()); }
+    BosonPathRegion* cellRegion(const BoVector2& p)  { return cellRegion((int)p.x(), (int)p.y()); }
     /**
      * @return passability type of given cell
      **/
@@ -553,8 +556,8 @@ class BosonPathInfo
       hlpath = 0;
       hlstep = 0;
       llpath.clear();
-      start = QPoint(0, 0);
-      dest = QPoint(0, 0);
+      start.reset();
+      dest.reset();
       range = 0;
       startRegion = 0;
       destRegion = 0;
@@ -579,11 +582,11 @@ class BosonPathInfo
     unsigned int hlstep;
 
     // Low-level path, containing waypoints
-    QValueVector<QPoint> llpath;
+    QValueVector<BoVector2> llpath;
 
-    // Start and destination point, in canvas coords
-    QPoint start;
-    QPoint dest;
+    // Start and destination point
+    BoVector2 start;
+    BoVector2 dest;
 
     // Range, in cells
     // If range is 0, we try to get as close to destination point as possible,

@@ -26,6 +26,7 @@
 #include "boitemlist.h"
 #include "bosoncanvas.h"
 #include "bodebug.h"
+#include "bo3dtools.h"
 
 #include <klistview.h>
 #include <klistbox.h>
@@ -91,7 +92,7 @@ KGameUnitDebug::KGameUnitDebug(QWidget* parent) : QWidget(parent)
  d = new KGameUnitDebugPrivate;
  QVBoxLayout* topLayout = new QVBoxLayout(this);
  QHBoxLayout* layout = new QHBoxLayout(topLayout);
- 
+
  d->mUnitList = new KListView(this);
  d->mId = d->mUnitList->addColumn(i18n("Id"));
  d->mOwner = d->mUnitList->addColumn(i18n("Owner"));
@@ -104,7 +105,7 @@ KGameUnitDebug::KGameUnitDebug(QWidget* parent) : QWidget(parent)
  d->mHealth = d->mUnitList->addColumn(i18n("Health"));
 // d->mUnitList->addColumn(i18n("Costs"));
  d->mSpeed = d->mUnitList->addColumn(i18n("Speed"));
-// connect(d->mUnitList, SIGNAL(executed(QListBoxItem*)), 
+// connect(d->mUnitList, SIGNAL(executed(QListBoxItem*)),
 //		this, SLOT(slotSelectUnit(QListBoxItem*)));
  d->mWidth = d->mUnitList->addColumn(i18n("Width"));
  d->mHeight = d->mUnitList->addColumn(i18n("Height"));
@@ -149,7 +150,7 @@ KGameUnitDebug::KGameUnitDebug(QWidget* parent) : QWidget(parent)
  d->mCells->addColumn(i18n("X"));
  d->mCells->addColumn(i18n("Y"));
  connect(d->mUnitList, SIGNAL(selectionChanged(QListViewItem*)), this, SLOT(updateCells(QListViewItem*)));
- 
+
 
 /*
  d->mUnitView = new KListView(this);
@@ -243,7 +244,7 @@ void KGameUnitDebug::update(QListViewItem* item, Unit* unit)
  item->setText(d->mWidth, QString::number(unit->width()));
  item->setText(d->mHeight, QString::number(unit->height()));
 
- QRect r = unit->boundingRect();
+ BoRect r = unit->boundingRect();
  item->setText(d->mBoundingRect, QString("%1,%2,%3,%4").arg(r.x()).arg(r.y()).arg(r.width()).arg(r.height()));
 }
 
@@ -259,7 +260,7 @@ void KGameUnitDebug::slotUnitPropertyChanged(KGamePropertyBase* prop)
 		if (unit->dataHandler() == (KGamePropertyHandler*)sender()) {
 			break;
 		}
-		
+
 	}
  }
  if (!unit) {
@@ -286,7 +287,7 @@ void KGameUnitDebug::updateWaypoints(QListViewItem* item)
 	boWarning() << k_lineinfo << "id " << id << " not found" << endl;
 	return;
  }
- QValueList<QPoint> points = unit->waypointList();
+ QValueList<BoVector2> points = unit->waypointList();
  for (unsigned int i = 0; i < points.count(); i++) {
 	(void)new QListBoxText(d->mWaypoints, i18n("x=%1 y=%2").arg(points[i].x()).arg(points[i].y()));
  }
@@ -314,7 +315,7 @@ void KGameUnitDebug::updateProduction(QListViewItem* item)
 		item->setText(2, i18n("Ready")); // currently always ready
 		// TODO: also show ProductionType
 	}
- 
+
  }
 }
 

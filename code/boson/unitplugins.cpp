@@ -35,11 +35,11 @@
 #include "bosonweapon.h"
 #include "bosonpath.h"
 #include "boevent.h"
+#include "bo3dtools.h"
 
 #include <klocale.h>
 
 #include <qpair.h>
-#include <qpoint.h>
 #include <qdom.h>
 #include <qstringlist.h>
 
@@ -279,7 +279,7 @@ void ProductionPlugin::advance(unsigned int)
 					currentx++;
 				}
 
-				if (canvas()->canPlaceUnitAtCell(speciesTheme()->unitProperties(id), QPoint(currentx, currenty), this)) {
+				if (canvas()->canPlaceUnitAt(speciesTheme()->unitProperties(id), BoVector2(currentx, currenty), this)) {
 					// Free cell - place unit at it
 					mProductionState = mProductionState + 1;
 					//FIXME: buildProduction should not
@@ -976,8 +976,8 @@ void BombingPlugin::advance(unsigned int)
 {
  // Check if we're at the drop point
  // Unit's center point
- float unitx = unit()->x() + unit()->width() / 2;
- float unity = unit()->y() + unit()->height() / 2;
+ float unitx = unit()->centerX();
+ float unity = unit()->centerY();
  float dist = QMAX(QABS(unitx - mPosX), QABS(unity - mPosY));
 // boDebug() << k_funcinfo << "dist: " << dist << endl;
 // boDebug() << k_funcinfo << "my pos is: (" << unitx << "; " << unity << ");  drop-point is: (" << mPosX << "; " << mPosY << ")" << endl;
@@ -989,7 +989,7 @@ void BombingPlugin::advance(unsigned int)
 	} else {
 		unit()->pathInfo()->slowDownAtDest = false;
 		unit()->pathInfo()->moveAttacking = false;
-		unit()->addWaypoint(QPoint((int)mPosX, (int)mPosY));
+		unit()->addWaypoint(BoVector2(mPosX, mPosY));
 		unit()->setAdvanceWork(Unit::WorkMove);
 	}
 	return;
@@ -1029,7 +1029,7 @@ void BombingPlugin::advance(unsigned int)
 		unit()->setWork(Unit::WorkNone);
 	} else {
 		unit()->pathInfo()->moveAttacking = false;
-		unit()->addWaypoint(QPoint((int)newx, (int)newy));
+		unit()->addWaypoint(BoVector2(newx, newy));
 		unit()->setWork(Unit::WorkMove);  // We don't want to return here anymore
 	}
 	mWeapon = 0;

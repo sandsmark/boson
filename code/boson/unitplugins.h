@@ -36,7 +36,7 @@ class PluginProperties;
 class Boson;
 class BosonItem;
 class BosonWeapon;
-class QPoint;
+
 class QDomElement;
 
 /**

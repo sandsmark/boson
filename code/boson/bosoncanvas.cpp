@@ -568,17 +568,19 @@ void BosonCanvas::slotAdvance(unsigned int advanceCallsCount, bool advanceFlag)
  a.advance(d->mAnimList, advanceCallsCount, advanceFlag);
 }
 
-bool BosonCanvas::canGo(const UnitProperties* prop, const QRect& rect) const
+bool BosonCanvas::canGo(const UnitProperties* prop, const BoRect& rect) const
 {
 // boDebug() << k_funcinfo << endl;
- if (rect.x() < 0 || rect.y() < 0 ||
-		rect.x() + rect.width() >= (int)mapWidth() ||
-		rect.y() + rect.height() >= (int)mapHeight()) {
+ if (rect.left() < 0 || rect.top() < 0 ||
+		rect.right() > mapWidth() ||
+		rect.bottom() > mapHeight()) {
 	return false;
  }
- int y = rect.y(); // what about modulu? do we care ?
+ int right = lround(rect.right());
+ int bottom = lround(rect.bottom());
+ int y = (int)rect.y(); // what about modulu? do we care ?
  do {
-	int x = rect.x();
+	int x = (int)rect.x();
 	do {
 		Cell* newCell = cell(x, y);
 		if (!newCell) {
@@ -603,9 +605,9 @@ bool BosonCanvas::canGo(const UnitProperties* prop, const QRect& rect) const
 			}
 		}
 		x++;
-	} while (x < rect.right());
+	} while (x < right);
 	y++;
- } while (y < rect.bottom());
+ } while (y < bottom);
 
  return true;
 }
@@ -661,8 +663,8 @@ void BosonCanvas::updateSight(Unit* unit, float , float)
 // (new unit placed)!
 
  unsigned int sight = unit->sightRange(); // *cell* number! not pixel number!
- unsigned int x = unit->boundingRect().center().x();
- unsigned int y = unit->boundingRect().center().y();
+ unsigned int x = (unsigned int)unit->centerX();
+ unsigned int y = (unsigned int)unit->centerY();
 
  int left = ((x > sight) ? (x - sight) : 0) - x;
  int top = ((y > sight) ? (y - sight) : 0) - y;
@@ -1062,7 +1064,7 @@ void BosonCanvas::addToCells(BosonItem* item)
  }
 }
 
-bool BosonCanvas::canPlaceUnitAtCell(const UnitProperties* prop, const QPoint& pos, ProductionPlugin* factory) const
+bool BosonCanvas::canPlaceUnitAt(const UnitProperties* prop, const BoVector2& pos, ProductionPlugin* factory) const
 {
  float width = prop->unitWidth();
  float height = prop->unitHeight();
@@ -1077,7 +1079,7 @@ bool BosonCanvas::canPlaceUnitAtCell(const UnitProperties* prop, const QPoint& p
  if (!onCanvas(pos)) {
 	return false;
  }
- QRect r(pos.x(), pos.y(), lround(width), lround(height));
+ BoRect r(pos, BoVector2(width, height));
  if (!canGo(prop, r)) {
 	return false;
  }
@@ -1097,9 +1099,7 @@ bool BosonCanvas::canPlaceUnitAtCell(const UnitProperties* prop, const QPoint& p
 		boError() << k_funcinfo << "production plugin has NULL owner" << endl;
 		return false;
 	}
-	int dx = QABS(r.center().x() - factoryUnit->boundingRect().center().x());
-	int dy = QABS(r.center().y() - factoryUnit->boundingRect().center().y());
-	if (dx * dx + dy * dy <= BUILD_RANGE * BUILD_RANGE) {
+	if ((r.center() - factoryUnit->center()).dotProduct() <= BUILD_RANGE * BUILD_RANGE) {
 		return true;
 	}
  } else {
@@ -1700,9 +1700,14 @@ void BosonCanvas::removeFromAdvanceLists(BosonItem* item)
  }
 }
 
+bool BosonCanvas::onCanvas(const BoVector2& pos) const
+{
+ return onCanvas(pos.x(), pos.y());
+}
+
 bool BosonCanvas::onCanvas(const BoVector3& pos) const
 {
- return onCanvas((int)pos.x(), (int)pos.y());
+ return onCanvas(pos.x(), pos.y());
 }
 
 void BosonCanvas::deleteItems(const QValueList<unsigned long int>& _ids)

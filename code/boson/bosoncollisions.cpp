@@ -106,13 +106,10 @@ Unit* BosonCollisions::findUnitAt(const BoVector3 & pos) const
  return findUnitAtCell((int)(pos.x()), (int)(pos.y()), pos.z());
 }
 
-QValueList<Unit*> BosonCollisions::unitCollisionsInRange(const QPoint& pos, int radius) const
+QValueList<Unit*> BosonCollisions::unitCollisionsInRange(const BoVector2& pos, int radius) const
 {
- BoItemList* l = collisions(QRect(
-		(pos.x() - radius > 0) ? pos.x() - radius : 0,
-		(pos.y() - radius > 0) ? pos.y() - radius : 0,
-		pos.x() + radius,
-		pos.y() + radius));
+ BoItemList* l = collisions(BoRect(QMAX(pos.x() - radius, 0), QMAX(pos.x() - radius, 0),
+		pos.x() + radius, pos.y() + radius));
 
  QValueList<Unit*> list;
  BoItemList::Iterator it;
@@ -127,11 +124,8 @@ QValueList<Unit*> BosonCollisions::unitCollisionsInRange(const QPoint& pos, int 
 		continue;
 	}
 //	boDebug(310) << "unit at x=" << u->x() << ",y=" << u->y() << ",pos=" << pos.x() << "," << pos.y() << endl;
-	int w = pos.x() - (int)(u->x() + u->width() / 2);
-	int h = pos.y() - (int)(u->y() + u->height() / 2);
-//	boDebug(310) << "w*w=" << w*w << ",h*h=" << h*h << " <= r*r=" << radius*radius<< endl;
 
-	if (w * w + h * h <= radius * radius) {
+	if ((pos - u->center()).dotProduct() <= radius * radius) {
 //		boDebug(310) << "adding " << u->id() << endl;
 		list.append(u);
 	}
@@ -144,11 +138,8 @@ QValueList<Unit*> BosonCollisions::unitCollisionsInSphere(const BoVector3& pos, 
  radius -= 10;  // hack, but prevents nearby units from getting damaged in some conditions
  // FIXME: code duplicated from unitCollisionsInRange
  boDebug(310) << k_funcinfo << endl;
- BoItemList* l = collisions(QRect(
-		(pos.x() - radius > 0) ? (int)pos.x() - radius : 0,
-		(pos.y() - radius > 0) ? (int)pos.y() - radius : 0,
-		(int)pos.x() + radius,
-		(int)pos.y() + radius));
+ BoItemList* l = collisions(BoRect(QMAX(pos.x() - radius, 0), QMAX(pos.x() - radius, 0),
+		pos.x() + radius, pos.y() + radius));
 
  QValueList<Unit*> list;
  BoItemList::Iterator it;
@@ -192,16 +183,12 @@ bool BosonCollisions::cellOccupied(int x, int y, Unit* unit, bool excludeMoving)
  return cell(x, y)->isOccupied(unit, includeMoving);
 }
 
-#warning FIXME: rect has ints only, might need float
-bool BosonCollisions::cellsOccupied(const QRect& rect) const
+bool BosonCollisions::cellsOccupied(const BoRect& rect) const
 {
- const int left = rect.left();
- const int top = rect.top();
- const int right = lround(rect.right());
- const int bottom = lround(rect.bottom());
-
- for (int x = left; x < right; x++) {
-	for (int y = top; y < bottom; y++) {
+ int right = lround(rect.right());
+ int bottom = lround(rect.bottom());
+ for (int x = (int)rect.left(); x < right; x++) {
+	for (int y = (int)rect.top(); y < bottom; y++) {
 		if (cellOccupied(x, y)) {
 			return true;
 		}
@@ -245,26 +232,22 @@ BoItemList* BosonCollisions::collisionsAtCells(const QPtrVector<Cell>* cells, co
  return collisions;
 }
 
-#warning FIXME: rect has ints only, might need float
-BoItemList* BosonCollisions::collisions(const QRect& rect, const BosonItem* item, bool exact) const
+BoItemList* BosonCollisions::collisions(const BoRect& rect, const BosonItem* item, bool exact) const
 {
- // rect is canvas coordinates!
- int w = lround(rect.width());
- int h = lround(rect.height());
- return collisionsAtCells(QRect(rect.left(), rect.top(), w, h), item, exact);
+ return collisionsAtCells(rect, item, exact);
 }
 
-BoItemList* BosonCollisions::collisionsAtCells(const QRect& rect, const BosonItem* item, bool exact) const
+BoItemList* BosonCollisions::collisionsAtCells(const BoRect& rect, const BosonItem* item, bool exact) const
 {
  if (!map()) {
 	BO_NULL_ERROR(map());
 	return new BoItemList();
  }
  int left, right, top, bottom;
- left = QMAX(rect.left(), 0);
- right = QMIN(rect.right(), QMAX((int)map()->width() - 1, 0));
- top = QMAX(rect.top(), 0);
- bottom = QMIN(rect.bottom(), QMAX((int)map()->height() - 1, 0));
+ left = QMAX((int)rect.left(), 0);
+ right = QMIN(lround(rect.right()), (int)map()->width());
+ top = QMAX((int)rect.top(), 0);
+ bottom = QMIN(lround(rect.bottom()), (int)map()->height());
  int size = (right - left + 1) * (bottom - top + 1);
  if (size <= 0) {
 	return new BoItemList();
@@ -272,8 +255,8 @@ BoItemList* BosonCollisions::collisionsAtCells(const QRect& rect, const BosonIte
  QPtrVector<Cell> cells(size);
  int n = 0;
  Cell* allCells = map()->cells();
- for (int i = left; i <= right; i++) {
-	for (int j = top; j <= bottom; j++) {
+ for (int i = left; i < right; i++) {
+	for (int j = top; j < bottom; j++) {
 		if (!map()->isValidCell(i, j)) {
 			boError(310) << k_funcinfo << "not a valid cell: " << i << "," << j << endl;
 			continue;
@@ -303,9 +286,9 @@ BoItemList* BosonCollisions::collisionsAtCell(int x, int y) const
  return collisionsAtCells(&cells, 0, true); // FIXME: exact = true has no effect
 }
 
-BoItemList* BosonCollisions::collisions(const QPoint& pos) const
+BoItemList* BosonCollisions::collisions(const BoVector2& pos) const
 {
- return collisionsAtCell(pos.x(), pos.y());
+ return collisionsAtCell((int)pos.x(), (int)pos.y());
 }
 
 QValueList<Unit*> BosonCollisions::collisionsInBox(const BoVector3& v1, const BoVector3& v2, BosonItem* exclude) const
@@ -319,15 +302,13 @@ QValueList<Unit*> BosonCollisions::collisionsInBox(const BoVector3& v1, const Bo
  }
 
  // Calculate rect in cell coordinates
- int w = lround(v2.x() - v1.x());
- int h = lround(v2.y() - v1.y());
  int left, right, top, bottom;
  left = QMAX((int)v1.x(), 0);
- right = QMIN(left + w, QMAX((int)map()->width() - 1, 0));
+ right = QMIN(lround(v2.x()), (int)map()->width());
  top = QMAX((int)v1.y(), 0);
- bottom = QMIN(top + h, QMAX((int)map()->height() - 1, 0));
+ bottom = QMIN(lround(v2.y()), (int)map()->height());
  boDebug() << k_funcinfo << "Cell rect: (" << left << ";" << top << ")-(" << right << ";" << bottom <<
-		");  size: " << w << "x" << h << endl;
+		")" << endl;
 
  // Make list of cells
  int size = (right - left + 1) * (bottom - top + 1);
@@ -337,8 +318,8 @@ QValueList<Unit*> BosonCollisions::collisionsInBox(const BoVector3& v1, const Bo
  QPtrVector<Cell> cells(size);
  int n = 0;
  Cell* allCells = map()->cells();
- for (int i = left; i <= right; i++) {
-	for (int j = top; j <= bottom; j++) {
+ for (int i = left; i < right; i++) {
+	for (int j = top; j < bottom; j++) {
 		Cell* c = &allCells[map()->cellArrayPos(i, j)];
 		if (!c) {
 			boError(310) << k_funcinfo << "NULL cell (although the coordinates should be valid: " << i << "," << j << ")" << endl;

@@ -105,8 +105,8 @@ public:
 
 		mWeapons = 0;
 	}
-	KGamePropertyList<QPoint> mWaypoints;
-	KGamePropertyList<QPoint> mPathPoints;
+	KGamePropertyList<BoVector2> mWaypoints;
+	KGamePropertyList<BoVector2> mPathPoints;
 	KGameProperty<int> mWantedRotation;
 
 	// be *very* careful with those - NewGameDialog uses Unit::save() which
@@ -249,12 +249,12 @@ void Unit::select(bool markAsLeader)
  updateSelectBox();
 }
 
-int Unit::destinationX() const
+float Unit::destinationX() const
 {
  return pathInfo()->dest.x();
 }
 
-int Unit::destinationY() const
+float Unit::destinationY() const
 {
  return pathInfo()->dest.y();
 }
@@ -668,7 +668,7 @@ void Unit::advanceAttack(unsigned int advanceCallsCount)
 	if (!moveTo(target()->x(), target()->y(), range)) {
 		setWork(WorkNone);
 	} else {
-		addWaypoint(QPoint((int)target()->x(), (int)target()->y()));
+		addWaypoint(BoVector2(target()->x(), target()->y()));
 		setAdvanceWork(WorkMove);
 	}
 	return;
@@ -794,7 +794,7 @@ void Unit::advanceTurn(unsigned int)
  }
 }
 
-void Unit::addWaypoint(const QPoint& pos)
+void Unit::addWaypoint(const BoVector2& pos)
 {
  d->mWaypoints.append(pos);
 }
@@ -808,7 +808,7 @@ void Unit::waypointDone()
  d->mWaypoints.remove(d->mWaypoints.at(0));
 }
 
-const QValueList<QPoint>& Unit::waypointList() const
+const QValueList<BoVector2>& Unit::waypointList() const
 {
  return d->mWaypoints;
 }
@@ -834,7 +834,7 @@ void Unit::resetPathInfo()
 }
 
 
-void Unit::moveTo(const QPoint& pos, bool attack)
+void Unit::moveTo(const BoVector2& pos, bool attack)
 {
  d->mTarget = 0;
 
@@ -844,7 +844,7 @@ void Unit::moveTo(const QPoint& pos, bool attack)
 
  if (moveTo(x, y, 0)) {
 	boDebug() << k_funcinfo << "unit " << id() << ": Will move to (" << x << "; " << y << ")" << endl;
-	addWaypoint(QPoint((int)x, (int)y));
+	addWaypoint(BoVector2(x, y));
 	pathInfo()->moveAttacking = attack;
 	pathInfo()->slowDownAtDest = true;
 	setWork(WorkMove);
@@ -916,8 +916,8 @@ void Unit::newPath()
  // FIXME: don't check if cell is valid/invalid if range > 0
  //  then unit would behave correctly when e.g. commanding land unit to attack
  //  a ship
- int cellX = pathInfo()->dest.x();
- int cellY = pathInfo()->dest.y();
+ int cellX = (int)pathInfo()->dest.x();
+ int cellY = (int)pathInfo()->dest.y();
  if (!ownerIO()->isFogged(cellX, cellY)) {
 	Cell* destCell = canvas()->cell(cellX, cellY);
 	if (!destCell || (!ownerIO()->canGo(this, destCell))) {
@@ -927,7 +927,7 @@ void Unit::newPath()
 		boDebug() << k_funcinfo << "unit " << id() << ": Null cell or can't go to (" <<
 				pathInfo()->dest.x() << "; " << pathInfo()->dest.y() << ") (cell (" << cellX << "; " << cellY << "))" << endl;
 		clearPathPoints();
-		addPathPoint(QPoint(PF_CANNOT_GO, PF_CANNOT_GO));
+		addPathPoint(BoVector2(PF_CANNOT_GO, PF_CANNOT_GO));
 		return;
 	}
  }
@@ -958,7 +958,7 @@ void Unit::newPath()
  if (pathPointCount() == 0) {
 	// Pathfinder now adds -1; -1 itself, so this shouldn't be reached
 	boError() << k_funcinfo << "!!!!! No valid points in path !!!!! Fix pathfinder !!!!!" << endl;
-	addPathPoint(QPoint(PF_CANNOT_GO, PF_CANNOT_GO));
+	addPathPoint(BoVector2(PF_CANNOT_GO, PF_CANNOT_GO));
  }
  return;
 }
@@ -968,12 +968,12 @@ void Unit::clearWaypoints()
  d->mWaypoints.clear();
 }
 
-const QPoint& Unit::currentWaypoint() const
+const BoVector2& Unit::currentWaypoint() const
 {
  return d->mWaypoints[0];
 }
 
-void Unit::addPathPoint(const QPoint& pos)
+void Unit::addPathPoint(const BoVector2& pos)
 {
  d->mPathPoints.append(pos);
 }
@@ -983,7 +983,7 @@ unsigned int Unit::pathPointCount() const
  return d->mPathPoints.count();
 }
 
-const QPoint& Unit::currentPathPoint()
+const BoVector2& Unit::currentPathPoint()
 {
  return d->mPathPoints.first();
 }
@@ -1002,7 +1002,7 @@ void Unit::pathPointDone()
  d->mPathPoints.pop_front();
 }
 
-const QValueList<QPoint>& Unit::pathPointList() const
+const QValueList<BoVector2>& Unit::pathPointList() const
 {
  return d->mPathPoints;
 }
@@ -1214,13 +1214,9 @@ BoItemList* Unit::unitsInRange(unsigned long int range) const
  // TODO: we use a *rect* for the range this is extremely bad.
  // ever heard about pythagoras ;-) ?
 
- int left, right, top, bottom;
- leftTopCell(&left, &top);
- rightBottomCell(&right, &bottom);
  // AB: note that we don't need to do error checking like left < 0, since
  // collisions() does this anyway.
- QRect rect;
- rect.setCoords(left - range, top - range, right + range, bottom + range);
+ BoRect rect(leftEdge() - range, topEdge() - range, rightEdge() + range, bottomEdge() + range);
 
  // TODO: we should do this using PlayerIO. It should return items that are
  // actually visible to us only!
@@ -1693,7 +1689,7 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCallsCount) // this act
  float xspeed = 0;
  float yspeed = 0;
  float dist = speed();
- QPoint pp;
+ BoVector2 pp;
 
  // We move through the pathpoints, until we've passed dist distance
  while (dist > 0) {
@@ -1729,20 +1725,20 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCallsCount) // this act
 
 	boDebug(401) << k_funcinfo << "Moving from (" << x << "; " << y <<
 			") to (" << x + xspeed << "; " << y + yspeed <<
-			"); pp: (" << (float)pp.x() << "; " << (float)pp.y() <<
+			"); pp: (" << pp.x() << "; " << pp.y() <<
 			"); dist: " << dist << "/" << speed() << endl;
 	printBinaryFloat("x", x);
 	printBinaryFloat("y", y);
 	printBinaryFloat("xspeed", xspeed);
 	printBinaryFloat("yspeed", yspeed);
-	printBinaryFloat("pp.x()", (float)pp.x());
-	printBinaryFloat("pp.y()", (float)pp.y());
+	printBinaryFloat("pp.x()", pp.x());
+	printBinaryFloat("pp.y()", pp.y());
 	// Check if we reached that pathpoint
-	if ((x + xspeed == (float)pp.x()) && (y + yspeed == (float)pp.y())) {
+	if ((x + xspeed == pp.x()) && (y + yspeed == pp.y())) {
 		// Unit has reached pathpoint
 		boDebug(401) << k_funcinfo << "unit " << id() << ": unit is at pathpoint" << endl;
 		pathPointDone();
-		QPoint nextpp = currentPathPoint();
+		BoVector2 nextpp = currentPathPoint();
 		boDebug(401) << k_funcinfo << "next pathpoint is (" << nextpp.x() << "; " << nextpp.y() << ")" << endl;
 		// Check for enemies
 		if (attackEnemyUnitsInRangeWhileMoving()) {
@@ -1766,7 +1762,7 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCallsCount) // this act
  turnTo();
 }
 
-float MobileUnit::moveTowardsPoint(const QPoint& p, float x, float y, float maxdist, float &xspeed, float &yspeed)
+float MobileUnit::moveTowardsPoint(const BoVector2& p, float x, float y, float maxdist, float &xspeed, float &yspeed)
 {
  //boDebug(401) << k_funcinfo << "p: (" << (float)p.x() << "; "<< (float)p.y() << "); pos: (" << x << "; "<< y <<
 		//");  maxdist: " << maxdist << "; xspeed: " << xspeed << "; yspeed: " << yspeed << endl;
@@ -1774,8 +1770,8 @@ float MobileUnit::moveTowardsPoint(const QPoint& p, float x, float y, float maxd
  float dist = 0.0f;
  // Calculate difference between point and our current position
  float xdiff, ydiff;
- xdiff = (float)p.x() - x;
- ydiff = (float)p.y() - y;
+ xdiff = p.x() - x;
+ ydiff = p.y() - y;
 
  // Calculate how much to move on x-axis
  if (xdiff != 0.0f) {
@@ -1826,8 +1822,8 @@ void MobileUnit::advanceMoveCheck()
 				canvas()->collisionsInBox(BoVector3(x() + d->lastXVelocity * 5, y() + d->lastYVelocity * 5, z()),
 				BoVector3(x() + d->lastXVelocity * 5 + width(), y() + d->lastYVelocity * 5 + height(), z() + depth()), this)) {*/
 #else
-		if (canvas()->cellOccupied(currentPathPoint().x(),
-				currentPathPoint().y(), this, false)) {
+		if (canvas()->cellOccupied((int)currentPathPoint().x(),
+				(int)currentPathPoint().y(), this, false)) {
 #endif
 			// Obstacle is still there. Continue waiting
 			if (pathInfo()->waiting >= 600) {
@@ -1862,8 +1858,8 @@ void MobileUnit::advanceMoveCheck()
 		return;
 	}
  }
- if (!canvas()->cell(currentPathPoint().x(), currentPathPoint().y())) {
-	boError(401) << k_funcinfo << "NULL cell " << currentPathPoint().x() << "," << currentPathPoint().y() << endl;
+ if (!canvas()->cell((int)currentPathPoint().x(), (int)currentPathPoint().y())) {
+	boError(401) << k_funcinfo << "NULL cell " << (int)currentPathPoint().x() << "," << (int)currentPathPoint().y() << endl;
 	setMovingStatus(Standing);
 	stopMoving();
 	setWork(WorkNone);
@@ -1872,11 +1868,11 @@ void MobileUnit::advanceMoveCheck()
 
  // Check if top-left point of the unit will be on canvas after moving
  if (!canvas()->onCanvas(boundingRectAdvanced().topLeft())) {
-	QPoint point = boundingRectAdvanced().topLeft();
+	BoVector2 point = boundingRectAdvanced().topLeft();
 	QString problem;
-	if (!canvas()->onCanvas(QPoint(0, point.y()))) {
+	if (!canvas()->onCanvas(BoVector2(0, point.y()))) {
 		problem = QString("top==%1").arg(point.y());
-	} else if (!canvas()->onCanvas(QPoint(point.x(), 0))) {
+	} else if (!canvas()->onCanvas(BoVector2(point.x(), 0))) {
 		problem = QString("left==%1").arg(point.x());
 	} else {
 		boError(401) << k_funcinfo
@@ -1901,11 +1897,11 @@ void MobileUnit::advanceMoveCheck()
  }
  // Check if bottom-right point of the unit will be on canvas after moving
  if (!canvas()->onCanvas(boundingRectAdvanced().bottomRight())) {
-	QPoint point = boundingRectAdvanced().bottomRight();
+	BoVector2 point = boundingRectAdvanced().bottomRight();
 	QString problem;
-	if (!canvas()->onCanvas(QPoint(0, point.y()))) {
+	if (!canvas()->onCanvas(BoVector2(0, point.y()))) {
 		problem = QString("bottom==%1").arg(point.y());
-	} else if (!canvas()->onCanvas(QPoint(point.x(), 0))) {
+	} else if (!canvas()->onCanvas(BoVector2(point.x(), 0))) {
 		problem = QString("right==%1").arg(point.x());
 	} else {
 		boError(401) << k_funcinfo
@@ -1947,12 +1943,12 @@ void MobileUnit::advanceMoveCheck()
 		BoVector3(x() + d->lastXVelocity + width(), y() + d->lastYVelocity + height(), z() + depth()), this);
  if (!immediatecollisions.isEmpty()) {
 #else
- if (canvas()->cellOccupied(currentPathPoint().x(),
-		currentPathPoint().y(), this, false)) {
+ if (canvas()->cellOccupied((int)currentPathPoint().x(),
+		(int)currentPathPoint().y(), this, false)) {
 #endif
 	boDebug(401) << k_funcinfo << "Next pathpoint is occupied, waiting" << endl;
-	const BoItemList* items = canvas()->cell(currentPathPoint().x(),
-			currentPathPoint().y())->items();
+	const BoItemList* items = canvas()->cell((int)currentPathPoint().x(),
+			(int)currentPathPoint().y())->items();
 	bool flying = isFlying();
 	for (BoItemList::ConstIterator it = items->begin(); it != items->end(); it++) {
 		if (RTTI::isUnit((*it)->rtti())) {
@@ -2129,7 +2125,7 @@ void MobileUnit::advanceFollow(unsigned int advanceCallsCount)
  // Do nothing (unit is in range)
 }
 
-QRect MobileUnit::boundingRect() const
+BoRect MobileUnit::boundingRect() const
 {
 // FIXME: workaround for pathfinding which does not yet support units with size
 // > 1.0f
@@ -2138,7 +2134,7 @@ QRect MobileUnit::boundingRect() const
 	boWarning() << k_funcinfo << "width or height  < 1.0f - not supported!!" << endl;
 	return BosonItem::boundingRect();
  }
- return QRect((int)x(), (int)y(), (int)1.0f, (int)1.0f);
+ return BoRect(x(), y(), x() + 1.0f, y() + 1.0f);
 }
 
 bool MobileUnit::loadFromXML(const QDomElement& root)
@@ -2209,7 +2205,7 @@ void MobileUnit::newPath()
  Unit::newPath();
 }
 
-bool MobileUnit::checkPathPoint(const QPoint& p)
+bool MobileUnit::checkPathPoint(const BoVector2& p)
 {
  boDebug(401) << k_funcinfo << "p: (" << p.x() << "; " << p.y() << ")" << endl;
  // Check for special codes in path point
@@ -2246,7 +2242,7 @@ bool MobileUnit::checkPathPoint(const QPoint& p)
 		}
 	} else {
 		// There are more waypoints. Take the next one
-		//QPoint wp = currentWaypoint();
+		//BoVector2 wp = currentWaypoint();
 		boWarning() << k_funcinfo << "Waypoints aren't supported yet!" << endl;
 		// Stop for now (until we have working implementation)
 		setMovingStatus(Standing);

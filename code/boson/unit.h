@@ -34,6 +34,8 @@ class RepairPlugin;
 class BosonWeapon;
 class BosonPathInfo;
 class BoVector3;
+class BoVector2;
+class BoRect;
 template<class T> class QValueList;
 template<class T> class QPtrList;
 class QDomElement;
@@ -271,9 +273,9 @@ public:
 	/**
 	 * Add pos to the waypoint list.
 	 **/
-	void addWaypoint(const QPoint& pos);
+	void addWaypoint(const BoVector2& pos);
 
-	const QPoint& currentWaypoint() const;
+	const BoVector2& currentWaypoint() const;
 	unsigned int waypointCount() const;
 	/**
 	 * Removes all waypoints from the list.
@@ -288,12 +290,12 @@ public:
 	/**
 	 * @return A list of all waypoints for debugging
 	 **/
-	const QValueList<QPoint>& waypointList() const;
+	const QValueList<BoVector2>& waypointList() const;
 
 	/**
 	 * @return List of path-points
 	 **/
-	const QValueList<QPoint>& pathPointList() const;
+	const QValueList<BoVector2>& pathPointList() const;
 
 	/**
 	 * Move this unit to a specified point. Also make sure that previous
@@ -302,7 +304,7 @@ public:
 	 * @param pos The point on the canvas to move to.
 	 * @param attack If this is true, unit will stop and attack any enemy units in range while moving
 	 **/
-	virtual void moveTo(const QPoint& pos, bool attack = false);
+	virtual void moveTo(const BoVector2& pos, bool attack = false);
 
 
 	// TODO: maybe make this protected?
@@ -365,13 +367,13 @@ public:
 	 * If unit isn't moving, returned value is undefined.
 	 * Returned value is in canvas coordinates.
 	 **/
-	int destinationX() const;
+	float destinationX() const;
 	/**
 	 * @return Y-coordinate of unit's current destination (where it's moving).
 	 * If unit isn't moving, returned value is undefined.
 	 * Returned value is in canvas coordinates.
 	 **/
-	int destinationY() const;
+	float destinationY() const;
 	/**
 	 * @return Current moving range of the unit (how close to destination point it
 	 *  must move).
@@ -483,7 +485,7 @@ protected:
 	 * Adds so-called path point for this unit.
 	 * Path points are like waypoints, except that they are internal.
 	 **/
-	void addPathPoint(const QPoint& pos);
+	void addPathPoint(const BoVector2& pos);
 	/**
 	 * @return Number of path-points
 	 **/
@@ -491,7 +493,7 @@ protected:
 	/**
 	 * @return Current path-point (where unit should go next)
 	 **/
-	const QPoint& currentPathPoint();
+	const BoVector2& currentPathPoint();
 	/**
 	 * Clears list of path-points
 	 **/
@@ -576,7 +578,7 @@ public:
 	 **/
 	void repairAt(Facility* repairYard);
 
-	virtual QRect boundingRect() const;
+	virtual BoRect boundingRect() const;
 
 	virtual bool saveAsXML(QDomElement& root);
 	virtual bool loadFromXML(const QDomElement& root);
@@ -592,7 +594,7 @@ public:
 	 *
 	 * @return How much is moved (will be <= maxdist)
 	 **/
-	float moveTowardsPoint(const QPoint& p, float x, float y, float maxdist, float &xspeed, float &yspeed);
+	float moveTowardsPoint(const BoVector2& p, float x, float y, float maxdist, float &xspeed, float &yspeed);
 
 	virtual void newPath();
 
@@ -600,7 +602,7 @@ public:
 	 * Check if pathpoint p marks end of the path. If yes, then it stops unit,
 	 * turns to random direction and true, otherwise returns false.
 	 **/
-	bool checkPathPoint(const QPoint& p);
+	bool checkPathPoint(const BoVector2& p);
 
 protected:
 	virtual void advanceMoveInternal(unsigned int advanceCallsCount); // move one step futher to path

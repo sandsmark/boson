@@ -32,6 +32,188 @@ class QDomElement;
 
 
 /**
+ * @short Vector with 2 components.
+ *
+ * @author Rivo Laks <rivolaks@hot.ee>
+ **/
+class BoVector2
+{
+  public:
+    BoVector2()  { reset(); }
+    BoVector2(GLfloat x, GLfloat y)  { set(x, y); }
+    BoVector2(const QPoint& p);
+    BoVector2(const GLfloat* data)  { set(data); }
+    BoVector2(const BoVector2& v)  { set(v); }
+    ~BoVector2()  {}
+
+    /**
+     * Make this vector a null vector.
+     **/
+    inline void reset()  { mData[0] = mData[1] = 0.0f; }
+
+    /**
+     * @return The first (x) coordinate of the vector.
+     **/
+    inline GLfloat x() const  { return mData[0]; }
+    /**
+     * @return The second (y) coordinate of the vector.
+     **/
+    inline GLfloat y() const  { return mData[1]; }
+
+    /**
+     * Assign the values @p x, @p y to the vector.
+     **/
+    inline void set(GLfloat x, GLfloat y)
+    {
+      mData[0] = x;  mData[1] = y;
+    }
+    /**
+     * @overload
+     **/
+    inline void set(const BoVector2& v)  { set(v.data()); }
+    /**
+     * @overload
+     **/
+    inline void set(const float* v)  { set(v[0], v[1]); }
+
+    /**
+     * Assign the x coordinate to the vector.
+     **/
+    inline void setX(GLfloat x)  { mData[0] = x; }
+    /**
+     * Assign the y coordinate to the vector.
+     **/
+    inline void setY(GLfloat y)  { mData[1] = y; }
+
+    inline float dotProduct() const
+    {
+      return mData[0] * mData[0] + mData[1] * mData[1];
+    }
+    float length() const;
+
+    inline GLfloat operator[](int i) const  { return mData[i]; }
+    inline void operator=(const BoVector2& v)  { set(v); }
+    inline bool operator==(const BoVector2& v) const
+    {
+      return isEqual(mData, v.data());
+    }
+    static bool isEqual(const float* v1, const float* v2, float diff = 0.001)
+    {
+      // avoid fabsf() as we don't include math.h
+      float d1 = v1[0] - v2[0];
+      float d2 = v1[1] - v2[1];
+      if (d1 < 0.0f)
+      {
+        d1 = -d1;
+      }
+      if (d2 < 0.0f)
+      {
+        d2 = -d2;
+      }
+      if (d1 > diff)
+      {
+        return false;
+      }
+      if (d2 > diff)
+      {
+        return false;
+      }
+      return true;
+    }
+
+    inline BoVector2 operator+(const BoVector2& v) const
+    {
+      return BoVector2(mData[0] + v[0], mData[1] + v[1]);
+    }
+    inline BoVector2 operator-(const BoVector2& v) const
+    {
+      return BoVector2(mData[0] - v[0], mData[1] - v[1]);
+    }
+    inline BoVector2 operator*(float f) const
+    {
+      return BoVector2(mData[0] * f, mData[1] * f);
+    }
+    inline BoVector2 operator/(float f) const
+    {
+      return BoVector2(mData[0] / f, mData[1] / f);
+    }
+    inline void operator+=(const BoVector2& v)
+    {
+      mData[0] += v[0];
+    }
+    inline void operator-=(const BoVector2& v)
+    {
+      mData[0] -= v[0];
+    }
+
+    inline const GLfloat* data() const { return mData; }
+
+
+  private:
+    friend QDataStream& operator<<(QDataStream& s, const BoVector2& v);
+    friend QDataStream& operator>>(QDataStream& s, BoVector2& v);
+
+    GLfloat mData[2];
+};
+
+QDataStream& operator<<(QDataStream& s, const BoVector2& v);
+QDataStream& operator>>(QDataStream& s, BoVector2& v);
+
+
+/**
+ * @short Rectangle class
+ *
+ * @author Rivo Laks <rivolaks@hot.ee>
+ **/
+class BoRect
+{
+  public:
+    BoRect(const BoVector2& topLeft, const BoVector2& bottomRight)
+    {
+      set(topLeft, bottomRight);
+    }
+    BoRect(const GLfloat left, const GLfloat top, const GLfloat right, const GLfloat bottom)
+    {
+      set(left, top, right, bottom);
+    }
+
+    inline void set(const BoVector2& topLeft, const BoVector2& bottomRight)
+    {
+      mTopLeft = topLeft;
+      mBottomRight = bottomRight;
+    }
+    inline void set(const GLfloat left, const GLfloat top, const GLfloat right, const GLfloat bottom)
+    {
+      mTopLeft = BoVector2(left, top);
+      mBottomRight = BoVector2(right, bottom);
+    }
+
+    inline GLfloat left() const  { return mTopLeft.x(); }
+    inline GLfloat top() const  { return mTopLeft.y(); }
+    inline GLfloat right() const  { return mBottomRight.x(); }
+    inline GLfloat bottom() const  { return mBottomRight.y(); }
+
+    inline const BoVector2& topLeft() const { return mTopLeft; }
+    inline const BoVector2& bottomRight() const { return mBottomRight; }
+
+    inline GLfloat x() const  { return mTopLeft.x(); }
+    inline GLfloat y() const  { return mTopLeft.y(); }
+
+    inline GLfloat width() const  { return mBottomRight.x() - mTopLeft.x(); }
+    inline GLfloat height() const  { return mBottomRight.y() - mTopLeft.y(); }
+
+    inline BoVector2 center() const
+    {
+      return BoVector2((left() + right()) / 2, (top() + bottom()) / 2);
+    }
+
+
+  private:
+    BoVector2 mTopLeft;
+    BoVector2 mBottomRight;
+};
+
+/**
  * @author Rivo Laks <rivolaks@hot.ee>
  **/
 class BoVector3
