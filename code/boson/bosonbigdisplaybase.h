@@ -249,6 +249,8 @@ protected:
 	virtual void updateCursor() = 0;
 	virtual void actionClicked(const BoAction& action, QDataStream& stream, bool* send) = 0;
 
+	QPoint cursorCanvasPos();
+
 	void generateCellList();
 
 	/**

@@ -273,7 +273,8 @@ bool BosonBigDisplay::actionBuild(QDataStream& stream, const QPoint& canvasPos)
 	return false;
  }
 
- if (!(canvas())->canPlaceUnitAt(localPlayer()->unitProperties(production->currentProductionId()), canvasPos, production)) {
+ QPoint pos = canvasPos / BO_TILE_SIZE;
+ if (!(canvas())->canPlaceUnitAt(localPlayer()->unitProperties(production->currentProductionId()), pos, production)) {
 	boDebug() << k_funcinfo << "Cannot place production here" << endl;
 	return false;
  }
@@ -283,8 +284,8 @@ bool BosonBigDisplay::actionBuild(QDataStream& stream, const QPoint& canvasPos)
  stream << (Q_UINT32)production->completedProductionType();
  stream << (Q_ULONG)factory->id();
  stream << (Q_UINT32)factory->owner()->id();
- stream << (Q_INT32)canvasPos.x() / BO_TILE_SIZE;
- stream << (Q_INT32)canvasPos.y() / BO_TILE_SIZE;
+ stream << (Q_INT32)pos.x();
+ stream << (Q_INT32)pos.y();
  return true;
 }
 
@@ -471,13 +472,7 @@ void BosonBigDisplay::updateCursor()
 	return;
  }
 
- QPoint widgetPos = mapFromGlobal(QCursor::pos());
- QPoint canvasPos;
- GLdouble x, y, z;
- mapCoordinates(widgetPos, &x, &y, &z);
- worldToCanvas(x, y, z, &canvasPos);
-
- if (!canvas()->onCanvas(canvasPos)) {
+ if (!canvas()->onCanvas(cursorCanvasPos())) {
 	d->mCursorType = CursorDefault;
 	c->setCursor(d->mCursorType);
 	c->setWidgetCursor(this);
@@ -487,8 +482,8 @@ void BosonBigDisplay::updateCursor()
  if (!d->mLockAction) {
 	if (!selection()->isEmpty()) {
 		if (selection()->leader()->owner() == localPlayer()) {
-			Unit* unit = ((BosonCanvas*)canvas())->findUnitAt(canvasPos);
-			if (unit && (!selection()->leader()->owner()->isFogged(canvasPos.x() / BO_TILE_SIZE, canvasPos.y() / BO_TILE_SIZE))) {
+			Unit* unit = ((BosonCanvas*)canvas())->findUnitAt(cursorCanvasPos());
+			if (unit && (!selection()->leader()->owner()->isFogged(cursorCanvasPos().x() / BO_TILE_SIZE, cursorCanvasPos().y() / BO_TILE_SIZE))) {
 				if (unit->owner() == localPlayer()) {
 					d->mCursorType = CursorDefault;
 				} else if(selection()->leader()->unitProperties()->canShoot()) {

@@ -632,7 +632,7 @@ bool BosonCanvas::canPlaceUnitAt(const UnitProperties* prop, const QPoint& pos, 
 	boError() << k_funcinfo << "null height for " << prop->typeId() << endl;
 	return false;
  }
- QRect r(pos.x(), pos.y(), width, height);
+ QRect r(pos.x() * BO_TILE_SIZE, pos.y() * BO_TILE_SIZE, width, height);
  if (!canGo(prop, r)) {
 	return false;
  }
