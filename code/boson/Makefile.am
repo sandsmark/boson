@@ -26,6 +26,7 @@ BOSON_SRC = \
 	speciestheme.cpp \
 	player.cpp \
 	kgamedialogbosonconfig.cpp \
+	bo3dtools.cpp \
 	bosonbigdisplaybase.cpp \
 	bosonbigdisplay.cpp \
 	bosonminimap.cpp \
