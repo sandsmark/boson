@@ -311,7 +311,7 @@ bool BoFullScreen::enterModeInList(int index)
 	BO_NULL_ERROR(mode);
 	return false;
  }
- return bo_enter_mode(mode);
+ return bo_vidmode_enter_mode(mode);
 #endif // HAVE_XFREE86_VIDMODE
  return false;
 }
@@ -359,7 +359,7 @@ static bool bo_vidmode_enter_mode(XF86VidModeModeInfo* mode)
 static void bo_videmode_enter_orig_mode()
 {
  if (gVidOriginalModeValid) {
-	bo_enter_mode(&gVidOriginalMode);
+	bo_vidmode_enter_mode(&gVidOriginalMode);
  }
 }
 #endif // HAVE_XFREE86_VIDMODE
@@ -401,8 +401,7 @@ static void bo_xrr_enter_orig_mode()
 {
  if (gXRROriginalModeValid) {
 	boDebug() << k_funcinfo << "entering mode " << gXRROriginalMode << endl;
-//	bo_xrr_enter_mode(gXRROriginalMode, gXRRScreenConfig);
-	bo_xrr_enter_mode(gXRROriginalMode, 0);
+	bo_xrr_enter_mode(gXRROriginalMode, gXRRScreenConfig);
  }
 }
 
@@ -456,6 +455,31 @@ static bool bo_xrr_enter_mode(int mode, XRRScreenConfiguration* sc)
  if (stat == BadValue) {
 	boError() << k_funcinfo << "unable to switch mode" << endl;
 	return false;
+ }
+ if (w) {
+	// make it "fullscreen" as in w->showFullScreen(), i.e. make it fill the
+	// entire screen (but no more!)
+
+
+	int count;
+	XRRScreenSize* sizes = XRRConfigSizes(sc, &count);
+	if (mode >= count) {
+		boError() << k_funcinfo << "oops - something weird happened!" << endl;
+		bo_xrr_enter_orig_mode();
+		return false;
+	}
+	int width = sizes[mode].width;
+	int height = sizes[mode].height;
+
+	w->reparent(0, QWidget::WType_TopLevel |
+			QWidget::WStyle_Customize |
+			QWidget::WStyle_NoBorder
+			/* | w->getWFlags() & 0xffff0000*/,
+			w->mapToGlobal(QPoint(0, 0)));
+	w->resize(width, height);
+	w->raise();
+	w->show();
+	w->setActiveWindow();
  }
  return true;
 }
