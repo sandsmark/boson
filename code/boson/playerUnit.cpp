@@ -23,7 +23,7 @@
 
 #include <math.h>
 
-#include "common/map.h"
+#include "common/bomap.h"
 #include "common/log.h"
 
 #include "bosonCanvas.h"

@@ -1,5 +1,5 @@
 /***************************************************************************
-                          map.h  -  description                    
+                          bomap.h  -  description                    
                              -------------------                                         
 
     version              : $Id$
@@ -18,8 +18,8 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef MAP_H
-#define MAP_H
+#ifndef BOMAP_H
+#define BOMAP_H
 
 
 #include "common/groundType.h"
@@ -42,4 +42,4 @@
 
 
 
-#endif /* MAP_H */
+#endif /* BOMAP_H */

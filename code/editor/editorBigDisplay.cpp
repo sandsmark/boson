@@ -21,7 +21,7 @@
 #include <stdlib.h>  // random
 
 #include "common/log.h"
-#include "common/map.h"
+#include "common/bomap.h"
 
 #include "editorBigDisplay.h"
 #include "editorCanvas.h"

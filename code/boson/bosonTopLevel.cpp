@@ -21,7 +21,7 @@
 #include <qpushbutton.h>
 
 #include "common/log.h"
-#include "common/map.h"
+#include "common/bomap.h"
 
 #include "bosonTopLevel.h"
 #include "visualMiniDisplay.h"

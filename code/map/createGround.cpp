@@ -22,7 +22,7 @@
 #include <qstring.h>
 
 #include "common/log.h"
-#include "common/map.h"
+#include "common/bomap.h"
 
 QImage		theBig( BIG_W*BO_TILE_SIZE, BIG_H*BO_TILE_SIZE, 32);
 QString		themePath;

@@ -22,8 +22,6 @@
 
 #include <qpainter.h>
 
-#include "common/map.h"
-
 #include "boserver.h"
 #include "serverUnit.h"
 #include "game.h"
