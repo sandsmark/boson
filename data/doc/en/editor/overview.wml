@@ -37,7 +37,7 @@
         </td>
     </tr>
     <tr>
-        <td valign="top"><img src="edit_height.png"></td>
+        <td valign="top"><img src="edit_height.png" class="image_border"></td>
         <td>
             <ul>
                 <li>Changing cells height by hand over the "Edit Height" function of the editor.<br>
