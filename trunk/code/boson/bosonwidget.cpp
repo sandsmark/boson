@@ -30,7 +30,7 @@
 #include "global.h"
 #include "gameoverdialog.h"
 #include "bodebug.h"
-#include "commandframe/bosoncommandframebase.h"
+#include "bosoncommandframeinterface.h"
 #include "sound/bosonaudiointerface.h"
 
 #include <kstdgameaction.h>
@@ -87,9 +87,9 @@ void BosonWidget::initPlayer()
  }
 }
 
-BosonCommandFrameBase* BosonWidget::createCommandFrame(QWidget* parent)
+BosonCommandFrameInterface* BosonWidget::createCommandFrame(QWidget* parent)
 {
- BosonCommandFrameBase* frame = BosonCommandFrameBase::createCommandFrame(parent, true);
+ BosonCommandFrameInterface* frame = BosonCommandFrameInterface::createCommandFrame(parent, true);
  connect(boGame, SIGNAL(signalUpdateProduction(Unit*)),
 		frame, SLOT(slotUpdateProduction(Unit*)));
  connect(boGame, SIGNAL(signalUpdateProductionOptions()),

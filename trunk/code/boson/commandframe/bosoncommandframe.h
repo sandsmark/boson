@@ -80,7 +80,7 @@ protected slots:
 	void slotUpdate();
 
 private:
-	friend BosonCommandFrameBase* BosonCommandFrameBase::createCommandFrame(QWidget*, bool);
+	friend BosonCommandFrameInterface* BosonCommandFrameFactory::createCommandFrame2(QWidget*, bool);
 	BosonCommandFrame(QWidget* parent);
 
 private:

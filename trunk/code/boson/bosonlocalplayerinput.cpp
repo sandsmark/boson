@@ -23,7 +23,7 @@
 #include "boaction.h"
 #include "unit.h"
 #include "player.h"
-#include "commandframe/bosoncommandframebase.h"
+#include "bosoncommandframeinterface.h"
 #include "boselection.h"
 #include "player.h"
 #include "bosonmessage.h"
@@ -42,7 +42,7 @@
 BosonLocalPlayerInput::BosonLocalPlayerInput() : KGameIO()
 {
   boDebug() << k_funcinfo << endl;
-  mCmdFrame = 0;
+  mCommandFrame = 0;
   mEventListener = 0;
 }
 
@@ -72,15 +72,15 @@ void BosonLocalPlayerInput::initIO(KPlayer* p)
   }
 }
 
-void BosonLocalPlayerInput::setCommandFrame(BosonCommandFrameBase* cmdframe)
+void BosonLocalPlayerInput::setCommandFrame(BosonCommandFrameInterface* cmdframe)
 {
   boDebug() << k_funcinfo << endl;
-  if(mCmdFrame)
+  if(mCommandFrame)
   {
     boError() << k_funcinfo << "CMDFRAME ALREADY SET!!!" << endl;
     return;
   }
-  mCmdFrame = cmdframe;
+  mCommandFrame = cmdframe;
   connect(cmdframe, SIGNAL(signalAction(const BoSpecificAction&)),
       this, SLOT(slotAction(const BoSpecificAction&)));
 }
@@ -97,7 +97,7 @@ void BosonLocalPlayerInput::slotAction(const BoSpecificAction& action)
   switch (action.type())
   {
     case ActionStop:
-      stopUnits(mCmdFrame->selection()->allUnits());
+      stopUnits(mCommandFrame->selection()->allUnits());
       break;
     case ActionLayMine:
       layMine(action);

@@ -27,7 +27,7 @@ class KActionCollection;
 
 class BosonCursor;
 class BosonCanvas;
-class BosonCommandFrameBase;
+class BosonCommandFrameInterface;
 class BosonBigDisplay;
 class BosonBigDisplayBase;
 class Unit;
@@ -86,7 +86,7 @@ protected slots:
 	void slotGameOverDialogFinished();
 
 protected:
-	virtual BosonCommandFrameBase* createCommandFrame(QWidget* parent);
+	virtual BosonCommandFrameInterface* createCommandFrame(QWidget* parent);
 
 	virtual void initKActions();
 	virtual void initDisplayManager();

@@ -33,7 +33,7 @@
 #include "boaction.h"
 #include "botexmapimportdialog.h"
 #include "bosongroundtheme.h"
-#include "commandframe/bosoncommandframebase.h"
+#include "bosoncommandframeinterface.h"
 
 #include <kfiledialog.h>
 #include <klocale.h>
@@ -138,9 +138,9 @@ void EditorWidget::initPlayer()
 // minimap()->slotShowMap(true);
 }
 
-BosonCommandFrameBase* EditorWidget::createCommandFrame(QWidget* parent)
+BosonCommandFrameInterface* EditorWidget::createCommandFrame(QWidget* parent)
 {
- BosonCommandFrameBase* frame = BosonCommandFrameBase::createCommandFrame(parent, false);
+ BosonCommandFrameInterface* frame = BosonCommandFrameInterface::createCommandFrame(parent, false);
 // connect(boGame, SIGNAL(signalUpdateProduction(Unit*)),
 //		frame, SLOT(slotUpdateProduction(Unit*)));
 
@@ -285,7 +285,7 @@ void EditorWidget::slotChangeLocalPlayer(int index)
 void EditorWidget::slotPlace(int index)
 {
  boDebug() << k_funcinfo << "index: " << index << endl;
- BosonCommandFrameBase* cmd = cmdFrame();
+ BosonCommandFrameInterface* cmd = cmdFrame();
  if (!cmd) {
 	boError() << k_funcinfo << "NULL cmd frame" << endl;
 	return;

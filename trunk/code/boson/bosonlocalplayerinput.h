@@ -24,7 +24,7 @@
 
 #include "global.h"
 
-class BosonCommandFrameBase;
+class BosonCommandFrameInterface;
 class BoSpecificAction;
 class Unit;
 class Player;
@@ -74,7 +74,7 @@ class BosonLocalPlayerInput : public KGameIO
     void placeUnit(Player* owner, unsigned long int unitType, int x, int y);
     void changeHeight(int x, int y, float height);
 
-    virtual void setCommandFrame(BosonCommandFrameBase* cmdframe);
+    virtual void setCommandFrame(BosonCommandFrameInterface* cmdframe);
 
 
   protected slots:
@@ -84,7 +84,7 @@ class BosonLocalPlayerInput : public KGameIO
     void signalAction(const BoSpecificAction& action);
 
   private:
-    BosonCommandFrameBase* mCmdFrame;
+    BosonCommandFrameInterface* mCommandFrame;
     BoEventListener* mEventListener;
 };
 

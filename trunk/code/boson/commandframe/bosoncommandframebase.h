@@ -22,6 +22,7 @@
 #include <qframe.h>
 #include "../global.h"
 #include "../boaction.h"
+#include "../bosoncommandframeinterface.h"
 
 class Unit;
 class UnitBase;
@@ -38,12 +39,26 @@ class KPlayer;
 class QVBox;
 class QScrollView;
 
+class BosonCommandFrameFactory : public BosonCommandFrameFactoryBase
+{
+public:
+	BosonCommandFrameFactory()
+	{
+	}
+
+	virtual BosonCommandFrameInterface* createCommandFrame(QWidget* parent, bool game)
+	{
+		return createCommandFrame2(parent, game);
+	}
+
+	BosonCommandFrameInterface* createCommandFrame2(QWidget* parent, bool game);
+};
 
 /**
  * @short The frame where you can order units
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
  **/
-class BosonCommandFrameBase : public QFrame
+class BosonCommandFrameBase : public BosonCommandFrameInterface
 {
 	Q_OBJECT
 public:
@@ -51,29 +66,11 @@ public:
 	virtual ~BosonCommandFrameBase();
 
 	/**
-	 * Create a cmdframe. The cmdframe will be a @ref BosonCommandFrame if
-	 * @p game is TRUE and a @ref EditorCommandFrame if @p game is FALSE.
-	 **/
-	static BosonCommandFrameBase* createCommandFrame(QWidget* parent, bool game);
-
-	/**
 	 * @param p The player whose units can be produced here.
 	 **/
 	void setLocalPlayer(Player* p);
 	Player* localPlayer() const;
 	PlayerIO* localPlayerIO() const;
-
-	/**
-	 * Ok, I know this function is a hack. Since we use QToolBar as parent
-	 * of BosonCommandFrameBase we need to do some ugly things - like
-	 * reparenting the minimap. It is done only once, immediately after
-	 * constructing the command frame.
-	 *
-	 * Seriously it does not even belong here. It belongs <em>next</em> to
-	 * BosonCommandFrameBase onto the QToolBar. But hey - it doesn't hurt here
-	 * and it's an easy solution for the background pixmap :-)
-	 **/
-	void reparentMiniMap(QWidget* map);
 
 	/**
 	 * @internal
@@ -201,30 +198,6 @@ protected:
 	 * don't need this.
 	 **/
 	void addUnitView();
-
-signals:
-	// AB: maybe use PlayerIO instead of Player parameter
-	void signalPlaceUnit(unsigned long int unitType, Player* owner);
-
-	/**
-	 * @param textureCount See @ref BosonGroundTheme::textureCount
-	 * @param alpha An array (of size @þ textureCount) defining how much of
-	 * every texture should get displayed. 255 is maximum, 0 is nothing.
-	 **/
-	void signalPlaceGround(unsigned int textureCount, unsigned char* alpha);
-
-	/**
-	 * Emitted when user clicks on action button (e.g move). Also used for
-	 * the placement preview, when the player clicks on a constructed
-	 * facility and wants it to be placed on the map.
-	 */
-	void signalAction(const BoSpecificAction& action);
-
-	/**
-	 * This unit should become the only selected unit. See @ref
-	 * BosonOrderButton::signalSelectUnit
-	 **/
-	void signalSelectUnit(Unit* unit);
 
 protected slots:
 	/**

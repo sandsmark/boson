@@ -44,7 +44,7 @@
 #include "bosonlocalplayerinput.h"
 #include "bosoncomputerio.h"
 #include "bosonmodeltextures.h"
-#include "commandframe/bosoncommandframebase.h"
+#include "bosoncommandframeinterface.h"
 #include "sound/bosonaudiointerface.h"
 #include "script/bosonscript.h"
 #include "bosonwidgets/bogamechat.h"
@@ -111,7 +111,7 @@ public:
 		mLightWidget = 0;
 	}
 
-	BosonCommandFrameBase* mCommandFrame;
+	BosonCommandFrameInterface* mCommandFrame;
 	BoGameChatWidget* mChat;
 
 	KActionMenu* mActionDebugPlayers;
@@ -897,7 +897,7 @@ void BosonWidgetBase::slotPlayerLeftGame(KPlayer* player)
  delete menu;
 }
 
-BosonCommandFrameBase* BosonWidgetBase::cmdFrame() const
+BosonCommandFrameInterface* BosonWidgetBase::cmdFrame() const
 {
  return d->mCommandFrame;
 }

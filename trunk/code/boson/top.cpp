@@ -46,6 +46,7 @@
 #include "bosongroundtheme.h"
 #include "bofullscreen.h"
 #include "bosonlocalplayerinput.h"
+#include "commandframe/bosoncommandframebase.h"
 //#include "kgamecelldebug.h"
 
 #include <kgamedebugdialog.h>
@@ -126,6 +127,8 @@ TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
 #if KDE_VERSION < 310
  d->mLoadingDockConfig = false;
 #endif
+
+ BosonCommandFrameInterface::setFactory(new BosonCommandFrameFactory());
 
  mMainDock = createDockWidget("mainDock", 0, this, i18n("Map"));
  mMainDock->setDockSite(KDockWidget::DockCorner);
