@@ -7,7 +7,8 @@ FACILITIES = \
 	tree1 \
 	tree2 \
 	tree3 \
-	oiltower
+	oiltower \
+	mineralmine
 
 unitsdir = $(kde_datadir)/boson/themes/species/neutral/units
 
