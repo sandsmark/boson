@@ -170,15 +170,19 @@ void BosonLocalPlayerInput::layMine(const BoSpecificAction& action)
   sendInput(msg);
 }
 
-void BosonLocalPlayerInput::harvest(Unit* u, int x, int y)
+void BosonLocalPlayerInput::harvest(const HarvesterPlugin* harvester, const ResourceMinePlugin* mine)
 {
+  BO_CHECK_NULL_RET(harvester);
+  BO_CHECK_NULL_RET(harvester->unit());
+  BO_CHECK_NULL_RET(mine);
+  BO_CHECK_NULL_RET(mine->unit());
   boDebug() << k_funcinfo << endl;
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
 
   stream << (Q_UINT32)BosonMessage::MoveMine;
-  stream << (Q_ULONG)u->id();
-  stream << QPoint(x, y);
+  stream << (Q_ULONG)harvester->unit()->id();
+  stream << (Q_ULONG)mine->unit()->id();
 
   QDataStream msg(b, IO_ReadOnly);
   sendInput(msg);
