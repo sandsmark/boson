@@ -141,10 +141,6 @@ BosonWidget::~BosonWidget()
  delete d->mCursor;
  delete d->mDisplayManager;
 
-// delete the destroyed units first
- canvas()->deleteDestroyed();
-// all KGame stuff will be deleted in TopWidget
- 
  delete d;
  kdDebug() << k_funcinfo << "done" << endl;
 }
@@ -919,6 +915,8 @@ void BosonWidget::slotDebugRequestIdName(int msgid, bool , QString& name)
 
 void BosonWidget::slotEndGame()
 {
+// this needs to be done first, before the players are removed
+ canvas()->deleteDestroyed();
  game()->quitGame();
 }
 
