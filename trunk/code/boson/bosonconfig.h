@@ -71,7 +71,9 @@ public:
 	static void saveChatFramePosition(int pos, KConfig* conf = 0);
 	static int readChatFramePosition(KConfig* conf = 0);
 
+	void setSound(bool s);
 	bool sound() const;
+	void setMusic(bool m);
 	bool music() const;
 
 	void save(KConfig* conf = 0);
@@ -79,10 +81,10 @@ public:
 
 protected:
 	bool readSound(KConfig* conf);
-	void saveSound(bool sound, KConfig* conf);
+	void saveSound(KConfig* conf);
 
 	bool readMusic(KConfig* conf);
-	void saveMusic(bool sound, KConfig* conf);
+	void saveMusic(KConfig* conf);
 
 private:
 	static BosonConfig* mBosonConfig;
