@@ -767,8 +767,11 @@ void TopWidget::endGame()
  delete d->mBosonWidget;
  d->mBosonWidget = 0;
  delete mBoson;  // Easiest way to reset game info
+ mBoson = 0;
  delete mCanvas;
+ mCanvas = 0;
  delete mMap;
+ mMap = 0;
 }
 
 void TopWidget::reinitGame()
