@@ -68,7 +68,7 @@ visualMobUnit::visualMobUnit(mobileMsg_t *msg)
 {
 
 	setZ	(Z_MOBILE + 3 * type);
-	move	(msg->x, msg->y);
+	move	(BO_TILE_SIZE * msg->x , BO_TILE_SIZE * msg->y);
 }
 
 visualMobUnit::~visualMobUnit()

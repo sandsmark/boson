@@ -98,15 +98,13 @@ void bosonTopLevel::setOrders( int what, int who)
 
 void bosonTopLevel::object_put(int x, int y)
 {
+	construct.x = X() + (x / BO_TILE_SIZE) ;
+	construct.y = Y() + (y / BO_TILE_SIZE) ;
 	switch(orderType) {
 		case OT_FACILITY:
-			construct.x = X() + (x / BO_TILE_SIZE) ;
-			construct.y = Y() + (y / BO_TILE_SIZE) ;
 			sendMsg(buffer, MSG_FACILITY_CONSTRUCT, MSG(construct) );
 			break;
 		case OT_MOBILE:
-			construct.x = X() * BO_TILE_SIZE + x;
-			construct.y = Y() * BO_TILE_SIZE + y;
 			sendMsg(buffer, MSG_MOBILE_CONSTRUCT, MSG(construct) );
 			break;
 		default:
