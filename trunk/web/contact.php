@@ -55,7 +55,9 @@ draw_bigbox_begin("Contact us");
 draw_bigbox_subheader("<a name=\"mail\"></a>Mailing lists");
 draw_bigbox_text("There are three mailing lists.<br><br>
     <a href=\"mailto:boson-devel@lists.sourceforge.net\">boson-devel@lists.sourceforge.net</a>
-    is meant for users and developers. If you have questions or problems, you can always come there and ask.<br>
+    is meant for users and developers. If you have questions or problems, you can always come there and ask.
+    Note that you have to subscribe or you message needs some days to reach the list. Also include a note
+    if you aren't on list so the other users can CC you.<br>
     <br>
     boson-cvs@lists.sourceforge.net is only meant for CVS logs, please do not post there.<br>
     <br>
