@@ -43,9 +43,6 @@
 
 #define BAR_WIDTH 10 // FIXME hardcoded value
 
-
-// KProgress has been renamed to KGameProgress after KDE3 beta1. KProgress is
-// now useless for us. But For Beta1 it's still ok.
 class BoProgress : public KGameProgress
 {
 	public:
@@ -424,17 +421,18 @@ void BosonCommandWidget::unset()
 
 void BosonCommandWidget::advanceProduction(double percentage)
 {
-// kdDebug() << k_funcinfo << percentage << endl;
  if (!d->mOwner) {
 	kdError() << k_funcinfo << "NULL owner" << endl;
+	return;
  }
- QPixmap small = *d->mOwner->speciesTheme()->smallOverview(d->mUnitType);
+ QPixmap small(*d->mOwner->speciesTheme()->smallOverview(d->mUnitType));
  if (percentage == 100) {
 	setPixmap(small);
 	return;
  }
 
  KPixmap progress(small);
+ progress.setMask(QBitmap()); // something strange is going on... why is this necessary for pixmaps with alpha channel? we already deleted the alpha pixmal in SpeciesTheme...
  KPixmapEffect::intensity(progress, 1.4);
 
  QBitmap mask(progress.width(), progress.height());
@@ -451,7 +449,7 @@ void BosonCommandWidget::advanceProduction(double percentage)
  // sqrt(pow(mask.width(),2) + pow(mask.height(), 2)),
  // but this is faster.
  int pieSize = mask.width() + mask.height(); 
- p.drawPie((mask.width()-pieSize)/2, (mask.height() - pieSize)/2, pieSize, 
+ p.drawPie((mask.width() - pieSize)/2, (mask.height() - pieSize)/2, pieSize,
 		pieSize, 16*90, -16*360*(percentage/100));
  p.end();
 

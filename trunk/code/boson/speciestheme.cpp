@@ -35,6 +35,26 @@
 #include <qintdict.h>
 #include <qdir.h>
 
+/**
+ * * By any reason QPixmap uses the alpha mask if existing, even if a custom 
+ * mask using setMask() is supplied. We use this hack to delete the alpha mask 
+ * if existing, so we can use our custom mask in 
+ * BosonCommandWidget::advanceProduction()
+ **/
+class OverviewPixmap : public QPixmap
+{
+public:
+	OverviewPixmap() : QPixmap() {}
+	void killAlphaMask() 
+	{
+		if (data->alphapm) {
+			delete data->alphapm;
+			data->alphapm = 0;
+		}
+	}
+};
+
+
 class SpeciesTheme::SpeciesThemePrivate
 {
 public:
@@ -182,11 +202,12 @@ bool SpeciesTheme::loadUnit(int type)
  if (d->mSmallOverview[type]) {
 	kdError() << "SmallOverview of " << type << " already there" << endl;
  } else {
-	QPixmap* p = new QPixmap;
+	OverviewPixmap* p = new OverviewPixmap;
 	if (!loadUnitPixmap(path + "overview-small.png", *p, false)) {
 		kdError() << "SpeciesTheme : Can't load " << path + "overview-small.png" << endl;
 		return false;
 	}
+	p->killAlphaMask();
 	d->mSmallOverview.insert(type, p);
  }
 
