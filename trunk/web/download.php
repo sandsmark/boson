@@ -85,11 +85,19 @@ recommended. :-) You can download the tarball from
 (16 548 KB) or via SF.net's web interface from
 <a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&release_id=194601\">here</a>.<br><br>");
 
-/*draw_bigbox_subheader("Gentoo");
-draw_bigbox_text("A boson ebuild is available in the standard gentoo portage and
-is tested against gcc-2.95.3 (gentoo 1.2 and previous) and gcc-3.2 (gentoo 1.4
-and following). To get boson downloaded, compiled and installed, please issue a
-<pre>emerge boson</pre><br>");*/
+draw_bigbox_subheader("Gentoo");
+draw_bigbox_text("Boson-0.9 is in the official portage tree, unmasked.<br>
+To get boson downloaded, compiled and installed, please issue a
+<pre>emerge sync; emerge boson</pre>
+If you're not familiar with <i>emerge</i>, see
+<a href=\"http://www.gentoo.org/doc/en/portage-user.xml\">http://www.gentoo.org/doc/en/portage-user.xml</a>
+for more info.<br><br>");
+
+draw_bigbox_subheader("Debian");
+draw_bigbox_text("To install Boson on Debian, do this:
+<pre>apt-get update; apt-get install boson</pre>
+This will download and install Boson's binary packages, so you'll have Boson up
+and running in just few minutes.<br><br>");
 
 /*draw_bigbox_subheader("RPM/binary releases");
 draw_bigbox_text("Note that RPM packages are not provided by the Boson team and
