@@ -89,11 +89,10 @@ We depend on:
 -------------
 - kdelibs 3
 - qt 3
-- kdegames/libkdegames 3
-- kdemultimedia 3
 - maybe kdebase3
  --> never tried without kdebase!
 - lib3ds
 - OpenGL
 - wml (compilation only! - for docs)
+- OpenAL
 
