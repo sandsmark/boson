@@ -33,10 +33,11 @@
     <pre>
     cvs -z3 co -P code
     cvs -z3 co -P data
+    cvs -z3 co -P tools
     </pre>
     Compilation of code:
     <pre>
-    cd "code"
+    cd code && ln -s ../tools/admin admin 
     make -f Makefile.cvs
     ./configure
     make
@@ -44,7 +45,7 @@
     </pre>
     Compilation of data:
     <pre>
-    cd data && ln -s ../code/admin admin 
+    cd data && ln -s ../tools/admin admin 
     make -f Makefile.cvs
     ./configure
     make
