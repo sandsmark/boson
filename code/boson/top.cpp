@@ -709,7 +709,8 @@ void TopWidget::slotStartGame(const QString& playFieldId)
  removeStartupWidget(IdLoading);
 
  // Init some stuff
- statusBar()->show();
+ d->mActionStatusbar->setChecked(true); // we do not yet remember user settings here! TODO
+ slotToggleStatusbar();// AB: doesn't really toggle!
  d->mBosonWidget->initGameMode(playFieldId);
  enableGameActions(true);
  d->mFpstimer.start(1000);
