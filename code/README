@@ -24,10 +24,10 @@ Minimum software requirements:
         KDE (at least version 3.1) - see http://www.kde.org
         Python 2.0 or better (2.3 is recommended) - see http://www.python.org/
         kdegames/libkdegames - usually shipped with KDE
-        kdemultimedia - also shipped with KDE
         libvorbis (for sound and music) - see http://www.vorbis.com
         lib3ds (Units and building rendering) - see http://lib3ds.sf.net
         OpenGL - The OpenGL library (should be included in your XFree Server or graphics card driver)
+        OpenAL - an audio library
         WML and Perl - Optional, for the handbook - see http://www.thewml.org
 
 
