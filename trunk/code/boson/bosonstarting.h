@@ -142,7 +142,6 @@ protected:
 	bool startScenario();
 	bool start();
 	bool loadTiles();
-	bool loadGameData3();
 
 	/**
 	 * Add the players for a loaded game.
