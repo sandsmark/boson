@@ -48,9 +48,12 @@ QValueList<Unit*> BoItemList::units(bool collidingOnly, bool includeMoving, Unit
 		continue;
 	}
 	if (RTTI::isUnit((*it)->rtti())) {
+		Unit* u = (Unit*)*it;
+		if (u->isDestroyed()) {
+			continue;
+		}
 		if (collidingOnly) {
-			Unit* u = (Unit*)*it;
-			if (u->isDestroyed() || (includeMoving && u->isMoving())) {
+			if (includeMoving && u->isMoving()) {
 				continue;
 			}
 			if (!forUnit || (!forUnit->isFlying() && !u->isFlying())) {
