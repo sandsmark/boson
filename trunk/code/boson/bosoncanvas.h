@@ -19,9 +19,15 @@
 #ifndef BOSONCANVAS_H
 #define BOSONCANVAS_H
 
-#include <qcanvas.h>
+#include "defines.h"
 
-class KPlayer;
+#ifndef NO_OPENGL
+#include <qobject.h>
+#include <qvaluelist.h>
+#else
+#include <qcanvas.h>
+#endif
+
 class BosonMap;
 class Cell;
 class Player;
@@ -30,15 +36,35 @@ class Facility;
 class UnitProperties;
 class BoShot;
 class BoDisplayManager;
+class BosonTiles;
+class BoItemList;
+class BosonSprite;
 
+class KPlayer;
+
+
+
+// buggy moc
+#ifndef NO_OPENGL
+class CanvasHack : public QObject
+{
+public:
+	CanvasHack(QObject* p, const char* name) : QObject(p, name){}
+};
+#else
+class CanvasHack : public QCanvas
+{
+public:
+	CanvasHack(QObject* p, const char* name) : QCanvas(p, name){}
+};
+#endif
 /**
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
  **/
-class BosonCanvas : public QCanvas
+class BosonCanvas : public CanvasHack
 {
 	Q_OBJECT
 public:
-	BosonCanvas(QPixmap p, unsigned int w, unsigned int h);
 	BosonCanvas(QObject* parent);
 	~BosonCanvas();
 
@@ -69,6 +95,8 @@ public:
 
 	void setMap(BosonMap* map);
 	BosonMap* map() const;
+	unsigned int mapHeight() const;
+	unsigned int mapWidth() const;
 
 	/**
 	 * Load the tileset. Note that you <em>must not</em> call @ref
@@ -82,14 +110,20 @@ public:
 	 **/
 	void loadTiles(const QString& tileFile, bool withtimer = true);
 
-	/**
-	 * Reimlemented from QCanvas::addAnimation because of @ref advance
-	 **/
-	virtual void addAnimation(QCanvasItem*);
-	/**
-	 * Reimlemented from QCanvas::removeAnimation because of @ref advance
-	 **/
-	virtual void removeAnimation(QCanvasItem*);
+#ifdef NO_OPENGL
+	virtual void addAnimation(QCanvasItem*) {}
+	virtual void removeAnimation(QCanvasItem*) {}
+#endif
+
+	virtual void addAnimation(BosonSprite* item);
+	virtual void removeAnimation(BosonSprite* item);
+
+	void addItem(BosonSprite* item);
+	void removeItem(BosonSprite* item);
+
+	BoItemList bosonCollisions(const QPointArray& cells, const BosonSprite* item, bool exact) const;
+	BoItemList bosonCollisions(const QRect& rect) const;
+	BoItemList bosonCollisions(const QPoint& pos) const;
 
 	/**
 	 * Called by @ref Unit. This informs the canvas about a moved
@@ -98,7 +132,7 @@ public:
 	 *
 	 * Also adjust the mini map - see @ref signalUnitMoved
 	 **/
-	void unitMoved(Unit* unit, double oldX, double oldY);
+	void unitMoved(Unit* unit, float oldX, float oldY);
 
 	/**
 	 * Called by @ref Unit. One unit damages/shoots at another unit.
@@ -113,10 +147,10 @@ public:
 
 	void deleteShot(BoShot*);
 
-	void updateSight(Unit*, double oldX, double oldY);
+	void updateSight(Unit*, float oldX, float oldY);
 
 	Cell* cellAt(Unit* unit) const;
-	Cell* cellAt(double x, double y) const;
+	Cell* cellAt(float x, float y) const;
 	Cell* cell(int x, int y) const;
 
 	void fogLocal(int x, int y);
@@ -202,10 +236,33 @@ public:
 	 **/
 	void killPlayer(Player* player);
 
-	void addToCells(Unit* u);
-	void removeFromCells(Unit* u);
+	void addToCells(BosonSprite* u);
+	void removeFromCells(BosonSprite* u);
 
 	void setDisplayManager(BoDisplayManager* m);
+
+	/**
+	 * This is meant to be used instead of QCanvas::allItems, since it also
+	 * works for OpenGL
+	 * @return A complete list of <em>all</em> items on the canvas.
+	 **/
+	BoItemList allBosonItems() const;
+
+	BosonTiles* tileSet() const;
+
+#ifndef NO_OPENGL
+	void resize(int w, int h);
+	int width() const { return mWidth; }
+	int height() const { return mHeight; }
+	bool onCanvas(const QPoint& pos) const
+	{
+		return onCanvas(pos.x(), pos.y());
+	}
+	bool onCanvas(int x, int y) const
+	{
+		return x >= 0 && y >= 0 && x < width() && y < height();
+	}
+#endif
 
 public slots:
 	/**
@@ -230,7 +287,7 @@ public slots:
 	virtual void update();
 
 signals:
-	void signalUnitMoved(Unit* unit, double oldX, double oldY);
+	void signalUnitMoved(Unit* unit, float oldX, float oldY);
 	void signalUnitDestroyed(Unit* unit);
 	void signalOutOfGame(Player*);
 	void signalTilesLoading(int);
@@ -259,6 +316,11 @@ private:
 private:
 	class BosonCanvasPrivate;
 	BosonCanvasPrivate* d;
+
+#ifndef NO_OPENGL
+	int mWidth;
+	int mHeight;
+#endif
 };
 
 #endif

@@ -25,9 +25,9 @@
 #include <qcanvas.h>
 #include <kdebug.h>
 
-QValueList<QCanvasItem*> BoItemList::items(bool collidingOnly, bool includeMoving, Unit* forUnit) const 
+QValueList<BosonSprite*> BoItemList::items(bool collidingOnly, bool includeMoving, Unit* forUnit) const 
 {
- QValueList<QCanvasItem*> list;
+ QValueList<BosonSprite*> list;
  QValueList<Unit*> unitList = units(collidingOnly, includeMoving, forUnit, &list);
 
  //TODO: once we have non-unit items we need to test if they are actually
@@ -35,12 +35,12 @@ QValueList<QCanvasItem*> BoItemList::items(bool collidingOnly, bool includeMovin
 
  QValueList<Unit*>::Iterator it = unitList.begin();
  for (; it != unitList.end(); ++it) {
-	list.append((QCanvasItem*)*it);
+	list.append((BosonSprite*)*it);
  }
  return list;
 }
 
-QValueList<Unit*> BoItemList::units(bool collidingOnly, bool includeMoving, Unit* forUnit, QValueList<QCanvasItem*>* nonUnits) const 
+QValueList<Unit*> BoItemList::units(bool collidingOnly, bool includeMoving, Unit* forUnit, QValueList<BosonSprite*>* nonUnits) const 
 {
  QValueList<Unit*> list;
  ConstIterator it = begin();
@@ -107,5 +107,8 @@ bool BoItemList::isOccupied(Unit* forUnit, bool includeMoving) const
 
 void BoItemList::willBeOccupiedBy(Unit* unit)
 {
- appendUnit(unit);
+ // FIXME: ab: ahem... this might cause some trouble in the future
+ // the unit is not yet there actually!
+ appendItem((BosonSprite*)unit);
 }
+

@@ -25,6 +25,7 @@
 #include "bosonbigdisplay.h"
 #include "editorbigdisplay.h"
 #include "bosonconfig.h"
+#include "bosoncursor.h"
 #include "player.h"
 #include "boselection.h"
 
@@ -116,7 +117,7 @@ public:
 	QPtrList<BosonBigDisplayBase> mDisplayList;
 	QPtrList<BoBox> mBoxList;
 
-	QCanvas* mCanvas;
+	BosonCanvas* mCanvas;
 	BosonBigDisplayBase* mActiveDisplay;
 
 	QVBoxLayout* mLayout;
@@ -124,7 +125,7 @@ public:
 	QIntDict<BoSelection> mSelectionGroups;
 };
 
-BoDisplayManager::BoDisplayManager(QCanvas* canvas, QWidget* parent, bool gameMode) : QWidget(parent, "bosondisplaymanager")
+BoDisplayManager::BoDisplayManager(BosonCanvas* canvas, QWidget* parent, bool gameMode) : QWidget(parent, "bosondisplaymanager")
 {
  d = new BoDisplayManagerPrivate;
  d->mDisplayList.setAutoDelete(true);
@@ -140,10 +141,12 @@ BoDisplayManager::BoDisplayManager(QCanvas* canvas, QWidget* parent, bool gameMo
 
 BoDisplayManager::~BoDisplayManager()
 {
+ kdDebug() << k_funcinfo << endl;
  d->mSelectionGroups.clear();
  d->mDisplayList.clear();
  d->mBoxList.clear();
  delete d;
+ kdDebug() << k_funcinfo << "done" << endl;
 }
 
 void BoDisplayManager::slotMakeActiveDisplay(BosonBigDisplayBase* display)
@@ -169,6 +172,7 @@ void BoDisplayManager::markActive(BosonBigDisplayBase* display, bool active)
 	return;
  }
  display->setActive(active);
+#ifdef NO_OPENGL
  if (active) {
 	if (d->mDisplayList.count() > 1) {
 		display->setLineWidth(style().pixelMetric(QStyle::PM_DefaultFrameWidth, this) + 3);
@@ -178,6 +182,7 @@ void BoDisplayManager::markActive(BosonBigDisplayBase* display, bool active)
  } else {
 	display->setLineWidth(style().pixelMetric(QStyle::PM_DefaultFrameWidth, this));
  }
+#endif
 }
 
 BosonBigDisplayBase* BoDisplayManager::activeDisplay() const
@@ -335,12 +340,17 @@ void BoDisplayManager::setCursor(BosonCursor* cursor)
 	it.current()->setCursor(cursor);
 	++it;
  }
+ if (cursor) {
+	disconnect(cursor, 0, this, 0);
+	connect(cursor, SIGNAL(signalUpdate()), this, SLOT(slotUpdate()));
+ }
 }
 
 void BoDisplayManager::setLocalPlayer(Player* p)
 {
  QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
  while (it.current()) {
+	kdDebug() << k_funcinfo << endl;
 	it.current()->setLocalPlayer(p);
 	++it;
  }
@@ -447,6 +457,64 @@ void BoDisplayManager::paintChatMessages()
  // TODO
 }
 
+void BoDisplayManager::slotUpdate()
+{
+ //AB: currently multiple GL-displays are not supported
+ QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
+ while (it.current()) {
+	//AB: should be updateGL(); -> the updateGLCursor() is just a hack for
+	//an #ifdef in BosonBigDisplayBase
+#ifndef NO_OPENGL
+	it.current()->updateGLCursor();
+#else
+	it.current()->update();
+	kdDebug() << "should not be called at all" << endl;
+#endif
+	++it;
+ }
+}
+
+//FIXME: same as above - but called from the canvas only
+void BoDisplayManager::slotUpdateCanvas()
+{
+ //AB: currently multiple GL-displays are not supported
+ kdDebug() << k_funcinfo << "is obsolete - we use an update timer instead!" << endl;
+ QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
+ while (it.current()) {
+	//AB: should be updateGL(); -> the updateGLCanvas() is just a hack for
+	//an #ifdef in BosonBigDisplayBase
+#ifndef NO_OPENGL
+	it.current()->updateGL();
+#else
+	it.current()->update();
+#endif
+	++it;
+ }
+}
+
+void BoDisplayManager::slotUpdateIntervalChanged(unsigned int ms)
+{
+ QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
+ while (it.current()) {
+	it.current()->setUpdateInterval(ms);
+	++it;
+ }	
+}
+
+void BoDisplayManager::slotCenterHomeBase()
+{
+ if (activeDisplay()) {
+	activeDisplay()->slotCenterHomeBase();
+ }
+}
+
+void BoDisplayManager::slotResetViewProperties()
+{
+ if (activeDisplay()) {
+	activeDisplay()->slotResetViewProperties();
+ }
+}
+
 void BoDisplayManager::slotSelectGroup(int number)
 {
  if (number < 0 || number >= 10) {
@@ -498,3 +566,4 @@ void BoDisplayManager::slotUnitAction(int action)
 {
  activeDisplay()->unitAction(action);
 }
+

@@ -32,7 +32,6 @@ class KGame;
 class KGameChat;
 class BosonCursor;
 class BoSelection;
-class BoAction;
 
 class QLabel;
 
@@ -60,12 +59,12 @@ class BosonBigDisplay : public BosonBigDisplayBase
 {
 	Q_OBJECT
 public:
-	BosonBigDisplay(QCanvas* c, QWidget* parent);
+	BosonBigDisplay(BosonCanvas* c, QWidget* parent);
 	virtual ~BosonBigDisplay();
 
-	virtual void setLocalPlayer(Player* p);
-
 	virtual void unitAction(int actionType);
+
+//	virtual void setLocalPlayer(Player* p);
 
 public slots:
 	void slotMoveSelection(int cellX, int cellY);
@@ -84,10 +83,11 @@ protected:
 	 * which performs the move on every client
 	 * @param send Set to true if you actually want to send the stream
 	 **/
-	virtual void actionClicked(const BoAction* action, QDataStream& stream, bool& send);
+	virtual void actionClicked(const BoAction& action, QDataStream& stream, bool* send);
 
 	// action*() methods family. These methods were previously integrated into
 	//  actionClicked(), but now it's broken into multiple methods
+	// AB: I'd prefer using BoAction instead of pos!
 	bool actionMine(QDataStream& stream, const QPoint& pos);
 	bool actionMove(QDataStream& stream, const QPoint& pos);
 	bool actionBuild(QDataStream& stream, const QPoint& pos);

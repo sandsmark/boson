@@ -21,7 +21,6 @@
 
 #include <kgame/kplayer.h>
 
-class QCanvasPixmapArray;
 class QColor;
 class Unit;
 class Facility;
@@ -44,12 +43,6 @@ public:
 	};
 	Player();
 	virtual ~Player();
-
-	/**
-	 * @return A @ref QCanvasPixmapArray for the specified unit (see @ref
-	 * UnitProperties::typeId) of the species of this player
-	 **/
-	QCanvasPixmapArray* pixmapArray(int unitType) const;
 
 	void loadTheme(const QString& species, const QColor& teamColor);
 

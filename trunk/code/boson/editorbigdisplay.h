@@ -35,7 +35,6 @@ class KGame;
 class KGameChat;
 class BosonCursor;
 class BoSelection;
-class BoAction;
 
 class QLabel;
 
@@ -63,7 +62,7 @@ class EditorBigDisplay : public BosonBigDisplayBase
 {
 	Q_OBJECT
 public:
-	EditorBigDisplay(QCanvas* c, QWidget* parent);
+	EditorBigDisplay(BosonCanvas* c, QWidget* parent);
 	virtual ~EditorBigDisplay();
 
 	virtual void setLocalPlayer(Player* p);
@@ -93,7 +92,7 @@ protected:
 	 * which performs the move on every client
 	 * @param send Set to true if you actually want to send the stream
 	 **/
-	virtual void actionClicked(const BoAction* action, QDataStream& stream, bool& send);
+	virtual void actionClicked(const BoAction& action, QDataStream& stream, bool* send);
 //	void editorActionClicked(const BoAction* action);//note: original editorActionClicked() didn't have stream or send parameters.
 
 	/**
@@ -101,7 +100,7 @@ protected:
 	 **/
 	virtual void updateCursor();
 
-	virtual bool actionLocked() const { return false; };
+	virtual bool actionLocked() const { return false; }
 
 //	void addMouseIO(Player* p);
 

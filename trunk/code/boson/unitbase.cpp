@@ -49,6 +49,7 @@ public:
 UnitBase::UnitBase(const UnitProperties* prop)
 {
  d = new UnitBasePrivate;
+ d->mProperties.setPolicy(KGamePropertyBase::PolicyLocal); // fallback
  mOwner = 0;
  mUnitProperties = prop; // WARNING: this might be 0 at this point! MUST be != 0 for Unit, but ScenarioUnit uses 0 here
 

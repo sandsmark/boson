@@ -20,6 +20,7 @@
 #include "bosoncursor.h"
 
 #include "rtti.h" // if we ever make this class public we should remove dependancy on this class
+#include "bosoncanvas.h" // see above .. but since we don't depend on QCanvas anymore thats just an illusion ;)
 
 #include <ksimpleconfig.h>
 #include <kstandarddirs.h>
@@ -214,9 +215,16 @@ bool BosonKDECursor::insertMode(int , QString , QString )
  return true;
 }
 
+
 /////////////////////////////////////////
 /////// BosonSpriteCursor ///////////////
 /////////////////////////////////////////
+
+#ifndef NO_OPENGL
+#include "bosontexturearray.h"
+#include <qimage.h>
+
+#else
 
 class BoCursorSprite : public QCanvasSprite
 {
@@ -225,26 +233,38 @@ public:
 	virtual bool collidesWith(const QCanvasItem*) const { return false; }
 	virtual int rtti() const { return RTTI::SpriteCursor; }
 };
+#endif // !NO_OPENGL
 
 class BosonSpriteCursor::BosonSpriteCursorPrivate
 {
 public:
 	BosonSpriteCursorPrivate()
 	{
+		mCurrentFrame = 0;
+
+#ifndef NO_OPENGL
+		mCurrentTextures = 0;
+#else
 		mCanvas = 0;
 		mCurrentFrames = 0;
-		mCurrentFrame = -1;
-
 		mCursor = 0;
+#endif
 	}
 
-	QCanvas* mCanvas;
 	QTimer mAnimateTimer;
-	QIntDict<QCanvasPixmapArray> mCursorPixmaps;
-	QCanvasPixmapArray* mCurrentFrames;
 	int mCurrentFrame;
 
+#ifndef NO_OPENGL
+	QIntDict<BosonTextureArray> mCursorPixmaps;
+	BosonTextureArray* mCurrentTextures;
+#else
+	QCanvas* mCanvas;
+	QIntDict<QCanvasPixmapArray> mCursorPixmaps;
+	QCanvasPixmapArray* mCurrentFrames;
+
 	BoCursorSprite* mCursor;
+#endif
+
 	unsigned int mHotspotX;
 	unsigned int mHotspotY;
 };
@@ -254,13 +274,15 @@ BosonSpriteCursor::BosonSpriteCursor() : BosonCursor()
  d = new BosonSpriteCursorPrivate;
  d->mCursorPixmaps.setAutoDelete(true);
  connect(&d->mAnimateTimer, SIGNAL(timeout()), this, SLOT(slotAdvance()));
- d->mHotspotX = 0;
- d->mHotspotY = 0;
+ mHotspotX = 0;
+ mHotspotY = 0;
 }
 
 BosonSpriteCursor::~BosonSpriteCursor()
 {
+#ifdef NO_OPENGL
  delete d->mCursor;
+#endif
  d->mCursorPixmaps.clear();
  delete d;
 }
@@ -270,20 +292,37 @@ void BosonSpriteCursor::setCursor(int mode)
  if (mode == cursorMode()) {
 	return;
  }
+#ifdef NO_OPENGL
  if (!d->mCursor) {
 	kdError() << k_funcinfo << "NULL cursor sprite" << endl;
 	return;
  }
+#endif
  BosonCursor::setCursor(mode);
  d->mAnimateTimer.stop();
+// kdDebug() << k_funcinfo << endl;
  if (mode >= 0) {
-	QCanvasPixmapArray* a = d->mCursorPixmaps[cursorMode()];
-//	d->mCursor->hide();
+#ifndef NO_OPENGL
+	BosonTextureArray * a;
+#else
+	QCanvasPixmapArray* a;
+#endif
+	a = d->mCursorPixmaps[cursorMode()];
+	hideCursor();
 	if (a) {
+//		kdDebug() << k_funcinfo << mode << endl;
 		if (!a->isValid()) {
-			kdError() << k_funcinfo << "pixmap array not valid for mode=" << mode << endl;
+			kdError() << k_funcinfo << "array not valid for mode=" << mode << endl;
 			return;
 		}
+#ifndef NO_OPENGL
+		setCurrentTextureArray(a);
+//		d->mCursor->setFrame(0);
+		showCursor();
+		if (d->mCurrentTextures && d->mCurrentTextures->count() > 1) {
+			d->mAnimateTimer.start(100);
+		}
+#else
 		// workaround for a qt < 3.0.5 bug
 		if (d->mCursor->frame() >= (int)a->count()) {
 			d->mCursor->setFrame(0);
@@ -291,21 +330,23 @@ void BosonSpriteCursor::setCursor(int mode)
 		d->mCurrentFrames = a;
 		d->mCursor->setSequence(a);
 		d->mCursor->setFrame(0);
-		d->mCursor->show();
+		showCursor();
 		if (d->mCursor->frameCount() > 1) {
 			d->mAnimateTimer.start(100);
 		}
+#endif
 	} else {
-		kdWarning() << k_funcinfo << "NULL pixmap array for " << mode << endl;
-		d->mCursor->hide();
+		kdWarning() << k_funcinfo << "NULL array for " << mode << endl;
+		hideCursor();
 	}
  } else {
-	d->mCursor->hide();
+	hideCursor();
  }
 }
 
-void BosonSpriteCursor::setCanvas(QCanvas* canvas, int mode, int z)
+void BosonSpriteCursor::setCanvas(BosonCanvas* canvas, int mode, int z)
 {
+#ifdef NO_OPENGL
  if (d->mCanvas) {
 	kdError() << k_funcinfo << "Canvas already set" << endl;
 	return;
@@ -317,6 +358,7 @@ void BosonSpriteCursor::setCanvas(QCanvas* canvas, int mode, int z)
 	d->mCursor = new BoCursorSprite(0, d->mCanvas);
 	d->mCursor->setZ(z);
  }
+#endif // NO_OPENGL
  setCursor(mode);
 }
 
@@ -328,7 +370,11 @@ void BosonSpriteCursor::setWidgetCursor(QWidget* w)
  }
 }
 
+#ifndef NO_OPENGL
+bool BosonSpriteCursor::insertMode(int mode, BosonTextureArray* array)
+#else
 bool BosonSpriteCursor::insertMode(int mode, QCanvasPixmapArray* array)
+#endif
 {
  if (d->mCursorPixmaps[mode]) {
 	kdWarning() << k_funcinfo << "Mode already inserted - removing first" << endl;
@@ -336,40 +382,69 @@ bool BosonSpriteCursor::insertMode(int mode, QCanvasPixmapArray* array)
  }
  if (array) {
 	d->mCursorPixmaps.insert(mode, array);
+#ifndef NO_OPENGL
+	if (!d->mCurrentTextures) {
+		d->mCurrentTextures = array;
+	}
+#endif
 	return true;
  }
  return false;
 }
 
+#ifdef NO_OPENGL
 QCanvasSprite* BosonSpriteCursor::cursorSprite() const
 {
  return d->mCursor;
 }
+#endif
 
 void BosonSpriteCursor::move(double x, double y)
 {
+#ifdef NO_OPENGL
  d->mCursor->move(x, y);
+#endif
 }
 
 void BosonSpriteCursor::slotAdvance()
 {
+#ifndef NO_OPENGL
+ if (!d->mCurrentTextures) {
+	return;
+ }
+ d->mCurrentFrame++;
+ if (d->mCurrentFrame >= (int)d->mCurrentTextures->count()) {
+	d->mCurrentFrame = 0;
+ }
+ // update the GL widget - not really nice, since its already updated pretty
+ // often :(
+ // but we need to do this, especially if game speed is low
+ emit signalUpdate();
+#else
  d->mCursor->setFrame((d->mCursor->frame() + 1 + d->mCursor->frameCount()) % d->mCursor->frameCount());
 
  // not a real ideal solution... this gets called very often anyway.
  // we need it here when the game speed is very low
  d->mCursor->canvas()->update();
+#endif
 }
 
 void BosonSpriteCursor::hideCursor()
 {
- d->mCursor->hide();
+#ifdef NO_OPENGL
+ if (d->mCursor) {
+	d->mCursor->hide();
+ }
+#endif
 }
 
 void BosonSpriteCursor::showCursor()
 {
+#ifdef NO_OPENGL
  if (d->mCursor) {
 	d->mCursor->show();
  }
+#endif
 }
 
 bool BosonSpriteCursor::insertMode(int mode, QString baseDir, QString cursor)
@@ -377,304 +452,106 @@ bool BosonSpriteCursor::insertMode(int mode, QString baseDir, QString cursor)
  return insertMode(mode, loadSpriteCursor(baseDir, cursor));
 }
 
+#ifndef NO_OPENGL
+BosonTextureArray* BosonSpriteCursor::loadSpriteCursor(QString baseDir, QString cursor)
+#else
 QCanvasPixmapArray* BosonSpriteCursor::loadSpriteCursor(QString baseDir, QString cursor)
+#endif
 {
  if (baseDir.right(1) != QString::fromLatin1("/")) {
 	baseDir += QString::fromLatin1("/");
  }
- QCanvasPixmapArray* array = 0;
  KSimpleConfig c(baseDir + cursor + QString::fromLatin1("/index.desktop"));
  kdDebug() << baseDir << endl;
+#ifdef NO_OPENGL
+ QCanvasPixmapArray* array = 0;
+#endif
  if (!c.hasGroup("Boson Cursor")) {
 	kdWarning() << k_funcinfo << "index.desktop is missing default group" << endl;
- } else {
-	c.setGroup("Boson Cursor");
-	QString filePrefix = c.readEntry("FilePrefix", QString::fromLatin1("cursor-"));
-	unsigned int frames = c.readUnsignedNumEntry("FrameCount", 1);
-	mHotspotX = c.readUnsignedNumEntry(QString("HotspotX"), 0);
-	mHotspotY = c.readUnsignedNumEntry(QString("HotspotY"), 0);
-	QValueList<QPixmap> pixmaps;
-	QPointArray points(frames);
-	for (unsigned int j = 0; j < frames; j++) {
-		points.setPoint(j, mHotspotX, mHotspotY);
-		QPixmap p;
-		QString number;
-		number.sprintf("%04d", j);
-		QString file = QString::fromLatin1("%1%2/%3%4.png").arg(baseDir).arg(cursor).arg(filePrefix).arg(number);
-		if (p.load(file)) {
-			QBitmap mask(file);
-			p.setMask(mask);
-		} else {
-			kdError() << k_funcinfo << "Could not load " << file << endl;
-		}
-		pixmaps.append(p);
-	}
-	if (pixmaps.count() > 0) {
-		array = new QCanvasPixmapArray(pixmaps, points);
-	} else {
-		kdError() << k_funcinfo << "No pixmaps loaded from " << baseDir + cursor << endl;
-	}
+	return 0;
  }
- return array;
+ c.setGroup("Boson Cursor");
+ QString filePrefix = c.readEntry("FilePrefix", QString::fromLatin1("cursor-"));
+ unsigned int frames = c.readUnsignedNumEntry("FrameCount", 1);
+#ifndef NO_OPENGL
+ QValueList<QImage> images;
+#else
+ QValueList<QPixmap> pixmaps;
+ QPointArray points(frames);
+#endif
+
+ mHotspotX = c.readUnsignedNumEntry(QString("HotspotX"), 0);
+ mHotspotY = c.readUnsignedNumEntry(QString("HotspotY"), 0);
+ for (unsigned int j = 0; j < frames; j++) {
+	QString number;
+	number.sprintf("%04d", j);
+	QString file = QString::fromLatin1("%1%2/%3%4.png").arg(baseDir).arg(cursor).arg(filePrefix).arg(number);
+#ifndef NO_OPENGL
+	QImage image;
+	if (!image.load(file)) {
+		kdError() << k_funcinfo << "Could not load " << file << endl;
+		// TODO: load dummy image
+	}
+	images.append(image);
+#else
+	points.setPoint(j, mHotspotX, mHotspotY);
+	QPixmap p;
+	if (p.load(file)) {
+		QBitmap mask(file);
+		p.setMask(mask);
+	} else {
+		kdError() << k_funcinfo << "Could not load " << file << endl;
+	}
+	pixmaps.append(p);
+#endif // !NO_OPENGL
+ }
+#ifndef NO_OPENGL
+ if (images.count() > 0) {
+	kdDebug() << "create cursor texture array" << endl;
+	BosonTextureArray* array = new BosonTextureArray(images);
+	kdDebug() << "created texture array" << endl;
+	return array;
+#else
+ if (pixmaps.count() > 0) {
+	array = new QCanvasPixmapArray(pixmaps, points);
+	return array;
+#endif
+ } else {
+	kdError() << k_funcinfo << "Could not load from " << baseDir + cursor << endl;
+ }
+ return 0;
 }
 
+#ifndef NO_OPENGL
+GLuint BosonSpriteCursor::currentTexture() const
+{
+ BosonTextureArray* a = d->mCurrentTextures;
+ if (!a) {
+	kdError() << k_funcinfo << "NULL current texture array" << endl;
+	return 0;
+ }
+ return a->texture(d->mCurrentFrame);
+}
+
+void BosonSpriteCursor::setCurrentTextureArray(BosonTextureArray* array)
+{
+ if (!array) {
+	kdError() << k_funcinfo << "NULL texture array" << endl;
+	return;
+ }
+ if (!array->isValid()) {
+	kdError() << k_funcinfo << "invalid texture array" << endl;
+	return;
+ }
+ d->mCurrentTextures = array;
+ if (d->mCurrentFrame >= (int)d->mCurrentTextures->count()) {
+	d->mCurrentFrame = 0;
+ }
+}
+#else
 QPoint BosonSpriteCursor::pos() const
 {
  return QPoint((int)d->mCursor->x(), (int)d->mCursor->y());
 }
-
-
-
-/////////////////////////////////////////
-/////// BosonExperimentalCursor /////////
-/////////////////////////////////////////
-class BosonExperimentalCursor::BosonExperimentalCursorPrivate
-{
-public:
-	BosonExperimentalCursorPrivate()
-	{
-		mCurrentFrames = 0;
-		mCurrentFrame = -1;
-
-		mCursor = 0;
-
-		mWidget = 0;
-	}
-
-	QTimer mAnimateTimer;
-	QIntDict<QCanvasPixmapArray> mCursorPixmaps;
-	QCanvasPixmapArray* mCurrentFrames;
-	int mCurrentFrame;
-
-	QLabel* mCursor;
-
-	QWidget* mWidget;
-	QRect mRect;
-};
-
-BosonExperimentalCursor::BosonExperimentalCursor() : BosonCursor()
-{
- d = new BosonExperimentalCursorPrivate;
- d->mCursorPixmaps.setAutoDelete(true);
- connect(&d->mAnimateTimer, SIGNAL(timeout()), this, SLOT(slotAdvance()));
-
- init();
-}
-
-BosonExperimentalCursor::~BosonExperimentalCursor()
-{
- d->mCursorPixmaps.clear();
- delete d->mCursor;
- delete d;
-}
-
-void BosonExperimentalCursor::init()
-{
- // from kdesktop/startupid.cpp
- d->mCursor = new QLabel(0, 0, 
-		WX11BypassWM|
-		WRepaintNoErase|
-		WStaticContents|
-		WResizeNoErase);
-// XSetWindowAttributes attr;
-// attr.save_under = True; // useful saveunder if possible to avoid redrawing
-// XChangeWindowAttributes( qt_xdisplay(), d->mCursor->winId(), CWSaveUnder, &attr );
- d->mCursor->setStyle("Windows"); // set a simple style w/o background
- d->mCursor->hide();
-}
-
-void BosonExperimentalCursor::slotAdvance()
-{
-// d->mCursor->hide();
-	
-// d->mCursor->setFrame((d->mCursor->frame() + 1 + d->mCursor->frameCount()) % d->mCursor->frameCount());
- QCanvasPixmap* p;
- if ((int)d->mCurrentFrames->count() > d->mCurrentFrame + 1) {
-	d->mCurrentFrame++;
- } else {
-	d->mCurrentFrame = 0;
- }
- 
- p = d->mCurrentFrames->image(d->mCurrentFrame);
- if (!p) {
-	d->mCursor->hide();
-	return;
- }
- d->mCursor->resize(p->width(), p->height());
-// d->mCursor->setBackground(TransparentMode);
- d->mCursor->setMask(*p->mask());
- d->mCursor->setPixmap(*p);
-
- d->mCursor->show();
-
-
-// paintCursor(0, QCursor::pos());
-}
-
-void BosonExperimentalCursor::setCursor(int mode)
-{
- if (mode == cursorMode()) {
-	return;
- }
- BosonCursor::setCursor(mode);
- d->mAnimateTimer.stop();
- if (mode >= 0) {
-	QCanvasPixmapArray* a = d->mCursorPixmaps[cursorMode()];
-//	d->mCursor->hide();
-	if (a) {
-		d->mCurrentFrames = a;
-		if (a->count() > 1) {
-			d->mAnimateTimer.start(100);
-//			d->mAnimateTimer.start(1000);
-		}
-		slotAdvance();
-		d->mCursor->show();
-	} else {
-		d->mCursor->hide();
-		kdWarning() << k_funcinfo << "NULL pixmap array for " << mode << endl;
-	}
- } else {
-	d->mCursor->hide();
- }
-}
-
-void BosonExperimentalCursor::setWidgetCursor(QWidget* w)
-{
- d->mWidget = w;
- if (!w) {
-	return;
- }
- if (!d->mCursor->parent()) {
-	d->mCursor->reparent(w, QPoint(0,0));
-	d->mCursor->hide();
- }
-
- if (d->mWidget->cursor().shape() != Qt::BlankCursor) {
-//	kdDebug() << k_funcinfo << endl;
-	d->mWidget->setCursor(Qt::BlankCursor);
- }
-}
-
-void BosonExperimentalCursor::move(double x, double y)
-{
-	return;
- d->mCursor->move((int)x, (int)y); // TODO: hotspot!
-
- // from kdesktop/startupod.cpp:
-// XRaiseWindow(qt_xdisplay(), d->mCursor->winId());
-// QApplication::flushX();
-
- paintCursor(0, QPoint((int)x, (int)y));
-}
-
-bool BosonExperimentalCursor::insertMode(int mode, QCanvasPixmapArray* array)
-{
- if (d->mCursorPixmaps[mode]) {
-	kdWarning() << k_funcinfo << "Mode already inserted - removing first" << endl;
-	d->mCursorPixmaps.remove(mode);
- }
- if (array) {
-	d->mCursorPixmaps.insert(mode, array);
-	return true;
- }
- return false;
-}
-
-void BosonExperimentalCursor::hideCursor()
-{
-// d->mCursor->hide();
-}
-
-void BosonExperimentalCursor::showCursor()
-{
-// d->mCursor->show();
-}
-
-void BosonExperimentalCursor::removeOldCursor()
-{
- if (!d->mWidget) {
-	return;
- }
- kdDebug() << k_funcinfo << endl;
-// d->mWidget->repaint(d->mRect);
-}
-
-QRect BosonExperimentalCursor::oldCursor() const
-{
- return d->mRect;
-}
-
-bool BosonExperimentalCursor::insertMode(int mode, QString baseDir, QString cursor)
-{
- return insertMode(mode, loadCursor(baseDir, cursor));
-}
-
-void BosonExperimentalCursor::paintCursor(QPainter* /**obsolete**/, const QPoint& pos)
-{
-	return;
-kdDebug() << k_funcinfo << endl;
- if (!d->mCurrentFrames) {
-	return;
- }
- if (d->mCurrentFrame < 0 || (int)d->mCurrentFrames->count() <= d->mCurrentFrame) {
-	return;
- }
- if (!d->mWidget) {
-	return;
- }
- QPainter p(d->mWidget);
-kdDebug() << k_funcinfo << endl;
- QPixmap* pix = d->mCurrentFrames->image(d->mCurrentFrame);
- if (!pix) {
-	return;
- }
- d->mRect = QRect(pos, QSize(pix->width(), pix->height()));
- p.drawPixmap(d->mRect, *pix);
- p.end();
-kdDebug() << k_funcinfo << "end" << endl;
-}
-
-QCanvasPixmapArray* BosonExperimentalCursor::loadCursor(QString baseDir, QString cursor)
-{
- if (baseDir.right(1) != QString::fromLatin1("/")) {
-	baseDir += QString::fromLatin1("/");
- }
- QCanvasPixmapArray* array = 0;
- KSimpleConfig c(baseDir + cursor + QString::fromLatin1("/index.desktop"));
- if (!c.hasGroup("Boson Cursor")) {
-	kdWarning() << k_funcinfo << "index.desktop is missing default group" << endl;
- } else {
-	c.setGroup("Boson Cursor");
-	QString filePrefix = c.readEntry("FilePrefix", QString::fromLatin1("cursor-"));
-	unsigned int frames = c.readUnsignedNumEntry("FrameCount", 1);
-	unsigned int hotspotX = 0;
-	unsigned int hotspotY = 0;
-	QValueList<QPixmap> pixmaps;
-	QPointArray points(frames);
-	for (unsigned int j = 0; j < frames; j++) {
-		hotspotX = c.readUnsignedNumEntry(QString("HotspotX_%1").arg(j), hotspotX);
-		hotspotY = c.readUnsignedNumEntry(QString("HotspotY_%1").arg(j), hotspotY);
-		points.setPoint(j, hotspotX, hotspotY);
-		QPixmap p;
-		QString number;
-		number.sprintf("%04d", j);
-		QString file = QString::fromLatin1("%1%2/%3%4.png").arg(baseDir).arg(cursor).arg(filePrefix).arg(number);
-		if (p.load(file)) {
-			QBitmap mask(file);
-			p.setMask(mask);
-		} else {
-			kdError() << k_funcinfo << "Could not load " << file << endl;
-		}
-		pixmaps.append(p);
-	}
-	if (pixmaps.count() > 0) {
-		array = new QCanvasPixmapArray(pixmaps, points);
-	} else {
-		kdError() << k_funcinfo << "No pixmaps loaded from " << baseDir + cursor << endl;
-	}
- }
- return array;
-}
-
-
+#endif
 

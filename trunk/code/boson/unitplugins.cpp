@@ -24,6 +24,7 @@
 #include "player.h"
 #include "bosoncanvas.h"
 #include "boson.h"
+#include "boitemlist.h"
 
 #include "defines.h"
 
@@ -255,7 +256,7 @@ void RepairPlugin::repairInRange()
 
  // TODO: once we started repairing a unit also repair it in the next call,
  // until it isn't in range anymore or is repaired
- QCanvasItemList list = unit()->unitsInRange();
+ BoItemList list = unit()->unitsInRange();
  for (unsigned int i = 0; i < list.count(); i++) {
 	Unit* u = (Unit*)list[i];
 	if (u->health() >= u->unitProperties()->health()) {

@@ -17,6 +17,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #include "unitproperties.h"
+#include "defines.h"
 
 #include <qcanvas.h>
 #include "speciestheme.h"
@@ -32,7 +33,7 @@ public:
 	{
 	}
 
-	double mSpeed;
+	float mSpeed;
 	bool mCanGoOnLand; // a nice candidate for bitfields...
 	bool mCanGoOnWater;
 	bool mCanMineMinerals;
@@ -51,6 +52,7 @@ public:
 	QValueList<int> mProducerList;
 	bool mCanRefineMinerals;
 	bool mCanRefineOil;
+	unsigned int mConstructionFrames;
 };
 
 class UnitProperties::UnitPropertiesPrivate
@@ -140,7 +142,7 @@ void UnitProperties::loadMobileProperties(KSimpleConfig* conf)
 {
  conf->setGroup("Boson Mobile Unit");
  mMobileProperties = new MobileProperties;
- mMobileProperties->mSpeed = conf->readDoubleNumEntry("Speed", 0);
+ mMobileProperties->mSpeed = (float)conf->readDoubleNumEntry("Speed", 0);
  if(mMobileProperties->mSpeed < 0) {
 	kdWarning() << k_funcinfo << "Invalid Speed value: " << mMobileProperties->mSpeed <<
 			" for unit " << typeId() << ", defaulting to 0" << endl;
@@ -166,6 +168,7 @@ void UnitProperties::loadFacilityProperties(KSimpleConfig* conf)
  mFacilityProperties->mCanRefineMinerals = conf->readBoolEntry("CanRefineMinerals",
 		false);
  mFacilityProperties->mCanRefineOil= conf->readBoolEntry("CanRefineOil", false);
+ mFacilityProperties->mConstructionFrames= conf->readUnsignedNumEntry("ConstructionSteps", FACILITY_CONSTRUCTION_STEPS);
 }
 
 bool UnitProperties::isMobile() const
@@ -198,7 +201,7 @@ unsigned long int UnitProperties::oilCost() const
  return mOilCost;
 }
 
-double UnitProperties::speed() const
+float UnitProperties::speed() const
 {
  if (!mMobileProperties) {
 	return 0;
@@ -281,5 +284,13 @@ bool UnitProperties::canRefineOil() const
 	return false;
  }
  return mFacilityProperties->mCanRefineOil;
+}
+
+unsigned int UnitProperties::constructionSteps() const
+{
+ if (!mFacilityProperties) {
+	return 0;
+ }
+ return mFacilityProperties->mConstructionFrames;
 }
 

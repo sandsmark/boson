@@ -42,6 +42,7 @@ COMMON_SRC = \
 	player.cpp \
 	bosoncommandframe.cpp \
 	kgamedialogbosonconfig.cpp \
+	bosonbigdisplaybase.cpp \
 	bosonbigdisplay.cpp \
 	bosonminimap.cpp \
 	bosonunitview.cpp \
@@ -69,8 +70,12 @@ COMMON_SRC = \
 	unitplugins.cpp \
 	bosonstarteditorwidget.cpp \
 	bosonstartupbasewidget.cpp \
-	bosonbigdisplaybase.cpp \
-	editorbigdisplay.cpp
+	editorbigdisplay.cpp \
+	bosontexturearray.cpp \
+	bosonmodel.cpp \
+	bosonglfont.cpp \
+	bosonprofiling.cpp \
+	bosonprofilingdialog.cpp
 
 BOUNIT_SRC = \
 	unitproperties.cpp \
@@ -78,11 +83,11 @@ BOUNIT_SRC = \
 	bounitmain.cpp
 
 boson_LDFLAGS = $(KDE_RPATH) $(all_libraries)
-boson_LDADD = $(top_builddir)/boson/visual/libbosonvisual.la -lkdegames -lqtmcop -lsoundserver_idl -lartskde $(LIB_KDEUI)
+boson_LDADD = $(top_builddir)/boson/visual/libbosonvisual.la -lkdegames -lqtmcop -lsoundserver_idl -lartskde -lGLU -l3ds $(LIB_KDEUI)
 boson_SOURCES = $(BOSON_SRC) $(COMMON_SRC)
 
 #boeditor_LDFLAGS = $(KDE_RPATH) $(all_libraries)
-#boeditor_LDADD = -lkdegames -lqtmcop -lsoundserver_idl -lartskde $(LIB_KDEUI) 
+#boeditor_LDADD = $(top_builddir)/boson/visual/libbosonvisual.la -lkdegames -lqtmcop -lsoundserver_idl -lartskde $(LIB_KDEUI) 
 #boeditor_SOURCES = $(BOEDITOR_SRC) $(COMMON_SRC)
 
 bounit_LDFLAGS = $(KDE_RPATH) $(all_libraries)

@@ -20,7 +20,7 @@
 #define BOITEMLIST_H
 
 #include <qvaluelist.h>
-class QCanvasItem;
+class BosonSprite;
 class Unit;
 
 /**
@@ -33,17 +33,21 @@ class Unit;
  *
  * Note that since nothing of the above except units is implemented in boson so
  * all items in the list are units, currently. 
- * @short A list of QCanvasItem
+ *
+ * UPDATE: the list now consists of BosonSprite and therefore <em>items</em>,
+ * not just units. we may add some additional code to separate units (in favor
+ * of performance) in the future
+ * @short A list of @ref BosonSprite
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class BoItemList : public QValueList<QCanvasItem*>
+class BoItemList : public QValueList<BosonSprite*>
 {
 public:
-	// FIXME: this *should* be Unit* instead of QCanvasItem but since we
-	// must not include unit.h here we use QCanvasItem. pointer conversion
+	// FIXME: this *should* be Unit* instead of BosonSprite but since we
+	// must not include unit.h here we use BosonSprite . pointer conversion
 	// without unit.h included would cause problems here :-(
-	iterator appendUnit(QCanvasItem* unit) { return QValueList<QCanvasItem*>::append((QCanvasItem*)unit); }
-	uint removeUnit(QCanvasItem* unit) { return QValueList<QCanvasItem*>::remove((QCanvasItem*)unit); }
+	iterator appendItem(BosonSprite* item) { return QValueList<BosonSprite*>::append(item); }
+	uint removeItem(BosonSprite* item) { return QValueList<BosonSprite*>::remove(item); }
 
 	/**
 	 * @param collidingOnly if TRUE return only items that are interesting
@@ -59,7 +63,7 @@ public:
 	 * if TRUE, otherwise not
 	 * @return The units on this cell
 	 **/
-	QValueList<Unit*> units(bool collidingOnly = true, bool includeMoving = true, Unit* forUnit = 0, QValueList<QCanvasItem*>* nonUnit = 0) const;
+	QValueList<Unit*> units(bool collidingOnly = true, bool includeMoving = true, Unit* forUnit = 0, QValueList<BosonSprite*>* nonUnit = 0) const;
 	
 	/**
 	 * @param collidingOnly if TRUE return only items that are interesting
@@ -72,7 +76,7 @@ public:
 	 * if TRUE, otherwise not
 	 * @return The items on this cell
 	 **/
-	QValueList<QCanvasItem*> items(bool collidingOnly = true, bool includeMoving = true, Unit* forUnit = 0) const;
+	QValueList<BosonSprite*> items(bool collidingOnly = true, bool includeMoving = true, Unit* forUnit = 0) const;
 
 	/**
 	 * Please note that this function might get performance improvements!
@@ -92,14 +96,14 @@ protected:
 	/**
 	 * You are meant to use e.g. @ref appendUnit but not append. We change the
 	 * access permissions to protected here to avoid adding of a
-	 * QCanvasItem* directly.
+	 * BosonSprite directly.
 	 **/
-	QValueList<QCanvasItem*>::append;
+	QValueList<BosonSprite*>::append;
 
 	/**
 	 * See above. You are meant to use e.g. @ref removeUnit
 	 **/
-	QValueList<QCanvasItem*>::remove;
+	QValueList<BosonSprite*>::remove;
 };
 
 #endif

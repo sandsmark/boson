@@ -40,3 +40,26 @@ dnl AC_CHECK_KGAMEPROGRESS
 
 KDE_CHECK_STL
 
+dnl TODO: we need to find out which version is installed and which we need
+AC_DEFUN(AC_CHECK_LIB3DS,
+[
+AC_MSG_CHECKING([for lib3ds/file.h])
+AC_FIND_FILE(lib3ds/file.h,  [$kde_incdirs], lib3ds)
+if test "$lib3ds" = NO ; then
+  AC_MSG_RESULT([no])
+  AC_MSG_ERROR([lib3ds was not found. See http://lib3ds.sourceforge.net])
+else
+  AC_MSG_RESULT([$lib3ds])
+fi
+])
+AC_CHECK_LIB3DS
+
+AC_DEFUN(AC_BOSON_HAVE_GL,
+[
+AC_HAVE_GL
+if test "$ac_cv_have_gl" = "no"; then
+  AC_MSG_ERROR([Cannot find OpenGL on your system!])
+fi
+])
+AC_BOSON_HAVE_GL
+

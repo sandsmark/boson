@@ -204,20 +204,50 @@ unsigned int BosonStatistics::winningPoints()
 
 void BosonStatistics::load(QDataStream& stream)
 {
- stream >> mShots;
- stream >> mMinedMinerals;
- stream >> mMinedOil;
- stream >> mRefinedMinerals;
- stream >> mRefinedOil;
- stream >> mProducedMobileUnits;
- stream >> mProducedFacilities;
- stream >> mDestroyedMobileUnits;
- stream >> mDestroyedFacilities;
- stream >> mDestroyedOwnMobileUnits;
- stream >> mDestroyedOwnFacilities;
- stream >> mLostMobileUnits;
- stream >> mLostFacilities;
- stream >> mPoints;
+ Q_UINT32 shots;
+ Q_UINT32 minedMinerals;
+ Q_UINT32 minedOil;
+ Q_UINT32 refinedMinerals;
+ Q_UINT32 refinedOil;
+ Q_UINT32 producedMobUnits;
+ Q_UINT32 producedFac;
+ Q_UINT32 destroyedMobUnits;
+ Q_UINT32 destroyedFac;
+ Q_UINT32 destroyedOwnMobUnits;
+ Q_UINT32 destroyedOwnFac;
+ Q_UINT32 lostMobUnits;
+ Q_UINT32 lostFac;
+ Q_INT32 points;
+
+ stream >> shots;
+ stream >> minedMinerals;
+ stream >> minedOil;
+ stream >> refinedMinerals;
+ stream >> refinedOil;
+ stream >> producedMobUnits;
+ stream >> producedFac;
+ stream >> destroyedMobUnits;
+ stream >> destroyedFac;
+ stream >> destroyedOwnMobUnits;
+ stream >> destroyedOwnFac;
+ stream >> lostMobUnits;
+ stream >> lostFac;
+ stream >> points;
+
+ mShots = shots;
+ mMinedMinerals = minedMinerals;
+ mMinedOil = minedOil;
+ mRefinedMinerals = refinedMinerals;
+ mRefinedOil = refinedOil;
+ mProducedMobileUnits = producedMobUnits;
+ mProducedFacilities = producedFac;
+ mDestroyedMobileUnits = destroyedMobUnits;
+ mDestroyedFacilities = destroyedFac;
+ mDestroyedOwnMobileUnits = destroyedOwnMobUnits;
+ mDestroyedOwnFacilities = destroyedOwnFac;
+ mLostMobileUnits = lostMobUnits;
+ mLostFacilities = lostFac;
+ mPoints = points;
 }
 
 void BosonStatistics::save(QDataStream& stream)
@@ -237,3 +267,4 @@ void BosonStatistics::save(QDataStream& stream)
  stream << (Q_UINT32)mLostFacilities;
  stream << (Q_INT32)mPoints;
 }
+

@@ -21,16 +21,20 @@
 
 #include "unitbase.h"
 #include "global.h"
+#include "visual/bosonsprite.h"
 
 #include <qcanvas.h>
 
 class Player;
 class BosonCanvas;
+class BoItemList;
 class UnitProperties;
 class Cell;
 class Facility;
 class ProductionPlugin;
 class RepairPlugin;
+
+class KGameUnitDebug;
 
 /**
  * Implementation of the visual parts of a unit. As far as possible all stuff
@@ -42,7 +46,7 @@ class RepairPlugin;
  * therefore not possible! This is done to save as much memory as possible.
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
  **/
-class Unit : public UnitBase, public QCanvasSprite
+class Unit : public UnitBase, public BosonSprite
 {
 public:
 	enum PropertyIds {
@@ -79,7 +83,7 @@ public:
 		SoundReportUnderAttack = 6
 	};
 
-	Unit(const UnitProperties* prop, Player* owner, QCanvas* canvas);
+	Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas);
 	virtual ~Unit();
 
 	inline virtual int rtti() const { return UnitBase::rtti(); }
@@ -88,10 +92,14 @@ public:
 
 	inline BosonCanvas* boCanvas() const { return (BosonCanvas*)canvas(); }
 
-	void select();
-	void unselect();
+	virtual void select(bool markAsLeader = false);
 
-	virtual void moveBy(double x, double y);
+	/**
+	 * Note that we use float all over in boson, since mesa uses float
+	 * internally. We won't gain precision by double but we will lose some
+	 * performance
+	 **/
+	virtual void moveBy(float x, float y, float z);
 
 	/**
 	 * There is not much to do here. Keep the stuff in this function as
@@ -167,6 +175,7 @@ public:
 	 * soon as it is received from there you can work with it. That means,
 	 * that after calling addWaypoint() @ref waypointCount has not yet been
 	 * increased!
+	 * UPDATE: this documentation is outdated! see source code
 	 **/
 	void addWaypoint(const QPoint& pos);
 	
@@ -178,9 +187,7 @@ public:
 	 * <em>immediately</em> - in contrary to @ref addWaypoint this is not
 	 * sent over network as all function calling clearWaypoints() are
 	 * already called on all clients!
-	 * @param send If FALSE clear the waypoints immediately (like
-	 * PolicyLocal) otherwise send the command over network (like
-	 * PolicyClean)
+	 * UPDATE: this documentation is outdated! see source code
 	 **/
 	void clearWaypoints();
 
@@ -217,7 +224,7 @@ public:
 	 * attack. -1 keeps the previously set range.
 	 * @return true if unit can go to destination, false otherwise
 	 **/
-	bool moveTo(double x, double y, int range = 0);
+	bool moveTo(float x, float y, int range = 0);
 
 	/**
 	 * Just stop moving. Don't call this if you don't want to stop attacking
@@ -235,19 +242,17 @@ public:
 	 * @return All units except this that are in @ref weaponRange of this
 	 * unit.
 	 **/
-	QCanvasItemList unitsInRange() const;
+	BoItemList unitsInRange() const;
 
 	/**
 	 * @return Just like @ref unitsInRange but only enemy units.
 	 **/
-	QCanvasItemList enemyUnitsInRange() const;
+	BoItemList enemyUnitsInRange() const;
 
 	/**
 	 * Calls @ref BosonCanvas setWorkChanged
 	 **/
 	virtual void setAdvanceWork(WorkType w);
-
-	virtual bool collidesWith(const QCanvasItem* item) const;
 
 	int destinationX() const;
 	int destinationY() const;
@@ -284,6 +289,8 @@ protected:
 private:
 	class UnitPrivate;
 	UnitPrivate* d;
+
+	friend class KGameUnitDebug;
 };
 
 
@@ -296,11 +303,11 @@ private:
 class MobileUnit : public Unit
 {
 public:
-	MobileUnit(const UnitProperties* prop, Player* owner, QCanvas* canvas);
+	MobileUnit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas);
 	virtual ~MobileUnit();
 
-	virtual void setSpeed(double s);
-	virtual double speed() const;
+	virtual void setSpeed(float s);
+	virtual float speed() const;
 
 	/**
 	 * Turn to direction. This sets a new frame according to the new
@@ -385,7 +392,7 @@ private:
 class Facility : public Unit
 {
 public:
-	Facility(const UnitProperties* prop, Player* owner, QCanvas* canvas);
+	Facility(const UnitProperties* prop, Player* owner, BosonCanvas* canvas);
 	virtual ~Facility();
 
 	/**
@@ -393,13 +400,7 @@ public:
 	 * pixmap of the facility is shown.
 	 * @return The number of available construction steps for a facility.
 	 **/
-	static int constructionSteps();
-
-	/**
-	 * @return How many advance calls are needed to increase @ref
-	 * constructionSteps
-	 **/
-	static int constructionDelay();
+	unsigned int constructionSteps() const;
 
 	/**
 	 * Please note that the construction state of a unit specifies if a unit
@@ -432,7 +433,7 @@ public:
 	 * Does nothing if @ref isConstructionComplete is false - otherwise the
 	 * same as @ref Unit::moveTo
 	 **/
-	virtual void moveTo(double x, double y, int range = 0);
+	virtual void moveTo(float x, float y, int range = 0);
 
 	/**
 	 * Advance the construction animation. This is usually called when

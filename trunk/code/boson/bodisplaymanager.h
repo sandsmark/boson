@@ -30,7 +30,7 @@ class Player;
 
 class KPlayer;
 
-class QCanvas;
+class BosonCanvas;
 
 /**
  * Since boson is able to provide different displays ("views") of the same map
@@ -52,12 +52,19 @@ class BoDisplayManager : public QWidget
 {
 	Q_OBJECT
 public:
+	enum ScrollDirection {
+		ScrollUp = 0,
+		ScrollRight = 1,
+		ScrollDown = 2,
+		ScrollLeft = 3
+	};
+
 	/**
 	 * @param gameMode controls whether to create @ref BosonBigDisplay or
 	 * @ref EditorBigDisplay widgets in @ref addDisplay. @ref
 	 * BosonBigDisplay widgets are the default (TRUE)
 	 **/
-	BoDisplayManager(QCanvas* canvas, QWidget* parent, bool gameMode = true);
+	BoDisplayManager(BosonCanvas* canvas, QWidget* parent, bool gameMode = true);
 	~BoDisplayManager();
 
 	BosonBigDisplayBase* addInitialDisplay();
@@ -165,6 +172,13 @@ public slots:
 
 	void slotUnitAction(int action);
 
+	void slotUpdateIntervalChanged(unsigned int);
+	void slotCenterHomeBase();
+	void slotResetViewProperties();
+
+	void slotUpdate();
+	void slotUpdateCanvas(); // same as above - but called from the canvas only
+
 signals:
 	/**
 	 * Emitted when the currently active display changes.
@@ -176,13 +190,6 @@ signals:
 	void signalActiveDisplay(BosonBigDisplayBase* active, BosonBigDisplayBase* old);
 
 protected:
-	enum ScrollDirection {
-		ScrollUp = 0,
-		ScrollRight = 1,
-		ScrollDown = 2,
-		ScrollLeft = 3
-	};
-
 	BosonBigDisplayBase* addDisplay(QWidget* parent);
 	BoBox* findBox(BosonBigDisplayBase*) const;
 	void recreateLayout();

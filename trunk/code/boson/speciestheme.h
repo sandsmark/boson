@@ -19,16 +19,25 @@
 #ifndef SPECIESTHEME_H
 #define SPECIESTHEME_H
 
+#include "defines.h"
+#include "global.h"
 #include <qstring.h>
 #include <qcolor.h>
 #include <qvaluelist.h>
 #include "global.h"
 
+#ifndef NO_OPENGL
+#include <GL/gl.h>
+class BosonTextureArray;
+class BosonModel;
+#else
+class QCanvasPixmapArray;
+#endif
+
 class UnitProperties;
 class UnitBase;
 
 class QPixmap;
-class QCanvasPixmapArray;
 class QStringList;
 class QColor;
 
@@ -72,19 +81,34 @@ public:
 	 **/
 	bool loadUnit(int unitType);
 
-	bool loadUnitGraphics(const UnitProperties* prop);
-
 	/**
-	 * Load pixmaps of available actions (attack, move...). This must be done
-	 * before @ref actionPixmap can return anything useful
+	 * Load pixmaps of available actions (attack, move ...). This must be
+	 * done before @ref actionPixmap can return anything useful
 	 **/
 	bool loadActionGraphics();
 
+	/**
+	 * @return Pixmap for the specified action
+	 **/
+	QPixmap* actionPixmap(UnitAction action);
+
+	int unitWidth(int unitType);
+	int unitHeight(int unitType);
+
+#ifndef NO_OPENGL
+	BosonTextureArray* textureArray(int unitType);
+	GLuint textureNumber(int unitType, int direction);
+	// TODO an OpenGL implementation for shot()
+
+	GLuint displayList(int unitType);
+	BosonModel* unitModel(int unitType);
+#else
 	/**
 	 * @return The pixmap array for unitType or NULL if none was found for
 	 * this unitType. See also @ref UnitProperties::typeId
 	 **/
 	QCanvasPixmapArray* pixmapArray(int unitType);
+
 
 	/**
 	 * Make sure to call @ref loadShot before!
@@ -96,6 +120,7 @@ public:
 	 * Make sure to call @ref loadBigShot before!
 	 **/
 	QCanvasPixmapArray* bigShot(bool isFacility, unsigned int version) const;
+#endif
 
 	/**
 	 * @return The big overview pixmap (the one that is displayed when the
@@ -113,11 +138,6 @@ public:
 	QPixmap* smallOverview(int unitType);
 
 	/**
-	 * @return Pixmap for specified action
-	 **/
-	QPixmap* actionPixmap(UnitAction action);
-
-	/**
 	 * @return The color of the team of this player. See also @ref
 	 * setTeamColor
 	 **/
@@ -128,7 +148,7 @@ public:
 	 * have been loaded that use the teamcolor (like units)!
 	 *
 	 * So you cannot use this anymore as soon as you called @ref
-	 * loadUnitPixmap
+	 * loadUnitImage
 	 * @return True if the color could be changed, otherwise false.
 	 **/
 	bool setTeamColor(const QColor& color);
@@ -209,6 +229,8 @@ public:
 	static QValueList<QColor> defaultColors();
 
 protected:
+	bool loadUnitGraphics(const UnitProperties* prop);
+
 	/**
 	 * Load a pixmap from path with mash (or not). This is used for all unit
 	 * pixmaps: small/big overview and sprites. It is <em>not</em> yet used
@@ -218,7 +240,8 @@ protected:
 	 * filename.
 	 * @param pix The pixmap that is loaded. 
 	 **/
-	bool loadUnitPixmap(const QString& fileName, QPixmap &pix, bool withMask = true, bool withTeamColor = true);
+	bool loadUnitImage(const QString& fileName, QImage &image, bool withMask = true, bool withTeamColor = true);
+//	bool loadUnitPixmap(const QString& fileName, QPixmap &pix, bool withMask = true, bool withTeamColor = true);
 
 	/**
 	 * Used for the shot sprites by @ref loadShot.
@@ -232,13 +255,23 @@ protected:
 	 **/
 	void readUnitConfigs();
 
+#ifndef NO_OPENGL
+	void loadUnitTextures(int type, QValueList<QImage> list);
+	void loadUnitModel(const UnitProperties* prop);
+	GLuint createDisplayList(int typeId);
+#endif
+
 private:
 	class SpeciesThemePrivate;
 	SpeciesThemePrivate* d;
 
 	QString mThemePath;
 	QColor mTeamColor;
+#ifdef NO_OPENGL
 	QCanvasPixmapArray* mShot;
+#endif
+
+	static int mThemeNumber;
 };
 
 #endif

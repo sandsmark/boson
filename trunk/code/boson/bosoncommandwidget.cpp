@@ -355,7 +355,11 @@ void BosonCommandWidget::setAction(UnitAction action, Player* owner)
  mCommandType = CommandAction;
  mAction = (int)action;
 
- setPixmap(*(owner->speciesTheme()->actionPixmap(action)));
+ if (!owner->speciesTheme()->actionPixmap(action)) {
+	kdError() << k_funcinfo << "NULL pixmap for action " << action << endl;
+	return;
+ }
+ setPixmap(*owner->speciesTheme()->actionPixmap(action));
 
  mHealth->hide();
  mReload->hide();

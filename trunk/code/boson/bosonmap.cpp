@@ -18,17 +18,15 @@
 */
 
 #include "bosonmap.h"
+#include "bosonmap.moc"
 
+#include "defines.h"
 #include "cell.h"
 
 #include <qdatastream.h>
 #include <qdom.h>
 
 #include <kdebug.h>
-
-#include "defines.h"
-
-#include "bosonmap.moc"
 
 #define TAG_FIELD "boeditor_magic_0_6"
 #define TAG_FIELD_LEN 18 // len of above
@@ -72,7 +70,7 @@ bool BosonMap::loadMap(const QByteArray& buffer, bool binary)
  if (binary) {
 	QDataStream stream(buffer, IO_ReadOnly);
 	if (!verifyMap (stream)) { // we already did this so this cannot fail
-		kdError() << "Invalid map file" << endl;
+		kdError() << k_funcinfo << "Invalid map file" << endl;
 		return false;
 	}
 	if (!loadMapGeo(stream)) {
@@ -509,7 +507,7 @@ bool BosonMap::loadCell(QDataStream& stream, int& groundType, unsigned char& b)
 void BosonMap::saveCell(QDataStream& stream, int groundType, unsigned char version)
 {
  if (version > 4) {
-	kdWarning() << "Invalid version " << version << endl;
+	kdWarning() << k_funcinfo << "Invalid version " << version << endl;
 	version = 0;
  }
  stream << (Q_INT32)TAG_CELL;
@@ -520,15 +518,13 @@ void BosonMap::saveCell(QDataStream& stream, int groundType, unsigned char versi
 Cell* BosonMap::cell(int x, int y) const
 {
  if (!d->mCells) {
-	kdError() << "Cells not yet created" << endl;
+	kdError() << k_funcinfo << "Cells not yet created" << endl;
 	return 0;
  }
  if (x < 0 || x >= (int)width()) {
-	kdWarning() << "Invalid Cell! x=" << x << endl;
 	return 0;
  }
  if (y < 0 || y >= (int)height()) {
-	kdWarning() << "Invalid Cell! y=" << y << endl;
 	return 0;
  }
  return &d->mCells[ x + y * width() ];

@@ -36,6 +36,7 @@
 #include "kgameunitdebug.h"
 #include "kgameplayerdebug.h"
 #include "kgamecelldebug.h"
+#include "bosonprofilingdialog.h"
 #include "bosonmusic.h"
 #include "bosoncursor.h"
 #include "commandinput.h"
@@ -44,6 +45,8 @@
 #include "boselection.h"
 #include "global.h"
 #include "top.h"
+#include "bosonbigdisplay.h"
+#include "boitemlist.h"
 
 #include "defines.h"
 
@@ -168,8 +171,6 @@ void BosonWidget::init()
  initConnections();
  initKeys();
 
- slotChangeCursor(boConfig->readCursorMode(), boConfig->readCursorDir());
-
  setFocusPolicy(StrongFocus); // accept key event
  setFocus();
 
@@ -195,8 +196,8 @@ void BosonWidget::initMiniMap()
 
  connect(game(), SIGNAL(signalAddUnit(Unit*, int, int)),
 		minimap(), SLOT(slotAddUnit(Unit*, int, int)));
- connect(canvas(), SIGNAL(signalUnitMoved(Unit*, double, double)),
-		minimap(), SLOT(slotMoveUnit(Unit*, double, double)));
+ connect(canvas(), SIGNAL(signalUnitMoved(Unit*, float, float)),
+		minimap(), SLOT(slotMoveUnit(Unit*, float, float)));
  connect(canvas(), SIGNAL(signalUnitDestroyed(Unit*)),
 		minimap(), SLOT(slotUnitDestroyed(Unit*)));
 }
@@ -237,7 +238,16 @@ void BosonWidget::initDisplayManager()
  connect(d->mCommandFrame, SIGNAL(signalAction(int)),
 		mDisplayManager, SLOT(slotUnitAction(int)));
 
+ displayManager()->setLocalPlayer(player()); // this does nothing.
+}
+
+void BosonWidget::addInitialDisplay()
+{
  initBigDisplay(displayManager()->addInitialDisplay());
+
+ // we need to add the display first (in order to create a valid GL context) and
+ // then load the cursor
+ slotChangeCursor(boConfig->readCursorMode(), boConfig->readCursorDir());
 }
 
 void BosonWidget::initChat()
@@ -410,7 +420,7 @@ void BosonWidget::initLayout()
 
  QVBoxLayout* topLayout = new QVBoxLayout(this);
  topLayout->addWidget(displayManager());
- topLayout->activate();
+
  if(!kapp->config()->hasGroup("BosonGameDock")) {
 	// Dock config isn't saved (probably first start). Hide chat dock (we only
 	//  show commandframe by default)
@@ -432,15 +442,22 @@ void BosonWidget::slotDebug()
  b = dlg->addVBoxPage(i18n("Debug &Boson Players"));
  KGamePlayerDebug* player = new KGamePlayerDebug(b);
  player->setBoson(game());
- 
+
  b = dlg->addVBoxPage(i18n("Debug &Cells"));
  KGameCellDebug* cells = new KGameCellDebug(b);
  cells->setMap(playField()->map());
- 
+
  connect(dlg, SIGNAL(finished()), dlg, SLOT(slotDelayedDestruct()));
  connect(dlg, SIGNAL(signalRequestIdName(int,bool,QString&)),
 		this, SLOT(slotDebugRequestIdName(int,bool,QString&)));
  dlg->show();
+}
+
+void BosonWidget::slotProfiling()
+{
+ BosonProfilingDialog* dlg = new BosonProfilingDialog(this, false); // note that dialog won't get updated while it is running, even if its non-modal!
+ connect(dlg, SIGNAL(finished()), dlg, SLOT(slotDelayedDestruct()));
+ dlg->exec();
 }
 
 void BosonWidget::slotArrowScrollChanged(int speed)
@@ -469,6 +486,18 @@ void BosonWidget::slotStartScenario()
 		game()->slotSetGameSpeed(BosonConfig::readGameSpeed());
 	}
  }
+
+ #warning FIXME
+ // this is a strange bug: we need to resize the widget once it is shown - otherwise we'll have a VERY slot frame rate.
+ // I can't find out where the problem resides :-(
+ QTimer::singleShot(500, this, SLOT(slotHack1()));
+}
+
+void BosonWidget::slotHack1()
+{
+ QSize size = displayManager()->activeDisplay()->size();
+ displayManager()->activeDisplay()->resize(size.width() - 1, size.height() - 1);
+ displayManager()->activeDisplay()->resize(size);
 }
 
 void BosonWidget::slotGamePreferences()
@@ -493,6 +522,7 @@ void BosonWidget::slotGamePreferences()
  dlg->setMMBScrolling(boConfig->mmbMove());
  dlg->setCursor(mode);
  dlg->setCursorEdgeSensity(boConfig->cursorEdgeSensity());
+ dlg->setUpdateInterval(boConfig->updateInterval());
 
  connect(dlg, SIGNAL(signalArrowScrollChanged(int)),
 		this, SLOT(slotArrowScrollChanged(int)));
@@ -506,6 +536,8 @@ void BosonWidget::slotGamePreferences()
 		this, SLOT(slotCmdBackgroundChanged(const QString&)));
  connect(dlg, SIGNAL(signalMiniMapScaleChanged(double)),
 		this, SLOT(slotMiniMapScaleChanged(double)));
+ connect(dlg, SIGNAL(signalUpdateIntervalChanged(unsigned int)),
+		displayManager(), SLOT(slotUpdateIntervalChanged(unsigned int)));
 
  dlg->show();
 }
@@ -539,10 +571,10 @@ void BosonWidget::slotRemoveUnit(Unit* unit)
  emit signalFacilitiesCount(unit->owner()->facilitiesCount());
 }
 
-void BosonWidget::zoom(const QWMatrix& m)
+void BosonWidget::setZoomFactor(float factor)
 {
  if (displayManager()->activeDisplay()) {
-	displayManager()->activeDisplay()->setWorldMatrix(m);
+	displayManager()->activeDisplay()->setZoomFactor(factor);
  }
 }
 
@@ -611,7 +643,7 @@ void BosonWidget::slotToggleMusic()
 
 void BosonWidget::displayAllItems(bool display)
 {
- QCanvasItemList all = canvas()->allItems();
+ BoItemList all = canvas()->allBosonItems();
  for (unsigned int i = 0; i < all.count(); i++) {
 	all[i]->setVisible(display);
  }
@@ -693,19 +725,19 @@ void BosonWidget::slotSetActiveDisplay(BosonBigDisplayBase* active, BosonBigDisp
  }
 
  if (old) {
-	disconnect(old, SIGNAL(contentsMoving(int, int)),
+	disconnect(old, SIGNAL(signalTopLeftCell(int, int)),
 			minimap(), SLOT(slotMoveRect(int, int)));
 	disconnect(old, SIGNAL(signalSizeChanged(int, int)),
 			minimap(), SLOT(slotResizeRect(int, int)));
 	disconnect(minimap(), SIGNAL(signalReCenterView(const QPoint&)),
-			old, SLOT(slotReCenterView(const QPoint&)));
+			old, SLOT(slotReCenterDisplay(const QPoint&)));
  }
- connect(active, SIGNAL(contentsMoving(int, int)),
+ connect(active, SIGNAL(signalTopLeftCell(int, int)),
 		minimap(), SLOT(slotMoveRect(int, int)));
  connect(active, SIGNAL(signalSizeChanged(int, int)),
 		minimap(), SLOT(slotResizeRect(int, int)));
  connect(minimap(), SIGNAL(signalReCenterView(const QPoint&)),
-		active, SLOT(slotReCenterView(const QPoint&)));
+		active, SLOT(slotReCenterDisplay(const QPoint&)));
 
  if (old) {
 	disconnect(minimap(), SIGNAL(signalMoveSelection(int, int)),
@@ -808,16 +840,16 @@ void BosonWidget::initKeys()
  // KAction supports slots that take integer parameter :-)
  (void)new KAction(i18n("Scroll Up"), Qt::Key_Up, displayManager(),
 		SLOT(slotScroll(int)), actionCollection(),
-		QString("scroll_up {%1}").arg(ScrollUp));
+		QString("scroll_up {%1}").arg(BoDisplayManager::ScrollUp));
  (void)new KAction(i18n("Scroll Down"), Qt::Key_Down, displayManager(),
 		SLOT(slotScroll(int)), actionCollection(),
-		QString("scroll_down {%1}").arg(ScrollDown));
+		QString("scroll_down {%1}").arg(BoDisplayManager::ScrollDown));
  (void)new KAction(i18n("Scroll Left"), Qt::Key_Left, displayManager(),
 		SLOT(slotScroll(int)), actionCollection(),
-		QString("scroll_left {%1}").arg(ScrollLeft));
+		QString("scroll_left {%1}").arg(BoDisplayManager::ScrollLeft));
  (void)new KAction(i18n("Scroll Right"), Qt::Key_Right, displayManager(),
 		SLOT(slotScroll(int)), actionCollection(),
-		QString("scroll_right {%1}").arg(ScrollRight));
+		QString("scroll_right {%1}").arg(BoDisplayManager::ScrollRight));
  for (int i = 0; i < 10; i++) {
 	(void)new KAction(i18n("Select Group %1").arg(i == 0 ? 10 : i), 
 			Qt::Key_0 + i, displayManager(), 
@@ -829,6 +861,10 @@ void BosonWidget::initKeys()
 			QString("create_group {%1}").arg(i));
  }
 #endif
+ (void)new KAction(i18n("Center &Home Base"), KShortcut(Qt::Key_H), 
+		displayManager(), SLOT(slotCenterHomeBase()), actionCollection(), "game_center_base");
+ (void)new KAction(i18n("&Reset View Properties"), KShortcut(Qt::Key_R), 
+		displayManager(), SLOT(slotResetViewProperties()), actionCollection(), "game_reset_view_properties");
 }
 
 void BosonWidget::slotDebugRequestIdName(int msgid, bool , QString& name)
@@ -899,6 +935,7 @@ void BosonWidget::slotDebugRequestIdName(int msgid, bool , QString& name)
 void BosonWidget::slotEndGame()
 {
 // this needs to be done first, before the players are removed
+ displayManager()->quitGame();
  canvas()->deleteDestroyed();
  game()->quitGame();
 }

@@ -157,16 +157,6 @@ void Player::loadTheme(const QString& species, const QColor& teamColor)
  mSpecies = new SpeciesTheme(species, teamColor);
 }
 
-QCanvasPixmapArray* Player::pixmapArray(int unitType) const
-{
- if (!speciesTheme()) {
-	kdError() << k_funcinfo << "NULL theme" << endl;
-	return 0;
- }
- return speciesTheme()->pixmapArray(unitType);
-}
-
-
 void Player::addUnit(Unit* unit)
 {
  d->mUnitPropID++;// used for ID of KGamePropertyHandler
@@ -365,7 +355,7 @@ bool Player::load(QDataStream& stream)
 	unit->setId(id);
 
 	// Emit signal for canvas and minimap and BosonWidget
-	emit signalUnitLoaded(unit, x, y);
+	emit signalUnitLoaded(unit, (int)x, (int)y);
 	// Call unit's loading methods
 	if(!unit->load(stream)) {
 		kdError() << k_funcinfo << "Error while loading unit with id=" << id << endl;
@@ -573,3 +563,4 @@ bool Player::hasUnitWithType(int type) const
  }
  return false;
 }
+
