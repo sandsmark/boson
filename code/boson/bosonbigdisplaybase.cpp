@@ -1287,7 +1287,7 @@ void BosonBigDisplayBase::worldToCanvas(GLfloat x, GLfloat y, GLfloat /*z*/, QPo
  pos->setY((int)(-y / BO_GL_CELL_SIZE * BO_TILE_SIZE));
 }
 
-bool BosonBigDisplayBase::mapCoordinates(const QPoint& pos, GLdouble* posX, GLdouble* posY, GLdouble* posZ) const
+bool BosonBigDisplayBase::mapCoordinates(const QPoint& pos, GLdouble* posX, GLdouble* posY, GLdouble* /*posZ*/) const
 {
  GLint realy = d->mViewport[3] - (GLint)pos.y() - 1;
 

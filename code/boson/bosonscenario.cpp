@@ -599,18 +599,18 @@ bool BosonScenario::loadUnit(QDomElement& node, Unit* unit)
 		unit->setWork((UnitBase::WorkType)v);
 	}
  }
- if (node.hasAttribute("ReloadState")) {
+/* if (node.hasAttribute("ReloadState")) {
 	unsigned int v = node.attribute("ReloadState").toUInt(&ok);
 	if (!ok) {
 		boError(250) << k_funcinfo << "Invalid value for ReloadState" << endl;
 		ret = false;
 	} else if (unit) {
 		boWarning(250) << k_funcinfo << "Value for ReloadStat is valid, but not yet supported." << endl;
-//		unit->setReloadState(v);
+		unit->setReloadState(v);
 	}
  }
 
-/* if (node.hasAttribute("WeaponDamage")) {
+ if (node.hasAttribute("WeaponDamage")) {
 	int v = node.attribute("WeaponDamage").toInt(&ok);
 	if (!ok) {
 		boError(250) << k_funcinfo << "Invalid value for WeaponDamage" << endl;

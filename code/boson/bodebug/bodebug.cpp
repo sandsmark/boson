@@ -394,7 +394,7 @@ bodbgstream& bodbgstream::operator << (QWidget* widget)
   return *this;
 }
 
-QString boBacktrace(int levels)
+QString boBacktrace(int /*levels*/)
 {
     QString s;
 #ifdef HAVE_BACKTRACE
