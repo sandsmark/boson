@@ -2090,11 +2090,19 @@ bool BosonBigDisplayBase::mapDistance(int windx, int windy, GLfloat* dx, GLfloat
  GLfloat moveZ; // unused
  GLfloat moveX1, moveY1;
  GLfloat moveX2, moveY2;
- if (!mapCoordinates(QPoint(0, 0), &moveX1, &moveY1, &moveZ, false)) {
+ if (windx >= width()) {
+	boError() << k_funcinfo << "windx (" << windx <<") must be < " << width() << endl;
+	return false;
+ }
+ if (windy >= height()) {
+	boError() << k_funcinfo << "windy (" << windy <<") must be < " << height() << endl;
+	return false;
+ }
+ if (!mapCoordinates(QPoint(width() / 2 - windx / 2, height() / 2 - windy / 2), &moveX1, &moveY1, &moveZ, false)) {
 	boError() << k_funcinfo << "Cannot map coordinates" << endl;
 	return false;
  }
- if (!mapCoordinates(QPoint(windx, windy), &moveX2, &moveY2, &moveZ, false)) {
+ if (!mapCoordinates(QPoint(width() / 2 + windx / 2, height() / 2 + windy / 2), &moveX2, &moveY2, &moveZ, false)) {
 	boError() << k_funcinfo << "Cannot map coordinates" << endl;
 	return false;
  }
