@@ -714,6 +714,10 @@ function counter2_get_browser($ua)
   {
     return "Mozilla Firebird";
   }
+  else if(eregi("Firefox", $ua))
+  {
+    return "Firefox";
+  }
   else if(eregi("Konqueror", $ua))
   {
     return "Konqueror";
@@ -722,7 +726,7 @@ function counter2_get_browser($ua)
   {
     return "Safari";
   }
-  else if(eregi("(rv:0.9)|(rv:1.0)|(rv:1.1)|(rv:1.2)|(rv:1.3)|(rv:1.4)|(rv:1.5)|(rv:1.6)", $ua))
+  else if(eregi("(rv:0.9)|(rv:1.0)|(rv:1.1)|(rv:1.2)|(rv:1.3)|(rv:1.4)|(rv:1.5)|(rv:1.6)|(rv:1.7)|(rv:1.8)|(rv:1.)", $ua))
   {
     return "Mozilla";
   }
