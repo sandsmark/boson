@@ -951,21 +951,25 @@ void BoDefaultGroundRenderer::renderCellsNow(Cell** cells, int count, int corner
 	int texy = offsetCount - (y % offsetCount) - 1;
 
 	SETALPHA(upperLeftAlpha);
+	glColor4ub(255, 255, 255, upperLeftAlpha);
 	glNormal3fv(normalMap[y * cornersWidth + x].data());
 	glTexCoord2f(texOffsets[x % offsetCount], texOffsets[texy % offsetCount] + offset);
 	glVertex3f(cellXPos, cellYPos, upperLeftHeight);
 
 	SETALPHA(lowerLeftAlpha);
+	glColor4ub(255, 255, 255, lowerLeftAlpha);
 	glNormal3fv(normalMap[(y + 1) * cornersWidth + x].data());
 	glTexCoord2f(texOffsets[x % offsetCount], texOffsets[texy % offsetCount]);
 	glVertex3f(cellXPos, cellYPos - BO_GL_CELL_SIZE, lowerLeftHeight);
 
 	SETALPHA(lowerRightAlpha);
+	glColor4ub(255, 255, 255, lowerRightAlpha);
 	glNormal3fv(normalMap[(y + 1) * cornersWidth + (x + 1)].data());
 	glTexCoord2f(texOffsets[x % offsetCount] + offset, texOffsets[texy % offsetCount]);
 	glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos - BO_GL_CELL_SIZE, lowerRightHeight);
 
 	SETALPHA(upperRightAlpha);
+	glColor4ub(255, 255, 255, upperRightAlpha);
 	glNormal3fv(normalMap[y * cornersWidth + (x + 1)].data());
 	glTexCoord2f(texOffsets[x % offsetCount] + offset, texOffsets[texy % offsetCount] + offset);
 	glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos, upperRightHeight);
