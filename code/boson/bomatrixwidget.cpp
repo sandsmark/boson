@@ -155,3 +155,140 @@ bool BoMatrixWidget::compareMatrices(BoMatrixWidget* widget, float diff)
  return (ok && ok2);
 }
 
+
+class BoPUIMatrixWidgetPrivate
+{
+public:
+	BoPUIMatrixWidgetPrivate()
+	{
+		mLayout = 0;
+	}
+	BoMatrix mMatrix;
+	QGridLayout* mLayout;
+	QIntDict<BoPUILabel> mLabel;
+};
+
+
+BoPUIMatrixWidget::BoPUIMatrixWidget(QObject* parent, const char* name) : BoPUIWidget(parent, name)
+{
+ d = new BoPUIMatrixWidgetPrivate;
+// d->mLayout = new QGridLayout(this, 0, 1);
+ for (int i = 0; i < 16; i++) {
+	BoPUILabel* l = new BoPUILabel(this);
+	d->mLabel.insert(i, l);
+//	d->mLayout->addWidget(l, i % 4, i / 4); // TODO: grid layout
+	mLayout->addWidget(l);
+ }
+ mPrecision = 6;
+}
+
+BoPUIMatrixWidget::~BoPUIMatrixWidget()
+{
+ delete d;
+}
+
+void BoPUIMatrixWidget::setMatrix(const BoMatrix* m)
+{
+ if (!m) {
+	boError() << k_funcinfo << "NULL matrix" << endl;
+	return;
+ }
+ setMatrix(*m);
+}
+
+void BoPUIMatrixWidget::setMatrix(const BoMatrix& m)
+{
+ d->mMatrix = m;
+ for (int i = 0; i < 4; i++) {
+	const float* data = d->mMatrix.data();
+	d->mLabel[i + 0]->setText(QString::number(data[i + 0], 'f', precision()));
+	d->mLabel[i + 4]->setText(QString::number(data[i + 4], 'f', precision()));
+	d->mLabel[i + 8]->setText(QString::number(data[i + 8], 'f', precision()));
+	d->mLabel[i + 12]->setText(QString::number(data[i + 12], 'f', precision()));
+ }
+}
+
+void BoPUIMatrixWidget::setMatrix(Lib3dsMatrix m)
+{
+ BoMatrix matrix;
+ for (int i = 0; i < 4; i++) {
+	for (int j = 0; j < 4; j++) {
+		matrix.setElement(i, j, m[j][i]);
+	}
+ }
+ setMatrix(&matrix);
+}
+
+void BoPUIMatrixWidget::setIdentity()
+{
+ BoMatrix m;
+ setMatrix(&m);
+}
+
+void BoPUIMatrixWidget::clear()
+{
+ d->mMatrix.loadIdentity();
+ setMatrix(d->mMatrix);
+ for (int i = 0; i < 16; i++) {
+	unmark(i);
+ }
+}
+
+const BoMatrix& BoPUIMatrixWidget::matrix() const
+{
+ return d->mMatrix;
+}
+
+void BoPUIMatrixWidget::mark(unsigned int i)
+{
+ if (i >= 16) {
+	return;
+ }
+#warning fixme
+#if 0
+ QPalette p(palette());
+ p.setColor(QColorGroup::Text, Qt::red);
+// p.setColor(QColorGroup::ForeGround, Qt::red);
+ d->mLabel[i]->setPalette(p);
+ d->mLabel[i]->setPaletteForegroundColor(Qt::red);
+#endif
+}
+
+void BoPUIMatrixWidget::unmark(unsigned int i)
+{
+ if (i >= 16) {
+	return;
+ }
+#warning fixme
+#if 0
+ d->mLabel[i]->unsetPalette();
+#endif
+}
+
+bool BoPUIMatrixWidget::compareMatrices(const BoMatrix& m, float diff)
+{
+ bool ok = true;
+ for (unsigned int i = 0; i < 16; i++) {
+	if (fabs(d->mMatrix[i] - m[i]) <= diff) {
+		unmark(i);
+	} else {
+		mark(i);
+		ok = false;
+	}
+ }
+ return ok;
+}
+
+bool BoPUIMatrixWidget::compareMatrices(BoPUIMatrixWidget* widget, float diff)
+{
+ if (!widget) {
+	return false;
+ }
+ // remember that the right part of && is not evaluated, if the left part is
+ // false! but we want to mark them in all cases!
+ bool ok = compareMatrices(widget->matrix(), diff);
+ bool ok2 = widget->compareMatrices(matrix(), diff);
+ return (ok && ok2);
+}
+
+

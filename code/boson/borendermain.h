@@ -48,10 +48,12 @@ class BoVector3;
 class BoFrame;
 class BoLight;
 class BoLightCameraWidget;
+class BoLightCameraWidget1;
 class BoMaterialWidget;
 class KCmdLineArgs;
 class QCheckBox;
 class BoFontInfo;
+class BoPUILayout;
 
 class KMyFloatNumInput : public KDoubleNumInput
 {
@@ -126,10 +128,14 @@ signals:
 	void signalCameraChanged();
 
 	void signalFrameChanged(int);
+	void signalFrameChanged(float);
 	void signalLODChanged(int);
+	void signalLODChanged(float);
 
 	void signalMaxFramesChanged(int);
+	void signalMaxFramesChanged(float);
 	void signalMaxLODChanged(int);
+	void signalMaxLODChanged(float);
 
 	void signalMeshSelected(int);
 
@@ -142,7 +148,15 @@ public slots:
 			resizeGL(width(), height());
 		}
 	}
+	void slotFrameChanged(float f)
+	{
+		slotFrameChanged((int)f);
+	}
 	void slotFrameChanged(int f);
+	void slotLODChanged(float l)
+	{
+		slotLODChanged((int)l);
+	}
 	void slotLODChanged(int l);
 	void slotPlacementPreviewChanged(bool on)
 	{
@@ -169,6 +183,8 @@ public slots:
 	void slotHideSelectedMesh();
 	void slotHideUnSelectedMeshes();
 	void slotUnHideAllMeshes();
+	void slotEnableLight(bool);
+	void slotEnableMaterials(bool);
 
 protected:
 	virtual bool eventFilter(QObject* o, QEvent* e);
@@ -176,6 +192,8 @@ protected:
 	virtual void mousePressEvent(QMouseEvent*);
 	virtual void mouseReleaseEvent(QMouseEvent*);
 	virtual void wheelEvent(QWheelEvent*);
+	virtual void keyPressEvent(QKeyEvent* e);
+	virtual void keyReleaseEvent(QKeyEvent* e);
 
 	void renderAxii();
 	void renderModel(int mode = -1);
@@ -217,6 +235,9 @@ protected:
 	int pickObject(const QPoint& pos);
 
 private:
+	void initPUIGUI();
+
+private:
 	friend class RenderMain; // we need to emit signals from outside, in order to save lots of forwarding code
 	QTimer* mUpdateTimer;
 	BosonModel* mModel;
@@ -225,6 +246,7 @@ private:
 	int mMeshUnderMouse;
 	int mSelectedMesh;
 
+	BoPUILayout* mPUILayout;
 	BosonGLFont* mDefaultFont;
 
 	float mFovY; // we allow real zooming here!
@@ -240,62 +262,6 @@ private:
 
 	BoCamera* mCamera;
 	BoLight* mLight;
-};
-
-class PreviewConfig : public QWidget
-{
-	Q_OBJECT
-public:
-	PreviewConfig(QWidget* parent);
-	~PreviewConfig();
-
-	void setCamera(BoCamera* camera);
-
-signals:
-	void signalFovYChanged(float);
-	void signalFrameChanged(int);
-	void signalLODChanged(int);
-	void signalResetDefaults();
-	void signalPlacementPreviewChanged(bool); // display preview placement - if false display normal model
-	void signalDisallowPlacementChanged(bool); // only valid of placementpreview is also on. if true display the model that is shown when the unit can't be placed - otherwise the model that is shown if it can be placed.
-	void signalWireFrameChanged(bool);
-	void signalConstructionChanged(bool);
-	void signalRenderAxisChanged(bool);
-	void signalRenderGridChanged(bool);
-	void signalHideMesh();
-	void signalHideOthers();
-	void signalUnHideAll();
-
-public slots:
-	void slotCameraChanged();
-	void slotMeshSelected(int);
-
-protected slots:
-	void slotFovYChanged(float f) { mFovY->setValue(f); }
-	void slotFrameChanged(int f) { mFrame->setValue(f); }
-	void slotLODChanged(int l) { mFrame->setValue(l); }
-
-	void slotMaxFramesChanged(int max) { mFrame->setRange(0, max); }
-	void slotMaxLODChanged(int max) { mLOD->setRange(0, max); }
-	void slotEnableLightChanged(bool);
-	void slotEnableMaterialsChanged(bool);
-
-private:
-	KMyFloatNumInput* mFovY;
-	KIntNumInput* mFrame;
-	KIntNumInput* mLOD;
-	QPushButton* mHideMesh;
-	QPushButton* mHideOthers;
-	QPushButton* mUnHideAll;
-	QCheckBox* mPlacementPreview;
-	QCheckBox* mDisallowPlacement;
-	QCheckBox* mWireFrame;
-	QCheckBox* mConstruction;
-	BoCameraWidget* mCameraWidget;
-	QCheckBox* mRenderAxis;
-	QCheckBox* mRenderGrid;
-	QCheckBox* mEnableLight;
-	QCheckBox* mEnableMaterials;
 };
 
 /**
@@ -357,13 +323,12 @@ protected slots:
 	void slotChangeFont();
 
 private:
-	PreviewConfig* mConfig;
 	ModelPreview* mPreview;
 	QPtrList<SpeciesTheme> mSpecies;
 	QPtrDict<SpeciesTheme> mAction2Species;
 	BoDebugDCOPIface* mIface;
 
-	BoLightCameraWidget* mLightWidget;
+	BoLightCameraWidget1* mLightWidget;
 	BoMaterialWidget* mMaterialWidget;
 };
 

@@ -1,6 +1,7 @@
 ## Makefile.am for boson
 
 SUBDIRS = data \
+	bopui \
 	bosonwidgets \
 	items \
 	commandframe \
@@ -19,7 +20,8 @@ noinst_LTLIBRARIES = \
 		libborender.la \
 		libboinfo.la \
 		libbo3dsdebug.la
-bin_PROGRAMS = boson borender bounit boprofiling bocursor boinfo bo3dsdebug
+bin_PROGRAMS = boson borender bounit boprofiling bocursor boinfo
+#bo3dsdebug
 
 INCLUDES = -I$(top_srcdir)/bodebug $(all_includes)
 
@@ -139,10 +141,12 @@ libboson_la_LIBADD = \
 		$(top_builddir)/boson/bosonwidgets/libbosonwidgets.la \
 		$(top_builddir)/boson/script/libbosonscript.la \
 		$(top_builddir)/boson/bosonfont/libbosonfont.la \
+		$(top_builddir)/boson/bopui/libbopui.la \
 		$(LIB_KGAME) \
 		$(LIB_KDEUI) \
 		$(LIB_KIO) \
 		$(GLLIB) -l3ds \
+		$(LIB_PLIB) \
 		$(LIB_XRANDR)
 
 boson_LDFLAGS = $(KDE_RPATH) $(all_libraries) -Xlinker -export-dynamic
@@ -232,9 +236,11 @@ bo3dsdebug_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 bo3dsdebug_LDADD = \
 		$(top_builddir)/boson/libbo3dsdebug.la \
 		$(top_builddir)/bodebug/libbodebug.la \
+		$(top_builddir)/boson/bopui/libbopui.la \
 		$(LIB_BOMEMORY) \
 		-l3ds \
 		$(GLLIB) \
+		$(LIB_PLIB) \
 		-lkio $(LIB_KDEUI)
 bo3dsdebug_SOURCES = \
 		bo3dsdebugmain.cpp
