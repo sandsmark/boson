@@ -219,9 +219,7 @@ void BosonCommandFrame::slotShowSingleUnit(Unit* unit)
  if (!unit) {
 	// display nothing
 	d->mUnitView->setUnit(0);
-	for (unsigned int i = 0; i < d->mOrderButton.count(); i++) {
-		d->mOrderButton[i]->setUnit(0);
-	}
+	hideOrderButtons();
 	return;
  }
  if (unit->isDestroyed()) {
@@ -497,7 +495,9 @@ void BosonCommandFrame::slotFacilityProduces(Facility* f)
 	kdError() << k_funcinfo << "NULL facility" << endl;
 	return;
  }
- slotSetProduction(f);
+ if (d->mFactory == f) {
+	slotSetProduction(f);
+ }
 }
 
 void BosonCommandFrame::slotProductionCompleted(Facility* f)
@@ -506,7 +506,9 @@ void BosonCommandFrame::slotProductionCompleted(Facility* f)
 	kdError() << k_funcinfo << "NULL facility" << endl;
 	return;
  }
- slotSetProduction(f);
+ if (d->mFactory == f) {
+	slotSetProduction(f);
+ }
 }
 
 void BosonCommandFrame::slotSetButtonsPerRow(int b)
