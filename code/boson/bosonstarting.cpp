@@ -110,11 +110,11 @@ void BosonStarting::slotStart()
 	// in case we forgot this somewhere
 	boGame->unlock();
 
-	boError() << k_funcinfo << "game starting failed" << endl;
+	boError(270) << k_funcinfo << "game starting failed" << endl;
 	emit signalStartingFailed();
 	return;
  }
- boDebug() << k_funcinfo << "game starting succeeded" << endl;
+ boDebug(270) << k_funcinfo << "game starting succeeded" << endl;
 }
 
 bool BosonStarting::start()
@@ -129,7 +129,7 @@ bool BosonStarting::start()
 
  boDebug(270) << k_funcinfo << endl;
  if (!boGame) {
-	boError() << k_funcinfo << "NULL boson object" << endl;
+	boError(270) << k_funcinfo << "NULL boson object" << endl;
 	return false;
  }
  if (boGame->gameStatus() != KGame::Init) {
@@ -151,7 +151,7 @@ bool BosonStarting::start()
 
  QMap<QString, QByteArray> files;
  if (!BosonPlayField::unstreamFiles(files, mNewGameData)) {
-	boError() << k_funcinfo << "invalid newgame stream" << endl;
+	boError(270) << k_funcinfo << "invalid newgame stream" << endl;
 	return false;
  }
  if (!mDestPlayField->loadPlayField(files)) {
@@ -249,7 +249,7 @@ QByteArray BosonStarting::loadGame(const QString& loadingFileName)
 	return QByteArray();
  }
 
- boDebug() << k_funcinfo << "done" << endl;
+ boDebug(270) << k_funcinfo << "done" << endl;
 
  return playField;
 }
@@ -372,7 +372,7 @@ bool BosonStarting::startScenario(QMap<QString, QByteArray>& files)
  static int profilingPlayerIds = boProfiling->requestEventId("FixPlayerIds");
  boProfiling->start(profilingPlayerIds);
  if (!fixPlayerIds(files)) {
-	boError() << k_funcinfo << "could not replace player numbers by real player ids" << endl;
+	boError(270) << k_funcinfo << "could not replace player numbers by real player ids" << endl;
 	return false;
  }
  boProfiling->stop(profilingPlayerIds);
@@ -461,16 +461,16 @@ void BosonStarting::startingCompletedReceived(const QByteArray& buffer, Q_UINT32
 	}
  }
 
- boDebug() << k_funcinfo << "received IdGameStartingCompleted from all clients." << endl;
+ boDebug(270) << k_funcinfo << "received IdGameStartingCompleted from all clients." << endl;
  if (!checkStartingCompletedMessages()) {
 	#warning TODO
 	// TODO: abort game starting.
 	// AB: we cannot use return, as then boson would be in a unusable state
 	// (cannot leave loading widget)
-	boError() << k_funcinfo << "starting messages broken." << endl;
-	boError() << k_funcinfo << "TODO: abort game starting" << endl;
+	boError(270) << k_funcinfo << "starting messages broken." << endl;
+	boError(270) << k_funcinfo << "TODO: abort game starting" << endl;
  } else {
-	boDebug() << k_funcinfo << "all IdGameStartingCompleted valid. starting the game." << endl;
+	boDebug(270) << k_funcinfo << "all IdGameStartingCompleted valid. starting the game." << endl;
  }
 
  // AB: _first_ set the new game status.
@@ -613,7 +613,7 @@ bool BosonStarting::fixPlayerIds(QMap<QString, QByteArray>& files) const
  actualIds = 0;
 
  if (!ret) {
-	boError() << k_funcinfo << "unable to fix player ids" << endl;
+	boError(270) << k_funcinfo << "unable to fix player ids" << endl;
 	return false;
  }
 
@@ -638,7 +638,7 @@ bool BosonStarting::fixPlayerIds(int* actualIds, unsigned int players, QDomEleme
 		continue;
 	}
 	if (!fixPlayerIds(actualIds, players, e)) {
-		boError() << k_funcinfo << "recursive call failed" << endl;
+		boError(270) << k_funcinfo << "recursive call failed" << endl;
 		return false;
 	}
  }
@@ -646,7 +646,7 @@ bool BosonStarting::fixPlayerIds(int* actualIds, unsigned int players, QDomEleme
 	bool ok;
 	unsigned long int id = root.attribute("PlayerId").toULong(&ok);
 	if (!ok) {
-		boError() << k_funcinfo << "PlayerId is not a valid number" << endl;
+		boError(270) << k_funcinfo << "PlayerId is not a valid number" << endl;
 		return false;
 	}
 
@@ -655,11 +655,11 @@ bool BosonStarting::fixPlayerIds(int* actualIds, unsigned int players, QDomEleme
 	// If (due to some bug) the file stores the actual ID, then it is
 	// >= 1025, i.e. > 1000
 	if (id > 1000) {
-		boError() << k_funcinfo << "invalid PlayerId at this point: " << id << " -> probably the actual ID was stored, instead of expected index" << endl;
+		boError(270) << k_funcinfo << "invalid PlayerId at this point: " << id << " -> probably the actual ID was stored, instead of expected index" << endl;
 		return false;
 	}
 	if (id >= players) {
-		boError() << k_funcinfo << "invalid PlayerId: " << id << " must be < " << players << endl;
+		boError(270) << k_funcinfo << "invalid PlayerId: " << id << " must be < " << players << endl;
 		return false;
 	}
 	root.setAttribute("PlayerId", QString::number(actualIds[id]));
@@ -682,11 +682,11 @@ bool BosonStarting::fixPlayerIdsInFileNames(int* actualIds, unsigned int players
 	bool ok;
 	unsigned int n = number.toUInt(&ok);
 	if (!ok) {
-		boError() << k_funcinfo << "not a valid number in " << it.key() << endl;
+		boError(270) << k_funcinfo << "not a valid number in " << it.key() << endl;
 		return false;
 	}
 	if (n >= players) {
-		boError() << k_funcinfo << "found file for player " << n << " but only " << players << " players available" << endl;
+		boError(270) << k_funcinfo << "found file for player " << n << " but only " << players << " players available" << endl;
 		return false;
 	}
 
@@ -710,25 +710,25 @@ bool BosonStarting::fixPlayerIdsInFileNames(int* actualIds, unsigned int players
 bool BosonStarting::checkStartingCompletedMessages() const
 {
  if (!boGame->isAdmin()) {
-	boError() << k_funcinfo << "only ADMIN can do this" << endl;
+	boError(270) << k_funcinfo << "only ADMIN can do this" << endl;
 	return false;
  }
  QByteArray admin = d->mStartingCompletedMessage[boGame->gameId()];
  if (admin.size() == 0) {
-	boError() << k_funcinfo << "have not StartingCompleted message from ADMIN" << endl;
+	boError(270) << k_funcinfo << "have not StartingCompleted message from ADMIN" << endl;
 	return false;
  }
  QDataStream adminStream(admin, IO_ReadOnly);
  Q_INT8 adminSuccess;
  adminStream >> adminSuccess;
  if (!adminSuccess) {
-	boError() << k_funcinfo << "ADMIN failed in game starting" << endl;
+	boError(270) << k_funcinfo << "ADMIN failed in game starting" << endl;
 	return false;
  }
  QCString adminThemeMD5;
  adminStream >> adminThemeMD5;
  if (adminThemeMD5.isNull()) {
-	boError() << k_funcinfo << "no MD5 string for themes by ADMIN" << endl;
+	boError(270) << k_funcinfo << "no MD5 string for themes by ADMIN" << endl;
 	return false;
  }
  QMap<unsigned int, QByteArray>::Iterator it = d->mStartingCompletedMessage.begin();
@@ -740,13 +740,13 @@ bool BosonStarting::checkStartingCompletedMessages() const
 	Q_INT8 success;
 	stream >> success;
 	if (!success) {
-		boError() << k_funcinfo << "client " << it.key() << " failed on game starting" << endl;
+		boError(270) << k_funcinfo << "client " << it.key() << " failed on game starting" << endl;
 		return false;
 	}
 	QCString themeMD5;
 	stream >> themeMD5;
 	if (themeMD5 != adminThemeMD5) {
-		boError() << k_funcinfo << "theme MD5 sums of client "
+		boError(270) << k_funcinfo << "theme MD5 sums of client "
 				<< it.key()
 				<< " and ADMIN differ." << endl
 				<< "ADMIN has: " << adminThemeMD5 << endl
