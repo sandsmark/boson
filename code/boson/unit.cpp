@@ -1698,6 +1698,20 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCallsCount) // this act
 			") to (" << x + xspeed << "; " << y + yspeed <<
 			"); pp: (" << (float)pp.x() << "; " << (float)pp.y() <<
 			"); dist: " << dist << "/" << speed() << endl;
+#define printBinary(var) { \
+		fprintf(stderr, "    %s: ", #var); \
+		int* var2 = (int*)&var; \
+		for (int i = 31; i >= 0; i--) { if ((*var2) & 0x1 << i) {fprintf(stderr, "1");} else{fprintf(stderr, "0");} } \
+		fprintf(stderr, "\n"); \
+}
+	printBinary(x);
+	printBinary(y);
+	printBinary(xspeed);
+	printBinary(yspeed);
+	float ppx = (float)pp.x();
+	float ppy = (float)pp.y();
+	printBinary(ppx);
+	printBinary(ppy);
 	// Check if we reached that pathpoint
 	if ((x + xspeed == (float)pp.x()) && (y + yspeed == (float)pp.y())) {
 		// Unit has reached pathpoint
