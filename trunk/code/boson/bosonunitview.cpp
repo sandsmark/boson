@@ -133,7 +133,7 @@ void BosonUnitView::setUnit(Unit* unit)
  }
  d->mName->setText(unit->unitProperties()->name());
  d->mHealth->setText(i18n("Health: %1").arg(unit->health()));
- d->mOwner->setText(i18n("Owner: %1").arg(unit->owner()->name()));
+ d->mOwner->setText(i18n("Player: %1").arg(unit->owner()->name()));
  d->mId->setText(i18n("Id : %1").arg(unit->id()));
  d->mDamage->setText(i18n("Damage : %1").arg(unit->damage())); // confusing name: not the damage this unit *has* but the damage the unit *makes*
  d->mRange->setText(i18n("Range: %1").arg(unit->range()));
