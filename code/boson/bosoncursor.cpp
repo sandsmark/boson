@@ -397,9 +397,7 @@ void BosonSpriteCursor::setCurrentData(BosonSpriteCursorData* data)
  if (d->mCurrentFrame >= (int)mCurrentData->mArray->count()) {
 	d->mCurrentFrame = 0;
  }
- if (QABS(d->mCurrentRotate) >= 360) {
-	d->mCurrentRotate = 0;
- }
+ d->mCurrentRotate = 0;
 
  if (mCurrentData->mAnimated && mCurrentData->mAnimationSpeed > 0) {
 	d->mAnimateTimer.start(mCurrentData->mAnimationSpeed);
