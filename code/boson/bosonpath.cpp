@@ -27,8 +27,7 @@
 #include <qpoint.h>
 
 #define ERROR_COST 100000
-//#define MAX_PATH_COST 5000 // AB: too low!!
-#define MAX_PATH_COST 500000
+#define MAX_PATH_COST 5000
 
 class Marking
 {
