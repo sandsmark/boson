@@ -141,8 +141,8 @@ public:
 		}
 		// AB: see pixelToHeight() for explanation on these
 		// restrictions
-		h = QMIN(h, 15.0f);
-		h = QMAX(h, -10.5f);
+		h = QMIN(h, 18.75f);
+		h = QMAX(h, -13.125f);
 		mHeightMap[arrayPos(x, y)] = h;
 	}
 
@@ -190,7 +190,7 @@ public:
 		mTextureCount = textureCount;
 		initialize(0, 255);
 		for (unsigned int i = 1; i < textureCount; i++) {
-			initialize(0, 0);
+			initialize(i, 0);
 		}
 	}
 	~BoTexMap()
