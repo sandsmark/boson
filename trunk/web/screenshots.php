@@ -150,10 +150,17 @@ if($HTTP_GET_VARS["page"] != "")
 **  add_screenshot(<description>, <date added>, <thumbnail filename>, <big version filename>);
 **  Note that filenames do not contain directory and that files are in JPG AND NOT IN PNG because of the size
 **/
+add_screenshot("Big battle. Thanks to big performance improvements, it is
+    possible to have much bigger battles in 0.8",
+    "NEW: 1. April 2003 (Boson 0.8)", "0.8-3-thumb.jpg", "0.8-3.jpg");
+add_screenshot("Tens of units fighting - that wasn't possible in 0.7",
+    "NEW: 1. April 2003 (Boson 0.8)", "0.8-2-thumb.jpg", "0.8-2.jpg");
+add_screenshot("0.8 includes new super-powerful DaisyCutter bomb",
+    "NEW: 1. April 2003 (Boson 0.8)", "0.8-1-thumb.jpg", "0.8-1.jpg");
 add_screenshot("Smoking refineries",
-    "NEW: 31. Dec. 2002 (CVS)", "smoke_refineries_thumb.jpg", "smoke_refineries.jpg");
+    "31. Dec. 2002 (CVS)", "smoke_refineries_thumb.jpg", "smoke_refineries.jpg");
 add_screenshot("The big war",
-    "NEW: 31. Dec. 2002 (CVS)", "big_war_thumb.jpg", "big_war.jpg");
+    "31. Dec. 2002 (CVS)", "big_war_thumb.jpg", "big_war.jpg");
 add_screenshot("Outer defenses of an enemy being taken out",
     "10. Nov. 2002 (Boson 0.7)", "0.7-6-thumb.jpg", "0.7-6.jpg");
 add_screenshot("",
