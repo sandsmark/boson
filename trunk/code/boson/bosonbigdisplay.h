@@ -221,8 +221,6 @@ protected slots:
 
 	void slotContentsMoving(int x, int y);
 
-	void test();
-
 private:
 	void init();
 
