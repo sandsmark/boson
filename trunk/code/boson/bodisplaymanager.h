@@ -93,6 +93,18 @@ public slots:
 	void slotEditorWillPlaceCell(int);
 	void slotEditorWillPlaceUnit(int unitType, UnitBase* fac, KPlayer*);
 
+
+	void slotScrollUp() { slotScroll(ScrollUp); }
+	void slotScrollRight() { slotScroll(ScrollRight); }
+	void slotScrollDown() { slotScroll(ScrollDown); }
+	void slotScrollLeft() { slotScroll(ScrollLeft); }
+	/**
+	 * Scroll the active display
+	 * @param direction See @ref ScrollDirection
+	 **/
+	void slotScroll(int direction);
+
+
 signals:
 	/**
 	 * Emitted when the currently active display changes.
@@ -104,6 +116,13 @@ signals:
 	void signalActiveDisplay(BosonBigDisplay* active, BosonBigDisplay* old);
 
 protected:
+	enum ScrollDirection {
+		ScrollUp = 0,
+		ScrollRight = 1,
+		ScrollDown = 2,
+		ScrollLeft = 3
+	};
+
 	BosonBigDisplay* addDisplay(QWidget* parent);
 	BoBox* findBox(BosonBigDisplay*) const;
 	void recreateLayout();
