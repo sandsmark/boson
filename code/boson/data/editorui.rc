@@ -13,6 +13,8 @@
     <Action name="editor_height" />
     <Action name="editor_import_heightmap" />
     <Action name="editor_export_heightmap" />
+    <Action name="editor_import_texmap" />
+    <Action name="editor_export_texmap" />
     <Action name="editor_create_unit"  />
     <Action name="editor_create_tiles" />
     <Action name="editor_create_debug_tiles" />
