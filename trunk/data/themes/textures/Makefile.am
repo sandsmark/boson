@@ -60,7 +60,9 @@ texture_DATA = \
 	wheel.jpg \
 	wheel1.jpg \
 	window1.jpg \
-	window2.jpg
+	window2.jpg \
+	broken1.jpg \
+	broken2.jpg
 
 # no further editing need here
 
