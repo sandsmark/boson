@@ -245,8 +245,8 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 				while (it.current()) {
 					unit = it.current();
 					unit->moveTo(pos);
-					pos2.setX(pos.x() + (unit->x() - leader->x()));
-					pos2.setY(pos.y() + (unit->y() - leader->y()));
+					pos2.setX(pos.x() + (int)(unit->x() - leader->x()));
+					pos2.setY(pos.y() + (int)(unit->y() - leader->y()));
 					unit->moveTo(pos2);
 					++it;
 				}
@@ -525,7 +525,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 		}
 		if (!production->contains(unitType)) {
 			kdDebug() << unitType << " is not in production queue" << endl;
-			return;
+			return true;
 		}
 		if (production->currentProduction() == unitType) {
 			if (factory->work() == Unit::WorkProduce) {

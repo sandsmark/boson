@@ -28,10 +28,6 @@
 #include <qpoint.h>
 #include <sys/time.h> // only for debug
 
-#ifdef USE_STL
- #include <vector.h>
-#endif
-
 #define ERROR_COST 100000
 #define MAX_PATH_COST 5000
 #define FOGGED_COST 2.5
@@ -69,9 +65,15 @@ inline void BosonPath::PathNode::operator=(const BosonPath::PathNode& a)
   level = a.level;
 }
 
-const inline bool operator<(const BosonPath::PathNode& a, const BosonPath::PathNode& b)
+// AB: that const once was added for g++-3.x -> i am sure it is used for nothing
+// - but please test before removing... sometimes gcc is *really* strange...
+inline const bool operator<(const BosonPath::PathNode& a, const BosonPath::PathNode& b)
 {
   return (a.g + a.h) < (b.g + b.h);
+}
+inline const bool operator>(const BosonPath::PathNode& a, const BosonPath::PathNode& b)
+{
+  return (a.g + a.h) > (b.g + b.h);
 }
 
 /** Describes found path

@@ -140,7 +140,7 @@ KGamePropertyHandler* UnitBase::dataHandler() const
  return &d->mProperties;
 }
 
-inline int UnitBase::type() const
+int UnitBase::type() const
 {
  return unitProperties()->typeId();
 }
@@ -170,7 +170,7 @@ bool UnitBase::load(QDataStream& stream)
  return ret;
 }
 
-inline SpeciesTheme* UnitBase::speciesTheme() const
+SpeciesTheme* UnitBase::speciesTheme() const
 {
  if (!owner()) {
 	kdWarning() << k_funcinfo << "NULL owner" << endl;
@@ -179,17 +179,17 @@ inline SpeciesTheme* UnitBase::speciesTheme() const
  return owner()->speciesTheme();
 }
 
-inline bool UnitBase::isFacility() const
+bool UnitBase::isFacility() const
 {
  return unitProperties()->isFacility();
 }
 
-inline bool UnitBase::isMobile() const
+bool UnitBase::isMobile() const
 {
  return unitProperties()->isMobile();
 }
 
-inline bool UnitBase::isFlying() const
+bool UnitBase::isFlying() const
 {
  return (unitProperties() ? unitProperties()->isAircraft() : false);
 }

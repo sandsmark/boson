@@ -37,7 +37,7 @@
 #define POWER_LEVELS 15// AB: is from common/unit.h - the number of frames for the SelectBox, each with less power
 #define PART_NB (POWER_LEVELS)
 
-SelectBox::SelectBox(int x, int y, int width, int height, int z, QCanvas* canvas, bool leader)
+SelectBox::SelectBox(double x, double y, int width, int height, double z, QCanvas* canvas, bool leader)
 	: QCanvasSprite(0, canvas)
 {
  mWidth = width + 2 * SP_H_DISTANCE;
@@ -161,7 +161,7 @@ QCanvasPixmapArray* SelectBox::initPixmapArray()
 
 void SelectBox::update(double factor)
 {
- setFrame((frames() - 1) * factor);
+ setFrame((int)((frames() - 1) * factor));
 }
 
 int SelectBox::barHeight()

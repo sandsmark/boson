@@ -443,10 +443,10 @@ void BosonCommandWidget::slotUnitChanged(Unit* unit)
  if (unit->health() > unit->unitProperties()->health()) {
 	kdWarning() << k_lineinfo << "health > possible health" << endl;
  }
- mHealth->setValue(h);
+ mHealth->setValue((int)h);
 
  double r = 100 - ((double)unit->reloadState() * 100 / (double)unit->unitProperties()->reload());
- mReload->setValue(r);
+ mReload->setValue((int)r);
 }
 
 
@@ -502,7 +502,7 @@ void BosonCommandWidget::advanceProduction(double percentage)
  // but this is faster.
  int pieSize = mask.width() + mask.height(); 
  p.drawPie((mask.width() - pieSize)/2, (mask.height() - pieSize)/2, pieSize,
-		pieSize, 16*90, -16*360*(percentage/100));
+		pieSize, 16*90, (int)(-16*360*(percentage/100)));
  p.end();
 
  progress.setMask(mask);

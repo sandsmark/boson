@@ -199,12 +199,12 @@ void BosonMiniMap::mousePressEvent(QMouseEvent *e)
 	return;
  }
  if (e->button() == LeftButton) {
-	emit signalReCenterView( QPoint(e->pos().x() / (scale() * zoom()) - d->mPainterMoveX, e->pos().y() / (scale() * zoom()) - d->mPainterMoveY) );
+	emit signalReCenterView( QPoint((int)(e->pos().x() / (scale() * zoom()) - d->mPainterMoveX), (int)(e->pos().y() / (scale() * zoom()) - d->mPainterMoveY)) );
 	e->accept();
 	return;
  } else if (e->button() == RightButton) {
-	emit signalMoveSelection(e->pos().x() / (scale() * zoom()) - d->mPainterMoveX, 
-			e->pos().y() / (scale() * zoom()) - d->mPainterMoveY);
+	emit signalMoveSelection((int)(e->pos().x() / (scale() * zoom()) - d->mPainterMoveX),
+			(int)(e->pos().y() / (scale() * zoom()) - d->mPainterMoveY));
  }
 }
 
@@ -320,7 +320,7 @@ void BosonMiniMap::slotUnfog(int x, int y)
  QValueList<Unit*> list = mCanvas->unitsAtCell(x, y);
  if (!list.isEmpty()) {
 	Unit* u = list.first();
-	slotAddUnit(u, u->x() / BO_TILE_SIZE, u->y() / BO_TILE_SIZE);
+	slotAddUnit(u, (int)(u->x() / BO_TILE_SIZE), (int)(u->y() / BO_TILE_SIZE));
  }
 }
 
@@ -412,8 +412,8 @@ bool BosonMiniMap::eventFilter(QObject* o, QEvent* e)
 		|| zoom() != boConfig->miniMapZoom()) {
 	d->mScale = boConfig->miniMapScale();
 	d->mZoom = boConfig->miniMapZoom();
-	d->mPixmap->setFixedWidth(mGround->width() * scale());
-	d->mPixmap->setFixedHeight(mGround->height() * scale());
+	d->mPixmap->setFixedWidth((int)(mGround->width() * scale()));
+	d->mPixmap->setFixedHeight((int)(mGround->height() * scale()));
 	d->mPixmap->erase();
  }
  QRect selectionRect(d->mSelectionPos, d->mSelectionSize);

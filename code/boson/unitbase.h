@@ -140,7 +140,7 @@ public:
 	/**
 	 * @return Guess what? See @ref UnitProperties::name
 	 **/
-	inline const QString& name() const;
+	const QString& name() const;
 
 	/**
 	 * Health aka hitpoints
@@ -159,7 +159,7 @@ public:
 	 **/
 	inline virtual void setHealth(unsigned long int h) { mHealth = h; }
 
-	inline bool isDestroyed() const
+	bool isDestroyed() const
 	{
 		return (health() == 0);
 	}
@@ -175,13 +175,13 @@ public:
 	 **/
 	void setOwner(Player* owner);
 
-	inline KGamePropertyHandler* dataHandler() const;
+	KGamePropertyHandler* dataHandler() const;
 
 	/**
 	 * The ID of the unit. This ID is unique for this game.
 	 * @return The uniuque ID of the unit
 	 **/
-	inline unsigned long int id() const;
+	unsigned long int id() const;
 
 	/**
 	 * Set the ID of this unit. A ID must be unique for the owner, so it
@@ -190,17 +190,17 @@ public:
 	 **/
 	void setId(unsigned long int id);
 
-	inline unsigned long int shields() const;
-	inline void setShields(unsigned long int shields);
+	unsigned long int shields() const;
+	void setShields(unsigned long int shields);
 
-	inline unsigned long int armor() const;
-	inline void setArmor(unsigned long int armor);
+	unsigned long int armor() const;
+	void setArmor(unsigned long int armor);
 
 	/**
 	 * The type of the unit as described in the index.desktop file of this
 	 * unit. See also @ref UnitProperties::typeId
 	 **/
-	inline int type() const;
+	int type() const;
 
 	/**
 	 * @return The RTTI of this unit. You can use @ref RTTI::isUnit to find
@@ -268,25 +268,25 @@ public:
 	 * in the constructor. Note that if you get NULL here you don't have to
 	 * care about crashes as the game will crash anyway.
 	 **/
-	inline const UnitProperties* unitProperties() const { return mUnitProperties; }
+	const UnitProperties* unitProperties() const { return mUnitProperties; }
 
 	/**
 	 * Convenience method for owner()->speciesTheme().
 	 * See @ref Player::speciesTheme
 	 * @return The @ref SpeciesTheme of the owner of this unit.
 	 **/
-	inline SpeciesTheme* speciesTheme() const;
+	SpeciesTheme* speciesTheme() const;
 
 	/**
 	 * Cenvenience method for unitProperties()->isFacility().
 	 * See @ref UnitProperties::isFacility
 	 **/
-	inline bool isFacility() const;
+	bool isFacility() const;
 	/**
 	 * Cenvenience method for unitProperties()->isMobile().
 	 * See @ref UnitProperties::isMobile
 	 **/
-	inline bool isMobile() const;
+	bool isMobile() const;
 
 	/**
 	 * One day we might have units which can go on air <em>and</em> on land
@@ -297,10 +297,10 @@ public:
 	 * unitProperties()->isAircraft is false. Currently this is juste the 
 	 * same as @ref unitProperties()->isAircraft.
 	 **/
-	inline bool isFlying() const;
+	bool isFlying() const;
 
-	inline void increaseDeletionTimer();
-	inline unsigned int deletionTimer() const;
+	void increaseDeletionTimer();
+	unsigned int deletionTimer() const;
 
 	/**
 	 * @return true if unit is moving (work() == WorkMove || work() == WorkMoveInGroup)
@@ -314,7 +314,7 @@ public:
 	 * @return THe reload state of the weapon. If this is 0 the unit can
 	 * shoot, otherwise not.
 	 **/
-	inline unsigned int reloadState() const;
+	unsigned int reloadState() const;
 
 	/**
 	 * Reduces @ref reloadState by 1 until it reaches 0.
