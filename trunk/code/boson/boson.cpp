@@ -250,7 +250,7 @@ void BosonApp::initView(int w, int h)
 	/* a mainView is each window containing : field, mini, order...
 	   this one is the first one, other can pop up as well */
 
-	mainView *mainview = new mainView(field, this, "main_view_0");
+	mainView *mainview = new mainView(this, "main_view_0");
 	setView(mainview);
 	mainview->show();
 	resize(800, 626);

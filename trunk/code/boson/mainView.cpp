@@ -28,7 +28,7 @@
 
 #include "mainView.h"		// myself
 
-mainView::mainView(bosonField *field, QWidget *parent=0, const char *name=0)
+mainView::mainView(QWidget *parent=0, const char *name=0)
 	:QWidget(parent, name)
 { 
 	QHBoxLayout	*topLayout = new QHBoxLayout(this);
@@ -39,7 +39,7 @@ mainView::mainView(bosonField *field, QWidget *parent=0, const char *name=0)
 
 	topLayout->addLayout(leftLayout,0);
 
-		view = new bosonView(field, this, "bosonView");
+		view = new bosonView(this, "bosonView");
 		
 		mini = new visualMiniDisplay(view, this);
 		mini->setFixedSize(200,200);

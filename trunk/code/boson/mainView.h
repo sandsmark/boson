@@ -32,7 +32,7 @@ class mainView : public QWidget
 {
 	Q_OBJECT
 public:
-	mainView(bosonField *field, QWidget *parent=0, const char *name=0);
+	mainView( QWidget *parent=0, const char *name=0);
 
 protected:
 	virtual void keyReleaseEvent (QKeyEvent * e );

@@ -36,6 +36,7 @@
 
 #include "game.h"
 #include "bosonView.h"
+#include "bosonField.h"
 //#include "playerUnit.h"
 
 #define VIEW_ONE	1
@@ -44,13 +45,13 @@
 
 
 
-bosonView::bosonView(visualField *p, QWidget *parent, const char *name=0L)
-	:visualView(p,parent,name)
+bosonView::bosonView(QWidget *parent, const char *name=0L)
+	:visualView(::field,parent,name)
 {
 	int i;
 	QString path(kapp->kde_datadir() + "/boson/themes/panels/standard/overview_none.xpm" );
 
-	connect(p, SIGNAL(reCenterView(int,int)), SLOT(reCenterView(int,int)));
+	connect(field, SIGNAL(reCenterView(int,int)), SLOT(reCenterView(int,int)));
 
 	setFrameStyle(QFrame::Sunken | QFrame::Panel);
 	setLineWidth(5);

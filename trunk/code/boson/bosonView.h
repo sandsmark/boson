@@ -37,7 +37,7 @@ class bosonView : public visualView
 	Q_OBJECT
 
 public:
-	bosonView(visualField *, QWidget *parent=0, const char *name=0L);
+	bosonView(QWidget *parent=0, const char *name=0L);
 
 	enum orderType_t { OT_NONE =-1 , OT_FACILITY=10, OT_MOBILE=11};
 
