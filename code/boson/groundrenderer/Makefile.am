@@ -6,7 +6,8 @@ libbogroundrendererplugin_la_SOURCES = \
 		bogroundrendererfactory.cpp \
 		bodefaultgroundrenderer.cpp \
 		bofastgroundrenderer.cpp \
-		bogroundrendererbase.cpp
+		bogroundrendererbase.cpp \
+		boquadtreenode.cpp
 
 pluginsdir = $(kde_datadir)/boson/groundrendererplugins
 plugins_DATA =
