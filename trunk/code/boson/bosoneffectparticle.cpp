@@ -534,6 +534,7 @@ bool BosonEffectParticleGeneric::loadFromXML(const QDomElement& root)
 }
 
 
+
 /*****  BosonEffectParticleTrail  *****/
 
 BosonEffectParticleTrail::BosonEffectParticleTrail(const BosonEffectPropertiesParticleTrail* prop,
@@ -875,6 +876,436 @@ bool BosonEffectParticleTrail::loadFromXML(const QDomElement& root)
 
   return true;
 }
+
+
+
+/*****  BosonEffectParticleEnvironmental  *****/
+
+BosonEffectParticleEnvironmental::BosonEffectParticleEnvironmental(const BosonEffectPropertiesParticleEnvironmental* prop,
+    float density, float range, const BoTextureArray* textures,
+    const BoVector3Fixed& pos) :
+    BosonEffectParticle(prop)
+{
+  mDensity = density;
+  mRange = range;
+  // Calculate how many particles should be in total
+  float num = mDensity * (mRange * mRange * mRange * 8);  // = mDensity * pow(mRange * 2, 3)
+  mParticleCount = (int)(num * 1.10f);  // 10% is for safety
+
+  mParticles = new BosonGenericParticle[mParticleCount];
+  mTextures = textures;
+
+  // Init variables to defaults
+  mMass = 1.0;
+  mBlendFunc[0] = GL_SRC_ALPHA;
+  mBlendFunc[1] = GL_ONE_MINUS_SRC_ALPHA;
+  mNum = 0;
+  mObsolete = false;
+  mBoundingSphereRadius = 10.0f;  // Any value >0 should work
+
+  // Init num particles at default position
+  int i = 0;
+  // Min/max coords of the box where to spawn particles
+  BoVector3Fixed min(pos.x() - mRange, pos.y() - mRange, pos.z() - mRange);
+  BoVector3Fixed max(pos.x() + mRange, pos.y() + mRange, pos.z() + mRange);
+
+  // Spawn them
+  while(num >= 1.0f)
+  {
+    // Spawn next particle
+    // Use this dead particle to spawn new one.
+    // Choose random position inside this box.
+    mParticles[i].pos.setX(getFloat(min.x(), max.x()));
+    mParticles[i].pos.setY(getFloat(min.y(), max.y()));
+    mParticles[i].pos.setZ(getFloat(min.z(), max.z()));
+    initParticle(&mParticles[i], mParticles[i].pos);
+    i++;
+    num -= 1.0f;
+  }
+
+  BosonEffect::setPosition(pos);
+}
+
+BosonEffectParticleEnvironmental::~BosonEffectParticleEnvironmental()
+{
+  delete[] mParticles;
+}
+
+void BosonEffectParticleEnvironmental::update(float elapsed)
+{
+  BosonEffect::update(elapsed);
+  if(!hasStarted())
+  {
+    return;
+  }
+
+  // We need to spawn some new particles, because when particles move, some of
+  //  them go outside the range, others move, and some areas won't have any
+  //  particles anymore.
+  //  This is very similar to moving the whole particle system: if average
+  //  velocity of the particles is velo, then we can treat the situation as if
+  //  the particle system was moved by -velo.
+
+  // First update particles and obsolete those that have gone out of range.
+  BoVector3Fixed pos = position();
+  mNum = 0;
+  for(unsigned int i = 0; i < mParticleCount; i++)
+  {
+    if(mParticles[i].life > 0.0)
+    {
+      // Update particle
+      updateParticle(&mParticles[i], elapsed);
+      // Calculate dist between particle and particle system's center.
+      bofixed dist = 0;
+      dist = QMAX(dist, QABS(pos.x() - mParticles[i].pos.x()));
+      dist = QMAX(dist, QABS(pos.y() - mParticles[i].pos.y()));
+      dist = QMAX(dist, QABS(pos.z() - mParticles[i].pos.z()));
+      if(dist > mRange)
+      {
+        // Particle is too far away, mark it as dead
+        mParticles[i].life = -1.0f;
+      }
+      else
+      {
+        mNum++;
+      }
+    }
+  }
+
+  // Then spawn some new particles where necessary.
+  // This is average velocity of all particles
+  BoVector3Fixed velo = mParticleVelo + BosonEffectPropertiesParticle::wind().toFixed() * mMass;
+  particleBoxMoved(pos, (pos - velo * elapsed));
+}
+
+void BosonEffectParticleEnvironmental::setPosition(const BoVector3Fixed& pos)
+{
+  BoVector3Fixed oldpos = position();
+  if(oldpos == pos)
+  {
+    // Position didn't change. No need to do anything
+    return;
+  }
+  BosonEffect::setPosition(pos);
+
+  // Delete all particles that are too far away now
+  for(unsigned int i = 0; i < mParticleCount; i++)
+  {
+    if(mParticles[i].life > 0.0)
+    {
+      // Calculate dist between particle and particle system's center.
+      bofixed dist = 0;
+      dist = QMAX(dist, QABS(pos.x() - mParticles[i].pos.x()));
+      dist = QMAX(dist, QABS(pos.y() - mParticles[i].pos.y()));
+      dist = QMAX(dist, QABS(pos.z() - mParticles[i].pos.z()));
+      if(dist > mRange)
+      {
+        // Particle is too far away, mark it as dead
+        mParticles[i].life = -1.0f;
+        mNum--;
+      }
+    }
+  }
+
+  particleBoxMoved(oldpos, pos);
+}
+
+void BosonEffectParticleEnvironmental::particleBoxMoved(const BoVector3Fixed& oldpos, const BoVector3Fixed& newpos)
+{
+  // Find out the area where to spawn new particles
+  // If oldbox is the old bounding box of the system, and newbox is the new
+  //  one, then this area would be (newbox - oldbox). This area consists of
+  //  at most 3 axis-aligned boxes.
+  class MyBox
+  {
+    public:
+      MyBox() { empty = true; volume = 0.0f; }
+      void updateVolume()  { volume = (max.x() - min.x()) * (max.y() - min.y()) * (max.z() - min.z()); }
+
+      BoVector3Fixed min;
+      BoVector3Fixed max;
+      float volume;
+      bool empty;
+  };
+
+  // These boxes will contain areas which are in newbox, but not in oldbox.
+  MyBox boxes[3];
+
+  // Make boxes for old and new positions
+  MyBox oldbox;
+  oldbox.min.set(oldpos.x() - mRange, oldpos.y() - mRange, oldpos.z() - mRange);
+  oldbox.max.set(oldpos.x() + mRange, oldpos.y() + mRange, oldpos.z() + mRange);
+  MyBox newbox;
+  newbox.min.set(newpos.x() - mRange, newpos.y() - mRange, newpos.z() - mRange);
+  newbox.max.set(newpos.x() + mRange, newpos.y() + mRange, newpos.z() + mRange);
+
+  // Transform oldbox, so that it's completely inside newbox. That will make
+  //  some things easier.
+  oldbox.min.set(QMAX(oldbox.min.x(), newbox.min.x()), QMAX(oldbox.min.y(), newbox.min.y()),
+      QMAX(oldbox.min.z(), newbox.min.z()));
+  oldbox.max.set(QMIN(oldbox.max.x(), newbox.max.x()), QMIN(oldbox.max.y(), newbox.max.y()),
+      QMIN(oldbox.max.z(), newbox.max.z()));
+
+
+  // Calculate z-difference
+  if(oldpos.z() != newpos.z())
+  {
+    boxes[2].empty = false;
+    boxes[2].min = newbox.min;
+    boxes[2].max = newbox.max;
+    if(oldpos.z() < newpos.z())
+    {
+      // Difference box is above old box
+      boxes[2].min.setZ(oldbox.max.z());
+    }
+    else
+    {
+      // Difference box is below old box
+      boxes[2].max.setZ(oldbox.min.z());
+    }
+    boxes[2].updateVolume();
+  }
+
+  // Calculate x-difference
+  if(oldpos.x() != newpos.x())
+  {
+    boxes[0].empty = false;
+    boxes[0].min = newbox.min;
+    boxes[0].max = newbox.max;
+    if(oldpos.x() < newpos.x())
+    {
+      // Difference box is right of old box
+      boxes[0].min.setX(oldbox.max.x());
+    }
+    else
+    {
+      // Difference box is left of old box
+      boxes[0].max.setX(oldbox.min.x());
+    }
+    // This makes sure no area is included twice in those boxes
+    boxes[0].min.setZ(oldbox.min.z());
+    boxes[0].max.setZ(oldbox.max.z());
+    boxes[0].updateVolume();
+  }
+
+  // Calculate y-difference
+  if(oldpos.y() != newpos.y())
+  {
+    boxes[1].empty = false;
+    boxes[1].min = newbox.min;
+    boxes[1].max = newbox.max;
+    if(oldpos.y() < newpos.y())
+    {
+      // Difference box is in front of old box
+      boxes[1].min.setY(oldbox.max.y());
+    }
+    else
+    {
+      // Difference box is behind of old box
+      boxes[1].max.setY(oldbox.min.y());
+    }
+    // This makes sure no area is included twice in those boxes
+    boxes[1].min.setZ(oldbox.min.z());
+    boxes[1].max.setZ(oldbox.max.z());
+    boxes[1].min.setX(oldbox.min.x());
+    boxes[1].max.setX(oldbox.max.x());
+    boxes[1].updateVolume();
+  }
+
+
+  // Spawn particles in new boxes
+  unsigned int particlepos = 0;
+  for(int i = 0; i < 3; i++)
+  {
+    if(boxes[i].empty)
+    {
+      continue;
+    }
+    // Calculate how many particles to spawn
+    float num = mDensity * boxes[i].volume;
+    while(num >= 1.0f)
+    {
+      // Spawn next particle
+      for(; particlepos < mParticleCount; particlepos++)
+      {
+        if(mParticles[particlepos].life <= 0.0)
+        {
+          // Use this dead particle to spawn new one.
+          // Choose random position inside this box.
+          mParticles[particlepos].pos.setX(getFloat(boxes[i].min.x(), boxes[i].max.x()));
+          mParticles[particlepos].pos.setY(getFloat(boxes[i].min.y(), boxes[i].max.y()));
+          mParticles[particlepos].pos.setZ(getFloat(boxes[i].min.z(), boxes[i].max.z()));
+          initParticle(&mParticles[particlepos], mParticles[particlepos].pos);
+          mNum++;
+          // Break out of for-loop
+          break;
+        }
+      }
+      num -= 1.0f;
+    }
+  }
+}
+
+void BosonEffectParticleEnvironmental::initParticle(BosonGenericParticle* particle, const BoVector3Fixed& pos)
+{
+  // Note that most stuff isn't initialized here, it's done in
+  //  BosonParticleSystemProperties
+  particle->pos = pos;
+  if(!mTextures)
+  {
+    boError(150) << k_funcinfo << "NULL textures" << endl;
+  }
+  else
+  {
+    particle->tex = mTextures->texture(0);
+  }
+  particle->system = this;
+  if(properties())
+  {
+    ((BosonEffectPropertiesParticleTrail*)properties())->initParticle(this, particle);
+  }
+}
+
+void BosonEffectParticleEnvironmental::updateParticle(BosonGenericParticle* particle, float elapsed)
+{
+  particle->pos.addScaled(particle->velo, elapsed);
+
+  if(properties())
+  {
+    ((BosonEffectPropertiesParticleTrail*)properties())->updateParticle(this, particle);
+  }
+}
+
+bool BosonEffectParticleEnvironmental::saveAsXML(QDomElement& root) const
+{
+  if(!BosonEffectParticle::saveAsXML(root))
+  {
+    return false;
+  }
+
+  root.setAttribute("Num", mNum);
+  root.setAttribute("Mass", mMass);
+  root.setAttribute("Obsolete", mObsolete ? 1 : 0);
+  root.setAttribute("Range", mRange);
+  root.setAttribute("Density", mDensity);
+  mParticleVelo.saveAsXML(root, "ParticleVelo");
+
+  // Init byte array and data stream
+  QByteArray ba;
+  QDataStream stream(ba, IO_WriteOnly);
+
+  // Save particles
+  int particlessaved = 0;
+  for(unsigned int i = 0; i < mParticleCount; i++)
+  {
+    if(mParticles[i].life > 0.0)
+    {
+      stream << mParticles[i].velo;
+      stream << mParticles[i].maxage;
+      stream << mParticles[i].color;
+      stream << mParticles[i].pos;
+      stream << mParticles[i].size;
+      stream << mParticles[i].life;
+      stream << mParticles[i].distance;
+      particlessaved++;
+    }
+  }
+  if(particlessaved != mNum)
+  {
+    boError() << k_funcinfo << "mNum was invalid!!!" << endl;
+    return false;
+  }
+
+  // Encode ba to base64
+  QString base64data = KCodecs::base64Encode(ba);
+  // Save as QDomText
+  QDomDocument doc = root.ownerDocument();
+  QDomElement data = doc.createElement("Data");
+  QDomText domtext = doc.createTextNode(base64data);
+  root.appendChild(data);
+  data.appendChild(domtext);
+
+  return true;
+}
+
+bool BosonEffectParticleEnvironmental::loadFromXML(const QDomElement& root)
+{
+  if(!BosonEffectParticle::loadFromXML(root))
+  {
+    return false;
+  }
+
+  bool ok;
+  mNum = root.attribute("Num").toInt(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading Num attribute ('" << root.attribute("Num") << "')" << endl;
+    return false;
+  }
+  mMass = root.attribute("Mass").toFloat(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading Mass attribute ('" << root.attribute("Mass") << "')" << endl;
+    return false;
+  }
+  mObsolete = (root.attribute("Obsolete").toInt(&ok));
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading Obsolete attribute ('" << root.attribute("Obsolete") << "')" << endl;
+    return false;
+  }
+  mRange = root.attribute("Range").toFloat(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading Range attribute ('" << root.attribute("Range") << "')" << endl;
+    return false;
+  }
+  mDensity = root.attribute("Density").toFloat(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading Density attribute ('" << root.attribute("Density") << "')" << endl;
+    return false;
+  }
+  mParticleVelo.loadFromXML(root, "ParticleVelo");
+
+  QDomElement dataelement = root.namedItem("Data").toElement();
+  if(dataelement.isNull())
+  {
+    boError() << k_funcinfo << "Data element not found!" << endl;
+    return false;
+  }
+  QString base64data = dataelement.text();
+  if(base64data.isEmpty())
+  {
+    boDebug() << k_funcinfo << "Empty or invalid text in Data element!" << endl;
+    return false;
+  }
+  QByteArray ba;
+  KCodecs::base64Decode(base64data.utf8(), ba);  // Is utf8() safe to use here?
+
+  // Init data stream
+  QDataStream stream(ba, IO_ReadOnly);
+
+  // Load particles
+  for(int i = 0; i < mNum; i++)
+  {
+    mParticles[i].system = this;
+    stream >> mParticles[i].velo;
+    stream >> mParticles[i].maxage;
+    stream >> mParticles[i].color;
+    stream >> mParticles[i].pos;
+    stream >> mParticles[i].size;
+    stream >> mParticles[i].life;
+    stream >> mParticles[i].distance;
+
+    // Update particle's texture (can't be saved because texture id can change)
+    // Env. particles always use only the first texture atm
+    mParticles[i].tex = mTextures->texture(0);
+  }
+
+  return true;
+}
+
 
 
 /*****  BoParticleList  *****/

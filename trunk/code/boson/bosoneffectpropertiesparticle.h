@@ -181,5 +181,57 @@ class BosonEffectPropertiesParticleTrail : public BosonEffectPropertiesParticle
 };
 
 
+
+/**
+ * @short Properties class for BosonEffectParticleEnvironmental
+ *
+ * See @ref BosonEffectParticleEnvironmental for info about environmental
+ *  particle effects.
+ *
+ * @author Rivo Laks <rivolaks@hot.ee>
+ **/
+class BosonEffectPropertiesParticleEnvironmental : public BosonEffectPropertiesParticle
+{
+  public:
+    BosonEffectPropertiesParticleEnvironmental();
+
+
+    virtual BosonEffect::Type type() const  { return BosonEffect::ParticleEnvironmental; }
+
+    virtual bool load(KSimpleConfig* cfg, const QString& group, bool inherited = false);
+
+
+    virtual BosonEffect* newEffect(const BoVector3Fixed& pos, const BoVector3Fixed& rot = BoVector3Fixed()) const;
+
+
+    /**
+     * Initializes given particle
+     **/
+    virtual void initParticle(BosonEffectParticle* effect, BosonParticle* particle) const;
+
+    /**
+     * Updates given particle
+     **/
+    virtual void updateParticle(BosonEffectParticle* effect, BosonParticle* particle) const;
+
+
+  protected:
+    void reset();
+
+
+  protected:
+    BoVector3Fixed mMinVelo, mMaxVelo;
+    float mSize;
+    BoVector4Float mColor;
+    float mMass, mParticleDist;
+    QString mTextureName;
+    QString mGLBlendFuncStr, mGLSrcBlendFuncStr;
+    int mGLBlendFunc, mGLSrcBlendFunc;
+    float mDensity;
+    float mRange;
+    const BoTextureArray* mTextures;
+};
+
+
 #endif //BOSONEFFECTPROPERTIESPARTICLE_H
 

@@ -214,6 +214,10 @@ BosonEffectProperties* BosonEffectPropertiesManager::newParticleEffectProperties
   {
     return new BosonEffectPropertiesParticleTrail();
   }
+  else if(type == "ParticleEnvironmental")
+  {
+    return new BosonEffectPropertiesParticleEnvironmental();
+  }
   else
   {
     boError() << k_funcinfo << "Invalid type '" << type << "'" << endl;

@@ -51,7 +51,7 @@ class BosonEffect
      */
     enum Type { Fog, Fade, Collection, Light, BulletTrail,
         // All particle effect subtypes _must_ come after Particle!
-        Particle, ParticleGeneric, ParticleTrail };
+        Particle, ParticleGeneric, ParticleTrail, ParticleEnvironmental };
 
 
     BosonEffect(const BosonEffectProperties* prop = 0);

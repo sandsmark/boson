@@ -35,6 +35,7 @@ class BoTextureArray;
 class BoTexture;
 class BosonEffectParticle;
 class BosonEffectPropertiesParticleTrail;
+class BosonEffectPropertiesParticleEnvironmental;
 
 
 /**
@@ -178,6 +179,13 @@ class BosonEffectParticle : public BosonEffect
      * Unaligned particles will be aligned to xy-plane.
      **/
     bool alignParticles() const  { return mAlign; }
+
+    /**
+     * @return Whether to test if particle system is fogged before rendering.
+     * Fogged particle systems (the ones that player can't see) won't be
+     *  rendered unless this method returns false.
+     **/
+    virtual bool testFogged() const  { return true; }
 
 
   protected:
@@ -527,6 +535,125 @@ class BosonEffectParticleTrail : public BosonEffectParticle
     BoVector3Fixed mOffset;
 
     BoVector3Fixed mLastPos;
+};
+
+
+
+/**
+ * @short Environmental particle effect.
+ *
+ * Environmental effects, as the name implies, fill the whole environment (map)
+ *  in Boson. Such effects include e.g. rain and snow.
+ *
+ * @author Rivo Laks <rivolaks@hot.ee>
+ **/
+class BosonEffectParticleEnvironmental : public BosonEffectParticle
+{
+  public:
+    /**
+     * Constructs new trail particle effect.
+     * @param prop Properties for this effect.
+     * @param maxnum Maximum number of particles in this effect.
+     * @param textures Texture array for this effect
+     * @param pos Initial position for this effect.
+     **/
+    BosonEffectParticleEnvironmental(const BosonEffectPropertiesParticleEnvironmental* prop,
+        float density, float range, const BoTextureArray* textures,
+        const BoVector3Fixed& pos);
+    virtual ~BosonEffectParticleEnvironmental();
+
+
+    virtual Type type() const  { return BosonEffect::ParticleEnvironmental; }
+
+
+    /**
+     * Updates all particles within this system and creates new ones if needed
+     * and if age is more than 0.
+     **/
+    virtual void update(float elapsed);
+
+
+    virtual BosonParticle* particle(unsigned int i)  { return &mParticles[i]; }
+
+    /**
+     * Set new position for this effect.
+     * Note that new particles between old position and the new one will be
+     *  created once the @ref update method is next called, so if you move the
+     *  effect several times between two @ref update calls, only one "line of
+     *  particles" is drawn.
+     **/
+    virtual void setPosition(const BoVector3Fixed& pos);
+
+
+    /**
+     * Makes the effect obsolete.
+     * No more particles will be created after this.
+     **/
+    virtual void makeObsolete()  { mObsolete = true; BosonEffect::makeObsolete(); }
+    virtual bool isActive() const  { return ((mNum > 0) || (!mObsolete)); }
+
+
+    /**
+     * Return mass of the particles of this particle system.
+     * It defines how much the wind affects particles.
+     **/
+    inline float mass() const  { return mMass; }
+    /**
+     * Set the mass of the particles of this system
+     * @see mass
+     **/
+    void setMass(float m)  { mMass = m; }
+
+    float range() const  { return mRange; }
+    void setRange(float r)  { mRange = r; }
+
+    /**
+     * @return Average velocity of particles.
+     * Note that this doesn't take wind into account
+     **/
+    const BoVector3Fixed& particleVelo() const  { return mParticleVelo; }
+    void setParticleVelo(const BoVector3Fixed& velo)  { mParticleVelo = velo; }
+
+
+    /**
+     * Sets OpenGL blending function of this system. This function is used in
+     * @ref draw mehod. You can use this to specify your own blending functions
+     * if needed. Defaults are GL_SRC_ALPHA and GL_ONE_MINUS_SRC_ALPHA.
+     * @param sf Source blend function
+     * @param df Destination blend function
+     **/
+    void setBlendFunc(int sf, int df) { mBlendFunc[0] = sf; mBlendFunc[1] = df; }
+
+    // Always render
+    virtual bool testFogged() const  { return false; }
+
+
+    virtual bool saveAsXML(QDomElement& root) const;
+    virtual bool loadFromXML(const QDomElement& root);
+
+
+  protected:
+    /**
+     * Called when new particle is made active and needs to be initialized
+     **/
+    virtual void initParticle(BosonGenericParticle* particle, const BoVector3Fixed& pos);
+    /**
+     * Called when particle has to be updated. Called from @ref update
+     **/
+    virtual void updateParticle(BosonGenericParticle* particle, float elapsed);
+
+    void particleBoxMoved(const BoVector3Fixed& oldpos, const BoVector3Fixed& newpos);
+
+
+  protected:
+    BosonGenericParticle* mParticles;  // Array of particles
+    int mNum;  // Current number of particles (aka number of active particles)
+    const BoTextureArray* mTextures;  // Textures of particles
+    float mMass;
+    bool mObsolete;  // If true, new particles won't be created anymore
+    float mRange;
+    float mDensity;
+    BoVector3Fixed mParticleVelo;
 };
 
 
