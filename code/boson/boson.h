@@ -124,6 +124,9 @@ signals:
 	 **/
 	void signalCompletedProduction(Facility* factory);
 
+	void signalNotEnoughMinerals(Player* p);
+	void signalNotEnoughOil(Player* p);
+
 protected:
 	virtual bool playerInput(QDataStream& stream, KPlayer* player);
 

@@ -218,6 +218,23 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			kdError() << k_lineinfo << "Invalid unitType " << unitType << endl;
 			break;
 		}
+		const UnitProperties* prop = p->unitProperties(unitType);
+		if (!prop) {
+			kdError() << k_lineinfo << "NULL properties (EVIL BUG)" << endl;
+			break;
+		}
+		if (p->minerals() < prop->mineralCost()) {
+			kdDebug() << k_lineinfo << "not enough minerals to produce" << endl;
+			emit signalNotEnoughMinerals(p);
+			break;
+		}
+		if (p->oil() < prop->oilCost()) {
+			kdDebug() << k_lineinfo << "not enough oil to produce" << endl;
+			emit signalNotEnoughOil(p);
+			break;
+		}
+		p->setMinerals(p->minerals() - prop->mineralCost());
+		p->setOil(p->oil() - prop->oilCost());
 		factory->addProduction(unitType);
 		emit signalProduceUnit(factory);
 		break;
@@ -246,7 +263,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 		}
 		if (!((Unit*)factory)->isFacility()) {
 			kdError() << k_lineinfo << factoryId << " is not a facility" << endl;
-			return;
+			break;
 		}
 		int unitType = factory->completedProduction();
 		kdDebug() << k_lineinfo 
