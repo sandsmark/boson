@@ -57,3 +57,7 @@ InfoOutput=4
 # BoScript if off by default
 [700]
 InfoOutput=4
+
+# KGame is off by default
+[11001]
+InfoOutput=4
