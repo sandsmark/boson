@@ -3,10 +3,6 @@ Game TODOs
 - AI
 - BosonCommandWidget should paint the order pixmap only *once* no more. E.g. we
   repaint for setGrayOut() and setProductionCount()
-- mine/harvest minerals/oil is only at an experimantal state ; same about
-  refining
-- oil towers: they should be placed on an oil field. oil tankers go to the
-  towers and receive the oil from them, which they take to the refinery
 - pathfinding doesn't support units with size > BO_TILE_SIZE. get rid of
   MobileUnit::boundingRect() hack
 - let the player configure how often the different advance methods are called.
@@ -14,11 +10,8 @@ Game TODOs
   KGameProperty with PolicyClean, since it *must* be *exactly* the same value on
   every client. A frontend with settings like "best performance" == call
   advance methods seldom and stuff like this would also be nice
-- display "filling" status of harvesters instead of firepower. use different
-  colors!
 - "welcome to Boson" text in startup screen should be translateable (we can use
   QPainter to paint it to pixmap)
-- Do not start game before all players have loaded their data
 - mark selected units, i.e. display the group number in the selectbox (and also
   in the cmd frame for every unit)
 - maybe provide UnitGroups without keyboard, too. select units, click on a
@@ -31,8 +24,6 @@ Game TODOs
   then. we need to provide some config entries for indes.unit for this,
   specifying the frame number when armor changes. note that the frame number for
   this must NOT depend on the .3ds file!
-- many methods depend on a factory to be a facility. remove this dependance. a
-  production plugin can be part of a mobile unit, too
 - Add screenshots support to saving/loading widget
 - call updateCursor() every advance call, so that the cursor changes also if a
   unit moved below it.
@@ -40,9 +31,6 @@ Game TODOs
   hurting performance. instead we should use a separate timer for this.
 - Add support for playing sound in a loop. E.g. for missile fly sound
 - Add support for miner sounds (mining/unloading)
-- Complete loading/saving. ATM, some things are still not saved:
-  wreckages, particle systems,
-  camera, unit groups
 
 Editor (map, unit, scenario) TODOs
 - unit editor: add an additional page for the description of the unit (longer
@@ -50,8 +38,6 @@ Editor (map, unit, scenario) TODOs
   on. Maybe use plain docbook or so
 
 General TODOs
-- find out whether signalUnitPropertyChanged() is a good thing at all. Might
-  save some performance if we don't use it.
 - add revision (CVS) number of files to the connection protocol. If the versions
   differ then deny connection. This ensures that all clients are at the smae
   version. We need the revision number of each file - how to do add this
@@ -60,19 +46,12 @@ General TODOs
 - transmit everything on startup over network (== map, unitProperties). This
   saves us from a cheating player who (maybe just accidently) changed the files
   (units/*/index.unit especially).
-- make sure that kdemultimedia is installed - perhaps disable .ogg support
-  somehow if it isn't
-- make sure that libogg and so on is installed! even if kdemultimedia is
-  installed it may still be that ogg support is missing
 - hostname lineedit in BosonNetworkOptionsWidget seems to have wrong
   BackgroundOrigin  update: it's not wrong, it's disabled-color
 - pixmaps on startup widgets should be centered horizontally
 - Use KMD5 to calculate checksum of map and unitProperties at the beginning of
   game and transfer only needed things over network. Saves some traffic
 - Click+Move in minimap should move the rectangle (aka the screen position)
-- ./configure allows --without-gl
-- Clean up BosonNewGameWidget. E.g. map selection stuff sucks IMHO and we also
-  need some UI fixes. E.g. it should show min/max players of current map
 - Debugging mode: when this is selected in the menu, the cmdframe is switched
   into a "debugging" display. it just displays data about several aspects.
   mainly about the cursor position - e.g. when the cursor is above a unit, is
@@ -97,8 +76,6 @@ Data TODOs
 - can we use a coded gradient instead of the startup-bg pix? would allow every
   size then
 - background story - especially descriptions of the units
-- maps
-- other species
 - sounds for miner (mining/unloading, maybe when player commands unit to mine)
 - better shooting sounds
 - explosion sounds
