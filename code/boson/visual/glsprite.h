@@ -39,15 +39,15 @@ public:
 	virtual void setCanvas(BosonCanvas*);
 
 	BosonCanvas* canvas() const { return mCanvas; }
-	float x() const { return mX; }
-	float y() const { return mY; }
-	float z() const { return mZ; }
-	GLfloat* vertexPointer() { return mVertexPointer; } // FIXME: what about const?
+	inline float x() const { return mX; }
+	inline float y() const { return mY; }
+	inline float z() const { return mZ; }
+	inline GLfloat* vertexPointer() { return mVertexPointer; } // FIXME: what about const?
 	inline void setX(float x) 
 	{ 
 		mX = x;
 		float glX = mX / BO_TILE_SIZE * BO_GL_CELL_SIZE; 
-		float glW = width() / BO_TILE_SIZE * BO_GL_CELL_SIZE;
+		float glW = ((float)width()) / BO_TILE_SIZE * BO_GL_CELL_SIZE;
 		mVertexPointer[0] = glX;
 		mVertexPointer[3] = glX;
 		mVertexPointer[6] = glX + glW;
@@ -57,7 +57,7 @@ public:
 	{
 		mY = y;
 		float glY = -(mY + height()) / BO_TILE_SIZE * BO_GL_CELL_SIZE; 
-		float glH = height() / BO_TILE_SIZE * BO_GL_CELL_SIZE;
+		float glH = ((float)height()) / BO_TILE_SIZE * BO_GL_CELL_SIZE;
 		mVertexPointer[1] = glY;
 		mVertexPointer[4] = glY + glH;
 		mVertexPointer[7] = glY + glH;
@@ -143,6 +143,17 @@ public:
 		return textures() ? textures()->texture(number) : 0;
 	}
 
+	// FIXME: once we move to display lists we need to fix width() and height()!
+	// note: this is designed so that the display list can change at any time! e.g. if the unit gets destroyed we might diplay a different model
+	void setDisplayList(GLuint list)
+	{
+		mDisplayList = list;
+	}
+	inline GLuint displayList() const 
+	{
+		return mDisplayList; 
+	}
+
 private:
 	// AB: we can't use KGameProperty here, since QCanvasSprite doesn't use
 	// it either. Remember to save all of this and especially load it again!
@@ -156,6 +167,7 @@ private:
 	float mYVelocity;
 	BosonTextureArray* mTextures;
 	GLfloat mVertexPointer[3*4]; // topleft;bottomleft;bottomright;topright
+	GLuint mDisplayList;
 };
 
 #endif // !NO_OPENGL

@@ -71,7 +71,8 @@ COMMON_SRC = \
 	bosonstarteditorwidget.cpp \
 	bosonstartupbasewidget.cpp \
 	editorbigdisplay.cpp \
-	bosontexturearray.cpp
+	bosontexturearray.cpp \
+	bosonmodel.cpp
 
 BOUNIT_SRC = \
 	unitproperties.cpp \

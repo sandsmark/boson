@@ -39,6 +39,7 @@ GLSprite::GLSprite(BosonTextureArray* array, BosonCanvas* canvas)
  mYVelocity = 0.0;
 
  mTextures = array;
+ mDisplayList = 0;
 }
 
 GLSprite::~GLSprite()

@@ -61,83 +61,10 @@
 
 
 #define PLIB 0
-#define LIB3DS 0
 
 #if PLIB
 #include <plib/ssg.h>
-#elif LIB3DS
-#include <lib3ds/file.h>
-#include <lib3ds/camera.h> // we probably don't need this!
-#include <lib3ds/node.h>
-#include <lib3ds/matrix.h>
-#include <lib3ds/mesh.h>
-#include <lib3ds/vector.h>
-Lib3dsFile* file;
-
-void renderNode(Lib3dsNode* node)
-{
- {
-	Lib3dsNode* p;
-	for (p = node->childs; p; p = p->next) {
-		renderNode(p);
-	}
- }
- if (node->type == LIB3DS_OBJECT_NODE) {
-	if (strcmp(node->name, "$$$DUMMY") == 0) {
-		return;
-	}
-	if (!node->user.d) {
-		Lib3dsMesh* mesh = lib3ds_file_mesh_by_name(file, node->name); // FIXME: what is this?
-		if (!mesh) {
-			return;
-		}
-	glColor3f(1.0,0.0,0.0);
-		node->user.d = glGenLists(1);
-		glNewList(node->user.d, GL_COMPILE);
-
-		unsigned int p;
-		Lib3dsMatrix invMeshMatrix;
-		lib3ds_matrix_copy(invMeshMatrix, mesh->matrix);
-		lib3ds_matrix_inv(invMeshMatrix);
-
-		for (p = 0; p < mesh->faces; ++p) {
-			Lib3dsFace &f = mesh->faceL[p];
-			//...
-
-
-			{
-				//..
-				int i;
-				Lib3dsVector v[3];
-				for (i = 0; i < 3; i++) {
-					lib3ds_vector_transform(v[i], invMeshMatrix, mesh->pointL[f.points[i]].pos);
-				}
-	glColor3f(1.0,0.0,0.0);
-				glBegin(GL_TRIANGLES);
-//					glNormal3fv(f.normal);
-//					kdDebug() << v[0][0] << "," << v[0][1] << ","<<v[0][2] << endl;
-					glVertex3fv(v[0]);
-					glVertex3fv(v[1]);
-					glVertex3fv(v[2]);
-				glEnd();
-	glColor3f(1.0, 1.0, 1.0);
-			}
-		}
-		glEndList();
-	}
-	if (node->user.d) {
-	glColor3f(1.0,0.0,0.0);
-		glPushMatrix();
-		Lib3dsObjectData* d = &node->data.object;
-		glMultMatrixf(&node->matrix[0][0]);
-		glTranslatef(-d->pivot[0], -d->pivot[1], -d->pivot[2]);
-		glCallList(node->user.d);
-		glPopMatrix();
-	glColor3f(1.0, 1.0, 1.0);
-	}
- }
-}
-#endif // LIB3DS
+#endif // PLIB
 
 float textureUpperLeft[2] = { 0.0, 0.0 };
 float textureLowerLeft[2] = { 0.0, 1.0 };
@@ -297,7 +224,7 @@ public:
 	BosonBigDisplayBasePrivate()
 	{
 #ifndef NO_OPENGL
-#if ((PLIB) || (LIB3DS))
+#if PLIB
 		m3ds = 0;
 #endif
 #endif
@@ -350,9 +277,7 @@ public:
 
 #ifndef NO_OPENGL
 #if PLIB
-//	ssgEntity* m3ds;
-#elif LIB3DS
-	Lib3dsFile* m3ds;
+	ssgEntity* m3ds;
 #endif
 #endif
 };
@@ -407,15 +332,6 @@ BosonBigDisplayBase::BosonBigDisplayBase(BosonCanvas* c, QWidget* parent)
 
 BosonBigDisplayBase::~BosonBigDisplayBase()
 {
-#ifndef NO_OPENGL
-#if LIB3DS
- if (d->m3ds) {
-	lib3ds_file_free(d->m3ds);
-	d->m3ds = 0;
- }
-#endif
-#endif
-	
  quitGame();
  delete mSelection;
 // delete d->mChat;
@@ -438,11 +354,6 @@ void BosonBigDisplayBase::initializeGL()
 
 #if PLIB
  d->m3ds = ssgLoad3ds("/home/andi/tank.3ds");
-#elif LIB3DS
- d->m3ds = lib3ds_file_load("/home/guest/3ds/tank//tank.3ds");
- kdDebug() << k_funcinfo << "current frame: " << d->m3ds->current_frame << endl;
- lib3ds_file_eval(d->m3ds, d->m3ds->current_frame);
- file = d->m3ds;
 #endif
  if (checkError()) {
 	kdError() << k_funcinfo << endl;
@@ -556,23 +467,6 @@ void BosonBigDisplayBase::paintGL()
 	kdError() << k_funcinfo << "cells rendered" << endl;
  }
 
-#if LIB3DS
- glPushMatrix();
- glTranslatef(1.0,-1.0,0.0);
-
- // FIXME: the .3ds files are *way* too big!
- // they should be smaller - bigger files with more polygons lead to bad
- // performance
- // FIXME: we need to find a way to have a fixed size. e.g. a unit should have
- // size of about BO_GL_CELL_SIZE. but we can only scale relative :(
- glScalef(0.001,0.001,0.001);
- Lib3dsNode* node;
- for (node = d->m3ds->nodes; node != 0; node = node->next) {
-	renderNode(node);
- }
- glPopMatrix();
-#endif
-
  glEnable(GL_BLEND);
  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
  //wow.. we have a LOT of space for tuning here!
@@ -583,7 +477,7 @@ void BosonBigDisplayBase::paintGL()
 	//closer to surface, then flying units
 		
 	BosonSprite* item = *it;
-	GLuint tex = item->currentTexture();
+/*	GLuint tex = item->currentTexture();
 	if (tex == 0) {
 		kdWarning() << k_funcinfo << "invalid texture" << endl;
 		if (!item->textures()) {
@@ -593,8 +487,6 @@ void BosonBigDisplayBase::paintGL()
 		}
 		continue;
 	}
-	//FIXME: for ships and aircrafts boundingRect().width() and .height()
-	//returns a wrong value!! (48;48 instead of e.g. 96;96) why??
 
 	glBindTexture(GL_TEXTURE_2D, tex); // which texture to load
 
@@ -602,6 +494,22 @@ void BosonBigDisplayBase::paintGL()
 	// FIXME: performance: we could combine all units with the same texture
 	glTexCoordPointer(2, GL_FLOAT, 0, textureCoordPointer); 
 	glVertexPointer(3, GL_FLOAT, 0, item->vertexPointer());
+*/
+	// FIXME!!! don't apply here, don't cast here
+	Unit* u = (Unit*)item;
+	// FIXME: dont push matrix here
+	glPushMatrix();
+	glTranslatef(u->x() / BO_TILE_SIZE * BO_GL_CELL_SIZE, 
+			-u->y() / BO_TILE_SIZE * BO_GL_CELL_SIZE, 
+			u->z() / BO_TILE_SIZE * BO_GL_CELL_SIZE);
+	if (item->displayList() == 0) {
+		GLuint list = u->speciesTheme()->displayList(u->type());
+		kdDebug() << k_funcinfo << "set list to " << list << endl;
+		item->setDisplayList(list);
+	}
+	glCallList(item->displayList());
+	glPopMatrix();
+	
 	/*
 #warning FIXME REMOVE!!
 	if (((Unit*)item)->id() == 37) {
@@ -613,9 +521,9 @@ void BosonBigDisplayBase::paintGL()
 		}
 		kdDebug()<< "verticesdone"<<endl;
 	}
+	glDrawElements(GL_QUADS, 4, GL_UNSIGNED_BYTE, unitIndices);
 	*/
 			
-	glDrawElements(GL_QUADS, 4, GL_UNSIGNED_BYTE, unitIndices);
  }
  if (checkError()) {
 	kdError() << k_funcinfo << "units rendered" << endl;
@@ -940,6 +848,7 @@ void BosonBigDisplayBase::slotResetViewProperties()
  d->mFovY = 60.0;
  d->mAspect = 1.0;
  setCameraPos(d->mPosX, d->mPosY, d->mPosZ);
+ resizeGL(d->mW, d->mH);
 #endif
 }
 
