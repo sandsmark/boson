@@ -803,31 +803,10 @@ QValueList<Unit*> BosonCanvas::unitCollisionsInRange(const QPoint& pos, int radi
 
 QValueList<Unit*> BosonCanvas::unitsAtCell(int x, int y)
 {
- QValueList<Unit*> list;
  if (!cell(x, y)) {
-	return list;
+	return QValueList<Unit*>();
  }
-// qt bug (confirmed). will be fixed in 3.1
-#if QT_VERSION >= 310
- QCanvasItemList l = collisions(QRect(x * BO_TILE_SIZE, y * BO_TILE_SIZE,
-			BO_TILE_SIZE, BO_TILE_SIZE));
-#else
- QCanvasItemList l = collisions(QRect(x * BO_TILE_SIZE, y * BO_TILE_SIZE,
-			BO_TILE_SIZE-1, BO_TILE_SIZE-1));
-#endif
- for (unsigned int i = 0; i < l.count(); i++) {
-	if (!RTTI::isUnit(l[i]->rtti())) {
-		// this item is not important for us here
-		continue;
-	}
-	Unit* u = (Unit*)l[i];
-	if (u->isDestroyed()) {
-		// this item is not important for us here
-		continue;
-	}
-	list.append(u);
- }
- return list;
+ return cell(x, y)->items()->units(false);
 }
 
 bool BosonCanvas::cellOccupied(int x, int y)
@@ -835,72 +814,21 @@ bool BosonCanvas::cellOccupied(int x, int y)
  if (!cell(x, y)) {
 	return true;
  }
- return !(unitsAtCell(x, y).isEmpty());
- // alternative version (faster but duplicated code):
- /*
-// qt bug (confirmed). will be fixed in 3.1
-#if QT_VERSION >= 310
- QCanvasItemList list = collisions(QRect(x * BO_TILE_SIZE, y * BO_TILE_SIZE,
-		BO_TILE_SIZE, BO_TILE_SIZE));
-#else
- QCanvasItemList list = collisions(QRect(x * BO_TILE_SIZE, y * BO_TILE_SIZE,
-		BO_TILE_SIZE-1, BO_TILE_SIZE-1));
-#endif
- if(list.isEmpty()) {
-	return false;
- }
- for (unsigned int i = 0; i < list.count(); i++) {
-	if (!RTTI::isUnit(list[i]->rtti()))
-		continue;
-	Unit* u = (Unit*)list[i];
-	if(u->isDestroyed())
-		continue;
-	if(u->isFlying())
-		continue;
-	return true;
- }
- return false;
- */
+ return cell(x, y)->isOccupied();
 }
 
-bool BosonCanvas::cellOccupied(int x, int y, Unit* unit, bool excludemoving)
+bool BosonCanvas::cellOccupied(int x, int y, Unit* unit, bool excludeMoving)
 {
-// qt bug (confirmed). will be fixed in 3.1
  if (unit->isFlying()) {
 	return false; // even if there are other flying units - different altitudes!
  }
-#if QT_VERSION >= 310
- QCanvasItemList list = collisions(QRect(x * BO_TILE_SIZE, y * BO_TILE_SIZE,
-		BO_TILE_SIZE, BO_TILE_SIZE));
-#else
- QCanvasItemList list = collisions(QRect(x * BO_TILE_SIZE, y * BO_TILE_SIZE,
-		BO_TILE_SIZE-1, BO_TILE_SIZE-1));
-#endif
- if(list.isEmpty()) {
-	return false;
- }
- for (unsigned int i = 0; i < list.count(); i++) {
-	if (!RTTI::isUnit(list[i]->rtti())) {
-		continue;
-	}
-	Unit* u = (Unit*)list[i];
-	if(u->isDestroyed()) {
-		continue;
-	}
-	if(u->isFlying()) {
-		continue;
-	}
-	if(u->id() == unit->id()) {
-		continue;
-	}
-	if(excludemoving) {
-		if(u->isMoving()) {
-			continue;
-		}
-	}
+// qt bug (confirmed). will be fixed in 3.1
+ if (!cell(x, y)) {
+	kdError() << k_funcinfo << "NULL cell" << endl;
 	return true;
  }
- return false;
+ bool includeMoving = !excludeMoving; // FIXME: replace exclude by include in parameter
+ return cell(x, y)->isOccupied(unit, includeMoving);
 }
 
 
