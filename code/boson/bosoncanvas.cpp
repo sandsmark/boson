@@ -730,19 +730,18 @@ void BosonCanvas::shotHit(BosonShot* s)
 void BosonCanvas::explosion(const BoVector3& pos, long int damage, float range, float fullrange, Player* owner)
 {
  // Decrease health of all units within damaging range of explosion
- float r = QMAX(0, range - 1);  // - 1 is needed to prevent units on next cells from also being damaged
- float fr = QMAX(0, fullrange - 1);
  long int d;
  float dist;
- QValueList<Unit*> l = collisions()->unitCollisionsInSphere(pos, (int)r);
+ QValueList<Unit*> l = collisions()->unitCollisionsInSphere(pos, range);
  for (unsigned int i = 0; i < l.count(); i++) {
 	Unit* u = l[i];
 	// We substract unit's size from actual distance
-	dist = QMAX(u->distance(pos) - QMIN(u->width(), u->height()), 0);
-	if (dist <= fr * fr || r == fr) {
+	float unitsize = QMIN(u->width(), u->height()) / 2.0f;
+	dist = QMAX(sqrt(u->distance(pos)) - unitsize, 0);
+	if (dist <= fullrange || range == fullrange) {
 		d = damage;
 	} else {
-		d = (long int)((1 - (sqrt(dist) - fr) / (r - fr)) * damage);
+		d = (long int)((1 - (dist - fullrange) / (range - fullrange)) * damage);
 	}
 	unitDamaged(u, d);
 	if (u->isDestroyed() && owner) {

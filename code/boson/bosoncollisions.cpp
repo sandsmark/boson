@@ -106,7 +106,7 @@ Unit* BosonCollisions::findUnitAt(const BoVector3 & pos) const
  return findUnitAtCell((int)(pos.x()), (int)(pos.y()), pos.z());
 }
 
-QValueList<Unit*> BosonCollisions::unitCollisionsInRange(const BoVector2& pos, int radius) const
+QValueList<Unit*> BosonCollisions::unitCollisionsInRange(const BoVector2& pos, float radius) const
 {
  BoItemList* l = collisions(BoRect(QMAX(pos.x() - radius, 0), QMAX(pos.x() - radius, 0),
 		pos.x() + radius, pos.y() + radius));
@@ -133,9 +133,8 @@ QValueList<Unit*> BosonCollisions::unitCollisionsInRange(const BoVector2& pos, i
  return list;
 }
 
-QValueList<Unit*> BosonCollisions::unitCollisionsInSphere(const BoVector3& pos, int radius) const
+QValueList<Unit*> BosonCollisions::unitCollisionsInSphere(const BoVector3& pos, float radius) const
 {
- radius -= 10;  // hack, but prevents nearby units from getting damaged in some conditions
  // FIXME: code duplicated from unitCollisionsInRange
  boDebug(310) << k_funcinfo << endl;
  BoItemList* l = collisions(BoRect(QMAX(pos.x() - radius, 0), QMAX(pos.x() - radius, 0),
