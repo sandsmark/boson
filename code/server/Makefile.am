@@ -1,55 +1,62 @@
-####### kdevelop will overwrite this part!!! (begin)##########
-CXXFLAGS = -pipe -Wall  -g # -O2
+############################################################################
+#                         Makefile.am  -  description                    
+#                            -------------------                                         
+#
+#   version              : $Id$
+#   begin                : before CVS was used :-)
+#                                          
+#   copyright            : (C) 1999 by Thomas Capricelli                         
+#   email                : capricel@enst.fr                                     
+############################################################################
+#
+############################################################################
+##                                                                         #
+##   This program is free software; you can redistribute it and/or modify  #
+##   it under the terms of the GNU General Public License as published by  #
+##   the Free Software Foundation; either version 2 of the License, or     #
+##   (at your option) any later version.                                   # 
+##                                                                         #
+############################################################################
+
+# include files
+INCLUDES= $(all_includes)
+
+# compilation
+CXXFLAGS = -pipe -Wall -g # -O2
 #MY_HOST :=  $(shell hostname | tr '[a-z]' '[A-Z]')_$(shell domainname | tr '[a-z]' '[A-Z]')
 #CXXFLAGS += -D$(MY_HOST)
 LDFLAGS =  -s 
+
+
+bin_PROGRAMS = boserver
+
+#boserver
+boserver_METASOURCES = USE_AUTOMOC
+boserver_LDFLAGS = $(all_libraries) $(KDE_RPATH)
+
 boserver_SOURCES = boserver.cpp main.cpp connect.cpp serverUnit.cpp serverMap.cpp player.cpp serverCell.cpp game.cpp
-boserver_LDADD   = ../common/libboson.la  -lkfile -lkfm -lkdeui -lkdecore -lqt -lXext -lX11 $(LIBSOCKET)
+boserver_LDADD   = ../common/libboson.a  -lkfile -lkfm -lkdeui -lkdecore -lqt -lXext -lX11 $(LIBSOCKET)
 
-SUBDIRS = 
 
-EXTRA_DIST = main.cpp boserver.cpp boserver.h connect.h connect.cpp serverUnit.cpp serverUnit.h serverMap.cpp player.cpp serverCell.h serverCell.cpp game.h game.cpp
-
+#(un)install
 install-data-local:
 	$(mkinstalldirs) $(kde_appsdir)/
 	$(INSTALL_DATA) bosserver.kdelnk $(kde_appsdir)/bosserver.kdelnk
 	$(mkinstalldirs) $(kde_icondir)/
-	$(INSTALL_DATA) boson.xpm $(kde_icondir)/boson.xpm
+	$(INSTALL_DATA) bosserver.xpm $(kde_icondir)/boserver.xpm
 	$(mkinstalldirs) $(kde_minidir)/
-	$(INSTALL_DATA) mini-boson.xpm $(kde_minidir)/mini-boson.xpm
+	$(INSTALL_DATA) mini-boserver.xpm $(kde_minidir)/mini-boserver.xpm
 
 uninstall-local:
-	-rm -f $(kde_appsdir)/boson.kdelnk
-	-rm -f $(kde_icondir)/boson.xpm
-	-rm -f $(kde_minidir)/mini-boson.xpm
+	-rm -f $(kde_appsdir)/boserver.kdelnk
+	-rm -f $(kde_icondir)/boserver.xpm
+	-rm -f $(kde_minidir)/mini-boserver.xpm
 
-####### kdevelop will overwrite this part!!! (end)############
-# this 10 paths are KDE specific. Use them:
-# kde_htmldir       Where your docs should go to. (contains lang subdirs)
-# kde_appsdir       Where your application file (.kdelnk) should go to. 
-# kde_icondir       Where your icon should go to.
-# kde_minidir       Where your mini icon should go to.
-# kde_datadir       Where you install application data. (Use a subdir)
-# kde_locale        Where translation files should go to.(contains lang subdirs)
-# kde_cgidir        Where cgi-bin executables should go to.
-# kde_confdir       Where config files should go to.
-# kde_mimedir       Where mimetypes should go to.
-# kde_toolbardir    Where general toolbar icons should go to.
-# kde_wallpaperdir  Where general wallpapers should go to.
 
-# set the include path for X, qt and KDE
-INCLUDES= $(all_includes)
-# claim, which subdirectories you want to install
-# you can add here more. This one gets installed 
-bin_PROGRAMS = boserver
+# garbage
+CLEANFILES = $(boserver_METASOURCES) boson-*.log
 
-boserver_METASOURCES = USE_AUTOMOC
-
-# the library search path. 
-boserver_LDFLAGS = $(all_libraries) $(KDE_RPATH)
-
-# them while "make clean", use CLEANFILES
-DISTCLEANFILES = $(boserver_METASOURCES)
+EXTRA_DIST = main.cpp boserver.cpp boserver.h connect.h connect.cpp serverUnit.cpp serverUnit.h serverMap.cpp player.cpp serverCell.h serverCell.cpp game.h game.cpp
 
 # make messages.po. Move this one to ../po/ and "make merge" in po
 # the -x is for skipping messages already translated in kdelibs

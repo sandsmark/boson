@@ -6,6 +6,7 @@ TODO:
 0.1 release :
 =============
 
+buf : boserver segfault when map file doesn't exist
 bug : segfault some times after failing to load some pixmap (fe ComStat/Field.003.bmp)
 configuration for server
 move logfile initialisation into common/
@@ -55,9 +56,8 @@ check that loading of pixmap has been done well
 #client units : shouldn't move over each other
 #make a toolbar with concerned buttons (move, stop, etc..)
 #take out the menu
-
-check Makefile.am for installation "make install"
-Map should be installed in apps/boson/map
+#check Makefile.am for installation "make install"
+#Map should be installed in apps/boson/map
 
 Website : documentation about
 	communication protocol,

@@ -10,11 +10,13 @@ boson-client.log
 configure
 config.log
 config.h
+config.h.in
+stamp-h.in
+aclocal.m4
 config.status
 libtool
 stamp-h
 pics
 boson.kdoc
-
 
 api
