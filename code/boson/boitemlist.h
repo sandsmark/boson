@@ -47,8 +47,7 @@ public:
 
 	/**
 	 * @param collidingOnly if TRUE return only items that are interesting
-	 * for collision detection. Please note that moving units are
-	 * <em>not</em> returned for colldingOnly == TRUE!!
+	 * for collision detection. Destroyed units are never returned.
 	 * @param forUnit The unit for which we test. This will not be included
 	 * in the returned list. Some tests also depend on this (e.g. on
 	 * @ref UnitBase::isFlying), if collidingOnly == TRUE. Ignored if you
