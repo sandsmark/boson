@@ -219,6 +219,15 @@ private:
  *
  * You can use the ufo @ref widget directly, however it is often more convenient
  * to just use this interface. You'll also find Qt style signals here.
+ *
+ * Note that you have to add every BoUfoWidget to a parent (e.g. @ref
+ * BoUfoManager::contentWidget), otherwise it will never get deleted.
+ *
+ * Do <em>NOT</em> delete a BoUfoWidget yourself! It is automatically deleted
+ * when the libufo widget that it manages is deleted.
+ *
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ * @short The boson class for a libufo widget
  **/
 class BoUfoWidget : public QObject
 {
@@ -287,8 +296,9 @@ public:
 	void setPreferredHeight(int h);
 	int preferredHeight() const;
 
-	void show();
-	void hide();
+	void setVisible(bool);
+	void show() { setVisible(true); }
+	void hide() { setVisible(false); }
 
 
 	void loadPropertiesFromXML(const QDomNamedNodeMap&);
@@ -691,6 +701,25 @@ private:
 	BoUfoLineEdit* mLineEdit;
 };
 
+class BoUfoMatrix : public BoUfoWidget
+{
+	Q_OBJECT
+public:
+	BoUfoMatrix();
+	~BoUfoMatrix();
+
+	/**
+	 * Apply a 4x4 matrix to be displayed
+	 **/
+	void setMatrix(const float*);
+
+private:
+	void init();
+
+private:
+	BoUfoLabel** mMatrix;
+};
+
 class BoUfoTabWidgetPrivate;
 class BoUfoTabWidget : public BoUfoWidget
 {
@@ -731,7 +760,6 @@ public:
 	BoUfoInternalFrame(BoUfoManager* manager, const QString& title = QString::null);
 	~BoUfoInternalFrame();
 
-	void setVisible(bool);
 	void setBounds(int x, int y, int w, int h);
 	void setTitle(const QString& title);
 	QString title() const;
