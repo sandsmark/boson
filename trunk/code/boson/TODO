@@ -73,6 +73,16 @@ General TODOs
 - ./configure allows --without-gl
 - Clean up BosonNewGameWidget. E.g. map selection stuff sucks IMHO and we also
   need some UI fixes. E.g. it should show min/max players of current map
+- Debugging mode: when this is selected in the menu, the cmdframe is switched
+  into a "debugging" display. it just displays data about several aspects.
+  mainly about the cursor position - e.g. when the cursor is above a unit, is
+  should display the name/type/id and the position of the unit. also it should
+  display the actual screen and canvas/world position of the cursor, so that it
+  can be checked whether these values are corred (ie the unit is _really_ under
+  the cursor). we could display the cell coordinates that would be under the
+  cursor, if the unit was not there, as well.
+  we may of course display additional data, such as fps, map size, unit count,
+  ...
 
 Data TODOs
 - sound for destroyed facilities - shouldn't be speech i guess
