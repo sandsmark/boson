@@ -42,11 +42,11 @@
 //  on map, but in general, default style is better IMO
 #define MOVE_IN_LINE
 
-class BosonPath::PathNode
+class PathNode
 {
   public:
     PathNode() { x = 0; y = 0; g = 0; h = 0; level = -1; };
-    inline void operator=(const BosonPath::PathNode& a);
+    inline void operator=(const PathNode& a);
     int x; // x-coordinate of cell
     int y; // y-coordinate of cell
 
@@ -55,7 +55,7 @@ class BosonPath::PathNode
     short int level; // node is level steps away from start. It's needed to search only 10 steps of path at once
 };
 
-inline void BosonPath::PathNode::operator=(const BosonPath::PathNode& a)
+inline void PathNode::operator=(const PathNode& a)
 {
   x = a.x;
   y = a.y;
@@ -66,11 +66,11 @@ inline void BosonPath::PathNode::operator=(const BosonPath::PathNode& a)
 
 // AB: that const once was added for g++-3.x -> i am sure it is used for nothing
 // - but please test before removing... sometimes gcc is *really* strange...
-inline const bool operator<(const BosonPath::PathNode& a, const BosonPath::PathNode& b)
+inline const bool operator<(const PathNode& a, const PathNode& b)
 {
   return (a.g + a.h) < (b.g + b.h);
 }
-inline const bool operator>(const BosonPath::PathNode& a, const BosonPath::PathNode& b)
+inline const bool operator>(const PathNode& a, const PathNode& b)
 {
   return (a.g + a.h) > (b.g + b.h);
 }
