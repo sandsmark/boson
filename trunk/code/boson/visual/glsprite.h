@@ -39,35 +39,17 @@ public:
 	inline float x() const { return mX; }
 	inline float y() const { return mY; }
 	inline float z() const { return mZ; }
-	inline GLfloat* vertexPointer() { return mVertexPointer; } // FIXME: what about const?
-	inline void setX(float x) 
-	{ 
+	inline void setX(float x)
+	{
 		mX = x;
-		float glX = mX / BO_TILE_SIZE * BO_GL_CELL_SIZE; 
-		float glW = ((float)width()) / BO_TILE_SIZE * BO_GL_CELL_SIZE;
-		mVertexPointer[0] = glX;
-		mVertexPointer[3] = glX;
-		mVertexPointer[6] = glX + glW;
-		mVertexPointer[9] = glX + glW;
 	}
-	inline void setY(float y) 
+	inline void setY(float y)
 	{
 		mY = y;
-		float glY = -(mY + height()) / BO_TILE_SIZE * BO_GL_CELL_SIZE; 
-		float glH = ((float)height()) / BO_TILE_SIZE * BO_GL_CELL_SIZE;
-		mVertexPointer[1] = glY;
-		mVertexPointer[4] = glY + glH;
-		mVertexPointer[7] = glY + glH;
-		mVertexPointer[10] = glY;
 	}
-	inline void setZ(float z) 
+	inline void setZ(float z)
 	{
 		mZ = z;
-		float glZ = mZ / BO_TILE_SIZE * BO_GL_CELL_SIZE; 
-		mVertexPointer[2] = glZ;
-		mVertexPointer[5] = glZ;
-		mVertexPointer[8] = glZ;
-		mVertexPointer[11] = glZ;
 	}
 
 	inline BosonModel* model() const { return mModel; }
@@ -148,7 +130,6 @@ private:
 	bool mIsVisible;
 	float mXVelocity;
 	float mYVelocity;
-	GLfloat mVertexPointer[3*4]; // topleft;bottomleft;bottomright;topright
 	BosonModel* mModel;
 };
 
