@@ -1,0 +1,72 @@
+/*
+    This file is part of the Boson game
+    Copyright (C) 2004 Andreas Beckermann (b_mann@gmx.de)
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+*/
+
+#ifndef BOSONPLAYERINPUT_H
+#define BOSONPLAYERINPUT_H
+
+#include <qobject.h>
+
+class QDataStream;
+class Player;
+class Boson;
+class Unit;
+class BosonCanvas;
+
+/**
+ * @short Helper class for @ref Boson
+ * This class handles player input in boson. Here we handle <em>received</em>
+ * input only, sending player input is handled elsewhere.
+ *
+ * When a player sends a player input message using @ref KGameIO::sendInput it
+ * is transmitted through network and delivered to @ref Boson::playerInput which
+ * forwards it to this class.
+ *
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+class BosonPlayerInput : public QObject
+{
+	Q_OBJECT
+public:
+	BosonPlayerInput(Boson* game);
+	~BosonPlayerInput();
+
+	bool playerInput(QDataStream& stream, Player* player);
+
+protected:
+	/**
+	 * Convenience method for mGame->findUnit(id, searchIn)
+	 **/
+	Unit* findUnit(unsigned long int id, Player* searchIn) const;
+
+	/**
+	 * Convenience method for (Player*)mGame->findPlayer(id)
+	 **/
+	Player* findPlayer(unsigned long int id) const;
+
+	BosonCanvas* canvas() const;
+
+signals:
+	void signalChangeTexMap(int x, int y, unsigned int textureCount, unsigned int* textures, unsigned char* alpha);
+	void signalUpdateProduction(Unit* factory);
+
+private:
+	Boson* mGame;
+};
+
+#endif
