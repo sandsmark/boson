@@ -2,7 +2,6 @@ Game TODOs
 - waypoints
 - constructing - maybe use Boson::slotDelayedAddUnit() or so? - partially done
 - make player color selectable in the new game dialog
-- use different cursors for moving, attacking, ...
 - unit accelleration: units should slowly start to accelerate and to brake when
   moving
 - selectpart: static memory should be deleted

@@ -243,7 +243,7 @@ void BosonWidget::addLocalPlayer()
  }
  Player* p = new Player;
  p->setName(BosonConfig::localPlayerName());
- KGameMouseIO* bigDisplayIO = new KGameMouseIO(d->mBigDisplay, true);
+ KGameMouseIO* bigDisplayIO = new KGameMouseIO(d->mBigDisplay->viewport(), true);
  connect(bigDisplayIO, SIGNAL(signalMouseEvent(KGameIO*, QDataStream&, QMouseEvent*, bool*)),
 		d->mBigDisplay, SLOT(slotMouseEvent(KGameIO*, QDataStream&, QMouseEvent*, bool*)));
  connect(p, SIGNAL(signalUnfog(int, int)),
@@ -562,7 +562,7 @@ void BosonWidget::startEditor()
 {
  // this manages the mouse input for bosonBigDisplay. In non-editor mode this is
  // done by KGameMouseIO
- EditorInput* input = new EditorInput(d->mBigDisplay);
+ EditorInput* input = new EditorInput(d->mBigDisplay->viewport());
  connect(input, SIGNAL(signalMouseEvent(QMouseEvent*, bool*)), 
 		d->mBigDisplay, SLOT(slotEditorMouseEvent(QMouseEvent*, bool*)));
 

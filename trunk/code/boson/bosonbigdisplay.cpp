@@ -127,6 +127,21 @@ void BosonBigDisplay::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseEvent
 	{
 		if (e->state() & LeftButton) {
 			moveSelectionRect(pos);
+		} else if (selectionMode() == SelectRect || selectionMode() == SelectSingle) {
+			if (selection().count() == 0) {
+				kdWarning() << "mode=" << selectionMode() << " but nothing selected" << endl;
+				break;
+			}
+			Unit* unit = ((BosonCanvas*)canvas())->findUnitAt(pos);
+			if (unit) {
+				if (unit->owner() == d->mLocalPlayer) {
+					setCursor(QCursor());
+				} else {
+					setCursor(QCursor(d->mCursorAttack));
+				}
+			} else if (selection().first()->isMobile()) {
+				setCursor(QCursor(d->mCursorMove));
+			}
 		}
 		e->accept();
 		break;

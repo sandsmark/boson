@@ -409,7 +409,14 @@ void BosonCanvas::fogLocal(int x, int y)
 
 void BosonCanvas::unfogLocal(int x, int y)
 {
- d->mFogOfWar.remove(cell(x, y));
+// it seems like this doesn't work sometimes... dunno why...
+ QCanvasSprite* s = d->mFogOfWar.take(cell(x, y));
+ if (s) {
+	s->hide();
+	delete s;
+ } else {
+	kdDebug() << "cannot remove fog on " << x << "," << y << endl;
+ }
 }
 
 void BosonCanvas::initFogOfWar(Player* p)
