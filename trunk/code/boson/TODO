@@ -87,12 +87,9 @@ General TODOs
   Why? It is used internally only... Failing e.g. here:
   inline bool operator<(const BosonPath::PathNode& a, const BosonPath::PathNode& b)
 - pixmaps on startup widgets should be centered horizontally
-- Saving and loading of games. Basics are already there (save() and load()
-  methods in some classes) but it still needs lot of work.
 - Use KMD5 to calculate checksum of map and unitProperties at the beginning of
   game and transfer only needed things over network. Saves some traffic
-- Rewrite or optimize minimap. Currently, it has terrible performance (scroll
-  the map and you'll see)
+- Minimap doesn't support units with width or height not equal to BO_TILE_SIZE
 
 Data TODOs
 - sound for minimap activated/deactivated
