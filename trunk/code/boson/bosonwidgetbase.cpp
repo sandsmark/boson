@@ -41,6 +41,7 @@
 #include "top.h"
 #include "bosonbigdisplaybase.h"
 #include "bodebug.h"
+#include "bosonprofiling.h"
 #include "commandframe/bosoncommandframe.h"
 #include "sound/bosonmusic.h"
 
@@ -653,9 +654,10 @@ void BosonWidgetBase::initKActions()
 		KShortcut(Qt::CTRL+Qt::Key_F), this, SLOT(slotToggleCmdFrameVisible()),
 		actionCollection(), "options_show_cmdframe");
 
- // Screenshot
  (void)new KAction(i18n("&Grab Screenshot"), KShortcut(Qt::CTRL + Qt::Key_G),
 		this, SLOT(slotGrabScreenshot()), actionCollection(), "game_grab_screenshot");
+ (void)new KAction(i18n("Grab &Profiling data"), KShortcut(Qt::CTRL + Qt::Key_P),
+		this, SLOT(slotGrabProfiling()), actionCollection(), "game_grab_profiling");
 
  // Debug - no i18n!
  (void)new KAction("Profiling", KShortcut(), this,
@@ -1006,17 +1008,37 @@ void BosonWidgetBase::slotGrabScreenshot()
 {
  boDebug() << k_funcinfo << "Taking screenshot!" << endl;
  QPixmap ss = QPixmap::grabWindow(mTop->winId());
- QString file;
- for(int i = 0; i < 1000; i++) {
-	file.sprintf("boson-%03d.png", i);
-	boDebug() << "Checking if file " << file << " exists" << endl;
-	if (!QFile::exists(file)) {
-		boDebug() << "    File doesn't exist, breaking" << endl;
-		break;
-	} else {
-		boDebug() << "    File exists, continuing" << endl;
-	}
+ QString file = findSaveFileName("boson", "png");
+ if (file.isNull()) {
+	boWarning() << k_funcinfo << "Can't find free filename???" << endl;
+	return;
  }
+ // TODO: chat message about file location!
  boDebug() << k_funcinfo << "Saving screenshot to " << file << endl;
  ss.save(file, "PNG");
 }
+
+void BosonWidgetBase::slotGrabProfiling()
+{
+ QString file = findSaveFileName("boprofiling", "boprof");
+ if (file.isNull()) {
+	boWarning() << k_funcinfo << "Can't find free filename???" << endl;
+	return;
+ }
+ // TODO: chat message about file location!
+ boDebug() << k_funcinfo << "Saving profiling to " << file << endl;
+ boProfiling->saveToFile(file);
+}
+
+QString BosonWidgetBase::findSaveFileName(const QString& prefix, const QString& suffix)
+{
+ QString file;
+ for (int i = 0; i < 1000; i++) {
+	file.sprintf("%s-%03d.%s", prefix.latin1(), i, suffix.latin1());
+	if (!QFile::exists(file)) {
+		return file;
+	}
+ }
+ return QString::null;
+}
+
