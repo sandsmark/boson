@@ -484,7 +484,7 @@ QByteArray BosonNewEditorWidget::createNewMap()
  playersDoc.appendChild(playersRoot);
  canvasDoc.appendChild(canvasRoot);
  canvasRoot.appendChild(canvasDoc.createElement(QString::fromLatin1("DataHandler")));
- for (int i = 0; i < maxPlayers; i++) {
+ for (int i = 0; i < maxPlayers + 1; i++) {
 	QDomElement p = playersDoc.createElement(QString::fromLatin1("Player"));
 	p.setAttribute("Id", i);
 	playersRoot.appendChild(p);
@@ -492,6 +492,10 @@ QByteArray BosonNewEditorWidget::createNewMap()
 	QDomElement items = canvasDoc.createElement(QString::fromLatin1("Items"));
 	items.setAttribute("Id", i);
 	canvasRoot.appendChild(items);
+
+	if (i == maxPlayers) {
+		p.setAttribute("IsNeutral", 1);
+	}
  }
 // playersRoot.setAttribute("LocalPlayerId", );
  files.insert("players.xml", playersDoc.toCString());
