@@ -30,15 +30,13 @@ class Unit;
 class BosonComputerIO : public KGameComputerIO
 {
 	Q_OBJECT
-	enum RTTI {
-		IdBosonComputerIO = 500
-	};
+
 public:
 	BosonComputerIO();
 	BosonComputerIO(KPlayer*);
 	~BosonComputerIO();
 
-	virtual int rtti() const { return IdBosonComputerIO; }
+	virtual int rtti() const { return KGameIO::ComputerIO; }
 
 protected:
 	virtual void reaction();
