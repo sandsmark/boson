@@ -3,7 +3,7 @@
 
 <h1>Facilities</h1>
 
-<grid layout=5x3 padding=15 border=0>
+<grid layout=5x3 padding=15 border=0 bgcolor="#204020">
 #include "simple_facilities.wml" type="Facilities" name="Map" \
         name2="map" type2="fix"
 #include "simple_facilities.wml" type="Facilities" name="Command Bunker" \
@@ -16,8 +16,8 @@
         name2="oiltower" type2="fix"
 #include "simple_facilities.wml" type="Facilities" name="Power Plant" \
         name2="powerplant" type2="fix"
-#include "simple_facilities.wml" type="Facilities" name="War Factory" \
-        name2="warfactory" type2="fix"
+#include "simple_facilities.wml" type="Facilities" name="Weapons Factory" \
+        name2="weaponsfactory" type2="fix"
 #include "simple_facilities.wml" type="Facilities" name="Comsat" \
         name2="comsat" type2="fix"
 #include "simple_facilities.wml" type="Facilities" name="Tech Center" \

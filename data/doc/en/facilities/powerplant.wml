@@ -1,4 +1,4 @@
 #include "facilities.wml" type="Facilities" name="Power Plant" \
         description="You will need it to get more facilities available. For details see the <a href='map.html'>facilities dependency tree</a>." \
         name2="powerplant" type2="fix" \
-        before_url="oiltower.html" before_text="Oil Tower" after_url="warfactory.html" after_text="War Factory" up_url="index.html"
+        before_url="oiltower.html" before_text="Oil Tower" after_url="weaponsfactory.html" after_text="Weapons Factory" up_url="index.html"

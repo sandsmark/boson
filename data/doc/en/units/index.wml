@@ -23,6 +23,8 @@
         name2="tiger" type2="mob"
 #include "simple_facilities.wml" type="Units" name="Ship" \
         name2="ship" type2="mob"
+#include "simple_facilities.wml" type="Units" name="Ferry" \
+        name2="ferry" type2="mob"
 #include "simple_facilities.wml" type="Units" name="Tornado" \
         name2="tornado" type2="mob"
 </grid>

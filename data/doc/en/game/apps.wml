@@ -9,14 +9,14 @@
       Boson also includes some tools usefull for developers and users. This is an overview.
     </p>
 
-    <grid layout=2x6 width="400">
-    <cell>boson</cell><cell>The game itself</cell>
-    <cell>bocursor</cell><cell>Test the settings for the curser</cell>
-    <cell>bodebugdialog</cell><cell>Enable/Disable debug output</cell>
-    <cell>boprofiling</cell><cell>View saved profiling data</cell>
-    <cell>borender</cell><cell>For viewing models</cell>
-    <cell>bounit</cell><cell>Settings editor for facilities</cell>
-    </grid>    
+    <table width="400" border="1" style="border-width:0;" cellpadding="7">
+    <tr><td>boson</td><td>The game itself</td></tr>
+    <tr><td>bocursor</td><td>Test the settings for the curser</td></tr>
+    <tr><td>bodebugdialog</td><td>Enable/Disable debug output</td></tr>
+    <tr><td>boprofiling</td><td>View saved profiling data</td></tr>
+    <tr><td>borender</td><td>For viewing models</td></tr>
+    <tr><td>bounit</td><td>Settings editor for facilities</td></tr>
+    </table>
 
 #include "nav.wml" before_url="index.html" before_text="In the game" after_url="scrolling.html" after_text="Scrolling" up_url="index.html"
 #include "footer.wml"
