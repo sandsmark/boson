@@ -88,6 +88,7 @@ void BosonStartupNetwork::slotPlayerPropertyChanged(KGamePropertyBase* prop, KPl
 
 void BosonStartupNetwork::slotPlayerJoinedGame(KPlayer* p)
 {
+ BO_CHECK_NULL_RET(p);
  boDebug() << k_funcinfo << "there are " << boGame->playerList()->count() << " players in game now" << endl;
  connect(p, SIGNAL(signalPropertyChanged(KGamePropertyBase*, KPlayer*)),
 		this, SLOT(slotPlayerPropertyChanged(KGamePropertyBase*, KPlayer*)));
