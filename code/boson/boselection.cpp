@@ -314,7 +314,7 @@ void BoSelection::slotRemoveItem(BosonItem* item)
  // doesn't exist anymore, when called from BosonItem d'tor
  // also note that we cast to Unit, but it might NOT be a Unit!
  // -> we can't access rtti() anymore
- mSelection.removeRef((Unit*)u);
+ mSelection.removeRef((Unit*)item);
 }
 
 
