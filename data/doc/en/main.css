@@ -41,3 +41,72 @@ A:HOVER {
 	background-color: #EFEFEF;
 	text-decoration: none;
 }
+
+
+/** Boxes **/
+.boxtitle {
+  font-weight: bold;
+}
+
+.boxtext {
+}
+
+table.box {
+  background-color: #004000;
+  color: #00ff00;
+}
+
+td.boxcell {
+  background-color: #202020;
+  color: #00ff00;
+}
+
+.bigboxtitle {
+  font-weight: bold;
+}
+
+.bigboxsubheader {
+  font-weight: bold;
+}
+
+.bigboxtext {
+  margin-left: 5px;
+}
+
+table.bigbox {
+  background-color: #004000;
+  color: #00ff00;
+}
+
+td.bigboxtitlecell {
+  background-color: #202020;
+  color: #00ff00;
+}
+
+td.bigboxcell {
+  background-color: #081808;
+  color: #00ff00;
+}
+
+table.bigboxarea {
+  background-color: #081808;
+  color: #00ff00;
+}
+
+td.bigboxsubheadercell {
+  background-color: #303030;
+  color: #00ff00;
+}
+
+
+/** Main area **/
+table.main {
+  background-color: #000000;
+  color: #00ff00;
+}
+
+td.mainarea {
+  background-color: #000000;
+  color: #00ff00;
+}
+
