@@ -41,6 +41,8 @@
 #include <qpainter.h>
 #include <qbitmap.h>
 #include <qlabel.h>
+#include <qtimer.h>
+#include <qcursor.h>
 
 #include "bosonbigdisplay.moc"
 
@@ -84,6 +86,8 @@ public:
 	QPoint mSelectionEnd;
 	bool mIsRMBMove;
 	QPoint mRMBMove; // position where RMB move started
+	QTimer mCursorEdgeTimer;
+	int mCursorEdgeCounter;
 
 	Player* mLocalPlayer;
 
@@ -123,9 +127,12 @@ void BosonBigDisplay::init()
  setHScrollBarMode(AlwaysOff);
  d->mConstruction.unitType = -1; // FIXME: 0 would be better but this is a unit...
  d->mConstruction.groundType = -1;
+ d->mCursorEdgeCounter = 0;
 
  connect(this, SIGNAL(contentsMoving(int, int)), 
 		this, SLOT(slotContentsMoving(int, int)));
+ connect(&d->mCursorEdgeTimer, SIGNAL(timeout()),
+		this, SLOT(slotCursorEdgeTimeout()));
 
  d->mChat = new KGameCanvasChat(this);
  d->mChat->setCanvas(canvas());
@@ -186,29 +193,32 @@ void BosonBigDisplay::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseEvent
 				scrollBy(pos.x() - d->mRMBMove.x(), pos.y() - d->mRMBMove.y());
 				d->mRMBMove = pos;
 			}
-		} else if (selectionMode() == SelectRect || selectionMode() == SelectSingle) {
-			if (selection().count() == 0) {
-				kdWarning() << "mode=" << selectionMode() << " but nothing selected" << endl;
-				break;
-			}
-			if (selection().first()->owner() == d->mLocalPlayer) {
-				Unit* unit = ((BosonCanvas*)canvas())->findUnitAt(pos);
-				if (unit) {
-					if (unit->owner() == d->mLocalPlayer) {
-						d->mCursor->setCursor(CursorDefault);
-						d->mCursor->setWidgetCursor(this);
-					} else {
-						d->mCursor->setCursor(CursorAttack);
-						d->mCursor->setWidgetCursor(this);
-					}
-				} else if (selection().first()->isMobile()) {
-					d->mCursor->setCursor(CursorMove);
-					d->mCursor->setWidgetCursor(this);
-					d->mCursor->showCursor();
+		} else {
+			// no button pressed
+			if (selectionMode() == SelectRect || selectionMode() == SelectSingle) {
+				if (selection().count() == 0) {
+					kdWarning() << "mode=" << selectionMode() << " but nothing selected" << endl;
+					break;
 				}
-			} else {
-				d->mCursor->setCursor(CursorDefault);
-				d->mCursor->setWidgetCursor(this);
+				if (selection().first()->owner() == d->mLocalPlayer) {
+					Unit* unit = ((BosonCanvas*)canvas())->findUnitAt(pos);
+					if (unit) {
+						if (unit->owner() == d->mLocalPlayer) {
+							d->mCursor->setCursor(CursorDefault);
+							d->mCursor->setWidgetCursor(this);
+						} else {
+							d->mCursor->setCursor(CursorAttack);
+							d->mCursor->setWidgetCursor(this);
+						}
+					} else if (selection().first()->isMobile()) {
+						d->mCursor->setCursor(CursorMove);
+						d->mCursor->setWidgetCursor(this);
+						d->mCursor->showCursor();
+					}
+				} else {
+					d->mCursor->setCursor(CursorDefault);
+					d->mCursor->setWidgetCursor(this);
+				}
 			}
 		}
 //		d->mCursor->move(e->globalPos().x(), e->globalPos().y());
@@ -763,4 +773,52 @@ void BosonBigDisplay::setContentsPos(int x, int y)
  QScrollView::setContentsPos(x, y);
  viewport()->setUpdatesEnabled(true);
  viewport()->update();
+}
+
+void BosonBigDisplay::slotCursorEdgeTimeout()
+{
+ int x = 0;
+ int y = 0;
+ const int sensity = boConfig->cursorEdgeSensity();
+ QWidget* w = qApp->mainWidget();
+ QPoint pos = w->mapFromGlobal(QCursor::pos());
+
+ const int move = 15; // FIXME hardcoded - use BosonConfig instead
+ if (pos.x() <= sensity && pos.x() > -1) {
+	x = -move;
+ } else if (pos.x() >= w->width() - sensity && pos.x() <= w->width()) {
+	x = move;
+ }
+ if (pos.y() <= sensity && pos.y() > -1) {
+	y = -move;
+ } else if (pos.y() >= w->height() - sensity && pos.y() <= w->height()) {
+	y = move;
+ }
+ if (!x && !y || !sensity) {
+	d->mCursorEdgeTimer.stop();
+	d->mCursorEdgeCounter = 0;
+ } else {
+	if (!d->mCursorEdgeTimer.isActive()) {
+		d->mCursorEdgeTimer.start(20);
+	}
+	d->mCursorEdgeCounter++;
+	if (d->mCursorEdgeCounter > 30) {
+		scrollBy(x, y);
+	}
+	
+ }
+}
+
+bool BosonBigDisplay::eventFilter(QObject* o, QEvent* e)
+{
+ switch (e->type()) {
+	case QEvent::MouseMove:
+		if (!d->mCursorEdgeTimer.isActive()) {
+			slotCursorEdgeTimeout();
+		}
+		break;
+	default:
+		break;
+ }
+ return QCanvasView::eventFilter(o, e);
 }

@@ -139,8 +139,12 @@ void BoDisplayManager::setActiveDisplay(BosonBigDisplay* big)
  
  if (old) {
 	old->setLineWidth(style().pixelMetric(QStyle::PM_DefaultFrameWidth, this));
+	qApp->setGlobalMouseTracking(false);
+	qApp->removeEventFilter(old);
  }
  d->mActiveDisplay->setLineWidth(style().pixelMetric(QStyle::PM_DefaultFrameWidth, this) + 3);
+ qApp->setGlobalMouseTracking(true);
+ qApp->installEventFilter(d->mActiveDisplay);
 }
 
 BosonBigDisplay* BoDisplayManager::activeDisplay() const

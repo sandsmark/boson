@@ -53,6 +53,8 @@ BosonConfig::BosonConfig(KConfig* conf)
  mMiniMapScale = 2.0;
  mMiniMapZoom = 1.0;
  mRMBMove = true;
+ mMMBMove = true;
+ mCursorEdgeSensity = 20;
 
  mDisableSound = false;
 
@@ -325,6 +327,32 @@ void BosonConfig::saveRMBMove(KConfig* conf)
  conf->writeEntry("RMBMove", rmbMove());
 }
 
+bool BosonConfig::readMMBMove(KConfig* conf)
+{
+ conf->setGroup("Boson");
+ bool m = conf->readBoolEntry("MMBMove", true);
+ return m;
+}
+
+void BosonConfig::saveMMBMove(KConfig* conf)
+{
+ conf->setGroup("Boson");
+ conf->writeEntry("MMBMove", mmbMove());
+}
+
+unsigned int BosonConfig::readCursorEdgeSensity(KConfig* conf)
+{
+ conf->setGroup("Boson");
+ unsigned int s = conf->readUnsignedNumEntry("CursorEdgeSensity", 20);
+ return s;
+}
+
+void BosonConfig::saveCursorEdgeSensity(KConfig* conf)
+{
+ conf->setGroup("Boson");
+ conf->writeEntry("CursorEdgeSensity", cursorEdgeSensity());
+}
+
 void BosonConfig::setCommandButtonsPerRow(int b)
 {
  d->mCommandButtonsPerRow = b;
@@ -349,6 +377,9 @@ void BosonConfig::reset(KConfig* conf)
  setArrowKeyStep(readArrowKeyStep(conf));
  setMiniMapScale(readMiniMapScale(conf));
  setMiniMapZoom(readMiniMapZoom(conf));
+ setRMBMove(readRMBMove(conf));
+ setMMBMove(readMMBMove(conf));
+ setCursorEdgeSensity(readCursorEdgeSensity(conf));
 
  conf->setGroup(oldGroup);
 }
@@ -367,6 +398,9 @@ void BosonConfig::save(bool editor, KConfig* conf)
  saveArrowKeyStep(conf);
  saveMiniMapScale(conf);
  saveMiniMapZoom(conf);
+ saveRMBMove(conf);
+ saveMMBMove(conf);
+ saveCursorEdgeSensity(conf);
  if (!editor) {
 	// place configs here that should not be saved in editor mode
  }
