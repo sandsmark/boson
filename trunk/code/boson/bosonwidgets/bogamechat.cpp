@@ -26,6 +26,7 @@
 #include <kgame/kgamechat.h>
 #include <kdebug.h>
 #include <kapplication.h>
+#include <klocale.h>
 
 #include <qlayout.h>
 #include <qlabel.h>
@@ -43,7 +44,8 @@ public:
 	QLabel* mDesignerLabel;
 };
 
-BoGameChatWidget::BoGameChatWidget(QWidget* parent, const char* name) : QWidget(parent, name)
+BoGameChatWidget::BoGameChatWidget(QWidget* parent, const char* name, KGame* game, int msgid)
+	: QWidget(parent, name)
 {
  d = new BoGameChatWidgetPrivate;
  d->mInitialized = false;
@@ -57,7 +59,7 @@ BoGameChatWidget::BoGameChatWidget(QWidget* parent, const char* name) : QWidget(
 	d->mDesignerLabel = new QLabel("This is a (dummy) BoGameChatWidget", this);
 	d->mDesignerLabel->resize(d->mDesignerLabel->sizeHint());
  } else {
-	initWidget();
+	initWidget(game, msgid);
  }
 }
 
@@ -66,17 +68,64 @@ BoGameChatWidget::~BoGameChatWidget()
  delete d;
 }
 
-void BoGameChatWidget::initWidget()
+void BoGameChatWidget::initWidget(KGame* game, int msgid)
 {
  if (d->mInitialized) {
 	return;
  }
+ if (msgid == 0) {
+	msgid = BosonMessage::IdChat;
+ }
  delete d->mDesignerLabel;
  d->mDesignerLabel = 0;
  d->mLayout = new QVBoxLayout(this);
- mKGameChat = new KGameChat(0, BosonMessage::IdChat, this);
+ mKGameChat = new BoGameChat(game, msgid, this);
  d->mLayout->addWidget(mKGameChat);
 
  d->mInitialized = true;
+}
+
+BoGameChat::BoGameChat(QWidget* parent, const char*)
+	: KGameChat(0, BosonMessage::IdChat, parent)
+{
+ init();
+}
+
+
+BoGameChat::BoGameChat(KGame* game, int msgid, QWidget* parent, const char*)
+	: KGameChat(game, msgid, parent)
+{
+ kdDebug() << k_funcinfo << endl;
+ init();
+}
+
+BoGameChat::~BoGameChat()
+{
+}
+
+void BoGameChat::init()
+{
+ // AB: we may need a list / dict / whatever here in the future. we may need to
+ // be able to send commands to different scripts.
+ mScriptEngine = nextId();
+ addSendingEntry(i18n("Send to script engine"), mScriptEngine);
+}
+
+void BoGameChat::returnPressed(const QString& text)
+{
+ int id = sendingEntry();
+ if (isScriptEngine(id)) {
+	emit signalScriptCommand(text);
+ } else {
+	KGameChat::returnPressed(text);
+ }
+}
+
+bool BoGameChat::isScriptEngine(int sendingEntryId) const
+{
+ if (sendingEntryId == mScriptEngine) {
+	return true;
+ }
+ return false;
 }
 

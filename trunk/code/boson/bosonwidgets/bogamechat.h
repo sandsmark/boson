@@ -21,19 +21,33 @@
 #ifndef BOGAMECHAT_H
 #define BOGAMECHAT_H
 
+#include <kgame/kgamechat.h>
 #include <qwidget.h>
 
 class KGameChat;
 class BoGameChatWidgetPrivate;
+class BoGameChat;
 
+/**
+ * This is a widget that creates a @ref BoGameChat widget in normal game mode
+ * and does nothing else. But in Qt designer mode it creates a dummy @ref QLabel
+ * only. @ref KGameChat (which @ref BoGameChat is derived from) uses a @ref
+ * KLineEdit which has often heavy problems with Qt designer, this workaround
+ * avoids crashes.
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
 class BoGameChatWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	BoGameChatWidget(QWidget* parent, const char* name);
+	/**
+	 * @param game Forwarded to @ref BoGameChat
+	 * @param msgid Forwarded to @ref BoGameChat
+	 **/
+	BoGameChatWidget(QWidget* parent = 0, const char* name = 0, KGame* game = 0, int msgid = 0);
 	~BoGameChatWidget();
 
-	KGameChat* chatWidget() const { return mKGameChat; }
+	BoGameChat* chatWidget() const { return mKGameChat; }
 
 	/**
 	 * Initialize the chat widget. This should be called automatically on
@@ -41,12 +55,53 @@ public:
 	 * are in Qt designer).
 	 *
 	 * You should not need to call this.
+	 * @param msgid The message id that is used for chat messages. Use 0 for
+	 * the default @ref BosonMessage::IdChat.
 	 **/
-	void initWidget();
+	void initWidget(KGame* game = 0, int msgid = 0);
 
 private:
-	KGameChat* mKGameChat;
+	BoGameChat* mKGameChat;
 	BoGameChatWidgetPrivate* d;
+};
+
+/**
+ * Simply a @ref KGameChat widget with an additional sending entry for the
+ * script enging. See also @ref KChatBase::addSendingEntry
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+class BoGameChat : public KGameChat
+{
+	Q_OBJECT
+public:
+	/**
+	 * Default c'tor that uses default values for message id and NULL for
+	 * the @ref KGame object.
+	 **/
+	BoGameChat(QWidget* parent = 0, const char* name = 0);
+	BoGameChat(KGame* game, int msgid, QWidget* parent = 0, const char* name = 0);
+	~BoGameChat();
+
+signals:
+	/**
+	 * The "message" was a command to the script engine.
+	 **/
+	void signalScriptCommand(const QString& text);
+
+protected:
+	virtual void returnPressed(const QString& text);
+
+	/**
+	 * @return TRUE if @p sendingEntryId (see @ref KChatBase::sendingEntry)
+	 * is the script engine. Otherwise FALSE.
+	 **/
+	bool isScriptEngine(int sendingEntryId) const;
+
+private:
+	void init();
+
+private:
+	int mScriptEngine;
 };
 
 #endif

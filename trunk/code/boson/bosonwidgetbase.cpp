@@ -46,6 +46,7 @@
 #include "commandframe/bosoncommandframebase.h"
 #include "sound/bosonaudiointerface.h"
 #include "script/bosonscript.h"
+#include "bosonwidgets/bogamechat.h"
 
 #include <kapplication.h>
 #include <klocale.h>
@@ -54,7 +55,6 @@
 #include <kpopupmenu.h>
 #include <kgame/kgamedebugdialog.h>
 #include <kgame/kgamepropertyhandler.h>
-#include <kgame/kgamechat.h>
 #include <klineedit.h>
 
 #include <qlayout.h>
@@ -87,13 +87,12 @@ public:
 
 		mChat = 0;
 		mChatDock = 0;
-		mScriptInput = 0;
 	}
 
 	BosonCommandFrameBase* mCommandFrame;
 	KDockWidget* mCommandFrameDock;
 
-	KGameChat* mChat;
+	BoGameChatWidget* mChat;
 	KDockWidget* mChatDock;
 
 	KActionMenu* mActionDebugPlayers;
@@ -102,8 +101,6 @@ public:
 	KToggleAction* mActionCmdFrame;
 
 	QPtrDict<KPlayer> mPlayers; // needed for debug only
-
-	KLineEdit* mScriptInput;
 
 	bool mInitialized;
 };
@@ -115,10 +112,6 @@ BosonWidgetBase::BosonWidgetBase(TopWidget* top, QWidget* parent)
  d->mInitialized = false;
  mTop = top;
  BosonScript::newScriptParser(BosonScript::Python);
- d->mScriptInput = new KLineEdit();
- connect(d->mScriptInput, SIGNAL(returnPressed(const QString&)),
-		this, SLOT(slotRunScriptLine(const QString&)));
- d->mScriptInput->show();
 
  mMiniMap = 0;
  mDisplayManager = 0;
@@ -310,7 +303,9 @@ void BosonWidgetBase::initChat()
  d->mChatDock = mTop->createDockWidget("chat_dock", 0, 0, i18n("Chat"));
  d->mChatDock->setEnableDocking(KDockWidget::DockTop | KDockWidget::DockBottom);
  d->mChatDock->setDockSite(KDockWidget::DockNone);
- d->mChat = new KGameChat(boGame, BosonMessage::IdChat, d->mChatDock);
+ d->mChat = new BoGameChatWidget(d->mChatDock, "chatwidget", boGame, BosonMessage::IdChat);
+ connect (d->mChat->chatWidget(), SIGNAL(signalScriptCommand(const QString&)),
+		this, SLOT(slotRunScriptLine(const QString&)));
  d->mChatDock->setWidget(d->mChat);
 
  connect(d->mChatDock, SIGNAL(iMBeingClosed()), this, SLOT(slotChatDockHidden()));
@@ -394,7 +389,7 @@ void BosonWidgetBase::initBigDisplay(BosonBigDisplayBase* b)
  b->setCanvas(canvas());
  b->setLocalPlayer(localPlayer()); // AB: this will also add the mouseIO!
  b->setCursor(mCursor);
- b->setKGameChat(d->mChat);
+ b->setKGameChat(d->mChat->chatWidget());
 
  b->show();
  b->makeActive();
@@ -552,7 +547,7 @@ void BosonWidgetBase::slotAddChatSystemMessage(const QString& fromName, const QS
 {
  // add a chat system-message *without* sending it over network (makes no sense
  // for system messages)
- d->mChat->addSystemMessage(fromName, text);
+ d->mChat->chatWidget()->addSystemMessage(fromName, text);
 
  displayManager()->addChatMessage(i18n("--- %1: %2").arg(fromName).arg(text));
 }
@@ -997,7 +992,7 @@ void BosonWidgetBase::setLocalPlayerRecursively(Player* p)
 	cmdFrame()->setLocalPlayer(localPlayer());
  }
  if (d->mChat) {
-	d->mChat->setFromPlayer(localPlayer());
+	d->mChat->chatWidget()->setFromPlayer(localPlayer());
  }
 }
 
@@ -1191,7 +1186,6 @@ void BosonWidgetBase::slotSetDebugFPS(bool debug)
 void BosonWidgetBase::slotRunScriptLine(const QString& line)
 {
  boScript->execLine(line);
- d->mScriptInput->clear();
 }
 
 void BosonWidgetBase::slotAdvance(unsigned int, bool)
