@@ -41,3 +41,7 @@ Text=AttackGround (weapon)
 [ActionLayMine]
 Pixmap=mine.png
 Text=Lay mine
+
+[ActionDropBomb]
+Pixmap=bomb.png
+Text=Drop bomb

@@ -1,6 +1,6 @@
 # add your pixmap to pixmaps_DATA (space separated) to make it install!
 pixmaps_DATA = testtech.png testtech2.png grizzlymissiles.png samsitemissiles.png turretupgrade.png \
-	attack.png follow.png harvest.png mine.png move.png repair.png stop.png
+	attack.png bomb.png follow.png harvest.png mine.png move.png repair.png stop.png
 
 # no further editing need here
 
