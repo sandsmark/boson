@@ -198,6 +198,9 @@ public:
 	static void saveCursorDir(const QString& dir, KConfig* conf = 0);
 	static QString readCursorDir(KConfig* conf = 0);
 
+// below we have config options that are stored in this class (and saved in
+// save())
+public:
 	void setSound(bool s) { mSound->setValue(s); }
 	bool sound() const { return mSound->value(); }
 	void setMusic(bool m) { mMusic->setValue(m); }
@@ -253,13 +256,19 @@ public:
 	void setCursorEdgeSensity(unsigned int m) { mCursorEdgeSensity->setValue(m); }
 	unsigned int cursorEdgeSensity() const { return mCursorEdgeSensity->value(); }
 
-	DebugMode debugMode() const;
+	bool useLight() const { return mUseLight->value(); }
+	void setUseLight(bool l) const { return mUseLight->setValue(l); }
+
+
+// below we have config values that are *not* stored when quitting boson
+public:
+	DebugMode debugMode() const { return mDebugMode; }
 
 	/**
 	 * Change the debugging mode. Note that this isn't saved to the config,
 	 * so this is lost on quit.
 	 **/
-	void setDebugMode(DebugMode m);
+	void setDebugMode(DebugMode m) { mDebugMode = m; }
 
 	/**
 	 * Disable sound loading and playing. Note that this value is 
@@ -284,6 +293,7 @@ public:
 	 **/
 	bool loadTiles() const { return mLoadTiles; }
 
+public:
 	void save(bool editor = false, KConfig* conf = 0);
 	void reset(KConfig* conf = 0);
 
@@ -339,6 +349,7 @@ private:
 	BoConfigIntEntry* mMouseWheelAction;
 	BoConfigIntEntry* mMouseWheelShiftAction;
 	BoConfigBoolEntry* mDeactivateWeaponSounds;
+	BoConfigBoolEntry* mUseLight;
 
 	// NOT stored to config file!
 	bool mDisableSound;

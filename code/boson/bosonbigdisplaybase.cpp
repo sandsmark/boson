@@ -84,6 +84,7 @@
 #define CLEAR_DEPTH_FULL 1
 
 #ifdef BO_LIGHT
+#warning move to class !
 static float lightPos[] = {10.0, -10.0, 10.0, 1.0};
 #endif
 
@@ -593,10 +594,8 @@ void BosonBigDisplayBase::initializeGL()
  glLightfv(GL_LIGHT0, GL_DIFFUSE, lightDif);
  glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
 
-#warning make configurable
  // light makes things slower!
  glEnable(GL_LIGHT0);
- glEnable(GL_LIGHTING);
 #endif
 
  if (checkError()) {
@@ -771,6 +770,11 @@ void BosonBigDisplayBase::paintGL()
 
  glEnable(GL_TEXTURE_2D);
  glEnable(GL_DEPTH_TEST);
+#ifdef BO_LIGHT
+ if (boConfig->useLight()) {
+	glEnable(GL_LIGHTING);
+ }
+#endif
 
  boProfiling->renderUnits(true);
  BoItemList allItems = mCanvas->allItems();
@@ -987,6 +991,7 @@ void BosonBigDisplayBase::paintGL()
 
 
  glDisable(GL_DEPTH_TEST);
+ glDisable(GL_LIGHTING);
 
  boProfiling->renderText(true); // AB: actually this is text and cursor
 
@@ -1002,7 +1007,6 @@ void BosonBigDisplayBase::paintGL()
 
  // alpha blending is used for both, cursor and text
  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
- glDisable(GL_LIGHTING);
 
  if (cursor()) {
 	// FIXME: use cursorCanvasPos()
@@ -1057,11 +1061,6 @@ void BosonBigDisplayBase::paintGL()
  if (checkError()) {
 	boError() << k_funcinfo << "selection rect rendered" << endl;
  }
-
-
-#ifdef BO_LIGHT
- glEnable(GL_LIGHTING);
-#endif
 
  glPopMatrix();
 
@@ -1366,7 +1365,7 @@ void BosonBigDisplayBase::renderParticles()
  glDepthMask(GL_FALSE);
  glEnable(GL_TEXTURE_2D);
  glEnable(GL_BLEND);
- glDisable(GL_LIGHTING);
+ glDisable(GL_LIGHTING); // warning: this functions leaves light at *disabled* !
 
  // Matrix stuff for aligned particles
  BoVector3 x(d->mModelviewMatrix[0], d->mModelviewMatrix[4], d->mModelviewMatrix[8]);
@@ -1430,9 +1429,6 @@ void BosonBigDisplayBase::renderParticles()
  glDepthMask(GL_TRUE);
  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
  glDisable(GL_BLEND);
-#ifdef BO_LIGHT
- glEnable(GL_LIGHTING);
-#endif
  //gettimeofday(&end, 0);
  //boDebug(150) << k_funcinfo << "Returning (all particles drawn); time elapsed: " << end.tv_usec - start.tv_usec << " us" << endl;
  //boDebug(150) << k_funcinfo << "        Visibility check:  " << tmvisiblecheck.tv_usec - start.tv_usec << " us" << endl;
@@ -2348,7 +2344,7 @@ void BosonBigDisplayBase::cameraChanged()
 		upX, upY, upZ);
 
 #ifdef BO_LIGHT
- // Reposition light 
+ // Reposition light
  glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
 #endif
 
