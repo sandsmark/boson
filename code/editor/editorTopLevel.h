@@ -65,7 +65,7 @@ class editorTopLevel : public visualTopLevel
 	
 	friend mainWidget;
 public:
-	editorTopLevel(BoEditorApp *app, const char *name = 0L, WFlags f = WDestructiveClose );
+	editorTopLevel(BoEditorApp *app, const char *name = "boeditor", WFlags f = WDestructiveClose );
 
 	/*
          * selection handling
