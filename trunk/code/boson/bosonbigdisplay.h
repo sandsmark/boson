@@ -96,7 +96,7 @@ protected:
 
 	virtual void updateCursor();
 
-	virtual bool actionLocked();
+	virtual bool actionLocked() const;
 
 //	void addMouseIO(Player* p);
 
