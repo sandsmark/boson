@@ -149,7 +149,7 @@ sub getval() {
             }
         }
 
-        if (@weapon1 >= 1) {
+        if (@weapon2 >= 1) {
             print "</table><td><table>";
             print "<tr><td colspan=\"2\"><b>Weapon 2</b></td></tr>\n";
             foreach $line (@weapon2) {
