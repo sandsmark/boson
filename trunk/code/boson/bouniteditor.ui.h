@@ -376,21 +376,21 @@ void BoUnitEditor::slotUpdateUnitProperties()
     
     // Mobile/facility properties
     if(mUnitTypeFacility->isChecked()) {
-	mUnit->createFacilityProperties();
+	mUnit->setIsFacility(true);
 	mUnit->setConstructionSteps(mUnitConstructionSteps->value());
     } else {
-	mUnit->createMobileProperties();
-	mUnit->setSpeed(bofixed(mUnitSpeed->value()));
+	mUnit->setIsFacility(false);
+	mUnit->setBaseValue_speed(bofixed(mUnitSpeed->value()));
 	mUnit->setCanGoOnLand(mUnitCanGoOnLand->isChecked());
 	mUnit->setCanGoOnWater(mUnitCanGoOnWater->isChecked());
     }
     // Properties page
-    mUnit->setHealth(mUnitHealth->value());
-    mUnit->setArmor(mUnitArmor->value());
-    mUnit->setShields(mUnitShields->value());
-    mUnit->setMineralCost(mUnitMineralCost->value());
-    mUnit->setOilCost(mUnitOilCost->value());
-    mUnit->setSightRange(mUnitSight->value());
+    mUnit->setBaseValue_health(mUnitHealth->value());
+    mUnit->setBaseValue_armor(mUnitArmor->value());
+    mUnit->setBaseValue_shields(mUnitShields->value());
+    mUnit->setBaseValue_mineralCost(mUnitMineralCost->value());
+    mUnit->setBaseValue_oilCost(mUnitOilCost->value());
+    mUnit->setBaseValue_sightRange(mUnitSight->value());
     mUnit->setTerrainType((UnitProperties::TerrainType)(mUnitTerrain->currentItem()));
     mUnit->setSupportMiniMap(mUnitSupportMiniMap->isChecked());
     // Weapons page
@@ -427,7 +427,7 @@ void BoUnitEditor::slotUpdateUnitProperties()
 	mUnit->addPlugin(p);
     }
     // Producing page
-    mUnit->setProductionTime(mUnitProductionTime->value());
+    mUnit->setBaseValue_productionTime(mUnitProductionTime->value());
     mUnit->setProducer(mUnitProducer->value());
     mUnit->setRequirements(stringToList(mUnitRequirements->text()));
     // Mapping page
@@ -563,14 +563,14 @@ void BoUnitEditor::slotUpdateWeaponProps()
     }
     BosonWeaponProperties* w = mWeapons.at(mCurrentWeapon);
     w->setWeaponName(mWeaponName->text());
-    w->setDamage(mWeaponDamage->value());
-    w->setDamageRange(mWeaponDamageRange->value());
-    w->setFullDamageRange(mWeaponFullDamageRange->value());
-    w->setReloadingTime(mWeaponReload->value());
-    w->setRange(mWeaponRange->value());
+    w->setBaseValue_damage(mWeaponDamage->value());
+    w->setBaseValue_damageRange(mWeaponDamageRange->value());
+    w->setBaseValue_fullDamageRange(mWeaponFullDamageRange->value());
+    w->setBaseValue_reloadingTime(mWeaponReload->value());
+    w->setBaseValue_range(mWeaponRange->value());
     w->setCanShootAtAirUnits(mWeaponCanShootAtAirUnits->isChecked());
     w->setCanShootAtLandUnits(mWeaponCanShootAtLandUnits->isChecked());
-    w->setSpeed((long unsigned int)mWeaponSpeed->value());
+    w->setBaseValue_speed((long unsigned int)mWeaponSpeed->value());
     w->setModelFileName(mWeaponModel->text());
     w->setHeight(mWeaponHeight->value());
     BoVector3Fixed offset(mWeaponOffsetX->value(), mWeaponOffsetY->value(), mWeaponOffsetZ->value());
