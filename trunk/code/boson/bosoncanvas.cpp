@@ -1102,10 +1102,26 @@ bool BosonCanvas::canPlaceUnitAt(const UnitProperties* prop, const BoVector2Fixe
 		return true;
 	}
  } else {
+	const RefineryProperties* refinery = (RefineryProperties*)prop->properties(PluginProperties::Refinery);
+	if(refinery) {
+		// Refineries can't be built close to resource mines
+		QValueList<Unit*> list = collisions()->unitCollisionsInRange(r.center(), REFINERY_FORBID_RANGE);
+		QValueList<Unit*>::Iterator it;
+		for (it = list.begin(); it != list.end(); it++) {
+			ResourceMinePlugin* resource = (ResourceMinePlugin*)(*it)->plugin(UnitPlugin::ResourceMine);
+			if(resource) {
+				if((refinery->canRefineMinerals() && resource->canProvideMinerals()) ||
+						(refinery->canRefineOil() && resource->canProvideOil())) {
+					return false;
+				}
+			}
+		}
+	}
 	// must be in BUILD_RANGE of any facility of the player
 	QValueList<Unit*> list = collisions()->unitCollisionsInRange(r.center(), BUILD_RANGE);
-	for (unsigned int i = 0; i < list.count(); i++) {
-		if (list[i]->isFacility() && list[i]->owner() == factory->player()) {
+	QValueList<Unit*>::Iterator it;
+	for (it = list.begin(); it != list.end(); it++) {
+		if ((*it)->isFacility() && (*it)->owner() == factory->player()) {
 			return true;
 		}
 	}
