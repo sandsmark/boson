@@ -218,8 +218,8 @@ void editorCanvas::changeCell(int x, int y, cell_t c)
 void editorCanvas::addPlayer(void)
 {
 	boAssert(nbPlayer<BOSON_MAX_PLAYERS-1);
-	loadSpecyTheme(nbPlayer);
-	nbPlayer++;
+	loadSpecyTheme(nbPlayer++);
+	emit nbPlayerChanged(nbPlayer);
 }
 
 

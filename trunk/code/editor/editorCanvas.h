@@ -62,6 +62,9 @@ public:
 	void		changeCell(int x, int y, cell_t c);
 	void		addPlayer(void);
 
+signals:
+	void	nbPlayerChanged(int);
+
 protected:
 	void	loadSpecyTheme(uint i);
 
