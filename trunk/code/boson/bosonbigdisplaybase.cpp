@@ -782,7 +782,7 @@ void BosonCanvasRenderer::renderSelections(const BoItemList* selectedItems)
 
 	GLfloat w = ((float)item->width());
 	GLfloat h = ((float)item->height());
-	GLfloat depth = item->glDepthMultiplier();
+	GLfloat depth = item->depth();
 	glPushMatrix();
 	glTranslatef(x, y, z);
 	if (w != 1.0 || h != 1.0 || depth != 1.0) {
@@ -1348,7 +1348,7 @@ public:
 	}
 	bool isModelPreview() const
 	{
-		if (mPlacementPreviewModel && mPlacementPreviewModel->frame(0) &&
+		if (mPlacementPreviewModel && mPlacementPreviewModel->lod(0)->frame(0) &&
 				mPlacementPreviewProperties) {
 			return true;
 		}
@@ -2103,7 +2103,7 @@ void BosonBigDisplayBase::renderPlacementPreview()
  }
  glTranslatef(x, -y, z);
  if (modelPreview) {
-	BoFrame* f = d->mPlacementPreview.model()->frame(0);
+	BoFrame* f = d->mPlacementPreview.model()->lod(0)->frame(0);
 	BosonModel::startModelRendering();
 	d->mPlacementPreview.model()->prepareRendering();
 	f->renderFrame(&localPlayerIO()->teamColor());
@@ -3085,7 +3085,7 @@ void BosonBigDisplayBase::setPlacementPreviewData(const UnitProperties* prop, bo
 		boError() << k_funcinfo << "NULL model for " << prop->typeId() << endl;
 		return;
 	}
-	BoFrame* f = m->frame(0);
+	BoFrame* f = m->lod(0)->frame(0);
 	if (!f) {
 		boError() << k_funcinfo << "NULL frame 0" << endl;
 		return;

@@ -55,10 +55,10 @@ static _bo_glBufferDataARB bo_glBufferDataARB = 0;
 #define GL_STATIC_DRAW_ARB 0x88E4
 #endif
 
-class BoMeshRendererModelDataVBO : public BoMeshRendererModelDataVA
+class BoMeshRendererModelDataVBO : public BoMeshRendererModelData
 {
 public:
-	BoMeshRendererModelDataVBO() : BoMeshRendererModelDataVA()
+	BoMeshRendererModelDataVBO() : BoMeshRendererModelData()
 	{
 		mVBO = 0;
 	}
@@ -105,16 +105,6 @@ BoMeshRendererModelData* BoMeshRendererVBO::createModelData() const
  return new BoMeshRendererModelDataVBO;
 }
 
-BoMeshRendererMeshData* BoMeshRendererVBO::createMeshData() const
-{
- return BoMeshRendererVertexArray::createMeshData();
-}
-
-BoMeshRendererMeshLODData* BoMeshRendererVBO::createMeshLODData() const
-{
- return BoMeshRendererVertexArray::createMeshLODData();
-}
-
 void BoMeshRendererVBO::initModelData(BosonModel* model)
 {
  BO_CHECK_NULL_RET(model);
@@ -123,7 +113,6 @@ void BoMeshRendererVBO::initModelData(BosonModel* model)
  BoMeshRendererModelDataVBO* data = (BoMeshRendererModelDataVBO*)model->meshRendererModelData();
  BO_CHECK_NULL_RET(data);
 
- const unsigned int pointSize = 8;
  if (hasVBOExtension()) {
 	bo_glGenBuffersARB(1, &data->mVBO);
 	if (data->mVBO == 0) {
@@ -131,41 +120,17 @@ void BoMeshRendererVBO::initModelData(BosonModel* model)
 	} else {
 		bo_glBindBufferARB(GL_ARRAY_BUFFER_ARB, data->mVBO);
 		bo_glBufferDataARB(GL_ARRAY_BUFFER_ARB,
-				data->mPointCount * pointSize * sizeof(float),
-				data->mPoints,
+				model->pointArraySize() * BoMesh::pointSize() * sizeof(float),
+				model->pointArray(),
 				GL_STATIC_DRAW_ARB);
 	}
  }
-}
-
-void BoMeshRendererVBO::initMeshData(BoMesh* mesh, unsigned int meshIndex)
-{
- BO_CHECK_NULL_RET(mesh);
- BoMeshRendererVertexArray::initMeshData(mesh, meshIndex);
-}
-
-void BoMeshRendererVBO::initMeshLODData(BoMeshLOD* meshLOD, unsigned int meshIndex, unsigned int lod)
-{
- BO_CHECK_NULL_RET(meshLOD);
- BoMeshRendererVertexArray::initMeshLODData(meshLOD, meshIndex, lod);
 }
 
 void BoMeshRendererVBO::deinitModelData(BosonModel* model)
 {
  BO_CHECK_NULL_RET(model);
  BoMeshRendererVertexArray::deinitModelData(model);
-}
-
-void BoMeshRendererVBO::deinitMeshData(BoMesh* mesh)
-{
- BO_CHECK_NULL_RET(mesh);
- BoMeshRendererVertexArray::deinitMeshData(mesh);
-}
-
-void BoMeshRendererVBO::deinitMeshLODData(BoMeshLOD* meshLOD)
-{
- BO_CHECK_NULL_RET(meshLOD);
- BoMeshRendererVertexArray::deinitMeshLODData(meshLOD);
 }
 
 void BoMeshRendererVBO::setModel(BosonModel* model)
@@ -182,6 +147,7 @@ void BoMeshRendererVBO::setModel(BosonModel* model)
  if (model == mPreviousModel) {
 	return;
  }
+
  mPreviousModel = model;
  BoMeshRendererModelDataVBO* data = (BoMeshRendererModelDataVBO*)model->meshRendererModelData();
  BO_CHECK_NULL_RET(data);
@@ -198,8 +164,8 @@ void BoMeshRendererVBO::setModel(BosonModel* model)
 #define OFFSET(i) ((i) * sizeof(float))
 	const int stride = 8 * sizeof(float);
 	vertexPtr = (void*)((char*)startPtr + OFFSET(0));
-	texelPtr = (void*)((char*)startPtr + OFFSET(0 + 3));
-	normalPtr = (void*)((char*)startPtr + OFFSET(0 + 3 + 2));
+	normalPtr = (void*)((char*)startPtr + OFFSET(0 + 3));
+	texelPtr = (void*)((char*)startPtr + OFFSET(0 + 3 + 3));
 #undef OFFSET
 	glVertexPointer(3, GL_FLOAT, stride, vertexPtr);
 	glNormalPointer(GL_FLOAT, stride, normalPtr);
@@ -208,23 +174,14 @@ void BoMeshRendererVBO::setModel(BosonModel* model)
 	// Disable VBO
 	bo_glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
 
-#warning FIXME
-	// atm we keep the data->mPoints around, because of useVBO() which can
-	// be changed on the fly.
-	// since we can change the renderer easily to plain vertex-arrays i
-	// believe we can remove that configure option and rather delete the
-	// points here (saves memory).
-	// keep in mind that the vertexarray renderer (the vbo depends on that)
-	// must not access data->mPoints anymore then
 	return;
  }
-
 }
 
-unsigned int BoMeshRendererVBO::render(const QColor* teamColor, BoMesh* mesh, BoMeshLOD* lod)
+unsigned int BoMeshRendererVBO::render(const QColor* teamColor, BoMesh* mesh)
 {
  // VBOs are rendered exactly like vertex arrays
- return BoMeshRendererVertexArray::render(teamColor, mesh, lod);
+ return BoMeshRendererVertexArray::render(teamColor, mesh);
 }
 
 

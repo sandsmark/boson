@@ -490,14 +490,6 @@ unsigned int BosonItem::preferredLod(float dist) const
  return 0;
 }
 
-float BosonItem::glDepthMultiplier() const
-{
- if (itemRenderer()) {
-	return itemRenderer()->glDepthMultiplier();;
- }
- return 1.0f;
-}
-
 void BosonItem::setRendererToEditorMode()
 {
  if (!itemRenderer()) {
@@ -506,7 +498,8 @@ void BosonItem::setRendererToEditorMode()
  // editor won't display the construction but always completed
  // facilities. otherwise it's hard to recognize where they
  // were actually placed
- itemRenderer()->setShowGLConstructionSteps(false);
+#warning FIXME
+// itemRenderer()->setShowGLConstructionSteps(false);
  itemRenderer()->setAnimationMode(UnitAnimationIdle);
 }
 

@@ -30,10 +30,12 @@
 #include <qpixmap.h>
 #include <qfile.h>
 #include <qimage.h>
+#include <qtextstream.h>
 
 #include <kstaticdeleter.h>
 #include <kstandarddirs.h>
 #include <ksimpleconfig.h>
+#include <ktempfile.h>
 
 static KStaticDeleter< QDict<SpeciesData> > sd;
 QDict<SpeciesData>* SpeciesData::mSpeciesData = 0;
@@ -50,41 +52,55 @@ public:
 
 BosonModel* BosonModelFactory::createUnitModel(const UnitProperties* prop, const QString& file)
 {
- BosonModel* m = new BosonModel(prop->unitPath(), file,
-		((float)prop->unitWidth()),
-		((float)prop->unitHeight()));
- m->setLongNames(prop->longTextureNames());
- m->loadModel();
- if (prop->isFacility()) {
-	m->generateConstructionFrames();
- }
+ BosonModel* m = new BosonModel(prop->unitPath(), file);
+ QString configfile = prop->unitPath() + QString::fromLatin1("index.unit");
+ m->loadModel(configfile);
 
 
  // now we load animation information. this is just which frame is used for
  // which animation mode - no frame/node/display list modifying needs to be
  // made.
- KSimpleConfig cfg(prop->unitPath() + QString::fromLatin1("index.unit"));
- cfg.setGroup("OpenGL");
+ KSimpleConfig cfg(configfile);
+ cfg.setGroup("Model");
  m->loadAnimationMode(UnitAnimationIdle, &cfg, QString::fromLatin1("Idle"));
  m->loadAnimationMode(UnitAnimationWreckage, &cfg, QString::fromLatin1("Wreckage"));
+ m->loadAnimationMode(UnitAnimationConstruction, &cfg, QString::fromLatin1("Construction"));
 
-
- m->finishLoading();
+ if (prop->isFacility()) {
+	m->generateConstructionAnimation(prop->constructionSteps());
+ }
 
  return m;
 }
 
 BosonModel* BosonModelFactory::createObjectModel(const KSimpleConfig* config, const QString& themePath)
 {
- float width = (float)config->readDoubleNumEntry(QString::fromLatin1("Width"), 1.0f);
- float height = (float)config->readDoubleNumEntry(QString::fromLatin1("Height"), 1.0f);
+ // Object models doesn't have per-model config, but bobmfconfig requires it to
+ //  set size of the model.
+ // So we create a temporary config file and copy necessary data there.
+ // TODO: separate BosonModelFactory into it's own file and make it also handle
+ //  model caching?
+ KTempFile tmpconfig;
+ // We want the temporary file to be deleted when we're done.
+ tmpconfig.setAutoDelete(true);
+
+ // We write the config file manually, using QTextStream.
+ // There's no point in creating KConfig object to write a single entry.
+ QTextStream* ts = tmpconfig.textStream();
+ if (!ts) {
+	boError() << k_funcinfo << "Couldn't create textstream object for KTempFile" << endl;
+	return 0;
+ }
+ (*ts) << "[Model]" << endl;
+ (*ts) << "Size=" << config->readDoubleNumEntry(QString::fromLatin1("Width"), 1.0f) << endl;
+ tmpconfig.close();
+
+ // Load name of the model file
  QString file = config->readEntry(QString::fromLatin1("File"), QString::fromLatin1("missile.3ds"));
 
 
- BosonModel* m = new BosonModel(themePath + QString::fromLatin1("/objects/"), file, width, height);
- m->loadModel();
-
- m->finishLoading();
+ BosonModel* m = new BosonModel(themePath + QString::fromLatin1("/objects/"), file);
+ m->loadModel(tmpconfig.name());
 
  return m;
 }
@@ -258,7 +274,7 @@ QStringList SpeciesData::unitModelFiles()
 {
  QStringList list;
  list.append("unit.3ds");
- list.append("unit.ac");
+ //list.append("unit.ac");
  return list;
 }
 

@@ -77,13 +77,9 @@ libboson_la_SOURCES = \
 	bosoncursor.cpp \
 	bosonstatistics.cpp \
 	bosonmodel.cpp \
-	bosonmodelloader.cpp \
-	bo3dsload.cpp \
-	boacload.cpp \
 	bomesh.cpp \
 	bomeshrenderer.cpp \
 	bomeshrenderermanager.cpp \
-	bolodbuilder.cpp \
 	bomaterial.cpp \
 	\
 	bogameproperty.cpp \
@@ -117,7 +113,8 @@ libboson_la_SOURCES = \
 	boconditionwidget.cpp \
 	bodebuglogdialog.cpp \
 	bowater.cpp \
-	botexture.cpp
+	botexture.cpp \
+	bobmfload.cpp
 
 
 libboson_la_LIBADD = \

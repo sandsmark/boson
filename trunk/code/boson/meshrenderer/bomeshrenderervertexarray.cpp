@@ -26,37 +26,7 @@
 
 #include <bodebug.h>
 
-BoMeshRendererModelDataVA::BoMeshRendererModelDataVA() : BoMeshRendererModelData()
-{
- mPoints = 0;
- mPointCount = 0;
 
- mMaxLODCount = 0;
- mOffsets = 0;
- mPointCounts = 0;
-}
-BoMeshRendererModelDataVA::~BoMeshRendererModelDataVA()
-{
- delete[] mPoints;
-
- delete[] mOffsets;
- delete[] mPointCounts;
-}
-
-class BoMeshRendererMeshLODDataVA : public BoMeshRendererMeshLODData
-{
-public:
-	BoMeshRendererMeshLODDataVA() : BoMeshRendererMeshLODData()
-	{
-		mOffset = 0;
-		mPointCount = 0;
-	}
-	~BoMeshRendererMeshLODDataVA()
-	{
-	}
-	unsigned int mOffset;
-	unsigned int mPointCount;
-};
 
 BoMeshRendererVertexArray::BoMeshRendererVertexArray() : BoMeshRenderer()
 {
@@ -65,78 +35,6 @@ BoMeshRendererVertexArray::BoMeshRendererVertexArray() : BoMeshRenderer()
 
 BoMeshRendererVertexArray::~BoMeshRendererVertexArray()
 {
-}
-
-BoMeshRendererModelData* BoMeshRendererVertexArray::createModelData() const
-{
- return new BoMeshRendererModelDataVA;
-}
-
-BoMeshRendererMeshData* BoMeshRendererVertexArray::createMeshData() const
-{
- return BoMeshRenderer::createMeshData();
-}
-
-BoMeshRendererMeshLODData* BoMeshRendererVertexArray::createMeshLODData() const
-{
- return new BoMeshRendererMeshLODDataVA;
-}
-
-void BoMeshRendererVertexArray::initModelData(BosonModel* model)
-{
- BO_CHECK_NULL_RET(model);
-
- // immediate mode doesn't need extra data, so we add a dummy object only
- // (initModelData won't get called again then)
- BoMeshRendererModelDataVA* data = (BoMeshRendererModelDataVA*)model->meshRendererModelData();
- BO_CHECK_NULL_RET(data);
- // now the difficult part starts.
- // here we have the definition point := (vertex,texel,normal). This means
- // basically that we need to fork every (vertex,texel) pair ("point" in BoMesh)
- // for every new normal.
- // as a result we have points := faces * 3. no vertex sharing takes place.
-
- unsigned int points = countModelPoints(model);
- data->mPoints = new float[points * 8];
- data->mPointCount = points;
- data->mMaxLODCount = 0;
- for (unsigned int i = 0; i < model->meshCount(); i++) {
-	BoMesh* mesh = model->mesh(i);
-	if (!mesh) {
-		continue;
-	}
-	data->mMaxLODCount = QMAX(data->mMaxLODCount, lodCount(mesh));
- }
- if (data->mMaxLODCount != 0) {
-	data->mOffsets = new unsigned int[model->meshCount() * data->mMaxLODCount];
-	data->mPointCounts = new unsigned int[model->meshCount() * data->mMaxLODCount];
- }
- fillModelPointsArray(model, data->mPoints,
-		data->mMaxLODCount, data->mOffsets, data->mPointCounts);
-
-}
-
-void BoMeshRendererVertexArray::initMeshData(BoMesh* mesh, unsigned int meshIndex)
-{
- BO_CHECK_NULL_RET(mesh);
- Q_UNUSED(meshIndex);
-}
-
-void BoMeshRendererVertexArray::initMeshLODData(BoMeshLOD* meshLOD, unsigned int meshIndex, unsigned int lod)
-{
- BO_CHECK_NULL_RET(meshLOD);
- BO_CHECK_NULL_RET(model());
- BoMeshRendererModelDataVA* modelData = (BoMeshRendererModelDataVA*)model()->meshRendererModelData();
- BO_CHECK_NULL_RET(modelData);
- BO_CHECK_NULL_RET(modelData->mOffsets);
- BO_CHECK_NULL_RET(modelData->mPointCounts);
-
- BoMeshRendererMeshLODDataVA* data = (BoMeshRendererMeshLODDataVA*)meshLOD->meshRendererMeshLODData();
- BO_CHECK_NULL_RET(data);
-
- int i = meshIndex * modelData->mMaxLODCount + lod;
- data->mOffset = modelData->mOffsets[i];
- data->mPointCount = modelData->mPointCounts[i];
 }
 
 void BoMeshRendererVertexArray::setModel(BosonModel* model)
@@ -148,13 +46,11 @@ void BoMeshRendererVertexArray::setModel(BosonModel* model)
  if (mPreviousModel == model) {
 	return;
  }
- BoMeshRendererModelDataVA* data = (BoMeshRendererModelDataVA*)model->meshRendererModelData();
- BO_CHECK_NULL_RET(data);
 
- const int stride = (3 + 2 + 3) * sizeof(float);
- glVertexPointer(3, GL_FLOAT, stride, data->mPoints);
- glTexCoordPointer(2, GL_FLOAT, stride, data->mPoints + 3);
- glNormalPointer(GL_FLOAT, stride, data->mPoints + (3 + 2));
+ const int stride = (3 + 3 + 2) * sizeof(float);
+ glVertexPointer(3, GL_FLOAT, stride, model->pointArray());
+ glNormalPointer(GL_FLOAT, stride, model->pointArray() + 3);
+ glTexCoordPointer(2, GL_FLOAT, stride, model->pointArray() + 3 + 3);
 
  mPreviousModel = model;
 }
@@ -188,27 +84,9 @@ void BoMeshRendererVertexArray::deinitFrame()
 }
 
 
-unsigned int BoMeshRendererVertexArray::render(const QColor* teamColor, BoMesh* mesh, BoMeshLOD* lod)
+unsigned int BoMeshRendererVertexArray::render(const QColor* teamColor, BoMesh* mesh)
 {
- if (!lod) {
-	BO_NULL_ERROR(lod);
-	return 0;
- }
- if (lod->pointsCacheCount() == 0) {
-	return 0;
- }
- if (!lod->pointsCache()) {
-	BO_NULL_ERROR(lod->pointsCache());
-	return 0;
- }
- BoMeshRendererMeshLODDataVA* lodData = (BoMeshRendererMeshLODDataVA*)lod->meshRendererMeshLODData();
- if (!lodData) {
-	BO_NULL_ERROR(lodData);
-	return 0;
- }
- int type = lod->type();
- if (type != GL_TRIANGLES) {
-	boError() << k_funcinfo << "only GL_TRIANGLES supported" << endl;
+ if (mesh->pointCount() == 0) {
 	return 0;
  }
 
@@ -224,6 +102,7 @@ unsigned int BoMeshRendererVertexArray::render(const QColor* teamColor, BoMesh* 
  //
  // so optimization should happen here - if possible at all...
 
+ // TODO: support material _and_ teamcolor
  BoMaterial::activate(mesh->material());
  if (!mesh->material()) {
 	if (mesh->isTeamColor()) {
@@ -236,6 +115,7 @@ unsigned int BoMeshRendererVertexArray::render(const QColor* teamColor, BoMesh* 
  } else {
 	BoMaterial* mat = mesh->material();
 	if (mat->textureName().isEmpty()) {
+		// FIXME: what's that for???
 		glPushAttrib(GL_CURRENT_BIT);
 		glColor3fv(mesh->material()->diffuse().data());
 		resetColor = true;
@@ -247,16 +127,8 @@ unsigned int BoMeshRendererVertexArray::render(const QColor* teamColor, BoMesh* 
  }
  unsigned int renderedPoints = 0;
 
-// glDrawElements(type, lod->pointsCacheCount(), GL_UNSIGNED_INT, lod->pointsCache());
- glDrawArrays(type, lodData->mOffset, lodData->mPointCount);
- renderedPoints = lodData->mPointCount;
-
- // reset the normal...
- // (better solution: don't enable light when rendering
- // selection rect!)
- const float n[] = { 0.0f, 0.0f, 1.0f };
- glNormal3fv(n);
-
+ glDrawArrays(mesh->renderMode(), mesh->pointOffset(), mesh->pointCount());
+ renderedPoints = mesh->pointCount();
 
  if (resetColor) {
 	// we need to reset the color (mainly for the placement preview)
@@ -269,68 +141,5 @@ unsigned int BoMeshRendererVertexArray::render(const QColor* teamColor, BoMesh* 
  }
 
  return renderedPoints;
-}
-
-
-unsigned int BoMeshRendererVertexArray::countModelPoints(const BosonModel* model) const
-{
- if (!model) {
-	return 0;
- }
- unsigned int points = 0;
- for (unsigned int i = 0; i < model->meshCount(); i++) {
-	BoMesh* mesh = model->mesh(i);
-	BO_CHECK_NULL_RET0(mesh);
-	for (unsigned int j = 0; j < lodCount(mesh); j++) {
-		BoMeshLOD* lod = levelOfDetail(mesh, j);
-		BO_CHECK_NULL_RET0(lod);
-		points += lod->facesCount() * 3;
-	}
- }
- return points;
-}
-
-void BoMeshRendererVertexArray::fillModelPointsArray(BosonModel* model, float* array, unsigned int maxLODCount, unsigned int* offsets, unsigned int* pointCounts)
-{
- BO_CHECK_NULL_RET(model);
- BO_CHECK_NULL_RET(array);
- BO_CHECK_NULL_RET(offsets);
- BO_CHECK_NULL_RET(pointCounts);
- unsigned int totalAddedPoints = 0;
- for (unsigned int i = 0; i < model->meshCount(); i++) {
-	BoMesh* mesh = model->mesh(i);
-	BO_CHECK_NULL_RET(mesh);
-	unsigned int meshAddedPoints = 0;
-	float* meshArray = array + (totalAddedPoints * 8);
-	for (unsigned int j = 0; j < lodCount(mesh); j++) {
-		BoMeshLOD* lod = levelOfDetail(mesh, j);
-		BO_CHECK_NULL_RET(lod);
-		offsets[i * maxLODCount + j] = totalAddedPoints + meshAddedPoints;
-		pointCounts[i * maxLODCount + j] = lod->facesCount() * 3;
-		for (unsigned int f = 0; f < lod->facesCount(); f++) {
-			const BoFace* face = lod->face(f);
-			BO_CHECK_NULL_RET(face);
-			float* point = meshArray + (meshAddedPoints * 8);
-			for (int v = 0; v < 3; v++) {
-				BO_CHECK_NULL_RET(face->pointIndex());
-				int p = face->pointIndex()[v];
-				BoVector3Float vertex = model->vertex(p);
-				BoVector3Float texel = model->texel(p);
-				BoVector3Float normal = face->normal(v);
-				point[v * 8 + 0] = vertex[0];
-				point[v * 8 + 1] = vertex[1];
-				point[v * 8 + 2] = vertex[2];
-				point[v * 8 + 3] = texel[0];
-				point[v * 8 + 4] = texel[1];
-				point[v * 8 + 5] = normal[0];
-				point[v * 8 + 6] = normal[1];
-				point[v * 8 + 7] = normal[2];
-			}
-			meshAddedPoints += 3;
-		}
-	}
-	totalAddedPoints += meshAddedPoints;
- }
-
 }
 

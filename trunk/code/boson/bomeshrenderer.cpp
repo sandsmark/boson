@@ -190,7 +190,7 @@ void BoMeshRenderer::stopModelRendering()
  completeFrameStatistics();
 }
 
-void BoMeshRenderer::renderMesh(const QColor* teamColor, BoMesh* mesh, unsigned int _lod)
+void BoMeshRenderer::renderMesh(const QColor* teamColor, BoMesh* mesh)
 {
  BO_CHECK_NULL_RET(mesh);
  BO_CHECK_NULL_RET(model());
@@ -198,15 +198,7 @@ void BoMeshRenderer::renderMesh(const QColor* teamColor, BoMesh* mesh, unsigned 
  // to have that in a very fast O(1) way, i.e. only a pointer compare.
 
 
- if (_lod >= mesh->lodCount()) {
-	_lod = mesh->lodCount() - 1;
- }
- BoMeshLOD* lod = mesh->levelOfDetail(_lod);
- if (!lod) {
-	BO_NULL_ERROR(lod);
-	return;
- }
- unsigned int renderedPoints = render(teamColor, mesh, lod);
+ unsigned int renderedPoints = render(teamColor, mesh);
  if (renderedPoints > 0) {
 	currentStatistics()->addMesh(renderedPoints);
  }
@@ -218,39 +210,30 @@ void BoMeshRenderer::initializeData(BosonModel* model)
  setModel(0);
  mModel = model;
  mModel->setMeshRendererModelData(createModelData());
- for (unsigned int i = 0; i < model->meshCount(); i++) {
-	BoMesh* mesh = model->mesh(i);
-	if (!mesh) {
-		BO_NULL_ERROR(mesh);
-		continue;
-	}
-	mesh->setMeshRendererMeshData(createMeshData());
-	for (unsigned int j = 0; j < lodCount(mesh); j++) {
-		BoMeshLOD* lod = levelOfDetail(mesh, j);
-		if (!lod) {
-			BO_NULL_ERROR(lod);
+ for (unsigned int i = 0; i < model->lodCount(); i++) {
+	BoLOD* lod = model->lod(i);
+	for (unsigned int j = 0; j < lod->meshCount(); j++) {
+		BoMesh* mesh = lod->mesh(j);
+		if (!mesh) {
+			BO_NULL_ERROR(mesh);
 			continue;
 		}
-		lod->setMeshRendererMeshLODData(createMeshLODData());
+		mesh->setMeshRendererMeshData(createMeshData());
 	}
  }
 
  // now give the meshrenderer a chance to initialize the data
  initModelData(model);
- for (unsigned int i = 0; i < model->meshCount(); i++) {
-	BoMesh* mesh = model->mesh(i);
-	if (!mesh) {
-		BO_NULL_ERROR(mesh);
-		continue;
-	}
-	initMeshData(mesh, i);
-	for (unsigned int j = 0; j < lodCount(mesh); j++) {
-		BoMeshLOD* lod = levelOfDetail(mesh, j);
-		if (!lod) {
-			BO_NULL_ERROR(lod);
+ unsigned int meshindex = 0;
+ for (unsigned int i = 0; i < model->lodCount(); i++) {
+	BoLOD* lod = model->lod(i);
+	for (unsigned int j = 0; j < lod->meshCount(); j++) {
+		BoMesh* mesh = lod->mesh(j);
+		if (!mesh) {
+			BO_NULL_ERROR(mesh);
 			continue;
 		}
-		initMeshLODData(lod, i, j);
+		initMeshData(mesh, meshindex++);
 	}
  }
  mModel = 0;
@@ -263,40 +246,30 @@ void BoMeshRenderer::deinitializeData(BosonModel* model)
  mModel = model;
 
  // give the meshrenderer a chance to remove custom data
- for (unsigned int i = 0; i < model->meshCount(); i++) {
-	BoMesh* mesh = model->mesh(i);
-	if (!mesh) {
-		BO_NULL_ERROR(mesh);
-		continue;
-	}
-	for (unsigned int j = 0; j < lodCount(mesh); j++) {
-		BoMeshLOD* lod = levelOfDetail(mesh, j);
-		if (!lod) {
-			BO_NULL_ERROR(lod);
+ for (unsigned int i = 0; i < model->lodCount(); i++) {
+	BoLOD* lod = model->lod(i);
+	for (unsigned int j = 0; j < lod->meshCount(); j++) {
+		BoMesh* mesh = lod->mesh(j);
+		if (!mesh) {
+			BO_NULL_ERROR(mesh);
 			continue;
 		}
-		deinitMeshLODData(lod);
+		deinitMeshData(mesh);
 	}
-	deinitMeshData(mesh);
  }
  deinitModelData(mModel);
 
  // remove the data from model and meshes/meshLODs
- for (unsigned int i = 0; i < model->meshCount(); i++) {
-	BoMesh* mesh = model->mesh(i);
-	if (!mesh) {
-		BO_NULL_ERROR(mesh);
-		continue;
-	}
-	for (unsigned int j = 0; j < lodCount(mesh); j++) {
-		BoMeshLOD* lod = levelOfDetail(mesh, j);
-		if (!lod) {
-			BO_NULL_ERROR(lod);
+ for (unsigned int i = 0; i < model->lodCount(); i++) {
+	BoLOD* lod = model->lod(i);
+	for (unsigned int j = 0; j < lod->meshCount(); j++) {
+		BoMesh* mesh = lod->mesh(j);
+		if (!mesh) {
+			BO_NULL_ERROR(mesh);
 			continue;
 		}
-		lod->setMeshRendererMeshLODData(0);
+		mesh->setMeshRendererMeshData(0);
 	}
-	mesh->setMeshRendererMeshData(0);
  }
  mModel->setMeshRendererModelData(0);
  mModel = 0;
@@ -313,13 +286,6 @@ void BoMeshRenderer::initMeshData(BoMesh* mesh, unsigned int meshIndex)
  Q_UNUSED(meshIndex);
 }
 
-void BoMeshRenderer::initMeshLODData(BoMeshLOD* meshLOD, unsigned int meshIndex, unsigned int lod)
-{
- Q_UNUSED(meshLOD);
- Q_UNUSED(meshIndex);
- Q_UNUSED(lod);
-}
-
 void BoMeshRenderer::deinitModelData(BosonModel* model)
 {
  Q_UNUSED(model);
@@ -330,11 +296,6 @@ void BoMeshRenderer::deinitMeshData(BoMesh* mesh)
  Q_UNUSED(mesh);
 }
 
-void BoMeshRenderer::deinitMeshLODData(BoMeshLOD* meshLOD)
-{
- Q_UNUSED(meshLOD);
-}
-
 BoMeshRendererModelData* BoMeshRenderer::createModelData() const
 {
  return new BoMeshRendererModelData;
@@ -343,27 +304,6 @@ BoMeshRendererModelData* BoMeshRenderer::createModelData() const
 BoMeshRendererMeshData* BoMeshRenderer::createMeshData() const
 {
  return new BoMeshRendererMeshData;
-}
-
-BoMeshRendererMeshLODData* BoMeshRenderer::createMeshLODData() const
-{
- return new BoMeshRendererMeshLODData;
-}
-
-unsigned int BoMeshRenderer::lodCount(const BoMesh* mesh) const
-{
- if (!mesh) {
-	return 0;
- }
- return mesh->lodCount();
-}
-
-BoMeshLOD* BoMeshRenderer::levelOfDetail(const BoMesh* mesh, unsigned int lod) const
-{
- if (!mesh) {
-	return 0;
- }
- return mesh->levelOfDetail(lod);
 }
 
 void BoMeshRenderer::addFrameStatistics()

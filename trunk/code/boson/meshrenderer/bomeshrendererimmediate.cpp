@@ -61,21 +61,20 @@ void BoMeshRendererImmediate::deinitFrame()
  glPopAttrib();
 }
 
-unsigned int BoMeshRendererImmediate::render(const QColor* teamColor, BoMesh* mesh, BoMeshLOD* lod)
+unsigned int BoMeshRendererImmediate::render(const QColor* teamColor, BoMesh* mesh)
 {
  if (!model()) {
 	BO_NULL_ERROR(model());
 	return 0;
  }
- unsigned int* pointsCache = lod->pointsCache();
- unsigned int pointsCacheCount = lod->pointsCacheCount();
- int type = lod->type();
- BoFaceNode* nodes = lod->nodes();
 
- if (!nodes || pointsCacheCount == 0) {
+ if (mesh->pointCount() == 0) {
 	// nothing to do.
 	return 0;
  }
+
+ int pointsize = BoMesh::pointSize();
+ float* pointArray = model()->pointArray() + pointsize * mesh->pointOffset();
 
  bool resetColor = false; // needs to be true after we changed the current color
  bool resetCullFace = false;
@@ -113,42 +112,16 @@ unsigned int BoMeshRendererImmediate::render(const QColor* teamColor, BoMesh* me
 
  unsigned int renderedPoints = 0;
 
- {
-	if (!pointsCache || pointsCacheCount == 0) {
-		boError() << k_funcinfo << "no point cache!" << endl;
-	} else {
-		glBegin(type);
+ glBegin(mesh->renderMode());
 
-		BoFaceNode* node = nodes;
-		while (node) {
-			const BoFace* face = node->face();
-			const int* points = face->pointIndex();
-
-			// AB: this is only partially immediate mode!
-			glNormal3fv(face->normal(0).data());
-			glTexCoord2fv(model()->texel(points[0]).data()); // AB: this is pretty slow, as it creates a BoVector3 object!
-			glVertex3fv(model()->vertex(points[0]).data()); // AB: this is pretty slow, as it creates a BoVector3 object!
-			glNormal3fv(face->normal(1).data());
-			glTexCoord2fv(model()->texel(points[1]).data());
-			glVertex3fv(model()->vertex(points[1]).data());
-			glNormal3fv(face->normal(2).data());
-			glTexCoord2fv(model()->texel(points[2]).data());
-			glVertex3fv(model()->vertex(points[2]).data());
-
-			renderedPoints += 3;
-
-			node = node->next();
-		}
-
-		glEnd();
-
-		// reset the normal...
-		// (better solution: don't enable light when rendering
-		// selection rect!)
-		const float n[] = { 0.0f, 0.0f, 1.0f };
-		glNormal3fv(n);
-	}
+ for (unsigned int i = 0; i < mesh->pointCount(); i++) {
+	glVertex3fv(pointArray + (i * pointsize + 0));
+	glNormal3fv(pointArray + (i * pointsize + 3));
+	glTexCoord2fv(pointArray + (i * pointsize + 6));
+	renderedPoints++;
  }
+
+ glEnd();
 
 
  if (resetColor) {
@@ -163,5 +136,4 @@ unsigned int BoMeshRendererImmediate::render(const QColor* teamColor, BoMesh* me
 
  return renderedPoints;
 }
-
 

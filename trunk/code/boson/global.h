@@ -37,7 +37,7 @@ enum CursorMode {
 enum Direction {
 	North = 0,
 	NorthEast = 1,
-	East = 2, 
+	East = 2,
 	SouthEast = 3,
 	South = 4,
 	SouthWest = 5,
@@ -135,6 +135,7 @@ enum UnitAnimationModes {
 	UnitAnimationMove = 1,
 	UnitAnimationMine = 2,
 	UnitAnimationRefine = 3,
+	UnitAnimationConstruction = 4,
 	UnitAnimationWreckage = 100
 };
 
