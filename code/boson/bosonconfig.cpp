@@ -19,7 +19,10 @@
 #include "bosonconfig.h"
 #include "defines.h"
 #include "boglobal.h"
-//#include "bodebug.h"
+#include "bodebug.h"
+
+#include <qptrlist.h>
+#include <qdict.h>
 
 #include <kconfig.h>
 #include <kapplication.h>
@@ -185,6 +188,8 @@ public:
 		mValue = conf->readIntListEntry(key());
 	}
 
+	virtual int type() const { return IntList; }
+
 	void setValue(QValueList<int> list) { mValue = list; }
 	QValueList<int> value() const { return mValue; }
 
@@ -211,12 +216,16 @@ public:
 	}
 
 	QPtrList<BoConfigEntry> mConfigEntries;
+	QDict<BoConfigEntry> mDynamicEntries; // added dynamically.
 };
 
 BosonConfig::BosonConfig(KConfig* conf)
 {
  d = new BosonConfigPrivate;
  d->mConfigEntries.setAutoDelete(true);
+ // don't delete them - they are in mConfigEntries, too and will get deleted
+ // there
+ d->mDynamicEntries.setAutoDelete(false);
 
  mSound = new BoConfigBoolEntry(this, "Sound", DEFAULT_SOUND);
  mMusic = new BoConfigBoolEntry(this, "Music", DEFAULT_MUSIC);
@@ -270,6 +279,7 @@ BosonConfig::BosonConfig(KConfig* conf)
 
 BosonConfig::~BosonConfig()
 {
+ d->mDynamicEntries.clear();
  d->mConfigEntries.clear();
  delete d;
 }
@@ -518,5 +528,156 @@ void BosonConfig::writeFloatNumList(QValueList<float> list, KConfig* cfg, const 
 	strlist.append(str.setNum(*it));
  }
  cfg->writeEntry(key, strlist);
+}
+
+void BosonConfig::addDynamicEntry(BoConfigEntry* entry)
+{
+ BO_CHECK_NULL_RET(entry);
+ if (entry->key().isEmpty()) {
+	boError() << k_funcinfo << "Cannot add empty key" << endl;
+	delete entry;
+	return;
+ }
+ if (hasKey(entry->key())) {
+	boError() << k_funcinfo << "entry " << entry->key() << " already there" << endl;
+	delete entry;
+	return;
+ }
+ d->mDynamicEntries.insert(entry->key(), entry);
+}
+
+bool BosonConfig::hasKey(const QString& key) const
+{
+ return (d->mDynamicEntries.find(key) != 0);
+}
+
+BoConfigEntry* BosonConfig::value(const QString& key) const
+{
+ return d->mDynamicEntries[key];
+}
+
+void BosonConfig::setBoolValue(const QString& key, bool v)
+{
+ BoConfigEntry* entry = value(key);
+ BO_CHECK_NULL_RET(entry);
+ if (entry->type() != BoConfigEntry::Bool) {
+	boError() << k_funcinfo << key << "is not a boolean entry. type=" << entry->type() << endl;
+	return;
+ }
+ ((BoConfigBoolEntry*)entry)->setValue(v);
+}
+
+void BosonConfig::setIntValue(const QString& key, int v)
+{
+ BoConfigEntry* entry = value(key);
+ BO_CHECK_NULL_RET(entry);
+ if (entry->type() != BoConfigEntry::Int) {
+	boError() << k_funcinfo << key << "is not an integer entry. type=" << entry->type() << endl;
+	return;
+ }
+ ((BoConfigIntEntry*)entry)->setValue(v);
+}
+
+void BosonConfig::setUIntValue(const QString& key, unsigned int v)
+{
+ BoConfigEntry* entry = value(key);
+ BO_CHECK_NULL_RET(entry);
+ if (entry->type() != BoConfigEntry::UInt) {
+	boError() << k_funcinfo << key << "is not an unsigned integer entry. type=" << entry->type() << endl;
+	return;
+ }
+ ((BoConfigUIntEntry*)entry)->setValue(v);
+}
+
+void BosonConfig::setStringValue(const QString& key, const QString& v)
+{
+ BoConfigEntry* entry = value(key);
+ BO_CHECK_NULL_RET(entry);
+ if (entry->type() != BoConfigEntry::String) {
+	boError() << k_funcinfo << key << "is not a string entry. type=" << entry->type() << endl;
+	return;
+ }
+ ((BoConfigStringEntry*)entry)->setValue(v);
+}
+
+void BosonConfig::setDoubleValue(const QString& key, double v)
+{
+ BoConfigEntry* entry = value(key);
+ BO_CHECK_NULL_RET(entry);
+ if (entry->type() != BoConfigEntry::Double) {
+	boError() << k_funcinfo << key << "is not a double entry. type=" << entry->type() << endl;
+	return;
+ }
+ ((BoConfigDoubleEntry*)entry)->setValue(v);
+}
+
+bool BosonConfig::boolValue(const QString& key, bool _default) const
+{
+ BoConfigEntry* entry = value(key);
+ if (!entry) {
+	boError() << k_funcinfo << "no key " << key << endl;
+	return _default;
+ }
+ if (entry->type() != BoConfigEntry::Bool) {
+	boError() << k_funcinfo << key << "is not a bool entry. type=" << entry->type() << endl;
+	return _default;
+ }
+ return ((BoConfigBoolEntry*)entry)->value();
+}
+
+int BosonConfig::intValue(const QString& key, int _default) const
+{
+ BoConfigEntry* entry = value(key);
+ if (!entry) {
+	boError() << k_funcinfo << "no key " << key << endl;
+	return _default;
+ }
+ if (entry->type() != BoConfigEntry::Int) {
+	boError() << k_funcinfo << key << "is not an integer entry. type=" << entry->type() << endl;
+	return _default;
+ }
+ return ((BoConfigIntEntry*)entry)->value();
+}
+
+unsigned int BosonConfig::uintValue(const QString& key, unsigned int _default) const
+{
+ BoConfigEntry* entry = value(key);
+ if (!entry) {
+	boError() << k_funcinfo << "no key " << key << endl;
+	return _default;
+ }
+ if (entry->type() != BoConfigEntry::UInt) {
+	boError() << k_funcinfo << key << "is not an unsigned integer entry. type=" << entry->type() << endl;
+	return _default;
+ }
+ return ((BoConfigUIntEntry*)entry)->value();
+}
+
+const QString&BosonConfig::stringValue(const QString& key, const QString& _default) const
+{
+ BoConfigEntry* entry = value(key);
+ if (!entry) {
+	boError() << k_funcinfo << "no key " << key << endl;
+	return _default;
+ }
+ if (entry->type() != BoConfigEntry::String) {
+	boError() << k_funcinfo << key << "is not a string entry. type=" << entry->type() << endl;
+	return _default;
+ }
+ return ((BoConfigStringEntry*)entry)->value();
+}
+
+double BosonConfig::doubleValue(const QString& key, double _default) const
+{
+ BoConfigEntry* entry = value(key);
+ if (!entry) {
+	boError() << k_funcinfo << "no key " << key << endl;
+	return _default;
+ }
+ if (entry->type() != BoConfigEntry::Double) {
+	boError() << k_funcinfo << key << "is not a double entry. type=" << entry->type() << endl;
+	return _default;
+ }
+ return ((BoConfigDoubleEntry*)entry)->value();
 }
 

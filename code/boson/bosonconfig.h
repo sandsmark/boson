@@ -32,6 +32,15 @@ template<class T> class QValueList;
 class BoConfigEntry
 {
 public:
+	enum Type {
+		Bool = 0,
+		Int = 1,
+		UInt = 2,
+		Double = 3,
+		String = 4,
+		IntList = 5
+	};
+public:
 	BoConfigEntry(BosonConfig* parent, const QString& key);
 	virtual ~BoConfigEntry();
 
@@ -46,6 +55,8 @@ public:
 
 	virtual void save(KConfig* conf) = 0;
 	virtual void load(KConfig* conf) = 0;
+
+	virtual int type() const = 0;
 
 	const QString& key() const { return mKey; }
 
@@ -66,6 +77,8 @@ public:
 	virtual void save(KConfig* conf);
 	virtual void load(KConfig* conf);
 
+	virtual int type() const { return Bool; }
+
 private:
 	bool mValue;
 };
@@ -81,6 +94,8 @@ public:
 
 	virtual void save(KConfig* conf);
 	virtual void load(KConfig* conf);
+
+	virtual int type() const { return Int; }
 
 private:
 	int mValue;
@@ -99,6 +114,8 @@ public:
 	virtual void save(KConfig* conf);
 	virtual void load(KConfig* conf);
 
+	virtual int type() const { return UInt; }
+
 private:
 	unsigned int mValue;
 };
@@ -115,6 +132,8 @@ public:
 	virtual void save(KConfig* conf);
 	virtual void load(KConfig* conf);
 
+	virtual int type() const { return Double; }
+
 private:
 	double mValue;
 };
@@ -130,6 +149,8 @@ public:
 
 	virtual void save(KConfig* conf);
 	virtual void load(KConfig* conf);
+
+	virtual int type() const { return String; }
 
 private:
 	QString mValue;
@@ -278,6 +299,100 @@ public:
 
 	void setToolTipCreator(int type) { mToolTipCreator->setValue(type); }
 	int toolTipCreator() const { return mToolTipCreator->value(); }
+
+
+
+
+
+	/**
+	 * Add a dynamic entry to BosonConfig. A dynamic entry does not have a
+	 * dedicates set/get function, but rather uses @ref setBoolValue,
+	 * @ref value and friends.
+	 *
+	 * You should not use this for extremely time critical config entries
+	 * (time critical means it is used several dozen times per second at
+	 * least), as at least one @ref QDict lookup is involved for nearly
+	 * every operation.
+	 *
+	 * For all non-time critical config entries this can be very handy, as
+	 * you don't need to modify bosonconfig.h (and therefore don't have to
+	 * recompile everything).
+	 **/
+	void addDynamicEntry(BoConfigEntry* entry);
+
+	/**
+	 * @return TRUE if a dynamic entry with @p key was added with @ref
+	 * addDynamicEntry, otherwise FALSE.
+	 **/
+	bool hasKey(const QString& key) const;
+
+	/**
+	 * Set the value of the config entry @p key (see @ref value) to @p
+	 * value. This operates on @ref BoConfigBoolEntry objects.
+	 *
+	 * Note that an overloaded "setValue()" method for this task is not
+	 * provided, because while programming it is only a minor difference
+	 * between setUIntValue() and setIntValue(), but as they resolve to two
+	 * different classes in BosonConfig it is a major difference here. I
+	 * believe this is not a problem for us.
+	 **/
+	void setBoolValue(const QString& key, bool value);
+
+	/**
+	 * Same as  @ref setBoolValue, but for @ref BoConfigIntEntry objects.
+	 **/
+	void setIntValue(const QString& key, int value);
+
+	/**
+	 * Same as  @ref setBoolValue, but for @ref BoConfigUIntEntry objects.
+	 **/
+	void setUIntValue(const QString& key, unsigned int value);
+
+	/**
+	 * Same as  @ref setBoolValue, but for @ref BoConfigDoubleEntry objects.
+	 **/
+	void setDoubleValue(const QString& key, double value);
+
+	/**
+	 * Same as  @ref setBoolValue, but for @ref BoConfigStringEntry objects.
+	 **/
+	void setStringValue(const QString& key, const QString& value);
+
+	/**
+	 * @return The (dynamic) entry for @p key, or NULL if no such key was
+	 * ever added using @ref addDynamicEntry.
+	 **/
+	BoConfigEntry* value(const QString& key) const;
+
+	/**
+	 * @return The value of the entry @p key, or @p _default no entry of the
+	 * correct type exists.
+	 **/
+	bool boolValue(const QString& key, bool _default = false) const;
+
+	/**
+	 * @return The value of the entry @p key, or @p _default no entry of the
+	 * correct type exists.
+	 **/
+	int intValue(const QString& key, int _default = 0) const;
+
+	/**
+	 * @return The value of the entry @p key, or @p _default no entry of the
+	 * correct type exists.
+	 **/
+	unsigned int uintValue(const QString& key, unsigned int _default = 0) const;
+
+	/**
+	 * @return The value of the entry @p key, or @p _default no entry of the
+	 * correct type exists.
+	 **/
+	const QString& stringValue(const QString& key, const QString& _default = QString::null) const;
+
+	/**
+	 * @return The value of the entry @p key, or @p _default no entry of the
+	 * correct type exists.
+	 **/
+	double doubleValue(const QString& key, double _default = 0.0) const;
 
 
 // below we have config values that are *not* stored when quitting boson
