@@ -98,8 +98,15 @@ bool playerMobUnit::getWantedMove(bosonMsgData *msg)
 			turnTo(newdir); // turning anyway
 			if (state != MUS_MOVING) return false;
 
+		case MUS_MOVING_WAIT:
+			if ( 0 == --countDown ) {
+				state = MUS_MOVING;	// and keep on the next case
+				logf(LOG_INFO, "MUS_MOVING_WAIT finished, [%p] try again now", this);
+			}
+			else return false;		// nothing, return
+
 		case MUS_MOVING:
-			ldx = dest_x - x() ; ldy= dest_y - y();
+			ldx = dest_x - x() ; ldy = dest_y - y();
 
 			range = mobileProp[type].range;
 			if (target && range*range > ldx*ldx + ldy*ldy) // we are near enough to shoot at the target
@@ -144,13 +151,16 @@ bool playerMobUnit::getWantedMove(bosonMsgData *msg)
 
 			/* failed : can't move any more */
 			asked_state = state = MUS_NONE;
-			present_dx = present_dy = 0; // so that willBe returns the good position
-			//logf(LOG_GAME_LOW, "ckeckMove failed stopping: mobile[%p] has stopped\n", this);
-			logf(LOG_WARNING, "ckeckMove failed : mobile[%p] has stopped\n", this);
+			logf(LOG_INFO, "ckeckMove failed : mobile[%p] will try later", this);
+			state = MUS_MOVING_WAIT;
+			countDown = 5;
 			return false; 
 
 			break;
 		}
+
+	logf(LOG_ERROR, "unhandled state in getWantedMove()");
+	return false;
 }
 
 
@@ -349,9 +359,9 @@ void playerMobUnit::do_goto(int mx, int my)
 {
 
 	dest_x = mx; dest_y = my;
-	if (x()==dest_x || y()==dest_y) return;
-
-	state = MUS_TURNING;
+	if (x()==dest_x && y()==dest_y)
+		state = MUS_NONE;
+	else	state = MUS_TURNING;
 	//puts("going to MUS_TURNING");
 
 ///orzel : moving across complicated environment algorithm

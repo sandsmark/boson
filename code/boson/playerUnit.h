@@ -28,6 +28,7 @@ enum mobUnitState {
 	MUS_NONE,
 	MUS_TURNING,
 	MUS_MOVING,
+	MUS_MOVING_WAIT,
 	MUS_,
 	};
 	
