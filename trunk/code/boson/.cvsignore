@@ -18,3 +18,4 @@ bocursor_meta_unload.cpp
 *.bsg
 borender
 borender_meta_unload.cpp
+boson-*.png
