@@ -34,11 +34,28 @@
 #include <klocale.h>
 #include <kgame/kgameio.h>
 
+#include <qbuffer.h>
 #include <qtimer.h>
+#include <qdatetime.h>
 #include <qptrlist.h>
+#include <qptrqueue.h>
 #include <qdom.h>
 
 #include "boson.moc"
+
+#define ENABLE_DELAYING
+
+#ifdef ENABLE_DELAYING
+class BoMessage
+{
+public:
+	QByteArray byteArray;
+	int msgid;
+	Q_UINT32 receiver;
+	Q_UINT32 sender;
+	Q_UINT32 clientId;
+};
+#endif
 
 class Boson::BosonPrivate
 {
@@ -48,9 +65,20 @@ public:
 		mGameTimer = 0;
 		mCanvas = 0;
 
+		mAdvanceDividerCount = 0;
 	}
 
 	QTimer* mGameTimer;
+#ifdef ENABLE_DELAYING
+	QTime mAdvanceDistance;
+	int mAdvanceDivider;
+	int mAdvanceDividerCount;
+	int mAdvanceMessageWaiting;
+	QPtrQueue<BoMessage> mDelayedMessages;
+	bool mIsLocked;
+	bool mDelayedWaiting; // FIXME bad name!
+#endif
+	
 	QCanvas* mCanvas; // this pointer is anti-OO IMHO
 	QPtrList<KGameComputerIO> mComputerIOList;
 	
@@ -66,6 +94,12 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
  d = new BosonPrivate;
 
  d->mGameTimer = new QTimer(this);
+#ifdef ENABLE_DELAYING
+ d->mAdvanceDivider = 1;
+ d->mIsLocked = false;
+ d->mDelayedWaiting = false;
+ d->mAdvanceMessageWaiting = 0;
+#endif
 
  connect(this, SIGNAL(signalNetworkData(int, const QByteArray&, Q_UINT32, Q_UINT32)),
 		this, SLOT(slotNetworkData(int, const QByteArray&, Q_UINT32, Q_UINT32)));
@@ -81,8 +115,10 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
 		this, SLOT(slotPlayerLeftGame(KPlayer*)));
  connect(this, SIGNAL(signalAdvance(unsigned int)),
 		this, SLOT(slotAdvanceComputerPlayers(unsigned int)));
+ connect(dataHandler(), SIGNAL(signalPropertyChanged(KGamePropertyBase*)),
+		this, SLOT(slotPropertyChanged(KGamePropertyBase*)));
  d->mGameSpeed.registerData(IdGameSpeed, dataHandler(),
-		KGamePropertyBase::PolicyLocal, "GameSpeed"); // PolicyClean?
+		KGamePropertyBase::PolicyClean, "GameSpeed");
  d->mNextUnitId.registerData(IdNextUnitId, dataHandler(),
 		KGamePropertyBase::PolicyLocal, "NextUnitId");
  d->mAdvanceCount.registerData(IdAdvanceCount, dataHandler(),
@@ -609,18 +645,18 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 		}
 		break;
 	}
-	case BosonMessage::Advance:
-//		lock();
-//		for (unsigned i = 0; i < 5; i++) {
-			emit signalAdvance(d->mAdvanceCount);
-			d->mAdvanceCount = d->mAdvanceCount + 1;
-			if (d->mAdvanceCount >= MAXIMAL_ADVANCE_COUNT) {
-				d->mAdvanceCount = 0;
-			}
-//			qApp->processEvents(5);
-//		}
-//		unlock();
+	case BosonMessage::Advance10:
+	{
+#ifdef ENABLE_DELAYING
+		d->mAdvanceDivider = 10;
+		d->mAdvanceDividerCount = 0;
+		lock();
+		kdDebug() << "Advance - speed (ms)=" << gameSpeed() << " elapsed: " << d->mAdvanceDistance.elapsed() << endl;
+		d->mAdvanceDistance.restart();
+#endif
+		slotReceiveAdvance();
 		break;
+	}
 	case BosonMessage::InitMap:
 		emit signalInitMap(buffer);
 		break;
@@ -711,6 +747,7 @@ void Boson::startGame()
 	connect(d->mGameTimer, SIGNAL(timeout()), this, SLOT(slotSendAdvance()));
 	if (gameSpeed() != 0) {
 		if (!d->mGameTimer->isActive()) {
+			kdDebug() << "start timer - ms=" << gameSpeed() << endl;
 			d->mGameTimer->start(gameSpeed());
 		} else {
 			kdWarning() << "timer was already active!" << endl;
@@ -723,7 +760,7 @@ void Boson::startGame()
 
 void Boson::slotSendAdvance()
 {
- sendMessage(0, BosonMessage::Advance);
+ sendMessage(0, BosonMessage::Advance10);
 }
 
 Unit* Boson::createUnit(int unitType, Player* owner)
@@ -807,14 +844,25 @@ void Boson::slotSetGameSpeed(int speed)
  }
  if ((speed > MIN_GAME_SPEED || speed < MAX_GAME_SPEED) && speed != 0) {
 	kdWarning() << "unexpected speed " << speed << endl;
+	return;
  }
 // kdDebug() << k_funcinfo << ": " << speed << endl;
  d->mGameSpeed = speed;
- if (d->mGameTimer->isActive()) {
-	d->mGameTimer->stop();
-	if (d->mGameSpeed != 0) {
-		d->mGameTimer->start(gameSpeed());
-	}
+}
+
+void Boson::slotPropertyChanged(KGamePropertyBase* p)
+{
+ switch (p->id()) {
+	case IdGameSpeed:
+		if (d->mGameTimer->isActive()) {
+			d->mGameTimer->stop();
+			if (d->mGameSpeed != 0) {
+				d->mGameTimer->start(gameSpeed());
+			}
+		}
+		break;
+	default:
+		break;
  }
 }
 
@@ -997,3 +1045,99 @@ QValueList<QColor> Boson::availableTeamColors() const
  }
  return colors;
 }
+
+void Boson::slotReceiveAdvance()
+{
+ emit signalAdvance(d->mAdvanceCount);
+#ifdef ENABLE_DELAYING
+ d->mAdvanceCount = d->mAdvanceCount + 1;
+ if (d->mAdvanceCount >= MAXIMAL_ADVANCE_COUNT) {
+	d->mAdvanceCount = 0;
+ }
+ if (d->mAdvanceDividerCount + 1 == d->mAdvanceDivider)  {
+	kdDebug() << k_funcinfo << "delayed messages: " 
+			<< d->mDelayedMessages.count() << endl;
+	unlock();
+ } else if (d->mAdvanceDividerCount + 1< d->mAdvanceDivider) {
+	int next;
+	if (d->mAdvanceMessageWaiting == 0) {
+		int t = (gameSpeed() + d->mAdvanceDivider * 2) * d->mAdvanceDividerCount / d->mAdvanceDivider; // time that should have been elapsed
+		int diff = QMAX(10, d->mAdvanceDistance.elapsed() - t + 10); // we are adding 1ms "safety" diff
+		next = QMAX(0, (gameSpeed() + d->mAdvanceDivider * 2) / d->mAdvanceDivider - diff);
+	} else {
+		next = 0;
+	}
+	if (d->mDelayedMessages.count() > 20) {
+		kdWarning() << k_funcinfo << "more than 20 messages delayed!!" << endl;
+		next = 0;
+	}
+//	kdDebug() << "next: " << next << endl;
+	QTimer::singleShot(next,  this, SLOT(slotReceiveAdvance()));
+	d->mAdvanceDividerCount++;
+ } else {
+	kdError() << k_funcinfo << "count > divider --> This must never happen!!" << endl;
+ }
+#endif
+}
+
+void Boson::networkTransmission(QDataStream& stream, int msgid, Q_UINT32 r, Q_UINT32 s, Q_UINT32 clientId)
+{
+#ifdef ENABLE_DELAYING
+ if (d->mIsLocked || d->mDelayedWaiting) {
+	kdDebug() << k_funcinfo << "delaying " << msgid<< endl;
+	BoMessage* m = new BoMessage;
+	m->byteArray = ((QBuffer*)stream.device())->readAll();
+	m->msgid = msgid;
+	m->receiver = r;
+	m->sender = s;
+	m->clientId = clientId;
+	d->mDelayedMessages.enqueue(m);
+	d->mDelayedWaiting = true;
+	if (msgid == KGameMessage::IdUser + BosonMessage::Advance10) {
+		d->mAdvanceMessageWaiting++;
+		kdDebug() << k_funcinfo << "advance message got delayed" << endl;
+	}
+	return;
+ }
+#endif
+ KGame::networkTransmission(stream, msgid, r, s, clientId);
+}
+
+void Boson::lock()
+{
+#ifdef ENABLE_DELAYING
+ kdDebug() << k_funcinfo << endl;
+ d->mIsLocked = true;
+#endif
+}
+
+void Boson::unlock()
+{
+#ifdef ENABLE_DELAYING
+ kdDebug() << k_funcinfo << endl;
+ d->mIsLocked = false;
+ while (!d->mDelayedMessages.isEmpty() && !d->mIsLocked) {
+	slotProcessDelayed();
+ }
+#endif
+}
+
+void Boson::slotProcessDelayed() // TODO: rename: processDelayed()
+{
+#ifdef ENABLE_DELAYING
+ BoMessage* m = d->mDelayedMessages.dequeue();
+ if (!m) {
+	kdWarning() << k_funcinfo << "no message here" << endl;
+	return;
+ }
+ QDataStream s(m->byteArray, IO_ReadOnly);
+ d->mDelayedWaiting = false;
+ if (m->msgid == KGameMessage::IdUser + BosonMessage::Advance10) {
+	d->mAdvanceMessageWaiting--;
+ }
+ networkTransmission(s, m->msgid, m->receiver, m->sender, m->clientId);
+ d->mDelayedWaiting = !d->mDelayedMessages.isEmpty();
+ delete m;
+#endif
+}
+

@@ -75,6 +75,10 @@ public:
 	 **/
 	void sendAddUnits(const QString& xmlDocument, Player* owner);
 
+	virtual void networkTransmission(QDataStream&, int msgid, Q_UINT32 receiver, Q_UINT32 sender, Q_UINT32 clientID);
+	virtual void lock();
+	virtual void unlock();
+
 public slots:
 	void slotSetGameSpeed(int speed);
 
@@ -205,6 +209,12 @@ protected slots:
 
 	void slotPlayerJoinedGame(KPlayer*);
 	void slotPlayerLeftGame(KPlayer*);
+
+	void slotProcessDelayed();
+
+	void slotPropertyChanged(KGamePropertyBase*);
+
+	void slotReceiveAdvance();
 
 private:
 	class BosonPrivate;
