@@ -34,26 +34,36 @@ class BosonParticleManager
   public:
     static void loadTextures(QString texdir);
 
-    enum Type { None = 0, Explosion = 1, Smoke = 2, Shot = 3, LastType };
+    enum Type { None = 0, Explosion = 1, Smoke = 2, Shot = 3, Fire = 4, SmallSmoke = 5, LastType };
 
     static BosonParticleSystem* newSystem(BoVector3 pos, Type type);
 
     inline static BosonParticleSystem* newExplosion(BoVector3 pos) { return newSystem(pos, Explosion); };
-    inline static BosonParticleSystem* newExplosion(float x, float y, float z) { return newSystem(BoVector3(x, y, z), Explosion); };
+//    inline static BosonParticleSystem* newExplosion(float x, float y, float z) { return newSystem(BoVector3(x, y, z), Explosion); };
     inline static BosonParticleSystem* newSmoke(BoVector3 pos) { return newSystem(pos, Smoke); };
-    inline static BosonParticleSystem* newSmoke(float x, float y, float z) { return newSystem(BoVector3(x, y, z), Smoke); };
+//    inline static BosonParticleSystem* newSmoke(float x, float y, float z) { return newSystem(BoVector3(x, y, z), Smoke); };
     inline static BosonParticleSystem* newShot(BoVector3 pos) { return newSystem(pos, Shot); };
-    inline static BosonParticleSystem* newShot(float x, float y, float z) { return newSystem(BoVector3(x, y, z), Shot); };
+//    inline static BosonParticleSystem* newShot(float x, float y, float z) { return newSystem(BoVector3(x, y, z), Shot); };
+    inline static BosonParticleSystem* newFire(BoVector3 pos) { return newSystem(pos, Fire); };
+//    inline static BosonParticleSystem* newFire(float x, float y, float z) { return newSystem(BoVector3(x, y, z), Fire); };
+    inline static BosonParticleSystem* newSmallSmoke(BoVector3 pos) { return newSystem(pos, SmallSmoke); };
 
     static void initExplosionParticle(BosonParticleSystem* system, BosonParticle* particle);
-    static void updateExplosionParticle(BosonParticleSystem* system, BosonParticle* particle);
+    //static void updateExplosionParticle(BosonParticleSystem* system, BosonParticle* particle);
 
     static void initSmokeParticle(BosonParticleSystem* system, BosonParticle* particle);
-    static void updateSmokeParticle(BosonParticleSystem* system, BosonParticle* particle);
+    //static void updateSmokeParticle(BosonParticleSystem* system, BosonParticle* particle);
 
     static void initShotParticle(BosonParticleSystem* system, BosonParticle* particle);
-    static void updateShotParticle(BosonParticleSystem* system, BosonParticle* particle);
+    //static void updateShotParticle(BosonParticleSystem* system, BosonParticle* particle);
+
+    static void initFireParticle(BosonParticleSystem* system, BosonParticle* particle);
+    static void updateFireParticle(BosonParticleSystem* system, BosonParticle* particle);
     
+    static void initSmallSmokeParticle(BosonParticleSystem* system, BosonParticle* particle);
+
+    static void updateFadeOutParticle(BosonParticleSystem* system, BosonParticle* particle);
+
     inline static float getFloat(float min, float max) { return ((float)(mRandom->getDouble())) * (max - min) + min; };
 
   protected:

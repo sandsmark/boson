@@ -39,6 +39,7 @@ BosonParticle::BosonParticle(BoVector4 c, BoVector3 p, BoVector3 v, float s, flo
   velo = v;
   size = s;
   life = l;
+  maxage = l;
 }
 
 BosonParticle::~BosonParticle()
@@ -52,6 +53,7 @@ void BosonParticle::reset()
   velo.reset();
   size = 0;
   life = -1.0;
+  maxage = 0;
 }
 
 void BosonParticle::update(float elapsed)
@@ -65,8 +67,7 @@ void BosonParticle::update(float elapsed)
 BosonParticleSystem::BosonParticleSystem(int maxnum, int initialnum, float size,
     float createrate, bool align, float maxradius, int texture,
     BoVector4 color, float particleage, float age, BoVector3 pos, BoVector3 velo,
-    ExternalFunction initFunc, ExternalFunction updateFunc,
-    ExternalFunction deleteFunc)
+    ExternalFunction initFunc, ExternalFunction updateFunc)
 {
   // Set some variables first
   mMaxNum = maxnum;
@@ -83,7 +84,6 @@ BosonParticleSystem::BosonParticleSystem(int maxnum, int initialnum, float size,
   mPos = pos;
   mInitFunc = initFunc;
   mUpdateFunc = updateFunc;
-  mDeleteFunc = deleteFunc;
   mParticleAge = particleage;
   mAge = age;
   mVelo = velo;
@@ -91,32 +91,25 @@ BosonParticleSystem::BosonParticleSystem(int maxnum, int initialnum, float size,
   init(initialnum);
 }
 
-BosonParticleSystem::BosonParticleSystem(int maxnum, int initialnum,
+BosonParticleSystem::BosonParticleSystem(int maxnum,
     float createrate, bool align, float maxradius, int texture,
-    ExternalFunction initFunc, ExternalFunction updateFunc,
-    ExternalFunction deleteFunc)
+    ExternalFunction initFunc, ExternalFunction updateFunc)
 {
   kdDebug() << k_funcinfo << "CREATING PARTICLE SYSTEM.  maxnum: " <<  maxnum <<
-      "; initialnum: " << initialnum << "; createrate: " << createrate << endl;
+      "; createrate: " << createrate << endl;
   // Set some variables first
   mMaxNum = maxnum;
-  if(initialnum > maxnum)
-  {
-    kdDebug() << k_funcinfo << "initialnum too big, setting to " << initialnum << endl;
-    initialnum = maxnum;
-  }
   mCreateRate = createrate;
   mAlign = align;
   mRadius = maxradius;
   mTexture = texture;
   mInitFunc = initFunc;
   mUpdateFunc = updateFunc;
-  mDeleteFunc = deleteFunc;
   mSize = 0;
   mParticleAge = 0;
   mAge = 3600;
 
-  init(initialnum);
+  init(0);
 }
 
 void BosonParticleSystem::init(int initialnum)
@@ -137,10 +130,17 @@ void BosonParticleSystem::init(int initialnum)
 
 void BosonParticleSystem::createParticles(int count)
 {
+  if(count > mMaxNum) 
+  {
+    count = mMaxNum;
+  }
   for(int i = 0; i < count; i++)
   {
-    initParticle(&mParticles[i]);
-    mNum++;
+    if(mParticles[i].life <= 0.0)
+    {
+      initParticle(&mParticles[i]);
+      mNum++;
+    }
   }
 }
 
@@ -155,6 +155,12 @@ void BosonParticleSystem::update(float elapsed)
       "; createCache: " << mCreateCache << "; will add " << elapsed * mCreateRate <<
       " to create cache (total will be = " << mCreateCache + (elapsed * mCreateRate) << ")" << endl;*/
   mCreateCache += (elapsed * mCreateRate);
+
+  if((mCreateCache < 1.0) && (mNum <= 0))
+  {
+    return;
+  }
+
   mNum = 0;
   mAge -= elapsed;
   
@@ -182,7 +188,6 @@ void BosonParticleSystem::update(float elapsed)
   if((mCreateCache >= 1.0) && (mAge >= 0.0))
   {
 //    kdDebug() << k_funcinfo << "createCache >= 1.0 (" << mCreateCache << "); trying to create new particles" << endl;
-    int created = 0;
     for(int i = 0; (i < mMaxNum) && (mCreateCache >= 1.0); i++)
     {
       if(mParticles[i].life <= 0.0)
@@ -191,7 +196,6 @@ void BosonParticleSystem::update(float elapsed)
         initParticle(&mParticles[i]);
         mCreateCache -= 1.0;
         mNum++;
-        created++;
       }
     }
 //    kdDebug() << k_funcinfo << "Created " << created << " new particles; createCache is now " << mCreateCache << endl;
@@ -229,10 +233,10 @@ void BosonParticleSystem::draw()
   }
   else
   {
-    nw.set(-size, 0, -size);
-    ne.set(size, 0, -size);
-    se.set(size, 0, size);
-    sw.set(-size, 0, size);
+    nw.set(-size, -size, 0);
+    ne.set(size, -size, 0);
+    se.set(size, size, 0);
+    sw.set(-size, size, 0);
   }
 
   // Update particles

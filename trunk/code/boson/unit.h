@@ -34,6 +34,7 @@ class Facility;
 class ProductionPlugin;
 class UnitPlugin;
 class RepairPlugin;
+class BosonParticleSystem;
 
 class KGameUnitDebug;
 
@@ -524,6 +525,12 @@ public:
 	 * otherwise @ref Unit::plugin
 	 **/
 	virtual UnitPlugin* plugin(int pluginType) const;
+
+	BosonParticleSystem* flamesParticleSystem() const;
+	void setFlamesParticleSystem(BosonParticleSystem* s);
+	BosonParticleSystem* smokeParticleSystem() const;
+	void setSmokeParticleSystem(BosonParticleSystem* s);
+	void deleteParticleSystems();
 
 private:
 	class FacilityPrivate;

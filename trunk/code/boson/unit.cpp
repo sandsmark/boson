@@ -33,6 +33,7 @@
 #include "pluginproperties.h"
 //#include "kspritetooltip.h" // FIXME
 #include "boson.h"
+#include "bosonparticlesystem.h"
 
 #include <kgame/kgamepropertylist.h>
 #include <kgame/kgame.h>
@@ -1211,10 +1212,16 @@ public:
 	FacilityPrivate()
 	{
 		mRepairPlugin = 0;
+
+		mFlamesParticleSystem = 0;
+		mSmokeParticleSystem = 0;
 	}
 
 	KGameProperty<unsigned int> mConstructionState; // state of *this* unit
 	RepairPlugin* mRepairPlugin;
+
+	BosonParticleSystem* mFlamesParticleSystem;
+	BosonParticleSystem* mSmokeParticleSystem;
 };
 
 Facility::Facility(const UnitProperties* prop, Player* owner, BosonCanvas* canvas) : Unit(prop, owner, canvas)
@@ -1339,3 +1346,32 @@ unsigned int Facility::currentConstructionStep() const
  return d->mConstructionState;
 }
 
+BosonParticleSystem* Facility::flamesParticleSystem() const
+{
+ return d->mFlamesParticleSystem;
+}
+
+void Facility::setFlamesParticleSystem(BosonParticleSystem* s)
+{
+ d->mFlamesParticleSystem = s;
+}
+
+BosonParticleSystem* Facility::smokeParticleSystem() const
+{
+ return d->mSmokeParticleSystem;
+}
+
+void Facility::setSmokeParticleSystem(BosonParticleSystem* s)
+{
+ d->mSmokeParticleSystem = s;
+}
+
+void Facility::deleteParticleSystems()
+{
+ if(d->mFlamesParticleSystem) {
+	delete d->mFlamesParticleSystem;
+ }
+ if(d->mSmokeParticleSystem) {
+	delete d->mSmokeParticleSystem;
+ }
+}

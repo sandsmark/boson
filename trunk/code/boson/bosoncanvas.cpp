@@ -332,7 +332,7 @@ void BosonCanvas::shootAtUnit(Unit* target, Unit* attackedBy, long int damage)
 	health -= damage;
 	target->setHealth((health >= 0) ? health : 0);
  }
-
+ 
  if (target->isDestroyed()) {
 	destroyUnit(target); // display the explosion ; not the shoot
  } else {
@@ -340,6 +340,30 @@ void BosonCanvas::shootAtUnit(Unit* target, Unit* attackedBy, long int damage)
 			-((target->y() + target->height() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE),
 			target->z() * BO_GL_CELL_SIZE / BO_TILE_SIZE);
 	d->mParticles.append(BosonParticleManager::newShot(pos));
+
+	if(target->isFacility()) {
+		if(target->health() <= (target->unitProperties()->health() / 2.0)) {
+			// If facility has less than 50% hitpoints, it's burning
+			if(!((Facility*)target)->flamesParticleSystem()) {
+				BosonParticleSystem* s = BosonParticleManager::newFire(pos);
+				((Facility*)target)->setFlamesParticleSystem(s);
+				d->mParticles.append(s);
+			}
+			if(!((Facility*)target)->smokeParticleSystem()) {
+				BosonParticleSystem* s = BosonParticleManager::newSmallSmoke(pos);
+				((Facility*)target)->setSmokeParticleSystem(s);
+				d->mParticles.append(s);
+			}
+		} else {
+			// If it has more hitpoints, it's not burning ;-)
+			if(((Facility*)target)->flamesParticleSystem()) {
+				((Facility*)target)->flamesParticleSystem()->setAge(0);
+			}
+			if(((Facility*)target)->smokeParticleSystem()) {
+				((Facility*)target)->smokeParticleSystem()->setAge(0);
+			}
+		}
+	}
  }
  attackedBy->playSound(SoundShoot);
 }
@@ -355,6 +379,16 @@ void BosonCanvas::destroyUnit(Unit* unit)
 	kdDebug() << "destroy unit " << unit->id() << endl;
 	Player* owner = unit->owner();
 	d->mDestroyedUnits.append(unit);
+
+	if(unit->isFacility()) {
+		kdDebug() << k_funcinfo << "destoying facility" << endl;
+		if(((Facility*)unit)->flamesParticleSystem()) {
+			((Facility*)unit)->flamesParticleSystem()->setAge(0);
+		}
+		if(((Facility*)unit)->smokeParticleSystem()) {
+			((Facility*)unit)->smokeParticleSystem()->setAge(0);
+		}
+	}
 
 	// the unit is added to a list - now displayed as a wreckage only.
 	unit->setAnimated(false);
