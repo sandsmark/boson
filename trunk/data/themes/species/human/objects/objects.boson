@@ -12,3 +12,8 @@ Height=0.3
 File=daisycutter.3ds
 Width=0.5
 Height=0.5
+
+[fragment]
+File=fragment1.3ds
+Width=0.2
+Height=0.2
