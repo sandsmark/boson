@@ -286,12 +286,13 @@ AC_DEFUN(AC_BOSON_CHECK_XRANDR,
   bo_save_ldflags="$LDFLAGS"
   bo_save_cflags="$CFLAGS"
   bo_save_libs="$LIBS"
-  dnl AB: maybe we need -lXRender, too
-  bo_lib_xrandr="-lXext -lXrandr"
+  dnl AB: -lXrender is required on some systems :-(
+  dnl TODO: find a way to link to it only on those systems
+  bo_lib_xrandr="-lXext -lXrender -lXrandr"
   AC_MSG_CHECKING(for XFree86 Xrandr extension)
   LDFLAGS="$LDFLAGS $X_LDFLAGS"
   CFLAGS="$CFLAGS $X_INCLUDES"
-  LIBS="$LIBS -lX11 -lXrender $bo_lib_xrandr"
+  LIBS="$LIBS -lX11 $bo_lib_xrandr"
 
   AC_TRY_LINK(
 	[
