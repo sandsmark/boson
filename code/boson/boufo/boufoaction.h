@@ -139,15 +139,29 @@ public:
 	virtual void plug(ufo::UWidget*);
 
 	// does NOT take ownership
-//	void insert(BoUfoAction* a, int index); // TODO
-	void insert(BoUfoAction* a);
+	void insert(BoUfoAction* a, int id = -1, int index = -1);
 	void remove(BoUfoAction* a);
+	void insertItem(const QString&, int id = -1, int index = -1);
+
+	BoUfoAction* item(int id) const;
+	int itemId(BoUfoAction*) const;
 
 	virtual void clear();
+
+	/**
+	 * Does nothing by default. Reimplemented by @ref BoUfoSelectAction
+	 **/
+	virtual void setCurrentItem(int id) { Q_UNUSED(id); }
 
 protected:
 	void redoMenus();
 	const QPtrList<BoUfoAction>& actions() const;
+
+signals:
+	void signalActivated(int id);
+
+protected slots:
+	void slotMenuItemActivated();
 
 private:
 	BoUfoActionMenuPrivate* d;
@@ -164,13 +178,7 @@ public:
 	virtual void clear();
 
 	void setItems(const QStringList&);
-	void setCurrentItem(int);
-
-protected slots:
-	void slotItemActivated();
-
-signals:
-	void signalActivated(int);
+	virtual void setCurrentItem(int id);
 
 private:
 	BoUfoSelectActionPrivate* d;
@@ -207,6 +215,8 @@ public:
 	void remove(BoUfoAction* action, bool deleteIt = true);
 	bool hasAction(const QString& name) const;
 	BoUfoAction* action(const QString& name) const;
+
+	void setActionEnabled(const QString& name, bool);
 
 	bool createGUI(const QString& file);
 	bool createGUI(const QStringList& fileList);
