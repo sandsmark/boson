@@ -1,7 +1,7 @@
 <?php
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -59,17 +59,6 @@ draw_bigbox_text("These requirements apply to the latest stable release
     * Optional: Sound card<br>
     <br>
     <b>Minimum software requirements:</b><br>
-    * XFree 4.x server (with OpenGL support) - see <a href=\"http://www.xfree86.org/\" target=\"_blank\">http://www.xfree86.org/</a><br>
-    * OpenGL - The OpenGL library (should be included in your XFree Server or graphics card driver)<br>
-    * Qt 3.1 or better - see <a href=\"http://www.trolltech.com/\" target=\"_blank\">http://www.trolltech.com/</a><br>
-    * KDE 3.1 or better (3.0 is untested) - see <a href=\"http://www.kde.org/\" target=\"_blank\">http://www.kde.org/</a><br>
-    * Python 2.0 or better (2.3 is recommended) - see <a href=\"http://www.python.org/\" target=\"_blank\">http://www.python.org/</a><br>
-    * kdegames/libkdegames - usually shipped with KDE<br>
-    * libvorbis (for sound and music) - see <a href=\"http://www.vorbis.com/\" target=\"_blank\">http://www.vorbis.com/</a><br>
-    * lib3ds (Units and building rendering) - see <a href=\"http://lib3ds.sf.net/\" target=\"_blank\">http://lib3ds.sf.net/</a><br>
-    * WML and Perl  - For the handbook - see <a href=\"http://www.thewml.org\" target=\"_blank\">http://www.thewml.org</a><br><br>
-    <br>
-    <b>Minimum software requirements (CVS version):</b><br>
     * XFree 4.x server (with OpenGL support, 4.3 and Xrandr for resolution changing) - see <a href=\"http://www.xfree86.org/\" target=\"_blank\">http://www.xfree86.org/</a><br>
     * OpenGL - The OpenGL library (should be included in your XFree Server or graphics card driver)<br>
     * Qt 3.1 or better - see <a href=\"http://www.trolltech.com/\" target=\"_blank\">http://www.trolltech.com/</a><br>

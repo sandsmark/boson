@@ -1,7 +1,7 @@
 <?php
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -242,11 +242,19 @@ add_screenshot("Lonely hut in the mountains, also some trees (including few
     broken ones) - they're also implemented as neutral units",
     "24. Dec. 2003 (CVS)", "0312-2-thumb.jpg", "0312-2.jpg");
 
-
 add_screenshot("Harvesters are mining for minerals",
-    "<b>NEW:</b> 29. April 2004 (Boson 0.10-CVS)", "harvesting1-thumb.jpg", "harvesting1.jpg");
+    "29. April 2004 (Boson 0.10-CVS)", "harvesting1-thumb.jpg", "harvesting1.jpg");
 add_screenshot("Just a nice screenshot",
-    "<b>NEW:</b> 29. April 2004 (Boson 0.10-CVS)", "neutral1-thumb.jpg", "neutral1.jpg");
+    "29. April 2004 (Boson 0.10-CVS)", "neutral1-thumb.jpg", "neutral1.jpg");
+
+add_screenshot("Inside the enemy's base",
+    "<b>NEW:</b> 2. May 2004 (Boson 0.10)", "0.10-1-thumb.jpg", "0.10-1.jpg");
+add_screenshot("An aircraft blown up by defenses on the Storm map",
+    "<b>NEW:</b> 2. May 2004 (Boson 0.10)", "0.10-2-thumb.jpg", "0.10-2.jpg");
+add_screenshot("Some units are trying do destroy an enemy's tank",
+    "<b>NEW:</b> 2. May 2004 (Boson 0.10)", "0.10-3-thumb.jpg", "0.10-3.jpg");
+add_screenshot("War between some units. Also note the new OpenGL minimap",
+    "<b>NEW:</b> 2. May 2004 (Boson 0.10)", "0.10-4-thumb.jpg", "0.10-4.jpg");
 
 
 
