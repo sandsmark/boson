@@ -24,6 +24,7 @@
 #include "bosonmap.h"
 #include "bosoncanvas.h"
 #include "bosonconfig.h"
+#include "boitemlist.h"
 #include "unit.h"
 #include "player.h"
 #include "bodebug.h"
@@ -166,8 +167,9 @@ void BosonMiniMap::slotChangeCell(int x, int y, int groundType, unsigned char ve
 	boError() << k_funcinfo << "map not yet created" << endl;
 	return;
  }
- BO_CHECK_NULL_RET(mCanvas)
- if (!mCanvas->cell(x, y)) {
+ BO_CHECK_NULL_RET(mCanvas);
+ Cell* c = mCanvas->cell(x, y);
+ if (!c) {
 	boError() << k_funcinfo << x << "," << y << " is no valid cell!" << endl;
 	return;
  }
@@ -176,7 +178,7 @@ void BosonMiniMap::slotChangeCell(int x, int y, int groundType, unsigned char ve
 	// we can't see this cell
 	return;
  }
- QValueList<Unit*> list = mCanvas->unitsAtCell(x, y);
+ QValueList<Unit*> list = c->items()->units(false);
  if (!list.isEmpty()) {
 	// there is a unit on the cell, so do not paint the cell.
 	return;
@@ -371,7 +373,7 @@ void BosonMiniMap::updateCell(int x, int y)
  if (!cell) {
 	return;
  }
- QValueList<Unit*> list = mCanvas->unitsAtCell(x, y);
+ QValueList<Unit*> list = cell->items()->units(false);
  if (list.isEmpty()) {
 	changeCell(x, y, cell->groundType(), cell->version());
  } else {
@@ -448,7 +450,7 @@ void BosonMiniMap::slotUnfog(int x, int y)
 	boError() << k_funcinfo << "invalid cell " << x << "," << y << endl;
 	return;
  }
- QValueList<Unit*> list = mCanvas->unitsAtCell(x, y);
+ QValueList<Unit*> list = cell->items()->units(false);
  if (!list.isEmpty()) {
 	Unit* u = list.first();
 	QPtrVector<Cell> cells;
