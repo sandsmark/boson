@@ -35,6 +35,8 @@
 
 #include <klocale.h>
 
+#include <math.h>
+
 BosonPlayerInput::BosonPlayerInput(Boson* game) : QObject(0, "bosonplayerinput")
 {
  mGame = game;

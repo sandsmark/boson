@@ -45,6 +45,8 @@
 #include <klocale.h>
 #include <kapplication.h>
 
+#include <math.h>
+
 
 // this just stores a *selection* for placement. This means e.g. if you click
 // on a unit (in the command frame!) the unit type is placed here as well as the
