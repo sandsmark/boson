@@ -218,7 +218,7 @@ bool KGameMouseIO::eventFilter( QObject *o, QEvent *e )
      QDataStream stream(buffer,IO_WriteOnly);
      bool eatevent=false;
      emit signalMouseEvent(this,stream,k,&eatevent);
-     boDebug(11001) << "################# eatevent=" << eatevent << endl;
+//     boDebug(11001) << "################# eatevent=" << eatevent << endl;
      QDataStream msg(buffer,IO_ReadOnly);
      if (eatevent && sendInput(msg))
      {
