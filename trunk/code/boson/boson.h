@@ -140,6 +140,8 @@ public:
 
 	void toggleAdvanceFlag();
 
+	virtual bool save(QDataStream& stream, bool savePlayers = true);
+
 public slots:
 	void slotSetGameSpeed(int speed);
 
