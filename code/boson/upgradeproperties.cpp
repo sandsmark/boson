@@ -28,6 +28,7 @@
 #include "player.h"
 #include "unitproperties.h"
 #include "speciestheme.h"
+#include "unit.h"
 
 
 /**********  UpgradePropertiesBase  **********/
@@ -185,17 +186,32 @@ QValueList<unsigned long int> UpgradePropertiesBase::readUIntList(KSimpleConfig*
   return list;
 }
 
-// I do not usually like macros, but this is one place where I feel that macro is good
+// I do not usually like macros, but this is one place where I feel that macros
+//  are good. Parameters:
 // list: property will be applied to all unitproperties in list
 // player: pointer to owner of UnitProperties
 // myvar: name of variable in this class
 // upvar: name of variable in UnitProperties
-#define applyProperty(list,player,myvar,upvar, name) { \
+#define applyProperty(list,player,myvar,upvar,name) { \
   QValueList<unsigned long int>::Iterator it; \
   for(it = list.begin(); it != list.end(); it++) \
   { \
     UnitProperties* prop = player->speciesTheme()->nonConstUnitProperties(*it); \
     prop->upvar = myvar; \
+  } \
+}
+
+// Like above, but also changes unitvar to myvar in all units whose id is
+//  in list
+#define applyPropertyToUnits(list,player,myvar,upvar,unitvar,name) { \
+  applyProperty(list,player,myvar,upvar,name); \
+  QPtrListIterator<Unit> uit(player->allUnits()); \
+  while(uit.current()) \
+  { \
+    if(list.contains(uit.current()->id())) \
+    { \
+      uit.current()->unitvar = myvar; \
+    } \
   } \
 }
 
@@ -223,19 +239,28 @@ void UpgradePropertiesBase::apply(Player* player)
 
   if(mHealthSpecified)
   {
+    applyPropertyToUnits(list, player, mHealth, mHealth, mHealth, "mHealth");
     applyProperty(list, player, mHealth, mHealth, "mHealth");
+    QPtrListIterator<Unit> uit(player->allUnits());
+    while(uit.current())
+    {
+      if(list.contains(uit.current()->id()))
+      {
+        uit.current()->mHealth = mHealth - (uit.current()->unitProperties()->health() - uit.current()->mHealth);
+      }
+    }
   }
   if(mWeaponRangeSpecified)
   {
-    applyProperty(list, player, mWeaponRange, mWeaponRange, "mWeaponRange");
+    applyPropertyToUnits(list, player, mWeaponRange, mWeaponRange, mWeaponRange, "mWeaponRange");
   }
   if(mSightRangeSpecified)
   {
-    applyProperty(list, player, mSightRange, mSightRange, "mSightRange");
+    applyPropertyToUnits(list, player, mSightRange, mSightRange, mSightRange, "mSightRange");
   }
   if(mWeaponDamageSpecified)
   {
-    applyProperty(list, player, mWeaponDamage, mWeaponDamage, "mWeaponDamage");
+    applyPropertyToUnits(list, player, mWeaponDamage, mWeaponDamage, mWeaponDamage, "mWeaponDamage");
   }
   if(mReloadSpecified)
   {
@@ -255,11 +280,11 @@ void UpgradePropertiesBase::apply(Player* player)
   }
   if(mArmorSpecified)
   {
-    applyProperty(list, player, mArmor, mArmor, "mArmor");
+    applyPropertyToUnits(list, player, mArmor, mArmor, mArmor, "mArmor");
   }
   if(mShieldsSpecified)
   {
-    applyProperty(list, player, mShields, mShields, "mShields");
+    applyPropertyToUnits(list, player, mShields, mShields, mShields, "mShields");
   }
   if(mSpeedSpecified)
   {
@@ -270,11 +295,19 @@ void UpgradePropertiesBase::apply(Player* player)
       UnitProperties* prop = player->speciesTheme()->nonConstUnitProperties(*it);
       prop->setSpeed(mSpeed);
     }
+    QPtrListIterator<Unit> uit(player->allUnits());
+    while(uit.current())
+    {
+      if(list.contains(uit.current()->id()))
+      {
+        uit.current()->setSpeed(mSpeed);
+      }
+    }
   }
-  if(mMaxResourcesSpecified)
+/*  if(mMaxResourcesSpecified)
   {
     applyProperty(list, player, mHealth, mHealth, "mHealth");
-  }
+  }*/
 }
 
 

@@ -25,44 +25,23 @@
 #include "player.h"
 #include "speciestheme.h"
 
-#include <kgame/kgameproperty.h>
-#include <kgame/kgamepropertyhandler.h>
-
 #include <kdebug.h>
-
-class UnitBase::UnitBasePrivate
-{
-public:
-	UnitBasePrivate()
-	{
-	}
-
-	KGamePropertyHandler mProperties;
-
-	KGameProperty<unsigned long int> mArmor;
-	KGameProperty<unsigned long int> mShields;
-	KGameProperty<unsigned long int> mId; // is a KGameProperty clever here?
-	KGameProperty<unsigned int> mDeletionTimer;
-	KGameProperty<unsigned int> mReloadState;
-
-};
 
 
 UnitBase::UnitBase(const UnitProperties* prop)
 {
- d = new UnitBasePrivate;
- d->mProperties.setPolicy(KGamePropertyBase::PolicyLocal); // fallback
+ mProperties.setPolicy(KGamePropertyBase::PolicyLocal); // fallback
  mOwner = 0;
  mUnitProperties = prop; // WARNING: this might be 0 at this point! MUST be != 0 for Unit, but ScenarioUnit uses 0 here
 
 // PolicyLocal?
  mHealth.registerData(IdHealth, dataHandler(), 
 		KGamePropertyBase::PolicyLocal, "Health");
- d->mArmor.registerData(IdArmor, dataHandler(), 
+ mArmor.registerData(IdArmor, dataHandler(),
 		KGamePropertyBase::PolicyLocal, "Armor");
- d->mShields.registerData(IdShields, dataHandler(), 
+ mShields.registerData(IdShields, dataHandler(),
 		KGamePropertyBase::PolicyLocal, "Shields");
- d->mId.registerData(IdId, dataHandler(), 
+ mId.registerData(IdId, dataHandler(),
 		KGamePropertyBase::PolicyLocal, "ID"); // perhaps use dataHandler()->id() instead
  mWeaponRange.registerData(IdWeaponRange, dataHandler(), 
 		KGamePropertyBase::PolicyLocal, "WeaponRange");
@@ -74,31 +53,30 @@ UnitBase::UnitBase(const UnitProperties* prop)
 		KGamePropertyBase::PolicyLocal, "Work");
  mAdvanceWork.registerData(IdAdvanceWork, dataHandler(), 
 		KGamePropertyBase::PolicyLocal, "AdvanceWork");
- d->mReloadState.registerData(IdReloadState, dataHandler(), 
+ mReloadState.registerData(IdReloadState, dataHandler(),
 		KGamePropertyBase::PolicyLocal, "ReloadState");
- d->mDeletionTimer.registerData(IdDeletionTimer, dataHandler(), 
+ mDeletionTimer.registerData(IdDeletionTimer, dataHandler(),
 		KGamePropertyBase::PolicyLocal, "DeletionTimer");
- d->mDeletionTimer.setEmittingSignal(false);
+ mDeletionTimer.setEmittingSignal(false);
 
 
  mWork.setLocal((int)WorkNone);
  mAdvanceWork.setLocal((int)WorkNone);
  mHealth.setLocal(0); // initially destroyed
- d->mShields.setLocal(0); // doesn't have any shields
- d->mArmor.setLocal(0); // doesn't have any armor
- d->mId.setLocal(0);
+ mShields.setLocal(0); // doesn't have any shields
+ mArmor.setLocal(0); // doesn't have any armor
+ mId.setLocal(0);
  mWeaponDamage.setLocal(0);
  mWeaponRange.setLocal(0);
  mSightRange.setLocal(0);
- d->mReloadState.setLocal(0);
- d->mDeletionTimer.setLocal(0);
+ mReloadState.setLocal(0);
+ mDeletionTimer.setLocal(0);
 }
 
 UnitBase::~UnitBase()
 {
 // kdDebug() << k_funcinfo << endl;
  dataHandler()->clear();
- delete d;
 // kdDebug() << k_funcinfo << " done" << endl;
 }
 
@@ -110,37 +88,37 @@ const QString& UnitBase::name() const
 
 unsigned long int UnitBase::shields() const
 {
- return d->mShields;
+ return mShields;
 }
 
 unsigned long int UnitBase::armor() const
 {
- return d->mArmor;
+ return mArmor;
 }
 
 void UnitBase::setId(unsigned long int id)
 {
- d->mId = id;
+ mId = id;
 }
 
 unsigned long int UnitBase::id() const
 {
- return d->mId;
+ return mId;
 }
 
 void UnitBase::setArmor(unsigned long int a)
 {
- d->mArmor = a;
+ mArmor = a;
 }
 
 void UnitBase::setShields(unsigned long int s)
 {
- d->mShields = s;
+ mShields = s;
 }
 
 KGamePropertyHandler* UnitBase::dataHandler() const
 {
- return &d->mProperties;
+ return &mProperties;
 }
 
 unsigned long int UnitBase::type() const
@@ -202,29 +180,29 @@ bool UnitBase::isFlying() const
 
 void UnitBase::increaseDeletionTimer()
 {
- d->mDeletionTimer = d->mDeletionTimer + 1;
+ mDeletionTimer = mDeletionTimer + 1;
 }
 
 unsigned int UnitBase::deletionTimer() const
 {
- return d->mDeletionTimer;
+ return mDeletionTimer;
 }
 
 unsigned int UnitBase::reloadState() const
 {
- return d->mReloadState;
+ return mReloadState;
 }
 
 void UnitBase::reloadWeapon()
 {
- if (d->mReloadState > 0) {
-	d->mReloadState = d->mReloadState - 1;
+ if (mReloadState > 0) {
+	mReloadState = mReloadState - 1;
  }
 }
 
 void UnitBase::resetReload()
 {
- d->mReloadState = unitProperties()->reload();
+ mReloadState = unitProperties()->reload();
 }
 
 const PluginProperties* UnitBase::properties(int pluginType) const
