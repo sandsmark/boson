@@ -26,4 +26,6 @@
 # spread out over the entire source repository.
 
 admin		tools/admin
+code		code &admin
 data		data &admin
+
