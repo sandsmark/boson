@@ -225,8 +225,7 @@ void BosonCanvas::deleteDestroyed()
 
 void BosonCanvas::setTileSet(QPixmap* p)
 {
- // called from TileLoader thread. Note that we don't lock anything here, as
- // only a single thread can call this.
+ // called from TileLoader.
  kdDebug() << k_funcinfo << endl;
  if (p->isNull()) {
 	kdError() << k_funcinfo << "NULL pixmap" << endl;
