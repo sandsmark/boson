@@ -84,6 +84,8 @@ public:
 	
 	void setKGame(KGame* g); // FIXME: remove when kde 3.0 beta2 or final is out!
 
+	void addChatMessage(const QString&);
+
 public slots:
 	/**
 	 * @param pos The new position - cell coordinates! so you have to

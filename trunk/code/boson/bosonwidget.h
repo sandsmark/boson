@@ -163,7 +163,12 @@ protected slots:
 
 	void slotInitFogOfWar();
 
+	void slotNotEnoughMinerals(Player*);
+	void slotNotEnoughOil(Player*);
+
 protected:
+	void addChatSystemMessage(const QString& fromName, const QString& text);
+	
 	void sendChangeTeamColor(Player* player, QRgb color);
 	void changeSpecies(const QString& species);
 	void addLocalPlayer();

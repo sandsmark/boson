@@ -679,3 +679,8 @@ void BosonBigDisplay::setKGame(KGame* g) // remove when kde3.0 beta2 is out
  d->mChat->setKGame(g);
 #endif
 }
+
+void BosonBigDisplay::addChatMessage(const QString& message)
+{
+ d->mChat->addMessage(message);
+}
