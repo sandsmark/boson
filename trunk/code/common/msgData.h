@@ -28,32 +28,41 @@
 
 class boBuffer;
 
+/*
 enum refusedType {
-	REFUSED_PLAYING,	/* A game is currently running, not used yet */
-	REFUSED_BAD_VERSION,	/* Your client version isn't compatible with the server's one, not used yet */
-	REFUSED_PRIVATE,	/* this is a private game, you haven't been invited, not used yet */
-	REFUSED_TOO_LOW,	/* your connection is too low, not used yet */
+	REFUSED_PLAYING,	// A game is currently running, not used yet
+	REFUSED_BAD_VERSION,	// Your client version isn't compatible with the server's one, not used yet
+	REFUSED_PRIVATE,	// this is a private game, you haven't been invited, not used yet
+	REFUSED_TOO_LOW,	// your connection is too low, not used yet
 	REFUSED_
 	};
+*/
 
 // If not STATED, all coordinates are grid-related (ie, not in pixel)
 
-/* MSG_DLG_ASK */ ///orzel still unused
-struct askMsg_t		{ int major, minor, patch; };
-/* MSG_DLG_ACCEPTED */ /// orzel still unused
+/*
+ * common header for facilityMsg_t and mobileMsg_t
+ */
+struct unitMsg_t    { uint who; int key, x, y; };
+
+
+
+/* MSG_DLG_ASK */
+//struct askMsg_t		{ int major, minor, patch; };
+/* MSG_DLG_ACCEPTED */
 struct acceptedMsg_t	{ uint who_you_are; int missing_player, total_player, sizeX, sizeY; };
-/* MSG_DLG_REFUSED */ /// orzel still unused
-struct refusedMsg_t	{ refusedType why_not; };
+/* MSG_DLG_REFUSED */
+//struct refusedMsg_t	{ refusedType why_not; };
 /* MSG_DLG_END */
 struct endMsg_t		{ enum endReasonType {normalEnd, playerDiedEnd } endReason; };
 /* MSG_MAP_ */
 struct cooMsg_t		{ int x, y; cell_t c; };
 /* MSG_FACILITY_CREATED */
-struct facilityMsg_t	{ uint who; int key, x, y, state; facilityType type; };
+struct facilityMsg_t:public unitMsg_t { int state; facilityType type; };
 /* MSG_FACILITY_CHANGED */
 struct fixChangedMsg_t	{ int key, state; };
 /* MSG_MOBILE_CREATED */
-struct mobileMsg_t	{ uint who; int key, x, y; mobType type; };
+struct mobileMsg_t:public unitMsg_t { mobType type; };
 /* MSG_MOBILE_MOVE_*  */
 struct moveMsg_t	{ int key, newx, newy;};
 /* MSG_*_DESTROYED */
@@ -75,9 +84,9 @@ struct unitRessMsg_t	{ int key; uint contain; };
 
 typedef union {
 /* Dialog layer */
-	askMsg_t	ask;
+//	askMsg_t	ask;
 	acceptedMsg_t	accepted;
-	refusedMsg_t	refused;
+//	refusedMsg_t	refused;
 	endMsg_t	end;
 /* game layer */
 	cooMsg_t	coo;

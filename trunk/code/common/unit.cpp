@@ -39,7 +39,7 @@ QRect Unit::gridRect(void)
  * MOBILE
  */
 mobUnit::mobUnit(mobileMsg_t *msg)
-	:Unit( (unitMsg_t*) msg)
+	:Unit( msg)
 {
 	type	= msg->type;
 }
@@ -59,7 +59,7 @@ void mobUnit::fill(mobileMsg_t &msg)
  * FACILITY
  */
 Facility::Facility(facilityMsg_t *msg)
-	:Unit( (unitMsg_t*) msg)
+	:Unit( msg)
 {
 	type	= msg->type;
 }

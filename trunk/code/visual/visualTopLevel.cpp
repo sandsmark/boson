@@ -201,7 +201,6 @@ void visualTopLevel::selectArea(int x1, int y1, int x2, int y2)
 	QCanvasItemList::Iterator it;
 	visualMobUnit *u;
  
-	// XXX : still neede with QCanvas collisions ? (QRect ?)
 	/* ensure that (x1<=x2 && y1<=y2) */
 	int t;
 	if (x2<x1) { t  = x1; x1 = x2; x2 = t ; }

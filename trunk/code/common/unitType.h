@@ -149,8 +149,6 @@ struct mobileProperties_t {
 	uint	goFlag;		// where can it go ? 
 
 /*
-// still unused ///orzel
-
 	int	weakness;	// how much does the power fail when hit by a unit weapon
 	int	initialForce;	// when initialized
 	int	hitForce;	// how many hit units towards the others

@@ -103,10 +103,9 @@ void BosonApp::initCanvas(int w, int h)
 	/* the field is created when a game is created */
 	QString themePath = *dataPath + "themes/grounds/earth.png";
 
-	printf("initView : loading groundTheme : %s\n", themePath.latin1() );
-
 	QPixmap *p = new QPixmap(themePath);
 	if (p->isNull() ) {
+		logf(LOG_ERROR, "can't load earth.png");
 		printf("can't load earth.png\n");
 		exit(1);
 	}
@@ -135,51 +134,3 @@ void BosonApp::serverDied(KProcess *)
 	return;
 }
 
-
-/*
-void BosonApp::dlgModified()
-{
-	int qret=KMessageBox::warningYesNoCancel(this,
-		i18n("The current file has been modified. \nSave Changes ?"),
-		i18n("Warning") );     
-
-  switch (qret)
-   {
-   case 1:
-     break;
-   case 2:
-     break;
-   case 3:
-     return;
-     break;
-   default:
-     break;
-   }
-}
-
-bool BosonApp::queryExit()
-{
-
-	int exit=KMessageBox::questionYesNo(this, i18n("Really Quit ?"), i18n("Exit"));
-	// XXX : not this, but ::Close() ?
-
-  if(exit==1)
-    return true;
-  else
-    return false;
-}
-
-void BosonApp::slotAppExit()
-{ 
-
-  ///////////////////////////////////////////////////////////////////
-  // exits the Application
-  if(this->queryExit())
-    {
-      //saveOptions();
-//      KTMainWindow::deleteAll();
-      kapp->quit();
-    }
-  else return;
-}
-*/

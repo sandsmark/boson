@@ -20,6 +20,10 @@
 
 #include <stdlib.h>	// exit(), atoi()
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <kapp.h>
 #include <kstddirs.h>
 #include <kmessagebox.h>
@@ -51,7 +55,7 @@ int main(int argc, char* argv[])
 	KAboutData aboutData(
 		"boserver"
 		, I18N_NOOP("Server for boson")
-		, "0.5" // XXX should use the #define somewhere
+		, VERSION
 		, I18N_NOOP("The server for the boson Game")
 		, KAboutData::License_GPL
 		, "(c) 1999-2000, The boson team"

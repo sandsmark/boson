@@ -21,6 +21,10 @@
 #include <assert.h>
 #include <stdlib.h> // exit()
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <klocale.h>
 #include <kcmdlineargs.h>
 #include <kaboutdata.h>
@@ -44,7 +48,7 @@ int main(/*int argc, char* argv[] */)
 	KAboutData aboutData(
 		"boeditor"
 		, I18N_NOOP("Boson level editor")
-		, "0.5" // XXX should use the #define somewhere
+		, VERSION
 		, I18N_NOOP("A level editor for the boson game")
 		, KAboutData::License_GPL
 		, "(c) 1999-2000, The boson team"
@@ -70,7 +74,7 @@ int main(/*int argc, char* argv[] */)
 
 	/* XXX orzel : temp, until GUI is really functionnal */
 	QString themePath = *dataPath +  "themes/grounds/earth.png";
-	printf("loading groundTheme : %s\n", themePath.latin1() );
+//	printf("loading groundTheme : %s\n", themePath.latin1() );
 	bigBackground = new QPixmap(themePath);
 	if (bigBackground->isNull() ) {
 		logf(LOG_ERROR, "can't load earth.png");
@@ -86,7 +90,6 @@ int main(/*int argc, char* argv[] */)
 	// app
 	app.slot_newWindow();
 
-	/// XXX,orzel :  not be...... but $KDEDIR and so on
 	app.do_open( *dataPath + "map/basic.bpf");
 
 	return app.exec();
