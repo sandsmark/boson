@@ -32,6 +32,36 @@
 
 
 /*
+ *  bosonUnit
+ */
+
+void bosonUnit::targetDying(bosonUnit *t)
+{
+	boAssert (target == t);
+	target = 0l;
+}
+
+
+void bosonUnit::u_attack(bosonUnit *u)
+{
+	if (target) {
+		disconnect(target, 0, this, 0); // target isn't connected to 'this' anymore
+	}
+
+	if (u == this) {
+		/* attacking myself */
+		logf(LOG_INFO, "%p attacking itself, aborting", this);
+		target = 0;
+		return;
+	}
+	target		= u;
+	shoot_timer	= -1;
+
+	connect( u, SIGNAL(dying(bosonUnit*)), this, SLOT(targetDying(bosonUnit*)) );
+}
+
+
+/*
  * playerMobUnit
  */
 
@@ -40,23 +70,17 @@ static const int pos_x[12] =
 static const int pos_y[12] = 
 	{ -94, -64, -17, +34, +77, +98, +94, +64, +17, -34, -77, -98};
 
-playerMobUnit::playerMobUnit(mobileMsg_t *msg, QObject* parent, const char *name)
-	: visualMobUnit(msg,parent,name)
+playerMobUnit::playerMobUnit(mobileMsg_t *msg)
+	: visualMobUnit(msg)
 	, state(MUS_NONE)
 {
 	asked_x = asked_y = 0;
 	turnTo(4); ///orzel : should be random
-	target = 0l;
 }
 
-playerMobUnit::~playerMobUnit()
-{
-	emit dying(this);
-}
 
 #define VECT_PRODUCT(dir)	(pos_x[dir]*(ldy) - pos_y[dir]*(ldx))
 #define SQ(x)			( (x) * (x) )
-
 bool playerMobUnit::getWantedMove(bosonMsgData *msg)
 {
 	int ldx, ldy;
@@ -278,13 +302,17 @@ void playerMobUnit::getWantedAction()
 
 bool playerMobUnit::getWantedShoot(bosonMsgData *msg)
 {
-	int dx, dy;
-	int range = mobileProp[type].range;
+	int	dx, dy;
+	int	range = mobileProp[type].range;
+	QRect	r;
 
 	if (!target) return false;		// no target
 	if (range<=0) return false;		// Unit can't shoot
 
-	dx = x() - target->_x(); dy = y() - target->_y();
+	Unit * _target =  (Unit *)target;
+
+	r = _target->rect();
+	dx = x() - r.x(); dy = y() - r.y();
 	if (range*range < dx*dx + dy*dy) return false; // too far
 
 	shoot_timer--;
@@ -292,9 +320,7 @@ bool playerMobUnit::getWantedShoot(bosonMsgData *msg)
 		else return false;		// not yet
 
 	// ok, let's shoot it
-	msg->shoot.target_key = (target->inherits("playerMobUnit"))?
-			((playerMobUnit*)target)->key:
-			((playerFacility*)target)->key;
+	msg->shoot.target_key = _target->key;
 	return true;
 }
 
@@ -306,7 +332,9 @@ void playerMobUnit::doMoveTo(int newx, int newy)
 	int dy = newy - y();
 
 	move(newx,newy);
+	puts("a");
 	emit sig_moveTo(newx, newy);
+	puts("b");
 
 	if (sp_up) sp_up->moveBy(dx,dy);
 	if (sp_down) sp_down->moveBy(dx,dy);
@@ -381,35 +409,25 @@ void playerMobUnit::u_stop(void)
 }
 
 
-void playerMobUnit::u_attack(Unit *u)
+void playerMobUnit::u_attack(bosonUnit *u)
 {
-	if (target) {
-		disconnect(target, 0, this, 0); // target isn't connected to 'this' anymore
-	}
+	QRect	r;
 
-	if (u == (Unit *)this) {
-		/* attacking myself */
-		logf(LOG_INFO, "%p attacking itself, aborting", this);
-		target = 0;
-		return;
-	}
-	target		= u;
-	shoot_timer	= -1;
+	bosonUnit::u_attack(u);
 
-	connect( u, SIGNAL(dying(Unit*)), this, SLOT(targetDying(Unit*)) );
 	connect( u, SIGNAL(sig_moveTo(int,int)), this, SLOT(targetMoveTo(int,int)) );
 
-	do_goto(u->_x(), u->_y());
+	if (u->inherits("playerMobUnit"))
+		r = ((playerMobUnit*)u)->rect();
+	else if (u->inherits("playerFacility"))
+		r = ((playerFacility*)u)->rect();
+	else {
+		logf(LOG_ERROR, "u_attack, what's this bosonUnit ???");
+		return;
+	}
 
-}
 
-
-void playerMobUnit::targetDying(Unit *t)
-{
-	boAssert (target == t);
-	//puts("target = 0l");
-	target = 0l;
-	// disconnection is handled by target destructor (in Qt)
+	do_goto(r.x(), r.y());
 }
 
 
@@ -427,8 +445,8 @@ void playerMobUnit::shooted(int _power)
 
 bool playerMobUnit::near(int d)
 {
-	int a = _x() - dest_x;
-	int b = _y() - dest_y;
+	int a = x() - dest_x;
+	int b = y() - dest_y;
 	
 	return (a*a + b*b) < (d*d);
 }
@@ -437,15 +455,9 @@ bool playerMobUnit::near(int d)
 /*
  * playerFacility
  */
-playerFacility::playerFacility(facilityMsg_t *msg, QObject* parent, const char *name)
-	: visualFacility(msg,parent,name)
+playerFacility::playerFacility(facilityMsg_t *msg)
+	: visualFacility(msg)
 {
-}
-
-playerFacility::~playerFacility()
-{
-	//puts("~playerFacility");
-	emit dying(this);
 }
 
 
@@ -462,16 +474,6 @@ void playerFacility::getWantedAction()
 }
 
 
-void playerFacility::targetDying(Unit*)
-{
-//	target = 0l;
-}
-
-
-void playerFacility::targetMoveTo(int newx, int newy)
-{
-}
-
 void playerFacility::shooted(int _power)
 {
 	if (sp_up) sp_up->setFrame(_power);
@@ -479,7 +481,7 @@ void playerFacility::shooted(int _power)
   
 
 
-#define underlyingGround() vcanvas->groundAt( _x()+10, _y()+10)
+#define underlyingGround() vcanvas->groundAt( x()+10, y()+10)
 
 /*
  * harvester 
@@ -493,7 +495,7 @@ bool harvesterUnit::getWantedMove(bosonMsgData *msg)
 			return false;
 			break;
 		case comingBack:
-			if ( _x() == base_x && _y() == base_y) {
+			if ( x() == base_x && y() == base_y) {
 				/* we are back : empty the harvester */ 
 //				puts("harvester : arrived home");
 				harvestEndMsg_t    he;

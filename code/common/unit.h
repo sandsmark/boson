@@ -21,7 +21,7 @@
 #ifndef UNIT_H 
 #define UNIT_H 
 
-#include <qobject.h>
+#include <qrect.h>
 
 #include "common/unitType.h"
 #include "common/msgData.h"
@@ -39,79 +39,72 @@ enum workType {
 	WORK_ 
 	};
 
+/*
+ * common header for facilityMsg_t and mobileMsg_t  XXX make *Msg_t inherit unitMsg_t...
+ */
+struct unitMsg_t    { int who, key, x, y; };
+
+
+/** 
+  * This class is the base for all boson units
+  */
+class Unit
+{
+
+public:
+	Unit(unitMsg_t *m) { who = m->who; key = m->key; countDown = 0; work = WORK_NONE; }
+
+	virtual	uint	getVisibility(void)=0;
+	virtual	QRect	rect(void)=0;
+  
+	int		who;		// who is the owner ?
+	int		key;
+protected:
+	uint		countDown;	// work countDown;
+	workType	work;		// work being done
+};
+
+
 /** 
   * This class is the base for all mobile units
   */
-class Unit : public QObject
-{
-
- Q_OBJECT
-
- public:
-  Unit(int who, QObject* parent=0, const char *name=0L);
-
-  virtual	int	_x(void)=0;
-  virtual	int	_y(void)=0;
-
-  virtual	int	getWidth(void)=0;
-  virtual	int	getHeight(void)=0;
-  virtual	uint	getVisibility(void)=0;
-  
-  int		who;		// who is the owner ?
-  protected:
-  uint		countDown;	// work countDown;
-  workType	work;		// work being done
-
-
-};
-
-
 class mobUnit : public Unit
 {
- Q_OBJECT
+public:
+			mobUnit(mobileMsg_t *msg);
 
- public:
-  mobUnit(mobileMsg_t *msg, QObject* parent=0L, const char *name=0L);
+	void		fill(mobileMsg_t &msg);
+	mobType		getType(void) {return type;}
 
-  void		fill(mobileMsg_t &msg);
-  void		getPos(uint &xx, uint &yy) {xx = _x(); yy = _y(); }
-  mobType	getType(void) {return type;}
+	virtual uint	getVisibility(void) {return mobileProp[type].visibility; }
+	virtual QRect	rect(void);
 
-  		int	goFlag(void) { return mobileProp[type].goFlag;}
+	int		goFlag(void) { return mobileProp[type].goFlag;}
 
-  virtual	int	getWidth(void) { return mobileProp[type].width;}
-  virtual	int	getHeight(void) { return mobileProp[type].height;}
-  virtual	uint	getVisibility(void) {return mobileProp[type].visibility; }
-  		QRect	rect(void);
-
- protected:
-  mobType		type;
-  uint	autonomy; 	// carburant ?
-  bool	isShown;	// if not -> is carried by another one
+protected:
+	mobType		type;
+	uint		autonomy; 	// carburant ?
 
 };
 
+
+/** 
+  * This class is the base for all fix units
+  */
 class Facility : public Unit
 {
- Q_OBJECT
+public:
+  			Facility(facilityMsg_t *msg);
 
- public:
-  		Facility(facilityMsg_t *msg, QObject* parent=0L, const char *name=0L);
+	void		fill(facilityMsg_t &msg);
+	facilityType	getType(void) {return type;}
 
-  void		fill(facilityMsg_t &msg);
+	virtual uint	getVisibility(void) {return facilityProp[type].visibility; }
+	virtual QRect	rect(void) { return QRect(0,0,facilityProp[type].width,facilityProp[type].height); }
 
-  facilityType	getType(void) {return type;}
-
-  virtual	int	getWidth(void) { return facilityProp[type].width;}
-  virtual	int	getHeight(void) { return facilityProp[type].height;}
-  virtual	uint	getVisibility(void) {return facilityProp[type].visibility; }
-  		QRect	rect(void);
-
- protected:
-  facilityType	type;
-
+protected:
+	facilityType	type;
 };
 
 #endif // UNIT_H
-
 

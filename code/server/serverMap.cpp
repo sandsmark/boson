@@ -50,18 +50,18 @@ void  BosonServer::checkUnitVisibility(Unit *u)
 int		i,j, im,jm, iM,jM;
 serverCell	*c;
 cooMsg_t        coo;
-int		dist = u->getVisibility();
 ulong		mask = getPlayerMask(u->who);
+int		dist = u->getVisibility();
 
-int		x = u->_x() / BO_TILE_SIZE,
-		y = u->_y() / BO_TILE_SIZE;
+int		x = u->rect().x() / BO_TILE_SIZE,
+		y = u->rect().y() / BO_TILE_SIZE;
 
 im = QMAX(0, x-dist) - x;
 iM = QMIN(map_width-1,	x+dist ) - x;
 jm = QMAX(0, y-dist ) - y;
 jM = QMIN(map_height-1,	y+dist ) - y;
 
-//printf("im iM jm jM : %d %d %d %d\n", im, iM, jm, jM);
+// printf("checkUnitVisibility : im iM jm jM : %d %d %d %d\n", im, iM, jm, jM);
 
 dist *= dist;
 
@@ -73,10 +73,11 @@ for (i=im ; i<=iM; i++)
 		c = &cell( i+x, j+y );
 		if ( ! c->isKnownBy(mask)) {
 			c->setKnown(mask);
+//			printf("checkUnitVisibility : cell(%d,%d) set to %x\n", i+x, j+y, (int)mask);
 			/* here, send a message for every changed state */
 			coo.x = i+x;
 			coo.y = j+y;
-			coo.c = c->_cell;;
+			coo.c = c->_cell;
 			if (GROUND_UNKNOWN != c->getGroundType() )
 				sendMsg (
 					player[u->who].buffer,
@@ -122,12 +123,13 @@ void BosonServer::placeMob(serverMobUnit *u)
 	ulong		k = 0l;
 	int		i,j, i2,j2;
 	int		xx, yy;
+	QRect		r = u->rect();
 
 	/* who is interested in knowing u's arrival */
-	xx = u->_x() / BO_TILE_SIZE;
-	yy = u->_y() / BO_TILE_SIZE;
-	i2 = (u->getWidth() + BO_TILE_SIZE -1 ) / BO_TILE_SIZE;
-	j2 = (u->getHeight() + BO_TILE_SIZE -1 )/ BO_TILE_SIZE;
+	xx = r.x() / BO_TILE_SIZE;
+	yy = r.y() / BO_TILE_SIZE;
+	i2 = (r.width() + BO_TILE_SIZE -1 ) / BO_TILE_SIZE;
+	j2 = (r.height() + BO_TILE_SIZE -1 )/ BO_TILE_SIZE;
 	k = getPlayerMask(u->who);
 	for (i=0; i<i2; i++)
 		for (j=0; j<j2; j++)
@@ -164,12 +166,13 @@ void BosonServer::placeFix(serverFacility * f)
 	ulong		k;
 	int		i,j, i2, j2;
 	int		xx, yy;
+	QRect		r = f->rect();
 
 	/* who is interested in knowing f's arrival */
-	xx = f->_x() / BO_TILE_SIZE;
-	yy = f->_y() / BO_TILE_SIZE;
-	i2 = (f->getWidth() + BO_TILE_SIZE -1 ) / BO_TILE_SIZE;
-	j2 = (f->getHeight() + BO_TILE_SIZE -1 )/ BO_TILE_SIZE;    
+	xx = r.x() / BO_TILE_SIZE;
+	yy = r.y() / BO_TILE_SIZE;
+	i2 = (r.width() + BO_TILE_SIZE -1 ) / BO_TILE_SIZE;
+	j2 = (r.height() + BO_TILE_SIZE -1 )/ BO_TILE_SIZE;    
 
 	k = getPlayerMask(f->who);
 	for (i=0; i<i2; i++)
@@ -211,12 +214,13 @@ void BosonServer::checkFixKnown(serverFacility *f)
 	int x,y;
 	int i,j, i2, j2;
 	ulong	k = 0l, k2;
+	QRect	r = f->rect();
 
-	x = f->_x() / BO_TILE_SIZE;;
-	y = f->_y() / BO_TILE_SIZE;;
+	x = r.x() / BO_TILE_SIZE;
+	y = r.y() / BO_TILE_SIZE;
 	///orzel : ugly
-	i2 = f->getWidth() / BO_TILE_SIZE;
-	j2 = f->getHeight() / BO_TILE_SIZE;
+	i2 = r.width() / BO_TILE_SIZE;
+	j2 = r.height() / BO_TILE_SIZE;
 
 	for (i=0; i<i2; i++)
 		for (j=0; j<j2; j++)
@@ -249,12 +253,13 @@ void BosonServer::checkMobileKnown(serverMobUnit *m)
 	int x,y;
 	int i,j, i2, j2;
 	ulong	k = 0l, k2;
+	QRect	r = m->rect();
 
 
-	x = m->_x() / BO_TILE_SIZE;
-	y = m->_y() / BO_TILE_SIZE;
-	i2 = (m->getWidth() + BO_TILE_SIZE -1 ) / BO_TILE_SIZE;
-	j2 = (m->getHeight() + BO_TILE_SIZE -1 )/ BO_TILE_SIZE;
+	x = r.x() / BO_TILE_SIZE;
+	y = r.y() / BO_TILE_SIZE;
+	i2 = (r.width() + BO_TILE_SIZE -1 ) / BO_TILE_SIZE;
+	j2 = (r.height() + BO_TILE_SIZE -1 )/ BO_TILE_SIZE;
 	
 	boAssert(x>=0); boAssert(y>=0);
 	boAssert(x<200); boAssert(y<200);

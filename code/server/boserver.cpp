@@ -370,7 +370,7 @@ switch(tag) {
 		ASSERT_DATA_BLENGHT(sizeof(data->move));
 		mob = mobile.find(data->move.key);
 		if (mob) {
-			mob->r_moveBy(data->move, playerId, player[playerId].buffer);
+			mob->r_moveBy(data->move, playerId);
   			checkUnitVisibility(mob);
 			}
 		else logf(LOG_ERROR, "handleGameMessage : unexpected mobile key in moveMsg_t : %d", data->move.key);

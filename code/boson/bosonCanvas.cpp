@@ -225,7 +225,7 @@ void bosonCanvas::shoot(shootMsg_t &m)
 	playerMobUnit	* mob;
 	playerFacility	* fix;
 	QRect		r;
-	int		_z;
+	double		_z;
 
 	mob = mobile.find(m.target_key);
 	fix = facility.find(m.target_key);

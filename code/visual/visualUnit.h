@@ -35,7 +35,7 @@ class selectPart;
 class visualUnit : public QCanvasSprite
 {
 public:
-	visualUnit(int k, QCanvasPixmapArray* s) : QCanvasSprite(s, vcanvas), key(k)
+	visualUnit(QCanvasPixmapArray* s) : QCanvasSprite(s, vcanvas)
 		{ power = MAX_POWER; sp_down = 0l; sp_up = 0l; contain = 0; }
 	
 	void	unSelect();
@@ -50,29 +50,24 @@ protected:
 	selectPart	*sp_down;
 	
 public:
-	int	key;
 	uint	contain;
 };
+
 
 class visualMobUnit : public mobUnit, public visualUnit
 {
 
-	Q_OBJECT
-
- public:
+public:
   
-  visualMobUnit(mobileMsg_t *, QObject* parent=0, const char *name=0L);
-  ~visualMobUnit();
+	visualMobUnit(mobileMsg_t *);
+	~visualMobUnit();
 
-	/** make the connection with <i>non-virtual</i> QCanvas* functions */
-	virtual	int	_x(void) {return x();}
-	virtual	int	_y(void) {return y();}
-
-/* attachement */
-  void  select();
-
-/* QCanvas stuff */
-  virtual int rtti() const { return S_MOBILE+type; }
+	/* Unit stuff */
+	virtual	QRect	rect(void);
+	/* QCanvas stuff */
+	virtual int rtti() const { return S_MOBILE+type; }
+	/* attachement */
+	void  select();
 
 };
 
@@ -82,21 +77,16 @@ class visualMobUnit : public mobUnit, public visualUnit
 class visualFacility : public Facility, public visualUnit
 {
 
-	Q_OBJECT
+public:
+	visualFacility(facilityMsg_t *msg);
+	~visualFacility();
 
- public:
-  visualFacility(facilityMsg_t *msg, QObject* parent=0L, const char *name=0L);
-  ~visualFacility();
-
-	/** make the connection with <i>non-virtual</i> QCanvas* functions */
-	virtual	int	_x(void) {return x();}
-	virtual	int	_y(void) {return y();}
-
-/* attachement */
-  void  select();
-
-/* QCanvas stuff */
-  virtual int	rtti() const { return S_FACILITY+type; }
+	/* Unit stuff */
+	virtual	QRect	rect(void);
+	/* QCanvas stuff */
+	virtual int	rtti() const { return S_FACILITY+type; }
+	/* attachement */
+	void  select();
 
 };
 
