@@ -254,7 +254,6 @@ BosonPlayField::BosonPlayField(QObject* parent) : QObject(parent, "BosonPlayFiel
 BosonPlayField::~BosonPlayField()
 {
  boDebug() << k_funcinfo << endl;
- emit signalNewMap(0);
  delete mMap;
  delete mDescription;
  delete mFile;
@@ -269,7 +268,7 @@ bool BosonPlayField::preLoadAllPlayFields()
  // TODO: ensure that UI doesn't block (i.e. call process events)
  BosonProfiler profiler(BosonProfiling::PreLoadPlayFields);
  if (BosonData::bosonData()->availablePlayFields().count() > 0) {
-		boWarning() << k_funcinfo << "playFields already loaded" << endl;
+	boWarning() << k_funcinfo << "playFields already loaded" << endl;
 	return true;
  }
  QStringList campaigns = findAvailableCampaigns();
@@ -481,9 +480,6 @@ bool BosonPlayField::loadMapFromFile(const QByteArray& mapXML, const QByteArray&
  // Create color map
  mMap->createColorMap();
 
-
- boDebug() << k_funcinfo << "map loaded. emitting signal" << endl;
- emit signalNewMap(mMap);
  return ret;
 }
 
@@ -585,7 +581,6 @@ QByteArray BosonPlayField::saveTexMapToFile()
 
 void BosonPlayField::quit()
 {
- emit signalNewMap(0);
  delete mMap;
  mMap = 0;
 }
@@ -594,7 +589,6 @@ void BosonPlayField::changeMap(BosonMap* m)
 {
  delete mMap;
  mMap = m;
- emit signalNewMap(mMap);
 }
 
 void BosonPlayField::changeDescription(BPFDescription* d)

@@ -214,12 +214,6 @@ public:
 	 **/
 	static QString defaultPlayField();
 
-signals:
-	/**
-	 * Emitted when the map changes. Note that this can even be 0!
-	 **/
-	void signalNewMap(BosonMap*);
-
 protected:
 	bool loadDescriptionFromFile(const QByteArray& xml);
 	bool loadMapFromFile(const QByteArray& xml, const QByteArray& heightMapImage, const QByteArray& texMap);
