@@ -37,17 +37,16 @@ mouse handling :
 
 0.3 release:
 ============
-on-demand theme loading ?? to speeds launching up
 source documentation
-server GUI
 client and server should be peer-killed proof
 attack feature
+handling of 2x2 tiles
+construction feature
 
 
 0.4 release:
 ============
 fog of war ?
-construction feature
 
 
 0.5 release: (first public release)
