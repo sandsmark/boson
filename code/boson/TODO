@@ -101,6 +101,8 @@ General TODOs
 - remove zooming support. maybe replace it by simple cameraZ position changes.
   especially remove BosonBigDisplayBase::setZoomFactor() and the menu entry.
 - unit editor does not support plugins
+- Don't load UnitProperties and technologies and other stuff in SpeciesTheme
+  constructor
 
 Data TODOs
 - sound for minimap activated/deactivated
