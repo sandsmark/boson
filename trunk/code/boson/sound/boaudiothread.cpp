@@ -253,7 +253,7 @@ void BoAudioThread::executeCommand(BoAudioCommand* command, BosonAudio* audio, B
 		if (sound) {
 			QString name = command->dataString1();
 			QString file = command->dataString2();
-//				boDebug(200) << k_funcinfo << "adding sound " << name << "->" << file << endl;
+//			boDebug(200) << k_funcinfo << "adding sound " << name << "->" << file << endl;
 			sound->addEventSound(name, file);
 		}
 		break;
@@ -261,7 +261,7 @@ void BoAudioThread::executeCommand(BoAudioCommand* command, BosonAudio* audio, B
 		if (sound) {
 			QString file = command->dataString2();
 			int id = command->dataInt();
-//				boDebug(200) << k_funcinfo << "adding sound " << id << "->" << file << endl;
+//			boDebug(200) << k_funcinfo << "adding sound " << id << "->" << file << endl;
 			sound->addEventSound(id, file);
 		}
 		break;
