@@ -94,7 +94,7 @@ void BosonStartWidgetBase::slotSendPlayFieldChanged(int index)
 void BosonStartWidgetBase::sendPlayFieldChanged(const QString& identifier)
 {
  if (!BosonPlayField::availablePlayFields().contains(identifier)) {
-	boError() << k_funcinfo << "Invalid playfied identifier " << identifier << endl;
+	boError() << k_funcinfo << "Invalid playfield identifier " << identifier << endl;
 	return;
  }
  QByteArray buffer;
