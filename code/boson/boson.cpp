@@ -2157,24 +2157,6 @@ bool Boson::savegame(QDataStream& stream, bool network, bool saveplayers)
  // Version information (for future format changes and backwards compatibility)
  stream << (Q_UINT32)BosonSaveLoad::latestSavegameVersion();
 
- // Players count for loading progressbar
- stream << (Q_UINT32)playerList()->count();
-
- if (gameStatus() != KGame::Init) {
-	boDebug() << k_funcinfo << "Saveing started game" << endl;
-	stream << (Q_INT8)true;
-
-	// Save map
-	// We are emulating a network (remote) stream.
-	d->mPlayField->savePlayFieldForRemote(stream);
-
-	// Save local player (only id)
-	stream << d->mPlayer->id();
- } else {
-	stream << (Q_INT8)false;
-	boDebug() << k_funcinfo << "Saveing not-yet started game" << endl;
- }
-
  // Save KGame stuff
 #if !HAVE_KGAME_SAVEGAME
  boWarning() << k_funcinfo << "Saving without KGame::savegame() is untested! (KDE 3.1 has KGame::savegame())" << endl;
@@ -2186,26 +2168,8 @@ bool Boson::savegame(QDataStream& stream, bool network, bool saveplayers)
 	return false;
  }
 
- // units. they must be loaded *after* the players, so it also needs to be saved
- // later
- QPtrListIterator<KPlayer> it(*playerList());
- for (; it.current(); ++it) {
-	if (!((Player*)it.current())->saveUnits(stream)) {
-		boError() << k_funcinfo << "Error when saving units" << endl;
-	}
- }
-
- if (gameStatus() != KGame::Init) {
-	// Save external stuff (camera, shots, particle systems...)
-	if (!d->mCanvas->save(stream)) {
-		boError() << k_funcinfo << "Error when saving canvas" << endl;
-	}
-	emit signalSaveExternalStuff(stream);
- }
-
  // Save end cookie
  stream << (Q_UINT32)BOSON_SAVEGAME_END_COOKIE;
-
 
  boDebug() << k_funcinfo << " done" << endl;
  return true;
@@ -2217,10 +2181,17 @@ bool Boson::load(QDataStream& stream, bool reset)
  return loadgame(stream, false, reset);
 }
 
-// AB: call KGame::reset() on loading!
 bool Boson::loadgame(QDataStream& stream, bool network, bool reset)
 {
- // network is false for normal game-loading
+ // AB: KGame::loadgame() is called for exactly two things:
+ // 1. loading a game from a file
+ // 2. initializing a newly connected player
+ //
+ // 1. is not used by boson. we use loadFromFile() for this.
+ // so for use only 2. is relevant.
+ // it would be great if we could one day support that players can join even if
+ // the game already started. but as we do not yet support this, we can keep
+ // this as simple as possible
  boDebug() << k_funcinfo << endl;
 
  d->mLoadingStatus = BosonSaveLoad::LoadingInProgress;
@@ -2233,7 +2204,7 @@ bool Boson::loadgame(QDataStream& stream, bool network, bool reset)
  stream >> a >> b1 >> b2 >> b3;
  if ((a != 128) || (b1 != 'B' || b2 != 'S' || b3 != 'G')) {
 	// Error - not Boson SaveGame
-	boError() << k_funcinfo << "This file is no Boson SaveGame" << endl;
+	boError() << k_funcinfo << "invalid magic cookie" << endl;
 	d->mLoadingStatus = BosonSaveLoad::InvalidFileFormat;
 	return false;
  }
@@ -2247,38 +2218,9 @@ bool Boson::loadgame(QDataStream& stream, bool network, bool reset)
  stream >> v;
  if (v != BosonSaveLoad::latestSavegameVersion()) {
 	// Error - older version
-	// TODO: It may be possible to load this version
 	boError() << k_funcinfo << "Unsupported format version (found: " << v << "; latest: " << BosonSaveLoad::latestSavegameVersion() << ")" << endl;
 	d->mLoadingStatus = BosonSaveLoad::InvalidVersion;
 	return false;
- }
-
- // Players count for loading progressbar
- Q_UINT32 playerscount;
- stream >> playerscount;
- emit signalLoadingPlayersCount(playerscount);
-
- emit signalLoadingType(BosonLoadingWidget::LoadSavedGame);
- Q_UINT32 localId = 0;
- Q_INT8 started; // network players usually connect before starting a game
- stream >> started;
- QByteArray mapBuffer;
- if (started) {
-	boDebug() << k_funcinfo << "Loading a previously saved game" << endl;
-	// Load map
-	BosonPlayField* f = new BosonPlayField;
-
-	// AB: we are emulating a network stream.
-	if (!f->loadPlayFieldFromRemote(stream)) {
-		boError() << k_funcinfo << "Could not load map from stream" << endl;
-		return false;
-	}
-	QDataStream mapstream(mapBuffer, IO_WriteOnly);
-	f->savePlayFieldForRemote(mapstream);
-	delete f;
-
-	// Load local player's id
-	stream >> localId;
  }
 
  // Load KGame stuff
@@ -2304,36 +2246,6 @@ bool Boson::loadgame(QDataStream& stream, bool network, bool reset)
 	s << (int)KGame::Init;
 	QDataStream readStream(b, IO_ReadOnly);
 	dataHandler()->processMessage(readStream, dataHandler()->id(), false);
- }
-
- if (started) {
-	// Set local player. This has to be done before loading units
-	d->mPlayer = (Player*)findPlayer(localId);
-	// AB: needs to be emitted after KGame::loadgame() which adds the
-	// players
-	emit signalLoadingType(BosonLoadingWidget::ReceiveMap);
-	emit signalInitMap(mapBuffer);
- }
-
- // units. they must be loaded *after* the players
- QPtrListIterator<KPlayer> it(*playerList());
- int currentplayer = 0;
- for (; it.current(); ++it, currentplayer++) {
-	emit signalLoadingPlayer(currentplayer);
-	emit signalLoadPlayerData((Player*)it.current());
-	emit signalLoadingType(BosonLoadingWidget::LoadSavedUnits);
-	if (!((Player*)it.current())->loadUnits(stream)) {
-		boError() << k_funcinfo << "Error when loading units" << endl;
-		return false;
-	}
- }
-
- if (started) {
-	// Load external stuff (camera, shots, particle systems...)
-	if (!d->mCanvas->load(stream)) {
-		boError() << k_funcinfo << "Error when loading canvas" << endl;
-	}
-	emit signalLoadExternalStuff(stream);
  }
 
  // Check end cookie
