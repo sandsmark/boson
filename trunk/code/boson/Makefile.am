@@ -54,7 +54,8 @@ COMMON_SRC = \
 	kgamecanvaschat.cpp \
 	bosoncursor.cpp \
 	bosonsound.cpp \
-	unitgroup.cpp
+	unitgroup.cpp \
+	gameoverdialog.cpp
 
 BOUNIT_SRC = \
 	unitproperties.cpp \

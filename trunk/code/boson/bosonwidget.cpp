@@ -44,6 +44,7 @@
 #include "editorinput.h"
 #include "commandinput.h"
 #include "bodisplaymanager.h"
+#include "gameoverdialog.h"
 #include "global.h"
 
 #include "defines.h"
@@ -86,6 +87,8 @@ public:
 
 		mChat = 0;
 
+		mGameOverDialog = 0;
+
 		mCursor = 0;
 	}
 	
@@ -116,6 +119,8 @@ public:
 	QString mCursorTheme; // path to cursor pixmaps
 
 	QPtrDict<KGameMouseIO> mIOList;
+
+	GameOverDialog* mGameOverDialog;
 
 	bool mEditorMode;
 };
@@ -1269,6 +1274,11 @@ void BosonWidget::slotOutOfGame(Player* p)
  }
  if (inGame <= 1 && winner) {
 	kdDebug() << k_funcinfo << "We have a winner! id=" << winner->id() << endl;
+	 delete d->mGameOverDialog;
+	 d->mGameOverDialog = new GameOverDialog(this);
+	 d->mGameOverDialog->createStatistics(d->mBoson, winner, d->mLocalPlayer);
+	 d->mGameOverDialog->show();
+	 d->mBoson->setGameStatus(KGame::End);
  } else if (!winner) {
 	kdError() << k_funcinfo << "no player left ?!" << endl;
 	return;
