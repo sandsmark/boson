@@ -1,7 +1,7 @@
 #include "kgameunitdebug.h"
 
 #include "boson.h"
-#include "visualunit.h"
+#include "unit.h"
 #include "player.h"
 
 #include <klistview.h>
@@ -27,7 +27,7 @@ public:
 
 	KListView* mUnitList;
 
-	QIntDict<VisualUnit> mUnits;
+	QIntDict<Unit> mUnits;
 };
 
 KGameUnitDebug::KGameUnitDebug(QWidget* parent) : QWidget(parent)
@@ -82,21 +82,21 @@ void KGameUnitDebug::slotUpdate()
 	return;
  }
 
- QPtrList<VisualUnit> units;
+ QPtrList<Unit> units;
  QPtrList<KPlayer>list = *d->mBoson->playerList();
  for (unsigned int i = 0; i < d->mBoson->playerCount(); i++) {
-	QPtrList<VisualUnit> playerUnits = ((Player*)list.at(i))->allUnits();
+	QPtrList<Unit> playerUnits = ((Player*)list.at(i))->allUnits();
 	for (unsigned int j = 0; j < playerUnits.count(); j++) {
 		units.append(playerUnits.at(j));
 	}
  }
 
- QPtrListIterator<VisualUnit> it(units);
+ QPtrListIterator<Unit> it(units);
  while (it.current()) {
 	if (d->mUnits.find(it.current()->id())) {
 		kdError() << "Cannot double-add id " << it.current()->id() << endl;
 	} else {
-		VisualUnit* unit = it.current();
+		Unit* unit = it.current();
 		d->mUnits.insert(unit->id(), unit);
 		addUnit(unit);
 	}
@@ -104,7 +104,7 @@ void KGameUnitDebug::slotUpdate()
  }
 }
 
-void KGameUnitDebug::addUnit(VisualUnit* unit)
+void KGameUnitDebug::addUnit(Unit* unit)
 {
  QListViewItem* item = new QListViewItem(d->mUnitList);
  item->setText(0, QString::number(unit->id()));

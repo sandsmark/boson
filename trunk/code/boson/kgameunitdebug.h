@@ -5,7 +5,7 @@
 
 class Boson;
 class KGameUnitDebugPrivate;
-class VisualUnit;
+class Unit;
 
 class KGameUnitDebug : public QWidget
 {
@@ -17,7 +17,7 @@ public:
 	void setBoson(Boson*);
 
 protected:
-	void addUnit(VisualUnit* unit);
+	void addUnit(Unit* unit);
 
 protected slots:
 	void slotUpdate();

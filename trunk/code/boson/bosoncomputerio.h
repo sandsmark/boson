@@ -7,10 +7,10 @@ class Player;
 
 class BosonComputerIO : public KGameComputerIO
 {
+	Q_OBJECT
 	enum RTTI {
 		IdBosonComputerIO = 500
 	};
-	Q_OBJECT
 public:
 	BosonComputerIO();
 	BosonComputerIO(KPlayer*);

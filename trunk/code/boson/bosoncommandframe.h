@@ -4,7 +4,7 @@
 #include <qframe.h>
 #include <qvaluelist.h>
 
-class VisualUnit;
+class Unit;
 class Player;
 
 class QPixmap;
@@ -42,14 +42,14 @@ public slots:
 	 * Show the selected unit in the @ref BosonUnitView
 	 * @param unit The selected unit
 	 **/
-	void slotShowSingleUnit(VisualUnit* unit);
+	void slotShowSingleUnit(Unit* unit);
 
 	/**
 	 * Set the orderbuttons to display the possible constructions of this
 	 * unit. Hide all buttons if none are possible
 	 * @param unit The selected unit
 	 **/
-	void slotSetConstruction(VisualUnit* unit);
+	void slotSetConstruction(Unit* unit);
 
 	/**
 	 * Called by @ref Editor when selecting a menu entry. Uses @ref
@@ -71,7 +71,7 @@ signals:
 	 * @param factory Where to construct
 	 * @param owner The owner of the factory (i.e. the local player)
 	 **/
-	void signalUnitSelected(int unitType, VisualUnit* factory, Player* owner);
+	void signalUnitSelected(int unitType, Unit* factory, Player* owner);
 
 	void signalCellSelected(int groundType, unsigned char version);
 

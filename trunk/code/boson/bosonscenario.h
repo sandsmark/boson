@@ -4,7 +4,7 @@
 #include <qstring.h>
 #include <qdatastream.h>
 
-class Unit;
+class UnitBase;
 class Boson;
 class Player;
 class QDomElement;

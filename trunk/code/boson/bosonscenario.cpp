@@ -1,7 +1,7 @@
 
 #include "bosonscenario.h"
 
-#include "unit.h"
+#include "unitbase.h"
 #include "player.h"
 #include "boson.h"
 

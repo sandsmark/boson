@@ -5,8 +5,8 @@
 
 class Player;
 class QCanvas;
-class VisualUnit;
-class VisualFacility;
+class Unit;
+class Facility;
 
 class BosonPrivate;
 class Boson : public KGame
@@ -32,7 +32,7 @@ public:
 
 	virtual KPlayer* createPlayer(int rtti, int io, bool isVirtual);
 
-	VisualUnit* createUnit(int unitType, Player* owner); // public for Player::load
+	Unit* createUnit(int unitType, Player* owner); // public for Player::load
 
 public slots:
 	void slotSetGameSpeed(int speed);
@@ -63,7 +63,7 @@ signals:
 	 * @param x x-coordinate of the unit on the canvas
 	 * @param y y-coordinate of the unit on the canvas
 	 **/
-	void signalAddUnit(VisualUnit* unit, int x, int y);
+	void signalAddUnit(Unit* unit, int x, int y);
 
 	/**
 	 * Order the canvas to call @ref QCanvas::advance
@@ -81,9 +81,9 @@ protected:
 	 * @param unitId The unit to search for
 	 * @param searchIn The player to search the unit in. 0 for all players
 	 **/
-	VisualUnit* findUnit(unsigned long int unitId, Player* searchIn) const;
+	Unit* findUnit(unsigned long int unitId, Player* searchIn) const;
 
-	bool constructUnit(VisualFacility* factory, int unitType, int x, int y);
+	bool constructUnit(Facility* factory, int unitType, int x, int y);
 
 protected slots:
 	/**

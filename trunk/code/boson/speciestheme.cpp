@@ -1,5 +1,5 @@
 #include "speciestheme.h"
-#include "unit.h"
+#include "unitbase.h"
 #include "unitproperties.h"
 
 #include "defines.h"
@@ -374,7 +374,7 @@ bool SpeciesTheme::loadShotPixmap(const QString& fileName, QPixmap& pix)
  return true;
 }
 
-void SpeciesTheme::loadNewUnit(Unit* unit)
+void SpeciesTheme::loadNewUnit(UnitBase* unit)
 {
  if (!unit) {
 	kdError() << k_funcinfo << ": NULL unit" << endl;
@@ -394,7 +394,7 @@ void SpeciesTheme::loadNewUnit(Unit* unit)
  unit->setReload(prop->reload());
 
  // what will we do with the name?
- // maybe soemthing like unit->setProperties(prop);? so Unit::name() 
+ // maybe soemthing like unit->setProperties(prop);? so UnitBase::name() 
  // could return UnitProperties::name()
  // but don't use unit->setName("blah") as the name is equal for all units of
  // one type and therefore much memory consumption!
@@ -449,7 +449,7 @@ void SpeciesTheme::readUnitConfigs()
  }
 }
 
-const UnitProperties* SpeciesTheme::unitProperties(Unit* unit) const
+const UnitProperties* SpeciesTheme::unitProperties(UnitBase* unit) const
 {
  if (!unit) {
 	kdError() << k_funcinfo << ": NULL unit" << endl;

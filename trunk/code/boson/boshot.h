@@ -5,7 +5,7 @@
 
 #include <qcanvas.h>
 
-class VisualUnit;
+class Unit;
 
 class BoShotPrivate;
 class BoShot : public QCanvasSprite
@@ -19,7 +19,7 @@ public:
 	 * animations.
 	 * @param canvas Guess what?
 	 **/
-	BoShot(VisualUnit* target, VisualUnit* attacker, QCanvas* canvas, bool destroyed = false);
+	BoShot(Unit* target, Unit* attacker, QCanvas* canvas, bool destroyed = false);
 	virtual ~BoShot();
 
 	virtual int rtti() const { return RTTI::BoShot; }

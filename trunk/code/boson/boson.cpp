@@ -4,7 +4,7 @@
 #include "bosonmessage.h"
 #include "player.h"
 #include "defines.h"
-#include "visualunit.h"
+#include "unit.h"
 #include "speciestheme.h"
 #include "unitproperties.h"
 #include "bosoncanvas.h"
@@ -110,7 +110,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			Q_ULONG unitId;
 			stream >> unitId;
 //			kdDebug() << "pos: " << pos.x() << " " << pos.y() << endl;
-			VisualUnit* unit = findUnit(unitId, player);
+			Unit* unit = findUnit(unitId, player);
 			if (!unit) {
 				kdDebug() << "unit " << unitId << " not found for this player" << endl;
 				continue;
@@ -136,7 +136,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 		Q_UINT32 unitCount;
 		stream >> attackedUnitId;
 		stream >> unitCount;
-		VisualUnit* attackedUnit = findUnit(attackedUnitId, 0);
+		Unit* attackedUnit = findUnit(attackedUnitId, 0);
 		if (!attackedUnit) {
 			kdError() << "Cannot attack NULL unit" << endl;
 			return true;
@@ -151,7 +151,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 						<< endl;
 				continue;
 			}
-			VisualUnit* unit = findUnit(unitId, player);
+			Unit* unit = findUnit(unitId, player);
 			if (!unit) {
 				kdDebug() << "unit " << unitId << " not found for this player" << endl;
 				continue;
@@ -190,7 +190,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			kdError() << "Cannot construct without owner" << endl;
 			break;
 		}
-		VisualFacility* factory = (VisualFacility*)findUnit(factoryId, p);
+		Facility* factory = (Facility*)findUnit(factoryId, p);
 		if (!factory) {
 			kdError() << "Cannot construct without factory" << endl;
 			break;
@@ -234,7 +234,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 			kdError() << "Cannot find player " << owner << endl;
 			break;
 		}
-		VisualUnit* unit = createUnit(unitType, (Player*)p);
+		Unit* unit = createUnit(unitType, (Player*)p);
 		unit->setId(nextUnitId());
 		emit signalAddUnit(unit, x, y);
 		break;
@@ -275,7 +275,7 @@ void Boson::slotSendAdvance()
  sendMessage(0, BosonMessage::Advance);
 }
 
-VisualUnit* Boson::createUnit(int unitType, Player* owner)
+Unit* Boson::createUnit(int unitType, Player* owner)
 {
  if (!owner) {
 	kdError() << k_funcinfo << ": NULL owner" << endl;
@@ -292,16 +292,16 @@ VisualUnit* Boson::createUnit(int unitType, Player* owner)
 	return 0;
  }
 
- VisualUnit* unit = 0;
+ Unit* unit = 0;
  if (prop->isMobile()) {
-	unit = new VisualMobileUnit(unitType, owner, d->mCanvas);
+	unit = new MobileUnit(unitType, owner, d->mCanvas);
  } else if (prop->isFacility()) {
-	unit = new VisualFacility(unitType, owner, d->mCanvas);
+	unit = new Facility(unitType, owner, d->mCanvas);
  } else { // should be impossible
 	kdError() << k_funcinfo << "invalid unit type " << unitType << endl;
 	return 0;
  }
- owner->addUnit(unit); // can also be in VisualUnit c'tor - is this clean?
+ owner->addUnit(unit); // can also be in Unit c'tor - is this clean?
  theme->loadNewUnit(unit);
 
  return unit;
@@ -314,14 +314,14 @@ unsigned long int Boson::nextUnitId()
  return d->mNextUnitId;
 }
 
-VisualUnit* Boson::findUnit(unsigned long int id, Player* searchIn) const
+Unit* Boson::findUnit(unsigned long int id, Player* searchIn) const
 {
  if (searchIn) {
 	return searchIn->findUnit(id);
  }
  QPtrListIterator<KPlayer> it(*playerList());
  while (it.current()) {
-	VisualUnit* unit = ((Player*)it.current())->findUnit(id);
+	Unit* unit = ((Player*)it.current())->findUnit(id);
 	if (unit) {
 		return unit;
 	}
@@ -412,7 +412,7 @@ void Boson::slotReplacePlayerIO(KPlayer* player, bool* remove)
 // kdDebug() << k_funcinfo << endl;
 }
 
-bool Boson::constructUnit(VisualFacility* factory, int unitType, int x, int y)
+bool Boson::constructUnit(Facility* factory, int unitType, int x, int y)
 {
  if (!factory) {
 	kdError() << k_funcinfo << ": NULL factory cannot produce" << endl;
@@ -444,13 +444,13 @@ bool Boson::constructUnit(VisualFacility* factory, int unitType, int x, int y)
 	if (RTTI::isUnit((*it)->rtti())) {
 		continue; // this item is not interesting here
 	}
-	VisualUnit* unit = (VisualUnit*)*it;
+	Unit* unit = (Unit*)*it;
 	if (!unit->isDestroyed()) {
 		kdDebug() << "Cannot create unit here" << endl;
 		return false;
 	}
  }
- VisualUnit* unit = createUnit(unitType, p);
+ Unit* unit = createUnit(unitType, p);
  unit->setId(nextUnitId());
  emit signalAddUnit(unit, x, y);
  return true;

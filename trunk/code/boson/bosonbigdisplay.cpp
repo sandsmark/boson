@@ -1,7 +1,7 @@
 
 #include "bosonbigdisplay.h"
 
-#include "visualunit.h"
+#include "unit.h"
 #include "bosoncanvas.h"
 #include "player.h"
 #include "unitproperties.h"
@@ -28,7 +28,7 @@
 struct ConstructUnit
 {
 	int unitType; // to be constructed unit
-	VisualUnit* factory; // facility that constructs the unit (or NULL in editor mode)
+	Unit* factory; // facility that constructs the unit (or NULL in editor mode)
 	Player* owner; // the owner of the unit - probably only for editor mode.
 	int groundType;
 	unsigned char version;
@@ -46,7 +46,7 @@ public:
 	}
 
 	BosonBigDisplay::SelectionMode mSelectionMode;
-	QPtrList<VisualUnit> mSelectionList;
+	QPtrList<Unit> mSelectionList;
 	QPoint mSelectionStart;
 	QPoint mSelectionEnd;
 	bool mIsSelecting;
@@ -133,7 +133,7 @@ void BosonBigDisplay::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseEvent
 void BosonBigDisplay::startSelection(const QPoint& pos)
 {
  // LMB clicked - either select the unit or start a selection rect
- VisualUnit* unit = ((BosonCanvas*)canvas())->findUnitAt(pos);
+ Unit* unit = ((BosonCanvas*)canvas())->findUnitAt(pos);
  if (!unit) {
 	// nothing has been found : it's a ground-click
 	// Here, we have to draw a "selection box"...
@@ -195,7 +195,7 @@ BosonBigDisplay::SelectionMode BosonBigDisplay::selectionMode() const
 void BosonBigDisplay::clearSelection()
 {
  d->mSelectionMode = SelectNone;
- QPtrListIterator<VisualUnit> it(d->mSelectionList);
+ QPtrListIterator<Unit> it(d->mSelectionList);
  while (it.current()) {
 	it.current()->unselect();
 	++it;
@@ -203,7 +203,7 @@ void BosonBigDisplay::clearSelection()
  d->mSelectionList.clear();
 }
 
-void BosonBigDisplay::addUnitSelection(VisualUnit* unit)
+void BosonBigDisplay::addUnitSelection(Unit* unit)
 {
  if (!unit) {
 	kdError() << k_funcinfo << "NULL unit" << endl;
@@ -230,7 +230,7 @@ const QPoint& BosonBigDisplay::selectionEnd() const
  return d->mSelectionEnd;
 }
 
-QPtrList<VisualUnit>& BosonBigDisplay::selection() const
+QPtrList<Unit>& BosonBigDisplay::selection() const
 {
  return d->mSelectionList;
 }
@@ -244,7 +244,7 @@ void BosonBigDisplay::selectArea(const QRect& rect)
 
  for (it = list.begin(); it != list.end(); ++it) {
 	if (RTTI::isUnit((*it)->rtti())) {
-		VisualUnit* unit = (VisualUnit*)*it;
+		Unit* unit = (Unit*)*it;
 		if (unit->unitProperties()->isMobile()) { // no NULL check for performance
 			addUnitSelection(unit);
 		}
@@ -302,10 +302,10 @@ void BosonBigDisplay::actionClicked(const QPoint& pos, QDataStream& stream, bool
 	kdError() << k_funcinfo << ": SelectNone" << endl;
 	return;
  }
- VisualUnit* unit = ((BosonCanvas*)canvas())->findUnitAt(pos);
+ Unit* unit = ((BosonCanvas*)canvas())->findUnitAt(pos);
  if (!unit) {
 	if ((selection().first()->unitProperties()->isMobile())) { // move the selection to pos
-		QPtrListIterator<VisualUnit> it(selection());
+		QPtrListIterator<Unit> it(selection());
 		// tell the clients we want to move units:
 		stream << (Q_UINT32)BosonMessage::MoveMove;
 		// tell them where to move to:
@@ -319,7 +319,7 @@ void BosonBigDisplay::actionClicked(const QPoint& pos, QDataStream& stream, bool
 		}
 		send = true;
 	} else { // place constructions
-		VisualFacility* fac = (VisualFacility*)selection().first();
+		Facility* fac = (Facility*)selection().first();
 		if (fac->unitProperties()->canProduce() && fac->hasConstruction()) {
 			// create the new unit
 			stream << (Q_UINT32)BosonMessage::MoveConstruct;
@@ -332,7 +332,7 @@ void BosonBigDisplay::actionClicked(const QPoint& pos, QDataStream& stream, bool
 		}
 	}
  } else { // there is a unit - attack it!
-	QPtrListIterator<VisualUnit> it(selection());
+	QPtrListIterator<Unit> it(selection());
 	// tell the clients we want to attack:
 	stream << (Q_UINT32)BosonMessage::MoveAttack;
 	// tell them which unit to attack:
@@ -428,7 +428,7 @@ void BosonBigDisplay::editorActionClicked(const QPoint& pos)
 }
 
 
-void BosonBigDisplay::slotWillConstructUnit(int unitType, VisualUnit* factory, Player* owner)
+void BosonBigDisplay::slotWillConstructUnit(int unitType, Unit* factory, Player* owner)
 {
  if (!owner) {
 	kdDebug() << k_funcinfo << ": NULL owner" << endl;
@@ -443,7 +443,7 @@ void BosonBigDisplay::slotWillConstructUnit(int unitType, VisualUnit* factory, P
  d->mConstruction.groundType = -1;
  if (factory) {
 	kdDebug() << "there is a factory " << endl;
-	((VisualFacility*)factory)->addConstruction(unitType);
+	((Facility*)factory)->addConstruction(unitType);
  }
 }
 
@@ -454,7 +454,7 @@ void BosonBigDisplay::slotWillPlaceCell(int groundType, unsigned char version)
  d->mConstruction.version = version;
 }
 
-void BosonBigDisplay::slotUnitChanged(VisualUnit* unit)
+void BosonBigDisplay::slotUnitChanged(Unit* unit)
 {
  if (!unit) {
 	kdError() << k_funcinfo << "NULL unit" << endl;

@@ -9,7 +9,7 @@ class KGameIO;
 class QKeyEvent;
 
 class BosonCanvas;
-class VisualUnit;
+class Unit;
 class Player;
 
 class BosonWidgetPrivate;
@@ -83,7 +83,7 @@ protected:
 protected slots:
 	void slotPlayerJoinedGame(KPlayer* p);
 	void slotArrowScrollChanged(int speed);
-	void slotAddUnit(VisualUnit* unit, int x, int y);
+	void slotAddUnit(Unit* unit, int x, int y);
 	void slotStartGame();
 
 	void slotReceiveMap(const QByteArray& map);

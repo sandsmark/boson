@@ -1,6 +1,6 @@
 #include "bosonunitview.h"
 
-#include "visualunit.h"
+#include "unit.h"
 #include "player.h"
 #include "unitproperties.h"
 #include "speciestheme.h"
@@ -97,7 +97,7 @@ BosonUnitView::~BosonUnitView()
  delete d;
 }
 
-void BosonUnitView::setUnit(VisualUnit* unit)
+void BosonUnitView::setUnit(Unit* unit)
 {
  if (!unit) {
 	// hide all labels
