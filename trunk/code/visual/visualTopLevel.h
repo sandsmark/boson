@@ -66,8 +66,8 @@ public slots:
 	void reCenterView(int x, int y);
 	void relativeReCenterView(int x, int y) {reCenterView(x+viewX, y+viewY);}
 	void reSizeView(int l, int h);
-	void mobileDestroyed(int);
-	void fixDestroyed(int);
+//	void mobileDestroyed(int);
+//	void fixDestroyed(int);
 
 public:
 	void relativeMoveView(int dx, int dy);
