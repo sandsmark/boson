@@ -5,6 +5,7 @@
     <Action name="game_center_base" />
     <Action name="game_reset_view_properties" />
     <Action name="game_grab_screenshot" />
+    <Action name="game_grab_profiling" />
   </Menu>
 </MenuBar>
 </kpartgui>

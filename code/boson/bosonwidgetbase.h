@@ -186,6 +186,7 @@ protected slots:
 	void slotToggleCmdFrameVisible();
 	void slotToggleChatVisible();
 	void slotGrabScreenshot();
+	void slotGrabProfiling();
 
 	void slotCmdBackgroundChanged(const QString& file);
 	void slotMiniMapScaleChanged(double);
@@ -248,6 +249,12 @@ protected:
 	 **/
 	virtual void startScenarioAndGame();
 
+	/**
+	 * Find a filename for prefix-nnn.suffx where nnn is a number. The
+	 * returned string will either be a filename where something can be
+	 * stored (i.e. no file of this name exists yet) or QString::null.
+	 **/
+	QString findSaveFileName(const QString& prefix, const QString& suffix);
 
 private:
 	void initChat();
