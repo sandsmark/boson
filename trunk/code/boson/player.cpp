@@ -266,11 +266,22 @@ Unit* Player::findUnit(unsigned long int unitId) const
 
 bool Player::save(QDataStream& stream)
 {
+// we need save() and load() for the new game dialog. The units part should be
+// unused, only the species theme should be necessary.
+ kdDebug() << k_funcinfo << endl;
  if (!KPlayer::save(stream)) {
 	kdError() << "Couldn't save player" << endl;
 	return false;
  }
-// kdDebug() << k_funcinfo < endl;
+ if (speciesTheme()) {
+	stream << speciesTheme()->identifier();
+	stream << speciesTheme()->teamColor();
+ } else {
+	 stream << QString::null;
+	 stream << (QRgb)0;
+ }
+
+// the stuff below this should (!) be unused.
  Q_UINT32 unitCount = d->mUnits.count();
  stream << unitCount;
  for (unsigned int i = 0; i < unitCount; i++) {
@@ -289,13 +300,19 @@ bool Player::save(QDataStream& stream)
 
 bool Player::load(QDataStream& stream)
 {
-// Player::load() is unused!
-
+// kdDebug() << k_funcinfo < endl;
  if (!KPlayer::load(stream)) {
 	kdError() << "Couldn't load player" << endl;
 	return false;
  }
-// kdDebug() << k_funcinfo < endl;
+ QString themeIdentifier;
+ QRgb teamColor;
+ stream >> themeIdentifier;
+ stream >> teamColor;
+ if (themeIdentifier != QString::null) {
+	loadTheme(SpeciesTheme::speciesDirectory(themeIdentifier), teamColor);
+ }
+
  Q_UINT32 unitCount;
  stream >> unitCount;
  //perhaps:

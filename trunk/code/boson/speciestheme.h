@@ -160,6 +160,11 @@ public:
 	static QString defaultSpecies();
 
 	static QString speciesDirectory(const QString& identifier);
+
+	/**
+	 * @return The identifier of the current theme
+	 **/
+	QString identifier() const;
 	
 
 protected:
