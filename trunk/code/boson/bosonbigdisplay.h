@@ -105,6 +105,8 @@ public slots:
 
 	void slotMoveSelection(int cellX, int cellY);
 
+	virtual void setContentsPos(int x, int y);
+
 signals:
 	/**
 	 * Emitted when a single unit (@ref selectionMode == Select_Single) is
