@@ -414,3 +414,104 @@ void BosonEffectPropertiesParticleTrail::updateParticle(BosonEffectParticle* eff
   }
   particle->tex = mTextures->texture(t);
 }
+
+
+
+/*****  BosonEffectPropertiesParticleEnvironmental  *****/
+
+BosonEffectPropertiesParticleEnvironmental::BosonEffectPropertiesParticleEnvironmental() :
+    BosonEffectPropertiesParticle()
+{
+  reset();
+}
+
+void BosonEffectPropertiesParticleEnvironmental::reset()
+{
+  // Reset all variables to their default values
+  mMass = 0.5;
+  mMinVelo.reset();
+  mMaxVelo.reset();
+  mColor.reset();
+  mSize = 0.5;
+  mParticleDist = 0;
+  mTextureName = "smoke";
+  mGLBlendFuncStr = "GL_ONE_MINUS_SRC_ALPHA";
+  mGLSrcBlendFuncStr = "GL_SRC_ALPHA";
+  mRange = 5;
+  mDensity = 10;
+}
+
+bool BosonEffectPropertiesParticleEnvironmental::load(KSimpleConfig* cfg, const QString& group, bool inherited)
+{
+  if(!BosonEffectPropertiesParticle::load(cfg, group, inherited))
+  {
+    return false;
+  }
+
+  mMass = (float)(cfg->readDoubleNumEntry("Mass", mMass));
+  mMinVelo = BosonConfig::readBoVector3FixedEntry(cfg, "MinVelocity", mMinVelo);
+  mMaxVelo = BosonConfig::readBoVector3FixedEntry(cfg, "MaxVelocity", mMaxVelo);
+  mColor = BosonConfig::readBoVector4FloatEntry(cfg, "Color", mColor);
+  mSize = (float)(cfg->readDoubleNumEntry("Size", mSize));
+  mParticleDist = (float)(cfg->readDoubleNumEntry("ParticleDist", mParticleDist));
+  mGLBlendFuncStr = cfg->readEntry("BlendFunc", mGLBlendFuncStr);
+  mGLSrcBlendFuncStr = cfg->readEntry("SrcBlendFunc", mGLSrcBlendFuncStr);
+  mRange = (float)(cfg->readDoubleNumEntry("Range", mRange));
+  mDensity = (float)(cfg->readDoubleNumEntry("Density", mDensity));
+  mTextureName = cfg->readEntry("Texture", mTextureName);
+
+  // If we're loading main properties (not inherited ones), load the textures
+  //  now.
+  if(!inherited)
+  {
+    mTextures = getTextures(mTextureName);
+    mGLBlendFunc = Bo3dTools::string2GLBlendFunc(mGLBlendFuncStr);
+    if(mGLBlendFunc == GL_INVALID_ENUM)
+    {
+      boError() << k_funcinfo << "Invalid OpenGL blend function (dst): '" << mGLBlendFuncStr << "'" << endl;
+      mGLBlendFunc = GL_ONE_MINUS_SRC_ALPHA;
+    }
+    mGLSrcBlendFunc = Bo3dTools::string2GLBlendFunc(mGLSrcBlendFuncStr);
+    if(mGLSrcBlendFunc == GL_INVALID_ENUM)
+    {
+      boError() << k_funcinfo << "Invalid OpenGL blend function (src): '" << mGLSrcBlendFuncStr << "'" << endl;
+      mGLSrcBlendFunc = GL_SRC_ALPHA;
+    }
+  }
+  return true;
+}
+
+BosonEffect* BosonEffectPropertiesParticleEnvironmental::newEffect(const BoVector3Fixed& pos, const BoVector3Fixed& /*rot*/) const
+{
+  BoVector3Fixed worldpos = pos;
+  worldpos.canvasToWorld();
+
+  BosonEffectParticleEnvironmental* e = new BosonEffectParticleEnvironmental(this, mDensity, mRange, mTextures, worldpos);
+  e->setMass(mMass);
+  e->setParticleDist(mParticleDist);
+  e->setBlendFunc(mGLSrcBlendFunc, mGLBlendFunc);
+  e->setParticleVelo((mMinVelo + mMaxVelo) / 2);
+
+  return e;
+}
+
+void BosonEffectPropertiesParticleEnvironmental::initParticle(BosonEffectParticle* effect, BosonParticle* p) const
+{
+  BosonGenericParticle* particle = (BosonGenericParticle*)p;
+  particle->life = 1.0f;  // Not used, this just tells that the particle is active
+  particle->maxage = 1.0f;  // Not used
+  particle->color = mColor;
+  particle->size = mSize;
+  BosonEffectParticleEnvironmental* e = (BosonEffectParticleEnvironmental*)effect;
+  particle->velo.set(BosonEffect::getFloat(mMinVelo[0], mMaxVelo[0]),
+      BosonEffect::getFloat(mMinVelo[1], mMaxVelo[1]), BosonEffect::getFloat(mMinVelo[2], mMaxVelo[2]));
+  particle->velo += (wind().toFixed() * e->mass());
+}
+
+void BosonEffectPropertiesParticleEnvironmental::updateParticle(BosonEffectParticle* /*effect*/, BosonParticle* /*p*/) const
+{
+  // Nothing to do, because parameters are constant for environmental
+  //  particles.
+  // TODO: maybe support animated textures (they would just loop then)?
+}
+

@@ -2864,6 +2864,16 @@ void BosonBigDisplayBase::cameraChanged()
 	}
  }
 
+ // Update position of environmental effects
+ QPtrListIterator<BosonEffect> it(*canvas()->effects());
+ while (it.current()) {
+	if (it.current()->type() == BosonEffect::ParticleEnvironmental) {
+		it.current()->setPosition(camera()->cameraPos().toFixed());
+	}
+	++it;
+ }
+
+
  boWaterManager->modelviewMatrixChanged(d->mModelviewMatrix);
  boWaterManager->setCameraPos(camera()->cameraPos());
 
@@ -3951,7 +3961,7 @@ void BosonBigDisplayBase::makeVisibleEffectsList(BoVisibleEffects* v)
 		// TODO: maybe we should just add particleDist() to bounding sphere radius
 		//  of the system?
 		if (sphereInFrustum(s->position(), s->boundingSphereRadius())) {
-			if (localPlayerIO()->canSee((int)s->position().x(), -(int)s->position().y())) {
+			if (!s->testFogged() || localPlayerIO()->canSee((int)s->position().x(), -(int)s->position().y())) {
 				v->mParticles.append(s);
 				v->mAll.append(it.current());
 			}
