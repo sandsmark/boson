@@ -55,6 +55,9 @@ Game TODOs
   production plugin can be part of a mobile unit, too
 - BUG: units go through near clip and are "broken" when you zoom in above some
   tall facility or aircraft
+- move the addToCells() call from Unit::moveBy() to BosonSprite::moveBy()!
+- rename BosonSprite. It simply is not a sprite anymore (was designed in order
+  to provide both, QCanvasSprite and GLSprites). Anyone knows a good name?
 
 Editor (map, unit, scenario) TODOs
 - totally broken, currently
