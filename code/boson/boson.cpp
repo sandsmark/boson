@@ -1186,7 +1186,8 @@ Unit* Boson::createUnit(unsigned long int unitType, Player* owner)
  theme->loadNewUnit(unit);
  unit->setAnimationMode(UnitAnimationIdle);
  if (unit->isFlying()) {
-	unit->moveBy(0.0f, 0.0f, 2.0 * BO_TILE_SIZE / BO_GL_CELL_SIZE);
+//	unit->moveBy(0.0f, 0.0f, 2.0 * BO_TILE_SIZE / BO_GL_CELL_SIZE);
+	unit->moveBy(0.0f, 0.0f, 2.0);
  }
 
  return unit;
