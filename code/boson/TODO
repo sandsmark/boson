@@ -86,6 +86,8 @@ General TODOs
 - Minimap doesn't support units with width or height not equal to BO_TILE_SIZE
 - Click+Move in minimap should move the rectangle (aka the screen position)
 - ./configure allows --without-gl
+- Clean up BosonNewGameWidget. E.g. map selection stuff sucks IMHO and we also
+  need some UI fixes. E.g. it should show min/max players of current map
 
 Data TODOs
 - sound for destroyed facilities - shouldn't be speech i guess

@@ -314,11 +314,14 @@ public:
 	/**
 	 * @return All units except this that are in @ref weaponRange of this
 	 * unit.
+	 * Note that it doesn't include units on cells that are not visible
+	 * (e.g. fogged) for local player.
 	 **/
 	BoItemList unitsInRange(BosonWeapon* w) const;
 
 	/**
 	 * @return Just like @ref unitsInRange but only enemy units.
+	 * Note that it doesn't include units on fogged cells (see @ref unitsInRange)
 	 **/
 	BoItemList enemyUnitsInRange(BosonWeapon* w) const;
 

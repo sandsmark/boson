@@ -599,6 +599,12 @@ bool BosonPath::rangeCheck()
   //  goal and waste time.
   // First quick check if goal is occupied if range is 0
   int dist = QMAX(QABS(mStartx - mGoalx), QABS(mStarty - mGoaly));
+  // If distance to goal is more than SEARCH_STEPS, we won't search complete
+  //  path and we don't need this method
+  if(dist > SEARCH_STEPS)
+  {
+    return false;
+  }
   if(mRange == 0)
   {
     if(cost(mGoalx, mGoaly) != ERROR_COST)
@@ -617,6 +623,12 @@ bool BosonPath::rangeCheck()
   int x, y;
   for(int range = 1; range < dist; range++)
   {
+    // We must not look too far, otherwise we have crash, because marking array
+    //  isn't big enough
+    if(dist + range > SEARCH_STEPS)
+    {
+      return false;
+    }
     // Bad duplicated code. But it's faster this way
     // First check upper and lower sides of "rectangle"
     for(x = mGoalx - range; x <= mGoalx + range; x++)

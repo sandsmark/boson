@@ -249,6 +249,7 @@ BosonNewGameWidget::~BosonNewGameWidget()
   // Save stuff like player name, color etc.
   boConfig->saveLocalPlayerName(mNameEdit->text());
   boConfig->saveLocalPlayerColor(mPlayercolor);
+  boConfig->saveLocalPlayerMap(mMapId);
 
   boConfig->saveComputerPlayerName(mAddAIName->text());
 }
@@ -285,6 +286,7 @@ void BosonNewGameWidget::initPlayer()
 
 void BosonNewGameWidget::initMaps()
 {
+  QString mapid = boConfig->readLocalPlayerMap();
   QStringList list = BosonPlayField::availablePlayFields();
   for (unsigned int i = 0; i < list.count(); i++)
   {
@@ -294,12 +296,16 @@ void BosonNewGameWidget::initMaps()
 //    d->mPlayFieldIndex2Comment.insert(i, cfg.readEntry("Comment", i18n("None")));
 //    QString fileName = list[i].left(list[i].length() - strlen(".boson")) + QString::fromLatin1(".bpf");
 //    d->mPlayFieldIndex2FileName.insert(i, fileName);
-    mMapIndex2Identifier.insert(i, cfg.readEntry("Identifier", QString::fromLatin1("Unknown")));
+    QString id = cfg.readEntry("Identifier", QString::fromLatin1("Unknown"));
+    if(id == mapid)
+    {
+      mMap = i;
+    }
+    mMapIndex2Identifier.insert(i, id);
   }
-  mMapCombo->setCurrentItem(0);
-  mMap = 0;
+  mMapCombo->setCurrentItem(mMap);
   if(boGame->isAdmin())
-    slotMyMapChanged(0);
+    slotMyMapChanged(mMap);
 }
 
 void BosonNewGameWidget::initSpecies()
@@ -461,6 +467,7 @@ void BosonNewGameWidget::slotMapChanged(const QString& id)
       int index = it.key();
       mMap = index;
       mMapName->setText(mMapCombo->text(index));
+      mMapId = id;
       if(boGame->isAdmin())
       {
         // Init map to be able to check max/min players count
