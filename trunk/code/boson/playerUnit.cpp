@@ -286,8 +286,6 @@ void playerMobUnit::u_stop(void)
 playerFacility::playerFacility(facilityMsg_t *msg, QObject* parent=0L, const char *name=0L)
 	: visualFacility(msg,parent,name)
 {
-	moveTo(BO_TILE_SIZE * msg->x , BO_TILE_SIZE * msg->y);
-	frame(msg->state);
 }
 
 

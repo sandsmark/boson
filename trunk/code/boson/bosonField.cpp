@@ -32,6 +32,10 @@
 bosonField::bosonField(uint w, uint h, QObject *parent, const char *name=0L)
 	: visualField(w,h,parent,name)
 {
+	mobile.resize(149);
+	facility.resize(149);
+	mobile.setAutoDelete(TRUE);
+	facility.setAutoDelete(TRUE);   
 }
 
 

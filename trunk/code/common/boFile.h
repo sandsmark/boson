@@ -1,5 +1,5 @@
 /***************************************************************************
-                         playField.h  -  description                              
+                         boFile.h  -  description                              
                              -------------------                                         
 
     version              : $Id$
@@ -18,92 +18,70 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef PLAYFIELD_H 
-#define PLAYFIELD_H 
-
-#include <qstring.h>
+#ifndef BOFILE_H 
+#define BOFILE_H 
 
 #include "../common/unitType.h"
 #include "../common/groundType.h"
 
 
 class QDataStream;
-
-struct origMobile {
-	mobType	t;
-	int	who;
-	int	x;
-	int	y;
-};
-
-struct origFacility {
-	facilityType	t;
-	int		who;
-	int		x;
-	int		y;
-};
+class QFile;
+class mobileMsg_t;
+class facilityMsg_t;
 
 
-struct origPeople {
-	int		nbMobiles;
-	int		nbFacilities;
-	origMobile	*mobile;
-	origFacility	*facility;
-};
+#define stateAssert(s)								\
+		if ((s)!=BFstate) {						\
+			logf(LOG_ERROR, "boFile : bad BFstate %d, while %d assumed, line %d",\
+				(s), BFstate, __LINE__);				\
+			error = true; return;					\
+		}
 
-
-struct bosonMap {
-	groundType	**cells;
-	int		width;
-	int		height;
-};
-
-class playField //: public  QDataStream
+class boFile 
 {
 
- public:
-	playField();
-	playField(const QString name);
-	~playField();
+public:
+	boFile();
+virtual	~boFile();
 
-	void setFile(const QString name);
+protected :
 
-	bool	load	(void);
-	bool	write	(void);
+	bool	openRead(const char *);
+	bool	openWrite(const char *);
+	bool	Close();
 
- private:
-
-/*	QDataStream& operator<< (origMobile *);
-	QDataStream& operator>> (origMobile *);
-
-	QDataStream& operator<< (origFacility *);
-	QDataStream& operator>> (origFacility *);
-
-	QDataStream& operator<< (Cell *);
-	QDataStream& operator>> (Cell *); */
-
-	bool	load(origMobile &);
-	bool	load(origFacility &);
-	bool	load(groundType  &);
-	bool	loadMap();
-	bool	loadPeople();
-
-	void	write(origMobile &);
-	void	write(origFacility &);
-	void	write(groundType &);
-	void	writeMap();
-	void	writePeople();
-
-	QDataStream	*stream;
-	QString		filename;
-
-public :
+/* header */
+	int		map_width;
+	int		map_height;
 	int		nbPlayer;
-	bosonMap	map;
-	origPeople	people;
+	int		nbMobiles;
+	int		nbFacilities;
+
+	groundType load();
+	void	load(mobileMsg_t &);
+	void	load(facilityMsg_t &);
+
+	void	write(groundType );
+	void	write(mobileMsg_t &m);
+	void	write(facilityMsg_t &f);
+
+	bool	isOk() {return !error; }
+
+
+private:
+
+	enum {
+		None,		// nothing has happened
+		Read,		// a file is being read
+		Write,		// a file is being written
+	}		BFstate;
+	QDataStream	*stream;
+	QFile		*f;
+	bool		error;
 
 };
  
 
-#endif // PLAYFIELD_H
+#endif // BOFILE_H
 

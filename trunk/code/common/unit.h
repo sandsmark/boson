@@ -75,6 +75,7 @@ class mobUnit : public Unit
  public:
   mobUnit(mobileMsg_t *msg, QObject* parent=0L, const char *name=0L);
 
+  void		fill(mobileMsg_t &msg);
   void		getPos(uint &xx, uint &yy) {xx = _x(); yy = _y(); }
   mobType	getType(void) {return type;}
 
@@ -98,6 +99,8 @@ class Facility : public Unit
 
  public:
   		Facility(facilityMsg_t *msg, QObject* parent=0L, const char *name=0L);
+
+  void		fill(facilityMsg_t &msg);
 
   facilityType	getType(void) {return type;}
 

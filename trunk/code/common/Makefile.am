@@ -30,14 +30,14 @@ LDFLAGS =  -s
 
 # libboson.a
 noinst_LIBRARIES = libboson.a
-libboson_a_SOURCES = boconnect.cpp log.cpp unit.cpp cell.cpp bobuffer.cpp unitType.cpp groundType.cpp playField.cpp
+libboson_a_SOURCES = boconnect.cpp log.cpp unit.cpp cell.cpp bobuffer.cpp unitType.cpp groundType.cpp boFile.cpp
 libboson_a_METASOURCES = USE_AUTOMOC
 
 
 # garbage
-EXTRA_DIST = boconnect.cpp msgData.h log.h log.cpp unit.cpp unit.h cell.cpp cell.h ground.h bobuffer.cpp unitType.h unitType.cpp groundType.h groundType.cpp playField.h playField.cpp
+EXTRA_DIST = boconnect.cpp msgData.h log.h log.cpp unit.cpp unit.h cell.cpp cell.h ground.h bobuffer.cpp unitType.h unitType.cpp groundType.h groundType.cpp boFile.h boFile.cpp
 
-noinst_HEADERS = bobuffer.h boconfig.h cell.h groundType.h log.h msgData.h playField.h refused.h unit.h unitType.h
+noinst_HEADERS = bobuffer.h boconfig.h cell.h groundType.h log.h msgData.h boFile.h refused.h unit.h unitType.h
 
 
 CLEANFILES = $(libboson_a_METASOURCES)
