@@ -44,8 +44,6 @@
 #define MAX_MAP_HEIGHT 500
 #define MAX_MAP_WIDTH 500
 
-#define ARROW_KEY_STEP 10 
-
 #define MAX_GAME_SPEED 10 // the advance period - lower means faster
 #define MIN_GAME_SPEED 800 // the advance period - higher means slower
 #define DEFAULT_GAME_SPEED 70

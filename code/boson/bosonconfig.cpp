@@ -37,6 +37,7 @@ public:
 	bool mSound;
 	bool mMusic;
 	int mCommandButtonsPerRow;
+	unsigned int mArrowKeyStep;
 
 	// don't save this to the config
 	DebugMode mDebugMode;
@@ -51,6 +52,7 @@ BosonConfig::BosonConfig(KConfig* conf)
  d->mMusic = true;
  d->mCommandButtonsPerRow = 3;
  d->mDebugMode = DebugNormal;
+ d->mArrowKeyStep = 10;
 
  // load from config
  reset(conf);
@@ -276,6 +278,30 @@ bool BosonConfig::sound() const
  return d->mSound;
 }
 
+void BosonConfig::saveArrowKeyStep(KConfig* conf)
+{
+ conf->setGroup("Boson");
+ conf->writeEntry("ArrowKeyStep", arrowKeyStep());
+}
+
+unsigned int BosonConfig::readArrowKeyStep(KConfig* conf)
+{
+ conf->setGroup("Boson");
+ unsigned int k = conf->readUnsignedNumEntry("ArrowKeyStep", arrowKeyStep());
+ return k;
+}
+
+void BosonConfig::setArrowKeyStep(unsigned int k)
+{
+ d->mArrowKeyStep = k;
+}
+
+unsigned int BosonConfig::arrowKeyStep() const
+{
+ return d->mArrowKeyStep;
+}
+
+
 int BosonConfig::readCommandButtonsPerRow(KConfig* conf)
 {
  conf->setGroup("Boson");
@@ -310,6 +336,7 @@ void BosonConfig::reset(KConfig* conf)
  setMusic(readMusic(conf));
  setSound(readSound(conf));
  setCommandButtonsPerRow(readCommandButtonsPerRow(conf));
+ setArrowKeyStep(readArrowKeyStep(conf));
 
  conf->setGroup(oldGroup);
 }
@@ -325,6 +352,7 @@ void BosonConfig::save(bool editor, KConfig* conf)
  saveMusic(conf);
  saveSound(conf);
  saveCommandButtonsPerRow(conf);
+ saveArrowKeyStep(conf);
  if (!editor) {
 	// place configs here that should not be saved in editor mode
  }

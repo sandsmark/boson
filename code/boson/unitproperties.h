@@ -184,6 +184,7 @@ public:
 	 **/
 
 	bool canMineMinerals() const;
+
 	/**
 	 * @return TRUE if this unit can mine oil. FALSE otherwise. Also
 	 * FALSE for facilities.
