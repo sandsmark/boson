@@ -1,6 +1,4 @@
 [Boson Facility]
-CanRefineMinerals=true
-CanRefineOil=false
 ConstructionSteps=20
 
 [Boson Unit]
@@ -27,6 +25,10 @@ UnitDepth=1
 UnitHeight=2
 UnitWidth=2
 Weapons=0
+
+[RefineryPlugin]
+CanRefineMinerals=true
+CanRefineOil=false
 
 [Sounds]
 OrderAttack=order_attack

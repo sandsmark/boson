@@ -30,7 +30,9 @@ Weapons=0
 [HarvesterPlugin]
 CanMineMinerals=true
 CanMineOil=false
-MaxResources=100
+MaxResources=150
+MiningSpeed=3
+UnloadingSpeed=10
 
 [Sounds]
 OrderAttack=order_attack

@@ -28,6 +28,10 @@ UnitHeight=2
 UnitWidth=2
 Weapons=0
 
+[RefineryPlugin]
+CanRefineMinerals=false
+CanRefineOil=true
+
 [Sounds]
 OrderAttack=order_attack
 OrderMove=order_move
