@@ -85,10 +85,12 @@ public:
 	}
 	~TeamColorData()
 	{
+		boDebug() << k_funcinfo << endl;
 		mUnitModels.clear();
 		mSmallOverview.clear();
 		mBigOverview.clear();
 		mObjectModels.clear();
+		boDebug() << k_funcinfo << "done" << endl;
 	}
 
 	QIntDict<BosonModel> mUnitModels;
@@ -115,10 +117,12 @@ SpeciesData::SpeciesData(const QString& speciesPath)
 
 SpeciesData::~SpeciesData()
 {
+ boDebug() << k_funcinfo << endl;
  d->mActionPixmaps.clear();
  d->mParticleProperties.clear();
  d->mTeamData.clear();
  delete d;
+ boDebug() << k_funcinfo << "done" << endl;
 }
 
 void SpeciesData::initStatic()
@@ -127,6 +131,7 @@ void SpeciesData::initStatic()
 	return;
  }
  mSpeciesData = new QDict<SpeciesData>();
+ mSpeciesData->setAutoDelete(true);
  sd.setObject(mSpeciesData);
 }
 
