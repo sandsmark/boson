@@ -35,6 +35,7 @@ BosonItem::BosonItem(BosonModel* model, BosonCanvas* canvas)
  mCurrentAnimation = 0;
  mX = mY = mZ = 0.0;
  mWidth = mHeight = 0;
+ mCellsDirty = true;
  mRotation = 0;
  mXRotation = 0;
  mGLDepthMultiplier = 1.0;
@@ -88,14 +89,18 @@ BosonItem::~BosonItem()
  }
 }
 
-QPointArray BosonItem::cells() const
+QPointArray BosonItem::cells()
 {
- int left, right, top, bottom;
- leftTopCell(&left, &top);
- rightBottomCell(&right, &bottom);
- right = QMIN(right, QMAX((int)canvas()->mapWidth() - 1, 0));
- bottom = QMIN(bottom, QMAX((int)canvas()->mapHeight() - 1, 0));
- return cells(left, right, top, bottom);
+ if (mCellsDirty) {
+	int left, right, top, bottom;
+	leftTopCell(&left, &top);
+	rightBottomCell(&right, &bottom);
+	right = QMIN(right, QMAX((int)canvas()->mapWidth() - 1, 0));
+	bottom = QMIN(bottom, QMAX((int)canvas()->mapHeight() - 1, 0));
+	mCells = cells(left, right, top, bottom);
+	mCellsDirty = false;
+ }
+ return mCells;
 }
 
 QPointArray BosonItem::cells(int left, int right, int top, int bottom)
@@ -300,11 +305,19 @@ void BosonItem::animate()
 
 void BosonItem::addToCells()
 {
+ // We don't do anything for shots (at the moment)
+ if (RTTI::isShot(rtti())) {
+	return;
+ }
  canvas()->addToCells(this);
 }
 
 void BosonItem::removeFromCells()
 {
+ // We don't do anything for shots (at the moment)
+ if (RTTI::isShot(rtti())) {
+	return;
+ }
  canvas()->removeFromCells(this);
 }
 
@@ -313,5 +326,6 @@ void BosonItem::setSize(int width, int height)
  removeFromCells();
  mWidth = width;
  mHeight = height;
+ mCellsDirty = true;
  addToCells();
 }

@@ -224,6 +224,7 @@ class BosonParticleSystem
      * Sets age of this system (in seconds).
      * Age is decreased every time @ref update is called and if it's 0, no new
      * particles are created anymore
+     * -1 means infinite time
      * @param a New age of this system
      **/
     void setAge(float a) { mAge = a; };

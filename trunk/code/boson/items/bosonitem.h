@@ -23,6 +23,8 @@
 
 #include <GL/gl.h>
 
+#include <qpointarray.h>
+
 class BosonCanvas;
 class SelectBox;
 class BosonModel;
@@ -183,12 +185,11 @@ public:
 	}
 
 	/**
-	 * Note that this function calculates the returned array - so if you are
-	 * doing time critical operations then cache the result, instead of
-	 * calling this twice.
+	 * Note that this function caches the result and recalculates it only when
+	 * item has moved - so usually it's not slow to call it.
 	 * @return An array of all cells this unit occupies.
 	 **/
-	QPointArray cells() const;
+	QPointArray cells();
 
 	/**
 	 * This is a more generic version of the above method. You can use it to
@@ -334,6 +335,7 @@ private:
 		mX = x;
 		mY = y;
 		mZ = z;
+		mCellsDirty = true;
 	}
 
 	void setCurrentFrame(BoFrame* frame);
@@ -390,6 +392,8 @@ private:
 	bool mIsAnimated;
 	SelectBox* mSelectBox;
 
+	QPointArray mCells;
+	bool mCellsDirty;
 };
 
 #endif

@@ -35,6 +35,7 @@ class RepairPlugin;
 class BosonParticleSystem;
 class BosonWeapon;
 template<class T> class QValueList;
+template<class T> class QPtrList;
 
 class KGameUnitDebug;
 
@@ -344,6 +345,13 @@ public:
 
 	void playSound(UnitSoundEvent event);
 
+	/**
+	 * @return List of active particle systems this unit has.
+	 * This may include e.g. smoke for factories.
+	 **/
+	QPtrList<BosonParticleSystem>* activeParticleSystems() const;
+	void setActiveParticleSystems(QPtrList<BosonParticleSystem> list);
+
 	BosonParticleSystem* smokeParticleSystem() const;
 	void setSmokeParticleSystem(BosonParticleSystem* s);
 
@@ -369,7 +377,7 @@ protected:
 	 * @return a list of interesting collisions, i.e. no non-units, no
 	 * destryed units, ...
 	 **/
-	QValueList<Unit*> unitCollisions(bool exact = false) const;
+	QValueList<Unit*> unitCollisions(bool exact = false);
 
 	/** 
 	 * Finds new path to destination.

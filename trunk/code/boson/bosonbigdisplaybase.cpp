@@ -75,7 +75,7 @@
 // Camera limits
 #define CAMERA_MIN_Z NEAR + 3
 #define CAMERA_MAX_Z FAR - 50
-#define CAMERA_MAX_RADIUS 40
+#define CAMERA_MAX_RADIUS 80
 
 //#define BO_LIGHT 1
 
@@ -1095,17 +1095,17 @@ void BosonBigDisplayBase::renderParticles()
  }
 
  // We sort out non-visible systems ourselves
- QPtrListIterator<BosonParticleSystem> it(*(canvas()->particleSystems()));
+ QPtrListIterator<BosonParticleSystem> allit(*(canvas()->particleSystems()));
  QPtrList<BosonParticleSystem> visible;
  BosonParticleSystem* s;
- while ((s = it.current()) != 0) {
-	++it;
+ while ((s = allit.current()) != 0) {
+	++allit;
 	//boDebug(150) << k_funcinfo << "System: " << s << "; radius: " << s->boundingSphereRadius() << endl;
 	if (sphereInFrustum(s->position(), s->boundingSphereRadius())) {
 #warning FIXME
 		// FIXME: this is wrong: parts of particle system may be visible even if it's center point isn't
 		if (canvas()->onCanvas(s->x(), s->y())) {
-			if (!localPlayer()->isFogged(s->x() / BO_TILE_SIZE, s->y() / BO_TILE_SIZE)) {
+			if (!localPlayer()->isFogged(s->x(), s->y())) {
 				visible.append(s);
 			}
 		}
@@ -1131,9 +1131,9 @@ void BosonBigDisplayBase::renderParticles()
 	float x, y, z;
 	d->mParticleList.clear();
 	// Add all particles to the list
-	it.toFirst();
-	while ((s = it.current()) != 0) {
-		++it;
+	QPtrListIterator<BosonParticleSystem> visibleit(visible);
+	while ((s = visibleit.current()) != 0) {
+		++visibleit;
 		for (int i = 0; i < s->mMaxNum; i++) {
 			if (s->mParticles[i].life > 0.0) {
 				p = &(s->mParticles[i]);
