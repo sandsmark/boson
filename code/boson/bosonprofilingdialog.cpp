@@ -32,6 +32,43 @@
 #include <qvbox.h>
 #include <qpushbutton.h>
 
+class QListViewItemNumber : public QListViewItem
+{
+public:
+	QListViewItemNumber(QListView* p) : QListViewItem(p)
+	{
+	}
+	QListViewItemNumber(QListViewItem* p) : QListViewItem(p)
+	{
+	}
+
+	virtual int compare(QListViewItem* i, int col, bool ascending) const
+	{
+		bool ok = true;
+		bool ok2 = true;
+		int n = key(col, ascending).toInt(&ok);
+		int n2 = i->key(col, ascending).toInt(&ok2);
+		// numbers first - then letters
+		if (ok && ok2) {
+			if (n == n2) {
+				return 0;
+			} else if (n > n2) {
+				return 1;
+			} else {
+				return -1;
+			}
+		} else if (ok) {
+			// this is a number, i is not. this comes first.
+			return -1;
+		} else if (ok2) {
+			// this is a noat number, i is. i comes first.
+			return 1;
+		} else {
+			return QListViewItem::compare(i, col, ascending);
+		}
+	}
+};
+
 class BosonProfilingDialog::BosonProfilingDialogPrivate
 {
 public:
@@ -185,18 +222,14 @@ void BosonProfilingDialog::resetLoadUnitPage()
  BosonProfiling::BosonProfilingPrivate* pd = d->data()->d;
  QMap<unsigned long int, BosonProfiling::BosonProfilingPrivate::TimesList>::Iterator it = pd->mUnitTimes.begin();
  for (; it != pd->mUnitTimes.end(); ++it) {
-	QListViewItem* unit = new QListViewItem(d->mUnits);
-	QString unitType;
-	unitType.sprintf("%05d", (int)it.key());
-	unit->setText(0, unitType);
+	QListViewItemNumber* unit = new QListViewItemNumber(d->mUnits);
+	unit->setText(0, QString::number(it.key()));
 	BosonProfiling::BosonProfilingPrivate::TimesList::Iterator timesIt = (*it).begin(); // wow what a line ;)
 	long int time = 0;
 	int i = 0;
 	for (; timesIt != (*it).end(); ++timesIt, i++) {
-		QListViewItem* item = new QListViewItem(unit);
-		QString num;
-		num.sprintf("%03d", i);
-		item->setText(0, num);
+		QListViewItemNumber* item = new QListViewItemNumber(unit);
+		item->setText(0, QString::number(i));
 		item->setText(1, QString::number(*timesIt));
 		item->setText(2, QString::number((double)*timesIt / 1000));
 		item->setText(3, QString::number((double)*timesIt / 1000000));
@@ -214,10 +247,8 @@ void BosonProfilingDialog::resetRenderPage()
  QValueList<RenderGLTimes>::Iterator it = pd->mRenderTimes.begin();
  int i = 0;
  for (; it != pd->mRenderTimes.end(); ++it, i++) {
-	QListViewItem* item = new QListViewItem(d->mRender);
-	QString num;
-	num.sprintf("%03d", i);
-	item->setText(0, num);
+	QListViewItemNumber* item = new QListViewItemNumber(d->mRender);
+	item->setText(0, QString::number(i));
 	createRenderItem(item, i18n("Clearing"), (*it).mClear);
 	createRenderItem(item, i18n("Cells"), (*it).mCells);
 	createRenderItem(item, i18n("Units"), (*it).mUnits);
@@ -239,7 +270,7 @@ void BosonProfilingDialog::resetFilesPage()
 
 void BosonProfilingDialog::createRenderItem(QListViewItem* parent, const QString& type, long int time)
 {
- QListViewItem* item = new QListViewItem(parent);
+ QListViewItemNumber* item = new QListViewItemNumber(parent);
  item->setText(1, type);
  item->setText(2, QString::number(time));
  item->setText(3, QString::number((double)time / 1000));
@@ -252,16 +283,13 @@ void BosonProfilingDialog::resetEventsPage()
  BosonProfiling::BosonProfilingPrivate* pd = d->data()->d;
  QMap<int, BosonProfiling::BosonProfilingPrivate::TimesList>::Iterator it = pd->mTimes.begin(); // now *that* is an ugly line! ggg
  for (; it != pd->mTimes.end(); ++it) {
-	QListViewItem* event = new QListViewItem(d->mEvents);
+	QListViewItemNumber* event = new QListViewItemNumber(d->mEvents);
 	event->setText(0, profilingName(it.key()));
 	BosonProfiling::BosonProfilingPrivate::TimesList::Iterator timesIt = (*it).begin();
 	int i = 0;
 	for (; timesIt != (*it).end(); ++timesIt, i++) {
-		QListViewItem* item = new QListViewItem(event);
+		QListViewItemNumber* item = new QListViewItemNumber(event);
 		item->setText(0, QString::number(i));
-		QString num;
-		num.sprintf("%03d", i);
-		item->setText(0, num);
 		item->setText(1, QString::number(*timesIt));
 		item->setText(2, QString::number((double)*timesIt / 1000));
 		item->setText(3, QString::number((double)*timesIt / 1000000));
