@@ -1,0 +1,23 @@
+#include "top.wml"
+    <h1>
+      Units - Grizzly
+    </h1>
+    <p>&nbsp;</p>
+    <table border="0">
+	<tr>
+		<td><img src="grizzly.png" border="0">&nbsp;</td>
+		<td valign="top"><img src="../none.png" border="0" height="30"><br>
+		There is no description yet.
+	</tr>
+	<tr><td><br>&nbsp</td></tr>
+    </table>
+        
+<:
+use get_values;
+
+# ( facility type, facility name)
+get_values->getval("mob", "grizzly");
+:>
+
+#include "nav.wml" before_url="oil_harvester.html" before_text="Oil harvester" after_url="leopard.html" after_text="Leopard" up_url="index.html"
+#include "footer.wml"
