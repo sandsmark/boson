@@ -75,6 +75,7 @@ AC_DEFUN([AC_BOSON_HAVE_GL_LIBS],
  AC_TRY_LINK(
 	[
 #include <GL/gl.h>
+#include <GL/glext.h>
 	], [
 #ifndef GL_VERSION_1_2
 #error GL_VERSION_1_2 is not defined! OpenGL 1.2 is required!
