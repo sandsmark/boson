@@ -278,11 +278,9 @@ void BosonWidgetBase::initGameMode()//FIXME: rename! we don't have a difference 
 {
  BO_CHECK_NULL_RET(displayManager());
 
- // Init all bigdisplays
- QPtrListIterator<BosonBigDisplayBase> it(*displayManager()->displayList());
- while (it.current()) {
-	initBigDisplay(it.current());
-	++it;
+ // Init all bigdisplays // AB: there is only one now
+ if (displayManager()->activeDisplay()) {
+	initBigDisplay(displayManager()->activeDisplay());
  }
 
  initLayout();
@@ -488,21 +486,6 @@ void BosonWidgetBase::slotUnfogAll(Player* pl)
 	}
 	boGame->slotAddChatSystemMessage(i18n("Debug"), i18n("Unfogged player %1 - %2").arg(p->id()).arg(p->name()));
  }
-}
-
-void BosonWidgetBase::slotSplitDisplayHorizontal()
-{
- initBigDisplay(displayManager()->splitActiveDisplayHorizontal());
-}
-
-void BosonWidgetBase::slotSplitDisplayVertical()
-{
- initBigDisplay(displayManager()->splitActiveDisplayVertical());
-}
-
-void BosonWidgetBase::slotRemoveActiveDisplay()
-{
- displayManager()->removeActiveDisplay();
 }
 
 void BosonWidgetBase::slotCmdBackgroundChanged(const QString& file)

@@ -161,10 +161,6 @@ public slots:
 	void slotReloadMeshRenderer();
 	void slotReloadGroundRenderer();
 
-	void slotSplitDisplayHorizontal();
-	void slotSplitDisplayVertical();
-	void slotRemoveActiveDisplay();
-
 	/**
 	 * Sends signals to update mobiles/facilities count for player p
 	 **/

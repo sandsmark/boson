@@ -712,30 +712,6 @@ void TopWidget::slotGameOver()
  loadInitialDockConfig();
 }
 
-void TopWidget::slotSplitDisplayHorizontal()
-{
- if (!d->mBosonWidget) {
-	return;
- }
- d->mBosonWidget->slotSplitDisplayHorizontal();
-}
-
-void TopWidget::slotSplitDisplayVertical()
-{
- if (!d->mBosonWidget) {
-	return;
- }
- d->mBosonWidget->slotSplitDisplayVertical();
-}
-
-void TopWidget::slotRemoveActiveDisplay()
-{
- if (!d->mBosonWidget) {
-	return;
- }
- d->mBosonWidget->slotRemoveActiveDisplay();
-}
-
 // FIXME: nonsense name. this doesn't toggle anything, but it applies the
 // d->mActionStatusbar status to the actual statusbar
 void TopWidget::slotToggleStatusbar()
