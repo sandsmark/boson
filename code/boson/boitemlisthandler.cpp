@@ -22,15 +22,12 @@
 #include "boitemlist.h"
 #include "bodebug.h"
 
-#include <kstaticdeleter.h>
-
 #include <qptrlist.h>
 #include <qtimer.h>
 
 // currently we delete the lists as soon as we return to the event loop
 #define DELETION_DELAY 0
 
-static KStaticDeleter<BoItemListHandler> sd;
 BoItemListHandler* BoItemListHandler::mItemListHandler = 0;
 
 class BoItemListHandlerPrivate
@@ -57,8 +54,23 @@ BoItemListHandler::~BoItemListHandler()
 void BoItemListHandler::initStatic()
 {
  if (!mItemListHandler) {
-	sd.setObject(mItemListHandler, new BoItemListHandler());
+	// AB: at the moment we do not store in BoItemList whether we registered
+	// to a handler. but as we store BosonPlayField objects statically and
+	// delete them using a static deleter we have to ensure that the
+	// item list handler still exists when they are deleted.
+	// unfortunately KStaticDeleter is registered to a list using append() and
+	// is removed using take(0). so we can't ensure this. therefore we
+	// can't use a static deleter here, but have to use our own deletion
+	// function.
+	mItemListHandler = new BoItemListHandler();
+	qAddPostRoutine(BoItemListHandler::deleteStatic);
  }
+}
+
+void BoItemListHandler::deleteStatic()
+{
+ delete mItemListHandler;
+ mItemListHandler = 0;
 }
 
 void BoItemListHandler::registerList(BoItemList* list)

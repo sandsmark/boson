@@ -43,6 +43,7 @@ public:
 
 	static BoItemListHandler* itemListHandler() { return mItemListHandler; }
 	static void initStatic();
+	static void deleteStatic();
 
 	void registerList(BoItemList* list);
 	void unregisterList(BoItemList* list);
