@@ -121,7 +121,6 @@ protected:
 	 * Move a unit. If @p oldX or @p oldY are -1 then they are ignored
 	 * (added a unit)
 	 **/
-	void moveUnit(Unit* unit, int x, int y, int oldX, int oldY);
 	void moveUnit(Unit* unit, const QPointArray& newCells, const QPointArray& oldCells);
 
 	/**
