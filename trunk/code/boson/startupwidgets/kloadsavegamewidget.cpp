@@ -211,6 +211,7 @@ void KLoadSaveGameWidget::updateGames()
  if (!d->mSave && d->mButtons.count() == 0) {
 	if (!d->mNoGamesLabel) {
 		d->mNoGamesLabel = new QLabel(i18n("No saved games available"), d->mButtonWidget);
+        d->mNoGamesLabel->setPaletteForegroundColor( QColor( 255, 255, 255 ));
 		d->mTopButtonLayout->addWidget(d->mNoGamesLabel, 5, AlignCenter);
 		d->mNoGamesLabel->show();
 	}
@@ -262,6 +263,7 @@ KSaveGameWidget* KLoadSaveGameWidget::addFile(const QString& file, const QString
  w->setLevel(level);
  w->setDateTime(date);
  w->setFile(file);
+ w->setPaletteForegroundColor( QColor( 255, 255, 255 ));
  w->show();
  return w;
 }
@@ -279,7 +281,7 @@ void KLoadSaveGameWidget::slotDelete()
 	return;
  }
  QString file = w->file();
- int r = KMessageBox::questionYesNoCancel(this, 
+ int r = KMessageBox::questionYesNoCancel(this,
 		i18n("Do you really want to delete %1 ?").arg(QFileInfo(file).fileName()),
 		QString::null, KStdGuiItem::yes(), KStdGuiItem::no(), "ConfirmDeleteGame");
  if (r != KMessageBox::Yes) {
