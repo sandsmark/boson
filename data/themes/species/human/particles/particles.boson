@@ -385,7 +385,7 @@ Texture=dirt
 
 
 
-[VeryLightFactorySmoke1]
+[VeryLightMineralRefinerySmoke1]
 Id=10001
 MinVelocity=0,0,0
 MaxVelocity=0,0,0.15
@@ -405,7 +405,7 @@ SystemLife=3600
 Align=true
 Texture=smoke
 
-[VeryLightFactorySmoke2]
+[VeryLightMineralRefinerySmoke2]
 Id=10002
 MinVelocity=0,0,0
 MaxVelocity=0,0,0.125
@@ -425,7 +425,7 @@ SystemLife=3600
 Align=true
 Texture=smoke
 
-[VeryLightFactorySmoke3]
+[VeryLightMineralRefinerySmoke3]
 Id=10003
 MinVelocity=0,0,0
 MaxVelocity=0,0,0.1
@@ -445,3 +445,64 @@ SystemLife=3600
 Align=true
 Texture=smoke
 
+
+[VeryLightOilRefinerySmoke1]
+Id=10004
+MinVelocity=0,0,0
+MaxVelocity=0,0,0.1
+MinPos=0.71,0.25,2
+MaxPos=0.71,0.25,2
+StartColor=0.8,0.8,0.8,0.3
+EndColor=0.9,0.9,0.9,0.0
+MinLife=2.5
+MaxLife=40.0
+MaxNum=16
+InitNum=0
+BlendFunc=GL_ONE_MINUS_SRC_ALPHA
+Rate=4
+StartSize=0.05
+EndSize=0.5
+SystemLife=3600
+Align=true
+Texture=smoke
+
+[VeryLightOilRefinerySmoke2]
+Id=10005
+MinVelocity=0,0,0
+MaxVelocity=0,0,0.1
+MinPos=0.71,-0.65,2
+MaxPos=0.71,-0.65,2
+StartColor=0.8,0.8,0.8,0.3
+EndColor=0.9,0.9,0.9,0.0
+MinLife=2.5
+MaxLife=40.0
+MaxNum=16
+InitNum=0
+BlendFunc=GL_ONE_MINUS_SRC_ALPHA
+Rate=4
+StartSize=0.05
+EndSize=0.5
+SystemLife=3600
+Align=true
+Texture=smoke
+
+
+[VeryLightPowerPlantSmoke1]
+Id=10006
+MinVelocity=0,0,0
+MaxVelocity=0,0,0.1
+MinPos=0.4,0.5,1.05
+MaxPos=0.4,0.5,1.05
+StartColor=0.8,0.8,0.8,0.3
+EndColor=0.9,0.9,0.9,0.0
+MinLife=2.5
+MaxLife=40.0
+MaxNum=16
+InitNum=0
+BlendFunc=GL_ONE_MINUS_SRC_ALPHA
+Rate=4
+StartSize=0.5
+EndSize=1
+SystemLife=3600
+Align=true
+Texture=smoke
