@@ -55,7 +55,8 @@ public:
 		SavePlayerToXML = 23,
 		SavePlayFieldToXML = 24,
 		SaveGameToXMLWriteFile = 25,
-		SaveCanvasToXML = 26
+		SaveCanvasToXML = 26,
+		SaveExternalToXML = 27
 	};
 	BosonProfiling();
 	BosonProfiling(const BosonProfiling& profiling);

@@ -23,6 +23,7 @@
 #include <qptrlist.h>
 
 class Unit;
+class QDomElement;
 
 /**
  * Represents a selection. Every @ref BosonBigDisplay has its own selection
@@ -126,6 +127,9 @@ public:
 	bool hasOilHarvester() const;
 
 	void activate(bool on);
+
+	void saveAsXML(QDomElement& root);
+	void loadFromXML(const QDomElement& root, bool activate = false);
 
 public slots:
 	void slotSelectSingleUnit(Unit* unit) { selectUnit(unit, true); }

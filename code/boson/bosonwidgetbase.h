@@ -27,6 +27,7 @@ class KPlayer;
 class KGamePropertyBase;
 class KActionCollection;
 class QDataStream;
+class QDomElement;
 
 class BosonCursor;
 class BosonCanvas;

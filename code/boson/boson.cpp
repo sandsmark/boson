@@ -56,7 +56,7 @@ Boson* Boson::mBoson = 0;
 #define ADVANCE_INTERVAL 250 // ms
 
 // Saving format version (000005 = 00.00.05)
-#define BOSON_SAVEGAME_FORMAT_VERSION 0x000030
+#define BOSON_SAVEGAME_FORMAT_VERSION 0x000040
 
 #define BOSON_SAVEGAME_END_COOKIE 1718
 
@@ -1738,6 +1738,14 @@ bool Boson::saveToFile(const QString& file)
 	return false;
  }
 
+ boProfiling->start(BosonProfiling::SaveExternalToXML);
+ QString externalXML = saveExternalAsXML();
+ boProfiling->stop(BosonProfiling::SaveExternalToXML);
+ if (externalXML.isNull()) {
+	return false;
+ }
+
+
 
  // we store the map as binary. XML would take a lot of space and time to save
  // and load.
@@ -1760,6 +1768,10 @@ bool Boson::saveToFile(const QString& file)
  }
  if (!f.writeFile(QString::fromLatin1("canvas.xml"), canvasXML)) {
 	boError() << k_funcinfo << "Could not write canvas.xml to " << file << endl;
+	return false;
+ }
+ if (!f.writeFile(QString::fromLatin1("external.xml"), externalXML)) {
+	boError() << k_funcinfo << "Could not write external.xml to " << file << endl;
 	return false;
  }
  if (!f.writeFile(QString::fromLatin1("map"), map)) {
@@ -1837,6 +1849,17 @@ QString Boson::saveCanvasAsXML()
  return doc.toString();
 }
 
+QString Boson::saveExternalAsXML()
+{
+ QDomDocument doc(QString::fromLatin1("External"));
+ QDomElement root = doc.createElement(QString::fromLatin1("External")); // XML file for external data
+ doc.appendChild(root);
+
+ emit signalSaveExternalStuffAsXML(root);
+
+ return doc.toString();
+}
+
 bool Boson::loadFromFile(const QString& file)
 {
  boDebug(260) << k_funcinfo << endl;
@@ -1850,11 +1873,13 @@ bool Boson::loadFromFile(const QString& file)
  QString kgameXML;
  QString playersXML;
  QString canvasXML;
+ QString externalXML;
  QByteArray map;
 
  kgameXML = QString(f.kgameData());
  playersXML = QString(f.playersData());
  canvasXML = QString(f.canvasData());
+ externalXML = QString(f.externalData());
  map = f.mapData();
 
  if (kgameXML.isEmpty()) {
@@ -1869,6 +1894,11 @@ bool Boson::loadFromFile(const QString& file)
  }
  if (canvasXML.isEmpty()) {
 	boError(260) << k_funcinfo << "Empty canvasXML" << endl;
+	d->mLoadingStatus = BSGFileError;
+	return false;
+ }
+ if (externalXML.isEmpty()) {
+	boError(260) << k_funcinfo << "Empty externalXML" << endl;
 	d->mLoadingStatus = BSGFileError;
 	return false;
  }
@@ -1968,10 +1998,17 @@ bool Boson::loadFromFile(const QString& file)
 	p->loadUnitsFromXML(e);
  }
 
+ // Load canvas (shots)
  if (!loadCanvasFromXML(canvasXML)) {
 	return false;
  }
 
+ // Load external stuff (camera)
+ if (!loadExternalFromXML(externalXML)) {
+	return false;
+ }
+
+ d->mLoadingStatus = LoadingCompleted;
  return true;
 }
 
@@ -1992,7 +2029,7 @@ bool Boson::loadKGameFromXML(const QString& xml)
 	return false;
  }
  if (version != latestSavegameVersion()) {
-	boError() << "savegame version " << version << " not supported" << endl;
+	boError() << "savegame version " << version << " not supported (latest is " << latestSavegameVersion() << ")" << endl;
 	d->mLoadingStatus = InvalidVersion;
 	return false;
  }
@@ -2038,8 +2075,25 @@ bool Boson::loadCanvasFromXML(const QString& xml)
  QDomElement root = doc.documentElement();
 
  if (!d->mCanvas->loadFromXML(root)) {
+	d->mLoadingStatus = InvalidXML;
 	return false;
  }
+
+ return true;
+}
+
+bool Boson::loadExternalFromXML(const QString& xml)
+{
+ boDebug() << k_funcinfo << endl;
+ // Load external stuff (camera)
+ QDomDocument doc(QString::fromLatin1("External"));
+ if (!loadXMLDoc(&doc, xml)) {
+	d->mLoadingStatus = InvalidXML;
+	return false;
+ }
+ QDomElement root = doc.documentElement();
+
+ emit signalLoadExternalStuffFromXML(root);
 
  return true;
 }

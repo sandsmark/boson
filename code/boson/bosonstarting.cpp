@@ -160,13 +160,16 @@ bool BosonStarting::loadGame(const QString& loadingFileName)
  connect(boGame, SIGNAL(signalLoadingPlayer(int)), this, SIGNAL(signalLoadingPlayer(int)));
  boGame->lock();
  bool loaded = boGame->loadFromFile(loadingFileName);
+ if (!loaded) {
+	return false;
+ }
  slotLoadTiles();
  boGame->unlock();
 
  mLoading = false;
 
  startGame();
- return loaded;
+ return true;
 }
 
 void BosonStarting::checkEvents()

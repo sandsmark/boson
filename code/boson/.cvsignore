@@ -20,3 +20,5 @@ borender
 borender_meta_unload.cpp
 boson-*.png
 boinfo
+*.bpf
+boson-*.jpg

@@ -64,6 +64,7 @@
 #include <qfile.h>
 #include <qfileinfo.h>
 #include <qdatastream.h>
+#include <qdom.h>
 
 #include "bosonwidgetbase.moc"
 
@@ -860,12 +861,18 @@ void BosonWidgetBase::saveConfig()
 void BosonWidgetBase::startScenarioAndGame()
 {
  boDebug() << k_funcinfo << endl;
- displayManager()->slotCenterHomeBase();
+ // Center home base if new game was started. If game is loaded, camera was
+ //  already loaded as well
+ // FIXME: this is hackish but I don't know any other way of checking if game
+ //  is loaded or new one here. Feel free to improve
+ if (boGame->loadingStatus() != Boson::LoadingCompleted) {
+	displayManager()->slotCenterHomeBase();
+ }
 
  #warning FIXME
  // this is a strange bug: we need to resize the widget once it is shown - otherwise we'll have a VERY slot frame rate.
  // I can't find out where the problem resides :-(
- QTimer::singleShot(500, this, SLOT(slotHack1()));
+ //QTimer::singleShot(500, this, SLOT(slotHack1()));
 }
 
 void BosonWidgetBase::slotDebugMode(int index)
@@ -1133,6 +1140,7 @@ void BosonWidgetBase::slotLoadExternalStuffFromXML(const QDomElement& root)
  boDebug() << k_funcinfo << endl;
  // TODO: load camera
  // TODO: load unitgroups
+ displayManager()->loadFromXML(root);
 }
 
 void BosonWidgetBase::slotSaveExternalStuffAsXML(QDomElement& root)
@@ -1140,6 +1148,7 @@ void BosonWidgetBase::slotSaveExternalStuffAsXML(QDomElement& root)
  boDebug() << k_funcinfo << endl;
  // TODO: save camera  (BosonBigDisplayBase?)
  // TODO: save unitgroups  (BoDisplayManager?)
+ displayManager()->saveAsXML(root);
 }
 
 OptionsDialog* BosonWidgetBase::gamePreferences(bool editor)

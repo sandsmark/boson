@@ -581,7 +581,10 @@ void TopWidget::endGame()
 	d->mBosonWidget->quitGame();
 	disconnect(d->mBosonWidget, 0, 0, 0);
 	d->mStatusBarTimer.stop();
-	saveGameDockConfig();
+	// This prevent wrong dock config from getting saved when loading fails
+	if (boGame->gameStatus() != KGame::Init) {
+		saveGameDockConfig();
+	}
  }
  // Delete all objects
  delete d->mBosonWidget;

@@ -92,6 +92,7 @@ float textureLowerLeft[2] = { 0.0, 0.0 };
 float textureLowerRight[2] = { 1.0, 0.0 };
 float textureUpperRight[2] = { 1.0, 1.0 };
 
+// Maybe camera class should be put to it's own file
 class Camera
 {
 public:
@@ -181,6 +182,54 @@ public:
 	{
 		mMapWidth = w;
 		mMapHeight = h;
+	}
+
+	void loadFromXML(const QDomElement& root)
+	{
+		bool ok;
+		float lookatx, lookaty, lookatz;
+		lookatx = root.attribute("LookAtX").toFloat(&ok);
+		if (!ok) {
+			boError() << k_funcinfo << "Invalid value for LookAtX tag" << endl;
+			lookatx = 0;
+		}
+		lookaty = root.attribute("LookAtY").toFloat(&ok);
+		if (!ok) {
+			boError() << k_funcinfo << "Invalid value for LookAtY tag" << endl;
+			lookaty = 0;
+		}
+		lookatz = root.attribute("LookAtZ").toFloat(&ok);
+		if (!ok) {
+			boError() << k_funcinfo << "Invalid value for LookAtZ tag" << endl;
+			mPosZ = 0;
+		}
+		mPosZ = root.attribute("PosZ").toFloat(&ok);
+		if (!ok) {
+			boError() << k_funcinfo << "Invalid value for PosZ tag" << endl;
+			mPosZ = 0;
+		}
+		mRotation = root.attribute("Rotation").toFloat(&ok);
+		if (!ok) {
+			boError() << k_funcinfo << "Invalid value for Rotation tag" << endl;
+			mRotation = 0;
+		}
+		mRadius = root.attribute("Radius").toFloat(&ok);
+		if (!ok) {
+			boError() << k_funcinfo << "Invalid value for Radius tag" << endl;
+			mRadius = 0;
+		}
+		boDebug(260) << k_funcinfo << "Setting lookat to (" << lookatx << ", " << lookaty << ", " << lookatz << ")" << endl;
+		mLookAt.set(lookatx, lookaty, lookatz);
+		boDebug(260) << k_funcinfo << "lookat is now (" << mLookAt.x() << ", " << mLookAt.y() << ", " << mLookAt.z() << ")" << endl;
+	}
+	void saveAsXML(QDomElement& root)
+	{
+		root.setAttribute("LookAtX", mLookAt.x());
+		root.setAttribute("LookAtY", mLookAt.y());
+		root.setAttribute("LookAtZ", mLookAt.z());
+		root.setAttribute("PosZ", mPosZ);
+		root.setAttribute("Rotation", mRotation);
+		root.setAttribute("Radius", mRadius);
 	}
 
 	void setZ(GLfloat z) { mPosZ = z; }
@@ -3133,5 +3182,39 @@ void BosonBigDisplayBase::slotRemovedItemFromCanvas(BosonItem* item)
  // destructor, its functions might be destroyed already!
  BO_CHECK_NULL_RET(item);
  d->mToolTips->unsetItem(item);
+}
+
+void BosonBigDisplayBase::loadFromXML(const QDomElement& root)
+{
+ boDebug() << k_funcinfo << endl;
+ // Load camera
+ QDomElement cam = root.namedItem(QString::fromLatin1("Camera")).toElement();
+ if (cam.isNull()) {
+	boError(260) << k_funcinfo << "no camera" << endl;
+	return;
+ }
+ camera()->loadFromXML(cam);
+ cameraChanged();
+ // Load selection
+ QDomElement sel = root.namedItem(QString::fromLatin1("Selection")).toElement();
+ if (sel.isNull()) {
+	boError(260) << k_funcinfo << "no selection" << endl;
+	return;
+ }
+ selection()->loadFromXML(sel, true);
+}
+
+void BosonBigDisplayBase::saveAsXML(QDomElement& root)
+{
+ boDebug() << k_funcinfo << endl;
+ QDomDocument doc = root.ownerDocument();
+ // Save camera
+ QDomElement cam = doc.createElement(QString::fromLatin1("Camera"));
+ camera()->saveAsXML(cam);
+ root.appendChild(cam);
+ // Save current selection
+ QDomElement sel = doc.createElement(QString::fromLatin1("Selection"));
+ selection()->saveAsXML(sel);
+ root.appendChild(sel);
 }
 

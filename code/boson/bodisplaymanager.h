@@ -28,10 +28,10 @@ class UnitBase;
 class BosonCursor;
 class Player;
 class Unit;
+class BosonCanvas;
 
 class KPlayer;
-
-class BosonCanvas;
+class QDomElement;
 
 /**
  * Since boson is able to provide different displays ("views") of the same map
@@ -107,6 +107,9 @@ public:
 
 	void setToolTipCreator(int type);
 	void setToolTipUpdatePeriod(int ms);
+
+	void saveAsXML(QDomElement& root);
+	void loadFromXML(const QDomElement& root);
 
 public slots:
 	/**

@@ -367,8 +367,10 @@ protected:
 	QString saveKGameAsXML();
 	QString savePlayersAsXML();
 	QString saveCanvasAsXML();
+	QString saveExternalAsXML();
 	bool loadKGameFromXML(const QString&);
 	bool loadCanvasFromXML(const QString&);
+	bool loadExternalFromXML(const QString&);
 
 	/**
 	 * Load the XML file in @p xml into @p doc and display an error message

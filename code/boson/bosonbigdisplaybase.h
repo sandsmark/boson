@@ -37,6 +37,7 @@ class BosonItem;
 
 class KGameChat;
 class KGameIO;
+class QDomElement;
 template<class T> class QPtrList;
 
 /**
@@ -250,6 +251,9 @@ public:
 	const QPoint& cursorCanvasPos() const; // obsolete!
 	const BoVector3& cursorCanvasVector() const;
 	BosonBigDisplayInputBase* displayInput() const;
+
+	void saveAsXML(QDomElement& root);
+	void loadFromXML(const QDomElement& root);
 
 public slots:
 	void slotCenterHomeBase();

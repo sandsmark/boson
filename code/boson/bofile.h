@@ -212,6 +212,10 @@ public:
 	{
 		return fileData(QString::fromLatin1("canvas.xml"));
 	}
+	QByteArray externalData() const
+	{
+		return fileData(QString::fromLatin1("external.xml"));
+	}
 };
 
 #endif
