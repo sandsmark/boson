@@ -66,10 +66,13 @@ selectPart::selectPart(int _f, int _z, sp_type type)
 void drawSelectBox(QPainter &painter, QColor c1, QColor c2, int power)
 {
 	QPen	pen(Qt::red);
-	int	len =  3 * ( PART_NB-power);
+	int	len =  3 * ( PART_NB-1-power);
 
 	painter.setPen(pen);
-	painter.fillRect(len,0, SP_W - len ,SP_THICK,c1);
+	/* "scrollbar" */
+	painter.fillRect(0  ,0, SP_W       ,SP_THICK,c1);
+	painter.fillRect(len,0, SP_W - len ,SP_THICK,c2);
+	/* selection corner */
 	painter.fillRect(
 		SP_W - SP_CORNER_LEN	, SP_CORNER_POS,
 		SP_CORNER_LEN		, SP_THICK, c2);

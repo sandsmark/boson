@@ -27,7 +27,7 @@
 #include "common/unit.h"	// MAX_POWER
 
 
-#define PART_NB		(MAX_POWER+1)
+#define PART_NB		(MAX_POWER)
 
 class selectPart : public QCanvasSprite
 {
