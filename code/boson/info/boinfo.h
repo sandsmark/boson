@@ -145,6 +145,14 @@ public:
 		HaveProprietaryNVidiaXDriver = 550,
 		// AB: leave some space for further proprietary drivers
 
+		// devices
+		DevNVidiaCTL = 600,
+		DevNVidia0 = 601,
+		DevNVidia1 = 602,
+		DevNVidia2 = 603,
+		DevNVidia3 = 604,
+		// AB: leave a lot of space for more devices
+
 		// an InfoEntries entry specifies the runtime value. The same
 		// entry + CompileOffset specifies the compile time value. note
 		// that it is possible for both values to be left out
@@ -573,6 +581,7 @@ protected:
 	void updateXInfo(QWidget* w);
 	void updateOSInfo();
 	void updateLibraryInfo();
+	void updateDevicesInfo();
 
 	/**
 	 * @return 0 On success, otherwise from @ref CharacterDevice, OR'ed

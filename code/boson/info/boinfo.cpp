@@ -205,6 +205,7 @@ void BoInfo::update(BosonGLWidget* widget)
  updateXInfo(widget);
  updateOSInfo();
  updateLibraryInfo();
+ updateDevicesInfo();
 }
 
 void BoInfo::updateLibraryInfo()
@@ -257,6 +258,15 @@ void BoInfo::updateLibraryInfo()
 	insert(BoInfo::HaveLibGLCore_so_1, lib);
  }
 
+}
+
+void BoInfo::updateDevicesInfo()
+{
+ insert(BoInfo::DevNVidiaCTL, (int)checkCharacterDevice(QString::fromLatin1("/dev/nvidiactl")));
+ insert(BoInfo::DevNVidia0, (int)checkCharacterDevice(QString::fromLatin1("/dev/nvidia0")));
+ insert(BoInfo::DevNVidia1, (int)checkCharacterDevice(QString::fromLatin1("/dev/nvidia1")));
+ insert(BoInfo::DevNVidia2, (int)checkCharacterDevice(QString::fromLatin1("/dev/nvidia2")));
+ insert(BoInfo::DevNVidia3, (int)checkCharacterDevice(QString::fromLatin1("/dev/nvidia3")));
 }
 
 void BoInfo::insert(int key, int value)
@@ -686,27 +696,27 @@ QStringList BoInfo::checkProprietaryNVidiaDriver() const
  }
 
  // TODO: move the check to update() !
- int ret = checkCharacterDevice(QString::fromLatin1("/dev/nvidiactl"));
+ int ret = getInt(BoInfo::DevNVidiaCTL);
  if (ret != CharSuccess) {
 	QString error = makeCharacterDeviceErrorString(ret);
 	list.append(i18n("Problem with %1: %2").arg("/deb/nvidiactl").arg(error));
  }
- ret = checkCharacterDevice(QString::fromLatin1("/dev/nvidia0"));
+ ret = getInt(BoInfo::DevNVidia0);
  if (ret != CharSuccess) {
 	QString error = makeCharacterDeviceErrorString(ret);
 	list.append(i18n("Problem with %1: %2").arg("/deb/nvidia0").arg(error));
  }
- ret = checkCharacterDevice(QString::fromLatin1("/dev/nvidia1"));
+ ret = getInt(BoInfo::DevNVidia1);
  if (ret != CharSuccess) {
 	QString error = makeCharacterDeviceErrorString(ret);
 	list.append(i18n("Problem with %1: %2").arg("/deb/nvidia1").arg(error));
  }
- ret = checkCharacterDevice(QString::fromLatin1("/dev/nvidia2"));
+ ret = getInt(BoInfo::DevNVidia2);
  if (ret != CharSuccess) {
 	QString error = makeCharacterDeviceErrorString(ret);
 	list.append(i18n("Problem with %1: %2").arg("/deb/nvidia2").arg(error));
  }
- ret = checkCharacterDevice(QString::fromLatin1("/dev/nvidia3"));
+ ret = getInt(BoInfo::DevNVidia3);
  if (ret != CharSuccess) {
 	QString error = makeCharacterDeviceErrorString(ret);
 	list.append(i18n("Problem with %1: %2").arg("/deb/nvidia3").arg(error));
