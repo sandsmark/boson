@@ -68,8 +68,8 @@ public:
 	{
 		bool ok = true;
 		bool ok2 = true;
-		int n = key(col, ascending).toInt(&ok);
-		int n2 = i->key(col, ascending).toInt(&ok2);
+		double n = key(col, ascending).toDouble(&ok);
+		double n2 = i->key(col, ascending).toDouble(&ok2);
 		// numbers first - then letters
 		if (ok && ok2) {
 			if (n == n2) {
@@ -83,7 +83,7 @@ public:
 			// this is a number, i is not. this comes first.
 			return -1;
 		} else if (ok2) {
-			// this is a noat number, i is. i comes first.
+			// this is not a number, i is. i comes first.
 			return 1;
 		} else {
 			return QListViewItem::compare(i, col, ascending);
@@ -1128,6 +1128,8 @@ void BosonProfilingDialog::resetEventsPage()
 		QListViewItemNumber* s = new QListViewItemNumber(event);
 		s->setText(0, i18n("Sum"));
 		s->setTime(1, sum, sum);
+
+		event->setTime(1, sum, sum);
 
 		QListViewItemNumber* average = new QListViewItemNumber(event);
 		average->setText(0, i18n("Average"));
