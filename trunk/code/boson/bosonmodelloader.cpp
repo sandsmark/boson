@@ -20,6 +20,7 @@
 #include "bosonmodelloader.h"
 
 #include "bo3dsload.h"
+#include "boacload.h"
 #include "bomesh.h"
 #include "bomaterial.h"
 #include "bosonmodel.h"
@@ -187,6 +188,13 @@ bool BosonModelLoader::loadModel()
 	Bo3DSLoad loader(mDirectory, mFile, mData);
 	if (!loader.loadModel()) {
 		boError() << k_funcinfo << "error while loading from .3ds file" << endl;
+		return false;
+	}
+ } else if (mFile.right(3) == QString::fromLatin1(".ac")) {
+	// load a .ac file
+	BoACLoad loader(mDirectory, mFile, mData);
+	if (!loader.loadModel()) {
+		boError() << k_funcinfo << "error while loading from .ac file" << endl;
 		return false;
 	}
  } else {

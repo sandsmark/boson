@@ -149,10 +149,10 @@ public:
 	QString themePath() const;
 
 	/**
-	 * @return The model filename. This is the relative filename, i.e.
-	 * currently just "unit.3ds"
+	 * @return List of possible model filenames.
+	 * These are the relative filenames, i.e. "unit.3ds", "unit.ac"
 	 **/
-	static QString unitModelFile();
+	static QStringList unitModelFiles();
 
 protected:
 

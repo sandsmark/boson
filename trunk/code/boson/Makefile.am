@@ -104,7 +104,8 @@ BOSON_COMMON_SRC = \
 	bosoneffect.cpp \
 	bosoneffectproperties.cpp \
 	bosoneffectparticle.cpp \
-	bosoneffectpropertiesparticle.cpp
+	bosoneffectpropertiesparticle.cpp \
+	boacload.cpp
 
 
 
