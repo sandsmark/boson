@@ -639,7 +639,7 @@ void KGameModelDebug::slotConstructMeshList()
 	item->setText(4, QString::number(mesh->faces));
 	item->setText(5, QString::number(mesh->flags));
 	int indices = 0;
-	for (int i = 0; i < mesh->faces; i++) {
+	for (unsigned int i = 0; i < mesh->faces; i++) {
 		Lib3dsFace* f = &mesh->faceL[i];
 		indices = QMAX(indices, f->points[0]);
 		indices = QMAX(indices, f->points[1]);
