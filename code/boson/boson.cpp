@@ -31,6 +31,7 @@
 #include "bosonplayfield.h"
 #include "global.h"
 #include "upgradeproperties.h"
+#include "bosonprofiling.h"
 #include "bodebug.h"
 
 #include <klocale.h>
@@ -951,6 +952,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 	{
 		Q_UINT32 owner;
 		stream >> owner;
+		boDebug() << k_lineinfo << "AddUnisXML for " << owner << endl;
 
 		QString xmlDocument;
 		stream >> xmlDocument;
@@ -966,6 +968,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 			break;
 		}
 
+		boProfiling->start(BosonProfiling::AddUnitsXML);
 		QDomDocument doc;
 		doc.setContent(xmlDocument);
 		QDomElement root = doc.documentElement();
@@ -974,6 +977,8 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 			QDomElement e = list.item(i).toElement();
 			addUnit(e, (Player*)p);
 		}
+		boProfiling->stop(BosonProfiling::AddUnitsXML);
+		boDebug() << k_lineinfo << "AddUnisXML done" << endl;
 		break;
 	}
 	case BosonMessage::AdvanceN:

@@ -403,6 +403,9 @@ QString BosonProfilingDialog::profilingName(int profilingEvent) const
 	case BosonProfiling::LoadModelDummy:
 		name = i18n("LoadModelDummy");
 		break;
+	case BosonProfiling::AddUnitsXML:
+		name = i18n("AddUnitsXML");
+		break;
 	default:
 		name = i18n("Unknown %1").arg(profilingEvent);
 		break;
