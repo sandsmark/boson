@@ -52,11 +52,6 @@ General TODOs
 - transmit everything on startup over network (== map, unitProperties). This
   saves us from a cheating player who (maybe just accidently) changed the files
   (units/*/index.desktop especially).
-- QCanvas::collisions(QRect(x,y,w,h)); returns a wrong list! it returns the
-  collisions on the rect QRect(x,y,w+1,h+1). This is fixed all over boson by
-  using collisions(QRect(x,y,w-1,h-1)) ; a bug report has been sent. Remember to
-  change this again if that is (a) really a qt bug and (b) it is fixed in a
-  released version. also remember to add a configure check for the fixed version
 - make cursors themeable again (quite easy cause we use BosonCursor for all of
   this)
 - decrease game speed ; increase unit speed. Saves cpu power
