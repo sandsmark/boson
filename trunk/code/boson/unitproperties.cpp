@@ -229,7 +229,7 @@ void UnitProperties::loadMobileProperties(KSimpleConfig* conf)
  }
  mMobileProperties->mAccelerationSpeed = (float)conf->readDoubleNumEntry("AccelerationSpeed", 0.5);
  mMobileProperties->mDecelerationSpeed = (float)conf->readDoubleNumEntry("DecelerationSpeed", 1.0);
- mMobileProperties->mRotationSpeed = conf->readNumEntry("RotationSpeed", mMobileProperties->mSpeed * 2);
+ mMobileProperties->mRotationSpeed = conf->readNumEntry("RotationSpeed", (int)(mMobileProperties->mSpeed * 2));
  mMobileProperties->mCanGoOnLand = conf->readBoolEntry("CanGoOnLand",
 		(isLand() || isAircraft()));
  mMobileProperties->mCanGoOnWater = conf->readBoolEntry("CanGoOnWater",
@@ -466,7 +466,7 @@ float UnitProperties::decelerationSpeed() const
  return mMobileProperties->mDecelerationSpeed;
 }
 
-float UnitProperties::rotationSpeed() const
+int UnitProperties::rotationSpeed() const
 {
  if (!mMobileProperties) {
 	return 0;
@@ -608,7 +608,7 @@ void UnitProperties::setDecelerationSpeed(float speed)
  }
 }
 
-void UnitProperties::setRotationSpeed(float speed)
+void UnitProperties::setRotationSpeed(int speed)
 {
  if (mMobileProperties) {
 	mMobileProperties->mRotationSpeed = speed;
@@ -703,7 +703,7 @@ void UnitProperties::reset()
  mMobileProperties->mSpeed = 0; // Hmm, this doesn't make any sense IMO
  mMobileProperties->mAccelerationSpeed = 0.5;
  mMobileProperties->mDecelerationSpeed = 1.0;
- mMobileProperties->mRotationSpeed = 2 * mMobileProperties->mSpeed;
+ mMobileProperties->mRotationSpeed = (int)(2 * mMobileProperties->mSpeed);
  mMobileProperties->mCanGoOnLand = true;
  mMobileProperties->mCanGoOnWater = false;
  // Sounds

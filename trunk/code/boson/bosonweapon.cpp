@@ -159,8 +159,7 @@ BosonShot* BosonWeaponProperties::newShot(Unit* attacker, BoVector3 pos, BoVecto
   }
   else if(shotType() == BosonShot::Mine)
   {
-    // Not yet supported
-    return 0;
+    s = new BosonShotMine(attacker->owner(), attacker->canvas(), this, pos);
   }
   else
   {

@@ -100,7 +100,7 @@ Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
 
  // note: these width and height can be used for e.g. pathfinding. It does not
  // depend in any way on the .3ds file or another OpenGL thing.
- setSize(prop->unitWidth(), prop->unitHeight());
+ setSize(prop->unitWidth(), prop->unitHeight(), prop->unitDepth() / BO_TILE_SIZE);
 
  registerData(&d->mWaypoints, IdWaypoints);
  registerData(&d->mMoveDestX, IdMoveDestX);

@@ -36,6 +36,7 @@ BosonItem::BosonItem(BosonModel* model, BosonCanvas* canvas)
  mCurrentAnimation = 0;
  mX = mY = mZ = 0.0f;
  mWidth = mHeight = 0;
+ mDepth = 0.0;
  mCellsDirty = true;
  mRotation = 0.0f;
  mXRotation = 0.0f;
@@ -155,50 +156,32 @@ void BosonItem::makeCells(Cell* allCells, QPtrVector<Cell>* cells, int left, int
 
 bool BosonItem::bosonCollidesWith(BosonItem* item) const
 {
-  // New collision-check method for units
- if (!RTTI::isUnit(item->rtti())) {
-	switch (item->rtti()) {
-		// items we never collide with:
-//		case RTTI::Missile:
-//		case RTTI::OilField:
-//			return false;
-		default:
-			// we have unknown item here!
-			// this must not happen, since an unknown item here is a major
-			// performance problem - but at least it'll be important to fix it
-			// then :)
-			boWarning() << k_funcinfo << "unknown item - rtti=" << item->rtti() << endl;
-			return false;
-	}
+ // First we test z-coordinate
+ if (!(QMAX(z(), item->z()) <= QMIN(z() + depth(), item->z() + item->depth()))) {
+	// z-coordinates doesn't intersect. Then items doesn't collide either
+  return false;
  }
 
- // I use centers of units as positions here
- double myx, myy, itemx, itemy;
- QRect r = boundingRectAdvanced();
- QRect r2 = item->boundingRectAdvanced();
- myx = r.center().x();
- myy = r.center().y();
- itemx = r2.center().x();
- itemy = r2.center().y();
-
- double itemw, itemh;
- itemw = r2.width();
- itemh = r2.height();
-
- if (itemw <= BO_TILE_SIZE && itemh <= BO_TILE_SIZE) {
-	double dist = QABS(itemx - myx) + QABS(itemy - myy);
-	return (dist < BO_TILE_SIZE);
- } else {
-	for (int i = 0; i < itemw; i += BO_TILE_SIZE) {
-		for (int j = 0; j < itemh; j += BO_TILE_SIZE) {
-			double dist = QABS((itemx + i) - myx) + QABS((itemy + j) - myy);
-			if (dist < BO_TILE_SIZE) {
-				return true;
-			}
-		}
-	}
+ // Then bounding rect intersect test
+ // Taken from QRect::intersects() but I didn't use this method for speed reasons
+ if (!((QMAX(x(), item->x()) <= QMIN(x() + width() - 1, item->x() + item->width() - 1)) &&
+		(QMAX(y(), item->y()) <= QMIN(y() + height() - 1, item->y() + item->height() - 1)))) {
+	// Bounding rects does not intersect
+	return false;
  }
- return false;
+
+
+ if (!(RTTI::isUnit(rtti()) && RTTI::isUnit(item->rtti()))) {
+	// At least one item is not unit
+	// Non-unit items collide if their bounding boxes collide
+	return true;
+ }
+
+ // Both items are units
+ // Units are special because they must be able to move diagonally. When moving
+ //  diagonally, it's ok if their bounding boxes intersect on xy plane. Then we
+ //  check if this item's center isn't inside other item's bounding rect
+ return item->boundingRectAdvanced().contains(boundingRectAdvanced().center(), true);
 }
 
 void BosonItem::setAnimated(bool a)
@@ -366,11 +349,12 @@ void BosonItem::removeFromCells()
  canvas()->removeFromCells(this);
 }
 
-void BosonItem::setSize(int width, int height)
+void BosonItem::setSize(int width, int height, float depth)
 {
  removeFromCells();
  mWidth = width;
  mHeight = height;
+ mDepth = depth;
  mCellsDirty = true;
  addToCells();
 }
