@@ -1,14 +1,12 @@
 # KDE Config File  
 [KDE Desktop Entry]
 Type=Application
-Exec=boserver
+Exec=boserver  
 Icon=boserver.xpm
 MiniIcon=boserver.xpm
-DocPath=boserver/index.html
-Comment=Real time stragy game
-Comment[fr]=Jeu de strategie en temps reel
+Comment=This is the server for the Boson game
+Comment[fr]=Serveur pour le jeu Boson
 Terminal=0
-Name=Boserver
-Name[de]=Boserver
-Name[fr]=Boserver
-Name[it]=Boserver
+Name=Boson server
+Name[fr]=Serveur de Boson
+
