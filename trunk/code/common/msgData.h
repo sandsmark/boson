@@ -42,10 +42,12 @@ struct askMsg_t		{ int major, minor, patch; };
 struct acceptedMsg_t	{ int who_you_are, missing_player, total_player, sizeX, sizeY; };
 /* MSG_DLG_REFUSED */ /// orzel still unused
 struct refusedMsg_t	{ refusedType why_not; };
+/* MSG_DLG_END */
+struct endMsg_t		{ enum {normalEnd, playerDiedEnd } endReason; };
 /* MSG_MAP_ */
 struct cooMsg_t		{ int x, y; cell_t c; };
 /* MSG_FACILITY_CREATED */
-struct facilityMsg_t	{ int who, key, x, y, state; facilityType type; };
+struct facilityMsg_t	{ uint who; int key, x, y, state; facilityType type; };
 /* MSG_FACILITY_CHANGED */
 struct fixChangedMsg_t	{ int key, state; };
 /* MSG_MOBILE_CREATED */
@@ -74,6 +76,7 @@ typedef union {
 	askMsg_t	ask;
 	acceptedMsg_t	accepted;
 	refusedMsg_t	refused;
+	endMsg_t	end;
 /* game layer */
 	cooMsg_t	coo;
 	facilityMsg_t	facility;
@@ -164,6 +167,7 @@ enum bosonMsgTag {
 	MSG_DLG_REFUSED,
 	MSG_DLG_BEGIN,
 	MSG_DLG_OK,
+	MSG_DLG_END,
 	MSG_DLG_,
 
 	MSG_END_DIALOG_LAYER,
