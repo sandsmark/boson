@@ -10,6 +10,7 @@ flock($fp, LOCK_EX) or die ("Failure accesing $counter_file");
 $visits = (int)fgets($fp, 80);
 $visits++;
 ftruncate($fp, 0);
+fseek($fp, 0);
 fputs($fp, (string)$visits);
 flock($fp, LOCK_UN) or die ("Cannot release lock file");
 fclose($fp);
