@@ -408,6 +408,56 @@ QString BosonSaveLoad::saveExternalAsXML()
 }
 
 
+bool BosonSaveLoad::loadNewGame(const QByteArray& playersXML, const QByteArray& canvasXML)
+{
+ // AB: nearly all code copied from loadFromFile().
+ boDebug() << k_funcinfo << endl;
+ d->mLoadingStatus = LoadingInProgress;
+
+  if (playersXML.isEmpty()) {
+	boError() << k_funcinfo << "Empty playersXML" << endl;
+	addLoadError(SaveLoadError::LoadBSGFileError, i18n("empty file: players.xml"));
+	d->mLoadingStatus = BSGFileError;
+	return false;
+ }
+ if (canvasXML.isEmpty()) {
+	boError() << k_funcinfo << "Empty canvasXML" << endl;
+	addLoadError(SaveLoadError::LoadBSGFileError, i18n("empty file: canvas.xml"));
+	d->mLoadingStatus = BSGFileError;
+	return false;
+ }
+
+#if 0
+ if (!loadPlayersFromXML(playersXML)) {
+	return false;
+ }
+ boDebug() << k_funcinfo << d->mBoson->playerCount() << " players loaded" << endl;
+#endif
+ emit signalLoadingType(BosonLoadingWidget::ReceiveMap);
+
+
+ // Load player data (e.g. unit configs, unit models, ...
+ // TODO: since we use XML for savegames now we should be able to include this
+ // to regular startup code in BosonStarting!
+ KPlayer* p;
+ int current = 0;
+ for (p = d->mBoson->playerList()->first(); p; p = d->mBoson->playerList()->next(), current++) {
+	emit signalLoadingPlayer(current);
+	emit signalLoadPlayerData((Player*)p);
+	emit signalLoadingType(BosonLoadingWidget::LoadSavedUnits);
+ }
+
+ boDebug() << k_funcinfo << "loading units" << endl;
+
+ // Load canvas (items - i.e. units and shots)
+ if (!loadCanvasFromXML(canvasXML)) {
+	addLoadError(SaveLoadError::General, i18n("error while loading canvas"));
+	return false;
+ }
+
+ return true;
+}
+
 bool BosonSaveLoad::loadFromFile(const QString& file)
 {
  boDebug(260) << k_funcinfo << endl;
@@ -582,7 +632,7 @@ bool BosonSaveLoad::loadFromFile(const QMap<QString, QByteArray>& fileList)
 	return false;
  }
 
- if (!loadKGameFromXML(kgameXML)) {
+ if (!loadVersionFromXML(kgameXML)) {
 	return false;
  }
 
@@ -621,6 +671,12 @@ bool BosonSaveLoad::loadFromFile(const QMap<QString, QByteArray>& fileList)
 	return false;
  }
 
+ // _first_ load canvas, _then_ kgame.xml - nextUnitId must be loaded after all
+ // units have been loaded
+ if (!loadKGameFromXML(kgameXML)) {
+	return false;
+ }
+
  // Load external stuff (camera)
  if (!loadExternalFromXML(externalXML)) {
 	addLoadError(SaveLoadError::General, i18n("error while loading external data"));
@@ -631,8 +687,10 @@ bool BosonSaveLoad::loadFromFile(const QMap<QString, QByteArray>& fileList)
  return true;
 }
 
-bool BosonSaveLoad::loadKGameFromXML(const QString& xml)
+bool BosonSaveLoad::loadVersionFromXML(const QString& xml)
 {
+ // AB: this takes a kgame.xml. maybe we should split that file up into
+ // kgame.xml and version.xml?
  boDebug() << k_funcinfo << endl;
  QDomDocument doc(QString::fromLatin1("Boson"));
  if (!loadXMLDoc(&doc, xml)) {
@@ -655,6 +713,20 @@ bool BosonSaveLoad::loadKGameFromXML(const QString& xml)
 	d->mLoadingStatus = InvalidVersion;
 	return false;
  }
+ return true;
+}
+
+bool BosonSaveLoad::loadKGameFromXML(const QString& xml)
+{
+ boDebug() << k_funcinfo << endl;
+ QDomDocument doc(QString::fromLatin1("Boson"));
+ if (!loadXMLDoc(&doc, xml)) {
+	addLoadError(SaveLoadError::LoadInvalidXML, i18n("Parsing error in kgame.xml"));
+	d->mLoadingStatus = InvalidXML;
+	return false;
+ }
+ QDomElement root = doc.documentElement();
+ bool ok = false;
 
  // load the datahandler
  QDomElement handler = root.namedItem(QString::fromLatin1("DataHandler")).toElement();

@@ -145,11 +145,6 @@ public:
 	Unit* findUnit(unsigned long int unitId, Player* searchIn) const;
 
 	/**
-	 * Used by @ref BosonStarting to add the initial units to the game
-	 **/
-	void addInitialUnits(const QString& xml, Player* owner);
-
-	/**
 	 * The factory completed to produce a unit and is now told to build
 	 * (place) it.
 	 * @param factory Where the unit is being build
@@ -373,13 +368,6 @@ signals:
 	void signalStartNewGame();
 
 	/**
-	 * @param unit The unit to be added
-	 * @param x x-coordinate of the unit on the canvas
-	 * @param y y-coordinate of the unit on the canvas
-	 **/
-	void signalAddUnit(Unit* unit, int x, int y);
-
-	/**
 	 * Order the canvas to call @ref BosonCanvas::slotAdvance
 	 * @param advanceCount The number of this advance call. This is used to
 	 * decide what should be done - e.g. there is no need to check for new
@@ -471,21 +459,6 @@ signals:
 
 protected:
 	virtual bool playerInput(QDataStream& stream, KPlayer* player);
-
-	/**
-	 * Create a new unit. No resources of the player are reduced, the unit
-	 * is created immediately.
-	 **/
-	Unit* addUnit(unsigned long int unitType, Player* owner, int x, int y);
-
-	/**
-	 * Create a unit from node. This behaves similar to the above function,
-	 * but you can specify <em>every</em> property in the node, not just
-	 * type and position. 
-	 *
-	 * This is used by @ref BosonScenario.
-	 **/
-	Unit* addUnit(QDomElement& node, Player* owner);
 
 	/**
 	 * Load the XML file in @p xml into @p doc and display an error message

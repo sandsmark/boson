@@ -33,10 +33,14 @@
 #include "bosondata.h"
 #include "bodebug.h"
 #include "bpfdescription.h"
+#include "bosonfileconverter.h"
+#include "bosonsaveload.h"
 
 #include <klocale.h>
 
 #include <qtimer.h>
+#include <qdom.h>
+#include <qmap.h>
 
 BosonStarting::BosonStarting(QObject* parent) : QObject(parent, "bosonstarting")
 {
@@ -57,6 +61,7 @@ void BosonStarting::setNewGameData(const QByteArray& data)
 
 void BosonStarting::setEditorMap(const QByteArray& buffer)
 {
+#if 0
  boDebug() << k_funcinfo << endl;
  QDataStream stream(buffer, IO_ReadOnly);
  delete mNewPlayField;
@@ -86,6 +91,8 @@ void BosonStarting::setEditorMap(const QByteArray& buffer)
  mNewPlayField->changeDescription(description);
 
  mNewPlayField->finalizeLoading(); // do not preload anything or so
+
+#endif
 }
 
 void BosonStarting::startNewGame()
@@ -455,8 +462,11 @@ void BosonStarting::loadUnitDatas(Player* p)
  }
 }
 
+// FIXME: should return bool !
+// (return to startup page if starting fails)
 void BosonStarting::startScenario()
 {
+ BO_CHECK_NULL_RET(mPlayer);
  if (mLoading) {
 	boError() << k_funcinfo << "scenario doesn't need to be started on loading" << endl;
 	return;
@@ -464,8 +474,93 @@ void BosonStarting::startScenario()
  BO_CHECK_NULL_RET(boGame);
  BO_CHECK_NULL_RET(mPlayField);
  BO_CHECK_NULL_RET(mPlayField->scenario());
- if (!mPlayField->scenario()->startScenario(boGame)) {
-	boError() << k_funcinfo << "error starting scenario" << endl;
+ QCString s = mPlayField->scenario()->saveScenarioToDocument().utf8();
+ QByteArray playersXML;
+ QByteArray canvasXML;
+ BosonFileConverter converter;
+ converter.convertScenario_From_0_8_To_0_9(s, &playersXML, &canvasXML);
+
+ // FIXME: savegames store the _id_ of the players, but the scenario (and
+ // thefore this playersXML) only the player _number_
+ QString errorMsg;
+ int line = 0, column = 0;
+ QDomDocument doc;
+ if (!doc.setContent(QCString(playersXML), &errorMsg, &line, &column)) {
+	boError() << k_funcinfo << "unable to load playersXML - parse error at line=" << line << ",column=" << column << " errorMsg=" << errorMsg << endl;
+	return;
+ }
+ QDomElement root = doc.documentElement();
+ QDomNodeList list = root.elementsByTagName("Player");
+ if (list.count() < 1) {
+	boError() << k_funcinfo << "no Player tag found" << endl;
+	return;
+ }
+ QMap<int, int> player2Number;
+ for (unsigned int i = 0; i < list.count(); i++) {
+	QDomElement e = list.item(i).toElement();
+	player2Number.insert(i, e.attribute("Id").toInt());
+ }
+ QValueList<QDomElement> players;
+ players.append(list.item(0).toElement());
+ for (unsigned int i = 1; i < list.count(); i++) {
+	QDomElement e = list.item(i).toElement();
+	int number = player2Number[i];
+	bool inserted = false;
+	for (unsigned int j = 0; j < players.count() && !inserted; j++) {
+		if (player2Number[j] > number) {
+			players.insert(players.at(j), e);
+			inserted = true;
+		} else if (j + 1 == players.count()) {
+			players.append(e);
+			inserted = true;
+		}
+	}
+ }
+
+ QDomDocument canvasDoc;
+ if (!canvasDoc.setContent(QCString(canvasXML))) {
+	boError() << k_funcinfo << "unable to load canvasXML" << endl;
+	return;
+ }
+ QDomElement canvasRoot = canvasDoc.documentElement();
+ QDomNodeList itemsList = canvasRoot.elementsByTagName("Items");
+
+ // players is now a list of Player nodes, sorted by their Id (acutally at this
+ // point it is the playernumber only)
+ for (unsigned int i = 0; i < boGame->playerCount(); i++) {
+	int id = boGame->playerList()->at(i)->id();
+	QDomElement e = players[i];
+	int number = e.attribute("Id").toInt();
+	e.setAttribute("Id", id);
+
+	// also change the id in the OwnerId attribute of the Items tag
+	for (unsigned int j = 0; j < itemsList.count(); j++) {
+		QDomElement items = itemsList.item(j).toElement();
+		bool ok = false;
+		int ownerNumber = items.attribute("OwnerId").toInt(&ok);
+		if (!ok) {
+			boError() << k_funcinfo << "invalid OnwerOd" << endl;
+			continue;
+		}
+		if (ownerNumber == number) {
+			items.setAttribute("OwnerId", id);
+		}
+	}
+ }
+ root.setAttribute("LocalPlayerId", mPlayer->id());
+ playersXML = doc.toCString();
+ canvasXML = canvasDoc.toCString();
+
+ // AB: note that the player list can (and very often will) contain more players
+ // then the actual boGame->playerList(). the code must allow that.
+
+ // TODO: save the in-game players to a xml string, then replace all tags in it
+ // that appear in playersXML too with those in playersXML.
+// boGame->reset();
+
+ BosonSaveLoad* load = new BosonSaveLoad(boGame);
+ if (!load->loadNewGame(playersXML, canvasXML)) {
+	boError() << k_funcinfo << "failed starting game" << endl;
 	return;
  }
 }

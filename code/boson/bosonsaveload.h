@@ -157,6 +157,9 @@ public:
 	void setCanvas(BosonCanvas*);
 	void setPlayField(BosonPlayField*);
 
+	// AB: temporary function only, for the scenario-code-replacing process.
+	bool loadNewGame(const QByteArray& playersXML, const QByteArray& canvasXML);
+
 	/**
 	 * You are meant to use @ref Boson::loadFromFile instead, so that @ref
 	 * Boson::loadingStatus will be valid.
@@ -218,6 +221,7 @@ protected:
 	QString saveCanvasAsXML();
 	QString saveExternalAsXML();
 
+	bool loadVersionFromXML(const QString&); // takes kgame.xml
 	bool loadKGameFromXML(const QString&);
 	bool loadPlayersFromXML(const QString&);
 	bool loadCanvasFromXML(const QString&);

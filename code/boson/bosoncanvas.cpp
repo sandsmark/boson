@@ -157,17 +157,6 @@ Cell* BosonCanvas::cells() const
  return d->mMap->cells();
 }
 
-void BosonCanvas::slotAddUnit(Unit* unit, int x, int y)
-{
- if (!unit) {
-	boError() << k_funcinfo << "NULL unit!" << endl;
-	return;
- }
-
- unit->move(x, y, unit->z());
-// unit->show();
-}
-
 void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 {
 #define USE_ADVANCE_LISTS 1
@@ -757,16 +746,20 @@ void BosonCanvas::destroyUnit(Unit* unit)
 	// Make explosion if needed
 	const UnitProperties* prop = unit->unitProperties();
 	if (prop->explodingDamage() > 0) {
-		BosonShotExplosion* e = (BosonShotExplosion*)createNewItem(RTTI::Shot, unit->owner(), ItemType(BosonShot::Explosion, 0, 0));
+		BosonShotExplosion* e = (BosonShotExplosion*)createNewItem(RTTI::Shot, unit->owner(), ItemType(BosonShot::Explosion, 0, 0), pos);
 		// Do we want ability to set fullDamageRange here?
 		if (e) {
+			// AB: pos parameter is redundant due to createNewItem()
+			// change
 			e->activate(pos, prop->explodingDamage(), prop->explodingDamageRange(), 0.0f, 10);
 		}
 	}
 	// Add explosion fragments
 	for (unsigned int i = 0; i < unit->unitProperties()->explodingFragmentCount(); i++) {
-		BosonShotFragment* f = (BosonShotFragment*)createNewItem(RTTI::Shot, unit->owner(), ItemType(BosonShot::Fragment, 0, 0));
+		BosonShotFragment* f = (BosonShotFragment*)createNewItem(RTTI::Shot, unit->owner(), ItemType(BosonShot::Fragment, 0, 0), pos);
 		if (f) {
+			// AB: pos parameter is redundant due to createNewItem()
+			// change
 			f->activate(pos, unit->unitProperties());
 		}
 	}
@@ -1148,6 +1141,22 @@ bool BosonCanvas::loadItemFromXML(const QDomElement& item, Player* owner)
 	return false;
  }
 
+ BoVector3 pos;
+ pos.setX(item.attribute("x").toFloat(&ok));
+ if (!ok) {
+	boError() << k_funcinfo << "x attribute for Item tag missing or invalid" << endl;
+	return false;
+ }
+ pos.setY(item.attribute("y").toFloat(&ok));
+ if (!ok) {
+	boError() << k_funcinfo << "y attribute for Item tag missing or invalid" << endl;
+	return false;
+ }
+ pos.setZ(item.attribute("z").toFloat(&ok));
+ if (!ok) {
+	// missing z is ok, but not recommended.
+	pos.setZ(0.0f);
+ }
 
  if (RTTI::isUnit(rtti)) {
 	if (!item.hasAttribute(QString::fromLatin1("Id"))) {
@@ -1160,6 +1169,9 @@ bool BosonCanvas::loadItemFromXML(const QDomElement& item, Player* owner)
 	}
 	unsigned long int id = 0;
 	int dataHandlerId = -1;
+
+	// AB: "0" indicates that we want boson to assign an Id. the tag must
+	// always be present.
 	id = item.attribute(QString::fromLatin1("Id")).toULong(&ok);
 	if (!ok) {
 		boError(260) << k_funcinfo << "Invalid Id number for Item tag" << endl;
@@ -1172,19 +1184,26 @@ bool BosonCanvas::loadItemFromXML(const QDomElement& item, Player* owner)
 			return false;
 		}
 	}
+	if (id == 0) {
+		id = boGame->nextUnitId();
+	}
 
 	// FIXME: I think we should move addUnit() to bosoncanvas.
 	// probably do the same with signalAddUnit() and nextUnitId().
 	//
-	// FIXME: use floats? i.e. use canvas coordinates, not cell coordinates
-	// (the xml does it too)
-	int x = 0;
-	int y = 0;
 	// AB: TODO: createNewUnit() - which includes owner->addUnit()
-	Unit* u = (Unit*)createItem(RTTI::UnitStart + type, owner, ItemType(type), id);
+	// AB: maybe drop create_New_Item completely and move all it does to
+	// createItem().
+	// (i.e. the owner->addUnit() and the theme->loadNewUnit() call. also a
+	// few additional exceptions (editor, flying unit)).
+	Unit* u = (Unit*)createItem(RTTI::UnitStart + type, owner, ItemType(type), pos, id);
 
 	// Set additional properties
 	owner->addUnit(u, dataHandlerId);
+
+	if (u->speciesTheme()) {
+		u->speciesTheme()->loadNewUnit(u);
+	}
 
 	// Call unit's loading methods
 	if (!u->loadFromXML(item)) {
@@ -1195,7 +1214,7 @@ bool BosonCanvas::loadItemFromXML(const QDomElement& item, Player* owner)
 
 	return true;
  } else if (RTTI::isShot(rtti)) {
-	BosonShot* s = (BosonShot*)createNewItem(RTTI::Shot, owner, ItemType(type, group, groupType));
+	BosonShot* s = (BosonShot*)createNewItem(RTTI::Shot, owner, ItemType(type, group, groupType), pos);
 	if (!s) {
 		boError() << k_funcinfo << "Invalid shot - type=" << type << " group=" << group << " groupType=" << groupType << endl;
 		return false;
@@ -1326,9 +1345,9 @@ void BosonCanvas::deleteUnits(QPtrList<Unit>* units)
  }
 }
 
-BosonItem* BosonCanvas::createNewItem(int rtti, Player* owner, const ItemType& type)
+BosonItem* BosonCanvas::createNewItem(int rtti, Player* owner, const ItemType& type, const BoVector3& pos)
 {
- BosonItem* item = createItem(rtti, owner, type, boGame->nextUnitId());
+ BosonItem* item = createItem(rtti, owner, type, pos, boGame->nextUnitId());
  if (!item) {
 	return 0;
  }
@@ -1347,8 +1366,12 @@ BosonItem* BosonCanvas::createNewItem(int rtti, Player* owner, const ItemType& t
 	theme->loadNewUnit(unit);
 	unit->setAnimationMode(UnitAnimationIdle);
 	if (unit->isFlying()) {
-//		unit->moveBy(0.0f, 0.0f, 2.0 * BO_TILE_SIZE / BO_GL_CELL_SIZE);
-		unit->moveBy(0.0f, 0.0f, 2.0);
+		// AB: we have currently not decided how to treat flying units,
+		// so we just place them at a height of 2.0 on construction.
+		// note that on loading units this may break the positions and
+		// when the height of the ground is at 2.0, we don't recognize
+		// that either.
+		unit->move(unit->x(), unit->y(), 2.0f);
 	}
 
 
@@ -1367,16 +1390,26 @@ BosonItem* BosonCanvas::createNewItem(int rtti, Player* owner, const ItemType& t
  return item;
 }
 
-BosonItem* BosonCanvas::createItem(int rtti, Player* owner, const ItemType& type, unsigned long int id)
+BosonItem* BosonCanvas::createItem(int rtti, Player* owner, const ItemType& type, const BoVector3& pos, unsigned long int id)
 {
  BosonItem* item = 0;
+ if (!onCanvas(pos)) {
+	boError() << k_funcinfo << pos.debugString() << " is not on the canvas" << endl;
+	return 0;
+ }
+ if (id == 0) {
+	boError() << k_funcinfo << "id==0 is invalid." << endl;
+	return 0;
+ }
  if (RTTI::isUnit(rtti)) {
 	item = (BosonItem*)createUnit(owner, type.mType);
-	if (item) {
-		((Unit*)item)->setId(id);
-	}
  } else if (RTTI::isShot(rtti)) {
 	item = (BosonItem*)createShot(owner, type.mType, type.mGroup, type.mGroupType);
+ }
+ if (item) {
+	item->setId(id);
+	item->move(pos.x(), pos.y(), pos.z());
+	emit signalItemAdded(item);
  }
  return item;
 }
@@ -1402,6 +1435,7 @@ Unit* BosonCanvas::createUnit(Player* owner, unsigned long int unitType)
 	boError() << k_funcinfo << "invalid unit type " << unitType << endl;
 	return 0;
  }
+ theme->loadNewUnit(unit);
  return unit;
 }
 
