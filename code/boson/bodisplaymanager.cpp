@@ -458,7 +458,10 @@ void BoDisplayManager::slotClearGroup(int number)
 
 void BoDisplayManager::slotUnitAction(int action)
 {
- activeDisplay()->unitAction(action);
+ BO_CHECK_NULL_RET(activeDisplay());
+ BO_CHECK_NULL_RET(activeDisplay()->displayInput());
+
+ activeDisplay()->displayInput()->unitAction(action);
 }
 
 void BoDisplayManager::slotPlaceUnit(unsigned long int unitType, Player* owner)

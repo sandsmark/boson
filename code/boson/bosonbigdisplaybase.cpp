@@ -780,7 +780,7 @@ void BosonBigDisplayBase::paintGL()
  }
 
  boProfiling->renderUnits(true);
- BoItemList* allItems = mCanvas->allItems();
+ BoItemList* allItems = canvas()->allItems();
  BoItemList::Iterator it = allItems->begin();
  d->mRenderedItems = 0;
 
@@ -1076,7 +1076,7 @@ void BosonBigDisplayBase::paintGL()
 
  bool showProfilingMessage = boProfiling->renderEntries() < MAX_PROFILING_ENTRIES;
  boProfiling->render(false);
- if ( showProfilingMessage && boProfiling->renderEntries() >= MAX_PROFILING_ENTRIES) {
+ if (showProfilingMessage && boProfiling->renderEntries() >= MAX_PROFILING_ENTRIES) {
 	boGame->slotAddChatSystemMessage(i18n("%1 frames have been recorded by boProfiling. You can make profiling snapshots using CTRL+P").arg(boProfiling->renderEntries()));
  }
 }
@@ -1280,7 +1280,8 @@ void BosonBigDisplayBase::renderText()
 
 void BosonBigDisplayBase::renderCells()
 {
- BosonTiles* tiles = mCanvas->tileSet();
+ BO_CHECK_NULL_RET(canvas());
+ BosonTiles* tiles = canvas()->tileSet();
  if (!tiles) {
 	boError() << k_funcinfo << "NULL tiles" << endl;
 	return;
@@ -1303,19 +1304,11 @@ void BosonBigDisplayBase::renderCells()
 	generateCellList();
  }
 
- if (!localPlayer()) {
-	boError() << k_funcinfo << "NULL local player" << endl;
-	return;
- }
- BosonMap* map = mCanvas->map();
- if (!map) {
-	boError() << k_funcinfo << "NULL map" << endl;
-	return;
- }
+ BO_CHECK_NULL_RET(localPlayer());
+ BosonMap* map = canvas()->map();
+ BO_CHECK_NULL_RET(map);
  float* heightMap = map->heightMap();
- if (!heightMap) {
-	boError() << k_funcinfo << "NULL height map" << endl;
- }
+ BO_CHECK_NULL_RET(heightMap);
 
 
  // AB: we can increase performance even more here. lets replace d->mRenderCells
@@ -1463,7 +1456,7 @@ void BosonBigDisplayBase::renderParticles()
 	}
 
 	// If there's no particles, return
-	if(d->mParticleList.count() == 0) {
+	if (d->mParticleList.count() == 0) {
 		//gettimeofday(&end, 0);
 		//boDebug(150) << k_funcinfo << "Returning (no visible particles); time elapsed: " << end.tv_usec - start.tv_usec << " us" << endl;
 		return;
@@ -1493,10 +1486,10 @@ void BosonBigDisplayBase::renderParticles()
  bool betweenbeginend = false;  // If glBegin has been called, but glEnd() hasn't. Very hackish.
  BoVector3 a, b, c, e;  // Vertex positions. e is used instead of d which clashes with private class
 
- QPtrListIterator<BosonParticle> i(d->mParticleList);
+ QPtrListIterator<BosonParticle> it(d->mParticleList);
  //boDebug(150) << k_funcinfo << "Drawing " << i.count() << " particles" << endl;
- while ((p = i.current()) != 0) {
-	++i;
+ for (; it.current(); ++it) {
+	p = it.current();
 	// We change blend function and texture only if it's necessary
 	if (blendfunc != p->system->mBlendFunc[1]) {
 		// Note that we only check for dest blending function currently, because src
@@ -1521,7 +1514,7 @@ void BosonBigDisplayBase::renderParticles()
 		betweenbeginend = true;
 	}
 
-  if (p->system->mAlign) {
+ if (p->system->mAlign) {
 		a = p->pos + ((-x + y) * p->size);
 		b = p->pos + (( x + y) * p->size);
 		c = p->pos + (( x - y) * p->size);
@@ -2054,9 +2047,10 @@ void BosonBigDisplayBase::slotCenterHomeBase()
 
 void BosonBigDisplayBase::slotResetViewProperties()
 {
+ BO_CHECK_NULL_RET(canvas());
  d->mFovY = 60.0;
  d->mAspect = 1.0;
- setCamera(Camera(mCanvas->mapWidth(), mCanvas->mapHeight()));
+ setCamera(Camera(canvas()->mapWidth(), canvas()->mapHeight()));
  resizeGL(d->mViewport[2], d->mViewport[3]);
 }
 
@@ -2174,14 +2168,18 @@ bool BosonBigDisplayBase::mapDistance(int windx, int windy, GLfloat* dx, GLfloat
 bool BosonBigDisplayBase::mapCoordinatesToCell(const QPoint& pos, QPoint* cell)
 {
  GLfloat x, y, z;
+ if (canvas()) {
+	BO_NULL_ERROR(canvas());
+	return false;
+ }
  if (!mapCoordinates(pos, &x, &y, &z)) {
 	return false;
  }
  y *= -1;
  int cellX = (int)(x / BO_GL_CELL_SIZE);
  int cellY = (int)(y / BO_GL_CELL_SIZE);
- cellX = QMAX(0, QMIN((int)mCanvas->mapWidth(), cellX));
- cellY = QMAX(0, QMIN((int)mCanvas->mapHeight(), cellY));
+ cellX = QMAX(0, QMIN((int)canvas()->mapWidth(), cellX));
+ cellY = QMAX(0, QMIN((int)canvas()->mapHeight(), cellY));
  cell->setX(cellX);
  cell->setY(cellY);
  return true;
@@ -2490,7 +2488,8 @@ void BosonBigDisplayBase::scrollBy(int dx, int dy)
 
 void BosonBigDisplayBase::calculateWorldRect(const QRect& rect, float* minX, float* minY, float* maxX, float* maxY) const
 {
- const BosonMap* map = mCanvas->map();
+ BO_CHECK_NULL_RET(canvas());
+ const BosonMap* map = canvas()->map();
  BO_CHECK_NULL_RET(map);
  GLfloat posX, posY;
  GLfloat posZ;
@@ -2538,8 +2537,8 @@ void BosonBigDisplayBase::generateCellList()
 	// we construct the display before the map is received
 	return;
  }
- BosonProfiler p(50);
- BosonMap* map = mCanvas->map();
+ BO_CHECK_NULL_RET(canvas());
+ BosonMap* map = canvas()->map();
  if (!map) {
 	boError() << k_funcinfo << "NULL map" << endl;
 	return;
@@ -2975,7 +2974,8 @@ float BosonBigDisplayBase::sphereInFrustum(const BoVector3& pos, float radius) c
 
 void BosonBigDisplayBase::mapChanged()
 {
- camera()->setMapSize(mCanvas->mapWidth(), mCanvas->mapHeight());
+ BO_CHECK_NULL_RET(canvas());
+ camera()->setMapSize(canvas()->mapWidth(), canvas()->mapHeight());
 }
 
 const QPoint& BosonBigDisplayBase::cursorCanvasPos() const
@@ -3039,7 +3039,8 @@ void BosonBigDisplayBase::setPlacementCellPreviewData(int groundType, bool canPl
 	setPlacementPreviewData(0, false);
 	return;
  }
- BosonTiles* tiles = mCanvas->tileSet();
+ BO_CHECK_NULL_RET(canvas());
+ BosonTiles* tiles = canvas()->tileSet();
  if (!tiles) {
 	boError() << k_funcinfo << "NULL tiles" << endl;
 	setPlacementPreviewData(0, false);
@@ -3064,12 +3065,6 @@ void BosonBigDisplayBase::setDisplayInput(BosonBigDisplayInputBase* input)
 	delete d->mInput;
  }
  d->mInput = input;
-}
-
-void BosonBigDisplayBase::unitAction(int unitType)
-{
- BO_CHECK_NULL_RET(displayInput());
- displayInput()->unitAction(unitType);
 }
 
 BosonBigDisplayInputBase* BosonBigDisplayBase::displayInput() const
