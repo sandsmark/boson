@@ -48,12 +48,6 @@ public:
 	void setCursor(CursorMode mode);
 	void setGroupMove(GroupMoveMode mode);
 
-protected slots:
-	/**
-	 * @param ms The new game speed in ms
-	 **/
-	void slotSpeedChanged(int ms);
-
 signals:
 	void signalArrowScrollChanged(int);
 	void signalSpeedChanged(int);
@@ -68,8 +62,22 @@ signals:
 	 **/
 	void signalChatFramePositionChanged(int index); 
 
-	void signalCursorChanged(int index);
+	void signalCursorChanged(int index, const QString& cursorDir);
 	void signalGroupMoveChanged(int index);
+
+protected slots:
+	/**
+	 * @param ms The new game speed in ms
+	 **/
+	void slotSpeedChanged(int ms);
+
+	void slotCursorChanged(int index);
+	void slotCursorThemeChanged(int index);
+
+protected:
+	void initGeneralPage();
+	void initCursorPage();
+	void initPathfindingPage();
 
 private:
 	class OptionsDialogPrivate;

@@ -193,7 +193,7 @@ protected slots:
 	void slotNotEnoughMinerals(Player*);
 	void slotNotEnoughOil(Player*);
 
-	void slotChangeCursor(int mode);
+	void slotChangeCursor(int mode, const QString& dir);
 	void slotChangeGroupMove(int mode);
 
 protected:

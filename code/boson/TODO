@@ -67,6 +67,8 @@ General TODOs
 - splitViews: we could use one view for players that are allied with the local
   player. we need to transmit the position of the view over network... would be
   a nice idea!
+- boson is crashing if BosonCursor (e.g. the sprite one) cannot load the pixmaps
+  successfully
 
 Data TODOs
 - general sound (e.g. speech)

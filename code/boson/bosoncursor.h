@@ -194,6 +194,8 @@ public:
 	virtual void removeOldCursor() {}
 	inline virtual QRect oldCursor() const;
 
+	static QStringList availableThemes();
+	static QString defaultTheme();
 
 private:
 	int mMode;
