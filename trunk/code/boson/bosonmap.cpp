@@ -35,8 +35,6 @@
 #include <kglobal.h>
 #include <kstandarddirs.h>
 
-#define TAG_CELL (0xde)
-
 class BosonMap::BosonMapPrivate
 {
 public:
@@ -109,6 +107,20 @@ bool BosonMap::loadMap(QDomElement& root)
 
  return true;
 }
+
+bool BosonMap::loadMapFromFile(QDataStream& stream)
+{
+ if (!loadMapGeo(stream)) {
+	boError() << k_funcinfo << "Could not load map geo" << endl;
+	return false;
+ }
+ if (!loadCells(stream)) {
+	boError() << k_funcinfo << "Could not load map cells" << endl;
+	return false;
+ }
+ return true;
+}
+
 
 bool BosonMap::loadMap(QDataStream& stream)
 {
@@ -218,37 +230,6 @@ bool BosonMap::loadHeightMap(QDataStream& stream)
  return true;
 }
 
-
-bool BosonMap::saveMap(QDomElement& root)
-{
- QDomDocument doc = root.ownerDocument();
-
- QDomElement geo = doc.createElement("MapGeo");
- root.appendChild(geo);
-
- if (!saveMapGeo(geo)) {
-	boError() << k_funcinfo << "Could not save map geo" << endl;
-	return false;
- }
-
- QDomElement cells = doc.createElement("MapCells");
- root.appendChild(cells);
-
- if (!saveCells(cells)) {
-	boError() << k_funcinfo << "Could not save cells" << endl;
-	return false;
- }
-
-return true;
-}
-
-bool BosonMap::saveMapGeo(QDomElement& node)
-{
-// TODO: maybe check for validity
- node.setAttribute("Width", width());
- node.setAttribute("Height", height());
- return true;
-}
 
 bool BosonMap::loadMapGeo(QDomElement& node)
 {
@@ -408,36 +389,16 @@ bool BosonMap::loadCell(QDomElement& node, int& x, int& y, int& groundType, unsi
  return true;
 }
 
-bool BosonMap::saveCells(QDomElement& node)
+bool BosonMap::saveMapToFile(QDataStream& stream)
 {
- if (!mCells) {
-	boError() << k_funcinfo << "NULL cells" << endl;
+ if (!saveMapGeo(stream)) {
+	boError() << k_funcinfo << "Could not save map geo" << endl;
 	return false;
  }
- QDomDocument doc = node.ownerDocument();
- for (unsigned int i = 0; i < width(); i++) {
-	for (unsigned int j = 0; j < height(); j++) {
-		QDomElement c = doc.createElement("Cell");
-		node.appendChild(c);
-		saveCell(c, i, j, cell(i, j));
-	}
- }
- return true;
-}
-
-bool BosonMap::saveCell(QDomElement& node, int x, int y, Cell* cell)
-{
- if (!cell) {
-	boError() << k_funcinfo << "NULL cell" << endl;
+ if (!saveCells(stream)) {
+	boError() << k_funcinfo << "Could not save map cells" << endl;
 	return false;
  }
- QDomDocument doc = node.ownerDocument();
- node.setAttribute("x", x);
- node.setAttribute("y", y);
-
-// or should these be separate elements? I doubt this.
- node.setAttribute("GroundType", cell->groundType());
- node.setAttribute("Version", cell->version());
  return true;
 }
 
@@ -595,18 +556,11 @@ bool BosonMap::loadCell(QDataStream& stream, int& groundType, unsigned char& b)
 {
  Q_INT32 g;
  Q_INT8 version;
- stream >> g; // not groundType - first TAG_CELL
- if (g != TAG_CELL) {
-	boError() << k_funcinfo << "broken map file!" << endl;
-	boError() << k_funcinfo << "missing TAG_CELL!" << endl;
-	return false;
- }
 
- stream >> g; // this is the groundType now.
+ stream >> g;
  if (!Cell::isValidGround(g)) { 
 	return false; 
  }
-// if (g < 0 || ) { return false; }
 
  stream >> version;
  if (version > 4) {
@@ -626,7 +580,6 @@ void BosonMap::saveCell(QDataStream& stream, int groundType, unsigned char versi
 	boWarning() << k_funcinfo << "Invalid version " << version << endl;
 	version = 0;
  }
- stream << (Q_INT32)TAG_CELL;
  stream << (Q_INT32)groundType;
  stream << (Q_INT8)version;
 }
