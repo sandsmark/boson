@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -357,29 +357,21 @@ public slots:
 	 *
 	 * You can find this method in this class, because it is accessible from
 	 * mostly everywhere, where it might be needed
+	 * @param forPlayer If non-NULL, the message is added only for this
+	 * player. If @p forPlayer is not the local player, it is completely
+	 * ignored.
 	 **/
-	void slotAddChatSystemMessage(const QString& fromName, const QString& text);
+	void slotAddChatSystemMessage(const QString& fromName, const QString& text, const Player* forPlayer = 0);
 
 
 	/**
 	 * Convinence method for the above slot. Simply uses "Boson" as
 	 * fromName.
-	 **/
-	void slotAddChatSystemMessage(const QString& text);
-
-	/**
-	 * Just like @ref slotAddChatSystemMessage, but the message is
-	 * displayed only if @p player is the local player. Otherwise it is
+	 * @param forPlayer If non-NULL, the message is added only for this
+	 * player. If @p forPlayer is not the local player, it is completely
 	 * ignored.
 	 **/
-	void slotAddChatSystemMessageForLocalPlayer(const Player* player, const QString& fromName, const QString& text);
-
-	/**
-	 * Just like @ref slotAddChatSystemMessage, but the message is
-	 * displayed only if @p player is the local player. Otherwise it is
-	 * ignored.
-	 **/
-	void slotAddChatSystemMessageForLocalPlayer(const Player*, const QString& text);
+	void slotAddChatSystemMessage(const QString& text, const Player* forPlayer = 0);
 
 signals:
 	/**
