@@ -402,7 +402,7 @@ void BoUnitEditor::slotUpdateUnitProperties()
 	    mUnit->addTextureMapping(it.current()->text(0), it.current()->text(1));
 	}
     }
-    mUnit->addSound(SoundShoot, mUnitSoundShoot->text());
+//    mUnit->addSound(SoundShoot, mUnitSoundShoot->text());
     mUnit->addSound(SoundOrderMove, mUnitSoundOrderMove->text());
     mUnit->addSound(SoundOrderAttack, mUnitSoundOrderAttack->text());
     mUnit->addSound(SoundOrderSelect, mUnitSoundOrderSelect->text());
@@ -491,7 +491,7 @@ void BoUnitEditor::slotUpdateWidgets()
     for(tit = textures.begin(); tit != textures.end(); ++tit) {
 	(void)new QListViewItem(mUnitTexturesList, tit.key(), tit.data());
     }
-    mUnitSoundShoot->setText(mUnit->sound(SoundShoot));
+//    mUnitSoundShoot->setText(mUnit->sound(SoundShoot));
     mUnitSoundOrderMove->setText(mUnit->sound(SoundOrderMove));
     mUnitSoundOrderAttack->setText(mUnit->sound(SoundOrderAttack));
     mUnitSoundOrderSelect->setText(mUnit->sound(SoundOrderSelect));
