@@ -1044,7 +1044,7 @@ double Facility::productionProgress() const
 
 bool Facility::completedConstruction() const
 {
- if (completedConstruction()) {
+ if (work() == WorkConstructed) {
 	return false;
  }
  if (d->mConstructionState < (constructionSteps() - 1) * unitProperties()->constructionDelay()) {
