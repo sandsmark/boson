@@ -51,6 +51,7 @@ class BoLightCameraWidget;
 class BoMaterialWidget;
 class KCmdLineArgs;
 class QCheckBox;
+class BoFontInfo;
 
 class KMyFloatNumInput : public KDoubleNumInput
 {
@@ -101,6 +102,9 @@ public:
 	virtual void initializeGL();
 	virtual void paintGL();
 	virtual void resizeGL(int, int);
+
+	void setFont(const BoFontInfo& font);
+	const BoFontInfo& fontInfo() const;
 
 	void load(SpeciesTheme* s, const UnitProperties* prop);
 	void loadObjectModel(SpeciesTheme* s, const QString& file);
@@ -350,6 +354,7 @@ protected slots:
 	void slotShowGLStates();
 	void slotReloadModelTextures();
 	void slotReloadMeshRenderer();
+	void slotChangeFont();
 
 private:
 	PreviewConfig* mConfig;
