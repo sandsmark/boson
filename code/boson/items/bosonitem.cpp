@@ -186,6 +186,7 @@ BosonItem::~BosonItem()
 		boError() << k_funcinfo << "the item has not yet been removed from the canvas!!" << endl;
 	}
  }
+ delete mCells;
 }
 
 
