@@ -274,7 +274,7 @@ static bool bo_init_xrandr(Display* dpy, Window root)
 	return false;
  }
  if (gXRRScreenConfig) {
-	boWarning() << k_funcinfo << "xrandr already initialized!" << endl;
+	boDebug() << k_funcinfo << "xrandr already initialized!" << endl;
 	return true;
  }
  gXRRScreenConfig = XRRGetScreenInfo(dpy, root);
