@@ -25,6 +25,7 @@
 class Player;
 class BosonLoadingWidget;
 class KCmdLineArgs;
+class BosonStartupNetwork;
 
 class BosonStartupWidget : public QWidget
 {
@@ -48,6 +49,8 @@ public:
 	 **/
 	void resetWidgets();
 	void showLoadingWidget();
+
+	BosonStartupNetwork* networkInterface() const;
 
 public slots:
 	void slotLoadingType(int);
