@@ -616,7 +616,6 @@ bool BosonShotMine::loadFromXML(const QDomElement& root)
     return false;
   }
 
-  bool ok;
   QString activated;
 
   activated = root.attribute("Activated");
@@ -687,6 +686,9 @@ BosonShotBomb::BosonShotBomb(Player* owner, BosonCanvas* canvas, const BosonWeap
   setAccelerationSpeed(properties()->accelerationSpeed());
   setMaxSpeed(properties()->speed());
 
+  // TODO: BosonShotBomb and BosonShotMine share quite a lot code. Maybe make
+  //  bomb inherit from mine (bomb is basically a falling mine)
+  mActivated = false;
   move(pos.x(), pos.y(), pos.z());
   setVisible(true);
 }
@@ -707,6 +709,7 @@ bool BosonShotBomb::saveAsXML(QDomElement& root)
     return false;
   }
 
+  root.setAttribute("Activated", mActivated ? "true" : "false");
   root.setAttribute("Speed", speed());
   return true;
 }
@@ -729,6 +732,22 @@ bool BosonShotBomb::loadFromXML(const QDomElement& root)
     return false;
   }
 
+  QString activated;
+  activated = root.attribute("Activated");
+  if(activated == "true")
+  {
+    mActivated = true;
+  }
+  else if(activated == "false")
+  {
+    mActivated = false;
+  }
+  else
+  {
+    boError() << k_funcinfo << "Invalid value for Activated tag" << endl;
+    return false;
+  }
+
   setSpeed(speed);
   setAccelerationSpeed(properties()->accelerationSpeed());
   setMaxSpeed(properties()->speed());
@@ -740,6 +759,7 @@ bool BosonShotBomb::loadFromXML(const QDomElement& root)
 void BosonShotBomb::save(QDataStream& stream)
 {
   BosonShot::save(stream);
+  stream << (Q_UINT8)mActivated;
   stream << speed();
 }
 
@@ -747,6 +767,7 @@ void BosonShotBomb::load(QDataStream& stream)
 {
   BosonShot::load(stream);
   float speed;
+  stream >> (Q_UINT8)mActivated;
   stream >> speed;
   setSpeed(speed);
   setAccelerationSpeed(properties()->accelerationSpeed());
@@ -756,13 +777,36 @@ void BosonShotBomb::load(QDataStream& stream)
 
 void BosonShotBomb::advanceMoveInternal()
 {
-  // FIXME: better collision detection
-  if(z() <= canvas()->heightAtCorner((int)x() / BO_TILE_SIZE, (int)y() / BO_TILE_SIZE))
+  // First check if bomb touches terrain
+  // TODO: maybe put item/terrain collison check to generic BosonItem method
+  // Maybe check all corners intead of center point
+  if(z() <= canvas()->heightAtPoint(x() + width() / 2, y() + height() / 2))
   {
-    boDebug() << "BOMB: " << k_funcinfo << "contact. BOOM" << endl;
+    boDebug() << "BOMB: " << k_funcinfo << "terrain contact. BOOM" << endl;
     explode();
     return;
   }
+  // Then check if it collides with items
+  BoItemList* contacts = collisions()->collisions(boundingRect(), this, true);
+  if(!contacts->isEmpty())
+  {
+    // We use same trigger mechanism as for mine to prevent it from being
+    //  triggered by a collision with the unit that dropped it
+    if(mActivated)
+    {
+      boDebug() << "BOMB: " << k_funcinfo << "item contact. BOOM" << endl;
+      explode();
+    }
+  }
+  else
+  {
+    if(!mActivated)
+    {
+      boDebug() << "BOMB: " << k_funcinfo << "Bomb activated" << endl;
+      mActivated = true;
+    }
+  }
+
   accelerate();
   boDebug() << "BOMB: " << k_funcinfo << "accelerated (a. speed: " << accelerationSpeed() <<
       "); speed is now: " << speed() << "; z: " << z() << endl;

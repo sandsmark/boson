@@ -226,6 +226,9 @@ class BosonShotBomb : public BosonShot
 
   protected:
     virtual void advanceMoveInternal();
+
+  private:
+    bool mActivated;
 };
 
 

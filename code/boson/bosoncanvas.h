@@ -111,6 +111,13 @@ public:
 	 **/
 	float heightAtCorner(int x, int y) const;
 
+	/**
+	 * @return Height at point x,y (in canvas coordinates)
+	 * This is calculated from heights at the corners of the cell that the point
+	 * is on
+	 **/
+	float heightAtPoint(float x, float y) const;
+
 	void addAnimation(BosonItem* item);
 	void removeAnimation(BosonItem* item);
 	unsigned int animationsCount() const;

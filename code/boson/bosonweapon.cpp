@@ -163,7 +163,7 @@ BosonShot* BosonWeaponProperties::newShot(Unit* attacker, BoVector3 pos, BoVecto
   }
   else if(shotType() == BosonShot::Bomb)
   {
-    s = new BosonShotBomb(attacker->owner(), attacker->canvas(), this, pos);
+    s = new BosonShotBomb(attacker->owner(), attacker->canvas(), this, pos + mOffset);
   }
   else
   {
