@@ -55,7 +55,7 @@ int sendMsg(boBuffer *buffer, bosonMsgTag tag, int blen, bosonMsgData *data)
 
 	if (BOSON_NO_TAG == tag) return 0;
  
-	assert(blen <= sizeof(bosonMsgData) );
+	assert(blen <= (int)sizeof(bosonMsgData) );
 	if ( blen%sizeof(int) )
 		logf(LOG_WARNING, "boconnect : sendMsg : lenght % sizeof(int) is not 0");
 	assert( 0 == blen % sizeof(int) );
@@ -76,36 +76,34 @@ int sendMsg(boBuffer *buffer, bosonMsgTag tag, int blen, bosonMsgData *data)
 
 int recvMsg(boBuffer *buffer, bosonMsgTag &tag, int &blen, bosonMsgData *data)
 {
-//	int i=0;
-	int ilen;
-	int k ;
-	int sum;
+	int i=0, ilen, k, sum;
 
 	logf ( LOG_LAYER0, "Receiving msg");
 	assert(buffer->socket>0);
 
-//	i = 0;
 	/* receive tag&len */
-	k = recvPacket(buffer->socket,2);
+	k = recvPacket(buffer->socket,2); i = 0;
 	boAssert ( (2*sizeof(int)) == k );
 
-	unpackInt(tag);
+	unpackInt(k);
+	tag = (bosonMsgTag)k;
 	boAssert(tag >= 0);
 	boAssert(tag < MSG_LAST);
 
 	unpackInt(ilen);
 	blen = ilen * sizeof(int);
 
+	/* coherency check */
 	assert(ilen >= 0);
-	assert(blen <= sizeof(bosonMsgData) );
-	if (blen > sizeof(bosonMsgData) ) blen = sizeof(bosonMsgData);
+	assert(blen <= (int)sizeof(bosonMsgData) );
+	if (blen > (int)sizeof(bosonMsgData) ) blen = sizeof(bosonMsgData);
 	if (ilen > 0 && tag < MSG_END_SOCKET_LAYER)
 		logf(LOG_WARNING, "Unexpected data in a socket layer message, ignored");
 
 
 	/* receive data&checksum */
 	k = recvPacket(buffer->socket, ilen+1); /* +1 is checksum */
-	/*i = 0;*/
+	i = 0;
 	assert(k == ((ilen +1)*(int)sizeof(int)));
 	for (k=0; k< ilen; k++)
 		unpackInt(data->data[k]);

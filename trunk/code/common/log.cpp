@@ -59,7 +59,7 @@ if (level < 0) {
 
 if (level >= LOG_LAST) {
 	fprintf(logfile, "\n*** logf : too low level, set to LAYER0");
-	level = LOG_LAST-1;
+	level = (boLogLevel)(LOG_LAST-1);
 	}
 
 fprintf(logfile, "\n[%5d] %s : ", id, logLevelName[level]);
