@@ -228,7 +228,7 @@ void UnitProperties::saveUnitType(const QString& fileName)
  BosonConfig::writeUnsignedLongNumList(&conf, "Requirements", d->mRequirements);
  conf.writeEntry("ExplodingDamage", mExplodingDamage);
  conf.writeEntry("ExplodingDamageRange", mExplodingDamageRange);
- BosonConfig::writeEntry(&conf, "HitPoint", mHitPoint);
+ BosonConfig::writeEntry(&conf, "HitPoint", d->mHitPoint);
  conf.writeEntry("Producer", mProducer);
 
  BosonConfig::writeUnsignedLongNumList(&conf, "DestroyedEffects", d->mDestroyedEffectIds);
