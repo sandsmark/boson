@@ -47,12 +47,12 @@ Cell* BosonCollisions::cell(int x, int y) const
  return map()->cell(x, y);
 }
 
-Unit* BosonCollisions::findUnitAtCell(int x, int y, float z)
+Unit* BosonCollisions::findUnitAtCell(int x, int y, float z) const
 {
  return (Unit*)findItemAtCell(x, y, z, true);
 }
 
-BosonItem* BosonCollisions::findItemAtCell(int x, int y, float z, bool unitOnly)
+BosonItem* BosonCollisions::findItemAtCell(int x, int y, float z, bool unitOnly) const
 {
  BoItemList* list = collisionsAtCell(x, y);
  BoItemList::Iterator it;
@@ -92,12 +92,12 @@ BosonItem* BosonCollisions::findItemAtCell(int x, int y, float z, bool unitOnly)
  return ret;
 }
 
-BosonItem* BosonCollisions::findItemAt(const BoVector3& pos)
+BosonItem* BosonCollisions::findItemAt(const BoVector3& pos) const
 {
  return findItemAtCell((int)(pos.x() / BO_TILE_SIZE), (int)(pos.y() / BO_TILE_SIZE), pos.z(), false);
 }
 
-Unit* BosonCollisions::findUnitAt(const BoVector3 & pos)
+Unit* BosonCollisions::findUnitAt(const BoVector3 & pos) const
 {
  return findUnitAtCell((int)(pos.x() / BO_TILE_SIZE), (int)(pos.y() / BO_TILE_SIZE), pos.z());
 }

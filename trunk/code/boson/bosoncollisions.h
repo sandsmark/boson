@@ -54,9 +54,9 @@ public:
 	 * @return The unit on this coordinates of the canvas. Won't return a
 	 * destroyed unit (wreckage)
 	 **/
-	Unit* findUnitAt(const BoVector3& pos);
+	Unit* findUnitAt(const BoVector3& pos) const;
 
-	BosonItem* findItemAt(const BoVector3& pos);
+	BosonItem* findItemAt(const BoVector3& pos) const;
 
 	/**
 	 * See @ref findItemAtCell.
@@ -68,7 +68,7 @@ public:
 	 * @return The unit on this cell. Won't return a
 	 * destroyed unit (wreckage)
 	 **/
-	Unit* findUnitAtCell(int x, int y, float z);
+	Unit* findUnitAtCell(int x, int y, float z) const;
 
 	/*
 	 * @param x The x-coordinate of the cell
@@ -81,7 +81,7 @@ public:
 	 * @return The first item that is found on that cell. If that item is a
 	 * unit then it'll be returned only if it is not destroyed.
 	 **/
-	BosonItem* findItemAtCell(int x, int y, float z, bool unitOnly);
+	BosonItem* findItemAtCell(int x, int y, float z, bool unitOnly) const;
 
 	void setMap(BosonMap* map) { mMap = map; }
 	inline BosonMap* map() const { return mMap; }
