@@ -323,6 +323,8 @@ public:
 	 **/
 	inline bool completedConstruction() const;
 
+	inline double constructionProgress() const;
+
 	/**
 	 * @return Whether there are any productions pending for this unit.
 	 * Always FALSE if unitProperties()->canProduce() is FALSE.
@@ -346,7 +348,6 @@ public:
 	 * production.
 	 **/
 	inline int currentProduction() const;
-	 
 
 	/**
 	 * Remove the first item from the production list.
@@ -389,7 +390,8 @@ public:
 
 	/**
 	 * Advance the construction animation. This is usually called when
-	 * placing the unit until thje construction is completed.
+	 * placing the unit until the construction is completed. See @ref
+	 * completedConstruction
 	 **/
 	virtual void advanceConstruction();
 
