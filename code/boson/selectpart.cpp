@@ -22,6 +22,9 @@
 #include <qpainter.h>
 #include <qbitmap.h>
 
+#include <kpixmap.h>
+#include <kpixmapeffect.h>
+
 #define SP_THICK	2
 #define SP_CORNER_LEN	25
 #define SP_CORNER_POS	8
@@ -85,14 +88,14 @@ int SelectPart::frames()
 /*
  *  Drawing functions
  */
-void SelectPart::drawSelectBox(QPainter &painter, bool mask, int power)
+void SelectPart::drawSelectBox(QPainter &painter, bool mask, int frame)
 {
- int len = 2 * ( PART_NB - 1 - power );
+// int len = 2 * ( PART_NB - 1 - power );
 
  if (mask) {
-	// mask
-	// "scrollbar"
-	painter.fillRect(0, 0, SP_W, 2 * SP_THICK, Qt::color1);
+	// "scrollbar" - or rather "health bar"
+	painter.fillRect(0, 0, barWidth(frame), barHeight(), Qt::color1);
+
 	// selection corner
 	painter.fillRect(SP_W - SP_CORNER_LEN, SP_CORNER_POS,
 			SP_CORNER_LEN, SP_THICK, Qt::color1);
@@ -100,10 +103,15 @@ void SelectPart::drawSelectBox(QPainter &painter, bool mask, int power)
 			SP_THICK, SP_CORNER_LEN, Qt::color1);
  } else {
 	// read rendering 
-	/* "scrollbar" */
-	painter.fillRect(0, 0, len, 2 * SP_THICK, Qt::red);
-	painter.fillRect(len, 0, SP_W - len, 2 * SP_THICK, Qt::green);
-	/* selection corner */
+	// "scrollbar" - or rather "health bar"
+//	int a = barWidth(0); // why is this hack necessary????
+	KPixmap pix(QPixmap(barWidth(0), barHeight())); 
+	pix.fill(Qt::green);
+	KPixmapEffect::gradient(pix, Qt::red, Qt::green, 
+			KPixmapEffect::HorizontalGradient);
+	painter.drawPixmap(0, 0, pix);
+
+	// selection corner 
 	painter.fillRect(SP_W - SP_CORNER_LEN, SP_CORNER_POS,
 			SP_CORNER_LEN, SP_THICK, Qt::white);
 	painter.fillRect(SP_W - SP_THICK, SP_CORNER_POS,
@@ -118,40 +126,39 @@ QCanvasPixmapArray* SelectPart::initStatic(SelectPartType type)
  QPointArray points(PART_NB);
  QPainter painter;
 
- /* draw the mask */
- QBitmap mask (SP_W, SP_H);
- painter.begin(&mask);
- if (SelectPart::PartDown == type) {
-	painter.rotate(180);
-	painter.translate(-SP_W + 1, -SP_H + 1);
- }
- mask.fill(Qt::color0);
- drawSelectBox(painter, true); 
- painter.end();
-
  QPixmap pix(SP_W, SP_H);
  for(int i = 0; i < PART_NB; i++) {
-	/* draw it */
-	pix.fill(Qt::white);
+	// generate the mask first
+	QBitmap mask (SP_W, SP_H);
+	painter.begin(&mask);
+	if (SelectPart::PartDown == type) {
+		painter.rotate(180);
+		painter.translate(-SP_W + 1, -SP_H + 1);
+	}
+	mask.fill(Qt::color0);
+	drawSelectBox(painter, true, i);
+	painter.end();
 
+	// now draw the pixmap
 	painter.begin(&pix);
 	if (SelectPart::PartDown == type) {
 		painter.rotate(180);
 		painter.translate(-SP_W + 1, -SP_H + 1);
 	}
+	pix.fill(Qt::white);
 	drawSelectBox(painter, false, i);
 	painter.end();
 
-	/* merge results */
+	// merge results 
 	pix.setMask(mask);
 
-	/* create entries in QValueList */
+	// create entries in QValueList 
 	pixmaps.append(pix);
 
 	if (SelectPart::PartDown == type) {
-		points.setPoint(i, 1, SP_H-2 - SP_CORNER_POS);
+		points.setPoint(i, 1, SP_H - 2 - SP_CORNER_POS);
 	} else {
-		points.setPoint(i, SP_W-2, SP_CORNER_POS);
+		points.setPoint(i, SP_W - 2, SP_CORNER_POS);
 	}
  }
 
@@ -163,3 +170,12 @@ void SelectPart::update(double factor)
  setFrame((frames() - 1) * factor);
 }
 
+int SelectPart::barHeight()
+{
+ return 2 * SP_THICK;
+}
+
+int SelectPart::barWidth(int frame)
+{
+ return SP_W - 2 * (PART_NB - 1 - frame);
+}

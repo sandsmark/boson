@@ -78,6 +78,18 @@ protected:
 
 	static void drawSelectBox(QPainter& painter, bool bw, int power = 0);
 
+	/**
+	 * @return The width of the health bar when health is at factor.
+	 * @param frame The frame number. Note that frame==0 means full
+	 * health!!!
+	 **/
+	static int barWidth(int frame);
+
+	/**
+	 * @return The height of the health bar
+	 **/
+	static int barHeight();
+
 private:
 	void init(SelectPartType type);
 
