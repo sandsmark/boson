@@ -758,7 +758,10 @@ void BosonGLMiniMapRenderer::renderMiniMap()
  d->mModelviewMatrix.scale(mZoom, mZoom, 1.0f); // AB: maybe do this on the texture matrix stack
 // glScalef(mZoom, mZoom, 1.0f); // AB: maybe do this on the texture matrix stack
 
- glBindTexture(GL_TEXTURE_2D, 0);
+ GLuint tex;
+ glGenTextures(1, &tex);
+
+ glBindTexture(GL_TEXTURE_2D, tex);
  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, d->mMapTextureWidth, d->mMapTextureHeight,
@@ -768,6 +771,8 @@ void BosonGLMiniMapRenderer::renderMiniMap()
  glPopMatrix();
 
  renderCamera();
+
+ glDeleteTextures(1, &tex);
 }
 
 void BosonGLMiniMapRenderer::renderQuad()
