@@ -21,24 +21,16 @@
 #define BOSONSTARTEDITORWIDGET_H
 
 #include <qwidget.h>
-#include <qptrdict.h>
-#include <qcolor.h>
-#include <qvaluelist.h>
+#include <qmap.h>
 
-class QVBoxLayout; 
-class QHBoxLayout; 
-class QGridLayout; 
-class KColorCombo;
-class KGameChat;
+class QVBoxLayout;
+class QGridLayout;
+class QVGroupBox;
 class QComboBox;
-class QFrame;
-class QGroupBox;
 class QLabel;
 class QLineEdit;
-class QListBox;
-class QListBoxItem;
 class QPushButton;
-class QColor;
+class KIntNumInput;
 
 class Boson;
 class Player;
@@ -48,48 +40,58 @@ class TopWidget;
 class BosonPlayField;
 
 class BosonStartEditorWidget : public QWidget
-{ 
-  Q_OBJECT
-  public:
-    BosonStartEditorWidget(TopWidget* top, QWidget* parent);
-    ~BosonStartEditorWidget();
+{
+	Q_OBJECT
+public:
+	BosonStartEditorWidget(TopWidget* top, QWidget* parent);
+	~BosonStartEditorWidget();
 
-  public slots:
-    void slotStart();
-    /** 
-     * Called when user clicks on "Cancel" button
-     * Cancels game starting and closes (hides) this widget 
-     **/
-    void slotCancel();
+public slots:
+	void slotStart();
+	/**
+	 * Called when user clicks on "Cancel" button
+	 * Cancels game starting and closes (hides) this widget 
+	 **/
+	void slotCancel();
 
-  signals:
-    void signalStartGame();
-    void signalCancelled();
+signals:
+	void signalStartGame();
+	void signalCancelled();
 
-  protected:
-    void sendNewGame();
+protected slots:
+	void slotMapChanged(const QString& mapIdentifier);
+	void slotMyMapChanged(int index);
 
-  private:
-    void initKGame();
-    void initPlayer();
-    Player* player() const;
-    BosonPlayField* playField() const;
+protected:
+	void sendNewGame();
 
-  private:
-    QVBoxLayout* mBosonStartEditorWidgetLayout;
-    QVBoxLayout* mMainLayout;
-    QHBoxLayout* mStartGameLayout;
+	void initNewMap();
 
-    QPushButton* mCancelButton;
-    QPushButton* mStartGameButton;
+private:
+	void initKGame();
+	void initPlayer();
+	void initMaps();
+	void initTileSets();
+	void initSpecies();
+	Player* player() const; // FIXME: do NOT use here! we should add dummy AI players for *all* players (even local)
+	BosonPlayField* playField() const;
 
-    TopWidget* mTop;
-    QColor mPlayercolor;
-    QValueList<QColor> mAvailableColors;
-    int mMap;
-    int mMinPlayers;
-    int mMaxPlayers;
-    
+private:
+	QVBoxLayout* mTopLayout;
+
+	QComboBox* mMapCombo;
+	QVGroupBox* mMapBox; // information (size, tileset, ...) about the map
+	QComboBox* mTileSetCombo;
+	KIntNumInput* mMapWidth;
+	KIntNumInput* mMapHeight;
+	KIntNumInput* mMaxPlayers;
+
+	QPushButton* mCancelButton;
+	QPushButton* mStartGameButton;
+
+	QMap<int, QString> mMapIndex2Identifier;
+
+	TopWidget* mTop;
 };
 
-#endif // BOSONNEWGAMEWIDGET_H
+#endif
