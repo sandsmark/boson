@@ -2693,7 +2693,7 @@ void BosonBigDisplayBase::setLocalPlayerIO(PlayerIO* io)
 
  PlayerIO* previousPlayerIO = localPlayerIO();
  d->mLocalPlayerIO = io;
- boDebug() << k_funcinfo << "d-mLocalPlayerIO now: " << d->mLocalPlayerIO << endl;
+ boDebug() << k_funcinfo << "d->mLocalPlayerIO now: " << d->mLocalPlayerIO << endl;
 
  BoGroundRendererManager::manager()->setLocalPlayerIO(localPlayerIO());
 
@@ -5132,10 +5132,32 @@ void BosonBigDisplayBase::slotEditorSavePlayFieldAs()
  }
 }
 
+void BosonBigDisplayBase::slotEditorChangeLocalPlayerHack()
+{
+ slotEditorChangeLocalPlayer(0);
+}
+
 void BosonBigDisplayBase::slotEditorChangeLocalPlayer(int index)
 {
  Player* p = 0;
  p = (Player*)d->mEditorPlayers.at(index);
+
+ static Player* senderPlayer = 0;
+ if (sender() && sender()->inherits("BoUfoAction")) {
+
+	// AB: when changing the local player we delete the whole menu and
+	// recreate it.
+	// however we must not do that when called while dispatching ufo events
+	// (calling this slot usually results from a menu item click!).
+	// therefore we delay changing the local player using a QTimer.
+
+	boDebug() << k_funcinfo << "calling again indirectly using a QTimer..." << endl;
+	senderPlayer = p;
+	QTimer::singleShot(0, this, SLOT(slotEditorChangeLocalPlayerHack()));
+	return;
+ }
+ boDebug() << k_funcinfo << "sender() is NULL - we were probably called indirectly using a QTimer - continue..." << endl;
+ p = senderPlayer;
  if (p) {
 	emit signalEditorChangeLocalPlayer((Player*)p);
 	BO_CHECK_NULL_RET(d->mActionEditorPlace);

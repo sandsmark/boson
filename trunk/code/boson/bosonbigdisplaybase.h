@@ -465,6 +465,7 @@ protected slots:
 	void slotUnfogAll(Player* pl = 0);
 	void slotEditorSavePlayFieldAs();
 	void slotEditorChangeLocalPlayer(int);
+	void slotEditorChangeLocalPlayerHack();
 	void slotEditorDeleteSelectedUnits();
 	void slotEditorEditMapDescription();
 	void slotEditorPlace(int);
