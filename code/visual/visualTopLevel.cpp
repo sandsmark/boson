@@ -176,6 +176,8 @@ void visualTopLevel::selectFix(visualFacility *f)
 
 void visualTopLevel::selectMob(long key, visualMobUnit *m)
 {
+	if (m->isDestroyed()) return;
+
 	if (mobSelected.isEmpty()) {
 		boAssert( selectionWho = -1);
 		selectionWho = m->who;
