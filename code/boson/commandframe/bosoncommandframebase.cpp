@@ -262,6 +262,8 @@ void BosonCommandFrameBase::setSelectedUnit(Unit* unit)
 
  if (owner != localPlayer()) {
 	// hmm.. is this correct? maybe display for plugins anyway? dont know...
+	hidePluginWidgets();
+	selectionWidget()->hideOrderButtons();
 	return;
  }
  mSelectedUnit = unit;
