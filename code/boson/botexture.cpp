@@ -939,6 +939,11 @@ void BoTextureManager::unregisterTexture(BoTexture* tex)
   }
 
   mTextures.remove(tex);
+
+  if(mActiveTexture[mActiveTextureUnit] == tex)
+  {
+    invalidateCache();
+  }
 }
 
 void BoTextureManager::textureLoaded(BoTexture* tex, bool firsttime)
@@ -968,3 +973,6 @@ void BoTextureManager::textureFilterChanged()
   }
 }
 
+/*
+ * vim: et sw=2
+ */
