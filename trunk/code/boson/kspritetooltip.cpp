@@ -48,11 +48,43 @@ public:
 	{
 		mRttiList.remove(rtti);
 	}
+	void ignore(int rtti)
+	{
+		if (mIgnoreRTTIList.contains(rtti)) {
+			return;
+		}
+		mIgnoreRTTIList.append(rtti);
+	}
+	void ignore(QCanvasItem* item)
+	{
+		if (mIgnoreItemList.contains(item)) {
+			return;
+		}
+		mIgnoreItemList.append(item);
+	}
+	void unignore(int rtti)
+	{
+		mIgnoreRTTIList.remove(rtti);
+	}
+	void unignore(QCanvasItem* item)
+	{
+		mIgnoreItemList.remove(item);
+	}
+
+	bool testIgnore(QCanvasItem* item) const
+	{
+		bool i = mIgnoreItemList.contains(item);
+		if (i) {
+			return i;
+		}
+		return mIgnoreRTTIList.contains(item->rtti());
+
+	}
 
 	QString tip(QCanvasItem* item)
 	{
 		QString text;
-		// look first if there is a tip foir this special item. if not look for a tip
+		// look first if there is a tip for this special item. if not look for a tip
 		// for this rtti
 		QMap<QCanvasItem*, QString>::iterator it = mItemList.find(item);
 		if (it != mItemList.end()) {
@@ -69,16 +101,13 @@ public:
 private:
 	QMap<int, QString> mRttiList;
 	QMap<QCanvasItem*, QString> mItemList;
+
+	// the ignore-lists are relevant for KSpriteToolTip::maybeTip()
+	QValueList<int> mIgnoreRTTIList;
+	QValueList<QCanvasItem*> mIgnoreItemList;
 };
 
 static KTipManager* tipManager = 0;
-static void initTipManager()
-{
- if (tipManager) {
-	return;
- }
- tipManager = new KTipManager;
-}
 
 KSpriteToolTip::KSpriteToolTip(QCanvasView* v) : QToolTip(v)
 {
@@ -89,6 +118,15 @@ KSpriteToolTip::KSpriteToolTip(QCanvasView* v) : QToolTip(v)
 KSpriteToolTip::~KSpriteToolTip()
 {
 }
+
+static void KSpriteToolTip::initTipManager()
+{
+ if (tipManager) {
+	return;
+ }
+ tipManager = new KTipManager;
+}
+
 
 void KSpriteToolTip::add(int rtti, const QString& tip)
 {
@@ -118,6 +156,22 @@ void KSpriteToolTip::remove(int rtti)
  tipManager->remove(rtti);
 }
 
+void KSpriteToolTip::ignore(int rtti)
+{
+ if (!tipManager) {
+	return;
+ }
+ tipManager->ignore(rtti);
+}
+
+void KSpriteToolTip::ignore(QCanvasItem* item)
+{
+ if (!tipManager) {
+	return;
+ }
+ tipManager->ignore(item);
+}
+
 void KSpriteToolTip::maybeTip(const QPoint& p)
 {
  if (!mView) {
@@ -127,7 +181,16 @@ void KSpriteToolTip::maybeTip(const QPoint& p)
  if (sprites.isEmpty())  { // Check if there is a sprite
 	return;
  }
- QCanvasItem* item = sprites.front();
+ QCanvasItem* item = 0;
+ QCanvasItemList::Iterator it = sprites.begin();
+ for (; !item && it != sprites.end(); ++it) {
+	if (!tipManager->testIgnore(*it)) {
+		item = *it;
+	}
+ }
+ if (!item) {
+	return;
+ }
  QString text = tipManager->tip(item);
 
  if (text != QString::null) {

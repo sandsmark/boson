@@ -43,6 +43,12 @@ public:
 	virtual ~KSpriteToolTip();
 
 	/**
+	 * Initialize the global/static tip manager. This is done automatically
+	 * in the KSpriteToolTip c'tor, so you usually don't need to call this.
+	 **/
+	static void initTipManager();
+
+	/**
 	 * Add a tip that gets displayed for every item which @ref
 	 * QCanvasItem::rtti equals rtti. Note that you can override this tip if
 	 * you add a tip providing the pointer of the @ref QCanvasItem
@@ -63,6 +69,11 @@ public:
 	static void add(QCanvasItem* item, const QString& tip);
 	static void remove(QCanvasItem* item);
 	static void remove(int rtti);
+
+	static void ignore(int rtti);
+	static void ignore(QCanvasItem* item);
+	static void unignore(int rtti);
+	static void unignore(QCanvasItem* item);
 	
 protected:
 	virtual void maybeTip(const QPoint& pos);
