@@ -310,6 +310,7 @@ void BosonCanvas::shootAtUnit(Unit* target, Unit* attackedBy)
  BosonMissile* m = new BosonMissile(attackedBy, target);
  if (!m->isActive()) {
 	missileHit(m);
+	delete m;
  } else {
 	d->mMissiles.append(m);
  }

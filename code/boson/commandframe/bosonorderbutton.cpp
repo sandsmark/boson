@@ -26,6 +26,7 @@
 #include "../speciestheme.h"
 #include "../unitproperties.h"
 #include "../defines.h"
+#include "../upgradeproperties.h"
 
 #include <kgameprogress.h>
 #include <kpixmap.h>
@@ -94,17 +95,16 @@ protected:
 				break;
 			case BosonOrderButton::CommandProduce:
 			{
-				/// TODO!!!
-/*				if (commandWidget()->unitType() <= 0) {
-					kdWarning() << k_funcinfo << "CommandUnit, but no unittype" << endl;
+				if(commandWidget()->productionType() == ProduceUnit) {
+					const UnitProperties* prop = commandWidget()->productionOwner()->unitProperties(commandWidget()->productionId());
+					text = i18n("%1\nMinerals: %2\nOil: %3").arg(prop->name()).arg(prop->mineralCost()).arg(prop->oilCost());
+				} else if(commandWidget()->productionType() == ProduceTech) {
+					TechnologyProperties* prop = commandWidget()->productionOwner()->speciesTheme()->technology(commandWidget()->productionId());
+					text = i18n("%1\nMinerals: %2\nOil: %3").arg(prop->upgradeName()).arg(prop->mineralCost()).arg(prop->oilCost());
+				} else {
+					kdWarning() << k_funcinfo << "Invalid productiontype when producing!" << endl;
 					return QString::null;
 				}
-				if (!commandWidget()->productionOwner()) {
-					kdWarning() << k_funcinfo << "CommandUnit, but no production owner" << endl;
-					return QString::null;
-				}
-				const UnitProperties* prop = commandWidget()->productionOwner()->unitProperties(commandWidget()->unitType());
-				text = i18n("%1\nMinerals: %2\nOil: %3").arg(prop->name()).arg(prop->mineralCost()).arg(prop->oilCost());*/
 				break;
 			}
 			case BosonOrderButton::CommandUnitSelected:
