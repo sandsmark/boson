@@ -94,11 +94,6 @@ public slots:
 	void slotStartNewGame();
 
 	/**
-	 * Toggles if menubar is shown or hidden
-	 **/
-	void slotToggleMenubar();
-
-	/**
 	 * Toggles if togglebar is shown or hidden
 	 **/
 	void slotToggleStatusbar();
@@ -160,17 +155,6 @@ protected:
 	 * endGame and @ref reinitGame
 	 **/
 	void reinitGame();
-
-//	virtual bool eventFilter(QObject* o, QEvent* e);
-
-	void hideMenubar();
-	void showMenubar();
-
-	/**
-	 * Shows or hides the menubar, depending on the currently raised widget
-	 * (i.e. startup widget or game/editor widget) and the config settings
-	 **/
-	void showHideMenubar();
 
 	void changeLocalPlayer(Player* p);
 
