@@ -48,6 +48,7 @@ BOSON_SRC = \
 	bogroundrenderer.cpp \
 	bocamera.cpp \
 	boautocamera.cpp \
+	bocamerawidget.cpp \
 	bosongroundtheme.cpp \
 	bosonconfig.cpp \
 	optionsdialog.cpp \
