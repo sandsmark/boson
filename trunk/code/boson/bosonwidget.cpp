@@ -147,6 +147,7 @@ void BosonWidget::slotChangeCursor(int mode, const QString& cursorDir_)
 	case CursorKDE:
 	default:
 		b = new BosonKDECursor;
+		mode = CursorKDE; // in case we had an unknown/invalid mode
 		break;
  }
 
@@ -178,7 +179,8 @@ void BosonWidget::slotChangeCursor(int mode, const QString& cursorDir_)
  }
  changeCursor(b);
 
- mCursorTheme = cursorDir;
+ boConfig->setCursorMode(mode);
+ boConfig->setCursorDir(cursorDir);
 }
 
 void BosonWidget::startScenarioAndGame()
@@ -277,16 +279,6 @@ void BosonWidget::saveConfig()
 
  BosonConfig::saveLocalPlayerName(localPlayer()->name());
  BosonConfig::saveGameSpeed(boGame->gameSpeed());
- if (cursor()) {
-	if (cursor()->isA("BosonOpenGLCursor")) {
-		boConfig->saveCursorMode(CursorOpenGL);
-	} else {
-		boConfig->saveCursorMode(CursorKDE);
-	}
- } else {
-	boConfig->saveCursorMode(CursorKDE);
- }
- boConfig->saveCursorDir(mCursorTheme);
 // boConfig->save(editor); //FIXME
  boDebug() << k_funcinfo << "done" << endl;
 }

@@ -213,6 +213,8 @@ BosonConfig::BosonConfig(KConfig* conf)
  mMouseWheelShiftAction = new BoConfigIntEntry(this, "MouseWheelShiftAction", DEFAULT_MOUSE_WHEEL_SHIFT_ACTION);
  mDeactivateWeaponSounds = new BoConfigBoolEntry(this, "DeactivateWeaponSounds", DEFAULT_DEACTIVATE_WEAPON_SOUNDS);
  mUseLight = new BoConfigBoolEntry(this, "UseLight", DEFAULT_USE_LIGHT);
+ mCursorMode = new BoConfigIntEntry(this, "CursorMode", (int)DEFAULT_CURSOR);
+ mCursorDir = new BoConfigStringEntry(this, "CursorDir", DEFAULT_CURSOR_DIR);
 
  mDebugMode = DebugNormal;
 
@@ -359,52 +361,6 @@ int BosonConfig::readGameSpeed(KConfig* conf)
  int speed = conf->readNumEntry("Speed", DEFAULT_GAME_SPEED);
  conf->setGroup(oldGroup);
  return speed;
-}
-
-CursorMode BosonConfig::readCursorMode(KConfig* conf)
-{
- if (!conf) {
-	conf = kapp->config();
- }
- QString oldGroup = conf->group();
- conf->setGroup("Boson");
- int mode = conf->readNumEntry("CursorMode", DEFAULT_CURSOR);
- conf->setGroup(oldGroup);
- return (CursorMode)mode;
-}
-
-void BosonConfig::saveCursorMode(CursorMode mode, KConfig* conf)
-{
- if (!conf) {
-	conf = kapp->config();
- }
- QString oldGroup = conf->group();
- conf->setGroup("Boson");
- conf->writeEntry("CursorMode", (int)mode);
- conf->setGroup(oldGroup);
-}
-
-QString BosonConfig::readCursorDir(KConfig* conf)
-{
- if (!conf) {
-	conf = kapp->config();
- }
- QString oldGroup = conf->group();
- conf->setGroup("Boson");
- QString dir = conf->readEntry("CursorDir", QString::null); // QString::null causes slotChangeCursor() to use BosonCursor::defaultTheme
- conf->setGroup(oldGroup);
- return dir;
-}
-
-void BosonConfig::saveCursorDir(const QString& dir, KConfig* conf)
-{
- if (!conf) {
-	conf = kapp->config();
- }
- QString oldGroup = conf->group();
- conf->setGroup("Boson");
- conf->writeEntry("CursorDir", dir);
- conf->setGroup(oldGroup);
 }
 
 void BosonConfig::reset(KConfig* conf)

@@ -104,8 +104,6 @@ protected:
 private:
 	class BosonWidgetPrivate;
 	BosonWidgetPrivate* d;
-
-	QString mCursorTheme; // path to cursor pixmaps
 };
 
 #endif

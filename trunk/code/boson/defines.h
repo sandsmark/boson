@@ -71,6 +71,7 @@
 #define DEFAULT_USE_MMB_MOVE true
 #define DEFAULT_GAME_SPEED 5
 #define DEFAULT_CURSOR CursorOpenGL
+#define DEFAULT_CURSOR_DIR QString::null // QString::null means use BosonCursor::defaultTheme
 #define DEFAULT_CURSOR_EDGE_SENSITY 20
 #define DEFAULT_ARROW_SCROLL_SPEED 10
 #define DEFAULT_CMD_BUTTONS_PER_ROW 3

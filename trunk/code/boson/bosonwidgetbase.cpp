@@ -245,7 +245,7 @@ void BosonWidgetBase::addInitialDisplay()
 
  // we need to add the display first (in order to create a valid GL context) and
  // then load the cursor
- slotChangeCursor(boConfig->readCursorMode(), boConfig->readCursorDir());
+ slotChangeCursor(boConfig->cursorMode(), boConfig->cursorDir());
 }
 
 void BosonWidgetBase::initChat()
@@ -1124,24 +1124,12 @@ void BosonWidgetBase::slotSaveExternalStuff(QDataStream& stream)
 
 OptionsDialog* BosonWidgetBase::gamePreferences(bool editor)
 {
- CursorMode mode;
- if (cursor()) {
-	if (cursor()->isA("BosonOpenGLCursor")) {
-		mode = CursorOpenGL;
-	} else {
-		mode = CursorKDE;
-	}
- } else {
-	mode = CursorKDE;
- }
-
  OptionsDialog* dlg = new OptionsDialog(editor, this);
  dlg->setGame(boGame);
  dlg->setPlayer(localPlayer());
  dlg->slotLoad();
 
  connect(dlg, SIGNAL(finished()), dlg, SLOT(slotDelayedDestruct())); // seems not to be called if you quit with "cancel"!
- dlg->setCursor(mode);
 
  connect(dlg, SIGNAL(signalCursorChanged(int, const QString&)),
 		this, SLOT(slotChangeCursor(int, const QString&)));
