@@ -26,17 +26,10 @@
 
 class QString;
 
-class gameProperties_t {
-public:
-  QString	*worldName;
-  Player	player[BOSON_MAX_CONNECTION];
-  uint		jiffies;
-  uint		nbPlayer;
-  uint		nbConnected;
-};
-
-
-extern gameProperties_t gpp;
-
+extern Player	player[BOSON_MAX_CONNECTION];
+extern QString	*worldName;
+extern uint	jiffies;
+extern uint	nbPlayer;
+extern uint	nbConnected;
 
 #endif // SERVER_GAME_H 

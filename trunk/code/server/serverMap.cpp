@@ -40,8 +40,8 @@ key = 127; // why not ?
 
 	assert (openRead(mapfile));
 	///orzel, was ugly.. should handle openRead()==false correctly 
-	gpp.nbPlayer= nbPlayer;
-	gpp.worldName = new QString(worldName);
+	nbPlayer= nbPlayer;
+	worldName = new QString(_worldName);
 	assert (loadGround());
 }
 
@@ -87,7 +87,7 @@ for (i=im ; i<=iM; i++)
 			data.coo.g = c->getGroundType();
 			if (GROUND_UNKNOWN != data.coo.g)
 				sendMsg (
-					gpp.player[u->who].buffer,
+					player[u->who].buffer,
 					MSG_MAP_DISCOVERED,
 					sizeof(data.coo), &data  );
 			}
@@ -105,9 +105,9 @@ logf(LOG_GAME_HIGH, "BosonServer::createMobUnit called");
 
 data.key = key;
 assert(data.who< BOSON_MAX_CONNECTION);
-assert(gpp.player[data.who].socketState==SSS_CONNECT_OK);
+assert(player[data.who].socketState==SSS_CONNECT_OK);
 
-u = new serverMobUnit(gpp.player[data.who].buffer, &data);
+u = new serverMobUnit(player[data.who].buffer, &data);
 
 /* who is interested in knowing u's arrival */
 xx = data.x / BO_TILE_SIZE;
@@ -145,9 +145,9 @@ logf(LOG_GAME_HIGH, "BosonServer::createFixUnit called");
 data.key	= key;
 data.state	= 0;
 assert(data.who< BOSON_MAX_CONNECTION);
-assert(gpp.player[data.who].socketState==SSS_CONNECT_OK);
+assert(player[data.who].socketState==SSS_CONNECT_OK);
 
-f = new serverFacility(gpp.player[data.who].buffer, &data);
+f = new serverFacility(player[data.who].buffer, &data);
 
 /* who is interested in knowing u's arrival */
 i2 = facilityProp[data.type].width;

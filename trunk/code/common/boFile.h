@@ -56,7 +56,7 @@ protected :
 	bool	Close();
 
 /* header */
-	QString		worldName;
+	QString		_worldName;
 	int		map_width;
 	int		map_height;
 	int		nbPlayer;
