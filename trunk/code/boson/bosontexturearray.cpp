@@ -24,7 +24,12 @@
 
 #include <qimage.h>
 
+#include <GL/gl.h>
 #include <GL/glu.h>
+
+#ifndef GL_VERSION_1_1
+#warning Your system lacks OpenGL 1.1 - this version introduced texture objects. Do you really think you can run an OpenGL game without support for texture objects ?? ;)
+#endif
 
 // warning: mAllTextures is *not* setAutoDelete(true) !
 QIntDict<BoTextureInfo> BosonTextureArray::mAllTextures = QIntDict<BoTextureInfo>();
