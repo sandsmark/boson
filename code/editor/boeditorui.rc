@@ -2,7 +2,11 @@
 <kpartgui name="boeditor">
 <MenuBar>
     <Menu name="file">
-	    <Action name="new_window" />
+	<Action name="new_window" />
+    </Menu>
+    <Menu name="edit" ><text>&amp;Edit</text>
+	<Action name="edit_destroy" />
     </Menu>
 </MenuBar>
 </kpartgui>
+

@@ -78,7 +78,8 @@ signals:
 	void setWho(int);
 
 public slots:
-	void slotEditDestroy(void);
+	void slot_editDestroy(void);
+	void slot_close(void);
 
 protected:
 	/*

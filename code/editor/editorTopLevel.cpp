@@ -29,6 +29,9 @@
 #include <qcombobox.h>
 #include <qcheckbox.h>
 
+#include <klocale.h>
+#include <kstdaction.h>
+
 #include "common/log.h"
 #include "common/map.h"
 
@@ -67,22 +70,31 @@ static void fillGroundPixmap( QPixmap *p, int g)
 #undef BITBLT
 
 
+#define ADD_ACTION(name) KStdAction::##name(this, SLOT(slot_##name()), actionCollection() );
 editorTopLevel::editorTopLevel( BoEditorApp *app,  const char *name, WFlags f)
 	: visualTopLevel(name,f)
 	, mw(this)
 {
 
-	/* menus & toolbar */
+	/* toplevelwindow-specific actions */
+	(void) new KAction(
+		i18n("&Destroy objects"), Qt::CTRL + Qt::Key_E,
+		this, SLOT(slot_editDestroy()),
+		actionCollection(), "edit_destroy");
+	ADD_ACTION(close);
+//	ADD_ACTION(showToolbar);
+
+	/* application wide actions */
 	*actionCollection() +=  app->actions();
 
-//	createGUI();
-//	createGUI("boeditorui.rc");
-	createGUI("/opt/be/share/apps/boeditor/boeditorui.rc");
+	/* actual building */
+	createGUI("boeditorui.rc");
 
 	/* widgets */
 	makeCommandGui();
 	setView(&mw, false);
 }
+#undef ADD_ACTION
 
 
 void editorTopLevel::setSelected(QPixmap *p)
@@ -436,7 +448,7 @@ void editorTopLevel::makeCommandGui(void)
 }
 
 
-void editorTopLevel::slotEditDestroy(void)
+void editorTopLevel::slot_editDestroy(void)
 {
 	int mkey;
 	editorCanvas  *_canvas = (editorCanvas*)vcanvas;
@@ -458,6 +470,10 @@ void editorTopLevel::slotEditDestroy(void)
 	_canvas->update();
 }
 
+void editorTopLevel::slot_close(void)
+{
+	logf(LOG_INFO, "editorTopLevel::slot_close(void) called");
+}
 
 void editorTopLevel::updateViews(void)
 {
