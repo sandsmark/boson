@@ -25,6 +25,19 @@
 /*
  * MOBILE
  */
+QRect Unit::gridRect(void)
+{
+	QRect r = rect();
+
+	r.moveTopLeft( r.topLeft() / BO_TILE_SIZE );
+	r.setSize( (r.size() + QSize( BO_TILE_SIZE-1, BO_TILE_SIZE-1))/ BO_TILE_SIZE );
+
+	return r;
+}
+
+/*
+ * MOBILE
+ */
 mobUnit::mobUnit(mobileMsg_t *msg)
 	:Unit( (unitMsg_t*) msg)
 {

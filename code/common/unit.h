@@ -55,8 +55,19 @@ public:
 	Unit(unitMsg_t *m) { who = m->who; key = m->key; countDown = 0; work = WORK_NONE; }
 
 	virtual	uint	getVisibility(void)=0;
+	/**
+	 * return the place occupied by this unit
+	 * UNIT : PIXEL, (not grid)
+	 */
 	virtual	QRect	rect(void)=0;
   
+	/* return the center of this unit, pixel-wise */
+	QPoint		center(void) {return rect().center(); }
+	/**
+	 * the same as rect(), but in the grid system
+	 */
+	QRect		gridRect(void);
+
 	uint		who;		// who is the owner ?
 	int		key;
 protected:
