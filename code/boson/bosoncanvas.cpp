@@ -91,11 +91,16 @@ BosonCanvas::~BosonCanvas()
 // if (d->mFogPixmap) {
 //	delete d->mFogPixmap;
 // }
+ quitGame();
+ delete d;
+}
 
+void BosonCanvas::quitGame()
+{
+ kdDebug() << k_funcinfo << endl;
  deleteDestroyed(); // already called before
  d->mAnimList.clear();
  d->mFogOfWar.clear();
- delete d;
 }
 
 void BosonCanvas::deleteDestroyed()
@@ -232,6 +237,7 @@ void BosonCanvas::setMap(BosonMap* map)
 
 void BosonCanvas::initMap(const QString& tileFile)
 {
+kdDebug() << k_funcinfo << endl;
  if (!d->mMap) {
 	kdError() << k_funcinfo << ": NULL map" << endl;
 	return;
@@ -246,7 +252,6 @@ void BosonCanvas::initMap(const QString& tileFile)
 			continue;
 		}
 		slotAddCell(i, j, c->groundType(), c->version());
-		fogLocal(i, j); // the fog of war of the local player
 	}
  }
  update();
