@@ -171,6 +171,13 @@ public:
 	 **/
 	bool isPreLoaded() const { return mPreLoaded; }
 
+	/**
+	 * This emulates that loading has been completed. Useful when we are
+	 * creating new maps. Do <em>not</em> use this of you are not creating a
+	 * new map!
+	 **/
+	void finalizeLoading();
+
 signals:
 	/**
 	 * Emitted when the map changes. Note that this can even be 0!

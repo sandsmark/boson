@@ -447,3 +447,9 @@ void BosonPlayField::deleteMap()
  mMap = 0;
 }
 
+void BosonPlayField::finalizeLoading()
+{
+ mPreLoaded = true;
+ mLoaded = true;
+}
+

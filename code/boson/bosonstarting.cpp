@@ -57,7 +57,19 @@ void BosonStarting::startNewGame()
 
 	// only ADMIN should access mPlayFieldId !! the playfield gets
 	// transmitted through network. first map here - scenario later
-	BosonPlayField* loadField = BosonPlayField::playField(mPlayFieldId);
+	BosonPlayField* loadField = 0;
+	if (!mPlayFieldId.isNull()) {
+		boDebug() << k_funcinfo << "use " << mPlayFieldId << endl;
+		loadField = BosonPlayField::playField(mPlayFieldId);
+	} else {
+		// here we should be in editor mode creating a new map
+		boDebug() << k_funcinfo << "editor mode: create new map" << endl;
+		loadField = mPlayField;
+	}
+	if (!loadField) {
+		boError() << k_funcinfo << "NULL playField" << endl;
+		return;
+	}
 	loadField->loadPlayField(mPlayFieldId);
 	loadField->saveMap(stream);
 
@@ -66,6 +78,7 @@ void BosonStarting::startNewGame()
 	boGame->sendMessage(stream, BosonMessage::InitMap);
 	mLoadingWidget->setProgress(100);
  }
+ boDebug() << k_funcinfo << endl;
  // mPlayField should be empty - ensure this by deleting the map
  mPlayField->deleteMap();
 
@@ -73,6 +86,7 @@ void BosonStarting::startNewGame()
  // before actually starting the game we need to wait for the map (which is sent
  // by the ADMIN)
  mLoadingWidget->setLoading(BosonLoadingWidget::ReceiveMap);
+ boDebug() << k_funcinfo << "done" << endl;
 }
 
 bool BosonStarting::loadGame(const QString& loadingFileName)
