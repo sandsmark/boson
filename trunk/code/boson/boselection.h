@@ -39,7 +39,6 @@ public:
 	~BoSelection();
 
 	/**
-	 * Warning: this function does not emit any signal!
 	 * @param replace If TRUE (default) then the current selection is
 	 * replaced. If FALSE, the new units are added to the selection instead.
 	 **/
