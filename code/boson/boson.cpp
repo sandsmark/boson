@@ -2072,6 +2072,16 @@ void Boson::slotReceiveAdvance()
 void Boson::networkTransmission(QDataStream& stream, int msgid, Q_UINT32 r, Q_UINT32 s, Q_UINT32 clientId)
 {
  // Log message
+#warning is this a good place?
+ // AB: this is a very dangerous place - is it intended?
+ // when message B is received after a message A and B gets delayed (i.e.
+ // processed later) then the log will look like this:
+ // A, B, B
+ // because when a delayed message gets processed, networkTransmission() is
+ // called again - i.e. B appears twice in the log although it was physically
+ // received only once.
+ // as a solution to the we might move these two lines a bit down, right before
+ // the KGame::networkTransmission() call
  BoMessage* log = new BoMessage(stream, msgid, r, s, clientId, advanceCallsCount());
  d->mMessageLogger.append(log);
 
