@@ -53,8 +53,8 @@ cooMsg_t        coo;
 ulong		mask = getPlayerMask(u->who);
 int		dist = u->getVisibility();
 
-int		x = u->rect().x() / BO_TILE_SIZE,
-		y = u->rect().y() / BO_TILE_SIZE;
+int		x = u->gridRect().x(),
+		y = u->gridRect().y();
 
 im = QMAX(0, x-dist) - x;
 iM = QMIN(map_width-1,	x+dist ) - x;
@@ -121,19 +121,14 @@ void BosonServer::createMobUnit(mobileMsg_t &data)
 void BosonServer::placeMob(serverMobUnit *u)
 {
 	ulong		k = 0l;
-	int		i,j, i2,j2;
-	int		xx, yy;
-	QRect		r = u->rect();
+	int		i,j;
+	QRect		r = u->gridRect();
 
 	/* who is interested in knowing u's arrival */
-	xx = r.x() / BO_TILE_SIZE;
-	yy = r.y() / BO_TILE_SIZE;
-	i2 = (r.width() + BO_TILE_SIZE -1 ) / BO_TILE_SIZE;
-	j2 = (r.height() + BO_TILE_SIZE -1 )/ BO_TILE_SIZE;
 	k = getPlayerMask(u->who);
-	for (i=0; i<i2; i++)
-		for (j=0; j<j2; j++)
-			k |= cell( xx+i, yy+j).known;
+	for (i=0; i<r.width(); i++)
+		for (j=0; j<r.height(); j++)
+			k |= cell( r.x()+i, r.y()+j).known;
 	u->setKnown(k);
 
 	/* telling them */
@@ -164,20 +159,14 @@ void BosonServer::createFixUnit(facilityMsg_t &data)
 void BosonServer::placeFix(serverFacility * f)
 {
 	ulong		k;
-	int		i,j, i2, j2;
-	int		xx, yy;
-	QRect		r = f->rect();
+	int		i,j;
+	QRect		r = f->gridRect();
 
 	/* who is interested in knowing f's arrival */
-	xx = r.x() / BO_TILE_SIZE;
-	yy = r.y() / BO_TILE_SIZE;
-	i2 = (r.width() + BO_TILE_SIZE -1 ) / BO_TILE_SIZE;
-	j2 = (r.height() + BO_TILE_SIZE -1 )/ BO_TILE_SIZE;    
-
 	k = getPlayerMask(f->who);
-	for (i=0; i<i2; i++)
-		for (j=0; j<j2; j++)
-			k |= cell( xx+i, yy+j).known;
+	for (i=0; i<r.width(); i++)
+		for (j=0; j<r.height(); j++)
+			k |= cell( r.x()+i, r.y()+j).known;
 	f->setKnown(k);
 
 	/* telling them */
@@ -211,20 +200,13 @@ for (mobIt.toFirst(); mobIt; ++mobIt)
 
 void BosonServer::checkFixKnown(serverFacility *f)
 {
-	int x,y;
-	int i,j, i2, j2;
+	int i,j;
 	ulong	k = 0l, k2;
-	QRect	r = f->rect();
+	QRect	r = f->gridRect();
 
-	x = r.x() / BO_TILE_SIZE;
-	y = r.y() / BO_TILE_SIZE;
-	///orzel : ugly
-	i2 = r.width() / BO_TILE_SIZE;
-	j2 = r.height() / BO_TILE_SIZE;
-
-	for (i=0; i<i2; i++)
-		for (j=0; j<j2; j++)
-			k |= cell( x+i, y+j).known;
+	for (i=0; i<r.width(); i++)
+		for (j=0; j<r.height(); j++)
+			k |= cell( r.x()+i, r.y()+j).known;
 
 	i=0; // 'i' is now the player index
 	k2 = f->known;
@@ -250,23 +232,16 @@ void BosonServer::checkFixKnown(serverFacility *f)
 
 void BosonServer::checkMobileKnown(serverMobUnit *m)
 {
-	int x,y;
-	int i,j, i2, j2;
+	int i,j;
 	ulong	k = 0l, k2;
-	QRect	r = m->rect();
+	QRect	r = m->gridRect();
 
+	boAssert(r.x()>=0); boAssert(r.y()>=0);
+	boAssert(r.x()<200); boAssert(r.y()<200);
 
-	x = r.x() / BO_TILE_SIZE;
-	y = r.y() / BO_TILE_SIZE;
-	i2 = (r.width() + BO_TILE_SIZE -1 ) / BO_TILE_SIZE;
-	j2 = (r.height() + BO_TILE_SIZE -1 )/ BO_TILE_SIZE;
-	
-	boAssert(x>=0); boAssert(y>=0);
-	boAssert(x<200); boAssert(y<200);
-
-	for (i=0; i<i2; i++)
-		for (j=0; j<j2; j++)
-			k |= cell( x+i, y+j).known;
+	for (i=0; i<r.width(); i++)
+		for (j=0; j<r.height(); j++)
+			k |= cell( r.x()+i, r.y()+j).known;
 
 	i=0;
 	k2 = m->known;
