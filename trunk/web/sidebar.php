@@ -79,6 +79,7 @@ sidebar_box_begin("Statistics");
 global $lastupdate;
 global $filename;
 global $basedir;
+global $style;
 echo "
 <font class=\"lastupdate\">This page was last updated on<br>
 <font class=\"lastupdatevalue\">$lastupdate GMT</font>.<br></font>";
@@ -90,11 +91,11 @@ counter();
 echo "
 <br>
 <!-- We have Valid HTML 4.01! -->
-<a href=\"http://validator.w3.org/check/referer\"><img border=\"0\"
-    src=\"${basedir}pictures/valid-html401.png\"
+<a href=\"http://validator.w3.org/check/referer\" target=\"_blank\">
+<img border=\"0\" src=\"${basedir}pictures/valid-html401.png\"
     alt=\"Valid HTML 4.01!\" height=\"31\" width=\"88\"></a><br>
 <!-- We also have Valid CSS! -->
-<a href=\"http://jigsaw.w3.org/css-validator/\">
+<a href=\"http://jigsaw.w3.org/css-validator/validator?uri=http://boson.sourceforge.net/style-${style}.css\" target=\"_blank\">
   <img style=\"border:0;width:88px;height:31px\"
        src=\"${basedir}pictures/valid-css.png\"
        alt=\"Valid CSS!\"></a>";
