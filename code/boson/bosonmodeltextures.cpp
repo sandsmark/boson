@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -114,10 +114,12 @@ void BosonModelTextures::loadTexture(const QString& textureName, GLuint tex)
 	image.fill(Qt::red.rgb());
  }
  bool useAlpha = false;
+ bool mipmap = boConfig->modelTexturesMipmaps();
  if (image.hasAlphaBuffer()) {
 	useAlpha = true;
+	mipmap = false; // the alpha test seems to have problems with mipmapping
  }
- BosonTextureArray::createTexture(image, tex, boConfig->modelTexturesMipmaps(), useAlpha);
+ BosonTextureArray::createTexture(image, tex, mipmap, useAlpha);
 }
 
 void BosonModelTextures::removeModel(BosonModel* model)
