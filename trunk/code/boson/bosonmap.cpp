@@ -1062,7 +1062,7 @@ void BosonMap::fill(unsigned int texture)
  mTexMap->fill(texture);
 }
 
-float BosonMap::cellAverageHeight(int x, int y)
+float BosonMap::cellAverageHeight(int x, int y) const
 {
  Cell* c = cell(x, y);
  if (!c) {
