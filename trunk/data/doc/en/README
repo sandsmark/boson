@@ -1,8 +1,26 @@
-The Boson handbook uses wml.
+The Boson handbook uses wml (http://www.thewml.org).
 
-Things you should know:
+At the moment there are three includes. You can find them in includes ;)
+- top.wml
+- nav.wml
+- footer.wml
 
-- If you edit the wml file you should use the "make_html_files" script
-  because make doesn't rebuild the wml files if you change something.
-  
-- Don't commit html files ;)
+top.wml
+	This file includes the html header, css, some meta tags, the title and <body>
+	You can change the default title:
+	 #include top.wml title="new title"
+
+nav.wml
+	This is the navigation used at the bottom of the page.
+	This example is from tank.wml:
+	 #include "nav.wml" before_url="batzen.html" before_text="Batzen" after_url="ship.html" after_text="Ship"
+	I think that is self explained.
+	You can remove the before_* or after_* vars. Than you will only gett <-- and --> without a link. Useful for the first and last file.
+	The index link always goes to the main index file of the handbook.
+
+footer.wml
+	It adds the "maintained by" line and the default </body></html>
+
+
+have fun
+Felix  (felix.seeger@gmx.de)
