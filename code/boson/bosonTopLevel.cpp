@@ -76,7 +76,7 @@ bosonTopLevel::bosonTopLevel(BosonApp * /*parent*/, const char *name, WFlags f)
 
 	/* .. */
 	orderType = OT_NONE;
-	setView(&mw, false);
+	setCentralWidget(&mw);
 
 	/* orders buttons */
 	for (int i=0; i< 11; i++) { ///orzel : why 11, use *Nb

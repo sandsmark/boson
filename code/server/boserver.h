@@ -54,7 +54,7 @@ class serverFacility;
 /** 
   * This is the main widget of the Boson Server GUI
   */
-class BosonServer : public KTMainWindow, public boFile
+class BosonServer : public KMainWindow, public boFile
 {
   Q_OBJECT
 

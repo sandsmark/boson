@@ -40,7 +40,7 @@ extern "C" { extern void usleep(unsigned long); }
 
 
 BosonServer::BosonServer(int port, const char *mapfile, const char *name)
-	: KTMainWindow(name)
+	: KMainWindow(0l, name)
 {
 	QLabel		*label;
 	QGroupBox	*box;
