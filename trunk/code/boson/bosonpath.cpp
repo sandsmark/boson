@@ -421,7 +421,7 @@ void BosonPath::debug() const
  kdDebug() << "goalx,goaly = " << mGoalx << "," << mGoaly << endl;
  kdDebug() << "waypoints: " << path.size() << endl;
  int j = 0;
- for(vector<QPoint>::iterator i = path.begin(); i != path.end(); ++i, j++) { // FIXME should be const
+ for(vector<QPoint>::const_iterator i = path.begin(); i != path.end(); ++i, j++) { // FIXME should be const
 	kdDebug() << "waypoint " << j << ":" << endl;
 	kdDebug() << "x,y=" << (*i).x() << "," << (*i).y() << endl;
  }
