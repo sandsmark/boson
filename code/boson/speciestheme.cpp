@@ -728,6 +728,9 @@ void SpeciesTheme::playSound(UnitBase* unit, UnitSoundEvent event)
  if (!sound()) {
 	return;
  }
+ if (!boConfig->unitSoundActivated(event)) {
+	return;
+ }
  sound()->play(unit->unitProperties()->sound(event));
 }
 

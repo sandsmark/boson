@@ -23,6 +23,8 @@
 
 #include "global.h"
 
+class BosonConfig;
+
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
@@ -50,6 +52,7 @@ public:
 	void setRMBScrolling(bool);
 	void setMMBScrolling(bool);
 	void setCursorEdgeSensity(int);
+	void setUnitSoundsDeactivated(BosonConfig* conf);
 
 signals:
 	void signalArrowScrollChanged(int);
@@ -78,11 +81,13 @@ protected slots:
 	void slotMMBScrollingToggled(bool);
 	void slotCursorEdgeSensityChanged(int);
 	void slotSetDefaults();
+	void slotUnitSoundDeactivated(bool off);
 
 protected:
 	void initGeneralPage();
 	void initCursorPage();
 	void initScrollingPage();
+	void initSoundsPage();
 
 private:
 	class OptionsDialogPrivate;
