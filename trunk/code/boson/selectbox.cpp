@@ -248,7 +248,7 @@ void SelectBoxData::drawHealthBar(int frame)
  glEnd();
 
  glTranslatef(0.0, hy - 1.0, hz - 1.0);
- glColor3f(1.0, 1.0, 1.0);
+ glColor3ub(255, 255, 255);
  glEnable(GL_TEXTURE_2D);
 }
 
