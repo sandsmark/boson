@@ -56,7 +56,7 @@
 #include "bosontexturearray.h"
 
 // both must be > 0.0:
-#define NEAR 1.0
+#define NEAR 1.0 // FIXME: should be > 1.0
 #define FAR 100.0
 
 
@@ -244,6 +244,22 @@ public:
 	{
 		mMode = ModeNone;
 	}
+	int x() const
+	{
+		return mX;
+	}
+	int yy() const
+	{
+		return mY;
+	}
+	int oldX() const
+	{
+		return mOldX;
+	}
+	int oldY() const
+	{
+		return mOldY;
+	}
 	int dx() const
 	{
 		return (mX - mOldX);
@@ -348,17 +364,12 @@ BosonBigDisplayBase::BosonBigDisplayBase(BosonCanvas* c, QWidget* parent)
  d = new BosonBigDisplayBasePrivate;
  mCursor = 0;
  d->mCursorEdgeCounter = 0;
+ mCanvas = c;
+
+ mSelection = new BoSelection(this);
 
 #ifndef NO_OPENGL
- d->mPosX = 0.0;
- d->mPosY = 0.0;
- d->mPosZ = 10.0;
- d->mCenterDiffX = 0.0;
- d->mCenterDiffY = 0.0;
-
- d->mFovY = 60.0;
- d->mAspect = 1.0;
-
+ slotResetViewProperties();
  d->mW = 0;
  d->mH = 0;
 
@@ -386,11 +397,6 @@ BosonBigDisplayBase::BosonBigDisplayBase(BosonCanvas* c, QWidget* parent)
 
 #endif // !NO_OPENGL
 
- mSelection = new BoSelection(this);
- mCanvas = c;
-
-
- 
  connect(&d->mCursorEdgeTimer, SIGNAL(timeout()), 
 		this, SLOT(slotCursorEdgeTimeout()));
 
@@ -433,7 +439,7 @@ void BosonBigDisplayBase::initializeGL()
 #if PLIB
  d->m3ds = ssgLoad3ds("/home/andi/tank.3ds");
 #elif LIB3DS
- d->m3ds = lib3ds_file_load("/home/andi/tank.3ds");
+ d->m3ds = lib3ds_file_load("/home/guest/3ds/tank//tank.3ds");
  kdDebug() << k_funcinfo << "current frame: " << d->m3ds->current_frame << endl;
  lib3ds_file_eval(d->m3ds, d->m3ds->current_frame);
  file = d->m3ds;
@@ -455,8 +461,9 @@ void BosonBigDisplayBase::resizeGL(int w, int h)
  d->mW = w;
  d->mH = h;
 
+ GLfloat fovY = d->mFovY * d->mZoomFactor;
  d->mAspect = (float)w / (float)h;
- gluPerspective(d->mFovY, d->mAspect, NEAR, FAR);
+ gluPerspective(fovY, d->mAspect, NEAR, FAR);
 
  glMatrixMode(GL_MODELVIEW);
 
@@ -522,7 +529,7 @@ void BosonBigDisplayBase::paintGL()
  upZ = 0.0;
  float centerX, centerY, centerZ;
  centerX = cameraX() + d->mCenterDiffX;
- centerY = cameraY() + d->mCenterDiffY;
+ centerY = cameraY() - d->mCenterDiffY;
  centerZ = -100.0;
 // centerZ = d->mPosZ;
  // TODO: performance: isn't it possible to skip this by using pushMatrix() and
@@ -738,29 +745,39 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 	}
 	case QEvent::MouseMove:
 		d->mMouseMoveDiff.moveToPos(e->pos());
-		GLdouble dx, dy;
-
-		if (e->state() & ControlButton) {
-			d->mCenterDiffX += d->mMouseMoveDiff.dx();
-			d->mCenterDiffY += d->mMouseMoveDiff.dy();
-			kdDebug() << d->mCenterDiffX << " " << d->mCenterDiffY << endl;
-		} else if (e->state() & ShiftButton) {
-			// "zooming"
-			// actually we simply move the z-position of the camera but it basically has the effect of zooming
-			setCameraPos(cameraX(), cameraY(), cameraZ() - d->mMouseMoveDiff.dy());
-			kdDebug() << "posZ: " << d->mPosZ << endl;
-//		} else if (e->state() & AltButton) {
+		if (e->state() & AltButton) {
+			// zooming
+			d->mZoomFactor += ((float)d->mMouseMoveDiff.dy()) / 10;
+			kdDebug() << "zoom factor: " << d->mZoomFactor << endl;
+			resizeGL(d->mW, d->mH);
 		} else if (e->state() & LeftButton) {
-			d->mSelectionRect.setVisible(true);
-			moveSelectionRect(posX, posY, posZ);
+			if (e->state() & ControlButton) {
+				d->mCenterDiffX += d->mMouseMoveDiff.dx();
+				d->mCenterDiffY -= d->mMouseMoveDiff.dy();
+				kdDebug() << d->mCenterDiffX << " " << d->mCenterDiffY << endl;
+			} else if (e->state() & ShiftButton) {
+				// move the z-position of the cameraa
+				setCameraPos(cameraX(), cameraY(), cameraZ() + d->mMouseMoveDiff.dy());
+				kdDebug() << "posZ: " << d->mPosZ << endl;
+			} else if (e->state() & AltButton) {
+				// we can't use Alt+LMB since KDE already uses it to move the window :(
+			} else {
+				d->mSelectionRect.setVisible(true);
+				moveSelectionRect(posX, posY, posZ);
+			}
 		} else if (e->state() & RightButton) {
 #ifndef NO_OPENGL
 			if (boConfig->rmbMove()) {
+				//FIXME: doesn't work, since QCursor::setPos() also generates a MouseMove event
+//				QPoint pos = mapToGlobal(QPoint(d->mMouseMoveDiff.oldX(), d->mMouseMoveDiff.oldY()));
+//				QCursor::setPos(pos);
 				d->mMouseMoveDiff.startRMBMove();
-				setCameraPos(cameraX() + d->mMouseMoveDiff.dx(), 
-						cameraY() + d->mMouseMoveDiff.dy(), cameraZ());
+				GLdouble dx, dy;
+				int moveX = d->mMouseMoveDiff.dx();
+				int moveY = d->mMouseMoveDiff.dy();
+				mapDistance(moveX, moveY, &dx, &dy);
+				setCameraPos(cameraX() + dx, cameraY() + dy, cameraZ());
 			} else {
-				// oops
 				d->mMouseMoveDiff.stop();
 			}
 #else
@@ -901,13 +918,29 @@ Player* BosonBigDisplayBase::localPlayer() const
  return d->mLocalPlayer;
 }
 
-void BosonBigDisplayBase::slotCenterBase()
+void BosonBigDisplayBase::slotCenterHomeBase()
 {
  //TODO
  // find the command center of the local player
  QPoint pos(0, 0); // note: we use *cell* coordinates!
  
  slotReCenterDisplay(pos);
+}
+
+void BosonBigDisplayBase::slotResetViewProperties()
+{
+#ifndef NO_OPENGL
+ d->mPosX = 0.0;
+ d->mPosY = 0.0;
+ d->mPosZ = 10.0;
+ d->mCenterDiffX = 0.0;
+ d->mCenterDiffY = 0.0;
+ d->mZoomFactor = 1.0;
+
+ d->mFovY = 60.0;
+ d->mAspect = 1.0;
+ setCameraPos(d->mPosX, d->mPosY, d->mPosZ);
+#endif
 }
 
 void BosonBigDisplayBase::slotReCenterDisplay(const QPoint& pos)
@@ -1230,6 +1263,7 @@ QRect BosonBigDisplayBase::selectionRectCanvas() const
  end = QPoint(endx, endy);
 #endif
  QRect r(start, end);
+ r = r.normalize();
  return r;
 }
 
@@ -1475,3 +1509,17 @@ double BosonBigDisplayBase::fps() const
 {
   return d->mFps;
 }
+
+void BosonBigDisplayBase::setZoomFactor(float f)
+{
+#ifndef NO_OPENGL
+ kdDebug() << k_funcinfo << f << endl;
+ d->mZoomFactor = f;
+ resizeGL(d->mW, d->mH);
+#else
+ QWMatrix w;
+ w.scale((double)f, (double)f);
+ setWorldMatrix(w);
+#endif
+}
+

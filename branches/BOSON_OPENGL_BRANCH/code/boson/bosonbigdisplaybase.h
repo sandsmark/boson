@@ -160,6 +160,8 @@ public:
 
 	void setUpdateInterval(unsigned int ms);
 
+	void setZoomFactor(float factor);
+
 	/**
 	 * Scroll by a certain distance.
 	 *
@@ -192,7 +194,8 @@ public:
 #endif
 
 public slots:
-	void slotCenterBase();
+	void slotCenterHomeBase();
+	void slotResetViewProperties();
 
 	/**
 	 * @param pos the <em>cell</em>-coordinates of the centered position

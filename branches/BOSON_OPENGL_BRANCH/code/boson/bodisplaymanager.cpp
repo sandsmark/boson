@@ -491,3 +491,17 @@ void BoDisplayManager::slotUpdateIntervalChanged(unsigned int ms)
  }	
 }
 
+void BoDisplayManager::slotCenterHomeBase()
+{
+ if (activeDisplay()) {
+	activeDisplay()->slotCenterHomeBase();
+ }
+}
+
+void BoDisplayManager::slotResetViewProperties()
+{
+ if (activeDisplay()) {
+	activeDisplay()->slotResetViewProperties();
+ }
+}
+

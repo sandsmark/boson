@@ -57,7 +57,6 @@
 
 #include <qwidgetstack.h>
 #include <qtimer.h>
-#include <qwmatrix.h>
 #include <qhbox.h>
 #include <qptrdict.h>
 #include <qobjectlist.h>
@@ -217,7 +216,7 @@ void TopWidget::initActions()
 
  // Sound & Music
  KToggleAction* sound = new KToggleAction(i18n("Soun&d"), 0, this,
-		SLOT(slotToggleSound()), actionCollection(), "options_sound");
+	SLOT(slotToggleSound()), actionCollection(), "options_sound");
  sound->setChecked(boMusic->sound());
  KToggleAction* music = new KToggleAction(i18n("&Music"), 0, this,
 		SLOT(slotToggleMusic()), actionCollection(), "options_music");
@@ -244,6 +243,7 @@ void TopWidget::initActions()
  items.append(QString::number(50));
  items.append(QString::number(100));
  items.append(QString::number(150));
+ items.append(i18n("Free Zoom"));
  d->mActionZoom->setItems(items);
 
  // Display
@@ -329,6 +329,7 @@ void TopWidget::initStatusBar()
  bar->addWidget(resources);
 
 #ifndef NO_OPENGL
+kdDebug() << k_funcinfo << endl;
  QHBox* fps = new QHBox(bar);
  (void)new QLabel(i18n("FPS: "), fps);
  QLabel* fpsLabel = new QLabel(QString::number(0.0), fps);
@@ -904,11 +905,9 @@ void TopWidget::slotDebugMode(int index)
 void TopWidget::slotZoom(int index)
 {
 kdDebug() << "zoom index=" << index << endl;
- double percent = d->mActionZoom->items()[index].toDouble(); // bahh!!! 
- double factor = (double)percent / 100;
- QWMatrix m;
- m.scale(factor, factor);
- d->mBosonWidget->zoom(m);
+ float percent = d->mActionZoom->items()[index].toFloat(); // bahh!!! 
+ float factor = (float)percent / 100;
+ d->mBosonWidget->setZoomFactor(factor);
 }
 
 void TopWidget::slotToggleFullScreen()
@@ -1196,3 +1195,4 @@ void TopWidget::slotUpdateFPS()
  emit signalFPSUpdated(d->mBosonWidget->displaymanager()->activeDisplay()->fps());
 }
 #endif
+

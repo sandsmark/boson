@@ -92,7 +92,7 @@ public:
 
 	void saveConfig(bool editor = false);
 
-	void zoom(const QWMatrix&);
+	void setZoomFactor(float factor);
 
 	bool sound() const;
 	bool music() const;
