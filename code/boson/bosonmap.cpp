@@ -9,6 +9,8 @@
 #include <qfile.h>
 #include <qdatastream.h>
 
+#include <kgame/kgamepropertyhandler.h>
+#include <kgame/kgameproperty.h>
 #include <kdebug.h>
 #include <kstandarddirs.h>
 
@@ -17,47 +19,22 @@
 #define TAG_FIELD "boeditor_magic_0_3"
 #define TAG_FIELD_LEN 18 // len of above
 #define TAG_CELL (0xde)
-#define TAG_FIX (0xbe)
-#define TAG_MOB (0xba)
-
-struct MapUnit
-{
-	int unitType;
-	int x;
-	int y;
-	int who;// aka owner
-};
 
 class BosonMapPrivate
 {
 public:
 	BosonMapPrivate()
 	{
-		mMaxPlayers = 0;
-		mMapWidth = 0;
-		mMapHeight = 0;
-
-		mFacilities = 0;
-		mMobileUnits = 0;
-
-		mMobileCount = 0;
-		mFacilityCount = 0;
-
 		mCells = 0;
 	}
 	
 	QString mFileName;
-	int mMaxPlayers; // -1 == unlimited
-	unsigned int mMinPlayers;
-	int mMapWidth;
-	int mMapHeight;
-	QString mWorldName;
-	
-	MapUnit* mFacilities;
-	MapUnit* mMobileUnits;
-	unsigned int mMobileCount;
-	unsigned int mFacilityCount;
 
+	KGamePropertyHandler mProperties;
+
+	KGameProperty<int> mMapWidth;
+	KGameProperty<int> mMapHeight;
+	
 	Cell* mCells;
 };
 
@@ -74,26 +51,34 @@ BosonMap::BosonMap(const QString& fileName)
 
 BosonMap::~BosonMap()
 {
- if (d->mFacilities) {
-	delete[] d->mFacilities;
- }
- if (d->mMobileUnits) {
-	delete[] d->mMobileUnits;
- }
- if (d->mCells) {
-	delete[] d->mCells;
- }
  delete d;
 }
 
 void BosonMap::init()
 {
  d = new BosonMapPrivate;
+ // note we do not register d->mProperties anywhere as we don't use send() or
+ // emitSignal from KGameProperty. They are just used for saving the file.
+ d->mMapHeight.registerData(IdMapHeight, dataHandler(),
+		KGamePropertyBase::PolicyLocal, "MapHeight");
+ d->mMapWidth.registerData(IdMapWidth, dataHandler(),
+		KGamePropertyBase::PolicyLocal, "MapWidth");
+ d->mMapWidth.setLocal(0);
+ d->mMapHeight.setLocal(0);
 }
 
 QString BosonMap::defaultMap()
 {
+//TODO create a list of all maps (search for .desktop files in boson/map/) and
+//look if list contains "basic" - then check whether basic.bpf exists and return. 
+// Otherwise look for the first .desktop file which has a .bpf file exisiting.
+// Return that then.
  return locate("data", "boson/map/basic.bpf");
+}
+
+KGamePropertyHandler* BosonMap::dataHandler() const
+{
+ return &d->mProperties;
 }
 
 bool BosonMap::loadMap(const QString& fileName)
@@ -126,17 +111,6 @@ bool BosonMap::loadCompleteMap(QDataStream& stream)
 	return false;
  }
 
-// load mobile units into d->mMobileUnits
- if (!loadMobileUnits(stream)) {
-	kdError() << "Error loading mobile units" << endl;
-	return false;
- }
-
-// load fix units into d->mFacilities
- if (!loadFacilities(stream)) {
-	kdError() << "Error loading facilities" << endl;
-	return false;
- }
  return true;
 }
 
@@ -168,26 +142,22 @@ bool BosonMap::verifyMap(QDataStream& stream)
 
 bool BosonMap::loadMapGeo(QDataStream& stream)
 {
- Q_UINT32 players;
- Q_UINT32 mobiles;
- Q_UINT32 facilities;
+ Q_UINT32 players; // obsolete
  Q_INT32 mapWidth;
  Q_INT32 mapHeight;
- QString worldName; // FIXME: i18n?!
 
- stream >> players;
+ stream >> players; // obsolete
+
  stream >> mapWidth;
  stream >> mapHeight;
- stream >> mobiles;
- stream >> facilities;
- stream >> worldName;
+ 
+ stream >> players; // obsolete
+ stream >> players; // obsolete
+ QString x;
+ stream >> x; // obsolete
+
 
  // check 'realityness'
- if (players < 1) {
-	kdError() << "BosonMap::loadMap(): broken map file!" << endl;
-	kdError() << "players < 1" << endl;
-	return false;
- }
  if (mapWidth < 10) {
 	kdError() << "BosonMap::loadMap(): broken map file!" << endl;
 	kdError() << "mapWidth < 10" << endl;
@@ -196,22 +166,6 @@ bool BosonMap::loadMapGeo(QDataStream& stream)
  if (mapHeight < 10) {
 	kdError() << "BosonMap::loadMap(): broken map file!" << endl;
 	kdError() << "mapHeight < 10" << endl;
-	return false;
- }
- if (mobiles < 1) {
-	kdError() << "BosonMap::loadMap(): broken map file!" << endl;
-	kdError() << "Mobiles < 1" << endl;
-	return false;
- }
- if (facilities < 1) {
-	kdError() << "BosonMap::loadMap(): broken map file!" << endl;
-	kdError() << "Facilities < 1" << endl;
-	return false;
- }
-
- if (players > BOSON_MAX_PLAYERS) {
-	kdError() << "BosonMap::loadMap(): broken map file!" << endl;
-	kdError() << "players > " << BOSON_MAX_PLAYERS << endl;
 	return false;
  }
  if (mapWidth > MAX_MAP_WIDTH) {
@@ -224,26 +178,10 @@ bool BosonMap::loadMapGeo(QDataStream& stream)
 	kdError() << "mapHeight > " << MAX_MAP_HEIGHT << endl;
 	return false;
  }
- if (mobiles > MOBILES) {
-	kdError() << "BosonMap::loadMap(): broken map file!" << endl;
-	kdError() << "maxMobiles > " << MOBILES << endl;
-	kdError() << mobiles << endl;
-//	return false;
- }
- if (facilities > FACILITIES) {
-	kdError() << "BosonMap::loadMap(): broken map file!" << endl;
-	kdError() << "Facilities > " << FACILITIES << endl;
-	return false;
- }
 
 // map is ok - lets apply
- d->mMinPlayers = players; // minplayers is not yet used (players == the number of players in this map)
- d->mMaxPlayers = players; // maxplayers is not yet used (players == the number of players in this map)
  d->mMapWidth = mapWidth; // horizontal cell count
  d->mMapHeight = mapHeight; // vertical cell count
- d->mWorldName = worldName; // guess what?
- d->mFacilityCount = facilities; // no of facilities to be loaded from this map
- d->mMobileCount = mobiles; // no of mobiles to be loaded from this map
 
  if (d->mCells) {
 //	kdDebug() << "cells created before!! try to delete..." << endl;
@@ -256,7 +194,9 @@ bool BosonMap::loadMapGeo(QDataStream& stream)
 	for (int j = 0; j < height(); j++) {
 		int groundType = 0;
 		unsigned char version = 0;
-		loadCell(stream, groundType, version);
+		if (!loadCell(stream, groundType, version)) {
+			return false;
+		}
 		Cell* c = cell(i, j);
 		if (!c) {
 			kdError() << "NULL cell" << endl;
@@ -273,6 +213,32 @@ bool BosonMap::loadMapGeo(QDataStream& stream)
  return true;
 }
 
+bool BosonMap::saveMap(const QString& fileName)
+{
+ kdDebug() << "BosonMap::saveMap()" << endl;
+// TODO: check if file exists already
+ // open stream 
+ QFile f(fileName);
+ if (!f.open(IO_WriteOnly)){
+	kdError() << "BosonMap: Can't open file " << fileName << endl;
+	return false;
+ }
+ QDataStream stream(&f);
+ 
+ // magic 
+ // Qt marshalling for a string is 4-byte-len + data
+ stream << (Q_INT32)(TAG_FIELD_LEN - 1);
+
+ for (int i = 0; i <= TAG_FIELD_LEN; i++) {
+	stream << (Q_INT8)TAG_FIELD[i];
+ }
+
+ bool ret = saveMapGeo(stream);
+ f.close();
+ kdDebug() << "BosonMap::saveMap() done" << endl;
+ return ret;
+}
+
 bool BosonMap::saveMapGeo(QDataStream& stream)
 {
  if (!isValidGeo()) {
@@ -280,31 +246,17 @@ bool BosonMap::saveMapGeo(QDataStream& stream)
 	return false;
  }
  kdDebug() << "save map geo" << endl;
- stream << (Q_UINT32)minPlayers(); // FIXME: currently minPlayers==maxPlayers
+ stream << (Q_UINT32)1; // obsolete
  stream << (Q_INT32)width();
  stream << (Q_INT32)height();
- stream << (Q_UINT32)d->mMobileCount;
- stream << (Q_UINT32)d->mFacilityCount;
- stream << (QString)worldName();
+ stream << (Q_UINT32)1; // obsolete
+ stream << (Q_UINT32)1; // obsolete
+ stream << QString(""); // obsolete
 
  for (int i = 0; i < width(); i++) {
 	for (int j = 0; j < height(); j++) {
 		Cell* c = cell(i, j);
-		int groundType = 0;
-		unsigned char version = 0;
-		if (!c) {
-			kdError() << "BosonMap::saveMapGeo(): NULL cell" << endl;
-			// do not abort - otherwise all clients receiving this
-			// stream are completely broken as we expect
-			// width()*height() cells
-		} else {
-			groundType = c->groundType();
-			version = c->version();
-		}
-		
-		stream << (unsigned int)TAG_CELL;
-		stream << groundType;
-		stream << version;
+		saveCell(stream, c);
 	}
  }
  return true;
@@ -312,18 +264,6 @@ bool BosonMap::saveMapGeo(QDataStream& stream)
 
 bool BosonMap::isValidGeo() const
 {
- if (d->mMinPlayers != (uint)d->mMaxPlayers) {
-	kdError() << "internal error" << endl;
-	return false;
- }
- if (d->mMinPlayers < 1) {
-	kdError() << "minplayers < " << 1 << endl;
-	return false;
- }
- if (d->mMinPlayers > BOSON_MAX_PLAYERS) {
-	kdError() << "minplayers > " << BOSON_MAX_PLAYERS << endl;
-	return false;
- }
  if (width() < 10) {
 	kdError() << "width < 10" << endl;
 	return false;
@@ -340,122 +280,56 @@ bool BosonMap::isValidGeo() const
 	kdError() << "mapHeight > " << MAX_MAP_HEIGHT << endl;
 	return false;
  }
- if (d->mMobileCount< 1) {
-	kdError() << "Mobiles < 1" << endl;
-	return false;
- }
- if (d->mMobileCount > MOBILES) {
-	kdError() << "maxMobiles > " << MOBILES << endl;
-	kdError() << d->mMobileCount << endl;
-//	return false;
- }
- if (d->mFacilityCount < 1) {
-	kdError() << "Facilities < 1" << endl;
-	return false;
- }
- if (d->mFacilityCount > FACILITIES) {
-	kdError() << "Facilities > " << FACILITIES << endl;
-	return false;
- }
 
  //TODO: check cells!
 
  return true;
 }
 
-bool BosonMap::loadMobileUnits(QDataStream& stream)
-{
- if (d->mMobileUnits) {
-	kdError() << "Mobile units already loaded! loading again without deleting - memory hole!!" << endl;
- }
- if (d->mMobileCount < 1) {
-	kdError() << "MobileCount < 1" << endl;
-	return false;
- }
- d->mMobileUnits = new MapUnit[d->mMobileCount];
-
- for (unsigned int i = 0; i < d->mMobileCount; i++) {
-	int j;
-	int x, y, who;
-	stream >> j;
-	if (TAG_MOB != j) {
-		kdError() << "TAG_MOB missing" << endl;
-		return false;
-	}
-	stream >> j >> x >> y >> who;
-	// j == unitType (mobile unit)
-	// x,y == position on canvas
-	// owner == ... owner!
-	// we use another unitType format - facilities and mobile units share
-	// the same enum. so our unittype looks like this:
-	// groups land, air and water.
-
-//	int unitType = (Unit::FacilityLast + 1) + j;
-	int unitType = (9999 + 1) + j; // TODO: start a new map file format to avoid this
-
-	d->mMobileUnits[i].unitType = unitType;
-	d->mMobileUnits[i].x = x;
-	d->mMobileUnits[i].y = y;
-	d->mMobileUnits[i].who = who;
- }
- return true;
-}
-
-bool BosonMap::loadFacilities(QDataStream& stream)
-{
- if (d->mFacilities) {
-	kdError() << "Facilities already loaded! loading again without deleting - memory hole!!" << endl;
- }
- if (d->mFacilityCount < 1) {
-	kdError() << "FacilityCount < 1" << endl;
-	return false;
- }
- d->mFacilities = new MapUnit[d->mFacilityCount];
-
- for (unsigned int i = 0; i < d->mFacilityCount; i++) {
-	int j;
-	int x, y, who;
-	stream >> j;
-	if (TAG_FIX != j) {
-		kdError() << "TAG_FIX missing" << endl;
-		return false;
-	}
-	stream >> j >> x >> y >> who;
-	// j == unitType (facilityType)
-	// x,y == position on canvas
-	// owner == ... owner!
-	int unitType = j;
-	d->mFacilities[i].unitType = unitType;
-	d->mFacilities[i].x = x;
-	d->mFacilities[i].y = y;
-	d->mFacilities[i].who = who;
- }
- return true;
-}
-
 bool BosonMap::loadCell(QDataStream& stream, int& groundType, unsigned char& b)
 {
- stream >> groundType; // not groundType - first TAG_CELL
-
- if (groundType != TAG_CELL) {
+ Q_INT32 g;
+ Q_INT8 version;
+ stream >> g; // not groundType - first TAG_CELL
+ if (g != TAG_CELL) {
 	kdError() << "BosonMap::loadCell(): broken map file!" << endl;
 	kdError() << "missing TAG_CELL!" << endl;
 	return false;
  }
 
- stream >> groundType; // this is the groundType now.
- if(!Cell::isValidGround(groundType)) { 
+ stream >> g; // this is the groundType now.
+ if(!Cell::isValidGround(g)) { 
 	return false; 
  }
 // if (g < 0 || ) { return false; }
  
- stream >> b; // what is this?
- if (b > 4) {
+ stream >> version;
+ if (version > 4) {
 	kdError() << "BosonMap::loadCell(): broken map file!" << endl;
 	kdError() << "invalid cell!" << endl;
  }
+ groundType = g;
+ b = version;
 
  return true;
+}
+
+void BosonMap::saveCell(QDataStream& stream, Cell* c)
+{
+ int groundType = 0;
+ unsigned char version = 0;
+ if (!c) {
+	kdError() << "BosonMap::saveCell(): NULL Cell" << endl;
+	// do not abort - otherwise all clients receiving this
+	// stream are completely broken as we expect
+	// width()*height() cells
+ } else {
+	groundType = c->groundType();
+	version = c->version();
+ }
+ stream << (Q_INT32)TAG_CELL;
+ stream << (Q_INT32)groundType;
+ stream << (Q_INT8)version;
 }
 
 int BosonMap::width() const
@@ -468,85 +342,9 @@ int BosonMap::height() const
  return d->mMapHeight;
 }
 
-unsigned int BosonMap::minPlayers() const
+QString BosonMap::worldName() const // FIXME?
 {
- return d->mMinPlayers;
-}
-
-int BosonMap::maxPlayers() const
-{
- return d->mMaxPlayers;
-}
-
-const QString& BosonMap::worldName() const
-{
- return d->mWorldName;
-}
-
-void BosonMap::addPlayerUnits(Boson* boson, int playerNumber)
-{
- if (!boson) {
-	kdError() << "BosonMap::addPlayerUnits(): NULL game" << endl;
-	return;
- }
- Player* p = (Player*)boson->playerList()->at(playerNumber);
- if (!p) {
-	kdError() << "BosonMap::addPlayerUnits(): NULL player" << endl;
-	return;
- }
- kdDebug() << "BosonMap::addPlayerUnits of player " << playerNumber 
-		<< "==" << p->id() << endl;
- for (unsigned int i = 0; i < d->mFacilityCount; i++) {
-	if (d->mFacilities[i].who == playerNumber) {
-		addUnit(boson, p, 
-				d->mFacilities[i].unitType, 
-				d->mFacilities[i].x, 
-				d->mFacilities[i].y);
-	}
- }
- for (unsigned int i = 0; i < d->mMobileCount; i++) {
-	if (d->mMobileUnits[i].who == playerNumber) {
-		addUnit(boson, p, 
-				d->mMobileUnits[i].unitType,
-				d->mMobileUnits[i].x,
-				d->mMobileUnits[i].y);
-	}
- }
-}
-
-void BosonMap::addUnit(Boson* boson, Player* owner, int unitType, int x, int y)
-{
- if (!boson) {
-	kdError() << "BosonMap::addUnit(): NULL game" << endl;
-			return;
- }
- if (!owner) {
-	kdError() << "BosonMap::addUnit(): NULL player" << endl;
-	return;
- }
- boson->slotSendAddUnit(unitType, x, y, owner);
-}
-
-void BosonMap::startMap(Boson* boson)
-{
- if (!isValidGeo()) {
-	return;
- }
- if (!boson) {
-	kdError() << "BosonMap::addPlayerUnits(): NULL game" << endl;
-	return;
- }
- for (int i = 0; i < maxPlayers(); i++) {
-	addPlayerUnits(boson, i);
- }
- if (d->mMobileUnits) {
-	delete[] d->mMobileUnits;
-	d->mMobileUnits = 0;
- }
- if (d->mFacilities) {
-	delete[] d->mFacilities;
-	d->mFacilities = 0;
- }
+ //return d->mWorldName;
 }
 
 Cell* BosonMap::cell(int x, int y) const

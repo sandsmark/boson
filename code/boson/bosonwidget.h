@@ -44,6 +44,7 @@ public slots:
 //	void slotConnect();
 
 	void slotLoadMap(const QString& map);
+	void slotLoadScenario(const QString& scenario);
 	void slotChangeLocalPlayer(int playerNumber);
 
 	/**
