@@ -200,29 +200,6 @@ Everybody in the room nods knowingly.
 &lt;Timo&gt; AH TTACKING!<br />
 &lt;Felix&gt; Dude, will you shut up!?
 </p>
-
-<p class=\"announcement\">
-The next day...
-</p>
-
-<p class=\"announcement\">
-General Andreas, Rivo, Timo, Felix and Scott are back in the briefing room. The assault had launched a couple hours
-ago.
-</p>
-
-<p class=\"announcement\">
-&lt;Andi&gt; Report!<br />
-&lt;Felix&gt; Sir, the attack is going very well. We have pushed through their defenses and are currently razing their
-base.<br />
-&lt;Andi&gt; Excellent. Are they trembling?<br />
-&lt;Felix&gt; No sir.<br />
-&lt;Andi&gt; What do you mean \"No sir.\"? Why not?<br />
-&lt;Scott&gt; General, the enemy infantry and armored divisions haven't fired a single shot at us. They don't even
-seem to care that we are attacking them!<br />
-&lt;Andi&gt; They will pay dearly for this..<br />
-&lt;Timo&gt; Sir! Yes Sir!<br />
-* Andi punches Timo and storms out the door<br />
-</p>
 ");
 draw_bigbox_end();
 
