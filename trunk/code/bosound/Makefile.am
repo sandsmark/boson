@@ -25,7 +25,7 @@ bosonaudioprocess_LDADD = \
 		$(top_builddir)/bodebug/libbodebug.la \
 		$(LIB_QT) \
 		$(LIB_KDECORE) $(LIB_KIO) \
-		-lopenal
+		$(LIB_OPENAL)
 
 bosonaudioprocess_SOURCES = \
 		main.cpp
