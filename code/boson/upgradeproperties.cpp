@@ -251,6 +251,7 @@ template<class TYPE> void UpgradePropertiesValue<TYPE>::applyProperty(QValueList
   }
   boDebug() << "  " << k_funcinfo << "Applying property (type: " << type << ") to " << typeIds->count() << " props" << endl;
   QValueList<unsigned long int>::Iterator it;
+#warning oldvalue might be used initialized. FIX THIS !!
   TYPE oldvalue;
   for(it = typeIds->begin(); it != typeIds->end(); it++)
   {
