@@ -31,6 +31,8 @@ Weapons=0
 CanMineMinerals=false
 CanMineOil=true
 MaxResources=40
+MiningSpeed=2
+UnloadingSpeed=5
 
 [Sounds]
 OrderAttack=order_attack
