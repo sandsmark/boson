@@ -285,6 +285,44 @@ class BosonEffectPropertiesLight : public BosonEffectProperties
 
 
 /**
+ * @short Properties for bullet trail effect
+ *
+ * @author Rivo Laks <rivolaks@hot.ee>
+ **/
+class BosonEffectPropertiesBulletTrail : public BosonEffectProperties
+{
+  public:
+    BosonEffectPropertiesBulletTrail();
+
+
+    virtual BosonEffect::Type type() const  { return BosonEffect::BulletTrail; };
+
+
+    virtual bool load(KSimpleConfig* cfg, const QString& group, bool inherited = false);
+
+
+    virtual BosonEffect* newEffect(const BoVector3& pos, const BoVector3& rot = BoVector3()) const;
+
+
+    const BoVector4& color() const  { return mColor; }
+    float minLength() const  { return mMinLength; }
+    float maxLength() const  { return mMaxLength; }
+    float width() const  { return mWidth; }
+
+
+  protected:
+    void reset();
+
+    BoVector4 mColor;
+    float mMinLength;
+    float mMaxLength;
+    float mWidth;
+    float mProbability;
+};
+
+
+
+/**
  * @short Properties for collection effect
  *
  * Collection is special in that there is actually no BosonEffectCollection

@@ -187,13 +187,19 @@ class BosonShotBullet : public BosonShot
 
     void setTarget(const BoVector3& target);
 
+    virtual const QPtrList<BosonEffect>* effects() const  { return mFlyEffects; }
+
     inline virtual int type() const { return BosonShot::Bullet; }
 
+    virtual void explode();
+
   protected:
+    void setEffects(const QPtrList<BosonEffect>& list);
     virtual void moveToTarget();
 
   private:
     BoVector3 mTarget;
+    QPtrList<BosonEffect>* mFlyEffects;
 };
 
 

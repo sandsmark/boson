@@ -89,6 +89,10 @@ BosonEffectProperties* BosonEffectPropertiesFactory::newEffectProperties(const Q
   {
     return new BosonEffectPropertiesLight();
   }
+  else if(type == "BulletTrail")
+  {
+    return new BosonEffectPropertiesBulletTrail();
+  }
   else if(type == "Collection")
   {
     return new BosonEffectPropertiesCollection();
@@ -264,8 +268,10 @@ bool BosonEffectPropertiesFog::load(KSimpleConfig* cfg, const QString& group, bo
 
 BosonEffect* BosonEffectPropertiesFog::newEffect(const BoVector3& pos, const BoVector3&) const
 {
+  BoVector3 worldpos = pos;
+  worldpos.canvasToWorld();
   BosonEffectFog* fog = new BosonEffectFog(this);
-  fog->setPosition(pos);
+  fog->setPosition(worldpos);
   return fog;
 }
 
@@ -375,6 +381,57 @@ BosonEffect* BosonEffectPropertiesLight::newEffect(const BoVector3& pos, const B
 
 
 
+/*****  BosonEffectPropertiesBulletTrail  *****/
+
+BosonEffectPropertiesBulletTrail::BosonEffectPropertiesBulletTrail() : BosonEffectProperties()
+{
+  reset();
+}
+
+void BosonEffectPropertiesBulletTrail::reset()
+{
+  // Reset all variables to their default values
+  mColor.reset();
+  mMinLength = 0.0f;
+  mMaxLength = 0.0f;
+  mWidth = 1.0f;
+  mProbability = 1.0f;
+}
+
+bool BosonEffectPropertiesBulletTrail::load(KSimpleConfig* cfg, const QString& group, bool inherited)
+{
+  if(!BosonEffectProperties::load(cfg, group, inherited))
+  {
+    return false;
+  }
+
+  mColor = BosonConfig::readBoVector4Entry(cfg, "Color", mColor);
+  mMinLength = (float)(cfg->readDoubleNumEntry("MinLength", mMinLength));
+  mMaxLength = (float)(cfg->readDoubleNumEntry("MaxLength", mMaxLength));
+  mWidth = (float)(cfg->readDoubleNumEntry("Width", mWidth));
+  mProbability = (float)(cfg->readDoubleNumEntry("Probability", mProbability));
+
+  return true;
+}
+
+BosonEffect* BosonEffectPropertiesBulletTrail::newEffect(const BoVector3& pos, const BoVector3&) const
+{
+  if(mProbability < 1.0f)
+  {
+    if(BosonEffect::getFloat(0.0f, 1.0f) <= mProbability)
+    {
+      return 0;
+    }
+  }
+
+  BoVector3 worldpos = pos;
+  worldpos.canvasToWorld();
+  BosonEffectBulletTrail* line = new BosonEffectBulletTrail(this, worldpos);
+  return line;
+}
+
+
+
 /*****  BosonEffectPropertiesCollection  *****/
 
 BosonEffectPropertiesCollection::BosonEffectPropertiesCollection() : BosonEffectProperties()
@@ -439,7 +496,7 @@ QPtrList<BosonEffect> BosonEffectPropertiesCollection::newEffectsList(const BoVe
     {
       list.append(e.first());
     }
-    else
+    else if(e.count() > 0)
     {
       QPtrListIterator<BosonEffect> eit(e);
       while(eit.current())

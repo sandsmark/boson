@@ -243,6 +243,7 @@ BosonShotBullet::BosonShotBullet(Player* owner, BosonCanvas* canvas, const Boson
   }
 
   mTarget = target;
+  mFlyEffects = 0;
 
   explode();
 }
@@ -256,6 +257,8 @@ BosonShotBullet::BosonShotBullet(Player* owner, BosonCanvas* canvas, const Boson
     setActive(false);
     return;
   }
+
+  mFlyEffects = 0;
 }
 
 void BosonShotBullet::moveToTarget()
@@ -266,6 +269,26 @@ void BosonShotBullet::moveToTarget()
 void BosonShotBullet::setTarget(const BoVector3& target)
 {
   mTarget = target;
+}
+
+void BosonShotBullet::explode()
+{
+  // We need to create fly effects here, because atm, our position is shooter's
+  //  (weapon's) position and BosonShot::explode() moves us to target position,
+  //  so fly effects will then get correctly moved as well.
+  setEffects(properties()->newFlyEffects(BoVector3(x(), y(), z()), 0.0));
+
+  BosonShot::explode();
+
+  delete mFlyEffects;
+  mFlyEffects = 0;
+}
+
+void BosonShotBullet::setEffects(const QPtrList<BosonEffect>& list)
+{
+  delete mFlyEffects;
+  mFlyEffects = new QPtrList<BosonEffect>(list);
+  canvas()->addEffects(*mFlyEffects);
 }
 
 
