@@ -21,15 +21,49 @@
 
 #include <qwidget.h>
 
+#include <klistview.h>
+
 #include <lib3ds/types.h>
 
 class QListBoxItem;
 class QListViewItem;
 class QLabel;
+class KPopupMenu;
 
 class BosonModel;
 class SpeciesTheme;
 struct _Lib3dsTextureMap;
+
+class BoListView : public KListView
+{
+	Q_OBJECT
+public:
+	BoListView(QWidget* parent);
+
+	~BoListView();
+
+	/**
+	 * Insert the @ref QListView::columnText of @p column to the @ref
+	 * KPopupMenu that appears when the user right clicks on the header.
+	 *
+	 * The user will be able to hide the column then by clicking that menu
+	 * entry.
+	 *
+	 * This has no effect if it was called without any columns present. You
+	 * must call @ref addColmn first.
+	 **/
+	void allowHide(int column);
+
+protected slots:
+	void slotToggleHideColumn(int index);
+
+protected:
+	virtual bool eventFilter(QObject* o, QEvent* e);
+	
+private:
+	KPopupMenu* mPopup;
+};
+
 
 /**
  * This widget is most useful in borender, but could also be used in the main
@@ -80,6 +114,7 @@ protected slots:
 	void slotConstructMeshList();
 	void slotDisplayMaterial(QListBoxItem*);
 	void slotDisplayMesh(QListViewItem*);
+	void slotConnectToFace(QListViewItem*);
 
 protected:
 	void updateMaterialPage();

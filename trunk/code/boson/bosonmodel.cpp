@@ -29,6 +29,10 @@
 
 #include <qimage.h>
 #include <qgl.h>
+#include <qptrlist.h>
+#include <qstringlist.h>
+#include <qvaluelist.h>
+#include <qintdict.h>
 
 #include <lib3ds/file.h>
 #include <lib3ds/node.h>
@@ -156,24 +160,41 @@ public:
 	GLubyte mColor[3];
 };
 
+class BosonModel::Private
+{
+public:
+	Private()
+	{
+	}
+
+	QValueList<GLuint> mNodeDisplayLists;
+	QIntDict<BoFrame> mFrames;
+	QIntDict<BoFrame> mConstructionSteps;
+	QIntDict<BosonAnimation> mAnimations;
+	QMap<QString, QString> mTextureNames;
+	QString mDirectory;
+	QString mFile;
+};
+
 BosonModel::BosonModel(const QString& dir, const QString& file, float width, float height)
 {
  init();
- mDirectory = dir;
- mFile = file;
+ d->mDirectory = dir;
+ d->mFile = file;
  mWidth = width;
  mHeight = height;
 }
 
 void BosonModel::init()
 {
+ d = new Private;
  m3ds = 0;
  mTeamColor = 0;
  mWidth = 0;
  mHeight = 0;
- mFrames.setAutoDelete(true);
- mConstructionSteps.setAutoDelete(true);
- mAnimations.setAutoDelete(true);
+ d->mFrames.setAutoDelete(true);
+ d->mConstructionSteps.setAutoDelete(true);
+ d->mAnimations.setAutoDelete(true);
  if (!mModelTextures) { // TODO static deleter!
 	mModelTextures = new BosonModelTextures();
  }
@@ -187,27 +208,28 @@ BosonModel::~BosonModel()
  kdDebug() << k_funcinfo << endl;
  finishLoading();
  mModelTextures->removeModel(this);
- kdDebug() << k_funcinfo << "delete " << mFrames.count() << " frames" << endl;
- mFrames.clear();
- kdDebug() << k_funcinfo << "delete " << mConstructionSteps.count() << " construction frames" << endl;
- mConstructionSteps.clear();
- kdDebug() << k_funcinfo << "delete " << mNodeDisplayLists.count() << " child display lists" << endl;
- QValueList<GLuint>::Iterator it = mNodeDisplayLists.begin();
- for (; it != mNodeDisplayLists.end(); ++it) {
+ kdDebug() << k_funcinfo << "delete " << d->mFrames.count() << " frames" << endl;
+ d->mFrames.clear();
+ kdDebug() << k_funcinfo << "delete " << d->mConstructionSteps.count() << " construction frames" << endl;
+ d->mConstructionSteps.clear();
+ kdDebug() << k_funcinfo << "delete " << d->mNodeDisplayLists.count() << " child display lists" << endl;
+ QValueList<GLuint>::Iterator it = d->mNodeDisplayLists.begin();
+ for (; it != d->mNodeDisplayLists.end(); ++it) {
 	glDeleteLists((*it), 1);
  }
- mAnimations.clear();
+ d->mAnimations.clear();
+ delete d;
  kdDebug() << k_funcinfo << "done" << endl;
 }
 
 void BosonModel::loadModel()
 {
- if (mFile.isEmpty() || mDirectory.isEmpty()) {
+ if (d->mFile.isEmpty() || d->mDirectory.isEmpty()) {
 	kdError() << k_funcinfo << "No file has been specified for loading" << endl;
 	return;
  }
  boProfiling->start(BosonProfiling::LoadModel);
- QString fullFile = baseDirectory() + mFile;
+ QString fullFile = file();
  m3ds = lib3ds_file_load(fullFile);
  if (!m3ds) {
 	kdError() << k_funcinfo << "Can't load " << fullFile << endl;
@@ -234,13 +256,50 @@ void BosonModel::loadModel()
  boProfiling->stop(BosonProfiling::LoadModel);
 }
 
-QString BosonModel::cleanTextureName(const char* name)
+const QString& BosonModel::baseDirectory() const
+{
+ return d->mDirectory;
+}
+
+QString BosonModel::file() const
+{
+ return baseDirectory() + d->mFile;
+}
+
+void BosonModel::setLongNames(QMap<QString, QString> names)
+{
+ d->mTextureNames = names;
+}
+
+QString BosonModel::cleanTextureName(const char* name) const
 {
  QString s = QString(name).lower();
- if (mTextureNames.contains(s)) {
-	return mTextureNames[s];
+ if (d->mTextureNames.contains(s)) {
+	return d->mTextureNames[s];
  }
  return s;
+}
+
+QStringList BosonModel::textures(Lib3dsFile* file)
+{
+ QStringList list;
+ if (!file) {
+	kdError() << k_funcinfo << "NULL file" << endl;
+	return list;
+ }
+
+ // note that it is not neceassary to loop through all frames, since other
+ // frames do *not* (never!) contain other textures
+ Lib3dsMaterial* mat;
+ for (mat = file->materials; mat; mat = mat->next) {
+	Lib3dsTextureMap* t = &mat->texture1_map;
+	QString texName = t->name;
+	if (texName.isEmpty()) {
+		continue;
+	}
+	list.append(texName);
+ }
+ return list;
 }
 
 void BosonModel::loadTextures()
@@ -249,16 +308,10 @@ void BosonModel::loadTextures()
 	kdError() << k_funcinfo << "File was not yet loaded" << endl;
 	return;
  }
- //FIXME: do we need to loop through frames? i guess even in other frames there
- //shouldn't be other textures?!
- Lib3dsMaterial* mat;
- for (mat = m3ds->materials; mat; mat = mat->next) {
-	Lib3dsTextureMap* t = &mat->texture1_map;
-	QString texName = cleanTextureName(t->name);
-	if (texName.isEmpty()) {
-		continue;
-	}
-	mModelTextures->insert(this, texName);
+ QStringList list = textures(m3ds);
+ QStringList::Iterator it = list.begin();
+ for (; it != list.end(); ++it) {
+	mModelTextures->insert(this, cleanTextureName(*it));
  }
 }
 
@@ -350,7 +403,7 @@ void BosonModel::createDisplayLists()
 	frame->setDisplayList(list);
 	frame->setDepthMultiplier(helper.lengthZ() * scale / BO_GL_CELL_SIZE);
 //	frame->setDepthMultiplier(helper.lengthZ() / BO_GL_CELL_SIZE);
-	mFrames.insert(m3ds->current_frame, frame);
+	d->mFrames.insert(m3ds->current_frame, frame);
  }
 }
 
@@ -364,7 +417,7 @@ void BosonModel::generateConstructionLists()
  m3ds->current_frame = 0;
  lib3ds_file_eval(m3ds, m3ds->current_frame);
 
- BoFrame* frame0 = mFrames[0];
+ BoFrame* frame0 = d->mFrames[0];
  if (!frame0) {
 	kdError() << k_funcinfo << "No frame was loaded yet!" << endl;
 	return;
@@ -410,7 +463,7 @@ void BosonModel::generateConstructionLists()
 		glPopMatrix();
 	glEndList();
 	step->setDisplayList(list);
-	mConstructionSteps.insert(i, step);
+	d->mConstructionSteps.insert(i, step);
  }
 }
 
@@ -621,7 +674,7 @@ void BosonModel::loadNode(Lib3dsNode* node, bool reload)
 
 	// now start the actual display list for this node.
 	glNewList(node->user.d, GL_COMPILE);
-	mNodeDisplayLists.append(node->user.d);
+	d->mNodeDisplayLists.append(node->user.d);
 	glBindTexture(GL_TEXTURE_2D, myTex);
 
 	glBegin(GL_TRIANGLES); // note: you shouldn't do calculations after a glBegin() but we compile a display list only, so its ok
@@ -708,15 +761,25 @@ void BosonModel::renderNode(Lib3dsNode* node)
 
 BoFrame* BosonModel::frame(unsigned int frame) const
 {
- return mFrames[frame];
+ return d->mFrames[frame];
+}
+
+unsigned int BosonModel::frames() const
+{
+ return d->mFrames.count();
 }
 
 BoFrame* BosonModel::constructionStep(unsigned int step)
 {
- if (step >= mConstructionSteps.count()) {
-	step = mConstructionSteps.count() - 1;
+ if (step >= d->mConstructionSteps.count()) {
+	step = d->mConstructionSteps.count() - 1;
  }
- return mConstructionSteps[step];
+ return d->mConstructionSteps[step];
+}
+
+unsigned int BosonModel::constructionSteps() const
+{
+ return d->mConstructionSteps.count();
 }
 
 void BosonModel::setTeamColor(const QColor& c)
@@ -735,7 +798,7 @@ void BosonModel::finishLoading()
  }
  delete mTeamColor;
  mTeamColor = 0;
- mTextureNames.clear();
+ d->mTextureNames.clear();
 }
 
 void BosonModel::dumpVector(Lib3dsVector v)
@@ -744,6 +807,15 @@ void BosonModel::dumpVector(Lib3dsVector v)
 }
 
 void BosonModel::dumpTriangle(Lib3dsVector* v, GLuint texture, Lib3dsTexel* tex)
+{
+ BoVector3 vector[3];
+ for (int i = 0; i < 3; i++) {
+	vector[i].set(v[i]);
+ }
+ dumpTriangle(vector, texture, tex);
+}
+
+void BosonModel::dumpTriangle(BoVector3* v, GLuint texture, Lib3dsTexel* tex)
 {
  QString text = "triangle: ";
  for (int i = 0; i < 3; i++) {
@@ -785,9 +857,9 @@ void BosonModel::insertAnimationMode(int mode, int start, unsigned int range, un
 		range = 1;
 		speed = 1;
 	}
-	if (mAnimations[0]) {
+	if (d->mAnimations[0]) {
 		// default mode already there - replace it!
-		mAnimations.remove(0);
+		d->mAnimations.remove(0);
 	}
  } else {
 	if (start < 0 || range == 0 || speed == 0) {
@@ -795,7 +867,7 @@ void BosonModel::insertAnimationMode(int mode, int start, unsigned int range, un
 	}
  }
  BosonAnimation* anim = new BosonAnimation(start, range, speed);
- mAnimations.insert(mode, anim);
+ d->mAnimations.insert(mode, anim);
 }
 
 void BosonModel::loadAnimationMode(int mode, KSimpleConfig* conf, const QString& name)
@@ -814,4 +886,102 @@ void BosonModel::loadAnimationMode(int mode, KSimpleConfig* conf, const QString&
  speed = conf->readUnsignedNumEntry(QString::fromLatin1("FrameSpeed") + name, speed);
  insertAnimationMode(mode, start, range, speed);
 }
+
+BosonAnimation* BosonModel::animation(int mode) const
+{
+ return d->mAnimations[mode];
+}
+
+
+
+
+// note: these functions are *not* optimized for speed, as they are used on
+// startup only.
+
+bool BosonModel::isAdjacent(BoVector3* v1, BoVector3* v2)
+{
+ if (!v1 || !v2) {
+	return false;
+ }
+ int equal = 0;
+ for (int i = 0; i < 3; i++) {
+	if (v1[i].isEqual(v2[0]) || v1[i].isEqual(v2[1]) || v2[i].isEqual(v2[2])) {
+		equal++;
+	}
+ }
+
+// face1 is adjacent to face2 if at least 2 points are equal.
+// equal faces are possible, too.
+ return (equal >= 2);
+}
+
+// yes, i know this would be a great function for a recursive algorithm. but i
+// don't like recursion, so i do it with loops.
+void BosonModel::findAdjacentFaces(QPtrList<Lib3dsFace>* adjacentFaces, Lib3dsMesh* mesh, Lib3dsFace* search)
+{
+ if (!adjacentFaces || !mesh) {
+	return;
+ }
+
+ if (!search) {
+	search = &mesh->faceL[0];
+ }
+ adjacentFaces->append(search); // always adjacent to itself :)
+
+ // add all available faces to a list.
+ QPtrList<Lib3dsFace> faces;
+ for (unsigned int i = 0; i < mesh->faces; i++) {
+	Lib3dsFace* face = &mesh->faceL[i];
+	if (face == search) {
+		// no need to add this to the list of available faces
+		continue;
+	}
+	faces.append(face);
+ }
+
+
+ for (unsigned int i = 0; i < adjacentFaces->count(); i++) {
+	QPtrList<Lib3dsFace> found; // these need to get removed from faces list
+	QPtrListIterator<Lib3dsFace> it(faces);
+	BoVector3 current[3]; // the triangle/face we search for
+	for (int j = 0; j < 3; j++) {
+		// Lib3dsFace stores only the position (index) of the
+		// actual point. the actual points are in mesh->pointL
+		current[j].set(mesh->pointL[ adjacentFaces->at(i)->points[j] ].pos);
+	}
+
+	for (; it.current(); ++it) {
+		BoVector3 v[3];
+		for (int j = 0; j < 3; j++) {
+			v[j].set(mesh->pointL[ it.current()->points[j] ].pos);
+		}
+		if (BosonModel::isAdjacent(current, v)) {
+			adjacentFaces->append(it.current());
+			found.append(it.current());
+		} else {
+//			kdDebug() << "not adjacent in: " << mesh->name<< endl;
+//			BosonModel::dumpTriangle(v, 0, 0);
+		}
+	}
+	for (unsigned j = 0; j < found.count(); j++) {
+		faces.remove(found.at(j));
+	}
+ }
+
+ kdDebug() << k_funcinfo << "adjacent: " << adjacentFaces->count() << " of " << mesh->faces << endl;
+}
+
+// TODO: write a debug dialog which is able to display nodes and faces.
+// there should be a listbox (view?) with list of all faces of a node.
+// it should be designed like this:
+// face	point1	point2	point3
+// 1	x,y,z	x,y,z	x,y,z
+// 2	x,y,z	x,y,z	x,y,z
+// ...
+// there should be several checkboxes with that you can decide how this gets
+// displayed.
+// by default use "mesh-order" aka "face-order" or so. then point1 == pointL[f->point[0]]
+// but it should also be possible to sort by x,y or z. e.g. sorting by x means
+// that "point1" is the point of the face with the lowest x-coordinate.
+
 
