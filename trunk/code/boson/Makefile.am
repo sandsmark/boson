@@ -1,6 +1,7 @@
 ## Makefile.am for boson
 
-SUBDIRS = data \
+SUBDIRS = \
+	data \
 	boufo \
 	bosonwidgets \
 	items \
