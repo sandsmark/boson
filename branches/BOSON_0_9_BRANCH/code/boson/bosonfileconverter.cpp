@@ -22,7 +22,6 @@
 #include "bodebug.h"
 #include "defines.h"
 #include "boversion.h"
-#include "bosonsaveload.h"
 
 #include <qdatastream.h>
 #include <qcolor.h>
@@ -457,6 +456,87 @@ bool BosonFileConverter::convertScenario_From_0_8_To_0_9(const QByteArray& scena
  *canvasXML = canvasDoc.toCString();
  *kgameXML = kgameDoc.toCString();
 
+ return true;
+}
+
+bool BosonFileConverter::convertPlayField_From_0_9_To_0_9_1(QMap<QString, QByteArray>& files)
+{
+ QDomDocument kgameDoc(QString::fromLatin1("Boson"));
+ if (!loadXMLDoc(&kgameDoc, files["kgame.xml"])) {
+	boError() << k_funcinfo << "could not load kgame.xml" << endl;
+	return false;
+ }
+ QDomElement kgameRoot = kgameDoc.documentElement();
+ unsigned int version = kgameRoot.attribute("Version").toUInt();
+ if (version != BOSON_SAVEGAME_FORMAT_VERSION_0_9) {
+	boError() << k_funcinfo << "invalid version: " << version << endl;
+	return false;
+ }
+ kgameRoot.setAttribute("Version", BOSON_SAVEGAME_FORMAT_VERSION_0_9_1);
+
+ // we need to fix the Ids in the players.xml and canvas.xml files.
+ // there are exactly two possibilities:
+ // 1. the file is a playfield. then it is fixed already.
+ // 2. the file is a savegame. then the file contains actual IDs, but we need
+ // numbers.
+ //
+ // for code simplicity we ignore 1. -> it doesn't matter anway if we "fix
+ // again".
+ //
+ // while we're on it we also remove the "OwnerId" attribute in canvas.xml. it
+ // has been replaced by "Id"
+
+ QDomDocument playersDoc(QString::fromLatin1("Players"));
+ if (!loadXMLDoc(&playersDoc, files["players.xml"])) {
+	boError() << k_funcinfo << "could not load players.xml" << endl;
+	return false;
+ }
+ QDomElement playersRoot = playersDoc.documentElement();
+
+ QDomNodeList playerList = playersRoot.elementsByTagName("Player");
+ QMap<int, int> playerId2Number;
+ for (unsigned int i = 0; i < playerList.count(); i++) {
+	QDomElement p = playerList.item(i).toElement();
+	bool ok = false;
+	unsigned int id = p.attribute("Id").toUInt(&ok);
+	if (!ok) {
+		boError() << k_funcinfo << "invalid number for Id of Player " << i << endl;
+		return false;
+	}
+	p.setAttribute("Id", i);
+	playerId2Number.insert(id, i);
+ }
+
+ QDomDocument canvasDoc(QString::fromLatin1("Canvas"));
+ if (!loadXMLDoc(&canvasDoc, files["canvas.xml"])) {
+	boError() << k_funcinfo << "could not load canvas.xml" << endl;
+	return false;
+ }
+ QDomElement canvasRoot = canvasDoc.documentElement();
+ QDomNodeList itemsList = canvasRoot.elementsByTagName("Items");
+ for (unsigned int i = 0; i < itemsList.count(); i++) {
+	QDomElement e = itemsList.item(i).toElement();
+	if (!e.hasAttribute("Id")) {
+		// a .bpf file has both, Id and OwnerId (with OwnerId unused),
+		// but .bsg files have OwnerId only
+		e.setAttribute("Id", e.attribute("OwnerId"));
+	}
+	e.removeAttribute("OwnerId");
+	bool ok = false;
+	unsigned int id = e.attribute("Id").toUInt(&ok);
+	if (!ok) {
+		boError() << k_funcinfo << "invalid number for OwnerId of Items tag " << i << endl;
+		return false;
+	}
+	if (!playerId2Number.contains(id)) {
+		boError() << k_funcinfo << "unknown OwnerId " << id << " for Items tag " << i << endl;
+		return false;
+	}
+	e.setAttribute("Id", playerId2Number[id]);
+ }
+ files.insert("kgame.xml", kgameDoc.toString().utf8());
+ files.insert("players.xml", playersDoc.toString().utf8());
+ files.insert("canvas.xml", canvasDoc.toString().utf8());
  return true;
 }
 

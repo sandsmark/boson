@@ -61,6 +61,8 @@ public:
 	 **/
 	bool convertScenario_From_0_8_To_0_9(const QByteArray& scenarioXML, QByteArray* playersXML, QByteArray* canvasXML, QByteArray* kgameXML);
 
+	bool convertPlayField_From_0_9_To_0_9_1(QMap<QString, QByteArray>& files);
+
 protected:
 	bool loadXMLDoc(QDomDocument* doc, const QString& xml) const;
 };
