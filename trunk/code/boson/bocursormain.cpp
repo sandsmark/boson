@@ -29,6 +29,7 @@
 #include "bodebugdcopiface.h"
 #include "boversion.h"
 #include "boapplication.h"
+#include "boglobal.h"
 
 #include <kcmdlineargs.h>
 #include <kaboutdata.h>
@@ -39,6 +40,8 @@
 #include <qtimer.h>
 
 #include <GL/glu.h>
+
+static void postBosonConfigInit();
 
 static const char *description =
     I18N_NOOP("Cursor Editor for Boson");
@@ -181,6 +184,7 @@ int main(int argc, char **argv)
 		0,
 		"http://boson.eu.org");
  about.addAuthor( "Andreas Beckermann", I18N_NOOP("Design & Coding"), "b_mann@gmx.de" );
+ BosonConfig::setPostInitFunction(&postBosonConfigInit);
 
  KCmdLineArgs::init(argc, argv, &about);
  KCmdLineArgs::addCmdLineOptions(options);
@@ -215,5 +219,15 @@ int main(int argc, char **argv)
  delete preview;
  delete w;
  return r;
+}
+
+static void postBosonConfigInit()
+{
+ BosonConfig* conf = BoGlobal::boGlobal()->bosonConfig();
+ if (!conf) {
+	boError() << k_funcinfo << "NULL BosonConfig object" << endl;
+	return;
+ }
+ conf->setDisableSound(true);
 }
 
