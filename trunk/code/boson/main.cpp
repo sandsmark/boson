@@ -141,8 +141,8 @@ void postBosonConfigInit()
 	boError() << k_funcinfo << "NULL BosonConfig object" << endl;
 	return;
  }
- if (!args->isSet("sound")) {
-	boConfig->setDisableSound(true);
+ if (args->isSet("sound")) {
+	boConfig->setDisableSound(false);
  }
  if (!args->isSet("ai")) {
 	boDebug() << k_funcinfo << "ai arg is not set" << endl;
