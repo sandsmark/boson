@@ -394,14 +394,6 @@ public:
 	void addParticleSystem(BosonParticleSystem* s);
 	void addParticleSystems(const QPtrList<BosonParticleSystem> systems);
 
-	/**
-	 * Delete a list of units.
-	 *
-	 * This method is the <em>only</em> way to delete units! Do <em>NOT</em>
-	 * delete units from anywhere else!
-	 **/
-	void deleteUnits(QPtrList<Unit>* units);
-
 	bool loadFromXML(const QDomElement& root);
 	bool saveAsXML(QDomElement& root);
 
@@ -481,6 +473,12 @@ protected:
 	 * (e.g. in @ref deleteUnits and @ref deleteUnusedShots and so on)
 	 **/
 	void deleteItem(BosonItem* item);
+
+	/**
+	 * Delete a list of items. See also @ref deleteItem
+	 **/
+	void deleteItems(QPtrList<BosonItem>& items);
+	void deleteItems(BoItemList& items);
 
 	/**
 	 * Remove @p item from the list of items.
