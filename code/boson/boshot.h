@@ -47,6 +47,7 @@ public:
 	virtual void advance(int phase);
 
 protected:
+	void deleteMe();
 
 private:
 	class BoShotPrivate;
