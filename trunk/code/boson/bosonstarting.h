@@ -50,7 +50,7 @@ public:
 	 * Use @ref setPlayFieldId to specify the playfield that should get
 	 * loaded.
 	 **/
-	void setPlayField(BosonPlayField* f) { mPlayField = f; }
+	void setDestPlayField(BosonPlayField* f) { mDestPlayField = f; }
 	void setLocalPlayer(Player* p) { mPlayer = p; }
 	void setPlayFieldId(const QString& id) { mPlayFieldId = id; }
 	void setEditorMap(const QByteArray& buffer);
@@ -130,7 +130,7 @@ protected:
 	 * @return The playfield. protected, as you should get this from
 	 * elsewhere (e.g. @ref TopWidget) if you are outside this class
 	 **/
-	BosonPlayField* playField() const { return mPlayField; }
+	BosonPlayField* playField() const { return mDestPlayField; }
 
 	void loadPlayerData();
 	void loadUnitDatas(Player* p);
@@ -139,7 +139,7 @@ protected:
 
 private:
 	QByteArray mNewGameData;
-	BosonPlayField* mPlayField;
+	BosonPlayField* mDestPlayField;
 	BosonPlayField* mNewPlayField;
 	Player* mPlayer;
 

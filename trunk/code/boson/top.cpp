@@ -526,7 +526,7 @@ void TopWidget::slotStartNewGame()
 
  d->mStartup->showLoadingWidget();
 
- d->mStarting->setPlayField(mPlayField);
+ d->mStarting->setDestPlayField(mPlayField);
 
  initCanvas();
  initBosonWidget();
@@ -566,7 +566,7 @@ void TopWidget::slotLoadGame(const QString& fileName)
 	boError() << k_funcinfo << "NULL starting object!!" << endl;
 	return;
  }
- d->mStarting->setPlayField(mPlayField);
+ d->mStarting->setDestPlayField(mPlayField);
 
 
  // Start loading
