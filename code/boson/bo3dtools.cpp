@@ -29,6 +29,10 @@
 
 #include "bosonconfig.h"
 
+// Degrees to radians conversion (AB: from mesa/src/macros.h)
+#define DEG2RAD (M_PI/180.0)
+
+
 /*****  Misc methods  *****/
 
 float rotationToPoint(float x, float y)
@@ -389,6 +393,68 @@ void BoMatrix::multiply(const GLfloat* mat)
 #undef A
 #undef B
 #undef P
+}
+
+void BoMatrix::rotate(GLfloat angle, GLfloat x, GLfloat y, GLfloat z)
+{
+ // shamelessy stolen from mesa/src/math/m_math.c
+ GLfloat mag, s, c;
+ GLfloat xx, yy, zz, xy, yz, zx, xs, ys, zs, one_c;
+ GLfloat m[16];
+
+ s = (GLfloat) sin( angle * DEG2RAD );
+ c = (GLfloat) cos( angle * DEG2RAD );
+
+ mag = (GLfloat) sqrt( x*x + y*y + z*z ); // AB: mesa uses GL_SQRT here
+
+ if (mag <= 1.0e-4) 
+ {
+   // generate an identity matrix and return
+   loadIdentity();
+   return;
+ }
+
+ x /= mag;
+ y /= mag;
+ z /= mag;
+
+#define M(row,col)  m[col*4+row]
+
+ xx = x * x;
+ yy = y * y;
+ zz = z * z;
+ xy = x * y;
+ yz = y * z;
+ zx = z * x;
+ xs = x * s;
+ ys = y * s;
+ zs = z * s;
+ one_c = 1.0F - c;
+
+ M(0,0) = (one_c * xx) + c;
+ M(0,1) = (one_c * xy) - zs;
+ M(0,2) = (one_c * zx) + ys;
+ M(0,3) = 0.0F;
+
+ M(1,0) = (one_c * xy) + zs;
+ M(1,1) = (one_c * yy) + c;
+ M(1,2) = (one_c * yz) - xs;
+ M(1,3) = 0.0F;
+
+ M(2,0) = (one_c * zx) - ys;
+ M(2,1) = (one_c * yz) + xs;
+ M(2,2) = (one_c * zz) + c;
+ M(2,3) = 0.0F;
+
+ M(3,0) = 0.0F;
+ M(3,1) = 0.0F;
+ M(3,2) = 0.0F;
+ M(3,3) = 1.0F;
+
+#undef M
+
+ multiply(m);
+
 }
 
 void BoMatrix::debugMatrix(const GLfloat* m)
