@@ -349,6 +349,7 @@ class BoVector3
       return isEqual(v.data(), diff);
     }
 
+    inline bool operator==(const BoVector3& v) const { return isEqual(v); }
     /**
      * @overload
      *
