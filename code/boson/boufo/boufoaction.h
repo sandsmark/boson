@@ -71,7 +71,7 @@ signals:
 private:
 	void init(BoUfoActionCollection* parent, const QString& text, const KShortcut& cut, const QObject* receiver, const char* slot);
 
-protected:
+public: // g++ 3.4 complains if we make this protected
 	void uslotActivated(ufo::UActionEvent*);
 	void uslotHighlighted(ufo::UActionEvent*);
 	void uslotWidgetRemoved(ufo::UWidget*);
