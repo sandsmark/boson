@@ -351,7 +351,7 @@ void BosonProfiling::advanceItemFunction(bool start)
 
 void BosonProfiling::advanceItemMove(bool start)
 {
- d->mCurrentItemAdvanceTimes->mAdvance.getTime(start);
+ d->mCurrentItemAdvanceTimes->mMove.getTime(start);
 }
 
 void BosonProfiling::advanceItemStop()
