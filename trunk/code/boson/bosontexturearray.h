@@ -20,7 +20,10 @@
 #define BOSONTEXTUREARRAY_H
 
 #include <qvaluelist.h>
+#include <qintdict.h>
 #include <GL/gl.h>
+
+class BoTextureInfo;
 
 class QImage;
 class BosonTextureArray
@@ -92,6 +95,18 @@ public:
 		return mHeights ? mHeights[i] : 0;
 	}
 
+	/**
+	 * Set the texture parameter (i.e. magnification and minification
+	 * filters) according to current values from @ref BosonConfig.
+	 **/
+	static void resetTexParameter();
+	static void resetMipmapTexParameter();
+
+	/**
+	 * Reset texture parameter for all registered textures
+	 **/
+	static void resetAllTexParameter();
+
 
 private:
 	/**
@@ -105,6 +120,7 @@ private:
 	void init();
 
 private:
+	static QIntDict<BoTextureInfo> mAllTextures; // contains *all* textures. useful for the opntions dialog, where we can change texture parameters on runtime.
 	unsigned int mCount;
 	GLuint* mTextures;
 	int* mWidths;

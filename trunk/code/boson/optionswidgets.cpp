@@ -21,6 +21,7 @@
 
 #include "bosoncursor.h"
 #include "bosonmodel.h"
+#include "bosontexturearray.h"
 #include "boson.h"
 #include "defines.h"
 
@@ -395,8 +396,8 @@ OpenGLOptions::~OpenGLOptions()
 
 void OpenGLOptions::apply()
 {
- bool reloadAllTextures = false;
  bool reloadModelTextures = false;
+ bool resetTexParameter = false;
  emit signalUpdateIntervalChanged((unsigned int)mUpdateInterval->value());
  if (boConfig->modelTexturesMipmaps() != mModelTexturesMipmaps->isChecked()) {
 	boConfig->setModelTexturesMipmaps(mModelTexturesMipmaps->isChecked());
@@ -404,32 +405,33 @@ void OpenGLOptions::apply()
  }
  if (boConfig->magnificationFilter() != magnificationFilter()) {
 	boConfig->setMagnificationFilter(magnificationFilter());
-	reloadAllTextures = true;
+	resetTexParameter = true;
  }
  if (boConfig->minificationFilter() != minificationFilter()) {
 	boConfig->setMinificationFilter(minificationFilter());
-	reloadAllTextures = true;
+	resetTexParameter = true;
  }
  if (boConfig->mipmapMinificationFilter() != mipmapMinificationFilter()) {
 	boConfig->setMipmapMinificationFilter(mipmapMinificationFilter());
 	// only models use mipmaps (if at all)
 	if (boConfig->modelTexturesMipmaps()) {
-		reloadModelTextures = true;
+		resetTexParameter = true;
 	}
  }
 
- if (reloadModelTextures && !reloadAllTextures) {
-	reloadModelTextures = KMessageBox::questionYesNo(this, i18n("You need to reload the model textures to see your changes. Do you want to reload now (takes some time)?"));
+ if (reloadModelTextures) {
+	int r = KMessageBox::questionYesNo(this, i18n("You need to reload the model textures to see your changes. Do you want to reload now (takes some time)?"));
+	reloadModelTextures = (r == KMessageBox::Yes);
 	if (reloadModelTextures) {
 		BosonModel::reloadAllTextures();
 	}
  }
- if (reloadAllTextures) {
-	reloadAllTextures = KMessageBox::questionYesNo(this, i18n("You need to reload all textures to see your changes. Do you want to reload now (takes some time)?\nNote: this has not yet been implemented! only model textures will be reloaded! restart boson to reload all other textures!"));
-	if (reloadAllTextures) {
-		kdWarning() << k_funcinfo << "Need to reload all textures - not yet implemented!" << endl;
-		// TODO
-		BosonModel::reloadAllTextures();
+ if (resetTexParameter) {
+	// maybe display a message box now, asking for permission to reset the
+	// parameters. currently we just reset them - leave it at this as long
+	// as no problems appear
+	if (resetTexParameter) {
+		BosonTextureArray::resetAllTexParameter();
 	}
  }
 }
