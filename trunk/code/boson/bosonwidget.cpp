@@ -234,6 +234,9 @@ void BosonWidget::initDisplayManager()
 		this, SLOT(slotSetActiveDisplay(BosonBigDisplayBase*, BosonBigDisplayBase*)));
  canvas()->setDisplayManager(displayManager());
 
+ connect(d->mCommandFrame, SIGNAL(signalAction(int)),
+		mDisplayManager, SLOT(slotUnitAction(int)));
+
  initBigDisplay(displayManager()->addInitialDisplay());
 }
 
@@ -378,9 +381,6 @@ void BosonWidget::initBigDisplay(BosonBigDisplayBase* b)
 		d->mCommandFrame, SLOT(slotShowSingleUnit(Unit*)));
  connect(b->selection(), SIGNAL(signalSelectUnit(Unit*)),
 		d->mCommandFrame, SLOT(slotShowUnit(Unit*)));
-
- connect(d->mCommandFrame, SIGNAL(signalAction(int)),
-		b, SLOT(slotUnitAction(int)));
 
  b->makeActive();
 }

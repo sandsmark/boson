@@ -458,7 +458,7 @@ void BosonBigDisplay::addMouseIO(Player* p)
 }
 */
 
-void BosonBigDisplay::slotUnitAction(int actionType)
+void BosonBigDisplay::unitAction(int actionType)
 {
  switch ((UnitAction)actionType) {
 	case ActionMove:

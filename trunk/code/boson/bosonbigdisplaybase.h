@@ -137,6 +137,8 @@ public:
 	 **/
 	virtual void quitGame();
 
+	virtual void unitAction(int actionType) {};
+
 public slots:
 	/**
 	 * @param pos The new position - cell coordinates! so you have to
