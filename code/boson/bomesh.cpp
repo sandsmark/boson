@@ -845,6 +845,7 @@ public:
 
 BoMeshLOD::BoMeshLOD()
 {
+ d = new BoMeshLODPrivate;
  mNodes = 0;
  mPointsCache = 0;
  mPointsCacheCount = 0;
@@ -861,6 +862,7 @@ BoMeshLOD::~BoMeshLOD()
  if (mDisplayList) {
 	glDeleteLists(mDisplayList, 1);
  }
+ delete d;
 }
 
 void BoMeshLOD::createFaces(unsigned int faces)
