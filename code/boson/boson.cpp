@@ -812,6 +812,7 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
 
 Boson::~Boson()
 {
+ delete d->mMessageDelayer;
  delete d->mAdvance;
  delete d->mGameTimer;
  delete d->mCanvas;
