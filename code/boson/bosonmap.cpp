@@ -1041,7 +1041,7 @@ void BosonMap::recalculateCell(int x, int y)
 
  // amountOfLand + amountOfWater must be 255.
  amountOfLand += (255 - amountOfLand - amountOfWater);
- c->makeCell(amountOfLand, amountOfWater);
+ slotChangeCell(x, y, amountOfLand, amountOfWater);
 }
 
 void BosonMap::slotChangeTexMap(int x, int y, unsigned int texCount, unsigned int* textures, unsigned char* alpha)
@@ -1080,38 +1080,87 @@ void BosonMap::slotChangeTexMap(int x, int y, unsigned int texCount, unsigned in
  }
 
  // now we update up to 4 cells.
+ int cellsX[10]; // we use 10, so that we don't crash for bugs
+ int cellsY[10];
+ unsigned int count = 0;
  if (x == 0) { // left border
 	if (y == 0) { // top border
-		recalculateCell(x, y);
+		cellsX[count] = x;
+		cellsY[count] = y;
+		count++;
 	} else if ((uint)y == height()) { // bottom border
-		recalculateCell(x, y - 1);
+		cellsX[count] = x;
+		cellsY[count] = y - 1;
+		count++;
 	} else { // somewhere between top and bottom
-		recalculateCell(x, y);
-		recalculateCell(x, y - 1);
+		cellsX[count] = x;
+		cellsY[count] = y;
+		count++;
+		cellsX[count] = x;
+		cellsY[count] = y - 1;
+		count++;
 	}
  } else if ((uint)x == width()) { // right border
 	if (y == 0) { // top border
-		recalculateCell(x - 1, y);
+		cellsX[count] = x - 1;
+		cellsY[count] = y;
+		count++;
 	} else if ((uint)y == height()) { // bottom border
+		cellsX[count] = x - 1;
+		cellsY[count] = y - 1;
+		count++;
 		recalculateCell(x - 1, y - 1);
 	} else { // somewhere between top and bottom
-		recalculateCell(x - 1, y);
-		recalculateCell(x - 1, y - 1);
+		cellsX[count] = x - 1;
+		cellsY[count] = y;
+		count++;
+		cellsX[count] = x - 1;
+		cellsY[count] = y - 1;
+		count++;
 	}
  } else if (y == 0) {
 	// top border (can't be left or right border)
-	recalculateCell(x, y);
-	recalculateCell(x - 1, y);
+	cellsX[count] = x;
+	cellsY[count] = y;
+	count++;
+	cellsX[count] = x - 1;
+	cellsY[count] = y;
+	count++;
  } else if ((uint)y == height()) {
 	// bottom border (can't be left or right border)
-	recalculateCell(x, y - 1);
-	recalculateCell(x - 1, y - 1);
+	cellsX[count] = x;
+	cellsY[count] = y - 1;
+	count++;
+	cellsX[count] = x - 1;
+	cellsY[count] = y - 1;
+	count++;
  } else {
 	// no border at all. 4 cells are adjacent.
-	recalculateCell(x, y);
-	recalculateCell(x, y - 1);
-	recalculateCell(x - 1, y);
-	recalculateCell(x - 1, y - 1);
+	cellsX[count] = x;
+	cellsY[count] = y;
+	count++;
+	cellsX[count] = x;
+	cellsY[count] = y - 1;
+	count++;
+	cellsX[count] = x - 1;
+	cellsY[count] = y;
+	count++;
+	cellsX[count] = x - 1;
+	cellsY[count] = y - 1;
+	count++;
+ }
+ if (count > 4) {
+	boError() << k_funcinfo << "a cell cannot have more than 4 corners! count=" << count << endl;
+	count = 4;
+ }
+ for (unsigned int i = 0; i < count; i++) {
+	recalculateCell(cellsX[i], cellsY[i]);
+
+	// update minimap
+	// we may want to group these cells into a single array to save some
+	// speed once the editor is able to modify several cells at once.
+	// currently it isn't necessary.
+	emit signalCellChanged(cellsX[i], cellsY[i]);
  }
 }
 

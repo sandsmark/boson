@@ -171,37 +171,14 @@ void BosonMiniMap::createMap()
  updateGeometry();
 }
 
-void BosonMiniMap::slotChangeCell(int x, int y, int groundType, unsigned char version)
+void BosonMiniMap::slotUpdateCell(int x, int y)
 {
- boWarning() << k_funcinfo << "is obsolete" << endl;
- if (!ground()) {
-	boError() << k_funcinfo << "map not yet created" << endl;
-	return;
- }
- BO_CHECK_NULL_RET(map());
- Cell* c = map()->cell(x, y);
- if (!c) {
-	boError() << k_funcinfo << x << "," << y << " is no valid cell!" << endl;
-	return;
- }
- // AB: note that mLocalPlayer == NULL is valid in editor mode here!
- if (mLocalPlayer && mLocalPlayer->isFogged(x, y)) {
-	// we can't see this cell
-	return;
- }
- QValueList<Unit*> list = c->items()->units(false);
- if (!list.isEmpty()) {
-	// there is a unit on the cell, so do not paint the cell.
-	return;
- }
- changeCell(x, y, groundType, version);
+ updateCell(x, y);
+ repaintMiniMapPixmap();
 }
 
-void BosonMiniMap::changeCell(int x, int y, Cell* cell)
+void BosonMiniMap::calculateGround(int x, int y)
 {
- if (!cell) {
-	return;
- }
  BO_CHECK_NULL_RET(ground());
  BO_CHECK_NULL_RET(map());
  BO_CHECK_NULL_RET(map()->texMap());
@@ -253,39 +230,6 @@ void BosonMiniMap::changeCell(int x, int y, Cell* cell)
  b /= 4;
 
  setPoint(x, y, QColor(r, g, b));
-}
-
-void BosonMiniMap::changeCell(int x, int y, int groundType, unsigned char)
-{
-boWarning() << k_funcinfo << "is obsolete" << endl;
- if (!ground()) {
-	boError() << k_funcinfo << "map not yet created" << endl;
-	return;
- }
- if (x < 0 || x >= mapWidth()) {
-	return;
- }
- if (y < 0 || y >= mapHeight()) {
-	return;
- }
- switch (groundType) {
-	case Cell::GroundWater:
-	case Cell::GroundDeepWater:
-		setPoint(x, y, blue);
-		break;
-	case Cell::GroundGrass:
-	case Cell::GroundGrassOil:
-	case Cell::GroundGrassMineral:
-		setPoint(x, y, darkGreen);
-		break;
-	case Cell::GroundDesert:
-		setPoint(x, y, darkYellow);
-		break;
-	default:
-		setPoint(x, y, COLOR_UNKNOWN);
-		break;
- }
-// repaintMiniMapPixmap();
 }
 
 void BosonMiniMap::setPoint(int x, int y, const QColor& color)
@@ -431,7 +375,8 @@ void BosonMiniMap::updateCell(int x, int y)
 {
  BO_CHECK_NULL_RET(map());
  BO_CHECK_NULL_RET(ground());
- if (!map()->cell(x, y)) {
+ Cell* cell = map()->cell(x, y);
+ if (!cell) {
 	boError() << k_funcinfo << x << "," << y << " is no valid cell!" << endl;
 	return;
  }
@@ -442,13 +387,9 @@ void BosonMiniMap::updateCell(int x, int y)
 		return;
 	}
  }
- Cell* cell = map()->cell(x, y);
- if (!cell) {
-	return;
- }
  QValueList<Unit*> list = cell->items()->units(false);
  if (list.isEmpty()) {
-	changeCell(x, y, cell);
+	calculateGround(x, y);
  } else {
 	Unit* u = list.first();
 	QPtrVector<Cell> cells;
@@ -527,7 +468,7 @@ void BosonMiniMap::slotUnfog(int x, int y)
 	makeCellList(&cells, u, u->x(), u->y());
 	moveUnit(u, &cells, 0);
  } else {
-	changeCell(x, y, cell);
+	calculateGround(x, y);
  }
 }
 

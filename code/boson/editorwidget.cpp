@@ -119,15 +119,10 @@ void EditorWidget::initMap()
  connect(map, SIGNAL(signalGroundThemeChanged(BosonGroundTheme*)),
 		this, SLOT(slotGroundThemeChanged(BosonGroundTheme*)));
 
- connect(boGame, SIGNAL(signalChangeCell(int,int,int,unsigned char)),
-		minimap(), SLOT(slotChangeCell(int,int,int,unsigned char)));
-#warning TODO: update minimap
-#if 0
- connect(boGame, SIGNAL(signalChangeTexMap(int,int,unsigned int,unsigned int*,unsigned char*)),
-		minimap(), SLOT(slotChangeCell(int,int,unsigned int,unsigned int*,unsigned char*)));
-#endif
  connect(boGame, SIGNAL(signalChangeTexMap(int,int,unsigned int,unsigned int*,unsigned char*)),
 		map, SLOT(slotChangeTexMap(int,int,unsigned int,unsigned int*,unsigned char*)));
+ connect(map, SIGNAL(signalCellChanged(int,int)),
+		minimap(), SLOT(slotUpdateCell(int,int)));
 
  // AB: maybe we don't need the connect() above concerning groundtheme. it can't
  // be changed once the map is started
