@@ -85,6 +85,8 @@ public:
 	/**
 	 * Add a small number to the shown pixmap. The number displays how many
 	 * units of this type are in queue for production.
+	 *
+	 * -1 means display the text "paused"
 	 **/
 	void setProductionCount(int count);
 
