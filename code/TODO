@@ -30,6 +30,8 @@ how to handle non 1x1 tiles ?
 does units::rect need to be virtual anymore ?
 server : check that each unit does max 1 move each jiffie
 different subclass for my_units and other_units in client
+move visual.h/game.h to global.h
+merge mainView and bosonView/editorView
 fog of war
 
 graphism 
