@@ -265,7 +265,7 @@ BosonPlayField* Boson::playField() const
  return d->mPlayField;
 }
 
-Player* Boson::localPlayer()
+Player* Boson::localPlayer() const
 {
  return d->mPlayer;
 }
@@ -983,6 +983,11 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 				<< d->mAdvanceReceived.elapsed() << endl;
 		d->mAdvanceReceived.restart();
 		slotReceiveAdvance();
+		break;
+	}
+	case BosonMessage::ChangeMap:
+	{
+		emit signalEditorNewMap(buffer);
 		break;
 	}
 	case BosonMessage::InitMap:

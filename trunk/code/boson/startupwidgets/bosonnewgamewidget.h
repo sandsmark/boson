@@ -46,14 +46,13 @@ class Boson;
 class Player;
 class KPlayer;
 class KGamePropertyBase;
-class TopWidget;
 class BosonPlayField;
 
 class BosonNewGameWidget : public BosonStartWidgetBase
 {
 	Q_OBJECT
 public:
-	BosonNewGameWidget(TopWidget* top, QWidget* parent);
+	BosonNewGameWidget(QWidget* parent);
 	~BosonNewGameWidget();
 
 private:
@@ -161,12 +160,16 @@ public slots:
 	void slotSetAdmin(bool);
 
 signals:
-	void signalStartGame();
 	void signalShowNetworkOptions();
+
+	void signalSetLocalPlayer(Player* player);
 
 protected:
 	void sendNewGame();
 	virtual void setCurrentPlayField(BosonPlayField* field);
+
+	// AB: do NOT move to public!
+	Player* localPlayer() const { return mPlayer; }
 
 private:
 	QVBoxLayout* mBosonNewGameWidgetLayout;
@@ -190,6 +193,8 @@ private:
 	int mMaxPlayers;
 
 	QMap<int, QString> mSpeciesIndex2Identifier; // index -> species identifier
+
+	Player* mPlayer;
 };
 
 #endif

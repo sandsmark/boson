@@ -97,7 +97,6 @@ BosonWelcomeWidget::BosonWelcomeWidget(QWidget* parent) : QWidget(parent)
   connect(editorButton, SIGNAL(clicked()), this, SIGNAL(signalStartEditor()));
   connect(quitButton, SIGNAL(clicked()), this, SIGNAL(signalQuit()));
 
-  mBugReport = 0;
 }
 
 /*  
@@ -105,14 +104,5 @@ BosonWelcomeWidget::BosonWelcomeWidget(QWidget* parent) : QWidget(parent)
  */
 BosonWelcomeWidget::~BosonWelcomeWidget()
 {
-  delete mBugReport;
-}
-
-void BosonWelcomeWidget::slotReportBug()
-{
-  if (!mBugReport) {
-      mBugReport = new KBugReport(this, false);
-      connect(mBugReport, SIGNAL(finished()), this, SLOT(slotBugDialogFinished()));
-  }
 }
 

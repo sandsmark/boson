@@ -22,9 +22,6 @@
 #include <kdockwidget.h>
 #include <kdeversion.h>
 
-//#include <qstring.h>
-
-class QWidgetStack;
 class QString;
 class Boson;
 class Player;
@@ -62,7 +59,6 @@ public:
 	 **/
 	~TopWidget();
 
-	Player* player() const { return mPlayer; };
 	BosonPlayField* playField() const { return mPlayField; };
 	BosonCanvas* canvas() const { return mCanvas; };
 
@@ -80,30 +76,12 @@ public slots:
 
 	void slotStartEditor();
 
-	void slotLoadGame();
-
 	/**
 	 * Starts a new game. Called when user clicks "Start game" button in
 	 * BosonStartGameWidget
 	 **/
 	void slotStartNewGame();
 	
-	/**
-	 * Shows BosonWelcomeWidget
-	 * From there, user can start new game or quit
-	 **/
-	void slotShowMainMenu();
-
-	/**
-	 * Shows game network options 
-	 **/
-	void slotShowNetworkOptions();
-
-	/**
-	 * Hides game network options and shows BosonStartGameWidget 
-	 **/
-	void slotHideNetworkOptions();
-
 	/** 
 	 * Toggles sound
 	 **/
@@ -147,7 +125,6 @@ public slots:
 	void slotRemoveActiveDisplay();
 
 	void slotGameOver();
-	void slotSaveGame();
 
 #if KDE_VERSION < 310
 	virtual void setGeometry(const QRect&);
@@ -197,7 +174,7 @@ protected:
 	 **/
 	void reinitGame();
 
-	virtual bool eventFilter(QObject* o, QEvent* e);
+//	virtual bool eventFilter(QObject* o, QEvent* e);
 
 	void hideMenubar();
 	void showMenubar();
@@ -246,8 +223,12 @@ protected slots:
 	 * loading procedure.
 	 **/
 	void slotLoadGame(const QString& fileName);
-
 	void slotSaveGame(const QString& fileName, const QString& description);
+
+	void slotLoadGame();
+	void slotSaveGame();
+
+	void slotGameStarted();
 
 	/**
 	 * See @ref Boson::signalPlayFieldChanged.
@@ -256,6 +237,11 @@ protected slots:
 	 * that it can be started
 	 **/
 	void slotPlayFieldChanged(const QString& id);
+
+	void slotAddLocalPlayer();
+	void slotResetGame();
+
+	void slotEditorNewMap(const QByteArray&);
 
 private:
 	void initBoson();
@@ -268,16 +254,11 @@ private:
 
 	void slotWaitForMap();
 
-	void initStartupWidget(StartupWidgetIds id);
-	void showStartupWidget(StartupWidgetIds id);
-	void removeStartupWidget(StartupWidgetIds id);
 	void initBosonWidget(); // a special case for initStartupWidget - this must get called from outside a show*Widget().
 
-	void raiseWidget(StartupWidgetIds id);
 
 
 private:
-	QWidgetStack* mWs;
 	Player* mPlayer;
 	BosonPlayField* mPlayField;
 	BosonCanvas* mCanvas;

@@ -52,39 +52,23 @@
 // layouts, strange names for the spacers (which might be replaced by normal
 // stretches).
 // short: qt designer code
-BosonNewGameWidget::BosonNewGameWidget(TopWidget* top, QWidget* parent)
-    : BosonStartWidgetBase(top, parent)
+BosonNewGameWidget::BosonNewGameWidget(QWidget* parent)
+    : BosonStartWidgetBase(parent)
 {
  if (!boGame) {
 	boError() << k_funcinfo << "NULL Boson object" << endl;
 	return;
  }
+ mPlayer = 0;
 
  initKGame();
- initPlayer();
+// initPlayer();
 
  QVBoxLayout* bosonNewGameWidgetLayout = new QVBoxLayout( this, 11, 6, "BosonNewGameWidgetLayout");
 
  QVBoxLayout* mainLayout = new QVBoxLayout( 0, 0, 6, "mainlayout");
-
-  //FIXME!
-/*
- QLabel* header = new QLabel( this, "header" );
- QFont header_font(  header->font() );
- header_font.setPointSize( 30 );
- header_font.setBold( TRUE );
- header->setFont( header_font ); 
- header->setText( i18n( "Start New Game" ) );
- header->setAlignment( int( QLabel::AlignCenter ) );
- mainLayout->addWidget( header );
- QSpacerItem* spacer = new QSpacerItem( 20, 20, QSizePolicy::Minimum, QSizePolicy::Preferred );
- mainLayout->addItem( spacer );
- */
-
  QHBoxLayout* upperLayout = new QHBoxLayout( 0, 0, 6, "upperlayout"); 
-
  QVBoxLayout* leftLayout = new QVBoxLayout( 0, 0, 6, "eftlayout"); 
-
 
  mYourOptionsLayout = new QGridLayout( 0, 1, 1, 0, 6, "youroptionslayout"); 
  QSpacerItem* spacer_2 = new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum );
@@ -177,17 +161,10 @@ BosonNewGameWidget::BosonNewGameWidget(TopWidget* top, QWidget* parent)
  playersLayout->addWidget( mRemovePlayerButton );
  upperLayout->addLayout( playersLayout );
  mainLayout->addLayout( upperLayout );
-/*
- mLine1 = new QFrame( this, "AIne1" );
- mLine1->setProperty( "frameShape", (int)QFrame::HLine );
- mLine1->setFrameShadow( QFrame::Sunken );
- mLine1->setFrameShape( QFrame::HLine );
- mainLayout->addWidget( mLine1 );
- */
 
  mChatWidget = new KGameChat(0, BosonMessage::IdChat, this );
  mChatWidget->setKGame(boGame);
- mChatWidget->setFromPlayer(player());
+// mChatWidget->setFromPlayer(localPlayer());
  mainLayout->addWidget( mChatWidget );
 
  mLine2 = new QFrame( this, "line2" );
@@ -220,7 +197,6 @@ BosonNewGameWidget::BosonNewGameWidget(TopWidget* top, QWidget* parent)
 
  initPlayFields();
  initSpecies();
- initColors();
  mAdmin = !boGame->isAdmin(); // hack to make slotSetAdmin() think, that admin status changed
  slotSetAdmin(boGame->isAdmin());
 
@@ -258,13 +234,17 @@ void BosonNewGameWidget::initKGame()
 void BosonNewGameWidget::initPlayer()
 {
  boDebug() << k_funcinfo << "playerCount(): " << boGame->playerCount() << endl;
- player()->setName(boConfig->readLocalPlayerName());
- if (player()->speciesTheme()) {
+ if (!mPlayer) {
+	boWarning() << k_funcinfo << "waiting for local player to join first" << endl;
+	return;
+ }
+ mPlayer->setName(boConfig->readLocalPlayerName());
+ if (mPlayer->speciesTheme()) {
 	boDebug() << k_funcinfo << "Player has speciesTheme already loaded, reloading" << endl;
  }
  mPlayercolor = boConfig->readLocalPlayerColor();
- player()->loadTheme(SpeciesTheme::speciesDirectory(SpeciesTheme::defaultSpecies()), mPlayercolor);
- boGame->addPlayer(player());
+ mPlayer->loadTheme(SpeciesTheme::speciesDirectory(SpeciesTheme::defaultSpecies()), mPlayercolor);
+ mChatWidget->setFromPlayer(mPlayer);
 }
 
 void BosonNewGameWidget::initPlayFields()
@@ -308,10 +288,18 @@ void BosonNewGameWidget::initSpecies()
 
 void BosonNewGameWidget::initColors()
 {
+ if (!localPlayer()) {
+	boError() << k_funcinfo << "NULL local player" << endl;
+	return;
+ }
+ if (!localPlayer()->speciesTheme()) {
+	boError() << k_funcinfo << "local player has NULL species theme" << endl;
+	return;
+ }
  mAvailableColors.clear();
  mColorCombo->clear();
  mAvailableColors = boGame->availableTeamColors();
- mAvailableColors.prepend(player()->speciesTheme()->teamColor());
+ mAvailableColors.prepend(localPlayer()->speciesTheme()->teamColor());
  for(unsigned int i = 0; i < mAvailableColors.count(); i++) {
 	QPainter painter;
 	QRect rect(0, 0, mColorCombo->width(), QFontMetrics(painter.font()).height() + 4);
@@ -323,35 +311,47 @@ void BosonNewGameWidget::initColors()
  }
 }
 
-/*****  slots, where local player changes something  *****/
-
 void BosonNewGameWidget::slotMyNameChanged()
 {
- if (mNameEdit->text() != player()->name()) {
-	player()->setName(mNameEdit->text());
+ if (!localPlayer()) {
+	boError() << k_funcinfo << "NULL local player" << endl;
+	return;
+ }
+ if (mNameEdit->text() != localPlayer()->name()) {
+	localPlayer()->setName(mNameEdit->text());
  }
 }
 
 void BosonNewGameWidget::slotMyColorChanged(int index)
 {
+ if (!localPlayer()) {
+	boError() << k_funcinfo << "NULL local player" << endl;
+	return;
+ }
+
  mPlayercolor = mAvailableColors[index];
 
  QByteArray buffer;
  QDataStream stream(buffer, IO_WriteOnly);
- stream << (Q_UINT32)player()->id();
+ stream << (Q_UINT32)localPlayer()->id();
  stream << (Q_UINT32)mPlayercolor.rgb();
  boGame->sendMessage(buffer, BosonMessage::ChangeTeamColor);
 }
 
 void BosonNewGameWidget::slotMySpeciesChanged(int index)
 {
+ if (!localPlayer()) {
+	boError() << k_funcinfo << "NULL local player" << endl;
+	return;
+ }
+
  if (index >= (int)mSpeciesIndex2Identifier.count()) {
 	boError() << k_funcinfo << "invalid index " << index << endl;
 	return;
  }
  QByteArray buffer;
  QDataStream stream(buffer, IO_WriteOnly);
- stream << (Q_UINT32)player()->id();
+ stream << (Q_UINT32)localPlayer()->id();
  stream << mSpeciesIndex2Identifier[index];
  stream << mPlayercolor; //d->boGame->availableTeamColors().first().rgb();
  boGame->sendMessage(buffer, BosonMessage::ChangeSpecies);
@@ -359,6 +359,13 @@ void BosonNewGameWidget::slotMySpeciesChanged(int index)
 
 void BosonNewGameWidget::slotPlayerJoinedGame(KPlayer* p)
 {
+ // warning: we are assuming here that if playerCount() == 1 then the *local*
+ // player just entered the game.
+ // currently we can safely assume this, but it might be dangerous for network
+ // games. im not really sure how playerCount() gets handled for deactivated
+ // players in KGame (i.e. when the local player enters another game and so)
+
+
  boDebug() << k_funcinfo << "there are " << boGame->playerList()->count() << " players in game now" << endl;
  QListBoxText* t = new QListBoxText(p->name());
  mItem2Player.insert(t, p);
@@ -367,6 +374,11 @@ void BosonNewGameWidget::slotPlayerJoinedGame(KPlayer* p)
  connect(p, SIGNAL(signalPropertyChanged(KGamePropertyBase*, KPlayer*)),
 		this, SLOT(slotPropertyChanged(KGamePropertyBase*, KPlayer*)));
 
+ if (boGame->playerCount() == 1) {
+	boDebug() << k_funcinfo << "first player entered game - this must be the local player!" << endl;
+	mPlayer = (Player*)p;
+	initPlayer();
+ }
  initColors();
 }
 
@@ -436,8 +448,6 @@ void BosonNewGameWidget::slotColorChanged(Player*)
  initColors();
 }
 
-/*****  other stuff  *****/
-
 void BosonNewGameWidget::slotStart()
 {
  if (!boGame->isAdmin()) {
@@ -479,7 +489,12 @@ void BosonNewGameWidget::slotAddAIPlayer()
 
 void BosonNewGameWidget::slotRemovePlayer()
 {
- if (mHighlightedPlayer == player()) {
+ if (!localPlayer()) {
+	boError() << k_funcinfo << "NULL local player" << endl;
+	return;
+ }
+
+ if (mHighlightedPlayer == localPlayer()) {
 	emit signalCancelled();
  } else {
 	boGame->removePlayer(mHighlightedPlayer);
@@ -526,6 +541,7 @@ void BosonNewGameWidget::slotSetAdmin(bool admin)
 
 void BosonNewGameWidget::sendNewGame()
 {
+// emit signalSetLocalPlayer(mPlayer); // AB: might be obsolete because of signalAddLocalPlayer(). removed for now.
  slotMyNameChanged();
  BosonStartWidgetBase::sendNewGame();
 }

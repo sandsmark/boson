@@ -36,6 +36,7 @@
 #include <klocale.h>
 #include <knuminput.h>
 #include <ksimpleconfig.h>
+#include <kmessagebox.h>
 
 #include <qframe.h>
 #include <qlabel.h>
@@ -47,17 +48,15 @@
 // AB: this class is a complete fast hack!
 // not meant for public use yet
 
-BosonStartEditorWidget::BosonStartEditorWidget(TopWidget* top, QWidget* parent)
-    : BosonStartWidgetBase(top, parent)
+BosonStartEditorWidget::BosonStartEditorWidget(QWidget* parent)
+    : BosonStartWidgetBase(parent)
 {
- mTop = top;
  if (!boGame) {
 	boError() << k_funcinfo << "NULL game" << endl;
 	return;
  }
 
  initKGame();
- initPlayer();
 
  mTopLayout = new QVBoxLayout( this, 11, 6);
  mTopLayout->addSpacing(20);
@@ -155,57 +154,61 @@ void BosonStartEditorWidget::initKGame()
  connect(boGame, SIGNAL(signalPlayFieldChanged(const QString&)), this, SLOT(slotPlayFieldChanged(const QString&)));
 }
 
-void BosonStartEditorWidget::initPlayer()
-{
- boDebug() << k_funcinfo << "playerCount(): " << boGame->playerCount() << endl;
- player()->setName(boConfig->readLocalPlayerName());
- if (player()->speciesTheme()) {
-	boDebug() << k_funcinfo << "Player has speciesTheme already loaded, reloading" << endl;
- }
- QColor playerColor = boConfig->readLocalPlayerColor();
- player()->loadTheme(SpeciesTheme::speciesDirectory(SpeciesTheme::defaultSpecies()), playerColor);
- boGame->addPlayer(player());
-}
-
 void BosonStartEditorWidget::slotStart()
 {
  BosonPlayField* field = 0;
+ int maxPlayers = 0;
  if (mMapCombo->currentItem() == 0) {
-	field = mTop->playField();
-	BosonMap* map = new BosonMap(field);
-	BosonScenario* s = new BosonScenario();
+	BosonMap* map = new BosonMap(0);
 
 	// TODO: fill widget (i.e. fill with grass, water, ... by default)
 	map->resize(mMapWidth->value(), mMapHeight->value());
 	map->fill((int)Cell::GroundGrass);
-	s->setPlayers(mMaxPlayers->value(), mMaxPlayers->value());
-	s->initializeScenario();
 
-	field->changeMap(map);
-	field->changeScenario(s);
+	QByteArray b;
+	QDataStream stream(b, IO_WriteOnly);
+	map->saveMap(stream);
 
-	// ensure that we won't try to load this anymore.
-	field->finalizeLoading();
+	// WARNING: this is a hack! the message should contain the *map* only,
+	// not the scenario. I do not yet know how the scenario will be handled
+	// and if the maxplayers input will remain in this widget (we could
+	// start with a single player and further players in the editor itself).
+	stream << (Q_INT32)mMaxPlayers->value();
+	stream << (Q_INT32)mMaxPlayers->value();
+
+	boGame->sendMessage(b, BosonMessage::ChangeMap);
+	maxPlayers = mMaxPlayers->value();
  } else {
 	field = BosonPlayField::playField(playFieldIdentifier());
- }
- if (!field) {
-	boError() << k_funcinfo << "NULL playfield" << endl;
-	return;
- }
- BosonScenario* scenario = field->scenario();
- if (!scenario) {
-	boError() << k_funcinfo << "NULL scenario" << endl;
-	return;
+	if (!field) {
+		boError() << k_funcinfo << "NULL playfield" << endl;
+		return;
+	}
+	BosonScenario* scenario = field->scenario();
+	if (!scenario) {
+		boError() << k_funcinfo << "NULL scenario" << endl;
+		return;
+	}
+	maxPlayers = scenario->maxPlayers();
  }
 
- for (int i = 1; i < scenario->maxPlayers(); i++) {
+ QValueList<QColor> availableTeamColors = boGame->availableTeamColors();
+ if (availableTeamColors.count() < maxPlayers) {
+	boError() << k_funcinfo << "too many players - not enough team colors!" << endl;
+	KMessageBox::sorry(this, i18n("Too many (max-)players. Not enough colors available (internal error)."));
+	return;
+ }
+ for (int i = 0; i < maxPlayers; i++) {
 	// add dummy computer player
 	Player* p = new Player;
-	p->setName(i18n("Computer"));
-	QColor color = boGame->availableTeamColors().first();
+	p->setName(i18n("Player %1").arg(i + 1));
+	QColor color = availableTeamColors.first();
+	availableTeamColors.pop_front();
 	p->loadTheme(SpeciesTheme::speciesDirectory(SpeciesTheme::defaultSpecies()), color);
 	boGame->addPlayer(p);
+	if (i == 0) {
+		emit signalSetLocalPlayer(p);
+	}
  }
  sendNewGame();
 }
