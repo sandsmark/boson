@@ -85,9 +85,17 @@ function counter2($page)
 
 
   // acquire database lock
-  $fp = fopen($basedir . $lockfile, "w");
-  flock($fp, LOCK_EX) or die ("Failure accesing $file");
-
+  if(is_writeable($lockfile))
+  {
+    $fp = fopen($basedir . $lockfile, "w");
+    flock($fp, LOCK_EX) or die ("Failure accesing $file");
+  }
+  else
+  {
+    echo "<br>Local developer mode.<br>
+    Can't write to lockfile.<br><br>";
+    return;
+  }
 
   // init database connection
   counter2_init();
