@@ -1,4 +1,36 @@
 [article]
+date=July 18th 2003 14:19
+title=News from CVS
+text=I know, we've had total lack of updates, sorry about that. More than four
+    months have passed without a single article.<br>
+    But Boson is still being actively developed and there are number of new and
+    exciting features in current <a href="download.php#cvs">CVS version</a>.<br>
+    Here are few of them:
+    <ul>
+    <li>Units accelerate/decelerate realistically</li>
+    <li>New terrain rendering code. Terrain is now drawn using several layers
+        which are blended together. This creates nice effect for transitions and
+        looks really nice</li>
+    <li>Few updated unit models</li>
+    <li>New unit: Koyote (a nice helicopter with a cannon)</li>
+    <li>New unit: Warthog (A-10 plane with heavy anti-tank missiles)</li>
+    <li>New unit: Wolf (a truck which may carry other units in the future)</li>
+    <li>You can now add multiple units and draw multiple tiles in editor using
+        click+drag</li>
+    <li>Ground textures are drawn over multiple cells, making tiling effect less
+        visible</li>
+    <li>Basic scripting support using Python. Old (dumb) AI has already been
+        converted to a script</li>
+    </ul>
+    More detailed list of changes can be found on the
+    <a href="status.php#done">status page</a>.<br>
+    The homepage has some new stuff, too. There's new counter and
+    <a href="stats.php">statistics page</a> in case you're interested.<br>
+    And last, but not least, there are couple of new
+    <a href="screenshots.php">screenshots</a> available!
+    <br><br>
+
+[article]
 date=March 31st 2003 20:36
 title=Boson 0.8 released!
 text=After a long time we have finally completed boson 0.8. Read the

@@ -66,9 +66,9 @@ draw_bigbox_text("This is a list of features that we consider as
   <ul>
     <li>Fixing all critical bugs</li>
     <li>Campaign support for the map chooser</li>
+    <li>Better support for mines and bombs</li>
   </ul>
   <h2><a name=\"done\"></a>DONE</h2>
-  <blockquote>
 
   <h4>Internal</h4>
   <ul>
@@ -102,6 +102,7 @@ draw_bigbox_text("This is a list of features that we consider as
     <li>Support for bombs (basically a falling mine)</li>
     <li>New actions patch</li>
     <li>Basic scripting support</li>
+    <li>Movies can be grabbed from running game (but it's extremely slow)</li>
   </ul>
 
   <h4>Data</h4>
@@ -119,9 +120,7 @@ draw_bigbox_text("This is a list of features that we consider as
         click+drag</li>
     <li>Height maps can be exported</li>
     <li>Texture maps can be exported/imported in editor</li>
-  </ul>
-
-  </blockquote>");
+  </ul>");
 draw_bigbox_end();
 main_area_end();
 main_table_end();
