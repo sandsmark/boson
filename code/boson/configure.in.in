@@ -68,14 +68,99 @@ fi
 AC_HAVE_KGAME_VERSION
 
 
-AC_DEFUN(AC_BOSON_HAVE_GL,
+AC_DEFUN(AC_BOSON_HAVE_GL_HEADERS,
 [
-AC_HAVE_GL
-if test "$ac_cv_have_gl" = "no"; then
-  AC_MSG_ERROR([Cannot find OpenGL on your system! Maybe you need to install the development packages?])
-fi
+dnl first search for GL/gl.h and GL/glu.h
+ bo_have_gl=""
+ AC_CHECK_HEADERS(GL/gl.h,
+	bo_have_gl="yes",
+	bo_have_gl="no"
+ )
+ if test "x$bo_have_gl" != "xyes"; then
+	AC_MSG_ERROR([The file GL/gl.h could not be found. Please install the development package of your graphics card driver!])
+ fi
+
+ bo_have_glu=""
+ AC_CHECK_HEADERS(GL/glu.h,
+	bo_have_glu="yes",
+	bo_have_glu="no"
+ )
+ if test "x$bo_have_glu" != "xyes"; then
+	AC_MSG_ERROR([The file GL/glu.h could not be found. Please install the GLU development package (e.g. mesa-glu-devel). Note that this is NOT part of the graphics card drivers! E.g. NVidia does NOT ship GLU!])
+ fi
 ])
-AC_BOSON_HAVE_GL
+AC_BOSON_HAVE_GL_HEADERS
+
+AC_DEFUN(AC_BOSON_HAVE_GL_LIBS,
+[
+ AC_LANG_SAVE
+ AC_LANG_CPLUSPLUS
+ bo_save_ldflags="$LDFLAGS"
+ bo_save_cxxflags="$CXXFLAGS"
+
+ bo_have_gl=""
+ AC_MSG_CHECKING(for libGL)
+ LDFLAGS="$LDFLAGS $GL_LDFLAGS $X_LDFLAGS $all_libraries -lGL -lX11"
+ LDFLAGS="$LDFLAGS $LIB_XEXT -lm $LIBSOCKET"
+ CXXFLAGS="$CFLAGS $X_INCLUDES"
+ test -n "$GL_INCLUDE" && CFLAGS="-I$GL_INCLUDE $CFLAGS"
+
+ AC_TRY_LINK(
+	[
+#include <GL/gl.h>
+	], [
+glBegin(GL_TRIANGLES);
+glEnd();
+	],
+	[bo_have_gl=yes],
+	[bo_have_gl=no]
+ )
+ if test "x$bo_have_gl" != "xyes"; then
+	AC_MSG_RESULT([no])
+	AC_MSG_ERROR([configure was unable to link to libGL. Please install OpenGL (i.e. the 3d driver of your graphics card])
+ fi
+ AC_MSG_RESULT([yes])
+
+ bo_have_glu=""
+ AC_MSG_CHECKING(for libGLU)
+ LDFLAGS="$LDFLAGS -lGLU"
+ AC_TRY_LINK(
+	[
+#include <GL/gl.h>
+#include <GL/glu.h>
+	], [
+gluLookAt(0.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 100.0, 0.0);
+],
+	[bo_have_glu=yes],
+	[bo_have_glu=no]
+ )
+ if test "x$bo_have_glu" != "xyes"; then
+	AC_MSG_RESULT([no])
+	AC_MSG_ERROR([configure was unable to link to libGLU. Please install GLU (e.g.  mesa-glu). Note this is NOT included in your graphics card driver!])
+ fi
+ AC_MSG_RESULT([yes])
+
+ dnl AB: the AC_DEFINE is pretty useless, as we abort anyway, if GL not there
+ AC_DEFINE(HAVE_GL, 1, [Defines if you have GL (Mesa, OpenGL, ...)])
+ if test "$GL_LDFLAGS" = ""; then
+	GLLIB='-lGLU -lGL $(LIB_X11)'
+ else
+	GLLIB="$GL_LDFLAGS -lGLU -lGL "'$(LIB_X11)'
+ fi
+ if test "$GL_INCLUDE" = ""; then
+	GLINC=""
+ else
+	GLINC="-I$GL_INCLUDE"
+ fi
+
+ AC_LANG_RESTORE
+ LDFLAGS="$bo_save_ldflags"
+ CXXFLAGS="$bo_save_cxxflags"
+
+ AC_SUBST(GLLIB)
+ AC_SUBST(GLINC)
+])
+AC_BOSON_HAVE_GL_LIBS
 
 
 AC_DEFUN(AC_CHECK_KGAME_SAVEGAME,
