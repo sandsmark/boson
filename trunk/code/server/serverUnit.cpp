@@ -280,7 +280,7 @@ void serverFacility::reportDestroyed(int i)
 	destroyed.x = __x;
 	destroyed.y = __y;
 
-	logf(LOG_WARNING, "MSG_FACILITY_ is %d FACILITY_DESTROYED sent : __x is %d", MSG_FACILITY_DESTROYED, __x);
+	logf(LOG_WARNING, "I'm %d, owned by %d, FACILITY_DESTROYED sent", key, who);
 	sendMsg ( player[i].buffer, MSG_FACILITY_DESTROYED, sizeof(destroyed), &destroyed);
 }
 
