@@ -48,10 +48,14 @@ public:
 	KGameProperty<int> mMoveDestX;
 	KGameProperty<int> mMoveDestY;
 
-	SelectBox* mSelectBox;
-
+	// be *very* careful with those - NewGameDialog uses Unit::save() which
+	// saves all KGameProperty objects. If non-KGameProperty properties are
+	// changed before all players entered the game we'll have a broken
+	// network game.
 	bool mLeader;
 	Unit* mTarget;
+
+	SelectBox* mSelectBox;
 };
 
 Unit::Unit(const UnitProperties* prop, Player* owner, QCanvas* canvas) 
