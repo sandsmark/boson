@@ -433,7 +433,7 @@ void TopWidget::slotLoadGame(const QString& fileName)
 	Boson::LoadingStatus status = boGame->loadingStatus();
 	QString text, caption;
 	if (status == Boson::InvalidFileFormat || status == Boson::InvalidCookie) {
-		text = i18n("This file is not Boson SaveGame!");
+		text = i18n("This file is no Boson SaveGame!");
 		caption = i18n("Invalid file format!");
 	} else if (status == Boson::InvalidVersion) {
 		text = i18n("This file has unsupported saving format!\n"
