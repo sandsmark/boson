@@ -31,13 +31,11 @@
 
     <FONT FACE="helvetica" SIZE="2">
 
-    <P>To install boson, you need two packages: One for the code and one for the graphics. If you decide to download the sources and graphics separately, download both packages in the <i>bunzip2</i> format, because the <i>gunzip</i>ed files are generally bigger.</P>
+    <P>To install boson, you need two packages: One for the code and one for the graphics. You can get both from SourceForge CVS. See <a href="faq.html">FAQ</a> on how to download them</P>
 
-    <P>The game code should be extracted to $KDEDIR/share/apps, where it will create a subdirectory called "boson-X.Y". This directory should be renamed to "boson"</P>
+    <P>First you need to link the admin dir from code to data (ln -s code/admin data/admin). Now you can make/install both (make -f Makefile.cvs ; ./configure ; make ; make install). You can make the game as a user (and you should do so) but you probably need to install (make install) it as root.</P>
 
-    <P>The graphics file should be extracted to $KDEDIR/share/apps/ where it will create a subdirectory in <I>boson</I> called <I>themes</I>.</P>
-
-    <P>If you downloaded the source files, you will have to compile the game before being able to play. After installing the files, please proceed with the standard installation procedures. Go into the boson directory, and enter "./configure", followed by "make", which may take some time. Then, become superuser, and enter "make install". You should now find the boson entries in the KDE start menu. If anything goes wrong and you cannot find the problem or you think it's our fault, please send a mail to <A HREF = "mailto:orzel@yalbi.com">Thomas</A>, he'll be happy to answer any questions.</P>
+    <P>You should now find the boson entries in the KDE start menu. If anything goes wrong and you cannot find the problem or you think it's our fault, please send a mail to the <A HREF = "mailto:boson-devel@lists.sourceforge.net">boson team</A>, we'll be happy to answer any questions.</P>
 
     </FONT>
 
