@@ -1,8 +1,7 @@
 <cell>
-<b>
+<div class="thumb_header">
 $(name)
-</b>
-<br>
+</div>
     <a href="$(name2).html"><img src="$(name2)_small.jpg" border="0"></a>
 <:
 use get_values;
