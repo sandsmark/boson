@@ -205,6 +205,12 @@ public:
 	QValueList<const UnitProperties*> allUnits() const;
 
 	/**
+	 * @return The filenames of all models for this themes, as they could
+	 * be provided to @ref objectModel
+	 **/
+	QStringList allObjectModels() const;
+
+	/**
 	 * @return A list of all units that have a @ref UnitProperties::producer
 	 * specified in producerList.
 	 **/

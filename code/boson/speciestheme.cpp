@@ -398,6 +398,13 @@ QValueList<const UnitProperties*> SpeciesTheme::allUnits() const
  return list;
 }
 
+QStringList SpeciesTheme::allObjectModels() const
+{
+ QDir dir(themePath());
+ dir.cd(QString::fromLatin1("objects"));
+ return dir.entryList(QString::fromLatin1("*.3ds"), QDir::Files | QDir::Readable);
+}
+
 QValueList<unsigned long int> SpeciesTheme::productions(QValueList<unsigned long int> producers) const
 {
  QValueList<unsigned long int> list;

@@ -98,6 +98,7 @@ public:
 	virtual void resizeGL(int, int);
 
 	void load(SpeciesTheme* s, const UnitProperties* prop);
+	void loadObjectModel(SpeciesTheme* s, const QString& file);
 	void resetModel();
 
 signals:
@@ -273,15 +274,21 @@ protected:
 	 **/
 	void changeUnit(SpeciesTheme* s, const UnitProperties* prop);
 
+	void changeObject(SpeciesTheme* s, const QString& file);
+
+	SpeciesTheme* findTheme(const QString& theme) const;
+	void uncheckAllBut(KAction*); // BAH!
+
 protected slots:
 	void slotUnitChanged(int);
+	void slotObjectChanged(int);
 	void slotDebugModels();
 
 private:
 	PreviewConfig* mConfig;
 	ModelPreview* mPreview;
 	QPtrList<SpeciesTheme> mSpecies;
-	QPtrDict<SpeciesTheme> mPopup2Species;
+	QPtrDict<SpeciesTheme> mAction2Species;
 	BoDebugDCOPIface* mIface;
 };
 
