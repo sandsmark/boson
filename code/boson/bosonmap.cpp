@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2002 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -69,39 +69,6 @@ void BosonMap::init()
  setModified(false);
 }
 
-bool BosonMap::loadMap(const QByteArray& buffer, bool binary)
-{
- if (binary) {
-	QDataStream stream(buffer, IO_ReadOnly);
-	if (!verifyMap (stream)) { // we already did this so this cannot fail
-		boError() << k_funcinfo << "Invalid map file" << endl;
-		return false;
-	}
-	if (!loadMapGeo(stream)) {
-		boError() << "Error loading map geo" << endl;
-		return false;
-	}
-	if (!loadCells(stream)) {
-		boError() << "Error loading map cells" << endl;
-		return false;
-	}
-	return true;
- }
-
- // load XML file
- QDomDocument doc("BosonMap");
- QString errorMsg;
- int lineNo;
- int columnNo;
- if (!doc.setContent(buffer, false, &errorMsg, &lineNo, &columnNo)) {
-	boError() << "Parse error in line " << lineNo << ",column " << columnNo
-			<< " error message: " << errorMsg << endl;
-	return false;
- }
- QDomElement root = doc.documentElement();
- return loadMap(root);
-}
-
 bool BosonMap::loadMap(QDomElement& root)
 {
  QDomNodeList list;
@@ -138,44 +105,6 @@ bool BosonMap::loadMap(QDomElement& root)
  }
 
  return true;
-}
-
-bool BosonMap::verifyMap(QDataStream& stream)
-{
- char magic[ TAG_FIELD_LEN+4 ];  // paranoic spaces
- int i;
-
- // magic 
- // Qt marshalling for a string is 4-byte-len + data
- stream >> i;
- if (TAG_FIELD_LEN + 1 != i) {
-//	boError() << k_funcinfo << "Magic doesn't match(len), check file name" << endl;// not an error - probably an XML file
-	return false;
- }
-
- for (i = 0; i < TAG_FIELD_LEN + 1; i++) {
-	Q_INT8  b;
-	stream >> b;
-	magic[i] = b;
- }
-
- if (strncmp(magic, TAG_FIELD, TAG_FIELD_LEN) ) {
-//	boError() << k_funcinfo << "Magic doesn't match(string), check file name" << endl;
-	return false;
- }
- return true;
-}
-
-void BosonMap::saveValidityHeader(QDataStream& stream)
-{ // TODO: use QString for this
- // magic 
- // Qt marshalling for a string is 4-byte-len + data
-
- stream << (Q_INT32)(TAG_FIELD_LEN - 1);
-
- for (int i = 0; i <= TAG_FIELD_LEN; i++) {
-	stream << (Q_INT8)TAG_FIELD[i];
- }
 }
 
 bool BosonMap::loadMapGeo(QDataStream& stream)
@@ -492,7 +421,7 @@ bool BosonMap::loadCell(QDataStream& stream, int& groundType, unsigned char& b)
  }
 
  stream >> g; // this is the groundType now.
- if(!Cell::isValidGround(g)) { 
+ if (!Cell::isValidGround(g)) { 
 	return false; 
  }
 // if (g < 0 || ) { return false; }
