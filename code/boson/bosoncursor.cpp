@@ -511,7 +511,6 @@ public:
 	int mCurrentFrame;
 
 #ifndef NO_OPENGL
-	QPointArray mHotSpots;
 	QIntDict<BosonTextureArray> mCursorPixmaps;
 	BosonTextureArray* mCurrentTextures;
 #else
