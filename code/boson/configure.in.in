@@ -290,11 +290,8 @@ AC_CHECK_PLIB_HEADERS
 
 AC_DEFUN([AC_CHECK_PLIB_LIBS],
 [
-  AC_MSG_CHECKING([for plib libraries])
   AC_LANG_SAVE
   AC_LANG_CPLUSPLUS
-  bo_save_ldflags="$LDFLAGS"
-  bo_save_cxxflags="$CXXFLAGS"
 
 dnl Note the following dependencies in plib:
 dnl PW is independent
@@ -313,36 +310,14 @@ dnl In order to grant linking against static plib versions, we need to use
 dnl reverse dependency order, i.e. first link to PUI, then the libs it depends on
 
   LIB_PLIB="-lplibpuaux -lplibpu -lplibfnt -lplibsg -lplibul"
-  LDFLAGS="$LDFLAGS $LIB_PLIB -lGL"
-  CXXFLAGS="$CFLAGS $X_INCLUDES"
   bo_have_plib=""
 
-dnl AB: we need to use libtool here, because configure uses g++ $(LIBS)
-dnl conftest.cc. If $(LIBS) has static libs, then this causes huge problems.
-dnl AB: note that we should use ${builddir}/libtool, but by some reason this
-dnl doesn't work. However since builddir is equal (by definition) to ".", this
-dnl isn't a big problem.
-  bo_save_CXX="$CXX"
-  CXX="${SHELL-/bin/sh} ./libtool $CXX"
-  AC_TRY_LINK(
-	[
-#include <plib/ul.h>
-	], [
-ulClock c;
-	],
-	[bo_have_plib="yes"],
-	[bo_have_plib="no"]
-  )
+  AC_CHECK_LIB(plibul, ulInit, [bo_have_plib=yes], [bo_have_plib=no])
+
   if test "x$bo_have_plib" != "xyes" ; then
-	AC_MSG_RESULT([no])
 	AC_MSG_ERROR([linking to plib libraries failed. Install the plib libraries - see http://plib.sf.net])
-  else
-	AC_MSG_RESULT([$bo_have_plib])
   fi
-  CXX="$bo_save_CXX"
   AC_LANG_RESTORE
-  LDFLAGS="$bo_save_ldflags"
-  CXXFLAGS="$bo_save_cxxflags"
   AC_SUBST(LIB_PLIB)
 ])
 AC_CHECK_PLIB_LIBS
