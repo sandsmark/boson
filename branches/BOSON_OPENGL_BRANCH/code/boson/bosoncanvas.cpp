@@ -402,7 +402,7 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount)
 	}
  }
 
- if (d->mWorkConstructed.count() > 0 && (advanceCount % 30) == 0) {
+ if (d->mWorkConstructed.count() > 0 && (advanceCount % 20) == 0) {
 	QPtrListIterator<Unit> it(d->mWorkConstructed);
 	while (it.current()) {
 		if (!it.current()->isDestroyed()) {
@@ -492,10 +492,9 @@ void BosonCanvas::loadTiles(const QString& tiles, bool withtimer)
 	return;
  }
  d->mLoader->setDir(dir);
- if(withtimer) {
+ if (withtimer) {
 	QTimer::singleShot(0, this, SLOT(slotLoadTiles()));
- }
- else {
+ } else {
 	slotLoadTiles();
  }
 }

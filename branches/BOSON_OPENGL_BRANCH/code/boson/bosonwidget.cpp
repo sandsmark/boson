@@ -241,6 +241,9 @@ void BosonWidget::initDisplayManager()
  canvas()->setDisplayManager(displaymanager());
  displaymanager()->setLocalPlayer(player()); // this does nothing.
 
+}
+void BosonWidget::addInitialDisplay()
+{
  initBigDisplay(displaymanager()->addInitialDisplay());
 }
 

@@ -118,6 +118,12 @@ public:
 	void setChatVisible(bool visible);
 	void setCmdFrameVisible(bool visible);
 
+	/**
+	 * Add and initialize the first @ref BosonBigDisplayBase. Note that at
+	 * this point all tiles have to be loaded. See @ref BosonMap::tileSet
+	 * and @ref BosonCanvas::loadTiles
+	 **/
+	void addInitialDisplay();
 
 public slots:
 	void slotDebug();

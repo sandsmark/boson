@@ -1211,7 +1211,6 @@ void Facility::advanceConstruction()
  if (d->mConstructionState < constructionSteps() - 1) {
 	d->mConstructionState = d->mConstructionState + 1;
 	setFrame(d->mConstructionState);
-	kdDebug() << k_funcinfo << "frame: " << frame() << " cout=" << frameCount()<< endl;
  } else {
 	setWork(WorkNone);
 	owner()->facilityCompleted(this);

@@ -81,6 +81,13 @@ public:
 
 	QPixmap pixmap() const;
 
+	/**
+	 * Call this to create the texture objects. Must be called from a valid
+	 * context (i.e. call QGLWidget::makeCurrent or call it from one of the
+	 * standard QT-GL methods). At least afaik...
+	 **/
+	void generateTextures();
+
 	inline BosonTextureArray* textures() const 
 	{
 		return mTextures;

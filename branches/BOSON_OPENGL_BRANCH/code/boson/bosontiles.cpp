@@ -158,15 +158,21 @@ bool BosonTiles::loadTiles(QString dir, bool debug)
  }
 
  delete mTextures;
+
+ // AB: tiles are loaded - but the texturs cannot yet be generated! must be done
+ // after construction of the gl-context, aka the QGLWidget
+ emit signalTilesLoaded();
+ return true;
+}
+
+void BosonTiles::generateTextures()
+{
  QValueList<QImage> images;
  for (unsigned int i = 0; i < mTextureImages.count(); i++) {
 	images.append(mTextureImages[i]);
  }
  mTextures = new BosonTextureArray(images);
  mTextureImages.clear(); // free some space - we won't need it anymore, except for reloading the game/map.
-
- emit signalTilesLoaded();
- return true;
 }
 
 bool BosonTiles::save(const QString& fileName)

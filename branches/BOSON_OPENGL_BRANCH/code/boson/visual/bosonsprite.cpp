@@ -24,6 +24,8 @@
 
 #include <kdebug.h>
 
+#include <qpointarray.h>
+
 #ifndef NO_OPENGL
 BosonSprite::BosonSprite(BosonModel* model, BosonCanvas* canvas)
 	: GLSprite(model, canvas)
