@@ -758,9 +758,14 @@ void BosonWidget::changeLocalPlayer(Player* localPlayer)
 
  d->mDisplayManager->setLocalPlayer(d->mLocalPlayer);
  d->mChat->setFromPlayer(d->mLocalPlayer);
- slotSetActiveDisplay(d->mDisplayManager->activeDisplay() ? 
-		d->mDisplayManager->activeDisplay() : 
-		d->mDisplayManager->displays().first());
+
+// update slots
+ BosonBigDisplay* active = d->mDisplayManager->activeDisplay();
+ if (!active) {
+	kdError() << k_funcinfo << "NULL display" << endl;
+	return;
+ }
+ slotSetActiveDisplay(active, active);
 }
 
 void BosonWidget::slotAddComputerPlayer(Player* computer)
@@ -1025,8 +1030,6 @@ void BosonWidget::initBigDisplay(BosonBigDisplay* b)
 	kdError() << k_funcinfo << "NULL display" << endl;
 	return;
  }
- connect(b, SIGNAL(signalMakeActive(BosonBigDisplay*)), 
-		this, SLOT(slotSetActiveDisplay(BosonBigDisplay*)));
  b->setLocalPlayer(d->mLocalPlayer);
  b->setCursor(d->mCursor);
  b->setKGameChat(d->mChat);
@@ -1046,7 +1049,7 @@ void BosonWidget::initBigDisplay(BosonBigDisplay* b)
 	addMouseIO(b);
  }
 
- slotSetActiveDisplay(b);
+ b->makeActive();
 }
 
 void BosonWidget::addMouseIO(BosonBigDisplay* b)
@@ -1152,15 +1155,9 @@ void BosonWidget::slotChangeGroupMove(int mode)
  boConfig->saveGroupMoveMode((GroupMoveMode)mode);
 }
 
-void BosonWidget::slotSetActiveDisplay(BosonBigDisplay* display)
+void BosonWidget::slotSetActiveDisplay(BosonBigDisplay* active, BosonBigDisplay* old)
 {
- if (display == d->mDisplayManager->activeDisplay()) {
-	return;
- }
-
- BosonBigDisplay* old = d->mDisplayManager->activeDisplay();
- d->mDisplayManager->setActiveDisplay(display);
- if (!display) {
+ if (!active) {
 	kdWarning() << k_funcinfo << "NULL display" << endl;
 	return;
  }
@@ -1177,15 +1174,15 @@ void BosonWidget::slotSetActiveDisplay(BosonBigDisplay* display)
 	disconnect(old, SIGNAL(signalSelectUnit(Unit*)), 
 			d->mCommandFrame, SLOT(slotShowUnit(Unit*)));
  }
- connect(display, SIGNAL(contentsMoving(int, int)),
+ connect(active, SIGNAL(contentsMoving(int, int)),
 		d->mMiniMap, SLOT(slotMoveRect(int, int)));
- connect(display, SIGNAL(signalSizeChanged(int, int)),
+ connect(active, SIGNAL(signalSizeChanged(int, int)),
 		d->mMiniMap, SLOT(slotResizeRect(int, int)));
  connect(d->mMiniMap, SIGNAL(signalReCenterView(const QPoint&)),
-		display, SLOT(slotReCenterView(const QPoint&)));
- connect(display, SIGNAL(signalSingleUnitSelected(Unit*)), 
+		active, SLOT(slotReCenterView(const QPoint&)));
+ connect(active, SIGNAL(signalSingleUnitSelected(Unit*)), 
 		d->mCommandFrame, SLOT(slotShowSingleUnit(Unit*)));
- connect(display, SIGNAL(signalSelectUnit(Unit*)), 
+ connect(active, SIGNAL(signalSelectUnit(Unit*)), 
 		d->mCommandFrame, SLOT(slotShowUnit(Unit*)));
 
 
@@ -1194,7 +1191,7 @@ void BosonWidget::slotSetActiveDisplay(BosonBigDisplay* display)
 		disconnect(old, SIGNAL(signalAddCell(int,int, int, unsigned char)),
 				d->mMiniMap, SLOT(slotAddCell(int, int, int, unsigned char)));
 	}
-	connect(display, SIGNAL(signalAddCell(int,int, int, unsigned char)),
+	connect(active, SIGNAL(signalAddCell(int,int, int, unsigned char)),
 			d->mMiniMap, SLOT(slotAddCell(int, int, int, unsigned char)));
  } else {
 	if (old) {
@@ -1204,8 +1201,8 @@ void BosonWidget::slotSetActiveDisplay(BosonBigDisplay* display)
 				d->mCommandFrame, SLOT(slotSetAction(Unit*)));
 	}
 	connect(d->mMiniMap, SIGNAL(signalMoveSelection(int, int)),
-			display, SLOT(slotMoveSelection(int, int)));
-	connect(display, SIGNAL(signalSingleUnitSelected(Unit*)),
+			active, SLOT(slotMoveSelection(int, int)));
+	connect(active, SIGNAL(signalSingleUnitSelected(Unit*)),
 			d->mCommandFrame, SLOT(slotSetAction(Unit*)));
  }
 
@@ -1227,7 +1224,7 @@ void BosonWidget::slotSetActiveDisplay(BosonBigDisplay* display)
 			old, SLOT(slotUnitChanged(Unit*)));
  }
  connect(d->mLocalPlayer, SIGNAL(signalUnitChanged(Unit*)), 
-		display, SLOT(slotUnitChanged(Unit*)));
+		active, SLOT(slotUnitChanged(Unit*)));
 }
 
 void BosonWidget::slotOutOfGame(Player* p)

@@ -220,8 +220,10 @@ protected slots:
 
 	/**
 	 * Make display the currently active view
+	 * @param active The new active display.
+	 * @param old The previously active display, if non-NULL
 	 **/
-	void slotSetActiveDisplay(BosonBigDisplay* display);
+	void slotSetActiveDisplay(BosonBigDisplay* display, BosonBigDisplay* old);
 
 	void slotOutOfGame(Player* p);
 
