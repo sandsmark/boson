@@ -21,7 +21,7 @@
 #ifndef KNOWNBY_H 
 #define KNOWNBY_H 
 
-#include "common/msgData.h"
+#include "common/msgData.h"	// bosonMsgTag
 
 #ifndef ulong
 typedef unsigned long ulong;
