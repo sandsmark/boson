@@ -24,6 +24,7 @@
 #include "bodebug.h"
 
 #include <GL/gl.h>
+#include <math.h>
 
 
 /*****  BoParticleManager  *****/

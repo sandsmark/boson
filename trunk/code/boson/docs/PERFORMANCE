@@ -38,6 +38,9 @@ optimization, but the *last* step! inline only makes a difference for *very*
 often called functions
 
 
+------------------------------------------------------------------------------
+See mesas README file. There are some performance hints for software rendering
+
 
 ------------------------------------------------------------------------------
 Feel free to add further hints or links above.
