@@ -1128,42 +1128,6 @@ Check, if you installed the KDE header files correctly.])
   fi
 ])
 
-AC_DEFUN(KDE_CHECK_KDEQTADDON,
-[
-AC_MSG_CHECKING(for kde-qt-addon)
-AC_CACHE_VAL(kde_cv_have_kdeqtaddon,
-[
- kde_ldflags_safe="$LDFLAGS"
- kde_libs_safe="$LIBS"
- kde_cxxflags_safe="$CXXFLAGS"
-
- LIBS="-lkde-qt-addon $LIBQT $LIBS"
- CXXFLAGS="$CXXFLAGS $all_includes"
- LDFLAGS="$all_libraries $USER_LDFLAGS"
-
- AC_TRY_LINK([
-   #include <qdom.h>
- ],
- [
-   QDomDocument doc;
- ],
-  kde_cv_have_kdeqtaddon=yes,
-  kde_cv_have_kdeqtaddon=no
- )
-
- LDFLAGS=$kde_ldflags_safe
- LIBS=$kde_libs_safe
- kde_cxxflags_safe="$CXXFLAGS"
-])
-
-AC_MSG_RESULT($kde_cv_have_kdeqtaddon)
-
-if test "$kde_cv_have_kdeqtaddon" = "no"; then
-  AC_MSG_ERROR([Can't find libkde-qt-addon. You need to install it first.
-It is a separate package (and CVS module) named kde-qt-addon.])
-fi
-])
-
 AC_DEFUN(KDE_CHECK_KIMGIO,
 [
    AC_REQUIRE([AC_BASE_PATH_KDE])
