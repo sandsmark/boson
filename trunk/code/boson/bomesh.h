@@ -126,6 +126,12 @@ public:
 	~BoMesh();
 
 	/**
+	 * @return The number of faces/triangles (i.e. nodes) in this mesh. Use
+	 * the constructor to create the correct number.
+	 **/
+	unsigned int facesCount() const;
+
+	/**
 	 * @param See @ref BoNode::setFace. Remember to add the actual points to
 	 * this mesh! See especially @ref setVertex
 	 **/

@@ -281,6 +281,11 @@ void BoMesh::init()
  d->mMaxZ = 0.0f;
 }
 
+unsigned int BoMesh::facesCount() const
+{
+ return d->mAllNodes.count();
+}
+
 void BoMesh::createNodes(unsigned int faces)
 {
  if (d->mAllNodes.count() > 0) {
@@ -866,6 +871,13 @@ void BoMesh::movePoints(float* array, int index)
 	array[(index + i) * 5 + 3] = d->mPoints[i * 5 + 3];
 	array[(index + i) * 5 + 4] = d->mPoints[i * 5 + 4];
  }
+#warning FIXME: memory fragmentation
+ // we allocate a lot of floats and free them later (moving the values to
+ // a single array). this will probably lead to quite some memory
+ // fragmentation. we should change this design.
+ // but remember that the array that is actually used (d->mPoints) is allocated
+ // only once per model - so at this point there is no memory fragmentation (and
+ // this is the important place)
  delete[] d->mAllocatedPoints;
  d->mAllocatedPoints = 0;
  d->mPoints = array + index * 5;
