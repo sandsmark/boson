@@ -796,6 +796,7 @@ void Facility::addProduction(int unitType)
 void Facility::removeProduction()
 {
  d->mProductions.pop_front();
+ d->mProductionState = 0; // start next production (if any)
 }
 
 QValueList<int> Facility::productionList() const
@@ -812,11 +813,16 @@ void Facility::advanceProduction()
 	return;
  }
  // a unit is completed as soon as d->mProductionState == owner()->unitProperties(type)->productionTime()
- if (d->mProductionState <= owner()->unitProperties(type)->productionTime()) {
-	if (d->mProductionState == owner()->unitProperties(type)->productionTime()) {
+ unsigned int productionTime = owner()->unitProperties(type)->productionTime();
+ if (d->mProductionState <= productionTime) {
+	if (d->mProductionState == productionTime) {
 		kdDebug() << "unit " << type << " completed :-)" << endl;
+		d->mProductionState = d->mProductionState + 1;
+	} else {
+		d->mProductionState = d->mProductionState + 1;
+		double percentage = (double)(d->mProductionState * 100) / (double)productionTime;
+		owner()->productionAdvanced(this, percentage);
 	}
-	d->mProductionState = d->mProductionState + 1;
  }
 }
 

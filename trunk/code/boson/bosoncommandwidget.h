@@ -68,6 +68,16 @@ public:
 
 	CommandType commandType() const;
 
+	void unset();
+
+	/**
+	 * A call of this function does only make sense when @ref commandType is
+	 * @ref CommandUnit.
+	 *
+	 * This displays the progress of the production.
+	 **/
+	void advanceProduction(double percentage);
+
 public slots:
 	void slotUnitChanged(Unit*);
 

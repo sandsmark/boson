@@ -213,6 +213,12 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			break;
 		}
 		int unitType = factory->completedProduction();
+		kdDebug() << k_lineinfo 
+				<< "factory=" 
+				<< factory->id() 
+				<< ",unitid=" 
+				<< unitType 
+				<< endl;
 		if (unitType < 0) {
 			// hope this is working...
 			kdWarning() << k_lineinfo << "not yet completed" << endl;

@@ -454,7 +454,7 @@ const UnitProperties* SpeciesTheme::unitProperties(int unitType) const
 	return 0;
  }
  if (!d->mUnitProperties[unitType]) {
-	kdError() << "oops - no unit properties for " << unitType << endl;
+	kdError() << k_lineinfo << "oops - no unit properties for " << unitType << endl;
 	return 0;
  }
  return d->mUnitProperties[unitType];
