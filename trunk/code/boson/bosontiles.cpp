@@ -20,6 +20,7 @@
 #include "bosontiles.moc"
 
 #include "bosontexturearray.h"
+#include "bosonconfig.h"
 #include "bodebug.h"
 #include "defines.h"
 
@@ -133,26 +134,34 @@ bool BosonTiles::loadTiles(QString dir, bool debug)
  // mTextures.
  mTextureImages.clear();
 
- for (int i = 0; i < Cell::GroundLast; i++)    {       // load non-transitions
-	if (!loadGround(i, dir + groundType2Name((Cell::GroundType)i))) {
-		return false;
-	}
- }
- for (int i = 0; i < Cell::TransLast; i++) {                // load transitions
-	int j = 0;
-	for (j = 0; j < Cell::smallTilesPerTransition(); j++) {
-		if (!loadTransition(dir, Cell::getTransNumber((Cell::TransType)i, j))) {
+ // this can be useful for profiling some stuff. the display will become
+ // useless, no useful cell will be rendered, but also no startup time is spent
+ // here.
+ if (boConfig->loadTiles()) {
+	for (int i = 0; i < Cell::GroundLast; i++)    {       // load non-transitions
+		if (!loadGround(i, dir + groundType2Name((Cell::GroundType)i))) {
 			return false;
 		}
 	}
-	for ( ; j < Cell::tilesPerTransition(); j += 4) {
-		if (!loadTransition(dir, Cell::getTransNumber((Cell::TransType)i, j))) {
-			return false;
+	for (int i = 0; i < Cell::TransLast; i++) {                // load transitions
+		int j = 0;
+		for (j = 0; j < Cell::smallTilesPerTransition(); j++) {
+			if (!loadTransition(dir, Cell::getTransNumber((Cell::TransType)i, j))) {
+				return false;
+			}
+		}
+		for ( ; j < Cell::tilesPerTransition(); j += 4) {
+			if (!loadTransition(dir, Cell::getTransNumber((Cell::TransType)i, j))) {
+				return false;
+			}
 		}
 	}
- }
 
- delete mTextures;
+	delete mTextures;
+ } else {
+	QImage img(64, 64, 32);
+	mTextureImages.insert(0, img);
+ }
 
  // AB: tiles are loaded - but the texturs cannot yet be generated! must be done
  // after construction of the gl-context, aka the BosonGLWidget

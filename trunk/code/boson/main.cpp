@@ -41,6 +41,7 @@ static KCmdLineOptions options[] =
     { "playfield <identifier>", I18N_NOOP("Playfield identifier for newgame/start editor widget"), 0 },
     { "computer <count>", I18N_NOOP("Add (currently dummy) computer player"), 0 },
     { "start", I18N_NOOP("Start the game"), 0},
+    { "noloadtiles", I18N_NOOP("Do not load tiles (debugging only)"), 0},
     { 0, 0, 0 }
 };
 
@@ -74,6 +75,9 @@ int main(int argc, char **argv)
  KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
  if (!args->isSet("sound")) {
 	boConfig->setDisableSound(true);
+ }
+ if (!args->isSet("loadtiles")) {
+	boConfig->setLoadTiles(false);
  }
 
  TopWidget *top = new TopWidget;
