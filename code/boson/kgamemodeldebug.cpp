@@ -516,6 +516,7 @@ void KGameModelDebug::initMeshPage()
  d->mMeshView->addColumn(i18n("Texels count"), metrics.width(QString::number(111)));
  d->mMeshView->addColumn(i18n("Faces count"), metrics.width(QString::number(111)));
  d->mMeshView->addColumn(i18n("Flags count"), metrics.width(QString::number(11)));
+ d->mMeshView->addColumn(i18n("Max point index"), metrics.width(QString::number(11)));
  connect(d->mMeshView, SIGNAL(executed(QListViewItem*)), this, SLOT(slotDisplayMesh(QListViewItem*)));
  d->mMeshView->resize(d->mMeshView->height(), 150);
 
@@ -637,6 +638,14 @@ void KGameModelDebug::slotConstructMeshList()
 	item->setText(3, QString::number(mesh->texels));
 	item->setText(4, QString::number(mesh->faces));
 	item->setText(5, QString::number(mesh->flags));
+	int indices = 0;
+	for (int i = 0; i < mesh->faces; i++) {
+		Lib3dsFace* f = &mesh->faceL[i];
+		indices = QMAX(indices, f->points[0]);
+		indices = QMAX(indices, f->points[1]);
+		indices = QMAX(indices, f->points[2]);
+	}
+	item->setText(6, QString::number(indices));
 	d->mListItem2Mesh.insert(item, mesh);
  }
 }

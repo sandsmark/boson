@@ -153,6 +153,8 @@ public:
 
 	void setUpdateInterval(unsigned int ms);
 
+	void setDebugMapCoordinates(bool debug);
+
 	/**
 	 * Scroll by a certain distance.
 	 *
@@ -168,6 +170,7 @@ public:
 	bool mapCoordinatesToCell(const QPoint& pos, QPoint* cell);
 	bool mapDistance(int windowDistanceX, int windowDistanceY, GLdouble* dx, GLdouble* dy) const;
 	void worldToCanvas(GLfloat x, GLfloat y, GLfloat z, QPoint* pos) const;
+	void canvasToWorld(int x, int y, float z, GLfloat* glx, GLfloat* gly, GLfloat* glz) const;
 
 	double fps() const;
 

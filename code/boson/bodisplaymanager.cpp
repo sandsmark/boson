@@ -509,3 +509,13 @@ void BoDisplayManager::mapChanged()
 	++it;
  }
 }
+
+void BoDisplayManager::slotSetDebugMapCoordinates(bool debug)
+{
+ QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
+ while (it.current()) {
+	it.current()->setDebugMapCoordinates(debug);
+	++it;
+ }
+}
+

@@ -203,7 +203,7 @@ void ModelPreview::paintGL()
 	}
  }
 
-// glDisable(GL_CULL_FACE);
+ glDisable(GL_CULL_FACE);
  glDisable(GL_TEXTURE_2D);
  glDisable(GL_DEPTH_TEST);
  GLenum e = glGetError();
