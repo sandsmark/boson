@@ -37,7 +37,7 @@ class Unit;
 
 
 struct visualMap {
-	Cell		**cells;
+	visualCell	**cells;
 	int		width;
 	int		height;
 	};

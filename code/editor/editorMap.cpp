@@ -43,14 +43,14 @@ map.width = field.map.width;
 map.height = field.map.height;
 
 /* creation of the ground map */
-map.cells = new (Cell *)[map.width];
+map.cells = new (visualCell *)[map.width];
 for (i=0; i< map.width; i++)
-	map.cells[i] = new (Cell)[map.height];
+	map.cells[i] = new (visualCell)[map.height];
 
 /* initialisation */
 for (i=0; i< map.width; i++)
 	for (j=0; j< map.height; j++)
-		map.cells[i][j].setGroundType( field.map.cells[i][j]);
+		map.cells[i][j].set( field.map.cells[i][j], i, j);
 
 
 /* freeing of field.map.cells */
