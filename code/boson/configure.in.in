@@ -54,3 +54,12 @@ fi
 ])
 AC_CHECK_LIB3DS
 
+AC_DEFUN(AC_BOSON_HAVE_GL,
+[
+AC_HAVE_GL
+if test "$ac_cv_have_gl" = "no"; then
+  AC_MSG_ERROR([Cannot find OpenGL on your system!])
+fi
+])
+AC_BOSON_HAVE_GL
+
