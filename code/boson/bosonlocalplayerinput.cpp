@@ -145,7 +145,7 @@ void BosonLocalPlayerInput::produceAction(const BoSpecificAction& action)
   sendInput(msg);
 }
 
-void BosonLocalPlayerInput::stopUnits(QPtrList<Unit> units)
+void BosonLocalPlayerInput::stopUnits(const QPtrList<Unit>& units)
 {
   boDebug() << k_funcinfo << endl;
   if (units.isEmpty())
@@ -215,7 +215,7 @@ void BosonLocalPlayerInput::harvest(const HarvesterPlugin* harvester, const Reso
   sendInput(msg);
 }
 
-void BosonLocalPlayerInput::moveWithoutAttack(QPtrList<Unit> units, int x, int y)
+void BosonLocalPlayerInput::moveWithoutAttack(const QPtrList<Unit>& units, int x, int y)
 {
   boDebug() << k_funcinfo << endl;
   QByteArray b;
@@ -246,7 +246,7 @@ void BosonLocalPlayerInput::moveWithoutAttack(QPtrList<Unit> units, int x, int y
   sendInput(msg);
 }
 
-void BosonLocalPlayerInput::moveWithAttack(QPtrList<Unit> units, int x, int y)
+void BosonLocalPlayerInput::moveWithAttack(const QPtrList<Unit>& units, int x, int y)
 {
   boDebug() << k_funcinfo << endl;
   // FIXME: maybe moveWithAttack() and moveWithoutAttack() should be merged to
@@ -296,7 +296,7 @@ void BosonLocalPlayerInput::build(ProductionType type, Unit* factory, int x, int
   sendInput(msg);
 }
 
-void BosonLocalPlayerInput::attack(QPtrList<Unit> units, Unit* target)
+void BosonLocalPlayerInput::attack(const QPtrList<Unit>& units, Unit* target)
 {
   boDebug() << k_funcinfo << endl;
   QByteArray b;
@@ -340,7 +340,7 @@ void BosonLocalPlayerInput::dropBomb(Unit* u, int weapon, int x, int y)
   sendInput(msg);
 }
 
-void BosonLocalPlayerInput::repair(QPtrList<Unit> units, Unit* repairyard)
+void BosonLocalPlayerInput::repair(const QPtrList<Unit>& units, Unit* repairyard)
 {
   boDebug() << k_funcinfo << endl;
   QByteArray b;
@@ -367,7 +367,7 @@ void BosonLocalPlayerInput::repair(QPtrList<Unit> units, Unit* repairyard)
   sendInput(msg);
 }
 
-void BosonLocalPlayerInput::refine(QPtrList<Unit> units, Unit* refinery)
+void BosonLocalPlayerInput::refine(const QPtrList<Unit>& units, Unit* refinery)
 {
   boDebug() << k_funcinfo << endl;
   QByteArray b;
@@ -393,7 +393,7 @@ void BosonLocalPlayerInput::refine(QPtrList<Unit> units, Unit* refinery)
   sendInput(msg);
 }
 
-void BosonLocalPlayerInput::follow(QPtrList<Unit> units, Unit* target)
+void BosonLocalPlayerInput::follow(const QPtrList<Unit>& units, Unit* target)
 {
   boDebug() << k_funcinfo << endl;
   QByteArray b;
