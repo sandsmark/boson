@@ -138,19 +138,11 @@ void BoCamera::applyCameraToScene()
 
 const BoVector3& BoCamera::cameraPos()
 {
-  if(positionDirty())
-  {
-    updatePosition();
-  }
   return mCameraPos;
 }
 
 const BoVector3& BoCamera::up()
 {
-  if(positionDirty())
-  {
-    updatePosition();
-  }
   return mUp;
 }
 
@@ -413,6 +405,24 @@ bool BoGameCamera::loadFromXML(const QDomElement& root)
   mRadius = radius;
   setPositionDirty();
   return ret;
+}
+
+const BoVector3& BoGameCamera::cameraPos()
+{
+  if(positionDirty())
+  {
+    updatePosition();
+  }
+  return BoCamera::cameraPos();
+}
+
+const BoVector3& BoGameCamera::up()
+{
+  if(positionDirty())
+  {
+    updatePosition();
+  }
+  return BoCamera::up();
 }
 
 void BoGameCamera::setLookAt(const BoVector3& pos)
