@@ -55,6 +55,8 @@ public:
   bool load(QString filename);
   bool save(QString filename);
 
+  bool isModified() {return modified; }
+
 /* concerning contents */
   visualFacility *getFacility(long key) { return facilities.find(key); }
 
@@ -66,7 +68,7 @@ public:
 private:
 	long		key;
 	void		freeCells();
-	bool		isModified;
+	bool		modified;
 
 public: //needed by visualBigDisplay
 	visualCell	**cells;
