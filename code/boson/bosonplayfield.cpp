@@ -277,9 +277,19 @@ bool BosonPlayField::loadPlayField(const QString& file)
 	return false;
  }
 
- if (!loadMapFromFile(mFile->mapData(), mFile->heightMapData(), mFile->texMapData())) {
-	boError() << k_funcinfo << "Error loading map from " << file << endl;
-	return false;
+ QByteArray heightMap = mFile->heightMapData();
+ QByteArray texMap = mFile->texMapData();
+ if (!mFile->hasMapDirectory()) {
+	if (!loadMapFromFile_0_8(mFile->mapData(), heightMap, texMap)) {
+		boError() << k_funcinfo << "Error loading map from " << file << endl;
+		return false;
+	}
+ } else {
+	// AB: a map directory implies that map/map.xml is present.
+	if (!loadMapFromFile(mFile->mapXMLData(), heightMap, texMap)) {
+		boError() << k_funcinfo << "Error loading map from " << file << endl;
+		return false;
+	}
  }
  delete mFile;
  mFile = 0;
@@ -298,9 +308,13 @@ bool BosonPlayField::loadDescriptionFromFile(const QByteArray& xml)
  return true;
 }
 
-bool BosonPlayField::loadMapFromFile(const QByteArray& map, const QByteArray& heightMapImage, const QByteArray& texMap)
+bool BosonPlayField::loadMapFromFile_0_8(const QByteArray& map, const QByteArray& heightMapImage, const QByteArray& texMap)
 {
  boDebug() << k_funcinfo << endl;
+ if (map.size() == 0) {
+	boError() << k_funcinfo << "empty byte array for map" << endl;
+	return false;
+ }
  if (texMap.size() == 0) {
 	// there is no texmap in the file. Probably a map from boson <= 0.8
 	// convert it to our new format first.
@@ -309,7 +323,10 @@ bool BosonPlayField::loadMapFromFile(const QByteArray& map, const QByteArray& he
 	QByteArray newTexMap;
 
 	BosonFileConverter converter;
-	converter.convertMapFile_From_0_8_To_0_9(map, &newMap, &newTexMap);
+	if (!converter.convertMapFile_From_0_8_To_0_9(map, &newMap, &newTexMap)) {
+		boError() << k_funcinfo << "conversion from 0.8 to 0.9 failed." << endl;
+		return false;
+	}
 
 	if (newTexMap.size() == 0) {
 		boError() << k_funcinfo << "empty texmap" << endl;
@@ -317,19 +334,41 @@ bool BosonPlayField::loadMapFromFile(const QByteArray& map, const QByteArray& he
 	}
 	return loadMapFromFile(newMap, heightMapImage, newTexMap);
  }
- if (map.size() == 0) {
-	boError() << k_funcinfo << "empty byte array for map" << endl;
+
+ // when we come to this it is neither a 0.8 file nor a 0.9 file. a 0.8.128
+ // might be left (aka 0x00,0x08,0x80 -> development version that was never
+ // released).
+ // the map files are mostly equal there (they just aren't in map/ subdir)
+ // except of "map", which is in binary. we use an xml file in 0.9.
+
+ boDebug() << k_funcinfo << "trying to convert from 0.8.128 to 0.9" << endl;
+ QByteArray newMap;
+ BosonFileConverter converter;
+ if (!converter.convertMapFile_From_0_8_128_To_0_9(map, &newMap)) {
+	boError() << k_funcinfo << "conversion from 0.8.128 to 0.9 failed." << endl;
+	return false;
+ }
+ return loadMapFromFile(newMap, heightMapImage, texMap);
+}
+
+bool BosonPlayField::loadMapFromFile(const QByteArray& mapXML, const QByteArray& heightMapImage, const QByteArray& texMap)
+{
+ boDebug() << k_funcinfo << endl;
+ if (mapXML.size() == 0) {
+	boError() << k_funcinfo << "empty byte array for mapXML" << endl;
 	return false;
  }
  if (heightMapImage.size() == 0) {
 	boError() << k_funcinfo << "empty height map array" << endl;
 	return false;
  }
- // note: an empty texMap is fine - we will generate one (compatibility mode
- // for boson < 0.9)
+ if (texMap.size() == 0) {
+	boError() << k_funcinfo << "empty texmap array" << endl;
+	return false;
+ }
  delete mMap;
  mMap = new BosonMap(this);
- bool ret = mMap->loadMapFromFile(map);
+ bool ret = mMap->loadMapFromFile(mapXML);
  if (!ret) {
 	boError() << k_funcinfo << "Could not load map" << endl;
 	return false;
@@ -449,13 +488,7 @@ QByteArray BosonPlayField::saveMapToFile()
 	boError() << k_funcinfo << "NULL map" << endl;
 	return QByteArray();
  }
- QByteArray file;
- QDataStream stream(file, IO_WriteOnly);
- if (!mMap->saveMapToFile(stream)) {
-	boError() << k_funcinfo << "Error saving map" << endl;
-	return QByteArray();
- }
- return file;
+ return mMap->saveMapToFile();
 }
 
 QByteArray BosonPlayField::saveTexMapToFile()

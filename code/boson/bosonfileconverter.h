@@ -42,6 +42,16 @@ public:
 	bool convertMapFile_From_0_8_To_0_9(const QByteArray& map, QByteArray* newMap, QByteArray* texMap);
 
 	/**
+	 * Convert a "map" file (part of the .bpf files) to a map.xml file, as
+	 * used in boson 0.9.
+	 *
+	 * It is a trivial conversion, the values from the @p map array are
+	 * streamed into variables and then placed into a DOM tree, which is
+	 * stored into @p mapXML.
+	 **/
+	bool convertMapFile_From_0_8_128_To_0_9(const QByteArray& map, QByteArray* mapXML, int* mapWidth = 0, int* mapHeight = 0);
+
+	/**
 	 * Convert a set of files (kgame.xml, players.xml, canvas.xml,
 	 * external.xml, map) from boson 0.8 to boson 0.9.
 	 *
@@ -85,6 +95,10 @@ public:
 	 * ignored, as they don't influece the groundType in any way.
 	 * @param map The output buffer for the map file.
 	 * @param texMap The ouput buffer for the texmap.
+	 *
+	 * WARNING: the @p map will be a boson 0.8.128 map only. You need to
+	 * call @ref BosonFileConverter::convertMapFile_From_0_8_128_To_0_9 on
+	 * it!
 	 **/
 	bool convert(int* groundTypes, QByteArray* map, QByteArray* texMap);
 

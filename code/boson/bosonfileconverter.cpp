@@ -105,8 +105,9 @@ bool BosonFileConverter::convertMapFile_From_0_8_To_0_9(const QByteArray& map, Q
  delete[] versions;
  versions = 0;
 
+ QByteArray mapBuffer;
  MapToTexMap_From_0_8_To_0_9 converter((unsigned int)mapWidth, (unsigned int)mapHeight);
- bool ret = converter.convert(groundTypes, newMap, texMap);
+ bool ret = converter.convert(groundTypes, &mapBuffer, texMap);
  if (!ret) {
 	boError() << k_funcinfo << "unable to convert file" << endl;
  }
@@ -116,7 +117,56 @@ bool BosonFileConverter::convertMapFile_From_0_8_To_0_9(const QByteArray& map, Q
  delete[] versions;
 
 
- return ret;
+ // MapToTexMap converts the map to 0.8.128 only. further converting is
+ // necessary.
+ return convertMapFile_From_0_8_128_To_0_9(mapBuffer, newMap);
+}
+
+bool BosonFileConverter::convertMapFile_From_0_8_128_To_0_9(const QByteArray& map, QByteArray* mapXML, int* mapWidth, int* mapHeight)
+{
+ boDebug() << k_funcinfo << endl;
+ QDataStream stream(map, IO_ReadOnly);
+ QString magicCookie;
+ Q_UINT32 mapVersion;
+ Q_INT32 width;
+ Q_INT32 height;
+ QString groundTheme;
+
+ stream >> magicCookie;
+ stream >> mapVersion;
+ if (magicCookie != QString::fromLatin1("BosonMap")) {
+	boError() << k_funcinfo << "invalid magic cookie for map file: " << magicCookie << endl;
+	return false;
+ }
+ if (mapVersion != BOSONMAP_VERSION_0_8_128) {
+	boError() << k_funcinfo << "version must be " << BOSONMAP_VERSION_0_8_128 <<  "- is: " << mapVersion << endl;
+	return false;
+ }
+ stream >> width;
+ stream >> height;
+ if (width < 10 || height < 10 || width > 500 || height > 500) {
+	boError() << k_funcinfo << "invalid map geometry: " << width << "x" << height << endl;
+	return false;
+ }
+ stream >> groundTheme;
+
+ QDomDocument doc(QString::fromLatin1("BosonMap"));
+ QDomElement root = doc.createElement(QString::fromLatin1("BosonMap"));
+ root.setAttribute(QString::fromLatin1("Version"), BOSONMAP_VERSION_0_9);
+ root.setAttribute(QString::fromLatin1("GroundTheme"), groundTheme);
+ doc.appendChild(root);
+ QDomElement geometry = doc.createElement(QString::fromLatin1("Geometry"));
+ geometry.setAttribute(QString::fromLatin1("Width"), width);
+ geometry.setAttribute(QString::fromLatin1("Height"), height);
+ root.appendChild(geometry);
+
+ if (mapWidth && mapHeight) {
+	*mapWidth = width;
+	*mapHeight = height;
+ }
+ *mapXML = doc.toCString();
+// *mapXML = doc.toString().local8Bit(); // by any reason toCString() and therefore toUtf8() causes problems with unexpected characters
+ return true;
 }
 
 bool BosonFileConverter::convertSaveGame_From_0_8_To_0_9(QMap<QString, QByteArray>& fileList)
@@ -306,45 +356,15 @@ bool BosonFileConverter::convertSaveGame_From_0_8_128_To_0_9(QMap<QString, QByte
  QByteArray map_texMap;
  QByteArray map_description;
 
- QString magicCookie;
- Q_UINT32 mapVersion;
- Q_INT32 width;
- Q_INT32 height;
- QString groundTheme;
+ int width = 0;
+ int height = 0;
  {
 	QByteArray buffer;
 	stream >> buffer;
-
-	QDataStream mapStream(buffer, IO_ReadOnly);
-	mapStream >> magicCookie;
-	mapStream >> mapVersion;
-	if (magicCookie != QString::fromLatin1("BosonMap")) {
-		boError() << k_funcinfo << "invalid magic cookie for map file: " << magicCookie << endl;
+	if (!convertMapFile_From_0_8_128_To_0_9(buffer, &map_mapXML)) {
+		boError() << k_funcinfo << "unable to load map file" << endl;
 		return false;
 	}
-	if (mapVersion != BOSONMAP_VERSION_0_8_128) {
-		boError() << k_funcinfo << "version must be " << BOSONMAP_VERSION_0_8_128 <<  "- is: " << mapVersion << endl;
-		return false;
-	}
-	mapStream >> width;
-	mapStream >> height;
-	if (width < 10 || height < 10 || width > 500 || height > 500) {
-		boError() << k_funcinfo << "invalid map geometry: " << width << "x" << height << endl;
-		return false;
-	}
-	mapStream >> groundTheme;
- }
- {
-	QDomDocument doc(QString::fromLatin1("BosonMap"));
-	QDomElement root = doc.createElement(QString::fromLatin1("BosonMap"));
-	root.setAttribute(QString::fromLatin1("GroundTheme"), groundTheme);
-	doc.appendChild(root);
-	QDomElement geometry = doc.createElement(QString::fromLatin1("Geometry"));
-	geometry.setAttribute(QString::fromLatin1("Width"), width);
-	geometry.setAttribute(QString::fromLatin1("Height"), height);
-	root.appendChild(geometry);
-
-	map_mapXML = doc.toCString();
  }
 
  // height map.

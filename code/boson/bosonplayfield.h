@@ -186,6 +186,7 @@ signals:
 
 protected:
 	bool loadDescriptionFromFile(const QByteArray& xml);
+	bool loadMapFromFile_0_8(const QByteArray& xml, const QByteArray& heightMapImage, const QByteArray& texMap);
 	bool loadMapFromFile(const QByteArray& xml, const QByteArray& heightMapImage, const QByteArray& texMap);
 	bool loadScenarioFromFile(const QByteArray& xml);
 
