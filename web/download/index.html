@@ -10,28 +10,28 @@
 
 <TABLE WIDTH = "90%">
 
-  <TR><TD BGCOLOR = "#FFDE00">
+  <tr><td BGCOLOR = "#FFDE00">
   
-    <FONT FACE="helvetica" SIZE="3">
+    <font FACE="helvetica" SIZE="3">
 
     <B>Download Boson:</B>
 
-    </FONT>
+    </font>
 
-  </TD></TR>
+  </td></tr>
 
 
-  <TR><TD>
+  <tr><td>
   
-    <BR>
+    <br>
 
-    <FONT FACE="helvetica" SIZE="2">
+    <font FACE="helvetica" SIZE="2">
 
       <P>Please note that Boson isn't playable yet, so releases are made available mainly for developers, artists and anybody else just being curious. Nevertheless, if you encounter problems during the installation or in the game, please report this in the feedback section. Thank You.</P>
 
       <P>This section will become more complete as things like additional themes (graphics, music and sounds) are added.</P>
  
-    <BR><BR>
+    <br><br>
 
     <DIV ALIGN = "RIGHT">
 
@@ -40,74 +40,31 @@
 
 <!-- #################### RPM Download starts #################### //-->
 
-      <TR><TD BGCOLOR = "#FFDE00"> 
+      <tr><td BGCOLOR = "#FFDE00"> 
    
-        <FONT FACE="helvetica" SIZE="3"> 
+        <font FACE="helvetica" SIZE="3"> 
  
         <B>RPMs and SRPMs:</B> 
  
-        </FONT> 
+        </font> 
  
-      </TD></TR> 
+      </td></tr> 
 
-      <TR><TD>
+      <tr><td>
 
-        <BR>
+        <br>
    
-        <FONT FACE="helvetica" SIZE="2"> 
+        <font FACE="helvetica" SIZE="2"> 
  
-        <P>Here you can download the releases in RPM format for multiple platforms. Right now, these files include the precompiled boson code and the graphics files.</P>
+        <p>Boson is in a development state and I am far too lazy to generate RPMs right now. Please download the sources instead. If you *really* want/need RPM you might want to contact us at <a href="mailto:boson-devel@lists.sourceforge.net">boson-devel@lists.sourceforge.net</a>.</p>
  
-        </FONT> 
- 
-      </TD></TR> 
+        </font> 
 
-      <TR><TD>
+        <br>
+        <br>
+        <br>
 
-        <BR>
-
-        <CENTER>
-
-        <TABLE WIDTH = 90%" BGCOLOR = "#FFDE00"> 
- 
-          <TR> 
- 
-	    <TD><B><CENTER><FONT FACE="helvetica" SIZE="3">Version</FONT></CENTER></B></TD> 
-	    <TD><B><CENTER><FONT FACE="helvetica" SIZE="3">SRPM</FONT></CENTER></B></TD> 
-	    <TD><B><CENTER><FONT FACE="helvetica" SIZE="3">Suse 6.3</FONT></CENTER></B></TD> 
-	    <TD><B><CENTER><FONT FACE="helvetica" SIZE="3">LinuxPPC R5</FONT></CENTER></B></TD> 
-	    <TD><B><CENTER><FONT FACE="helvetica" SIZE="3">Release Date</FONT></CENTER></B></TD> 
- 
-          </TR> 
-  
-          <TR BGCOLOR = "#CCCCCC"> 
-
-	    <TD>0.4 / FTP</TD> 
-	    <TD><CENTER><a href="ftp://aquila.rezel.enst.fr/pub/boson/boson-0.4-2.src.rpm">6719 kb</a></CENTER></TD> 
-	    <TD><CENTER><a href="ftp://aquila.rezel.enst.fr/pub/boson/boson-0.4-suse63.i386.rpm">6757 kb</a></CENTER></TD> 
-	    <TD><CENTER><a href="ftp://aquila.rezel.enst.fr/pub/boson/boson-0.4-1.ppc.rpm">6770 kb</a></CENTER></TD> 
-	    <TD><CENTER>24/04/2000</CENTER></TD> 
-
-          </TR> 
- 
-          <TR BGCOLOR = "#CCCCCC"> 
-
-	    <TD>0.4 / HTTP</TD> 
-	    <TD><CENTER><a href="boson-0.4-2.src.rpm">6719 kb</a></CENTER></TD> 
-	    <TD><CENTER><a href="boson-0.4-suse63.i386.rpm">6757 kb</a></CENTER></TD> 
-	    <TD><CENTER><a href="boson-0.4-1.ppc.rpm">6770 kb</a></CENTER></TD> 
-	    <TD><CENTER>24/04/2000</CENTER></TD> 
-
-          </TR> 
- 
-
-        </TABLE>
-
-        </CENTER> 
-
-      <BR><BR><BR>
- 
-      </TD></TR>
+      </td></tr> 
 
 
 <!-- #################### RPM Download ends #################### //-->
@@ -115,151 +72,165 @@
 
 <!-- #################### Source Download starts #################### //-->
 
-      <TR><TD BGCOLOR = "#FFDE00"> 
+      <tr><td BGCOLOR = "#FFDE00"> 
 
-        <FONT FACE="helvetica" SIZE="3"> 
+        <font FACE="helvetica" SIZE="3"> 
  
         <B>Sources:</B> 
  
-        </FONT> 
+        </font> 
  
-      </TD></TR> 
+      </td></tr> 
 
-      <TR><TD>
+      <tr><td>
 
-        <BR>
+        <br>
    
-        <FONT FACE="helvetica" SIZE="2"> 
+        <font FACE="helvetica" SIZE="2"> 
  
-        <P>These are the source packages for Boson. Please note that you do need at least one of the graphics packages for Boson to work.</P>
+	We currently do not provide packages for the source code.  It would be
+	too much work for us to debug obsolete packaged code, so please use the
+	CVS code. You can get the code using these commands:
+	<br>
+        <br>
+	<code>
+         cvs -d:pserver:anonymous@cvs.boson.sourceforge.net:/cvsroot/boson login
+         <br>
+         cvs -z3 -d:pserver:anonymous@cvs.boson.sourceforge.net:/cvsroot/boson co code
+	</code>
+        <br>
+        <br>
+        please just press the Enter key when you are prompted for a password.
+        <br>
+        As soon as you have checked out the sources you can simply do a <br>
+        <br>
+        <code>
+         cd code <br>
+         cvs -z3 up -Pd
+	</code>
+        <br>
+        <br>
+        to update the sources. No need to login again.
+	<br>
+	To compile boson use something like
+	<br>
+	<br>
+	<code>
+	cd code <br>
+	./configure --prefix=/opt/kde3 <br>
+	make <br>
+	</code>
+	<br>
+	You need to be root to install boson:
+	<br>
+	<br>
+	<code>
+	su <br>
+	make install <br>
+	</code>
  
-        </FONT> 
+        </font> 
  
-      </TD></TR> 
+        <br><br><br>
 
-      <TR><TD>
-
-        <BR>
-
-        <CENTER>
-
-        <TABLE WIDTH = 90%" BGCOLOR = "#CCCCCC"> 
- 
-          <TR BGCOLOR = "#FFDE00"> 
- 
-	    <TD WIDTH = "30%"><B><CENTER><FONT FACE="helvetica" SIZE="3">Version</FONT></CENTER></B></TD> 
-	    <TD WIDTH = "20%"><B><CENTER><FONT FACE="helvetica" SIZE="3">gzip</FONT></CENTER></B></TD> 
-	    <TD WIDTH = "20%"><B><CENTER><FONT FACE="helvetica" SIZE="3">bzip2</FONT></CENTER></B></TD> 
-	    <TD WIDTH = "30%"><B><CENTER><FONT FACE="helvetica" SIZE="3">Release Date</FONT></CENTER></B></TD> 
- 
-          </TR> 
-
-          <TR>
-
-	    <TD>0.5 / FTP Mirror 1</TD>
-	    <TD><CENTER><A HREF="ftp://ftp.kde.org/pub/kde/unstable/apps/games/boson-0.5.tgz">345 kb</A></CENTER></TD>
-	    <TD><CENTER><A HREF="ftp://ftp.kde.org/pub/kde/unstable/apps/games/boson-0.5.tar.bz2">270 kb</A></CENTER></TD>
-	    <TD><CENTER>30/10/2000</CENTER></TD>
-
-          </TR>
-
-        </TABLE>
-
-        </CENTER> 
-
-        <BR><BR><BR>
- 
-      </TD></TR>
+      </td></tr> 
 
 <!-- #################### Source Download ends #################### //-->
 
 <!-- #################### Graphics Download starts #################### //-->
 
-      <TR><TD BGCOLOR = "#FFDE00"> 
+      <tr><td BGCOLOR = "#FFDE00"> 
    
-        <FONT FACE="helvetica" SIZE="3"> 
+        <font FACE="helvetica" SIZE="3"> 
  
         <B>Graphics:</B> 
  
-        </FONT> 
+        </font> 
  
-      </TD></TR> 
+      </td></tr> 
 
-      <TR><TD>
+      <tr><td>
 
-        <BR>
+        <br>
    
-        <FONT FACE="helvetica" SIZE="2"> 
+        <font FACE="helvetica" SIZE="2"> 
  
-        <P>These are the graphics packages for Boson. They are all the neccessary graphics files to play boson, including ground, species and GUI graphics. You only need to download one of the themes.</P>
+        <p>The graphics packages for Boson provide all the neccessary graphics
+        files to play boson, including ground, species and GUI graphics. Just
+        like for the sources we use CVS for these so-called data files. We don't
+        provide packages at this time as there are quite often (very small)
+        changes to some files and you would have to download the entire package
+        again.<br>So please use CVS for this as well. When there are changed to
+        the packages CVS only updates the changed parts.</p>
+        
+        Just use
+        <br>
+        <br>
+	<code>
+         cvs -d:pserver:anonymous@cvs.boson.sourceforge.net:/cvsroot/boson login
+         <br>
+         cvs -z3 -d:pserver:anonymous@cvs.boson.sourceforge.net:/cvsroot/boson co data 
+	</code>
+        <br>
+        <br>
+        to checkout the data files (veery big package! currently about 24MB).
+        Use
+        <br>
+        <br>
+        <code>
+         cd data <br>
+         cvs -z3 up -Pd
+	</code>
+        <br>
+        <br>
+        to update the data files.
+	To install them use something like <br>
+	<br>
+	<code>
+	./configure --prefix=/opt/kde3 <br>
+	make <br>
+	su <br>
+	make install <br>
+	</code>
+	<br>
+	See Sources for details - and don't forget to read the README file!
+	<br>
  
-        </FONT> 
+        </font> 
  
-      </TD></TR> 
+        <br><br><br>
 
-      <TR><TD>
-
-        <BR>
-
-        <CENTER>
-
-        <TABLE WIDTH = 90%" BGCOLOR = "#CCCCCC"> 
- 
-          <TR BGCOLOR = "#FFDE00"> 
- 
-	    <TD WIDTH = "30%"><B><CENTER><FONT FACE="helvetica" SIZE="3">Theme</FONT></CENTER></B></TD> 
-	    <TD WIDTH = "20%"><B><CENTER><FONT FACE="helvetica" SIZE="3">gzip</FONT></CENTER></B></TD> 
-	    <TD WIDTH = "20%"><B><CENTER><FONT FACE="helvetica" SIZE="3">bzip2</FONT></CENTER></B></TD> 
-	    <TD WIDTH = "30%"><B><CENTER><FONT FACE="helvetica" SIZE="3">Release Date</FONT></CENTER></B></TD> 
- 
-          </TR> 
-
-          <TR>
-
-	    <TD>Human/Earth - 0.5</TD>
-	    <TD><CENTER><A HREF="ftp://ftp.kde.org/pub/kde/unstable/apps/games/boson-pics-0.5.tgz">7000 kb</A></CENTER></TD>
-	    <TD>&nbsp;</TD>
-	    <TD><CENTER>30/10/2000</CENTER></TD>
-
-          </TR>
-
-        </TABLE>
-
-        </CENTER> 
- 
-        <BR><BR><BR>
-
-      </TD></TR>
+      </td></tr> 
 
 <!-- #################### Graphics Download ends #################### //-->
 
 <!-- #################### Music Download starts #################### //-->
 
-      <TR><TD BGCOLOR = "#FFDE00"> 
+      <tr><td BGCOLOR = "#FFDE00"> 
    
-        <FONT FACE="helvetica" SIZE="3"> 
+        <font FACE="helvetica" SIZE="3"> 
  
         <B>Music:</B> 
  
-        </FONT> 
+        </font> 
  
-      </TD></TR> 
+      </td></tr> 
 
-      <TR><TD>
+      <tr><td>
 
-        <BR>
+        <br>
    
-        <FONT FACE="helvetica" SIZE="2"> 
+        <font FACE="helvetica" SIZE="2"> 
  
         <P>The first music theme for Boson is currently in development. Also, the author has created an external boson - music <A HREF = "http://www.rebellion-scs.de/boson/" TARGET = "_parent">webpage</A>, where you can also download the songs. These files are not required to play Boson.</P>
  
-        </FONT> 
+        </font> 
  
-      </TD></TR> 
+      </td></tr> 
 
-      <TR><TD>
+      <tr><td>
 
-        <BR>
+        <br>
 
         <CENTER>
 
@@ -267,153 +238,153 @@
  
           <TR BGCOLOR = "#FFDE00"> 
  
-	    <TD WIDTH = "50%"><B><CENTER><FONT FACE="helvetica" SIZE="3">Theme</FONT></CENTER></B></TD> 
-	    <TD WIDTH = "20%"><B><CENTER><FONT FACE="helvetica" SIZE="3">zip</FONT></CENTER></B></TD> 
-	    <TD WIDTH = "30%"><B><CENTER><FONT FACE="helvetica" SIZE="3">Release Date</FONT></CENTER></B></TD> 
+	    <td WIDTH = "50%"><B><CENTER><font FACE="helvetica" SIZE="3">Theme</font></CENTER></B></td> 
+	    <td WIDTH = "20%"><B><CENTER><font FACE="helvetica" SIZE="3">zip</font></CENTER></B></td> 
+	    <td WIDTH = "30%"><B><CENTER><font FACE="helvetica" SIZE="3">Release Date</font></CENTER></B></td> 
  
-          </TR> 
+          </tr> 
 
-          <TR> 
+          <tr> 
  
-	    <TD WIDTH = "50%"><FONT FACE="helvetica" SIZE="2"><B>Progressive</B></FONT></TD><TD><FONT FACE="helvetica" SIZE="2"><B>Nils Trzebin</B></FONT></TD><TD>&nbsp;</TD>
+	    <td WIDTH = "50%"><font FACE="helvetica" SIZE="2"><B>Progressive</B></font></td><td><font FACE="helvetica" SIZE="2"><B>Nils Trzebin</B></font></td><td>&nbsp;</td>
 
-          </TR>
+          </tr>
  
-          <TR> 
+          <tr> 
  
-	    <TD WIDTH = "50%"><FONT FACE="helvetica" SIZE="2">Progressive - Track 01</FONT></TD> 
-	    <TD WIDTH = "20%"><CENTER><FONT FACE="helvetica" SIZE="2"><A HREF = "http://www.rebellion-scs.de/boson/loads/Progressive/Track1.mp3.mp3">1600 kb</A></FONT></CENTER></TD> 
-	    <TD WIDTH = "30%"><CENTER><FONT FACE="helvetica" SIZE="2">27/03/2000</FONT></CENTER></TD> 
+	    <td WIDTH = "50%"><font FACE="helvetica" SIZE="2">Progressive - Track 01</font></td> 
+	    <td WIDTH = "20%"><CENTER><font FACE="helvetica" SIZE="2"><A HREF = "http://www.rebellion-scs.de/boson/loads/Progressive/Track1.mp3.mp3">1600 kb</A></font></CENTER></td> 
+	    <td WIDTH = "30%"><CENTER><font FACE="helvetica" SIZE="2">27/03/2000</font></CENTER></td> 
 
-          </TR>
+          </tr>
  
-          <TR> 
+          <tr> 
  
-	    <TD WIDTH = "50%"><FONT FACE="helvetica" SIZE="2">Progressive - Track 02</FONT></TD> 
-	    <TD WIDTH = "20%"><CENTER><FONT FACE="helvetica" SIZE="2"><A HREF = "http://www.rebellion-scs.de/boson/loads/Progressive/Track2.mp3">1470 kb</A></FONT></CENTER></TD> 
-	    <TD WIDTH = "30%"><CENTER><FONT FACE="helvetica" SIZE="2">27/03/2000</FONT></CENTER></TD> 
+	    <td WIDTH = "50%"><font FACE="helvetica" SIZE="2">Progressive - Track 02</font></td> 
+	    <td WIDTH = "20%"><CENTER><font FACE="helvetica" SIZE="2"><A HREF = "http://www.rebellion-scs.de/boson/loads/Progressive/Track2.mp3">1470 kb</A></font></CENTER></td> 
+	    <td WIDTH = "30%"><CENTER><font FACE="helvetica" SIZE="2">27/03/2000</font></CENTER></td> 
 
-          </TR>
+          </tr>
  
-          <TR> 
+          <tr> 
  
-	    <TD WIDTH = "50%"><FONT FACE="helvetica" SIZE="2">Progressive - Track 03</FONT></TD> 
-	    <TD WIDTH = "20%"><CENTER><FONT FACE="helvetica" SIZE="2"><A HREF = "http://www.rebellion-scs.de/boson/loads/Progressive/Track3.mp3">900 kb</A></FONT></CENTER></TD> 
-	    <TD WIDTH = "30%"><CENTER><FONT FACE="helvetica" SIZE="2">27/03/2000</FONT></CENTER></TD> 
+	    <td WIDTH = "50%"><font FACE="helvetica" SIZE="2">Progressive - Track 03</font></td> 
+	    <td WIDTH = "20%"><CENTER><font FACE="helvetica" SIZE="2"><A HREF = "http://www.rebellion-scs.de/boson/loads/Progressive/Track3.mp3">900 kb</A></font></CENTER></td> 
+	    <td WIDTH = "30%"><CENTER><font FACE="helvetica" SIZE="2">27/03/2000</font></CENTER></td> 
 
-          </TR>
+          </tr>
 
-          <TR> 
+          <tr> 
  
-	    <TD WIDTH = "50%"><FONT FACE="helvetica" SIZE="2">Progressive - Track 04</FONT></TD> 
-	    <TD WIDTH = "20%"><CENTER><FONT FACE="helvetica" SIZE="2"><A HREF = "http://www.rebellion-scs.de/boson/loads/Progressive/Track4.mp3">990 kb</A></FONT></CENTER></TD> 
-	    <TD WIDTH = "30%"><CENTER><FONT FACE="helvetica" SIZE="2">27/03/2000</FONT></CENTER></TD> 
+	    <td WIDTH = "50%"><font FACE="helvetica" SIZE="2">Progressive - Track 04</font></td> 
+	    <td WIDTH = "20%"><CENTER><font FACE="helvetica" SIZE="2"><A HREF = "http://www.rebellion-scs.de/boson/loads/Progressive/Track4.mp3">990 kb</A></font></CENTER></td> 
+	    <td WIDTH = "30%"><CENTER><font FACE="helvetica" SIZE="2">27/03/2000</font></CENTER></td> 
 
-          </TR>
+          </tr>
 
-          <TR> 
+          <tr> 
  
-	    <TD WIDTH = "50%"><FONT FACE="helvetica" SIZE="2">Progressive - Track 05</FONT></TD> 
-	    <TD WIDTH = "20%"><CENTER><FONT FACE="helvetica" SIZE="2"><A HREF = "http://www.rebellion-scs.de/boson/loads/Progressive/Track5.mp3">2230 kb</A></FONT></CENTER></TD> 
-	    <TD WIDTH = "30%"><CENTER><FONT FACE="helvetica" SIZE="2">27/03/2000</FONT></CENTER></TD> 
+	    <td WIDTH = "50%"><font FACE="helvetica" SIZE="2">Progressive - Track 05</font></td> 
+	    <td WIDTH = "20%"><CENTER><font FACE="helvetica" SIZE="2"><A HREF = "http://www.rebellion-scs.de/boson/loads/Progressive/Track5.mp3">2230 kb</A></font></CENTER></td> 
+	    <td WIDTH = "30%"><CENTER><font FACE="helvetica" SIZE="2">27/03/2000</font></CENTER></td> 
 
-          </TR>
+          </tr>
 
-          <TR> 
+          <tr> 
  
-	    <TD WIDTH = "50%"><FONT FACE="helvetica" SIZE="2">Progressive - Track 06</FONT></TD> 
-	    <TD WIDTH = "20%"><CENTER><FONT FACE="helvetica" SIZE="2"><A HREF = "http://www.rebellion-scs.de/boson/loads/Progressive/Track6.mp3">2850 kb</A></FONT></CENTER></TD> 
-	    <TD WIDTH = "30%"><CENTER><FONT FACE="helvetica" SIZE="2">27/03/2000</FONT></CENTER></TD> 
+	    <td WIDTH = "50%"><font FACE="helvetica" SIZE="2">Progressive - Track 06</font></td> 
+	    <td WIDTH = "20%"><CENTER><font FACE="helvetica" SIZE="2"><A HREF = "http://www.rebellion-scs.de/boson/loads/Progressive/Track6.mp3">2850 kb</A></font></CENTER></td> 
+	    <td WIDTH = "30%"><CENTER><font FACE="helvetica" SIZE="2">27/03/2000</font></CENTER></td> 
 
-          </TR>
+          </tr>
 
-          <TR> 
+          <tr> 
  
-	    <TD WIDTH = "50%"><FONT FACE="helvetica" SIZE="2">Progressive - All Tracks</FONT></TD> 
-	    <TD WIDTH = "20%"><CENTER><FONT FACE="helvetica" SIZE="2"><A HREF = "http://www.rebellion-scs.de/boson/loads/Progressive/ProgressiveAll.zip">4860 kb</A></FONT></CENTER></TD> 
-	    <TD WIDTH = "30%"><CENTER><FONT FACE="helvetica" SIZE="2">27/03/2000</FONT></CENTER></TD> 
+	    <td WIDTH = "50%"><font FACE="helvetica" SIZE="2">Progressive - All Tracks</font></td> 
+	    <td WIDTH = "20%"><CENTER><font FACE="helvetica" SIZE="2"><A HREF = "http://www.rebellion-scs.de/boson/loads/Progressive/ProgressiveAll.zip">4860 kb</A></font></CENTER></td> 
+	    <td WIDTH = "30%"><CENTER><font FACE="helvetica" SIZE="2">27/03/2000</font></CENTER></td> 
 
-          </TR>
+          </tr>
 
 <!-- #################### Next Theme starts #################### //-->
 
-          <TR> 
+          <tr> 
  
-	    <TD WIDTH = "50%"><FONT FACE="helvetica" SIZE="2"><B>Jungle</B></FONT></TD><TD><FONT FACE="helvetica" SIZE="2"><B>Nils Trzebin</B></FONT></TD><TD>&nbsp;</TD>
+	    <td WIDTH = "50%"><font FACE="helvetica" SIZE="2"><B>Jungle</B></font></td><td><font FACE="helvetica" SIZE="2"><B>Nils Trzebin</B></font></td><td>&nbsp;</td>
 
-          </TR>
+          </tr>
 
-          <TR> 
+          <tr> 
 
-	    <TD WIDTH = "50%"><FONT FACE="helvetica" SIZE="2">Jungle - Track 01</FONT></TD> 
-	    <TD WIDTH = "20%"><CENTER><FONT FACE="helvetica" SIZE="2"><A HREF = "http://www.rebellion-scs.de/boson/loads/Jungle/Jungle1.mp3">2360 kb</A></FONT></CENTER></TD> 
-	    <TD WIDTH = "30%"><CENTER><FONT FACE="helvetica" SIZE="2">27/03/2000</FONT></CENTER></TD> 
+	    <td WIDTH = "50%"><font FACE="helvetica" SIZE="2">Jungle - Track 01</font></td> 
+	    <td WIDTH = "20%"><CENTER><font FACE="helvetica" SIZE="2"><A HREF = "http://www.rebellion-scs.de/boson/loads/Jungle/Jungle1.mp3">2360 kb</A></font></CENTER></td> 
+	    <td WIDTH = "30%"><CENTER><font FACE="helvetica" SIZE="2">27/03/2000</font></CENTER></td> 
 
-          </TR>
+          </tr>
 
-          <TR> 
+          <tr> 
 
-	    <TD WIDTH = "50%"><FONT FACE="helvetica" SIZE="2">Jungle - Track 02</FONT></TD> 
-	    <TD WIDTH = "20%"><CENTER><FONT FACE="helvetica" SIZE="2"><A HREF = "http://www.rebellion-scs.de/boson/loads/Jungle/Jungle2.mp3">1680 kb</A></FONT></CENTER></TD> 
-	    <TD WIDTH = "30%"><CENTER><FONT FACE="helvetica" SIZE="2">27/03/2000</FONT></CENTER></TD> 
+	    <td WIDTH = "50%"><font FACE="helvetica" SIZE="2">Jungle - Track 02</font></td> 
+	    <td WIDTH = "20%"><CENTER><font FACE="helvetica" SIZE="2"><A HREF = "http://www.rebellion-scs.de/boson/loads/Jungle/Jungle2.mp3">1680 kb</A></font></CENTER></td> 
+	    <td WIDTH = "30%"><CENTER><font FACE="helvetica" SIZE="2">27/03/2000</font></CENTER></td> 
 
-          </TR>
+          </tr>
 
-          <TR> 
+          <tr> 
 
-	    <TD WIDTH = "50%"><FONT FACE="helvetica" SIZE="2">Jungle - Track 03</FONT></TD> 
-	    <TD WIDTH = "20%"><CENTER><FONT FACE="helvetica" SIZE="2"><A HREF = "http://www.rebellion-scs.de/boson/loads/Jungle/Jungle3.mp3">2050 kb</A></FONT></CENTER></TD> 
-	    <TD WIDTH = "30%"><CENTER><FONT FACE="helvetica" SIZE="2">27/03/2000</FONT></CENTER></TD> 
+	    <td WIDTH = "50%"><font FACE="helvetica" SIZE="2">Jungle - Track 03</font></td> 
+	    <td WIDTH = "20%"><CENTER><font FACE="helvetica" SIZE="2"><A HREF = "http://www.rebellion-scs.de/boson/loads/Jungle/Jungle3.mp3">2050 kb</A></font></CENTER></td> 
+	    <td WIDTH = "30%"><CENTER><font FACE="helvetica" SIZE="2">27/03/2000</font></CENTER></td> 
 
-          </TR>
+          </tr>
 
-          <TR> 
+          <tr> 
 
-	    <TD WIDTH = "50%"><FONT FACE="helvetica" SIZE="2">Jungle - All Tracks</FONT></TD> 
-	    <TD WIDTH = "20%"><CENTER><FONT FACE="helvetica" SIZE="2"><A HREF = "http://www.rebellion-scs.de/boson/loads/Jungle/JungleAll.zip">6240 kb</A></FONT></CENTER></TD> 
-	    <TD WIDTH = "30%"><CENTER><FONT FACE="helvetica" SIZE="2">27/03/2000</FONT></CENTER></TD> 
+	    <td WIDTH = "50%"><font FACE="helvetica" SIZE="2">Jungle - All Tracks</font></td> 
+	    <td WIDTH = "20%"><CENTER><font FACE="helvetica" SIZE="2"><A HREF = "http://www.rebellion-scs.de/boson/loads/Jungle/JungleAll.zip">6240 kb</A></font></CENTER></td> 
+	    <td WIDTH = "30%"><CENTER><font FACE="helvetica" SIZE="2">27/03/2000</font></CENTER></td> 
 
-          </TR>
+          </tr>
 
 
 
-        </TABLE>
+        </table>
 
         </CENTER> 
  
-        <BR><BR><BR>
+        <br><br><br>
 
-      </TD></TR>
+      </td></tr>
 
 <!-- #################### Music Download ends #################### //-->
 
 <!-- #################### Sound Download starts #################### 
 
-      <TR><TD BGCOLOR = "#FFDE00"> 
+      <tr><td BGCOLOR = "#FFDE00"> 
    
-        <FONT FACE="helvetica" SIZE="3"> 
+        <font FACE="helvetica" SIZE="3"> 
  
         <B>Sounds:</B> 
  
-        </FONT> 
+        </font> 
  
-      </TD></TR> 
+      </td></tr> 
 
-      <TR><TD>
+      <tr><td>
 
-        <BR>
+        <br>
    
-        <FONT FACE="helvetica" SIZE="2"> 
+        <font FACE="helvetica" SIZE="2"> 
  
         <P>These are the sound packages for Boson. You can install one or more of the packages below to enable sound effects in Boson. These files are not required to play Boson.</P>
  
-        </FONT> 
+        </font> 
  
-      </TD></TR> 
+      </td></tr> 
 
-      <TR><TD>
+      <tr><td>
 
-        <BR>
+        <br>
 
         <CENTER>
 
@@ -421,27 +392,27 @@
  
           <TR BGCOLOR = "#FFDE00"> 
  
-	    <TD WIDTH = "30%"><B><CENTER><FONT FACE="helvetica" SIZE="3">Theme</FONT></CENTER></B></TD> 
-	    <TD WIDTH = "20%"><B><CENTER><FONT FACE="helvetica" SIZE="3">gzip</FONT></CENTER></B></TD> 
-	    <TD WIDTH = "20%"><B><CENTER><FONT FACE="helvetica" SIZE="3">bzip2</FONT></CENTER></B></TD> 
-	    <TD WIDTH = "30%"><B><CENTER><FONT FACE="helvetica" SIZE="3">Release Date</FONT></CENTER></B></TD> 
+	    <td WIDTH = "30%"><B><CENTER><font FACE="helvetica" SIZE="3">Theme</font></CENTER></B></td> 
+	    <td WIDTH = "20%"><B><CENTER><font FACE="helvetica" SIZE="3">gzip</font></CENTER></B></td> 
+	    <td WIDTH = "20%"><B><CENTER><font FACE="helvetica" SIZE="3">bzip2</font></CENTER></B></td> 
+	    <td WIDTH = "30%"><B><CENTER><font FACE="helvetica" SIZE="3">Release Date</font></CENTER></B></td> 
  
-          </TR> 
+          </tr> 
  
-        </TABLE>
+        </table>
         <P>Sorry, there are no sounds available yet.</P>
 
         </CENTER> 
  
-        <BR><BR><BR>
+        <br><br><br>
 
-      </TD></TR>
+      </td></tr>
 
      #################### Sound Download ends #################### //-->
 
 
-   </TABLE>
+   </table>
 
    </DIV>
-  </TD></TR></TABLE></CENTER></BODY></HTML>
+  </td></tr></table></CENTER></BODY></HTML>
 
