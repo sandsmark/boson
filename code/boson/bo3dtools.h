@@ -317,16 +317,6 @@ class BoVector3
     }
 
     /**
-     * Loads BoVector3 from KConfig
-     **/
-    static BoVector3 load(const KConfig* cfg, const QString key, const BoVector3& aDefault = BoVector3());
-
-    /**
-     * Saves BoVector3 to KConfig
-     **/
-    void save(KConfig* cfg, const QString key) const;
-
-    /**
      * @return TRUE when the coordinates of this vector equal x,y and z,
      * otherwise FALSE.
      **/
@@ -536,11 +526,6 @@ class BoVector4
      * @return The component / coordinate at @p i of this vector
      **/
     inline GLfloat operator[](int i) const { return mData[i]; }
-
-    /**
-     * Load a BoVector4 from @ref KConfig
-     **/
-    static BoVector4 load(const KConfig* cfg, const QString key, const BoVector4& aDefault = BoVector4());
 
     /**
      * @return A string that contains the vector @p v. This string can be used

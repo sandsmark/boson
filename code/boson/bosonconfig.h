@@ -25,6 +25,8 @@
 class QColor;
 class KConfig;
 class BosonConfig;
+class BoVector3;
+class BoVector4;
 template<class T> class QValueList;
 
 #define boConfig BosonConfig::bosonConfig()
@@ -205,6 +207,28 @@ public:
 	 * constructor)
 	 **/
 	static void setPostInitFunction(void (*func)());
+
+	/**
+	 * Read and return a @ref BoVector3. Will return @p aDefault if @p key
+	 * is not found.
+	 **/
+	static BoVector3 readBoVector3Entry(const KConfig* cfg, const QString& key, const BoVector3& aDefault);
+
+	/**
+	 * @overload
+	 *
+	 * Just the same as the above one, but it uses BoVector3(0, 0, 0) as
+	 * default. We don't use a default value in the parameter, as we would
+	 * have to include bo3dtools.h for that.
+	 **/
+	static BoVector3 readBoVector3Entry(const KConfig* cfg, const QString& key);
+
+	static BoVector4 readBoVector4Entry(const KConfig* cfg, const QString& key, const BoVector4& aDefault);
+	static BoVector4 readBoVector4Entry(const KConfig* cfg, const QString& key);
+
+	static void writeEntry(KConfig* cfg, const QString& key, const BoVector3& value);
+	static void writeEntry(KConfig* cfg, const QString& key, const BoVector4& value);
+
 
 	static QString readLocalPlayerName(KConfig* conf = 0);
 	static void saveLocalPlayerName(const QString& name, KConfig* conf = 0);

@@ -20,6 +20,7 @@
 #include "defines.h"
 #include "boglobal.h"
 #include "bodebug.h"
+#include "bo3dtools.h"
 
 #include <qptrlist.h>
 #include <qdict.h>
@@ -295,6 +296,63 @@ void BosonConfig::setPostInitFunction(void (*func)())
 	return;
  }
  globalConfig.setPostInitFunction(func);
+}
+
+BoVector3 BosonConfig::readBoVector3Entry(const KConfig* cfg, const QString& key, const BoVector3& aDefault)
+{
+ QValueList<float> list = BosonConfig::readFloatNumList(cfg, key);
+ if (list.count() != 3) {
+ 	if (list.count() != 0) {
+		boError() << k_funcinfo
+				<< "BoVector3 entry must have 3 floats, not "
+				<< list.count() << endl;
+	}
+	return aDefault;
+ }
+ return BoVector3(list[0], list[1], list[2]);
+}
+
+BoVector3 BosonConfig::readBoVector3Entry(const KConfig* cfg, const QString& key)
+{
+ return readBoVector3Entry(cfg, key, BoVector3());
+}
+
+BoVector4 BosonConfig::readBoVector4Entry(const KConfig* cfg, const QString& key)
+{
+ return readBoVector4Entry(cfg, key, BoVector4());
+}
+
+BoVector4 BosonConfig::readBoVector4Entry(const KConfig* cfg, const QString& key, const BoVector4& aDefault)
+{
+ QValueList<float> list = BosonConfig::readFloatNumList(cfg, key);
+ if (list.count() != 4) {
+ 	if (list.count() != 0) {
+		boError() << k_funcinfo
+				<< "BoVector4 entry must have 4 floats, not "
+				<< list.count() << endl;
+	}
+	return aDefault;
+ }
+ return BoVector4(list[0], list[1], list[2], list[3]);
+}
+
+void BosonConfig::writeEntry(KConfig* cfg, const QString& key, const BoVector3& value)
+{
+  QValueList<float> list;
+  list.append(value[0]);
+  list.append(value[1]);
+  list.append(value[2]);
+  BosonConfig::writeFloatNumList(list, cfg, key);
+}
+
+void BosonConfig::writeEntry(KConfig* cfg, const QString& key, const BoVector4& value)
+{
+  QValueList<float> list;
+  list.append(value[0]);
+  list.append(value[1]);
+  list.append(value[2]);
+  list.append(value[3]);
+  BosonConfig::writeFloatNumList(list, cfg, key);
 }
 
 void BosonConfig::addConfigEntry(BoConfigEntry* c)

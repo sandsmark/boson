@@ -166,7 +166,7 @@ void UnitProperties::loadUnitType(const QString& fileName, bool fullmode)
 	d->mExplodingFragmentFlyParticleSystems = BosonParticleSystemProperties::loadParticleSystemProperties(d->mExplodingFragmentFlyParticleSystemIds, mTheme);
 	d->mExplodingFragmentHitParticleSystems = BosonParticleSystemProperties::loadParticleSystemProperties(d->mExplodingFragmentHitParticleSystemIds, mTheme);
  }
- d->mHitPoint = BoVector3::load(&conf, "HitPoint");  // FIXME: better name
+ d->mHitPoint = BosonConfig::readBoVector3Entry(&conf, "HitPoint");  // FIXME: better name
  d->mHitPoint.cellToCanvas();
 
  d->mDestroyedParticleSystemIds = BosonConfig::readUnsignedLongNumList(&conf, "DestroyedParticles");
@@ -216,7 +216,7 @@ void UnitProperties::saveUnitType(const QString& fileName)
  conf.writeEntry("ExplodingDamageRange", mExplodingDamageRange);
  BoVector3 tmpHitPoint(d->mHitPoint);
  tmpHitPoint.canvasToCell();
- tmpHitPoint.save(&conf, "HitPoint");
+ BosonConfig::writeEntry(&conf, "HitPoint", tmpHitPoint);
  conf.writeEntry("Producer", mProducer);
 
  BosonConfig::writeUnsignedLongNumList(&conf, "DestroyedParticles", d->mDestroyedParticleSystemIds);
