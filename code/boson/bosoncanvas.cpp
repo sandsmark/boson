@@ -154,13 +154,19 @@ void BosonCanvas::quitGame()
  delete d->mPathfinder;
  d->mPathfinder = 0;
  deleteDestroyed();
- d->mAnimList.clear();
  d->mEffects.clear();
  QMap<int, QPtrList<BosonItem> >::Iterator it;
  for (it = d->mWork2AdvanceList.begin(); it != d->mWork2AdvanceList.end(); ++it) {
 	(*it).clear();
  }
  deleteItems(d->mAllItems);
+ if (!d->mAnimList.isEmpty()) {
+	boError() << k_funcinfo << "mAnimList is not empty!" << endl;
+	d->mAnimList.clear();
+ }
+ if (!d->mAllItems.isEmpty()) {
+	boError() << k_funcinfo << "mAllItems is not empty!" << endl;
+ }
  d->mChangeAdvanceList.clear();
  d->mNextItemId = 0;
 }
@@ -939,6 +945,12 @@ void BosonCanvas::removeItem(BosonItem* item)
  BoItemList::Iterator it;
  for (it = d->mAllItems.begin(); it != d->mAllItems.end(); ++it) {
 	(*it)->itemRemoved(item);
+ }
+ if (RTTI::isUnit(item->rtti())) {
+	Unit* u = (Unit*)item;
+	if (d->mDestroyedUnits.contains(u)) {
+		boError() << k_funcinfo << item << " still in destroyed units list" << endl;
+	}
  }
  emit signalRemovedItem(item);
 
