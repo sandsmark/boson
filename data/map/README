@@ -28,10 +28,11 @@ Comment[de]=German translation of the comment
 
 The .desktop file consists of a single group "[Boson map file]". It supports the
 following entries:
-Name=Text     - The name of the map. Translated versions can be created with
-                [de] after Name, where de is the language. See KDE/KConfig for
-                information about possible language letters. 
-                Note that you don't have to provide a translated version. If you
-                don't do the english name is used (which makes often more
-                sense).
-Comment=Text  - A short text about your map. Can also be translated.
+Name=Text       - The name of the map. Translated versions can be created with
+                  [de] after Name, where de is the language. See KDE/KConfig for
+                  information about possible language letters. 
+                  Note that you don't have to provide a translated version. If you
+                  don't do the english name is used (which makes often more
+                  sense).
+Comment=Text    - A short text about your map. Can also be translated.
+Identifier=Text - A unique text for this map. Do not translate!
