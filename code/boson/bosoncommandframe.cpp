@@ -6,6 +6,7 @@
 #include "speciestheme.h"
 #include "unitproperties.h"
 #include "bosonunitview.h"
+#include "cell.h"
 
 #include <kstandarddirs.h>
 #include <klocale.h>
@@ -26,8 +27,6 @@
 #include "defines.h"
 
 #include "bosoncommandframe.moc"
-
-#include "dunno.h" // FIXME
 
 #define ORDERS_PER_COLUMN 3
 #define ORDER_SPACING 3
@@ -58,6 +57,14 @@ public:
 		TransDownRightInverted
 	};
 
+	enum TransType {
+		TransGrassWater = 0,
+		TransGrassDesert,
+		TransDesertWater,
+		TransDeepWater,
+		TransLast
+	};
+
 	QPixmap plainTile(Cell::GroundType type)
 	{
 		if (type <= Cell::GroundUnknown || type >= Cell::GroundLast) {
@@ -67,53 +74,52 @@ public:
 		return tile((int)type);
 	}
 
-	QPixmap big1(int bigNo, Dunno::TransType trans, bool inverted) // bigNo = 0..4
+	QPixmap big1(int bigNo, TransType trans, bool inverted) // bigNo = 0..4
 	{
-		return tile(Dunno::getBigTransNumber(trans, (inverted ? 4 : 0) + bigNo));
+		return tile(getBigTransNumber(trans, (inverted ? 4 : 0) + bigNo));
 	}
 
-	QPixmap big2(int bigNo, Dunno::TransType trans, bool inverted) // bigNo = 0..4
+	QPixmap big2(int bigNo, TransType trans, bool inverted) // bigNo = 0..4
 	{
-		return tile(Dunno::getBigTransNumber(trans, (inverted ? 12 : 8) + bigNo));
+		return tile(getBigTransNumber(trans, (inverted ? 12 : 8) + bigNo));
 	}
 
-	QPixmap small(int smallNo, Dunno::TransType trans, bool inverted)
+	QPixmap small(int smallNo, TransType trans, bool inverted)
 	{
 		switch (smallNo) {
 			case 0:
-				return tile(Dunno::getTransNumber(trans,
+				return tile(getTransNumber(trans,
 						inverted ? TransUpLeftInverted
 						: TransUpLeft));
 			case 1:
-				return tile(Dunno::getTransNumber(trans,
-						inverted ? TransDown
-						: TransUp));
+				return tile(getTransNumber(trans, inverted ? 
+						TransDown : TransUp));
 			case 2:
-				return tile(Dunno::getTransNumber(trans,
+				return tile(getTransNumber(trans,
 						inverted ? TransUpRightInverted
 						: TransUpRight));
 			case 3:
-				return tile(Dunno::getTransNumber(trans,
+				return tile(getTransNumber(trans,
 						inverted ? TransRight
 						: TransLeft));
 			case 4:
-				return tile(Dunno::getTransNumber(trans,
+				return tile(getTransNumber(trans,
 						inverted ? to(trans)
 						: from(trans)));
 			case 5:
-				return tile(Dunno::getTransNumber(trans,
+				return tile(getTransNumber(trans,
 						inverted ? TransLeft
 						: TransRight));
 			case 6:
-				return tile(Dunno::getTransNumber(trans,
+				return tile(getTransNumber(trans,
 						inverted ? TransDownLeftInverted
 						: TransDownLeft));
 			case 7:
-				return tile(Dunno::getTransNumber(trans,
+				return tile(getTransNumber(trans,
 						inverted ? TransUp
 						: TransDown));
 			case 8:
-				return tile(Dunno::getTransNumber(trans,
+				return tile(getTransNumber(trans,
 						inverted ? TransDownRightInverted
 						: TransDownRight));
 			default:
@@ -126,7 +132,7 @@ public:
 	QPixmap tile(int g)
 	{
 		QPixmap p;
-		if (Dunno::isBigTrans(g)) {
+		if (isBigTrans(g)) {
 			p.resize(2 * BO_TILE_SIZE, 2 * BO_TILE_SIZE);
 		} else {
 			p.resize(BO_TILE_SIZE, BO_TILE_SIZE);
@@ -138,7 +144,7 @@ public:
 
 		// a big tile is 2*2 normal tiles - the upper left was painted
 		// above. The following will paint the remaining 3 rects
-		if (Dunno::isBigTrans(g>>2)) {
+		if (isBigTrans(g>>2)) {
 			g+=4;
 			bitBlt(&p, BO_TILE_SIZE, 0, this, big_x(g), big_y(g),
 					BO_TILE_SIZE, BO_TILE_SIZE);
@@ -158,17 +164,58 @@ protected:
 	int big_w() const { return 32; }
 	int big_x(int g) const { return ((g % big_w()) * BO_TILE_SIZE); }
 	int big_y(int g) const { return ((g / big_w()) * BO_TILE_SIZE); }
+	static int smallTilesPerTransition() { return 12; }
+	static int bigTilesPerTransition() { return 16; }
+	static int tilesPerTransition() 
+	{
+		return smallTilesPerTransition() + 4 * bigTilesPerTransition();
+	}
+	static int groundTilesNumber() 
+	{
+		return Cell::GroundLast + TransLast * tilesPerTransition(); 
+	}
+	static int getTransNumber(TransType transRef, int transTile)
+	{
+		return Cell::GroundLast + tilesPerTransition() * (int)transRef + transTile;
+	}
+	static int getBigTransNumber(TransType transRef, int transTile)
+	{
+		return getTransNumber(transRef, smallTilesPerTransition() + 4 * transTile);
+	}
+	static int getTransRef(int g) 
+	{
+		return ((g - Cell::GroundLast) / tilesPerTransition()); 
+	}
+	static int getTransTile(int g)
+	{
+		return ((g - Cell::GroundLast) % tilesPerTransition());
+	}
+	static bool isTrans(int g)
+	{
+		return (g >= Cell::GroundLast && g < groundTilesNumber());
+	}
+	static bool isSmallTrans(int g)
+	{
+		return (isTrans(g) && getTransTile(g) < smallTilesPerTransition());
+	}
+	static bool isBigTrans(int g)
+	{
+		return (isTrans(g) && getTransTile(g) >= smallTilesPerTransition());
+	}
 
-	Cell::GroundType from(Dunno::TransType trans) const
+
+
+
+	Cell::GroundType from(TransType trans) const
 	{
 		switch (trans) {
-			case Dunno::TransGrassWater:
+			case TransGrassWater:
 				return Cell::GroundGrass;
-			case Dunno::TransGrassDesert:
+			case TransGrassDesert:
 				return Cell::GroundGrass;
-			case Dunno::TransDesertWater:
+			case TransDesertWater:
 				return Cell::GroundDesert;
-			case Dunno::TransDeepWater:
+			case TransDeepWater:
 				return Cell::GroundDeepWater;
 			default:
 				kdError() << "Unknown trans " << (int)trans << endl;
@@ -176,16 +223,16 @@ protected:
 		}
 	}
 
-	Cell::GroundType to(Dunno::TransType trans) const
+	Cell::GroundType to(TransType trans) const
 	{
 		switch (trans) {
-			case Dunno::TransGrassWater:
+			case TransGrassWater:
 				return Cell::GroundWater;
-			case Dunno::TransGrassDesert:
+			case TransGrassDesert:
 				return Cell::GroundDesert;
-			case Dunno::TransDesertWater:
+			case TransDesertWater:
 				return Cell::GroundWater;
-			case Dunno::TransDeepWater:
+			case TransDeepWater:
 				return Cell::GroundWater;
 			default:
 				kdError() << "Unknown trans " << (int)trans
@@ -303,10 +350,10 @@ void BosonCommandFrame::initEditor()
 {
  d->mTransRef = new QComboBox(this);
  connect(d->mTransRef, SIGNAL(activated(int)), this, SLOT(slotRedrawTiles()));
- d->mTransRef->insertItem(i18n("Grass/Water"), (int)Dunno::TransGrassWater);
- d->mTransRef->insertItem(i18n("Grass/Desert"), (int)Dunno::TransGrassDesert);
- d->mTransRef->insertItem(i18n("Desert/Water"), (int)Dunno::TransDesertWater);
- d->mTransRef->insertItem(i18n("Deep Water"), (int)Dunno::TransDeepWater);
+ d->mTransRef->insertItem(i18n("Grass/Water"), (int)BosonCommandTiles::TransGrassWater);
+ d->mTransRef->insertItem(i18n("Grass/Desert"), (int)BosonCommandTiles::TransGrassDesert);
+ d->mTransRef->insertItem(i18n("Desert/Water"), (int)BosonCommandTiles::TransDesertWater);
+ d->mTransRef->insertItem(i18n("Deep Water"), (int)BosonCommandTiles::TransDeepWater);
 
  d->mInverted = new QCheckBox(this);
  d->mInverted->setText(i18n("Invert"));
@@ -568,7 +615,7 @@ void BosonCommandFrame::slotEditorLoadTiles(const QString& fileName)
 void BosonCommandFrame::slotRedrawTiles()
 {
  bool inverted = d->mInverted->isChecked();
- Dunno::TransType trans = (Dunno::TransType)d->mTransRef->currentItem();
+ BosonCommandTiles::TransType trans = (BosonCommandTiles::TransType)d->mTransRef->currentItem();
  // trans is one of TRANS_GW, TRANS_GD, TRANS_DW, TRANS_DWD ans specifies the
  // tile type (desert/water and so on)
  switch (d->mOrderType) {
