@@ -147,8 +147,20 @@ public:
 	 **/
 	inline void leftTopCell(int* left, int* top)  const
 	{
+		leftTopCell(left, top, leftEdge(), topEdge());
 		*left = (int)(leftEdge() / BO_TILE_SIZE);
 		*top = (int)(topEdge() / BO_TILE_SIZE);
+	}
+
+	/**
+	 * The same as the above version, but it isn't specific to a unit
+	 * instance. You can use it to find out which cells a unit would occupy
+	 * if it was at a certain position.
+	 **/
+	inline static void leftTopCell(int* left, int* top, float leftEdge, float topEdge)
+	{
+		*left = (int)(leftEdge / BO_TILE_SIZE);
+		*top = (int)(topEdge / BO_TILE_SIZE);
 	}
 
 	/**
@@ -158,8 +170,18 @@ public:
 	 **/
 	inline void rightBottomCell(int* right, int* bottom) const
 	{
-		*right = (int)(rightEdge() / BO_TILE_SIZE);
-		*bottom= (int)(bottomEdge() / BO_TILE_SIZE);
+		rightBottomCell(right, bottom, rightEdge(), bottomEdge());
+	}
+
+	/**
+	 * The same as the above version, but it isn't specific to a unit
+	 * instance. You can use it to find out which cells a unit would occupy
+	 * if it was at a certain position.
+	 **/
+	inline static void rightBottomCell(int* right, int* bottom, float rightEdge, float bottomEdge)
+	{
+		*right = (int)(rightEdge / BO_TILE_SIZE);
+		*bottom= (int)(bottomEdge / BO_TILE_SIZE);
 	}
 
 	/**
@@ -169,6 +191,19 @@ public:
 	 * @return An array of all cells this unit occupies.
 	 **/
 	QPointArray cells() const;
+
+	/**
+	 * This is a more generic version of the above method. You can use it to
+	 * calculate which cells the unit would occupy if it was at a certain
+	 * position.
+	 *
+	 * WARNING: this method <em>will</em> return invalid cells in the point
+	 * array, if you supply invalid parameters! It has no way to check
+	 * whether left/right/top/bottom are still on the map! Use the
+	 * overloaded method above to avoid this problem!
+	 * @return An array of all cells this unit would occupy.
+	 **/
+	static QPointArray cells(int left, int right, int top, int bottom);
 
 	bool bosonCollidesWith(BosonItem* item) const;
 
