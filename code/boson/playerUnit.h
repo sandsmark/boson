@@ -2,7 +2,7 @@
                           playerUnit.h  -  description                              
                              -------------------                                         
 
-    version              :                                   
+    version              : $Id$
     begin                : Sat Jan  9 19:35:36 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
@@ -46,6 +46,7 @@ class playerMobUnit : public mobUnit, public QwSprite
   playerMobUnit(mobileMsg_t *, QObject* parent=0, const char *name=0L);
   ~playerMobUnit();
 
+  /** make the connection with <i>non-virtual</i> QwSpriteField functions */
   virtual	int _x(void) {return x();}
   virtual	int _y(void) {return y();}
 
@@ -98,7 +99,7 @@ class playerFacility : public Facility, public QwSprite
  public:
   playerFacility(facilityMsg_t *msg, QObject* parent=0L, const char *name=0L);
   ~playerFacility();
-//  virtual QRect	rect(void);
+  /** make the connection with <i>non-virtual</i> QwSpriteField functions */
   virtual int	_x(void) {return x();}
   virtual int	_y(void) {return y();}
 

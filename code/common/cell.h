@@ -2,7 +2,7 @@
                           cell.h  -  description                              
                              -------------------                                         
 
-    version              :                                   
+    version              : $Id$
     begin                : Sat Jan  9 19:35:36 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
@@ -33,19 +33,18 @@
 class Cell
 {
 
- public:
-  Cell(groundType g = GROUND_UNKNOWN);
-  ~Cell();
+public:
+	Cell(groundType g = GROUND_UNKNOWN);
 
-  groundType	getGroundType(void) { return ground; }
-  void		setGroundType(groundType g) { ground =g ; }
-  void		setFacility(void) { ground = GROUND_FACILITY; }
+	groundType	getGroundType(void) { return ground; }
+	void		setGroundType(groundType g) { ground =g ; }
+//	void		setFacility(void) { ground = GROUND_FACILITY; }
 
- protected:
-  groundType	ground;
+protected:
+	groundType	ground;
 
- private:
-  destroyedType	destroyed;
+private:
+//	destroyedType	destroyed;
 };
 
 #endif // CELL_H

@@ -2,7 +2,7 @@
                           unit.cpp  -  description                              
                              -------------------                                         
 
-    version              :                                   
+    version              : $Id$
     begin                : Sat Jan  9 19:35:36 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
@@ -25,10 +25,6 @@ Unit::Unit(QObject*parent, const char *name)
 	: QObject(parent, name)
 {
 	who = 0;
-}
-
-Unit::~Unit()
-{
 }
 
 

@@ -2,7 +2,7 @@
                          selectPart.h  -  description                              
                              -------------------                                         
 
-    version              :                                   
+    version              : $Id$
     begin                : Sat Jun 26 16:23:00 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
@@ -27,6 +27,9 @@
 
 
 #define PART_NB		10
+
+
+///orzel : could be made with only one class with yet another arg  : PART_UP / PART_DOWN 
 
 
 class selectPart_up : public QwSprite

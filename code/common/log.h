@@ -2,7 +2,7 @@
                           log.h  -  description                    
                              -------------------                                         
 
-    version              :                                   
+    version              : $Id$
     begin                : Sat Apr 17 23:03:00 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
@@ -41,7 +41,7 @@ enum boLogLevel {
 extern FILE *logfile;
 
 #ifdef NDEBUG
-#define boAssert(a)	do {} while(0)
+#define boAssert(a)	do {} while(0);
 #else
 #define boAssert(a)	\
 	if (!(a))	\

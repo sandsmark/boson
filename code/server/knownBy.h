@@ -2,7 +2,7 @@
                           knownBy.h  -  description                    
                              -------------------                                         
 
-    version              :                                   
+    version              : $Id$
     begin                : Tue Jun  1 ??:??:?? CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         

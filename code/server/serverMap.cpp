@@ -2,7 +2,7 @@
                          serverMap.cpp  -  description                              
                              -------------------                                         
 
-    version              :                                   
+    version              : $Id$
     begin                : Sat Jan  9 19:35:36 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
@@ -23,6 +23,7 @@
 #include <qpainter.h>
 
 #include "../map/map.h"
+
 #include "serverCell.h"
 #include "boserver.h"
 #include "serverUnit.h"
@@ -75,6 +76,8 @@ assert(gpp.nbPlayer < 11);
 assert(gpp.nbPlayer > 1);
 
 }
+
+
 
 void  BosonServer::checkUnitVisibility(Unit *u)
 {
@@ -261,7 +264,6 @@ void BosonServer::checkFixKnown(serverFacility *f)
 			}
 		if ( k&1l) {
 			/* in this case the mobile should be known, but isn't */
-puts("discovering machin");
 			f->reportCreated(i);
 			f->setKnown(getPlayerMask(i));
 			}

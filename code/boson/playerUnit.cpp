@@ -2,7 +2,7 @@
                           playerUnit.cpp  -  description                              
                              -------------------                                         
 
-    version              :                                   
+    version              : $Id$
     begin                : Sat Jan  9 19:35:36 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
@@ -21,13 +21,13 @@
 #include <stdlib.h>	// int abs(int);
 #include <assert.h>
 
+#include "../map/map.h"
+#include "../common/log.h"
+
 #include "playerUnit.h"
 #include "speciesTheme.h"
 #include "game.h"
 #include "selectPart.h"
-
-#include "../map/map.h"
-#include "../common/log.h"
 
 #define PF_DELTA	5   // facilities selection box are DELTA pixels more inside rect()
 
@@ -45,6 +45,7 @@ playerMobUnit::playerMobUnit(mobileMsg_t *msg, QObject* parent=0, const char *na
 	, QwSprite(gpp.species[msg->who]->getPixmap(msg->type))
 	, state(MUS_NONE)
 {
+
 	z(Z_MOBILE + 3 * type);
 	moveTo(msg->x, msg->y);
 

@@ -2,7 +2,7 @@
                           groundType.h  -  description                              
                              -------------------                                         
 
-    version              :                                   
+    version              : $Id$
     begin                : Sat Jan  9 19:35:36 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
@@ -80,6 +80,7 @@ enum transition_t {
 #define IS_TRANS(g)		( (g) >= GROUND_LAST)
 #define IS_PLAIN(g)		( (g) >= 0 && (g) < GROUND_LAST)
 
+
 /* Transition description */
 struct groundTransProperties_t {
 	char		*name;
@@ -87,6 +88,7 @@ struct groundTransProperties_t {
 	};
 extern const groundTransProperties_t groundTransProp[];
 extern const int groundTransPropNb;
+
 
 /* Ground Properties */
 struct groundProperties_t {

@@ -2,7 +2,7 @@
                           bobuffer.h  -  description                    
                              -------------------                                         
 
-    version              :                                   
+    version              : $Id$
     begin                : Sun Jun  6 17:35:00 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
@@ -22,19 +22,20 @@
 #define BOBUFFER_H 
 
 class boBuffer {
+
 public:
- boBuffer(int socket, unsigned int size);
+	boBuffer(int socket, unsigned int size);
 
-void reset(void) { pos = 0; };
-void flush(void);
-void packInt(int value);
-void packInt(int *tab, unsigned int len);
+	void reset(void) { pos = 0; };
+	void flush(void);
+	void packInt(int value);
+	void packInt(int *tab, unsigned int len);
 
-int	socket;
+	int	socket;
 private :
-int	*data;
-unsigned int pos;
-unsigned int posMax;
+	int	*data;
+	unsigned int pos;
+	unsigned int posMax;
 };
 
 #endif // BOBUFFER_H

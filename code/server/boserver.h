@@ -2,7 +2,7 @@
                           boserver.h  -  description                    
                              -------------------                                         
 
-    version              :                                   
+    version              : $Id$
     begin                : Sat Jan  9 19:35:36 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
@@ -33,13 +33,11 @@
 #include <ktmainwindow.h>
 
 #include "../common/boconfig.h"
-//#include "../common/boconnect.h"
 #include "../common/unitType.h"
-//#include "../common/unit.h"	// for Facility
-#include "serverUnit.h"	// for Facility
 #include "../common/log.h"
-//#include "unit.h"		// for mobUnit
 #include "../common/playField.h"
+
+#include "serverUnit.h"		// for Facility
 #include "connect.h"
 #include "player.h"
 
@@ -48,8 +46,6 @@ class Unit;
 class Facility;
 class mobUnit;
 
-///orzel : plus temporaire que cette merde, tu meurs :
-#define MAX_UNIT	40
 
 struct serverMap {
 	serverCell	**cells;
@@ -106,9 +102,6 @@ class BosonServer : public KTMainWindow
   KServerSocket	*socket;
   uint		confirmedJiffies;
 
-
-//  int		maxX, maxY;
-//  serverCell	**cells; 
   serverMap 	map;
   origPeople	people;
 

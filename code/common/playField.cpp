@@ -2,7 +2,7 @@
                          playField.cpp  -  description                              
                              -------------------                                         
 
-    version              :                                   
+    version              : $Id$
     begin                : Sat Feb 14 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
@@ -24,24 +24,21 @@
 #include "playField.h"
 
 #include "../common/groundType.h"
-//#include "../common/cell.h"
-//#include "serverCell.h"
 
 
-
-#define		TAG_MOB		01
-#define		TAG_FIX		02
-#define		TAG_CELL	03
-#define		TAG_MAP		04
-#define		TAG_PEOPLE	05
+#define		TAG_MOB		(0xba)
+#define		TAG_FIX		(0xbe)
+#define		TAG_CELL	(0xde)
+#define		TAG_MAP		(0xad)
+#define		TAG_PEOPLE	(0xf0)
 #define		TAG_FIELD	"boeditor_magic_0_1"
 
 
 playField::playField(const char *name)
 {
-filename = name;
-stream = 0l;
-map.cells = 0l;
+	filename	= name;
+	stream		= 0l;
+	map.cells	= 0l;
 }
 
 

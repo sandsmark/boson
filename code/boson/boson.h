@@ -2,7 +2,7 @@
                           boson.h  -  description                              
                              -------------------                                         
 
-    version              :                                   
+    version              : $Id$
     begin                : Sat Jan  9 19:35:36 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
@@ -39,13 +39,10 @@
 #include <ksock.h>
 
 // application specific includes
-//#include "playerMap.h"
-#include "physMap.h"
-//#include "miniMap.h"
-//#include "viewMap.h"
-//#include "orderWin.h"
-#include "mainView.h"
 #include "../common/msgData.h"
+
+#include "physMap.h"
+#include "mainView.h"
 #include "connect.h"
 
 /**
@@ -135,7 +132,7 @@ private:
     KStatusBar *status_bar;
     QPopupMenu *file_menu_recent;
     QPopupMenu *view_menu;
-    QStrList *recentList; 
+//    QStrList *recentList; 
     /** rMainGeom keeps the acutal size of your application and is used to
       * restore your last used application size. */
     QRect rMainGeom;

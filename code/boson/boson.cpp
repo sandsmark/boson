@@ -2,7 +2,7 @@
                           boson.cpp  -  description                              
                              -------------------                                         
 
-    version              :                                   
+    version              : $Id$
     begin                : Sat Jan  9 19:35:36 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
@@ -21,9 +21,12 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <boson.h>
+
 #include <qframe.h>
+
 #include "ressource.h"
 #include "connect.h"
+
 #include "../common/boconfig.h"
 #include "../common/bobuffer.h"
 #include "../common/log.h"
@@ -44,8 +47,8 @@ BosonApp::BosonApp()
   setCaption("Boson " VERSION);
   ///////////////////////////////////////////////////////////////////
   // create basics 
-  recentList = new QStrList(true);
-  recentList->setAutoDelete(true);
+//  recentList = new QStrList(true);
+//  recentList->setAutoDelete(true);
 
   ///////////////////////////////////////////////////////////////////
   // read the config file options
@@ -312,8 +315,6 @@ void BosonApp::initView()
 
 	mainView *mainview = new mainView(phys, this, "main_view_0");
 	setView(mainview);
-
-	this->resize(700,600);
 }
 
 
@@ -323,7 +324,6 @@ void BosonApp::resizeEvent(QResizeEvent *evt)
     KTMainWindow::resizeEvent(evt);
 
     rMainGeom= this->geometry();
-    //map->resize(rMainGeom.width(),rMainGeom.height());
     updateRects();
 }
 
@@ -478,6 +478,7 @@ void BosonApp::slotStatusHelpMsg(const char *text)
 BEGIN_CMD(BosonApp)
 
   ON_CMD(ID_APP_EXIT,                 slotAppExit(),            i18n(""))
+
 
 //  ON_CMD(ID_VIEW_TOOLBAR_0,           slotViewToolBar_0(),      i18n(""))
 //  ON_CMD(ID_VIEW_STATUSBAR,           slotViewStatusBar(),      i18n(""))

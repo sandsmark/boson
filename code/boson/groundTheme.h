@@ -2,7 +2,7 @@
                           groundTheme.h  -  description                              
                              -------------------                                         
 
-    version              :                                   
+    version              : $Id$
     begin                : Sat Jan  9 19:35:36 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
@@ -38,20 +38,18 @@ class QwSpritePixmapSequence;
 class groundTheme
 {
   public:
-  groundTheme(char *themeName);
+	groundTheme(char *themeName);
 
+	bool	isOk(void){ return allLoaded; }
 	QwSpritePixmapSequence
 		*getPixmap(groundType gt) { return groundPix[gt]; }
-	bool	isOk(void){ return allLoaded; }
 
   private:
-	bool loadGround(int i, const QString &path, QProgressDialog &progress);
-	bool loadTransition(int i, const QString &path, QProgressDialog &progress);
+	bool loadGround		(int i, const QString &path, QProgressDialog &progress);
+	bool loadTransition	(int i, const QString &path, QProgressDialog &progress);
 
-  bool		allLoaded;
-  QPixmap	*no_pixmap;	///orzel : beurk .. no_pixmap == pixmap[-1]... a revoir
-
-  QwSpritePixmapSequence
+	bool	allLoaded;
+	QwSpritePixmapSequence
 		*groundPix[GROUND_LAST + TILES_PER_TRANSITION * 5]; ///orzel : max 5 transitions
 
 };

@@ -2,7 +2,7 @@
                           refused.h  -  description                    
                              -------------------                                         
 
-    version              :                                   
+    version              : $Id$
     begin                : Sat Apr 17 23:02:00 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
@@ -25,6 +25,8 @@
  * this enum explain why the connection to the game has been
  * refused by the server 
  */
+
+/// should be move to connect.h, no ?
 
 enum refusedType {
 	REFUSED_PLAYING,	/* A game is currently running, not used yet */

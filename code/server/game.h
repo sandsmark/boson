@@ -2,7 +2,7 @@
                          game.h  -  description                              
                              -------------------                                         
 
-    version              :                                   
+    version              : $Id$
     begin                : Sat Jun 19 01:53:00 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         

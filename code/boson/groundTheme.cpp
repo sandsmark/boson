@@ -2,7 +2,7 @@
                           groundTheme.cpp  -  description                              
                              -------------------                                         
 
-    version              :                                   
+    version              : $Id$
     begin                : Sat Jan  9 19:35:36 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
@@ -29,6 +29,7 @@
 
 #include "../common/log.h"
 #include "../map/map.h"
+
 #include "groundTheme.h"
 
 
@@ -60,9 +61,6 @@ for (i=0; i< groundTransPropNb; i++) {
 		progress ))
 	     allLoaded = false;
 	}
-
-no_pixmap = new QPixmap(BO_TILE_SIZE,BO_TILE_SIZE);
-no_pixmap->fill(black);
 
 progress.setProgress(PROGRESS_N);
 
