@@ -389,8 +389,6 @@ public:
 	QValueVector<BoFace> mAllFaces;
 	QPtrList<BoNode> mAllNodes;
 
-	QValueVector<BoMaterial> mAllMaterials;
-
 	unsigned int mPointCount;
 	float* mAllocatedPoints;
 	float* mPoints;
