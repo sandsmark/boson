@@ -636,6 +636,11 @@ bool BoUfoWidget::opaque() const
  return widget()->isOpaque();
 }
 
+void BoUfoWidget::setSize(int w, int h)
+{
+ widget()->setSize(w, h);
+}
+
 void BoUfoWidget::setMinimumWidth(int w)
 {
  ufo::UDimension s1 = widget()->getMinimumSize();
