@@ -190,7 +190,6 @@ void BosonWidget::init()
 
 BosonWidget::~BosonWidget()
 {
- saveConfig();
  delete d->mUnitTips;
 
 // first delete all KGame related stuff - will also remove players and therefore
@@ -227,6 +226,7 @@ void BosonWidget::addComputerPlayer(const QString& name)
  Player* p = new Player;
  p->setName(name);
  d->mBoson->addPlayer(p);
+ p->loadTheme(SpeciesTheme::defaultSpecies(), SpeciesTheme::defaultColor());// FIXME - should be selectable in new game dialog
 }
 
 void BosonWidget::slotPlayerJoinedGame(KPlayer* p)
@@ -297,17 +297,19 @@ void BosonWidget::slotNewGame()
 		this, SLOT(slotLoadMap(const QString&)));
  connect(bosonConfig, SIGNAL(signalScenarioChanged(const QString&)),
 		this, SLOT(slotLoadScenario(const QString&)));
+ connect(bosonConfig, SIGNAL(signalSpeciesChanged(const QString&)),
+		this, SLOT(slotChangeSpecies(const QString&)));
 
- // add a chat widget
+ // add a connection and a chat widget
  dialog->addGameConfig(bosonConfig);
  QVBox* page = dialog->configPage(KGameDialog::GameConfig);
- dialog->addConfigWidget(new KGameDialogChatConfig(BosonMessage::IdChat), page);
  dialog->addConfigWidget(new KGameDialogConnectionConfig(), page);
+ dialog->addConfigWidget(new KGameDialogChatConfig(BosonMessage::IdChat), page);
 
  // add a network config
  dialog->addNetworkConfig(new KGameDialogNetworkConfig(0));
 
- // a connection list - aka "ban this player" - also in game page (e.g. to see
+ // a connection list - aka "ban this player" - also in game page (to see
  // the number of the players when selecting a map)
  page = dialog->configPage(KGameDialog::NetworkConfig);
  dialog->addConnectionList(new KGameDialogConnectionConfig(0), page);
@@ -366,9 +368,9 @@ void BosonWidget::slotStartScenario()
  // is started!!
  // UPDATE (01/11/19): should be in scenario file!
  for (unsigned int i = 0; i < d->mBoson->playerCount(); i++) {
-	QRgb color = SpeciesTheme::defaultColor();
-	QString species = "human";
-	((Player*)d->mBoson->playerList()->at(i))->loadTheme(species, color);
+//	QRgb color = SpeciesTheme::defaultColor();
+//	QString species = "human";
+//	((Player*)d->mBoson->playerList()->at(i))->loadTheme(species, color);
  }
  d->mBoson->startGame(); // correct here? should be so.
 }
@@ -621,5 +623,14 @@ void BosonWidget::saveConfig()
  }
  BosonConfig::saveLocalPlayerName(d->mLocalPlayer->name());
  BosonConfig::saveGameSpeed(d->mBoson->gameSpeed());
+}
+
+void BosonWidget::slotChangeSpecies(const QString& directory)
+{
+ if (!d->mLocalPlayer) {
+	kdError() << "slotChangeSpecies(): no local player!" << endl;
+	return;
+ }
+ d->mLocalPlayer->loadTheme(directory, SpeciesTheme::defaultColor());
 }
 
