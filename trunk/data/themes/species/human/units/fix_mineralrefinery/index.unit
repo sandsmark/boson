@@ -10,6 +10,7 @@ DestroyedParticles=1010,3011,7002
 ExplodingDamage=0
 ExplodingDamageRange=0
 Health=300
+HitPoint=-0.2,-0.2,1.21
 Id=13
 IsFacility=true
 MineralCost=1000
