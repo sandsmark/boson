@@ -38,9 +38,16 @@
 #define		TAG_FIELD	"boeditor_magic_0_1"
 
 
+playField::playField()
+{
+	//filename is null;
+	stream		= 0l;
+	map.cells	= 0l;
+}
+
+
 playField::playField(const QString name)
 {
-//	filename	= kapp->kde_datadir() + "/boson/map/" + name;
 	filename	= name;
 	stream		= 0l;
 	map.cells	= 0l;
@@ -53,6 +60,10 @@ playField::~playField()
 //if (map.cells) delete map.cells;
 }
 
+void playField::setFile(const QString name)
+{
+	filename	= name;
+}
 
 
 bool playField::write(void)
