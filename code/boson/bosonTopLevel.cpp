@@ -1,5 +1,5 @@
 /***************************************************************************
-                          bosonView.cpp  -  description                              
+                          bosonTopLevel.cpp  -  description                              
                              -------------------                                         
 
     version              : $Id$
@@ -18,73 +18,34 @@
  *                                                                         *
  ***************************************************************************/
 
-#include <qlayout.h>
-#include <qwidgetstack.h>
-#include <qframe.h>
-#include <qscrollview.h>
-#include <qpixmap.h>
-#include <qlabel.h>
 #include <qpushbutton.h>
-
-#include <kapp.h>
 
 #include "common/log.h"
 #include "common/map.h"
-#include "common/unitType.h"
 
+#include "bosonTopLevel.h"
+#include "visualMiniDisplay.h"
+#include "bosonBigDisplay.h"
 #include "speciesTheme.h"
 
 #include "game.h"
-#include "bosonView.h"
-#include "bosonCanvas.h"
-
-#define VIEW_ONE	1
-#define VIEW_MANY	2
 
 
-
-
-bosonView::bosonView(QWidget *parent, const char *name)
-	:visualView(parent,name)
+bosonTopLevel::bosonTopLevel( const char *name, WFlags f)
+	: visualTopLevel(name,f)
+	, mw(this)
 {
-	int i;
+	orderType = OT_NONE;
 
-	connect(bocanvas, SIGNAL(reCenterView(int,int)), SLOT(reCenterView(int,int)));
-
-	setFrameStyle(QFrame::Sunken | QFrame::Panel);
-	setLineWidth(5);
-	
-	/* ressources */
-	oil_text	= new QLabel("Oil : ", this, "oil_text");
-	oil_text->setGeometry(10,8,80,10);
-	mineral_text	= new QLabel("Mineral : ", this, "mineral_text");
-	mineral_text->setGeometry(100,8,80,10);
-
-	/* stack */
-	stack = new QWidgetStack(this, "qwidgetstack");
-	stack->setFrameStyle(QFrame::Raised | QFrame::Panel);
-	stack->setLineWidth(5);
-	stack->setGeometry(10,23,180,110);
-
-	/* stack/one */
-	view_none = new QPixmap(); // XXX legal ? 
-
-	view_one = new QLabel(stack,"preview");
-	view_one->setPixmap(*view_none);
-	stack->addWidget(view_one, VIEW_ONE);
-
-	/* stack/many */
-	view_many = new QScrollView(stack,"scrollview");
-	stack->addWidget(view_many, VIEW_MANY);
-
-	stack->raiseWidget(VIEW_ONE);
+	setView(&mw, false);
 
 	/* orders buttons */
-	for (i=0; i< 11; i++) {
-		orderButton[i] = new QPushButton(this, "orderButtons");
+	for (int i=0; i< 11; i++) {
+		orderButton[i] = new QPushButton(mw.mainFrame, "orderButtons");
 		orderButton[i]->setGeometry( 10+(i%3)*60, 141+(i/3)*60, 55, 55);
 		orderButton[i]->hide();
 		}
+
 	connect(orderButton[0], SIGNAL(clicked(void)), this, SLOT(bc0(void)));
 	connect(orderButton[1], SIGNAL(clicked(void)), this, SLOT(bc1(void)));
 	connect(orderButton[2], SIGNAL(clicked(void)), this, SLOT(bc2(void)));
@@ -96,37 +57,10 @@ bosonView::bosonView(QWidget *parent, const char *name)
 	connect(orderButton[8], SIGNAL(clicked(void)), this, SLOT(bc8(void)));
 	connect(orderButton[9], SIGNAL(clicked(void)), this, SLOT(bc9(void)));
 	connect(orderButton[10], SIGNAL(clicked(void)), this, SLOT(bc10(void)));
-		
-	orderType = OT_NONE;
+
 }
 
-void bosonView::setSelected(QPixmap *p)
-{
-	view_one->setPixmap( p?*p:*view_none);
-}
-
-
-void bosonView::handleOrder(int order)
-{
-	switch(orderType) {
-		default:
-		case OT_NONE:
-			logf(LOG_ERROR, "unexpected bosonView::handleOrder");
-			return;
-			break;
-		case OT_FACILITY:
-			construct.type.fix = (facilityType) order;
-			setSelectionMode( SELECT_PUT);
-			break;
-		case OT_MOBILE:
-			construct.type.mob = (mobType) order;
-			setSelectionMode( SELECT_PUT);
-			break;
-	}
-}
-
-
-void bosonView::setOrders( int what, int who)
+void bosonTopLevel::setOrders( int what, int who)
 {
 	int i;
 
@@ -154,12 +88,12 @@ void bosonView::setOrders( int what, int who)
 			for (i=MOB_LAST; i<11; i++) orderButton[i]->hide();
 			break;
 		default:
-			logf(LOG_ERROR, "bosonView::setOrders : unexpected 'what' argument");
+			logf(LOG_ERROR, "bosonTopLevel::setOrders : unexpected 'what' argument");
 	}
 }
 
 
-void bosonView::object_put(int x, int y)
+void bosonTopLevel::object_put(int x, int y)
 {
 	switch(orderType) {
 		case OT_FACILITY:
@@ -176,16 +110,39 @@ void bosonView::object_put(int x, int y)
 			logf(LOG_ERROR, "object_put : unexpected \"orderType\" value");
 	}
 }
- 
 
-void bosonView::ressourcesUpdated(void)
+
+void bosonTopLevel::handleOrder(int order)
 {
-	char buffer[1024];
-	
-	sprintf(buffer, "Oil : %d", oil);
-	oil_text->setText(buffer);
-
-	sprintf(buffer, "Mineral : %d", mineral);
-	mineral_text->setText(buffer);
+	switch(orderType) {
+		default:
+		case OT_NONE:
+			logf(LOG_ERROR, "unexpected mainWidget::handleOrder");
+			return;
+			break;
+		case OT_FACILITY:
+			construct.type.fix = (facilityType) order;
+			setSelectionMode( SELECT_PUT);
+			break;
+		case OT_MOBILE:
+			construct.type.mob = (mobType) order;
+			setSelectionMode( SELECT_PUT);
+			break;
+	}
 }
+
+
+void bosonTopLevel::setSelected(QPixmap *p)
+{
+	mw.view_one->setPixmap( p?*p:*mw.view_none);
+}
+
+
+void bosonTopLevel::updateViews(void)
+{
+	mw.big->setContentsPos( X() * BO_TILE_SIZE, Y() * BO_TILE_SIZE );
+	mw.big->update();
+	mw.mini->repaint(FALSE);
+}
+
 

@@ -18,10 +18,15 @@
  *                                                                         *
  ***************************************************************************/
 
-#include "boeditor.h" 
+#include <assert.h>
+
 #include <klocale.h>
 #include <kcmdlineargs.h>
 #include <kaboutdata.h>
+#include <kapp.h>
+
+#include "editorCanvas.h"
+#include "editorTopLevel.h"
  
 int main(int argc, char* argv[])
 { 
@@ -45,10 +50,16 @@ int main(int argc, char* argv[])
 
 	KApplication app;  
  
-	BoEditorApp* boEditor = new BoEditorApp( (argc>1)?argv[1]:0l);
-	app.setMainWidget(boEditor);
-	app.setTopWidget(boEditor);
-	boEditor->show();
+	//BoEditorApp* boEditor = new BoEditorApp( (argc>1)?argv[1]:0l);
+	
+
+	/* XXX orzel : temp, until GUI is really functionnal */
+	editorCanvas *ecanvas;
+	vcanvas = ecanvas = new editorCanvas();
+	assert (true == ecanvas->Load("/opt/be/share/apps/boson/map/basic.bpf"));
+
+
+	(new editorTopLevel())->show();
 
 	return app.exec();
 }  

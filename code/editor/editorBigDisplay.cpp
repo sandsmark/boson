@@ -25,7 +25,7 @@
 #include "visualCell.h"
 #include "editorCanvas.h"
 
-editorBigDisplay::editorBigDisplay(visualView *v, QWidget *p, const char *n, WFlags f)
+editorBigDisplay::editorBigDisplay(editorTopLevel *v, QWidget *p, const char *n, WFlags f)
 	:visualBigDisplay(v,p,n,f)
 {
 
@@ -66,7 +66,7 @@ void editorBigDisplay::actionClicked(int mx, int my, int state)
 			} else
 				_canvas->changeCell( x, y, g);
 
-			view->setSelectionMode( visualView::SELECT_FILL);
+			vtl->setSelectionMode( editorTopLevel::SELECT_FILL);
 			break;
 
 		case OT_FACILITY:
@@ -77,7 +77,7 @@ void editorBigDisplay::actionClicked(int mx, int my, int state)
 			fix.state	= CONSTRUCTION_STEP-1;
 			fix.type	= f; 
 			_canvas->createFixUnit(fix);
-			view->setSelectionMode( visualView::SELECT_PUT);
+			vtl->setSelectionMode( editorTopLevel::SELECT_PUT);
 			break;
 
 		case OT_UNIT:
@@ -87,7 +87,7 @@ void editorBigDisplay::actionClicked(int mx, int my, int state)
 			mob.y		= my;
 			mob.type	= m;
 			_canvas->createMobUnit(mob);
-			view->setSelectionMode( visualView::SELECT_PUT);
+			vtl->setSelectionMode( editorTopLevel::SELECT_PUT);
 			break;
 	}
 

@@ -20,14 +20,15 @@
 
 #include "common/log.h"
 
+#include "bosonTopLevel.h"
 #include "bosonCanvas.h"
 #include "playerUnit.h"
 #include "bosonBigDisplay.h"
 #include "game.h"
 
 
-bosonBigDisplay::bosonBigDisplay(bosonView *v, QWidget *parent, const char *name, WFlags f)
-	:visualBigDisplay(v,parent,name,f)
+bosonBigDisplay::bosonBigDisplay(bosonTopLevel *btl, QWidget *parent, const char *name, WFlags f)
+	:visualBigDisplay(btl,parent,name,f)
 {
 }
 
@@ -37,10 +38,10 @@ void bosonBigDisplay::actionClicked(int mx, int my, int /*state*/)
 	QCanvasItem *sfg;
 
 	/* is there any mobiles of my own selected ? */
-	if (view->mobSelected.isEmpty()) return;	// nothing to do
-	if (who_am_i != view->selectionWho) return;	// nothing to do
+	if (vtl->mobSelected.isEmpty()) return;	// nothing to do
+	if (who_am_i != vtl->selectionWho) return;	// nothing to do
 
-	QIntDictIterator<visualMobUnit> mobIt(view->mobSelected);
+	QIntDictIterator<visualMobUnit> mobIt(vtl->mobSelected);
 
 
 	sfg = bocanvas->findUnitAt( mx, my);

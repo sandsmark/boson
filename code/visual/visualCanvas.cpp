@@ -102,7 +102,8 @@ void visualCanvas::setCell(int i, int j, groundType g)
 	boAssert(i<width()); boAssert(j<height());
 
 //	(void) new visualCell(g, i, j);
-	printf("setCell bypassed, g,i,j = %d,%d,%d \n", g, i, j);
+//	printf("setCell bypassed, g,i,j = %d,%d,%d \n", g, i, j);
+	//	XXXX
 
 	emit newCell(i,j,g);
 }

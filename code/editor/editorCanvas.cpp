@@ -48,10 +48,7 @@ bool editorCanvas::Load(QString filename)
 	if (!openRead(filename.data())) return false;
 	
 
-	puts("hop1");
-	
 	resize(map_width, map_height);
-	puts("hop2");
 
 	/* creation of the ground map */
 	cells = new (visualCell *)[map_width];
@@ -60,7 +57,6 @@ bool editorCanvas::Load(QString filename)
 	cells_allocated = true;
 
 	
-	puts("hop3");
 	/* initialisation */
 	for (i=0; i< map_width; i++)
 		for (j=0; j< map_height; j++) {
@@ -82,21 +78,18 @@ bool editorCanvas::Load(QString filename)
 					(i>0 && j>0 && IS_BIG_TRANS(cells[i-1][j-1].getGroundType())) );
 			}
 		}
-	puts("hop4");
 	
 	/* checking */
 	for (int i=0; i< 3; i++)
 		for (int j=0; j< 3; j++)
 			boAssert(0 <= cells[i][j].getGroundType());
 
-	puts("hop5");
 
 	for (i=0; i<nbMobiles; i++) {
 		boFile::load(mob);
 		if (!isOk()) return false;
 		createMobUnit(mob);
 	}
-	puts("hop6");
 
 	for (i=0; i<nbFacilities; i++) {
 		boFile::load(fix);
@@ -104,7 +97,6 @@ bool editorCanvas::Load(QString filename)
 		createFixUnit(fix);
 	}
 
-	puts("hop7");
 	// ok, it's all right
 	Close();
 	modified = false;

@@ -1,5 +1,5 @@
 /***************************************************************************
-                       boson/boson/mainView.h -  description 
+                       mainWidget.h -  description 
                              -------------------                                         
 
     version              : $Id$
@@ -18,31 +18,59 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef MAINVIEW_H
-#define MAINVIEW_H
+#ifndef MAINWIDGET_H
+#define MAINWIDGET_H
 
 #include <qwidget.h>
 
+#include "common/msgData.h"
+
+class	bosonTopLevel;
 class	visualMiniDisplay;
 class	bosonBigDisplay;
-class	bosonView;
+class	QWidgetStack;
+class	QLabel;
+class	QScrollView;
+class	QPixmap;
+class	QPushButton;
+class	QFrame;
 
-class mainView : public QWidget 
+class mainWidget : public QWidget 
 {
 	Q_OBJECT
-public:
-	mainView( QWidget *parent=0, const char *name=0);
 
+	friend bosonTopLevel;
+public:
+	mainWidget( bosonTopLevel *parent=0, const char *name=0);
+
+	void	ressourcesUpdated(void);
 protected:
 	virtual void keyReleaseEvent (QKeyEvent * e );
 	virtual void resizeEvent ( QResizeEvent *e );
 
 private:
+
+	bosonTopLevel	*btl;
+	/*
+	 * GUI
+	 */
+	void	makeCommandGui(void);
+
+	QFrame			*mainFrame;
 	/* the map object we are playing in */
 	visualMiniDisplay	*mini;
 	bosonBigDisplay		*big;
-	bosonView		*view;
+
+	/* state view (for selected items) */
+	QWidgetStack	*stack;
+	QLabel		*view_one;
+	QScrollView	*view_many;
+	QPixmap		*view_none;
+	
+	/* ressources */ 
+	QLabel		*oil_text, *mineral_text;
+
 };
 
 
-#endif     // MAINVIEW_H
+#endif     // MAINWIDGET_H

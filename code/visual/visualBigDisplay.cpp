@@ -25,33 +25,28 @@
 #include "common/log.h"
 #include "common/map.h"
 
+#include "visualTopLevel.h"
 #include "visualBigDisplay.h"
 #include "visualCell.h"
 #include "speciesTheme.h"
 #include "groundTheme.h"
   
 
-visualBigDisplay::visualBigDisplay(/*orderWin *o,*/ visualView *v, QWidget*parent, const char *name, WFlags f)
+visualBigDisplay::visualBigDisplay(/*orderWin *o,*/ visualTopLevel *v, QWidget*parent, const char *name, WFlags f)
 	: QCanvasView(vcanvas,parent,name,f)
+	, vtl(v)
 {
 
 //setBackgroundColor(black);
 //setBackgroundMode(fixedColor);
 
-/* related orderWindows */
-//order = o;
-
-/* the visualView */
-view = v;
-
 // QScrollView stuff 
 setVScrollBarMode( AlwaysOff);
 setHScrollBarMode( AlwaysOff);
+setResizePolicy(QScrollView::AutoOne);
 
-// connect(, SIGNAL(), this, SLOT());
-connect(view, SIGNAL(repaint(bool)), this, SLOT(repaint(bool)));
-connect(this, SIGNAL(relativeReCenterView(int, int)), view, SLOT(relativeReCenterView(int, int)));
-connect(this, SIGNAL(reSizeView(int, int)), view, SLOT(reSizeView(int, int)));
+connect(this, SIGNAL(relativeReCenterView(int, int)), vtl, SLOT(relativeReCenterView(int, int)));
+connect(this, SIGNAL(reSizeView(int, int)), vtl, SLOT(reSizeView(int, int)));
 
 }
 
@@ -62,10 +57,10 @@ visualBigDisplay::~visualBigDisplay()
 
 QRect visualBigDisplay::viewArea() const
 {
-//printf("visualBigDisplay::viewArea = %d.%d, %dx%d\n", BO_TILE_SIZE * view->X(), BO_TILE_SIZE * view->Y(), width(), height());
-return QRect(BO_TILE_SIZE * view->X(), BO_TILE_SIZE * view->Y(), width(), height());
-boAssert(width() / BO_TILE_SIZE == view->L());
-boAssert(height() / BO_TILE_SIZE == view->H());
+//printf("visualBigDisplay::viewArea = %d.%d, %dx%d\n", BO_TILE_SIZE * vtl->X(), BO_TILE_SIZE * vtl->Y(), width(), height());
+return QRect(BO_TILE_SIZE * vtl->X(), BO_TILE_SIZE * vtl->Y(), width(), height());
+boAssert(width() / BO_TILE_SIZE == vtl->L());
+boAssert(height() / BO_TILE_SIZE == vtl->H());
 }
 
 void visualBigDisplay::flush(const  QRect & area)
@@ -79,7 +74,7 @@ void visualBigDisplay::beginPainter (QPainter &p)
 ///orzel : to change if some kind of off-screen buffering is used
 
 p.begin(this);
-p.translate( - BO_TILE_SIZE * view->X(), - BO_TILE_SIZE * view->Y());
+p.translate( - BO_TILE_SIZE * vtl->X(), - BO_TILE_SIZE * vtl->Y());
 p.setBackgroundColor(black);
 
 boAssert(p.backgroundColor() == black);
@@ -97,7 +92,7 @@ void visualBigDisplay::drawContents( QPainter *p, int cx, int cy, int cw, int ch
 ///orzel : should be removed :
 //		r = rect();
 //printf("r = %d.%d, %dx%d\n", r.x(), r.y(), r.width(), r.height());
-		r.moveBy(view->X() * BO_TILE_SIZE, view->Y() * BO_TILE_SIZE);
+		r.moveBy(vtl->X() * BO_TILE_SIZE, vtl->Y() * BO_TILE_SIZE);
 //printf("visualBigDisplay::paintEvents, moved : %d.%d, %dx%d\n", r.x(), r.y(), r.width(), r.height());
 		canvas()->drawArea(r,p,!repaint_from_moving);
 		repaint_from_moving = FALSE;
@@ -112,12 +107,12 @@ void visualBigDisplay::mouseMoveEvent(QMouseEvent *e)
 	QPainter p;
 	QPen pen(green, 2);
 	
-	switch( view->getSelectionMode()) {
+	switch( vtl->getSelectionMode()) {
 		default:
-			logf(LOG_WARNING, "visualBigDisplay::mouseMoveEvent : unknown selectionMode(1), mode is %d", view->getSelectionMode());
-		case visualView::SELECT_NONE:
+			logf(LOG_WARNING, "visualBigDisplay::mouseMoveEvent : unknown selectionMode(1), mode is %d", vtl->getSelectionMode());
+		case visualTopLevel::SELECT_NONE:
 			break;
-		case visualView::SELECT_RECT:
+		case visualTopLevel::SELECT_RECT:
 			p.begin(this);
 			p.setPen(pen);
 			p.setRasterOp(XorROP);
@@ -132,16 +127,16 @@ void visualBigDisplay::mouseMoveEvent(QMouseEvent *e)
 			p.end();
 			break;
 
-		case visualView::SELECT_FILL:
-			selectX =  e->x() + view->X()*BO_TILE_SIZE;
-			selectY =  e->y() + view->Y()*BO_TILE_SIZE;
+		case visualTopLevel::SELECT_FILL:
+			selectX =  e->x() + vtl->X()*BO_TILE_SIZE;
+			selectY =  e->y() + vtl->Y()*BO_TILE_SIZE;
 			if (oldX==selectX && oldY==selectY)
 				return;
 			oldX = selectX; oldY = selectY;
 			actionClicked( oldX, oldY, e->state());
 			break;
 
-		case visualView::SELECT_PUT:
+		case visualTopLevel::SELECT_PUT:
 			break;
 	}
 }
@@ -151,13 +146,13 @@ void visualBigDisplay::mouseReleaseEvent(QMouseEvent *e)
 	QPainter p;
 	QPen pen(green, 2);
 
-	switch( view->getSelectionMode()) {
+	switch( vtl->getSelectionMode()) {
 		default:
-			logf(LOG_WARNING, "visualBigDisplay::mouseReleaseEvent : unknown selectionMode(2), mode is %d", view->getSelectionMode());
-		case visualView::SELECT_NONE:
-		case visualView::SELECT_FILL:
+			logf(LOG_WARNING, "visualBigDisplay::mouseReleaseEvent : unknown selectionMode(2), mode is %d", vtl->getSelectionMode());
+		case visualTopLevel::SELECT_NONE:
+		case visualTopLevel::SELECT_FILL:
 			break;
-		case visualView::SELECT_RECT:
+		case visualTopLevel::SELECT_RECT:
 			p.begin(this);
 			p.setPen(pen);
 			p.setRasterOp(XorROP);
@@ -167,20 +162,20 @@ void visualBigDisplay::mouseReleaseEvent(QMouseEvent *e)
 			p.end();
 		
 			/* generate multiple selection */
-			selectX	+= BO_TILE_SIZE * view->X();
-			selectY	+= BO_TILE_SIZE * view->Y();
-			oldX	+= BO_TILE_SIZE * view->X();
-			oldY	+= BO_TILE_SIZE * view->Y();
+			selectX	+= BO_TILE_SIZE * vtl->X();
+			selectY	+= BO_TILE_SIZE * vtl->Y();
+			oldX	+= BO_TILE_SIZE * vtl->X();
+			oldY	+= BO_TILE_SIZE * vtl->Y();
 			
-			view->selectArea(selectX, selectY, oldX, oldY);
+			vtl->selectArea(selectX, selectY, oldX, oldY);
 			vcanvas->update();
 
 			break;
-		case visualView::SELECT_PUT:
+		case visualTopLevel::SELECT_PUT:
 			break;
 			return;
 	}
-	view->setSelectionMode( visualView::SELECT_NONE);
+	vtl->setSelectionMode( visualTopLevel::SELECT_NONE);
 }
 
 void visualBigDisplay::resizeEvent(QResizeEvent *e)
@@ -193,10 +188,10 @@ void visualBigDisplay::resizeEvent(QResizeEvent *e)
 /*
 void visualBigDisplay::putSomething(void)
 {
-	view->setSelectionMode( visualView::SELECT_PUT);
+	vtl->setSelectionMode( visualTopLevel::SELECT_PUT);
 	oldX = selectX = 0;
 	oldY = selectY = 0;
-	view->unSelectFix();
+	vtl->unSelectFix();
 	return;
 }
 */
@@ -215,18 +210,18 @@ void visualBigDisplay::mousePressEvent(QMouseEvent *e)
 		}
 
 	/* Now we transpose coo into the map referential */
-	x += view->X()*BO_TILE_SIZE; y += view->Y()*BO_TILE_SIZE;
+	x += vtl->X()*BO_TILE_SIZE; y += vtl->Y()*BO_TILE_SIZE;
 	
 	if (e->button() & LeftButton) {	
 
-		if (view->getSelectionMode() == visualView::SELECT_PUT) {
-			view->object_put(e->x(), e->y());
+		if (vtl->getSelectionMode() == visualTopLevel::SELECT_PUT) {
+			vtl->object_put(e->x(), e->y());
 			return;
 		}
 
 		/* Control -> multiselection, else... */
 		if (! (e->state()&ControlButton)) {
-			view->unSelectAll();
+			vtl->unSelectAll();
 			}
 	
 		QCanvasItem *sfg = vcanvas->findUnitAt( x, y);
@@ -234,10 +229,10 @@ void visualBigDisplay::mousePressEvent(QMouseEvent *e)
 		if (!sfg) {
 			// nothing has been found : it's a ground-click
 			// Here, we have to draw a "selection box"...
-			view->setSelectionMode( visualView::SELECT_RECT);
+			vtl->setSelectionMode( visualTopLevel::SELECT_RECT);
 			oldX = selectX = e->x();
 			oldY = selectY = e->y();
-			view->unSelectFix();
+			vtl->unSelectFix();
 			return;
 		}
 	
@@ -245,11 +240,11 @@ void visualBigDisplay::mousePressEvent(QMouseEvent *e)
 		if ( IS_MOBILE(sfg->rtti())) {
 			visualMobUnit *m = (visualMobUnit *) sfg;
 	
-			view->unSelectFix();
-			if ((e->state()&ControlButton) && view->mobSelected.find(m->key))
-				view->unSelectMob(m->key);
+			vtl->unSelectFix();
+			if ((e->state()&ControlButton) && vtl->mobSelected.find(m->key))
+				vtl->unSelectMob(m->key);
 			else
-				view->selectMob(m->key, m);
+				vtl->selectMob(m->key, m);
 
 			vcanvas->update();
 			return;
@@ -257,8 +252,8 @@ void visualBigDisplay::mousePressEvent(QMouseEvent *e)
 
 		if ( IS_FACILITY(sfg->rtti())) {
 			visualFacility *f = (visualFacility *) sfg;
-			view->unSelectAll();		// anyway 
-			view->selectFix(f);
+			vtl->unSelectAll();		// anyway 
+			vtl->selectFix(f);
 
 			vcanvas->update();
 			return;

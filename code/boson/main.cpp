@@ -21,11 +21,13 @@
 #include <klocale.h>
 #include <kcmdlineargs.h>
 #include <kaboutdata.h>
+
 #include "boson.h" 
  
 int main(int argc, char* argv[])
 { 
 
+	/* about data */
 	KAboutData aboutData(
 		"boson"
 		, I18N_NOOP("Boson game")
@@ -40,18 +42,11 @@ int main(int argc, char* argv[])
 	aboutData.addAuthor("Thomas Capricelli", I18N_NOOP("Game Design & Coding"), "orzel@yalbi.com", "http://aquila.rezel.enst.fr/thomas/");
 	aboutData.addAuthor("Benjamin Adler", I18N_NOOP("Graphics & Homepage Design"), "benadler@bigfoot.de");
 		                                                              
+	/* application */
 	KCmdLineArgs::init( argc, argv, &aboutData );
+	BosonApp app;  
 
-
-	KApplication app;  
-
-	BosonApp* boson = new BosonApp();
-//orzel : can't give the servername as argument...
-//     	(argc>1)?argv[1]:0l);
-	app.setMainWidget(boson);
-	app.setTopWidget(boson);
-	boson->show();
-
+	/* main event loop */
 	return app.exec();
 }  
  

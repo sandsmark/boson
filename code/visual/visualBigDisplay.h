@@ -30,14 +30,14 @@
 #include "common/unit.h"	// Facility
 
 #include "speciesTheme.h"
-#include "visualView.h"
+//#include "visualTopLevel.h"
 
 class Cell;
 class Unit;
 class groundTheme;
 class QPixmap;
 class visualCell;
-class visualView;
+class visualTopLevel;
 class orderWin;
 
 
@@ -49,7 +49,7 @@ class visualBigDisplay : public QCanvasView
   Q_OBJECT
 
 public:
-  visualBigDisplay(/*orderWin *,*/ visualView *v, QWidget *parent=0, const char *name=0L, WFlags f=0);
+  visualBigDisplay(/*orderWin *,*/ visualTopLevel *, QWidget *parent=0, const char *name=0L, WFlags f=0);
   ~visualBigDisplay();
 
 
@@ -83,7 +83,7 @@ protected:
   virtual void mouseReleaseEvent(QMouseEvent *e);
   virtual void resizeEvent(QResizeEvent *e);
 
-  visualView	*view;
+  visualTopLevel	*vtl;
 
   int selectX, selectY;
   int oldX, oldY;

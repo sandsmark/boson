@@ -1,5 +1,5 @@
 /***************************************************************************
-                       editor/mainView.h -  description 
+                       mainWidget.h -  description 
                              -------------------                                         
 
     version              : $Id$
@@ -18,33 +18,40 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef MAINVIEW_H
-#define MAINVIEW_H
+#ifndef MAINWIDGET_H
+#define MAINWIDGET_H
 
 #include <qwidget.h>
 
-class	visualMiniDisplay;
-class	editorBigDisplay;
-class	visualView;
-class	editorCanvas;
+#include "common/msgData.h"
 
-class mainView : public QWidget 
+
+class editorTopLevel;
+class visualMiniDisplay;
+class editorBigDisplay;
+
+
+class mainWidget : public QWidget 
 {
 	Q_OBJECT
-public:
-	mainView(QWidget *parent=0, const char *name=0);
 
-public slots:
-	void slotEditDestroy(void);
+	friend editorTopLevel;
+public:
+	mainWidget( editorTopLevel *parent=0, const char *name=0);
+
+	void	ressourcesUpdated(void);
 protected:
-  virtual void keyReleaseEvent (QKeyEvent * e );
+	virtual void keyReleaseEvent (QKeyEvent * e );
+	virtual void resizeEvent ( QResizeEvent *e );
+
 
 private:
-/* the map object we are playing in */
-    visualMiniDisplay	*mini;
-    editorBigDisplay	*big;
-    visualView		*view;
+
+	editorTopLevel	*etl;
+	visualMiniDisplay	*mini;
+	editorBigDisplay	*big;
+
 };
 
 
-#endif     // MAINVIEW_H
+#endif     // MAINWIDGET_H

@@ -29,7 +29,7 @@ class Cell;
 class Unit;
 class QPixmap;
 class visualCell;
-class visualView;
+class visualTopLevel;
 class visualMobUnit;
 class visualFacility;
 
@@ -42,7 +42,7 @@ class visualMiniDisplay : public QWidget
   Q_OBJECT
 
 public:
-  visualMiniDisplay(visualView *v, QWidget *parent=0, const char *name=0L);
+  visualMiniDisplay(visualTopLevel *, QWidget *parent=0, const char *name=0L);
 
 signals:
   void	reCenterView(int x, int y);
@@ -62,7 +62,7 @@ protected:
 
 private:
 
-  visualView	*view;
+  visualTopLevel	*vtl;
   QPixmap	*ground;
 
 };

@@ -22,14 +22,15 @@
 #define BOSONBIGDISPLAY_H 
 
 #include "visualBigDisplay.h"
-#include "bosonView.h"
+
+class bosonTopLevel;
 
 class bosonBigDisplay : public visualBigDisplay
 {
   Q_OBJECT
 
 public:
-	bosonBigDisplay(bosonView *v, QWidget *parent=0, const char *name=0L, WFlags f=0);
+	bosonBigDisplay(bosonTopLevel *v, QWidget *parent=0, const char *name=0L, WFlags f=0);
 	/* from display classes */
 	virtual void actionClicked(int, int, int state);	// selecting, moving...
 

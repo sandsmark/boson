@@ -37,12 +37,14 @@
 #include "common/bobuffer.h"
 #include "common/msgData.h"
 
+#include "boson.h"
 #include "connectDlg.h"
 #include "serverDlg.h"
 #include "game.h"
 
-connectDlg::connectDlg(char *servername ,QWidget *parent, const char *name)
-	:QDialog(parent,name,true)
+connectDlg::connectDlg(BosonApp *p, char *servername , const char *name)
+	:QDialog(0l, name,true) // parentless : application-wide dialog
+	,_parent(p)
 {
         QPushButton	*button;
 	QLabel		*label;
@@ -161,7 +163,7 @@ void connectDlg::tryServer(void)
 	/* KSocket configuration */
 	connect (
 		Socket, SIGNAL(readEvent(KSocket *)), 
-		parent(), SLOT(handleSocketMessage(KSocket*) ) );
+		_parent, SLOT(handleSocketMessage(KSocket*) ) );
 	Socket->enableRead(TRUE);
 	
 	/* beginning of the connection protocol */
@@ -187,7 +189,7 @@ void connectDlg::tryServer(void)
 
 void connectDlg::launchServer(void)
 {
-	serverDlg *dlg = new serverDlg((QWidget*)parent(), "serverDlg_0");
+	serverDlg *dlg = new serverDlg( "serverDlg_0");
 
 	connect( dlg, SIGNAL(configure(const char *, const char *)), SLOT(configure(const char *, const char *)) );
 	hide();
@@ -204,9 +206,7 @@ void connectDlg::launchServer(void)
 /*
 void connectDlg::timeOut(void)
 {
-	puts("ThomasCapricelli");
 	if (  State >= PS_WAIT_BEGIN  )  {
-		puts("hopasdfasfs");
 		accept();
 		return;
 	}

@@ -1,5 +1,5 @@
 /***************************************************************************
-                          bosonView.h  -  description                              
+                          bosonTopLevel.h  -  description                              
                              -------------------                                         
 
     version              : $Id$
@@ -18,37 +18,41 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef BOSONVIEW_H 
-#define BOSONVIEW_H 
+#ifndef BOSONTOPLEVEL_H 
+#define BOSONTOPLEVEL_H 
 
-#include "visualView.h"
-
-class QPushButton;
-class QPixmap;
-class playerFacility;
-class QLabel;
-class QWidgetStack;
-class QScrollView;
-class QVBoxLayout;
+#include "mainWidget.h"
+#include "visualTopLevel.h"
 
 
-class bosonView : public visualView 
+/** 
+  * This class is the global object concerning a view : where, how large..
+  * It's also the place where selections are handled
+  * 
+  * it inherits from KTMainWindow only because it will _also_ be part of the GUI in boson or boeditor
+  */
+class bosonTopLevel : public visualTopLevel
 {
 	Q_OBJECT
-
+	
 public:
-	bosonView(QWidget *parent=0, const char *name=0L);
+	bosonTopLevel(const char *name = 0L, WFlags f = WDestructiveClose );
 
 	enum orderType_t { OT_NONE =-1 , OT_FACILITY=10, OT_MOBILE=11};
 
-	virtual void setSelected(QPixmap *);
-	virtual void setOrders(int what , int who=-1);
-	
-public slots:
-	void ressourcesUpdated(void);
+	/*
+	 * put object 
+	 */
+	virtual void	object_put(int, int);
+
+	/*
+         * selection handling
+         */
+	virtual void	setSelected(QPixmap *);
+	virtual void	setOrders(int what , int who=-1);
 
 protected:
-	virtual void object_put(int, int);
+	virtual	void	updateViews(void);
 
 private slots:
 	void bc0(void) { handleOrder(0); } // button clicked
@@ -66,20 +70,13 @@ private slots:
 private:
 	void	handleOrder(int);
 
-/* state view (for selected items) */
-	QWidgetStack	*stack;
-	QLabel		*view_one;
-	QScrollView	*view_many;
-	QPixmap		*view_none;
-	
-/* ressources */ 
-	QLabel		*oil_text, *mineral_text;
-
-/* GUI */
+	mainWidget	mw;
 	QPushButton	*orderButton[11];
+
 	orderType_t	orderType;
 	constructMsg_t	construct;
 };
 
-#endif // BOSONVIEW_H
+#endif // BOSONTOPLEVEL_H
+
 

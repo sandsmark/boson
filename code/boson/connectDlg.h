@@ -26,6 +26,7 @@
 
 class QLineEdit;
 class QPushButton;
+class BosonApp;
 
 
 class connectDlg : public QDialog 
@@ -33,7 +34,7 @@ class connectDlg : public QDialog
 	Q_OBJECT
 
 public:
-	connectDlg(char *servername=0l, QWidget *parent=0l, const char *name=0l);
+	connectDlg(BosonApp *parent, char *servername=0l, const char *name=0l);
 
 public slots:
 	void	tryServer(void);
@@ -44,6 +45,7 @@ private slots:
 //	void	timeOut(void);
 
 private:
+	BosonApp	*_parent;
 	QLineEdit	*e_server, *e_port;
 	QPushButton	*b_ok;
 };

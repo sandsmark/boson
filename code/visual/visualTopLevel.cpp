@@ -1,5 +1,5 @@
 /***************************************************************************
-                          visualView.cpp  -  description                              
+                          visualTopLevel.cpp  -  description                              
                              -------------------                                         
 
     version              : $Id$
@@ -18,13 +18,13 @@
  *                                                                         *
  ***************************************************************************/
 
-#include "visualView.h"
+#include "visualTopLevel.h"
 #include "common/log.h"
 #include "speciesTheme.h"
 
 
-visualView::visualView(QWidget *parent, const char *name=0L)
-	: QFrame(parent, name)
+visualTopLevel::visualTopLevel( const char *name, WFlags f)
+	: KTMainWindow(name,f)
 	,fixSelected( 0L )
 	,selectionMode(SELECT_NONE)
 {
@@ -34,7 +34,7 @@ visualView::visualView(QWidget *parent, const char *name=0L)
 }
 
 
-void visualView::reCenterView(int x, int y)
+void visualTopLevel::reCenterView(int x, int y)
 {
 	int oldX = viewX, oldY = viewY;
 
@@ -44,12 +44,12 @@ void visualView::reCenterView(int x, int y)
 	checkMove();
 
 	if (viewX != oldX || viewY != oldY) {
-		emit repaint(FALSE);
+		emit updateViews();
 		}
 }
 
 
-void visualView::reSizeView(int l, int h)
+void visualTopLevel::reSizeView(int l, int h)
 {
 	int	Xcenter = viewX + viewL/2,
 		Ycenter = viewY + viewH/2;
@@ -60,7 +60,7 @@ void visualView::reSizeView(int l, int h)
 	reCenterView(Xcenter, Ycenter);
 }
 
-void visualView::relativeMoveView(int dx, int dy)
+void visualTopLevel::relativeMoveView(int dx, int dy)
 {
 	int oldX = viewX, oldY = viewY;
 
@@ -70,11 +70,11 @@ void visualView::relativeMoveView(int dx, int dy)
 	checkMove();
 
 	if (viewX != oldX || viewY != oldY) {
-		emit repaint(FALSE);
+		updateViews();
 		}
 }
 
-void visualView::checkMove()
+void visualTopLevel::checkMove()
 {
 	viewX = QMIN(viewX, vcanvas->maxX - viewL);
 	viewY = QMIN(viewY, vcanvas->maxY - viewH);
@@ -84,35 +84,35 @@ void visualView::checkMove()
 }
 
 
-visualFacility * visualView::unSelectFix(void)
+visualFacility * visualTopLevel::unSelectFix(void)
 {
-visualFacility *f = fixSelected;
+	visualFacility *f = fixSelected;
 
-if (!f) return f; // already done
-fixSelected	= (visualFacility *) 0l;
-f->unSelect();
+	if (!f) return f; // already done
+	fixSelected	= (visualFacility *) 0l;
+	f->unSelect();
 
-emit setSelected((QPixmap *)0l);
-
-return f;
-}
-
-
-visualMobUnit *visualView::unSelectMob(long key)
-{
-visualMobUnit *m = mobSelected[key];
-mobSelected.remove(key);
-m->unSelect();
-
-if (mobSelected.isEmpty()) {
 	emit setSelected((QPixmap *)0l);
-	emit setOrders(-1);
-	}
 
-return m;
+	return f;
 }
 
-void visualView::unSelectAll(void)
+
+visualMobUnit *visualTopLevel::unSelectMob(long key)
+{
+	visualMobUnit *m = mobSelected[key];
+	mobSelected.remove(key);
+	m->unSelect();
+
+	if (mobSelected.isEmpty()) {
+		emit setSelected((QPixmap *)0l);
+		emit setOrders(-1);
+		}
+
+	return m;
+}
+
+void visualTopLevel::unSelectAll(void)
 {
 	QIntDictIterator<visualMobUnit> selIt(mobSelected);
 
@@ -131,7 +131,7 @@ void visualView::unSelectAll(void)
 }
 
 
-void visualView::selectFix(visualFacility *f)
+void visualTopLevel::selectFix(visualFacility *f)
 {
 	fixSelected = f;
 	fixSelected->select();
@@ -150,7 +150,7 @@ void visualView::selectFix(visualFacility *f)
 	logf(LOG_GAME_LOW, "select facility");
 }
 
-void visualView::selectMob(long key, visualMobUnit *m)
+void visualTopLevel::selectMob(long key, visualMobUnit *m)
 {
 	if (mobSelected.isEmpty()) {
 		boAssert( selectionWho = -1);
@@ -169,7 +169,7 @@ void visualView::selectMob(long key, visualMobUnit *m)
 
 
 
-void visualView::selectArea(int x1, int y1, int x2, int y2)
+void visualTopLevel::selectArea(int x1, int y1, int x2, int y2)
 {
 	QCanvasItemList qcitl;
 	visualMobUnit *u;

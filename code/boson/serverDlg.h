@@ -34,7 +34,7 @@ class serverDlg : public QDialog
 	Q_OBJECT
 
 public:
-	serverDlg(QWidget *parent=0l, const char *name=0l);
+	serverDlg(const char *name=0l);
 
 signals:
 	void	configure(const char *server, const char *port);
