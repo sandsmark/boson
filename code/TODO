@@ -1,10 +1,9 @@
-TODO:
 
+Orzel's patch pending : 8, 27, 43, 65, 
 
-Generic :
-=========
+Code : (Orzel)
+--------------
 (b=bug, f=feature)
-
 
 #2 b: when destroyed while selected, facilities are still selected (you can keep on building fe)
 #5 f: server detects end-of-game / winner..
@@ -14,15 +13,13 @@ Generic :
 #27 f: use of QPoint/QSize all over canvas/toplevel
 #28 f: remove EX() in common/unitType.cpp -> need lot of checking
 #30 f: new boDist() and use of it all over the place
-#34 b: editor : "close map" not working
+#34 b: editor : "close map" not working -> the file is closed, but the user has no feedback
 #38 b: selected units should be on a TopLevel basis (see multiple window in editor fe)
 #39 f: generic statusbar in visualTopLevel, so we can have units# in editor too
 #41 f: display info on selected units (power, what is doing and so on..)
-#42 f: sound support (arts)
 #43 f: music support (arts)
 #44 f: auto-positionning of newly built mobile units by server (need #23)
 #45 f: auto-attacking units when opponents units are "near"
-#46 b: small shots still have black background (need ben' new graphic)
 #48 f: oil decreasing when units are moving
 #54 f: clean up the maxX/maxY redonduncies
 #55 f: minimap size dynamically choosen (50x50 should use 2x2 pixels/tile)
@@ -32,7 +29,7 @@ Generic :
 #59 f: units construction : progressbar on unit_constructor, then autoput of the unit
 #60 f: fine-graining for *Theme.cpp : distinct loading of overview..
 #61 f: selectPart shouldn't be splitted (up/down)
-#62 b: report to QCanvas/author : shouldn't segfault when pixmap loading has failed
+#62 b: report to QCanvas/author : shouldn't segfault when pixmap loading has failed[still valid ?]
 #63 f: clean up the network code : what handles what ? and in which file..
 #64 f: proposiong/creating things only if ressources permit it in client (presently, the server already refuse to build)
 #65 f: positionning rect in editor/boson (you see where you'll put the facility)
@@ -47,7 +44,7 @@ Generic :
 #74 f: server : check that each unit does max 1 move each jiffy
 #75 f: dnd the minimap should move the screen
 #76 f: directon are still not handled after new positionning scheme (0.5)
-#77 f: releasiing some predefined 'templates' for the editor
+#77 f: releasing some predefined 'templates' for the editor
 #78 b: use checkMove() in boeditor as well
 #79 f: latest facilities from ben aren't used
 #80 f: health bar should be graduated
@@ -58,10 +55,47 @@ Generic :
 #86 b: don't spread boson-*.log everywhere
 #87 b: in connectDialog, 'cancel' removes the dialog but doesn't quit boson
 #88 f: drag&dropping MMB should move the map accordingly, not centered it
+#89 f: fog-of-war
+#90 f: forgotten fog-of-war (fow 2nd generation)
+#91 f: different cursors for different actions
+#92 f: bullet handling
+#93 f: statistics at the end of the game (need #5)
+#94 f: To select ALL units of one kind on the screen, left-doubleclick on one of them.
+#95 f: To attack multiple units: Hold the right mouse button, circle with variable size that embrase all attacked units
+#96 f: ping with higer-precision, ping unit in the status bar
+#97 f: cursor turning into arrow at the edge of the screen, to scroll the window
+#98 f: move explosion loading to specieTheme ("human")
+#99 f: non-hardcoded sound theme name "human" in bosonCanvas.cpp (-> speciesTheme/soundTheme ?)
+#106 f: shift-RMB does nothing in editor for oil/mineral ground
+#107 f: oil/mineral info should be in the TIME_ msg, cause anyway, they are sent in every data-burst
 
 
-Fixed after 0.5:
-================
+Graphics : (ben)
+----------------
+
+#100 g: mineral-grounds
+#101 g: new homepage for 0.6 
+#102 g: New graphics for connectDlg and serverDlg
+#103 g: Improved boat (96x96 square, not 'long')
+#104 g: 96x96 Plane 
+#105 g: smaller harvester (48x48)
+
+Sound : (Nils)
+--------------
+in themes/sound/human/
+	shoot.wav		// small shoot (bing)
+	fix_destroyed.wav	// facility destroyed (booom, argh..)
+	mobile_destroyed.wav	// mobile unit destroyed (boom, argh..)
+	mobile_attacking.wav	// mobile attacking ("yahaaaaaaaaaa")
+	mobile_going.wav	// mobile going to ("going sir")
+	radar_pulse.wav		// small sound for the radar (from time to time)
+
+
+
+Done since 0.5 :  (to put in ChangeLog for 0.6 release)
+----------------
+#46 b: small shots still have black background (need ben' new graphic)
 #84 b: launching server from client failed
+#42 f: sound support (arts)
 
 
