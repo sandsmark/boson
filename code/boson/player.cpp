@@ -144,7 +144,7 @@ void Player::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 sende
 }
 
 
-void Player::loadTheme(const QString& species, const QRgb& teamColor)
+void Player::loadTheme(const QString& species, const QColor& teamColor)
 {
  if (mSpecies) {
 	delete mSpecies;
@@ -267,7 +267,7 @@ bool Player::save(QDataStream& stream)
 	stream << speciesTheme()->teamColor();
  } else {
 	 stream << QString::null;
-	 stream << (QRgb)0;
+	 stream << QColor(0, 0, 0);
  }
 
 // the stuff below this should (!) be unused.
@@ -295,7 +295,7 @@ bool Player::load(QDataStream& stream)
 	return false;
  }
  QString themeIdentifier;
- QRgb teamColor;
+ QColor teamColor;
  stream >> themeIdentifier;
  stream >> teamColor;
  if (themeIdentifier != QString::null) {
@@ -405,3 +405,9 @@ void Player::productionAdvanced(Unit* factory, double percentage)
 {
  emit signalProductionAdvanced(factory, percentage);
 }
+
+const QColor& Player::teamColor() const
+{
+ return speciesTheme()->teamColor();
+}
+

@@ -29,14 +29,12 @@
 
 #include <klocale.h>
 #include <kdebug.h>
-#include <kstandarddirs.h>
 #include <ksimpleconfig.h>
 #include <kmessagebox.h>
 
 #include <qpushbutton.h>
 #include <qvgroupbox.h>
 #include <qcombobox.h>
-#include <qlayout.h>
 #include <qmap.h>
 #include <qhbox.h>
 #include <qlabel.h>
@@ -70,7 +68,7 @@ public:
 	QMap<int, QString> mSpeciesIndex2Comment;
 	QMap<int, QString> mSpeciesIndex2Identifier;
 
-	QValueList<QRgb> mColorList;
+	QValueList<QColor> mColorList;
 
 	QComboBox* mMapCombo;
 	QComboBox* mScenarioCombo;
@@ -231,9 +229,9 @@ void KGameDialogBosonConfig::regenerateColors()
  } else {
 	kdWarning() << k_funcinfo << "NULL owner" << endl;
  }
- QValueList<QRgb> colors = g->availableTeamColors();
+ QValueList<QColor> colors = g->availableTeamColors();
  for (unsigned int i = 0; i < colors.count(); i++) {
-	addColor(QColor(colors[i]));
+	addColor(colors[i]);
  }
 }
 
@@ -244,7 +242,8 @@ void KGameDialogBosonConfig::slotSpeciesChanged(Player* p)
 
 void KGameDialogBosonConfig::slotTeamColorChanged(int index)
 {
- QRgb c = d->mColorList[index];
+ QColor c = d->mColorList[index];
+kdDebug() << "?? is " << c.rgb() << endl;
  emit signalTeamColorChanged(c);
 }
 
@@ -256,7 +255,7 @@ void KGameDialogBosonConfig::slotTeamColorChanged(Player* p)
 
 void KGameDialogBosonConfig::addColor(const QColor& c)
 {
- d->mColorList.append(c.rgb());
+ d->mColorList.append(c);
  QPainter painter;
  QRect rect(0, 0, d->mPlayerColor->width(), QFontMetrics(painter.font()).height() + 4);
  QPixmap pixmap(rect.width(), rect.height());

@@ -35,7 +35,6 @@
 #include <qbitmap.h>
 #include <qpainter.h>
 #include <qtooltip.h>
-#include <qlabel.h>
 #include <qlayout.h>
 #include <qpushbutton.h>
 

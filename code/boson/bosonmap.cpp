@@ -19,10 +19,7 @@
 
 #include "bosonmap.h"
 
-#include "unitbase.h"
 #include "cell.h"
-#include "player.h"
-#include "boson.h"
 
 #include <qfile.h>
 #include <qdatastream.h>

@@ -21,9 +21,8 @@
 
 #include <kgame/kplayer.h>
 
-#include <qcolor.h>
-
 class QCanvasPixmapArray;
+class QColor;
 class Unit;
 class SpeciesTheme;
 class UnitProperties;
@@ -50,11 +49,16 @@ public:
 	 **/
 	QCanvasPixmapArray* pixmapArray(int unitType) const;
 
-	void loadTheme(const QString& species, const QRgb& teamColor);
+	void loadTheme(const QString& species, const QColor& teamColor);
 
 	void addUnit(Unit* unit);
 	void unitDestroyed(Unit* unit);
 	SpeciesTheme* speciesTheme() const { return mSpecies; }
+
+	/**
+	 * @return @ref SpeciesTheme::teamColor
+	 **/
+	const QColor& teamColor() const;
 
 	Unit* findUnit(unsigned long int unitId) const;
 

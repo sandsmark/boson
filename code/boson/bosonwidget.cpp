@@ -29,7 +29,6 @@
 #include "speciestheme.h"
 #include "kspritetooltip.h"
 #include "bosoncommandframe.h"
-#include "editorinput.h"
 #include "bosonmessage.h"
 #include "bosonmap.h"
 #include "bosonscenario.h"
@@ -40,15 +39,15 @@
 #include "kgamedialogcomputerconfig.h"
 #include "kgameunitdebug.h"
 #include "bosonmusic.h"
-#include "commandinput.h"
 #include "bosoncursor.h"
+#include "editorinput.h"
+#include "commandinput.h"
 #include "global.h"
 
 #include "defines.h"
 
 #include <klocale.h>
 #include <kconfig.h>
-#include <kapplication.h>
 #include <kdebug.h>
 #include <kstandarddirs.h>
 #include <kmessagebox.h>
@@ -58,8 +57,6 @@
 #include <kgame/kgamechat.h>
 
 #include <qlayout.h>
-#include <qevent.h>
-#include <qtimer.h>
 #include <qvbox.h>
 #include <qptrlist.h>
 
@@ -334,7 +331,7 @@ void BosonWidget::slotPlayerJoinedGame(KPlayer* player)
  }
  // check if the color of the new player is already taken
  QPtrListIterator<KPlayer> it(*d->mBoson->playerList());
- QRgb playerColor = p->speciesTheme()->teamColor();
+ QColor playerColor = p->speciesTheme()->teamColor();
  while (it.current()) {
 	if (it.current() != player) {
 		Player* p2 = (Player*)it.current();
@@ -412,8 +409,8 @@ void BosonWidget::slotNewGame()
 		bosonConfig, SLOT(slotTeamColorChanged(Player*)));
  connect(bosonConfig, SIGNAL(signalSpeciesChanged(const QString&)),
 		this, SLOT(slotSendChangeSpecies(const QString&)));
- connect(bosonConfig, SIGNAL(signalTeamColorChanged(QRgb)),
-		this, SLOT(slotSendChangeTeamColor(QRgb)));
+ connect(bosonConfig, SIGNAL(signalTeamColorChanged(const QColor&)),
+		this, SLOT(slotSendChangeTeamColor(const QColor&)));
  connect(dialog, SIGNAL(signalStartGame()), 
 		bosonConfig, SIGNAL(signalStartGame()));
  // Note: KGameDialogBosonConfig does not emit signals for the important things,
@@ -503,7 +500,7 @@ void BosonWidget::slotStartScenario()
  // is started!!
  // UPDATE (01/11/19): should be in scenario file!
  for (unsigned int i = 0; i < d->mBoson->playerCount(); i++) {
-//	QRgb color = SpeciesTheme::defaultColor();
+//	Color color = SpeciesTheme::defaultColor();
 //	QString species = "human";
 //	((Player*)d->mBoson->playerList()->at(i))->loadTheme(species, color);
  }
@@ -848,13 +845,13 @@ void BosonWidget::slotSendChangeSpecies(const QString& species)
  QDataStream stream(buffer, IO_WriteOnly);
  stream << (Q_UINT32)d->mLocalPlayer->id();
  stream << species;
- stream << d->mBoson->availableTeamColors().first();
+ stream << d->mBoson->availableTeamColors().first().rgb();
  d->mBoson->sendMessage(buffer, BosonMessage::ChangeSpecies);
  // the species is actually loaded in the class Boson when the message is
  // received
 }
 
-void BosonWidget::slotSendChangeTeamColor(QRgb color)
+void BosonWidget::slotSendChangeTeamColor(const QColor& color)
 {
  if (!d->mLocalPlayer) {
 	kdError() << k_funcinfo << "NULL localplayer" << endl;
@@ -863,7 +860,7 @@ void BosonWidget::slotSendChangeTeamColor(QRgb color)
  sendChangeTeamColor(d->mLocalPlayer, color);
 }
 
-void BosonWidget::sendChangeTeamColor(Player* player, QRgb color)
+void BosonWidget::sendChangeTeamColor(Player* player, const QColor& color)
 {
  if (!player) {
 	kdError() << k_funcinfo << "NULL player" << endl;
@@ -872,7 +869,7 @@ void BosonWidget::sendChangeTeamColor(Player* player, QRgb color)
  QByteArray buffer;
  QDataStream stream(buffer, IO_WriteOnly);
  stream << (Q_UINT32)player->id();
- stream << color;
+ stream << (Q_UINT32)color.rgb();
  d->mBoson->sendMessage(buffer, BosonMessage::ChangeTeamColor);
  // the color is actually changed in the class Boson when the message is
  // received
@@ -1191,7 +1188,7 @@ void BosonWidget::slotChangeCursor(int mode)
  d->mCursor->insertMode(CursorDefault, cursorDir, QString::fromLatin1("default"));
 // d->mCursor->setWidgetCursor(d->mBigDisplay);
 
- // some cursors need special final initializations. do themn now
+ // some cursors need special final initializations. do them now
  switch (mode) {
 	case CursorSprite:
 		((BosonSpriteCursor*)d->mCursor)->setCanvas(d->mCanvas,

@@ -18,7 +18,6 @@
 */
 #include "boson.h"
 
-#include "bosonmap.h"
 #include "bosonmessage.h"
 #include "player.h"
 #include "defines.h"
@@ -407,7 +406,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 	{
 		Q_UINT32 id;
 		QString species;
-		QRgb color;
+		Q_UINT32 color;
 		stream >> id;
 		stream >> species;
 		stream >> color;
@@ -416,14 +415,14 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 			kdError() << k_lineinfo << "Cannot find player " << id << endl;
 			return;
 		}
-		p->loadTheme(SpeciesTheme::speciesDirectory(species), color);
+		p->loadTheme(SpeciesTheme::speciesDirectory(species), QColor(color));
 		emit signalSpeciesChanged(p);
 		break;
 	}
 	case BosonMessage::ChangeTeamColor:
 	{
 		Q_UINT32 id;
-		QRgb color;
+		Q_UINT32 color;
 		stream >> id;
 		stream >> color;
 		Player* p = (Player*)findPlayer(id);
@@ -435,7 +434,8 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 			kdError() << k_lineinfo << "NULL speciesTheme for " << id << endl;
 			return;
 		}
-		if (p->speciesTheme()->setTeamColor(color)) {
+		QColor c(color);
+		if (p->speciesTheme()->setTeamColor(QColor(color))) {
 			emit signalTeamColorChanged(p);
 		} else {
 			kdWarning() << k_lineinfo << "could not change color for " << id << endl;
@@ -728,9 +728,9 @@ void Boson::slotAdvanceComputerPlayers()
  }
 }
 
-QValueList<QRgb> Boson::availableTeamColors() const
+QValueList<QColor> Boson::availableTeamColors() const
 {
- QValueList<QRgb> colors = SpeciesTheme::defaultColors();
+ QValueList<QColor> colors = SpeciesTheme::defaultColors();
  QPtrListIterator<KPlayer> it(*playerList());
  while (it.current()) {
 	if (((Player*)it.current())->speciesTheme()) {

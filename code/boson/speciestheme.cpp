@@ -87,7 +87,7 @@ QRgb default_color[BOSON_MAX_PLAYERS] = {
 	qRgb(0,127,127),
 };
 
-SpeciesTheme::SpeciesTheme(const QString& speciesDir, QRgb teamColor)
+SpeciesTheme::SpeciesTheme(const QString& speciesDir, const QColor& teamColor)
 {
  d = new SpeciesThemePrivate;
  d->mUnitProperties.setAutoDelete(true);
@@ -125,15 +125,15 @@ void SpeciesTheme::reset()
  }
 }
 
-QRgb SpeciesTheme::defaultColor()
+QColor SpeciesTheme::defaultColor()
 {
  defaultColorIndex++;
- return default_color[defaultColorIndex - 1];
+ return QColor(default_color[defaultColorIndex - 1]);
 }
 
-bool SpeciesTheme::loadTheme(const QString& speciesDir, QRgb teamColor)
+bool SpeciesTheme::loadTheme(const QString& speciesDir, const QColor& teamColor)
 {
- if (teamColor == qRgb(0,0,0)) { // no color specified
+ if (teamColor == QColor(0,0,0)) { // no color specified
 	setTeamColor(defaultColor());
  } else {
 	setTeamColor(teamColor);
@@ -321,7 +321,7 @@ bool SpeciesTheme::loadUnitPixmap(const QString &fileName, QPixmap &pix, bool wi
 			}
 			if (with_team_color) {
 				if ( (qRed(*p) > 0x80) && (qGreen(*p) < 0x70) && (qBlue(*p) < 0x70)) {
-					*p = teamColor();
+					*p = teamColor().rgb();
 				}
 			}
 		}
@@ -331,7 +331,7 @@ bool SpeciesTheme::loadUnitPixmap(const QString &fileName, QPixmap &pix, bool wi
 		p  = (QRgb *)image.scanLine(y);	// image
 		for ( x = 0; x < w; x++, p++ ) {
 			if ( (qRed(*p) > 0x90) && (qGreen(*p) < 0x60) && (qBlue(*p) < 0x60)) {
-				*p = teamColor();
+				*p = teamColor().rgb();
 			}
 		}
 	}
@@ -636,7 +636,7 @@ QString SpeciesTheme::identifier() const
  return cfg.readEntry("Identifier");
 }
 
-bool SpeciesTheme::setTeamColor(QRgb color)
+bool SpeciesTheme::setTeamColor(const QColor& color)
 {
  if (!d->mCanChangeTeamColor) {
 	kdWarning() << "Cannot change team color anymore!" << endl;
@@ -646,11 +646,11 @@ bool SpeciesTheme::setTeamColor(QRgb color)
  return true;
 }
 
-QValueList<QRgb> SpeciesTheme::defaultColors()
+QValueList<QColor> SpeciesTheme::defaultColors()
 {
- QValueList<QRgb> colors;
+ QValueList<QColor> colors;
  for (int i = 0; i < BOSON_MAX_PLAYERS; i++) {
-	colors.append(default_color[i]);
+	colors.append(QColor(default_color[i]));
  }
  return colors;
 }

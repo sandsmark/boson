@@ -33,18 +33,13 @@
 #include <klocale.h>
 #include <kdebug.h>
 
-#include <qwidgetstack.h>
-#include <qpushbutton.h>
 #include <qlayout.h>
 #include <qintdict.h>
-#include <qsignalmapper.h>
 #include <qpixmap.h>
 #include <qscrollview.h>
-#include <qlabel.h>
 #include <qcombobox.h>
 #include <qcheckbox.h>
 #include <qmap.h>
-#include <qgrid.h>
 
 #include "defines.h"
 

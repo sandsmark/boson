@@ -29,10 +29,6 @@
 
 #include <kdebug.h>
 
-#include <qrect.h>
-#include <qptrlist.h>
-
-
 class UnitBase::UnitBasePrivate
 {
 public:

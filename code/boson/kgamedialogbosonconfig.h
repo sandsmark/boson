@@ -38,7 +38,7 @@ signals:
 	void signalMapChanged(const QString& fileName);
 	void signalScenarioChanged(const QString& fileName);
 	void signalSpeciesChanged(const QString& species);
-	void signalTeamColorChanged(QRgb color);
+	void signalTeamColorChanged(const QColor& color);
 
 public slots:
 	void slotMapChanged(int index);

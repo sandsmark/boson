@@ -30,9 +30,6 @@
 #include <kstdgameaction.h>
 #include <kdebug.h>
 
-#include <qwmatrix.h>
-#include <qvbox.h>
-
 #include "top.moc"
 
 Top::Top() : TopBase()
