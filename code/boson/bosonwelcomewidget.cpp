@@ -25,10 +25,13 @@
 #include <klocale.h>
 #include <kstandarddirs.h>
 #include <kdebug.h>
+#include <kmessagebox.h>
 
 #include <qlabel.h>
 #include <qpushbutton.h>
 #include <qlayout.h>
+
+#include <stdlib.h>
 
 /*
  *  Constructs a BosonWelcomeWidget which is a child of 'parent', with the
@@ -38,11 +41,13 @@ BosonWelcomeWidget::BosonWelcomeWidget(QWidget* parent) : QWidget(parent)
 {
   mBosonWelcomeWidgetLayout = new QVBoxLayout( this, 11, 6, "BosonWelcomeWidgetLayout");
 
-  mMainLayout = new QVBoxLayout( 0, 0, 6, "mainlayout"); 
+  mMainLayout = new QVBoxLayout( 0, 0, 6, "mainlayout");
 
   QPixmap startupPix(locate("data", "boson/pics/startup.png"));
   if (startupPix.isNull()) {
-	 kdFatal() << "Unable to find startup pixmap - please install the data package!" << endl;
+	KMessageBox::error(this, i18n("You do not have Boson data files installed!\n"
+			"Please install data package of Boson and restart Boson."), i18n("Data files not found!"));
+	exit(1);
 	 return;
   }
   setErasePixmap(startupPix);

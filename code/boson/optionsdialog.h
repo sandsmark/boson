@@ -75,6 +75,7 @@ protected slots:
 	void slotRMBScrollingToggled(bool);
 	void slotMMBScrollingToggled(bool);
 	void slotCursorEdgeSensityChanged(int);
+	void slotSetDefaults();
 
 protected:
 	void initGeneralPage();
