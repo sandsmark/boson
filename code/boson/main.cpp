@@ -36,6 +36,7 @@ static KCmdLineOptions options[] =
     { "nosound", I18N_NOOP("Disable Sounds"), 0 },
     { "new", I18N_NOOP("Skip Welcome Widget and display the New Game screen"), 0 },
     { "editor", I18N_NOOP("Skip Welcome Widget and display the Start Editor screen"), 0 },
+    { "load", I18N_NOOP("Skip Welcome Widget and display the Load Game screen"), 0 },
     { "playfield <identifier>", I18N_NOOP("Playfield identifier for newgame/start editor widget"), 0 },
     { "computer <count>", I18N_NOOP("Add (currently dummy) computer player"), 0 },
     { "start", I18N_NOOP("Start the game"), 0},
@@ -83,6 +84,8 @@ int main(int argc, char **argv)
 	top->slotNewGame(args);
  } else if (args->isSet("editor")) {
 	top->slotStartEditor(args);
+ } else if (args->isSet("load")) {
+	top->slotLoadGame(args);
  }
  args->clear();
  return app.exec();

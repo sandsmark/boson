@@ -76,6 +76,7 @@ public slots:
 	void slotNewGame(KCmdLineArgs* args = 0);
 
 	void slotStartEditor(KCmdLineArgs* args = 0);
+	void slotLoadGame(KCmdLineArgs* args = 0);
 
 	/**
 	 * Starts a new game. Called when user clicks "Start game" button in
@@ -231,7 +232,6 @@ protected slots:
 	void slotLoadGame(const QString& fileName);
 	void slotSaveGame(const QString& fileName, const QString& description);
 
-	void slotLoadGame();
 	void slotSaveGame();
 
 	void slotGameStarted();
