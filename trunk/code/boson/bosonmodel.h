@@ -71,7 +71,7 @@ public:
 	 * This can be used for the construction animations. Remember to set the
 	 * correct display lists!
 	 **/
-	BoFrame(const BoFrame& frame, int firstMesh, int meshCount);
+	BoFrame(const BoFrame& frame, unsigned int firstMesh, unsigned int meshCount);
 	~BoFrame();
 
 	/**
@@ -80,7 +80,7 @@ public:
 	 **/
 	void allocMeshes(int meshes);
 
-	void setMesh(int index, BoMesh* mesh);
+	void setMesh(unsigned int index, BoMesh* mesh);
 
 	/**
 	 * To initialize the mesh you should call @ref setMesh before calling
@@ -109,7 +109,7 @@ public:
 	//*different* meshes! we can have several pointers two the same mesh,
 	//but they will have different matrices. e.g. we can have 4 wheels (-->
 	//the same mesh, but 4 different positions)
-	int meshCount() const { return mMeshCount; }
+	unsigned int meshCount() const { return mMeshCount; }
 
 	void renderFrame(const QColor* teamColor);
 
@@ -124,7 +124,7 @@ private:
 	float mDepthMultiplier;
 	float mRadius; // TODO
 
-	int mMeshCount;
+	unsigned int mMeshCount;
 	BoMatrix** mMatrices;
 	BoMesh** mMeshes;
 };

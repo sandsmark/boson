@@ -56,12 +56,88 @@
 BosonModelTextures* BosonModel::mModelTextures = 0;
 static KStaticDeleter<BosonModelTextures> sd;
 
+class BoMeshSorter
+{
+public:
+	class Mesh
+	{
+	public:
+		Mesh()
+		{
+			matrix = 0;
+			mesh = 0;
+		}
+		Mesh(const Mesh& m)
+		{
+			mesh = m.mesh;
+			matrix = m.matrix;
+		}
+		Mesh& operator=(const Mesh& m)
+		{
+			mesh = m.mesh;
+			matrix = m.matrix;
+			return *this;
+		}
+		BoMatrix* matrix;
+		BoMesh* mesh;
+	};
+
+	BoMeshSorter()
+	{
+	}
+	~BoMeshSorter()
+	{
+	}
+
+	static void sortByDepth(QValueList<Mesh>* meshes);
+};
+
+void BoMeshSorter::sortByDepth(QValueList<BoMeshSorter::Mesh>* meshes)
+{
+ BO_CHECK_NULL_RET(meshes);
+ if (meshes->count() == 0) {
+	boError() << k_funcinfo << "no meshes" << endl;
+	return;
+ }
+ if (meshes->count() == 1) {
+	return;
+ }
+ QValueList<BoMeshSorter::Mesh> list;
+
+ QValueList<BoMeshSorter::Mesh>::Iterator it;
+ for (it = meshes->begin(); it != meshes->end(); ++it) {
+	BoMeshSorter::Mesh mesh = *it;
+
+	// do some necessary calculations
+	mesh.mesh->calculateMaxMin();
+
+	float z = mesh.mesh->maxZ();
+	bool found = false;
+	QValueList<BoMeshSorter::Mesh>::Iterator it2;
+	for (it2 = list.begin(); it2 != list.end() && !found; ++it2) {
+		if (z >= (*it2).mesh->maxZ()) {
+			list.insert(it2, mesh);
+			found = true;
+		}
+	}
+	if (!found) {
+		list.append(mesh);
+	}
+ }
+
+ if (list.count() != meshes->count()) {
+	boError() << k_funcinfo << "invalid result! count=" << list.count() << " should be: " << meshes->count() << endl;
+	return;
+ }
+ *meshes = list;
+}
+
 BoFrame::BoFrame()
 {
  init();
 }
 
-BoFrame::BoFrame(const BoFrame& f, int firstMesh, int meshCount)
+BoFrame::BoFrame(const BoFrame& f, unsigned int firstMesh, unsigned int meshCount)
 {
  init();
  mDisplayList = f.mDisplayList;
@@ -71,10 +147,6 @@ BoFrame::BoFrame(const BoFrame& f, int firstMesh, int meshCount)
  if (meshCount == 0) {
 	boWarning() << k_funcinfo << "no mesh copied" << endl;
 	return;
- }
- if (firstMesh < 0) {
-	boError() << k_funcinfo << "first mesh: " << firstMesh << " < 0" << endl;
-	firstMesh = 0;
  }
  if (f.mMeshCount == 0 || !f.mMeshes || !f.mMatrices) {
 	boError() << k_funcinfo << "oops - can't copy from invalid mesh!" << endl;
@@ -89,7 +161,7 @@ BoFrame::BoFrame(const BoFrame& f, int firstMesh, int meshCount)
  }
  allocMeshes(meshCount);
  int pos = 0;
- for (int i = firstMesh; i < firstMesh + meshCount; i++) {
+ for (unsigned int i = firstMesh; i < firstMesh + meshCount; i++) {
 	mMeshes[pos] = f.mMeshes[i]; // copy the pointer only
 	mMatrices[pos]->loadMatrix(*f.mMatrices[i]);
 	pos++;
@@ -112,7 +184,7 @@ BoFrame::~BoFrame()
 	glDeleteLists(mDisplayList, 1);
  }
  if (mMatrices) {
-	for (int i = 0; i < mMeshCount; i++) {
+	for (unsigned int i = 0; i < mMeshCount; i++) {
 		delete mMatrices[i];
 	}
  }
@@ -143,9 +215,9 @@ void BoFrame::allocMeshes(int meshes)
  }
 }
 
-void BoFrame::setMesh(int index, BoMesh* mesh)
+void BoFrame::setMesh(unsigned int index, BoMesh* mesh)
 {
- if (index < 0 || index >= mMeshCount) {
+ if (index >= mMeshCount) {
 	boError() << k_funcinfo << "invalid mesh " << mesh << " , count=" << mMeshCount << endl;
 	return;
  }
@@ -162,7 +234,7 @@ BoMatrix* BoFrame::matrix(int index) const
 
 void BoFrame::renderFrame(const QColor* teamColor)
 {
- for (int i = 0; i < mMeshCount; i++) {
+ for (unsigned int i = 0; i < mMeshCount; i++) {
 	BoMatrix* m = mMatrices[i];
 	BoMesh* mesh = mMeshes[i];
 	if (!m) {
@@ -191,8 +263,8 @@ void BoFrame::mergeMeshes()
 {
 #ifdef AB_TEST
  QValueList<int> redundantMatrices;
- for (int i = 0; i < meshCount(); i++) {
-	for (int j = i + 1; j < meshCount(); j++) {
+ for (unsigned int i = 0; i < meshCount(); i++) {
+	for (unsigned int j = i + 1; j < meshCount(); j++) {
 		if (mMeshes[i]->textured() && !mMeshes[j]->textured()) {
 			continue;
 		}
@@ -217,40 +289,28 @@ void BoFrame::sortByDepth()
  // note that this function is not time critical, so you don't have to care
  // about speed of the algorithms (it is called once per model on startup only).
 
- QPtrList<BoMesh> meshes;
- QPtrList<BoMatrix> matrices;
- for (int i = 0; i < meshCount(); i++) {
-	BoMesh* mesh = mMeshes[i];
-	BoMatrix* matrix = mMatrices[i];
-
-	// do some necessary calculations
-	mesh->calculateMaxMin();
-
-	float z = mesh->maxZ();
-	bool found = false;
-	for (unsigned int j = 0; j < meshes.count() && !found; j++) {
-		if (z >= meshes.at(j)->maxZ()) {
-			meshes.insert(j, mesh);
-			matrices.insert(j, matrix);
-			found = true;
-		}
-	}
-	if (!found) {
-		meshes.append(mesh);
-		matrices.append(matrix);
-	}
+ QValueList<BoMeshSorter::Mesh> meshes;
+ for (unsigned int i = 0; i < meshCount(); i++) {
+	BoMeshSorter::Mesh mesh;
+	mesh.mesh = mMeshes[i];
+	mesh.matrix = mMatrices[i];
+	meshes.append(mesh);
  }
+ BoMeshSorter::sortByDepth(&meshes);
 
  // meshes is now sorted by maxZ.
- for (unsigned int i = 0; i < meshes.count(); i++) {
-	BoMesh* mesh = meshes.at(i);
-	BoMatrix* matrix = matrices.at(i);
+ QValueList<BoMeshSorter::Mesh>::Iterator it;
+ int i = 0;
+ for (it = meshes.begin(); it != meshes.end(); ++it) {
+	BoMesh* mesh = (*it).mesh;
+	BoMatrix* matrix = (*it).matrix;
 	if (!mesh || !matrix) {
 		boError() << k_funcinfo << "oops" << endl;
 		continue;
 	}
 	mMeshes[i] = mesh;
 	mMatrices[i] = matrix;
+	i++;
  }
 }
 
@@ -711,7 +771,7 @@ void BosonModel::computeBoundings(BoFrame* frame, BoHelper* helper) const
  BO_CHECK_NULL_RET(helper);
 
  BoVector3 v;
- for (int i = 0; i < frame->meshCount(); i++) {
+ for (unsigned int i = 0; i < frame->meshCount(); i++) {
 	BoMesh* mesh = frame->mesh(i);
 	BoMatrix* m = frame->matrix(i);
 	if (!mesh) {
@@ -751,7 +811,7 @@ void BosonModel::applyMasterScale()
 		scale = helper.scale(mWidth, mHeight);
 	}
 
-	for (int j = 0; j < f->meshCount(); j++) {
+	for (unsigned int j = 0; j < f->meshCount(); j++) {
 		BoMatrix* matrix = f->matrix(j);
 		BoMatrix m;
 		m.scale(scale,scale,scale);
