@@ -29,6 +29,7 @@ class UnitProperties;
 class BosonMap;
 class BosonStatistics;
 class ProductionPlugin;
+class QDomElement;
 
 /**
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
@@ -76,6 +77,10 @@ public:
 	const QColor& teamColor() const;
 
 	Unit* findUnit(unsigned long int unitId) const;
+
+	bool saveAsXML(QDomElement& element);
+	bool loadFromXML(const QDomElement& element);
+	bool loadUnitsFromXML(const QDomElement& element);
 
 	virtual bool load(QDataStream& stream);
 	bool loadUnits(QDataStream& stream); // must be done after the map was initialized
@@ -209,6 +214,10 @@ public slots:
 	 **/
 	void slotUnitPropertyChanged(KGamePropertyBase* prop);
 	void slotNetworkData(int msgid, const QByteArray& msg, Q_UINT32 sender, KPlayer*);
+
+protected:
+	void saveFogOfWar(QDomElement& root) const;
+	void loadFogOfWar(const QDomElement& root);
 
 private:
 	class PlayerPrivate;

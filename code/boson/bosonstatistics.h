@@ -21,8 +21,10 @@
 
 class UnitBase;
 class ProductionPlugin;
-class QDataStream;
+//class QDataStream;
 class Player;
+class QDomElement;
+class QString;
 
 /**
  * Whenever a unit shoots its weapon or whenever a new unit is produced we need
@@ -121,17 +123,19 @@ public:
 
 	static unsigned int winningPoints();
 
-	/** Load all statistics from QDataStream
+	/**
+	 * Load all statistics from @ref QDomElement
 	 * This is used for loading saved games
-	 * @param stream QDataStream from where statistics are read
+	 * @param root @ref QDomElement from where statistics are read
 	 **/
-	void load(QDataStream& stream);
+	void load(const QDomElement& root);
 
-	/** Save all statistics to QDataStream
+	/**
+	 * Save all statistics to @ref QDomElement
 	 * This is used for saving games
-	 * @param stream QDataStream where statistics are written to
+	 * @param root @ref QDomElement where statistics are written to
 	 **/
-	void save(QDataStream& stream);
+	void save(QDomElement& root) const;
 
 protected:
 	static float pointsPerRefinedMinerals();
@@ -149,6 +153,20 @@ protected:
 	 **/
 	static int pointsPerDestroyedOwnMobileUnit();
 	static int pointsPerDestroyedOwnFacility();
+
+
+	/**
+	 * Save @p value into @p root as an element with @p tagName
+	 **/
+	void saveULong(QDomElement& root, const QString& tagName, unsigned long int value) const;
+	void saveLong(QDomElement& root, const QString& tagName, long int value) const;
+
+	/**
+	 * Search in @p root for a tag with @p tagName and store its value into
+	 * @p value
+	 **/
+	void loadULong(const QDomElement& root , const QString& tagName, unsigned long int* value);
+	void loadLong(const QDomElement& root , const QString& tagName, long int* value);
 
 private:
 	unsigned long int mShots; // note: the unsigned is important here! long is about 2 billion, but that's really not much for shots!

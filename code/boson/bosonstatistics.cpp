@@ -21,8 +21,10 @@
 
 #include "unitbase.h"
 #include "player.h"
+#include "bodebug.h"
 
-#include <qdatastream.h>
+//#include <qdatastream.h>
+#include <qdom.h>
 
 BosonStatistics::BosonStatistics()
 {
@@ -203,69 +205,87 @@ unsigned int BosonStatistics::winningPoints()
  return 5000;
 }
 
-void BosonStatistics::load(QDataStream& stream)
+void BosonStatistics::saveULong(QDomElement& root, const QString& tagName, unsigned long int value) const
 {
- Q_UINT32 shots;
- Q_UINT32 minedMinerals;
- Q_UINT32 minedOil;
- Q_UINT32 refinedMinerals;
- Q_UINT32 refinedOil;
- Q_UINT32 producedMobUnits;
- Q_UINT32 producedFac;
- Q_UINT32 destroyedMobUnits;
- Q_UINT32 destroyedFac;
- Q_UINT32 destroyedOwnMobUnits;
- Q_UINT32 destroyedOwnFac;
- Q_UINT32 lostMobUnits;
- Q_UINT32 lostFac;
- Q_INT32 points;
-
- stream >> shots;
- stream >> minedMinerals;
- stream >> minedOil;
- stream >> refinedMinerals;
- stream >> refinedOil;
- stream >> producedMobUnits;
- stream >> producedFac;
- stream >> destroyedMobUnits;
- stream >> destroyedFac;
- stream >> destroyedOwnMobUnits;
- stream >> destroyedOwnFac;
- stream >> lostMobUnits;
- stream >> lostFac;
- stream >> points;
-
- mShots = shots;
- mMinedMinerals = minedMinerals;
- mMinedOil = minedOil;
- mRefinedMinerals = refinedMinerals;
- mRefinedOil = refinedOil;
- mProducedMobileUnits = producedMobUnits;
- mProducedFacilities = producedFac;
- mDestroyedMobileUnits = destroyedMobUnits;
- mDestroyedFacilities = destroyedFac;
- mDestroyedOwnMobileUnits = destroyedOwnMobUnits;
- mDestroyedOwnFacilities = destroyedOwnFac;
- mLostMobileUnits = lostMobUnits;
- mLostFacilities = lostFac;
- mPoints = points;
+ QDomDocument doc = root.ownerDocument();
+ QDomElement element = doc.createElement(tagName);
+ QDomText text = doc.createTextNode(QString::number(value));
+ element.appendChild(element);
+ root.appendChild(element);
 }
 
-void BosonStatistics::save(QDataStream& stream)
+void BosonStatistics::saveLong(QDomElement& root, const QString& tagName, long int value) const
 {
- stream << (Q_UINT32)mShots;
- stream << (Q_UINT32)mMinedMinerals;
- stream << (Q_UINT32)mMinedOil;
- stream << (Q_UINT32)mRefinedMinerals;
- stream << (Q_UINT32)mRefinedOil;
- stream << (Q_UINT32)mProducedMobileUnits;
- stream << (Q_UINT32)mProducedFacilities;
- stream << (Q_UINT32)mDestroyedMobileUnits;
- stream << (Q_UINT32)mDestroyedFacilities;
- stream << (Q_UINT32)mDestroyedOwnMobileUnits;
- stream << (Q_UINT32)mDestroyedOwnFacilities;
- stream << (Q_UINT32)mLostMobileUnits;
- stream << (Q_UINT32)mLostFacilities;
- stream << (Q_INT32)mPoints;
+ QDomDocument doc = root.ownerDocument();
+ QDomElement element = doc.createElement(tagName);
+ QDomText text = doc.createTextNode(QString::number(value));
+ element.appendChild(element);
+ root.appendChild(element);
+}
+
+void BosonStatistics::loadULong(const QDomElement& root, const QString& tagName, unsigned long int* value)
+{
+ QDomElement element = root.namedItem(tagName).toElement();
+ if (element.isNull()) {
+	boError() << k_funcinfo << "null element for tag: " << tagName << endl;
+	// do not touch value
+	return;
+ }
+ bool ok = false;
+ *value = element.text().toULong(&ok);
+ if (!ok) {
+	boWarning() << k_funcinfo << "Value for " << tagName << " is not a valid number" << endl;
+ }
+}
+
+void BosonStatistics::loadLong(const QDomElement& root, const QString& tagName, long int* value)
+{
+ QDomElement element = root.namedItem(tagName).toElement();
+ if (element.isNull()) {
+	boError() << k_funcinfo << "null element for tag: " << tagName << endl;
+	// do not touch value
+	return;
+ }
+ bool ok = false;
+ *value = element.text().toLong(&ok);
+ if (!ok) {
+	boWarning() << k_funcinfo << "Value for " << tagName << " is not a valid number" << endl;
+ }
+}
+
+void BosonStatistics::save(QDomElement& root) const
+{
+ saveULong(root, QString::fromLatin1("Shots"), mShots);
+ saveULong(root, QString::fromLatin1("MinedMinerals"), mMinedMinerals);
+ saveULong(root, QString::fromLatin1("MinedOil"), mMinedOil);
+ saveULong(root, QString::fromLatin1("RefinedMinerals"), mRefinedMinerals);
+ saveULong(root, QString::fromLatin1("RefinedOil"), mRefinedOil);
+ saveULong(root, QString::fromLatin1("ProducedMobileUnits"), mProducedMobileUnits);
+ saveULong(root, QString::fromLatin1("ProducedFacilities"), mProducedFacilities);
+ saveULong(root, QString::fromLatin1("DestroyedMobileUnits"), mDestroyedMobileUnits);
+ saveULong(root, QString::fromLatin1("DestroyedFacilities"), mDestroyedFacilities);
+ saveULong(root, QString::fromLatin1("DestroyedOwnMobileUnits"), mDestroyedOwnMobileUnits);
+ saveULong(root, QString::fromLatin1("DestroyedOwnFacilities"), mDestroyedOwnFacilities);
+ saveULong(root, QString::fromLatin1("LostMobileUnits"), mLostMobileUnits);
+ saveULong(root, QString::fromLatin1("LostFacilities"), mLostFacilities);
+ saveLong(root, QString::fromLatin1("Points"), mPoints);
+}
+
+void BosonStatistics::load(const QDomElement& root)
+{
+ loadULong(root, QString::fromLatin1("Shots"), &mShots);
+ loadULong(root, QString::fromLatin1("MinedMinerals"), &mMinedMinerals);
+ loadULong(root, QString::fromLatin1("MinedOil"), &mMinedOil);
+ loadULong(root, QString::fromLatin1("RefinedMinerals"), &mRefinedMinerals);
+ loadULong(root, QString::fromLatin1("RefinedOil"), &mRefinedOil);
+ loadULong(root, QString::fromLatin1("ProducedMobileUnits"), &mProducedMobileUnits);
+ loadULong(root, QString::fromLatin1("ProducedFacilities"), &mProducedFacilities);
+ loadULong(root, QString::fromLatin1("DestroyedMobileUnits"), &mDestroyedMobileUnits);
+ loadULong(root, QString::fromLatin1("DestroyedFacilities"), &mDestroyedFacilities);
+ loadULong(root, QString::fromLatin1("DestroyedOwnMobileUnits"), &mDestroyedOwnMobileUnits);
+ loadULong(root, QString::fromLatin1("DestroyedOwnFacilities"), &mDestroyedOwnFacilities);
+ loadULong(root, QString::fromLatin1("LostMobileUnits"), &mLostMobileUnits);
+ loadULong(root, QString::fromLatin1("LostFacilities"), &mLostFacilities);
+ loadLong(root, QString::fromLatin1("Points"), &mPoints);
 }
 
