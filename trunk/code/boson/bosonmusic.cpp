@@ -209,20 +209,6 @@ bool BosonMusic::isLoop() const
  return d->mLoop;
 }
 
-void BosonMusic::playSound(const QString& file) // obsolete
-{
- kdWarning() << k_funcinfo << "is obsolete" << endl;
-return;
- if (!sound()) {
-	return;
- }
- kdDebug() << k_funcinfo << file << endl;
-
- KPlayObjectFactory factory(server().server());
- KPlayObject* sound = factory.createPlayObject(file, true);
- sound->play();
-}
-
 void BosonMusic::playSound(const QString& species, int id)
 {
  if (boConfig->disableSound()) {
