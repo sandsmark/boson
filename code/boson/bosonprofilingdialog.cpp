@@ -1113,7 +1113,7 @@ void BosonProfilingDialog::resetEventsPage()
  QMap<int, BosonProfilingPrivate::TimesList>::Iterator it = pd->mTimes.begin(); // now *that* is an ugly line! ggg
  for (; it != pd->mTimes.end(); ++it) {
 	QListViewItemNumber* event = new QListViewItemNumber(d->mEvents);
-	event->setText(0, profilingName(it.key()));
+	event->setText(0, i18n("%1 (%2)").arg(profilingName(it.key())).arg(it.key()));
 	BosonProfilingPrivate::TimesList::Iterator timesIt = (*it).begin();
 	int i = 0;
 	long int sum = 0;
