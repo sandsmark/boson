@@ -81,6 +81,9 @@ void editorBigDisplay::actionClicked(QPoint mp, int state)
 void editorBigDisplay::object_put(QPoint p)
 {
 
+	facilityMsg_t	fix;
+	mobileMsg_t	mob;
+
 	p/= BO_TILE_SIZE;
 	p+= vtl->_pos();
 
@@ -90,7 +93,6 @@ void editorBigDisplay::object_put(QPoint p)
 			return;
 
 		case OT_FACILITY:
-			facilityMsg_t	fix;
 			fix.who 	= who;
 			fix.x		= p.x();
 			fix.y		= p.y();
@@ -100,7 +102,6 @@ void editorBigDisplay::object_put(QPoint p)
 			break;
 
 		case OT_UNIT:
-			mobileMsg_t	mob;
 			mob.who		= who;
 			mob.x		= p.x();
 			mob.y		= p.y();
