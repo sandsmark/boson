@@ -1076,6 +1076,9 @@ void BosonBigDisplayBase::renderPlacementPreview()
  glEnable(GL_BLEND);
  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
  glColor4ub(255, color, color, PLACEMENTPREVIEW_ALPHA);
+ // Disable depth buffer writes. If we'd write to depth buffer, screen-to-world
+ //  mapping functions wouldn't work correctly anymore.
+ glDepthMask(GL_FALSE);
 
  bool modelPreview = d->mPlacementPreview.isModelPreview();
  bool groundPreview = d->mPlacementPreview.isGroundPreview();
@@ -1130,6 +1133,7 @@ void BosonBigDisplayBase::renderPlacementPreview()
  glTranslatef(-x, y, -z);
  glColor4ub(255, 255, 255, 255);
  glDisable(GL_BLEND);
+ glDepthMask(GL_TRUE);
  // AB: see above. if GL_REPLACES ever becomes default we have to set it
  // here again.
 // glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
