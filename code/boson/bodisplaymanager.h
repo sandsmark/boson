@@ -96,9 +96,6 @@ public:
 	BosonBigDisplayBase* splitActiveDisplayVertical();
 	BosonBigDisplayBase* splitActiveDisplayHorizontal();
 
-	void paintResources();
-	void paintChatMessages();
-
 public slots:
 
 
