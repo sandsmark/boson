@@ -247,14 +247,6 @@ bool BosonSaveLoad::saveToFiles(QMap<QString, QByteArray>& files, Player* localP
 	return false;
  }
  BosonProfiler profiler(BosonProfiling::SaveGameToXML);
- if (d->mBoson->playerCount() < 1) {
-	boError() << k_funcinfo << "no players in game. cannot save" << endl;
-	return false;
- }
- if (d->mBoson->gameStatus() == KGame::Init) {
-	boError() << k_funcinfo << "Running game must not be in Init state" << endl;
-	return false;
- }
  if (!d->mPlayField) {
 	BO_NULL_ERROR(d->mPlayField);
 	return false;
@@ -465,6 +457,8 @@ QCString BosonSaveLoad::saveCanvasAsXML()
 	d->mCanvas->saveAsXML(root);
  } else {
 	boDebug() << k_funcinfo << "NULL canvas - saving nothing" << endl;
+	QDomElement handler = doc.createElement(QString::fromLatin1("DataHandler"));
+	root.appendChild(handler);
  }
 
  return doc.toCString();
@@ -530,6 +524,7 @@ bool BosonSaveLoad::loadNewGame(const QByteArray& playersXML, const QByteArray& 
  return true;
 }
 
+#if 0
 bool BosonSaveLoad::loadVersionFromXML(const QString& xml)
 {
  // AB: this takes a kgame.xml. maybe we should split that file up into
@@ -558,7 +553,9 @@ bool BosonSaveLoad::loadVersionFromXML(const QString& xml)
  }
  return true;
 }
+#endif
 
+#if 0
 bool BosonSaveLoad::loadKGameFromXML(const QString& xml)
 {
  boDebug() << k_funcinfo << endl;
@@ -588,10 +585,10 @@ bool BosonSaveLoad::loadKGameFromXML(const QString& xml)
  }
  return true;
 }
+#endif
 
 bool BosonSaveLoad::loadPlayersFromXML(const QString& playersXML)
 {
- // now load the players (not the units!)
  QDomDocument doc(QString::fromLatin1("Players"));
  if (!loadXMLDoc(&doc, playersXML)) {
 	addLoadError(SaveLoadError::LoadInvalidXML, i18n("Parsing error in players.xml"));
@@ -621,43 +618,6 @@ bool BosonSaveLoad::loadPlayersFromXML(const QString& playersXML)
 	return false;
  }
  Player* localPlayer = 0;
-#if 0
- // obsolete. we do that before already.
- boDebug(260) << k_funcinfo << "loading " << list.count() << " players" << endl;
- for (unsigned int i = 0; i < list.count(); i++) {
-	boDebug(260) << k_funcinfo << "creating player " << i << endl;
-	QDomElement player = list.item(i).toElement();
-	if (player.isNull()) {
-		boError(260) << k_funcinfo << "NULL player node" << endl;
-		continue;
-	}
-	bool ok = false;
-	unsigned int id = player.attribute(QString::fromLatin1("Id")).toUInt(&ok);
-	if (!ok) {
-		boError(260) << k_funcinfo << "Id tag of player " << i << " not a valid number" << endl;
-		addLoadError(SaveLoadError::LoadPlayersError, i18n("Id of player %1 not a valid number").arg(i));
-		continue;
-	}
-	if (d->mBoson->findPlayer(id)) {
-		addLoadError(SaveLoadError::LoadPlayersError, i18n("Player with Id %1 appears twice! Ignoring second player with this Id. File is broken."));
-		continue;
-	}
-	Player* p = (Player*)d->mBoson->createPlayer(0, 0, false); // we ignore all params anyway.
-	if (id == localId) {
-		localPlayer = p;
-	}
-//	p->loadFromXML(player);
-	systemAddPlayer((KPlayer*)p);
-
- }
-#endif
- for (unsigned int i = 0; i < list.count(); i++) {
-	unsigned int id = list.item(i).toElement().attribute(QString::fromLatin1("Id")).toUInt(&ok);
-	if (!ok) {
-		continue;
-	}
-	boDebug() << "Id in xml file: " << id << endl;
- }
  for (unsigned int i = 0; i < d->mBoson->playerCount(); i++) {
 	Player* p = (Player*)d->mBoson->playerList()->at(i);
 	QDomElement player;
@@ -681,34 +641,6 @@ bool BosonSaveLoad::loadPlayersFromXML(const QString& playersXML)
 		localPlayer = p;
 	}
 	p->loadFromXML(player);
- }
- for (unsigned int i = 0; i < list.count(); i++) {
-	QDomElement player = list.item(i).toElement();
-	if (player.isNull()) {
-		boError(260) << k_funcinfo << "NULL player node" << endl;
-		continue;
-	}
-	bool ok = false;
-	unsigned int id = player.attribute(QString::fromLatin1("Id")).toUInt(&ok);
-	if (!ok) {
-		boError(260) << k_funcinfo << "Id tag of player " << i << " not a valid number" << endl;
-		addLoadError(SaveLoadError::LoadPlayersError, i18n("Id of player %1 not a valid number").arg(i));
-		continue;
-	}
-	Player* p = (Player*)d->mBoson->findPlayer(id);
-	if (!p) {
-		// AB: probably this is totally valid - less players in game
-		// than maxplayers
-		boError() << k_funcinfo << "player with ID " << id << " not found" << endl;
-		continue;
-	}
-	if (id == localId) {
-		localPlayer = p;
-	}
-	if (!p->loadFromXML(player)) {
-		boError(260) << k_funcinfo << "could not load player " << p->id() << endl;
-		return false;
-	}
  }
  if (!localPlayer) {
 	boWarning(260) << k_funcinfo << "local player NOT found" << endl;
