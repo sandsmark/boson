@@ -7,6 +7,3 @@ libbosonscript_la_LIBADD = $(LIBPYTHON)
 libbosonscript_la_SOURCES = bosonscript.cpp pythonscript.cpp bosonscriptinterface.cpp
 
 METASOURCES = AUTO
-
-scriptsdir = $(kde_datadir)/boson/scripts
-scripts_DATA = boson-script.py localplayer-script.py utils.py conditions1.py
