@@ -116,23 +116,23 @@ static QString getDescrFromNum(unsigned int _num)
     }
     while (ch.isSpace()) {
       if (!(i < len))
-	continue;
+        continue;
       ++i;
       ch = data[i];
     }
     if (ch.isNumber()) {
-	int numStart = i ;
-	while (ch.isNumber())  {
-	  if (!(i < len))
-	    continue;
-	  ++i;
-	  ch = data[i];
-	}
-	number = data.mid(numStart,i).toULong(&longOK);
+      int numStart = i ;
+      while (ch.isNumber())  {
+        if (!(i < len))
+          continue;
+        ++i;
+        ch = data[i];
+      }
+      number = data.mid(numStart,i).toULong(&longOK);
     }
     while (ch.isSpace()) {
       if (!(i < len))
-	continue;
+        continue;
       ++i;
       ch = data[i];
     }
@@ -154,9 +154,9 @@ static QString getDescrFromNum(unsigned int _num)
 
 
 struct boDebugPrivate {
-  boDebugPrivate() : 
-  	oldarea(), config(0) { }
-  	
+  boDebugPrivate() :
+	oldarea(), config(0) { }
+
   ~boDebugPrivate() { delete config; }
 
   QString aAreaName;
@@ -200,34 +200,34 @@ static void kDebugBackend( unsigned short nLevel, unsigned int nArea, const char
   int nPriority = 0;
   QString aCaption;
 
-    /* Determine output */
+  /* Determine output */
 
-    QString key;
-    switch( nLevel )
-      {
-      case BoDebug::KDEBUG_INFO:
-	key = "InfoOutput";
-	aCaption = "Info";
-	nPriority = LOG_INFO;
-	break;
-      case BoDebug::KDEBUG_WARN:
-	key = "WarnOutput";
-	aCaption = "Warning";
-	nPriority = LOG_WARNING;
-	break;
-      case BoDebug::KDEBUG_FATAL:
-	key = "FatalOutput";
-	aCaption = "Fatal Error";
-	nPriority = LOG_CRIT;
-	break;
-      case BoDebug::KDEBUG_ERROR:
-      default:
-	/* Programmer error, use "Error" as default */
-	key = "ErrorOutput";
-	aCaption = "Error";
-	nPriority = LOG_ERR;
-	break;
-      }
+  QString key;
+  switch( nLevel )
+  {
+    case BoDebug::KDEBUG_INFO:
+      key = "InfoOutput";
+      aCaption = "Info";
+      nPriority = LOG_INFO;
+      break;
+    case BoDebug::KDEBUG_WARN:
+      key = "WarnOutput";
+      aCaption = "Warning";
+      nPriority = LOG_WARNING;
+      break;
+    case BoDebug::KDEBUG_FATAL:
+      key = "FatalOutput";
+      aCaption = "Fatal Error";
+      nPriority = LOG_CRIT;
+      break;
+    case BoDebug::KDEBUG_ERROR:
+    default:
+      /* Programmer error, use "Error" as default */
+      key = "ErrorOutput";
+      aCaption = "Error";
+      nPriority = LOG_ERR;
+      break;
+  }
 
   short nOutput = boDebug_data->config ? boDebug_data->config->readNumEntry(key, 2) : 2;
 
@@ -238,93 +238,95 @@ static void kDebugBackend( unsigned short nLevel, unsigned int nArea, const char
 
   // Output
   switch( nOutput )
-        {
-        case 0: // File
-          {
-                QString aKey;
-                switch( nLevel )
-                {
-                    case BoDebug::KDEBUG_INFO:
-                        aKey = "InfoFilename";
-                        break;
-                    case BoDebug::KDEBUG_WARN:
-                        aKey = "WarnFilename";
-                        break;
-                    case BoDebug::KDEBUG_FATAL:
-                        aKey = "FatalFilename";
-                        break;
-                    case BoDebug::KDEBUG_ERROR:
-                    default:
-                        aKey = "ErrorFilename";
-                        break;
-                }
-                QString aOutputFileName = boDebug_data->config->readEntry(aKey, "bodebug.dbg");
+  {
+    case 0: // File
+    {
+      QString aKey;
+      switch( nLevel )
+      {
+        case BoDebug::KDEBUG_INFO:
+          aKey = "InfoFilename";
+          break;
+        case BoDebug::KDEBUG_WARN:
+          aKey = "WarnFilename";
+          break;
+        case BoDebug::KDEBUG_FATAL:
+          aKey = "FatalFilename";
+          break;
+        case BoDebug::KDEBUG_ERROR:
+        default:
+          aKey = "ErrorFilename";
+          break;
+      }
+      QString aOutputFileName = boDebug_data->config->readEntry(aKey, "bodebug.dbg");
 
-                const int BUFSIZE = 4096;
-                char buf[BUFSIZE] = "";
-		int nSize;
-                if ( !boDebug_data->aAreaName.isEmpty() )
-		    nSize = snprintf( buf, BUFSIZE, "%s: %s", boDebug_data->aAreaName.ascii(), data);
-		else
-		    nSize = snprintf( buf, BUFSIZE, "%s", data);
+      const int BUFSIZE = 4096;
+      char buf[BUFSIZE] = "";
+      int nSize;
+      if ( !boDebug_data->aAreaName.isEmpty() )
+        nSize = snprintf( buf, BUFSIZE, "%s: %s", boDebug_data->aAreaName.ascii(), data);
+      else
+        nSize = snprintf( buf, BUFSIZE, "%s", data);
 
-                QFile aOutputFile( aOutputFileName );
-                aOutputFile.open( IO_WriteOnly | IO_Append );
-                if ( ( nSize == -1 ) || ( nSize >= BUFSIZE ) )
-                    aOutputFile.writeBlock( buf, BUFSIZE-1 );
-                else
-                    aOutputFile.writeBlock( buf, nSize );
-                aOutputFile.close();
-                break;
-          }
-        case 1: // Message Box
-          {
-                // Since we are in kdecore here, we cannot use KMsgBox and use
-                // QMessageBox instead
-	      if ( !boDebug_data->aAreaName.isEmpty() ) aCaption += QString("(")+boDebug_data->aAreaName+")";
-	      QMessageBox::warning( 0L, aCaption, data, i18n("&OK") );
-	      break;
-          }
-        case 2: // Shell
-          {
-              FILE *output;
-              /* we used to use stdout for debug
-              if (nPriority == LOG_INFO)
-                  output = stderr;
-              else */
-                  output = stderr;
-              // Uncomment this to get the pid of the app in the output (useful for e.g. kioslaves)
-	      // if ( !boDebug_data->aAreaName.isEmpty() ) fprintf( output, "%d %s: ", (int)getpid(), boDebug_data->aAreaName.ascii() );
-	      if ( !boDebug_data->aAreaName.isEmpty() ) fprintf( output, "%s: ", boDebug_data->aAreaName.ascii() );
-	      fputs(  data, output);
-	      break;
-          }
-        case 3: // syslog
-          {
-	      syslog( nPriority, data);
-	      break;
-          }
-        case 4: // nothing
-          {
-	      break;
-          }
-        case 5: // emit signal
-          {
-	      // we won't emit anything unless BoDebug::mDebug is non-NULL.
-	      // the user will need to call BoDebug::self() in order to connect
-	      // any signal to BoDebug. So if it is NULL, the signal won't be
-	      // used anyway.
-	      if (BoDebug::selfNonCreate()) {
-	        emit BoDebug::self()->emitSignal(boDebug_data->aAreaName, data, (BoDebug::DebugLevels)nLevel);
-	      }
-	      break;
-          }
-        }
+      QFile aOutputFile( aOutputFileName );
+      aOutputFile.open( IO_WriteOnly | IO_Append );
+      if ( ( nSize == -1 ) || ( nSize >= BUFSIZE ) )
+        aOutputFile.writeBlock( buf, BUFSIZE-1 );
+      else
+        aOutputFile.writeBlock( buf, nSize );
+      aOutputFile.close();
+      break;
+    }
+    case 1: // Message Box
+    {
+      // Since we are in kdecore here, we cannot use KMsgBox and use
+      // QMessageBox instead
+      if ( !boDebug_data->aAreaName.isEmpty() )
+        aCaption += QString("(") + boDebug_data->aAreaName + ")";
+      QMessageBox::warning( 0L, aCaption, data, i18n("&OK") );
+      break;
+    }
+    case 2: // Shell
+    {
+      FILE *output;
+      /* we used to use stdout for debug
+      if (nPriority == LOG_INFO)
+        output = stderr;
+      else */
+      output = stderr;
+      // Uncomment this to get the pid of the app in the output (useful for e.g. kioslaves)
+      // if ( !boDebug_data->aAreaName.isEmpty() ) fprintf( output, "%d %s: ", (int)getpid(), boDebug_data->aAreaName.ascii() );
+      if ( !boDebug_data->aAreaName.isEmpty() )
+        fprintf( output, "%s: ", boDebug_data->aAreaName.ascii() );
+      fputs(  data, output);
+      break;
+    }
+    case 3: // syslog
+    {
+      syslog( nPriority, data);
+      break;
+    }
+    case 4: // nothing
+    {
+      break;
+    }
+    case 5: // emit signal
+    {
+      // we won't emit anything unless BoDebug::mDebug is non-NULL.
+      // the user will need to call BoDebug::self() in order to connect
+      // any signal to BoDebug. So if it is NULL, the signal won't be
+      // used anyway.
+      if (BoDebug::selfNonCreate()) {
+        emit BoDebug::self()->emitSignal(boDebug_data->aAreaName, data, (BoDebug::DebugLevels)nLevel);
+      }
+      break;
+    }
+  }
 
   // check if we should abort
   if( ( nLevel == BoDebug::KDEBUG_FATAL )
       && ( !boDebug_data->config || boDebug_data->config->readNumEntry( "AbortFatal", 1 ) ) )
-        abort();
+    abort();
 }
 
 bodbgstream &perror( bodbgstream &s) { return s << QString::fromLocal8Bit(strerror(errno)); }
@@ -338,29 +340,31 @@ bodbgstream boWarning(bool cond, int area) { if (cond) return bodbgstream("WARNI
 bodbgstream boFatal(int area) { return bodbgstream("FATAL: ", area, BoDebug::KDEBUG_FATAL); }
 bodbgstream boFatal(bool cond, int area) { if (cond) return bodbgstream("FATAL: ", area, BoDebug::KDEBUG_FATAL); else return bodbgstream(0,0,false); }
 
-void bodbgstream::flush() {
-    if (output.isEmpty() || !print)
-	return;
-    kDebugBackend( level, area, output.local8Bit().data() );
-    output = QString::null;
+void bodbgstream::flush()
+{
+  if (output.isEmpty() || !print)
+    return;
+  kDebugBackend( level, area, output.local8Bit().data() );
+  output = QString::null;
 }
 
 bodbgstream &bodbgstream::form(const char *format, ...)
 {
-    char buf[4096];
-    va_list arguments;
-    va_start( arguments, format );
-    vsprintf( buf, format, arguments );
-    va_end(arguments);
-    *this << buf;
-    return *this;
+  char buf[4096];
+  va_list arguments;
+  va_start( arguments, format );
+  vsprintf( buf, format, arguments );
+  va_end(arguments);
+  *this << buf;
+  return *this;
 }
 
-bodbgstream::~bodbgstream() {
-    if (!output.isEmpty()) {
-	fprintf(stderr, "ASSERT: debug output not ended with \\n\n");
-	*this << "\n";
-    }
+bodbgstream::~bodbgstream()
+{
+  if (!output.isEmpty()) {
+    fprintf(stderr, "ASSERT: debug output not ended with \\n\n");
+    *this << "\n";
+  }
 }
 
 bodbgstream& bodbgstream::operator << (QWidget* widget)
@@ -368,68 +372,70 @@ bodbgstream& bodbgstream::operator << (QWidget* widget)
   QString string, temp;
   // -----
   if(widget==0)
+  {
+    string=(QString)"[Null pointer]";
+  }
+  else
+  {
+    temp.setNum((ulong)widget, 16);
+    string=(QString)"["+widget->className()+" pointer "
+        + "(0x" + temp + ")";
+    if(widget->name(0)==0)
     {
-      string=(QString)"[Null pointer]";
+      string += " to unnamed widget, ";
     } else {
-      temp.setNum((ulong)widget, 16);
-      string=(QString)"["+widget->className()+" pointer "
-	+ "(0x" + temp + ")";
-      if(widget->name(0)==0)
-	{
-	  string += " to unnamed widget, ";
-	} else {
-	  string += (QString)" to widget " + widget->name() + ", ";
-	}
-      string += "geometry="
-	+ QString().setNum(widget->width())
-	+ "x"+QString().setNum(widget->height())
-	+ "+"+QString().setNum(widget->x())
-	+ "+"+QString().setNum(widget->y())
-	+ "]";
+      string += (QString)" to widget " + widget->name() + ", ";
     }
+    string += "geometry="
+        + QString().setNum(widget->width())
+        + "x"+QString().setNum(widget->height())
+        + "+"+QString().setNum(widget->x())
+        + "+"+QString().setNum(widget->y())
+        + "]";
+  }
   if (!print)
-    {
-      return *this;
-    }
+  {
+    return *this;
+  }
   output += string;
   if (output.at(output.length() -1 ) == '\n')
-    {
-      flush();
-    }
+  {
+    flush();
+  }
   return *this;
 }
 
 QString boBacktrace(int levels)
 {
-    QString s;
+  QString s;
 #ifdef HAVE_BACKTRACE
-    void* trace[256];
-    int n = backtrace(trace, 256);
-    char** strings = backtrace_symbols (trace, n);
+  void* trace[256];
+  int n = backtrace(trace, 256);
+  char** strings = backtrace_symbols (trace, n);
 
-    if ( levels != -1 )
-        n = QMIN( n, levels );
-    s = "[\n";
+  if ( levels != -1 )
+    n = QMIN( n, levels );
+  s = "[\n";
 
-    for (int i = 0; i < n; ++i)
-        s += QString::number(i) +
-             QString::fromLatin1(": ") +
-             QString::fromLatin1(strings[i]) + QString::fromLatin1("\n");
-    s += "]\n";
-    free (strings);
+  for (int i = 0; i < n; ++i)
+    s += QString::number(i) +
+        QString::fromLatin1(": ") +
+        QString::fromLatin1(strings[i]) + QString::fromLatin1("\n");
+  s += "]\n";
+  free (strings);
 #endif
-    return s;
+  return s;
 }
 
 QString boBacktrace()
 {
-    return boBacktrace(-1 /*all*/);
+  return boBacktrace(-1 /*all*/);
 }
 
 void boClearDebugConfig()
 {
-    delete boDebug_data->config;
-    boDebug_data->config = 0;
+  delete boDebug_data->config;
+  boDebug_data->config = 0;
 }
 
 
@@ -446,7 +452,8 @@ BoDebug::~BoDebug()
 
 BoDebug* BoDebug::self()
 {
- if (!mDebug) {
+ if (!mDebug)
+ {
    mDebug = new BoDebug();
    sd.setObject(mDebug);
  }
@@ -462,3 +469,7 @@ BoDebug* BoDebug::selfNonCreate()
 #ifdef NDEBUG
 #define boDebug kndDebug
 #endif
+
+/*
+ * vim: et sw=2
+ */
