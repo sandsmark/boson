@@ -75,7 +75,8 @@ public:
 	 **/
 	void addProduction(int unitType);
 
-	QValueList<int> productionList() const;
+	QValueList<int> productionList() const { return mProductions; }
+	bool contains(int unitType) { return productionList().contains(unitType); }
 
 	/**
 	 * @return The percentage of the production progress. 0 means the

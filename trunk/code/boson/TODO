@@ -91,6 +91,7 @@ General TODOs
 - BsoonPath::PathNode needs to be public to compile in gcc 2.96
   Why? It is used internally only... Failing e.g. here:
   inline bool operator<(const BosonPath::PathNode& a, const BosonPath::PathNode& b)
+- pixmaps on startup widgets should be centered horizontally
 
 Data TODOs
 - sound for minimap activated/deactivated
