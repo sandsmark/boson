@@ -51,6 +51,11 @@ BosonStarting::~BosonStarting()
  delete mNewPlayField;
 }
 
+void BosonStarting::setNewGameData(const QByteArray& data)
+{
+ mNewGameData = data;
+}
+
 void BosonStarting::setEditorMap(const QByteArray& buffer)
 {
  boDebug() << k_funcinfo << endl;
@@ -94,6 +99,7 @@ void BosonStarting::startNewGame()
  emit signalLoadingReset();
  emit signalLoadingSetAdmin(boGame->isAdmin());
  emit signalLoadingPlayersCount(boGame->playerList()->count());
+#if 0
  // Transmit playfield over the net if we're admin
  if (boGame->isAdmin()) {
 	emit signalLoadingType(BosonLoadingWidget::AdminLoadMap);
@@ -144,6 +150,7 @@ void BosonStarting::startNewGame()
 	// send the loaded map via network
 	boGame->sendMessage(stream, BosonMessage::InitMap);
  }
+#endif
  boDebug() << k_funcinfo << endl;
  if (!mPlayField) {
 	boError() << k_funcinfo << "NULL playfield" << endl;
@@ -157,7 +164,16 @@ void BosonStarting::startNewGame()
  // before actually starting the game we need to wait for the map (which is sent
  // by the ADMIN)
  emit signalLoadingType(BosonLoadingWidget::ReceiveMap);
- boDebug() << k_funcinfo << "done" << endl;
+
+ QDataStream stream(mNewGameData, IO_ReadOnly);
+ if (!mPlayField->loadPlayFieldFromAdmin(stream)) {
+	boError() << k_funcinfo << "loading playfield from network stream failed" << endl;
+	emit signalStartingFailed();
+	return;
+ }
+ boDebug() << k_funcinfo << "playfield loaded" << endl;
+
+ slotReceiveMap(QByteArray());
 }
 
 bool BosonStarting::loadGame(const QString& loadingFileName)
@@ -226,6 +242,7 @@ void BosonStarting::slotReceiveMap(const QByteArray& buffer)
 	return;
  }
 
+#if 0
  emit signalLoadingType(BosonLoadingWidget::LoadMap);
  QDataStream stream(buffer, IO_ReadOnly);
  if (!mPlayField->loadPlayFieldFromRemote(stream)) {
@@ -233,6 +250,7 @@ void BosonStarting::slotReceiveMap(const QByteArray& buffer)
 	emit signalStartingFailed();
 	return;
  }
+#endif
  boGame->setPlayField(mPlayField);
  emit signalAssignMap(); // for the BosonWidgetBase
 
@@ -349,7 +367,7 @@ void BosonStarting::slotLoadGameData3() // FIXME rename!
 	// these will emit the signals using a QTimer::singleShot(), i.e. return
 	// immediately
 	boGame->initFogOfWar(this);
-	boGame->startScenario(this);
+	boGame->startScenario(this); // AB: signalStartScenario() seems not to be connected to any slot!
  } else if (mLoading) {
 	// If we're loading saved game, init fog of war for local player
 #warning LOADING code: FIXME
@@ -363,11 +381,7 @@ void BosonStarting::slotLoadGameData3() // FIXME rename!
 
  boDebug() << k_funcinfo << "done" << endl;
  if (!mLoading) {
-	if (boGame->isAdmin()) {
-		// WARNING: this sends messages!
-		// -> Boson::sendAddUnits()
-		startScenario();
-	}
+	startScenario();
 
 	// load games will do that themselves.
 	startGame();
@@ -445,23 +459,16 @@ void BosonStarting::loadUnitDatas(Player* p)
 
 void BosonStarting::startScenario()
 {
- if (!boGame->isAdmin()) {
-	boError() << k_funcinfo << "not admin" << endl;
-	return;
- }
  if (mLoading) {
 	boError() << k_funcinfo << "scenario doesn't need to be started on loading" << endl;
 	return;
  }
- BosonPlayField* field = boData->playField(mPlayFieldId);
- // TODO: on error we should abort starting the game, i.e. 
- // return to the welcome widget (and displaying a msg box) or so
- if (!field) {
-	boError() << k_funcinfo << "NULL playfield" << endl;
- } else if (!field->scenario()) {
-	boError() << k_funcinfo << "NULL scenario" << endl;
- } else {
-	field->scenario()->startScenario(boGame);
+ BO_CHECK_NULL_RET(boGame);
+ BO_CHECK_NULL_RET(mPlayField);
+ BO_CHECK_NULL_RET(mPlayField->scenario());
+ if (!mPlayField->scenario()->startScenario(boGame)) {
+	boError() << k_funcinfo << "error starting scenario" << endl;
+	return;
  }
 }
 
@@ -480,4 +487,5 @@ void BosonStarting::startGame()
  }
  boGame->sendMessage(0, BosonMessage::IdGameIsStarted);
 }
+
 

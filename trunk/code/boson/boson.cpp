@@ -37,6 +37,7 @@
 #include "bosonweapon.h"
 #include "bosonsaveload.h"
 #include "bosonconfig.h"
+#include "bosonstarting.h"
 #include "startupwidgets/bosonloadingwidget.h"
 
 #include <klocale.h>
@@ -502,6 +503,8 @@ class Boson::BosonPrivate
 public:
 	BosonPrivate()
 	{
+		mStartingObject = 0;
+
 		mGameTimer = 0;
 		mCanvas = 0;
 		mPlayField = 0;
@@ -512,6 +515,7 @@ public:
 		mAdvance = 0;
 		mMessageDelayer = 0;
 	}
+	BosonStarting* mStartingObject;
 
 	QTimer* mGameTimer;
 
@@ -635,6 +639,12 @@ void Boson::setLocalPlayer(Player* p)
  d->mPlayer = p;
 }
 
+void Boson::setStartingObject(BosonStarting* s)
+{
+ // AB: a NULL starting object unsets the object. it is totally valid
+ d->mStartingObject=  s;
+}
+
 void Boson::quitGame()
 {
  boDebug() << k_funcinfo << endl;
@@ -648,6 +658,8 @@ void Boson::quitGame()
 
  // remove all players from game
  removeAllPlayers();
+
+ setStartingObject(0);
  boDebug() << k_funcinfo << " done" <<  endl;
 }
 
@@ -1431,64 +1443,6 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 {
  QDataStream stream(buffer, IO_ReadOnly);
  switch (msgid) {
-	case BosonMessage::AddUnit:
-	{
-		Q_UINT32 owner;
-		Q_UINT32 unitType;
-		Q_INT32 x;
-		Q_INT32 y;
-
-		stream >> owner;
-		stream >> unitType;
-		stream >> x;
-		stream >> y;
-		
-		KPlayer* p = 0;
-		if (owner >= 1024) { // a KPlayer ID
-			p = findPlayer(owner);
-		} else {
-			p = playerList()->at(owner);
-		}
-		if (!p) {
-			boError() << k_lineinfo << "Cannot find player " << owner << endl;
-			break;
-		}
-		addUnit(unitType, (Player*)p, x, y);
-		break;
-	}
-	case BosonMessage::AddUnitsXML:
-	{
-		Q_UINT32 owner;
-		stream >> owner;
-		boDebug() << k_lineinfo << "AddUnitsXML for " << owner << endl;
-
-		QString xmlDocument;
-		stream >> xmlDocument;
-
-		KPlayer* p = 0;
-		if (owner >= 1024) { // a KPlayer ID
-			p = findPlayer(owner);
-		} else {
-			p = playerList()->at(owner);
-		}
-		if (!p) {
-			boError() << k_lineinfo << "Cannot find player " << owner << endl;
-			break;
-		}
-
-		boProfiling->start(BosonProfiling::AddUnitsXML);
-		QDomDocument doc;
-		loadXMLDoc(&doc, xmlDocument);
-		QDomElement root = doc.documentElement();
-		QDomNodeList list = root.elementsByTagName("Unit");
-		for (unsigned int i = 0; i < list.count(); i++) {
-			QDomElement e = list.item(i).toElement();
-			addUnit(e, (Player*)p);
-		}
-		boProfiling->stop(BosonProfiling::AddUnitsXML);
-		boDebug() << k_lineinfo << "AddUnitsXML done" << endl;
-		break;
-	}
 	case BosonMessage::AdvanceN:
 	{
 		d->mAdvance->receiveAdvanceMessage(gameSpeed());
@@ -1502,27 +1456,33 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 	case BosonMessage::InitMap:
 		emit signalInitMap(buffer);
 		break;
-	case BosonMessage::IdInitFogOfWar:
-		if (isRunning()) {
-			return;
-		}
-		emit signalInitFogOfWar();
-		break;
-	case BosonMessage::IdStartScenario:
-		if (isRunning()) {
-			return;
-		}
-		emit signalStartScenario();
-		break;
 	case BosonMessage::IdNewGame:
 	{
+		if (isRunning()) {
+			boError() << k_funcinfo << "received IdNewGame, but game is already running" << endl;
+			return;
+		}
+		if (!d->mStartingObject) {
+			boError() << k_funcinfo << "received IdNewGame, but starting a game is not allowed!" << endl;
+			return;
+		}
 		setGameMode(true);
+		d->mStartingObject->setNewGameData(buffer);
 		QTimer::singleShot(0, this, SIGNAL(signalStartNewGame()));
 		break;
 	}
 	case BosonMessage::IdNewEditor:
 	{
+		if (isRunning()) {
+			boError() << k_funcinfo << "received IdNewEditor, but game is already running" << endl;
+			return;
+		}
+		if (!d->mStartingObject) {
+			boError() << k_funcinfo << "received IdNewEditor, but starting a editor/game is not allowed!" << endl;
+			return;
+		}
 		setGameMode(false);
+		d->mStartingObject->setNewGameData(buffer);
 		QTimer::singleShot(0, this, SIGNAL(signalStartNewGame()));
 		break;
 	}
@@ -1828,47 +1788,26 @@ void Boson::slotPropertyChanged(KGamePropertyBase* p)
  }
 }
 
-void Boson::slotSendAddUnit(unsigned long int unitType, int x, int y, Player* owner)
-{ // used by the editor directly
- if (!isServer()) {
-	return;
- }
- if (!owner) {
-	boWarning() << k_funcinfo << "NULL owner! using first player" << endl;
-	owner = (Player*)playerList()->at(0);
- }
- if (!owner) { // no player here
-	boError() << k_funcinfo << "NULL owner" << endl;
-	return;
- }
-
- QByteArray buffer;
- QDataStream stream(buffer, IO_WriteOnly);
- stream << (Q_UINT32)owner->id();
- stream << (Q_UINT32)unitType;
- stream << (Q_INT32)x;
- stream << (Q_INT32)y;
- sendMessage(buffer, BosonMessage::AddUnit);
-}
-
-void Boson::sendAddUnits(const QString& xmlDocument, Player* owner)
+void Boson::addInitialUnits(const QString& xmlDocument, Player* owner)
 {
- if (!isServer()) {
-	return;
- }
  if (!owner) {
-	boWarning() << k_funcinfo << "NULL owner! using first player" << endl;
-	owner = (Player*)playerList()->at(0);
- }
- if (!owner) { // no player here
 	boError() << k_funcinfo << "NULL owner" << endl;
 	return;
  }
- QByteArray buffer;
- QDataStream stream(buffer, IO_WriteOnly);
- stream << (Q_UINT32)owner->id();
- stream << xmlDocument;
- sendMessage(buffer, BosonMessage::AddUnitsXML);
+ BosonProfiler profiler(BosonProfiling::AddUnitsXML);
+ boDebug() << k_lineinfo << endl;
+ QDomDocument doc;
+ if (!loadXMLDoc(&doc, xmlDocument)) {
+	boError() << k_funcinfo << "unable to load xml document for player " << owner->id() << endl;
+	return;
+ }
+ QDomElement root = doc.documentElement();
+ QDomNodeList list = root.elementsByTagName("Unit");
+ for (unsigned int i = 0; i < list.count(); i++) {
+	QDomElement e = list.item(i).toElement();
+	addUnit(e, owner);
+ }
+ boDebug() << k_lineinfo << "done" << endl;
 }
 
 void Boson::slotReplacePlayerIO(KPlayer* player, bool* remove)
@@ -2170,6 +2109,7 @@ bool Boson::savegame(QDataStream& stream, bool network, bool saveplayers)
 
  // Save end cookie
  stream << (Q_UINT32)BOSON_SAVEGAME_END_COOKIE;
+
 
  boDebug() << k_funcinfo << " done" << endl;
  return true;

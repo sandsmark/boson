@@ -393,8 +393,31 @@ void BosonNewGameWidget::slotNetStart()
 			}
 		}
 	}
+	if (!mSelectMap->currentItem()) {
+		KMessageBox::sorry(this, i18n("You have to select a map first"));
+		return;
+	}
+
+	BosonPlayField* field = 0;
+	if (!d->mItem2Map.contains(mSelectMap->currentItem())) {
+		KMessageBox::sorry(this, i18n("The selected item seems not to be a valid map. Please select a different map.\n(if you believe you have selected a valid map, you might have encountered a bug)"));
+		return;
+	}
+	QString identifier = d->mItem2Map[mSelectMap->currentItem()];
+	field = boData->playField(identifier);
+
+	if (!field) {
+		KMessageBox::sorry(this, i18n("The selected item seems to be a map, but it cannot be found.\nYou have encountered a bug."));
+		return;
+	}
+
 	// Send start message over net
-	networkInterface()->sendNewGame(false);
+	if (!networkInterface()->sendNewGame(field, false)) {
+		KMessageBox::sorry(this, i18n("The selected map could not be saved to a network stream. This might be due to a broken map file, or due to a boson bug.\nAnyway - the game cannot be started."));
+		return;
+	} else {
+		boDebug() << k_funcinfo << "newgame message sent successfully" << endl;
+	}
  }
 }
 

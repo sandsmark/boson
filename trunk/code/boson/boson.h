@@ -103,6 +103,17 @@ public:
 	Player* localPlayer() const;
 
 	/**
+	 * Set the object that will get used to start the game. Some starting
+	 * relevant network messages could get forwarded directly to this object
+	 * and we will store some data from network messages there.
+	 *
+	 * Note that a NULL @p starting parameter will unset the object and
+	 * therefore disable game starting. This can be done once the game has
+	 * been started, in order to avoid starting it twice.
+	 **/
+	void setStartingObject(BosonStarting* starting);
+
+	/**
 	 * Initialize a @ref BosonSaveLoad object with the relevant data.
 	 **/
 	void initSaveLoad(BosonSaveLoad*);
@@ -136,6 +147,11 @@ public:
 	Unit* findUnit(unsigned long int unitId, Player* searchIn) const;
 
 	/**
+	 * Used by @ref BosonStarting to add the initial units to the game
+	 **/
+	void addInitialUnits(const QString& xml, Player* owner);
+
+	/**
 	 * The factory completed to produce a unit and is now told to build
 	 * (place) it.
 	 * @param factory Where the unit is being build
@@ -145,12 +161,6 @@ public:
 	 * @param y The y-coordinate of the new unit.
 	 **/
 	bool buildProducedUnit(ProductionPlugin* factory, unsigned long int unitType, int x, int y);
-
-	/**
-	 * Behaves slightly similar to @ref slotSendAddUnit but this function
-	 * takes an xml document and you can add several units at once.
-	 **/
-	void sendAddUnits(const QString& xmlDocument, Player* owner);
 
 	virtual void networkTransmission(QDataStream&, int msgid, Q_UINT32 receiver, Q_UINT32 sender, Q_UINT32 clientID);
 
@@ -318,16 +328,6 @@ public: // small KGame extenstions for boson
 public slots:
 	void slotSetGameSpeed(int speed);
 	void slotTogglePause();
-
-	/**
-	 * Doesn't actually add a unit to the game but sends a message to the
-	 * network. The actual adding is done in @ref slotNetworkData
-	 * @param unitType The type of the unit (see @ref UnitProperties::typeId) to be added
-	 * @param x The x-coordinate (on the canvas) of the unit
-	 * @param y The y-coordinate (on the canvas) of the unit
-	 * @param owner The owner of the new unit.
-	 **/
-	void slotSendAddUnit(unsigned long int unitType, int x, int y, Player* owner);
 
 	void slotAdvanceComputerPlayers(unsigned int advanceCount, bool advanceFlag);
 

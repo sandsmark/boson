@@ -38,7 +38,7 @@ public:
 
 	void setGame(Boson* game);
 
-	void sendNewGame(bool editor);
+	bool sendNewGame(BosonPlayField* field, bool editor);
 	void sendChangeTeamColor(Player* p, const QColor& color);
 	void sendChangeSpecies(Player* p, const QString& species, const QColor& color);
 	void sendChangePlayerName(Player* p, const QString& name);
