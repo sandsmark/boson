@@ -90,6 +90,12 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg, bool full)
   // Other parameters
   m_range.init(cfg->readUnsignedLongNumEntry("Range", 0));
   mMaxFlyDistance = cfg->readDoubleNumEntry("MaxFlyDistance", m_range * 1.5f);
+  mStartAngle = cfg->readDoubleNumEntry("StartAngle", -1);
+  if(mStartAngle != -1 && (mStartAngle < 0 || mStartAngle > 90))
+  {
+    boError() << k_funcinfo << "StartAngle must be in range 0-90 or -1" << endl;
+    mStartAngle = -1;
+  }
   // Reload interval is converted from seconds to advance calls here
   m_reloadingTime.init((int)(cfg->readDoubleNumEntry("Reload", 0) * 20.0f));
  // We divide speeds with 20, because speeds in config files are cells/second,
@@ -100,7 +106,7 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg, bool full)
     boWarning() << k_funcinfo << "Type is rocket, but speed is 0, setting type to bullet" << endl;
     mShotType = BosonShot::Bullet;
   }
-  mAccelerationSpeed = (cfg->readDoubleNumEntry("AccelerationSpeed", 4) / 20.0f);
+  mAccelerationSpeed = (cfg->readDoubleNumEntry("AccelerationSpeed", 4) / 20.0f / 20.0f);
   bofixed turningspeed = (cfg->readDoubleNumEntry("TurningSpeed", 120) / 20.0f);
   // We convert turning speed for performace reasons
   mTurningSpeed = tan(turningspeed * DEG2RAD);
@@ -193,8 +199,9 @@ void BosonWeaponProperties::savePlugin(KSimpleConfig* cfg)
  // We multiply speeds with 20 because speeds in config files are cells/second,
  //  but here we have cells/advance calls
   cfg->writeEntry("Speed", speed() * 20.0f);
-  cfg->writeEntry("AccelerationSpeed", mAccelerationSpeed * 20.0f);
+  cfg->writeEntry("AccelerationSpeed", mAccelerationSpeed * 20.0f * 20.0f);
   cfg->writeEntry("TurningSpeed", atan(mTurningSpeed) * RAD2DEG * 20.0f);
+  cfg->writeEntry("StartAngle", mStartAngle);
   cfg->writeEntry("Damage", damage());
   cfg->writeEntry("DamageRange", damageRange());
   cfg->writeEntry("CanShootAtAirUnits", mCanShootAtAirUnits);
@@ -217,6 +224,7 @@ void BosonWeaponProperties::reset()
   m_speed.init(0);
   mAccelerationSpeed = 0;
   mTurningSpeed = tan(120 * DEG2RAD / 20.0f);
+  mStartAngle = -1;
   m_damage.init(0);
   m_damageRange.init(1);
   m_fullDamageRange.init(0.25 * m_damageRange);
