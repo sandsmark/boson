@@ -4,14 +4,10 @@
     </h1>
     <table border="0">
 	<tr>
-		<td><img src="../../../themes/species/human/units/fix_mineralrefinery/overview-big.png" border="0">&nbsp;</td>
+		<td><img src="samsite.png" border="0">&nbsp;</td>
 		<td valign="top"><img src="../none.png" border="0" height="30"><br>
 		A sam-site can fire air missiles against aircrafts.
 	</tr>
-	<tr><td>
-		<img src="../../../themes/species/human/units/fix_mineralrefinery/overview-big.png">&nbsp;
-		<img src="samsite.png">&nbsp;
-	</td></tr>
 	<tr><td><br>&nbsp</td></tr>
     </table>
     
