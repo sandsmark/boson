@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -31,6 +31,7 @@
 #include "player.h"
 #include "playerio.h"
 #include "unit.h"
+#include "bosonlocalplayerinput.h"
 #include "items/bosonitem.h"
 
 #warning TODO: the input classes should touch PlayerIO only, not Player directly!
@@ -42,7 +43,6 @@ BosonBigDisplayInputBase::BosonBigDisplayInputBase(BosonBigDisplayBase* parent) 
  mCursorType = CursorDefault;
  mActionLocked = false;
  mActionType = ActionAttack; // dummy initialization
- mLocalPlayerInput = 0;
 }
 
 BosonBigDisplayInputBase::~BosonBigDisplayInputBase()
@@ -80,6 +80,14 @@ PlayerIO* BosonBigDisplayInputBase::localPlayerIO() const
  return localPlayer()->playerIO();
 }
 
+BosonLocalPlayerInput* BosonBigDisplayInputBase::localPlayerInput() const
+{
+ if (!localPlayer()) {
+	return 0;
+ }
+ return (BosonLocalPlayerInput*)localPlayer()->findRttiIO(BosonLocalPlayerInput::LocalPlayerInputRTTI);
+}
+
 const QPoint& BosonBigDisplayInputBase::cursorCanvasPos() const
 {
  return bigDisplay()->cursorCanvasPos();
@@ -88,11 +96,6 @@ const QPoint& BosonBigDisplayInputBase::cursorCanvasPos() const
 const BoVector3& BosonBigDisplayInputBase::cursorCanvasVector() const
 {
  return bigDisplay()->cursorCanvasVector();
-}
-
-void BosonBigDisplayInputBase::setLocalPlayerInput(BosonLocalPlayerInput* input)
-{
- mLocalPlayerInput = input;
 }
 
 void BosonBigDisplayInputBase::selectSingle(Unit* unit, bool replace)
