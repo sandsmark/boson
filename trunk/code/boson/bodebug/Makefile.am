@@ -1,3 +1,5 @@
+SUBDIRS = . bodebugdialog
+
 noinst_LTLIBRARIES = libbodebug.la
 
 INCLUDES = $(all_includes)
