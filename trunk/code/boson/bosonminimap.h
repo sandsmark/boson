@@ -63,18 +63,10 @@ signals:
 
 public slots:
 	/**
-	 * Change the groundtype and version of a cell. Note that at this point
-	 * you cannot be sure that the @ref BosonMap already has the new values
-	 * at this cell. Better use @p groundType.
-	 *
-	 * This slot also ensures that no unit is at the cell and that is isnt
-	 * fogged.
 	 * @param x The x - coordinate of the cell
 	 * @param y The x - coordinate of the cell
-	 * @param groundType The type of the cell. See @ref Cell::GroundType
-	 * @param version Unused
 	 **/
-	void slotChangeCell(int x, int y, int groundType, unsigned char version);
+	void slotUpdateCell(int x, int y);
 
 	void slotAddUnit(Unit* unit, int x, int y);
 
@@ -127,20 +119,13 @@ protected:
 	void updateCell(int x, int y);
 
 	/**
-	 * Change the groundtype and version of a cell. Note that at this point
-	 * you cannot be sure that the @ref BosonMap already has the new values
-	 * at this cell. Better use @p groundType.
-	 *
-	 * This function doesn't check whether a unit is present at the cell or
-	 * whether it is fogged.
-	 * (useful to init the map)
+	 * Calculate the color of the cell at @p x, @p y accordint to the @ref
+	 * BosonMap::texMap. This method doesn't check for units and will
+	 * display the color of the ground at this point.
 	 * @param x The x - coordinate of the cell
 	 * @param y The x - coordinate of the cell
-	 * @param groundType The type of the cell. See @ref Cell::GroundType
-	 * @param version Unused
 	 **/
-	void changeCell(int x, int y, int groundType, unsigned char version); // obsolete
-	void changeCell(int x, int y, Cell* cell);
+	void calculateGround(int x, int y);
 
 	/**
 	 * @return Number of horizontal cells on this map

@@ -318,6 +318,16 @@ public slots:
 signals:
 	void signalGroundThemeChanged(BosonGroundTheme*);
 
+	/**
+	 * The @ref cell at @p x, @p y has been changed. This refers to the
+	 * texture values / amounts of land and water only, <em>not</em> to the
+	 * units on the cell.
+	 *
+	 * The signal is emitted in editor mode only, once the cell has been
+	 * changed completely.
+	 **/
+	void signalCellChanged(int x, int y);
+
 protected:
 	bool loadCell(QDataStream& stream, unsigned char* amountOfLand, unsigned char* amountOfLand) const;
 
