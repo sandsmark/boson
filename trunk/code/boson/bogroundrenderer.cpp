@@ -25,7 +25,6 @@
 #include "bosonconfig.h"
 #include "defines.h"
 #include "cell.h"
-#include "bosongroundtheme.h"
 #include "bo3dtools.h"
 #include "bomaterial.h"
 #include "bowater.h"
@@ -428,8 +427,8 @@ void BoGroundRenderer::updateFogTexture()
  int blocky1 = (mFogTextureDirtyAreaY1 + 1) / 4;
  int blockx2 = (mFogTextureDirtyAreaX2 + 1) / 4;
  int blocky2 = (mFogTextureDirtyAreaY2 + 1) / 4;
- int x = blockx1 * 4;
- int y = blocky1 * 4;
+ unsigned int x = blockx1 * 4;
+ unsigned int y = blocky1 * 4;
  int w = (blockx2 - blockx1 + 1) * 4;
  int h = (blocky2 - blocky1 + 1) * 4;
  // Create temporary array for the 4x4 block
