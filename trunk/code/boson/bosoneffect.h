@@ -168,10 +168,20 @@ class BosonEffect
      **/
     static void initStatic(const QString& particletexdir);
 
-    void markUpdate()
-    {
-      mUpdateCounter++;
-    }
+    /**
+     * @return Whether effect supports delayed updates.
+     * With delayed updates, effect is updates only when it's visible. But if
+     *  your effect always needs to be updates, no matter if it's visible or
+     *  not, reimplement this method to return false.
+     **/
+    virtual bool supportsDelayedUpdates() const  { return true; }
+
+    /**
+     * Marks effect for delayed update.
+     * If effect does not support delayed updates, it is updated immediately.
+     * Note that elapsed should always be 0.05
+     **/
+    void markUpdate(float elapsed);
 
   protected:
     BoVector3Fixed mPosition;
@@ -291,6 +301,7 @@ class BosonEffectFade : public BosonEffect
 
 
     virtual void update(float elapsed);
+    virtual bool supportsDelayedUpdates() const  { return false; }
     /**
      * Make fade effect obsolete (meaning that it will be deleted in the next
      *  advance call).
@@ -337,7 +348,7 @@ class BosonEffectFade : public BosonEffect
  * @short Effect for using real OpenGL lights.
  *
  * With this effect, you can add real dynamic OpenGL lights to the scene.
- * Note though, that you there is a limit for how many lights can be in scene
+ * Note though, that there is a limit for how many lights can be in scene
  *  at once and that too many lights can result in noticeable slowdowns. So
  *  it's best to use them only for few things, when you really need them, and
  *  make their lifetime short.
@@ -358,6 +369,7 @@ class BosonEffectLight : public BosonEffect
 
 
     virtual void update(float elapsed);
+    virtual bool supportsDelayedUpdates() const  { return false; }
 
     virtual void start();
 
