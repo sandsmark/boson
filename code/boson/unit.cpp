@@ -196,17 +196,17 @@ void Unit::select(bool markAsLeader)
 
 int Unit::destinationX() const
 {
- return d->mPathInfo.dest.x();
+ return pathInfo()->dest.x();
 }
 
 int Unit::destinationY() const
 {
- return d->mPathInfo.dest.y();
+ return pathInfo()->dest.y();
 }
 
 int Unit::moveRange() const
 {
- return d->mPathInfo.range;
+ return pathInfo()->range;
 }
 
 Unit* Unit::target() const
@@ -771,10 +771,10 @@ void Unit::resetPathInfo()
 	pathInfo()->hlpath = 0;
  }
 #endif
- d->mPathInfo.reset();
- d->mPathInfo.unit = this;
- d->mPathInfo.canMoveOnLand = unitProperties()->canGoOnLand();
- d->mPathInfo.canMoveOnWater = unitProperties()->canGoOnWater();
+ pathInfo()->reset();
+ pathInfo()->unit = this;
+ pathInfo()->canMoveOnLand = unitProperties()->canGoOnLand();
+ pathInfo()->canMoveOnWater = unitProperties()->canGoOnWater();
 }
 
 
@@ -789,8 +789,8 @@ void Unit::moveTo(const QPoint& pos, bool attack)
  if (moveTo(x, y, 0)) {
 	boDebug() << k_funcinfo << "unit " << id() << ": Will move to (" << x << "; " << y << ")" << endl;
 	addWaypoint(QPoint((int)x, (int)y));
-	d->mPathInfo.moveAttacking = attack;
-	d->mPathInfo.slowDownAtDest = true;
+	pathInfo()->moveAttacking = attack;
+	pathInfo()->slowDownAtDest = true;
 	setWork(WorkMove);
  } else {
 	boDebug() << k_funcinfo << "unit " << id() << ": CANNOT move to (" << x << "; " << y << ")" << endl;
@@ -803,7 +803,7 @@ bool Unit::moveTo(float x, float y, int range)
 {
  // Range -1 means to use previously set range
  if (range == -1) {
-	range = d->mPathInfo.range;
+	range = pathInfo()->range;
  }
 
  // Find destination cell
@@ -832,9 +832,9 @@ bool Unit::moveTo(float x, float y, int range)
 
  // Update path info
  resetPathInfo();
- d->mPathInfo.dest.setX((int)x);
- d->mPathInfo.dest.setY((int)y);
- d->mPathInfo.range = range;
+ pathInfo()->dest.setX((int)x);
+ pathInfo()->dest.setY((int)y);
+ pathInfo()->range = range;
 	boDebug() << k_funcinfo << "unit " << id() << ": dest: (" << (int)x << "; " << (int)y << "); range: " << range << endl;
 
  // Remove old way/pathpoints
@@ -859,8 +859,8 @@ void Unit::newPath()
  // FIXME: don't check if cell is valid/invalid if range > 0
  //  then unit would behave correctly when e.g. commanding land unit to attack
  //  a ship
- int cellX = d->mPathInfo.dest.x() / BO_TILE_SIZE;
- int cellY = d->mPathInfo.dest.y() / BO_TILE_SIZE;
+ int cellX = pathInfo()->dest.x() / BO_TILE_SIZE;
+ int cellY = pathInfo()->dest.y() / BO_TILE_SIZE;
  if (!owner()->isFogged(cellX, cellY)) {
 	Cell* destCell = canvas()->cell(cellX, cellY);
 	if (!destCell || (!destCell->canGo(unitProperties()))) {
@@ -868,7 +868,7 @@ void Unit::newPath()
 		//  coordinates (PF_CANNOT_GO; PF_CANNOT_GO) and in
 		//  MobileUnit::advanceMove(), we check for these special codes
 		boDebug() << k_funcinfo << "unit " << id() << ": Null cell or can't go to (" <<
-				d->mPathInfo.dest.x() << "; " << d->mPathInfo.dest.y() << ") (cell (" << cellX << "; " << cellY << "))" << endl;
+				pathInfo()->dest.x() << "; " << pathInfo()->dest.y() << ") (cell (" << cellX << "; " << cellY << "))" << endl;
 		clearPathPoints();
 		addPathPoint(QPoint(PF_CANNOT_GO, PF_CANNOT_GO));
 		return;
@@ -876,20 +876,20 @@ void Unit::newPath()
  }
 
  // Update our start position
- d->mPathInfo.start.setX((int)(BosonItem::x() + width() / 2));
- d->mPathInfo.start.setY((int)(BosonItem::y() + height() / 2));
+ pathInfo()->start.setX((int)(BosonItem::x() + width() / 2));
+ pathInfo()->start.setY((int)(BosonItem::y() + height() / 2));
  
  // Find path
 #ifdef PATHFINDER_TNG
- canvas()->pathfinder()->findPath(&d->mPathInfo);
+ canvas()->pathfinder()->findPath(pathInfo());
  
  // Copy low-level path to pathpoints' list
  clearPathPoints();
- for (int unsigned i = 0; i < d->mPathInfo.llpath.count(); i++) {
-	addPathPoint(d->mPathInfo.llpath[i]);
+ for (int unsigned i = 0; i < pathInfo()->llpath.count(); i++) {
+	addPathPoint(pathInfo()->llpath[i]);
  }
 #else
- QValueList<QPoint> path = BosonPath::findPath(this, d->mPathInfo.dest.x(), d->mPathInfo.dest.y(), d->mPathInfo.range);
+ QValueList<QPoint> path = BosonPath::findPath(this, pathInfo()->dest.x(), pathInfo()->dest.y(), pathInfo()->range);
  
  // Copy path to pathpoints' list
  clearPathPoints();
@@ -1404,12 +1404,12 @@ bool Unit::canShootAt(Unit *u)
 
 bool Unit::moveAttacking() const
 {
- return d->mPathInfo.moveAttacking;
+ return pathInfo()->moveAttacking;
 }
 
 bool Unit::slowDownAtDestination() const
 {
- return d->mPathInfo.slowDownAtDest;
+ return pathInfo()->slowDownAtDest;
 }
 
 int Unit::distance(const Unit* u) const
