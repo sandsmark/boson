@@ -33,6 +33,8 @@
 // And radians to degrees conversion
 #define RAD2DEG (180.0/M_PI)
 
+static float workaround_depth_value_1_0 = 1.0f;
+static bool workaround_depth_value_enabled = false;
 
 /*****  BoVector*  *****/
 
@@ -1004,6 +1006,10 @@ bool Bo3dTools::boUnProject(const BoMatrix& modelviewMatrix, const BoMatrix& pro
   if (z == -1.0f)
   {
     glReadPixels(pos.x(), realy, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
+    if (workaround_depth_value_enabled)
+    {
+      depth /= workaround_depth_value_1_0;
+    }
   }
   else
   {
@@ -1066,6 +1072,10 @@ bool Bo3dTools::mapCoordinates(const BoMatrix& modelviewMatrix, const BoMatrix& 
   // for mapping 2d values (screen coordinates) to 3d (world coordinates)
   GLfloat depth = 0.0;
   glReadPixels(pos.x(), realy, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
+  if (workaround_depth_value_enabled)
+  {
+    depth /= workaround_depth_value_1_0;
+  }
 
   // AB: 0.0f is reached when we have a point that is outside the actual window!
   if(useRealDepth && depth != 1.0f && depth != 0.0f) {
@@ -1130,6 +1140,12 @@ bool Bo3dTools::mapDistance(const BoMatrix& modelviewMatrix, const BoMatrix& pro
   return true;
 }
 
+
+void Bo3dTools::enableReadDepthBufferWorkaround(float _1_0_depthValue)
+{
+  workaround_depth_value_1_0 = _1_0_depthValue;
+  workaround_depth_value_enabled = true;
+}
 
 /*
  * vim:et sw=2

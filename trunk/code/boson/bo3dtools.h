@@ -1309,6 +1309,16 @@ class Bo3dTools
      * to scroll the scene by a certain distance.
      **/
     static bool mapDistance(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, int windx, int windy, GLfloat* dx, GLfloat* dy);
+
+    /**
+     * Workaround for a probable driver bug. ATI's properitary drivers do
+     * not return 1.0 in the depth buffer, even if it is cleared with 1.0.
+     * This function sets the value that is actually returned.
+     *
+     * Note that we still assume that 0.0 is returned properly, if it is
+     * cleared with 0.0
+     **/
+    static void enableReadDepthBufferWorkaround(float _1_0_depthValue);
 };
 
 
