@@ -834,6 +834,11 @@ void BosonBigDisplayBase::renderCells()
 	generateCellList();
  }
 
+ if (!localPlayer()) {
+	boError() << k_funcinfo << "NULL local player" << endl;
+	return;
+ }
+
  QPtrListIterator<Cell> cellIt(d->mRenderCells);
  GLuint texture = 0;
  int tile = -1;
@@ -1553,6 +1558,10 @@ void BosonBigDisplayBase::generateCellList()
  // re-generate the list of to-be-rendered cells:
  d->mRenderCells.clear();
  Cell* allCells = map->cells();
+ if (!allCells) {
+	boError() << k_funcinfo << "NULL cells!" << endl;
+	return;
+ }
  float radius = sqrt(2 * (BO_GL_CELL_SIZE/2) * (BO_GL_CELL_SIZE/2));
  for (unsigned int i = 0; i < map->width() * map->height(); i++) {
 	Cell* c = &allCells[i];
