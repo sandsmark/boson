@@ -91,19 +91,19 @@ int BoVector3::findPoint(const BoVector3& point, const BoVector3* array)
   return -1;
 }
 
-QString BoVector3::debugString(const BoVector3& v)
+QString BoVector3::debugString(const BoVector3& v, int prec)
 {
-  return QString("%1,%2,%3").arg(v.x()).arg(v.y()).arg(v.z());
+  return QString("%1,%2,%3").arg(v.x(), 0, 'f', prec).arg(v.y(), 0, 'f', prec).arg(v.z(), 0, 'f', prec);
 }
 
-QString BoVector3::debugString() const
+QString BoVector3::debugString(int prec) const
 {
-  return BoVector3::debugString(*this);
+  return BoVector3::debugString(*this, prec);
 }
 
-void BoVector3::debugVector(const BoVector3& v)
+void BoVector3::debugVector(const BoVector3& v, int prec)
 {
-  boDebug() << "vector: " << debugString(v) << endl;
+  boDebug() << "vector: " << debugString(v, prec) << endl;
 }
 
 QDataStream& operator<<(QDataStream& s, const BoVector3& v)
@@ -121,19 +121,19 @@ QDataStream& operator>>(QDataStream& s, BoVector3& v)
   return s;
 }
 
-QString BoVector4::debugString(const BoVector4& v)
+QString BoVector4::debugString(const BoVector4& v, int prec)
 {
-  return QString("%1,%2,%3,%4").arg(v.x()).arg(v.y()).arg(v.z()).arg(v.w());
+  return QString("%1,%2,%3,%4").arg(v.x(), 0, 'f', prec).arg(v.y(), 0, 'f', prec).arg(v.z(), 0, 'f', prec).arg(v.w(), 0, 'f', prec);
 }
 
-void BoVector4::debugVector(const BoVector4& v)
+void BoVector4::debugVector(const BoVector4& v, int prec)
 {
-  boDebug() << "vector: " << debugString(v) << endl;
+  boDebug() << "vector: " << debugString(v, prec) << endl;
 }
 
-QString BoVector4::debugString() const
+QString BoVector4::debugString(int prec) const
 {
-  return BoVector4::debugString(*this);
+  return BoVector4::debugString(*this, prec);
 }
 
 
@@ -802,6 +802,11 @@ void BoQuaternion::transform(BoVector3* v, const BoVector3* input) const
  // conjugate
  tmp.multiply(conjugate());
  v->set(tmp.mV);
+}
+
+QString BoQuaternion::debugString(int prec) const
+{
+ return QString("(%1,(%2))").arg(mW, 0, 'f', prec).arg(mV.debugString(prec));
 }
 
 

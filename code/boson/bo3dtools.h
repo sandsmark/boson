@@ -393,17 +393,17 @@ class BoVector3
      * @return A string that contains the vector @p v. This string can be used
      * for debugging.
      **/
-    static QString debugString(const BoVector3& v);
+    static QString debugString(const BoVector3& v, int prec = 6);
 
     /**
      * Dump this vector onto the console. See also @ref debugString
      **/
-    static void debugVector(const BoVector3& v);
+    static void debugVector(const BoVector3& v, int prec = 6);
 
     /**
      * Convenience method for BoVector3::debugString(*this)
      **/
-    QString debugString() const;
+    QString debugString(int prec = 6) const;
 
 
     // Conversion from one coordinate system to another. Should we use BO_GL_CELL_SIZE here?
@@ -567,17 +567,17 @@ class BoVector4
      * @return A string that contains the vector @p v. This string can be used
      * for debugging.
      **/
-    static QString debugString(const BoVector4& v);
+    static QString debugString(const BoVector4& v, int prec = 6);
 
     /**
      * Dump this vector onto the console. See also @ref debugString
      **/
-    static void debugVector(const BoVector4& v);
+    static void debugVector(const BoVector4& v, int prec = 6);
 
     /**
      * Convenience method for BoVector4::debugString(*this)
      **/
-    QString debugString() const;
+    QString debugString(int prec = 6) const;
 
   private:
     friend class BoMatrix;
@@ -1140,6 +1140,8 @@ class BoQuaternion
      * See @ref BoMatrix::toRotation
     **/
     void toRotation(float* angleX, float* angleY, float* angleZ);
+
+    QString debugString(int prec = 6) const;
 
   private:
     float mW;
