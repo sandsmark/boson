@@ -1,7 +1,7 @@
 <?php
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -52,7 +52,7 @@ draw_bigbox_text("Note that these instructions only apply if you're using a sour
 
 draw_bigbox_subheader("If you downloaded the big package");
 
-draw_bigbox_text("</p><pre>$ tar xjvf boson-all-0.9.tar.bz2
+draw_bigbox_text("</p><pre>$ tar xjvf boson-all-0.10.tar.bz2
 $ cd boson
 $ ./configure
 $ make
@@ -61,18 +61,18 @@ $ su
 
 draw_bigbox_subheader("If you downloaded code, data and music separately");
 
-draw_bigbox_text("</p><pre>$ tar xjvf boson-code-0.9.tar.bz2
+draw_bigbox_text("</p><pre>$ tar xjvf boson-code-0.10.tar.bz2
 $ cd code$ ./configure
 $ make
 $ su
 # make install</pre>
-  <pre>$ tar xjvf boson-data-0.9.tar.bz2
+  <pre>$ tar xjvf boson-data-0.10.tar.bz2
 $ cd data
 $ ./configure
 $ make
 $ su
 # make install</pre>
-  <pre>$ tar xjvf boson-music-0.9.tar.bz2
+  <pre>$ tar xjvf boson-music-0.10.tar.bz2
 $ cd music
 $ ./configure
 $ make

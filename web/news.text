@@ -1,4 +1,15 @@
 [article]
+id=040502
+date=May 2nd 2004 17:25
+title=0.10 released
+text=After a long and very hard work, we bring you Boson 0.10.<br>
+    Read the announcement <a href="announces/boson-0.10.php">here</a> and then
+    <a href="download.php">download it</a>. There are also some
+    <a href="screenshots.php">new screenshots</a> and the
+    <a href="announces/changelog-0.10.php">changelog</a> for those who are
+    interested.<br><br>
+
+[article]
 id=031224
 date=December 24th 2003 12:18
 title=Merry christmas and a happy new year!
@@ -192,7 +203,7 @@ Good new is that we're moving towards 0.8 which will probably be released in
     screens yet, but the page itself is improved. Individual screenshots are now
     also shown inside HTML-page, you can see the comment and date. And
     screenshots are on multiple pages, 10 screens each.<br><br>
-    
+
 
 [article]
 id=030104

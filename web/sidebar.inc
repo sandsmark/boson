@@ -1,7 +1,7 @@
 <?php
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -168,6 +168,7 @@ draw_link("Boson 0.7", "announces/boson-0.7.php");
 draw_link("Boson 0.8", "announces/boson-0.8.php");
 draw_link("Boson 0.9", "announces/boson-0.9.php");
 draw_link("Boson 0.9.1", "announces/boson-0.9.1.php");
+draw_link("Boson 0.10", "announces/boson-0.10.php");
 sidebar_box_end();
 }
 

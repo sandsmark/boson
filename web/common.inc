@@ -1,7 +1,7 @@
 <?php
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@
 
 
 /*****  Some variables  *****/
-$latestversion="0.9.1";
-$latestversiondate="16th November 2003";
+$latestversion="0.10";
+$latestversiondate="2nd May 2004";
 
 $counter_file="counter";
 $news_file="news.text";

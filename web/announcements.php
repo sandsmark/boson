@@ -1,7 +1,7 @@
 <?php
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -56,6 +56,7 @@ draw_bigbox_text("All Boson announcements:
     <li><a href=\"announces/boson-0.8.php\">Boson 0.8 press release</a></li>
     <li><a href=\"announces/boson-0.9.php\">Boson 0.9 press release</a></li>
     <li><a href=\"announces/boson-0.9.1.php\">Boson 0.9.1 press release</a></li>
+    <li><a href=\"announces/boson-0.10.php\">Boson 0.10 press release</a></li>
     </ul>
     <p class=\"bigboxtext\">");
 draw_bigbox_end();
