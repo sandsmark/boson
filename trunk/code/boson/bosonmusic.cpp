@@ -100,6 +100,12 @@ BosonMusic::BosonMusic(QObject* parent) : QObject(parent)
 		d->mPlayMusic = false;
 		d->mPlaySound = false;
 		boConfig->setDisableSound(true);
+	} else {
+		kdDebug() << k_funcinfo << "ogg support seems to be ok" << endl;
+		vector<Arts::TraderOffer>::iterator it;
+		for (it = offers->begin(); it != offers->end(); it++) {
+			kdDebug() << "ogg offer: " << it->interfaceName().c_str() << endl;
+		}
 	}
 	delete offers;
  }
