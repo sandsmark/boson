@@ -846,7 +846,6 @@ void BosonBigDisplayBase::renderCells()
 	Cell* c = cellIt.current();
 	int x = c->x();
 	int y = c->y();
-	int m = localPlayer()->mobilesCount(); // noop for testing. // FIXME REMOVE
 	if (localPlayer()->isFogged(x, y)) {
 		// don't draw anything at all. the cell will just be black,
 		// because of the glClear() call.
