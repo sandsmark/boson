@@ -669,6 +669,32 @@ EndSize=2.5
 SystemLife=1
 Texture=smoke
 
+[DaisyCutter-Flash]
+Id=20050
+Type=Light
+StartAmbient=0.7,0.3,0.1,1.0
+StartDiffuse=1.0,0.6,0.3,1.0
+StartSpecular=1.0,0.9,0.7,1.0
+EndAmbient=0.0,0.0,0.0,1.0
+EndDiffuse=0.0,0.0,0.0,1.0
+EndSpecular=0.0,0.0,0.0,1.0
+StartAttenuation=0,0.0,0.022
+EndAttenuation=0,0.0,0.022
+Position=0,0,4
+Life=7
+
+[DaisyCutter-BigFlash]
+Id=20051
+Type=Light
+Inherits=DaisyCutter-Flash
+StartAmbient=1.0,0.8,0.5,1.0
+StartDiffuse=1.0,1.0,0.7,1.0
+StartSpecular=1.0,1.0,1.0,1.0
+StartAttenuation=0,0.0,0.01
+EndAttenuation=0,0.0,0.01
+Position=0,0,4
+Life=0.3
+
 
 [DaisyCutter-GeneralSmokeTrace]
 Id=20110
