@@ -27,6 +27,7 @@
 #include <qlabel.h>
 
 #include <kdialog.h>
+#include <knuminput.h>
 
 #include <config.h>
 #ifdef HAVE_LIMITS_H
@@ -41,11 +42,13 @@ public:
 	{
 		mTopLayout = 0;
 		mMainLayout = 0;
+		mSliderLayout = 0;
 
 		mLabel = 0;
 	}
 	QVBoxLayout* mTopLayout;
 	QHBoxLayout* mMainLayout;
+	QHBoxLayout* mSliderLayout;
 
 	QLabel* mLabel;
 };
@@ -66,6 +69,7 @@ void BoNumInput::init()
 
  d->mTopLayout = new QVBoxLayout(this, 0, KDialog::spacingHint(), "bonuminput_toplayout");
  d->mMainLayout = new QHBoxLayout(d->mTopLayout);
+ d->mSliderLayout = new QHBoxLayout(d->mMainLayout);
 }
 
 void BoNumInput::setLabel(const QString& text, int a)
@@ -105,6 +109,11 @@ QHBoxLayout* BoNumInput::mainLayout() const
  return d->mMainLayout;
 }
 
+QHBoxLayout* BoNumInput::sliderLayout() const
+{
+ return d->mSliderLayout;
+}
+
 QVBoxLayout* BoNumInput::topLayout() const
 {
  return d->mTopLayout;
@@ -118,13 +127,9 @@ public:
 	{
 		mSpin = 0;
 		mSlider = 0;
-
-		mSliderLayout = 0;
 	}
 	QSpinBox* mSpin;
 	QSlider* mSlider;
-
-	QHBoxLayout* mSliderLayout;
 };
 
 BoIntNumInput::BoIntNumInput(QWidget* parent, const char* name) : BoNumInput(parent, name)
@@ -143,8 +148,6 @@ void BoIntNumInput::init()
  d->mSpin = new QSpinBox(INT_MIN, INT_MAX, 1, this, "bointnuminput_spinbox");
  connect(d->mSpin, SIGNAL(valueChanged(int)), this, SLOT(slotSpinValueChanged(int)));
  mainLayout()->addWidget(d->mSpin);
-
- d->mSliderLayout = new QHBoxLayout(mainLayout());
 
  setFocusProxy(d->mSpin);
 }
@@ -171,8 +174,8 @@ void BoIntNumInput::setRange(int min, int max, int step, bool slider)
 	if (!d->mSlider) {
 		d->mSlider = new QSlider(QSlider::Horizontal, this, "bointnuminput_slider");
 		d->mSlider->setTickmarks(QSlider::Below);
-		connect(d->mSlider, SIGNAL(valueChanged(int)), d->mSpin, SLOT(setValue(int)));
-		d->mSliderLayout->addWidget(d->mSlider);
+		connect(d->mSlider, SIGNAL(valueChanged(int)), this, SLOT(slotSliderMoved(int)));
+		sliderLayout()->addWidget(d->mSlider);
 	}
 	d->mSlider->setRange(min, max);
 
@@ -212,5 +215,137 @@ int BoIntNumInput::maxValue() const
 bool BoIntNumInput::showSlider() const
 {
  return d->mSlider;
+}
+
+void BoIntNumInput::slotSliderMoved(int v)
+{
+ d->mSpin->setValue(v);
+}
+
+
+
+class BoFloatNumInputPrivate
+{
+public:
+	BoFloatNumInputPrivate()
+	{
+		mSpin = 0;
+		mSlider = 0;
+	}
+	KDoubleSpinBox* mSpin;
+	QSlider* mSlider;
+};
+
+BoFloatNumInput::BoFloatNumInput(QWidget* parent, const char* name) : BoNumInput(parent, name)
+{
+ init();
+}
+
+BoFloatNumInput::~BoFloatNumInput()
+{
+ delete d;
+}
+
+void BoFloatNumInput::init()
+{
+ d = new BoFloatNumInputPrivate;
+ d->mSpin = new KDoubleSpinBox(0.0, 9999.0, 0.1, 0.0, 2, this, "bofloatnuminput_spinbox");
+ QSpinBox* spin = d->mSpin;
+ connect(spin, SIGNAL(valueChanged(int)), this, SLOT(slotSpinValueChanged(int)));
+ mainLayout()->addWidget(d->mSpin);
+
+ setFocusProxy(d->mSpin);
+}
+
+void BoFloatNumInput::slotSpinValueChanged(int v)
+{
+ if (d->mSlider) {
+	d->mSlider->setValue(v);
+ }
+ emit signalValueChanged(value());
+}
+
+void BoFloatNumInput::setRange(float min, float max, float step, bool slider)
+{
+ if (d->mSlider) {
+	d->mSlider->blockSignals(true);
+ }
+ min = QMIN(min, max);
+ max = QMAX(min, max);
+ d->mSpin->setRange(min, max, step, d->mSpin->precision());
+
+ step = d->mSpin->lineStep(); // in case it wasn't fully valid
+
+ if (slider) {
+	// upcast to base type to get min/maxValue in int form
+	QSpinBox* spin = d->mSpin;
+	int smin = spin->minValue();
+	int smax = spin->maxValue();
+	int svalue = spin->value();
+	int sstep = spin->lineStep();
+	if (!d->mSlider) {
+		d->mSlider = new QSlider(QSlider::Horizontal, this, "bofloatnuminput_slider");
+		d->mSlider->setTickmarks(QSlider::Below);
+		connect(d->mSlider, SIGNAL(valueChanged(int)), this, SLOT(slotSliderMoved(int)));
+		sliderLayout()->addWidget(d->mSlider);
+	}
+	d->mSlider->setRange(smin, smax);
+	d->mSlider->setLineStep(sstep);
+	d->mSlider->setValue(svalue);
+
+	int major = (smax-smin) / 10; // see KIntNumInput for a better version! this might overflow ints!
+	if (major == 0) {
+		major = sstep;
+	}
+	d->mSlider->setTickInterval(major);
+ } else {
+	delete d->mSlider;
+	d->mSlider = 0;
+ }
+ if (d->mSlider) {
+	d->mSlider->blockSignals(false);
+ }
+}
+
+void BoFloatNumInput::slotSliderMoved(int v)
+{
+ d->mSpin->setValue(mapSliderToSpin(v));
+}
+
+void BoFloatNumInput::setValue(float v)
+{
+ d->mSpin->setValue(v);
+ // slider gets changed by slotSpinValueChanged()
+}
+
+float BoFloatNumInput::value() const
+{
+ return (float)d->mSpin->value();
+}
+
+float BoFloatNumInput::minValue() const
+{
+ return (float)d->mSpin->minValue();
+}
+
+float BoFloatNumInput::maxValue() const
+{
+ return (float)d->mSpin->maxValue();
+}
+
+bool BoFloatNumInput::showSlider() const
+{
+ return d->mSlider;
+}
+
+double BoFloatNumInput::mapSliderToSpin(int val) const
+{
+ // map [slidemin,slidemax] to [spinmin,spinmax]
+ double spinmin = d->mSpin->minValue();
+ double spinmax = d->mSpin->maxValue();
+ double slidemin = d->mSlider->minValue(); // cast int to double to avoid
+ double slidemax = d->mSlider->maxValue(); // overflow in rel denominator
+ double rel = ( double(val) - slidemin ) / ( slidemax - slidemin );
+ return spinmin + rel * ( spinmax - spinmin );
 }
 
