@@ -464,10 +464,6 @@ public:
 	double mFps;
 	unsigned int mFrameCount;
 
-	bool mEvenFlag; // this is used for a nice trick to avoid clearing the depth 
-	                // buffer - see http://www.mesa3d.org/brianp/sig97/perfopt.htm
-
-
 	SelectionRect mSelectionRect;
 	MouseMoveDiff mMouseMoveDiff;
 
