@@ -38,6 +38,7 @@ class BoItemList;
 class BosonItem;
 class BoPixmapRenderer;
 class BoLight;
+class BoFontInfo;
 
 class KGameChat;
 class KGameIO;
@@ -182,6 +183,7 @@ public:
 	void setCursor(BosonCursor* c) { mCursor = c; }
 	BoSelection* selection() const { return mSelection; }
 
+	void setFont(const BoFontInfo& font);
 	QImage screenShot();
 
 	/**

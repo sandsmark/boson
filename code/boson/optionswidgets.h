@@ -28,10 +28,12 @@
 class Player;
 class Boson;
 class BosonConfig;
+class BoFontInfo;
 class KIntNumInput;
 class KDoubleNumInput;
 class QComboBox;
 class QCheckBox;
+class QPushButton;
 class QLineEdit;
 
 /**
@@ -233,9 +235,11 @@ protected slots:
 	void slotEnableATIDepthWorkaround(bool);
 	void slotATIDepthWorkaroundDefaultValue();
 	void slotShowDetails(bool);
+	void slotChangeFont();
 
 signals:
 	void signalGroundRendererChanged(int);
+	void signalFontChanged(const BoFontInfo& font);
 
 private:
 	QComboBox* mRenderingSpeed;
@@ -254,6 +258,9 @@ private:
 	QComboBox* mGroundRenderer;
 	QCheckBox* mUseLOD;
 	QComboBox* mDefaultLOD;
+	QPushButton* mFont;
+	BoFontInfo* mFontInfo;
+	bool mFontChanged;
 };
 
 class ChatOptions : public QVBox, public OptionsWidget

@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,12 +25,65 @@
 #include "../bosonglwidget.h"
 #include "bodebug.h"
 
+#include <klocale.h>
+
 #include <GL/glx.h>
 #include <X11/Xlib.h>
 #include <math.h>
 
 #include <qfont.h>
 #include <qstringlist.h>
+
+QString BoFontInfo::toString() const
+{
+ QString s;
+ QString name = this->name();
+ if (name.contains(QChar(','))) {
+	boError() << k_funcinfo << "font name contains a comma - won't save correct font!" << endl;
+	name = QString::null;
+ }
+ s = QString::number((int)textured()) + QChar(',')
+	+ QString::number((int)bold()) + QChar(',')
+	+ QString::number((int)italic()) + QChar(',')
+	+ QString::number(pointSize()) + QChar(',')
+	+ QString::number((int)fixed()) + QChar(',')
+	+ QString::number((int)underline()) + QChar(',')
+	+ QString::number((int)strikeOut()) + QChar(',')
+	+ name;
+ return s;
+}
+
+bool BoFontInfo::fromString(const QString& s)
+{
+ if (s.isEmpty()) {
+	// default font
+	*this = BoFontInfo();
+	return true;
+ }
+ QStringList l = QStringList::split(QChar(','), s);
+ if (l.count() != 8) {
+	boError() << k_funcinfo << "invalid font string " << s << endl;
+	return false;
+ }
+ setTextured((bool)l[0].toInt());
+ setBold((bool)l[1].toInt());
+ setItalic((bool)l[2].toInt());
+ setPointSize(l[3].toInt());
+
+ mFixedPitch = (bool)l[4].toInt();
+ mUnderline = (bool)l[5].toInt();
+ mStrikeOut = (bool)l[6].toInt();
+ mName = l[7];
+ return true;
+}
+
+QString BoFontInfo::guiName() const
+{
+ if (name().isNull()) {
+	return i18n("Default");
+ }
+ return name();
+}
 
 
 class BoFont {
@@ -48,6 +101,8 @@ public:
 	virtual int widestChar() const = 0;
 	virtual int width(const QString& text) const = 0;
 	virtual int height() const = 0;
+	virtual void setPointSize(int s) = 0;
+	virtual void setItalic(bool i) = 0;
 };
 
 class BoGLXFont : public BoFont{
@@ -84,6 +139,14 @@ public:
 	virtual int height() const
 	{
 		return mFontMetrics->height();
+	}
+	virtual void setPointSize(int s)
+	{
+		Q_UNUSED(s);
+	}
+	virtual void setItalic(bool i)
+	{
+		Q_UNUSED(i);
 	}
 
 private:
@@ -142,6 +205,7 @@ public:
 	{
 		mFont = 0;
 		mPointSize = 10.0f;
+		mItalic = false;
 	}
 	~BoTXFFont();
 
@@ -185,10 +249,19 @@ public:
 		}
 		return (int)ceilf((mFont->getWidestChar() + mFont->getGap()) * mPointSize);
 	}
+	virtual void setPointSize(int s)
+	{
+		mPointSize = (float)s;
+	}
+	virtual void setItalic(bool i)
+	{
+		mItalic = i;
+	}
 
 private:
 	fntTexFont* mFont;
 	float mPointSize;
+	bool mItalic;
 };
 
 BoTXFFont::~BoTXFFont()
@@ -219,10 +292,31 @@ int BoTXFFont::renderString(int x, int y, const GLubyte* string, unsigned int le
  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
  float pos[3] = { (float)x, (float)y, 0.0f };
  for (unsigned int i = 0; i < len; i++) {
-	mFont->putch(pos, mPointSize, 0.0f, (char)string[i]);
+	mFont->putch(pos, mPointSize, mItalic ? 1.0f : 0.0f, (char)string[i]);
  }
  glPopAttrib();
  return len;
+}
+
+BosonGLFont::BosonGLFont(const BoFontInfo& font)
+{
+ boDebug() << k_funcinfo << "creating font for " << font.name() << endl;
+ if (!BoContext::currentContext()) {
+	boError() << k_funcinfo << "NULL current context" << endl;
+	return;
+ }
+ mFont = 0;
+
+ mFontInfo = font;
+
+ if (!loadFont(mFontInfo)) {
+	boError() << k_funcinfo << "could not load font " << mFontInfo.name() << endl;
+ }
+}
+
+BosonGLFont::BosonGLFont()
+{
+ mFont = 0;
 }
 
 BosonGLFont::BosonGLFont(const QString& family)
@@ -234,15 +328,11 @@ BosonGLFont::BosonGLFont(const QString& family)
  }
  mFont = 0;
 
-#if 1
- if (!loadGLXFont(family)) {
-	boError() << k_funcinfo << "GLX font for " << family << "could not be loaded" << endl;
+ mFontInfo.setName(family);
+
+ if (!loadFont(mFontInfo)) {
+	boError() << k_funcinfo << "could not load font " << mFontInfo.name() << endl;
  }
-#else
- if (!loadTXFFont("/home/andi/haeberli.txf")) {
-	boError() << k_funcinfo << "TXF font could not be loaded" << endl;
- }
-#endif
 }
 
 BosonGLFont::~BosonGLFont()
@@ -250,14 +340,42 @@ BosonGLFont::~BosonGLFont()
  delete mFont;
 }
 
-bool BosonGLFont::loadGLXFont(const QString& family)
+bool BosonGLFont::loadFont(const BoFontInfo& font)
+{
+ bool ret = false;
+ BoFontInfo f = font;
+ if (f.textured()) {
+	ret = loadTXFFont(f);
+	if (!ret) {
+		boError() << k_funcinfo << "unable to load textured font " << f.name() << ". reverting to default GLX font" << endl;
+		f.setName(QString::null);
+		f.setTextured(false);
+		ret = loadGLXFont(f);
+	}
+ } else {
+	ret = loadGLXFont(f);
+	if (!ret) {
+		boError() << k_funcinfo << "unable to load GLX font " << f.name() << ". reverting to default GLX font" << endl;
+		f.setName(QString::null);
+		ret = loadGLXFont(f);
+	}
+ }
+ if (!ret) {
+	boError() << k_funcinfo << "unable to load font" << endl;
+	return false;
+ }
+ mFontInfo = f;
+ return true;
+}
+
+bool BosonGLFont::loadGLXFont(const BoFontInfo& font)
 {
  if (!BoContext::currentContext()) {
 	boError() << k_funcinfo << "NULL current context" << endl;
 	return false;
  }
  BoGLXFont* f = new BoGLXFont();
- if (!f->loadFont(family)) {
+ if (!f->loadFont(font.name())) {
 	delete f;
 	return false;
  }
@@ -266,20 +384,27 @@ bool BosonGLFont::loadGLXFont(const QString& family)
  return true;
 }
 
-bool BosonGLFont::loadTXFFont(const QString& fileName)
+bool BosonGLFont::loadTXFFont(const BoFontInfo& font)
 {
  if (!BoContext::currentContext()) {
 	boError() << k_funcinfo << "NULL current context" << endl;
 	return false;
  }
  BoTXFFont* f = new BoTXFFont();
- if (!f->loadFont(fileName)) {
+ if (!f->loadFont(font.name())) {
 	delete f;
 	return false;
  }
  delete mFont;
  mFont = f;
+ mFont->setPointSize(font.pointSize());
+ mFont->setItalic(font.italic());
  return true;
+}
+
+const BoFontInfo& BosonGLFont::fontInfo() const
+{
+ return mFontInfo;
 }
 
 void BosonGLFont::begin()

@@ -106,6 +106,8 @@ void OptionsDialog::initOpenGLPage()
  OpenGLOptions* o = new OpenGLOptions(vbox);
  connect(o, SIGNAL(signalGroundRendererChanged(int)),
 		this, SIGNAL(signalGroundRendererChanged(int)));
+ connect(o, SIGNAL(signalFontChanged(const BoFontInfo&)),
+		this, SIGNAL(signalFontChanged(const BoFontInfo&)));
  addOptions(o);
 }
 

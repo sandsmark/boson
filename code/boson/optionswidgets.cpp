@@ -28,6 +28,8 @@
 #include "bogltooltip.h"
 #include "bogroundrenderer.h"
 #include "bo3dtools.h"
+#include "bosonfont/bosonglfont.h"
+#include "bosonfont/bosonglfontchooser.h"
 
 #include <klocale.h>
 #include <knuminput.h>
@@ -457,6 +459,13 @@ OpenGLOptions::OpenGLOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
  mEnableATIDepthWorkaround->setChecked(false);
  slotEnableATIDepthWorkaround(false);
 
+ QHBox* fontBox = new QHBox(this);
+ (void)new QLabel(i18n("Font: "), fontBox);
+ mFont = new QPushButton(fontBox);
+ mFontChanged = false;
+ mFontInfo = new BoFontInfo();
+ connect(mFont, SIGNAL(clicked()), this, SLOT(slotChangeFont()));
+
  QPushButton* showDetails = new QPushButton(i18n("Show &Details"), this);
  showDetails->setToggleButton(true);
  connect(showDetails, SIGNAL(toggled(bool)), this, SLOT(slotShowDetails(bool)));
@@ -623,6 +632,17 @@ void OpenGLOptions::slotShowDetails(bool show)
  }
 }
 
+void OpenGLOptions::slotChangeFont()
+{
+ BoFontInfo f = *mFontInfo;
+ int result = BosonGLFontChooser::getFont(f, this);
+ if (result == QDialog::Accepted) {
+	*mFontInfo = f;
+	mFontChanged = true;
+	mFont->setText(mFontInfo->guiName());
+ }
+}
+
 void OpenGLOptions::apply()
 {
  boDebug(210) << k_funcinfo << endl;
@@ -677,6 +697,14 @@ void OpenGLOptions::apply()
  boConfig->setUseMaterials(mUseMaterials->isChecked());
  boConfig->setUseLOD(useLOD());
  boConfig->setUIntValue("DefaultLOD", defaultLOD());
+
+ if (mFontChanged) {
+	boConfig->setStringValue("GLFont", mFontInfo->toString());
+	mFontChanged = false;
+	emit signalFontChanged(*mFontInfo);
+ }
+
+
  boConfig->setBoolValue("EnableATIDepthWorkaround", mEnableATIDepthWorkaround->isChecked());
  if (mEnableATIDepthWorkaround->isChecked()) {
 	bool ok = false;
@@ -726,6 +754,12 @@ void OpenGLOptions::load()
  setDefaultLOD(boConfig->uintValue("DefaultLOD", 0));
  mEnableATIDepthWorkaround->setChecked(boConfig->boolValue("EnableATIDepthWorkaround"));
  mATIDepthWorkaroundValue->setText(QString::number(boConfig->doubleValue("ATIDepthWorkaroundValue")));
+ if (!mFontInfo->fromString(boConfig->stringValue("GLFont", QString::null))) {
+	boError() << k_funcinfo << "Could not load font " << boConfig->stringValue("GLFont", QString::null) << endl;
+	*mFontInfo = BoFontInfo();
+ }
+ mFont->setText(mFontInfo->guiName());
+ mFontChanged = false;
 }
 
 void OpenGLOptions::setUpdateInterval(int ms)

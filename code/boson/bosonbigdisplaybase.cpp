@@ -511,9 +511,9 @@ void BosonBigDisplayBase::initializeGL()
  d->mFpsTime = time.tv_sec * 1000000 + time.tv_usec;
 
  // this needs to be done in initializeGL():
- delete d->mDefaultFont;
- makeCurrent();
- d->mDefaultFont = new BosonGLFont(QString::fromLatin1("fixed"));
+ BoFontInfo font;
+ font.fromString(boConfig->stringValue("GLFont"));
+ setFont(font);
 
  if (!context()->deviceIsPixmap()) {
 	if (!directRendering()) {
@@ -724,6 +724,9 @@ void BosonBigDisplayBase::paintGL()
 
  // alpha blending is used for cursor/text/...
  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+ glEnable(GL_TEXTURE_2D);
+// glEnable(GL_BLEND);
 
  renderCursor();
 
@@ -1791,7 +1794,7 @@ void BosonBigDisplayBase::setLocalPlayer(Player* p)
  if (!localPlayer()) {
 	return;
  }
- addMouseIO(p);
+ addMouseIO(localPlayer());
 }
 
 Player* BosonBigDisplayBase::localPlayer() const
@@ -3098,5 +3101,13 @@ QImage BosonBigDisplayBase::screenShot()
  }
  delete[] buffer;
  return image;
+}
+
+void BosonBigDisplayBase::setFont(const BoFontInfo& font)
+{
+ makeCurrent();
+ delete d->mDefaultFont;
+ boDebug() << k_funcinfo << font.name() << " " << font.pointSize() << endl;
+ d->mDefaultFont = new BosonGLFont(font);
 }
 

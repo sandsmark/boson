@@ -30,6 +30,7 @@ class Unit;
 class BosonCanvas;
 class BoSelection;
 class BoSpecificAction;
+class BoFontInfo;
 
 class KPlayer;
 class QDomElement;
@@ -218,6 +219,8 @@ public slots:
 	void slotAction(const BoSpecificAction&);
 
 	void slotChangeGroundRenderer(int);
+
+	void slotChangeFont(const BoFontInfo& font);
 
 	void slotSetGrabMovie(bool grab);
 
