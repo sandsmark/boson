@@ -22,6 +22,8 @@
 
 #include <GL/gl.h>
 
+#include <lib3ds/types.h>
+
 class QString;
 class KConfig;
 class QDataStream;
@@ -81,6 +83,44 @@ class BoVector3
     inline bool isNull()  { return ((mData[0] == 0.0) && (mData[1] == 0.0) && (mData[2] == 0.0)); };
 
     /**
+     * Create 3 vectors from @p face in @p mesh and place them into @p v.
+     * @param v An array of size 3 which will contain the vectors of the face.
+     **/
+    static void makeVectors(BoVector3* v, const Lib3dsMesh* mesh, const Lib3dsFace* face);
+
+    /**
+     * @param v1 An array of 3 vectors (i.e. one triangle)
+     * @param v2 An array of 3 vectors (i.e. one triangle)
+     * @return TRUE if the two triangles are adjacent, i.e. if they share at
+     * least two points. also returns TRUE if the triangles are equal!
+     **/
+    static bool isAdjacent(const BoVector3* v1, const BoVector3* v2);
+
+    /**
+     * @param point The point to search for
+     * @param array An array of size 3 (one face/triangle)
+     * @return the index of the point @p point in @p array, or -1 if @p point is
+     * not in @p array.
+     **/
+    static int findPoint(const BoVector3& point, const BoVector3* array);
+
+    /**
+     * Convenience method for BoVector3::findPoint(*this, array);
+     **/
+    int findPoint(const BoVector3* array) const
+    {
+      return findPoint(*this, array);
+    }
+
+    /**
+     * Convenience method for BoVector3::isAdjacent(this, v);
+     **/
+    bool isAdjacent(const BoVector3* v) const
+    {
+      return isAdjacent(this, v);
+    }
+
+    /**
      * Loads BoVector3 from KConfig
      **/
     static BoVector3 load(KConfig* cfg, QString key);
@@ -113,6 +153,11 @@ class BoVector3
 
     static QString debugString(const BoVector3& v);
     static void debugVector(const BoVector3& v);
+
+    /**
+     * Convenience method for BoVector3::debugString(*this)
+     **/
+    QString debugString() const;
 
     /**
      * @overload
@@ -178,6 +223,11 @@ class BoVector4
 
     static QString debugString(const BoVector4& v);
     static void debugVector(const BoVector4& v);
+
+    /**
+     * Convenience method for BoVector4::debugString(*this)
+     **/
+    QString debugString() const;
 
   private:
     friend class BoMatrix;
