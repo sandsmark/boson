@@ -3655,8 +3655,8 @@ void BosonBigDisplayScriptConnector::connectToScript(BosonScript* script)
 		this, SLOT(slotGetCameraZ(float*)));
  reconnect(i, SIGNAL(signalSetUseCameraLimits(bool)),
 		this, SLOT(slotSetUseCameraLimits(bool)));
- reconnect(i, SIGNAL(signalSetCameraMoveMode(bool)),
-		this, SLOT(slotSetCameraMoveMode(bool)));
+ reconnect(i, SIGNAL(signalSetCameraMoveMode(int)),
+		this, SLOT(slotSetCameraMoveMode(int)));
  reconnect(i, SIGNAL(signalSetCameraPos(const BoVector3&)),
 		this, SLOT(slotSetCameraPos(const BoVector3&)));
  reconnect(i, SIGNAL(signalSetCameraLookAt(const BoVector3&)),
