@@ -86,7 +86,12 @@ public:
 	virtual bool showSlider() const;
 
 public slots:
-	void setValue(int);
+	/**
+	 * @param emitSignal Use FALSE to avoid @ref signalValueChanged being
+	 * emitted when you call this. By default it gets emitted, just as @ref
+	 * QSpinBox does.
+	 **/
+	void setValue(int, bool emitSignal = true);
 
 signals:
 	void signalValueChanged(int);
@@ -119,7 +124,12 @@ public:
 	virtual bool showSlider() const;
 
 public slots:
-	void setValue(float);
+	/**
+	 * @param emitSignal Use FALSE to avoid @ref signalValueChanged being
+	 * emitted when you call this. By default it gets emitted, just as @ref
+	 * QSpinBox does.
+	 **/
+	void setValue(float, bool emitSignal = true);
 
 signals:
 	void signalValueChanged(float);

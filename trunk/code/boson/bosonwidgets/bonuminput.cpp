@@ -191,10 +191,17 @@ void BoIntNumInput::setRange(int min, int max, int step, bool slider)
  }
 }
 
-void BoIntNumInput::setValue(int v)
+void BoIntNumInput::setValue(int v, bool emitSignal)
 {
+ if (!emitSignal) {
+	blockSignals(true);
+ }
  d->mSpin->setValue(v);
  // slider gets changed by slotSpinValueChanged()
+
+ if (!emitSignal) {
+	blockSignals(false);
+ }
 }
 
 int BoIntNumInput::value() const
@@ -312,10 +319,17 @@ void BoFloatNumInput::slotSliderMoved(int v)
  d->mSpin->setValue(mapSliderToSpin(v));
 }
 
-void BoFloatNumInput::setValue(float v)
+void BoFloatNumInput::setValue(float v, bool emitSignal)
 {
+ if (!emitSignal) {
+	blockSignals(true);
+ }
  d->mSpin->setValue(v);
  // slider gets changed by slotSpinValueChanged()
+
+ if (!emitSignal) {
+	blockSignals(false);
+ }
 }
 
 float BoFloatNumInput::value() const
