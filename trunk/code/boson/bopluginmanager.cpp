@@ -156,6 +156,11 @@ bool BoPluginManager::loadLibrary()
 	}
 	return false;
  }
+#if USE_BO_PLUGINS
+ if (d->mLibraryFactory) {
+	return true;
+ }
+#endif
  QString lib = libname();
  QString file;
 
@@ -163,10 +168,10 @@ bool BoPluginManager::loadLibrary()
  bool ret = true;
  typedef KLibFactory* (*init_function)();
  typedef int (*version_function)();
- init_function init_func = 0;
- version_function version_func = 0;
 
 #if USE_BO_PLUGINS
+ init_function init_func = 0;
+ version_function version_func = 0;
  file = KGlobal::dirs()->findResource("lib", QString("kde3/plugins/boson/%1.so").arg(lib));
  if (file.isEmpty()) {
 	error = i18n("Unable to find a file for this plugin");
@@ -175,20 +180,13 @@ bool BoPluginManager::loadLibrary()
  } else {
 	d->mLibrary = new QLibrary(file);
  }
-#else
- // AB: QLibrary uses dlopen() to open the library. passing NULL to dlopen as
- // filename causes dlopen to return a handle to the main program, which we want
- // to do here.
- file = QString::null;
- d->mLibrary = new QLibrary(file);
-#endif // USE_BO_PLUGINS
  if (ret) {
 	ret = d->mLibrary->load();
 	if (!ret) {
 		error = i18n("Library loading failed");
 		const char* e = dlerror();
 		if (e) {
-			error = QString("%1 - reported error: %2").arg(error).arg(e);
+			error = QString("%1 - reported error:\n%2").arg(error).arg(e);
 		}
 	}
  }
@@ -226,9 +224,16 @@ bool BoPluginManager::loadLibrary()
 		ret = false;
 	}
  }
+#else
+ file = "(no plugin)";
+#endif // USE_BO_PLUGINS
  if (ret) {
 	boDebug() << k_funcinfo << "initializing plugin" << endl;
+#if USE_BO_PLUGINS
 	d->mLibraryFactory = init_func();
+#else
+	d->mLibraryFactory = initWithoutLibrary();
+#endif
 	if (!d->mLibraryFactory) {
 		error = i18n("Could not load factory (init returned NULL)");
 		boError() << k_funcinfo << error << endl;
