@@ -34,11 +34,68 @@
 #include <qptrdict.h>
 #include <qbitmap.h>
 #include <qdatetime.h>
-//#include <qpainter.h>
+#include <qthread.h>
+
+#include <unistd.h>
 
 #include "defines.h"
 
 #include "bosoncanvas.moc"
+
+#define BOSON_CANVASTEXT_TEST 0
+
+#if BOSON_CANVASTEXT_TEST
+#include <qpainter.h>
+#endif
+
+/**
+ * Pixmap loader for the tileset. We use a different thread to provide
+ * non-blocking UI.
+ *
+ * It is important that you <em>DON'T</em> access the canvas (especially
+ * update()) before this is completed! The canvas does <em>not</em> have tiles
+ * before that!
+ *
+ * The first function accessing the canvas (in terms of update()) is @ref
+ * initFogOfWar which therefore checks if the thread is finished.
+ **/
+class TileLoader : public QThread
+{
+public:
+	TileLoader(BosonCanvas* c) : QThread()
+	{
+		mCanvas = c;
+		mTile = 0;
+	}
+	~TileLoader()
+	{
+	}
+
+	void setFile(const QString& f)
+	{
+		mFile = f;
+	}
+
+protected:
+	virtual void run()
+	{
+		kdDebug() << k_funcinfo << endl;
+		mTile = new QPixmap(mFile);
+		kdDebug() << k_funcinfo << "loaded" << endl;
+		if (mTile->isNull()) {
+			kdError() << k_funcinfo << "NULL pixmap" << endl;
+			return;
+		}
+		mCanvas->setTileSet(mTile);
+		delete mTile;
+		mTile = 0;
+		kdDebug() << k_funcinfo << "done" << endl;
+	}
+private:
+	QString mFile;
+	QPixmap* mTile;
+	BosonCanvas* mCanvas;
+};
 
 class FogOfWar : public QCanvasSprite
 {
@@ -54,6 +111,13 @@ public:
 	{
 		mMap = 0;
 		mFogPixmap = 0;
+
+		mLoader = 0;
+
+#if BOSON_CANVASTEXT_TEST
+		mMinerals = 0;
+		mOil = 0;
+#endif
 	}
 	
 	QPixmap mPix;
@@ -77,6 +141,12 @@ public:
 
 	QValueList<UnitGroup> mGroups;
 
+	TileLoader* mLoader;
+
+#if BOSON_CANVASTEXT_TEST
+	QCanvasRectangle* mMinerals;
+	QCanvasRectangle* mOil;
+#endif
 };
 
 BosonCanvas::BosonCanvas(QObject* parent)
@@ -99,12 +169,22 @@ void BosonCanvas::init()
  d->mFogOfWar.setAutoDelete(true);
  d->mDestroyedUnits.setAutoDelete(false);
  d->mDeleteShot.setAutoDelete(true);
+
+ d->mLoader = new TileLoader(this);
+ 
+#if BOSON_CANVASTEXT_TEST
+ d->mMinerals = new QCanvasRectangle(this);
+ d->mOil = new QCanvasRectangle(this);
+ d->mMinerals->hide();
+ d->mOil->hide();
+#endif
 }
 
 BosonCanvas::~BosonCanvas()
 {
 kdDebug()<< k_funcinfo << endl;
  quitGame();
+ delete d->mLoader;
  delete d->mFogPixmap;
  delete d;
 kdDebug()<< k_funcinfo <<"done"<< endl;
@@ -125,17 +205,13 @@ void BosonCanvas::deleteDestroyed()
  d->mDestroyedUnits.setAutoDelete(false);
 }
 
-void BosonCanvas::loadTiles(const QString& name)
+void BosonCanvas::setTileSet(QPixmap* p)
 {
-QTime time;
-QTime allTime;
-time.start();
-allTime.start();
- QString themePath = locate("data", QString("boson/themes/grounds/%1").arg(name));
- QPixmap p(themePath);
-kdDebug() << k_funcinfo << "pixmap loading time: " << time.elapsed() << endl;
- if (p.isNull()) {
-	kdError() << k_funcinfo << ": Could not load " << name << endl;
+ // called from TileLoader thread. Note that we don't lock anything here, as
+ // only a single thread can call this.
+ kdDebug() << k_funcinfo << endl;
+ if (p->isNull()) {
+	kdError() << k_funcinfo << "NULL pixmap" << endl;
 	return;
  }
  if (width() == 0 || height() == 0) {
@@ -146,10 +222,19 @@ kdDebug() << k_funcinfo << "pixmap loading time: " << time.elapsed() << endl;
 	kdError() << k_funcinfo << ": NULL map" << endl;
 	return;
  }
-time.restart();
- setTiles(p, d->mMap->width(), d->mMap->height(), BO_TILE_SIZE, BO_TILE_SIZE); 
-kdDebug() << k_funcinfo << "setTiles time: " << time.elapsed() << endl;
-kdDebug() << k_funcinfo << "elapsed time: " << allTime.elapsed() << endl;
+ setTiles(*p, d->mMap->width(), d->mMap->height(), BO_TILE_SIZE, BO_TILE_SIZE); 
+ 
+ for (unsigned int i = 0; i < d->mMap->width(); i++) {
+	for (unsigned int j = 0; j < d->mMap->height(); j++) {
+		Cell* c = d->mMap->cell(i, j);
+		if (!c) {
+			kdError() << k_funcinfo << ": NULL cell" << endl;
+			continue;
+		}
+		slotAddCell(i, j, c->groundType(), c->version());
+	}
+ }
+ update();
 }
 
 Cell* BosonCanvas::cell(int x, int y) const
@@ -346,32 +431,15 @@ void BosonCanvas::setMap(BosonMap* map)
 
 void BosonCanvas::initMap(const QString& tileFile)
 {
-kdDebug() << k_funcinfo << endl;
-QTime allTime;
-QTime time;
-time.start();
-allTime.start();
+ kdDebug() << k_funcinfo << endl;
  if (!d->mMap) {
 	kdError() << k_funcinfo << ": NULL map" << endl;
 	return;
  }
  resize(d->mMap->width() * BO_TILE_SIZE, d->mMap->height() * BO_TILE_SIZE);
-kdDebug() << k_funcinfo << "map resized - time elapsed:" << time.elapsed() << endl;
-time.restart();
- loadTiles(tileFile);
-kdDebug() << k_funcinfo << "tiles loaded- time elapsed:" << time.elapsed() << endl;
- for (unsigned int i = 0; i < d->mMap->width(); i++) {
-	for (unsigned int j = 0; j < d->mMap->height(); j++) {
-		Cell* c = d->mMap->cell(i, j);
-		if (!c) {
-			kdError() << k_funcinfo << ": NULL cell" << endl;
-			continue;
-		}
-		slotAddCell(i, j, c->groundType(), c->version());
-	}
- }
- update();
-kdDebug() << k_funcinfo << "elapsed time: " << allTime.elapsed() << endl;
+ QString file = locate("data", QString("boson/themes/grounds/%1").arg(tileFile));
+ d->mLoader->setFile(file);
+ d->mLoader->start();
 }
 
 void BosonCanvas::slotAddCell(int x, int y, int groundType, unsigned char version)
@@ -592,6 +660,10 @@ void BosonCanvas::unfogLocal(int x, int y)
 
 void BosonCanvas::initFogOfWar(Player* p)
 {
+ while (d->mLoader->running()) {
+	kdDebug() << k_funcinfo << "need to wait for TileLoader to finish" << endl;
+	sleep(1);
+ }
  if (!d->mFogPixmap) {
 	QString fogPath = locate("data", "boson/themes/fow.xpm");
 	d->mFogPixmap = new QCanvasPixmapArray(fogPath);
@@ -874,3 +946,40 @@ void BosonCanvas::removeView(QCanvasView* v)
  QCanvas::removeView(v);
  d->mViewList.removeRef(v);
 }
+
+void BosonCanvas::update()
+{
+#if BOSON_CANVASTEXT_TEST
+ QCanvasView* v = d->mViewList.first(); // where we paint minerals, oil and chattext to
+
+ int x = v->visibleWidth() - 100;
+ int y = 50;
+ int cx = 0;
+ int cy = 0;
+ bool changed = false; // if the view was scrolled
+ v->viewportToContents(x, y, cx, cy);
+ if (cx != d->mMinerals->x() || cy != d->mMinerals->y()) {
+	changed = true;
+
+	// we can still optimize this: (esp. in move() setVisible() and
+	// setSize())
+	d->mMinerals->setVisible(true);
+	d->mMinerals->setVisible(false);
+	d->mOil->setVisible(true);
+	d->mOil->setVisible(false);
+
+	d->mMinerals->move(cx, cy);
+	d->mMinerals->setSize(400,100);
+ }
+ 
+#endif
+ QCanvas::update();
+#if BOSON_CANVASTEXT_TEST
+ if (changed) {
+	QPainter p(v->viewport());
+	p.drawText(x, y, "Test");
+	p.end();
+ }
+#endif
+}
+
