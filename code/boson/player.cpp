@@ -355,7 +355,7 @@ bool Player::load(QDataStream& stream)
 	unit->setId(id);
 
 	// Emit signal for canvas and minimap and BosonWidget
-	emit signalUnitLoaded(unit, x, y);
+	emit signalUnitLoaded(unit, (int)x, (int)y);
 	// Call unit's loading methods
 	if(!unit->load(stream)) {
 		kdError() << k_funcinfo << "Error while loading unit with id=" << id << endl;
