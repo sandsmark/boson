@@ -177,7 +177,17 @@ void serverHarvester::getWantedAction(void)
 		server->placeMob(this); // replace it
 
 		/* actual transfer */
-		player[who].changeRessources(0, contain);
+		switch(type) {
+			case MOB_MINERAL_HARVESTER:
+				player[who].changeRessources(0, contain);
+				break;
+			case MOB_OIL_HARVESTER:
+				player[who].changeRessources(contain, 0);
+				break;
+			default:
+				logf(LOG_ERROR, "getWantedAction : unknown harvester type");
+				break;
+		}
 		contain = 0;
 		}
 
