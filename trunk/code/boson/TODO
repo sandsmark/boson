@@ -4,7 +4,7 @@ Game TODOs
 - make player color selectable in the new game dialog
 - use different cursors for moving, attacking, ...
 - fog of war (long time TODO)
-
+- new game dlg: "ok" should check validity and if possible also start the game
 
 Editor (map, unit, scenario) TODOs
 - don't place units on invalid tiles (e.g. ship on grass)
