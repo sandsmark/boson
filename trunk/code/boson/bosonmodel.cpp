@@ -1096,7 +1096,7 @@ void BosonModel::applyMasterScale()
 		m.multiply(matrix);
 		matrix->loadMatrix(m);
 	}
-	f->setDepthMultiplier(helper.lengthZ() * scale / BO_GL_CELL_SIZE);
+	f->setDepthMultiplier(helper.lengthZ() * scale);
  }
 }
 

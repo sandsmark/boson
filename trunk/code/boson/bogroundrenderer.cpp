@@ -124,7 +124,7 @@ unsigned int BoGroundRenderer::renderCells(const BosonMap* map)
 
  statistics()->clear();
 
- const float* heightMap = map->heightMap();
+ const float* heightMap = map->heightMap(); // FIXME: use the heightmap of the cell renderer
  int heightMapWidth = map->width() + 1;
 
  int cellsCount = 0;
@@ -173,12 +173,12 @@ void BoGroundRenderer::renderCellGrid(int* cells, int cellsCount, const float* h
 		int h;
 		BoGroundRenderer::getCell(cells, i, &x, &y, &w, &h);
 		const float dist = 0.0f;
-		GLfloat cellXPos = (float)x * BO_GL_CELL_SIZE;
-		GLfloat cellYPos = -(float)y * BO_GL_CELL_SIZE;
+		GLfloat cellXPos = (float)x;
+		GLfloat cellYPos = -(float)y;
 			glVertex3f(cellXPos, cellYPos, heightMap[y * heightMapWidth + x] + dist);
-			glVertex3f(cellXPos, cellYPos - h * BO_GL_CELL_SIZE, heightMap[(y+h) * heightMapWidth + x] + dist);
-			glVertex3f(cellXPos + w * BO_GL_CELL_SIZE, cellYPos - h * BO_GL_CELL_SIZE, heightMap[(y+h) * heightMapWidth + (x+w)] + dist);
-			glVertex3f(cellXPos + w * BO_GL_CELL_SIZE, cellYPos, heightMap[y * heightMapWidth + (x+w)] + dist);
+			glVertex3f(cellXPos, cellYPos - h, heightMap[(y+h) * heightMapWidth + x] + dist);
+			glVertex3f(cellXPos + w, cellYPos - h, heightMap[(y+h) * heightMapWidth + (x+w)] + dist);
+			glVertex3f(cellXPos + w, cellYPos, heightMap[y * heightMapWidth + (x+w)] + dist);
 	}
 	glEnd();
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
