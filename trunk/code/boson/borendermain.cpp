@@ -55,7 +55,7 @@
 #define NEAR 1.0
 #define FAR 100.0
 
-#define GL_UPDATE_TIMER 50 // sufficient for borender
+#define GL_UPDATE_TIMER 40
 
 static const char *description =
     I18N_NOOP("Rendering tester for Boson");
@@ -1258,14 +1258,12 @@ int main(int argc, char **argv)
  }
  if (args->isSet("unit")) {
 	if (theme.isEmpty()) {
-		boError() << k_funcinfo << "you have to specify both unit and species!" << endl;
-		return 1;
+		theme = QString::fromLatin1("human");
 	}
 	unit = args->getOption("unit");
  } else if (args->isSet("unit-id")) {
 	if (theme.isEmpty()) {
-		boError() << k_funcinfo << "you have to specify both unit-id and species!" << endl;
-		return 1;
+		theme = QString::fromLatin1("human");
 	}
 	QString arg = args->getOption("unit-id");
 	bool ok = false;
@@ -1276,8 +1274,7 @@ int main(int argc, char **argv)
 	}
  } else if (args->isSet("object")) {
 	if (theme.isEmpty()) {
-		boError() << k_funcinfo << "you have to specify both object and species!" << endl;
-		return 1;
+		theme = QString::fromLatin1("human");
 	}
 	object = args->getOption("object");
  }
