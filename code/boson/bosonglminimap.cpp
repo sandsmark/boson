@@ -561,7 +561,7 @@ bool BosonGLMiniMap::mouseEvent(KGameIO*, QDataStream&, QMouseEvent* e, bool* se
 		state = e->state() | e->button();
 		break;
 	case QEvent::MouseMove:
-		if (e->state() == state) {
+		if (e->state() == state && state != Qt::NoButton) {
 			return true;
 		} else {
 			return false;
