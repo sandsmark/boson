@@ -9,8 +9,8 @@ SUBDIRS =
 BO_DOC_DIR = units
 
 # list all wml files here
-BO_DOCS=index.wml tornado.wml mineral_harvester.wml \
-        oil_harvester.wml ship.wml grizzly.wml leopard.wml \
+BO_DOCS=index.wml tornado.wml mineralharvester.wml \
+        oilharvester.wml ship.wml grizzly.wml leopard.wml \
         panther.wml piranha.wml tiger.wml
 
 # list additional data here - these files will get installed

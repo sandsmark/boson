@@ -9,16 +9,16 @@ SUBDIRS =
 BO_DOC_DIR = facilities
 
 # list all wml files here
-BO_DOCS = index.wml bunker.wml comsat.wml helipad.wml map.wml \
+BO_DOCS = index.wml commandbunker.wml comsat.wml helipad.wml map.wml \
 	mineralrefinery.wml oiltower.wml powerplant.wml \
-	refinery.wml repairpad.wml samsite.wml techcenter.wml turret.wml \
+	oilrefinery.wml repairpad.wml samsite.wml techcenter.wml turret.wml \
 	warfactory.wml
 
 # list additional data here - these files will get installed
 doc_DATA = commandbunker.png comsat.png helipad.png \
 mineralrefinery.png oiltower.png powerplant.png \
 oilrefinery.png repairpad.png samsite.png techcenter.png turret.png \
-tree.png warfactory.png
+map.png warfactory.png
 
 # Configuration ends here!
 
