@@ -35,6 +35,7 @@
 
 #include <kmdcodec.h>
 #include <klocale.h>
+#include <krandomsequence.h>
 
 #include <qdatastream.h>
 #include <qptrqueue.h>
@@ -79,6 +80,56 @@ public:
 private:
 	QByteArray mLog;
 	QValueList<Q_UINT32> mClientsLeft;
+};
+
+class BoGameSyncMessage
+{
+public:
+	void setGame(Boson* game)
+	{
+		mGame = game;
+	}
+
+	QByteArray makeLog()
+	{
+		QByteArray b;
+		QDataStream s(b, IO_WriteOnly);
+
+		// note: this acutally _changes_ the random object.
+		// however since we do this at the same time on all clients, it
+		// is valid.
+		s << (Q_ULONG)mGame->random()->getLong(100000);
+		return b;
+	}
+	static QString findError(const QByteArray& b1, const QByteArray& b2)
+	{
+		return findBosonError(b1, b2);
+	}
+
+protected:
+	static QString findBosonError(const QByteArray& b1, const QByteArray& b2)
+	{
+		KMD5 md5(b1);
+		KMD5 md5_2(b2);
+		if (md5.hexDigest() != md5_2.hexDigest()) {
+			boWarning(370) << k_funcinfo << "there must be an error in the players log!!" << endl;
+		} else {
+			boDebug(370) << "error is not in the players log" << endl;
+			return QString::null;
+		}
+		QDataStream s1(b1, IO_ReadOnly);
+		QDataStream s2(b2, IO_ReadOnly);
+		Q_ULONG random1, random2;
+		s1 >> random1;
+		s2 >> random2;
+		if (random1 != random2) {
+			return i18n("Random numbers differ. Found: %1 should be: %2").arg(random2).arg(random2);
+		}
+		return i18n("There is an error in the game (i.e. the Boson class) log (MD5 sums don't match), but it could not be found.");
+	}
+
+private:
+	Boson* mGame;
 };
 
 class BoPlayerSyncMessage
@@ -362,6 +413,7 @@ public:
 	{
 		mGame = game;
 		mPlayerSync.setGame(mGame);
+		mBosonSync.setGame(mGame);
 	}
 
 	QByteArray makeLog(BosonCanvas* canvas, unsigned int advanceMessageCount, unsigned int interval);
@@ -374,15 +426,17 @@ private:
 
 	BoPlayerSyncMessage mPlayerSync;
 	BoCanvasSyncMessage mCanvasSync;
+	BoGameSyncMessage mBosonSync;
 };
 
 QByteArray BoLongSyncMessage::makeLog(BosonCanvas* canvas, unsigned int advanceMessageCount, unsigned int interval)
 {
  QMap<QString, QByteArray> streams;
+
  streams.insert("CanvasStream", mCanvasSync.makeLog(canvas, advanceMessageCount, interval));
 
- QByteArray playersBuffer = mPlayerSync.makeLog();
- streams.insert("PlayersStream", playersBuffer);
+ streams.insert("BosonStream", mBosonSync.makeLog());
+ streams.insert("PlayersStream", mPlayerSync.makeLog());
 
  // AB: we cannot use this yet.
  // the message log may contain old messages as well, from a previous game or
@@ -412,6 +466,10 @@ QString BoLongSyncMessage::findError(QDataStream& s1, QDataStream& s2)
  QString error;
  if (streams.count() != streams2.count()) {
 	error = i18n("Different streams count: %1, but should be %2").arg(streams2.count()).arg(streams.count());
+	return error;
+ }
+ error = BoGameSyncMessage::findError(streams["BosonStream"], streams2["BosonStream"]);
+ if (!error.isNull()) {
 	return error;
  }
  error = BoCanvasSyncMessage::findError(streams["CanvasStream"], streams2["CanvasStream"]);
