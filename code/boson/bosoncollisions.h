@@ -82,6 +82,7 @@ public:
 
 	BoItemList collisionsAtCells(const QPtrVector<Cell>* cells, const BosonItem* item, bool exact) const;
 	BoItemList collisions(const QRect& rect, const BosonItem* item = 0, bool exact = true) const; // note: exact == true has n effec for item != 0 ONLY!
+	BoItemList collisionsAtCells(const QRect& rect, const BosonItem* item = 0, bool exact = true) const; // note: exact == true has n effec for item != 0 ONLY!
 
 	/**
 	 * @param pos Position in <em>cell</em>-coordinates.
