@@ -41,7 +41,7 @@ sub getval() {
 
         foreach $line (@CONTENT) {
                 # parse [Boson Units]
-                if ($line =~ /^\[Boson\sUnit\]\s*/) { print "<tr><td colspan=\"2\"><b>Unit Properties<b></td></tr>\n"; }
+                if ($line =~ /^\[Boson\sUnit\]\s*/) { print "<tr><td colspan=\"2\"><b>Unit Properties</b></td></tr>\n"; }
                 #if ($line =~ /^\[Boson\sMobile\sUnit\]\s*/) { print "<tr><td colspan=\"2\">Boson Mobile Unit</td></tr>\n"; }
                 
                 if ($line =~ /^\[Weapon_\s*(\w+)/) {
@@ -55,7 +55,7 @@ sub getval() {
                         $upgrade = $1;
                         print "</table></td><td>\n";
                         print "<table border=\"0\">\n";
-                        print "<tr><td colspan=\"2\"><b>Upgrade $upgrade<b></td></tr>\n";
+                        print "<tr><td colspan=\"2\"><b>Upgrade $upgrade</b></td></tr>\n";
                 }
                 
                 foreach $line2 (@CONTENT2) {
@@ -70,7 +70,7 @@ sub getval() {
                                 }
                         }
                 }
-        print "</td></tr></table></table>\n";}
+        print "</table></td></tr></table>\n";}
 
 1;
 
