@@ -176,7 +176,7 @@ bool BoPluginManager::loadLibrary()
 	ret = d->mLibrary->load();
 	if (!ret) {
 		error = i18n("Library loading failed");
-		char* e = dlerror();
+		const char* e = dlerror();
 		if (e) {
 			error = QString("%1 - reported error: %2").arg(error).arg(e);
 		}
