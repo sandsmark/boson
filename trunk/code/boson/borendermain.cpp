@@ -419,6 +419,12 @@ void ModelPreview::renderMeshSelection()
  if (mSelectedMesh < 0) {
 	return;
  }
+ if (mCurrentFrame < 0) {
+	return;
+ }
+ if ((unsigned int)mCurrentFrame >= mModel->frames()) {
+	return;
+ }
  BoMesh* mesh = 0;
  BoFrame* f = frame(mCurrentFrame);
  if ((unsigned int)mSelectedMesh >= f->meshCount()) {
@@ -749,13 +755,19 @@ void ModelPreview::mouseReleaseEvent(QMouseEvent* e)
 {
  switch (e->button()) {
 	case QMouseEvent::LeftButton:
-		mSelectedMesh = mMeshUnderMouse;
+		selectMesh(mMeshUnderMouse);
 		break;
 	case QMouseEvent::RightButton:
 		break;
 	default:
 		break;
  }
+}
+
+void ModelPreview::selectMesh(int mesh)
+{
+ mSelectedMesh = mesh;
+ emit signalMeshSelected(mesh);
 }
 
 void ModelPreview::mouseMoveEvent(QMouseEvent* e)
@@ -874,6 +886,76 @@ void ModelPreview::updateCamera(const BoVector3& cameraPos, const BoVector3& loo
  emit signalCameraChanged();
 }
 
+void ModelPreview::hideMesh(unsigned int mesh, bool hide)
+{
+ if (!haveModel()) {
+	return;
+ }
+ for (unsigned int i = 0; i < mModel->frames(); i++) {
+	BoFrame* f = mModel->frame(i);
+	if (mesh >= f->meshCount()) {
+		boWarning() << k_funcinfo << "mesh does not exist: " << mesh << " meshes in frame: " << f->meshCount() << endl;
+		return;
+	}
+	if (!f) {
+		boWarning() << k_funcinfo << "NULL frame " << i << endl;
+		continue;
+	}
+	f->setHidden(mesh, hide);
+ }
+ if (mesh == mSelectedMesh) {
+	selectMesh(-1);
+ }
+}
+
+void ModelPreview::slotHideSelectedMesh()
+{
+ if (!haveModel()) {
+	return;
+ }
+ if (mSelectedMesh < 0) {
+	return;
+ }
+ hideMesh((unsigned int)mSelectedMesh);
+}
+
+void ModelPreview::slotHideUnSelectedMeshes()
+{
+ if (!haveModel()) {
+	return;
+ }
+ if (mSelectedMesh < 0) {
+	return;
+ }
+ if (mCurrentFrame < 0) {
+	return;
+ }
+ BoFrame* f = frame(mCurrentFrame);
+ BO_CHECK_NULL_RET(f);
+ for (unsigned int i = 0; i < f->meshCount(); i++) {
+	if (i == (unsigned int)mSelectedMesh) {
+		continue;
+	}
+	hideMesh(i);
+ }
+}
+
+void ModelPreview::slotUnHideAllMeshes()
+{
+ if (!haveModel()) {
+	return;
+ }
+ if (mCurrentFrame < 0) {
+	return;
+ }
+ BoFrame* f = frame(mCurrentFrame);
+ BO_CHECK_NULL_RET(f);
+ for (unsigned int i = 0; i < f->meshCount(); i++) {
+	hideMesh(i, false);
+ }
+}
+
+
 
 RenderMain::RenderMain()
 {
@@ -910,6 +992,10 @@ RenderMain::RenderMain()
  connect(mConfig, SIGNAL(signalDisallowPlacementChanged(bool)), mPreview, SLOT(slotDisallowPlacementChanged(bool)));
  connect(mConfig, SIGNAL(signalWireFrameChanged(bool)), mPreview, SLOT(slotWireFrameChanged(bool)));
  connect(mConfig, SIGNAL(signalConstructionChanged(bool)), mPreview, SLOT(slotConstructionChanged(bool)));
+ connect(mConfig, SIGNAL(signalHideMesh()), mPreview, SLOT(slotHideSelectedMesh()));
+ connect(mConfig, SIGNAL(signalHideOthers()), mPreview, SLOT(slotHideUnSelectedMeshes()));
+ connect(mConfig, SIGNAL(signalUnHideAll()), mPreview, SLOT(slotUnHideAllMeshes()));
+ connect(mPreview, SIGNAL(signalMeshSelected(int)), mConfig, SLOT(slotMeshSelected(int)));
 
 
  mPreview->slotResetView();
@@ -1304,8 +1390,6 @@ void RenderMain::uncheckAllBut(KAction* action)
  }
 }
 
-
-
 PreviewConfig::PreviewConfig(QWidget* parent) : QWidget(parent)
 {
  bool slider = false; // FIXME: there seems to be a bug with the slider. when you slide between e.g. -1.0->0.0 or so then there seem to be recursive setValue() calls which block the UI for some seconds
@@ -1329,6 +1413,18 @@ PreviewConfig::PreviewConfig(QWidget* parent) : QWidget(parent)
  mLOD->setRange(0, BosonModel::defaultLodCount() - 1);
  connect(mLOD, SIGNAL(valueChanged(int)), this, SIGNAL(signalLODChanged(int)));
  topLayout->addWidget(mLOD);
+ topLayout->addStretch(1);
+
+ QHBox* hideBox = new QHBox(this);
+ mHideMesh = new QPushButton(i18n("Hide"), hideBox);
+ mHideMesh->setEnabled(false);
+ mHideOthers = new QPushButton(i18n("Hide others"), hideBox);
+ mHideOthers->setEnabled(false);
+ mUnHideAll = new QPushButton(i18n("UnHide all"), hideBox);
+ connect(mHideMesh, SIGNAL(clicked()), this, SIGNAL(signalHideMesh()));
+ connect(mHideOthers, SIGNAL(clicked()), this, SIGNAL(signalHideOthers()));
+ connect(mUnHideAll, SIGNAL(clicked()), this, SIGNAL(signalUnHideAll()));
+ topLayout->addWidget(hideBox);
  topLayout->addStretch(1);
 
  QWidget* placement = new QWidget(this);
@@ -1372,6 +1468,17 @@ void PreviewConfig::setCamera(BoCamera* camera)
 void PreviewConfig::slotCameraChanged()
 {
  mCameraWidget->slotUpdateFromCamera();
+}
+
+void PreviewConfig::slotMeshSelected(int mesh)
+{
+ if (mesh < 0) {
+	mHideMesh->setEnabled(false);
+	mHideOthers->setEnabled(false);
+ } else {
+	mHideMesh->setEnabled(true);
+	mHideOthers->setEnabled(true);
+ }
 }
 
 int main(int argc, char **argv)
