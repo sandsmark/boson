@@ -33,6 +33,7 @@
 #include "startupwidgets/bosonloadingwidget.h"
 #include "bosondata.h"
 #include "bodebug.h"
+#include "bpfdescription.h"
 
 #include <klocale.h>
 
@@ -60,16 +61,25 @@ void BosonStarting::setEditorMap(const QByteArray& buffer)
  map->loadCompleteMap(stream);
  mNewPlayField->changeMap(map);
 
- // WARNING: this is a hack. See BosonStartEditorWidget class!
+ // WARNING: this is a hack. See BosonNewEditorWidget class!
  // this message should contain the map only, *not* the scenario!
  Q_INT32 maxPlayers;
  Q_INT32 minPlayers;
+ QString name;
+ QString comment;
  stream >> maxPlayers;
  stream >> minPlayers;
  BosonScenario* scenario = new BosonScenario();
  scenario->setPlayers(minPlayers, maxPlayers);
  scenario->initializeScenario();
  mNewPlayField->changeScenario(scenario);
+
+ stream >> name;
+ stream >> comment;
+ BPFDescription* description = new BPFDescription();
+ description->setName(name);
+ description->setComment(comment);
+ mNewPlayField->changeDescription(description);
 
  mNewPlayField->finalizeLoading(); // do not preload anything or so
 }

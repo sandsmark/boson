@@ -91,7 +91,7 @@ public slots:
 
 	/**
 	 * Mainly used internally. This will display the start editor widget
-	 * (see @ref BosonStartEditorWidget) where player can select the
+	 * (see @ref BosonNewEditorWidget) where player can select the
 	 * playfield to be edited.
 	 **/
 	void slotStartEditor(KCmdLineArgs* args = 0);
