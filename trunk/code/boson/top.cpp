@@ -321,7 +321,7 @@ void TopWidget::initKActions()
 		SLOT(slotProfiling()), actionCollection(), "debug_profiling");
  (void)new KAction(i18n("&Debug KGame..."), KShortcut(), this,
 		SLOT(slotDebugKGame()), actionCollection(), "debug_kgame");
- (void)new KAction(i18n("Debug &BoDebug log"), KShortcut(), this,
+ (void)new KAction(i18n("Debug &BoDebug log..."), KShortcut(), this,
 		SLOT(slotBoDebugLogDialog()), actionCollection(), "debug_bodebuglog");
  (void)new KAction(i18n("Sleep 1s"), KShortcut(), this,
 		SLOT(slotSleep1s()), actionCollection(), "debug_sleep_1s");
