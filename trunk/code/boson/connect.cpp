@@ -201,6 +201,11 @@ switch(tag) {
 		ASSERT_DATA_BLENGHT(sizeof(data->power));
 		field->shooted(data->power);
 		break;
+		
+	case MSG_UNIT_RESS:
+		ASSERT_DATA_BLENGHT(sizeof(data->unitRess));
+		field->updateRess(data->unitRess);
+		break;
 
 	case MSG_FACILITY_CHANGED :
 		ASSERT_DATA_BLENGHT(sizeof(data->fixChanged));

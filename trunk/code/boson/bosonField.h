@@ -58,6 +58,7 @@ public:
   void shooted(powerMsg_t &);
   void shoot(shootMsg_t &);
   void requestAction(void);
+  void updateRess(unitRessMsg_t &);
 
 /* concerning contents */
   playerFacility *getFacility(long key) { return facility.find(key); }

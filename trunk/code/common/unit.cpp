@@ -21,13 +21,11 @@
 #include "unit.h"
 #include "map.h"
 
-Unit::Unit(int _key, int _who, QObject*parent, const char *name)
+Unit::Unit(int _who, QObject*parent, const char *name)
 	: QObject(parent, name)
 {
 	who		= _who;
-	key		= _key;
 	
-	contain		= 0;
 	countDown	= 0;
 	work		= WORK_NONE;
 }
@@ -38,7 +36,7 @@ Unit::Unit(int _key, int _who, QObject*parent, const char *name)
  */
 
 mobUnit::mobUnit(mobileMsg_t *msg, QObject* parent, const char *name)
-:Unit(msg->key, msg->who, parent,name)
+:Unit(msg->who, parent,name)
 {
 	type	= msg->type;
 
@@ -67,7 +65,7 @@ QRect mobUnit::rect(void)
  */
 
 Facility::Facility(facilityMsg_t *msg, QObject* parent, const char *name)
-:Unit(msg->key, msg->who, parent,name)
+:Unit(msg->who, parent,name)
 {
 	type	= msg->type;
 }

@@ -6,6 +6,9 @@ TODO:
 Generic :
 =========
 
+move boson/handleGameMessage into field
+some WARNING / ERROR in logs
+creating things only if ressources permit it (presently, the server already refuse to build)
 positionning rect in editor/boson
 move boson.h into bosonapp.h (socket handling / generic stuff)
 	      and boWindow.h (KTMainWindow ...)
@@ -43,7 +46,8 @@ mouse handling :
 fog of war ?
 source documentation
 client and server should be peer-killed proof
-
+harvesting
+money/oil handling
 
 0.5 release: (first public release)
 ============

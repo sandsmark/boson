@@ -30,8 +30,8 @@ enum mobUnitState {
 	MUS_MOVING,
 	MUS_,
 	};
-
-
+	
+	
 class playerMobUnit : public visualMobUnit
 {
 
@@ -46,25 +46,26 @@ class playerMobUnit : public visualMobUnit
  
   void	shooted(int _power);
 /* Server orders */
-  void  doMoveBy(int dx, int dy);
+	void  doMoveBy(int dx, int dy);
   void  s_moveBy(int dx, int dy, int direction);
 
  protected:
   int	getLeft(int a=1) {return (direction+12-a)%12; }
   int	getRight(int a=1) {return (direction+a)%12; }
   void	turnTo(int newdir);
-  bool	checkMove(int dx, int dy);
+   bool	checkMove(int dx, int dy);
+   	bool near(int distance);
 
-	bool	getWantedMove(bosonMsgData *);
-	bool	getWantedShoot(bosonMsgData *);
+	virtual bool	getWantedMove(bosonMsgData *);
+	virtual bool	getWantedShoot(bosonMsgData *);
 	
 signals:
 	void dying(Unit *);
 	void sig_move(int dx, int dy);
 
- public slots:
-/* orders from user */
-  void	u_goto(int, int); // not the same as QwSprite::moveTo
+public slots:
+	/* orders from user */
+	virtual void	u_goto(int, int); // not the same as QwSprite::moveTo
   void  u_stop(void);	
   void  u_attack(Unit *);
   	void targetDying(Unit *);
@@ -85,6 +86,29 @@ signals:
 	int	shoot_timer;
 
 };
+
+
+class harvesterUnit : public playerMobUnit
+{
+	Q_OBJECT
+		
+public:
+	harvesterUnit(mobileMsg_t *m, QObject* parent=0, const char *name=0L) : playerMobUnit(m,parent,name)
+		{ hstate = standBy; base_x = m->x; base_y = m->y; }
+	virtual bool	getWantedMove(bosonMsgData *);
+	virtual bool	getWantedShoot(bosonMsgData *);
+	virtual void	u_goto(int, int);
+	
+	enum harvestState { standBy, goingTo, comingBack, harvesting };
+	
+private:
+	groundType	underlyingGround(void);
+
+	harvestState hstate;
+	int		base_x, base_y;
+};
+
+
 
 
 

@@ -49,7 +49,7 @@ class Unit : public QObject
  Q_OBJECT
 
  public:
-  Unit(int key, int who, QObject* parent=0, const char *name=0L);
+  Unit(int who, QObject* parent=0, const char *name=0L);
 
   virtual	int	_x(void)=0;
   virtual	int	_y(void)=0;
@@ -57,11 +57,9 @@ class Unit : public QObject
   virtual	int	getWidth(void)=0;
   virtual	int	getHeight(void)=0;
   virtual	uint	getVisibility(void)=0;
-
+  
   int		who;		// who is the owner ?
-  int		key;
   protected:
-  uint		contain;	// how much contain (petrol, money);
   uint		countDown;	// work countDown;
   workType	work;		// work being done
 
