@@ -7,6 +7,7 @@
 #include "visualunit.h"
 #include "speciestheme.h"
 #include "unitproperties.h"
+#include "bosoncanvas.h"
 
 #include <kdebug.h>
 #include <klocale.h>
@@ -26,7 +27,7 @@ public:
 	}
 
 	QTimer* mGameTimer;
-	QCanvas* mCanvas; // used for construcing a unit ONLY!! ( this pointer is anti-OO IMHO)
+	QCanvas* mCanvas; // this pointer is anti-OO IMHO
 	
 	KGamePropertyInt mGameSpeed;
 
@@ -415,6 +416,13 @@ bool Boson::constructUnit(VisualFacility* factory, int unitType, int x, int y)
  QCanvasPixmapArray* a = p->speciesTheme()->pixmapArray(unitType);
  if (!a) {
 	kdError() << "NULL pximap array for " << unitType << endl;
+	return false;
+ }
+ QRect rect = (QRect(x * BO_TILE_SIZE, y * BO_TILE_SIZE,
+		a->image(0)->width(), // -1?
+		a->image(0)->height())); // -1?
+ if (!((BosonCanvas*)d->mCanvas)->canGo(p->unitProperties(unitType), rect)) {
+	kdWarning() << "Unit can not be constructed here" << endl;
 	return false;
  }
  QCanvasItemList list = d->mCanvas->collisions(QRect(x * BO_TILE_SIZE,
