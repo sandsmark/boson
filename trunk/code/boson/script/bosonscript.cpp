@@ -39,7 +39,12 @@ BosonScript* BosonScript::mScript = 0;
 BosonScript* BosonScript::newScriptParser(Language lang)
 {
   boDebug() << k_funcinfo << endl;
-  BosonScript* s;
+  if(mScript)
+  {
+    boError() << k_funcinfo << "script already created" << endl;
+    return mScript;
+  }
+  BosonScript* s = 0;
   if(lang == Python)
   {
     s = new PythonScript();
@@ -47,15 +52,15 @@ BosonScript* BosonScript::newScriptParser(Language lang)
   else
   {
     boDebug() << k_funcinfo << "Invalid script language: " << lang << endl;
-    return 0;
+    s = 0;
   }
+  mScript = s;
   return s;
 }
 
 BosonScript::BosonScript()
 {
   boDebug() << k_funcinfo << endl;
-  mScript = this;
   mDisplay = 0;
   mPlayer = 0;
 }
