@@ -146,9 +146,6 @@ void BosonCommandFrame::init()
  setSizePolicy(QSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding));
  setMinimumSize(230, 200); // FIXME hardcoded value
 
- setFrameStyle(QFrame::Raised | QFrame::Panel);
- setLineWidth(5);
-
 }
 
 void BosonCommandFrame::initEditor()
