@@ -110,7 +110,7 @@ protected:
 
 	virtual QString configKey() const;
 	virtual QString libname() const;
-	virtual void initWithoutLibrary();
+	virtual KLibFactory* initWithoutLibrary();
 
 	virtual void initializePlugin();
 	virtual void deinitializePlugin();

@@ -23,6 +23,7 @@
 #include <config.h> // USE_BO_PLUGINS
 
 class BoPluginManagerPrivate;
+class KLibFactory;
 
 /**
  * @internal
@@ -37,13 +38,13 @@ class BoPluginManagerPrivate;
  **/
 #if USE_BO_PLUGINS
 #define BOPLUGIN_MANAGER_INITWITHOUTLIBRARY(className, libName) \
-	void className::initWithoutLibrary() { }
+	KLibFactory* className::initWithoutLibrary() { return 0; }
 #else
 #define BOPLUGIN_MANAGER_INITWITHOUTLIBRARY(className, libName) \
 	extern "C" { void* init_##libName(); }  \
-	void className::initWithoutLibrary() \
+	KLibFactory* className::initWithoutLibrary() \
 		{ \
-			init_##libName(); \
+			return (KLibFactory*)init_##libName(); \
 		}
 #endif
 
@@ -198,7 +199,7 @@ protected:
 	 * This method is a no-op if the program is compiled with plugin
 	 * support.
 	 **/
-	virtual void initWithoutLibrary() = 0;
+	virtual KLibFactory* initWithoutLibrary() = 0;
 
 	virtual void initializePlugin() = 0;
 	virtual void deinitializePlugin() = 0;

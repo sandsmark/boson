@@ -242,6 +242,15 @@ AC_DEFUN([AC_USE_PLUGINS],
    AC_DEFINE_UNQUOTED(USE_BO_PLUGINS, 1, [Define whether to use plugins.])
  fi
  AM_CONDITIONAL(include_plugins, test x$bo_use_plugins = xyes)
+
+ LIB_MESHRENDERER=
+ LIB_GROUNDRENDERER=
+ if test "$bo_use_plugins" != "yes"; then
+   LIB_MESHRENDERER="\$(top_builddir)/boson/meshrenderer/libbomeshrenderer.la"
+   LIB_GROUNDRENDERER="\$(top_builddir)/boson/groundrenderer/libbogroundrenderer.la"
+ fi
+ AC_SUBST(LIB_MESHRENDERER)
+ AC_SUBST(LIB_GROUNDRENDERER)
 ])
 AC_USE_PLUGINS
 
