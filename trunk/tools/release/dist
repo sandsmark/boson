@@ -1,11 +1,12 @@
 #!/bin/bash
 
 BOSON_BASE="$HOME/kde/boson/release/head"
+BOSON_TOOLS="$BOSON_BASE/tools"
 BOSON_CODE="$BOSON_BASE/code"
 BOSON_DATA="$BOSON_BASE/data"
 BOSON_MUSIC="$BOSON_BASE/music"
 
-BOSON_RELEASE="BOSON_0_7_RELEASE"
+BOSON_RELEASE="BOSON_0_8_RELEASE"
 
 # Configuration ends here
 
@@ -19,7 +20,7 @@ DEST_MUSIC="$DEST_BASE/music/boson-music-$BO_VERSION"
 function clean_all()
 {
  echo "WARNING: this will do a"
- echo "      make -f $BOSON_CODE/admin/Makefile.common cvs-clean"
+ echo "      make -f $BOSON_TOOLS/admin/Makefile.common cvs-clean"
  echo "in the following directories:"
  for i in $BOSON_CODE $BOSON_DATA ; do
 	echo "$i"
@@ -30,7 +31,7 @@ function clean_all()
 	echo "Stopping"
 	exit 1
  fi
- admindir="$BOSON_CODE/admin"
+ admindir="$BOSON_TOOLS/admin"
  echo "Doing cvs-clean now!"
  for i in $BOSON_CODE $BOSON_DATA ; do
 	echo "In $i"
@@ -43,6 +44,8 @@ function copy_code()
  echo "Copying code"
  cp -a $BOSON_CODE/* $DEST_ALL/
  cp -a $BOSON_CODE/* $DEST_CODE/
+ cp -a $BOSON_TOOLS/admin $DEST_CODE/
+ cp -a $BOSON_TOOLS/admin $DEST_ALL/
 }
 
 function copy_data()
@@ -64,7 +67,7 @@ function copy_data()
  cp -rd $BOSON_DATA/* $DEST_DATA/
 
 
- cp -r $BOSON_CODE/admin $DEST_DATA/
+ cp -a $BOSON_TOOLS/admin $DEST_DATA/
 # cp $BOSON_CODE/Makefile.cvs $DEST_DATA/
 }
 
