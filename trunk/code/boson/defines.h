@@ -55,6 +55,12 @@
 // playfield that gets used by default
 #define DEFAULT_PLAYFIELD QString::fromLatin1("basic2.bpf")
 
+// the placement preview. alpha apply to both previews, the _DISALLOW_COLOR
+// only if the facility can't placed at that point.
+// AB: the red component will alway be 255 anyway.
+#define PLACEMENTPREVIEW_ALPHA 120
+#define PLACEMENTPREVIEW_DISALLOW_COLOR 100 // should get used for the green and blue component
+
 
 // default values
 // used for both BosonConfig and OptionsDialog
