@@ -96,6 +96,8 @@ public:
 	BosonBigDisplayBase* splitActiveDisplayVertical();
 	BosonBigDisplayBase* splitActiveDisplayHorizontal();
 
+	void addChatMessage(const QString& text);
+
 public slots:
 
 	// old KActions suck!

@@ -94,10 +94,6 @@ void BosonWidget::initConnections()
 
  connect(game(), SIGNAL(signalInitFogOfWar()),
 		this, SLOT(slotInitFogOfWar()));
- connect(game(), SIGNAL(signalNotEnoughMinerals(Player*)),
-		this, SLOT(slotNotEnoughMinerals(Player*)));
- connect(game(), SIGNAL(signalNotEnoughOil(Player*)),
-		this, SLOT(slotNotEnoughOil(Player*)));
 }
 
 void BosonWidget::initPlayer()
