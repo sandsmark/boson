@@ -482,6 +482,10 @@ bool BosonStarting::startGame()
  return true;
 }
 
+
+// note: this method is _incompatible_ with network!!
+// if we want loading games to be network compatible, we need to add the players
+// _before_ loading the game.
 bool BosonStarting::addLoadGamePlayers(const QString& playersXML)
 {
  QDomDocument playersDoc;
@@ -506,6 +510,7 @@ bool BosonStarting::addLoadGamePlayers(const QString& playersXML)
 	return false;
  }
  boDebug(260) << k_funcinfo << "adding " << list.count() << " players" << endl;
+ BosonSaveLoad load(boGame);
  for (unsigned int i = 0; i < list.count(); i++) {
 	// AB: TODO: store "PlayerNumber" in the xml file only (use the same
 	// number for the canvas.xml as ownerid / ownernumber).
@@ -544,8 +549,8 @@ bool BosonStarting::addLoadGamePlayers(const QString& playersXML)
 
 	// AB: we _must_ add the players _before_ we load the game, in order to
 	// keep network working.
-//	boGame->systemAddPlayer((KPlayer*)player); // BosonSaveLoad uses this
-	boGame->addPlayer((KPlayer*)player);
+//
+	load.systemAddPlayer(player);
  }
 
  return true;
