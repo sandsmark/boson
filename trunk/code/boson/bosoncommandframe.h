@@ -84,6 +84,8 @@ public slots:
 	 **/
 	void slotEditorLoadTiles(const QString& fileName);
 
+	void slotShowUnit(Unit* unit); // TODO if this is the only unit -> use slotShowSingleUnit 
+
 signals:
 	/**
 	 * Emitted when an order button is clicked. This unit is marked for

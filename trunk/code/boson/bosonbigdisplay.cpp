@@ -30,6 +30,7 @@
 #include <kgame/kgameio.h>
 #include <kdebug.h>
 #include <kcursor.h>
+#include <klocale.h>
 
 #include <qptrlist.h>
 #include <qpoint.h>
@@ -79,6 +80,9 @@ public:
 	
 	QPixmap mCursorMove;
 	QPixmap mCursorAttack;
+
+	QCanvasText* mMinerals;
+	QCanvasText* mOil;
 };
 
 BosonBigDisplay::BosonBigDisplay(QCanvas* c, QWidget* parent) : QCanvasView(c, parent)
@@ -100,6 +104,18 @@ void BosonBigDisplay::init()
  setHScrollBarMode(AlwaysOff);
  d->mConstruction.unitType = -1; // FIXME: 0 would be better but this is a unit...
  d->mConstruction.groundType = -1;
+
+ connect(this, SIGNAL(contentsMoving(int, int)), 
+		this, SLOT(slotContentsMoving(int, int)));
+
+ d->mMinerals = new QCanvasText(canvas());
+ d->mMinerals->setZ(Z_RESOURCES);
+ d->mMinerals->setColor(white);
+ d->mMinerals->show();
+ d->mOil = new QCanvasText(canvas());
+ d->mOil->setZ(Z_RESOURCES);
+ d->mOil->setColor(white);
+ d->mOil->show();
 }
 
 BosonBigDisplay::~BosonBigDisplay()
@@ -204,7 +220,6 @@ void BosonBigDisplay::startSelection(const QPoint& pos)
 
  setSelectionMode(SelectSingle);
  addUnitSelection(unit);
- emit signalSingleUnitSelected(unit);
  //canvas->update(); // TODO?
 }
 
@@ -276,12 +291,20 @@ void BosonBigDisplay::addUnitSelection(Unit* unit)
 	kdDebug() << k_funcinfo << ": not owner" << endl;
 	return;
  }
+ if (unit->isDestroyed()) {
+	kdDebug() << k_lineinfo << "don't select destroyed unit" << endl;
+	return;
+ }
  if (d->mSelectionList.contains(unit)) {
 	return;
  }
  d->mSelectionList.append(unit);
  unit->select();
- emit signalSelectUnit(unit);
+ if (selectionMode() == SelectSingle) {
+	emit signalSingleUnitSelected(unit);
+ } else {
+	emit signalSelectUnit(unit);
+ }
 }
 
 const QPoint& BosonBigDisplay::selectionStart() const
@@ -581,3 +604,18 @@ void BosonBigDisplay::loadCursors(const QString& dir)
 // d->mCursorPixmap->hide();
 }
 
+void BosonBigDisplay::slotUpdateMinerals(int minerals)
+{
+ d->mMinerals->setText(i18n("Minerals: %1").arg(minerals));
+}
+
+void BosonBigDisplay::slotUpdateOil(int oil)
+{
+ d->mOil->setText(i18n("Oil: %1").arg(oil));
+}
+
+void BosonBigDisplay::slotContentsMoving(int x, int y)
+{
+ d->mMinerals->move(x + visibleWidth() - 5 - d->mMinerals->boundingRect().width(), y + 5);
+ d->mOil->move     (x + visibleWidth() - 5 - d->mOil->boundingRect().width(), y + 5 + d->mMinerals->boundingRect().height());
+}

@@ -84,6 +84,9 @@ public slots:
 
 	virtual void resizeContents(int w, int h);
 
+	void slotUpdateMinerals(int minerals);
+	void slotUpdateOil(int oil);
+
 signals:
 	/**
 	 * Emitted when a single unit (@ref selectionMode == Select_Single) is
@@ -196,6 +199,8 @@ protected slots:
 	void slotMouseEvent(KGameIO*, QDataStream& stream, QMouseEvent* e, bool *eatevent);
 
 	void slotEditorMouseEvent(QMouseEvent* e, bool* eatevent);
+
+	void slotContentsMoving(int x, int y);
 
 private:
 	void init();
