@@ -74,3 +74,7 @@ bounit_LDADD = -lkio $(LIB_KDEUI)
 bounit_SOURCES = $(BOUNIT_SRC) 
 
 METASOURCES = AUTO
+
+# not yet used:
+#messages: rc.cpp
+#	$(XGETTEXT) rc.cpp $(COMMON_SRC) $(BOSON_SRC) $(BOEDITOR_SRC) -o $(podir)/boson.pot
