@@ -147,7 +147,6 @@
 #endif
 
 
-
 #define ID_DEBUG_KILLPLAYER 0
 #define ID_DEBUG_ADD_10000_MINERALS 1
 #define ID_DEBUG_ADD_1000_MINERALS 2
@@ -200,6 +199,101 @@ static void calculateWorldRect(const BoGLMatrices& matrices, const QRect& rect, 
  *minY = QMIN((map->height() - 1), *minY);
  *minY *= -1;
  *maxY *= -1;
+}
+
+class BoFPSCounter
+{
+public:
+	BoFPSCounter()
+		: mUpdatePeriod(1000000)
+	{
+		mFrameCount = 0;
+		mFPSTime = 0;
+		mFPS = 0.0;
+		reset();
+	}
+
+	/**
+	 * @return The number of frames that have been rendered since the FPS
+	 * counter has been updated the last time. See also @ref
+	 * increaseFrameCounter and @ref fps
+	 **/
+	unsigned int framesSinceLastUpdate() const
+	{
+		return mFrameCount;
+	}
+
+	/**
+	 * @return How often the FPS count is updated, in ms. This is always 1
+	 * second.
+	 **/
+	unsigned int updatePeriod() const
+	{
+		return (unsigned int)mUpdatePeriod;
+	}
+
+	/**
+	 * @return The number of frames per second. Approximate value, updated
+	 * once per second in @ref increaseFrameCounter.
+	 **/
+	double fps() const
+	{
+		return mFPS;
+	}
+
+	/**
+	 * Let the frame counter know, that another frame is being rendered /
+	 * has been rendered.
+	 **/
+	void increaseFrameCounter()
+	{
+		mFrameCount++;
+		calcFPS();
+	}
+	void skipFrame()
+	{
+		if (mFrameCount > 0) {
+			mFrameCount--;
+		}
+	}
+
+	void reset();
+
+protected:
+	void calcFPS();
+
+private:
+	const int mUpdatePeriod;
+	long long int mFPSTime;
+	unsigned int mFrameCount;
+	double mFPS;
+};
+
+void BoFPSCounter::reset()
+{
+ mFrameCount = 0;
+ mFPS = 0.0;
+
+ struct timeval time;
+ gettimeofday(&time, 0);
+ mFPSTime = time.tv_sec * 1000000 + time.tv_usec;
+}
+
+void BoFPSCounter::calcFPS()
+{
+ long long int now = 0;
+ struct timeval time;
+ gettimeofday(&time, 0);
+ now = time.tv_sec * 1000000 + time.tv_usec;
+ if ((now - mFPSTime) >= updatePeriod()) {
+	mFPS = mFrameCount / ((now - mFPSTime) / 1000000.0);
+	mFPSTime = now;
+	mFrameCount = 0;
+ } else if ((now - mFPSTime) < 0) {
+	mFPSTime = now;
+	mFrameCount = 0;
+	mFPS = 0;
+ }
 }
 
 
@@ -1461,6 +1555,7 @@ public:
 		mLocalPlayerIO = 0;
 		mMouseIO = 0;
 		mInput = 0;
+		mSelectionGroups = 0;
 
 		mCursorCollection = 0;
 		mCursorEdgeScrolling = 0;
@@ -1472,10 +1567,6 @@ public:
 		mGameGLMatrices = 0;
 
 		mDefaultFont = 0;
-
-		mFpsTime = 0;
-		mFps = 0;
-		mFrameCount = 0;
 
 		mToolTips = 0;
 
@@ -1507,11 +1598,12 @@ public:
 	PlayerIO* mLocalPlayerIO;
 	KGameMouseIO* mMouseIO;
 	BosonBigDisplayInputBase* mInput;
-	QIntDict<BoSelection> mSelectionGroups;
+	BoSelectionGroup* mSelectionGroups;
 
 	BoCursorCollection* mCursorCollection;
 	BoCursorEdgeScrolling* mCursorEdgeScrolling;
 
+	BoFPSCounter mFPSCounter;
 	BosonCanvasRenderer* mCanvasRenderer;
 
 	BoGameCamera mCamera;
@@ -1528,10 +1620,6 @@ public:
 	BosonGLFont* mDefaultFont;// AB: maybe we should support several fonts
 
 	bool mGrabMovie;
-
-	long long int mFpsTime;
-	double mFps;
-	unsigned int mFrameCount;
 
 	SelectionRect mSelectionRect;
 	BoMouseMoveDiff mMouseMoveDiff;
@@ -1597,7 +1685,7 @@ BosonBigDisplayBase::~BosonBigDisplayBase()
  qApp->removeEventFilter(this);
 
  quitGame();
- d->mSelectionGroups.clear();
+ delete d->mSelectionGroups;
  delete d->mLightWidget;
  delete d->mScriptConnector;
  BoMeshRendererManager::manager()->unsetCurrentRenderer();
@@ -1632,14 +1720,11 @@ void BosonBigDisplayBase::init()
 
  d->mScriptConnector = new BosonBigDisplayScriptConnector(this);
 
- d->mSelectionGroups.setAutoDelete(true);
- for (int i = 0; i < 10; i++) {
-	BoSelection* s = new BoSelection(this);
-	d->mSelectionGroups.insert(i, s);
- }
  mSelection = new BoSelection(this);
  connect(mSelection, SIGNAL(signalSelectionChanged(BoSelection*)),
 		this, SIGNAL(signalSelectionChanged(BoSelection*)));
+ d->mSelectionGroups = new BoSelectionGroup(10, this);
+ d->mSelectionGroups->setSelection(selection());
  d->mToolTips = new BoGLToolTip(this);
  d->mCanvasRenderer = new BosonCanvasRenderer(*d->mGameGLMatrices);
  d->mGLMiniMap = new BosonGLMiniMap(this);
@@ -1708,13 +1793,10 @@ void BosonBigDisplayBase::setCanvas(BosonCanvas* canvas)
 	return;
  }
 
- QIntDictIterator<BoSelection> selectIt(d->mSelectionGroups);
- for (; selectIt.current(); ++selectIt) {
-	connect(mCanvas, SIGNAL(signalRemovedItem(BosonItem*)),
-			selectIt.current(), SLOT(slotRemoveItem(BosonItem*)));
- }
+ connect(mCanvas, SIGNAL(signalRemovedItem(BosonItem*)),
+		d->mSelectionGroups, SLOT(slotRemoveItem(BosonItem*)));
  connect(mCanvas, SIGNAL(signalUnitRemoved(Unit*)),
-		this, SLOT(slotUnitRemoved(Unit*)));
+		d->mSelectionGroups, SLOT(slotRemoveUnit(Unit*)));
  connect(mCanvas, SIGNAL(signalRemovedItem(BosonItem*)),
 		this, SLOT(slotRemovedItemFromCanvas(BosonItem*)));
  connect(mCanvas, SIGNAL(signalRemovedItem(BosonItem*)),
@@ -1842,13 +1924,11 @@ void BosonBigDisplayBase::initializeGL()
 
  d->mCanvasRenderer->initGL();
 
- if (checkError()) {
+ if (Bo3dTools::checkError()) {
 	boError() << k_funcinfo << endl;
  }
 
- struct timeval time;
- gettimeofday(&time, 0);
- d->mFpsTime = time.tv_sec * 1000000 + time.tv_usec;
+ d->mFPSCounter.reset();
 
  // this needs to be done in initializeGL():
  BoFontInfo font;
@@ -2181,9 +2261,9 @@ void BosonBigDisplayBase::initUfoGameActions()
  delete d->mCreateMapper;
  d->mCreateMapper = new QSignalMapper(this);
  connect(d->mSelectMapper, SIGNAL(mapped(int)),
-		this, SLOT(slotSelectSelectionGroup(int)));
+		d->mSelectionGroups, SLOT(slotSelectSelectionGroup(int)));
  connect(d->mCreateMapper, SIGNAL(mapped(int)),
-		this, SLOT(slotCreateSelectionGroup(int)));
+		d->mSelectionGroups, SLOT(slotCreateSelectionGroup(int)));
 
  for (int i = 0; i < 10; i++) {
 	BoUfoAction* a = new BoUfoAction(i18n("Select Group %1").arg(i == 0 ? 10 : i),
@@ -2342,7 +2422,7 @@ void BosonBigDisplayBase::resizeGL(int w, int h)
 	camera()->setCameraChanged(true);
  }
 
- if (checkError()) {
+ if (Bo3dTools::checkError()) {
 	boError() << k_funcinfo << endl;
  }
 }
@@ -2364,21 +2444,17 @@ void BosonBigDisplayBase::paintGL()
  BO_CHECK_NULL_RET(localPlayerIO());
  BO_CHECK_NULL_RET(displayInput());
 
- if (checkError()) {
+ if (Bo3dTools::checkError()) {
 	boError() << k_funcinfo << "OpenGL error at start of paintGL" << endl;
  }
 
- d->mFrameCount++;
- calcFPS();
- if (boGame->delayedMessageCount() >= 10 && d->mFrameCount != 0) {
-	// d->mFrameCount is set to 0 every second. so if we have >= 10 delayed
-	// messages we'll render one frame per second.
-	// now we need to reset the framecount, so that we won't display several
-	// hundred fps although there is only a single frame rendered :)
-	// We incremented by one above, so we decrement here.
-	if (d->mFrameCount > 1) {
-		d->mFrameCount--;
-	}
+ d->mFPSCounter.increaseFrameCounter();
+ if (boGame->delayedMessageCount() >= 10 && d->mFPSCounter.framesSinceLastUpdate() != 0) {
+	// framesSinceLastUpdate() is set to 0 every second. so if we
+	// have >= 10 delayed messages we'll render one frame per second.
+
+	// now we need to let the counter know, that this frame is being skipped
+	d->mFPSCounter.skipFrame();
 	return;
  }
  boProfiling->render(true);
@@ -2413,7 +2489,7 @@ void BosonBigDisplayBase::paintGL()
  // AB: I think this does not belong to the canvas renderer
  renderPlacementPreview();
 
- if (checkError()) {
+ if (Bo3dTools::checkError()) {
 	boError() << k_funcinfo << "preview rendered" << endl;
  }
 
@@ -2477,7 +2553,7 @@ void BosonBigDisplayBase::paintGL()
  if (d->mUpdateInterval) {
 	d->mUpdateTimer.start(d->mUpdateInterval);
  }
- if (checkError()) {
+ if (Bo3dTools::checkError()) {
 	boError() << k_funcinfo << "OpenGL error at end of paintGL" << endl;
  }
 }
@@ -2638,7 +2714,7 @@ void BosonBigDisplayBase::renderCursor()
 	cursor()->renderCursor(x, y);
  }
 
- if (checkError()) {
+ if (Bo3dTools::checkError()) {
 	boError() << k_funcinfo << "OpenGL error" << endl;
  }
 }
@@ -2683,7 +2759,7 @@ void BosonBigDisplayBase::renderText()
  }
 
 
- if (checkError()) {
+ if (Bo3dTools::checkError()) {
 	boError() << k_funcinfo << "OpenGL error" << endl;
  }
  boTextureManager->invalidateCache();
@@ -3231,9 +3307,7 @@ void BosonBigDisplayBase::leaveEvent(QEvent*)
 void BosonBigDisplayBase::quitGame()
 {
  boDebug() << k_funcinfo << endl;
- for (int i = 0; i < 10; i++) {
-	slotClearSelectionGroup(i);
- }
+ d->mSelectionGroups->clearGroups();
  setLocalPlayerIO(0);
  setCanvas(0);
 
@@ -3252,8 +3326,7 @@ void BosonBigDisplayBase::quitGame()
 
  // these are rather cosmetic. we won't crash if we don't clear
  d->mCursorEdgeScrolling->quitGame();
- d->mFps = 0;
- d->mFrameCount = 0;
+ d->mFPSCounter.reset();
  d->mSelectionRect.quitGame();
  d->mMouseMoveDiff.stop();
 // setCamera(BoGameCamera()); do not do this! it calls cameraChanged() which generates cell list and all that stuff
@@ -3434,7 +3507,7 @@ void BosonBigDisplayBase::cameraChanged()
 
  camera()->applyCameraToScene();
 
- if (checkError()) {
+ if (Bo3dTools::checkError()) {
 	boError() << k_funcinfo << "after BoGameCamera::applyCameraToScene()" << endl;
  }
 
@@ -3497,11 +3570,6 @@ BoAutoGameCamera* BosonBigDisplayBase::autoCamera() const
  return camera()->autoGameCamera();
 }
 
-bool BosonBigDisplayBase::checkError() const
-{
- return Bo3dTools::checkError();
-}
-
 void BosonBigDisplayBase::setUpdateInterval(unsigned int ms)
 {
  boDebug() << k_funcinfo << ms << endl;
@@ -3510,24 +3578,9 @@ void BosonBigDisplayBase::setUpdateInterval(unsigned int ms)
  QTimer::singleShot(d->mUpdateInterval, this, SLOT(slotUpdateGL()));
 }
 
-void BosonBigDisplayBase::calcFPS()
-{
- static long long int now = 0;
- struct timeval time;
- gettimeofday(&time, 0);
- now = time.tv_sec * 1000000 + time.tv_usec;
- // FPS is updated once per second
- if ((now - d->mFpsTime) >= 1000000) {
-	d->mFps = d->mFrameCount / ((now - d->mFpsTime) / 1000000.0);
-	d->mFpsTime = now;
-	d->mFrameCount = 0;
-//	boDebug() << k_funcinfo << "FPS: " << d->mFps << endl;
- }
-}
-
 double BosonBigDisplayBase::fps() const
 {
-  return d->mFps;
+  return d->mFPSCounter.fps();
 }
 
 void BosonBigDisplayBase::setViewport(int x, int y, GLsizei w, GLsizei h)
@@ -3754,15 +3807,6 @@ void BosonBigDisplayBase::slotRemovedItemFromCanvas(BosonItem* item)
  d->mToolTips->unsetItem(item);
 }
 
-void BosonBigDisplayBase::slotUnitRemoved(Unit* unit)
-{
- // AB: this slot is already called when the unit is destroyed, not only when it
- // is completely removed from the canvas
- for(int i = 0; i < 10; i++) {
-	d->mSelectionGroups[i]->removeUnit(unit);
- }
-}
-
 void BosonBigDisplayBase::slotMouseIODestroyed()
 {
  // the mouse IO sometimes gets destroyed outside this widget (when the player
@@ -3775,41 +3819,15 @@ void BosonBigDisplayBase::loadFromXML(const QDomElement& root)
 {
  boDebug() << k_funcinfo << endl;
 
- // Load selection groups
  QDomElement unitGroups = root.namedItem(QString::fromLatin1("UnitGroups")).toElement();
  if (unitGroups.isNull()) {
 	boError(260) << k_funcinfo << "no UnitGroups tag" << endl;
 	return;
  }
- QDomNodeList list = unitGroups.elementsByTagName(QString::fromLatin1("Group"));
- if (list.count() == 0) {
-	boWarning(260) << k_funcinfo << "no unitgroups" << endl;
+ if (!d->mSelectionGroups->loadFromXML(unitGroups)) {
+	boError() << k_funcinfo << "could not load selectiong groups" << endl;
 	return;
  }
- for (unsigned int i = 0; i < list.count(); i++) {
-	QDomElement e = list.item(i).toElement();
-	if (e.isNull()) {
-		boError(260) << k_funcinfo << i << " is not an element" << endl;
-		return;
-	}
-	if (!e.hasAttribute("Id")) {
-		boError(260) << k_funcinfo << "missing attribute: Id for Group " << i << endl;
-		continue;
-	}
-	int id;
-	bool ok;
-	id = e.attribute("Id").toInt(&ok);
-	if (!ok) {
-		boError(260) << k_funcinfo << "Invalid Id for Group " << i << endl;
-		continue;
-	}
-	if (!d->mSelectionGroups[id]) {
-		boError(260) <<k_funcinfo << "no unitgroup with id=" << id << endl;
-		continue;
-	}
-	d->mSelectionGroups[id]->loadFromXML(e);
- }
-
 
  QDomElement displays = root.namedItem(QString::fromLatin1("Displays")).toElement();
  if (displays.isNull()) {
@@ -3846,12 +3864,7 @@ void BosonBigDisplayBase::saveAsXML(QDomElement& root)
 
  // Save selection groups
  QDomElement unitGroups = doc.createElement(QString::fromLatin1("UnitGroups"));
- for(int i = 0; i < 10; i++) {
-	QDomElement group = doc.createElement(QString::fromLatin1("Group"));
-	group.setAttribute("Id", i);
-	d->mSelectionGroups[i]->saveAsXML(group);
-	unitGroups.appendChild(group);
- }
+ d->mSelectionGroups->saveAsXML(root);
  root.appendChild(unitGroups);
 
 
@@ -5670,45 +5683,6 @@ void BosonBigDisplayBase::slotDebugRequestIdName(int msgid, bool , QString& name
 		break;
  }
 // boDebug() << name << endl;
-}
-
-void BosonBigDisplayBase::slotSelectSelectionGroup(int number)
-{
- if (number < 0 || number >= 10) {
-	boError() << k_funcinfo << "Invalid group " << number << endl;
-	return;
- }
- if (!d->mSelectionGroups[number]) {
-	boError() << k_funcinfo << "NULL group " << number << endl;
-	return;
- }
- selection()->copy(d->mSelectionGroups[number]);
-}
-
-void BosonBigDisplayBase::slotCreateSelectionGroup(int number)
-{
- if (number < 0 || number >= 10) {
-	boError() << k_funcinfo << "Invalid group " << number << endl;
-	return;
- }
- if (!d->mSelectionGroups[number]) {
-	boError() << k_funcinfo << "NULL group " << number << endl;
-	return;
- }
- d->mSelectionGroups[number]->copy(selection());
-}
-
-void BosonBigDisplayBase::slotClearSelectionGroup(int number)
-{
- if (number < 0 || number >= 10) {
-	boError() << k_funcinfo << "Invalid group " << number << endl;
-	return;
- }
- if (!d->mSelectionGroups[number]) {
-	boError() << k_funcinfo << "NULL group " << number << endl;
-	return;
- }
- d->mSelectionGroups[number]->clear();
 }
 
 void BosonBigDisplayBase::slotSetGrabMovie(bool grab)

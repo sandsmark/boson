@@ -27,6 +27,7 @@
 #include "boson.h"
 
 #include <qdom.h>
+#include <qintdict.h>
 
 BoSelection::BoSelection(QObject* parent) : QObject(parent)
 {
@@ -315,5 +316,141 @@ void BoSelection::slotRemoveItem(BosonItem* item)
  // -> we can't access rtti() anymore
  mSelection.removeRef((Unit*)item);
 }
+
+
+
+BoSelectionGroup::BoSelectionGroup(int count, QObject* parent)
+	: QObject(parent)
+{
+ mCount = count;
+ mSelection = 0;
+ mSelectionGroups = new QIntDict<BoSelection>();
+ mSelectionGroups->setAutoDelete(true);
+ for (int i = 0; i < mCount; i++) {
+	BoSelection* s = new BoSelection(this);
+	mSelectionGroups->insert(i, s);
+ }
+}
+
+BoSelectionGroup::~BoSelectionGroup()
+{
+ mSelectionGroups->clear();
+ delete mSelectionGroups;
+}
+
+void BoSelectionGroup::clearGroups()
+{
+ for (int i = 0; i < count(); i++) {
+	slotClearSelectionGroup(i);
+ }
+}
+
+void BoSelectionGroup::slotRemoveItem(BosonItem* item)
+{
+ QIntDictIterator<BoSelection> it(*mSelectionGroups);
+ for (; it.current(); ++it) {
+	it.current()->slotRemoveItem(item);
+ }
+}
+
+void BoSelectionGroup::slotRemoveUnit(Unit* u)
+{
+ QIntDictIterator<BoSelection> it(*mSelectionGroups);
+ for (; it.current(); ++it) {
+	it.current()->removeUnit(u);
+ }
+}
+
+void BoSelectionGroup::slotSelectSelectionGroup(int number)
+{
+ BO_CHECK_NULL_RET(selection());
+ if (number < 0 || number >= count()) {
+	boError() << k_funcinfo << "Invalid group " << number << endl;
+	return;
+ }
+ if (!(*mSelectionGroups)[number]) {
+	boError() << k_funcinfo << "NULL group " << number << endl;
+	return;
+ }
+ selection()->copy((*mSelectionGroups)[number]);
+}
+
+void BoSelectionGroup::slotCreateSelectionGroup(int number)
+{
+ BO_CHECK_NULL_RET(selection());
+ if (number < 0 || number >= count()) {
+	boError() << k_funcinfo << "Invalid group " << number << endl;
+	return;
+ }
+ if (!(*mSelectionGroups)[number]) {
+	boError() << k_funcinfo << "NULL group " << number << endl;
+	return;
+ }
+ (*mSelectionGroups)[number]->copy(selection());
+}
+
+void BoSelectionGroup::slotClearSelectionGroup(int number)
+{
+ if (number < 0 || number >= count()) {
+	boError() << k_funcinfo << "Invalid group " << number << endl;
+	return;
+ }
+ if (!(*mSelectionGroups)[number]) {
+	boError() << k_funcinfo << "NULL group " << number << endl;
+	return;
+ }
+ (*mSelectionGroups)[number]->clear();
+}
+
+bool BoSelectionGroup::loadFromXML(const QDomElement& root)
+{
+ boDebug() << k_funcinfo << endl;
+
+ if (root.isNull()) {
+	return false;
+ }
+ QDomNodeList list = root.elementsByTagName(QString::fromLatin1("Group"));
+ if (list.count() == 0) {
+	boWarning(260) << k_funcinfo << "no unitgroups" << endl;
+	return false;
+ }
+ for (unsigned int i = 0; i < list.count(); i++) {
+	QDomElement e = list.item(i).toElement();
+	if (e.isNull()) {
+		boError(260) << k_funcinfo << i << " is not an element" << endl;
+		return false;
+	}
+	if (!e.hasAttribute("Id")) {
+		boError(260) << k_funcinfo << "missing attribute: Id for Group " << i << endl;
+		continue;
+	}
+	int id;
+	bool ok;
+	id = e.attribute("Id").toInt(&ok);
+	if (!ok) {
+		boError(260) << k_funcinfo << "Invalid Id for Group " << i << endl;
+		continue;
+	}
+	if (!(*mSelectionGroups)[id]) {
+		boError(260) <<k_funcinfo << "no unitgroup with id=" << id << endl;
+		continue;
+	}
+	(*mSelectionGroups)[id]->loadFromXML(e);
+ }
+ return true;
+}
+
+bool BoSelectionGroup::saveAsXML(QDomElement& root) const
+{
+ QDomDocument doc = root.ownerDocument();
+ for(int i = 0; i < count(); i++) {
+	QDomElement group = doc.createElement(QString::fromLatin1("Group"));
+	group.setAttribute("Id", i);
+	(*mSelectionGroups)[i]->saveAsXML(group);
+	root.appendChild(group);
+ }
+ return true;
+}
+
 
 

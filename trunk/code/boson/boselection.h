@@ -25,6 +25,7 @@
 class Unit;
 class BosonItem;
 class QDomElement;
+template<class T> class QIntDict;
 
 /**
  * Represents a selection. Every @ref BosonBigDisplay has its own selection
@@ -160,6 +161,85 @@ signals:
 private:
 	bool mIsActivated;
 	QPtrList<Unit> mSelection;
+};
+
+
+/**
+ * @short A collection of @ref BoSelection objects
+ *
+ * This class stores the selection groups that can usually be created using
+ * CTRL+number.
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+class BoSelectionGroup : public QObject
+{
+	Q_OBJECT
+public:
+	BoSelectionGroup(int count, QObject* parent);
+	~BoSelectionGroup();
+
+	int count() const
+	{
+		return mCount;
+	}
+
+	void clearGroups();
+
+	/**
+	 * Set the active selection, i.e. the selection that displays the unit
+	 * that are currently on the screen.
+	 *
+	 * This selection is used to copy data to/from when a selection group
+	 * from this class is selected or created.
+	 **/
+	void setSelection(BoSelection* s) { mSelection = s; }
+
+	/**
+	 * @return See @ref setSelection
+	 **/
+	BoSelection* selection() const { return mSelection; }
+
+	bool saveAsXML(QDomElement& root) const;
+	bool loadFromXML(const QDomElement& root);
+
+public slots:
+	/**
+	 * Connect @ref BosonCanvas::signalRemovedItem to this. It removes @p
+	 * item from all selections.
+	 **/
+	void slotRemoveItem(BosonItem* item);
+
+	/**
+	 * Connect @ref BosonCanvas::signalUnitRemoved to this. It calls @ref
+	 * BoSelection::removeUnit fro all selection groups.
+	 **/
+	void slotRemoveUnit(Unit* u);
+
+	/**
+	 * Select the specified selection group
+	 * @param number The selection group to be selected. Must be in range 0..9 where 1
+	 * is the first group and 0 the 10th group.
+	 **/
+	void slotSelectSelectionGroup(int number);
+
+	/**
+	 * Copy the current selection to the specified selection group.
+	 * @param number The group to be created. Must be in range 0..9 where 1
+	 * is the first group and 0 the 10th group.
+	 **/
+	void slotCreateSelectionGroup(int number);
+
+	/**
+	 * Clear the specified selection group.
+	 * @param number The group to be created. Must be in range 0..9 where 1
+	 * is the first group and 0 the 10th group.
+	 **/
+	void slotClearSelectionGroup(int number);
+
+private:
+	int mCount;
+	QIntDict<BoSelection>* mSelectionGroups;
+	BoSelection* mSelection;
 };
 
 #endif
