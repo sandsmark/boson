@@ -87,28 +87,22 @@ public:
 
 	KSpriteToolTip* mUnitTips;
 
+	QVBoxLayout* mFrameLayout; // minimap and command frame
 	
 	// options:
 	int mArrowKeyStep;
 };
 
-BosonWidget::BosonWidget(QWidget* parent, bool editor)
+BosonWidget::BosonWidget(QWidget* parent)
     : QWidget( parent, "BosonWidget" )
 {
  init();
 
- if (editor) {
-	addEditorCommandFrame();
- } else {
-	addGameCommandFrame();
- }
-
  QHBoxLayout* topLayout = new QHBoxLayout(this, 5); // FIXME: 5 is hardcoded
- QVBoxLayout* layout = new QVBoxLayout();
+ d->mFrameLayout = new QVBoxLayout();
  topLayout->addWidget(d->mBigDisplay);
- topLayout->addLayout(layout);
- layout->addWidget(d->mMiniMap, 0, AlignHCenter);
- layout->addWidget(d->mCommandFrame);
+ topLayout->addLayout(d->mFrameLayout);
+ d->mFrameLayout->addWidget(d->mMiniMap, 0, AlignHCenter);
 
 // the map is also found here. This is currently only used on startup to load
 // the cells (aka map - they contain the groundtypes) and the initial units.
@@ -121,7 +115,11 @@ BosonWidget::BosonWidget(QWidget* parent, bool editor)
  connect(d->mBigDisplay, SIGNAL(signalConstructUnit(int,int, int, Player*)),
 		d->mBoson, SLOT(slotSendAddUnit(int, int, int, Player*)));
 
+}
 
+void BosonWidget::insertCommandFrame(BosonCommandFrame* frame)
+{
+ d->mFrameLayout->addWidget(frame);
 }
 
 void BosonWidget::init()
@@ -138,7 +136,8 @@ void BosonWidget::init()
 // about units,
  d->mBigDisplay = new BosonBigDisplay(d->mCanvas, this);
  d->mMiniMap = new BosonMiniMap(this);
-// d->mCommandFrame is now in addEditorCommandFrame() or addGameCommandFrame()
+// d->mCommandFrame is now in addEditorCommandFrame() or addGameCommandFrame().
+// This is called by Top or Editor after construction of BosonWidget.
 
 
 // beside the three main widgets this widget contains the game itself. Boson is
@@ -199,8 +198,8 @@ void BosonWidget::init()
 // tooltips - added in slotAddUnit
  d->mUnitTips = new KSpriteToolTip(d->mBigDisplay);
 
- // 640*480 is probably not enough (KDE needs at least 800*600) but as a minimum
- // should be ok.
+// 640*480 is probably not enough (KDE needs at least 800*600) but as a minimum
+// should be ok.
  setMinimumWidth(640);
  setMinimumHeight(480);
 
@@ -493,8 +492,9 @@ void BosonWidget::addEditorCommandFrame()
 		d->mBigDisplay, SLOT(slotWillPlaceCell(int, unsigned char))); // in addEditorCommandFrame()
  connect(this, SIGNAL(signalEditorLoadTiles(const QString&)), 
 		d->mCommandFrame, SLOT(slotEditorLoadTiles(const QString&)));
-
+ insertCommandFrame(d->mCommandFrame);
 }
+
 void BosonWidget::addGameCommandFrame()
 { // remember to call this *after* init() - otherwise connect()s won't work
  d->mCommandFrame = new BosonCommandFrame(this, false);
@@ -505,6 +505,7 @@ void BosonWidget::addGameCommandFrame()
 		d->mCommandFrame, SLOT(slotShowSingleUnit(Unit*)));
  connect(d->mBigDisplay, SIGNAL(signalSingleUnitSelected(Unit*)),
 		d->mCommandFrame, SLOT(slotSetConstruction(Unit*)));
+ insertCommandFrame(d->mCommandFrame);
 }
 
 void BosonWidget::startEditor()

@@ -27,6 +27,7 @@ class KGameIO;
 class QKeyEvent;
 
 class BosonCanvas;
+class BosonCommandFrame;
 class Unit;
 class Player;
 
@@ -65,7 +66,7 @@ public:
 	/**
 	 * Default Constructor
 	 **/
-	BosonWidget(QWidget* parent, bool editor = false);
+	BosonWidget(QWidget* parent);
 
 	/**
 	 * Default Destructor
@@ -77,6 +78,9 @@ public:
 	void saveConfig();
 
 	void zoom(const QWMatrix&);
+
+	void addEditorCommandFrame();
+	void addGameCommandFrame();
 
 public slots:
 	void slotDebug();
@@ -120,7 +124,7 @@ protected:
 
 	void addDummyComputerPlayer(const QString& name); // used by editor only
 
-	void changeLocalPlayer(Player* p);
+	virtual void changeLocalPlayer(Player* p);
 	virtual void keyReleaseEvent(QKeyEvent* e);
 
 	void quitGame();
@@ -131,8 +135,7 @@ protected:
 	 **/
 	void recreateMap();
 
-	void addEditorCommandFrame();
-	void addGameCommandFrame();
+	void insertCommandFrame(BosonCommandFrame*);
 
 protected slots:
 	void slotPlayerJoinedGame(KPlayer* p);
