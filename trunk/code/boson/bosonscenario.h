@@ -103,7 +103,7 @@ public:
 	 * Clear the local xml document and apply the scenario that is
 	 * currently in boson.
 	 **/
-	void applyScenario(Boson* boson);
+	void applyScenario(const Boson* boson);
 	
 	/**
 	 * Add all available player units to the game, add minerals, ...
