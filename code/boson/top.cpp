@@ -72,7 +72,8 @@
 class TopWidget::TopWidgetPrivate
 {
 public:
-	TopWidgetPrivate() {
+	TopWidgetPrivate() 
+	{
 		mWelcome = 0;
 		mNewGame = 0;
 #ifndef NO_EDITOR
@@ -110,10 +111,15 @@ public:
 TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
 {
  d = new TopWidgetPrivate;
+ mBoson = 0;
+ mPlayer = 0;
+ mMap = 0;
+ mCanvas = 0;
+ mGame = false;
 #if KDE_VERSION < 310
  d->mLoadingDockConfig = false;
 #endif
- mGame = false;
+
  mMainDock = createDockWidget("mainDock", 0, this, i18n("Map"));
  mWs = new QWidgetStack(mMainDock);
  mMainDock->setWidget(mWs);
@@ -125,25 +131,29 @@ TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
 
  BosonConfig::initBosonConfig();
 
- initMusic();
- initBoson();
- initPlayer();
- initMap();
-
  setMinimumWidth(640);
  setMinimumHeight(480);
 
+ initMusic();
+
  initActions();
- enableGameActions(false);
  initStatusBar();
- showWelcomeWidget();
+
+ // "re" is not entirely correct ;)
+ reinitGame();
+
  loadInitialDockConfig();
 }
 
 TopWidget::~TopWidget()
 {
+ kdDebug() << k_funcinfo << endl;
+ kdDebug() << "endGame()" << endl;
+ endGame();
+ kdDebug() << "endGame() done" << endl;
  d->mPlayers.clear();
  delete d;
+ kdDebug() << k_funcinfo << "done" << endl;
 }
 
 void TopWidget::saveProperties(KConfig *config)
@@ -169,13 +179,14 @@ void TopWidget::readProperties(KConfig *config)
 
 void TopWidget::initActions()
 {
+ // note: mBoson and similar are *not* yet constructed!
  // Main actions: Game start/end and quit
  d->mGameActions = new KActionCollection(this); // actions that are available in game mode only
 
  //FIXME: slotNewGame() is broken - endGame() is enough for now.
 // (void)KStdGameAction::gameNew(this, SLOT(slotNewGame()), actionCollection()); //AB: game action?
  (void)KStdGameAction::end(this, SLOT(slotEndGame()), d->mGameActions);
-// (void)KStdGameAction::pause(mBoson, SLOT(slotTogglePause()), d->mGameActions);
+// (void)KStdGameAction::pause(mBoson, SLOT(slotTogglePause()), d->mGameActions); // FIXME: NO! mBoson is not yet constructed!
  (void)KStdGameAction::quit(this, SLOT(close()), actionCollection());
 
  // Settings
@@ -744,7 +755,7 @@ void TopWidget::slotEndGame()
  if(answer == KMessageBox::No) {
 	return;
  }
- endGame();
+ slotGameOver();
 }
 
 void TopWidget::endGame()
@@ -758,12 +769,14 @@ void TopWidget::endGame()
  delete mBoson;  // Easiest way to reset game info
  delete mCanvas;
  delete mMap;
+}
 
- // Then re-init needed stuff
+void TopWidget::reinitGame()
+{
  initBoson();
  initPlayer();
  initMap();
-
+ 
  // Change menus and show welcome widget
  mGame = false;
  d->mActionStatusbar->setChecked(false);
@@ -775,6 +788,7 @@ void TopWidget::endGame()
 void TopWidget::slotGameOver()
 {
  endGame();
+ reinitGame();
 }
 
 void TopWidget::slotGamePreferences()
@@ -807,6 +821,8 @@ void TopWidget::slotRemoveActiveDisplay()
  d->mBosonWidget->slotRemoveActiveDisplay();
 }
 
+// FIXME: nonsense name. this doesn't toggle anything, but it applies the
+// d->mActionStatusbar status to the actual statusbar
 void TopWidget::slotToggleStatusbar()
 {
  if(d->mActionStatusbar->isChecked()) {
