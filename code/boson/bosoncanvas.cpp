@@ -214,6 +214,9 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount)
 	
  QPtrListIterator<QCanvasItem> animIt(d->mAnimList);
  while (animIt.current()) {
+	// the only thing done here is to increase the reload counter. perhaps
+	// we should add a separate list containing all units which are
+	// realoading instead? would save a lot of function calls...
 	animIt.current()->advance(0);
 	++animIt;
  }
@@ -223,21 +226,21 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount)
 	++animIt;
  }
 
- if (d->mWorkNone.count() > 0 && advanceCount != 300) {
+ if (d->mWorkNone.count() > 0 && (advanceCount % 50) == 0) {
 	QPtrListIterator<Unit> it(d->mWorkNone);
 	while (it.current()) {
 		it.current()->advanceNone();
 		++it;
 	}
  }
- if (d->mWorkProduce.count() > 0 && advanceCount != 300) {
+ if (d->mWorkProduce.count() > 0 && (advanceCount % 1) == 0) {// always true. should be be bigger, like % 10 or so. we need to change something in the production logic for this.
 	QPtrListIterator<Unit> it(d->mWorkProduce);
 	while (it.current()) {
 		it.current()->advanceProduction();
 		++it;
 	}
  }
- if (d->mWorkMove.count() > 0 && advanceCount != 400) {
+ if (d->mWorkMove.count() > 0 && (advanceCount % 1) == 0) { // always true
 	QPtrListIterator<Unit> it(d->mWorkMove);
 	while (it.current()) {
 		it.current()->advanceMove(); // move
@@ -245,21 +248,21 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount)
 		++it;
 	}
  }
- if (d->mWorkMine.count() > 0 && advanceCount != 400) {
+ if (d->mWorkMine.count() > 0 && (advanceCount % 40) == 0) {
 	QPtrListIterator<Unit> it(d->mWorkMine);
 	while (it.current()) {
 		it.current()->advanceMine();
 		++it;
 	}
  }
- if (d->mWorkAttack.count() > 0 && advanceCount != 400) {
+ if (d->mWorkAttack.count() > 0 && advanceCount != 400) { // always true
 	QPtrListIterator<Unit> it(d->mWorkAttack);
 	while (it.current()) {
 		it.current()->advanceAttack();
 		++it;
 	}
  }
- if (d->mWorkConstructed.count() > 0 && advanceCount != 400) {
+ if (d->mWorkConstructed.count() > 0 && (advanceCount % 40) == 0) {
 	QPtrListIterator<Unit> it(d->mWorkConstructed);
 	while (it.current()) {
 		it.current()->advanceConstruction();
