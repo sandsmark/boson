@@ -118,6 +118,7 @@ inline	int	boGridDist	(QPoint p ) { return boGridDist( p.x(), p.y() ); }
 struct unitProperties_t {
 /* from here.... */
 	const char 	*name;		// The name of the funny thing...
+	const char	*desc;		// Description of the unit
 	int	width;
 	int	height;
 	int	visibility;	// how far it can see
@@ -137,6 +138,7 @@ struct unitProperties_t {
 struct mobileProperties_t {
 /* from here.... */
 	const char 	*name;		// The name of the funny thing...
+	const char	*desc;		// Description of the unit
 	int	width;		// pixel-size
 	int	height;		// pixel-size
 	int	visibility;	// how far it can see
@@ -171,6 +173,7 @@ extern const int mobilePropNb;
 struct facilityProperties_t  {
 /* from here.... */
 	const char 	*name;		// Guess it, geek..
+	const char	*desc;		// Description of the unit
 	int	width;		// tile-size
 	int	height;		// tile-size
 	int	visibility;	// how far it can see
