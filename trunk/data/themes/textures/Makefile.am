@@ -25,16 +25,15 @@ texture_DATA = \
 	mslback1.jpg \
 	mslfrnt1.jpg \
 	roof1.jpg \
-	stairs1.jpg
-	swtchbrd.jpg
-	tnkhull1.jpg
-	tracks.jpg
-	trtside.jpg
-	vehlcamo.jpg
-	wall1.jpg
-	wall2.jpg
-	wheel.jpg
-	wheel1.jpg
+	stairs1.jpg \
+	swtchbrd.jpg \
+	tnkhull1.jpg \
+	tracks.jpg \
+	trtside.jpg \
+	wall1.jpg \
+	wall2.jpg \
+	wheel.jpg \
+	wheel1.jpg \
 	window1.jpg
 
 # no further editing need here
