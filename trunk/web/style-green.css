@@ -275,3 +275,35 @@ h3.announcement {
   background-color: transparent;
   text-align: center;
 }
+
+/** Statistics **/
+a.statslink {
+  color: #00ff00;
+  text-decoration: none;
+}
+a.statslink:hover {
+  color: #00ff00;
+  text-decoration: underline;
+}
+
+.stats_views {
+  font-size: large;
+  font-weight: bold;
+}
+
+.stats_visits {
+  font-weight: bold;
+}
+
+.statscell {
+  background-color: #081808;
+}
+
+.statscell2 {
+  background-color: #182818;
+}
+
+img.statsbar {
+  vertical-alignment: middle;
+}
+

@@ -21,6 +21,7 @@
 
 /*****  Variables  *****/
 $filename="announcements.php";
+$basedir="";
 
 /*****  Some includes  *****/
 include("common.php");
