@@ -32,7 +32,7 @@ BosonProfiling* BosonProfiling::mProfiling = 0;
 
 #define COMPARE_TIMES(time1, time2) ( ((time2.tv_sec - time1.tv_sec) * 1000000) + (time2.tv_usec - time1.tv_usec) )
 
-#define PROFILING_VERSION 0x07 // increase if you change the file format of saved files!
+#define PROFILING_VERSION 0x08 // increase if you change the file format of saved files!
 
 unsigned long int compareTimes(const struct timeval& t1, const struct timeval& t2)
 {
@@ -194,6 +194,7 @@ void BosonProfiling::init()
  d->mRenderTimes.setAutoDelete(true);
  d->mSlotAdvanceTimes.setAutoDelete(true);
  d->mGLUpdateInterval = 0; // profiling logs can make use of the OpenGL update interval - makes anlalyzations easier
+ d->mGameSpeed = -1;
  d->mVersion = PROFILING_VERSION;
 }
 
@@ -399,6 +400,7 @@ bool BosonProfiling::save(QDataStream& stream) const
  stream << (Q_INT32)PROFILING_VERSION;
 
  stream << (Q_UINT32)d->mGLUpdateInterval;
+ stream << (Q_INT32)d->mGameSpeed;
 
  stream << d->mUnitTimes;
  stream << d->mTimes;
@@ -449,17 +451,22 @@ bool BosonProfiling::load(QDataStream& stream)
  }
  Q_INT32 version;
  stream >> version;
- if (version != PROFILING_VERSION && version != 0x06) {
+ if (version != PROFILING_VERSION && version < 0x06) {
 	boError() << k_funcinfo << "Invalid profiling format version " << version << endl;
 	return false;
  }
  d->mVersion = version;
 
- Q_UINT32 glUteInterval = 0;
+ Q_UINT32 glUpdateInterval = 0;
+ Q_INT32 gameSpeed = -1;
  if (version >= 0x07) {
-	stream >> glUteInterval;
+	stream >> glUpdateInterval;
  }
- d->mGLUpdateInterval = glUteInterval;
+ if (version >= 0x08) {
+	stream >> gameSpeed;
+ }
+ d->mGLUpdateInterval = glUpdateInterval;
+ d->mGameSpeed = gameSpeed;
 
  // from here on we assume the stream is ok
  d->mUnitTimes.clear();
@@ -497,3 +504,12 @@ unsigned int BosonProfiling::glUpdateInterval() const
  return d->mGLUpdateInterval;
 }
 
+void BosonProfiling::setGameSpeed(int speed)
+{
+ d->mGameSpeed = speed;
+}
+
+int BosonProfiling::gameSpeed() const
+{
+ return d->mGameSpeed;
+}

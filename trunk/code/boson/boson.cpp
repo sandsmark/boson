@@ -1277,6 +1277,11 @@ void Boson::slotPropertyChanged(KGamePropertyBase* p)
 				}
 			}
 		}
+		if (gamePaused()) {
+			boProfiling->setGameSpeed(0);
+		} else {
+			boProfiling->setGameSpeed(gameSpeed());
+		}
 		break;
 	case IdGamePaused:
 		boDebug() << k_funcinfo << "game paused changed! now=" << d->mGamePaused << endl;
@@ -1287,6 +1292,11 @@ void Boson::slotPropertyChanged(KGamePropertyBase* p)
 			boDebug() << k_funcinfo << "starting timer again" << endl;
 			slotAddChatSystemMessage(i18n("The game is not paused anymore"));
 			d->mGameTimer->start(ADVANCE_INTERVAL);
+		}
+		if (gamePaused()) {
+			boProfiling->setGameSpeed(0);
+		} else {
+			boProfiling->setGameSpeed(gameSpeed());
 		}
 		break;
 	default:

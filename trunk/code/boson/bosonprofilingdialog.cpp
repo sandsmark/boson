@@ -91,10 +91,44 @@ public:
 	}
 };
 
-class RenderSummary : public QWidget
+void SummaryWidgetBase::set(struct timeval* start, struct timeval* end, unsigned int count)
+{
+ if (!start || !end || count == 0) {
+	clear();
+	return;
+ }
+ mStartSec = start->tv_sec;
+ mStartUSec = start->tv_usec;
+ mEndSec = end->tv_sec;
+ mEndUSec = end->tv_usec;
+ mCount = count;
+}
+
+QString SummaryWidgetBase::startTime() const
+{
+ QDateTime s;
+ s.setTime_t(mStartSec);
+ return s.time().toString();
+}
+
+QString SummaryWidgetBase::endTime() const
+{
+ QDateTime e;
+ e.setTime_t(mEndSec);
+ return e.time().toString();
+}
+
+double SummaryWidgetBase::elapsed() const
+{
+ double diff = (mEndSec - mStartSec) * 1000000 + (mEndUSec - mStartUSec);
+ diff /= 1000000;
+ return diff;
+}
+
+class RenderSummary : public SummaryWidgetBase
 {
 public:
-	RenderSummary(QWidget* parent) : QWidget(parent, "RenderSummary")
+	RenderSummary(QWidget* parent) : SummaryWidgetBase(parent, "RenderSummary")
 	{
 		QGridLayout* topLayout = new QGridLayout(this);
 		int row = 0;
@@ -147,13 +181,10 @@ public:
 	{
 	}
 
-	void clear()
+	virtual void clear()
 	{
-		mStartSec = 0;
-		mStartUSec = 0;
-		mEndSec = 0;
-		mEndUSec = 0;
-		mCount = 0;
+		SummaryWidgetBase::clear();
+		mUpdateInterval = -1;
 		mStartLabel->setText("");
 		mEndLabel->setText("");
 		mSeconds->setText("");
@@ -161,38 +192,17 @@ public:
 		mFPSLabel->setText("");
 		mUpdateIntervalLabel->setText("");
 	}
-
-	void set(struct timeval* start, struct timeval* end, int count)
-	{
-		if (!start || !end || count == 0) {
-			clear();
-			return;
-		}
-		mStartSec = start->tv_sec;
-		mStartUSec = start->tv_usec;
-		mEndSec = end->tv_sec;
-		mEndUSec = end->tv_usec;
-		mCount = count;
-	}
 	void setUpdateInterval(int i)
 	{
 		mUpdateInterval = i;
 	}
-
 	void apply()
 	{
-		QDateTime s, e;
-		s.setTime_t(mStartSec);
-		e.setTime_t(mEndSec);
-		mStartLabel->setText(s.time().toString());
-		mEndLabel->setText(e.time().toString());
-		mCountLabel->setText(QString::number(mCount));
-
-		double diff = (mEndSec - mStartSec) * 1000000 + (mEndUSec - mStartUSec);
-		diff /= 1000000;
-		mSeconds->setText(QString::number(diff));
-		double fps = ((double)mCount) / diff;
-		mFPSLabel->setText(QString::number(fps));
+		mStartLabel->setText(startTime());
+		mEndLabel->setText(endTime());
+		mCountLabel->setText(QString::number(count()));
+		mSeconds->setText(QString::number(elapsed()));
+		mFPSLabel->setText(QString::number(perSecond()));
 
 		if (mUpdateInterval == -1) {
 			mUpdateIntervalLabel->setText("(unknown)");
@@ -202,11 +212,6 @@ public:
 	}
 
 private:
-	long mStartSec;
-	long mStartUSec;
-	long mEndSec;
-	long mEndUSec;
-	int mCount;
 	int mUpdateInterval;
 	QLabel* mStartLabel;
 	QLabel* mEndLabel;
@@ -214,6 +219,104 @@ private:
 	QLabel* mCountLabel;
 	QLabel* mFPSLabel;
 	QLabel* mUpdateIntervalLabel;
+};
+
+class SlotAdvanceSummary : public SummaryWidgetBase
+{
+public:
+	SlotAdvanceSummary(QWidget* parent) : SummaryWidgetBase(parent, "SlotAdvanceSummary")
+	{
+		QGridLayout* topLayout = new QGridLayout(this);
+		int row = 0;
+	int column = 0;
+		QLabel* label = new QLabel(i18n("First profiled advance call at:"), this);
+		mStartLabel = new QLabel(this);
+		topLayout->addWidget(label, row, column);
+		column++;
+		topLayout->addWidget(mStartLabel, 0, column);
+		column++;
+
+		label = new QLabel(i18n("Last profiled advance call at:"), this);
+		mEndLabel = new QLabel(this);
+		topLayout->addWidget(label, 0, column);
+		column++;
+		topLayout->addWidget(mEndLabel, 0, column);
+
+		row++;
+		column = 0;
+		label = new QLabel(i18n("Elapsed seconds: "), this);
+		mSeconds = new QLabel(this);
+		topLayout->addWidget(label, row, column);
+		column++;
+		topLayout->addWidget(mSeconds, row, column);
+
+		row++;
+		column = 0;
+		label = new QLabel(i18n("Advance call count in this time: "), this);
+		mCountLabel = new QLabel(this);
+		topLayout->addWidget(label, row, column);
+		column++;
+		topLayout->addWidget(mCountLabel, row, column);
+		column++;
+
+		label = new QLabel(i18n("Advance calls per second: "), this);
+		mPerSecondLabel = new QLabel(this);
+		topLayout->addWidget(label, row, column);
+		column++;
+		topLayout->addWidget(mPerSecondLabel, row, column);
+		column++;
+
+		label = new QLabel(i18n("Game speed: "), this);
+		mGameSpeedLabel = new QLabel(this);
+		topLayout->addWidget(label, row, column);
+		column++;
+		topLayout->addWidget(mGameSpeedLabel, row, column);
+		column++;
+	}
+	~SlotAdvanceSummary()
+	{
+	}
+
+	void clear()
+	{
+		SummaryWidgetBase::clear();
+		mGameSpeed = -1;
+		mStartLabel->setText("");
+		mEndLabel->setText("");
+		mSeconds->setText("");
+		mCountLabel->setText("");
+		mPerSecondLabel->setText("");
+		mGameSpeedLabel->setText("");
+	}
+
+	void setGameSpeed(int i)
+	{
+		mGameSpeed = i;
+	}
+
+	void apply()
+	{
+		mStartLabel->setText(startTime());
+		mEndLabel->setText(endTime());
+		mCountLabel->setText(QString::number(count()));
+		mSeconds->setText(QString::number(elapsed()));
+		mPerSecondLabel->setText(QString::number(perSecond()));
+
+		if (mGameSpeed == -1) {
+			mGameSpeedLabel->setText("(unknown)");
+		} else {
+			mGameSpeedLabel->setText(QString::number(mGameSpeed));
+		}
+	}
+
+private:
+	int mGameSpeed;
+	QLabel* mStartLabel;
+	QLabel* mEndLabel;
+	QLabel* mSeconds;
+	QLabel* mCountLabel;
+	QLabel* mPerSecondLabel;
+	QLabel* mGameSpeedLabel;
 };
 
 class BosonProfilingDialogPrivate
@@ -225,10 +328,12 @@ public:
 		mRender = 0;
 		mRenderSummary = 0;
 		mSlotAdvance = 0;
-		mSlotAdvanceSummaryOnly = 0;
-		mSlotAdvanceSummaryForCount = 0;
+		mSlotAdvanceSumAverageOnly = 0;
+		mSlotAdvanceSumAverageForCount = 0;
+		mSlotAdvanceSummary = 0;
 		mItemAdvance = 0;
-		mItemAdvanceSummaryOnly = 0;
+		mItemAdvanceSumAverageOnly = 0;
+//		mItemAdvanceSummary = 0;
 		mEvents = 0;
 		mCurrentFile = 0;
 
@@ -241,10 +346,12 @@ public:
 	KListView* mRender;
 	RenderSummary* mRenderSummary;
 	KListView* mSlotAdvance;
-	QCheckBox* mSlotAdvanceSummaryOnly;
-	QCheckBox* mSlotAdvanceSummaryForCount;
+	QCheckBox* mSlotAdvanceSumAverageOnly;
+	QCheckBox* mSlotAdvanceSumAverageForCount;
+	SlotAdvanceSummary* mSlotAdvanceSummary;
 	KListView* mItemAdvance;
-	QCheckBox* mItemAdvanceSummaryOnly;
+	QCheckBox* mItemAdvanceSumAverageOnly;
+//	ItemAdvanceSummary* mItemAdvanceSummary;
 	KListView* mEvents;
 	QLabel* mCurrentFile;
 	QString mCurrentFileName;
@@ -340,14 +447,17 @@ void BosonProfilingDialog::initSlotAdvanceWidget(QWidget* widget)
  d->mSlotAdvance->addColumn(i18n("Time (s)"));
  d->mSlotAdvance->addColumn(i18n("%"));
  QHBox* slotAdvanceControlBox = new QHBox(widget);
- d->mSlotAdvanceSummaryOnly = new QCheckBox(i18n("Summary only"), slotAdvanceControlBox);
- d->mSlotAdvanceSummaryOnly->setChecked(true);
- d->mSlotAdvanceSummaryForCount = new QCheckBox(i18n("Summary for AdvanceCount"), slotAdvanceControlBox);
- d->mSlotAdvanceSummaryForCount->setChecked(true);
+ d->mSlotAdvanceSumAverageOnly = new QCheckBox(i18n("Average only"), slotAdvanceControlBox);
+ d->mSlotAdvanceSumAverageOnly->setChecked(true);
+ d->mSlotAdvanceSumAverageForCount = new QCheckBox(i18n("Average for AdvanceCount"), slotAdvanceControlBox);
+ d->mSlotAdvanceSumAverageForCount->setChecked(true);
+
+ d->mSlotAdvanceSummary = new SlotAdvanceSummary(widget);
 
  layout->addWidget(slotAdvanceLabel);
  layout->addWidget(d->mSlotAdvance);
  layout->addWidget(slotAdvanceControlBox);
+ layout->addWidget(d->mSlotAdvanceSummary);
 }
 
 void BosonProfilingDialog::initItemAdvanceWidget(QWidget* widget)
@@ -370,8 +480,8 @@ void BosonProfilingDialog::initItemAdvanceWidget(QWidget* widget)
  layout->addWidget(d->mItemAdvance);
 
  QHBox* controlBox = new QHBox(widget);
- d->mItemAdvanceSummaryOnly = new QCheckBox(i18n("Item Advance Summary Only"), controlBox);
- d->mItemAdvanceSummaryOnly->setChecked(true);
+ d->mItemAdvanceSumAverageOnly = new QCheckBox(i18n("Item Advance Sum and Average Only"), controlBox);
+ d->mItemAdvanceSumAverageOnly->setChecked(true);
  layout->addWidget(controlBox);
 }
 
@@ -517,6 +627,7 @@ void BosonProfilingDialog::resetRenderPage()
  if (!count) {
 	d->mRenderSummary->set(0, 0, 0);
 	d->mRenderSummary->setUpdateInterval(-1);
+	d->mRenderSummary->apply();
 	return;
  }
  unsigned long int func = aFunction / count;
@@ -615,7 +726,7 @@ private:
 
 void BosonProfilingDialog::slotResetSlotAdvancePage()
 {
- if (!d->mItemAdvanceSummaryOnly->isChecked()) {
+ if (!d->mItemAdvanceSumAverageOnly->isChecked()) {
 	int r = KMessageBox::questionYesNo(this, i18n("You selected to display advance information for ALL items - this will take a very long time.\nDo you really want to do this?"));
 	if (r != KMessageBox::Yes) {
 		return;
@@ -629,9 +740,12 @@ void BosonProfilingDialog::slotResetSlotAdvancePage()
 void BosonProfilingDialog::resetSlotAdvanceWidget()
 {
  d->mSlotAdvance->clear();
- d->mItemAdvance->clear();
+ d->mSlotAdvanceSummary->clear();
  BosonProfilingPrivate* pd = d->data()->d;
  if (pd->mSlotAdvanceTimes.isEmpty()) {
+	d->mSlotAdvanceSummary->set(0, 0, 0);
+	d->mSlotAdvanceSummary->setGameSpeed(-1);
+	d->mSlotAdvanceSummary->apply();
 	return;
  }
 
@@ -649,7 +763,8 @@ void BosonProfilingDialog::resetSlotAdvanceWidget()
 	for (unsigned int i = 0; i < slotAdvanceValueNames.count(); i++) {
 		slotAdvanceSums[i].add(it.current()->mAdvanceCount, values[i]);
 	}
-	if (!d->mSlotAdvanceSummaryOnly->isChecked()) {
+	if (!d->mSlotAdvanceSumAverageOnly->isChecked()) {
+		// TODO: we should display sums, too
 		unsigned long int func = values[0];
 		unsigned int call = it.current()->mAdvanceCount;
 		QListViewItemNumber* item = new QListViewItemNumber(d->mSlotAdvance);
@@ -674,7 +789,8 @@ void BosonProfilingDialog::resetSlotAdvanceWidget()
  // a separate summary for ever advance count. we do special things there, e.g.
  // shots are delete for MAXIMAL_ADVANCE_COUNT only. so this might be useful to
  // improve certain functions
- if (d->mSlotAdvanceSummaryForCount->isChecked()) {
+ if (d->mSlotAdvanceSumAverageForCount->isChecked()) {
+	// TODO: we should display sums, too
 	QValueList<unsigned int> advanceCalls;
 	for (unsigned int i = 0; i < slotAdvanceValueNames.count(); i++) {
 		QValueList<unsigned int> list = slotAdvanceSums[i].advanceCalls();
@@ -706,6 +822,11 @@ void BosonProfilingDialog::resetSlotAdvanceWidget()
 	}
  }
 
+ d->mSlotAdvanceSummary->set(&pd->mSlotAdvanceTimes.first()->mFunction.mData[0],
+		&pd->mSlotAdvanceTimes.last()->mFunction.mData[1],
+		pd->mSlotAdvanceTimes.count());
+ d->mSlotAdvanceSummary->setGameSpeed(pd->mGameSpeed);
+ d->mSlotAdvanceSummary->apply();
 }
 
 void BosonProfilingDialog::resetItemAdvanceWidget()
@@ -765,7 +886,7 @@ void BosonProfilingDialog::addItemAdvance(ProfileSlotAdvance* slotAdvance)
 	return;
  }
  QPtrListIterator<ProfileItemAdvance> it(slotAdvance->mItems);
- if (d->mItemAdvanceSummaryOnly->isChecked()) {
+ if (d->mItemAdvanceSumAverageOnly->isChecked()) {
 	return;
  }
  for (; it.current(); ++it) {
