@@ -469,7 +469,9 @@ protected:
 	 * Used by @ref loadFromXML.
 	 **/
 	bool loadItemsFromXML(const QDomElement& root);
+	bool saveItemsAsXML(QDomElement& root) const;
 	bool loadEffectsFromXML(const QDomElement& root);
+	bool saveEffectsAsXML(QDomElement& root) const;
 
 	bool loadEventListenerFromXML(const QDomElement& root);
 	bool saveEventListenerAsXML(QDomElement& root) const;

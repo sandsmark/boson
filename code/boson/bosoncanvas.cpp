@@ -1070,12 +1070,10 @@ bool BosonCanvas::loadFromXML(const QDomElement& root)
 	boError(260) << k_funcinfo << "unable to load EventListener from XML" << endl;
 	return false;
  }
-
  if (!loadItemsFromXML(root)) {
 	boError(260) << k_funcinfo << "unable to load items from XML" << endl;
 	return false;
  }
-
  if (!loadEffectsFromXML(root)) {
 	boError(260) << k_funcinfo << "unable to load effects from XML" << endl;
 	// AB: do NOT return. this is NOT critical.
@@ -1416,70 +1414,21 @@ bool BosonCanvas::loadEffectsFromXML(const QDomElement& root)
 bool BosonCanvas::saveAsXML(QDomElement& root)
 {
  boDebug() << k_funcinfo << endl;
- QDomDocument doc = root.ownerDocument();
 
  if (!saveEventListenerAsXML(root)) {
 	boError() << k_funcinfo << "cannot save event listener as XML" << endl;
 	return false;
  }
-
- QMap<unsigned int, QDomElement> owner2Items;
- for (KPlayer* p = boGame->playerList()->first(); p; p = boGame->playerList()->next()) {
-	QDomElement items = doc.createElement(QString::fromLatin1("Items"));
-
-	// note: we need to store the index in the list here, not the p->id() !
-	items.setAttribute(QString::fromLatin1("PlayerId"), boGame->playerList()->findRef(p));
-	root.appendChild(items);
-	owner2Items.insert(p->id(), items);
+ if (!saveItemsAsXML(root)) {
+	boError() << k_funcinfo << "cannot save items as xml" << endl;
+	return false;
+ }
+ if (!saveEffectsAsXML(root)) {
+	boError() << k_funcinfo << "could not save effects as xml" << endl;
+	return false;
  }
 
- for (BosonItem* i = d->mAnimList.first(); i; i = d->mAnimList.next()) {
-	QDomElement items;
-	if (RTTI::isShot(i->rtti())) {
-		BosonShot* s = (BosonShot*)i;
-		if (!s->owner()) {
-			BO_NULL_ERROR(s->owner());
-			continue;
-		}
-		unsigned int id = s->owner()->id();
-		items = owner2Items[id];
-	} else if (RTTI::isUnit(i->rtti())) {
-		Unit* u = (Unit*)i;
-		if (!u->owner()) {
-			BO_NULL_ERROR(u->owner());
-			continue;
-		}
-		unsigned int id = u->owner()->id();
-		items = owner2Items[id];
-	}
-	if (items.isNull()) {
-		boError() << k_funcinfo << "no Items element found" << endl;
-		continue;
-	}
-	QDomElement item = doc.createElement(QString::fromLatin1("Item"));
-	if (RTTI::isShot(i->rtti())) {
-		if (!((BosonShot*)i)->isActive()) {
-			continue;
-		}
-	}
-	if (!i->saveAsXML(item)) {
-		boError() << k_funcinfo << "Could not save item " << i << endl;
-		continue;
-	}
-	items.appendChild(item);
- }
-
- // Save effects
- QDomElement effects = doc.createElement(QString::fromLatin1("Effects"));
- root.appendChild(effects);
- QPtrListIterator<BosonEffect> effectIt(d->mEffects);
- while (effectIt.current()) {
-	QDomElement e = doc.createElement(QString::fromLatin1("Effect"));
-	effectIt.current()->saveAsXML(e);
-	effects.appendChild(e);
-	++effectIt;
- }
-
+ QDomDocument doc = root.ownerDocument();
  BosonPropertyXML propertyXML;
  QDomElement handler = doc.createElement(QString::fromLatin1("DataHandler"));
  root.appendChild(handler);
@@ -1498,6 +1447,73 @@ bool BosonCanvas::saveEventListenerAsXML(QDomElement& root) const
  return d->mEventListener->save(eventListener);
 }
 
+bool BosonCanvas::saveItemsAsXML(QDomElement& root) const
+{
+ QDomDocument doc = root.ownerDocument();
+ QMap<unsigned int, QDomElement> owner2Items;
+ for (KPlayer* p = boGame->playerList()->first(); p; p = boGame->playerList()->next()) {
+	QDomElement items = doc.createElement(QString::fromLatin1("Items"));
+
+	// note: we need to store the index in the list here, not the p->id() !
+	items.setAttribute(QString::fromLatin1("PlayerId"), boGame->playerList()->findRef(p));
+	root.appendChild(items);
+	owner2Items.insert(p->id(), items);
+ }
+
+ for (BosonItem* i = d->mAnimList.first(); i; i = d->mAnimList.next()) {
+	QDomElement items;
+	if (RTTI::isShot(i->rtti())) {
+		BosonShot* s = (BosonShot*)i;
+		if (!s->owner()) {
+			BO_NULL_ERROR(s->owner());
+			return false;
+		}
+		unsigned int id = s->owner()->id();
+		items = owner2Items[id];
+	} else if (RTTI::isUnit(i->rtti())) {
+		Unit* u = (Unit*)i;
+		if (!u->owner()) {
+			BO_NULL_ERROR(u->owner());
+			return false;
+		}
+		unsigned int id = u->owner()->id();
+		items = owner2Items[id];
+	}
+	if (items.isNull()) {
+		boError() << k_funcinfo << "no Items element found" << endl;
+		return false;
+	}
+	QDomElement item = doc.createElement(QString::fromLatin1("Item"));
+	if (RTTI::isShot(i->rtti())) {
+		if (!((BosonShot*)i)->isActive()) {
+			continue;
+		}
+	}
+	if (!i->saveAsXML(item)) {
+		boError() << k_funcinfo << "Could not save item " << i << endl;
+		return false;
+	}
+	items.appendChild(item);
+ }
+ return true;
+}
+
+bool BosonCanvas::saveEffectsAsXML(QDomElement& root) const
+{
+ QDomDocument doc = root.ownerDocument();
+
+ // Save effects
+ QDomElement effects = doc.createElement(QString::fromLatin1("Effects"));
+ root.appendChild(effects);
+ QPtrListIterator<BosonEffect> effectIt(d->mEffects);
+ while (effectIt.current()) {
+	QDomElement e = doc.createElement(QString::fromLatin1("Effect"));
+	effectIt.current()->saveAsXML(e);
+	effects.appendChild(e);
+	++effectIt;
+ }
+ return true;
+}
 
 void BosonCanvas::changeAdvanceList(BosonItem* item)
 {
