@@ -273,6 +273,10 @@ void BosonSpriteCursor::setCursor(int mode)
 	QCanvasPixmapArray* a = d->mCursorPixmaps[cursorMode()];
 //	d->mCursor->hide();
 	if (a) {
+		if (!a->isValid()) {
+			kdError() << k_funcinfo << "pixmap array not valid for mode=" << mode << endl;
+			return;
+		}
 		d->mCurrentFrames = a;
 		d->mCursor->setSequence(a);
 		d->mCursor->setFrame(0);
