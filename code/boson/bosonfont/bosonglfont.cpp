@@ -304,7 +304,7 @@ public:
 		float w = 0.0f;
 		for (int i = 0; i < len; i++) {
 			char c = string[i];
-			w += mFont->getWidth(c, mPointSize);
+			w += ceilf(mFont->getWidth(c, mPointSize));
 			if (c != ' ') {
 				w += mFont->getGap() * mPointSize;
 			}
@@ -358,11 +358,11 @@ BoTXFFont::~BoTXFFont()
 bool BoTXFFont::loadFont(const QString& fileName)
 {
  mFont = new BofntTexFont();
+ mFont->setGap(0.0f);
  if (mFont->load(fileName.latin1()) != FNT_TRUE) {
 	boError() << k_funcinfo << "could not load txf font " << fileName << endl;
 	return false;
  }
- mFont->setGap(0.0f);
  return true;
 }
 
