@@ -291,6 +291,7 @@ private:
 	void initMiniMap();
 	void initCommandFrame();
 	void initLayout();
+	void initLocalPlayerInput();
 
 	/**
 	 * Initialize the debug player menu and the usual player menu in editor

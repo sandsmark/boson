@@ -348,9 +348,6 @@ void BoDisplayManager::quitGame()
  for (int i = 0; i < 10; i++) {
 	slotClearGroup(i);
  }
- d->mDisplayList.clear();
- d->mBoxList.clear();
- d->mActiveDisplay = 0;
 }
 
 BoBox* BoDisplayManager::findBox(BosonBigDisplayBase* b) const
@@ -697,12 +694,8 @@ void BoDisplayManager::slotAction(const BoSpecificAction& action)
  activeDisplay()->displayInput()->action(action);
 }
 
-void BoDisplayManager::setLocalPlayerInput(BosonLocalPlayerInput* input)
+QPtrList<BosonBigDisplayBase>* BoDisplayManager::displayList()
 {
- QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
- while (it.current()) {
-	it.current()->displayInput()->setLocalPlayerInput(input);
-	++it;
- }
+ return &d->mDisplayList;
 }
 

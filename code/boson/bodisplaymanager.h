@@ -30,10 +30,10 @@ class Unit;
 class BosonCanvas;
 class BoSelection;
 class BoSpecificAction;
-class BosonLocalPlayerInput;
 
 class KPlayer;
 class QDomElement;
+template<class T> class QPtrList;
 
 /**
  * Since boson is able to provide different displays ("views") of the same map
@@ -98,8 +98,6 @@ public:
 	 **/
 	void setCanvas(BosonCanvas* canvas);
 
-	void setLocalPlayerInput(BosonLocalPlayerInput* input);
-
 	void quitGame();
 
 	void removeActiveDisplay();
@@ -124,6 +122,8 @@ public:
 	 * @return BosonBigDisplayBase::fps for the @ref activeDisplay
 	 **/
 	double fps() const;
+
+	QPtrList<BosonBigDisplayBase>* displayList();
 
 public slots:
 	/**
