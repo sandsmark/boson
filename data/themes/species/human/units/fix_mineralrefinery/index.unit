@@ -3,7 +3,7 @@ ConstructionSteps=20
 
 [Boson Unit]
 Armor=0
-ConstructedEffects=10001,10002,10003
+ConstructedEffects=10003
 DestroyedEffects=1010,3011,6011,7010
 ExplodingDamage=0
 ExplodingDamageRange=0
