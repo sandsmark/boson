@@ -443,8 +443,6 @@ public:
 
 protected:
 	void createFaces(unsigned int faces);
-	bool connectNodes(const BoAdjacentDataBase* database, const QPtrList<BoFaceNode>& nodes, QPtrList<BoFaceNode>* found, BoFaceNode* node) const;
-
 
 	// this is meant to check whether the something on the screen will
 	// change if we draw this mesh now.
