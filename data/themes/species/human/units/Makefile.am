@@ -4,7 +4,8 @@ MOBILE_UNITS = \
 	mob_oilharvester \
 	mob_quad \
 	mob_ship \
-	mob_tank
+	mob_tank \
+	mob_batzen
 FACILITIES = \
 	fix_barracks \
 	fix_comsat \
@@ -18,7 +19,8 @@ FACILITIES = \
 	fix_samsite \
 	fix_techcenter \
 	fix_turret \
-	fix_warfactory
+	fix_warfactory \
+	fix_mineralrefinery
 
 unitsdir = $(kde_datadir)/boson/themes/species/human/units
 

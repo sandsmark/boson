@@ -1,0 +1,16 @@
+[Boson Unit]
+IsFacility=false
+TerrainType=0
+Name=Batzen
+Id=10006
+Health=100
+MineralCost=100
+Range=100
+Damage=10
+Reload=30
+Producer=0
+
+[Boson Mobile Unit]
+Speed=4
+CanGoOnLand=true
+CanGoOnWater=false
