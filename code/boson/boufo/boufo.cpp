@@ -1364,6 +1364,7 @@ BoUfoVBox::BoUfoVBox() : BoUfoWidget()
 void BoUfoVBox::init()
 {
  setLayoutClass(UVBoxLayout);
+ setOpaque(false);
 }
 
 BoUfoHBox::BoUfoHBox() : BoUfoWidget()
@@ -1374,6 +1375,7 @@ BoUfoHBox::BoUfoHBox() : BoUfoWidget()
 void BoUfoHBox::init()
 {
  setLayoutClass(UHBoxLayout);
+ setOpaque(false);
 }
 
 class BoUfoTabWidgetPrivate
