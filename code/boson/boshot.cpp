@@ -51,6 +51,7 @@ boShot::boShot(int _x, int _y, int _z, shot_style style)
 {
 
 	int	version;
+	bool	ret;
 	switch(style) {
 
 		case SHOT_SHOT:
@@ -78,13 +79,23 @@ boShot::boShot(int _x, int _y, int _z, shot_style style)
 
 		case SHOT_UNIT:
 			version = random()% UNITS_SHOTS_NB;
-			boAssert(loadBig(style, version));
+			ret = loadBig(style, version);
+			boAssert(ret);
+			if (!ret) {
+				delete this;
+				return;
+			}
 			maxCounter = UNITS_SHOT_FRAMES;
 			setSequence(unitSequ[version]);
 			break;
 		case SHOT_FACILITY:
 			version = random()% FIX_SHOTS_NB;
-			boAssert(loadBig(style, version));
+			ret = loadBig(style, version);
+			boAssert(ret);
+			if (!ret) {
+				delete this;
+				return;
+			}
 			maxCounter = FIX_SHOT_FRAMES;
 			setSequence(fixSequ[version]);
 			/*
@@ -201,8 +212,8 @@ bool loadPixmap(const QString &path, QPixmap **pix)
 	w = image.width(); h = image.height();
 
 	boAssert(image.depth()==32);
-	boAssert( w>31 );
-	boAssert( h>31 );
+	boAssert( w>7 );
+	boAssert( h>10 );
 	
 
 	if (image.isNull() || w < 32 || h < 32) 
