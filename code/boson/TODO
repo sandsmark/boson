@@ -1,7 +1,7 @@
+This list is mostly obsolete. Use bugs.kde.org instead.
+
 Game TODOs
 - waypoints
-- BosonCommandWidget should paint the order pixmap only *once* no more. E.g. we
-  repaint for setGrayOut() and setProductionCount()
 - pathfinding doesn't support units with size > BO_TILE_SIZE. get rid of
   MobileUnit::boundingRect() hack
 - let the player configure how often the different advance methods are called.
@@ -24,10 +24,6 @@ Game TODOs
   specifying the frame number when armor changes. note that the frame number for
   this must NOT depend on the .3ds file!
 - Add screenshots support to saving/loading widget
-- call updateCursor() every advance call, so that the cursor changes also if a
-  unit moved below it.
-  UPDATE: don't do this. we call it on mouse move already - this would mainly
-  hurting performance. instead we should use a separate timer for this.
 - Add support for playing sound in a loop. E.g. for missile fly sound
 - Add support for miner sounds (mining/unloading)
 
@@ -74,7 +70,6 @@ Data TODOs
   QPainter to paint on it?
 - can we use a coded gradient instead of the startup-bg pix? would allow every
   size then
-- background story - especially descriptions of the units
 - sounds for miner (mining/unloading, maybe when player commands unit to mine)
 - better shooting sounds
 - explosion sounds
