@@ -816,11 +816,6 @@ void BoUfoWidget::setLayoutClass(LayoutClass layout)
 	case NoLayout:
 		setLayout(0);
 		break;
-	case UFlowLayout:
-		setLayout(new ufo::UFlowLayout());
-		break;
-		break;
-	case UBoxLayout:
 	case UHBoxLayout:
 //		setLayout(new ufo::UBoxLayout(ufo::UBoxLayout::XAxis));
 		setLayout(new ufo::UBoBoxLayout(true));
