@@ -47,6 +47,8 @@
 #include <qptrlist.h>
 #include <qdom.h>
 
+#include <math.h>
+
 #include "defines.h"
 
 #define MAX_PATH_AGE 5
