@@ -31,6 +31,11 @@ public:
 	BoEventMatching();
 	~BoEventMatching();
 
+	const BoEvent* event() const
+	{
+		return mEvent;
+	}
+
 	bool ignoreUnitId() const
 	{
 		return mIgnoreUnitId;
