@@ -657,6 +657,8 @@ void BosonBigDisplayBase::initializeGL()
  boTextureManager->initOpenGL();
  boWaterManager->initOpenGL();
 
+ boConfig->setTextureFOW(boTextureManager->textureUnits() > 1);
+
  connect(kapp->eventLoop(), SIGNAL(signalUpdateGL()), this, SLOT(slotUpdateGL()));
 
  recursive = false;
@@ -2244,6 +2246,10 @@ void BosonBigDisplayBase::setLocalPlayerIO(PlayerIO* io)
 				d->mGLMiniMap, SLOT(slotFog(int, int)));
 		io->connect(SIGNAL(signalUnfog(int, int)),
 				d->mGLMiniMap, SLOT(slotUnfog(int, int)));
+		io->connect(SIGNAL(signalFog(int, int)),
+				this, SLOT(slotFog(int, int)));
+		io->connect(SIGNAL(signalUnfog(int, int)),
+				this, SLOT(slotUnfog(int, int)));
 		if (boGame->gameMode()) {
 			io->connect(SIGNAL(signalShowMiniMap(bool)),
 					d->mGLMiniMap, SLOT(slotShowMiniMap(bool)));
@@ -3974,6 +3980,22 @@ void BosonBigDisplayBase::makeVisibleEffectsList(BoVisibleEffects* v)
 		v->mAll.append(it.current());
 	}
 	++it;
+ }
+}
+
+void BosonBigDisplayBase::slotFog(int x, int y)
+{
+ BoGroundRenderer* r = BoGroundRendererManager::manager()->currentRenderer();
+ if (r) {
+	r->cellChanged(x, y);
+ }
+}
+
+void BosonBigDisplayBase::slotUnfog(int x, int y)
+{
+ BoGroundRenderer* r = BoGroundRendererManager::manager()->currentRenderer();
+ if (r) {
+	r->cellChanged(x, y);
  }
 }
 

@@ -317,6 +317,9 @@ public slots:
 	 **/
 	void slotUnitChanged(Unit* unit);
 
+	void slotFog(int x, int y);
+	void slotUnfog(int x, int y);
+
 signals:
 	void signalMakeActive(BosonBigDisplayBase*);
 

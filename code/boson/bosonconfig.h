@@ -562,6 +562,9 @@ public:
 	void setDisableModelLoading(bool d) { mDisableModelLoading = d; }
 	bool disableModelLoading() const { return mDisableModelLoading; }
 
+	void setTextureFOW(bool t) { mTextureFOW = t; }
+	bool textureFOW() const { return mTextureFOW; }
+
 public:
 	void save(bool editor = false, KConfig* conf = 0);
 	void reset(KConfig* conf = 0);
@@ -645,6 +648,7 @@ private:
 	bool mShowResources;
 	bool mEnableColormap;
 	bool mDisableModelLoading;
+	bool mTextureFOW;
 	unsigned int mDefaultLodCount;
 };
 
