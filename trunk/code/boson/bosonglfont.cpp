@@ -57,7 +57,7 @@ int BosonGLFont::width(const QString& text)
  if (!mFontMetrics) {
 	return 0;
  }
- // AB: we use the widest chat of the font only. may be .. bad. but at least it
+ // AB: we use the widest char of the font only. may be .. bad. but at least it
  // is fast and easy to use.
  return text.length() * metrics()->maxWidth();
 }
@@ -111,6 +111,12 @@ int BosonGLFont::height(const QString& text, int maxWidth)
 int BosonGLFont::renderText(int x, int y, const QString& text, int maxWidth, bool background)
 {
  int heightSum = 0;
+ if (x < 0) {
+	x = 0;
+ }
+ if (y < 0) {
+	y = 0;
+ }
  QStringList lines = QStringList::split('\n', text);
  QStringList::Iterator it;
  for (it = lines.begin(); it != lines.end(); ++it) {
