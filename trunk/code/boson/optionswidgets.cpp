@@ -20,6 +20,7 @@
 #include "bosonconfig.h"
 
 #include "bosoncursor.h"
+#include "bosonmodel.h"
 #include "boson.h"
 #include "defines.h"
 
@@ -27,12 +28,14 @@
 #include <knuminput.h>
 #include <ksimpleconfig.h>
 #include <kstandarddirs.h>
+#include <kmessagebox.h>
 #include <kdebug.h>
 
 #include <qlabel.h>
 #include <qcombobox.h>
 #include <qcheckbox.h>
 #include <qvbox.h>
+#include <qtooltip.h>
 
 #include "optionswidgets.moc"
 
@@ -45,6 +48,11 @@ OptionsWidget::OptionsWidget()
 OptionsWidget::~OptionsWidget()
 {
 }
+
+
+//////////////////////////////////////////////////////////////////////
+// General Options
+//////////////////////////////////////////////////////////////////////
 
 GeneralOptions::GeneralOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
 {
@@ -126,6 +134,10 @@ void GeneralOptions::setCmdBackground(const QString& file)
 }
 
 
+//////////////////////////////////////////////////////////////////////
+// Cursor Options
+//////////////////////////////////////////////////////////////////////
+
 CursorOptions::CursorOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
 {
  QHBox* hbox = new QHBox(this);
@@ -188,6 +200,11 @@ void CursorOptions::setCursor(CursorMode mode)
  mCursor->setCurrentItem(mode);
 }
 
+
+//////////////////////////////////////////////////////////////////////
+// Scrolling Options
+// "Scrolling" applies to both arrow scrolling and mouse scrolling!
+//////////////////////////////////////////////////////////////////////
 
 ScrollingOptions::ScrollingOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
 {
@@ -265,6 +282,9 @@ void ScrollingOptions::setMMBScrolling(bool on)
 }
 
 
+//////////////////////////////////////////////////////////////////////
+// Sound Options
+//////////////////////////////////////////////////////////////////////
 
 SoundOptions::SoundOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
 {
@@ -323,12 +343,20 @@ void SoundOptions::setUnitSoundsDeactivated(BosonConfig* conf)
 }
 
 
+//////////////////////////////////////////////////////////////////////
+// OpenGL Options
+//////////////////////////////////////////////////////////////////////
 
 OpenGLOptions::OpenGLOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
 {
  mUpdateInterval = new KIntNumInput(DEFAULT_UPDATE_INTERVAL, this);
  mUpdateInterval->setRange(2, 400);
  mUpdateInterval->setLabel(i18n("Update interval (low values hurt performance)"));
+ QToolTip::add(mUpdateInterval, i18n("The update interval specifies after how many milli seconds the scene gets re-rendered and therefore directly influence the frames per seconds. But low values prevent boson from doing other important tasks and therefore you might end up in a game that takes several seconds until your units react to your commands! 20ms are usually a good value."));
+ mModelTexturesMipmaps = new QCheckBox(this);
+ mModelTexturesMipmaps->setText(i18n("Use mipmaps for model textures"));
+ QToolTip::add(mModelTexturesMipmaps, i18n("With mipmapping disabled units often look ugly - but it consumes less memory and therefore might improve rendering speed."));
+
 }
 
 OpenGLOptions::~OpenGLOptions()
@@ -337,17 +365,31 @@ OpenGLOptions::~OpenGLOptions()
 
 void OpenGLOptions::apply()
 {
+ bool reloadModelTextures = false;
  emit signalUpdateIntervalChanged((unsigned int)mUpdateInterval->value());
+ if (boConfig->modelTexturesMipmaps() != mModelTexturesMipmaps->isChecked()) {
+	boConfig->setModelTexturesMipmaps(mModelTexturesMipmaps->isChecked());
+	reloadModelTextures = true;
+ }
+
+ if (reloadModelTextures) {
+	reloadModelTextures = KMessageBox::questionYesNo(this, i18n("You need to reload the model textures to see your changes. Do you want to reload now (takes some time)?"));
+	if (reloadModelTextures) {
+		BosonModel::reloadAllTextures();
+	}
+ }
 }
 
 void OpenGLOptions::setDefaults()
 {
  setUpdateInterval(DEFAULT_UPDATE_INTERVAL);
+ mModelTexturesMipmaps->setChecked(true);
 }
 
 void OpenGLOptions::load()
 {
  setUpdateInterval(boConfig->updateInterval());
+ mModelTexturesMipmaps->setChecked(boConfig->modelTexturesMipmaps());
 }
 
 void OpenGLOptions::setUpdateInterval(int ms)
@@ -355,6 +397,11 @@ void OpenGLOptions::setUpdateInterval(int ms)
  kdDebug() << k_funcinfo << ms << endl;
  mUpdateInterval->setValue(ms);
 }
+
+
+//////////////////////////////////////////////////////////////////////
+// Chat Options
+//////////////////////////////////////////////////////////////////////
 
 ChatOptions::ChatOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
 {

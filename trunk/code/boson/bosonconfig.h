@@ -220,6 +220,9 @@ public:
 	unsigned int chatScreenRemoveTime() const { return mChatScreenRemoveTime->value(); }
 	void setChatScreenMaxItems(int max) { mChatScreenMaxItems->setValue(max); }
 	int chatScreenMaxItems() const { return mChatScreenMaxItems->value(); }
+	void setModelTexturesMipmaps(bool enable) { mModelTexturesMipmaps->setValue(enable); }
+	bool modelTexturesMipmaps() const { return mModelTexturesMipmaps->value(); }
+
 	void setUnitSoundActivated(UnitSoundEvent e, bool activated);
 	bool unitSoundActivated(UnitSoundEvent e) const;
 
@@ -273,6 +276,7 @@ private:
 	BoConfigBoolEntry* mRMBMove;
 	BoConfigBoolEntry* mShowMenubarInGame;
 	BoConfigBoolEntry* mShowMenubarOnStartup;
+	BoConfigBoolEntry* mModelTexturesMipmaps;
 	BoConfigIntEntry* mCommandButtonsPerRow;
 	BoConfigIntEntry* mChatScreenMaxItems;
 	BoConfigUIntEntry* mChatScreenRemoveTime;

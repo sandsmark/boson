@@ -170,6 +170,7 @@ signals:
 
 private:
 	KIntNumInput* mUpdateInterval;
+	QCheckBox* mModelTexturesMipmaps;
 };
 
 class ChatOptions : public QVBox, public OptionsWidget

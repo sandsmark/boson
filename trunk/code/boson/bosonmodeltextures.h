@@ -69,8 +69,11 @@ public:
 	 **/
 	const QString& texturePath() const { return mTexturePath; }
 
+	void reloadTextures();
+
 protected:
 	void removeTexture(GLuint tex);
+	void loadTexture(const QString& textureName, GLuint tex);
 
 private:
 	void init();

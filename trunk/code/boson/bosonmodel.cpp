@@ -447,25 +447,29 @@ void BosonModel::computeBoundings(Lib3dsNode* node, BosonModel::BoHelper* helper
  }
 }
 
-void BosonModel::loadNodes()
+void BosonModel::loadNodes(bool reload)
 {
  if (!QGLContext::currentContext()) {
 	kdError() << k_funcinfo << "NULL current context" << endl;
 	return;
  }
- kdDebug() << k_funcinfo << "loading all nodes" << endl;
+ if (reload) {
+	kdDebug() << k_funcinfo << "reloading all nodes" << endl;
+ } else {
+	kdDebug() << k_funcinfo << "loading all nodes" << endl;
+ }
  Lib3dsNode* p;
  for (p = m3ds->nodes; p; p = p->next) {
-	loadNode(p);
+	loadNode(p, reload);
  }
 }
 
-void BosonModel::loadNode(Lib3dsNode* node)
+void BosonModel::loadNode(Lib3dsNode* node, bool reload)
 {
  {
 	Lib3dsNode* p;
 	for (p = node->childs; p; p = p->next) {
-		loadNode(p);
+		loadNode(p, reload);
 	}
  }
  if (node->type == LIB3DS_OBJECT_NODE) {
@@ -489,8 +493,15 @@ void BosonModel::loadNode(Lib3dsNode* node)
 			return;
 		}
 	} else {
-		kdWarning() << k_funcinfo << "node was already loaded before" << endl;
-		return;
+		if (reload) {
+			// it is important that the list is deleted, but the
+			// newly generated list must have the *same* number as
+			// it had before!
+			glDeleteLists(node->user.d, 1);
+		} else {
+			kdWarning() << k_funcinfo << "node was already loaded before" << endl;
+			return;
+		}
 	}
 
 	unsigned int p;
@@ -770,5 +781,15 @@ void BosonModel::myTransform(GLfloat* r, GLfloat* m, GLfloat* v)
 	r[i] = M(i, 0) * v[0] + M(i, 1) * v[1] + M(i, 2) * v[2] + M(i, 3) * v[3];
  }
 #undef M
+}
+
+void BosonModel::reloadAllTextures()
+{
+ kdDebug() << k_funcinfo << endl;
+ if (!mModelTextures) {
+	kdError() << k_funcinfo << "NULL model textures ?!?!" << endl;
+	return;
+ }
+ mModelTextures->reloadTextures();
 }
 
