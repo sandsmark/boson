@@ -302,9 +302,9 @@ void BosonCanvas::updateSight(Unit* unit, double, double)
 
  int left = ((x > sight) ? (x - sight) : 0) - x;
  int top = ((y > sight) ? (y - sight) : 0) - y;
- int right = ((x + sight > d->mMap->width() - 1) ?  d->mMap->width() - 1 :
+ int right = ((x + sight > d->mMap->width()) ?  d->mMap->width() :
 		x + sight) - x;
- int bottom = ((y + sight > d->mMap->height() - 1) ?  d->mMap->height() - 1 :
+ int bottom = ((y + sight > d->mMap->height()) ?  d->mMap->height() :
 		y + sight) - y;
  
  sight *= sight;
