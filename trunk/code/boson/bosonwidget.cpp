@@ -314,16 +314,18 @@ void BosonWidget::slotNewGame()
  // add our costum game config widget
  KGameDialogBosonConfig* bosonConfig = new KGameDialogBosonConfig(0);
  connect(bosonConfig, SIGNAL(signalStartGame()), this, SLOT(slotStartGame()));
-// connect(bosonConfig, SIGNAL(signalAddComputerPlayer()),
-//		this, SLOT(slotAddComputerPlayer()));
  connect(d->mBoson, SIGNAL(signalMapChanged(const QString&)),
 		bosonConfig, SLOT(slotMapChanged(const QString&)));
  connect(d->mBoson, SIGNAL(signalScenarioChanged(const QString&)),
 		bosonConfig, SLOT(slotScenarioChanged(const QString&)));
-// connect(bosonConfig, SIGNAL(signalScenarioChanged(const QString&)),
-//		this, SLOT(slotLoadScenario(const QString&)));
  connect(bosonConfig, SIGNAL(signalSpeciesChanged(const QString&)),
 		this, SLOT(slotSendChangeSpecies(const QString&)));
+ // Note: KGameDialogBosonConfig does not emit signals for the important things,
+ // but rather sends a message over the network (see BosonMessage). 
+ // This is done to provide network transparency in the dialog - when the admin
+ // changes the map then on all clients the map must change.
+ // You can find the reactions to these messages in Boson::slotNetworkData().
+
 
  // add a connection and a chat widget
  dialog->addGameConfig(bosonConfig);
@@ -352,7 +354,6 @@ void BosonWidget::slotNewGame()
  // show the dialog
  dialog->show();
  bosonConfig->slotMapChanged(0);
-// connect(d->mBoson, SIGNAL(signalPlayerJoinedGame(KPlayer*)), dialog, SLOT(show()));
 }
 
 void BosonWidget::slotStartGame()
@@ -568,13 +569,13 @@ void BosonWidget::slotLoadScenario(const QString& scenario)
  }
  d->mScenario = new BosonScenario;
  d->mScenario->loadScenario(BosonScenario::scenarioFileName(scenario));
-// d->mScenario->loadScenario(BosonScenario::scenarioFileName(scenario));
  d->mBoson->setMinPlayers(d->mScenario->minPlayers());
  d->mBoson->setMaxPlayers(d->mScenario->maxPlayers());
 }
 
 void BosonWidget::slotReceiveMap(const QByteArray& buffer)
 {
+ kdDebug() << k_funcinfo << endl;
  QDataStream stream(buffer, IO_ReadOnly);
  recreateMap();
  QString tiles = "earth.png"; // TODO: should be selectable
@@ -584,9 +585,10 @@ void BosonWidget::slotReceiveMap(const QByteArray& buffer)
  // load tiles if in editor mode - otherwise this does nothing
  emit signalEditorLoadTiles(tiles);
 
+// kdDebug() << "init minimap" << endl;
+ d->mMiniMap->initMap(); // very fast function
  kdDebug() << "init map" << endl;
- d->mMiniMap->initMap();
- d->mCanvas->initMap(tiles);
+ d->mCanvas->initMap(tiles); // takes most of startup time!
 
  kdDebug() << k_funcinfo << " done" << endl;
 }
