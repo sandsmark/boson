@@ -28,8 +28,6 @@ Game TODOs
 - maybe provide UnitGroups without keyboard, too. select units, click on a
   (empty) button to store that group. another click on that button restores the
   group. rmb on that button deletes it
-- Use different config file fields for repairing and weapon damage. Then unit
-  that can repair can also shoot at enemies.
 - make clear that "building mode" is enabled. maybe replace the cursor by the
   facility that should get built.
 - display on the map where a facility can be placed. maybe change the cursor to
@@ -48,14 +46,13 @@ Game TODOs
   this must NOT depend on the .3ds file!
 - many methods depend on a factory to be a facility. remove this dependance. a
   production plugin can be part of a mobile unit, too
-- BUG: units go through near clip and are "broken" when you zoom in above some
-  tall facility or aircraft
 - maintaining two different files for one map sucks. we should be able to place
   all map_name.boson data into the .bpf file, too. xml supports i18n, too!
 - particles: there are only very few different textures used by particles
   (specified in particles.boson). we would gain a lot of speed by grouping all
   particles with one texture on the screen into a single glBegin()/glEnd() pair
 - Add screenshots support to saving/loading widget
+- Shooting sounds should be specified per weapon, not per unit
 
 Editor (map, unit, scenario) TODOs
 - don't place units on invalid tiles (e.g. ship on grass)
@@ -88,7 +85,6 @@ General TODOs
   game and transfer only needed things over network. Saves some traffic
 - Minimap doesn't support units with width or height not equal to BO_TILE_SIZE
 - Click+Move in minimap should move the rectangle (aka the screen position)
-- unit editor does not support plugins
 - ./configure allows --without-gl
 
 Data TODOs
