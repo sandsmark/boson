@@ -42,7 +42,7 @@ class serverUnit {
  *  MOBILE
  */
 
-class serverMobUnit : public mobUnit, serverUnit, knownBy
+class serverMobUnit : public mobUnit, public serverUnit, public knownBy
 {
  Q_OBJECT
 
@@ -63,7 +63,7 @@ private:
 /*
  *  FACILITY
  */
-class serverFacility : public Facility, serverUnit, knownBy
+class serverFacility : public Facility, public serverUnit, public knownBy
 {
  Q_OBJECT
 
