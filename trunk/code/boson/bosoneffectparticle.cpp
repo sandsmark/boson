@@ -646,7 +646,7 @@ void BosonEffectParticleTrail::update(float elapsed)
 
   if(mCreateCache >= 1.0)
   {
-    boWarning() << k_funcinfo << "mCreateCache = " << mCreateCache << " after update()! Increase MaxSpeed!" << endl;
+    boWarning() << k_funcinfo << "propid: " << properties()->id() << "; mCreateCache = " << mCreateCache << " after update()! Increase MaxSpeed!" << endl;
   }
 
   // Particle update and init methods set mRadius to dot product for performance
