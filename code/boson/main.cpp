@@ -134,7 +134,7 @@ int main(int argc, char **argv)
 		boError() << k_funcinfo << "default-lodcount was not a valid number" << endl;
 		return 1;
 	}
-	boConfig->setUIntValue("DefaultLODCount", v);
+	boConfig->setDefaultLodCount(v);
  }
  if (args->isSet("new")) {
 	top->slotNewGame(args);
