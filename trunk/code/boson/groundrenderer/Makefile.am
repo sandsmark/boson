@@ -6,6 +6,7 @@ libbogroundrendererplugin_la_SOURCES = \
 		bogroundrendererfactory.cpp \
 		bodefaultgroundrenderer.cpp \
 		bofastgroundrenderer.cpp \
+		boveryfastgroundrenderer.cpp \
 		bogroundrendererbase.cpp \
 		boquadtreenode.cpp
 
