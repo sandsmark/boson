@@ -17,6 +17,8 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#define BEFORE_BETA2 1 // remove as soon as KDE3 beta2 or final is out. beta 1 doesn't include kartsserver.h
+
 #include "bosonmusic.h"
 #include "bosonmusic.moc"
 
@@ -24,9 +26,11 @@
 #include <kstandarddirs.h>
 #include <kapplication.h>
 #include <kdebug.h>
-#include <kartsserver.h>
 #include <kplayobject.h>
 #include <kplayobjectfactory.h>
+#ifndef BEFORE_BETA_2
+#include <kartsserver.h>
+#endif
 
 #include <qtimer.h>
 #include <qstringlist.h>
@@ -43,7 +47,11 @@ public:
 		mTicker = 0;
 	}
 
-	KArtsServer mServer;
+#ifndef BEFORE_BETA2
+	KArtsServer mServer;// FIXME we also have one in bosoncanvas.cpp!!!
+#else
+	Arts::SoundServerV2 mServer; // FIXME remove when next beta arrived
+#endif
 	KPlayObject* mPlayObject;
 
 	QTimer* mTicker;
@@ -62,6 +70,9 @@ BosonMusic::BosonMusic(QObject* parent) : QObject(parent)
  d->mTicker = new QTimer(this);
  connect(d->mTicker, SIGNAL(timeout()), this, SLOT(slotUpdateTicker()));
  d->mLoop = false;
+#ifdef BEFORE_BETA2
+ d->mServer = Arts::Reference("global:Arts_SoundServerV2");
+#endif
 }
 
 BosonMusic::~BosonMusic()
@@ -84,8 +95,16 @@ bool BosonMusic::load(const QString& file)
  if (d->mPlayObject) {
 	delete d->mPlayObject;
  }
+#ifndef BEFORE_BETA2
  KPlayObjectFactory factory(d->mServer.server());
  d->mPlayObject = factory.createPlayObject(file, true);
+#else
+ if (d->mServer.isNull() || d->mServer.error()) {
+	return false;
+ }
+ KPlayObjectFactory factory(d->mServer);
+ d->mPlayObject = factory.createPlayObject(file, true);
+#endif
  if (d->mPlayObject->isNull()) {
 	delete d->mPlayObject;
 	d->mPlayObject = 0;
