@@ -24,7 +24,7 @@
 #include <qwidget.h>
 
 class	miniMap;
-class	fieldMap;
+class	editorFieldMap;
 class	viewMap;
 class	editorMap;
 class	infoWin;
@@ -38,7 +38,7 @@ public:
 private:
 /* the map object we are playing in */
     miniMap		*mini;
-    fieldMap		*field;
+    editorFieldMap	*field;
     viewMap		*view;
 /* Window displayer information */
     infoWin		*info;

@@ -1,9 +1,9 @@
 /***************************************************************************
-                       boson/editor/mainView.cpp -  description 
+                          editorFieldMap.h  -  description                              
                              -------------------                                         
 
     version              : $Id$
-    begin                : Mon Apr 19 23:56:00 CET 1999
+    begin                : Tue Sep 21 01:18:00 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
     email                : capricel@enst.fr                                     
@@ -18,38 +18,38 @@
  *                                                                         *
  ***************************************************************************/
 
-#include <qlayout.h>
+#ifndef EDITOR_FIELD_MAP_H 
+#define EDITOR_FIELD_MAP_H 
 
-#include "infoWin.h"
-#include "editorMap.h"
-#include "miniMap.h"
-#include "editorFieldMap.h"
-#include "viewMap.h"
+#include "fieldMap.h"
 
-#include "mainView.h"		// myself
+class QPopupMenu;
 
-mainView::mainView(editorMap *phys, QWidget *parent=0, const char *name=0)
-	:QWidget(parent, name)
-{ 
-	QHBoxLayout	*topLayout = new QHBoxLayout(this);
-	QVBoxLayout	*leftLayout = new QVBoxLayout();
+/** 
+  * Add all editor-specific 'bells and whistles' to the visual/fieldMap
+  */
+class editorFieldMap : public fieldMap
+{
 
-	topLayout->addLayout(leftLayout,0);
+	Q_OBJECT
 
-		view = new viewMap(phys); // the view associated with this window
-		mini = new miniMap(view, this);
-		mini->setFixedSize(200,200);
-		leftLayout->addWidget(mini);
+public:
+	editorFieldMap(viewMap *v, QWidget *parent=0, const char *name=0L, WFlags f=0);
 
-		info = new infoWin(this, "infowin");
-		leftLayout->addWidget(info, 10);
+protected:
+	virtual void mousePressEvent(QMouseEvent *e);
 
-/* This is the main map, the game area */
-	field = new editorFieldMap(view, this);
-	topLayout->addWidget(field,10);
+private slots:
+	void setCell(int);
+	void setTransTile(int);
+	void setTransType(int);
+	void setTransItem(int);
 
-/* finish the stuff */
-//	leftLayout->addStretch(10);
-	topLayout->activate();
-}
+private:
+	QPopupMenu	*popup;
+
+};
+
+#endif // EDITOR_FIELD_MAP_H
+
 
