@@ -27,9 +27,9 @@
 #include "bosonstatistics.h"
 #include "boson.h"
 #include "upgradeproperties.h"
+#include "unitpropertyhandler.h"
 #include "bodebug.h"
 
-#include <kgame/kgamepropertyhandler.h>
 #include <kgame/kgame.h>
 #include <kgame/kgamemessage.h>
 
@@ -186,8 +186,7 @@ void Player::addUnit(Unit* unit)
 
  if (unit->isMobile()) {
 	d->mMobilesCount++;
- }
- else {
+ } else {
 	d->mFacilitiesCount++;
  }
 }
@@ -220,8 +219,6 @@ void Player::slotUnitPropertyChanged(KGamePropertyBase* prop)
  }
 
  bool emitSignalUnitChanged = false;
- // first check for prop->id() - we don't have to search for the unit, if we
- // won't do anything anyway.
  switch (prop->id()) {
 	case UnitBase::IdHealth:
 	case UnitBase::IdArmor:
@@ -238,35 +235,20 @@ void Player::slotUnitPropertyChanged(KGamePropertyBase* prop)
 		break;
  }
  if (!emitSignalUnitChanged) {
-	// nothing to do, here - no need to search for the unit.
+	// nothing to do here
 	return;
  }
 
-#warning FIXME
- // The following hack is a major speed problem.
- // This slot is called for *every* unit property except those that have called
- // setEmittingSignal(false) (I think so at least).
- // But since we are searching through every unit in the list of the player, it
- // will take *very* long if there are many units.
- // UPDATE: this should have become better since I've moved the switch
- // (prop->id()) to *above* the search for the unit. So we won't even start
- // searching the unit for most properties.
-
-// VERY EVIL HACK!!!
- Unit* unit;
- bool found = false;
- for (unit = d->mUnits.first(); unit && !found; unit = d->mUnits.next()) {
-	if (unit->dataHandler() == (KGamePropertyHandler*)sender()) {
-		found = true;
-//		boDebug() << "found unit " << unit->id() << endl;
-		break;
-	}
+ // AB: we don't check for sender()->isA() here, for performance reasons.
+ UnitPropertyHandler* p = (UnitPropertyHandler*)sender();
+ if (!p->unit()) {
+	boError() << k_funcinfo << "NULL parent unit for property handler" << endl;
+	boDebug() << "player=" << id() << ",propId=" << prop->id() << endl;
+	return;
  }
-// (evil hack end)
-
+ Unit* unit = (Unit*)p->unit();
  if (!unit) {
 	boError() << k_funcinfo << "NULL unit" << endl;
-	boDebug() << "player=" << id() << ",propId=" << prop->id() << ",units=" << d->mUnits.count() << endl;
 	return;
  }
  if (emitSignalUnitChanged) {
