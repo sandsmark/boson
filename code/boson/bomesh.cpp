@@ -361,6 +361,197 @@ int BoNode::findPointIndex(int index) const
 }
 
 
+#if 0
+{
+	// does NOT change for LOD:
+	BoMaterial* mMaterial;
+	BoundingObject* mBoundingObject;
+	BoMeshPoints mMeshPoints; // (not yet)
+}
+{
+	BoNode* mNodes;
+	QValueVector<BoFace> mAllFaces;
+	QPtrList<BoNode> mAllNodes;
+
+	unsigned int* mPointsCache;
+	unsigned int mPointsCacheCount;
+}
+#endif
+
+/**
+ * This class is a collection of points for @ref BoMesh. You start by calling
+ * @ref allocatePoints and then modify the points using @ref setVertex and @ref
+ * setTexel (and maybe friends - depends on current implementation).
+ *
+ * This class supports moving all points to a different array - see @ref
+ * movePoints. This can be used to maintain a single huge array, instead of
+ * multiple small arrays. This can be more handy and more efficient.
+ *
+ * But note that you cannot add additional points (other than those that were
+ * initially allocated), so you have to allocate all points that you may need
+ * right from the beginning.
+ *
+ * @short points collection for @ref BoMesh
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+class BoMeshPoints
+{
+public:
+	BoMeshPoints()
+	{
+		mPointCount = 0;
+		mPoints = 0;
+		mAllocatedPoints = 0;
+		mPointsMovedBy = 0;
+	}
+	~BoMeshPoints()
+	{
+		boMem->freeFloatArray(mAllocatedPoints);
+		mPoints = 0;
+	}
+	inline static int pointSize()
+	{
+		// 3 vertex components, 2 texel components
+		return (3 + 2);
+	}
+	inline static int vertexPos()
+	{
+		return 0;
+	}
+	inline static int texelPos()
+	{
+		return 3;
+	}
+
+	void setVertex(unsigned int index, const BoVector3& vertex)
+	{
+		BO_CHECK_NULL_RET(mPoints);
+		if (index >= points()) {
+			boError() << k_funcinfo << "invalid index " << index
+					<< " max=" << points() - 1 << endl;
+			return;
+		}
+		mPoints[index * pointSize() + vertexPos() + 0] = vertex[0];
+		mPoints[index * pointSize() + vertexPos() + 1] = vertex[1];
+		mPoints[index * pointSize() + vertexPos() + 2] = vertex[2];
+	}
+	void setTexel(unsigned int index, const BoVector3& texel)
+	{
+		BO_CHECK_NULL_RET(mPoints);
+		if (index >= points()) {
+			boError() << k_funcinfo << "invalid index " << index
+					<< " max=" << points() - 1 << endl;
+			return;
+		}
+		mPoints[index * pointSize() + texelPos() + 0] = texel[0];
+		mPoints[index * pointSize() + texelPos() + 1] = texel[1];
+	}
+	inline BoVector3 vertex(unsigned int p) const
+	{
+		if (!mPoints) {
+			boError() << k_funcinfo << "no points allocated" << endl;
+			return BoVector3();
+		}
+		if (p >= points()) {
+			boError() << k_funcinfo << "invalid point " << p
+					<< " max=" << points() - 1 << endl;
+			return BoVector3();
+		}
+		return BoVector3(&mPoints[p * pointSize() + vertexPos()]);
+	}
+
+	inline unsigned int points() const
+	{
+		return mPointCount;
+	}
+
+	/**
+	 * You should be careful when you use this - you may be doing something
+	 * wrong.
+	 * This class stores the points with indices 0 .. @ref points, whereas
+	 * @ref BoFace::pointIndex references indices pointsMovedBy ..
+	 * pointsMovedBy + @ref points. This is why you may think you need this.
+	 *
+	 * But usually you are meant to use glArrayElement() with parameters
+	 * directly from @ref BoFace::pointIndex or the @ref BoMesh::vertex
+	 * methods instead. BoMesh::vertex may use pointsMovedBy under certain
+	 * circumstances - you should not if you can avoid it.
+	 *
+	 * @return How much the points got moved by @ref movePoints. This is
+	 * just the index parameter of @ref movePoints.
+	 **/
+	inline unsigned int pointsMovedBy() const
+	{
+		return mPointsMovedBy;
+	}
+
+	void allocatePoints(int points)
+	{
+		if (mAllocatedPoints) {
+			boError() << k_funcinfo << "points already allocated!" << endl;
+			if (mPoints == mAllocatedPoints) {
+				mPoints = 0;
+			}
+			boMem->freeFloatArray(mAllocatedPoints);
+			mAllocatedPoints = 0;
+		}
+		if (mPoints) {
+			boError() << k_funcinfo << "non-NULL points array!" << endl;
+			mPoints = 0;
+		}
+		mPointCount = points;
+
+		const int pointSize = BoMesh::pointSize();
+
+		// note that a lot of space is wasted - some objects are not textured
+		// but we can render more efficient this way.
+		mAllocatedPoints = boMem->allocateFloatArray(mPointCount * pointSize);
+		mPoints = mAllocatedPoints;
+
+		for (unsigned int i = 0; i < mPointCount; i++) {
+			for (int j = 0; j < pointSize; j++) {
+				mAllocatedPoints[i * pointSize + j] = 0.0f;
+			}
+		}
+	}
+
+	unsigned int movePoints(float* array, int index)
+	{
+		unsigned int pointsMoved = 0;
+		if (!mAllocatedPoints) {
+			boError() << k_funcinfo << "no points allocated" << endl;
+			return pointsMoved;
+		}
+		const int pointSize = BoMesh::pointSize();
+		for (unsigned int i = 0; i < points(); i++) {
+			for (int j = 0; j < pointSize; j++) {
+				array[(index + i) * pointSize + j] = mPoints[i * pointSize + j];
+			}
+		}
+		pointsMoved = points();
+
+		#warning FIXME: memory fragmentation
+		// we allocate a lot of floats and free them later (moving the values to
+		// a single array). this will probably lead to quite some memory
+		// fragmentation. we should change this design.
+		// but remember that the array that is actually used (d->mPoints) is allocated
+		// only once per model - so at this point there is no memory fragmentation (and
+		// this is the important place)
+		boMem->freeFloatArray(mAllocatedPoints);
+		mAllocatedPoints = 0;
+		mPoints = array + index * pointSize;
+		mPointsMovedBy = index;
+
+		return pointsMoved;
+	}
+
+private:
+	float* mPoints;
+	float* mAllocatedPoints;
+	unsigned int mPointsMovedBy;
+	unsigned int mPointCount;
+};
+
 class BoMeshPrivate
 {
 public:
@@ -369,9 +560,6 @@ public:
 		mNodes = 0;
 
 		mMaterial = 0;
-
-		mAllocatedPoints = 0;
-		mPoints = 0;
 
 		mPointsCache = 0;
 		mPointsCacheCount = 0;
@@ -389,10 +577,7 @@ public:
 	QValueVector<BoFace> mAllFaces;
 	QPtrList<BoNode> mAllNodes;
 
-	unsigned int mPointCount;
-	float* mAllocatedPoints;
-	float* mPoints;
-	unsigned int mPointsMovedBy;
+	BoMeshPoints mMeshPoints;
 
 	// the list of points in the final order (after connectNodes() or
 	// addNodes() was called). iterating through nodes() is equalivent (for
@@ -422,8 +607,6 @@ BoMesh::~BoMesh()
 	glDeleteLists(d->mDisplayList, 1);
  }
  d->mAllNodes.clear();
- boMem->freeFloatArray(d->mAllocatedPoints);
- d->mPoints = 0; // do NOT delete!
  delete d->mBoundingObject;
  delete d;
 }
@@ -435,8 +618,6 @@ void BoMesh::init()
  d->mType = GL_TRIANGLES;
  d->mIsTeamColor = false;
  d->mDisplayList = 0;
- d->mPointCount = 0;
- d->mPointsMovedBy = 0;
 
  d->mMinX = 0.0f;
  d->mMaxX = 0.0f;
@@ -448,18 +629,17 @@ void BoMesh::init()
 
 int BoMesh::pointSize()
 {
- // 3 vertex components, 2 texel components
- return (3 + 2);
+ return BoMeshPoints::pointSize();
 }
 
 int BoMesh::vertexPos()
 {
- return 0;
+ return BoMeshPoints::vertexPos();
 }
 
 int BoMesh::texelPos()
 {
- return 3;
+ return BoMeshPoints::texelPos();
 }
 
 void BoMesh::setMaterial(BoMaterial* mat)
@@ -874,58 +1054,17 @@ GLuint BoMesh::textureObject() const
 
 void BoMesh::allocatePoints(unsigned int points)
 {
- if (d->mAllocatedPoints) {
-	boError() << k_funcinfo << "points already allocated!" << endl;
-	if (d->mPoints == d->mAllocatedPoints) {
-		d->mPoints = 0;
-	}
-	boMem->freeFloatArray(d->mAllocatedPoints);
-	d->mAllocatedPoints = 0;
- }
- if (d->mPoints) {
-	boError() << k_funcinfo << "non-NULL points array!" << endl;
-	d->mPoints = 0;
- }
- d->mPointCount = points;
-
- // note that a lot of space is wasted - some objects are not textured
- // but we can render more efficient this way.
- d->mAllocatedPoints = boMem->allocateFloatArray(d->mPointCount * pointSize());
- d->mPoints = d->mAllocatedPoints;
-
- // AB: we initialize the array elements now. this is close to useless since we
- // overwrite it later anyway. but valgrind complains for meshes that don't use
- // textures (since we copy uninitialized values around).
- for (unsigned int i = 0; i < d->mPointCount; i++) {
-	for (int j = 0; j < pointSize(); j++) {
-		d->mAllocatedPoints[i * pointSize() + j] = 0.0f;
-	}
- }
+ d->mMeshPoints.allocatePoints(points);
 }
 
 void BoMesh::setVertex(unsigned int index, const BoVector3& vertex)
 {
- BO_CHECK_NULL_RET(d->mPoints);
- if (index >= points()) {
-	boError() << k_funcinfo << "invalid index " << index << " max=" << points() - 1 << endl;
-	return;
- }
- d->mPoints[index * pointSize() + vertexPos() + 0] = vertex[0];
- d->mPoints[index * pointSize() + vertexPos() + 1] = vertex[1];
- d->mPoints[index * pointSize() + vertexPos() + 2] = vertex[2];
+ d->mMeshPoints.setVertex(index, vertex);
 }
 
 BoVector3 BoMesh::vertex(unsigned int p) const
 {
- if (!d->mPoints) {
-	boError() << k_funcinfo << "no points allocated" << endl;
-	return BoVector3();
- }
- if (p >= points()) {
-	boError() << k_funcinfo << "invalid point " << p << " max=" << points() - 1 << endl;
-	return BoVector3();
- }
- return BoVector3(&d->mPoints[p * pointSize() + vertexPos()]);
+ return d->mMeshPoints.vertex(p);
 }
 
 BoVector3 BoMesh::vertex(unsigned int face, unsigned int i) const
@@ -938,23 +1077,16 @@ BoVector3 BoMesh::vertex(unsigned int face, unsigned int i) const
 	boError() << k_funcinfo << " vertex index must be 0..2, not " << i << endl;
 	i = i % 3;
  }
- return vertex(d->mAllFaces[face].pointIndex()[i] - d->mPointsMovedBy);
+ return vertex(d->mAllFaces[face].pointIndex()[i] - d->mMeshPoints.pointsMovedBy());
 }
 
 void BoMesh::setTexel(unsigned int index, const BoVector3& texel)
 {
- BO_CHECK_NULL_RET(d->mPoints);
- if (index >= points()) {
-	boError() << k_funcinfo << "invalid index " << index << " max=" << points() - 1 << endl;
-	return;
- }
- d->mPoints[index * pointSize() + texelPos() + 0] = texel[0];
- d->mPoints[index * pointSize() + texelPos() + 1] = texel[1];
+ d->mMeshPoints.setTexel(index, texel);
 }
 
 void BoMesh::setNormal(unsigned int face, int vertex, const BoVector3& normal)
 {
- BO_CHECK_NULL_RET(d->mPoints);
  if (face >= facesCount()) {
 	boError() << k_funcinfo << "invalid face " << face << " max=" << facesCount() << endl;
 	return;
@@ -1148,7 +1280,7 @@ void BoMesh::loadDisplayList(const QColor* teamColor, bool reload)
 
 unsigned int BoMesh::points() const
 {
- return d->mPointCount;
+ return d->mMeshPoints.points();
 }
 
 bool BoMesh::isTeamColor() const
@@ -1166,13 +1298,12 @@ GLuint BoMesh::displayList() const
  return d->mDisplayList;
 }
 
-void BoMesh::movePoints(float* array, int index)
+unsigned int BoMesh::movePoints(float* array, int index)
 {
- if (!d->mAllocatedPoints) {
-	boError() << k_funcinfo << "no points allocated" << endl;
-	return;
- }
- // first of all we fix the indices of all faces.
+ // move all points to the new array
+ unsigned int pointsMoved = d->mMeshPoints.movePoints(array, index);
+
+ // now we fix the (point-)indices of all faces.
  for (unsigned int i = 0; i < facesCount(); i++) {
 	BoFace* face = &d->mAllFaces[i];
 	const int* orig = face->pointIndex();
@@ -1182,27 +1313,12 @@ void BoMesh::movePoints(float* array, int index)
 	p[2] = index + orig[2];
 	face->setPointIndex(p);
  }
- // now we move the vertices and texture coordinates to the new array
- for (unsigned int i = 0; i < points(); i++) {
-	for (int j = 0; j < pointSize(); j++) {
-		array[(index + i) * pointSize() + j] = d->mPoints[i * pointSize() + j];
-	}
- }
-#warning FIXME: memory fragmentation
- // we allocate a lot of floats and free them later (moving the values to
- // a single array). this will probably lead to quite some memory
- // fragmentation. we should change this design.
- // but remember that the array that is actually used (d->mPoints) is allocated
- // only once per model - so at this point there is no memory fragmentation (and
- // this is the important place)
- boMem->freeFloatArray(d->mAllocatedPoints);
- d->mAllocatedPoints = 0;
- d->mPoints = array + index * pointSize();
- d->mPointsMovedBy = index;
+
  if (d->mPointsCache) {
 	// we need to regenerate the cache
 	createPointCache();
  }
+ return pointsMoved;
 }
 
 void BoMesh::createPointCache()

@@ -1076,8 +1076,8 @@ void BosonModel::mergeArrays()
  it.toFirst();
  int index = 0;
  for (; it.current(); ++it) {
-	it.current()->movePoints(d->mPoints, index);
-	index += it.current()->points();
+	unsigned int pointsMoved = it.current()->movePoints(d->mPoints, index);
+	index += pointsMoved;
  }
 }
 
