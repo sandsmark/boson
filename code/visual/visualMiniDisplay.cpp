@@ -102,15 +102,16 @@ void visualMiniDisplay::newCell(int i, int j, groundType g) //, QPainter *p)
 		default:
 			logf(LOG_ERROR, "visualMiniDisplay::drawCell : unexpected groundType");
 		case GROUND_WATER :
+		case GROUND_WATER_OIL:
 			setPoint( i, j, blue, &p);
 			break;
 		case GROUND_GRASS :
+		case GROUND_GRASS_OIL :
 			setPoint( i, j, green, &p);
 			break;
 		case GROUND_DESERT :
 			setPoint( i, j, darkYellow, &p);
 			break;
-
 		}
 	p.end();
 	repaint(FALSE);
