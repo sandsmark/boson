@@ -89,7 +89,8 @@ boprofiling_SOURCES = $(BOPROFILING_SRC)
 
 bocursor_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 bocursor_LDADD = -lkio $(LIB_KDEUI) -lGLU
-bocursor_SOURCES = bocursormain.cpp bosoncursoreditor.cpp bosoncursor.cpp bosontexturearray.cpp
+bocursor_SOURCES = bocursormain.cpp bosoncursoreditor.cpp bosoncursor.cpp \
+		bosontexturearray.cpp bosonconfig.cpp
 
 borender_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 borender_LDADD = \

@@ -18,6 +18,7 @@
 */
 
 #include "bosontexturearray.h"
+#include "bosonconfig.h"
 
 #include <qimage.h>
 #include <qgl.h>
@@ -103,30 +104,22 @@ bool BosonTextureArray::createTexture(const QImage& image, GLuint texture, bool 
  // (usually!!) - so don't change it :)
 
  if (useMipmaps) {
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (GLenum)boConfig->magnificationFilter());
 	// note: GL_*_MIPMAP_* is slower! GL_NEAREST would be fastest
-	// AB: a config option would be nice here - slow machines use other
-	// values than fast machines
-//	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); // note: this makes mipmaps senseless!
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (GLenum)boConfig->mipmapMinificationFilter());
 	int error = gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, buffer.width(),
 			buffer.height(), GL_RGBA, GL_UNSIGNED_BYTE,
 			buffer.bits());
-	//FIXME: how to apply minification and magnification filters??
 	if (error) {
 		kdWarning() << k_funcinfo << "gluBuild2DMipmaps returned error: " << error << endl;
 	}
  } else {
 	// AB: we dont build mipmaps for cell and cursor textures (e.g.) those
-	// are not so much quality relevant - so we use GL_NEAREST for both,
-	// minification and magnification. this is said to be faster than
-	// GL_LINEAR
+	// are not so much quality relevant
 	// TODO: performance: combine several textures into a single one and
 	// adjust the coordinates in glTexCoord
-//	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-//	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (GLenum)boConfig->magnificationFilter());
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (GLenum)boConfig->minificationFilter());
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, buffer.width(),
 			buffer.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE,

@@ -349,6 +349,10 @@ void SoundOptions::setUnitSoundsDeactivated(BosonConfig* conf)
 
 OpenGLOptions::OpenGLOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
 {
+ // AB: most entries here are very technical (especially the texture filters).
+ // put them into a separate widget which can be reached using a "advanced"
+ // button. then add some default options (i.e. best speed, average speed, best
+ // quality)
  mUpdateInterval = new KIntNumInput(DEFAULT_UPDATE_INTERVAL, this);
  mUpdateInterval->setRange(2, 400);
  mUpdateInterval->setLabel(i18n("Update interval (low values hurt performance)"));
@@ -356,6 +360,32 @@ OpenGLOptions::OpenGLOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
  mModelTexturesMipmaps = new QCheckBox(this);
  mModelTexturesMipmaps->setText(i18n("Use mipmaps for model textures"));
  QToolTip::add(mModelTexturesMipmaps, i18n("With mipmapping disabled units often look ugly - but it consumes less memory and therefore might improve rendering speed."));
+
+ QHBox* hbox = new QHBox(this);
+ (void)new QLabel(i18n("Texture Magnification Filter"), hbox);
+ mMagnificationFilter = new QComboBox(hbox);
+ mMagnificationFilter->insertItem(i18n("Use GL_NEAREST (fastest)"));
+ mMagnificationFilter->insertItem(i18n("Use GL_LINEAR (best quality)"));
+ QToolTip::add(mMagnificationFilter, i18n("This selects which filter method is used when the textures need to be displayed at a bigger size than they are stored at. This applies to all textures.")); // AB: also note how big the impact on speed is!
+
+ hbox = new QHBox(this);
+ (void)new QLabel(i18n("Texture Minification Filter"), hbox);
+ mMinificationFilter = new QComboBox(hbox);
+ mMinificationFilter->insertItem(i18n("Use GL_NEAREST (fastest)"));
+ mMinificationFilter->insertItem(i18n("Use GL_LINEAR (best quality)"));
+ QToolTip::add(mMinificationFilter, i18n("This selects which filter method is used when the textures need to be displayed at a smaller size than they are stored at. This applies to not-mipmapped textures only.")); // AB: also note how big the impact on speed is!
+
+ hbox = new QHBox(this);
+ (void)new QLabel(i18n("Texture Mipmap Minification Filter"), hbox);
+ mMipmapMinificationFilter = new QComboBox(hbox);
+ mMipmapMinificationFilter->insertItem(i18n("Use GL_NEAREST (fastest)"));
+ mMipmapMinificationFilter->insertItem(i18n("Use GL_LINEAR"));
+ mMipmapMinificationFilter->insertItem(i18n("Use GL_NEAREST_MIPMAP_NEAREST"));
+ mMipmapMinificationFilter->insertItem(i18n("Use GL_NEAREST_MIPMAP_LINEAR"));
+ mMipmapMinificationFilter->insertItem(i18n("Use GL_LINEAR_MIPMAP_NEAREST"));
+ mMipmapMinificationFilter->insertItem(i18n("Use GL_LINEAR_MIPMAP_LINEAR (best quality)"));
+ QToolTip::add(mMipmapMinificationFilter, i18n("This selects which filter method is used when the textures need to be displayed at a smaller size than they are stored at. This applies to mipmapped textures (i.e. model textures) only.\nNote: The speed GL_*_MIPMAP_* will probably be noticebly slower, but it's quality is way better!"));
+
 
 }
 
@@ -365,16 +395,40 @@ OpenGLOptions::~OpenGLOptions()
 
 void OpenGLOptions::apply()
 {
+ bool reloadAllTextures = false;
  bool reloadModelTextures = false;
  emit signalUpdateIntervalChanged((unsigned int)mUpdateInterval->value());
  if (boConfig->modelTexturesMipmaps() != mModelTexturesMipmaps->isChecked()) {
 	boConfig->setModelTexturesMipmaps(mModelTexturesMipmaps->isChecked());
 	reloadModelTextures = true;
  }
+ if (boConfig->magnificationFilter() != magnificationFilter()) {
+	boConfig->setMagnificationFilter(magnificationFilter());
+	reloadAllTextures = true;
+ }
+ if (boConfig->minificationFilter() != minificationFilter()) {
+	boConfig->setMinificationFilter(minificationFilter());
+	reloadAllTextures = true;
+ }
+ if (boConfig->mipmapMinificationFilter() != mipmapMinificationFilter()) {
+	boConfig->setMipmapMinificationFilter(mipmapMinificationFilter());
+	// only models use mipmaps (if at all)
+	if (boConfig->modelTexturesMipmaps()) {
+		reloadModelTextures = true;
+	}
+ }
 
- if (reloadModelTextures) {
+ if (reloadModelTextures && !reloadAllTextures) {
 	reloadModelTextures = KMessageBox::questionYesNo(this, i18n("You need to reload the model textures to see your changes. Do you want to reload now (takes some time)?"));
 	if (reloadModelTextures) {
+		BosonModel::reloadAllTextures();
+	}
+ }
+ if (reloadAllTextures) {
+	reloadAllTextures = KMessageBox::questionYesNo(this, i18n("You need to reload all textures to see your changes. Do you want to reload now (takes some time)?\nNote: this has not yet been implemented! only model textures will be reloaded! restart boson to reload all other textures!"));
+	if (reloadAllTextures) {
+		kdWarning() << k_funcinfo << "Need to reload all textures - not yet implemented!" << endl;
+		// TODO
 		BosonModel::reloadAllTextures();
 	}
  }
@@ -384,12 +438,18 @@ void OpenGLOptions::setDefaults()
 {
  setUpdateInterval(DEFAULT_UPDATE_INTERVAL);
  mModelTexturesMipmaps->setChecked(true);
+ setMagnificationFilter(DEFAULT_MAGNIFICATION_FILTER);
+ setMinificationFilter(DEFAULT_MINIFICATION_FILTER);
+ setMipmapMinificationFilter(DEFAULT_MIPMAP_MINIFICATION_FILTER);
 }
 
 void OpenGLOptions::load()
 {
  setUpdateInterval(boConfig->updateInterval());
  mModelTexturesMipmaps->setChecked(boConfig->modelTexturesMipmaps());
+ setMagnificationFilter(boConfig->magnificationFilter());
+ setMinificationFilter(boConfig->minificationFilter());
+ setMipmapMinificationFilter(boConfig->mipmapMinificationFilter());
 }
 
 void OpenGLOptions::setUpdateInterval(int ms)
@@ -398,6 +458,101 @@ void OpenGLOptions::setUpdateInterval(int ms)
  mUpdateInterval->setValue(ms);
 }
 
+void OpenGLOptions::setMagnificationFilter(int f)
+{
+ switch(f) {
+	case GL_NEAREST:
+	default:
+		mMagnificationFilter->setCurrentItem(0);
+		break;
+	case GL_LINEAR:
+		mMagnificationFilter->setCurrentItem(1);
+		break;
+ }
+}
+
+int OpenGLOptions::magnificationFilter() const
+{
+ if (mMagnificationFilter->currentItem() == 1) {
+	return GL_LINEAR;
+ }
+ // index is either 0 or -1
+ return GL_NEAREST;
+}
+
+int OpenGLOptions::minificationFilter() const
+{
+ if (mMinificationFilter->currentItem() == 1) {
+	return GL_LINEAR;
+ }
+ // index is either 0 or -1
+ return GL_NEAREST;
+}
+
+void OpenGLOptions::setMinificationFilter(int f)
+{
+ switch(f) {
+	case GL_NEAREST:
+	default:
+		mMinificationFilter->setCurrentItem(0);
+		break;
+	case GL_LINEAR:
+		mMinificationFilter->setCurrentItem(1);
+		break;
+ }
+}
+
+int OpenGLOptions::mipmapMinificationFilter() const
+{
+ GLenum e;
+ switch (mMipmapMinificationFilter->currentItem()) {
+	case 0:
+		e = GL_NEAREST;
+		break;
+	case 1:
+		e = GL_LINEAR;
+		break;
+	default:
+	case 2:
+		e = GL_NEAREST_MIPMAP_NEAREST;
+		break;
+	case 3:
+		e = GL_NEAREST_MIPMAP_LINEAR;
+		break;
+	case 4:
+		e = GL_LINEAR_MIPMAP_LINEAR;
+		break;
+	case 5:
+		e = GL_LINEAR_MIPMAP_NEAREST;
+		break;
+ }
+ return (int)e;
+}
+
+void OpenGLOptions::setMipmapMinificationFilter(int f)
+{
+ switch(f) {
+	case GL_NEAREST:
+		mMipmapMinificationFilter->setCurrentItem(0);
+		break;
+	case GL_LINEAR:
+		mMipmapMinificationFilter->setCurrentItem(1);
+		break;
+	default:
+	case GL_NEAREST_MIPMAP_NEAREST:
+		mMipmapMinificationFilter->setCurrentItem(2);
+		break;
+	case GL_NEAREST_MIPMAP_LINEAR:
+		mMipmapMinificationFilter->setCurrentItem(3);
+		break;
+	case GL_LINEAR_MIPMAP_NEAREST:
+		mMipmapMinificationFilter->setCurrentItem(4);
+		break;
+	case GL_LINEAR_MIPMAP_LINEAR:
+		mMipmapMinificationFilter->setCurrentItem(5);
+		break;
+ }
+}
 
 //////////////////////////////////////////////////////////////////////
 // Chat Options

@@ -222,6 +222,12 @@ public:
 	int chatScreenMaxItems() const { return mChatScreenMaxItems->value(); }
 	void setModelTexturesMipmaps(bool enable) { mModelTexturesMipmaps->setValue(enable); }
 	bool modelTexturesMipmaps() const { return mModelTexturesMipmaps->value(); }
+	int magnificationFilter() const { return mMagnificationFilter->value(); }
+	void setMagnificationFilter(int f) { mMagnificationFilter->setValue(f); }
+	int minificationFilter() const { return mMinificationFilter->value(); }
+	void setMinificationFilter(int f) { mMinificationFilter->setValue(f); }
+	int mipmapMinificationFilter() const { return mMipmapMinificationFilter->value(); }
+	void setMipmapMinificationFilter(int f) { mMipmapMinificationFilter->setValue(f); }
 
 	void setUnitSoundActivated(UnitSoundEvent e, bool activated);
 	bool unitSoundActivated(UnitSoundEvent e) const;
@@ -286,6 +292,9 @@ private:
 	BoConfigDoubleEntry* mMiniMapScale;
 	BoConfigDoubleEntry* mMiniMapZoom;
 	BoConfigIntListEntry* mUnitSoundsDeactivated;
+	BoConfigIntEntry* mMagnificationFilter;
+	BoConfigIntEntry* mMinificationFilter;
+	BoConfigIntEntry* mMipmapMinificationFilter;
 
 	// NOT stored to config file!
 	bool mDisableSound;
