@@ -113,7 +113,6 @@ Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
 	kdError() << k_funcinfo << "NULL model - this will most probably crash!" << endl;
 	return;
  }
- setFrame(0);
 
  if (isFlying()) {
 	// FIXME i guess we can store z-position as opengl coordinates
@@ -203,9 +202,7 @@ void Unit::setHealth(unsigned long int h)
  updateSelectBox();
  if (isDestroyed()) {
 	unselect();
-#warning FIXME
-	setFrame(frameCount() - 1); // FIXME: this is not true anymore! we need some kind of special frame for a destroyed unit!
-	setAnimated(false);
+	setAnimationMode(AnimationWreckage);
  }
 }
 
@@ -307,6 +304,7 @@ void Unit::advance(unsigned int advanceCount)
  } else {
 	d->shieldReloadCounter++;
  }
+ BosonItem::advance(advanceCount); // animation
 }
 
 void Unit::advanceNone(unsigned int advanceCount)
@@ -406,14 +404,14 @@ void Unit::advanceTurn(unsigned int)
  // Find out direction of turning
  // TODO: maybe we can cache it somewhere so we'd only have to calculate it
  //  when we want to turn. OTOH, it shouldn't be very expensive calculation
- if(dir >= 180) {
-	if((d->wantedDirection < dir) && (d->wantedDirection >= dir - 180)) {
+ if (dir >= 180) {
+	if ((d->wantedDirection < dir) && (d->wantedDirection >= dir - 180)) {
 		turnright = false;
 	} else {
 		turnright = true;
 	}
  } else {
-	if((d->wantedDirection > dir) && (d->wantedDirection <= dir + 180)) {
+	if ((d->wantedDirection > dir) && (d->wantedDirection <= dir + 180)) {
 		turnright = true;
 	} else {
 		turnright = false;
@@ -421,26 +419,26 @@ void Unit::advanceTurn(unsigned int)
  }
 
  // FIXME: This algorithm _sucks_. Replace it with something better
- for(int i = 0; i < TURN_STEP; i++) {
-	if(dir == d->wantedDirection) {
+ for (int i = 0; i < TURN_STEP; i++) {
+	if (dir == d->wantedDirection) {
 		break;
 	}
-	if(turnright) {
+	if (turnright) {
 		dir += 1;
 	} else {
 		dir -= 1;
 	}
 	// Check for overflows
-	if(dir < 0) {
+	if (dir < 0) {
 		dir += 360;
-	} else if(dir > 360) {
+	} else if (dir > 360) {
 		dir -= 360;
 	}
  }
 
  setRotation((float)dir);
 
- if(d->wantedDirection == dir) {
+ if (d->wantedDirection == dir) {
 	if (work() == WorkTurn) {
 		setWork(WorkNone);
 	} else if (advanceWork() != work()) {
@@ -472,7 +470,7 @@ unsigned int Unit::waypointCount() const
 void Unit::moveTo(const QPoint& pos)
 {
  d->mTarget = 0;
- if(moveTo(pos.x(), pos.y(), 0)) {
+ if (moveTo(pos.x(), pos.y(), 0)) {
 	setWork(WorkMove);
  } else {
 	setWork(WorkNone);
@@ -486,14 +484,14 @@ bool Unit::moveTo(float x, float y, int range)
  if (range == -1) {
 	range = d->mMoveRange;
  }
- if(!owner()->isFogged((int)(x / BO_TILE_SIZE), (int)(y / BO_TILE_SIZE))) {
+ if (!owner()->isFogged((int)(x / BO_TILE_SIZE), (int)(y / BO_TILE_SIZE))) {
 	Cell* c = canvas()->cell((int)(x / BO_TILE_SIZE), (int)(y / BO_TILE_SIZE));
 	if (!c) {
 		kdError() << k_funcinfo << "NULL cell at " << x << "," << y << endl;
 		return false;
 	}
 	// No pathfinding if goal not reachable or occupied and we can see it
-	if(!c->canGo(unitProperties())) {
+	if (!c->canGo(unitProperties())) {
 		return false;
 	}
  }
@@ -515,10 +513,10 @@ bool Unit::moveTo(float x, float y, int range)
 void Unit::newPath()
 {
  kdDebug() << k_funcinfo << endl;
- if(!owner()->isFogged(d->mMoveDestX / BO_TILE_SIZE, d->mMoveDestY / BO_TILE_SIZE)) {
+ if (!owner()->isFogged(d->mMoveDestX / BO_TILE_SIZE, d->mMoveDestY / BO_TILE_SIZE)) {
 	Cell* destCell = canvas()->cell(d->mMoveDestX / BO_TILE_SIZE,
 			d->mMoveDestY / BO_TILE_SIZE);
-	if(!destCell || (!destCell->canGo(unitProperties()))) {
+	if (!destCell || (!destCell->canGo(unitProperties()))) {
 		// If we can't move to destination, then we add waypoint with coordinates
 		//  -1; -1 and in MobileUnit::advanceMove(), if currentWaypoint()'s
 		//  coordinates are -1; -1 then we stop moving.
@@ -533,12 +531,12 @@ void Unit::newPath()
  for (int unsigned i = 0; i < path.count(); i++) {
 	addWaypoint(path[i]);
  }
- if((currentWaypoint().x() == x() + width() / 2) && (currentWaypoint().y() == y() + height() / 2))
+ if ((currentWaypoint().x() == x() + width() / 2) && (currentWaypoint().y() == y() + height() / 2))
  {
 	kdDebug() << k_funcinfo << "!!!!! First waypoint is unit's current pos! Removing" << endl;
 	waypointDone();
  }
- if(waypointCount() == 0)
+ if (waypointCount() == 0)
  {
 	addWaypoint(QPoint(-1, -1));
  }
@@ -589,8 +587,6 @@ bool Unit::save(QDataStream& stream)
  stream << (float)x();
  stream << (float)y();
  stream << (float)z();
- stream << (Q_INT8)true; // FIXME: replacement for isVisible() which is obsolete
- stream << (Q_INT32)frame();
  return true;
 }
 
@@ -600,23 +596,21 @@ bool Unit::load(QDataStream& stream)
 	kdError() << "Unit not loaded properly" << endl;
 	return false;
  }
+ //AB: the frame number was loaded/saved as well. i removed this because we
+ //shouldn't have this in loading code. frame is dependant on the current
+ //actions/animations/... but not relevant to actual game code. it is just the
+ //visible appearance
  float x;
  float y;
  float z;
- Q_INT8 visible;
- Q_INT32 frame;
 
  stream >> x;
  stream >> y;
  stream >> z;
- stream >> visible;
- stream >> frame;
 
  move(x, y, z);
  if (isDestroyed()) {
 	kdError() << k_funcinfo << "unit is already destroyed" << endl;
- } else {
-	setFrame(frame);
  }
  return true;
 }
@@ -693,7 +687,7 @@ BoItemList Unit::unitsInRange() const
 	if (!RTTI::isUnit((*it)->rtti())) {
 		continue;
 	}
-	if(((Unit*)(*it))->isDestroyed()) {
+	if (((Unit*)(*it))->isDestroyed()) {
 		continue;
 	}
 	// TODO: remove the items from inRange which are not actually in range (hint:
@@ -897,13 +891,13 @@ void MobileUnit::advanceMoveInternal(unsigned int) // this actually needs to be 
 	return;
  }
 
- if(mSearchPath) {
+ if (mSearchPath) {
 	newPath();
 	mSearchPath = false;
 	return;
  }
 
- if(waypointCount() == 0) {
+ if (waypointCount() == 0) {
 	// Waypoints were PolicyClean previously but are now PolicyLocal so they
 	//  should arrive immediately. If there are no waypoints but advanceMove is
 	//  called, then probably there's an error somewhere
@@ -944,7 +938,7 @@ void MobileUnit::advanceMoveInternal(unsigned int) // this actually needs to be 
 
  // FIXME: as path is now recalculated every time waypoint is reached, this
  //  should never be called
- if((wp.x() == -2) &&(wp.y() == -2)) {
+ if ((wp.x() == -2) &&(wp.y() == -2)) {
 	clearWaypoints();
 	newPath();
 	return;
@@ -957,19 +951,19 @@ void MobileUnit::advanceMoveInternal(unsigned int) // this actually needs to be 
  float yspeed = 0;
 
  // First check if we're at waypoint
- if((x == wp.x()) && (y == wp.y())) {
+ if ((x == wp.x()) && (y == wp.y())) {
 	kdDebug() << k_funcinfo << "unit is at waypoint" << endl;
 	waypointDone();
 
-	if(waypointCount() == 0) {
+	if (waypointCount() == 0) {
 		kdDebug() << k_funcinfo << "no more waypoints. Stopping moving" << endl;
 		stopMoving();
 		// Turn a bit
 		int turn = (int)rotation() + (owner()->game()->random()->getLong(90) - 45);
 		// Check for overflows
-		if(turn < 0) {
+		if (turn < 0) {
 			turn += 360;
-		} else if(turn > 360) {
+		} else if (turn > 360) {
 			turn -= 360;
 		}
 		Unit::turnTo(int(turn));
@@ -988,7 +982,7 @@ void MobileUnit::advanceMoveInternal(unsigned int) // this actually needs to be 
  // Check if we can actually go to waypoint (maybe it was fogged)
  // FIXME: currentWaypoint should have been unfogged when path was calculated
  //  because we now recalc path after every waypoint (see ~5 lines above)
- if(!canvas()->cell(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE) ||
+ if (!canvas()->cell(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE) ||
 		!canvas()->cell(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE)->canGo(unitProperties())) {
 	kdWarning() << k_funcinfo << "cannot go to waypoint, finding new path" << endl;
 	setVelocity(0.0, 0.0);
@@ -1003,20 +997,20 @@ void MobileUnit::advanceMoveInternal(unsigned int) // this actually needs to be 
  // Try to go to same x and y coordinates as waypoint's coordinates
  // First x coordinate
  // Slow down if there is less than speed() pixels to go
- if(QABS(wp.x() - x) < speed()) {
+ if (QABS(wp.x() - x) < speed()) {
 	xspeed = wp.x() - x;
  } else {
 	xspeed = speed();
-	if(wp.x() < x) {
+	if (wp.x() < x) {
 		xspeed = -xspeed;
 	}
  }
  // Same with y coordinate
- if(QABS(wp.y() - y) < speed()) {
+ if (QABS(wp.y() - y) < speed()) {
 	yspeed = wp.y() - y;
  } else {
 	yspeed = speed();
-	if(wp.y() < y) {
+	if (wp.y() < y) {
 		yspeed = -yspeed;
 	}
  }
@@ -1056,7 +1050,7 @@ void MobileUnit::advanceMoveCheck()
 	setVelocity(0.0, 0.0);
 
 	const int recalculate = 50; // recalculate when 50 advanceMove() failed
-	if(d->mPathRecalculated >= 2) {
+	if (d->mPathRecalculated >= 2) {
 		kdDebug() << k_funcinfo << "Path recalculated 3 times and it didn't help, giving up and stopping" << endl;
 		stopMoving();
 		return;
@@ -1101,8 +1095,8 @@ void MobileUnit::turnTo(Direction direction)
  // At the moment, all units are facing south by default, but currect would be
  //  north so change direction hack as soon as it's fixed
  float dir = (int)direction * 45;
- if(rotation() != dir) {
-	Unit::turnTo(dir);
+ if (rotation() != dir) {
+	Unit::turnTo((int)dir);
 	setAdvanceWork(WorkTurn);
  }
 }
@@ -1112,21 +1106,21 @@ void MobileUnit::turnTo()
  float xspeed = xVelocity();
  float yspeed = yVelocity();
  // Set correct frame
- if((xspeed == 0) && (yspeed < 0)) { // North
+ if ((xspeed == 0) && (yspeed < 0)) { // North
  	turnTo(North);
- } else if((xspeed > 0) && (yspeed < 0)) { // NE
+ } else if ((xspeed > 0) && (yspeed < 0)) { // NE
 	turnTo(NorthEast);
- } else if((xspeed > 0) && (yspeed == 0)) { // East
+ } else if ((xspeed > 0) && (yspeed == 0)) { // East
 	turnTo(East);
- } else if((xspeed > 0) && (yspeed > 0)) { // SE
+ } else if ((xspeed > 0) && (yspeed > 0)) { // SE
 	turnTo(SouthEast);
- } else if((xspeed == 0) && (yspeed > 0)) { // South
+ } else if ((xspeed == 0) && (yspeed > 0)) { // South
 	turnTo(South);
- } else if((xspeed < 0) && (yspeed > 0)) { // SW
+ } else if ((xspeed < 0) && (yspeed > 0)) { // SW
 	turnTo(SouthWest);
- } else if((xspeed < 0) && (yspeed == 0)) { // West
+ } else if ((xspeed < 0) && (yspeed == 0)) { // West
 	turnTo(West);
- } else if((xspeed < 0) && (yspeed < 0)) { // NW
+ } else if ((xspeed < 0) && (yspeed < 0)) { // NW
 	turnTo(NorthWest);
  } else if (xspeed == 0 && yspeed == 0) {
 //	kdDebug() << k_funcinfo << "xspeed == 0 and yspeed == 0" << endl;
@@ -1196,7 +1190,7 @@ void MobileUnit::waypointDone()
 
 bool MobileUnit::load(QDataStream& stream)
 {
- if(!Unit::load(stream)) {
+ if (!Unit::load(stream)) {
 	kdError() << "Unit not loaded properly" << endl;
 	return false;
  }
@@ -1206,7 +1200,7 @@ bool MobileUnit::load(QDataStream& stream)
 
 bool MobileUnit::save(QDataStream& stream)
 {
- if(!Unit::save(stream)) {
+ if (!Unit::save(stream)) {
 	kdError() << "Unit not loaded properly" << endl;
 	return false;
  }
@@ -1347,7 +1341,7 @@ void Facility::setConstructionStep(unsigned int step)
 	setWork(WorkNone);
 	owner()->facilityCompleted(this);
 	((Boson*)owner()->game())->slotUpdateProductionOptions();
-	setFrame(0);
+	setAnimationMode(AnimationIdle);
  }
 }
 
@@ -1371,7 +1365,7 @@ void Facility::deleteParticleSystems()
 /* if(d->mFlamesParticleSystem) {
 	delete d->mFlamesParticleSystem;
  }
- if(d->mSmokeParticleSystem) {
+ if (d->mSmokeParticleSystem) {
 	delete d->mSmokeParticleSystem;
  }*/
 }

@@ -25,6 +25,7 @@
 
 #include <kdebug.h>
 
+#include <qintdict.h>
 #include <qrect.h>
 #include <qpointarray.h>
 
@@ -32,6 +33,7 @@ BosonItem::BosonItem(BosonModel* model, BosonCanvas* canvas)
 {
  mCanvas = canvas;
  mModel = model;
+ mCurrentAnimation = 0;
  mX = mY = mZ = 0.0;
  mWidth = mHeight = 0;
  mRotation = 0;
@@ -39,14 +41,19 @@ BosonItem::BosonItem(BosonModel* model, BosonCanvas* canvas)
  mDisplayList = 0;
  mFrame = 0;
  mGLConstructionStep = 0;
+ mAnimationCounter = 0;
 
  mXVelocity = 0.0;
  mYVelocity = 0.0;
 
+ mCurrentAnimation = 0;
  mBoundingSphereRadius = 1.0; // TODO: can we extract this from the model? this probably needs to change with different frames!
 
  mIsAnimated = false;
  mSelectBox = 0;
+
+ // set the default animation mode
+ setAnimationMode(0);
 
  if (mCanvas) {
 	mCanvas->addItem(this);
@@ -59,12 +66,14 @@ BosonItem::BosonItem(BosonModel* model, BosonCanvas* canvas)
 	return;
  }
 
+
  // FIXME the correct frame must be set after this constructor!
  if (mGLConstructionStep >= mModel->constructionSteps()) {
 	setCurrentFrame(mModel->frame(frame()));
  } else {
 	setCurrentFrame(mModel->constructionStep(mGLConstructionStep));
  }
+
 }
 
 BosonItem::~BosonItem()
@@ -114,7 +123,7 @@ QPointArray BosonItem::cells() const
 bool BosonItem::bosonCollidesWith(BosonItem* item) const
 {
   // New collision-check method for units
- if(!RTTI::isUnit(item->rtti())) {
+ if (!RTTI::isUnit(item->rtti())) {
 	switch (item->rtti()) {
 		// items we never collide with:
 //		case RTTI::Missile:
@@ -213,6 +222,7 @@ void BosonItem::setGLConstructionStep(unsigned int s)
 	kdWarning() << k_funcinfo << "NULL construction step " << s << endl;
 	return;
  }
+ mGLConstructionStep = s;
  setCurrentFrame(f);
 }
 
@@ -236,18 +246,56 @@ void BosonItem::setFrame(int _frame)
 		if (f) {
 			setCurrentFrame(f);
 			mFrame = _frame;
+		} else {
+			kdWarning() << k_funcinfo << "invalid frame " << _frame << endl;
 		}
 	}
 }
 
 unsigned int BosonItem::frameCount() const
 {
- return model() ? model()->frames() : 0; 
+ return model() ? model()->frames() : 0;
 }
 
 void BosonItem::setCurrentFrame(BoFrame* frame)
 {
  setDisplayList(frame->displayList());
  setGLDepthMultiplier(frame->depthMultiplier());
+}
+
+void BosonItem::setAnimationMode(int mode)
+{
+ if (mGLConstructionStep < model()->constructionSteps()) {
+	return;
+ }
+ BosonAnimation* anim = model()->animation(mode);
+ if (!anim) {
+	if (mCurrentAnimation) {
+		return;
+	}
+	anim = model()->animation(0);
+	if (!anim) {
+		kdError() << k_funcinfo << "NULL default animation mode!" << endl;
+		return;
+	}
+ }
+ mCurrentAnimation = anim;
+ setFrame(mCurrentAnimation->start());
+}
+
+void BosonItem::animate()
+{
+ if (!mCurrentAnimation || !mCurrentAnimation->speed()) {
+	return;
+ }
+ mAnimationCounter++;
+ if (mAnimationCounter >= mCurrentAnimation->speed()) {
+	unsigned int f = frame() + 1;
+	if (f >= mCurrentAnimation->start() + mCurrentAnimation->range()) {
+		f = mCurrentAnimation->start();
+	}
+	setFrame(f);
+	mAnimationCounter = 0;
+ }
 }
 

@@ -163,13 +163,13 @@ void UnitProperties::loadFacilityProperties(KSimpleConfig* conf)
 
 void UnitProperties::loadAllPluginProperties(KSimpleConfig* conf)
 {
- if (conf->hasGroup("ProductionPlugin")) {
+ if (conf->hasGroup(ProductionProperties::propertyGroup())) {
 	loadPluginProperties(new ProductionProperties(this), conf);
  }
- if (conf->hasGroup("RepairPlugin")) {
+ if (conf->hasGroup(RepairProperties::propertyGroup())) {
 	loadPluginProperties(new RepairProperties(this), conf);
  }
- if (conf->hasGroup("HarvesterPlugin")) {
+ if (conf->hasGroup(HarvesterProperties::propertyGroup())) {
 	loadPluginProperties(new HarvesterProperties(this), conf);
  }
 }
@@ -308,3 +308,4 @@ void UnitProperties::setSpeed(float speed)
  }
  mMobileProperties->mSpeed = speed;
 }
+

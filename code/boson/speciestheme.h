@@ -200,13 +200,6 @@ public:
 	void reset();
 
 	/**
-	 * Load the shot "animation"
-	 **/
-	//TODO: OpenGL implementations!
-//	bool loadShot();
-//	bool loadBigShot(bool isFacility, unsigned int version);
-
-	/**
 	 * @return The @ref BosonSound object for this species.
 	 **/
 	BosonSound* sound() const { return mSound; }
@@ -266,11 +259,6 @@ protected:
 	 * @param pix The pixmap that is loaded. 
 	 **/
 	bool loadUnitImage(const QString& fileName, QImage &image, bool withMask = true, bool withTeamColor = true);
-
-	/**
-	 * Used for the shot sprites by @ref loadShot.
-	 **/
-	bool loadShotPixmap(const QString& fileName, QPixmap& pix);
 
 	/**
 	 * Read the config files for all units available on this computer. The
