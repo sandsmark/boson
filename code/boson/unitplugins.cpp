@@ -775,7 +775,7 @@ void BombingPlugin::bomb(int weaponId, float x, float y)
  boDebug() << k_funcinfo << "Drop-point: (" << mPosX << "; " << mPosY << ")" << endl;
  mWeapon = w;
 
- unit()->setPluginWork(UnitPlugin::Bomb);
+ unit()->setPluginWork(UnitPlugin::Bombing);
 }
 
 void BombingPlugin::advance(unsigned int)
@@ -902,7 +902,7 @@ void MiningPlugin::mine(int weaponId)
 
  // Mine will be layed in advance()
 
- unit()->setPluginWork(UnitPlugin::Mine);
+ unit()->setPluginWork(UnitPlugin::Mining);
 }
 
 void MiningPlugin::advance(unsigned int)
@@ -1002,5 +1002,4 @@ bool MiningPlugin::loadFromXML(const QDomElement& root)
  // mWeapon = ...;
  return true;
 }
-
 
