@@ -67,17 +67,22 @@ QPixmap BosonTiles::tile(int g)
  return p;
 }
 
-int BosonTiles::big_w() const
+int BosonTiles::big_w()
 {
  return 32;
 }
 
-int BosonTiles::big_x(int g) const
+int BosonTiles::big_h()
+{
+ return ((Cell::groundTilesNumber() * 4 + big_w() - 1) / big_w());
+}
+
+int BosonTiles::big_x(int g)
 { 
  return ((g % big_w()) * BO_TILE_SIZE);
 }
 
-int BosonTiles::big_y(int g) const
+int BosonTiles::big_y(int g)
 {
  return ((g / big_w()) * BO_TILE_SIZE);
 }

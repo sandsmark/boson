@@ -22,10 +22,12 @@ public:
 	// call this like the original fillGroundPixmap() in editorTopLevel.cpp
 	QPixmap tile(int g);
 
+	static int big_w();
+	static int big_h();
+	static int big_x(int g);
+	static int big_y(int g);
+
 protected:
-	int big_w() const;
-	int big_x(int g) const;
-	int big_y(int g) const;
 };
 
 #endif
