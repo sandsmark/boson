@@ -452,3 +452,12 @@ BosonStatistics* Player::statistics() const
 {
  return d->mStatistics;
 }
+
+bool Player::isEnemy(Player* p) const
+{
+ if (p == this) {
+	return false;
+ }
+ return true;
+}
+
