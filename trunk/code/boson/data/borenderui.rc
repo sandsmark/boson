@@ -5,6 +5,11 @@
   <Menu name="debug" group="debugmenu"><text>&amp;Debug</text>
     <Action name="debug_models" />
     <Action name="debug_species" />
+    <Action name="debug_show_opengl_states" />
+    <Menu name="debug_lazy"><text>&amp;Lazyness</text>
+      <Action name="debug_lazy_reload_model_textures" />
+      <Action name="debug_lazy_reload_meshrenderer" />
+    </Menu>
   </Menu>
   <Menu name="settings" group="settingsmenu"><text>&amp;Settings</text>
     <Action name="options_show_vertex_points" />
