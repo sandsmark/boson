@@ -18,8 +18,8 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef GROUND_TYPE_H 
-#define GROUND_TYPE_H 
+#ifndef GROUNDTYPE_H 
+#define GROUNDTYPE_H 
 
 enum groundType {
 	GROUND_FACILITY = -2,
@@ -114,5 +114,5 @@ enum destroyedType {
 	DESTROYED_
 	};
 
-#endif // GROUND_TYPE_H
+#endif // GROUNDTYPE_H
 

@@ -1,5 +1,5 @@
 /***************************************************************************
-                          editorFieldMap.cpp  -  description                              
+                          editorBigDisplay.cpp  -  description                              
                              -------------------                                         
 
     version              : $Id$
@@ -20,12 +20,12 @@
 
 #include <qpopupmenu.h>
 
-#include "editorFieldMap.h"
-#include "viewMap.h"
+#include "editorBigDisplay.h"
+#include "visualView.h"
 #include "visualCell.h"
 
-editorFieldMap::editorFieldMap(viewMap *v, QWidget *p, const char *n, WFlags f)
-	:fieldMap(v,p,n,f)
+editorBigDisplay::editorBigDisplay(visualView *v, QWidget *p, const char *n, WFlags f)
+	:visualBigDisplay(v,p,n,f)
 {
 
 	QPopupMenu *qpm;
@@ -82,21 +82,21 @@ editorFieldMap::editorFieldMap(viewMap *v, QWidget *p, const char *n, WFlags f)
 }
 
 
-void editorFieldMap::setCell(int g)
+void editorBigDisplay::setCell(int g)
 {
 	selectedCell->set((groundType)g);
-	view->phys->update();
+	view->field->update();
 }
 
-void editorFieldMap::setTransTile(int)
+void editorBigDisplay::setTransTile(int)
 {
 }
 
-void editorFieldMap::setTransType(int)
+void editorBigDisplay::setTransType(int)
 {
 }
 
-void editorFieldMap::setTransItem(int)
+void editorBigDisplay::setTransItem(int)
 {
 }
 

@@ -24,26 +24,26 @@
 #include "../common/log.h"
 #include "../common/map.h"
 
-#include "viewMap.h"
-#include "editorFieldMap.h"
+#include "visualView.h"
+#include "editorBigDisplay.h"
 //#include "orderWin.h"
-#include "editorMap.h"
+#include "editorField.h"
 
 // orzel : quite ugly ....
-#define mobileList	(((editorMap*)(view->phys))->mobile)
-#define facilityList	(((editorMap*)(view->phys))->facility)
-#define eMap		(((editorMap*)(view->phys))->map)
+#define mobileList	(((editorField*)(view->field))->mobile)
+#define facilityList	(((editorField*)(view->field))->facility)
+#define eMap		(((editorField*)(view->field))->map)
 
 static int selectX, selectY;
 static int oldX, oldY;
 
 /* ugly orzel hack......*/
-void fieldMap::mousePressEvent(QMouseEvent *e)
+void visualBigDisplay::mousePressEvent(QMouseEvent *e)
 {
 }
 
 
-void editorFieldMap::mousePressEvent(QMouseEvent *e)
+void editorBigDisplay::mousePressEvent(QMouseEvent *e)
 {
 int x, y;
 
@@ -131,7 +131,7 @@ if (e->button() & MidButton) {
 }
 }
 
-void fieldMap::mouseMoveEvent(QMouseEvent *e)
+void visualBigDisplay::mouseMoveEvent(QMouseEvent *e)
 {
 QPainter p;
 QPen pen(green, 2);
@@ -152,7 +152,7 @@ if (oldX != selectX && oldY != selectY)
 p.end();
 }
 
-void fieldMap::mouseReleaseEvent(QMouseEvent *e)
+void visualBigDisplay::mouseReleaseEvent(QMouseEvent *e)
 {
 QPainter p;
 QPen pen(green, 2);
@@ -206,7 +206,7 @@ oldY -= BO_TILE_SIZE * view->Y();
 repaint (selectX, selectY, oldX, oldY, FALSE);
 }
 
-void fieldMap::resizeEvent(QResizeEvent *e)
+void visualBigDisplay::resizeEvent(QResizeEvent *e)
 {
 emit reSizeView((width()+BO_TILE_SIZE+1)/BO_TILE_SIZE, (height()+BO_TILE_SIZE+1)/BO_TILE_SIZE);
 }
@@ -214,7 +214,7 @@ emit reSizeView((width()+BO_TILE_SIZE+1)/BO_TILE_SIZE, (height()+BO_TILE_SIZE+1)
 
 
 
-void fieldMap::unSelectAll(void)
+void visualBigDisplay::unSelectAll(void)
 {
 QIntDictIterator<visualMobUnit> selIt(view->mobSelected);
 
@@ -235,12 +235,12 @@ view->unSelectAll();
 }
 
 ///orzel : those two should become inlined in .h
-void fieldMap::unSelectFix(void)
+void visualBigDisplay::unSelectFix(void)
 {
 	view->unSelectFix();
 }
 
-void fieldMap::unSelectMob(long key)
+void visualBigDisplay::unSelectMob(long key)
 {
 	view->unSelectMob(key);
 }

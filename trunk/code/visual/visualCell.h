@@ -18,8 +18,8 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef VISUAL_CELL_H 
-#define VISUAL_CELL_H 
+#ifndef VISUALCELL_H 
+#define VISUALCELL_H 
 
 #include <QwSpriteField.h>
 
@@ -47,4 +47,4 @@ public:
 
 };
 
-#endif // VISUAL_CELL_H
+#endif // VISUALCELL_H

@@ -1,5 +1,5 @@
 /***************************************************************************
-                          editorMap.h  -  description                              
+                          editorField.h  -  description                              
                              -------------------                                         
 
     version              : $Id$
@@ -18,8 +18,8 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef EDITOR_MAP_H 
-#define EDITOR_MAP_H 
+#ifndef EDITORFIELD_H 
+#define EDITORFIELD_H 
 
 #include <qintdict.h>
 
@@ -29,7 +29,7 @@
 #include "../common/unit.h"	// Facility
 
 #include "visualUnit.h"		// visualMobUnit
-#include "physMap.h"
+#include "visualField.h"
 
 class QRect;
 class QPainter;
@@ -47,12 +47,12 @@ struct visualMap {
 /** 
   * This class encapsulate the "physical" idea of the map : size, contents..
   */
-class editorMap : public physMap
+class editorField : public visualField 
 {
   Q_OBJECT
 
  public:
-  editorMap(uint l, uint h, QObject *parent=0, const char *name=0L);
+  editorField(uint l, uint h, QObject *parent=0, const char *name=0L);
 
   void createMob(mobileMsg_t &);
   void destroyMob(destroyedMsg_t &);
@@ -78,6 +78,6 @@ class editorMap : public physMap
 
 };
 
-#endif // EDITOR_MAP_H
+#endif // EDITORFIELD_H
 
 

@@ -27,13 +27,13 @@ LDFLAGS =  -s
 
 # libbovisual.a
 noinst_LIBRARIES = libbovisual.a
-libbovisual_a_SOURCES = fieldDisplay.cpp fieldMap.cpp groundTheme.cpp miniDisplay.cpp miniEvent.cpp miniMap.cpp physMap.cpp selectPart.cpp speciesTheme.cpp viewMap.cpp visualCell.cpp visualUnit.cpp viewSelect.cpp
+libbovisual_a_SOURCES = visualBigDisplay.cpp groundTheme.cpp visualMiniDisplay.cpp visualField.cpp selectPart.cpp speciesTheme.cpp visualView.cpp visualCell.cpp visualUnit.cpp 
 libbovisual_a_METASOURCES = USE_AUTOMOC
 
 #garbage
 CLEANFILES = $(boson_METASOURCES) boson-*.log
 
-EXTRA_DIST = fieldDisplay.cpp fieldMap.cpp groundTheme.cpp miniDisplay.cpp miniEvent.cpp miniMap.cpp physMap.cpp selectPart.cpp speciesTheme.cpp viewMap.cpp visualCell.cpp visualUnit.cpp fieldMap.h groundTheme.h miniMap.h physMap.h selectPart.h speciesTheme.h sprites.h viewMap.h visual.h visualCell.h visualUnit.h
+EXTRA_DIST = visualBigDisplay.cpp groundTheme.cpp visualMiniDisplay.cpp visualField.cpp selectPart.cpp speciesTheme.cpp visualView.cpp visualCell.cpp visualUnit.cpp visualBigDisplay.h groundTheme.h visualMiniDisplay.h visualField.h selectPart.h speciesTheme.h sprites.h visualView.h visual.h visualCell.h visualUnit.h
 
 # make messages.po. Move this one to ../po/ and "make merge" in po
 # the -x is for skipping messages already translated in kdelibs

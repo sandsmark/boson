@@ -23,19 +23,19 @@
 #include "../common/log.h"
 #include "../common/map.h"
 
-#include "bosonViewMap.h"
-#include "fieldMap.h"
+#include "bosonView.h"
+#include "visualBigDisplay.h"
 //#include "orderWin.h"
-#include "playerMap.h"
+#include "bosonField.h"
 
 
-#define mobileList (((playerMap*)(view->phys))->mobile)
-#define facilityList (((playerMap*)(view->phys))->facility)
+#define mobileList (((bosonField*)(view->field))->mobile)
+#define facilityList (((bosonField*)(view->field))->facility)
 
 static int selectX, selectY;
 static int oldX, oldY;
 
-void fieldMap::mousePressEvent(QMouseEvent *e)
+void visualBigDisplay::mousePressEvent(QMouseEvent *e)
 {
 int x, y;
 
@@ -52,7 +52,7 @@ if (e->button() & MidButton) {
 if (e->button() & RightButton) {
 	x += view->X()*BO_TILE_SIZE; y += view->Y()*BO_TILE_SIZE;
 	//orzel : ugly fix..
-	((bosonViewMap*)view)->leftClicked( x, y);
+	((bosonView*)view)->leftClicked( x, y);
 	return;
 	}
 
@@ -118,7 +118,7 @@ if (e->button() & LeftButton) {
 	}
 }
 
-void fieldMap::mouseMoveEvent(QMouseEvent *e)
+void visualBigDisplay::mouseMoveEvent(QMouseEvent *e)
 {
 QPainter p;
 QPen pen(green, 2);
@@ -139,7 +139,7 @@ if (oldX != selectX && oldY != selectY)
 p.end();
 }
 
-void fieldMap::mouseReleaseEvent(QMouseEvent *e)
+void visualBigDisplay::mouseReleaseEvent(QMouseEvent *e)
 {
 QPainter p;
 QPen pen(green, 2);
@@ -193,7 +193,7 @@ oldY -= BO_TILE_SIZE * view->Y();
 repaint (selectX, selectY, oldX, oldY, FALSE);
 }
 
-void fieldMap::resizeEvent(QResizeEvent *e)
+void visualBigDisplay::resizeEvent(QResizeEvent *e)
 {
 emit reSizeView((width()+BO_TILE_SIZE+1)/BO_TILE_SIZE, (height()+BO_TILE_SIZE+1)/BO_TILE_SIZE);
 }
@@ -201,7 +201,7 @@ emit reSizeView((width()+BO_TILE_SIZE+1)/BO_TILE_SIZE, (height()+BO_TILE_SIZE+1)
 
 
 
-void fieldMap::unSelectAll(void)
+void visualBigDisplay::unSelectAll(void)
 {
 QIntDictIterator<visualMobUnit> selIt(view->mobSelected);
 
@@ -222,12 +222,12 @@ view->unSelectAll();
 }
 
 ///orzel : those two should become inlined in .h
-void fieldMap::unSelectFix(void)
+void visualBigDisplay::unSelectFix(void)
 {
 	view->unSelectFix();
 }
 
-void fieldMap::unSelectMob(long key)
+void visualBigDisplay::unSelectMob(long key)
 {
 	view->unSelectMob(key);
 }

@@ -22,14 +22,14 @@
 #include <qkeycode.h>
 
 #include "infoWin.h"
-#include "playerMap.h"
-#include "miniMap.h"
-#include "fieldMap.h"
-#include "bosonViewMap.h"
+#include "bosonField.h"
+#include "visualMiniDisplay.h"
+#include "visualBigDisplay.h"
+#include "bosonView.h"
 
 #include "mainView.h"		// myself
 
-mainView::mainView(playerMap *phys, QWidget *parent=0, const char *name=0)
+mainView::mainView(bosonField *field, QWidget *parent=0, const char *name=0)
 	:QWidget(parent, name)
 { 
 	QHBoxLayout	*topLayout = new QHBoxLayout(this);
@@ -40,8 +40,8 @@ mainView::mainView(playerMap *phys, QWidget *parent=0, const char *name=0)
 
 	topLayout->addLayout(leftLayout,0);
 
-		view = new bosonViewMap(phys); // the view associated with this window
-		mini = new miniMap(view, this);
+		view = new bosonView(field); // the view associated with this window
+		mini = new visualMiniDisplay(view, this);
 		mini->setFixedSize(200,200);
 		leftLayout->addWidget(mini);
 
@@ -49,8 +49,8 @@ mainView::mainView(playerMap *phys, QWidget *parent=0, const char *name=0)
 		leftLayout->addWidget(info, 10);
 
 /* This is the main map, the game area */
-	field = new fieldMap(view, this);
-	topLayout->addWidget(field,10);
+	big = new visualBigDisplay(view, this);
+	topLayout->addWidget(big,10);
 
 /* finish the stuff */
 //	leftLayout->addStretch(10);

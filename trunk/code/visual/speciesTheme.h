@@ -18,8 +18,8 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef SPECIES_THEME_H 
-#define SPECIES_THEME_H 
+#ifndef SPECIESTHEME_H 
+#define SPECIESTHEME_H 
 
 
 #include "../common/cell.h"
@@ -85,6 +85,6 @@ class speciesTheme
 
 };
 
-#endif // SPECIES_THEME_H
+#endif // SPECIESTHEME_H
 
 

@@ -18,8 +18,8 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef SERVER_UNIT_H 
-#define SERVER_UNIT_H 
+#ifndef SERVERUNIT_H 
+#define SERVERUNIT_H 
 
 #include "../common/unit.h"
 #include "../common/msgData.h"
@@ -87,5 +87,5 @@ class serverFacility : public Facility, public serverUnit, public knownBy
 };
  
 
-#endif // SERVER_UNIT_H
+#endif // SERVERUNIT_H
 

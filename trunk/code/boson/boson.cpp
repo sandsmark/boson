@@ -308,13 +308,13 @@ void BosonApp::initStatusBar()
 void BosonApp::initView()
 { 
 
-/* the physical map is created when a game is created */
-	phys = new playerMap(200,200);
+/* the field is created when a game is created */
+	field = new bosonField(200,200);
 
 /* a mainView is each window containing : field, mini, order...
    this one is the first one, other can pop up as well */
 
-	mainView *mainview = new mainView(phys, this, "main_view_0");
+	mainView *mainview = new mainView(field, this, "main_view_0");
 	setView(mainview);
 }
 

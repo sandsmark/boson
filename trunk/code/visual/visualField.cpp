@@ -1,5 +1,5 @@
 /***************************************************************************
-                          physMap.cpp  -  description                              
+                          visualField.cpp  -  description                              
                              -------------------                                         
 
     version              : $Id$
@@ -27,12 +27,12 @@
 #include "../common/boconfig.h"
 #include "../common/map.h"
 
-#include "physMap.h"
+#include "visualField.h"
 #include "speciesTheme.h"
 #include "groundTheme.h"
 #include "visual.h"
   
-physMap::physMap(uint w, uint h, QObject *parent, const char *name=0L)
+visualField::visualField(uint w, uint h, QObject *parent, const char *name=0L)
 	: QObject(parent, name)
 	, QwSpriteField (w * BO_TILE_SIZE ,h * BO_TILE_SIZE)
 {
@@ -63,7 +63,7 @@ vpp.species[0]	= new speciesTheme("red_human");
 }
 
 
-void physMap::setCell(int i, int j, groundType g)
+void visualField::setCell(int i, int j, groundType g)
 {
 	boAssert(i>=0); boAssert(j>=0);
 	boAssert(i<width()); boAssert(j<height());

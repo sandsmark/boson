@@ -18,8 +18,8 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef SERVER_CELL_H 
-#define SERVER_CELL_H 
+#ifndef SERVERCELL_H 
+#define SERVERCELL_H 
 
 #include "../common/cell.h"
 #include "../server/knownBy.h"
@@ -35,4 +35,4 @@ class serverCell : public knownBy, public Cell
 
 };
 
-#endif // SERVER_CELL_H
+#endif // SERVERCELL_H

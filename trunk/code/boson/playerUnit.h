@@ -18,8 +18,8 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef PLAYER_UNIT_H 
-#define PLAYER_UNIT_H 
+#ifndef PLAYERUNIT_H 
+#define PLAYERUNIT_H 
 
 #include "visualUnit.h"
 #include "sprites.h"
@@ -84,5 +84,5 @@ class playerFacility : public visualFacility
  private:
 };
 
-#endif // PLAYER_UNIT_H
+#endif // PLAYERUNIT_H
 

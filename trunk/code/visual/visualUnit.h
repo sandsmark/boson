@@ -18,8 +18,8 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef VISUAL_UNIT_H 
-#define VISUAL_UNIT_H 
+#ifndef VISUALUNIT_H 
+#define VISUALUNIT_H 
 
 #include <QwSpriteField.h>
 
@@ -85,5 +85,5 @@ class visualFacility : public Facility, public QwSprite
 
 };
 
-#endif // VISUAL_UNIT_H
+#endif // VISUALUNIT_H
 

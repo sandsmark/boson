@@ -18,8 +18,8 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef SERVER_CONNECT_H 
-#define SERVER_CONNECT_H 
+#ifndef SERVERCONNECT_H 
+#define SERVERCONNECT_H 
 
 //#ifdef HAVE_CONFIG_H
 //#include <config.h>
@@ -43,4 +43,4 @@ enum serverState {
 	SS_
 	};
 
-#endif // SERVER_CONNECT_H
+#endif // SERVERCONNECT_H

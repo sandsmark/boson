@@ -32,7 +32,7 @@ class playerFacility;
 class QLabel;
 class QWidgetStack;
 class QScrollView;
-//class fieldMap;
+//class visualBigDisplay;
 class QVBoxLayout;
 
 #define ORDER_BUTTONS_NB  (8)
@@ -53,7 +53,7 @@ private:
 	QPixmap		*view_none;
 
 private:
-//	fieldMap	*field;
+//	visualBigDisplay	*field;
 
 /* GUI */
 	QPushButton	*orderButton[ORDER_BUTTONS_NB];

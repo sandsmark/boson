@@ -75,7 +75,7 @@ BoEditorApp::~BoEditorApp()
 {
 
 delete recentList;
-delete phys;
+delete field;
 logf(LOG_INFO, "Closing logfile\n");
 if (logfile && logfile != stderr) fclose(logfile);
 }
@@ -282,14 +282,14 @@ void BoEditorApp::initView()
 { 
 
 /* the physical map is created when a game is created */
-	phys = new editorMap(200,200);
+	field = new editorField(200,200);
 	*filename = kapp->kde_datadir() + "/boson/map/editor_test.bpf";
-	assert (true == phys->load(*filename));
+	assert (true == field->load(*filename));
 
 /* a mainView is each window containing : field, mini, order...
    this one is the first one, other can pop up as well */
 
-	mainView *mainview = new mainView(phys, this, "main_view_0");
+	mainView *mainview = new mainView(field, this, "main_view_0");
 	setView(mainview);
 }
 
@@ -436,14 +436,14 @@ void BoEditorApp::slotViewStatusBar()
 void BoEditorApp::slotFileNewWindow()
 {
 	
-	mainView *mainview = new mainView(phys, this, "main_view_0");
+	mainView *mainview = new mainView(field, this, "main_view_0");
 	setView(mainview);
 }
 
 void BoEditorApp::slotFileNew()
 {
 
-//	if(phys->isModified() && dlgModified() )
+//	if(field->isModified() && dlgModified() )
 		return;
 	
 //	doc->newDocument();		
@@ -476,7 +476,7 @@ void BoEditorApp::slotFileOpenRecent(int id_)
 
 void BoEditorApp::slotFileSave()
 {
-	phys->save(*filename);
+	field->save(*filename);
 //	doc->saveDocument(doc->getPathName()+doc->getTitle());
 }
 
@@ -487,7 +487,7 @@ void BoEditorApp::slotFileSaveAs()
 		QFileInfo saveAsInfo(newName);
 
 		*filename = newName;
-		assert(phys->save(newName));
+		assert(field->save(newName));
 		addRecentFile(newName);
 		setCaption(kapp->appName()+": "+saveAsInfo.fileName());
 	}

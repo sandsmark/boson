@@ -22,14 +22,14 @@
 #include <qkeycode.h>
 
 #include "infoWin.h"
-#include "editorMap.h"
-#include "miniMap.h"
-#include "editorFieldMap.h"
-#include "viewMap.h"
+#include "editorField.h"
+#include "visualMiniDisplay.h"
+#include "editorBigDisplay.h"
+#include "visualView.h"
 
 #include "mainView.h"		// myself
 
-mainView::mainView(editorMap *phys, QWidget *parent=0, const char *name=0)
+mainView::mainView(editorField *field, QWidget *parent=0, const char *name=0)
 	:QWidget(parent, name)
 { 
 	QHBoxLayout	*topLayout = new QHBoxLayout(this);
@@ -40,8 +40,8 @@ mainView::mainView(editorMap *phys, QWidget *parent=0, const char *name=0)
 
 	topLayout->addLayout(leftLayout,0);
 
-		view = new viewMap(phys); // the view associated with this window
-		mini = new miniMap(view, this);
+		view = new visualView(field); // the view associated with this window
+		mini = new visualMiniDisplay(view, this);
 		mini->setFixedSize(200,200);
 		leftLayout->addWidget(mini);
 
@@ -49,8 +49,8 @@ mainView::mainView(editorMap *phys, QWidget *parent=0, const char *name=0)
 		leftLayout->addWidget(info, 10);
 
 /* This is the main map, the game area */
-	field = new editorFieldMap(view, this);
-	topLayout->addWidget(field,10);
+	big = new editorBigDisplay(view, this);
+	topLayout->addWidget(big,10);
 
 /* finish the stuff */
 //	leftLayout->addStretch(10);

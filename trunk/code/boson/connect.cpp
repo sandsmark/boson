@@ -168,19 +168,19 @@ switch(tag) {
 		jiffies ++;
 		boAssert(jiffies == data->jiffies);
 	// let's each object speaks
-		phys->requestAction(buffer);
+		field->requestAction(buffer);
 	// latest message is MSG_TIME_CONFIRM
 		sendMsg(buffer, MSG_TIME_CONFIRM, sizeof(data->jiffies), data);
 		logf(LOG_COMM, "flush : jiffies++ : %u", jiffies);
 		buffer->flush();
-		phys->update();		// QwSpriteField periodical rendering
+		field->update();		// QwSpriteField periodical rendering
 		break;
 
 	case MSG_MAP_DISCOVERED :
 		ASSERT_DATA_BLENGHT(sizeof(data->coo));
 		logf(LOG_GAME_LOW, "received MSG_MAP_DISCOVERED : (%d,%d) = %d",
 			data->coo.x, data->coo.y, (int)data->coo.g );
-		phys->setCell(data->coo.x, data->coo.y, data->coo.g);
+		field->setCell(data->coo.x, data->coo.y, data->coo.g);
 		return;
 		break;
 
@@ -193,7 +193,7 @@ switch(tag) {
 			data->facility.key,
 			data->facility.state
 			);
-		phys->createFix(data->facility);
+		field->createFix(data->facility);
 		break;
 
 	case MSG_FACILITY_CHANGED :
@@ -202,7 +202,7 @@ switch(tag) {
 			data->fixChanged.key,
 			data->fixChanged.state
 			);
-		f = phys->getFacility(data->fixChanged.key);
+		f = field->getFacility(data->fixChanged.key);
 		if (f) {
 			f->s_setState(data->fixChanged.state);
 			}
@@ -213,7 +213,7 @@ switch(tag) {
 	case MSG_FACILITY_DESTROYED :
 		ASSERT_DATA_BLENGHT(sizeof(data->destroyed));
 		logf(LOG_GAME_HIGH, "Facility(%d) destroyed", data->destroyed.key);
-		phys->destroyFix(data->destroyed);
+		field->destroyFix(data->destroyed);
 		break;
 
 
@@ -226,18 +226,18 @@ switch(tag) {
 			data->mobile.x,
 			data->mobile.y
 			);
-		phys->createMob(data->mobile);
+		field->createMob(data->mobile);
 		break;
 
 	case MSG_MOBILE_DESTROYED :
 		ASSERT_DATA_BLENGHT(sizeof(data->destroyed));
 		logf(LOG_GAME_HIGH, "mobile(%d) destroyed", data->destroyed.key);
-		phys->destroyMob(data->destroyed);
+		field->destroyMob(data->destroyed);
 		break;
 
 	case MSG_MOBILE_MOVE_C :
 		ASSERT_DATA_BLENGHT(sizeof(data->move));
-		phys->move(data->move);
+		field->move(data->move);
 		break;
 
 	}

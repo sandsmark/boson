@@ -18,34 +18,34 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef MAIN_VIEW_H
-#define MAIN_VIEW_H
+#ifndef MAINVIEW_H
+#define MAINVIEW_H
 
 #include <qwidget.h>
 
-class	miniMap;
-class	editorFieldMap;
-class	viewMap;
-class	editorMap;
+class	visualMiniDisplay;
+class	editorBigDisplay;
+class	visualView;
+class	editorField;
 class	infoWin;
 
 class mainView : public QWidget 
 {
 	Q_OBJECT
 public:
-	mainView(editorMap *phys, QWidget *parent=0, const char *name=0);
+	mainView(editorField *field, QWidget *parent=0, const char *name=0);
 
 protected:
   virtual void keyReleaseEvent (QKeyEvent * e );
 
 private:
 /* the map object we are playing in */
-    miniMap		*mini;
-    editorFieldMap	*field;
-    viewMap		*view;
+    visualMiniDisplay	*mini;
+    editorBigDisplay	*big;
+    visualView		*view;
 /* Window displayer information */
     infoWin		*info;
 };
 
 
-#endif     // MAIN_VIEW_H
+#endif     // MAINVIEW_H

@@ -1,5 +1,5 @@
 /***************************************************************************
-                          fieldMap.h  -  description                              
+                          visualBigDisplay.h  -  description                              
                              -------------------                                         
 
     version              : $Id$
@@ -18,8 +18,8 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef FIELD_MAP_H 
-#define FIELD_MAP_H 
+#ifndef VISUALBIGDISPLAY_H 
+#define VISUALBIGDISPLAY_H 
 
 
 #include <qframe.h> ///orzel qwidget
@@ -42,20 +42,20 @@ class Unit;
 class groundTheme;
 class QPixmap;
 class visualCell;
-class viewMap;
+class visualView;
 class orderWin;
 
 
 /** 
   * This class handles all operations concerning the game Board/Map
   */
-class fieldMap : public QWidget, public QwAbsSpriteFieldView
+class visualBigDisplay : public QWidget, public QwAbsSpriteFieldView
 {
   Q_OBJECT
 
 public:
-  fieldMap(/*orderWin *,*/ viewMap *v, QWidget *parent=0, const char *name=0L, WFlags f=0);
-  ~fieldMap();
+  visualBigDisplay(/*orderWin *,*/ visualView *v, QWidget *parent=0, const char *name=0L, WFlags f=0);
+  ~visualBigDisplay();
 
 
 
@@ -89,10 +89,10 @@ protected:
   void	unSelectAll(void);
 
 
-  viewMap	*view;
+  visualView	*view;
 
 };
 
-#endif // FIELD_MAP_H
+#endif // VISUALBIGDISPLAY_H
 
 
