@@ -33,3 +33,8 @@ bool BoInfo::haveMtrr() const
 {
  return false;
 }
+
+QString dataMemory() const
+{
+ return QString::null;
+}

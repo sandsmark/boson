@@ -135,3 +135,24 @@ bool BoInfo::haveMtrr() const
  return !getString(MTRRString).isEmpty();
 }
 
+QString BoInfo::dataMemory() const
+{
+ int pid = (int)getpid();
+ QString status = readFile(QString("/proc/%1/status").arg(pid));
+ if (!status.isEmpty()) {
+	// we need the lines starting with Vm only
+	QStringList list = QStringList::split('\n', status);
+	QRegExp rx("^VmData:\\s*");
+	for (unsigned int i = 0 ; i < list.count(); i++) {
+		if (rx.search(list[i]) >= 0) {
+			QString memory = list[i];
+			memory.replace(rx, "");
+			rx = QRegExp(" .*");
+			memory.replace(rx, "");
+			return memory;
+		}
+	}
+ }
+ return QString::null;
+}
+

@@ -522,6 +522,28 @@ public:
 	 **/
 	bool haveMtrr() const;
 
+	/**
+	 * Note that this is <em>always<em> current data!!
+	 *
+	 * This entry is <em>not</em> updates by @ref updateOSInfo or friends
+	 * and it isn't stored into the boinfo log either! This is for debugging
+	 * purposes (think about it: memory usage changes over lifetime of the
+	 * programe, so logging it only once is useless)
+	 *
+	 * Also note that this value is <em>not</em> accurate! E.g. on linux it
+	 * gives the amount of memory pages that are allocated for the
+	 * application, but it doesn't say anything about how much of this
+	 * memory is actually in use! It may be possible that there are 30MB
+	 * allocated, but 20MB have been freed already (but still appear in this
+	 * number)! Keep this in mind when using this number
+	 *
+	 * @return The amount of memory in the data segment that is allocated by
+	 * the current application (boson/borender/bounit/...). On linux this is the
+	 * number after "VmData" in /proc/PID/status. The returned string should
+	 * be the number only, without the "VmData: ". In kb.
+	 **/
+	QString dataMemory() const;
+
 
 	QMap<int, QVariant> completeData() const;
 	/**
@@ -564,6 +586,11 @@ public:
 	// - RAM in general
 	// - is GLX module loaded in XFree86Config ? --> extensions list
 	//   --> same about GLcore and so
+	//   --> the modules (also drivers) are loaded by "loadmod.c", function
+	//   LoadModule(). See xf86Init.c, which parses the X-config and calls
+	//   that.
+	//   // AB: we need the LoadModule() stuff *only*. if GLX isn't loaded,
+	//   then it is not listed in the extensions list.
 	// 
 protected:
 	void insert(int key, int value);
