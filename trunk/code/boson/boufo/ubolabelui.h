@@ -53,6 +53,8 @@ public:
 
 	UDimension getPreferredSize(const UWidget * w);
 
+	virtual int getHeightForWidth(const UWidget * widget, int w);
+
 protected:
 	// AB: these is our modification of this class.
 	// we use the style* methods instead of corresponding methods in
