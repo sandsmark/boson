@@ -1330,7 +1330,7 @@ void BosonMap::recalculateNormalsInRect(int x1, int y1, int x2, int y2)
  }
  BoVector3 a, b, c, n;
  BoVector3* normals = new BoVector3[w * h];
-#define NORM(x, y) normals[(y - cy1) * h + (x - cx1)]
+#define NORM(x, y) normals[(y - cy1) * w + (x - cx1)]
  // FIXME: this is not entirely correct: our cells consist of a single quad atm,
  //  however, they can be "folded" so that it seems to consist of two triangles.
  //  In this case, the cell actually has two planes - one for each half.
