@@ -27,7 +27,7 @@
 static const char *description =
     I18N_NOOP("Unit Editor for Boson");
 
-static const char *version = "v0.6pre";
+static const char *version = "v0.6";
 
 static KCmdLineOptions options[] =
 {
