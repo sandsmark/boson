@@ -164,6 +164,7 @@ public:
 	
 private:
 	bool		atHome(void) { return home == gridRect().topLeft(); }
+	groundType	myHarvestGround(void) { return (getType()==MOB_OIL_HARVESTER)?GROUND_GRASS_OIL:GROUND_GRASS_MINERAL; }
 
 	harvestState	hstate;
 	QPoint		home;

@@ -129,9 +129,9 @@ void bosonCanvas::createMob(mobileMsg_t &m)
 
 	switch (m.type) {
 		default:
-		case MOB_MINERAL_HARVESTER:
 			u = new playerMobUnit(&m);
 			break;
+		case MOB_MINERAL_HARVESTER:
 		case MOB_OIL_HARVESTER:
 			u = new harvesterUnit(&m);
 			break;
