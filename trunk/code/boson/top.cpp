@@ -62,13 +62,6 @@
 #include <qhbox.h>
 #include <qfile.h>
 
-#define ID_WIDGETSTACK_WELCOME 1
-#define ID_WIDGETSTACK_NEWGAME 2
-#define ID_WIDGETSTACK_STARTEDITOR 3
-#define ID_WIDGETSTACK_BOSONWIDGET 4
-#define ID_WIDGETSTACK_NETWORK 5
-#define ID_WIDGETSTACK_LOADING 6
-
 class TopWidget::TopWidgetPrivate
 {
 public:
@@ -286,23 +279,23 @@ void TopWidget::enableGameActions(bool enable)
  }
 }
 
-void TopWidget::initStartupWidget(int id)
+void TopWidget::initStartupWidget(StartupWidgetIds id)
 {
- if (mWs->widget(id)) {
+ if (mWs->widget((int)id)) {
 	// already initialized
 	return;
  }
- if (id == ID_WIDGETSTACK_BOSONWIDGET) {
+ if (id == IdBosonWidget) {
 	// bosonwidget gets initialized from within game starting, not
 	// from here
 	kdError() << k_funcinfo << "BosonWidget must be initialized directly using initBosonWidget() !" << endl;
 	return;
  }
  BosonStartupBaseWidget* startup = new BosonStartupBaseWidget(mWs);
- mWs->addWidget(startup, id);
+ mWs->addWidget(startup, (int)id);
  QWidget* w = 0;
  switch (id) {
-	case ID_WIDGETSTACK_WELCOME:
+	case IdWelcome:
 	{
 		d->mWelcome = new BosonWelcomeWidget(startup->plainWidget());
 		w = d->mWelcome;
@@ -312,7 +305,7 @@ void TopWidget::initStartupWidget(int id)
 		connect(d->mWelcome, SIGNAL(signalQuit()), this, SLOT(close()));
 		break;
 	}
-	case ID_WIDGETSTACK_NEWGAME:
+	case IdNewGame:
 	{
 		d->mNewGame = new BosonNewGameWidget(this, startup->plainWidget());
 		w = d->mNewGame;
@@ -323,14 +316,14 @@ void TopWidget::initStartupWidget(int id)
 		d->mNewGame->show();
 		break;
 	}
-	case ID_WIDGETSTACK_STARTEDITOR:
+	case IdStartEditor:
 	{
 		d->mStartEditor = new BosonStartEditorWidget(this, startup->plainWidget());
 		w = d->mStartEditor;
 		connect(d->mStartEditor, SIGNAL(signalCancelled()), this, SLOT(slotShowMainMenu()));
 		break;
 	}
-	case ID_WIDGETSTACK_NETWORK:
+	case IdNetwork:
 	{
 		d->mNetworkOptions = new BosonNetworkOptionsWidget(startup->plainWidget());
 		w = d->mNetworkOptions;
@@ -338,7 +331,7 @@ void TopWidget::initStartupWidget(int id)
 				this, SLOT(slotHideNetworkOptions()));
 		break;
 	}
-	case ID_WIDGETSTACK_LOADING:
+	case IdLoading:
 	{
 		d->mLoadingWidget = new BosonLoadingWidget(startup->plainWidget());
 		w = d->mLoadingWidget;
@@ -351,7 +344,7 @@ void TopWidget::initStartupWidget(int id)
 		d->mLoadingWidget->setProgress(0);
 		break;
 	}
-	case ID_WIDGETSTACK_BOSONWIDGET: // gets loaded elsewhere
+	case IdBosonWidget: // gets loaded elsewhere
 	default:
 	{
 		mWs->removeWidget(startup);
@@ -368,18 +361,18 @@ void TopWidget::initStartupWidget(int id)
  startup->initBackgroundOrigin();
 }
 
-void TopWidget::showStartupWidget(int id)
+void TopWidget::showStartupWidget(StartupWidgetIds id)
 {
  initStartupWidget(id);
  raiseWidget(id);
  switch (id) {
-	case ID_WIDGETSTACK_WELCOME:
-	case ID_WIDGETSTACK_NEWGAME:
-	case ID_WIDGETSTACK_STARTEDITOR:
+	case IdWelcome:
+	case IdNewGame:
+	case IdStartEditor:
 		break;
-	case ID_WIDGETSTACK_BOSONWIDGET:
-	case ID_WIDGETSTACK_NETWORK:
-	case ID_WIDGETSTACK_LOADING:
+	case IdBosonWidget:
+	case IdNetwork:
+	case IdLoading:
 		showHideMenubar();
 		break;
 	default:
@@ -409,7 +402,7 @@ void TopWidget::initBosonWidget(bool loading)
  d->mBosonWidget->init(); // this depends on several virtual methods and therefore can't be called in the c'tor
  factory()->addClient(d->mBosonWidget); // XMLClient-stuff. needs to be called *after* creation of KAction objects, so outside BosonWidget might be a good idea :-)
 // createGUI("bosonui.rc", false);
- mWs->addWidget(d->mBosonWidget, ID_WIDGETSTACK_BOSONWIDGET);
+ mWs->addWidget(d->mBosonWidget, IdBosonWidget);
 
  connect(d->mBosonWidget, SIGNAL(signalChangeLocalPlayer(Player*)), this, SLOT(slotChangeLocalPlayer(Player*)));
  connect(d->mBosonWidget, SIGNAL(signalEndGame()), this, SLOT(slotEndGame()));
@@ -427,17 +420,17 @@ void TopWidget::initBosonWidget(bool loading)
 
 void TopWidget::slotNewGame()
 {
- showStartupWidget(ID_WIDGETSTACK_NEWGAME);
+ showStartupWidget(IdNewGame);
 }
 
 void TopWidget::slotStartEditor()
 {
- showStartupWidget(ID_WIDGETSTACK_STARTEDITOR);
+ showStartupWidget(IdStartEditor);
 }
 
 void TopWidget::slotStartNewGame()
 {
- showStartupWidget(ID_WIDGETSTACK_LOADING);
+ showStartupWidget(IdLoading);
 
  d->mStarting->setLoadingWidget(d->mLoadingWidget);
  d->mStarting->setPlayField(mPlayField);
@@ -489,7 +482,7 @@ void TopWidget::slotLoadGame()
  // network, just as slotStartNewGame() gets called. This way we could 
  // support loading network games.
 
- showStartupWidget(ID_WIDGETSTACK_LOADING);
+ showStartupWidget(IdLoading);
 
  initCanvas();
  initBosonWidget(true);
@@ -539,7 +532,7 @@ void TopWidget::slotLoadGame()
 	reinitGame();
 
 	// Then return to welcome screen
-	showStartupWidget(ID_WIDGETSTACK_WELCOME);
+	showStartupWidget(IdWelcome);
  }
 
  kdDebug() << k_funcinfo << "done" << endl;
@@ -559,12 +552,12 @@ void TopWidget::slotShowMainMenu()
  // Delete all players to remove added AI players, then re-init local player
  boGame->removeAllPlayers();
  initPlayer();
- showStartupWidget(ID_WIDGETSTACK_WELCOME);
+ showStartupWidget(IdWelcome);
 }
 
 void TopWidget::slotShowNetworkOptions()
 {
- showStartupWidget(ID_WIDGETSTACK_NETWORK);
+ showStartupWidget(IdNetwork);
 }
 
 void TopWidget::slotHideNetworkOptions()
@@ -573,7 +566,7 @@ void TopWidget::slotHideNetworkOptions()
  delete d->mNetworkOptions;
  d->mNetworkOptions = 0;
  d->mNewGame->slotSetAdmin(boGame->isAdmin());
- showStartupWidget(ID_WIDGETSTACK_NEWGAME);
+ showStartupWidget(IdNewGame);
 }
 
 void TopWidget::slotAssignMap()
@@ -613,7 +606,7 @@ void TopWidget::slotStartGame()
  */
 
  int progress = 0; // FIXME: wrong value!
- showStartupWidget(ID_WIDGETSTACK_BOSONWIDGET);
+ showStartupWidget(IdBosonWidget);
  delete d->mNewGame;
  d->mNewGame = 0;
  delete d->mStartEditor;
@@ -710,7 +703,7 @@ void TopWidget::reinitGame()
  d->mActionStatusbar->setChecked(false);
  slotToggleStatusbar();
  enableGameActions(false);
- showStartupWidget(ID_WIDGETSTACK_WELCOME);
+ showStartupWidget(IdWelcome);
 }
 
 void TopWidget::slotGameOver()
@@ -762,17 +755,17 @@ void TopWidget::slotToggleMenubar()
 	return;
  }
  int id = mWs->id(mWs->visibleWidget());
- switch (id) {
-	case ID_WIDGETSTACK_WELCOME:
-	case ID_WIDGETSTACK_NEWGAME:
-	case ID_WIDGETSTACK_LOADING:
-	case ID_WIDGETSTACK_NETWORK:
+ switch ((StartupWidgetIds)id) {
+	case IdWelcome:
+	case IdNewGame:
+	case IdLoading:
+	case IdNetwork:
 		boConfig->setShowMenubarOnStartup(d->mActionMenubar->isChecked());
 		break;
-	case ID_WIDGETSTACK_BOSONWIDGET:
+	case IdBosonWidget:
 		boConfig->setShowMenubarInGame(d->mActionMenubar->isChecked());
 		break;
-	case ID_WIDGETSTACK_STARTEDITOR:
+	case IdStartEditor:
 		// editor without menubar is pretty useless, i guess
 		break;
 	default:
@@ -874,16 +867,16 @@ bool TopWidget::queryExit()
  if (!w) {
 	return true;
  }
- switch (mWs->id(w)) {
-	case ID_WIDGETSTACK_BOSONWIDGET:
+ switch ((StartupWidgetIds)mWs->id(w)) {
+	case IdBosonWidget:
 		d->mBosonWidget->saveConfig();
 		d->mBosonWidget->quitGame();
 		saveGameDockConfig();
 		return true;
-	case ID_WIDGETSTACK_NEWGAME:
-	case ID_WIDGETSTACK_LOADING:
-	case ID_WIDGETSTACK_NETWORK:
-	case ID_WIDGETSTACK_WELCOME:
+	case IdNewGame:
+	case IdLoading:
+	case IdNetwork:
+	case IdWelcome:
 		saveInitialDockConfig();
 		return true;
 	default:
@@ -892,10 +885,10 @@ bool TopWidget::queryExit()
  return true;
 }
 
-void TopWidget::raiseWidget(int id)
+void TopWidget::raiseWidget(StartupWidgetIds id)
 {
  switch (id) {
-	case ID_WIDGETSTACK_WELCOME:
+	case IdWelcome:
 	{
 		QWidget* w = mWs->widget(id);
 		setMinimumSize(w->size());
@@ -907,9 +900,9 @@ void TopWidget::raiseWidget(int id)
 		}
 		break;
 	}
-	case ID_WIDGETSTACK_NEWGAME:
-	case ID_WIDGETSTACK_LOADING:
-	case ID_WIDGETSTACK_NETWORK:
+	case IdNewGame:
+	case IdLoading:
+	case IdNetwork:
 		setMinimumSize(BOSON_MINIMUM_WIDTH, BOSON_MINIMUM_HEIGHT);
 		setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
 		if (boConfig->showMenubarOnStartup()) {
@@ -918,7 +911,7 @@ void TopWidget::raiseWidget(int id)
 			hideMenubar();
 		}
 		break;
-	case ID_WIDGETSTACK_BOSONWIDGET:
+	case IdBosonWidget:
 		if (boConfig->showMenubarInGame()) {
 			showMenubar();
 		} else {
@@ -927,7 +920,7 @@ void TopWidget::raiseWidget(int id)
 		setMinimumSize(BOSON_MINIMUM_WIDTH, BOSON_MINIMUM_HEIGHT);
 		setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
 		break;
-	case ID_WIDGETSTACK_STARTEDITOR:
+	case IdStartEditor:
 		showMenubar();
 		setMinimumSize(BOSON_MINIMUM_WIDTH, BOSON_MINIMUM_HEIGHT);
 		setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
@@ -990,25 +983,25 @@ void TopWidget::showHideMenubar()
 	return;
  }
  int id = mWs->id(mWs->visibleWidget());
- switch (id) {
-	case ID_WIDGETSTACK_WELCOME:
-	case ID_WIDGETSTACK_NEWGAME:
-	case ID_WIDGETSTACK_LOADING:
-	case ID_WIDGETSTACK_NETWORK:
+ switch ((StartupWidgetIds)id) {
+	case IdWelcome:
+	case IdNewGame:
+	case IdLoading:
+	case IdNetwork:
 		if (boConfig->showMenubarOnStartup()) {
 			showMenubar();
 		} else {
 			hideMenubar();
 		}
 		break;
-	case ID_WIDGETSTACK_BOSONWIDGET:
+	case IdBosonWidget:
 		if (boConfig->showMenubarInGame()) {
 			showMenubar();
 		} else {
 			hideMenubar();
 		}
 		break;
-	case ID_WIDGETSTACK_STARTEDITOR:
+	case IdStartEditor:
 		// editor without menubar is pretty useless, i guess
 		showMenubar();
 		break;

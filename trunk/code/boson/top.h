@@ -39,6 +39,19 @@ class TopWidget : public KDockMainWindow
 	Q_OBJECT
 public:
 	/**
+	 * These are the IDs of the startup widgets, as used by e.g. @ref
+	 * showStartupWidget.
+	 **/
+	enum StartupWidgetIds {
+		IdWelcome = 0,
+		IdNewGame = 1,
+		IdStartEditor = 2,
+		IdBosonWidget = 3,
+		IdNetwork = 4,
+		IdLoading = 5
+	};
+
+	/**
 	 * Default Constructor
 	 **/
 	TopWidget();
@@ -250,11 +263,11 @@ private:
 
 	void slotWaitForMap();
 
-	void initStartupWidget(int id);
-	void showStartupWidget(int id);
+	void initStartupWidget(StartupWidgetIds id);
+	void showStartupWidget(StartupWidgetIds id);
 	void initBosonWidget(bool loading = false); // a special case for initStartupWidget - this must get called from outside a show*Widget().
 
-	void raiseWidget(int id);
+	void raiseWidget(StartupWidgetIds id);
 
 
 private:
