@@ -26,7 +26,7 @@
 #include <qcanvas.h>		// graphism
 #include "sprites.h"		// rtti S_SHOT
 
-#define SHOT_FRAMES		18
+#define SHOT_FRAMES		5
 
 #define UNITS_SHOT_FRAMES	16
 #define FIX_SHOT_FRAMES		16
@@ -57,6 +57,7 @@ private:
 	static	QCanvasPixmapArray	*shotSequ;			// explosions sequence for small shots
 
 	static	bool loadBig(shot_style style, int version);		// load one unit/facilitye pixmaps set
+	static	bool loadSmall();
 
 	int	counter;
 	int	maxCounter;

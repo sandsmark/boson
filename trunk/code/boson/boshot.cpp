@@ -55,21 +55,9 @@ boShot::boShot(int _x, int _y, int _z, shot_style style)
 
 		case SHOT_SHOT:
 			/* small shot (unit hitten) */
-			if (!shotSequ) { // static imagepool initialization
-	//			QString path( locate ( "data", "boson/themes/species/human/explosions/shot/explosion00.pbm") + "explosion%02d" );
-				QString path = *dataPath + "themes/species/human/explosions/" SHOTS ;
-	//			printf("path is %s\n", (const char*)path);
-	//			printf("path is %s\n", (const char*)path);
-				shotSequ = new QCanvasPixmapArray(path+".ppm", SHOT_FRAMES);
-				//shotSequ = new QCanvasPixmapArray(path+".ppm", path+".pbm", SHOT_FRAMES);
-	//			printf("image0 is %d %d\n", shotSequ->image(0)->width(), shotSequ->image(0)->height());
-				boAssert(!shotSequ->image(0)->isNull());
-				if (shotSequ->image(0)->width()!=8 || shotSequ->image(0)->height()!=11) {
-					delete shotSequ;
-					shotSequ = 0;
-					delete this;
-					return;
-				}
+			if (!loadSmall()) {
+				delete this;
+				return;
 			}
 			setSequence(shotSequ);		// set image set
 			maxCounter = SHOT_FRAMES;
@@ -119,6 +107,33 @@ void  boShot::timerEvent( QTimerEvent * )
 	}
 	killTimers();
 	delete this;
+}
+
+
+bool boShot::loadSmall()
+{
+	int		j;
+	char		buffer[200];
+	QList<QPixmap>	pix_l;
+	QList<QPoint>	point_l;
+	QPixmap		*p;
+	QPoint		*pp;
+	QString		path  = *dataPath + "themes/species/human/explosions/shots/shot.01";
+
+	if (shotSequ) return true; 	// already there
+
+	for(j=0; j< SHOT_FRAMES; j++) {
+		sprintf(buffer, ".%04d.bmp", j);
+		if (!loadPixmap(path + buffer, &p)) {
+			logf(LOG_ERROR, "boshot::loadBig Can't load %s.%04d.bmp  ...\n", (const char *)path, j);
+			return false;
+		}
+		pix_l.append(p);
+		pp = new QPoint( p->width() >> 1, p->height() >> 1); // hotspot in the center
+		point_l.append(pp);
+	}
+	shotSequ = new QCanvasPixmapArray(pix_l, point_l);
+	return true;
 }
 
 
@@ -208,12 +223,12 @@ bool loadPixmap(const QString &path, QPixmap **pix)
 	
 	w = image.width(); h = image.height();
 
-	boAssert(image.depth()==32);
+//	boAssert(image.depth()==32);
 	boAssert( w>7 );
 	boAssert( h>10 );
 	
 
-	if (image.isNull() || w < 32 || h < 32) 
+	if (image.isNull() || w < 25 || h < 25) 
 		return false;
 	
 	
