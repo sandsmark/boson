@@ -27,8 +27,14 @@ echo "
 
 function print_header()
 {
+$image;
+global $style;
+if($style == "green")
+  $image="pictures/header.jpg";
+else
+  $image="pictures/boson.png";
 echo "
-<h1 align=\"center\"><img src=\"pictures/boson.png\" alt=\"Boson logo\"></h1><br>";
+<h1 align=\"center\"><img src=\"$image\" alt=\"Boson logo\"></h1><br>";
 }
 
 /*****  HTML header & footer  *****/
@@ -55,6 +61,15 @@ header ("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT"); // Always modifi
 header ("Cache-Control: no-cache, must-revalidate");  // HTTP/1.1
 header ("Pragma: no-cache");                          // HTTP/1.0
 
+// Select stylesheet
+global $style;
+$stylesheet;
+if($style == "green")
+  $stylesheet="style-green.css";
+else
+  $stylesheet="style-blue.css";
+
+// HTML header
 echo "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">
 <html>
   <head>
@@ -63,7 +78,7 @@ echo "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">
     <meta name=\"Title\" content=\"Boson: real-time strategy game for KDE\">
     <meta name=\"description\" content=\"Boson is a free real-time strategy game for KDE\">
     <meta name=\"keywords\" content=\"Boson,real-time,realtime,real time,strategy,game,KDE,Linux,X11,Qt,OpenGL,3d\">
-    <link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\">
+    <link rel=\"stylesheet\" type=\"text/css\" href=\"$stylesheet\">
   </head>
   <body>";
   // "
@@ -81,7 +96,7 @@ setcookie("Visits", (string)$visitcount, time() + 3600 * 24 * 365 * 25); // Expi
 
 // Last modification stuff
 global $filename, $lastupdate;
-$lastupdate=date("jS F Y H:i:s", filemtime($filename));
+$lastupdate=gmdate("jS F Y H:i:s", filemtime($filename));
 }
 
 ?>

@@ -1,19 +1,31 @@
 /*****  CSS styles for Boson homepage  *****/
 
 
+/** Important things first **/
+body {
+  color: #00ff00;
+  background-color: #000000;
+}
+
+/** Stupid buggy Konqueror */
+td {
+  color: #00ff00;
+}
+
+
 /** Links **/
 a {
-  color: #0000a0;
+  color: #60ff60;
   background-color: transparent;
   text-decoration: none;
 }
 a:visited {
   background-color: transparent;
-  color: #000060;
+  color: #60d060;
 }
 a:hover {
   background-color: transparent;
-  color: #0000d0;
+  color: #ffffff;
   text-decoration: underline;
 }
 
@@ -23,7 +35,7 @@ a:hover {
   font-weight: bold;
 }
 
-.sidebarboxlink {
+a.sidebarboxlink {
 }
 
 .sidebardownloadversion {
@@ -33,13 +45,13 @@ a:hover {
 a.sidebardownloadlink {
   font-weight: bold;
   background-color: transparent;
-  color: #7b7b7b;
+  color: #80a080;
   text-decoration: none;
 }
 a.sidebardownloadlink:hover {
   font-weight: bold;
   background-color: transparent;
-  color: #505050;
+  color: #80c080;
   text-decoration: underline;
 }
 
@@ -47,6 +59,17 @@ a.sidebardownloadlink:hover {
 /** Boxes **/
 .boxtitle {
   font-weight: bold;
+}
+
+.boxtext {
+}
+
+table.box {
+  background-color: #004000;
+}
+
+td.boxcell {
+  background-color: #202020;
 }
 
 .bigboxtitle {
@@ -57,7 +80,55 @@ a.sidebardownloadlink:hover {
   font-weight: bold;
 }
 
-.boxtext {
+.bigboxtext {
+}
+
+table.bigbox {
+  background-color: #004000;
+}
+
+td.bigboxtitlecell {
+  background-color: #202020;
+}
+
+td.bigboxcell {
+  background-color: #081808;
+}
+
+table.bigboxarea {
+  background-color: #081808;
+}
+
+td.bigboxsubheadercell {
+  background-color: #303030;
+}
+
+
+/** Main area **/
+table.main {
+  background-color: #000000;
+}
+
+td.mainarea {
+  background-color: #000000;
+}
+
+
+/** Sidebar **/
+table.sidebar {
+  background-color: #000000;
+}
+
+table.sidebarbox {
+  background-color: #004000;
+}
+
+td.sidebarboxtitlecell {
+  background-color: #202020;
+}
+
+td.sidebarboxcell {
+  background-color: #081808;
 }
 
 
@@ -95,14 +166,14 @@ a.copyright {
   font-size: small;
   font-style: italic;
   background-color: transparent;
-  color: #404040;
+  color: #a0a0a0;
   text-decoration: none;
 }
 a.copyright:hover {
   font-size: small;
   font-style: italic;
   background-color: transparent;
-  color: #202020;
+  color: #c0c0c0;
   text-decoration: underline;
 }
 
@@ -110,38 +181,38 @@ a.copyright:hover {
   font-size: x-small;
   font-style: italic;
   background-color: transparent;
-  color: #a0a0a0;
+  color: #606060;
 }
 .elapsedtimevalue {
   font-size: x-small;
   font-style: italic;
   background-color: transparent;
-  color: #606060;
+  color: #808080;
 }
 
 .lastupdate {
   font-size: small;
   background-color: transparent;
-  color: #606060;
+  color: #808080;
 }
 .lastupdatevalue {
   font-size: small;
   background-color: transparent;
-  color: #000000;
+  color: #b0b0b0;
 }
 
 .counter {
   font-size: small;
   background-color: transparent;
-  color: #606060;
+  color: #808080;
 }
 .countervalue {
   font-size: small;
   background-color: transparent;
-  color: #000000;
+  color: #b0b0b0;
 }
 
 pre {
   background-color: transparent;
-  color: #606060;
+  color: #a0d0a0;
 }

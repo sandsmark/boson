@@ -5,7 +5,7 @@ function sidebar_begin()
 echo "
 <!-- Begin sidebar -->
 <td>
-  <table width=\"200\" cellpadding=\"0\" cellspacing=\"0\" bgcolor=\"#ffffff\">";
+  <table width=\"200\" cellpadding=\"0\" cellspacing=\"0\" class=\"sidebar\">";
 }
 
 function sidebar_end()
@@ -21,11 +21,11 @@ function sidebar_box_begin($title)
 echo "
 <!-- Begin sidebar box with title $title -->
 <tr><td>
-  <table bgcolor=\"#8080ff\" cellpadding=\"2\" cellspacing=\"1\" border=\"0\" width=\"100%\">
-    <tr><td bgcolor=\"#b0b0ff\">
+  <table cellpadding=\"2\" cellspacing=\"1\" border=\"0\" width=\"100%\" class=\"sidebarbox\">
+    <tr><td class=\"sidebarboxtitlecell\">
       <font class=\"sidebarboxtitle\">&nbsp;$title</font>
     </td></tr>
-    <tr><td bgcolor=\"#e0e0ff\">";
+    <tr><td class=\"sidebarboxcell\">";
 }
 
 function sidebar_box_end()
@@ -38,7 +38,7 @@ echo "
 </td></tr>";
 }
 
-function draw_link($title, $href, $style = "sidebar_box_link")
+function draw_link($title, $href, $style = "sidebarboxlink")
 {
 echo "
 &nbsp;&nbsp;<a class=\"$style\" href=\"$href\">$title</a><br>";
@@ -67,7 +67,7 @@ global $lastupdate;
 global $filename;
 echo "
 <font class=\"lastupdate\">This page was last updated on<br>
-<font class=\"lastupdatevalue\">$lastupdate</font>.<br></font>";
+<font class=\"lastupdatevalue\">$lastupdate GMT</font>.<br></font>";
 
 // Counter
 counter();
