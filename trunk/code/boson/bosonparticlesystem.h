@@ -163,21 +163,23 @@ class BosonParticleSystem
     void moveParticles(BoVector3 v);
 
     /**
-     * Sets current position of this system. Position of particles are relative
-     * to position of system they belong to, so you can easily move all
-     * particles with this method
+     * Sets current position of this system.
      *
      * WARNING this class uses <em>OpenGL</em> Coordinates!
      * @param p New position of this system
      **/
-    void setPosition(BoVector3 p) { mPos = p; };
+    void setPosition(BoVector3 p)  { mPos = p; };
     /**
      * WARNING this class uses <em>OpenGL</em> Coordinates!
      * @return Current position of this system
      **/
-    inline const BoVector3 position() { return mPos; };
+    inline const BoVector3 position()  { return mPos; };
 
-    void setRotation(BoVector3 r) { mRot = r; };
+    void setRotation(GLfloat angle, GLfloat x, GLfloat y, GLfloat z)
+        { mRotated = true; mMatrix.rotate(angle, x, y, z); };
+    inline bool isRotated()  { return mRotated; };
+
+    inline const BoMatrix& matrix()  { return mMatrix;};
 
     /**
      * Sets current velocity of particles in this system.
@@ -287,7 +289,7 @@ class BosonParticleSystem
     BosonParticleTextureArray mTextures;  // Textures of particles
     BoVector3 mPos;
     BoVector3 mVelo;
-    BoVector3 mRot;
+    bool mRotated;
     float mAge;
     int mBlendFunc[2];
 
@@ -297,6 +299,10 @@ class BosonParticleSystem
     const BosonParticleSystemProperties* mProp;
 
     BoVector3 nw, ne, sw, se;  // Coordinates of particle base vertexes
+
+    BoMatrix mMatrix;  // Rotation matrix. Used to calculate position and
+        //  velocity of particles when they're initialized. Stored here for
+        //  perf. reasons
 
     friend class BosonBigDisplayBase;
 };

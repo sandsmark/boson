@@ -139,7 +139,7 @@ BosonParticleSystemProperties::~BosonParticleSystemProperties()
 {
 }
 
-BosonParticleSystem* BosonParticleSystemProperties::newSystem(BoVector3 pos) const
+BosonParticleSystem* BosonParticleSystemProperties::newSystem(BoVector3 pos, float rotation) const
 {
   /// FIXME: 5 is radius of bounding sphere of particle system. This MUST be
   //  calculated, not hardcoded. And for some systems (e.g. missile's trails),
@@ -150,26 +150,41 @@ BosonParticleSystem* BosonParticleSystemProperties::newSystem(BoVector3 pos) con
   s->setSize(1.0);
   s->setAge(mAge);
   s->setBlendFunc(GL_SRC_ALPHA, mGLBlendFunc);
+  if(rotation != 0.0)
+  {
+    s->setRotation(rotation, 0, 0, 1);
+  }
   s->createParticles(mInitNum);
 
   return s;
 }
 
-void BosonParticleSystemProperties::initParticle(BosonParticleSystem*, BosonParticle* particle) const
+void BosonParticleSystemProperties::initParticle(BosonParticleSystem* s, BosonParticle* particle) const
 {
   particle->life = getFloat(mMinLife, mMaxLife);
   particle->maxage = particle->life;
-  particle->velo = BoVector3(getFloat(mMinVelo[0], mMaxVelo[0]),
-      getFloat(mMinVelo[1], mMaxVelo[1]), getFloat(mMinVelo[2], mMaxVelo[2]));
   if(mNormalize)
   {
     particle->velo.scale(getFloat(mMinScale, mMaxScale) / particle->velo.length());
   }
   particle->color = mStartColor;
-  // Note that particle's position is relative to position of particle system
-  particle->pos = BoVector3(getFloat(mMinPos[0], mMaxPos[0]),
-      getFloat(mMinPos[1], mMaxPos[1]), getFloat(mMinPos[2], mMaxPos[2]));
   particle->size = mStartSize;
+  if(s->isRotated())
+  {
+    BoVector3 pos(getFloat(mMinPos[0], mMaxPos[0]),
+        getFloat(mMinPos[1], mMaxPos[1]), getFloat(mMinPos[2], mMaxPos[2]));
+    BoVector3 velo(getFloat(mMinVelo[0], mMaxVelo[0]),
+        getFloat(mMinVelo[1], mMaxVelo[1]), getFloat(mMinVelo[2], mMaxVelo[2]));
+    s->matrix().transform(&pos, &pos);
+    s->matrix().transform(&velo, &velo);
+  }
+  else
+  {
+    particle->pos += BoVector3(getFloat(mMinPos[0], mMaxPos[0]),
+        getFloat(mMinPos[1], mMaxPos[1]), getFloat(mMinPos[2], mMaxPos[2]));
+    particle->velo = BoVector3(getFloat(mMinVelo[0], mMaxVelo[0]),
+        getFloat(mMinVelo[1], mMaxVelo[1]), getFloat(mMinVelo[2], mMaxVelo[2]));
+  }
 }
 
 void BosonParticleSystemProperties::updateParticle(BosonParticleSystem*, BosonParticle* particle) const

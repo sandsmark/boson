@@ -135,13 +135,17 @@ void BosonParticleSystem::init(int initialnum)
   mCreateCache = 0.0;
   mBlendFunc[0] = GL_SRC_ALPHA;
   mBlendFunc[1] = GL_ONE_MINUS_SRC_ALPHA;
+  mRotated = false;
 
   // Create particles
   mParticles = new BosonParticle[mMaxNum];
 
   // Create initial particles
   mNum = 0;
-  createParticles(initialnum);
+  if(initialnum)
+  {
+    createParticles(initialnum);
+  }
 //  boDebug(150) << k_funcinfo << "Created " << mNum << " initial particles" << endl;
 }
 
@@ -223,7 +227,7 @@ void BosonParticleSystem::initParticle(BosonParticle* particle)
 {
   particle->color = mColor;
   particle->life = mParticleAge;
-  particle->pos.reset();
+  particle->pos = mPos;
   particle->size = mSize;
   particle->velo = mVelo;
   particle->tex = mTextures.mTextureIds[0];

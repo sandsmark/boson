@@ -83,16 +83,9 @@ BosonShot::BosonShot(const BosonWeaponProperties* prop, Player* owner, BosonCanv
   setRotation(rotationToPoint(mVelo[0], mVelo[1]));
   mZ = 0;
   // Particle systems
-  mFlyParticleSystems = prop->newFlyParticleSystems(pos);
+  mFlyParticleSystems = prop->newFlyParticleSystems(pos, -rotation());
   canvas->addParticleSystems(mFlyParticleSystems);
   mParticleVelo = sqrt(mVelo[0] * mVelo[0] + mVelo[1] * mVelo[1]) / (float)BO_TILE_SIZE;
-  // Initialize particle systems
-  QPtrListIterator<BosonParticleSystem> it(mFlyParticleSystems);
-  while(it.current())
-  {
-    it.current()->setRotation(BoVector3(0, 0, -rotation()));
-    ++it;
-  }
 }
 
 void BosonShot::advance(unsigned int phase)
@@ -118,7 +111,6 @@ void BosonShot::advance(unsigned int phase)
     BoVector3 newpos(it.current()->position());
     newpos.add(move);
     it.current()->setPosition(newpos);
-    it.current()->moveParticles(BoVector3(0, mParticleVelo, move[2]));
     ++it;
   }
   mStep++;

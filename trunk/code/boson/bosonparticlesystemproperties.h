@@ -60,7 +60,7 @@ class BosonParticleSystemProperties
     BosonParticleSystemProperties(KSimpleConfig* cfg);
     ~BosonParticleSystemProperties();
 
-    BosonParticleSystem* newSystem(BoVector3 pos) const;
+    BosonParticleSystem* newSystem(BoVector3 pos, float rotation = 0.0) const;
 
     inline static float getFloat(float min, float max)  { return ((float)(mRandom->getDouble())) * (max - min) + min; };
 
