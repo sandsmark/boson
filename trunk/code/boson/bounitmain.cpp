@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -59,9 +59,10 @@ int main(int argc, char **argv)
 
  BosonConfig::setPostInitFunction(&postBosonConfigInit);
 
+ QCString argv0(argv[0]);
  KCmdLineArgs::init(argc, argv, &about);
  KCmdLineArgs::addCmdLineOptions(options);
- BoApplication app;
+ BoApplication app(argv0);
 
  KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
  BoUnitEditor* dlg = new BoUnitEditor(0);

@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2003-2004 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2003-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,7 +25,26 @@
 #include <kglobal.h>
 #include <kstandarddirs.h>
 
-BoApplication::BoApplication(bool allowStyles, bool enableGUI)
+#include <qfileinfo.h>
+#include <qfile.h>
+#include <qdir.h>
+
+#include <stdlib.h>
+
+/**
+ * @return @ref QApplication::applicationDirPath(), but it does not use the
+ * argv[0] that is given to @ref QApplication, as it is broken (@ref
+ * KCmdLineArgs::init strips the path out of it).
+ **/
+static QString fixedApplicationDirPath(const QCString& argv0);
+
+/**
+ * @internal
+ * Required for @ref fixedApplicationDirPath
+ **/
+static QString resolveSymlinks( const QString& path, int depth = 0 );
+
+BoApplication::BoApplication(const QCString& argv0, bool allowStyles, bool enableGUI)
 	: KApplication(allowStyles, enableGUI)
 {
  // this is for broken installations. people tend to install to /usr/local or
@@ -52,8 +71,9 @@ BoApplication::BoApplication(bool allowStyles, bool enableGUI)
  //     static boson binary resides.
  //     note that BOSON_PREFIX needs to be ignored as well, as nothing will get
  //     installed there!
- qDebug(QString("Using prefix: %1").arg(applicationDirPath())); // do NOT use boDebug() here. we need to have the prefix before using that
- KGlobal::dirs()->addPrefix(applicationDirPath());
+ QString applicationDirPath = fixedApplicationDirPath(argv0);
+ qDebug("Using prefix: %s", applicationDirPath.latin1()); // do NOT use boDebug() here. we need to have the prefix before using that
+ KGlobal::dirs()->addPrefix(applicationDirPath);
 #endif
 
  BoGlobal::initStatic();
@@ -67,3 +87,98 @@ BoApplication::~BoApplication()
  }
 }
 
+QString fixedApplicationDirPath(const QCString& _argv0)
+{
+ // AB: code has been shamelessy stolen from
+ // QApplication::applicationFilePath()/applicationDirPath().
+ QString applicationFilePath;
+
+ QString argv0 = QFile::decodeName( _argv0 );
+ QString absPath;
+
+ if ( argv0[0] == '/' ) {
+	/*
+	  If argv0 starts with a slash, it is already an absolute
+	  file path.
+	*/
+	absPath = argv0;
+ } else if ( argv0.find('/') != -1 ) {
+	/*
+	  If argv0 contains one or more slashes, it is a file path
+	  relative to the current directory.
+	*/
+	absPath = QDir::current().absFilePath( argv0 );
+ } else {
+	/*
+	  Otherwise, the file path has to be determined using the
+	  PATH environment variable.
+	*/
+	char *pEnv = getenv( "PATH" );
+	QStringList paths( QStringList::split(QChar(':'), pEnv) );
+	QStringList::const_iterator p = paths.begin();
+	while ( p != paths.end() ) {
+		QString candidate = QDir::current().absFilePath( *p + "/" + argv0 );
+		if ( QFile::exists(candidate) ) {
+			absPath = candidate;
+			break;
+		}
+		++p;
+	}
+ }
+
+ absPath = QDir::cleanDirPath( absPath );
+ if ( QFile::exists(absPath) ) {
+	applicationFilePath = resolveSymlinks( absPath );
+ } else {
+	applicationFilePath = QString::null;
+ }
+
+ return QFileInfo(applicationFilePath).dirPath();
+}
+
+
+QString resolveSymlinks( const QString& path, int depth )
+{
+ bool foundLink = FALSE;
+ QString linkTarget;
+ QString part = path;
+ int slashPos = path.length();
+
+ // too deep; we give up
+ if ( depth == 128 )
+	return QString::null;
+
+ do {
+	part = part.left( slashPos );
+	QFileInfo fileInfo( part );
+	if ( fileInfo.isSymLink() ) {
+		foundLink = TRUE;
+		linkTarget = fileInfo.readLink();
+		break;
+	}
+ } while ( (slashPos = part.findRev('/')) != -1 );
+
+ if ( foundLink ) {
+	QString path2;
+	if ( linkTarget[0] == '/' ) {
+		path2 = linkTarget;
+		if ( slashPos < (int) path.length() ) {
+			path2 += "/" + path.right( path.length() - slashPos - 1 );
+		}
+	} else {
+		QString relPath;
+		relPath = part.left( part.findRev('/') + 1 ) + linkTarget;
+		if ( slashPos < (int) path.length() ) {
+			if ( !linkTarget.endsWith( "/" ) ) {
+				relPath += "/";
+			}
+		relPath += path.right( path.length() - slashPos - 1 );
+		}
+		path2 = QDir::current().absFilePath( relPath );
+	}
+	path2 = QDir::cleanDirPath( path2 );
+	return resolveSymlinks( path2, depth + 1 );
+ } else {
+	return path;
+ }
+}
