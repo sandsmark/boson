@@ -28,6 +28,7 @@
 #include "defines.h"
 #include "kgamecanvaschat.h"
 #include "bosoncursor.h"
+#include "bosonmusic.h"
 
 #include <kgame/kgameio.h>
 #include <kdebug.h>
@@ -250,7 +251,7 @@ void BosonBigDisplay::startSelection(const QPoint& pos)
  }
 
  setSelectionMode(SelectSingle);
- unit->boCanvas()->play(unit->sound(Unit::SoundOrderSelect));
+ boMusic->playSound(unit->sound(Unit::SoundOrderSelect));
  addUnitSelection(unit);
  //canvas->update(); // TODO?
 }
@@ -285,7 +286,7 @@ void BosonBigDisplay::removeSelectionRect()
 	} else {
 		Unit* u = selection().first();
 		if (u->owner() == d->mLocalPlayer) {
-			u->boCanvas()->play(u->sound(Unit::SoundOrderSelect));
+			boMusic->playSound(u->sound(Unit::SoundOrderSelect));
 		}
 	}
  }
@@ -472,7 +473,7 @@ void BosonBigDisplay::actionClicked(const QPoint& pos, QDataStream& stream, bool
 	}
 	send = true;
 	Unit* u = selection().first();
-	((BosonCanvas*)canvas())->play(u->sound(Unit::SoundOrderAttack));
+	boMusic->playSound(u->sound(Unit::SoundOrderAttack));
  }
 }
 

@@ -23,6 +23,8 @@
 
 class QStringList;
 
+#define boMusic BosonMusic::bosonMusic()
+
 /**
  * Music support. Not much to describe here...
  *
@@ -37,6 +39,9 @@ class BosonMusic : public QObject
 public:
 	BosonMusic(QObject* parent);
 	~BosonMusic();
+
+	static BosonMusic* bosonMusic() { return mBosonMusic; }
+	static void initBosonMusic();
 
 	/**
 	 * Play a previously loaded file. See @ref load
@@ -81,14 +86,13 @@ public:
 	void setMusic(bool);
 	void setSound(bool);
 
-public slots:
 	/**
 	 * Play a single file. This does not really belong to music but rather
 	 * to sound - but a special class fo this would probably too much
 	 * overhead.
 	 * @param file File to be played. Absolute filename.
 	 **/
-	void slotPlaySound(const QString& file);
+	void playSound(const QString& file);
 
 protected slots:
 	void slotUpdateTicker();
@@ -96,6 +100,8 @@ protected slots:
 private:
 	class BosonMusicPrivate;
 	BosonMusicPrivate* d;
+
+	static BosonMusic* mBosonMusic;
 };
 
 #endif

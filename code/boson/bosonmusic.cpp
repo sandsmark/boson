@@ -41,6 +41,10 @@
 
 #define TICKER_VALUE 500 // same as in kaboodle
 
+
+BosonMusic* BosonMusic::mBosonMusic = 0;
+
+
 class BosonMusic::BosonMusicPrivate
 {
 public:
@@ -89,6 +93,14 @@ BosonMusic::BosonMusic(QObject* parent) : QObject(parent)
 BosonMusic::~BosonMusic()
 {
  delete d;
+}
+
+void BosonMusic::initBosonMusic()
+{
+ if (mBosonMusic) {
+	return;
+ }
+ mBosonMusic = new BosonMusic(0);
 }
 
 void BosonMusic::play()
@@ -195,7 +207,7 @@ bool BosonMusic::isLoop() const
  return d->mLoop;
 }
 
-void BosonMusic::slotPlaySound(const QString& file)
+void BosonMusic::playSound(const QString& file)
 {
 #ifdef BETA1
  if (d->mServer.isNull()) {
