@@ -1095,4 +1095,8 @@ QMap<int, int>* BosonCanvas::workCounts()
  return &d->mWorkCounts;
 }
 
+bool BosonCanvas::onCanvas(const BoVector3& pos) const
+{
+ return onCanvas((int)pos.x(), (int)pos.y());
+}
 

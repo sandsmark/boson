@@ -50,32 +50,38 @@ public:
 
 	/**
 	 * @param pos The position to check for presence of a unit. In
-	 * <em>canvas</em>-coordinates. See also @ref findUnitAtCell
+	 * <em>canvas</em>-coordinates. See also @ref findUnitAtCell.
 	 * @return The unit on this coordinates of the canvas. Won't return a
 	 * destroyed unit (wreckage)
 	 **/
-	Unit* findUnitAt(const QPoint& pos);
+	Unit* findUnitAt(const BoVector3& pos);
 
-	BosonItem* findItemAt(const QPoint& pos);
+	BosonItem* findItemAt(const BoVector3& pos);
 
 	/**
 	 * See @ref findItemAtCell.
 	 * @param x The x-coordinate of the cell
 	 * @param y The y-coordinate of the cell
+	 * @param z The desired z coordinate of the unit. Unused if only one
+	 * unit is there, if there are multiple units on the cell the one with
+	 * the closest z value is chosen
 	 * @return The unit on this cell. Won't return a
 	 * destroyed unit (wreckage)
 	 **/
-	Unit* findUnitAtCell(int x, int y);
+	Unit* findUnitAtCell(int x, int y, float z);
 
 	/*
 	 * @param x The x-coordinate of the cell
 	 * @param y The y-coordinate of the cell
+	 * @param z The desired z coordinate of the item. Unused if only one
+	 * item is there, if there are multiple units on the cell the one with
+	 * the closest z value is chosen
 	 * @param unitOnly If TRUE this returns units only (see @ref
 	 * findUnitAtCell), otherwise any item.
 	 * @return The first item that is found on that cell. If that item is a
 	 * unit then it'll be returned only if it is not destroyed.
 	 **/
-	BosonItem* findItemAtCell(int x, int y, bool unitOnly);
+	BosonItem* findItemAtCell(int x, int y, float z, bool unitOnly);
 
 	void setMap(BosonMap* map) { mMap = map; }
 	inline BosonMap* map() const { return mMap; }
@@ -85,9 +91,10 @@ public:
 	BoItemList* collisionsAtCells(const QRect& rect, const BosonItem* item = 0, bool exact = true) const; // note: exact == true has n effec for item != 0 ONLY!
 
 	/**
-	 * @param pos Position in <em>cell</em>-coordinates.
+	 * @param x x-Position in <em>cell</em>-coordinates.
+	 * @param y y-Position in <em>cell</em>-coordinates.
 	 **/
-	BoItemList* collisionsAtCell(const QPoint& pos) const;
+	BoItemList* collisionsAtCell(int x, int y) const;
 
 	/**
 	 * @param pos Position in <em>canvas</em> coordinates, i.e. not cell

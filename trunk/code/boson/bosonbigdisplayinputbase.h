@@ -32,6 +32,7 @@ class Player;
 class Unit;
 class UnitProperties;
 class BoItemList;
+class BoVector3;
 
 template<class T> class QPtrList;
 
@@ -48,6 +49,7 @@ public:
 	BosonCollisions* collisions() const;
 	Player* localPlayer() const;
 	const QPoint& cursorCanvasPos() const;
+	const BoVector3& cursorCanvasVector() const;
 
 	void setActionType(UnitAction type) { mActionType = type; }
 

@@ -483,7 +483,7 @@ bool Unit::attackEnemyUnitsInRange()
 	if (w->canShootAt(target()) && inRange(w->properties()->range(), target())) {
 		shootAt(w, target());
 		if (target()->isDestroyed()) {
-			d->mTarget = 0l;
+			d->mTarget = 0;
 		}
 	}
  }
@@ -575,17 +575,17 @@ void Unit::advanceAttack(unsigned int advanceCount)
 
  boDebug(300) << k_funcinfo << endl;
  if (!target()) {
-	boWarning() << k_funcinfo << "cannot attack NULL target" << endl;
+	boWarning() << k_funcinfo << id() << " cannot attack NULL target" << endl;
 	stopAttacking();
 	return;
  }
  if (target()->isDestroyed()) {
-	boDebug(300) << "Target is destroyed!" << endl;
+	boDebug(300) << "Target (" << target()->id() << ") is destroyed!" << endl;
 	stopAttacking();
 	return;
  }
 
- boDebug(300) << "    " << k_funcinfo << "checking if unit's in range" << endl;
+ boDebug(300) << "    " << k_funcinfo << "checking if unit " << target()->id() << ") is in range" << endl;
  int range;
  if (target()->isFlying()) {
 	range = unitProperties()->maxAirWeaponRange();
@@ -1395,10 +1395,9 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCount) // this actually
 
  boDebug(401) << k_funcinfo << "unit " << id() << endl;
  if (advanceWork() != work()) {
-	if (work() == WorkAttack) {
+	if (work() == WorkAttack && target()) {
 		// no need to move to the position of the unit...
 		// just check if unit is in range now.
-		// TODO: maybe cache range somewhere. OTOH, I don't think it would make things much faster
 		int range;
 		if (target()->isFlying()) {
 			range = unitProperties()->maxAirWeaponRange();
@@ -1414,6 +1413,8 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCount) // this actually
 		// if it has moved also adjust waypoints
 		// RL: I'm not sure if it's needed because path will be recalced every time
 		//  new cell is reached anyway
+	} else if (work() == WorkAttack && !target()) {
+		boWarning() << k_funcinfo << id() << " is in WorkAttack, but has NULL target!" << endl;
 	}
  } else if (moveAttacking()) {
 	// Attack any enemy units in range
