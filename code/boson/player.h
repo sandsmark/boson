@@ -134,7 +134,8 @@ public:
 	bool canBuild(unsigned long int unitType) const;
 
 	/**
-	 * @return TRUE if player has unit with type type, FALSE otherwise
+	 * @return TRUE if player has <em>constructed</em> (if it is a facility) unit 
+	 * with type type, FALSE otherwise
 	 **/
 	bool hasUnitWithType(unsigned long int type) const;
 
