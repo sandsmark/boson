@@ -27,6 +27,78 @@ class BoMeshLOD;
 class BoMeshRendererModelData;
 class BoMeshRendererMeshData;
 class BoMeshRendererMeshLODData;
+class BoMeshRendererStatistics;
+
+class BoMeshRendererStatisticsCollectionPrivate;
+class BoMeshRendererStatisticsCollection
+{
+public:
+	BoMeshRendererStatisticsCollection();
+	virtual ~BoMeshRendererStatisticsCollection();
+
+	void setMaxEntries(unsigned int entries)
+	{
+		mMaxEntries = entries;
+	}
+	void setTakeOwnership(bool o);
+
+	void add(BoMeshRendererStatistics* stat);
+
+	QString statisticsData() const;
+
+	bool takeOwnership() const
+	{
+		return mTakeOwnership;
+	}
+
+protected:
+	/**
+	 * Add the values in @p stat to the collection.
+	 *
+	 * This method pre-calculates sums of statistical data for displaying
+	 * them in the rendering loop without looping over all objects on demand.
+	 **/
+	virtual void addStatistics(const BoMeshRendererStatistics* stat);
+
+	/**
+	 * Ensure that the statistical data of @p stat added by @ref
+	 * addStatistics are removed again.
+	 **/
+	virtual void removeStatistics(const BoMeshRendererStatistics* stat);
+
+private:
+	BoMeshRendererStatisticsCollectionPrivate* d;
+	bool mTakeOwnership;
+	unsigned int mMaxEntries;
+	unsigned int mMeshes;
+	unsigned int mPoints;
+};
+
+class BoMeshRendererStatistics
+{
+public:
+	BoMeshRendererStatistics();
+	virtual ~BoMeshRendererStatistics();
+
+	virtual void addMesh(unsigned int renderedPoints);
+
+	virtual void finalize(BoMeshRendererStatisticsCollection* c);
+
+	unsigned int meshes() const
+	{
+		return mMeshes;
+	}
+	unsigned int points() const
+	{
+		return mPoints;
+	}
+
+private:
+	unsigned int mMeshes;
+	unsigned int mPoints;
+};
+
+class BoMeshRendererPrivate;
 
 /**
  * The meshrenderer takes care of rendering all meshes of a model (and therefore
@@ -92,14 +164,17 @@ public:
 	void deinitializeData(BosonModel* model);
 
 	/**
-	 * Called (exactly once) before model rendering starts. Here you can
-	 * e.g. enable certain OpenGL states, that you require.
-	 *
-	 * Remember to disable all enabled states in @ref stopModelRendering.
-	 * You can use e.g. glPushAttrib() / glPopAttrib() for that!
+	 * Call this when your rendering function starts to render the models.
+	 * This calls @ref initFrame and therefore prepares OpenGL for model
+	 * rendering.
 	 **/
-	virtual void startModelRendering() = 0;
-	virtual void stopModelRendering() = 0;
+	void startModelRendering();
+
+	/**
+	 * Call this once your rendering function has no further models to
+	 * render in this frame.
+	 **/
+	void stopModelRendering();
 
 	/**
 	 * Set the current model. All meshes used in @ref render must belong to
@@ -115,8 +190,23 @@ public:
 	 **/
 	void renderMesh(const QColor* teamColor, BoMesh* mesh, unsigned int lod);
 
+	QString statisticsData() const;
+
 protected:
-	virtual void render(const QColor* teamColor, BoMesh* mesh, BoMeshLOD* lod) = 0;
+	/**
+	 * Called (exactly once) before model rendering starts. Here you can
+	 * e.g. enable certain OpenGL states, that you require.
+	 *
+	 * Remember to disable all enabled states in @ref stopModelRendering.
+	 * You can use e.g. glPushAttrib() / glPopAttrib() for that!
+	 **/
+	virtual void initFrame() = 0;
+	virtual void deinitFrame() = 0;
+
+	/**
+	 * @return How many points have been rendered
+	 **/
+	virtual unsigned int render(const QColor* teamColor, BoMesh* mesh, BoMeshLOD* lod) = 0;
 
 	/**
 	 * Called by @ref initializeData before @ref initModelData is called. The
@@ -192,8 +282,24 @@ protected:
 	unsigned int lodCount(const BoMesh* mesh) const;
 	BoMeshLOD* levelOfDetail(const BoMesh* mesh, unsigned int lod) const;
 
+	virtual void addFrameStatistics();
+	virtual void completeFrameStatistics();
+
+	virtual BoMeshRendererStatisticsCollection* createStatisticsCollection();
+	BoMeshRendererStatistics* currentStatistics() const
+	{
+		return mCurrentStatistics;
+	}
+
 private:
+	void initStatisticsCollection();
+
+private:
+	BoMeshRendererPrivate* d;
 	BosonModel* mModel;
+	BoMeshRendererStatisticsCollection* mStatistics;
+	BoMeshRendererStatisticsCollection* mShortStatistics;
+	BoMeshRendererStatistics* mCurrentStatistics;
 };
 
 #endif

@@ -42,7 +42,7 @@ void BoMeshRendererImmediate::setModel(BosonModel* model)
  }
 }
 
-void BoMeshRendererImmediate::startModelRendering()
+void BoMeshRendererImmediate::initFrame()
 {
  glPushAttrib(GL_POLYGON_BIT); // GL_CULL_FACE
 
@@ -50,14 +50,17 @@ void BoMeshRendererImmediate::startModelRendering()
  glCullFace(GL_BACK);
 }
 
-void BoMeshRendererImmediate::stopModelRendering()
+void BoMeshRendererImmediate::deinitFrame()
 {
  glPopAttrib();
 }
 
-void BoMeshRendererImmediate::render(const QColor* teamColor, BoMesh* mesh, BoMeshLOD* lod)
+unsigned int BoMeshRendererImmediate::render(const QColor* teamColor, BoMesh* mesh, BoMeshLOD* lod)
 {
- BO_CHECK_NULL_RET(model());
+ if (!model()) {
+	BO_NULL_ERROR(model());
+	return 0;
+ }
  unsigned int* pointsCache = lod->pointsCache();
  unsigned int pointsCacheCount = lod->pointsCacheCount();
  int type = lod->type();
@@ -65,7 +68,7 @@ void BoMeshRendererImmediate::render(const QColor* teamColor, BoMesh* mesh, BoMe
 
  if (!nodes) {
 	// nothing to do.
-	return;
+	return 0;
  }
 
  bool resetColor = false; // needs to be true after we changed the current color
@@ -94,14 +97,14 @@ void BoMeshRendererImmediate::render(const QColor* teamColor, BoMesh* mesh, BoMe
 	resetColor = true;
  }
 
+ unsigned int renderedPoints = 0;
+
  {
 	if (!pointsCache || pointsCacheCount == 0) {
 		boError() << k_funcinfo << "no point cache!" << endl;
 	} else {
 		glBegin(type);
 
-		int vertices = 0;
-		int faces = 0;
 		BoFaceNode* node = nodes;
 		while (node) {
 			const BoFace* face = node->face();
@@ -118,18 +121,12 @@ void BoMeshRendererImmediate::render(const QColor* teamColor, BoMesh* mesh, BoMe
 			glTexCoord2fv(model()->texel(points[2]).data());
 			glVertex3fv(model()->vertex(points[2]).data());
 
-			vertices += 3;
-			faces++;
+			renderedPoints += 3;
 
 			node = node->next();
 		}
 
 		glEnd();
-#if 0
-		// FIXME for meshrenderer
-		glstat_item_vertices += vertices;
-		glstat_item_faces += faces;
-#endif
 
 		// reset the normal...
 		// (better solution: don't enable light when rendering
@@ -152,6 +149,7 @@ void BoMeshRendererImmediate::render(const QColor* teamColor, BoMesh* mesh, BoMe
  if (mesh->material()) {
 	mesh->material()->deactivate();
  }
+ return renderedPoints;
 }
 
 

@@ -1199,7 +1199,6 @@ void BosonBigDisplayBase::renderText()
 	y -= d->mDefaultFont->height();
 	y -= d->mDefaultFont->renderText(x, y, text, d->mViewport[2] - x);
  }
-#ifdef PATHFINDER_TNG
  if (boConfig->debugPFData()) {
 	Cell* cellundercursor = boGame->canvas()->cellAt(d->mCanvasPos.x(), d->mCanvasPos.y());
 	BosonPathRegion* r = 0;
@@ -1242,7 +1241,6 @@ void BosonBigDisplayBase::renderText()
 	y -= d->mDefaultFont->height();
 	y -= d->mDefaultFont->renderText(x, y, text, d->mViewport[2] - x);
  }
-#endif
  if (boConfig->debugOpenGLMatrices()) {
 	int x = border;
 	int y = d->mViewport[3] - border;
@@ -1373,6 +1371,10 @@ void BosonBigDisplayBase::renderText()
 	text += i18n("Cells rendered: %1\n").arg(d->mRenderedCells);
 	text += i18n("  F/V: %1/%2\n").arg(glstat_terrain_faces).arg(glstat_terrain_vertices);
 	text += i18n("Particles rendered: %1").arg(d->mRenderedParticles);
+	y -= d->mDefaultFont->renderText(x, y, text, width() - x);
+
+	text = i18n("Mesh renderer statistics:\n");
+	text += BoMeshRendererManager::manager()->currentStatisticsData();
 	y -= d->mDefaultFont->renderText(x, y, text, width() - x);
 
  }

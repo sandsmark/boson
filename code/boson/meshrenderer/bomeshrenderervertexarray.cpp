@@ -153,7 +153,7 @@ void BoMeshRendererVertexArray::setModel(BosonModel* model)
  glNormalPointer(GL_FLOAT, stride, data->mPoints + (3 + 2));
 }
 
-void BoMeshRendererVertexArray::startModelRendering()
+void BoMeshRendererVertexArray::initFrame()
 {
  glPushAttrib(GL_POLYGON_BIT); // glEnable(GL_CULL_FACE)
 
@@ -164,7 +164,7 @@ void BoMeshRendererVertexArray::startModelRendering()
  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
-void BoMeshRendererVertexArray::stopModelRendering()
+void BoMeshRendererVertexArray::deinitFrame()
 {
  glPopAttrib();
 
@@ -174,22 +174,28 @@ void BoMeshRendererVertexArray::stopModelRendering()
 }
 
 
-void BoMeshRendererVertexArray::render(const QColor* teamColor, BoMesh* mesh, BoMeshLOD* lod)
+unsigned int BoMeshRendererVertexArray::render(const QColor* teamColor, BoMesh* mesh, BoMeshLOD* lod)
 {
  if (!lod) {
 	BO_NULL_ERROR(lod);
-	return;
+	return 0;
  }
- BO_CHECK_NULL_RET(lod->pointsCache());
+ if (!lod->pointsCache()) {
+	BO_NULL_ERROR(lod->pointsCache());
+	return 0;
+ }
  if (lod->pointsCacheCount() == 0) {
-	return;
+	return 0;
  }
  BoMeshRendererMeshLODDataVA* lodData = (BoMeshRendererMeshLODDataVA*)lod->meshRendererMeshLODData();
- BO_CHECK_NULL_RET(lodData);
+ if (!lodData) {
+	BO_NULL_ERROR(lodData);
+	return 0;
+ }
  int type = lod->type();
  if (type != GL_TRIANGLES) {
 	boError() << k_funcinfo << "only GL_TRIANGLES supported" << endl;
-	return;
+	return 0;
  }
 
  bool resetColor = false; // needs to be true after we changed the current color
@@ -217,9 +223,11 @@ void BoMeshRendererVertexArray::render(const QColor* teamColor, BoMesh* mesh, Bo
 	glColor3fv(mesh->material()->diffuse().data());
 	resetColor = true;
  }
+ unsigned int renderedPoints = 0;
 
 // glDrawElements(type, lod->pointsCacheCount(), GL_UNSIGNED_INT, lod->pointsCache());
  glDrawArrays(type, lodData->mOffset, lodData->mPointCount);
+ renderedPoints = lodData->mPointCount;
 
  // reset the normal...
  // (better solution: don't enable light when rendering
@@ -240,6 +248,8 @@ void BoMeshRendererVertexArray::render(const QColor* teamColor, BoMesh* mesh, Bo
  if (mesh->material()) {
 	mesh->material()->deactivate();
  }
+
+ return renderedPoints;
 }
 
 
