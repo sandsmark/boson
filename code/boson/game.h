@@ -21,6 +21,8 @@
 #ifndef GAME_H 
 #define GAME_H 
 
+#include "../common/boconfig.h"
+
 class groundTheme;
 class speciesTheme;
 
@@ -28,9 +30,10 @@ class gameProperties_t {
 
 public:
   groundTheme	*ground;
-  speciesTheme	*species[2];
+  speciesTheme	*species[BOSON_MAX_PLAYERS];
   speciesTheme	*myspecies;
   int		who_am_i;
+  int		nb_player;
 	
 };
 
