@@ -501,13 +501,6 @@ void BoMesh::createFaces(unsigned int faces)
 	BoNode* node = new BoNode(&d->mAllFaces[face]);
 	d->mAllNodes.append(node);
  }
-
- // every face (triangle) has 3 points.
- // note that when we use GL_TRIANGLE_STRIP one day we might be able to reduce
- // the number of allocated points. but here in createFace() we should still
- // allocate facesCount() * 3 - we would replace the array once the mesh is
- // stripified.
- allocatePoints(facesCount() * 3);
 }
 
 void BoMesh::setFace(int index, const BoFace& face)
