@@ -140,14 +140,14 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
  if (advanceFlag) {
 	// note: the advance methods must not change the advanceFunction()s
 	// here!
+	// AB: do NOT add something here - if you add something for units then
+	// check for isDestroyed() !!
 	while (animIt.current()) {
 		BosonItem* s = animIt.current();
 		s->advance(advanceCount);
 		s->advanceFunction(advanceCount); // once this was called this object is allowed to change its advanceFunction()
-		// now move *without* collision detection. collision detection should
-		// have been done above - especially in advanceMoveCheck() methods.
-		// AB: do NOT add something here - if you add something for units then
-		// check for isDestroyed() !!
+
+		// AB: warning: this might cause trouble at this point! see Unit::moveBy()
 		if (s->xVelocity() || s->yVelocity()) {
 			s->moveBy(s->xVelocity(), s->yVelocity(), 0.0);
 		}
@@ -160,6 +160,8 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 		BosonItem* s = animIt.current();
 		s->advance(advanceCount);
 		s->advanceFunction2(advanceCount); // once this was called this object is allowed to change its advanceFunction2()
+
+		// AB: warning: this might cause trouble at this point! see Unit::moveBy()
 		if (s->xVelocity() || s->yVelocity()) {
 			s->moveBy(s->xVelocity(), s->yVelocity(), 0.0);
 		}
@@ -169,7 +171,7 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
  unlockAdvanceFunction();
 
  deleteUnusedShots();
- 
+
  updateParticleSystems(0.05);  // With default game speed, delay between advance messages is 1.0 / 20 = 0.05 sec
 
  if (advanceCount == MAXIMAL_ADVANCE_COUNT) {

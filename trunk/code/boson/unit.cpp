@@ -307,19 +307,15 @@ void Unit::moveBy(float moveX, float moveY, float moveZ)
 	return;
  }
 
- // QCanvasItem::moveBy() is called from QCanvasItem::advance(1). I finally
- // found out why it is a bad idea (tm) to do collision detection here.
- // QCanvas::collisions() (and all other collisions()) use imageAdvanced() for
- // collision detection.
- // collision detection of item A may found none - so it is moved. but item B
- // may find item A as collision candidate. but it now tests for the *next*
- // advance() pahse, as A has already been moved. so it may happen that item B
- // is ok, too, as item A won't be in the way in the next phase.
- // This means that be will be moved, too, but it mustn't be moved - we have a
- // collision.
- // UDPATE: we don't use QCanvas anymore - but this is still valid! We don't
- // support the advance phases anymore - we actually move directly in
- // BosonCanvas::slotAdvance()
+ // QCanvas::advance() uses a different approach than we do. They call moveBy()
+ // from phase 1 and do interesting stuff like collision detection in phase 0.
+ // we do collision detection of 1st unit and then move 1st unit and *then* do
+ // collision detection of 2nd unit and then move 2nd unit, i.e. we do both
+ // parts in a single phase.
+ //
+ // this will most probably cause trouble in the future, but it is necessary for
+ // things like addToCells().
+
  float oldX = x();
  float oldY = y();
 
