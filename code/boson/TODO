@@ -68,6 +68,9 @@ Editor (map, unit, scenario) TODOs
   game speed!!
 - write EditorWidget for editor which should replace BosonWidget that doesn't
   support editor anymore
+- a savegame dialog. most RTS game don't ask the player to handle filenames but
+  rather provide a list of savegames with additional information, such as date,
+  map, players, ...
 
 General TODOs
 - find out whether signalUnitPropertyChanged() is a good thing at all. Might
