@@ -162,7 +162,12 @@ BosonShot* BosonWeaponProperties::newShot(Unit* attacker, BoVector3 pos, BoVecto
   }
   else if(shotType() == BosonShot::Missile)
   {
-    s = new BosonShotMissile(attacker->owner(), attacker->canvas(), this, pos + mOffset, target);
+    BoVector3 realpos;
+    BoMatrix m;
+    m.rotate(attacker->rotation(), 0, 0, 1);
+    m.transform(&realpos, &mOffset);
+    realpos += pos;
+    s = new BosonShotMissile(attacker->owner(), attacker->canvas(), this, realpos, target);
   }
   else if(shotType() == BosonShot::Mine)
   {
@@ -170,7 +175,12 @@ BosonShot* BosonWeaponProperties::newShot(Unit* attacker, BoVector3 pos, BoVecto
   }
   else if(shotType() == BosonShot::Bomb)
   {
-    s = new BosonShotBomb(attacker->owner(), attacker->canvas(), this, pos + mOffset);
+    BoVector3 realpos;
+    BoMatrix m;
+    m.rotate(attacker->rotation(), 0, 0, 1);
+    m.transform(&realpos, &mOffset);
+    realpos += pos;
+    s = new BosonShotBomb(attacker->owner(), attacker->canvas(), this, realpos);
   }
   else
   {
