@@ -90,6 +90,7 @@ public slots:
 
 	void slotStartEditor(KCmdLineArgs* args = 0);
 	void slotLoadGame(KCmdLineArgs* args = 0);
+	void slotLoadFromLog(const QString& logFile);
 
 	/**
 	 * Starts a new game. Called when user clicks "Start game" button in

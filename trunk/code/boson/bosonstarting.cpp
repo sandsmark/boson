@@ -49,6 +49,8 @@ public:
 	{
 	}
 	QValueList<Q_UINT32> mStartingCompleted; // clients that completed starting
+
+	QString mLoadFromLogFile;
 };
 
 BosonStarting::BosonStarting(QObject* parent) : QObject(parent, "bosonstarting")
@@ -70,6 +72,17 @@ void BosonStarting::setNewGameData(const QByteArray& data)
 
 void BosonStarting::setEditorMap(const QByteArray& buffer)
 {
+}
+
+void BosonStarting::setLoadFromLogFile(const QString& file)
+{
+ // TODO check if thats a valid file
+ d->mLoadFromLogFile = file;
+}
+
+QString BosonStarting::logFile() const
+{
+ return d->mLoadFromLogFile;
 }
 
 void BosonStarting::startNewGame()
@@ -578,7 +591,12 @@ void BosonStarting::startingCompletedReceived(const QByteArray& buffer, Q_UINT32
  // note: Boson is in PolicyClean, so the game status does *not* change
  // immediately. but it will change before IdGameIsStarted is received.
  boGame->setGameStatus(KGame::Run);
- boGame->sendMessage(0, BosonMessage::IdGameIsStarted);
+
+ if (d->mLoadFromLogFile.isEmpty()) {
+	boGame->sendMessage(0, BosonMessage::IdGameIsStarted);
+ } else {
+	boGame->sendMessage(1, BosonMessage::IdGameIsStarted);
+ }
 }
 
 void BosonStarting::sendStartingCompleted(bool success)

@@ -50,6 +50,7 @@ static KCmdLineOptions options[] =
     { "new", I18N_NOOP("Skip Welcome Widget and display the New Game screen"), 0 },
     { "editor", I18N_NOOP("Skip Welcome Widget and display the Start Editor screen"), 0 },
     { "load", I18N_NOOP("Skip Welcome Widget and display the Load Game screen"), 0 },
+    { "load-from-log <file>", I18N_NOOP(""), 0 },
     { "playfield <identifier>", I18N_NOOP("Playfield identifier for newgame/start editor widget"), 0 },
     { "computer <count>", I18N_NOOP("Add (currently dummy) computer player"), 0 },
     { "start", I18N_NOOP("Start the game"), 0},
@@ -155,6 +156,9 @@ int main(int argc, char **argv)
 	top->slotStartEditor(args);
  } else if (args->isSet("load")) {
 	top->slotLoadGame(args);
+ } else if (args->isSet("load-from-log")) {
+	QString file = args->getOption("load-from-log");
+	top->slotLoadFromLog(file);
  }
  args->clear();
  return app.exec();
