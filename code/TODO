@@ -5,6 +5,7 @@ Generic :
 =========
 
 
+check if qcanvas can handle png's transparency
 redo icon/.desktop stuff into makefile.am's
 
 editor/boson : mapping different signal to ONE function (int signal_nb) is possible with qt2
