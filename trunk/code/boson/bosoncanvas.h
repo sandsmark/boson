@@ -207,6 +207,9 @@ public:
 	bool cellsOccupied(const QRect& rect, Unit* u = 0, bool excludeMoving = false) const;
 
 	/**
+	 * @param pos The location where the unit should get placed. This is in
+	 * <em>cell</em>-coordinates. This point specifies the
+	 * <em>upper-left</em> corner of the unit.
 	 * @param factory If NULL then BUILD_RANGE is ignored. Otherwise facilities
 	 * must be in range of BUILD_RANGE of any player unit and mobile units
 	 * in BUILD_RANGE of the facility.
