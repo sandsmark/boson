@@ -44,15 +44,28 @@ enum facilityType {
 #define BO_GO_DESERT	0x080
 #define BO_GO_AIR	(BO_GO_SEA | BO_GO_PLAIN | BO_GO_ROCK | BO_GO_DESERT)
 
-/* unit properties */
-struct unitProperties_t {
-	};
 
 #ifndef uint
 #define uint unsigned int
 #endif
 
-/* mobile properties  */
+/*
+ * UNIT properties
+ */
+
+struct unitProperties_t {
+/* from here.... */
+	char 	*name;		// The name of the funny thing...
+	uint	orders;		// which orders it's able to understand
+/* ... to here : shoudn't be changed, as general type assume this is here, in this order */
+	};
+
+
+
+/*
+ * MOBILE properties
+ */
+
 //struct mobileProperties_t : public unitProperties_t {
 struct mobileProperties_t {
 /* from here.... */
@@ -81,8 +94,12 @@ struct mobileProperties_t {
 extern mobileProperties_t mobileProp[];
 extern const int mobilePropNb;
 
-/* facility properties  */
-//struct facilityProperties_t :public unitProperties_t {
+
+
+
+/*
+ * MOBILE properties
+ */
 struct facilityProperties_t  {
 /* from here.... */
 	char 	*name;		// Guess it, geek..

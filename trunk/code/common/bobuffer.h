@@ -1,9 +1,9 @@
 /***************************************************************************
-                          bobuffer.cpp  -  description                    
+                          bobuffer.h  -  description                    
                              -------------------                                         
 
     version              :                                   
-    begin                : Sat Jan  9 19:35:36 CET 1999
+    begin                : Sun Jun  6 17:35:00 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
     email                : capricel@enst.fr                                     
@@ -18,54 +18,23 @@
  *                                                                         *
  ***************************************************************************/
 
-#include <stdio.h>
-#include <assert.h>
-#include <unistd.h>
-#include <netinet/in.h>
+#ifndef BOBUFFER_H 
+#define BOBUFFER_H 
 
-#include "bobuffer.h"
-#include "log.h"
+class boBuffer {
+public:
+ boBuffer(int socket, unsigned int size);
 
+void reset(void) { pos = 0; };
+void flush(void);
+void packInt(int value);
+void packInt(int *tab, unsigned int len);
 
-boBuffer::boBuffer(int s, unsigned int size)
-{
-	posMax = size;
-	socket = s;
-	data = new int[size];
-	assert(data!=0);
+int	socket;
+private :
+int	*data;
+unsigned int pos;
+unsigned int posMax;
+};
 
-	reset();
-
-}
-
-void boBuffer::flush(void)
-{
-	int i;
-
-	assert(socket>0);
-	assert(pos< posMax);
-
-	if (0 == pos) {
-		logf(LOG_WARNING, "boBuffer::flush : flushing empty buffer");
-		return;
-		}
-
-	i = write(socket, data, pos*sizeof(int));
-	assert(i == ((int)sizeof(int)*(pos)));
-
-	logf(LOG_LAYER1, "[socket %2d ] Flushing %d out of %d (%f %%)", socket, pos, posMax, (float)(100.*pos/posMax));
-
-	reset();
-}
-
-void boBuffer::packInt(int val)
-{
-	data[pos++] = htonl(val);
-	boAssert(pos < posMax);
-}
-
-void boBuffer::packInt(int *tab, unsigned int len)
-{
-	unsigned int i;
-	for(i=0; i<len; i++) packInt(tab[i]);
-}
+#endif // BOBUFFER_H

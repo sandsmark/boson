@@ -21,48 +21,57 @@
 #include "unit.h"
 #include "../map/map.h"
 
-Unit::Unit(QObject*parent, const char *name=0L)
+Unit::Unit(QObject*parent, const char *name)
 	: QObject(parent, name)
 {
-//pos_x = 0; 
-//pos_y = 0;
-who = 0;
+	who = 0;
 }
 
 Unit::~Unit()
 {
 }
 
-mobUnit::mobUnit(mobileMsg_t *msg, QObject* parent, const char *name=0L)
+
+/*
+ * MOBILE
+ */
+
+mobUnit::mobUnit(mobileMsg_t *msg, QObject* parent, const char *name)
 :Unit(parent,name)
 {
-key	= msg->key;
-who	= msg->who;
-type	= msg->type;
+	key	= msg->key;
+	who	= msg->who;
+	type	= msg->type;
 
-isShown = TRUE; ///orzel : should be removed since Qw handles this now...
+	isShown = TRUE; ///orzel : should be removed since Qw handles this now...
 }
+
 
 QRect mobUnit::rect(void)
 {
-register int
-	w = mobileProp[type].width,
-	h = mobileProp[type].height;
-return QRect(-w/2 + _x(), -h/2 + _y(), w, h);
+	register int
+		w = mobileProp[type].width,
+		h = mobileProp[type].height;
+	return QRect(-w/2 + _x(), -h/2 + _y(), w, h);
 }
 
-Facility::Facility(facilityMsg_t *msg, QObject* parent, const char *name=0L)
+
+/*
+ * FACILITY
+ */
+
+Facility::Facility(facilityMsg_t *msg, QObject* parent, const char *name)
 :Unit(parent,name)
 {
-key	= msg->key;
-who	= msg->who;
-type	= msg->type;
+	key	= msg->key;
+	who	= msg->who;
+	type	= msg->type;
 }
 
 
 QRect Facility::rect(void)
 {
-return QRect( _x(), _y(),
+	return QRect( _x(), _y(),
 		BO_TILE_SIZE * facilityProp[type].width,
 		BO_TILE_SIZE * facilityProp[type].height);
 }

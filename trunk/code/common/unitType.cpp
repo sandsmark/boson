@@ -31,8 +31,8 @@
 
 mobileProperties_t mobileProp[] = {
 	{"Quad", 0, 32, 32, 3, 4},	// MOB_QUAD
-	{"Aircraft", 0, 72, 72, 5, 4},	// MOB_AIRCRAFT
-	{"Ship", 0, 96, 96, 4, 4},	// MOB_SHIP
+	{"Aircraft", 0, 72, 72, 3, 6},	// MOB_AIRCRAFT
+	{"Ship", 0, 96, 96, 2, 3},	// MOB_SHIP
 	};
 
 facilityProperties_t facilityProp[] = {

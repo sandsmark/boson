@@ -27,6 +27,7 @@
 
 #define BOSON_NO_DATA	0, ((bosonMsgData *) 0L)
 
+class boBuffer;
 
 /* MSG_DLG_ASK */ ///orzel still unused
 struct askMsg_t		{ int major, minor, patch; };
@@ -67,23 +68,6 @@ test made on LinuxPPC on february 3rd 1999 :
    sizeof(bosonMsgData) = 40
    sizeof(bosonMsgData.coo) = 12
 */
-
-class boBuffer {
-public:
- boBuffer(int socket, unsigned int size);
-
-void reset(void) { pos = 0; };
-void flush(void);
-void packInt(int value);
-void packInt(int *tab, unsigned int len);
-
-int	socket;
-private :
-int	*data;
-unsigned int pos;
-unsigned int posMax;
-};
-
 
 /* layer 1 transition */
 #define TRANSITION(signal,newState,emit)	\

@@ -38,7 +38,7 @@ class Cell
   ~Cell();
 
   groundType	getGroundType(void) { return ground; }
-/*  virtual*/	void setGroundType(groundType g) { ground =g ; }
+  void		setGroundType(groundType g) { ground =g ; }
   void		setFacility(void) { ground = GROUND_FACILITY; }
 
  protected:
