@@ -29,6 +29,8 @@
 
 #include "editorField.h"
   
+//editorField::editorField(QObject *parent, const char *name=0L)
+//	: visualField(parent,name)
 editorField::editorField(uint w, uint h, QObject *parent, const char *name=0L)
 	: visualField(w,h,parent,name)
 {
@@ -37,27 +39,31 @@ editorField::editorField(uint w, uint h, QObject *parent, const char *name=0L)
 	mobiles.setAutoDelete(TRUE);
 	facilities.setAutoDelete(TRUE);   
 	key = 253;
+
+	cells_allocated = false;
 }
 
 
-bool editorField::load(QString filename)
+bool editorField::Load(QString filename)
 {
 	int i,j;
 	mobileMsg_t	mob;
 	facilityMsg_t	fix;
 	Cell		c;
-	static	bool	cells_allocated = false;
 
-	if (cells_allocated) freeRessources();
+	freeRessources();
 
 	if (!openRead(filename.data())) return false;
+	
+	
+	//resize(map_width, map_height);
 
 	/* creation of the ground map */
 	cells = new (visualCell *)[map_width];
 	for (i=0; i< map_width; i++)
 		cells[i] = new (visualCell)[map_height];
-
 	cells_allocated = true;
+
 	
 	/* initialisation */
 	for (i=0; i< map_width; i++)
@@ -100,7 +106,7 @@ bool editorField::load(QString filename)
 }
 
 
-bool editorField::save(QString filename)
+bool editorField::Save(QString filename)
 {
 	int i,j;
 	mobileMsg_t	mob;
@@ -136,9 +142,45 @@ bool editorField::save(QString filename)
 }
 
 
+bool editorField::New(uint w, uint h, const QString &name)
+{
+	int i,j;
+
+	freeRessources();
+
+	/* QwSpriteField configuratoin */
+	resize(w,h);
+	
+	/* boFile configuration */
+	nbPlayer = 2;  // XXX still hardcoded .......
+	map_width = w;
+	map_height = h;
+	_worldName = name;
+
+	/* creation of the ground map */
+	cells = new (visualCell *)[map_width];
+	for (i=0; i< map_width; i++)
+		cells[i] = new (visualCell)[map_height];
+	cells_allocated = true;
+	
+	/* initialisation */
+	for (i=0; i< map_width; i++)
+		for (j=0; j< map_height; j++) {
+			cells[i][j].set( GROUND_WATER, i, j);
+			cells[i][j].setFrame((3*i+5*j)%4);
+		}
+
+	modified = true;
+	
+	return true;
+}
+
+
 void editorField::freeRessources()
 {
 	int i;
+
+	if (!cells_allocated) return;
 
 	/* freeing of cells */
 	for (i=0; i< map_width; i++)
@@ -149,6 +191,9 @@ void editorField::freeRessources()
 	mobiles.clear();
 	/* freeing of facilities */
 	facilities.clear();
+	modified = false;
+	
+	cells_allocated = false;
 }
 
 
@@ -161,6 +206,7 @@ void editorField::createMobUnit(mobileMsg_t &msg)
 	m = new visualMobUnit(&msg);
 	mobiles.insert(msg.key, m);
 
+	modified = true;
 //	emit updateMobile(m);
 }
 
@@ -194,6 +240,7 @@ void editorField::createFixUnit(facilityMsg_t &msg)
 	f = new visualFacility(&msg);
 	facilities.insert(msg.key, f);
 
+	modified = true;
 //	emit updateFix(f);
 }
 
@@ -235,6 +282,7 @@ void editorField::deleteCell(int x, int y)
 
 
 	/* actually delete the cell */
+	modified = true;
 	cells[x][y].set(GROUND_UNKNOWN);
 	cells[x][y].z( Z_INVISIBLE);
 
@@ -266,6 +314,7 @@ void editorField::deleteCell(int x, int y)
 void editorField::setCell(int x, int y, groundType g )
 {
 //	printf ("setting %d,%d at %d\n", x, y, g);
+	modified = true;
 	if ( IS_BIG_TRANS(g) || IS_BIG_TRANS( cells[x][y].getGroundType() ) ) {
 		deleteCell(x,y+1);
 		deleteCell(x+1,y);

@@ -284,7 +284,7 @@ void BoEditorApp::initView()
 
 /* the physical map is created when a game is created */
 	vfield = field = new editorField(200,200);
-	assert (true == field->load(*currentFile));
+	assert (true == field->Load(*currentFile));
 
 /* a mainView is each window containing : field, mini, order...
    this one is the first one, other can pop up as well */
@@ -463,7 +463,7 @@ void BoEditorApp::slotFileOpen()
 	if(!fileToOpen.isEmpty()){
 		QFileInfo saveAsInfo(fileToOpen);
 
-		field->load(fileToOpen);
+		field->Load(fileToOpen);
 		setCaption(kapp->appName()+": "+saveAsInfo.fileName());
 		addRecentFile(fileToOpen);
 	}
@@ -479,14 +479,14 @@ void BoEditorApp::slotFileOpenRecent(int id_)
 		return;
 	}
 
-	field->load(recentList->at(id_));
+	field->Load(recentList->at(id_));
 	setCaption(kapp->appName()+": "+recentList->at(id_));
 }
 
 void BoEditorApp::slotFileSave()
 {
 	if (currentFile)
-		field->save(*currentFile);
+		field->Save(*currentFile);
 	else slotFileSaveAs();
 }
 
@@ -497,7 +497,7 @@ void BoEditorApp::slotFileSaveAs()
 		QFileInfo saveAsInfo(newName);
 
 		*currentFile = newName;
-		assert(field->save(newName));
+		assert(field->Save(newName));
 		addRecentFile(newName);
 		setCaption(kapp->appName()+": "+saveAsInfo.fileName());
 	}

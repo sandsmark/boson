@@ -44,6 +44,7 @@ class editorField : public visualField, public boFile
 	Q_OBJECT
 
 public:
+ // editorField(QObject *parent=0, const char *name=0L);
   editorField(uint l, uint h, QObject *parent=0, const char *name=0L);
 
   void createMobUnit(mobileMsg_t &);
@@ -52,8 +53,9 @@ public:
   void createFixUnit(facilityMsg_t &);
   void destroyFixUnit(destroyedMsg_t &);
 
-  bool load(QString filename);
-  bool save(QString filename);
+  bool Load(QString filename);
+  bool Save(QString filename);
+  bool New(uint w, uint h, const QString &name);
 
   bool isModified() {return modified; }
 
@@ -72,6 +74,7 @@ private:
 	long		key;
 	void		freeRessources();
 	bool		modified;
+	bool		cells_allocated;
 
 public: //needed by visualBigDisplay
 	visualCell	**cells;
