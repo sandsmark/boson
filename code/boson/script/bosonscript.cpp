@@ -20,9 +20,6 @@
 #include "bosonscript.h"
 
 #include "../bo3dtools.h"
-#include "../bocamera.h"
-#include "../boautocamera.h"
-#include "../bosonbigdisplaybase.h"
 #include "../player.h"
 #include "../boson.h"
 #include "../bosonmessage.h"
@@ -36,12 +33,12 @@
 #include "../unitplugins.h"
 #include "../bosonprofiling.h"
 #include "../bosonpath.h"
-#include "../bolight.h"
 #include "../speciestheme.h"
 #include "../bosoneffectproperties.h"
 #include "../playerio.h"
 #include "../pluginproperties.h"
 #include "../unitbase.h"
+#include "bosonscriptinterface.h"
 #include "bodebug.h"
 
 #include "pythonscript.h"
@@ -52,7 +49,7 @@
 #include <qpoint.h>
 
 
-BosonBigDisplayBase* BosonScript::mDisplay = 0;
+BosonScript* BosonScript::mCurrentScript = 0;
 BosonCanvas* BosonScript::mCanvas = 0;
 Boson* BosonScript::mGame = 0;
 
@@ -75,12 +72,14 @@ BosonScript* BosonScript::newScriptParser(Language lang, Player* p)
 BosonScript::BosonScript(Player* p)
 {
   boDebug() << k_funcinfo << endl;
+  mInterface = new BosonScriptInterface(0);
   mPlayer = p;
 }
 
 BosonScript::~BosonScript()
 {
   boDebug() << k_funcinfo << endl;
+  delete mInterface;
 }
 
 void BosonScript::sendInput(int playerId, QDataStream& stream)
@@ -104,26 +103,9 @@ void BosonScript::sendInput(int playerId, QDataStream& stream)
   p->forwardInput(stream);
 }
 
-BoGameCamera* BosonScript::camera()
+void BosonScript::makeScriptCurrent(BosonScript* s)
 {
-  if(!display())
-  {
-    boError() << k_funcinfo << "NULL display" << endl;
-    return 0;
-  }
-
-  return display()->camera();
-}
-
-BoAutoGameCamera* BosonScript::autoCamera()
-{
-  if(!display())
-  {
-    boError() << k_funcinfo << "NULL display" << endl;
-    return 0;
-  }
-
-  return display()->autoCamera();
+  mCurrentScript = s;
 }
 
 int BosonScript::playerId() const
@@ -135,17 +117,6 @@ int BosonScript::playerId() const
   }
 
   return player()->id();
-}
-
-BoLight* BosonScript::light(int id)
-{
-  if(!display())
-  {
-    boError() << k_funcinfo << "NULL display" << endl;
-    return 0;
-  }
-
-  return display()->light(id);
 }
 
 /*****  Player methods  *****/
@@ -989,253 +960,154 @@ int BosonScript::playerUnitsOfTypeCount(int playerid, int type)
 
 void BosonScript::setCameraRotation(float r)
 {
-  autoCamera()->setRotation(r);
+  interface()->setCameraRotation(r);
 }
 
 void BosonScript::setCameraRadius(float r)
 {
-  autoCamera()->setRadius(r);
+  interface()->setCameraRadius(r);
 }
 
 void BosonScript::setCameraZ(float z)
 {
-  autoCamera()->setZ(z);
+  interface()->setCameraZ(z);
 }
 
 void BosonScript::setCameraMoveMode(int mode)
 {
   boDebug() << k_funcinfo << "mode: " << mode << endl;
-  autoCamera()->setMoveMode((BoAutoCamera::MoveMode)mode);
-}
-
-void BosonScript::setCameraLookAt(const BoVector3& pos)
-{
-  autoCamera()->setLookAt(pos);
+  interface()->setCameraMoveMode(mode);
 }
 
 void BosonScript::setCameraPos(const BoVector3& pos)
 {
-  autoCamera()->setCameraPos(pos);
+  interface()->setCameraPos(pos);
+}
+
+void BosonScript::setCameraLookAt(const BoVector3& pos)
+{
+  interface()->setCameraLookAt(pos);
 }
 
 void BosonScript::setCameraUp(const BoVector3& up)
 {
-  autoCamera()->setUp(up);
+  interface()->setCameraUp(up);
 }
 
 void BosonScript::setCameraLimits(bool on)
 {
-  camera()->setUseLimits(on);
+  interface()->setUseCameraLimits(on);
 }
 
 void BosonScript::setCameraFreeMode(bool on)
 {
-  camera()->setFreeMovement(on);
+  interface()->setCameraFreeMovement(on);
 }
 
 void BosonScript::commitCameraChanges(int ticks)
 {
-  autoCamera()->commitChanges(ticks);
+  interface()->commitCameraChanges(ticks);
 }
 
 BoVector3 BosonScript::cameraLookAt()
 {
-  return camera()->lookAt();
+  return interface()->cameraLookAt();
 }
 
 BoVector3 BosonScript::cameraPos()
 {
-  return camera()->cameraPos();
+  return interface()->cameraPos();
 }
 
 BoVector3 BosonScript::cameraUp()
 {
-  return camera()->up();
+  return interface()->cameraUp();
 }
 
 float BosonScript::cameraRotation()
 {
-  return camera()->rotation();
+  return interface()->cameraRotation();
 }
 
 float BosonScript::cameraRadius()
 {
-  return camera()->radius();
+  return interface()->cameraRadius();
 }
 
 float BosonScript::cameraZ()
 {
-  return camera()->z();
+  return interface()->cameraZ();
 }
 
 /*****  Light methods  *****/
 BoVector4 BosonScript::lightPos(int id)
 {
-  BoLight* l = light(id);
-  if(!l)
-  {
-    boError() << k_funcinfo << "No light with id " << id << endl;
-    return BoVector4();
-  }
-
-  return l->position();
+  return interface()->lightPos(id);
 }
 
 BoVector4 BosonScript::lightAmbient(int id)
 {
-  BoLight* l = light(id);
-  if(!l)
-  {
-    boError() << k_funcinfo << "No light with id " << id << endl;
-    return BoVector4();
-  }
-
-  return l->ambient();
+  return interface()->lightAmbient(id);
 }
 
 BoVector4 BosonScript::lightDiffuse(int id)
 {
-  BoLight* l = light(id);
-  if(!l)
-  {
-    boError() << k_funcinfo << "No light with id " << id << endl;
-    return BoVector4();
-  }
-
-  return l->diffuse();
+  return interface()->lightDiffuse(id);
 }
 
 BoVector4 BosonScript::lightSpecular(int id)
 {
-  BoLight* l = light(id);
-  if(!l)
-  {
-    boError() << k_funcinfo << "No light with id " << id << endl;
-    return BoVector4();
-  }
-
-  return l->specular();
+  return interface()->lightSpecular(id);
 }
 
 BoVector3 BosonScript::lightAttenuation(int id)
 {
-  BoLight* l = light(id);
-  if(!l)
-  {
-    boError() << k_funcinfo << "No light with id " << id << endl;
-    return BoVector3();
-  }
-
-  return l->attenuation();
+  return interface()->lightAttenuation(id);
 }
 
 bool BosonScript::lightEnabled(int id)
 {
-  BoLight* l = light(id);
-  if(!l)
-  {
-    boError() << k_funcinfo << "No light with id " << id << endl;
-    return false;
-  }
-
-  return l->isEnabled();
+  return interface()->lightEnabled(id);
 }
 
 void BosonScript::setLightPos(int id, BoVector4 pos)
 {
-  BoLight* l = light(id);
-  if(!l)
-  {
-    boError() << k_funcinfo << "No light with id " << id << endl;
-    return;
-  }
-
-  l->setPosition(pos);
+  interface()->setLightPos(id, pos);
 }
 
 void BosonScript::setLightAmbient(int id, BoVector4 a)
 {
-  BoLight* l = light(id);
-  if(!l)
-  {
-    boError() << k_funcinfo << "No light with id " << id << endl;
-    return;
-  }
-
-  l->setAmbient(a);
+  interface()->setLightAmbient(id, a);
 }
 
 void BosonScript::setLightDiffuse(int id, BoVector4 d)
 {
-  BoLight* l = light(id);
-  if(!l)
-  {
-    boError() << k_funcinfo << "No light with id " << id << endl;
-    return;
-  }
-
-  l->setDiffuse(d);
+  interface()->setLightDiffuse(id, d);
 }
 
 void BosonScript::setLightSpecular(int id, BoVector4 s)
 {
-  BoLight* l = light(id);
-  if(!l)
-  {
-    boError() << k_funcinfo << "No light with id " << id << endl;
-    return;
-  }
-
-  l->setSpecular(s);
+  interface()->setLightSpecular(id, s);
 }
 
 void BosonScript::setLightAttenuation(int id, BoVector3 a)
 {
-  BoLight* l = light(id);
-  if(!l)
-  {
-    boError() << k_funcinfo << "No light with id " << id << endl;
-    return;
-  }
-
-  l->setAttenuation(a);
+  interface()->setLightAttenuation(id, a);
 }
 
 void BosonScript::setLightEnabled(int id, bool enable)
 {
-  BoLight* l = light(id);
-  if(!l)
-  {
-    boError() << k_funcinfo << "No light with id " << id << endl;
-    return;
-  }
-
-  l->setEnabled(enable);
+  interface()->setLightEnabled(id, enable);
 }
 
 int BosonScript::addLight()
 {
-  if(!display())
-  {
-    boError() << k_funcinfo << "NULL display" << endl;
-    return -1;
-  }
-  BoLight* l = display()->newLight();
-  if(!l)
-  {
-    return -1;
-  }
-  return l->id();
+  return interface()->addLight();
 }
 
 void BosonScript::removeLight(int id)
 {
-  if(!display())
-  {
-    boError() << k_funcinfo << "NULL display" << endl;
-    return;
-  }
-  display()->removeLight(id);
+  interface()->removeLight(id);
 }
 
 /*****  AI methods  *****/
@@ -1293,4 +1165,8 @@ void BosonScript::addEffect(unsigned int id, BoVector3 pos, float zrot)
   BosonCanvas* c = boGame->canvasNonConst();
   c->addEffects(list);
 }
+
+/*
+ * vim: et sw=2
+ */
 

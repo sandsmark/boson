@@ -39,6 +39,7 @@ class BosonItem;
 class BoPixmapRenderer;
 class BoLight;
 class BoFontInfo;
+class BosonScript;
 
 class KGameChat;
 class KGameIO;
@@ -168,6 +169,7 @@ public:
 
 	void setCanvas(BosonCanvas* canvas);
 
+	void setLocalPlayerScript(BosonScript* script);
 	void setDisplayInput(BosonBigDisplayInputBase* input);
 
 	void setLocalPlayerIO(PlayerIO* p);
@@ -559,4 +561,71 @@ private:
 	BoSelection* mSelection;
 };
 
+/**
+ * This class connects to the relevant signals of @ref BosonScriptInterface. All
+ * communication between @ref BosonScript and @ref BosonBigDisplayBase happens
+ * trough the interface class and this class.
+ *
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+class BosonBigDisplayScriptConnector : public QObject
+{
+	Q_OBJECT
+public:
+	BosonBigDisplayScriptConnector(BosonBigDisplayBase* parent);
+	~BosonBigDisplayScriptConnector();
+
+	/**
+	 * Make this object resond to the signals of @p script. Note that only
+	 * one slot is allowed to connect to one signal in @p script, as the
+	 * return values are retrieved through the slots.
+	 **/
+	void connectToScript(BosonScript* script);
+
+
+protected slots:
+	/*  Light  */
+	void slotAddLight(int* id);
+	void slotRemoveLight(int id);
+	void slotGetLightPos(int id, BoVector4*);
+	void slotGetLightAmbient(int id, BoVector4*);
+	void slotGetLightDiffuse(int id, BoVector4*);
+	void slotGetLightSpecular(int id, BoVector4*);
+	void slotGetLightAttenuation(int id, BoVector3*);
+	void slotGetLightEnabled(int id, bool*);
+	void slotSetLightPos(int id, const BoVector4&);
+	void slotSetLightAmbient(int id, const BoVector4&);
+	void slotSetLightDiffuse(int id, const BoVector4&);
+	void slotSetLightSpecular(int id, const BoVector4&);
+	void slotSetLightAttenuation(int id, const BoVector3&);
+	void slotSetLightEnabled(int id, bool);
+
+	/*  Camera  */
+	void slotGetCameraPos(BoVector3*);
+	void slotGetCameraLookAt(BoVector3*);
+	void slotGetCameraUp(BoVector3*);
+	void slotGetCameraRotation(float*);
+	void slotGetCameraRadius(float*);
+	void slotGetCameraZ(float*);
+	void slotSetUseCameraLimits(bool);
+	void slotSetCameraFreeMovement(bool);
+
+	/*  AutoCamera  */
+	void slotSetCameraPos(const BoVector3&);
+	void slotSetCameraLookAt(const BoVector3&);
+	void slotSetCameraUp(const BoVector3&);
+	void slotSetCameraRotation(float);
+	void slotSetCameraRadius(float);
+	void slotSetCameraZ(float);
+	void slotSetCameraMoveMode(int);
+	void slotCommitCameraChanges(int);
+
+protected:
+	void reconnect(const QObject*, const char*, const QObject*, const char*);
+
+private:
+	BosonBigDisplayBase* mDisplay;
+};
+
 #endif
+

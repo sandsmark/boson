@@ -192,6 +192,7 @@ void PythonScript::uninitScripting()
 
 void PythonScript::getPythonLock()
 {
+  makeScriptCurrent(this);
   PyEval_AcquireLock();
   PyThreadState_Swap(mInterpreter);
 }
@@ -200,6 +201,7 @@ void PythonScript::freePythonLock()
 {
   PyThreadState_Swap(0);
   PyEval_ReleaseLock();
+  makeScriptCurrent(0);
 }
 
 void PythonScript::loadScript(QString file)
@@ -924,233 +926,256 @@ PyObject* PythonScript::py_playerUnitsOfTypeCount(PyObject*, PyObject* args)
 
 PyObject* PythonScript::py_setCameraRotation(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   float r;
   if(!PyArg_ParseTuple(args, (char*)"f", &r))
   {
     return 0;
   }
-  BosonScript::setCameraRotation(r);
+  currentScript()->setCameraRotation(r);
   Py_INCREF(Py_None);
   return Py_None;
 }
 
 PyObject* PythonScript::py_setCameraRadius(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   float r;
   if(!PyArg_ParseTuple(args, (char*)"f", &r))
   {
     return 0;
   }
-  BosonScript::setCameraRadius(r);
+  currentScript()->setCameraRadius(r);
   Py_INCREF(Py_None);
   return Py_None;
 }
 
 PyObject* PythonScript::py_setCameraZ(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   float z;
   if(!PyArg_ParseTuple(args, (char*)"f", &z))
   {
     return 0;
   }
-  BosonScript::setCameraZ(z);
+  currentScript()->setCameraZ(z);
   Py_INCREF(Py_None);
   return Py_None;
 }
 
 PyObject* PythonScript::py_setCameraMoveMode(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int m;
   if(!PyArg_ParseTuple(args, (char*)"i", &m))
   {
     return 0;
   }
-  BosonScript::setCameraMoveMode(m);
+  currentScript()->setCameraMoveMode(m);
   Py_INCREF(Py_None);
   return Py_None;
 }
 
 PyObject* PythonScript::py_setCameraLookAt(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   float x, y, z;
   if(!PyArg_ParseTuple(args, (char*)"fff", &x, &y, &z))
   {
     return 0;
   }
-  BosonScript::setCameraLookAt(BoVector3(x, y, z));
+  currentScript()->setCameraLookAt(BoVector3(x, y, z));
   Py_INCREF(Py_None);
   return Py_None;
 }
 
 PyObject* PythonScript::py_setCameraPos(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   float x, y, z;
   if(!PyArg_ParseTuple(args, (char*)"fff", &x, &y, &z))
   {
     return 0;
   }
-  BosonScript::setCameraPos(BoVector3(x, y, z));
+  currentScript()->setCameraPos(BoVector3(x, y, z));
   Py_INCREF(Py_None);
   return Py_None;
 }
 
 PyObject* PythonScript::py_setCameraUp(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   float x, y, z;
   if(!PyArg_ParseTuple(args, (char*)"fff", &x, &y, &z))
   {
     return 0;
   }
-  BosonScript::setCameraUp(BoVector3(x, y, z));
+  currentScript()->setCameraUp(BoVector3(x, y, z));
   Py_INCREF(Py_None);
   return Py_None;
 }
 
 PyObject* PythonScript::py_setCameraLimits(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int on;
   if(!PyArg_ParseTuple(args, (char*)"i", &on))
   {
     return 0;
   }
-  BosonScript::setCameraLimits((bool)on);
+  currentScript()->setCameraLimits((bool)on);
   Py_INCREF(Py_None);
   return Py_None;
 }
 
 PyObject* PythonScript::py_setCameraFreeMode(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int on;
   if(!PyArg_ParseTuple(args, (char*)"i", &on))
   {
     return 0;
   }
-  BosonScript::setCameraFreeMode((bool)on);
+  currentScript()->setCameraFreeMode((bool)on);
   Py_INCREF(Py_None);
   return Py_None;
 }
 
 PyObject* PythonScript::py_commitCameraChanges(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int ticks;
   if(!PyArg_ParseTuple(args, (char*)"i", &ticks))
   {
     return 0;
   }
-  BosonScript::commitCameraChanges(ticks);
+  currentScript()->commitCameraChanges(ticks);
   Py_INCREF(Py_None);
   return Py_None;
 }
 
 PyObject* PythonScript::py_cameraLookAt(PyObject*, PyObject*)
 {
-  BoVector3 pos = BosonScript::cameraLookAt();
+  BO_CHECK_NULL_RET0(currentScript());
+  BoVector3 pos = currentScript()->cameraLookAt();
   return Py_BuildValue((char*)"[f, f, f]", pos.x(), pos.y(), pos.z());
 }
 
 PyObject* PythonScript::py_cameraPos(PyObject*, PyObject*)
 {
-  BoVector3 pos = BosonScript::cameraPos();
+  BO_CHECK_NULL_RET0(currentScript());
+  BoVector3 pos = currentScript()->cameraPos();
   return Py_BuildValue((char*)"[f, f, f]", pos.x(), pos.y(), pos.z());
 }
 
 PyObject* PythonScript::py_cameraUp(PyObject*, PyObject*)
 {
-  BoVector3 pos = BosonScript::cameraUp();
+  BO_CHECK_NULL_RET0(currentScript());
+  BoVector3 pos = currentScript()->cameraUp();
   return Py_BuildValue((char*)"[f, f, f]", pos.x(), pos.y(), pos.z());
 }
 
 PyObject* PythonScript::py_cameraRotation(PyObject*, PyObject*)
 {
-  return Py_BuildValue((char*)"f", BosonScript::cameraRotation());
+  BO_CHECK_NULL_RET0(currentScript());
+  return Py_BuildValue((char*)"f", currentScript()->cameraRotation());
 }
 
 PyObject* PythonScript::py_cameraRadius(PyObject*, PyObject*)
 {
-  return Py_BuildValue((char*)"f", BosonScript::cameraRadius());
+  BO_CHECK_NULL_RET0(currentScript());
+  return Py_BuildValue((char*)"f", currentScript()->cameraRadius());
 }
 
 PyObject* PythonScript::py_cameraZ(PyObject*, PyObject*)
 {
-  return Py_BuildValue((char*)"f", BosonScript::cameraZ());
+  BO_CHECK_NULL_RET0(currentScript());
+  return Py_BuildValue((char*)"f", currentScript()->cameraZ());
 }
 
 
 /*****  Light functions  *****/
 PyObject* PythonScript::py_lightPos(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int id;
   if(!PyArg_ParseTuple(args, (char*)"i", &id))
   {
     return 0;
   }
 
-  BoVector4 pos = BosonScript::lightPos(id);
+  BoVector4 pos = currentScript()->lightPos(id);
   return Py_BuildValue((char*)"(ffff)", pos.x(), pos.y(), pos.z(), pos.w());
 }
 
 PyObject* PythonScript::py_lightAmbient(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int id;
   if(!PyArg_ParseTuple(args, (char*)"i", &id))
   {
     return 0;
   }
 
-  BoVector4 a = BosonScript::lightAmbient(id);
+  BoVector4 a = currentScript()->lightAmbient(id);
   return Py_BuildValue((char*)"(ffff)", a.x(), a.y(), a.z(), a.w());
 }
 
 PyObject* PythonScript::py_lightDiffuse(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int id;
   if(!PyArg_ParseTuple(args, (char*)"i", &id))
   {
     return 0;
   }
 
-  BoVector4 d = BosonScript::lightDiffuse(id);
+  BoVector4 d = currentScript()->lightDiffuse(id);
   return Py_BuildValue((char*)"(ffff)", d.x(), d.y(), d.z(), d.w());
 }
 
 PyObject* PythonScript::py_lightSpecular(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int id;
   if(!PyArg_ParseTuple(args, (char*)"i", &id))
   {
     return 0;
   }
 
-  BoVector4 s = BosonScript::lightSpecular(id);
+  BoVector4 s = currentScript()->lightSpecular(id);
   return Py_BuildValue((char*)"(ffff)", s.x(), s.y(), s.z(), s.w());
 }
 
 PyObject* PythonScript::py_lightAttenuation(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int id;
   if(!PyArg_ParseTuple(args, (char*)"i", &id))
   {
     return 0;
   }
 
-  BoVector3 a = BosonScript::lightAttenuation(id);
+  BoVector3 a = currentScript()->lightAttenuation(id);
   return Py_BuildValue((char*)"(fff)", a.x(), a.y(), a.z());
 }
 
 PyObject* PythonScript::py_lightEnabled(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int id;
   if(!PyArg_ParseTuple(args, (char*)"i", &id))
   {
     return 0;
   }
 
-  return Py_BuildValue((char*)"i", BosonScript::lightEnabled(id) ? 1 : 0);
+  return Py_BuildValue((char*)"i", currentScript()->lightEnabled(id) ? 1 : 0);
 }
 
 
 PyObject* PythonScript::py_setLightPos(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int id;
   float x, y, z, w;
   if(!PyArg_ParseTuple(args, (char*)"i(ffff)", &id, &x, &y, &z, &w))
@@ -1158,7 +1183,7 @@ PyObject* PythonScript::py_setLightPos(PyObject*, PyObject* args)
     return 0;
   }
 
-  BosonScript::setLightPos(id, BoVector4(x, y, z, w));
+  currentScript()->setLightPos(id, BoVector4(x, y, z, w));
 
   Py_INCREF(Py_None);
   return Py_None;
@@ -1166,6 +1191,7 @@ PyObject* PythonScript::py_setLightPos(PyObject*, PyObject* args)
 
 PyObject* PythonScript::py_setLightAmbient(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int id;
   float r, g, b, a;
   if(!PyArg_ParseTuple(args, (char*)"i(ffff)", &id, &r, &g, &b, &a))
@@ -1173,7 +1199,7 @@ PyObject* PythonScript::py_setLightAmbient(PyObject*, PyObject* args)
     return 0;
   }
 
-  BosonScript::setLightAmbient(id, BoVector4(r, g, b, a));
+  currentScript()->setLightAmbient(id, BoVector4(r, g, b, a));
 
   Py_INCREF(Py_None);
   return Py_None;
@@ -1181,6 +1207,7 @@ PyObject* PythonScript::py_setLightAmbient(PyObject*, PyObject* args)
 
 PyObject* PythonScript::py_setLightDiffuse(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int id;
   float r, g, b, a;
   if(!PyArg_ParseTuple(args, (char*)"i(ffff)", &id, &r, &g, &b, &a))
@@ -1188,7 +1215,7 @@ PyObject* PythonScript::py_setLightDiffuse(PyObject*, PyObject* args)
     return 0;
   }
 
-  BosonScript::setLightDiffuse(id, BoVector4(r, g, b, a));
+  currentScript()->setLightDiffuse(id, BoVector4(r, g, b, a));
 
   Py_INCREF(Py_None);
   return Py_None;
@@ -1196,6 +1223,7 @@ PyObject* PythonScript::py_setLightDiffuse(PyObject*, PyObject* args)
 
 PyObject* PythonScript::py_setLightSpecular(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int id;
   float r, g, b, a;
   if(!PyArg_ParseTuple(args, (char*)"i(ffff)", &id, &r, &g, &b, &a))
@@ -1203,7 +1231,7 @@ PyObject* PythonScript::py_setLightSpecular(PyObject*, PyObject* args)
     return 0;
   }
 
-  BosonScript::setLightSpecular(id, BoVector4(r, g, b, a));
+  currentScript()->setLightSpecular(id, BoVector4(r, g, b, a));
 
   Py_INCREF(Py_None);
   return Py_None;
@@ -1211,6 +1239,7 @@ PyObject* PythonScript::py_setLightSpecular(PyObject*, PyObject* args)
 
 PyObject* PythonScript::py_setLightAttenuation(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int id;
   float c, l, q;
   if(!PyArg_ParseTuple(args, (char*)"i(fff)", &id, &c, &l, &q))
@@ -1218,7 +1247,7 @@ PyObject* PythonScript::py_setLightAttenuation(PyObject*, PyObject* args)
     return 0;
   }
 
-  BosonScript::setLightAttenuation(id, BoVector3(c, l, q));
+  currentScript()->setLightAttenuation(id, BoVector3(c, l, q));
 
   Py_INCREF(Py_None);
   return Py_None;
@@ -1226,13 +1255,14 @@ PyObject* PythonScript::py_setLightAttenuation(PyObject*, PyObject* args)
 
 PyObject* PythonScript::py_setLightEnabled(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int id, enable;
   if(!PyArg_ParseTuple(args, (char*)"ii", &id, &enable))
   {
     return 0;
   }
 
-  BosonScript::setLightEnabled(id, enable);
+  currentScript()->setLightEnabled(id, enable);
 
   Py_INCREF(Py_None);
   return Py_None;
@@ -1241,18 +1271,20 @@ PyObject* PythonScript::py_setLightEnabled(PyObject*, PyObject* args)
 
 PyObject* PythonScript::py_addLight(PyObject*, PyObject*)
 {
-  return Py_BuildValue((char*)"i", BosonScript::addLight());
+  BO_CHECK_NULL_RET0(currentScript());
+  return Py_BuildValue((char*)"i", currentScript()->addLight());
 }
 
 PyObject* PythonScript::py_removeLight(PyObject*, PyObject* args)
 {
+  BO_CHECK_NULL_RET0(currentScript());
   int id;
   if(!PyArg_ParseTuple(args, (char*)"i", &id))
   {
     return 0;
   }
 
-  BosonScript::removeLight(id);
+  currentScript()->removeLight(id);
   Py_INCREF(Py_None);
   return Py_None;
 }

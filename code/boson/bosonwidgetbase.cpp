@@ -1164,6 +1164,8 @@ void BosonWidgetBase::initScripts()
  // No script will be loaded
  d->mLocalPlayerScript->loadScript(locate("data", "boson/scripts/localplayer-script.py"));
  d->mLocalPlayerScript->init();
+
+ displayManager()->activeDisplay()->setLocalPlayerScript(d->mLocalPlayerScript);
 }
 
 void BosonWidgetBase::slotDumpGameLog()
