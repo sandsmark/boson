@@ -1,5 +1,5 @@
 
-COMPILE_FIRST = bodebug kgame bosound
+COMPILE_FIRST = bomemory bodebug kgame bosound
 
 SUBDIRS = $(TOPSUBDIRS)
 
