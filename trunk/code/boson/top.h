@@ -247,6 +247,9 @@ signals:
 	 **/
 	void signalShotsUpdated(int);
 
+protected:
+	void forceHide(bool hide);
+
 protected slots:
 	void slotUpdateStatusBar();
 	void slotUnitCountChanged(Player*);
@@ -259,6 +262,9 @@ private:
 
 	KMainWindow* mMainWindow;
 	Player* mLocalPlayer;
+	QTimer* mUpdateTimer;
+	bool mForceHide;
+	bool mUserShow;
 };
 
 #endif

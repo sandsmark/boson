@@ -68,32 +68,26 @@ class TopWidget::TopWidgetPrivate
 public:
 	TopWidgetPrivate()
 	{
+		mIface = 0;
 		mWidgetStack = 0;
 
 		mStartup = 0;
-
 		mDisplay = 0;
 
 		mStarting = 0;
-
-		mIface = 0;
 
 		mLocalPlayer = 0;
 
 		mStatusBarHandler = 0;
 	}
 
+	BoDebugDCOPIface* mIface;
 	QWidgetStack* mWidgetStack;
 
 	BosonStartupWidget* mStartup;
-
 	BosonBigDisplayBase* mDisplay;
 
-	QTimer mStatusBarTimer;
-
 	BosonStarting* mStarting;
-
-	BoDebugDCOPIface* mIface;
 
 	QGuardedPtr<Player> mLocalPlayer;
 
@@ -124,9 +118,6 @@ TopWidget::TopWidget() : KMainWindow(0, "topwindow")
 		this, SLOT(slotCancelLoadSave()));
 
  d->mStatusBarHandler = new BoStatusBarHandler(this, this);
-
- connect(&d->mStatusBarTimer, SIGNAL(timeout()),
-		d->mStatusBarHandler, SLOT(slotUpdateStatusBar()));
 
  d->mWidgetStack->addWidget(d->mStartup);
 
@@ -369,7 +360,6 @@ void TopWidget::endGame()
  if (boGame) {
 	boGame->quitGame();
  }
- d->mStatusBarTimer.stop();
  Boson::deleteBoson();  // Easiest way to reset game info
  delete d->mStarting;
  d->mStarting = 0;
@@ -619,7 +609,6 @@ void TopWidget::slotGameStarted()
  d->mStartup->resetWidgets();
 
  // Init some stuff
- d->mStatusBarTimer.start(1000);
  if (d->mDisplay->isInputInitialized()) {
 	boWarning() << k_funcinfo << "display input is already initialized?! probably quitGame() was not called" << endl;
  } else {
@@ -787,6 +776,9 @@ BoStatusBarHandler::BoStatusBarHandler(KMainWindow* w, QObject* parent)
 	: QObject(parent)
 {
  mMainWindow = w;
+ mUpdateTimer = new QTimer(this);
+ mForceHide = false;
+ mUserShow = false;
  mLocalPlayer = 0;
  KStatusBar* bar = w->statusBar();
  QHBox* box = new QHBox(bar);
@@ -826,6 +818,9 @@ BoStatusBarHandler::BoStatusBarHandler(KMainWindow* w, QObject* parent)
  connect(this, SIGNAL(signalShotsUpdated(int)), shotsLabel, SLOT(setNum(int)));
 
  bar->hide();
+
+ connect(mUpdateTimer, SIGNAL(timeout()), this, SLOT(slotUpdateStatusBar()));
+ mUpdateTimer->start(1000);
 }
 
 void BoStatusBarHandler::setLocalPlayer(Player* p)
@@ -907,6 +902,11 @@ void BoStatusBarHandler::slotPlayerPropertyChanged(KGamePropertyBase* prop, KPla
 
 void BoStatusBarHandler::slotUpdateStatusBar()
 {
+ if (!boGame || boGame->gameStatus() != KGame::Run) {
+	forceHide(true);
+	return;
+ }
+ forceHide(false);
  const BosonCanvas* canvas = boGame->canvas();
  BO_CHECK_NULL_RET(canvas);
  BosonCanvasStatistics* stat = canvas->canvasStatistics();
@@ -928,10 +928,20 @@ void BoStatusBarHandler::slotUpdateStatusBar()
 
 void BoStatusBarHandler::slotToggleStatusbar(bool show)
 {
- if (show) {
+ mUserShow = show;
+ if (mUserShow && !mForceHide) {
 	mMainWindow->statusBar()->show();
  } else {
 	mMainWindow->statusBar()->hide();
  }
+}
+
+void BoStatusBarHandler::forceHide(bool hide)
+{
+ if (mForceHide == hide) {
+	return;
+ }
+ mForceHide = hide;
+ slotToggleStatusbar(mUserShow);
 }
 
