@@ -25,6 +25,8 @@
 #include "bosonconfig.h"
 #include "bosonprofiling.h"
 #include "script/bosonscript.h"
+#include "boson.h"
+#include "boeventlistener.h"
 
 #include <kgame/kgame.h>
 #include <kstandarddirs.h>
@@ -44,18 +46,29 @@ BosonComputerIO::BosonComputerIO() : KGameComputerIO()
 	setReactionPeriod(1);
  }
  mScript = 0;
-}
-
-BosonComputerIO::BosonComputerIO(KPlayer* p) : KGameComputerIO(p)
-{
- boDebug() << k_funcinfo << endl;
+ mEventListener = 0;
 }
 
 BosonComputerIO::~BosonComputerIO()
 {
- if (mScript) {
-	delete mScript;
+ delete mScript;
+ delete mEventListener;
+}
+
+void BosonComputerIO::initIO(KPlayer* p)
+{
+ KGameComputerIO::initIO(p);
+ delete mEventListener;
+ mEventListener = 0;
+ if (!p) {
+	return;
  }
+
+ // warning: p->game() is NULL at this point. using boGame here is ugly.
+ boDebug() << k_funcinfo << endl;
+ BoEventManager* manager = boGame->eventManager();
+ mEventListener = new BoComputerPlayerEventListener((Player*)player(), manager, this);
+ mEventListener->initScript();
 }
 
 void BosonComputerIO::initScript()

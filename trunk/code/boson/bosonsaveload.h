@@ -211,12 +211,14 @@ protected:
 	QCString savePlayersAsXML();
 	QCString saveCanvasAsXML();
 	QCString saveExternalAsXML();
+	bool saveEventListenerScripts(QMap<QString, QByteArray>* files);
 
 	bool loadVersionFromXML(const QString&); // takes kgame.xml
 	bool loadKGameFromXML(const QString&);
 	bool loadPlayersFromXML(const QString&);
 	bool loadCanvasFromXML(const QString&);
 	bool loadExternalFromXML(const QString&);
+	bool loadEventListenerScripts(const QMap<QString, QByteArray>& files);
 
 	bool convertSaveGameToPlayField(QMap<QString, QByteArray>& files);
 
@@ -226,6 +228,24 @@ protected:
 	void addError(SaveLoadError* error);
 	void addSaveError(SaveLoadError::ErrorType, const QString& text = QString::null, const QString& caption = QString::null);
 	void addLoadError(SaveLoadError::ErrorType, const QString& text = QString::null, const QString& caption = QString::null);
+
+	/**
+	 * This fixes player ids of filenames for saving.
+	 *
+	 * Other classes (e.g. the @ref BoEventManager) save their files to @p
+	 * files and sometimes use the playerid in the filenames (e.g.
+	 * ai-player_id.py). This method reads those filenames, removes them
+	 * from @p files and re-adds them with the player id replaced by the
+	 * index of the player in the game list (which is used in boson .bpf and
+	 * .bsg files).
+	 *
+	 * Only files with a "-player_id" substring, where id is a number, are
+	 * touched. That substring is replaced by "-player_n", where n is the
+	 * index of the player.
+	 *
+	 * @return FALSE on error, otherwise TRUE.
+	 **/
+	bool convertPlayerIdsToIndices(QMap<QString, QByteArray>& files) const;
 
 private:
 	void initBoson();

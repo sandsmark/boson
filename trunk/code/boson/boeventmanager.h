@@ -78,6 +78,11 @@ public:
 	 **/
 	bool loadListenerScripts(const QMap<QString, QByteArray>& scripts);
 
+	/**
+	 * Used by @ref BoEventListener.
+	 **/
+	bool loadEventListenerScript(BoEventListener* listener);
+
 protected:
 	void deliverEvent(BoEvent* event);
 	void declareEvents();
