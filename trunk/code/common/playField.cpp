@@ -23,7 +23,7 @@
 #include <qdatastream.h>
 #include <qfile.h>
 
-#include <kapp.h>
+//#include <kapp.h>
 
 #include "playField.h"
 

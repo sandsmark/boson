@@ -21,7 +21,7 @@
 #include <qpainter.h>
 
 #include "../common/log.h"
-#include "../map/map.h"
+#include "../common/map.h"
 
 #include "viewMap.h"
 #include "fieldMap.h"

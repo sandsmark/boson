@@ -22,7 +22,7 @@
 #include <qpopupmenu.h>
 
 #include "../common/log.h"
-#include "../map/map.h"
+#include "../common/map.h"
 
 #include "viewMap.h"
 #include "editorFieldMap.h"

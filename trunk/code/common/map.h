@@ -1,9 +1,9 @@
 /***************************************************************************
-                          miniDisplay.cpp  -  description                              
+                          map.h  -  description                    
                              -------------------                                         
 
     version              : $Id$
-    begin                : Sat Feb 17, 1999
+    begin                : Sat Apr 17 23:02:00 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
     email                : capricel@enst.fr                                     
@@ -18,39 +18,9 @@
  *                                                                         *
  ***************************************************************************/
 
-#include <qpainter.h>
-#include <qpixmap.h>
-//#include <qcolor.h>
+#ifndef MAP_H
+#define MAP_H
 
-//#include "../common/log.h"
-#include "../common/map.h"
+#define BO_TILE_SIZE 48
 
-#include "miniMap.h"
-//#include "playerCell.h"
-//#include "speciesTheme.h"
-//#include "groundTheme.h"
-//#include "viewMap.h"
-#include "visualUnit.h"
-#include "game.h"
-
-
-void miniMap::drawMobile(visualMobUnit *unit)
-{
-	QPainter p;
-	p.begin(ground);
-	setPoint(unit->_x()/BO_TILE_SIZE, unit->_y()/BO_TILE_SIZE, (unit->who==gpp.who_am_i)?magenta:darkMagenta, &p);
-	p.end();
-	repaint(FALSE);
-}
-
-
-void miniMap::drawFix(visualFacility *fix)
-{
-	QPainter p;
-	p.begin(ground);
-	setPoint(fix->_x(), fix->_y(), (fix->who==gpp.who_am_i)?magenta:darkMagenta, &p);
-	p.end();
-	repaint(FALSE);
-}
-
-
+#endif /* MAP_H */

@@ -21,7 +21,7 @@
 #ifndef PLAYER_UNIT_H 
 #define PLAYER_UNIT_H 
 
-#include "../visual/visualUnit.h"
+#include "visualUnit.h"
 #include "sprites.h"
 
 

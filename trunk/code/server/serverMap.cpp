@@ -22,7 +22,7 @@
 
 #include <qpainter.h>
 
-#include "../map/map.h"
+#include "../common/map.h"
 
 #include "serverCell.h"
 #include "boserver.h"

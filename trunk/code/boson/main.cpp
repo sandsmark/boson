@@ -1,5 +1,5 @@
 /***************************************************************************
-                          boson.cpp  -  description                              
+                          main.cpp  -  description                              
                              -------------------                                         
 
     version              : $Id$
@@ -22,7 +22,7 @@
  
 int main(int argc, char* argv[])
 { 
-	KApplication app(argc,argv,"boson");  
+	KApplication app(argc,argv,"Boson");  
  
 /*	if (app.isRestored())
 		RESTORE(BosonApp);

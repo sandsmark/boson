@@ -36,7 +36,6 @@
 #include <kaccel.h>
 #include <kiconloader.h>
 #include <kmsgbox.h>
-#include <ksock.h>
 
 // application specific includes
 #include "../common/msgData.h"
@@ -47,11 +46,14 @@
 /**
   * This Class is the base class for your application. It sets up the main
   * window and reads the config file as well as providing a menubar, toolbar
-  * and statusbar. For the main view, an instance of class KMyappView is
+  * and statusbar. For the main view, an instance of class BoEditorApp is
   * created which creates your view.
   */
 class BoEditorApp : public KTMainWindow 
-{    Q_OBJECT 
+{
+
+	Q_OBJECT 
+
 public: 
   /** construtor */
   BoEditorApp(char *servername=0l); 

@@ -25,7 +25,7 @@
 #include <qcolor.h>
 
 #include "../common/log.h"
-#include "../map/map.h"
+#include "../common/map.h"
 
 #include "miniMap.h"
 #include "visualCell.h"

@@ -18,7 +18,7 @@
  *                                                                         *
  ***************************************************************************/
 
-#include "../map/map.h"
+#include "../common/map.h"
 
 #include "groundTheme.h"
 #include "visualCell.h"

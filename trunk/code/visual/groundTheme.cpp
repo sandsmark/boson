@@ -28,7 +28,7 @@
 #include <kapp.h>
 
 #include "../common/log.h"
-#include "../map/map.h"
+#include "../common/map.h"
 
 #include "groundTheme.h"
 
@@ -69,7 +69,7 @@ for (i=0; i< groundTransPropNb; i++) {
 progress.setProgress(PROGRESS_N);
 
 if (!allLoaded) logf(LOG_ERROR, "groundTheme : not all loaded !");
-	else logf(LOG_INFO, "groundTheme loaded : %d ground tiles, %d transition tiles",
+	else logf(LOG_INFO, "groundTheme loaded : %d ground tiles, %d transition tileset",
 		groundPropNb, groundTransPropNb);
 
 }

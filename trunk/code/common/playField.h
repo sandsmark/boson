@@ -34,14 +34,14 @@ struct origMobile {
 	int	who;
 	int	x;
 	int	y;
-	};
+};
 
 struct origFacility {
-   facilityType	t;
-	int	who;
-	int	x;
-	int	y;
-	};
+	facilityType	t;
+	int		who;
+	int		x;
+	int		y;
+};
 
 
 struct origPeople {
@@ -49,14 +49,14 @@ struct origPeople {
 	int		nbFacilities;
 	origMobile	*mobile;
 	origFacility	*facility;
-	};
+};
 
 
 struct bosonMap {
 	groundType	**cells;
 	int		width;
 	int		height;
-	};
+};
 
 class playField //: public  QDataStream
 {

@@ -21,7 +21,7 @@
 //#include <stdlib.h>	// int abs(int);
 //#include <assert.h>
 
-#include "../map/map.h"
+#include "../common/map.h"
 #include "../common/log.h"
 
 #include "visualUnit.h"

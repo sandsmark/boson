@@ -25,7 +25,6 @@
 #include <qframe.h>
 
 #include "ressource.h"
-#include "connect.h"
 
 #include "../common/boconfig.h"
 #include "../common/bobuffer.h"
