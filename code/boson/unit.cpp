@@ -1005,7 +1005,7 @@ void MobileUnit::advanceMoveInternal(unsigned int) // this actually needs to be 
 	return;
  }
 
- boDebug() << k_funcinfo << endl;
+ boDebug(401) << k_funcinfo << endl;
  if (advanceWork() != work()) {
 	if (work() == WorkAttack) {
 		// no need to move to the position of the unit...
@@ -1130,11 +1130,11 @@ void MobileUnit::advanceMoveCheck()
 	setWork(WorkNone);
 	return;
  }
- boDebug() << k_funcinfo << endl;
+ boDebug(401) << k_funcinfo << endl;
  if (canvas()->cellOccupied(currentWaypoint().x() / BO_TILE_SIZE,
 		currentWaypoint().y() / BO_TILE_SIZE, this, false)) {
-//	boDebug() << k_funcinfo << "collisions" << endl;
-//	boWarning() << k_funcinfo << "" << id() << " -> " << l.first()->id() 
+//	boDebug(401) << k_funcinfo << "collisions" << endl;
+//	boWarning(401) << k_funcinfo << "" << id() << " -> " << l.first()->id() 
 //		<< " (count=" << l.count() <<")"  << endl;
 	// do not move at all. Moving is not stopped completely!
 	// work() is still workMove() so we'll continue moving in the next
@@ -1167,7 +1167,7 @@ void MobileUnit::advanceMoveCheck()
  }
  d->mMovingFailed = 0;
  d->mPathRecalculated = 0;
- boDebug() << k_funcinfo << "done" << endl;
+ boDebug(401) << k_funcinfo << "done" << endl;
 }
 
 void MobileUnit::setSpeed(float speed)
