@@ -32,9 +32,10 @@
 #include <ksimpleconfig.h>
 
 /*****  BosonWeaponProperties  *****/
-BosonWeaponProperties::BosonWeaponProperties(const UnitProperties* prop) :
+BosonWeaponProperties::BosonWeaponProperties(const UnitProperties* prop, unsigned long int id) :
     PluginProperties(prop)
 {
+  mId = id;
 }
 
 BosonWeaponProperties::~BosonWeaponProperties()

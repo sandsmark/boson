@@ -27,6 +27,7 @@ class ProductionPlugin;
 class BosonCanvas;
 class QDomElement;
 class BosonPlayField;
+class QDataStream;
 
 #define boGame Boson::boson()
 
@@ -177,6 +178,16 @@ public:
 	 **/
 	static void deleteBoson();
 
+	/**
+	 * @return Latest Boson savegame format version
+	 **/
+	unsigned long int latestSavegameVersion();
+
+	/**
+	 * @return Boson savegame format version of currently loaded game
+	 **/
+	unsigned long int currentSavegameVersion();
+
 public slots:
 	void slotSetGameSpeed(int speed);
 	void slotTogglePause();
@@ -324,6 +335,9 @@ signals:
 
 	void signalAddChatSystemMessage(const QString& fromName, const QString& text);
 
+	void signalLoadExternalStuff(QDataStream& stream);
+	void signalSaveExternalStuff(QDataStream& stream);
+
 protected:
 	virtual bool playerInput(QDataStream& stream, KPlayer* player);
 	Unit* createUnit(unsigned long int unitType, Player* owner);
@@ -359,9 +373,6 @@ protected slots:
 	 * BosonCanvasCanvas::slotAdvance ist called.
 	 **/
 	void slotSendAdvance();
-
-	void slotSave(QDataStream& stream);
-	void slotLoad(QDataStream& stream);
 
 	void slotReplacePlayerIO(KPlayer* player, bool* remove);
 

@@ -527,7 +527,8 @@ void BoUnitEditor::slotUpdateWeaponProps()
 
 void BoUnitEditor::slotAddWeapon()
 {
-    BosonWeaponProperties* w = new BosonWeaponProperties(mUnit);
+    // 0 is actually invalid id... but we don't care as it's only used for loading/saving games
+    BosonWeaponProperties* w = new BosonWeaponProperties(mUnit, 0);
     w->reset();
     mWeapons.append(w);
     mWeaponsList->insertItem("New weapon", mWeapons.count() - 1);

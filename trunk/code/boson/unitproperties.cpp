@@ -311,7 +311,7 @@ void UnitProperties::loadWeapons(KSimpleConfig* conf)
  mMaxLandWeaponRange = 0;
  for (int i = 0; i < num; i++) {
 	conf->setGroup(QString("Weapon_%1").arg(i));
-	BosonWeaponProperties* p = new BosonWeaponProperties(this);
+	BosonWeaponProperties* p = new BosonWeaponProperties(this, i + 1);
 	p->loadPlugin(conf, mFullMode);
 	d->mPlugins.append(p);
 	if (p->canShootAtAirUnits()) {
@@ -734,5 +734,19 @@ void UnitProperties::setHitPoint(const BoVector3& hitpoint)
 const BoVector3& UnitProperties::hitPoint() const
 {
  return d->mHitPoint;
+}
+
+const BosonWeaponProperties* UnitProperties::weaponProperties(unsigned long int id) const
+{
+ QPtrListIterator<PluginProperties> it(d->mPlugins);
+ while (it.current()) {
+	if (it.current()->pluginType() == PluginProperties::Weapon) {
+		if (((BosonWeaponProperties*)it.current())->id() == id) {
+			return (BosonWeaponProperties*)it.current();
+		}
+	}
+	++it;
+ }
+ return 0l;
 }
 

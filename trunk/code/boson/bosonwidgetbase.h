@@ -26,6 +26,7 @@
 class KPlayer;
 class KGamePropertyBase;
 class KActionCollection;
+class QDataStream;
 
 class BosonCursor;
 class BosonCanvas;
@@ -134,14 +135,23 @@ public slots:
 	void slotSplitDisplayHorizontal();
 	void slotSplitDisplayVertical();
 	void slotRemoveActiveDisplay();
-	
+
 	void slotInitFogOfWar();
+
+	/**
+	 * Sends signals to update mobiles/facilities count for player p
+	 **/
+	void slotUnitCountChanged(Player* p);
 
 protected slots:
 	virtual void slotPlayerJoinedGame(KPlayer*);
 	virtual void slotPlayerLeftGame(KPlayer*);
 
 	void slotHack1();
+
+	// These 2 are used to save/load camera, shots, particle systems etc.
+	void slotLoadExternalStuff(QDataStream& stream);
+	void slotSaveExternalStuff(QDataStream& stream);
 
 signals:
 	// hmm.. these *never* get emitted?

@@ -51,7 +51,7 @@ class BosonWeaponProperties : public PluginProperties
      * Constructs new BosonWeaponProperties. You must call @ref loadPlugin
      * before doing anything
      **/
-    BosonWeaponProperties(const UnitProperties* prop);
+    BosonWeaponProperties(const UnitProperties* prop, unsigned long int id);
     ~BosonWeaponProperties();
 
     /**
@@ -116,6 +116,8 @@ class BosonWeaponProperties : public PluginProperties
     void playSound(WeaponSoundEvent event) const;
 
     QMap<int, QString> sounds() const;
+
+    unsigned long int id() const  { return mId; };
     
     /**
      * Creates new shot
@@ -162,6 +164,7 @@ class BosonWeaponProperties : public PluginProperties
     friend class BoUnitEditor;
 
   private:
+    unsigned long int mId;
     unsigned long int mRange;
     long int mDamage;
     float mDamageRange;

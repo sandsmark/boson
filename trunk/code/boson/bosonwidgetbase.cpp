@@ -61,6 +61,7 @@
 #include <qptrdict.h>
 #include <qsignalmapper.h>
 #include <qfile.h>
+#include <qdatastream.h>
 
 #include "bosonwidgetbase.moc"
 
@@ -210,6 +211,11 @@ void BosonWidgetBase::initConnections()
  connect(boGame, SIGNAL(signalAddUnit(Unit*, int, int)),
 		this, SLOT(slotAddUnit(Unit*, int, int)));
 
+ connect(boGame, SIGNAL(signalLoadExternalStuff(QDataStream&)),
+		this, SLOT(slotLoadExternalStuff(QDataStream&))); 
+ connect(boGame, SIGNAL(signalSaveExternalStuff(QDataStream&)),
+		this, SLOT(slotSaveExternalStuff(QDataStream&))); 
+
  connect(boGame, SIGNAL(signalAddChatSystemMessage(const QString&,const QString&)),
 		this, SLOT(slotAddChatSystemMessage(const QString&,const QString&)));
 }
@@ -264,8 +270,7 @@ void BosonWidgetBase::initPlayer()
  // Needed for loading game
  emit signalMineralsUpdated(localPlayer()->minerals());
  emit signalOilUpdated(localPlayer()->oil());
- emit signalMobilesCount(localPlayer()->mobilesCount());
- emit signalFacilitiesCount(localPlayer()->facilitiesCount());
+ slotUnitCountChanged(localPlayer());
 }
 
 void BosonWidgetBase::initGameMode(const QString& playFieldId)//FIXME: rename! we don't have a difference to initEditorMode anymore. maybe just initGame() or so??
@@ -416,8 +421,7 @@ void BosonWidgetBase::slotAddUnit(Unit* unit, int, int)
 	return;
  }
 
- emit signalMobilesCount(p->mobilesCount());
- emit signalFacilitiesCount(p->facilitiesCount());
+ slotUnitCountChanged(p);
 }
 
 void BosonWidgetBase::slotRemoveUnit(Unit* unit)
@@ -426,8 +430,7 @@ void BosonWidgetBase::slotRemoveUnit(Unit* unit)
 	return;
  }
 
- emit signalMobilesCount(unit->owner()->mobilesCount());
- emit signalFacilitiesCount(unit->owner()->facilitiesCount());
+ slotUnitCountChanged(unit->owner());
 }
 
 void BosonWidgetBase::slotFog(int x, int y)
@@ -1052,3 +1055,24 @@ QString BosonWidgetBase::findSaveFileName(const QString& prefix, const QString& 
  return QString::null;
 }
 
+void BosonWidgetBase::slotUnitCountChanged(Player* p)
+{
+ emit signalMobilesCount(p->mobilesCount());
+ emit signalFacilitiesCount(p->facilitiesCount());
+}
+
+void BosonWidgetBase::slotLoadExternalStuff(QDataStream& stream)
+{
+ boDebug() << k_funcinfo << endl;
+ canvas()->load(stream);
+ // TODO: load camera
+ // TODO: load unitgroups
+}
+
+void BosonWidgetBase::slotSaveExternalStuff(QDataStream& stream)
+{
+ boDebug() << k_funcinfo << endl;
+ canvas()->save(stream);
+ // TODO: save camera  (BosonBigDisplayBase?)
+ // TODO: save unitgroups  (BoDisplayManager?)
+}

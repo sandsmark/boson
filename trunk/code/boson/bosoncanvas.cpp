@@ -34,10 +34,12 @@
 #include "bosonstatistics.h"
 #include "bosonprofiling.h"
 #include "bodebug.h"
+#include "boson.h"
 
 #include <klocale.h>
 
 #include <qpointarray.h>
+#include <qdatastream.h>
 
 #include "bosoncanvas.moc"
 
@@ -965,5 +967,51 @@ void BosonCanvas::addParticleSystems(const QPtrList<BosonParticleSystem> systems
 unsigned int BosonCanvas::animationsCount() const
 {
  return d->mAnimList.count();
+}
+
+void BosonCanvas::save(QDataStream& stream)
+{
+ boDebug() << k_funcinfo << endl;
+ // Save shots
+ // Count first. This is bad because we have to iterate through list twice
+ Q_UINT32 shotscount = 0;
+ for (BosonItem* i = d->mAnimList.first(); i; i = d->mAnimList.next()) {
+	if (RTTI::isShot(i->rtti())) {
+		shotscount++;
+	}
+ }
+ stream << shotscount;
+ boDebug() << "    " << k_funcinfo << "Saving " << shotscount << " shots" << endl;
+
+ BosonShot* s;
+ for (BosonItem* i = d->mAnimList.first(); i; i = d->mAnimList.next()) {
+	if (RTTI::isShot(i->rtti())) {
+		boDebug() << "        " << k_funcinfo << "Saving shot" << endl;
+		s = (BosonShot*)i;
+		stream << (Q_UINT32)s->owner()->id();
+		stream << (Q_UINT32)s->properties()->unitProperties()->typeId();
+		stream << (Q_UINT32)s->properties()->id();
+		s->save(stream);
+	}
+ }
+}
+
+void BosonCanvas::load(QDataStream& stream)
+{
+ boDebug() << k_funcinfo << endl;
+ Q_UINT32 shotscount;
+ stream >> shotscount;
+ boDebug() << "    " << k_funcinfo << "Loading " << shotscount << " shots" << endl;
+
+ BosonShot* s;
+ Player* p;
+ Q_UINT32 playerid, unitpropid, propid;
+ for (unsigned int i = 0; i < shotscount; i++) {
+	boDebug() << "        " << k_funcinfo << "Loading shot" << endl;
+	stream >> playerid >> unitpropid >> propid;
+	p = (Player*)boGame->findPlayer(playerid);
+	s = new BosonShot(p->speciesTheme()->unitProperties(unitpropid)->weaponProperties(propid),
+			p, this, stream);
+ }
 }
 

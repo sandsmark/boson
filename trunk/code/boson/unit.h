@@ -563,6 +563,9 @@ public:
 	BosonParticleSystem* flamesParticleSystem() const;
 	void setFlamesParticleSystem(BosonParticleSystem* s);
 
+	virtual bool load(QDataStream& stream);
+	virtual bool save(QDataStream& stream);
+
 private:
 	class FacilityPrivate;
 	FacilityPrivate* d;

@@ -189,35 +189,23 @@ bool UnitBase::save(QDataStream& stream)
  // TODO: we need to save and load Unit::mCurrentPlugin->pluginType() !!
  // note that multiple plugins of the same type are not *yet* supported! but
  // they might be one day..
- stream << (Q_UINT32)unitProperties()->typeId();
  bool ret = dataHandler()->save(stream);
  if (mWeaponProperties) {
 	// call weaponDataHandler() only, if it was called in c'tor, as it is
 	// created here otherwise
 	ret = ret && weaponDataHandler()->save(stream);
  }
- stream << (Q_UINT32)id();
  return ret;
 }
 
 bool UnitBase::load(QDataStream& stream)
 {
- Q_UINT32 typeId;
- Q_UINT32 id;
- stream >> typeId;
- if (!speciesTheme()) {
-	boError() << k_funcinfo << "NULL speciesTheme" << endl;
-	return false;
- }
- mUnitProperties = speciesTheme()->unitProperties(typeId);
  bool ret = dataHandler()->load(stream);
   if (mWeaponProperties) {
 	// call weaponDataHandler() only, if it was called in c'tor, as it is
 	// created here otherwise
 	ret = ret && weaponDataHandler()->load(stream);
  }
- stream >> id;
- mId = id;
  return ret;
 }
 
