@@ -684,24 +684,6 @@ bool Player::loadFromXML(const QDomElement& root)
  // this does NOT load the units!
 
  bool ok = false;
-#if 0
- int id = root.attribute(QString::fromLatin1("Id")).toInt(&ok);
- if (!ok) {
-	boError(260) << k_funcinfo << "Id was no valid number" << endl;
-	return false;
- }
-
- // WARNING: KGame from KDE < 3.2 was assigning an Id on its own in
- // KGame::systemAddPlayer() when it was not yet set. But due to other problems
- // it does _not_ do that anymore, so we have to set our own Id!
- setId(id);
- int networkPriority = root.attribute(QString::fromLatin1("NetworkPriority")).toInt(&ok);
- if (!ok) {
-	boError(260) << k_funcinfo << "NetworkPriority was no valid number" << endl;
-	return false;
- }
- setNetworkPriority(networkPriority);
-#endif
 
  boDebug(260) << k_funcinfo << "load data handler" << endl;
  // load the data handler

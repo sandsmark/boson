@@ -588,42 +588,9 @@ bool BosonSaveLoad::loadFromFile(const QMap<QString, QByteArray>& fileList)
 	addLoadError(SaveLoadError::LoadBSGFileError, i18n("savegame version (%1) is too recent. Can read up to %2 only.").arg(version).arg(latestSavegameVersion()));
 	return false;
  }
- if (version < BOSON_SAVEGAME_FORMAT_VERSION_0_8) {
-	boError(260) << k_funcinfo << "version " << version << " is too old. Must be at least from boson 0.8" << endl;
-	addLoadError(SaveLoadError::LoadBSGFileError, i18n("savegame version (%1) is too old. Must be at least %2.").arg(version).arg(BOSON_SAVEGAME_FORMAT_VERSION_0_8));
-	d->mLoadingStatus = InvalidVersion;
-	return false;
- }
-
- if (version == BOSON_SAVEGAME_FORMAT_VERSION_0_8) {
-	boDebug(260) << "trying to load a savegame from boson 0.8" << endl;
-	BosonFileConverter converter;
-	QMap<QString, QByteArray> list = fileList;
-	bool ok = converter.convertSaveGame_From_0_8_To_0_9(list);
-	if (!ok) {
-		boError(260) << "File converting failed. cannot load this file." << endl;
-		addLoadError(SaveLoadError::InvalidFileFormat, i18n("Failed converting savegame from boson 0.8. Unable to load this file."));
-		d->mLoadingStatus = InvalidFileFormat;
-		return false;
-	}
-	return loadFromFile(list);
- } else if (version == BOSON_SAVEGAME_FORMAT_VERSION_0_8_128) {
-	boDebug(260) << "trying to load a savegame from boson 0.8.128" << endl;
-	BosonFileConverter converter;
-	QMap<QString, QByteArray> list = fileList;
-	bool ok = converter.convertSaveGame_From_0_8_128_To_0_9(list);
-	if (!ok) {
-		boError(260) << "File converting failed. cannot load this file." << endl;
-		addLoadError(SaveLoadError::InvalidFileFormat, i18n("Failed converting savegame from boson 0.8.128. Unable to load this file."));
-		d->mLoadingStatus = InvalidFileFormat;
-		return false;
-	}
-	return loadFromFile(list);
- }
 
  if (version != latestSavegameVersion()) {
-	boError(260) << k_funcinfo << "version " << version << " could not be converted to current savegame format." << endl;
-	addLoadError(SaveLoadError::LoadInvalidVersion, i18n("File format version (%1) could not be converted to current file format. Unable to load this file.").arg(version));
+	addLoadError(SaveLoadError::LoadInvalidVersion, i18n("File format version (%1) not supported. Unable to load this file.").arg(version));
 	return false;
  }
 
