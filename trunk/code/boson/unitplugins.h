@@ -35,6 +35,7 @@ class Player;
 class PluginProperties;
 class Boson;
 class BosonWeapon;
+class QPoint;
 
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
