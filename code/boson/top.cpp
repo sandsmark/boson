@@ -115,7 +115,7 @@ TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
  d = new TopWidgetPrivate;
  mBoson = 0;
  mPlayer = 0;
- mMap = 0;
+ mPlayField = 0;
  mCanvas = 0;
  mGame = false;
 #if KDE_VERSION < 310
@@ -292,9 +292,9 @@ void TopWidget::initPlayer()
  mPlayer = new Player;
 }
 
-void TopWidget::initMap()
+void TopWidget::initPlayField()
 {
- mMap = new BosonPlayField(this);
+ mPlayField = new BosonPlayField(this);
 }
 
 void TopWidget::initStatusBar()
@@ -583,7 +583,7 @@ void TopWidget::loadGameData1() // FIXME rename!
 		checkEvents();
 		QByteArray buffer;
 		QDataStream stream(buffer, IO_WriteOnly);
-		mMap->saveMap(stream);
+		mPlayField->saveMap(stream);
 		d->mLoading->setProgress(50);
 		checkEvents();
 		// send the loaded map via network
@@ -804,8 +804,8 @@ void TopWidget::slotReceiveMap(const QByteArray& buffer)
 {
  disconnect(mBoson, SIGNAL(signalInitMap(const QByteArray&)), this, SLOT(slotReceiveMap(const QByteArray&)));
  QDataStream stream(buffer, IO_ReadOnly);
- mMap->loadMap(stream);
- mBoson->setMap(mMap);
+ mPlayField->loadMap(stream);
+ mBoson->setMap(mPlayField);
 
  d->mLoading->setProgress(300);
 
@@ -926,15 +926,15 @@ void TopWidget::endGame()
  mBoson = 0;
  delete mCanvas;
  mCanvas = 0;
- delete mMap;
- mMap = 0;
+ delete mPlayField;
+ mPlayField = 0;
 }
 
 void TopWidget::reinitGame()
 {
  initBoson();
  initPlayer();
- initMap();
+ initPlayField();
  
  // Change menus and show welcome widget
  mGame = false;

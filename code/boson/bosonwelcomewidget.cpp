@@ -38,75 +38,63 @@ BosonWelcomeWidget::BosonWelcomeWidget(QWidget* parent) : QWidget(parent)
 {
   mBosonWelcomeWidgetLayout = new QVBoxLayout( this, 11, 6, "BosonWelcomeWidgetLayout");
 
-  // 6 + 60 + 15 == logo == 81
-
   mMainLayout = new QVBoxLayout( 0, 0, 6, "mainlayout"); 
 
-  mMainLayout->addSpacing(10);//FIXME hardcoded
+//  mMainLayout->addSpacing(10);//FIXME hardcoded
   QPixmap bannerPix(locate("data", "boson/pics/boson-startup-banner.png"));
   mBanner = new QLabel(this);
   mBanner->setPixmap(bannerPix);
-  mMainLayout->addWidget(mBanner);
+  mMainLayout->addWidget(mBanner, 0, AlignHCenter);
 
-  // 66 + 25 + 72 == 163
+  mMainLayout->addSpacing(10);
 
-  mMainLayout->addSpacing(33);
-  QPixmap textFramePix(locate("data", "boson/pics/boson-startup-textframe.png"));
-  mTextFrame = new QLabel(this);
-  mTextFrame->setPixmap(textFramePix);
-  mTextFrame->setFixedSize(textFramePix.size());
-  mMainLayout->addWidget(mTextFrame);
+  QWidget* textFrame = new QWidget(this);
+  mMainLayout->addWidget(textFrame, 0, AlignHCenter);
+  QVBoxLayout* textFrameLayout = new QVBoxLayout(textFrame, 0, AlignHCenter);
+  QPixmap textPixmap(locate("data", "boson/pics/boson-startup-textframe.png"));
+  QLabel* textPix = new QLabel(textFrame);
+  textPix->setPixmap(textPixmap);
+  textFrameLayout->addWidget(textPix, 0, AlignHCenter);
+  
+  // we fix this to the size of the pixmap!
+  textPix->setFixedSize(textPixmap.size());
+  textFrame->setFixedWidth(textPixmap.width());
 
-  // 163 + 33 + 248 == 444
+  
+  QWidget* buttonWidget = new QWidget(textFrame);
+  textFrameLayout->addWidget(buttonWidget, 0, AlignHCenter);
+  QHBoxLayout* buttonsLayout = new QHBoxLayout( buttonWidget, 0, 6, "buttonslayout");
+  buttonsLayout->addStretch(1);
 
-  mMainLayout->addSpacing(20);
-
-
-  QVBoxLayout* textFrameLayout = new QVBoxLayout( mTextFrame, 15, 6, "textframelayout" );
-  textFrameLayout->addStretch(1);
-  textFrameLayout->addStretch(1);
-  textFrameLayout->addStretch(1);
-  QHBoxLayout* lowerLayout = new QHBoxLayout( textFrameLayout, -1, "lowerlayout");
-  textFrameLayout->addStretch(1);
-  QHBoxLayout* buttonsLayout = new QHBoxLayout( 0, 0, 6, "buttonslayout");
-
-  mNewGameButton = new QPushButton( mTextFrame, "newgamebutton" );
+  mNewGameButton = new QPushButton( buttonWidget, "newgamebutton" );
   mNewGameButton->setText( i18n( "S&tart new game" ) );
   mNewGameButton->setMinimumWidth(120);
-  buttonsLayout->addWidget( mNewGameButton, 0, 0 );
-  QSpacerItem* spacer_3 = new QSpacerItem( 20, 20, QSizePolicy::Minimum, QSizePolicy::Expanding );
-  buttonsLayout->addItem( spacer_3 );
+  buttonsLayout->addWidget( mNewGameButton );
+  buttonsLayout->addStretch(1);
 
-  mLoadGameButton = new QPushButton( mTextFrame, "loadgamebutton" );
+  mLoadGameButton = new QPushButton( buttonWidget, "loadgamebutton" );
   mLoadGameButton->setText( i18n( "&Load saved game" ) );
   mLoadGameButton->setMinimumWidth(120);
   buttonsLayout->addWidget( mLoadGameButton );
-  QSpacerItem* spacer_6 = new QSpacerItem( 20, 20, QSizePolicy::Minimum, QSizePolicy::Expanding );
-  buttonsLayout->addItem( spacer_6 );
+  buttonsLayout->addStretch(1);
 
 #ifndef NO_EDITOR
-  mEditorButton = new QPushButton( mTextFrame, "editorbutton" );
+
+  mEditorButton = new QPushButton( buttonWidget, "editorbutton" );
   mEditorButton->setText( i18n( "Start &Editor" ) );
   mEditorButton->setMinimumWidth(120);
   buttonsLayout->addWidget( mEditorButton );
   connect(mEditorButton, SIGNAL(clicked()), this, SIGNAL(signalStartEditor()));
+  buttonsLayout->addStretch(1);
 #else
   mEditorButton = 0;
 #endif
 
-  mQuitButton = new QPushButton( mTextFrame, "quitbutton" );
+  mQuitButton = new QPushButton( buttonWidget, "quitbutton" );
   mQuitButton->setText( i18n( "&Quit Boson" ) );
   mQuitButton->setMinimumWidth(120);
   buttonsLayout->addWidget( mQuitButton );
-  QSpacerItem* spacer_4 = new QSpacerItem( 20, 20, QSizePolicy::Minimum, QSizePolicy::Expanding );
-  buttonsLayout->addItem( spacer_4 );
-  QSpacerItem* spacer_5 = new QSpacerItem( 20, 20, QSizePolicy::Minimum, QSizePolicy::Expanding );
-  buttonsLayout->addItem( spacer_5 );
-
-  lowerLayout->addStretch(1);
-  lowerLayout->addLayout(buttonsLayout);
-  lowerLayout->addStretch(1);
-
+  buttonsLayout->addStretch(1);
 
   mBosonWelcomeWidgetLayout->addLayout( mMainLayout );
 

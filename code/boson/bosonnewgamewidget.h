@@ -60,7 +60,7 @@ class BosonNewGameWidget : public QWidget
     ~BosonNewGameWidget();
     /** Resets all configuration */
 
-    QString& playfield();
+    QString playFieldString() const;
 
   private:
     QLabel* mColorLabel;
@@ -176,9 +176,9 @@ class BosonNewGameWidget : public QWidget
     void initMaps();
     void initSpecies();
     void initColors();
-    inline Boson* game();
-    inline Player* player();
-    inline BosonPlayField* map();
+    inline Boson* game() const;
+    inline Player* player() const;
+    inline BosonPlayField* playField() const;
 
     QPtrDict<KPlayer> mItem2Player;
     KPlayer* mHighlightedPlayer;

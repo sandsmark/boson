@@ -20,6 +20,7 @@
 #include "bosonnewgamewidget.h"
 #include "bosonnewgamewidget.moc"
 
+#include "defines.h"
 #include "bosonconfig.h"
 #include "bosonmessage.h"
 #include "player.h"
@@ -30,7 +31,6 @@
 #include "bosonplayfield.h"
 #include "speciestheme.h"
 #include "bosonscenario.h"
-#include "defines.h"
 
 #include <klocale.h>
 #include <kgame/kgameproperty.h>
@@ -83,42 +83,43 @@ BosonNewGameWidget::BosonNewGameWidget(TopWidget* top, QWidget* parent)
 
   mLeftLayout = new QVBoxLayout( 0, 0, 6, "eftlayout"); 
 
+
   mYourOptionsLayout = new QGridLayout( 0, 1, 1, 0, 6, "youroptionslayout"); 
   QSpacerItem* spacer_2 = new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum );
   mYourOptionsLayout->addMultiCell( spacer_2, 2, 2, 2, 3 );
 
+  mNameLabel = new QLabel( this, "namelabel" );
+  mNameLabel->setText( i18n( "Your Name:" ) );
+  mYourOptionsLayout->addWidget( mNameLabel, 0, 0 );
+
   mColorLabel = new QLabel( this, "colorlabel" );
   mColorLabel->setText( i18n( "Your Color:" ) );
-
   mYourOptionsLayout->addWidget( mColorLabel, 1, 0 );
+
+  mSpeciesLabel = new QLabel( this, "specieslabel" );
+  mSpeciesLabel->setText( i18n( "Your Species:" ) );
+  mYourOptionsLayout->addWidget( mSpeciesLabel, 2, 0 );
 
   mMapLabel = new QLabel( this, "maplabel" );
   mMapLabel->setText( i18n( "Map:" ) );
+  mYourOptionsLayout->addWidget( mMapLabel, 3, 0 );
 
-  mYourOptionsLayout->addMultiCellWidget( mMapLabel, 3, 3, 0, 1 );
   QSpacerItem* spacer_3 = new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum );
   mYourOptionsLayout->addMultiCell( spacer_3, 0, 0, 1, 2 );
   QSpacerItem* spacer_4 = new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum );
   mYourOptionsLayout->addItem( spacer_4, 1, 2 );
 
-  mColorCombo = new QComboBox( this, "colorcombo" );
-
-  mYourOptionsLayout->addMultiCellWidget( mColorCombo, 1, 1, 3, 4 );
-
-  mNameLabel = new QLabel( this, "namelabel" );
-  mNameLabel->setText( i18n( "Your Name:" ) );
-
-  mYourOptionsLayout->addWidget( mNameLabel, 0, 0 );
-
   mNameEdit = new QLineEdit( this, "nameedit" );
   mNameEdit->setText(boConfig->readLocalPlayerName());
-
   mYourOptionsLayout->addWidget( mNameEdit, 0, 4 );
+
+  mColorCombo = new QComboBox( this, "colorcombo" );
+  mYourOptionsLayout->addWidget( mColorCombo, 1, 4 );
+
   QSpacerItem* spacer_5 = new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum );
   mYourOptionsLayout->addItem( spacer_5, 3, 2 );
 
   mSpeciesCombo = new QComboBox( FALSE, this, "speciescombo" );
-
   mYourOptionsLayout->addWidget( mSpeciesCombo, 2, 4 );
 
   mMapCombo = new QComboBox( FALSE, this, "mapcombo" );
@@ -126,10 +127,7 @@ BosonNewGameWidget::BosonNewGameWidget(TopWidget* top, QWidget* parent)
   mMapName = new QLabel(this, "mapname");
   mMapName->hide();
 
-  mSpeciesLabel = new QLabel( this, "specieslabel" );
-  mSpeciesLabel->setText( i18n( "Your Species:" ) );
 
-  mYourOptionsLayout->addWidget( mSpeciesLabel, 2, 0 );
   mLeftLayout->addLayout( mYourOptionsLayout );
   QSpacerItem* spacer_6 = new QSpacerItem( 20, 20, QSizePolicy::Minimum, QSizePolicy::Expanding );
   mLeftLayout->addItem( spacer_6 );
@@ -177,12 +175,13 @@ BosonNewGameWidget::BosonNewGameWidget(TopWidget* top, QWidget* parent)
   mPlayersLayout->addWidget( mRemovePlayerButton );
   mUpperLayout->addLayout( mPlayersLayout );
   mMainLayout->addLayout( mUpperLayout );
-
+/*
   mLine1 = new QFrame( this, "AIne1" );
   mLine1->setProperty( "frameShape", (int)QFrame::HLine );
   mLine1->setFrameShadow( QFrame::Sunken );
   mLine1->setFrameShape( QFrame::HLine );
   mMainLayout->addWidget( mLine1 );
+  */
 
   mChatWidget = new KGameChat(0, BosonMessage::IdChat, this );
   mChatWidget->setKGame(game());
@@ -285,7 +284,9 @@ void BosonNewGameWidget::initPlayer()
   kdDebug() << k_funcinfo << "playerCount(): " << game()->playerCount() << endl;
   player()->setName(boConfig->readLocalPlayerName());
   if(player()->speciesTheme())
+  {
     kdDebug() << k_funcinfo << "Player has speciesTheme already loaded, reloading" << endl;
+  }
   mPlayercolor = boConfig->readLocalPlayerColor();
   player()->loadTheme(SpeciesTheme::speciesDirectory(SpeciesTheme::defaultSpecies()), mPlayercolor);
   game()->addPlayer(player());
@@ -384,10 +385,10 @@ void BosonNewGameWidget::slotMyMapChanged(int index)
   stream << mMapIndex2Identifier[index];
   game()->sendMessage(buffer, BosonMessage::ChangePlayField);
   // Init map to be able to check max/min players count
-  kdDebug() << k_funcinfo << " Loading map, index: " << index << ", name: " << playfield() << endl;
-  map()->loadPlayField(BosonPlayField::playFieldFileName(playfield()));
-  mMinPlayers = map()->scenario()->minPlayers();
-  mMaxPlayers = map()->scenario()->maxPlayers();
+  kdDebug() << k_funcinfo << " Loading map, index: " << index << ", name: " << playFieldString() << endl;
+  playField()->loadPlayField(BosonPlayField::playFieldFileName(playFieldString()));
+  mMinPlayers = playField()->scenario()->minPlayers();
+  mMaxPlayers = playField()->scenario()->maxPlayers();
 }
 
 void BosonNewGameWidget::slotMySpeciesChanged(int index)
@@ -563,15 +564,21 @@ void BosonNewGameWidget::slotPlayerSelected(QListBoxItem* item)
     return;
   }
   if(game()->isAdmin() || !mHighlightedPlayer->isVirtual())
+  {
     mRemovePlayerButton->setEnabled(true);
+  }
   else
+  {
     mRemovePlayerButton->setEnabled(false);
+  }
 }
 
 void BosonNewGameWidget::slotSetAdmin(bool admin)
 {
   if(admin == mAdmin)
+  {
     return;
+  }
   if(admin)
   {
     mMapCombo->show();
@@ -589,24 +596,24 @@ void BosonNewGameWidget::slotSetAdmin(bool admin)
   mAdmin = admin;
 }
 
-QString& BosonNewGameWidget::playfield()
+QString BosonNewGameWidget::playFieldString() const
 {
   return mMapIndex2Identifier[mMap];
 }
 
-inline Boson* BosonNewGameWidget::game()
+inline Boson* BosonNewGameWidget::game() const
 {
   return mTop->game();
 }
 
-inline Player* BosonNewGameWidget::player()
+inline Player* BosonNewGameWidget::player() const
 {
   return mTop->player();
 }
 
-inline BosonPlayField* BosonNewGameWidget::map()
+inline BosonPlayField* BosonNewGameWidget::playField() const
 {
-  return mTop->map();
+  return mTop->playField();
 }
 
 void BosonNewGameWidget::sendNewGame() 
