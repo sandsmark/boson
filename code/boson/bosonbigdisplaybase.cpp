@@ -1959,6 +1959,9 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* io, QDataStream& stream, QMous
 
 void BosonBigDisplayBase::mouseEventWheel(float delta, Orientation orientation, const BoMouseEvent& boEvent, QDataStream&, bool*)
 {
+
+#warning FIXME: d->mCanvasPos/Vector are not fixed when zooming with wheel
+
  int action;
  if (boEvent.shiftButton()) {
 	action = boConfig->mouseWheelShiftAction();
@@ -2629,10 +2632,16 @@ void BosonBigDisplayBase::addChatMessage(const QString& message)
 
 void BosonBigDisplayBase::slotCursorEdgeTimeout()
 {
+ BO_CHECK_NULL_RET(camera());
+ if (boGame->gameStatus() == KGame::Init) {
+	// probably startup screen visible
+	return;
+ }
  float x = 0;
  float y = 0;
  const int sensity = boConfig->cursorEdgeSensity();
  QWidget* w = qApp->mainWidget();
+ BO_CHECK_NULL_RET(w);
  QPoint pos = w->mapFromGlobal(QCursor::pos());
 
  const int move = 20; // FIXME hardcoded - use BosonConfig instead
@@ -2711,6 +2720,8 @@ void BosonBigDisplayBase::zoom(float delta)
  BO_CHECK_NULL_RET(camera());
  BO_CHECK_NULL_RET(canvas());
  BO_CHECK_NULL_RET(canvas()->map());
+
+#warning FIXME: d->mCanvasPos, d->mCanvasVector
 
  camera()->changeZ(delta);
 }
