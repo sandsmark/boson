@@ -43,6 +43,7 @@
 #include "boson.h"
 #include "bodebug.h"
 #include "items/bosonshot.h"
+#include "items/bosonitemrenderer.h"
 #include "unitplugins.h"
 #include "bosonmodel.h"
 #include "bo3dtools.h"
@@ -771,9 +772,9 @@ void BosonBigDisplayBase::paintGL()
 	glEnable(GL_NORMALIZE);
  }
 
- BosonModel::startModelRendering();
+ BosonItemRenderer::startItemRendering();
  renderItems();
- BosonModel::stopModelRendering();
+ BosonItemRenderer::stopItemRendering();
 
  if (boConfig->wireFrames()) {
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -3202,8 +3203,9 @@ void BosonBigDisplayBase::saveAsXML(QDomElement& root)
 void BosonBigDisplayBase::showEvent(QShowEvent* e)
 {
  BosonGLWidget::showEvent(e);
- BO_CHECK_NULL_RET(displayInput());
- displayInput()->updateCursor();
+ if (displayInput()) {
+	displayInput()->updateCursor();
+ }
 }
 
 bool BosonBigDisplayBase::isInputInitialized()
