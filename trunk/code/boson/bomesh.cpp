@@ -1296,6 +1296,16 @@ void BoMesh::setFace(int index, const BoFace& face)
  lod->setFace(index, face);
 }
 
+const BoFace* BoMesh::face(unsigned int f) const
+{
+ BoMeshLOD* lod = levelOfDetail(0);
+ if (!lod) {
+	boError(100) << k_funcinfo << "NULL default LOD" << endl;
+	return 0;
+ }
+ return lod->face(f);
+}
+
 void BoMesh::disconnectNodes()
 {
  for (unsigned int i = 0; i < d->mLODCount; i++) {
@@ -1372,6 +1382,11 @@ void BoMesh::setVertices(const QValueVector<BoVector3>& vertices)
 BoVector3 BoMesh::vertex(unsigned int p) const
 {
  return d->mMeshPoints.vertex(p);
+}
+
+BoVector3 BoMesh::texel(unsigned int p) const
+{
+ return d->mMeshPoints.texel(p);
 }
 
 BoVector3 BoMesh::vertex(unsigned int face, unsigned int i, unsigned int _lod) const
