@@ -294,6 +294,7 @@ BosonConfig::BosonConfig(KConfig* conf)
  mTextureFilter = new BoConfigIntEntry(this, "TextureFilter", DEFAULT_TEXTURE_FILTER);
  mTextureCompression = new BoConfigBoolEntry(this, "TextureCompression", DEFAULT_TEXTURE_COMPRESSION);
  mTextureColorMipmaps = new BoConfigBoolEntry(this, "TextureColorMipmaps", false);
+ mTextureAnisotropy = new BoConfigIntEntry(this, "TextureAnisotropy", 1);
 
  mDebugMode = DebugNormal;
 

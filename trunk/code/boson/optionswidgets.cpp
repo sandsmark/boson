@@ -503,9 +503,22 @@ OpenGLOptions::OpenGLOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
  mTextureFilter->insertItem(i18n("Use GL_LINEAR"));
  //mTextureFilter->insertItem(i18n("Use GL_NEAREST_MIPMAP_NEAREST"));
  //mTextureFilter->insertItem(i18n("Use GL_NEAREST_MIPMAP_LINEAR"));
- mTextureFilter->insertItem(i18n("Use GL_LINEAR_MIPMAP_NEAREST"));
- mTextureFilter->insertItem(i18n("Use GL_LINEAR_MIPMAP_LINEAR (best quality)"));
- QToolTip::add(mTextureFilter, i18n("Selects texture filtering method\nGL_LINEAR_MIPMAP_LINEAR looks best, at the expense of some performance."));
+ mTextureFilter->insertItem(i18n("Use GL_LINEAR_MIPMAP_NEAREST (bilinear)"));
+ mTextureFilter->insertItem(i18n("Use GL_LINEAR_MIPMAP_LINEAR (trilinear)"));
+ if (boTextureManager->maxTextureAnisotropy() >= 2) {
+	mTextureFilter->insertItem(i18n("Low anisotropic"));
+ }
+ if (boTextureManager->maxTextureAnisotropy() >= 4) {
+	mTextureFilter->insertItem(i18n("Medium anisotropic"));
+ }
+ if (boTextureManager->maxTextureAnisotropy() >= 8) {
+	mTextureFilter->insertItem(i18n("High anisotropic"));
+ }
+ if (boTextureManager->maxTextureAnisotropy() >= 16) {
+	mTextureFilter->insertItem(i18n("Very high anisotropic"));
+ }
+
+ QToolTip::add(mTextureFilter, i18n("Selects texture filtering method\nGL_LINEAR_MIPMAP_LINEAR looks very good.\nAnisotropic modes look even better but are slower."));
 
  mUseCompressedTextures = new QCheckBox(mAdvanced);
  mUseCompressedTextures->setText(i18n("Use compressed textures"));
@@ -671,6 +684,10 @@ void OpenGLOptions::apply()
 	// TODO: reload only if mipmapping was turned on/off
 	reloadTextures = true;
  }
+ if (boConfig->textureAnisotropy() != textureAnisotropy()) {
+	boConfig->setTextureAnisotropy(textureAnisotropy());
+	resetTexParameter = true;
+ }
 
  if(boConfig->textureCompression() != mUseCompressedTextures->isChecked()) {
 	boConfig->setTextureCompression(mUseCompressedTextures->isChecked());
@@ -779,6 +796,7 @@ void OpenGLOptions::load()
  setRenderingSpeed(boConfig->intValue("RenderingSpeed", Defaults));
  setUpdateInterval(boConfig->updateInterval());
  setTextureFilter(boConfig->textureFilter());
+ setTextureAnisotropy(boConfig->textureAnisotropy());
  mUseCompressedTextures->setChecked(boConfig->textureCompression());
  mUseColoredMipmaps->setChecked(boConfig->textureColorMipmaps());
  setAlignSelectionBoxes(boConfig->alignSelectionBoxes());
@@ -837,6 +855,50 @@ void OpenGLOptions::setTextureFilter(int f)
 	default:
 	case GL_LINEAR_MIPMAP_LINEAR:
 		mTextureFilter->setCurrentItem(2);
+		break;
+ }
+}
+
+int OpenGLOptions::textureAnisotropy() const
+{
+ switch (mTextureFilter->currentItem()) {
+	case 3:
+		return 2;
+		break;
+	case 4:
+		return 4;
+		break;
+	case 5:
+		return 8;
+		break;
+	case 6:
+		return 16;
+		break;
+	default:
+		return 1;
+		break;
+ }
+}
+
+void OpenGLOptions::setTextureAnisotropy(int a)
+{
+ switch(a) {
+	case 2:
+		mTextureFilter->setCurrentItem(3);
+		break;
+	case 4:
+		mTextureFilter->setCurrentItem(4);
+		break;
+	case 8:
+		mTextureFilter->setCurrentItem(5);
+		break;
+	case 16:
+		mTextureFilter->setCurrentItem(6);
+		break;
+	default:
+		if (mTextureFilter->currentItem() >= 3) {
+			mTextureFilter->setCurrentItem(2);
+		}
 		break;
  }
 }

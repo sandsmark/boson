@@ -68,6 +68,14 @@
 #define GL_TEXTURE_CUBE_MAP 0x8513
 #endif
 
+#ifndef GL_TEXTURE_MAX_ANISOTROPY_EXT
+#define GL_TEXTURE_MAX_ANISOTROPY_EXT 0x84FE
+#endif
+
+#ifndef GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT
+#define GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT 0x84FF
+#endif
+
 typedef void (*_bo_glActiveTexture)(GLenum);
 
 static _bo_glActiveTexture bo_glActiveTexture = 0;
@@ -231,6 +239,12 @@ void BoTexture::applyOptions()
   // Set correct filter
   glTexParameteri(mType, GL_TEXTURE_MAG_FILTER, filtermag);
   glTexParameteri(mType, GL_TEXTURE_MIN_FILTER, filtermin);
+
+  // Set anisotropy
+  if(boTextureManager->supportsAnisotropicFiltering())
+  {
+    glTexParameteri(mType, GL_TEXTURE_MAX_ANISOTROPY_EXT, boTextureManager->textureAnisotropy());
+  }
 }
 
 void BoTexture::load(const QString& name)
@@ -851,6 +865,18 @@ void BoTextureManager::initOpenGL()
     boDebug() << k_funcinfo << "S3TC texture compression is not supported!" << endl;
   }
 
+  // Check if anisotropic texture filtering is supported
+  mMaxAnisotropy = 1;
+  if(extensions.contains("GL_EXT_texture_filter_anisotropic"))
+  {
+    glGetIntegerv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &mMaxAnisotropy);
+  }
+  boDebug() << k_funcinfo << "Max anisotropy: " << mMaxAnisotropy << endl;
+  if(boConfig->textureAnisotropy() > mMaxAnisotropy)
+  {
+    boConfig->setTextureAnisotropy(mMaxAnisotropy);
+  }
+
 
   // Init active texture cache
   mActiveTexture = new BoTexture*[mTextureUnits];
@@ -1037,6 +1063,11 @@ bool BoTextureManager::useTextureCompression() const
 int BoTextureManager::textureFilter() const
 {
   return boConfig->textureFilter();
+}
+
+int BoTextureManager::textureAnisotropy() const
+{
+  return boConfig->textureAnisotropy();
 }
 
 
