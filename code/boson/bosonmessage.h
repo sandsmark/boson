@@ -12,8 +12,9 @@ public:
 		IdStopMoving = 6,
 
 	// Player Moves:
-		MoveMove = 100, 
-		MoveAttack = 101, 
+		MoveMove = 100, // Unit(s) is/are moved
+		MoveAttack = 101, // a unit is being attacked
+		MoveConstruct = 102, // construct a unit
 
 
 		// the last message ID:

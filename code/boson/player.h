@@ -8,6 +8,7 @@
 class QCanvasPixmapArray;
 class VisualUnit;
 class SpeciesTheme;
+class UnitProperties;
 
 
 class PlayerPrivate;
@@ -47,6 +48,11 @@ public:
 	 * cleanly!!
 	 **/
 	void sendStopMoving(VisualUnit* unit);
+
+	/**
+	 * Convenience method for theme()->unitProperties()
+	 **/
+	const UnitProperties* unitProperties(int unitType) const;
 
 signals:
 	void signalCreateUnit(VisualUnit*& unit, int unitType, Player* owner); // obsolete

@@ -66,6 +66,7 @@ public:
 		mInverted = 0;
 
 		mOwner = 0;
+		mFactory = 0;
 	}
 
 	QIntDict<QPushButton> mOrderButton;
@@ -86,6 +87,7 @@ public:
 	BosonCommandFrame::OrderType mOrderType; // plain tiles, facilities, mob units, ...
 
 	Player* mOwner;
+	VisualUnit* mFactory; // the unit that is producing
 
 	QMap<int, int> mOrder2Type; // map order button -> unitType
 };
@@ -142,10 +144,10 @@ void BosonCommandFrame::initEditor()
 {
  d->mTransRef = new QComboBox(this);
  connect(d->mTransRef, SIGNAL(activated(int)), this, SLOT(slotRedrawTiles()));
- d->mTransRef->insertItem(i18n("Grass/Water"), (int)BosonTiles::TransGrassWater);
- d->mTransRef->insertItem(i18n("Grass/Desert"), (int)BosonTiles::TransGrassDesert);
- d->mTransRef->insertItem(i18n("Desert/Water"), (int)BosonTiles::TransDesertWater);
- d->mTransRef->insertItem(i18n("Deep Water"), (int)BosonTiles::TransDeepWater);
+ d->mTransRef->insertItem(i18n("Grass/Water"), (int)Cell::TransGrassWater);
+ d->mTransRef->insertItem(i18n("Grass/Desert"), (int)Cell::TransGrassDesert);
+ d->mTransRef->insertItem(i18n("Desert/Water"), (int)Cell::TransDesertWater);
+ d->mTransRef->insertItem(i18n("Deep Water"), (int)Cell::TransDeepWater);
 
  d->mInverted = new QCheckBox(this);
  d->mInverted->setText(i18n("Invert"));
@@ -200,19 +202,19 @@ void BosonCommandFrame::slotShowSingleUnit(VisualUnit* unit)
 	return;
  }
  if (!unit->owner()) {
-	kdError() << "BosonCommandFrame::slotUnitSelected: unit has no owner" 
+	kdError() << "BosonCommandFrame::slotShowSingleUnit: unit has no owner" 
 			<< endl;
 	return;
  }
  SpeciesTheme* theme = unit->owner()->speciesTheme();
  if (!theme) {
-	kdError() << "BosonCommandFrame::slotUnitSelected: owner has no "
+	kdError() << "BosonCommandFrame::slotShowSingleUnit: owner has no "
 			<< "species theme" << endl;
 	return;
  }
  QPixmap* p = theme->bigOverview(unit->type());
  if (!p) {
-	kdError() << "BosonCommandFrame::slotUnitSelected: unit has no big"
+	kdError() << "BosonCommandFrame::slotShowSingleUnit: unit has no big"
 			<< "overview in this theme" << endl;
 	return;
  }
@@ -222,8 +224,10 @@ void BosonCommandFrame::slotShowSingleUnit(VisualUnit* unit)
 
 void BosonCommandFrame::slotSetConstruction(VisualUnit* unit)
 {
+ hideOrderButtons(); // this makes sure that they are even hidden if the unit 
+                     // cannot produce
  if (!unit) {
-	kdError() << "EditorCommandFrame::slotSetConstruction(): NULL unit"
+	kdError() << "BosonCommandFrame::slotSetConstruction(): NULL unit"
 			<< endl;
 	return;
  }
@@ -233,17 +237,32 @@ void BosonCommandFrame::slotSetConstruction(VisualUnit* unit)
 	return;
  }
 
- // don't display construction items of units of other players. TODO: must be
- // fixed!
- if (owner->isVirtual()) { // a virtual player is a not-local player. FIXME: computer player isn't virtual!
-	kdDebug() << "BosonCommandFrame::slotSetConstruction(): we are not the owner (FIXME)" << endl;
+ // don't display construction items of units of other players. 
+ if (owner != d->mOwner) {
+	kdDebug() << "BosonCommandFrame::slotSetConstruction(): we are not the owner" << endl;
 	return;
  }
- setUnitOrders(unit->type(), owner);
+
+ const UnitProperties* prop = unit->unitProperties();
+ if (!prop) {
+	kdError() << "slotSetConstruction(): NULL unitProperties" << endl;
+	return;
+ }
+ if (!prop->canProduce()) {
+	return;
+ }
+ QValueList<int> produceList = prop->produceList();
+ setOrderButtons(produceList, owner);
+ d->mFactory = unit;
+ 
+ d->mOrderType = Mobiles; // kind of FIXME: it doesn't matter whether this is
+                          // Mobiles or Facilities. The difference is only in 
+			  // editor.cpp for the KActions.
 }
 
 void BosonCommandFrame::hideOrderButtons()
 {
+ d->mFactory = 0;
  QIntDictIterator<QPushButton> it(d->mOrderButton);
  while (it.current()) {
 	it.current()->hide();
@@ -272,38 +291,12 @@ void BosonCommandFrame::setOrderTooltip(unsigned int id, const QString& text)
  QToolTip::add(d->mOrderButton[id], text);
 }
 
-void BosonCommandFrame::setUnitOrders(int unitType, Player* owner)
-{
- hideOrderButtons();
- if (!owner) {
-	kdError() << "setUnitOrders(): NULL owner" << endl;
-	return;
- }
- SpeciesTheme* theme = owner->speciesTheme();
- if (!theme) {
-	kdError() << "setUnitOrders(): NULL species theme" << endl;
-	return;
- }
- const UnitProperties* prop = theme->unitProperties(unitType);
- if (!prop) {
-	kdError() << "setUnitOrders(): NULL unitProperties" << endl;
-	return;
- }
- if (!prop->canProduce()) {
-	return;
- }
- QValueList<int> produceList = prop->produceList();
- setOrderButtons(produceList, owner);
-}
-
 void BosonCommandFrame::setOrderButtons(QValueList<int> produceList, Player* owner)
 {
- hideOrderButtons();
  initOrderButtons(produceList.count());
  for (unsigned int i = 0; i < produceList.count(); i++) {
 	setOrderButton(i, produceList[i], owner);
  }
- 
 }
 
 void BosonCommandFrame::setOrderButton(unsigned int button, int unitType, Player* owner)
@@ -326,10 +319,6 @@ void BosonCommandFrame::setOrderButton(unsigned int button, int unitType, Player
  }
  setOrderPixmap(button, *small);
  d->mOrder2Type.insert(button, unitType);
- if (button == 0) {
-	d->mOwner = owner; // we need the owner to emit the correct signal. The
-	                   // editor depends on this value.
- }
 
  const UnitProperties* prop = owner->speciesTheme()->unitProperties(unitType);
  if (!prop) {
@@ -350,7 +339,7 @@ void BosonCommandFrame::slotHandleOrder(int index)
 		break;
 	case Facilities:
 	case Mobiles:
-		emit signalUnitSelected(d->mOrder2Type[index], 0, d->mOwner);
+		emit signalUnitSelected(d->mOrder2Type[index], d->mFactory, d->mOwner);
 		break;
 	default:
 		kdError() << "unexpected construction index " << index << endl;
@@ -360,8 +349,8 @@ void BosonCommandFrame::slotHandleOrder(int index)
 
 void BosonCommandFrame::slotEditorConstruction(int index, Player* owner)
 {
+ hideOrderButtons();
  if (index == -1) {
-	hideOrderButtons();
 	return;
  }
  if (!owner) {
@@ -407,7 +396,7 @@ void BosonCommandFrame::slotEditorLoadTiles(const QString& fileName)
 void BosonCommandFrame::slotRedrawTiles()
 {
  bool inverted = d->mInverted->isChecked();
- BosonTiles::TransType trans = (BosonTiles::TransType)d->mTransRef->currentItem();
+ Cell::TransType trans = (Cell::TransType)d->mTransRef->currentItem();
  // trans is one of TRANS_GW, TRANS_GD, TRANS_DW, TRANS_DWD ans specifies the
  // tile type (desert/water and so on)
  switch (d->mOrderType) {
@@ -425,7 +414,7 @@ void BosonCommandFrame::slotRedrawTiles()
 		hideOrderButtons();
 		initOrderButtons(9);
 		for (int i = 0; i < 9; i++) {
-			int tile = d->mTiles->smallTileNumber(i, trans, inverted);
+			int tile = Cell::smallTileNumber(i, trans, inverted);
 			setOrderPixmap(i, d->mTiles->tile(tile));
 			d->mOrder2Type.insert(i, tile);
 		}
@@ -436,7 +425,7 @@ void BosonCommandFrame::slotRedrawTiles()
 		for (int i = 0; i < 4; i++) {
 			QPixmap p = d->mTiles->big1(i, trans, inverted);
 			setOrderPixmap(i, p);
-			d->mOrder2Type.insert(i, d->mTiles->getBigTransNumber(
+			d->mOrder2Type.insert(i, Cell::getBigTransNumber(
 					trans, (inverted ? 4 : 0) + i));
 			// FIXME: big tiles are currently placed as small ones
 			// only
@@ -448,7 +437,7 @@ void BosonCommandFrame::slotRedrawTiles()
 		for (int i = 0; i < 4; i++) {
 			QPixmap p = d->mTiles->big2(i, trans, inverted);
 			setOrderPixmap(i, p);
-			d->mOrder2Type.insert(i, d->mTiles->getBigTransNumber(
+			d->mOrder2Type.insert(i, Cell::getBigTransNumber(
 					trans, (inverted ? 12 : 8) + i));
 			// FIXME: big tiles are currently placed as small ones
 			// only
@@ -464,3 +453,7 @@ void BosonCommandFrame::slotRedrawTiles()
  }
 }
 
+void BosonCommandFrame::setLocalPlayer(Player* p)
+{
+ d->mOwner = p;
+}

@@ -334,3 +334,11 @@ void Player::sendStopMoving(VisualUnit* unit)
  game()->sendMessage(buffer, BosonMessage::IdStopMoving, id());
 }
 
+const UnitProperties* Player::unitProperties(int unitType) const
+{
+ if (!speciesTheme()) {
+	kdError() << "NULL theme" << endl;
+	return 0;
+ }
+ return speciesTheme()->unitProperties(unitType);
+}

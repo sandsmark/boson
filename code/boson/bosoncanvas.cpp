@@ -30,6 +30,7 @@ public:
 	
 	QPixmap mPix;
 	QPtrList<QCanvasItem> mAnimList; // see BosonCanvas::advance()
+	QPtrList<VisualUnit> mDestroyUnits;
 	QPtrList<VisualUnit> mDestroyedUnits;
 
 	BosonMap* mMap; // just a pointer - no memory allocated
@@ -69,6 +70,7 @@ void BosonCanvas::init()
 BosonCanvas::~BosonCanvas()
 {
  kdDebug() << "~BosonCanvas" << endl;
+ d->mDestroyUnits.clear();
  d->mDestroyedUnits.clear();
  d->mAnimList.clear();
  delete d->mSoundServer;
@@ -159,22 +161,23 @@ void BosonCanvas::advance()
  }
 
  // a unit must not be deleted in QCanvasItem::advance (see QT docs). Therefore
- // we add them to d->mDestroyedUnits and delete them all here now.
- if (!d->mDestroyedUnits.isEmpty()) {
-	QPtrListIterator<VisualUnit> destroyedIt(d->mDestroyedUnits);
+ // we add them to d->mDestroyUnits and delete them all here now.
+ if (!d->mDestroyUnits.isEmpty()) {
+	QPtrListIterator<VisualUnit> destroyedIt(d->mDestroyUnits);
 	while (destroyedIt.current()) {
 		VisualUnit* unit = destroyedIt.current();
 		kdDebug() << "destroy unit " << unit->id() << endl;
 		emit signalUnitDestroyed(unit); // currently unused
 		unit->owner()->unitDestroyed(unit); // remove from player without deleting
+		d->mDestroyedUnits.append(unit); // delete it in destructor - maybe remove the wreckage after a timerevent?
 		++destroyedIt;
 	}
-//	d->mDestroyedUnits.clear(); // we don't clear but display the wreckage
+	d->mDestroyUnits.clear();
  }
  update();
 }
 
-bool BosonCanvas::canGo(VisualUnit* unit, const QRect& rect) const
+bool BosonCanvas::canGo(const UnitProperties* prop, const QRect& rect) const
 {
 //kdDebug() << "BosonCanvas::canGo" << endl;
  int y = rect.y() / BO_TILE_SIZE; // what about modulu? do we care ?
@@ -182,7 +185,7 @@ bool BosonCanvas::canGo(VisualUnit* unit, const QRect& rect) const
 	int x = rect.x() / BO_TILE_SIZE;
 	do {
 		Cell* newCell = cell(x, y);
-		if (!newCell->canGo(unit->unitProperties())) {
+		if (!newCell->canGo(prop)) {
 			kdDebug() << "can  not go on " << x << "," << y << endl;
 			return false;
 		} else {
@@ -193,28 +196,6 @@ bool BosonCanvas::canGo(VisualUnit* unit, const QRect& rect) const
 	y++;
  } while(y * BO_TILE_SIZE <= rect.bottom());
 
-/*
-// kdDebug() << "This unit can go there!" << endl;
- // unit con go on the ground of the new cell. Now check if there is a unit
- // already there...
- if (unit->unitProperties()->isAircraft()) {
-	return true; // aircraft dont collide with other units. //TODO: they collide with other aircrafts!
- }
- QCanvasItemList items = collisions(rect);
- QCanvasItemList::iterator it;
- for (it = items.begin(); it != items.end(); ++it) {
-	if (*it != unit) {
-		if ((*it)->rtti() >= RTTI::UnitStart) { // AKA isUnit
-			VisualUnit* u = (VisualUnit*)*it;
-			if (!u->isDestroyed() && !u->unitProperties()->isAircraft()) {
-				kdDebug() << "unit " << unit->id() << " would collide with " 
-						<< ((VisualUnit*)(*it))->id() << endl;
-				return false;
-			}
-		}
-	}
- }
-*/
  return true;
 }
 
@@ -295,10 +276,10 @@ void BosonCanvas::shootAtUnit(VisualUnit* target, VisualUnit* attackedBy, long i
  if (target->isDestroyed()) {
 	// we cannot delete it here!
 	// called from VisualUnit::advance() so we must delay
-	if (!d->mDestroyedUnits.contains(target)) {
+	if (!d->mDestroyUnits.contains(target)) {
 		// dunno if this is correct - should it be delete immediately?
 		// what about e.g. a wreckage?
-		d->mDestroyedUnits.append(target);
+		d->mDestroyUnits.append(target);
 		(void) new BoShot(target, attackedBy, this, true);
 	}
  } else {

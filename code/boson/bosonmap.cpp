@@ -444,7 +444,9 @@ bool BosonMap::loadCell(QDataStream& stream, int& groundType, unsigned char& b)
  }
 
  stream >> groundType; // this is the groundType now.
- // if(!IS_VALID_GROUND(g) { return false; }
+ if(!Cell::isValidGround(groundType)) { 
+	return false; 
+ }
 // if (g < 0 || ) { return false; }
  
  stream >> b; // what is this?

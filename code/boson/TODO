@@ -2,7 +2,6 @@
 - constructing - maybe use Boson::slotDelayedAddUnit() or so?
 - unit editor (should be quite easy cause of config files)
 - zooming (QCanvas::setWorldMatrix())
-- add unitProperties() to Player
 - rename Unit->UnitBase ; VisualUnit->Unit
 - SpeciesTheme loads all pixmaps into memory - share it between different
   players (if they have the same themes)

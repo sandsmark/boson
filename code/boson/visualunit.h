@@ -21,14 +21,15 @@ class VisualUnitPrivate;
  * therefore not possible!
  **/
 class VisualUnit : public Unit, public QCanvasSprite
-{ // could become an abstract class
+{
 public:
 	enum PropertyIds {
 		IdDirection = Unit::IdLast + 1,
 		IdWaypoints = Unit::IdLast + 2,
 		IdFix_ConstructionState = Unit::IdLast + 3,
 		IdFix_ConstructionDelay = Unit::IdLast + 4,
-		IdReloadState = Unit::IdLast + 5
+		IdReloadState = Unit::IdLast + 5,
+		IdFix_Constructions = Unit::IdLast + 6
 
 	};
 	VisualUnit(int type, Player* owner, QCanvas* canvas);
@@ -140,12 +141,18 @@ public:
 	
 	virtual void beConstructed();
 
+	/**
+	 * @return Whether there are any constructions pending for this unit
+	 **/
+	bool hasConstruction() const;
+
+	int completedConstruction() const;
+
+	void removeConstruction(); // removes first item
+	void addConstruction(int unitType);
+
 private:
 	VisualFacilityPrivate* d;
 };
-
-
-
-
 
 #endif

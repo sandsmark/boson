@@ -26,11 +26,16 @@ public:
 		Big1 = 4,
 		Big2 = 5,
 		
-		Order_Last // should always be the last item - used by loops
+		OrderLast // should always be the last item - used by loops
 	};
 
 	BosonCommandFrame(QWidget* parent, bool editor = false);
 	~BosonCommandFrame();
+
+	/**
+	 * @param p The player whose units can be constructed here.
+	 **/
+	void setLocalPlayer(Player* p);
 
 public slots:
 	/**
@@ -93,12 +98,6 @@ protected:
 	 * @param produceList A list containing UnitTypeIDs.
 	 **/
 	void setOrderButtons(QValueList<int> produceList, Player* owner);
-
-	/**
-	 * Let all order buttons display the units that unitType is able to
-	 * construct. See also @ref UnitProperties::produceList
-	 **/
-	void setUnitOrders(int unitType, Player* owner);
 
 	/**
 	 * Make sure that at least no order buttons exist. Create order buttons
