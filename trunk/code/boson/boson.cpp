@@ -1425,7 +1425,7 @@ void Boson::slotReceiveAdvance()
 
  d->mAdvanceCount = d->mAdvanceCount + 1; // this advance count is important for Unit e.g. - but not used in this function.
  if (d->mAdvanceCount > MAXIMAL_ADVANCE_COUNT) {
-	d->mAdvanceCount = 1;
+	d->mAdvanceCount = 0;
  }
 
  // we also have "mAdvanceDividerCount". the mAdvanceCount is important in Unit,
