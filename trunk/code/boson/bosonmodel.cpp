@@ -24,7 +24,7 @@
 #include "bosonprofiling.h"
 #include "bo3dtools.h"
 #include "bosonmodelloader.h"
-#include "bosonglwidget.h"
+#include "bosonglwidget.h" // BoContext
 #include "bodebug.h"
 #include "bomesh.h"
 #include "bomaterial.h"
