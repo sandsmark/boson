@@ -432,7 +432,7 @@ const BosonParticleSystemProperties* SpeciesData::particleSystemProperties(unsig
  return d->mParticleProperties[id];
 }
 
-BoAction* SpeciesData::action(const QString& name) const
+const BoAction* SpeciesData::action(const QString& name) const
 {
  BoAction* action = d->mActions[name];
  if (!action) {
