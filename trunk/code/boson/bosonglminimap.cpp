@@ -539,24 +539,40 @@ void BosonGLMiniMap::slotFog(int x, int y)
 bool BosonGLMiniMap::mouseEvent(KGameIO*, QDataStream&, QMouseEvent* e, bool* send)
 {
  *send = false;
+ static int state = Qt::NoButton;
  if (!mRenderer) {
+	state = Qt::NoButton;
 	return false;
  }
  if (!d->mShowMiniMap) {
+	state = Qt::NoButton;
 	return false;
  }
- static int state = Qt::NoButton;
+ QPoint cell;
+ bool inside = mRenderer->windowToCell(e->pos(), &cell);
+
+ if (!inside) {
+	state = state & QEvent::MouseButtonMask; // we dont care about keyboard buttons
+	if (state != Qt::NoButton) { // the minimap is responsible for this event
+		if (e->type() == QEvent::MouseButtonRelease) {
+			// we grab these, but dont use them
+			state = state & ~e->button();
+			return true;
+		}
+		return true;
+	}
+	return false;
+ }
+
+ // the mouse is in the minimap, but the user is pressing a button down that was
+ // not pressed inside the minimap. dont catch it
+ if (state != e->state()) {
+	return false;
+ }
  switch (e->type()) {
 	case QEvent::MouseButtonRelease:
-		// we grab these, but dont use them
-		if (state & e->button()) {
-			state = e->state() & ~e->button();
-			return true;
-		} else {
-			// the release belongs to a press outside the minimap
-			return false;
-		}
-		break;
+		state = e->stateAfter();
+		return true;
 	case QEvent::MouseButtonPress:
 		state = e->state() | e->button();
 		break;
@@ -569,15 +585,15 @@ bool BosonGLMiniMap::mouseEvent(KGameIO*, QDataStream&, QMouseEvent* e, bool* se
 		break;
 	case QEvent::MouseButtonDblClick:
 		state = e->state() | e->button();
-		return false;
+		return true;
 		break;
 	default:
-		return false;
+		return true;
  }
- QPoint cell;
- if (!mRenderer->windowToCell(e->pos(), &cell)) {
-	state = Qt::NoButton;
-	return false;
+ if (e->type() != QEvent::MouseButtonPress) {
+	boWarning() << k_funcinfo << "oops - not a press event?!" << endl;
+	state = e->state();
+	return true;
  }
  if (e->button() == Qt::LeftButton) {
 	emit signalReCenterView(cell);
