@@ -27,3 +27,8 @@ install-data-local:
 		done \
 	done
 
+# we install the entire directory - so we need to add the entire directory to
+# the make dist target. remember to remove the CVS dirs here after doing a make
+# dist!
+EXTRA_DIST = $(GROUNDS)
+
