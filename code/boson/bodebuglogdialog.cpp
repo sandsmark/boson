@@ -28,6 +28,8 @@
 #include <qlistview.h>
 #include <qlayout.h>
 #include <qvbox.h>
+#include <qtextedit.h>
+#include <qlabel.h>
 
 class QListViewItemNumber : public QListViewItem
 {
@@ -72,14 +74,18 @@ public:
 	{
 	}
 	QListView* mMessages;
+	QTextEdit* mBacktrace;
+	QMap<QListViewItem*, QString> mItem2Backtrace;
 };
 
 BoDebugLogWidget::BoDebugLogWidget(QWidget* parent, const char* name) : QWidget(parent, name)
 {
  d = new BoDebugLogWidgetPrivate;
- QVBoxLayout* layout = new QVBoxLayout(this);
- d->mMessages = new QListView(this);
- layout->addWidget(d->mMessages);
+ QVBoxLayout* topLayout = new QVBoxLayout(this);
+ QSplitter* splitter = new QSplitter(Vertical, this);
+ topLayout->addWidget(splitter);
+ d->mMessages = new QListView(splitter);
+ connect(d->mMessages, SIGNAL(selectionChanged(QListViewItem*)), this, SLOT(slotMessageSelected(QListViewItem*)));
 
  d->mMessages->setAllColumnsShowFocus(true);
  d->mMessages->addColumn(i18n("Nr"));
@@ -87,16 +93,39 @@ BoDebugLogWidget::BoDebugLogWidget(QWidget* parent, const char* name) : QWidget(
  d->mMessages->addColumn(i18n("AreaNr"));
  d->mMessages->addColumn(i18n("Level"));
  d->mMessages->addColumn(i18n("Text"));
+
+ QWidget* backtraceBox = new QWidget(splitter);
+ QLabel* backtraceLabel = new QLabel(i18n("Backtrace"), backtraceBox);
+ d->mBacktrace = new QTextEdit(backtraceBox);
+ d->mBacktrace->setReadOnly(true);
+ QVBoxLayout* backtraceLayout = new QVBoxLayout(backtraceBox);
+ backtraceLayout->addWidget(backtraceLabel);
+ backtraceLayout->addWidget(d->mBacktrace);
 }
 
 BoDebugLogWidget::~BoDebugLogWidget()
 {
+ d->mItem2Backtrace.clear();
  delete d;
+}
+
+void BoDebugLogWidget::slotMessageSelected(QListViewItem* item)
+{
+ QString backtrace;
+ if (item) {
+	backtrace = d->mItem2Backtrace[item];
+ }
+ if (backtrace.isEmpty()) {
+	backtrace = i18n("No backtrace found");
+ }
+ d->mBacktrace->setText(backtrace);
 }
 
 void BoDebugLogWidget::setMessages(const QPtrList<BoDebugMessage>& m)
 {
  d->mMessages->clear();
+ d->mItem2Backtrace.clear();
+ d->mBacktrace->setText(QString::null);
  QPtrListIterator<BoDebugMessage> it(m);
  int i = 0;
  while (it.current()) {
@@ -119,11 +148,19 @@ void BoDebugLogWidget::setMessages(const QPtrList<BoDebugMessage>& m)
 			level = i18n("Unknown");
 			break;
 	}
+	QString text = it.current()->message();
+	if (!text.isEmpty() && text[text.length() - 1] == '\n') {
+		text = text.left(text.length() - 1);
+	}
 	item->setText(0, QString::number(i));
 	item->setText(1, it.current()->areaName());
 	item->setText(2, QString::number(it.current()->area()));
 	item->setText(3, level);
-	item->setText(4, it.current()->message());
+	item->setText(4, text);
+	d->mItem2Backtrace.insert(item, it.current()->backtrace());
+	if (text.contains('\n')) {
+		item->setMultiLinesEnabled(true);
+	}
 	++it;
 	i++;
  }

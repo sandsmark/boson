@@ -104,6 +104,7 @@ void BoDebugLog::addEntry(const QString& string, int area, const QString& areaNa
  bool addToAll = true;
  unsigned int countLevel = mMessages[level].count();
  unsigned int countAll = mMessages[level].count();
+ QString backtrace;
  if (countLevel >= mMaxCount[level]) {
 	if (mPopAtFront[level]) {
 		mMessages[level].removeFirst();
@@ -120,16 +121,19 @@ void BoDebugLog::addEntry(const QString& string, int area, const QString& areaNa
 		addToAll = false;
 	}
  }
+ if (level != BoDebug::KDEBUG_INFO) {
+	backtrace = boBacktrace(-1);
+ }
  if (addToLevel) {
-	BoDebugMessage* m = new BoDebugMessage(string, area, areaName, level);
+	BoDebugMessage* m = new BoDebugMessage(string, area, areaName, level, backtrace);
 	mMessages[level].append(m);
  }
  if (addToAll) {
-	BoDebugMessage* m = new BoDebugMessage(string, area, areaName, level);
+	BoDebugMessage* m = new BoDebugMessage(string, area, areaName, level, backtrace);
 	mAllMessages.append(m);
  }
  if (mEmitSignal[level] || mAllEmitSignal) {
-	BoDebugMessage m(string, area, areaName, level);
+	BoDebugMessage m(string, area, areaName, level, backtrace);
 	emit signalMessage(m);
 	switch (level) {
 		case BoDebug::KDEBUG_INFO:

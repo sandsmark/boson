@@ -30,8 +30,8 @@
 class BoDebugMessage
 {
 public:
-	BoDebugMessage(const QString& m, int area, const QString& areaName, int level)
-		: mMessage(m), mArea(area), mAreaName(areaName), mLevel(level)
+	BoDebugMessage(const QString& m, int area, const QString& areaName, int level, const QString& backtrace)
+		: mMessage(m), mArea(area), mAreaName(areaName), mLevel(level), mBacktrace(backtrace)
 	{
 	}
 
@@ -39,12 +39,14 @@ public:
 	int area() const { return mArea; }
 	const QString& areaName() const { return mAreaName; }
 	int level() const { return mLevel; }
+	const QString& backtrace() const { return mBacktrace; }
 
 private:
 	QString mMessage;
 	int mArea;
 	QString mAreaName;
 	int mLevel;
+	QString mBacktrace;
 
 };
 
