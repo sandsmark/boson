@@ -233,6 +233,24 @@ void BosonNewGameWidget::slotNetStart()
 			i18n("Too few players"));
  } else {
 	slotLocalPlayerNameChanged();
+	for (unsigned int i = 0; i < boGame->playerCount() - 1; i++) {
+		Player* p = (Player*)boGame->playerList()->at(i);
+		if (!p) {
+			BO_NULL_ERROR(p);
+			continue;
+		}
+		for (unsigned int j = i + 1; j < boGame->playerCount(); j++) {
+			Player* p2 = (Player*)boGame->playerList()->at(j);
+			if (!p2) {
+				BO_NULL_ERROR(p2);
+				continue;
+			}
+			if (p->teamColor() == p2->teamColor()) {
+				KMessageBox::sorry(this, i18n("Cannot start game - player %1 (id=%2) and %3 (id=%4) have the same teamcolor.\nThis is not allowed!").arg(p->name()).arg(p->id()).arg(p2->name()).arg(p2->id()));
+				return;
+			}
+		}
+	}
 	networkInterface()->sendNewGame(false);
  }
 }
