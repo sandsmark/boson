@@ -9,6 +9,7 @@ METASOURCES = AUTO
 libbodebug_la_SOURCES = \
 	bodebug.cpp \
 	bodebugdcopiface.cpp \
+	bodebuglog.cpp \
 	bodebugdcopiface.skel
 
 include ../admin/Doxyfile.am

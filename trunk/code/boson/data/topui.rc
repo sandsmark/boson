@@ -9,6 +9,7 @@
   <DefineGroup name="viewmenu" />
   <Menu name="debug" group="debugmenu"><text>&amp;Debug</text>
     <Action name="debug_kgame" />
+    <Action name="debug_bodebuglog" />
     <Action name="debug_profiling" />
   </Menu>
   <Menu name="settings" group="settingsmenu"><text>&amp;Settings</text>
