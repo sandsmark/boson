@@ -27,6 +27,7 @@
 #include "bosongroundtheme.h"
 #include "bosontexturearray.h"
 #include "bo3dtools.h"
+#include "bomaterial.h"
 
 // not nice in this file. we need it for boGame->status() == KGame::Init
 // maybe we should require KGame not to be in init state before constructin the
@@ -910,23 +911,6 @@ void BoDefaultGroundRenderer::renderCellsNow(Cell** cells, int count, int corner
 
  glBegin(GL_QUADS);
 
- // This macro sets alpha value to alpha for material diffuse and ambient
- //  colors. It's better than using glColorMaterial() because we can now use
- //  correct color components for diffuse color and correct alpha for ambient
- //  color.
- // glColor() call is for rendering with lighting disabled
-#define SETALPHA(alpha)  ambient.setW(alpha / 255.0); \
-		diffuse.setW(alpha / 255.0); \
-		glMaterialfv(GL_FRONT, GL_AMBIENT, ambient.data()); \
-		glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse.data()); \
-		glColor4ub(255, 255, 255, alpha);
-
- BoVector4 ambient(0.2f, 0.2f, 0.2f, 1.0f);
- BoVector4 diffuse(0.8f, 0.8f, 0.8f, 1.0f);
- glMaterialfv(GL_FRONT, GL_AMBIENT, ambient.data());
- glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse.data());
- glMaterialf(GL_FRONT, GL_SHININESS, 0.0f);
-
  for (int i = 0; i < count; i++) {
 	Cell* c = cells[i];
 	int x = c->x();
@@ -953,28 +937,34 @@ void BoDefaultGroundRenderer::renderCellsNow(Cell** cells, int count, int corner
 	// FIXME: texy might be a bit confusing since we don't have texx
 	int texy = offsetCount - (y % offsetCount) - 1;
 
-	SETALPHA(upperLeftAlpha);
+	// the material settings are ignored when light disabled, the color is
+	// ignored when light enabled.
+	BoMaterial::setDefaultAlpha((float)upperLeftAlpha / 255.0f);
+	glColor4ub(255, 255, 255, upperLeftAlpha);
 	glNormal3fv(normalMap[y * cornersWidth + x].data());
 	glTexCoord2f(texOffsets[x % offsetCount], texOffsets[texy % offsetCount] + offset);
 	glVertex3f(cellXPos, cellYPos, upperLeftHeight);
 
-	SETALPHA(lowerLeftAlpha);
+	BoMaterial::setDefaultAlpha((float)lowerLeftAlpha / 255.0f);
+	glColor4ub(255, 255, 255, lowerLeftAlpha);
 	glNormal3fv(normalMap[(y + 1) * cornersWidth + x].data());
 	glTexCoord2f(texOffsets[x % offsetCount], texOffsets[texy % offsetCount]);
 	glVertex3f(cellXPos, cellYPos - BO_GL_CELL_SIZE, lowerLeftHeight);
 
-	SETALPHA(lowerRightAlpha);
+	BoMaterial::setDefaultAlpha((float)lowerRightAlpha / 255.0f);
+	glColor4ub(255, 255, 255, lowerRightAlpha);
 	glNormal3fv(normalMap[(y + 1) * cornersWidth + (x + 1)].data());
 	glTexCoord2f(texOffsets[x % offsetCount] + offset, texOffsets[texy % offsetCount]);
 	glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos - BO_GL_CELL_SIZE, lowerRightHeight);
 
-	SETALPHA(upperRightAlpha);
+	BoMaterial::setDefaultAlpha((float)upperRightAlpha / 255.0f);
+	glColor4ub(255, 255, 255, upperRightAlpha);
 	glNormal3fv(normalMap[y * cornersWidth + (x + 1)].data());
 	glTexCoord2f(texOffsets[x % offsetCount] + offset, texOffsets[texy % offsetCount] + offset);
 	glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos, upperRightHeight);
  }
-#undef SETALPHA
  glEnd();
+ BoMaterial::setDefaultAlpha(1.0f);
 }
 
 
