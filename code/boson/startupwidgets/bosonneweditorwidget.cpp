@@ -288,6 +288,7 @@ void BosonNewEditorWidget::slotNewMapToggled(bool isNewMap)
 	mChangeMaxWidth->setValue(50);
 	mChangeMaxPlayers->setValue(2);
 	mChangeTileset->setCurrentItem(0);
+	mMapPropertiesTextBrowser->setText(i18n("Create a new (empty) map"));
 
 	// FIXME
 //	mMapCombo->setCurrentItem(0);
