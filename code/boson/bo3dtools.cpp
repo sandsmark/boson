@@ -162,6 +162,29 @@ void BoMatrix::loadMatrix(GLenum matrix)
  glGetFloatv(matrix, mData);
 }
 
+void BoMatrix::loadMatrix(const BoVector3& x, const BoVector3& y, const BoVector3& z)
+{
+  setElement(0, 0, x[0]);
+  setElement(0, 1, x[1]);
+  setElement(0, 2, x[2]);
+  setElement(0, 3, 0.0f);
+
+  setElement(1, 0, y[0]);
+  setElement(1, 1, y[1]);
+  setElement(1, 2, y[2]);
+  setElement(1, 3, 0.0f);
+
+  setElement(2, 0, z[0]);
+  setElement(2, 1, z[1]);
+  setElement(2, 2, z[2]);
+  setElement(2, 3, 0.0f);
+
+  setElement(3, 0, 0.0f);
+  setElement(3, 1, 0.0f);
+  setElement(3, 2, 0.0f);
+  setElement(3, 3, 1.0f);
+}
+
 void BoMatrix::transform(BoVector3* vector, const BoVector3* input) const
 {
  // v = m * i, m is a 4x4 OpenGL matrix, r and v are both a 3x1 column vector.
@@ -410,6 +433,17 @@ void BoMatrix::rotate(GLfloat angle, GLfloat x, GLfloat y, GLfloat z)
 
  multiply(m);
 
+}
+
+void BoMatrix::setLookAtRotation(const BoVector3& cameraPos, const BoVector3& lookAt, const BoVector3& up)
+{
+  BoVector3 z = cameraPos - lookAt;
+  z.normalize();
+  BoVector3 x = BoVector3::crossProduct(up, z);
+  BoVector3 y = BoVector3::crossProduct(z, x);
+  x.normalize();
+  y.normalize();
+  loadMatrix(x, y, z);
 }
 
 bool BoMatrix::isEqual(const BoMatrix& matrix, float diff) const

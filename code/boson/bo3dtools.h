@@ -669,6 +669,12 @@ class BoMatrix
     void loadMatrix(const BoMatrix& m) { loadMatrix(m.data()); }
 
     /**
+     * @overload
+     * The three vectors get interpreted as <em>column</em> vectors
+     **/
+    void loadMatrix(const BoVector3& column1, const BoVector3& column2, const BoVector3& column3);
+
+    /**
      * Change the element at @p row, @p column to @p value. See also @ref
      * element and @ref indexAt
      **/
@@ -765,6 +771,12 @@ class BoMatrix
      * See also the OpenGL glRotate() which uses the same syntax.
      **/
     void rotate(GLfloat angle, GLfloat x, GLfloat y, GLfloat z);
+
+    /**
+     * Generate a matrix from the three vectors, just as gluLookAt() does. Note
+     * that the origin will remain at (0,0,0), it is not translated.
+     **/
+    void setLookAtRotation(const BoVector3& cameraPos, const BoVector3& lookAt, const BoVector3& up);
 
     /**
      * Transform the vector @p input according to this matrix and put the result
