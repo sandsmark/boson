@@ -143,7 +143,6 @@ void SelectBoxData::drawCube()
 
  glLineWidth(1.0);
  glEnable(GL_TEXTURE_2D);
- glEnable(GL_BLEND);
 }
 
 void SelectBoxData::drawHealthBar(int frame)
@@ -250,7 +249,6 @@ void SelectBoxData::drawHealthBar(int frame)
 
  glTranslatef(0.0, hy - 1.0, hz - 1.0);
  glColor3f(1.0, 1.0, 1.0);
- glEnable(GL_BLEND);
  glEnable(GL_TEXTURE_2D);
 }
 
