@@ -99,13 +99,16 @@ void serverMobUnit::r_moveBy(moveMsg_t &msg, uint playerId)
 		return;
 		}
 	
-	int dx = __x - msg.newx;
-	int dy = __y - msg.newy;
-	int speed = mobileProp[type].speed;
-	dx *= dx; dy *= dy; speed *= speed;
-	boAssert( dx + dy < speed);
 
 	// XXX some check here ! no cheat allowed...
+	// speed check:
+
+	//int dx = __x - msg.newx;
+	//int dy = __y - msg.newy;
+	//int speed = mobileProp[type].speed;
+	//dx *= dx; dy *= dy; speed *= speed;
+	//boAssert( dx + dy < speed);
+
 	__x = msg.newx;
 	__y = msg.newy;
 
