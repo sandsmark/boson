@@ -665,6 +665,8 @@ BoTrackWidget::BoTrackWidget(QWidget* parent) : QWidget(parent)
  l->addWidget(hbox);
  (void)new QLabel(i18n("Flags: "), hbox);
  mFlags = new QLabel(hbox);
+ (void)new QLabel(i18n("Type: "), hbox);
+ mType = new QLabel(hbox);
 
  mFlagList = new KListBox(this);
  l->addWidget(mFlagList);
@@ -673,6 +675,7 @@ BoTrackWidget::BoTrackWidget(QWidget* parent) : QWidget(parent)
  QLabel* keyLabel = new QLabel(i18n("Keys"), this);
  l->addWidget(keyLabel);
  mKeys = new KListView(this);
+ mKeys->setAllColumnsShowFocus(true);
  QFontMetrics metrics(font());
  mKeys->addColumn(i18n("Frame"));
  mKeys->addColumn(i18n("Flags"), metrics.width(QString::number(11))); // number
@@ -697,6 +700,7 @@ void BoTrackWidget::slotDisplayTrack(Bo3DSTrack* track)
  mFlagList->clear();
  mKeys->clear();
  mFlags->setText(QString(""));
+ mType->setText(i18n("<none>"));
 
  mKeys->setColumnText(mKeyData0, QString(""));
  mKeys->setColumnText(mKeyData1, QString(""));
@@ -752,6 +756,7 @@ void BoTrackWidget::slotDisplayTrack(Bo3DSTrack* track)
 	switch (track->type()) {
 		case Bo3DSTrackKey::TrackLin1:
 		{
+ 			mType->setText(i18n("Lin1 (1 float)"));
 			// AB: once we found out what the values mean, we should find
 			// usable names
 			mKeys->setColumnText(mKeyData0, i18n("value"));
@@ -761,6 +766,7 @@ void BoTrackWidget::slotDisplayTrack(Bo3DSTrack* track)
 		}
 		case Bo3DSTrackKey::TrackLin3:
 		{
+ 			mType->setText(i18n("Lin3 (3 floats)"));
 			mKeys->setColumnText(mKeyData0, i18n("value"));
 			mKeys->setColumnText(mKeyData1, i18n("dd"));
 			mKeys->setColumnText(mKeyData2, i18n("ds"));
@@ -769,15 +775,18 @@ void BoTrackWidget::slotDisplayTrack(Bo3DSTrack* track)
 		case Bo3DSTrackKey::TrackBool:
 		{
 			// no data to be displayed
+ 			mType->setText(i18n("Bool"));
 			break;
 		}
 		case Bo3DSTrackKey::TrackMorph:
 		{
+ 			mType->setText(i18n("Morph"));
 			mKeys->setColumnText(mKeyData0, i18n("name"));
 			break;
 		}
 		case Bo3DSTrackKey::TrackQuat:
 		{
+ 			mType->setText(i18n("Quaternion"));
 			mKeys->setColumnText(mKeyData0, i18n("axis"));
 			mKeys->setColumnText(mKeyData1, i18n("angle"));
 			mKeys->setColumnText(mKeyData2, i18n("q"));
@@ -1252,6 +1261,7 @@ QWidget* BoNodeObjectDataWidget::addWidget(const QString& label, QWidget* w)
 BoListView::BoListView(QWidget* parent) : KListView(parent)
 {
  mPopup = 0;
+ setAllColumnsShowFocus(true);
 }
 
 BoListView::~BoListView()
@@ -1428,6 +1438,7 @@ void KGameModelDebug::init()
  initMeshPage();
  initMaterialPage();
  initNodePage();
+ setMatrixPrecision(3);
 
  slotUpdate();
 }
@@ -1446,6 +1457,7 @@ void KGameModelDebug::initMaterialPage()
  d->mMaterialData = new BoMaterialWidget(splitter);
 
  d->mTextureView = new KListView(splitter);
+ d->mTextureView->setAllColumnsShowFocus(true);
  d->mTextureView->addColumn(i18n("Map"));
  d->mTextureView->addColumn(i18n("Name"));
  d->mTextureView->addColumn(i18n("Flags"), metrics.width(QString::number(111)));
@@ -1477,6 +1489,7 @@ void KGameModelDebug::initMeshPage()
 
  QVBox* meshView = new QVBox(splitter);
  d->mMeshView = new KListView(meshView);
+ d->mMeshView->setAllColumnsShowFocus(true);
  d->mMeshView->addColumn(i18n("Name"), metrics.width(i18n("Name")));
  d->mMeshView->addColumn(i18n("Color"), metrics.width(QString::number(111)));
  d->mMeshView->addColumn(i18n("Points count"), metrics.width(QString::number(111)));
@@ -1539,6 +1552,7 @@ void KGameModelDebug::initNodePage()
 
  QVBox* nodeView = new QVBox(splitter);
  d->mNodeView = new KListView(nodeView);
+ d->mNodeView->setAllColumnsShowFocus(true);
  d->mNodeView->setRootIsDecorated(true);
  d->mNodeView->addColumn(i18n("Name"));
  d->mNodeView->addColumn(i18n("ID"));
@@ -1582,6 +1596,13 @@ void KGameModelDebug::initNodePage()
  l->addWidget(d->mCurrentFrame);
 
  d->mTabWidget->addTab(d->mNodePage, i18n("&Nodes"));
+}
+
+void KGameModelDebug::setMatrixPrecision(int prec)
+{
+ d->mMeshMatrix->setPrecision(prec);
+ d->mInvMeshMatrix->setPrecision(prec);
+ d->mNodeMatrix->setPrecision(prec);
 }
 
 void KGameModelDebug::addFile(const QString& file, const QString& _name)

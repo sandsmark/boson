@@ -118,6 +118,8 @@ public:
 	 **/
 	void addFiles(const QString& dir);
 
+	void setMatrixPrecision(int prec = 6);
+
 	/**
 	 * @return A text displaying the compontents of the RGBA argument
 	 **/
@@ -255,6 +257,7 @@ protected:
 
 private:
 	QLabel* mFlags;
+	QLabel* mType;
 	KListBox* mFlagList;
 	KListView* mKeys;
 	int mKeyData0;
