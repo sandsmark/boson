@@ -35,6 +35,7 @@
 #include "editorTopLevel.h"
 #include "editorCanvas.h"
 #include "speciesTheme.h"
+#include "boeditor.h"
 
 #include "editorBigDisplay.h"
 #include "visualMiniDisplay.h"
@@ -43,15 +44,6 @@
 #define VIEW_ONE	1
 #define VIEW_MANY	2
 
-
-FILE *logfile = (FILE *) 0L;
-
-/*
- * visual/visual.h
- */
-visualCanvas		*vcanvas;
-speciesTheme		*species[BOSON_MAX_PLAYERS] = {0l, 0l};
-int			nb_player;
 /*
  * editor/main.cpp
  */
@@ -75,10 +67,19 @@ static void fillGroundPixmap( QPixmap *p, int g)
 #undef BITBLT
 
 
-editorTopLevel::editorTopLevel( const char *name, WFlags f)
+editorTopLevel::editorTopLevel( BoEditorApp *app,  const char *name, WFlags f)
 	: visualTopLevel(name,f)
 	, mw(this)
 {
+
+	/* menus & toolbar */
+	*actionCollection() +=  app->actions();
+
+//	createGUI();
+//	createGUI("boeditorui.rc");
+	createGUI("/opt/be/share/apps/boeditor/boeditorui.rc");
+
+	/* widgets */
 	makeCommandGui();
 	setView(&mw, false);
 }

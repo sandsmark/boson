@@ -23,16 +23,17 @@
 #include <klocale.h>
 #include <kcmdlineargs.h>
 #include <kaboutdata.h>
-#include <kapp.h>
 #include <kstddirs.h>
-//#include <kinstance.h>
-
 
 #include "common/log.h"
 #include "editorCanvas.h"
 #include "editorTopLevel.h"
-
+#include "boeditor.h"
 #include "visual.h"
+
+
+/* log.h , should be moved to common !! */
+FILE *logfile = (FILE *) 0L;
  
 extern QPixmap *bigBackground;
 
@@ -56,6 +57,8 @@ int main(int argc, char* argv[])
 	KCmdLineArgs::init( 1, &fake_arg, &aboutData );
 	//KCmdLineArgs::init( argc, argv, &aboutData );
 
+	BoEditorApp app;
+
 
 	/* temp XXX : logfile initialisation  */
 	logfile = fopen(BOSON_LOGFILE_EDITOR, "a+b");
@@ -67,12 +70,8 @@ int main(int argc, char* argv[])
 	logf(LOG_INFO, "========= New Log File ==============");
 
 
-
-	KApplication app;  
  
 	//BoEditorApp* boEditor = new BoEditorApp( (argc>1)?argv[1]:0l);
-	
-
 
 
 	/* XXX orzel : temp, until GUI is really functionnal */
@@ -86,17 +85,13 @@ int main(int argc, char* argv[])
 	}
 
 
-
-
-
-
 	/* the canvas is created when a game is created */
 	editorCanvas *ecanvas;
 	vcanvas = ecanvas = new editorCanvas(*bigBackground);
 	assert (true == ecanvas->Load("/opt/be/share/apps/boson/map/basic.bpf"));
 
 
-	(new editorTopLevel())->show();
+	(new editorTopLevel(&app))->show();
 
 	return app.exec();
 }  
