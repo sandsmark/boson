@@ -1478,7 +1478,7 @@ void BosonBigDisplayBase::removeSelectionRect(bool replace)
 	QPoint canvasPos;
 	worldToCanvas(x, y, z, &canvasPos);
 	Unit* unit = 0l;
-	if (!localPlayer()->isFogged(canvasPos.x() / BO_TILE_SIZE, canvasPos.x() / BO_TILE_SIZE)) {
+	if (!localPlayer()->isFogged(canvasPos.x() / BO_TILE_SIZE, canvasPos.y() / BO_TILE_SIZE)) {
 	unit = canvas()->findUnitAt(canvasPos);
 	}
 	if (unit) {
