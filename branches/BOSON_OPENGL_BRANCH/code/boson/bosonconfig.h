@@ -19,11 +19,10 @@
 #ifndef BOSONCONFIG_H
 #define BOSONCONFIG_H
 
-#include <qstring.h>
-#include <qcolor.h>
-
 #include "global.h"
 
+class QColor;
+class QString;
 class KConfig;
 
 #define boConfig BosonConfig::bosonConfig()
