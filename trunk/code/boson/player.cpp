@@ -543,19 +543,15 @@ void Player::facilityCompleted(Facility* fac)
  }
 }
 
-// obsolete due to events!
-bool Player::checkOutOfGame()
+void Player::setOutOfGame()
 {
- // TODO: make more clever.
- // e.g. currently every small unit, like harvesters, needs to be destroyed...
  if ((Player*)boGame->playerList()->getLast() == this) {
 	// the last player is per definition the neutral player (which is never
 	// out of the game).
 	mOutOfGame = false;
-	return isOutOfGame();
+	return;
  }
- mOutOfGame = (d->mUnits.count() == 0);
- return isOutOfGame();
+ mOutOfGame = true;
 }
 
 BosonStatistics* Player::statistics() const
