@@ -321,6 +321,7 @@ protected:
 		if (r->parent) {
 			// TODO?
 		}
+		return true;
 	}
 
 	static bool unstreamRegion(QDataStream& stream, Q_INT32& id, Q_INT32& passabilityType, Q_INT32& cellsCount, float& centerx, float& centery, float& cost,
