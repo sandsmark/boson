@@ -31,6 +31,7 @@ class BosonModel;
 class BosonSound;
 class UnitProperties;
 class UnitBase;
+class Unit;
 class UpgradeProperties;
 class BosonParticleSystemProperties;
 class BosonWeaponProperties;
@@ -180,7 +181,7 @@ public:
 	 * one), don't use it if values will differ from the defaults (although
 	 * it wouldn't hurt if you would still use this)
 	 **/
-	void loadNewUnit(UnitBase* unit);
+	void loadNewUnit(Unit* unit);
 
 	const UnitProperties* unitProperties(unsigned long int unitType) const;
 

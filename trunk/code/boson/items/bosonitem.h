@@ -159,10 +159,9 @@ public:
 	/**
 	 * Render the item. This assumes the modelview matrix was already
 	 * translated and rotated to the correct position.
-	 * @param teamColor The color that should get used for teamcolored areas
-	 * of the mode. Use NULL if you don't want a team-colored object.
+	 * @return number of vertices rendered
 	 **/
-	void renderItem();
+	unsigned int renderItem();
 
 	inline GLuint displayList() const
 	{
@@ -251,6 +250,48 @@ public:
 		mYVelocity = vy;
 		mZVelocity = vz;
 	}
+
+	/**
+	 * @return Current speed of this item
+	 **/
+	inline float speed() const { return mCurrentSpeed; }
+	inline void setSpeed(float s) { mCurrentSpeed = s; }
+	/**
+	 * @return Maximum speed this item may have
+	 **/
+	inline float maxSpeed() const { return mMaxSpeed; }
+	inline void setMaxSpeed(float maxspeed) { mMaxSpeed = maxspeed; }
+	/**
+	 * Raises speed by @ref accelerationSpeed unless @ref currentSpeed is
+	 * @ref maxSpeed
+	 **/
+	inline void accelerate() { mCurrentSpeed = QMIN(maxSpeed(), speed() + accelerationSpeed()); }
+	/**
+	 * Lowers speed by @ref decelerationSpeed unless @ref currentSpeed is 0
+	 **/
+	inline void decelerate() { mCurrentSpeed = QMAX(0, speed() - decelerationSpeed()); }
+	/**
+	 * @return How fast this unit accelerates.
+	 * Acceleration speed shows how much speed of unit changes per advance call.
+	 **/
+	inline float accelerationSpeed() const { return mAccelerationSpeed; }
+	inline void setAccelerationSpeed(float s) { mAccelerationSpeed = s; }
+	/**
+	 * @return How fast this unit decelerates.
+	 * Deceleration speed shows how much speed of unit changes per advance call.
+	 **/
+	inline float decelerationSpeed() const { return mDecelerationSpeed; }
+	inline void setDecelerationSpeed(float s) { mDecelerationSpeed = s; }
+	/**
+	 * @return How much this unit moves before stopping completely
+	 * This is distance that item will move before it completely stops when it
+	 * starts deceleration now and continues it until stopping
+	 **/
+	inline float decelerationDistance() const { return (mCurrentSpeed / mDecelerationSpeed) / 2 * mCurrentSpeed; }
+
+
+	inline void setVisible(bool v) { mIsVisible = v; }
+	inline bool isVisible() const { return mIsVisible; }
 
 	/**
 	 * Set the animation mode. Only possible if the construction of the unit
@@ -448,6 +489,11 @@ private:
 	float mYVelocity;
 	float mZVelocity;
 
+	float mCurrentSpeed;
+	float mMaxSpeed;
+	float mAccelerationSpeed;
+	float mDecelerationSpeed;
+
 // OpenGL values. should not be used for pathfinding and so on. Most stoff
 // shouldn't be stored in save() either
 	float mRotation;
@@ -473,6 +519,7 @@ private:
 
 	QPtrVector<Cell>* mCells;
 	bool mCellsDirty;
+	bool mIsVisible;
 };
 
 #endif

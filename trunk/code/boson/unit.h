@@ -388,7 +388,7 @@ protected:
 	 * This is in Unit instead of @ref MobileUnit so that we can apply a
 	 * path to newly constructed units of factories.
 	 **/
-	void newPath();
+	virtual void newPath();
 
 	/**
 	 * Move the unit. By default this does nothing. Reimplemented in @ref
@@ -464,9 +464,6 @@ public:
 	MobileUnit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas);
 	virtual ~MobileUnit();
 
-	virtual void setSpeed(float s);
-	virtual float speed() const;
-
 	/**
 	 * Turn to direction. This sets a new frame according to the new
 	 * direction.
@@ -496,6 +493,19 @@ public:
 	virtual bool save(QDataStream& stream);
 
 	virtual void stopMoving();
+
+	bool attackEnemyUnitsInRangeWhileMoving();
+
+	virtual void newPath();
+
+	/**
+	 * Check if waypoint wp marks end of the path. If yes, then it stops unit,
+	 * turns to random direction and true, otherwise returns false.
+	 **/
+	bool checkWaypoint(const QPoint& wp);
+
+	virtual int rotationSpeed() const;
+	virtual void setRotationSpeed(int s);
 
 protected:
 	virtual void advanceMoveInternal(unsigned int advanceCount); // move one step futher to path

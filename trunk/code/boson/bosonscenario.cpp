@@ -688,7 +688,7 @@ bool BosonScenario::loadMobile(QDomElement& node, MobileUnit* mob)
 	if (!ok) {
 		boError(250) << k_funcinfo << "Invalid value for speed!" << endl;
 	} else if (mob) {
-		mob->setSpeed(speed);
+		mob->setMaxSpeed(speed);
 	}
  }
  return ret;

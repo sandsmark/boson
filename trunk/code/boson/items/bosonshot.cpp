@@ -41,10 +41,18 @@ BosonShot::BosonShot(const BosonWeaponProperties* prop, Player* owner, BosonCanv
     BosonItem(prop ? prop->model() : 0, canvas)
 {
   boDebug(350) << "MISSILE: " << k_funcinfo << "Creating new shot" << endl;
+  //boDebug(350) << "    pos: (" << pos.x() << "; " << pos.y() << "; " << pos.z() << ");  target: (" <<
+  //    target.x() << "; " << target.y() << "; " << target.z() << "); this=" << this << endl;
   mOwner = owner;
   mProp = prop;
+  mTarget = target;
   mFlyParticleSystems = 0;
+  // FIXME: can't we use values from objects config file here?
   setSize(BO_TILE_SIZE / 2, BO_TILE_SIZE / 2); // AB: pretty much a random value
+  // At first shot is invisible. It will be set visible when it's advanced. This
+  //  is needed because x rotation isn't calculated in constructor and it would
+  //  be wrong until missile is advanced.
+  setVisible(false);
   if (!mProp)
   {
     boError(350) << k_funcinfo << "NULL weapon properties!" << endl;
@@ -71,33 +79,39 @@ BosonShot::BosonShot(const BosonWeaponProperties* prop, Player* owner, BosonCanv
     // This shot is bullet, not missile - it has infinite speed and it reaches
     //  it's target immideately. No need to calculate anything.
     boDebug(350) << "MISSILE: " << k_funcinfo << "    Attacker's shot is bullet (infinite speed). Returning" << endl;
-    move(target[0], target[1], target[2]);
-    mActive = false;
+    explode();
     return;
   }
   // First set the velocity to length of whole trip (for calculations)
   mVelo = target - pos;
-  mLength = mVelo.length();
-  mMaxHeight = prop->height() * (mLength / BO_TILE_SIZE);
-  //boDebug(350) << "MISSILE: " << k_funcinfo << "    Length of trip: " << length << endl;
-  // Calculate number of steps
-  mTotalSteps = (int)ceilf(mLength / prop->speed()) - 1;
-  // Current step
-  mStep = 0;
-  //boDebug(350) << "MISSILE: " << k_funcinfo << "    Steps: " << mSteps << endl;
-  // Set velocity
-  mVelo.scale(prop->speed() / mLength);
-  //boDebug(350) << "MISSILE: " << k_funcinfo << "    Normalized & scaled (final) velocity: (" << mVelo[0] << "; " << mVelo[1] << "; " << mVelo[2] << ")" << endl;
+  mVelo.setZ(0.0);
+
+  mTotalDist = mVelo.length();
+
+  // Speeds
+  setAccelerationSpeed(0.2);
+  setMaxSpeed(prop->speed());
+
+  // Maximum height missile can have
+  mMaxHeight = prop->height() * (mTotalDist / BO_TILE_SIZE);
+  // Set correct base velocity. Note that this must be multiplied with speed()
+  //  to get actual velocity for given speed
+  mVelo.setZ(target.z() - pos.z());
+  mVelo.scale(1 / mTotalDist);
+
   // Particle systems
   mFlyParticleSystems = new QPtrList<BosonParticleSystem>(prop->newFlyParticleSystems(pos, 0.0));
   canvas->addParticleSystems(*mFlyParticleSystems);
+  // FIXME: name: it has nothing to do with particles anymore
   mParticleVelo = sqrt(mVelo[0] * mVelo[0] + mVelo[1] * mVelo[1]) / (float)BO_TILE_SIZE;
+
   // Initialization
   mActive = true;
   move(pos[0], pos[1], pos[2]);
   setAnimated(true);
   setRotation(rotationToPoint(mVelo[0], mVelo[1]));
   mZ = 0; // For parable calculations only, must be 0 at the beginning
+  mPassedDist = 0;
 }
 
 BosonShot::BosonShot(const BosonWeaponProperties* prop, Player* owner, BosonCanvas* canvas) :
@@ -113,19 +127,26 @@ BosonShot::BosonShot(const BosonWeaponProperties* prop, Player* owner, BosonCanv
 // (actually only set the velocity - it is moved by BosonCanvas::slotAdvance())
 void BosonShot::advanceMoveInternal()
 {
-  mStep++;
+  setVisible(true);
+  // Always accelerate
+  accelerate();
+  // Increase distance that missile has flied
+  mPassedDist += speed();
   // Calculate parable height at current step
-  float factor = mStep / (float)mTotalSteps - 0.5;  // Factor will be in range -0.5 to 0.5
+  float factor = mPassedDist / mTotalDist - 0.5;  // Factor will be in range -0.5 to 0.5
   factor = -4 * (factor * factor) + 1;  // Factor is now  0 ... 1 ... 0  depending of current step
   // How much will be added to current z position
   float addZ = (mMaxHeight * factor);
-  float zvelo = mVelo[2] + (addZ - mZ);
+  float zvelo = mVelo[2] * speed() + (addZ - mZ);
   mZ = addZ;
-  setVelocity(mVelo[0], mVelo[1], zvelo);
-  setXRotation(rotationToPoint(mParticleVelo, zvelo) - 90 );
-  if(mStep >= mTotalSteps)
+  setVelocity(mVelo[0] * speed(), mVelo[1] * speed(), zvelo);
+  setXRotation(rotationToPoint(mParticleVelo * speed(), zvelo) - 90 );
+
+  // Check if missile is still active
+  BoVector3 dist = mTarget - BoVector3(x() + xVelocity(), y() + yVelocity(), z() + zVelocity());
+  if(dist.dotProduct() <= speed() * speed())
   {
-    mActive = false;
+    explode();
   }
 }
 
@@ -171,8 +192,8 @@ bool BosonShot::saveAsXML(QDomElement& root)
   root.setAttribute("Owner", (unsigned int)mOwner->id());
 
   // Too many attributes?
-  root.setAttribute("Step", mStep);
-  root.setAttribute("TotalSteps", mTotalSteps);
+//  root.setAttribute("Step", mStep);
+//  root.setAttribute("TotalSteps", mTotalSteps);
   root.setAttribute("mZ", mZ);
   root.setAttribute("x", x());
   root.setAttribute("y", y());
@@ -230,7 +251,7 @@ bool BosonShot::loadFromXML(const QDomElement& root)
     rotation = 0;
     // don't stop (will be broken, but unit won't get deleted)
   }
-  mStep = root.attribute("Step").toUInt(&ok);
+/*  mStep = root.attribute("Step").toUInt(&ok);
   if (!ok) {
     boError() << k_funcinfo << "Invalid value for Step tag" << endl;
     return false;
@@ -239,7 +260,7 @@ bool BosonShot::loadFromXML(const QDomElement& root)
   if (!ok) {
     boError() << k_funcinfo << "Invalid value for TotalSteps tag" << endl;
     return false;
-  }
+  }*/
   mZ = root.attribute("mZ").toFloat(&ok);
   if (!ok) {
     boError() << k_funcinfo << "Invalid value for mZ tag" << endl;
@@ -272,9 +293,9 @@ void BosonShot::save(QDataStream& stream)
   stream << (float)y();
   stream << (float)z();
   stream << mVelo;
-  stream << (Q_UINT32)mStep;
-  stream << (Q_UINT32)mTotalSteps;
-  stream << (float)mLength;
+//  stream << (Q_UINT32)mStep;
+//  stream << (Q_UINT32)mTotalSteps;
+  stream << (float)mTotalDist;
   stream << (float)mZ;
   stream << (float)mParticleVelo;
   stream << (float)rotation();
@@ -282,23 +303,32 @@ void BosonShot::save(QDataStream& stream)
 
 void BosonShot::load(QDataStream& stream)
 {
-  Q_UINT32 step, totalsteps;
+//  Q_UINT32 step, totalsteps;
   float x, y, z;
   float rot;
 
   stream >> x >> y >> z;
   stream >> mVelo;
-  stream >> step >> totalsteps;
-  stream >> mLength >> mZ >> mParticleVelo;
+//  stream >> step >> totalsteps;
+  stream >> mTotalDist >> mZ >> mParticleVelo;
   stream >> rot;
 
-  mStep = step;
-  mTotalSteps = totalsteps;
-  mActive = (mStep < mTotalSteps);
+//  mStep = step;
+//  mTotalSteps = totalsteps;
+//  mActive = (mStep < mTotalSteps);
   move(x, y, z);
   boDebug() << k_funcinfo << "Moving to (" << x << "; " << y << "; " << z << ")" << endl;
   setRotation(rot);
   setAnimated(true);
+}
+
+void BosonShot::explode()
+{
+ mActive = false;
+ move(mTarget.x(), mTarget.y(), mTarget.z());
+ setVelocity(0, 0, 0);
+ setVisible(false);
+ canvas()->shotHit(this);
 }
 
 

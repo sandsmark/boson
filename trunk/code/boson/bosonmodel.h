@@ -111,7 +111,7 @@ public:
 	//the same mesh, but 4 different positions)
 	unsigned int meshCount() const { return mMeshCount; }
 
-	void renderFrame(const QColor* teamColor);
+	unsigned int renderFrame(const QColor* teamColor);
 
 	void mergeMeshes();
 	void sortByDepth();

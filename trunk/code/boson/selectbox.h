@@ -60,6 +60,7 @@ public :
 
 	void update(double);
 	inline GLuint displayList() const { return mDisplayList; }
+	unsigned int verticesCount() const;
 
 private:
 	GLuint mDisplayList;

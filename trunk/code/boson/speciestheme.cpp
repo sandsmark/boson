@@ -304,7 +304,7 @@ QString SpeciesTheme::unitActionName(UnitAction action)
  return QString::null;
 }
 
-void SpeciesTheme::loadNewUnit(UnitBase* unit)
+void SpeciesTheme::loadNewUnit(Unit* unit)
 {
  if (!unit) {
 	boError() << k_funcinfo << "NULL unit" << endl;
@@ -324,7 +324,9 @@ void SpeciesTheme::loadNewUnit(UnitBase* unit)
  unit->setSightRange(prop->sightRange());
 
  if (prop->isMobile()) {
-	unit->setSpeed(prop->speed());
+	unit->setMaxSpeed(prop->speed());
+	unit->setAccelerationSpeed(0.4);
+	unit->setDecelerationSpeed(0.8);
  } else if (prop->isFacility()) {
 
  }

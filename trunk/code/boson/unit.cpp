@@ -467,7 +467,7 @@ bool Unit::attackEnemyUnitsInRange()
 		float rot = rotationToPoint(target()->x() - x(), target()->y() - y());
 		if (rot < rotation() - 5 || rot > rotation() + 5) {
 			// Rotate to face target
-			if (QABS(rotation() - rot) > (2 * speed())) {
+			if (QABS(rotation() - rot) > rotationSpeed()) {
 				turnTo((int)rot);
 				setAdvanceWork(WorkTurn);
 				return true;
@@ -613,7 +613,7 @@ void Unit::advanceAttack(unsigned int advanceCount)
  if (isMobile()) {
 	float rot = rotationToPoint(target()->x() - x(), target()->y() - y());
 	if(rot < rotation() - 5 || rot > rotation() + 5) {
-		if(QABS(rotation() - rot) > (2 * speed())) {
+		if(QABS(rotation() - rot) > rotationSpeed()) {
 			turnTo((int)rot);
 			setAdvanceWork(WorkTurn);
 			return;
@@ -675,14 +675,13 @@ void Unit::advanceTurn(unsigned int)
 	turncw = !turncw;
  }
 
- // TODO: rotating speed should be configurable
- if (a <= (int)(2 * speed())) {
+ if (a <= rotationSpeed()) {
 	dir = d->mWantedRotation;
  } else {
 	if (turncw) {
-		dir += (int)(2 * speed());
+		dir += rotationSpeed();
 	} else {
-		dir -= (int)(2 * speed());
+		dir -= rotationSpeed();
 	}
  }
  // Check for overflows
@@ -760,8 +759,9 @@ bool Unit::moveTo(float x, float y, int range, bool attack)
 	}
  }
 
- d->mMoveDestX = (int)x;
- d->mMoveDestY = (int)y;
+ // Center of the destination cell
+ d->mMoveDestX = (int)(cellX * BO_TILE_SIZE + width() / 2);
+ d->mMoveDestY = (int)(cellY * BO_TILE_SIZE + height() / 2);
  d->mMoveRange = range;
 
  // Do not find path here!!! It would break pathfinding for groups. Instead, we
@@ -1344,7 +1344,6 @@ public:
 	{
 	}
 
-	KGameProperty<float> mSpeed;
 	KGameProperty<unsigned int> mMovingFailed;
 	KGameProperty<unsigned int> mPathRecalculated;
 	// Maybe it would be better to move this to Unit? Currently we have to reset
@@ -1360,12 +1359,10 @@ MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, BosonCanvas* c
 {
  d = new MobileUnitPrivate;
 
- registerData(&d->mSpeed, IdSpeed);
  registerData(&d->mMovingFailed, IdMovingFailed);
  registerData(&d->mPathRecalculated, IdPathRecalculated);
  registerData(&d->mPathAge, IdPathAge);
 
- d->mSpeed.setLocal(0);
  d->mMovingFailed.setLocal(0);
  d->mPathRecalculated.setLocal(0);
  d->mPathAge.setLocal(0);
@@ -1392,8 +1389,9 @@ MobileUnit::~MobileUnit()
 
 void MobileUnit::advanceMoveInternal(unsigned int advanceCount) // this actually needs to be called for every advanceCount.
 {
- if (speed() == 0) {
-	boWarning(401) << k_funcinfo << "unit " << id() << ": speed == 0" << endl;
+ if (maxSpeed() == 0) {
+	// If unit's max speed is 0, it cannot move
+	boError(401) << k_funcinfo << "unit " << id() << ": maxspeed == 0" << endl;
 	stopMoving();
 	return;
  }
@@ -1402,15 +1400,11 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCount) // this actually
 	// If we're moving with attacking, first check for any enemies in the range
 	//  This prevents units from moving on when you order them to move somewhere
 	//  but there are still enemies in the range.
-	if (moveAttacking() && attackEnemyUnitsInRange()) {
-		boDebug(401) << k_funcinfo << "unit " << id() << ": Enemy units found in range, attacking" << endl;
-		setVelocity(0.0, 0.0, 0.0);  // To prevent moving
-		setMoving(false);
+	if (attackEnemyUnitsInRangeWhileMoving()) {
 		return;
 	}
+	// If there aren't any enemies, find new path
 	newPath();
-	d->mPathAge = 0;
-	setSearchPath(0);
  }
 
  if (waypointCount() == 0) {
@@ -1421,8 +1415,12 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCount) // this actually
 	//  is wrong here
 	boError(401) << k_funcinfo << "unit " << id() << ": No waypoints" << endl;
 	newPath();
-	d->mPathAge = 0;
-	return;
+	if (waypointCount() == 0) {
+		// Serious problem somewhere
+		boError(401) << k_funcinfo << "unit " << id() << ": Still no waypoints. Aborting" << endl;
+		stopMoving();
+		return;
+	}
  }
 
  boDebug(401) << k_funcinfo << "unit " << id() << endl;
@@ -1443,53 +1441,31 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCount) // this actually
 		}
 		// TODO: make sure that target() hasn't moved!
 		// if it has moved also adjust waypoints
-		// RL: I'm not sure if it's needed because path will be recalced every time
-		//  new cell is reached anyway
 	} else if (work() == WorkAttack && !target()) {
-		boWarning() << k_funcinfo << id() << " is in WorkAttack, but has NULL target!" << endl;
+		boError() << k_funcinfo << id() << " is in WorkAttack, but has NULL target!" << endl;
+		stopAttacking();
+		return;
 	}
  } else if (moveAttacking()) {
 	// Attack any enemy units in range
 	// Don't check for enemies every time (if we don't have a target) because it
 	//  slows things down
-  // TODO: Maybe check for enemies every time waypoint is reached instead?
 	if (target()) {
-		if (attackEnemyUnitsInRange()) {
-			boDebug(401) << k_funcinfo << "unit " << id() << ": Enemy units found in range, attacking" << endl;
-			setVelocity(0.0, 0.0, 0.0);  // To prevent moving
-			setMoving(false);
+		if (attackEnemyUnitsInRangeWhileMoving()) {
 			return;
 		}
 	}
  }
 
- QPoint wp = currentWaypoint(); // where we go to
- // If both waypoint's coordinates are -1, then it means that either path to
- //  destination can't be found or that we're already at the goal point. Either
- //  way, we stop moving
- if ((wp.x() == -1) && (wp.y() == -1)) {
-	stopMoving();
-	if (work() == WorkNone) {
-		boDebug() << k_funcinfo << id() << ": stopping moving. Turning" << endl;
-		// Turn a bit
-		int turn = (int)rotation() + (owner()->game()->random()->getLong(90) - 45);
-		// Check for overflows
-		if (turn < 0) {
-			turn += 360;
-		} else if (turn > 360) {
-			turn -= 360;
-		}
-		Unit::turnTo(turn);
-		setWork(WorkTurn);
-	}
+ // Get current waypoint and check if it's valid
+ QPoint wp = currentWaypoint();
+ if (checkWaypoint(wp)) {
 	return;
  }
 
+ // x and y are center of the unit here
  int x = (int)(BosonItem::x() + width() / 2);
  int y = (int)(BosonItem::y() + height() / 2);
-
- float xspeed = 0;
- float yspeed = 0;
 
  // First check if we're at waypoint
  if ((x == wp.x()) && (y == wp.y())) {
@@ -1501,64 +1477,59 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCount) // this actually
  // This is a bad hack to fix #55926
  if (d->mWayPointReached) {
 	// Check for enemy units in range every time waypoint is reached
-	if (moveAttacking() && attackEnemyUnitsInRange()) {
-		boDebug(401) << k_funcinfo << "unit " << id() << ": Enemy units found in range, attacking" << endl;
-		setVelocity(0.0, 0.0, 0.0);  // To prevent moving
-		setMoving(false);
+	if (attackEnemyUnitsInRangeWhileMoving()) {
 		return;
 	}
-
 	// Path is recalculated every MAX_PATH_AGE waypoints
 	d->mPathAge = d->mPathAge + 1;
 	if (d->mPathAge >= MAX_PATH_AGE || waypointCount() == 0) {
 		boDebug(401) << k_funcinfo << "Searching new path (update)" << endl;
 		newPath();
-		d->mPathAge = 0;
 	}
 
 	wp = currentWaypoint();
-	// FIXME: code duplication. But it must be done here to prevent trying to go
-	//  to -1; -1 coordinates and ending up with wrong rotation
-	if ((wp.x() == -1) && (wp.y() == -1)) {
-		stopMoving();
-		if (work() == WorkNone) {
-			boDebug() << k_funcinfo << id() << ": stopping moving. Turning" << endl;
-			// Turn a bit
-			int turn = (int)rotation() + (owner()->game()->random()->getLong(90) - 45);
-			// Check for overflows
-			if (turn < 0) {
-				turn += 360;
-			} else if (turn > 360) {
-				turn -= 360;
-			}
-			Unit::turnTo(turn);
-			setWork(WorkTurn);
-		}
+	if (checkWaypoint(wp)) {
 		return;
 	}
 	d->mWayPointReached = false;
  }
 
+ // If we're close to destination, decelerate, otherwise accelerate
+ // TODO: we should also slow down when turning at waypoint.
+ if (QMAX(QABS(x - destinationX()), QABS(y - destinationY())) <= decelerationDistance()) {
+	boDebug(401) << "MOVING: " << "decelerating; pos: (" << x << ", " << y << "); dest: (" <<
+			destinationX() << ", " << destinationY() << "); dist: " <<
+			QMAX(QABS(x - destinationX()), QABS(y - destinationY())) << "; decel. dist: " <<
+			decelerationDistance() << ";  speed: " << speed() << endl;
+	decelerate();
+ } else {
+	accelerate();
+ }
+
  // Try to go to same x and y coordinates as waypoint's coordinates
  // First x coordinate
  // Slow down if there is less than speed() pixels to go
- if (QABS(wp.x() - x) < speed()) {
-	xspeed = wp.x() - x;
+ // FIXME: don't slow down if direction doesn't change and moving continues
+ float xspeed = 0;
+ float yspeed = 0;
+ float dist = (int)speed();
+ float xdiff, ydiff;
+
+ xdiff = wp.x() - x;
+ ydiff = wp.y() - y;
+
+ if (QABS(xdiff) < dist) {
+	xspeed += xdiff;
  } else {
-	xspeed = speed();
-	if (wp.x() < x) {
-		xspeed = -xspeed;
-	}
+	xspeed += (xdiff > 0) ? dist : -dist;
  }
  // Same with y coordinate
- if (QABS(wp.y() - y) < speed()) {
-	yspeed = wp.y() - y;
+ if (QABS(ydiff) < dist) {
+	yspeed += ydiff;
  } else {
-	yspeed = speed();
-	if (wp.y() < y) {
-		yspeed = -yspeed;
-	}
+	yspeed += (ydiff > 0) ? dist : -dist;
  }
+
 
  // Set velocity for actual moving
  setVelocity(xspeed, yspeed, 0.0);
@@ -1642,6 +1613,7 @@ void MobileUnit::advanceMoveCheck()
 
 	d->mMovingFailed = d->mMovingFailed + 1;
 	setVelocity(0.0, 0.0, 0.0);
+	setSpeed(0);
 	// If we haven't yet recalculated path, consider unit to be moving
 	setMoving(d->mPathRecalculated == 0);
 
@@ -1669,16 +1641,6 @@ void MobileUnit::advanceMoveCheck()
  d->mMovingFailed = 0;
  d->mPathRecalculated = 0;
  //boDebug(401) << k_funcinfo << "unit " << id() << ": done" << endl;
-}
-
-void MobileUnit::setSpeed(float speed)
-{
- d->mSpeed = speed;
-}
-
-float MobileUnit::speed() const
-{
- return d->mSpeed;
 }
 
 void MobileUnit::turnTo(Direction direction)
@@ -1817,6 +1779,60 @@ void MobileUnit::stopMoving()
  d->mMovingFailed = 0;
  d->mPathRecalculated = 0;
  d->mWayPointReached = false;
+ setSpeed(0);
+}
+
+bool MobileUnit::attackEnemyUnitsInRangeWhileMoving()
+{
+ if (moveAttacking() && attackEnemyUnitsInRange()) {
+	boDebug(401) << k_funcinfo << "unit " << id() << ": Enemy units found in range, attacking" << endl;
+	setVelocity(0.0, 0.0, 0.0);  // To prevent moving
+	setSpeed(0);
+	setMoving(false);
+	return true;
+ }
+ return false;
+}
+
+void MobileUnit::newPath()
+{
+ Unit::newPath();
+ d->mPathAge = 0;
+ setSearchPath(0);
+}
+
+bool MobileUnit::checkWaypoint(const QPoint& wp)
+{
+ // If both waypoint's coordinates are -1, then it means that either path to
+ //  destination can't be found or that we're already at the goal point. Either
+ //  way, we stop moving
+ if ((wp.x() == -1) && (wp.y() == -1)) {
+	stopMoving();
+	if (work() == WorkNone) {
+		boDebug() << k_funcinfo << id() << ": stopping moving. Turning" << endl;
+		// Turn a bit
+		int turn = (int)rotation() + (owner()->game()->random()->getLong(90) - 45);
+		// Check for overflows
+		if (turn < 0) {
+			turn += 360;
+		} else if (turn > 360) {
+			turn -= 360;
+		}
+		Unit::turnTo(turn);
+		setWork(WorkTurn);
+	}
+	return true;
+ }
+ return false;
+}
+
+int MobileUnit::rotationSpeed() const
+{
+ return int(maxSpeed() * 2);
+}
+
+void MobileUnit::setRotationSpeed(int s)
+{
 }
 
 
