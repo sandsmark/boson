@@ -7,7 +7,11 @@ Game TODOs
 - end of game - winner ; statistics
 - fullscreen mode
 - scroll if cursor at the edge of the window
-- rewrite fog of war (QCanvas suckz): use QCanvasSprite::hide() on all units and
+- rewrite fog of war (QCanvas suckz): use QCanvasSprite::hide() on all units
+  and. We could also use QCanvas::drawForeground() to get rid of the
+  QCanvasSprites. But there is also a problem when scrolling the widget - all
+  units are visible for a moment then (until the fow is drawn). Bug is in
+  QCanvas: when the widget is scrolled QCanvas does not use double buffering
   let the Cell display black. Don't use a QCanvasSprite for the fog of war.
   Terrible performance.
 - BosonPath needs to be improved greatly - in progress

@@ -44,6 +44,8 @@ public:
 	KGameProperty<unsigned int> mReloadState;
 
 	KGamePropertyList<QPoint> mWaypoints;
+	KGameProperty<int> mMoveDestX;
+	KGameProperty<int> mMoveDestY;
 
 	SelectBox* mSelectBox;
 
@@ -56,19 +58,20 @@ Unit::Unit(const UnitProperties* prop, Player* owner, QCanvas* canvas)
  d = new UnitPrivate;
  setOwner(owner);
 
-//hmm.. would probably make more sense in Unit instead of Unit
  d->mDirection.registerData(IdDirection, dataHandler(), 
 		KGamePropertyBase::PolicyLocal, "Direction");
  d->mWaypoints.registerData(IdWaypoints, dataHandler(), 
-		KGamePropertyBase::PolicyLocal, "Waypoints");
+		KGamePropertyBase::PolicyClean, "Waypoints");
+ d->mMoveDestX.registerData(IdMoveDestX, dataHandler(), 
+		KGamePropertyBase::PolicyLocal, "MoveDestX");
+ d->mMoveDestY.registerData(IdMoveDestY, dataHandler(), 
+		KGamePropertyBase::PolicyLocal, "MoveDestY");
 
  d->mReloadState.registerData(IdReloadState, dataHandler(), 
 		KGamePropertyBase::PolicyLocal, "ReloadState");
 
  d->mDirection.setLocal(0); // not yet used
  d->mReloadState.setLocal(0);
- mPathrecalc = -1;
- mAttacking = false;
 }
 
 Unit::~Unit()
@@ -117,7 +120,6 @@ void Unit::setTarget(Unit* target)
 	return;
  }
  if (!target->isDestroyed()) {
-	mAttacking = true;
 	setWork(WorkAttack);
 	setAnimated(true);
  }
@@ -191,40 +193,13 @@ void Unit::advance(int phase)
 	return;
  }
  if (phase == 0) {
-/*	// collision detection should be done here as far as i understand
-	// do not move the item/unit here!
-
-	// perhaps test if there is a enemy unit in weapon range (x() - range()
-	// -> x() + width() + range() and so on)
-	// but we would need a setAnimated(true) for all units then :-(
-	if (work() == WorkMove) {
-		advanceMove(); // move one step
-		advanceMoveCheck(); // safety check for advanceMove(). see comments in moveBy()
-	} else if (work() == WorkAttack) {
-		attackUnit(target());
-	} else if (work() == WorkProduce) {
-		advanceProduction();
-	} else if (work() == WorkMine) {
-		// TODO
-	} else if (work() == WorkConstructed) {
-		advanceConstruction();
-	} else if (work() == WorkNone) {
-//		advanceNone();//TODO
-//		kdDebug() << k_funcinfo << ": work==WorkNone" << endl;
-		QCanvasItemList list = enemyUnitsInRange();
-		if (!list.isEmpty()) {
-			shootAt((Unit*)list[0]);
-		}
-	} else {
-		kdError() << "work: " << work() << endl;
-	}
-	*/
 	if (d->mReloadState > 0) {
 		d->mReloadState = d->mReloadState - 1;
 	}
  } else { // phase == 1
 	// QCanvasSprite::advance() just moves for phase == 1 ; let's do it
-	// here, too
+	// here, too. Collision detection is done is phase == 0 - in all of the
+	// other advance*() functions.
 	moveBy(xVelocity(), yVelocity());
  }
 }
@@ -247,7 +222,6 @@ void Unit::advanceNone()
  }
 }
 
-
 void Unit::advanceAttack()
 {
  attackUnit(target());
@@ -256,12 +230,20 @@ void Unit::advanceAttack()
 void Unit::addWaypoint(const QPoint& pos)
 {
  d->mWaypoints.append(pos);
-// kdDebug() << "added " <<pos.x() << " " << pos.y() << endl;
 }
 
 void Unit::waypointDone()
 {
+// waypoints are added with PolicyClean, but removed with PolicyLocal. That is
+// kind of ugly but this way we can ensure that only one client has to calculate
+// the path but every client uses the path.
+// Try to avoid this concept! Do NOT copy it!
+ d->mWaypoints.setPolicy(KGamePropertyBase::PolicyLocal);
  d->mWaypoints.remove(d->mWaypoints.at(0));
+ d->mWaypoints.setPolicy(KGamePropertyBase::PolicyClean);
+ if (waypointCount() == 0) {
+	setWork(WorkNone);
+ }
 }
 
 QValueList<QPoint> Unit::waypointList() const
@@ -278,10 +260,7 @@ void Unit::moveTo(const QPoint& pos)
 {
  d->mTarget = 0;
  moveTo(pos.x(), pos.y());
- if (mPathrecalc == 0) {
-//	setWork(WorkMove); // already done by moveTo(int, int)
-	setAnimated(true);
- }
+ setWork(WorkMove); 
 }
 
 void Unit::moveTo(int x, int y)
@@ -293,22 +272,57 @@ void Unit::moveTo(int x, int y)
 	if(!boCanvas()->cell(x / BO_TILE_SIZE, y / BO_TILE_SIZE)->canGo(unitProperties())) {
 		return;
 	}
-	if(boCanvas()->cellOccupied(x / BO_TILE_SIZE, y / BO_TILE_SIZE) && !mAttacking) {
+	if(boCanvas()->cellOccupied(x / BO_TILE_SIZE, y / BO_TILE_SIZE) && work() != WorkAttack) {
 		return;
 	}
  }
 
- // Actual path to destination is found in advanceMove()
- // here, we only set mPathrecalc to 0
- mPathrecalc = 0;
- mMoveDestX = x;
- mMoveDestY = y;
- setWork(WorkMove);
+ d->mMoveDestX = x;
+ d->mMoveDestY = y;
+
+ newPath();
 }
 
-void Unit::clearWaypoints()
+bool Unit::newPath()
 {
+ if (owner()->isVirtual()) {
+	// only the owner of the unit calculates the path and then transmits it
+	// over network. a "virtual" player is one which is duplicated on
+	// another client - but the actual player is on another client.
+	return false;
+ }
+ if(!owner()->isFogged(d->mMoveDestX / BO_TILE_SIZE, d->mMoveDestY / BO_TILE_SIZE)) {
+	if(! boCanvas()->cell(d->mMoveDestX / BO_TILE_SIZE, d->mMoveDestY / BO_TILE_SIZE)->
+			canGo(unitProperties())) {
+		return false;
+	}
+	if(boCanvas()->cellOccupied(d->mMoveDestX / BO_TILE_SIZE, d->mMoveDestY / BO_TILE_SIZE,
+			this) && work() != WorkAttack) {
+		return false;
+	}
+ }
+ QValueList<QPoint> path = BosonPath::findPath(this, d->mMoveDestX, d->mMoveDestY);
+ if(path.count() < 1) {// Is it actually needed?
+	return false;
+ }
+ clearWaypoints(true); // send it over network. the list is cleared just before the addWaypoints() below take effect
+ for (int unsigned i = 0; i < path.count(); i++) {
+	addWaypoint(path[i]);
+ }
+ return true;
+}
+
+void Unit::clearWaypoints(bool send)
+{
+// waypoints are added with PolicyClean, but removed with PolicyLocal. That is
+// kind of ugly but this way we can ensure that only one client has to calculate
+// the path but every client uses the path.
+// Try to avoid this concept! Do NOT copy it!
+ if (!send) {
+	d->mWaypoints.setPolicy(KGamePropertyBase::PolicyLocal);
+ }
  d->mWaypoints.clear();
+ d->mWaypoints.setPolicy(KGamePropertyBase::PolicyClean);
 }
 
 const QPoint& Unit::currentWaypoint() const
@@ -321,53 +335,21 @@ void Unit::stopMoving()
  kdDebug() << "stopMoving" << endl;
  clearWaypoints();
 
- // AB: maybe reimplement in Facility and check for 
- // completedConstruction() == false. Did not yet do so as this should never be
- // called, as we check already in moveTo()
- setWork(WorkNone);
+ // Call this only if we are only moving - stopMoving() is also called e.g. on
+ // WorkAttack, when the unit is not yet in range.
+ if (work() == WorkMove) {
+	setWork(WorkNone);
+ }
  setXVelocity(0);
  setYVelocity(0);
 // setAnimated(false); // do not call advance() anymore - is more efficient
-
- // in theory all units move on all clients the same - i.e. a playerInput() is
- // transmitted to all clients and all variables should always have the same
- // value.
- // but at least as of today (01/11/03) this is not completely working by any
- // reason. It can happen that a unit moves on client A but on client B there is
- // a collision with another unit - so it doesn't move. There are several
- // solutions possible
- // -> we should send a "IdStopMoving" and stop moving on all
- // clients at once - but the time lag is not nice. so we currently do the
- // following:
- // When one client has a collision for a unit and calls "stopMoving()" it sends
- // out the current coordinates of the unit. These coordinates are applied on
- // the other clients (they now also stop the unit). So all clients are synced
- // again.
- // the problem: if client A has a collision or arrival on destination, as well
- // as client B (this is the usual case!!) the *both* send out IdStopMoving with
- // the same coordinates... not nice...
-
- // I think I have found the reason for the not-synced units:
- // the problem seems to appear if several units are moved at once. Probably
- // they are added to the QCanvas in a different order and therefore are
- // advanced in a different order. This might result in an already moved (and
- // therefore no more a case for collisions) unit on client A but not yet moved
- // unit on client B (and therefore collisions return a different list, ...)
- // a solution will be: reorder the canvaslists!
-
- // so now i hace fixed the above. The problem seems to be solved - the
- // sendStopMoving below still resides here as of testing and debugging. Remove
- // it as soon as it's sure that we don't need it anymore. Will save a lot of
- // network traffik!
- 
- // UPDATE (01/12/22): This is now obsolete. we don't need it anymore.
 }
 
 void Unit::stopAttacking()
 {
  stopMoving(); // FIXME not really intuitive... nevertheless its currenlty useful.
  setTarget(0);
- mAttacking = false;
+ setWork(WorkNone);
 }
 
 bool Unit::save(QDataStream& stream)
@@ -437,7 +419,7 @@ void Unit::attackUnit(Unit* target)
 	// TODO: make sure that the attakced unit has not moved!!
 	// if it has moved the waypoints should be regenerated (perhaps if the
 	// unit moved across one or more cells?)
-	if (waypointCount() == 0) {
+	if (waypointCount() == 0) { //FIXME perhaps it could happen that the new waypoints have not yet arrived but are underway! moveTo() would clear them...
 		moveTo(target->x(), target->y());
 	}
 	kdDebug() << "unit not in range - moving..." << endl;
@@ -524,12 +506,14 @@ QCanvasItemList Unit::enemyUnitsInRange() const
 QValueList<Unit*> Unit::unitCollisions(bool exact) const
 {
  QValueList<Unit*> units;
+ if (isFlying()) { // flying units never collide - different altitudes
+	return units;
+ }
  QCanvasItemList collisionList = collisions(exact);
  if (collisionList.isEmpty()) {
 	return units;
  }
  
- bool flying = isFlying();
  QCanvasItemList::Iterator it;
  for (it = collisionList.begin(); it != collisionList.end(); ++it) {
 	if (!RTTI::isUnit((*it)->rtti())) {
@@ -538,9 +522,6 @@ QValueList<Unit*> Unit::unitCollisions(bool exact) const
 	Unit* unit = ((Unit*)*it);
 	if (unit->isDestroyed()) {
 		continue;
-	}
-	if (flying == unit->isFlying()) {
-		units.append(unit);
 	}
  }
  return units;
@@ -559,8 +540,6 @@ void Unit::setWork(WorkType w)
  UnitBase::setWork(w);
 }
 
-
-
 /////////////////////////////////////////////////
 // MobileUnit
 /////////////////////////////////////////////////
@@ -573,6 +552,9 @@ public:
 	}
 
 	KGameProperty<double> mSpeed;
+
+	KGameProperty<unsigned int> mMovingFailed;
+
 };
 
 MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, QCanvas* canvas) : Unit(prop, owner, canvas)
@@ -580,6 +562,11 @@ MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, QCanvas* canva
  d = new MobileUnitPrivate;
  d->mSpeed.registerData(IdSpeed, dataHandler(), 
 		KGamePropertyBase::PolicyLocal, "Speed");
+ d->mMovingFailed.registerData(IdMovingFailed, dataHandler(), 
+		KGamePropertyBase::PolicyLocal, "MovingFailed");
+ d->mSpeed.setLocal(0);
+ d->mMovingFailed.setLocal(0);
+ d->mMovingFailed.setEmittingSignal(false);
 }
 
 MobileUnit::~MobileUnit()
@@ -590,42 +577,32 @@ MobileUnit::~MobileUnit()
 void MobileUnit::advanceMove()
 {
  if (speed() == 0) {
+	kdWarning() << "speed == 0" << endl;
 	stopMoving();
-	kdDebug() << "speed == 0" << endl;
 	return;
- }
-
- if(mPathrecalc == 0) {
-	if(! newPath()) {
-		// Can't go to destination - stop moving;
-		/// TODO: go to tile near destination?
-		kdDebug() << "Can't find new path to destination cell - stopping" << endl;
-		stopMoving();
-		return;
-	}
- } else {
-	mPathrecalc--;
  }
 
  if(waypointCount() == 0) {
-	// shouldn't happen - work() should be WorkNone here
-	kdWarning() << k_funcinfo << ": no waypoints?!" << endl;
-	stopMoving(); // should have been called before already
+	// waypoints are PolicyClean - so they might need some advanceMove()
+	// calls until they are actually here
+	kdDebug() << "waypoints have not yet arrived" << endl;
+	setXVelocity(0);
+	setYVelocity(0);
 	return;
  }
-
 
  QPoint wp = currentWaypoint(); // where we go to
  // Check if we can actually go to waypoint (maybe it was fogged)
  if((boCanvas()->cellOccupied(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE, this) &&
-		!mAttacking) || 
+		work() != WorkAttack) || 
 		!boCanvas()->cell(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE)->canGo(unitProperties())) {
-	if(! newPath()) {
-		stopMoving();
-		return;
-	}
-	wp = currentWaypoint(); // where we go to
+	kdDebug() << "cannot go there :-( (1)" << endl;
+	setXVelocity(0);
+	setYVelocity(0);
+//	d->mRecalcPath = 0;
+	return; // path recalculated in advanceMoveCheck()
  }
+
  QRect position = boundingRect(); // where we currently are.
  int x = position.center().x();
  int y = position.center().y();
@@ -638,23 +615,26 @@ void MobileUnit::advanceMove()
 
 	kdDebug() << k_funcinfo << ": unit is at waypoint" << endl;
  	waypointDone();
+	
 	if(waypointCount() == 0) {
 		kdDebug() << k_funcinfo << ": no more waypoints. Stopping moving" << endl;
 		// What to do?
 		stopMoving();
 		return;
 	}
+	
 	wp = currentWaypoint();
 	// Check if we can actually go to waypoint
 	if((boCanvas()->cellOccupied(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE, this) &&
-			!mAttacking) ||
+			work() != WorkAttack) ||
 			!boCanvas()->cell(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE)->canGo(unitProperties())) {
-		if(! newPath()) {
-			stopMoving();
-			return;
-		}
-		wp = currentWaypoint(); // where we go to
+		setXVelocity(0);
+		setYVelocity(0);
+		kdDebug() << "cannot go there :-(" << endl;
+//		d->mRecalcPath = 0;
+		return; // path recalculated in advanceMoveCheck()
 	}
+	
  }
  
  // Try to go to same x and y coordinates as waypoint's coordinates
@@ -689,7 +669,7 @@ void MobileUnit::advanceMove()
  for (int unsigned i = 0; i < collisionList.count(); i++) {
 	kdWarning() << id() << " colliding with unit" << endl;
 	/// TODO: wait some time before searching new path
-	mPathrecalc = 0;
+//	mPathrecalc = 0;
  }
 /* QCanvasItemList collisionList = collisions(exact);
  if(! collisionList.isEmpty())
@@ -726,19 +706,44 @@ void MobileUnit::advanceMove()
 
 void MobileUnit::advanceMoveCheck()
 {
+ if (!canvas()->onCanvas(boundingRectAdvanced().topLeft())) {
+	kdDebug() << k_funcinfo << "not on canvas" << endl;
+	stopMoving();
+	setWork(WorkNone);
+	return;
+ }
+ if (!canvas()->onCanvas(boundingRectAdvanced().bottomRight())) {
+	kdDebug() << k_funcinfo << "not on canvas" << endl;
+	stopMoving();
+	setWork(WorkNone);
+	return;
+ }
  QValueList<Unit*> l = unitCollisions(true);
  if (!l.isEmpty()) {
+	kdDebug() << k_funcinfo << "collisions" << endl;
 //	kdWarning() << k_funcinfo << ": " << id() << " -> " << l.first()->id() 
 //		<< " (count=" << l.count() <<")"  << endl;
 	// do not move at all. Moving is not stopped completely!
 	// work() is still workMove() so we'll continue moving in the next
 	// advanceMove() call
 
-	 // AB: perhaps we need to increase the "wait" timer
+	d->mMovingFailed = d->mMovingFailed + 1; // perhaps use PolicyDirty for mMovingFailed. then add a if(isVirtual()) to this
 	setXVelocity(0);
 	setYVelocity(0);
+
+	const int recalculate = 50; // recalculate when 50 advanceMove() failed
+	if (d->mMovingFailed >= recalculate) {
+		kdDebug() << "recalculating path" << endl;
+		// you must not do anything that changes local variables directly here!
+		// all changed of variables with PolicyClean are ok, as they are sent
+		// over network and do not take immediate effect.
+
+		newPath();
+		d->mMovingFailed = 0;
+	}
 	return;
  }
+ d->mMovingFailed = 0;
 }
 
 void MobileUnit::setSpeed(double speed)
@@ -749,36 +754,6 @@ void MobileUnit::setSpeed(double speed)
 double MobileUnit::speed() const
 {
  return d->mSpeed;
-}
-
-bool MobileUnit::newPath()
-{
- if(!owner()->isFogged(mMoveDestX / BO_TILE_SIZE, mMoveDestY / BO_TILE_SIZE)) {
-	if(! boCanvas()->cell(mMoveDestX / BO_TILE_SIZE, mMoveDestY / BO_TILE_SIZE)->
-			canGo(unitProperties())) {
-		return false;
-	}
-	if(boCanvas()->cellOccupied(mMoveDestX / BO_TILE_SIZE, mMoveDestY / BO_TILE_SIZE,
-			this) && !mAttacking) {
-		return false;
-	}
- }
- QValueList<QPoint> path = BosonPath::findPath(this, mMoveDestX, mMoveDestY);
- if(path.count() < 1) {// Is it actually needed?
-	return false;
- }
- for (int unsigned i = 0; i < path.count(); i++) {
-	addWaypoint(path[i]);
- }
- mPathrecalc = 50;
- return true;
-}
-
-bool MobileUnit::newPath(int destx, int desty)
-{
- mMoveDestX = destx;
- mMoveDestY = desty;
- return newPath();
 }
 
 void MobileUnit::turnTo(Direction direction)

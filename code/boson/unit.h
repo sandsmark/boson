@@ -44,10 +44,13 @@ public:
 	enum PropertyIds {
 		IdDirection = UnitBase::IdLast + 1,
 		IdWaypoints = UnitBase::IdLast + 2,
-		IdFix_ConstructionState = UnitBase::IdLast + 3,
-		IdReloadState = UnitBase::IdLast + 4,
-		IdFix_Productions = UnitBase::IdLast + 5,
-		IdFix_ProductionState = UnitBase::IdLast + 6
+		IdMoveDestX = UnitBase::IdLast + 3,
+		IdMoveDestY = UnitBase::IdLast + 4,
+		IdMovingFailed = UnitBase::IdLast + 5,
+		IdReloadState = UnitBase::IdLast + 6,
+		IdFix_ConstructionState = UnitBase::IdLast + 20,
+		IdFix_Productions = UnitBase::IdLast + 21,
+		IdFix_ProductionState = UnitBase::IdLast + 22
 
 	};
 
@@ -137,10 +140,33 @@ public:
 	bool inRange(Unit* unit) const;
 
 // waypoint stuff: // also in facility - produced units receive this initial waypoint
+	/**
+	 * Add pos to the waypoint list. Please note that waypoints are actually
+	 * added later. addWaypoint() sends the point over network and only as
+	 * soon as it is received from there you can work with it. That means,
+	 * that after calling addWaypoint() @ref waypointCount has not yet been
+	 * increased!
+	 **/
 	void addWaypoint(const QPoint& pos);
+	
 	const QPoint& currentWaypoint() const;
 	unsigned int waypointCount() const;
-	void clearWaypoints();
+
+	/**
+	 * Removes all waypoints from the list. Note that this is done
+	 * <em>immediately</em> - in contrary to @ref addWaypoint this is not
+	 * sent over network as all function calling clearWaypoints() are
+	 * already called on all clients!
+	 * @param send If FALSE clear the waypoints immediately (like
+	 * PolicyLocal) otherwise send the command over network (like
+	 * PolicyClean)
+	 **/
+	void clearWaypoints(bool send = false);
+
+	/**
+	 * Remove the first waypoint from the list. Note that this is done
+	 * <em>immediately</em>. See @ref clearWaypoints for more infos.
+	 **/
 	void waypointDone();
 
 	/**
@@ -188,7 +214,7 @@ public:
 	 * Calls @ref BosonCanvas setWorkChanged
 	 **/
 	virtual void setWork(WorkType w);
-	
+
 protected:
 	void shootAt(Unit* target);
 
@@ -198,9 +224,16 @@ protected:
 	 **/
 	QValueList<Unit*> unitCollisions(bool exact = false) const;
 
-	int mPathrecalc;
-	int mMoveDestX, mMoveDestY;
-	bool mAttacking;
+	/** 
+	 * Finds new path to destination.
+	 * Destination must have been set before in variables movedestx and 
+	 * movedesty - usually using @ref moveTo
+	 *
+	 * This is in Unit instead of @ref MobileUnit so that we can apply a
+	 * path to newly constructed units of factories.
+	 * @return true if path was found, false otherwise
+	 **/
+	bool newPath();
 
 private:
 	class UnitPrivate;
@@ -234,13 +267,6 @@ public:
 protected:
 	virtual void advanceMove(); // move one step futher to path
 	virtual void advanceMoveCheck();
-	/** Finds new path to destination
-	  * Destination must have been set before in variables movedestx and movedesty
-	  * @return true if path was found, false otherwise
-	  */
-	bool newPath();
-	/** Same as above, but sets movedestx to destx and movedesty to desty first */
-	bool newPath(int destx, int desty);
 
 private:
 	// a d pointer is probably not very good here - far too much memory consumption
