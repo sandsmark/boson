@@ -83,8 +83,8 @@ BoShot::BoShot(Unit* target, Unit* attacker, QCanvas* canvas, bool destroyed)
 
 	// x and y should be kind of random (note: use KGame::random()) ! -> see
 	// original boShot
-	setX(target->x());
-	setY(target->y());
+	setX(target->x() + target->width() / 2);
+	setY(target->y() + target->height() / 2);
 	setZ(target->z() + 1);
  }
  if (!sequence) {
