@@ -25,12 +25,13 @@
 int main(int argc, char* argv[])
 { 
 
-	KApplication app(argc,argv,"boson");  
+	KApplication	app(argc,argv,"boson");  
+	QString		mapname(kapp->kde_datadir() + "/boson/map/basic.bpf");
  
 /*	if (app.isRestored()) 
 		RESTORE(BosonServer);
 	else { */
-	BosonServer* server = new BosonServer("basic.bpf");
+	BosonServer* server = new BosonServer(mapname);
 	server->show();
 //}  
 	return app.exec();
