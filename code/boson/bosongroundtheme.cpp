@@ -39,6 +39,7 @@ struct TextureGroundType
 	unsigned char mAmountOfWater;
 	QRgb mMiniMapColor;
 	int mAnimationDelay;
+	QString mPixmapFile;
 };
 
 
@@ -129,11 +130,13 @@ BosonGroundTheme::BosonGroundTheme()
 {
  d = new BosonGroundThemePrivate;
  mTextures.setAutoDelete(true);
+ mPixmaps.setAutoDelete(true);
 }
 
 BosonGroundTheme::~BosonGroundTheme()
 {
  mTextures.clear();
+ mPixmaps.clear();
  delete d;
 }
 
@@ -214,6 +217,7 @@ bool BosonGroundTheme::loadGroundThemeConfig(const QString& file)
 	BoVector3 color = BosonConfig::readBoVector3Entry(&conf, "MiniMapColor");
 	types[i].mMiniMapColor = qRgb((int)color.x(), (int)color.y(), (int)color.z());
 	types[i].mAnimationDelay = conf.readUnsignedNumEntry("AnimationDelay", 1);
+	types[i].mPixmapFile = conf.readEntry("Pixmap", QString::null);
 
 	// ensure correct values:
 	if (types[i].mAmountOfLand + types[i].mAmountOfWater != 255) {
@@ -295,6 +299,14 @@ QString BosonGroundTheme::textureFileName(unsigned int texture) const
  return d->mGroundTypes[texture].mFile;
 }
 
+QString BosonGroundTheme::texturePixmapFileName(unsigned int texture) const
+{
+ if (texture >= textureCount()) {
+	return QString::null;
+ }
+ return d->mGroundTypes[texture].mPixmapFile;
+}
+
 unsigned int BosonGroundTheme::textureCount() const
 {
  return d->mGroundTypes.count();
@@ -316,6 +328,28 @@ void BosonGroundTheme::loadTextureImages(const QString& dir, unsigned int textur
  }
  BosonTextureArray* t = new BosonTextureArray(absFiles);
  mTextures.insert(texture, t);
+
+ // Load pixmap (for editor)
+ QString pixmapfile = texturePixmapFileName(texture);
+ if (pixmapfile.isNull()) {
+	// If no pixmap is given, we take the first available texture
+	pixmapfile = files.first();
+ }
+ QPixmap tmppix;
+ if (!tmppix.load(dir + "/" + pixmapfile)) {
+	tmppix = QPixmap();
+ }
+ if (tmppix.isNull()) {
+	boWarning() << k_funcinfo << "unable to load pixmap for texture " << texture << " from " << dir + "/" + pixmapfile << endl;
+	tmppix = QPixmap(50, 50, 32);
+	tmppix.fill(Qt::green);
+ }
+ // Final pixmap will be at most 50x50 pixels big
+ int w = QMIN(tmppix.width(), 50);
+ int h = QMIN(tmppix.height(), 50);
+ QPixmap* pix = new QPixmap(w, h);
+ bitBlt(pix, 0, 0, &tmppix, 0, 0, w, h);
+ mPixmaps.insert(texture, pix);
 }
 
 const QString& BosonGroundTheme::identifier() const
@@ -325,25 +359,7 @@ const QString& BosonGroundTheme::identifier() const
 
 QPixmap BosonGroundTheme::pixmap(unsigned int texture)
 {
- QPixmap pix;
- if (texture < textureCount()) {
-	// Find first name*.png or name*.jpg file
-	QString name = textureFileName(texture);
-	QDir dir(d->mGroundThemeDir);
-	QStringList files = dir.entryList(name + "*.png " + name + "*.jpg", QDir::Files, QDir::Name);
-	boDebug() << k_funcinfo << "Loading from " << d->mGroundThemeDir + "/" + files.first() << endl;
-	if (!pix.load(d->mGroundThemeDir + "/" + files.first())) {
-		pix = QPixmap();
-	}
- } else {
-	boError() << k_funcinfo << "invalid texture " << texture << " textureCount: " << textureCount() << endl;
- }
- if (pix.isNull()) {
-	boWarning() << k_funcinfo << "unable to load texture " << texture << endl;
-	pix = QPixmap(64, 64, 32);
-	pix.fill(Qt::green);
- }
- return pix;
+ return *mPixmaps[texture];
 }
 
 BosonTextureArray* BosonGroundTheme::textures(int i) const
