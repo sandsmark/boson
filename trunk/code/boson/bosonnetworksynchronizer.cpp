@@ -427,6 +427,7 @@ protected:
 		stream << i->start;
 		stream << i->dest;
 		stream << (Q_INT32)i->range;
+#if 0
 		if (i->startRegion) {
 			stream << (Q_INT32)i->startRegion->id;
 		} else {
@@ -437,6 +438,9 @@ protected:
 		} else {
 			stream << (Q_INT32)-1;
 		}
+#endif
+		stream << (Q_INT32)-2; // AB: region pointers are often invalid (regions deleted), so we cannot use it.
+		stream << (Q_INT32)-2; // AB: region pointers are often invalid (regions deleted), so we cannot use it.
 		stream << (Q_INT8)i->passable;
 		stream << (Q_INT8)i->canMoveOnLand;
 		stream << (Q_INT8)i->canMoveOnWater;
