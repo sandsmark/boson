@@ -26,6 +26,7 @@
 #include "boshot.h"
 #include "bosonmusic.h"
 #include "unitgroup.h"
+#include "bosontiles.h"
 
 #include <kdebug.h>
 #include <klocale.h>
@@ -82,9 +83,9 @@ public:
 	{
 	}
 
-	void setFile(const QString& f)
+	void setDir(const QString& d)
 	{
-		mFile = f;
+		mDir = d;
 	}
 
 #ifndef USE_THREAD
@@ -99,8 +100,12 @@ protected:
 	virtual void run()
 	{
 		kdDebug() << k_funcinfo << endl;
-		mTile = new QPixmap(mFile);
-		kdDebug() << k_funcinfo << "loaded" << endl;
+		QTime time;
+		time.start();
+		BosonTiles tiles;
+		tiles.loadTiles(mDir);
+		mTile = new QPixmap(tiles.pixmap());
+		kdDebug() << k_funcinfo << "loading took: " << time.elapsed() << endl;
 		if (mTile->isNull()) {
 			kdError() << k_funcinfo << "NULL pixmap" << endl;
 			return;
@@ -111,7 +116,7 @@ protected:
 		kdDebug() << k_funcinfo << "done" << endl;
 	}
 private:
-	QString mFile;
+	QString mDir;
 	QPixmap* mTile;
 	BosonCanvas* mCanvas;
 };
@@ -459,7 +464,7 @@ void BosonCanvas::setMap(BosonMap* map)
  d->mMap = map;
 }
 
-void BosonCanvas::initMap(const QString& tileFile)
+void BosonCanvas::initMap(const QString& tiles)
 {
  kdDebug() << k_funcinfo << endl;
  if (!d->mMap) {
@@ -467,8 +472,12 @@ void BosonCanvas::initMap(const QString& tileFile)
 	return;
  }
  resize(d->mMap->width() * BO_TILE_SIZE, d->mMap->height() * BO_TILE_SIZE);
- QString file = locate("data", QString("boson/themes/grounds/%1").arg(tileFile));
- d->mLoader->setFile(file);
+ QString dir = KGlobal::dirs()->findResourceDir("data", QString("boson/themes/grounds/%1/index.desktop").arg(tiles)) + QString("boson/themes/grounds/%1").arg(tiles);
+ if (dir == QString::null) {
+	kdError() << k_funcinfo << "Cannot find tileset " << tiles << endl;
+	return;
+ }
+ d->mLoader->setDir(dir);
  d->mLoader->start();
 }
 
