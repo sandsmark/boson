@@ -114,7 +114,7 @@ public:
 	void start(int event);
 
 	/**
-	 * @return The elapsed time s ince calling @ref start with this event
+	 * @return The elapsed time since calling @ref start with this event
 	 * number (in usec). Undefined if @ref start has not yet been called
 	 * with this event number.
 	 **/
