@@ -18,13 +18,13 @@
  *                                                                         *
  ***************************************************************************/
 
-//#include <math.h>	// sqrt
 #include <stdlib.h>	// int abs(int);
 #include <assert.h>
 
 #include "playerUnit.h"
 #include "speciesTheme.h"
 #include "game.h"
+#include "selectPart.h"
 
 #include "../map/map.h"
 #include "../common/log.h"
@@ -34,9 +34,9 @@
  * playerMobUnit
  */
 
-const static pos_x[12] = 
+const static int pos_x[12] = 
 	{  34,  77,  98,  94,  64,  17, -34, -77, -98, -94, -64, -17};
-const static pos_y[12] = 
+const static int pos_y[12] = 
 	{ -94, -64, -17, +34, +77, +98, +94, +64, +17, -34, -77, -98};
 
 playerMobUnit::playerMobUnit(mobileMsg_t *msg, QObject* parent=0, const char *name=0L)
@@ -48,9 +48,17 @@ playerMobUnit::playerMobUnit(mobileMsg_t *msg, QObject* parent=0, const char *na
 	moveTo(msg->x, msg->y);
 
 	asked_dx = asked_dy = 0;
+
+	sp_down = 0l; sp_up = 0l;
 	
 	turnTo(4); ///orzel : should be random
 }
+
+playerMobUnit::~playerMobUnit()
+{
+unSelect();
+}
+
 
 #define VECT_PRODUCT(dir) (pos_x[dir]*(ldy) - pos_y[dir]*(ldx))
 
@@ -138,14 +146,42 @@ int playerMobUnit::getWantedAction()
 
 
 
+/***** selection *********/
+void playerMobUnit::select()
+{
+	QRect	r = rect();
+
+	sp_up = new selectPart_up(5);
+	sp_up->moveTo(r.right(), r.top());
+	sp_down = new selectPart_down(4);
+	sp_down->moveTo(r.left(), r.bottom());
+}
+
+
+void playerMobUnit::unSelect()
+{
+	delete  sp_up;
+	delete	sp_down;
+	sp_down = 0l;
+	sp_up = 0l;
+}
+
+
 /***** server orders *********/
+void playerMobUnit::doMoveBy(int dx, int dy)
+{
+	moveBy(dx,dy);
+	if (sp_up) sp_up->moveBy(dx,dy);
+	if (sp_down) sp_down->moveBy(dx,dy);
+}
+
 void playerMobUnit::s_moveBy(int dx, int dy, int dir)
 {
 //orzel : use some kind of fuel
 //printf("Moved  : d(%d.%d)\n", dx, dy);
 if ( who!=gpp.who_am_i) {
 	/* this not my unit */
-	moveBy(dx,dy);
+	doMoveBy(dx,dy);
 	direction = dir;
 	frame(direction);
 	return;
@@ -165,7 +201,7 @@ if (dx != asked_dx || dy != asked_dy)
 if (dir != direction)
 	logf(LOG_ERROR, "playerMobUnit::s_moveBy : unexpected direction");
 
-moveBy(dx,dy);
+doMoveBy(dx,dy);
 
 if (x()==dest_x && y()==dest_y) {
 	//puts("going to MUS_NONE");

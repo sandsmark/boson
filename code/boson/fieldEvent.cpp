@@ -105,8 +105,7 @@ if (e->button() & LeftButton) {
 			}
 		}
 
-	if (found) drawSelected();
-	else {
+	if (!found) {
 	// Here, we have to draw a "selection box"...
 		order->setSelectionMode( SELECT_RECT);
 		oldX = selectX = e->x();
@@ -198,6 +197,8 @@ emit reSizeView((width()+BO_TILE_SIZE+1)/BO_TILE_SIZE, (height()+BO_TILE_SIZE+1)
 }
 
 
+
+
 void fieldMap::unSelectAll(void)
 {
 QIntDictIterator<playerMobUnit> selIt(order->mobSelected);
@@ -207,8 +208,10 @@ QIntDictIterator<playerMobUnit> selIt(order->mobSelected);
 unSelectFix();
 
 /* deal with mobiles */
-for (selIt.toFirst(); selIt;) // ++ not needed, selIt should be increased
+for (selIt.toFirst(); selIt;) { // ++ not needed, selIt should be increased
+	selIt.current()->unSelect();
 	unSelectMob(selIt.currentKey()); // by the .remove() in unselect
+	}
 boAssert(order->mobSelected.isEmpty());
 if (!order->mobSelected.isEmpty()) order->mobSelected.clear();
 
@@ -219,28 +222,10 @@ order->unSelectAll();
 
 void fieldMap::unSelectFix(void)
 {
-playerFacility *f = order->unSelectFix();
-if (!f) return; // already done
-
-repaint(
-	(f->_x()-view->X()) * BO_TILE_SIZE - BO_SELECT_MARGIN,
-	(f->_y()-view->Y()) * BO_TILE_SIZE - BO_SELECT_MARGIN,
-	f->getWidth() + BO_SELECT_MARGIN + BO_SELECT_MARGIN,
-	f->getHeight() + BO_SELECT_MARGIN + BO_SELECT_MARGIN,
-	FALSE);
+	order->unSelectFix();
 }
 
 void fieldMap::unSelectMob(long key)
 {
-playerMobUnit *m = order->mobSelected[key];
-
-order->unSelectMob(key);
-//mobSelected.remove(key);
-
-repaint(
-	m->_x() - view->X() * BO_TILE_SIZE - BO_SELECT_MARGIN,
-	m->_y() - view->Y() * BO_TILE_SIZE - BO_SELECT_MARGIN,
-	m->getWidth() + BO_SELECT_MARGIN + BO_SELECT_MARGIN,
-	m->getHeight() + BO_SELECT_MARGIN + BO_SELECT_MARGIN,
-	FALSE);
+	order->unSelectMob(key);
 }

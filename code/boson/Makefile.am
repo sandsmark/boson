@@ -3,12 +3,12 @@ CXXFLAGS = -pipe -Wall -g # -O2
 #MY_HOST :=  $(shell hostname | tr '[a-z]' '[A-Z]')_$(shell domainname | tr '[a-z]' '[A-Z]')
 #CXXFLAGS += -D$(MY_HOST)
 LDFLAGS =  -s 
-boson_SOURCES = mainView.cpp boson.cpp main.cpp connect.cpp groundTheme.cpp speciesTheme.cpp playerUnit.cpp playerCell.cpp physMap.cpp viewMap.cpp fieldMap.cpp miniMap.cpp fieldDisplay.cpp miniDisplay.cpp fieldEvent.cpp miniEvent.cpp orderWin.cpp game.cpp
+boson_SOURCES = mainView.cpp boson.cpp main.cpp connect.cpp groundTheme.cpp speciesTheme.cpp playerUnit.cpp playerCell.cpp physMap.cpp viewMap.cpp fieldMap.cpp miniMap.cpp fieldDisplay.cpp miniDisplay.cpp fieldEvent.cpp miniEvent.cpp orderWin.cpp game.cpp selectPart.cpp
 boson_LDADD   =  ../common/libboson.la -lkfile -lkfm -lkdeui -lkdecore -lQwSpriteField -lqt -lXext -lX11 $(LIBSOCKET)
 
 SUBDIRS = docs 
 
-EXTRA_DIST = main.cpp boson.cpp boson.h ressource.h boson.kdelnk boson.xpm mini-boson.xpm connect.h connect.cpp groundTheme.cpp groundTheme.h speciesTheme.cpp speciesTheme.h playerUnit.cpp playerUnit.h playerCell.cpp playerCell.h physMap.cpp physMap.h viewMap.cpp viewMap.h fieldMap.cpp fieldMap.h miniMap.cpp miniMap.h fieldDisplay.cpp miniDisplay.cpp fieldEvent.cpp miniEvent.cpp orderWin.cpp orderWin.h game.cpp game.h mainView.cpp mainView.h
+EXTRA_DIST = main.cpp boson.cpp boson.h ressource.h boson.kdelnk boson.xpm mini-boson.xpm connect.h connect.cpp groundTheme.cpp groundTheme.h speciesTheme.cpp speciesTheme.h playerUnit.cpp playerUnit.h playerCell.cpp playerCell.h physMap.cpp physMap.h viewMap.cpp viewMap.h fieldMap.cpp fieldMap.h miniMap.cpp miniMap.h fieldDisplay.cpp miniDisplay.cpp fieldEvent.cpp miniEvent.cpp orderWin.cpp orderWin.h game.cpp game.h mainView.cpp mainView.h selectPart.h selectPart.cpp
 
 install-data-local:
 	$(mkinstalldirs) $(kde_appsdir)/

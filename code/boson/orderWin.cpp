@@ -30,7 +30,6 @@
 
 #include "../common/log.h"
 
-#include "playerUnit.h"
 #include "orderWin.h"
 #include "fieldMap.h"
 #include "game.h"
@@ -101,6 +100,7 @@ playerMobUnit *orderWin::unSelectMob(long key)
 {
 playerMobUnit *m = mobSelected[key];
 mobSelected.remove(key);
+m->unSelect();
 
 if (mobSelected.isEmpty()) {
 	view_one->setPixmap(*view_none);
@@ -149,7 +149,7 @@ else {
 		return;
 	}
 
-mobSelected.insert(key, m);
+mobSelected.insert(key, m); m->select();
 view_one->setPixmap(*gpp.species[m->who]->getBigOverview(m));
 logf(LOG_GAME_LOW, "select mobile");
 }
