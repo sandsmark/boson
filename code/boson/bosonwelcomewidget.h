@@ -52,7 +52,6 @@ class BosonWelcomeWidget : public QWidget
     QPushButton* mQuitButton;
 
     QLabel* mBanner;
-    QLabel* mTextFrame;
 
 };
 
