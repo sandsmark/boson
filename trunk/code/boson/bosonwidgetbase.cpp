@@ -702,14 +702,16 @@ void BosonWidgetBase::initKActions()
 		this, SLOT(slotSetDebugFPS(bool)));
 
 
- KSelectAction* debugMode = new KSelectAction("Mode", KShortcut(), actionCollection(), "debug_mode");
+ KSelectAction* debugMode = new KSelectAction(i18n("Mode"), KShortcut(),
+		actionCollection(), "debug_mode");
  connect(debugMode, SIGNAL(activated(int)), this, SLOT(slotDebugMode(int)));
  QStringList l;
- l.append("Normal");
- l.append("Debug Selection");
+ l.append(i18n("Normal"));
+ l.append(i18n("Debug Selection"));
  debugMode->setItems(l);
  debugMode->setCurrentItem(0);
- d->mActionDebugPlayers = new KActionMenu("Players", actionCollection(), "debug_players");
+ d->mActionDebugPlayers = new KActionMenu(i18n("Players"),
+		actionCollection(), "debug_players");
 
  cheating->setChecked(DEFAULT_CHEAT_MODE);
  slotToggleCheating(DEFAULT_CHEAT_MODE);
