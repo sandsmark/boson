@@ -19,6 +19,7 @@
 
 // AB: first include the ufo headers, otherwise we conflict with Qt
 #include <ufo/ufo.hpp>
+#include <ufo/gl/ugl_image.hpp>
 #include <ufo/ux/ux.hpp>
 #include <ufo/events/umousewheelevent.hpp>
 #include <ufo/events/ukeysym.hpp>
@@ -37,6 +38,9 @@
 #include <qobject.h>
 #include <qdom.h>
 #include <qintdict.h>
+#include <qpixmap.h>
+#include <qimage.h>
+#include <qgl.h>
 
 #include <bodebug.h>
 
@@ -268,6 +272,136 @@ static ufo::UKeyCode_t convertQtKeyToUfo(int key)
  }
  return uk;
 }
+
+
+BoUfoImageIO::BoUfoImageIO()
+{
+ init();
+}
+
+BoUfoImageIO::BoUfoImageIO(const QPixmap& p)
+{
+ init();
+ setPixmap(p);
+}
+
+BoUfoImageIO::BoUfoImageIO(const QImage& img)
+{
+ init();
+ setImage(img);
+}
+
+void BoUfoImageIO::init()
+{
+ mImageIO = 0;
+}
+
+BoUfoImageIO::~BoUfoImageIO()
+{
+ if (mImageIO) {
+	mImageIO->unreference();
+ }
+}
+
+void BoUfoImageIO::setPixmap(const QPixmap& p)
+{
+ if (mImageIO) {
+	boError() << k_funcinfo << "data is already set" << endl;
+	return;
+ }
+ QImage img = p.convertToImage();
+ setImage(img);
+}
+
+void BoUfoImageIO::setImage(const QImage& _img)
+{
+ if (mImageIO) {
+	boError() << k_funcinfo << "data is already set" << endl;
+	return;
+ }
+ // AB: atm UImage uses a format with y-coordinates flipped
+ QImage img = QGLWidget::convertToGLFormat(_img.mirror(false, true));
+ mImageIO = new ufo::UImageIO(img.bits(), img.width(), img.height(), 4);
+ mImageIO->reference();
+}
+
+
+BoUfoImage::BoUfoImage()
+{
+ init();
+}
+
+BoUfoImage::BoUfoImage(const QPixmap& p)
+{
+ init();
+ load(p);
+}
+
+BoUfoImage::BoUfoImage(const QImage& img)
+{
+ init();
+ load(img);
+}
+
+BoUfoImage::BoUfoImage(const BoUfoImage& img)
+{
+ init();
+ load(img);
+}
+
+BoUfoImage::~BoUfoImage()
+{
+ if (mImage) {
+	mImage->unreference();
+ }
+}
+
+void BoUfoImage::load(const QPixmap& p)
+{
+ BoUfoImageIO io(p);
+ set(&io);
+}
+
+void BoUfoImage::load(const QImage& img)
+{
+ BoUfoImageIO io(img);
+ set(&io);
+}
+
+void BoUfoImage::load(const BoUfoImage& img)
+{
+ load(img);
+ set(img.image());
+}
+
+void BoUfoImage::init()
+{
+ mImage = 0;
+}
+
+void BoUfoImage::set(BoUfoImageIO* io)
+{
+ BO_CHECK_NULL_RET(io);
+ BO_CHECK_NULL_RET(io->imageIO());
+ if (mImage) {
+	mImage->unreference();
+	mImage = 0;
+ }
+ ufo::UImage* image = new ufo::UGL_Image(io->imageIO());
+ set(image);
+}
+
+void BoUfoImage::set(ufo::UImage* img)
+{
+ BO_CHECK_NULL_RET(img);
+ if (mImage) {
+	boError() << k_funcinfo << "image not NULL" << endl;
+	return;
+ }
+ mImage = img;
+ mImage->reference();
+}
+
 
 BoUfoManager::BoUfoManager(int w, int h, bool opaque)
 	: QObject(0, "ufomanager")
@@ -536,6 +670,7 @@ void BoUfoWidget::init(ufo::UWidget* w)
  mWidget = w;
 
  mWidget->setOpaque(false);
+ mBackgroundImageDrawable = 0;
 
 #if 0
 #warning fixme
@@ -722,12 +857,52 @@ void BoUfoWidget::loadPropertiesFromXML(const QDomNamedNodeMap& map)
 
 void BoUfoWidget::setBackground(BoUfoDrawable* drawable)
 {
- mBackground = drawable;
- if (mBackground) {
-	widget()->setBackground(mBackground->drawable());
+ if (drawable) {
+	setBackground(drawable->drawable());
  } else {
-	widget()->setBackground(0);
+	setBackground((ufo::UDrawable*)0);
  }
+}
+
+void BoUfoWidget::setBackground(ufo::UDrawable* drawable)
+{
+ widget()->setBackground(drawable);
+ if (drawable) {
+	// AB: libufo should do this, I believe!
+	setSize(drawable->getDrawableWidth(), drawable->getDrawableHeight());
+ }
+}
+
+void BoUfoWidget::setBackgroundImage(const BoUfoImage& img)
+{
+ BO_CHECK_NULL_RET(img.image());
+ if (mBackgroundImageDrawable) {
+	mBackgroundImageDrawable->unreference();
+	mBackgroundImageDrawable = 0;
+ }
+ mBackgroundImageDrawable = img.image();
+ mBackgroundImageDrawable->reference();
+ setBackground(img.image()); // ufo::UImage is a ufo::UDrawable
+}
+
+void BoUfoWidget::setBackgroundImageFile(const QString& file)
+{
+ if (!file.isEmpty()) {
+	QImage img;
+	if (!img.load(file)) {
+		boError() << k_funcinfo << file << " could not be loaded" << endl;
+		return;
+	}
+	setBackgroundImage(img);
+ } else {
+	setBackgroundImage(BoUfoImage());
+ }
+ mBackgroundImageFile = file;
+}
+
+QString BoUfoWidget::backgroundImageFile() const
+{
+ return mBackgroundImageFile;
 }
 
 void BoUfoWidget::setForegroundColor(const QColor& c)
@@ -779,6 +954,11 @@ BoUfoWidget::~BoUfoWidget()
 {
  // AB: do NOT delete the mWidget!
  // we are child of mWidget, not the other way round.
+
+ boDebug() << k_funcinfo << endl;
+ if (mBackgroundImageDrawable) {
+	mBackgroundImageDrawable->unreference();
+ }
 }
 
 void BoUfoWidget::uslotMouseEntered(ufo::UMouseEvent* e)
@@ -1126,6 +1306,31 @@ QString BoUfoPushButton::text() const
  return text;
 }
 
+void BoUfoPushButton::setIcon(const BoUfoImage& img)
+{
+ mButton->setIcon(new ufo::UImageIcon(img.image()));
+}
+
+void BoUfoPushButton::setIconFile(const QString& file)
+{
+ if (!file.isEmpty()) {
+	QImage img;
+	if (!img.load(file)) {
+		boError() << k_funcinfo << file << " could not be loaded" << endl;
+		return;
+	}
+	setIcon(img);
+ } else {
+	setIcon(BoUfoImage());
+ }
+ mIconFile = file;
+}
+
+QString BoUfoPushButton::iconFile() const
+{
+ return mIconFile;
+}
+
 
 BoUfoLineEdit::BoUfoLineEdit() : BoUfoWidget()
 {
@@ -1336,6 +1541,31 @@ QString BoUfoLabel::text() const
 {
  QString text = mLabel->getText().c_str();
  return text;
+}
+
+void BoUfoLabel::setIcon(const BoUfoImage& img)
+{
+ mLabel->setIcon(new ufo::UImageIcon(img.image()));
+}
+
+void BoUfoLabel::setIconFile(const QString& file)
+{
+ if (!file.isEmpty()) {
+	QImage img;
+	if (!img.load(file)) {
+		boError() << k_funcinfo << file << " could not be loaded" << endl;
+		return;
+	}
+	setIcon(img);
+ } else {
+	setIcon(BoUfoImage());
+ }
+ mIconFile = file;
+}
+
+QString BoUfoLabel::iconFile() const
+{
+ return mIconFile;
 }
 
 BoUfoCheckBox::BoUfoCheckBox() : BoUfoWidget()
@@ -1619,18 +1849,44 @@ int BoUfoTabWidget::findId() const
 
 BoUfoWidget* BoUfoFactory::createWidget(const QString& className)
 {
+ if (!widgets().contains(className)) {
+	boError() << k_funcinfo << "don't know class " << className << endl;
+	return 0;
+ }
 #define CLASSNAME(name) if (className == #name) { return new name(); }
  CLASSNAME(BoUfoWidget)
+ CLASSNAME(BoUfoHBox)
+ CLASSNAME(BoUfoVBox)
  CLASSNAME(BoUfoPushButton)
  CLASSNAME(BoUfoCheckBox)
+ CLASSNAME(BoUfoSlider)
  CLASSNAME(BoUfoNumInput)
  CLASSNAME(BoUfoLabel)
  CLASSNAME(BoUfoLineEdit)
  CLASSNAME(BoUfoTextEdit)
  CLASSNAME(BoUfoComboBox)
  CLASSNAME(BoUfoListBox)
+ CLASSNAME(BoUfoMatrix)
+ CLASSNAME(BoUfoTabWidget)
 #undef CLASSNAME
  return 0;
+}
+
+QStringList BoUfoFactory::widgets()
+{
+ QStringList list;
+ list.append("BoUfoWidget");
+ list.append("BoUfoHBox");
+ list.append("BoUfoVBox");
+ list.append("BoUfoPushButton");
+ list.append("BoUfoCheckBox");
+ list.append("BoUfoNumInput");
+ list.append("BoUfoLabel");
+ list.append("BoUfoLineEdit");
+ list.append("BoUfoTextEdit");
+ list.append("BoUfoComboBox");
+ list.append("BoUfoListBox");
+ return list;
 }
 
 BoUfoInternalFrame::BoUfoInternalFrame(BoUfoManager* manager, const QString& title)

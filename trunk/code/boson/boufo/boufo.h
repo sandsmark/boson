@@ -43,6 +43,8 @@ namespace ufo {
 	class ULayoutManager;
 	class UDimension;
 	class UDrawable;
+	class UImage;
+	class UImageIO;
 
 	class UWidget;
 	class UButton;
@@ -72,6 +74,7 @@ class BoUfoFactory
 {
 public:
 	static BoUfoWidget* createWidget(const QString& className);
+	static QStringList widgets();
 };
 
 
@@ -209,7 +212,12 @@ private:
 	BoUfoMenuBar* mMenuBar;
 };
 
-
+/**
+ * Frontend to @ref ufo::UDrawable. You can simply subclass this class and
+ * totally ignore @ref ufo::UDrawable. If you require a @ref ufo::UDrawable
+ * pointer, just use @ref drawable which provides a pointer to the internal
+ * drawable (which calls methods in this class only).
+ **/
 class BoUfoDrawable
 {
 public:
@@ -230,6 +238,74 @@ private:
 	ufo::UDrawable* mDrawable;
 };
 
+/**
+ * Use @ref BoUfoImage instead.
+ **/
+class BoUfoImageIO
+{
+public:
+	BoUfoImageIO();
+	BoUfoImageIO(const QPixmap&);
+	BoUfoImageIO(const QImage&);
+	~BoUfoImageIO();
+
+	void setPixmap(const QPixmap& p);
+	void setImage(const QImage& img);
+
+	ufo::UImageIO* imageIO() const
+	{
+		return mImageIO;
+	}
+
+private:
+	void init();
+
+private:
+	ufo::UImageIO* mImageIO;
+};
+
+
+/**
+ * Frontend to @ref ufo::UImage. Just create an object of this class with the
+ * desired @ref QPixmap or @ref QImage and then use @ref image for your ufo
+ * object.
+ *
+ * An object of this class references the @ref ufo::UImage object it holds and
+ * unreferences it when it is destroyed. Therefore you can use the @ref image in
+ * as many ufo object as you want.
+ * Note that when the object of this class is destroyed, the @ref image is only
+ * deleted when no ufo object holds a reference anymore, so you can delete this
+ * object at any time.
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+class BoUfoImage
+{
+public:
+	BoUfoImage();
+	BoUfoImage(const QPixmap&); // slowest
+	BoUfoImage(const QImage&);
+	BoUfoImage(const BoUfoImage&); // fastest
+	~BoUfoImage();
+
+	void load(const QPixmap&);
+	void load(const QImage&);
+	void load(const BoUfoImage&);
+
+	ufo::UImage* image() const
+	{
+		return mImage;
+	}
+
+protected:
+	void set(BoUfoImageIO*);
+	void set(ufo::UImage*);
+
+private:
+	void init();
+
+private:
+	ufo::UImage* mImage;
+};
 
 /**
  * This class is an interface between libufo and Qt/boson.
@@ -261,6 +337,7 @@ class BoUfoWidget : public QObject
 	Q_PROPERTY(int minimumHeight READ minimumHeight WRITE setMinimumHeight);
 	Q_PROPERTY(int preferredWidth READ preferredWidth WRITE setPreferredWidth);
 	Q_PROPERTY(int preferredHeight READ preferredHeight WRITE setPreferredHeight);
+	Q_PROPERTY(QString backgroundImageFile READ backgroundImageFile WRITE setBackgroundImageFile);
 	Q_ENUMS(LayoutClass);
 public:
 	// AB: we must not use a QObject parent here. otherwise garbage
@@ -278,6 +355,20 @@ public:
 	{
 		return mWidget;
 	}
+
+	/**
+	 * Convenience method for @ref setBackground with a drawable that paints
+	 * @p img.
+	 **/
+	void setBackgroundImage(const BoUfoImage& img);
+	void setBackgroundImageFile(const QString&);
+
+	/**
+	 * @return The file set by @ref setBackgroundImageFile, @ref
+	 * QString::null by default. Undefined if you changed the background
+	 * with methods other than @ref setBackgroundImageFile.
+	 **/
+	QString backgroundImageFile() const;
 
 	/**
 	 * @param drawable The object used for rendering the background. Note
@@ -393,16 +484,28 @@ private:
 	void uslotFocusGained(ufo::UFocusEvent* e);
 	void uslotFocusLost(ufo::UFocusEvent* e);
 
+protected:
+	/**
+	 * @overload
+	 * Use the public version instead.
+	 **/
+	// AB: this one is useful when you want to use a ufo::UImage. however
+	// you still need to take care of deletion yourself and if we would make
+	// this public, we'd forget that.
+	void setBackground(ufo::UDrawable* drawable);
+
 private:
 	ufo::UWidget* mWidget;
 	LayoutClass mLayoutClass;
-	BoUfoDrawable* mBackground;
+	QString mBackgroundImageFile;
+	ufo::UDrawable* mBackgroundImageDrawable;
 };
 
 class BoUfoLabel : public BoUfoWidget
 {
 	Q_OBJECT
 	Q_PROPERTY(QString text READ text WRITE setText);
+	Q_PROPERTY(QString iconFile READ iconFile WRITE setIconFile);
 public:
 	BoUfoLabel();
 	BoUfoLabel(const QString& text);
@@ -414,6 +517,19 @@ public:
 
 	void setText(const QString& text);
 	QString text() const;
+	void setIcon(const BoUfoImage&);
+
+	/**
+	 * Convenience method that calls @ref setIcon.
+	 **/
+	void setIconFile(const QString&);
+
+	/**
+	 * @return The filename used in @ref setIconFile. Note that if you set
+	 * an icon through other methods (e.g. by using @ref setIcon directly)
+	 * the returned value of this method is undefined.
+	 **/
+	QString iconFile() const;
 
 protected:
 	virtual void setMinimumSize(const ufo::UDimension& size);
@@ -424,12 +540,14 @@ private:
 
 private:
 	ufo::ULabel* mLabel;
+	QString mIconFile;
 };
 
 class BoUfoPushButton : public BoUfoWidget
 {
 	Q_OBJECT
 	Q_PROPERTY(QString text READ text WRITE setText);
+	Q_PROPERTY(QString iconFile READ iconFile WRITE setIconFile);
 public:
 	// AB: we must not use a QObject parent here. otherwise garbage
 	// collection of libufo and Qt may confuse each other.
@@ -443,6 +561,19 @@ public:
 
 	void setText(const QString& text);
 	QString text() const;
+	void setIcon(const BoUfoImage&);
+
+	/**
+	 * Convenience method that calls @ref setIcon.
+	 **/
+	void setIconFile(const QString&);
+
+	/**
+	 * @return The filename used in @ref setIconFile. Note that if you set
+	 * an icon through other methods (e.g. by using @ref setIcon directly)
+	 * the returned value of this method is undefined.
+	 **/
+	QString iconFile() const;
 
 	virtual void setMinimumSize(const ufo::UDimension& size);
 	virtual void setPreferredSize(const ufo::UDimension& size);
@@ -459,6 +590,7 @@ private:
 
 private:
 	ufo::UButton* mButton;
+	QString mIconFile;
 };
 
 class BoUfoCheckBox : public BoUfoWidget
