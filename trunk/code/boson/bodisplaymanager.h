@@ -171,6 +171,8 @@ public slots:
 	void slotSetDebugShowCellGrid(bool);
 	void slotSetDebugMatrices(bool);
 	void slotSetDebugItemWorks(bool);
+	void slotSetDebugCamera(bool);
+	void slotSetDebugRenderCounts(bool);
 
 signals:
 	/**

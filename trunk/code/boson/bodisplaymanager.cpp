@@ -546,6 +546,24 @@ void BoDisplayManager::slotSetDebugItemWorks(bool debug)
  }
 }
 
+void BoDisplayManager::slotSetDebugCamera(bool debug)
+{
+ QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
+ while (it.current()) {
+	it.current()->setDebugCamera(debug);
+	++it;
+ }
+}
+
+void BoDisplayManager::slotSetDebugRenderCounts(bool debug)
+{
+ QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
+ while (it.current()) {
+	it.current()->setDebugRenderCounts(debug);
+	++it;
+ }
+}
+
 void BoDisplayManager::unlockAction()
 {
  QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
