@@ -1518,8 +1518,6 @@ void BosonBigDisplayBase::slotResetViewProperties()
  d->mAspect = 1.0;
  setCamera(Camera(mCanvas->mapWidth(), mCanvas->mapHeight()));
  resizeGL(d->mViewport[2], d->mViewport[3]);
-// a1 = 0;
-// a2 = 0;
 }
 
 void BosonBigDisplayBase::slotReCenterDisplay(const QPoint& pos)
@@ -2036,6 +2034,7 @@ void BosonBigDisplayBase::setUpdateInterval(unsigned int ms)
 {
  boDebug() << k_funcinfo << ms << endl;
  d->mUpdateInterval = ms;
+ boProfiling->setGLUpdateInterval(ms);
  QTimer::singleShot(d->mUpdateInterval, this, SLOT(slotUpdateGL()));
 }
 

@@ -20,6 +20,7 @@
 #include "bosonprofiling.h"
 #include "bosonprofilingprivate.h"
 #include "bodebug.h"
+#include "bosonconfig.h"
 
 #include <kstaticdeleter.h>
 
@@ -31,7 +32,7 @@ BosonProfiling* BosonProfiling::mProfiling = 0;
 #define COMPARE_TIMES(time1, time2) ( ((time2.tv_sec - time1.tv_sec) * 1000000) + (time2.tv_usec - time1.tv_usec) )
 
 #define MAX_ENTRIES 300
-#define PROFILING_VERSION 0x06 // increase if you change the file format of saved files!
+#define PROFILING_VERSION 0x07 // increase if you change the file format of saved files!
 
 unsigned long int compareTimes(const struct timeval& t1, const struct timeval& t2)
 {
@@ -192,6 +193,8 @@ void BosonProfiling::init()
  d = new BosonProfilingPrivate;
  d->mRenderTimes.setAutoDelete(true);
  d->mSlotAdvanceTimes.setAutoDelete(true);
+ d->mGLUpdateInterval = 0; // profiling logs can make use of the OpenGL update interval - makes anlalyzations easier
+ d->mVersion = PROFILING_VERSION;
 }
 
 BosonProfiling::~BosonProfiling()
@@ -383,8 +386,14 @@ bool BosonProfiling::saveToFile(const QString& fileName)
 
 bool BosonProfiling::save(QDataStream& stream) const
 {
+ if (d->mVersion != PROFILING_VERSION) {
+	boError() << k_funcinfo << "Can save new logs only! old logs can't be saved!" << endl;
+	return false;
+ }
  stream << QString::fromLatin1("BosonProfiling");
  stream << (Q_INT32)PROFILING_VERSION;
+
+ stream << (Q_UINT32)d->mGLUpdateInterval;
 
  stream << d->mUnitTimes;
  stream << d->mTimes;
@@ -435,10 +444,17 @@ bool BosonProfiling::load(QDataStream& stream)
  }
  Q_INT32 version;
  stream >> version;
- if (version != PROFILING_VERSION) {
+ if (version != PROFILING_VERSION && version != 0x06) {
 	boError() << k_funcinfo << "Invalid profiling format version " << version << endl;
 	return false;
  }
+ d->mVersion = version;
+
+ Q_UINT32 glUteInterval = 0;
+ if (version >= 0x07) {
+	stream >> glUteInterval;
+ }
+ d->mGLUpdateInterval = glUteInterval;
 
  // from here on we assume the stream is ok
  d->mUnitTimes.clear();
@@ -464,5 +480,15 @@ bool BosonProfiling::load(QDataStream& stream)
 	d->mSlotAdvanceTimes.append(t);
  }
  return true;
+}
+
+void BosonProfiling::setGLUpdateInterval(unsigned int ms)
+{
+ d->mGLUpdateInterval = ms;
+}
+
+unsigned int BosonProfiling::glUpdateInterval() const
+{
+ return d->mGLUpdateInterval;
 }
 

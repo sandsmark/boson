@@ -61,6 +61,20 @@ public:
 	static BosonProfiling* bosonProfiling() { return mProfiling; }
 
 	/**
+	 * Change the OpenGL update interval. This value can be useful when
+	 * analyzin profiling logs.
+	 **/
+	void setGLUpdateInterval(unsigned int interval);
+
+	/**
+	 * @return The OpenGL update interval. Be careful with this value - when
+	 * the interval was changed then you can end up in one half of the
+	 * profiling log to be with the old interval, the second half with the
+	 * new interval - but only the new interval is recorded into the log.
+	 **/
+	unsigned int glUpdateInterval() const;
+
+	/**
 	 * Start the timer for profiling. Note that nesting timers <em>are</em>
 	 * possible, as long as you use different events. Example:
 	 * <pre>
