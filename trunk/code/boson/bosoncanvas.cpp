@@ -737,6 +737,8 @@ void BosonCanvas::removeItem(BosonSprite* item)
  d->mAllItems.remove(item);
 }
 
+
+// this is an extremely time-critical function!
 BoItemList BosonCanvas::bosonCollisions(const QPointArray& cells, const BosonSprite* item, bool exact) const
 {
  // FIXME: if exact is true we assume that cells == item->cells() !!
@@ -756,7 +758,7 @@ BoItemList BosonCanvas::bosonCollisions(const QPointArray& cells, const BosonSpr
 	for (it = cellItems->begin(); it != cellItems->end(); ++it) {
 		BosonSprite* s = *it;
 		if (s != item) {
-			if (seen.findIndex(s) < 0 && (!item || !exact || item->bosonCollidesWith(s))) { 
+			if (seen.findIndex(s) < 0 && (!item || !exact || item->bosonCollidesWith(s))) {
 				seen.append(s);
 				collisions.append(s);
 			}

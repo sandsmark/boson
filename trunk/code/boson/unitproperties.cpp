@@ -285,7 +285,7 @@ const PluginProperties* UnitProperties::properties(int pluginType) const
 
 void UnitProperties::loadUpgrades(KSimpleConfig* conf)
 {
- kdDebug() << k_funcinfo << endl;
+// kdDebug() << k_funcinfo << endl;
  conf->setGroup("Boson Unit");
  int count = conf->readNumEntry("Upgrades", 0);
  if (count == 0) {
