@@ -3,7 +3,6 @@
       Getting started
     </h1>
     <p>&nbsp;</p>
-    <p>
       Minimum hardware requirements:<br>
       <ul>
        <li>500 MHz Ix86 Prozessor (don't know anything about other machines)</li>
@@ -11,8 +10,6 @@
        <li>3D accelerator card (this is the most important part!!)</li>
        <li>Optional: Sound card</li>
      </ul>
-     </p>
-    <p>
      Minimum software requirements:
      <ul>
        <li><a href="http://www.xfree86.org" target="_blank">XFree 4.x server</a> (with OpenGL support)</li>
@@ -30,7 +27,6 @@
      Athlon 750 Mhz, 256, Geforce2 MX, X4.2, kde3.1
      PIII 450; 512; voodoo3; X4.2; kde3.0.2
      -->
-    </p>
     <p>
       Please note that since we do not yet provide precompiled binaries you will
       need to install the development packages of these libraries as well (the
