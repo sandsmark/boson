@@ -683,6 +683,7 @@ void BoGameCamera::setCameraPos(const BoVector3Float& pos)
 
   // Validate position
   checkCameraPosition();
+  setCameraChanged(true);
 }
 
 void BoGameCamera::setRadius(GLfloat r)
@@ -695,6 +696,7 @@ void BoGameCamera::setRadius(GLfloat r)
 
   // Validate camera's position
   checkCameraPosition();
+  setCameraChanged(true);
 }
 
 void BoGameCamera::setRotation(GLfloat r)
@@ -707,6 +709,7 @@ void BoGameCamera::setRotation(GLfloat r)
 
   // Validates camera's position
   checkCameraPosition();
+  setCameraChanged(true);
 }
 
 void BoGameCamera::setZ(GLfloat z)
@@ -717,6 +720,7 @@ void BoGameCamera::setZ(GLfloat z)
 
   // Validate camera pos
   checkCameraPosition();
+  setCameraChanged(true);
 }
 
 void BoGameCamera::setFreeMovement(bool free)
@@ -737,6 +741,7 @@ void BoGameCamera::setFreeMovement(bool free)
     //  to higher values than allowed, and when camera comes out of free mode,
     //  those values won't be checked for.
     updateCamera();
+    setCameraChanged(true);
   }
 }
 
@@ -755,6 +760,7 @@ void BoGameCamera::setUseLimits(bool use)
     checkRadius();
     checkLookAtPosition();
     checkCameraPosition();
+    setCameraChanged(true);
   }
 }
 
