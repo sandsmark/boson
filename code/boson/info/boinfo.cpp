@@ -535,6 +535,24 @@ QString BoInfo::keyToName(int key)
 	case BoInfo::HaveProprietaryNVidiaXDriver:
 		string = i18n("Have the proprietary %1").arg(NVIDIAXDRIVER);
 		break;
+	case BoInfo::DevNVidiaCTL:
+		string = i18n("/dev/nvidiactl");
+		break;
+	case BoInfo::DevNVidia0:
+		string = i18n("/dev/nvidia0");
+		break;
+	case BoInfo::DevNVidia1:
+		string = i18n("/dev/nvidia1");
+		break;
+	case BoInfo::DevNVidia2:
+		string = i18n("/dev/nvidia2");
+		break;
+	case BoInfo::DevNVidia3:
+		string = i18n("/dev/nvidia3");
+		break;
+
+	default:
+		string = i18n("(Unknown)");
  }
  return string;
 }
@@ -606,9 +624,6 @@ void BoInfo::debug() const
 	QString value = valueToString(it.key());
 	if (value != QString::null) {
 		QString name = keyToName(it.key());
-		if (name.isEmpty()) {
-			name = i18n("Unknown entry");
-		}
 		boDebug() << name  + ": " << value << endl;
 	}
  }
