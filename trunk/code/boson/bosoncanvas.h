@@ -212,7 +212,6 @@ public:
 
 	int particleSystemsCount();
 	void updateParticleSystems(float elapsed);
-	void renderParticleSystems();
 	QPtrList<BosonParticleSystem>* particleSystems();
 
 	void updateMissiles();

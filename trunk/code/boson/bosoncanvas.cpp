@@ -785,16 +785,6 @@ void BosonCanvas::updateParticleSystems(float elapsed)
  }
 }
 
-void BosonCanvas::renderParticleSystems()
-{
- QPtrListIterator<BosonParticleSystem> it((d->mParticles));
- BosonParticleSystem* s;
- while ((s = it.current()) != 0) {
-	++it;
-	s->draw();
- }
-}
-
 void BosonCanvas::updateMissiles()
 {
 /* QPtrListIterator<BosonMissile> it(d->mMissiles);
