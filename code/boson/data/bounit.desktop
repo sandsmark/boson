@@ -1,0 +1,13 @@
+[Desktop Entry]
+Comment=Unit Editor for Boson
+Name=BoUnit
+Exec=bounit
+MapNotify=true
+TerminalOptions=
+Icon=boson
+Path=
+DocPath=boson/index.html
+Type=Application
+Terminal=0
+InitialPreference=8
+
