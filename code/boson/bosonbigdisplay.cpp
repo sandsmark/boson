@@ -336,6 +336,8 @@ void BosonBigDisplay::clearSelection()
  d->mSelectionList.clear();
  d->mCursor->setCursor(CursorDefault);
  d->mCursor->setWidgetCursor(this);
+ //FIXME: we emit this even if the selection was empty before, too - is this
+ //good?
  emit signalSingleUnitSelected(0);
 }
 
