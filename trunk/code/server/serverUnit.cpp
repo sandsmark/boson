@@ -191,7 +191,7 @@ void serverMobUnit::reportHidden(int i)
 QRect serverMobUnit::rect(void)
 {
 	QRect r = mobUnit::rect();
-	r.moveBy( __x, __y );
+	r.moveBy( __x*BO_TILE_SIZE, __y*BO_TILE_SIZE );
 	return r;
 }
 
@@ -255,8 +255,6 @@ serverFacility::serverFacility(boBuffer *b, facilityMsg_t *msg)
 	:Facility(msg)
 	,serverUnit( b, (unitMsg_t*)msg)
 {
-	__x *= BO_TILE_SIZE;
-	__y *= BO_TILE_SIZE;
 	counter = BUILDING_SPEED;
 }
 
@@ -382,7 +380,7 @@ void serverFacility::reportHidden(int i)
 QRect serverFacility::rect(void)
 {
 	QRect r = Facility::rect();
-	r.moveBy( __x, __y );
+	r.moveBy( __x*BO_TILE_SIZE, __y*BO_TILE_SIZE );
 	return r;
 }
 

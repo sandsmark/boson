@@ -40,6 +40,7 @@ public:
 
 protected:
 	boBuffer	*buffer;
+	/** x,y position, grid-wise! */
 	int		__x, __y;
 	int		state;
 	int		power;
