@@ -24,7 +24,6 @@
 #include "../defines.h"
 #include "../cell.h"
 #include "../bo3dtools.h"
-#include "../bosonprofiling.h"
 #include <bodebug.h>
 
 // not nice in this file. we need it for boGame->status() == KGame::Init
@@ -289,7 +288,6 @@ void BoGroundRendererBase::generateCellList(const BosonMap* map)
 
 Cell** CellListBuilderNoTree::generateCellList(const BosonMap* map, Cell** origRenderCells, int* renderCellsSize, unsigned int* renderCellsCount)
 {
- BosonProfiler profiler(777893);
  if (!viewport()) {
 	BO_NULL_ERROR(viewport());
 	return origRenderCells;
@@ -816,7 +814,6 @@ void CellListBuilderNoTree::calculateWorldRect(const QRect& rect, int mapWidth, 
 
 Cell** CellListBuilderTree::generateCellList(const BosonMap* map, Cell** origRenderCells, int* renderCellsSize, unsigned int* renderCellsCount)
 {
- BosonProfiler profiler(777894);
  if (!map) {
 	BO_NULL_ERROR(map);
 	return origRenderCells;
