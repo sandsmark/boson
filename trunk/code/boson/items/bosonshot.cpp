@@ -146,6 +146,7 @@ bool BosonShot::saveAsXML(QDomElement& root)
   root.setAttribute("y", y());
   root.setAttribute("z", z());
 
+  root.setAttribute("Rtti", rtti());
   root.setAttribute("Type", type());
 
   // the unittype defines the group of the shot (through the weapons of that
