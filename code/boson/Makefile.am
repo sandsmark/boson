@@ -235,18 +235,18 @@ libbo3dsdebug_la_SOURCES = \
 		bo3dtools.cpp \
 		kgamemodeldebug.cpp \
 		bomatrixwidget.cpp
-bo3dsdebug_LDFLAGS = $(KDE_RPATH) $(all_libraries)
-bo3dsdebug_LDADD = \
-		$(top_builddir)/boson/libbo3dsdebug.la \
-		$(top_builddir)/bodebug/libbodebug.la \
-		$(top_builddir)/boson/bopui/libbopui.la \
-		$(LIB_BOMEMORY) \
-		-l3ds \
-		$(GLLIB) \
-		$(LIB_PLIB) \
-		-lkio $(LIB_KDEUI)
-bo3dsdebug_SOURCES = \
-		bo3dsdebugmain.cpp
+#bo3dsdebug_LDFLAGS = $(KDE_RPATH) $(all_libraries)
+#bo3dsdebug_LDADD = \
+#		$(top_builddir)/boson/libbo3dsdebug.la \
+#		$(top_builddir)/bodebug/libbodebug.la \
+#		$(top_builddir)/boson/bopui/libbopui.la \
+#		$(LIB_BOMEMORY) \
+#		-l3ds \
+#		$(GLLIB) \
+#		$(LIB_PLIB) \
+#		-lkio $(LIB_KDEUI)
+#bo3dsdebug_SOURCES = \
+#		bo3dsdebugmain.cpp
 
 METASOURCES = AUTO
 
