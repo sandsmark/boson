@@ -47,6 +47,7 @@
 #include <qcursor.h>
 
 #include <sys/time.h>
+#include <iostream.h>
 
 
 #ifdef NO_OPENGL
@@ -61,12 +62,6 @@
 #define NEAR 1.0 // FIXME: should be > 1.0
 #define FAR 100.0
 
-
-#define PLIB 0 // obsolete - we use Lib3ds
-
-#if PLIB
-#include <plib/ssg.h>
-#endif // PLIB
 
 #define COMPARE_TIMES(time1, time2) ( ((time2.tv_sec - time1.tv_sec) * 1000000) + (time2.tv_usec - time1.tv_usec) )
 
@@ -227,13 +222,6 @@ class BosonBigDisplayBase::BosonBigDisplayBasePrivate
 public:
 	BosonBigDisplayBasePrivate()
 	{
-#ifndef NO_OPENGL
-#if PLIB
-		m3ds = 0;
-#endif
-#endif
-
-		
 		mLocalPlayer = 0;
 //		mChat = 0;
 
@@ -283,12 +271,6 @@ public:
 	QTimer mUpdateTimer;
 	int mUpdateInterval;
 	
-
-#ifndef NO_OPENGL
-#if PLIB
-	ssgEntity* m3ds;
-#endif
-#endif
 };
 
 BosonBigDisplayBase::BosonBigDisplayBase(BosonCanvas* c, QWidget* parent)
@@ -360,9 +342,6 @@ void BosonBigDisplayBase::initializeGL()
  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
 
-#if PLIB
- d->m3ds = ssgLoad3ds("/home/andi/tank.3ds");
-#endif
  if (checkError()) {
 	kdError() << k_funcinfo << endl;
  }
@@ -641,7 +620,7 @@ void BosonBigDisplayBase::paintGL()
  timer_start = COMPARE_TIMES(time1, time2);
  function_time = COMPARE_TIMES(funcStart, time2);
 
- kdDebug() << k_funcinfo << endl
+ cout << k_funcinfo << endl
 		<< "clearing:    " << clearTime << endl 
 		<< "misc1:       " << misc1 << endl
 		<< "renderCells: " << render_cells << endl
