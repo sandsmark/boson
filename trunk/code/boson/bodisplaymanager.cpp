@@ -105,6 +105,8 @@ BosonBigDisplayBase* BoDisplayManager::addInitialDisplay()
 		this, SLOT(slotSelectGroup(int)));
  connect(b, SIGNAL(signalCreateGroup(int)),
 		this, SLOT(slotCreateGroup(int)));
+ connect(b, SIGNAL(signalSetGrabMovie(bool)),
+		this, SLOT(slotSetGrabMovie(bool)));
 
  d->mLayout->addWidget(b);
  d->mLayout->activate();
@@ -122,6 +124,8 @@ void BoDisplayManager::setCanvas(BosonCanvas* c)
  }
  connect(c, SIGNAL(signalUnitRemoved(Unit*)),
 		this, SLOT(slotUnitRemoved(Unit*)));
+
+ d->mActiveDisplay->setCanvas(c);
 }
 
 void BoDisplayManager::quitGame()

@@ -37,6 +37,7 @@
 #include "boevent.h"
 #include "bosoneffectproperties.h"
 #include "bowater.h"
+#include "script/bosonscript.h"
 
 #include <klocale.h>
 #include <kgame/kmessageclient.h>
@@ -186,6 +187,9 @@ bool BosonStarting::start()
 		p->initMap(mDestPlayField->map(), boGame->gameMode());
 	}
  }
+
+ BosonScript::setGame(boGame);
+ BosonScript::setCanvas(boGame->canvasNonConst());
 
  boGame->lock();
  if (!loadTiles()) {

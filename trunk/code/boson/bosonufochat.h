@@ -24,7 +24,6 @@
 class BosonGLFont;
 class KPlayer;
 class KGame;
-class KGameChat;
 class QStringList;
 
 /**
@@ -37,8 +36,6 @@ public:
 	BosonUfoChat();
 	~BosonUfoChat();
 
-	void setChat(KGameChat* chat);
-
 	/**
 	 * @return The id of the messages produced by KGameCanvasChat. This id
 	 * is used by @ref KGame and you should not use it in any other message
@@ -46,7 +43,11 @@ public:
 	 **/
 	int messageId() const;
 
-	void setKGame(KGame* game);
+	void setMessageId(int msgid);
+	/**
+	 * @param msgid Ignored if < 0, otherwise sets the @ref messageId
+	 **/
+	void setKGame(KGame* game, int msgid = -1);
 	KGame* game() const { return mGame; }
 
 	/**
@@ -86,7 +87,7 @@ private:
 	BosonUfoChatPrivate* d;
 
 	KGame* mGame;
-	KGameChat* mChat;
+	int mMessageId;
 };
 
 #endif

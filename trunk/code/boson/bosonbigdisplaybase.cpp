@@ -89,6 +89,7 @@
 #include "botexmapimportdialog.h"
 #include "optionsdialog.h"
 #include "boaction.h"
+#include "boeventlistener.h"
 #ifdef BOSON_USE_BOMEMORY
 #include "bomemory/bomemorydialog.h"
 #endif
@@ -1111,8 +1112,6 @@ public:
 		mMouseIO = 0;
 		mInput = 0;
 
-		mChat = 0;
-
 		mCanvasRenderer = 0;
 
 		mDefaultFont = 0;
@@ -1176,8 +1175,6 @@ public:
 
 	QTimer mCursorEdgeTimer;
 	int mCursorEdgeCounter;
-
-	BosonGLChat* mChat;
 
 	BosonCanvasRenderer* mCanvasRenderer;
 
@@ -1296,7 +1293,6 @@ BosonBigDisplayBase::~BosonBigDisplayBase()
  BoMeshRendererManager::manager()->unsetCurrentRenderer();
  BoGroundRendererManager::manager()->unsetCurrentRenderer();
  delete mSelection;
- delete d->mChat;
  delete d->mDefaultFont;
  delete d->mToolTips;
  delete d->mGLMiniMap;
@@ -1326,7 +1322,6 @@ void BosonBigDisplayBase::init()
  mSelection = new BoSelection(this);
  connect(mSelection, SIGNAL(signalSelectionChanged(BoSelection*)),
 		this, SIGNAL(signalSelectionChanged(BoSelection*)));
- d->mChat = new BosonGLChat(this);
  d->mToolTips = new BoGLToolTip(this);
  d->mCanvasRenderer = new BosonCanvasRenderer(d->mModelviewMatrix, d->mViewFrustum, d->mViewport);
  d->mGLMiniMap = new BosonGLMiniMap(this);
@@ -1707,6 +1702,7 @@ void BosonBigDisplayBase::initUfoGUI()
 
  d->mUfoChat = new BosonUfoChat();
  south->addWidget(d->mUfoChat);
+ d->mUfoChat->setMessageId(BosonMessage::IdChat);
 
 
  // TODO: tooltips ?
@@ -1893,7 +1889,7 @@ void BosonBigDisplayBase::initUfoActions(bool gameMode)
 		KShortcut(), 0, 0, actionCollection, "debug_texture_memory");
  connect(debugTextureMemory, SIGNAL(signalToggled(bool)), this, SLOT(slotSetDebugTextureMemory(bool)));
  (void)new BoUfoAction(i18n("&Unfog"), KShortcut(), this,
-		SIGNAL(signalUnfogAll()), actionCollection, "debug_unfog");
+		SLOT(slotUnfogAll()), actionCollection, "debug_unfog");
  (void)new BoUfoAction(i18n("Dump game &log"), KShortcut(), this,
 		SLOT(slotDumpGameLog()), actionCollection, "debug_gamelog");
  BoUfoToggleAction* enableColorMap = new BoUfoToggleAction(i18n("Enable colormap"),
@@ -3151,6 +3147,8 @@ void BosonBigDisplayBase::setLocalPlayerIO(PlayerIO* io)
  delete d->mMouseIO;
  d->mMouseIO = 0;
 
+ boWaterManager->setLocalPlayerIO(localPlayerIO());
+
  if (d->mGLMiniMap) {
 	if (previousPlayerIO) {
 		previousPlayerIO->disconnect(0, d->mGLMiniMap, 0);
@@ -3182,6 +3180,10 @@ void BosonBigDisplayBase::setLocalPlayerIO(PlayerIO* io)
 		disconnect(i, 0, d->mUfoCommandFrame, 0);
 		disconnect(d->mUfoCommandFrame, 0, i, 0);
 	}
+
+	// AB: we should probably add such a signal to the IO and use the one in
+	// the IO then!
+	disconnect((KPlayer*)previousPlayerIO->player(), SIGNAL(signalUnitChanged(Unit*)), this, 0);
  }
 
  d->mUfoCommandFrame->setLocalPlayerIO(localPlayerIO());
@@ -3193,6 +3195,11 @@ void BosonBigDisplayBase::setLocalPlayerIO(PlayerIO* io)
  // ok
  setGameMode(boGame->gameMode());
 
+ // AB: we should probably add such a signal to the IO and use the one in
+ // the IO then!
+ connect((KPlayer*)localPlayerIO()->player(), SIGNAL(signalUnitChanged(Unit*)),
+		this, SLOT(slotUnitChanged(Unit*)));
+
 
  addMouseIO(localPlayerIO());
 
@@ -3200,6 +3207,9 @@ void BosonBigDisplayBase::setLocalPlayerIO(PlayerIO* io)
  if (i) {
 	connect(d->mUfoCommandFrame, SIGNAL(signalAction(const BoSpecificAction&)),
 			i, SLOT(slotAction(const BoSpecificAction&)));
+	if (i->eventListener()) {
+		setLocalPlayerScript(i->eventListener()->script());
+	}
  } else {
 	boError() << k_funcinfo << "local player does not have any BosonLocalPlayerInput!" << endl;
  }
@@ -3325,7 +3335,6 @@ void BosonBigDisplayBase::quitGame()
  delete d->mInput,
  d->mInput = 0;
  setLocalPlayerIO(0);
- setKGameChat(0);
  setCanvas(0);
 
  // these are rather cosmetic. we won't crash if we don't clear
@@ -3580,18 +3589,8 @@ BoItemList* BosonBigDisplayBase::selectionRectItems()
  return localPlayerIO()->unitsAtCells(&cellVector);
 }
 
-void BosonBigDisplayBase::setKGameChat(KGameChat* chat)
-{
-#warning FIXME
- // FIXME: KGameChat should not be used anymore. we should use an ufo widget
- // only
- d->mChat->setChat(chat);
- d->mUfoChat->setChat(chat);
-}
-
 void BosonBigDisplayBase::addChatMessage(const QString& message)
 {
- d->mChat->addMessage(message);
  d->mUfoChat->addMessage(message);
 }
 
@@ -4926,6 +4925,7 @@ void BosonBigDisplayBase::resetGameMode()
  BO_CHECK_NULL_RET(ufoManager());
 
  slotChangeCursor(boConfig->cursorMode(), boConfig->cursorDir());
+ d->mUfoChat->setKGame(boGame);
 
  // by default the cmdframe is in game mode.
  d->mUfoCommandFrame->setGameMode(true);
@@ -5824,5 +5824,41 @@ void BosonBigDisplayBase::slotChangeCursor(int mode, const QString& cursorDir_)
 
  boConfig->setCursorMode(mode);
  boConfig->setCursorDir(cursorDir);
+}
+
+void BosonBigDisplayBase::slotUnfogAll(Player* pl)
+{
+ // AB: disabled, because we cannot use player.h here.
+ // see also comment in slotEditorEditPlayerMinerals()
+#if 0
+ if (!boGame) {
+	boError() << k_funcinfo << "NULL game" << endl;
+	return;
+ }
+ if (!boGame->playField()) {
+	boError() << k_funcinfo << "NULL playField" << endl;
+	return;
+ }
+ BosonMap* map = boGame->playField()->map();
+ if (!map) {
+	boError() << k_funcinfo << "NULL map" << endl;
+	return;
+ }
+ QPtrList<KPlayer> list;
+ if (!pl) {
+	list = *boGame->playerList();
+ } else {
+	list.append(pl);
+ }
+ for (unsigned int i = 0; i < list.count(); i++) {
+	Player* p = (Player*)list.at(i);
+	for (unsigned int x = 0; x < map->width(); x++) {
+		for (unsigned int y = 0; y < map->height(); y++) {
+			p->unfog(x, y);
+		}
+	}
+	boGame->slotAddChatSystemMessage(i18n("Debug"), i18n("Unfogged player %1 - %2").arg(p->id()).arg(p->name()));
+ }
+#endif
 }
 
