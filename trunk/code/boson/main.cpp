@@ -28,6 +28,8 @@
 #include <kcmdlineargs.h>
 #include <klocale.h>
 
+#define HARDCODE_NOSOUND 1
+
 static const char *description =
     I18N_NOOP("A realtime strategy game for KDE");
 
@@ -35,7 +37,11 @@ static const char *version = BOSON_VERSION_STRING;
 
 static KCmdLineOptions options[] =
 {
+#if HARDCODE_NOSOUND
+    { "sound", I18N_NOOP("Enable Sounds"), 0 },
+#else
     { "nosound", I18N_NOOP("Disable Sounds"), 0 },
+#endif
     { "new", I18N_NOOP("Skip Welcome Widget and display the New Game screen"), 0 },
     { "editor", I18N_NOOP("Skip Welcome Widget and display the Start Editor screen"), 0 },
     { "load", I18N_NOOP("Skip Welcome Widget and display the Load Game screen"), 0 },
