@@ -1,7 +1,7 @@
 [Animation]
 FrameCount=20
 RotateDegree=0
-Speed=50
+Speed=100
 
 [Boson Cursor]
 FilePrefix=cursor-
