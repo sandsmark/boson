@@ -38,6 +38,7 @@
 #include "bosonlocalplayerinput.h"
 #include "bosonweapon.h"
 #include "no_player.h"
+#include "bo3dtools.h"
 
 #include <klocale.h>
 
@@ -342,7 +343,7 @@ bool BosonBigDisplayInput::actionBuild(const BoVector3& canvasVector)
 	boError() << k_funcinfo << "NULL unit properties" << endl;
 	return false;
  }
- if (!canvas()->canPlaceUnitAt(prop, QPoint((int)canvasVector.x(), (int)canvasVector.y()), production)) {
+ if (!canvas()->canPlaceUnitAt(prop, BoVector2(canvasVector.x(), canvasVector.y()), production)) {
 	boDebug() << k_funcinfo << "Cannot place production here" << endl;
 	boGame->slotAddChatSystemMessage(i18n("You can't place a %1 there").arg(prop->name()));
 	return false;
@@ -607,7 +608,7 @@ void BosonBigDisplayInput::updateCursor()
 		if (unit) {
 			if (localPlayerIO()->ownsUnit(unit)) {
 				setCursorType(CursorDefault);
-				// we might add something like 
+				// we might add something like
 				// if (leader->isDamaged() && unit->canRepair())
 				// here
 			} else if (leader->unitProperties()->canShoot()) {

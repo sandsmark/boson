@@ -58,6 +58,7 @@
 #include "bomemory/bomemorydialog.h"
 #endif
 #include "bowater.h"
+#include "bo3dtools.h"
 
 #include <kapplication.h>
 #include <klocale.h>
@@ -301,8 +302,8 @@ void BosonWidgetBase::initGameMode()//FIXME: rename! we don't have a difference 
  //  anyway (and I don't intend to use it for anything else)
  boDebug() << k_funcinfo << "Trying searching sample path" << endl;
  BosonPathInfo i;
- i.start = QPoint(5, 5);
- i.dest = QPoint(45, 35);
+ i.start = BoVector2(5, 5);
+ i.dest = BoVector2(45, 35);
  boDebug() << k_funcinfo << "Let's go!" << endl;
  canvas()->pathfinder()->findPath(&i);
  boDebug() << k_funcinfo << "sample path searching complete" << endl;

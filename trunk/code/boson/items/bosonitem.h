@@ -30,13 +30,14 @@ class BosonCollisions;
 class SelectBox;
 class BosonModel;
 class BosonAnimation;
-class QRect;
 class Cell;
 class BosonEffect;
 class BosonItemPropertyHandler;
 class Player;
 class BoVector3;
 class BosonItemRenderer;
+class BoVector2;
+class BoRect;
 
 class KGamePropertyHandler;
 class KGamePropertyBase;
@@ -236,11 +237,15 @@ public:
 
 	inline float leftEdge() const { return x(); }
 	inline float topEdge() const { return y(); }
-	inline float rightEdge() const { return (leftEdge() + width() - 1); }
-	inline float bottomEdge() const { return (topEdge() + height() - 1); }
+	inline float rightEdge() const { return leftEdge() + width(); }
+	inline float bottomEdge() const { return topEdge() + height(); }
 
-	QRect boundingRect() const;
-	QRect boundingRectAdvanced() const;
+	inline float centerX() const { return x() + width() / 2.0f; };
+	inline float centerY() const { return y() + height() / 2.0f; };
+	BoVector2 center() const;
+
+	BoRect boundingRect() const;
+	BoRect boundingRectAdvanced() const;
 
 	/**
 	 * Move the item to @p nx, @p ny, @p nz. Note that it is moved without
@@ -385,7 +390,7 @@ public:
 	 * calculate which cells the unit would occupy if it was at a certain
 	 * position.
 	 **/
-	static void makeCells(Cell* allCells, QPtrVector<Cell>* cells, int left, int right, int top, int bottom, int mapWidth, int mapHeight);
+	static void makeCells(Cell* allCells, QPtrVector<Cell>* cells, const BoRect& rect, int mapWidth, int mapHeight);
 
 	/**
 	 * @return Whether this unit collides with given unit.

@@ -88,7 +88,7 @@ bool BosonPlayerInput::playerInput(QDataStream& stream, Player* player)
 	{
 		bool attack;
 		Q_UINT8 attackcode;
-		QPoint pos;
+		BoVector2 pos;
 		Q_UINT32 unitCount;
 		stream >> attackcode;
 		if (attackcode == 0) {
@@ -778,7 +778,7 @@ bool BosonPlayerInput::playerInput(QDataStream& stream, Player* player)
 		const UnitProperties* prop = p->speciesTheme()->unitProperties(unitType);
 		float width = prop->unitWidth();
 		float height = prop->unitHeight();
-		QRect r(cellX, cellY, lround(width), lround(height));
+		BoRect r(cellX, cellY, cellX + width, cellY + height);
 		if (!canvas()->canGo(prop, r)) {
 			boWarning() << k_funcinfo << "Unit with type " << unitType << " can't go to (" << cellX << "; " << cellY << ")" << endl;
 			break;

@@ -163,7 +163,7 @@ public:
 	 * the ground <em>not</em> for collisions with other units. See @ref Unit for
 	 * this.
 	 **/
-	bool canGo(const UnitProperties* prop, const QRect& rect) const;
+	bool canGo(const UnitProperties* prop, const BoRect& rect) const;
 
 	void setMap(BosonMap* map);
 	BosonMap* map() const;
@@ -352,45 +352,24 @@ public:
 
 	/**
 	 * @param pos The location where the unit should get placed.
-	 * This is in <em>cell</em>-coordinates. This point specifies the
-	 * <em>upper-left</em> corner of the unit.
+	 * This point specifies the <em>upper-left</em> corner of the unit.
 	 * @param factory If NULL then BUILD_RANGE is ignored. Otherwise
 	 * facilities must be in range of BUILD_RANGE of any player unit and
 	 * mobile units in BUILD_RANGE of the facility.
 	 * @return TRUE if the unit can be placed at pos, otherwise FALSE
 	 **/
-	bool canPlaceUnitAtCell(const UnitProperties* unit, const QPoint& pos, ProductionPlugin* factory) const;
-
-	/**
-	 * Same as above, but this takes canvas coordinates in @p pos.
-	 *
-	 * Note that this is <em>not</em> more accurate than the above one. It
-	 * does not check for half-cells or so, i.e. does not check for pixel
-	 * positions. It simply checks for a valid canvas position as well
-	 * (this is usefule, since (-10,-10) on canvas maps to (0,0), but it
-	 * should be invalid!)
-	 **/
-	bool canPlaceUnitAt(const UnitProperties* unit, const QPoint& pos, ProductionPlugin* factory) const
-	{
-		if (!onCanvas(pos)) {
-			return false;
-		}
-		return canPlaceUnitAtCell(unit, pos, factory);
-	}
+	bool canPlaceUnitAt(const UnitProperties* unit, const BoVector2& pos, ProductionPlugin* factory) const;
 
 	void quitGame();
 
 	void addToCells(BosonItem* u);
 	void removeFromCells(BosonItem* u);
 
-	bool onCanvas(const QPoint& pos) const
+	bool onCanvas(const BoVector2& pos) const;
+	bool onCanvas(const BoVector3& pos) const;
+	bool onCanvas(float x, float y) const
 	{
-		return onCanvas(pos.x(), pos.y());
-	}
-	bool onCanvas(const BoVector3& canvasPos) const;
-	bool onCanvas(int x, int y) const
-	{
-		return x >= 0 && y >= 0 && (unsigned int)x < mapWidth() && (unsigned int)y < mapHeight();
+		return x >= 0.0f && y >= 0.0f && x <= mapWidth() && y <= mapHeight();
 	}
 
 	bool advanceFunctionLocked() const { return mAdvanceFunctionLocked; }

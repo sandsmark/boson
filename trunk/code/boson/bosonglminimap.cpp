@@ -150,12 +150,9 @@ void BosonGLMiniMap::makeCellList(QPtrVector<Cell>* cells, const Unit* unit, flo
 {
  BO_CHECK_NULL_RET(map());
  BO_CHECK_NULL_RET(unit);
- int left, right, top, bottom;
- BosonItem::leftTopCell(&left, &top, x, y);
- BosonItem::rightBottomCell(&right, &bottom, x + unit->width() - 1, y + unit->height() - 1);
- right = QMIN(right, QMAX((int)map()->width() - 1, 0));
- bottom = QMIN(bottom, QMAX((int)map()->height() - 1, 0));
- BosonItem::makeCells(map()->cells(), cells, left, right, top, bottom, map()->width(), map()->height());
+ float right = QMIN(x + unit->width(), map()->width());
+ float bottom = QMIN(y + unit->height(), map()->height());
+ BosonItem::makeCells(map()->cells(), cells, BoRect(x, y, right, bottom), map()->width(), map()->height());
 }
 
 

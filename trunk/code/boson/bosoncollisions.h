@@ -25,9 +25,9 @@ class Unit;
 class BoItemList;
 class BosonItem;
 class BoVector3;
+class BoVector2;
+class BoRect;
 
-class QPoint;
-class QRect;
 template<class T> class QPtrList;
 template<class T> class QValueList;
 template<class T> class QPtrVector;
@@ -87,8 +87,8 @@ public:
 	inline BosonMap* map() const { return mMap; }
 
 	BoItemList* collisionsAtCells(const QPtrVector<Cell>* cells, const BosonItem* item, bool exact) const;
-	BoItemList* collisions(const QRect& rect, const BosonItem* item = 0, bool exact = true) const; // note: exact == true has n effec for item != 0 ONLY!
-	BoItemList* collisionsAtCells(const QRect& rect, const BosonItem* item = 0, bool exact = true) const; // note: exact == true has n effec for item != 0 ONLY!
+	BoItemList* collisions(const BoRect& rect, const BosonItem* item = 0, bool exact = true) const; // note: exact == true has n effec for item != 0 ONLY!
+	BoItemList* collisionsAtCells(const BoRect& rect, const BosonItem* item = 0, bool exact = true) const; // note: exact == true has n effec for item != 0 ONLY!
 
 	/**
 	 * @param x x-Position in <em>cell</em>-coordinates.
@@ -100,7 +100,7 @@ public:
 	 * @param pos Position in <em>canvas</em> coordinates, i.e. not cell
 	 * values
 	 **/
-	BoItemList* collisions(const QPoint& pos) const;
+	BoItemList* collisions(const BoVector2& pos) const;
 
 	/**
 	 * Usually you don't need a @ref QCanvasItemList of all units in a
@@ -110,7 +110,7 @@ public:
 	 * units inside the rect which are also in the circle. Maybe we could
 	 * check for the circle directly.
 	 **/
-	QValueList<Unit*> unitCollisionsInRange(const QPoint& pos, int radius) const;
+	QValueList<Unit*> unitCollisionsInRange(const BoVector2& pos, int radius) const;
 
 	/**
 	 * Same as @ref unitCollisionInRange, but also checks for z-coordinate and
@@ -138,7 +138,7 @@ public:
 	 * @param rect Check all cells on this rect
 	 * @return TRUE if any cell in rect is occupied, otherwise FALSE.
 	 **/
-	bool cellsOccupied(const QRect& rect) const;
+	bool cellsOccupied(const BoRect& rect) const;
 
 	QValueList<Unit*> collisionsInBox(const BoVector3& v1, const BoVector3& v2, BosonItem* exclude) const;
 

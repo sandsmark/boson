@@ -30,12 +30,13 @@
 #include "bosonitemrenderer.h"
 #include "bodebug.h"
 
-#include <qrect.h>
 #include <qptrlist.h>
 #include <qptrvector.h>
 #include <qdom.h>
 
 #include <kstaticdeleter.h>
+
+#include <math.h>
 
 QMap<int, QString>* BosonItemProperties::mPropertyMap = 0;
 static KStaticDeleter< QMap<int, QString> > sd;
@@ -172,10 +173,7 @@ BosonItem::~BosonItem()
 QPtrVector<Cell>* BosonItem::cells()
 {
  if (mCellsDirty) {
-	int left, right, top, bottom;
-	leftTopCell(&left, &top);
-	rightBottomCell(&right, &bottom);
-	makeCells(canvas()->cells(), mCells, left, right, top, bottom, canvas()->mapWidth(), canvas()->mapHeight());
+	makeCells(canvas()->cells(), mCells, boundingRect(), canvas()->mapWidth(), canvas()->mapHeight());
 	mCellsDirty = false;
  }
  return mCells;
@@ -186,18 +184,13 @@ QPtrVector<Cell>* BosonItem::cellsConst() const
  return mCells;
 }
 
-void BosonItem::makeCells(Cell* allCells, QPtrVector<Cell>* cells, int left, int right, int top, int bottom, int mapWidth, int mapHeight)
+void BosonItem::makeCells(Cell* allCells, QPtrVector<Cell>* cells, const BoRect& rect, int mapWidth, int mapHeight)
 {
  BO_CHECK_NULL_RET(allCells);
- left = QMAX(left, 0);
- top = QMAX(top, 0);
- right = QMAX(left, right);
- bottom = QMAX(top, bottom);
-
- right = QMIN(right, QMAX(mapWidth - 1, 0));
- bottom = QMIN(bottom, QMAX(mapHeight - 1, 0));
- left = QMIN(left, right);
- top = QMIN(top, bottom);
+ int left = QMAX((int)rect.left(), 0);
+ int top = QMAX((int)rect.top(), 0);
+ int right = QMIN(lround(rect.right()), mapWidth);
+ int bottom = QMIN(lround(rect.bottom()), mapHeight);
 
  // AB: WARNING: we do direct array/pointer calculations here, so
  // right/bottom/left/top MUST be valid for the allCells array!
@@ -211,8 +204,8 @@ void BosonItem::makeCells(Cell* allCells, QPtrVector<Cell>* cells, int left, int
  }
 
  int n = 0;
- for (int i = left; i <= right; i++) {
-	for (int j = top; j <= bottom; j++) {
+ for (int i = left; i < right; i++) {
+	for (int j = top; j < bottom; j++) {
 		// note: we calculate the cell in the array on our own here,
 		// because a) it's a bit faster than map->cell() and b) (more
 		// important) we don't have to include bosonmap.h
@@ -299,18 +292,21 @@ void BosonItem::unselect()
  mSelectBox = 0;
 }
 
-QRect BosonItem::boundingRect() const
+BoVector2 BosonItem::center() const
 {
- return QRect(QPoint((int)leftEdge(), (int)topEdge()),
-		QPoint((int)(leftEdge() + width()) - 1, (int)(topEdge() + height()) - 1));
+  return BoVector2(centerX(), centerY());
 }
 
-QRect BosonItem::boundingRectAdvanced() const
+BoRect BosonItem::boundingRect() const
 {
- int left = (int)(leftEdge() + xVelocity());
- int top = (int)(topEdge() + yVelocity());
- return QRect(QPoint(left, top),
-		QPoint((int)(left + width()) - 1, (int)(top + height()) - 1));
+ return BoRect(leftEdge(), topEdge(), leftEdge() + width(), topEdge() + height());
+}
+
+BoRect BosonItem::boundingRectAdvanced() const
+{
+ float left = leftEdge() + xVelocity();
+ float top = topEdge() + yVelocity();
+ return BoRect(left, top, left + width(), top + height());
 }
 
 void BosonItem::addToCells()
