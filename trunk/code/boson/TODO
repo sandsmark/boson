@@ -31,6 +31,14 @@ Game TODOs
   colors!
 - TopWidget::slotNewGame() is broken
 - chat widget should be hidden by default
+- BUG: when you select some building that can shoot and then move cursor over an
+  enemy's unit or building, cursor becomes attack cursor but it doesn't change
+  back to normal when you move cursor away from enemy's unit or building
+- "welcome to Boson" text in startup screen should be translateable (we can use
+  QPainter to paint it to pixmap)
+- show messagebox if data files can't be found. Don't crash
+- minimap zooming factor should always be integral. It looks terrible otherwise
+- BUG: "Defaults" button in OptionsDialog doesn't work
 
 Editor (map, unit, scenario) TODOs
 - totally broken, currently
