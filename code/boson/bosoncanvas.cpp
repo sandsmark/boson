@@ -129,6 +129,12 @@ Cell* BosonCanvas::cell(int x, int y) const
  return d->mMap->cell(x, y);
 }
 
+Cell* BosonCanvas::cells() const
+{
+ BO_CHECK_NULL_RET0(d->mMap);
+ return d->mMap->cells();
+}
+
 void BosonCanvas::slotAddUnit(Unit* unit, int x, int y)
 {
  if (!unit) {
