@@ -131,6 +131,7 @@ public:
 		mInverted = 0;
 		mTiles = 0;
 
+		mButtonOffset = 0;
 	}
 
 	QIntDict<BosonCommandWidget> mOrderButton;
@@ -144,6 +145,7 @@ public:
 
 	OrderType mOrderType; // plain tiles, facilities, mob units, ...
 
+	int mButtonOffset;
 };
 
 BoOrderWidget::BoOrderWidget(bool editor, QWidget* parent) : QWidget(parent)
@@ -178,6 +180,8 @@ void BoOrderWidget::ensureButtons(unsigned int number)
 				this, SIGNAL(signalProduceUnit(int)));
 		connect(b, SIGNAL(signalStopProduction(int)),
 				this, SIGNAL(signalStopProduction(int)));
+		connect(b, SIGNAL(signalAction(int)),
+				this, SIGNAL(signalAction(int)));
 	}
  }
  resetLayout();
@@ -214,7 +218,7 @@ void BoOrderWidget::setButtonsPerRow(int b)
 
 void BoOrderWidget::setOrderButtons(QValueList<int> produceList, Player* owner, Facility* factory)
 {
- ensureButtons(produceList.count());
+ ensureButtons(produceList.count() + d->mButtonOffset);
  hideOrderButtons();
  int unitType = -1;
  ProductionPlugin* production = 0;
@@ -226,7 +230,7 @@ void BoOrderWidget::setOrderButtons(QValueList<int> produceList, Player* owner, 
 		unitType = production->currentProduction();
 	}
  }
- for (unsigned int i = 0; i < produceList.count(); i++) {
+ for (unsigned int i = d->mButtonOffset; i < produceList.count() + d->mButtonOffset; i++) {
 	d->mOrderButton[i]->setUnit(produceList[i], owner);
 	d->mTopLayout->activate();
 	if (unitType >= 0 && production) {
@@ -256,6 +260,33 @@ void BoOrderWidget::hideOrderButtons()
  while (it.current()) {
 	it.current()->setUnit(0);
 	++it;
+ }
+ d->mButtonOffset = 0;
+}
+
+void BoOrderWidget::showUnitActions(Unit* unit)
+{
+ kdDebug() << k_funcinfo << endl;
+ d->mButtonOffset = 0;  // Should be 0 anyway...
+ ensureButtons(3); // 3 is maximum number of actions for now
+
+ // Order of action buttons: move, attack, stop. Nothing else yet.
+ if(unit->isMobile()) {
+	// If it's mobile, it can move
+	d->mOrderButton[d->mButtonOffset]->setAction(ActionMove, unit->owner());
+	d->mButtonOffset++;
+ }
+
+ if(unit->unitProperties()->canShoot()) {
+	// It can shoot
+	d->mOrderButton[d->mButtonOffset]->setAction(ActionAttack, unit->owner());
+	d->mButtonOffset++;
+ }
+
+ // If it can't move or attack, then there's no sense in having stop
+ if(d->mButtonOffset != 0) {
+	d->mOrderButton[d->mButtonOffset]->setAction(ActionStop, unit->owner());
+	d->mButtonOffset++;
  }
 }
 
@@ -462,6 +493,8 @@ BosonCommandFrame::BosonCommandFrame(QWidget* parent, bool editor) : QFrame(pare
 		this, SLOT(slotStopProduction(int)));
  connect(d->mOrderWidget, SIGNAL(signalPlaceCell(int)),
 		this, SIGNAL(signalCellSelected(int)));
+ connect(d->mOrderWidget, SIGNAL(signalAction(int)),
+		this, SIGNAL(signalAction(int)));
  actionLayout->addWidget(d->mOrderWidget);
  d->mOrderWidget->setBackgroundOrigin(WindowOrigin);
  d->mActionWidgets.append(d->mOrderWidget);
@@ -540,6 +573,10 @@ void BosonCommandFrame::slotSetAction(Unit* unit)
  }
 
  d->mSelectedUnit = unit;
+
+ // Show unit's actions (move, attack, stop...
+ d->mOrderWidget->showUnitActions(unit);
+ d->mOrderWidget->show();
 
  const UnitProperties* prop = unit->unitProperties();
  if (unit->isFacility()) {

@@ -32,6 +32,10 @@ class QPixmap;
 class KPlayer;
 
 /**
+ * This is scrollable widget in the commandframe that contains buttons of unit
+ * actions (when single unit is selected) or selected units (when multiple
+ * units are selected)
+ *
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
  **/
 class BoOrderWidget : public QWidget
@@ -55,6 +59,10 @@ public:
 
 	void productionAdvanced(Unit* factory, double percentage);
 
+	/**
+	 * Adds buttons of actions unit can do (such as attack, move or stop)
+	 **/
+	void showUnitActions(Unit* unit);
 
 	void initEditor();
 	void editorLoadTiles(const QString& dirName);
@@ -73,6 +81,7 @@ signals:
 	void signalProduceUnit(int unitType);
 	void signalStopProduction(int unitType);
 	void signalPlaceCell(int groundType);
+	void signalAction(int actionType);
 
 private:
 	class BoOrderWidgetPrivate;
@@ -165,9 +174,9 @@ signals:
 	void signalCellSelected(int groundType);
 
 	/**
-	 * Center the base of the local player
-	 **/
-	void signalCenterBase();
+	 * Emitted when user clicks on action button (e.g move)
+	 */
+	void signalAction(int actionType);
 
 protected slots:
 	void slotProduceUnit(int unitType);

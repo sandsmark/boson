@@ -35,6 +35,7 @@
 #include "bosonmessage.h"
 #include "bosonmap.h"
 #include "speciestheme.h"
+#include "bosonprofiling.h"
 #ifndef NO_OPENGL
 #include "bodisplaymanager.h"
 #include "bosonbigdisplaybase.h"
@@ -141,6 +142,7 @@ TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
  setMainDockWidget(mMainDock);
 
  BosonConfig::initBosonConfig();
+ BosonProfiling::initProfiling();
 
  setMinimumWidth(640);
  setMinimumHeight(480);
@@ -216,7 +218,7 @@ void TopWidget::initActions()
 
  // Sound & Music
  KToggleAction* sound = new KToggleAction(i18n("Soun&d"), 0, this,
-	SLOT(slotToggleSound()), actionCollection(), "options_sound");
+		SLOT(slotToggleSound()), actionCollection(), "options_sound");
  sound->setChecked(boMusic->sound());
  KToggleAction* music = new KToggleAction(i18n("&Music"), 0, this,
 		SLOT(slotToggleMusic()), actionCollection(), "options_music");

@@ -114,6 +114,17 @@ protected:
 				}
 				text = i18n("%1\nId: %2").arg(commandWidget()->unit()->unitProperties()->name()).arg(commandWidget()->unit()->id());
 				break;
+			case BosonCommandWidget::CommandAction:
+				if(commandWidget()->action() == ActionMove) {
+					text = i18n("Move");
+				}
+				else if(commandWidget()->action() == ActionAttack) {
+					text = i18n("Attack");
+				}
+				else if(commandWidget()->action() == ActionStop) {
+					text = i18n("Stop");
+				}
+				break;
 		}
 		return text;
 	}
@@ -247,6 +258,7 @@ BosonCommandWidget::BosonCommandWidget(QWidget* parent) : QWidget(parent)
  mProductionOwner = 0;
  mUnitType = 0;
  mTileNumber = 0;
+ mAction = -1;
  mCommandType = CommandNothing;
 
  QHBoxLayout* topLayout = new QHBoxLayout(this);
@@ -327,7 +339,7 @@ void BosonCommandWidget::setUnit(int unitType, Player* owner)
  mUnitType = unitType;
  mProductionOwner = owner;
  mCommandType = CommandUnit;
- 
+
  displayUnitPixmap(unitType, owner);
 
  mHealth->hide();
@@ -336,6 +348,23 @@ void BosonCommandWidget::setUnit(int unitType, Player* owner)
  show();
  // note: setGrayOut() and setProductionCount() are handled in 
  // BosonCommandFrame for this!
+}
+
+void BosonCommandWidget::setAction(UnitAction action, Player* owner)
+{
+ mCommandType = CommandAction;
+ mAction = (int)action;
+
+ if (!owner->speciesTheme()->actionPixmap(action)) {
+	kdError() << k_funcinfo << "NULL pixmap for action " << action << endl;
+	return;
+ }
+ setPixmap(*owner->speciesTheme()->actionPixmap(action));
+
+ mHealth->hide();
+ mReload->hide();
+
+ show();
 }
 
 void BosonCommandWidget::setCell(int tileNo, BosonTiles* tileSet)
@@ -408,6 +437,9 @@ void BosonCommandWidget::slotClicked()
 			// selected? or can we omit this signal?
 //			emit signalUnit(mUnit);
 		}
+		break;
+	case CommandAction:
+		emit signalAction(mAction);
 		break;
 	default:
 		kdError() << "Unknown Command Type " << commandType() << endl;

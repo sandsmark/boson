@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2002 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 #include "bosonbigdisplaybase.h"
 #include "bosonbigdisplaybase.moc"
 
+#include "defines.h"
 #include "bosonwidget.h"
 #include "bosontiles.h"
 #include "bosoncanvas.h"
@@ -30,7 +31,6 @@
 #include "unit.h"
 #include "unitproperties.h"
 #include "speciestheme.h"
-#include "defines.h"
 #include "player.h"
 #include "bosoncursor.h"
 #include "boselection.h"
@@ -38,6 +38,7 @@
 #include "bosonmusic.h"
 #include "selectbox.h"
 #include "visual/bosonchat.h"
+#include "bosonprofiling.h"
 
 #include <kgame/kgameio.h>
 
@@ -66,9 +67,6 @@
 #define NEAR 1.0 // FIXME: should be > 1.0
 #define FAR 100.0
 
-
-#define DEBUG_RENDER_TIMES 0
-#define COMPARE_TIMES(time1, time2) ( ((time2.tv_sec - time1.tv_sec) * 1000000) + (time2.tv_usec - time1.tv_usec) )
 
 float textureUpperLeft[2] = { 0.0, 0.0 };
 float textureLowerLeft[2] = { 0.0, 1.0 };
@@ -421,11 +419,7 @@ void BosonBigDisplayBase::resizeGL(int w, int h)
 
 void BosonBigDisplayBase::paintGL()
 {
-#if DEBUG_RENDER_TIMES
- struct timeval time1, time2, funcStart;
- long int clearTime = 0, misc1 = 0, render_cells = 0, render_units = 0, timer_start = 0, creating_iterator = 0, misc2 = 0, render_text = 0, function_time = 0;
- gettimeofday(&funcStart, 0);
-#endif
+ boProfiling->render(true);
  d->mUpdateTimer.stop();
 //kdDebug() << k_funcinfo << endl;
  // TODO: use 0,0 as lower left, instead of top left
@@ -462,16 +456,11 @@ void BosonBigDisplayBase::paintGL()
  // nice trick to avoid clearing it. see
  // http://www.mesa3d.org/brianp/sig97/perfopt.htm
  // in 3.5!
- 
-#if DEBUG_RENDER_TIMES
- gettimeofday(&time1, 0);
-#endif
+
+ boProfiling->renderClear(true);
  glClear(GL_COLOR_BUFFER_BIT);
-#if DEBUG_RENDER_TIMES
- gettimeofday(&time2, 0);
- clearTime = COMPARE_TIMES(time1, time2);
- time1 = time2;
-#endif
+ boProfiling->renderClear(false);
+
  // the guy who wrote http://www.mesa3d.org/brianp/sig97/perfopt.htm is *really* clever!
  // this trick avoids clearing the depth buffer:
  if (d->mEvenFlag) {
@@ -514,19 +503,10 @@ void BosonBigDisplayBase::paintGL()
 		kdError() << k_funcinfo << "Unable to generate map display list" << endl;
 		return;
 	}
-	kdDebug() << k_funcinfo << "Successfully generated map display list" << endl;
  }
-#if DEBUG_RENDER_TIMES
- gettimeofday(&time2, 0);
- misc1 = COMPARE_TIMES(time1, time2);
-
- gettimeofday(&time1, 0);
-#endif
+ boProfiling->renderCells(true);
  glCallList(d->mMapDisplayList);
-#if DEBUG_RENDER_TIMES
- gettimeofday(&time2, 0);
- render_cells = COMPARE_TIMES(time1, time2);
-#endif
+ boProfiling->renderCells(false);
 
  if (checkError()) {
 	kdError() << k_funcinfo << "cells rendered" << endl;
@@ -535,16 +515,11 @@ void BosonBigDisplayBase::paintGL()
  glEnable(GL_DEPTH_TEST); // FIXME: this should be the first occurance of glEnable(GL_DEPTH_TEST)!
  glEnable(GL_BLEND); // AB: once we have 3d models for all units we can get rid of this. we need it for the cursor only then.
  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-#if DEBUG_RENDER_TIMES
- gettimeofday(&time1, 0);
-#endif
+
+
+ boProfiling->renderUnits(true);
  BoItemList allItems = mCanvas->allBosonItems();
  BoItemList::Iterator it = allItems.begin();
-#if DEBUG_RENDER_TIMES
- gettimeofday(&time2, 0);
- creating_iterator = COMPARE_TIMES(time1, time2);
- gettimeofday(&time1, 0);
-#endif
  for (; it != allItems.end(); ++it) {
 	//FIXME: order by z-coordinates! first those which are
 	//closer to surface, then flying units
@@ -579,31 +554,45 @@ void BosonBigDisplayBase::paintGL()
 
 	glTranslatef(-x, -y, -z); 
  }
-#if DEBUG_RENDER_TIMES
- gettimeofday(&time2, 0);
- render_units = COMPARE_TIMES(time1, time2);
- time1 = time2;
-#endif
+ boProfiling->renderUnits(false);
+
  if (checkError()) {
 	kdError() << k_funcinfo << "when units rendered" << endl;
  }
  glDisable(GL_DEPTH_TEST);
+
+ boProfiling->renderText(true); // AB: actually this is text and cursor
 
 // TODO: cursor must always be on top and should not be scaled (i.e. cause of zoom)
 // possible solutions: load the identity matrix ; maybe even use an ortho
 // projection matrix for the cursor (it seems that we can mix them!)
 // AB: it'll be always on top, cause we disabled the depth buffer test above
  if (cursor() && cursor()->isA("BosonSpriteCursor")) {
+	// cursor and text are drawn in a 2D-matrix, so that we can use window
+	// coordinates
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glLoadIdentity();
+	gluOrtho2D(0.0, (GLfloat)d->mW, 0.0, (GLfloat)d->mH); // the same as the viewport
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadIdentity();
+	
+	 
 	BosonSpriteCursor* c = (BosonSpriteCursor*)cursor();
 	GLuint tex = c->currentTexture();
 	if (tex != 0) {
 		glPushMatrix();
 		QPoint pos = mapFromGlobal(c->pos());
-		GLdouble x;
-		GLdouble y;
-		GLdouble z;
-		mapCoordinates(pos, &x, &y, &z);
-		glTranslatef(x, y, 0.0);
+		GLfloat x;
+		GLfloat y;
+//		GLdouble z;
+		x = (GLfloat)pos.x();
+		y = (GLfloat)-pos.y();
+//		mapCoordinates(pos, &x, &y, &z);
+//		glTranslatef(x, y, 0.0);
+//		glRasterPos2i(x, y);
+		glRasterPos2i(pos.x(), -pos.y());
 
 		float w = 0.5;
 		float h = 0.5;
@@ -617,13 +606,21 @@ void BosonBigDisplayBase::paintGL()
 
 		glPopMatrix();
 	}
- }
- if (checkError()) {
-	kdError() << k_funcinfo << "cursor rendered" << endl;
- }
 
- glDisable(GL_BLEND);
- glDisable(GL_TEXTURE_2D);
+	glDisable(GL_BLEND);
+	glDisable(GL_TEXTURE_2D);
+	if (checkError()) {
+		kdError() << k_funcinfo << "cursor rendered" << endl;
+	}
+	renderText();
+
+	// now restore the old 3D-matrix
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
+	glMatrixMode(GL_MODELVIEW);
+	glPopMatrix();
+ }
+ boProfiling->renderText(false);
 
  if (d->mSelectionRect.isVisible()) {
 	glPushMatrix();
@@ -657,48 +654,16 @@ void BosonBigDisplayBase::paintGL()
 	kdError() << k_funcinfo << "selection rect rendered" << endl;
  }
 
-#if DEBUG_RENDER_TIMES
- gettimeofday(&time2, 0);
- misc2 = COMPARE_TIMES(time1, time2);
- time1 = time2;
-#endif
- renderText();
-#if DEBUG_RENDER_TIMES
- gettimeofday(&time2, 0);
- render_text = COMPARE_TIMES(time1, time2);
- gettimeofday(&time1, 0);
-#endif
-
  if (d->mUpdateInterval) {
 	d->mUpdateTimer.start(d->mUpdateInterval);
  }
 
-#if DEBUG_RENDER_TIMES
- gettimeofday(&time2, 0);
- timer_start = COMPARE_TIMES(time1, time2);
- function_time = COMPARE_TIMES(funcStart, time2);
- 
- cout << k_funcinfo << endl
-		<< "clearing:    " << clearTime << endl 
-		<< "misc1:       " << misc1 << endl
-		<< "renderCells: " << render_cells << endl
-		<< "renderUnits: " << render_units << endl
-		<< "misc2:       " << misc2 << endl
-		<< "text:        " << render_text << endl
-		<< "timerStart:  " << timer_start << endl
-		<< "function:    " << function_time << endl;
-#endif
+ boProfiling->render(false);
+ boProfiling->debugRender();
 }
 
 void BosonBigDisplayBase::renderText()
 {
- glMatrixMode(GL_PROJECTION);
- glPushMatrix();
- glLoadIdentity();
- gluOrtho2D(0.0, (GLfloat)d->mW, 0.0, (GLfloat)d->mH); // the same as the viewport
- glMatrixMode(GL_MODELVIEW);
- glPushMatrix();
- glLoadIdentity();
  glListBase(d->mDefaultFont->displayList()); // AB: this is a redundant call, since we don't change it somewhere in paintGL(). but we might support different fonts one day and so we need it anyway.
  glColor3f(1.0, 1.0, 1.0);
  const int border = 5;
@@ -735,10 +700,6 @@ void BosonBigDisplayBase::renderText()
 
  glColor3f(1.0, 1.0, 1.0);
  
- glMatrixMode(GL_PROJECTION);
- glPopMatrix();
- glMatrixMode(GL_MODELVIEW);
- glPopMatrix();
 }
 
 #endif // !NO_OPENGL
@@ -857,19 +818,23 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 	case QEvent::MouseButtonPress:
 		makeActive();
 		if (e->button() == LeftButton) {
-		/*
-			if (e->state() & ControlButton) {
-
-			} else if (e->state() & AltButton) {
-			} else if (e->state() & ShiftButton) {
+			if (actionLocked()) {
+				// If action is locked then it means that user clicked on an action
+				// button and wants to perform specific action
+				// AB: IMHO this fits better in RMB-Pressed.
+				// mixing LMB and RMB for actions is very
+				// confusing
+				bool send = false;
+				BoAction action;
+				action.setWorldPos(posX, posY, posZ);
+				action.setCanvasPos(canvasPos);
+				actionClicked(action, stream, &send);
+				if (send) {
+					*eatevent = true;
+				}
 			} else {
-			*/
-				// not modifier key was pressed
-				// start selection rect (or a simple selection 
-				// if mouse doesn't get moved)
-//				startSelection(posX, posY, posZ);
 				d->mSelectionRect.setStart(posX, posY, posZ);
-//			}
+			}
 		} else if (e->button() == MidButton) {
 			if (boConfig->mmbMove()) {
 				int cellX, cellY;

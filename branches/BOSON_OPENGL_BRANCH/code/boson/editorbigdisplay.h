@@ -100,6 +100,8 @@ protected:
 	 **/
 	virtual void updateCursor();
 
+	virtual bool actionLocked() const { return false; }
+
 //	void addMouseIO(Player* p);
 
 private:

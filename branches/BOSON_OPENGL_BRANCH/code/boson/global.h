@@ -69,4 +69,13 @@ enum CursorType {
 	CursorDefault = 2
 };
 
+/**
+ * Describes unit's action such as attack, move or stop
+ **/
+enum UnitAction {
+	ActionAttack = 0,
+	ActionMove = 1,
+	ActionStop = 2
+};
+
 #endif

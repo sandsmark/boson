@@ -66,6 +66,7 @@ public:
 	
 public slots:
 	void slotMoveSelection(int cellX, int cellY);
+	void slotUnitAction(int actionType);
 
 signals:
 
@@ -81,9 +82,19 @@ protected:
 	 * which performs the move on every client
 	 * @param send Set to true if you actually want to send the stream
 	 **/
-	void actionClicked(const BoAction& action, QDataStream& stream, bool* send);
+	virtual void actionClicked(const BoAction& action, QDataStream& stream, bool* send);
+
+	// AB: I'd prefer using BoAction instead of pos!
+	bool actionMine(QDataStream& stream, const QPoint& pos);
+	bool actionMove(QDataStream& stream, const QPoint& pos);
+	bool actionBuild(QDataStream& stream, const QPoint& pos);
+	bool actionAttack(QDataStream& stream, const QPoint& pos);
+	bool actionRepair(QDataStream& stream, const QPoint& pos);
+	bool actionRefine(QDataStream& stream, const QPoint& pos);
 
 	virtual void updateCursor();
+
+	virtual bool actionLocked() const;
 
 //	void addMouseIO(Player* p);
 
