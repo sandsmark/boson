@@ -49,10 +49,14 @@ public:
   bosonField(uint l, uint h, QObject *parent=0, const char *name=0L);
 
   void createMob(mobileMsg_t &);
+  void unHideMob(mobileMsg_t &);
   void destroyMob(destroyedMsg_t &);
+  void hideMob(destroyedMsg_t &);
 
   void createFix(facilityMsg_t &);
+  void unHideFix(facilityMsg_t &);
   void destroyFix(destroyedMsg_t &);
+  void hideFix(destroyedMsg_t &);
 
   void move(moveMsg_t &);
   void shooted(powerMsg_t &);
@@ -73,5 +77,4 @@ signals:
 };
 
 #endif // BOSONFIELD_H
-
 
