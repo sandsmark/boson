@@ -145,6 +145,8 @@ if [ ! -d "$BOSON_MUSIC" ]; then
 fi
 
 if [ "x$BOSON_RELEASE" != "x" ]; then
+	echo "Updating $BOSON_TOOLS"
+	cd $BOSON_TOOLS && cvs up -r $BOSON_RELEASE
 	echo "Updating $BOSON_CODE"
 	cd $BOSON_CODE && cvs up -r $BOSON_RELEASE
 	echo "Updating $BOSON_DATA"
