@@ -34,6 +34,7 @@
 #include "../common/unit.h"	// Facility
 
 #include "speciesTheme.h"
+#include "visualView.h"
 //#include "orderWin.h"
 //#include "game.h"
 
@@ -84,12 +85,15 @@ protected:
   virtual void mouseMoveEvent(QMouseEvent *e);
   virtual void mouseReleaseEvent(QMouseEvent *e);
   virtual void resizeEvent(QResizeEvent *e);
-  void	unSelectMob(long key);
-  void	unSelectFix(void);
+  void  unSelectFix(void) { view->unSelectFix(); }
+  void  unSelectMob(long key) { view->unSelectMob(key); }
   void	unSelectAll(void);
 
 
   visualView	*view;
+
+  int selectX, selectY;
+  int oldX, oldY;
 
 };
 

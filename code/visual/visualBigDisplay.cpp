@@ -28,7 +28,6 @@
 #include "visualCell.h"
 #include "speciesTheme.h"
 #include "groundTheme.h"
-#include "visualView.h"
   
 
 visualBigDisplay::visualBigDisplay(/*orderWin *o,*/ visualView *v, QWidget*parent, const char *name, WFlags f)
@@ -98,6 +97,117 @@ void visualBigDisplay::paintEvent(QPaintEvent *evt)
 		viewing->updateInView(this, r);
 	}
 
+}
+
+
+void visualBigDisplay::mouseMoveEvent(QMouseEvent *e)
+{
+	QPainter p;
+	QPen pen(green, 2);
+
+	if (SELECT_RECT != view->getSelectionMode()) return;
+
+	p.begin(this);
+	p.setPen(pen);
+	p.setRasterOp(XorROP);
+	/* erase previous rect */
+	if (oldX != selectX && oldY != selectY)	
+		drawRectSelect(selectX, selectY, oldX, oldY, p);
+	/* draw present rect */
+	oldX = e->x();
+	oldY = e->y();
+	if (oldX != selectX && oldY != selectY)	
+		drawRectSelect(selectX, selectY, oldX, oldY, p);
+	p.end();
+}
+
+void visualBigDisplay::mouseReleaseEvent(QMouseEvent *e)
+{
+	QPainter p;
+	QPen pen(green, 2);
+/*
+	QIntDictIterator<visualMobUnit> mobIt mobIt(view->field->mobileList());
+	QIntDictIterator<visualFacility> fixIt(view->field->facilityList());
+*/
+
+//	visualMobUnit	*m;
+//	int		t;
+
+	if (SELECT_RECT != view->getSelectionMode()) return;
+
+	p.begin(this);
+	p.setPen(pen);
+	p.setRasterOp(XorROP);
+	/* erase rect */
+	if (oldX != selectX && oldY != selectY)	
+		drawRectSelect(selectX, selectY, oldX, oldY, p);
+	p.end();
+	view->setSelectionMode( SELECT_NONE);
+
+	/* generate multiple selection */
+
+/*
+	if (selectX > oldX) {
+		t = oldX; 
+		oldX = selectX;
+		selectX = t;
+	}
+
+	if (selectY > oldY) {
+		t = oldY; 
+		oldY = selectY;
+		selectY = t;
+	}
+*/
+	selectX	+= BO_TILE_SIZE * view->X();
+	selectY	+= BO_TILE_SIZE * view->Y();
+	oldX	+= BO_TILE_SIZE * view->X();
+	oldY	+= BO_TILE_SIZE * view->Y();
+	
+	view->selectArea(selectX, selectY, oldX, oldY);
+/*
+	for (mobIt.toFirst(); mobIt; ++mobIt) {
+		m = mobIt.current();
+		if (	selectX<=m->_x() && oldX>m->_x() + m->getWidth() &&
+			selectY<=m->_y() && oldY>m->_y() + m->getHeight() &&
+			!view->mobSelected.find(mobIt.currentKey()) ) 
+
+				view->selectMob(mobIt.currentKey(), m);
+	}
+*/
+
+/*
+	selectX -= BO_TILE_SIZE * view->X();
+	selectY -= BO_TILE_SIZE * view->Y();
+	oldX -= BO_TILE_SIZE * view->X();
+	oldY -= BO_TILE_SIZE * view->Y();
+	repaint (selectX, selectY, oldX, oldY, FALSE);
+*/
+}
+
+void visualBigDisplay::resizeEvent(QResizeEvent *e)
+{
+	emit reSizeView (	(width()+BO_TILE_SIZE-1)/BO_TILE_SIZE,
+				(height()+BO_TILE_SIZE-1)/BO_TILE_SIZE  );
+}
+
+
+void visualBigDisplay::unSelectAll(void)
+{
+	QIntDictIterator<visualMobUnit> selIt(view->mobSelected);
+
+	/* deal with fix */
+	unSelectFix();
+
+	/* deal with mobiles */
+	for (selIt.toFirst(); selIt;) { 		// ++ not needed, selIt should be increased
+		selIt.current()->unSelect();		// deal with selectPart
+		unSelectMob(selIt.currentKey());	// by the .remove() in unselect
+	}
+	boAssert(view->mobSelected.isEmpty());
+	if (!view->mobSelected.isEmpty()) view->mobSelected.clear();
+
+	view->unSelectAll();
 }
 
 

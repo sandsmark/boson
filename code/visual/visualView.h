@@ -21,8 +21,6 @@
 #ifndef VISUALVIEW_H 
 #define VISUALVIEW_H 
 
-#include <qintdict.h>
-
 #include <visualUnit.h>
 #include "visualField.h"
 
@@ -49,6 +47,9 @@ class visualView : public QObject
 public:
 	visualView(visualField *, QObject *parent=0, const char *name=0L);
 
+	/*
+	 * size / position handling
+ 	 */
 	int X(void) { return viewX; }
 	int Y(void) { return viewY; }
 
@@ -78,7 +79,11 @@ private:
 	int	viewL, viewH;	// size of the viewing window
 	int	viewX, viewY;	// relative position of the upper-left corner
 
-	/* selection handling */
+
+
+	/*
+         * selection handling
+         */
 
 public:
 	selectionMode_t	getSelectionMode(void) {return selectionMode;}
@@ -88,6 +93,8 @@ public:
 	visualFacility	*unSelectFix(void);
 	visualMobUnit	*unSelectMob(long key);
 	void		unSelectAll(void);
+	/** add to selection all units in this area */
+	void		selectArea(int x1, int y1, int x2, int y2);
 signals:
 	void		setSelected(QPixmap *); //null -> nothing is selected
 	void		setOrders(unsigned long);  //orzel : should be something like 'actionSet'
