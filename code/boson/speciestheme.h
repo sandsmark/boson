@@ -37,10 +37,9 @@ class QStringList;
 class QColor;
 
 /**
- * Stores player's species - this includes units' sprites (if you're using
- * QCanvas) or textures and models (if you're using OpenGL), sounds, properties
- * and overviews as well as action pixmaps (attack, move and stop) and player's
- * teamcolor.
+ * Stores player's species - this includes units' textures and models, sounds, 
+ * properties and overviews as well as action pixmaps (attack, move and stop) 
+ * and player's teamcolor.
  *
  * This class provides methods for loading and teamcoloring pixmaps and for
  * retrieving them later.

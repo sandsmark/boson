@@ -35,7 +35,7 @@ public:
 
 	/**
 	 * Set the shown value for the game speed. Note that this value is the
-	 * time between 2 @ref QCanvas::advance calls in ms while the dialog
+	 * time between 2 advance calls in ms while the dialog
 	 * does not show anything in ms. The dialog values are just the
 	 * opposite: higher values mean higher speed.
 	 **/

@@ -106,7 +106,7 @@ bool ProductionPlugin::canPlaceProductionAt(const QPoint& pos)
 	kdDebug() << k_lineinfo << "no completed construction" << endl;
 	return false;
  }
- QValueList<Unit*> list = unit()->boCanvas()->unitCollisionsInRange(pos, BUILD_RANGE);
+ QValueList<Unit*> list = unit()->canvas()->unitCollisionsInRange(pos, BUILD_RANGE);
 
  const UnitProperties* prop = unit()->owner()->unitProperties(currentProduction());
  if (!prop) {
@@ -197,9 +197,9 @@ void ProductionPlugin::advance()
 				}
 
 				//TODO: use BosonCanvas::canPlaceUnitAt()
-//				if(unit()->boCanvas()->cellOccupied(currentx, currenty)) {
+//				if(unit()->canvas()->cellOccupied(currentx, currenty)) {
 //				FIXME: should not depend on Facility*
-				if(unit()->boCanvas()->canPlaceUnitAt(unit()->speciesTheme()->unitProperties(type), QPoint(currentx * BO_TILE_SIZE, currenty * BO_TILE_SIZE), (Facility*)unit())) {
+				if(unit()->canvas()->canPlaceUnitAt(unit()->speciesTheme()->unitProperties(type), QPoint(currentx * BO_TILE_SIZE, currenty * BO_TILE_SIZE), (Facility*)unit())) {
 					// Free cell - place unit at it
 					mProductionState = mProductionState + 1;
 					//FIXME: buildProduction should not

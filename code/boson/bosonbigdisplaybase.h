@@ -32,7 +32,6 @@ class UnitProperties;
 
 class KGameChat;
 class KGameIO;
-class QCanvas;
 
 class BoAction
 {
@@ -105,7 +104,6 @@ public:
 	void setLocalPlayer(Player* p);
 
 	BosonCanvas* canvas() const { return mCanvas; }
-	BosonCanvas* boCanvas() const { return mCanvas; } // since QScrollView returns QCanvas*
 
 	/**
 	 * Emit @ref signalMakeActive to inform @ref BosonWidget and @ref

@@ -122,7 +122,7 @@ void BosonBigDisplay::actionClicked(const BoAction& action, QDataStream& stream,
 	return;
  }
 
- Unit* unit = boCanvas()->findUnitAt(action.canvasPos());
+ Unit* unit = canvas()->findUnitAt(action.canvasPos());
  if (!unit) {
 	if (selection()->hasMobileUnit()) { // move the selection to pos
 		if (selection()->count() == 1) {
@@ -235,7 +235,7 @@ bool BosonBigDisplay::actionBuild(QDataStream& stream, const QPoint& canvasPos)
 	return false;
  }
 
- if (!(boCanvas())->canPlaceUnitAt(localPlayer()->unitProperties(production->currentProduction()), canvasPos, fac)) {
+ if (!(canvas())->canPlaceUnitAt(localPlayer()->unitProperties(production->currentProduction()), canvasPos, fac)) {
 	kdDebug() << k_funcinfo << "Cannot place production here" << endl;
 	return false;
  }
@@ -251,7 +251,7 @@ bool BosonBigDisplay::actionBuild(QDataStream& stream, const QPoint& canvasPos)
 
 bool BosonBigDisplay::actionAttack(QDataStream& stream, const QPoint& canvasPos)
 {
- Unit* unit = boCanvas()->findUnitAt(canvasPos);
+ Unit* unit = canvas()->findUnitAt(canvasPos);
  QPtrList<Unit> list = selection()->allUnits();
  QPtrListIterator<Unit> it(list);
  // tell the clients we want to attack:
@@ -274,7 +274,7 @@ bool BosonBigDisplay::actionAttack(QDataStream& stream, const QPoint& canvasPos)
 
 bool BosonBigDisplay::actionRepair(QDataStream& stream, const QPoint& canvasPos)
 {
- Unit* unit = boCanvas()->findUnitAt(canvasPos);
+ Unit* unit = canvas()->findUnitAt(canvasPos);
  QPtrList<Unit> allUnits = selection()->allUnits();
  QPtrList<Unit> list;
  QPtrListIterator<Unit> it(allUnits);
@@ -308,7 +308,7 @@ bool BosonBigDisplay::actionRepair(QDataStream& stream, const QPoint& canvasPos)
 
 bool BosonBigDisplay::actionRefine(QDataStream& stream, const QPoint& canvasPos)
 {
- Unit* unit = boCanvas()->findUnitAt(canvasPos);
+ Unit* unit = canvas()->findUnitAt(canvasPos);
  bool minerals = unit->unitProperties()->canRefineMinerals();
  QPtrList<Unit> allUnits = selection()->allUnits();
  QPtrList<Unit> list;

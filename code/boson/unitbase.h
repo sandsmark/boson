@@ -203,8 +203,7 @@ public:
 	unsigned long int type() const;
 
 	/**
-	 * @return The RTTI of this unit. You can use @ref RTTI::isUnit to find
-	 * out if a @ref QCanvasSprite is a unit.
+	 * @return The RTTI of this unit.
 	 **/
 	inline virtual int rtti() const { return RTTI::UnitStart + (int)type(); }
 

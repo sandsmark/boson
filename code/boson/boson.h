@@ -170,7 +170,7 @@ signals:
 	void signalAddUnit(Unit* unit, int x, int y);
 
 	/**
-	 * Order the canvas to call @ref QCanvas::advance
+	 * Order the canvas to call @ref BosonCanvas::slotAdvance
 	 * @param advanceCount The number of this advance call. This is used to
 	 * decide what should be done - e.g. there is no need to check for new
 	 * enemies every advance call. This value is increased after the signal
@@ -255,7 +255,7 @@ protected slots:
 
 	/**
 	 * Send an advance message. When this is received by the clients @ref
-	 * QCanvas::advance ist called.
+	 * BosonCanvasCanvas::slotAdvance ist called.
 	 **/
 	void slotSendAdvance();
 
