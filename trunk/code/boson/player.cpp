@@ -643,7 +643,7 @@ bool Player::hasUnitWithType(unsigned long int type) const
 
 bool Player::hasTechnology(unsigned long int id) const
 {
- TechnologyProperties* tech = speciesTheme()->technologyList().find(id);
+ UpgradeProperties* tech = speciesTheme()->technologyList().find(id);
  if (!tech) {
 	return false;
  }
@@ -657,35 +657,19 @@ void Player::technologyResearched(ProductionPlugin*, unsigned long int id)
 {
  boDebug() << k_funcinfo << "id: " << id << endl;
  // Check if it isn't researched already
- QIntDictIterator<TechnologyProperties> it(speciesTheme()->technologyList());
+ QIntDictIterator<UpgradeProperties> it(speciesTheme()->technologyList());
  while (it.current()) {
 	if (((unsigned long int)(it.currentKey()) == id) && (it.current()->isResearched())) {
-		boError() << k_funcinfo << "Technology " << it.current() << " already researched!" << endl;
+		boError() << k_funcinfo << "upgrade " << it.current() << " already researched!" << endl;
 		return;
 	}
 	++it;
  }
 
- TechnologyProperties* prop = speciesTheme()->technology(id);
+ UpgradeProperties* prop = speciesTheme()->technology(id);
  prop->setResearched(true);
  prop->apply(this);
 
- // Iterate through upgrades, applying as needed
- QValueList<unsigned long int> unitIds = speciesTheme()->allFacilities();  // FIXME: this is dirty
- unitIds += speciesTheme()->allMobiles();
- QValueList<unsigned long int>::iterator pit;
- for (pit = unitIds.begin(); pit != unitIds.end(); pit++) {
-	UpgradeProperties* upgrade;
-	QPtrList<UpgradeProperties> ulist = speciesTheme()->nonConstUnitProperties(*pit)->unresearchedUpgrades();
-	for (upgrade = ulist.first(); upgrade; upgrade = ulist.next()) {
-		if (upgrade->canBeResearched(this)) {
-			boDebug() << k_funcinfo << "    Applying upgrade for UP " << *pit << " with id " << upgrade->id() << endl;
-			upgrade->setResearched(true);
-			upgrade->apply(this);
-			speciesTheme()->nonConstUnitProperties(*pit)->upgradeResearched( upgrade);
-		}
-	}
- }
  ((Boson*)game())->slotUpdateProductionOptions();
  // TODO: also update unit view
 }

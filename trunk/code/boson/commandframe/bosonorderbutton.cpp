@@ -97,7 +97,7 @@ protected:
 					const UnitProperties* prop = commandWidget()->productionOwner()->unitProperties(commandWidget()->productionId());
 					text = i18n("%1\nMinerals: %2\nOil: %3").arg(prop->name()).arg(prop->mineralCost()).arg(prop->oilCost());
 				} else if(commandWidget()->productionType() == ProduceTech) {
-					TechnologyProperties* prop = commandWidget()->productionOwner()->speciesTheme()->technology(commandWidget()->productionId());
+					UpgradeProperties* prop = commandWidget()->productionOwner()->speciesTheme()->technology(commandWidget()->productionId());
 					text = i18n("%1\nMinerals: %2\nOil: %3").arg(prop->upgradeName()).arg(prop->mineralCost()).arg(prop->oilCost());
 				} else {
 					boWarning() << k_funcinfo << "Invalid productiontype when producing!" << endl;

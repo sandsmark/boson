@@ -170,6 +170,7 @@ class BosonWeaponProperties : public PluginProperties
     void reset();
 
     friend class BoUnitEditor;
+    friend class UpgradeProperties;
 
   private:
     unsigned long int mId;

@@ -21,7 +21,6 @@
 
 #include "speciestheme.h"
 #include "pluginproperties.h"
-#include "upgradeproperties.h"
 #include "bosonparticlesystem.h"
 #include "bosonparticlesystemproperties.h"
 #include "bosonweapon.h"
@@ -47,9 +46,6 @@ public:
 
 	QMap<QString, QString> mTextureNames;
 	QMap<int, QString> mSounds;
-
-	QPtrList<UpgradeProperties> mUpgrades;
-	QPtrList<UpgradeProperties> mNotResearchedUpgrades;
 
 	QPtrList<BosonParticleSystemProperties> mDestroyedParticleSystems;
 	QValueList<unsigned long int> mDestroyedParticleSystemIds;
@@ -109,8 +105,6 @@ void UnitProperties::init()
  mMobileProperties = 0;
  mFacilityProperties = 0;
  d->mPlugins.setAutoDelete(true);
- d->mUpgrades.setAutoDelete(true);
- d->mNotResearchedUpgrades.setAutoDelete(true);
 }
 
 UnitProperties::~UnitProperties()
@@ -176,7 +170,6 @@ void UnitProperties::loadUnitType(const QString& fileName, bool fullmode)
  loadAllPluginProperties(&conf);
  loadTextureNames(&conf);
  loadSoundNames(&conf);
- loadUpgrades(&conf);
  loadWeapons(&conf);
 }
 
@@ -220,7 +213,6 @@ void UnitProperties::saveUnitType(const QString& fileName)
  saveAllPluginProperties(&conf);  // This saves weapons too
  saveTextureNames(&conf);
  saveSoundNames(&conf);
-// saveUpgrades(&conf); // TODO
 }
 
 void UnitProperties::loadMobileProperties(KSimpleConfig* conf)
@@ -428,22 +420,6 @@ QMap<int, QString> UnitProperties::sounds() const
  return d->mSounds;
 }
 
-QPtrList<UpgradeProperties> UnitProperties::possibleUpgrades() const
-{
- return d->mUpgrades;
-}
-
-QPtrList<UpgradeProperties> UnitProperties::unresearchedUpgrades() const
-{
- return d->mNotResearchedUpgrades;
-}
-
-void UnitProperties::upgradeResearched(UpgradeProperties* upgrade)
-{
- d->mNotResearchedUpgrades.removeRef(upgrade);
-}
-
-
 void UnitProperties::setRequirements(QValueList<unsigned long int> requirements)
 {
  d->mRequirements = requirements;
@@ -516,26 +492,6 @@ const PluginProperties* UnitProperties::properties(int pluginType) const
 	}
  }
  return 0;
-}
-
-void UnitProperties::loadUpgrades(KSimpleConfig* conf)
-{
-// boDebug() << k_funcinfo << endl;
- d->mUpgrades.clear();
- d->mNotResearchedUpgrades.clear();
- conf->setGroup("Boson Unit");
- int count = conf->readNumEntry("Upgrades", 0);
- if (count == 0) {
-	return;
- }
- boDebug() << k_funcinfo << "Loading " << count << " upgrades for unit " << typeId() << endl;
- for (int i = 1; i <= count; i++) {
-	UpgradeProperties* upgrade = new UpgradeProperties(this, i);
-	upgrade->loadPlugin(conf);
-	d->mUpgrades.append(upgrade);
-	d->mNotResearchedUpgrades.append(upgrade);
- }
- boDebug() << k_funcinfo << "DONE" << endl;
 }
 
 QPtrList<BosonParticleSystem> UnitProperties::newDestroyedParticleSystems(float x, float y, float z) const
@@ -722,8 +678,6 @@ void UnitProperties::reset()
  d->mSounds.insert(SoundReportUnderAttack, "report_underattack");
  // Clear other lists
  d->mTextureNames.clear();
- d->mUpgrades.clear();
- d->mNotResearchedUpgrades.clear();
 }
 
 void UnitProperties::setHitPoint(const BoVector3& hitpoint)

@@ -31,7 +31,6 @@ class BosonModel;
 class BosonSound;
 class UnitProperties;
 class UnitBase;
-class TechnologyProperties;
 class UpgradeProperties;
 class BosonParticleSystemProperties;
 class BosonWeaponProperties;
@@ -181,7 +180,7 @@ public:
 
 	UnitProperties* nonConstUnitProperties(unsigned long int unitType) const;
 
-	TechnologyProperties* technology(unsigned long int techType) const;
+	UpgradeProperties* technology(unsigned long int techType) const;
 
 	/**
 	 * @return the path to the species theme (ending with
@@ -277,9 +276,7 @@ public:
 	 * Do not use this method! It's only meant to be used by
 	 * Player::hasTechnology() and might be made private later
 	 **/
-	QIntDict<TechnologyProperties> technologyList() const;
-
-	void upgradeResearched(unsigned long int unitType, UpgradeProperties* upgrade);
+	QIntDict<UpgradeProperties> technologyList() const;
 
 	void loadUnitModel(const UnitProperties* prop);
 
