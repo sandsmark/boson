@@ -150,12 +150,12 @@ Available versions are:<br>
 draw_bigbox_subheader("<a name=\"cvs\"></a>CVS - Bleeding edge development version");
 draw_bigbox_text("You can get both code and data from CVS using the procedure below.<br>
 First, login to the CVS-server by issuing
-<pre>$ cvs -d:pserver:anonymous@cvs.boson.sourceforge.net:/cvsroot/boson login</pre>
+<pre>$ cvs -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/boson login</pre>
 When asked for a password, just press enter. Now, download the code and data by typing
 <pre>
-$ cvs -z3 -d:pserver:anonymous@cvs.boson.sourceforge.net:/cvsroot/boson co -P code
-$ cvs -z3 -d:pserver:anonymous@cvs.boson.sourceforge.net:/cvsroot/boson co -P data
-$ cvs -z3 -d:pserver:anonymous@cvs.boson.sourceforge.net:/cvsroot/boson co -P tools
+$ cvs -z3 -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/boson co -P code
+$ cvs -z3 -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/boson co -P data
+$ cvs -z3 -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/boson co -P tools
 </pre>
 Now you need to link the admin dir from the tools directory:
 <pre>
