@@ -39,10 +39,12 @@
 
 FILE *logfile = (FILE *) 0L;
 
-visualProperties_t vpp = {
-	0l,
-	{0l, 0l}
-	};
+/*
+ * visual/visual.h
+ */
+groundTheme		*ground = 0;
+speciesTheme		*species[BOSON_MAX_PLAYERS] = {0l, 0l};
+int			nb_player;
 
 
 BoEditorApp::BoEditorApp(char *filename)

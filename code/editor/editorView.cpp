@@ -155,48 +155,48 @@ void editorView::redrawTiles(void)
 	
 	switch(which) {
 		case 1:
-			seq = vpp.ground->getPixmap( GET_TRANS_NUMBER(trans, (inverted?16:12) + 0) );
+			seq = ground->getPixmap( GET_TRANS_NUMBER(trans, (inverted?16:12) + 0) );
 			bigTiles[0]->setPixmap(*seq->image(0));
-			seq = vpp.ground->getPixmap( GET_TRANS_NUMBER(trans, (inverted?16:12) + 1) );
+			seq = ground->getPixmap( GET_TRANS_NUMBER(trans, (inverted?16:12) + 1) );
 			bigTiles[1]->setPixmap(*seq->image(0));
-			seq = vpp.ground->getPixmap( GET_TRANS_NUMBER(trans, (inverted?16:12) + 2) );
+			seq = ground->getPixmap( GET_TRANS_NUMBER(trans, (inverted?16:12) + 2) );
 			bigTiles[2]->setPixmap(*seq->image(0));
-			seq = vpp.ground->getPixmap( GET_TRANS_NUMBER(trans, (inverted?16:12) + 3) );
+			seq = ground->getPixmap( GET_TRANS_NUMBER(trans, (inverted?16:12) + 3) );
 			bigTiles[3]->setPixmap(*seq->image(0));
 			break;
 
 		case 2:
-			seq = vpp.ground->getPixmap( GET_TRANS_NUMBER(trans, (inverted?24:20) + 0) );
+			seq = ground->getPixmap( GET_TRANS_NUMBER(trans, (inverted?24:20) + 0) );
 			bigTiles[0]->setPixmap(*seq->image(0));
-			seq = vpp.ground->getPixmap( GET_TRANS_NUMBER(trans, (inverted?24:20) + 1) );
+			seq = ground->getPixmap( GET_TRANS_NUMBER(trans, (inverted?24:20) + 1) );
 			bigTiles[1]->setPixmap(*seq->image(0));
-			seq = vpp.ground->getPixmap( GET_TRANS_NUMBER(trans, (inverted?24:20) + 2) );
+			seq = ground->getPixmap( GET_TRANS_NUMBER(trans, (inverted?24:20) + 2) );
 			bigTiles[2]->setPixmap(*seq->image(0));
-			seq = vpp.ground->getPixmap( GET_TRANS_NUMBER(trans, (inverted?24:20) + 3) );
+			seq = ground->getPixmap( GET_TRANS_NUMBER(trans, (inverted?24:20) + 3) );
 			bigTiles[3]->setPixmap(*seq->image(0));
 			break;
 		case 0:
-			seq = vpp.ground->getPixmap( GET_TRANS_NUMBER(trans, inverted?TRANS_ULI:TRANS_UL) );
+			seq = ground->getPixmap( GET_TRANS_NUMBER(trans, inverted?TRANS_ULI:TRANS_UL) );
 			tiles[0]->setPixmap(*seq->image(0));
-			seq = vpp.ground->getPixmap( GET_TRANS_NUMBER(trans, inverted?TRANS_DOWN:TRANS_UP) );
+			seq = ground->getPixmap( GET_TRANS_NUMBER(trans, inverted?TRANS_DOWN:TRANS_UP) );
 			tiles[1]->setPixmap(*seq->image(0));
-			seq = vpp.ground->getPixmap( GET_TRANS_NUMBER(trans, inverted?TRANS_URI:TRANS_UR) );
+			seq = ground->getPixmap( GET_TRANS_NUMBER(trans, inverted?TRANS_URI:TRANS_UR) );
 			tiles[2]->setPixmap(*seq->image(0));
 
-			seq = vpp.ground->getPixmap( GET_TRANS_NUMBER(trans, inverted?TRANS_RIGHT:TRANS_LEFT) );
+			seq = ground->getPixmap( GET_TRANS_NUMBER(trans, inverted?TRANS_RIGHT:TRANS_LEFT) );
 			tiles[3]->setPixmap(*seq->image(0));
-			seq = vpp.ground->getPixmap( GET_TRANS_NUMBER(trans, inverted?TRANS_LEFT:TRANS_RIGHT) );
+			seq = ground->getPixmap( GET_TRANS_NUMBER(trans, inverted?TRANS_LEFT:TRANS_RIGHT) );
 			tiles[5]->setPixmap(*seq->image(0));
 
-			seq = vpp.ground->getPixmap( GET_TRANS_NUMBER(trans, inverted?TRANS_DLI:TRANS_DL) );
+			seq = ground->getPixmap( GET_TRANS_NUMBER(trans, inverted?TRANS_DLI:TRANS_DL) );
 			tiles[6]->setPixmap(*seq->image(0));
-			seq = vpp.ground->getPixmap( GET_TRANS_NUMBER(trans, inverted?TRANS_UP:TRANS_DOWN) );
+			seq = ground->getPixmap( GET_TRANS_NUMBER(trans, inverted?TRANS_UP:TRANS_DOWN) );
 			tiles[7]->setPixmap(*seq->image(0));
-			seq = vpp.ground->getPixmap( GET_TRANS_NUMBER(trans, inverted?TRANS_DRI:TRANS_DR) );
+			seq = ground->getPixmap( GET_TRANS_NUMBER(trans, inverted?TRANS_DRI:TRANS_DR) );
 			tiles[8]->setPixmap(*seq->image(0));
 			
 			// middle one
-			seq = vpp.ground->getPixmap( inverted?groundTransProp[trans].to:groundTransProp[trans].from);
+			seq = ground->getPixmap( inverted?groundTransProp[trans].to:groundTransProp[trans].from);
 			tiles[4]->setPixmap(*seq->image(0));
 			break;
 	} // switch()
@@ -282,7 +282,7 @@ void editorView::handleButton(int but)
 			break;
 	} // switch(which)
 	
-	setSelected( vpp.ground->getPixmap(g)->image(0));
+	setSelected( ground->getPixmap(g)->image(0));
 	emit setSelectedTile (g);		// need to be after the setSelected
 }
 

@@ -139,7 +139,7 @@ void visualView::selectFix(visualFacility *f)
 {
 	fixSelected = f;
 	fixSelected->select();
-	emit setSelected( vpp.species[f->who]->getBigOverview(f));
+	emit setSelected( species[f->who]->getBigOverview(f));
 	
 	switch (f->getType()) {
 		case FACILITY_CMDBUNKER:
@@ -167,7 +167,7 @@ void visualView::selectMob(long key, visualMobUnit *m)
 		}
 
 	mobSelected.insert(key, m); m->select();
-	emit setSelected( vpp.species[m->who]->getBigOverview(m));
+	emit setSelected( species[m->who]->getBigOverview(m));
 	logf(LOG_GAME_LOW, "select mobile");
 }
 

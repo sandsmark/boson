@@ -90,7 +90,7 @@ void bosonField::createFix(facilityMsg_t &m)
 {
 	playerFacility *f;
 
-	assert(m.who < vpp.nb_player);
+	assert(m.who < nb_player);
 
 	f = new playerFacility(&m);
 	facility.insert(m.key, f);
