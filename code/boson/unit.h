@@ -184,6 +184,10 @@ protected:
 
 	virtual void advanceProduction() { }
 
+	int mPathrecalc;
+	int mMoveDestX, mMoveDestY;
+	bool mAttacking;
+
 private:
 	class UnitPrivate;
 	UnitPrivate* d;
@@ -204,6 +208,13 @@ public:
 
 protected:
 	virtual void advanceMove(); // move one step futher to path
+	/** Finds new path to destination
+	  * Destination must have been set before in variables movedestx and movedesty
+	  * @return true if path was found, false otherwise
+	  */
+	bool newPath();
+	/** Same as above, but sets movedestx to destx and movedesty to desty first */
+	bool newPath(int destx, int desty);
 
 private:
 	// a d pointer is probably not very good here - far too much memory consumption

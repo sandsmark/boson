@@ -92,6 +92,8 @@ class BosonPath
     float pathCost() const { return mPathCost; };
 
   private:
+    class PathNode;
+    class Marking;
     float dist(int ax, int ay, int bx, int by);
     float cost(int x, int y);
     inline void getFirst(QValueList<PathNode>&, PathNode& n);
