@@ -131,7 +131,8 @@ bool UnitProperties::loadUnitType(const QString& fileName, bool fullmode)
  mUnitHeight = (conf.readDoubleNumEntry("UnitHeight", 1.0));
  mUnitDepth = conf.readDoubleNumEntry("UnitDepth", 1.0);
  d->mName = conf.readEntry("Name", i18n("Unknown"));
- m_productionTime.init(conf.readUnsignedNumEntry("ProductionTime", 100));
+ // We convert this from seconds to advance calls
+ m_productionTime.init((int)(conf.readDoubleNumEntry("ProductionTime", 5) * 20.0f));
  m_health.init(conf.readUnsignedLongNumEntry("Health", 100));
  m_mineralCost.init(conf.readUnsignedLongNumEntry("MineralCost", 100));
  m_oilCost.init(conf.readUnsignedLongNumEntry("OilCost", 0));
@@ -198,7 +199,8 @@ void UnitProperties::saveUnitType(const QString& fileName)
  conf.writeEntry("MineralCost", mineralCost());
  conf.writeEntry("OilCost", oilCost());
  conf.writeEntry("SightRange", sightRange());
- conf.writeEntry("ProductionTime", productionTime());
+ // This is converted from advance calls to seconds
+ conf.writeEntry("ProductionTime", productionTime() / 20.0f);
  conf.writeEntry("Shield", shields());
  conf.writeEntry("Armor", armor());
  conf.writeEntry("SupportMiniMap", mSupportMiniMap);
