@@ -117,8 +117,6 @@ BoFullScreen::BoFullScreen()
  d = new BoFullScreenPrivate;
  d->mInitialized = false;
 
- // AB: won't work. at this point everything is closed already!
- // -> no qApp pointer, no display, ...
  atexit(bo_enter_orig_mode);
 }
 
@@ -126,8 +124,6 @@ BoFullScreen::~BoFullScreen()
 {
  // reset to the original resolution asap.
  // will probably called twice, due to atexit()
- // AB: won't work. at this point everything is closed already!
- // -> no qApp pointer, no display, ...
  enterOriginalMode();
 
 #ifdef HAVE_XFREE86_XRANDR
