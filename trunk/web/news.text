@@ -1,4 +1,19 @@
 [article]
+id=031017
+date=October 17th 2003 14:18
+title=Fresh screenshots
+text=Some new
+    <a href="screenshots.php">screenshots</a> have been made, showing
+    mostly lighting. They're really beautiful ;-)<br>
+    <a href="http://dot.kde.org/">Dot</a> finally
+    <a href="http://dot.kde.org/1066312914/">mentioned</a> yesterday that we
+    have <a href="movies.php">movies</a> available. It took a month, but it
+    looks like it was worth it as yesterday we had about 10 times more visitors
+    than on an average day.<br>
+    About release date for 0.9, we still cannot say anything certain yet, but it
+    looks like it may come at the end of November in December.<br><br>
+
+[article]
 id=031015
 date=October 15th 2003 14:40
 title=New poll, new features

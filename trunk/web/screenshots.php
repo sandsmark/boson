@@ -195,21 +195,31 @@ add_screenshot("Big battle. Thanks to big performance improvements, it is
     possible to have much bigger battles in 0.8",
     "1. April 2003 (Boson 0.8)", "0.8-3-thumb.jpg", "0.8-3.jpg");
 add_screenshot("Showing new terrain rendering and some units",
-    "<b>NEW:</b> 4. Aug. 2003 (CVS)", "terrain-1-thumb.jpg", "terrain-1.jpg");
+    "4. Aug. 2003 (CVS)", "terrain-1-thumb.jpg", "terrain-1.jpg");
 add_screenshot("Another terrain shot, showing muddy coastline",
-    "<b>NEW:</b> 4. Aug. 2003 (CVS)", "terrain-2-thumb.jpg", "terrain-2.jpg");
+    "4. Aug. 2003 (CVS)", "terrain-2-thumb.jpg", "terrain-2.jpg");
 add_screenshot("Some A-10 planes attacking enemy base",
-    "<b>NEW:</b> 4. Aug. 2003 (CVS)", "0308-1-thumb.jpg", "0308-1.jpg");
+    "4. Aug. 2003 (CVS)", "0308-1-thumb.jpg", "0308-1.jpg");
 add_screenshot("A-10 blew up some tanks",
-    "<b>NEW:</b> 4. Aug. 2003 (CVS)", "0308-2-thumb.jpg", "0308-2.jpg");
+    "4. Aug. 2003 (CVS)", "0308-2-thumb.jpg", "0308-2.jpg");
 add_screenshot("Bunch of enemies blown up",
-    "<b>NEW:</b> 4. Aug. 2003 (CVS)", "0308-3-thumb.jpg", "0308-3.jpg");
+    "4. Aug. 2003 (CVS)", "0308-3-thumb.jpg", "0308-3.jpg");
 add_screenshot("Some Koyote choppers attacking enemy",
-    "<b>NEW:</b> 4. Aug. 2003 (CVS)", "0308-4-thumb.jpg", "0308-4.jpg");
+    "4. Aug. 2003 (CVS)", "0308-4-thumb.jpg", "0308-4.jpg");
 add_screenshot("Leopard tank blown up",
-    "<b>NEW:</b> 4. Aug. 2003 (CVS)", "0308-5-thumb.jpg", "0308-5.jpg");
+    "4. Aug. 2003 (CVS)", "0308-5-thumb.jpg", "0308-5.jpg");
 add_screenshot("Battle between Leopard tanks and Grizzlies",
-    "<b>NEW:</b> 4. Aug. 2003 (CVS)", "0308-6-thumb.jpg", "0308-6.jpg");
+    "4. Aug. 2003 (CVS)", "0308-6-thumb.jpg", "0308-6.jpg");
+add_screenshot("War at night showing unit lighting. Smoke is probably too light,
+    it should be darker.",
+    "<b>NEW:</b> 17. Oct. 2003 (CVS)", "0310-1-thumb.jpg", "0310-1.jpg");
+add_screenshot("War at night. You can see units being lit correctly",
+    "<b>NEW:</b> 17. Oct. 2003 (CVS)", "0310-2-thumb.jpg", "0310-2.jpg");
+add_screenshot("Looking down from the top of the mountain...",
+    "<b>NEW:</b> 17. Oct. 2003 (CVS)", "0310-3-thumb.jpg", "0310-3.jpg");
+add_screenshot("New lighting and terrain rendering code in action. Note that
+    camera is very high, so large area is visible",
+    "<b>NEW:</b> 17. Oct. 2003 (CVS)", "0310-4-thumb.jpg", "0310-4.jpg");
 
 $ss_count = count($screens);
 
