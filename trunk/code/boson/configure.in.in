@@ -295,10 +295,35 @@ AC_DEFUN([AC_CHECK_PLIB_LIBS],
   AC_LANG_CPLUSPLUS
   bo_save_ldflags="$LDFLAGS"
   bo_save_cxxflags="$CXXFLAGS"
-  LIB_PLIB="-lplibul -lplibpu -lplibfnt -lplibpuaux -lplibsg"
+
+dnl Note the following dependencies in plib:
+dnl PW is independent
+dnl UL is independent
+dnl JS depends only on UL
+dnl SL depends only on UL
+dnl SG depends only on UL
+dnl NET depends only on UL
+dnl FNT depends on UL and SG
+dnl SSG depends on UL and SG
+dnl SSGAUX depends on UL, SG and SSG
+dnl PUI depends on UL, SG and FNT
+dnl PUAUX depends on UL, SG, FNT and PUI
+dnl PSL depends on UL, SG and SSG
+dnl In order to grant linking against static plib versions, we need to use
+dnl reverse dependency order, i.e. first link to PUI, then the libs it depends on
+
+nl  LIB_PLIB="-lplibpuaux -lplibpu -lplibfnt -lplibsg -lplibul"
   LDFLAGS="$LDFLAGS $LIB_PLIB -lGL"
   CXXFLAGS="$CFLAGS $X_INCLUDES"
   bo_have_plib=""
+
+dnl AB: we need to use libtool here, because configure uses g++ $(LIBS)
+dnl conftest.cc. If $(LIBS) has static libs, then this causes huge problems.
+dnl AB: note that we should use ${builddir}/libtool, but by some reason this
+dnl doesn't work. However since builddir is equal (by definition) to ".", this
+dnl isn't a big problem.
+  bo_save_CXX="$CXX"
+  CXX="${SHELL-/bin/sh} ./libtool $CXX"
   AC_TRY_LINK(
 	[
 #include <plib/ul.h>
@@ -314,6 +339,7 @@ ulClock c;
   else
 	AC_MSG_RESULT([$bo_have_plib])
   fi
+  CXX="$bo_save_CXX"
   AC_LANG_RESTORE
   LDFLAGS="$bo_save_ldflags"
   CXXFLAGS="$bo_save_cxxflags"
