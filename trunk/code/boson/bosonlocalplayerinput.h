@@ -62,16 +62,16 @@ class BosonLocalPlayerInput : public KGameIO
     void stopUnits(const QPtrList<Unit>& units);
     void layMine(const BoSpecificAction& action);
     void harvest(const HarvesterPlugin* harvester, const ResourceMinePlugin* mine);
-    void moveWithoutAttack(const QPtrList<Unit>& units, int x, int y);
-    void moveWithAttack(const QPtrList<Unit>& units, int x, int y);
-    void build(ProductionType type, Unit* factory, int x, int y);
+    void moveWithoutAttack(const QPtrList<Unit>& units, float x, float y);
+    void moveWithAttack(const QPtrList<Unit>& units, float x, float y);
+    void build(ProductionType type, Unit* factory, float x, float y);
     void attack(const QPtrList<Unit>& units, Unit* target);
-    void dropBomb(Unit* u, int weapon, int x, int y);
+    void dropBomb(Unit* u, int weapon, float x, float y);
     void repair(const QPtrList<Unit>& units, Unit* repairyard);
     void refine(const QPtrList<Unit>& units, Unit* refinery);
     void follow(const QPtrList<Unit>& units, Unit* target);
 
-    void placeUnit(Player* owner, unsigned long int unitType, int x, int y);
+    void placeUnit(Player* owner, unsigned long int unitType, float x, float y);
     void changeHeight(int x, int y, float height);
 
     virtual void setCommandFrame(BosonCommandFrameInterface* cmdframe);

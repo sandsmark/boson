@@ -532,8 +532,9 @@ PyObject* PythonScript::py_nearestOilLocations(PyObject*, PyObject* args)
 /*****  Unit functions  *****/
 PyObject* PythonScript::py_moveUnit(PyObject*, PyObject* args)
 {
-  int player, id, x, y;
-  if(!PyArg_ParseTuple(args, (char*)"iiii", &player, &id, &x, &y))
+  int player, id;
+  float x, y;
+  if(!PyArg_ParseTuple(args, (char*)"iiff", &player, &id, &x, &y))
   {
     return 0;
   }
@@ -546,8 +547,9 @@ PyObject* PythonScript::py_moveUnit(PyObject*, PyObject* args)
 
 PyObject* PythonScript::py_moveUnitWithAttacking(PyObject*, PyObject* args)
 {
-  int player, id, x, y;
-  if(!PyArg_ParseTuple(args, (char*)"iiii", &player, &id, &x, &y))
+  int player, id;
+  float x, y;
+  if(!PyArg_ParseTuple(args, (char*)"iiff", &player, &id, &x, &y))
   {
     return 0;
   }
@@ -588,8 +590,9 @@ PyObject* PythonScript::py_stopUnit(PyObject*, PyObject* args)
 
 PyObject* PythonScript::py_mineUnit(PyObject*, PyObject* args)
 {
-  int player, id, x, y;
-  if(!PyArg_ParseTuple(args, (char*)"iiii", &player, &id, &x, &y))
+  int player, id;
+  float x, y;
+  if(!PyArg_ParseTuple(args, (char*)"iiff", &player, &id, &x, &y))
   {
     return 0;
   }
@@ -617,8 +620,9 @@ PyObject* PythonScript::py_setUnitRotation(PyObject*, PyObject* args)
 
 PyObject* PythonScript::py_dropBomb(PyObject*, PyObject* args)
 {
-  int player, id, weapon, x, y;
-  if(!PyArg_ParseTuple(args, (char*)"iiiii", &player, &id, &weapon, &x, &y))
+  int player, id, weapon;
+  float x, y;
+  if(!PyArg_ParseTuple(args, (char*)"iiiff", &player, &id, &weapon, &x, &y))
   {
     return 0;
   }
@@ -645,8 +649,9 @@ PyObject* PythonScript::py_produceUnit(PyObject*, PyObject* args)
 
 PyObject* PythonScript::py_spawnUnit(PyObject*, PyObject* args)
 {
-  int player, type, x, y;
-  if(!PyArg_ParseTuple(args, (char*)"iiii", &player, &type, &x, &y))
+  int player, type;
+  float x, y;
+  if(!PyArg_ParseTuple(args, (char*)"iiff", &player, &type, &x, &y))
   {
     return 0;
   }
@@ -659,8 +664,9 @@ PyObject* PythonScript::py_spawnUnit(PyObject*, PyObject* args)
 
 PyObject* PythonScript::py_teleportUnit(PyObject*, PyObject* args)
 {
-  int player, id, x, y;
-  if(!PyArg_ParseTuple(args, (char*)"iiii", &player, &id, &x, &y))
+  int player, id;
+  float x, y;
+  if(!PyArg_ParseTuple(args, (char*)"iiff", &player, &id, &x, &y))
   {
     return 0;
   }

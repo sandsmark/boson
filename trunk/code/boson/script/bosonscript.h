@@ -164,12 +164,12 @@ class BosonScript
      * Unit will go directly to given position and will ignore any units on the
      * way
      **/
-    static void moveUnit(int player, int id, int x, int y);
+    static void moveUnit(int player, int id, float x, float y);
     /**
      * Moves unit with id id to (x, y)
      * Unit will shoot at any enemy units on the way
      **/
-    static void moveUnitWithAttacking(int player, int id, int x, int y);
+    static void moveUnitWithAttacking(int player, int id, float x, float y);
     /**
      * Unit with id attackerId will attack unit targetId
      **/
@@ -181,7 +181,7 @@ class BosonScript
     /**
      * Sends unit with id id to mine at (x, y)
      **/
-    static void mineUnit(int player, int id, int x, int y);
+    static void mineUnit(int player, int id, float x, float y);
     /**
      * Sets unit's rotation to rotation
      **/
@@ -189,7 +189,7 @@ class BosonScript
     /**
      * Drops bomb with given unit with specified weapon to given pos
      **/
-    static void dropBomb(int player, int id, int weapon, int x, int y);
+    static void dropBomb(int player, int id, int weapon, float x, float y);
     /**
      * Produces unit with type production in factory with id factory
      **/
@@ -197,11 +197,11 @@ class BosonScript
     /**
      * Spawns unit owned by player, with type type, at (x, y)
      **/
-    static void spawnUnit(int player, int type, int x, int y);
+    static void spawnUnit(int player, int type, float x, float y);
     /**
      * Teleports (immediately moves) unit with id id, owned by player to (x, y)
      **/
-    static void teleportUnit(int player, int id, int x, int y);
+    static void teleportUnit(int player, int id, float x, float y);
 
     /**
      * @return List of units on cell (x, y)

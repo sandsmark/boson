@@ -275,7 +275,7 @@ QValueList<BoVector2> BosonScript::nearestOilLocations(int playerId, int x, int 
 
 
 /*****  Unit methods  *****/
-void BosonScript::moveUnit(int player, int id, int x, int y)
+void BosonScript::moveUnit(int player, int id, float x, float y)
 {
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
@@ -295,7 +295,7 @@ void BosonScript::moveUnit(int player, int id, int x, int y)
   sendInput(player, msg);
 }
 
-void BosonScript::moveUnitWithAttacking(int player, int id, int x, int y)
+void BosonScript::moveUnitWithAttacking(int player, int id, float x, float y)
 {
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
@@ -347,7 +347,7 @@ void BosonScript::stopUnit(int player, int id)
   sendInput(player, msg);
 }
 
-void BosonScript::mineUnit(int player, int id, int x, int y)
+void BosonScript::mineUnit(int player, int id, float x, float y)
 {
   // First we have to find resource mine
   // TODO: it sucks to do this here, perhaps we could have something like a
@@ -392,15 +392,14 @@ void BosonScript::setUnitRotation(int player, int id, float rotation)
   sendInput(player, msg);
 }
 
-void BosonScript::dropBomb(int player, int id, int weapon, int x, int y)
+void BosonScript::dropBomb(int player, int id, int weapon, float x, float y)
 {
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
 
   stream << (Q_UINT32)BosonMessage::MoveDropBomb;
   // tell place
-  stream << (Q_INT32)x;
-  stream << (Q_INT32)y;
+  stream << BoVector2(x, y);
   // tell them how many units attack:
   stream << (Q_UINT32)1;
   stream << (Q_UINT32)id;
@@ -425,7 +424,7 @@ void BosonScript::produceUnit(int player, int factory, int production)
   sendInput(player, msg);
 }
 
-void BosonScript::spawnUnit(int player, int type, int x, int y)
+void BosonScript::spawnUnit(int player, int type, float x, float y)
 {
   if(!game())
   {
@@ -438,14 +437,13 @@ void BosonScript::spawnUnit(int player, int type, int x, int y)
   stream << (Q_UINT32)BosonMessage::MovePlaceUnit;
   stream << (Q_UINT32)player;
   stream << (Q_UINT32)type;
-  stream << (Q_INT32)x;
-  stream << (Q_INT32)y;
+  stream << BoVector2(x, y);
 
   QDataStream msg(b, IO_ReadOnly);
   sendInput(player, msg);
 }
 
-void BosonScript::teleportUnit(int player, int id, int x, int y)
+void BosonScript::teleportUnit(int player, int id, float x, float y)
 {
   if(!game())
   {
@@ -458,8 +456,7 @@ void BosonScript::teleportUnit(int player, int id, int x, int y)
   stream << (Q_UINT32)BosonMessage::MoveTeleport;
   stream << (Q_UINT32)player;
   stream << (Q_UINT32)id;
-  stream << (Q_INT32)x;
-  stream << (Q_INT32)y;
+  stream << BoVector2(x, y);
 
   QDataStream msg(b, IO_ReadOnly);
   sendInput(player, msg);

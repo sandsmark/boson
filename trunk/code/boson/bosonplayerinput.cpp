@@ -538,15 +538,13 @@ bool BosonPlayerInput::playerInput(QDataStream& stream, Player* player)
 		Q_UINT32 productionType;
 		Q_ULONG factoryId;
 		Q_UINT32 owner;
-		Q_INT32 x;
-		Q_INT32 y;
+		BoVector2 pos;
 
 		stream >> productionType;
 
 		stream >> factoryId;
 		stream >> owner;
-		stream >> x;
-		stream >> y;
+		stream >> pos;
 
 		// Only units are "built"
 		if ((ProductionType)productionType != ProduceUnit) {
@@ -586,7 +584,7 @@ bool BosonPlayerInput::playerInput(QDataStream& stream, Player* player)
 			boWarning() << k_lineinfo << "not yet completed" << endl;
 			break;
 		}
-		mGame->buildProducedUnit(production, unitType, x, y);
+		mGame->buildProducedUnit(production, unitType, pos);
 		break;
 	}
 	case BosonMessage::MoveFollow:
@@ -664,11 +662,10 @@ bool BosonPlayerInput::playerInput(QDataStream& stream, Player* player)
 	{
 		boDebug() << k_funcinfo << "MoveDropBomb action" << endl;
 		Q_UINT32 unitCount;
-		Q_INT32 x, y;
+		BoVector2 pos;
 		Q_UINT32 unitId, weaponId;
 
-		stream >> x;
-		stream >> y;
+		stream >> pos;
 		stream >> unitCount;
 
 		for (unsigned int i = 0; i < unitCount; i++) {
@@ -690,7 +687,7 @@ bool BosonPlayerInput::playerInput(QDataStream& stream, Player* player)
 				boError() << k_lineinfo << "This unit has no bombing plugin" << endl;
 				break;
 			}
-			b->bomb(weaponId, x, y);
+			b->bomb(weaponId, pos);
 		}
 		boDebug() << k_funcinfo << "done" << endl;
 
@@ -700,13 +697,11 @@ bool BosonPlayerInput::playerInput(QDataStream& stream, Player* player)
 	{
 		Q_UINT32 unitId;
 		Q_UINT32 owner;
-		Q_INT32 x;
-		Q_INT32 y;
+		BoVector2 pos;
 
 		stream >> owner;
 		stream >> unitId;
-		stream >> x;
-		stream >> y;
+		stream >> pos;
 
 		Player* p = findPlayer(owner);
 		if (!p) {
@@ -719,7 +714,7 @@ bool BosonPlayerInput::playerInput(QDataStream& stream, Player* player)
 			break;
 		}
 
-		u->moveBy(x - u->x(), y - u->y(), 0);
+		u->moveBy(pos.x() - u->x(), pos.y() - u->y(), 0);
 
 		break;
 	}
@@ -752,13 +747,11 @@ bool BosonPlayerInput::playerInput(QDataStream& stream, Player* player)
 	{
 		Q_UINT32 unitType;
 		Q_UINT32 owner;
-		Q_INT32 cellX;
-		Q_INT32 cellY;
+		BoVector2 pos;
 
 		stream >> owner;
 		stream >> unitType;
-		stream >> cellX;
-		stream >> cellY;
+		stream >> pos;
 
 		Player* p = 0;
 		if (owner >= 1024) { // a KPlayer ID
@@ -778,18 +771,18 @@ bool BosonPlayerInput::playerInput(QDataStream& stream, Player* player)
 		const UnitProperties* prop = p->speciesTheme()->unitProperties(unitType);
 		float width = prop->unitWidth();
 		float height = prop->unitHeight();
-		BoRect r(cellX, cellY, cellX + width, cellY + height);
+		BoRect r(pos, pos + BoVector2(width, height));
 		if (!canvas()->canGo(prop, r)) {
-			boWarning() << k_funcinfo << "Unit with type " << unitType << " can't go to (" << cellX << "; " << cellY << ")" << endl;
+			boWarning() << k_funcinfo << "Unit with type " << unitType << " can't go to (" << pos.x() << "; " << pos.y() << ")" << endl;
 			break;
 		}
 		if (canvas()->collisions()->cellsOccupied(r)) {
-			boWarning() << k_funcinfo << "Cells at (" << cellX << "; " << cellY << ") are occupied" << endl;
+			boWarning() << k_funcinfo << "Cells at (" << pos.x() << "; " << pos.y() << ") are occupied" << endl;
 			break;
 		}
 
-		BoVector3 pos((float)cellX, (float)cellY, 0.0f);
-		Unit* u = (Unit*)canvas()->createNewItem(RTTI::UnitStart + unitType, p, ItemType(unitType), pos);
+		BoVector3 pos3(pos.x(), pos.y(), 0.0f);
+		Unit* u = (Unit*)canvas()->createNewItem(RTTI::UnitStart + unitType, p, ItemType(unitType), pos3);
 		// Facilities will be fully constructed by default
 		if (u->isFacility()) {
 			((Facility*)u)->setConstructionStep(((Facility*)u)->constructionSteps());
