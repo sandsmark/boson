@@ -159,7 +159,7 @@ bool BosonItem::bosonCollidesWith(BosonItem* item) const
  // First we test z-coordinate
  if (QMAX(z(), item->z()) > QMIN(z() + depth(), item->z() + item->depth())) {
 	// z-coordinates doesn't intersect. Then items doesn't collide either
-  return false;
+	return false;
  }
 
  // Then bounding rect intersect test
