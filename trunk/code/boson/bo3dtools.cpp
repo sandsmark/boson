@@ -357,6 +357,40 @@ void BoMatrix::translate(GLfloat x, GLfloat y, GLfloat z)
  mData[15] = mData[3] * x + mData[7] * y + mData[11] * z + mData[15];
 }
 
+void BoMatrix::scale(GLfloat x, GLfloat y, GLfloat z)
+{
+ // shamelessy stolen from mesa/src/math/m_math.c
+ mData[0] *= x;   mData[4] *= y;   mData[8]  *= z;
+ mData[1] *= x;   mData[5] *= y;   mData[9]  *= z;
+ mData[2] *= x;   mData[6] *= y;   mData[10] *= z;
+ mData[3] *= x;   mData[7] *= y;   mData[11] *= z;
+ // mesa now changes some flags. we don't do so. TODO: check if this might cause
+ // trouble
+}
+
+void BoMatrix::multiply(const GLfloat* mat)
+{
+ // shamelessy stolen from mesa/src/math/m_math.c
+ // we use matmul4() from mesa only, not matmul34(). this means we are slower
+ // than mesa! (and also less complex).
+ // AB: this function multiplies mData by mat and places the result into mData.
+#define A(row,col)  mData[(col<<2)+row] // matrix A
+#define B(row,col)  mat[(col<<2)+row] // matrix B
+#define P(row,col)  mData[(col<<2)+row] // product (A * B)
+ GLint i;
+ for (i = 0; i < 4; i++)
+ {
+   const GLfloat ai0=A(i,0),  ai1=A(i,1),  ai2=A(i,2),  ai3=A(i,3);
+   P(i,0) = ai0 * B(0,0) + ai1 * B(1,0) + ai2 * B(2,0) + ai3 * B(3,0);
+   P(i,1) = ai0 * B(0,1) + ai1 * B(1,1) + ai2 * B(2,1) + ai3 * B(3,1);
+   P(i,2) = ai0 * B(0,2) + ai1 * B(1,2) + ai2 * B(2,2) + ai3 * B(3,2);
+   P(i,3) = ai0 * B(0,3) + ai1 * B(1,3) + ai2 * B(2,3) + ai3 * B(3,3);
+ }
+#undef A
+#undef B
+#undef P
+}
+
 void BoMatrix::debugMatrix(const GLfloat* m)
 {
  boDebug() << k_funcinfo << endl;
