@@ -19,7 +19,7 @@
 #ifndef __BOSONCURSOR_H__
 #define __BOSONCURSOR_H__
 
-//#include <qobject.h>
+#include <qobject.h>
 
 class QCanvas;
 class QPoint;
@@ -28,9 +28,9 @@ class QCursor;
 
 /**
  **/
-class BosonCursor
+class BosonCursor : public QObject
 {
-//	Q_OBJECT
+	Q_OBJECT
 public:
 	enum CursorMode {
 		Attack = 0,
@@ -88,6 +88,8 @@ public:
 	void loadCursors();
 
 protected:
+protected slots:
+	void slotAdvance();
 
 private:
 	class BosonCursorPrivate;
