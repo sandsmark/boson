@@ -1089,6 +1089,47 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 	{
 		break;
 	}
+	case BosonMessage::IdKillPlayer:
+	{
+		Player* p = 0;
+		Q_UINT32 id = 0;
+		stream >> id;
+		p = (Player*)findPlayer(id);
+		BO_CHECK_NULL_RET(p);
+		BO_CHECK_NULL_RET(d->mCanvas);
+		d->mCanvas->killPlayer(p);
+		slotAddChatSystemMessage(i18n("Debug"), i18n("Killed player %1 - %2").arg(p->id()).arg(p->name()));
+	}
+	case BosonMessage::IdModifyMinerals:
+	{
+		Player* p = 0;
+		Q_INT32 change = 0;
+		Q_UINT32 id = 0;
+		stream >> id;
+		stream >> change;
+		p = (Player*)findPlayer(id);
+		BO_CHECK_NULL_RET(p);
+		if ((Q_INT32)p->minerals() + change < 0) {
+		}
+		p->setMinerals(p->minerals() + change);
+		break;
+	}
+	case BosonMessage::IdModifyOil:
+	{
+		Player* p = 0;
+		Q_INT32 change = 0;
+		Q_UINT32 id = 0;
+		stream >> id;
+		stream >> change;
+		p = (Player*)findPlayer(id);
+		BO_CHECK_NULL_RET(p);
+		if ((Q_INT32)p->oil() + change < 0) {
+			p->setOil(0);
+		} else {
+			p->setOil(p->oil() + change);
+		}
+		break;
+	}
 	default:
 		boWarning() << k_funcinfo << "unhandled msgid " << msgid << endl;
 		break;

@@ -94,8 +94,6 @@ public:
 
 	void setShowChat(bool s);
 
-	void debugKillPlayer(KPlayer* p);
-
 	bool isCmdFrameVisible() const;
 	bool isChatVisible() const;
 	void setChatVisible(bool visible);
