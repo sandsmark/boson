@@ -98,7 +98,7 @@ int main(int argc, char **argv)
  top->show();
 
  if (boConfig->boolValue("EnableATIDepthWorkaround", false)) {
-	double depth = boConfig->doubleValue("ATIDepthWorkaroundValu", 0.00390625);
+	double depth = boConfig->doubleValue("ATIDepthWorkaroundValue", 0.00390625);
 	Bo3dTools::enableReadDepthBufferWorkaround((float)depth);
  }
 
