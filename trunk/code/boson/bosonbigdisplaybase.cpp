@@ -741,7 +741,7 @@ void BosonBigDisplayBase::paintGL()
 
 	GLfloat x = (item->x() + item->width() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE;
 	GLfloat y = -((item->y() + item->height() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE);
-	GLfloat z = item->z() * BO_GL_CELL_SIZE / BO_TILE_SIZE;
+	GLfloat z = item->z(); // this is already in the correct format!
 
 	// TODO: performance: we can improve this greatly:
 	// simply group the items to bigger sphere or boxes. every box is of
@@ -797,6 +797,7 @@ void BosonBigDisplayBase::paintGL()
 	glPushMatrix();
 	glRotatef(-(item->rotation()), 0.0, 0.0, 1.0);
 	glRotatef(item->xRotation(), 1.0, 0.0, 0.0);
+	glRotatef(item->yRotation(), 0.0, 1.0, 0.0);
 
 	// FIXME: performance: we could create a displaylist that contains the selectbox and simply change item->displayList()
 	// when the item is selected/unselected
