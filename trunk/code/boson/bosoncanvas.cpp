@@ -79,9 +79,7 @@ public:
 
 		mProperties = 0;
 
-#ifdef PATHFINDER_TNG
 		mPathfinder = 0;
-#endif
 	}
 	BosonCanvasStatistics* mStatistics;
 
@@ -111,9 +109,7 @@ public:
 	// but for now we are safe.
 	KGameProperty<unsigned long int> mNextItemId;
 
-#ifdef PATHFINDER_TNG
 	BosonPath2* mPathfinder;
-#endif
 };
 
 BosonCanvas::BosonCanvas(QObject* parent)
@@ -1570,13 +1566,11 @@ BosonItem* BosonCanvas::createItem(int rtti, Player* owner, const ItemType& type
  if (item) {
 	item->setId(id);
 	item->move(pos.x(), pos.y(), pos.z());
-#ifdef PATHFINDER_TNG
 	if (RTTI::isUnit(rtti)) {
 		// We also need to recalc occupied status for cells that unit is on.
 		// FIXME: this is hackish
 		unitMovingStatusChanges((Unit*)item, UnitBase::Moving, UnitBase::Standing);
 	}
-#endif
 	emit signalItemAdded(item);
  }
  return item;
@@ -1683,9 +1677,9 @@ unsigned long int BosonCanvas::nextItemId()
  return d->mNextItemId;
 }
 
-#ifdef PATHFINDER_TNG
 void BosonCanvas::initPathfinder()
 {
+#ifdef PATHFINDER_TNG
  boDebug() << k_funcinfo << endl;
 
  if (d->mPathfinder) {
@@ -1703,17 +1697,17 @@ void BosonCanvas::initPathfinder()
  d->mPathfinder->colorizeRegions();
 
  boDebug() << k_funcinfo << "DONE" << endl;
+#endif
 }
 
 BosonPath2* BosonCanvas::pathfinder()
 {
  return d->mPathfinder;
 }
-#endif
 
-#ifdef PATHFINDER_TNG
 void BosonCanvas::unitMovingStatusChanges(Unit* u, int oldstatus, int newstatus)
 {
+#ifdef PATHFINDER_TNG
  if (oldstatus == newstatus) {
 	// Shouldn't probably happen
 	boWarning() << k_funcinfo << "oldstatus == newstatus" << endl;
@@ -1751,6 +1745,6 @@ void BosonCanvas::unitMovingStatusChanges(Unit* u, int oldstatus, int newstatus)
 	}
 	pathfinder()->cellsOccupiedStatusChanged(x1, y1, x2, y2);
  }
-}
 #endif
+}
 

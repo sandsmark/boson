@@ -22,9 +22,6 @@
 #include "bosoncollisions.h"
 #include "defines.h"
 
-#warning FIXME!!!!!! REMOVE THIS!!! (PF_TNG include)
-#include "bosonpath.h"
-
 #include <qobject.h>
 
 class BosonMap;
@@ -39,9 +36,7 @@ class BosonParticleSystem;
 class BosonShot;
 class BosonCanvasStatistics;
 class BoVector3;
-#ifdef PATHFINDER_TNG
 class BosonPath2;
-#endif
 
 class KPlayer;
 class QDataStream;
@@ -161,10 +156,8 @@ public:
 	 **/
 	void initCell(int x, int y);
 
-#ifdef PATHFINDER_TNG
 	void initPathfinder();
 	BosonPath2* pathfinder();
-#endif
 
 	inline BosonCollisions* collisions() const { return mCollisions; }
 
@@ -254,9 +247,7 @@ public:
 	 **/
 	void unitMoved(Unit* unit, float oldX, float oldY);
 
-#ifdef PATHFINDER_TNG
 	void unitMovingStatusChanges(Unit* u, int oldstatus, int newstatus);
-#endif
 
 	/**
 	 * Called by @ref Unit. One unit damages/shoots at another unit.
