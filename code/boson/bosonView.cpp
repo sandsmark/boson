@@ -29,6 +29,7 @@
 #include <kapp.h>
 
 #include "../common/log.h"
+#include "../common/map.h"
 #include "../common/unitType.h"
 
 #include "speciesTheme.h"
