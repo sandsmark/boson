@@ -21,6 +21,7 @@
 
 #include "cell.h"
 #include "bosonmap.h"
+#include "bosoncanvas.h"
 #include "speciestheme.h"
 #include "unit.h"
 #include "defines.h"
@@ -47,6 +48,7 @@ public:
 
 		mMap = 0;
 		mLocalPlayer = 0;
+		mCanvas = 0;
 
 		mUseFog = false;
 	}
@@ -59,6 +61,7 @@ public:
 	QPoint mPos;
 
 	BosonMap* mMap;
+	BosonCanvas* mCanvas;
 	Player* mLocalPlayer;
 
 	bool mUseFog;
@@ -182,7 +185,6 @@ void BosonMiniMap::mousePressEvent(QMouseEvent *e)
 
 void BosonMiniMap::slotAddUnit(Unit* unit, int x, int y)
 {
-// FIXME: fog of war
  if (!unit) {
 	kdError() << k_funcinfo << ": NULL unit" << endl;
 	return;
@@ -221,6 +223,11 @@ void BosonMiniMap::slotResizeRect(int w, int h)
 void BosonMiniMap::setMap(BosonMap* map)
 {
  d->mMap = map;
+}
+
+void BosonMiniMap::setCanvas(BosonCanvas* c)
+{
+ d->mCanvas = c;
 }
 
 void BosonMiniMap::initMap()
@@ -278,7 +285,7 @@ void BosonMiniMap::slotUnitDestroyed(Unit* unit)
 	kdError() << k_funcinfo << ": NULL cell" << endl;
 	return;
  }
- slotAddCell(x, y, c->groundType(), c->version());
+ slotUnfog(x, y);
 }
 
 void BosonMiniMap::slotUnfog(int x, int y)
@@ -292,7 +299,11 @@ void BosonMiniMap::slotUnfog(int x, int y)
 	return;
  }
  slotAddCell(x, y, c->groundType(), c->version());
- //TODO units at this point/cell!!
+ QValueList<Unit*> list = d->mCanvas->unitsAtCell(x, y);
+ if (!list.isEmpty()) {
+	Unit* u = list.first();
+	slotAddUnit(u, u->x() / BO_TILE_SIZE, u->y() / BO_TILE_SIZE);
+ }
 }
 
 void BosonMiniMap::slotFog(int x, int y)

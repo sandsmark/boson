@@ -158,6 +158,7 @@ void BosonWidget::init()
 // about units,
  d->mBigDisplay = new BosonBigDisplay(d->mCanvas, this);
  d->mMiniMap = new BosonMiniMap(this);
+ d->mMiniMap->setCanvas(d->mCanvas);
 // d->mCommandFrame is now in addEditorCommandFrame() or addGameCommandFrame().
 // This is called by Top or Editor after construction of BosonWidget.
 
