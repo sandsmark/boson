@@ -56,6 +56,7 @@ namespace ufo {
 	class ULabel;
 	class UComboBox;
 	class UInternalFrame;
+	class UBoProgress;
 
 
 	class UActionEvent;
@@ -832,6 +833,35 @@ private:
 	float mMax;
 	float mStep;
 	ufo::USlider* mSlider;
+};
+
+class BoUfoProgress : public BoUfoWidget
+{
+	Q_OBJECT
+public:
+	// AB: we must not use a QObject parent here. otherwise garbage
+	// collection of libufo and Qt may confuse each other.
+	BoUfoProgress(Qt::Orientation = Horizontal);
+
+	void setOrientation(Qt::Orientation o);
+
+	ufo::UBoProgress* progress() const
+	{
+		return mProgress;
+	}
+
+	double value() const;
+	void setValue(double v);
+	void setRange(double min, double max);
+
+	double minimumValue() const;
+	double maximumValue() const;
+
+private:
+	void init(Qt::Orientation);
+
+private:
+	ufo::UBoProgress* mProgress;
 };
 
 class BoUfoNumInput : public BoUfoWidget

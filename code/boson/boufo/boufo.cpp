@@ -27,6 +27,8 @@
 #include <ufo/ui/uuidefs.hpp>
 #include "ubolabelui.h"
 #include "uboboxlayout.h"
+#include "uboprogress.h"
+#include "uboprogressui.h"
 
 // AB: make sure that we are compatible to system that have QT_NO_STL defined
 #ifndef QT_NO_STL
@@ -363,18 +365,27 @@ BoUfoImage::~BoUfoImage()
 
 void BoUfoImage::load(const QPixmap& p)
 {
+ if (p.isNull()) {
+	return;
+ }
  BoUfoImageIO io(p);
  set(&io);
 }
 
 void BoUfoImage::load(const QImage& img)
 {
+ if (img.isNull()) {
+	return;
+ }
  BoUfoImageIO io(img);
  set(&io);
 }
 
 void BoUfoImage::load(const BoUfoImage& img)
 {
+ if (!img.image()) {
+	return;
+ }
  load(img);
  set(img.image());
 }
@@ -438,6 +449,7 @@ BoUfoManager::BoUfoManager(int w, int h, bool opaque)
 	BO_NULL_ERROR(mContext->getUIManager());
  } else {
 	mContext->getUIManager()->setUI("ULabelUI", (ufo::UI_HANDLER)&ufo::UBoLabelUI::createUI);
+	mContext->getUIManager()->setUI("UBoProgressUI", (ufo::UI_HANDLER)&ufo::UBoProgressUI::createUI);
  }
 
  mRootPane = mContext->getRootPane();
@@ -1206,6 +1218,56 @@ float BoUfoSlider::floatValue() const
  return mStep * ((float)value());
 }
 
+BoUfoProgress::BoUfoProgress(Qt::Orientation o) : BoUfoWidget()
+{
+ init(o);
+}
+
+void BoUfoProgress::init(Qt::Orientation o)
+{
+ setLayoutClass(UHBoxLayout);
+
+ mProgress = new ufo::UBoProgress();
+ mProgress->updateUI();
+ setOrientation(o);
+ widget()->add(mProgress);
+}
+
+void BoUfoProgress::setOrientation(Orientation o)
+{
+ if (o == Horizontal) {
+	mProgress->setOrientation(ufo::Horizontal);
+ } else {
+	mProgress->setOrientation(ufo::Vertical);
+ }
+}
+
+double BoUfoProgress::value() const
+{
+ return mProgress->getValue();
+}
+
+double BoUfoProgress::minimumValue() const
+{
+ return mProgress->getMinimumValue();
+}
+
+double BoUfoProgress::maximumValue() const
+{
+ return mProgress->getMaximumValue();
+}
+
+void BoUfoProgress::setValue(double v)
+{
+ mProgress->setValue(v);
+}
+
+void BoUfoProgress::setRange(double min, double max)
+{
+ mProgress->setMinimumValue(min);
+ mProgress->setMaximumValue(max);
+}
+
 BoUfoNumInput::BoUfoNumInput() : BoUfoWidget()
 {
  init();
@@ -1387,7 +1449,11 @@ QString BoUfoPushButton::text() const
 
 void BoUfoPushButton::setIcon(const BoUfoImage& img)
 {
- mButton->setIcon(new ufo::UImageIcon(img.image()));
+ if (!img.image()) {
+	mButton->setIcon(0);
+ } else {
+	mButton->setIcon(new ufo::UImageIcon(img.image()));
+ }
 }
 
 void BoUfoPushButton::setIconFile(const QString& file)
@@ -1624,7 +1690,11 @@ QString BoUfoLabel::text() const
 
 void BoUfoLabel::setIcon(const BoUfoImage& img)
 {
- mLabel->setIcon(new ufo::UImageIcon(img.image()));
+ if (!img.image()) {
+	mLabel->setIcon(0);
+ } else {
+	mLabel->setIcon(new ufo::UImageIcon(img.image()));
+ }
 }
 
 void BoUfoLabel::setIconFile(const QString& file)

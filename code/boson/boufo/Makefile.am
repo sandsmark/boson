@@ -13,7 +13,9 @@ libboufo_la_SOURCES = \
 	boufo.cpp \
 	boufoaction.cpp \
 	uboboxlayout.cpp \
-	ubolabelui.cpp
+	ubolabelui.cpp \
+	uboprogress.cpp \
+	uboprogressui.cpp
 
 libboufo_la_LIBADD = \
 	$(LIB_UFO)
