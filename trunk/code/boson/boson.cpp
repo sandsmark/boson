@@ -59,6 +59,7 @@
 #include <qfile.h>
 
 #include <stdlib.h>
+#include <sys/time.h>
 
 Boson* Boson::mBoson = 0;
 
@@ -83,6 +84,32 @@ static void ensureComputerIOListValid(Boson* boson, const QPtrList<KGameComputer
 static void emergencySave(int signal);
 class BoMessageLogger;
 
+BoAdvanceMessageTimes::BoAdvanceMessageTimes(int gameSpeed)
+{
+ if (gameSpeed <= 0) {
+	boError(300) << k_funcinfo << "invalid advance message - gameSpeed " << gameSpeed << endl;
+	gameSpeed = 1;
+ }
+ mCurrentCall = 0;
+ mGameSpeed = gameSpeed;
+ mAdvanceCalls = new struct timeval[mGameSpeed];
+ gettimeofday(&mAdvanceMessage, 0);
+}
+
+BoAdvanceMessageTimes::~BoAdvanceMessageTimes()
+{
+ delete[] mAdvanceCalls;
+}
+
+void BoAdvanceMessageTimes::receiveAdvanceCall()
+{
+ if (mCurrentCall >= mGameSpeed) {
+	boError(300) << k_funcinfo << "too many advance calls for this advance message" << endl;
+	return;
+ }
+ gettimeofday(&mAdvanceCalls[mCurrentCall], 0);
+ mCurrentCall++;
+}
 
 /**
  * @short Class that maintains advance messages and advance calls.
@@ -121,6 +148,9 @@ public:
 		mAdvanceMessageSent = false;
 
 		initProperties(mBoson->dataHandler());
+
+		mAdvanceMessageTimes.setAutoDelete(true);
+		mCurrentAdvanceMessageTimes = 0;
 	}
 
 	static int advanceMessageInterval()
@@ -164,6 +194,9 @@ public:
 				<< mAdvanceReceived.elapsed() << endl;
 		mAdvanceReceived.restart();
 		mBoson->slotReceiveAdvance();
+
+		mCurrentAdvanceMessageTimes = new BoAdvanceMessageTimes(gameSpeed);
+		mAdvanceMessageTimes.append(mCurrentAdvanceMessageTimes);
 	}
 
 	void sendAdvance() // slot?
@@ -181,7 +214,7 @@ public:
 			boDebug(300) << k_funcinfo << mBoson->advanceCallsCount() << " message delivery locked, returning" << endl;
 			return;
 		}
-		boDebug(300) << k_funcinfo << mBoson->advanceCallsCount() << " sending advance msg" << endl;
+		boDebug(300) << k_funcinfo << "advanceCallsCount=" << mBoson->advanceCallsCount() << " sending advance msg" << endl;
 		mBoson->sendMessage(0, BosonMessage::AdvanceN);
 		mAdvanceMessageSent = true;
 	}
@@ -211,6 +244,11 @@ public:
 	 **/
 	void receiveAdvanceCall();
 
+	const QPtrList<BoAdvanceMessageTimes>& advanceMessageTimes() const
+	{
+		return mAdvanceMessageTimes;
+	}
+
 private:
 	Boson* mBoson;
 
@@ -218,6 +256,9 @@ private:
 	int mAdvanceDivider; // pretty much exactly gameSpeed()
 	int mAdvanceDividerCount; // how many advance *calls* have been made since the last advance *message*
 	bool mAdvanceMessageSent;
+
+	QPtrList<BoAdvanceMessageTimes> mAdvanceMessageTimes;
+	BoAdvanceMessageTimes* mCurrentAdvanceMessageTimes;
 
 
 	KGamePropertyInt mAdvanceFlag;
@@ -228,6 +269,8 @@ private:
 
 void BoAdvance::receiveAdvanceCall()
 {
+ BO_CHECK_NULL_RET(mCurrentAdvanceMessageTimes);
+ mCurrentAdvanceMessageTimes->receiveAdvanceCall();
 // boDebug() << k_funcinfo << advanceCallsCount() << endl;
  bool flag = advanceFlag();
  // we need to toggle the flag *now*, in case one of the Unit::advance*()
@@ -393,8 +436,6 @@ Boson::~Boson()
 void Boson::initBoson()
 {
  mBoson = new Boson(0);
- connect(BoDebug::self(), SIGNAL(notify(const QString&,const char*,int)),
-		mBoson, SLOT(slotDebugOutput(const QString&,const char*,int)));
 }
 
 void Boson::deleteBoson()
@@ -427,6 +468,16 @@ BosonCanvas* Boson::canvasNonConst() const
 const BosonCanvas* Boson::canvas() const
 {
  return d->mCanvas;
+}
+
+bool Boson::event(QEvent* e)
+{
+ return KGame::event(e);
+}
+
+bool Boson::eventFilter(QObject* o, QEvent* e)
+{
+ return KGame::eventFilter(o, e);
 }
 
 void Boson::setPlayField(BosonPlayField* p)
@@ -1398,7 +1449,7 @@ static void emergencySave(int signal)
  minute.sprintf("%02d", time.time().minute());
  second.sprintf("%02d", time.time().second());
  QString prefix = QString("boson_crash-%1%2%3%4%5%6").
-	 	arg(year).
+		arg(year).
 		arg(month).
 		arg(day).
 		arg(hour).
@@ -1484,5 +1535,10 @@ bool Boson::loadCanvasConditions(const QDomElement& root)
 bool Boson::saveCanvasConditions(QDomElement& root) const
 {
  return canvas()->saveConditions(root);
+}
+
+const QPtrList<BoAdvanceMessageTimes>& Boson::advanceMessageTimes() const
+{
+ return d->mAdvance->advanceMessageTimes();
 }
 
