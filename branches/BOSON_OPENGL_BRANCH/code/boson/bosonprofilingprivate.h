@@ -42,6 +42,6 @@ public:
 	RenderGLTimes mCurrentRenderTimes;
 
 	QMap<ProfilingEvent, struct timeval> mProfilingTimes;
-	QMap<ProfilingEvent, TimesList> mTimes;
+	QMap<int, TimesList> mTimes;
 };
 

@@ -39,9 +39,21 @@ protected:
 	void initLoadUnitPage();
 	void initRenderPage();
 	void initEventsPage();
+	void initFilesPage();
+
+	void reset();
+	void resetLoadUnitPage();
+	void resetRenderPage();
+	void resetEventsPage();
+	void resetFilesPage();
 
 	void createRenderItem(QListViewItem* parent, const QString& type, long int time);
 	QString profilingName(int profilingEvent) const;
+
+protected slots:
+	void slotUpdate();
+	void slotSaveToFile();
+	void slotLoadFromFile();
 
 private:
 	class BosonProfilingDialogPrivate;

@@ -21,6 +21,7 @@
 
 #define boProfiling BosonProfiling::bosonProfiling()
 
+class QString;
 class BosonProfilingDialog;
 
 /**
@@ -55,6 +56,7 @@ public:
 
 	// remember to update operator= and default c'tor if you change
 	// something!
+	// also update operator>>() and operator<<() in the .cpp file
 	long int mClear;
 	long int mCells;
 	long int mUnits;
@@ -105,6 +107,9 @@ public:
 	void renderUnits(bool start);
 	void renderText(bool start);
 	void debugRender();
+
+	bool saveToFile(const QString& fileName);
+	bool loadFromFile(const QString& fileName);
 
 private:
 	class BosonProfilingPrivate;
