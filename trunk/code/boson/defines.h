@@ -54,7 +54,7 @@
 #define Z_FOG_OF_WAR (Z_MOBILE + 50000) // must be > any unit 
 #define Z_RESOURCES (Z_FOG_OF_WAR + 10000) // must be greater than anything else
 
-#define BUILD_RANGE 10 * BO_TILE_SIZE // units can be placed within 10 tiles from its factory
+#define BUILD_RANGE 5 * BO_TILE_SIZE // units can be placed within 10 tiles from its factory
 
 #define BOSON_PORT 5454
 

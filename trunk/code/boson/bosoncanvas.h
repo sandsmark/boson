@@ -114,6 +114,16 @@ public:
 
 	void deleteDestroyed();
 
+	/**
+	 * Usually you don't need a @ref QCanvasItemList of all units in a
+	 * certain rect but rather a list of all units in a certain circle. This
+	 * function does exactly that. Note that it's speed can be improved as
+	 * it first uses @ref QCanvas::collisions for a rect and then checks for
+	 * units inside the rect which are also in the circle. Maybe we could
+	 * check for the circle directly.
+	 **/
+	QValueList<Unit*> unitCollisionsInRange(const QPoint& pos, int radius);
+
 public slots:
 	/**
 	 * The game (@ref Boson) reports that a unit shall be added - lets do

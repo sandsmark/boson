@@ -447,3 +447,36 @@ void BosonCanvas::initFogOfWar(Player* p)
  }
 }
 
+QValueList<Unit*> BosonCanvas::unitCollisionsInRange(const QPoint& pos, int radius)
+{
+ QCanvasItemList l = collisions(QRect(
+		(pos.x() - radius > 0) ? pos.x() - radius : 0,
+		(pos.y() - radius > 0) ? pos.y() - radius : 0,
+		pos.x() + radius,
+		pos.y() + radius));
+		
+			
+ QValueList<Unit*> list;
+ for (unsigned int i = 0; i < l.count(); i++) {
+	if (!RTTI::isUnit(l[i]->rtti())) {
+		// this item is not important for us here
+		continue;
+	}
+	Unit* u = (Unit*)l[i];
+	if (u->isDestroyed()) {
+		// this item is not important for us here
+		continue;
+	}
+//	kdDebug() << "unit at x=" << u->x() << ",y=" << u->y() << ",pos=" << pos.x() << "," << pos.y() << endl;
+	int w = pos.x() - (int)u->x();
+	int h = pos.y() - (int)u->y();
+//	kdDebug() << "w*w=" << w*w << ",h*h=" << h*h << " <= r*r=" << radius*radius<< endl;
+
+	if (w * w + h * h <= radius * radius) {
+//		kdDebug() << "adding " << u->id() << endl;
+		list.append(u);
+	}
+ }
+ return list;
+}
+
