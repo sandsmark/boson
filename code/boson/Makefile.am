@@ -2,6 +2,7 @@
 
 SUBDIRS = \
 	data \
+	bosonfont \
 	boufo \
 	bosonwidgets \
 	items \
@@ -10,7 +11,6 @@ SUBDIRS = \
 	sound \
 	info \
 	script \
-	bosonfont \
 	meshrenderer \
 	groundrenderer
 
