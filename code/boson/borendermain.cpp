@@ -344,7 +344,6 @@ void ModelPreview::initUfoGUI()
  BoUfoActionCollection* actionCollection = mUfoManager->actionCollection();
  BO_CHECK_NULL_RET(actionCollection);
 
-#warning TODO: KToggleAction
 #warning TODO: KActionMenu
  BoUfoToggleAction* vertexPoints = new BoUfoToggleAction(i18n("Show vertex points"),
 		KShortcut(), 0, 0,
@@ -353,9 +352,8 @@ void ModelPreview::initUfoGUI()
  vertexPoints->setChecked(boConfig->boolValue("ShowVertexPoints"));
 
  // TODO BoUfoStdAction
-#warning FIXME: use KMainWindow::close()
  (void)new BoUfoAction(i18n("Quit"), KShortcut(),
-		this, SLOT(close()),
+		kapp, SLOT(closeAllWindows()),
 		actionCollection, "file_quit");
  (void)new BoUfoAction(i18n("Vertex point size..."), 0,
 		this, SIGNAL(signalChangeVertexPointSize()),
