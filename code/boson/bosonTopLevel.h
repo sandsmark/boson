@@ -28,10 +28,9 @@
 class BosonApp;
 
 /** 
-  * This class is the global object concerning a view : where, how large..
-  * It's also the place where selections are handled
-  * 
-  * it inherits from KTMainWindow only because it will _also_ be part of the GUI in boson or boeditor
+ * the bosonTopLevel is the window containing everything the user can actually see
+ * ie : miniMap/map/orders-info window, and so on. It has decoration on it as all
+ * KDE windows.
   */
 class bosonTopLevel : public visualTopLevel
 {
