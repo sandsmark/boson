@@ -204,7 +204,7 @@ protected:
 	 **/
 	void showHideMenubar();
 
-	void changeLocalPlayer(Player* p, bool init = true);
+	void changeLocalPlayer(Player* p);
 
 	/**
 	 * Display the dialog @p dialog. This function takes care of deleting
