@@ -254,14 +254,21 @@ void BosonNewGameWidget::initColors()
 	return;
  }
 
+ Player* p = (Player*)mHighlightedPlayer;
+ if (!p) {
+	p = localPlayer();
+ }
+
  QValueList<QColor> availableColors = boGame->availableTeamColors();
- availableColors.prepend(localPlayer()->speciesTheme()->teamColor());
+ availableColors.prepend(p->teamColor());
 
  // first set all taken, then make those available, that are still available
  mLocalColor->setAllTaken(true);
  for(unsigned int i = 0; i < availableColors.count(); i++) {
 	mLocalColor->setTaken(availableColors[i], false);
  }
+
+ mLocalColor->highlightColor(p->teamColor());
 }
 
 void BosonNewGameWidget::addDummyComputerPlayer()
@@ -273,6 +280,10 @@ void BosonNewGameWidget::addDummyComputerPlayer()
 void BosonNewGameWidget::slotNetStart()
 {
  if (!boGame->isAdmin()) {
+	return;
+ }
+ if (!mChooseBosonMap->currentItem()) {
+	KMessageBox::sorry(this, i18n("No map selected. Select a map first!"));
 	return;
  }
  if ((int)boGame->playerCount() > mMaxPlayers) {
@@ -452,10 +463,25 @@ void BosonNewGameWidget::slotLocalPlayerColorChanged(int index)
 	boWarning() << k_funcinfo << "Invalid index: " << index << endl;
 	return;
  }
- BO_CHECK_NULL_RET(localPlayer());
- mPlayerColor = SpeciesTheme::defaultColors()[index];
+ Player* p = (Player*)mHighlightedPlayer;
+ if (!p) {
+	p = localPlayer();
+ }
+ BO_CHECK_NULL_RET(p);
+ if (p != localPlayer()) {
+	if (!boGame->isAdmin()) {
+		KMessageBox::sorry(this, i18n("Only ADMIN can change color of other players!"));
+		return;
+	}
+ }
 
- networkInterface()->sendChangeTeamColor(localPlayer(), mPlayerColor);
+ QColor color = SpeciesTheme::defaultColors()[index];
+
+ networkInterface()->sendChangeTeamColor(p, color);
+
+ if (p == localPlayer()) {
+	mPlayerColor = color;
+ }
 }
 
 void BosonNewGameWidget::slotLocalPlayerPlayFieldChanged(QListViewItem* item)
@@ -533,6 +559,8 @@ void BosonNewGameWidget::slotLocalPlayerHighlightedPlayer(QListBoxItem* item)
  } else {
 	mRemovePlayer->setEnabled(false);
  }
+
+ initColors();
 }
 
 Player* BosonNewGameWidget::localPlayer() const
