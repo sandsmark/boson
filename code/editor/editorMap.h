@@ -1,5 +1,5 @@
 /***************************************************************************
-                          playerMap.h  -  description                              
+                          editorMap.h  -  description                              
                              -------------------                                         
 
     version              : $Id$
@@ -18,8 +18,8 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef PLAYER_MAP_H 
-#define PLAYER_MAP_H 
+#ifndef EDITOR_MAP_H 
+#define EDITOR_MAP_H 
 
 #include <qintdict.h>
 
@@ -41,12 +41,12 @@ class Unit;
 /** 
   * This class encapsulate the "physical" idea of the map : size, contents..
   */
-class playerMap : public physMap
+class editorMap : public physMap
 {
   Q_OBJECT
 
  public:
-  playerMap(uint l, uint h, QObject *parent=0, const char *name=0L);
+  editorMap(uint l, uint h, QObject *parent=0, const char *name=0L);
 
   void createMob(mobileMsg_t &);
   void destroyMob(destroyedMsg_t &);
@@ -64,6 +64,6 @@ class playerMap : public physMap
 
 };
 
-#endif // PLAYER_MAP_H
+#endif // EDITOR_MAP_H
 
 

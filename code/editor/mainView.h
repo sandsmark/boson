@@ -26,14 +26,14 @@
 class	miniMap;
 class	fieldMap;
 class	viewMap;
-class	playerMap;
+class	editorMap;
 class	infoWin;
 
 class mainView : public QWidget 
 {
 	Q_OBJECT
 public:
-	mainView(playerMap *phys, QWidget *parent=0, const char *name=0);
+	mainView(editorMap *phys, QWidget *parent=0, const char *name=0);
 
 private:
 /* the map object we are playing in */
