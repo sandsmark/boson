@@ -58,12 +58,12 @@ BoCamera& BoCamera::operator=(const BoCamera& c)
 void BoCamera::init()
 {
  initStatic();
- mLookAt.set(0, 0, 0);
- mPosZ = 8.0;
- mRotation = 0.0;
- mRadius = 5.0;
- mMapWidth = 0.0;
- mMapHeight = 0.0;
+ mLookAt.set(0.0f, 0.0f, 0.0f);
+ mPosZ = 8.0f;
+ mRotation = 0.0f;
+ mRadius = 5.0f;
+ mMapWidth = 0.0f;
+ mMapHeight = 0.0f;
 }
 
 void BoCamera::initStatic()
@@ -121,8 +121,8 @@ void BoCamera::changeZ(GLfloat diff)
 void BoCamera::changeRadius(GLfloat diff)
 {
  float radius = mRadius + mPosZ / CAMERA_MAX_RADIUS * diff;  // How much radius is changed depends on z position
- if (radius < 0.0) {
-	radius = 0.0;
+ if (radius < 0.0f) {
+	radius = 0.0f;
  } else if (radius > mPosZ) {
 	radius = mPosZ;
  }
@@ -132,10 +132,10 @@ void BoCamera::changeRadius(GLfloat diff)
 void BoCamera::changeRotation(GLfloat diff)
 {
  float rotation = mRotation + diff;
- if (rotation < 0.0) {
-	rotation += 360.0;
- } else if (rotation > 360.0) {
-	rotation -= 360.0;
+ if (rotation < 0.0f) {
+	rotation += 360.0f;
+ } else if (rotation > 360.0f) {
+	rotation -= 360.0f;
  }
  mRotation = rotation;
 }
@@ -153,32 +153,32 @@ void BoCamera::loadFromXML(const QDomElement& root)
  lookatx = root.attribute("LookAtX").toFloat(&ok);
  if (!ok) {
 	boError() << k_funcinfo << "Invalid value for LookAtX tag" << endl;
-	lookatx = 0;
+	lookatx = 0.0f;
  }
  lookaty = root.attribute("LookAtY").toFloat(&ok);
  if (!ok) {
 	boError() << k_funcinfo << "Invalid value for LookAtY tag" << endl;
-	lookaty = 0;
+	lookaty = 0.0f;
  }
  lookatz = root.attribute("LookAtZ").toFloat(&ok);
  if (!ok) {
 	boError() << k_funcinfo << "Invalid value for LookAtZ tag" << endl;
-	mPosZ = 0;
+	mPosZ = 0.0f;
  }
  mPosZ = root.attribute("PosZ").toFloat(&ok);
  if (!ok) {
 	boError() << k_funcinfo << "Invalid value for PosZ tag" << endl;
-	mPosZ = 0;
+	mPosZ = 0.0f;
  }
  mRotation = root.attribute("Rotation").toFloat(&ok);
  if (!ok) {
 	boError() << k_funcinfo << "Invalid value for Rotation tag" << endl;
-	mRotation = 0;
+	mRotation = 0.0f;
  }
  mRadius = root.attribute("Radius").toFloat(&ok);
  if (!ok) {
 	boError() << k_funcinfo << "Invalid value for Radius tag" << endl;
-	mRadius = 0;
+	mRadius = 0.0f;
  }
  boDebug(260) << k_funcinfo << "Setting lookat to (" << lookatx << ", " << lookaty << ", " << lookatz << ")" << endl;
  mLookAt.set(lookatx, lookaty, lookatz);
@@ -200,13 +200,13 @@ void BoCamera::checkPosition()
  if (!mMapWidth || !mMapHeight) {
 	return;
  }
- if (mLookAt.x() < 0.0) {
-	mLookAt.setX(0.0);
+ if (mLookAt.x() < 0.0f) {
+	mLookAt.setX(0.0f);
  } else if (mLookAt.x() > mMapWidth) {
 	mLookAt.setX(mMapWidth);
  }
- if (mLookAt.y() > 0.0) {
-	mLookAt.setY(0.0);
+ if (mLookAt.y() > 0.0f) {
+	mLookAt.setY(0.0f);
  } else if (mLookAt.y() < -mMapHeight) {
 	mLookAt.setY(-mMapHeight);
  }
@@ -219,15 +219,16 @@ void BoCamera::applyCameraToScene()
 
  float diffX, diffY;
  float radius = this->radius();
- if (radius <= 0.02) {
+ if (radius <= 0.02f) {
 	// If radius is 0, up vector will be wrong so we change it
-	radius = 0.02;
+	radius = 0.02f;
  }
  pointByRotation(&diffX, &diffY, this->rotation(), radius);
  float lookatX, lookatY, lookatZ;  // Point that we look at
  lookatX = lookAt().x();
  lookatY = lookAt().y();
- lookatZ = 0.0f;
+// lookatZ = 0.0f;
+ lookatZ = lookAt().z();
  float eyeX, eyeY, eyeZ;  // Position of camera
  eyeX = lookatX + diffX;
  eyeY = lookatY + diffY;
@@ -236,7 +237,7 @@ void BoCamera::applyCameraToScene()
  float upX, upY, upZ;  // up vector (points straight up in viewport)
  upX = -diffX;
  upY = -diffY;
- upZ = 0.0;
+ upZ = 0.0f;
 
  gluLookAt(eyeX, eyeY, eyeZ,
 		lookatX, lookatY, lookatZ,
