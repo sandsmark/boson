@@ -25,6 +25,7 @@
 #include "boversion.h"
 #include "bodebug.h"
 #include "bo3dtools.h"
+#include <config.h>
 
 #include <kaboutdata.h>
 #include <kcmdlineargs.h>
@@ -87,6 +88,9 @@ int main(int argc, char **argv)
 
  KCmdLineArgs::init(argc, argv, &about);
  KCmdLineArgs::addCmdLineOptions(options);
+#ifdef BOSON_COMPILE_STATIC
+ KApplication::disableAutoDcopRegistration();
+#endif
  BoApplication app;
  KGlobal::locale()->insertCatalogue("libkdegames");
 
