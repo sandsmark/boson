@@ -176,7 +176,16 @@ public:
 	void updateSight(Unit*, float oldX, float oldY);
 
 	Cell* cellAt(Unit* unit) const;
+
+	/**
+	 * @return The cell at @p x, @p y in <em>canvas</em>-coordinates
+	 **/
 	Cell* cellAt(float x, float y) const;
+
+	/**
+	 * @return The cell at @p x, @p y (in cell coordinates - see @ref cellAt
+	 * for other coordinates)
+	 **/
 	Cell* cell(int x, int y) const;
 
 	void deleteDestroyed();
