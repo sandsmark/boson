@@ -65,7 +65,7 @@ public:
 		IdPathRecalculated = UnitBase::IdLast + 52,
 
 		// properties in Facility
-		IdConstructionState = UnitBase::IdLast + 100,
+		IdConstructionStep = UnitBase::IdLast + 100,
 
 		// properties in UnitPlugins and derived classes
 		IdProductionState = UnitBase::IdLast + 300,
