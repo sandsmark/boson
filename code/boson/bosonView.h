@@ -43,6 +43,9 @@ public:
 
 	virtual void setSelected(QPixmap *);
 	virtual void setOrders(int what , int who=-1);
+	
+public slots:
+	void ressourcesUpdated(void);
 
 protected:
 	virtual void object_put(int, int);
@@ -61,15 +64,16 @@ private slots:
 	void bc10(void) { handleOrder(10); } // button clicked
 
 private:
+	void	handleOrder(int);
+
 /* state view (for selected items) */
 	QWidgetStack	*stack;
 	QLabel		*view_one;
 	QScrollView	*view_many;
 	QPixmap		*view_none;
-
-private:
-	void	handleOrder(int);
-//	visualBigDisplay	*field;
+	
+/* ressources */ 
+	QLabel		*oil_text, *mineral_text;
 
 /* GUI */
 	QPushButton	*orderButton[11];

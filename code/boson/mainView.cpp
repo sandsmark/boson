@@ -47,6 +47,8 @@ mainView::mainView(bosonField *field, QWidget *parent=0, const char *name=0)
 		leftLayout->addWidget(mini);
 		leftLayout->addWidget(view, 10);
 
+		
+	connect(parent, SIGNAL(ressourcesUpdated(void)), view, SLOT(ressourcesUpdated(void)));
 /* This is the main map, the game area */
 	big = new bosonBigDisplay(view, this);
 	topLayout->addWidget(big,10);

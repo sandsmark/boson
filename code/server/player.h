@@ -31,8 +31,8 @@ class BosonServer;
 class boBuffer;
 
 
-#define BO_INITIAL_OIL		300
-#define BO_INITIAL_MINERAL	2000
+#define BO_INITIAL_OIL		2000
+#define BO_INITIAL_MINERAL	1000
 
 
 /**
@@ -64,13 +64,16 @@ public :
   
 /* ressources */
   bool			needFlushing;
-  uint			oil;
-  uint			mineral;
+  int			oil;
+  int			mineral;
 
 /* methods */
   void			flush(void);
-  void			changeOil(int delta);
-  void			changeMineral(int delta);
+  /**
+    * changeRessources will try do _add_ deltas to the ressources, and 
+    * return false if it can't, else the needFlushing flag is set
+    * */
+  bool			changeRessources(int delta_oil, int delta_mineral);
 
 };
 

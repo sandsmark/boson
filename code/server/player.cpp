@@ -45,7 +45,6 @@ Player::Player(void)
 }
 
 
-
 void Player::flush(void)
 {
 	static bosonMsgData	msg;	// static so that no need to reallocate it at every call
@@ -67,17 +66,17 @@ void Player::flush(void)
 	needFlushing = false;
 }
 
-void Player::changeOil(int delta)
+
+bool Player::changeRessources(int delta_oil, int delta_mineral)
 {
-	oil += delta;
+	if ( (delta_mineral+mineral<0) || (delta_oil+oil<0) ) return false;
+
+	mineral	+= delta_mineral;
+	oil	+= delta_oil;
 	needFlushing = true;
+	return true;
 }
 
 
-void Player::changeMineral(int delta)
-{
-	mineral += delta;
-	needFlushing = true;
-}
 
 
