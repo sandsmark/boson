@@ -27,6 +27,8 @@
 
 #include <kstandarddirs.h>
 #include <kdebug.h>
+#include <kmessagebox.h>
+#include <klocale.h>
 
 //#include <klocale.h>
 BosonStartupBaseWidget::BosonStartupBaseWidget(QWidget* parent, const char* name) 
@@ -37,7 +39,9 @@ BosonStartupBaseWidget::BosonStartupBaseWidget(QWidget* parent, const char* name
 
  QPixmap backgroundPix(locate("data", "boson/pics/boson-startup-bg.png"));
  if (backgroundPix.isNull()) {
-	kdError() << "Could not find background pixmap. Please install the data package first!" << endl;
+	KMessageBox::error(this, i18n("You do not have Boson data files installed!\n"
+			"Please install data package of Boson and restart Boson."), i18n("Data files not found!"));
+//	kdError() << "Could not find background pixmap. Please install the data package first!" << endl;
 	return;
  }
  setPaletteBackgroundPixmap(backgroundPix);
