@@ -1,0 +1,49 @@
+#include "top.wml"
+    <h1>
+      Frequently asked questions
+    </h1>
+    <p>&nbsp;</p>
+    <p>
+      Here you will find answers for most of your questions.
+    </p>
+    <ol>
+      <li><a href="#1">- When is Boson finished ?</a></li>
+      <li><a href="#2">- Why is Boson so slow ?</a></li>
+      <li><a href="#3">- How can I submit a bug report ?</a></li>
+      <li><a href="#4">- Are there other supported languages than english ?</a></li>
+      <li><a href="#5">- Boson crashes my computer, what can I do ?</a></li>
+    </ol>
+    
+    <p>&nbsp;</p>
+    <a name="1">- When is Boson finished ?</a>
+    <p>When it's done.</p>
+    
+    <p>&nbsp;</p>
+    <a name="2">- Why is boson so slow ?</a>
+    <p>
+    There are many reasons, some things that can help:<br>
+    - Check your hardware: <a href="started.html">here</a><br>
+    - Try resizing the window and/or make it smaller<br>
+    - Increase the update interval in the Boson settings<br>
+    - Change the color depth of your XServer<br>
+    </p>
+
+    <p>&nbsp;</p>
+    <a name="3">- How can I submit a bug report ?</a>
+    <p>You can submit a bugreport through <a href="http://bugs.kde.org/wizard.cgi" target="_blank">bugs.kde.org</a><br>
+    Or simply start Bosony you will find the "Report Bug..." entry in the "Help" menu.</p>
+    
+    <p>&nbsp;</p>
+    <a name="4">- Are there other supported languages than english ?</a>
+    <p>No, Boson is a game in development, text changes very often. It is to hard to maintain different languages yet.
+    </p>
+
+    <p>&nbsp;</p>
+    <a name="5">- Boson crashes my computer, what can I do ?</a>
+    <p>It looks like sometimes there is a problem with a Boson/KDE/OpenGL/malloc/driver combination.<br>
+    If you have total crashes or kernel memory errors please start Boson under an other window manager like fvwm2 or failsave.<br>
+    The system crashes should go away but please contact us because we need more people with the same problem.
+    </p>
+
+#include "nav.wml" before_url="editor/facilities.html" before_text="Building facilities" after_url="credits.html" after_text="Credits" up_url="index.html"
+#include "footer.wml"

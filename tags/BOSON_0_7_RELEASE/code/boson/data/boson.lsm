@@ -1,0 +1,20 @@
+Begin3
+Title:          Boson
+Version:        0.7
+Entered-date:   10JNOV02
+Description:    network real time strategy game (warcraft-like), whithout AI.
+Keywords:       server, warcraft, strategy, game, KDE, X11, Qt, RTS, OpenGL
+Author:         Thomas Capricelli <orzel@yalbi.com>
+                Andreas Beckermann <b_mann@gmx.de>
+Maintained-by:  Andreas Beckermann <b_mann@gmx.de>
+Primary-site:   boson.eu.org /download/
+                35M  boson-all-0.7.tar.bz2
+                675K boson-code-0.7.tar.bz2
+                19M  boson-data-0.7.tar.bz2
+                16M  boson-music-0.7.tar.bz2
+Alternate-site: ftp.kde.org /pub/kde/unstable/apps/KDE3.x/games/
+Home-page:      http://boson.eu.org/
+Original-site:  
+Platform:       Linux and other Unices, needs Qt>=3.0.0, kdelibs>=3.0, kdegames>=3.0, lib3ds and OpenGL
+Copying-policy: GNU General Public License
+End

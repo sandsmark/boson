@@ -1,0 +1,95 @@
+This document is meant as a list of functions where performance might be
+improved, i.e. which are time consuming or time critical (get called very
+often).
+You can also find some hints here on how to improve performance/find performance
+problems.
+Feel free to add entries here if you like!
+
+First - what needs to be improved? Well not every function that is slow also is
+a performance problem. For example BosonBigDisplay::actionClicked*() is
+completely uninteresting for performance optimization. It is called only once
+every few seconds - when the player clicks somewhere, i.e. calls an action.
+So don't waste your time improving such functions - better improve e.g.
+addToCells() which gets called *whenever* a unit moves (i.e. a few dozen times a
+second).
+A nice introduction on *what* to improve can be found here:
+http://www.opengl.org/developers/faqs/technical/performance.htm#perf0010
+This is mostly for OpenGL performance, but the basic parts apply to *every*
+program.
+
+It is not always easy to find the correct function - the real problem are those
+that don't take much time, but are called hundreds of times per second. It is
+very hard to measure the time spent in such functions, as the overhead added by
+measuring is often as much as the complete function. You can e.g. use
+BosonProfiling - but for such functions you should add additional functions
+there, as it was done for the render*() functions. The "normal" profiling
+accesses a QValueList which is ok for most measuring, but not for very often
+called functions.
+
+Once you found a time consuming method/function you can start "usual"
+optimization - most often you'll try to remove as many function calls as
+possible, as every function adds an overhead. Unrolling loops often helps, too.
+Refer to performance documents, like:
+http://www.mesa3d.org/brianp/sig97/perfopt.htm
+--> OpenGL only, but still some hints can be used in non-OpenGL functions, too
+
+Please remember that making a function inline is not the first step of
+optimization, but the *last* step! inline only makes a difference for *very*
+often called functions
+
+
+
+------------------------------------------------------------------------------
+Feel free to add further hints or links above.
+Below follow locations in boson which might get improved (or not) - feel free to
+add entries here, too!
+------------------------------------------------------------------------------
+
+General notes:
+- Maybe we can implement some kind of level of detail? i.e. when the player
+  zooms out, we simply render less meshes/faces, since the player can't see a
+  difference at a higher distance anyway.
+  Problem: we either need to provide several different models (too much work for
+  designers) or write a clever algorithm...
+
+
+Function specific notes:
+
+BosonBigDisplayBase::paintGL()
+This does all the OpenGL stuff, but I believe it'd be hard to improve it
+noticebly. Most time is spent somewhere else - you can influence this only
+indirectly.
+But we might gain something from sorting units by z-position (remember that this
+will be very complex, since we support rotating, too!)
+
+BosonModel::renderNode()
+Here I achieved one of the biggest performance improvement by now. Instead of
+allowing a model to change the texture between different faces, they now MUST be
+the same in one mesh. This way we can render all faces in a single
+glBegin(GL_TRIANGLES)/glEnd() pair.
+We still can improve this:
+- write an algorithm that finds connected triangles. Instead of GL_TRIANGLES we
+  can use GL_TRIANGLE_STRIP then (which is usually the fastest object). (AB: I'm
+  on it...)
+- we need to change the texture matrix (GL_TEXTURE) in order to map the textures
+  correctly. this is done for *every* face (i.e. eseveral hundred times per
+  model) - we could save a lot if we simply used the lib3ds matrices. (AB: I'm
+  on it, but it's not yet working correctly)
+- teamcolored meshes might get grouped somehow. But I think we'd lose more than
+  we'd gain. we could save a few glColor() calls then - but it might be
+  necessary to do more calculations (i.e. glMultMatrix()) which cost time. But
+  at least worth a try
+BosonModel::renderNode() is *by far* the most important position for OpenGL
+optimizations. Most rendering stuff is done here - especially for a lot of units
+on the screen it is very important that they are rendered really fast.
+
+BosonCanvas::bosonCollisions()
+This is called *very* often - e.g. whenever a unit moves (can it go there? does
+the sight view need to be updated? is another unit in weapon range?). and even
+if it does not do anything boson still checks whether a unit is in range, so
+this is called for many/most units in every advance call. I believe we can tune
+this function!
+But we need to be careful, since it is very important that this function gives
+the same result on all clients (i.e. don't do floating point calculations or use
+random numbers and so on)
+
