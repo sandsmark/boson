@@ -3,7 +3,6 @@ Game TODOs
 - unit accelleration: units should slowly start to accelerate and to brake when
   moving
 - left dbl-click should select ALL units of that type
-- auto-attacking when unit is in range
 - end of game - winner ; statistics
 - fullscreen mode
 - scroll if cursor at the edge of the window
@@ -27,8 +26,6 @@ Game TODOs
 - _much_ better moving for multiple units in group
 - BosonCommandWidget should paint the order pixmap only *once* no more. E.g. we
   repaint for setGrayOut() and setProductionCount()
-- transmit waypoints over network (PolicyClean). Use BosonPath only on the
-  owner client
 
 
 Editor (map, unit, scenario) TODOs
@@ -64,7 +61,6 @@ General TODOs
 - make cursors themeable again (quite easy cause we use BosonCursor for all of
   this)
 - decrease game speed ; increase unit speed. Saves cpu power
-- add check for STL to configure script
 - when scrolling the big display the minerals/oil labels leave a white area
   behind which are repainted a moment later. this white area should not appear
   at all...
