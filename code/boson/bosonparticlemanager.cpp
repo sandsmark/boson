@@ -188,9 +188,9 @@ void BosonParticleManager::initShockWaveParticle(BosonParticleSystem*, BosonPart
   particle->maxage = particle->life;
   BoVector3 velo(getFloat(-1, 1), getFloat(-1, 1), getFloat(-0.2, 0.2));  // Extremely big velocity
   velo.normalize();
-  velo.scale(getFloat(4, 5));
+  velo.scale(getFloat(3.5, 5));
   particle->velo = velo;
-  particle->color = BoVector4(1.0, 0.4, 0.01, 0.25);
+  particle->color = BoVector4(0.8, 0.8, 0.8, 0.25);
   particle->pos = BoVector3(0, 0, getFloat(0.2, 0.7));
 }
 
