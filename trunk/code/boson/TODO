@@ -56,6 +56,6 @@ General TODOs
 - OptionsDialog: default position of commandframe
 
 Data TODOs
-- replace .bmp files by .png ones
-- fix the pixmap naming: file.00nn.bmp -> file-00nn.png
+- replace .bmp files by .png ones (done - need to commit)
+- fix the pixmap naming: file.00nn.bmp -> file-00nn.png (done - need to commit)
 - general sound (e.g. speech)
