@@ -40,10 +40,16 @@ BosonGLFont::BosonGLFont(const QString& family)
  mFont.setStyleHint(QFont::AnyStyle, QFont::PreferBitmap);
  mFontMetrics = new QFontMetrics(mFont);
 
- // FIXME: i18n() support!
- mFontDisplayList = glGenLists(256);
- glXUseXFont((Font)mFont.handle(), 0, 256, mFontDisplayList);
- boDebug() << k_funcinfo << family << " font created" << endl;
+ if ((int)mFont.handle() == 0) {
+	boError() << k_funcinfo << "could not load any bitmap font!" << endl;
+	mFontDisplayList = 0;
+ } else {
+	// FIXME: i18n() support!
+	mFontDisplayList = glGenLists(256);
+	glXUseXFont((Font)mFont.handle(), 0, 256, mFontDisplayList);
+	boDebug() << k_funcinfo << family << " font created. display lists base=" << mFontDisplayList << endl;
+ }
+
 }
 
 BosonGLFont::~BosonGLFont()
