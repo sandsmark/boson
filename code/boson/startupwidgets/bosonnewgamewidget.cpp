@@ -165,11 +165,11 @@ BosonNewGameWidget::BosonNewGameWidget(TopWidget* top, QWidget* parent)
 
   mPlayersLayout = new QVBoxLayout( 0, 0, 6, "playerslayout"); 
 
-  mPlayersLabel = new QLabel( this, "playerslabel" );
-  QFont playerslabel_font(  mPlayersLabel->font() );
-  mPlayersLabel->setFont( playerslabel_font ); 
-  mPlayersLabel->setText( i18n( "Connected Players:" ) );
-  mPlayersLayout->addWidget( mPlayersLabel );
+  QLabel* playersLabel = new QLabel( this, "playerslabel" );
+  QFont playerslabel_font( playersLabel->font() );
+  playersLabel->setFont( playerslabel_font ); 
+  playersLabel->setText( i18n( "Connected Players:" ) );
+  mPlayersLayout->addWidget( playersLabel );
 
   mPlayersList = new QListBox( this, "playerslist" );
   mPlayersLayout->addWidget( mPlayersList );
@@ -218,7 +218,7 @@ BosonNewGameWidget::BosonNewGameWidget(TopWidget* top, QWidget* parent)
   mStartGameLayout->addWidget( mStartGameButton );
   mMainLayout->addLayout( mStartGameLayout );
   mBosonNewGameWidgetLayout->addLayout( mMainLayout );
-  
+
   mHighlightedPlayer = 0l;
 
   initMaps();
@@ -241,9 +241,6 @@ BosonNewGameWidget::BosonNewGameWidget(TopWidget* top, QWidget* parent)
   connect(mSpeciesCombo, SIGNAL(activated(int)), this, SLOT(slotMySpeciesChanged(int)));
 }
 
-/*
- *  Destroys the object and frees any allocated resources
- */
 BosonNewGameWidget::~BosonNewGameWidget()
 {
   // Save stuff like player name, color etc.

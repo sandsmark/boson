@@ -73,7 +73,6 @@ class BosonNewGameWidget : public QWidget
     QLabel* mAddAINameLabel;
     QLineEdit* mAddAIName;
     QPushButton* mAddAIButton;
-    QLabel* mPlayersLabel;
     QListBox* mPlayersList;
     QPushButton* mRemovePlayerButton;
     QFrame* mLine1;
