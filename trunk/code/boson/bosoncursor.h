@@ -35,8 +35,7 @@ public:
 	enum CursorMode {
 		Attack = 0,
 		Move = 1,
-		OwnUnit = 2,
-		Default = 3,
+		Default = 2,
 		
 		Hide // this MUST be the last entry!
 	};

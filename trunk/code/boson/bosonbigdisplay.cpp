@@ -200,7 +200,7 @@ void BosonBigDisplay::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseEvent
 			Unit* unit = ((BosonCanvas*)canvas())->findUnitAt(pos);
 			if (unit) {
 				if (unit->owner() == d->mLocalPlayer) {
-					d->mCursor->setCursor(BosonCursor::OwnUnit);
+					d->mCursor->setCursor(BosonCursor::Default);
 					d->mCursor->setCursor(this);
 				} else {
 					d->mCursor->setCursor(BosonCursor::Attack);
