@@ -395,10 +395,7 @@ void Unit::updateZ(float moveByX, float moveByY, float* moveByZ, float* rotateX,
  }
 
  if (isFlying()) {
-	if (newZ < z() + *moveByZ) {
-		// don't touch moveByZ.
-		return;
-	}
+	newZ += 2.0f;  // Flying units are always 2 units above the ground
  }
  *moveByZ = newZ - z();
 }
