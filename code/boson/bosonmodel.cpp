@@ -40,6 +40,7 @@
 #include <qintdict.h>
 #include <qptrvector.h>
 
+#include <math.h>
 #if HAVE_GL_GLEXT_H
 #include <GL/glext.h>
 #endif
