@@ -61,6 +61,7 @@
 #include <qptrdict.h>
 #include <qsignalmapper.h>
 #include <qfile.h>
+#include <qfileinfo.h>
 #include <qdatastream.h>
 
 #include "bosonwidgetbase.moc"
@@ -1049,6 +1050,7 @@ QString BosonWidgetBase::findSaveFileName(const QString& prefix, const QString& 
  for (int i = 0; i < 1000; i++) {
 	file.sprintf("%s-%03d.%s", prefix.latin1(), i, suffix.latin1());
 	if (!QFile::exists(file)) {
+		return QFileInfo(file).absFilePath();
 		return file;
 	}
  }
