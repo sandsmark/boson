@@ -132,12 +132,12 @@ function add_screenshot($description, $date, $thumbfile, $bigfile)
 /*****  Functions  *****/
 
 // show
-if($HTTP_GET_VARS["show"] != "")
+if(array_key_exists("show", $HTTP_GET_VARS))
 {
   $show_ss=$HTTP_GET_VARS["show"];
 }
 // page
-if($HTTP_GET_VARS["page"] != "")
+if(array_key_exists("page", $HTTP_GET_VARS))
 {
   $page=$HTTP_GET_VARS["page"];
 }
@@ -248,13 +248,34 @@ add_screenshot("Just a nice screenshot",
     "29. April 2004 (Boson 0.10-CVS)", "neutral1-thumb.jpg", "neutral1.jpg");
 
 add_screenshot("Inside the enemy's base",
-    "<b>NEW:</b> 2. May 2004 (Boson 0.10)", "0.10-1-thumb.jpg", "0.10-1.jpg");
+    "2. May 2004 (Boson 0.10)", "0.10-1-thumb.jpg", "0.10-1.jpg");
 add_screenshot("An aircraft blown up by defenses on the Storm map",
-    "<b>NEW:</b> 2. May 2004 (Boson 0.10)", "0.10-2-thumb.jpg", "0.10-2.jpg");
+    "2. May 2004 (Boson 0.10)", "0.10-2-thumb.jpg", "0.10-2.jpg");
 add_screenshot("Some units are trying do destroy an enemy's tank",
-    "<b>NEW:</b> 2. May 2004 (Boson 0.10)", "0.10-3-thumb.jpg", "0.10-3.jpg");
+    "2. May 2004 (Boson 0.10)", "0.10-3-thumb.jpg", "0.10-3.jpg");
 add_screenshot("War between some units. Also note the new OpenGL minimap",
-    "<b>NEW:</b> 2. May 2004 (Boson 0.10)", "0.10-4-thumb.jpg", "0.10-4.jpg");
+    "2. May 2004 (Boson 0.10)", "0.10-4-thumb.jpg", "0.10-4.jpg");
+
+add_screenshot("Sam-site and an aircraft shooting each other",
+    "<b>NEW:</b> 23. December 2004 (CVS)", "0412-10-thumb.jpg", "0412-10.jpg");
+add_screenshot("Some units attacking player's base",
+    "<b>NEW:</b> 23. December 2004 (CVS)", "0412-9-thumb.jpg", "0412-9.jpg");
+add_screenshot("Close-up of some trees",
+    "<b>NEW:</b> 23. December 2004 (CVS)", "0412-8-thumb.jpg", "0412-8.jpg");
+add_screenshot("New fog-of-war rendering method produces smooth transitions for terrain",
+    "<b>NEW:</b> 23. December 2004 (CVS)", "0412-7-thumb.jpg", "0412-7.jpg");
+add_screenshot("Another screenshot of the water with some oil towers in the background",
+    "<b>NEW:</b> 23. December 2004 (CVS)", "0412-6-thumb.jpg", "0412-6.jpg");
+add_screenshot("A guided missile flying towards a helicopter",
+    "<b>NEW:</b> 23. December 2004 (CVS)", "0412-5-thumb.jpg", "0412-5.jpg");
+add_screenshot("A small lake with forest at one side",
+    "<b>NEW:</b> 23. December 2004 (CVS)", "0412-4-thumb.jpg", "0412-4.jpg");
+add_screenshot("A burning house",
+    "<b>NEW:</b> 23. December 2004 (CVS)", "0412-3-thumb.jpg", "0412-3.jpg");
+add_screenshot("New beautiful water with translucency, reflections and waves",
+    "<b>NEW:</b> 23. December 2004 (CVS)", "0412-2-thumb.jpg", "0412-2.jpg");
+add_screenshot("A village conquered by enemy with some stuff burning and smoking",
+    "<b>NEW:</b> 23. December 2004 (CVS)", "0412-1-thumb.jpg", "0412-1.jpg");
 
 
 
