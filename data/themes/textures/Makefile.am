@@ -105,7 +105,8 @@ texture_DATA = \
 	crate-wooden-1.jpg \
 	barrel-1.jpg \
 	toilet-1.jpg \
-	house-1.jpg
+	house-1.jpg \
+	tree-1.jpg
 
 # no further editing need here
 
