@@ -37,6 +37,7 @@
 #include <kstdaction.h>
 #include <kfiledialog.h>
 #include <kmessagebox.h>
+#include <kshortcut.h>
 
 #include <qintdict.h>
 #include <qwmatrix.h>
@@ -101,16 +102,33 @@ class Editor::EditorPrivate
 public:
 	EditorPrivate()
 	{
+		mEdit = 0;
+
 		mPlayerAction = 0;
-		mBuildAction = 0;
 		mCellsAction = 0;
+
+		mActionFacilities = 0;
+		mActionMobiles = 0;
+		mActionCellPlain = 0;
+		mActionCellSmall = 0;
+		mActionCellBig1 = 0;
+		mActionCellBig2 = 0;
 	}
 
+	KSelectAction* mEdit;
+
 	KSelectAction* mPlayerAction;
-	KSelectAction* mBuildAction;
 	KSelectAction* mCellsAction;
 
+	KRadioAction* mActionFacilities;
+	KRadioAction* mActionMobiles;
+	KRadioAction* mActionCellPlain;
+	KRadioAction* mActionCellSmall;
+	KRadioAction* mActionCellBig1;
+	KRadioAction* mActionCellBig2;
+
 	QIntDict<Player> mPlayers;
+	bool mMapMode;
 };
 
 Editor::Editor() : TopBase()
@@ -122,6 +140,8 @@ Editor::Editor() : TopBase()
 		this, SLOT(slotPlayerJoinedGame(KPlayer*)));
  connect(bosonWidget(), SIGNAL(signalPlayerLeftGame(KPlayer*)), 
 		this, SLOT(slotPlayerLeftGame(KPlayer*)));
+ connect(bosonWidget(), SIGNAL(signalGameStarted()), 
+		this, SLOT(slotGameStarted()));
 
  initKAction();
 
@@ -130,6 +150,7 @@ Editor::Editor() : TopBase()
  showMaximized();
 
  bosonWidget()->startEditor();
+
 }
 
 Editor::~Editor()
@@ -149,42 +170,42 @@ void Editor::initKAction()
 		  SLOT(slotSaveScenarioAs()), actionCollection(), 
 		  "file_save_scenario_as");
 
+ d->mEdit = new KSelectAction(i18n("&Edit"), QKeySequence(), actionCollection(), "editor_edit");
+ connect(d->mEdit, SIGNAL(activated(int)), this, SLOT(slotChangeEdit(int)));
+ QStringList list;
+ list.append(i18n("&Map"));
+ list.append(i18n("&Scenario"));
+ d->mEdit->setItems(list);
+ list.clear();
+ 
  d->mPlayerAction = new KSelectAction(i18n("&Player"), QKeySequence(), actionCollection(), "editor_player");
  connect(d->mPlayerAction, SIGNAL(activated(int)), 
 		bosonWidget(), SLOT(slotChangeLocalPlayer(int)));
- d->mBuildAction = new KSelectAction(i18n("&Units"), QKeySequence(), actionCollection(), "editor_build");
- connect(d->mBuildAction, SIGNAL(activated(int)), 
-		bosonWidget(), SLOT(slotEditorConstructionChanged(int)));
 
-// quite complex - but this way we are mostly independant from changes in
-// BosonCommandFrame::OrderType
- QStringList buildList;
- for (int i = 0; i < BosonCommandFrame::OrderLast; i++) {
-	switch ((BosonCommandFrame::OrderType)i) {
-		case BosonCommandFrame::Facilities:
-			buildList.append(i18n("Facilities"));
-			break;
-		case BosonCommandFrame::Mobiles:
-			buildList.append(i18n("Mobile Units"));
-			break;
-		case BosonCommandFrame::PlainTiles:
-			buildList.append(i18n("Plain Tiles"));
-			break;
-		case BosonCommandFrame::Small:
-			buildList.append(i18n("Small"));
-			break;
-		case BosonCommandFrame::Big1:
-			buildList.append(i18n("Big 1"));
-			break;
-		case BosonCommandFrame::Big2:
-			buildList.append(i18n("Big 2"));
-			break;
-		default:
-			kdError() << "unknown order " << i << endl;
-			break;
-	}
- }
- d->mBuildAction->setItems(buildList);
+ d->mActionFacilities = new KRadioAction(i18n("&Facilities"), KShortcut(),
+		this, SLOT(slotPlaceFacilities()), actionCollection(),
+		"editor_place_facilities");
+ d->mActionFacilities->setExclusiveGroup("Place");
+ d->mActionMobiles = new KRadioAction(i18n("&Mobiles"), KShortcut(),
+		this, SLOT(slotPlaceMobiles()), actionCollection(),
+		"editor_place_mobiles");
+ d->mActionMobiles->setExclusiveGroup("Place");
+ d->mActionCellSmall = new KRadioAction(i18n("&Small"), KShortcut(),
+		this, SLOT(slotPlaceCellSmall()), actionCollection(),
+		"editor_place_cell_small");
+ d->mActionCellSmall->setExclusiveGroup("Place");
+ d->mActionCellPlain = new KRadioAction(i18n("&Plain"), KShortcut(), 
+		this, SLOT(slotPlaceCellPlain()), actionCollection(),
+		"editor_place_cell_plain");
+ d->mActionCellPlain->setExclusiveGroup("Place");
+ d->mActionCellBig1 = new KRadioAction(i18n("&Big1"), KShortcut(), 
+		this, SLOT(slotPlaceCellBig1()),actionCollection(),
+		"editor_place_cell_big1");
+ d->mActionCellBig1->setExclusiveGroup("Place");
+ d->mActionCellBig2 = new KRadioAction(i18n("B&ig2"), KShortcut(), 
+		this, SLOT(slotPlaceCellBig2()),actionCollection(),
+		"editor_place_cell_big2");
+ d->mActionCellBig2->setExclusiveGroup("Place");
 
  (void)new KAction(i18n("&Create Custom Unit"), QKeySequence(), this,
 		  SLOT(slotCreateUnit()), actionCollection(),
@@ -263,13 +284,6 @@ void Editor::slotFileNew()
 // bosonWidget()->startEditor();
 }
 
-void Editor::slotChangePlayer(int index)
-{
-kdWarning() << k_funcinfo << "is obsolete" << endl;
-// Player* currentPlayer = d->mPlayers[index];
-
-}
-
 void Editor::slotPlayerJoinedGame(KPlayer* player)
 {
  if (!player) {
@@ -309,12 +323,6 @@ void Editor::slotPlayerLeftGame(KPlayer* player)
  d->mPlayerAction->setItems(players);
 }
 
-void Editor::slotChangeUnitConstruction(int index)
-{
- kdWarning() << k_funcinfo << "is obsolete" << endl;
-// bosonWidget()->editorConstructionChanged(index, d->mPlayers[d->mPlayerAction->currentItem()]);
-}
-
 void Editor::slotCreateUnit()
 {
  BosonUnitDialog* dlg = new BosonUnitDialog(this);
@@ -349,3 +357,80 @@ void Editor::slotCreateTiles()
  newTiles.save(fileName);
 }
 
+void Editor::slotChangeEdit(int e)
+{
+ kdDebug() << k_funcinfo << endl;
+ // e == 0 is map editor
+ // e == 1 is scenario editor
+ if (bosonWidget()->isModified()) {
+	KMessageBox::sorry(this, i18n("Please save the current file first"));
+	if (e == 0) {
+		d->mEdit->setCurrentItem(1);
+	} else {
+		d->mEdit->setCurrentItem(1);
+	}
+	return;
+ }
+ d->mActionFacilities->setEnabled(e == 1);
+ d->mActionMobiles->setEnabled(e == 1);
+ d->mActionCellSmall->setEnabled(e == 0);
+ d->mActionCellPlain->setEnabled(e == 0);
+ d->mActionCellBig1->setEnabled(e == 0);
+ d->mActionCellBig2->setEnabled(e == 0);
+ if (e == 0) {
+	d->mActionCellSmall->activate();
+ } else {
+	d->mActionFacilities->activate();
+ }
+ bosonWidget()->displayAllItems(e == 1);
+ d->mMapMode = (e == 0);
+}
+
+void Editor::slotPlaceFacilities()
+{
+ if (!d->mMapMode) {
+	bosonWidget()->slotEditorConstructionChanged(BosonCommandFrame::Facilities);
+ }
+}
+
+void Editor::slotPlaceMobiles()
+{
+ if (!d->mMapMode) {
+	bosonWidget()->slotEditorConstructionChanged(BosonCommandFrame::Mobiles);
+ }
+}
+
+void Editor::slotPlaceCellSmall()
+{
+ if (d->mMapMode) {
+	bosonWidget()->slotEditorConstructionChanged(BosonCommandFrame::Small);
+ }
+}
+
+void Editor::slotPlaceCellPlain()
+{
+ if (d->mMapMode) {
+	bosonWidget()->slotEditorConstructionChanged(BosonCommandFrame::Plain);
+ }
+}
+
+void Editor::slotPlaceCellBig1()
+{
+ if (d->mMapMode) {
+	bosonWidget()->slotEditorConstructionChanged(BosonCommandFrame::Big1);
+ }
+}
+
+void Editor::slotPlaceCellBig2()
+{
+ if (d->mMapMode) {
+	bosonWidget()->slotEditorConstructionChanged(BosonCommandFrame::Big2);
+ }
+}
+
+void Editor::slotGameStarted()
+{
+ bosonWidget()->setModified(false);
+ d->mEdit->setCurrentItem(0); // TODO: use BosonConfig
+ slotChangeEdit(0); 
+}

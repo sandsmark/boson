@@ -65,6 +65,14 @@ public:
 
 	void loadCursors(const QString& dir);
 
+	/**
+	 * This makes only sense when in editor mode: change the @ref
+	 * isModified status.
+	 **/
+	void setModified(bool m);
+
+	bool isModified() const;
+
 public slots:
 	/**
 	 * @param pos The new position - cell coordinates! so you have to

@@ -65,11 +65,22 @@ private slots:
 
 	void slotConfigureKeys();
 
-	void slotChangePlayer(int index);
-	void slotChangeUnitConstruction(int index);
-
 	void slotPlayerJoinedGame(KPlayer* p);
 	void slotPlayerLeftGame(KPlayer* p);
+	void slotGameStarted();
+
+	/**
+	 * The kind of the editor is to be changed. Either map or scenario
+	 * editor (currently).
+	 **/
+	void slotChangeEdit(int);
+
+	void slotPlaceFacilities();
+	void slotPlaceMobiles();
+	void slotPlaceCellSmall();
+	void slotPlaceCellPlain();
+	void slotPlaceCellBig1();
+	void slotPlaceCellBig2();
 
 private:
 	void initKAction();
