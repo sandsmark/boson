@@ -29,9 +29,13 @@ class BoAutoCamera;
 class BoAutoGameCamera;
 class BoLight;
 class BoContext;
+class BosonCanvas;
 
 /**
- * Camera class for Boson
+ * Base camera class for Boson
+ *
+ * This is very basic camera, supporting only lookAt, cameraPos and up vectors.
+ * It doesn't check for collisions with terrain/units either.
  *
  * @author Rivo Laks <rivolaks@hot.ee>
  **/
@@ -44,14 +48,17 @@ class BoCamera
       GameCamera = 1,
       LightCamera = 2
     };
+
     BoCamera();
     BoCamera(const BoCamera& c)
     {
       *this = c;
     }
 
-
     virtual ~BoCamera();
+
+    BoCamera& operator=(const BoCamera& c);
+
 
     virtual int cameraType() const { return Camera; }
 
@@ -79,13 +86,17 @@ class BoCamera
     void applyCameraToScene();
 
 
-    BoCamera& operator=(const BoCamera& c);
-
     /**
-     * Set the gluLookAt() paremeters directly. Note that when you use
-     * this @ref radius and @ref rotation will remain undefined.
+     * Set the gluLookAt() paremeters directly.
      **/
     virtual void setGluLookAt(const BoVector3& cameraPos, const BoVector3& lookAt, const BoVector3& up);
+
+
+    /**
+     * @return The point we are looking at. This is the lookAt vector, as it
+     * can get used by gluLookAt().
+     **/
+    const BoVector3& lookAt() const  { return mLookAt; }
 
     /**
      * @return The eye vector (camera position), as it can get used by
@@ -102,20 +113,24 @@ class BoCamera
 
 
     // These will _move_ given things by given values
+    void changeCameraPos(const BoVector3& diff);
     void changeLookAt(const BoVector3& diff);
+    void changeUp(const BoVector3& diff);
 
     // these will change the up and cameraPos vectors!
     /**
-     * Set lookAt point of camera
-     * Changes are not commited
+     * Set lookAt point of camera (where the camera is looking at)
      **/
-    virtual void setLookAt(const BoVector3& pos);
-
+    virtual void setLookAt(const BoVector3& lookat);
     /**
-     * @return The point we are looking at. This is the lookAt vector, as it
-     * can get used by gluLookAt().
+     * Set position of the camera
      **/
-    const BoVector3& lookAt() const  { return mLookAt; }
+    virtual void setCameraPos(const BoVector3& pos);
+    /**
+     * Set up vector of the camera (vector pointing straight up in the viewport)
+     **/
+    virtual void setUp(const BoVector3& up);
+
 
     virtual bool loadFromXML(const QDomElement& root);
     virtual bool saveAsXML(QDomElement& root);
@@ -145,14 +160,23 @@ class BoCamera
   private:
     friend class BoAutoCamera;
     BoAutoCamera* mAutoCamera;
+
     BoVector3 mLookAt;
     BoVector3 mUp;
     BoVector3 mCameraPos;
+
     bool mPosDirty;
 };
 
 /**
- * Camera class for Boson
+ * Game camera class for Boson
+ *
+ * Game camera differs from base camera in that it supports setting radius,
+ * rotation, z, etc for camera and then recalculates camera's position and
+ * lookAt vector itself, so you don't have to bother
+ *
+ * Game camera also takes care of collision detection between camera and ground
+ * to make sure that camera is always above the ground.
  *
  * @author Rivo Laks <rivolaks@hot.ee>
  **/
@@ -161,9 +185,9 @@ class BoGameCamera : public BoCamera
   public:
     BoGameCamera();
     /**
-     * Construct camera which will move only in given rectangle
+     * Construct camera
      **/
-    BoGameCamera(GLfloat minX, GLfloat maxX, GLfloat minY, GLfloat maxY);
+    BoGameCamera(const BosonCanvas* canvas);
 
     BoGameCamera(const BoGameCamera& c)
       : BoCamera()
@@ -187,17 +211,13 @@ class BoGameCamera : public BoCamera
     BoGameCamera& operator=(const BoGameCamera& c);
 
 
-    static float minCameraZ();
-    static float maxCameraZ();
-    static float maxCameraRadius();
-
-
     // These will _move_ given things by given values
     void changeZ(GLfloat diff);
     void changeRadius(GLfloat diff);
     void changeRotation(GLfloat diff);
 
     virtual void setLookAt(const BoVector3& pos);
+    virtual void setCameraPos(const BoVector3& pos);
     virtual const BoVector3& cameraPos();
     virtual const BoVector3& up();
 
@@ -205,7 +225,6 @@ class BoGameCamera : public BoCamera
     /**
      * Set camera's rotation (in degrees). Rotation is measured from y-axis, if
      * it's 0, camera will look along y-axis.
-     * Changes are not commited
      **/
     void setRotation(GLfloat r);
     /**
@@ -213,45 +232,45 @@ class BoGameCamera : public BoCamera
      * It means that if there would be a cylinder which lower center point would
      * be at lookAt point and it's radius would be r, then camera would be
      * somewhere along the edge of upper cap of this cylinder.
-     * Changes are not commited
      **/
     void setRadius(GLfloat r);
     /**
      * Set distance between lookAt point and camera in z-axis
-     * Changes are not commited
+     * Note that it can also be < 0.0, e.g. when camera's z-coordinate is below 0
      **/
     void setZ(GLfloat z);
 
+    /**
+     * This specifies how much camera is above the ground. Not that it's not
+     * distance between camera position and terrain's height at this point, but
+     * between camera's lookat point and terrain's height at this point.
+     **/
     GLfloat z() const  { return mPosZ; }
     GLfloat rotation() const  { return mRotation; }
     GLfloat radius() const  { return mRadius; }
 
-    /**
-     * Set limits for the camera. The camera tries not to move beyond the
-     * given rectangle.
-     **/
-    void setMoveRect(GLfloat minX, GLfloat maxX, GLfloat minY, GLfloat maxY);
+    void setCanvas(BosonCanvas* canvas)  { mCanvas = canvas; }
+
 
     virtual bool loadFromXML(const QDomElement& root);
     virtual bool saveAsXML(QDomElement& root);
 
 
-    /**
-     * @internal
-     * Calculate the new z value, according to the camera restrictions.
-     *
-     * This is used by @ref changeZ as well as by the @ref BoAutoGameCamera.
-     **/
-    float calculateNewZ(float diff) const;
-    float calculateNewRadius(GLfloat diff) const;
-
+    float minCameraZ();
+    float maxCameraZ();
 
   protected:
     /**
-     * Checks if camera is inside rectangle set by setMoveRect method.
-     * If it's not inside this rectangle, it will be moved into it.
+     * Checks if camera's lookat point is on the map.
+     * If it's not, it will be moved onto it.
      **/
-    void checkPosition();
+    void checkLookAtPosition();
+
+    /**
+     * Makes sure camera is above the ground.
+     * If it's not, it will be moved upwards, so that it will be.
+     **/
+    void checkCameraPosition();
 
     /**
      * Update the parameters for gluLookAt() (@ref cameraPos
@@ -260,9 +279,15 @@ class BoGameCamera : public BoCamera
      * Don't call this manually, call @ref setPositionDirty instead. This will
      * be automatically called by @ref cameraPos and @ref up, if it's dirty.
      **/
-    void updatePosition();
+    void updateCamera();
 
     void checkRotation();
+
+    /**
+     * Makes sure camera's readius is within limits (e.g. camera's angle is not
+     *  less than minimum angle)
+     **/
+    void checkRadius();
 
   private:
     void init();
@@ -274,7 +299,7 @@ class BoGameCamera : public BoCamera
     GLfloat mRotation;
     GLfloat mRadius;
 
-    GLfloat mMinX, mMaxX, mMinY, mMaxY;
+    const BosonCanvas* mCanvas;
 };
 
 

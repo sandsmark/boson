@@ -32,6 +32,9 @@ class QDomElement;
  *
  * This can be used e.g. in scripts to provide automatic camera movement.
  *
+ * Note that auto camera will _not_ do _any_ validation or limits checking on
+ * the coordinates that you throw at it.
+ *
  * @author Rivo Laks <rivolaks@hot.ee>
  **/
 class BoAutoCamera
@@ -85,6 +88,8 @@ class BoAutoCamera
     // If now is true, value is changed immediately (only this value, if other
     //  changes are being committed at the same time, they won't be cancelled)
     void changeLookAt(const BoVector3& diff);
+    void changeUp(const BoVector3& pos);
+    void changeCameraPos(const BoVector3& pos);
 
     // these will change the up and cameraPos vectors!
     /**
@@ -92,22 +97,14 @@ class BoAutoCamera
      * Changes are not commited
      **/
     void setLookAt(const BoVector3& pos);
+    void setUp(const BoVector3& pos);
+    void setCameraPos(const BoVector3& pos);
 
     virtual bool loadFromXML(const QDomElement& root);
     virtual bool saveAsXML(QDomElement& root);
 
 
   protected:
-    /**
-     * Update the parameters for gluLookAt() (@ref cameraPos
-     * and @ref up) according to the new values from @ref radius,
-     * @ref rotation and @ref lookAt.
-     * Don't call this manually, call @ref setPositionDirty instead. This will
-     * be automatically called by @ref cameraPos and @ref up, if it's dirty.
-     **/
-    virtual void updatePosition()
-    {
-    }
     virtual void resetDifferences();
 
     void setPositionDirty(bool d = true);
@@ -121,7 +118,7 @@ class BoAutoCamera
 
   private:
     BoCamera* mCamera;
-    BoVector3 mLookAtDiff;
+    BoVector3 mLookAtDiff, mUpDiff, mCameraPosDiff;
     int mCommitTime, mRemainingTime;
     MoveMode mMoveMode;
     float mMovedAmount;
@@ -182,14 +179,6 @@ class BoAutoGameCamera : public BoAutoCamera
     virtual bool saveAsXML(QDomElement& root);
 
   protected:
-   /**
-    * Update the parameters for gluLookAt() (@ref cameraPos
-    * and @ref up) according to the new values from @ref radius,
-    * @ref rotation and @ref lookAt.
-    * Don't call this manually, call @ref setPositionDirty instead. This will
-    * be automatically called by @ref cameraPos and @ref up, if it's dirty.
-    **/
-   virtual void updatePosition();
    virtual void resetDifferences();
 
   private:
