@@ -1,5 +1,6 @@
 #include "editor.h"
 
+#include "bosonunitdialog.h"
 #include "bosonwidget.h"
 #include "player.h"
 
@@ -19,6 +20,7 @@
 #include <kstdaccel.h>
 #include <kaction.h>
 #include <kstdaction.h>
+#include <kfiledialog.h>
 
 #include <qintdict.h>
 
@@ -120,6 +122,8 @@ Editor::Editor()
  // and a status bar
  setupStatusBar();
 
+ showMaximized();
+
  d->mBosonWidget->startEditor();
 }
 
@@ -131,19 +135,24 @@ Editor::~Editor()
 void Editor::setupActions()
 {
  KStdAction::openNew(this, SLOT(slotFileNew()), actionCollection());
-// KStdGameAction::gameNew(this, SLOT(slotGameNew()), actionCollection());
-// KStdGameAction::save(this, SLOT(fileSave()), actionCollection());
-// KStdGameAction::saveAs(this, SLOT(fileSaveAs()), actionCollection());
+// KStdAction::save(this, SLOT(fileSave()), actionCollection());
+// KStdAction::saveAs(this, SLOT(fileSaveAs()), actionCollection());
  KStdAction::quit(kapp, SLOT(quit()), actionCollection());
 
+ (void)new KAction(i18n("Save Map as..."), QKeySequence(), this,
+		  SLOT(slotSaveMapAs()), actionCollection(),
+		  "file_save_map_as");
+ (void)new KAction(i18n("Save Scenario as..."), QKeySequence(), this,
+		  SLOT(slotSaveScenarioAs()), actionCollection(), 
+		  "file_save_scenario_as");
 // Debug - no i18n!
- (void)new KAction("Debug", 0, d->mBosonWidget, SLOT(slotDebug()), actionCollection(), "game_debug");
+ (void)new KAction("Debug", QKeySequence(), d->mBosonWidget, SLOT(slotDebug()), actionCollection(), "game_debug");
 
 
- d->mPlayerAction = new KSelectAction(i18n("Player"), 0, actionCollection(), "editor_player");
+ d->mPlayerAction = new KSelectAction(i18n("Player"), QKeySequence(), actionCollection(), "editor_player");
  connect(d->mPlayerAction, SIGNAL(activated(int)), 
 		d->mBosonWidget, SLOT(slotChangeLocalPlayer(int)));
- d->mBuildAction = new KSelectAction(i18n("Units"), 0, actionCollection(), "editor_build");
+ d->mBuildAction = new KSelectAction(i18n("Units"), QKeySequence(), actionCollection(), "editor_build");
  connect(d->mBuildAction, SIGNAL(activated(int)), 
 		d->mBosonWidget, SLOT(slotEditorConstructionChanged(int)));
 
@@ -177,12 +186,16 @@ void Editor::setupActions()
  }
  d->mBuildAction->setItems(buildList);
 
+ (void)new KAction(i18n("Create Custom Unit"), QKeySequence(), this,
+		  SLOT(slotCreateUnit()), actionCollection(),
+		  "editor_create_unit");
+
  d->mToolbarAction = KStdAction::showToolbar(this, SLOT(optionsShowToolbar()), actionCollection());
  d->mStatusbarAction = KStdAction::showStatusbar(this, SLOT(optionsShowStatusbar()), actionCollection());
 
  KStdAction::keyBindings(this, SLOT(optionsConfigureKeys()), actionCollection());
  KStdAction::configureToolbars(this, SLOT(optionsConfigureToolbars()), actionCollection());
- KStdAction::preferences(d->mBosonWidget, SLOT(slotPreferences()), actionCollection());
+ KStdAction::preferences(d->mBosonWidget, SLOT(slotGamePreferences()), actionCollection()); // FIXME: slotEditorPreferences()
 
  createGUI("bosoneditorui.rc");
 }
@@ -214,12 +227,31 @@ void Editor::readProperties(KConfig *config)
  }
 }
 
-void Editor::fileSave()
+void Editor::slotSaveMapAs()
 {
+ QString startIn; // shall we provide this??
+ QString fileName = KFileDialog::getSaveFileName(startIn, "*.bpf", this);
+ if (fileName != QString::null) {
+	if (QFileInfo(fileName).extension().isEmpty()) {
+		fileName += ".bpf";
+	}
+	d->mBosonWidget->slotEditorSaveMap(fileName);
+ }
 }
 
-void Editor::fileSaveAs()
+void Editor::slotSaveScenarioAs()
 {
+ // FIXME: you need an already saved map here!!
+ // check for isChanged() or so!
+
+ QString startIn; // shall we provide this??
+ QString fileName = KFileDialog::getSaveFileName(startIn, "*.bsc", this);
+ if (fileName != QString::null) {
+	if (QFileInfo(fileName).extension().isEmpty()) {
+		fileName += ".bsc";
+	}
+	d->mBosonWidget->slotEditorSaveScenario(fileName);
+ }
 }
 
 void Editor::optionsShowToolbar()
@@ -312,4 +344,9 @@ void Editor::slotChangeUnitConstruction(int index)
 // d->mBosonWidget->editorConstructionChanged(index, d->mPlayers[d->mPlayerAction->currentItem()]);
 }
 
-
+void Editor::slotCreateUnit()
+{
+ BosonUnitDialog* dlg = new BosonUnitDialog(this);
+ dlg->exec();
+ delete dlg;
+}

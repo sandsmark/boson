@@ -15,13 +15,13 @@ class BosonScenarioPrivate;
 class BosonScenario
 {
 public:
+	/*
 	enum PropertyId {
 		IdMaxPlayers = 0,
 		IdMinPlayers = 1,
 		IdMapHeight = 2,
 		IdMapWidth = 3,
-		IdWorldName = 4 //TODO: i18n
-	};
+	};*/
 
 	BosonScenario();
 	BosonScenario(const QString& fileName);
@@ -33,15 +33,16 @@ public:
 	int maxPlayers() const;
 	unsigned int minPlayers() const;
 
-//	QString worldName() const; // TODO: scenario name
-
 	/**
 	 * Load the specified scenario from a file. Note that this is just about
 	 * the units - you have to load the map separately using @ref BosonMap!
+	 *
+	 * Note that BosonScenario does <em>not</em> check whether the scenario is
+	 * valid for the current map!
 	 * @param fileName the absolute filename of the map file.
 	 **/
-	// TODO: which map can be used with this scenario??
 	bool loadScenario(const QString& fileName);
+
 	bool saveScenario(const QString& fileName, bool binary = false);
 	
 	/**

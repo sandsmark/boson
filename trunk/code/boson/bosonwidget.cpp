@@ -16,6 +16,8 @@
 #include "kgamedialogbosonconfig.h"
 #include "bosonmap.h"
 #include "bosonscenario.h"
+#include "bosonconfig.h"
+#include "optionsdialog.h"
 
 #include "defines.h"
 
@@ -129,6 +131,7 @@ void BosonWidget::init()
 // AB: but nevertheless this might be necessary - e.g. Boson::signalAddUnit()
 // sends a request to add a unit but Boson should rather create it itself.
  d->mBoson = new Boson(this);
+ d->mBoson->slotSetGameSpeed(BosonConfig::gameSpeed());
  connect(d->mBoson, SIGNAL(signalAdvance()),
 		d->mCanvas, SLOT(advance()));
  connect(d->mBoson, SIGNAL(signalAddUnit(VisualUnit*, int, int)),
@@ -157,6 +160,8 @@ void BosonWidget::init()
 		d->mCanvas, SLOT(slotAddCell(int, int, int, unsigned char)));
  connect(d->mBigDisplay, SIGNAL(signalAddCell(int,int, int, unsigned char)),
 		d->mMiniMap, SLOT(slotAddCell(int, int, int, unsigned char)));
+ connect(d->mBigDisplay, SIGNAL(signalAddCell(int,int, int, unsigned char)),
+		this, SLOT(slotAddCell(int, int, int, unsigned char)));
 		
  connect(d->mMiniMap, SIGNAL(signalReCenterView(const QPoint&)),
 		d->mBigDisplay, SLOT(slotReCenterView(const QPoint&)));
@@ -173,6 +178,11 @@ void BosonWidget::init()
 // tooltips - added in slotAddUnit
  d->mUnitTips = new KSpriteToolTip(d->mBigDisplay);
 
+ // 640*480 is probably not enough (KDE needs at least 800*600) but as a minimum
+ // should be ok.
+ setMinimumWidth(640);
+ setMinimumHeight(480);
+
  setFocusPolicy(StrongFocus); // accept key event
  setFocus();
  d->mBoson->slotSetGameSpeed(DEFAULT_GAME_SPEED);
@@ -180,6 +190,7 @@ void BosonWidget::init()
 
 BosonWidget::~BosonWidget()
 {
+ saveConfig();
  delete d->mUnitTips;
 
 // first delete all KGame related stuff - will also remove players and therefore
@@ -201,7 +212,7 @@ void BosonWidget::addLocalPlayer()
 	delete d->mLocalPlayer;
  }
  Player* p = new Player;
- p->setName(i18n("You"));
+ p->setName(BosonConfig::localPlayerName());
  KGameMouseIO* bigDisplayIO = new KGameMouseIO(d->mBigDisplay, true);
  connect(bigDisplayIO, SIGNAL(signalMouseEvent(KGameIO*, QDataStream&, QMouseEvent*, bool*)),
 		d->mBigDisplay, SLOT(slotMouseEvent(KGameIO*, QDataStream&, QMouseEvent*, bool*)));
@@ -265,7 +276,7 @@ void BosonWidget::slotArrowScrollChanged(int speed)
 
 void BosonWidget::slotNewGame()
 {
- kdDebug() << "BosonWidget::slotNewGame()" << endl;
+// kdDebug() << "BosonWidget::slotNewGame()" << endl;
  if (d->mBoson->isRunning()) {
 	if (KMessageBox::questionYesNo(this, i18n("Quit the running game?"))
 			!= KMessageBox::Yes) {
@@ -291,11 +302,13 @@ void BosonWidget::slotNewGame()
  dialog->addGameConfig(bosonConfig);
  QVBox* page = dialog->configPage(KGameDialog::GameConfig);
  dialog->addConfigWidget(new KGameDialogChatConfig(BosonMessage::IdChat), page);
+ dialog->addConfigWidget(new KGameDialogConnectionConfig(), page);
 
  // add a network config
  dialog->addNetworkConfig(new KGameDialogNetworkConfig(0));
 
- // a connection list - aka "ban this player"
+ // a connection list - aka "ban this player" - also in game page (e.g. to see
+ // the number of the players when selecting a map)
  page = dialog->configPage(KGameDialog::NetworkConfig);
  dialog->addConnectionList(new KGameDialogConnectionConfig(0), page);
 
@@ -337,6 +350,10 @@ void BosonWidget::slotStartGame()
 void BosonWidget::slotStartScenario()
 {
  kdDebug() << "start scenario" << endl;
+ if (!d->mScenario) {
+	kdError() << "NULL scenario" << endl;
+	return;
+ }
  d->mScenario->startScenario(d->mBoson);
 
  // TODO as soon as it is implemented the map file should also contain the
@@ -356,9 +373,9 @@ void BosonWidget::slotStartScenario()
  d->mBoson->startGame(); // correct here? should be so.
 }
 
-void BosonWidget::slotPreferences()
+void BosonWidget::slotGamePreferences()
 {
-/*
+
  OptionsDialog* dlg = new OptionsDialog(this);
  connect(dlg, SIGNAL(finished()), dlg, SLOT(slotDelayedDestruct())); // seems not to be called if you quit with "cancel"!
  dlg->setGameSpeed(d->mBoson->gameSpeed());
@@ -368,8 +385,7 @@ void BosonWidget::slotPreferences()
 		this, SLOT(slotArrowScrollChanged(int)));
  connect(dlg, SIGNAL(signalSpeedChanged(int)),
 		d->mBoson, SLOT(slotSetGameSpeed(int)));
- dlg->show();*/
- kdDebug() << "options disabled" << endl;
+ dlg->show();
 }
 
 void BosonWidget::slotAddUnit(VisualUnit* unit, int, int)
@@ -559,5 +575,51 @@ void BosonWidget::slotAddComputerPlayer()
 {
  // TODO: name, difficulty, ...
  addComputerPlayer(i18n("Computer"));
+}
+
+void BosonWidget::slotEditorSaveMap(const QString& fileName)
+{
+ if (!d->mMap) {
+	kdError() << "BosonWidget::slotEditorSaveMap(): NULL map" << endl;
+	return;
+ }
+ // TODO: let the user choose - binary or XML.
+ d->mMap->saveMap(fileName, false);
+}
+
+void BosonWidget::slotEditorSaveScenario(const QString& fileName)
+{
+ if (!d->mScenario) {
+	kdError() << "BosonWidget::slotEditorSaveScenario(): NULL scenario" << endl;
+	return;
+ }
+ // TODO: let the user choose - binary or XML? XML is far better here. binary is
+ // probably useless (scenario files are not that big).
+ d->mScenario->saveScenario(fileName, false);
+}
+
+void BosonWidget::slotAddCell(int x, int y, int type, unsigned char b)
+{
+ if (!d->mMap) {
+	kdError() << "NULL map" << endl;
+	return;
+ }
+ d->mMap->changeCell(x, y, type, b);
+}
+
+void BosonWidget::saveConfig()
+{
+ // note: the game is *not* saved here! just general settings like game speed,
+ // player name, ...
+ if (!d->mBoson) {
+	kdError() << "NULL game" << endl;
+	return;
+ }
+ if (!d->mLocalPlayer) {
+	kdError() << "NULL local player" << endl;
+	return;
+ }
+ BosonConfig::saveLocalPlayerName(d->mLocalPlayer->name());
+ BosonConfig::saveGameSpeed(d->mBoson->gameSpeed());
 }
 

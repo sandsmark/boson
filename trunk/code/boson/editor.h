@@ -42,8 +42,10 @@ protected:
 
 private slots:
 	void slotFileNew();
-	void fileSave();
-	void fileSaveAs();
+
+	void slotSaveMapAs();
+	void slotSaveScenarioAs();
+	void slotCreateUnit();
 
 	void optionsShowToolbar();
 	void optionsShowStatusbar();

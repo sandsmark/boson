@@ -36,13 +36,13 @@ class BosonMapPrivate;
 class BosonMap
 {
 public:
+	/*
 	enum PropertyId {
 		IdMaxPlayers = 0,
 		IdMinPlayers = 1,
 		IdMapHeight = 2,
 		IdMapWidth = 3,
-		IdWorldName = 4 //TODO: i18n
-	};
+	};*/
 
 	BosonMap();
 	BosonMap(const QString& fileName);
@@ -52,7 +52,6 @@ public:
 	int width() const;
 	int maxPlayers() const;
 	unsigned int minPlayers() const;
-	QString worldName() const;
 
 	/**
 	 * @return All valid map files. The list contains the .desktop files.
@@ -121,6 +120,8 @@ public:
 	bool isValid() const;
 
 	Cell* cell(int x, int y) const;
+
+	void changeCell(int x, int y, int groundType, unsigned char b);
 
 protected:
 	bool loadCell(QDataStream& stream, int& groundType, unsigned char& b);

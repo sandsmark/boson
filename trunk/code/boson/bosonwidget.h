@@ -36,7 +36,7 @@ public:
 public slots:
 	void slotDebug();
 	void slotNewGame();
-	void slotPreferences();
+	void slotGamePreferences();
 	void slotEndGame();
 
 	void slotLoadMap(const QString& map);
@@ -48,6 +48,9 @@ public slots:
 	 * shall be changed (mobile -> facilities or the other way round)
 	 **/
 	void slotEditorConstructionChanged(int index);
+
+	void slotEditorSaveMap(const QString& fileName);
+	void slotEditorSaveScenario(const QString& fileName);
 
 signals:
 	void signalPlayerJoinedGame(KPlayer* p); // used by the map editor
@@ -71,6 +74,8 @@ protected:
 	void addEditorCommandFrame();
 	void addGameCommandFrame();
 
+	void saveConfig();
+
 protected slots:
 	void slotPlayerJoinedGame(KPlayer* p);
 	void slotArrowScrollChanged(int speed);
@@ -80,6 +85,8 @@ protected slots:
 	void slotReceiveMap(const QByteArray& map);
 
 	void slotAddComputerPlayer();
+
+	void slotAddCell(int,int,int,unsigned char);
 
 private:
 	void init();

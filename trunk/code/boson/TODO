@@ -12,5 +12,3 @@
   this limited number of orderbuttons.
 - map editor: big tiles are currently placed as small ones only
 
-- BosonMap: i18n (of the world name) is a TODO. Maybe use a mapfile.desktop file
-  which contains the worldname and a short description
