@@ -21,12 +21,8 @@
 
 #include "defines.h"
 
-#ifndef NO_OPENGL
 #include <qobject.h>
 #include <qvaluelist.h>
-#else
-#include <qcanvas.h>
-#endif
 
 class BosonMap;
 class Cell;
@@ -44,24 +40,10 @@ class KPlayer;
 
 
 
-// buggy moc
-#ifndef NO_OPENGL
-class CanvasHack : public QObject
-{
-public:
-	CanvasHack(QObject* p, const char* name) : QObject(p, name){}
-};
-#else
-class CanvasHack : public QCanvas
-{
-public:
-	CanvasHack(QObject* p, const char* name) : QCanvas(p, name){}
-};
-#endif
 /**
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
  **/
-class BosonCanvas : public CanvasHack
+class BosonCanvas : public QObject
 {
 	Q_OBJECT
 public:
@@ -109,11 +91,6 @@ public:
 	 * @param withtimer whether to use timer
 	 **/
 	void loadTiles(const QString& tileFile, bool withtimer = true);
-
-#ifdef NO_OPENGL
-	virtual void addAnimation(QCanvasItem*) {}
-	virtual void removeAnimation(QCanvasItem*) {}
-#endif
 
 	virtual void addAnimation(BosonSprite* item);
 	virtual void removeAnimation(BosonSprite* item);
@@ -250,7 +227,6 @@ public:
 
 	BosonTiles* tileSet() const;
 
-#ifndef NO_OPENGL
 	void resize(int w, int h);
 	int width() const { return mWidth; }
 	int height() const { return mHeight; }
@@ -262,7 +238,6 @@ public:
 	{
 		return x >= 0 && y >= 0 && x < width() && y < height();
 	}
-#endif
 
 public slots:
 	/**
@@ -283,8 +258,6 @@ public slots:
 	virtual void advance();
 
 	void slotAddCell(int x, int y, int groundType, unsigned char b);
-
-	virtual void update();
 
 signals:
 	void signalUnitMoved(Unit* unit, float oldX, float oldY);
@@ -317,10 +290,8 @@ private:
 	class BosonCanvasPrivate;
 	BosonCanvasPrivate* d;
 
-#ifndef NO_OPENGL
 	int mWidth;
 	int mHeight;
-#endif
 };
 
 #endif

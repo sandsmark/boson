@@ -19,12 +19,10 @@
 
 #include "bosontexturearray.h"
 
-#ifndef NO_OPENGL
 #include <qimage.h>
 #include <qgl.h>
 
 #include <kdebug.h>
-#endif
 
 BosonTextureArray::BosonTextureArray()
 {
@@ -64,7 +62,6 @@ BosonTextureArray::~BosonTextureArray()
 
 bool BosonTextureArray::createTextures(QValueList<QImage> images, GLenum mode)
 {
-#ifndef NO_OPENGL
  GLenum error = glGetError();
  if (error != GL_NO_ERROR) {
 	kdError() << k_funcinfo << "OpenGL Error before loading textures: " << gluErrorString(error) << endl;
@@ -142,7 +139,6 @@ bool BosonTextureArray::createTextures(QValueList<QImage> images, GLenum mode)
 		kdError() << k_funcinfo << "OpenGL Error when loading texture " << i << ": " << gluErrorString(error) << endl;
 	}
  }
-#endif
  return true;
 }
 

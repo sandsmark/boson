@@ -64,11 +64,7 @@ public:
 
 Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas) 
 		: UnitBase(prop), 
-#ifndef NO_OPENGL
 		BosonSprite(owner->speciesTheme() ? owner->speciesTheme()->unitModel(prop->typeId()) : 0, canvas)
-#else
-		BosonSprite(owner->speciesTheme() ? owner->speciesTheme()->pixmapArray(prop->typeId()) : 0, canvas)
-#endif
 {
  d = new UnitPrivate;
  setOwner(owner);
@@ -91,22 +87,17 @@ Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
  d->mMoveRange.setLocal(0);
 
  // TODO: the tooltips do not yet work with OpenGL!!
-#ifdef NO_OPENGL
- KSpriteToolTip::add(rtti(), unitProperties()->name());
-#else
+// KSpriteToolTip::add(rtti(), unitProperties()->name());
  if (!model()) {
 	kdError() << k_funcinfo << "NULL model - this will most probably crash!" << endl;
 	return;
  }
  model()->setFrame(0);
-#endif
 }
 
 Unit::~Unit()
 {
-#ifdef NO_OPENGL
- KSpriteToolTip::remove(this);
-#endif
+// KSpriteToolTip::remove(this);
  d->mWaypoints.setEmittingSignal(false); // just to prevent warning in Player::slotUnitPropertyChanged()
  d->mWaypoints.clear();
  unselect();
@@ -209,12 +200,6 @@ void Unit::moveBy(float moveX, float moveY, float moveZ)
  float oldY = y();
  boCanvas()->removeFromCells(this);
  BosonSprite::moveBy(moveX, moveY, moveZ);
-#ifdef NO_OPENGL
- if (selectBox()) {
-	// im pretty sure we won't need moveZ in the select box.. not yet ;)
-	selectBox()->moveBy(moveX, moveY, 0.0);
- }
-#endif
  boCanvas()->addToCells(this);
  boCanvas()->unitMoved(this, oldX, oldY);
 }

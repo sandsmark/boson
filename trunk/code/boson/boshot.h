@@ -20,17 +20,14 @@
 #define BOSHOT_H
 
 #include "defines.h"
-
+#include "visual/bosonsprite.h"
 #include "rtti.h"
 
 class BosonCanvas;
 class Unit;
 
-#ifndef NO_OPENGL
 #warning BoShot has not yet been implemented for OpenGL
-#endif
 
-#include "visual/bosonsprite.h"
 
 /**
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>

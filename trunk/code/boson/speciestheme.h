@@ -24,16 +24,11 @@
 #include <qstring.h>
 #include <qcolor.h>
 #include <qvaluelist.h>
-#include "global.h"
 
-#ifndef NO_OPENGL
 #include <GL/gl.h>
+
 class BosonTextureArray;
 class BosonModel;
-#else
-class QCanvasPixmapArray;
-#endif
-
 class UnitProperties;
 class UnitBase;
 
@@ -103,32 +98,12 @@ public:
 	int unitWidth(unsigned long int unitType);
 	int unitHeight(unsigned long int unitType);
 
-#ifndef NO_OPENGL
 	BosonTextureArray* textureArray(unsigned long int unitType);
 	GLuint textureNumber(unsigned long int unitType, int direction);
 	// TODO an OpenGL implementation for shot()
 
 	GLuint displayList(unsigned long int unitType);
 	BosonModel* unitModel(unsigned long int unitType);
-#else
-	/**
-	 * @return The pixmap array for unitType or NULL if none was found for
-	 * this unitType. See also @ref UnitProperties::typeId
-	 **/
-	QCanvasPixmapArray* pixmapArray(unsigned long int unitType);
-
-
-	/**
-	 * Make sure to call @ref loadShot before!
-	 * @return The animation of a normal shot.
-	 **/
-	QCanvasPixmapArray* shot() const { return mShot; }
-	
-	/**
-	 * Make sure to call @ref loadBigShot before!
-	 **/
-	QCanvasPixmapArray* bigShot(bool isFacility, unsigned int version) const;
-#endif
 
 	/**
 	 * @return The big overview pixmap (the one that is displayed when the
@@ -263,11 +238,9 @@ protected:
 	 **/
 	void readUnitConfigs();
 
-#ifndef NO_OPENGL
 	void loadUnitTextures(unsigned long int type, QValueList<QImage> list);
 	void loadUnitModel(const UnitProperties* prop);
 	GLuint createDisplayList(unsigned long int typeId);
-#endif
 
 private:
 	class SpeciesThemePrivate;
@@ -275,9 +248,6 @@ private:
 
 	QString mThemePath;
 	QColor mTeamColor;
-#ifdef NO_OPENGL
-	QCanvasPixmapArray* mShot;
-#endif
 };
 
 #endif

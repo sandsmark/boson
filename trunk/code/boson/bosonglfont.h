@@ -20,8 +20,6 @@
 #ifndef BOSONGLFONT_H
 #define BOSONGLFONT_H
 
-#ifndef NO_OPENGL
-
 #include <GL/gl.h>
 
 #include <qfontmetrics.h>
@@ -72,6 +70,5 @@ private:
 	GLuint mFontDisplayList; 
 };
 
-#endif // !NO_OPENGL
-
 #endif // BOSONGLFONT_H
+

@@ -1150,7 +1150,6 @@ QValueList<QColor> Boson::availableTeamColors() const
 void Boson::slotReceiveAdvance()
 {
  emit signalAdvance(d->mAdvanceCount);
- d->mCanvas->update();
  d->mAdvanceCount = d->mAdvanceCount + 1;
  if (d->mAdvanceCount >= MAXIMAL_ADVANCE_COUNT) {
 	d->mAdvanceCount = 0;

@@ -21,7 +21,6 @@
 
 #include <config.h>
 
-//#define NO_OPENGL
 //#define NO_EDITOR
 
 #define BO_TILE_SIZE 48

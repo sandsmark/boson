@@ -36,10 +36,8 @@
 #include "bosonmap.h"
 #include "speciestheme.h"
 #include "bosonprofiling.h"
-#ifndef NO_OPENGL
 #include "bodisplaymanager.h"
 #include "bosonbigdisplaybase.h"
-#endif
 
 #include <kapplication.h>
 #include <klocale.h>
@@ -109,9 +107,7 @@ public:
 
 	QPtrDict<KPlayer> mPlayers; // needed for debug only
 
-#ifndef NO_OPENGL
 	QTimer mFpstimer;
-#endif
 
 #if KDE_VERSION < 310
 	bool mLoadingDockConfig;
@@ -251,18 +247,6 @@ void TopWidget::initActions()
  d->mActionZoom->setItems(items);
 
  // Display
- // note: the icons for these action need to have konqueror installed!
-#ifdef NO_OPENGL
- (void)new KAction(i18n( "Split Display &Left/Right"), "view_left_right",
-		   CTRL+SHIFT+Key_L, this, SLOT(slotSplitDisplayHorizontal()),
-		   d->mGameActions, "splitviewh");
- (void)new KAction(i18n("Split Display &Top/Bottom"), "view_top_bottom",
-		   CTRL+SHIFT+Key_T, this, SLOT(slotSplitDisplayVertical()),
-		   d->mGameActions, "splitviewv");
- (void)new KAction(i18n("&Remove Active Display"), "view_remove",
-		  CTRL+SHIFT+Key_R, this, SLOT(slotRemoveActiveDisplay()),
-		  d->mGameActions, "removeview");
-#endif
  d->mActionFullScreen = new KToggleAction(i18n("&Fullscreen Mode"), CTRL+SHIFT+Key_F,
 		this, SLOT(slotToggleFullScreen()), actionCollection(), "window_fullscreen");
  d->mActionFullScreen->setChecked(false);
@@ -332,14 +316,11 @@ void TopWidget::initStatusBar()
  connect(this, SIGNAL(signalOilUpdated(int)), oilLabel, SLOT(setNum(int)));
  bar->addWidget(resources);
 
-#ifndef NO_OPENGL
-kdDebug() << k_funcinfo << endl;
  QHBox* fps = new QHBox(bar);
  (void)new QLabel(i18n("FPS: "), fps);
  QLabel* fpsLabel = new QLabel(QString::number(0.0), fps);
  connect(this, SIGNAL(signalFPSUpdated(double)), fpsLabel, SLOT(setNum(double)));
  bar->addWidget(fps);
-#endif
 
  bar->hide();
 }
@@ -771,10 +752,8 @@ void TopWidget::loadGameData3() // FIXME rename!
  enableGameActions(true);
  initDebugPlayersMenu();
  checkDockStatus();
-#ifndef NO_OPENGL
  d->mFpstimer.start(1000);
  connect(&d->mFpstimer, SIGNAL(timeout()), this, SLOT(slotUpdateFPS()));
-#endif
 
  connect(d->mBosonWidget, SIGNAL(signalChatDockHidden()), this, SLOT(slotChatDockHidden()));
  connect(d->mBosonWidget, SIGNAL(signalCmdFrameDockHidden()), this, SLOT(slotCmdFrameDockHidden()));
@@ -946,10 +925,8 @@ void TopWidget::endGame()
  if (d->mBosonWidget) {
 	d->mBosonWidget->slotEndGame();
 	disconnect(d->mBosonWidget, 0, 0, 0);
-#ifndef NO_OPENGL
 	d->mFpstimer.stop();
 	disconnect(&d->mFpstimer, 0, 0, 0);
-#endif
 	saveGameDockConfig();
  }
  // Delete all objects
@@ -1225,8 +1202,6 @@ void TopWidget::slotSaveGame()
 
 void TopWidget::slotUpdateFPS()
 {
-#ifndef NO_OPENGL
  emit signalFPSUpdated(d->mBosonWidget->displayManager()->activeDisplay()->fps());// damn this call sucks!
-#endif
 }
 
