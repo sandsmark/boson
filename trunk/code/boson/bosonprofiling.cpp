@@ -603,15 +603,15 @@ void BosonProfiling::endBenchmark(const QString& name)
 
 	count++;
  }
- boDebug().form("%10s |%15s |%15s |%15s |%15s |%15s",
+ (boDebug()).form("%10s |%15s |%15s |%15s |%15s |%15s",
 		"", "function", "advancefunc", "deleteshots", "particles", "maxadvcount") << endl;
- boDebug().form("%10s |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f",
+ (boDebug()).form("%10s |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f",
 		"TOTAL", advfunction / 1000.0, advancefunction / 1000.0, deleteshots / 1000.0,
 		particles / 1000.0, maximaladvancecount / 1000.0) << endl;
- boDebug().form("%10s |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f",
+ (boDebug()).form("%10s |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f",
 		"average", advfunction / 1000.0 / count, advancefunction / 1000.0 / count, deleteshots / 1000.0 / count,
 		particles / 1000.0 / count, maximaladvancecount / 1000.0 / count) << endl;
- boDebug().form("%10s |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f",
+ (boDebug()).form("%10s |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f",
 		"max", maxadvfunction / 1000.0, maxadvancefunction / 1000.0, maxdeleteshots / 1000.0,
 		maxparticles / 1000.0, maxmaximaladvancecount / 1000.0) << endl << endl;
 
@@ -639,18 +639,18 @@ void BosonProfiling::endBenchmark(const QString& name)
 
 	count++;
  }
- boDebug().form("%10s |%15s |%15s |%15s |%15s |%15s |%15s",
+ (boDebug()).form("%10s |%15s |%15s |%15s |%15s |%15s |%15s",
 		"", "function", "clear", "cells", "items", "particles", "text") << endl;
- boDebug().form("%10s |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f",
+ (boDebug()).form("%10s |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f",
 		"TOTAL", glfunction / 1000.0, clear / 1000.0, cells / 1000.0,
 		units / 1000.0, glparticles / 1000.0, text / 1000.0) << endl;
- boDebug().form("%10s |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f",
+ (boDebug()).form("%10s |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f",
 		"average", glfunction / 1000.0 / count, clear / 1000.0 / count, cells / 1000.0 / count,
 		units / 1000.0 / count, glparticles / 1000.0 / count, text / 1000.0 / count) << endl;
- boDebug().form("%10s |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f",
+ (boDebug()).form("%10s |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f",
 		"max", maxglfunction / 1000.0, maxclear / 1000.0, maxcells / 1000.0,
 		maxunits / 1000.0, maxglparticles / 1000.0, maxtext / 1000.0) << endl;
- boDebug().form("%d frames were rendered in %.3f sec - average FPS was %.2f",
+ (boDebug()).form("%d frames were rendered in %.3f sec - average FPS was %.2f",
 		count, d->mBenchmark->mInterval.diff() / 1000000.0, count / (d->mBenchmark->mInterval.diff() / 1000000.0)) << endl;
 
 
