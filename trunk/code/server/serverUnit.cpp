@@ -27,10 +27,10 @@
 #include "player.h"
 #include "game.h"
 
+
 /*
  *  KNOWN_BY
  */
-
 void knownBy::sendToKnown(bosonMsgTag tag, int blen, void *data)
 {
 	int i;
@@ -39,7 +39,7 @@ void knownBy::sendToKnown(bosonMsgTag tag, int blen, void *data)
 	for ( i=0; k; i++,k>>=1) {
 		boAssert(i<3);
 		if (k&1l) sendMsg ( player[i].buffer, tag, blen, data);
-		}
+	}
 }
 
 
@@ -47,8 +47,7 @@ void knownBy::sendToKnown(bosonMsgTag tag, int blen, void *data)
 /*
  * class serverUnit
  */
-
-void serverUnit::increaseContain(void)
+void serverMobUnit::increaseContain(void)
 {
 	unitRessMsg_t	m;
 
@@ -59,13 +58,14 @@ void serverUnit::increaseContain(void)
 
 }
 
+
+
 /*
  *  MOBILE 
  */
-
-serverMobUnit::serverMobUnit(boBuffer *b, mobileMsg_t *msg, QObject* parent, const char *name)
-	:mobUnit(msg,parent,name)
-	,serverUnit(msg->key, b,msg->x, msg->y)
+serverMobUnit::serverMobUnit(boBuffer *b, mobileMsg_t *msg)
+	:mobUnit(msg)
+	,serverUnit( b, (unitMsg_t*)msg)
 {
 }
 
@@ -90,8 +90,7 @@ bool serverMobUnit::shooted(void)
 }
 
 
-
-void serverMobUnit::r_moveBy(moveMsg_t &msg, int playerId, boBuffer * buffer)
+void serverMobUnit::r_moveBy(moveMsg_t &msg, int playerId)
 {
 
 	/* owner check */
@@ -112,6 +111,7 @@ void serverMobUnit::r_moveBy(moveMsg_t &msg, int playerId, boBuffer * buffer)
 
 	sendToKnown( MSG_MOBILE_MOVE_C, MSG(msg) );
 }
+
 
 void serverMobUnit::reportCreated(int i)
 {
@@ -149,6 +149,7 @@ void serverMobUnit::reportUnHidden(int i)
 
 void serverMobUnit::reportDestroyed(int i)
 {
+
 	destroyedMsg_t  destroyed;
 
 	destroyed.key = key;
@@ -161,11 +162,13 @@ void serverMobUnit::reportDestroyed(int i)
 		sendToKnown( MSG_MOBILE_DESTROYED  , MSG(destroyed) );
 	else
 		sendMsg( player[i].buffer, MSG_MOBILE_DESTROYED  , MSG(destroyed) );
+
 }
 
 
 void serverMobUnit::reportHidden(int i)
 {
+
 	destroyedMsg_t  destroyed;
 
 	destroyed.key = key;
@@ -179,6 +182,14 @@ void serverMobUnit::reportHidden(int i)
 		unSetKnown(getPlayerMask(i));
 	}
 
+}
+
+
+QRect serverMobUnit::rect(void)
+{
+	QRect r = mobUnit::rect();
+	r.moveBy( __x, __y );
+	return r;
 }
 
 
@@ -209,15 +220,16 @@ void serverHarvester::getWantedAction(void)
 				break;
 		}
 		contain = 0;
-		}
+	}
 
 }
+
 
 void serverHarvester::emptying(void)
 {
 	if (!atHome()) {
 		logf(LOG_ERROR, "serverHarvesting::emptying while not at home, refused");
-		printf("base is %d,%d, we are at %d,%d\n", base_x, base_y, _x(), _y());
+//		printf("base is %d,%d, we are at %d,%d\n", base_x, base_y, _x(), _y());
 		return;
 	}
 	/* destroy (hide) the client harvester */
@@ -226,21 +238,29 @@ void serverHarvester::emptying(void)
 
 }
 
+bool serverHarvester::atHome(void)
+{
+	QRect r = rect();
+	return ( r.x() == base_x && r.y() == base_y );
+}
 
 
 /*
  *  FACILITY
  */
-
-serverFacility::serverFacility(boBuffer *b, facilityMsg_t *msg, QObject* parent, const char *name)
-	:Facility(msg,parent,name)
-	,serverUnit(msg->key, b,msg->x * BO_TILE_SIZE, msg->y * BO_TILE_SIZE)
+serverFacility::serverFacility(boBuffer *b, facilityMsg_t *msg)
+	:Facility(msg)
+	,serverUnit( b, (unitMsg_t*)msg)
 {
+	__x *= BO_TILE_SIZE;
+	__y *= BO_TILE_SIZE;
 	counter = BUILDING_SPEED;
 }
 
+
 bool serverFacility::shooted(void)
 {
+
 	if (--power <=0) {
 
 		reportDestroyed();
@@ -261,6 +281,7 @@ bool serverFacility::shooted(void)
 
 void serverFacility::getWantedAction(void)
 {
+
 	fixChangedMsg_t msg;
 
 	boAssert(state>=0);
@@ -271,11 +292,13 @@ void serverFacility::getWantedAction(void)
 		msg.key   = key;
 		msg.state = state;
 		sendToKnown (MSG_FACILITY_CHANGED, MSG(msg) );
-		}
+	}
 }
+
 
 void serverFacility::reportUnHidden(int i)
 {
+
 	facilityMsg_t   facility; 
 
 	fill(facility);
@@ -291,7 +314,6 @@ void serverFacility::reportUnHidden(int i)
 		else	sendMsg ( player[i].buffer, MSG_FACILITY_UNHIDDEN, MSG(facility) );
 
 		setKnown(getPlayerMask(i));
-
 	}
 
 }
@@ -299,6 +321,7 @@ void serverFacility::reportUnHidden(int i)
 
 void serverFacility::reportCreated(int i)
 {
+
 	facilityMsg_t     facility;
 		
 	fill(facility);
@@ -330,10 +353,13 @@ void serverFacility::reportDestroyed(int i)
 		sendToKnown( MSG_FACILITY_DESTROYED, MSG(destroyed) );
 	else
 		sendMsg ( player[i].buffer, MSG_FACILITY_DESTROYED  , MSG(destroyed) );
+
 }
+
 
 void serverFacility::reportHidden(int i)
 {
+
 	destroyedMsg_t  destroyed;
 
 	destroyed.key = key;
@@ -347,9 +373,13 @@ void serverFacility::reportHidden(int i)
 		sendMsg ( player[i].buffer, MSG_FACILITY_HIDDEN, MSG(destroyed) );
 		unSetKnown(getPlayerMask(i));
 	}
-
 }
 
 
-
+QRect serverFacility::rect(void)
+{
+	QRect r = Facility::rect();
+	r.moveBy( __x, __y );
+	return r;
+}
 

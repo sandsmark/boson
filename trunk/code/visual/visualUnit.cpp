@@ -62,9 +62,9 @@ void visualUnit::doShow()
  * visualMobUnit
  */
 
-visualMobUnit::visualMobUnit(mobileMsg_t *msg, QObject* parent, const char *name)
-	: mobUnit(msg,parent,name)
-	, visualUnit(msg->key, species[msg->who]->getPixmap(msg->type))
+visualMobUnit::visualMobUnit(mobileMsg_t *msg)
+	: mobUnit(msg)
+	, visualUnit(species[msg->who]->getPixmap(msg->type))
 {
 
 	setZ	(Z_MOBILE + 3 * type);
@@ -92,12 +92,21 @@ void visualMobUnit::select()
 }
 
 
+QRect visualMobUnit::rect(void)
+{
+	QRect r = mobUnit::rect();
+	r.moveBy( x(), y() );
+	return r;
+}
+
+
+
 /*
  * visualFacility
  */
-visualFacility::visualFacility(facilityMsg_t *msg, QObject* parent, const char *name)
-	: Facility(msg,parent,name)
-	, visualUnit(msg->key, species[msg->who]->getPixmap(msg->type))
+visualFacility::visualFacility(facilityMsg_t *msg)
+	: Facility(msg)
+	, visualUnit(species[msg->who]->getPixmap(msg->type))
 {
 	setZ	(Z_FACILITY);
 	move	(BO_TILE_SIZE * msg->x , BO_TILE_SIZE * msg->y);
@@ -127,4 +136,11 @@ void visualFacility::select()
 	sp_down->move(r.left() + PF_DELTA, r.bottom() - PF_DELTA);
 }
 
+
+QRect visualFacility::rect(void)
+{
+	QRect r = Facility::rect();
+	r.moveBy( x(), y() );
+	return r;
+}
 

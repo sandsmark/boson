@@ -21,69 +21,54 @@
 #include "unit.h"
 #include "map.h"
 
-Unit::Unit(int _who, QObject*parent, const char *name)
-	: QObject(parent, name)
-{
-	who		= _who;
-	
-	countDown	= 0;
-	work		= WORK_NONE;
-}
-
 
 /*
  * MOBILE
  */
-
-mobUnit::mobUnit(mobileMsg_t *msg, QObject* parent, const char *name)
-:Unit(msg->who, parent,name)
+mobUnit::mobUnit(mobileMsg_t *msg)
+	:Unit( (unitMsg_t*) msg)
 {
 	type	= msg->type;
-
-	isShown = TRUE; ///orzel : should be removed since Qw handles this now...
 }
+
 
 void mobUnit::fill(mobileMsg_t &msg)
 {
+	QRect r = rect();
+
 	msg.who = who;
-	msg.x   = _x();
-	msg.y   = _y();
+	msg.x   = r.x();
+	msg.y   = r.y();
 	msg.type= type;
 }
+
 
 QRect mobUnit::rect(void)
 {
 	register int
 		w = mobileProp[type].width,
 		h = mobileProp[type].height;
-	return QRect(-w/2 + _x(), -h/2 + _y(), w, h);
+	return QRect(-w/2 , -h/2 , w, h);
 }
 
 
 /*
  * FACILITY
  */
-
-Facility::Facility(facilityMsg_t *msg, QObject* parent, const char *name)
-:Unit(msg->who, parent,name)
+Facility::Facility(facilityMsg_t *msg)
+	:Unit( (unitMsg_t*) msg)
 {
 	type	= msg->type;
 }
 
 
-QRect Facility::rect(void)
-{
-	return QRect( _x(), _y(),
-		facilityProp[type].width,
-		facilityProp[type].height);
-}
-
-
 void Facility::fill(facilityMsg_t &msg)
 {
+	QRect r = rect();
+
 	msg.who = who;
-	msg.x   = _x() / BO_TILE_SIZE;
-	msg.y   = _y() / BO_TILE_SIZE;
+	msg.x   = r.x() / BO_TILE_SIZE;
+	msg.y   = r.y() / BO_TILE_SIZE;
 	msg.type= type;
 }
 
