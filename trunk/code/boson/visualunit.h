@@ -80,6 +80,8 @@ public:
 	virtual bool save(QDataStream& stream);
 	virtual bool load(QDataStream& stream);
 
+	void updateSelectBox();
+
 protected:
 
 private:

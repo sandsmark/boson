@@ -76,10 +76,11 @@ void VisualUnit::select()
 // put the selection box on the same canvas as the unit and around the unit
 // QRect r = rect();//AB: FIXME
  QRect r = boundingRect();
- d->mSelectBoxUp = new SelectPart(health(), z(), SelectPart::PartUp, canvas());
+ d->mSelectBoxUp = new SelectPart(z(), SelectPart::PartUp, canvas());
  d->mSelectBoxUp->move(r.right() - PM_DELTA_H, r.top() + PM_DELTA_V);
- d->mSelectBoxDown = new SelectPart(health(), z(), SelectPart::PartDown, canvas());
+ d->mSelectBoxDown = new SelectPart(z(), SelectPart::PartDown, canvas());
  d->mSelectBoxDown->move(r.left() - PM_DELTA_H, r.bottom() + PM_DELTA_V);
+ updateSelectBox();
 }
 
 void VisualUnit::unselect()
@@ -118,10 +119,20 @@ void VisualUnit::setHealth(unsigned long int h)
 	return;
  }
  Unit::setHealth(h);
+ updateSelectBox();
+}
+
+void VisualUnit::updateSelectBox()
+{
  if (d->mSelectBoxUp) {
-	double div = (double)h / maxHealth;
+	unsigned long int maxHealth = unitProperties()->health();
+	double div = (double)health() / maxHealth;
 	int frame = (int)((double)(SelectPart::frames() - 1) * div);
 	d->mSelectBoxUp->setFrame(frame);
+	d->mSelectBoxUp->show();
+ }
+ if (d->mSelectBoxDown) {
+	d->mSelectBoxDown->show();
  }
 }
 
@@ -394,17 +405,7 @@ void VisualMobileUnit::advanceMove()
 
  QRect position = boundingRect(); // where we currently are.
  QPoint waypoint = currentWaypoint(); // where we go to
-/* if (position.contains(waypoint)) { // we arrived at our destination
-	kdDebug() << "arrived at point" << endl;
-	if (waypointCount() == 1) { // this is the only point left in path
-		stopMoving();
-	} else {
-		waypointDone(); // remove the waypoint
-	}
-	return;
- }*/
- // we haven't arrived - let's move now
-// kdDebug() << "w: " << waypoint.x() << " " << waypoint.y() << endl;
+
  setXVelocity(0); // so that boundinRectAdvanced() is working
  setYVelocity(0); // so that boundinRectAdvanced() is working
  double x = position.center().x();
