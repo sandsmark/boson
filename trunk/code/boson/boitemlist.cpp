@@ -265,6 +265,9 @@ bofixed BoItemList::passageCostLand() const
 			cost += PF_TNG_COST_ENGAGING_UNIT;
 		} else if(u->movingStatus() == UnitBase::MustSearch) {
 			cost += PF_TNG_COST_MUSTSEARCH_UNIT;
+		} else if(u->movingStatus() == UnitBase::Removing) {
+			// Unit is being deleted, but it hasn't been removed from cells yet.
+			//  Do nothing
 		} else {
 			// Internal moving status. This shouldn't be reached
 			boError() << k_funcinfo << "Internal moving status " << u->movingStatus() <<
@@ -305,6 +308,9 @@ bofixed BoItemList::passageCostAir() const
 			cost += PF_TNG_COST_ENGAGING_UNIT;
 		} else if(u->movingStatus() == UnitBase::MustSearch) {
 			cost += PF_TNG_COST_MUSTSEARCH_UNIT;
+		} else if(u->movingStatus() == UnitBase::Removing) {
+			// Unit is being deleted, but it hasn't been removed from cells yet.
+			//  Do nothing
 		} else {
 			// Internal moving status. This shouldn't be reached
 			boError() << k_funcinfo << "Internal moving status " << u->movingStatus() <<
