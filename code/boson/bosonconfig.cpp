@@ -213,29 +213,6 @@ void BosonConfig::saveCursorDir(const QString& dir, KConfig* conf)
  conf->setGroup(oldGroup);
 }
 
-GroupMoveMode BosonConfig::readGroupMoveMode(KConfig* conf)
-{
- if (!conf) {
-	conf = kapp->config();
- }
- QString oldGroup = conf->group();
- conf->setGroup("Boson");
- int mode = conf->readNumEntry("GroupMoveMode", GroupMoveOld);
- conf->setGroup(oldGroup);
- return (GroupMoveMode)mode;
-}
-
-void BosonConfig::saveGroupMoveMode(GroupMoveMode mode, KConfig* conf)
-{
- if (!conf) {
-	conf = kapp->config();
- }
- QString oldGroup = conf->group();
- conf->setGroup("Boson");
- conf->writeEntry("GroupMoveMode", (int)mode);
- conf->setGroup(oldGroup);
-}
-
 void BosonConfig::saveSound(KConfig* conf)
 {
  conf->setGroup("Boson");

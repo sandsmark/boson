@@ -185,7 +185,6 @@ protected slots:
 	void slotNotEnoughOil(Player*);
 
 	void slotChangeCursor(int mode, const QString& dir);
-	void slotChangeGroupMove(int mode);
 
 	void slotArrowScrollChanged(int speed);
 	void slotAddUnit(Unit* unit, int x, int y);

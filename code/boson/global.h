@@ -35,11 +35,6 @@ enum CursorMode {
 	CursorKDE = 2,
 	CursorExperimental = 3
 };
-enum GroupMoveMode {
-	GroupMoveOld = 0,
-	GroupMoveNew = 1,
-	GroupMoveFollow = 2
-};
 
 enum Direction {
 	North = 0,

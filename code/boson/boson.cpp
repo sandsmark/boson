@@ -213,8 +213,6 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 	{
 		QPoint pos;
 		Q_UINT32 unitCount;
-		Q_UINT32 mode;
-		stream >> mode;
 		stream >> pos;
 		stream >> unitCount;
 		QPtrList<Unit> unitsToMove;
@@ -252,35 +250,10 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 		if(unitsToMove.count() == 1) {
 			unitsToMove.first()->moveTo(pos);
 		} else {
-			if(mode == GroupMoveFollow) {
-				Unit* unit = unitsToMove.take(0);
-				unit->moveTo(pos);
-				unit->setGroupLeader(true);
-				emit signalNewGroup(unit, unitsToMove);
-			} else if (mode == GroupMoveOld) {
-				it.toFirst();
-				while (it.current()) {
-					it.current()->moveTo(pos);
-					++it;
-				}
-			} else if (mode == GroupMoveNew) {
-				kdDebug() << k_funcinfo << "mode == GroupMoveNew" << endl;
-				Unit* leader = unitsToMove.take(0);
-				leader->moveTo(pos);
-				Unit* unit;
-				QPoint pos2;
-
-				it.toFirst();
-				while (it.current()) {
-					unit = it.current();
-					unit->moveTo(pos);
-					pos2.setX(pos.x() + (int)(unit->x() - leader->x()));
-					pos2.setY(pos.y() + (int)(unit->y() - leader->y()));
-					unit->moveTo(pos2);
-					++it;
-				}
-			} else {
-				kdError() << k_funcinfo << "wrong GroupMoveMode " << mode << endl;
+			it.toFirst();
+			while (it.current()) {
+				it.current()->moveTo(pos);
+				++it;
 			}
 		}
 		break;
