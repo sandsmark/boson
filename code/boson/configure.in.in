@@ -109,6 +109,9 @@ AC_DEFUN(AC_BOSON_HAVE_GL_LIBS,
 	[
 #include <GL/gl.h>
 	], [
+#ifndef GL_VERSION_1_1
+#error GL_VERSION_1_1 is not defined! OpenGL 1.1 is required!
+#endif
 glBegin(GL_TRIANGLES);
 glEnd();
 	],
