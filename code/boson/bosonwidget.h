@@ -162,6 +162,8 @@ signals:
 	void signalChatDockHidden();
 	void signalCmdFrameDockHidden();
 
+	void signalGameOver();
+
 protected slots:
 	void slotCmdBackgroundChanged(const QString& file);
 	void slotMiniMapScaleChanged(double);
@@ -195,6 +197,8 @@ protected slots:
 	void slotOutOfGame(Player* p);
 
 	void slotDebugRequestIdName(int msgid, bool userid, QString& name);
+
+	void slotGameOverDialogFinished();
 
 protected:
 	void addChatSystemMessage(const QString& fromName, const QString& text);

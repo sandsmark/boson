@@ -752,6 +752,8 @@ void BosonWidget::slotSetActiveDisplay(BosonBigDisplay* active, BosonBigDisplay*
 
 void BosonWidget::slotOutOfGame(Player* p)
 {
+ // TODO write BosonGameOverWidget, add it to widgetstack in TopWidget and then
+ //  use it instead
  int inGame = 0;
  Player* winner = 0;
  for (unsigned int i = 0; i < game()->playerList()->count(); i++) {
@@ -762,11 +764,12 @@ void BosonWidget::slotOutOfGame(Player* p)
  }
  if (inGame <= 1 && winner) {
 	kdDebug() << k_funcinfo << "We have a winner! id=" << winner->id() << endl;
-	 delete d->mGameOverDialog;
-	 d->mGameOverDialog = new GameOverDialog(this);
-	 d->mGameOverDialog->createStatistics(game(), winner, player());
-	 d->mGameOverDialog->show();
-	 game()->setGameStatus(KGame::End);
+	delete d->mGameOverDialog;
+	d->mGameOverDialog = new GameOverDialog(this);
+	d->mGameOverDialog->createStatistics(game(), winner, player());
+	d->mGameOverDialog->show();
+	connect(d->mGameOverDialog, SIGNAL(finished()), this, SLOT(slotGameOverDialogFinished()));
+	game()->setGameStatus(KGame::End);
  } else if (!winner) {
 	kdError() << k_funcinfo << "no player left ?!" << endl;
 	return;
@@ -973,3 +976,8 @@ void BosonWidget::saveConfig(bool editor)
  kdDebug() << k_funcinfo << "done" << endl;
 }
 
+void BosonWidget::slotGameOverDialogFinished()
+{
+ d->mGameOverDialog->delayedDestruct();
+ emit signalGameOver();
+}
