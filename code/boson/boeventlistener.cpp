@@ -194,7 +194,7 @@ BoCanvasEventListener::~BoCanvasEventListener()
 
 void BoCanvasEventListener::processEvent(const BoEvent* event)
 {
- if (event->name() == "PlayerAllUnitsDestroyed") {
+ if (event->name() == "AllUnitsDestroyed") {
 	Player* p = (Player*)boGame->findPlayer(event->playerId());
 	if (!p) {
 		boError(360) << k_funcinfo << "could not find specified player " << event->playerId() << endl;
@@ -227,21 +227,23 @@ BoLocalPlayerEventListener::~BoLocalPlayerEventListener()
 
 void BoLocalPlayerEventListener::processEvent(const BoEvent* event)
 {
+ BO_CHECK_NULL_RET(playerIO());
+ BO_CHECK_NULL_RET(playerIO()->speciesTheme());
  if (event->playerId() != 0) {
 	if (event->playerId() != playerIO()->playerId()) {
 		return;
 	}
  }
- if (event->name() == "UnitProduced") {
+ if (event->name() == "UnitWithTypeProduced") {
 	if (event->rtti() != BoEvent::RTTIULong) {
-		boError(360) << k_funcinfo << "invalid event rtti for UnitProduced" << endl;
+		boError(360) << k_funcinfo << "invalid event rtti for UnitWithTypeProduced" << endl;
 		return;
 	}
 	const BoGenericULongEvent* e = (const BoGenericULongEvent*)event;
 	unsigned long int unitType = e->data1();
 	const UnitProperties* prop = playerIO()->unitProperties(unitType);
 	if (!prop) {
-		boError(360) << k_funcinfo << "cannot find unittype " << unitType << " specified in UnitProduced" << endl;
+		boError(360) << k_funcinfo << "cannot find unittype " << unitType << " specified in UnitWithTypeProduced" << endl;
 		return;
 	}
 	if (prop->isFacility()) {
@@ -257,7 +259,13 @@ void BoLocalPlayerEventListener::processEvent(const BoEvent* event)
 				i18n("A %1 has been produced and will be placed on the map now").arg(prop->name()),
 				playerIO()->player());
 	}
- } else if (event->name() == "PlayerAllUnitsDestroyed") {
+ } else if (event->name() == "AllUnitsDestroyed") {
+ } else if (event->name() == "LostMinimap") {
+	playerIO()->speciesTheme()->playSound(SoundReportMinimapDeactivated);
+	playerIO()->emitSignalShowMiniMap(false);
+ } else if (event->name() == "GainedMinimap") {
+	speciesTheme()->playSound(SoundReportMinimapActivated);
+	playerIO()->emitSignalShowMiniMap(true);
  }
 }
 

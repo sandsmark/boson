@@ -72,10 +72,21 @@ BoEventManager::~BoEventManager()
 void BoEventManager::declareEvents()
 {
 #define BO_DECLARE_EVENT(name) d->mEventNames.append(QCString(#name));
- BO_DECLARE_EVENT(UnitProduced);
- BO_DECLARE_EVENT(UnitDestroyed);
- BO_DECLARE_EVENT(PlayerAllUnitsDestroyed);
- BO_DECLARE_EVENT(ProducedUnitPlaced);
+ BO_DECLARE_EVENT(UnitWithTypeProduced);
+ BO_DECLARE_EVENT(UnitWithTypeDestroyed);
+ BO_DECLARE_EVENT(AllUnitsDestroyed);
+ BO_DECLARE_EVENT(LostMinimap);
+ BO_DECLARE_EVENT(GainedMinimap);
+
+ BO_DECLARE_EVENT(AllMobileUnitsDestroyed);
+ BO_DECLARE_EVENT(AllFacilitiesDestroyed);
+ BO_DECLARE_EVENT(AllUnitsWithTypeDestroyed);
+ BO_DECLARE_EVENT(ProducedUnitWithTypePlaced);
+ BO_DECLARE_EVENT(UnitsWithTypeDestroyedCount);
+ BO_DECLARE_EVENT(EnemyUnitsWithTypeDestroyedCount);
+ BO_DECLARE_EVENT(UnitsWithTypeLostCount);
+ BO_DECLARE_EVENT(UnitWithIdUnfogged);
+ BO_DECLARE_EVENT(UnitsWithTypeUnfogged);
 
  BO_DECLARE_EVENT(CustomEvent);
  BO_DECLARE_EVENT(CustomStringEvent);

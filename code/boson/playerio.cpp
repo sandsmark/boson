@@ -326,3 +326,8 @@ bool PlayerIO::disconnect(const char* signal, const QObject* receiver, const cha
  return QObject::disconnect(player(), signal, receiver, member);
 }
 
+void PlayerIO::emitSignalShowMiniMap(bool s)
+{
+ mPlayer->emitSignalShowMiniMap(s);
+}
+

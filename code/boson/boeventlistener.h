@@ -44,9 +44,7 @@ public:
 
 	bool addCondition(BoCondition* c);
 
-
 	void receiveEvent(const BoEvent* event);
-
 
 	/**
 	 * @param event An event with a location, i.e. @ref BoEvent::hasLocation

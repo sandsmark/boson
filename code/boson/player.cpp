@@ -33,6 +33,7 @@
 #include "bosonprofiling.h"
 #include "bodebug.h"
 #include "bobincoder.h"
+#include "boevent.h"
 
 #include <kgame/kgame.h>
 #include <kgame/kgamemessage.h>
@@ -253,8 +254,9 @@ void Player::unitDestroyed(Unit* unit)
  }
  if (unit->unitProperties()->supportMiniMap()) {
 	if (!hasMiniMap()) {
-		speciesTheme()->playSound(SoundReportMinimapDeactivated);
-		emit signalShowMiniMap(false);
+		BoEvent* event = new BoEvent("LostMinimap");
+		event->setLocation(BoVector3(unit->x(), unit->y(), unit->z()));
+		boGame->queueEvent(event);
 	}
  }
 }
@@ -533,8 +535,9 @@ void Player::facilityCompleted(Facility* fac)
 	return;
  }
  if (fac->unitProperties()->supportMiniMap()) {
-	speciesTheme()->playSound(SoundReportMinimapActivated);
-	emit signalShowMiniMap(true);
+	BoEvent* event = new BoEvent("GainedMinimap");
+	event->setLocation(BoVector3(fac->x(), fac->y(), fac->z()));
+	boGame->queueEvent(event);
  }
 }
 
@@ -906,3 +909,7 @@ void Player::writeGameLog(QTextStream& log)
  log << endl;
 }
 
+void Player::emitSignalShowMiniMap(bool show)
+{
+ emit signalShowMiniMap(show);
+}
