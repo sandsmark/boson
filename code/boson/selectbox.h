@@ -24,7 +24,7 @@
 #include "rtti.h"
 
 /**
- * @author Thomas Capricelli <capricel@email.enst.fr>
+ * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
  **/
 class SelectBox : public QCanvasSprite
 {

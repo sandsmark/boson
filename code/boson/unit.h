@@ -215,7 +215,15 @@ public:
 
 	void updateSelectBox();
 
+	/**
+	 * @return All units except this that are in @ref weaponRange of this
+	 * unit.
+	 **/
 	QCanvasItemList unitsInRange() const;
+
+	/**
+	 * @return Just like @ref unitsInRange but only enemy units.
+	 **/
 	QCanvasItemList enemyUnitsInRange() const;
 
 	/**

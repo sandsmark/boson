@@ -27,7 +27,7 @@
  * doesn't know the actual number of rttis used by @ref VisualUnit. So don't
  * add any rttis here after @ref UnitStart!
  *
- * Not that you have to recompile nearly everything if you change this file!
+ * Note that you have to recompile nearly everything if you change this file!
  * @short Boson rttis
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
  **/

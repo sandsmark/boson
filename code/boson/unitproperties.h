@@ -187,6 +187,12 @@ public:
 	 * @return Whether this unit can shoot at land units
 	 **/
 	bool canShootAtLandUnits() const { return mCanShootAtLandUnits; }
+
+	/**
+	 * @return Whether the unit can shoot at all. A unit that can shoot is a
+	 * military unit and is meant to be destroyed first. 
+	 **/
+	bool canShoot() const { return (canShootAtLandUnits() || canShootAtAirUnits()); }
 	
 	/**
 	 * @return Whether this facility (if it is one) can produce anything.

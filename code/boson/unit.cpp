@@ -129,14 +129,14 @@ Unit* Unit::target() const
 void Unit::setTarget(Unit* target)
 {
  d->mTarget = target;
- if (!target) {
+ if (!d->mTarget) {
 	return;
  }
  if (weaponDamage() == 0) {
 	kdWarning() << "Cannot attack: waponDamage() == 0" << endl;
 	return;
  }
- if (!target->isDestroyed()) {
+ if (!d->mTarget->isDestroyed()) {
 	setWork(WorkAttack);
  }
 }
@@ -228,8 +228,18 @@ void Unit::advanceNone()
 // to fire at every enemy in range.
 // kdDebug() << k_funcinfo << ": work==WorkNone" << endl;
  QCanvasItemList list = enemyUnitsInRange();
- if (!list.isEmpty()) {
-	shootAt((Unit*)list[0]);
+ if (list.count() > 0) {
+	QCanvasItemList::Iterator it = list.begin();
+	for (; it != list.end(); ++it) {
+		if (((Unit*)*it)->unitProperties()->canShoot()) {
+			shootAt((Unit*)*it);
+			break;
+		}
+	}
+	if (it != list.end()) {
+		// no military unit (i.e. unit that can shoot) found
+		shootAt((Unit*)*it);
+	}
  }
 }
 
@@ -520,8 +530,9 @@ QCanvasItemList Unit::enemyUnitsInRange() const
  QCanvasItemList enemy;
  QCanvasItemList::Iterator it = units.begin();
  for (; it != units.end(); ++it) {
-	if (((Unit*)(*it))->owner() != owner()) {
-		enemy.append(*it);
+	Unit* u = (Unit*)*it;
+	if (owner()->isEnemy(u->owner())) {
+		enemy.append(u);
 	}
  }
  return enemy;
