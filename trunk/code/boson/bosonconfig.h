@@ -344,6 +344,12 @@ public:
 	bool textureColorMipmaps() const { return mTextureColorMipmaps->value(); }
 	void setTextureAnisotropy(int a) { mTextureAnisotropy->setValue(a); }
 	int textureAnisotropy() const { return mTextureAnisotropy->value(); }
+	void setMaxProfilingEventEntries(unsigned int max) { mMaxProfilingEventEntries->setValue(max); }
+	unsigned int maxProfilingEventEntries() const { return mMaxProfilingEventEntries->value(); }
+	void setMaxProfilingAdvanceEntries(unsigned int max) { mMaxProfilingAdvanceEntries->setValue(max); }
+	unsigned int maxProfilingAdvanceEntries() const { return mMaxProfilingAdvanceEntries->value(); }
+	void setMaxProfilingRenderingEntries(unsigned int max) { mMaxProfilingRenderingEntries->setValue(max); }
+	unsigned int maxProfilingRenderingEntries() const { return mMaxProfilingRenderingEntries->value(); }
 
 
 	void setUnitSoundActivated(UnitSoundEvent e, bool activated);
@@ -634,6 +640,9 @@ private:
 	BoConfigBoolEntry* mTextureCompression;
 	BoConfigBoolEntry* mTextureColorMipmaps;
 	BoConfigIntEntry* mTextureAnisotropy;
+	BoConfigUIntEntry* mMaxProfilingEventEntries;
+	BoConfigUIntEntry* mMaxProfilingAdvanceEntries;
+	BoConfigUIntEntry* mMaxProfilingRenderingEntries;
 
 	// NOT stored to config file!
 	bool mDisableSound;

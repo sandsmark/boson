@@ -70,6 +70,7 @@
 #include <qtimer.h>
 #include <qhbox.h>
 #include <qvbox.h>
+#include <qinputdialog.h>
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -300,6 +301,12 @@ void TopWidget::initKActions()
  (void)KStdAction::keyBindings(this, SLOT(slotConfigureKeys()), actionCollection());
  d->mActionMenubar = KStdAction::showMenubar(this, SLOT(slotToggleMenubar()), actionCollection());
  d->mActionStatusbar = KStdAction::showStatusbar(this, SLOT(slotToggleStatusbar()), actionCollection());
+ (void)new KAction(i18n("Maximal entries per event..."), KShortcut(), this,
+		SLOT(slotChangeMaxProfilingEventEntries()), actionCollection(), "options_profiling_max_event_entries");
+ (void)new KAction(i18n("Maximal advance call entries..."), KShortcut(), this,
+		SLOT(slotChangeMaxProfilingAdvanceEntries()), actionCollection(), "options_profiling_max_advance_entries");
+ (void)new KAction(i18n("Maximal rendering entries..."), KShortcut(), this,
+		SLOT(slotChangeMaxProfilingRenderingEntries()), actionCollection(), "options_profiling_max_rendering_entries");
 
  // Display
  d->mActionFullScreen = new KToggleAction(i18n("&Fullscreen Mode"), CTRL+SHIFT+Key_F,
@@ -1236,4 +1243,43 @@ void TopWidget::slotChangeLocalPlayer(Player* p)
  changeLocalPlayer(p);
 }
 
+
+void TopWidget::slotChangeMaxProfilingEventEntries()
+{
+ bool ok = true;
+ unsigned int max = boConfig->maxProfilingEventEntries();
+ max = (unsigned int)QInputDialog::getInteger(i18n("Profiling event entries"),
+		i18n("Maximal number of profiling entries per event"),
+		(int)max, 0, 100000, 1, &ok, this);
+ if (ok) {
+	boConfig->setMaxProfilingEventEntries(max);
+	boProfiling->setMaxEventEntries(boConfig->maxProfilingEventEntries());
+ }
+}
+
+void TopWidget::slotChangeMaxProfilingAdvanceEntries()
+{
+ bool ok = true;
+ unsigned int max = boConfig->maxProfilingAdvanceEntries();
+ max = (unsigned int)QInputDialog::getInteger(i18n("Profiling advance entries"),
+		i18n("Maximal number of profiled advance calls"),
+		(int)max, 0, 100000, 1, &ok, this);
+ if (ok) {
+	boConfig->setMaxProfilingAdvanceEntries(max);
+	boProfiling->setMaxAdvanceEntries(boConfig->maxProfilingAdvanceEntries());
+ }
+}
+
+void TopWidget::slotChangeMaxProfilingRenderingEntries()
+{
+ bool ok = true;
+ unsigned int max = boConfig->maxProfilingRenderingEntries();
+ max = (unsigned int)QInputDialog::getInteger(i18n("Profiling rendering entries"),
+		i18n("Maximal number of profiled frames"),
+		(int)max, 0, 100000, 1, &ok, this);
+ if (ok) {
+	boConfig->setMaxProfilingRenderingEntries(max);
+	boProfiling->setMaxRenderingEntries(boConfig->maxProfilingRenderingEntries());
+ }
+}
 

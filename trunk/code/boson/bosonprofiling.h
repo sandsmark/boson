@@ -160,8 +160,8 @@ public:
 
 	/**
 	 * Stop the event timer and append the resulting time to the list. If
-	 * the list contains more than MAX_ENTRIES the first item is removed.
-	 * See also @ref start
+	 * the list contains more than @ref maxEventEntries the first item is
+	 * removed. See also @ref start
 	 *
 	 * @param appendToList If TRUE (default) the resulting time will be
 	 * appended to the list for this event, and can be analyzed using @ref
@@ -248,12 +248,40 @@ public:
 	 **/
 	bool load(QDataStream& stream);
 
+	void setMaxEventEntries(unsigned int max)
+	{
+		mMaxEventEntries = max;
+	}
+	void setMaxAdvanceEntries(unsigned int max)
+	{
+		mMaxAdvanceEntries = max;
+	}
+	void setMaxRenderingEntries(unsigned int max)
+	{
+		mMaxRenderingEntries = max;
+	}
+	inline unsigned int maxEventEntries() const
+	{
+		return mMaxEventEntries;
+	}
+	inline unsigned int maxAdvanceEntries() const
+	{
+		return mMaxAdvanceEntries;
+	}
+	inline unsigned int maxRenderingEntries() const
+	{
+		return mMaxRenderingEntries;
+	}
+
 private:
 	void init();
 
 private:
 	BosonProfilingPrivate* d;
 	friend class BosonProfilingDialog;
+	unsigned int mMaxEventEntries;
+	unsigned int mMaxRenderingEntries;
+	unsigned int mMaxAdvanceEntries;
 };
 
 unsigned long int compareTimes(const struct timeval& t1, const struct timeval& t2);

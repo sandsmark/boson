@@ -17,6 +17,11 @@
   <Menu name="settings" group="settingsmenu"><text>&amp;Settings</text>
     <Action name="options_sound" append="show_merge" />
     <Action name="options_music" append="show_merge" />
+    <Menu name="profiling"><text>&amp;Profiling</text>
+      <Action name="options_profiling_max_event_entries" />
+      <Action name="options_profiling_max_advance_entries" />
+      <Action name="options_profiling_max_rendering_entries" />
+    </Menu>
   </Menu>
   <Menu name="window" append="settings_merge" group="windowmenu"><text>&amp;Window</text>
     <Action name="window_fullscreen" />
