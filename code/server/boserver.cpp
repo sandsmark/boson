@@ -23,6 +23,7 @@
 #include <qgroupbox.h>
 
 #include <kapp.h>
+#include <kmsgbox.h>
 
 #include "../common/bobuffer.h"
 #include "../common/map.h"	 ///orzel: temp, pour la creation...
@@ -76,6 +77,14 @@ BosonServer::BosonServer(int port, const char *mapfile, const char *name=0L)
 	logf(LOG_INFO, "Entering BosonServer constructor");
 
 	initSocket(port);
+	if ( SS_DOWN == state) {
+ 		KMsgBox::message(0l, "boserver ERROR",
+				"Network error : server can't bind to socket\n"
+				"Check that no other boserver is running"
+				);
+		exit(-1);
+		return;
+	}
 	logf(LOG_INFO, "Socket is initialized");
 
 	initMap(mapfile);
@@ -121,6 +130,7 @@ state = SS_INIT;
 
 if (-1 == socket->socket()) {
 	logf(LOG_FATAL, "socket == -1, no connection");
+	state = SS_DOWN;
 	return;
 	}
 else
