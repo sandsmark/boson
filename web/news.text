@@ -1,4 +1,33 @@
 [article]
+id=031015
+date=October 15th 2003 14:40
+title=New poll, new features
+text=We have a new poll finally: How often should Boson be released?<br>
+    The previous poll was up more than 6 weeks (for too long, I know) and had
+    more than 120 votes. Quite expectedly, people want AI most, more than half
+    of the voters chose AI. Second place went to better graphics.<br><br>
+    About AI, unfortunately we won't have any intelligent AI in 0.9 (it will
+    still have same dummy AI that 0.8 had), but there is already scripting
+    support and once it has evolved far enough, we'll start developing AI. So,
+    there is possibility that 0.10 (that's right, after 0.9 will come 0.10, not
+    1.0) will have AI.<br>
+    We'll use <a href="http://www.python.org">Python</a> as scripting language,
+    so in case you have any experience with either this or AI and if you're
+    willing to help us, write to our
+    <a href="mailto:boson-devel@__NOSPAM__lists.sourceforge.net">mailing
+    list.</a><br>
+    About graphics, if you're an artist, please
+    <a href="mailto:boson-devel@__NOSPAM__lists.sourceforge.net">contact us</a>!
+    We need your help! Programmers and testers are welcome too!<br><br>
+    On other news, CVS has some new new features again.<br>
+    Probably most noticeable is improved support for lighting, e.g. terrain is
+    now lit correctly. Models have support for smooth surfaces. Startup code
+    (for starting new games and loading saved ones) was rewritten. And we have
+    experimental LOD (level of detail) support now. It means that models farther
+    from the camera will be drawn with less detail, resulting in
+    speedups.<br><br>
+
+[article]
 id=030915
 date=September 15th 2003 13:40
 title=The Boson movies

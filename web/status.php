@@ -78,7 +78,7 @@ draw_bigbox_text("This is a list of features that we consider as
     <li>New terrain rendering code. Terrain is now drawn using several layers
         which are blended together. This creates nice effect for transitions and
         looks really nice</li>
-    <li>Added supports for light and halos using particles</li>
+    <li>Added supports for lights and halos using particles</li>
     <li>Added support for explosion fragments when unit is destroyed</li>
     <li>Materials are supported for models</li>
     <li>Models have normals now, meaning that everything should be lit correctly</li>
@@ -86,6 +86,9 @@ draw_bigbox_text("This is a list of features that we consider as
     <li>New kind of smoke for wreckages</li>
     <li>Improved particle systems</li>
     <li>Weapon flashes when shooting</li>
+    <li>Support for smooth surfaces</li>
+    <li>Terrain normals (i.e. terrain is lit correctly)</li>
+    <li>Experimental LOD support</li>
   </ul>
 
 
