@@ -6,3 +6,4 @@ Id=0
 Health=100
 MineralCost=100
 Producer=10
+SupportMiniMap=true
