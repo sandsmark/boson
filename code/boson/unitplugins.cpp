@@ -252,7 +252,7 @@ void ProductionPlugin::advance(unsigned int)
 					mProductionState = mProductionState + 1;
 					//FIXME: buildProduction should not
 					//depend on Facility! should be Unit
-					((Boson*)player()->game())->buildProducedUnit((Facility*)unit(), type, currentx, currenty);
+					((Boson*)player()->game())->buildProducedUnit(this, type, currentx, currenty);
 					return;
 				}
 			}
@@ -409,7 +409,7 @@ void HarvesterPlugin::advanceRefine()
 		unit()->setWork(Unit::WorkNone);
 		return;
 	}
-	Facility* ref = 0;
+	Facility* ref = 0; // FIXME: must not depend on Facility! Use a RefineryPlugin
 	while (it.current() && !ref) {
 		const UnitProperties* unitProp = it.current()->unitProperties();
 		if (!it.current()->isFacility()) {

@@ -124,6 +124,8 @@ void BosonBigDisplay::actionClicked(const BoAction& action, QDataStream& stream,
 
  Unit* unit = canvas()->findUnitAt(action.canvasPos());
  if (!unit) {
+	//FIXME: first check if a the unit can produce! even mobile units can
+	//have the production plugin!!
 	if (selection()->hasMobileUnit()) { // move the selection to pos
 		if (selection()->count() == 1) {
 			// there are special things to do for a single selected unit
@@ -239,8 +241,11 @@ bool BosonBigDisplay::actionMove(QDataStream& stream, const QPoint& canvasPos)
 
 bool BosonBigDisplay::actionBuild(QDataStream& stream, const QPoint& canvasPos)
 {
- Facility* fac = (Facility*)selection()->leader();
- ProductionPlugin* production = (ProductionPlugin*)(fac->plugin(UnitPlugin::Production));
+ Unit* factory = selection()->leader();
+ if (!factory) {
+	return false;
+ }
+ ProductionPlugin* production = (ProductionPlugin*)(factory->plugin(UnitPlugin::Production));
  if (!production || !production->hasProduction() || production->completedProduction() <= 0) {
 	return false;
  }
@@ -252,8 +257,8 @@ bool BosonBigDisplay::actionBuild(QDataStream& stream, const QPoint& canvasPos)
 
  // create the new unit
  stream << (Q_UINT32)BosonMessage::MoveBuild;
- stream << (Q_ULONG)fac->id();
- stream << (Q_UINT32)fac->owner()->id();
+ stream << (Q_ULONG)factory->id();
+ stream << (Q_UINT32)factory->owner()->id();
  stream << (Q_INT32)canvasPos.x() / BO_TILE_SIZE;
  stream << (Q_INT32)canvasPos.y() / BO_TILE_SIZE;
  return true;

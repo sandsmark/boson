@@ -301,10 +301,7 @@ void KGameUnitDebug::updateProduction(QListViewItem* item)
 	kdWarning() << k_lineinfo << "id " << id << " not found" << endl;
 	return;
  }
- if (!unit->isFacility()) {
-	return;
- }
- ProductionPlugin* production = ((Facility*)unit)->productionPlugin();
+ ProductionPlugin* production = (ProductionPlugin*)unit->plugin(UnitPlugin::Production);
  if (production) {
 	QValueList<unsigned long int> productions = production->productionList();
 	for (unsigned int i = 0; i < productions.count(); i++) {

@@ -23,7 +23,7 @@
 
 class Player;
 class Unit;
-class Facility;
+class ProductionPlugin;
 class BosonCanvas;
 class QDomElement;
 class BosonPlayField;
@@ -102,7 +102,7 @@ public:
 	 * @param x The x-coordinate of the new unit.
 	 * @param y The y-coordinate of the new unit.
 	 **/
-	bool buildProducedUnit(Facility* factory, unsigned long int unitType, int x, int y);
+	bool buildProducedUnit(ProductionPlugin* factory, unsigned long int unitType, int x, int y);
 
 	/**
 	 * Behaves slightly similar to @ref slotSendAddUnit but this function

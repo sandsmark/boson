@@ -119,13 +119,13 @@ void BosonStatistics::addLostFacility(UnitBase*)
  mPoints += pointsPerLostFacility();
 }
 
-void BosonStatistics::addProducedMobileUnit(UnitBase*, UnitBase*)
+void BosonStatistics::addProducedMobileUnit(UnitBase*, ProductionPlugin*)
 {
  mProducedMobileUnits++;
  mPoints += pointsPerProducedMobileUnit();
 }
 
-void BosonStatistics::addProducedFacility(UnitBase*, UnitBase*)
+void BosonStatistics::addProducedFacility(UnitBase*, ProductionPlugin*)
 {
  mProducedFacilities++;
  mPoints += pointsPerProducedFacility();

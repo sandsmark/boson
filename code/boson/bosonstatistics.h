@@ -20,6 +20,7 @@
 #define BOSONSTATISTICS_H
 
 class UnitBase;
+class ProductionPlugin;
 class QDataStream;
 
 /**
@@ -69,7 +70,7 @@ public:
 	 * has been produced most by this player
 	 * @param producer Unused (see above)
 	 **/
-	void addProducedFacility(UnitBase* produced, UnitBase* producedBy);
+	void addProducedFacility(UnitBase* produced, ProductionPlugin* producedBy);
 
 	/**
 	 * Increase the value returned by @producedFacility
@@ -77,7 +78,7 @@ public:
 	 * has been produced most by this player
 	 * @param producer Unused (see above)
 	 **/
-	void addProducedMobileUnit(UnitBase* produced, UnitBase* producedBy);
+	void addProducedMobileUnit(UnitBase* produced, ProductionPlugin* producedBy);
 
 	void increaseMinedMinerals(unsigned int increaseBy  = 1);
 	void increaseMinedOil(unsigned int increaseBy  = 1);
