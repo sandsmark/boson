@@ -20,6 +20,7 @@
 
 #include "../bosonmodel.h"
 #include "../bo3dtools.h"
+#include "../bosonconfig.h"
 #include "bosonitem.h"
 #include "bodebug.h"
 
@@ -39,6 +40,27 @@ BosonItemRenderer::~BosonItemRenderer()
 {
 }
 
+void BosonItemRenderer::startItemRendering()
+{
+ if (!boConfig->disableModelLoading()) {
+	BosonModel::startModelRendering();
+ } else {
+	glPushAttrib(GL_ENABLE_BIT | GL_POLYGON_BIT);
+	glDisable(GL_TEXTURE_2D);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	glDisable(GL_LIGHTING);
+ }
+}
+
+void BosonItemRenderer::stopItemRendering()
+{
+ if (!boConfig->disableModelLoading()) {
+	BosonModel::stopModelRendering();
+ } else {
+	glPopAttrib();
+ }
+}
+
 const QColor* BosonItemRenderer::teamColor() const
 {
  return mItem->teamColor();
@@ -51,6 +73,59 @@ void BosonItemRenderer::setGLDepthMultiplier(float d)
 
 void BosonItemRenderer::renderItem(unsigned int lod)
 {
+ Q_UNUSED(lod);
+
+ // this code renders an item without using a model. this is for debugging only
+ // (by not loading the models we can reduce startup time greatly)
+ BO_CHECK_NULL_RET(mItem);
+ float w = ((float)mItem->width()) / BO_TILE_SIZE;
+ float h = ((float)mItem->width()) / BO_TILE_SIZE;
+ float depth = mItem->depth();
+
+ // make the box a little bit smaller, looks nicer
+ w -= 0.1f;
+ h -= 0.1f;
+
+ glColor3ub(255, 0, 0);
+ glTranslatef(-w/2, -h/2, 0.0f);
+ glBegin(GL_QUADS);
+	// bottom
+	glVertex3f(0.0f, h, 0.0f);
+	glVertex3f(w, h, 0.0f);
+	glVertex3f(w, 0.0f, 0.0f);
+	glVertex3f(0.0f, 0.0f, 0.0f);
+
+	// top
+	glVertex3f(0.0f, h, depth);
+	glVertex3f(w, h, depth);
+	glVertex3f(w, 0.0f, depth);
+	glVertex3f(0.0f, 0.0f, depth);
+
+	// left
+	glVertex3f(0.0f, 0.0f, 0.0f);
+	glVertex3f(0.0f, 0.0f, depth);
+	glVertex3f(0.0f, h, depth);
+	glVertex3f(0.0f, h, 0.0f);
+
+	// right
+	glVertex3f(w, 0.0f, 0.0f);
+	glVertex3f(w, 0.0f, depth);
+	glVertex3f(w, h, depth);
+	glVertex3f(w, h, 0.0f);
+
+	// front
+	glVertex3f(0.0f, h, 0.0f);
+	glVertex3f(w, h, 0.0f);
+	glVertex3f(w, 0.0f, 0.0f);
+	glVertex3f(0.0f, 0.0f, 0.0f);
+
+	// back
+	glVertex3f(0.0f, h, depth);
+	glVertex3f(w, h, depth);
+	glVertex3f(w, 0.0f, depth);
+	glVertex3f(0.0f, 0.0f, depth);
+ glEnd();
+ glTranslatef(w/2, h/2, 0.0f);
 }
 
 bool BosonItemRenderer::itemInFrustum(const float* frustum) const

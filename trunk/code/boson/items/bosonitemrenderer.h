@@ -47,6 +47,9 @@ public:
 	BosonItemRenderer(BosonItem* item);
 	virtual ~BosonItemRenderer();
 
+	static void startItemRendering();
+	static void stopItemRendering();
+
 	virtual bool setModel(BosonModel*) { return true; }
 
 	/**
