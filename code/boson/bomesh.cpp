@@ -394,7 +394,7 @@ public:
 	unsigned int mPointCount;
 	float* mAllocatedPoints;
 	float* mPoints;
-	unsigned int mPointsMovedBy; // if you use that you are either debugging or doing something wrong.
+	unsigned int mPointsMovedBy;
 
 	// the list of points in the final order (after connectNodes() or
 	// addNodes() was called). iterating through nodes() is equalivent (for
@@ -916,7 +916,8 @@ void BoMesh::setVertex(unsigned int index, const BoVector3& vertex)
 {
  BO_CHECK_NULL_RET(d->mPoints);
  if (index >= points()) {
-	boError() << k_funcinfo << "invalid index " << index << " max=" << points() << endl;
+	boError() << k_funcinfo << "invalid index " << index << " max=" << points() - 1 << endl;
+	return;
  }
  d->mPoints[index * pointSize() + vertexPos() + 0] = vertex[0];
  d->mPoints[index * pointSize() + vertexPos() + 1] = vertex[1];
@@ -925,46 +926,82 @@ void BoMesh::setVertex(unsigned int index, const BoVector3& vertex)
 
 BoVector3 BoMesh::vertex(unsigned int p) const
 {
+ if (!d->mPoints) {
+	boError() << k_funcinfo << "no points allocated" << endl;
+	return BoVector3();
+ }
  if (p >= points()) {
-	boError() << k_funcinfo << "invalid point " << p << endl;
+	boError() << k_funcinfo << "invalid point " << p << " max=" << points() - 1 << endl;
 	return BoVector3();
  }
  return BoVector3(&d->mPoints[p * pointSize() + vertexPos()]);
+}
+
+BoVector3 BoMesh::vertex(unsigned int face, unsigned int i) const
+{
+ if (face >= facesCount()) {
+	boError() << k_funcinfo << "invalid face " << face << " have only " << facesCount() << endl;
+	return BoVector3();
+ }
+ if (i >= 3) {
+	boError() << k_funcinfo << " vertex index must be 0..2, not " << i << endl;
+	i = i % 3;
+ }
+ return vertex(d->mAllFaces[face].pointIndex()[i] - d->mPointsMovedBy);
 }
 
 void BoMesh::setTexel(unsigned int index, const BoVector3& texel)
 {
  BO_CHECK_NULL_RET(d->mPoints);
  if (index >= points()) {
-	boError() << k_funcinfo << "invalid index " << index << " max=" << points() << endl;
+	boError() << k_funcinfo << "invalid index " << index << " max=" << points() - 1 << endl;
+	return;
  }
  d->mPoints[index * pointSize() + texelPos() + 0] = texel[0];
  d->mPoints[index * pointSize() + texelPos() + 1] = texel[1];
 }
 
-void BoMesh::setNormal(unsigned int index, const BoVector3& normal)
+void BoMesh::setNormal(unsigned int face, int vertex, const BoVector3& normal)
 {
  BO_CHECK_NULL_RET(d->mPoints);
- index = index - index % 3;
- if (index >= points() - 2) {
-	boError() << k_funcinfo << "invalid index " << index << " max=" << points() - 2 << endl;
+ if (face >= facesCount()) {
+	boError() << k_funcinfo << "invalid face " << face << " max=" << facesCount() << endl;
+	return;
+ }
+ if (vertex >= 3) {
+	boError() << k_funcinfo << "vertex must be 0..2  or -1 not " << vertex << endl;
+	vertex = vertex % 3;
  }
 
- // atm all vertices of a face share the same (surface-)normal. this might
- // change!
- int face = index / 3;
- d->mAllFaces[face].setAllNormals(normal);
+ if (vertex < 0) {
+	d->mAllFaces[face].setAllNormals(normal);
+ } else {
+	d->mAllFaces[face].setNormal(vertex, normal);
+ }
+}
+
+BoVector3 BoMesh::normal(unsigned int face, unsigned int vertex) const
+{
+ if (face >= facesCount()) {
+	boError() << k_funcinfo << "invalid face " << face << " max= " << facesCount() << endl;
+	return BoVector3();
+ }
+ if (vertex >= 3) {
+	boError() << k_funcinfo << "invalid vertex " << vertex << " must be 0..2" << endl;
+	vertex = vertex % 3;
+ }
+ return d->mAllFaces[face].normal(vertex);
 }
 
 BoVector3 BoMesh::normal(unsigned int p) const
 {
  if (p >= points()) {
-	boError() << k_funcinfo << "invalid point " << p << " max=" << points() << endl;
+	boError() << k_funcinfo << "invalid point " << p << " max=" << points() - 1 << endl;
 	return BoVector3();
  }
  int face = p / 3;
  int vertex = p % 3;
- return d->mAllFaces[face].normal(vertex);
+ return normal(face, vertex);
 }
 
 void BoMesh::calculateNormals()
@@ -974,14 +1011,13 @@ void BoMesh::calculateNormals()
  //
  // note that we calculate 1 normal per face only at the moment!
  for (unsigned int face = 0; face < facesCount(); face++) {
-	unsigned int index = face * 3;
-	BoVector3 a(vertex(face * 3 + 0));
-	BoVector3 b(vertex(face * 3 + 1));
-	BoVector3 c(vertex(face * 3 + 2));
+	BoVector3 a(vertex(face, 0));
+	BoVector3 b(vertex(face, 1));
+	BoVector3 c(vertex(face, 2));
 #if AB_DEBUG_1
-	boDebug() << k_funcinfo << index << ": a=" << a.debugString() << endl;
-	boDebug() << k_funcinfo << index << ": b=" << b.debugString() << endl;
-	boDebug() << k_funcinfo << index << ": c=" << c.debugString() << endl;
+	boDebug() << k_funcinfo << face << ": a=" << a.debugString() << endl;
+	boDebug() << k_funcinfo << face << ": b=" << b.debugString() << endl;
+	boDebug() << k_funcinfo << face << ": c=" << c.debugString() << endl;
 #endif
 
 	// AB: we use the same order as lib3ds does. check whether this is the
@@ -990,19 +1026,19 @@ void BoMesh::calculateNormals()
 	p = c - b;
 	q = a - b;
 #if AB_DEBUG_1
-	boDebug() << k_funcinfo << index << ": p=" << p.debugString() << endl;
-	boDebug() << k_funcinfo << index << ": q=" << q.debugString() << endl;
+	boDebug() << k_funcinfo << face << ": p=" << p.debugString() << endl;
+	boDebug() << k_funcinfo << face << ": q=" << q.debugString() << endl;
 #endif
 	BoVector3 normal = BoVector3::crossProduct(p, q);
 #if AB_DEBUG_1
-	boDebug() << k_funcinfo << index << ": normal1=" << normal.debugString() << endl;
+	boDebug() << k_funcinfo << face << ": normal1=" << normal.debugString() << endl;
 #endif
 	normal.normalize();
 #if AB_DEBUG_1
-	boDebug() << k_funcinfo << index << ": normal2=" << normal.debugString() << endl;
+	boDebug() << k_funcinfo << face << ": normal2=" << normal.debugString() << endl;
 #endif
 
-	setNormal(index, normal);
+	setNormal(face, -1, normal);
  }
 }
 
