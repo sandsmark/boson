@@ -231,6 +231,9 @@ void BosonProfiling::render(bool start)
 	d->mCurrentRenderTimes->mFunction.start();
  } else {
 	d->mCurrentRenderTimes->mFunction.stop();
+	if (d->mBenchmark) {
+		d->mBenchmark->addRender(d->mCurrentRenderTimes);
+	}
 	d->mRenderTimes.append(d->mCurrentRenderTimes);
 	if (d->mRenderTimes.count() > MAX_PROFILING_ENTRIES) {
 		d->mRenderTimes.removeFirst();
@@ -295,6 +298,9 @@ void BosonProfiling::advance(bool start, unsigned int advanceCount)
 	d->mCurrentSlotAdvanceTimes->mFunction.start();
  } else {
 	d->mCurrentSlotAdvanceTimes->mFunction.stop();
+	if (d->mBenchmark) {
+		d->mBenchmark->addAdvance(d->mCurrentSlotAdvanceTimes);
+	}
 	d->mSlotAdvanceTimes.append(d->mCurrentSlotAdvanceTimes);
 	if (d->mSlotAdvanceTimes.count() > MAX_PROFILING_ENTRIES) {
 		d->mSlotAdvanceTimes.removeFirst();
@@ -519,3 +525,105 @@ int BosonProfiling::gameSpeed() const
 {
  return d->mGameSpeed;
 }
+
+void BosonProfiling::startBenchmark()
+{
+ boDebug() << k_funcinfo << endl;
+ if (d->mBenchmark) {
+	boError() << k_funcinfo << "Old benchmark exists! Deleting";
+	delete d->mBenchmark;
+ }
+ d->mBenchmark = new ProfileBenchmark;
+ d->mBenchmark->mInterval.start();
+ boDebug() << k_funcinfo << "benchmark is now " << d->mBenchmark << endl;
+}
+
+void BosonProfiling::endBenchmark()
+{
+ boDebug() << k_funcinfo << endl;
+ if (!d->mBenchmark) {
+	boError() << k_funcinfo << "No benchmark" << endl;
+	return;
+ }
+
+ d->mBenchmark->mInterval.stop();
+
+ boDebug() << k_funcinfo << "BENCHMARK RESULTS:" << endl << endl;
+
+ // Advance stuff
+ boDebug() << "ADVANCE RESULTS:" << endl;
+ boDebug() << d->mBenchmark->mAdvanceProfiles.count() << " advance calls were profiled" << endl;
+ QValueList<ProfileSlotAdvance>::iterator advit;
+ unsigned long int advfunction = 0, advancefunction = 0, deleteshots = 0, particles = 0, maximaladvancecount = 0;
+ unsigned long int maxadvfunction = 0, maxadvancefunction = 0, maxdeleteshots = 0, maxparticles = 0, maxmaximaladvancecount = 0;
+ unsigned long int count = 0;
+ for (advit = d->mBenchmark->mAdvanceProfiles.begin(); advit != d->mBenchmark->mAdvanceProfiles.end(); ++advit) {
+	advfunction += (*advit).dFunction();
+	advancefunction += (*advit).dAdvanceFunction();
+	deleteshots += (*advit).dDeleteUnusedShots();
+	particles += (*advit).dParticles();
+	maximaladvancecount += (*advit).dMaximalAdvanceCount();
+
+	maxadvfunction = QMAX(maxadvfunction, (*advit).dFunction());
+	maxadvancefunction = QMAX(maxadvancefunction, (*advit).dAdvanceFunction());
+	maxdeleteshots = QMAX(maxdeleteshots, (*advit).dDeleteUnusedShots());
+	maxparticles = QMAX(maxparticles, (*advit).dParticles());
+	maxmaximaladvancecount = QMAX(maxmaximaladvancecount, (*advit).dMaximalAdvanceCount());
+
+	count++;
+ }
+ boDebug().form("%10s |%15s |%15s |%15s |%15s |%15s",
+		"", "function", "advancefunc", "deleteshots", "particles", "maxadvcount") << endl;
+ boDebug().form("%10s |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f",
+		"TOTAL", advfunction / 1000.0, advancefunction / 1000.0, deleteshots / 1000.0,
+		particles / 1000.0, maximaladvancecount / 1000.0) << endl;
+ boDebug().form("%10s |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f",
+		"average", advfunction / 1000.0 / count, advancefunction / 1000.0 / count, deleteshots / 1000.0 / count,
+		particles / 1000.0 / count, maximaladvancecount / 1000.0 / count) << endl;
+ boDebug().form("%10s |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f",
+		"max", maxadvfunction / 1000.0, maxadvancefunction / 1000.0, maxdeleteshots / 1000.0,
+		maxparticles / 1000.0, maxmaximaladvancecount / 1000.0) << endl << endl;
+
+ // Render stuff
+ boDebug() << "RENDER RESULTS:" << endl;
+ boDebug() << d->mBenchmark->mRenderProfiles.count() << " rendered frames were profiled" << endl;
+ QValueList<RenderGLTimes>::iterator glit;
+ unsigned long int glfunction = 0, clear = 0, cells = 0, units = 0, glparticles = 0, text = 0;
+ unsigned long int maxglfunction = 0, maxclear = 0, maxcells = 0, maxunits = 0, maxglparticles = 0, maxtext = 0;
+ count = 0;
+ for (glit = d->mBenchmark->mRenderProfiles.begin(); glit != d->mBenchmark->mRenderProfiles.end(); ++glit) {
+	glfunction += (*glit).dFunction();
+	clear += (*glit).dClear();
+	cells += (*glit).dCells();
+	units += (*glit).dUnits();
+	glparticles += (*glit).dParticles();
+	text += (*glit).dText();
+
+	maxglfunction = QMAX(maxglfunction, (*glit).dFunction());
+	maxclear = QMAX(maxclear, (*glit).dClear());
+	maxcells = QMAX(maxcells, (*glit).dCells());
+	maxunits = QMAX(maxunits, (*glit).dUnits());
+	maxglparticles = QMAX(maxglparticles, (*glit).dParticles());
+	maxtext = QMAX(maxtext, (*glit).dText());
+
+	count++;
+ }
+ boDebug().form("%10s |%15s |%15s |%15s |%15s |%15s |%15s",
+		"", "function", "clear", "cells", "items", "particles", "text") << endl;
+ boDebug().form("%10s |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f",
+		"TOTAL", glfunction / 1000.0, clear / 1000.0, cells / 1000.0,
+		units / 1000.0, glparticles / 1000.0, text / 1000.0) << endl;
+ boDebug().form("%10s |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f",
+		"average", glfunction / 1000.0 / count, clear / 1000.0 / count, cells / 1000.0 / count,
+		units / 1000.0 / count, glparticles / 1000.0 / count, text / 1000.0 / count) << endl;
+ boDebug().form("%10s |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f",
+		"max", maxglfunction / 1000.0, maxclear / 1000.0, maxcells / 1000.0,
+		maxunits / 1000.0, maxglparticles / 1000.0, maxtext / 1000.0) << endl;
+ boDebug().form("%d frames were rendered in %.3f sec - average FPS was %.2f",
+		count, d->mBenchmark->mInterval.diff() / 1000000.0, count / (d->mBenchmark->mInterval.diff() / 1000000.0)) << endl;
+
+
+ delete d->mBenchmark;
+ d->mBenchmark = 0;
+}
+

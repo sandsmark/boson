@@ -168,6 +168,11 @@ public:
 		mAdvanceCount = advanceCount;
 		mItems.setAutoDelete(true);
 	}
+	// Dummy ctor for QValueList. You shouldn't normally use it
+	ProfileSlotAdvance()
+	{
+		mItems.setAutoDelete(true);
+	}
 	unsigned long int dFunction() const { return mFunction.diff(); }
 	unsigned long int dAdvanceFunction() const { return mAdvanceFunction.diff(); }
 	unsigned long int dDeleteUnusedShots() const { return mDeleteUnusedShots.diff(); }
@@ -211,6 +216,22 @@ public:
 	QPtrList<ProfileItemAdvance> mItems;
 };
 
+class ProfileBenchmark
+{
+public:
+	void addAdvance(ProfileSlotAdvance* adv)
+	{
+		mAdvanceProfiles.append(*adv);
+	}
+	void addRender(RenderGLTimes* gl)
+	{
+		mRenderProfiles.append(*gl);
+	}
+
+	QValueList<ProfileSlotAdvance> mAdvanceProfiles;
+	QValueList<RenderGLTimes> mRenderProfiles;
+	ProfilingEntry mInterval;
+};
 
 class BosonProfilingPrivate
 {
@@ -220,6 +241,7 @@ public:
 		mCurrentRenderTimes = 0;
 		mCurrentSlotAdvanceTimes = 0;
 		mCurrentItemAdvanceTimes = 0;
+		mBenchmark = 0;
 	}
 	typedef QValueList<long int> TimesList;
 
@@ -240,6 +262,8 @@ public:
 	unsigned int mGLUpdateInterval;
 	int mGameSpeed;
 	int mVersion;
+
+	ProfileBenchmark* mBenchmark;
 };
 
 #endif

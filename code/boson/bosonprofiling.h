@@ -136,6 +136,9 @@ public:
 	void loadUnit();
 	void loadUnitDone(unsigned long int typeId);
 
+	void startBenchmark();
+	void endBenchmark();
+
 	// WARNING: do !NOT! call render*() or advance*() before you called
 	// render(true)/advance(true) or after render(false)/advance(false) !
 	// that would crash! (no NULL check in favor of performance)

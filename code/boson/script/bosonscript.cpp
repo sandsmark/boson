@@ -34,6 +34,7 @@
 #include "../bosonconfig.h"
 #include "../unitproperties.h"
 #include "../unitplugins.h"
+#include "../bosonprofiling.h"
 #include "bodebug.h"
 
 #include "pythonscript.h"
@@ -720,5 +721,16 @@ float BosonScript::cameraZ()
 float BosonScript::aiDelay()
 {
   return boConfig->aiDelay();
+}
+
+/*****  Other methods  *****/
+void BosonScript::startBenchmark()
+{
+ boProfiling->startBenchmark();
+}
+
+void BosonScript::endBenchmark()
+{
+ boProfiling->endBenchmark();
 }
 
