@@ -11,4 +11,6 @@
     <Action name="options_zoom" />
   </Menu>
 </MenuBar>
+<ToolBar name="CommandFrame">
+</ToolBar>
 </kpartgui>
