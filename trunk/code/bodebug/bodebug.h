@@ -79,194 +79,252 @@ typedef bondbgstream & (*BONDBGFUNC)(bondbgstream &); // manipulator function
  *    boDebug() << "The value of i is " << i << endl;
  * </pre>
  * @see bondbgstream
- */
-class bodbgstream {
+ **/
+class bodbgstream
+{
  public:
-  /**
-   * @internal
-   */
-    bodbgstream(unsigned int _area, unsigned int _level, bool _print = true) :
+   /**
+    * @internal
+    **/
+   bodbgstream(unsigned int _area, unsigned int _level, bool _print = true) :
       area(_area), level(_level),  print(_print) { }
-    bodbgstream(const char * initialString, unsigned int _area, unsigned int _level, bool _print = true) :
+   bodbgstream(const char * initialString, unsigned int _area, unsigned int _level, bool _print = true) :
       output(QString::fromLatin1(initialString)), area(_area), level(_level),  print(_print) { }
-    /// Copy constructor
-    bodbgstream(bodbgstream &str) :
+   /// Copy constructor
+   bodbgstream(bodbgstream &str) :
       output(str.output), area(str.area), level(str.level), print(str.print) { str.output.truncate(0); }
-    bodbgstream(const bodbgstream &str) :
+   bodbgstream(const bodbgstream &str) :
       output(str.output), area(str.area), level(str.level), print(str.print) {}
-    ~bodbgstream();
-    /**
-     * Prints the given value.
-     * @param i the boolean to print (as "true" or "false")
-     * @return this stream
-     */
-    bodbgstream &operator<<(bool i)  {
-	if (!print) return *this;
-	output += QString::fromLatin1(i ? "true" : "false");
-	return *this;
-    }
-    /**
-     * Prints the given value.
-     * @param i the short to print
-     * @return this stream
-     */
-    bodbgstream &operator<<(short i)  {
-	if (!print) return *this;
-	QString tmp; tmp.setNum(i); output += tmp;
-	return *this;
-    }
-    /**
-     * Prints the given value.
-     * @param i the unsigned short to print
-     * @return this stream
-     */
-    bodbgstream &operator<<(unsigned short i) {
-        if (!print) return *this;
-        QString tmp; tmp.setNum(i); output += tmp;
-        return *this;
-    }
-    /**
-     * Prints the given value.
-     * @param i the char to print
-     * @return this stream
-     */
-    bodbgstream &operator<<(char i)  {
-	if (!print) return *this;
-	QString tmp; tmp.setNum(int(i)); output += tmp;
-	return *this;
-    }
-    /**
-     * Prints the given value.
-     * @param i the unsigned char to print
-     * @return this stream
-     */
-    bodbgstream &operator<<(unsigned char i) {
-        if (!print) return *this;
-        QString tmp; tmp.setNum(static_cast<unsigned int>(i)); output += tmp;
-        return *this;
-    }
-    /**
-     * Prints the given value.
-     * @param i the int to print
-     * @return this stream
-     */
-    bodbgstream &operator<<(int i)  {
-	if (!print) return *this;
-	QString tmp; tmp.setNum(i); output += tmp;
-	return *this;
-    }
-    /**
-     * Prints the given value.
-     * @param i the unsigned int to print
-     * @return this stream
-     */
-    bodbgstream &operator<<(unsigned int i) {
-        if (!print) return *this;
-        QString tmp; tmp.setNum(i); output += tmp;
-        return *this;
-    }
-    /**
-     * Prints the given value.
-     * @param i the long to print
-     * @return this stream
-     */
-    bodbgstream &operator<<(long i) {
-        if (!print) return *this;
-        QString tmp; tmp.setNum(i); output += tmp;
-        return *this;
-    }
-    /**
-     * Prints the given value.
-     * @param i the unsigned long to print
-     * @return this stream
-     */
-    bodbgstream &operator<<(unsigned long i) {
-        if (!print) return *this;
-        QString tmp; tmp.setNum(i); output += tmp;
-        return *this;
-    }
-    /**
-     * Flushes the output.
-     */
-    void flush(); //AB: if this was virtual we wouldn't have to fork these files!
+   ~bodbgstream();
 
-    /**
-     * Prints the given value.
-     * @param string the string to print
-     * @return this stream
-     */
-    bodbgstream &operator<<(const QString& string) {
-	if (!print) return *this;
-	output += string;
-	if (output.at(output.length() -1 ) == '\n')
-	    flush();
-	return *this;
-    }
-    /**
-     * Prints the given value.
-     * @param string the string to print
-     * @return this stream
-     */
-    bodbgstream &operator<<(const char *string) {
-	if (!print) return *this;
-	output += QString::fromUtf8(string);
-	if (output.at(output.length() - 1) == '\n')
-	    flush();
-	return *this;
-    }
-    /**
-     * Prints the given value.
-     * @param string the string to print
-     * @return this stream
-     */
-    bodbgstream &operator<<(const QCString& string) {
-        *this << string.data();
-        return *this;
-    }
-    /**
-     * Prints the given value.
-     * @param p a pointer to print (in number form)
-     * @return this stream
-     */
-    bodbgstream& operator<<(const void * p) {
-        form("%p", p);
-        return *this;
-    }
-    /**
-     * Invokes the given function.
-     * @param f the function to invoke
-     * @return the return value of @p f
-     */
-    bodbgstream& operator<<(BODBGFUNC f) {
-	if (!print) return *this;
-	return (*f)(*this);
-    }
-    /**
-     * Prints the given value.
-     * @param d the double to print
-     * @return this stream
-     */
-    bodbgstream& operator<<(double d) {
-      QString tmp; tmp.setNum(d); output += tmp;
-      return *this;
-    }
-    /**
-     * Prints the string @p format which can contain
-     * printf-style formatted values.
-     * @param format the printf-style format
-     * @return this stream
-     */
-    bodbgstream &form(const char *format, ...);
-    /** Operator to print out basic information about a QWidget.
-     *  Output of class names only works if the class is moc'ified.
-     * @param widget the widget to print
-     * @return this stream
-     */
-    bodbgstream& operator << (QWidget* widget);
+   /**
+    * Prints the given value.
+    * @param i the boolean to print (as "true" or "false")
+    * @return this stream
+    **/
+   bodbgstream &operator<<(bool i)
+   {
+     if (!print)
+     {
+       return *this;
+     }
+     output += QString::fromLatin1(i ? "true" : "false");
+     return *this;
+   }
+   /**
+    * Prints the given value.
+    * @param i the short to print
+    * @return this stream
+    */
+   bodbgstream &operator<<(short i)
+   {
+     if (!print)
+     {
+       return *this;
+     }
+     QString tmp; tmp.setNum(i); output += tmp;
+     return *this;
+   }
+   /**
+    * Prints the given value.
+    * @param i the unsigned short to print
+    * @return this stream
+    */
+   bodbgstream &operator<<(unsigned short i)
+   {
+     if (!print)
+     {
+       return *this;
+     }
+     QString tmp; tmp.setNum(i); output += tmp;
+     return *this;
+   }
+   /**
+    * Prints the given value.
+    * @param i the char to print
+    * @return this stream
+    */
+   bodbgstream &operator<<(char i)
+   {
+     if (!print)
+     {
+       return *this;
+     }
+     QString tmp; tmp.setNum(int(i)); output += tmp;
+     return *this;
+   }
+   /**
+    * Prints the given value.
+    * @param i the unsigned char to print
+    * @return this stream
+    */
+   bodbgstream &operator<<(unsigned char i)
+   {
+     if (!print)
+     {
+       return *this;
+     }
+     QString tmp; tmp.setNum(static_cast<unsigned int>(i)); output += tmp;
+     return *this;
+   }
+   /**
+    * Prints the given value.
+    * @param i the int to print
+    * @return this stream
+    */
+   bodbgstream &operator<<(int i)
+   {
+     if (!print)
+     {
+       return *this;
+     }
+     QString tmp; tmp.setNum(i); output += tmp;
+     return *this;
+   }
+   /**
+    * Prints the given value.
+    * @param i the unsigned int to print
+    * @return this stream
+    */
+   bodbgstream &operator<<(unsigned int i)
+   {
+     if (!print)
+     {
+       return *this;
+     }
+     QString tmp; tmp.setNum(i); output += tmp;
+     return *this;
+   }
+   /**
+    * Prints the given value.
+    * @param i the long to print
+    * @return this stream
+    */
+   bodbgstream &operator<<(long i)
+   {
+     if (!print)
+     {
+       return *this;
+     }
+     QString tmp; tmp.setNum(i); output += tmp;
+     return *this;
+   }
+   /**
+    * Prints the given value.
+    * @param i the unsigned long to print
+    * @return this stream
+    */
+   bodbgstream &operator<<(unsigned long i)
+   {
+     if (!print)
+     {
+       return *this;
+     }
+     QString tmp; tmp.setNum(i); output += tmp;
+     return *this;
+   }
+   /**
+    * Flushes the output.
+    */
+   void flush(); //AB: if this was virtual we wouldn't have to fork these files!
+
+   /**
+    * Prints the given value.
+    * @param string the string to print
+    * @return this stream
+    */
+   bodbgstream &operator<<(const QString& string)
+   {
+     if (!print)
+     {
+       return *this;
+     }
+     output += string;
+     if (output.at(output.length() -1 ) == '\n')
+     {
+       flush();
+     }
+     return *this;
+   }
+   /**
+    * Prints the given value.
+    * @param string the string to print
+    * @return this stream
+    */
+   bodbgstream &operator<<(const char *string)
+   {
+     if (!print)
+     {
+       return *this;
+     }
+     output += QString::fromUtf8(string);
+     if (output.at(output.length() - 1) == '\n')
+     {
+       flush();
+     }
+     return *this;
+   }
+   /**
+    * Prints the given value.
+    * @param string the string to print
+    * @return this stream
+    */
+   bodbgstream &operator<<(const QCString& string)
+   {
+     *this << string.data();
+     return *this;
+   }
+   /**
+    * Prints the given value.
+    * @param p a pointer to print (in number form)
+    * @return this stream
+    */
+   bodbgstream& operator<<(const void * p)
+   {
+     form("%p", p);
+     return *this;
+   }
+   /**
+    * Invokes the given function.
+    * @param f the function to invoke
+    * @return the return value of @p f
+    */
+   bodbgstream& operator<<(BODBGFUNC f)
+   {
+     if (!print)
+     {
+       return *this;
+     }
+     return (*f)(*this);
+   }
+   /**
+    * Prints the given value.
+    * @param d the double to print
+    * @return this stream
+    */
+   bodbgstream& operator<<(double d)
+   {
+     QString tmp; tmp.setNum(d); output += tmp;
+     return *this;
+   }
+   /**
+    * Prints the string @p format which can contain
+    * printf-style formatted values.
+    * @param format the printf-style format
+    * @return this stream
+    */
+   bodbgstream &form(const char *format, ...);
+   /** Operator to print out basic information about a QWidget.
+    *  Output of class names only works if the class is moc'ified.
+    * @param widget the widget to print
+    * @return this stream
+    */
+   bodbgstream& operator << (QWidget* widget);
+
  private:
-    QString output;
-    unsigned int area, level;
-    bool print;
+   QString output;
+   unsigned int area, level;
+   bool print;
 };
 
 /**
@@ -290,98 +348,98 @@ bodbgstream &perror( bodbgstream &s);
  */
 class bondbgstream {
  public:
-  /// EMpty constructor.
-    bondbgstream() {}
-    ~bondbgstream() {}
-    /**
-     * Does nothing.
-     * @return this stream
-     */
-    bondbgstream &operator<<(short int )  { return *this; }
-    /**
-     * Does nothing.
-     * @return this stream
-     */
-    bondbgstream &operator<<(unsigned short int )  { return *this; }
-    /**
-     * Does nothing.
-     * @return this stream
-     */
-    bondbgstream &operator<<(char )  { return *this; }
-    /**
-     * Does nothing.
-     * @return this stream
-     */
-    bondbgstream &operator<<(unsigned char )  { return *this; }
-    /**
-     * Does nothing.
-     * @return this stream
-     */
-    bondbgstream &operator<<(int )  { return *this; }
-    /**
-     * Does nothing.
-     * @return this stream
-     */
-    bondbgstream &operator<<(unsigned int )  { return *this; }
-    /**
-     * Does nothing.
-     */
-    void flush() {}
-    /**
-     * Does nothing.
-     * @return this stream
-     */
-    bondbgstream &operator<<(const QString& ) { return *this; }
-    /**
-     * Does nothing.
-     * @return this stream
-     */
-    bondbgstream &operator<<(const QCString& ) { return *this; }
-    /**
-     * Does nothing.
-     * @return this stream
-     */
-    bondbgstream &operator<<(const char *) { return *this; }
-    /**
-     * Does nothing.
-     * @return this stream
-     */
-    bondbgstream& operator<<(const void *) { return *this; }
-    /**
-     * Does nothing.
-     * @return this stream
-     */
-    bondbgstream& operator<<(void *) { return *this; }
-    /**
-     * Does nothing.
-     * @return this stream
-     */
-    bondbgstream& operator<<(double) { return *this; }
-    /**
-     * Does nothing.
-     * @return this stream
-     */
-    bondbgstream& operator<<(long) { return *this; }
-    /**
-     * Does nothing.
-     * @return this stream
-     */
-    bondbgstream& operator<<(unsigned long) { return *this; }
-    /**
-     * Does nothing.
-     * @return this stream
-     */
-    bondbgstream& operator<<(BONDBGFUNC) { return *this; }
-    /**
-     * Does nothing.
-     * @return this stream
-     */
-    bondbgstream& operator << (QWidget*) { return *this; }
-    /**
-     * Does nothing.
-     * @return this stream
-     */
-    bondbgstream &form(const char *, ...) { return *this; }
+   /// Empty constructor.
+   bondbgstream() {}
+   ~bondbgstream() {}
+   /**
+    * Does nothing.
+    * @return this stream
+    **/
+   bondbgstream &operator<<(short int )  { return *this; }
+   /**
+    * Does nothing.
+    * @return this stream
+    **/
+   bondbgstream &operator<<(unsigned short int )  { return *this; }
+   /**
+    * Does nothing.
+    * @return this stream
+    **/
+   bondbgstream &operator<<(char )  { return *this; }
+   /**
+    * Does nothing.
+    * @return this stream
+    **/
+   bondbgstream &operator<<(unsigned char )  { return *this; }
+   /**
+    * Does nothing.
+    * @return this stream
+    **/
+   bondbgstream &operator<<(int )  { return *this; }
+   /**
+    * Does nothing.
+    * @return this stream
+    **/
+   bondbgstream &operator<<(unsigned int )  { return *this; }
+   /**
+    * Does nothing.
+    **/
+   void flush() {}
+   /**
+    * Does nothing.
+    * @return this stream
+    **/
+   bondbgstream &operator<<(const QString& ) { return *this; }
+   /**
+    * Does nothing.
+    * @return this stream
+    **/
+   bondbgstream &operator<<(const QCString& ) { return *this; }
+   /**
+    * Does nothing.
+    * @return this stream
+    **/
+   bondbgstream &operator<<(const char *) { return *this; }
+   /**
+    * Does nothing.
+    * @return this stream
+    */
+   bondbgstream& operator<<(const void *) { return *this; }
+   /**
+    * Does nothing.
+    * @return this stream
+    **/
+   bondbgstream& operator<<(void *) { return *this; }
+   /**
+    * Does nothing.
+    * @return this stream
+    **/
+   bondbgstream& operator<<(double) { return *this; }
+   /**
+    * Does nothing.
+    * @return this stream
+    **/
+   bondbgstream& operator<<(long) { return *this; }
+   /**
+    * Does nothing.
+    * @return this stream
+    **/
+   bondbgstream& operator<<(unsigned long) { return *this; }
+   /**
+    * Does nothing.
+    * @return this stream
+    **/
+   bondbgstream& operator<<(BONDBGFUNC) { return *this; }
+   /**
+    * Does nothing.
+    * @return this stream
+    **/
+   bondbgstream& operator << (QWidget*) { return *this; }
+   /**
+    * Does nothing.
+    * @return this stream
+    **/
+   bondbgstream &form(const char *, ...) { return *this; }
 };
 
 /**
@@ -461,63 +519,63 @@ void boClearDebugConfig();
 #include <qobject.h>
 class BoDebug : public QObject
 {
-	Q_OBJECT
+  Q_OBJECT
 public:
-	BoDebug();
-	~BoDebug();
+  BoDebug();
+  ~BoDebug();
 
-	enum DebugLevels {
-		KDEBUG_INFO = 0,
-		KDEBUG_WARN = 1,
-		KDEBUG_ERROR = 2,
-		KDEBUG_FATAL = 3
-	};
+  enum DebugLevels {
+    KDEBUG_INFO = 0,
+    KDEBUG_WARN = 1,
+    KDEBUG_ERROR = 2,
+    KDEBUG_FATAL = 3
+  };
 
-	/**
-	 * Create and return the BoDebug object. You should use this method in
-	 * your program!
-	 * @return The BoDebug instance of your program. The instance will be
-	 * created if not present.
-	 **/
-	static BoDebug* self();
+  /**
+   * Create and return the BoDebug object. You should use this method in
+   * your program!
+   * @return The BoDebug instance of your program. The instance will be
+   * created if not present.
+   **/
+  static BoDebug* self();
 
-	//AB: workaround. we need this in kDebugBackend. we should make that
-	//function a method of BoDebug instead, so that we can access mDebug
-	//directly. maybe we make kDebugBackend a friend of this class instead
-	/**
-	 * @internal
-	 * Do <em>not</em> use this in your program!
-	 * @return The global BoDebug instance. Does <em>not</em> create the
-	 * instance if not present and will return NULL in that case.
-	 **/
-	static BoDebug* selfNonCreate();
+  //AB: workaround. we need this in kDebugBackend. we should make that
+  //function a method of BoDebug instead, so that we can access mDebug
+  //directly. maybe we make kDebugBackend a friend of this class instead
+  /**
+   * @internal
+   * Do <em>not</em> use this in your program!
+   * @return The global BoDebug instance. Does <em>not</em> create the
+   * instance if not present and will return NULL in that case.
+   **/
+  static BoDebug* selfNonCreate();
 
-	/**
-	 * Calles internally. Emits @ref notify.
-	 **/
-	void emitSignal(const QString& area, const char* data, int level)
-	{
-		emit notify(area, data, level);
-	}
+  /**
+   * Calles internally. Emits @ref notify.
+   **/
+  void emitSignal(const QString& area, const char* data, int level)
+  {
+    emit notify(area, data, level);
+  }
 
 signals:
-	/**
-	 * @param area The string that belongs to the specified debug area. The
-	 * string is specified in the bodebug.areas file. Usually this is simply
-	 * the instance name of the application, e.g. "boson" for boson if you
-	 * use boDebug() << endl; or boDebug(0) << endl;
-	 * @param data The text of the debug output. Including the prefix, such
-	 * as "ERROR: " or "WARNING: ".
-	 * @param level What kind of debug output this is - see @ref
-	 * DebugLevels. The value depends on the function you called, e.g.
-	 * boWarning() will always generate @ref KDEBUG_WARN.
-	 **/
-	void notify(const QString& area, const char* data, int level);
+  /**
+   * @param area The string that belongs to the specified debug area. The
+   * string is specified in the bodebug.areas file. Usually this is simply
+   * the instance name of the application, e.g. "boson" for boson if you
+   * use boDebug() << endl; or boDebug(0) << endl;
+   * @param data The text of the debug output. Including the prefix, such
+   * as "ERROR: " or "WARNING: ".
+   * @param level What kind of debug output this is - see @ref
+   * DebugLevels. The value depends on the function you called, e.g.
+   * boWarning() will always generate @ref KDEBUG_WARN.
+   **/
+  void notify(const QString& area, const char* data, int level);
 
 private:
-	static BoDebug* mDebug;
-	class BoDebugPrivate;
-	BoDebugPrivate* d;
+  static BoDebug* mDebug;
+  class BoDebugPrivate;
+  BoDebugPrivate* d;
 };
 
 #if 0
@@ -531,3 +589,6 @@ private:
 
 #endif
 
+/*
+ * vim: et sw=2
+ */
