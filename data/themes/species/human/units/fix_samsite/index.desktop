@@ -13,8 +13,3 @@ CanShootAtLandUnits=false
 Producer=10
 Requirements=5,0,2
 
-[Textures]
-Textures=concrt1.jpg,metal1.jpg,metal2.jpg
-metal1.jpg=bomber_metal1a.jpg
-concrt1.jpg = rome_streets1.jpg
-metal2.jpg=battlefrnt.jpg

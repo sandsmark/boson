@@ -10,12 +10,3 @@ Requirements=5
 UnitWidth=2.0
 UnitHeight=2.0
 
-[Textures]
-Textures=concrt1.jpg,concrt2.jpg,concrt3.jpg,metal8.jpg,tnkhull1.jpg,roof1.jpg
-concrt1.jpg=rome_streets1.jpg
-concrt2.jpg=docktopside.jpg
-concrt3.jpg=5sqtunnelroad.jpg
-metal8.jpg=crome.jpg
-tnkhull1.jpg=etopcrome.jpg
-roof1.jpg=blueglasblks2.jpg
-
