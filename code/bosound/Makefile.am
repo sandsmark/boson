@@ -20,7 +20,8 @@ libbosonsound_la_SOURCES = \
 	bosonaudio.cpp
 libbosonsound_la_LIBADD = \
 		$(top_builddir)/bosound/libbosonsoundcommon.la \
-		$(BO_LIB_OPENAL)
+		$(BO_LIB_OPENAL) \
+		$(LIB_OPENAL)
 
 #bosonaudioprocess_LDFLAGS = $(all_libraries)
 #bosonaudioprocess_LDADD = \
