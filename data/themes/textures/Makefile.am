@@ -107,7 +107,26 @@ texture_DATA = \
 	toilet-1.jpg \
 	house-1.jpg \
 	tree-1.jpg \
-	rubbishpile-1.jpg
+	rubbishpile-1.jpg \
+	cntnr1.jpg \
+	cntnr2.jpg \
+	door.jpg \
+	gardoor1.jpg \
+	road1.jpg \
+	roof3.jpg \
+	roof4.jpg \
+	roof5.jpg \
+	wall10.jpg \
+	wall11.jpg \
+	wall12.jpg \
+	wall13.jpg \
+	wall14.jpg \
+	wall5.jpg \
+	wall6.jpg \
+	wall7.jpg \
+	wall8.jpg \
+	wall9.jpg \
+	window3.jpg
 
 # no further editing need here
 

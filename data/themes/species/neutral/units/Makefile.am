@@ -30,7 +30,16 @@ FACILITIES = \
 	tree6-big \
 	tree6-small \
 	oiltower \
-	mineralmine
+	mineralmine \
+	barn2 \
+	containers1 \
+	factory1 \
+	factory2 \
+	factory2-destroyed \
+	house2 \
+	road1-curve \
+	road1-straight \
+	well1
 
 unitsdir = $(kde_datadir)/boson/themes/species/neutral/units
 
@@ -58,4 +67,3 @@ install-data-local:
 # the make dist target. remember to remove the CVS dirs here after doing a make
 # dist!
 EXTRA_DIST = $(FACILITIES) $(MOBILE_UNITS)
-
