@@ -57,11 +57,23 @@
 #include <qcstring.h>
 #include <qfile.h>
 
+#include <stdlib.h>
+
 #include "boson.moc"
 
 Boson* Boson::mBoson = 0;
 
 #define ADVANCE_INTERVAL 250 // ms
+
+/**
+ * Function that checks whether the ComputerIO list is still valid (i.e. players
+ * still in the game). If it is not, boson is quit with an error message. Evil
+ * error.
+ *
+ * This is a debugging function - invalid pointers must not (never!) appear in
+ * the list.
+ **/
+static void ensureComputerIOListValid(Boson* boson, const QPtrList<KGameComputerIO>& computerIOList);
 
 
 /**
@@ -1595,6 +1607,9 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 		} else {
 			boWarning() << "is not server - cannot start the game!" << endl;
 		}
+
+		ensureComputerIOListValid(this, d->mComputerIOList);
+
 		emit signalGameStarted();
 		break;
 	}
@@ -1909,6 +1924,8 @@ void Boson::slotPlayerLeftGame(KPlayer* p)
 	d->mComputerIOList.removeRef((KGameComputerIO*)io);
  }
  slotAddChatSystemMessage(i18n("Player %1 - %2 left the game").arg(p->id()).arg(p->name()));
+
+ ensureComputerIOListValid(this, d->mComputerIOList);
 }
 
 void Boson::slotAdvanceComputerPlayers(unsigned int /*advanceCount*/, bool /*advanceFlag*/)
@@ -2339,3 +2356,44 @@ bool Boson::addNeutralPlayer()
  return true;
 }
 
+static void ensureComputerIOListValid(Boson* boson, const QPtrList<KGameComputerIO>& computerIOList)
+{
+ if (!boson) {
+	BO_NULL_ERROR(boson);
+	return;
+ }
+ if (computerIOList.isEmpty()) {
+	return;
+ }
+ QPtrList<KGameComputerIO> validList;
+ QPtrListIterator<KPlayer> playerIt(*boson->playerList());
+ while (playerIt.current()) {
+	KGameComputerIO* io = (KGameComputerIO*)playerIt.current()->findRttiIO(KGameIO::ComputerIO);
+	++playerIt;
+
+	if (io) {
+		validList.append(io);
+	}
+ }
+
+ QPtrListIterator<KGameComputerIO> ioIt(computerIOList);
+ while (ioIt.current()) {
+	KGameComputerIO* io = ioIt.current();
+	++ioIt;
+
+	// we must not access the pointer directly, we first have to find out
+	// that it is really valid
+	if (!validList.contains(io)) {
+		boError() << k_funcinfo << "ComputerIO " << io << " is an invalid pointer. quitting boson now. evil bug." << endl;
+		exit(1);
+		return;
+	}
+
+	// io should be a valid pointer. _if_ it still is invalid, it should
+	// crash now.
+	QString name = io->name();
+	int reactionPeriod = io->reactionPeriod();
+	boDebug() << k_funcinfo << name << " is a valid computer IO" << endl;
+ }
+
+}
