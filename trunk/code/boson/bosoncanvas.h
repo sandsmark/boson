@@ -324,7 +324,15 @@ public:
 	void addParticleSystem(BosonParticleSystem* s);
 	void addParticleSystems(const QPtrList<BosonParticleSystem> systems);
 
-	QMap<int, int>* workCounts();
+	/**
+	 * Delete a list of units.
+	 *
+	 * This method is the <em>only</em> way to delete units! Do <em>NOT</em>
+	 * delete units from anywhere else!
+	 **/
+	void deleteUnits(QPtrList<Unit>* units);
+
+	QMap<int, int>* workCounts() const;
 	void resetWorkCounts();
 
 	void load(QDataStream& stream);
@@ -351,6 +359,22 @@ signals:
 	void signalUnitMoved(Unit* unit, float oldX, float oldY);
 	void signalUnitRemoved(Unit* unit);
 	void signalOutOfGame(Player*);
+
+	/**
+	 * Emitted by @ref removeItem just after the item is removed from the
+	 * canvas. Note that this usually happens from the destructor of an
+	 * item!
+	 *
+	 * Do not use this in the game, as it isn't reliable enough. For example
+	 * you must not use this to ensure that @ref Unit::target points to a
+	 * valid unit, as it is not fully sure when a unit gets removed from the
+	 * canvas / is deleted. It might happen at different moments on
+	 * different clients.
+	 *
+	 * You can safely use this for any GUI related problems (like ensuring
+	 * that the tooltip item points to a valid item)
+	 **/
+	void signalRemovedItem(BosonItem* item);
 
 protected:
 	void lockAdvanceFunction() { mAdvanceFunctionLocked = true; }

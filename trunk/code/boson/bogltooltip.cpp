@@ -122,12 +122,9 @@ public:
 	 **/
 	// AB: we could also add set*() functions for e.g. cells or whatever we
 	// like
-#warning TODO
-	// TODO: we have to ensure this pointer is actually cleared to NULL once
-	// the item gets deleted!!
-	// maybe add a remove() function that gets called whenever an item is
-	// removed from the canvas
 	void setItem(BosonItem* item);
+
+	BosonItem* item() const { return mItem; }
 
 	/**
 	 * Update the data of the tooltip. This does <em>not</em> check what is
@@ -284,6 +281,13 @@ void BoGLToolTip::slotTimeOut()
  if (d->mToolTip.isEmpty()) {
 	hideTip();
 	return;
+ }
+}
+
+void BoGLToolTip::unsetItem(BosonItem* item)
+{
+ if (d->mToolTip.item() == item) {
+	d->mToolTip.setItem(0);
  }
 }
 

@@ -519,7 +519,7 @@ void BosonBigDisplayBase::init()
 	boError() << k_funcinfo << "No OpenGL support present on this system??" << endl;
 	return;
  }
- 
+
  // and another hack..
 // setMinimumSize(QSize(400,400));
 
@@ -529,7 +529,10 @@ void BosonBigDisplayBase::init()
  connect(&d->mCursorEdgeTimer, SIGNAL(timeout()), 
 		this, SLOT(slotCursorEdgeTimeout()));
 
- connect(boGame, SIGNAL(signalAdvance(unsigned int, bool)), this, SLOT(slotAdvance(unsigned int, bool)));
+ connect(boGame, SIGNAL(signalAdvance(unsigned int, bool)),
+		this, SLOT(slotAdvance(unsigned int, bool)));
+ connect(canvas(), SIGNAL(signalRemovedItem(BosonItem*)),
+		this, SLOT(slotRemovedItemFromCanvas(BosonItem*)));
 
  //TODO: sprite tooltips
 
@@ -3137,5 +3140,13 @@ bool BosonBigDisplayBase::boUnProject(const QPoint& pos, BoVector3* ret, float z
  ret->set(result[0] / result[3], result[1] / result[3], result[2] / result[3]);
 
  return true;
+}
+
+void BosonBigDisplayBase::slotRemovedItemFromCanvas(BosonItem* item)
+{
+ // be careful with the item pointer! this is usually called from the BosonItem
+ // destructor, its functions might be destroyed already!
+ BO_CHECK_NULL_RET(item);
+ d->mToolTips->unsetItem(item);
 }
 

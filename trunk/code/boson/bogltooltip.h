@@ -131,6 +131,12 @@ public:
 
 	virtual bool eventFilter(QObject* o, QEvent* e);
 
+	/**
+	 * Ensure that @p item is <em>not</em> currently shown. This should
+	 * happen before the item is deleted.
+	 **/
+	void unsetItem(BosonItem* item);
+
 protected:
 	void hideTip();
 
