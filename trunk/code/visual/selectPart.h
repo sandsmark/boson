@@ -22,24 +22,24 @@
 #define SELECTPART_H 
 
 
-#include <QwSpriteField.h>
+#include <qcanvas.h>
 #include "sprites.h"		// S_PART
 #include "common/unit.h"	// MAX_POWER
 
 
 #define PART_NB		(MAX_POWER+1)
 
-class selectPart : public QwSprite
+class selectPart : public QCanvasSprite
 {
 public:
 	enum sp_type { PART_UP, PART_DOWN};
 
 	selectPart(int frame, int z, sp_type type);
 	
-	virtual int rtti() const { return S_PART; } /* Qw stuff */
+	virtual int rtti() const { return S_PART; } /* Qcanvas stuff */
 private:
-	static QwSpritePixmapSequence  *qsps_up;
-	static QwSpritePixmapSequence  *qsps_down;
+	static QCanvasPixmapArray	*qsps_up;
+	static QCanvasPixmapArray	*qsps_down;
 	
 };
 

@@ -24,14 +24,15 @@
 
 #include "common/log.h"
 #include "boshot.h"
+#include "visual.h"
 
 
-QwSpritePixmapSequence * boShot::shotSequ = 0l;
-QwSpritePixmapSequence * boShot::bigShotSequ = 0l;
+QCanvasPixmapArray * boShot::shotSequ = 0l;
+QCanvasPixmapArray * boShot::bigShotSequ = 0l;
 
 
 
-static QwSpritePixmapSequence *loadBig(void);
+static QCanvasPixmapArray *loadBig(void);
 static bool loadPixmap(const QString &path, QPixmap **pix);
 
 
@@ -42,6 +43,7 @@ static bool loadPixmap(const QString &path, QPixmap **pix);
  *  boshot
  */
 boShot::boShot(int _x, int _y, int _z, bool isBig)
+	: QCanvasSprite (0, bocanvas)
 {
 
 	if (isBig) {
@@ -59,7 +61,8 @@ boShot::boShot(int _x, int _y, int _z, bool isBig)
 		/* small shot (unit hitten) */
 		if (!shotSequ) { // static imagepool initialization
 			QString path( locate ( "data", "boson/themes/species/human/explosions/shot/") + "explosion%02d" );
-			shotSequ = new QwSpritePixmapSequence(path+".ppm", path+".pbm", SHOT_FRAMES);
+			shotSequ = new QCanvasPixmapArray(path+".ppm", SHOT_FRAMES);
+			//shotSequ = new QCanvasPixmapArray(path+".ppm", path+".pbm", SHOT_FRAMES);
 		}
 
 		setSequence(shotSequ);		// set image set
@@ -68,8 +71,8 @@ boShot::boShot(int _x, int _y, int _z, bool isBig)
 	}
 
 
-	counter = 0; frame( 0);		// position the first image of the animation
-	moveTo(_x, _y); z( _z + 1);	// position in the field
+	counter = 0; setFrame( 0);		// position the first image of the animation
+	move(_x, _y); setZ( _z + 1);	// position in the field
 	startTimer(60);			// begin animation, 60 ms/frame
 }
 
@@ -77,7 +80,7 @@ void  boShot::timerEvent( QTimerEvent * )
 {
 	counter++;
 	if (counter<maxCounter) {
-		frame(counter);
+		setFrame(counter);
 		return;
 	}
 	killTimers();
@@ -85,7 +88,7 @@ void  boShot::timerEvent( QTimerEvent * )
 }
 
 
-QwSpritePixmapSequence *loadBig(void) // XXX should be factorized with speciesTheme.cpp stuff...
+QCanvasPixmapArray *loadBig(void) // XXX should be factorized with speciesTheme.cpp stuff...
 {
 
 	int		j;
@@ -110,7 +113,7 @@ QwSpritePixmapSequence *loadBig(void) // XXX should be factorized with speciesTh
 		point_l.append(pp);
 	}
 
-	return new QwSpritePixmapSequence(pix_l, point_l);
+	return new QCanvasPixmapArray(pix_l, point_l);
 }
 
 

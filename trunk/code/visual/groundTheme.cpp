@@ -19,10 +19,10 @@
  ***************************************************************************/
 
 #include <qbitarray.h>
+#include <qcanvas.h>
 
-#include <QwSpriteField.h>
-#include <qstring.h>
-#include <qstringlist.h>
+//#include <qstring.h>
+//#include <qstringlist.h>
 
 #include <kstddirs.h>
 #include <kinstance.h>
@@ -39,14 +39,15 @@ groundTheme::groundTheme(char *themeName)
 	boAssert (GROUND_LAST == groundPropNb);
 	boAssert (TRANS_LAST  == groundTransPropNb);
 
-	groundPix	= new (QwSpritePixmapSequence *)[NB_GROUND_TILES];
-//	themePath	= new QString( "/opt/be/share/apps/boson/themes/grounds/earth/");
+	groundPix	= new (QCanvasPixmapArray *)[NB_GROUND_TILES];
 
+	/*
 	QStringList candidates = KGlobal::instance()->dirs()->resourceDirs("data");
 	for (QStringList::ConstIterator it = candidates.begin(); it != candidates.end(); it++) {
 		QString a = *it;
 		printf("try : %s\n", (char*) a.latin1() );
 	}
+	*/
 
 	themePath	= new QString (KGlobal::instance()->dirs()->findResourceDir("data", "boson/map/basic.bpf") );
 	*themePath	+= "boson/themes/grounds/";
@@ -85,10 +86,10 @@ groundTheme::~groundTheme()
 
 void groundTheme::loadGround(int i, const QString &path)
 {
-  	groundPix[i] = new QwSpritePixmapSequence(path+".%.2d.bmp",0l, 4);
+  	groundPix[i] = new QCanvasPixmapArray(path+".%1.bmp", 4);
 /*	boAssert(BO_TILE_SIZE == pixmap[i]->width());
 	boAssert(BO_TILE_SIZE == pixmap[i]->height()); */
-/// XXX orzel : do some boAssert with QwSpritePixmapSequence sizes... 
+/// XXX orzel : do some boAssert with QCanvasPixmapArray sizes... 
 	if (groundPix[i]->image(0)->isNull()) {
 		logf(LOG_ERROR, "groundTheme : Can't load %s.XX.bmp ...", (const char *)path);
 	}
@@ -115,7 +116,7 @@ void groundTheme::loadTransition(groundType gt)
 }
 
 
-QwSpritePixmapSequence *groundTheme::getPixmap(groundType gt)
+QCanvasPixmapArray *groundTheme::getPixmap(groundType gt)
 {
 
 	if (!pixLoaded->testBit(gt))

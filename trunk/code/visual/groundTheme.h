@@ -26,7 +26,7 @@
 
 class QBitArray;
 class QPixmap;
-class QwSpritePixmapSequence;
+class QCanvasPixmapArray;
 
 /** 
  * This class is a ground-pixmap loader / cache
@@ -37,7 +37,7 @@ public:
 	groundTheme(char *themeName);
 	~groundTheme();
 
-	QwSpritePixmapSequence *getPixmap(groundType gt);
+	QCanvasPixmapArray *getPixmap(groundType gt);
 
 private:
 	void loadGround		(int i, const QString &path);
@@ -47,7 +47,7 @@ private:
 	QString		transName[TRANS_LAST];
 	QBitArray	*pixLoaded;
 
-	QwSpritePixmapSequence **groundPix;
+	QCanvasPixmapArray **groundPix;
 
 };
 

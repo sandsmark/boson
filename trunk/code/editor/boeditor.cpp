@@ -47,7 +47,7 @@ FILE *logfile = (FILE *) 0L;
 /*
  * visual/visual.h
  */
-visualField		*vfield;
+QCanvas			*bocanvas;
 groundTheme		*ground = 0;
 speciesTheme		*species[BOSON_MAX_PLAYERS] = {0l, 0l};
 int			nb_player;
@@ -474,7 +474,7 @@ void BoEditorApp::slotFileNew()
 	}
 
 	/* the physical map is created when a game is created */
-	vfield = field = new editorField();
+	bocanvas = field = new editorField();
 
 	groundType g;
 	switch(newdlg->type) {
@@ -545,7 +545,7 @@ void BoEditorApp::doLoad(QString newname)
 
 	slotFileClose();
 	/* the physical map is created when a game is created */
-	vfield = field = new editorField();
+	bocanvas = field = new editorField();
 
 	*currentFile = newname;
 	assert (true == field->Load(*currentFile));

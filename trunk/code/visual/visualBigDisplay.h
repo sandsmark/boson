@@ -21,12 +21,9 @@
 #ifndef VISUALBIGDISPLAY_H 
 #define VISUALBIGDISPLAY_H 
 
-
-#include <qframe.h> ///orzel qwidget
 #include <qintdict.h>
 #include <qpainter.h>
-
-#include <QwSpriteField.h>
+#include <qcanvas.h>
 
 #include "common/groundType.h"
 #include "common/unitType.h"
@@ -47,7 +44,7 @@ class orderWin;
 /** 
   * This class handles all operations concerning the game Board/Map
   */
-class visualBigDisplay : public QWidget, public QwAbsSpriteFieldView
+class visualBigDisplay : public QCanvasView
 {
   Q_OBJECT
 
@@ -65,7 +62,7 @@ signals:
 
 protected:
 
-/* Qw virtual functions */
+/* QCanvas virtual functions */
   virtual QRect viewArea() const;
   virtual bool preferDoubleBuffering() const {return true;}
   virtual void beginPainter(QPainter &);
@@ -78,7 +75,9 @@ protected:
   void drawRectSelect(int x1, int y1, int x2, int y2, QPainter &qp) {qp.drawRect(x1, y1, x2-x1, y2-y1);}
 
 /* events */
-  virtual void paintEvent(QPaintEvent *evt);
+//  virtual void drawContents( QPainter*, int cx, int cy, int cw, int ch );
+
+//  virtual void paintEvent(QPaintEvent *evt);
   virtual void mousePressEvent(QMouseEvent *e);
   virtual void mouseMoveEvent(QMouseEvent *e);
   virtual void mouseReleaseEvent(QMouseEvent *e);

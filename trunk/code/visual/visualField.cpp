@@ -33,9 +33,8 @@
 #include "visual.h"
   
 
-visualField::visualField(uint w, uint h, QObject *parent, const char *name)
-	: QObject(parent, name)
-	, QwSpriteField (w * BO_TILE_SIZE ,h * BO_TILE_SIZE)
+visualField::visualField(uint w, uint h)
+	: QCanvas (w * BO_TILE_SIZE ,h * BO_TILE_SIZE)
 {
 	/* map geometry */
 	maxX = w; maxY = h;
@@ -45,9 +44,8 @@ visualField::visualField(uint w, uint h, QObject *parent, const char *name)
 
 
 
-visualField::visualField(QObject *parent, const char *name)
-	: QObject(parent, name)
-	, QwSpriteField ()
+visualField::visualField(void)
+	: QCanvas ()
 {
 	/* map geometry */
 	maxX = 0; maxY = 0;
@@ -95,7 +93,7 @@ void visualField::resize (int w, int h)
 
 	/* map geometry */
 	maxX = w; maxY = h;
-	QwSpriteField::resize(w * BO_TILE_SIZE ,h * BO_TILE_SIZE);
+	QCanvas::resize(w * BO_TILE_SIZE ,h * BO_TILE_SIZE);
 }
 
 
@@ -104,18 +102,19 @@ void visualField::setCell(int i, int j, groundType g)
 	boAssert(i>=0); boAssert(j>=0);
 	boAssert(i<width()); boAssert(j<height());
 
-	(void) new visualCell(g, i, j);
+//	(void) new visualCell(g, i, j);
+	printf("setCell bypassed, g,i,j = %d,%d,%d \n", g, i, j);
 
 	emit newCell(i,j,g);
 }
 
 
 
-QwSpriteFieldGraphic * visualField::findUnitAt(int x, int y)
+QCanvasItem * visualField::findUnitAt(int x, int y)
 {
-	Pix p;
-	QwSpriteFieldGraphic *u;
+	QCanvasItem *u;
 
+	/* XXXX 
 	for( p = topAt(x,y); p; next(p))
 		if (IS_UNIT(at(p)->rtti()) && exact(p))  {
 			u =  at(p);
@@ -123,15 +122,16 @@ QwSpriteFieldGraphic * visualField::findUnitAt(int x, int y)
 			return u;
 		}
 
+	*/
 	return NULL;
 }
 
 
 groundType visualField::findGroundAt(int x, int y)
 {
-        Pix p;
 	groundType g;
  
+	/* XXXX
         for( p = topAt(x,y); p; next(p))
                 if (IS_GROUND(at(p)->rtti()) && exact(p))  {
 			g = ((visualCell*)at(p))->getGroundType();
@@ -140,6 +140,7 @@ groundType visualField::findGroundAt(int x, int y)
 			return g;
 		}
 	logf(LOG_ERROR, "can't find ground in visualField::findGroundAt");
+	*/
 	return GROUND_UNKNOWN;
 }
 

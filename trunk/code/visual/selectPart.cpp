@@ -28,16 +28,19 @@
 #define SP_W		35
 #define SP_H		(SP_CORNER_LEN+SP_CORNER_POS)
 
-static void drawSelectBox(QPainter &painter, QColor c1, QColor c2, int power);
-static QwSpritePixmapSequence *initStatic(selectPart::sp_type type);
+extern QCanvas	*bocanvas;
 
-QwSpritePixmapSequence * selectPart::qsps_up = 0l;
-QwSpritePixmapSequence * selectPart::qsps_down = 0l;
+static void drawSelectBox(QPainter &painter, QColor c1, QColor c2, int power);
+static QCanvasPixmapArray *initStatic(selectPart::sp_type type);
+
+QCanvasPixmapArray * selectPart::qsps_up = 0l;
+QCanvasPixmapArray * selectPart::qsps_down = 0l;
 
 /*
  *  selectPart
  */
 selectPart::selectPart(int _f, int _z, sp_type type)
+	: QCanvasSprite(0, bocanvas)
 {
 	if (PART_DOWN == type) {
 		if (!qsps_down) qsps_down = initStatic(PART_DOWN);
@@ -50,8 +53,8 @@ selectPart::selectPart(int _f, int _z, sp_type type)
 	boAssert(_f<PART_NB);
 	if (_f<0 ) _f = 0;
 	if (_f>= PART_NB ) _f = PART_NB-1;
-	frame(_f);
-	z( _z + 1);
+	setFrame(_f);
+	setZ ( _z + 1);
 }
 
 
@@ -74,7 +77,7 @@ void drawSelectBox(QPainter &painter, QColor c1, QColor c2, int power)
 }
 
 
-QwSpritePixmapSequence *initStatic(selectPart::sp_type type)
+QCanvasPixmapArray *initStatic(selectPart::sp_type type)
 {
 	int i;
 	QList<QPixmap>	pixmaps;
@@ -131,7 +134,7 @@ QwSpritePixmapSequence *initStatic(selectPart::sp_type type)
 	delete _mask;
 	delete _pix;
 
-	return new QwSpritePixmapSequence(pixmaps,points);
+	return new QCanvasPixmapArray(pixmaps,points);
 
 }
 

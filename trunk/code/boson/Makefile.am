@@ -33,7 +33,7 @@ SUBDIRS = docs
 boson_METASOURCES = USE_AUTOMOC
 boson_LDFLAGS = $(all_libraries) $(KDE_RPATH)
 boson_SOURCES = boson.cpp connect.cpp bosonBigDisplay.cpp game.cpp main.cpp mainView.cpp miniDisplay.cpp bosonField.cpp playerUnit.cpp bosonView.cpp connectDlg.cpp serverDlg.cpp boshot.cpp
-boson_LDADD   =  ../visual/libbovisual.a ../common/libboson.a -lQwSpriteField $(LIB_KDEUI)
+boson_LDADD   =  ../visual/libbovisual.a ../common/libboson.a $(LIB_KDEUI)
 
 
 #(un)install stuff

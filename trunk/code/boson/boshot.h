@@ -22,24 +22,24 @@
 #define BOSHOT_H 
 
 #include <qobject.h>		// timer
-#include <QwSpriteField.h>	// grahism
+#include <qcanvas.h>		// graphism
 #include "sprites.h"		// rtti S_SHOT
 
 #define SHOT_FRAMES	18
 #define BIG_SHOT_FRAMES	16
 
-class boShot : public QObject,  public QwSprite
+class boShot : public QObject,  public QCanvasSprite
 {
 	Q_OBJECT
 public:
 	boShot(int _x, int _y, int _z, bool isBig=false);
-/* Qw stuff */
+/* QCanvas stuff */
 	virtual int	rtti() const { return S_SHOT; }
 protected:
 	void  timerEvent( QTimerEvent * );
 private:
-	static	QwSpritePixmapSequence  *shotSequ;
-	static	QwSpritePixmapSequence  *bigShotSequ;
+	static	QCanvasPixmapArray  *shotSequ;
+	static	QCanvasPixmapArray  *bigShotSequ;
 	int	counter;
 	int	maxCounter;
 	
