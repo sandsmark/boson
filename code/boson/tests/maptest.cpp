@@ -133,7 +133,7 @@ static bool testHeightMap()
  // finally testing all possible pixel values and their height.
  // note that it is important to find out whether there are problems with
  // floating point numbers (i.e. with the precision)
- for (int p = 0; p < 255; p++) {
+ for (int p = 0; p <= 255; p++) {
 	float f = BoHeightMap::pixelToHeight(p);
 	int p2 = BoHeightMap::heightToPixel(f);
 	if (p != p2) {
