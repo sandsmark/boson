@@ -6,7 +6,7 @@ $latestversiondate="9th July 2002";
 
 $counter_file="counter";
 
-$style="blue";
+$style="green";
 
 $visitcount;
 $lastupdate;
