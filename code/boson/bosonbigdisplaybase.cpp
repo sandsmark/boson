@@ -449,7 +449,7 @@ void BosonBigDisplayBase::init()
  d->mDebugMapCoordinatesX = 0.0f;
  d->mDebugMapCoordinatesY = 0.0f;
  d->mDebugMapCoordinatesZ = 0.0f;
- boScript->setDisplay(this); // AB: EVIL! this is part of BosonScript init
+ BosonScript::setDisplay(this); // AB: EVIL! this is part of BosonScript init
 // process, but initializing is partially done in BosonWidgetBase, partially
 // here. this is *bad*
 
