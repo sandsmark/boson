@@ -18,7 +18,7 @@
  *                                                                         *
  ***************************************************************************/
 
-#include <stdlib.h>
+#include <stdlib.h> 	// random
 #include <assert.h>
 
 #include <math.h>
@@ -75,7 +75,7 @@ playerMobUnit::playerMobUnit(mobileMsg_t *msg)
 	: visualMobUnit(msg)
 	, state(MUS_NONE)
 {
-	turnTo(4); ///orzel : should be random
+	turnTo(random()%12);
 }
 
 
