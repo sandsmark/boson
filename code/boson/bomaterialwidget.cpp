@@ -116,7 +116,7 @@ void BoMaterialWidget::addMaterial(BoMaterial* mat)
  int index = d->mMaterials.count();
  d->mMaterials.insert(index, mat);
  d->mMaterialsList->insertItem(mat->name(), index);
- if (!mActiveMaterial) {
+ if (!d->mActiveMaterial) {
 	slotActiveMaterialChanged(index);
  }
 }
