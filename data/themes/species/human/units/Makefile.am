@@ -14,7 +14,7 @@ FACILITIES = \
 	fix_oiltower \
 	fix_powerplant \
 	fix_prison \
-	fix_refinery \
+	fix_oilrefinery \
 	fix_repairpad \
 	fix_samsite \
 	fix_techcenter \

@@ -137,6 +137,10 @@ ProducerList=List   - CanProduce must be true for this.
                       The facility will be able to produce all units with the
                       "Producer" entry that is listed here.
                       Default is an empty List.
+CanRefineOil=Boolean - True if this is an oilrefinery.
+                      Default is false
+CanRefineMinerals=Boolean - True if this is a mineralrefinery.
+                            Default is false
 -------------------------------------------------------------------------------
 
 
