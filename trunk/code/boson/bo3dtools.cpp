@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -273,14 +273,16 @@ QString BoVector4::debugString() const
 
 void BoMatrix::loadMatrix(const GLfloat* m)
 {
- for (int i = 0; i < 16; i++) {
+ for (int i = 0; i < 16; i++)
+ {
    mData[i] = m[i];
  }
 }
 
 void BoMatrix::loadMatrix(GLenum matrix)
 {
- switch (matrix) {
+ switch (matrix)
+ {
    case GL_MODELVIEW_MATRIX:
    case GL_PROJECTION_MATRIX:
    case GL_TEXTURE_MATRIX:
@@ -354,9 +356,9 @@ bool BoMatrix::invert(BoMatrix* inverse) const
  r3[7] = 1.0, r3[4] = r3[5] = r3[6] = 0.0;
 
  /* choose pivot - or die */
- if (fabs(r3[0])>fabs(r2[0])) SWAP_ROWS(r3, r2);
- if (fabs(r2[0])>fabs(r1[0])) SWAP_ROWS(r2, r1);
- if (fabs(r1[0])>fabs(r0[0])) SWAP_ROWS(r1, r0);
+ if (fabs(r3[0])>fabs(r2[0])) { SWAP_ROWS(r3, r2); }
+ if (fabs(r2[0])>fabs(r1[0])) { SWAP_ROWS(r2, r1); }
+ if (fabs(r1[0])>fabs(r0[0])) { SWAP_ROWS(r1, r0); }
  if (0.0 == r0[0])  return false;
 
  /* eliminate first variable     */
@@ -374,9 +376,9 @@ bool BoMatrix::invert(BoMatrix* inverse) const
  if (s != 0.0) { r1[7] -= m1 * s; r2[7] -= m2 * s; r3[7] -= m3 * s; }
 
  /* choose pivot - or die */
- if (fabs(r3[1])>fabs(r2[1])) SWAP_ROWS(r3, r2);
- if (fabs(r2[1])>fabs(r1[1])) SWAP_ROWS(r2, r1);
- if (0.0 == r1[1])  return false;
+ if (fabs(r3[1])>fabs(r2[1])) { SWAP_ROWS(r3, r2); }
+ if (fabs(r2[1])>fabs(r1[1])) { SWAP_ROWS(r2, r1); }
+ if (0.0 == r1[1]) { return false; }
 
  /* eliminate second variable */
  m2 = r2[1]/r1[1]; m3 = r3[1]/r1[1];
@@ -388,8 +390,8 @@ bool BoMatrix::invert(BoMatrix* inverse) const
  s = r1[7]; if (0.0 != s) { r2[7] -= m2 * s; r3[7] -= m3 * s; }
 
  /* choose pivot - or die */
- if (fabs(r3[2])>fabs(r2[2])) SWAP_ROWS(r3, r2);
- if (0.0 == r2[2])  return false;
+ if (fabs(r3[2])>fabs(r2[2])) { SWAP_ROWS(r3, r2); }
+ if (0.0 == r2[2]) { return false; }
 
  /* eliminate third variable */
  m3 = r3[2]/r2[2];
@@ -398,7 +400,7 @@ bool BoMatrix::invert(BoMatrix* inverse) const
  r3[7] -= m3 * r2[7];
 
  /* last check */
- if (0.0 == r3[3]) return false;
+ if (0.0 == r3[3]) { return false; }
 
  s = 1.0F/r3[3];             /* now back substitute row 3 */
  r3[4] *= s; r3[5] *= s; r3[6] *= s; r3[7] *= s;
@@ -543,8 +545,10 @@ void BoMatrix::rotate(GLfloat angle, GLfloat x, GLfloat y, GLfloat z)
 
 bool BoMatrix::isEqual(const BoMatrix& matrix) const
 {
-  for (int i = 0; i < 16; i++) {
-    if (mData[i] != matrix.mData[i]) {
+  for (int i = 0; i < 16; i++)
+  {
+    if (mData[i] != matrix.mData[i])
+    {
       return false;
     }
   }
@@ -554,7 +558,8 @@ bool BoMatrix::isEqual(const BoMatrix& matrix) const
 void BoMatrix::debugMatrix(const GLfloat* m)
 {
  boDebug() << k_funcinfo << endl;
- for (int i = 0; i < 4; i++) {
+ for (int i = 0; i < 4; i++)
+ {
    boDebug() << QString("%1 %2 %3 %4").arg(m[i]).arg(m[i + 4]).arg(m[i + 8]).arg(m[i + 12]) << endl;
  }
  boDebug() << k_funcinfo << "done" << endl;
