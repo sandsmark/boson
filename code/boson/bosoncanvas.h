@@ -413,6 +413,11 @@ public:
 	bool loadFromXML(const QDomElement& root);
 	bool saveAsXML(QDomElement& root);
 
+	// AB: we need this in the movie, but is it really good to make it
+	// public??
+	// NO!
+	bool loadItemFromXML(const QDomElement& unit, Player* owner);
+
 public slots:
 	/**
 	 * @param See @ref Boson::signalAdvance
@@ -462,8 +467,6 @@ protected:
 
 	Unit* createUnit(Player* owner, unsigned long int unitType);
 	BosonShot* createShot(Player* owner, unsigned long int shotType, unsigned long int unitType, unsigned long int weaponPropertyId);
-
-	bool loadItemFromXML(const QDomElement& unit, Player* owner);
 
 	void lockAdvanceFunction() { mAdvanceFunctionLocked = true; }
 	void unlockAdvanceFunction() { mAdvanceFunctionLocked = false; }

@@ -77,10 +77,7 @@ public:
 		IdResourcesMined = UnitBase::IdLast + 301,
 		IdResourcesX = UnitBase::IdLast + 302,
 		IdResourcesY = UnitBase::IdLast + 303,
-		IdHarvestingType = UnitBase::IdLast + 304,
-		IdBombingPosX = UnitBase::IdLast + 305,
-		IdBombingPosY = UnitBase::IdLast + 306,
-		IdMinePlacingCounter = UnitBase::IdLast + 307
+		IdHarvestingType = UnitBase::IdLast + 304
 	};
 
 	Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas);

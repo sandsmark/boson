@@ -1,61 +1,17 @@
 #!/bin/bash
 
-really_delete=0
-
 function delete_files()
 {
- files=`ls $1 2>/dev/null`
- if [ ! -z "$files" ]; then
-	if [ "$really_delete" = "1" ]
-	then
-		echo "Delete files:"
-		echo " $1"
-		rm $1
-	else
-		echo -n "rm "
-		echo $files
-	fi
- fi
+ echo "Delete files:"
+ echo " $1"
+ rm $1
 }
 
 function delete_dir()
 {
- if [ "$really_delete" = "1" ]
- then
-	echo "Delete dir:"
-	echo " $1"
-	rm -rf $1
- else
-	echo "rm -rf $1"
- fi
-}
-
-function delete_all_boson_related_stuff()
-{
- # this might be dangerous!
- delete_files "$KDEDIR/bin/bo*"
-
- delete_files "$KDEDIR/share/config/bodebug*"
- delete_files "$KDEDIR/share/icons/*/*/apps/boson.png"
- delete_files "$KDEDIR/share/applnk/Games/TacticStrategy/boson.desktop"
- delete_files "$KDEDIR/share/applnk/Games/TacticStrategy/bounit.desktop"
- delete_files "$KDEDIR/lib/kde3/plugins/designer/bosonwidgets.*"
- delete_dir "$KDEDIR/share/doc/HTML/en/boson"
- delete_dir "$KDEDIR/share/apps/boson"
- delete_dir "$KDEDIR/share/apps/borender"
- delete_dir "$KDEDIR/share/applnk/Games/TacticStrategy/boson"
-
- # now from $KDEHOME
- if [ "x$KDEHOME" = "x" ]; then
-	# TODO: check $KDEDIRS!
-	echo "\$KDEHOME is not set - using ~/.kde"
-	KDEHOME="~/.kde"
- fi
-
- # this might be dangerous
- delete_files "$KDEHOME/share/config/bo*rc"
-
- delete_dir "$KDEHOME/share/apps/boson"
+ echo "Delete dir:"
+ echo " $1"
+ rm -rf $1
 }
 
 
@@ -76,17 +32,29 @@ if [ "x$answer" != "xyes" ]; then
 	exit 1
 fi
 
-really_delete=0
-echo "The following operations will be performed:"
-delete_all_boson_related_stuff
-echo "Type yes to continue"
-read answer2
+# this might be dangerous!
+delete_files "$KDEDIR/bin/bo*"
 
-if [ "x$answer2" != "xyes" ]; then
-	echo "Aborting"
-	exit 1
+delete_files "$KDEDIR/share/config/bodebug*"
+delete_files "$KDEDIR/share/icons/*/*/apps/boson.png"
+delete_files "$KDEDIR/share/applnk/Games/TacticStrategy/boson.desktop"
+delete_files "$KDEDIR/share/applnk/Games/TacticStrategy/bounit.desktop"
+delete_files "$KDEDIR/lib/kde3/plugins/designer/bosonwidgets.*"
+delete_dir "$KDEDIR/share/doc/HTML/en/boson"
+delete_dir "$KDEDIR/share/apps/boson"
+delete_dir "$KDEDIR/share/apps/borender"
+delete_dir "$KDEDIR/share/applnk/Games/TacticStrategy/boson"
+
+# now from $KDEHOME
+if [ "x$KDEHOME" = "x" ]; then
+	# TODO: check $KDEDIRS!
+	echo "\$KDEHOME is not set - using ~/.kde in 4 seconds."
+	echo "press CTRL+C to abort!"
+	sleep 4
+	KDEHOME="~/.kde"
 fi
 
-really_delete=1
-delete_all_boson_related_stuff
+# this might be dangerous
+delete_files "$KDEHOME/share/config/bo*rc"
 
+delete_dir "$KDEHOME/share/apps/boson"

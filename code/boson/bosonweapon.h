@@ -265,9 +265,6 @@ class BosonWeapon : public UnitPlugin
       reload();
     }
 
-    virtual bool saveAsXML(QDomElement& root) const;
-    virtual bool loadFromXML(const QDomElement& root);
-
     /**
      * @return Whether this weapon can shoot at unit u
      **/
