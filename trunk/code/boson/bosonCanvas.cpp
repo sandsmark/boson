@@ -22,7 +22,7 @@
 #include <assert.h>
 
 // Arts / sound stuff
-#include <arts/qiomanager.h>
+//#include <arts/qiomanager.h>
 #include <arts/soundserver.h>                                                                                                                                     
 
 #include "common/log.h"
@@ -57,16 +57,16 @@ bosonCanvas::bosonCanvas( QPixmap p, uint w, uint h)
 	cells = new Cell[w*h];
 
 	// sound initialisation 
-	Arts::QIOManager qiomanager;			// defined in qiomanager.h
-	Arts::Dispatcher dispatcher(&qiomanager);	// defined in dispatcher.h
-
-	soundserver = new Arts::SimpleSoundServer( Arts::Reference("global:Arts_SimpleSoundServer") ); 
-	if (!soundserver)
-		logf(LOG_ERROR, "null Arts::SimpleSoundServer, sound disabled");
+	//new Arts::Dispatcher(new Arts::QIOManager); // using this one, the second boson segfaults in Arts::Reference()
+	new Arts::Dispatcher();
+	soundserver =  new Arts::SimpleSoundServer ;
+	//logf(LOG_INFO, "Soundserver created");
+        *soundserver =  Arts::Reference("global:Arts_SimpleSoundServer"); 	//soundserver
+	//logf(LOG_INFO, "Soundserver assigned");
 
 	if(soundserver->isNull())
 		logf(LOG_ERROR, "can't open artsd connection for sound, SOUND DISABLED");
-	else	logf(LOG_ERROR, "non null artsd connection established (server = %p), SOUND should be ok", soundserver);
+	else	logf(LOG_ERROR, "Sound initialised.");
 }
 
 
@@ -354,7 +354,7 @@ void bosonCanvas::play(char *filename)
 {
 	if(soundserver->isNull()) return; // no sound available
 
-	QString path = *dataPath + "sound/" + filename;
+	QString path = *dataPath + "themes/sound/human/" + filename;
 	logf(LOG_INFO, "(sound) playing : %s", path.latin1());
 	soundserver->play(path.latin1());
 }
