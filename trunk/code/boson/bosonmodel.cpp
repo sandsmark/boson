@@ -583,7 +583,7 @@ public:
 	QPtrVector<BoMaterial> mAllMaterials;
 
 	QValueList<GLuint> mNodeDisplayLists;
-	QIntDict<BoFrame> mConstructionSteps;
+	QPtrVector<BoFrame> mConstructionSteps;
 	QIntDict<BosonAnimation> mAnimations;
 	QMap<QString, QString> mTextureNames;
 	QString mDirectory;
@@ -936,6 +936,7 @@ void BosonModel::generateConstructionFrames()
  BoMeshSorter::sortByMinZ(frame0, &meshes);
 
  unsigned int* indices = new unsigned int[meshes.count()];
+ d->mConstructionSteps.resize(meshes.count());
  for (unsigned int i = 0; i < meshes.count(); i++) {
 	for (unsigned int j = 0; j < frame0->meshCount(); j++) {
 		// a damn slow linear search... but who cares for a 20 entry
