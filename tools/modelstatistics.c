@@ -37,6 +37,9 @@ struct Summary {
 
 	int mNodeCount;
 	int mNodeFaceCount; // more relevant value - actual number of faces in the model
+
+	int mMaxNodeFaceCount;
+	const char* mMaxNodeFaceFile; // will be a pointer only!!
 };
 
 
@@ -117,6 +120,7 @@ int main(int argc, const char** argv)
  printf("Total faces in meshes: %d\n", summary.mMeshFaceCount);
  printf("Total nodes: %d\n", summary.mNodeCount);
  printf("Total faces in models (all nodes): %d\n", summary.mNodeFaceCount);
+ printf("Maximal node faces (%d) in %s\n", summary.mMaxNodeFaceCount, summary.mMaxNodeFaceFile);
 
  return 0;
 }
@@ -136,6 +140,9 @@ void initSummary(struct Summary* summary)
  summary->mMeshFaceCount = 0;
  summary->mNodeCount = 0;
  summary->mNodeFaceCount = 0;
+
+ summary->mMaxNodeFaceCount = 0;
+ summary->mMaxNodeFaceFile = 0;
 }
 
 void initNodesSummary(struct NodesSummary* summary)
@@ -183,6 +190,10 @@ void parseModel(const char* filename, struct Summary* summary)
  summary->mMeshFaceCount += meshFaceCount;
  summary->mNodeCount += nodesSummary.mCount;
  summary->mNodeFaceCount += nodesSummary.mFaceCount;
+ if (nodesSummary.mFaceCount > summary->mMaxNodeFaceCount) {
+	summary->mMaxNodeFaceCount = nodesSummary.mFaceCount;
+	summary->mMaxNodeFaceFile = filename;
+ }
  lib3ds_file_free(file);
 }
 
