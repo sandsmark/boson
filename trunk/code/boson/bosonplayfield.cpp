@@ -61,7 +61,7 @@ BosonPlayField::~BosonPlayField()
 QString BosonPlayField::defaultPlayField()
 {
 //TODO create a list of all playfield (search for .desktop files in boson/map/)
-// (AB: still boson/map ??)
+// (AB: still boson/map ?? )
 // andlook if list contains "basic" - then check whether basic.bpf exists and return. 
 // Otherwise look for the first .desktop file which has a .bpf file exisiting.
 // Return that then.
@@ -183,8 +183,9 @@ bool BosonPlayField::loadMap(QDomElement& root)
  QDomElement node = list.item(0).toElement();
  delete mMap;
  mMap = new BosonMap(this);
- mMap->loadMap(node);
+ bool ret = mMap->loadMap(node);
  emit signalNewMap(mMap);
+ return ret;
 }
 
 bool BosonPlayField::loadScenario(QDomElement& root)
@@ -199,7 +200,7 @@ bool BosonPlayField::loadScenario(QDomElement& root)
  QDomElement node = list.item(0).toElement();
  delete mScenario;
  mScenario = new BosonScenario();
- mScenario->loadScenario(node);
+ return mScenario->loadScenario(node);
 }
 
 void BosonPlayField::loadMap(QDataStream& stream)

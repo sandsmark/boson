@@ -248,7 +248,7 @@ void BosonScenario::startScenario(Boson* boson)
  }
 
  
- for (int i = 0; i < list.count(); i++) {
+ for (unsigned int i = 0; i < list.count(); i++) {
 	bool ok = false;
 	QDomElement node = list.item(i).toElement();
 	Player* p = (Player*)boson->playerList()->at(playerOrder[i]);
@@ -567,6 +567,7 @@ bool BosonScenario::saveFacility(QDomElement& node, Facility* fac)
  } else if (fac->currentConstructionStep() != 0) {
 	node.setAttribute("ConstructionStep", fac->currentConstructionStep());
  }
+ return true;
 }
 
 bool BosonScenario::loadFacility(QDomElement& node, Facility* fac)
