@@ -19,7 +19,19 @@
 #ifndef __BOSONPATH_H__
 #define __BOSONPATH_H__
 
-#include <qdatastream.h>
+
+// Defines whether to use STL (Standard Template Library) or QTL (Qt Template Library)
+// If there is no STL implementation for your compiler, you can use QTL, but I
+//  recommend using STL as it is little bit faster (should be at least)
+#define USE_STL 1
+
+#ifdef USE_STL
+ #include <vector.h>
+ #include <stl_heap.h>
+#else
+// #include <qdatastream.h>
+#endif
+
 #include <qvaluelist.h>
 
 class Unit;
@@ -94,9 +106,17 @@ class BosonPath
   private:
     class PathNode;
     class Marking;
+    /// TODO: QTL impl.
+#ifdef USE_STL
+    greater<PathNode> comp;
+#endif
     float dist(int ax, int ay, int bx, int by);
     float cost(int x, int y);
+#ifdef USE_STL
+    inline void getFirst(vector<PathNode>&, PathNode& n);
+#else
     inline void getFirst(QValueList<PathNode>&, PathNode& n);
+#endif
     inline void neighbor(int& x, int& y, Direction d);
     inline Direction reverseDir(Direction d);
 

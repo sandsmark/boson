@@ -26,10 +26,15 @@
 
 #include <qcanvas.h>
 #include <qpoint.h>
+#include <qdatetime.h> // only for debug
+
+#ifdef USE_STL
+ #include <vector.h>
+#endif
 
 #define ERROR_COST 100000
 #define MAX_PATH_COST 5000
-#define FOGGED_COST 5
+#define FOGGED_COST 2.5
 
 class BosonPath::Marking
 {
@@ -53,11 +58,15 @@ class BosonPath::PathNode
     float h; // distance of all cells the unit has crossed up to here
 };
 
-bool operator < (const BosonPath::PathNode& a, const BosonPath::PathNode& b)
+inline bool operator < (const BosonPath::PathNode& a, const BosonPath::PathNode& b)
 {
   return (a.g + a.h) < (b.g + b.h);
 }
 
+/*
+* !!! Please do not make big changes to code in this class unless you really now
+*    what you are doing and if you make any bigger changes, send note to author!
+*/
 
 BosonPath::BosonPath(Unit* unit, int startx, int starty, int goalx, int goaly)
 {
@@ -104,12 +113,18 @@ QValueList<QPoint> BosonPath::findPath(Unit* unit, int goalx, int goaly)
 
 bool BosonPath::findPath()
 {
+  QTime time;
+  time.start();
   mNodesRemoved = 0;
   mPathLength = 0;
   mPathCost = 0;
   bool pathfound = false;
   Marking mark[mUnit->canvas()->width() / BO_TILE_SIZE][mUnit->canvas()->height() / BO_TILE_SIZE];
+#ifdef USE_STL
+  vector<PathNode> open;
+#else
   QValueList<PathNode> open;
+#endif
 
   // Create first (main) node
   PathNode node;
@@ -158,7 +173,11 @@ bool BosonPath::findPath()
     {
       kdDebug() << k_funcinfo << "mNodesRemoved >= mAbortPath" << endl;
       // Pick best node from OPEN
+#ifdef USE_STL
+      for(vector<PathNode>::iterator i = open.begin(); i != open.end(); ++i)
+#else
       for(QValueList<PathNode>::iterator i = open.begin(); i != open.end(); ++i)
+#endif
       {
         if(((*i).g + (*i).h) < (node.g + node.h))
         {
@@ -225,7 +244,11 @@ bool BosonPath::findPath()
         mark[n2.x][n2.y].g = n2.g;
         // Push node to OPEN
         open.push_back(n2);
-//FIXME        push_heap(open.begin(), open.end(), comp);
+#ifdef USE_STL
+        push_heap(open.begin(), open.end(), comp);
+#else
+        qHeapSort(open);
+#endif
       }
       else
       {
@@ -238,8 +261,12 @@ bool BosonPath::findPath()
             // Our current node has lower cost than the one, that was here, so
             //  we modify the path
             // First, find this node in OPEN
-            QValueList<PathNode>::iterator find = open.end();
-            for(find = open.begin(); find != open.end(); ++find)
+#ifdef USE_STL
+            vector<PathNode>::iterator find = open.begin();
+#else
+            QValueList<PathNode>::iterator find = open.begin();
+#endif
+            for(; find != open.end(); ++find)
             {
               if(((*find).x == n2.x) && ((*find).y == n2.y))
               {
@@ -258,7 +285,11 @@ bool BosonPath::findPath()
             mark[n2.x][n2.y].f = n2.g + n2.h;
             // Replace cost of node that was in OPEN
             (*find).g = n2.g;
-//FIXME            push_heap(open.begin(), find + 1, comp);
+#ifdef USE_STL
+            push_heap(open.begin(), find + 1, comp);
+#else
+            qHeapSort(open.begin(), ++find);
+#endif
           }
         }
       }
@@ -332,6 +363,7 @@ bool BosonPath::findPath()
 
 //  kdDebug() << k_funcinfo << "end" << endl;
 //  debug();
+  kdDebug() << "BosonPath::findPath() : path found, took " << time.elapsed() << " ms" << endl;
   return pathfound;
 }
 
@@ -426,10 +458,20 @@ float BosonPath::cost(int x, int y)
   return cost + mMinCost;
 }
 
+#ifdef USE_STL
+inline void BosonPath::getFirst(vector<PathNode>& v, PathNode& n)
+#else
 inline void BosonPath::getFirst(QValueList<PathNode>& v, PathNode& n)
+#endif
 {
   n = v.front();
+#ifdef USE_STL
+  pop_heap(v.begin(), v.end(), comp);
+  v.pop_back();
+#else
+  qHeapSort(v);
   v.pop_front();
+#endif
 }
 
 inline BosonPath::Direction BosonPath::reverseDir(Direction d)
