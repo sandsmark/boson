@@ -30,10 +30,24 @@
 #include "speciesTheme.h"
 #include "visual.h" 		// dataPath
 
+QRgb	default_color[BOSON_MAX_PLAYERS] = {
+	qRgb(0,0,255),
+	qRgb(0,255,0),
+	qRgb(255,0,0),
+	qRgb(255,255,0),
+	qRgb(255,0,255),
+	qRgb(0,255,255),
+	qRgb(127,255,0),
+	qRgb(255,0,127),
+	qRgb(0,127,255),
+	qRgb(0,127,127),
+};
+static int default_color_index = 0;
 
 speciesTheme::speciesTheme(char *themeName, QRgb color)
 {
-	team_color		= color;
+	team_color		= color==qRgb(0,0,0)?default_color[default_color_index++]:color;
+	default_color_index	%= BOSON_MAX_PLAYERS;
 
 	mobBigOverview		= new QPixmap*[mobilePropNb];
 	fixBigOverview		= new QPixmap*[facilityPropNb];
