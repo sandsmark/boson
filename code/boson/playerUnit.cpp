@@ -160,6 +160,7 @@ bool playerMobUnit::checkMove(int dx, int dy)
 			// p is what would be hit if ....
 			ty = at(p)->rtti();
 			if (ty < S_GROUND) continue;	// S_PART
+			if (ty >=  S_SHOT) continue;	// S_PART
 			if (ty < S_MOBILE) {		// S_GROUND
 				g = ty - S_GROUND;
 //printf("\ng = %d\n", g); fflush(stdout);
