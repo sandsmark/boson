@@ -239,10 +239,10 @@ void BosonCommandWidget::setUnit(Unit* unit)
  slotUnitChanged(d->mUnit);
  setToolTip(i18n("%1\nId: %2").arg(unit->unitProperties()->name()).arg(unit->id()));
 
+ show();
  d->mHealth->show();
  d->mReload->show(); // TODO don't show if unit cannot shoot
 
- show();
  setProductionCount(0);
  setGrayOut(false);
 }
