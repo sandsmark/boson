@@ -325,17 +325,24 @@ QPtrList<Unit>& BosonBigDisplay::selection() const
 void BosonBigDisplay::selectArea(const QRect& rect)
 {
  QCanvasItemList list;
+ QCanvasItemList unitList;
  QCanvasItemList::Iterator it;
-// return;
  list = canvas()->collisions(rect.normalize());
-
  for (it = list.begin(); it != list.end(); ++it) {
 	if (RTTI::isUnit((*it)->rtti())) {
 		Unit* unit = (Unit*)*it;
-		if (unit->unitProperties()->isMobile()) { // no NULL check for performance
-			addUnitSelection(unit);
+		if (unit->unitProperties()->isMobile()) {
+			unitList.append(*it);
 		}
 	}
+	
+ }
+
+ if (unitList.count() == 1) {
+	setSelectionMode(SelectSingle);
+ }
+ for (it = unitList.begin(); it != unitList.end(); ++it) {
+	addUnitSelection((Unit*)*it);
  }
 }
 
