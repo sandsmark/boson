@@ -24,6 +24,8 @@
 template<class T> class QValueList;
 template<class T, class T2> class QMap;
 class QDomDocument;
+class QDomNodeList;
+class QStringList;
 
 class BosonFileConverter
 {
@@ -67,6 +69,18 @@ public:
 
 protected:
 	bool loadXMLDoc(QDomDocument* doc, const QString& xml) const;
+
+	/**
+	 * Remove the KGameProperty tags from the item tags specified by @p
+	 * itemList.
+	 *
+	 * The @p itemList is expected to be in the same format as it is used by
+	 * boson 0.9.1, but can of course be used for anything else that uses
+	 * the same format, i.e. there must be <DataHandler> tags that contain
+	 * the properties. This method searches recursively in all items in @p
+	 * itemList
+	 **/
+	void removePropertyIds_0_9_1(const QDomNodeList& itemList, const QStringList& ids);
 };
 
 /**
