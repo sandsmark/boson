@@ -23,6 +23,7 @@
 #include <qptrlist.h>
 
 class Unit;
+class BosonItem;
 class QDomElement;
 
 /**
@@ -134,10 +135,22 @@ public:
 public slots:
 	void slotSelectSingleUnit(Unit* unit) { selectUnit(unit, true); }
 
+	/**
+	 * Remove @p item from the selection. This does nothing if @p item is
+	 * not a unit.
+	 *
+	 * You can (and should) use this slot to ensure that an item/unit is
+	 * actually removed from the selection when it is deleted.
+	 **/
+	void slotRemoveItem(BosonItem* item);
+
 protected:
 	void add(Unit* unit);
-	void remove(Unit* unit);
-	
+	/**
+	 * @return TRUE if @p unit was in this selection, otherwise FALSE
+	 **/
+	bool remove(Unit* unit);
+
 signals:
 	/**
 	 * @param selection this

@@ -24,6 +24,7 @@
 #include "bosonbigdisplayinputbase.h"
 #include "bosonconfig.h"
 #include "boselection.h"
+#include "bosoncanvas.h"
 #include "bodebug.h"
 #include "boaction.h"
 
@@ -339,6 +340,11 @@ void BoDisplayManager::setCanvas(BosonCanvas* c)
  while (it.current()) {
 	it.current()->setCanvas(c);
 	++it;
+ }
+ QIntDictIterator<BoSelection> selectIt(d->mSelectionGroups);
+ for (; selectIt.current(); ++selectIt) {
+	connect(c, SIGNAL(signalRemovedItem(BosonItem*)),
+			selectIt.current(), SLOT(slotRemoveItem(BosonItem*)));
  }
 }
 

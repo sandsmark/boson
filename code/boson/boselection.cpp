@@ -119,18 +119,21 @@ void BoSelection::selectUnits(QPtrList<Unit> list, bool replace)
 
 void BoSelection::removeUnit(Unit* unit)
 {
- remove(unit);
- emit signalSelectionChanged(this);
+ bool ret = remove(unit);
+ if (ret) {
+	emit signalSelectionChanged(this);
+ }
 }
 
-void BoSelection::remove(Unit* unit)
+bool BoSelection::remove(Unit* unit)
 {
  if (!unit) {
 	boError() << k_funcinfo << "NULL unit" << endl;
-	return;
+	return false;
  }
- mSelection.removeRef(unit);
+ bool ret = mSelection.removeRef(unit);
  unit->unselect();
+ return ret;
 }
 
 bool BoSelection::hasMobileUnit() const
@@ -303,3 +306,15 @@ void BoSelection::loadFromXML(const QDomElement& root, bool activate)
 	emit signalSelectionChanged(this);
  }
 }
+
+void BoSelection::slotRemoveItem(BosonItem* item)
+{
+ BO_CHECK_NULL_RET(item);
+ if (!RTTI::isUnit(item->rtti())) {
+	return;
+ }
+ Unit* u = (Unit*)item;
+ removeUnit(u);
+}
+
+
