@@ -32,6 +32,7 @@ template<class T1, class T2> class QMap;
 class BoUfoActionCollection;
 class BoUfoMenuBar;
 class BoUfoWidget;
+class BoUfoInternalFrame;
 
 namespace ufo {
 	class UXToolkit;
@@ -51,6 +52,7 @@ namespace ufo {
 	class ULineEdit;
 	class ULabel;
 	class UComboBox;
+	class UInternalFrame;
 
 
 	class UActionEvent;
@@ -146,6 +148,9 @@ public:
 	{
 		return mContentWidget;
 	}
+
+	void addFrame(BoUfoInternalFrame*);
+	void removeFrame(BoUfoInternalFrame*);
 
 	/**
 	 * This may be required when you have multiple BoUfoManager objects
@@ -258,10 +263,10 @@ public:
 
 	void setEnabled(bool);
 
-	void addWidget(BoUfoWidget* w);
-	void addSpacing(int spacing);
+	virtual void addWidget(BoUfoWidget* w);
+	virtual void addSpacing(int spacing);
 
-	void setLayoutClass(LayoutClass);
+	virtual void setLayoutClass(LayoutClass);
 	LayoutClass layoutClass() const
 	{
 		return mLayoutClass;
@@ -710,6 +715,160 @@ private:
 
 private:
 	BoUfoTabWidgetPrivate* d;
+};
+
+
+/**
+ * Note: in libufo @ref ufo::UInternalFrame objects have to be added using @ref
+ * ufo::URootPane::addFrame, so they are special cases. You cannot add them to
+ * other widgets. Therefore you have to add a BoUfoInternalFrame object using
+ * @ref BoUfoManager::addFrame. This is done automatically by the constructor.
+ **/
+class BoUfoInternalFrame : public BoUfoWidget
+{
+	Q_OBJECT
+public:
+	BoUfoInternalFrame(BoUfoManager* manager, const QString& title = QString::null);
+	~BoUfoInternalFrame();
+
+	void setVisible(bool);
+	void setBounds(int x, int y, int w, int h);
+	void setTitle(const QString& title);
+	QString title() const;
+	void setResizable(bool r);
+	bool resizable() const;
+	void setMaximizable(bool m);
+	bool maximizable() const;
+	void setMinimizable(bool m);
+	bool minimizable() const;
+
+	/**
+	 * See @ref ufo::UInternalFrame::pack. This adjusts the size of the
+	 * widget so that it fits to its contents.
+	 **/
+	void adjustSize();
+
+	/**
+	 * @reimplemented
+	 **/
+	virtual void setLayoutClass(LayoutClass c)
+	{
+		contentWidget()->setLayoutClass(c);
+	}
+
+	/**
+	 * @reimplemented
+	 **/
+	virtual void addWidget(BoUfoWidget* w)
+	{
+		contentWidget()->addWidget(w);
+	}
+
+	/**
+	 * @reimplemented
+	 **/
+	virtual void addSpacing(int spacing)
+	{
+		contentWidget()->addSpacing(spacing);
+	}
+
+	ufo::UInternalFrame* frame() const
+	{
+		return (ufo::UInternalFrame*)widget();
+	}
+	ufo::URootPane* rootPane() const
+	{
+		return mRootPane;
+	}
+
+	/**
+	 * You should prefer @ref contentWidget instead, which returns the same
+	 * widget.
+	 **/
+	ufo::UWidget* contentPane() const
+	{
+		return mContentPane;
+	}
+
+	/**
+	 * @return A BoUfo wrapper around @ref contentPane. Use this instead of
+	 * @ref contentPane.
+	 **/
+	BoUfoWidget* contentWidget() const
+	{
+		return mContentWidget;
+	}
+
+
+private:
+	void init();
+
+private:
+	ufo::URootPane* mRootPane;
+	ufo::UWidget* mContentPane;
+	BoUfoWidget* mContentWidget;
+};
+
+
+class BoUfoInputDialog : public BoUfoInternalFrame
+{
+	Q_OBJECT
+public:
+	BoUfoInputDialog(BoUfoManager* manager, const QString& label, const QString& title = QString::null);
+	~BoUfoInputDialog();
+
+	void setLabel(const QString& label);
+
+
+	// note that due to the design of libufo we cannot make modal dialogs.
+	// so we can't return the integer value here.
+	// AB: the returned pointer can be discarded usually.
+	static BoUfoInputDialog* getIntegerWidget(BoUfoManager* manager, const QObject* receiver, const char* slot, const QString& label, const QString& title = QString::null, int value = 0, int min = 0, int max = 1000, int step = 1);
+	static BoUfoInputDialog* getFloatWidget(BoUfoManager* manager, const QObject* receiver, const char* slot, const QString& label, const QString& title = QString::null, float value = 0.0, float min = 0.0, float max = 1000.0, float step = 1.0);
+	static BoUfoInputDialog* getStringWidget(BoUfoManager* manager, const QObject* receiver, const char* slot, const QString& label, const QString& title = QString::null, const QString& value = QString::null);
+
+signals:
+	/**
+	 * Emitted right before the frame is removed from the ufo manager.
+	 *
+	 * Note that this widget is closed shortly after this and therfore will
+	 * get deleted then.
+	 **/
+	void signalClosed();
+
+	/**
+	 * Emitted when Cancel is clicked, right before the widget is being closed.
+	 *
+	 * Note that this widget is closed shortly after this and therfore will
+	 * get deleted then.
+	 **/
+	void signalCancelled();
+	void signalValueEntered(int);
+	void signalValueEntered(float);
+	void signalValueEntered(const QString&);
+
+protected:
+	BoUfoNumInput* numInput();
+	BoUfoLineEdit* lineEdit();
+	void close();
+
+	static BoUfoInputDialog* createNumDialog(BoUfoManager* manager, const QString& label, const QString& title, float value, float min, float max, float step);
+
+protected slots:
+	void slotOkClicked();
+	void slotCancelled();
+
+private:
+	void init();
+
+private:
+	BoUfoManager* mUfoManager;
+	BoUfoLabel* mLabel;
+	BoUfoWidget* mContents;
+	BoUfoPushButton* mOk;
+	BoUfoPushButton* mCancel;
+	BoUfoNumInput* mNumInput;
+	BoUfoLineEdit* mLineEdit;
 };
 
 #endif
