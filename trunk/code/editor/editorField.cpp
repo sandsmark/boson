@@ -45,6 +45,7 @@ bool editorField::load(QString filename)
 	int i,j;
 	mobileMsg_t	mob;
 	facilityMsg_t	fix;
+	Cell		c;
 
 
 	if (!openRead(filename.data())) return false;
@@ -56,8 +57,11 @@ bool editorField::load(QString filename)
 	
 	/* initialisation */
 	for (i=0; i< map_width; i++)
-		for (j=0; j< map_height; j++)
-			cells[i][j].set( boFile::load(), i, j );
+		for (j=0; j< map_height; j++) {
+			boFile::load( c);
+			cells[i][j].set(c.getGroundType(), i, j);
+			cells[i][j].setFrame(c.getItem());
+		}
 	
 	/* checking */
 	for (int i=0; i< 3; i++)
@@ -98,7 +102,7 @@ bool editorField::save(QString filename)
 	/* initialisation */
 	for (i=0; i< map_width; i++)
 		for (j=0; j< map_height; j++)
-			write(cells[i][j].getGroundType());
+			write(cells[i][j]);
 	
 	for (mobIt.toFirst(); mobIt; ++mobIt) {
 		mobIt.current()->fill(mob);

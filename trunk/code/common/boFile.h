@@ -29,6 +29,7 @@ class QDataStream;
 class QFile;
 class mobileMsg_t;
 class facilityMsg_t;
+class Cell;
 
 
 #define stateAssert(s)								\
@@ -58,11 +59,11 @@ protected :
 	int		nbMobiles;
 	int		nbFacilities;
 
-	groundType load();
+	void	load(Cell &);
 	void	load(mobileMsg_t &);
 	void	load(facilityMsg_t &);
 
-	void	write(groundType );
+	void	write(Cell &);
 	void	write(mobileMsg_t &m);
 	void	write(facilityMsg_t &f);
 

@@ -27,6 +27,10 @@
 
 #include "../common/groundType.h"
 
+#ifndef byte
+typedef unsigned char byte;
+#endif
+
 /** 
   * This class represents one cell of the main game board
   */
@@ -34,14 +38,18 @@ class Cell
 {
 
 public:
-	Cell(groundType g = GROUND_UNKNOWN);
+	Cell(groundType g = GROUND_UNKNOWN, byte it=0);
 
-	groundType	getGroundType(void) { return ground; }
-	void		setGroundType(groundType g) { ground =g ; }
+	groundType	getGroundType(void)	{ return ground; }
+	byte		getItem()		{ return item; }
+
+	void		setGroundType(groundType g)	{ ground = g ; }
+	void		setItem(byte it)		{ item   = it ; }
 //	void		setFacility(void) { ground = GROUND_FACILITY; }
 
 protected:
 	groundType	ground;
+	byte		item;
 
 private:
 //	destroyedType	destroyed;

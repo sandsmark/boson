@@ -142,7 +142,7 @@ void editorBigDisplay::setTransRef(int r)
 void editorBigDisplay::setItem(int i)
 {
 	boAssert(i>=0 && i<4);
-	selectedCell->frame( i);
+	selectedCell->setFrame( i);
 	view->field->update();
 }
 

@@ -20,8 +20,9 @@
 
 #include "cell.h"
 
-Cell::Cell(groundType g)
+Cell::Cell(groundType g, byte it)
 {
-	ground = g;
+	ground	= g;
+	item	= it;
 //	destroyed = DESTROYED_NONE ;
 }

@@ -22,6 +22,7 @@
 #include <qfile.h>
 
 #include "../common/log.h"
+#include "../common/cell.h"
 #include "../common/msgData.h"
 #include "boFile.h"
 
@@ -43,7 +44,6 @@ boFile::boFile()
 
 boFile::~boFile()
 {
-//if (map.cells) delete map.cells;
 }
 
 
@@ -178,32 +178,32 @@ void	boFile::load(facilityMsg_t &f)
 	return ;
 }
 
-groundType boFile::load()
+void boFile::load(Cell &c)
 {
 	int g;
+	byte b;
 
-	if (Read!=BFstate) {
-		logf(LOG_ERROR, "boFile : bad BFstate %d, while %d assumed, line %d",
-			Read,  BFstate, __LINE__);
-		error = true; return GROUND_UNKNOWN;;
-	}
+	stateAssert(Read);
 
 	*stream >> g;
 	if (TAG_CELL !=g ) {
 		error = true;
 		logf(LOG_ERROR, "TAG_CELL missing");
-		return GROUND_UNKNOWN;
+		return;
 	}
 	
 	*stream >> g;
 	boAssert( IS_GROUND(g));
+	c.setGroundType((groundType)g);
 
-	return (groundType) g;
+	*stream >> b;
+	boAssert( b<4);
+	c.setItem(b);
 }
 
 /** write ***/
 
-void	boFile::write(mobileMsg_t &m)
+void boFile::write(mobileMsg_t &m)
 {
 	stateAssert(Write);
 
@@ -211,7 +211,7 @@ void	boFile::write(mobileMsg_t &m)
 	*stream << (int)m.type << m.x << m.y << m.who;
 }
 
-void	boFile::write(facilityMsg_t &f)
+void boFile::write(facilityMsg_t &f)
 {
 	stateAssert(Write);
 
@@ -219,11 +219,12 @@ void	boFile::write(facilityMsg_t &f)
 	*stream << (int)f.type << f.x << f.y << f.who;
 }
 
-void	boFile::write(groundType g)
+void boFile::write(Cell &c)
 {
 	stateAssert(Write);
 
 	*stream << TAG_CELL;
-	*stream << (int)g;
+	*stream << (int)c.getGroundType();
+	*stream << c.getItem();
 }
 

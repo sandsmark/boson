@@ -37,6 +37,7 @@ class QDataStream;
 class QFile;
 class mobileMsg_t;
 class facilityMsg_t;
+class Cell;
 
 
 #define stateAssert(s)								\
@@ -53,7 +54,6 @@ public:
 	boFile();
 virtual	~boFile();
 
-
 	bool	openRead(const char *);
 	bool	openWrite(const char *);
 	bool	Close();
@@ -65,17 +65,15 @@ virtual	~boFile();
 	int		nbMobiles;
 	int		nbFacilities;
 
-	groundType load();
+	void	load(Cell &);
 	void	load(mobileMsg_t &);
 	void	load(facilityMsg_t &);
 
-	void	write(groundType );
+	void	write(Cell &);
 	void	write(mobileMsg_t &m);
 	void	write(facilityMsg_t &f);
 
 	bool	isOk() {return !error; }
-
-
 
 	enum {
 		None,		// nothing has happened
