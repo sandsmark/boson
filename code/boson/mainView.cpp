@@ -54,7 +54,7 @@ mainView::mainView(bosonField *field, QWidget *parent=0, const char *name=0)
 /* finish the stuff */
 //	leftLayout->addStretch(10);
 	topLayout->activate();
-	setMinimumSize(800, 624);
+//	setMinimumSize(800, 624);
 }
 
 #define ARROW_KEY_STEP	2
