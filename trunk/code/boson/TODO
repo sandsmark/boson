@@ -3,7 +3,6 @@ Game TODOs
 - make player color selectable in the new game dialog
 - unit accelleration: units should slowly start to accelerate and to brake when
   moving
-- selectpart: static memory should be deleted
 - BosonPath doesn't honor fog of war
 - MiniMap does not know about units when removing fog of war
 - remove wreckages after a certain timeout
@@ -32,10 +31,6 @@ General TODOs
 - selection rect is not working correctly if zooming in
 - SpeciesTheme loads all pixmaps into memory - share it between different
   players (if they have the same themes)
-- bosoncommandframe: a qgridlayout with a orderbutton count of (16?) - must be dividable by 3. the
-  bottom 3 buttons are: left is a down (aka next page) , middle is free, right
-  is a up (aka previous page) button. SO we can add any number of pixmaps with
-  this limited number of orderbuttons.
 - player should select team color in new game dialog
 - fimd out whether signalUnitPropertyChanged() is a good thing at all. Might
   save some performance if we don't use it.
@@ -47,7 +42,6 @@ General TODOs
   differ then deny connection. This ensures that all clients are at the smae
   version. We need the revision number of each file - how to do add this
   automatically?
-- replace selectpart by QCanvasRectangle??
 - BosonTiles: use KPixmapSplitter (kdelibs/kdefx)
 - MiniMap: darker green
 - emit signalSingleUnitSelected when selectRect contains only 1 unit

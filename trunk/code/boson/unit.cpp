@@ -20,37 +20,29 @@
 #include "unit.h"
 #include "player.h"
 #include "bosoncanvas.h"
-#include "selectpart.h"
 #include "cell.h"
 #include "speciestheme.h"
 #include "unitproperties.h"
 #include "bosonpath.h"
+#include "selectbox.h"
 
 #include <kgame/kgamepropertylist.h>
 
-#include <unistd.h>
-
 #include "defines.h"
-
-
-#define PM_DELTA_H      (+4)   // mobiles selection boxes are DELTA pixels more inside rect()
-#define PM_DELTA_V      (+10)   // mobiles selection boxes are DELTA pixels more inside rect()
 
 class Unit::UnitPrivate
 {
 public:
 	UnitPrivate()
 	{
-		mSelectBoxUp = 0;
-		mSelectBoxDown = 0;
+		mSelectBox = 0;
 	}
 	KGamePropertyInt mDirection;
 	KGameProperty<unsigned int> mReloadState;
 
 	KGamePropertyList<QPoint> mWaypoints;
 
-	SelectPart* mSelectBoxUp;
-	SelectPart* mSelectBoxDown;
+	SelectBox* mSelectBox;
 
 	Unit* mTarget;
 };
@@ -87,29 +79,20 @@ void Unit::select()
  if (isDestroyed()) {
 	return; // shall we really return?
  }
- if (d->mSelectBoxUp || d->mSelectBoxDown) {
+ if (d->mSelectBox) {
 	// the box was already created
 	return;
  }
 // put the selection box on the same canvas as the unit and around the unit
-// QRect r = rect();//AB: FIXME
- QRect r = boundingRect();
- d->mSelectBoxUp = new SelectPart(z(), SelectPart::PartUp, canvas());
- d->mSelectBoxUp->move(r.right() - PM_DELTA_H, r.top() + PM_DELTA_V);
- d->mSelectBoxDown = new SelectPart(z(), SelectPart::PartDown, canvas());
- d->mSelectBoxDown->move(r.left() - PM_DELTA_H, r.bottom() + PM_DELTA_V);
+ d->mSelectBox = new SelectBox(x(), y(), width(), height(), z(), canvas());
  updateSelectBox();
 }
 
 void Unit::unselect()
 {
- if (d->mSelectBoxUp) {
-	delete d->mSelectBoxUp;
-	d->mSelectBoxUp = 0;
- }
- if (d->mSelectBoxDown) {
-	delete d->mSelectBoxDown;
-	d->mSelectBoxDown = 0;
+ if (d->mSelectBox) {
+	delete d->mSelectBox;
+	d->mSelectBox = 0;
  }
 }
 
@@ -160,14 +143,11 @@ void Unit::setHealth(unsigned long int h)
 
 void Unit::updateSelectBox()
 {
- if (d->mSelectBoxUp) {
+ if (d->mSelectBox) {
 	unsigned long int maxHealth = unitProperties()->health();
 	double div = (double)health() / maxHealth;
-	d->mSelectBoxUp->update(div);
-	d->mSelectBoxUp->show();
- }
- if (d->mSelectBoxDown) {
-	d->mSelectBoxDown->show();
+	d->mSelectBox->update(div);
+	d->mSelectBox->show();
  }
 }
 
@@ -197,11 +177,8 @@ void Unit::moveBy(double moveX, double moveY)
  }*/
 
 
- if (d->mSelectBoxUp) {
-	d->mSelectBoxUp->moveBy(moveX, moveY);
- }
- if (d->mSelectBoxDown) {
-	d->mSelectBoxDown->moveBy(moveX, moveY);
+ if (d->mSelectBox) {
+	d->mSelectBox->moveBy(moveX, moveY);
  }
  ((BosonCanvas*)canvas())->unitMoved(this, oldX, oldY);
 }

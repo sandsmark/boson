@@ -17,8 +17,8 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef __SELECTPART_H__
-#define __SELECTPART_H__
+#ifndef __SELECTBOX_H__
+#define __SELECTBOX_H__
 
 #include <qcanvas.h>
 #include "rtti.h"
@@ -26,39 +26,22 @@
 /**
  * @author Thomas Capricelli <capricel@email.enst.fr>
  **/
-class SelectPart : public QCanvasSprite
+class SelectBox : public QCanvasSprite
 {
 public:
-	enum SelectPartType { 
-		PartUp,
-		PartDown
-	};
-
 	/**
 	 * Construct one part of the selection box.
-	 * @param z See the z coordinate of the selected unit. It it
-	 * automatically increased so that the box is above the unit.
-	 * @param type Which type of the box is this - the upper or the lower
-	 * part. See @ref SelectPartType
 	 * @ref canvas Guess what?
+	 * @param width The width of the <em>unit</em>. The width of the
+	 * selectbox will be higher!
+	 * @param height The height of the <em>unit</em>. The height of the
+	 * selectbox will be higher!
+	 * @param z See @ref Unit::z
 	 **/
-	SelectPart(int z, SelectPartType type, QCanvas* canvas);
+	SelectBox(int x, int y, int width, int height, int z,QCanvas* canvas);
 
-	/**
-	 * Construct one part of the selection box.
-	 * @param frame The start frame of the box. Different frames show
-	 * different value of power.
-	 * @param z See the z coordinate of the selected unit. It it
-	 * automatically increased so that the box is above the unit.
-	 * @param type Which type of the box is this - the upper or the lower
-	 * part. See @ref SelectPartType
-	 * @ref canvas Guess what?
-	 **/
-	SelectPart(int frame, int z, SelectPartType type, QCanvas* canvas);
-	
 	virtual int rtti() const 
 	{ 
-		// unclean!
 		return RTTI::SelectPart;
 	}
 
@@ -74,30 +57,43 @@ public:
 	void update(double factor);
 
 protected:
-	QCanvasPixmapArray* initStatic(SelectPartType type);
+	QCanvasPixmapArray* initPixmapArray();
 
-	static void drawSelectBox(QPainter& painter, bool mask);
-	static void drawHealthBox(QPainter& painter, bool mask, int power = 0);
+	void drawSelectBox(QPainter& painter, bool mask);
+	void drawHealthBar(QPainter& painter, bool mask, int power = 0);
 
 	/**
 	 * @return The width of the health bar when health is at factor.
 	 * @param frame The frame number. Note that frame==frames()-1 means full
 	 * health
 	 **/
-	static int barWidth(int frame);
+	int barWidth(int frame);
 
 	/**
 	 * @return The height of the health bar
 	 **/
-	static int barHeight();
+	int barHeight();
+
+	int boxWidth() const;
+	int boxHeight() const;
+
+	/**
+	 * @return The length of a line of a corner. It must be bigger for big
+	 * units and smaller for smaller units. Otherwise we don't have 4
+	 * corners but a single rect (or 4 very small corners compared to the
+	 * unit's size)
+	 **/
+	int cornerLength() const;
 
 private:
-	void init(SelectPartType type);
+	void init();
 
 private:
-	static QCanvasPixmapArray *mPartUp;
-	static QCanvasPixmapArray *mPartDown;
+	QCanvasPixmapArray *mPixmapArray;
+
+	int mWidth;
+	int mHeight;
 };
 
-#endif // __SELECTPART_H__
+#endif // __SELECTBOX_H__
 

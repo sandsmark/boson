@@ -55,6 +55,29 @@ class BoProgress : public KProgress
 		}
 };
 
+class BoButton : public QPushButton
+{
+public:
+	BoButton(QWidget* p) : QPushButton(p)
+	{
+	}
+
+	virtual QSize sizeHint() const
+	{
+		// there is a *lot* of code in the QPushButton implementation
+		// -> hope this is enough for our needs...
+		if (!pixmap()) {
+			return QSize(0, 0);
+		}
+		return QSize(pixmap()->width(), pixmap()->height());
+	}
+protected:
+	virtual void drawButton(QPainter* p)
+	{
+		drawButtonLabel(p);
+	}
+};
+
 class BosonCommandWidget::BosonCommandWidgetPrivate
 {
 public:
@@ -74,7 +97,7 @@ public:
 		mReload = 0;
 	}
 
-	QPushButton* mPixmap;
+	BoButton * mPixmap;
 
 	int mTileNumber;
 	int mUnitType;
@@ -96,7 +119,7 @@ BosonCommandWidget::BosonCommandWidget(QWidget* parent) : QWidget(parent)
 
  QWidget* display = new QWidget(this);
  QHBoxLayout* displayLayout = new QHBoxLayout(display);
- d->mPixmap = new QPushButton(display, "Overview");
+ d->mPixmap = new BoButton(display);
  connect(d->mPixmap, SIGNAL(clicked()), this, SLOT(slotClicked()));
  displayLayout->addWidget(d->mPixmap);
 
@@ -115,6 +138,9 @@ BosonCommandWidget::BosonCommandWidget(QWidget* parent) : QWidget(parent)
  d->mHealth->setValue(0);
  d->mReload->setValue(0);
  
+ d->mPixmap->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
+ setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
+ setSizePolicy(QSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum));
 }
 
 BosonCommandWidget::~BosonCommandWidget()
@@ -144,7 +170,7 @@ void BosonCommandWidget::setUnit(Unit* unit)
  slotUnitChanged(d->mUnit);
 
  d->mHealth->show();
- d->mReload->show();
+ d->mReload->show(); // TODO don't show if unit cannot shoot
 
  show();
 }

@@ -67,7 +67,7 @@ KGameUnitDebug::KGameUnitDebug(QWidget* parent) : QWidget(parent)
  d->mUnitList->addColumn(i18n("Z"));
  d->mUnitList->addColumn(i18n("Name"));
  d->mUnitList->addColumn(i18n("Health"));
-// d->mUnitList->addColumn(i18n("Prize"));
+// d->mUnitList->addColumn(i18n("Costs"));
  d->mUnitList->addColumn(i18n("Speed"));
 // connect(d->mUnitList, SIGNAL(executed(QListBoxItem*)), 
 //		this, SLOT(slotSelectUnit(QListBoxItem*)));

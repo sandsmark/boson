@@ -43,12 +43,13 @@
 #include <qcombobox.h>
 #include <qcheckbox.h>
 #include <qmap.h>
+#include <qgrid.h>
 
 #include "defines.h"
 
 #include "bosoncommandframe.moc"
 
-#define ORDERS_PER_COLUMN 3
+#define ORDERS_PER_ROW 3
 #define ORDER_SPACING 3
 
 class OrderScrollView : public QScrollView
@@ -72,7 +73,6 @@ public:
 	BosonCommandFramePrivate()
 	{
 		mScrollView = 0;
-		mOrderLayout = 0;
 		mOrderWidget = 0;
 
 		mUnitView = 0;
@@ -87,11 +87,9 @@ public:
 	}
 
 	QIntDict<BosonCommandWidget> mOrderButton;
-	QWidget* mOrderWidget;
+	QGrid* mOrderWidget;
 	OrderScrollView* mScrollView;
 
-	QVBoxLayout* mOrderLayout;
-	QPtrList<QHBoxLayout> mHOrderLayoutList;
 
 	BosonUnitView* mUnitView;
 
@@ -131,12 +129,10 @@ BosonCommandFrame::BosonCommandFrame(QWidget* parent, bool editor) : QFrame(pare
 // the order buttons
  d->mScrollView = new OrderScrollView(this);
  layout->addWidget(d->mScrollView, 1);
- d->mOrderWidget = new QWidget(d->mScrollView->viewport());
+ d->mOrderWidget = new QGrid(ORDERS_PER_ROW, d->mScrollView->viewport());
  d->mScrollView->addChild(d->mOrderWidget);
+ d->mScrollView->viewport()->setBackgroundMode(backgroundMode());
 // d->mOrderWidget->setMinimumWidth(d->mScrollView->viewport()->width()); // might cause problems if scrollview is resized. maybe subclass QScrollView
- 
-// d->mOrderLayout = new QVBoxLayout(d->mScrollView->viewport(), ORDER_SPACING, ORDER_SPACING);
- d->mOrderLayout = new QVBoxLayout(d->mOrderWidget, 0, ORDER_SPACING);
  
  show();
 }
@@ -169,7 +165,6 @@ void BosonCommandFrame::initEditor()
 
 BosonCommandFrame::~BosonCommandFrame()
 {
- d->mHOrderLayoutList.clear();
  if (d->mTiles) {
 	delete d->mTiles;
  }
@@ -183,15 +178,7 @@ void BosonCommandFrame::initOrderButtons(unsigned int no)
  }
  for (unsigned int i = 0; i < no; i++) {
 	if (!d->mOrderButton[i]) {
-		QHBoxLayout* h = 0;
-		if (d->mHOrderLayoutList.count() > i / ORDERS_PER_COLUMN) {
-			h = d->mHOrderLayoutList.at(i / ORDERS_PER_COLUMN);
-		} else {
-			h = new QHBoxLayout(d->mOrderLayout, ORDER_SPACING);
-			d->mHOrderLayoutList.append(h);
-		}
 		BosonCommandWidget* b = new BosonCommandWidget(d->mOrderWidget);
-		h->addWidget(b);
 		b->hide();
 		d->mOrderButton.insert(i, b);
 		connect(b, SIGNAL(signalPlaceCell(int)), 
