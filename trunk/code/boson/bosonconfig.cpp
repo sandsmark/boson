@@ -245,6 +245,7 @@ class BosonConfig::BosonConfigPrivate
 {
 public:
 	BosonConfigPrivate()
+		: mDynamicEntries(QDict<BoConfigEntry>(101))
 	{
 	}
 
@@ -758,39 +759,53 @@ void BosonConfig::addDynamicEntry(BoConfigEntry* entry, KConfig* conf)
  entry->load(conf);
 }
 
-void BosonConfig::addDynamicEntryBool(const QString& configKey, bool defaultValue, bool saveConfig)
+BoConfigBoolEntry* BosonConfig::addDynamicEntryBool(const QString& configKey, bool defaultValue, bool saveConfig)
 {
- addDynamicEntry(new BoConfigBoolEntry(this, configKey, defaultValue, saveConfig));
+ BoConfigBoolEntry* e = new BoConfigBoolEntry(this, configKey, defaultValue, saveConfig);
+ addDynamicEntry(e);
+ return e;
 }
 
-void BosonConfig::addDynamicEntryInt(const QString& configKey, int defaultValue, bool saveConfig)
+BoConfigIntEntry* BosonConfig::addDynamicEntryInt(const QString& configKey, int defaultValue, bool saveConfig)
 {
- addDynamicEntry(new BoConfigIntEntry(this, configKey, defaultValue, saveConfig));
+ BoConfigIntEntry* e = new BoConfigIntEntry(this, configKey, defaultValue, saveConfig);
+ addDynamicEntry(e);
+ return e;
 }
 
-void BosonConfig::addDynamicEntryUInt(const QString& configKey, unsigned int defaultValue, bool saveConfig)
+BoConfigUIntEntry* BosonConfig::addDynamicEntryUInt(const QString& configKey, unsigned int defaultValue, bool saveConfig)
 {
- addDynamicEntry(new BoConfigUIntEntry(this, configKey, defaultValue, saveConfig));
+ BoConfigUIntEntry* e = new BoConfigUIntEntry(this, configKey, defaultValue, saveConfig);
+ addDynamicEntry(e);
+ return e;
 }
 
-void BosonConfig::addDynamicEntryDouble(const QString& configKey, double defaultValue, bool saveConfig)
+BoConfigDoubleEntry* BosonConfig::addDynamicEntryDouble(const QString& configKey, double defaultValue, bool saveConfig)
 {
- addDynamicEntry(new BoConfigDoubleEntry(this, configKey, defaultValue, saveConfig));
+ BoConfigDoubleEntry* e = new BoConfigDoubleEntry(this, configKey, defaultValue, saveConfig);
+ addDynamicEntry(e);
+ return e;
 }
 
-void BosonConfig::addDynamicEntryString(const QString& configKey, QString defaultValue, bool saveConfig)
+BoConfigStringEntry* BosonConfig::addDynamicEntryString(const QString& configKey, QString defaultValue, bool saveConfig)
 {
- addDynamicEntry(new BoConfigStringEntry(this, configKey, defaultValue, saveConfig));
+ BoConfigStringEntry* e = new BoConfigStringEntry(this, configKey, defaultValue, saveConfig);
+ addDynamicEntry(e);
+ return e;
 }
 
-void BosonConfig::addDynamicEntryColor(const QString& configKey, QColor defaultValue, bool saveConfig)
+BoConfigColorEntry* BosonConfig::addDynamicEntryColor(const QString& configKey, QColor defaultValue, bool saveConfig)
 {
- addDynamicEntry(new BoConfigColorEntry(this, configKey, defaultValue, saveConfig));
+ BoConfigColorEntry* e = new BoConfigColorEntry(this, configKey, defaultValue, saveConfig);
+ addDynamicEntry(e);
+ return e;
 }
 
-void BosonConfig::addDynamicEntryIntList(const QString& configKey, const QValueList<int>& defaultValue, bool saveConfig)
+BoConfigIntListEntry* BosonConfig::addDynamicEntryIntList(const QString& configKey, const QValueList<int>& defaultValue, bool saveConfig)
 {
- addDynamicEntry(new BoConfigIntListEntry(this, configKey, defaultValue, saveConfig));
+ BoConfigIntListEntry* e = new BoConfigIntListEntry(this, configKey, defaultValue, saveConfig);
+ addDynamicEntry(e);
+ return e;
 }
 
 bool BosonConfig::hasKey(const QString& key) const
