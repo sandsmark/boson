@@ -52,9 +52,13 @@ public:
 	BosonBigDisplayPrivate()
 	{
 		mMouseIO = 0;
+		mLockCursor = false;
+		mCursorType = CursorDefault;
 	}
 
 	KGameMouseIO* mMouseIO;
+	bool mLockCursor;
+	CursorType mCursorType;
 };
 
 BosonBigDisplay::BosonBigDisplay(BosonCanvas* c, QWidget* parent) 
@@ -88,93 +92,74 @@ void BosonBigDisplay::actionClicked(const BoAction& action, QDataStream& stream,
  if (selection()->isEmpty()) {
 	return;
  }
- Unit* unit = ((BosonCanvas*)canvas())->findUnitAt(action.canvasPos());
+
+ if (d->mLockCursor) {
+	switch (d->mCursorType) {
+		case CursorMove:
+			if (selection()->hasMobileUnit()) {
+				if (!actionMove(stream, action.canvasPos())) {
+					return;
+				}
+				*send = true;
+			}
+			break;
+		case CursorAttack:
+		{
+			Unit* unit = canvas()->findUnitAt(action.canvasPos());
+			if (unit) {
+				if (!actionAttack(stream, action.canvasPos())) {
+					return;
+				}
+				*send = true;
+			}
+			break;
+		}
+		default:
+			kdError() << k_funcinfo << "Unknown cursortype for locked cursor: " << d->mCursorType << endl;
+			break;
+	}
+	d->mLockCursor = false;
+	return;
+ }
+
+ Unit* unit = boCanvas()->findUnitAt(action.canvasPos());
  if (!unit) {
 	if (selection()->hasMobileUnit()) { // move the selection to pos
 		if (selection()->count() == 1) {
 			// there are special things to do for a single selected unit
 			// (e.g. mining if the unit is a harvester)
-			MobileUnit* u = (MobileUnit*)selection()->leader();
-			if (u->canMine(((BosonCanvas*)canvas())->cellAt(action.canvasPos().x(), action.canvasPos().y()))) {
-				stream << (Q_UINT32)BosonMessage::MoveMine;
-				stream << (Q_ULONG)u->id();
-				stream << action.canvasPos();
+			if (actionMine(stream, action.canvasPos())) {
 				*send = true;
 				return;
 			}
 		}
 
-		QPtrList<Unit> list = selection()->allUnits();
-		QPtrListIterator<Unit> it(list);
-		// tell the clients we want to move units:
-		stream << (Q_UINT32)BosonMessage::MoveMove;
-		// tell them where to move to:
-		stream << action.canvasPos();
-		// tell them how many units:
-		stream << (Q_UINT32)list.count();
-		Unit* unit = 0;
-		while (it.current()) {
-			if (!unit) {
-				unit = it.current();
-			}
-			// tell them which unit to move:
-			stream << (Q_ULONG)it.current()->id(); // MUST BE UNIQUE!
-			++it;
-		}
-		if (unit->owner() == localPlayer()) {
-			boMusic->playSound(unit, Unit::SoundOrderMove);
+		if (!actionMove(stream, action.canvasPos())) {
+			return;
 		}
 		*send = true;
 	} else { // place constructions
 		// FIXME: another option: add the waypoint to the facility and
 		// apply it to any unit that gets constructed by that facility.
 		// For this we'd probably have to use LMB for unit placing
-		Facility* fac = (Facility*)selection()->leader();
-		ProductionPlugin* production = fac->productionPlugin();
-		if (!production || !production->hasProduction() || production->completedProduction() < 0) {
+		if (!actionBuild(stream, action.canvasPos())) {
 			return;
 		}
-		
-//		if (!fac->canPlaceProductionAt(action.pos())) { // obsolete
-		if (!((BosonCanvas*)canvas())->canPlaceUnitAt(localPlayer()->unitProperties(production->currentProduction()), action.canvasPos(), fac)) {
-			kdDebug() << k_funcinfo << "Cannot place production here" << endl;
-			return;
-		}
-
-		// create the new unit
-		stream << (Q_UINT32)BosonMessage::MoveBuild;
-		stream << (Q_ULONG)fac->id();
-		stream << (Q_UINT32)fac->owner()->id();
-		stream << (Q_INT32)action.canvasPos().x() / BO_TILE_SIZE;
-		stream << (Q_INT32)action.canvasPos().y() / BO_TILE_SIZE;
 		*send = true;
 	}
  } else { // there is a unit - attack it?
 	if ((localPlayer()->isEnemy(unit->owner()) || action.forceAttack()) &&
 			selection()->canShootAt(unit)) {
 		// attack the unit
-		QPtrList<Unit> list = selection()->allUnits();
-		QPtrListIterator<Unit> it(list);
-		// tell the clients we want to attack:
-		stream << (Q_UINT32)BosonMessage::MoveAttack;
-		// tell them which unit to attack:
-		stream << (Q_ULONG)unit->id();
-		// tell them how many units attack:
-		stream << (Q_UINT32)list.count();
-		while (it.current()) {
-			// tell them which unit is going to attack:
-			stream << (Q_ULONG)it.current()->id(); // MUST BE UNIQUE!
-			++it;
+		if (!actionAttack(stream, action.canvasPos())) {
+			return;
 		}
 		*send = true;
-		Unit* u = selection()->leader();
-		if (u->owner() == localPlayer()) {
-			boMusic->playSound(u, Unit::SoundOrderAttack);
-		}
 
 	} else if (localPlayer()->isEnemy(unit->owner())) {
 		// a non-friendly unit, but the selection cannot shoot
 		// we probably won't do anything here
+		// IDEA: what about "I cannot shoot that!" sound?
 	} else {
 		// click on a friendly unit
 		if (unit->weaponDamage() < 0 && unit->isFacility() && unit->repairPlugin()) {
@@ -182,74 +167,19 @@ void BosonBigDisplay::actionClicked(const BoAction& action, QDataStream& stream,
 			// (not yet implemented) //FIXME
 			// note that currently the unit can go to every friendly
 			// player, even non-local players
-			QPtrList<Unit> allUnits = selection()->allUnits();
-			QPtrList<Unit> list;
-			QPtrListIterator<Unit> it(allUnits);
-			while (it.current()) {
-				if (it.current()->health() < it.current()->unitProperties()->health()) {
-					kdDebug() << "repair " << it.current()->id() << endl;
-					list.append(it.current());
-				}
-				++it;
-			}
-			it = QPtrListIterator<Unit>(list);
-			// tell the clients we want to repair:
-			stream << (Q_UINT32)BosonMessage::MoveRepair;
-			// the owner of the repairyard (can also be an allied
-			// player - not localplayer only)
-			stream << (Q_UINT32)unit->owner()->id();
-			// tell them where to repair the units:
-			stream << (Q_ULONG)unit->id();
-			// tell them how many units to be repaired:
-			stream << (Q_UINT32)list.count();
-			while (it.current()) {
-				// tell them which unit is going be repaired:
-				stream << (Q_ULONG)it.current()->id();
-				++it;
+			if (!actionRepair(stream, action.canvasPos())) {
+				return;
 			}
 			*send = true;
-			// TODO:
-//			Unit* u = selection()->leader();
-//			boMusic->playSound(u, Unit::SoundOrderRepair);
 		} else if ((unit->unitProperties()->canRefineMinerals() &&
 				selection()->hasMineralHarvester()) ||
 				(unit->unitProperties()->canRefineOil() &&
 				selection()->hasOilHarvester())) {
 			// go to the refinery
-			bool minerals = unit->unitProperties()->canRefineMinerals();
-			QPtrList<Unit> allUnits = selection()->allUnits();
-			QPtrList<Unit> list;
-			QPtrListIterator<Unit> unitsIt(allUnits);
-			while (unitsIt.current()) {
-				if (unitsIt.current()->unitProperties()->canMineMinerals() && minerals) {
-					list.append(unitsIt.current());
-				} else if (unitsIt.current()->unitProperties()->canMineOil() && !minerals) {
-					list.append(unitsIt.current());
-				}
-				++unitsIt;
-			}
-			if (!list.count()) {
-				kdError() << k_lineinfo << "MoveRefine: empty list!!" << endl;
+			if (!actionRefine(stream, action.canvasPos())) {
 				return;
 			}
-			QPtrListIterator<Unit> it(list);
-			stream << (Q_UINT32)BosonMessage::MoveRefine;
-			// the owner of the refinery (can also be an allied
-			// player - not localplayer only)
-			stream << (Q_UINT32)unit->owner()->id();
-			// destination:
-			stream << (Q_ULONG)unit->id();
-			// how many units go to the refinery
-			stream << (Q_UINT32)list.count();
-			while (it.current()) {
-				// tell them which unit goes there
-				stream << (Q_ULONG)it.current()->id();
-				++it;
-			}
 			*send = true;
-			// TODO:
-//			Unit* u = selection()->leader();
-//			boMusic->playSound(u, Unit::SoundOrderRefine);
 		} else {
 			// selection and clicked unit both are friendly
 			// no repairyard and no refinery
@@ -258,6 +188,161 @@ void BosonBigDisplay::actionClicked(const BoAction& action, QDataStream& stream,
 		}
 	}
  }
+}
+
+bool BosonBigDisplay::actionMine(QDataStream& stream, const QPoint& canvasPos)
+{
+ MobileUnit* u = (MobileUnit*)selection()->leader();
+ if (u->canMine(((BosonCanvas*)canvas())->cellAt(canvasPos.x(), canvasPos.y()))) {
+	stream << (Q_UINT32)BosonMessage::MoveMine;
+	stream << (Q_ULONG)u->id();
+	stream << canvasPos;
+	return true;
+ }
+ return false;
+}
+
+bool BosonBigDisplay::actionMove(QDataStream& stream, const QPoint& canvasPos)
+{
+ QPtrList<Unit> list = selection()->allUnits();
+ QPtrListIterator<Unit> it(list);
+ // tell the clients we want to move units:
+ stream << (Q_UINT32)BosonMessage::MoveMove;
+ // tell them where to move to:
+ stream << canvasPos;
+ // tell them how many units:
+ stream << (Q_UINT32)list.count();
+ Unit* unit = 0;
+ while (it.current()) {
+	if (!unit) {
+		unit = it.current();
+	}
+	// tell them which unit to move:
+	stream << (Q_ULONG)it.current()->id(); // MUST BE UNIQUE!
+	++it;
+ }
+ if (unit->owner() == localPlayer()) {
+	boMusic->playSound(unit, Unit::SoundOrderMove);
+ }
+ return true;
+}
+
+bool BosonBigDisplay::actionBuild(QDataStream& stream, const QPoint& canvasPos)
+{
+ Facility* fac = (Facility*)selection()->leader();
+ ProductionPlugin* production = fac->productionPlugin();
+ if (!production || !production->hasProduction() || production->completedProduction() < 0) {
+	return false;
+ }
+
+ if (!(boCanvas())->canPlaceUnitAt(localPlayer()->unitProperties(production->currentProduction()), canvasPos, fac)) {
+	kdDebug() << k_funcinfo << "Cannot place production here" << endl;
+	return false;
+ }
+
+ // create the new unit
+ stream << (Q_UINT32)BosonMessage::MoveBuild;
+ stream << (Q_ULONG)fac->id();
+ stream << (Q_UINT32)fac->owner()->id();
+ stream << (Q_INT32)canvasPos.x() / BO_TILE_SIZE;
+ stream << (Q_INT32)canvasPos.y() / BO_TILE_SIZE;
+ return true;
+}
+
+bool BosonBigDisplay::actionAttack(QDataStream& stream, const QPoint& canvasPos)
+{
+ Unit* unit = boCanvas()->findUnitAt(canvasPos);
+ QPtrList<Unit> list = selection()->allUnits();
+ QPtrListIterator<Unit> it(list);
+ // tell the clients we want to attack:
+ stream << (Q_UINT32)BosonMessage::MoveAttack;
+ // tell them which unit to attack:
+ stream << (Q_ULONG)unit->id();
+ // tell them how many units attack:
+ stream << (Q_UINT32)list.count();
+ while (it.current()) {
+	// tell them which unit is going to attack:
+	stream << (Q_ULONG)it.current()->id(); // MUST BE UNIQUE!
+	++it;
+ }
+ Unit* u = selection()->leader();
+ if (u->owner() == localPlayer()) {
+	boMusic->playSound(u, Unit::SoundOrderAttack);
+ }
+ return true;
+}
+
+bool BosonBigDisplay::actionRepair(QDataStream& stream, const QPoint& canvasPos)
+{
+ Unit* unit = boCanvas()->findUnitAt(canvasPos);
+ QPtrList<Unit> allUnits = selection()->allUnits();
+ QPtrList<Unit> list;
+ QPtrListIterator<Unit> it(allUnits);
+ while (it.current()) {
+	if (it.current()->health() < it.current()->unitProperties()->health()) {
+		kdDebug() << "repair " << it.current()->id() << endl;
+		list.append(it.current());
+	}
+	++it;
+ }
+ it = QPtrListIterator<Unit>(list);
+ // tell the clients we want to repair:
+ stream << (Q_UINT32)BosonMessage::MoveRepair;
+ // the owner of the repairyard (can also be an allied
+ // player - not localplayer only)
+ stream << (Q_UINT32)unit->owner()->id();
+ // tell them where to repair the units:
+ stream << (Q_ULONG)unit->id();
+ // tell them how many units to be repaired:
+ stream << (Q_UINT32)list.count();
+ while (it.current()) {
+	// tell them which unit is going be repaired:
+	stream << (Q_ULONG)it.current()->id();
+	++it;
+ }
+// TODO:
+// Unit* u = selection()->leader();
+// boMusic->playSound(u, Unit::SoundOrderRepair);
+ return true;
+}
+
+bool BosonBigDisplay::actionRefine(QDataStream& stream, const QPoint& canvasPos)
+{
+ Unit* unit = boCanvas()->findUnitAt(canvasPos);
+ bool minerals = unit->unitProperties()->canRefineMinerals();
+ QPtrList<Unit> allUnits = selection()->allUnits();
+ QPtrList<Unit> list;
+ QPtrListIterator<Unit> unitsIt(allUnits);
+ while (unitsIt.current()) {
+	if (unitsIt.current()->unitProperties()->canMineMinerals() && minerals) {
+		list.append(unitsIt.current());
+	} else if (unitsIt.current()->unitProperties()->canMineOil() && !minerals) {
+		list.append(unitsIt.current());
+	}
+	++unitsIt;
+ }
+ if (!list.count()) {
+	kdError() << k_lineinfo << "MoveRefine: empty list!!" << endl;
+	return false;
+ }
+ QPtrListIterator<Unit> it(list);
+ stream << (Q_UINT32)BosonMessage::MoveRefine;
+ // the owner of the refinery (can also be an allied
+ // player - not localplayer only)
+ stream << (Q_UINT32)unit->owner()->id();
+ // destination:
+ stream << (Q_ULONG)unit->id();
+ // how many units go to the refinery
+ stream << (Q_UINT32)list.count();
+ while (it.current()) {
+	// tell them which unit goes there
+	stream << (Q_ULONG)it.current()->id();
+	++it;
+ }
+// TODO:
+// Unit* u = selection()->leader();
+// boMusic->playSound(u, Unit::SoundOrderRefine);
+ return true;
 }
 
 /*
@@ -326,38 +411,41 @@ void BosonBigDisplay::updateCursor()
  QPoint canvasPos = viewportToContents(widgetPos);
 #endif
  
- if (!selection()->isEmpty()) {
-	if (selection()->leader()->owner() == localPlayer()) {
-		Unit* unit = ((BosonCanvas*)canvas())->findUnitAt(canvasPos);
-		if (unit) {
-			if (unit->owner() == localPlayer()) {
-				c->setCursor(CursorDefault);
-//				c->setWidgetCursor(this);
-			} else if(selection()->leader()->unitProperties()->canShoot()) {
-				if((unit->isFlying() && selection()->leader()->unitProperties()->canShootAtAirUnits()) ||
-						(!unit->isFlying() && selection()->leader()->unitProperties()->canShootAtLandUnits())) {
-					c->setCursor(CursorAttack);
+ if (!d->mLockCursor) {
+	if (!selection()->isEmpty()) {
+		if (selection()->leader()->owner() == localPlayer()) {
+			Unit* unit = ((BosonCanvas*)canvas())->findUnitAt(canvasPos);
+			if (unit) {
+				if (unit->owner() == localPlayer()) {
+					d->mCursorType = CursorDefault;
 //					c->setWidgetCursor(this);
+				} else if(selection()->leader()->unitProperties()->canShoot()) {
+					if((unit->isFlying() && selection()->leader()->unitProperties()->canShootAtAirUnits()) ||
+							(!unit->isFlying() && selection()->leader()->unitProperties()->canShootAtLandUnits())) {
+						d->mCursorType = CursorAttack;
+//						c->setWidgetCursor(this);
+					}
 				}
+			} else if (selection()->leader()->isMobile()) {
+				d->mCursorType = CursorMove;
+//				c->setWidgetCursor(this);
+				c->showCursor();
+			} else {
+				d->mCursorType = CursorDefault;
+//				c->setWidgetCursor(this);
+				c->showCursor();
 			}
-		} else if (selection()->leader()->isMobile()) {
-			c->setCursor(CursorMove);
-//			c->setWidgetCursor(this);
-			c->showCursor();
 		} else {
-			c->setCursor(CursorDefault);
+			d->mCursorType = CursorDefault;
 //			c->setWidgetCursor(this);
-			c->showCursor();
 		}
 	} else {
-		c->setCursor(CursorDefault);
+		d->mCursorType = CursorDefault;
 //		c->setWidgetCursor(this);
 	}
- } else {
-	c->setCursor(CursorDefault);
-//	c->setWidgetCursor(this);
  }
 
+ c->setCursor(d->mCursorType);
  c->move(canvasPos.x(), canvasPos.y());
  c->setWidgetCursor(this);
 }
@@ -382,3 +470,53 @@ void BosonBigDisplay::addMouseIO(Player* p)
  localPlayer()->addGameIO(d->mMouseIO);
 }
 */
+
+void BosonBigDisplay::slotUnitAction(int actionType)
+{
+ switch ((UnitAction)actionType) {
+	case ActionMove:
+		d->mCursorType = CursorMove;
+		break;
+	case ActionAttack:
+		d->mCursorType = CursorAttack;
+		break;
+	case ActionStop:
+	{
+		if(selection()->isEmpty()) {
+			kdError() << k_funcinfo << "Selection is empty!" << endl;
+			return;
+		}
+		// Stop all selected units
+		// I REALLY hope I'm doing this correctly
+		// TODO: should be in actionStop()
+		QPtrList<Unit> list = selection()->allUnits();
+		QPtrListIterator<Unit> it(list);
+		QByteArray b;
+		QDataStream stream(b, IO_WriteOnly);
+
+		// tell the clients we want to move units:
+		stream << (Q_UINT32)BosonMessage::MoveStop;
+		// tell them how many units:
+		stream << (Q_UINT32)list.count();
+		while (it.current()) {
+			// tell them which unit to move:
+			stream << (Q_ULONG)it.current()->id(); // MUST BE UNIQUE!
+			++it;
+		}
+
+		QDataStream msg(b, IO_WriteOnly);
+		localPlayer()->forwardInput(msg);
+		d->mLockCursor = false;
+		return;
+	}
+	default:
+		kdError() << k_funcinfo << "Unknown actionType: " << actionType << endl;
+		return;
+ }
+ d->mLockCursor = true;
+}
+
+bool BosonBigDisplay::actionLocked() const
+{
+ return d->mLockCursor;
+}

@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2002 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -130,6 +130,7 @@ public:
 	void setLocalPlayer(Player* p);
 
 	BosonCanvas* canvas() const { return mCanvas; }
+	BosonCanvas* boCanvas() const { return mCanvas; } // since QScrollView returns QCanvas*
 
 	/**
 	 * Emit @ref signalMakeActive to inform @ref BosonWidget and @ref
@@ -291,6 +292,8 @@ protected:
 	Player* localPlayer() const;
 
 	void addMouseIO(Player* p);
+
+	virtual bool actionLocked() const = 0;
 
 private:
 	void init();

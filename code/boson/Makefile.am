@@ -73,7 +73,8 @@ COMMON_SRC = \
 	editorbigdisplay.cpp \
 	bosontexturearray.cpp \
 	bosonmodel.cpp \
-	bosonglfont.cpp 
+	bosonglfont.cpp \
+	bosonprofiling.cpp
 
 BOUNIT_SRC = \
 	unitproperties.cpp \

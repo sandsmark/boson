@@ -20,6 +20,7 @@
 #define SPECIESTHEME_H
 
 #include "defines.h"
+#include "global.h"
 #include <qstring.h>
 #include <qcolor.h>
 #include <qvaluelist.h>
@@ -80,6 +81,17 @@ public:
 	bool loadUnit(int unitType);
 
 	bool loadUnitGraphics(const UnitProperties* prop);
+
+	/**
+	 * Load pixmaps of available actions (attack, move ...). This must be
+	 * done before @ref actionPixmap can return anything useful
+	 **/
+	bool loadActionGraphics();
+
+	/**
+	 * @return Pixmap for the specified action
+	 **/
+	QPixmap* actionPixmap(UnitAction action);
 
 	int unitWidth(int unitType);
 	int unitHeight(int unitType);

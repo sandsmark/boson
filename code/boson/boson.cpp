@@ -302,6 +302,40 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 		}
 		break;
 	}
+	case BosonMessage::MoveStop:
+	{
+		Q_UINT32 unitCount;
+		stream >> unitCount;
+		QPtrList<Unit> unitsToStop;
+		for (unsigned int i = 0; i < unitCount; i++) {
+			Q_ULONG unitId;
+			stream >> unitId;
+			Unit* unit = findUnit(unitId, player);
+			if (!unit) {
+				kdDebug() << "unit " << unitId << " not found for this player" << endl;
+				continue;
+			}
+			if (unit->owner() != player) {
+				kdDebug() << "unit " << unitId << "only owner can stop units!" << endl;
+				continue;
+			}
+			if (unit->isDestroyed()) {
+				kdDebug() << "cannot stop destroyed units" << endl;
+				continue;
+			}
+			unitsToStop.append(unit);
+		}
+		if (unitsToStop.count() == 0) {
+			kdWarning() << k_lineinfo << "no unit to stop" << endl;
+			break;
+		}
+		QPtrListIterator<Unit> it(unitsToStop);
+		while (it.current()) {
+			it.current()->stopAttacking();  // call stopAttacking() because it also sets unit's work to WorkNone... and it doesn't hurt
+			++it;
+		}
+		break;
+	}
 	case BosonMessage::MoveMine:
 	{
 		kdDebug() << "MoveMine" << endl;
@@ -1234,7 +1268,7 @@ bool Boson::save(QDataStream& stream, bool saveplayers)
 	stream << (Q_INT8)true;
 	// Save map
 	d->mPlayField->saveMap(stream);
-	
+
 	// Save local player (only id)
 	stream << d->mPlayer->id();
  } else {

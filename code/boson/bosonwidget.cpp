@@ -829,7 +829,7 @@ void BosonWidget::initKeys()
 			s, actionCollection(),
 			QString("create_group_%1").arg(i));
  }
-#else 
+#else
  // KAction supports slots that take integer parameter :-)
  (void)new KAction(i18n("Scroll Up"), Qt::Key_Up, displayManager(),
 		SLOT(slotScroll(int)), actionCollection(),
