@@ -285,8 +285,6 @@ protected slots:
 	 **/
 	void slotCheckGameDockStatus();
 
-	void slotRemoveFromGUIFactory(QObject*);
-
 private:
 	void initDisplayManager();
 	void initBoson();

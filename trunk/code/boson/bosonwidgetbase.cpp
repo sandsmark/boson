@@ -124,6 +124,11 @@ BosonWidgetBase::BosonWidgetBase(QWidget* parent)
 BosonWidgetBase::~BosonWidgetBase()
 {
  boDebug() << k_funcinfo << endl;
+ if (factory()) {
+	// remove the bosonwidget-specific menus from the XML GUI (menubar,
+	// toolbar, ...)
+	factory()->removeClient(this);
+ }
  if (mDisplayManager) {
 	// we do NOT delete the display manager here
 	setDisplayManager(0);
