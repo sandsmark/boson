@@ -23,6 +23,7 @@
 #include "bodebug.h"
 #include "bosonmap.h"
 #include "bosongroundtheme.h"
+#include "bofiledialog.h"
 
 #include <klocale.h>
 #include <kfiledialog.h>
@@ -158,7 +159,7 @@ bool BoTexMapImportDialog::unchanged() const
 void BoTexMapImportDialog::slotSelectTexMapImage()
 {
  BO_CHECK_NULL_RET(d->mMap);
- QString fileName = KFileDialog::getOpenFileName(QString::null, "*.png", this);
+ QString fileName = BoFileDialog::getOpenFileName(QString::null, "*.png", this);
  if (fileName.isNull()) {
 	return;
  }

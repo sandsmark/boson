@@ -50,6 +50,7 @@
 #include "bomeshrenderermanager.h"
 #include "playerio.h"
 #include "botexmapimportdialog.h"
+#include "bofiledialog.h"
 #ifdef BOSON_USE_BOMEMORY
 #include "bomemory/bomemorydialog.h"
 #endif
@@ -1369,7 +1370,7 @@ void BosonMenuInput::slotEditorSavePlayFieldAs()
 {
  boDebug() << k_funcinfo << endl;
  QString startIn; // shall we provide this??
- QString fileName = KFileDialog::getSaveFileName(startIn, "*.bpf", 0);
+ QString fileName = BoFileDialog::getSaveFileName(startIn, "*.bpf", 0);
  if (fileName.isNull()) {
 	return;
  }
@@ -1464,7 +1465,7 @@ void BosonMenuInput::slotEditorImportHeightMap()
  BO_CHECK_NULL_RET(boGame->playField());
  BO_CHECK_NULL_RET(boGame->playField()->map());
  boDebug() << k_funcinfo << endl;
- QString fileName = KFileDialog::getOpenFileName(QString::null, "*.png", 0);
+ QString fileName = BoFileDialog::getOpenFileName(QString::null, "*.png", 0);
  if (fileName.isNull()) {
 	return;
  }
@@ -1500,7 +1501,7 @@ void BosonMenuInput::slotEditorExportHeightMap()
  BO_CHECK_NULL_RET(boGame->playField());
  BO_CHECK_NULL_RET(boGame->playField()->map());
  boDebug() << k_funcinfo << endl;
- QString fileName = KFileDialog::getSaveFileName(QString::null, "*.png", 0);
+ QString fileName = BoFileDialog::getSaveFileName(QString::null, "*.png", 0);
  if (fileName.isNull()) {
 	return;
  }
@@ -1565,7 +1566,7 @@ void BosonMenuInput::slotEditorExportTexMap()
  boDebug() << k_funcinfo << "tex: " << tex << endl;
  delete d;
 
- QString fileName = KFileDialog::getSaveFileName(QString::null, "*.png", 0);
+ QString fileName = BoFileDialog::getSaveFileName(QString::null, "*.png", 0);
  if (fileName.isNull()) {
 	return;
  }
