@@ -161,11 +161,11 @@ void Bo3DSLoad::loadMesh(Lib3dsNode* node)
 	return;
  }
  if (mesh->faces < 1) {
-	boWarning() << k_funcinfo << "no faces in " << mesh->name << " of " << file() << endl;
+	boWarning() << k_funcinfo << "no faces in mesh " << mesh->name << " of " << file() << endl;
 	return;
  }
  if (mesh->points < 1) {
-	boWarning() << k_funcinfo << "no points in " << mesh->name << " of " << file() << endl;
+	boWarning() << k_funcinfo << "no points in mesh " << mesh->name << " of " << file() << endl;
 	return;
  }
  if (mesh->texels != 0 && mesh->texels != mesh->points) {
