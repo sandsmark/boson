@@ -27,6 +27,7 @@ class QString;
 class BosonMap;
 class BoMatrix;
 class bofixed;
+class BoTexture;
 template<class T> class BoVector3;
 typedef BoVector3<bofixed> BoVector3Fixed;
 typedef BoVector3<float> BoVector3Float;
@@ -177,6 +178,13 @@ public:
 	static void getCell(int* renderCells, unsigned int cellCount, int* x, int* y, int* w, int* h);
 	static int* makeCellArray(unsigned int count);
 
+	/**
+	 * Call this when fogged status of a cell changes.
+	 * This updates the fog texture accordingly.
+	 **/
+	void cellChanged(int x, int y);
+	void initFogTexture(const BosonMap* map);
+
 protected:
 	/**
 	 * This generates an array of visible cells for the @p playerIO. It works
@@ -257,6 +265,13 @@ private:
 	int* mRenderCells;
 	int mRenderCellsSize; // max. number of cells in the array
 	unsigned int mRenderCellsCount; // actual number of cells in the array
+
+	BoTexture* mFogTexture;
+	unsigned char* mFogTextureData;
+	int mFogTextureDataW;
+	int mFogTextureDataH;
+	unsigned int mLastMapWidth;
+	unsigned int mLastMapHeight;
 };
 
 #endif

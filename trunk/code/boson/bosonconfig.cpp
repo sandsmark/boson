@@ -314,6 +314,7 @@ BosonConfig::BosonConfig(KConfig* conf)
  mShowResources = true;
  mEnableColormap = false;
  mDisableModelLoading = false;
+ mTextureFOW = true;
  mDefaultLodCount = 5;
 
  // these are dynamic entries. usually they are added in the class where they
