@@ -17,9 +17,3 @@ HotspotX=number      -  The horizontal hotspot of the cursor. Example:
                         center of the cursor
 HotspotY=number      -  See above.
 
-
-X-Cursors (The animated ones are actually sprites) have a very easy filename
-syntax. They are just named like "action.png". E.g.:
-move.png
-where the animated cursors are in
-move/
