@@ -28,6 +28,7 @@ class Player;
 class BosonCanvas;
 class UnitProperties;
 class Cell;
+class Facility;
 
 /**
  * Implementation of the visual parts of a unit. As far as possible all stuff
@@ -49,6 +50,8 @@ public:
 		IdMoveDestY = UnitBase::IdLast + 4,
 		IdMob_MovingFailed = UnitBase::IdLast + 5,
 		IdMob_ResourcesMined = UnitBase::IdLast + 6,
+		IdMob_ResourcesX= UnitBase::IdLast + 7,
+		IdMob_ResourcesY= UnitBase::IdLast + 8,
 		IdFix_ConstructionState = UnitBase::IdLast + 20,
 		IdFix_Productions = UnitBase::IdLast + 21,
 		IdFix_ProductionState = UnitBase::IdLast + 22,
@@ -117,6 +120,8 @@ public:
 	 **/
 	virtual void advanceMine() { }
 
+	virtual void advanceRefine() { }
+
 	/**
 	 * Attack a unit. The target was set before using @ref setTarget
 	 **/
@@ -142,6 +147,7 @@ public:
 
 	inline Unit* target() const;
 	virtual void setTarget(Unit* target);
+
 	bool inRange(Unit* unit) const;
 
 // waypoint stuff: // also in facility - produced units receive this initial waypoint
@@ -236,6 +242,12 @@ public:
 	int destinationX() const;
 	int destinationY() const;
 
+	/**
+	 * @return TRUE if this unit is next to unit (i.e. less than one cell
+	 * distance) otherwise FALSE
+	 **/
+	bool isNextTo(Unit* unit) const;
+
 protected:
 	void shootAt(Unit* target);
 
@@ -293,6 +305,7 @@ public:
 	void leaderMoved(double x, double y);
 
 	virtual void advanceMine();
+	virtual void advanceRefine();
 	virtual void advanceMove(); // move one step futher to path
 	/**
 	 * Move according to the velocity of leader
@@ -302,8 +315,20 @@ public:
 
 	/**
 	 * @return The number of resources that have been mined by this unit.
+	 * Always 0 if this unit can't mine oil/minerals
 	 **/
 	unsigned int resourcesMined() const;
+	
+	/**
+	 * @return The x-coordinate of the resource field or 0 if none has been
+	 * set or this unit cannot mine.
+	 **/
+	int resourcesX() const;
+	/**
+	 * @return The y-coordinate of the resource field or 0 if none has been
+	 * set or this unit cannot mine.
+	 **/
+	int resourcesY() const;
 
 	/**
 	 * @return TRUE if this unit can mine the minerals at cell (if any), 
@@ -315,6 +340,15 @@ public:
 	 * Order the unit to mine minerals/oil at pos
 	 **/
 	void mineAt(const QPoint& pos);
+
+	void setRefinery(Facility* refinery);
+
+	/**
+	 * We use @ref target for the refinery. If @ref target is not a refinery
+	 * we return NULL
+	 * @return NULL if no valid refinery is set, otherwise the refinery.
+	 **/
+	inline Facility* refinery() const;
 
 private:
 	// a d pointer is probably not very good here - far too much memory consumption
