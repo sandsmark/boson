@@ -1320,6 +1320,20 @@ class Bo3dTools
      **/
     static void enableReadDepthBufferWorkaround(float _1_0_depthValue);
     static void disableReadDepthBufferWorkaround();
+
+    /**
+     * Check whether there is any OpenGL error and output an error to the
+     * konsole if there is one. The error state is cleared then (since @ref
+     * glGetError is used).
+     *
+     * @param error If non-NULL this is set to the error (if any) or to GL_NO_ERROR
+     * @param errorString If non-NULL this is set to the error string describing
+     * @p error, or to an empty string if there is no error. @ref gluErrorString
+     * is used for this string.
+     * @param errorName If non-NULL this is set to the name of the enum that describes
+     * @p error, or an empty string if there is no error.
+     **/
+    static bool checkError(GLenum* error = 0, QString* errorString = 0, QString* errorName = 0);
 };
 
 

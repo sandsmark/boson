@@ -536,7 +536,7 @@ void BosonBigDisplayBase::initializeGL()
 
  BoVector4 lightDif(1.0f, 1.0f, 1.0f, 1.0f);
  BoVector4 lightAmb(0.5f, 0.5f, 0.5f, 1.0f);
- BoVector4 lightPos(-6000.0, 3000.0, 10000.0, 1.0);
+ BoVector3 lightPos(-6000.0, 3000.0, 10000.0);
 
  BoLight* l = newLight();
  // This is the "main" light, i.e. the Sun. It should always have id 0
@@ -546,7 +546,8 @@ void BosonBigDisplayBase::initializeGL()
  l->setAmbient(lightAmb);
  l->setDiffuse(lightDif);
  l->setSpecular(lightDif);
- l->setPosition(lightPos);
+ l->setDirectional(false); // AB: actually we would want TRUE here, as it is the sun!
+ l->setPosition3(lightPos);
 
  l->setEnabled(true);
 
@@ -2630,38 +2631,7 @@ BoAutoGameCamera* BosonBigDisplayBase::autoCamera() const
 
 bool BosonBigDisplayBase::checkError() const
 {
- bool ret = true;
- GLenum e = glGetError();
- switch (e) {
-	case GL_INVALID_ENUM:
-		boError() << "GL_INVALID_ENUM" << endl;
-		break;
-	case GL_INVALID_VALUE:
-		boError() << "GL_INVALID_VALUE" << endl;
-		break;
-	case GL_INVALID_OPERATION:
-		boError() << "GL_INVALID_OPERATION" << endl;
-		break;
-	case GL_STACK_OVERFLOW:
-		boError() << "GL_STACK_OVERFLOW" << endl;
-		break;
-	case GL_STACK_UNDERFLOW:
-		boError() << "GL_STACK_UNDERFLOW" << endl;
-		break;
-	case GL_OUT_OF_MEMORY:
-		boError() << "GL_OUT_OF_MEMORY" << endl;
-		break;
-	case GL_NO_ERROR:
-		ret = false;
-		break;
-	default:
-		boError() << "Unknown OpenGL Error: " << (int)e << endl;
-		break;
- }
- if (e != GL_NO_ERROR) {
-	boError() << "Error string: " << (char*)gluErrorString(e) << endl;
- }
- return ret;
+ return Bo3dTools::checkError();
 }
 
 void BosonBigDisplayBase::setUpdateInterval(unsigned int ms)
