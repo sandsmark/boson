@@ -49,6 +49,14 @@ public slots:
 
 signals:
 	/**
+	 * Start a scenario. This should be done after loading map and scenario
+	 * (a scenario is loaded first, <em>then</em> started). It is
+	 * implemented using @ref KGame::sendMessage as the map must be loaded
+	 * this way as well.
+	 **/
+	void signalStartScenario();
+
+	/**
 	 * @param unit The unit to be added
 	 * @param x x-coordinate of the unit on the canvas
 	 * @param y y-coordinate of the unit on the canvas

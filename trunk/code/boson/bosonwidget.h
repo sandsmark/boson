@@ -53,8 +53,10 @@ signals:
 	void signalPlayerJoinedGame(KPlayer* p); // used by the map editor
 	void signalPlayerLeftGame(KPlayer* p); // used by the map editor
 
+protected slots:
+	void slotStartScenario();
+
 protected:
-	void startScenario();
 	void changeLocalPlayer(Player* p);
 	virtual void keyReleaseEvent(QKeyEvent* e);
 

@@ -129,37 +129,39 @@ void BosonWidget::init()
 // AB: but nevertheless this might be necessary - e.g. Boson::signalAddUnit()
 // sends a request to add a unit but Boson should rather create it itself.
  d->mBoson = new Boson(this);
- connect(d->mBoson, SIGNAL(signalAdvance()), 
+ connect(d->mBoson, SIGNAL(signalAdvance()),
 		d->mCanvas, SLOT(advance()));
- connect(d->mBoson, SIGNAL(signalAddUnit(VisualUnit*, int, int)), 
+ connect(d->mBoson, SIGNAL(signalAddUnit(VisualUnit*, int, int)),
 		d->mCanvas, SLOT(slotAddUnit(VisualUnit*, int, int))); // needs a QCanvas - we need to call Boson::setCanvas for this
- connect(d->mBoson, SIGNAL(signalAddUnit(VisualUnit*, int, int)), 
+ connect(d->mBoson, SIGNAL(signalAddUnit(VisualUnit*, int, int)),
 		d->mMiniMap, SLOT(slotAddUnit(VisualUnit*, int, int)));
- connect(d->mBoson, SIGNAL(signalAddUnit(VisualUnit*, int, int)), 
+ connect(d->mBoson, SIGNAL(signalAddUnit(VisualUnit*, int, int)),
 		this, SLOT(slotAddUnit(VisualUnit*, int, int)));
- connect(d->mBoson, SIGNAL(signalPlayerJoinedGame(KPlayer*)), 
+ connect(d->mBoson, SIGNAL(signalPlayerJoinedGame(KPlayer*)),
 		this, SIGNAL(signalPlayerJoinedGame(KPlayer*)));
- connect(d->mBoson, SIGNAL(signalPlayerJoinedGame(KPlayer*)), 
+ connect(d->mBoson, SIGNAL(signalPlayerJoinedGame(KPlayer*)),
 		this, SLOT(slotPlayerJoinedGame(KPlayer*)));
- connect(d->mBoson, SIGNAL(signalPlayerLeftGame(KPlayer*)), 
+ connect(d->mBoson, SIGNAL(signalPlayerLeftGame(KPlayer*)),
 		this, SIGNAL(signalPlayerLeftGame(KPlayer*)));
- connect(d->mBoson, SIGNAL(signalInitMap(const QByteArray&)), 
+ connect(d->mBoson, SIGNAL(signalInitMap(const QByteArray&)),
 		this, SLOT(slotReceiveMap(const QByteArray&)));
+ connect(d->mBoson, SIGNAL(signalStartScenario()),
+		this, SLOT(slotStartScenario()));
 
 
- connect(d->mBigDisplay, SIGNAL(contentsMoving(int, int)), 
+ connect(d->mBigDisplay, SIGNAL(contentsMoving(int, int)),
 		d->mMiniMap, SLOT(slotMoveRect(int, int)));
- connect(d->mBigDisplay, SIGNAL(signalSizeChanged(int, int)), 
+ connect(d->mBigDisplay, SIGNAL(signalSizeChanged(int, int)),
 		d->mMiniMap, SLOT(slotResizeRect(int, int)));
  connect(d->mBigDisplay, SIGNAL(signalAddCell(int,int, int, unsigned char)),
 		d->mCanvas, SLOT(slotAddCell(int, int, int, unsigned char)));
  connect(d->mBigDisplay, SIGNAL(signalAddCell(int,int, int, unsigned char)),
 		d->mMiniMap, SLOT(slotAddCell(int, int, int, unsigned char)));
 		
- connect(d->mMiniMap, SIGNAL(signalReCenterView(const QPoint&)), 
+ connect(d->mMiniMap, SIGNAL(signalReCenterView(const QPoint&)),
 		d->mBigDisplay, SLOT(slotReCenterView(const QPoint&)));
 
- connect(d->mCanvas, SIGNAL(signalUnitMoved(VisualUnit*, double, double)), 
+ connect(d->mCanvas, SIGNAL(signalUnitMoved(VisualUnit*, double, double)),
 		d->mMiniMap, SLOT(slotMoveUnit(VisualUnit*, double, double)));
 // connect(d->mCanvas, SIGNAL(signalUnitDestroyed(VisualUnit*)), 
 //		d->mBigDisplay, SLOT(slotUnitDestroyed(VisualUnit*)));
@@ -278,11 +280,11 @@ void BosonWidget::slotNewGame()
  // add our costum game config widget
  KGameDialogBosonConfig* bosonConfig = new KGameDialogBosonConfig(0);
  connect(bosonConfig, SIGNAL(signalStartGame()), this, SLOT(slotStartGame()));
- connect(bosonConfig, SIGNAL(signalAddComputerPlayer()), 
+ connect(bosonConfig, SIGNAL(signalAddComputerPlayer()),
 		this, SLOT(slotAddComputerPlayer()));
- connect(bosonConfig, SIGNAL(signalMapChanged(const QString&)), 
+ connect(bosonConfig, SIGNAL(signalMapChanged(const QString&)),
 		this, SLOT(slotLoadMap(const QString&)));
- connect(bosonConfig, SIGNAL(signalScenarioChanged(const QString&)), 
+ connect(bosonConfig, SIGNAL(signalScenarioChanged(const QString&)),
 		this, SLOT(slotLoadScenario(const QString&)));
 
  // add a chat widget
@@ -292,7 +294,7 @@ void BosonWidget::slotNewGame()
 
  // add a network config
  dialog->addNetworkConfig(new KGameDialogNetworkConfig(0));
- 
+
  // a connection list - aka "ban this player"
  page = dialog->configPage(KGameDialog::NetworkConfig);
  dialog->addConnectionList(new KGameDialogConnectionConfig(0), page);
@@ -318,22 +320,21 @@ void BosonWidget::slotStartGame()
 	kdWarning() << "game already running" << endl;
 	return;
  }
- if (d->mBoson->playerCount() < d->mBoson->minPlayers()) { 
+ if (d->mBoson->playerCount() < d->mBoson->minPlayers()) {
 	KMessageBox::sorry(this, i18n("Need at least %1 players").arg(d->mBoson->minPlayers()));
 	kdError() << "not enough players" << endl;
 	return;
  }
- if (d->mBoson->maxPlayers() > 0 && (int)d->mBoson->playerCount() > d->mBoson->maxPlayers()) { 
+ if (d->mBoson->maxPlayers() > 0 && (int)d->mBoson->playerCount() > d->mBoson->maxPlayers()) {
 	KMessageBox::sorry(this, i18n("Maximal %1 players").arg(d->mBoson->maxPlayers()));
 	kdError() << "too many players" << endl;
 	return;
  }
 
- startScenario();
- d->mBoson->startGame();
+ d->mBoson->sendMessage(0, BosonMessage::IdStartScenario);
 }
 
-void BosonWidget::startScenario()
+void BosonWidget::slotStartScenario()
 {
  kdDebug() << "start scenario" << endl;
  d->mScenario->startScenario(d->mBoson);
@@ -352,6 +353,7 @@ void BosonWidget::startScenario()
 	QString species = "human";
 	((Player*)d->mBoson->playerList()->at(i))->loadTheme(species, color);
  }
+ d->mBoson->startGame(); // correct here? should be so.
 }
 
 void BosonWidget::slotPreferences()
@@ -444,11 +446,11 @@ void BosonWidget::addGameCommandFrame()
 { // remember to call this *after* init() - otherwise connect()s won't work
  d->mCommandFrame = new BosonCommandFrame(this, false);
 
- connect(d->mCommandFrame, SIGNAL(signalUnitSelected(int,VisualUnit*, Player*)), 
+ connect(d->mCommandFrame, SIGNAL(signalUnitSelected(int,VisualUnit*, Player*)),
 		d->mBigDisplay, SLOT(slotWillConstructUnit(int, VisualUnit*, Player*))); // in addEditorCommandFrame()
- connect(d->mBigDisplay, SIGNAL(signalSingleUnitSelected(VisualUnit*)), 
+ connect(d->mBigDisplay, SIGNAL(signalSingleUnitSelected(VisualUnit*)),
 		d->mCommandFrame, SLOT(slotShowSingleUnit(VisualUnit*)));
- connect(d->mBigDisplay, SIGNAL(signalSingleUnitSelected(VisualUnit*)), 
+ connect(d->mBigDisplay, SIGNAL(signalSingleUnitSelected(VisualUnit*)),
 		d->mCommandFrame, SLOT(slotSetConstruction(VisualUnit*)));
 }
 
@@ -472,8 +474,8 @@ void BosonWidget::startEditor()
  slotLoadMap(BosonMap::defaultMap());
  slotLoadScenario(BosonScenario::defaultScenario()); // perhaps this should load the map as well - as it depends on the map...
 
- // TODO: d->mScenario->startScenario(d->mBoson); // wait for map from network
- d->mBoson->startGame(); // AB: working here?
+
+ d->mBoson->sendMessage(0, BosonMessage::IdStartScenario);
 }
 
 void BosonWidget::slotLoadMap(const QString& map)
