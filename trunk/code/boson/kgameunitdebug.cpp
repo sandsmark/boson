@@ -26,6 +26,7 @@
 #include <klistbox.h>
 #include <klocale.h>
 #include <kdebug.h>
+#include <kgame/kgamepropertyhandler.h>
 
 #include <qlayout.h>
 #include <qpushbutton.h>
@@ -50,6 +51,7 @@ public:
 	KListView* mProduction;
 
 	QIntDict<Unit> mUnits;
+	QPtrDict<QListViewItem> mItems;
 
 	// column ids:
 	int mId;
@@ -131,6 +133,7 @@ void KGameUnitDebug::slotUpdate()
  d->mUnitList->clear();
 // d->mUnitView->clear();
  d->mUnits.clear();
+ d->mItems.clear();
  d->mWaypoints->clear();
  d->mProduction->clear();
  if (!d->mBoson) {
@@ -162,6 +165,14 @@ void KGameUnitDebug::slotUpdate()
 void KGameUnitDebug::addUnit(Unit* unit)
 {
  QListViewItem* item = new QListViewItem(d->mUnitList);
+ d->mItems.insert(unit, item);
+ connect(unit->dataHandler(), SIGNAL(signalPropertyChanged(KGamePropertyBase*)),
+		this, SLOT(slotUnitPropertyChanged(KGamePropertyBase*)));
+ update(item, unit);
+}
+
+void KGameUnitDebug::update(QListViewItem* item, Unit* unit)
+{
  item->setText(d->mId, QString::number(unit->id()));
  item->setText(d->mOwner, QString::number(unit->owner() ? unit->owner()->id() : 0));
  item->setText(d->mRTTI, QString::number(unit->rtti()));
@@ -174,6 +185,35 @@ void KGameUnitDebug::addUnit(Unit* unit)
  item->setText(d->mSpeed, QString::number(unit->speed()));
  item->setText(d->mWidth, QString::number(unit->width()));
  item->setText(d->mHeight, QString::number(unit->height()));
+}
+
+void KGameUnitDebug::slotUnitPropertyChanged(KGamePropertyBase* prop)
+{
+// again, our evil hack. See Player::slotUnitPropertyChanged()
+ Unit* unit = 0;
+ QPtrList<Unit> units;
+ QPtrList<KPlayer>list = *d->mBoson->playerList();
+ for (unsigned int i = 0; i < d->mBoson->playerCount() && !unit; i++) {
+	QPtrList<Unit> playerUnits = ((Player*)list.at(i))->allUnits();
+	for (unit = playerUnits.first(); unit; unit = playerUnits.next()) {
+		if (unit->dataHandler() == (KGamePropertyHandler*)sender()) {
+			break;
+		}
+		
+	}
+ }
+ if (!unit) {
+	kdWarning() << k_funcinfo << "unit not found" << endl;
+	return;
+ }
+
+ switch (prop->id()) {
+	case Unit::IdReloadState:
+		break;
+	default:
+		update(d->mItems[unit], unit);
+		break;
+ }
 }
 
 void KGameUnitDebug::updateWaypoints(QListViewItem* item)
