@@ -26,11 +26,13 @@
 #include "bodebug.h"
 
 #include <kgame/kgamepropertyhandler.h>
+#include <kstaticdeleter.h>
 
 #include <qdom.h>
 #include <qmap.h>
 
 QMap<int, QString>* UnitBase::mPropertyMap = 0;
+static KStaticDeleter< QMap<int, QString> > sd;
 
 UnitBase::UnitBase(const UnitProperties* prop)
 {
@@ -83,8 +85,13 @@ UnitBase::~UnitBase()
 
 void UnitBase::initStatic()
 {
+ if (mPropertyMap) {
+	boError() << k_funcinfo << "Called twice" << endl;
+	return;
+ }
  delete mPropertyMap;
  mPropertyMap = new QMap<int, QString>;
+ sd.setObject(mPropertyMap);
  addPropertyId(IdHealth, QString::fromLatin1("Health"));
  addPropertyId(IdArmor, QString::fromLatin1("Armor"));
  addPropertyId(IdShields, QString::fromLatin1("Shields"));
