@@ -637,6 +637,7 @@ void ModelPreview::renderModel(int mode)
 		boError() << k_funcinfo << "NULL frame" << endl;
 	}
  }
+ BoMaterial::deactivate();
 
  glPopAttrib();
  glDisableClientState(GL_VERTEX_ARRAY);
