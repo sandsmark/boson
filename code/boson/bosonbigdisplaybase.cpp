@@ -1777,7 +1777,7 @@ void BosonBigDisplayBase::slotCenterHomeBase()
  // find the command center of the local player
  QPoint pos(0, 0); // note: we use *cell* coordinates!
  Player* p = localPlayer();
- QPtrList<Unit> units = p->allUnits();
+ QPtrList<Unit> units = *(p->allUnits());
  QPtrListIterator<Unit> it(units);
  Unit* commandCenter = 0;
  for (; it.current() && !commandCenter; ++it) {

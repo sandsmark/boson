@@ -325,8 +325,7 @@ bool EditorBigDisplayInput::selectAll(const UnitProperties* prop, bool replace)
 {
  QPtrList<Unit> list;
  for (unsigned int i = 0; i < boGame->playerCount(); i++) {
-	QPtrList<Unit> allUnits = ((Player*)boGame->playerList()->at(i))->allUnits();
-	QPtrListIterator<Unit> it(allUnits);
+	QPtrListIterator<Unit> it(*(((Player*)boGame->playerList()->at(i))->allUnits()));
 	while (it.current()) {
 		if (it.current()->unitProperties()->typeId() == prop->typeId()) {
 			if (canSelect(it.current()) == CanSelectMultipleOk) {

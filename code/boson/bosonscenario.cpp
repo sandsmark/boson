@@ -427,8 +427,7 @@ bool BosonScenario::savePlayer(QDomElement& node, Player* p)
  }
 
  // now save all units of the player into node
- QPtrList<Unit> list = p->allUnits();
- QPtrListIterator<Unit> it(list);
+ QPtrListIterator<Unit> it(*(p->allUnits()));
  while (it.current()) {
 	Unit* u = it.current();
 	QDomElement unit = doc.createElement("Unit");

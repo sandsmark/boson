@@ -195,7 +195,7 @@ void KGameUnitDebug::slotUpdate()
  QPtrList<Unit> units;
  QPtrList<KPlayer>list = *d->mBoson->playerList();
  for (unsigned int i = 0; i < d->mBoson->playerCount(); i++) {
-	QPtrList<Unit> playerUnits = ((Player*)list.at(i))->allUnits();
+	QPtrList<Unit> playerUnits = *((Player*)list.at(i))->allUnits();
 	for (unsigned int j = 0; j < playerUnits.count(); j++) {
 		units.append(playerUnits.at(j));
 	}
@@ -249,7 +249,7 @@ void KGameUnitDebug::slotUnitPropertyChanged(KGamePropertyBase* prop)
  QPtrList<Unit> units;
  QPtrList<KPlayer>list = *d->mBoson->playerList();
  for (unsigned int i = 0; i < d->mBoson->playerCount() && !unit; i++) {
-	QPtrList<Unit> playerUnits = ((Player*)list.at(i))->allUnits();
+	QPtrList<Unit> playerUnits = *((Player*)list.at(i))->allUnits();
 	for (unit = playerUnits.first(); unit; unit = playerUnits.next()) {
 		if (unit->dataHandler() == (KGamePropertyHandler*)sender()) {
 			break;

@@ -44,6 +44,8 @@ template<class TYPE> class UpgradePropertiesValue
     virtual QString loadBaseValue(KSimpleConfig* cfg, QString key);
     void applyProperty(QValueList<unsigned long int>* typeIds, Player* player,
         UpgradeType type);
+    void applyPropertyToUnits(TYPE oldvalue, unsigned long int typeId,
+        Player* player, UpgradeType type);
     TYPE applyValue(TYPE applyTo);
 
     ValueType type;

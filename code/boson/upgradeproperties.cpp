@@ -251,6 +251,7 @@ template<class TYPE> void UpgradePropertiesValue<TYPE>::applyProperty(QValueList
   }
   boDebug() << "  " << k_funcinfo << "Applying property (type: " << type << ") to " << typeIds->count() << " props" << endl;
   QValueList<unsigned long int>::Iterator it;
+  TYPE oldvalue;
   for(it = typeIds->begin(); it != typeIds->end(); it++)
   {
     boDebug() << "    " << k_funcinfo << "Applying to prop with id " << *it << endl;
@@ -260,19 +261,22 @@ template<class TYPE> void UpgradePropertiesValue<TYPE>::applyProperty(QValueList
     {
       case Health:
       {
-        boDebug() << "        " << k_funcinfo << "Applying health; old value: " << prop->health() << endl;
-        prop->setHealth(applyValue(prop->health()));
+        oldvalue = prop->health();
+        boDebug() << "        " << k_funcinfo << "Applying health; old value: " << oldvalue << endl;
+        prop->setHealth(applyValue(oldvalue));
         boDebug() << "        " << k_funcinfo << "New value: " << prop->health() << endl;
         break;
       }
       case Armor:
       {
-        prop->setArmor(applyValue(prop->armor()));
+        oldvalue = prop->armor();
+        prop->setArmor(applyValue(oldvalue));
         break;
       }
       case Shields:
       {
-        prop->setShields(applyValue(prop->shields()));
+        oldvalue = prop->shields();
+        prop->setShields(applyValue(oldvalue));
         break;
       }
       case MineralCost:
@@ -287,7 +291,8 @@ template<class TYPE> void UpgradePropertiesValue<TYPE>::applyProperty(QValueList
       }
       case SightRange:
       {
-        prop->setSightRange(applyValue(prop->sightRange()));
+        oldvalue = prop->sightRange();
+        prop->setSightRange(applyValue(oldvalue));
         break;
       }
       case ProductionTime:
@@ -301,6 +306,68 @@ template<class TYPE> void UpgradePropertiesValue<TYPE>::applyProperty(QValueList
         break;
       }
     }
+    // Apply to already existing units
+    boDebug() << "    " << k_funcinfo << "Applying to existing units with typeid " << *it << endl;
+    applyPropertyToUnits(oldvalue, *it, player, type);
+  }
+}
+
+template<class TYPE> void UpgradePropertiesValue<TYPE>::applyPropertyToUnits(TYPE oldvalue,
+    unsigned long int typeId, Player* player, UpgradeType type)
+{
+  boDebug() << "      " << k_funcinfo << "PARAMS: oldvalue: " << oldvalue << "; typeId: " << typeId <<
+      "; player: " << player << "; type: " << type << endl;
+  // First check if this upgrade should applied to already existing units
+  switch(type)
+  {
+    // These must be updated:
+    case Health:
+    case Armor:
+    case Shields:
+    case SightRange:
+    {
+      break;
+    }
+    default:
+    {
+      // Other types are not stored in UnitBase nor Unit
+      return;
+    }
+  }
+  boDebug() << "      " << k_funcinfo << "Starting to apply" << endl;
+  QPtrListIterator<Unit> it(*(player->allUnits()));
+  boDebug() << "        " << k_funcinfo << "Unit count: " << it.count() << endl;
+  Unit* u;
+  while(it.current())
+  {
+    u = it.current();
+    if(u->type() == typeId)
+    {
+      if(type == Health)
+      {
+        // Health is special: we have to take old health into account as well
+        //int oldhealth = u->health();
+        u->setHealth((u->health() / (float)oldvalue) * u->unitProperties()->health());
+        /*boDebug() << "        " << k_funcinfo << "Applying to unit with id " << u->id() <<
+            "; old: " << oldhealth << "; old max: " << oldvalue << "; new max: " <<
+            u->unitProperties()->health() << "; new health: " << u->health() << endl;*/
+      }
+      else if(type == Shields)
+      {
+        // Shields are also quite special, but not that special, so we use simpler approach here
+        u->setShields(u->unitProperties()->shields() - (oldvalue - u->shields()));
+      }
+      else if(type == Armor)
+      {
+        // New value will just replace the old one
+        u->setArmor(u->unitProperties()->armor());
+      }
+      else if(type == SightRange)
+      {
+        u->setSightRange(u->unitProperties()->sightRange());
+      }
+    }
+    ++it;
   }
 }
 
