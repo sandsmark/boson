@@ -26,6 +26,7 @@
 #include "boitemlist.h"
 #include "bodebug.h"
 #include "defines.h"
+#include "bosonprofiling.h"
 
 #include <qptrvector.h>
 
@@ -108,6 +109,7 @@ Unit* BosonCollisions::findUnitAt(const BoVector3Fixed& pos) const
 
 QValueList<Unit*> BosonCollisions::unitCollisionsInRange(const BoVector2Fixed& pos, bofixed radius) const
 {
+ PROFILE_METHOD
  BoItemList* l = collisions(BoRectFixed(QMAX(pos.x() - radius, bofixed(0)), QMAX(pos.y() - radius, bofixed(0)),
 		pos.x() + radius, pos.y() + radius));
 
@@ -135,6 +137,7 @@ QValueList<Unit*> BosonCollisions::unitCollisionsInRange(const BoVector2Fixed& p
 
 QValueList<Unit*> BosonCollisions::unitCollisionsInSphere(const BoVector3Fixed& pos, bofixed radius) const
 {
+ PROFILE_METHOD
  // FIXME: code duplicated from unitCollisionsInRange
  boDebug(310) << k_funcinfo << endl;
  BoItemList* l = collisions(BoRectFixed(QMAX(pos.x() - radius, bofixed(0)), QMAX(pos.y() - radius, bofixed(0)),
@@ -199,6 +202,7 @@ bool BosonCollisions::cellsOccupied(const BoRectFixed& rect) const
 // this is an extremely time-critical function!
 BoItemList* BosonCollisions::collisionsAtCells(const QPtrVector<Cell>* cells, const BosonItem* item, bool exact) const
 {
+ PROFILE_METHOD
  // FIXME: if exact is true we assume that cells == item->cells() !!
 // AB: item can be NULL, too!
  BoItemList* collisions = new BoItemList(); // will get deleted by BoItemListHandler
@@ -238,6 +242,7 @@ BoItemList* BosonCollisions::collisions(const BoRectFixed& rect, const BosonItem
 
 BoItemList* BosonCollisions::collisionsAtCells(const BoRectFixed& rect, const BosonItem* item, bool exact) const
 {
+ PROFILE_METHOD
  if (!map()) {
 	BO_NULL_ERROR(map());
 	return new BoItemList();
@@ -281,7 +286,7 @@ BoItemList* BosonCollisions::collisionsAtCell(int x, int y) const
 	return new BoItemList();
  }
  cells.insert(0, c);
- boDebug(310) << k_funcinfo << c->x() << " " << c->y() << endl;
+// boDebug(310) << k_funcinfo << c->x() << " " << c->y() << endl;
  return collisionsAtCells(&cells, 0, true); // FIXME: exact = true has no effect
 }
 
@@ -292,6 +297,7 @@ BoItemList* BosonCollisions::collisions(const BoVector2Fixed& pos) const
 
 QValueList<Unit*> BosonCollisions::collisionsInBox(const BoVector3Fixed& v1, const BoVector3Fixed& v2, BosonItem* exclude) const
 {
+ PROFILE_METHOD
  boDebug() << k_funcinfo << "v1: (" << v1.x() << "; " << v1.y() << "; " << v1.z() <<
 		");  v2: (" << v2.x() << "; " << v2.y() << "; " << v2.z() << ")" << endl;
  QValueList<Unit*> units;
