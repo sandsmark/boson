@@ -210,6 +210,7 @@ void BosonMiniMap::changeCell(int x, int y, int groundType, unsigned char)
  }
  switch (groundType) {
 	case Cell::GroundWater:
+	case Cell::GroundDeepWater:
 		setPoint(x, y, blue);
 		break;
 	case Cell::GroundGrass:
