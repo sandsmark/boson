@@ -4,6 +4,7 @@
   <Menu name="game" group="filemenu"><text>&amp;Game</text>
     <Action name="game_center_base" />
     <Action name="game_reset_view_properties" />
+    <Action name="grab_screenshot" />
   </Menu>
   <Menu name="debug" group="debugmenu"><text>&amp;Debug</text>
     <Action name="debug_kgame" />

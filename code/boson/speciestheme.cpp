@@ -890,7 +890,7 @@ BosonModel* SpeciesTheme::objectModel(QString file)
 {
  if(!d->mObjectModels[file]) {
 	// Model isn't loaded yet. Load it now
-	BosonModel* m = new BosonModel(themePath() + "/objects/", file, 0.3, 0.3);
+	BosonModel* m = new BosonModel(themePath() + "/objects/", file, 0.4, 0.4);
 	m->setTeamColor(teamColor());
 	m->loadModel();
 	d->mObjectModels.insert(file, m);

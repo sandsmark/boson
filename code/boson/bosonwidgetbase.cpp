@@ -62,6 +62,7 @@
 #include <qtimer.h>
 #include <qptrdict.h>
 #include <qsignalmapper.h>
+#include <qfile.h>
 
 #include "bosonwidgetbase.moc"
 
@@ -630,7 +631,7 @@ void BosonWidgetBase::initKActions()
  scrollMapper->setMapping(a, BoDisplayManager::ScrollRight);
 
  // FIXME: the editor should not have a "game" menu, so what to do with this?
- (void)new KAction(i18n("&Reset View Properties"), KShortcut(Qt::Key_R), 
+ (void)new KAction(i18n("&Reset View Properties"), KShortcut(Qt::Key_R),
 		displayManager(), SLOT(slotResetViewProperties()), actionCollection(), "game_reset_view_properties");
 
  // Dockwidgets show/hide
@@ -641,6 +642,9 @@ void BosonWidgetBase::initKActions()
 		KShortcut(Qt::CTRL+Qt::Key_F), this, SLOT(slotToggleCmdFrameVisible()),
 		actionCollection(), "options_show_cmdframe");
 
+ // Screenshot
+ (void)new KAction(i18n("&Grab Screenshot"), KShortcut(Qt::CTRL + Qt::Key_G),
+		this, SLOT(slotGrabScreenshot()), actionCollection(), "grab_screenshot");
 
  // Zoom
  d->mActionZoom = new KSelectAction(i18n("&Zoom"), KShortcut(), actionCollection(), "options_zoom");
@@ -977,3 +981,21 @@ void BosonWidgetBase::setLocalPlayerRecursively(Player* p)
  }
 }
 
+void BosonWidgetBase::slotGrabScreenshot()
+{
+ kdDebug() << k_funcinfo << "Taking screenshot!" << endl;
+ QPixmap ss = QPixmap::grabWindow(mTop->winId());
+ QString file;
+ for(int i = 0; i < 1000; i++) {
+	file.sprintf("boson-%03d.png", i);
+	kdDebug() << "Checking if file " << file << " exists" << endl;
+	if(!QFile::exists(file)) {
+		kdDebug() << "    File doesn't exist, breaking" << endl;
+		break;
+	} else {
+		kdDebug() << "    File exists, continuing" << endl;
+	}
+ }
+ kdDebug() << k_funcinfo << "Saving screenshot to " << file << endl;
+ ss.save(file, "PNG");
+}

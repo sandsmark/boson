@@ -189,6 +189,7 @@ protected slots:
 	void slotZoom(int);
 	void slotToggleCmdFrameVisible();
 	void slotToggleChatVisible();
+	void slotGrabScreenshot();
 
 	void slotCmdBackgroundChanged(const QString& file);
 	void slotMiniMapScaleChanged(double);
