@@ -74,7 +74,7 @@ General TODOs
   successfully - should be fixed, but not yet tested
 - shipyard
 - make sure that kdemultimedia is installed - perhaps disable .ogg support
-  somehow if it isn't installed
+  somehow if it isn't
 
 Data TODOs
 - general sound (e.g. speech) - in progress
