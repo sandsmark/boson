@@ -32,22 +32,22 @@
 class Cell {
 
 public:
-	Cell(void) { ground = g_unknown; flags=0u; }
+	Cell(void) { ground = g_unknown; flags=(cell_flags)0u; }
 
 	bool isKnown(void) { return flags&known_f; }	// known_f : known / unknown
 	void setGround(groundType);
 	/** tel if a given mobile can "go" on this cell */
 	bool canGo(mobType type);
 
-	enum {
+	enum cell_flags {
 		known_f	= 0x01,
 		building_f = 0x02,
 		field_unit_f = 0x03,
 		flying_unit_f = 0x04
-	} cell_flags;
+	} flags;
 
-	void	setFlag(uint f) { flags |= f;}
-	void	unsetFlag(uint f) { flags &= ~f; }
+	void	setFlag(cell_flags f) { flags = (cell_flags) (flags|f); } //  { flags |= f;} gives warning ??
+	void	unsetFlag(cell_flags f) { flags = (cell_flags) (flags&~f); }
 
 	bool building(void) { return flags & building_f; }	// building_f : building
 	void put_building(void) { setFlag(building_f); }
@@ -70,8 +70,6 @@ private:
 		g_grass,
 		g_desert
 	} ground;
-	uint  flags;
-	// flags : set/reset
 } ;
 
 
