@@ -24,7 +24,6 @@
 
 #include "common/log.h"
 #include "common/boconfig.h" // MAX_PLAYERS
-#include "common/map.h"
 
 #include "bosonCanvas.h"
 #include "boshot.h"
@@ -187,8 +186,6 @@ void bosonCanvas::createFix(facilityMsg_t &m)
 
 	emit updateFix(f);
 	
-	if ( FACILITY_CMDBUNKER == m.type && m.who == who_am_i)
-		emit reCenterView(m.x, m.y);
 }
 
 
