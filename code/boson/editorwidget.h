@@ -97,6 +97,7 @@ protected slots:
 	void slotEditPlayerMinerals();
 	void slotEditPlayerOil();
 	void slotEditHeight(bool);
+	void slotImportHeightMap();
 
 	void slotLockAction(bool);
 
