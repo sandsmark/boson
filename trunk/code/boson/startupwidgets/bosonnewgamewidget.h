@@ -32,6 +32,8 @@ class BosonPlayField;
 class Player;
 class KPlayer;
 class KGamePropertyBase;
+class BosonCampaign;
+class QListViewItem;
 
 class BosonNewGameWidgetPrivate;
 class BosonNewGameWidget : public BosonNewGameWidgetBase
@@ -114,6 +116,7 @@ protected:
 private:
 	void initPlayer();
 	void initPlayFields();
+	void initPlayFields(BosonCampaign*, QListViewItem*);
 	void initSpecies();
 	void initColors();
 

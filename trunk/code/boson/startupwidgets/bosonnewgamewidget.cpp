@@ -26,7 +26,9 @@
 #include "../speciestheme.h"
 #include "../bosoncomputerio.h"
 #include "../boson.h"
+#include "../bosoncampaign.h"
 #include "../bosonplayfield.h"
+#include "../bosoncampaign.h"
 #include "../bpfdescription.h"
 #include "../bosonscenario.h"
 #include "../bosondata.h"
@@ -141,13 +143,38 @@ void BosonNewGameWidget::initPlayer()
 
 void BosonNewGameWidget::initPlayFields()
 {
- QStringList list = boData->availablePlayFields();
- boDebug() << k_funcinfo << list.count() << endl;
- for (unsigned int i = 0; i < list.count(); i++) {
-	QListViewItem* item = new QListViewItem(mChooseBosonMap);
-	item->setText(0, boData->playField(list[i])->playFieldName());
-	mChooseBosonMap->insertItem(item);
-	d->mItem2Map.insert(item, list[i]);
+ boDebug() << k_funcinfo << boData->availablePlayFields().count() << " playfields found" << endl;
+ QListViewItem* maps = new QListViewItem(mChooseBosonMap);
+ maps->setOpen(true);
+ maps->setSelectable(false);
+
+ QStringList list = boData->availableCampaigns();
+ // the default campaign _must_ be there (even if its empty!)
+ if (list.count() == 0) {
+	boError() << k_funcinfo << "no campaigns found. At least the default campaign (random maps) is mandatory!" << endl;
+	return;
+ }
+ if (list[0] != QString::fromLatin1("")) {
+	boError() << k_funcinfo  << "first campaign must be the default campaign! fist is: " << list[0] << endl;
+	return;
+ }
+
+ BosonCampaign* defaultCampaign = boData->campaign(QString::fromLatin1(""));
+ BO_CHECK_NULL_RET(defaultCampaign);
+ initPlayFields(defaultCampaign, maps);
+
+ QListViewItem* campaigns = new QListViewItem(mChooseBosonMap);
+ campaigns->setOpen(true);
+ campaigns->setSelectable(false);
+ campaigns->setText(0, i18n("Campaigns"));
+ for (unsigned int i = 1; i < list.count(); i++) {
+	BosonCampaign* campaign = boData->campaign(list[i]);
+	if (!campaign) {
+		BO_NULL_ERROR(campaign);
+		continue;
+	}
+	QListViewItem* item = new QListViewItem(campaigns);
+	initPlayFields(campaign, item);
  }
  if (boGame->isAdmin()) {
 	// load the map that was selected in a previous game
@@ -160,6 +187,33 @@ void BosonNewGameWidget::initPlayFields()
 		index = list.findIndex(BosonPlayField::defaultPlayField());
 	}
 	networkInterface()->sendChangePlayField(index);
+ }
+}
+
+void BosonNewGameWidget::initPlayFields(BosonCampaign* campaign, QListViewItem* parent)
+{
+ BO_CHECK_NULL_RET(campaign);
+ BO_CHECK_NULL_RET(parent);
+ parent->setOpen(true);
+ parent->setSelectable(false);
+ if (campaign->identifier().isEmpty()) {
+	boDebug() << k_funcinfo << "default campaign" << endl;
+	parent->setText(0, i18n("Maps")); // FIXME: better name. "misc maps" ? "other maps" ?
+ } else {
+	boDebug() << k_funcinfo << campaign->identifier() << endl;
+	parent->setText(0, campaign->name());
+ }
+ QStringList list = campaign->playFields();
+ boDebug() << list.count() << endl;
+ for (unsigned int i = 0; i < list.count(); i++) {
+	QListViewItem* item = new QListViewItem(parent);
+	BosonPlayField* field = boData->playField(list[i]);
+	if (!field) {
+		BO_NULL_ERROR(field);
+		continue;
+	}
+	item->setText(0, field->playFieldName());
+	d->mItem2Map.insert(item, list[i]);
  }
 }
 

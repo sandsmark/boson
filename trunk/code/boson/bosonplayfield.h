@@ -206,6 +206,9 @@ protected:
 	 **/
 	static QStringList findAvailablePlayFields();
 
+	static QStringList findAvailableCampaigns();
+	static QStringList findPlayFieldsOfCampaign(const QString& campaign);
+
 private:
 	BosonMap* mMap;
 	BosonScenario* mScenario;

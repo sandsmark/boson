@@ -42,6 +42,7 @@ public:
 
 	QDict<BosonDataObject> mGroundThemes;
 	QDict<BosonDataObject> mPlayFields;
+	QDict<BosonDataObject> mCampaigns;
 };
 
 BosonData::BosonData()
@@ -49,10 +50,12 @@ BosonData::BosonData()
  d = new BosonDataPrivate;
  d->mGroundThemes.setAutoDelete(true);
  d->mPlayFields.setAutoDelete(true);
+ d->mCampaigns.setAutoDelete(true);
 }
 
 BosonData::~BosonData()
 {
+ d->mCampaigns.clear();
  d->mPlayFields.clear();
  d->mGroundThemes.clear();
  delete d;
@@ -144,5 +147,35 @@ bool BosonData::loadPlayField(const QString& id)
 	return false;
  }
  return d->mPlayFields[id]->load();
+}
+
+bool BosonData::insertCampaign(BosonDataObject* campaign)
+{
+ if (!campaign) {
+	return true;
+ }
+ if (d->mCampaigns[campaign->idString()]) {
+	return false;
+ }
+ d->mCampaigns.insert(campaign->idString(), campaign);
+ return true;
+}
+
+BosonCampaign* BosonData::campaign(const QString& id) const
+{
+ if (!d->mCampaigns[id]) {
+	return 0;
+ }
+ return (BosonCampaign*)d->mCampaigns[id]->pointer();
+}
+
+QStringList BosonData::availableCampaigns() const
+{
+ QStringList list;
+ QDictIterator<BosonDataObject> it(d->mCampaigns);
+ for (; it.current(); ++it) {
+	list.append(it.currentKey());
+ }
+ return list;
 }
 
