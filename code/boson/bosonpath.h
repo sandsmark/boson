@@ -491,14 +491,10 @@ class BosonPathFlyingNode : public BosonPathNode
 template<class T> class BosonPathHeap : public QValueList<T>
 {
   public:
-    inline QValueListIterator<T> begin() { return QValueList<T>::begin(); }
-    inline QValueListIterator<T> end() { return QValueList<T>::end(); }
-    inline void pop_front() { QValueList<T>::pop_front(); }
-    inline T& first() { return QValueList<T>::first(); }
     inline void add(const T& x)
     {
       QValueListIterator<T> it;
-      for(it = begin(); it != end(); ++it)
+      for(it = this->begin(); it != this->end(); ++it)
       {
         if((x.g + x.h) <= ((*it).g + (*it).h))
         {
@@ -506,7 +502,7 @@ template<class T> class BosonPathHeap : public QValueList<T>
           break;
         }
       }
-      if(it == end()) {
+      if(it == this->end()) {
         append(x);
       }
     }
@@ -531,8 +527,8 @@ template<class T> class BosonPathHeap : public QValueList<T>
 
     inline void takeFirst(T& x)
     {
-      x = first();
-      pop_front();
+      x = this->first();
+      this->pop_front();
     }
 };
 
