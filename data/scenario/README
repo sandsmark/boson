@@ -1,12 +1,67 @@
-Just a few ideas here currently:
-the map file contains information about the map itself (cells/tiles). See
-map/README.
 
-The scenario file should first contain the map on which the scenario is being
-played. This map must be unique! (imagine you add a ship and on map A this is on
-water and on map B it's on land...)
+While the map file (.bpf) contains information about the actual map the scenario
+file contains informations about the players and their units on the map.
 
-Then the scenario file contains information about players (min/max players) and
-their units (count, type, position).
+The scenario files have the same structure as the map files: you have a scenario
+file (.bsc - Boson SCenario) which contains the actual scenario and a .desktop
+file which gives further information (currently name, comment, and the map)
+about the scenario. The default scenario (basic) has therefore these files:
+basic.bsc
+basic.desktop
 
-Currently that's all. Very much under construction.
+I won't explain the complete structure of the .bsc file - see the class
+BosonScenario for this. But as this is the file you will work on to create a
+game I'll explain the basic structure below. 
+
+But first the .desktop file. Just like the .desktop file of the map the
+scenario's .desktop file consists of a single group ("[Boson Scenario]"). It can
+contain the following entries (note that most people don't like updating README
+file but like coding :-) look at the existing files for a recent usgae): 
+Name=Text           - Scenario name. Should be a few words only. Use e.g. [de] 
+                      to create a (here for german) localized version of the 
+                      name. See KConfig for more info
+Comment=Text        - A text about your scenario. Just like the Name this can be
+                      translated.
+Map=Map Identifier  - The Identifier of the map file this scenario if for. This
+                      must (!) be a unique identifier (see the maps .desktop 
+                      files for possible values)
+
+Note that a scenario file depends on a map and therefore the "Map=" entry is the
+most important one. Your file won't work without it. Here an example .desktop
+file for the default Scenario "Basic":
+
+[Boson Scenario]
+Name=Basic
+Comment=None yet
+Map=Basic
+
+
+Now some words about the actual scenario file (.bsc):
+The .desktop file tells you which map is being used - note that this is very
+important for the scenario file, as it doesn't make sense to place a Unit on
+10,10 if there is water on the map but you thought that map had land there...
+
+I don't know much about "clean" XML fles - so note that some minor things might
+change as soon as anyone with a better knwonledge looks at it. 
+The file has a tag "<BosonScenario>" - all other tags are inside this one.
+There is a tag "<ScenarioSettings>" with the arguments "MinPlayers" and
+"MaxPlayers" - these might move to the main tag one day. Both take a number as
+value. 
+The next tag is the "<ScenarioPlayers>" which contains the players. This might
+be removed soon!
+
+The tag "<Player>" takes as argument the "PlayerNumber" which take a number as
+value. This number must be unique for every player, all numbers from
+0...MaxPlayers must be provided (or should but I dunno whether it is currently
+working if you don't provide MaxPlayers players...)
+
+All sub-tags are now (currently) the units. A "<Unit>" tag takes the cell 
+coordinates of the unit as arguments (numbers!) as well as the UnitType. The
+UnitType is the Id of the unit - see the README file of the units for this. You
+can have several units of the same UnitType (that's why we don't use UnitId or
+so here...)
+
+Note that this file is currently *very* basic and therefore under heavy
+development. When you read this document it might already be obsolete concerning
+the .bsc file. Look at the files themselves or at the code (class BosonScenario)
+for a recent usage. 
