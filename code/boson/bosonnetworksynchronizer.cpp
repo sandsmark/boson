@@ -321,7 +321,7 @@ QByteArray BoCanvasSyncMessage::makeLog(BosonCanvas* canvas, int start, int coun
  BoItemList::Iterator it;
  int index = 0;
  for (it = canvas->allItems()->begin(); it != canvas->allItems()->end() && (int)list.count() < count; ++it) {
-	if (index >= start || index < ((start + count) % canvas->allItems()->count())) {
+	if (index >= start || index < ((start + count) % (int)canvas->allItems()->count())) {
 		list.append(*it);
 	}
 	index++;
