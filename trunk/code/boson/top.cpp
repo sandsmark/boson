@@ -21,6 +21,7 @@
 
 #include "defines.h"
 #include "bosonwidget.h"
+#include "editorwidget.h"
 #include "bosonwelcomewidget.h"
 #include "bosonnewgamewidget.h"
 #include "bosonserveroptionswidget.h" // TODO rename: bosonnetworkoptionswidget
@@ -95,7 +96,7 @@ public:
 #endif
 	BosonNetworkOptionsWidget* mNetworkOptions;
 	BosonLoadingWidget* mLoading;
-	BosonWidget* mBosonWidget;
+	BosonWidgetBase* mBosonWidget;
 
 	KToggleAction* mActionStatusbar;
 	KToggleAction* mActionChat;
@@ -201,7 +202,7 @@ void TopWidget::initActions()
 
  // Settings
  (void)KStdAction::keyBindings(this, SLOT(slotConfigureKeys()), actionCollection());
- (void)KStdAction::preferences(this, SLOT(slotGamePreferences()), d->mGameActions);
+// (void)KStdAction::preferences(this, SLOT(slotGamePreferences()), d->mGameActions);
  d->mActionStatusbar = KStdAction::showStatusbar(this, SLOT(slotToggleStatusbar()), d->mGameActions);
 
  // Dockwidgets show/hide
@@ -260,7 +261,7 @@ void TopWidget::initActions()
 	actionCollection()->insert(*it);
  }
 #endif
- createGUI();
+ createGUI("bosonui.rc", false);
  menuBar()->hide();
 }
 
@@ -328,7 +329,7 @@ void TopWidget::initStatusBar()
 void TopWidget::enableGameActions(bool enable)
 {
  if(enable && ! d->mBosonWidget) {
-	kdWarning() << k_lineinfo << "NULL BosonWidget!" << endl;
+	kdWarning() << k_lineinfo << "NULL BosonWidgetBase!" << endl;
  }
  KActionPtrList list = d->mGameActions->actions();
  KActionPtrList::Iterator it;
@@ -431,7 +432,14 @@ void TopWidget::initBosonWidget(bool loading)
 	kdWarning() << k_funcinfo << "widget already allocated!" << endl;
 	return;
  }
- d->mBosonWidget = new BosonWidget(this, mWs, loading);
+ if (game()->gameMode()) {
+	d->mBosonWidget = new BosonWidget(this, mWs, loading);
+ } else {
+	d->mBosonWidget = new EditorWidget(this, mWs, loading);
+ }
+ d->mBosonWidget->init(); // this depends on several virtual methods and therefore can't be called in the c'tor
+ factory()->addClient(d->mBosonWidget); // XMLClient-stuff. needs to be called *after* creation of KAction objects, so outside BosonWidget might be a good idea :-)
+// createGUI("bosonui.rc", false);
  mWs->addWidget(d->mBosonWidget, ID_WIDGETSTACK_BOSONWIDGET);
 
  connect(d->mBosonWidget, SIGNAL(signalMobilesCount(int)), this, SIGNAL(signalSetMobilesCount(int)));
@@ -667,7 +675,7 @@ void TopWidget::loadGameData2() //FIXME rename!
  mCanvas = new BosonCanvas(this);
  mBoson->setCanvas(mCanvas);
 
- // Init BosonWidget
+ // Init BosonWidgetBase
  initBosonWidget(mLoading);
 
  // Load map tiles. This takes most time
@@ -692,7 +700,7 @@ void TopWidget::loadGameData3() // FIXME rename!
 {
  boProfiling->start(BosonProfiling::LoadGameData3);
  // If we're loading saved game, local player isn't set and inited, because it
- //  was not known (not loaded) when BosonWidget was constructed. Set and init
+ //  was not known (not loaded) when BosonWidgetBase was constructed. Set and init
  //  it now
  if(mLoading) {
 	mPlayer = mBoson->localPlayer();
@@ -734,7 +742,7 @@ void TopWidget::loadGameData3() // FIXME rename!
  d->mLoading->setLoading(BosonLoadingWidget::StartingGame);
  checkEvents();
 
- // Show BosonWidget
+ // Show BosonWidgetBase
  showBosonWidget();
  if(d->mNewGame) {
 	delete d->mNewGame;
@@ -757,21 +765,25 @@ void TopWidget::loadGameData3() // FIXME rename!
 
  connect(d->mBosonWidget, SIGNAL(signalChatDockHidden()), this, SLOT(slotChatDockHidden()));
  connect(d->mBosonWidget, SIGNAL(signalCmdFrameDockHidden()), this, SLOT(slotCmdFrameDockHidden()));
- connect(d->mBosonWidget, SIGNAL(signalGameOver()), this, SLOT(slotGameOver()));
+
+ // FIXME: why isn't this where d->mBosonWidget new'ed ???
+ if (game()->gameMode()) {
+	connect(d->mBosonWidget, SIGNAL(signalGameOver()), this, SLOT(slotGameOver()));
+ }
 
  progress += 300;
  d->mLoading->setProgress(progress);
  d->mLoading->setLoading(BosonLoadingWidget::LoadingDone);  // FIXME: This is probably meaningless
 
  if(mLoading) {
-	// These are from BosonWidget::slotStartScenario() which can't be used when
+	// These are from BosonWidgetBase::slotStartScenario() which can't be used when
 	//  we're loading saved game
 	mBoson->startGame();
 	mBoson->sendMessage(0, BosonMessage::IdGameIsStarted);
 	mBoson->slotSetGameSpeed(BosonConfig::readGameSpeed());
  }
 
- // mGame indicates that game is running (and BosonWidget shown and game game
+ // mGame indicates that game is running (and BosonWidgetBase shown and game game
  //  actions enabled etc.)
  mGame = true;
  boProfiling->stop(BosonProfiling::LoadGameData3);
@@ -963,7 +975,8 @@ void TopWidget::slotGameOver()
 
 void TopWidget::slotGamePreferences()
 {
- d->mBosonWidget->slotGamePreferences();
+	kdWarning() << k_funcinfo << "obsolete" << endl;
+// d->mBosonWidget->slotGamePreferences();
 }
 
 void TopWidget::slotDebug()
@@ -1140,7 +1153,7 @@ bool TopWidget::queryExit()
  }
  switch (mWs->id(w)) {
 	case ID_WIDGETSTACK_BOSONWIDGET:
-		d->mBosonWidget->saveConfig(false);
+		d->mBosonWidget->saveConfig();
 		d->mBosonWidget->slotEndGame();
 		saveGameDockConfig();
 		return true;

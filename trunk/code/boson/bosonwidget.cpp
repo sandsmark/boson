@@ -19,53 +19,29 @@
 
 #include "bosonwidget.h"
 
-#include "bosonbigdisplaybase.h"
+#include "defines.h"
 #include "bosonminimap.h"
 #include "bosoncanvas.h"
 #include "boson.h"
 #include "player.h"
-#include "unitproperties.h"
-#include "unit.h"
 #include "bosoncommandframe.h"
 #include "bosonmessage.h"
-#include "bosonmap.h"
 #include "bosonplayfield.h"
-#include "bosonscenario.h"
 #include "bosonconfig.h"
 #include "optionsdialog.h"
-#include "kgameunitdebug.h"
-#include "kgameplayerdebug.h"
-#include "kgamecelldebug.h"
-#include "bosonprofilingdialog.h"
-#include "bosonmusic.h"
 #include "bosoncursor.h"
-#include "commandinput.h"
 #include "bodisplaymanager.h"
-#include "gameoverdialog.h"
-#include "boselection.h"
 #include "global.h"
-#include "top.h"
 #include "bosonbigdisplay.h"
-#include "boitemlist.h"
+#include "bosonmusic.h"
+#include "commandinput.h"
+#include "gameoverdialog.h"
 
-#include "defines.h"
-
-#include <kapplication.h>
 #include <klocale.h>
 #include <kaction.h>
 #include <kdebug.h>
-#include <kmessagebox.h>
-#include <kconfig.h>
-#include <kdockwidget.h>
-#include <kgame/kgamedebugdialog.h>
-#include <kgame/kgamepropertyhandler.h>
-#include <kgame/kgamechat.h>
+#include <kdeversion.h>
 
-#include <qlayout.h>
-#include <qvbox.h>
-#include <qptrlist.h>
-#include <qpainter.h>
-#include <qtimer.h>
 #include <qregexp.h>
 
 #include "bosonwidget.moc"
@@ -75,209 +51,50 @@ class BosonWidget::BosonWidgetPrivate
 public:
 	BosonWidgetPrivate()
 	{
-		mCommandFrame = 0;
 		mCmdInput = 0;
-		mCommandFrameDock = 0;
-
-		mChat = 0;
-		mChatDock = 0;
 
 		mGameOverDialog = 0;
 	}
 
-	BosonCommandFrame* mCommandFrame;
 	CommandInput* mCmdInput;
-	KDockWidget* mCommandFrameDock;
-
-	KGameChat* mChat;
-	KDockWidget* mChatDock;
 
 	GameOverDialog* mGameOverDialog;
 };
 
 BosonWidget::BosonWidget(TopWidget* top, QWidget* parent, bool loading)
-    : QWidget( parent, "BosonWidget" ), KXMLGUIClient(/*FIXME: clientParent!*/top)
+    : BosonWidgetBase(top, parent, loading)
 {
  d = new BosonWidgetPrivate;
- mTop = top;
- mLoading = loading;
-
- mCursor = 0;
- mMiniMap = 0;
- mDisplayManager = 0;
-
-// XMLClient stuff - not all of this is necessary! most cut'n'pasted from
-// elsewhere
- actionCollection()->setWidget(this);
- setXMLFile(top->xmlFile());
-// XMLClient stuff end
-
- init();
-
-// again XMLClient stuff - this needs to be called *after* creation of the
-// KAction objects.
- mTop->factory()->addClient(this);
 }
 
 BosonWidget::~BosonWidget()
 {
  kdDebug() << k_funcinfo << endl;
- if (mTop && mTop->factory()) {
-	mTop->factory()->removeClient(this);
- }
- delete d->mCommandFrameDock;
- delete d->mChatDock;
-
- delete mCursor;
- delete mDisplayManager;
-
  delete d;
  kdDebug() << k_funcinfo << "done" << endl;
 }
 
-BosonCanvas* BosonWidget::canvas() const
-{
- return mTop->canvas();
-}
-
-BosonPlayField* BosonWidget::playField() const
-{
- return mTop->playField();
-}
-
-Player* BosonWidget::player() const
-{
- return mTop->player();
-}
-
-Boson* BosonWidget::game() const
-{
- return mTop->game();
-}
-
-void BosonWidget::init()
-{
- // NOTE: order of init* methods is very important here, so don't change it,
- //  unless you know what you're doing!
- initMiniMap();
- initChat();
- initGameCommandFrame();
- initDisplayManager();
- initMap();
- if(!mLoading) {
-	initPlayer();
- }
-
- initConnections();
- initKeys();
-
- setFocusPolicy(StrongFocus); // accept key event
- setFocus();
-
- emit signalInitDone();
-}
-
-void BosonWidget::initMap()
-{
- kdDebug() << k_funcinfo << endl;
-
- canvas()->setMap(playField()->map());
- minimap()->setMap(playField()->map());
- minimap()->initMap();
- game()->setPlayField(playField());
-}
-
-void BosonWidget::initMiniMap()
-{
- mMiniMap = new BosonMiniMap(0);
- minimap()->hide();
- minimap()->setCanvas(canvas());
- minimap()->setBackgroundOrigin(WindowOrigin);
-
- connect(game(), SIGNAL(signalAddUnit(Unit*, int, int)),
-		minimap(), SLOT(slotAddUnit(Unit*, int, int)));
- connect(canvas(), SIGNAL(signalUnitMoved(Unit*, float, float)),
-		minimap(), SLOT(slotMoveUnit(Unit*, float, float)));
- connect(canvas(), SIGNAL(signalUnitDestroyed(Unit*)),
-		minimap(), SLOT(slotUnitDestroyed(Unit*)));
-}
-
 void BosonWidget::initConnections()
 {
- connect(canvas(), SIGNAL(signalUnitDestroyed(Unit*)),
-		this, SLOT(slotRemoveUnit(Unit*)));
+ BosonWidgetBase::initConnections();
  connect(canvas(), SIGNAL(signalOutOfGame(Player*)),
 		this, SLOT(slotOutOfGame(Player*)));
 
+ // this does the actual game. note that editor must not have this!
  connect(game(), SIGNAL(signalAdvance(unsigned int)),
 		canvas(), SLOT(slotAdvance(unsigned int)));
- connect(game(), SIGNAL(signalAddUnit(Unit*, int, int)),
-		canvas(), SLOT(slotAddUnit(Unit*, int, int))); 
 
- connect(game(), SIGNAL(signalAddUnit(Unit*, int, int)),
-		this, SLOT(slotAddUnit(Unit*, int, int)));
  connect(game(), SIGNAL(signalInitFogOfWar()),
 		this, SLOT(slotInitFogOfWar()));
-/* connect(game(), SIGNAL(signalStartScenario()),
-		this, SLOT(slotStartScenario()));*/
- connect(game(), SIGNAL(signalGameStarted()),
-		this, SIGNAL(signalGameStarted()));
  connect(game(), SIGNAL(signalNotEnoughMinerals(Player*)),
 		this, SLOT(slotNotEnoughMinerals(Player*)));
  connect(game(), SIGNAL(signalNotEnoughOil(Player*)),
 		this, SLOT(slotNotEnoughOil(Player*)));
 }
 
-void BosonWidget::initDisplayManager()
-{
- mDisplayManager = new BoDisplayManager(canvas(), this, game()->gameMode());
- connect(mDisplayManager, SIGNAL(signalActiveDisplay(BosonBigDisplayBase*, BosonBigDisplayBase*)),
-		this, SLOT(slotSetActiveDisplay(BosonBigDisplayBase*, BosonBigDisplayBase*)));
- canvas()->setDisplayManager(displayManager());
-
- connect(d->mCommandFrame, SIGNAL(signalAction(int)),
-		mDisplayManager, SLOT(slotUnitAction(int)));
-
- displayManager()->setLocalPlayer(player()); // this does nothing.
-}
-
-void BosonWidget::addInitialDisplay()
-{
- initBigDisplay(displayManager()->addInitialDisplay());
-
- // we need to add the display first (in order to create a valid GL context) and
- // then load the cursor
- slotChangeCursor(boConfig->readCursorMode(), boConfig->readCursorDir());
-}
-
-void BosonWidget::initChat()
-{
- d->mChatDock = mTop->createDockWidget("chat_dock", 0, 0, i18n("Chat"));
- d->mChatDock->setEnableDocking(KDockWidget::DockTop | KDockWidget::DockBottom);
- d->mChat = new KGameChat(game(), BosonMessage::IdChat, d->mChatDock);
- d->mChatDock->setWidget(d->mChat);
- d->mChatDock->hide();
-
- connect(d->mChatDock, SIGNAL(iMBeingClosed()), this, SIGNAL(signalChatDockHidden()));
- connect(d->mChatDock, SIGNAL(hasUndocked()), this, SIGNAL(signalChatDockHidden()));
-}
-
 void BosonWidget::initPlayer()
 {
- if(!mLoading) {
-	for (unsigned int i = 0; i < game()->playerCount(); i++) {
-		Player* p = (Player*)game()->playerList()->at(i);
-		if (p) {
-			p->initMap(playField()->map());
-		}
-	}
- }
-
- minimap()->setLocalPlayer(player());
- displayManager()->setLocalPlayer(player());
- game()->setLocalPlayer(player());
- d->mCommandFrame->setLocalPlayer(player());
- d->mChat->setFromPlayer(player());
+ BosonWidgetBase::initPlayer();
  player()->addGameIO(d->mCmdInput);
 
  connect(player(), SIGNAL(signalUnfog(int, int)),
@@ -286,21 +103,27 @@ void BosonWidget::initPlayer()
 		this, SLOT(slotFog(int, int)));
  connect(player(), SIGNAL(signalShowMiniMap(bool)),
 		minimap(), SLOT(slotShowMap(bool)));
- connect(player(), SIGNAL(signalPropertyChanged(KGamePropertyBase*, KPlayer*)),
-		this, SLOT(slotPlayerPropertyChanged(KGamePropertyBase*, KPlayer*)));
 
- // Needed for loading game
- emit signalMineralsUpdated(player()->minerals());
- emit signalOilUpdated(player()->oil());
- emit signalMobilesCount(player()->mobilesCount());
- emit signalFacilitiesCount(player()->facilitiesCount());
  minimap()->slotShowMap(player()->hasMiniMap());
+}
+
+BosonCommandFrame* BosonWidget::createCommandFrame(QWidget* parent)
+{
+ BosonCommandFrame* frame = new BosonCommandFrame(parent, false);
+ connect(game(), SIGNAL(signalUpdateProduction(Unit*)),
+		frame, SLOT(slotUpdateProduction(Unit*)));
+
+ //AB: can we use the same input for the editor?
+ d->mCmdInput = new CommandInput;
+ d->mCmdInput->setCommandFrame(frame);
+ return frame;
 }
 
 void BosonWidget::slotChangeCursor(int mode, const QString& cursorDir_)
 {
  kdDebug() << k_funcinfo << endl;
  if (!game()->gameMode()) {
+	// editor mode
 	mode = CursorKDE;
  }
  BosonCursor* b;
@@ -335,7 +158,7 @@ void BosonWidget::slotChangeCursor(int mode, const QString& cursorDir_)
  if (!ok) {
 	kdError() << k_funcinfo << "Could not load cursor mode " << mode << " from " << cursorDir << endl;
 	delete b;
-	if (!mCursor && mode != CursorKDE) { // loading *never* fails for CursorKDE. we check here anyway.
+	if (!cursor() && mode != CursorKDE) { // loading *never* fails for CursorKDE. we check here anyway.
 		// load fallback cursor
 		slotChangeCursor(CursorKDE, QString::null);
 		return;
@@ -343,11 +166,8 @@ void BosonWidget::slotChangeCursor(int mode, const QString& cursorDir_)
 	// continue to use the old cursor
 	return;
  }
- if(mCursor) {
-	delete mCursor;
- }
- mCursor = b;
- displayManager()->setCursor(mCursor);
+ changeCursor(b);
+
  mCursorTheme = cursorDir;
 
  // some cursors need special final initializations. do them now
@@ -362,151 +182,25 @@ void BosonWidget::slotChangeCursor(int mode, const QString& cursorDir_)
  }
 }
 
-void BosonWidget::initGameMode()//FIXME: rename! we don't have a difference to initEditorMode anymore. maybe just initGame() or so??
-{
- initLayout();
- if(!mLoading) {
-	slotStartScenario();
- }
- mLoading = false;
-}
-
-void BosonWidget::initBigDisplay(BosonBigDisplayBase* b)
-{
- if (!b) {
-	kdError() << k_funcinfo << "NULL display" << endl;
-	return;
- }
- b->setLocalPlayer(player());
- b->setCursor(mCursor);
- b->setKGameChat(d->mChat);
-
-
- connect(b->selection(), SIGNAL(signalSingleUnitSelected(Unit*)),
-		d->mCommandFrame, SLOT(slotSetAction(Unit*)));
- connect(b->selection(), SIGNAL(signalSingleUnitSelected(Unit*)),
-		d->mCommandFrame, SLOT(slotShowSingleUnit(Unit*)));
-
- connect(b->selection(), SIGNAL(signalSelectUnit(Unit*)),
-		d->mCommandFrame, SLOT(slotShowUnit(Unit*)));
-
- b->makeActive();
-}
-
-void BosonWidget::initGameCommandFrame()
-{
- d->mCommandFrameDock = mTop->createDockWidget("cmdframe_dock", 0, 0, i18n("Command Frame"));
- d->mCommandFrameDock->setEnableDocking(KDockWidget::DockLeft | KDockWidget::DockRight);
- d->mCommandFrame = new BosonCommandFrame(d->mCommandFrameDock, false);
- d->mCommandFrameDock->setWidget(d->mCommandFrame);
- d->mCommandFrameDock->hide();
- d->mCommandFrame->reparentMiniMap(minimap());
-
- connect(game(), SIGNAL(signalUpdateProduction(Unit*)),
-		d->mCommandFrame, SLOT(slotUpdateProduction(Unit*)));
- connect(d->mCommandFrameDock, SIGNAL(iMBeingClosed()), this, SIGNAL(signalCmdFrameDockHidden()));
- connect(d->mCommandFrameDock, SIGNAL(hasUndocked()), this, SIGNAL(signalCmdFrameDockHidden()));
-
- d->mCmdInput = new CommandInput;
- d->mCmdInput->setCommandFrame(d->mCommandFrame);
-}
-
-void BosonWidget::initLayout()
-{
- d->mCommandFrameDock->manualDock(mTop->getMainDockWidget(), KDockWidget::DockLeft, 30);
- d->mChatDock->manualDock(mTop->getMainDockWidget(), KDockWidget::DockBottom, 80);
-
- QVBoxLayout* topLayout = new QVBoxLayout(this);
- topLayout->addWidget(displayManager());
-
- if(!kapp->config()->hasGroup("BosonGameDock")) {
-	// Dock config isn't saved (probably first start). Hide chat dock (we only
-	//  show commandframe by default)
-	d->mChatDock->changeHideShowState();
- }
- else {
-	mTop->loadGameDockConfig();
- }
-}
-
-void BosonWidget::slotDebug()
-{
- KGameDebugDialog* dlg = new KGameDebugDialog(game(), this);
- 
- QVBox* b = dlg->addVBoxPage(i18n("Debug &Units"));
- KGameUnitDebug* units = new KGameUnitDebug(b);
- units->setBoson(game());
-
- b = dlg->addVBoxPage(i18n("Debug &Boson Players"));
- KGamePlayerDebug* player = new KGamePlayerDebug(b);
- player->setBoson(game());
-
- b = dlg->addVBoxPage(i18n("Debug &Cells"));
- KGameCellDebug* cells = new KGameCellDebug(b);
- cells->setMap(playField()->map());
-
- connect(dlg, SIGNAL(finished()), dlg, SLOT(slotDelayedDestruct()));
- connect(dlg, SIGNAL(signalRequestIdName(int,bool,QString&)),
-		this, SLOT(slotDebugRequestIdName(int,bool,QString&)));
- dlg->show();
-}
-
-void BosonWidget::slotProfiling()
-{
- BosonProfilingDialog* dlg = new BosonProfilingDialog(this, false); // note that dialog won't get updated while it is running, even if its non-modal!
- connect(dlg, SIGNAL(finished()), dlg, SLOT(slotDelayedDestruct()));
- dlg->exec();
-}
-
-void BosonWidget::slotArrowScrollChanged(int speed)
-{
- boConfig->setArrowKeyStep(speed);
-}
-
-void BosonWidget::slotMiniMapScaleChanged(double scale)
-{
- boConfig->setMiniMapScale(scale);
- minimap()->repaint();
-}
-
 void BosonWidget::slotStartScenario()
 {
- playField()->scenario()->startScenario(game());
+ BosonWidgetBase::slotStartScenario();
  boMusic->startLoop();
-
- // This DOES NOT work correctly
- game()->startGame(); // correct here? should be so.
-
- // as soon as this message is received the game is actually started
- if (game()->isAdmin()) {
-	game()->sendMessage(0, BosonMessage::IdGameIsStarted);
-	if (game()->gameMode()) {
-		game()->slotSetGameSpeed(BosonConfig::readGameSpeed());
-	}
- }
-
- #warning FIXME
- // this is a strange bug: we need to resize the widget once it is shown - otherwise we'll have a VERY slot frame rate.
- // I can't find out where the problem resides :-(
- QTimer::singleShot(500, this, SLOT(slotHack1()));
-}
-
-void BosonWidget::slotHack1()
-{
- QSize size = displayManager()->activeDisplay()->size();
- displayManager()->activeDisplay()->resize(size.width() - 1, size.height() - 1);
- displayManager()->activeDisplay()->resize(size);
 }
 
 void BosonWidget::slotGamePreferences()
 {
  CursorMode mode;
- if (mCursor->isA("BosonSpriteCursor")) {
-	mode = CursorSprite;
- } else if (mCursor->isA("BosonExperimentalCursor")) {
-	mode = CursorExperimental;
- } else if (mCursor->isA("BosonKDECursor")) {
-	mode = CursorKDE;
+ if (cursor()) {
+	if (cursor()->isA("BosonSpriteCursor")) {
+		mode = CursorSprite;
+	} else if (cursor()->isA("BosonExperimentalCursor")) {
+		mode = CursorExperimental;
+	} else if (cursor()->isA("BosonKDECursor")) {
+		mode = CursorKDE;
+	} else {
+		mode = CursorNormal;
+	}
  } else {
 	mode = CursorNormal;
  }
@@ -540,220 +234,6 @@ void BosonWidget::slotGamePreferences()
  dlg->show();
 }
 
-void BosonWidget::slotAddUnit(Unit* unit, int, int)
-{
- if (!unit) {
-	kdError() << k_funcinfo << "NULL unit" << endl;
-	return;
- }
- Player* p = unit->owner();
- if (!p) {
-	kdError() << k_funcinfo << "NULL owner" << endl;
-	return;
- }
- if (p != player()) {
-	return;
- }
-
- emit signalMobilesCount(p->mobilesCount());
- emit signalFacilitiesCount(p->facilitiesCount());
-}
-
-void BosonWidget::slotRemoveUnit(Unit* unit)
-{
- if (unit->owner() != player()) {
-	return;
- }
-
- emit signalMobilesCount(unit->owner()->mobilesCount());
- emit signalFacilitiesCount(unit->owner()->facilitiesCount());
-}
-
-void BosonWidget::setZoomFactor(float factor)
-{
- if (displayManager()->activeDisplay()) {
-	displayManager()->activeDisplay()->setZoomFactor(factor);
- }
-}
-
-void BosonWidget::slotFog(int x, int y)
-{
- // very time critical function!!
-
- // slotFog() and slotUnfog() exist here so that we need only a single slot
- // instead of two (on ein minimap and one to actually create/remove the fog)
- // should save some performance (at least I hope)
- minimap()->slotFog(x, y); // FIXME: no need for slot
-}
-
-void BosonWidget::slotUnfog(int x, int y)
-{
- minimap()->slotUnfog(x, y); // FIXME: no need for slot
-}
-
-void BosonWidget::slotPlayerPropertyChanged(KGamePropertyBase* prop, KPlayer* p)
-{
- if (p != player()) {
-	// not yet used
-	return;
- }
- switch (prop->id()) {
-	case Player::IdMinerals:
-		emit signalMineralsUpdated(player()->minerals());
-		break;
-	case Player::IdOil:
-		emit signalOilUpdated(player()->oil());
-		break;
-	default:
-		break;
- }
-}
-
-void BosonWidget::slotInitFogOfWar()
-{
- minimap()->initFogOfWar(player());
-}
-
-bool BosonWidget::sound() const
-{
- return boMusic->sound();
-}
-
-bool BosonWidget::music() const
-{
- return boMusic->music();
-}
-
-void BosonWidget::slotToggleSound()
-{
- boMusic->setSound(!boMusic->sound());
- boConfig->setSound(boMusic->sound());
-}
-
-void BosonWidget::slotToggleMusic()
-{
- boMusic->setMusic(!boMusic->music());
- boConfig->setMusic(boMusic->music());
-}
-
-void BosonWidget::displayAllItems(bool display)
-{
- BoItemList all = canvas()->allBosonItems();
- for (unsigned int i = 0; i < all.count(); i++) {
-	all[i]->setVisible(display);
- }
-}
-
-void BosonWidget::slotNotEnoughMinerals(Player* p)
-{
- if (p != player()) {
-	return;
- }
- addChatSystemMessage(i18n("Boson"), i18n("You have not enough minerals!"));
-}
-
-void BosonWidget::slotNotEnoughOil(Player* p)
-{
- if (p != player()) {
-	return;
- }
- addChatSystemMessage(i18n("Boson"), i18n("You have not enough oil!"));
-}
-
-void BosonWidget::addChatSystemMessage(const QString& fromName, const QString& text)
-{
- d->mChat->addSystemMessage(fromName, text);
-
- // FIXME: only to the current display or to all displays ??
- if (displayManager()->activeDisplay()) {
-	displayManager()->activeDisplay()->addChatMessage(i18n("--- %1: %2").arg(fromName).arg(text));
- }
-}
-
-void BosonWidget::slotSetCommandButtonsPerRow(int b)
-{
- d->mCommandFrame->slotSetButtonsPerRow(b);
-}
-
-void BosonWidget::slotUnfogAll(Player* pl)
-{
- if (!playField()->map()) {
-	kdError() << k_funcinfo << "NULL map" << endl;
-	return;
- }
- QPtrList<KPlayer> list;
- if (!pl) {
-	list = *game()->playerList();
- } else {
-	list.append(pl);
- }
- for (unsigned int i = 0; i < list.count(); i++) {
-	Player* p = (Player*)list.at(i);
-	for (unsigned int x = 0; x < playField()->map()->width(); x++) {
-		for (unsigned int y = 0; y < playField()->map()->height(); y++) {
-			p->unfog(x, y);
-		}
-	}
- }
-}
-
-void BosonWidget::slotSplitDisplayHorizontal()
-{
- initBigDisplay(displayManager()->splitActiveDisplayHorizontal());
-}
-
-void BosonWidget::slotSplitDisplayVertical()
-{
- initBigDisplay(displayManager()->splitActiveDisplayVertical());
-}
-
-void BosonWidget::slotRemoveActiveDisplay()
-{
- displayManager()->removeActiveDisplay();
-}
-
-void BosonWidget::slotSetActiveDisplay(BosonBigDisplayBase* active, BosonBigDisplayBase* old)
-{
- if (!active) {
-	kdWarning() << k_funcinfo << "NULL display" << endl;
-	return;
- }
-
- if (old) {
-	disconnect(old, SIGNAL(signalChangeViewport(const QPoint&,
-			const QPoint&, const QPoint&, const QPoint&)),
-			minimap(), SLOT(slotMoveRect(const QPoint&,
-			const QPoint&, const QPoint&, const QPoint&)));
-	disconnect(minimap(), SIGNAL(signalReCenterView(const QPoint&)),
-			old, SLOT(slotReCenterDisplay(const QPoint&)));
- }
- connect(active, SIGNAL(signalChangeViewport(const QPoint&,const QPoint&,
-		const QPoint&, const QPoint&)),
-		minimap(), SLOT(slotMoveRect(const QPoint&, const QPoint&,
-		const QPoint&, const QPoint&)));
- connect(minimap(), SIGNAL(signalReCenterView(const QPoint&)),
-		active, SLOT(slotReCenterDisplay(const QPoint&)));
-
- if (old) {
-	disconnect(minimap(), SIGNAL(signalMoveSelection(int, int)),
-			old, SLOT(slotMoveSelection(int, int)));
- }
- connect(minimap(), SIGNAL(signalMoveSelection(int, int)),
-		active, SLOT(slotMoveSelection(int, int)));
-
-  // note: all other bigdisplays should unselect now.
-
- // BosonBigDisplay knows whether a unit was selected. If a unit changed forward
- // the signal to the big display and let it decide whether the
- // signalSingleUnitSelected should be emitted
- if (old) {
-	disconnect(player(), SIGNAL(signalUnitChanged(Unit*)),
-			old, SLOT(slotUnitChanged(Unit*)));
- }
- connect(player(), SIGNAL(signalUnitChanged(Unit*)),
-		active, SLOT(slotUnitChanged(Unit*)));
-}
-
 void BosonWidget::slotOutOfGame(Player* p)
 {
  // TODO write BosonGameOverWidget, add it to widgetstack in TopWidget and then
@@ -780,41 +260,10 @@ void BosonWidget::slotOutOfGame(Player* p)
  }
 }
 
-void BosonWidget::debugKillPlayer(KPlayer* p)
+void BosonWidget::initKActions()
 {
- canvas()->killPlayer((Player*)p);
-}
-
-void BosonWidget::slotCmdBackgroundChanged(const QString& file)
-{
- if (file == QString::null) {
-	d->mCommandFrame->unsetPalette();
-	return;
- }
- QPixmap p(file);
- if (p.isNull()) {
-	kdError() << k_funcinfo << "Could not load " << file << endl;
-	d->mCommandFrame->unsetPalette();
-	return;
- }
- d->mCommandFrame->setPaletteBackgroundPixmap(p);
-}
-
-void BosonWidget::initKeys()
-{
+ BosonWidgetBase::initKActions();
 #if KDE_VERSION < 310 // old kactions
- (void)new KAction(i18n("Scroll Up"), Qt::Key_Up, displayManager(),
-		SLOT(slotScrollUp()), actionCollection(),
-		"scroll_up");
- (void)new KAction(i18n("Scroll Down"), Qt::Key_Down, displayManager(),
-		SLOT(slotScrollDown()), actionCollection(),
-		"scroll_down");
- (void)new KAction(i18n("Scroll Left"), Qt::Key_Left, displayManager(),
-		SLOT(slotScrollLeft()), actionCollection(),
-		"scroll_left");
- (void)new KAction(i18n("Scroll Right"), Qt::Key_Right, displayManager(),
-		SLOT(slotScrollRight()), actionCollection(),
-		"scroll_right");
  QString slotSelect = SLOT(slotSelectGroup());
  QString slotCreate = SLOT(slotCreateGroup());
  for (int i = 0; i < 10; i++) {
@@ -833,18 +282,6 @@ void BosonWidget::initKeys()
  }
 #else
  // KAction supports slots that take integer parameter :-)
- (void)new KAction(i18n("Scroll Up"), Qt::Key_Up, displayManager(),
-		SLOT(slotScroll(int)), actionCollection(),
-		QString("scroll_up {%1}").arg(BoDisplayManager::ScrollUp));
- (void)new KAction(i18n("Scroll Down"), Qt::Key_Down, displayManager(),
-		SLOT(slotScroll(int)), actionCollection(),
-		QString("scroll_down {%1}").arg(BoDisplayManager::ScrollDown));
- (void)new KAction(i18n("Scroll Left"), Qt::Key_Left, displayManager(),
-		SLOT(slotScroll(int)), actionCollection(),
-		QString("scroll_left {%1}").arg(BoDisplayManager::ScrollLeft));
- (void)new KAction(i18n("Scroll Right"), Qt::Key_Right, displayManager(),
-		SLOT(slotScroll(int)), actionCollection(),
-		QString("scroll_right {%1}").arg(BoDisplayManager::ScrollRight));
  for (int i = 0; i < 10; i++) {
 	(void)new KAction(i18n("Select Group %1").arg(i == 0 ? 10 : i), 
 			Qt::Key_0 + i, displayManager(), 
@@ -858,73 +295,7 @@ void BosonWidget::initKeys()
 #endif
  (void)new KAction(i18n("Center &Home Base"), KShortcut(Qt::Key_H), 
 		displayManager(), SLOT(slotCenterHomeBase()), actionCollection(), "game_center_base");
- (void)new KAction(i18n("&Reset View Properties"), KShortcut(Qt::Key_R), 
-		displayManager(), SLOT(slotResetViewProperties()), actionCollection(), "game_reset_view_properties");
-}
-
-void BosonWidget::slotDebugRequestIdName(int msgid, bool , QString& name)
-{
- // we don't use i18n() for debug messages... not worth the work
- switch (msgid) {
-	case BosonMessage::InitMap:
-		name = "Init Map";
-		break;
-	case BosonMessage::ChangeSpecies:
-		name = "Change Species";
-		break;
-	case BosonMessage::ChangePlayField:
-		name = "Change PlayField";
-		break;
-	case BosonMessage::ChangeTeamColor:
-		name = "Change TeamColor";
-		break;
-	case BosonMessage::IdInitFogOfWar:
-		name = "Init Fog of War";
-		break;
-	case BosonMessage::IdStartScenario:
-		name = "Start Scenario";
-		break;
-	case BosonMessage::AddUnit:
-		name = "Add Unit";
-		break;
-	case BosonMessage::AddUnitsXML:
-		name = "Add Units from XML";
-		break;
-	case BosonMessage::AdvanceN:
-		name = "Advance";
-		break;
-	case BosonMessage::IdChat:
-		name = "Chat Message";
-		break;
-	case BosonMessage::IdGameIsStarted:
-		name = "Game is started";
-		break;
-	case BosonMessage::MoveMove:
-		name = "PlayerInput: Move";
-		break;
-	case BosonMessage::MoveAttack:
-		name = "PlayerInput: Attack";
-		break;
-	case BosonMessage::MoveBuild:
-		name = "PlayerInput: Build";
-		break;
-	case BosonMessage::MoveProduce:
-		name = "PlayerInput: Produce";
-		break;
-	case BosonMessage::MoveProduceStop:
-		name = "PlayerInput: Produce Stop";
-		break;
-	case BosonMessage::MoveMine:
-		name = "PlayerInput: Mine";
-		break;
-	case BosonMessage::UnitPropertyHandler:
-	default:
-		// a unit property was changed
-		// all ids > UnitPropertyHandler will be a unit property. we
-		// don't check further...
-		break;
- }
-// kdDebug() << name << endl;
+ (void)KStdAction::preferences(this, SLOT(slotGamePreferences()), actionCollection());
 }
 
 void BosonWidget::slotEndGame()
@@ -935,43 +306,7 @@ void BosonWidget::slotEndGame()
  game()->quitGame();
 }
 
-bool BosonWidget::isCmdFrameVisible() const
-{
- return d->mCommandFrameDock->isVisible();
-}
-
-bool BosonWidget::isChatVisible() const
-{
- return d->mChatDock->isVisible();
-}
-
-void BosonWidget::setCmdFrameVisible(bool visible)
-{
- if(visible && d->mCommandFrameDock->mayBeShow())
-	d->mCommandFrameDock->show();
- else if(! visible && d->mCommandFrameDock->mayBeHide())
-	d->mCommandFrameDock->hide();
-}
-
-void BosonWidget::setChatVisible(bool visible)
-{
- if(visible && d->mChatDock->mayBeShow())
-	d->mChatDock->show();
- else if(! visible && d->mChatDock->mayBeHide())
-	d->mChatDock->hide();
-}
-
-void BosonWidget::toggleCmdFrameVisible()
-{
- d->mCommandFrameDock->changeHideShowState();
-}
-
-void BosonWidget::toggleChatVisible()
-{
- d->mChatDock->changeHideShowState();
-}
-
-void BosonWidget::saveConfig(bool editor)
+void BosonWidget::saveConfig()
 {
   // note: the game is *not* saved here! just general settings like game speed,
   // player name, ...
@@ -984,24 +319,25 @@ void BosonWidget::saveConfig(bool editor)
 	kdError() << k_funcinfo << "NULL local player" << endl;
 	return;
  }
+ BosonWidgetBase::saveConfig();
 
- if (!editor) {
-	BosonConfig::saveLocalPlayerName(player()->name());
-	BosonConfig::saveGameSpeed(game()->gameSpeed());
- } else {
-	 
- }
- if (mCursor->isA("BosonSpriteCursor")) {
-	boConfig->saveCursorMode(CursorSprite);
- } else if (mCursor->isA("BosonExperimentalCursor")) {
-	boConfig->saveCursorMode(CursorExperimental);
- } else if (mCursor->isA("BosonKDECursor")) {
-	boConfig->saveCursorMode(CursorKDE);
+ BosonConfig::saveLocalPlayerName(player()->name());
+ BosonConfig::saveGameSpeed(game()->gameSpeed());
+ if (cursor()) {
+	if (cursor()->isA("BosonSpriteCursor")) {
+		boConfig->saveCursorMode(CursorSprite);
+	} else if (cursor()->isA("BosonExperimentalCursor")) {
+		boConfig->saveCursorMode(CursorExperimental);
+	} else if (cursor()->isA("BosonKDECursor")) {
+		boConfig->saveCursorMode(CursorKDE);
+	} else {
+		boConfig->saveCursorMode(CursorNormal);
+	}
  } else {
 	boConfig->saveCursorMode(CursorNormal);
  }
  boConfig->saveCursorDir(mCursorTheme);
- boConfig->save(editor);
+// boConfig->save(editor); //FIXME
  kdDebug() << k_funcinfo << "done" << endl;
 }
 
