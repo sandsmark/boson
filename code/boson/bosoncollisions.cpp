@@ -29,6 +29,8 @@
 
 #include <qptrvector.h>
 
+#include <math.h>
+
 BosonCollisions::BosonCollisions()
 {
  init();
@@ -59,7 +61,7 @@ BosonItem* BosonCollisions::findItemAtCell(int x, int y, float z, bool unitOnly)
  BoItemList* list = collisionsAtCell(x, y);
  BoItemList::Iterator it;
 
- // AB: about unitOnly: we could improve performance slightly by using a 
+ // AB: about unitOnly: we could improve performance slightly by using a
  // separate function instead of this additional check. BUT:
  // a) we won't gain much (probably a few ns only)
  // b) we shouldn't do a bad design for that little speedups.
@@ -111,7 +113,7 @@ QValueList<Unit*> BosonCollisions::unitCollisionsInRange(const QPoint& pos, int 
 		(pos.y() - radius > 0) ? pos.y() - radius : 0,
 		pos.x() + radius,
 		pos.y() + radius));
-			
+
  QValueList<Unit*> list;
  BoItemList::Iterator it;
  for (it = l->begin(); it != l->end(); ++it) {
@@ -147,7 +149,7 @@ QValueList<Unit*> BosonCollisions::unitCollisionsInSphere(const BoVector3& pos, 
 		(pos.y() - radius > 0) ? (int)pos.y() - radius : 0,
 		(int)pos.x() + radius,
 		(int)pos.y() + radius));
-			
+
  QValueList<Unit*> list;
  BoItemList::Iterator it;
  for (it = l->begin(); it != l->end(); ++it) {
