@@ -30,7 +30,15 @@
 #include "unitproperties.h"
 #include "boaction.h"
 
+#include <math.h>
+
 #include <ksimpleconfig.h>
+
+// Degrees to radians conversion (AB: from mesa/src/macros.h)
+#define DEG2RAD (M_PI/180.0)
+// And radians to degrees conversion
+#define RAD2DEG (180.0/M_PI)
+
 
 /*****  BosonWeaponProperties  *****/
 BosonWeaponProperties::BosonWeaponProperties(const UnitProperties* prop, unsigned long int id) :
@@ -62,6 +70,10 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg, bool full)
   {
     mShotType = BosonShot::Rocket;
   }
+  else if(shottype == "Missile")
+  {
+    mShotType = BosonShot::Missile;
+  }
   else if(shottype == "Mine")
   {
     mShotType = BosonShot::Mine;
@@ -77,6 +89,7 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg, bool full)
   }
   // Other parameters
   m_range.init(cfg->readUnsignedLongNumEntry("Range", 0));
+  mMaxFlyDistance = cfg->readDoubleNumEntry("MaxFlyDistance", m_range * 1.5f);
   // Reload interval is converted from seconds to advance calls here
   m_reloadingTime.init((int)(cfg->readDoubleNumEntry("Reload", 0) * 20.0f));
  // We divide speeds with 20, because speeds in config files are cells/second,
@@ -88,6 +101,9 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg, bool full)
     mShotType = BosonShot::Bullet;
   }
   mAccelerationSpeed = (cfg->readDoubleNumEntry("AccelerationSpeed", 4) / 20.0f);
+  bofixed turningspeed = (cfg->readDoubleNumEntry("TurningSpeed", 120) / 20.0f);
+  // We convert turning speed for performace reasons
+  mTurningSpeed = tan(turningspeed * DEG2RAD);
   m_damage.init(cfg->readUnsignedLongNumEntry("Damage", 0));
   m_damageRange.init(cfg->readDoubleNumEntry("DamageRange", 1));
   m_fullDamageRange.init(cfg->readDoubleNumEntry("FullDamageRange", 0.25 * m_damageRange));
@@ -150,6 +166,10 @@ void BosonWeaponProperties::savePlugin(KSimpleConfig* cfg)
   {
     shottype == "Rocket";
   }
+  else if(mShotType = BosonShot::Missile)
+  {
+    shottype == "Missile";
+  }
   else if(mShotType = BosonShot::Mine)
   {
     shottype == "Mine";
@@ -174,6 +194,7 @@ void BosonWeaponProperties::savePlugin(KSimpleConfig* cfg)
  //  but here we have cells/advance calls
   cfg->writeEntry("Speed", speed() * 20.0f);
   cfg->writeEntry("AccelerationSpeed", mAccelerationSpeed * 20.0f);
+  cfg->writeEntry("TurningSpeed", atan(mTurningSpeed) * RAD2DEG * 20.0f);
   cfg->writeEntry("Damage", damage());
   cfg->writeEntry("DamageRange", damageRange());
   cfg->writeEntry("CanShootAtAirUnits", mCanShootAtAirUnits);
@@ -195,6 +216,7 @@ void BosonWeaponProperties::reset()
   m_reloadingTime.init(0);
   m_speed.init(0);
   mAccelerationSpeed = 0;
+  mTurningSpeed = tan(120 * DEG2RAD / 20.0f);
   m_damage.init(0);
   m_damageRange.init(1);
   m_fullDamageRange.init(0.25 * m_damageRange);
@@ -267,6 +289,39 @@ BosonShot* BosonWeaponProperties::newShot(Unit* attacker, BoVector3Fixed pos, Bo
   {
     boError() << k_funcinfo << "Invalid shotType: " << shotType() << endl;
     return 0;
+  }
+  return s;
+}
+
+BosonShot* BosonWeaponProperties::newShot(Unit* attacker, BoVector3Fixed pos, Unit* target) const
+{
+  if(!attacker)
+  {
+    boError() << k_funcinfo << "NULL attacker" << endl;
+    return 0;
+  }
+  BosonShot* s = 0;
+  BosonCanvas* canvas = attacker->canvas();
+  BO_CHECK_NULL_RET0(canvas);
+  BO_CHECK_NULL_RET0(attacker->owner());
+  if(shotType() == BosonShot::Missile)
+  {
+    BoVector3Float realPosFloat;
+    BoMatrix m;
+    m.rotate(attacker->rotation(), 0, 0, 1);
+    BoVector3Float offset = mOffset.toFloat();
+    m.transform(&realPosFloat, &offset);
+    BoVector3Fixed realPos = realPosFloat.toFixed();
+    realPos += pos;
+    ItemType type(BosonShot::Missile, unitProperties()->typeId(), id());
+    s = (BosonShot*)canvas->createNewItem(RTTI::Shot, attacker->owner(), type, realPos);
+    ((BosonShotMissile*)s)->init(realPos, target);
+  }
+  else
+  {
+    boWarning() << k_funcinfo << "Use newShot() which takes target position parameter for shottype " << shotType() << endl;
+    BoVector3Fixed targetpos(target->centerX(), target->centerY(), target->z());
+    s = newShot(attacker, pos, targetpos);
   }
   return s;
 }
@@ -407,9 +462,19 @@ bool BosonWeapon::canShootAt(Unit* u) const
 
 void BosonWeapon::shoot(Unit* u)
 {
+  BoVector3Fixed mypos(unit()->centerX(), unit()->centerY(), unit()->z());
+  if(mProp->shotType() == BosonShot::Missile)
+  {
+    // FIXME: code duplication
+    mProp->newShot(unit(), mypos, u);
+    canvas()->addEffects(mProp->newShootEffects(mypos, unit()->rotation()));
+    mProp->playSound(SoundWeaponShoot);
+    mReloadCounter = mProp->reloadingTime();
+    return;
+  }
+
   BoVector3Fixed targetpos(u->centerX(), u->centerY(), u->z());
   targetpos += u->unitProperties()->hitPoint();
-  BoVector3Fixed mypos(unit()->centerX(), unit()->centerY(), unit()->z());
   if(mProp->takeTargetVeloIntoAccount() && mProp->shotType() == BosonShot::Rocket)
   {
     // Calculate how much time it should take to reach target
