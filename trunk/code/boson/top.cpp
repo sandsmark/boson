@@ -48,6 +48,7 @@
 #include "bofullscreen.h"
 #include "bosonlocalplayerinput.h"
 #include "commandframe/bosoncommandframebase.h"
+#include "bodebuglogdialog.h"
 //#include "kgamecelldebug.h"
 
 #include <kgamedebugdialog.h>
@@ -342,6 +343,8 @@ void TopWidget::initKActions()
 		SLOT(slotProfiling()), actionCollection(), "debug_profiling");
  (void)new KAction(i18n("&Debug KGame..."), KShortcut(), this,
 		SLOT(slotDebugKGame()), actionCollection(), "debug_kgame");
+ (void)new KAction(i18n("Debug &BoDebug log"), KShortcut(), this,
+		SLOT(slotBoDebugLogDialog()), actionCollection(), "debug_bodebuglog");
 
  createGUI("topui.rc", false);
 
@@ -1287,5 +1290,13 @@ void TopWidget::slotDebugRequestIdName(int msgid, bool , QString& name)
 void TopWidget::slotChangeLocalPlayer(Player* p)
 {
  changeLocalPlayer(p);
+}
+
+void TopWidget::slotBoDebugLogDialog()
+{
+ BoDebugLogDialog* dialog = new BoDebugLogDialog(this);
+ connect(dialog, SIGNAL(finished()), dialog, SLOT(deleteLater()));
+ dialog->slotUpdate();
+ dialog->show();
 }
 
