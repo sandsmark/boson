@@ -52,8 +52,8 @@ public:
 
 
 	void placeGround();
-	void placeMobiles(Player* owner);
-	void placeFacilities(Player* owner);
+	void placeMobiles(PlayerIO* io);
+	void placeFacilities(PlayerIO* io);
 
 signals:
 	/**
