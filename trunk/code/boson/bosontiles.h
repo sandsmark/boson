@@ -21,14 +21,14 @@
 
 #include "cell.h"
 
-#include <qpixmap.h>
-
 class QImage;
+class QPixmap;
+class QString;
 
 /**
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
  **/
-class BosonTiles //: public QPixmap
+class BosonTiles
 {
 public:
 	/**

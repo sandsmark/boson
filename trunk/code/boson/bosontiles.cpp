@@ -24,6 +24,7 @@
 
 #include <qimage.h>
 #include <qapplication.h>
+#include <qpixmap.h>
 
 BosonTiles::BosonTiles()
 {

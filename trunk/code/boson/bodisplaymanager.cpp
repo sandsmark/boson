@@ -264,6 +264,15 @@ void BoDisplayManager::setCursor(BosonCursor* cursor)
  }
 }
 
+void BoDisplayManager::setLocalPlayer(Player* p)
+{
+ QPtrListIterator<BosonBigDisplay> it(d->mDisplayList);
+ while (it.current()) {
+	it.current()->setLocalPlayer(p);
+	++it;
+ }
+}
+
 void BoDisplayManager::slotUpdateMinerals(int m)
 {
  QPtrListIterator<BosonBigDisplay> it(d->mDisplayList);

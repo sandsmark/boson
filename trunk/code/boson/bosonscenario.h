@@ -20,7 +20,6 @@
 #define BOSONSCENARIO_H
 
 #include <qstring.h>
-#include <qptrlist.h>
 
 class Boson;
 class Player;

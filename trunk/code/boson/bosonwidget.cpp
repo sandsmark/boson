@@ -770,13 +770,7 @@ void BosonWidget::changeLocalPlayer(Player* localPlayer)
  d->mCommandFrame->setLocalPlayer(d->mLocalPlayer);
  d->mMiniMap->setLocalPlayer(d->mLocalPlayer);
 
- QPtrList<BosonBigDisplay> list = d->mDisplayManager->displays();
- QPtrListIterator<BosonBigDisplay> it(list);
- while (it.current()) {
-	it.current()->setLocalPlayer(d->mLocalPlayer);
-	++it;
- }
-
+ d->mDisplayManager->setLocalPlayer(d->mLocalPlayer);
  d->mChat->setFromPlayer(d->mLocalPlayer);
  slotSetActiveDisplay(d->mDisplayManager->activeDisplay() ? 
 		d->mDisplayManager->activeDisplay() : 
