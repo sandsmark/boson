@@ -342,6 +342,8 @@ public:
 	bool textureCompression() const { return mTextureCompression->value(); }
 	void setTextureColorMipmaps(bool on) { mTextureColorMipmaps->setValue(on); }
 	bool textureColorMipmaps() const { return mTextureColorMipmaps->value(); }
+	void setTextureAnisotropy(int a) { mTextureAnisotropy->setValue(a); }
+	int textureAnisotropy() const { return mTextureAnisotropy->value(); }
 
 
 	void setUnitSoundActivated(UnitSoundEvent e, bool activated);
@@ -631,6 +633,7 @@ private:
 	BoConfigIntEntry* mTextureFilter;
 	BoConfigBoolEntry* mTextureCompression;
 	BoConfigBoolEntry* mTextureColorMipmaps;
+	BoConfigIntEntry* mTextureAnisotropy;
 
 	// NOT stored to config file!
 	bool mDisableSound;

@@ -187,6 +187,9 @@ protected:
 	int textureFilter() const;
 	void setTextureFilter(int f);
 
+	int textureAnisotropy() const;
+	void setTextureAnisotropy(int f);
+
 	void setUseLOD(bool l);
 	bool useLOD() const;
 

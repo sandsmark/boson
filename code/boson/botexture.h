@@ -347,15 +347,18 @@ class BoTextureManager
     bool supportsTextureCube() const  { return mSupportsTextureCube; }
     bool supportsGenerateMipmap() const  { return mSupportsGenerateMipmap; }
     bool supportsTextureCompression() const  { return mSupportsTextureCompressionS3TC; }
+    bool supportsAnisotropicFiltering() const  { return (mMaxAnisotropy > 1); }
 
     int maxTextureSize() const  { return mMaxTextureSize; }
     int max3DTextureSize() const  { return mMax3DTextureSize; }
     int maxCubeTextureSize() const  { return mMaxCubeTextureSize; }
     int textureUnits() const  { return mTextureUnits; }
+    int maxTextureAnisotropy() const  { return mMaxAnisotropy; }
 
     bool useColoredMipmaps() const;
     bool useTextureCompression() const;
     int textureFilter() const;
+    int textureAnisotropy() const;
 
 
     // Those are meant to be used by only BoTexture.
@@ -417,6 +420,7 @@ class BoTextureManager
     int mMax3DTextureSize;
     int mMaxCubeTextureSize;
     int mTextureUnits;
+    int mMaxAnisotropy;
 };
 
 #endif // BOTEXTURE_H
