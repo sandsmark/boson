@@ -59,7 +59,12 @@ public:
 		SaveExternalToXML = 27,
 		PreLoadPlayFields = 40,
 		LoadPlayField = 41,
-		FindPath = 100
+		FindPath = 100,
+		WriteGameLog = 200,
+		SaveGameLogs = 201,
+		MakeGameLog = 202,
+		GenerateLOD = 300,
+		BuildLOD = 301
 	};
 	BosonProfiling();
 	BosonProfiling(const BosonProfiling& profiling);
