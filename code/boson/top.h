@@ -96,9 +96,7 @@ public slots:
 	/**
 	 * Toggles if togglebar is shown or hidden
 	 **/
-	void slotToggleStatusbar();
-
-	void slotConfigureKeys();
+	void slotToggleStatusbar(bool show);
 
 	/**
 	 * Ends current game and reinits all game data, so that a new game can
@@ -158,16 +156,6 @@ protected:
 
 	void changeLocalPlayer(Player* p);
 
-	/**
-	 * Display the dialog @p dialog. This function takes care of deleting
-	 * the dialog once it gets closed.
-	 *
-	 * This should not be used for modal dialogs, as (1) it is started using
-	 * @ref KDialogBase::exec, not @ref KDialogBase::show and (2) since it
-	 * is modal you can just delete it as soon as it returns.
-	 **/
-	void displayNonModalDialog(KDialogBase* dialog);
-
 protected slots:
 	void slotChangeLocalPlayer(Player* p);
 	void slotUpdateStatusBar();
@@ -204,13 +192,11 @@ protected slots:
 
 	void slotEditorNewMap(const QByteArray&);
 
-	void slotDebugKGame();
 	void slotDebugRequestIdName(int msgid, bool userid, QString& name);
 
 private:
 	void initDisplayManager();
 	void initBoson();
-	void initKActions();
 	void initStatusBar();
 	void enableGameActions(bool enable);
 

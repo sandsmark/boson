@@ -309,8 +309,6 @@ void BosonWidgetBase::initLayout()
 
  QVBoxLayout* topLayout = new QVBoxLayout(this);
  topLayout->addWidget(displayManager());
-
- emit signalLoadBosonGameDock();
 }
 
 void BosonWidgetBase::changeCursor(BosonCursor* cursor)
@@ -322,14 +320,6 @@ void BosonWidgetBase::changeCursor(BosonCursor* cursor)
  delete mCursor;
  mCursor = cursor;
  displayManager()->activeDisplay()->setCursor(mCursor);
-}
-
-void BosonWidgetBase::slotHack1()
-{
- BosonBigDisplayBase* display = displayManager()->activeDisplay();
- QSize size = display->size();
- display->resize(size.width() - 1, size.height() - 1);
- display->resize(size);
 }
 
 void BosonWidgetBase::slotItemAdded(BosonItem* item)
@@ -490,7 +480,10 @@ void BosonWidgetBase::startScenarioAndGame()
  // FIXME: this is hackish but I don't know any other way of checking if game
  //  is loaded or new one here. Feel free to improve
  if (boGame->loadingStatus() != BosonSaveLoad::LoadingCompleted) {
-	slotCenterHomeBase();
+	BO_CHECK_NULL_RET(displayManager());
+	BosonBigDisplayBase* display = displayManager()->activeDisplay();
+	BO_CHECK_NULL_RET(display);
+	display->slotCenterHomeBase();
  }
 }
 
@@ -629,13 +622,5 @@ PlayerIO* BosonWidgetBase::localPlayerIO() const
 	return localPlayer()->playerIO();
  }
  return 0;
-}
-
-void BosonWidgetBase::slotCenterHomeBase()
-{
- BO_CHECK_NULL_RET(displayManager());
- BosonBigDisplayBase* display = displayManager()->activeDisplay();
- BO_CHECK_NULL_RET(display);
- display->slotCenterHomeBase();
 }
 

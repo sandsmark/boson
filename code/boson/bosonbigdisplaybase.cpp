@@ -82,12 +82,16 @@
 #include "boconditionwidget.h"
 #include "bocamerawidget.h"
 #include "bosonmessage.h"
+#include "kgameunitdebug.h"
+#include "kgameplayerdebug.h"
+#include "kgameadvancemessagesdebug.h"
 #ifdef BOSON_USE_BOMEMORY
 #include "bomemory/bomemorydialog.h"
 #endif
 
 #include <kgame/kgameio.h>
 #include <kgame/kplayer.h>
+#include <kgame/kgamedebugdialog.h>
 
 #include <klocale.h>
 #include <kmessagebox.h>
@@ -107,6 +111,7 @@
 #include <qlayout.h>
 #include <qptrdict.h>
 #include <qinputdialog.h>
+#include <qvbox.h>
 
 #if HAVE_SYS_TIME_H
 #include <sys/time.h>
@@ -1143,11 +1148,14 @@ public:
 
 #if 0
 		mActionMenubar = 0;
-		mActionStatusbar = 0;
 #endif
+		mActionStatusbar = 0;
 		mActionDebugPlayers = 0;
 		mActionChat = 0;
 		mActionFullScreen = 0;
+
+		mSelectMapper = 0;
+		mCreateMapper = 0;
 	}
 
 	PlayerIO* mLocalPlayerIO;
@@ -1237,12 +1245,14 @@ public:
 
 #if 0
 	QGuardedPtr<BoUfoToggleAction> mActionMenubar;
-	QGuardedPtr<BoUfoToggleAction> mActionStatusbar;
 #endif
+	QGuardedPtr<BoUfoToggleAction> mActionStatusbar;
 	QGuardedPtr<BoUfoActionMenu> mActionDebugPlayers;
 	QGuardedPtr<BoUfoToggleAction> mActionChat;
 	QGuardedPtr<BoUfoToggleAction> mActionFullScreen;
 	QPtrDict<KPlayer> mActionDebugPlayer2Player;
+	QSignalMapper* mSelectMapper;
+	QSignalMapper* mCreateMapper;
 };
 
 BosonBigDisplayBase::BosonBigDisplayBase(QWidget* parent)
@@ -1746,7 +1756,7 @@ void BosonBigDisplayBase::initUfoActions(bool gameMode)
  // Settings
 // (void)BoUfoStdAction::keyBindings(this, SLOT(slotConfigureKeys()), actionCollection);
 // d->mActionMenubar = BoUfoStdAction::showMenubar(this, SLOT(slotToggleMenubar()), actionCollection);
-// d->mActionStatusbar = BoUfoStdAction::showStatusbar(this, SLOT(slotToggleStatusbar()), actionCollection);
+ d->mActionStatusbar = BoUfoStdAction::showStatusbar(this, SLOT(slotToggleStatusbar()), actionCollection);
  BoUfoToggleAction* sound = new BoUfoToggleAction(i18n("Soun&d"),
 		KShortcut(), this, SLOT(slotToggleSound()),
 		actionCollection, "options_sound");
@@ -1770,8 +1780,8 @@ void BosonBigDisplayBase::initUfoActions(bool gameMode)
  // Debug
  (void)new BoUfoAction(i18n("&Profiling..."), KShortcut(), this,
 		SLOT(slotProfiling()), actionCollection, "debug_profiling");
-// (void)new BoUfoAction(i18n("&Debug KGame..."), KShortcut(), this,
-//		SLOT(slotDebugKGame()), actionCollection, "debug_kgame");
+ (void)new BoUfoAction(i18n("&Debug KGame..."), KShortcut(), this,
+		SLOT(slotDebugKGame()), actionCollection, "debug_kgame");
  (void)new BoUfoAction(i18n("Debug &BoDebug log..."), KShortcut(), this,
 		SLOT(slotBoDebugLogDialog()), actionCollection, "debug_bodebuglog");
  (void)new BoUfoAction(i18n("sleep() 1s"), KShortcut(), this,
@@ -1919,6 +1929,8 @@ void BosonBigDisplayBase::initUfoActions(bool gameMode)
 
  cheating->setChecked(DEFAULT_CHEAT_MODE);
  slotToggleCheating(DEFAULT_CHEAT_MODE);
+ d->mActionStatusbar->setChecked(true);
+ slotToggleStatusbar();
 
  actionCollection->createGUI(files);
 }
@@ -1928,11 +1940,11 @@ void BosonBigDisplayBase::initUfoGameActions()
  BoUfoActionCollection* actionCollection = ufoManager()->actionCollection();
  BO_CHECK_NULL_RET(actionCollection);
 
-// (void)BoUfoStdAction::gameQuit(BosonWidgetBase, SIGNAL(signalQuit()), actionCollection);
-// (void)BoUfoStdAction::gameEnd(BosonWidgetBase, SIGNAL(signalEndGame()), actionCollection);
-// (void)BoUfoStdAction::gameSave(BosonWidgetBase, SIGNAL(signalSaveGame()), actionCollection);
+ (void)BoUfoStdAction::gameQuit(this, SIGNAL(signalQuit()), actionCollection);
+ (void)BoUfoStdAction::gameEnd(this, SIGNAL(signalEndGame()), actionCollection);
+ (void)BoUfoStdAction::gameSave(this, SIGNAL(signalSaveGame()), actionCollection);
  (void)BoUfoStdAction::gamePause(boGame, SLOT(slotTogglePause()), actionCollection);
-// (void)BoUfoStdAction::preferences(this, SLOT(slotPreferences()), actionCollection);
+ (void)BoUfoStdAction::preferences(this, SIGNAL(signalGamePreferences()), actionCollection);
  (void)new BoUfoAction(i18n("Center &Home Base"),
 		KShortcut(Qt::Key_H),
 		this, SLOT(slotCenterHomeBase()),
@@ -1941,6 +1953,29 @@ void BosonBigDisplayBase::initUfoGameActions()
 		KShortcut(),
 		this, SLOT(slotSyncNetwork()),
 		actionCollection, "debug_sync_network");
+
+
+ delete d->mSelectMapper;
+ d->mSelectMapper = new QSignalMapper(this);
+ delete d->mCreateMapper;
+ d->mCreateMapper = new QSignalMapper(this);
+ connect(d->mSelectMapper, SIGNAL(mapped(int)),
+		this, SIGNAL(signalSelectGroup(int)));
+ connect(d->mCreateMapper, SIGNAL(mapped(int)),
+		this, SIGNAL(signalCreateGroup(int)));
+
+ for (int i = 0; i < 10; i++) {
+	BoUfoAction* a = new BoUfoAction(i18n("Select Group %1").arg(i == 0 ? 10 : i),
+			Qt::Key_0 + i, d->mSelectMapper,
+			SLOT(map()), actionCollection,
+			QString("select_group_%1").arg(i));
+	d->mSelectMapper->setMapping(a, i);
+	a = new BoUfoAction(i18n("Create Group %1").arg(i == 0 ? 10 : i),
+			Qt::CTRL + Qt::Key_0 + i, d->mCreateMapper,
+			SLOT(map()), actionCollection,
+			QString("create_group_%1").arg(i));
+	d->mCreateMapper->setMapping(a, i);
+ }
 
 }
 
@@ -5250,6 +5285,54 @@ void BosonBigDisplayBase::slotChangeMaxProfilingRenderingEntries()
  }
 }
 
+void BosonBigDisplayBase::slotToggleStatusbar()
+{
+ BO_CHECK_NULL_RET(d->mActionStatusbar);
+ emit signalToggleStatusbar(d->mActionStatusbar->isChecked());
+}
 
+void BosonBigDisplayBase::slotDebugKGame()
+{
+ if (!boGame) {
+	boError() << k_funcinfo << "NULL game" << endl;
+	return;
+ }
+ KGameDebugDialog* dlg = new KGameDebugDialog(boGame, this, false);
+
+ QVBox* b = dlg->addVBoxPage(i18n("Debug &Units"));
+ KGameUnitDebug* units = new KGameUnitDebug(b);
+ units->setBoson(boGame);
+
+ b = dlg->addVBoxPage(i18n("Debug &Boson Players"));
+ KGamePlayerDebug* player = new KGamePlayerDebug(b);
+ player->setBoson(boGame);
+
+ b = dlg->addVBoxPage(i18n("Debug &Advance messages"));
+ KGameAdvanceMessagesDebug* messages = new KGameAdvanceMessagesDebug(b);
+ messages->setBoson(boGame);
+
+#if 0
+ if (boGame->playField()) {
+	BosonMap* map = boGame->playField()->map();
+	if (!map) {
+		boError() << k_funcinfo << "NULL map" << endl;
+		return;
+	}
+	b = dlg->addVBoxPage(i18n("Debug &Cells"));
+
+	// AB: this hardly does anything atm (04/04/23), but it takes a lot of
+	// time and memory to be initialized on big maps (on list item per cell,
+	// on a 500x500 map thats a lot)
+	KGameCellDebug* cells = new KGameCellDebug(b);
+	cells->setMap(map);
+ }
+#endif
+
+ connect(dlg, SIGNAL(signalRequestIdName(int,bool,QString&)),
+		this, SLOT(slotDebugRequestIdName(int,bool,QString&)));
+
+ connect(dlg, SIGNAL(finished()), dlg, SLOT(deleteLater()));
+ dlg->show();
+}
 
 

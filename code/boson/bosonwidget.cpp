@@ -27,6 +27,7 @@
 #include "optionsdialog.h"
 #include "bosoncursor.h"
 #include "bodisplaymanager.h"
+#include "bosonbigdisplaybase.h"
 #include "global.h"
 #include "gameoverdialog.h"
 #include "bodebug.h"
@@ -71,6 +72,18 @@ void BosonWidget::initConnections()
  BosonWidgetBase::initConnections();
  connect(boGame, SIGNAL(signalPlayerKilled(Player*)),
 		this, SLOT(slotPlayerKilled(Player*)));
+}
+
+void BosonWidget::initDisplayManager()
+{
+ BosonWidgetBase::initDisplayManager();
+ BO_CHECK_NULL_RET(displayManager());
+ BosonBigDisplayBase* display = displayManager()->activeDisplay();
+ BO_CHECK_NULL_RET(display);
+ connect(display, SIGNAL(signalSaveGame()), this, SIGNAL(signalSaveGame()));
+ connect(display, SIGNAL(signalEndGame()), this, SIGNAL(signalEndGame()));
+ connect(display, SIGNAL(signalQuit()), this, SIGNAL(signalQuit()));
+ connect(display, SIGNAL(signalGamePreferences()), this, SLOT(slotGamePreferences()));
 }
 
 void BosonWidget::initPlayer()
@@ -180,34 +193,6 @@ void BosonWidget::slotPlayerKilled(Player* p)
 	boError() << k_funcinfo << "no player left ?!" << endl;
 	return;
  }
-}
-
-void BosonWidget::initKActions()
-{
- QSignalMapper* selectMapper = new QSignalMapper(this);
- QSignalMapper* createMapper = new QSignalMapper(this);
- connect(selectMapper, SIGNAL(mapped(int)), displayManager(), SLOT(slotSelectGroup(int)));
- connect(createMapper, SIGNAL(mapped(int)), displayManager(), SLOT(slotCreateGroup(int)));
-
- QString slotSelect = SLOT(slotSelectGroup());
- QString slotCreate = SLOT(slotCreateGroup());
- for (int i = 0; i < 10; i++) {
-	KAction* a = new KAction(i18n("Select Group %1").arg(i == 0 ? 10 : i),
-			Qt::Key_0 + i, selectMapper,
-			SLOT(map()), actionCollection(),
-			QString("select_group_%1").arg(i));
-	selectMapper->setMapping(a, i);
-	a = new KAction(i18n("Create Group %1").arg(i == 0 ? 10 : i),
-			Qt::CTRL + Qt::Key_0 + i, createMapper,
-			SLOT(map()), actionCollection(),
-			QString("create_group_%1").arg(i));
-	createMapper->setMapping(a, i);
- }
- (void)KStdGameAction::save(this, SIGNAL(signalSaveGame()), actionCollection());
- (void)KStdGameAction::end(this, SIGNAL(signalEndGame()), actionCollection());
- (void)KStdGameAction::quit(this, SIGNAL(signalQuit()), actionCollection());
-
- (void)KStdAction::preferences(this, SLOT(slotGamePreferences()), actionCollection());
 }
 
 void BosonWidget::saveConfig()

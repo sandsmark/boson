@@ -76,8 +76,8 @@ protected slots:
 	void slotGameOverDialogFinished();
 
 protected:
-	virtual void initKActions();
 	virtual void initConnections();
+	virtual void initDisplayManager();
 	virtual void setBosonXMLFile();
 
 	virtual void startScenarioAndGame();
