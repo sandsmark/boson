@@ -34,6 +34,7 @@
 #include <kdebug.h>
 #include <kcursor.h>
 #include <klocale.h>
+#include <kstandarddirs.h>
 
 #include <qptrlist.h>
 #include <qpoint.h>
@@ -144,7 +145,11 @@ void BosonBigDisplay::init()
  d->mChat->setZ(Z_CANVASTEXT);
 
  d->mCursor = new BosonCursor;
- d->mCursor->setCanvas(canvas());
+ QString cursorDir = KGlobal::dirs()->findResourceDir("data", "boson/themes/cursors/move/index.desktop") + QString::fromLatin1("boson/themes/cursors");
+ d->mCursor->insertMode(CursorMove, cursorDir, QString::fromLatin1("move"));
+ d->mCursor->insertMode(CursorAttack, cursorDir, QString::fromLatin1("attack"));
+ d->mCursor->insertMode(CursorDefault, cursorDir, QString::fromLatin1("default"));
+ d->mCursor->setCanvas(canvas(), CursorAttack, Z_CANVAS_CURSOR);
 }
 
 BosonBigDisplay::~BosonBigDisplay()
@@ -201,16 +206,16 @@ void BosonBigDisplay::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseEvent
 			Unit* unit = ((BosonCanvas*)canvas())->findUnitAt(pos);
 			if (unit) {
 				if (unit->owner() == d->mLocalPlayer) {
-					d->mCursor->setCursor(BosonCursor::Default);
-					d->mCursor->setCursor(this);
+					d->mCursor->setCursor(CursorDefault);
+					d->mCursor->setWidgetCursor(this);
 				} else {
-					d->mCursor->setCursor(BosonCursor::Attack);
-					d->mCursor->setCursor(this);
+					d->mCursor->setCursor(CursorAttack);
+					d->mCursor->setWidgetCursor(this);
 				}
 			} else if (selection().first()->isMobile()) {
 //				kdDebug() << "change cursor" << endl;
-				d->mCursor->setCursor(BosonCursor::Move);
-				d->mCursor->setCursor(this);
+				d->mCursor->setCursor(CursorMove);
+				d->mCursor->setWidgetCursor(this);
 			}
 		}
 		d->mCursor->move(pos.x(), pos.y());
@@ -312,8 +317,8 @@ void BosonBigDisplay::clearSelection()
 	++it;
  }
  d->mSelectionList.clear();
- d->mCursor->setCursor(BosonCursor::Default);
- d->mCursor->setCursor(this);
+ d->mCursor->setCursor(CursorDefault);
+ d->mCursor->setWidgetCursor(this);
  emit signalSingleUnitSelected(0);
 }
 

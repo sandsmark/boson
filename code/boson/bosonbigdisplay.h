@@ -65,6 +65,12 @@ public:
 		SelectRect = 2
 	};
 
+	enum CursorMode {
+		CursorAttack = 0,
+		CursorMove = 1,
+		CursorDefault = 2
+	};
+
 	void setLocalPlayer(Player* p);
 
 	/**
