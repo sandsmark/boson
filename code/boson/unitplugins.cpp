@@ -486,8 +486,13 @@ bool HarvesterPlugin::loadFromXML(const QDomElement& root)
 	boError() << k_funcinfo << "Invalid number for Refinery attribute" << endl;
 	return false;
  }
-#warning FIXME
-// mRefinery = ...;
+ if (refineryId != 0) {
+	// AB: retrieving from Boson is not 100% nice, but definitely necessary
+	// and valid at this point. we need to get the pointer, even if the
+	// refinery is an enemy or if it is invisible to us
+	// --> it was saved this way, so we must load it this way.
+	mRefinery = game()->findUnit(refineryId, 0);
+ }
  return true;
 }
 
