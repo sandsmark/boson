@@ -174,7 +174,10 @@ void BosonCursor::loadCursors()
 	kdWarning() << "cursors already loaded..." << endl;
 	delete d->mCursor;
  }
- QString dir = KGlobal::dirs()->findResourceDir("data", "boson/themes/cursors/move.png") + QString::fromLatin1("boson/themes/cursors");
+ QString dir = KGlobal::dirs()->findResourceDir("data", "boson/themes/cursors/move/index.desktop") + QString::fromLatin1("boson/themes/cursors");
+
+ // normal cursor support is broken!
+ /*
  QString move = dir + QString::fromLatin1("/move.png");
  QString attack = dir + QString::fromLatin1("/attack.png");
  QString defaultCursor = dir + QString::fromLatin1("/default.png");
@@ -195,7 +198,7 @@ void BosonCursor::loadCursors()
 	d->mCursorAttack.setMask(mask);
  } else {
 	kdError() << k_funcinfo << "Could not load " << defaultCursor << endl;
- }
+ }*/
 
 
 #ifdef PIXMAP_CURSOR
