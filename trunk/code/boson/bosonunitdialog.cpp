@@ -19,6 +19,9 @@
 #include "bosonunitdialog.h"
 
 #include "unitproperties.h"
+#include "unit.h" // for Directions
+
+#include "defines.h"
 
 #include <klocale.h>
 #include <kfiledialog.h>
@@ -36,6 +39,50 @@
 #include <qcombobox.h>
 
 #include "bosonunitdialog.moc"
+
+class BosonUnitPixmap : public QWidget
+{
+public:
+	BosonUnitPixmap(QWidget* parent) : QWidget(parent)
+	{
+		QVBoxLayout* l = new QVBoxLayout(this);
+		l->setAutoAdd(true);
+		mLabel = new QLabel(this);
+		mPixmap = new QLabel(this);
+		mFileName= new QPushButton(this);
+	}
+	
+	~BosonUnitPixmap()
+	{
+	}
+
+	void setPixmap(const QString& fileName)
+	{
+		mPixmap->setPixmap(QPixmap(fileName));
+		int pos = fileName.findRev('/') + 1;
+		setFileName(fileName.right(fileName.length() - pos));
+	}
+	
+	void setFileName(const QString& fileName)
+	{
+		mFileName->setText(fileName);
+	}
+	
+	void setPixmap(const QPixmap& pix)
+	{
+		mPixmap->setPixmap(pix);
+	}
+	
+	void setLabel(const QString& text)
+	{
+		mLabel->setText(text);
+	}
+
+private:
+	QLabel* mLabel;
+	QLabel* mPixmap;
+	QPushButton* mFileName;
+};
 
 class BosonUnitDialog::BosonUnitDialogPrivate
 {
@@ -63,6 +110,8 @@ public:
 		mSpeed = 0;
 		
 		mUnitFacilityProperties = 0;
+
+		mDestroyedPixmap = 0;
 	}
 
 	UnitProperties* mUnit;
@@ -85,6 +134,9 @@ public:
 	KDoubleNumInput* mSpeed;
 	
 	QWidget* mUnitFacilityProperties;
+
+	BosonUnitPixmap* mDestroyedPixmap;
+	QPtrList<BosonUnitPixmap> mUnitPixmaps;
 };
 
 BosonUnitDialog::BosonUnitDialog(QWidget* parent) 
@@ -93,8 +145,9 @@ BosonUnitDialog::BosonUnitDialog(QWidget* parent)
 {
  d = new BosonUnitDialogPrivate;
  
- initDirectories();
- initProperties();
+ initDirectoriesPage();
+ initPropertiesPage();
+ initPixmapsPage();
 }
 
 
@@ -106,7 +159,7 @@ BosonUnitDialog::~BosonUnitDialog()
  delete d;
 }
 
-void BosonUnitDialog::initDirectories()
+void BosonUnitDialog::initDirectoriesPage()
 {
  QVBox* dirs = addVBoxPage(i18n("&Directories and Files"));
  (void)new QLabel(i18n("Directory where the unit is stored:"), dirs);
@@ -115,17 +168,17 @@ void BosonUnitDialog::initDirectories()
 
 }
 
-void BosonUnitDialog::initProperties()
+void BosonUnitDialog::initPropertiesPage()
 {
- QVBox* props = addVBoxPage(i18n("&Properties"));
+ QVBox* page = addVBoxPage(i18n("&Properties"));
 
- d->mUnitType = new QVButtonGroup(i18n("Unit type"), props);
+ d->mUnitType = new QVButtonGroup(i18n("Unit type"), page);
  (void)new QRadioButton(i18n("Is facility"), d->mUnitType);
  (void)new QRadioButton(i18n("Is Mobile"), d->mUnitType);
  d->mUnitType->setRadioButtonExclusive(true);
  connect(d->mUnitType, SIGNAL(pressed(int)), this, SLOT(slotTypeChanged(int)));
 
- d->mUnitProperties = new QWidget(props);
+ d->mUnitProperties = new QWidget(page);
  QGridLayout* layout = new QGridLayout(d->mUnitProperties, -1, 2, marginHint(), spacingHint());
  
 // TODO: range of numimnputs!
@@ -170,21 +223,40 @@ void BosonUnitDialog::initProperties()
  
 
 // Mobile Unit Properties 
- d->mUnitMobileProperties = new QWidget(props);
+ d->mUnitMobileProperties = new QWidget(page);
  d->mUnitMobileProperties->setEnabled(false);
  QGridLayout* mobileLayout = new QGridLayout(d->mUnitMobileProperties, -1, 2, marginHint(), spacingHint());
  d->mSpeed = new KDoubleNumInput(d->mUnitMobileProperties);
  d->mSpeed->setLabel(i18n("Speed"), AlignVCenter);
+ d->mSpeed->setRange(0.0, 100.0);
  mobileLayout->addMultiCellWidget(d->mSpeed, 0, 0, 0, 1);
 
 
 // Facility Properties 
- d->mUnitFacilityProperties = new QWidget(props);
+ d->mUnitFacilityProperties = new QWidget(page);
  d->mUnitFacilityProperties->setEnabled(false);
 
  
- d->mCreateUnit = new QPushButton(i18n("Create Unit"), props);
+ d->mCreateUnit = new QPushButton(i18n("Create Unit"), page);
  connect(d->mCreateUnit, SIGNAL(pressed()), this, SLOT(slotCreateUnit()));
+}
+
+void BosonUnitDialog::initPixmapsPage()
+{
+ QFrame* page = addPage(i18n("P&ixmaps"));
+ unsigned int count = QMAX(PIXMAP_PER_FIX, PIXMAP_PER_MOBILE) - 1;
+ int rows = count/3 + 2;
+ QGridLayout* l = new QGridLayout(page, rows,  3);
+ for (unsigned int i = 0; i < count; i++) {
+	BosonUnitPixmap* u = new BosonUnitPixmap(page);
+	l->addWidget(u, i / 3, i % 3);
+	d->mUnitPixmaps.append(u);
+	u->hide();
+ }
+ d->mDestroyedPixmap = new BosonUnitPixmap(page);
+ l->addWidget(d->mDestroyedPixmap, rows -1, 0);
+ d->mDestroyedPixmap->setLabel(i18n("Destroyed"));
+ 
 }
 
 void BosonUnitDialog::slotChangeUnitDir()
@@ -226,6 +298,20 @@ void BosonUnitDialog::slotChangeUnitDir()
  d->mTerrainType->setCurrentItem(d->mUnit->isLand() ? 0 : d->mUnit->isShip() ?
 		1 : d->mUnit->isAircraft() ? 2 : 0);
  d->mSpeed->setValue(d->mUnit->speed());
+ kdDebug() << d->mUnit->speed() << endl;
+
+ QString fileName = d->mUnit->unitPath() + QString("field.%1.bmp");
+ unsigned int pixmaps = d->mUnit->isFacility() ? PIXMAP_PER_FIX : PIXMAP_PER_MOBILE;
+ for (unsigned int i = 0; i < pixmaps; i++) {
+	QString number;
+	number.sprintf("%04d", i);
+	if (i != pixmaps - 1) {
+		d->mUnitPixmaps.at(i)->setPixmap(fileName.arg(number));
+	} else {
+		d->mDestroyedPixmap->setPixmap(fileName.arg(number));
+	}
+ }
+
  kdDebug() << "hopefully successfully loaded " << d->mUnit->typeId() << endl;
 }
 
@@ -281,9 +367,58 @@ void BosonUnitDialog::slotTypeChanged(int id)
  if (id == 0) { // is facility
 	d->mUnitFacilityProperties->setEnabled(true);
 	d->mUnitMobileProperties->setEnabled(false);
+
+	for (unsigned int i = 0; i < d->mUnitPixmaps.count(); i++) {
+		if (i < PIXMAP_PER_FIX - 1) {
+			d->mUnitPixmaps.at(i)->show();
+			d->mUnitPixmaps.at(i)->setLabel(i18n("Step %1").arg(i));
+		} else {
+			d->mUnitPixmaps.at(i)->hide();
+		}
+	}
  } else { // is mobile unit
 	d->mUnitFacilityProperties->setEnabled(false);
 	d->mUnitMobileProperties->setEnabled(true);
+	for (unsigned int i = 0; i < d->mUnitPixmaps.count(); i++) {
+		if (i < PIXMAP_PER_MOBILE - 1) {
+			d->mUnitPixmaps.at(i)->show();
+			QString text;
+			switch ((Unit::Direction)i) {
+				case Unit::North:
+					text = i18n("North");
+					break;
+				case Unit::NorthEast:
+					text = i18n("NorthEast");
+					break;
+				case Unit::East:
+					text = i18n("East");
+					break;
+				case Unit::SouthEast:
+					text = i18n("SouthEast");
+					break;
+				case Unit::South:
+					text = i18n("South");
+					break;
+				case Unit::SouthWest:
+					text = i18n("SouthWest");
+					break;
+				case Unit::West:
+					text = i18n("West");
+					break;
+				case Unit::NorthWest:
+					text = i18n("NorthWest");
+					break;
+				default:
+					text = i18n("Unknown");
+					break;
+					
+			}
+			d->mUnitPixmaps.at(i)->setLabel(text);
+			
+		} else {
+			d->mUnitPixmaps.at(i)->hide();
+		}
+	}
  }
 }
 
