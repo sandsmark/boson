@@ -89,21 +89,40 @@ bool playerMobUnit::getWantedMove(state_t &wstate)
 	int range;
 
 
-	asked.x = x();
-	asked.y = y();
+	asked.x = gridRect().x();
+	asked.y = gridRect().y();
 
-	/*
+
+	int dx = dest_x - gridRect().x();
+	int dy = dest_y - gridRect().y();
+
+	if (!dx && !dy) state = MUS_NONE;
+
 	switch(state){
 		default:
 			logf(LOG_ERROR, "playerMobUnit::getWantedMove : unknown state");
 			return false;
-			break;
 
 		case MUS_NONE:
 			return false;
-			break;
 
 		case MUS_TURNING:
+		case MUS_MOVING:
+			if (dx*dx>dy*dy) {
+				asked.x += (dx>0)?1:-1;
+			} else {
+				asked.y += (dy>0)?1:-1;
+			}
+			wstate = asked;
+			asked_state = MUS_MOVING;
+			return true;
+	}
+
+	// should not be reached :
+	return false;
+
+
+/*
 			assert(direction>=0); assert(direction<12);
 			ldx = dest_x - x(); ldy = dest_y - y();
 			vp1 = VECT_PRODUCT(direction);
@@ -189,10 +208,7 @@ bool playerMobUnit::getWantedMove(state_t &wstate)
 
 			break;
 		}
-
-	logf(LOG_ERROR, "unhandled state in getWantedMove()");
 	*/
-	return false;
 }
 
 
@@ -343,7 +359,9 @@ bool playerMobUnit::getWantedShoot(bosonMsgData *msg)
 
 
 /***** server orders *********/
-void playerMobUnit::doMoveTo(state_t ns)
+
+/* actually do the job, used by different functions */
+void playerMobUnit::do_moveTo(state_t ns)
 {
 	int dx = ns.x - x();
 	int dy = ns.y - y();
@@ -356,12 +374,14 @@ void playerMobUnit::doMoveTo(state_t ns)
 	if (sp_down) sp_down->moveBy(dx,dy);
 }
 
+
+/* server order */
 void playerMobUnit::s_moveTo(state_t ns)
 {
 
 	//orzel : use some kind of fuel
 	if ( who!=who_am_i) { /* this not my unit */
-		doMoveTo(ns);
+		do_moveTo(ns);
 		return;
 		}
 
@@ -375,7 +395,7 @@ void playerMobUnit::s_moveTo(state_t ns)
 	if (ns.x!=asked.x || ns.y!=asked.y)
 		logf(LOG_ERROR, "playerMobUnit::s_moveTo : unexpected dx,dy");
 
-	doMoveTo(ns);
+	do_moveTo(ns);
 
 	if (x()==dest_x && y()==dest_y) {
 		//puts("going to MUS_NONE");
@@ -399,7 +419,7 @@ void playerMobUnit::u_goto(int mx, int my) // not the same as QCanvasSprite::mov
 		target = 0l;
 		//puts("u_goto disconnecting target");
 	}
-	do_goto(mx, my);
+	do_goto(mx/BO_TILE_SIZE, my/BO_TILE_SIZE);
 }
 	
 	
@@ -439,7 +459,7 @@ void playerMobUnit::u_attack(bosonUnit *u)
 		return;
 	}
 
-	do_goto(p.x(), p.y());
+	do_goto(p.x()/BO_TILE_SIZE, p.y()/BO_TILE_SIZE);
 }
 
 

@@ -75,7 +75,6 @@ public:
  
 	void		shooted(int _power);
 /* Server orders */
-	void		doMoveTo(state_t nstate);
 	void		s_moveTo(state_t nstate);
 
 protected:
@@ -87,15 +86,22 @@ protected:
 
 	virtual bool	getWantedMove(state_t &);
 	virtual bool	getWantedShoot(bosonMsgData *);
-	
+
 public slots:
-	/* orders from user */
+	/** user asked for a given destination */
 	virtual void	u_goto(int, int); // not the same as QCanvasSprite::moveTo
+	/** user asked to stop */
 	void		u_stop(void);	
+	/** user asked to attack the given unit */
 	virtual void	u_attack(bosonUnit *); // reimplemented from bosonUnit
+
+	/** this slots receives message when the attacked unit moves */
   	void		targetMoveTo(int, int);
 
 private :
+	/** actually do the job of moving the unit, from server order */
+	void		do_moveTo(state_t nstate);
+	/** actually do the job of configuring the unit with given destination */
 	void		do_goto(int, int);
 	int		direction;	// [0-11] is the angle ...
 	mobUnitState	state;
