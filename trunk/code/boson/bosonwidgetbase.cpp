@@ -872,6 +872,7 @@ void BosonWidgetBase::slotDebugPlayer(int index)
 void BosonWidgetBase::slotChatDockHidden()
 {
  d->mActionChat->setChecked(false);
+ setFocus();
 }
 
 void BosonWidgetBase::slotCmdFrameDockHidden()
