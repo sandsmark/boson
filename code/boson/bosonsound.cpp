@@ -74,6 +74,9 @@ public:
 	void rewind()
 	{
 		kdDebug() << k_funcinfo << endl;
+		if (isNull()) {
+			return;
+		}
 		if (!(object()->capabilities() & Arts::capSeek)) {
 			kdDebug() << "cannot seek" << endl;
 			reload();
@@ -99,7 +102,12 @@ public:
 		}
 		KPlayObjectFactory factory(mParent->server().server());
 		mPlayObject = factory.createPlayObject(file(), true);
-		mPlayed = false;
+		if (mPlayObject && mPlayObject->isNull()) {
+			mPlayed = false;
+		} else {
+			delete mPlayObject;
+			mPlayObject = 0;
+		}
 	}
 
 	void playFromBeginning()
@@ -209,15 +217,11 @@ void BosonSound::loadDefaultEvent(int event, const QString& filter)
  for (unsigned int i = 0; i < list.count(); i++) {
 	kdDebug() << k_funcinfo << "adding " << event << " = " << list[i] << endl;
 	BoPlayObject* playObject = new BoPlayObject(this, list[i]);
-	if (playObject->object()) {
-		if (playObject->isNull()) {
-			kdWarning() << k_funcinfo << "NULL sound " << list[i] << endl;
-			delete playObject;
-		} else {
-			d->mDefaultSounds[event].append(playObject);
-		}
+	if (!playObject->isNull()) {
+		d->mDefaultSounds[event].append(playObject);
 	} else {
 		kdWarning() << k_funcinfo << "NULL sound " << list[i] << endl;
+		delete playObject;
 	}
  }
  d->mDefaultSounds[event].setAutoDelete(true);
@@ -230,11 +234,11 @@ void BosonSound::addSound(int id, const QString& file)
 	return;
  }
  BoPlayObject* playObject = new BoPlayObject(this, file);
- if (playObject->isNull()) {
+ if (!playObject->isNull()) {
+	d->mSounds.insert(id, playObject);
+ } else {
 	kdWarning() << k_funcinfo << "NULL sound " << file << endl;
 	delete playObject;
- } else {
-	d->mSounds.insert(id, playObject);
  }
 }
 
@@ -277,11 +281,12 @@ void BosonSound::addEventSound(int unitType, int event, const QString& file)
  kdDebug() << k_funcinfo << "adding: " << unitType << "->" << event << " = " << file << endl;
  KPlayObjectFactory factory(server().server());
  BoPlayObject* playObject = new BoPlayObject(this, file);
- if (playObject->isNull()) {
-	kdWarning() << k_funcinfo << "NULL sound " << file << endl;
- } else {
+ if (!playObject->isNull()) {
 	// that's really ugly code:
 	(d->mUnitSounds[unitType])[event].append(playObject);
+ } else {
+	kdWarning() << k_funcinfo << "NULL sound " << file << endl;
+	delete playObject;
  }
 }
 
