@@ -184,6 +184,9 @@ public:
 	BosonTextureArray* mArray;
 	unsigned int mHotspotX;
 	unsigned int mHotspotY;
+	bool mAnimated;
+	unsigned int mAnimationSpeed;
+	int mRotateDegree;
 };
 
 class BosonSpriteCursor : public BosonCursor

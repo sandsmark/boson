@@ -4,7 +4,7 @@
 # there are none, comment this out
 SUBDIRS = data visual sound
 
-bin_PROGRAMS = boson bounit boprofiling
+bin_PROGRAMS = boson bounit boprofiling bocursor
 
 INCLUDES = -I$(kde_includes)/arts $(all_includes)
 
@@ -83,6 +83,10 @@ bounit_SOURCES = bounitmain.cpp bosonsearchpathswidget.ui bouniteditor.ui
 boprofiling_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 boprofiling_LDADD = -lkio $(LIB_KDEUI)
 boprofiling_SOURCES = $(BOPROFILING_SRC)
+
+bocursor_LDFLAGS = $(KDE_RPATH) $(all_libraries)
+bocursor_LDADD = -lkio $(LIB_KDEUI) -lGLU
+bocursor_SOURCES = bocursormain.cpp bosoncursoreditor.cpp bosoncursor.cpp bosontexturearray.cpp
 
 METASOURCES = AUTO
 
