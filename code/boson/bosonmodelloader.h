@@ -112,6 +112,9 @@ protected:
 	 **/
 	const QString& baseDirectory() const;
 
+	bool optimizeModel();
+	bool checkValidity() const;
+
 private:
 	void init();
 
