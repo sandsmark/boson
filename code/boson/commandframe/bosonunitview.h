@@ -52,7 +52,7 @@ protected:
 	void hideAll();
 	void showGeneral();
 
-	virtual void displayUnitPixmap(int unitType, Player* owner);
+	virtual void displayUnitPixmap(unsigned long int unitType, Player* owner);
 
 private:
 	class BosonUnitViewPrivate;
