@@ -266,7 +266,25 @@ void BosonParticleSystem::setPosition(BoVector3 p)
 
 void BosonParticleSystem::setRotation(GLfloat angle, GLfloat x, GLfloat y, GLfloat z)
 {
-  mRotated = true; mMatrix.rotate(angle, x, y, z);
+  mRotated = true;
+  if(x != 0.0f)
+  {
+    mRotation.setX(angle);
+  }
+  if(y != 0.0f)
+  {
+    mRotation.setY(angle);
+  }
+  if(z != 0.0f)
+  {
+    mRotation.setZ(angle);
+  }
+
+  mMatrix.loadIdentity();
+  mMatrix.rotate(mRotation.z(), 0.0f, 0.0f, 1.0f);
+  mMatrix.rotate(mRotation.x(), 1.0f, 0.0f, 0.0f);
+  mMatrix.rotate(mRotation.y(), 0.0f, 1.0f, 0.0f);
+
   if(mMoveParticlesWithSystem)
   {
     BoMatrix m;

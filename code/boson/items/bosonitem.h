@@ -503,13 +503,13 @@ public:
 	 * floating point operations!
 	 **/
 	inline float rotation() const { return mRotation; }
-	void setRotation(float r) { rotateParticleSystems(-(r - mRotation), 0.0, 0.0, 1.0); mRotation = r; }
+	void setRotation(float r) { rotateParticleSystems(-r, 0.0, 0.0, 1.0); mRotation = r; }
 
 	inline float xRotation() const { return mXRotation; }
-	void setXRotation(float r) { rotateParticleSystems(r - mXRotation, 1.0, 0.0, 0.0); mXRotation = r; }
+	void setXRotation(float r) { rotateParticleSystems(r, 1.0, 0.0, 0.0); mXRotation = r; }
 
 	inline float yRotation() const { return mYRotation; }
-	void setYRotation(float r) { rotateParticleSystems(r - mYRotation, 0.0, 1.0, 0.0); mYRotation = r; }
+	void setYRotation(float r) { rotateParticleSystems(r, 0.0, 1.0, 0.0); mYRotation = r; }
 
 
 	void moveParticleSystems(float x, float y, float z);

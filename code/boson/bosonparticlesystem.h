@@ -332,6 +332,7 @@ class BosonParticleSystem
     BoMatrix mMatrix;  // Rotation matrix. Used to calculate position and
         //  velocity of particles when they're initialized. Stored here for
         //  perf. reasons
+    BoVector3 mRotation;  // Euler angles for rotation
 
     friend class BosonBigDisplayBase;
 };
