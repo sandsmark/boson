@@ -1159,6 +1159,11 @@ BosonPathRegion::~BosonPathRegion()
   {
     neighbors[i].region->removeNeighbor(this);
   }
+  // Remove from group
+  if(group)
+  {
+    group->regions.remove(this);
+  }
   // And remove ourselves from pathfinder's regions list
 //  boDebug(510) << k_funcinfo << "removing self from regions list" << endl;
   sector->pathfinder->removeRegion(this);
@@ -1216,7 +1221,7 @@ void BosonPathRegion::findCells(int x, int y)
       }
       else if(sector->pathfinder->cellRegion(n2.x, n2.y))
       {
-        // Cell is already in a group
+        // Cell is already in a region
         continue;
       }
       else if(sector->pathfinder->cellPassability(n2.x, n2.y) != passabilityType)
