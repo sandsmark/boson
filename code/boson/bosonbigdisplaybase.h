@@ -170,7 +170,7 @@ public:
 
 	void setDisplayInput(BosonBigDisplayInputBase* input);
 
-	void setLocalPlayer(Player* p);
+	void setLocalPlayerIO(PlayerIO* p);
 
 	const BosonCanvas* canvas() const { return mCanvas; }
 
@@ -253,7 +253,6 @@ public:
 
 	double fps() const;
 
-	Player* localPlayer() const;
 	PlayerIO* localPlayerIO() const;
 
 	/**
@@ -545,7 +544,7 @@ protected:
 
 	BoItemList* selectionRectItems();
 
-	void addMouseIO(Player* p);
+	void addMouseIO(PlayerIO* playerIO);
 
 	void generateMovieFrame(const QByteArray& data, BoPixmapRenderer* renderer);
 private:

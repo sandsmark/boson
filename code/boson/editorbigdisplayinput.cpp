@@ -30,7 +30,7 @@
 #include "boson.h"
 #include "bosonmap.h"
 #include "bosoncursor.h"
-#include "player.h"
+#include "playerio.h"
 #include "unitproperties.h"
 #include "pluginproperties.h"
 #include "unit.h"
@@ -39,6 +39,8 @@
 #include "bodebug.h"
 #include "boaction.h"
 #include "bosonlocalplayerinput.h"
+#include "player.h" // FIXME: should not be here!
+//#include "no_player.h"
 
 #include <klocale.h>
 #include <kapplication.h>
@@ -194,8 +196,8 @@ bool EditorBigDisplayInput::actionPlace(const BoVector3& canvasVector)
 	BO_NULL_ERROR(canvas())
 	return false;
  }
- if (!localPlayer()) {
-	BO_NULL_ERROR(localPlayer())
+ if (!localPlayerIO()) {
+	BO_NULL_ERROR(localPlayerIO())
 	return false;
  }
  if (!localPlayerInput()) {
@@ -213,7 +215,7 @@ bool EditorBigDisplayInput::actionPlace(const BoVector3& canvasVector)
 		boError() << k_funcinfo << "NULL owner" << endl;
 		return false;
 	}
-	const UnitProperties* prop = localPlayer()->unitProperties(d->mPlacement.unitType());
+	const UnitProperties* prop = localPlayerIO()->unitProperties(d->mPlacement.unitType());
 	if (!prop) {
 		boError() << k_funcinfo << "invalid unittype " << d->mPlacement.unitType() << endl;
 		return false;
@@ -364,11 +366,11 @@ void EditorBigDisplayInput::placeUnit(unsigned long int unitType, Player* owner)
 	boError() << k_funcinfo << "NULL owner" << endl;
 	return;
  }
- if (owner != localPlayer()) {
+ if (owner != localPlayerIO()->player()) {
 	boError() << k_funcinfo << "owner != localplayer" << endl;
 	return;
  }
- boDebug() << k_funcinfo << "now placing unit: " << unitType << " for " << owner->id() << "==" << owner->name() << endl;
+ boDebug() << k_funcinfo << "now placing unit: " << unitType << " for " << localPlayerIO()->playerId() << "==" << localPlayerIO()->name() << endl;
  d->mPlacement.placeUnit(unitType, owner);
 }
 
@@ -422,6 +424,7 @@ void EditorBigDisplayInput::updatePlacementPreviewData()
 		bigDisplay()->setPlacementPreviewData(0, false);
 		return;
 	}
+#warning do NOT use Player here! use PlayerIO
 	const UnitProperties* prop = d->mPlacement.owner()->unitProperties(d->mPlacement.unitType());
 
 	bool canPlace = canvas()->canPlaceUnitAt(prop, cursorCanvasPos(), 0);
@@ -479,7 +482,7 @@ bool EditorBigDisplayInput::selectAll(const UnitProperties* prop, bool replace)
 
 void EditorBigDisplayInput::slotMoveSelection(int cellX, int cellY)
 {
- BO_CHECK_NULL_RET(localPlayer());
+ BO_CHECK_NULL_RET(localPlayerIO());
  BO_CHECK_NULL_RET(selection());
  if (selection()->isEmpty()) {
 	return;

@@ -20,6 +20,7 @@
 #include "bosonbigdisplaybase.h"
 #include "bosonbigdisplaybase.moc"
 
+#include "no_player.h"
 #include "defines.h"
 #include "bosoncanvas.h"
 #include "bosoncanvasstatistics.h"
@@ -30,7 +31,6 @@
 #include "unit.h"
 #include "unitproperties.h"
 #include "speciestheme.h"
-#include "player.h"
 #include "playerio.h"
 #include "bosoncursor.h"
 #include "boselection.h"
@@ -267,7 +267,7 @@ class BosonBigDisplayBase::BosonBigDisplayBasePrivate
 public:
 	BosonBigDisplayBasePrivate()
 	{
-		mLocalPlayer = 0;
+		mLocalPlayerIO = 0;
 		mChat = 0;
 		mMouseIO = 0;
 
@@ -284,7 +284,7 @@ public:
 		mGLMiniMap = 0;
 	}
 
-	Player* mLocalPlayer;
+	PlayerIO* mLocalPlayerIO;
 	KGameMouseIO* mMouseIO;
 	BosonBigDisplayInputBase* mInput;
 
@@ -2061,15 +2061,15 @@ void BosonBigDisplayBase::mouseEventReleaseDouble(ButtonState button, const BoMo
  }
 }
 
-void BosonBigDisplayBase::addMouseIO(Player* p)
+void BosonBigDisplayBase::addMouseIO(PlayerIO* io)
 {
  boDebug() << k_funcinfo << endl;
- BO_CHECK_NULL_RET(p);
+ BO_CHECK_NULL_RET(io);
  if (d->mMouseIO) {
 	boError() << k_funcinfo << "mouse IO already present for this display!" << endl;
 	return;
  }
- if (p->hasRtti(KGameIO::MouseIO)) {
+ if (io->hasRtti(KGameIO::MouseIO)) {
 	// FIXME: this is only invalid if the IO is for the same big display!
 	boWarning() << k_funcinfo << "player already has a mouse IO" << endl;
 	return;
@@ -2079,7 +2079,7 @@ void BosonBigDisplayBase::addMouseIO(Player* p)
 		this, SLOT(slotMouseEvent(KGameIO*, QDataStream&, QMouseEvent*, bool*)));
  connect(d->mMouseIO, SIGNAL(destroyed()),
 		this, SLOT(slotMouseIODestroyed()));
- p->addGameIO(d->mMouseIO);
+ io->addGameIO(d->mMouseIO);
 }
 
 void BosonBigDisplayBase::makeActive()
@@ -2099,20 +2099,20 @@ void BosonBigDisplayBase::setActive(bool a)
  selection()->activate(a);
 }
 
-void BosonBigDisplayBase::setLocalPlayer(Player* p)
+void BosonBigDisplayBase::setLocalPlayerIO(PlayerIO* io)
 {
  boDebug() << k_funcinfo << endl;
- if (localPlayer() && p) {
-	// note that we do this even if p == d->mLocalPlayer.
+ if (localPlayerIO() && io) {
+	// note that we do this even if io == d->mLocalPlayerIO.
 	// we do this to guarantee that _all_ objects are properly initialized
 	// with the new player, even if they did not exist yet when the player was set
 	// the first time
-	boDebug() << k_funcinfo << "already a local player present! unset..." << endl;
-	setLocalPlayer(0);
+	boDebug() << k_funcinfo << "already a local playerIO present! unset..." << endl;
+	setLocalPlayerIO(0);
  }
 
- Player* previousPlayer = localPlayer();
- d->mLocalPlayer = p;
+ PlayerIO* previousPlayerIO = localPlayerIO();
+ d->mLocalPlayerIO = io;
 
  BoGroundRendererManager::manager()->setLocalPlayerIO(localPlayerIO());
 
@@ -2120,45 +2120,38 @@ void BosonBigDisplayBase::setLocalPlayer(Player* p)
  d->mMouseIO = 0;
 
  if (d->mGLMiniMap) {
-	if (previousPlayer) {
-		disconnect(previousPlayer, 0, d->mGLMiniMap, 0);
+	if (previousPlayerIO) {
+		previousPlayerIO->disconnect(0, d->mGLMiniMap, 0);
 	}
-	if (localPlayer()) {
-		connect(localPlayer(), SIGNAL(signalFog(int, int)),
+	if (localPlayerIO()) {
+		PlayerIO* io = localPlayerIO();
+		io->connect(SIGNAL(signalFog(int, int)),
 				d->mGLMiniMap, SLOT(slotFog(int, int)));
-		connect(localPlayer(), SIGNAL(signalUnfog(int, int)),
+		io->connect(SIGNAL(signalUnfog(int, int)),
 				d->mGLMiniMap, SLOT(slotUnfog(int, int)));
 		if (boGame->gameMode()) {
-			connect(localPlayer(), SIGNAL(signalShowMiniMap(bool)),
+			io->connect(SIGNAL(signalShowMiniMap(bool)),
 					d->mGLMiniMap, SLOT(slotShowMiniMap(bool)));
-			d->mGLMiniMap->slotShowMiniMap(localPlayer()->hasMiniMap());
+			d->mGLMiniMap->slotShowMiniMap(io->hasMiniMap());
 		} else {
 			d->mGLMiniMap->slotShowMiniMap(true);
 		}
 	}
 	d->mGLMiniMap->setLocalPlayerIO(localPlayerIO());
  }
- if (!localPlayer()) {
+ if (!localPlayerIO()) {
 	return;
  }
- addMouseIO(localPlayer());
+ addMouseIO(localPlayerIO());
 
  if (canvas()) {
 	slotInitMiniMapFogOfWar();
  }
 }
 
-Player* BosonBigDisplayBase::localPlayer() const
-{
- return d->mLocalPlayer;
-}
-
 PlayerIO* BosonBigDisplayBase::localPlayerIO() const
 {
- if (!d->mLocalPlayer) {
-	return 0;
- }
- return d->mLocalPlayer->playerIO();
+ return d->mLocalPlayerIO;
 }
 
 void BosonBigDisplayBase::slotCenterHomeBase()
@@ -2260,7 +2253,7 @@ void BosonBigDisplayBase::leaveEvent(QEvent*)
 void BosonBigDisplayBase::quitGame()
 {
  boDebug() << k_funcinfo << endl;
- setLocalPlayer(0);
+ setLocalPlayerIO(0);
  setCanvas(0);
 
  // these are the important things - they *must* be cleared in order to avoid
@@ -2274,7 +2267,7 @@ void BosonBigDisplayBase::quitGame()
  d->mMouseIO = 0;
  delete d->mInput,
  d->mInput = 0;
- setLocalPlayer(0);
+ setLocalPlayerIO(0);
  setKGameChat(0);
  setCanvas(0);
 
@@ -2950,16 +2943,17 @@ void BosonBigDisplayBase::setPlacementPreviewData(const UnitProperties* prop, bo
  if (!prop) {
 	return;
  }
- if (!localPlayer()) {
-	boError() << k_funcinfo << "NULL local player" << endl;
+ if (!localPlayerIO()) {
+	boError() << k_funcinfo << "NULL local playerIO" << endl;
 	return;
  }
- if (!localPlayer()->speciesTheme()) {
+ SpeciesTheme* theme = localPlayerIO()->speciesTheme();
+ if (!theme) {
 	boError() << k_funcinfo << "NULL theme" << endl;
 	return;
  }
  if (d->mPlacementPreview.unitProperties() != prop) {
-	BosonModel* m = localPlayer()->speciesTheme()->unitModel(prop->typeId()); // AB: this does a lookup in a list and therefore should be avoided (this method gets called at least whenever the mouse is moved!)
+	BosonModel* m = theme->unitModel(prop->typeId()); // AB: this does a lookup in a list and therefore should be avoided (this method gets called at least whenever the mouse is moved!)
 	if (!m) {
 		boError() << k_funcinfo << "NULL model for " << prop->typeId() << endl;
 		return;
