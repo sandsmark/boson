@@ -189,6 +189,42 @@ texture.jpg=LongName.jpg - "texture.jpg" is the "short name" of the texture,
                            anyway).
 -------------------------------------------------------------------------------
 
+The OpenGL group is also shared by all units and not mandatory, but will
+probably be used by most units. In this group you specify e.g. how many frames
+the model has and how they should be used. Note that counting starts at 0 here!
+so e.g. 5 frames are 0..4 !
+The first frame of an action is specified by "FrameStart*" where "*" is the
+action. See below for possible values here. The number of frames for this action
+is specified by "FrameRange*", where "*" is again the action. You'll also need
+to specify how fast the frames change - this is done by the "advance" calls
+(which depend on the game speed, btw). Specify it by "FrameSpeed*".
+So e.g. to use the first 10 frames when the unit does nothing and to change the
+frame every 5 advance calls use this:
+FrameStartIdle=0
+FrameRangeIdle=10
+FrameSpeedIdle=5
+-------------------------------------------------------------------------------
+[OpenGL]
+FrameStartIdle=Number     - (see above for general information)
+                            Default is 0.
+FrameRangeIdle=Number     - (see above for general information)
+                            Default is 1.
+FrameSpeedIdle=Number     - (see above for general information)
+                            Default is 1.
+                            The "Idle" action specifies the frames/animation
+                            of the unit when it does nothing, i.e. is idle.
+FrameStartWreckage=Number - (see above for general information)
+                            Default is -1.
+FrameRangeWreckage=Number - (see above for general information)
+                            Default is 0.
+FrameSpeedWreckage=Number - (see above for general information)
+                            Default is 0.
+                            The "Wreckage" action specifies the frames/animation
+                            of the unit when it is destroyed
+
+-------------------------------------------------------------------------------
+
+
 
 Now lets get to the "misc" stuff. You can define several plugins - look into
 pluginproperties.h for a list of all possible plugins (NOT unitplugins.h!)
@@ -237,3 +273,7 @@ CanRefineMinerals=Boolean - True if this is a mineralrefinery.
 -------------------------------------------------------------------------------
 
 
+
+/*
+ * vim:et
+ */
