@@ -100,14 +100,12 @@ public:
 	BosonPlayField* mPlayField;
 	BosonCanvas* mCanvas;
 
-	BosonSaveLoad::LoadingStatus mLoadingStatus;
 	QPtrQueue<SaveLoadError> mErrorQueue;
 };
 
 BosonSaveLoad::BosonSaveLoad(Boson* boson) : QObject(boson, "bosonsaveload")
 {
  d = new BosonSaveLoadPrivate;
- d->mLoadingStatus = NotLoaded;
  d->mBoson = boson;
  d->mErrorQueue.setAutoDelete(true);
 
@@ -127,21 +125,10 @@ void BosonSaveLoad::initBoson()
 	return;
  }
 
- connect(this, SIGNAL(signalLoadExternalStuff(QDataStream&)),
-		d->mBoson, SIGNAL(signalLoadExternalStuff(QDataStream&)));
- connect(this, SIGNAL(signalSaveExternalStuff(QDataStream&)),
-		d->mBoson, SIGNAL(signalSaveExternalStuff(QDataStream&)));
  connect(this, SIGNAL(signalLoadExternalStuffFromXML(const QDomElement&)),
 		d->mBoson, SIGNAL(signalLoadExternalStuffFromXML(const QDomElement&)));
  connect(this, SIGNAL(signalSaveExternalStuffAsXML(QDomElement&)),
 		d->mBoson, SIGNAL(signalSaveExternalStuffAsXML(QDomElement&)));
-}
-
-void BosonSaveLoad::systemAddPlayer(KPlayer* p)
-{
- if (p && d->mBoson) {
-	d->mBoson->systemAddPlayer_(this, p);
- }
 }
 
 void BosonSaveLoad::setCanvas(BosonCanvas* canvas)
@@ -167,11 +154,6 @@ void BosonSaveLoad::addLoadError(SaveLoadError::ErrorType type, const QString& t
 void BosonSaveLoad::addSaveError(SaveLoadError::ErrorType type, const QString& text, const QString& caption)
 {
  addError(new SaveError(type, text, caption));
-}
-
-BosonSaveLoad::LoadingStatus BosonSaveLoad::loadingStatus() const
-{
- return d->mLoadingStatus;
 }
 
 unsigned long int BosonSaveLoad::latestSavegameVersion()
@@ -276,16 +258,6 @@ bool BosonSaveLoad::savePlayFieldToFiles(QMap<QString, QByteArray>& files)
  }
  ret = convertSaveGameToPlayField(files);
  return ret;
-}
-
-bool BosonSaveLoad::saveToFile(const QString& file)
-{
- QMap<QString, QByteArray> files;
- if (!saveToFiles(files)) {
-	boError() << k_funcinfo << "saving failed" << endl;
-	return false;
- }
- return saveToFile(files, file);
 }
 
 bool BosonSaveLoad::saveToFile(const QMap<QString, QByteArray>& files, const QString& file)
@@ -453,22 +425,22 @@ QCString BosonSaveLoad::saveExternalAsXML()
 }
 
 
-bool BosonSaveLoad::loadNewGame(const QByteArray& playersXML, const QByteArray& canvasXML)
+//bool BosonSaveLoad::loadNewGame(const QByteArray& playersXML, const QByteArray& canvasXML)
+bool BosonSaveLoad::startFromFiles(const QMap<QString, QByteArray>& files)
 {
- // AB: nearly all code copied from loadFromFile().
  boDebug(270) << k_funcinfo << endl;
- d->mLoadingStatus = LoadingInProgress;
+
+ QByteArray playersXML = files["players.xml"];
+ QByteArray canvasXML = files["canvas.xml"];
 
   if (playersXML.isEmpty()) {
 	boError(270) << k_funcinfo << "Empty playersXML" << endl;
 	addLoadError(SaveLoadError::LoadBSGFileError, i18n("empty file: players.xml"));
-	d->mLoadingStatus = BSGFileError;
 	return false;
  }
  if (canvasXML.isEmpty()) {
 	boError(270) << k_funcinfo << "Empty canvasXML" << endl;
 	addLoadError(SaveLoadError::LoadBSGFileError, i18n("empty file: canvas.xml"));
-	d->mLoadingStatus = BSGFileError;
 	return false;
  }
 
@@ -494,7 +466,6 @@ bool BosonSaveLoad::loadPlayersFromXML(const QString& playersXML)
  QDomDocument doc(QString::fromLatin1("Players"));
  if (!loadXMLDoc(&doc, playersXML)) {
 	addLoadError(SaveLoadError::LoadInvalidXML, i18n("Parsing error in players.xml"));
-	d->mLoadingStatus = InvalidXML;
 	return false;
  }
  QDomElement root = doc.documentElement();
@@ -502,7 +473,6 @@ bool BosonSaveLoad::loadPlayersFromXML(const QString& playersXML)
  if (list.count() < 1) {
 	boError(270) << k_funcinfo << "no Player tags in file" << endl;
 	addLoadError(SaveLoadError::LoadInvalidXML, i18n("No Player Tag in players.xml"));
-	d->mLoadingStatus = InvalidXML;
 	return false;
  }
  for (unsigned int i = 0; i < d->mBoson->playerCount(); i++) {
@@ -551,14 +521,12 @@ bool BosonSaveLoad::loadCanvasFromXML(const QString& xml)
  QDomDocument doc(QString::fromLatin1("Canvas"));
  if (!loadXMLDoc(&doc, xml)) {
 	addLoadError(SaveLoadError::LoadInvalidXML, i18n("Parsing error in canvas.xml"));
-	d->mLoadingStatus = InvalidXML;
 	return false;
  }
  QDomElement root = doc.documentElement();
 
  if (!d->mCanvas->loadFromXML(root)) {
 	addLoadError(SaveLoadError::LoadInvalidXML, i18n("error while loading canvas.xml"));
-	d->mLoadingStatus = InvalidXML;
 	return false;
  }
 
@@ -572,7 +540,6 @@ bool BosonSaveLoad::loadExternalFromXML(const QString& xml)
  QDomDocument doc(QString::fromLatin1("External"));
  if (!loadXMLDoc(&doc, xml)) {
 	addLoadError(SaveLoadError::LoadInvalidXML, i18n("Parsing error in external.xml"));
-	d->mLoadingStatus = InvalidXML;
 	return false;
  }
  QDomElement root = doc.documentElement();

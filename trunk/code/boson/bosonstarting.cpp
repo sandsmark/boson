@@ -353,7 +353,7 @@ void BosonStarting::loadUnitDatas(Player* p)
 // (return to startup page if starting fails)
 // AB: startScenario should be moved to above, so that we don't have to unstream
 // the files again. but we need a qtimer::singleshot on the way to here..
-bool BosonStarting::startScenario(const QMap<QString, QByteArray>& files)
+bool BosonStarting::startScenario(QMap<QString, QByteArray>& files)
 {
  if (!boGame) {
 	BO_NULL_ERROR(boGame);
@@ -363,136 +363,15 @@ bool BosonStarting::startScenario(const QMap<QString, QByteArray>& files)
 	BO_NULL_ERROR(mDestPlayField);
 	return false;
  }
- if (!files.contains("players.xml")) {
-	boError(270) << k_funcinfo << "no players.xml found" << endl;
+
+ // map player number (aka index, as used by .bsg/.bpf) to player Id
+ if (!fixPlayerIds(files)) {
+	boError() << k_funcinfo << "could not replace player numbers by real player ids" << endl;
 	return false;
  }
- if (!files.contains("canvas.xml")) {
-	boError(270) << k_funcinfo << "no canvas.xml found" << endl;
-	return false;
- }
- QByteArray playersXML = files["players.xml"];
- QByteArray canvasXML = files["canvas.xml"];
-
- // FIXME: savegames store the _id_ of the players, but the scenario (and
- // thefore this playersXML) only the player _number_
- QString errorMsg;
- int line = 0, column = 0;
- QDomDocument playersDoc;
- if (!playersDoc.setContent(QString(playersXML), &errorMsg, &line, &column)) {
-	boError(270) << k_funcinfo << "unable to load playersXML - parse error at line=" << line << ",column=" << column << " errorMsg=" << errorMsg << endl;
-	return false;
- }
- QDomElement playersRoot = playersDoc.documentElement();
- QDomNodeList playersList = playersRoot.elementsByTagName("Player");
- if (playersList.count() < 2) {
-	// there must be at least to Player tags: one player and one neutral
-	// player (netral must always be present)
-	boError(270) << k_funcinfo << "not enough Player tags found" << endl;
-	return false;
- }
- for (unsigned int i = 0; i < playersList.count(); i++) {
-	QDomElement e = playersList.item(i).toElement();
-	if (e.isNull()) {
-		boError(270) << k_funcinfo << "invalid Player tag" << endl;
-		return false;
-	}
-
-	// the IDs in the file must be in sequential order.
-	unsigned int id = e.attribute("Id").toUInt();
-	if (id != i) {
-		boError(270) << k_funcinfo << "unexpected Id " << id << " for Player tag. expected " << i << endl;
-		return false;
-	}
- }
-
- QDomDocument canvasDoc;
- if (!canvasDoc.setContent(QString(canvasXML), &errorMsg, &line, &column)) {
-	boError(270) << k_funcinfo << "unable to load canvasXML - parse error at line=" << line << ",column=" << column << " errorMsg=" << errorMsg << endl;
-	return false;
- }
- QDomElement canvasRoot = canvasDoc.documentElement();
- QDomNodeList itemsList = canvasRoot.elementsByTagName("Items");
- for (unsigned int i = 0; i < itemsList.count(); i++) {
-	QDomElement e = itemsList.item(i).toElement();
-
-	// the IDs in the file must be in sequential order.
-	unsigned int id = e.attribute("Id").toUInt();
-	if (id != i) {
-		boError(270) << k_funcinfo << "Unexpected Id " << id << " for Items tag. expected " << i << endl;
-		return false;
-	}
- }
-
- for (unsigned int i = 0; i < boGame->playerCount(); i++) {
-	// in the file we have only "dummy" IDs, i.e. sequentially ordered
-	// numbers from 0..maxPlayers. we need the actual IDs to start loading,
-	// so we need to replace the dummy IDs.
-	int actualId = boGame->playerList()->at(i)->id();
-	unsigned int playerIndex = 0; // index of the Player tag
-
-	QDomElement e;
-	if (i != boGame->playerList()->count() - 1) {
-		playerIndex = i;
-		e = playersList.item(playerIndex).toElement();
-		if (e.isNull()) {
-			boError(270) << k_funcinfo << "invalid Player tag " << playerIndex << endl;
-			return false;
-		}
-		if (e.attribute("Id").toUInt() != playerIndex) {
-			boError(270) << k_funcinfo << "unexpected Id for Player tag " << playerIndex << endl;
-			return false;
-		}
-	} else {
-		// per definition the last player in the list is _always_ the
-		// neutral player.
-		playerIndex = playersList.count() - 1;
-		e = playersList.item(playerIndex).toElement();
-		if (e.isNull()) {
-			boError(270) << k_funcinfo << "invalid Player tag for neutral player (" << playerIndex << ")" << endl;
-			return false;
-		}
-		if (!e.hasAttribute("IsNeutral")) {
-			boError(270) << k_funcinfo << "file format error: last player must be neutral player" << endl;
-			return false;
-		}
-		bool ok = false;
-		if (e.attribute("IsNeutral").toUInt(&ok) != 1) {
-			boError(270) << k_funcinfo << "IsNeutral attribute must be 1 if present" << endl;
-			return false;
-		}
-		if (!ok) {
-			boError(270) << k_funcinfo << "invalid value for IsNeutral attribute" << endl;
-			return false;
-		}
-	}
-	e.setAttribute("Id", actualId);
-
-	// the Items tag must be fixed as well.
-	e = itemsList.item(playerIndex).toElement();
-	if (e.isNull()) {
-		boError(270) << k_funcinfo << "invalid Items tag " << playerIndex << endl;
-		return false;
-	}
-	if (e.attribute("Id").toUInt() != playerIndex) {
-		boError(270) << k_funcinfo << "unexpected Id for Items tag " << playerIndex << endl;
-		return false;
-	}
-	e.setAttribute("Id", actualId);
-
- }
- playersXML = playersDoc.toCString();
- canvasXML = canvasDoc.toCString();
-
- // AB: note that the player list can (and very often will) contain more players
- // then the actual boGame->playerList(). the code must allow that.
-
- // TODO: save the in-game players to a xml string, then replace all tags in it
- // that appear in playersXML too with those in playersXML.
-// boGame->reset();
 
  BosonSaveLoad* load = new BosonSaveLoad(boGame);
- if (!load->loadNewGame(playersXML, canvasXML)) {
+ if (!load->startFromFiles(files)) {
 	boError(270) << k_funcinfo << "failed starting game" << endl;
 	return false;
  }
@@ -599,5 +478,154 @@ void BosonStarting::sendStartingCompleted(bool success)
 	return;
  }
  boGame->sendMessage(0, BosonMessage::IdGameStartingCompleted);
+}
+
+bool BosonStarting::fixPlayerIds(QMap<QString, QByteArray>& files) const
+{
+ if (!files.contains("players.xml")) {
+	boError(270) << k_funcinfo << "no players.xml found" << endl;
+	return false;
+ }
+ if (!files.contains("canvas.xml")) {
+	boError(270) << k_funcinfo << "no canvas.xml found" << endl;
+	return false;
+ }
+ if (!files.contains("kgame.xml")) {
+	boError(270) << k_funcinfo << "no kgame.xml found" << endl;
+	return false;
+ }
+ QByteArray playersXML = files["players.xml"];
+ QByteArray canvasXML = files["canvas.xml"];
+ QByteArray kgameXML = files["kgame.xml"];
+
+ // FIXME: savegames store the _id_ of the players, but the scenario (and
+ // thefore this playersXML) only the player _number_
+ QString errorMsg;
+ int line = 0, column = 0;
+ QDomDocument playersDoc;
+ if (!playersDoc.setContent(QString(playersXML), &errorMsg, &line, &column)) {
+	boError(270) << k_funcinfo << "unable to load playersXML - parse error at line=" << line << ",column=" << column << " errorMsg=" << errorMsg << endl;
+	return false;
+ }
+ QDomElement playersRoot = playersDoc.documentElement();
+ QDomNodeList playersList = playersRoot.elementsByTagName("Player");
+ if (playersList.count() < 2) {
+	// there must be at least to Player tags: one player and one neutral
+	// player (netral must always be present)
+	boError(270) << k_funcinfo << "less than 2 Player tags found in file. This is an invalid file." << endl;
+	return false;
+ }
+ for (unsigned int i = 0; i < playersList.count(); i++) {
+	QDomElement e = playersList.item(i).toElement();
+	if (e.isNull()) {
+		boError(270) << k_funcinfo << "invalid Player tag" << endl;
+		return false;
+	}
+
+	// the IDs in the file must be in sequential order.
+	unsigned int id = e.attribute("Id").toUInt();
+	if (id != i) {
+		boError(270) << k_funcinfo << "unexpected Id " << id << " for Player tag. expected " << i << endl;
+		return false;
+	}
+ }
+
+ QDomDocument canvasDoc;
+ if (!canvasDoc.setContent(QString(canvasXML), &errorMsg, &line, &column)) {
+	boError(270) << k_funcinfo << "unable to load canvasXML - parse error at line=" << line << ",column=" << column << " errorMsg=" << errorMsg << endl;
+	return false;
+ }
+ QDomElement canvasRoot = canvasDoc.documentElement();
+ QDomNodeList itemsList = canvasRoot.elementsByTagName("Items");
+ for (unsigned int i = 0; i < itemsList.count(); i++) {
+	QDomElement e = itemsList.item(i).toElement();
+
+	// the IDs in the file must be in sequential order.
+	unsigned int id = e.attribute("Id").toUInt();
+	if (id != i) {
+		boError(270) << k_funcinfo << "Unexpected Id " << id << " for Items tag. expected " << i << endl;
+		return false;
+	}
+ }
+
+ /*
+  * This is where the fun starts.
+  *
+  * We go through our player list and replace the _index_ (i.e. the "player
+  * number" which is used in the files) by their actual _ID_.
+  *
+  * TODO: on startup the player should be able to chose on which side he wants
+  * to play, and here we should map the chosen number to the correct ID.
+  */
+
+ // AB: note that the player list can (and very often will) contain more players
+ // then the actual boGame->playerList(). the code must allow that.
+
+ for (unsigned int i = 0; i < boGame->playerCount(); i++) {
+	// in the file we have only "dummy" IDs, i.e. sequentially ordered
+	// numbers from 0..maxPlayers. we need the actual IDs to start loading,
+	// so we need to replace the dummy IDs.
+	int actualId = boGame->playerList()->at(i)->id();
+	unsigned int playerIndex = 0; // index of the Player tag
+
+	QDomElement e;
+	if (i != boGame->playerList()->count() - 1) {
+		playerIndex = i;
+		e = playersList.item(playerIndex).toElement();
+		if (e.isNull()) {
+			boError(270) << k_funcinfo << "invalid Player tag " << playerIndex << endl;
+			return false;
+		}
+		if (e.attribute("Id").toUInt() != playerIndex) {
+			boError(270) << k_funcinfo << "unexpected Id for Player tag " << playerIndex << endl;
+			return false;
+		}
+	} else {
+		// per definition the last player in the list is _always_ the
+		// neutral player (no actual player can chose to play this
+		// player).
+		playerIndex = playersList.count() - 1;
+		e = playersList.item(playerIndex).toElement();
+		if (e.isNull()) {
+			boError(270) << k_funcinfo << "invalid Player tag for neutral player (" << playerIndex << ")" << endl;
+			return false;
+		}
+		if (!e.hasAttribute("IsNeutral")) {
+			boError(270) << k_funcinfo << "file format error: last player must be neutral player" << endl;
+			return false;
+		}
+		bool ok = false;
+		if (e.attribute("IsNeutral").toUInt(&ok) != 1) {
+			boError(270) << k_funcinfo << "IsNeutral attribute must be 1 if present" << endl;
+			return false;
+		}
+		if (!ok) {
+			boError(270) << k_funcinfo << "invalid value for IsNeutral attribute" << endl;
+			return false;
+		}
+	}
+	e.setAttribute("Id", actualId);
+
+	// the Items tag must be fixed as well.
+	e = itemsList.item(playerIndex).toElement();
+	if (e.isNull()) {
+		boError(270) << k_funcinfo << "invalid Items tag " << playerIndex << endl;
+		return false;
+	}
+	if (e.attribute("Id").toUInt() != playerIndex) {
+		boError(270) << k_funcinfo << "unexpected Id for Items tag " << playerIndex << endl;
+		return false;
+	}
+	e.setAttribute("Id", actualId);
+
+	// and now the conditions
+ }
+ playersXML = playersDoc.toCString();
+ canvasXML = canvasDoc.toCString();
+
+ files.insert("players.xml", playersXML);
+ files.insert("canvas.xml", canvasXML);
+
+ return true;
 }
 

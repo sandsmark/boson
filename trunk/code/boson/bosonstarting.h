@@ -127,9 +127,24 @@ protected:
 
 	bool loadPlayerData();
 	void loadUnitDatas(Player* p);
-	bool startScenario(const QMap<QString, QByteArray>& files);
+	bool startScenario(QMap<QString, QByteArray>& files);
 	bool start();
 	bool loadTiles();
+
+	/**
+	 * We cannot store the actual player ID in our files (.bsg/.bpf),
+	 * because the ID can be totally different when the game is loaded again
+	 * (remember: starting a new game is just a special case of loading a
+	 * game).
+	 *
+	 * Therefore we store the _index_ of the players in our files ("player
+	 * number"). But all load() methods (e.g. in BosonCanvas) expect the
+	 * _actual ID_, as that's what they need to load the files correctly.
+	 *
+	 * So we need to map the "player number" from the file, to the actual
+	 * player ID. This is done here.
+	 **/
+	bool fixPlayerIds(QMap<QString, QByteArray>& files) const;
 
 	/**
 	 * Add the players for a loaded game.

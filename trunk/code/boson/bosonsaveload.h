@@ -151,12 +151,35 @@ public:
 	// AB: temporary function only, for the scenario-code-replacing process.
 	bool loadNewGame(const QByteArray& playersXML, const QByteArray& canvasXML);
 
-	bool saveToFile(const QString& file);
+	/**
+	 * Sace the game to @p files.
+	 **/
 	bool saveToFiles(QMap<QString, QByteArray>& files);
+
+	/**
+	 * Just like @ref saveToFiles, but this takes care of converting the
+	 * saved data into the correct format for a playfield file. This data
+	 * can be used to start <em>new</em> games, as opposed to loading saved
+	 * games.
+	 **/
 	bool savePlayFieldToFiles(QMap<QString, QByteArray>& files);
+
+	/**
+	 * Save the data from @p files to the @p file. Use @ref saveToFiles or
+	 * @ref savePlayFieldToFiles to actually save the data.
+	 **/
 	static bool saveToFile(const QMap<QString, QByteArray>& files, const QString& file);
 
-	LoadingStatus loadingStatus() const;
+	/**
+	 * Start a game from a @p files QMap. The @p files should come from a
+	 * file that was saved using @ref saveToFile
+	 *
+	 * Note that the actual file and data loading all happens in @ref
+	 * BosonStarting. This just starts the actual game, i.e. makes sure that
+	 * items are added and so on. The playfield has been loaded already,
+	 * too.
+	 **/
+	bool startFromFiles(const QMap<QString, QByteArray>& files);
 
 	/**
 	 * Load the XML file in @p xml into @p doc and display an error message
@@ -209,12 +232,6 @@ protected:
 
 private:
 	void initBoson();
-
-	/**
-	 * KGame::systemAddPlayer is protected, this is used as a workaround.
-	 * Not nice, but working.
-	 **/
-	void systemAddPlayer(KPlayer*);
 
 private:
 	BosonSaveLoadPrivate* d;
