@@ -153,7 +153,11 @@ void BosonWidget::startScenarioAndGame()
 {
  BosonWidgetBase::startScenarioAndGame();
  if (boGame->isAdmin()) {
-	boGame->slotSetGameSpeed(BosonConfig::readGameSpeed());
+	if (boGame->gameSpeed() == 0) {
+		// don't do this if gameSpeed() != 0, as it was set already
+		// (e.g. due to a savegame)
+		boGame->slotSetGameSpeed(BosonConfig::readGameSpeed());
+	}
  }
  boMusic->startLoop();
 }
