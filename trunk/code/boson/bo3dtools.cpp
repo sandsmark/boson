@@ -20,8 +20,6 @@
 #include "bo3dtools.h"
 #include "bodebug.h"
 
-#include <kconfig.h>
-
 #include <qstring.h>
 #include <qptrlist.h>
 #include <qdatastream.h>
@@ -29,8 +27,6 @@
 #include <math.h>
 
 #include <lib3ds/mesh.h>
-
-#include "bosonconfig.h"
 
 // Degrees to radians conversion (AB: from mesa/src/macros.h)
 #define DEG2RAD (M_PI/180.0)
@@ -52,21 +48,6 @@ BoVector3 BoVector3::crossProduct(const BoVector3& v, const BoVector3& w)
   r.setY((v.z() * w.x()) - (v.x() * w.z()));
   r.setZ((v.x() * w.y()) - (v.y() * w.x()));
   return r;
-}
-
-BoVector3 BoVector3::load(const KConfig* cfg, const QString key, const BoVector3& aDefault)
-{
-  QValueList<float> list = BosonConfig::readFloatNumList(cfg, key);
-  if(list.count() == 0)
-  {
-    return BoVector3(aDefault);
-  }
-  else if(list.count() != 3)
-  {
-    boError() << k_funcinfo << "BoVector3 entry must have 3 floats, not " << list.count() << endl;
-    return BoVector3(aDefault);
-  }
-  return BoVector3(list[0], list[1], list[2]);
 }
 
 void BoVector3::makeVectors(BoVector3* v, const Lib3dsMesh* mesh, const Lib3dsFace* face)
@@ -110,15 +91,6 @@ int BoVector3::findPoint(const BoVector3& point, const BoVector3* array)
   return -1;
 }
 
-void BoVector3::save(KConfig* cfg, QString key) const
-{
-  QValueList<float> list;
-  list.append(mData[0]);
-  list.append(mData[1]);
-  list.append(mData[2]);
-  BosonConfig::writeFloatNumList(list, cfg, key);
-}
-
 QString BoVector3::debugString(const BoVector3& v)
 {
   return QString("%1,%2,%3").arg(v.x()).arg(v.y()).arg(v.z());
@@ -147,23 +119,6 @@ QDataStream& operator>>(QDataStream& s, BoVector3& v)
   v.mData[1] = y;
   v.mData[2] = z;
   return s;
-}
-
-
-BoVector4 BoVector4::load(const KConfig* cfg, const QString key, const BoVector4& aDefault)
-{
-  QValueList<float> list = BosonConfig::readFloatNumList(cfg, key);
-  if(list.count() == 0)
-  {
-    // Probably value wasn't specified.
-    return BoVector4(aDefault);
-  }
-  else if(list.count() != 4)
-  {
-    boError() << k_funcinfo << "BoVector4 entry must have 4 floats, not " << list.count() << endl;
-    return BoVector4(aDefault);
-  }
-  return BoVector4(list[0], list[1], list[2], list[3]);
 }
 
 QString BoVector4::debugString(const BoVector4& v)

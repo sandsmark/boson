@@ -73,7 +73,7 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg, bool full)
   mCanShootAtAirUnits = cfg->readBoolEntry("CanShootAtAirUnits", false);
   mCanShootAtLandUnits = cfg->readBoolEntry("CanShootAtLandUnits", false);
   mHeight = (float)(cfg->readDoubleNumEntry("Height", 0.25));
-  mOffset = BoVector3::load(cfg, "Offset");
+  mOffset = BosonConfig::readBoVector3Entry(cfg, "Offset");
   mOffset.cellToCanvas();
   mShootParticleSystemIds = BosonConfig::readUnsignedLongNumList(cfg, "ShootParticles");
   mFlyParticleSystemIds = BosonConfig::readUnsignedLongNumList(cfg, "FlyParticles");
@@ -116,7 +116,7 @@ void BosonWeaponProperties::savePlugin(KSimpleConfig* cfg)
   cfg->writeEntry("Height", (double)mHeight);
   BoVector3 offset(mOffset);
   offset.canvasToCell();
-  offset.save(cfg, "Offset");
+  BosonConfig::writeEntry(cfg, "Offset", offset);
   BosonConfig::writeUnsignedLongNumList(cfg, "ShootParticles", mShootParticleSystemIds);
   BosonConfig::writeUnsignedLongNumList(cfg, "FlyParticles", mFlyParticleSystemIds);
   BosonConfig::writeUnsignedLongNumList(cfg, "HitParticles", mHitParticleSystemIds);

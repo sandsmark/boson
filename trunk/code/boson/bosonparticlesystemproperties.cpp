@@ -144,10 +144,10 @@ void BosonParticleSystemProperties::load(KSimpleConfig* cfg, const QString& grou
   {
     boError(150) << k_funcinfo << "Invalid id in group " << cfg->group() << endl;
   }
-  mMinVelo = BoVector3::load(cfg, "MinVelocity", mMinVelo);
-  mMaxVelo = BoVector3::load(cfg, "MaxVelocity", mMaxVelo);
-  mMinPos = BoVector3::load(cfg, "MinPos", mMinPos);
-  mMaxPos = BoVector3::load(cfg, "MaxPos", mMaxPos);
+  mMinVelo = BosonConfig::readBoVector3Entry(cfg, "MinVelocity", mMinVelo);
+  mMaxVelo = BosonConfig::readBoVector3Entry(cfg, "MaxVelocity", mMaxVelo);
+  mMinPos = BosonConfig::readBoVector3Entry(cfg, "MinPos", mMinPos);
+  mMaxPos = BosonConfig::readBoVector3Entry(cfg, "MaxPos", mMaxPos);
   mNormalizePos = cfg->readBoolEntry("NormalizePos", mNormalizePos);
   if(mNormalizePos)
   {
@@ -160,8 +160,8 @@ void BosonParticleSystemProperties::load(KSimpleConfig* cfg, const QString& grou
     mMinVeloScale = (float)(cfg->readDoubleNumEntry("MinVeloScale", mMinVeloScale));
     mMaxVeloScale = (float)(cfg->readDoubleNumEntry("MaxVeloScale", mMaxVeloScale));
   }
-  mStartColor = BoVector4::load(cfg, "StartColor", mStartColor);
-  mEndColor = BoVector4::load(cfg, "EndColor", mEndColor);
+  mStartColor = BosonConfig::readBoVector4Entry(cfg, "StartColor", mStartColor);
+  mEndColor = BosonConfig::readBoVector4Entry(cfg, "EndColor", mEndColor);
   mMinLife = (float)(cfg->readDoubleNumEntry("MinLife", mMinLife));
   mMaxLife = (float)(cfg->readDoubleNumEntry("MaxLife", mMaxLife));
   mMaxNum = cfg->readNumEntry("MaxNum", mMaxNum);
