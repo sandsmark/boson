@@ -1581,6 +1581,14 @@ class Bo3dTools
     static bofixed rad2deg(bofixed rad);
 
     /**
+     * @param plane An array of size 4 representing a plane. The first 3 floats
+     * are the normal vector, the 4th value the distance.
+     * @return The distance of @pos from the @p plane. Negative if @p pos is
+     * behind the @p plane.
+     **/
+    static float distanceFromPlane(const float* plane, const BoVector3Float& pos);
+
+    /**
      * See @ref BosonBigDisplayBase::extractFrustum for more information about this stuff.
      *
      * We use a bounding spere so that we can easily rotate it.

@@ -1193,6 +1193,11 @@ bofixed Bo3dTools::rad2deg(bofixed rad)
   return rad * RAD2DEG;
 }
 
+float Bo3dTools::distanceFromPlane(const float* plane, const BoVector3Float& pos)
+{
+  return pos.x() * plane[0] + pos.y() * plane[1] + pos.z() * plane[2] + plane[3];
+}
+
 float Bo3dTools::sphereInFrustum(const float* viewFrustum, const BoVector3Float& pos, float radius)
 {
   // FIXME: performance: we might unroll the loop and then make this function
