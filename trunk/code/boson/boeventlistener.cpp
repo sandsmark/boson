@@ -108,7 +108,16 @@ bool BoEventListener::save(QDomElement& root) const
  QDomDocument doc = root.ownerDocument();
  QDomElement conditions = doc.createElement("Conditions");
  root.appendChild(conditions);
- return saveConditions(conditions);
+ if (!saveConditions(conditions)) {
+	return false;
+ }
+ QDomElement eventhandlers = doc.createElement("EventHandlers");
+ root.appendChild(eventhandlers);
+ if (!saveEventHandlers(eventhandlers)) {
+	return false;
+ }
+
+ return true;
 }
 
 // TODO: rename to loadFromXML()
@@ -119,7 +128,19 @@ bool BoEventListener::load(const QDomElement& root)
 	boError(360) << k_funcinfo << "No Conditions tag" << endl;
 	return false;
  }
- return loadConditions(conditions);
+ if (!loadConditions(conditions)) {
+	return false;
+ }
+ QDomElement eventhandlers = root.namedItem("EventHandlers").toElement();
+ if (eventhandlers.isNull()) {
+	boDebug(360) << k_funcinfo << "No EventHandlers tag" << endl;
+	return true;
+ }
+ if (!loadEventHandlers(eventhandlers)) {
+	return false;
+ }
+
+ return true;
 }
 
 bool BoEventListener::saveScriptData(QByteArray* scriptData) const
@@ -158,7 +179,7 @@ bool BoEventListener::loadScript(const QByteArray& script, const QByteArray& scr
 	// the script may have saved the PlayerId into the script. we somehow
 	// must tell it the new Id.
 	// (we are loading a saved game here)
-	QDataStream stream(script, IO_ReadOnly);
+	QDataStream stream(scriptData, IO_ReadOnly);
 	return d->mScript->load(stream);
  }
 
@@ -246,6 +267,61 @@ bool BoEventListener::loadConditions(const QDomElement& root)
 		return false;
 	}
  }
+ boDebug(360) << k_funcinfo << "done" << endl;
+ return true;
+}
+
+bool BoEventListener::saveEventHandlers(QDomElement& root) const
+{
+ QDomDocument doc = root.ownerDocument();
+
+ QIntDictIterator<BoEventHandlerInfo> it(d->mEventHandlers);
+ for( ; it.current(); ++it) {
+	BoEventHandlerInfo* info = it.current();
+	QDomElement e = doc.createElement("EventHandler");
+	e.setAttribute("id", it.currentKey());
+	e.setAttribute("EventName", info->eventname);
+	e.setAttribute("FunctionName", info->function);
+	e.setAttribute("FunctionArgs", info->args);
+	root.appendChild(e);
+ }
+
+ root.setAttribute("NextId", d->mNextEventHandlerId);
+ return true;
+}
+
+bool BoEventListener::loadEventHandlers(const QDomElement& root)
+{
+ boDebug(360) << k_funcinfo << endl;
+ d->mEventHandlers.clear();
+ d->mNextEventHandlerId = 1;
+ bool ok = false;
+ QDomNodeList list = root.elementsByTagName("EventHandler");
+ for (unsigned int i = 0; i < list.count(); i++) {
+	QDomElement e = list.item(i).toElement();
+	if (e.isNull()) {
+		boError(360) << k_funcinfo << "not a valid element" << endl;
+		return false;
+	}
+	BoEventHandlerInfo* info = new BoEventHandlerInfo;
+	info->eventname = e.attribute("EventName");
+	info->function = e.attribute("FunctionName");
+	info->args = e.attribute("FunctionArgs");
+	bool ok = false;
+	int id = e.attribute("id").toLong(&ok);
+	if (!ok) {
+		boError(360) << k_funcinfo << "Invalid id!" << endl;
+		delete info;
+		return false;
+	}
+	d->mEventHandlers.insert(id, info);
+ }
+ int nextid = root.attribute("NextId").toLong(&ok);
+ if (!ok) {
+	boError(360) << k_funcinfo << "Invalid NextId!" << endl;
+	return false;
+ }
+ d->mNextEventHandlerId = nextid;
  boDebug(360) << k_funcinfo << "done" << endl;
  return true;
 }

@@ -77,6 +77,8 @@ public:
 
 	bool saveConditions(QDomElement& root) const;
 	bool loadConditions(const QDomElement& root);
+	bool saveEventHandlers(QDomElement& root) const;
+	bool loadEventHandlers(const QDomElement& root);
 
 	bool addCondition(BoCondition* c);
 
