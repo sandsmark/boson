@@ -223,7 +223,7 @@ public:
 	/**
 	 * Calls @ref BosonCanvas setWorkChanged
 	 **/
-	virtual void setWork(WorkType w);
+	virtual void setAdvanceWork(WorkType w);
 
 	virtual bool collidesWith(const QCanvasItem* item) const;
 
@@ -303,6 +303,11 @@ public:
 	 * otherwise FALSE.
 	 **/
 	bool canMine(Cell* cell) const;
+
+	/**
+	 * Order the unit to mine minerals/oil at pos
+	 **/
+	void mineAt(const QPoint& pos);
 
 private:
 	// a d pointer is probably not very good here - far too much memory consumption
