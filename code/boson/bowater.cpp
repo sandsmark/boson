@@ -362,7 +362,8 @@ BoWaterManager::BoWaterManager()
   }
   mMap = 0;
   mUnderwater = 0;
-  //mWaterDepth = 0;
+  mCellPassable = 0;
+  mCellVisible = 0;
   mTime = 0;
   mLakes.setAutoDelete(true);
   mDirty = true;
@@ -381,7 +382,6 @@ BoWaterManager::~BoWaterManager()
   delete[] mUnderwater;
   delete[] mCellPassable;
   delete[] mCellVisible;
-  //delete[] mWaterDepth;
   delete mWaterTex;
   delete mWaterBump;
   delete mEnvMap;
@@ -391,6 +391,7 @@ BoWaterManager::~BoWaterManager()
 bool BoWaterManager::loadFromXML(const QDomElement& root)
 {
   // Init some data structures
+  delete[] mUnderwater;
   mUnderwater = new bool[mWidth * mHeight];
   for (int y = 0; y < mHeight; y++)
   {
@@ -519,6 +520,8 @@ void BoWaterManager::initCellMaps()
   // Size of map in cells
   mCellWidth = mWidth - 1;
   mCellHeight = mHeight - 1;
+  delete[] mCellPassable;
+  delete[] mCellVisible;
   mCellPassable = new bool[mCellWidth * mCellHeight];
   mCellVisible = new bool[mCellWidth * mCellHeight];
 
