@@ -875,7 +875,28 @@ bool CellListBuilderTree::cellsVisible(int x, int y, int x2, int y2, bool* parti
  // but atm we use the average height of the center cell only. I have not been
  // able to find any false negatives with this (except for a _very_ big height
  // difference of adjacent cells), so I think it's ok.
- float z = mMap->cellAverageHeight(c->x(), c->y());
+ // UPDATE: thats exactly what we do now.
+ //         the situation has improved, we have less false negatives now.
+ //         especially on "canyon"-like maps we need to improve this code even
+ //         further, but doing this test for _all_ cells has no effect (except
+ //         of making it really slow).
+ //         we would need to take the height in the radius into account, i
+ //         think. note this problem exists on maps with high z differences on
+ //         adjacent cells only!
+ float z = 0.0f;
+ if (w * h > 4) {
+	// do it the fast way if we check more than 4 cells at once
+	z = mMap->cellAverageHeight(c->x(), c->y());
+ } else {
+	int cells = 0;
+	for (int i = x; i < x2; i++) {
+		for (int j = y; j < y2; j++) {
+			z += mMap->cellAverageHeight(i, j);
+			cells++;
+		}
+	}
+	z /= cells;
+ }
 
  BoVector3 center(hmid, -vmid, z);
 
