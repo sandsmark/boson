@@ -81,8 +81,6 @@ void BosonWidget::initDisplayManager()
  BosonBigDisplayBase* display = displayManager()->activeDisplay();
  BO_CHECK_NULL_RET(display);
  connect(display, SIGNAL(signalSaveGame()), this, SIGNAL(signalSaveGame()));
- connect(display, SIGNAL(signalEndGame()), this, SIGNAL(signalEndGame()));
- connect(display, SIGNAL(signalQuit()), this, SIGNAL(signalQuit()));
  connect(display, SIGNAL(signalGamePreferences()), this, SLOT(slotGamePreferences()));
 }
 
@@ -223,11 +221,5 @@ void BosonWidget::slotGameOverDialogFinished()
  // we must not emit directly, as it'd delete the BosonWidget and therefore the
  // GameOverDialog, but that is later deleted through the event loop
  QTimer::singleShot(0, this, SIGNAL(signalGameOver()));
-}
-
-void BosonWidget::setBosonXMLFile()
-{
- BosonWidgetBase::setBosonXMLFile();
- setXMLFile("bosonui.rc", true);
 }
 
