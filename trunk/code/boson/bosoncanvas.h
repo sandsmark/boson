@@ -37,6 +37,7 @@ class BosonShot;
 class BosonCanvasStatistics;
 class BoVector3;
 class BosonPath2;
+class BoEventListener;
 
 class KPlayer;
 class QDataStream;
@@ -412,6 +413,8 @@ public:
 	 * Valid in editor mode only. Delete the specified items.
 	 **/
 	void deleteItems(const QValueList<unsigned long int>& items);
+
+	BoEventListener* eventListener() const;
 
 public slots:
 	/**
