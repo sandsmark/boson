@@ -89,7 +89,7 @@ void BosonCursor::setCursor(int mode)
  d->mMode = (int)mode;
 #ifndef NO_PIXMAP_CURSOR
  d->mAnimateTimer.stop();
- if (mode > 0) {
+ if (mode >= 0) {
 	QCanvasPixmapArray* a = d->mCursorPixmaps[d->mMode];
 	d->mCursor->hide();
 	if (a) {
