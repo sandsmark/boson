@@ -39,6 +39,7 @@ void editorBigDisplay::actionClicked(int mx, int my)
 	int	x		= mx / BO_TILE_SIZE,
 		y		= my / BO_TILE_SIZE;
 
+	view->setSelectionMode( SELECT_FILL) ;
 
 	boAssert(x>=0);
 	boAssert(x<field->width());

@@ -264,7 +264,6 @@ void visualBigDisplay::mousePressEvent(QMouseEvent *e)
 	} // LeftButton 
 
 	if (e->button() & RightButton) {
-		view->setSelectionMode( SELECT_FILL) ;
 		actionClicked( x, y);
 		oldX = x; oldY = y;
 		return;

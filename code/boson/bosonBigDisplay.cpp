@@ -37,6 +37,8 @@ void bosonBigDisplay::actionClicked(int mx, int my)
 {
 	QwSpriteFieldGraphic *sfg;
 
+	view->setSelectionMode( SELECT_FILL) ;
+
 	/* is there any mobiles of my own selected ? */
 	if (view->mobSelected.isEmpty()) return;	// nothing to do
 	if (who_am_i != view->selectionWho) return;	// nothing to do
