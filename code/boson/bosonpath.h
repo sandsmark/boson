@@ -23,7 +23,7 @@
 // Defines whether to use STL (Standard Template Library) or QTL (Qt Template Library)
 // If there is no STL implementation for your compiler, you can use QTL, but I
 //  recommend using STL as it is little bit faster (should be at least)
-#include "config.h"
+#include <config.h>
 #if defined(HAVE_HP_STL) || defined(HAVE_SGI_STL)
  #define USE_STL 1
 #endif
