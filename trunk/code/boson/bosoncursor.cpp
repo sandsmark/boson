@@ -75,6 +75,22 @@ QString BosonCursor::defaultTheme()
  return cursorDir;
 }
 
+bool BosonCursor::insertDefaultModes(const QString& cursorDir)
+{
+ bool ret = true;
+ if (!insertMode(CursorMove, cursorDir, QString::fromLatin1("move"))) {
+	ret = false;
+ }
+ if (!insertMode(CursorAttack, cursorDir, QString::fromLatin1("attack"))) {
+	ret = false;
+ }
+ if (!insertMode(CursorDefault, cursorDir, QString::fromLatin1("default"))) {
+	ret = false;
+ }
+ return ret;
+}
+
+
 
 /////////////////////////////////////////
 /////// BosonKDECursor //////////////////
@@ -354,4 +370,86 @@ void BosonOpenGLCursor::renderCursor(GLfloat x, GLfloat y)
 	glPopAttrib();
  }
 }
+
+
+
+BosonCursorCollection::BosonCursorCollection()
+{
+ mCursor = 0;
+ mCursorType = -1;
+}
+
+BosonCursorCollection::~BosonCursorCollection()
+{
+ QMap<int, QMap<QString, BosonCursor*> >::iterator it;
+ for (it = mCursors.begin(); it != mCursors.end(); ++it) {
+	QMap<QString, BosonCursor*>::iterator it2;
+	for (it2 = (*it).begin(); it2 != (*it).end(); ++it2) {
+		delete *it2;
+	}
+ }
+ mCursors.clear();
+}
+
+BosonCursor* BosonCursorCollection::loadCursor(int type, const QString& cursorDir_, QString& cursorDir)
+{
+ boDebug() << k_funcinfo << endl;
+
+ cursorDir = cursorDir_;
+ if (cursorDir.isNull()) {
+	cursorDir = BosonCursor::defaultTheme();
+ }
+
+ BosonCursor* b = (mCursors[type])[cursorDir_];
+ if (b) {
+	return b;
+ }
+ switch (type) {
+	case CursorOpenGL:
+		b = new BosonOpenGLCursor;
+		break;
+	default:
+		type = CursorKDE;
+	case CursorKDE:
+		b = new BosonKDECursor;
+		break;
+ }
+
+ if (!b->insertDefaultModes(cursorDir)) {
+	boError() << k_funcinfo << "Could not load cursor type " << type << " from " << cursorDir << endl;
+	delete b;
+	if (type != CursorKDE) { // loading *never* fails for CursorKDE. we check here anyway.
+		// load fallback cursor
+		return loadCursor(CursorKDE, QString::null, cursorDir);
+	}
+	boError() << k_funcinfo << "oops - loading CursorKDE failed. THIS MUST NEVER HAPPEN!" << endl;
+	return 0;
+ }
+ (mCursors[type]).insert(cursorDir, b);
+
+ return b;
+}
+
+BosonCursor* BosonCursorCollection::changeCursor(int type, const QString& cursorDir, QString* actualCursorDir)
+{
+ boDebug() << k_funcinfo << endl;
+
+ QString dir;
+ BosonCursor* b = loadCursor(type, cursorDir, dir);
+ if (actualCursorDir) {
+	*actualCursorDir = dir;
+ }
+
+ if (b) {
+	mCursor = b;
+	mCursorDir = dir;
+	mCursorType = type;
+ } else {
+	// will never happen, as loadCursor() falls back to CursorKDE.
+	boError() << k_funcinfo << "loading cursor failed." << endl;
+ }
+ return b;
+}
+
+
 

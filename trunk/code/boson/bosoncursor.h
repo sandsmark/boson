@@ -124,6 +124,17 @@ public:
 	virtual bool insertMode(int mode, QString baseDir, QString cursor) = 0;
 
 	/**
+	 * Call @ref insertMode for the (hardcoded) modes that are available by
+	 * default.
+	 * @return TRUE, if all @ref insertMode calls succeeded, otherwise
+	 * FALSE.
+	 *
+	 * @param cursorDir The directory of the desired cursor theme - e.g.
+	 * @ref defaultTheme
+	 **/
+	bool insertDefaultModes(const QString& cursorDir);
+
+	/**
 	 * Render the cursor on the screen with x,y as the central point. Does
 	 * nothing for non-OpenGL cursors.
 	 **/
@@ -211,6 +222,92 @@ private:
 	BosonOpenGLCursorPrivate* d;
 
 	BosonOpenGLCursorData* mCurrentData;
+};
+
+
+
+/**
+ * @short Small class that provides access to several @ref BosonCursor objects.
+ *
+ * This class is desired to store the @ref BosonCursor objects that are used by
+ * the program - usually this is only one or two - e.g. we might often switch
+ * between the default KDE/X11 and the OpenGL cursor. With this class, the
+ * textures of the OpenGL cursor are loaded only once.
+ *
+ * You can change the cursor using @ref changeCursor and retrieve the current
+ * one using @ref cursor. Hint: don't store the pointer somewhere, we might
+ * change this class to delete old cursor objects one day.
+ *
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+class BosonCursorCollection
+{
+public:
+	BosonCursorCollection();
+	~BosonCursorCollection();
+
+	/**
+	 * @return The current cursor. See @ref changeCursor.
+	 **/
+	BosonCursor* cursor() const
+	{
+		return mCursor;
+	}
+
+	// TODO: rename CursorMode enum to CursorType.
+	// "mode" is used in BosonCursor::cursorMode() and therefore ambigious.
+	/**
+	 * @return The type of the cursor, such as @ref CursorOpenGL or @ref
+	 * CursorKDE, or -1 if @ref cursor is NULL.
+	 **/
+	int cursorType() const
+	{
+		return mCursorType;
+	}
+
+	/**
+	 * @return The directory of the current cursor theme, or NULL if @ref
+	 * cursor is NULL.
+	 **/
+	const QString& cursorDir() const
+	{
+		return mCursorDir;
+	}
+
+	/**
+	 * Changes the cursor that is returned by @ref cursor. The demanded
+	 * cursor is automatically loaded if necessary.
+	 *
+	 * @param type This must be either @ref CursorKDE or @ref CursorOpenGL.
+	 * @param cursorDir The directory where to load the data for this cursor
+	 * (e.g. textures). Can be @ref QString::null for e.g. @ref CursorKDE.
+	 * @param actualCursorDir If non-NULL this is set to the actual
+	 * directory that has been used for the cursor. This may differ from @p
+	 * cursorDir when @p cursorDir has been invalid or empty.
+	 * @return The newly loaded cursor, or NULL if no cursor could be loaded
+	 * for the specified parameters. Note that @ref cursor remains at the
+	 * old cursor in that case (i.e. may be non-NULL).
+	 **/
+	BosonCursor* changeCursor(int type, const QString& cursorDir, QString* actualCursorDir = 0);
+
+	/**
+	 * Called automatically by @ref changeCursor, you usually don't need
+	 * this.
+	 *
+	 * This loads the cursor only if required. It is a noop if the cursor
+	 * was loaded previously already.
+	 * @param cursor Where the cursor stores its data files. May be @ref
+	 * QString::null to indicate the default theme.
+	 * @param actualDir This is set to the cursor directory that is actually
+	 * used (it might differ from @p cursorDir).
+	 **/
+	BosonCursor* loadCursor(int type , const QString& cursorDir, QString& actualDir);
+
+private:
+	QMap<int, QMap<QString, BosonCursor*> > mCursors;
+	BosonCursor* mCursor;
+	int mCursorType;
+	QString mCursorDir;
 };
 
 

@@ -258,128 +258,6 @@ void BoFPSCounter::calcFPS()
 }
 
 
-class BoCursorCollection
-{
-public:
-	BoCursorCollection();
-	~BoCursorCollection();
-
-	/**
-	 * @return The current cursor. See @ref changeCursor.
-	 **/
-	BosonCursor* cursor() const
-	{
-		return mCursor;
-	}
-
-	/**
-	 * @param mode This must be either @ref CursorKDE or @ref CursorOpenGL.
-	 * @param cursorDir The directory where to load the data for this cursor
-	 * (e.g. textures). Can be @ref QString::null for e.g. @ref CursorKDE.
-	 **/
-	void changeCursor(int mode, const QString& cursorDir);
-
-	/**
-	 * Called automatically by @ref changeCursor.
-	 *
-	 * This loads the cursor only if required. It is a noop if the cursor
-	 * was loaded previously already.
-	 * @param cursor Where the cursor stores its data files. May be @ref
-	 * QString::null to indicate the default theme.
-	 * @param actualDir This is set to the cursor directory that is actually
-	 * used (it might differ from @p cursorDir).
-	 **/
-	BosonCursor* loadCursor(int mode, const QString& cursorDir, QString& actualDir);
-
-private:
-	QMap<int, QMap<QString, BosonCursor*> > mCursors;
-	BosonCursor* mCursor;
-};
-
-BoCursorCollection::BoCursorCollection()
-{
- mCursor = 0;
-}
-
-BoCursorCollection::~BoCursorCollection()
-{
- QMap<int, QMap<QString, BosonCursor*> >::iterator it;
- for (it = mCursors.begin(); it != mCursors.end(); ++it) {
-	QMap<QString, BosonCursor*>::iterator it2;
-	for (it2 = (*it).begin(); it2 != (*it).end(); ++it2) {
-		delete *it2;
-	}
- }
- mCursors.clear();
-}
-
-BosonCursor* BoCursorCollection::loadCursor(int mode, const QString& cursorDir_, QString& cursorDir)
-{
- boDebug() << k_funcinfo << endl;
-
- cursorDir = cursorDir_;
- if (cursorDir.isNull()) {
-	cursorDir = BosonCursor::defaultTheme();
- }
-
- BosonCursor* b = (mCursors[mode])[cursorDir_];
- if (b) {
-	return b;
- }
- switch (mode) {
-	case CursorOpenGL:
-		b = new BosonOpenGLCursor;
-		break;
-	default:
-		mode = CursorKDE;
-	case CursorKDE:
-		b = new BosonKDECursor;
-		break;
- }
-
- bool ok = true;
- if (!b->insertMode(CursorMove, cursorDir, QString::fromLatin1("move"))) {
-	ok = false;
- }
- if (!b->insertMode(CursorAttack, cursorDir, QString::fromLatin1("attack"))) {
-	ok = false;
- }
- if (!b->insertMode(CursorDefault, cursorDir, QString::fromLatin1("default"))) {
-	ok = false;
- }
- if (!ok) {
-	boError() << k_funcinfo << "Could not load cursor mode " << mode << " from " << cursorDir << endl;
-	delete b;
-	if (mode != CursorKDE) { // loading *never* fails for CursorKDE. we check here anyway.
-		// load fallback cursor
-		return loadCursor(CursorKDE, QString::null, cursorDir);
-	}
-	boError() << k_funcinfo << "oops - loading CursorKDE failed. THIS MUST NEVER HAPPEN!" << endl;
-	return 0;
- }
- (mCursors[mode]).insert(cursorDir, b);
-
- return b;
-}
-
-void BoCursorCollection::changeCursor(int mode, const QString& cursorDir)
-{
- boDebug() << k_funcinfo << endl;
-
- QString actualCursorDir;
- BosonCursor* b = loadCursor(mode, cursorDir, actualCursorDir);
-
- if (b) {
-	mCursor = b;
-	boConfig->setCursorMode(mode);
-	boConfig->setCursorDir(actualCursorDir);
- } else {
-	// will never happen, as loadCursor() falls back to CursorKDE.
-	boError() << k_funcinfo << "loading cursor failed." << endl;
- }
-}
-
-
 
 BoCursorEdgeScrolling::BoCursorEdgeScrolling(QObject* parent) : QObject(parent)
 {
@@ -1548,7 +1426,7 @@ public:
 	BosonBigDisplayInputBase* mInput;
 	BoSelectionGroup* mSelectionGroups;
 
-	BoCursorCollection* mCursorCollection;
+	BosonCursorCollection* mCursorCollection;
 	BoCursorEdgeScrolling* mCursorEdgeScrolling;
 
 	BoFPSCounter mFPSCounter;
@@ -1646,7 +1524,7 @@ void BosonBigDisplayBase::init()
  d->mFovY = 60.0f;
  d->mGrabMovie = false;
  d->mGameGLMatrices = new BoGLMatrices(d->mModelviewMatrix, d->mProjectionMatrix, d->mViewFrustum, d->mViewport, d->mFovY, d->mAspect);
- d->mCursorCollection = new BoCursorCollection();
+ d->mCursorCollection = new BosonCursorCollection();
  d->mCursorEdgeScrolling = new BoCursorEdgeScrolling(this);
  d->mCursorEdgeScrolling->setCamera(camera());
  d->mCursorEdgeScrolling->setMatrices(d->mGameGLMatrices);
@@ -4318,7 +4196,11 @@ void BosonBigDisplayBase::slotChangeCursor(int mode, const QString& cursorDir)
 		mode = CursorKDE;
 	}
  }
- d->mCursorCollection->changeCursor(mode, cursorDir);
+ if (d->mCursorCollection->changeCursor(mode, cursorDir)) {
+	// TODO: rename setCursorMode() to setCursorType()
+	boConfig->setCursorMode(d->mCursorCollection->cursorType());
+	boConfig->setCursorDir(d->mCursorCollection->cursorDir());
+ }
 }
 
 void BosonBigDisplayBase::slotDebugRequestIdName(int msgid, bool , QString& name)
