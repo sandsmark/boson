@@ -58,6 +58,8 @@ BosonItem::BosonItem(BosonModel* model, BosonCanvas* canvas)
  mIsAnimated = false;
  mSelectBox = 0;
 
+ mCells = new QPtrVector<Cell>();
+
  if (mCanvas) {
 	mCanvas->addItem(this);
  } else {
@@ -99,15 +101,15 @@ QPtrVector<Cell>* BosonItem::cells()
 	rightBottomCell(&right, &bottom);
 	right = QMIN(right, QMAX((int)canvas()->mapWidth() - 1, 0));
 	bottom = QMIN(bottom, QMAX((int)canvas()->mapHeight() - 1, 0));
-	makeCells(canvas(), &mCells, left, right, top, bottom);
+	makeCells(canvas(), mCells, left, right, top, bottom);
 	mCellsDirty = false;
  }
- return &mCells;
+ return mCells;
 }
 
 QPtrVector<Cell>* BosonItem::cellsConst() const
 {
- return &mCells;
+ return mCells;
 }
 
 void BosonItem::makeCells(const BosonCanvas* canvas, QPtrVector<Cell>* cells, int left, int right, int top, int bottom)

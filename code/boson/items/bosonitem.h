@@ -471,7 +471,7 @@ private:
 	bool mIsAnimated;
 	SelectBox* mSelectBox;
 
-	QPtrVector<Cell> mCells;
+	QPtrVector<Cell>* mCells;
 	bool mCellsDirty;
 };
 
