@@ -29,6 +29,8 @@ Game TODOs
 - pause
 - sprite cursor seems to lead to crashes sometimes when moving the mouse (very
   seldom only)
+- don't display the firepower-bar (i.e. reload bar) when the unit/facility
+  cannot shoot
 
 
 Editor (map, unit, scenario) TODOs
