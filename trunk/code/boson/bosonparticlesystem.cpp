@@ -22,6 +22,8 @@
 #include "bo3dtools.h"
 #include "bosonparticlemanager.h"
 #include "bodebug.h"
+#include "boson.h"
+#include "player.h"
 
 #include <GL/gl.h>
 
@@ -249,10 +251,13 @@ void BosonParticleSystem::draw()
 //  boDebug() << "PARTICLE:" << "        " << k_funcinfo << "translating by (" << mPos[0] << ", " << mPos[1] << ", " << mPos[2] << ")" << endl;
   glBindTexture(GL_TEXTURE_2D, mTexture);
   glBlendFunc(mBlendFunc[0], mBlendFunc[1]);
+  
+  Player* p = boGame->localPlayer();
 
   // FIXME: between glBegin() and glEnd() there should be as little code as
   // possible, i.e. try to get around the loop and so.
   // FIXME: can't we use a display list here?
+  // FIXME: maybe we can use vertex arrays here?
   glBegin(GL_QUADS);
   for(int i = 0; i < mMaxNum; i++)
   {
@@ -261,6 +266,12 @@ void BosonParticleSystem::draw()
     {
       continue;
     }
+    // FIXME: this is extremely bad here but we must not draw particles on fogged areas
+    if(p->isFogged(mParticles[i].pos[0] + mPos[0], -(mParticles[i].pos[1] + mPos[1])))
+    {
+      continue;
+    }
+
     BoVector3 a, b, c, d;  // Vertex positions
 
     a.setScaledSum(mParticles[i].pos, nw, mParticles[i].size);

@@ -463,7 +463,7 @@ void TopWidget::initBosonWidget(bool loading)
 
  connect(d->mBosonWidget, SIGNAL(signalChangeLocalPlayer(Player*)), this, SLOT(slotChangeLocalPlayer(Player*)));
  connect(d->mBosonWidget, SIGNAL(signalEndGame()), this, SLOT(slotEndGame()));
- connect(d->mBosonWidget, SIGNAL(signalQuit()), this, SLOT(slotGameOver()));
+ connect(d->mBosonWidget, SIGNAL(signalQuit()), this, SLOT(close()));
  connect(d->mBosonWidget, SIGNAL(signalMobilesCount(int)), this, SIGNAL(signalSetMobilesCount(int)));
  connect(d->mBosonWidget, SIGNAL(signalFacilitiesCount(int)), this, SIGNAL(signalSetFacilitiesCount(int)));
  connect(d->mBosonWidget, SIGNAL(signalOilUpdated(int)), this, SIGNAL(signalOilUpdated(int)));
