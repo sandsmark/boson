@@ -149,8 +149,9 @@ void HarvesterProperties::loadPlugin(KSimpleConfig* config)
 	mCanMineOil = false;
  }
  mMaxResources = config->readUnsignedNumEntry("MaxResources", 100);
- mMiningSpeed = config->readUnsignedNumEntry("MiningSpeed", 10);
- mUnloadingSpeed = config->readUnsignedNumEntry("UnloadingSpeed", 10);
+ // Convert speeds from amount/second to amount/adv.call
+ mMiningSpeed = (int)(config->readDoubleNumEntry("MiningSpeed", 100) / 20.0f);
+ mUnloadingSpeed = (int)(config->readDoubleNumEntry("UnloadingSpeed", 200) / 20.0f);
 }
 
 void HarvesterProperties::savePlugin(KSimpleConfig* config)
@@ -159,8 +160,9 @@ void HarvesterProperties::savePlugin(KSimpleConfig* config)
  config->writeEntry("CanMineMinerals", mCanMineMinerals);
  config->writeEntry("CanMineOil", mCanMineOil);
  config->writeEntry("MaxResources", mMaxResources);
- config->writeEntry("MiningSpeed", mMiningSpeed);
- config->writeEntry("UnloadingSpeed", mUnloadingSpeed);
+ // Convert speeds from amount/adv.call to amount/second
+ config->writeEntry("MiningSpeed", mMiningSpeed * 20.0f);
+ config->writeEntry("UnloadingSpeed", mUnloadingSpeed * 20.0f);
 }
 
 
