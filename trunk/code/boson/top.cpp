@@ -53,8 +53,9 @@ Top::Top()
  setupStatusBar();
 
  // a local player is always needed for a game (not for editor)
- d->mBosonWidget->addLocalPlayer();
+// d->mBosonWidget->addLocalPlayer();
 
+ d->mBosonWidget->slotNewGame(); // adds a local player, too
 }
 
 Top::~Top()
