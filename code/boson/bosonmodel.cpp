@@ -205,41 +205,41 @@ void BosonModel::init()
 
 BosonModel::~BosonModel()
 {
- boDebug() << k_funcinfo << endl;
+ boDebug(100) << k_funcinfo << endl;
  finishLoading();
  mModelTextures->removeModel(this);
- boDebug() << k_funcinfo << "delete " << d->mFrames.count() << " frames" << endl;
+ boDebug(100) << k_funcinfo << "delete " << d->mFrames.count() << " frames" << endl;
  d->mFrames.clear();
- boDebug() << k_funcinfo << "delete " << d->mConstructionSteps.count() << " construction frames" << endl;
+ boDebug(100) << k_funcinfo << "delete " << d->mConstructionSteps.count() << " construction frames" << endl;
  d->mConstructionSteps.clear();
- boDebug() << k_funcinfo << "delete " << d->mNodeDisplayLists.count() << " child display lists" << endl;
+ boDebug(100) << k_funcinfo << "delete " << d->mNodeDisplayLists.count() << " child display lists" << endl;
  QValueList<GLuint>::Iterator it = d->mNodeDisplayLists.begin();
  for (; it != d->mNodeDisplayLists.end(); ++it) {
 	glDeleteLists((*it), 1);
  }
  d->mAnimations.clear();
  delete d;
- boDebug() << k_funcinfo << "done" << endl;
+ boDebug(100) << k_funcinfo << "done" << endl;
 }
 
 void BosonModel::loadModel()
 {
  if (d->mFile.isEmpty() || d->mDirectory.isEmpty()) {
-	boError() << k_funcinfo << "No file has been specified for loading" << endl;
+	boError(100) << k_funcinfo << "No file has been specified for loading" << endl;
 	return;
  }
  boProfiling->start(BosonProfiling::LoadModel);
  QString fullFile = file();
  m3ds = lib3ds_file_load(fullFile);
  if (!m3ds) {
-	boError() << k_funcinfo << "Can't load " << fullFile << endl;
+	boError(100) << k_funcinfo << "Can't load " << fullFile << endl;
 	boProfiling->stop(BosonProfiling::LoadModel);
 	return;
  }
 
  Lib3dsNode* node = m3ds->nodes;
  if (!node) {
-	boError() << k_funcinfo << "Could not load file " << fullFile << " correctly" << endl;
+	boError(100) << k_funcinfo << "Could not load file " << fullFile << " correctly" << endl;
 	boProfiling->stop(BosonProfiling::LoadModel);
 	return;
  }
@@ -251,7 +251,7 @@ void BosonModel::loadModel()
  createDisplayLists();
  boProfiling->stop(BosonProfiling::LoadModelDisplayLists);
 
- boDebug() << k_funcinfo << "loaded from " << fullFile << endl;
+ boDebug(100) << k_funcinfo << "loaded from " << fullFile << endl;
 
  boProfiling->stop(BosonProfiling::LoadModel);
 }
@@ -284,7 +284,7 @@ QStringList BosonModel::textures(Lib3dsFile* file)
 {
  QStringList list;
  if (!file) {
-	boError() << k_funcinfo << "NULL file" << endl;
+	boError(100) << k_funcinfo << "NULL file" << endl;
 	return list;
  }
 
@@ -305,7 +305,7 @@ QStringList BosonModel::textures(Lib3dsFile* file)
 void BosonModel::loadTextures()
 {
  if (!m3ds) {
-	boError() << k_funcinfo << "File was not yet loaded" << endl;
+	boError(100) << k_funcinfo << "File was not yet loaded" << endl;
 	return;
  }
  QStringList list = textures(m3ds);
@@ -318,13 +318,13 @@ void BosonModel::loadTextures()
 void BosonModel::createDisplayLists()
 {
  if (!QGLContext::currentContext()) {
-	boError() << k_funcinfo << "NULL current context" << endl;
+	boError(100) << k_funcinfo << "NULL current context" << endl;
 	return;
  }
- boDebug() << k_funcinfo << "creating " << m3ds->frames << " lists" << endl;
+ boDebug(100) << k_funcinfo << "creating " << m3ds->frames << " lists" << endl;
  GLuint listBase = glGenLists(m3ds->frames);
  if (listBase == 0) {
-	boError() << k_funcinfo << "NULL display lists created" << endl;
+	boError(100) << k_funcinfo << "NULL display lists created" << endl;
 	return;
  }
  float scale = 1.0; // note: all frame must share the same scaling factor. this means that the model mustn't grow in x or y direction (width or height). It can grow/shrink in z-direction however.
@@ -374,7 +374,7 @@ void BosonModel::createDisplayLists()
 		if (i == 0) {
 			// we compute scaling for the first frame only.
 			scale = helper.scale(mWidth, mHeight);
-			boDebug() << "master scale: " << scale << endl;
+			boDebug(100) << "master scale: " << scale << endl;
 		}
 
 		// FIXME: can we do our own calculations here, instead of OpenGL
@@ -410,7 +410,7 @@ void BosonModel::createDisplayLists()
 void BosonModel::generateConstructionLists()
 {
  if (!m3ds) {
-	boError() << k_funcinfo << "NULL file" << endl;
+	boError(100) << k_funcinfo << "NULL file" << endl;
 	return;
  }
  // construction lists are always generated from the 1st frame!
@@ -419,7 +419,7 @@ void BosonModel::generateConstructionLists()
 
  BoFrame* frame0 = d->mFrames[0];
  if (!frame0) {
-	boError() << k_funcinfo << "No frame was loaded yet!" << endl;
+	boError(100) << k_funcinfo << "No frame was loaded yet!" << endl;
 	return;
  }
  unsigned int nodes = 0;
@@ -427,7 +427,7 @@ void BosonModel::generateConstructionLists()
  for (node = m3ds->nodes; node; node = node->next) {
 	nodes++;
  }
- boDebug() << k_funcinfo << "Generating " << nodes << " construction lists" << endl;
+ boDebug(100) << k_funcinfo << "Generating " << nodes << " construction lists" << endl;
 
  // again this iterating... it is exactly the same as it was for the first frame
  // in createDisplayLists() but I don't want to store it somewhere. Especially
@@ -441,7 +441,7 @@ void BosonModel::generateConstructionLists()
  float scale = helper.scale(mWidth, mHeight);
  GLuint base = glGenLists(nodes);
  if (base == 0) {
-	boError() << k_funcinfo << "NULL display lists created" << endl;
+	boError(100) << k_funcinfo << "NULL display lists created" << endl;
 	return;
  }
  for (unsigned int i = 0; i < nodes; i++) {
@@ -510,13 +510,13 @@ void BosonModel::computeBoundings(Lib3dsNode* node, BosonModel::BoHelper* helper
 void BosonModel::loadNodes(bool reload)
 {
  if (!QGLContext::currentContext()) {
-	boError() << k_funcinfo << "NULL current context" << endl;
+	boError(100) << k_funcinfo << "NULL current context" << endl;
 	return;
  }
  if (reload) {
-	boDebug() << k_funcinfo << "reloading all nodes" << endl;
+	boDebug(100) << k_funcinfo << "reloading all nodes" << endl;
  } else {
-	boDebug() << k_funcinfo << "loading all nodes" << endl;
+	boDebug(100) << k_funcinfo << "loading all nodes" << endl;
  }
  Lib3dsNode* p;
  for (p = m3ds->nodes; p; p = p->next) {
@@ -549,7 +549,7 @@ void BosonModel::loadNode(Lib3dsNode* node, bool reload)
 	if (!node->user.d) {
 		node->user.d = glGenLists(1);
 		if (node->user.d == 0) {
-			boError() << k_funcinfo << "NULL display list created" << endl;
+			boError(100) << k_funcinfo << "NULL display list created" << endl;
 			return;
 		}
 	} else {
@@ -559,7 +559,7 @@ void BosonModel::loadNode(Lib3dsNode* node, bool reload)
 			// it had before!
 			glDeleteLists(node->user.d, 1);
 		} else {
-			boWarning() << k_funcinfo << "node was already loaded before" << endl;
+			boWarning(100) << k_funcinfo << "node was already loaded before" << endl;
 			return;
 		}
 	}
@@ -596,7 +596,7 @@ void BosonModel::loadNode(Lib3dsNode* node, bool reload)
 				mat = mat2;
 			}
 			if (mat != mat2) {
-				boWarning() << "face " << p << " uses different material than previous faces" << endl;
+				boWarning(100) << "face " << p << " uses different material than previous faces" << endl;
 			}
 		}
 	}
@@ -616,7 +616,7 @@ void BosonModel::loadNode(Lib3dsNode* node, bool reload)
 		} else {
 			myTex = mModelTextures->texture(texName);
 			if (!myTex) {
-				boWarning() << k_funcinfo << "Texture " << t->name << " was not loaded" << endl;
+				boWarning(100) << k_funcinfo << "Texture " << t->name << " was not loaded" << endl;
 			}
 		}
 	} else {
@@ -661,7 +661,7 @@ void BosonModel::loadNode(Lib3dsNode* node, bool reload)
 		}
 		texMatrix.loadMatrix(GL_TEXTURE_MATRIX);
 		if (texMatrix.isNull()) {
-			boWarning() << k_funcinfo << "Invalid texture matrix was generated!" << endl;
+			boWarning(100) << k_funcinfo << "Invalid texture matrix was generated!" << endl;
 			texMatrix.loadIdentity();
 		}
 
@@ -686,7 +686,7 @@ void BosonModel::loadNode(Lib3dsNode* node, bool reload)
 			lib3ds_vector_transform(v[i], invMeshMatrix, mesh->pointL[ f->points[i] ].pos);
 			if (mesh->texels != mesh->points) {
 				if (mesh->texels != 0) {
-					boWarning() << k_funcinfo << "hmm.. points: " << mesh->points
+					boWarning(100) << k_funcinfo << "hmm.. points: " << mesh->points
 							<< " , texels: " << mesh->texels << endl;
 				}
 				myTex = 0;
@@ -803,7 +803,7 @@ void BosonModel::finishLoading()
 
 void BosonModel::dumpVector(Lib3dsVector v)
 {
- boDebug() << "Vector: " << v[0] << "," << v[1] << "," << v[2] << endl;
+ boDebug(100) << "Vector: " << v[0] << "," << v[1] << "," << v[2] << endl;
 }
 
 void BosonModel::dumpTriangle(Lib3dsVector* v, GLuint texture, Lib3dsTexel* tex)
@@ -833,14 +833,14 @@ void BosonModel::dumpTriangle(BoVector3* v, GLuint texture, Lib3dsTexel* tex)
  } else {
 	text += "(no texture)";
  }
- boDebug() << text << endl;
+ boDebug(100) << text << endl;
 }
 
 void BosonModel::reloadAllTextures()
 {
- boDebug() << k_funcinfo << endl;
+ boDebug(100) << k_funcinfo << endl;
  if (!mModelTextures) {
-	boError() << k_funcinfo << "NULL model textures ?!?!" << endl;
+	boError(100) << k_funcinfo << "NULL model textures ?!?!" << endl;
 	return;
  }
  mModelTextures->reloadTextures();
@@ -852,7 +852,7 @@ void BosonModel::insertAnimationMode(int mode, int start, unsigned int range, un
 	// mode == 0 is a special mode. we default to it when everything fails,
 	// so this *must* be valid.
 	if (start < 0 || range == 0 || speed == 0) {
-		boWarning() << k_funcinfo << "invalid values for default mode! start=" << start << ",range=" << range << ",speed=" << speed << endl;
+		boWarning(100) << k_funcinfo << "invalid values for default mode! start=" << start << ",range=" << range << ",speed=" << speed << endl;
 		start = 0;
 		range = 1;
 		speed = 1;
@@ -965,7 +965,7 @@ void BosonModel::findAdjacentFaces(QPtrList<Lib3dsFace>* adjacentFaces, Lib3dsMe
 	}
  }
 
- boDebug() << k_funcinfo << "adjacent: " << adjacentFaces->count() << " of " << mesh->faces << endl;
+ boDebug(100) << k_funcinfo << "adjacent: " << adjacentFaces->count() << " of " << mesh->faces << endl;
 }
 
 // TODO: write a debug dialog which is able to display nodes and faces.
