@@ -163,6 +163,14 @@ public:
 
 	void setBoundingSphereRadius(float r) { mBoundingSphereRadius = r; }
 
+	/**
+	 * Returns unit's current rotation around z-axis. This is used for rotating
+	 * unit to correct direction when moving
+	 **/
+	inline float rotation() const { return mRotation; }
+
+	inline void setRotation(float r) { mRotation = r; }
+
 private:
 	// FIXME: use KGameProperty here. We can do so, since we don't use
 	// QCanvasSprite anymore.
@@ -172,6 +180,7 @@ private:
 	float mZ;
 	int mWidth;
 	int mHeight;
+	float mRotation;
 
 	float mGLDepthMultiplier;
 	GLuint mDisplayList;
