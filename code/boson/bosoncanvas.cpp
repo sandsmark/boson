@@ -382,7 +382,7 @@ void BoCanvasAdvance::updateWork2AdvanceList()
 void BoCanvasAdvance::maximalAdvanceCountTasks(unsigned int advanceCallsCount)
 {
  static int profilingMaxAdvanceCount = boProfiling->requestEventId("Advance: special MAXIMAL_ADVANCE_COUNT tasks");
- BosonProfiling profiler(profilingMaxAdvanceCount); // measure _all_ advanceCallsCounts
+ BosonProfiler profiler(profilingMaxAdvanceCount); // measure _all_ advanceCallsCounts
 
  const unsigned int MAXIMAL_ADVANCE_COUNT = 39;
  if (advanceCallsCount % MAXIMAL_ADVANCE_COUNT != 0) {
