@@ -459,11 +459,12 @@ protected slots:
 	void slotToggleCheating(bool);
 	void slotShowLight0Widget();
 	void slotDebugMemory();
-	void slotDebugPlayer(int);
+	void slotDebugKillPlayer(Q_UINT32 playerId);
+	void slotDebugModifyMinerals(Q_UINT32 playerId, int amount);
+	void slotDebugModifyOil(Q_UINT32 playerId, int amount);
 	void slotChangeMaxProfilingEventEntries();
 	void slotChangeMaxProfilingAdvanceEntries();
 	void slotChangeMaxProfilingRenderingEntries();
-	void slotToggleStatusbar();
 	void slotPreferences();
 	void slotPreferencesApply();
 	void slotDebugKGame();
@@ -471,11 +472,11 @@ protected slots:
 	void slotChangeCursor(int, const QString&);
 	void slotUnfogAll(Player* pl = 0);
 	void slotEditorSavePlayFieldAs();
-	void slotEditorChangeLocalPlayer(int);
-	void slotEditorChangeLocalPlayerHack();
 	void slotEditorDeleteSelectedUnits();
 	void slotEditorEditMapDescription();
-	void slotEditorPlace(int);
+	void slotEditorShowPlaceFacilities();
+	void slotEditorShowPlaceMobiles();
+	void slotEditorShowPlaceGround();
 	void slotEditorImportHeightMap();
 	void slotEditorImportTexMap();
 	void slotEditorExportHeightMap();
@@ -545,7 +546,7 @@ protected:
 protected slots:
 	void slotToggleSound();
 	void slotToggleMusic();
-	void slotToggleFullScreen();
+	void slotToggleFullScreen(bool);
 	void slotProfiling();
 	void slotBoDebugLogDialog();
 	void slotSleep1s();
@@ -626,6 +627,15 @@ protected:
 	void extractFrustum();
 
 	/**
+	 * Update the @ref cursorCanvasVector according to the current cursor and
+	 * camera settings.
+	 *
+	 * This should be called whenever the mouse is moved (i.e. when a mouse
+	 * move event occurs) and whenever the camera is changed.
+	 **/
+	void updateCursorCanvasVector();
+
+	/**
 	 * See @ref extractFrustum for more information about this stuff.
 	 *
 	 * We use a bounding spere so that we can easily rotate it.
@@ -667,9 +677,6 @@ protected:
 	void generateMovieFrame(const QByteArray& data, BoPixmapRenderer* renderer);
 	void resetGameMode();
 	void setGameMode(bool);
-
-	void createDebugPlayersMenu();
-	void createEditorPlayerMenu();
 
 private:
 	void init();
