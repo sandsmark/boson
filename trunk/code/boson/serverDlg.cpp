@@ -86,7 +86,7 @@ void serverDlg::slotOk(void)
 	int port = atoi(e_port->text());
 
 	if ( ! (port>1000) ) {
-		logf(LOG_FATAL,"launchServer : unexpected port %s.", (const char *)e_port->text());
+		logf(LOG_FATAL,"slotOk : unexpected port %s.", (const char *)e_port->text());
   		KMessageBox::error(this, "The port must be an integer bigger than 1000", "unexpected port");
 		return;
 	}
