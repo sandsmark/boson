@@ -95,8 +95,21 @@ public:
 
 	void setMap(BosonMap* map);
 	BosonMap* map() const;
+
+	/**
+	 * @return @ref BosonMap::width
+	 **/
 	unsigned int mapHeight() const;
+
+	/**
+	 * @return @ref BosonMap::height
+	 **/
 	unsigned int mapWidth() const;
+
+	/**
+	 * @return @ref BosonMap::heightMap
+	 **/
+	float* heightMap() const;
 
 	virtual void addAnimation(BosonItem* item);
 	virtual void removeAnimation(BosonItem* item);
