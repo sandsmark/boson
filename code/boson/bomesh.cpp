@@ -1354,12 +1354,18 @@ void BoMesh::renderMesh(const QColor* teamColor, unsigned int _lod)
  // so optimization should happen here - if possible at all...
 
  BoMaterial::activate(material());
- if (!material() && isTeamColor()) {
-	if (teamColor) {
-		glPushAttrib(GL_CURRENT_BIT);
-		glColor3ub(teamColor->red(), teamColor->green(), teamColor->blue());
-		resetColor = true;
+ if (!material()) {
+	if (isTeamColor()) {
+		if (teamColor) {
+			glPushAttrib(GL_CURRENT_BIT);
+			glColor3ub(teamColor->red(), teamColor->green(), teamColor->blue());
+			resetColor = true;
+		}
 	}
+ } else if (material()->textureName().isEmpty()){
+	glPushAttrib(GL_CURRENT_BIT);
+	glColor3fv(material()->diffuse().data());
+	resetColor = true;
  }
 
 #define USE_OCCLUSION_CULLING 0
