@@ -1304,6 +1304,11 @@ BosonItem* BosonCanvas::createItemFromXML(const QDomElement& item, Player* owner
 	// few additional exceptions (editor, flying unit)).
 	Unit* u = (Unit*)createItem(RTTI::UnitStart + type, owner, ItemType(type), pos, id);
 
+	if (!u) {
+		boError(260) << k_funcinfo << "could not create unit type=" << type << " for owner=" << owner->id() << endl;
+		return 0;
+	}
+
 	// Set additional properties
 	owner->addUnit(u, dataHandlerId);
 
