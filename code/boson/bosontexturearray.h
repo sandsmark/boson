@@ -103,7 +103,6 @@ public:
 	 **/
 	static void copyAllTextures(BoContext* src, BoContext* dest);
 
-private:
 	/**
 	 * Inspired by source code of Mesa-4.0.1 see teximage.c for the original
 	 * implementation - function logbase2()
@@ -112,6 +111,7 @@ private:
 	 **/
 	static int nextPower2(int n);
 
+private:
 	void init();
 
 private:
