@@ -5,6 +5,7 @@ ConstructionSteps=25
 
 [Boson Unit]
 Armor=0
+ConstructedParticles=10006
 DestroyedParticles=1010,3010,7002
 ExplodingDamage=0
 ExplodingDamageRange=0
