@@ -366,7 +366,7 @@ bool BosonSaveLoad::saveToFile(const QMap<QString, QByteArray>& files, const QSt
 	int lastSlash = path.findRev('/');
 	QString dir = path.left(lastSlash);
 	QString baseName = path.right(path.length() - (lastSlash + 1));
-	if (!f.writeFile(baseName, QString(files[path]), dir)) {
+	if (!f.writeFile(baseName, files[path], dir)) {
 		boError() << k_funcinfo << "Could not write " << baseName << " to " << file << endl;
 		return false;
 	}
