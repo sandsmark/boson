@@ -417,6 +417,36 @@ protected:
 	 **/
 	void mouseEventReleaseDouble(ButtonState button, const BoMouseEvent& action, QDataStream& stream, bool* send);
 
+protected slots:
+	void slotToggleSound();
+	void slotToggleMusic();
+	void slotToggleFullScreen();
+	void slotProfiling();
+	void slotBoDebugLogDialog();
+	void slotSleep1s();
+	void slotGrabProfiling();
+	void slotSetShowResources(bool show);
+	void slotSetEnableColorMap(bool enable);
+	void slotShowGLStates();
+	void slotReloadMeshRenderer();
+	void slotReloadGroundRenderer();
+	void slotCrashBoson();
+	void slotSetDebugMode(int);
+	void slotSetDebugMapCoordinates(bool);
+	void slotSetDebugPFData(bool);
+	void slotSetDebugShowCellGrid(bool);
+	void slotSetDebugMatrices(bool);
+	void slotSetDebugItemWorks(bool);
+	void slotSetDebugCamera(bool);
+	void slotSetDebugRenderCounts(bool);
+	void slotSetDebugBoundingBoxes(bool);
+	void slotSetDebugFPS(bool);
+	void slotSetDebugAdvanceCalls(bool);
+	void slotSetDebugTextureMemory(bool);
+	void slotSetDebugWireFrames(bool);
+	void slotDumpGameLog();
+	void slotSyncNetwork();
+
 protected:
 	virtual void initializeGL();
 	virtual void resizeGL(int w, int h);
@@ -558,9 +588,15 @@ protected:
 	void addMouseIO(PlayerIO* playerIO);
 
 	void generateMovieFrame(const QByteArray& data, BoPixmapRenderer* renderer);
+	void resetGameMode();
+	void setGameMode(bool);
+
 private:
 	void init();
 	void initUfoGUI();
+	void initUfoActions(bool gameMode);
+	void initUfoGameActions();
+	void initUfoEditorActions();
 
 private:
 	class BosonBigDisplayBasePrivate;
