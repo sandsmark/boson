@@ -129,6 +129,7 @@ bool BosonPlayField::preLoadAllPlayFields()
  }
  QStringList::Iterator it;
  for (it = list.begin(); it != list.end(); ++it) {
+	// this will also preload the playfield!
 	BosonPlayFieldData* data = new BosonPlayFieldData(*it, new BosonPlayField());
 	if (data->idString().isEmpty()) {
 		boError() << k_funcinfo << *it << " could not be loaded" << endl;
