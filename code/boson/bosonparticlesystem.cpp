@@ -98,15 +98,15 @@ void BoParticleManager::draw(QPtrList<BosonParticleSystem>* systems, const BoVec
 
   /// Draw particles
   QPtrListIterator<BosonParticle> i(*this);
-  //boDebug() << k_funcinfo << "Drawing " << i.count() << " particles" << endl;
+  //boDebug(150) << k_funcinfo << "Drawing " << i.count() << " particles" << endl;
   while((p = i.current()) != 0)
   {
     // To make things faster (again), we call BosonParticleSystem::draw() only
     //  when particle system of current particle changes.
-    //boDebug() << k_funcinfo << "Drawing loop; current particle's distance: " << p->distance << endl;
+    //boDebug(150) << k_funcinfo << "Drawing loop; current particle's distance: " << p->distance << endl;
     p->system->draw(i);
   }
-  //boDebug() << k_funcinfo << "Drawing completed" << endl;
+  //boDebug(150) << k_funcinfo << "Drawing completed" << endl;
   glColor4f(1.0, 1.0, 1.0, 1.0); // Reset color
 }
 
@@ -116,7 +116,7 @@ int BoParticleManager::compareItems(QPtrCollection::Item item1, QPtrCollection::
   float d1, d2;
   d1 = ((BosonParticle*)item1)->distance;
   d2 = ((BosonParticle*)item2)->distance;
-  //boDebug() << k_funcinfo << "d1: " << d1 << "; d2: " << d2 << endl;
+  //boDebug(150) << k_funcinfo << "d1: " << d1 << "; d2: " << d2 << endl;
   if(d1 > d2)
   {
     return -1;
@@ -225,7 +225,7 @@ void BosonParticleSystem::init(int initialnum)
   // Create initial particles
   mNum = 0;
   createParticles(initialnum);
-//  boDebug() << k_funcinfo << "Created " << mNum << " initial particles" << endl;
+//  boDebug(150) << k_funcinfo << "Created " << mNum << " initial particles" << endl;
 }
 
 void BosonParticleSystem::createParticles(int count)
@@ -251,7 +251,7 @@ BosonParticleSystem::~BosonParticleSystem()
 
 void BosonParticleSystem::update(float elapsed)
 {
-/*  boDebug() << k_funcinfo << " UPDATING; elapsed: " << elapsed << "; createRate: " << mCreateRate <<
+/*  boDebug(150) << k_funcinfo << " UPDATING; elapsed: " << elapsed << "; createRate: " << mCreateRate <<
       "; createCache: " << mCreateCache << "; will add " << elapsed * mCreateRate <<
       " to create cache (total will be = " << mCreateCache + (elapsed * mCreateRate) << ")" << endl;*/
   mCreateCache += (elapsed * mCreateRate);
@@ -287,7 +287,7 @@ void BosonParticleSystem::update(float elapsed)
   // Create some new ones if needed
   if((mCreateCache >= 1.0) && (mAge >= 0.0))
   {
-//    boDebug() << k_funcinfo << "createCache >= 1.0 (" << mCreateCache << "); trying to create new particles" << endl;
+//    boDebug(150) << k_funcinfo << "createCache >= 1.0 (" << mCreateCache << "); trying to create new particles" << endl;
     for(int i = 0; (i < mMaxNum) && (mCreateCache >= 1.0); i++)
     {
       if(mParticles[i].life <= 0.0)
@@ -298,7 +298,7 @@ void BosonParticleSystem::update(float elapsed)
         mNum++;
       }
     }
-//    boDebug() << k_funcinfo << "Created " << created << " new particles; createCache is now " << mCreateCache << endl;
+//    boDebug(150) << k_funcinfo << "Created " << created << " new particles; createCache is now " << mCreateCache << endl;
   }
 }
 
@@ -342,7 +342,7 @@ void BosonParticleSystem::preDraw()
 
 void BosonParticleSystem::draw(QPtrListIterator<BosonParticle>& it)
 {
-//  boDebug() << "PARTICLE:" << "        " << k_funcinfo << "drawing " << mNum << " particles" << endl;
+//  boDebug(150) << "PARTICLE:" << "        " << k_funcinfo << "drawing " << mNum << " particles" << endl;
   // Complex method. Parts of this method are taken from Plib project (plib.sf.net)
   // Return if there are no living particles
   if(mNum <= 0)
@@ -366,7 +366,7 @@ void BosonParticleSystem::draw(QPtrListIterator<BosonParticle>& it)
 
   // Update particles
 //  int num = 0;
-//  boDebug() << "PARTICLE:" << "        " << k_funcinfo << "translating by (" << mPos[0] << ", " << mPos[1] << ", " << mPos[2] << ")" << endl;
+//  boDebug(150) << "PARTICLE:" << "        " << k_funcinfo << "translating by (" << mPos[0] << ", " << mPos[1] << ", " << mPos[2] << ")" << endl;
   // TODO: perf: how much would it make things faster if we'd cache current OGL
   //  blend function somewhere and only change it if necessary?
   glBlendFunc(mBlendFunc[0], mBlendFunc[1]);
@@ -412,7 +412,7 @@ void BosonParticleSystem::draw(QPtrListIterator<BosonParticle>& it)
     if(lasttex != p->tex)
     {
       // This is ugly but it makes things faster
-      //boDebug() << k_funcinfo << "Different texture: last: " << lasttex << "; new: " << p->tex << endl;
+      //boDebug(150) << k_funcinfo << "Different texture: last: " << lasttex << "; new: " << p->tex << endl;
       lasttex = p->tex;
       glEnd();
       glBindTexture(GL_TEXTURE_2D, p->tex);
@@ -429,7 +429,7 @@ void BosonParticleSystem::draw(QPtrListIterator<BosonParticle>& it)
   glEnd();
 
   glPopMatrix();
-//  boDebug() << "PARTICLE:" << "        " << k_funcinfo << "drawn " << num << " particles" << endl;
+//  boDebug(150) << "PARTICLE:" << "        " << k_funcinfo << "drawn " << num << " particles" << endl;
 }
 
 void BosonParticleSystem::initParticle(BosonParticle* particle)

@@ -44,12 +44,12 @@ BosonParticleTextureArray BosonParticleSystemProperties::getTextures(const QStri
 {
   if(!mTextureArrays.contains(name))
   {
-    boDebug() << k_funcinfo << "Adding texture with name " << name << " to textures arrays map" << endl;
+    boDebug(150) << k_funcinfo << "Adding texture with name " << name << " to textures arrays map" << endl;
     BosonParticleTextureArray t;
     QDir d(mTexturePath);
     QStringList files = d.entryList(name + "*.png", QDir::Files, QDir::Name);
     t.mTextureCount = files.count();
-    boDebug() << k_funcinfo << "Found " << files.count() << " suitable files" << endl;
+    boDebug(150) << k_funcinfo << "Found " << files.count() << " suitable files" << endl;
     t.mTextureIds = new GLuint[t.mTextureCount];
     glGenTextures(t.mTextureCount, t.mTextureIds);
     
@@ -57,7 +57,7 @@ BosonParticleTextureArray BosonParticleSystemProperties::getTextures(const QStri
     for(QStringList::Iterator it = files.begin(); it != files.end(); it++)
     {
       BosonTextureArray::createTexture(mTexturePath + "/" + *it, t.mTextureIds[i], boConfig->modelTexturesMipmaps());
-      boDebug() << k_funcinfo << "Created new texture from file " << *it  << "; id: " << i << "; OGL name: " << t.mTextureIds[i] << endl;
+      boDebug(150) << k_funcinfo << "Created new texture from file " << *it  << "; id: " << i << "; OGL name: " << t.mTextureIds[i] << endl;
       i++;
     }
 /*    GLuint tex;
@@ -85,7 +85,7 @@ BosonParticleSystemProperties::BosonParticleSystemProperties(KSimpleConfig* cfg)
   mId = cfg->readUnsignedLongNumEntry("Id", 0);
   if(mId == 0)
   {
-    boError() << k_funcinfo << "Invalid id in group " << cfg->group() << endl;
+    boError(150) << k_funcinfo << "Invalid id in group " << cfg->group() << endl;
   }
   mMinVelo = BoVector3::load(cfg, "MinVelocity");
   mMaxVelo = BoVector3::load(cfg, "MaxVelocity");
@@ -118,7 +118,7 @@ BosonParticleSystemProperties::BosonParticleSystemProperties(KSimpleConfig* cfg)
   }
   else
   {
-    boError() << k_funcinfo << "Invalid BlendFunc entry in config file: " << mGLBlendFuncStr << endl;
+    boError(150) << k_funcinfo << "Invalid BlendFunc entry in config file: " << mGLBlendFuncStr << endl;
     mGLBlendFunc = GL_ONE_MINUS_SRC_ALPHA;
   }
   mRate = (float)(cfg->readDoubleNumEntry("Rate", 0));
@@ -128,10 +128,10 @@ BosonParticleSystemProperties::BosonParticleSystemProperties(KSimpleConfig* cfg)
   mAlign = cfg->readBoolEntry("Align", true);
   QString textureName = cfg->readEntry("Texture", "explosion");
   mTextures = getTextures(textureName);
-  boDebug() << k_funcinfo << "Number of textures found: " << mTextures.mTextureCount << endl;
+  boDebug(150) << k_funcinfo << "Number of textures found: " << mTextures.mTextureCount << endl;
   for(int i = 0; i < mTextures.mTextureCount; i++)
   {
-    boDebug() << "    " << k_funcinfo << "OGL name of texture[" << i << "]: " << mTextures.mTextureIds[i] << endl;
+    boDebug(150) << "    " << k_funcinfo << "OGL name of texture[" << i << "]: " << mTextures.mTextureIds[i] << endl;
   }
 }
 

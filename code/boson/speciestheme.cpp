@@ -197,7 +197,7 @@ bool SpeciesTheme::loadTechnologies()
  }
  QStringList::Iterator it;
  for(it = techs.begin(); it != techs.end(); ++it) {
-	boDebug() << k_funcinfo << "Loading technology from group " << *it << endl;
+//	boDebug() << k_funcinfo << "Loading technology from group " << *it << endl;
 	TechnologyProperties* tech = new TechnologyProperties;
 	cfg.setGroup(*it);
 	tech->load(&cfg);
