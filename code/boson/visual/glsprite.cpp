@@ -94,6 +94,10 @@ void GLSprite::setGLConstructionStep(unsigned int s)
  // note: in case of s >= model()->constructionSteps() we use the last
  // constructionStep that is defined in the model until an actual frame is set.
  BoFrame* f = model()->constructionStep(s);
+ if (!f) {
+	kdWarning() << k_funcinfo << "NULL construction step " << s << endl;
+	return;
+ }
  setCurrentFrame(f);
 }
 
