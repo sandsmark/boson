@@ -7,7 +7,7 @@ SUBDIRS = data
 
 bin_PROGRAMS = boson boeditor
 
-INCLUDES = $(all_includes)
+INCLUDES = -I$(kde_includes)/arts $(all_includes)
 
 # all boson(game)-only parts
 BOSON_SRC = main.cpp top.cpp 
@@ -46,14 +46,15 @@ COMMON_SRC = \
 	unit.cpp \
 	newgamedialog.cpp \
 	topbase.cpp \
-	bosoncommandwidget.cpp
+	bosoncommandwidget.cpp \
+	bosonmusic.cpp
 
 boson_LDFLAGS = $(KDE_RPATH) $(all_libraries)
-boson_LDADD = -lkdegames -lqtmcop -lsoundserver_idl $(LIB_KDEUI)
+boson_LDADD = -lkdegames -lqtmcop -lsoundserver_idl -lartskde $(LIB_KDEUI)
 boson_SOURCES = $(BOSON_SRC) $(COMMON_SRC)
 
 boeditor_LDFLAGS = $(KDE_RPATH) $(all_libraries)
-boeditor_LDADD = -lkdegames -lqtmcop -lsoundserver_idl $(LIB_KDEUI) $(LIB_KFILE)
+boeditor_LDADD = -lkdegames -lqtmcop -lsoundserver_idl -lartskde $(LIB_KDEUI) $(LIB_KFILE)
 boeditor_SOURCES = $(BOEDITOR_SRC) $(COMMON_SRC)
 
 METASOURCES = AUTO

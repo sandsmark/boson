@@ -47,23 +47,10 @@ General TODOs
   differ then deny connection. This ensures that all clients are at the smae
   version. We need the revision number of each file - how to do add this
   automatically?
-- save command frame position in config
 - replace selectpart by QCanvasRectangle??
-- replace QPushButton in CommandFrame by custom widgets (see
-  QPainter::drawPixmap() for pixmap painting and QWidget::mouseEvent() for mouse
-  click). This widget should show the image of the unit, health, weapon state
-  (and so on). It should be in 2 version: one small (to be used as either the
-  order buttons or to display the unit selections) and one big (replacement for
-  BosonUnitView). There is always one big widget on the screen (even if it
-  displays nothing) and an unknwon number of small widgets (0...x, where x can
-  be unlimited, thanks to QScrollView).
-  Don't forget to think about editor mode (cells)!
-  Also reimplement sizeHint() to honor the self-implemented pixmap drawing!
 - BosonTiles: use KPixmapSplitter (kdelibs/kdefx)
 - MiniMap: darker green
 - emit signalSingleUnitSelected when selectRect contains only 1 unit
-- is Unit::reload() used? Probably use rather UnitProperties::reload() as
-  Unit::reloadState() there as well
 - IdReloadState also makes Player emit signalUnitChanged() - this might become a
   performance problem!! we need it for BosonCommandWidget
 
@@ -71,5 +58,4 @@ General TODOs
 Data TODOs
 - replace .bmp files by .png ones
 - fix the pixmap naming: file.00nn.bmp -> file-00nn.png
-- music (background)
 - general sound (e.g. speech)

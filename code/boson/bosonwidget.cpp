@@ -39,6 +39,7 @@
 #include "kgamedialogbosonconfig.h"
 #include "kgamedialogcomputerconfig.h"
 #include "kgameunitdebug.h"
+#include "bosonmusic.h"
 
 #include "defines.h"
 
@@ -79,6 +80,8 @@ public:
 
 		mTopLayout = 0;
 		mFrameLayout = 0;
+
+		mMusic = 0;
 	}
 	
 	BosonBigDisplay* mBigDisplay;
@@ -97,6 +100,8 @@ public:
 	QHBoxLayout* mTopLayout;
 	QVBoxLayout* mFrameLayout; // minimap and command frame
 
+	BosonMusic* mMusic;
+	
 	// performance variables:
 	int mMobilesCount;
 	int mFacilitiesCount;
@@ -216,6 +221,8 @@ void BosonWidget::init()
  connect(d->mCanvas, SIGNAL(signalUnitDestroyed(Unit*)), 
 		d->mMiniMap, SLOT(slotUnitDestroyed(Unit*)));
 
+
+ d->mMusic = new BosonMusic(this);
 
 // tooltips - added in slotAddUnit
  d->mUnitTips = new KSpriteToolTip(d->mBigDisplay);
@@ -438,6 +445,7 @@ void BosonWidget::slotStartScenario()
 	return;
  }
  d->mScenario->startScenario(d->mBoson);
+ d->mMusic->startLoop();
 
  // TODO as soon as it is implemented the map file should also contain the
  // species of the player. The NewGameDialog should enable the player to choose
