@@ -37,6 +37,8 @@
 #include "bosonsaveload.h"
 #include "bosonconfig.h"
 #include "bosonstarting.h"
+//#include "boevent.h"
+#include "boeventmanager.h"
 #include "startupwidgets/bosonloadingwidget.h"
 
 #include <klocale.h>
@@ -243,7 +245,12 @@ void BoAdvance::receiveAdvanceCall()
  // methods changes the advance function. this change must not appear to the
  // currently used function, but to the other one.
  toggleAdvanceFlag();
+
  emit mBoson->signalAdvance(advanceCount(), flag);
+ // AB: do _not_ connect to the signal!
+ // -> slots may be called in random order, but we need well defined order
+ // (otherwise network may get broken soon)
+ mBoson->eventManager()->advance();
 
  mAdvanceCallsCount = mAdvanceCallsCount + 1;
  mAdvanceCount = mAdvanceCount + 1;
@@ -711,6 +718,8 @@ public:
 
 		mAdvance = 0;
 		mMessageDelayer = 0;
+
+		mEventManager = 0;
 	}
 	BosonStarting* mStartingObject;
 
@@ -730,6 +739,8 @@ public:
 
 	BoAdvance* mAdvance;
 	BoMessageDelayer* mMessageDelayer;
+
+	BoEventManager* mEventManager;
 };
 
 Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
@@ -764,6 +775,8 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
 		KGamePropertyBase::PolicyClean, "GameSpeed");
  d->mGamePaused.setLocal(false);
  d->mGameSpeed.setLocal(0);
+
+ d->mEventManager = new BoEventManager(this);
 
  setMinPlayers(1);
 
@@ -2655,5 +2668,15 @@ bool Boson::loadFromLogFile()
 
  d->mMessageDelayer->unlock();
  return true;
+}
+
+BoEventManager* Boson::eventManager() const
+{
+ return d->mEventManager;
+}
+
+void Boson::queueEvent(BoEvent* event)
+{
+ eventManager()->queueEvent(event);
 }
 

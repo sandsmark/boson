@@ -18,6 +18,7 @@
 */
 
 #include "bosonlocalplayerinput.h"
+#include "bosonlocalplayerinput.moc"
 
 #include "boaction.h"
 #include "unit.h"
@@ -28,23 +29,45 @@
 #include "bosonmessage.h"
 #include "bodebug.h"
 #include "bosonweapon.h"
+#include "boeventlistener.h"
+#include "boson.h"
 
 #include <qptrlist.h>
 #include <qdatastream.h>
 #include <qpoint.h>
 
-#include "bosonlocalplayerinput.moc"
 
-
+// AB: because of the event listener the name "Input" is not correct anymore.
+// this class still handles input, but also output (as it reports events)
 BosonLocalPlayerInput::BosonLocalPlayerInput() : KGameIO()
 {
   boDebug() << k_funcinfo << endl;
   mCmdFrame = 0;
+  mEventListener = 0;
 }
 
 BosonLocalPlayerInput::~BosonLocalPlayerInput()
 {
   boDebug() << k_funcinfo << endl;
+ delete mEventListener;
+}
+
+void BosonLocalPlayerInput::initIO(KPlayer* p)
+{
+ KGameIO::initIO(p);
+ delete mEventListener;
+ mEventListener = 0;
+ if (!p) {
+	return;
+ }
+ boDebug() << k_funcinfo << endl;
+ if (game()) {
+	// note: a NULL game() _is_ possible on program startup.
+	// that player IO will be deleted later though, it is never really used
+	PlayerIO* io = ((Player*)p)->playerIO();
+	BoEventManager* manager = ((Boson*)game())->eventManager();
+	mEventListener = new BoLocalPlayerEventListener(io, manager, this);
+ }
 }
 
 void BosonLocalPlayerInput::setCommandFrame(BosonCommandFrameBase* cmdframe)

@@ -471,6 +471,9 @@ protected:
 	bool loadItemsFromXML(const QDomElement& root);
 	bool loadEffectsFromXML(const QDomElement& root);
 
+	bool loadEventListenerFromXML(const QDomElement& root);
+	bool saveEventListenerAsXML(QDomElement& root) const;
+
 	/**
 	 * Parses @p item and will create a @ref BosonItem correspoding to the
 	 * attributes and elements found there.

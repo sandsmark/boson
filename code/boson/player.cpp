@@ -538,6 +538,7 @@ void Player::facilityCompleted(Facility* fac)
  }
 }
 
+// obsolete due to events!
 bool Player::checkOutOfGame()
 {
  // TODO: make more clever.
@@ -709,7 +710,7 @@ bool Player::saveAsXML(QDomElement& root)
  }
 
  // note: we need to save the index in the list, not the actual id()
- root.setAttribute(QString::fromLatin1("Id"), game()->playerList()->findRef(this));
+ root.setAttribute(QString::fromLatin1("PlayerId"), game()->playerList()->findRef(this));
 
  if (game()->playerList()->findRef(this) == (int)game()->playerList()->count() - 1) {
 	root.setAttribute(QString::fromLatin1("IsNeutral"), 1);

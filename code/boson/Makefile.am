@@ -118,7 +118,13 @@ libboson_la_SOURCES = \
 	bosoneffectproperties.cpp \
 	bosoneffectparticle.cpp \
 	bosoneffectpropertiesparticle.cpp \
-	boacload.cpp
+	boacload.cpp \
+	boevent.cpp \
+	boeventmatching.cpp \
+	boeventlistener.cpp \
+	boeventmanager.cpp \
+	bostatuscondition.cpp \
+	bocondition.cpp
 
 
 libboson_la_LIBADD = \
@@ -134,20 +140,21 @@ libboson_la_LIBADD = \
 		$(LIB_KDEUI) \
 		$(LIB_KIO) \
 		$(GLLIB) -l3ds \
-		$(LIB_XRANDR) \
-		$(LIB_BOMEMORY)
+		$(LIB_XRANDR)
 
 boson_LDFLAGS = $(KDE_RPATH) $(all_libraries) -Xlinker -export-dynamic
 boson_LDADD = \
 		$(top_builddir)/boson/startupwidgets/libbosonstartupwidgets.la \
-		$(top_builddir)/boson/libboson.la
+		$(top_builddir)/boson/libboson.la \
+		$(LIB_BOMEMORY)
 boson_SOURCES = \
 		top.cpp  \
 		main.cpp
 
 bounit_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 bounit_LDADD = \
-		$(top_builddir)/boson/libboson.la
+		$(top_builddir)/boson/libboson.la \
+		$(LIB_BOMEMORY)
 bounit_SOURCES = \
 		bounitmain.cpp bosonsearchpathswidget.ui \
 		bouniteditor.ui
@@ -191,7 +198,8 @@ libborender_la_SOURCES = \
 borender_LDFLAGS = $(KDE_RPATH) $(all_libraries) -Xlinker -export-dynamic
 borender_LDADD = \
 		$(top_builddir)/boson/libboson.la \
-		$(top_builddir)/boson/libborender.la
+		$(top_builddir)/boson/libborender.la \
+		$(LIB_BOMEMORY)
 borender_SOURCES = \
 		kgamespeciesdebug.cpp \
 		borendermain.cpp
