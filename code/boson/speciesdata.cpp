@@ -420,7 +420,7 @@ void SpeciesData::loadParticleSystemProperties()
 	// already loaded, probably for another player
 	return;
  }
- BosonParticleSystemProperties::init(themePath() + "/particles");
+ BosonParticleSystemProperties::initStatic(themePath() + "/particles");
  QFile f(themePath() + "particles/particles.boson");
  if (!f.exists()) {
 	boDebug() << k_funcinfo << "no particles.boson file found" << endl;

@@ -36,7 +36,6 @@
 #include <GL/gl.h>
 
 /// Start of static initialization stuff
-KRandomSequence* BosonParticleSystemProperties::mRandom = 0;
 QMap<QString, BosonParticleTextureArray> BosonParticleSystemProperties::mTextureArrays;
 QString BosonParticleSystemProperties::mTexturePath;
 
@@ -71,10 +70,9 @@ BosonParticleTextureArray BosonParticleSystemProperties::getTextures(const QStri
   return mTextureArrays[name];
 }
 
-void BosonParticleSystemProperties::init(const QString& texdir)
+void BosonParticleSystemProperties::initStatic(const QString& texdir)
 {
   mTexturePath = texdir;
-  mRandom = new KRandomSequence(123456789); // AB: this isn't random, but that won't matter for particles.
 }
 /// End of static initialization stuff (below this is real code ;-))
 
