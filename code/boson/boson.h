@@ -66,7 +66,7 @@ private:
 
 	/** initialisation functions */
 	void init(void); // internal
-	void initCanvas(int, int);
+	void initCanvas(uint, uint, uint);
 	/** called when the server told us the game has finished */
 	void gameEnd( endMsg_t::endReasonType reason );
 };

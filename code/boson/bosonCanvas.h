@@ -47,7 +47,7 @@ class bosonCanvas : public visualCanvas, public CellMap
 	Q_OBJECT
 
 public:
-	bosonCanvas( QPixmap, uint w, uint h);
+	bosonCanvas( QPixmap, uint w, uint h, uint np);
 	~bosonCanvas();
 
   void createMob(mobileMsg_t &);
@@ -104,6 +104,7 @@ private:
 	int	radar_pulse;
 	int	my_fix;
 	int	my_mobiles;
+	uint	nb_player;
 };
 
 #endif // BOSONFIELD_H
