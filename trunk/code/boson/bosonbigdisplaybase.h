@@ -426,6 +426,12 @@ protected:
 	void createRenderItemList();
 
 	void renderItems();
+	/**
+	 * @param isFlying If TRUE, the provided z value is always used, which
+	 * is expected to be higher than any cells. Otherwise the z value of
+	 * every cell is used.
+	 **/
+	void renderPathLines(QValueList<QPoint>& path, bool isFlying = false, float z = 0.05f);
 	void renderCursor();
 	void renderSelectionRect();
 	void renderPlacementPreview();
