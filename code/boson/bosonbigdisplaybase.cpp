@@ -296,18 +296,21 @@ public:
 	BosonBigDisplayBasePrivate()
 	{
 		mLocalPlayerIO = 0;
-		mChat = 0;
 		mMouseIO = 0;
-
-		mFrameCount = 0;
-		mFps = 0;
-		mFpsTime = 0;
-		mDefaultFont = 0;
-
 		mInput = 0;
-		mToolTips = 0;
+
+		mChat = 0;
+
+		mDefaultFont = 0;
+		mSelectBoxData = 0;
 
 		mRenderItemList = 0;
+
+		mFpsTime = 0;
+		mFps = 0;
+		mFrameCount = 0;
+
+		mToolTips = 0;
 
 		mGLMiniMap = 0;
 
@@ -334,6 +337,7 @@ public:
 	GLfloat mAspect; // see gluPerspective
 
 	BosonGLFont* mDefaultFont;// AB: maybe we should support several fonts
+	SelectBoxData* mSelectBoxData;
 
 	BoItemList* mRenderItemList;
 
@@ -399,6 +403,7 @@ BosonBigDisplayBase::~BosonBigDisplayBase()
  delete mSelection;
  delete d->mChat;
  delete d->mDefaultFont;
+ delete d->mSelectBoxData;
  delete d->mToolTips;
  delete d->mGLMiniMap;
  SpeciesData::clearSpeciesData();
@@ -624,6 +629,8 @@ void BosonBigDisplayBase::initializeGL()
  BoFontInfo font;
  font.fromString(boConfig->stringValue("GLFont"));
  setFont(font);
+
+ d->mSelectBoxData = new SelectBoxData();
 
  updateOpenGLSettings();
 
@@ -1027,7 +1034,8 @@ void BosonBigDisplayBase::renderItems()
 	if (boConfig->alignSelectionBoxes()) {
 		glRotatef(camera()->rotation(), 0.0, 0.0, 1.0);
 	}
-	glCallList(item->selectBox()->displayList());
+	GLuint list = d->mSelectBoxData->list(item->selectBox()->factor());
+	glCallList(list);
 	glPopMatrix();
 	Unit* u = 0;
 	if (RTTI::isUnit(item->rtti())) {

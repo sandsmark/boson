@@ -24,7 +24,6 @@ class BosonItem;
 class BosonCanvas;
 
 #include <GL/gl.h>
-#include <qmap.h>
 
 class BosonTextureArray;
 
@@ -40,16 +39,17 @@ public:
 	/**
 	 * @param factor Should be health/maxHealth of the unit
 	 **/
-	GLuint list(double factor);
+	GLuint list(float factor);
 
 protected:
 	void loadBoxes();
 	static void drawCube();
-	static void drawHealthBar(int frame);
+	static void drawHealthBar(int frame, int displayListCount);
 
 private:
-	QMap<int, GLuint> mDisplayLists;
 	BosonTextureArray* mTextures;
+	GLuint mDisplayListBase;
+	GLsizei mDisplayListCount;
 };
 
 class SelectBox
@@ -58,12 +58,25 @@ public :
 	SelectBox(BosonItem*, BosonCanvas* canvas, bool groupLeader = false);
 	~SelectBox();
 
-	void update(double);
-	inline GLuint displayList() const { return mDisplayList; }
+	/**
+	 * Set a factor between 0 and 1 that describes the amount of health of
+	 * the item this box belongs to.
+	 *
+	 * The health bar of the selectbox displays the health according to this
+	 * factor.
+	 **/
+	void setFactor(float factor)
+	{
+		mFactor = factor;
+	}
+
+	float factor() const
+	{
+		return mFactor;
+	}
 
 private:
-	GLuint mDisplayList;
-	static SelectBoxData* mBoxData;
+	float mFactor;
 };
 
 #endif
