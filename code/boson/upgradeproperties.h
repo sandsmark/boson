@@ -128,17 +128,14 @@ class UpgradeProperties
     enum ValueType { Absolute = 0, Relative, Percent };
 
     void applyProperty(QValueList<unsigned long int>* typeIds, Player* player,
-        const QString& data, UpgradeType type, int weaponid = -1);
+        const QString& data, UpgradeType type, int weaponid = -1) const;
     void applyPropertyToUnits(float oldvalue, unsigned long int typeId,
-        Player* player, UpgradeType type);
+        Player* player, UpgradeType type) const;
 
 
-    unsigned long int applyValue(const QString& data, unsigned long int oldvalue);
-    float applyValue(const QString& data, float oldvalue);
-    void parseEntry(const QString& entry, ValueType& type, QString& value);
-
-    class UpgradePropertiesPrivate;
-    UpgradePropertiesPrivate* d;
+    unsigned long int applyValue(const QString& data, unsigned long int oldvalue) const;
+    float applyValue(const QString& data, float oldvalue) const;
+    void parseEntry(const QString& entry, ValueType& type, QString& value) const;
 
   private:
     /**
@@ -152,7 +149,7 @@ class UpgradeProperties
      * @return The new value, i.e. @p oldValue changed by @p value according to
      * @p data.
      **/
-    template<class T> T applyValueInternal(ValueType type, T oldvalue, T value);
+    template<class T> T applyValueInternal(ValueType type, T oldvalue, T value) const;
 
   private:
     bool mResearched;
@@ -166,6 +163,9 @@ class UpgradeProperties
     bool mApplyToMobiles;
     const BoAction* mProduceAction;
     const SpeciesTheme* mTheme;
+
+    class UpgradePropertiesPrivate;
+    UpgradePropertiesPrivate* d;
 };
 
 #endif // UPGRADEPROPERTIES_H
