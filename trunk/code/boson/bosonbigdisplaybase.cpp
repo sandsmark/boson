@@ -553,14 +553,17 @@ void BosonBigDisplayBase::resizeGL(int w, int h)
 
  glClearDepth(1.0f);
  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+#if 0
+ // AB: this does not work dependable :(
  float depth = 1.0f;
  glReadPixels(0, 0, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
- if (fabsf(depth - 1.0f) > 0.001) {
+ if (fabsf(depth) > 0.001 && fabsf(depth - 1.0f) > 0.001) {
 	// i really cannot  imagine why this happens - but it does for me.
 	// Radeon 9200 with ATI proprietary drivers, version 3.2.8
 	boWarning() << k_funcinfo << "clearing depth buffer with 1.0 did caused depth buffer values of " << depth << ", but not 1.0! enabling workaround" << endl;
 	Bo3dTools::enableReadDepthBufferWorkaround(depth);
  }
+#endif
 
 
  if (canvas()) {
