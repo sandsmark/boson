@@ -2,7 +2,7 @@
 KDE_LANG = en
 
 # all subdirs that should get processed, too
-SUBDIRS = 
+SUBDIRS =
 
 # please specify the subdirectry here, e.g. "units" or "facilities". leave empty
 # for toplevel directory.
@@ -11,7 +11,8 @@ BO_DOC_DIR = units
 # list all wml files here
 BO_DOCS=index.wml tornado.wml mineralharvester.wml \
         oilharvester.wml ship.wml ferry.wml grizzly.wml leopard.wml \
-        panther.wml piranha.wml tiger.wml map.wml
+        panther.wml piranha.wml tiger.wml transall.wml puma.wml \
+        map.wml
 
 # list additional data here - these files will get installed
 doc_DATA=tornado.jpg mineralharvester.jpg oilharvester.jpg \
