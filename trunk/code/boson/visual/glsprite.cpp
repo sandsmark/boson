@@ -33,6 +33,8 @@ GLSprite::GLSprite(BosonModel* model, BosonCanvas* canvas)
  mYVelocity = 0.0;
 
  mModel = model;
+
+ mBoundingSphereRadius = 1.0; // TODO: can we extract this from the model? this probably needs to change with different frames!
 }
 
 GLSprite::~GLSprite()

@@ -57,7 +57,8 @@
 // won't compile anymore!
 #warning You dont have sys/time.h - please report this problem to boson-devel@lists.sourceforge.net and provide us with information about your system!
 #endif
-#include <iostream.h>
+//#include <iostream.h>
+#include <math.h>
 
 
 #include "bosontexturearray.h"
@@ -301,6 +302,7 @@ public:
 	GLint mViewport[4]; // x,y,w,h of the viewport. see setViewport
 	GLdouble mProjectionMatrix[16];
 	GLdouble mModelviewMatrix[16];
+	GLdouble mFrustumMatrix[6][4];
 
 
 	GLfloat mFovY; // see gluPerspective
@@ -324,7 +326,7 @@ public:
 
 	QTimer mUpdateTimer;
 	int mUpdateInterval;
-	
+
 };
 
 BosonBigDisplayBase::BosonBigDisplayBase(BosonCanvas* c, QWidget* parent)
@@ -365,6 +367,11 @@ void BosonBigDisplayBase::init()
  for (int i = 0; i < 16; i++) {
 	d->mProjectionMatrix[i] = 0.0;
 	d->mModelviewMatrix[i] = 0.0;
+ }
+ for (int i = 0; i < 6; i++) {
+	for (int j = 0; j < 4; j++) {
+		d->mFrustumMatrix[i][j] = 0.0;
+	}
  }
 
  d->mMapDisplayList = 0;
@@ -416,15 +423,15 @@ void BosonBigDisplayBase::initializeGL()
 	kdError() << k_funcinfo << endl;
  }
 
- // the actual GL initializing should be done now.
- d->mInitialized = true;
- 
  struct timeval time;
  gettimeofday(&time, 0);
  d->mFpsTime = time.tv_sec * 1000000 + time.tv_usec;
 
  // this needs to be done in initializeGL():
  d->mDefaultFont = new BosonGLFont(QString::fromLatin1("fixed"));
+
+ // the actual GL initializing should be done now.
+ d->mInitialized = true;
 
  // this is usually done by QT anyway - except if the window was hidden when
  // loading was completed (for example). But we need to initialize at least the
@@ -449,6 +456,7 @@ void BosonBigDisplayBase::resizeGL(int w, int h)
  // cache the composed projection matrix. we'll need it very often in
  // mapCoordinates()
  glGetDoublev(GL_PROJECTION_MATRIX, d->mProjectionMatrix);
+ extractFrustum(); // projection matrix changed
  glMatrixMode(GL_MODELVIEW);
 
 
@@ -469,6 +477,10 @@ void BosonBigDisplayBase::resizeGL(int w, int h)
 
 void BosonBigDisplayBase::paintGL()
 {
+ if (!d->mInitialized) {
+	glInit();
+	return;
+ }
  boProfiling->render(true);
  d->mUpdateTimer.stop();
 //kdDebug() << k_funcinfo << endl;
@@ -550,7 +562,27 @@ void BosonBigDisplayBase::paintGL()
 	GLfloat y = -(item->y() * BO_GL_CELL_SIZE / BO_TILE_SIZE + ((float)item->height()) * BO_GL_CELL_SIZE / BO_TILE_SIZE);
 	GLfloat z = item->z() * BO_GL_CELL_SIZE / BO_TILE_SIZE;
 
-	glTranslatef(x, y, z); // AB: we can use the item->vertexPointer(), too!
+	// TODO: performance: we can improve this greatly:
+	// simply group the items to bigger sphere or boxes. every box is of
+	// size of (maybe) 10.0*10.0. We maintain a list of items for *every*
+	// box. we can simply test if the box is in the frustum and if so we
+	// test every item of that list. if not we can skip every item of that
+	// box.
+	// Especially in bigger games with big maps and several hundred units
+	// this would be a great speedup.
+	//
+	// but note: do *not* use these lists for anything except OpenGL! we
+	// mustn't use them for e.g. pathfinding. the bounding spheres of the
+	// units depend e.g. on the .3ds files and are therefore UI only. If we
+	// depend on it in pathfinding we'd soon have a brolen network (think
+	// about differnt CPUs with different rounding values for floating
+	// point calculations)
+	if (!sphereInFrustum(x, y, z, item->boundingSphereRadius())) {
+		// the unit is not visible, currently. no need to draw anything.
+		continue;
+	}
+
+	glTranslatef(x, y, z);
 
 	if (item->displayList() == 0) {
 		kdWarning() << k_funcinfo << "NULL display list for item rtti=" << item->rtti() << endl;
@@ -1486,6 +1518,7 @@ void BosonBigDisplayBase::setCamera(const Camera& camera)
  // everything else will be discarded by glPushMatrix/glPopMatrix anyway (in
  // paintGL()). So we cache the matrix here, for mapCoordinates()
  glGetDoublev(GL_MODELVIEW_MATRIX, d->mModelviewMatrix);
+ extractFrustum(); // modelview matrix changed
 
  QPoint cellTL; // topleft cell
  QPoint cellTR; // topright cell
@@ -1597,5 +1630,186 @@ void BosonBigDisplayBase::setViewport(int x, int y, GLsizei w, GLsizei h)
  d->mViewport[1] = y;
  d->mViewport[2] = w;
  d->mViewport[3] = h;
+}
+
+void BosonBigDisplayBase::extractFrustum()
+{
+ // modelview or projection matrix was changed (and therefore the frustum).
+ GLdouble clip[16];
+ GLdouble t;
+
+ // Combine the two matrices (multiply projection by modelview)
+ clip[0] = d->mModelviewMatrix[0] * d->mProjectionMatrix[0] +
+		d->mModelviewMatrix[1] * d->mProjectionMatrix[4] +
+		d->mModelviewMatrix[2] * d->mProjectionMatrix[8] +
+		d->mModelviewMatrix[3] * d->mProjectionMatrix[12];
+ clip[1] = d->mModelviewMatrix[0] * d->mProjectionMatrix[1] +
+		d->mModelviewMatrix[1] * d->mProjectionMatrix[5] +
+		d->mModelviewMatrix[2] * d->mProjectionMatrix[9] +
+		d->mModelviewMatrix[3] * d->mProjectionMatrix[13];
+ clip[2] = d->mModelviewMatrix[0] * d->mProjectionMatrix[2] +
+		d->mModelviewMatrix[1] * d->mProjectionMatrix[6] +
+		d->mModelviewMatrix[2] * d->mProjectionMatrix[10] +
+		d->mModelviewMatrix[3] * d->mProjectionMatrix[14];
+ clip[3] = d->mModelviewMatrix[0] * d->mProjectionMatrix[3] +
+		d->mModelviewMatrix[1] * d->mProjectionMatrix[7] +
+		d->mModelviewMatrix[2] * d->mProjectionMatrix[11] +
+		d->mModelviewMatrix[3] * d->mProjectionMatrix[15];
+
+ clip[4] = d->mModelviewMatrix[4] * d->mProjectionMatrix[0] +
+		d->mModelviewMatrix[5] * d->mProjectionMatrix[4] +
+		d->mModelviewMatrix[6] * d->mProjectionMatrix[8] +
+		d->mModelviewMatrix[7] * d->mProjectionMatrix[12];
+ clip[5] = d->mModelviewMatrix[4] * d->mProjectionMatrix[1] +
+		d->mModelviewMatrix[5] * d->mProjectionMatrix[5] +
+		d->mModelviewMatrix[6] * d->mProjectionMatrix[9] +
+		d->mModelviewMatrix[7] * d->mProjectionMatrix[13];
+ clip[6] = d->mModelviewMatrix[4] * d->mProjectionMatrix[2] +
+		d->mModelviewMatrix[5] * d->mProjectionMatrix[6] +
+		d->mModelviewMatrix[6] * d->mProjectionMatrix[10] +
+		d->mModelviewMatrix[7] * d->mProjectionMatrix[14];
+ clip[7] = d->mModelviewMatrix[4] * d->mProjectionMatrix[3] +
+		d->mModelviewMatrix[5] * d->mProjectionMatrix[7] +
+		d->mModelviewMatrix[6] * d->mProjectionMatrix[11] +
+		d->mModelviewMatrix[7] * d->mProjectionMatrix[15];
+
+ clip[8] = d->mModelviewMatrix[8] * d->mProjectionMatrix[0] +
+		d->mModelviewMatrix[9] * d->mProjectionMatrix[4] +
+		d->mModelviewMatrix[10] * d->mProjectionMatrix[8] +
+		d->mModelviewMatrix[11] * d->mProjectionMatrix[12];
+ clip[9] = d->mModelviewMatrix[8] * d->mProjectionMatrix[1] +
+		d->mModelviewMatrix[9] * d->mProjectionMatrix[5] +
+		d->mModelviewMatrix[10] * d->mProjectionMatrix[9] +
+		d->mModelviewMatrix[11] * d->mProjectionMatrix[13];
+ clip[10] = d->mModelviewMatrix[8] * d->mProjectionMatrix[2] +
+		d->mModelviewMatrix[9] * d->mProjectionMatrix[6] +
+		d->mModelviewMatrix[10] * d->mProjectionMatrix[10] +
+		d->mModelviewMatrix[11] * d->mProjectionMatrix[14];
+ clip[11] = d->mModelviewMatrix[8] * d->mProjectionMatrix[3] +
+		d->mModelviewMatrix[9] * d->mProjectionMatrix[7] +
+		d->mModelviewMatrix[10] * d->mProjectionMatrix[11] +
+		d->mModelviewMatrix[11] * d->mProjectionMatrix[15];
+
+ clip[12] = d->mModelviewMatrix[12] * d->mProjectionMatrix[0] +
+		d->mModelviewMatrix[13] * d->mProjectionMatrix[4] +
+		d->mModelviewMatrix[14] * d->mProjectionMatrix[8] +
+		d->mModelviewMatrix[15] * d->mProjectionMatrix[12];
+ clip[13] = d->mModelviewMatrix[12] * d->mProjectionMatrix[1] +
+		d->mModelviewMatrix[13] * d->mProjectionMatrix[5] +
+		d->mModelviewMatrix[14] * d->mProjectionMatrix[9] +
+		d->mModelviewMatrix[15] * d->mProjectionMatrix[13];
+ clip[14] = d->mModelviewMatrix[12] * d->mProjectionMatrix[2] +
+		d->mModelviewMatrix[13] * d->mProjectionMatrix[6] +
+		d->mModelviewMatrix[14] * d->mProjectionMatrix[10] +
+		d->mModelviewMatrix[15] * d->mProjectionMatrix[14];
+ clip[15] = d->mModelviewMatrix[12] * d->mProjectionMatrix[3] +
+		d->mModelviewMatrix[13] * d->mProjectionMatrix[7] +
+		d->mModelviewMatrix[14] * d->mProjectionMatrix[11] +
+		d->mModelviewMatrix[15] * d->mProjectionMatrix[15];
+
+ // Extract the numbers for the RIGHT plane
+ d->mFrustumMatrix[0][0] = clip[3] - clip[0];
+ d->mFrustumMatrix[0][1] = clip[7] - clip[4];
+ d->mFrustumMatrix[0][2] = clip[11] - clip[8];
+ d->mFrustumMatrix[0][3] = clip[15] - clip[12];
+
+ // Normalize the result
+ t = sqrt(d->mFrustumMatrix[0][0] * d->mFrustumMatrix[0][0] +
+		d->mFrustumMatrix[0][1] * d->mFrustumMatrix[0][1] +
+		d->mFrustumMatrix[0][2] * d->mFrustumMatrix[0][2]);
+ d->mFrustumMatrix[0][0] /= t;
+ d->mFrustumMatrix[0][1] /= t;
+ d->mFrustumMatrix[0][2] /= t;
+ d->mFrustumMatrix[0][3] /= t;
+
+ // Extract the numbers for the LEFT plane
+ d->mFrustumMatrix[1][0] = clip[3] + clip[0];
+ d->mFrustumMatrix[1][1] = clip[7] + clip[4];
+ d->mFrustumMatrix[1][2] = clip[11] + clip[8];
+ d->mFrustumMatrix[1][3] = clip[15] + clip[12];
+
+ // Normalize the result
+ t = sqrt(d->mFrustumMatrix[1][0] * d->mFrustumMatrix[1][0] +
+		d->mFrustumMatrix[1][1] * d->mFrustumMatrix[1][1] +
+		d->mFrustumMatrix[1][2] * d->mFrustumMatrix[1][2]);
+ d->mFrustumMatrix[1][0] /= t;
+ d->mFrustumMatrix[1][1] /= t;
+ d->mFrustumMatrix[1][2] /= t;
+ d->mFrustumMatrix[1][3] /= t;
+
+ // Extract the BOTTOM plane
+ d->mFrustumMatrix[2][0] = clip[3] + clip[1];
+ d->mFrustumMatrix[2][1] = clip[7] + clip[5];
+ d->mFrustumMatrix[2][2] = clip[11] + clip[9];
+ d->mFrustumMatrix[2][3] = clip[15] + clip[13];
+
+ // Normalize the result
+ t = sqrt(d->mFrustumMatrix[2][0] * d->mFrustumMatrix[2][0] +
+		d->mFrustumMatrix[2][1] * d->mFrustumMatrix[2][1] +
+		d->mFrustumMatrix[2][2] * d->mFrustumMatrix[2][2]);
+ d->mFrustumMatrix[2][0] /= t;
+ d->mFrustumMatrix[2][1] /= t;
+ d->mFrustumMatrix[2][2] /= t;
+ d->mFrustumMatrix[2][3] /= t;
+
+ // Extract the TOP plane
+ d->mFrustumMatrix[3][0] = clip[3] - clip[1];
+ d->mFrustumMatrix[3][1] = clip[7] - clip[5];
+ d->mFrustumMatrix[3][2] = clip[11] - clip[9];
+ d->mFrustumMatrix[3][3] = clip[15] - clip[13];
+
+ // Normalize the result
+ t = sqrt(d->mFrustumMatrix[3][0] * d->mFrustumMatrix[3][0] +
+		d->mFrustumMatrix[3][1] * d->mFrustumMatrix[3][1] +
+		d->mFrustumMatrix[3][2] * d->mFrustumMatrix[3][2]);
+ d->mFrustumMatrix[3][0] /= t;
+ d->mFrustumMatrix[3][1] /= t;
+ d->mFrustumMatrix[3][2] /= t;
+ d->mFrustumMatrix[3][3] /= t;
+
+ // Extract the FAR plane
+d->mFrustumMatrix[4][0] = clip[3] - clip[2];
+d->mFrustumMatrix[4][1] = clip[7] - clip[6];
+d->mFrustumMatrix[4][2] = clip[11] - clip[10];
+d->mFrustumMatrix[4][3] = clip[15] - clip[14];
+
+ // Normalize the result
+ t = sqrt(d->mFrustumMatrix[4][0] * d->mFrustumMatrix[4][0] +
+		d->mFrustumMatrix[4][1] * d->mFrustumMatrix[4][1] +
+		d->mFrustumMatrix[4][2] * d->mFrustumMatrix[4][2]);
+ d->mFrustumMatrix[4][0] /= t;
+ d->mFrustumMatrix[4][1] /= t;
+ d->mFrustumMatrix[4][2] /= t;
+ d->mFrustumMatrix[4][3] /= t;
+
+ // Extract the NEAR plane
+ d->mFrustumMatrix[5][0] = clip[3] + clip[2];
+ d->mFrustumMatrix[5][1] = clip[7] + clip[6];
+ d->mFrustumMatrix[5][2] = clip[11] + clip[10];
+ d->mFrustumMatrix[5][3] = clip[15] + clip[14];
+
+ // Normalize the result
+ t = sqrt(d->mFrustumMatrix[5][0] * d->mFrustumMatrix[5][0] +
+		d->mFrustumMatrix[5][1] * d->mFrustumMatrix[5][1] +
+		d->mFrustumMatrix[5][2] * d->mFrustumMatrix[5][2]);
+ d->mFrustumMatrix[5][0] /= t;
+ d->mFrustumMatrix[5][1] /= t;
+ d->mFrustumMatrix[5][2] /= t;
+ d->mFrustumMatrix[5][3] /= t;
+}
+
+float BosonBigDisplayBase::sphereInFrustum(float x, float y, float z, float radius) const
+{
+ // FIXME: performance: we might unrull the loop and then make this function
+ // inline. We call it pretty often!
+ float distance;
+ for (int p = 0; p < 6; p++) {
+	distance = d->mFrustumMatrix[p][0] * x + d->mFrustumMatrix[p][1] * y +
+			d->mFrustumMatrix[p][2] * z + d->mFrustumMatrix[p][3];
+	if (distance <= -radius){
+		return 0;
+	}
+ }
+ return distance + radius;
 }
 
