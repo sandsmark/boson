@@ -1,4 +1,32 @@
 [article]
+id=030902
+date=September 2nd 2003 14:16
+title=Poll, patents and more
+text=First, we have a poll now, so you can vote about some stuff :-)<br>
+    The first poll is about what in your opinion is most important for Boson
+    right now. Vote and we may take poll's results into account while
+    developing.<br>
+    On other news, some of you have probably noticed the protest page against
+    software patents in Europe. As a part of
+    <a href="http://swpat.ffii.org/group/demo/index.en.html">bigger campaign</a>
+    we replaced the main page with it from 27th August until 1st September. It
+    seems the vote itself has been delayed until the end of September, so
+    there's still some time for you to
+    <a href="http://swpat.ffii.org/">take action</a>. If software patents will
+    be legalized in europe, we (as well as many other open-source projects) may
+    not be able to continue our work, because many ideas we use (e.g.
+    <a href="http://swpat.ffii.org/patents/txt/ep/0394/160/">progress bars</a>)
+    are patented.<br>
+    About CVS, there is, as always, lots of new stuff there. Most noticeable are
+    redesigned startup widgets, new wreckage handling (they now slowly sink
+    into ground instead of disappearing at once) and many fixed bugs. Updated
+    changelog is available at <a href="status.php">status page</a>.<br>
+    And we have a surprise for you coming soon, so check back in a week or so
+    ;-)
+    <br><br>
+
+[article]
+id=030804
 date=August 4th 2003 18:05
 title=News from CVS
 text=I know, we've had total lack of updates, sorry about that. More than four
@@ -31,6 +59,7 @@ text=I know, we've had total lack of updates, sorry about that. More than four
     <br><br>
 
 [article]
+id=030331
 date=March 31st 2003 20:36
 title=Boson 0.8 released!
 text=After a long time we have finally completed boson 0.8. Read the
@@ -40,13 +69,14 @@ text=After a long time we have finally completed boson 0.8. Read the
     <br><br>
 
 [article]
+id=030307
 date=March 7th 2003 17:07
 title=Status update after long time
 text=It's been quite long since the last update.<br>
 Good new is that we're moving towards 0.8 which will probably be released in
     late March. Of course there are many
     <a href="status.php#done">changes</a> in the current CVS version. To name a
-    few bigger:</p>
+    few bigger:
     <ul>
     <li>Better support for upgrades, including weapon upgrades</li>
     <li>Support for heightmaps. Map is not flat anymore!</li>
@@ -62,6 +92,7 @@ Good new is that we're moving towards 0.8 which will probably be released in
     
 
 [article]
+id=030104
 date=January 4th 2003 10:19
 title=New year's update
 text=Here comes another status update.<br>
@@ -69,7 +100,7 @@ text=Here comes another status update.<br>
     released, our homepage received as many hits during the following week
     as it had since September when the new homepage was opened :-)<br>
     Now about CVS. There are already many improvements in our CVS code and we're
-    moving forward to 0.8. Biggest changes are:</p>
+    moving forward to 0.8. Biggest changes are:
     <ul><li>Map information is preloaded on startup (no slowdown when changing
     map)</li>
     <li>Particles drawing has been improved</li>
@@ -83,16 +114,17 @@ text=Here comes another status update.<br>
     And last, but not least, code of this homepage is now licenced under GPL
     which means that you can use it to create your own pages, provided that you
     also give note about the original author
-    (<a href="mailto:boson-devel@lists.sourceforge.net">The Boson Team</a>) and
+    (<a href="mailto:boson-devel@__NOSPAM__lists.sourceforge.net">The Boson Team</a>) and
     a link to this page. And we'd be happy if you'd also mail us, so we know if
     somebody is using it ;-)
     <br><br>
 
 [article]
+id=030103
 date=January 3rd 2003 04:30
 title=Boson 0.7 RPMs for Mandrake available
 text=
-    <a href="mailto:bstoke@bstoke.co.uk">Steve</a> provided us with RPM packages
+    <a href="mailto:bstoke@__NOSPAM__bstoke.co.uk">Steve</a> provided us with RPM packages
     for Mandrake 9.0 (on i386). You can download them at
     <a href="http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=121263">SourceForge</a>.
     Thanks a lot Steve!<br>
@@ -101,6 +133,7 @@ text=
     <br><br>
 
 [article]
+id=021216
 date=December 16th 2002 20:40
 title=Handbook available online
 text=The Boson handbook is now available online. You can have a look at
@@ -109,6 +142,7 @@ text=The Boson handbook is now available online. You can have a look at
     <br><br>
 
 [article]
+id=021115
 date=November 15th 2002 12:45
 title=IMPORTANT: Problem found in 0.7, fix available
 text=Many users who downloaded 0.7 reported problems when using 24bpp depth
@@ -120,15 +154,17 @@ text=Many users who downloaded 0.7 reported problems when using 24bpp depth
     <br><br>
 
 [article]
+id=021112
 date=November 12th 2002 21:10
 title=Boson 0.7 RPMs available
 text=
-    <a href="mailto:krzyko@users.sourceforge.net">Krzysztof Kosz</a> once
+    <a href="mailto:krzyko@__NOSPAM__users.sourceforge.net">Krzysztof Kosz</a> once
     again provided us with RPM packages. You can find them on our
     <a href="download.php">download page</a>!
     <br><br>
 
 [article]
+id=021110
 date=November 10th 2002 16:25
 title=Boson 0.7 released!
 text=The Boson Team is happy to announce that release 0.7 of Boson is now
@@ -139,12 +175,13 @@ text=The Boson Team is happy to announce that release 0.7 of Boson is now
     <br><br>
 
 [article]
+id=021027
 date=October 27th 2002 20:40
 title=Dynamic news
 text=We have now dynamic news!<br>
     This means that the main page now has a fixed number (currently 5) of articles and
     older articles are in the "Older News" sidebar box. There is also
-    <a href="all-news.php">a page that contains all news articles</a>. Many
+    <a href="news.php">a page that contains all news articles</a>. Many
     thanks to Brad for this feature!<br>
     About Boson, version 0.7 will most probaly be released in November, so we
     encourage everybody to get <a href="download.php#cvs">a CVS copy of Boson</a>
@@ -158,6 +195,7 @@ text=We have now dynamic news!<br>
     <br><br>
 
 [article]
+id=021014
 date=October 14th 2002 17:54
 title=Another update
 text=Again, much has changed during the last weeks. I wanted to take some
@@ -182,6 +220,7 @@ text=Again, much has changed during the last weeks. I wanted to take some
     <br><br>
 
 [article]
+id=020928
 date=September 28th 2002 19:55
 title=Updates
 text= Pretty much has happened during last few weeks.<br>
@@ -201,6 +240,7 @@ text= Pretty much has happened during last few weeks.<br>
 
 
 [article]
+id=020910
 date=September 10th 2002 20:00
 title=More eyecandy
 text= Boson now has particle effects! This means that shots and explosions work
@@ -214,6 +254,7 @@ text= Boson now has particle effects! This means that shots and explosions work
 
 
 [article]
+id=020902
 date=September 2nd 2002 18:08
 title=New features!
 text=I promised to add new features and here comes the first one: you can now
@@ -223,16 +264,17 @@ text=I promised to add new features and here comes the first one: you can now
     can write them yourself! All you need to do is to write a new stylesheet that
     specifies the used colors. It's not hard! You can use style-blue.css as
     template. When you're done, send them to
-    <a href=\"mailto:rivolaks@hot.ee\">me</a>, I'm happy to put them up here!<br><br>
+    <a href=\"mailto:rivolaks@__NOSPAM__hot.ee\">me</a>, I'm happy to put them up here!<br><br>
 
 
 
 [article]
+id=020901
 date=September 1st 2002 19:22
 title=New homepage
 text=Boson has a new homepage! This homepage should be much better than the old
     one, but it's new, so it may contain some errors (I hope it doesn't though).
-    If you find an error, please report it to <a href="mailto:boson-devel@lists.sourceforge.net">our mailinglist</a><br>
+    If you find an error, please report it to <a href="mailto:boson-devel@__NOSPAM__lists.sourceforge.net">our mailinglist</a><br>
     This is not a modification of our old homepage, it's written from scratch in
     PHP, which hopefully makes it easier to maintain than the old one.<br>
     What has changed compared to the old page? It has a new look which reminds
