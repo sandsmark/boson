@@ -1752,7 +1752,7 @@ sub tag_BOSONDOCFILES ()
         my $wmlfile = shift(@wmlfiles);
         $lines .= "\n$htmlfile:\n";
         $lines .= "\t\@if test -x \"\$(WML)\"; then \\\n";
-        $lines .= "\t  \$(WML) -I \"\$(top_srcdir)/doc/$kdelang/includes\" -o $htmlfile \$(srcdir)/$wmlfile ;\\\n";
+        $lines .= "\t  \$(WML) -I \"\$(top_srcdir)/doc/$kdelang/includes\" -D basedir~./ -o $htmlfile \$(srcdir)/$wmlfile ;\\\n";
         $lines .= "\t  echo \$(WML) -I \"\$(top_srcdir)/doc/$kdelang/includes\" -o $htmlfile \$(srcdir)/$wmlfile ;\\\n";
         $lines .= "\tfi\n";
         $lines .= "\n";
