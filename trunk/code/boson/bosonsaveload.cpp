@@ -210,7 +210,7 @@ bool BosonSaveLoad::loadXMLDoc(QDomDocument* doc, const QString& xml)
  return true;
 }
 
-bool BosonSaveLoad::saveToFiles(QMap<QString, QByteArray>& files, Player* localPlayer)
+bool BosonSaveLoad::saveToFiles(QMap<QString, QByteArray>& files)
 {
  boDebug() << k_funcinfo << endl;
  if (!files.isEmpty()) {
@@ -238,7 +238,7 @@ bool BosonSaveLoad::saveToFiles(QMap<QString, QByteArray>& files, Player* localP
  }
 
  boProfiling->start(BosonProfiling::SavePlayersToXML);
- QByteArray playersXML = savePlayersAsXML(localPlayer);
+ QByteArray playersXML = savePlayersAsXML();
  boProfiling->stop(BosonProfiling::SavePlayersToXML);
  if (playersXML.isNull()) {
 	return false;
@@ -266,10 +266,10 @@ bool BosonSaveLoad::saveToFiles(QMap<QString, QByteArray>& files, Player* localP
  return true;
 }
 
-bool BosonSaveLoad::savePlayFieldToFiles(QMap<QString, QByteArray>& files, Player* localPlayer)
+bool BosonSaveLoad::savePlayFieldToFiles(QMap<QString, QByteArray>& files)
 {
  // first we save a complete game.
- bool ret = saveToFiles(files, localPlayer);
+ bool ret = saveToFiles(files);
  if (!ret) {
 	boError() << k_funcinfo << "saving failed" << endl;
 	return ret;
@@ -278,10 +278,10 @@ bool BosonSaveLoad::savePlayFieldToFiles(QMap<QString, QByteArray>& files, Playe
  return ret;
 }
 
-bool BosonSaveLoad::saveToFile(Player* localPlayer, const QString& file)
+bool BosonSaveLoad::saveToFile(const QString& file)
 {
  QMap<QString, QByteArray> files;
- if (!saveToFiles(files, localPlayer)) {
+ if (!saveToFiles(files)) {
 	boError() << k_funcinfo << "saving failed" << endl;
 	return false;
  }
@@ -396,7 +396,7 @@ QCString BosonSaveLoad::saveKGameAsXML()
  return doc.toCString();
 }
 
-QCString BosonSaveLoad::savePlayersAsXML(Player* localPlayer)
+QCString BosonSaveLoad::savePlayersAsXML()
 {
  QDomDocument doc(QString::fromLatin1("Players"));
  QDomElement root = doc.createElement(QString::fromLatin1("Players"));
@@ -505,7 +505,6 @@ bool BosonSaveLoad::loadPlayersFromXML(const QString& playersXML)
 	d->mLoadingStatus = InvalidXML;
 	return false;
  }
- Player* localPlayer = 0;
  for (unsigned int i = 0; i < d->mBoson->playerCount(); i++) {
 	Player* p = (Player*)d->mBoson->playerList()->at(i);
 	QDomElement player;

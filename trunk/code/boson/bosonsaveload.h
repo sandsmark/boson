@@ -151,9 +151,9 @@ public:
 	// AB: temporary function only, for the scenario-code-replacing process.
 	bool loadNewGame(const QByteArray& playersXML, const QByteArray& canvasXML);
 
-	bool saveToFile(Player* localPlayer, const QString& file);
-	bool saveToFiles(QMap<QString, QByteArray>& files, Player* localPlayer);
-	bool savePlayFieldToFiles(QMap<QString, QByteArray>& files, Player* localPlayer);
+	bool saveToFile(const QString& file);
+	bool saveToFiles(QMap<QString, QByteArray>& files);
+	bool savePlayFieldToFiles(QMap<QString, QByteArray>& files);
 	static bool saveToFile(const QMap<QString, QByteArray>& files, const QString& file);
 
 	LoadingStatus loadingStatus() const;
@@ -188,7 +188,7 @@ protected:
 	// TODO: move relevant stuff to BosonStarting.
 
 	QCString saveKGameAsXML();
-	QCString savePlayersAsXML(Player* localPlayer);
+	QCString savePlayersAsXML();
 	QCString saveCanvasAsXML();
 	QCString saveExternalAsXML();
 
