@@ -187,6 +187,9 @@ QString BosonProfilingDialog::profilingName(int profilingEvent) const
 	case BosonProfiling::LoadModelDummy:
 		name = i18n("LoadModelDummy");
 		break;
+	case BosonProfiling::SlotAdvance:
+		name = i18n("SlotAdvance");
+		break;
 	default:
 		name = i18n("Unknown %1").arg(profilingEvent);
 		break;
