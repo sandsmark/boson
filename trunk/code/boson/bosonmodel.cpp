@@ -264,9 +264,10 @@ void BoMeshSorter::sortByZ(QValueList<BoMeshSorter::Mesh>* meshes, bool byMaxZ)
 			meshes->append(*listIt);
 		}
 	}
-	map.remove(mapIt.key());
 	delete list;
  }
+ map.clear(); // all inserted pointers are already deleted
+
  if (meshesCount != meshes->count()) {
 	boWarning() << k_funcinfo << "oops - something weird happened: meshesCount=" << meshesCount << " meshes->count()=" << meshes->count() << endl;
  }
