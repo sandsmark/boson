@@ -36,7 +36,7 @@
 #include "bosonTopLevel.h"
 #include "bosonCanvas.h"
 #include "boson.h"
-#include "ressource.h"
+//#include "ressource.h"
 #include "game.h"
 #include "connectDlg.h"
 

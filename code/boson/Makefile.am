@@ -48,6 +48,6 @@ KDE_ICON = boson
 #garbage
 CLEANFILES = boson-*.log
 
-EXTRA_DIST = boson.cpp connect.cpp bosonBigDisplay.cpp game.cpp main.cpp mainWidget.cpp miniDisplay.cpp bosonCanvas.cpp playerUnit.cpp boson.h connect.h game.h mainWidget.h bosonCanvas.h playerUnit.h ressource.h connectDlg.cpp connectDlg.h serverDlg.cpp serverDlg.h boshot.cpp boshot.h bosonTopLevel.h bosonTopLevel.cpp
+EXTRA_DIST = boson.cpp connect.cpp bosonBigDisplay.cpp game.cpp main.cpp mainWidget.cpp miniDisplay.cpp bosonCanvas.cpp playerUnit.cpp boson.h connect.h game.h mainWidget.h bosonCanvas.h playerUnit.h connectDlg.cpp connectDlg.h serverDlg.cpp serverDlg.h boshot.cpp boshot.h bosonTopLevel.h bosonTopLevel.cpp
 
 
