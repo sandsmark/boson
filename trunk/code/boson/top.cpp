@@ -498,6 +498,7 @@ void TopWidget::slotPlayFieldChanged(const QString& id)
 
 void TopWidget::slotStartNewGame()
 {
+ boDebug() << k_funcinfo << endl;
  showStartupWidget(IdLoading);
 
  d->mStarting->setLoadingWidget(d->mLoadingWidget);
