@@ -72,6 +72,14 @@ public:
 	 * correct display lists!
 	 **/
 	BoFrame(const BoFrame& frame, unsigned int firstMesh, unsigned int meshCount);
+
+	/**
+	 * @overload
+	 * Just as above, but this version takes an array of mesh indices from
+	 * @p frame that will get copied into thuis frame.
+	 **/
+	BoFrame(const BoFrame& frame, unsigned int* meshes, unsigned int meshCount);
+
 	~BoFrame();
 
 	/**
@@ -118,6 +126,7 @@ public:
 
 private:
 	void init();
+	void copyMeshes(const BoFrame& frame, unsigned int* meshes, unsigned int count);
 
 private:
 	GLuint mDisplayList;
