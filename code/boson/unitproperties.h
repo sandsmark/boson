@@ -274,6 +274,15 @@ public:
 
 	const PluginProperties* properties(int pluginType) const;
 
+	/**
+	 * @return First part of the sound filename - e.g. "move" if the file
+	 * name should be "move_00.ogg". the _00 is added dynamically (randomly)
+	 * by @ref BosonSound
+	 **/
+	QString sound(int soundEvent) const { return mSounds[soundEvent]; }
+
+	QMap<int, QString> sounds() const { return mSounds; }
+
 protected:
 	void loadMobileProperties(KSimpleConfig* conf);
 	void loadFacilityProperties(KSimpleConfig* conf);
@@ -281,6 +290,7 @@ protected:
 	void loadPluginProperties(PluginProperties* prop, KSimpleConfig* conf);
 
 	void loadTextureNames(KSimpleConfig* conf);
+	void loadSoundNames(KSimpleConfig* conf);
 private:
 	SpeciesTheme* mTheme;
 
@@ -311,6 +321,7 @@ private:
 	QPtrList<PluginProperties> mPlugins;
 
 	QMap<QString, QString> mTextureNames;
+	QMap<int, QString> mSounds;
 };
 
 #endif

@@ -127,6 +127,7 @@ void UnitProperties::loadUnitType(const QString& fileName)
 
  loadAllPluginProperties(&conf);
  loadTextureNames(&conf);
+ loadSoundNames(&conf);
 }
 
 void UnitProperties::loadMobileProperties(KSimpleConfig* conf)
@@ -193,6 +194,19 @@ void UnitProperties::loadTextureNames(KSimpleConfig* conf)
 		kdDebug() << "mapping " << textures[i] << "->" << longName << endl;
 	}
  }
+}
+
+void UnitProperties::loadSoundNames(KSimpleConfig* conf)
+{
+ mSounds.clear();
+ conf->setGroup("Sounds");
+ mSounds.insert(SoundShoot, conf->readEntry("Shoot", "shoot"));
+ mSounds.insert(SoundOrderMove, conf->readEntry("OrderMove", "order_move"));
+ mSounds.insert(SoundOrderAttack, conf->readEntry("OrderAttack", "order_attack"));
+ mSounds.insert(SoundOrderSelect, conf->readEntry("OrderSelect", "order_select"));
+ mSounds.insert(SoundReportProduced, conf->readEntry("ReportProduced", "report_produced"));
+ mSounds.insert(SoundReportDestroyed, conf->readEntry("ReportDestroyed", "report_destroyed"));
+ mSounds.insert(SoundReportUnderAttack, conf->readEntry("ReportUnderAttack", "report_underattack"));
 }
 
 bool UnitProperties::isMobile() const

@@ -42,13 +42,15 @@ public:
 	BosonSound();
 	~BosonSound();
 
-	void play(Unit* unit, int event);
+	/**
+	 * @param Sound name as returned by @ref UnitProperties::sound
+	 **/
+	void play(const QString& name);
 	void play(int id);
 
 	/**
-	 * Add a unit to BosonSound. All sounds of this unit are added. If the
-	 * unit does not have a sound for a special action the default sounds of
-	 * the theme are used.
+	 * Add a unit to BosonSound. All sounds in @ref UnitProperties::sounds
+	 * are automatically added.
 	 **/
 	void addUnitSounds(const UnitProperties* prop);
 
@@ -66,13 +68,15 @@ public:
 	 **/
 	KArtsServer& server() const;
 
-	void loadDefaultEvent(int event, const QString& eventFilter);
-
 	Arts::StereoEffectStack effectStack();
 
 protected:
-	void addEvent(unsigned long int unitType, int unitSound, QDir& dir);
-	void addEventSound(unsigned long int unitType, int unitSound, const QString& file);
+	/**
+	 * @param name First part of filename. E.g. "shoot" if "shoot_nn.ogg" is
+	 * the filename, where nn is 00-number of available files.
+	 **/
+	void addEvent(const QString& dir, const QString& name);
+	void addEventSound(const QString& name, const QString& file);
 
 private:
 	typedef QPtrList<BoPlayObject> SoundList;

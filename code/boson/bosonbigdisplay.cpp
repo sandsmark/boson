@@ -233,7 +233,7 @@ bool BosonBigDisplay::actionMove(QDataStream& stream, const QPoint& canvasPos)
 	++it;
  }
  if (unit->owner() == localPlayer()) {
-	boMusic->playSound(unit, Unit::SoundOrderMove);
+	boMusic->playSound(unit, SoundOrderMove);
  }
  return true;
 }
@@ -278,7 +278,7 @@ bool BosonBigDisplay::actionAttack(QDataStream& stream, const QPoint& canvasPos)
  }
  Unit* u = selection()->leader();
  if (u->owner() == localPlayer()) {
-	boMusic->playSound(u, Unit::SoundOrderAttack);
+	boMusic->playSound(u, SoundOrderAttack);
  }
  return true;
 }
@@ -313,7 +313,7 @@ bool BosonBigDisplay::actionRepair(QDataStream& stream, const QPoint& canvasPos)
  }
 // TODO:
 // Unit* u = selection()->leader();
-// boMusic->playSound(u, Unit::SoundOrderRepair);
+// boMusic->playSound(u, SoundOrderRepair);
  return true;
 }
 
@@ -360,7 +360,7 @@ bool BosonBigDisplay::actionRefine(QDataStream& stream, const QPoint& canvasPos)
  }
 // TODO:
 // Unit* u = selection()->leader();
-// boMusic->playSound(u, Unit::SoundOrderRefine);
+// boMusic->playSound(u, SoundOrderRefine);
  return true;
 }
 
@@ -382,7 +382,7 @@ bool BosonBigDisplay::actionFollow(QDataStream& stream, const QPoint& canvasPos)
  }
  Unit* u = selection()->leader();
  if (u->owner() == localPlayer()) {
-	boMusic->playSound(u, Unit::SoundOrderMove);
+	boMusic->playSound(u, SoundOrderMove);
  }
  return true;
 }

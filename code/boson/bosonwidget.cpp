@@ -584,13 +584,11 @@ void BosonWidget::slotFog(int x, int y)
  // instead of two (on ein minimap and one to actually create/remove the fog)
  // should save some performance (at least I hope)
  minimap()->slotFog(x, y); // FIXME: no need for slot
- canvas()->fogLocal(x, y);
 }
 
 void BosonWidget::slotUnfog(int x, int y)
 {
  minimap()->slotUnfog(x, y); // FIXME: no need for slot
- canvas()->unfogLocal(x, y);
 }
 
 void BosonWidget::slotPlayerPropertyChanged(KGamePropertyBase* prop, KPlayer* p)
@@ -613,7 +611,6 @@ void BosonWidget::slotPlayerPropertyChanged(KGamePropertyBase* prop, KPlayer* p)
 
 void BosonWidget::slotInitFogOfWar()
 {
- canvas()->initFogOfWar(player());
  minimap()->initFogOfWar(player());
 }
 
