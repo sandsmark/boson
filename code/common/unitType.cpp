@@ -56,7 +56,7 @@ facilityProperties_t facilityProp[] = {
 	{"samsite"	, 0, 1, 1, 4, 0}, 			// FACILITY_SAMSITE
 	{"oiltower"	, 0, 1, 1, 2, 0}, 			// FACILITY_OILTOWER
 	{"refinery"	, 0, 2, 2, 3, 0},			// FACILITY_REFINERY
-	{"repairpad"	, 0, 3, 3, 4, 0},			// FACILITY_REPAIRPAD
+	{"repairpad"	, 0, 2, 2, 4, 0},			// FACILITY_REPAIRPAD
 	{"turret"	, 0, 1, 1, 5, 90},			// FACILITY_TURRET
 	};
 
