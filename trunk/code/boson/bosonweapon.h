@@ -101,8 +101,15 @@ class BosonWeaponProperties : public PluginProperties
     inline bool canShootAtLandUnits() const  { return mCanShootAtLandUnits; }
     /**
      * @return The weapon range of this unit. It's a number of cells
-    **/
+     **/
     inline unsigned long int range() const  { return m_range; }
+    /**
+     * @return Maximum flying distance of the missile of this weapon.
+     * If the missile hasn't caught the target after flying this distance, the
+     *  missile runs out of fuel and self-detonates.
+     * This has effect only for missile weapons.
+     **/
+    inline bofixed maxFlyDistance() const  { return mMaxFlyDistance; }
     /**
      * @return The number of advance calls until the weapon is reloaded
      **/
@@ -129,6 +136,12 @@ class BosonWeaponProperties : public PluginProperties
      * @return Acceleration speed of missile of this unit
      **/
     inline bofixed accelerationSpeed() const  { return mAccelerationSpeed; }
+    /**
+     * @return tangens of turning speed of the missile of this weapon.
+     * Turning speed specifies how fast the missile can turn.
+     * It has effect only for missile weapons.
+     **/
+    bofixed turningSpeed() const  { return mTurningSpeed; }
     /**
      * @return Filename of 3d model of shot of this weapon.
      * Only used in unit editor
@@ -186,6 +199,7 @@ class BosonWeaponProperties : public PluginProperties
      * Note that pos or target may not be used depending on shot's type
      **/
     BosonShot* newShot(Unit* attacker, BoVector3Fixed pos, BoVector3Fixed target) const;
+    BosonShot* newShot(Unit* attacker, BoVector3Fixed pos, Unit* target) const;
 
     QPtrList<BosonEffect> newShootEffects(BoVector3Fixed pos, bofixed rotation) const;
     QPtrList<BosonEffect> newFlyEffects(BoVector3Fixed pos, bofixed rotation) const;
@@ -217,6 +231,8 @@ class BosonWeaponProperties : public PluginProperties
     void setSound(int event, QString filename);
     void setAutoUse(bool use)  { mAutoUse = use; }
     void setTakeTargetVeloIntoAccount(bool take)  { mTakeTargetVeloIntoAccount = take; }
+    void setMaxFlyDistance(bofixed dist)  { mMaxFlyDistance = dist; }
+    void setTurningSpeed(bofixed s)  { mTurningSpeed = s; }
 
     void reset();
     void loadAction(UnitAction type, KSimpleConfig* cfg, const QString& key, bool useDefault = false);
@@ -262,6 +278,8 @@ class BosonWeaponProperties : public PluginProperties
     QIntDict<BoAction> mActions;
     bool mAutoUse;
     bool mTakeTargetVeloIntoAccount;
+    bofixed mMaxFlyDistance;
+    bofixed mTurningSpeed;
 
 
 #undef DECLAREUPGRADEABLE

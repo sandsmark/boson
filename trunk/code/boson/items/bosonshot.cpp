@@ -29,6 +29,7 @@
 #include "../bosoneffectproperties.h"
 #include "../boson.h"
 #include "../speciestheme.h"
+#include "../unit.h"
 #include "bodebug.h"
 
 #include <ksimpleconfig.h>
@@ -284,6 +285,7 @@ void BosonShotBullet::explode()
 }
 
 
+
 /*****  BosonShotRocket  *****/
 
 BosonShotRocket::BosonShotRocket(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop) :
@@ -498,6 +500,207 @@ bool BosonShotRocket::loadFromXML(const QDomElement& root)
 void BosonShotRocket::moveToTarget()
 {
   move(mTarget.x(), mTarget.y(), mTarget.z());
+}
+
+
+
+/*****  BosonShotMissile  *****/
+
+BosonShotMissile::BosonShotMissile(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop) :
+    BosonShot(owner, canvas, prop)
+{
+  initStatic();
+  registerData(&mPassedDist, IdPassedDist);
+}
+
+BosonShotMissile::~BosonShotMissile()
+{
+}
+
+void BosonShotMissile::initStatic()
+{
+  static bool initialized = false;
+  if (initialized)
+  {
+    return;
+  }
+  initialized = true;
+  addPropertyId(IdPassedDist, "PassedDist");
+}
+
+void BosonShotMissile::init(const BoVector3Fixed& pos, Unit* target)
+{
+  boDebug(350) << "MISSILE: " << k_funcinfo << "Creating new shot" << endl;
+  mTarget = target;
+  if(!properties())
+  {
+    boError(350) << k_funcinfo << "NULL weapon properties!" << endl;
+    setActive(false);
+    return;
+  }
+  if(!canvas()->onCanvas((int)pos[0], (int)pos[1]))
+  {
+    boError(350) << k_funcinfo << "invalid start position" << endl;
+    setActive(false);
+    return;
+  }
+
+  // Speeds
+  setAccelerationSpeed(properties()->accelerationSpeed());
+  setMaxSpeed(properties()->speed());
+
+  // Effects
+  setEffects(properties()->newFlyEffects(pos, 0.0));
+
+  // Initialization
+  move(pos[0], pos[1], pos[2]);
+  //setRotation(Bo3dTools::rotationToPoint(target->x() - pos.x(), target->y() - pos.y()));
+
+  mPassedDist = 0;
+
+  // Initial velocity
+  mVelo.set(mTarget->x() - x(), mTarget->y() - y(), mTarget->z() - z());
+  mVelo.normalize();
+}
+
+// move the shot by one step
+// (actually only set the velocity - it is moved by BosonCanvas::slotAdvance())
+void BosonShotMissile::advanceMoveInternal()
+{
+  if(!mTarget || mTarget->isDestroyed())
+  {
+    explode();
+    return;
+  }
+
+  setVisible(true);
+  // Always accelerate
+  accelerate();
+  // Increase distance that missile has flied
+  mPassedDist = mPassedDist + speed();
+  if(mPassedDist > mProp->maxFlyDistance())
+  {
+    // TODO: wait e.g. 0.5 or 1 second before exploding
+    explode();
+    return;
+  }
+
+  boDebug() << k_funcinfo << id() << ": target pos: (" << mTarget->x() << "; " << mTarget->y() << "; " << mTarget->z() << ")" << endl;
+  boDebug() << k_funcinfo << id() << ": my pos: (" << x() << "; " << y() << "; " << z() << ")" << endl;
+  // Calculate velocity
+  // Missile always moves towards it's target
+  BoVector3Fixed totarget(mTarget->x() - x(), mTarget->y() - y(), mTarget->z() - z());
+  bofixed totargetlen = totarget.length();
+  // We need check this here to avoid division by 0 later
+  if(totargetlen <= speed())
+  {
+    boDebug() << k_funcinfo << id() << ": near target (totargetlen = " << totargetlen << "), exploding" << endl;
+    explode();
+    return;
+  }
+
+  // Normalize totarget. totarget vector now shows direction to target
+  totarget.scale(1.0f / totargetlen);
+
+  // Difference between missile's current direction and direction to target
+  BoVector3Fixed diff = totarget - mVelo;
+  bofixed difflen = diff.length();
+  if(difflen != 0)
+  {
+    boDebug() << k_funcinfo << id() << ": difflen = " << difflen << endl;
+    // Missile is not flying towards the target atm
+    // Calculate new velocity vector
+    if(mProp->turningSpeed() < difflen)
+    {
+      diff.scale(mProp->turningSpeed() / difflen);
+    }
+    // Alter velocity direction so that it's more towards the target
+    mVelo += diff;
+    mVelo.normalize();
+  }
+
+  // This is final velocity
+  BoVector3Fixed velo(mVelo * speed());
+
+  setVelocity(velo.x(), velo.y(), velo.z());
+  setRotation(Bo3dTools::rotationToPoint(velo.x(), velo.y()));
+  setXRotation(Bo3dTools::rotationToPoint(velo.y(), velo.z()) + 90);
+}
+
+bool BosonShotMissile::saveAsXML(QDomElement& root)
+{
+  if(!BosonShot::saveAsXML(root))
+  {
+    boError() << k_funcinfo << "Error saving BosonShot" << endl;
+    return false;
+  }
+
+  root.setAttribute("xVelocity", mVelo.x());
+  root.setAttribute("yVelocity", mVelo.y());
+  root.setAttribute("zVelocity", mVelo.z());
+  root.setAttribute("Speed", speed());
+  root.setAttribute("Target", mTarget->id());
+  return true;
+}
+
+bool BosonShotMissile::loadFromXML(const QDomElement& root)
+{
+  if(!BosonShot::loadFromXML(root))
+  {
+    boError() << k_funcinfo << "Error loading BosonShot" << endl;
+    return false;
+  }
+
+  bool ok;
+  bofixed speed;
+  bofixed xvelo, yvelo, zvelo;
+  unsigned int targetid;
+
+  xvelo = root.attribute("xVelocity").toFloat(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Invalid value for xVelocity tag" << endl;
+    return false;
+  }
+  yvelo = root.attribute("yVelocity").toFloat(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Invalid value for yVelocity tag" << endl;
+    return false;
+  }
+  zvelo = root.attribute("zVelocity").toFloat(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Invalid value for zVelocity tag" << endl;
+    return false;
+  }
+  speed = root.attribute("Speed").toFloat(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Invalid value for Speed tag" << endl;
+    return false;
+  }
+  targetid = root.attribute("Target").toUInt(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Invalid value for Target tag" << endl;
+    return false;
+  }
+
+  mTarget = boGame->findUnit(targetid, 0);
+  mVelo.set(xvelo, yvelo, zvelo);
+  setRotation(Bo3dTools::rotationToPoint(mVelo.x(), mVelo.y()));
+  setXRotation(Bo3dTools::rotationToPoint(mVelo.y(), mVelo.z()) + 90);
+  setSpeed(speed);
+  setAccelerationSpeed(properties()->accelerationSpeed());
+  setMaxSpeed(properties()->speed());
+  setVisible(true);
+  return true;
+}
+
+void BosonShotMissile::moveToTarget()
+{
+  //move(mTarget->x(), mTarget->y(), mTarget->z());
 }
 
 

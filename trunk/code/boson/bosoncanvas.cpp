@@ -1985,6 +1985,17 @@ BosonShot* BosonCanvas::createShot(Player* owner, unsigned long int shotType, un
 		s = (BosonShot*)new BosonShotRocket(owner, this, prop);
 		break;
 	}
+	case BosonShot::Missile:
+	{
+		SpeciesTheme* t = owner->speciesTheme();
+		BO_CHECK_NULL_RET0(t);
+		const UnitProperties* unitProperties = t->unitProperties(unitType);
+		BO_CHECK_NULL_RET0(unitProperties);
+		const BosonWeaponProperties* prop = unitProperties->weaponProperties(weaponPropertyId);
+		BO_CHECK_NULL_RET0(prop);
+		s = (BosonShot*)new BosonShotMissile(owner, this, prop);
+		break;
+	}
 	case BosonShot::Explosion:
 		s = (BosonShot*)new BosonShotExplosion(owner, this);
 		break;

@@ -67,7 +67,8 @@ class BosonShot : public BosonItem
       Explosion,
       Mine,
       Bomb,
-      Fragment
+      Fragment,
+      Missile
     };
 
     /**
@@ -268,6 +269,50 @@ class BosonShotRocket : public BosonShot
     KGameProperty<bofixed> mZ;
     KGameProperty<bofixed> mMaxHeight;
     bofixed mEffectVelo;
+};
+
+
+/**
+ * @short Shot class for missile
+ *
+ * Missile is a shot that flies trough the air, trying to reach it's target.
+ *
+ * Missiles are guided, that is, they will follow their targets.
+ *
+ * @author Rivo Laks <rivolaks@hot.ee>
+ **/
+class BosonShotMissile : public BosonShot
+{
+  public:
+    enum PropertyIds
+    {
+      // 4544 to 4607 (4544+63) allowed here
+      IdPassedDist = 4544 + 0,
+    };
+
+    BosonShotMissile(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop);
+    ~BosonShotMissile();
+
+    virtual bool saveAsXML(QDomElement& root);
+    virtual bool loadFromXML(const QDomElement& root);
+
+    void init(const BoVector3Fixed& pos, Unit* target);
+
+    inline virtual int type() const { return BosonShot::Rocket; }
+
+  protected:
+    virtual void advanceMoveInternal();
+
+    virtual void moveToTarget();
+
+  private:
+    static void initStatic();
+
+  private:
+    Unit* mTarget;
+    KGameProperty<bofixed> mPassedDist;
+    // This is _normalized_ velocity, i.e. just direction
+    BoVector3Fixed mVelo;
 };
 
 
