@@ -695,11 +695,22 @@ bool BosonSaveLoad::convertSaveGameToPlayField(QMap<QString, QByteArray>& files)
 	BosonPropertyXML::removeProperty(handler, KGamePropertyBase::IdName);
  }
 
+ QDomDocument canvasDoc("Canvas");
+ if (!loadXMLDoc(&canvasDoc, QString(files["canvas.xml"]))) {
+	boError() << k_funcinfo << "invalid canvas.xml file saved" << endl;
+	return false;
+ }
+ QDomElement canvasRoot = canvasDoc.documentElement();
+ canvasRoot.removeChild(canvasRoot.namedItem("Pathfinder"));
+ canvasRoot.removeChild(canvasRoot.namedItem("Effects"));
+
  QByteArray kgameXML = kgameDoc.toCString();
  QByteArray playersXML = playersDoc.toCString();
+ QByteArray canvasXML = canvasDoc.toCString();
  files.remove("external.xml");
  files.insert("kgame.xml", kgameXML);
  files.insert("players.xml", playersXML);
+ files.insert("canvas.xml", canvasXML);
 
  QStringList list = files.keys();
  list = list.grep(QRegExp("^scripts\\/.*\\/data\\/"));
