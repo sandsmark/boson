@@ -6,10 +6,8 @@ TODO:
 0.1 release :
 =============
 
-make a toolbar with concerned buttons (move, stop, etc..)
-take out the menu
-DND of the map onto the minimap
-how to handle non 1x1 tiles ? 
+bug : segfault some times after failing to load some pixmap (fe ComStat/Field.003.bmp)
+configuration for server
 does units::rect need to be virtual anymore ?
 when clicking (no box) on two mobiles, both are selected, but shouldn't
 server : check that each unit does max 1 move each jiffie
@@ -46,8 +44,11 @@ check that loading of pixmap has been done well
 #bug : select mobile, move, somewhere, can't move somewhere else...
 #mobiles can go only on the ground they are allowed to.
 #client units : shouldn't move over each other
+#make a toolbar with concerned buttons (move, stop, etc..)
+#take out the menu
 
 check Makefile.am for installation "make install"
+Map should be installed in apps/boson/map
 
 Website : documentation about
 	communication protocol,
@@ -82,6 +83,10 @@ what about drag and dropping units ? :-)
 smooth  known-unknown transition
 see again "virtual(?) Unit::getWidth" and checkUnitDiscovered badly centered
 different subclass for my_units and other_units in client
+document headers for kdoc
+smoother moves (using float instead of int for VirtualSprite?)
+DND of the map onto the minimap
+how to handle non 1x1 tiles ? 
 
 black background ??
 
@@ -95,7 +100,7 @@ mailing list ?
 then:
 =====
 
-kind of acceleration to make starting moves smoother ?
+kind of acceleration to make starting moves smoother ? (ben)
 forgotten fog of war
 player*Unit::map should be put global
 
