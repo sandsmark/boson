@@ -587,7 +587,7 @@ public:
 };
 
 BosonBigDisplayBase::BosonBigDisplayBase(QWidget* parent)
-		: BosonGLWidget(parent)
+		: BosonGLWidget(parent, boConfig->wantDirect())
 {
  boDebug() << k_funcinfo << endl;
  init();

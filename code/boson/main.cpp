@@ -51,6 +51,7 @@ static KCmdLineOptions options[] =
     { "noloadtiles", I18N_NOOP("Do not load tiles (debugging only)"), 0},
     { "aidelay <delay>", I18N_NOOP("Set AI delay (in seconds). The less it is, the faster AI will send it's units"), 0 },
     { "noai", I18N_NOOP("Disable AI"), 0 },
+    { "indirect", I18N_NOOP("Use Indirect rendering (sloooow!!). debugging only."), 0 },
     { 0, 0, 0 }
 };
 
@@ -102,6 +103,10 @@ int main(int argc, char **argv)
 		// Fall back to default
 		boConfig->setAiDelay(3.0);
 	}
+ }
+ if (args->isSet("indirect")) {
+	boWarning() << k_funcinfo << "use indirect rendering (slow!)" << endl;
+	boConfig->setWantDirect(false);
  }
 
  TopWidget *top = new TopWidget;
