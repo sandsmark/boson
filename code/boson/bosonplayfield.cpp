@@ -183,7 +183,7 @@ bool BosonPlayFieldInformation::loadPlayersInformation(const QByteArray& xml)
  QString errorMsg;
  int line = 0, column = 0;
  QDomDocument doc(QString::fromLatin1("Players"));
- if (!doc.setContent(QCString(xml), &errorMsg, &line, &column)) {
+ if (!doc.setContent(QString(xml), &errorMsg, &line, &column)) {
 	boError() << k_funcinfo << "unable to set XML content - error in line=" << line << ",column=" << column << " errorMsg=" << errorMsg << endl;
 	return false;
  }
@@ -206,7 +206,6 @@ bool BosonPlayFieldInformation::loadMapInformation(const QByteArray& xml)
  int line = 0, column = 0;
  QDomDocument doc(QString::fromLatin1("BosonMap"));
 #warning FIXME
- // AB: why does QCString(xml) not work here when loading games?
  if (!doc.setContent(QString(xml), &errorMsg, &line, &column)) {
 	boError() << k_funcinfo << "unable to set XML content - error in line=" << line << ",column=" << column << " errorMsg=" << errorMsg << endl;
 	boDebug() << QString(xml) << endl;

@@ -415,7 +415,6 @@ bool BosonStarting::startScenario()
  QString errorMsg;
  int line = 0, column = 0;
  QDomDocument doc;
- // AB QCString() causes problems :(
  if (!doc.setContent(QString(playersXML), &errorMsg, &line, &column)) {
 	boError() << k_funcinfo << "unable to load playersXML - parse error at line=" << line << ",column=" << column << " errorMsg=" << errorMsg << endl;
 	return false;
@@ -449,7 +448,7 @@ bool BosonStarting::startScenario()
  }
 
  QDomDocument canvasDoc;
- if (!canvasDoc.setContent(QCString(canvasXML))) {
+ if (!canvasDoc.setContent(QString(canvasXML))) {
 	boError() << k_funcinfo << "unable to load canvasXML" << endl;
 	return false;
  }
