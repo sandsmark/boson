@@ -413,6 +413,7 @@ bool BosonScenario::savePlayer(QDomElement& node, Player* p)
 	nodeList.item(0).replaceChild(doc.createTextNode(QString::number(p->minerals())), nodeList.item(0).firstChild());
  }
 
+ nodeList = node.elementsByTagName("Oil");
  if (nodeList.count() != 1) {
 	boError(250) << k_funcinfo << "Invalid element count for Oil: " << nodeList.count() << endl;
 	return false;
