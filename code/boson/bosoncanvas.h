@@ -146,8 +146,9 @@ public:
 	/**
 	 * Like previous one, but unit u can be on cell
 	 * Can be used from inside Unit class
+	 * If excludemoving is true moving units can be on cell
 	 */
-	bool cellOccupied(int x, int y, Unit* u);
+	bool cellOccupied(int x, int y, Unit* u, bool excludemoving = false);
 
 	void quitGame();
 

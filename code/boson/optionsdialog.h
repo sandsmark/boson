@@ -46,6 +46,7 @@ public:
 	void setCommandFramePosition(CommandFramePosition position);
 	void setChatFramePosition(ChatFramePosition position);
 	void setCursor(CursorMode mode);
+	void setGroupMove(GroupMoveMode mode);
 
 protected slots:
 	/**

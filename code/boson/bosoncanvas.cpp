@@ -726,7 +726,7 @@ bool BosonCanvas::cellOccupied(int x, int y)
  */
 }
 
-bool BosonCanvas::cellOccupied(int x, int y, Unit* unit)
+bool BosonCanvas::cellOccupied(int x, int y, Unit* unit, bool excludemoving)
 {
 // qt bug (confirmed). will be fixed in 3.1
  if (unit->isFlying()) {
@@ -755,6 +755,11 @@ bool BosonCanvas::cellOccupied(int x, int y, Unit* unit)
 	}
 	if(u->id() == unit->id()) {
 		continue;
+	}
+	if(excludemoving) {
+		if(u->isMoving()) {
+			continue;
+		}
 	}
 	return true;
  }

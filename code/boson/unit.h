@@ -244,6 +244,8 @@ protected:
 	 **/
 	bool newPath();
 
+	bool searchpath;
+
 private:
 	class UnitPrivate;
 	UnitPrivate* d;

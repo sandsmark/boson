@@ -17,6 +17,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #include "optionsdialog.h"
+#include "bosonconfig.h"
 
 #include "defines.h"
 
@@ -110,6 +111,7 @@ OptionsDialog::OptionsDialog(QWidget* parent, bool modal)
  d->mGroupmove = new QComboBox(plainPage());
  d->mGroupmove->insertItem(i18n("Old Style (All units move to same position)"), GroupMoveOld);
  d->mGroupmove->insertItem(i18n("Experimental follow-style (units follow leader)"), GroupMoveFollow);
+ d->mGroupmove->insertItem(i18n("New style (much better, but not fully working yet)"), GroupMoveNew);
  l->addWidget(d->mGroupmove);
  connect(d->mGroupmove, SIGNAL(activated(int)),
 		this, SIGNAL(signalGroupMoveChanged(int)));
@@ -117,6 +119,7 @@ OptionsDialog::OptionsDialog(QWidget* parent, bool modal)
  setCommandFramePosition(CmdFrameLeft);
  setChatFramePosition(ChatFrameBottom);
  setCursor(CursorSprite);
+ setGroupMove(boConfig->readGroupMoveMode());
 }
 
 
@@ -164,4 +167,9 @@ void OptionsDialog::setChatFramePosition(ChatFramePosition position)
 void OptionsDialog::setCursor(CursorMode mode)
 {
  d->mCursor->setCurrentItem(mode);
+}
+
+void OptionsDialog::setGroupMove(GroupMoveMode mode)
+{
+ d->mGroupmove->setCurrentItem(mode);
 }

@@ -174,6 +174,28 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 		} else {
 			kdError() << k_funcinfo << " : wrong GroupMoveMode : " << mode << endl;
 		}
+		else if(mode == GroupMoveNew)
+		{
+			kdDebug() << k_funcinfo << " : mode == GroupMoveNew" << endl;
+			if(unitsToMove.count() == 1)
+			{
+				unitsToMove.first()->moveTo(pos);
+				break;
+			}
+			Unit* leader = unitsToMove.take(0);
+			leader->moveTo(pos);
+			Unit* unit;
+			QPoint pos2;
+			for(unit = unitsToMove.first(); unit; unit = unitsToMove.next())
+			{
+				pos2.setX(pos.x() + (unit->x() - leader->x()));
+				pos2.setY(pos.y() + (unit->y() - leader->y()));
+				unit->moveTo(pos2);
+			}
+		}
+		else
+			kdError() << k_funcinfo << " : wrong GroupMoveMode : " << mode << endl;
+		break;
 	}
 	case BosonMessage::MoveAttack:
 	{
