@@ -76,11 +76,11 @@ QString ProductionProperties::name() const
 
 void ProductionProperties::loadPlugin(KSimpleConfig* config)
 {
- if (!config->hasGroup("ProducerPlugin")) {
+ if (!config->hasGroup("ProductionPlugin")) {
 	kdError() << k_funcinfo << "unit has no production plugin" << endl;
 	return;
  }
- config->setGroup("ProducerPlugin");
+ config->setGroup("ProductionPlugin");
  mProducerList = config->readIntListEntry("ProducerList");
 }
 
