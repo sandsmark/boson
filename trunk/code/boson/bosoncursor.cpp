@@ -325,6 +325,10 @@ void BosonSpriteCursor::move(double x, double y)
 void BosonSpriteCursor::slotAdvance()
 {
  d->mCursor->setFrame((d->mCursor->frame() + 1 + d->mCursor->frameCount()) % d->mCursor->frameCount());
+
+ // not a real ideal solution... this gets called very often anyway.
+ // we need it here when the game speed is very low
+ d->mCursor->canvas()->update();
 }
 
 void BosonSpriteCursor::hideCursor()
