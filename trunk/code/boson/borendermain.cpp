@@ -1451,7 +1451,7 @@ void ModelPreview::slotEnableMaterials(bool e)
 
 
 
-RenderMain::RenderMain()
+RenderMain::RenderMain() : KMainWindow()
 {
  mSpecies.setAutoDelete(true);
  QStringList list = SpeciesTheme::availableSpecies();
