@@ -25,6 +25,8 @@
 #include "bodebug.h"
 
 #include <kapplication.h>
+#include <kmessagebox.h>
+#include <klocale.h>
 
 #include <qgl.h> // convertToGLFormat()
 #include <qimage.h> // convertToGLFormat()
@@ -209,9 +211,9 @@ BoContext::~BoContext()
  boDebug() << k_funcinfo << "done" << endl;
 }
 
-bool BoContext::create()
+bool BoContext::create(bool wantDirect)
 {
- mValid = chooseContext();
+ mValid = chooseContext(wantDirect);
  return mValid;
 }
 
@@ -335,8 +337,7 @@ void* BoContext::chooseVisual()
 		tryDouble = FALSE;
 		triedDouble = TRUE;
 		continue;
-	}
-	else if ( triedDouble ) {
+	} else if ( triedDouble ) {
 		fmt.setDoubleBuffer( FALSE );
 		triedDouble = FALSE;
 	}
@@ -356,7 +357,7 @@ void* BoContext::chooseVisual()
  }
  return vis;
 }
-bool BoContext::chooseContext()
+bool BoContext::chooseContext(bool wantDirect)
 {
  if (!mPaintDevice) {
 	boError() << k_funcinfo << "NULL paint device" << endl;
@@ -374,8 +375,7 @@ bool BoContext::chooseContext()
 // glFormat.setPlane( res );
  glXGetConfig( disp, (XVisualInfo*)mVi, GLX_DOUBLEBUFFER, &res );
  if (!res) {
-	// TODO: msg box!
-	boError() << k_funcinfo << "double buffer is not supported! exit now.." << endl;
+	 KMessageBox::error(0, i18n("Double buffering is not supported by your system. Exit now"));
 	kapp->exit(1);
 	return false;
  }
@@ -383,8 +383,7 @@ bool BoContext::chooseContext()
  mDepth = res;
  glXGetConfig( disp, (XVisualInfo*)mVi, GLX_RGBA, &res );
  if (!res) {
-	// TODO: msg box!
-	boError() << k_funcinfo << "RGBA not available - color index is NOT supported by boson!" << endl;
+	 KMessageBox::error(0, i18n("RGBA is not supported by your system. Exit now"));
 	kapp->exit(1);
 	return false;
  }
@@ -398,7 +397,6 @@ bool BoContext::chooseContext()
  mStereo = res;
 
  d->mContext = 0;
- bool wantDirect = true; // for debugging false might make sense. also for optimizing software rendering?
  if (!d->mContext) {
 	d->mContext = glXCreateContext( disp, (XVisualInfo *)mVi, None, wantDirect);
  }
@@ -418,12 +416,15 @@ public:
 		mContext = 0;
 	}
 	BoContext* mContext;
+
+	bool mWantDirect;
 };
 
-BosonGLWidget::BosonGLWidget(QWidget* parent) : QWidget(parent)
+BosonGLWidget::BosonGLWidget(QWidget* parent, bool direct) : QWidget(parent)
 {
- d = new BosonGLWidgetPrivate;
  boDebug() << k_funcinfo << endl;
+ d = new BosonGLWidgetPrivate;
+ d->mWantDirect = direct;
  init();
 }
 
@@ -562,7 +563,7 @@ void BosonGLWidget::setContext(BoContext* context)
  }
  d->mContext = context;
 
- bool createFailed = !d->mContext->create();
+ bool createFailed = !d->mContext->create(d->mWantDirect);
  if (createFailed) {
 	boError() << k_funcinfo << "Could not create OpenGL context" << endl;
 	return;
