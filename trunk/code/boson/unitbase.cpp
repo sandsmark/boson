@@ -63,14 +63,14 @@ UnitBase::UnitBase(const UnitProperties* prop)
 		KGamePropertyBase::PolicyLocal, "Shields");
  d->mId.registerData(IdId, dataHandler(), 
 		KGamePropertyBase::PolicyLocal, "ID"); // perhaps use dataHandler()->id() instead
- mWork.registerData(IdWork, dataHandler(), 
-		KGamePropertyBase::PolicyLocal, "Work");
- mDamage.registerData(IdDamage, dataHandler(), 
-		KGamePropertyBase::PolicyLocal, "Damage");
  mRange.registerData(IdRange, dataHandler(), 
 		KGamePropertyBase::PolicyLocal, "Range");
  mSightRange.registerData(IdSightRange, dataHandler(), 
 		KGamePropertyBase::PolicyLocal, "SightRange");
+ mDamage.registerData(IdDamage, dataHandler(), 
+		KGamePropertyBase::PolicyLocal, "Damage");
+ mWork.registerData(IdWork, dataHandler(), 
+		KGamePropertyBase::PolicyLocal, "Work");
 
 
  mWork.setLocal((int)WorkNone);
