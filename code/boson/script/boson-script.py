@@ -3,7 +3,7 @@ import BoScript;
 
 cycle = 0;
 
-def init2():
+def init():
   print "Init called";
   method1();
 
