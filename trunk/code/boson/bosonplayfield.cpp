@@ -65,14 +65,14 @@ QString BosonPlayField::defaultPlayField()
 	KSimpleConfig cfg(l[i]);
 	cfg.setGroup("Boson PlayField");
 	QString ident = cfg.readEntry("Identifier");
-	if (ident == QString::fromLatin1("Basic")) {
+	if (ident == QString::fromLatin1("Basic2")) {
 		return ident;
 	} else if (identifier == QString::null) {
 		identifier = ident;
 	}
  }
- boWarning() << "cannot find Basic map - using " << identifier << " instead" << endl;
- return QString::null;
+ boWarning() << "cannot find Basic2 map - using " << identifier << " instead" << endl;
+ return identifier;
 }
 
 QStringList BosonPlayField::availablePlayFields()

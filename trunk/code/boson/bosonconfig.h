@@ -186,6 +186,9 @@ public:
 	static QColor readLocalPlayerColor(KConfig* conf = 0);
 	static void saveLocalPlayerColor(const QColor& color, KConfig* conf = 0);
 
+	static QString readLocalPlayerMap(KConfig* conf = 0);
+	static void saveLocalPlayerMap(const QString& id, KConfig* conf = 0);
+
 	static void saveGameSpeed(int speed, KConfig* conf = 0);
 	static int readGameSpeed(KConfig* conf = 0);
 

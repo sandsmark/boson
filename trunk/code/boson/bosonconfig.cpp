@@ -18,6 +18,7 @@
 */
 #include "bosonconfig.h"
 #include "defines.h"
+#include "bosonplayfield.h"
 //#include "bodebug.h"
 
 #include <kconfig.h>
@@ -305,6 +306,29 @@ void BosonConfig::saveLocalPlayerColor(const QColor& color, KConfig* conf)
  QString oldGroup = conf->group();
  conf->setGroup("Boson");
  conf->writeEntry("LocalPlayerColor", color);
+ conf->setGroup(oldGroup);
+}
+
+QString BosonConfig::readLocalPlayerMap(KConfig* conf)
+{
+ if (!conf) {
+	conf = kapp->config();
+ }
+ QString oldGroup = conf->group();
+ conf->setGroup("Boson");
+ QString name = conf->readEntry("LocalPlayerMap", BosonPlayField::defaultPlayField());
+ conf->setGroup(oldGroup);
+ return name;
+}
+
+void BosonConfig::saveLocalPlayerMap(const QString& id, KConfig* conf)
+{
+ if (!conf) {
+	conf = kapp->config();
+ }
+ QString oldGroup = conf->group();
+ conf->setGroup("Boson");
+ conf->writeEntry("LocalPlayerMap", id);
  conf->setGroup(oldGroup);
 }
 

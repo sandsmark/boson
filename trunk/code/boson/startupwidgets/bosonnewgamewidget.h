@@ -189,6 +189,7 @@ class BosonNewGameWidget : public QWidget
     int mMap;
     int mMinPlayers;
     int mMaxPlayers;
+    QString mMapId;
 
     QMap<int, QString> mMapIndex2Identifier; // index -> playfield identifier
     QMap<int, QString> mSpeciesIndex2Identifier; // index -> species identifier
