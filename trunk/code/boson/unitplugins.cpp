@@ -574,19 +574,16 @@ bool HarvesterPlugin::isNextTo(const Unit* u) const
 	BO_NULL_ERROR(unit());
 	return false;
  }
- float distx;
- float disty;
- if (u->x() < (unit()->x() + unit()->width()) && (u->x() + u->width()) > unit()->x()) {
-	distx = 0.0f;
- } else {
-	distx = fminf(fabsf(u->x() - (unit()->x() + unit()->width())), fabsf((u->x() + u->width()) - unit()->x()));
- }
- if (u->y() < (unit()->y() + unit()->height()) && (u->y() + u->height()) > unit()->y()) {
-	disty = 0.0f;
- } else {
-	disty = fminf(fabsf(u->y() - (unit()->y() + unit()->height())), fabsf((u->y() + u->height()) - unit()->y()));
- }
- if (distx * distx + disty * disty < BO_TILE_SIZE * BO_TILE_SIZE) {
+
+ float distx, disty;
+ distx = fabsf((u->x() + u->width() / 2) - (unit()->x() + unit()->width() / 2));
+ disty = fabsf((u->y() + u->height() / 2) - (unit()->y() + unit()->height() / 2));
+
+ float allowedx, allowedy;
+ allowedx = unit()->width() / 2 + u->width() / 2;
+ allowedy = unit()->height() / 2 + u->height() / 2;
+
+ if (distx <= allowedx && disty <= allowedy) {
 	return true;
  }
  return false;
