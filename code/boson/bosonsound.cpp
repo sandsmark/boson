@@ -32,6 +32,7 @@
 #include <arts/kplayobjectfactory.h>
 #include <arts/kartsserver.h>
 #include <arts/flowsystem.h>
+#include <arts/connect.h>
 
 #include <qstringlist.h>
 #include <qintdict.h>
