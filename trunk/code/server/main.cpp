@@ -18,6 +18,8 @@
  *                                                                         *
  ***************************************************************************/
 
+#include <stdlib.h>	// exit(), atoi()
+
 #include <kapp.h>
 #include <kstddirs.h>
 #include <kmessagebox.h>
