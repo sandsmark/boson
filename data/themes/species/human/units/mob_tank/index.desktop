@@ -16,3 +16,7 @@ Armor=3
 Speed=3
 CanGoOnLand=true
 CanGoOnWater=false
+
+[Textures]
+metal3.jpg=hhroofgray.jpg
+
