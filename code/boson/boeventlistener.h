@@ -42,6 +42,9 @@ public:
 	virtual bool save(QDomElement& root) const;
 	virtual bool load(const QDomElement& root);
 
+	bool saveConditions(QDomElement& root) const;
+	bool loadConditions(const QDomElement& root);
+
 	bool addCondition(BoCondition* c);
 
 	void receiveEvent(const BoEvent* event);
@@ -58,9 +61,6 @@ protected:
 	virtual void processEvent(const BoEvent* event) = 0;
 
 	void deliverToConditions(const BoEvent* event);
-
-	bool saveConditions(QDomElement& root) const;
-	bool loadConditions(const QDomElement& root);
 
 	void ensureScriptInterpreter();
 
