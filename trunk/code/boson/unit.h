@@ -67,6 +67,7 @@ public:
 		IdSpeed = UnitBase::IdLast + 50,
 		IdMovingFailed = UnitBase::IdLast + 51,
 		IdPathRecalculated = UnitBase::IdLast + 52,
+		IdPathAge = UnitBase::IdLast + 53,
 
 		// properties in Facility
 		IdConstructionStep = UnitBase::IdLast + 100,
