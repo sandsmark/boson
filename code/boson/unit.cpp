@@ -931,7 +931,7 @@ void MobileUnit::turnTo()
  } else if((xspeed < 0) && (yspeed < 0)) { // NW
 	turnTo(NorthWest);
  } else if (xspeed == 0 && yspeed == 0) {
-	kdDebug() << k_funcinfo << "xspeed == 0 and yspeed == 0" << endl;
+//	kdDebug() << k_funcinfo << "xspeed == 0 and yspeed == 0" << endl;
  } else {
 	kdDebug() << k_funcinfo << "error when setting frame" << endl;
  }
