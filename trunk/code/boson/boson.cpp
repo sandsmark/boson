@@ -1276,13 +1276,13 @@ void Boson::makeUnitLog()
 		ts << endl;
 		// Waypoints
 		ts << "        " << u->waypointCount() << " waypoints:";
-		for (QValueList<QPoint>::const_iterator pit = u->waypointList().begin(); pit != u->waypointList().end(); pit++) {
+		for (QValueList<BoVector2>::const_iterator pit = u->waypointList().begin(); pit != u->waypointList().end(); pit++) {
 			ts << " (" << (*pit).x() << "; " << (*pit).y() << ")";
 		}
 		ts << endl;
 		// Pathpoints
 		ts << "        " << u->pathPointList().count() << " pathpoints:";
-		for (QValueList<QPoint>::const_iterator pit = u->pathPointList().begin(); pit != u->pathPointList().end(); pit++) {
+		for (QValueList<BoVector2>::const_iterator pit = u->pathPointList().begin(); pit != u->pathPointList().end(); pit++) {
 			ts << " (" << (*pit).x() << "; " << (*pit).y() << ")";
 		}
 		ts << endl;
