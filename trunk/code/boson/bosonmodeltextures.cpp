@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -79,8 +79,6 @@ void BosonModelTextures::init()
 
 BosonModelTextures::~BosonModelTextures()
 {
- // should not do anything. all models should get deleted first and when all
- // models are removed all textures should have been deleted, too
  boDebug(110) << k_funcinfo << endl;
  if (d->mName2Texture.count() != 0) {
 	boWarning(110) << k_funcinfo << "Not all textures have been deleted yet!!" << endl;
@@ -89,11 +87,11 @@ BosonModelTextures::~BosonModelTextures()
  boDebug(110) << k_funcinfo << "done" << endl;
 }
 
-void BosonModelTextures::insert(BosonModel* model, const QString& textureName)
+GLuint BosonModelTextures::insert(BosonModel* model, const QString& textureName)
 {
  if (!model) {
 	boError(110) << k_funcinfo << "NULL model" << endl;
-	return;
+	return 0;
  }
  GLuint tex = 0;
  if (!d->mName2Texture.contains(textureName)) {
@@ -104,6 +102,7 @@ void BosonModelTextures::insert(BosonModel* model, const QString& textureName)
 	tex = texture(textureName);
  }
  d->mModels[tex].append(model);
+ return tex;
 }
 
 void BosonModelTextures::loadTexture(const QString& textureName, GLuint tex)
@@ -151,7 +150,9 @@ void BosonModelTextures::removeTexture(GLuint tex)
  for (; it != d->mName2Texture.end() && it.data() != tex; ++it) {
 	// nothing else to do
  }
- d->mName2Texture.remove(it);
+ if (it != d->mName2Texture.end()) {
+	d->mName2Texture.remove(it);
+ }
  glDeleteTextures(1, &tex);
  boDebug(110) << k_funcinfo << tex << " has been deleted" << endl;
 }
