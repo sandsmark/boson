@@ -224,11 +224,17 @@ void BosonWidget::init()
 BosonWidget::~BosonWidget()
 {
  delete d->mUnitTips;
+ delete d->mMiniMap;
+ delete d->mBigDisplay;
+ delete d->mCommandFrame;
 
-// first delete all KGame related stuff - will also remove players and therefore
-// units. Otherwise this is deleted later, when all units are already cleared by
+// delete the destroyed units first
+ d->mCanvas->deleteDestroyed();
+// now delte all KGame stuff. Also removed player and therefore the rest of the
+// units.  Otherwise this is deleted later, when all units are already cleared by
 // QCanvas (->crash)
  delete d->mBoson;
+ delete d->mCanvas;
  if (d->mMap) {
 	delete d->mMap;
  }

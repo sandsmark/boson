@@ -99,16 +99,21 @@ void BosonCanvas::init()
 
 BosonCanvas::~BosonCanvas()
 {
-// kdDebug() << k_funcinfo << endl;
 // if (d->mFogPixmap) {
 //	delete d->mFogPixmap;
 // }
- d->mDestroyUnits.clear();
- d->mDestroyedUnits.clear();
+
+ deleteDestroyed(); // already called before
  d->mAnimList.clear();
  d->mFogOfWar.clear();
  delete d->mSoundServer;
  delete d;
+}
+
+void BosonCanvas::deleteDestroyed()
+{
+ d->mDestroyUnits.clear();
+ d->mDestroyedUnits.clear();
 }
 
 void BosonCanvas::loadTiles(const QString& name)
