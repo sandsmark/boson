@@ -127,5 +127,13 @@ draw_link("Boson 0.6.1", "announces/boson-0.6.1.php");
 sidebar_box_end();
 }
 
+function sidebar_stories_box()
+{
+sidebar_box_begin("Boson stories");
+draw_link("Story #1&nbsp;&nbsp;(Oct. 17, 2002)", "stories/story-20021017.php");
+draw_link("Story #2&nbsp;&nbsp;(Nov. 08, 2002)", "stories/story-20021108.php");
+sidebar_box_end();
+}
+
 
 ?>
