@@ -85,7 +85,7 @@
 
 #ifdef BO_LIGHT
 #warning move to class !
-static float lightPos[] = {10.0, -10.0, 10.0, 1.0};
+static float lightPos[] = {-6000.0, 3000.0, 10000.0, 1.0};
 #endif
 
 #include <GL/glu.h>
@@ -588,7 +588,7 @@ void BosonBigDisplayBase::initializeGL()
 
 #ifdef BO_LIGHT
  float lightAmb[] = {0.8, 0.8, 0.8, 1.0};
- float lightDif[] = {0.2, 0.2, 0.2, 1.0};
+ float lightDif[] = {1.0, 1.0, 1.0, 1.0};
 
  glLightfv(GL_LIGHT0, GL_AMBIENT, lightAmb);
  glLightfv(GL_LIGHT0, GL_DIFFUSE, lightDif);
