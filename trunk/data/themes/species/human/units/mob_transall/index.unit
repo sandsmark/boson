@@ -5,6 +5,7 @@ Speed=5
 
 [Boson Unit]
 Armor=7
+ConstructedParticles=11130,11131,11132,11133
 DestroyedParticles=1001,3001
 ExplodingDamage=0
 ExplodingDamageRange=0
@@ -21,9 +22,9 @@ Shield=0
 SightRange=9
 SupportMiniMap=false
 TerrainType=2
-UnitDepth=1
-UnitHeight=1.5
-UnitWidth=1.5
+UnitDepth=1.2
+UnitHeight=3
+UnitWidth=3
 Weapons=1
 
 [Sounds]
