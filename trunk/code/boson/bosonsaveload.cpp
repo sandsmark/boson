@@ -649,7 +649,6 @@ bool BosonSaveLoad::loadKGameFromXML(const QString& xml)
 bool BosonSaveLoad::loadPlayersFromXML(const QString& playersXML)
 {
  // now load the players (not the units!)
- QMap<Player*, QDomElement> player2Element;
  QDomDocument doc(QString::fromLatin1("Boson"));
  if (!loadXMLDoc(&doc, playersXML)) {
 	addLoadError(SaveLoadError::LoadInvalidXML, i18n("Parsing error in players.xml"));
@@ -692,6 +691,11 @@ bool BosonSaveLoad::loadPlayersFromXML(const QString& playersXML)
 	unsigned int id = player.attribute(QString::fromLatin1("Id")).toUInt(&ok);
 	if (!ok) {
 		boError(260) << k_funcinfo << "Id tag of player " << i << " not a valid number" << endl;
+		addLoadError(SaveLoadError::LoadPlayersError, i18n("Id of player %1 not a valid number").arg(i));
+		continue;
+	}
+	if (d->mBoson->findPlayer(id)) {
+		addLoadError(SaveLoadError::LoadPlayersError, i18n("Player with Id %1 appears twice! Ignoring second player with this Id. File is broken."));
 		continue;
 	}
 	Player* p = (Player*)d->mBoson->createPlayer(0, 0, false); // we ignore all params anyway.
@@ -700,11 +704,11 @@ bool BosonSaveLoad::loadPlayersFromXML(const QString& playersXML)
 	}
 	p->loadFromXML(player);
 	systemAddPlayer((KPlayer*)p);
-	player2Element.insert(p, player);
 
  }
  if (!localPlayer) {
 	boWarning(260) << k_funcinfo << "local player NOT found" << endl;
+	addLoadError(SaveLoadError::LoadPlayersError, i18n("No local player found"));
  }
  d->mBoson->setLocalPlayer(localPlayer);
 
