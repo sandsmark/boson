@@ -22,6 +22,10 @@
 #include <kplayer.h>
 #include <kgameproperty.h>
 
+#ifdef NO_PLAYER_H_HERE
+#error No player.h include is allowed here
+#endif
+
 class QColor;
 class QDomElement;
 class QTextStream;
