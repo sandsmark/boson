@@ -230,14 +230,6 @@ void Unit::advance(int phase)
  }
 }
 
-void Unit::turnTo(int direction)
-{
- if (direction < 0 || direction >= PIXMAP_PER_MOBILE - 1) {
-	kdError() << "direction " << direction << " not supported" << endl;
-	return;
- }
- setFrame(direction);
-}
 
 void Unit::addWaypoint(const QPoint& pos)
 {
@@ -653,30 +645,11 @@ void MobileUnit::advanceMove()
 	}
  }
 
- // Set correct frame
- if((xspeed == 0) && (yspeed < 0)) { // North
- 	turnTo(North);
- } else if((xspeed > 0) && (yspeed < 0)) { // NE
-	turnTo(NorthEast);
- } else if((xspeed > 0) && (yspeed == 0)) { // East
-	turnTo(East);
- } else if((xspeed > 0) && (yspeed > 0)) { // SE
-	turnTo(SouthEast);
- } else if((xspeed == 0) && (yspeed > 0)) { // South
-	turnTo(South);
- } else if((xspeed < 0) && (yspeed > 0)) { // SW
-	turnTo(SouthWest);
- } else if((xspeed < 0) && (yspeed == 0)) { // West
-	turnTo(West);
- } else if((xspeed < 0) && (yspeed < 0)) { // NW
-	turnTo(NorthWest);
- } else {
-	kdDebug() << "xspeed == 0 and yspeed == 0 or error when setting frame" << endl;
- }
-
  // Set velocity for actual moving
-// kdDebug() << k_funcinfo << "setting velocity: x=" << xspeed << ", y=" << yspeed << endl;
  setVelocity(xspeed, yspeed);
+
+ // set the new direction according to new speed
+ turnTo();
 
  // Check for units on way
  QValueList<Unit*> collisionList = unitCollisions();
@@ -760,7 +733,45 @@ bool MobileUnit::newPath(int destx, int desty)
  return newPath();
 }
 
+void MobileUnit::turnTo(Direction direction)
+{
+/* if (direction < 0 || direction >= PIXMAP_PER_MOBILE - 1) {
+	kdError() << "direction " << direction << " not supported" << endl;
+	return;
+ }*/
+ setFrame((int)direction);
+}
 
+void MobileUnit::turnTo()
+{
+ double xspeed = xVelocity();
+ double yspeed = yVelocity();
+ // Set correct frame
+ if((xspeed == 0) && (yspeed < 0)) { // North
+ 	turnTo(North);
+ } else if((xspeed > 0) && (yspeed < 0)) { // NE
+	turnTo(NorthEast);
+ } else if((xspeed > 0) && (yspeed == 0)) { // East
+	turnTo(East);
+ } else if((xspeed > 0) && (yspeed > 0)) { // SE
+	turnTo(SouthEast);
+ } else if((xspeed == 0) && (yspeed > 0)) { // South
+	turnTo(South);
+ } else if((xspeed < 0) && (yspeed > 0)) { // SW
+	turnTo(SouthWest);
+ } else if((xspeed < 0) && (yspeed == 0)) { // West
+	turnTo(West);
+ } else if((xspeed < 0) && (yspeed < 0)) { // NW
+	turnTo(NorthWest);
+ } else {
+	kdDebug() << "xspeed == 0 and yspeed == 0 or error when setting frame" << endl;
+ }
+}
+
+
+/////////////////////////////////////////////////
+// Facility
+/////////////////////////////////////////////////
 
 class Facility::FacilityPrivate
 {

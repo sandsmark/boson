@@ -76,8 +76,6 @@ public:
 
 	inline virtual int rtti() const { return UnitBase::rtti(); }
 
-	inline void turnTo(int direction);
-
 	inline virtual void setHealth(unsigned long int h);
 
 	inline BosonCanvas* boCanvas() const { return (BosonCanvas*)canvas(); }
@@ -189,6 +187,17 @@ public:
 
 	virtual void setSpeed(double s);
 	inline virtual double speed() const;
+
+	/**
+	 * Turn to direction. This sets a new frame according to the new
+	 * direction.
+	 **/
+	inline void turnTo(Direction direction);
+
+	/**
+	 * Call turnTo according to the current speed (you want to use this!)
+	 **/
+	inline void turnTo();
 
 protected:
 	virtual void advanceMove(); // move one step futher to path
