@@ -9,7 +9,7 @@
     </p>
     <h4>General</h4>
       <a href="#gen_1">- When is Boson finished ?</a><br>
-      <a href="#gen_3">- How can I submit a bug report ?</a><br>
+      <a href="#gen_3">- How do I submit a bug report ?</a><br>
       <a href="#gen_98">- Are there other supported languages than english ?</a><br>
       <a href="#gen_99">- Boson crashed my computer, what can I do ?</a><br>
     <h4>Game</h4>
@@ -27,12 +27,16 @@
     </p>
     <br>
 
-    <a name="gen_3">- How can I submit a bug report ?</a>
+    <a name="gen_3">- How do I submit a bug report ?</a>
     <p>
     You can submit a bugreport through <a href="http://bugs.kde.org/wizard.cgi" target="_blank">bugs.kde.org</a>.<br>
     Or simply start Boson, you will find the "Report Bug..." entry in the "Help" menu.<br>
-    If you don't get a menu on startup than hit the right mouse button and select "Show Menubar".<br>
+    If you don't get a menu on startup than hit the right mouse button and select "Show Menubar".<br><br>
     Please include a backtrace if you have one. Also, if self compiled, configuring with "--enable-debug=full" helps us.<br>
+    If Boson crashed, please send us the emergency logs. You can use tar/gzip or zip and attach them to the bugreport.
+    These logs help us to "replay" the situation in which boson crashed. You can find them in the directory where boson
+    was started.<br><br>
+
     If you have speed problems, please klick <a href="#game_2">here</a>.
     </p>
     <br>
