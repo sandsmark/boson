@@ -160,6 +160,7 @@ void UnitProperties::loadUnitType(const QString& fileName, bool fullmode)
  mExplodingFragmentCount = conf.readUnsignedNumEntry("ExplodingFragmentCount", 0);
  mExplodingFragmentDamage = conf.readLongNumEntry("ExplodingFragmentDamage", 10);
  mExplodingFragmentDamageRange = (float)conf.readDoubleNumEntry("ExplodingFragmentDamageRange", 0.5);
+ mRemoveWreckageImmediately = conf.readBoolEntry("RemoveWreckageImmediately", false);
  d->mExplodingFragmentFlyParticleSystemIds = BosonConfig::readUnsignedLongNumList(&conf, "ExplodingFragmentFlyParticles");
  d->mExplodingFragmentHitParticleSystemIds = BosonConfig::readUnsignedLongNumList(&conf, "ExplodingFragmentHitParticles");
  if (mFullMode) {

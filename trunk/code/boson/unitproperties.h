@@ -362,6 +362,8 @@ public:
 	QPtrList<BosonParticleSystem> newExplodingFragmentFlyParticleSystems(BoVector3 pos) const;
 	QPtrList<BosonParticleSystem> newExplodingFragmentHitParticleSystems(BoVector3 pos) const;
 
+	bool removeWreckageImmediately() const { return mRemoveWreckageImmediately; }
+
 
 	/**
 	 * Load actions for this unit. Must be called after overview pixmaps are
@@ -410,6 +412,7 @@ protected:
 	void setExplodingDamageRange(float range)  { mExplodingDamageRange = range; };
 	void setExplodingDamage(long int damage)  { mExplodingDamage = damage; };
 	void setHitPoint(const BoVector3& hitpoint);
+	void setRemoveWreckageImmediately(bool remove)  { mRemoveWreckageImmediately = remove; }
 
 	// These only have effect if there is mobile or facility properties
 	void setConstructionSteps(unsigned int steps);
@@ -474,6 +477,7 @@ private:
 	unsigned int mExplodingFragmentCount;
 	long int mExplodingFragmentDamage;
 	float mExplodingFragmentDamageRange;
+	bool mRemoveWreckageImmediately;
 
 	MobileProperties* mMobileProperties;
 	FacilityProperties* mFacilityProperties;
