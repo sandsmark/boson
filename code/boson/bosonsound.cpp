@@ -107,6 +107,10 @@ public:
 		result = mParent->server().server().createPlayObjectForURL(
 				string(file()), string(mimeType->name()),
 				false); // false as we connect it to the soundcard ourselfes
+		if (result.isNull()) {
+			kdError() << k_funcinfo << "NULL playobject" << endl;
+			return;
+		}
 
 		Arts::Synth_BUS_UPLINK uplink = Arts::DynamicCast(
 				mParent->server().server().createObject(
