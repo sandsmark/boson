@@ -75,11 +75,8 @@ protected slots:
 	void slotPlayerKilled(Player* p);
 	void slotGameOverDialogFinished();
 
-	void slotSyncNetwork();
-
 protected:
 	virtual void initKActions();
-	virtual void initDisplayManager();
 	virtual void initConnections();
 	virtual void setBosonXMLFile();
 
