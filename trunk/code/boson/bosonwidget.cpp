@@ -5,10 +5,8 @@
 #include "bosonminimap.h"
 #include "bosoncanvas.h"
 #include "boson.h"
-#include "bosonmap.h"
 #include "player.h"
 #include "visualunit.h"
-#include "defines.h"
 #include "speciestheme.h"
 #include "unitproperties.h"
 #include "kspritetooltip.h"
@@ -16,6 +14,10 @@
 #include "editorinput.h"
 #include "bosonmessage.h"
 #include "kgamedialogbosonconfig.h"
+#include "bosonmap.h"
+#include "bosonscenario.h"
+
+#include "defines.h"
 
 #include <klocale.h>
 #include <kconfig.h>
@@ -48,6 +50,7 @@ public:
 		mBoson = 0;
 		mLocalPlayer = 0;
 		mMap = 0;
+		mScenario = 0;
 	}
 	
 	BosonBigDisplay* mBigDisplay;
@@ -59,6 +62,7 @@ public:
 	Boson* mBoson;
 	Player* mLocalPlayer;
 	BosonMap* mMap;
+	BosonScenario* mScenario;
 
 	KSpriteToolTip* mUnitTips;
 
@@ -88,7 +92,6 @@ BosonWidget::BosonWidget(QWidget* parent, bool editor)
 // the map is also found here. This is currently only used on startup to load
 // the cells (aka map - they contain the groundtypes) and the initial units.
 // do not call in init()  -  connects to commandframe
-// clearMap(); // note: also creates a new map!
 
  d->mBoson->setCanvas(d->mCanvas); // should not be stored here - but seems to be necessary :-(
 
@@ -183,6 +186,9 @@ BosonWidget::~BosonWidget()
  delete d->mBoson;
  if (d->mMap) {
 	delete d->mMap;
+ }
+ if (d->mScenario) {
+	delete d->mScenario;
  }
  delete d;
 }
@@ -326,6 +332,7 @@ void BosonWidget::slotStartGame()
  // signal in newgamedialog.
  kdDebug() << "BosonWidget::slotStartGame(): load default map" << endl;
  slotLoadMap(BosonMap::defaultMap()); // also sends over network
+ slotLoadScenario(BosonScenario::defaultScenario()); // perhaps this should load the map as well - as it depends on the map...
 
 }
 
@@ -367,7 +374,10 @@ void BosonWidget::quitGame()
  
  d->mLocalPlayer = 0;
 
-// clearMap();
+ if (d->mMap) {
+	delete d->mMap;
+	d->mMap = 0;
+ }
 
  // now re-add the local player
  addLocalPlayer();
@@ -390,7 +400,7 @@ void BosonWidget::slotEditorConstructionChanged(int index)
  d->mCommandFrame->slotEditorConstruction(index, d->mLocalPlayer);
 }
 
-void BosonWidget::clearMap()
+void BosonWidget::clearMap() // TODO: rename - recreate map or so
 {
  if (d->mMap) {
 	delete d->mMap;
@@ -461,7 +471,6 @@ void BosonWidget::slotLoadMap(const QString& map)
 	return;
  }
  if (!d->mMap) {
-	kdWarning() << "NULL map" << endl;
 	clearMap();
  }
  // load the map into d->mMap
@@ -475,6 +484,23 @@ void BosonWidget::slotLoadMap(const QString& map)
 
  // send the loaded map via network. It will be initialized in slotReceiveMap
  d->mBoson->sendMessage(stream, BosonMessage::InitMap);
+
+ delete d->mMap; // we create it again when InitMap is received again.
+ d->mMap = 0;
+}
+
+void BosonWidget::slotLoadScenario(const QString& scenario)
+{
+ if (!d->mBoson->isServer()) {
+	kdWarning() << "BosonWidget::slotLoadScenario(): not server" << endl;
+	return;
+ }
+ if (d->mScenario) {
+	kdWarning() << "already loaded a scenario! delete it ... " << endl;
+	delete d->mScenario;
+ }
+ d->mScenario = new BosonScenario;
+ d->mScenario->loadScenario(scenario);
 }
 
 void BosonWidget::slotReceiveMap(const QByteArray& buffer)
@@ -510,8 +536,8 @@ void BosonWidget::slotReceiveMap(const QByteArray& buffer)
 
  if (d->mBoson->isServer()) {
 	// add player units
-	kdDebug() << "start map" << endl;
-	d->mMap->startMap(d->mBoson);
+	kdDebug() << "start scenario" << endl;
+	d->mScenario->startScenario(d->mBoson);
 
 	// FIXME: we have too many functions called "startGame"!
 	// now start the game
