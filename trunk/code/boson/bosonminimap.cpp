@@ -176,14 +176,12 @@ void BosonMiniMap::slotChangeCell(int x, int y, int groundType, unsigned char ve
 	// we can't see this cell
 	return;
  }
- if (mCanvas->findUnitAtCell(x, y)) {
+ QValueList<Unit*> list = mCanvas->unitsAtCell(x, y);
+ if (!list.isEmpty()) {
 	// there is a unit on the cell, so do not paint the cell.
 	return;
  }
  changeCell(x, y, groundType, version);
-
- // we need to repaint now - especially in editor mode when a cell was changed.
- d->mPixmap->repaint(false);// performance - units will be added and therefore repaint()
 }
 
 void BosonMiniMap::changeCell(int x, int y, int groundType, unsigned char)
@@ -214,8 +212,7 @@ void BosonMiniMap::changeCell(int x, int y, int groundType, unsigned char)
 		setPoint(x, y, COLOR_UNKNOWN);
 		break;
  }
-// d->mPixmap->repaint(false);// performance - this gets called for map init -
-// more will happen with the mini map anyway, so it'll be repainted later
+ d->mPixmap->repaint(false);
 }
 
 void BosonMiniMap::setPoint(int x, int y, const QColor& color)
@@ -370,7 +367,8 @@ void BosonMiniMap::updateCell(int x, int y)
  if (list.isEmpty()) {
 	changeCell(x, y, cell->groundType(), cell->version());
  } else {
-	setPoint(x, y, list.first()->owner()->teamColor());
+	Unit* u = list.first();
+	moveUnit(u, makeCellList(u, u->x(), u->y()), QPointArray());
  }
 }
 
@@ -407,6 +405,7 @@ BosonMap* BosonMiniMap::map() const
 void BosonMiniMap::initMap()
 {
  BO_CHECK_NULL_RET(map());
+ setUpdatesEnabled(false);
  createMap();
  bool oldFog = mUseFog;
  mUseFog = true;
@@ -416,6 +415,8 @@ void BosonMiniMap::initMap()
 	}
  }
  mUseFog = oldFog;
+ setUpdatesEnabled(true);
+ repaint(false);
 }
 
 void BosonMiniMap::slotUnitDestroyed(Unit* unit)
@@ -438,9 +439,9 @@ void BosonMiniMap::slotUnfog(int x, int y)
  QValueList<Unit*> list = mCanvas->unitsAtCell(x, y);
  if (!list.isEmpty()) {
 	Unit* u = list.first();
-	slotAddUnit(u, (int)u->x(), (int)u->y());
+	moveUnit(u, makeCellList(u, u->x(), u->y()), QPointArray());
  } else {
-	slotChangeCell(x, y, cell->groundType(), cell->version());
+	changeCell(x, y, cell->groundType(), cell->version());
  }
 }
 
