@@ -21,7 +21,6 @@
 
 class UnitBase;
 class ProductionPlugin;
-//class QDataStream;
 class Player;
 class QDomElement;
 class QString;
@@ -64,7 +63,7 @@ public:
 	 * @param destroyedBy Player that destroyed the unit
 	 **/
 	void addDestroyedFacility(UnitBase* destroyed, Player* destroyedBy);
-			
+
 	/**
 	 * Increase the value returned by @producedFacility
 	 * @param produced Unused - might get used to show which special unit
