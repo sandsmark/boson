@@ -4,7 +4,7 @@
 CC = gcc
 CXX = g++
 
-all: checktextures fixtexturesize modelstatistics stripifier
+all: checktextures fixtexturesize modelstatistics stripifier gentexfont
 
 checktextures: checktextures.c
 	$(CC) checktextures.c -o checktextures -l3ds -lm
@@ -18,3 +18,5 @@ fixtexturesize: fixtexturesize.cpp
 stripifier: stripifier.c
 	$(CC) stripifier.c -o stripifier -l3ds -lm
 
+gentexfont: gentexfont.c
+	$(CC) -o gentexfont gentexfont.c -lX11 -L/usr/X11R6/lib
