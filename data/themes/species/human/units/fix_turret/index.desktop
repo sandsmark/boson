@@ -11,8 +11,17 @@ Producer=10
 Requirements=5,2,3
 ProductionTime=60
 DestroyedParticles=1001
-Weapons=1001
+Weapons=1
 
 [Boson Facility]
 ConstructionSteps=12
 
+[Weapon_0]
+Range=5
+Reload=5
+CanShootAtAirUnits=false
+CanShootAtLandUnits=true
+Speed=0
+Damage=5
+DamageRange=1
+HitParticles=2002

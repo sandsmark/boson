@@ -12,7 +12,7 @@ Shield=20
 ProductionTime=70
 Upgrades=1
 DestroyedParticles=1001,6001,3002
-Weapons=1001
+Weapons=1
 
 [Boson Mobile Unit]
 Speed=4
@@ -24,3 +24,13 @@ RequireTechnologies=12
 WeaponRange=5
 WeaponDamage=15
 Health=60
+
+[Weapon_0]
+Range=4
+Reload=5
+CanShootAtAirUnits=false
+CanShootAtLandUnits=true
+Damage=5
+Speed=0
+DamageRange=1
+HitParticles=2002
