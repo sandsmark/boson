@@ -24,6 +24,7 @@
 #include "cell.h"
 #include "unit.h"
 #include "bosoncanvas.h"
+#include "bosonmap.h"
 
 #include <qptrvector.h>
 
@@ -207,5 +208,34 @@ bool PlayerIO::canGo(const Unit* unit, const Cell* cell, bool _default) const
 	return canGo(unit->unitProperties(), cell, _default);
  }
  return _default;
+}
+
+bool PlayerIO::isValidCell(int x, int y) const
+{
+ if (!player()->map()) {
+	return false;
+ }
+ return player()->map()->isValidCell(x, y);
+}
+
+Cell* PlayerIO::cell(int x, int y, bool* valid) const
+{
+ bool v;
+ Cell* c = 0;
+ if (!player()->map()) {
+	v = false;
+ } else {
+	c = player()->map()->cell(x, y);
+ }
+ if (!v) {
+	if (valid) {
+		*valid = v;
+	}
+	return 0;
+ }
+ if (valid) {
+	*valid = v;
+ }
+ return c;
 }
 

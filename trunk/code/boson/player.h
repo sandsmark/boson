@@ -51,6 +51,8 @@ public:
 
 	PlayerIO* playerIO() const;
 
+	BosonMap* map() const;
+
 	/**
 	 * Quit the current game for this player. This will reset some variables
 	 * so that the player can play on a new map.

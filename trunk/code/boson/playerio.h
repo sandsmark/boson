@@ -66,6 +66,19 @@ public:
 	bool isFogged(const Cell* c) const;
 
 	/**
+	 * @return The cell at @p x, @p y (see @ref BosonMap::cell) if that cell
+	 * is visible, or 0 if the cell is either not visible to this player, or
+	 * if @p x, @p y are not a valid cell.
+	 * @param If 0 is returned because the @p x, @p y parameters were
+	 * incorrect, this is set to FALSE, if non-null. Otherwise (i.e. the
+	 * cell is not visible to this player) it is set to TRUE. If it is NULL,
+	 * it is simply ignored.
+	 **/
+	Cell* cell(int x, int y, bool* isValid = 0) const;
+
+	bool isValidCell(int x, int y) const;
+
+	/**
 	 * @return Whether the player can see these coordinates. This is equal
 	 * to !isFogged(cellX, cellY).
 	 **/
