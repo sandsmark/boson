@@ -19,7 +19,8 @@
  ***************************************************************************/
 
 #include <assert.h>
-#include <stdlib.h> //exit
+#include <stdlib.h> // exit
+#include <unistd.h> // sleep
 
 #include <ksock.h>
 
@@ -115,6 +116,9 @@ void BosonServer::playerHasDied(uint playerId)
 	// closing connections
 	for(i= 0; i < nbPlayer; i++) {
 		if (i!=playerId) sendMsg(player[i].buffer, MSG_DLG_END,  MSG(end) );
+	}
+	sleep(1);	// let the messages reach clients
+	for(i= 0; i < nbPlayer; i++) {
 		player[i].socketState = SSS_CONNECT_DOWN;
 		delete player[i].socket;
 		delete player[i].buffer;
