@@ -58,8 +58,8 @@ protected :
 	int		map_width;
 	int		map_height;
 	uint		nbPlayer;
-	int		nbMobiles;
-	int		nbFacilities;
+	uint		nbMobiles;
+	uint		nbFacilities;
 
 	void	load(cell_t &);
 	void	load(mobileMsg_t &);

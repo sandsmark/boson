@@ -112,8 +112,7 @@ private:
 	time_t	ping;
 	time_t	last_sync;
 	int	radar_pulse;
-	int	my_fix;
-	int	my_mobiles;
+	uint	my_fix, my_mobiles;
 	uint	nb_player;
 };
 
