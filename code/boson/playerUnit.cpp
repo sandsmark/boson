@@ -264,7 +264,9 @@ bool playerMobUnit::getWantedShoot(bosonMsgData *msg)
 		else return false;		// not yet
 
 	// ok, let's shoot it
-	msg->shoot.target_key = ((visualUnit *)target)->key;
+	msg->shoot.target_key = (target->inherits("playerMobUnit"))?
+			((playerMobUnit*)target)->key:
+			((playerFacility*)target)->key;
 	return true;
 }
 
