@@ -97,7 +97,10 @@ draw_bigbox_subheader("Debian");
 draw_bigbox_text("To install Boson on Debian, do this:
 <pre>apt-get update; apt-get install boson</pre>
 This will download and install Boson's binary packages, so you'll have Boson up
-and running in just few minutes.<br><br>");
+and running in just few minutes.<br>
+Note that you should also have something like
+<pre>deb http://ftp2.de.debian.org/debian sid main</pre>
+in your <i>/etc/apt/sources.list</i> file.<br><br>");
 
 /*draw_bigbox_subheader("RPM/binary releases");
 draw_bigbox_text("Note that RPM packages are not provided by the Boson team and
