@@ -4,14 +4,10 @@
     </h1>
     <table border="0">
 	<tr>
-		<td><img src="../../../themes/species/human/units/fix_barracks/overview-big.png" border="0">&nbsp;</td>
+		<td><img src="barracks.png" border="0">&nbsp;</td>
 		<td valign="top"><img src="../none.png" border="0" height="30"><br>
 		Here you can build land units (tank, oil harvester...).
 	</tr>
-	<tr><td>
-		<img src="../../../themes/species/human/units/fix_barracks/overview-big.png">&nbsp;
-		<img src="../../../themes/species/human/units/fix_barracks/overview-small.png">&nbsp;
-	</td></tr>
 	<tr><td><br>&nbsp</td></tr>
     </table>
     

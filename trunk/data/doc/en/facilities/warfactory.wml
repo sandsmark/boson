@@ -4,15 +4,11 @@
     </h1>
     <table border="0">
 	<tr>
-		<td><img src="../../../themes/species/human/units/fix_warfactory/overview-big.png" border="0">&nbsp;</td>
+		<td><img src="warfactory.png" border="0">&nbsp;</td>
 		<td valign="top"><img src="../none.png" border="0" height="30"><br>
 		The War factory provides technology to build other buildings, see the <a href="map.html">Facilities dependency tree</a><br>
 		You can also build land units here.
 	</tr>
-	<tr><td>
-		<img src="../../../themes/species/human/units/fix_warfactory/overview-big.png">&nbsp;
-		<img src="warfactory.png">&nbsp;
-	</td></tr>
 	<tr><td><br>&nbsp</td></tr>
     </table>
     
