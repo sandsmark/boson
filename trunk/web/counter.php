@@ -665,7 +665,11 @@ function counter2_get_browser($ua)
   {
     return "Konqueror";
   }
-  else if(eregi("(rv:1.1)|(rv:1.2)|(rv1.3)|(rv:1.4)", $ua))
+  else if(eregi("Safari", $ua))
+  {
+    return "Safari";
+  }
+  else if(eregi("(rv:1.1)|(rv:1.2)|(rv:1.3)|(rv:1.4)|(rv:1.5)", $ua))
   {
     return "Mozilla";
   }
@@ -673,7 +677,7 @@ function counter2_get_browser($ua)
   {
     return "Netscape";
   }
-  else if(eregi("(nuhk)|(Googlebot)|(Yammybot)|(Openbot)|(Slurp/cat)", $ua))
+  else if(eregi("(nuhk)|(Googlebot)|(Yammybot)|(Openbot)|(Slurp/cat)|(crawler)|(ContentHarvester)|(ia_archiver)", $ua))
   {
     return "SearchBot";
   }
@@ -717,6 +721,10 @@ function counter2_get_os($ua)
   {
     return "OpenBSD";
   }
+  else if(eregi("FreeBSD", $ua))
+  {
+    return "FreeBSD";
+  }
   else if(eregi("SunOS", $ua))
   {
     return "Sun OS";
@@ -741,7 +749,7 @@ function counter2_get_os($ua)
   {
     return "OS/2";
   }
-  else if(eregi("(nuhk)|(Googlebot)|(Yammybot)|(Openbot)|(Slurp/cat)", $ua))
+  else if(eregi("(nuhk)|(Googlebot)|(Yammybot)|(Openbot)|(Slurp/cat)|(crawler)|(ContentHarvester)|(ia_archiver)", $ua))
   {
     return "SearchBot";
   }
