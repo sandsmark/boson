@@ -14,6 +14,10 @@ METASOURCES = AUTO
 libbosonsoundcommon_la_SOURCES = \
 	boaudiocommand.cpp
 
+if link_static
+else
+LIB_OPENAL_LIB=$(LIB_OPENAL)
+endif
 libbosonsound_la_SOURCES = \
 	boaudiocommand.cpp \
 	boaudiothread.cpp \
@@ -21,7 +25,7 @@ libbosonsound_la_SOURCES = \
 libbosonsound_la_LIBADD = \
 		$(top_builddir)/bosound/libbosonsoundcommon.la \
 		$(BO_LIB_OPENAL) \
-		$(LIB_OPENAL)
+		$(LIB_OPENAL_LIB)
 
 #bosonaudioprocess_LDFLAGS = $(all_libraries)
 #bosonaudioprocess_LDADD = \
