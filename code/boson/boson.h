@@ -36,6 +36,7 @@ class BoMessage;
 class BoEvent;
 class BoEventManager;
 class BoAdvanceMessageTimes;
+class BoDebugMessage;
 
 #define boGame Boson::boson()
 
@@ -523,7 +524,9 @@ protected slots:
 
 	void slotReceiveAdvance();
 
-	void slotDebugOutput(const QString& area, const char* data, int level);
+	void slotBoDebugOutput(const BoDebugMessage&);
+	void slotBoDebugWarning(const BoDebugMessage&);
+	void slotBoDebugError(const BoDebugMessage&);
 
 private:
 	friend class BoAdvance;

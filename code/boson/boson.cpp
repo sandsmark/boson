@@ -33,6 +33,7 @@
 #include "bosonprofiling.h"
 #include "bofile.h"
 #include "bodebug.h"
+#include "bodebuglog.h"
 #include "bosonsaveload.h"
 #include "bosonconfig.h"
 #include "bosonstarting.h"
@@ -419,6 +420,21 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
 	boError() << k_funcinfo << "oops - already an emergencySaveFunction set! overwriting!" << endl;
  }
  KCrash::setEmergencySaveFunction(emergencySave);
+
+ BoDebugLog* debugLog = BoDebugLog::debugLog();
+ if (debugLog) {
+	connect(debugLog, SIGNAL(signalError(const BoDebugMessage&)),
+			this, SLOT(slotBoDebugError(const BoDebugMessage&)));
+	connect(debugLog, SIGNAL(signalWarn(const BoDebugMessage&)),
+			this, SLOT(slotBoDebugWarning(const BoDebugMessage&)));
+	connect(debugLog, SIGNAL(signalDebug(const BoDebugMessage&)),
+			this, SLOT(slotBoDebugOutput(const BoDebugMessage&)));
+
+	// we could provide config entries for these, that allow enabling _INFO
+	// as well
+	debugLog->setEmitSignal(BoDebug::KDEBUG_ERROR, true);
+	debugLog->setEmitSignal(BoDebug::KDEBUG_WARN, true);
+ }
 }
 
 Boson::~Boson()
@@ -1235,11 +1251,6 @@ void Boson::slotAddChatSystemMessage(const QString& text, const Player* p)
  slotAddChatSystemMessage(i18n("Boson"), text, p);
 }
 
-void Boson::slotDebugOutput(const QString& area, const char* data, int level)
-{
- slotAddChatSystemMessage(area, data);
-}
-
 unsigned int Boson::delayedMessageCount() const
 {
  return d->mMessageDelayer->delayedMessageCount();
@@ -1540,5 +1551,32 @@ bool Boson::saveCanvasConditions(QDomElement& root) const
 const QPtrList<BoAdvanceMessageTimes>& Boson::advanceMessageTimes() const
 {
  return d->mAdvance->advanceMessageTimes();
+}
+
+void Boson::slotBoDebugOutput(const BoDebugMessage& m)
+{
+ QString area = m.areaName();
+ if (area.isEmpty()) {
+	area = i18n("Debug");
+ }
+ slotAddChatSystemMessage(area, i18n("ERROR: %1").arg(m.message()));
+}
+
+void Boson::slotBoDebugWarning(const BoDebugMessage& m)
+{
+ QString area = m.areaName();
+ if (area.isEmpty()) {
+	area = i18n("Debug");
+ }
+ slotAddChatSystemMessage(area, i18n("WARNING: %1").arg(m.message()));
+}
+
+void Boson::slotBoDebugError(const BoDebugMessage& m)
+{
+ QString area = m.areaName();
+ if (area.isEmpty()) {
+	area = i18n("Debug");
+ }
+ slotAddChatSystemMessage(area, i18n("ERROR: %1").arg(m.message()));
 }
 

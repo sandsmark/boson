@@ -162,6 +162,7 @@ boson_SOURCES = \
 		kgameplayerdebug.cpp \
 		kgamecelldebug.cpp \
 		gameoverdialog.cpp \
+		bodebuglogdialog.cpp \
 		main.cpp
 
 bounit_LDFLAGS = $(KDE_RPATH) $(all_libraries)

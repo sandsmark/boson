@@ -31,11 +31,12 @@
 #endif
 
 #include "bodebugdcopiface.h"
+#include "bodebuglog.h"
 
-#include "kapplication.h"
-#include "kglobal.h"
-#include "kinstance.h"
-#include "kstandarddirs.h"
+#include <kapplication.h>
+#include <kglobal.h>
+#include <kinstance.h>
+#include <kstandarddirs.h>
 #include <qmessagebox.h>
 #include <klocale.h>
 #include <qfile.h>
@@ -227,6 +228,12 @@ static void kDebugBackend( unsigned short nLevel, unsigned int nArea, const QStr
     }
   }
 
+  BoDebugLog* log = BoDebugLog::debugLog();
+  if (log)
+  {
+    log->addEntry(_output, nArea, boDebug_data->aAreaName, nLevel);
+  }
+
   QString sOutput;
   int nPriority = 0;
   QString aCaption;
@@ -350,21 +357,6 @@ static void kDebugBackend( unsigned short nLevel, unsigned int nArea, const QStr
       if ( !boDebug_data->aAreaName.isEmpty() )
       {
         fprintf( output, "%s: ", boDebug_data->aAreaName.ascii() );
-      }
-      switch(nLevel)
-      {
-        case BoDebug::KDEBUG_WARN:
-          fprintf(output, "WARNING: ");
-          break;
-        case BoDebug::KDEBUG_FATAL:
-          fprintf(output, "FATAL: ");
-          break;
-        case BoDebug::KDEBUG_ERROR:
-          fprintf(output, "ERROR: ");
-          break;
-        case BoDebug::KDEBUG_INFO:
-        default:
-          break;
       }
       fputs(data, output);
       break;
