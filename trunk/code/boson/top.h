@@ -265,6 +265,7 @@ private:
 
 	void initStartupWidget(StartupWidgetIds id);
 	void showStartupWidget(StartupWidgetIds id);
+	void removeStartupWidget(StartupWidgetIds id);
 	void initBosonWidget(bool loading = false); // a special case for initStartupWidget - this must get called from outside a show*Widget().
 
 	void raiseWidget(StartupWidgetIds id);
