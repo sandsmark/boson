@@ -26,6 +26,8 @@
 class QDomElement;
 class QDomNodeList;
 class BoEventMatching;
+class Boson;
+template <class T1, class T2> class QMap;
 
 // AB: we use QCString for performance reasons here. all event names will always
 // be english names with only ascii chracters. QCString uses qstrcmp() and
@@ -62,7 +64,7 @@ public:
 	 **/
 	static BoEvent* createEvent(int rtti);
 
-	virtual bool save(QDomElement& root) const;
+	virtual bool save(QDomElement& root, const QMap<int,int>* playerId2Index) const;
 	virtual bool load(const QDomElement& root);
 
 	/**
@@ -215,7 +217,7 @@ public:
 		return mData2;
 	}
 
-	virtual bool save(QDomElement& root) const;
+	virtual bool save(QDomElement& root, const QMap<int,int>* playerId2Index) const;
 	virtual bool load(const QDomElement& root);
 	virtual bool matches(const BoEventMatching* m, const BoEvent* e) const;
 
@@ -257,7 +259,7 @@ public:
 		return mData2;
 	}
 
-	virtual bool save(QDomElement& root) const;
+	virtual bool save(QDomElement& root, const QMap<int,int>* playerId2Index) const;
 	virtual bool load(const QDomElement& root);
 	virtual bool matches(const BoEventMatching* m, const BoEvent* e) const;
 

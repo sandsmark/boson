@@ -38,7 +38,7 @@ BoEventMatching::~BoEventMatching()
  delete mEvent;
 }
 
-bool BoEventMatching::save(QDomElement& root) const
+bool BoEventMatching::save(QDomElement& root, const QMap<int, int>* playerId2Index) const
 {
  if (!mEvent) {
 	boError(360) << k_funcinfo << "cannot save a matching with NULL event" << endl;
@@ -46,7 +46,7 @@ bool BoEventMatching::save(QDomElement& root) const
  }
  QDomDocument doc = root.ownerDocument();
  QDomElement e = doc.createElement("Event");
- if (!mEvent->save(e)) {
+ if (!mEvent->save(e, playerId2Index)) {
 	boError(360) << k_funcinfo << "cannot save event" << endl;
 	return false;
  }

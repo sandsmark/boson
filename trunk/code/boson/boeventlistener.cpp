@@ -29,6 +29,7 @@
 #include "unitproperties.h"
 #include "script/bosonscript.h"
 #include "speciestheme.h"
+#include <kgame/kplayer.h> // KPlayer::id()
 
 #include <klocale.h>
 
@@ -86,10 +87,18 @@ bool BoEventListener::saveConditions(QDomElement& root) const
  QDomDocument doc = root.ownerDocument();
  QDomElement conditions = doc.createElement("Conditions");
  root.appendChild(conditions);
+
+ QMap<int, int> playerId2Index;
+ QPtrListIterator<KPlayer> playerIt(*boGame->playerList());
+ while (playerIt.current()) {
+	int index = boGame->playerList()->findRef(playerIt.current());
+	playerId2Index.insert(playerIt.current()->id(), index);
+	++playerIt;
+ }
  QPtrListIterator<BoCondition> it(d->mConditions);
  while (it.current()) {
 	QDomElement e = doc.createElement("Condition");
-	if (!it.current()->save(e)) {
+	if (!it.current()->save(e, &playerId2Index)) {
 		boError(360) << k_funcinfo << "unable to save condition" << endl;
 		return false;
 	}

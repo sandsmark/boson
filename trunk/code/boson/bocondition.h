@@ -26,6 +26,7 @@ class QDomNodeList;
 
 class BoEvent;
 class BosonScript;
+template<class T1, class T2> class QMap;
 
 class BoConditionPrivate;
 
@@ -84,7 +85,7 @@ public:
 
 	void processEvent(const BoEvent* event);
 
-	virtual bool save(QDomElement& root) const;
+	virtual bool save(QDomElement& root, const QMap<int, int>* playerId2Index) const;
 	virtual bool load(const QDomElement& root);
 
 	/**
