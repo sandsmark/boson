@@ -102,6 +102,12 @@ draw_bigbox_text("What has been changed since 0.9.1:
     <li>Free mode and no-limits mode for camera (to get used by scripts)</li>
 </ul>
 
+ <h3>Editor</h3>
+ <ul>
+     <li>Change height icon</li>
+     <li>Bugfixes</li>
+ </ul>
+
  <h3>Data</h3>
  <ul>
      <li>Some neutral objects added (mineralmine, trees, stone, house...)</li>
