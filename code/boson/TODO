@@ -81,8 +81,6 @@ General TODOs
   automatically?
   We can do this using static const char filename_id = "$Id:";
 - BosonTiles: pehaps use KPixmapSplitter (kdelibs/kdefx)
-- IdReloadState also makes Player emit signalUnitChanged() - this might become a
-  performance problem!! we need it for BosonCommandWidget
 - transmit everything on startup over network (== map, unitProperties). This
   saves us from a cheating player who (maybe just accidently) changed the files
   (units/*/index.desktop especially).

@@ -84,10 +84,8 @@ Boson* UnitPlugin::game() const
 
 ProductionPlugin::ProductionPlugin(Unit* unit) : UnitPlugin(unit)
 {
-// mProductions.registerData(Unit::IdPlugin_Productions, dataHandler(),
-//		KGamePropertyBase::PolicyLocal, "Productions");
- mProductionState.registerData(Unit::IdPlugin_ProductionState, dataHandler(),
-		KGamePropertyBase::PolicyLocal, "ProductionState");
+// unit->registerData(&mProductions, Unit::IdProductions);
+ unit->registerData(&mProductionState, Unit::IdProductionState);
  mProductionState.setLocal(0);
 // mProductions.setEmittingSignal(false); // just to prevent warning in Player::slotUnitPropertyChanged()
  mProductionState.setEmittingSignal(false); // called quite often - not emitting will increase speed a little bit
@@ -400,17 +398,13 @@ HarvesterPlugin::HarvesterPlugin(Unit* unit)
 {
  // FIXME: we should clean the property IDs. They should be in UnitPlugin, not
  // in Unit.
- mResourcesMined.registerData(Unit::IdMob_ResourcesMined, dataHandler(),
-		KGamePropertyBase::PolicyLocal, "ResourcesMined");
+ unit->registerData(&mResourcesMined, Unit::IdResourcesMined);
+ unit->registerData(&mResourcesX, Unit::IdResourcesX);
+ unit->registerData(&mResourcesY, Unit::IdResourcesY);
+ unit->registerData(&mHarvestingType, Unit::IdHarvestingType);
  mResourcesMined.setLocal(0);
- mResourcesX.registerData(Unit::IdMob_ResourcesX, dataHandler(),
-		KGamePropertyBase::PolicyLocal, "ResourcesX");
  mResourcesX.setLocal(0);
- mResourcesY.registerData(Unit::IdMob_ResourcesY, dataHandler(),
-		KGamePropertyBase::PolicyLocal, "ResourcesY");
  mResourcesY.setLocal(0);
- mHarvestingType.registerData(Unit::IdMob_HarvestingType, dataHandler(),
-		KGamePropertyBase::PolicyLocal, "HarvestingType");
  mHarvestingType.setLocal(0);
  mRefinery = 0l;
 }

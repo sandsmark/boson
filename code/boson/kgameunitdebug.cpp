@@ -263,8 +263,6 @@ void KGameUnitDebug::slotUnitPropertyChanged(KGamePropertyBase* prop)
  }
 
  switch (prop->id()) {
-	case Unit::IdReloadState:
-		break;
 	default:
 		update(d->mItems[unit], unit);
 		break;
