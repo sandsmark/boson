@@ -85,9 +85,9 @@ public:
 	WorkType work() const;
 
 	/**
-	 * @return Guess what?
+	 * @return Guess what? See @ref UnitProperties::name
 	 **/
-	const QString& name() const; // FIXME: NOT HERE! is in UnitProperties!!! // woule take too much memory (100 * unitType_1 would be 100 * 1 name...)
+	const QString& name() const;
 
 	/**
 	 * Health aka hitpoints
@@ -191,25 +191,25 @@ public:
 	 * SpeciesTheme and therefore of the @ref owner of this unit. If this
 	 * unit does not yet have an owner this always returns 0!!
 	 **/
-	const UnitProperties* unitProperties() const;
+	inline const UnitProperties* unitProperties() const;
 
 	/**
 	 * Convenience method for owner()->speciesTheme().
 	 * See @ref Player::speciesTheme
 	 * @return The @ref SpeciesTheme of the owner of this unit.
 	 **/
-	SpeciesTheme* speciesTheme() const;
+	inline SpeciesTheme* speciesTheme() const;
 
 	/**
 	 * Cenvenience method for unitProperties()->isFacility().
 	 * See @ref UnitProperties::isFacility
 	 **/
-	bool isFacility() const;
+	inline bool isFacility() const;
 	/**
 	 * Cenvenience method for unitProperties()->isMobile().
 	 * See @ref UnitProperties::isMobile
 	 **/
-	bool isMobile() const;
+	inline bool isMobile() const;
 
 	/**
 	 * One day we might have units which can go on air <em>and</em> on land
@@ -220,7 +220,7 @@ public:
 	 * unitProperties()->isAircraft is false. Currently this is juste the 
 	 * same as @ref unitProperties()->isAircraft.
 	 **/
-	bool isFlying() const;
+	inline bool isFlying() const;
 	
 private:
 	class UnitBasePrivate;
