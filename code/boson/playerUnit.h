@@ -58,6 +58,7 @@ signals:
 	void	dying(bosonUnit *);
 protected:
 	bool	_getWantedShoot(class Unit *&);
+	void	stop_attacking(void) { target = 0l; }
 	/* attack */
 	bosonUnit 	*target;
 	int		shoot_timer;
@@ -194,6 +195,8 @@ public:
 	// User orders 
 	/** user asked to attack the given unit */
 	virtual void	u_attack(bosonUnit *); // reimplemented from bosonUnit
+	/** user asked to stop */
+	void		u_stop(void);	
 
 	// Server orders
 	void	s_setState(int );
