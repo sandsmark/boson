@@ -736,6 +736,7 @@ MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, QCanvas* canva
 			KGamePropertyBase::PolicyLocal, "ResourcesY");
 	d->mHarvesterProperties->mResourcesY.setLocal(0);
  }
+ setWork(WorkNone);
 }
 
 MobileUnit::~MobileUnit()
