@@ -30,6 +30,177 @@ class BosonGroundTheme;
 class BosonTextureArray;
 
 /**
+ * @short abstract class for data operating of the corners of the cells (like
+ * heightmap and texmap)
+ **/
+class BoMapCornerArray
+{
+public:
+	/**
+	 * @param width Number of corners (i.e. mapwidth + 1)
+	 * @param width Number of corners (i.e. mapheight + 1)
+	 **/
+	BoMapCornerArray(unsigned int width, unsigned int height)
+	{
+		mWidth = width;
+		mHeight = height;
+	}
+
+	/**
+	 * @return The width of this array, i.e. the number of corners (@ref
+	 * BosonMap::width + 1) of this map.
+	 **/
+	inline unsigned int width() const
+	{
+		return mWidth;
+	}
+	/**
+	 * @return The height of this array, i.e. the number of corners (@ref
+	 * BosonMap::height + 1) of this map.
+	 **/
+	inline unsigned int height() const
+	{
+		return mHeight;
+	}
+
+	/**
+	 * @return The index of the corner @p x, @p y in the internal array.
+	 **/
+	inline int arrayPos(int x, int y) const
+	{
+		return x + y * width();
+	}
+
+	/**
+	 * @overload
+	 *
+	 * This is a static version of the function above.
+	 **/
+	inline static int arrayPos(int x, int y, int width)
+	{
+		return x + y * width;
+	}
+
+private:
+	unsigned int mWidth;
+	unsigned int mHeight;
+};
+
+class BoTexMap : public BoMapCornerArray
+{
+public:
+	/**
+	 * Create a new texMap array for width x height corners and @p
+	 * textureCount different textures.
+	 *
+	 * The array is initialized to 255 for the first texture and to 0 for
+	 * all other textures.
+	 **/
+	BoTexMap(unsigned int textureCount, unsigned int width, unsigned int height)
+			: BoMapCornerArray(width, height)
+	{
+		mTexMap = new unsigned char[texMapArrayPos(textureCount - 1, width - 1, height - 1) + 1];
+		mTextureCount = textureCount;
+		initialize(0, 255);
+		for (unsigned int i = 1; i < textureCount; i++) {
+			initialize(0, 0);
+		}
+	}
+	~BoTexMap()
+	{
+		delete[] mTexMap;
+	}
+
+	/**
+	 * @return The internal texmap array, which defines how much percent
+	 * of every texture (see also @ref BosonMap::textureCount) are used in the corners
+	 * of the cells.
+	 * @param texture This defines which values should be returned. Use 0
+	 * for the entire texMap, or use a value less than @ref textureCount
+	 * to get the values for a certain texture (0 is also the first
+	 * texture).
+	 **/
+	inline unsigned char* texMap(unsigned int texture = 0) const
+	{
+		return (mTexMap + texMapArrayPos(texture, 0, 0));
+	}
+
+	/**
+	 * @param x The x-coordinate of the left corner that is wanted.
+	 * @param y The y-coordinate of the top corner that is wanted.
+	 * @param texture The index/number of the texture (grass, desert, water,
+	 * ...) that is wanted.
+	 **/
+	inline int texMapArrayPos(unsigned int texture, int x, int y) const
+	{
+		return texMapArrayPos(texture, x, y, width(), height());
+	}
+
+	/**
+	 * @overload
+	 *
+	 * This is a static version of the function above.
+	 **/
+	inline static int texMapArrayPos(unsigned int texture, int x, int y, int width, int height)
+	{
+		return ((texture) * width * height + arrayPos(x, y, width));
+	}
+
+	/**
+	 * @return The alpha value in the texMap for @p texture at @p x, @p y.
+	 * This is the recommended way of retrieving values from the texmap.
+	 * Note that it is inline, so you will have only a very small overhead.
+	 **/
+	inline unsigned char texMapAlpha(unsigned int texture, int x, int y) const
+	{
+		return mTexMap[texMapArrayPos(texture, x, y)];
+	}
+
+	/**
+	 * Set the alpha value for @p texture at @p x, @p y to @p value.
+	 **/
+	void setTexMapAlpha(unsigned int texture, int x, int y, unsigned char value)
+	{
+		mTexMap[texMapArrayPos(texture, x, y)] = value;
+	}
+
+	/**
+	 * Fill the texMap with 100% of texture @p texture.
+	 **/
+	void fill(unsigned int texture)
+	{
+		for (unsigned int i = 0; i < mTextureCount; i++) {
+			initialize(i, 0);
+		}
+		initialize(texture, 255);
+	}
+
+protected:
+	/**
+	 * Initialize (fill) the @p texture (at all coordinates) with @p alpha. If @p texture
+	 * is negative then <em>all</em>textures (i.e. the complete texMap) are
+	 * filled with @p alpha.
+	 **/
+	void initialize(int texture, unsigned char alpha)
+	{
+		if (texture < 0) {
+			for (unsigned int i = 0; i < mTextureCount; i++) {
+				initialize(i, alpha);
+			}
+			return;
+		}
+		for (unsigned int x = 0; x < width(); x++) {
+			for (unsigned int y = 0; y < height(); y++) {
+				setTexMapAlpha(texture, x, y, alpha);
+			}
+		}
+	}
+private:
+	unsigned char* mTexMap;
+	unsigned int mTextureCount;
+};
+
+/**
  * This class represents a boson map. It is part of a @ref BosonPlayField (a
  * .bpf file) and gets stored on disk as binary.
  *
@@ -211,23 +382,33 @@ public:
 	 **/
 	inline unsigned char* texMap(int texture = 0) const
 	{
-		return (mTexMap + texture * (width() + 1) * (height() + 1));
+		return mTexMap ? mTexMap->texMap(texture) : 0;
 	}
 
 	/**
-	 * @param x The x-coordinate of the left corner that is wanted.
-	 * @param y The y-coordinate of the top corner that is wanted.
-	 * @param texture The index/number of the texture (grass, desert, water,
-	 * ...) that is wanted.
+	 * @return BoTexMap::texMapArrayPos
 	 **/
 	inline int texMapArrayPos(unsigned int texture, int x, int y) const
 	{
-		return ((texture) * (width() + 1) * (height() + 1) + cornerArrayPos(x, y));
+		return BoTexMap::texMapArrayPos(texture, x, y, width() + 1, height() + 1);
 	}
 
+	/**
+	 * @return BoTexMap::texMapAlpha. Will crash if @ref texMap is NULL (we
+	 * don't check in favor of performance).
+	 **/
 	inline unsigned char texMapAlpha(unsigned int texture, int x, int y) const
 	{
-		return mTexMap[texMapArrayPos(texture, x, y)];
+		return mTexMap->texMapAlpha(texture, x, y);
+	}
+
+	/**
+	 * @see BoTexMap::setTexMapAlpha. Will crash if @ref texMap is NULL (we
+	 * don't check in favor of performance).
+	 **/
+	void setTexMapAlpha(unsigned int texture, int x, int y, unsigned char alpha)
+	{
+		mTexMap->setTexMapAlpha(texture, x, y, alpha);
 	}
 
 	/**
@@ -408,7 +589,7 @@ private:
 	BosonMapPrivate* d;
 	Cell* mCells;
 	float* mHeightMap;
-	unsigned char* mTexMap;
+	BoTexMap* mTexMap;
 	bool mModified;
 
 	unsigned int mMapWidth;

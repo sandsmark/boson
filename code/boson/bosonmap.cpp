@@ -56,7 +56,7 @@ BosonMap::~BosonMap()
 {
  delete[] mCells;
  delete[] mHeightMap;
- delete[] mTexMap;
+ delete mTexMap;
  delete d;
 }
 
@@ -87,14 +87,10 @@ bool BosonMap::createNewMap(unsigned int width, unsigned int height, BosonGround
  mGroundTheme = theme;
 
  mHeightMap = new float[cornerArrayPos(width, height) + 1];
- mTexMap = new unsigned char[texMapArrayPos(theme->textureCount() - 1, width, height) + 1];
+ mTexMap = new BoTexMap(theme->textureCount(), width + 1, height + 1);
  for (unsigned int x = 0; x < width + 1; x++) {
 	for (unsigned y = 0; y < height + 1; y++) {
 		mHeightMap[cornerArrayPos(x, y)] = 0.0f;
-		mTexMap[texMapArrayPos(0, x, y)] = 255;
-		for (unsigned int i = 1; i < theme->textureCount(); i++) {
-			mTexMap[texMapArrayPos(i, x, y)] = 0;
-		}
 	}
  }
  bool ret = generateCellsFromTexMap();
@@ -113,7 +109,7 @@ bool BosonMap::createNewMap(unsigned int width, unsigned int height, BosonGround
 
  delete[] mHeightMap;
  mHeightMap = 0;
- delete[] mTexMap;
+ delete mTexMap;
  mTexMap = 0;
  delete[] mCells;
  mCells = 0;
@@ -217,7 +213,7 @@ bool BosonMap::loadMapGeo(QDataStream& stream)
 
  delete[] mCells;
  delete[] mHeightMap;
- delete[] mTexMap;
+ delete mTexMap;
 
  mHeightMap = 0;
  mCells = 0;
@@ -399,7 +395,7 @@ bool BosonMap::loadTexMap(QDataStream& stream)
  }
  if (mTexMap) {
 	boWarning() << k_funcinfo << "already a texmap present - deleting..." << endl;
-	delete[] mTexMap;
+	delete mTexMap;
 	mTexMap = 0;
  }
  if (width() * height() <= 0) {
@@ -444,21 +440,15 @@ bool BosonMap::loadTexMap(QDataStream& stream)
  // them all. we also have to initialize all textures.
  // one day we may want to change this to save a few kb of memory on some maps
  // (none yet)
- mTexMap = new unsigned char[texMapArrayPos(groundTheme()->textureCount() - 1, width(), height())];
- for (unsigned int i = 0; i < groundTheme()->textureCount(); i++) {
-	for (unsigned int x = 0; x < width() + 1; x++) {
-		for (unsigned int y = 0; y < height() + 1; y++) {
-			mTexMap[texMapArrayPos(i, x, y)] = 0;
-		}
-	}
- }
+ mTexMap = new BoTexMap(groundTheme()->textureCount(), width() + 1, height() + 1);
+
  // now load all textures that are actually used here.
  for (unsigned int i = 0; i < textures; i++) {
 	for (unsigned int x = 0; x < width() + 1; x++) {
 		for (unsigned int y = 0; y < height() + 1; y++) {
 			Q_UINT8 c;
 			stream >> c;
-			mTexMap[texMapArrayPos(i, x, y)] = c;
+			setTexMapAlpha(i, x, y, c);
 		}
 	}
  }
@@ -497,7 +487,7 @@ bool BosonMap::saveTexMap(QDataStream& stream)
  for (unsigned int i = 0; i < groundTheme()->textureCount(); i++) {
 	for (unsigned int x = 0; x < width() + 1; x++) {
 		for (unsigned int y = 0; y < height() + 1; y++) {
-			stream << (Q_UINT8)mTexMap[texMapArrayPos(i, x, y)];
+			stream << (Q_UINT8)texMapAlpha(i, x, y);
 		}
 	}
  }
@@ -844,19 +834,7 @@ void BosonMap::fill(unsigned int texture)
 	return;
  }
 
- // initialize to 0 first
- for (unsigned int x = 0; x < width() + 1; x++) {
-	for (unsigned int y = 0; y < height() + 1; y++) {
-		for (unsigned int i = 0; i < groundTheme()->textureCount(); i++) {
-			mTexMap[texMapArrayPos(0, x, y)] = 0;
-		}
-	}
- }
- for (unsigned int x = 0; x < width() + 1; x++) {
-	for (unsigned int y = 0; y < height() + 1; y++) {
-		mTexMap[texMapArrayPos(texture, x, y)] = 255;
-	}
- }
+ mTexMap->fill(texture);
 }
 
 float BosonMap::cellAverageHeight(int x, int y)
@@ -944,7 +922,7 @@ bool BosonMap::importTexMap(const QImage* img, int texturesPerComponent, bool us
 	return false;
  }
  if (!mTexMap) {
-	boError() << k_funcinfo << "NULL texmap" << endl;
+	BO_NULL_ERROR(mTexMap);
 	return false;
  }
 
@@ -954,9 +932,9 @@ boDebug() << k_funcinfo << endl;
 	for (unsigned int x = 0; x < width() + 1; x++) {
 		QRgb pixel = line[x];
 //		for (int i = 0; i < texturesPerComponent; i++) {
-			mTexMap[texMapArrayPos(0, x, y)] = qRed(pixel);
-			mTexMap[texMapArrayPos(1, x, y)] = qGreen(pixel);
-			mTexMap[texMapArrayPos(2, x, y)] = qBlue(pixel);
+			setTexMapAlpha(0, x, y, qRed(pixel));
+			setTexMapAlpha(1, x, y, qGreen(pixel));
+			setTexMapAlpha(2, x, y, qBlue(pixel));
 //		}
 	}
  }
@@ -1121,7 +1099,7 @@ void BosonMap::slotChangeTexMap(int x, int y, unsigned int texCount, unsigned in
 		boError() << k_funcinfo << "invalid texture " << texture << endl;
 		continue;
 	}
-	mTexMap[texMapArrayPos(texture, x, y)] = alpha[i];
+	setTexMapAlpha(texture, x, y, alpha[i]);
  }
 
  // now we update up to 4 cells.
