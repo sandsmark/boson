@@ -21,6 +21,7 @@
 
 #include "bo3dtools.h"
 #include "bosonparticlesystemproperties.h"
+#include "bosontexturearray.h"
 #include "bodebug.h"
 
 #include <GL/gl.h>
@@ -86,7 +87,7 @@ void BosonParticle::update(float elapsed)
 /*****  BosonParticleSystem  *****/
 
 BosonParticleSystem::BosonParticleSystem(int maxnum,
-    float createrate, bool align, const BosonParticleTextureArray* textures,
+    float createrate, bool align, const BosonTextureArray* textures,
     const BosonParticleSystemProperties* prop)
 {
   // Set some variables first
@@ -219,13 +220,13 @@ void BosonParticleSystem::initParticle(BosonParticle* particle)
   {
     boError(150) << k_funcinfo << "NULL textures" << endl;
   }
-  else if(!mTextures->mTextureIds)
+  else if(!mTextures->isValid())
   {
-    boError(150) << k_funcinfo << "NULL texture array" << endl;
+    boError(150) << k_funcinfo << "invalid texture array" << endl;
   }
   else
   {
-    particle->tex = mTextures->mTextureIds[0];
+    particle->tex = mTextures->texture(0);
   }
   particle->system = this;
   if(mProp)

@@ -155,12 +155,12 @@ class BosonParticleSystem
      * @param createrate How many additional particles are created each second.
      * @param align Whether to align particles to camera. If false, particles
      *   are aligned to XY plane.
-     * @param textures @ref BosonParticleTextureArray containing all textures
+     * @param textures @ref BosonTextureArray containing all textures
      *   that will be used by this particle system.
      * @param prop Properties of this system.
      **/
     BosonParticleSystem(int maxnum, float createrate,
-        bool align, const BosonParticleTextureArray* textures,
+        bool align, const BosonTextureArray* textures,
         const BosonParticleSystemProperties* prop);
     /**
      * Destructs BosonParticleSystem. This deletes all particles
@@ -313,7 +313,7 @@ class BosonParticleSystem
     bool mAlign;  // Whether to align particles to camera
     float mRadius;  // Radius of bounding sphere
     bool mMoveParticlesWithSystem;  // Particles are moved with system if true
-    const BosonParticleTextureArray* mTextures;  // Textures of particles
+    const BosonTextureArray* mTextures;  // Textures of particles
     BoVector3 mPos;
     bool mRotated;
     float mAge;
