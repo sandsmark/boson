@@ -54,6 +54,8 @@ class BosonLocalPlayerInput : public KGameIO
 
     virtual void initIO(KPlayer*);
 
+    BoEventListener* eventListener() const  { return mEventListener; }
+
     virtual int rtti() const  { return LocalPlayerInputRTTI; }
 
     virtual void produceAction(const BoSpecificAction& action);
