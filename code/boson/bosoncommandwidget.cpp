@@ -24,8 +24,13 @@
 #include "player.h"
 #include "speciestheme.h"
 #include "unitproperties.h"
+#include "defines.h"
 
+#ifdef HAVE_KGAMEPROGRESS
+#include <kgameprogress.h>
+#else
 #include <kprogress.h>
+#endif
 #include <kpixmap.h>
 #include <kpixmapeffect.h>
 #include <klocale.h>
@@ -42,10 +47,21 @@
 
 #define BAR_WIDTH 10 // FIXME hardcoded value
 
+
+// KProgress has been renamed to KGameProgress after KDE3 beta1. KProgress is
+// now useless for us. But For Beta1 it's still ok.
+#ifdef HAVE_KGAMEPROGRESS
+class BoProgress : public KGameProgress
+#else
 class BoProgress : public KProgress
+#endif
 {
 	public:
+#ifdef HAVE_KGAMEPROGRESS
+		BoProgress(QWidget* p) : KGameProgress(p) { }
+#else
 		BoProgress(QWidget* p) : KProgress(p) { }
+#endif
 
 		virtual void setGeometry(int x, int y, int w, int h)
 		{
@@ -53,7 +69,11 @@ class BoProgress : public KProgress
 			pix.fill(green);
 			KPixmapEffect::gradient(pix, green, red, KPixmapEffect::VerticalGradient);
 			setBarPixmap(pix);
+#ifdef HAVE_KGAMEPROGRESS
+			KGameProgress::setGeometry(x, y, w, h);
+#else
 			KProgress::setGeometry(x, y, w, h);
+#endif
 		}
 };
 
