@@ -360,6 +360,9 @@ class BosonEffectParticleGeneric : public BosonEffectParticle
     void createParticles(int count);
 
 
+    virtual int maxDelayedUpdates() const  { return mMaxDelayedUpdates; }
+    void setMaxDelayedUpdates(int n)  { mMaxDelayedUpdates = n; }
+
     virtual bool saveAsXML(QDomElement& root) const;
     virtual bool loadFromXML(const QDomElement& root);
 
@@ -387,6 +390,7 @@ class BosonEffectParticleGeneric : public BosonEffectParticle
     float mMass;
     float mMaxParticleSize;
     BoMatrix mMatrix;
+    int mMaxDelayedUpdates;
 };
 
 
@@ -506,6 +510,9 @@ class BosonEffectParticleTrail : public BosonEffectParticle
     void setBlendFunc(int sf, int df) { mBlendFunc[0] = sf; mBlendFunc[1] = df; }
 
 
+    virtual int maxDelayedUpdates() const  { return mMaxDelayedUpdates; }
+    void setMaxDelayedUpdates(int n)  { mMaxDelayedUpdates = n; }
+
     virtual bool saveAsXML(QDomElement& root) const;
     virtual bool loadFromXML(const QDomElement& root);
 
@@ -532,6 +539,7 @@ class BosonEffectParticleTrail : public BosonEffectParticle
     BoMatrix mMatrix;
     bool mObsolete;  // If true, new particles won't be created anymore
     float mSpacing;
+    int mMaxDelayedUpdates;
 
     BoVector3Fixed mOffset;
 

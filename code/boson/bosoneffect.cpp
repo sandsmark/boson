@@ -82,9 +82,9 @@ BosonEffect::~BosonEffect()
 
 void BosonEffect::doDelayedUpdates()
 {
-  if(mUpdateCounter > 40)
+  if(mUpdateCounter > maxDelayedUpdates())
   {
-    mUpdateCounter = 40;
+    mUpdateCounter = maxDelayedUpdates();
   }
   while(mUpdateCounter > 0)
   {
