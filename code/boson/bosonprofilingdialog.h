@@ -28,6 +28,42 @@ class QListViewItemNumber;
 class ProfileSlotAdvance;
 class ProfileItemAdvance;
 
+class SummaryWidgetBase : public QWidget
+{
+	Q_OBJECT
+public:
+	SummaryWidgetBase(QWidget* parent, const char* name) : QWidget(parent, name)
+	{
+	}
+	~SummaryWidgetBase()
+	{
+	}
+
+	virtual void clear()
+	{
+		mStartSec = 0;
+		mStartUSec = 0;
+		mEndSec = 0;
+		mEndUSec = 0;
+		mCount = 0;
+
+	}
+
+	void set(struct timeval* start, struct timeval* end, unsigned int count);
+	QString startTime() const;
+	QString endTime() const;
+	unsigned int count() const { return mCount; }
+	double elapsed() const;
+	double perSecond() const { return ((double)count()) / elapsed(); }
+
+private:
+	long mStartSec;
+	long mStartUSec;
+	long mEndSec;
+	long mEndUSec;
+	unsigned int mCount;
+};
+
 class BosonProfilingDialogPrivate;
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>

@@ -59,7 +59,7 @@ public:
 
 	/**
 	 * Change the OpenGL update interval. This value can be useful when
-	 * analyzin profiling logs.
+	 * analyzing profiling logs.
 	 **/
 	void setGLUpdateInterval(unsigned int interval);
 
@@ -70,6 +70,18 @@ public:
 	 * new interval - but only the new interval is recorded into the log.
 	 **/
 	unsigned int glUpdateInterval() const;
+
+	/**
+	 * Change the game speed. Can be useful for analyzing profiling logs.
+	 **/
+	void setGameSpeed(int gameSpeed);
+
+	/**
+	 * @return The game speed when the log was recorded. Be careful with
+	 * this value - the same problem as with @ref glUpdateInterval applies
+	 * to this one!
+	 **/
+	int gameSpeed() const;
 
 	/**
 	 * Start the timer for profiling. Note that nesting timers <em>are</em>

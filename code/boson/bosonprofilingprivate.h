@@ -209,6 +209,7 @@ public:
 	QMap<int, TimesList> mTimes;
 
 	unsigned int mGLUpdateInterval;
+	int mGameSpeed;
 	int mVersion;
 };
 
