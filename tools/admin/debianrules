@@ -36,7 +36,6 @@ $DCOPIDL		=	"$kde_bindir/dcopidl";
 $DCOPIDL2CPP		=	"$kde_bindir/dcopidl2cpp";
 $KDB2HTML		=	"$kde_bindir/kdb2html";
 $MCOPIDL		=	"$kde_bindir/mcopidl";
-$ARTSCCONFIG		=	"$kde_bindir/artsc-config";
 
 if (defined $ENV{DEB_BUILD_OPTIONS} &&
     $ENV{DEB_BUILD_OPTIONS} =~ /\bdebug\b/) {
@@ -78,7 +77,6 @@ if (@ARGV && $ARGV[0] eq 'echodirs') {
   print STDOUT "export DCOPIDL2CPP=$DCOPIDL2CPP\n";
   print STDOUT "export KDB2HTML=$KDB2HTML\n";
   print STDOUT "export MCOPIDL=$MCOPIDL\n";
-  print STDOUT "export ARTSCCONFIG=$ARTSCCONFIG\n";
   print STDOUT "export INSTALL_DATA=install -p -c -m 644\n";
 
   print STDOUT "configkde=$enable_debug $enable_final --disable-rpath --prefix=\$(kde_prefix) --libexecdir=\$(kde_bindir) --sysconfdir=\$(sysconfdir) --libdir=\$(kde_libdir) --includedir=\$(kde_includedir) --with-qt-includes=/usr/include/qt3 --mandir=\$(mandir) --infodir=\$(infodir)\n";
