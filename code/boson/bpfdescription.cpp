@@ -27,7 +27,7 @@
 #include <qfile.h>
 #include <qfileinfo.h>
 
-BPFDescription::BPFDescription(const QByteArray& data)
+BPFDescription::BPFDescription(const QString& data)
 {
  mFile.setContent(data);
 }
@@ -38,6 +38,8 @@ BPFDescription::BPFDescription()
  QDomElement root = mFile.createElement("BosonMapDescription");
  mFile.appendChild(root);
  setTextForElement("Language", "C");
+ setTextForElement("Name", "");
+ setTextForElement("Comment", "");
 }
 
 BPFDescription::~BPFDescription()

@@ -64,7 +64,9 @@ BOSON_SRC = \
 	bosonstarting.cpp \
 	bpfdescription.cpp \
 	bpffile.cpp \
-	bosonweapon.cpp
+	bosonweapon.cpp \
+	bpfdescriptiondialog.cpp
+
 
 BOPROFILING_SRC= \
 	bosonprofilingdialog.cpp \

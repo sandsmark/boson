@@ -25,6 +25,7 @@ class BosonMap;
 class BosonScenario;
 class Boson;
 class BPFFile;
+class BPFDescription;
 
 class KArchiveDirectory;
 class KTar;
@@ -122,6 +123,7 @@ public:
 	 * broken then!
 	 **/
 	bool loadMap(QDataStream& stream);
+	bool loadDescription(QDataStream& stream);
 
 	/**
 	 * This simply deletes the map. This may be useful for game starting, as
@@ -133,9 +135,11 @@ public:
 	void deleteMap();
 	
 	void saveMap(QDataStream& stream);
+	void saveDescription(QDataStream& stream);
 
 	BosonMap* map() const { return mMap; }
 	BosonScenario* scenario() const { return mScenario; }
+	BPFDescription* description() const { return mDescription; }
 	const QString& identifier() const { return mIdentifier; }
 
 	void quit();
@@ -154,8 +158,8 @@ public:
 	 **/
 	void changeScenario(BosonScenario* s);
 
-	const QString& playFieldName() const { return mName; }
-	const QString& playFieldComment() const { return mComment; }
+	QString playFieldName() const;
+	QString playFieldComment() const;
 
 	/**
 	 * @return Whether the the playfield has been completely loaded. This is
@@ -199,9 +203,8 @@ private:
 private:
 	BosonMap* mMap;
 	BosonScenario* mScenario;
+	BPFDescription* mDescription;
 	QString mIdentifier; // AB: this is not yet fully implemented - e.g. it isn't changed when saving or changing the map. should be the filename (see BPFFile::identifier())
-	QString mName;
-	QString mComment;
 	bool mLoaded;
 	bool mPreLoaded;
 	BPFFile* mFile;
