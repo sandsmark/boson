@@ -185,48 +185,6 @@ double ProductionPlugin::productionProgress() const
  return percentage;
 }
 
-bool ProductionPlugin::canPlaceProductionAt(const QPoint& pos)
-{
- if (!hasProduction() || completedProductionId() <= 0) {
-	boDebug() << k_lineinfo << "no completed construction" << endl;
-	return false;
- }
-
- if(completedProductionType() != ProduceUnit) {
-	boDebug() << k_funcinfo << "Current production is not unit!" << endl;
-	return false;  // Maybe return true, so that tech. is researched? OTOH, this should never be reached anyway ;-)
- }
-
- QValueList<Unit*> list = canvas()->unitCollisionsInRange(pos, BUILD_RANGE);
-
- const UnitProperties* prop = speciesTheme()->unitProperties(currentProductionId());
- if (!prop) {
-	boError() << k_lineinfo << "NULL unit properties - EVIL BUG!" << endl;
-	return false;
- }
- if (prop->isFacility()) {
-	// a facility can be placed within BUILD_RANGE of *any* friendly
-	// facility on map
-	for (unsigned int i = 0; i < list.count(); i++) {
-		if (list[i]->isFacility() && list[i]->owner() == player()) {
-			boDebug() << "Facility in BUILD_RANGE" << endl;
-			// TODO: also check whether a unit is already at that position!!
-			return true;
-		}
-	}
- } else {
-	// a mobile unit can be placed within BUILD_RANGE of its factory *only*
-	for (unsigned int i = 0; i < list.count(); i++) {
-		if (list[i] == (Unit*)this) {
-			// TODO: also check whether a unit is already at that position!!
-			return true;
-		}
-	}
- }
- return false;
-}
-
-
 void ProductionPlugin::advance(unsigned int)
 {
  unsigned long int id = currentProductionId();
@@ -305,7 +263,6 @@ void ProductionPlugin::advance(unsigned int)
 					currentx++;
 				}
 
-//				FIXME: should not depend on Facility*
 				if (canvas()->canPlaceUnitAt(speciesTheme()->unitProperties(id), QPoint(currentx, currenty), this)) {
 					// Free cell - place unit at it
 					mProductionState = mProductionState + 1;
