@@ -75,6 +75,10 @@ bool BosonTextureArray::createTextures(QValueList<QImage> images, GLenum mode)
 	kdDebug() << k_funcinfo << "textures already generated?!" << endl;
 	return false;
  }
+ if (!QGLContext::currentContext()) {
+	kdError() << k_funcinfo << "NULL current context!!" << endl;
+	return false; // baaaad - we should delay loading or so
+ }
  QImage buffer;
  mMode = mode;
  mCount = images.count();
