@@ -155,7 +155,6 @@ public slots:
 	 * players
 	 **/
 	void slotUnfogAll(Player* player = 0);
-	void slotEnableFOW(bool enable);
 
 	void slotDumpGameLog();
 	void slotShowLight0Widget();
