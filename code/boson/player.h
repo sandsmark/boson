@@ -74,7 +74,6 @@ public:
 	const UnitProperties* unitProperties(int unitType) const;
 
 signals:
-	void signalCreateUnit(Unit*& unit, int unitType, Player* owner); // obsolete
 	void signalLoadUnit(int unitType, unsigned long int id, Player* owner);
 
 	void signalUnitChanged(Unit* unit);
