@@ -152,6 +152,7 @@ borender_LDADD = \
 borender_SOURCES = \
 		$(BOSON_SRC) \
 		kgamemodeldebug.cpp \
+		kgamespeciesdebug.cpp \
 		borendermain.cpp
 
 boinfo_LDFLAGS = $(KDE_RPATH) $(all_libraries)
