@@ -65,7 +65,7 @@ void BosonSprite::setCanvas(BosonCanvas* c)
 
 QPointArray BosonSprite::cells() const
 {
- // FIXME: test with both, QCanvas and OpenGL!
+ // FIXME: test a little bit! UPDATE: should be working!
  QPointArray c;
  int left, right, top, bottom;
  int n = 0;
