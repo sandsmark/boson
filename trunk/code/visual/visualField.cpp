@@ -32,13 +32,34 @@
 #include "groundTheme.h"
 #include "visual.h"
   
+
 visualField::visualField(uint w, uint h, QObject *parent, const char *name=0L)
 	: QObject(parent, name)
 	, QwSpriteField (w * BO_TILE_SIZE ,h * BO_TILE_SIZE)
 {
+	/* map geometry */
+	maxX = w; maxY = h;
 
-/* map geometry */
-maxX = w; maxY = h;
+	init();
+}
+
+
+
+visualField::visualField(QObject *parent, const char *name=0L)
+	: QObject(parent, name)
+	, QwSpriteField ()
+{
+	/* map geometry */
+	maxX = 0; maxY = 0;
+
+	init();
+}
+	
+	
+	
+void visualField::init(void)
+{
+
 
 /* Themes selection (should be moved thereafter) */
 ground	= new groundTheme("earth");
@@ -66,6 +87,15 @@ species[0]	= new speciesTheme("human", qRgb( 0, 255, 0) );
 */
 
 
+}
+
+
+void visualField::resize (int w, int h)
+{
+
+	/* map geometry */
+	maxX = w; maxY = h;
+	QwSpriteField::resize(w,h);
 }
 
 

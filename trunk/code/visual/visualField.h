@@ -64,6 +64,12 @@ public:
 	/** find the unit at this position */
 	QwSpriteFieldGraphic	*findUnitAt(int x, int y);
 	groundType		findGroundAt(int x, int y);
+	
+	
+	virtual void resize (int, int);
+protected:
+	visualField(QObject *parent=0, const char *name=0L); // to be used by editorField
+	void init(void);
 
 signals:
 	void newCell(int,int, groundType g);
