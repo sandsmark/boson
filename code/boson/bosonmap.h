@@ -1,5 +1,5 @@
-#ifndef __BOSONMAP_H__
-#define __BOSONMAP_H__
+#ifndef __BOSONMAPDOM_H__
+#define __BOSONMAPDOM_H__
 
 #include <qstring.h>
 #include <qdatastream.h>
@@ -7,7 +7,7 @@
 class Cell;
 class Unit;
 class Boson;
-class KGamePropertyHandler;
+class QDomElement;
 
 class BosonMapPrivate;
 
@@ -44,14 +44,20 @@ public:
 	bool loadMap(const QString& fileName);
 	
 	/**
-	 * Read the map geo from stream. This only reads map size, playercount,
-	 * cells and something like this. This does <em>not</em> read the units
+	 * Read the map geo from stream. This only reads map size, playercount
+	 * and something like this. Use @ref loadCells to load the cells.
+	 *
+	 * This does <em>not</em> read the units
 	 * of the player. Usually you will transmit the geo parts of a map (see
 	 * @ref saveMapGeo) to all clients but only the server loads the units
 	 * which will be added.
-	 * @param stream The stream to read from
 	 **/
 	bool loadMapGeo(QDataStream& stream);
+	/**
+	 * Load the cells from the stream.
+	 * @param stream The stream to read from
+	 **/
+	bool loadCells(QDataStream& stream);
 
 	/**
 	 * Save the map geo into stream. This creates a stream in the format
@@ -64,8 +70,22 @@ public:
 	 * @param stream The stream to write to
 	 **/
 	bool saveMapGeo(QDataStream& stream);
+	bool saveCells(QDataStream& stream);
 
-	bool saveMap(const QString& fileName);
+	/**
+	 * Save the map to a file. By default this creates an XML file. But you
+	 * can also create a binary file. While an XML file is human readable a
+	 * binary file is smaller and faster parsed by boson. 
+	 *
+	 * Please note that the map file is only read <em>once</em> from file
+	 * per game, so speed does not matter much (icon loading takes far more
+	 * time).
+	 * @param fileName The filename of the new map. Must be absolute.
+	 * @param binary If false this creates an XML file (much better
+	 * readable). If true a binary file is created.
+	 **/
+	bool saveMap(const QString& fileName, bool binary = false);
+
 
 	/**
 	 * @return The (hardcoded) default map
@@ -73,25 +93,28 @@ public:
 	static QString defaultMap();
 
 	/**
-	 * @return TRUE if the current map geo is valid i.e. can be transmitted
+	 * @return TRUE if the current map is valid i.e. can be transmitted
 	 * savely using @ref saveMapGeo
 	 **/
-	bool isValidGeo() const;
-
-	KGamePropertyHandler* dataHandler() const;
+	bool isValid() const;
 
 	Cell* cell(int x, int y) const;
 
 protected:
 	bool loadCell(QDataStream& stream, int& groundType, unsigned char& b);
-	void saveCell(QDataStream& stream, Cell* cell);
 
-	/**
-	 * Load the entire map from a stream. Used mainly by @ref loadMap.
-	 *
-	 * You will rather want to use @ref loadMapGeo
-	 **/
-	bool loadCompleteMap(QDataStream& stream);
+	void saveCell(QDataStream& stream, int groundType, unsigned char b);
+
+	bool saveMapGeo(QDomElement&);
+	bool saveCells(QDomElement&);
+	bool saveCell(QDomElement&, int x, int y, Cell* cell);
+
+	bool loadMapGeo(QDomElement&);
+	bool loadCells(QDomElement&);
+	bool loadCell(QDomElement&, int& x, int& y, int& groundType, unsigned char& b);
+
+
+	bool loadMap(const QByteArray& buffer, bool binary);
 
 	/**
 	 * Read the magic string from stream.
@@ -99,6 +122,13 @@ protected:
 	 * Otherwise FALSE (not a boson map file)
 	 **/
 	bool verifyMap(QDataStream& stream);
+
+	/**
+	 * Write the validity string to the stream. @ref verifyMap reads this
+	 * string, so a binary map loaded from a file should first contain the
+	 * validity string/header.
+	 **/
+	void saveValidityHeader(QDataStream& stream);
 
 private:
 	void init();

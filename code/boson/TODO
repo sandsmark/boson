@@ -14,3 +14,4 @@
 
 - BosonMap: i18n (of the world name) is a TODO. Maybe use a mapfile.desktop file
   which contains the worldname and a short description
+- compress map and scenario files
