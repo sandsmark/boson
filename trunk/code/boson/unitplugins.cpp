@@ -462,7 +462,7 @@ void HarvesterPlugin::advanceRefine()
 			++it;
 			continue;
 		}
-		boDebug() << k_funcinfo << "    unit " << it.current()->id() << " has refinery props" << endl;
+		boDebug() << k_funcinfo << "    unit " << it.current()->id() << " has refinery properties" << endl;
 		if ((prop->canMineMinerals() && rprop->canRefineMinerals()) || (prop->canMineOil() && rprop->canRefineOil())) {
 			boDebug() << k_funcinfo << "    unit " << it.current()->id() << " would be suitable..." << endl;
 			float dist = QMAX(QABS(unit()->x() - it.current()->x()), QABS(unit()->y() - it.current()->y()));
