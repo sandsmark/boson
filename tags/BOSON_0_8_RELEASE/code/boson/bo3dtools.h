@@ -1,0 +1,425 @@
+/*
+    This file is part of the Boson game
+    Copyright (C) 2002 The Boson Team (boson-devel@lists.sourceforge.net)
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+*/
+
+#ifndef BO3DTOOLS_H
+#define BO3DTOOLS_H
+
+#include <GL/gl.h>
+
+#include <lib3ds/types.h>
+
+#include "defines.h"
+
+class QString;
+class KConfig;
+class QDataStream;
+
+float rotationToPoint(float x, float y);
+void pointByRotation(float* x, float* y, const float angle, const float radius);
+
+
+/**
+ * @author Rivo Laks <rivolaks@hot.ee>
+ **/
+class BoVector3
+{
+  public:
+    BoVector3()  { reset(); };
+    BoVector3(GLfloat x, GLfloat y, GLfloat z)  { set(x, y, z); }
+    BoVector3(GLfloat* data) { set(data[0], data[1], data[2]); }
+    ~BoVector3() {};
+
+    inline void reset()  { mData[0] = mData[1] = mData[2] = 0; };
+
+    inline GLfloat x() const { return mData[0]; };
+    inline GLfloat y() const { return mData[1]; };
+    inline GLfloat z() const { return mData[2]; };
+
+    inline void set(GLfloat x, GLfloat y, GLfloat z)  { mData[0] = x;  mData[1] = y;  mData[2] = z; };
+    inline void setX(GLfloat x) { mData[0] = x; }
+    inline void setY(GLfloat y) { mData[1] = y; }
+    inline void setZ(GLfloat z) { mData[2] = z; }
+    inline void set(const float* v) { set(v[0], v[1], v[2]); }
+
+    inline void addScaled(BoVector3 v, GLfloat s)  { mData[0] += v.mData[0] * s;  mData[1] += v.mData[1] * s;  mData[2] += v.mData[2] * s; };
+    inline void setScaledSum(BoVector3 a, BoVector3 b,  GLfloat s)
+        { mData[0] = a.mData[0] + b.mData[0] * s;   mData[1] = a.mData[1] + b.mData[1] * s;   mData[2] = a.mData[2] + b.mData[2] * s; };
+    inline void add(BoVector3 v)  { mData[0] += v.mData[0]; mData[1] += v.mData[1]; mData[2] += v.mData[2]; };
+    inline void normalize()  { scale(1 / length()); };
+    inline void scale(float s)  {mData[0] = mData[0] * s;  mData[1] = mData[1] * s;  mData[2] = mData[2] * s; };
+
+    //AB: this calls sqrt() and therefore is slow!
+    float length() const;
+    inline float dotProduct() const  { return mData[0] * mData[0] + mData[1] * mData[1] + mData[2] * mData[2]; };
+
+    inline const GLfloat* data() const { return mData; }
+    inline void operator=(BoVector3 v)  { mData[0] = v.mData[0];  mData[1] = v.mData[1];  mData[2] = v.mData[2]; };
+    inline void operator=(const GLfloat* v)  { mData[0] = v[0];  mData[1] = v[1];  mData[2] = v[2]; };
+    inline void operator+=(BoVector3 v)  { mData[0] += v.mData[0]; mData[1] += v.mData[1]; mData[2] += v.mData[2]; };
+    inline GLfloat operator[](int i) const  { return mData[i]; };
+
+    inline BoVector3 operator+(const BoVector3& v) const  { return BoVector3(mData[0] + v.mData[0], mData[1] + v.mData[1], mData[2] + v.mData[2]); };
+    inline BoVector3 operator-(const BoVector3& v) const  { return BoVector3(mData[0] - v.mData[0], mData[1] - v.mData[1], mData[2] - v.mData[2]); };
+    inline BoVector3 operator*(float f) const  { return BoVector3(mData[0] * f, mData[1] * f, mData[2] * f); };
+    inline BoVector3 operator/(float f) const  { return BoVector3(mData[0] / f, mData[1] / f, mData[2] / f); };
+    inline BoVector3 operator-() const  { return BoVector3(-mData[0], -mData[1], -mData[2]); };
+
+    // Conversion from one coordinate system to another. Should we use BO_GL_CELL_SIZE here?
+    inline void canvasToCell()  { mData[0] /= (float)BO_TILE_SIZE; mData[1] /= (float)BO_TILE_SIZE; };
+    inline void cellToCanvas()  { mData[0] *= (float)BO_TILE_SIZE; mData[1] *= (float)BO_TILE_SIZE; };
+    inline void canvasToWorld()  { mData[0] /= (float)BO_TILE_SIZE; mData[1] = -(mData[1] / (float)BO_TILE_SIZE); };
+
+    /**
+     * @return Whether all components of this vector are zeros
+     **/
+    inline bool isNull() const  { return ((mData[0] == 0.0) && (mData[1] == 0.0) && (mData[2] == 0.0)); };
+
+    /**
+     * Create 3 vectors from @p face in @p mesh and place them into @p v.
+     * @param v An array of size 3 which will contain the vectors of the face.
+     **/
+    static void makeVectors(BoVector3* v, const Lib3dsMesh* mesh, const Lib3dsFace* face);
+
+    /**
+     * @param v1 An array of 3 vectors (i.e. one triangle)
+     * @param v2 An array of 3 vectors (i.e. one triangle)
+     * @return TRUE if the two triangles are adjacent, i.e. if they share at
+     * least two points. also returns TRUE if the triangles are equal!
+     **/
+    static bool isAdjacent(const BoVector3* v1, const BoVector3* v2);
+
+    /**
+     * @param point The point to search for
+     * @param array An array of size 3 (one face/triangle)
+     * @return the index of the point @p point in @p array, or -1 if @p point is
+     * not in @p array.
+     **/
+    static int findPoint(const BoVector3& point, const BoVector3* array);
+
+    /**
+     * Convenience method for BoVector3::findPoint(*this, array);
+     **/
+    int findPoint(const BoVector3* array) const
+    {
+      return findPoint(*this, array);
+    }
+
+    /**
+     * Convenience method for BoVector3::isAdjacent(this, v);
+     **/
+    bool isAdjacent(const BoVector3* v) const
+    {
+      return isAdjacent(this, v);
+    }
+
+    /**
+     * Loads BoVector3 from KConfig
+     **/
+    static BoVector3 load(const KConfig* cfg, const QString key, const BoVector3& aDefault = BoVector3());
+
+    /**
+     * Saves BoVector3 to KConfig
+     **/
+    void save(KConfig* cfg, const QString key) const;
+
+    /**
+     * @return TRUE when @p v is at the same position (x,y,z are all equal).
+     * Otherwise FALSE.
+     **/
+    bool isEqual(const BoVector3& v) const { return v.mData[0] == mData[0] && v.mData[1] == mData[1] && v.mData[2] == mData[2]; }
+
+    /**
+     * @overload
+     *
+     * Same as above, except that it takes an array of 3 floats, such as e.g.
+     * Lib3dsVector.
+     **/
+    bool isEqual(float* v) const { return mData[0] == v[0] && mData[1] == v[1] && mData[2] == v[2]; }
+
+    /**
+     * @overload
+     *
+     * Same as above, except that it takes 3 separate floats as arguments.
+     **/
+    bool isEqual(float x, float y, float z) const { return mData[0] == x && mData[1] == y && mData[2] == z; }
+
+    static QString debugString(const BoVector3& v);
+    static void debugVector(const BoVector3& v);
+
+    /**
+     * Convenience method for BoVector3::debugString(*this)
+     **/
+    QString debugString() const;
+
+    /**
+     * @overload
+     *
+     * Same as above, except that it takes 2 separate float arrays. You can use
+     * this static method without a BoVector3 instance - useful for comparing
+     * Lib3dsVectors.
+     **/
+   static bool isEqual(float* v1, float* v2) { return v1[0] == v2[0] && v1[1] == v2[1] && v1[2] && v2[2]; }
+   
+  private:
+    friend class BoMatrix;
+    friend QDataStream& operator<<(QDataStream& s, const BoVector3& v);
+    friend QDataStream& operator>>(QDataStream& s, BoVector3& v);
+
+    GLfloat mData[3];
+};
+
+QDataStream& operator<<(QDataStream& s, const BoVector3& v);
+QDataStream& operator>>(QDataStream& s, BoVector3& v);
+
+/**
+ * @author Rivo Laks <rivolaks@hot.ee>
+ **/
+class BoVector4
+{
+  public:
+    BoVector4()  { reset(); };
+    BoVector4(GLfloat x, GLfloat y, GLfloat z, GLfloat w)  { set(x, y, z, w); };
+    ~BoVector4() {};
+
+    inline void reset()  {  mData[0] = mData[1] = mData[2] = mData[3] = 0; };
+
+    inline void set(GLfloat x, GLfloat y, GLfloat z, GLfloat w)  { mData[0] = x;  mData[1] = y;  mData[2] = z; mData[3] = w; };
+    inline void setX(GLfloat x) { mData[0] = x; }
+    inline void setY(GLfloat y) { mData[1] = y; }
+    inline void setZ(GLfloat z) { mData[2] = z; }
+    inline void setW(GLfloat w) { mData[3] = w; }
+
+    inline GLfloat x() const { return mData[0]; };
+    inline GLfloat y() const { return mData[1]; };
+    inline GLfloat z() const { return mData[2]; };
+    inline GLfloat w() const { return mData[3]; };
+
+    inline void addScaled(BoVector4 v, GLfloat s)
+        { mData[0] += v.mData[0] * s;  mData[1] += v.mData[1] * s;  mData[2] += v.mData[2] * s;  mData[3] += v.mData[3] * s; };
+    inline void setScaledSum(BoVector4 a, BoVector4 b,  GLfloat s)
+        { mData[0] = a.mData[0] + b.mData[0] * s;   mData[1] = a.mData[1] + b.mData[1] * s;   mData[2] = a.mData[2] + b.mData[2] * s;   mData[3] = a.mData[3] + b.mData[3] * s; };
+    inline void setBlended(BoVector4 a, float af, BoVector4 b, float bf)
+        { mData[0] = a.mData[0] * af + b.mData[0] * bf;   mData[1] = a.mData[1] * af + b.mData[1] * bf;
+        mData[2] = a.mData[2] * af + b.mData[2] * bf;   mData[3] = a.mData[3] * af + b.mData[3] * af; };
+    inline void add(BoVector4 v)  { mData[0] += v.mData[0]; mData[1] += v.mData[1]; mData[2] += v.mData[2]; mData[3] += v.mData[3]; };
+
+    inline const GLfloat* data() const { return mData; }
+    inline void operator=(BoVector4 v)  { mData[0] = v.mData[0];  mData[1] = v.mData[1];  mData[2] = v.mData[2];  mData[3] = v.mData[3]; };
+    inline void operator=(const GLfloat* v)  { mData[0] = v[0];  mData[1] = v[1];  mData[2] = v[2];  mData[3] = v[3]; };
+    inline GLfloat operator[](int i) const { return mData[i]; };
+
+    /**
+     * Loads BoVector4 from KConfig
+     **/
+    static BoVector4 load(const KConfig* cfg, const QString key, const BoVector4& aDefault = BoVector4());
+
+    static QString debugString(const BoVector4& v);
+    static void debugVector(const BoVector4& v);
+
+    /**
+     * Convenience method for BoVector4::debugString(*this)
+     **/
+    QString debugString() const;
+
+  private:
+    friend class BoMatrix;
+    GLfloat mData[4];
+};
+
+/**
+ * an OpenGL 4x4 matrix. note that we use (just like mesa) column major order to
+ * store the matrix elements!
+ * 
+ * This means that a matrix
+ * <pre>
+ * A11 A12 A13 A14
+ * A21 A22 A23 A24
+ * A31 A32 A33 A34
+ * A41 A42 A43 A44
+ * </pre>
+ * Will be stored in memory like this:
+ * <pre>
+ * A11 A21 A31 A41 A12 A22 A32 A42 A13 A23 A33 A43 A41 A42 A43 A44
+ * </pre>
+ *
+ * Note that this class is not optimized for speed.
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+// AB: note that this is a dummy implementation. we need BoMatrix::debugMatrix()
+// only right now. one day we might add rotate() translate() and all that stuff
+// here, too.
+class BoMatrix
+{
+  public:
+    BoMatrix()
+    {
+      loadIdentity();
+    }
+    BoMatrix(const GLfloat* m)
+    {
+      loadMatrix(m);
+    }
+    BoMatrix(GLenum matrix)
+    {
+      loadMatrix(matrix);
+    }
+    BoMatrix(const BoMatrix& m)
+    {
+      loadMatrix(m);
+    }
+
+    /**
+     * Load the identity matrix (the "1" for matrices - M * identity = M)
+     **/
+    void loadIdentity()
+    {
+      int i;
+      for (i = 0; i < 16; i++) {
+        mData[i] = 0.0;
+      }
+      mData[0] = mData[5] = mData[10] = mData[15] = 1.0;
+    }
+
+    /**
+     * Load the specified OpenGL matrix.
+     * @param GL_MODELVIEW_MATRIX, GL_PROJECTION_MATRIX or GL_TEXTURE_MATRIX.
+     * Note that all other values (also e.g. GL_TEXTURE) will result in the
+     * identity matrix and generate an error
+     **/
+    void loadMatrix(GLenum matrix);
+    void loadMatrix(const GLfloat* m);
+    void loadMatrix(const BoMatrix& m) { loadMatrix(m.data()); }
+
+    void setElement(int row, int column, float value)
+    {
+      mData[row + column * 4] = value;
+    }
+
+    /**
+     * @param row 0..3 -> specifies the row (aka line) of the matrix
+     * @param column 0..3 -> specifies the column of the matrix (what a
+     * surprise)
+     * @return The element of the matrix at the specified position
+     **/
+    inline float element(int row, int column) const
+    {
+      return mData[row + column * 4];
+    }
+
+    const GLfloat* data() const { return mData; }
+    void debugMatrix()
+    {
+      debugMatrix(data());
+    }
+
+    /**
+     * @return TRUE if <em>all</em> elements of this matrix are 0. Otherwise
+     * FALSE.
+     **/
+    bool isNull() const
+    {
+      for (int i = 0; i < 16; i++) {
+        if (mData[i] != 0.0) {
+          return false;
+        }
+      }
+      return true;
+    }
+    /**
+     * @return TRUE if this is the identity matrix, otherwise FALSE.
+     **/
+    bool isIdentity() const
+    {
+      for (int i = 0; i < 16; i++) {
+        if (mData[i] != 0.0) {
+          if (mData[i] != 1.0 || i % 5 != 0) {
+            return false;
+          }
+        }
+      }
+      return true;
+    }
+
+    /**
+     * Translate (i.e. move) the matrix by x,y,z.
+     **/
+    void translate(GLfloat x, GLfloat y, GLfloat z);
+    inline void translate(BoVector3 v)
+    {
+      translate(v.x(), v.y(), v.z());
+    }
+
+    /**
+     * Scale the matrix by x,y,z.
+     *
+     * Note that if one of x,y,z is 0.0 the result will probably an invalid
+     * matrix. Don't do that unless you really know what you're doing.
+     **/
+    void scale(GLfloat x, GLfloat y, GLfloat z);
+
+    /**
+     * Multiply the matrix by @p mat.
+     * @param mat An array as returned by @ref data and as used by OpenGL.
+     **/
+    void multiply(const GLfloat* mat);
+
+    /**
+     * @overloaded
+     **/
+    inline void multiply(const BoMatrix* mat)
+    {
+      multiply(mat->data());
+    }
+
+    /**
+     * Rotate around a specified axis. @p angle specifies the angle, i.e. how
+     * much it is rotated and x,y,z specify the axis.
+     *
+     * See also the OpenGL glRotate() which uses the same syntax.
+     **/
+    void rotate(GLfloat angle, GLfloat x, GLfloat y, GLfloat z);
+
+    /**
+     * Transform the vector @p input according to this matrix and put the result
+     * into @p v.
+     *
+     * This calculates simply does v = M * input, where M is this matrix.
+     **/
+    void transform(BoVector3* v, const BoVector3* input) const;
+    void transform(BoVector4* v, const BoVector4* input) const;
+
+    /**
+     * Invert this matrix and place the result into @p inverse
+     **/
+    bool invert(BoMatrix* inverse) const;
+
+    bool isEqual(const BoMatrix& matrix) const;
+
+    static void debugMatrix(const GLfloat* matrix);
+
+    inline GLfloat operator[](int i) const { return mData[i]; }
+
+  private:
+    GLfloat mData[16];
+};
+
+#endif // BO3DTOOLS_H
+/*
+ * vim:et sw=2
+ */
