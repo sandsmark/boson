@@ -551,15 +551,21 @@ class BosonPathInfo
       hlpath = 0;
       hlstep = 0;
       llpath.clear();
+      start = QPoint(0, 0);
+      dest = QPoint(0, 0);
+      range = 0;
       startRegion = 0;
-      possibleDestRegions.clear();
       destRegion = 0;
+      possibleDestRegions.clear();
       passable = true;
       canMoveOnLand = true;
       canMoveOnWater = false;
       flying = false;
+      passability = BosonPath2::Land;
       moveAttacking = true;
       slowDownAtDest = true;
+      waiting = 0;
+      pathrecalced = 0;
     }
 
     // Unit that we're searching path for
