@@ -114,7 +114,7 @@ template<class T> class BoVector2
     /**
      * @overload
      **/
-    inline void set(const BoVector2& v)  { set(v.data()); }
+    inline void set(const BoVector2<T>& v)  { set(v.data()); }
     /**
      * @overload
      **/
@@ -123,17 +123,17 @@ template<class T> class BoVector2
     /**
      * Assign the x coordinate to the vector.
      **/
-    inline void setX(bofixed x)  { mData[0] = x; }
+    inline void setX(T x)  { mData[0] = x; }
     /**
      * Assign the y coordinate to the vector.
      **/
-    inline void setY(bofixed y)  { mData[1] = y; }
+    inline void setY(T y)  { mData[1] = y; }
 
-    inline bofixed dotProduct() const
+    inline T dotProduct() const
     {
       return mData[0] * mData[0] + mData[1] * mData[1];
     }
-    bofixed length() const
+    T length() const
     {
       return sqrt(dotProduct());
     }
@@ -180,7 +180,7 @@ template<class T> class BoVector2
     {
       return BoVector2(mData[0] * f, mData[1] * f);
     }
-    inline BoVector2 operator/(bofixed f) const
+    inline BoVector2 operator/(T f) const
     {
       return BoVector2(mData[0] / f, mData[1] / f);
     }
@@ -193,7 +193,7 @@ template<class T> class BoVector2
       mData[0] -= v[0];
     }
 
-    inline const bofixed* data() const { return mData; }
+    inline const T* data() const { return mData; }
 
 
   private:
@@ -589,7 +589,7 @@ template<class T> class BoVector3
       v2[0] = x;
       v2[1] = y;
       v2[2] = z;
-      return BoVector3<T>::isEqual(mData, v2);
+      return BoVector3<T>::isEqual(mData, v2, diff);
       return true;
     }
 
