@@ -25,13 +25,6 @@
             <blue>255</blue>
         </color>
     </property>
-    <property name="paletteBackgroundColor">
-        <color>
-            <red>66</red>
-            <green>66</green>
-            <blue>66</blue>
-        </color>
-    </property>
     <property name="caption">
         <string>BosonNewGameWidgetBase</string>
     </property>
