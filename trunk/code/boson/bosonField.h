@@ -60,8 +60,7 @@ class bosonField : public visualField
 /* concerning contents */
   playerFacility *getFacility(long key) { return facility.find(key); }
 
-  public: ///orzel : temp
-
+//private :
   QIntDict<playerMobUnit>	mobile;
   QIntDict<playerFacility>	facility;
 
