@@ -563,64 +563,54 @@ void BosonBigDisplayBase::paintGL()
 
  boProfiling->renderText(true); // AB: actually this is text and cursor
 
-// TODO: cursor must always be on top and should not be scaled (i.e. cause of zoom)
-// possible solutions: load the identity matrix ; maybe even use an ortho
-// projection matrix for the cursor (it seems that we can mix them!)
-// AB: it'll be always on top, cause we disabled the depth buffer test above
+
+ // cursor and text are drawn in a 2D-matrix, so that we can use window
+ // coordinates
+ glMatrixMode(GL_PROJECTION);
+ glPushMatrix();
+ glLoadIdentity();
+ gluOrtho2D(0.0, (GLfloat)d->mW, 0.0, (GLfloat)d->mH); // the same as the viewport
+ glMatrixMode(GL_MODELVIEW);
+ glPushMatrix();
+ glLoadIdentity();
  if (cursor() && cursor()->isA("BosonSpriteCursor")) {
-	// cursor and text are drawn in a 2D-matrix, so that we can use window
-	// coordinates
-	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-	glLoadIdentity();
-	gluOrtho2D(0.0, (GLfloat)d->mW, 0.0, (GLfloat)d->mH); // the same as the viewport
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glLoadIdentity();
-	
-	 
 	BosonSpriteCursor* c = (BosonSpriteCursor*)cursor();
+
+	// FIXME: we could also use glRasterPos2i() and draw the image, just
+	// like we do for the text, instead of texture objects.
+	// Which version would be faster?
 	GLuint tex = c->currentTexture();
 	if (tex != 0) {
-		glPushMatrix();
 		QPoint pos = mapFromGlobal(c->pos());
 		GLfloat x;
 		GLfloat y;
-//		GLdouble z;
 		x = (GLfloat)pos.x();
-		y = (GLfloat)-pos.y();
-//		mapCoordinates(pos, &x, &y, &z);
-//		glTranslatef(x, y, 0.0);
-//		glRasterPos2i(x, y);
-		glRasterPos2i(pos.x(), -pos.y());
-
-		float w = 0.5;
-		float h = 0.5;
+		y = (GLfloat)d->mH - (GLfloat)pos.y();
+		const GLfloat w = 50;
+		const GLfloat h = 50;
 		glBindTexture(GL_TEXTURE_2D, tex);
 		glBegin(GL_QUADS);
-			glTexCoord2f(0.0, 0.0); glVertex3f(0.0, 0.0, 0.0);
-			glTexCoord2f(0.0, 1.0); glVertex3f(0.0, h, 0.0);
-			glTexCoord2f(1.0, 1.0); glVertex3f(w, h, 0.0);
-			glTexCoord2f(1.0, 0.0); glVertex3f(w, 0.0, 0.0);
+			glTexCoord2f(0.0, 0.0); glVertex3f(x, y, 0.0);
+			glTexCoord2f(0.0, 1.0); glVertex3f(x, y + h, 0.0);
+			glTexCoord2f(1.0, 1.0); glVertex3f(x + w, y + h, 0.0);
+			glTexCoord2f(1.0, 0.0); glVertex3f(x + w, y, 0.0);
 		glEnd();
-
-		glPopMatrix();
 	}
-
-	glDisable(GL_BLEND);
-	glDisable(GL_TEXTURE_2D);
-	if (checkError()) {
-		kdError() << k_funcinfo << "cursor rendered" << endl;
-	}
-	renderText();
-
-	// now restore the old 3D-matrix
-	glMatrixMode(GL_PROJECTION);
-	glPopMatrix();
-	glMatrixMode(GL_MODELVIEW);
-	glPopMatrix();
  }
+ glDisable(GL_BLEND);
+ glDisable(GL_TEXTURE_2D);
+ if (checkError()) {
+	kdError() << k_funcinfo << "cursor rendered" << endl;
+ }
+ renderText();
+
+ // now restore the old 3D-matrix
+ glMatrixMode(GL_PROJECTION);
+ glPopMatrix();
+ glMatrixMode(GL_MODELVIEW);
+ glPopMatrix();
  boProfiling->renderText(false);
+
 
  if (d->mSelectionRect.isVisible()) {
 	glPushMatrix();
