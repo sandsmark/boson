@@ -293,6 +293,7 @@ bool BosonPropertyXML::removeProperty(QDomElement& root, unsigned long int id)
 	}
 	if (element.attribute(QString::fromLatin1("Id")).compare(QString::number(id)) == 0) {
 		root.removeChild(element);
+		i--; // the element will be removed from the list :(
 		ret = true;
 	}
  }
