@@ -641,7 +641,7 @@ bool BosonFileConverter::convertPlayField_From_0_9_1_To_0_10(QMap<QString, QByte
  return true;
 }
 
-bool BosonFileConverter::convertPlayField_From_0_10_To_0_11(QMap<QString, QByteArray>& files)
+bool BosonFileConverter::convertPlayField_From_0_10_To_0_10_80(QMap<QString, QByteArray>& files)
 {
  QDomDocument kgameDoc(QString::fromLatin1("Boson"));
  QDomDocument canvasDoc(QString::fromLatin1("Canvas"));
@@ -662,12 +662,10 @@ bool BosonFileConverter::convertPlayField_From_0_10_To_0_11(QMap<QString, QByteA
  QDomElement canvasRoot = canvasDoc.documentElement();
  QDomElement playersRoot = playersDoc.documentElement();
 
-#if BOSON_VERSION_MICRO < 0x80 || BOSON_VERSION_MINOR >= 0x11
-#error replace the following by BOSON_SAVEGAME_FORMAT_VERSION_0_11
-#endif
-#define BO_VERSION BOSON_MAKE_SAVEGAME_FORMAT_VERSION(0x00, 0x02, 0x04)
- kgameRoot.setAttribute("Version", BO_VERSION);
-#undef BO_VERSION
+ // 0.10.80 is a development version that was never released.
+ // this just exist because we have some maps in cvs with this format version
+ // and need to convert them, too.
+ kgameRoot.setAttribute("Version", BOSON_MAKE_SAVEGAME_FORMAT_VERSION(0x00, 0x02, 0x04));
 
  // all occurances of the player ID/index are now stored in an attribute named
  // "PlayerId"
@@ -708,33 +706,6 @@ bool BosonFileConverter::convertPlayField_From_0_10_To_0_11(QMap<QString, QByteA
 	QString id = e.attribute("Id");
 	e.removeAttribute("Id");
 	e.setAttribute("PlayerId", id);
-
-	// BO_TILE_SIZE is no more
-	QDomNodeList items = e.elementsByTagName("Item");
-	for (unsigned int j = 0; j < items.count(); j++) {
-		QDomElement item = items.item(j).toElement();
-		if (item.isNull()) {
-			boError() << k_funcinfo << "invalid Item tag" << endl;
-			return false;
-		}
-		bool ok;
-		float x = (float)item.attribute("x").toInt(&ok);
-		if (!ok) {
-			boError() << k_funcinfo << "x attribute is not a valid integer" << endl;
-			return false;
-		}
-		float y = (float)item.attribute("y").toInt(&ok);
-		if (!ok) {
-				boError() << k_funcinfo << "y attribute is not a valid integer" << endl;
-				return false;
-		}
-		x /= 48.0f;
-		y /= 48.0f;
-
-#warning this will be changed! -> we need to use fixed point values
-		item.setAttribute("x", x);
-		item.setAttribute("y", y);
-	}
  }
 
 
@@ -795,7 +766,7 @@ bool BosonFileConverter::convertPlayField_From_0_10_To_0_11(QMap<QString, QByteA
  if (files["map/water.xml"].size() == 0) {
 	boDebug() << k_funcinfo << "Adding dummy water.xml file" << endl;
 	// Old file format - add dummy water.xml file
-	if(!addDummyWaterXML_From_0_10_To_0_11(files["map/water.xml"]))
+	if(!addDummyWaterXML_From_0_10_To_0_10_80(files["map/water.xml"]))
 	{
 		boError() << k_funcinfo << "Couldn't add dummy water.xml file" << endl;
 		return false;
@@ -808,12 +779,75 @@ bool BosonFileConverter::convertPlayField_From_0_10_To_0_11(QMap<QString, QByteA
  return true;
 }
 
-bool BosonFileConverter::addDummyWaterXML_From_0_10_To_0_11(QByteArray& waterXML)
+bool BosonFileConverter::addDummyWaterXML_From_0_10_To_0_10_80(QByteArray& waterXML)
 {
  QDomDocument doc(QString::fromLatin1("Water"));
  QDomElement root = doc.createElement(QString::fromLatin1("Water"));
  doc.appendChild(root);
  waterXML = doc.toCString();
+ return true;
+}
+
+bool BosonFileConverter::convertPlayField_From_0_10_80_To_0_11(QMap<QString, QByteArray>& files)
+{
+ QDomDocument kgameDoc(QString::fromLatin1("Boson"));
+ QDomDocument canvasDoc(QString::fromLatin1("Canvas"));
+ QDomDocument playersDoc(QString::fromLatin1("Players"));
+ if (!loadXMLDoc(&kgameDoc, files["kgame.xml"])) {
+	boError() << k_funcinfo << "could not load kgame.xml" << endl;
+	return false;
+ }
+ if (!loadXMLDoc(&canvasDoc, files["canvas.xml"])) {
+	boError() << k_funcinfo << "could not load canvas.xml" << endl;
+	return false;
+ }
+ QDomElement kgameRoot = kgameDoc.documentElement();
+ QDomElement canvasRoot = canvasDoc.documentElement();
+
+#if BOSON_VERSION_MICRO < 0x80 || BOSON_VERSION_MINOR >= 0x11
+#error replace the following by BOSON_SAVEGAME_FORMAT_VERSION_0_11
+#endif
+#define BO_VERSION BOSON_MAKE_SAVEGAME_FORMAT_VERSION(0x00, 0x02, 0x05)
+ kgameRoot.setAttribute("Version", BO_VERSION);
+#undef BO_VERSION
+
+ QDomNodeList itemsList = canvasRoot.elementsByTagName("Items");
+ for (unsigned int i = 0; i < itemsList.count(); i++) {
+	QDomElement e = itemsList.item(i).toElement();
+	if (e.isNull()) {
+		boError() << k_funcinfo << "invalid Items tag" << endl;
+		return false;
+	}
+
+	// BO_TILE_SIZE is no more
+	QDomNodeList items = e.elementsByTagName("Item");
+	for (unsigned int j = 0; j < items.count(); j++) {
+		QDomElement item = items.item(j).toElement();
+		if (item.isNull()) {
+			boError() << k_funcinfo << "invalid Item tag" << endl;
+			return false;
+		}
+		bool ok;
+		float x = (float)item.attribute("x").toInt(&ok);
+		if (!ok) {
+			boError() << k_funcinfo << "x attribute is not a valid integer" << endl;
+			return false;
+		}
+		float y = (float)item.attribute("y").toInt(&ok);
+		if (!ok) {
+				boError() << k_funcinfo << "y attribute is not a valid integer" << endl;
+				return false;
+		}
+		x /= 48.0f;
+		y /= 48.0f;
+
+#warning this will be changed! -> we need to use fixed point values
+		item.setAttribute("x", x);
+		item.setAttribute("y", y);
+	}
+ }
+ files.insert("kgame.xml", kgameDoc.toString().utf8());
+ files.insert("canvas.xml", canvasDoc.toString().utf8());
  return true;
 }
 

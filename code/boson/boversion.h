@@ -22,7 +22,7 @@
 // AB: in favor of readability we don't use real hex numbers, i.e. we use 0x10 == 10
 #define BOSON_VERSION_MAJOR 0x00
 #define BOSON_VERSION_MINOR 0x10
-#define BOSON_VERSION_MICRO 0x80
+#define BOSON_VERSION_MICRO 0x81
 #define BOSON_VERSION_STRING "0.11pre"
 
 #define BOSON_VERSION ((BOSON_VERSION_MAJOR << 16) | (BOSON_VERSION_MINOR << 8) | BOSON_VERSION_MICRO)
@@ -33,7 +33,7 @@
 // (saved in kgame.xml, <Boson Version="...">)
 #define BOSON_SAVEGAME_FORMAT_VERSION_MAJOR 0x00
 #define BOSON_SAVEGAME_FORMAT_VERSION_MINOR 0x02
-#define BOSON_SAVEGAME_FORMAT_VERSION_RELEASE 0x04
+#define BOSON_SAVEGAME_FORMAT_VERSION_RELEASE 0x05
 
 #define BOSON_MAKE_SAVEGAME_FORMAT_VERSION( a,b,c ) ( ((a) << 16) | ((b) << 8) | (c) )
 #define BOSON_SAVEGAME_FORMAT_VERSION \
