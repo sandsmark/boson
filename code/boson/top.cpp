@@ -374,7 +374,6 @@ void TopWidget::showStartupWidget(StartupWidgetIds id)
 	case IdWelcome:
 	case IdNewGame:
 	case IdStartEditor:
-		break;
 	case IdBosonWidget:
 	case IdNetwork:
 	case IdLoading:
@@ -800,13 +799,6 @@ void TopWidget::slotToggleMenubar()
 		break;
  }
  showHideMenubar();
-/*
- if (d->mActionMenubar->isChecked()) {
-	menuBar()->show();
- } else {
-	menuBar()->hide();
- }
-*/
 }
 
 void TopWidget::loadGameDockConfig()
@@ -918,8 +910,11 @@ void TopWidget::raiseWidget(StartupWidgetIds id)
 	case IdWelcome:
 	{
 		QWidget* w = mWs->widget(id);
-		setMinimumSize(w->size());
-		setMaximumSize(w->size());
+		QSize s = w->sizeHint();
+		if (!d->mActionMenubar->isChecked()) {
+		}
+		setMinimumSize(s);
+		setMaximumSize(s);
 		showHideMenubar();
 		break;
 	}
