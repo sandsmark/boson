@@ -42,15 +42,17 @@
 #include <kstdgameaction.h>
 #include <kaction.h>
 #include <kdebug.h>
-#include <qwidgetstack.h>
-#include <qtimer.h>
 #include <kkeydialog.h>
-#include <qwmatrix.h>
-#include <qhbox.h>
-#include <qptrdict.h>
+#include <kmenubar.h>
 #include <kpopupmenu.h>
 #include <kmessagebox.h>
 #include <kconfig.h>
+
+#include <qwidgetstack.h>
+#include <qtimer.h>
+#include <qwmatrix.h>
+#include <qhbox.h>
+#include <qptrdict.h>
 
 #define ID_DEBUG_KILLPLAYER 0
 #define ID_WIDGETSTACK_WELCOME 1
@@ -242,6 +244,7 @@ void TopWidget::initActions()
  }
 #endif
  createGUI();
+ menuBar()->hide();
 }
 
 void TopWidget::initMusic()
@@ -347,6 +350,7 @@ void TopWidget::showWelcomeWidget()
 	initWelcomeWidget();
  }
  mWs->raiseWidget(ID_WIDGETSTACK_WELCOME);
+ menuBar()->hide();
 }
 
 void TopWidget::initNewGameWidget()
@@ -366,6 +370,7 @@ void TopWidget::showNewGameWidget()
 	initNewGameWidget();
  }
  mWs->raiseWidget(ID_WIDGETSTACK_NEWGAME);
+ menuBar()->hide();
 }
 
 void TopWidget::initStartEditorWidget()
@@ -387,6 +392,7 @@ void TopWidget::showStartEditorWidget()
 	initStartEditorWidget();
  }
  mWs->raiseWidget(ID_WIDGETSTACK_STARTEDITOR);
+ menuBar()->hide();
 #endif
 }
 
@@ -405,6 +411,7 @@ void TopWidget::showBosonWidget()
 	initBosonWidget();
  }
  mWs->raiseWidget(ID_WIDGETSTACK_BOSONWIDGET);
+ menuBar()->show();
 }
 
 void TopWidget::initNetworkOptions()
@@ -423,6 +430,7 @@ void TopWidget::showNetworkOptions()
 	initNetworkOptions();
  }
  mWs->raiseWidget(ID_WIDGETSTACK_NETWORK);
+ menuBar()->hide();
 }
 
 void TopWidget::initLoadingWidget()
@@ -440,6 +448,7 @@ void TopWidget::showLoadingWidget()
 	initLoadingWidget();
  }
  mWs->raiseWidget(ID_WIDGETSTACK_LOADING);
+ menuBar()->hide();
 }
 
 void TopWidget::slotNewGame()
