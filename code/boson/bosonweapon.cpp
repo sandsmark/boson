@@ -55,13 +55,15 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg, bool full)
   mShotType = (BosonShot::Type)(cfg->readNumEntry("Type", (int)BosonShot::Missile));
   m_range.init(cfg->readUnsignedLongNumEntry("Range", 0));
   m_reloadingTime.init(cfg->readUnsignedNumEntry("Reload", 0));
-  m_speed.init((cfg->readDoubleNumEntry("Speed", 0)) / 48.0f);
+ // We divide speeds with 20, because speeds in config files are cells/second,
+ //  but we want cells/advance calls
+  m_speed.init(cfg->readDoubleNumEntry("Speed", 0) / 20.0f);
   if(speed() == 0 && mShotType == BosonShot::Missile)
   {
     boWarning() << k_funcinfo << "Type is missile, but speed is 0, setting type to bullet" << endl;
     mShotType = BosonShot::Bullet;
   }
-  mAccelerationSpeed = (cfg->readDoubleNumEntry("AccelerationSpeed", 0.2)) / 48.0f;
+  mAccelerationSpeed = (cfg->readDoubleNumEntry("AccelerationSpeed", 4) / 20.0f);
   m_damage.init(cfg->readUnsignedLongNumEntry("Damage", 0));
   m_damageRange.init(cfg->readDoubleNumEntry("DamageRange", 1));
   m_fullDamageRange.init(cfg->readDoubleNumEntry("FullDamageRange", 0.25 * m_damageRange));
@@ -116,8 +118,10 @@ void BosonWeaponProperties::savePlugin(KSimpleConfig* cfg)
   cfg->writeEntry("Name", mName);
   cfg->writeEntry("Range", range());
   cfg->writeEntry("Reload", reloadingTime());
-  cfg->writeEntry("Speed", speed() * 48.0f);
-  cfg->writeEntry("AccelerationSpeed", mAccelerationSpeed * 48.0f);
+ // We multiply speeds with 20 because speeds in config files are cells/second,
+ //  but here we have cells/advance calls
+  cfg->writeEntry("Speed", speed() * 20.0f);
+  cfg->writeEntry("AccelerationSpeed", mAccelerationSpeed * 20.0f);
   cfg->writeEntry("Damage", damage());
   cfg->writeEntry("DamageRange", damageRange());
   cfg->writeEntry("CanShootAtAirUnits", mCanShootAtAirUnits);

@@ -227,15 +227,17 @@ void UnitProperties::saveUnitType(const QString& fileName)
 void UnitProperties::loadMobileProperties(KSimpleConfig* conf)
 {
  conf->setGroup("Boson Mobile Unit");
- m_speed.init(conf->readDoubleNumEntry("Speed", 0) / 48.0f);
+ // We divide speeds with 20, because speeds in config files are cells/second,
+ //  but we want cells/advance calls
+ m_speed.init(conf->readDoubleNumEntry("Speed", 0) / 20.0f);
  if (speed() < 0) {
 	boWarning() << k_funcinfo << "Invalid Speed value: " << speed() <<
 			" for unit " << typeId() << ", defaulting to 0" << endl;
 	m_speed.init(0);
  }
- mAccelerationSpeed = conf->readDoubleNumEntry("AccelerationSpeed", 0.1) / 48.0f;
- mDecelerationSpeed = conf->readDoubleNumEntry("DecelerationSpeed", 0.2) / 48.0f;
- mRotationSpeed = conf->readNumEntry("RotationSpeed", (int)(speed() * 48.0f * 2));
+ mAccelerationSpeed = conf->readDoubleNumEntry("AccelerationSpeed", 1) / 20.0f;
+ mDecelerationSpeed = conf->readDoubleNumEntry("DecelerationSpeed", 2) / 20.0f;
+ mRotationSpeed = (int)(conf->readNumEntry("RotationSpeed", (int)(speed() * 20.0f * 90.0f)) / 20.0f);
  mCanGoOnLand = conf->readBoolEntry("CanGoOnLand", (isLand() || isAircraft()));
  mCanGoOnWater = conf->readBoolEntry("CanGoOnWater", (isShip() || isAircraft()));
 }
@@ -368,10 +370,12 @@ void UnitProperties::loadActions()
 void UnitProperties::saveMobileProperties(KSimpleConfig* conf)
 {
  conf->setGroup("Boson Mobile Unit");
- conf->writeEntry("Speed", (double)speed() * 48.0);
- conf->writeEntry("AccelerationSpeed", (double)mAccelerationSpeed);
- conf->writeEntry("DecelerationSpeed", (double)mDecelerationSpeed);
- conf->writeEntry("RotationSpeed", mRotationSpeed);
+ // We multiply speeds with 20 because speeds in config files are cells/second,
+ //  but here we have cells/advance calls
+ conf->writeEntry("Speed", speed() * 20.0f);
+ conf->writeEntry("AccelerationSpeed", (double)mAccelerationSpeed * 20.0f);
+ conf->writeEntry("DecelerationSpeed", (double)mDecelerationSpeed * 20.0f);
+ conf->writeEntry("RotationSpeed", mRotationSpeed * 20.0f);
  conf->writeEntry("CanGoOnLand", mCanGoOnLand);
  conf->writeEntry("CanGoOnWater", mCanGoOnWater);
 }
@@ -701,9 +705,9 @@ void UnitProperties::reset()
  mExplodingDamageRange = 0;
  // Mobile stuff (because unit is mobile by default)
  mIsFacility = false;
- mAccelerationSpeed = 0.5;
- mDecelerationSpeed = 1.0;
- mRotationSpeed = (int)(2 * speed());
+ mAccelerationSpeed = 2;
+ mDecelerationSpeed = 4;
+ mRotationSpeed = (int)(45.0f * speed());
  mCanGoOnLand = true;
  mCanGoOnWater = false;
  // Sounds
