@@ -271,6 +271,13 @@ public:
 	void setGLConstructionStep(unsigned int step);
 
 	/**
+	 * Convenience method. Note that the glConstructionSteps differ from the
+	 * @ref Facility::constructionSteps completely!
+	 * @return model()->constructionSteps()
+	 **/
+	unsigned int glConstructionSteps() const;
+
+	/**
 	 * For OpenGL performance <em>only</em>! Do <em>not</em> use outside
 	 * OpenGL! Especially not in pathfinding!
 	 * @ return The radius of the bounding sphere. See @ref

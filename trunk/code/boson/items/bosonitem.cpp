@@ -71,7 +71,7 @@ BosonItem::BosonItem(BosonModel* model, BosonCanvas* canvas)
 
 
  // FIXME the correct frame must be set after this constructor!
- if (mGLConstructionStep >= mModel->constructionSteps()) {
+ if (mGLConstructionStep >= glConstructionSteps()) {
 	setCurrentFrame(mModel->frame(frame()));
  } else {
 	setCurrentFrame(mModel->constructionStep(mGLConstructionStep));
@@ -230,9 +230,14 @@ void BosonItem::setGLConstructionStep(unsigned int s)
  setCurrentFrame(f);
 }
 
+unsigned int BosonItem::glConstructionSteps() const
+{
+ return model()->constructionSteps();
+}
+
 void BosonItem::setFrame(int _frame)
 {
- if (mGLConstructionStep < model()->constructionSteps()) {
+ if (mGLConstructionStep < glConstructionSteps()) {
 	// this unit (?) has not yet been constructed
 	// completely.
 	// Note that mGLConstructionStep is totally different
@@ -269,7 +274,7 @@ void BosonItem::setCurrentFrame(BoFrame* frame)
 
 void BosonItem::setAnimationMode(int mode)
 {
- if (mGLConstructionStep < model()->constructionSteps()) {
+ if (mGLConstructionStep < glConstructionSteps()) {
 	return;
  }
  BosonAnimation* anim = model()->animation(mode);
