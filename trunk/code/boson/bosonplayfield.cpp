@@ -54,11 +54,13 @@ BosonPlayField::BosonPlayField(QObject* parent) : QObject(parent, "BosonPlayFiel
 
 BosonPlayField::~BosonPlayField()
 {
+ boDebug() << k_funcinfo << endl;
  emit signalNewMap(0);
  delete mMap;
  delete mScenario;
  delete mDescription;
  delete mFile;
+ boDebug() << k_funcinfo << "done" << endl;
 }
 
 void BosonPlayField::initStatic()
