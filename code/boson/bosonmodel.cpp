@@ -690,7 +690,7 @@ void BosonModel::loadNode(Lib3dsNode* node, bool reload)
 		}
 		glTranslatef(t->offset[0], t->offset[1], 0.0);
 		if (t->rotation != 0.0) {
-			glRotatef(t->rotation, 0.0, 0.0, 1.0);
+			glRotatef(-t->rotation, 0.0, 0.0, 1.0);
 		}
 		glTranslatef(mesh->map_data.pos[0], mesh->map_data.pos[1], mesh->map_data.pos[2]);
 		float scale = mesh->map_data.scale;
