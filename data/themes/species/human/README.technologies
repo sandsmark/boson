@@ -1,4 +1,6 @@
-Technologies giving you the ability to change unit and facilitie properties during the game.
+With technologies you get the ability to change unit and facility properties during the game.
+This file explains the syntax of an entry in the index.technologies file.
+
 
 The entries marked with * are mandatory.
 -------------------------------------------------------------------------------
