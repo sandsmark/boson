@@ -1,4 +1,4 @@
-<!DOCTYPE UI><UI version="3.2" stdsetdef="1">
+<!DOCTYPE UI><UI version="3.1" stdsetdef="1">
 <class>BosonGLFontChooserBase</class>
 <author>Felix Seeger &lt;felix.seeger@gmx.de&gt;</author>
 <widget class="QWidget">
