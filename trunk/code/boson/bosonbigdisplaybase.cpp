@@ -809,7 +809,22 @@ void BosonBigDisplayBase::paintGL()
 	while ((s = it.current()) != 0) {
 		++it;
 		if (sphereInFrustum(s->position().data(), s->boundingSphereRadius())) {
-			s->draw();
+#warning FIXME
+			// BosonParticleSystem uses *OpenGL* coordinates for
+			// position, not cell/canvas coordinates.
+			// this is a bug imho, although they are often pretty
+			// similar. the class should do
+			// a) maintain two coordinates (cell and opengl)
+			// b) provide cell values with position() or better with
+			// x() and y() as the rest does (esp. BosonItem)
+			//
+			// cell-coordinates only is not an option, as the
+			// accuracy of opengl coordinates is needed.
+			int cellX = (int)s->position()[0];
+			int cellY = (int)s->position()[1];
+			if (canvas()->onCanvas(cellX, cellY) && !localPlayer()->isFogged(cellX, cellY)) {
+				s->draw();
+			}
 		}
 	}
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

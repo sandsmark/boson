@@ -95,6 +95,13 @@ public:
 
 	void fog(int x, int y);
 	void unfog(int x, int y);
+
+	/**
+	 * @param x Position of the cell in <em>Cell</em>-coordinates
+	 * @param y Position of the cell in <em>Cell</em>-coordinates
+	 * @return Whether the map is fogged for this player at the
+	 * (cell)-coordinates x,y.
+	 **/
 	bool isFogged(int x, int y) const;
 
 	unsigned long int minerals() const;
