@@ -30,6 +30,8 @@ visualMiniDisplay::visualMiniDisplay(visualTopLevel *v, QWidget*parent, const ch
 	, _w(-1), _h(-1), vtl(v), _ground(0l)
 {
 
+	setSizePolicy( QSizePolicy( QSizePolicy::Fixed, QSizePolicy::Fixed) );
+
 	sync();
 /* make the connection */
 	connect(vcanvas, SIGNAL(newCell(int,int, groundType)), this, SLOT(newCell(int,int, groundType)));
@@ -64,6 +66,7 @@ void visualMiniDisplay::sync(void)
 		_w = vtl->maxX();
 		_h = vtl->maxY();
 		createData();
+		updateGeometry();
 	}
 
 	p.begin(_ground);

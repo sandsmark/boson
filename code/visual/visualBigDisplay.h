@@ -52,6 +52,7 @@ public:
 
 	/* from display classes */
 	virtual void actionClicked(int, int, int state)=0;	// selecting, moving...
+	virtual QSize sizeHint() const { return QSize(100,100); } // minimum size
 
 signals:
 	void	relativeReCenterView (int x, int y);

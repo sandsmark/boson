@@ -348,7 +348,11 @@ void editorTopLevel::makeCommandGui(void)
 {
 	int		i;
 
-	mainFrame = new QFrame(&mw);
+	mainFrame = mw.mainFrame;
+
+	mainFrame->setSizePolicy( QSizePolicy( QSizePolicy::Minimum, QSizePolicy::MinimumExpanding ) );
+	mainFrame->setMinimumSize (220, 200);
+
 
 	mainFrame->setFrameStyle(QFrame::Sunken | QFrame::Panel);
 	mainFrame->setLineWidth(5);
