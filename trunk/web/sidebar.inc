@@ -75,7 +75,7 @@ function sidebar_links_box()
 sidebar_box_begin("Links");
 draw_link("Main page", "index.php");
 echo "<br>";
-draw_link("All news", "all-news.php");
+draw_link("All news", "news.php");
 draw_link("Screenshots", "screenshots.php");
 draw_link("Download", "download.php");
 draw_link("Install", "install.php");

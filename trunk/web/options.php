@@ -25,12 +25,9 @@ $filename="options.php";
 $change_style="";
 
 /*****  Some includes  *****/
-include("common.php");
-include("sidebar.php");
-include("main.php");
-include("counter.php");
-include("boxes.php");
-include("variables.php");
+include_once("common.inc");
+include_once("sidebar.inc");
+include_once("counter.inc");
 
 /*****  Start of main stuff  *****/
 
@@ -49,20 +46,12 @@ echo "
 if($HTTP_GET_VARS["style"] != "")
 {
   $change_style=$HTTP_GET_VARS["style"];
+  $HTTP_COOKIE_VARS["Style"] = $change_style;
   setcookie("Style", $change_style, time() + 3600 * 24 * 365 * 25); // Expires after 25 years
 }
 
-do_start_stuff();
 
-if($change_style != "")
-  $style=$change_style;
-
-// Headers
-html_print_header("Style options");
-print_header();
-
-// Main table
-main_table_begin();
+start_page("Style options");
 
 // Sidebar
 sidebar_begin();
@@ -94,11 +83,8 @@ draw_bigbox_text("
 draw_bigbox_end();
 
 main_area_end();
-main_table_end();
 
-// Footers
-print_footer();
-html_print_footer();
+end_page();
 
 
 ?>

@@ -296,3 +296,21 @@ img.statsbar {
   vertical-alignment: middle;
 }
 
+/** Poll **/
+.pollquestion {
+  font-weight: bold;
+}
+
+.pollanswer {
+}
+
+a.pollresults {
+}
+
+a.pollold {
+}
+
+.pollyourvote {
+  font-weight: bold;
+}
+

@@ -24,12 +24,9 @@ $filename="screenshots.php";
 $screenshotsdir="shots/";
 
 /*****  Some includes  *****/
-include("common.php");
-include("sidebar.php");
-include("main.php");
-include("counter.php");
-include("boxes.php");
-include("variables.php");
+include_once("common.inc");
+include_once("sidebar.inc");
+include_once("counter.inc");
 
 $show_ss=-1;
 $max_screens_per_page=10;
@@ -218,18 +215,11 @@ $ss_count = count($screens);
 
 /*****  Start of main stuff  *****/
 
-do_start_stuff();
-
 if($show_ss == -1)
 {
     // Showing thumbs of all screenshots
-    // Headers
-    html_print_header("Screenshots");
-    print_header();
-    
-    // Main table
-    main_table_begin();
-    
+    start_page("Screenshots");
+
     // Sidebar
     sidebar_begin();
       sidebar_links_box();
@@ -300,11 +290,8 @@ if($show_ss == -1)
     draw_bigbox_end();
     
     main_area_end();
-    main_table_end();
-    
-    // Footers
-    print_footer();
-    html_print_footer();
+
+    end_page();
 }
 else
 {
@@ -314,14 +301,10 @@ else
     // We're counting viewed screens as downloads
     counter2_download("Screenshot $ssnum");
 
-    html_print_header("Screenshot $ssnum");
-    print_header();
-    
-    // Main table
-    main_table_begin();
-    
+    start_page("Screenshot $ssnum");
+
     // No sidebar to save space
-    
+
     main_area_begin();
     
     // Screenshots stuff
@@ -334,11 +317,8 @@ else
     draw_bigbox_end();
     
     main_area_end();
-    main_table_end();
-    
-    // Footers
-    print_footer();
-    html_print_footer();
+
+    end_page();
 }
 
 ?>

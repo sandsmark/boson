@@ -22,22 +22,12 @@
 $basedir="";
 $filename="stats.php";
 
-include("${basedir}common.php");
-include("${basedir}counter.php");
-include("${basedir}sidebar.php");
-include("${basedir}main.php");
-include("${basedir}variables.php");
-include("${basedir}boxes.php");
+include_once("common.inc");
+include_once("sidebar.inc");
+include_once("counter.inc");
 
 
-do_start_stuff();
-
-// Headers
-html_print_header("Statistics page");
-print_header();
-
-// Main table
-main_table_begin();
+start_page("Statistics");
 
 // Sidebar
 sidebar_begin();
@@ -118,10 +108,7 @@ main_area_begin();
   }
 
 main_area_end();
-main_table_end();
 
-// Footers
-print_footer();
-html_print_footer();
+end_page();
 
 ?>
