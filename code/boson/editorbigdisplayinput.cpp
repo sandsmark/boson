@@ -26,6 +26,7 @@
 #include "bosoncanvas.h"
 #include "bosonconfig.h"
 #include "bosonmessage.h"
+#include "bosongroundtheme.h"
 #include "boson.h"
 #include "bosonmap.h"
 #include "bosoncursor.h"
@@ -264,8 +265,13 @@ bool EditorBigDisplayInput::actionPlace(QDataStream& stream, const BoVector3& ca
 		BO_NULL_ERROR(map);
 		return false;
 	}
-	if (map->textureCount() != d->mPlacement.textureCount()) {
-		boError() << k_funcinfo << "textureCount=" << map->textureCount()
+	BosonGroundTheme* groundTheme = map->groundTheme();
+	if (!groundTheme) {
+		BO_NULL_ERROR(groundTheme);
+		return false;
+	}
+	if (groundTheme->textureCount() != d->mPlacement.textureCount()) {
+		boError() << k_funcinfo << "textureCount=" << groundTheme->textureCount()
 				<< " , placement textureCount="
 				<< d->mPlacement.textureCount() << endl;
 		return false;
@@ -282,7 +288,7 @@ bool EditorBigDisplayInput::actionPlace(QDataStream& stream, const BoVector3& ca
 	for (unsigned int i = 0; i < 4; i++) {
 		stream << (Q_UINT32)cornersX[i];
 		stream << (Q_UINT32)cornersY[i];
-		stream << (Q_UINT32)map->textureCount();
+		stream << (Q_UINT32)groundTheme->textureCount();
 		for (unsigned int j = 0; j < d->mPlacement.textureCount(); j++) {
 			unsigned char alpha = 0;
 			alpha = d->mPlacement.textureAlpha(j);
