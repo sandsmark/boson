@@ -31,57 +31,66 @@ BosonProfiling* BosonProfiling::mProfiling = 0;
 #define COMPARE_TIMES(time1, time2) ( ((time2.tv_sec - time1.tv_sec) * 1000000) + (time2.tv_usec - time1.tv_usec) )
 
 #define MAX_ENTRIES 300
-#define PROFILING_VERSION 0x03 // increase if you change the file format of saved files!
+#define PROFILING_VERSION 0x04 // increase if you change the file format of saved files!
+
+unsigned long int compareTimes(const struct timeval& t1, const struct timeval& t2)
+{
+ return (((t2.tv_sec - t1.tv_sec) * 1000000) + (t2.tv_usec - t1.tv_usec));
+}
+
+QDataStream& operator<<(QDataStream& s, const struct timeval& t)
+{
+ s << t.tv_sec;
+ s << t.tv_usec;
+ return s;
+}
+
+QDataStream& operator>>(QDataStream& s, struct timeval& t)
+{
+ s >> t.tv_sec;
+ s >> t.tv_usec;
+ return s;
+}
 
 QDataStream& operator<<(QDataStream& s, const RenderGLTimes& t)
 {
- s << (Q_LONG)t.mClear;
- s << (Q_LONG)t.mCells;
- s << (Q_LONG)t.mUnits;
  s << (Q_UINT32)t.mUnitCount;
- s << (Q_LONG)t.mMissiles;
- s << (Q_LONG)t.mParticles;
- s << (Q_LONG)t.mFOW;
- s << (Q_LONG)t.mText;
- s << (Q_LONG)t.mFunction;
+ for (int i = 0; i < 2; i++) {
+	s << t.mClear[i];
+	s << t.mCells[i];
+	s << t.mUnits[i];
+	s << t.mMissiles[i];
+	s << t.mParticles[i];
+	s << t.mFOW[i];
+	s << t.mText[i];
+	s << t.mFunction[i];
+ }
  return s;
 }
 
 QDataStream& operator>>(QDataStream& s, RenderGLTimes& t)
 {
- Q_LONG clear;
- Q_LONG cells;
- Q_LONG units;
  Q_UINT32 unitCount;
- Q_LONG missiles;
- Q_LONG particles;
- Q_LONG fow;
- Q_LONG text;
- Q_LONG function;
- s >> clear;
- s >> cells;
- s >> units;
  s >> unitCount;
- s >> missiles;
- s >> particles;
- s >> fow;
- s >> text;
- s >> function;
- t.mClear = clear;
- t.mCells = cells;
- t.mUnits = units;
  t.mUnitCount = unitCount;
- t.mMissiles = missiles;
- t.mParticles = particles;
- t.mFOW = fow;
- t.mText = text;
- t.mFunction = function;
+ for (int i = 0; i < 2; i++) {
+	s >> t.mClear[i];
+	s >> t.mCells[i];
+	s >> t.mUnits[i];
+	s >> t.mMissiles[i];
+	s >> t.mParticles[i];
+	s >> t.mFOW[i];
+	s >> t.mText[i];
+	s >> t.mFunction[i];
+  }
  return s;
 }
+
 
 BosonProfiling::BosonProfiling()
 {
  d = new BosonProfilingPrivate;
+ d->mRenderTimes.setAutoDelete(true);
 }
 
 BosonProfiling::BosonProfiling(const BosonProfiling& p)
@@ -97,6 +106,7 @@ BosonProfiling::BosonProfiling(const BosonProfiling& p)
 
 BosonProfiling::~BosonProfiling()
 {
+ d->mRenderTimes.clear();
  delete d;
 }
 
@@ -124,104 +134,60 @@ void BosonProfiling::loadUnitDone(unsigned long int typeId)
 void BosonProfiling::render(bool start)
 {
  if (start) {
-	gettimeofday(&d->mTimeRenderFunction, 0);
+	if (d->mCurrentRenderTimes) {
+		boError() << k_funcinfo << "current rendertime object is non-NULL" << endl;
+		delete d->mCurrentRenderTimes;
+	}
+	d->mCurrentRenderTimes = new RenderGLTimes();
+	gettimeofday(&d->mCurrentRenderTimes->mFunction[0], 0);
  } else {
-	struct timeval time;
-	gettimeofday(&time, 0);
-	d->mCurrentRenderTimes.mFunction = COMPARE_TIMES(d->mTimeRenderFunction, time);
+	gettimeofday(&d->mCurrentRenderTimes->mFunction[1], 0);
 	d->mRenderTimes.append(d->mCurrentRenderTimes);
 	if (d->mRenderTimes.count() >= MAX_ENTRIES) {
-		d->mRenderTimes.remove(d->mRenderTimes.begin());
+		d->mRenderTimes.removeFirst();
 	}
+	d->mCurrentRenderTimes = 0;
  }
 }
 
 void BosonProfiling::renderClear(bool start)
 {
- if (start) {
-	gettimeofday(&d->mTimeRenderPart, 0);
- } else {
-	struct timeval time;
-	gettimeofday(&time, 0);
-	d->mCurrentRenderTimes.mClear = COMPARE_TIMES(d->mTimeRenderPart, time);
- }
+ gettimeofday(&d->mCurrentRenderTimes->mClear[start ? 0 : 1], 0);
 }
 
 void BosonProfiling::renderCells(bool start)
 {
- if (start) {
-	gettimeofday(&d->mTimeRenderPart, 0);
- } else {
-	struct timeval time;
-	gettimeofday(&time, 0);
-	d->mCurrentRenderTimes.mCells = COMPARE_TIMES(d->mTimeRenderPart, time);
- }
+ gettimeofday(&d->mCurrentRenderTimes->mCells[start ? 0 : 1], 0);
 }
 
 void BosonProfiling::renderUnits(bool start, unsigned int units)
 {
  if (start) {
-	gettimeofday(&d->mTimeRenderPart, 0);
+	gettimeofday(&d->mCurrentRenderTimes->mUnits[0], 0);
  } else {
-	struct timeval time;
-	gettimeofday(&time, 0);
-	d->mCurrentRenderTimes.mUnits = COMPARE_TIMES(d->mTimeRenderPart, time);
-	d->mCurrentRenderTimes.mUnitCount = units;
+	gettimeofday(&d->mCurrentRenderTimes->mUnits[1], 0);
+	d->mCurrentRenderTimes->mUnitCount = units;
  }
 }
 
 void BosonProfiling::renderMissiles(bool start)
 {
- if (start) {
-	gettimeofday(&d->mTimeRenderPart, 0);
- } else {
-	struct timeval time;
-	gettimeofday(&time, 0);
-	d->mCurrentRenderTimes.mMissiles = COMPARE_TIMES(d->mTimeRenderPart, time);
- }
+ gettimeofday(&d->mCurrentRenderTimes->mMissiles[start ? 0 : 1], 0);
 }
 
 void BosonProfiling::renderParticles(bool start)
 {
- if (start) {
-	gettimeofday(&d->mTimeRenderPart, 0);
- } else {
-	struct timeval time;
-	gettimeofday(&time, 0);
-	d->mCurrentRenderTimes.mParticles = COMPARE_TIMES(d->mTimeRenderPart, time);
- }
+ gettimeofday(&d->mCurrentRenderTimes->mParticles[start ? 0 : 1], 0);
 }
 
 void BosonProfiling::renderFOW(bool start)
 {
- if (start) {
-	gettimeofday(&d->mTimeRenderPart, 0);
- } else {
-	struct timeval time;
-	gettimeofday(&time, 0);
-	d->mCurrentRenderTimes.mFOW = COMPARE_TIMES(d->mTimeRenderPart, time);
- }
+ gettimeofday(&d->mCurrentRenderTimes->mFOW[start ? 0 : 1], 0);
 }
 
 void BosonProfiling::renderText(bool start)
 {
- if (start) {
-	gettimeofday(&d->mTimeRenderPart, 0);
- } else {
-	struct timeval time;
-	gettimeofday(&time, 0);
-	d->mCurrentRenderTimes.mText = COMPARE_TIMES(d->mTimeRenderPart, time);
- }
-}
-
-void BosonProfiling::debugRender()
-{
- boDebug()
-		<< "Clear: " << d->mCurrentRenderTimes.mClear << endl
-		<< "Cells: " << d->mCurrentRenderTimes.mCells << endl
-		<< "Units: " << d->mCurrentRenderTimes.mUnits << endl
-		<< "Text:  " << d->mCurrentRenderTimes.mText << endl
-		<< "Function: " << d->mCurrentRenderTimes.mFunction << endl;
+ gettimeofday(&d->mCurrentRenderTimes->mText[start ? 0 : 1], 0);
 }
 
 void BosonProfiling::start(ProfilingEvent event)
@@ -258,8 +224,14 @@ bool BosonProfiling::save(QDataStream& stream) const
  stream << (Q_INT32)PROFILING_VERSION;
 
  stream << d->mUnitTimes;
- stream << d->mRenderTimes;
  stream << d->mTimes;
+
+ // now the render times. we use a ptrlist here, so its more tricky
+ stream << (Q_UINT32)d->mRenderTimes.count();
+ QPtrListIterator<RenderGLTimes> it(d->mRenderTimes);
+ for (; it.current(); ++it) {
+	stream << *it.current();
+ }
  return true;
 }
 
@@ -300,8 +272,15 @@ bool BosonProfiling::load(QDataStream& stream)
  d->mTimes.clear();
 
  stream >> d->mUnitTimes;
- stream >> d->mRenderTimes;
  stream >> d->mTimes;
+
+ Q_UINT32 renderTimesCount;
+ stream >> renderTimesCount;
+ for (unsigned int i = 0; i < renderTimesCount; i++) {
+	RenderGLTimes* t = new RenderGLTimes;
+	stream >> *t;
+	d->mRenderTimes.append(t);
+ }
  return true;
 }
 

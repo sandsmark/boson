@@ -248,7 +248,7 @@ void BosonProfilingDialog::resetRenderPage()
 {
  d->mRender->clear();
  BosonProfiling::BosonProfilingPrivate* pd = d->data()->d;
- QValueList<RenderGLTimes>::Iterator it = pd->mRenderTimes.begin();
+ QPtrListIterator<RenderGLTimes> it(pd->mRenderTimes);
  int i = 0;
  // average values:
  long int aClear = 0;
@@ -260,28 +260,28 @@ void BosonProfilingDialog::resetRenderPage()
  long int aFOW = 0;
  long int aText = 0;
  long int aFunction = 0;
- for (; it != pd->mRenderTimes.end(); ++it, i++) {
-	long int func = (*it).mFunction;
+ for (; it.current(); ++it, i++) {
+	long int func = it.current()->dFunction();
 	QListViewItemNumber* item = new QListViewItemNumber(d->mRender);
 	item->setText(0, QString::number(i));
-	initRenderItem(item, i18n("Function"), (*it).mFunction, func);
-	aFunction += (*it).mFunction;
+	initRenderItem(item, i18n("Function"), it.current()->dFunction(), func);
+	aFunction += it.current()->dFunction();
 
-	initRenderItem(new QListViewItemNumber(item), i18n("Clearing"), (*it).mClear, func);
-	aClear += (*it).mClear;
-	initRenderItem(new QListViewItemNumber(item), i18n("Cells"), (*it).mCells, func);
-	aCells += (*it).mCells;
-	initRenderItem(new QListViewItemNumber(item), i18n("Units (%1)").arg((*it).mUnitCount), (*it).mUnits, func);
-	aUnitCount += (*it).mUnitCount;
-	aUnits += (*it).mUnits;
-	initRenderItem(new QListViewItem(item), i18n("Missiles"), (*it).mMissiles, func);
-	aMissiles += (*it).mMissiles;
-	initRenderItem(new QListViewItem(item), i18n("Particles"), (*it).mParticles, func);
-	aParticles += (*it).mParticles;
-	initRenderItem(new QListViewItem(item), i18n("FOW"), (*it).mFOW, func);
-	aFOW += (*it).mFOW;
-	initRenderItem(new QListViewItem(item), i18n("Text"), (*it).mText, func);
-	aText += (*it).mText;
+	initRenderItem(new QListViewItemNumber(item), i18n("Clearing"), it.current()->dClear(), func);
+	aClear += it.current()->dClear();
+	initRenderItem(new QListViewItemNumber(item), i18n("Cells"), it.current()->dCells(), func);
+	aCells += it.current()->dCells();
+	initRenderItem(new QListViewItemNumber(item), i18n("Units (%1)").arg(it.current()->mUnitCount), it.current()->dUnits(), func);
+	aUnitCount += it.current()->mUnitCount;
+	aUnits += it.current()->dUnits();
+	initRenderItem(new QListViewItem(item), i18n("Missiles"), it.current()->dMissiles(), func);
+	aMissiles += it.current()->dMissiles();
+	initRenderItem(new QListViewItem(item), i18n("Particles"), it.current()->dParticles(), func);
+	aParticles += it.current()->dParticles();
+	initRenderItem(new QListViewItem(item), i18n("FOW"), it.current()->dFOW(), func);
+	aFOW += it.current()->dFOW();
+	initRenderItem(new QListViewItem(item), i18n("Text"), it.current()->dText(), func);
+	aText += it.current()->dText();
 	item->setOpen(true);
  }
 
