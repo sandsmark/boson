@@ -28,11 +28,24 @@
 class QListBoxItem;
 class QListViewItem;
 class QLabel;
+class QPushButton;
+class QVBoxLayout;
+class QCheckBox;
 class KPopupMenu;
+class KListBox;
+
+struct _Lib3dsTextureMap;
+typedef struct _Lib3dsObjectData Lib3dsObjectData;
 
 class BosonModel;
 class SpeciesTheme;
-struct _Lib3dsTextureMap;
+class Bo3DSTrack;
+class Bo3DSTrackTCB;
+class Bo3DSTrackKey;
+class Bo3DSTrackQuat;
+class Bo3DSTrackLin3;
+class Bo3DSTrackBool;
+class Bo3DSTrackMorph;
 
 class BoListView : public KListView
 {
@@ -149,5 +162,107 @@ private:
 	class KGameModelDebugPrivate;
 	KGameModelDebugPrivate* d;
 };
+
+
+#include <qmap.h>
+/**
+ * @internal
+ * Helper class.
+ **/
+class BoNodeTracksWidget : public QWidget
+{
+	Q_OBJECT
+public:
+	BoNodeTracksWidget(QWidget* parent);
+
+	void setNodeObjectData(Lib3dsObjectData* d);
+
+signals:
+	void signalDisplayTrack(Bo3DSTrack* track);
+
+protected slots:
+	void slotButtonToggled(bool);
+
+private:
+	QPushButton* mPosition;
+	QPushButton* mRotation;
+	QPushButton* mScale;
+	QPushButton* mMorph;
+	QPushButton* mHide;
+	QLabel* mPositionLabel;
+	QLabel* mRotationLabel;
+	QLabel* mScaleLabel;
+	QLabel* mMorphLabel;
+	QLabel* mHideLabel;
+	Bo3DSTrackLin3* mPositionTrack;
+	Bo3DSTrackQuat* mRotationTrack;
+	Bo3DSTrackLin3* mScaleTrack;
+	Bo3DSTrackBool* mHideTrack;
+	Bo3DSTrackMorph* mMorphTrack;
+	QMap<QPushButton*, Bo3DSTrack*> mButton2Track;
+};
+
+class BoNodeObjectDataWidget : public QWidget
+{
+	Q_OBJECT
+public:
+	BoNodeObjectDataWidget(QWidget* parent);
+
+	void setNodeObjectData(Lib3dsObjectData* d);
+
+signals:
+	void signalDisplayTrack(Bo3DSTrack* track);
+
+protected:
+	QWidget* addWidget(const QString& label, QWidget* w);
+
+private:
+	QVBoxLayout* mLayout;
+
+	QLabel* mPivot;
+	QLabel* mInstance;
+	QLabel* mBBoxMin;
+	QLabel* mBBoxMax;
+	QLabel* mPos;
+	QLabel* mRot;
+#if 0
+	QLabel* mRotAngle;
+#endif
+	QLabel* mRotX;
+	QLabel* mRotY;
+	QLabel* mRotZ;
+	QLabel* mScl;
+	QLabel* mMorphSmooth;
+	QLabel* mMorph;
+	QCheckBox* mHide;
+	BoNodeTracksWidget* mNodeTracks;
+};
+
+class BoTrackWidget : public QWidget
+{
+	Q_OBJECT
+public:
+	BoTrackWidget(QWidget* parent);
+
+protected slots:
+	void slotDisplayTrack(Bo3DSTrack*);
+
+protected:
+	QListViewItem* createItem(Bo3DSTrackKey* key, int type);
+
+	void configureTCB(QListViewItem* item, const Bo3DSTrackTCB& tcb);
+	void configureKey(QListViewItem* item, Bo3DSTrackKey* key, int type);
+
+private:
+	QLabel* mFlags;
+	KListBox* mFlagList;
+	KListView* mKeys;
+	int mKeyData0;
+	int mKeyData1;
+	int mKeyData2;
+	int mKeyData3;
+	int mKeyData4;
+};
+
 
 #endif

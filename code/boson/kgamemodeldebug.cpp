@@ -39,6 +39,8 @@
 #include <qvbox.h>
 #include <qstringlist.h>
 #include <qtooltip.h>
+#include <qpushbutton.h>
+#include <qbuttongroup.h>
 #include <qdir.h>
 
 #include <ksimpleconfig.h>
@@ -66,6 +68,820 @@
 #include "bo3dsload.h"
 #endif
 
+/**
+ * AB: TCB stands for Tension-Continuity-Bias. Whatever that may be. See
+ * http://www.scriptspot.com/bobo/rendfaq/ACRONYM.HTM for a (very) short
+ * explanation.
+ *
+ * This class is simply a c++ implementation of the lib3ds struct.
+ **/
+class Bo3DSTrackTCB
+{
+public:
+	Bo3DSTrackTCB()
+	{
+		mFrame = 0;
+		mFlags = 0;
+		mTens = 0.0f;
+		mCont = 0.0f;
+		mBias = 0.0f;
+		mEaseTo = 0.0f;
+		mEaseFrom = 0.0f;
+	}
+	~Bo3DSTrackTCB()
+	{
+	}
+	void copyTCB(const Lib3dsTcb& tcb)
+	{
+		mFrame = tcb.frame;
+		mFlags = tcb.flags;
+		mTens = tcb.tens;
+		mCont = tcb.cont;
+		mBias = tcb.bias;
+		mEaseTo = tcb.ease_to;
+		mEaseFrom = tcb.ease_from;
+	}
+
+	long int mFrame; // AB: redundant. we store it as the position in the list already.
+	unsigned short int mFlags;
+	float mTens; // AB: probably short for tension
+	float mCont; // AB: probably short for continuity
+	float mBias;
+	float mEaseTo;
+	float mEaseFrom;
+};
+
+
+class Bo3DSTrackKey
+{
+public:
+	class TrackKeyData {
+	public:
+		TrackKeyData() { }
+		virtual ~TrackKeyData() { }
+	};
+
+	/**
+	 * AB: no need to store anything beyond the default TCB in here.
+	 * A bool tracks works this way: the initial value is predefined.
+	 * whenever a bool key appears, the value is flipped. So for example
+	 * you want to know the value at frame 14 out of 100 frames. You
+	 * start with false (as it is predefined). There are keys at 
+	 * 1,4,7,9,55,78 and 99. When you come to the key at 1, the value is
+	 * flipped, i.e. is true now. At 4 it becomes false again, at 7 it will
+	 * be true and at 9 it goes back to false. Here we stop, as 55
+	 * is > 14. So false is the value we search.
+	 **/
+	class TrackKeyDataBool : public TrackKeyData {
+	public:
+		TrackKeyDataBool() : TrackKeyData() { }
+	};
+
+	class TrackKeyDataLin1 : public TrackKeyData {
+	public:
+		TrackKeyDataLin1() : TrackKeyData() { }
+		float value;
+		float dd;
+		float ds;
+	};
+
+	class TrackKeyDataLin3 : public TrackKeyData {
+	public:
+		TrackKeyDataLin3() : TrackKeyData() { }
+		BoVector3 value;
+		BoVector3 dd;
+		BoVector3 ds;
+	};
+
+	class TrackKeyDataQuat : public TrackKeyData {
+	public:
+		TrackKeyDataQuat() : TrackKeyData() { }
+		BoVector3 axis;
+		float angle;
+		BoQuaternion q;
+		BoQuaternion dd;
+		BoQuaternion ds;
+	};
+
+	class TrackKeyDataMorph : public TrackKeyData {
+	public:
+		TrackKeyDataMorph() : TrackKeyData() { }
+		QString name;
+	};
+
+	enum Type {
+		TrackBool = 0,
+		TrackLin1 = 1,
+		TrackLin3 = 2,
+		TrackQuat = 3,
+		TrackMorph = 4
+	};
+
+public:
+	Bo3DSTrackKey(int type)
+	{
+		mData = 0;
+		switch (type) {
+			case TrackBool:
+				mData = (TrackKeyData*)new TrackKeyDataBool();
+				break;
+			case TrackLin1:
+				mData = (TrackKeyData*)new TrackKeyDataLin1();
+				break;
+			case TrackLin3:
+				mData = (TrackKeyData*)new TrackKeyDataLin3();
+				break;
+			case TrackQuat:
+				mData = (TrackKeyData*)new TrackKeyDataQuat();
+				break;
+			case TrackMorph:
+				mData = (TrackKeyData*)new TrackKeyDataMorph();
+				break;
+			default:
+				boError() << k_funcinfo << "invalid type " << type << endl;
+				break;
+		}
+	}
+	~Bo3DSTrackKey()
+	{
+		delete mData;
+	}
+
+	TrackKeyDataBool* boolData() const { return (TrackKeyDataBool*)mData; }
+	TrackKeyDataLin1* lin1Data() const { return (TrackKeyDataLin1*)mData; }
+	TrackKeyDataLin3* lin3Data() const { return (TrackKeyDataLin3*)mData; }
+	TrackKeyDataQuat* quatData() const { return (TrackKeyDataQuat*)mData; }
+	TrackKeyDataMorph* morphData() const { return (TrackKeyDataMorph*)mData; }
+
+	const Bo3DSTrackTCB& tcb() const
+	{
+		return mTCB;
+	}
+
+	Bo3DSTrackTCB mTCB;
+
+private:
+	TrackKeyData* mData;
+};
+
+class Bo3DSTrack
+{
+public:
+	Bo3DSTrack()
+	{
+		mFlags = 0;
+		mKeys.setAutoDelete(true);
+	}
+	virtual ~Bo3DSTrack()
+	{
+	}
+
+	void removeKey(int frame)
+	{
+		mKeys.remove(frame);
+	}
+
+	bool haveKey(int frame) const
+	{
+		return (mKeys.find(frame) != 0);
+	}
+	unsigned long int flags() const
+	{
+		return mFlags;
+	}
+	unsigned int keyCount() const
+	{
+		return mKeys.count();
+	}
+
+	/**
+	 * @return Of which type the keys in this class are. See @ref
+	 * Bo3DSTrackKey::Type
+	 **/
+	virtual int type() const = 0;
+
+	/**
+	 * Insert a key of the correct type. Must be implemented by derived
+	 * classes (you can use @ref insertKeyType)
+	 **/
+	Bo3DSTrackKey* insertKey(int frame)
+	{
+		if (haveKey(frame)) {
+			removeKey(frame);
+		}
+		Bo3DSTrackKey* key = createKey();
+		mKeys.insert(frame, key);
+		return key;
+	}
+
+	void clear()
+	{
+		mFlags = 0x00;
+		mKeys.clear();
+	}
+	const QIntDict<Bo3DSTrackKey>& keys() const
+	{
+		return mKeys;
+	}
+
+protected:
+	virtual Bo3DSTrackKey* createKey() = 0;
+
+protected:
+	unsigned long int mFlags;
+
+	// AB: lib3ds uses a simple linked list instead of a map. this is a very
+	// bad choice and they have to do a lot of additional code because of
+	// this, but they don't have a choice, as they use plain c - but we do
+	// have a choice :)
+	QIntDict<Bo3DSTrackKey> mKeys;
+};
+
+// AB: a Lin1 track stores 3 floats in every key. yet have to find out the exact
+// semantics.
+class Bo3DSTrackLin1 : public Bo3DSTrack
+{
+public:
+	Bo3DSTrackLin1() : Bo3DSTrack()
+	{
+	}
+	Bo3DSTrackLin1(const Lib3dsLin1Track& track) : Bo3DSTrack()
+	{
+		loadTrack(track);
+	}
+	void loadTrack(const Lib3dsLin1Track& track)
+	{
+		clear();
+		mFlags = track.flags;
+		Lib3dsLin1Key* key = track.keyL;
+		while (key) {
+			copyKey(key);
+			key = key->next;
+		}
+	}
+	virtual int type() const { return (int)Bo3DSTrackKey::TrackLin1; }
+
+	float eval(float t) const
+	{
+		return 0.0f;
+	}
+
+protected:
+	virtual Bo3DSTrackKey* createKey()
+	{
+		return new Bo3DSTrackKey(Bo3DSTrackKey::TrackLin1);
+	}
+	void copyKey(Lib3dsLin1Key* _key)
+	{
+		BO_CHECK_NULL_RET(_key);
+		Bo3DSTrackKey* key = insertKey(_key->tcb.frame);
+		key->mTCB.copyTCB(_key->tcb);
+		key->lin1Data()->value = _key->value;
+		key->lin1Data()->dd = _key->dd;
+		key->lin1Data()->ds = _key->ds;
+	}
+};
+
+// AB: a Lin3 track stores 3 vectors in every key. yet have to find out the exact
+// semantics.
+class Bo3DSTrackLin3 : public Bo3DSTrack
+{
+public:
+	Bo3DSTrackLin3() : Bo3DSTrack()
+	{
+	}
+
+	/**
+	 * Construct a Bo3DSTrackLin3 object and copy the data from @p track.
+	 **/
+	Bo3DSTrackLin3(const Lib3dsLin3Track& track) : Bo3DSTrack()
+	{
+		loadTrack(track);
+	}
+
+	void loadTrack(const Lib3dsLin3Track& track)
+	{
+		clear();
+		mFlags = track.flags;
+		Lib3dsLin3Key* key = track.keyL;
+		while (key) {
+			copyKey(key);
+			key = key->next;
+		}
+	}
+	virtual int type() const { return (int)Bo3DSTrackKey::TrackLin3; }
+
+	BoVector3 eval(float t) const
+	{
+		return BoVector3();
+	}
+
+protected:
+	virtual Bo3DSTrackKey* createKey()
+	{
+		return new Bo3DSTrackKey(Bo3DSTrackKey::TrackLin3);
+	}
+
+	void copyKey(Lib3dsLin3Key* _key)
+	{
+		BO_CHECK_NULL_RET(_key);
+		Bo3DSTrackKey* key = insertKey(_key->tcb.frame);
+		key->mTCB.copyTCB(_key->tcb);
+		key->lin3Data()->value.set(_key->value);
+		key->lin3Data()->dd.set(_key->dd);
+		key->lin3Data()->ds.set(_key->ds);
+	}
+
+};
+
+class Bo3DSTrackBool : public Bo3DSTrack
+{
+public:
+	Bo3DSTrackBool() : Bo3DSTrack()
+	{
+	}
+	Bo3DSTrackBool(const Lib3dsBoolTrack& track) : Bo3DSTrack()
+	{
+		loadTrack(track);
+	}
+	void loadTrack(const Lib3dsBoolTrack& track)
+	{
+		clear();
+		mFlags = track.flags;
+		Lib3dsBoolKey* key = track.keyL;
+		while (key) {
+			copyKey(key);
+			key = key->next;
+		}
+	}
+	virtual int type() const { return (int)Bo3DSTrackKey::TrackBool; }
+
+	bool eval(float t) const
+	{
+		if (mKeys.isEmpty()) {
+			return false;
+		}
+		if (mKeys.count() == 1) {
+			return true;
+		}
+		bool result = false;
+
+		// TODO dummy implementation only!
+#if 0
+		QIntDictIterator<Bo3DSTrackKey> it(mKeys);
+		while (t < (float)it.currentKey()) {
+			result = !result;
+			++it;
+			if (!it.current()) {
+				return result;
+			}
+		}
+#endif
+
+
+		return result;
+	}
+
+protected:
+	virtual Bo3DSTrackKey* createKey()
+	{
+		return new Bo3DSTrackKey(Bo3DSTrackKey::TrackBool);
+	}
+	void copyKey(Lib3dsBoolKey* _key)
+	{
+		BO_CHECK_NULL_RET(_key);
+		Bo3DSTrackKey* key = insertKey(_key->tcb.frame);
+		key->mTCB.copyTCB(_key->tcb);
+		// nothing else to copy in a bool track.
+	}
+
+};
+
+// AB: a "Morph" track stores an array of 64 chars ("name") in every key. since
+// that array is named "name", it is probably meant as a string.
+// i have not the least idea what the semantics might be.
+class Bo3DSTrackMorph: public Bo3DSTrack
+{
+public:
+	Bo3DSTrackMorph() : Bo3DSTrack()
+	{
+	}
+	Bo3DSTrackMorph(const Lib3dsMorphTrack& track) : Bo3DSTrack()
+	{
+		loadTrack(track);
+	}
+	void loadTrack(const Lib3dsMorphTrack& track)
+	{
+		clear();
+		mFlags = track.flags;
+		Lib3dsMorphKey* key = track.keyL;
+		while (key) {
+			copyKey(key);
+			key = key->next;
+		}
+	}
+	virtual int type() const { return (int)Bo3DSTrackKey::TrackMorph; }
+
+	QString eval(float t) const
+	{
+		return QString::null;
+	}
+
+protected:
+	virtual Bo3DSTrackKey* createKey()
+	{
+		return new Bo3DSTrackKey(Bo3DSTrackKey::TrackMorph);
+	}
+	void copyKey(Lib3dsMorphKey* _key)
+	{
+		BO_CHECK_NULL_RET(_key);
+		Bo3DSTrackKey* key = insertKey(_key->tcb.frame);
+		key->mTCB.copyTCB(_key->tcb);
+		key->morphData()->name = _key->name;
+	}
+
+};
+
+class Bo3DSTrackQuat : public Bo3DSTrack
+{
+public:
+	Bo3DSTrackQuat() : Bo3DSTrack()
+	{
+	}
+	Bo3DSTrackQuat(const Lib3dsQuatTrack& track) : Bo3DSTrack()
+	{
+		loadTrack(track);
+	}
+	void loadTrack(const Lib3dsQuatTrack& track)
+	{
+		clear();
+		mFlags = track.flags;
+		Lib3dsQuatKey* key = track.keyL;
+		while (key) {
+			copyKey(key);
+			key = key->next;
+		}
+	}
+	virtual int type() const { return (int)Bo3DSTrackKey::TrackQuat; }
+
+	BoQuaternion eval(float t) const
+	{
+		return BoQuaternion();
+	}
+
+protected:
+	virtual Bo3DSTrackKey* createKey()
+	{
+		return new Bo3DSTrackKey(Bo3DSTrackKey::TrackQuat);
+	}
+	void copyKey(Lib3dsQuatKey* _key)
+	{
+		BO_CHECK_NULL_RET(_key);
+		Bo3DSTrackKey* key = insertKey(_key->tcb.frame);
+		key->mTCB.copyTCB(_key->tcb);
+		key->quatData()->axis.set(_key->axis);
+		key->quatData()->angle = _key->angle;
+		key->quatData()->q.set(_key->q[3], BoVector3(_key->q));
+		key->quatData()->dd.set(_key->dd[3], BoVector3(_key->dd));
+		key->quatData()->ds.set(_key->ds[3], BoVector3(_key->ds));
+	}
+};
+
+BoNodeTracksWidget::BoNodeTracksWidget(QWidget* parent) : QWidget(parent)
+{
+ mPositionTrack = new Bo3DSTrackLin3;
+ mRotationTrack = new Bo3DSTrackQuat;
+ mScaleTrack = new Bo3DSTrackLin3;
+ mMorphTrack = new Bo3DSTrackMorph;
+ mHideTrack = new Bo3DSTrackBool;
+
+ QVBoxLayout* l = new QVBoxLayout(this);
+ QGrid* grid = new QGrid(2, this);
+ l->addWidget(grid);
+ mPosition = new QPushButton(i18n("Position track"), grid);
+ mPosition->setToggleButton(true);
+ mPositionLabel = new QLabel(grid);
+
+ mRotation = new QPushButton(i18n("Rotation track"), grid);
+ QToolTip::add(mRotation, i18n("Note: the .3ds file stores the axis and the angle values only. Not the actual quaternion"));
+ mRotation->setToggleButton(true);
+ mRotationLabel = new QLabel(grid);
+
+ mScale = new QPushButton(i18n("Scale track"), grid);
+ mScale->setToggleButton(true);
+ mScaleLabel = new QLabel(grid);
+
+ mMorph = new QPushButton(i18n("Morph track"), grid);
+ mMorph->setToggleButton(true);
+ mMorphLabel = new QLabel(grid);
+
+ mHide = new QPushButton(i18n("Hide track"), grid);
+ mHide->setToggleButton(true);
+ mHideLabel = new QLabel(grid);
+
+ mButton2Track.insert(mPosition, mPositionTrack);
+ mButton2Track.insert(mRotation, mRotationTrack);
+ mButton2Track.insert(mScale, mScaleTrack);
+ mButton2Track.insert(mMorph, mMorphTrack);
+ mButton2Track.insert(mHide, mHideTrack);
+
+ connect(mPosition, SIGNAL(toggled(bool)), this, SLOT(slotButtonToggled(bool)));
+ connect(mRotation, SIGNAL(toggled(bool)), this, SLOT(slotButtonToggled(bool)));
+ connect(mScale, SIGNAL(toggled(bool)), this, SLOT(slotButtonToggled(bool)));
+ connect(mMorph, SIGNAL(toggled(bool)), this, SLOT(slotButtonToggled(bool)));
+ connect(mHide, SIGNAL(toggled(bool)), this, SLOT(slotButtonToggled(bool)));
+
+ setNodeObjectData(0);
+}
+
+void BoNodeTracksWidget::slotButtonToggled(bool on)
+{
+ emit signalDisplayTrack(0);
+ if (!on) {
+	return;
+ }
+ QPushButton* b = (QPushButton*)sender();
+ if (!b) {
+	return;
+ }
+ Bo3DSTrack* track = mButton2Track[b];
+ if (!track) {
+	return;
+ }
+ static bool recursive = false;
+ if (recursive) {
+	return;
+ }
+ recursive = true;
+
+ // set all off, then re-enable b
+ mPosition->setOn(false);
+ mRotation->setOn(false);
+ mScale->setOn(false);
+ mMorph->setOn(false);
+ mHide->setOn(false);
+ b->setOn(true);
+
+ emit signalDisplayTrack(track);
+
+ recursive = false;
+}
+
+void BoNodeTracksWidget::setNodeObjectData(Lib3dsObjectData* d)
+{
+ // AB: the data here won't change for different frames. it's always the same in
+ // every frame of a node.
+ mPositionTrack->clear();
+ mRotationTrack->clear();
+ mScaleTrack->clear();
+ mHideTrack->clear();
+ mMorphTrack->clear();
+ if (d) {
+	mPositionTrack->loadTrack(d->pos_track);
+	mRotationTrack->loadTrack(d->rot_track);
+	mScaleTrack->loadTrack(d->scl_track);
+	mHideTrack->loadTrack(d->hide_track);
+	mMorphTrack->loadTrack(d->morph_track);
+ }
+ mPositionLabel->setText(i18n("Flag: %1 Key Number: %2").arg(mPositionTrack->flags()).arg(mPositionTrack->keyCount()));
+ mRotationLabel->setText(i18n("Flag: %1 Key Number: %2").arg(mRotationTrack->flags()).arg(mRotationTrack->keyCount()));
+ mScaleLabel->setText(i18n("Flag: %1 Key Number: %2").arg(mScaleTrack->flags()).arg(mScaleTrack->keyCount()));
+ mHideLabel->setText(i18n("Flag: %1 Key Number: %2").arg(mHideTrack->flags()).arg(mHideTrack->keyCount()));
+ mMorphLabel->setText(i18n("Flag: %1 Key Number: %2").arg(mMorphTrack->flags()).arg(mMorphTrack->keyCount()));
+
+ mPosition->setOn(false);
+ mRotation->setOn(false);
+ mScale->setOn(false);
+ mHide->setOn(false);
+ mMorph->setOn(false);
+ emit signalDisplayTrack(0);
+}
+
+BoTrackWidget::BoTrackWidget(QWidget* parent) : QWidget(parent)
+{
+ QVBoxLayout* l = new QVBoxLayout(this);
+
+ QHBox* hbox = new QHBox(this);
+ l->addWidget(hbox);
+ (void)new QLabel(i18n("Flags: "), hbox);
+ mFlags = new QLabel(hbox);
+
+ mFlagList = new KListBox(this);
+ l->addWidget(mFlagList);
+ l->addStretch(0);
+
+ QLabel* keyLabel = new QLabel(i18n("Keys"), this);
+ l->addWidget(keyLabel);
+ mKeys = new KListView(this);
+ QFontMetrics metrics(font());
+ mKeys->addColumn(i18n("Frame"));
+ mKeys->addColumn(i18n("Flags"), metrics.width(QString::number(11))); // number
+ mKeys->addColumn(i18n("Flags"), metrics.width(QString::number(11))); // strings
+ mKeys->addColumn(i18n("Tension"), metrics.width(QString::number(11)));
+ mKeys->addColumn(i18n("Continuity"), metrics.width(QString::number(11)));
+ mKeys->addColumn(i18n("Bias"), metrics.width(QString::number(11)));
+ mKeys->addColumn(i18n("Ease To"), metrics.width(QString::number(11)));
+ mKeys->addColumn(i18n("Ease From"), metrics.width(QString::number(11)));
+
+ mKeyData0 = mKeys->addColumn(i18n("Key Data 1"));
+ mKeyData1 = mKeys->addColumn(i18n("Key Data 2"));
+ mKeyData2 = mKeys->addColumn(i18n("Key Data 3"));
+ mKeyData3 = mKeys->addColumn(i18n("Key Data 4"));
+ mKeyData4 = mKeys->addColumn(i18n("Key Data 5"));
+
+ l->addWidget(mKeys, 1);
+}
+
+void BoTrackWidget::slotDisplayTrack(Bo3DSTrack* track)
+{
+ mFlagList->clear();
+ mKeys->clear();
+ mFlags->setText(QString(""));
+
+ mKeys->setColumnText(mKeyData0, QString(""));
+ mKeys->setColumnText(mKeyData1, QString(""));
+ mKeys->setColumnText(mKeyData2, QString(""));
+ mKeys->setColumnText(mKeyData3, QString(""));
+ mKeys->setColumnText(mKeyData4, QString(""));
+
+ if (track) {
+	unsigned long int flags = track->flags();
+	mFlags->setText(QString::number(flags));
+	if (flags != 0x00) {
+		mFlagList->show();
+		unsigned long int all = 0x00;
+		if (flags & LIB3DS_REPEAT) {
+			(void)new QListBoxText(mFlagList, QString::fromLatin1("LIB3DS_REPEAT"));
+			all |= LIB3DS_REPEAT;
+		}
+		if (flags & LIB3DS_SMOOTH) {
+			(void)new QListBoxText(mFlagList, QString::fromLatin1("LIB3DS_SMOOTH"));
+			all |= LIB3DS_SMOOTH;
+		}
+		if (flags & LIB3DS_LOCK_X) {
+			(void)new QListBoxText(mFlagList, QString::fromLatin1("LIB3DS_LOCK_X"));
+			all |= LIB3DS_LOCK_X;
+		}
+		if (flags & LIB3DS_LOCK_Y) {
+			(void)new QListBoxText(mFlagList, QString::fromLatin1("LIB3DS_LOCK_Y"));
+			all |= LIB3DS_LOCK_Y;
+		}
+		if (flags & LIB3DS_LOCK_Z) {
+			(void)new QListBoxText(mFlagList, QString::fromLatin1("LIB3DS_LOCK_Z"));
+			all |= LIB3DS_LOCK_Z;
+		}
+		if (flags & LIB3DS_UNLINK_X) {
+			(void)new QListBoxText(mFlagList, QString::fromLatin1("LIB3DS_UNLINK_X"));
+			all |= LIB3DS_UNLINK_X;
+		}
+		if (flags & LIB3DS_UNLINK_Y) {
+			(void)new QListBoxText(mFlagList, QString::fromLatin1("LIB3DS_UNLINK_Y"));
+			all |= LIB3DS_UNLINK_Y;
+		}
+		if (flags & LIB3DS_UNLINK_Z) {
+			(void)new QListBoxText(mFlagList, QString::fromLatin1("LIB3DS_UNLINK_Z"));
+			all |= LIB3DS_UNLINK_Z;
+		}
+		if ((flags | all) != all) {
+			(void)new QListBoxText(mFlagList, i18n("Some flags not recognized! Remaining: %1").arg((flags | all) ^ all));
+		}
+	} else {
+		mFlagList->hide();
+	}
+
+	switch (track->type()) {
+		case Bo3DSTrackKey::TrackLin1:
+		{
+			// AB: once we found out what the values mean, we should find
+			// usable names
+			mKeys->setColumnText(mKeyData0, i18n("value"));
+			mKeys->setColumnText(mKeyData1, i18n("dd"));
+			mKeys->setColumnText(mKeyData2, i18n("ds"));
+			break;
+		}
+		case Bo3DSTrackKey::TrackLin3:
+		{
+			mKeys->setColumnText(mKeyData0, i18n("value"));
+			mKeys->setColumnText(mKeyData1, i18n("dd"));
+			mKeys->setColumnText(mKeyData2, i18n("ds"));
+			break;
+		}
+		case Bo3DSTrackKey::TrackBool:
+		{
+			// no data to be displayed
+			break;
+		}
+		case Bo3DSTrackKey::TrackMorph:
+		{
+			mKeys->setColumnText(mKeyData0, i18n("name"));
+			break;
+		}
+		case Bo3DSTrackKey::TrackQuat:
+		{
+			mKeys->setColumnText(mKeyData0, i18n("axis"));
+			mKeys->setColumnText(mKeyData1, i18n("angle"));
+			mKeys->setColumnText(mKeyData2, i18n("q"));
+			mKeys->setColumnText(mKeyData3, i18n("dd"));
+			mKeys->setColumnText(mKeyData4, i18n("ds"));
+			break;
+		}
+		default:
+			boError() << k_funcinfo << "unknown type " << track->type() << endl;
+			break;
+	}
+
+	QIntDictIterator<Bo3DSTrackKey> it(track->keys());
+	while (it.current()) {
+		QListViewItem* item = createItem(it.current(), track->type());
+		++it;
+	}
+ }
+}
+
+QListViewItem* BoTrackWidget::createItem(Bo3DSTrackKey* key, int type)
+{
+ BO_CHECK_NULL_RET0(key);
+ QListViewItem* item = new QListViewItem(mKeys);
+ configureTCB(item, key->tcb());
+ configureKey(item, key, type);
+ return item;
+}
+
+void BoTrackWidget::configureTCB(QListViewItem* item, const Bo3DSTrackTCB& tcb)
+{
+ BO_CHECK_NULL_RET(item);
+ item->setText(0, QString("%1").arg(tcb.mFrame, 3));
+ item->setText(1, QString::number(tcb.mFlags));
+ if (tcb.mFlags != 0x00) {
+	QString flags;
+	if (tcb.mFlags & LIB3DS_USE_TENSION) {
+		flags += "LIB3DS_USE_TENSION";
+	}
+	if (tcb.mFlags & LIB3DS_USE_CONTINUITY) {
+		flags += " LIB3DS_USE_CONTINUITY";
+	}
+	if (tcb.mFlags & LIB3DS_USE_BIAS) {
+		flags += " LIB3DS_USE_BIAS";
+	}
+	if (tcb.mFlags & LIB3DS_USE_EASE_TO) {
+		flags += " LIB3DS_USE_EASE_TO";
+	}
+	if (tcb.mFlags & LIB3DS_USE_EASE_FROM) {
+		flags += " LIB3DS_USE_EASE_FROM";
+	}
+	item->setText(2, flags);
+ }
+ item->setText(3, QString::number(tcb.mTens));
+ item->setText(4, QString::number(tcb.mCont));
+ item->setText(5, QString::number(tcb.mBias));
+ item->setText(6, QString::number(tcb.mEaseTo));
+ item->setText(7, QString::number(tcb.mEaseFrom));
+}
+
+void BoTrackWidget::configureKey(QListViewItem* item, Bo3DSTrackKey* key, int type)
+{
+ BO_CHECK_NULL_RET(item);
+ BO_CHECK_NULL_RET(key);
+ const int prec = 3;
+ switch (type) {
+	case Bo3DSTrackKey::TrackLin1:
+	{
+		item->setText(mKeyData0, QString::number(key->lin1Data()->value, 'f', prec));
+		item->setText(mKeyData1, QString::number(key->lin1Data()->dd, 'f', prec));
+		item->setText(mKeyData2, QString::number(key->lin1Data()->ds, 'f', prec));
+		break;
+	}
+	case Bo3DSTrackKey::TrackLin3:
+	{
+		item->setText(mKeyData0, key->lin3Data()->value.debugString(prec));
+		item->setText(mKeyData1, key->lin3Data()->dd.debugString(prec));
+		item->setText(mKeyData2, key->lin3Data()->ds.debugString(prec));
+		break;
+	}
+	case Bo3DSTrackKey::TrackBool:
+	{
+		// no data to be displayed
+		break;
+	}
+	case Bo3DSTrackKey::TrackMorph:
+	{
+		item->setText(mKeyData0, key->morphData()->name);
+		break;
+	}
+	case Bo3DSTrackKey::TrackQuat:
+	{
+		item->setText(mKeyData0, key->quatData()->axis.debugString(prec));
+		item->setText(mKeyData1, QString::number(key->quatData()->angle, 'f', prec));
+		item->setText(mKeyData2, key->quatData()->q.debugString(prec));
+		item->setText(mKeyData3, key->quatData()->dd.debugString(prec));
+		item->setText(mKeyData4, key->quatData()->ds.debugString(prec));
+		break;
+	}
+	default:
+		boError() << k_funcinfo << "unknown type " << type << endl;
+		return;
+ }
+}
 
 class BoMaterialWidget : public QWidget
 {
@@ -309,288 +1125,128 @@ public:
 	}
 };
 
-class BoNodeObjectDataWidget : public QWidget
+BoNodeObjectDataWidget::BoNodeObjectDataWidget(QWidget* parent) : QWidget(parent, "nodeobjectdatawidget")
 {
-public:
-	BoNodeObjectDataWidget(QWidget* parent) : QWidget(parent, "nodeobjectdatawidget")
-	{
-		mLayout = new QVBoxLayout(this);
+ mLayout = new QVBoxLayout(this);
 
-		mPivot = (QLabel*)addWidget(i18n("Pivot"), new QLabel(this));
-		QToolTip::add(mPivot, i18n("The pivot point of the node"));
+ mPivot = (QLabel*)addWidget(i18n("Pivot"), new QLabel(this));
+ QToolTip::add(mPivot, i18n("The pivot point of the node"));
 
-		mInstance = (QLabel*)addWidget(i18n("Instance"), new QLabel(this));
-		QToolTip::add(mInstance, i18n("dunno what this is"));
+ mInstance = (QLabel*)addWidget(i18n("Instance"), new QLabel(this));
+ QToolTip::add(mInstance, i18n("dunno what this is"));
 
-		mBBoxMin = (QLabel*)addWidget(i18n("bbox_min"), new QLabel(this));
-		QToolTip::add(mBBoxMin, i18n("Most probably this is the min point of the bounding box"));
-		mBBoxMax = (QLabel*)addWidget(i18n("bbox_max"), new QLabel(this));
-		QToolTip::add(mBBoxMax, i18n("Most probably this is the max point of the bounding box"));
+ mBBoxMin = (QLabel*)addWidget(i18n("bbox_min"), new QLabel(this));
+ QToolTip::add(mBBoxMin, i18n("Most probably this is the min point of the bounding box"));
+ mBBoxMax = (QLabel*)addWidget(i18n("bbox_max"), new QLabel(this));
+ QToolTip::add(mBBoxMax, i18n("Most probably this is the max point of the bounding box"));
 
-		mPos = (QLabel*)addWidget(i18n("Position"), new QLabel(this));
-		QToolTip::add(mPos, i18n("The position of the node in this frame. The matrix of the node has already been translated by this value."));
-		mRot = (QLabel*)addWidget(i18n("Rotation (quat)"), new QLabel(this));
-		QToolTip::add(mRot, i18n("The rotation of the node in this frame. The matrix of the node has already been rotated by this value. These 4 values (the quaternion) are the actually stored values."));
+ mPos = (QLabel*)addWidget(i18n("Position"), new QLabel(this));
+ QToolTip::add(mPos, i18n("The position of the node in this frame. The matrix of the node has already been translated by this value."));
+ mRot = (QLabel*)addWidget(i18n("Rotation (quat)"), new QLabel(this));
+ QToolTip::add(mRot, i18n("The rotation of the node in this frame. The matrix of the node has already been rotated by this value. These 4 values (the quaternion) are the actually stored values."));
 #if 0
-		mRotAngle = (QLabel*)addWidget(i18n("Axis Rotation (x,y,z) -> degree)"), new QLabel(this));
-		QToolTip::add(mRotAngle, i18n("The rotation in readable angles, calculated from the quaternion.\nFirst you see the axis (x,y,z) that is rotated around and then the angle."));
+ mRotAngle = (QLabel*)addWidget(i18n("Axis Rotation (x,y,z) -> degree)"), new QLabel(this));
+ QToolTip::add(mRotAngle, i18n("The rotation in readable angles, calculated from the quaternion.\nFirst you see the axis (x,y,z) that is rotated around and then the angle."));
 #endif
-		mRotX = (QLabel*)addWidget(i18n("X Rotation"), new QLabel(this));
-		mRotY = (QLabel*)addWidget(i18n("Y Rotation"), new QLabel(this));
-		mRotZ = (QLabel*)addWidget(i18n("Z Rotation"), new QLabel(this));
-		QToolTip::add(mRotX, i18n("The rotation in readable angles, calculated from the quaternion.\n"));
-		QToolTip::add(mRotY, i18n("The rotation in readable angles, calculated from the quaternion.\n"));
-		QToolTip::add(mRotZ, i18n("The rotation in readable angles, calculated from the quaternion.\n"));
-		mScl = (QLabel*)addWidget(i18n("Scale"), new QLabel(this));
-		QToolTip::add(mScl, i18n("The scale factor of the node in this frame. The matrix of the node has already been scaled by this value."));
+ mRotX = (QLabel*)addWidget(i18n("X Rotation"), new QLabel(this));
+ mRotY = (QLabel*)addWidget(i18n("Y Rotation"), new QLabel(this));
+ mRotZ = (QLabel*)addWidget(i18n("Z Rotation"), new QLabel(this));
+ QToolTip::add(mRotX, i18n("The rotation in readable angles, calculated from the quaternion.\n"));
+ QToolTip::add(mRotY, i18n("The rotation in readable angles, calculated from the quaternion.\n"));
+ QToolTip::add(mRotZ, i18n("The rotation in readable angles, calculated from the quaternion.\n"));
+ mScl = (QLabel*)addWidget(i18n("Scale"), new QLabel(this));
+ QToolTip::add(mScl, i18n("The scale factor of the node in this frame. The matrix of the node has already been scaled by this value."));
 
-		mMorphSmooth = (QLabel*)addWidget(i18n("morph_smooth"), new QLabel(this));
-		mMorph = (QLabel*)addWidget(i18n("morph"), new QLabel(this));
+ mMorphSmooth = (QLabel*)addWidget(i18n("morph_smooth"), new QLabel(this));
+ mMorph = (QLabel*)addWidget(i18n("morph"), new QLabel(this));
 
-		mHide = (QCheckBox*)addWidget(i18n("Hide"), new QCheckBox(this));
-		mHide->setEnabled(false);
-	}
+ mHide = (QCheckBox*)addWidget(i18n("Hide"), new QCheckBox(this));
+ mHide->setEnabled(false);
 
-	void setNodeObjectData(Lib3dsObjectData* d)
-	{
-		QString pivot;
-		QString instance;
-		QString bboxMin;
-		QString bboxMax;
-		QString pos;
-		QString rot;
+ mNodeTracks = new BoNodeTracksWidget(this);
+ mLayout->addWidget(mNodeTracks);
+ connect(mNodeTracks, SIGNAL(signalDisplayTrack(Bo3DSTrack*)), this, SIGNAL(signalDisplayTrack(Bo3DSTrack*)));
+}
+
+void BoNodeObjectDataWidget::setNodeObjectData(Lib3dsObjectData* d)
+{
+ QString pivot;
+ QString instance;
+ QString bboxMin;
+ QString bboxMax;
+ QString pos;
+ QString rot;
 #if 0
-		QString rotAngle;
+ QString rotAngle;
 #endif
-		QString rotX;
-		QString rotY;
-		QString rotZ;
-		QString scl;
-		QString morphSmooth;
-		QString morph;
-		bool hide = false;
+ QString rotX;
+ QString rotY;
+ QString rotZ;
+ QString scl;
+ QString morphSmooth;
+ QString morph;
+ bool hide = false;
 
-		if (d) {
-			const int prec = 3; // number of digits after the decimal point
-			pivot = QString("(%1,%2,%3)").arg(d->pivot[0], 0, 'f', prec).arg(d->pivot[1], 0, 'f', prec).arg(d->pivot[2], 0, 'f', prec);
-			instance = QString(d->instance);
-			bboxMin = QString("(%1,%2,%3)").arg(d->bbox_min[0], 0, 'f', prec).arg(d->bbox_min[1], 0, 'f', prec).arg(d->bbox_min[2], 0, 'f', prec);
-			bboxMax = QString("(%1,%2,%3)").arg(d->bbox_max[0], 0, 'f', prec).arg(d->bbox_max[1], 0, 'f', prec).arg(d->bbox_max[2], 0, 'f', prec);
-			pos = QString("(%1,%2,%3)").arg(d->pos[0], 0, 'f', prec).arg(d->pos[1], 0, 'f', prec).arg(d->pos[2], 0, 'f', prec);
-			rot = QString("(%1,%2,%3,%4)").arg(d->rot[0], 0, 'f', prec).arg(d->rot[1], 0, 'f', prec).arg(d->rot[2], 0, 'f', prec).arg(d->rot[3], 0, 'f', prec);
+ if (d) {
+	const int prec = 3; // number of digits after the decimal point
+	pivot = QString("(%1,%2,%3)").arg(d->pivot[0], 0, 'f', prec).arg(d->pivot[1], 0, 'f', prec).arg(d->pivot[2], 0, 'f', prec);
+	instance = QString(d->instance);
+	bboxMin = QString("(%1,%2,%3)").arg(d->bbox_min[0], 0, 'f', prec).arg(d->bbox_min[1], 0, 'f', prec).arg(d->bbox_min[2], 0, 'f', prec);
+	bboxMax = QString("(%1,%2,%3)").arg(d->bbox_max[0], 0, 'f', prec).arg(d->bbox_max[1], 0, 'f', prec).arg(d->bbox_max[2], 0, 'f', prec);
+	pos = QString("(%1,%2,%3)").arg(d->pos[0], 0, 'f', prec).arg(d->pos[1], 0, 'f', prec).arg(d->pos[2], 0, 'f', prec);
+	rot = QString("(%1,%2,%3,%4)").arg(d->rot[0], 0, 'f', prec).arg(d->rot[1], 0, 'f', prec).arg(d->rot[2], 0, 'f', prec).arg(d->rot[3], 0, 'f', prec);
 
-			float rX = 0.0f, rY = 0.0f, rZ = 0.0f;
+	float rX = 0.0f, rY = 0.0f, rZ = 0.0f;
 #if 0
-			float angle = 0.0f;
-			quatToAxisRotation(d->rot, &rX, &rY, &rZ, &angle);
-			rotAngle = QString("(%1,%2,%3) -> %4 degrees").arg(rX).arg(rY).arg(rZ).arg(angle);
+	float angle = 0.0f;
+	quatToAxisRotation(d->rot, &rX, &rY, &rZ, &angle);
+	rotAngle = QString("(%1,%2,%3) -> %4 degrees").arg(rX).arg(rY).arg(rZ).arg(angle);
 #endif
-			quatToEulerAngles(d->rot, &rX, &rY, &rZ);
-			rotX = QString::number(rX);
-			rotY = QString::number(rY);
-			rotZ = QString::number(rZ);
+	BoQuaternion q(d->rot[3], BoVector3(d->rot));
+	q.matrix().toRotation(&rX, &rY, &rZ);
+	rotX = QString::number(rX);
+	rotY = QString::number(rY);
+	rotZ = QString::number(rZ);
 
-			scl = QString("(%1,%2,%3)").arg(d->scl[0], 0, 'f', prec).arg(d->scl[1], 0, 'f', prec).arg(d->scl[2], 0, 'f', prec);
-			morphSmooth = QString::number(d->morph_smooth);
-			morph = QString(d->morph);
-			hide = d->hide;
-		}
+	scl = QString("(%1,%2,%3)").arg(d->scl[0], 0, 'f', prec).arg(d->scl[1], 0, 'f', prec).arg(d->scl[2], 0, 'f', prec);
+	morphSmooth = QString::number(d->morph_smooth);
+	morph = QString(d->morph);
+	hide = d->hide;
+ }
 
-		mPivot->setText(pivot);
-		mInstance->setText(instance);
-		mBBoxMin->setText(bboxMin);
-		mBBoxMax->setText(bboxMax);
-		mPos->setText(pos);
-		mRot->setText(rot);
+ mPivot->setText(pivot);
+ mInstance->setText(instance);
+ mBBoxMin->setText(bboxMin);
+ mBBoxMax->setText(bboxMax);
+ mPos->setText(pos);
+ mRot->setText(rot);
 #if 0
-		mRotAngle->setText(rotAngle);
+ mRotAngle->setText(rotAngle);
 #endif
-		mRotX->setText(rotX);
-		mRotY->setText(rotY);
-		mRotZ->setText(rotZ);
-		mScl->setText(scl);
-		mMorphSmooth->setText(morphSmooth);
-		mMorph->setText(morph);
-		mHide->setChecked(hide);
-	}
+ mRotX->setText(rotX);
+ mRotY->setText(rotY);
+ mRotZ->setText(rotZ);
+ mScl->setText(scl);
+ mMorphSmooth->setText(morphSmooth);
+ mMorph->setText(morph);
+ mHide->setChecked(hide);
 
-protected:
-	QWidget* addWidget(const QString& label, QWidget* w)
-	{
-		QWidget* box = new QWidget(this, "widgetbox");
-		w->reparent(box, QPoint(0,0)); // ugly, but useful
-		QHBoxLayout* l = new QHBoxLayout(box);
-		l->addWidget(new QLabel(label, box, "label"));
-		l->addWidget(w);
-		mLayout->addWidget(box);
+ mNodeTracks->setNodeObjectData(d);
+}
 
-		return w;
-	}
+QWidget* BoNodeObjectDataWidget::addWidget(const QString& label, QWidget* w)
+{
+ QWidget* box = new QWidget(this, "widgetbox");
+ w->reparent(box, QPoint(0,0)); // ugly, but useful
+ QHBoxLayout* l = new QHBoxLayout(box);
+ l->addWidget(new QLabel(label, box, "label"));
+ l->addWidget(w);
+ mLayout->addWidget(box);
 
-#if 0
-	// AB: this functions doesn't work how i expect it.
-	// i used the algorithms from the site mentioned below, but i haven't
-	// found out what exactly it calculates (e.g. whether the angle is in
-	// radians or degree, ...)
-	// i am very sure that it does not calculate the rotation axis and it's
-	// angle. or if it does, this implementation has a bug.
-	// disabled, because it isn't important anymore - we use
-	// quatToEulerAngles() instead, which is far more what we need.
-
-	// convert quaternion to a rotation around an axis.
-	void quatToAxisRotation(Lib3dsQuat _q, float* _x, float* _y, float* _z, float* _angle)
-	{
-		if (!_x || !_y || !_z || !_angle) {
-			return;
-		}
-		// see e.g. http://www.j3d.org/matrix_faq/matrfaq_latest.html
-		// for some useful information on quaternions (this algorithm is
-		// from there!)
-		Lib3dsQuat q;
-		lib3ds_quat_copy(q, _q);
-		lib3ds_quat_normalize(q);
-		float cos_a = q[3]; // cos_a = w
-		float angle = acos(cos_a) * 2;
-		float sin_a = sqrt(1.0f - cos_a * cos_a);
-		if (fabs(sin_a) < 0.0005) {
-			sin_a = 1;
-		}
+ return w;
+}
 
 
-		// the axis where we rotate
-		*_x = q[0] / sin_a;
-		*_y = q[1] / sin_a;
-		*_z = q[2] / sin_a;
-
-		// the angle that is used on the above axis
-		*_angle = angle;
-	}
-#endif
-
-	void quatToRotationMatrix(Lib3dsQuat _q, float* mat)
-	{
-		// note: mat is *NOT* a Lib3dsMatrix. it is a 16 element array,
-		// in the format used by OpenGL.
-		// see also http://www.j3d.org/matrix_faq/matrfaq_latest.html
-		if (!mat) {
-			return;
-		}
-
-		Lib3dsQuat q; // I am assuming this is of form (X,Y,Z,W), is that true?
-		lib3ds_quat_copy(q, _q);
-		lib3ds_quat_normalize(q);
-
-		float xx = q[0] * q[0];
-		float xy = q[0] * q[1];
-		float xz = q[0] * q[2];
-		float xw = q[0] * q[3];
-
-		float yy = q[1] * q[1];
-		float yz = q[1] * q[2];
-		float yw = q[1] * q[3];
-
-		float zz = q[2] * q[2];
-		float zw = q[2] * q[3];
-
-		mat[0] = 1.0f - 2.0f * ( yy + zz );
-		mat[1] = 2.0f * ( xy - zw );
-		mat[2] = 2.0f * ( xz + yw );
-		mat[3] = 0.0f;
-
-		mat[4] = 2.0f * ( xy + zw );
-		mat[5] = 1.0f - 2.0f * ( xx + zz );
-		mat[6] = 2.0f * ( yz - xw );
-		mat[7] = 0.0f;
-
-		mat[8] = 2.0f * ( xz - yw );
-		mat[9] = 2.0f * ( yz + xw );
-		mat[10] = 1.0f - 2.0f * ( xx + yy );
-		mat[11] = 0.0f;
-
-		mat[12] = 0.0f;
-		mat[13] = 0.0f;
-		mat[14] = 0.0f;
-		mat[15] = 1.0f;
-	}
-
-	// convert a quaternion to so-called euler angles.
-	// euler angles are angles around one of [x,y,z] axis. i.i
-	// (1,0,0) or (0,1,0) or (0,0,1) in OpenGL's glRotate()
-	void quatToEulerAngles(Lib3dsQuat _q, float* _x, float* _y, float* _z)
-	{
-		// hm
-		// I cannot use quaternions properly so I am using docs only. I
-		// have not yet found any docs that do this conversion directly,
-		// so we convert to a rotation matrix first, then to euler
-		// angles.
-
-		Lib3dsQuat q; // I am assuming this is of form (X,Y,Z,W), is that true?
-		lib3ds_quat_copy(q, _q);
-
-		float mat[16];
-		quatToRotationMatrix(q, mat);
-
-		// now convert that matrix to euler angles.
-		// see also http://www.j3d.org/matrix_faq/matrfaq_latest.html
-
-		float angle_x, angle_y, angle_z;
-		float D;
-		angle_y = D =  asin(mat[2]); // Calculate Y-axis angle
-		float C = cos(angle_y);
-		angle_y = Bo3dTools::rad2deg(angle_y);
-
-		float tr_x, tr_y;
-		if (fabs(C) > 0.005) {
-			tr_x =  mat[10] / C; // get X-axis angle
-			tr_y = -mat[6]  / C;
-			angle_x = Bo3dTools::rad2deg(atan2(tr_y, tr_x));
-			tr_x =  mat[0] / C; // Get Z-axis angle
-			tr_y = -mat[1] / C;
-			angle_z  = Bo3dTools::rad2deg(atan2(tr_y, tr_x));
-		} else { // gimball lock
-			angle_x = 0; // Set X-axis angle to zero
-			tr_x = mat[5]; // And calculate Z-axis angle
-			tr_y = mat[4];
-			angle_z = Bo3dTools::rad2deg(atan2(tr_y, tr_x));
-		}
-
-		// return only positive angles in [0,360]
-		if (angle_x < 0) {
-			angle_x += 360;
-		}
-		if (angle_y < 0) {
-			angle_y += 360;
-		}
-		if (angle_z < 0) {
-			angle_z += 360;
-		}
-
-
-		*_x = angle_x;
-		*_y = angle_y;
-		*_z = angle_z;
-	}
-
-private:
-	QVBoxLayout* mLayout;
-
-	QLabel* mPivot;
-	QLabel* mInstance;
-	QLabel* mBBoxMin;
-	QLabel* mBBoxMax;
-	QLabel* mPos;
-	QLabel* mRot;
-#if 0
-	QLabel* mRotAngle;
-#endif
-	QLabel* mRotX;
-	QLabel* mRotY;
-	QLabel* mRotZ;
-	QLabel* mScl;
-	QLabel* mMorphSmooth;
-	QLabel* mMorph;
-	QCheckBox* mHide;
-};
 
 
 BoListView::BoListView(QWidget* parent) : KListView(parent)
@@ -687,6 +1343,8 @@ public:
 		mCurrentFrame = 0;
 		mNodeMatrix = 0;
 		mNodeObjectData = 0;
+		mNodeTracks = 0;
+		mTrackView = 0;
 
 		mMeshFacesCountLabel = 0;
 		mMeshVertexCountLabel = 0;
@@ -727,6 +1385,8 @@ public:
 	KIntNumInput* mCurrentFrame;
 	BoMatrixWidget* mNodeMatrix;
 	BoNodeObjectDataWidget* mNodeObjectData;
+	BoNodeTracksWidget* mNodeTracks;
+	BoTrackWidget* mTrackView;
 
 	QLabel* mMeshFacesCountLabel;
 	QLabel* mMeshVertexCountLabel;
@@ -906,8 +1566,13 @@ void KGameModelDebug::initNodePage()
  //
  // and node->matrix
 
- QVGroupBox* nodeMatrixBox = new QVGroupBox(i18n("Matrix"), splitter);
+ QVBox* box = new QVBox(splitter);
+ QVGroupBox* nodeMatrixBox = new QVGroupBox(i18n("Matrix"), box);
  d->mNodeMatrix = new BoMatrixWidget(nodeMatrixBox);
+ QVGroupBox* trackBox = new QVGroupBox(i18n("Track"), box);
+ d->mTrackView = new BoTrackWidget(trackBox);
+ connect(d->mNodeObjectData, SIGNAL(signalDisplayTrack(Bo3DSTrack*)),
+		d->mTrackView, SLOT(slotDisplayTrack(Bo3DSTrack*)));
 
 
  d->mCurrentFrame = new KIntNumInput(d->mNodePage);
