@@ -1,0 +1,7 @@
+some thoughts about the map editor:
+
+- command frame: combobox -> choose player. When chosen display the player's
+  units
+- when unit is chosen display its properties (in command frame as well?)
+- use menu+toolbar to choose whether mobile units or facilities shall be shown
+  in bosoncommandframe
