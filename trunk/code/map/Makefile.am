@@ -33,7 +33,7 @@ createGround_LDFLAGS = $(all_libraries) $(KDE_RPATH)
 
 #basic.bpf
 data_DATA = earth.png
-datadir = $(kde_datadir)/boson/themes/ground
+datadir = $(kde_datadir)/boson/themes/grounds
 
 earth.png : createGround
 	./createGround
