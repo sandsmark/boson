@@ -132,6 +132,42 @@ void BoConfigStringEntry::load(KConfig* conf)
  mValue = conf->readEntry(key(), mValue);
 }
 
+class BoConfigIntListEntry : public BoConfigEntry
+{
+public:
+	BoConfigIntListEntry(BosonConfig* parent, const QString& key, QValueList<int> defaultValue) : BoConfigEntry(parent, key)
+	{
+		mValue = defaultValue;
+	}
+	~BoConfigIntListEntry() {}
+
+	virtual void load(KConfig* conf)
+	{
+		activate(conf);
+		conf->writeEntry(key(), mValue);
+	}
+	virtual void save(KConfig* conf)
+	{
+		activate(conf);
+		mValue = conf->readIntListEntry(key());
+	}
+
+	void setValue(QValueList<int> list) { mValue = list; }
+	QValueList<int> value() const { return mValue; }
+
+	void append(int e)
+	{
+		if (!contains(e)) {
+			mValue.append(e);
+		}
+	}
+	void remove(int e) { mValue.remove(e); }
+	bool contains(int e) { return mValue.contains(e); }
+
+private:
+	QValueList<int> mValue;
+};
+
 
 
 class BosonConfig::BosonConfigPrivate
@@ -161,6 +197,7 @@ BosonConfig::BosonConfig(KConfig* conf)
  mUpdateInterval = new BoConfigUIntEntry(this, "GLUpdateInterval", 25);
  mMiniMapScale = new BoConfigDoubleEntry(this, "MiniMapScale", 2.0);
  mMiniMapZoom = new BoConfigDoubleEntry(this, "MiniMapZoom", 1.0);
+ mUnitSoundsDeactivated = new BoConfigIntListEntry(this, "DeactivateUnitSounds", QValueList<int>());
 
  mDebugMode = DebugNormal;
 
@@ -370,5 +407,19 @@ void BosonConfig::setDebugMode(DebugMode m)
 BosonConfig::DebugMode BosonConfig::debugMode() const
 {
  return mDebugMode;
+}
+
+void BosonConfig::setUnitSoundActivated(UnitSoundEvent e, bool activated)
+{
+ if (activated) {
+	mUnitSoundsDeactivated->remove((int)e);
+ } else {
+	mUnitSoundsDeactivated->append((int)e);
+ }
+}
+
+bool BosonConfig::unitSoundActivated(UnitSoundEvent e) const
+{
+ return !mUnitSoundsDeactivated->contains((int)e);
 }
 

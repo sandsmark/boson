@@ -215,6 +215,7 @@ void BosonWidget::slotGamePreferences()
  dlg->setCursor(mode);
  dlg->setCursorEdgeSensity(boConfig->cursorEdgeSensity());
  dlg->setUpdateInterval(boConfig->updateInterval());
+ dlg->setUnitSoundsDeactivated(boConfig);
 
  connect(dlg, SIGNAL(signalArrowScrollChanged(int)),
 		this, SLOT(slotArrowScrollChanged(int)));

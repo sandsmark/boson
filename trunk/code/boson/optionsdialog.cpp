@@ -67,6 +67,8 @@ public:
 	QCheckBox* mRMBScrolling;
 	QCheckBox* mMMBScrolling;
 	KIntNumInput* mCursorEdgeSensity;
+
+	QMap<QCheckBox*, UnitSoundEvent> mCheckBox2UnitSoundEvent;
 };
 
 OptionsDialog::OptionsDialog(QWidget* parent, bool modal)
@@ -74,10 +76,11 @@ OptionsDialog::OptionsDialog(QWidget* parent, bool modal)
 		Cancel, parent, "bosonoptionsdialog", modal, true)
 {
  d = new OptionsDialogPrivate;
- 
+
  initGeneralPage();
  initCursorPage();
  initScrollingPage();
+ initSoundsPage();
 
  connect(this, SIGNAL(defaultClicked()), this, SLOT(slotSetDefaults()));
 }
@@ -94,13 +97,13 @@ void OptionsDialog::initGeneralPage()
  d->mArrowSpeed = new KIntNumInput(10, vbox);
  d->mArrowSpeed->setRange(1, 200);
  d->mArrowSpeed->setLabel(i18n("Arrow Key Steps"));
- connect(d->mArrowSpeed, SIGNAL(valueChanged(int)), 
+ connect(d->mArrowSpeed, SIGNAL(valueChanged(int)),
 		this, SIGNAL(signalArrowScrollChanged(int)));
 
  d->mGameSpeed = new KIntNumInput(10, vbox);
  d->mGameSpeed->setRange(MIN_GAME_SPEED, MAX_GAME_SPEED);
  d->mGameSpeed->setLabel(i18n("Game Speed"));
- connect(d->mGameSpeed, SIGNAL(valueChanged(int)), 
+ connect(d->mGameSpeed, SIGNAL(valueChanged(int)),
 		this, SLOT(slotSpeedChanged(int)));
 
  d->mUpdateInterval = new KIntNumInput(50, vbox);
@@ -137,9 +140,9 @@ void OptionsDialog::initCursorPage()
  d->mCursor->insertItem(i18n("Sprite Cursor"), CursorSprite);
  d->mCursor->insertItem(i18n("B/W Cursor"), CursorNormal);
  d->mCursor->insertItem(i18n("KDE Standard Cursor"), CursorKDE);
- d->mCursor->insertItem(i18n("Experimental Cursor (*Very* Unstable)"), 
+ d->mCursor->insertItem(i18n("Experimental Cursor (*Very* Unstable)"),
 		CursorExperimental);
- connect(d->mCursor, SIGNAL(activated(int)), 
+ connect(d->mCursor, SIGNAL(activated(int)),
 		this, SLOT(slotCursorChanged(int)));
 
  hbox = new QHBox(vbox);
@@ -159,7 +162,7 @@ void OptionsDialog::initCursorPage()
  }
  connect(d->mCursorTheme, SIGNAL(activated(int)),
 		this, SLOT(slotCursorThemeChanged(int)));
- 
+
 
  setCursor(CursorSprite);
 }
@@ -171,17 +174,47 @@ void OptionsDialog::initScrollingPage()
  (void)new QLabel(i18n("Enable Right Mouse Button Scrolling"), hbox);
  d->mRMBScrolling = new QCheckBox(hbox);
  connect(d->mRMBScrolling, SIGNAL(toggled(bool)), this, SLOT(slotRMBScrollingToggled(bool)));
- 
+
  hbox = new QHBox(vbox);
  (void)new QLabel(i18n("Enable Middle Mouse Button Scrolling"), hbox);
  d->mMMBScrolling = new QCheckBox(hbox);
  connect(d->mMMBScrolling, SIGNAL(toggled(bool)), this, SLOT(slotMMBScrollingToggled(bool)));
- 
+
  hbox = new QHBox(vbox);
  (void)new QLabel(i18n("Sensity of cursor at edge of the windo Scrolling (0 for disabled)"), hbox);
  d->mCursorEdgeSensity = new KIntNumInput(hbox);
  d->mCursorEdgeSensity->setRange(0, 50);
  connect(d->mCursorEdgeSensity, SIGNAL(valueChanged(int)), this, SLOT(slotCursorEdgeSensityChanged(int)));
+
+}
+
+void OptionsDialog::initSoundsPage()
+{
+ QVBox* vbox = addVBoxPage(i18n("S&ounds"));
+ (void)new QLabel(i18n("Disable the following unit sounds (please send a bug report if you can think of more descriptive names):"), vbox);
+ QCheckBox* c;
+ c = new QCheckBox(i18n("Shoot"), vbox);
+ d->mCheckBox2UnitSoundEvent.insert(c, SoundShoot);
+ connect(c, SIGNAL(toggled(bool)), this, SLOT(slotUnitSoundDeactivated(bool)));
+ c = new QCheckBox(i18n("Order Move"), vbox);
+ d->mCheckBox2UnitSoundEvent.insert(c, SoundOrderMove);
+ connect(c, SIGNAL(toggled(bool)), this, SLOT(slotUnitSoundDeactivated(bool)));
+ c = new QCheckBox(i18n("Order Attack"), vbox);
+ d->mCheckBox2UnitSoundEvent.insert(c, SoundOrderAttack);
+ connect(c, SIGNAL(toggled(bool)), this, SLOT(slotUnitSoundDeactivated(bool)));
+ c = new QCheckBox(i18n("Order Select"), vbox);
+ d->mCheckBox2UnitSoundEvent.insert(c, SoundOrderSelect);
+ connect(c, SIGNAL(toggled(bool)), this, SLOT(slotUnitSoundDeactivated(bool)));
+ c = new QCheckBox(i18n("Report Produced"), vbox);
+ d->mCheckBox2UnitSoundEvent.insert(c, SoundReportProduced);
+ connect(c, SIGNAL(toggled(bool)), this, SLOT(slotUnitSoundDeactivated(bool)));
+ c = new QCheckBox(i18n("Report Destroyed"), vbox);
+ d->mCheckBox2UnitSoundEvent.insert(c, SoundReportDestroyed);
+ connect(c, SIGNAL(toggled(bool)), this, SLOT(slotUnitSoundDeactivated(bool)));
+ c = new QCheckBox(i18n("Report Under Attack"), vbox);
+ d->mCheckBox2UnitSoundEvent.insert(c, SoundReportUnderAttack);
+ connect(c, SIGNAL(toggled(bool)), this, SLOT(slotUnitSoundDeactivated(bool)));
+
 
 }
 
@@ -295,6 +328,32 @@ void OptionsDialog::setCursorEdgeSensity(int v)
  d->mCursorEdgeSensity->setValue(v);
 }
 
+void OptionsDialog::setUnitSoundsDeactivated(BosonConfig* conf)
+{
+ if (!conf) {
+	return;
+ }
+ QMap<QCheckBox*, UnitSoundEvent>::Iterator it = d->mCheckBox2UnitSoundEvent.begin();
+ for (; it != d->mCheckBox2UnitSoundEvent.end(); ++it) {
+	it.key()->setChecked(!boConfig->unitSoundActivated(it.data()));
+ }
+}
+
+void OptionsDialog::slotUnitSoundDeactivated(bool off)
+{
+ QCheckBox* s = (QCheckBox*)sender(); // a little bit hackiish...
+ if (!s) {
+	kdWarning() << k_funcinfo << "NULL sender()" << endl;
+	return;
+ }
+ if (!d->mCheckBox2UnitSoundEvent.contains(s)) {
+	kdWarning() << k_funcinfo << "Unknown checkbox" << endl;
+	return;
+ }
+ UnitSoundEvent e = d->mCheckBox2UnitSoundEvent[s];
+ boConfig->setUnitSoundActivated(e, !off);
+}
+
 void OptionsDialog::slotSetDefaults()
 {
  // FIXME: these values are copied from BosonConfig
@@ -308,3 +367,4 @@ void OptionsDialog::slotSetDefaults()
  slotCursorChanged((int)CursorSprite);
  setCursorEdgeSensity(20);
 }
+

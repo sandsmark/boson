@@ -135,6 +135,8 @@ private:
 	QString mValue;
 };
 
+class BoConfigIntListEntry; // forwarding, since i dont want to #include <qvaluelist.h>
+
 /**
  * Boson has two different types of config entries, you can find both of them in
  * BosonConfig.
@@ -214,6 +216,8 @@ public:
 	double miniMapZoom() const { return mMiniMapZoom->value(); }
 	void setCommandButtonsPerRow(int b) { mCommandButtonsPerRow->setValue(b); }
 	int commandButtonsPerRow() const { return mCommandButtonsPerRow->value(); }
+	void setUnitSoundActivated(UnitSoundEvent e, bool activated);
+	bool unitSoundActivated(UnitSoundEvent e) const;
 
 	/**
 	 * @param m How "sensitive" the edge is. I.e. the number the cursor must
@@ -271,6 +275,7 @@ private:
 	BoConfigUIntEntry* mUpdateInterval;
 	BoConfigDoubleEntry* mMiniMapScale;
 	BoConfigDoubleEntry* mMiniMapZoom;
+	BoConfigIntListEntry* mUnitSoundsDeactivated;
 
 	// NOT stored to config file!
 	bool mDisableSound;
