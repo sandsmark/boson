@@ -35,9 +35,7 @@ main_area_begin();
 // Contacts
 draw_bigbox_begin("Status");
 draw_bigbox_text("Boson is currently still under heavy development.<br><br>
-  In the latest CVS version, there are no significant changes, compared
-  to the latest stable release ($latestversion).<br><br>
-  We're currently heading for release of version 0.8, but it is currently
+  We're heading for release of version 0.8, but it is currently
   unclear when it will be released.<br><br>");
 
 draw_bigbox_subheader("<a name=\"features\"></a>Feature list");
