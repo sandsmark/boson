@@ -158,8 +158,6 @@ void BosonSaveLoad::initBoson()
  connect(this, SIGNAL(signalLoadPlayerData(Player*)),
 		d->mBoson, SIGNAL(signalLoadPlayerData(Player*)));
 #endif
- connect(this, SIGNAL(signalInitMap(const QByteArray&)),
-		d->mBoson, SIGNAL(signalInitMap(const QByteArray&)));
 }
 
 void BosonSaveLoad::systemAddPlayer(KPlayer* p)

@@ -367,13 +367,6 @@ void TopWidget::initBoson()
 		this, SLOT(slotPlayFieldChanged(const QString&)));
  connect(boGame, SIGNAL(signalGameStarted()), this, SLOT(slotGameStarted()));
 
- // this signal gets emitted when starting a game (new games as well as loading
- // games). the admin sends the map and all clients (including admin) will
- // receive and use it.
- connect(boGame, SIGNAL(signalInitMap(const QByteArray&)),
-		d->mStarting, SLOT(slotReceiveMap(const QByteArray&)));
-
-
  // for editor (new maps)
  connect(boGame, SIGNAL(signalEditorNewMap(const QByteArray&)),
 		this, SLOT(slotEditorNewMap(const QByteArray&)));
@@ -1277,9 +1270,6 @@ void TopWidget::slotDebugRequestIdName(int msgid, bool , QString& name)
 {
  // we don't use i18n() for debug messages... not worth the work
  switch (msgid) {
-	case BosonMessage::InitMap:
-		name = "Init Map";
-		break;
 	case BosonMessage::ChangeSpecies:
 		name = "Change Species";
 		break;
