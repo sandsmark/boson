@@ -20,16 +20,18 @@
 
 #include <stdio.h>
 #include <unistd.h>
-#include <boson.h>
 
 #include <qframe.h>
 
+#include <kmsgbox.h>
+
 #include "../common/boconfig.h"
-#include "../common/bobuffer.h"
 #include "../common/log.h"
 
+#include "boson.h"
 #include "ressource.h"
 #include "game.h"
+#include "connectDlg.h"
 
 
 FILE *logfile = (FILE *) 0L;
@@ -98,49 +100,6 @@ void BosonApp::init()
   disableCommand(ID_EDIT_COPY);*/
 }
 
-void BosonApp::initSocket(char *servername)
-{
-char charbuf[1024];
-
-if (!servername)
-	if (gethostname(charbuf, 1023)) {
-		printf("can't get hostname, aborting\n");
-		return;
-	} else servername = charbuf;
-
-/* let's say the server is on the local machine, hum..  */
-Socket = new KSocket(servername,  BOSON_DEFAULT_PORT);
-
-if (-1 == Socket->socket())  {
-	logf(LOG_FATAL, "BosonApp : beuh, unable to connect socket to \"%s\" server\n", servername);
-	socketState = PSS_CONNECT_DOWN;
-	return;
-}
-
-buffer = new boBuffer(Socket->socket(), BOSON_BUFFER_SIZE );
-
-logf(LOG_COMM, "KSocket connect ok");
-logf(LOG_COMM, "\tsocket = %d, addr = %lu",
-			Socket->socket(), Socket->getAddr());
-
-socketState = PSS_INIT;
-
-connect (
-	Socket, SIGNAL(readEvent(KSocket *)), 
-	this, SLOT(handleSocketMessage(KSocket*) ) );
-Socket->enableRead(TRUE);
-
-/*
-bosonMsgData	data;
-bosonMsgTag	tag;
-int		len;
-*/
-
-logf(LOG_LAYER1, "Sending MSG_HS_INIT...");
-sendMsg(buffer, MSG_HS_INIT, BOSON_NO_DATA );
-
-socketState = PSS_WAIT_CONFIRM_INIT ;
-}
 
 void BosonApp::initMenuBar()
 {
@@ -263,14 +222,33 @@ void BosonApp::initStatusBar()
 
 }
 
+void BosonApp::initSocket(char *servername)
+{ 
+
+	int ret;
+	connectDlg *dlg;
+
+	/* find a connection to a server */
+	dlg = new connectDlg(servername, this, "connect_0");
+	ret = dlg->exec();
+	delete dlg;
+
+	if ( ret != QDialog::Accepted ) {
+		logf(LOG_ERROR, "initSocket : connectDlg rejected with value %d", ret);
+		return;
+	}
+	logf(LOG_INFO, "initSocket : connectDlg accepted, going on");
+}
+
+
 void BosonApp::initView(int w, int h)
 { 
 
-/* the field is created when a game is created */
+	/* the field is created when a game is created */
 	field = new bosonField(w,h);
 
-/* a mainView is each window containing : field, mini, order...
-   this one is the first one, other can pop up as well */
+	/* a mainView is each window containing : field, mini, order...
+	   this one is the first one, other can pop up as well */
 
 	mainView *mainview = new mainView(field, this, "main_view_0");
 	setView(mainview);
@@ -430,6 +408,19 @@ void BosonApp::slotStatusHelpMsg(const char *text)
   status_bar->message(text, 2000);
 }
 
+void BosonApp::serverDied(KProcess *)
+{
+	logf(LOG_FATAL,"boson : server died unexpectedly ");
+  	KMsgBox::message(0l , "unexpected server death",
+			"The server has died unexpectedly, please report the bug"
+			"to the author <orzel@yalbi.com>. Please send the boson-server.log"
+			"and boson-client.log you may find in the directory from where"
+		        "you've launched boson (probably your home if you've used a menu entry"
+			);
+	return;
+}
+
+
 
 
 
@@ -483,3 +474,5 @@ BEGIN_STATUS_MSG(BosonApp)
   ON_STATUS_MSG(ID_VIEW_OPTIONS,     i18n("Set program options")) */
 
 END_STATUS_MSG()
+
+

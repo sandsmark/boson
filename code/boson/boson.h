@@ -35,7 +35,6 @@
 #include <ktmainwindow.h> 
 #include <kaccel.h>
 #include <kiconloader.h>
-#include <kmsgbox.h>
 #include <ksock.h>
 
 // application specific includes
@@ -45,6 +44,8 @@
 #include "mainView.h"
 #include "connect.h"
 
+
+class KProcess;
 /**
   * This Class is the base class for your application. It sets up the main
   * window and reads the config file as well as providing a menubar, toolbar
@@ -116,6 +117,9 @@ protected:
     void slotStatusMsg(const char *text);
     /** change the status message of the whole statusbar temporary */
     void slotStatusHelpMsg(const char *text);
+    
+	/** called whenever the server launched by serverDlg died */
+	void	serverDied(KProcess *);
 
 	/** initSocket try to connect to the BosonServer */
 	void initSocket(char *servername=0l);
@@ -143,8 +147,6 @@ private:
       * positions as well and implement them in saveOptions() and readOptions().
       */    
     KMenuBar::menuPosition menu_bar_pos;
-
-
 };   
  
 #endif // BOSON_H

@@ -128,7 +128,7 @@ switch(State) {
 				data->accepted.sizeY);
 			who_am_i	= data->accepted.who_you_are;
 			vpp.nb_player	= data->accepted.total_player;
-			initView(200,200);
+			initView(data->accepted.sizeX, data->accepted.sizeY);
 			myspecy	= vpp.species[data->accepted.who_you_are];
 			break;
 		case MSG_DLG_REFUSED :

@@ -1,9 +1,9 @@
 /***************************************************************************
-                          config.h  -  description                    
+                         connectDlg.h  -  description                              
                              -------------------                                         
 
     version              : $Id$
-    begin                : Sat Jan  9 19:35:36 CET 1999
+    begin                : Sat Nov 11 17:19:00 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
     email                : capricel@enst.fr                                     
@@ -18,33 +18,36 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef BOCONFIG_H 
-#define BOCONFIG_H 
+#ifndef CONNECT_DLG_H 
+#define CONNECT_DLG_H 
 
-#define BOSON_VERSION_MAJOR	0
-#define BOSON_VERSION_MINOR	2
-#define BOSON_VERSION_PATCH	0
-#define BOSON_VERSION_TEXT	"0.2.0"
-#define BOSON_MAGIC		"Orzel"
-#define BOSON_VERSION_MAGIC	"boson/orzel@eagle, 1999"
-#define BOSON_MAGIC_LENGHT	(sizeof(BOSON_MAGIC)/sizeof(char))
+#include <qdialog.h>
 
-#define BOSON_MAX_CONNECTION	(5)
-#define BOSON_MAX_PLAYERS	BOSON_MAX_CONNECTION ///orzel : to clean up
-#define BOSON_DEFAULT_PORT	(5454)
-#define BOSON_DEFAULT_PORT_CHAR	"5454"
-#define BOSON_BUFFER_SIZE	(5*1024)
 
-#define BOSON_SERVER_LAUNCHED	"Boson server launched"
+class QLineEdit;
+class QPushButton;
 
-#ifdef EAGLE
-#define BOSON_LOGFILE_SERVER	"/tmp/boson-server.log"
-#define BOSON_LOGFILE_CLIENT	"/tmp/boson-client.log"
-#define BOSON_LOGFILE_EDITOR	"/tmp/boson-editor.log"
-#else
-#define BOSON_LOGFILE_SERVER	"boson-server.log"
-#define BOSON_LOGFILE_CLIENT	"boson-client.log"
-#define BOSON_LOGFILE_EDITOR	"boson-editor.log"
-#endif
 
-#endif // BOCONFIG_H
+class connectDlg : public QDialog 
+{
+	Q_OBJECT
+
+public:
+	connectDlg(char *servername=0l, QWidget *parent=0l, const char *name=0l);
+
+public slots:
+	void	tryServer(void);
+	void	configure(const char *server, const char *port);
+
+private slots:
+	void	launchServer(void);
+//	void	timeOut(void);
+
+private:
+	QLineEdit	*e_server, *e_port;
+	QPushButton	*b_ok;
+};
+
+
+#endif // CONNECT_DLG_H 
+

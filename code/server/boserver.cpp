@@ -83,6 +83,9 @@ BosonServer::BosonServer(int port, const char *mapfile, const char *name=0L)
 	label	= new QLabel(buf, box);
 	//label->setAlignment(AlignVCenter | AlignLeft);
 	label->setGeometry( 10, 120, 250, 30);
+
+	/* we are ready to handle new connection */
+	printf(BOSON_SERVER_LAUNCHED); fflush (stdout);
 }
 
 
@@ -124,6 +127,7 @@ else
 connect(
 	socket, SIGNAL(accepted(KSocket *)),
 	this, SLOT(handleNewConnection(KSocket *))  );
+
 }
 
 
