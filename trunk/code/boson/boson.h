@@ -131,7 +131,7 @@ public:
 	virtual bool load(QDataStream& stream, bool reset = true);
 	virtual bool loadgame(QDataStream& stream, bool network, bool reset);
 
-	LoadingStatus loadingStatus();
+	LoadingStatus loadingStatus() const;
 
 	/**
 	 * See @ref Unit::advanceFunction2 for more info about this.

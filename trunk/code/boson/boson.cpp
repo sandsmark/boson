@@ -50,10 +50,6 @@ Boson* Boson::mBoson = 0;
 
 #define ADVANCE_INTERVAL 250 // ms
 
-// the advance message <-> advance call thing is pretty new. i want to have
-// debug output from it in bug reports, so please do not define this.
-// on the other hand i often need to test a few things where i don't need those
-// messages. defining this lets easily disable the debug output.
 #define NO_ADVANCE_DEBUG
 
 // Saving format version (000005 = 00.00.05)
@@ -67,6 +63,85 @@ public:
 	Q_UINT32 receiver;
 	Q_UINT32 sender;
 	Q_UINT32 clientId;
+
+	QString debug(KGame* game)
+	{
+		if (!game) {
+			return QString::null;
+		}
+		QString m = QString("msgid=%1").arg(msgid);
+		QString r = QString("receiver=%3").arg(receiver);
+		QString s = QString("sender=%2").arg(sender);
+		if (KGameMessage::isPlayer(receiver)) {
+			KPlayer* p = game->findPlayer(receiver);
+			if (!p) {
+				r += QString("(player cant be found)");
+			} else {
+				r += QString("(player %1)").arg(p->name());
+			}
+		} else if (KGameMessage::isGame(receiver)) {
+			if (receiver == 0) {
+				r += "(broadcast games)";
+			} else if (receiver == game->gameId()) {
+				r += "(local game)";
+			} else {
+				r += "(remote game)";
+			}
+		}
+
+		if (KGameMessage::isPlayer(sender)) {
+			KPlayer* p = game->findPlayer(receiver);
+			if (!p) {
+				r += QString("(player cant be found)");
+			} else {
+				r += QString("(player %1)").arg(p->name());
+			}
+		} else if (KGameMessage::isGame(sender)) {
+			if (sender == 0) {
+				r += "(broadcast games)";
+			} else if (sender == game->gameId()) {
+				s += "(local game)";
+			} else {
+				s += "(remote game)";
+			}
+		}
+
+		QString mname = KGameMessage::messageId2Text(msgid);
+		if (!mname.isEmpty()) {
+			m += QString("(%1)").arg(mname);
+		}
+
+		QString d;
+		d = m + " " + r + " " + s;
+
+		d += debugMore(game);
+		return d;
+	}
+
+	QString debugMore(KGame* game)
+	{
+		QString m;
+		QDataStream s(byteArray, IO_ReadOnly);
+		if (msgid == KGameMessage::IdGameProperty) {
+			int propId;
+			KGameMessage::extractPropertyHeader(s, propId);
+			if (propId == KGamePropertyBase::IdCommand) {
+				m = " is a property command";
+				// we could use
+				// KGameMessage::extractPropertyCommand() here
+				// now
+			} else {
+				KGamePropertyBase* p;
+				p = game->dataHandler()->dict().find(propId);
+				if (!p) {
+					m = QString(" property %1 can't be found").arg(propId);
+				} else {
+					m = QString(" property: %1(%2)").arg(propId).arg(game->dataHandler()->propertyName(propId));
+				}
+			}
+		}
+		return m;
+	}
 };
 
 class Boson::BosonPrivate
@@ -1407,13 +1482,13 @@ void Boson::slotReceiveAdvance()
 void Boson::networkTransmission(QDataStream& stream, int msgid, Q_UINT32 r, Q_UINT32 s, Q_UINT32 clientId)
 {
  if (d->mIsLocked || d->mDelayedWaiting) {
-	kdDebug() << k_funcinfo << "delaying " << msgid<< endl;
 	BoMessage* m = new BoMessage;
 	m->byteArray = ((QBuffer*)stream.device())->readAll();
 	m->msgid = msgid;
 	m->receiver = r;
 	m->sender = s;
 	m->clientId = clientId;
+	kdDebug() << k_funcinfo << "delayed " << m->debug(this) << endl;
 	d->mDelayedMessages.enqueue(m);
 	d->mDelayedWaiting = true;
 	switch (msgid - KGameMessage::IdUser) {
@@ -1443,6 +1518,7 @@ void Boson::unlock()
  kdDebug() << k_funcinfo << endl;
 #endif
  d->mIsLocked = false;
+ int c = d->mDelayedMessages.count();
  while (!d->mDelayedMessages.isEmpty() && !d->mIsLocked) {
 	slotProcessDelayed();
  }
@@ -1544,6 +1620,7 @@ bool Boson::loadgame(QDataStream& stream, bool network, bool reset)
 {
  // network is false for normal game-loading
  kdDebug() << k_funcinfo << endl;
+
  d->mLoadingStatus = LoadingInProgress;
 
  // Load magic data
@@ -1603,12 +1680,18 @@ bool Boson::loadgame(QDataStream& stream, bool network, bool reset)
 
  // KGame::loadgame() also loads the gamestatus. some functions depend on KGame
  // to be in Init status as long as it is still loading, so we set it manually
- // here. we first need to set PolicyLocal, to make the change take immediate
- // effect
- KGame::GamePolicy oldPolicy = boGame->policy();
- boGame->setPolicy(KGame::PolicyLocal);
- boGame->setGameStatus(KGame::Init);
- boGame->setPolicy(oldPolicy);
+ // here. we can't do this using KGame::setStatus(), as the policy is clean, but
+ // we need Init state *now*. Changing policy would also change our property
+ // policies (we use both clean and local policies, so this would not work).
+ {
+	// set gameStatus to Init. Will be set to Run later
+	QByteArray b;
+	QDataStream s(b, IO_WriteOnly);
+	KGameMessage::createPropertyHeader(s, KGamePropertyBase::IdGameStatus);
+	s << (int)KGame::Init;
+	QDataStream readStream(b, IO_ReadOnly);
+	dataHandler()->processMessage(readStream, dataHandler()->id(), false);
+ }
 
  if (started) {
 	// AB: needs to be emitted after KGame::loadgame() which adds the
@@ -1631,15 +1714,12 @@ bool Boson::loadgame(QDataStream& stream, bool network, bool reset)
 	d->mPlayer = (Player*)findPlayer(localId);
  }
 
- // Set game status to Init. It will be set to Run in TopWidget
- setGameStatus(Init);
-
  d->mLoadingStatus = LoadingCompleted;
  kdDebug() << k_funcinfo << " done" << endl;
  return true;
 }
 
-Boson::LoadingStatus Boson::loadingStatus()
+Boson::LoadingStatus Boson::loadingStatus() const
 {
  return d->mLoadingStatus;
 }

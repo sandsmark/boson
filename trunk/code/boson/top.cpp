@@ -117,7 +117,6 @@ TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
 #if KDE_VERSION < 310
  d->mLoadingDockConfig = false;
 #endif
- mLoading = false;
 
  mMainDock = createDockWidget("mainDock", 0, this, i18n("Map"));
  mWs = new QWidgetStack(mMainDock);
@@ -438,7 +437,6 @@ void TopWidget::slotStartEditor()
 
 void TopWidget::slotStartNewGame()
 {
- mLoading = false;
  showStartupWidget(ID_WIDGETSTACK_LOADING);
 
  d->mStarting->setLoadingWidget(d->mLoadingWidget);
@@ -542,7 +540,6 @@ void TopWidget::slotLoadGame()
 
 	// Then return to welcome screen
 	showStartupWidget(ID_WIDGETSTACK_WELCOME);
-	mLoading = false; // obsolete
  }
 
  kdDebug() << k_funcinfo << "done" << endl;
@@ -630,16 +627,16 @@ void TopWidget::slotStartGame()
  enableGameActions(true);
  d->mFpstimer.start(1000);
  connect(&d->mFpstimer, SIGNAL(timeout()), this, SLOT(slotUpdateFPS()));
+}
 
-
-#warning FIXME
- if (mLoading) { // FIXME: mLoading is obsolete here...
-	// These are from BosonWidgetBase::slotStartScenario() which can't be used when
-	//  we're loading saved game
-	boGame->startGame();
-	boGame->sendMessage(0, BosonMessage::IdGameIsStarted);
-	boGame->slotSetGameSpeed(BosonConfig::readGameSpeed());
- }
+void TopWidget::slotStartGameLoadWorkaround() // I know the name sucks - its intended!
+{
+ // These are from BosonWidgetBase::slotStartScenario() which can't be used when
+ //  we're loading saved game
+ boGame->startGame();
+ boGame->sendMessage(0, BosonMessage::IdGameIsStarted);
+ boGame->slotSetGameSpeed(BosonConfig::readGameSpeed());
+ kdDebug() << "speed: " << boGame->gameSpeed() << endl;
 }
 
 void TopWidget::slotToggleSound()
@@ -704,6 +701,7 @@ void TopWidget::reinitGame()
  d->mStarting = new BosonStarting(this); // manages startup of games
  connect(d->mStarting, SIGNAL(signalStartGame()), this, SLOT(slotStartGame()));
  connect(d->mStarting, SIGNAL(signalAssignMap()), this, SLOT(slotAssignMap()));
+ connect(d->mStarting, SIGNAL(signalStartGameLoadWorkaround()), this, SLOT(slotStartGameLoadWorkaround()));
 
  initBoson();
  initPlayer();

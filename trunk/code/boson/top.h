@@ -211,6 +211,20 @@ protected slots:
 	void slotStartGame();
 
 	/**
+	 * This is (currently) called directly after @ref slotStartGame, once
+	 * @ref BosonStarting emits the signal for this slot. For loading games
+	 * we need to init some final stuff (e.g. change the @ref
+	 * Boson::gameStatus() to @ref KGame::Run, start to send the advance
+	 * messages, ...). For starting games this is done by @ref
+	 * BosonScenario, so we don't need this slot then.
+	 *
+	 * The name sucks because I want to emphasize that a good design would
+	 * allow using the same (maybe static) function in @ref BosonScenario or
+	 * so for both, loading and starting games.
+	 **/
+	void slotStartGameLoadWorkaround();
+
+	/**
 	 * Assign the map (from starting/loading a game) to the game.
 	 *
 	 * From this point on we can actually use the map.
@@ -249,7 +263,6 @@ private:
 	BosonPlayField* mPlayField;
 	BosonCanvas* mCanvas;
 	KDockWidget* mMainDock;
-	bool mLoading;
 
 	class TopWidgetPrivate;
 	TopWidgetPrivate* d;
