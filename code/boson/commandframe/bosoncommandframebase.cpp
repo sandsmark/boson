@@ -20,6 +20,9 @@
 #include "bosoncommandframebase.h"
 #include "bosoncommandframebase.moc"
 
+#include "bosoncommandframe.h"
+#include "editorcommandframe.h"
+
 #include "bosonorderwidget.h"
 #include "bosonunitview.h"
 #include "../unit.h"
@@ -171,6 +174,16 @@ BosonCommandFrameBase::~BosonCommandFrameBase()
 {
  d->mUnitDisplayWidgets.clear();
  delete d;
+}
+
+BosonCommandFrameBase* BosonCommandFrameBase::createCommandFrame(QWidget* parent, bool game)
+{
+ if (game) {
+	return new BosonCommandFrame(parent);
+ } else {
+	return new EditorCommandFrame(parent);
+ }
+ return 0;
 }
 
 BosonOrderWidget* BosonCommandFrameBase::selectionWidget() const

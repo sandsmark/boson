@@ -39,7 +39,6 @@ class BosonCommandFrame : public BosonCommandFrameBase
 {
 	Q_OBJECT
 public:
-	BosonCommandFrame(QWidget* parent);
 	~BosonCommandFrame();
 
 public slots:
@@ -82,6 +81,10 @@ protected slots:
 
 
 	void slotUpdate();
+
+private:
+	friend BosonCommandFrameBase* BosonCommandFrameBase::createCommandFrame(QWidget*, bool);
+	BosonCommandFrame(QWidget* parent);
 
 private:
 	void init();

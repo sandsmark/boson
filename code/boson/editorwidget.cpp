@@ -35,7 +35,7 @@
 #include "bosonlocalplayerinput.h"
 #include "botexmapimportdialog.h"
 #include "bosongroundtheme.h"
-#include "commandframe/editorcommandframe.h"
+#include "commandframe/bosoncommandframebase.h"
 
 #include <kfiledialog.h>
 #include <klocale.h>
@@ -149,7 +149,7 @@ void EditorWidget::initPlayer()
 
 BosonCommandFrameBase* EditorWidget::createCommandFrame(QWidget* parent)
 {
- EditorCommandFrame* frame = new EditorCommandFrame(parent);
+ BosonCommandFrameBase* frame = BosonCommandFrameBase::createCommandFrame(parent, false);
 // connect(boGame, SIGNAL(signalUpdateProduction(Unit*)),
 //		frame, SLOT(slotUpdateProduction(Unit*)));
 
@@ -300,7 +300,7 @@ void EditorWidget::slotChangeLocalPlayer(int index)
 void EditorWidget::slotPlace(int index)
 {
  boDebug() << k_funcinfo << "index: " << index << endl;
- EditorCommandFrame* cmd = editorCmdFrame();
+ BosonCommandFrameBase* cmd = cmdFrame();
  if (!cmd) {
 	boError() << k_funcinfo << "NULL cmd frame" << endl;
 	return;
@@ -346,11 +346,6 @@ void EditorWidget::slotPlayerJoinedGame(KPlayer* player)
  slotChangeLocalPlayer(d->mPlayerAction->currentItem());
 }
 
-EditorCommandFrame* EditorWidget::editorCmdFrame() const
-{
- return (EditorCommandFrame*)cmdFrame();
-}
-
 void EditorWidget::slotPlayerLeftGame(KPlayer* player)
 {
  if (!player) {
@@ -377,8 +372,8 @@ void EditorWidget::slotPlayerLeftGame(KPlayer* player)
 
 void EditorWidget::slotGroundThemeChanged(BosonGroundTheme* theme)
 {
- BO_CHECK_NULL_RET(editorCmdFrame());
- editorCmdFrame()->setGroundTheme(theme);
+ BO_CHECK_NULL_RET(cmdFrame());
+ cmdFrame()->setGroundTheme(theme);
 }
 
 void EditorWidget::slotGameStarted()
