@@ -51,10 +51,10 @@ BosonTextureArray::BosonTextureArray()
  init();
 }
 
-BosonTextureArray::BosonTextureArray(QValueList<QImage> images, bool useMipmaps)
+BosonTextureArray::BosonTextureArray(QValueList<QImage> images, bool useMipmaps, bool useAlpha)
 {
  init();
- if (!createTextures(images, useMipmaps)) {
+ if (!createTextures(images, useMipmaps, useAlpha)) {
 	boWarning(110) << k_funcinfo << "Could not create textures" << endl;
  }
 }
@@ -82,7 +82,7 @@ BosonTextureArray::~BosonTextureArray()
 // boDebug(110) << k_funcinfo << "done" << endl;
 }
 
-bool BosonTextureArray::createTexture(const QImage& image, GLuint texture, bool useMipmaps)
+bool BosonTextureArray::createTexture(const QImage& image, GLuint texture, bool useMipmaps, bool useAlpha)
 {
  if (!BoContext::currentContext()) {
 	boError(110) << k_funcinfo << "NULL current context!!" << endl;
@@ -127,11 +127,12 @@ bool BosonTextureArray::createTexture(const QImage& image, GLuint texture, bool 
  // could replace the first GL_RGBA parameter by GL_RGB (leave the second at
  // GL_RGBA!). note that at least the cursor needs alpha!
 
+ int internalFormat = useAlpha ? GL_RGBA : GL_RGB;
  if (useMipmaps) {
 	resetMipmapTexParameter();
-	int error = gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, buffer.width(),
-			buffer.height(), GL_RGBA, GL_UNSIGNED_BYTE,
-			buffer.bits());
+	int error = gluBuild2DMipmaps(GL_TEXTURE_2D, internalFormat,
+			buffer.width(), buffer.height(), GL_RGBA,
+			GL_UNSIGNED_BYTE, buffer.bits());
 	if (error) {
 		boWarning(110) << k_funcinfo << "gluBuild2DMipmaps returned error: " << error << endl;
 	}
@@ -142,11 +143,9 @@ bool BosonTextureArray::createTexture(const QImage& image, GLuint texture, bool 
 	// adjust the coordinates in glTexCoord
 	resetTexParameter();
 
-#warning FIXME
-	// we use the alpha channel for the cursor *only* !!
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, buffer.width(),
-			buffer.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE,
-			buffer.bits());
+	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat,
+			buffer.width(), buffer.height(), 0, GL_RGBA,
+			GL_UNSIGNED_BYTE, buffer.bits());
  }
 
  error = glGetError();
@@ -187,7 +186,7 @@ void BosonTextureArray::resetMipmapTexParameter()
 
 }
 
-bool BosonTextureArray::createTextures(QValueList<QImage> images, bool useMipmaps)
+bool BosonTextureArray::createTextures(QValueList<QImage> images, bool useMipmaps, bool useAlpha)
 {
  GLenum error = glGetError();
  if (error != GL_NO_ERROR) {
@@ -217,7 +216,7 @@ bool BosonTextureArray::createTextures(QValueList<QImage> images, bool useMipmap
 // boDebug(110) << k_funcinfo << "count=" << mCount << endl;
 
  for (unsigned int i = 0; i < mCount; i++) {
-	createTexture(images[i], mTextures[i], useMipmaps);
+	createTexture(images[i], mTextures[i], useMipmaps, useAlpha);
  }
  return true;
 }
