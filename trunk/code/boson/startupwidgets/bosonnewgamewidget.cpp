@@ -280,7 +280,6 @@ void BosonNewGameWidget::initPlayFields(BosonCampaign* campaign, QListViewItem* 
 	parent->setText(0, campaign->name());
  }
  QStringList list = campaign->playFields();
- boDebug() << list.count() << endl;
  for (unsigned int i = 0; i < list.count(); i++) {
 	QListViewItem* item = new QListViewItem(parent);
 	BosonPlayField* field = boData->playField(list[i]);
