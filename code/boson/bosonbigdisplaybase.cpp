@@ -520,6 +520,8 @@ public:
 		mRenderCells = 0;
 		mRenderCellsSize = 0;
 		mRenderCellsCount = 0;
+
+		mRenderItemList = 0;
 	}
 
 	Player* mLocalPlayer;
@@ -550,6 +552,8 @@ public:
 	Cell** mRenderCells;
 	int mRenderCellsSize; // max. number of cells in the array
 	int mRenderCellsCount; // actual number of cells in the array
+
+	BoItemList* mRenderItemList;
 
 	long long int mFpsTime;
 	double mFps;
@@ -602,6 +606,7 @@ BosonBigDisplayBase::~BosonBigDisplayBase()
 {
  boDebug() << k_funcinfo << endl;
  quitGame();
+ delete d->mRenderItemList;
  delete mSelection;
  delete d->mChat;
  delete d->mDefaultFont;
@@ -628,6 +633,8 @@ void BosonBigDisplayBase::init()
  d->mDebugMapCoordinatesX = 0.0f;
  d->mDebugMapCoordinatesY = 0.0f;
  d->mDebugMapCoordinatesZ = 0.0f;
+
+ d->mRenderItemList = new BoItemList(1, false);
 
  mSelection = new BoSelection(this);
  connect(mSelection, SIGNAL(signalSelectionChanged(BoSelection*)),
@@ -859,7 +866,12 @@ void BosonBigDisplayBase::paintGL()
 	boError() << k_funcinfo << "before unit rendering" << endl;
  }
 
- glEnable(GL_TEXTURE_2D);
+ if (boConfig->wireFrames()) {
+	glDisable(GL_TEXTURE_2D);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+ } else {
+	glEnable(GL_TEXTURE_2D);
+ }
  glEnable(GL_DEPTH_TEST);
  if (boConfig->useLight()) {
 	glEnable(GL_LIGHTING);
@@ -867,8 +879,6 @@ void BosonBigDisplayBase::paintGL()
  }
 
  boProfiling->renderUnits(true);
- BoItemList* allItems = canvas()->allItems();
- BoItemList::Iterator it = allItems->begin();
  d->mRenderedItems = 0;
  d->mRenderedModelVertices = 0;
  d->mRenderedCellVertices = 0;
@@ -882,63 +892,26 @@ void BosonBigDisplayBase::paintGL()
 
  glEnableClientState(GL_VERTEX_ARRAY);
  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
- for (; it != allItems->end(); ++it) {
-	BosonItem* item = *it;
 
-	if (!item->isVisible()) {
-		continue;
-	}
+ // we build the list of items that will be rendered independantly from actually
+ // rendering them.
+ // this adds overhead of an additional loop, but a) is better design (this task
+ // isn't so speed critical) and b) allows us e.g. to sort or to use separate
+ // loops for rendering items and rendering selection rects. short: it is
+ // better.
+ createRenderItemList(); // AB: this is very fast. < 1.5ms on experimental5 for me
+ BoItemList::Iterator it = d->mRenderItemList->begin();
+ for (; it != d->mRenderItemList->end(); ++it) {
+	BosonItem* item = *it;
 
 	// FIXME: can't we use BoVector3 and it's conversion methods here?
 	GLfloat x = (item->x() + item->width() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE;
 	GLfloat y = -((item->y() + item->height() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE);
 	GLfloat z = item->z(); // this is already in the correct format!
 
-	// TODO: performance: we can improve this greatly:
-	// simply group the items to bigger sphere or boxes. every box is of
-	// size of (maybe) 10.0*10.0. We maintain a list of items for *every*
-	// box. we can simply test if the box is in the frustum and if so we
-	// test every item of that list. if not we can skip every item of that
-	// box.
-	// Especially in bigger games with big maps and several hundred units
-	// this would be a great speedup.
-	//
-	// but note: do *not* use these lists for anything except OpenGL! we
-	// mustn't use them for e.g. pathfinding. the bounding spheres of the
-	// units depend e.g. on the .3ds files and are therefore UI only. If we
-	// depend on it in pathfinding we'd soon have a broken network (think
-	// about differnt CPUs with different rounding values for floating
-	// point calculations)
-	// UPDATE: we could instead use the "sectors" that we are planning to
-	// use for collision detection and pathfinding also for the frustum
-	// tests (they wouldn't do floating point calculations)
-	if (!sphereInFrustum(x, y, z, item->boundingSphereRadius())) {
-		// the unit is not visible, currently. no need to draw anything.
-		continue;
-	}
-
 	// AB: note units are rendered in the *center* point of their
 	// width/height.
 	// but concerning z-position they are rendered from bottom to top!
-
-	const QPtrVector<Cell>* cells = item->cells();
-	bool visible = false;
-	for (unsigned int i = 0; i < cells->count(); i++) {
-		Cell* c = cells->at(i);
-		if (!c) {
-			boError() << k_funcinfo << i << " is no valid cell!" << endl;
-			continue;
-		}
-		if (!localPlayer()->isFogged(c->x(), c->y())) {
-			visible = true;
-			// ugly but faster than placing this into the loop
-			// condition
-			break;
-		}
-	}
-	if (!visible) {
-		continue;
-	}
 
 	glTranslatef(x, y, z);
 	glPushMatrix();
@@ -982,11 +955,16 @@ void BosonBigDisplayBase::paintGL()
 	}
 
 	glTranslatef(-x, -y, -z);
-	d->mRenderedItems++;
  }
+ d->mRenderedItems += d->mRenderItemList->count();
+ d->mRenderItemList->clear();
  glDisableClientState(GL_VERTEX_ARRAY);
  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
  glDisable(GL_CULL_FACE);
+ if (boConfig->wireFrames()) {
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	glEnable(GL_TEXTURE_2D);
+ }
  boProfiling->renderUnits(false, d->mRenderedItems);
 
  if (checkError()) {
@@ -1003,79 +981,7 @@ void BosonBigDisplayBase::paintGL()
  }
 
  // Facility-placing preview code
- if (displayInput()->actionLocked() && displayInput()->actionType() == ActionBuild &&
-		d->mPlacementPreview.hasPreview()) {
-	// AB: GL_MODULATE is currently default. if we every change it to
-	// GL_REPLACE we should change it here:
-//	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-	GLubyte color;
-	if (d->mPlacementPreview.canPlace()) {
-		color = 255;
-	} else {
-		color = PLACEMENTPREVIEW_DISALLOW_COLOR;
-	}
-	glEnable(GL_BLEND);
-	glColor4ub(255, color, color, PLACEMENTPREVIEW_ALPHA);
-
-#warning FIXME: z value!
-	bool modelPreview = d->mPlacementPreview.isModelPreview();
-	bool cellPreview = d->mPlacementPreview.isCellPreview();
-	const float z = 0.1;
-	QPoint pos(d->mPlacementPreview.canvasPos());
-	int w = 0;
-	int h = 0;
-	if (modelPreview) {
-		w = d->mPlacementPreview.unitProperties()->unitWidth();
-		h = d->mPlacementPreview.unitProperties()->unitHeight();
-	}
-	float x = ((pos.x() + w / 2)) * BO_GL_CELL_SIZE;
-	float y = ((pos.y() + h / 2)) * BO_GL_CELL_SIZE;
-	if (pos.x() >= 0) {
-		x = x - pos.x() % BO_TILE_SIZE;
-	} else {
-		x = x - (BO_TILE_SIZE + pos.x() % BO_TILE_SIZE);
-	}
-	if (pos.y() >= 0) {
-		y = y - pos.y() % BO_TILE_SIZE;
-	} else {
-		y = y - (BO_TILE_SIZE + pos.y() % BO_TILE_SIZE);
-	}
-	x /= BO_TILE_SIZE;
-	y /= BO_TILE_SIZE;
-	glTranslatef(x, -y, z);
-	if (modelPreview) {
-		BoFrame* f = d->mPlacementPreview.model()->frame(0);
-		glEnableClientState(GL_VERTEX_ARRAY);
-		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-		d->mPlacementPreview.model()->enablePointer();
-		d->mRenderedOtherVertices += f->renderFrame(&localPlayer()->teamColor());
-		glDisableClientState(GL_VERTEX_ARRAY);
-		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	} else if (cellPreview) {
-		glBindTexture(GL_TEXTURE_2D, d->mPlacementPreview.cellTexture());
-		glBegin(GL_QUADS);
-			glTexCoord2fv(textureUpperLeft);
-			glVertex3f(0.0f, 0.0f, 0.0f);
-
-			glTexCoord2fv(textureLowerLeft);
-			glVertex3f(0.0f, - BO_GL_CELL_SIZE, 0.0f);
-
-			glTexCoord2fv(textureLowerRight);
-			glVertex3f(BO_GL_CELL_SIZE, -BO_GL_CELL_SIZE, 0.0f);
-
-			glTexCoord2fv(textureUpperRight);
-			glVertex3f(BO_GL_CELL_SIZE, 0.0f, 0.0f);
-		glEnd();
-		d->mRenderedOtherVertices += 4;
-	}
-	glTranslatef(-x, y, -z);
-	glColor4ub(255, 255, 255, 255);
-	glDisable(GL_BLEND);
-	// AB: see above. if GL_REPLACES ever becomes default we have to set it
-	// here again.
-//	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
- }
-
+ renderPlacementPreview();
 
  if (checkError()) {
 	boError() << k_funcinfo << "preview rendered" << endl;
@@ -1110,6 +1016,123 @@ void BosonBigDisplayBase::paintGL()
  // alpha blending is used for both, cursor and text
  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+ renderCursor();
+ if (checkError()) {
+	boError() << k_funcinfo << "GL error when cursor rendered" << endl;
+ }
+
+ glDisable(GL_TEXTURE_2D);
+ renderSelectionRect();
+ renderText();
+
+ // now restore the old 3D-matrix
+ glMatrixMode(GL_PROJECTION);
+ glPopMatrix();
+ glMatrixMode(GL_MODELVIEW);
+ glPopMatrix();
+ boProfiling->renderText(false);
+
+ if (checkError()) {
+	boError() << k_funcinfo << "text rendered" << endl;
+ }
+
+ glPopMatrix();
+
+ bool showProfilingMessage = boProfiling->renderEntries() < MAX_PROFILING_ENTRIES;
+ boProfiling->render(false);
+ if (showProfilingMessage && boProfiling->renderEntries() >= MAX_PROFILING_ENTRIES) {
+	boGame->slotAddChatSystemMessage(i18n("%1 frames have been recorded by boProfiling. You can make profiling snapshots using CTRL+P").arg(boProfiling->renderEntries()));
+ }
+
+ if (d->mUpdateInterval) {
+	d->mUpdateTimer.start(d->mUpdateInterval);
+ }
+}
+
+void BosonBigDisplayBase::renderPlacementPreview()
+{
+ if (!displayInput()->actionLocked()) {
+	return;
+ }
+ if (displayInput()->actionType() != ActionBuild) {
+	return;
+ }
+ if (!d->mPlacementPreview.hasPreview()) {
+	return;
+ }
+ // AB: GL_MODULATE is currently default. if we every change it to
+ // GL_REPLACE we should change it here:
+// glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+ GLubyte color;
+ if (d->mPlacementPreview.canPlace()) {
+	color = 255;
+ } else {
+	color = PLACEMENTPREVIEW_DISALLOW_COLOR;
+ }
+ glEnable(GL_BLEND);
+ glColor4ub(255, color, color, PLACEMENTPREVIEW_ALPHA);
+
+#warning FIXME: z value!
+ bool modelPreview = d->mPlacementPreview.isModelPreview();
+ bool cellPreview = d->mPlacementPreview.isCellPreview();
+ const float z = 0.1;
+ QPoint pos(d->mPlacementPreview.canvasPos());
+ int w = 0;
+ int h = 0;
+ if (modelPreview) {
+	w = d->mPlacementPreview.unitProperties()->unitWidth();
+	h = d->mPlacementPreview.unitProperties()->unitHeight();
+ }
+ float x = ((pos.x() + w / 2)) * BO_GL_CELL_SIZE;
+ float y = ((pos.y() + h / 2)) * BO_GL_CELL_SIZE;
+ if (pos.x() >= 0) {
+	x = x - pos.x() % BO_TILE_SIZE;
+ } else {
+	x = x - (BO_TILE_SIZE + pos.x() % BO_TILE_SIZE);
+ }
+ if (pos.y() >= 0) {
+	y = y - pos.y() % BO_TILE_SIZE;
+ } else {
+	y = y - (BO_TILE_SIZE + pos.y() % BO_TILE_SIZE);
+ }
+ x /= BO_TILE_SIZE;
+ y /= BO_TILE_SIZE;
+ glTranslatef(x, -y, z);
+ if (modelPreview) {
+	BoFrame* f = d->mPlacementPreview.model()->frame(0);
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	d->mPlacementPreview.model()->enablePointer();
+	d->mRenderedOtherVertices += f->renderFrame(&localPlayer()->teamColor());
+	glDisableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+ } else if (cellPreview) {
+	glBindTexture(GL_TEXTURE_2D, d->mPlacementPreview.cellTexture());
+	glBegin(GL_QUADS);
+		glTexCoord2fv(textureUpperLeft);
+		glVertex3f(0.0f, 0.0f, 0.0f);
+
+		glTexCoord2fv(textureLowerLeft);
+		glVertex3f(0.0f, - BO_GL_CELL_SIZE, 0.0f);
+
+		glTexCoord2fv(textureLowerRight);
+		glVertex3f(BO_GL_CELL_SIZE, -BO_GL_CELL_SIZE, 0.0f);
+
+		glTexCoord2fv(textureUpperRight);
+		glVertex3f(BO_GL_CELL_SIZE, 0.0f, 0.0f);
+	glEnd();
+	d->mRenderedOtherVertices += 4;
+ }
+ glTranslatef(-x, y, -z);
+ glColor4ub(255, 255, 255, 255);
+ glDisable(GL_BLEND);
+ // AB: see above. if GL_REPLACES ever becomes default we have to set it
+ // here again.
+// glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+}
+
+void BosonBigDisplayBase::renderCursor()
+{
  if (cursor()) {
 	// FIXME: use cursorCanvasPos()
 	QPoint pos = mapFromGlobal(QCursor::pos());
@@ -1117,11 +1140,10 @@ void BosonBigDisplayBase::paintGL()
 	GLfloat y = (GLfloat)d->mViewport[3] - (GLfloat)pos.y();
 	cursor()->renderCursor(x, y);
  }
- glDisable(GL_TEXTURE_2D);
- if (checkError()) {
-	boError() << k_funcinfo << "GL error when cursor rendered" << endl;
- }
+}
 
+void BosonBigDisplayBase::renderSelectionRect()
+{
  if (d->mSelectionRect.isVisible()) {
 	glPushMatrix();
 
@@ -1145,31 +1167,6 @@ void BosonBigDisplayBase::paintGL()
 
 	glColor3ub(255, 255, 255);
 	glPopMatrix();
- }
-
- renderText();
-
- // now restore the old 3D-matrix
- glMatrixMode(GL_PROJECTION);
- glPopMatrix();
- glMatrixMode(GL_MODELVIEW);
- glPopMatrix();
- boProfiling->renderText(false);
-
- if (checkError()) {
-	boError() << k_funcinfo << "selection rect rendered" << endl;
- }
-
- glPopMatrix();
-
- if (d->mUpdateInterval) {
-	d->mUpdateTimer.start(d->mUpdateInterval);
- }
-
- bool showProfilingMessage = boProfiling->renderEntries() < MAX_PROFILING_ENTRIES;
- boProfiling->render(false);
- if (showProfilingMessage && boProfiling->renderEntries() >= MAX_PROFILING_ENTRIES) {
-	boGame->slotAddChatSystemMessage(i18n("%1 frames have been recorded by boProfiling. You can make profiling snapshots using CTRL+P").arg(boProfiling->renderEntries()));
  }
 }
 
@@ -1423,7 +1420,6 @@ void BosonBigDisplayBase::renderCells()
  int tile = -1;
  int heightMapWidth = map->width() + 1;
  d->mRenderedCells = 0;
-// int heightMapHeight = map->height() + 1;
  for (int i = 0; i < d->mRenderCellsCount; i++) {
 	Cell* c = d->mRenderCells[i];
 	int x = c->x();
@@ -1443,19 +1439,25 @@ void BosonBigDisplayBase::renderCells()
 	}
 	// FIXME: performance: only a single glBegin(GL_QUADS)!
 //	boDebug() << heightMap[y * heightMapWidth + x] << endl;
+	float* heightMapUpperLeft = &heightMap[y * heightMapWidth + x];
+	float upperLeftHeight = *heightMapUpperLeft;
+	float upperRightHeight = *(heightMapUpperLeft + 1);
+	float lowerLeftHeight = *(heightMapUpperLeft + heightMapWidth);
+	float lowerRightHeight = *(heightMapUpperLeft + heightMapWidth + 1);
 	glBegin(GL_QUADS);
 		glTexCoord2fv(textureUpperLeft);
-		glVertex3f(cellXPos, cellYPos, heightMap[y * heightMapWidth + x]);
+		glVertex3f(x, y, upperLeftHeight);
 
 		glTexCoord2fv(textureLowerLeft);
-		glVertex3f(cellXPos, cellYPos - BO_GL_CELL_SIZE, heightMap[(y+1) * heightMapWidth + x]);
+		glVertex3f(x, y - BO_GL_CELL_SIZE, lowerLeftHeight);
 
 		glTexCoord2fv(textureLowerRight);
-		glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos - BO_GL_CELL_SIZE, heightMap[(y+1) * heightMapWidth + (x+1)]);
+		glVertex3f(x + BO_GL_CELL_SIZE, y - BO_GL_CELL_SIZE, lowerRightHeight);
 
 		glTexCoord2fv(textureUpperRight);
-		glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos, heightMap[y * heightMapWidth + (x+1)]);
+		glVertex3f(x + BO_GL_CELL_SIZE, y, upperRightHeight);
 	glEnd();
+
 	d->mRenderedCells++;
 	d->mRenderedCellVertices += 4;
  }
@@ -2626,6 +2628,67 @@ void BosonBigDisplayBase::scrollBy(int dx, int dy)
  cameraChanged();
 }
 
+void BosonBigDisplayBase::createRenderItemList()
+{
+ d->mRenderItemList->clear();
+ BoItemList* allItems = canvas()->allItems();
+ BoItemList::Iterator it = allItems->begin();
+ for (; it != allItems->end(); ++it) {
+	BosonItem* item = *it;
+
+	if (!item->isVisible()) {
+		continue;
+	}
+
+	// FIXME: can't we use BoVector3 and it's conversion methods here?
+	GLfloat x = (item->x() + item->width() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE;
+	GLfloat y = -((item->y() + item->height() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE);
+	GLfloat z = item->z(); // this is already in the correct format!
+
+	// TODO: performance: we can improve this greatly:
+	// simply group the items to bigger sphere or boxes. every box is of
+	// size of (maybe) 10.0*10.0. We maintain a list of items for *every*
+	// box. we can simply test if the box is in the frustum and if so we
+	// test every item of that list. if not we can skip every item of that
+	// box.
+	// Especially in bigger games with big maps and several hundred units
+	// this would be a great speedup.
+	// UPDATE: probably not *that* big, as rendering itself is a bigger
+	// bottleneck.
+
+	// UPDATE: we could instead use the "sectors" that we are planning to
+	// use for collision detection and pathfinding also for the frustum
+	// tests (they wouldn't do floating point calculations)
+	if (!sphereInFrustum(x, y, z, item->boundingSphereRadius())) {
+		// the unit is not visible, currently. no need to draw anything.
+		continue;
+	}
+
+	// AB: note units are rendered in the *center* point of their
+	// width/height.
+	// but concerning z-position they are rendered from bottom to top!
+
+	const QPtrVector<Cell>* cells = item->cells();
+	bool visible = false;
+	for (unsigned int i = 0; i < cells->count(); i++) {
+		Cell* c = cells->at(i);
+		if (!c) {
+			boError() << k_funcinfo << i << " is no valid cell!" << endl;
+			continue;
+		}
+		if (!localPlayer()->isFogged(c->x(), c->y())) {
+			visible = true;
+			// ugly but faster than placing this into the loop
+			// condition
+			break;
+		}
+	}
+	if (visible) {
+		d->mRenderItemList->append(*it);
+	}
+ }
+}
+
 void BosonBigDisplayBase::calculateWorldRect(const QRect& rect, float* minX, float* minY, float* maxX, float* maxY) const
 {
  BO_CHECK_NULL_RET(canvas());
@@ -2945,6 +3008,9 @@ void BosonBigDisplayBase::extractFrustum()
  d->mViewFrustum[0][3] = clip[15] - clip[12];
 
  // Normalize the result
+ // ( AB: normalizing means to make a unit vector, i.e. a vector with length 1! )
+ // ( AB: the length of a vector v is |v| == sqrt(v[0]^2 + v[1]^2 + v[2]^2) )
+ // ( AB: you can normalize a vector by doing v / |v| )
  t = sqrt(d->mViewFrustum[0][0] * d->mViewFrustum[0][0] +
 		d->mViewFrustum[0][1] * d->mViewFrustum[0][1] +
 		d->mViewFrustum[0][2] * d->mViewFrustum[0][2]);
@@ -3031,7 +3097,7 @@ d->mViewFrustum[4][3] = clip[15] - clip[14];
 
 float BosonBigDisplayBase::sphereInFrustum(const BoVector3& pos, float radius) const
 {
- // FIXME: performance: we might unrull the loop and then make this function
+ // FIXME: performance: we might unroll the loop and then make this function
  // inline. We call it pretty often!
  float distance;
  for (int p = 0; p < 6; p++) {
@@ -3302,5 +3368,12 @@ void BosonBigDisplayBase::saveAsXML(QDomElement& root)
  QDomElement sel = doc.createElement(QString::fromLatin1("Selection"));
  selection()->saveAsXML(sel);
  root.appendChild(sel);
+}
+
+void BosonBigDisplayBase::showEvent(QShowEvent* e)
+{
+ BosonGLWidget::showEvent(e);
+ BO_CHECK_NULL_RET(displayInput());
+ displayInput()->updateCursor();
 }
 

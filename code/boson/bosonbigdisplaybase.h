@@ -364,6 +364,13 @@ protected:
 	virtual void resizeGL(int w, int h);
 	virtual void paintGL();
 
+	virtual void showEvent(QShowEvent* e);
+
+	void createRenderItemList();
+
+	void renderCursor();
+	void renderSelectionRect();
+	void renderPlacementPreview();
 	/**
 	 * Called by @ref paintGL only to render text on the screen
 	 **/
