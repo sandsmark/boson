@@ -135,35 +135,7 @@ void Player::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 sende
 
  // this wasn't a unit property but a normal message
  switch (msgid) {
-	case BosonMessage::IdStopMoving:
-	{
-		kdWarning() << "IdStopMoving is obsolete" << endl;
-		/*
-		unsigned long int id;
-		double x;
-		double y;
-		double z;
-
-		stream >> id;
-		stream >> x;
-		stream >> y;
-		stream >> z;
-
-		Unit* unit = findUnit(id);
-		if (!unit) {
-			kdError() << "Unit " << id << " not found" << endl;
-			break;
-		}
-		if (unit->work() != UnitBase::WorkNone) {
-			kdWarning() << "work != WorkNone" << endl;
-		}
-		unit->stopMoving(false); // do not send again
-		unit->setX(x);
-		unit->setY(y);
-		unit->setZ(z);
-		*/
-		break;
-	}
+	// none here currently
 	default:
 		kdWarning() << "Unknown message " << msgid << endl;
 		break;
@@ -231,9 +203,7 @@ void Player::slotUnitPropertyChanged(KGamePropertyBase* prop)
 // (evil hack end)
 
  if (!unit) {
-//	KGamePropertyHandler* h = (KGamePropertyHandler*)sender();
 	kdError() << k_funcinfo << ": NULL unit" << endl;
-//	kdDebug() << h->id() << endl;
 	kdDebug() << "player=" << id() << ",propId=" << prop->id() << ",units=" << d->mUnits.count() << endl;
 	return;
  }
@@ -246,7 +216,9 @@ void Player::slotUnitPropertyChanged(KGamePropertyBase* prop)
 	case Unit::IdDirection:
 	case Unit::IdWaypoints:
 	case Unit::IdFix_ConstructionState:
-	case Unit::IdFix_ConstructionDelay:
+//	case Unit::IdFix_ConstructionDelay: // obsolete
+	case Unit::IdFix_Productions:
+	case Unit::IdFix_ProductionState:
 		// these IDs are not to be displayed in BosonUnitView.
 		break;
 	case UnitBase::IdHealth:
@@ -352,23 +324,6 @@ bool Player::load(QDataStream& stream)
 QPtrList<Unit> Player::allUnits() const
 {
  return d->mUnits;
-}
-
-void Player::sendStopMoving(Unit* unit)
-{
- if (!game()) {
-	return;
- }
- kdWarning() << "sendStopMoving is obsolete" << endl;
- /*
- QByteArray buffer;
- QDataStream stream(buffer, IO_WriteOnly);
- stream << (unsigned long int)unit->id();
- stream << (double)unit->x();
- stream << (double)unit->y();
- stream << (double)unit->z();
- game()->sendMessage(buffer, BosonMessage::IdStopMoving, id());
- */
 }
 
 const UnitProperties* Player::unitProperties(int unitType) const

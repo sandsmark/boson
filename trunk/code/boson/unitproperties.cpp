@@ -56,8 +56,6 @@ public:
 
 	unsigned long int mArmor;
 	unsigned long int mShields;
-	unsigned long int mMineralCost;
-	unsigned long int mOilCost;
 
 	MobileProperties* mMobileProperties;
 	FacilityProperties* mFacilityProperties;
@@ -95,15 +93,16 @@ void UnitProperties::loadUnitType(const QString& fileName)
  mName = conf.readEntry("Name", i18n("Unknown"));
  mTypeId = conf.readNumEntry("Id", -1); // -1 == invalid // Note: Id == Unit::type() , NOT Unit::id() !
  mHealth = conf.readUnsignedLongNumEntry("Health", 100);
- d->mShields = conf.readUnsignedLongNumEntry("Shield", 0); 
- d->mArmor = conf.readUnsignedLongNumEntry("Armor", 0); 
- d->mMineralCost= conf.readUnsignedLongNumEntry("MineralCost", 0); 
- d->mOilCost = conf.readUnsignedLongNumEntry("OilCost", 0); 
+ mMineralCost= conf.readUnsignedLongNumEntry("MineralCost", 0); 
+ mOilCost = conf.readUnsignedLongNumEntry("OilCost", 0); 
  mDamage = conf.readLongNumEntry("Damage", 0); 
  mRange = conf.readUnsignedLongNumEntry("Range", 0); 
  mSightRange = conf.readUnsignedLongNumEntry("SightRange", 5); 
  mReload = conf.readUnsignedNumEntry("Reload", 0); 
  mTerrain = (TerrainType)conf.readNumEntry("TerrainType", 0);
+ mProductionTime = conf.readUnsignedNumEntry("ProductionTime", 100);
+ d->mShields = conf.readUnsignedLongNumEntry("Shield", 0); 
+ d->mArmor = conf.readUnsignedLongNumEntry("Armor", 0); 
  if (mTerrain < 0 || mTerrain > 2) {
 	mTerrain = (TerrainType)0;
  }
@@ -158,12 +157,12 @@ unsigned long int UnitProperties::shields() const
 
 unsigned long int UnitProperties::mineralCost() const
 {
- return d->mMineralCost;
+ return mMineralCost;
 }
 
 unsigned long int UnitProperties::oilCost() const
 {
- return d->mOilCost;
+ return mOilCost;
 }
 
 double UnitProperties::speed() const
@@ -206,3 +205,15 @@ QValueList<int> UnitProperties::produceList() const
  return d->mFacilityProperties->mProduceList;
 }
 
+int UnitProperties::constructionDelay() const
+{
+ if (!d->mFacilityProperties) {
+	return 0;
+ }
+ return 50; // default
+}
+
+unsigned int UnitProperties::productionTime() const
+{
+ return mProductionTime;
+}

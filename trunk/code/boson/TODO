@@ -5,7 +5,7 @@ Game TODOs
 - use different cursors for moving, attacking, ...
 - unit accelleration: units should slowly start to accelerate and to brake when
   moving
-- selectpart/cell: static memory should be deleted
+- selectpart: static memory should be deleted
 - BosonPath doesn't honor fog of war
 - MiniMap does not know about units when removing fog of war
 
@@ -28,6 +28,7 @@ General TODOs
 - player should select team color in new game dialog
 - fimd out whether signalUnitPropertyChanged() is a good thing at all. Might
   save some performance if we don't use it.
+- use typeId = 0 as invalid (NOT -1!)
 
 
 Data TODOs

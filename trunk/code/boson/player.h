@@ -68,13 +68,6 @@ public:
 	QPtrList<Unit> allUnits() const;
 
 	/**
-	 * Called by @ref Unit to sync the positions of the units on
-	 * several clients. Shouldn't be necessary if it was implemented
-	 * cleanly!!
-	 **/
-	void sendStopMoving(Unit* unit);
-
-	/**
 	 * Convenience method for theme()->unitProperties()
 	 **/
 	const UnitProperties* unitProperties(int unitType) const;
