@@ -314,7 +314,10 @@ void BoSelection::slotRemoveItem(BosonItem* item)
 	return;
  }
  Unit* u = (Unit*)item;
- removeUnit(u);
+
+ // AB: do _not_ call remove()/removeUnit(), as it calls unit->unselect() which
+ // doesn't exist anymore, when called from BosonItem d'tor
+ mSelection.removeRef(u);
 }
 
 
