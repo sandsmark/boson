@@ -106,7 +106,7 @@ void PythonScript::loadScript(QString file)
 
 void PythonScript::callFunction(QString function)
 {
-  boDebug() << k_funcinfo << "function: " << function << endl;
+  boDebug(700) << k_funcinfo << "function: " << function << endl;
   if(!mDict)
   {
     boError() << k_funcinfo << "No file loaded!" << endl;
@@ -125,7 +125,7 @@ void PythonScript::callFunction(QString function)
 
 void PythonScript::execLine(const QString& line)
 {
-  boDebug() << k_funcinfo << "line: " << line << endl;
+  boDebug(700) << k_funcinfo << "line: " << line << endl;
   PyRun_SimpleString((char*)line.ascii());
 }
 
