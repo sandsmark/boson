@@ -5,7 +5,7 @@
 
 <:
 use make_tech_tree;
-make_tech_tree->draw_map();
+make_tech_tree->draw_map(fixed);
 :>
 
 <p>

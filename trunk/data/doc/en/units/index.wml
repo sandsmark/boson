@@ -4,7 +4,9 @@
 <h1>Units</h1>
 
 
-<grid layout=5x2 padding=15 border=0>
+<grid layout=5x2 padding=15 border=0 bgcolor="#204020">
+#include "simple_facilities.wml" type="Units" name="Map" \
+        name2="map" type2="mob"
 #include "simple_facilities.wml" type="Units" name="Mineral Harvester" \
         name2="mineralharvester" type2="mob"
 #include "simple_facilities.wml" type="Units" name="Oil Harvester" \
@@ -25,5 +27,5 @@
         name2="tornado" type2="mob"
 </grid>
 
-#include "nav.wml" before_url="../facilities/samsite.html" before_text="Sam-Site" after_url="mineralharvester.html" after_text="Mineral Harvester"  up_url="../index.html"
+#include "nav.wml" before_url="../facilities/samsite.html" before_text="Sam-Site" after_url="map.html" after_text="Unit dependency tree"  up_url="../index.html"
 #include "footer.wml"

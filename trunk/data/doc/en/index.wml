@@ -4,7 +4,7 @@
       The Boson Handbook
     </h1>
     <p>
-      <i>Revision 0.7 - 3rd of November, 2002</i>
+      <i>Revision 0.8 - 16rd of December, 2002</i>
     </p>
     <h3>
       What is this?
@@ -72,15 +72,16 @@
           <dt>4 <a href="units/index.html">Units</a></dt>
           <dd>
             <dl>
-              <dt>4.1 <a href="units/mineralharvester.html">Mineral Harvester</a></dt>
-              <dt>4.2 <a href="units/oilharvester.html">Oil Harvester</a></dt>
-              <dt>4.3 <a href="units/grizzly.html">Grizzly</a></dt>
-              <dt>4.4 <a href="units/leopard.html">Leopard</a></dt>
-              <dt>4.5 <a href="units/panther.html">Panther</a></dt>
-              <dt>4.6 <a href="units/piranha.html">Piranha</a></dt>
-              <dt>4.7 <a href="units/tiger.html">Tiger</a></dt>
-              <dt>4.8 <a href="units/ship.html">Ship</a></dt>
-              <dt>4.9 <a href="units/tornado.html">Tornado</a></dt>
+              <dt>4.1 <a href="units/map.html">Unit dependency tree</a></dt>
+              <dt>4.2 <a href="units/mineralharvester.html">Mineral Harvester</a></dt>
+              <dt>4.3 <a href="units/oilharvester.html">Oil Harvester</a></dt>
+              <dt>4.4 <a href="units/grizzly.html">Grizzly</a></dt>
+              <dt>4.5 <a href="units/leopard.html">Leopard</a></dt>
+              <dt>4.6 <a href="units/panther.html">Panther</a></dt>
+              <dt>4.7 <a href="units/piranha.html">Piranha</a></dt>
+              <dt>4.8 <a href="units/tiger.html">Tiger</a></dt>
+              <dt>4.9 <a href="units/ship.html">Ship</a></dt>
+              <dt>4.10 <a href="units/tornado.html">Tornado</a></dt>
             </dl>
           </dd>
           <dd>&nbsp;</dd>

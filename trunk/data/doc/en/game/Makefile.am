@@ -10,7 +10,7 @@ BO_DOC_DIR=game
 
 # list all wml files here
 BO_DOCS=index.wml attacking.wml buildfac.wml buildunit.wml cursor.wml \
-                scrolling.wml moving.wml configure.wml repairing.wml \
+                scrolling.wml moving.wml apps.wml configure.wml repairing.wml \
                 technologies.wml equipment.wml
 
 # list additional data here - these files will get installed
