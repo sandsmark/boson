@@ -4,12 +4,13 @@ TerrainType=0
 Name=Quad
 Id=10001
 Health=50
-MineralCost=100
-WeaponRange=4
+MineralCost=80
+WeaponR0ange=4
 WeaponDamage=10
 Reload=5
 Producer=0
 Requirements=3
+Shield=20
 ProductionTime=70
 
 [Boson Mobile Unit]
