@@ -63,6 +63,7 @@ BosonUfoChat::BosonUfoChat() : BoUfoWidget()
 
 BosonUfoChat::~BosonUfoChat()
 {
+ d->mLabel = 0;
  clear();
  delete d;
 }
@@ -204,6 +205,9 @@ void BosonUfoChat::slotTimeout()
 
 void BosonUfoChat::updateChat()
 {
+ if (!d->mLabel) {
+	return;
+ }
  if (d->mMessages.count() == 0) {
 	d->mLabel->setText("");
 	return;
