@@ -60,11 +60,11 @@ sub getval() {
                 
                 foreach $line2 (@CONTENT2) {
                         # remove all spaces and \n
-                        $line =~ s/\s//g;
+                        #$line =~ s/\s//g;
                         $line2 =~ s/\s//g;
                         $line2 =~ tr/\n//d;
                         #print "trying: $line <--> $line2\n";
-                        if ($line =~ /^$line2=\s*(\w+)/ ) {
+                        if ($line =~ /^$line2=\s*(.*)/ ) {
                                 $value = $1;
                                 print "<tr><td width=\"110\">$line2</td><td>$value</td></tr>\n";
                                 }
