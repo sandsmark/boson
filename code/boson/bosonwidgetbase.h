@@ -66,7 +66,7 @@ public:
 	/**
 	 * Default Constructor
 	 **/
-	BosonWidgetBase(TopWidget* top, QWidget* parent, bool loading = false);
+	BosonWidgetBase(TopWidget* top, QWidget* parent);
 
 	/**
 	 * Default Destructor
@@ -79,10 +79,12 @@ public:
 	BosonCanvas* canvas() const;
 	inline BosonMiniMap* minimap() const { return mMiniMap; }
 	inline BoDisplayManager* displayManager() const { return mDisplayManager; }
-	BosonPlayField* playField() const;
 	Player* localPlayer() const { return mLocalPlayer; }
 
-	void initGameMode();
+	/**
+	 * @param playFieldId See @ref Top::slotStartGame
+	 **/
+	void initGameMode(const QString& playFieldId);
 
 	virtual void saveConfig();
 
@@ -112,6 +114,7 @@ public:
 	virtual void initPlayer();
 	virtual void initMap();
 	virtual void quitGame();
+
 
 public slots:
 //	void slotPreferences();
@@ -187,7 +190,6 @@ protected slots:
 	void slotCmdBackgroundChanged(const QString& file);
 	void slotMiniMapScaleChanged(double);
 
-	virtual void slotStartScenario();
 
 	void slotUnfog(int x, int y);
 	void slotFog(int x, int y);
@@ -232,6 +234,21 @@ protected:
 	virtual void initConnections();
 	virtual void setBosonXMLFile();
 
+	virtual void startScenario(const QString& playFieldId);
+
+	/**
+	 * Called by @ref slotStartScenario and the equivalent for loading games
+	 * (remember that we can't use @ref slotStartScenario for loading
+	 * games).
+	 *
+	 * This will actually start scenario and game, send @ref
+	 * BosonMessage::IdGameIsStarted and so on.
+	 *
+	 * Derived classes should e.g. set the game speed.
+	 **/
+	virtual void startScenarioAndGame();
+
+
 private:
 	void initChat();
 
@@ -257,8 +274,6 @@ private:
 	TopWidget* mTop;
 	BosonMiniMap* mMiniMap;
 	BoDisplayManager* mDisplayManager;
-
-	bool mLoading;
 };
 
 #endif

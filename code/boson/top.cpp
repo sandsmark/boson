@@ -228,6 +228,7 @@ void TopWidget::initBoson()
  // sends an IdStartGame over network. Once this is received signalStartNewGame()
  // is emitted and we start here
  connect(boGame, SIGNAL(signalStartNewGame()), this, SLOT(slotStartNewGame()));
+ connect(boGame, SIGNAL(signalPlayFieldChanged(const QString&)), this, SLOT(slotPlayFieldChanged(const QString&)));
 
  // this signal gets emitted when starting a game (new games as well as loading
  // games). the admin sends the map and all clients (including admin) will
@@ -439,7 +440,7 @@ void TopWidget::removeStartupWidget(StartupWidgetIds id)
  }
 }
 
-void TopWidget::initBosonWidget(bool loading)
+void TopWidget::initBosonWidget()
 {
  if (d->mBosonWidget) {
 	//should not happen!
@@ -447,13 +448,13 @@ void TopWidget::initBosonWidget(bool loading)
 	return;
  }
  if (boGame->gameMode()) {
-	BosonWidget* w = new BosonWidget(this, mWs, loading);
+	BosonWidget* w = new BosonWidget(this, mWs);
 	connect(w, SIGNAL(signalSaveGame()), this, SLOT(slotSaveGame()));
 	connect(w, SIGNAL(signalLoadGame()), this, SLOT(slotLoadGame()));
 	connect(w, SIGNAL(signalGameOver()), this, SLOT(slotGameOver()));
 	d->mBosonWidget = w;
  } else {
-	EditorWidget* w = new EditorWidget(this, mWs, loading);
+	EditorWidget* w = new EditorWidget(this, mWs);
 	d->mBosonWidget = w;
  }
  changeLocalPlayer(player(), false);
@@ -486,6 +487,15 @@ void TopWidget::slotStartEditor()
  showStartupWidget(IdStartEditor);
 }
 
+void TopWidget::slotPlayFieldChanged(const QString& id)
+{
+ if (!d->mStarting) {
+	boError() << k_funcinfo << "NULL starting object!!" << endl;
+	return;
+ }
+ d->mStarting->setPlayFieldId(id);
+}
+
 void TopWidget::slotStartNewGame()
 {
  showStartupWidget(IdLoading);
@@ -495,7 +505,7 @@ void TopWidget::slotStartNewGame()
  d->mStarting->setLocalPlayer(mPlayer);
 
  initCanvas();
- initBosonWidget(false);
+ initBosonWidget();
 
  // this will take care of all data loading, like models, textures and so. this
  // also initializes the map and will send IdStartScenario - in short this will
@@ -528,7 +538,7 @@ void TopWidget::slotLoadGame(const QString& fileName)
  showStartupWidget(IdLoading);
 
  initCanvas();
- initBosonWidget(true);
+ initBosonWidget();
 
  // This must be called manually as we don't send IdNewGame message
  boGame->setGameMode(true);
@@ -665,7 +675,7 @@ void TopWidget::slotAssignMap()
  d->mBosonWidget->initMap();
 }
 
-void TopWidget::slotStartGame()
+void TopWidget::slotStartGame(const QString& playFieldId)
 {
  boDebug() << k_funcinfo << endl;
  if (boGame->gameStatus() != KGame::Init) {
@@ -699,20 +709,10 @@ void TopWidget::slotStartGame()
 
  // Init some stuff
  statusBar()->show();
- d->mBosonWidget->initGameMode();
+ d->mBosonWidget->initGameMode(playFieldId);
  enableGameActions(true);
  d->mFpstimer.start(1000);
  connect(&d->mFpstimer, SIGNAL(timeout()), this, SLOT(slotUpdateFPS()));
-}
-
-void TopWidget::slotStartGameLoadWorkaround() // I know the name sucks - its intended!
-{
- // These are from BosonWidgetBase::slotStartScenario() which can't be used when
- //  we're loading saved game
- boGame->startGame();
- boGame->sendMessage(0, BosonMessage::IdGameIsStarted);
- boGame->slotSetGameSpeed(BosonConfig::readGameSpeed());
- boDebug() << "speed: " << boGame->gameSpeed() << endl;
 }
 
 void TopWidget::slotToggleSound()
@@ -776,9 +776,8 @@ void TopWidget::reinitGame()
 
  delete d->mStarting;
  d->mStarting = new BosonStarting(this); // manages startup of games
- connect(d->mStarting, SIGNAL(signalStartGame()), this, SLOT(slotStartGame()));
+ connect(d->mStarting, SIGNAL(signalStartGame(const QString&)), this, SLOT(slotStartGame(const QString&)));
  connect(d->mStarting, SIGNAL(signalAssignMap()), this, SLOT(slotAssignMap()));
- connect(d->mStarting, SIGNAL(signalStartGameLoadWorkaround()), this, SLOT(slotStartGameLoadWorkaround()));
 
  initBoson();
  initPlayer();

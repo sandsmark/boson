@@ -119,6 +119,7 @@ void UnitBase::addPropertyId(int id, const QString& name)
 {
  if (mPropertyMap->contains(id)) {
 	boError() << k_funcinfo << "Cannot add " << id << " twice!" << endl;
+	boError() << k_funcinfo << "Existing name: " << *mPropertyMap->find(id) << " ; provided name: " << name << endl;
 	return;
  }
 /* if (mPropertyMap->values().contains(name)) {

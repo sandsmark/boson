@@ -25,7 +25,6 @@ BOSON_SRC = \
 	speciestheme.cpp \
 	speciesdata.cpp \
 	player.cpp \
-	kgamedialogbosonconfig.cpp \
 	bo3dtools.cpp \
 	bosonbigdisplaybase.cpp \
 	bosonbigdisplay.cpp \
@@ -62,6 +61,8 @@ BOSON_SRC = \
 	bosonparticlesystem.cpp \
 	bosonparticlesystemproperties.cpp \
 	bosonstarting.cpp \
+	bpfdescription.cpp \
+	bpffile.cpp \
 	bosonweapon.cpp
 
 BOPROFILING_SRC= \

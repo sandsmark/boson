@@ -74,18 +74,18 @@ bool BosonScenario::loadScenario(QDomElement& root)
 
  QDomNodeList list = root.elementsByTagName("ScenarioSettings");
  if (list.count() != 1) {
-	boError(250) << "Cannot have ScenarioSettings " << list.count() 
-			<< " times"<< endl;
+	boError(250) << k_funcinfo << "Cannot have ScenarioSettings "
+			<< list.count() << " times"<< endl;
 	return false;
  }
  QDomElement settings = list.item(0).toElement();
  if (settings.isNull()) {
-	boError(250) << "settings is not a QDomElement" << endl;
+	boError(250) << k_funcinfo << "settings is not a QDomElement" << endl;
 	return false;
  }
 
  if (!loadScenarioSettings(settings)) {
-	boError(250) << "Could not load scenario settings" << endl;
+	boError(250) << k_funcinfo << "Could not load scenario settings" << endl;
 	return false;
  }
 
@@ -96,33 +96,33 @@ bool BosonScenario::loadScenario(QDomElement& root)
  QDomNodeList list;
  list = root.elementsByTagName("ScenarioSettings");
  if (list.count() != 1) {
-	boError(250) << "Cannot have ScenarioSettings " << list.count() 
+	boError(250) << k_funcinfo << "Cannot have ScenarioSettings " << list.count() 
 			<< " times"<< endl;
 	return false;
  }
  QDomElement settings = list.item(0).toElement();
  if (settings.isNull()) {
-	boError(250) << "settings is not a QDomElement" << endl;
+	boError(250) << k_funcinfo << "settings is not a QDomElement" << endl;
 	return false;
  }
  if (!loadScenarioSettings(settings)) {
-	boError(250) << "Could not load scenario settings" << endl;
+	boError(250) << k_funcinfo << "Could not load scenario settings" << endl;
 	return false;
  }
 
  list = root.elementsByTagName("ScenarioPlayers");
  if (list.count() != 1) {
-	boError(250) << "Cannot have ScenarioPlayers " << list.count() 
+	boError(250) << k_funcinfo << "Cannot have ScenarioPlayers " << list.count() 
 			<< " times"<< endl;
 	return false;
  }
  QDomElement players = list.item(0).toElement();
  if (players.isNull()) {
-	boError(250) << "players is not a QDomElement" << endl;
+	boError(250) << k_funcinfo << "players is not a QDomElement" << endl;
 	return false;
  }
  if (!loadPlayers(players)) {
-	boError(250) << "Could not load scenario players" << endl;
+	boError(250) << k_funcinfo << "Could not load scenario players" << endl;
 	return false;
  }*/
 
@@ -150,7 +150,7 @@ bool BosonScenario::saveScenarioSettings(QDomElement& node)
 bool BosonScenario::loadScenarioSettings(QDomElement& node)
 {
  if (!node.hasAttribute("MaxPlayers")) {
-	boError(250) << "Missing MaxPlayers" << endl;
+	boError(250) << k_funcinfo << "Missing MaxPlayers" << endl;
 	return false;
  }
 
@@ -159,18 +159,18 @@ bool BosonScenario::loadScenarioSettings(QDomElement& node)
  if (node.hasAttribute("MinPlayers")) {
 	min = node.attribute("MinPlayers").toUInt(&ok);
 	if (!ok) {
-		boWarning(250) << "invalid MinPlayers" << endl;
+		boWarning(250) << k_funcinfo << "invalid MinPlayers" << endl;
 		min = 1;
 	}
  }
  if (min < 1) {
 	boError(250) << k_funcinfo << "broken scenario file!" << endl;
-	boError(250) << "min < 1" << endl;
+	boError(250) << k_funcinfo << "min < 1" << endl;
 	return false;
  }
  int max = node.attribute("MaxPlayers").toInt(&ok);
  if (!ok) {
-	boWarning(250) << "invalid MaxPlayers" << endl;
+	boWarning(250) << k_funcinfo << "invalid MaxPlayers" << endl;
 	max = min;
  }
  if (max > BOSON_MAX_PLAYERS) {
@@ -178,7 +178,7 @@ bool BosonScenario::loadScenarioSettings(QDomElement& node)
 	boError(250) << k_funcinfo << "max > " << BOSON_MAX_PLAYERS << endl;
 	return false;
  }
- if ((int)min > max) { 
+ if ((int)min > max) {
 	boError(250) << k_funcinfo << "broken scenario file!" << endl;
 	boError(250) << k_funcinfo << "min > max" << endl;
 	return false;
@@ -193,11 +193,11 @@ bool BosonScenario::loadScenarioSettings(QDomElement& node)
 bool BosonScenario::isValid() const
 {
  if (d->mMinPlayers < 1) {
-	boError(250) << "minplayers < " << 1 << endl;
+	boError(250) << k_funcinfo << "minplayers < " << 1 << endl;
 	return false;
  }
  if (d->mMinPlayers > BOSON_MAX_PLAYERS) {
-	boError(250) << "minplayers > " << BOSON_MAX_PLAYERS << endl;
+	boError(250) << k_funcinfo << "minplayers > " << BOSON_MAX_PLAYERS << endl;
 	return false;
  }
  return true;
@@ -244,7 +244,7 @@ void BosonScenario::startScenario(Boson* boson)
  for (int unsigned i = 0; i < list.count(); i++) {
 	QDomElement player = list.item(i).toElement();
 	if (!player.hasAttribute("PlayerNumber")) {
-		boError(250) << "Missing PlayerNumber" << endl;
+		boError(250) << k_funcinfo << "Missing PlayerNumber" << endl;
 		return;
 	}
 	bool ok = true;
@@ -272,7 +272,7 @@ void BosonScenario::startScenario(Boson* boson)
 	QDomElement m = node.elementsByTagName("Minerals").item(0).toElement();
 	unsigned long int minerals = m.text().toULong(&ok);
 	if (!ok) {
-		boError(250) << "Invalid minerals" << endl;
+		boError(250) << k_funcinfo << "Invalid minerals" << endl;
 		minerals = 0;
 	}
 	p->setMinerals(minerals);
@@ -280,7 +280,7 @@ void BosonScenario::startScenario(Boson* boson)
 	QDomElement o = node.elementsByTagName("Oil").item(0).toElement();
 	unsigned long int oil = o.text().toULong(&ok);
 	if (!ok) {
-		boError(250) << "Invalid oil" << endl;
+		boError(250) << k_funcinfo << "Invalid oil" << endl;
 		oil= 0;
 	}
 	p->setOil(oil);
@@ -293,7 +293,7 @@ void BosonScenario::startScenario(Boson* boson)
 bool BosonScenario::initializeScenario()
 {
  if (maxPlayers() < 0) {
-	boError(250) << "Oops - infinite players not yet supported :(" << endl;
+	boError(250) << k_funcinfo << "Oops - infinite players not yet supported :(" << endl;
 	return false;
  }
  if (d->mInternalDoc.hasChildNodes()) {
@@ -313,7 +313,7 @@ bool BosonScenario::initializeScenario()
  root.appendChild(scenarioSettings);
  boDebug(250) << k_funcinfo << "minplayers=" << minPlayers() << " maxplayers=" << maxPlayers() << endl;
  if (!saveScenarioSettings(scenarioSettings)) { //FIXME: "save" is not correct. maybe apply.. use a separate function?
-	boError(250) << "Could not apply scenario settings" << endl;
+	boError(250) << k_funcinfo << "Could not apply scenario settings" << endl;
 	return false;
  }
 
@@ -361,7 +361,7 @@ void BosonScenario::applyScenario(Boson* boson)
  root.appendChild(scenarioSettings);
  boDebug(250) << k_funcinfo << "minplayers=" << minPlayers() << " maxplayers=" << maxPlayers() << endl;
  if (!saveScenarioSettings(scenarioSettings)) { //FIXME: "save" is not correct. maybe apply.. use a separate function?
-	boError(250) << "Could not apply scenario settings" << endl;
+	boError(250) << k_funcinfo << "Could not apply scenario settings" << endl;
 	return;
  }
 
@@ -380,7 +380,7 @@ void BosonScenario::applyScenario(Boson* boson)
 	players.appendChild(playerNode);
 	initPlayerNode(playerNode, i);
 	if (!savePlayer(playerNode, p)) {
-		boError(250) << "Error saving player " << i << endl;
+		boError(250) << k_funcinfo << "Error saving player " << i << endl;
 		return;
 	}
  }

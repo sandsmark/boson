@@ -54,13 +54,19 @@ void BosonStarting::startNewGame()
 	mLoadingWidget->setLoading(BosonLoadingWidget::SendMap);
 	QByteArray buffer;
 	QDataStream stream(buffer, IO_WriteOnly);
-	mPlayField->saveMap(stream);
+
+	// only ADMIN should access mPlayFieldId !! the playfield gets
+	// transmitted through network. first map here - scenario later
+	BosonPlayField* loadField = BosonPlayField::playField(mPlayFieldId);
+	loadField->loadPlayField(mPlayFieldId);
+	loadField->saveMap(stream);
+
 	mLoadingWidget->setProgress(50);
 	// send the loaded map via network
 	boGame->sendMessage(stream, BosonMessage::InitMap);
 	mLoadingWidget->setProgress(100);
  }
- // clients have no map, but ADMIN has. this call makes them equal
+ // mPlayField should be empty - ensure this by deleting the map
  mPlayField->deleteMap();
 
 
@@ -97,9 +103,8 @@ bool BosonStarting::loadGame(const QString& loadingFileName)
  f.close();
  mLoading = false;
 
- boDebug() << k_funcinfo << "mit signalStartGame()" << endl;
- emit signalStartGame(); // FIXME - also in loadgamedata3
- emit signalStartGameLoadWorkaround();
+ // start the game. we are loading a game, so we must not start a scenario here.
+ emit signalStartGame(QString::null); // FIXME - also in loadgamedata3
  return loaded;
 }
 
@@ -267,7 +272,11 @@ void BosonStarting::slotLoadGameData3() // FIXME rename!
 
  boDebug() << k_funcinfo << "done" << endl;
  if (!mLoading) {
-	emit signalStartGame();
+	QString playFieldId;
+	if (boGame->isAdmin()) {
+		playFieldId = mPlayFieldId;
+	}
+	emit signalStartGame(playFieldId);
  }
 // boGame->unlock();
 }

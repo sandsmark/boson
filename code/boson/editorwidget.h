@@ -63,7 +63,7 @@ public:
 	/**
 	 * Default Constructor
 	 **/
-	EditorWidget(TopWidget* top, QWidget* parent, bool loading = false);
+	EditorWidget(TopWidget* top, QWidget* parent);
 
 	/**
 	 * Default Destructor
@@ -84,7 +84,6 @@ protected slots:
 	virtual void slotPlayerJoinedGame(KPlayer*);
 	virtual void slotPlayerLeftGame(KPlayer*);
 
-	virtual void slotStartScenario();
 
 	void slotOutOfGame(Player* p);
 
@@ -104,6 +103,7 @@ protected:
 	virtual void initDisplayManager();
 	virtual void initConnections();
 	virtual void setBosonXMLFile();
+	virtual void startScenario(const QString& playFieldId);
 
 	void savePlayField(const QString& fileName);
 

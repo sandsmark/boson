@@ -221,22 +221,11 @@ protected slots:
 	 *
 	 * Do not confuse with e.g. @ref slotStartNewGame, @ref
 	 * slotStartEditor or @ref slotLoadGame
+	 * @param playFieldId QString::null if no playfield should be started
+	 * (e.g. you are not ADMIN, you are loading a game, ...) otherwise the
+	 * id of the playfield as in @ref BosonStarting::playField.
 	 **/
-	void slotStartGame();
-
-	/**
-	 * This is (currently) called directly after @ref slotStartGame, once
-	 * @ref BosonStarting emits the signal for this slot. For loading games
-	 * we need to init some final stuff (e.g. change the @ref
-	 * Boson::gameStatus() to @ref KGame::Run, start to send the advance
-	 * messages, ...). For starting games this is done by @ref
-	 * BosonScenario, so we don't need this slot then.
-	 *
-	 * The name sucks because I want to emphasize that a good design would
-	 * allow using the same (maybe static) function in @ref BosonScenario or
-	 * so for both, loading and starting games.
-	 **/
-	void slotStartGameLoadWorkaround();
+	void slotStartGame(const QString& playFieldId);
 
 	/**
 	 * Assign the map (from starting/loading a game) to the game.
@@ -260,6 +249,14 @@ protected slots:
 
 	void slotSaveGame(const QString& fileName, const QString& description);
 
+	/**
+	 * See @ref Boson::signalPlayFieldChanged.
+	 *
+	 * This applies the map identifier to the @reg BosonStarting object so
+	 * that it can be started
+	 **/
+	void slotPlayFieldChanged(const QString& id);
+
 private:
 	void initBoson();
 	void initCanvas();
@@ -274,7 +271,7 @@ private:
 	void initStartupWidget(StartupWidgetIds id);
 	void showStartupWidget(StartupWidgetIds id);
 	void removeStartupWidget(StartupWidgetIds id);
-	void initBosonWidget(bool loading = false); // a special case for initStartupWidget - this must get called from outside a show*Widget().
+	void initBosonWidget(); // a special case for initStartupWidget - this must get called from outside a show*Widget().
 
 	void raiseWidget(StartupWidgetIds id);
 

@@ -62,8 +62,8 @@ public:
 	QPtrList<Player> mPlayers;
 };
 
-EditorWidget::EditorWidget(TopWidget* top, QWidget* parent, bool loading)
-    : BosonWidgetBase(top, parent, loading)
+EditorWidget::EditorWidget(TopWidget* top, QWidget* parent)
+    : BosonWidgetBase(top, parent)
 {
  d = new EditorWidgetPrivate;
 }
@@ -101,14 +101,14 @@ void EditorWidget::initConnections()
 void EditorWidget::initMap()
 {
  BosonWidgetBase::initMap();
- if (!playField() || !playField()->map()) {
+ if (!boGame->playField() || !boGame->playField()->map()) {
 	boError() << k_funcinfo << endl;
 	return;
  }
- connect(playField()->map(), SIGNAL(signalTileSetChanged(BosonTiles*)),
+ connect(boGame->playField()->map(), SIGNAL(signalTileSetChanged(BosonTiles*)),
 		this, SLOT(slotTileSetChanged(BosonTiles*)));
  connect(boGame, SIGNAL(signalChangeCell(int,int,int,unsigned char)),
-		playField()->map(), SLOT(slotChangeCell(int,int,int,unsigned char)));
+		boGame->playField()->map(), SLOT(slotChangeCell(int,int,int,unsigned char)));
 }
 
 void EditorWidget::initPlayer()
@@ -220,8 +220,8 @@ void EditorWidget::slotSavePlayFieldAs()
 
 void EditorWidget::savePlayField(const QString& fileName)
 {
- playField()->applyScenario(boGame); // this must be called before we are able to save the playfield! otherwise the old units will be used
- bool ok = playField()->savePlayField(fileName);
+ boGame->playField()->applyScenario(boGame); // this must be called before we are able to save the playfield! otherwise the old units will be used
+ bool ok = boGame->playField()->savePlayField(fileName);
  if (!ok) {
 	boError() << k_funcinfo << "An error occured" << endl;
 
@@ -349,9 +349,9 @@ void EditorWidget::slotGameStarted()
  slotPlace(0);
 }
 
-void EditorWidget::slotStartScenario()
+void EditorWidget::startScenario(const QString& playFieldId)
 {
- BosonWidgetBase::slotStartScenario();
+ BosonWidgetBase::startScenario(playFieldId);
  slotChangeLocalPlayer(0);
  d->mPlayerAction->setCurrentItem(0);
 }

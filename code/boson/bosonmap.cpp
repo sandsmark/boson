@@ -34,8 +34,6 @@
 #include <kglobal.h>
 #include <kstandarddirs.h>
 
-#define TAG_FIELD "boeditor_magic_0_6"
-#define TAG_FIELD_LEN 18 // len of above
 #define TAG_CELL (0xde)
 
 class BosonMap::BosonMapPrivate
@@ -74,33 +72,33 @@ bool BosonMap::loadMap(QDomElement& root)
  QDomNodeList list;
  list = root.elementsByTagName("MapGeo");
  if (list.count() != 1) {
-	boError() << "XML error: cannot have tag MapGeo " 
+	boError() << k_funcinfo << "XML error: cannot have tag MapGeo "
 			<< list.count() << " times" << endl;
 	return false;
  }
  QDomElement geo = list.item(0).toElement();
  if (geo.isNull()) {
-	boError() << "XML error: geo is not an QDomElement" << endl;
+	boError() << k_funcinfo << "XML error: geo is not an QDomElement" << endl;
 	return false;
  }
  if (!loadMapGeo(geo)) {
-	boError() << "XML error: failed loading map geo" << endl;
+	boError() << k_funcinfo << "XML error: failed loading map geo" << endl;
 	return false;
  }
 
  list = root.elementsByTagName("MapCells");
  if (list.count() != 1) {
-	boError() << "XML error: cannot have tag Map Geo " 
+	boError() << k_funcinfo << "XML error: cannot have tag Map Geo " 
 			<< list.count() << " times" << endl;
 	return false;
  }
  QDomElement cells = list.item(0).toElement();
  if (geo.isNull()) {
-	boError() << "XML error: cells is not an QDomElement" << endl;
+	boError() << k_funcinfo << "XML error: cells is not an QDomElement" << endl;
 	return false;
  }
  if (!loadCells(cells)) {
-	boError() << "XML error: failed loading map geo" << endl;
+	boError() << k_funcinfo << "XML error: failed loading map geo" << endl;
 	return false;
  }
 
@@ -183,11 +181,9 @@ bool BosonMap::loadCells(QDataStream& stream)
 bool BosonMap::saveMap(QDomElement& root)
 {
  QDomDocument doc = root.ownerDocument();
- QDomElement node = doc.createElement("BosonMap");
- root.appendChild(node);
 
  QDomElement geo = doc.createElement("MapGeo");
- node.appendChild(geo);
+ root.appendChild(geo);
 
  if (!saveMapGeo(geo)) {
 	boError() << k_funcinfo << "Could not save map geo" << endl;
@@ -195,7 +191,7 @@ bool BosonMap::saveMap(QDomElement& root)
  }
 
  QDomElement cells = doc.createElement("MapCells");
- node.appendChild(cells);
+ root.appendChild(cells);
 
  if (!saveCells(cells)) {
 	boError() << k_funcinfo << "Could not save cells" << endl;
@@ -216,11 +212,11 @@ bool BosonMap::saveMapGeo(QDomElement& node)
 bool BosonMap::loadMapGeo(QDomElement& node)
 {
  if (!node.hasAttribute("Width")) {
-	boError() << "Map width is mandatory!" << endl;
+	boError() << k_funcinfo << "Map width is mandatory!" << endl;
 	return false;
  }
  if (!node.hasAttribute("Height")) {
-	boError() << "Map height is mandatory!" << endl;
+	boError() << k_funcinfo << "Map height is mandatory!" << endl;
 	return false;
  }
  Q_INT32 width = node.attribute("Width").toInt();
@@ -240,14 +236,14 @@ bool BosonMap::loadCells(QDomElement& node)
 {
  QDomNodeList list = node.elementsByTagName("Cell");
  if (list.count() < width() * height()) {
-	boError() << "XML error: not enough cells" << endl;
+	boError() << k_funcinfo << "XML error: not enough cells" << endl;
 	return false;
  }
  if (list.count() != width() * height()) {
-	boWarning() << "Cell count doesn't match width * height" 
+	boWarning() << k_funcinfo << "Cell count doesn't match width * height"
 			<< endl;
  }
- 
+
  QByteArray buffer;
  QDataStream stream(buffer, IO_WriteOnly);
  int* groundType = new int[width() * height()];
@@ -255,14 +251,14 @@ bool BosonMap::loadCells(QDomElement& node)
  for (unsigned int i = 0; i < list.count(); i++) {
 	QDomElement cell = list.item(i).toElement();
 	if (cell.isNull()) {
-		boError() << "XML error: cell is not an QDomElement" << endl;
+		boError() << k_funcinfo << "XML error: cell is not an QDomElement" << endl;
 	} else {
 		int x;
 		int y;
 		int g;
 		unsigned char v;
 		if (!loadCell(cell, x, y, g, v)) {
-			boError() << "XML error: could not load cell" << endl;
+			boError() << k_funcinfo << "XML error: could not load cell" << endl;
 			continue;
 		}
 		groundType[x + y * width()] = g;
@@ -286,19 +282,19 @@ bool BosonMap::loadCells(QDomElement& node)
 bool BosonMap::loadCell(QDomElement& node, int& x, int& y, int& groundType, unsigned char& version)
 {
  if (!node.hasAttribute("x")) {
-	boError() << "XML: attribute x is mandatory!" << endl;
+	boError() << k_funcinfo << "XML: attribute x is mandatory!" << endl;
 	return false;
  }
  if (!node.hasAttribute("y")) {
-	boError() << "XML: attribute y is mandatory!" << endl;
+	boError() << k_funcinfo << "XML: attribute y is mandatory!" << endl;
 	return false;
  }
  if (!node.hasAttribute("GroundType")) {
-	boError() << "XML: attribute GroundType is mandatory!" << endl;
+	boError() << k_funcinfo << "XML: attribute GroundType is mandatory!" << endl;
 	return false;
  }
  if (!node.hasAttribute("Version")) {
-	boError() << "XML: attribute Version is mandatory!" << endl;
+	boError() << k_funcinfo << "XML: attribute Version is mandatory!" << endl;
 	return false;
  }
  x = node.attribute("x").toInt();
@@ -353,7 +349,7 @@ bool BosonMap::saveCell(QDomElement& node, int x, int y, Cell* cell)
 bool BosonMap::saveMapGeo(QDataStream& stream)
 {
  if (!isValid()) {
-	boError() << "Map geo is not valid" << endl;
+	boError() << k_funcinfo << "Map geo is not valid" << endl;
 	return false;
  }
 // boDebug() << k_funcinfo << endl;
@@ -384,19 +380,19 @@ bool BosonMap::saveCells(QDataStream& stream)
 bool BosonMap::isValid() const
 {
  if (width() < 10) {
-	boError() << "width < 10" << endl;
+	boError() << k_funcinfo << "width < 10" << endl;
 	return false;
  }
  if (width() > MAX_MAP_WIDTH) {
-	boError() << "mapWidth > " << MAX_MAP_WIDTH << endl;
+	boError() << k_funcinfo << "mapWidth > " << MAX_MAP_WIDTH << endl;
 	return false;
  }
  if (height() < 10) {
-	boError() << "height < 10" << endl;
+	boError() << k_funcinfo << "height < 10" << endl;
 	return false;
  }
  if (height() > MAX_MAP_HEIGHT) {
-	boError() << "mapHeight > " << MAX_MAP_HEIGHT << endl;
+	boError() << k_funcinfo << "mapHeight > " << MAX_MAP_HEIGHT << endl;
 	return false;
  }
  if (!mCells) {
@@ -416,7 +412,7 @@ bool BosonMap::loadCell(QDataStream& stream, int& groundType, unsigned char& b)
  stream >> g; // not groundType - first TAG_CELL
  if (g != TAG_CELL) {
 	boError() << k_funcinfo << "broken map file!" << endl;
-	boError() << "missing TAG_CELL!" << endl;
+	boError() << k_funcinfo << "missing TAG_CELL!" << endl;
 	return false;
  }
 
@@ -425,7 +421,7 @@ bool BosonMap::loadCell(QDataStream& stream, int& groundType, unsigned char& b)
 	return false; 
  }
 // if (g < 0 || ) { return false; }
- 
+
  stream >> version;
  if (version > 4) {
 	boError() << k_funcinfo << "broken map file!" << endl;
@@ -470,7 +466,7 @@ void BosonMap::slotChangeCell(int x, int y, int groundType, unsigned char b)
 //boDebug() << width() << " " << height() << endl;
  Cell* c = cell(x, y);
  if (!c) {
-	boError() << "Invalid cell x=" << x << ",y=" << y << endl;
+	boError() << k_funcinfo << "Invalid cell x=" << x << ",y=" << y << endl;
 	return;
  }
  if ((Cell::GroundType)groundType == Cell::GroundUnknown) {

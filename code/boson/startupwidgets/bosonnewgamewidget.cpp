@@ -93,21 +93,21 @@ BosonNewGameWidget::BosonNewGameWidget(TopWidget* top, QWidget* parent)
   QSpacerItem* spacer_2 = new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum );
   mYourOptionsLayout->addMultiCell( spacer_2, 2, 2, 2, 3 );
 
-  mNameLabel = new QLabel( this, "namelabel" );
-  mNameLabel->setText( i18n( "Your Name:" ) );
-  mYourOptionsLayout->addWidget( mNameLabel, 0, 0 );
+  QLabel* nameLabel = new QLabel( this, "namelabel" );
+  nameLabel->setText( i18n( "Your Name:" ) );
+  mYourOptionsLayout->addWidget( nameLabel, 0, 0 );
 
-  mColorLabel = new QLabel( this, "colorlabel" );
-  mColorLabel->setText( i18n( "Your Color:" ) );
-  mYourOptionsLayout->addWidget( mColorLabel, 1, 0 );
+  QLabel* colorLabel = new QLabel( this, "colorlabel" );
+  colorLabel->setText( i18n( "Your Color:" ) );
+  mYourOptionsLayout->addWidget( colorLabel, 1, 0 );
 
   mSpeciesLabel = new QLabel( this, "specieslabel" );
   mSpeciesLabel->setText( i18n( "Your Species:" ) );
   mYourOptionsLayout->addWidget( mSpeciesLabel, 2, 0 );
 
-  mMapLabel = new QLabel( this, "maplabel" );
-  mMapLabel->setText( i18n( "Map:" ) );
-  mYourOptionsLayout->addWidget( mMapLabel, 3, 0 );
+  QLabel* mapLabel = new QLabel( this, "maplabel" );
+  mapLabel->setText( i18n( "Map:" ) );
+  mYourOptionsLayout->addWidget( mapLabel, 3, 0 );
 
   QSpacerItem* spacer_3 = new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum );
   mYourOptionsLayout->addMultiCell( spacer_3, 0, 0, 1, 2 );
@@ -294,22 +294,18 @@ void BosonNewGameWidget::initMaps()
   QStringList list = BosonPlayField::availablePlayFields();
   for (unsigned int i = 0; i < list.count(); i++)
   {
-    KSimpleConfig cfg(list[i]);
-    cfg.setGroup("Boson PlayField");
-    mMapCombo->insertItem(cfg.readEntry("Name", i18n("Unknown")), i);
-//    d->mPlayFieldIndex2Comment.insert(i, cfg.readEntry("Comment", i18n("None")));
-//    QString fileName = list[i].left(list[i].length() - strlen(".boson")) + QString::fromLatin1(".bpf");
-//    d->mPlayFieldIndex2FileName.insert(i, fileName);
-    QString id = cfg.readEntry("Identifier", QString::fromLatin1("Unknown"));
-    if(id == mapid)
+    mMapCombo->insertItem(BosonPlayField::playFieldName(list[i]));
+    if(list[i] == mapid)
     {
       mMap = i;
     }
-    mMapIndex2Identifier.insert(i, id);
+    mMapIndex2Identifier.insert(i, list[i]);
   }
   mMapCombo->setCurrentItem(mMap);
   if(boGame->isAdmin())
+  {
     slotMyMapChanged(mMap);
+  }
 }
 
 void BosonNewGameWidget::initSpecies()
@@ -461,7 +457,6 @@ void BosonNewGameWidget::slotPropertyChanged(KGamePropertyBase* prop, KPlayer* p
 
 void BosonNewGameWidget::slotMapChanged(const QString& id)
 {
-//  mMapName->setText(name);
   // id is map identifier, we want to display name
   QMap<int, QString>::iterator it;
   for(it = mMapIndex2Identifier.begin(); it != mMapIndex2Identifier.end(); ++it)
@@ -470,15 +465,21 @@ void BosonNewGameWidget::slotMapChanged(const QString& id)
     {
       int index = it.key();
       mMap = index;
-      mMapName->setText(mMapCombo->text(index));
+      mMapName->setText(BosonPlayField::playFieldName(playFieldIdentifier()));
       mMapId = id;
       if(boGame->isAdmin())
       {
-        // Init map to be able to check max/min players count
-        boDebug() << k_funcinfo << " Loading map, index: " << index << ", name: " << playFieldString() << endl;
-        playField()->loadPlayField(BosonPlayField::playFieldFileName(playFieldString()));
-        mMinPlayers = playField()->scenario()->minPlayers();
-        mMaxPlayers = playField()->scenario()->maxPlayers();
+        BosonPlayField* field = BosonPlayField::playField(id);
+       if (!field)
+       {
+         boError() << k_funcinfo << "NULL playfield " << id << endl;
+         // what now? reset to default playfield? if so we need to ensure that
+         // it actually exists and so!
+         return;
+       }
+
+        mMinPlayers = field->scenario()->minPlayers();
+        mMaxPlayers = field->scenario()->maxPlayers();
       }
       return;
     }
@@ -606,7 +607,7 @@ void BosonNewGameWidget::slotSetAdmin(bool admin)
   mAdmin = admin;
 }
 
-QString BosonNewGameWidget::playFieldString() const
+QString BosonNewGameWidget::playFieldIdentifier() const
 {
   return mMapIndex2Identifier[mMap];
 }
@@ -614,11 +615,6 @@ QString BosonNewGameWidget::playFieldString() const
 Player* BosonNewGameWidget::player() const
 {
   return mTop->player();
-}
-
-BosonPlayField* BosonNewGameWidget::playField() const
-{
-  return mTop->playField();
 }
 
 void BosonNewGameWidget::sendNewGame()
