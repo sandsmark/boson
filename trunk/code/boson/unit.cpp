@@ -35,6 +35,7 @@
 #include "boson.h"
 #include "bosonparticlesystem.h"
 #include "bosonweapon.h"
+#include "bopointeriterator.h"
 #include "bodebug.h"
 
 #include <kgame/kgamepropertylist.h>
@@ -57,6 +58,8 @@ public:
 	{
 		mTarget = 0;
 		mSmokeParticleSystem = 0;
+
+		mWeapons = 0;
 	}
 	KGamePropertyList<QPoint> mWaypoints;
 	KGameProperty<int> mMoveDestX;
@@ -74,7 +77,7 @@ public:
 	// these must NOT be touched (items added or removed) after the c'tor.
 	// loading code will depend in this list to be at the c'tor state!
 	QPtrList<UnitPlugin> mPlugins;
-	QPtrList<BosonWeapon> mWeapons;
+	BosonWeapon** mWeapons;
 
 	// OpenGL only:
 	BosonParticleSystem* mSmokeParticleSystem;  // This will be removed soon
@@ -94,9 +97,7 @@ Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
  mAdvanceFunction2 = &Unit:: advanceNone;
  setOwner(owner);
  d->mPlugins.setAutoDelete(true);
- d->mWeapons.setAutoDelete(true);
  d->mPlugins.clear();
- d->mWeapons.clear();
 
  // note: these width and height can be used for e.g. pathfinding. It does not
  // depend in any way on the .3ds file or another OpenGL thing.
@@ -150,7 +151,11 @@ Unit::~Unit()
  d->mWaypoints.clear();
  unselect();
  d->mPlugins.clear();
- d->mWeapons.clear();
+ BoPointerIterator<BosonWeapon> it = d->mWeapons;
+ for (; *it; ++it) {
+	delete *it;
+ }
+ delete[] d->mWeapons;
  delete d;
 }
 
@@ -407,11 +412,10 @@ void Unit::advance(unsigned int advanceCount)
 	return;
  }
  // Reload weapons
- if (d->mWeapons.count() > 0) {
-	QPtrListIterator<BosonWeapon> it(d->mWeapons);
-	while (it.current()) {
-		it.current()->advance(advanceCount);
-		++it;
+ if (d->mWeapons[0]) {
+	BosonWeapon** w = &d->mWeapons[0];
+	for (; *w; w++) {
+		(*w)->advance(advanceCount);
 	}
  }
 
@@ -445,14 +449,16 @@ bool Unit::attackEnemyUnitsInRange()
  if (!unitProperties()->canShoot()) {
 	return false;
  }
+ if (!d->mWeapons[0]) {
+	return false;
+ }
 
  // TODO: Note that this is not completely realistic nor good: it may be good to
  //  e.g. not waste some weapon with very big damage and reload values for very
  //  weak unit. So there room left for improving :-)
- QPtrListIterator<BosonWeapon> wit(d->mWeapons);
- BosonWeapon* w;
- while (( w = wit.current()) != 0) {
-	++wit;
+ BoPointerIterator<BosonWeapon> wit(d->mWeapons);
+ for (; *wit; ++wit) {
+	BosonWeapon* w = *wit;
 
 	if (!w->reloaded()) {
 		continue;
@@ -615,7 +621,7 @@ void Unit::advanceAttack(unsigned int advanceCount)
 	return;
  }
 
- if(isMobile()) {
+ if (isMobile()) {
 	float rot = rotationToPoint(target()->x() - x(), target()->y() - y());
 	if(rot < rotation() - 5 || rot > rotation() + 5) {
 		if(QABS(rotation() - rot) > (2 * speed())) {
@@ -630,10 +636,9 @@ void Unit::advanceAttack(unsigned int advanceCount)
 
  // Shoot at target with as many weapons as possible
  boDebug(300) << "    " << k_funcinfo << "shooting at target" << endl;
- QPtrListIterator<BosonWeapon> wit(d->mWeapons);
- BosonWeapon* w;
- while (( w = wit.current()) != 0) {
-	++wit;
+ BoPointerIterator<BosonWeapon> wit(d->mWeapons);
+ for (; *wit; ++wit) {
+	BosonWeapon* w = *wit;
 	if (w->reloaded() && w->canShootAt(target()) && inRange(w->properties()->range(), target())) {
 		shootAt(w, target());
 		if (target()->isDestroyed()) {
@@ -1158,28 +1163,45 @@ void Unit::setActiveParticleSystems(QPtrList<BosonParticleSystem> list)
 
 void Unit::loadWeapons()
 {
+ if (d->mWeapons) {
+	boWarning() << k_funcinfo << "Weapons already loaded! doing nothing." << endl;
+	return;
+ }
+
+ // since we use an array and not a list we need to count the weapons first.
+ int count = 0;
  QPtrListIterator<PluginProperties> it(*(unitProperties()->plugins()));
- while (it.current()) {
+ for (; it.current(); ++it) {
 	if (it.current()->pluginType() == PluginProperties::Weapon) {
-		if (d->mWeapons.count() < MAX_WEAPONS_PER_UNIT) {
-			d->mWeapons.append(new BosonWeapon(d->mWeapons.count(), (BosonWeaponProperties*)(it.current()), this));
-		} else {
-			boError() << k_funcinfo << "Too many weapons in this unit! type=" << type() << endl;
-			return;
-		}
+		count++;
 	}
-	++it;
+ }
+ if (count > MAX_WEAPONS_PER_UNIT) {
+	boError() << k_funcinfo << "Too many weapons in this unit! type=" << type() << endl;
+	count = MAX_WEAPONS_PER_UNIT;
+ }
+ d->mWeapons = new BosonWeapon*[count + 1]; // last element MUST be 0
+ for (int i = 0; i < count + 1; i++) {
+	d->mWeapons[i] = 0;
+ }
+ int weaponPos = 0;
+ it.toFirst();
+ for (; it.current() && weaponPos < count; ++it) {
+	if (it.current()->pluginType() == PluginProperties::Weapon) {
+		BosonWeaponProperties* prop = (BosonWeaponProperties*)it.current();
+		d->mWeapons[weaponPos] = new BosonWeapon(weaponPos, prop, this);
+		weaponPos++;
+	}
  }
 }
 
 bool Unit::canShootAt(Unit *u)
 {
- QPtrListIterator<BosonWeapon> it(d->mWeapons);
- while (it.current()) {
-	if (it.current()->canShootAt(u)) {
+ BoPointerIterator<BosonWeapon> it(d->mWeapons);
+ for (; *it; ++it) {
+	if ((*it)->canShootAt(u)) {
 		return true;
 	}
-	++it;
  }
  return false;
 }
