@@ -317,6 +317,7 @@ BosonConfig::BosonConfig(KConfig* conf)
  addDynamicEntry(new BoConfigDoubleEntry(this, "ATIDepthWorkaroundValue", 0.00390625));
  addDynamicEntry(new BoConfigStringEntry(this, "GLFont", QString::null));
  addDynamicEntry(new BoConfigBoolEntry(this, "SmoothShading", true));
+ addDynamicEntry(new BoConfigUIntEntry(this, "DefaultLODCount", 5));
 
  // load from config
  reset(conf);

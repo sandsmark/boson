@@ -28,6 +28,7 @@
 #include "bodebug.h"
 #include "bomesh.h"
 #include "bomaterial.h"
+#include "bosonconfig.h"
 #include "bomemorytrace.h"
 
 #include <ksimpleconfig.h>
@@ -1068,10 +1069,17 @@ void BosonModel::computeBoundingObjects()
 
 void BosonModel::generateLOD()
 {
- unsigned int lodCount = defaultLodCount();
+ unsigned int lodCount = boConfig->uintValue("DefaultLODCount");
  if (lodCount == 0) {
 	boWarning() << k_funcinfo << "LOD count of 0 is not allowed" << endl;
 	lodCount = 1;
+ }
+ if (lodCount > 5) {
+	// AB: this is a BoLODBuilder limitation.
+	// (not that as of 03/12/13 the same limitation is in choosing the
+	// LOD that is used, as the LODLevels array has 5 entries only)
+	boWarning() << k_funcinfo << "more than 5 LODs not supported" << endl;
+	lodCount = 5;
  }
 
  d->mLODCount = lodCount;
@@ -1164,13 +1172,30 @@ void BosonModel::enablePointer()
  glTexCoordPointer(2, GL_FLOAT, stride, d->mPoints + BoMesh::texelPos());
 }
 
-unsigned int BosonModel::defaultLodCount()
-{
- return 5;
-}
-
 unsigned int BosonModel::lodCount() const
 {
  return d->mLODCount;
+}
+
+unsigned int BosonModel::preferredLod(float dist) const
+{
+ unsigned int lod = 0;
+
+ // LOD distance levels
+ // If distance between item and camera is less than LODLevels[x], lod level
+ // x is used
+ static const float LODLevels[] = { 7.0f, 12.0f, 20.0f, 30.0f, 1000.0f };
+
+ while (lod < lodCount() - 1) {
+	if (dist > LODLevels[lod]) {
+		// Object is too far for this lod
+		lod++;
+	} else {
+		// Use this lod
+		break;
+	}
+ }
+
+ return lod;
 }
 

@@ -57,6 +57,7 @@ static KCmdLineOptions options[] =
     { "indirect", I18N_NOOP("Use Indirect rendering (sloooow!!). debugging only."), 0 },
     { "ati-depth-workaround", I18N_NOOP("Enable the ATI (proprietary) driver workaround for reading the depth buffer. Will use depth of 0.00390625"), 0 },
     { "ati-depth-workaround-depth <depth>", I18N_NOOP("Use with --ati-depth-workaround. Supply a depth value for your system (default=0.00390625)"), 0 },
+    { "default-lodcount <count>", I18N_NOOP("Use <count> for default level of detail count"), 0 },
     { 0, 0, 0 }
 };
 
@@ -123,6 +124,17 @@ int main(int argc, char **argv)
 		}
 	}
 	Bo3dTools::enableReadDepthBufferWorkaround(depth);
+ }
+ if (args->isSet("default-lodcount")) {
+	bool ok = false;
+	unsigned int v = 0;
+	QString s = args->getOption("default-lodcount");
+	v = s.toUInt(&ok);
+	if (!ok) {
+		boError() << k_funcinfo << "default-lodcount was not a valid number" << endl;
+		return 1;
+	}
+	boConfig->setUIntValue("DefaultLODCount", v);
  }
  if (args->isSet("new")) {
 	top->slotNewGame(args);

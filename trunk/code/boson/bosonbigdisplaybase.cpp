@@ -839,14 +839,6 @@ void BosonBigDisplayBase::renderItems()
  createRenderItemList(); // AB: this is very fast. < 1.5ms on experimental5 for me
 
  bool useLOD = boConfig->useLOD();
- unsigned int defaultLOD = boConfig->uintValue("DefaultLOD", 0);
-
- // LOD distance levels
- // If distance between item and camera is less than LODLevels[x], lod level
- //  x is used
- static const float LODLevels[] = { 7.0f, 12.0f, 20.0f, 30.0f, 1000.0f };
-
- unsigned int lod = 0;
 
  BoItemList* selectedItems = new BoItemList(0, false);
  BoItemList::Iterator it = d->mRenderItemList->begin();
@@ -868,8 +860,6 @@ void BosonBigDisplayBase::renderItems()
 	glRotatef(item->xRotation(), 1.0, 0.0, 0.0);
 	glRotatef(item->yRotation(), 0.0, 1.0, 0.0);
 
-	// TODO: change lod according to distance from the camera
-
 	// FIXME: performance: we could create a displaylist that contains the selectbox and simply change item->displayList()
 	// when the item is selected/unselected
 	// Units will be tinted accordingly to how much health they have left
@@ -883,18 +873,11 @@ void BosonBigDisplayBase::renderItems()
 	} else {
 		glColor3ub(255, 255, 255);
 	}
+
+	unsigned int lod = 0;
 	if (useLOD) {
 		float dist = (camera()->cameraPos() - BoVector3(x, y, z)).length();
-		lod = defaultLOD;
-		while (lod < (item->lodCount() - 1)) {
-			if (dist > LODLevels[lod]) {
-				// Object is too far for this lod
-				lod++;
-			} else {
-				// Use this lod
-				break;
-			}
-		}
+		lod = item->preferredLod(dist);
 	}
 	item->renderItem(lod);
 	glColor3ub(255, 255, 255);

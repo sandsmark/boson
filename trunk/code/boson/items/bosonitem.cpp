@@ -554,3 +554,10 @@ unsigned int BosonItem::lodCount() const
  return mModel->lodCount();
 }
 
+unsigned int BosonItem::preferredLod(float dist) const
+{
+ if (!mModel) {
+	return 0;
+ }
+ return mModel->preferredLod(dist);
+}
