@@ -23,6 +23,7 @@
 #include "fnt.h"
 
 #include "../bosonglwidget.h"
+#include "../botexture.h"
 #include "bodebug.h"
 
 #include <klocale.h>
@@ -636,7 +637,7 @@ int BosonGLFont::renderLine(int x, int y, const QString& text, int maxWidth, boo
  if (background) {
 	glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT);
 	glEnable(GL_BLEND);
-	glDisable(GL_TEXTURE_2D);
+	boTextureManager->disableTexturing();
 	glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
 	glRecti(x, y - maxHeight, x + w, y);
 	glPopAttrib();
