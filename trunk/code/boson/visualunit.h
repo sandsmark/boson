@@ -83,6 +83,10 @@ public:
 
 	void updateSelectBox();
 
+
+	QCanvasItemList unitsInRange() const;
+	QCanvasItemList enemyUnitsInRange() const;
+
 protected:
 
 private:

@@ -11,6 +11,7 @@
 
 #include <kdebug.h>
 #include <klocale.h>
+#include <kgame/kgameio.h>
 
 #include <qtimer.h>
 
@@ -28,6 +29,7 @@ public:
 
 	QTimer* mGameTimer;
 	QCanvas* mCanvas; // this pointer is anti-OO IMHO
+	QPtrList<KGameComputerIO> mComputerIOList;
 	
 	KGamePropertyInt mGameSpeed;
 
@@ -49,6 +51,12 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
 		this, SLOT(slotLoad(QDataStream&)));
  connect(this, SIGNAL(signalReplacePlayerIO(KPlayer*, bool*)),
 		this, SLOT(slotReplacePlayerIO(KPlayer*, bool*)));
+ connect(this, SIGNAL(signalPlayerJoinedGame(KPlayer*)),
+		this, SLOT(slotPlayerJoinedGame(KPlayer*)));
+ connect(this, SIGNAL(signalPlayerLeftGame(KPlayer*)),
+		this, SLOT(slotPlayerLeftGame(KPlayer*)));
+ connect(this, SIGNAL(signalAdvance()),
+		this, SLOT(slotAdvanceComputerPlayers()));
  d->mGameSpeed.registerData(IdGameSpeed, dataHandler(),
 		KGamePropertyBase::PolicyLocal, "GameSpeed"); // PolicyClean?
  d->mNextUnitId.registerData(IdNextUnitId, dataHandler(),
@@ -445,5 +453,41 @@ bool Boson::constructUnit(VisualFacility* factory, int unitType, int x, int y)
  unit->setId(nextUnitId());
  emit signalAddUnit(unit, x, y);
  return true;
+}
+
+void Boson::slotPlayerJoinedGame(KPlayer* p)
+{
+ if (!p) {
+	return;
+ }
+ KGameIO* io = p->findRttiIO(KGameIO::ComputerIO);
+ if (io) {
+	// note the IO is added on only *one* client!
+	d->mComputerIOList.append((KGameComputerIO*)io);
+ }
+}
+
+void Boson::slotPlayerLeftGame(KPlayer* p)
+{
+ if (!p) {
+	return;
+ }
+ KGameIO* io = p->findRttiIO(KGameIO::ComputerIO);
+ if (io) {
+	d->mComputerIOList.removeRef((KGameComputerIO*)io);
+ }
+}
+
+void Boson::slotAdvanceComputerPlayers()
+{
+ // we use this to "advance" the computer player. This is a completely new concept
+ // introduced to KGameIO just for boson. See KGaneComputerIO documentation for
+ // more. Basically this means - let the computer do something.
+ QPtrListIterator<KGameComputerIO> it(d->mComputerIOList);
+// kdDebug() << "count = " << d->mComputerIOList.count() << endl;
+ while (it.current()) {
+	it.current()->advance();
+	++it;
+ }
 }
 
