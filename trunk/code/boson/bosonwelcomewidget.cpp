@@ -49,24 +49,24 @@ BosonWelcomeWidget::BosonWelcomeWidget(QWidget* parent) : QWidget(parent)
   QSpacerItem* spacer = new QSpacerItem( 20, 20, QSizePolicy::Minimum, QSizePolicy::Preferred );
   mMainLayout->addItem( spacer );
 
-  mLowerLayout = new QHBoxLayout( 0, 0, 6, "lowerlayout"); 
-
   mBosonPixmap = new QLabel( this, "bosonpixmap" );
   mBosonPixmap->setAlignment( int( QLabel::AlignCenter ) );
-  mLowerLayout->addWidget( mBosonPixmap );
-  //FIXME: at least alignment.. maybe even stretch the pixmap?
+  mMainLayout->addWidget( mBosonPixmap );
   mBosonPixmap->setPixmap(QPixmap(locate("data", "boson/pics/biglogo.png")));
   QSpacerItem* spacer_2 = new QSpacerItem( 20, 20, QSizePolicy::Preferred, QSizePolicy::Minimum );
-  mLowerLayout->addItem( spacer_2 );
+  mMainLayout->addItem( spacer_2 );
 
-  mButtonsLayout = new QVBoxLayout( 0, 0, 6, "buttonslayout"); 
+  mLowerLayout = new QHBoxLayout( 0, 0, 6, "lowerlayout");
+
+  mButtonsLayout = new QVBoxLayout( 0, 0, 6, "buttonslayout");
 
   mNewGameButton = new QPushButton( this, "newgamebutton" );
   mNewGameButton->setText( i18n( "S&tart new game" ) );
+  mNewGameButton->setMinimumWidth(150);
   mButtonsLayout->addWidget( mNewGameButton );
   QSpacerItem* spacer_3 = new QSpacerItem( 20, 20, QSizePolicy::Minimum, QSizePolicy::Expanding );
   mButtonsLayout->addItem( spacer_3 );
-  
+
 #ifndef NO_EDITOR
   mEditorButton = new QPushButton( this, "editorbutton" );
   mEditorButton->setText( i18n( "Start Editor" ) ); // TODO: accel
@@ -83,7 +83,13 @@ BosonWelcomeWidget::BosonWelcomeWidget(QWidget* parent) : QWidget(parent)
   mButtonsLayout->addItem( spacer_4 );
   QSpacerItem* spacer_5 = new QSpacerItem( 20, 20, QSizePolicy::Minimum, QSizePolicy::Expanding );
   mButtonsLayout->addItem( spacer_5 );
-  mLowerLayout->addLayout( mButtonsLayout );
+
+  QSpacerItem* spacer_6 = new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Fixed );
+  QSpacerItem* spacer_7 = new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Fixed );
+  mLowerLayout->addItem(spacer_6);
+  mLowerLayout->addLayout(mButtonsLayout);
+  mLowerLayout->addItem(spacer_7);
+
   mMainLayout->addLayout( mLowerLayout );
   mBosonWelcomeWidgetLayout->addLayout( mMainLayout );
 
