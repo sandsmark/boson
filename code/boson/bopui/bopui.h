@@ -145,6 +145,17 @@ public:
 	BoPUIWidget(QObject* parent, const char* name = 0);
 	~BoPUIWidget();
 
+	/**
+	 * Makes sense only if @ref layout is not NULL.
+	 *
+	 * When this is enabled, widgets which use this widget as parent are
+	 * automatically added to @ref layout.
+	 **/
+	void setAutoAddToLayout(bool add)
+	{
+		mAutoAddToLayout = add;
+	}
+
 	void setPos(int x, int y);
 	void setSize(int w, int h);
 
@@ -224,6 +235,8 @@ public:
 	void doLayout(int, int);
 	friend class BoPUILayout;
 
+	virtual bool event(QEvent* e);
+
 signals:
 	void signalActivated();
 
@@ -256,6 +269,7 @@ private:
 	int mY;
 	bool mHidden;
 	bool mIsEnabled;
+	bool mAutoAddToLayout;
 
 	char* mLegend;
 	BoPUILabel* mLabelWidget;
@@ -285,10 +299,7 @@ public:
 	 * Set the text of the button. Convenience method to the @ref setLegend
 	 * method. "legend" is the plib notation.
 	 **/
-	void setText(const QString& text)
-	{
-		setLegend(text);
-	}
+	void setText(const QString& text);
 
 signals:
 	void signalClicked();

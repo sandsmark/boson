@@ -556,6 +556,7 @@ void BoPUIWidget::init()
  mHidden = false;
  mLabel = 0;
  mLegend = 0;
+ mAutoAddToLayout = false;
 }
 
 BoPUIWidget::~BoPUIWidget()
@@ -572,6 +573,26 @@ BoPUIWidget::~BoPUIWidget()
 	// AB: do NOT delete plib widgets directly
 	puDeleteObject(mWidget);
  }
+}
+
+bool BoPUIWidget::event(QEvent* e)
+{
+ switch (e->type()) {
+	case QEvent::ChildInserted:
+	{
+		QChildEvent* c = (QChildEvent*)e;
+		QObject* child = c->child();
+		
+		if (mAutoAddToLayout && layout() && child && child->inherits("BoPUIWidget")) {
+			BoPUIWidget* w = (BoPUIWidget*)child;
+			layout()->addWidget(w);
+		}
+		break;
+	}
+	default:
+		break;
+ }
+ return QObject::event(e);
 }
 
 void BoPUIWidget::setTopParentLayout(BoPUILayout* l)
@@ -750,13 +771,7 @@ BoPUIPushButton::BoPUIPushButton(QObject* parent, const char* name) : BoPUIWidge
 BoPUIPushButton::BoPUIPushButton(const QString& text, QObject* parent, const char* name) : BoPUIWidget(parent, name)
 {
  init();
- setLegend(text);
-
- // AB: this should be included in setLegend(). but calling setLegend() twiice
- // would cause problems then
- int w = puGetDefaultLegendFont().getStringWidth(text.latin1()) + PUSTR_LGAP + PUSTR_RGAP;
- int h = puGetDefaultLegendFont().getStringHeight(text.latin1()) + puGetDefaultLegendFont().getStringDescender () + PUSTR_TGAP + PUSTR_BGAP;
- setSize(w, h);
+ setText(text);
 }
 
 void BoPUIPushButton::init()
@@ -768,6 +783,17 @@ void BoPUIPushButton::init()
  setSize(20, 20);
 
  installCallback(mWidget);
+}
+
+void BoPUIPushButton::setText(const QString& text)
+{
+ setLegend(text);
+
+ // warning: this causes problems when setText() is called more than once!
+ // -> widget resizes after every call, ignoring any user settings
+ int w = puGetDefaultLegendFont().getStringWidth(text.latin1()) + PUSTR_LGAP + PUSTR_RGAP;
+ int h = puGetDefaultLegendFont().getStringHeight(text.latin1()) + puGetDefaultLegendFont().getStringDescender () + PUSTR_TGAP + PUSTR_BGAP;
+ setSize(w, h);
 }
 
 void BoPUIPushButton::emitSignal()
