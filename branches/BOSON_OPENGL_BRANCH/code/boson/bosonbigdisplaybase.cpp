@@ -526,11 +526,15 @@ void BosonBigDisplayBase::paintGL()
 
 	glTranslatef(x, y, z); // AB: we can use the item->vertexPointer(), too!
 
-	// FIXME!!! don't apply here, don't cast here
-	Unit* u = (Unit*)item;
 	if (item->displayList() == 0) {
-		GLuint list = u->speciesTheme()->displayList(u->type());
-		item->setDisplayList(list);
+		if (RTTI::isUnit(item->rtti())) {
+			// FIXME!!! don't apply here, don't cast here
+			Unit* u = (Unit*)item;
+			GLuint list = u->speciesTheme()->displayList(u->type());
+			item->setDisplayList(list);
+		} else {
+			continue;
+		}
 	}
 	// FIXME: performance: we could create a displaylist that contains the selectbox and simply change item->displayList()
 	// when the item is selected/unselected
