@@ -21,7 +21,6 @@
 
 #include "bogroundrendererbase.h"
 
-class Cell;
 class PlayerIO;
 class QString;
 
@@ -40,7 +39,7 @@ public:
 
 	virtual int rtti() const { return Fast; } // obsolete. use className() instead
 
-	virtual void renderVisibleCells(Cell** cells, unsigned int cellsCount, const BosonMap* map);
+	virtual void renderVisibleCells(int* cells, unsigned int cellsCount, const BosonMap* map);
 };
 
 class BoFastGroundRendererNoTree : public BoFastGroundRenderer

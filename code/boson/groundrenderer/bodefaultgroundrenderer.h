@@ -21,7 +21,6 @@
 
 #include "bogroundrendererbase.h"
 
-class Cell;
 class PlayerIO;
 class QString;
 
@@ -41,7 +40,7 @@ public:
 	virtual int rtti() const { return Default; }
 
 protected:
-	virtual void renderVisibleCells(Cell** cells, unsigned int cellsCount, const BosonMap* map);
+	virtual void renderVisibleCells(int* cells, unsigned int cellsCount, const BosonMap* map);
 
 private:
 	/**
@@ -53,8 +52,8 @@ private:
 	 *
 	 * One could optimize this by using multitexturing for example!
 	 **/
-	unsigned int renderCellsNow(Cell** cells, int count, int cornersWidth, const float* heightMap, const float* normalMap, const unsigned char* texMapStart);
-	void renderCellColors(Cell** cells, int count, int width, const unsigned char* colorMap, const float* heightMap);
+	unsigned int renderCellsNow(int* cells, int count, int cornersWidth, const float* heightMap, const float* normalMap, const unsigned char* texMapStart);
+	void renderCellColors(int* cells, int count, int width, const unsigned char* colorMap, const float* heightMap);
 };
 
 class BoDefaultGroundRendererNoTree : public BoDefaultGroundRenderer

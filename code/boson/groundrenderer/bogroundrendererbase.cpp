@@ -44,6 +44,7 @@ static bool lineSegmentIntersects(const float* plane, const BoVector3& start, co
 
 static int g_cellsVisibleCalls = 0;
 
+static float distanceFromPlane(const float* plane, const BoVector3& pos);
 
 /**
  * This class takes care of building a list (an array in this case) of cells
@@ -75,7 +76,7 @@ public:
 	 * @param renderCellsCount Set this to the number of cells in @p
 	 * renderCells that are used (starting from 0), i.e. should be rendered.
 	 **/
-	virtual Cell** generateCellList(const BosonMap* map, Cell** renderCells, int* renderCellsSize, unsigned int* renderCellsCount) = 0;
+	virtual int* generateCellList(const BosonMap* map, int* renderCells, int* renderCellsSize, unsigned int* renderCellsCount) = 0;
 
 private:
 	const float* mViewFrustum;
@@ -99,7 +100,7 @@ public:
 	}
 	~CellListBuilderTree() {}
 
-	virtual Cell** generateCellList(const BosonMap* map, Cell** renderCells, int* renderCellsSize, unsigned int* renderCellsCount);
+	virtual int* generateCellList(const BosonMap* map, int* renderCells, int* renderCellsSize, unsigned int* renderCellsCount);
 
 protected:
 	/**
@@ -107,7 +108,7 @@ protected:
 	 * whether the cells in ((x,y),(x2,y2)) are visible and adds all visible
 	 * cells to @p cells.
 	 **/
-	void checkCells(Cell** cells, int x, int y, int x2, int y2);
+	void checkCells(int* cells, int x, int y, int x2, int y2);
 
 	/**
 	 * @return Whether the cells in the rect (x,y) to (x2,y2) are visible.
@@ -121,7 +122,7 @@ protected:
 	/**
 	 * Add all cells in the rect (x, y) to (x2, y2) to @p cells
 	 **/
-	void addCells(Cell** cells, int x, int y, int x2, int y2);
+	void addCells(int* cells, int x, int y, int x2, int y2);
 
 private:
 	// these variables are valid only while we are in generateCellList() !
@@ -158,7 +159,7 @@ public:
 	}
 	~CellListBuilderNoTree() {}
 
-	virtual Cell** generateCellList(const BosonMap* map, Cell** renderCells, int* renderCellsSize, unsigned int* renderCellsCount);
+	virtual int* generateCellList(const BosonMap* map, int* renderCells, int* renderCellsSize, unsigned int* renderCellsCount);
 
 protected:
 	void calculateWorldRect(const QRect& rect,
@@ -279,17 +280,17 @@ void BoGroundRendererBase::generateCellList(const BosonMap* map)
  }
  int renderCellsSize = 0;
  unsigned int renderCellsCount = 0;
- Cell** originalList = renderCells();
+ int* originalList = renderCells();
  mCellListBuilder->setViewFrustum(viewFrustum());
  mCellListBuilder->setViewport(viewport());
- Cell** renderCells = mCellListBuilder->generateCellList(map, originalList, &renderCellsSize, &renderCellsCount);
+ int* renderCells = mCellListBuilder->generateCellList(map, originalList, &renderCellsSize, &renderCellsCount);
  if (renderCells != originalList) {
 	setRenderCells(renderCells, renderCellsSize);
  }
  setRenderCellsCount(renderCellsCount);
 }
 
-Cell** CellListBuilderNoTree::generateCellList(const BosonMap* map, Cell** origRenderCells, int* renderCellsSize, unsigned int* renderCellsCount)
+int* CellListBuilderNoTree::generateCellList(const BosonMap* map, int* origRenderCells, int* renderCellsSize, unsigned int* renderCellsCount)
 {
  if (!viewport()) {
 	BO_NULL_ERROR(viewport());
@@ -334,11 +335,11 @@ Cell** CellListBuilderNoTree::generateCellList(const BosonMap* map, Cell** origR
  cellMaxX = QMIN(cellMaxX, (int)map->width() - 1);
  cellMaxY = QMIN(cellMaxY, (int)map->height() - 1);
 
- Cell** renderCells = origRenderCells;
+ int* renderCells = origRenderCells;
  int size = (cellMaxX - cellMinX + 1) * (cellMaxY - cellMinY + 1);
  size = QMIN((int)(map->width() * map->height()), size);
  if (size > *renderCellsSize) {
-	renderCells = new Cell*[size];
+	renderCells = new int[size * 2];
 	*renderCellsSize = size;
  }
 
@@ -380,7 +381,7 @@ Cell** CellListBuilderNoTree::generateCellList(const BosonMap* map, Cell** origR
 		if (Bo3dTools::sphereInFrustum(viewFrustum(), BoVector3(glX, glY, (minz + maxz) / 2), sqrt(2 * (BO_GL_CELL_SIZE/2) * (BO_GL_CELL_SIZE/2) + z * z))) {
 			// AB: instead of storing the cell here we should store
 			// cell coordinates and create a vertex array with that
-			renderCells[count] = c;
+			BoGroundRenderer::setCell(renderCells, count, c->x(), c->y());
 			count++;
 		}
 	}
@@ -815,7 +816,7 @@ void CellListBuilderNoTree::calculateWorldRect(const QRect& rect, int mapWidth, 
 
 }
 
-Cell** CellListBuilderTree::generateCellList(const BosonMap* map, Cell** origRenderCells, int* renderCellsSize, unsigned int* renderCellsCount)
+int* CellListBuilderTree::generateCellList(const BosonMap* map, int* origRenderCells, int* renderCellsSize, unsigned int* renderCellsCount)
 {
  if (!map) {
 	BO_NULL_ERROR(map);
@@ -823,12 +824,12 @@ Cell** CellListBuilderTree::generateCellList(const BosonMap* map, Cell** origRen
  }
  static int profiling_id = boProfiling->requestEventId("generateCellList");
  BosonProfiler prof(profiling_id);
- Cell** renderCells = origRenderCells;
+ int* renderCells = origRenderCells;
  if (*renderCellsSize < (int)(map->width() * map->height())) {
 	// we don't know in advance how many cells we might need, so we allocate
 	// width * height
 	*renderCellsSize = map->width() * map->height();
-	renderCells = new Cell*[*renderCellsSize];
+	renderCells = new int[*renderCellsSize * 2];
  }
  mMap = map;
  mCount = 0;
@@ -843,12 +844,13 @@ Cell** CellListBuilderTree::generateCellList(const BosonMap* map, Cell** origRen
  return renderCells;
 }
 
-void CellListBuilderTree::addCells(Cell** cells, int l, int t, int r, int b)
+void CellListBuilderTree::addCells(int* cells, int l, int t, int r, int b)
 {
 // boDebug() << k_funcinfo << "l=" << l << ",t=" << t << ",r=" << r << ",b=" << b << endl;
  for (int x = l; x <= r; x++) {
 	for (int y = t; y <= b; y++) {
-		cells[mCount] = mMap->cell(x, y);
+		Cell* c = mMap->cell(x, y);
+		BoGroundRenderer::setCell(cells, mCount, c->x(), c->y());
 		mCount++;
 	}
  }
@@ -923,7 +925,7 @@ bool CellListBuilderTree::cellsVisible(int x, int y, int x2, int y2, bool* parti
  return true;
 }
 
-void CellListBuilderTree::checkCells(Cell** cells, int l, int t, int r, int b)
+void CellListBuilderTree::checkCells(int* cells, int l, int t, int r, int b)
 {
  if (l == r && b == t) {
 	return;

@@ -131,7 +131,7 @@ public:
 	 * It does render the grid only if @ref BosonConfig::debugShowCellGrid
 	 * returns true.
 	 **/
-	void renderCellGrid(Cell** cells, int cellsCount, const float* heightMap, int heightMapWidth);
+	void renderCellGrid(int* cells, int cellsCount, const float* heightMap, int heightMapWidth);
 
 
 	/**
@@ -164,6 +164,17 @@ public:
 		return mStatistics;
 	}
 
+	virtual QString debugStringForPoint(const BoVector3& pos) const
+	{
+		return QString::null;
+	}
+
+// helper function that sets the cell @p cellCount in @p renderCells to @p x, @p
+// y.
+	static void setCell(int* renderCells, unsigned int cellCount, int x, int y);
+	static void getCell(int* renderCells, unsigned int cellCount, int* x, int* y);
+	static int* makeCellArray(unsigned int count);
+
 protected:
 	/**
 	 * This generates an array of visible cells for the @p playerIO. It works
@@ -175,9 +186,9 @@ protected:
 	 * Note that you _MUST_ delete[] the array when you are done using it!
 	 * @param cellCount The number of cells in the array is returned here.
 	 **/
-	Cell** createVisibleCellList(int* cellCount, PlayerIO* playerIO);
+	int* createVisibleCellList(int* cellCount, PlayerIO* playerIO);
 
-	void setRenderCells(Cell** renderCells, int renderCellsSize);
+	void setRenderCells(int* renderCells, int renderCellsSize);
 	void setRenderCellsCount(unsigned int count);
 
 	/**
@@ -186,7 +197,7 @@ protected:
 	 * first @ref renderCellsCount elements are actually used. The rest can
 	 * (and should) be NULL.
 	 **/
-	Cell** renderCells() const
+	int* renderCells() const
 	{
 		return mRenderCells;
 	}
@@ -226,7 +237,8 @@ protected:
 		return mViewFrustum;
 	}
 
-	virtual void renderVisibleCells(Cell** cells, unsigned int cellsCount, const BosonMap* map) = 0;
+	virtual void renderVisibleCells(int* cells, unsigned int cellsCount, const BosonMap* map) = 0;
+
 
 private:
 	const BoMatrix* mModelviewMatrix;
@@ -240,7 +252,7 @@ private:
 	//should store x,y,z and texture x,y there. for this we need to have
 	//cells in a single texture!
 	//--> then we could also use GL_QUAD_STRIP
-	Cell** mRenderCells;
+	int* mRenderCells;
 	int mRenderCellsSize; // max. number of cells in the array
 	unsigned int mRenderCellsCount; // actual number of cells in the array
 };

@@ -41,7 +41,7 @@ BoFastGroundRenderer::~BoFastGroundRenderer()
 {
 }
 
-void BoFastGroundRenderer::renderVisibleCells(Cell** renderCells, unsigned int cellsCount, const BosonMap* map)
+void BoFastGroundRenderer::renderVisibleCells(int* renderCells, unsigned int cellsCount, const BosonMap* map)
 {
  BO_CHECK_NULL_RET(renderCells);
  BO_CHECK_NULL_RET(map);
@@ -54,19 +54,20 @@ void BoFastGroundRenderer::renderVisibleCells(Cell** renderCells, unsigned int c
 
  unsigned int* cellTextures = new unsigned int[cellsCount];
  for (unsigned int i = 0; i < cellsCount; i++) {
-	Cell* c = renderCells[i];
-	if (!c) {
-		boError() << k_funcinfo << "NULL cell" << endl;
+	int x, y;
+	BoGroundRenderer::getCell(renderCells, i, &x, &y);
+	if (x < 0 || y < 0) {
+		boError() << k_funcinfo << "invalid cell" << endl;
 		continue;
 	}
 	cellTextures[i] = 0;
 	unsigned int maxValue = 0;
 	for (unsigned int j = 0; j < groundTheme->textureCount(); j++) {
 		unsigned int v = 0;
-		v += (int)map->texMapAlpha(j, c->x(), c->y());
-		v += (int)map->texMapAlpha(j, c->x() + 1, c->y());
-		v += (int)map->texMapAlpha(j, c->x(), c->y() + 1);
-		v += (int)map->texMapAlpha(j, c->x() + 1, c->y() + 1);
+		v += (int)map->texMapAlpha(j, x, y);
+		v += (int)map->texMapAlpha(j, x + 1, y);
+		v += (int)map->texMapAlpha(j, x, y + 1);
+		v += (int)map->texMapAlpha(j, x + 1, y + 1);
 		if (v > maxValue) {
 			maxValue = v;
 
@@ -97,11 +98,10 @@ void BoFastGroundRenderer::renderVisibleCells(Cell** renderCells, unsigned int c
 		if (cellTextures[j] != i) {
 			continue;
 		}
-		Cell* c = renderCells[j];
+		int x;
+		int y;
+		BoGroundRenderer::getCell(renderCells, j, &x, &y);
 		count++;
-
-		int x = c->x();
-		int y = c->y();
 
 		int celloffset = y * cornersWidth + x;
 		const float* heightMapUpperLeft = heightMap + celloffset;
