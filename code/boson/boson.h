@@ -266,6 +266,8 @@ public:
 	void startScenario(BosonStarting*);
 
 
+	unsigned long int nextUnitId();
+
 public: // small KGame extenstions for boson
 	/**
 	 * Used internally by @ref KGame. Simply create and return a new @ref
@@ -469,8 +471,6 @@ signals:
 
 protected:
 	virtual bool playerInput(QDataStream& stream, KPlayer* player);
-
-	unsigned long int nextUnitId();
 
 	/**
 	 * Create a new unit. No resources of the player are reduced, the unit

@@ -740,7 +740,7 @@ void BosonCanvas::destroyUnit(Unit* unit)
 	// Make explosion if needed
 	const UnitProperties* prop = unit->unitProperties();
 	if (prop->explodingDamage() > 0) {
-		BosonShotExplosion* e = (BosonShotExplosion*)createNewItem(RTTI::Shot, unit->owner(), BosonShot::Explosion, 0, 0);
+		BosonShotExplosion* e = (BosonShotExplosion*)createNewItem(RTTI::Shot, unit->owner(), ItemType(BosonShot::Explosion, 0, 0));
 		// Do we want ability to set fullDamageRange here?
 		if (e) {
 			e->activate(pos, prop->explodingDamage(), prop->explodingDamageRange(), 0.0f, 10);
@@ -748,7 +748,7 @@ void BosonCanvas::destroyUnit(Unit* unit)
 	}
 	// Add explosion fragments
 	for (unsigned int i = 0; i < unit->unitProperties()->explodingFragmentCount(); i++) {
-		BosonShotFragment* f = (BosonShotFragment*)createNewItem(RTTI::Shot, unit->owner(), BosonShot::Fragment, 0, 0);
+		BosonShotFragment* f = (BosonShotFragment*)createNewItem(RTTI::Shot, unit->owner(), ItemType(BosonShot::Fragment, 0, 0));
 		if (f) {
 			f->activate(pos, unit->unitProperties());
 		}
@@ -1142,24 +1142,32 @@ bool BosonCanvas::loadItemFromXML(const QDomElement& item, Player* owner)
 		return false;
 	}
 	unsigned long int id = 0;
-	int dataHandlerId = 0;
-
+	int dataHandlerId = -1;
 	id = item.attribute(QString::fromLatin1("Id")).toULong(&ok);
 	if (!ok) {
 		boError(260) << k_funcinfo << "Invalid Id number for Item tag" << endl;
 		return false;
 	}
-	dataHandlerId = item.attribute(QString::fromLatin1("DataHandlerId")).toInt(&ok);
-	if (!ok) {
-		boError(260) << k_funcinfo << "Invalid DataHandlerId number for Item tag" << endl;
-		return false;
+	if (item.hasAttribute(QString::fromLatin1("DataHandlerId"))) {
+		dataHandlerId = item.attribute(QString::fromLatin1("DataHandlerId")).toInt(&ok);
+		if (!ok) {
+			boError(260) << k_funcinfo << "Invalid DataHandlerId number for Item tag" << endl;
+			return false;
+		}
 	}
 
-	Unit* u = (Unit*)createItem(RTTI::UnitStart + type, owner, type);
+	// FIXME: I think we should move addUnit() to bosoncanvas.
+	// probably do the same with signalAddUnit() and nextUnitId().
+	//
+	// FIXME: use floats? i.e. use canvas coordinates, not cell coordinates
+	// (the xml does it too)
+	int x = 0;
+	int y = 0;
+	// AB: TODO: createNewUnit() - which includes owner->addUnit()
+	Unit* u = (Unit*)createItem(RTTI::UnitStart + type, owner, ItemType(type), id);
 
 	// Set additional properties
 	owner->addUnit(u, dataHandlerId);
-	u->setId(id);
 
 	// Call unit's loading methods
 	if (!u->loadFromXML(item)) {
@@ -1170,7 +1178,7 @@ bool BosonCanvas::loadItemFromXML(const QDomElement& item, Player* owner)
 
 	return true;
  } else if (RTTI::isShot(rtti)) {
-	BosonShot* s = (BosonShot*)createNewItem(RTTI::Shot, owner, type, group, groupType);
+	BosonShot* s = (BosonShot*)createNewItem(RTTI::Shot, owner, ItemType(type, group, groupType));
 	if (!s) {
 		boError() << k_funcinfo << "Invalid shot - type=" << type << " group=" << group << " groupType=" << groupType << endl;
 		return false;
@@ -1301,9 +1309,9 @@ void BosonCanvas::deleteUnits(QPtrList<Unit>* units)
  }
 }
 
-BosonItem* BosonCanvas::createNewItem(int rtti, Player* owner, unsigned long int type, unsigned long int group, unsigned long int groupType)
+BosonItem* BosonCanvas::createNewItem(int rtti, Player* owner, const ItemType& type)
 {
- BosonItem* item = createItem(rtti, owner, type, group, groupType);
+ BosonItem* item = createItem(rtti, owner, type, boGame->nextUnitId());
  if (!item) {
 	return 0;
  }
@@ -1331,16 +1339,18 @@ BosonItem* BosonCanvas::createNewItem(int rtti, Player* owner, unsigned long int
  return item;
 }
 
-BosonItem* BosonCanvas::createItem(int rtti, Player* owner, unsigned long int type, unsigned long int group, unsigned long int groupType)
+BosonItem* BosonCanvas::createItem(int rtti, Player* owner, const ItemType& type, unsigned long int id)
 {
+ BosonItem* item = 0;
  if (RTTI::isUnit(rtti)) {
-	Q_UNUSED(group);
-	Q_UNUSED(groupType);
-	return (BosonItem*)createUnit(owner, type);
+	item = (BosonItem*)createUnit(owner, type.mType);
+	if (item) {
+		((Unit*)item)->setId(id);
+	}
  } else if (RTTI::isShot(rtti)) {
-	return (BosonItem*)createShot(owner, type, group, groupType);
+	item = (BosonItem*)createShot(owner, type.mType, type.mGroup, type.mGroupType);
  }
- return 0;
+ return item;
 }
 
 Unit* BosonCanvas::createUnit(Player* owner, unsigned long int unitType)
