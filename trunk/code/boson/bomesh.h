@@ -225,12 +225,6 @@ public:
 
 	void createFaces(unsigned int faces);
 
-	/**
-	 * @param data The full-detailed mesh data, i.e. LOD 0.
-	 * @param lod The to-be-generated level of detail.
-	 **/
-	void generateLOD(BoMeshLOD* data, unsigned int lod);
-
 	inline BoFaceNode* nodes() const
 	{
 		return mNodes;

@@ -22,6 +22,7 @@
 #include "bo3dtools.h"
 #include "bomaterial.h"
 #include "bomemorytrace.h"
+#include "bolodbuilder.h"
 
 #include <qptrlist.h>
 #include <qcolor.h>
@@ -889,13 +890,6 @@ void BoMeshLOD::createFaces(unsigned int faces)
  }
 }
 
-void BoMeshLOD::generateLOD(BoMeshLOD* data, unsigned int lod)
-{
- BO_CHECK_NULL_RET(data);
- boDebug(100) << k_funcinfo << "generate lod=" << lod << endl;
- boDebug(100) << k_funcinfo << "TODO: implement" << endl;
-}
-
 unsigned int BoMeshLOD::facesCount() const
 {
  return d->mAllFaces.count();
@@ -1651,10 +1645,21 @@ void BoMesh::generateLOD()
 		<< " exisiting: " << oldCount
 		<< " generating: " << LODCount - oldCount
 		<< endl;
+
+ BoLODBuilder builder(this, lod[0]);
  for (unsigned int i = oldCount; i < LODCount; i++) {
 	lod[i] = new BoMeshLOD();
-	lod[i]->generateLOD(lod[0], i);
+	QValueList<BoFace> faces = builder.generateLOD(i);
+	lod[i]->createFaces(faces.count());
+	for (unsigned int j = 0; j < faces.count(); j++) {
+		lod[i]->setFace(j, faces[j]);
+	}
+	calculateNormals(i);
  }
+
+ delete[] d->mLODs;
+ d->mLODs = lod;
+ d->mLODCount = LODCount;
 }
 
 BoMeshLOD* BoMesh::levelOfDetail(unsigned int lod) const
