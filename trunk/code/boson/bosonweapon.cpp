@@ -339,16 +339,14 @@ void BosonWeapon::registerWeaponData(int weaponNumber, KGamePropertyBase* prop, 
 		name);
 }
 
-bool BosonWeapon::saveAsXML(QDomElement& root) const
+bool BosonWeapon::saveAsXML(QDomElement& /*root*/) const
 {
- Q_UNUSED(root);
  // AB: nothing to do here.
  return true;
 }
 
-bool BosonWeapon::loadFromXML(const QDomElement& root)
+bool BosonWeapon::loadFromXML(const QDomElement& /*root*/)
 {
- Q_UNUSED(root);
  // AB: nothing to do here.
  return true;
 }
