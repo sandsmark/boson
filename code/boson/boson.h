@@ -22,6 +22,7 @@
 #define BOSON_H 
  
 // include files for QT
+#include <qlist.h>
 // include files for KDE 
 #include <kapp.h> 
 // application specific includes
@@ -30,6 +31,7 @@
 
 class KSocket;
 class KProcess;
+class bosonTopLevel;
 
 
 /*
@@ -70,6 +72,8 @@ private:
 	void init(void); // internal
 	void initCanvas(int, int);
 	void gameEnd( endMsg_t::endReasonType reason );
+
+	QList<bosonTopLevel> topLevels;
 
 signals:
 	void ressourcesUpdated(void);
