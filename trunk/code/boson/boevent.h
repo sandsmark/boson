@@ -37,7 +37,7 @@ public:
 	enum RTTIs {
 		RTTIEvent = 1,
 		RTTIULong = 2,
-		RTTIString = 3,
+		RTTIString = 3
 	};
 public:
 	/**
@@ -65,6 +65,11 @@ public:
 	virtual bool save(QDomElement& root) const;
 	virtual bool load(const QDomElement& root);
 
+	/**
+	 * @return TRUE if this event matches the event @p e under the matching
+	 * @p m. The matching @p m describes which parameters are relevant when
+	 * comparing the events.
+	 **/
 	virtual bool matches(const BoEventMatching* m, const BoEvent* e) const;
 
 	/**
