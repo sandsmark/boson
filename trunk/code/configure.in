@@ -29,7 +29,7 @@ AC_OUTPUT(Makefile \
 	boson/docs/Makefile \
 	boson/docs/en/Makefile \
 	editor/Makefile \
-	map/Makefile \
+	tools/Makefile \
 )
 
 
