@@ -1946,14 +1946,69 @@ void BosonBigDisplayBase::generateCellList()
 	boError() << k_funcinfo << "NULL cells!" << endl;
 	return;
  }
+ float maxX, maxY;
+ float minX, minY;
+ GLdouble posX, posY;
+ GLdouble posZ;
+ mapCoordinates(QPoint(0,0), &posX, &posY, &posZ);
+ maxX = minX = posX;
+ maxY = minY = -posY;
+ mapCoordinates(QPoint(width(),0), &posX, &posY, &posZ);
+ maxX = QMAX(maxX, posX);
+ maxY = QMAX(maxY, -posY);
+ minX = QMIN(minX, posX);
+ minY = QMIN(minY, -posY);
+ mapCoordinates(QPoint(0,height()), &posX, &posY, &posZ);
+ maxX = QMAX(maxX, posX);
+ maxY = QMAX(maxY, -posY);
+ minX = QMIN(minX, posX);
+ minY = QMIN(minY, -posY);
+ mapCoordinates(QPoint(width(),height()), &posX, &posY, &posZ);
+ maxX = QMAX(maxX, posX);
+ maxY = QMAX(maxY, -posY);
+ minX = QMIN(minX, posX);
+ minY = QMIN(minY, -posY);
+
+ maxX = QMAX(0, maxX);
+ maxY = QMAX(0, maxY);
+ minX = QMAX(0, minX);
+ minY = QMAX(0, minY);
+ maxX = QMIN(width(), maxX);
+ minX = QMIN(width(), minX);
+ maxY = QMIN(height(), maxY);
+ minY = QMIN(height(), minY);
+
+ // if everything went fine we need to add those cells that are in the
+ // ((minX,minY),(maxX,maxY)) rectangle only.
+
+ int cellMinX = (int)(minX / BO_GL_CELL_SIZE); // AB: *no* +1 for min values!
+ int cellMaxX = (int)(maxX / BO_GL_CELL_SIZE) + 1; // +1 because of a modulo (very probably at this point)
+ int cellMinY = (int)(minY / BO_GL_CELL_SIZE);
+ int cellMaxY = (int)(maxY / BO_GL_CELL_SIZE) + 1;
+
+ // all cells between those min/max values above might be visible. unfortunately
+ // we need to add *all* visible cells to our list, but we need to add as *few*
+ // as possible.
+ // we could improve speed (important for big maps!) here if we would group
+ // several cells into a single sphereInFrustum() call for example.
+ //
+ // note that the current implementation is very fast at default zoom, but if
+ // you zoom out (and therefore there are lots of cells visible) it is still too
+ // slow.
+
  float radius = sqrt(2 * (BO_GL_CELL_SIZE/2) * (BO_GL_CELL_SIZE/2));
- for (unsigned int i = 0; i < map->width() * map->height(); i++) {
-	Cell* c = &allCells[i];
-	GLfloat x = (float)c->x() * BO_GL_CELL_SIZE + BO_GL_CELL_SIZE / 2;
-	GLfloat y = -((float)c->y() * BO_GL_CELL_SIZE + BO_GL_CELL_SIZE / 2);
+ for (int x = cellMinX; x <= cellMaxX; x++) {
+	for (int y = cellMinY; y <= cellMaxY; y++) {
+		// WARNING: x/y MUST be valid!!! there is *no* additional check
+		// here!
+		Cell* c = &allCells[x + y * map->width()];
+		
+		GLfloat glX = (float)c->x() * BO_GL_CELL_SIZE + BO_GL_CELL_SIZE / 2;
+		GLfloat glY = -((float)c->y() * BO_GL_CELL_SIZE + BO_GL_CELL_SIZE / 2);
 	
-	if (sphereInFrustum(x, y, 0.0, radius)) {
-		d->mRenderCells.append(c);
+		if (sphereInFrustum(glX, glY, 0.0, radius)) {
+			d->mRenderCells.append(c);
+		}
 	}
  }
 }
