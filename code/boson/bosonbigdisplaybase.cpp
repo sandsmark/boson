@@ -62,7 +62,6 @@
 
 #define PLIB 0
 #define LIB3DS 0
-#define ANIMATED_CURSOR_TIMER 0 // huge performance problem
 
 #if PLIB
 #include <plib/ssg.h>
@@ -207,58 +206,72 @@ private:
 	bool mVisible;
 };
 
-class RMBMove
+class MouseMoveDiff
 {
 public:
-	RMBMove()
+	enum Mode {
+		ModeNone = 0,
+		ModeRMBMove = 1
+	} MouseMoveMode;
+	
+	MouseMoveDiff()
 	{
-		mIsRMBMove = false;
-		mX = 0.0;
-		mY = 0.0;
-		mZ = 0.0;
+		mMode = ModeNone;
+		mX = 0;
+		mY = 0;
+		mOldX = 0;
+		mOldY = 0;
 	}
 
-	void setStartPos(GLfloat x, GLfloat y, GLfloat z)
+	inline void moveToPos(const QPoint& pos)
 	{
+		moveToPos(pos.x(), pos.y());
+	}
+	inline void moveToPos(int x, int y)
+	{
+		mOldX = mX;
+		mOldY = mY;
 		mX = x;
 		mY = y;
-		mZ = z;
 	}
-	void start(GLfloat x, GLfloat y, GLfloat z)
+
+	void startRMBMove()
 	{
-		mX = x;
-		mY = y;
-		mZ = z;
-		mIsRMBMove = true;
+		// we need this mode setting for rmb moving cause the right mouse button click might be an action as well
+		mMode = ModeRMBMove;
 	}
-	
 	void stop()
 	{
-		mIsRMBMove = false;
+		mMode = ModeNone;
 	}
-	GLfloat x() const
+	int dx() const
 	{
-		return mX;
+		return (mX - mOldX);
 	}
-	GLfloat y() const
+	int dy() const
 	{
-		return mY;
-	}
-	GLfloat z() const
-	{
-		return mZ;
+		return (mY - mOldY);
 	}
 	
 	bool isRMBMove() const
 	{
-		return mIsRMBMove;
+		return mode() == ModeRMBMove;
+	}
+	void setMode(Mode mode) 
+	{
+		mMode = mode;
+	}
+	Mode mode() const
+	{
+		return mMode;
 	}
 
 private:
-	bool mIsRMBMove;
-	GLfloat mX;
-	GLfloat mY;
-	GLfloat mZ;
+	Mode mMode;
+	int mX;
+	int mY;
+	int mOldX;
+	int mOldY;
 };
 
 
@@ -274,7 +287,6 @@ public:
 #endif
 
 		
-		mMouseIO = 0;
 		mLocalPlayer = 0;
 //		mChat = 0;
 
@@ -285,7 +297,6 @@ public:
 #endif
 	}
 
-	KGameMouseIO* mMouseIO;
 	Player* mLocalPlayer;
 	QTimer mCursorEdgeTimer;
 	int mCursorEdgeCounter;
@@ -298,6 +309,9 @@ public:
 	float mPosY;
 	float mPosZ;
 	float mZoomFactor; //TODO
+
+	float mCenterDiffX;
+	float mCenterDiffY;
 
 	int mW; // width ... we should use glGetIntegerv(GL_VIEWPORT, view); and then view[foo] instead.
 	int mH; // height ... see above
@@ -313,7 +327,7 @@ public:
 #endif // !NO_OPENGL
 
 	SelectionRect mSelectionRect;
-	RMBMove mRMBMove;
+	MouseMoveDiff mMouseMoveDiff;
 
 
 	QTimer mUpdateTimer;
@@ -329,13 +343,6 @@ public:
 
 BosonBigDisplayBase::BosonBigDisplayBase(BosonCanvas* c, QWidget* parent)
 		: MyHack(parent, "bigdisplay")
-/*
-#ifdef NO_OPENGL
-		: QCanvasView(parent, "bigdisplay")
-#else
-		: QGLWidget(parent, "bigdisplay")
-#endif
-*/
 {
  kdDebug() << k_funcinfo << endl;
  d = new BosonBigDisplayBasePrivate;
@@ -346,6 +353,8 @@ BosonBigDisplayBase::BosonBigDisplayBase(BosonCanvas* c, QWidget* parent)
  d->mPosX = 0.0;
  d->mPosY = 0.0;
  d->mPosZ = 10.0;
+ d->mCenterDiffX = 0.0;
+ d->mCenterDiffY = 0.0;
 
  d->mFovY = 60.0;
  d->mAspect = 1.0;
@@ -402,7 +411,6 @@ BosonBigDisplayBase::~BosonBigDisplayBase()
 #endif
 	
  quitGame();
-// delete d->mMouseIO;//don't delete here! KPlayer d'tor does this already
  delete mSelection;
 // delete d->mChat;
 // delete d->mUnitTips;
@@ -421,14 +429,6 @@ void BosonBigDisplayBase::initializeGL()
  glEnableClientState(GL_VERTEX_ARRAY);
  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
-
-#if ANIMATED_CURSOR_TIMER
- //FIXME: which value is "good"? 100 is far too low for the cursor. 10 is 
- //too low concerning performance
- //50 isn't good either.
-// kdWarning() << "STARTING UPDATE TIMER! HUGE PERFORMANCE PROBLEM!" << endl;
-// d->mUpdateTimer.start(50);
-#endif
 
 #if PLIB
  d->m3ds = ssgLoad3ds("/home/andi/tank.3ds");
@@ -508,7 +508,7 @@ void BosonBigDisplayBase::paintGL()
  // nice trick to avoid clearing it. see
  // http://www.mesa3d.org/brianp/sig97/perfopt.htm
  // in 3.5!
-// glClear(GL_COLOR_BUFFER_BIT);
+ glClear(GL_COLOR_BUFFER_BIT);
  calcFPS();
  glMatrixMode(GL_MODELVIEW); // default matrix mode anyway ; redundant!
  glLoadIdentity();
@@ -521,8 +521,8 @@ void BosonBigDisplayBase::paintGL()
  upY = 1.0;
  upZ = 0.0;
  float centerX, centerY, centerZ;
- centerX = cameraX();
- centerY = cameraY();
+ centerX = cameraX() + d->mCenterDiffX;
+ centerY = cameraY() + d->mCenterDiffY;
  centerZ = -100.0;
 // centerZ = d->mPosZ;
  // TODO: performance: isn't it possible to skip this by using pushMatrix() and
@@ -737,19 +737,31 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 		break;
 	}
 	case QEvent::MouseMove:
-		if (e->state() & LeftButton) {
+		d->mMouseMoveDiff.moveToPos(e->pos());
+		GLdouble dx, dy;
+
+		if (e->state() & ControlButton) {
+			d->mCenterDiffX += d->mMouseMoveDiff.dx();
+			d->mCenterDiffY += d->mMouseMoveDiff.dy();
+			kdDebug() << d->mCenterDiffX << " " << d->mCenterDiffY << endl;
+		} else if (e->state() & ShiftButton) {
+			// "zooming"
+			// actually we simply move the z-position of the camera but it basically has the effect of zooming
+			setCameraPos(cameraX(), cameraY(), cameraZ() - d->mMouseMoveDiff.dy());
+			kdDebug() << "posZ: " << d->mPosZ << endl;
+//		} else if (e->state() & AltButton) {
+		} else if (e->state() & LeftButton) {
 			d->mSelectionRect.setVisible(true);
 			moveSelectionRect(posX, posY, posZ);
 		} else if (e->state() & RightButton) {
 #ifndef NO_OPENGL
 			if (boConfig->rmbMove()) {
-				GLfloat dx = posX - d->mRMBMove.x();
-				GLfloat dy = posY - d->mRMBMove.y();
-				setCameraPos(cameraX() + dx, cameraY() + dy, cameraZ());
-				d->mRMBMove.start(cameraX(), cameraY(), cameraZ());
+				d->mMouseMoveDiff.startRMBMove();
+				setCameraPos(cameraX() + d->mMouseMoveDiff.dx(), 
+						cameraY() + d->mMouseMoveDiff.dy(), cameraZ());
 			} else {
 				// oops
-				d->mRMBMove.stop();
+				d->mMouseMoveDiff.stop();
 			}
 #else
 			//TODO - the canvasview version is broken
@@ -773,14 +785,19 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 	case QEvent::MouseButtonPress:
 		makeActive();
 		if (e->button() == LeftButton) {
-//			startSelection(posX, posY, posZ);
-			d->mSelectionRect.setStart(posX, posY, posZ);
-#ifdef NO_OPENGL
-#else
-#if !ANIMATED_CURSOR_TIMER
-			updateGL();
-#endif
-#endif
+		/*
+			if (e->state() & ControlButton) {
+
+			} else if (e->state() & AltButton) {
+			} else if (e->state() & ShiftButton) {
+			} else {
+			*/
+				// not modifier key was pressed
+				// start selection rect (or a simple selection 
+				// if mouse doesn't get moved)
+//				startSelection(posX, posY, posZ);
+				d->mSelectionRect.setStart(posX, posY, posZ);
+//			}
 		} else if (e->button() == MidButton) {
 			if (boConfig->mmbMove()) {
 				int cellX, cellY;
@@ -793,16 +810,11 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 #endif
 				slotReCenterDisplay(QPoint(cellX, cellY));
 				updateCursor();
-#ifdef NO_OPENGL
-#else
-#if !ANIMATED_CURSOR_TIMER
-				updateGL();
-#endif
-#endif
 			}
 		} else if (e->button() == RightButton) {
 			if (boConfig->rmbMove()) {
-				d->mRMBMove.setStartPos(posX, posY, posZ); // set position, but do not yet start!
+				//AB: this might be obsolete..
+				d->mMouseMoveDiff.moveToPos(e->pos()); // set position, but do not yet start!
 			}
 		}
 		e->accept();
@@ -810,15 +822,9 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 	case QEvent::MouseButtonRelease:
 		if (e->button() == LeftButton) {
 			removeSelectionRect();
-#ifdef NO_OPENGL
-#else
-#if !ANIMATED_CURSOR_TIMER
-			updateGL();
-#endif
-#endif
 		} else if (e->button() == RightButton) {
-			if (d->mRMBMove.isRMBMove()) {
-				d->mRMBMove.stop();
+			if (d->mMouseMoveDiff.isRMBMove()) {
+				d->mMouseMoveDiff.stop();
 			} else {
 				//TODO: port editor to KGameIO - otherwise
 				//eatevent and send are useless
@@ -847,19 +853,16 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
  }
 }
 
-
-
-
 void BosonBigDisplayBase::addMouseIO(Player* p)
 {
  kdDebug() << k_funcinfo << endl;
  // FIXME: check if player is valid, mouse IO already present, ... see
  // BosonBigDisplayBase
  // another TODO: implement a GL based widget for the editor!
- d->mMouseIO = new KGameMouseIO(this, true);
- connect(d->mMouseIO, SIGNAL(signalMouseEvent(KGameIO*, QDataStream&, QMouseEvent*, bool*)),
+ KGameMouseIO* mouseIO = new KGameMouseIO(this, true);
+ connect(mouseIO, SIGNAL(signalMouseEvent(KGameIO*, QDataStream&, QMouseEvent*, bool*)),
 		this, SLOT(slotMouseEvent(KGameIO*, QDataStream&, QMouseEvent*, bool*)));
- p->addGameIO(d->mMouseIO);
+ p->addGameIO(mouseIO);
 }
 
 void BosonBigDisplayBase::makeActive()
@@ -921,8 +924,8 @@ void BosonBigDisplayBase::slotReCenterDisplay(const QPoint& pos)
 #ifndef NO_OPENGL
 void BosonBigDisplayBase::worldToCanvas(GLfloat x, GLfloat y, GLfloat /*z*/, QPoint* pos) const
 {
- pos->setX(x / BO_GL_CELL_SIZE * BO_TILE_SIZE);
- pos->setY(-y / BO_GL_CELL_SIZE * BO_TILE_SIZE);
+ pos->setX((int)(x / BO_GL_CELL_SIZE * BO_TILE_SIZE));
+ pos->setY((int)(-y / BO_GL_CELL_SIZE * BO_TILE_SIZE));
 }
 
 bool BosonBigDisplayBase::mapCoordinates(const QPoint& pos, GLdouble* posX, GLdouble* posY, GLdouble* posZ) const
@@ -961,6 +964,25 @@ bool BosonBigDisplayBase::mapCoordinates(const QPoint& pos, GLdouble* posX, GLdo
 // kdDebug() << "click on: " << *posX << "," << *posY << "," <<*posZ << endl;
  return true;
 }
+
+bool BosonBigDisplayBase::mapDistance(int windx, int windy, GLdouble* dx, GLdouble* dy) const
+{
+ GLdouble moveZ; // unused
+ GLdouble moveX1, moveY1;
+ GLdouble moveX2, moveY2;
+ if (!mapCoordinates(QPoint(0, 0), &moveX1, &moveY1, &moveZ)) {
+	kdError() << k_funcinfo << "Cannot map coordinates" << endl;
+	return false;
+ }
+ if (!mapCoordinates(QPoint(windx, windy), &moveX2, &moveY2, &moveZ)) {
+	kdError() << k_funcinfo << "Cannot map coordinates" << endl;
+	return false;
+ }
+ *dx = moveX2 - moveX1;
+ *dy = moveY2 - moveY1;
+ return true;
+}
+
 #endif // !NO_OPENGL
 
 void BosonBigDisplayBase::enterEvent(QEvent*)
@@ -1231,20 +1253,10 @@ void BosonBigDisplayBase::slotCursorEdgeTimeout()
 
  const int move = 20; // FIXME hardcoded - use BosonConfig instead
 #ifndef NO_OPENGL
- GLdouble moveZ; // unused
- GLdouble moveX1, moveY1;
- GLdouble moveX2, moveY2;
- if (!mapCoordinates(QPoint(0, 0), &moveX1, &moveY1, &moveZ)) {
-	kdError() << k_funcinfo << "Cannot map coordinates" << endl;
-	return;
- }
- if (!mapCoordinates(QPoint(move, move), &moveX2, &moveY2, &moveZ)) {
-	kdError() << k_funcinfo << "Cannot map coordinates" << endl;
-	return;
- }
-
- GLfloat moveX = QABS(moveX1 - moveX2);
- GLfloat moveY = -QABS(moveY1 - moveY2);
+ GLdouble dx, dy;
+ mapDistance(move, move, &dx, &dy);
+ GLfloat moveX = (GLfloat)dx;
+ GLfloat moveY = (GLfloat)dy;
 #else
  const float moveX = move;
  const float moveY = move;
@@ -1281,18 +1293,9 @@ void BosonBigDisplayBase::slotCursorEdgeTimeout()
 void BosonBigDisplayBase::scrollBy(int dx, int dy)
 {
 #ifndef NO_OPENGL
- GLdouble z;
- GLdouble x1, y1;
- GLdouble x2, y2;
- if (!mapCoordinates(QPoint(0, 0), &x1, &y1, &z)) {
-	kdError() << k_funcinfo << "Cannot map coordinates" << endl;
-	return;
- }
- if (!mapCoordinates(QPoint(dx, dy), &x2, &y2, &z)) {
-	kdError() << k_funcinfo << "Cannot map coordinates" << endl;
-	return;
- }
- setCameraPos(cameraX() + x2 - x1, cameraY() + y2 - y1, cameraZ());
+ GLdouble x, y;
+ mapDistance(dx, dy, &x, &y);
+ setCameraPos(cameraX() + x, cameraY() + y, cameraZ());
 #else 
  QCanvasView::scrollBy(dx, dy);
 #endif
@@ -1377,10 +1380,7 @@ void BosonBigDisplayBase::setCameraPos(GLfloat x, GLfloat y, GLfloat z)
  
  d->mPosX = QMAX(w / 2, QMIN(((float)mCanvas->mapWidth()) * BO_GL_CELL_SIZE - w / 2, x));
  d->mPosY = QMIN(h / 2, QMAX((-((float)mCanvas->mapHeight()) * BO_GL_CELL_SIZE) - h / 2, y));
- d->mPosZ = QMAX(NEAR, QMIN(FAR, z));
-#if !ANIMATED_CURSOR_TIMER
- updateGL();
-#endif
+ d->mPosZ = QMAX(NEAR+0.1, QMIN(FAR-0.1, z));
 
  int cellX = (int)(x1 / BO_GL_CELL_SIZE);
  int cellY = -(int)(y1 / BO_GL_CELL_SIZE);
@@ -1409,9 +1409,6 @@ GLfloat BosonBigDisplayBase::cameraZ() const
 void BosonBigDisplayBase::updateGLCursor()
 {
  // FIXME: use updateGL() directly instead. this function is just for testing.
-#if !ANIMATED_CURSOR_TIMER
- updateGL();
-#endif
 }
 
 bool BosonBigDisplayBase::checkError()
@@ -1474,7 +1471,7 @@ void BosonBigDisplayBase::calcFPS()
  d->mFramecount++;
 }
 
-double BosonBigDisplayBase::fps()
+double BosonBigDisplayBase::fps() const
 {
   return d->mFps;
 }
