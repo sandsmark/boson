@@ -111,9 +111,9 @@ bool BoCamera::loadFromXML(const QDomElement& root)
     boError(230) << k_funcinfo << "Invalid value for LookAtZ tag" << endl;
     lookatz = 0.0f;
   }
-  boDebug(260) << k_funcinfo << "Setting lookat to (" << lookatx << ", " << lookaty << ", " << lookatz << ")" << endl;
+//  boDebug(260) << k_funcinfo << "Setting lookat to (" << lookatx << ", " << lookaty << ", " << lookatz << ")" << endl;
   mLookAt.set(lookatx, lookaty, lookatz);
-  boDebug(260) << k_funcinfo << "lookat is now (" << lookAt().x() << ", " << lookAt().y() << ", " << lookAt().z() << ")" << endl;
+//  boDebug(260) << k_funcinfo << "lookat is now (" << lookAt().x() << ", " << lookAt().y() << ", " << lookAt().z() << ")" << endl;
   setPositionDirty();
   return true;
  }
