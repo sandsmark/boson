@@ -7,7 +7,7 @@ SUBDIRS = data
 
 bin_PROGRAMS = boson boeditor
 
-INCLUDES = $(all_includes)
+INCLUDES = -I$(kde_includes)/arts $(all_includes)
 
 # all boson(game)-only parts
 BOSON_SRC = main.cpp top.cpp 
