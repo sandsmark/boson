@@ -1,8 +1,8 @@
 <!DOCTYPE UI><UI version="3.1" stdsetdef="1">
-<class>BosonStartEditorWidgetBase</class>
+<class>BosonNewEditorWidgetBase</class>
 <widget class="QWidget">
     <property name="name">
-        <cstring>BosonStartEditorWidgetBase</cstring>
+        <cstring>BosonNewEditorWidgetBase</cstring>
     </property>
     <property name="geometry">
         <rect>
@@ -19,7 +19,7 @@
         </size>
     </property>
     <property name="caption">
-        <string>BosonNewGameWidgetBase</string>
+        <string>BosonNewEditorWidgetBase</string>
     </property>
     <grid>
         <property name="name">
@@ -235,31 +235,31 @@
     <connection>
         <sender>mChangeMaxHeight</sender>
         <signal>sliderMoved(int)</signal>
-        <receiver>BosonStartEditorWidgetBase</receiver>
+        <receiver>BosonNewEditorWidgetBase</receiver>
         <slot>slotMaxHeigthChanged(int)</slot>
     </connection>
     <connection>
         <sender>mChangeMaxPlayers</sender>
         <signal>sliderMoved(int)</signal>
-        <receiver>BosonStartEditorWidgetBase</receiver>
+        <receiver>BosonNewEditorWidgetBase</receiver>
         <slot>slotMaxPlayersChanged(int)</slot>
     </connection>
     <connection>
         <sender>mChangeMaxWidth</sender>
         <signal>sliderMoved(int)</signal>
-        <receiver>BosonStartEditorWidgetBase</receiver>
+        <receiver>BosonNewEditorWidgetBase</receiver>
         <slot>slotMaxWidthChanged(int)</slot>
     </connection>
     <connection>
         <sender>mChangeTileset</sender>
         <signal>activated(int)</signal>
-        <receiver>BosonStartEditorWidgetBase</receiver>
+        <receiver>BosonNewEditorWidgetBase</receiver>
         <slot>slotTilesetChanged(int)</slot>
     </connection>
     <connection>
         <sender>mChooseBosonMap</sender>
         <signal>clicked(QListViewItem*)</signal>
-        <receiver>BosonStartEditorWidgetBase</receiver>
+        <receiver>BosonNewEditorWidgetBase</receiver>
         <slot>slotMapChanged()</slot>
     </connection>
 </connections>
@@ -268,7 +268,8 @@
     <slot access="protected" specifier="pure virtual">slotTilesetChanged(int)</slot>
     <slot access="protected" specifier="pure virtual">slotMaxPlayersChanged(int)</slot>
     <slot access="protected" specifier="pure virtual">slotMaxWidthChanged(int)</slot>
-    <slot access="private" specifier="pure virtual">slotMaxHeigthChanged(int)</slot>
+    <slot access="protected" specifier="pure virtual">slotMaxHeigthChanged(int)</slot>
+    <slot access="protected" specifier="pure virtual">slotNewMapToggled()</slot>
 </slots>
 <layoutdefaults spacing="6" margin="11"/>
 <includehints>
