@@ -783,7 +783,7 @@ void BosonCanvas::updateParticleSystems(float elapsed)
 	s->update(elapsed);
 	if (!s->isActive()) {
 		boDebug() << k_funcinfo << "**********  REMOVING inactive particle system (particle count: " << s->particleCount() << ")!  *****" << endl;
-		d->mParticles.remove();
+		d->mParticles.remove(s);
 		i--;
 		count--;
 	}
@@ -802,8 +802,8 @@ void BosonCanvas::deleteUnusedShots()
 	if (RTTI::isShot(i->rtti())) {
 		if (!((BosonShot*)i)->isActive()) {
 			shotHit((BosonShot*)i);
-			d->mAnimList.remove();
-			d->mAllItems.removeItem(i);
+			removeAnimation(i);
+			removeItem(i);
 			delete i;
 		}
 	}
