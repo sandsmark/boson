@@ -1764,7 +1764,7 @@ sub tag_BOSONDOCFILES ()
                 $basedir .= "../";
             }
         }
-        $lines .= "\n$htmlfile: $wmlfile\n";
+        $lines .= "\n$htmlfile: \$(top_srcdir)/doc/$kdelang/includes $wmlfile\n";
         $lines .= "\t\@if test -x \"\$(WML)\"; then \\\n";
         $lines .= "\t  \$(WML) -I \"\$(top_srcdir)/doc/$kdelang/includes\" -D basedir=$basedir -o $htmlfile \$(srcdir)/$wmlfile ;\\\n";
         $lines .= "\t  echo \$(WML) -I \"\$(top_srcdir)/doc/$kdelang/includes\" -D basedir=$basedir -o $htmlfile \$(srcdir)/$wmlfile ;\\\n";
