@@ -136,7 +136,6 @@ void BoListDebugDialog::load()
 
 void BoListDebugDialog::save()
 {
-  kdDebug() << k_funcinfo << endl;
   QPtrListIterator<QCheckBox> it ( boxes );
   for ( ; it.current() ; ++it )
   {
