@@ -195,14 +195,14 @@ def advanceA10Game(cycle):
     boprint("info", "let's attack with some units")
     units = [25, 26, 32, 33, 82, 88, 89 ]
     for unit in units:
-      BoScript.moveUnitWithAttacking(player, unit, 46 * 48, 46 * 48)
+      BoScript.moveUnitWithAttacking(player, unit, 46, 46)
   elif cycle == 140:
     boprint("info", "stop two units")
     BoScript.stopUnit(player, 25)
     BoScript.stopUnit(player, 26)
   elif cycle == 160:
     boprint("info", "move unit")
-    BoScript.moveUnit(player, 88, 20 * 48, 46 * 48)
+    BoScript.moveUnit(player, 88, 20, 46)
   elif cycle == 180:
     boprint("info", "attack unit")
     BoScript.attack(player, 32, 1)
