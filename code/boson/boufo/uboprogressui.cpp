@@ -83,6 +83,13 @@ UBoProgressUI::paintGradient(UGraphics * g, const UBoProgress * progress, const 
 	g->setColor(from);
 	glPushAttrib(GL_LIGHTING_BIT);
 	glShadeModel(GL_SMOOTH);
+#warning fixme
+	// FIXME: the gradient is not correct - it will always be from colors
+	// "from" to "to", no matter how large the factor is. e.g. if factor is
+	// 0.5, then 50% of the bar are drawn, but one end will be "from", the
+	// other "to", but correct would be "from" at one end and at the other
+	// end the "color that would be at that position, if we would use
+	// factor=1"
 	if (progress->getOrientation() == Horizontal) {
 		glBegin(GL_QUADS);
 			glVertex2i(rect.x, rect.y);
