@@ -1296,7 +1296,7 @@ void BosonScript::removeLight(int id)
 /*****  AI methods  *****/
 float BosonScript::aiDelay()
 {
-  return boConfig->boolValue("AIDelay");
+  return (float)boConfig->doubleValue("AIDelay");
 }
 
 /*****  Other methods  *****/
