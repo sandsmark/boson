@@ -819,14 +819,14 @@ void BosonCommandFrame::placeGround()
  d->mPlacementWidget->setOrderButtonsGround();
 }
 
-void BosonCommandFrame::placeMobiles(Player* owner)
+void BosonCommandFrame::placeMobiles(PlayerIO* io)
 {
  boDebug(220) << k_funcinfo << endl;
- if (!owner) {
-	boError(220) << k_funcinfo << "NULL owner" << endl;
+ if (!io) {
+	boError(220) << k_funcinfo << "NULL io" << endl;
 	return;
  }
- SpeciesTheme* theme = owner->speciesTheme();
+ SpeciesTheme* theme = io->speciesTheme();
  if (!theme) {
 	boError(220) << k_funcinfo << "NULL speciestheme" << endl;
 	return;
@@ -838,20 +838,20 @@ void BosonCommandFrame::placeMobiles(Player* owner)
 	BoSpecificAction a(theme->unitProperties(*it)->produceAction());
 	a.setType(ActionPlacementPreview);
 	a.setProductionId(*it);
-	a.setProductionOwner(owner);
+	a.setProductionOwner(io->player());
 	actions.append(a);
  }
  d->mPlacementWidget->setOrderButtons(actions);
 }
 
-void BosonCommandFrame::placeFacilities(Player* owner)
+void BosonCommandFrame::placeFacilities(PlayerIO* io)
 {
  boDebug(220) << k_funcinfo << endl;
- if (!owner) {
-	boError(220) << k_funcinfo << "NULL owner" << endl;
+ if (!io) {
+	boError(220) << k_funcinfo << "NULL io" << endl;
 	return;
  }
- SpeciesTheme* theme = owner->speciesTheme();
+ SpeciesTheme* theme = io->speciesTheme();
  if (!theme) {
 	boError(220) << k_funcinfo << "NULL speciestheme" << endl;
 	return;
@@ -863,7 +863,7 @@ void BosonCommandFrame::placeFacilities(Player* owner)
 	BoSpecificAction a(theme->unitProperties(*it)->produceAction());
 	a.setType(ActionPlacementPreview);
 	a.setProductionId(*it);
-	a.setProductionOwner(owner);
+	a.setProductionOwner(io->player());
 	actions.append(a);
  }
  d->mPlacementWidget->setOrderButtons(actions);
