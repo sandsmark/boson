@@ -207,7 +207,7 @@ void UnitProperties::saveUnitType(const QString& fileName)
 void UnitProperties::loadMobileProperties(KSimpleConfig* conf)
 {
  conf->setGroup("Boson Mobile Unit");
- mMobileProperties = new MobileProperties;
+ createMobileProperties();
  mMobileProperties->mSpeed = (float)conf->readDoubleNumEntry("Speed", 0);
  if(mMobileProperties->mSpeed < 0) {
 	boWarning() << k_funcinfo << "Invalid Speed value: " << mMobileProperties->mSpeed <<
@@ -223,7 +223,7 @@ void UnitProperties::loadMobileProperties(KSimpleConfig* conf)
 void UnitProperties::loadFacilityProperties(KSimpleConfig* conf)
 {
  conf->setGroup("Boson Facility");
- mFacilityProperties = new FacilityProperties;
+ createFacilityProperties();
  mFacilityProperties->mCanRefineMinerals = conf->readBoolEntry("CanRefineMinerals",
 		false);
  mFacilityProperties->mCanRefineOil = conf->readBoolEntry("CanRefineOil", false);
@@ -364,11 +364,6 @@ const QString& UnitProperties::name() const
  return d->mName;
 }
 
-void UnitProperties::setUnitPath(const QString& p)
-{
- d->mUnitPath = p;
-}
-
 const QString& UnitProperties::unitPath() const
 {
  return d->mUnitPath;
@@ -507,14 +502,6 @@ void UnitProperties::loadUpgrades(KSimpleConfig* conf)
  boDebug() << k_funcinfo << "DONE" << endl;
 }
 
-void UnitProperties::setSpeed(float speed)
-{
- if (!mMobileProperties) {
-	return;
- }
- mMobileProperties->mSpeed = speed;
-}
-
 QPtrList<BosonParticleSystem> UnitProperties::newDestroyedParticleSystems(float x, float y, float z) const
 {
  QPtrList<BosonParticleSystem> list;
@@ -525,4 +512,69 @@ QPtrList<BosonParticleSystem> UnitProperties::newDestroyedParticleSystems(float 
 	++it;
  }
  return list;
+}
+
+void UnitProperties::clearPlugins()
+{
+ d->mPlugins.clear();
+ if(mMobileProperties) {
+	delete mMobileProperties;
+	mMobileProperties = 0;
+ }
+ if(mFacilityProperties) {
+	delete mFacilityProperties;
+	mFacilityProperties = 0;
+ }
+}
+
+void UnitProperties::createMobileProperties()
+{
+ mMobileProperties = new MobileProperties;
+}
+
+void UnitProperties::createFacilityProperties()
+{
+ mFacilityProperties = new FacilityProperties;
+}
+
+void UnitProperties::setCanRefineMinerals(bool r)
+{
+ if(mFacilityProperties) {
+	mFacilityProperties->mCanRefineMinerals = r;
+ }
+}
+
+void UnitProperties::setCanRefineOil(bool r)
+{
+ if(mFacilityProperties) {
+	mFacilityProperties->mCanRefineOil = r;
+ }
+}
+
+void UnitProperties::setConstructionSteps(unsigned int steps)
+{
+ if(mFacilityProperties) {
+	mFacilityProperties->mConstructionFrames = steps;
+ }
+}
+
+void UnitProperties::setSpeed(float speed)
+{
+ if(mMobileProperties) {
+	mMobileProperties->mSpeed = speed;
+ }
+}
+
+void UnitProperties::setCanGoOnLand(bool c)
+{
+ if(mMobileProperties) {
+	mMobileProperties->mCanGoOnLand = c;
+ }
+}
+
+void UnitProperties::setCanGoOnWater(bool c)
+{
+ if(mMobileProperties) {
+	mMobileProperties->mCanGoOnWater = c;
+ }
 }
