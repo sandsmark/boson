@@ -27,9 +27,6 @@
 #define BO_GL_CELL_SIZE 1.0
 
 
-// undefine this to enable experimental canvastext. baaad performance!
-#define NO_BOSON_CANVASTEXT
-
 #define BOSON_COOKIE 992
 
 
