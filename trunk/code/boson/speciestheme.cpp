@@ -145,7 +145,10 @@ bool SpeciesTheme::loadUnit(unsigned long int type)
  //  actions) here
  nonConstUnitProperties(type)->loadActions();
 
- loadUnitModel(prop);
+ if (!loadUnitModel(prop)) {
+	boError() << k_funcinfo << "unable to load model for unit " << type << endl;
+	ret = false;
+ }
 
  if (!ret) {
 	boProfiling->loadUnitDone(type);
@@ -225,10 +228,10 @@ bool SpeciesTheme::loadTechnologies()
  return true;
 }
 
-void SpeciesTheme::loadObjects()
+bool SpeciesTheme::loadObjects()
 {
- finalizeTeamColor();
- mData->loadObjects(teamColor());
+ finalizeTeamColor(); // AB: this is obsolete, the models don't use the teamcolor anymore. removing it should be safe.
+ return mData->loadObjects(teamColor());
 }
 
 QStringList SpeciesTheme::unitModelFiles()
@@ -553,11 +556,11 @@ QValueList<QColor> SpeciesTheme::defaultColors()
  return colors;
 }
 
-void SpeciesTheme::loadUnitModel(const UnitProperties* prop)
+bool SpeciesTheme::loadUnitModel(const UnitProperties* prop)
 {
  // once we load the model the teamcolor can't be changed anymore
  finalizeTeamColor();
- mData->loadUnitModel(prop, teamColor());
+ return mData->loadUnitModel(prop, teamColor());
 }
 
 void SpeciesTheme::playSound(UnitBase* unit, UnitSoundEvent event)

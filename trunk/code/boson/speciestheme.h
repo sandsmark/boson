@@ -95,7 +95,7 @@ public:
 	 **/
 	bool loadTechnologies();
 
-	void loadObjects();
+	bool loadObjects();
 
 	void loadActions();
 
@@ -274,7 +274,7 @@ public:
 	 **/
 	const QIntDict<UpgradeProperties>& technologyList() const;
 
-	void loadUnitModel(const UnitProperties* prop);
+	bool loadUnitModel(const UnitProperties* prop);
 
 	/**
 	 * Read the config files for all units available on this computer. The

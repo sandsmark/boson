@@ -93,7 +93,7 @@ public:
 	 * Load the model for the specified unit @p prop and the color @p
 	 * teamColor.
 	 **/
-	void loadUnitModel(const UnitProperties* prop, const QColor& teamColor);
+	bool loadUnitModel(const UnitProperties* prop, const QColor& teamColor);
 
 	/**
 	 * Load the overview pixmaps for the unit @p prop in the color @p
@@ -103,9 +103,11 @@ public:
 	bool loadUnitOverview(const UnitProperties* prop, const QColor& teamColor);
 
 	/**
-	 * Load the objects specified in $speciesdir/objects/objects.boson
+	 * Load the objects specified in $speciesdir/objects/objects.boson.
+	 *
+	 * Note that this also loads the models of the objects.
 	 **/
-	void loadObjects(const QColor& teamColor);
+	bool loadObjects(const QColor& teamColor);
 
 	/**
 	 * Load the actions specified in $speciesdir/actions.boson
@@ -119,7 +121,8 @@ public:
 	BosonModel* unitModel(unsigned long int unitType) const;
 
 	/**
-	 * @return The specified object model with id @name.
+	 * @return The model of the specified object model with id @name as
+	 * loaded by @ref loadObjects.
 	 **/
 	BosonModel* objectModel(const QString& file) const;
 
