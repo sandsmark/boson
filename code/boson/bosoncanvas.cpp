@@ -148,7 +148,7 @@ public:
 
 	BosonMap* mMap; // just a pointer - no memory allocated
 
-	QMap<Unit*, int> mWorkChanged; // Unit::setWork() has been called on these units. FIXME: the int parameter is obsolete
+	QMap<Unit*, int> mWorkChanged; // Unit::setAdvanceWork() has been called on these units. FIXME: the int parameter is obsolete
 
 	QPtrList<QCanvasItem> mAnimList; // see BosonCanvas::slotAdvance()
 	QPtrList<Unit> mWorkNone;
@@ -329,9 +329,9 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount)
 // update (02/03/14): for performance reasons we use several lists now. Every
 // UnitBase::WorkType has an own list which is iterated and the units are
 // advanced according to advanceCount. E.g. we don't need to call
-// advanceProduce()*every* advance call but we *need* to call advanceMove()
+// advanceProduce() *every* advance call but we *need* to call advanceMove()
 // every advance call (if the unit is moving). Their lists must not be changed
-// while they are iterated. So we test if the work was changed and if so we add
+// while they are iterated. So we test if the advanceWork() was changed and if so we add
 // the unit to the workChanged list and after all of the advance calls we change
 // the lists.
 	
@@ -384,8 +384,8 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount)
 		++it;
 	}
  }
-// if (d->mWorkConstructed.count() > 0 && (advanceCount % 1) == 0) { // AB: for testing only
- if (d->mWorkConstructed.count() > 0 && (advanceCount % 30) == 0) {//AB: this should be the correct line!
+
+ if (d->mWorkConstructed.count() > 0 && (advanceCount % 30) == 0) {
 	QPtrListIterator<Unit> it(d->mWorkConstructed);
 	while (it.current()) {
 		it.current()->advanceConstruction();
@@ -627,7 +627,7 @@ void BosonCanvas::destroyUnit(Unit* unit)
  if (!d->mDestroyedUnits.contains(unit)) {
 	Player* owner = unit->owner();
 	d->mDestroyedUnits.append(unit);
-	unit->setWork(UnitBase::WorkNone); // maybe add a WorkDestroyed? no need to currently
+	unit->setWork(UnitBase::WorkDestroyed);
 	unit->setAnimated(false);
 	if (unit->health() != 0) {
 		unit->setHealth(0);
@@ -908,11 +908,11 @@ void BosonCanvas::changeWork()
 	if (d->mDestroyedUnits.contains(u)) {
 		continue;
 	}
-	if (u->isDestroyed()) {
+	if (u->isDestroyed() || u->advanceWork() == UnitBase::WorkDestroyed) {
 		kdWarning() << k_funcinfo << "is already destroyed" << endl;
 		continue;
 	}
-	switch (u->work()) {
+	switch (u->advanceWork()) {
 		case UnitBase::WorkNone:
 			d->mWorkNone.append(u);
 			break;
@@ -933,6 +933,9 @@ void BosonCanvas::changeWork()
 			break;
 		case UnitBase::WorkMoveInGroup:
 			// already in d->mGroups
+			break;
+		case UnitBase::WorkDestroyed:
+			// nothing to do here. is in d->mDestroyedUnits
 			break;
 	}
  }

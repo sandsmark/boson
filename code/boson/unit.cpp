@@ -348,6 +348,8 @@ void Unit::stopMoving()
  // WorkAttack, when the unit is not yet in range.
  if (isMoving()) {
 	setWork(WorkNone);
+ } else if (advanceWork() != work()) {
+	setAdvanceWork(work());
  }
  setXVelocity(0);
  setYVelocity(0);
@@ -555,12 +557,12 @@ QValueList<Unit*> Unit::unitCollisions(bool exact) const
  return units;
 }
 
-void Unit::setWork(WorkType w)
+void Unit::setAdvanceWork(WorkType w)
 {
- if (w != work() || isDestroyed()) {
+ if (w != advanceWork() || isDestroyed()) {
 	boCanvas()->setWorkChanged(this, work());
  }
- UnitBase::setWork(w);
+ UnitBase::setAdvanceWork(w);
 }
 
 void Unit::moveInGroup()
@@ -865,10 +867,6 @@ double MobileUnit::speed() const
 
 void MobileUnit::turnTo(Direction direction)
 {
-/* if (direction < 0 || direction >= PIXMAP_PER_MOBILE - 1) {
-	kdError() << "direction " << direction << " not supported" << endl;
-	return;
- }*/
  setFrame((int)direction);
 }
 
@@ -914,24 +912,6 @@ void MobileUnit::advanceMine()
 {
  kdDebug() << k_funcinfo << endl;
 
- int x = (int)(QCanvasSprite::x() + width() / 2);
- int y = (int)(QCanvasSprite::y() + height() / 2);
- QPoint wp = currentWaypoint();
- if (waypointCount() > 1 || x != wp.x() || y != wp.y()) {
-
-// if (!canMine(boCanvas()->cellAt((Unit*)this))) { // FIXME: the player ordered to go to a certain place, not to *any* cell we can mine at...
-	kdDebug() << "moving to mining..." << endl;
-//	kdDebug() << destinationX() / BO_TILE_SIZE << "    " << x / BO_TILE_SIZE << endl;
-//	kdDebug() << destinationY() / BO_TILE_SIZE << "    " << y / BO_TILE_SIZE << endl;
-	advanceMove();
-	advanceMoveCheck();
-	return;
- }
- 
- //FIXME: this should not be necessary!!!
- setXVelocity(0);
- setYVelocity(0);
-
  if (canMine(boCanvas()->cellAt(this))) {
 	d->mResourcesMined = d->mResourcesMined + 1;
 	if (unitProperties()->canMineMinerals()) {
@@ -963,6 +943,15 @@ bool MobileUnit::canMine(Cell* cell) const
 	return true;
  }
  return false;
+}
+
+void MobileUnit::mineAt(const QPoint& pos)
+{
+ //TODO: don't move if unit cannot mine more minerals/oil or no minerals/oil at all
+ kdDebug() << k_funcinfo << endl;
+ moveTo(pos);
+ setWork(WorkMine);
+ setAdvanceWork(WorkMove);
 }
 
 /////////////////////////////////////////////////

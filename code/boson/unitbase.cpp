@@ -69,6 +69,8 @@ UnitBase::UnitBase(const UnitProperties* prop)
 		KGamePropertyBase::PolicyLocal, "WeaponDamage");
  mWork.registerData(IdWork, dataHandler(), 
 		KGamePropertyBase::PolicyLocal, "Work");
+ mAdvanceWork.registerData(IdAdvanceWork, dataHandler(), 
+		KGamePropertyBase::PolicyLocal, "AdvanceWork");
  d->mReloadState.registerData(IdReloadState, dataHandler(), 
 		KGamePropertyBase::PolicyLocal, "ReloadState");
  d->mDeletionTimer.registerData(IdDeletionTimer, dataHandler(), 
@@ -77,6 +79,7 @@ UnitBase::UnitBase(const UnitProperties* prop)
 
 
  mWork.setLocal((int)WorkNone);
+ mAdvanceWork.setLocal((int)WorkNone);
  mHealth.setLocal(0); // initially destroyed
  d->mShields.setLocal(0); // doesn't have any shields
  d->mArmor.setLocal(0); // doesn't have any armor

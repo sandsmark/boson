@@ -63,12 +63,13 @@ public:
 		IdShields = KGamePropertyBase::IdUser + 2,
 		IdId = KGamePropertyBase::IdUser + 3,
 		IdWork = KGamePropertyBase::IdUser + 6,
-		IdSpeed = KGamePropertyBase::IdUser + 7,
-		IdWeaponDamage = KGamePropertyBase::IdUser + 8,
-		IdWeaponRange = KGamePropertyBase::IdUser + 9,
-		IdSightRange = KGamePropertyBase::IdUser + 11,
-		IdDeletionTimer = KGamePropertyBase::IdUser + 12,
-		IdReloadState = KGamePropertyBase::IdUser + 13,
+		IdAdvanceWork = KGamePropertyBase::IdUser + 7,
+		IdSpeed = KGamePropertyBase::IdUser + 8,
+		IdWeaponDamage = KGamePropertyBase::IdUser + 9,
+		IdWeaponRange = KGamePropertyBase::IdUser + 10,
+		IdSightRange = KGamePropertyBase::IdUser + 12,
+		IdDeletionTimer = KGamePropertyBase::IdUser + 13,
+		IdReloadState = KGamePropertyBase::IdUser + 14,
 		//...
 		IdLast
 	};
@@ -92,7 +93,8 @@ public:
 		WorkMine = 3,
 		WorkAttack = 4,
 		WorkConstructed = 5,
-		WorkMoveInGroup = 6
+		WorkMoveInGroup = 6,
+		WorkDestroyed = 7
 	};
 	
 	UnitBase(const UnitProperties* prop);
@@ -101,13 +103,40 @@ public:
 	/**
 	 * Change what this unit is currently doing.
 	 **/
-	virtual void setWork(WorkType w) { mWork= w; }
+	void setWork(WorkType w) 
+	{ 
+		mWork = w;
+		setAdvanceWork(w); 
+	}
+
+	/**
+	 * Change what this unit is currently doing.
+	 *
+	 * The difference to @ref setWork is important in @ref
+	 * BosonCanvas::slotAdvance. This method decides what the unit is meant
+	 * to do (concerning the Unit::advanceXYZ() methods) depending on @ref
+	 * advanceWork. This is usually the same as @ref work, but think e.g. of
+	 * a unit that should mine minerals but first needs to move to the
+	 * minerals field. It needs to have @ref WorkMine but to make moving
+	 * work it needs to have @ref advanceWork == @ref WorkMove.
+	 *
+	 * You need to change this only very seldom.
+	 **/
+	virtual void setAdvanceWork(WorkType w) { mAdvanceWork = w; }
 
 	/**
 	 * @return What this unit is currently doing. See @ref WorkTyp on
 	 * information what this can be.
 	 **/
 	inline WorkType work() const { return (WorkType)mWork.value(); }
+
+	/**
+	 * See also @ref setAdvanceWork, where usage is explained. You should
+	 * not use this, use @ref work instead!
+	 * @return Usually the same as @ref work, but sometime the advanceWork
+	 * differs from the actual @ref work.
+	 **/
+	inline WorkType advanceWork() const { return (WorkType)mAdvanceWork.value(); }
 
 	/**
 	 * @return Guess what? See @ref UnitProperties::name
@@ -276,7 +305,10 @@ public:
 	/**
 	 * @return true if unit is moving (work() == WorkMove || work() == WorkMoveInGroup)
 	 **/
-	inline bool isMoving() { return (work() == WorkMove || work() == WorkMoveInGroup); };
+	inline bool isMoving() 
+	{ 
+		return (work() == WorkMove || work() == WorkMoveInGroup); 
+	}
 
 	/**
 	 * @return THe reload state of the weapon. If this is 0 the unit can
@@ -306,6 +338,7 @@ private:
 	KGameProperty<unsigned int> mSightRange;
 	KGameProperty<long int> mWeaponDamage; // can also be repair (negative value)
 	KGamePropertyInt mWork;
+	KGamePropertyInt mAdvanceWork;
 
 	const UnitProperties* mUnitProperties;
 };

@@ -262,8 +262,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			kdDebug() << "cannot mine with destroyed units" << endl;
 			break;
 		}
-		u->moveTo(pos);
-		u->setWork(Unit::WorkMine);
+		u->mineAt(pos);
 		break;
 	}
 	case BosonMessage::MoveProduce:
