@@ -51,7 +51,7 @@ class BoInfoPrivate;
  * these data are not provided in a library. So I wrote our own library...
  * We collect data that is/might be useful for us only, so don't expect data
  * about your printer here ;-) But actually if I found some maybe-useful data
- * then I included them here - even if we will probably never actully use them.
+ * then I included them here - even if we will probably never actually use them.
  * Rather more than less.
  *
  * You should use @ref BoInfoDialog to inspect the data further. BoInfo provides
