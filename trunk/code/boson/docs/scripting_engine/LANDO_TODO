@@ -1,14 +1,52 @@
 Get up to speed on C++
 -- Programming Linux Games
+
 Get up to speed on QT
 -- http://doc.trolltech.com/3.0/
+
 Get up to speed on kde
 -- No references yet
+
+Get up to speed on OpenGL
+-- www.opengl.org
+
+Get up to speed on OpenAL
+--- www.openal.org
+
+Get up to speed on Ogg Vorbis
+--- www.vorbis.com
+
+Investigate SDL
+-- http://www.libsdl.org
+
+Investigate Clanlib
+
 Work through Boson source code
+
 Complete Bible
+
 Start Coding Scripting engine
-Recruit Documentor
-Recruit Tools-Master
-Recruit Co-Pilot
-Recruit Administrator
-Recruit Researcher
+-- Look at scheme for scripting language design
+---- www.gnu.org/guile
+---- MzScheme www.cs.rice.edu/PLT
+
+Graphics
+-- Get blender up and running
+---- Create flaming hotpoint
+---- Implement flaming hotpoint on an object.
+
+Recruiting
+-- Documentor
+-- Tools-Master
+-- Co-Pilot
+-- Administrator
+-- Researcher
+
+Examine bug system
+-- bugs.kde.org
+
+Network Code
+-- Look at compression libraries
+---- www.gzip.org
+-- Consider writing own communication library
+
