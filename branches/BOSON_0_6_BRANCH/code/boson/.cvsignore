@@ -1,0 +1,8 @@
+Makefile
+Makefile.in
+*.moc
+boson
+boeditor
+.deps
+.libs
+boson_meta_unload.cpp
