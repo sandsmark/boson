@@ -23,6 +23,8 @@
 #include <qwidget.h>
 
 class QGLFormat;
+class BoPUIActionCollection;
+class BoPUIMenuBar;
 
 // AB: most code was shamlessy stolen from QGLContext
 class BoContext
@@ -153,6 +155,23 @@ public:
 	 **/
 	static QImage convertToGLFormat( const QImage& img );
 
+	void setActionCollection(BoPUIActionCollection* c)
+	{
+		mActionCollection = c;
+	}
+	BoPUIActionCollection* actionCollection() const
+	{
+		return mActionCollection;
+	}
+	void setMenuBar(BoPUIMenuBar* bar)
+	{
+		mMenuBar = bar;
+	}
+	BoPUIMenuBar* menuBar() const
+	{
+		return mMenuBar;
+	}
+
 public slots:
 	void slotUpdateGL();
 
@@ -176,6 +195,9 @@ private:
 private:
 	class BosonGLWidgetPrivate;
 	BosonGLWidgetPrivate* d;
+
+	BoPUIActionCollection* mActionCollection;
+	BoPUIMenuBar* mMenuBar;
 };
 
 /**
