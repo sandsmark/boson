@@ -703,9 +703,17 @@ void ModelPreview::mousePressEvent(QMouseEvent* e)
  }
 }
 
-void ModelPreview::mouseReleaseEvent(QMouseEvent* )
+void ModelPreview::mouseReleaseEvent(QMouseEvent* e)
 {
- mSelectedMesh = mMeshUnderMouse;
+ switch (e->button()) {
+	case QMouseEvent::LeftButton:
+		mSelectedMesh = mMeshUnderMouse;
+		break;
+	case QMouseEvent::RightButton:
+		break;
+	default:
+		break;
+ }
 }
 
 void ModelPreview::mouseMoveEvent(QMouseEvent* e)
