@@ -35,7 +35,7 @@ class Cell;
  * most stuff is in Unit, UnitBase is kind of obsolete, might be removed
  * someday)
  *
- * Not that Unit does <em>not</em> inherit @ref QObject! Signals/Slots are
+ * Note that Unit does <em>not</em> inherit @ref QObject! Signals/Slots are
  * therefore not possible! This is done to save as much memory as possible.
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
  **/
