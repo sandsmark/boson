@@ -104,8 +104,9 @@ enum transition_t {
 
 
 
-/***** cell_t ******/
-
+/*
+ *  cell_t 
+ */
 	//
 	//  cell_t needs to be a scalar type cause QCanvas uses a 'int'
 	//  so we can't use a class..
@@ -120,11 +121,12 @@ inline groundType	ground(cell_t c) { return (groundType) (c>>2); }
 inline cell_t		cell(groundType g, int v=0) { return (cell_t) (g<<2 | (v&0x3)); }
 inline void		setGround(cell_t &c, groundType g) {  c&=0x3; c|= (g<<2); }
 inline void		setVersion(cell_t &c, byte v) {  c&=~0x3; c|= (v&0x3); }
-/***** cell_t ******/
 
 
 
-/* Transition description */
+/*
+ * Transition description
+ **/
 struct groundTransProperties_t {
 	const char	*name;
 	groundType	from, to;
@@ -143,6 +145,7 @@ extern const int groundPropNb;
 
 /* destroyed type */
 ///orzel : still unused...
+/*
 enum destroyedType {
 	DESTROYED_NONE,
 	DESTROYED_WEAK,
@@ -152,6 +155,7 @@ enum destroyedType {
 	DESTROYED_STRONG,
 	DESTROYED_
 	};
+*/
 
 #endif // GROUNDTYPE_H
 
