@@ -43,6 +43,9 @@ class BoInfoPrivate;
  * the fact that it makes profiling easier if you know which graphics card,
  * which version, which cpu and so on is involved.
  *
+ * Another problem is that we don't want to do certain things on slow computers.
+ * So we need access to e.g. the @ref cpuSpeed().
+ *
  * KDE provides some nice KControl modules which provide a lot or even most of
  * the data that we need. Unfortunately it is of no use at all in KControl and
  * these data are not provided in a library. So I wrote our own library...
@@ -488,6 +491,10 @@ public:
 	 * This parses the CPU string if available (/proc/cpuinfo on linux) and
 	 * returns the speed of the cpu in MHz. -1 for an unknown OS (currently
 	 * everything except linux) as well as when an error occurs
+	 *
+	 * Note that this <em>reall</em> parses the string - the value is not
+	 * yet cached, so you should not use this in paintGL() or so! One day
+	 * we'll add caching for values like this.
 	 **/
 	float cpuSpeed() const;
 
