@@ -33,7 +33,12 @@
 #define FOGGED_COST 2.5
 #define SEARCH_STEPS 10  // How many steps of path to find
 
-#define MOVE_IN_LINE
+// If you uncomment next line, you will enable in-line moving style.
+//  With this moving style, unit movement is less agressive and units
+//  wait until they can move, they don't search path around other units.
+//  This is useful when moving big group of units through narrow places
+//  on map, but in general, default style is better IMO
+//#define MOVE_IN_LINE
 
 class BosonPath::Marking
 {
