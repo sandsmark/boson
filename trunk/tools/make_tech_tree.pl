@@ -3,15 +3,30 @@
 use strict;
 use Image::Magick;
 
+# usage: command path_to_facilities [mob]
+#
+# If you add "fixed" mobile units will be ignored
+
 # AB: there might be problems with this script if the index.unit files were
 # stored in dos mode!!
 
+
+my $debug = 0;                #change this to 1 to enable debug output
 my $unitpath = $ARGV[0];
+my $unittype = $ARGV[1];
+
 
 my @units;
 opendir(UNITDIR, $unitpath) or die ("Oops - can't open dir $unitpath\n");
+
 foreach my $entry (readdir(UNITDIR)) {
-	next if ($entry eq "CVS" || $entry =~ /^\./);
+    if ($unittype eq "fixed") {
+        next if ($entry eq "CVS" || $entry =~ /^\./ || $entry =~ /^mob.*/);
+        }
+    else {
+        next if ($entry eq "CVS" || $entry =~ /^\./);
+        }
+
 	my $dir = $unitpath."/".$entry;
 	if (-d $dir && -f $dir."/index.unit") {
 		push(@units, $dir."/index.unit");
@@ -64,7 +79,7 @@ foreach my $unit (@units) {
 			$requirements{$id} = $requirement;
 		}
 	} else {
-		print "No unit found in $unit\n";
+		print_mesg("No unit found in $unit\n");
 	}
 }
 
@@ -110,7 +125,7 @@ my %yposition; # id of unit -> y position of bottom of units' rectangle
 my %boxwidth;  # id of unit -> width of the drawn box/rectangle
 my $y = $ydistance;
 while ($count < $maxcount && @done_list < @idlist) {
-	print "------------------count:$count---------------------\n";
+	print_mesg("------------------count:$count---------------------\n");
 	my @found = find_paintable(@idlist); # also returns all in @done_list!
 	my @done;
 	my $rectheight = 0;
@@ -121,7 +136,7 @@ while ($count < $maxcount && @done_list < @idlist) {
 	}
 	my $complete_width = complete_text_width(\@localnames); # the width of all boxes in one line
 	if ($complete_width > $imagewidth) {
-		print "WARNING: complete text of this line is too wide for image!\n";
+		print_mesg("WARNING: complete text of this line is too wide for image!\n");
 		$complete_width = $imagewidth;
 	}
 	my $xdistance = ($imagewidth - $complete_width) / (@found - @done_list + 1); # rest_width / (elements+1)
@@ -131,7 +146,7 @@ while ($count < $maxcount && @done_list < @idlist) {
 
 		push(@done, $id);
 		paint_unit($id, $names{$id});
-		print "   ";
+		print_mesg("   ");
 		my $ret;
 
 		my ($x_ppem, $y_ppem, $ascender, $descender, $textwidth, $textheight, $max_advance) = $image->QueryFontMetrics(text=>$names{$id});
@@ -146,14 +161,14 @@ while ($count < $maxcount && @done_list < @idlist) {
 		$yposition{$id} = $y2;
 		$boxwidth{$id} = $rectwidth;
 		if ($ret) {
-			print $ret."\n";
+			print_mesg($ret."\n");
 			die;
 		}
 		my $xtextpos = $x + $rect_inside_spacing;
 		my $ytextpos = $y + $rectheight - (($rectheight - 2 * $rect_inside_spacing) / 2);
 		$ret = $image->Annotate(text=>$names{$id}, x=>$xtextpos, y=>$ytextpos);
 		if ($ret) {
-			print $ret."\n";
+			print_mesg($ret."\n");
 			die;
 		}
 
@@ -161,7 +176,7 @@ while ($count < $maxcount && @done_list < @idlist) {
 		# part...
 #		if ($count < 2) {
 		my @req = split(/,/, $requirements{$id});
-		print "for $id: @req\n";
+		print_mesg("for $id: @req\n");
 		foreach (@req) {
 #			draw_line($x, $rectwidth, $y - $rectheight, $_);
 			draw_line($x, $rectwidth, $y, $_);
@@ -174,14 +189,14 @@ while ($count < $maxcount && @done_list < @idlist) {
 	}
 	if (@found > 0) {
 		$y = $y + $rectheight + $ydistance;
-		print "\n";
+		print_mesg("\n");
 		push(@done_list, @done);
 	}
 	$count++;
 }
 
-my $file = "tree.png";
-print "Write to $file\n";
+my $file = "map.png";
+print_mesg("Write to $file\n");
 $image->Write($file);
 
 
@@ -200,10 +215,10 @@ sub paint_unit($$)
 	my $id = $_[0];
 	my $name = $_[1];
 	if (!$id) {
-		print "paint_unit: oops!!\n";
+		print_mesg("paint_unit: oops!!\n");
 		return;
 	}
-	print $id."=".$name;
+	print_mesg($id."=".$name);
 }
 
 sub find_value($$)
@@ -247,3 +262,9 @@ sub draw_line($$$$)
 	$image->Draw(primitive=>'line', stroke=>'black', points=>"$fromx,$fromy $tox,$toy");
 }
 
+sub print_mesg()
+{
+    if ($debug == 1) {
+        print @_;
+        }
+}
