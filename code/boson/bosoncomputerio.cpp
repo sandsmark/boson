@@ -54,6 +54,9 @@ BosonComputerIO::~BosonComputerIO()
 
 void BosonComputerIO::reaction()
 {
+ if (boConfig->aiDelay() == 0.0) {
+	return;
+ }
  boDebug() << k_funcinfo << endl;
 
  if(!mTarget || mTarget->isDestroyed()) {
