@@ -3956,6 +3956,9 @@ void BosonBigDisplayBase::makeVisibleEffectsList(BoVisibleEffects* v)
 				v->mAll.append(it.current());
 			}
 		}
+	} else if (it.current()->type() > BosonEffect::Light) {
+		// Do nothing. Lights are not handled here, this is here just to avoid the
+		//  warning.
 	} else {
 		boWarning() << k_funcinfo << "unexpected type " << it.current()->type();
 		v->mAll.append(it.current());
