@@ -117,6 +117,7 @@ public:
 	BosonGroundThemePrivate()
 	{
 	}
+	QString mGroundThemeDir;
 	QValueVector<TextureGroundType> mGroundTypes;
 	QString mId;
 };
@@ -251,6 +252,7 @@ bool BosonGroundTheme::loadGroundTheme(QString dir)
  }
 
  mTextures = new BosonTextureArray(images);
+ d->mGroundThemeDir = dir;
  return true;
 }
 
@@ -331,5 +333,25 @@ QString BosonGroundTheme::groundType2Name(int groundType)
 		break;
  }
  return QString::null;
+}
+
+QPixmap BosonGroundTheme::pixmap(unsigned int texture)
+{
+ QPixmap pix;
+ if (texture < textureCount()) {
+	QImage image = loadTextureImage(d->mGroundThemeDir, groundType(texture),
+			amountOfLand(texture), amountOfWater(texture));
+	if (!pix.convertFromImage(image)) {
+		pix = QPixmap();
+	}
+ } else {
+	boError() << k_funcinfo << "invalid texture " << texture << " textureCount: " << textureCount() << endl;
+ }
+ if (pix.isNull()) {
+	boWarning() << k_funcinfo << "unable to load texture " << texture << endl;
+	pix = QPixmap(64, 64, 32);
+	pix.fill(Qt::green);
+ }
+ return pix;
 }
 
