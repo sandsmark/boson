@@ -1,6 +1,5 @@
 Game TODOs
 - waypoints
-- make player color selectable in the new game dialog
 - unit accelleration: units should slowly start to accelerate and to brake when
   moving
 - BosonPath doesn't honor fog of war

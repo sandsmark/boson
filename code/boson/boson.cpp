@@ -360,6 +360,29 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 			return;
 		}
 		p->loadTheme(SpeciesTheme::speciesDirectory(species), color);
+		emit signalSpeciesChanged(p);
+		break;
+	}
+	case BosonMessage::ChangeTeamColor:
+	{
+		Q_UINT32 id;
+		QRgb color;
+		stream >> id;
+		stream >> color;
+		Player* p = (Player*)findPlayer(id);
+		if (!p) {
+			kdError() << k_lineinfo << "Cannot find player " << id << endl;
+			return;
+		}
+		if (!p->speciesTheme()) {
+			kdError() << k_lineinfo << "NULL speciesTheme for " << id << endl;
+			return;
+		}
+		if (p->speciesTheme()->setTeamColor(color)) {
+			emit signalTeamColorChanged(p);
+		} else {
+			kdWarning() << k_lineinfo << "could not change color for " << id << endl;
+		}
 		break;
 	}
 	case BosonMessage::ChangeMap:
@@ -497,14 +520,14 @@ void Boson::slotSetGameSpeed(int speed)
  }
 }
 
-void Boson::slotSave(QDataStream& stream)
+void Boson::slotSave(QDataStream& /*stream*/)
 { // save non-KGameProperty datas here
 // stream <<
 }
 
-void Boson::slotLoad(QDataStream& stream)
+void Boson::slotLoad(QDataStream& /*stream*/)
 {
- kdDebug() << "next id: " << d->mNextUnitId << endl;
+// kdDebug() << "next id: " << d->mNextUnitId << endl;
 }
 
 void Boson::slotSendAddUnit(int unitType, int x, int y, Player* owner)
@@ -635,3 +658,16 @@ void Boson::slotAdvanceComputerPlayers()
  }
 }
 
+QValueList<QRgb> Boson::availableTeamColors() const
+{
+ QValueList<QRgb> colors = SpeciesTheme::defaultColors();
+ QPtrListIterator<KPlayer> it(*playerList());
+ while (it.current()) {
+	if (((Player*)it.current())->speciesTheme()) {
+//		kdError() << k_funcinfo << "NULL speciesTheme for " << it.current()->id() << endl;
+		colors.remove(((Player*)it.current())->speciesTheme()->teamColor());
+	}
+	++it;
+ }
+ return colors;
+}

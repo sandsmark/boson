@@ -22,6 +22,8 @@
 #include "bosonscenario.h"
 #include "speciestheme.h"
 #include "bosonmessage.h"
+#include "boson.h"
+#include "player.h"
 
 #include <kgame/kgame.h>
 
@@ -38,6 +40,7 @@
 #include <qmap.h>
 #include <qhbox.h>
 #include <qlabel.h>
+#include <qpainter.h>
 
 #include "kgamedialogbosonconfig.moc"
 
@@ -47,12 +50,14 @@ public:
 	KGameDialogBosonConfigPrivate()
 	{
 		mPlayerSpecies = 0;
+		mPlayerColor = 0;
 		
 		mMapCombo = 0;
 		mScenarioCombo = 0;
 	}
 
 	QComboBox* mPlayerSpecies;
+	QComboBox* mPlayerColor;
 
 	QMap<int, QString> mMapIndex2FileName; // index -> *.bpf file
 	QMap<int, QString> mMapIndex2Comment; // index -> map comment
@@ -65,6 +70,8 @@ public:
 	QMap<int, QString> mSpeciesIndex2Comment;
 	QMap<int, QString> mSpeciesIndex2Identifier;
 
+	QValueList<QRgb> mColorList;
+
 	QComboBox* mMapCombo;
 	QComboBox* mScenarioCombo;
 };
@@ -75,9 +82,14 @@ KGameDialogBosonConfig::KGameDialogBosonConfig(QWidget* parent)
  d = new KGameDialogBosonConfigPrivate;
 
  QHBox* speciesWidget = new QHBox(this);
- (void)new QLabel(i18n("Your species"), this);
+ (void)new QLabel(i18n("Your species"), speciesWidget);
  d->mPlayerSpecies = new QComboBox(speciesWidget);
  connect(d->mPlayerSpecies, SIGNAL(activated(int)), this, SLOT(slotSpeciesChanged(int)));
+
+ QHBox* colorWidget = new QHBox(this);
+ (void)new QLabel(i18n("Your team color"), colorWidget);
+ d->mPlayerColor = new QComboBox(colorWidget);
+ connect(d->mPlayerColor, SIGNAL(activated(int)), this, SLOT(slotTeamColorChanged(int)));
 
  QVGroupBox* mapBox = new QVGroupBox(i18n("Map and Scenario"), this);
  d->mMapCombo = new QComboBox(mapBox);
@@ -98,19 +110,13 @@ KGameDialogBosonConfig::KGameDialogBosonConfig(QWidget* parent)
  connect(d->mScenarioCombo, SIGNAL(activated(int)), 
 		this, SLOT(slotScenarioChanged(int)));
 
-// QPushButton* addComputerPlayer = new QPushButton(i18n("&Add Computer Player"), this);
-// connect(addComputerPlayer, SIGNAL(pressed()), 
-//		this, SIGNAL(signalAddComputerPlayer())); // TODO: name, difficulty, ...
-
  QPushButton* startGame = new QPushButton(i18n("&Start Game"), this);
  connect(startGame, SIGNAL(pressed()), this, SLOT(slotStartGame()));
 }
 
 KGameDialogBosonConfig::~KGameDialogBosonConfig()
 {
-// kdDebug() << k_funcinfo << endl;
  delete d;
-// kdDebug() << k_funcinfo << " done" << endl;
 }
 
 void KGameDialogBosonConfig::slotMapChanged(int index)
@@ -208,5 +214,55 @@ void KGameDialogBosonConfig::slotSpeciesChanged(int index)
 	return;
  }
  emit signalSpeciesChanged(d->mSpeciesIndex2Identifier[index]);
+}
+
+void KGameDialogBosonConfig::regenerateColors()
+{
+ Boson* g = (Boson*)game();
+ if (!g) {
+	kdWarning() << k_funcinfo << "NULL game" << endl;
+	return;
+ }
+ d->mPlayerColor->clear();
+ d->mColorList.clear();
+ Player* p = (Player*)owner();
+ if (p) {
+	addColor(p->speciesTheme()->teamColor());
+ } else {
+	kdWarning() << k_funcinfo << "NULL owner" << endl;
+ }
+ QValueList<QRgb> colors = g->availableTeamColors();
+ for (unsigned int i = 0; i < colors.count(); i++) {
+	addColor(QColor(colors[i]));
+ }
+}
+
+void KGameDialogBosonConfig::slotSpeciesChanged(Player* p)
+{
+ slotTeamColorChanged(p);
+}
+
+void KGameDialogBosonConfig::slotTeamColorChanged(int index)
+{
+ QRgb c = d->mColorList[index];
+ emit signalTeamColorChanged(c);
+}
+
+void KGameDialogBosonConfig::slotTeamColorChanged(Player* p)
+{
+ kdDebug() << k_funcinfo << endl;
+ regenerateColors();
+}
+
+void KGameDialogBosonConfig::addColor(const QColor& c)
+{
+ d->mColorList.append(c.rgb());
+ QPainter painter;
+ QRect rect(0, 0, d->mPlayerColor->width(), QFontMetrics(painter.font()).height() + 4);
+ QPixmap pixmap(rect.width(), rect.height());
+ painter.begin(&pixmap);
+ painter.fillRect(rect, QBrush(c));
+ painter.end();
+ d->mPlayerColor->insertItem(pixmap);
 }
 

@@ -332,6 +332,26 @@ void BosonWidget::slotPlayerJoinedGame(KPlayer* player)
  if (player == d->mLocalPlayer) {
 	changeLocalPlayer(d->mLocalPlayer); // now with a KGame object
  }
+
+ if (!d->mBoson->isAdmin()) {
+	return;
+ }
+ // check if the color of the new player is already taken
+ QPtrListIterator<KPlayer> it(*d->mBoson->playerList());
+ QRgb playerColor = p->speciesTheme()->teamColor();
+ while (it.current()) {
+	if (it.current() != player) {
+		Player* p2 = (Player*)it.current();
+		if (!p2->speciesTheme()) {
+			kdWarning() << k_lineinfo << "NULL speciesTheme" << endl;
+			continue;
+		}
+		if (playerColor == p2->speciesTheme()->teamColor()) {
+			sendChangeTeamColor(p, d->mBoson->availableTeamColors().first());
+		}
+	}
+	++it;
+ }
 }
 
 void BosonWidget::keyReleaseEvent(QKeyEvent* e)
@@ -389,8 +409,14 @@ void BosonWidget::slotNewGame()
 		bosonConfig, SLOT(slotMapChanged(const QString&)));
  connect(d->mBoson, SIGNAL(signalScenarioChanged(const QString&)),
 		bosonConfig, SLOT(slotScenarioChanged(const QString&)));
+ connect(d->mBoson, SIGNAL(signalSpeciesChanged(Player*)),
+		bosonConfig, SLOT(slotSpeciesChanged(Player*)));
+ connect(d->mBoson, SIGNAL(signalTeamColorChanged(Player*)),
+		bosonConfig, SLOT(slotTeamColorChanged(Player*)));
  connect(bosonConfig, SIGNAL(signalSpeciesChanged(const QString&)),
 		this, SLOT(slotSendChangeSpecies(const QString&)));
+ connect(bosonConfig, SIGNAL(signalTeamColorChanged(QRgb)),
+		this, SLOT(slotSendChangeTeamColor(QRgb)));
  connect(dialog, SIGNAL(signalStartGame()), 
 		bosonConfig, SIGNAL(signalStartGame()));
  // Note: KGameDialogBosonConfig does not emit signals for the important things,
@@ -813,9 +839,33 @@ void BosonWidget::slotSendChangeSpecies(const QString& species)
  QDataStream stream(buffer, IO_WriteOnly);
  stream << (Q_UINT32)d->mLocalPlayer->id();
  stream << species;
- stream << SpeciesTheme::defaultColor();
+ stream << d->mBoson->availableTeamColors().first();
  d->mBoson->sendMessage(buffer, BosonMessage::ChangeSpecies);
  // the species is actually loaded in the class Boson when the message is
+ // received
+}
+
+void BosonWidget::slotSendChangeTeamColor(QRgb color)
+{
+ if (!d->mLocalPlayer) {
+	kdError() << k_funcinfo << "NULL localplayer" << endl;
+	return;
+ }
+ sendChangeTeamColor(d->mLocalPlayer, color);
+}
+
+void BosonWidget::sendChangeTeamColor(Player* player, QRgb color)
+{
+ if (!player) {
+	kdError() << k_funcinfo << "NULL player" << endl;
+	return;
+ }
+ QByteArray buffer;
+ QDataStream stream(buffer, IO_WriteOnly);
+ stream << (Q_UINT32)player->id();
+ stream << color;
+ d->mBoson->sendMessage(buffer, BosonMessage::ChangeTeamColor);
+ // the color is actually changed in the class Boson when the message is
  // received
 }
 
