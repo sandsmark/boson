@@ -66,6 +66,7 @@
 #include "bo3dsload.h"
 #endif
 
+
 class BoMaterialWidget : public QWidget
 {
 public:
@@ -328,7 +329,7 @@ public:
 
 		mPos = (QLabel*)addWidget(i18n("Position"), new QLabel(this));
 		QToolTip::add(mPos, i18n("The position of the node in this frame. The matrix of the node has already been translated by this value."));
-		mRot = (QLabel*)addWidget(i18n("Rotation (quaternion)"), new QLabel(this));
+		mRot = (QLabel*)addWidget(i18n("Rotation (quat)"), new QLabel(this));
 		QToolTip::add(mRot, i18n("The rotation of the node in this frame. The matrix of the node has already been rotated by this value. These 4 values (the quaternion) are the actually stored values."));
 #if 0
 		mRotAngle = (QLabel*)addWidget(i18n("Axis Rotation (x,y,z) -> degree)"), new QLabel(this));
@@ -370,12 +371,13 @@ public:
 		bool hide = false;
 
 		if (d) {
-			pivot = QString("(%1,%2,%3)").arg(d->pivot[0]).arg(d->pivot[1]).arg(d->pivot[2]);
+			const int prec = 3; // number of digits after the decimal point
+			pivot = QString("(%1,%2,%3)").arg(d->pivot[0], 0, 'f', prec).arg(d->pivot[1], 0, 'f', prec).arg(d->pivot[2], 0, 'f', prec);
 			instance = QString(d->instance);
-			bboxMin = QString("(%1,%2,%3)").arg(d->bbox_min[0]).arg(d->bbox_min[1]).arg(d->bbox_min[2]);
-			bboxMax = QString("(%1,%2,%3)").arg(d->bbox_max[0]).arg(d->bbox_max[1]).arg(d->bbox_max[2]);
-			pos = QString("(%1,%2,%3)").arg(d->pos[0]).arg(d->pos[1]).arg(d->pos[2]);
-			rot = QString("(%1,%2,%3,%4)").arg(d->rot[0]).arg(d->rot[1]).arg(d->rot[2]).arg(d->rot[3]);
+			bboxMin = QString("(%1,%2,%3)").arg(d->bbox_min[0], 0, 'f', prec).arg(d->bbox_min[1], 0, 'f', prec).arg(d->bbox_min[2], 0, 'f', prec);
+			bboxMax = QString("(%1,%2,%3)").arg(d->bbox_max[0], 0, 'f', prec).arg(d->bbox_max[1], 0, 'f', prec).arg(d->bbox_max[2], 0, 'f', prec);
+			pos = QString("(%1,%2,%3)").arg(d->pos[0], 0, 'f', prec).arg(d->pos[1], 0, 'f', prec).arg(d->pos[2], 0, 'f', prec);
+			rot = QString("(%1,%2,%3,%4)").arg(d->rot[0], 0, 'f', prec).arg(d->rot[1], 0, 'f', prec).arg(d->rot[2], 0, 'f', prec).arg(d->rot[3], 0, 'f', prec);
 
 			float rX = 0.0f, rY = 0.0f, rZ = 0.0f;
 #if 0
@@ -388,7 +390,7 @@ public:
 			rotY = QString::number(rY);
 			rotZ = QString::number(rZ);
 
-			scl = QString("(%1,%2,%3)").arg(d->scl[0]).arg(d->scl[1]).arg(d->scl[2]);
+			scl = QString("(%1,%2,%3)").arg(d->scl[0], 0, 'f', prec).arg(d->scl[1], 0, 'f', prec).arg(d->scl[2], 0, 'f', prec);
 			morphSmooth = QString::number(d->morph_smooth);
 			morph = QString(d->morph);
 			hide = d->hide;
