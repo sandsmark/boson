@@ -86,6 +86,18 @@ public:
 	 * @return The @ref SpeciesTheme this property belongs to.
 	 **/
 	SpeciesTheme* theme() const { return mTheme; }
+
+	/**
+	 * @return The unrotated width of the unit. The value is number of cells
+	 * this unit occupies * BO_TILE_SIZE
+	 **/
+	unsigned int unitWidth() const { return mUnitWidth; }
+	
+	/**
+	 * @return The unrotated height of the unit. The value is number of cells
+	 * this unit occupies * BO_TILE_SIZE
+	 **/
+	unsigned int unitHeight() const { return mUnitWidth; }
 	
 	/**
 	 * @return Default health aka power aka hitpoints of this unit.
@@ -297,6 +309,8 @@ private:
 	QString mName;
 	QString mUnitPath; // the path to the unit files
 	unsigned long int mTypeId; // note: 0 is invalid!
+	unsigned int mUnitWidth;
+	unsigned int mUnitHeight;
 	unsigned long int mHealth;
 	unsigned long int mWeaponRange;
 	unsigned int mSightRange;
