@@ -82,7 +82,7 @@ BosonWelcomeWidget::BosonWelcomeWidget(QWidget* parent) : QWidget(parent)
   mEditorButton->setText( i18n( "Start &Editor" ) );
   mEditorButton->setMinimumWidth(150);
   buttonsLayout->addWidget( mEditorButton );
-  connect(mEditorButton, SIGNAL(clicked()), mTextFrame, SIGNAL(signalStartEditor()));
+  connect(mEditorButton, SIGNAL(clicked()), this, SIGNAL(signalStartEditor()));
 #else
   mEditorButton = 0;
 #endif
