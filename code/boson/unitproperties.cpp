@@ -30,6 +30,9 @@
 
 #include <ksimpleconfig.h>
 #include <klocale.h>
+#include <kmdcodec.h>
+
+#include <qfile.h>
 
 class UnitProperties::UnitPropertiesPrivate
 {
@@ -38,6 +41,7 @@ public:
 	{
 	}
 
+	QCString mMD5;
 	QString mName;
 	QString mUnitPath; // the path to the unit files
 	QValueList<unsigned long int> mRequirements;
@@ -122,10 +126,17 @@ UnitProperties::~UnitProperties()
  delete d;
 }
 
-void UnitProperties::loadUnitType(const QString& fileName, bool fullmode)
+bool UnitProperties::loadUnitType(const QString& fileName, bool fullmode)
 {
  mFullMode = fullmode;
  bool isFacility;
+ QFile file(fileName);
+ if (!file.open(IO_ReadOnly)) {
+	boError() << k_funcinfo << "could not open " << fileName << endl;
+	return false;
+ }
+ KMD5 md5(file.readAll());
+ d->mMD5 = md5.hexDigest();
  KSimpleConfig conf(fileName);
  conf.setGroup(QString::fromLatin1("Boson Unit"));
 
@@ -189,6 +200,7 @@ void UnitProperties::loadUnitType(const QString& fileName, bool fullmode)
  loadTextureNames(&conf);
  loadSoundNames(&conf);
  loadWeapons(&conf);
+ return true;
 }
 
 void UnitProperties::saveUnitType(const QString& fileName)
@@ -436,6 +448,11 @@ void UnitProperties::saveSoundNames(KSimpleConfig* conf)
  conf->writeEntry("ReportProduced", d->mSounds[SoundReportProduced]);
  conf->writeEntry("ReportDestroyed", d->mSounds[SoundReportDestroyed]);
  conf->writeEntry("ReportUnderAttack", d->mSounds[SoundReportUnderAttack]);
+}
+
+const QCString& UnitProperties::md5() const
+{
+ return d->mMD5;
 }
 
 void UnitProperties::setName(const QString& n)

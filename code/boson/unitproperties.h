@@ -28,6 +28,7 @@ class BosonEffect;
 class BosonEffectProperties;
 class BoVector3;
 class BoAction;
+class QCString;
 class QString;
 template<class T> class QValueList;
 template<class T> class QPtrList;
@@ -94,7 +95,7 @@ public:
 	 * The file should contain units/your_unit_dir/index.unit at the end
 	 * and should be an absolute path.
 	 **/
-	void loadUnitType(const QString& fileName, bool fullmode = true);
+	bool loadUnitType(const QString& fileName, bool fullmode = true);
 
 	/**
 	 * Save UnitProperties to the file. This sets all values of UnitProperties. All values are
@@ -110,6 +111,13 @@ public:
 	 * @return The @ref SpeciesTheme this property belongs to.
 	 **/
 	SpeciesTheme* theme() const { return mTheme; }
+
+	/**
+	 * @return The MD5 sum of the file this UnitProperties object was loaded
+	 * from. Note that when @ref loadUnitType was not called, the md5 sum is
+	 * empty (null).
+	 **/
+	const QCString& md5() const;
 
 	/**
 	 * @return The unrotated width of the unit. The value is number of cells

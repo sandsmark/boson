@@ -100,6 +100,12 @@ public:
 	void loadActions();
 
 	/**
+	 * @return Concatenation of all @ref UnitProperties::md5 sums in this
+	 * theme, separated by "\n"s
+	 **/
+	QCString unitPropertiesMD5() const;
+
+	/**
 	 * @return The i18n'ed name of the specified unit action. Can be used
 	 * e.g. in tooltips
 	 **/

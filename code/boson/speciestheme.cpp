@@ -185,6 +185,22 @@ void SpeciesTheme::loadActions()
  mData->loadActions();
 }
 
+QCString SpeciesTheme::unitPropertiesMD5() const
+{
+ QCString string;
+ QIntDictIterator<UnitProperties> it(d->mUnitProperties);
+ while (it.current()) {
+	if (string.isNull()) {
+		string = it.current()->md5();
+	} else {
+		string += "\n";
+		string += it.current()->md5();
+	}
+	++it;
+ }
+ return string;
+}
+
 QPixmap* SpeciesTheme::pixmap(const QString& name)
 {
  return mData->pixmap(name);
