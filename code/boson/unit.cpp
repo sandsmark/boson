@@ -1516,16 +1516,61 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCount) // this actually
 void MobileUnit::advanceMoveCheck()
 {
  if (!canvas()->onCanvas(boundingRectAdvanced().topLeft())) {
-	boError(401) << k_funcinfo << "unit " << id() << ": not on canvas (topLeft): (" <<
-			(int)(leftEdge() + xVelocity()) << "; " << (int)(topEdge() + yVelocity()) << ")" << endl;
+	QPoint point = boundingRectAdvanced().topLeft();
+	QString problem;
+	if (!canvas()->onCanvas(QPoint(0, point.y()))) {
+		problem = QString("top==%1").arg(point.y());
+	} else if (!canvas()->onCanvas(QPoint(point.x(), 0))) {
+		problem = QString("left==%1").arg(point.x());
+	} else {
+		boError(401) << k_funcinfo
+				<< "internal error: (0," << point.y() <<
+				") and (" << point.x()
+				<< ",0) are on canvas, but (" << point.x() <<
+				"," << point.y() << ") isn't !"
+				<< endl;
+		problem = "internal";
+	}
+	boError(401) << k_funcinfo << "unit " << id()
+			<< " not on canvas (topLeftAdvanced): (" << point.x()
+			<< ";" << point.y() << ")" << " problem was: "
+			<< problem << endl;
+	boError(401) << k_funcinfo << "leaving unit a current topleft pos: ("
+			<< boundingRect().topLeft().x() << ";"
+			<< boundingRect().topLeft().y() << ")" << endl;
 	stopMoving();
 	setWork(WorkNone);
 	return;
  }
  if (!canvas()->onCanvas(boundingRectAdvanced().bottomRight())) {
-	boError(401) << k_funcinfo << "unit " << id() << ": not on canvas (bottomRight): (" <<
-			(int)(leftEdge() + width() + xVelocity()) << "; " << (int)(topEdge() + height() + yVelocity()) << ")" << endl;
-	boError(401) << k_funcinfo << "    leftEdge: " << leftEdge() << "; width: " << width() << "; xVelo: " << xVelocity() << "; (int)xVelo: " << (int)xVelocity() << endl;
+	QPoint point = boundingRectAdvanced().bottomRight();
+	QString problem;
+	if (!canvas()->onCanvas(QPoint(0, point.y()))) {
+		problem = QString("bottom==%1").arg(point.y());
+	} else if (!canvas()->onCanvas(QPoint(point.x(), 0))) {
+		problem = QString("right==%1").arg(point.x());
+	} else {
+		boError(401) << k_funcinfo
+				<< "internal error: (0," << point.y() <<
+				") and (" << point.x()
+				<< ",0) are on canvas, but (" << point.x() <<
+				"," << point.y() << ") isn't !"
+				<< endl;
+	}
+	boError(401) << k_funcinfo << "unit " << id()
+			<< " not on canvas (bottomRightAdvanced): ("
+			<< point.x() << ";" << point.y() << ")"
+			<< "  current rightEdge: " << rightEdge()
+			<< " ; current bottomEdge:" << bottomEdge()
+			<< " ; xVelo: " << xVelocity()
+			<< " ; (int)xVelo: " << (int)xVelocity()
+			<< " ; yVelo: " << yVelocity()
+			<< " ; (int)yVelo: " << (int)yVelocity()
+			<< " problem was: "
+			<< problem << endl;
+	boError(401) << k_funcinfo << "leaving unit a current bottomright pos: ("
+			<< boundingRect().bottomRight().x() << ";"
+			<< boundingRect().bottomRight().y() << ")" << endl;
 	stopMoving();
 	setWork(WorkNone);
 	return;
