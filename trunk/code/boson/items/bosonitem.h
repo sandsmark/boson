@@ -104,7 +104,13 @@ public:
 	// different depth is ok!
 	inline int width() const { return mWidth; }
 	inline int height() const { return mHeight; }
-  inline float depth() const { return mDepth; }
+	/**
+	 * @return item's height in z-direction.
+	 * This does not depend on any OpenGL stuff (model, frame etc) and should be
+	 * same on all clients, so it can be used for collision detection and
+	 * pathfinding
+	 **/
+	inline float depth() const { return mDepth; }
 
 	inline float leftEdge() const { return x(); }
 	inline float topEdge() const { return y(); }

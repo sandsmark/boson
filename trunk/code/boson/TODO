@@ -1,7 +1,5 @@
 Game TODOs
 - waypoints
-- unit accelleration: units should slowly start to accelerate and to brake when
-  moving
 - AI
 - BosonCommandWidget should paint the order pixmap only *once* no more. E.g. we
   repaint for setGrayOut() and setProductionCount()

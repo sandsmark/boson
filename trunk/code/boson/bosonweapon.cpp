@@ -161,6 +161,10 @@ BosonShot* BosonWeaponProperties::newShot(Unit* attacker, BoVector3 pos, BoVecto
   {
     s = new BosonShotMine(attacker->owner(), attacker->canvas(), this, pos);
   }
+  else if(shotType() == BosonShot::Bomb)
+  {
+    s = new BosonShotBomb(attacker->owner(), attacker->canvas(), this, pos);
+  }
   else
   {
     boError() << k_funcinfo << "Invalid shotType: " << shotType() << endl;

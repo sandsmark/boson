@@ -322,11 +322,7 @@ void SpeciesTheme::loadNewUnit(Unit* unit)
  unit->setSightRange(prop->sightRange());
 
  if (prop->isMobile()) {
-	unit->setMaxSpeed(prop->speed());
-	unit->setAccelerationSpeed(prop->accelerationSpeed());
-	unit->setDecelerationSpeed(prop->decelerationSpeed());
  } else if (prop->isFacility()) {
-
  }
 }
 

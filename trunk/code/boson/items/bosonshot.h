@@ -40,7 +40,7 @@ class QDomElement;
 class BosonShot : public BosonItem
 {
   public:
-    enum Type { Bullet = 0, Missile, Explosion, Mine };
+    enum Type { Bullet = 0, Missile, Explosion, Mine, Bomb };
 
     /**
      * @param owner The player that shot. This is usually @ref Unit::owner of
@@ -208,6 +208,24 @@ class BosonShotMine : public BosonShot
 
   private:
     bool mActivated;
+};
+
+
+class BosonShotBomb : public BosonShot
+{
+  public:
+    BosonShotBomb(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop, BoVector3 pos);
+    BosonShotBomb(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop);
+
+    virtual bool saveAsXML(QDomElement& root);
+    virtual bool loadFromXML(const QDomElement& root);
+    virtual void save(QDataStream& stream);
+    virtual void load(QDataStream& stream);
+
+    inline virtual int type() const { return BosonShot::Bomb; };
+
+  protected:
+    virtual void advanceMoveInternal();
 };
 
 

@@ -1163,6 +1163,10 @@ bool BosonCanvas::loadFromXML(const QDomElement& root)
 		s = new BosonShotMissile(owner, this, weapon);
 	} else if(type == BosonShot::Explosion) {
 		s = new BosonShotExplosion(owner, this);
+	} else if(type == BosonShot::Mine) {
+		s = new BosonShotMine(owner, this, weapon);
+	} else if(type == BosonShot::Bomb) {
+		s = new BosonShotBomb(owner, this, weapon);
 	} else {
 		boError() << k_funcinfo << "Invalid type: " << type << endl;
 		continue;

@@ -53,13 +53,13 @@ BosonShot::BosonShot(Player* owner, BosonCanvas* canvas, const BosonWeaponProper
   //  be wrong until missile is advanced.
   setVisible(false);
 
-  if (!mOwner)
+  if(!mOwner)
   {
     boError(350) << k_funcinfo << "NULL owner!" << endl;
     setActive(false);
     return;
   }
-  if (!canvas)
+  if(!canvas)
   {
     boError(350) << k_funcinfo << "NULL canvas" << endl;
     setActive(false);
@@ -115,6 +115,13 @@ bool BosonShot::saveAsXML(QDomElement& root)
   root.setAttribute("x", x());
   root.setAttribute("y", y());
   root.setAttribute("z", z());
+
+  root.setAttribute("Owner", (unsigned int)owner()->id());
+  if(properties())
+  {
+    root.setAttribute("UnitType", (unsigned int)properties()->unitProperties()->typeId());
+    root.setAttribute("WeaponType", (unsigned int)properties()->id());
+  }
   return true;
 }
 
@@ -125,17 +132,20 @@ bool BosonShot::loadFromXML(const QDomElement& root)
   float y;
   float z;
   x = root.attribute("x").toFloat(&ok);
-  if (!ok) {
+  if(!ok)
+  {
     boError() << k_funcinfo << "Invalid value for x tag" << endl;
     return false;
   }
   y = root.attribute("y").toFloat(&ok);
-  if (!ok) {
+  if(!ok)
+  {
     boError() << k_funcinfo << "Invalid value for y tag" << endl;
     return false;
   }
   z = root.attribute("z").toFloat(&ok);
-  if (!ok) {
+  if(!ok)
+  {
     boError() << k_funcinfo << "Invalid value for z tag" << endl;
     return false;
   }
@@ -143,7 +153,7 @@ bool BosonShot::loadFromXML(const QDomElement& root)
   mActive = true; // Inactive shots won't be saved
   move(x, y, z);
 
-  // Is it ok to do these here?
+  // Is it ok to do this here?
   setAnimated(true);
   return true;
 }
@@ -198,7 +208,7 @@ float BosonShot::fullDamageRange() const
 BosonShotBullet::BosonShotBullet(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop, BoVector3 target) :
     BosonShot(owner, canvas, prop)
 {
-  if (!properties())
+  if(!properties())
   {
     boError(350) << k_funcinfo << "NULL weapon properties!" << endl;
     setActive(false);
@@ -213,7 +223,7 @@ BosonShotBullet::BosonShotBullet(Player* owner, BosonCanvas* canvas, const Boson
 BosonShotBullet::BosonShotBullet(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop) :
     BosonShot(owner, canvas, prop)
 {
-  if (!properties())
+  if(!properties())
   {
     boError(350) << k_funcinfo << "NULL weapon properties!" << endl;
     setActive(false);
@@ -237,7 +247,7 @@ BosonShotMissile::BosonShotMissile(Player* owner, BosonCanvas* canvas, const Bos
   //    target.x() << "; " << target.y() << "; " << target.z() << "); this=" << this << endl;
   mFlyParticleSystems = 0;
   mTarget = target;
-  if (!properties())
+  if(!properties())
   {
     boError(350) << k_funcinfo << "NULL weapon properties!" << endl;
     setActive(false);
@@ -283,7 +293,7 @@ BosonShotMissile::BosonShotMissile(Player* owner, BosonCanvas* canvas, const Bos
 BosonShotMissile::BosonShotMissile(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop) :
     BosonShot(owner, canvas, prop)
 {
-  if (!properties())
+  if(!properties())
   {
     boError(350) << k_funcinfo << "NULL weapon properties!" << endl;
     setActive(false);
@@ -327,9 +337,6 @@ bool BosonShotMissile::saveAsXML(QDomElement& root)
     return false;
   }
 
-  root.setAttribute("UnitType", (unsigned int)properties()->unitProperties()->typeId());
-  root.setAttribute("WeaponType", (unsigned int)properties()->id());
-
   // Too many attributes?
   root.setAttribute("xVelo", mVelo.x());
   root.setAttribute("yVelo", mVelo.y());
@@ -359,58 +366,69 @@ bool BosonShotMissile::loadFromXML(const QDomElement& root)
   float speed;
 
   xvelo = root.attribute("xVelo").toFloat(&ok);
-  if (!ok) {
+  if(!ok)
+  {
     boError() << k_funcinfo << "Invalid value for xVelo tag" << endl;
     return false;
   }
   yvelo = root.attribute("yVelo").toFloat(&ok);
-  if (!ok) {
+  if(!ok)
+  {
     boError() << k_funcinfo << "Invalid value for yVelo tag" << endl;
     return false;
   }
   zvelo = root.attribute("zVelo").toFloat(&ok);
-  if (!ok) {
+  if(!ok)
+  {
     boError() << k_funcinfo << "Invalid value for zVelo tag" << endl;
     return false;
   }
   targetx = root.attribute("Targetx").toFloat(&ok);
-  if (!ok) {
+  if(!ok)
+  {
     boError() << k_funcinfo << "Invalid value for Targetx tag" << endl;
     return false;
   }
   targety = root.attribute("Targety").toFloat(&ok);
-  if (!ok) {
+  if(!ok)
+  {
     boError() << k_funcinfo << "Invalid value for Targety tag" << endl;
     return false;
   }
   targetz = root.attribute("Targetz").toFloat(&ok);
-  if (!ok) {
+  if(!ok)
+  {
     boError() << k_funcinfo << "Invalid value for Targetz tag" << endl;
     return false;
   }
 
   mTotalDist = root.attribute("TotalDist").toFloat(&ok);
-  if (!ok) {
+  if(!ok)
+  {
     boError() << k_funcinfo << "Invalid value for TotalDist tag" << endl;
     return false;
   }
   mPassedDist = root.attribute("PassedDist").toFloat(&ok);
-  if (!ok) {
+  if(!ok)
+  {
     boError() << k_funcinfo << "Invalid value for PassedDist tag" << endl;
     return false;
   }
   mZ = root.attribute("mZ").toFloat(&ok);
-  if (!ok) {
+  if(!ok)
+  {
     boError() << k_funcinfo << "Invalid value for mZ tag" << endl;
     return false;
   }
   mMaxHeight = root.attribute("MaxHeight").toFloat(&ok);
-  if (!ok) {
+  if(!ok)
+  {
     boError() << k_funcinfo << "Invalid value for MaxHeight tag" << endl;
     return false;
   }
   speed = root.attribute("Speed").toFloat(&ok);
-  if (!ok) {
+  if(!ok)
+  {
     boError() << k_funcinfo << "Invalid value for Speed tag" << endl;
     return false;
   }
@@ -422,6 +440,7 @@ bool BosonShotMissile::loadFromXML(const QDomElement& root)
   setSpeed(speed);
   setAccelerationSpeed(properties()->accelerationSpeed());
   setMaxSpeed(properties()->speed());
+  setVisible(true);
   return true;
 }
 
@@ -455,11 +474,12 @@ void BosonShotMissile::load(QDataStream& stream)
   setSpeed(speed);
   setAccelerationSpeed(properties()->accelerationSpeed());
   setMaxSpeed(properties()->speed());
+  setVisible(true);
 }
 
 void BosonShotMissile::moveToTarget()
 {
- move(mTarget.x(), mTarget.y(), mTarget.z());
+  move(mTarget.x(), mTarget.y(), mTarget.z());
 }
 
 
@@ -506,22 +526,26 @@ bool BosonShotExplosion::loadFromXML(const QDomElement& root)
   bool ok;
 
   mDamage = (long int)root.attribute("Damage").toInt(&ok);
-  if (!ok) {
+  if(!ok)
+  {
     boError() << k_funcinfo << "Invalid value for Damage tag" << endl;
     return false;
   }
   mDamageRange = root.attribute("DamageRange").toFloat(&ok);
-  if (!ok) {
+  if(!ok)
+  {
     boError() << k_funcinfo << "Invalid value for DamageRange tag" << endl;
     return false;
   }
   mFullDamageRange = root.attribute("FullDamageRange").toFloat(&ok);
-  if (!ok) {
+  if(!ok)
+  {
     boError() << k_funcinfo << "Invalid value for FullDamageRange tag" << endl;
     return false;
   }
   mDelay = root.attribute("Delay").toInt(&ok);
-  if (!ok) {
+  if(!ok)
+  {
     boError() << k_funcinfo << "Invalid value for Delay tag" << endl;
     return false;
   }
@@ -557,7 +581,7 @@ void BosonShotExplosion::advanceMoveInternal()
 }
 
 
-/*****  BosonShotExplosion  *****/
+/*****  BosonShotMine  *****/
 
 BosonShotMine::BosonShotMine(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop, BoVector3 pos) :
     BosonShot(owner, canvas, prop)
@@ -574,20 +598,58 @@ BosonShotMine::BosonShotMine(Player* owner, BosonCanvas* canvas, const BosonWeap
 
 bool BosonShotMine::saveAsXML(QDomElement& root)
 {
+  if(!BosonShot::saveAsXML(root))
+  {
+    boError() << k_funcinfo << "Error while saving BosonShot" << endl;
+    return false;
+  }
+
+  root.setAttribute("Activated", mActivated ? "true" : "false");
   return true;
 }
 
 bool BosonShotMine::loadFromXML(const QDomElement& root)
 {
+  if(!BosonShot::loadFromXML(root))
+  {
+    boError() << k_funcinfo << "Error while loading BosonShot" << endl;
+    return false;
+  }
+
+  bool ok;
+  QString activated;
+
+  activated = root.attribute("Activated");
+  if(activated == "true")
+  {
+    mActivated = true;
+  }
+  else if(activated == "false")
+  {
+    mActivated = false;
+  }
+  else
+  {
+    boError() << k_funcinfo << "Invalid value for Activated tag" << endl;
+    return false;
+  }
+
+  setVisible(true);
+
   return true;
 }
 
 void BosonShotMine::save(QDataStream& stream)
 {
+  BosonShot::save(stream);
+  stream << (Q_UINT8)mActivated;
 }
 
 void BosonShotMine::load(QDataStream& stream)
 {
+  BosonShot::load(stream);
+  stream >> (Q_UINT8)mActivated;
+  setVisible(true);
 }
 
 void BosonShotMine::advanceMoveInternal()
@@ -612,6 +674,99 @@ void BosonShotMine::advanceMoveInternal()
       mActivated = true;
     }
   }
+}
+
+
+
+/*****  BosonShotBomb  *****/
+
+BosonShotBomb::BosonShotBomb(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop, BoVector3 pos) :
+    BosonShot(owner, canvas, prop)
+{
+  // Speeds
+  setAccelerationSpeed(properties()->accelerationSpeed());
+  setMaxSpeed(properties()->speed());
+
+  move(pos.x(), pos.y(), pos.z());
+  setVisible(true);
+}
+
+BosonShotBomb::BosonShotBomb(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop) :
+    BosonShot(owner, canvas, prop)
+{
+  // Speeds
+  setAccelerationSpeed(properties()->accelerationSpeed());
+  setMaxSpeed(properties()->speed());
+}
+
+bool BosonShotBomb::saveAsXML(QDomElement& root)
+{
+  if(!BosonShot::saveAsXML(root))
+  {
+    boError() << k_funcinfo << "Error while saving BosonShot" << endl;
+    return false;
+  }
+
+  root.setAttribute("Speed", speed());
+  return true;
+}
+
+bool BosonShotBomb::loadFromXML(const QDomElement& root)
+{
+  if(!BosonShot::loadFromXML(root))
+  {
+    boError() << k_funcinfo << "Error loading BosonShot" << endl;
+    return false;
+  }
+
+  bool ok;
+  float speed;
+
+  speed = root.attribute("Speed").toFloat(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Invalid value for Speed tag" << endl;
+    return false;
+  }
+
+  setSpeed(speed);
+  setAccelerationSpeed(properties()->accelerationSpeed());
+  setMaxSpeed(properties()->speed());
+  setVisible(true);
+
+  return true;
+}
+
+void BosonShotBomb::save(QDataStream& stream)
+{
+  BosonShot::save(stream);
+  stream << speed();
+}
+
+void BosonShotBomb::load(QDataStream& stream)
+{
+  BosonShot::load(stream);
+  float speed;
+  stream >> speed;
+  setSpeed(speed);
+  setAccelerationSpeed(properties()->accelerationSpeed());
+  setMaxSpeed(properties()->speed());
+  setVisible(true);
+}
+
+void BosonShotBomb::advanceMoveInternal()
+{
+  // FIXME: better collision detection
+  if(z() <= canvas()->heightAtCorner((int)x() / BO_TILE_SIZE, (int)y() / BO_TILE_SIZE))
+  {
+    boDebug() << "BOMB: " << k_funcinfo << "contact. BOOM" << endl;
+    explode();
+    return;
+  }
+  accelerate();
+  boDebug() << "BOMB: " << k_funcinfo << "accelerated (a. speed: " << accelerationSpeed() <<
+      "); speed is now: " << speed() << "; z: " << z() << endl;
+  setVelocity(0, 0, -speed());
 }
 
 
