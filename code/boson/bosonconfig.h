@@ -273,6 +273,17 @@ public:
 	 **/
 	bool disableSound() const { return mDisableSound; }
 
+	void setLoadTiles(bool l) { mLoadTiles = l; }
+
+	/**
+	 * If FALSE (for debugging only) then no tiles are loaded (or dummy
+	 * tiles only). Useful for runtime profiling of advance stuff for
+	 * example, since we don't need to wait for tiles to be loaded.
+	 *
+	 * Of course rendering values are useless then.
+	 **/
+	bool loadTiles() const { return mLoadTiles; }
+
 	void save(bool editor = false, KConfig* conf = 0);
 	void reset(KConfig* conf = 0);
 
@@ -332,6 +343,7 @@ private:
 	// NOT stored to config file!
 	bool mDisableSound;
 	DebugMode mDebugMode;
+	bool mLoadTiles;
 };
 
 #endif

@@ -216,6 +216,7 @@ BosonConfig::BosonConfig(KConfig* conf)
  mDebugMode = DebugNormal;
 
  mDisableSound = false;
+ mLoadTiles = true;
 
  // load from config
  reset(conf);
