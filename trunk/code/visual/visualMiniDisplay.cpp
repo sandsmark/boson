@@ -33,6 +33,7 @@ visualMiniDisplay::visualMiniDisplay(visualTopLevel *v, QWidget*parent, const ch
 /* create the (back)ground pixmap */
 	_ground = new QPixmap(v->maxX(), v->maxY());
 	_ground->fill(black);
+	sync();
 
 /* make the connection */
 	connect(vcanvas, SIGNAL(newCell(int,int, groundType)), this, SLOT(newCell(int,int, groundType)));
