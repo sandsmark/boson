@@ -674,7 +674,6 @@ void BosonBigDisplayBase::paintGL()
  glLoadIdentity();
 
  // alpha blending is used for both, cursor and text
- glEnable(GL_BLEND);
  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
  if (cursor()) {
@@ -688,8 +687,6 @@ void BosonBigDisplayBase::paintGL()
 	kdError() << k_funcinfo << "GL error when cursor rendered" << endl;
  }
  renderText();
-
- glDisable(GL_BLEND);
 
  // now restore the old 3D-matrix
  glMatrixMode(GL_PROJECTION);
@@ -758,6 +755,7 @@ void BosonBigDisplayBase::renderText()
  int y = d->mViewport[3] - d->mDefaultFont->height() - border;
 
  // Alpha-blended rectangle
+ glEnable(GL_BLEND);
  glColor4f(0.0, 0.0, 0.0, 0.5);
  glRecti(x - alphaborder, d->mViewport[3] - border + alphaborder,
 		d->mViewport[2] - border + alphaborder, d->mViewport[3] - (2 * d->mDefaultFont->height()) - border - alphaborder);
@@ -793,6 +791,7 @@ void BosonBigDisplayBase::renderText()
  glCallLists((*it).length(), GL_UNSIGNED_BYTE, (GLubyte*)(*it).latin1()); // list.begin()
 
  glColor3f(1.0, 1.0, 1.0);
+ glDisable(GL_BLEND);
 }
 
 
