@@ -777,8 +777,8 @@ void BosonBigDisplayBase::paintGL()
 #endif
 
  boProfiling->renderUnits(true);
- BoItemList allItems = mCanvas->allItems();
- BoItemList::Iterator it = allItems.begin();
+ BoItemList* allItems = mCanvas->allItems();
+ BoItemList::Iterator it = allItems->begin();
  unsigned int renderedUnits = 0;
 
  // AB: this are problematic for triangle strips! they need to be in a special
@@ -787,7 +787,7 @@ void BosonBigDisplayBase::paintGL()
  glCullFace(GL_BACK);
  glEnableClientState(GL_VERTEX_ARRAY);
  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
- for (; it != allItems.end(); ++it) {
+ for (; it != allItems->end(); ++it) {
 	//FIXME: order by z-coordinates! first those which are
 	//closer to surface, then flying units
 
