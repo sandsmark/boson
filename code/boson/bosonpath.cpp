@@ -208,9 +208,6 @@ bool BosonPath::findPath()
       {
         // If goal is unreachable and we've searched long enough, then we
         //  should stop searching and go to closest tile to goal
-        /// TODO: currently, "nearest" node can actually be on opposite side of
-        //   goal (nearest is nearest to _goal_). But we would then have to add
-        //   VISITED set to get this working...
         node = nearest;
         pathfound = AlternatePath;
       }
@@ -285,7 +282,7 @@ bool BosonPath::findPath()
 
       n2.h = dist(n2.x, n2.y, mGoalx, mGoaly);
 
-      if(n2.h < nearest.h)
+      if((n2.h + n2.g * 0.2) < (nearest.h + nearest.g * 0.2))
       {
         nearest = n2;
       }
