@@ -960,7 +960,12 @@ void BosonBigDisplayBase::paintGL()
 	d->mUpdateTimer.start(d->mUpdateInterval);
  }
 
+ bool showProfilingMessage = boProfiling->renderEntries() < MAX_PROFILING_ENTRIES;
  boProfiling->render(false);
+ if ( showProfilingMessage && boProfiling->renderEntries() >= MAX_PROFILING_ENTRIES) {
+	boGame->slotAddChatSystemMessage(i18n("%1 frames have been recorded by boProfiling. You can make profiling snapshots using CTRL+P").arg(boProfiling->renderEntries()));
+	boGame->slotAddChatSystemMessage(i18n("TODO: newlines for chat messages"));
+ }
 }
 
 void BosonBigDisplayBase::renderText()
