@@ -908,13 +908,7 @@ void BosonWidget::slotInitFogOfWar()
 
 void BosonWidget::slotCommandFramePosition(int pos)
 {
- if (pos == CmdFrameRight) {
-	emit signalMoveCommandFrame(DockRight);
- } else if (pos == CmdFrameUndocked) {
-	emit signalMoveCommandFrame(DockUnmanaged);
- } else {
-	emit signalMoveCommandFrame(DockLeft);
- }
+ emit signalMoveCommandFrame(pos);
  d->mCommandPos = (CommandFramePosition)pos;
 }
 

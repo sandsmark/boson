@@ -30,6 +30,7 @@
 #include <qbitmap.h>
 #include <qtimer.h>
 #include <qintdict.h>
+#include <qlabel.h>
 
 #include <X11/Xlib.h>
 
@@ -66,6 +67,11 @@ QRect BosonCursor::oldCursor() const
 
 void BosonCursor::move(double, double)
 {
+}
+
+QPoint BosonCursor::pos() const
+{
+ return QCursor::pos();
 }
 
 
@@ -135,11 +141,15 @@ void BosonNormalCursor::insertMode(int mode, QString baseDir, QString cursor)
 
 QCursor* BosonNormalCursor::loadQCursor(QString baseDir, QString cursor)
 {
+ if (baseDir.right(1) != QString::fromLatin1("/")) {
+	baseDir += QString::fromLatin1("/");
+ }
  QCursor* qcursor = 0;
  QPixmap p;
- QString file = baseDir + cursor + QString::fromLatin1(".xpm"); // FIXME: only xpm??
+ QString file = baseDir + cursor + QString::fromLatin1(".png");
  //TODO: hotspot!!
  if (p.load(file)) {
+	p.setMask(p.createHeuristicMask());
 	qcursor = new QCursor(p);
  }
  return qcursor;
@@ -321,7 +331,10 @@ QCanvasPixmapArray* BosonSpriteCursor::loadSpriteCursor(QString baseDir, QString
  return array;
 }
 
-
+QPoint BosonSpriteCursor::pos() const
+{
+ return QPoint(d->mCursor->x(), d->mCursor->y());
+}
 
 
 
@@ -333,7 +346,6 @@ class BosonExperimentalCursor::BosonExperimentalCursorPrivate
 public:
 	BosonExperimentalCursorPrivate()
 	{
-		mCanvas = 0;
 		mCurrentFrames = 0;
 		mCurrentFrame = -1;
 
@@ -342,13 +354,12 @@ public:
 		mWidget = 0;
 	}
 
-	QCanvas* mCanvas;
 	QTimer mAnimateTimer;
 	QIntDict<QCanvasPixmapArray> mCursorPixmaps;
 	QCanvasPixmapArray* mCurrentFrames;
 	int mCurrentFrame;
 
-	QWidget* mCursor;
+	QLabel* mCursor;
 
 	QWidget* mWidget;
 	QRect mRect;
@@ -365,27 +376,29 @@ BosonExperimentalCursor::BosonExperimentalCursor() : BosonCursor()
 
 BosonExperimentalCursor::~BosonExperimentalCursor()
 {
+ d->mCursorPixmaps.clear();
+ delete d->mCursor;
  delete d;
 }
 
 void BosonExperimentalCursor::init()
 {
  // from kdesktop/startupid.cpp
- d->mCursor = new QWidget(0, 0, 
+ d->mCursor = new QLabel(0, 0, 
 		WX11BypassWM|
 		WRepaintNoErase|
 		WStaticContents|
 		WResizeNoErase);
- XSetWindowAttributes attr;
- attr.save_under = True; // useful saveunder if possible to avoid redrawing
- XChangeWindowAttributes( qt_xdisplay(), d->mCursor->winId(), CWSaveUnder, &attr );
+// XSetWindowAttributes attr;
+// attr.save_under = True; // useful saveunder if possible to avoid redrawing
+// XChangeWindowAttributes( qt_xdisplay(), d->mCursor->winId(), CWSaveUnder, &attr );
  d->mCursor->setStyle("Windows"); // set a simple style w/o background
  d->mCursor->hide();
 }
 
 void BosonExperimentalCursor::slotAdvance()
 {
- d->mCursor->hide();
+// d->mCursor->hide();
 	
 // d->mCursor->setFrame((d->mCursor->frame() + 1 + d->mCursor->frameCount()) % d->mCursor->frameCount());
  QCanvasPixmap* p;
@@ -394,20 +407,21 @@ void BosonExperimentalCursor::slotAdvance()
  } else {
 	d->mCurrentFrame = 0;
  }
- /*
+ 
  p = d->mCurrentFrames->image(d->mCurrentFrame);
  if (!p) {
+	d->mCursor->hide();
 	return;
  }
  d->mCursor->resize(p->width(), p->height());
- bitBlt(d->mCursor, 0, 0, p, 0, 0, p->width(), p->height());
 // d->mCursor->setBackground(TransparentMode);
  d->mCursor->setMask(*p->mask());
-// d->mAnimateTimer.stop();
-*/
+ d->mCursor->setPixmap(*p);
+
+ d->mCursor->show();
 
 
- paintCursor(0, QCursor::pos());
+// paintCursor(0, QCursor::pos());
 }
 
 void BosonExperimentalCursor::setCursor(int mode)
@@ -422,17 +436,18 @@ void BosonExperimentalCursor::setCursor(int mode)
 //	d->mCursor->hide();
 	if (a) {
 		d->mCurrentFrames = a;
-		d->mCursor->show();
 		if (a->count() > 1) {
-//			d->mAnimateTimer.start(100);
-			d->mAnimateTimer.start(1000);
-		}
+			d->mAnimateTimer.start(100);
+//			d->mAnimateTimer.start(1000);
+			}
+		slotAdvance();
 		d->mCursor->show();
 	} else {
+		d->mCursor->hide();
 		kdWarning() << k_funcinfo << "NULL pixmap array for " << mode << endl;
 	}
  } else {
-//	d->mCursor->hide();
+	d->mCursor->hide();
  }
 }
 
@@ -441,6 +456,10 @@ void BosonExperimentalCursor::setWidgetCursor(QWidget* w)
  d->mWidget = w;
  if (!w) {
 	return;
+ }
+ if (!d->mCursor->parent()) {
+	d->mCursor->reparent(w, QPoint(0,0));
+	d->mCursor->hide();
  }
 
  if (d->mWidget->cursor().shape() != Qt::BlankCursor) {
@@ -451,7 +470,8 @@ void BosonExperimentalCursor::setWidgetCursor(QWidget* w)
 
 void BosonExperimentalCursor::move(double x, double y)
 {
-// d->mCursor->move(x, y); // TODO: hotspot!
+	return;
+ d->mCursor->move(x, y); // TODO: hotspot!
 
  // from kdesktop/startupod.cpp:
 // XRaiseWindow(qt_xdisplay(), d->mCursor->winId());
@@ -502,6 +522,7 @@ void BosonExperimentalCursor::insertMode(int mode, QString baseDir, QString curs
 
 void BosonExperimentalCursor::paintCursor(QPainter* /**obsolete**/, const QPoint& pos)
 {
+	return;
 kdDebug() << k_funcinfo << endl;
  if (!d->mCurrentFrames) {
 	return;

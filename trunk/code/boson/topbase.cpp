@@ -360,10 +360,12 @@ QFrame* TopBase::commandFrame() const
 
 void TopBase::slotMoveCommandFrame(int pos)
 {
- if (pos == DockUnmanaged) {
+ if (pos == CmdFrameUndocked) {
 	d->mCommandBar->undock();
+ } else if (pos == CmdFrameRight) {
+	moveDockWindow(d->mCommandBar, DockRight);
  } else {
-	moveDockWindow(d->mCommandBar, (Dock)pos);
+	moveDockWindow(d->mCommandBar, DockLeft);
  }
 }
 

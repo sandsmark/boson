@@ -146,11 +146,18 @@ void BosonBigDisplay::init()
  d->mChat->setCanvas(canvas());
  d->mChat->setZ(Z_CANVASTEXT);
 
- slotChangeCursor(CursorSprite);
+ slotChangeCursor(boConfig->readCursorMode());
 }
 
 BosonBigDisplay::~BosonBigDisplay()
 {
+ if (d->mCursor->isA("BosonSpriteCursor")) {
+	boConfig->saveCursorMode(CursorSprite);
+ } else if (d->mCursor->isA("BosonExperimentalCursor")) {
+	boConfig->saveCursorMode(CursorExperimental);
+ } else {
+	boConfig->saveCursorMode(CursorNormal);
+ }
  delete d->mSelectionRect;
  delete d->mChat;
  delete d;
@@ -222,9 +229,8 @@ void BosonBigDisplay::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseEvent
 		}
 //		d->mCursor->move(e->globalPos().x(), e->globalPos().y());
 		d->mCursor->move(pos.x(), pos.y());
-
-		canvas()->update();
 		d->mCursor->setWidgetCursor(viewport());
+		canvas()->update();
 		e->accept();
 		break;
 	}
@@ -232,7 +238,14 @@ void BosonBigDisplay::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseEvent
 		if (e->button() == LeftButton) {
 			startSelection(pos);
 		} else if (e->button() == MidButton) {
+			int oldX = contentsX();
+			int oldY = contentsY();
 			center(pos.x(), pos.y());
+			QPoint p = d->mCursor->pos();
+			d->mCursor->move(p.x() + contentsX() - oldX,
+					p.y() + contentsY() - oldY);
+			d->mCursor->setWidgetCursor(viewport());
+			canvas()->update();
 		} else if (e->button() == RightButton) {
 			d->mRMBMove = pos;
 		}
@@ -793,5 +806,10 @@ void BosonBigDisplay::slotChangeCursor(int mode)
 		break;
 
  }
+}
+
+void BosonBigDisplay::drawContents(QPainter* p, int x, int y, int w, int h)
+{
+ QCanvasView::drawContents(p, x, y, w, h);
 }
 
