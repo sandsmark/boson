@@ -613,12 +613,15 @@ class BosonGLMiniMapRendererPrivate
 public:
 	BosonGLMiniMapRendererPrivate()
 	{
-		mTextures = 0;
+		mMapTexture = 0;
 	}
-	BosonTextureArray* mTextures;
 	BoMatrix mModelviewMatrix;
 	QImage mOrigLogo; // original size
 	QImage mLogo; // scaled size
+
+	GLubyte* mMapTexture;
+	int mMapTextureWidth;
+	int mMapTextureHeight;
 };
 
 BosonGLMiniMapRenderer::BosonGLMiniMapRenderer(const int* viewport)
@@ -645,7 +648,7 @@ BosonGLMiniMapRenderer::BosonGLMiniMapRenderer(const int* viewport)
 
 BosonGLMiniMapRenderer::~BosonGLMiniMapRenderer()
 {
- delete d->mTextures;
+ delete[] d->mMapTexture;
  delete d;
 }
 
@@ -671,44 +674,38 @@ void BosonGLMiniMapRenderer::scaleImages()
 void BosonGLMiniMapRenderer::createMap(unsigned int w, unsigned int h, BosonGroundTheme* theme)
 {
  BO_CHECK_NULL_RET(theme);
- delete d->mTextures;
- d->mTextures = 0;
 
  mMapWidth = w;
  mMapHeight = h;
-
- QValueList<QImage> images;
 
  unsigned int w2 = BosonTextureArray::nextPower2(mMapWidth);
  unsigned int h2 = BosonTextureArray::nextPower2(mMapHeight);
  mTextureMaxWidth = (float)w / (float)w2;
  mTextureMaxHeight = (float)h / (float)h2;
- QImage mapTexture(w2, h2, 32);
- mapTexture.setAlphaBuffer(true);
- for (int i = 0; i < mapTexture.height(); i++) {
-	unsigned int* p = (unsigned int*)mapTexture.scanLine(i);
-	for (int j = 0; j < mapTexture.width(); j++) {
-		// AB: qRgba() is inline
-		p[j] = qRgba(0, 0, 0, 0);
-	}
- }
- images.append(mapTexture);
- d->mTextures = new BosonTextureArray(images, false, true);
 
- // AB: mapTexture has been resized to 2^n * 2^m. replace the alpha values for
- // all coordinates that are relevant to us.
- GLubyte* t = new GLubyte[w * h * 4];
- for (unsigned int i = 0; i < w; i ++) {
-	for (unsigned int j = 0; j < h; j ++) {
-		t[(j * w + i) * 4 + 0] = 0;
-		t[(j * w + i) * 4 + 1] = 0;
-		t[(j * w + i) * 4 + 2] = 0;
-		t[(j * w + i) * 4 + 3] = 255;
+ delete[] d->mMapTexture;
+ d->mMapTexture = new GLubyte[w2 * h2 * 4];
+ d->mMapTextureWidth = w2;
+ d->mMapTextureHeight = h2;
+
+ for (int y = 0; y < d->mMapTextureHeight; y++) {
+	for (int x = 0; x < d->mMapTextureWidth; x++) {
+		d->mMapTexture[(y * w + x) * 4 + 0] = 0;
+		d->mMapTexture[(y * w + x) * 4 + 1] = 0;
+		d->mMapTexture[(y * w + x) * 4 + 2] = 0;
+		d->mMapTexture[(y * w + x) * 4 + 3] = 0;
 	}
  }
- glBindTexture(GL_TEXTURE_2D, d->mTextures->texture(0));
- glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, t);
- delete[] t;
+
+ // AB: d->mMapTexture has been resized to 2^n * 2^m. replace the alpha values for
+ // all coordinates that are relevant to us.
+ for (unsigned int x = 0; x < w; x++) {
+	for (unsigned int y = 0; y < h; y++) {
+		// FIXME: endianness?
+		d->mMapTexture[(y * w + x) * 4 + 3] = 0;
+	}
+ }
+
 }
 
 void BosonGLMiniMapRenderer::render()
@@ -749,7 +746,7 @@ void BosonGLMiniMapRenderer::renderLogo()
 
 void BosonGLMiniMapRenderer::renderMiniMap()
 {
- BO_CHECK_NULL_RET(d->mTextures);
+ BO_CHECK_NULL_RET(d->mMapTexture);
  glPushMatrix();
  glLoadIdentity();
  d->mModelviewMatrix.loadIdentity();
@@ -757,7 +754,12 @@ void BosonGLMiniMapRenderer::renderMiniMap()
 
  d->mModelviewMatrix.scale(mZoom, mZoom, 1.0f); // AB: maybe do this on the texture matrix stack
 // glScalef(mZoom, mZoom, 1.0f); // AB: maybe do this on the texture matrix stack
- glBindTexture(GL_TEXTURE_2D, d->mTextures->texture(0));
+
+ glBindTexture(GL_TEXTURE_2D, 0);
+ glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+ glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+ glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, d->mMapTextureWidth, d->mMapTextureHeight,
+		0, GL_RGBA, GL_UNSIGNED_BYTE, d->mMapTexture);
  renderQuad();
 
  glPopMatrix();
@@ -812,15 +814,15 @@ void BosonGLMiniMapRenderer::setFogged(int x, int y)
 
 void BosonGLMiniMapRenderer::setPoint(int x, int y, const QColor& color)
 {
- BO_CHECK_NULL_RET(d->mTextures);
- GLubyte t[4];
- t[0] = color.red();
- t[1] = color.green();
- t[2] = color.blue();
- t[3] = 255;
- glBindTexture(GL_TEXTURE_2D, d->mTextures->texture(0));
- // GL_TEXTURE_2D, level, x, y, w, h, format, type, pixels
- glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, t);
+ BO_CHECK_NULL_RET(d->mMapTexture);
+ if (d->mMapTextureWidth <= 0 || d->mMapTextureHeight <= 0) {
+	boError() << k_funcinfo << "invalid map texture size" << endl;
+ }
+ // FIXME: endianness ?
+ d->mMapTexture[(y * d->mMapTextureWidth + x) * 4 + 0] = color.red();
+ d->mMapTexture[(y * d->mMapTextureWidth + x) * 4 + 1] = color.green();
+ d->mMapTexture[(y * d->mMapTextureWidth + x) * 4 + 2] = color.blue();
+ d->mMapTexture[(y * d->mMapTextureWidth + x) * 4 + 3] = 255; // redundant! is already set on initialization
 }
 
 void BosonGLMiniMapRenderer::setAlignment(int f)
