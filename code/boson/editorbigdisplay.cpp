@@ -315,10 +315,14 @@ BosonBigDisplayBase::PlacementPreview EditorBigDisplay::placementPreview() const
 	// Check if unit can be placed to cursor position.
 	// FIXME: this code is taken from BosonCanvas::canPlaceUnitAt()
 	QRect r(p.x * BO_TILE_SIZE, p.y * BO_TILE_SIZE, p.w * BO_TILE_SIZE, p.h * BO_TILE_SIZE);
-	if (!canvas()->canGo(u, r) || canvas()->cellsOccupied(r)) {
+	if(p.x < 0 || p.y < 0 || (p.x + p.w) > canvas()->mapWidth() || (p.y + p.h) > canvas()->mapHeight()) {
 		p.canPlace = false;
 	} else {
-		p.canPlace = true;
+		if (!canvas()->canGo(u, r) || canvas()->cellsOccupied(r)) {
+			p.canPlace = false;
+		} else {
+			p.canPlace = true;
+		}
 	}
 	p.draw = true;
  }
