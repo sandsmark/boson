@@ -440,7 +440,7 @@ bool BosonScenario::savePlayer(QDomElement& node, Player* p)
 	return false;
  }
  if (nodeList.item(0).firstChild().isText()) {
-	nodeList.item(0).replaceChild(doc.createTextNode(QString::number(p->minerals())), nodeList.item(0).firstChild());
+	nodeList.item(0).replaceChild(doc.createTextNode(QString::number(p->oil())), nodeList.item(0).firstChild());
  }
 
  // now save all units of the player into node
