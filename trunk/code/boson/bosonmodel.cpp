@@ -695,6 +695,11 @@ void BosonModel::loadModel()
 	return;
  }
 
+ QIntDictIterator<BoMesh> meshIt(d->mMeshes);
+ for (; meshIt.current(); ++meshIt) {
+	meshIt.current()->calculateNormals();
+ }
+
  mergeArrays();
  mergeMeshesInFrames();
  sortByDepth();
