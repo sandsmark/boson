@@ -19,12 +19,11 @@
 #ifndef BOSONAUDIO_H
 #define BOSONAUDIO_H
 
-#include <qobject.h>
-
 class QStringList;
 class KArtsServer;
 class BosonMusic;
 class BosonSound;
+class QString;
 
 class BosonAudioPrivate;
 
