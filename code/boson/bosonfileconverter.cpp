@@ -168,8 +168,20 @@ bool BosonFileConverter::convertSaveGame_From_0_8_To_0_9(QValueList<QByteArray>&
 		if (unit.isNull()) {
 			continue;
 		}
-		items.appendChild(unit.cloneNode(true));
 		unitsTag.removeChild(unit);
+//		QDomElement unitCopy = unit.cloneNode(true);
+		unit.setTagName(QString::fromLatin1("Item"));
+		bool ok = false;
+		unsigned int unitType = unit.attribute(QString::fromLatin1("UnitType")).toUInt(&ok);
+		if (!ok) {
+			boError() << k_funcinfo << "UnitType attribute is not a valid number for Item " << j << endl;
+			continue;
+		}
+
+		// 200 is RTTI::UnitStart. Hardcoded in case this value is
+		// changed one day (it was 200 in 0.8)
+		unit.setAttribute(QString::fromLatin1("Rtti"), 200 + unitType);
+		items.appendChild(unit);
 	}
 	player.removeChild(unitsTag);
  }
@@ -206,6 +218,8 @@ bool BosonFileConverter::convertSaveGame_From_0_8_To_0_9(QValueList<QByteArray>&
 	shotsTag.removeChild(shot);
 	items.appendChild(shot);
 	shot.removeAttribute(QString::fromLatin1("Owner"));
+	shot.setTagName(QString::fromLatin1("Item"));
+	shot.setAttribute(QString::fromLatin1("Rtti"), 150);
  }
  canvasRoot.removeChild(shotsTag);
 
