@@ -1133,7 +1133,7 @@ void BosonModel::renderMesh(BoMesh* boMesh, Lib3dsMesh* mesh, bool textured, Lib
 		renderPoint(mesh, node->face(), point, textured, invMeshMatrix, texMatrix);
 	}
  } else {
-	for (node = node->next(); node; node = node->next()) {
+	for (; node; node = node->next()) {
 		for (int i = 0; i < 3; i++) {
 			renderPoint(mesh, node->face(), i, textured, invMeshMatrix, texMatrix);
 		}
