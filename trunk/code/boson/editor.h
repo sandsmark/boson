@@ -19,18 +19,14 @@
 #ifndef __EDITOR_H__
 #define __EDITOR_H__
 
-#ifdef HAVE_CONFIG_H
-//#include <config.h>
-#endif 
-
-#include <kmainwindow.h>
+#include "topbase.h"
 
 class KPlayer;
 
 /**
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
  **/
-class Editor : public KMainWindow
+class Editor : public TopBase
 {
 	Q_OBJECT
 public:
@@ -67,10 +63,7 @@ private slots:
 	void slotCreateUnit();
 	void slotCreateTiles();
 
-	void optionsShowToolbar();
-	void optionsShowStatusbar();
-	void optionsConfigureKeys();
-	void optionsConfigureToolbars();
+	void slotConfigureKeys();
 
 	void slotChangePlayer(int index);
 	void slotChangeUnitConstruction(int index);
@@ -78,12 +71,9 @@ private slots:
 	void slotPlayerJoinedGame(KPlayer* p);
 	void slotPlayerLeftGame(KPlayer* p);
 
-	void slotZoom(int index);
-
 private:
-	void setupAccel();
-	void setupActions();
-	void setupStatusBar();
+	void initKAction();
+	void initStatusBar();
 
 private:
 	class EditorPrivate;

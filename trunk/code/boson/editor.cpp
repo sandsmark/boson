@@ -26,17 +26,13 @@
 #include "bosoncommandframe.h" // necessary cause of BosonCommandFrame::OrderType
 
 #include <kapplication.h>
+#include <kcmdlineargs.h>
+#include <kaboutdata.h>
 #include <kglobal.h>
 #include <klocale.h>
-#include <kmenubar.h>
 #include <kkeydialog.h>
-#include <kaccel.h>
 #include <kconfig.h>
-#include <kaboutdata.h>
-#include <kcmdlineargs.h>
-#include <kedittoolbar.h>
 #include <kstatusbar.h>
-#include <kstdaccel.h>
 #include <kaction.h>
 #include <kstdaction.h>
 #include <kfiledialog.h>
@@ -105,16 +101,10 @@ class Editor::EditorPrivate
 public:
 	EditorPrivate()
 	{
-		mBosonWidget = 0;
-		mToolbarAction = 0;
-		mStatusbarAction = 0;
-
 		mPlayerAction = 0;
+		mBuildAction = 0;
+		mCellsAction = 0;
 	}
-
-	BosonWidget* mBosonWidget;
-	KToggleAction* mToolbarAction;
-	KToggleAction* mStatusbarAction;
 
 	KSelectAction* mPlayerAction;
 	KSelectAction* mBuildAction;
@@ -123,29 +113,23 @@ public:
 	QIntDict<Player> mPlayers;
 };
 
-Editor::Editor() : KMainWindow( 0 )
+Editor::Editor() : TopBase()
 {
  d = new EditorPrivate;
 
- d->mBosonWidget = new BosonWidget(this);
- d->mBosonWidget->addEditorCommandFrame();
- connect(d->mBosonWidget, SIGNAL(signalPlayerJoinedGame(KPlayer*)), 
+ bosonWidget()->addEditorCommandFrame();
+ connect(bosonWidget(), SIGNAL(signalPlayerJoinedGame(KPlayer*)), 
 		this, SLOT(slotPlayerJoinedGame(KPlayer*)));
- connect(d->mBosonWidget, SIGNAL(signalPlayerLeftGame(KPlayer*)), 
+ connect(bosonWidget(), SIGNAL(signalPlayerLeftGame(KPlayer*)), 
 		this, SLOT(slotPlayerLeftGame(KPlayer*)));
 
- // tell the KMainWindow that this is indeed the main widget
- setCentralWidget(d->mBosonWidget);
+ initKAction();
 
- // then, setup our actions
- setupActions();
-
- // and a status bar
- setupStatusBar();
+ initStatusBar();
 
  showMaximized();
 
- d->mBosonWidget->startEditor();
+ bosonWidget()->startEditor();
 }
 
 Editor::~Editor()
@@ -153,11 +137,9 @@ Editor::~Editor()
  delete d;
 }
 
-void Editor::setupActions()
+void Editor::initKAction()
 {
  KStdAction::openNew(this, SLOT(slotFileNew()), actionCollection());
-// KStdAction::save(this, SLOT(fileSave()), actionCollection());
-// KStdAction::saveAs(this, SLOT(fileSaveAs()), actionCollection());
  KStdAction::quit(kapp, SLOT(quit()), actionCollection());
 
  (void)new KAction(i18n("Save &Map as..."), QKeySequence(), this,
@@ -166,16 +148,13 @@ void Editor::setupActions()
  (void)new KAction(i18n("Save &Scenario as..."), QKeySequence(), this,
 		  SLOT(slotSaveScenarioAs()), actionCollection(), 
 		  "file_save_scenario_as");
-// Debug - no i18n!
- (void)new KAction("Debug", QKeySequence(), d->mBosonWidget, SLOT(slotDebug()), actionCollection(), "game_debug");
-
 
  d->mPlayerAction = new KSelectAction(i18n("&Player"), QKeySequence(), actionCollection(), "editor_player");
  connect(d->mPlayerAction, SIGNAL(activated(int)), 
-		d->mBosonWidget, SLOT(slotChangeLocalPlayer(int)));
+		bosonWidget(), SLOT(slotChangeLocalPlayer(int)));
  d->mBuildAction = new KSelectAction(i18n("&Units"), QKeySequence(), actionCollection(), "editor_build");
  connect(d->mBuildAction, SIGNAL(activated(int)), 
-		d->mBosonWidget, SLOT(slotEditorConstructionChanged(int)));
+		bosonWidget(), SLOT(slotEditorConstructionChanged(int)));
 
 // quite complex - but this way we are mostly independant from changes in
 // BosonCommandFrame::OrderType
@@ -214,17 +193,13 @@ void Editor::setupActions()
 		  SLOT(slotCreateTiles()), actionCollection(),
 		  "editor_create_tiles");
 
- d->mToolbarAction = KStdAction::showToolbar(this, SLOT(optionsShowToolbar()), actionCollection());
- d->mStatusbarAction = KStdAction::showStatusbar(this, SLOT(optionsShowStatusbar()), actionCollection());
-
- KStdAction::keyBindings(this, SLOT(optionsConfigureKeys()), actionCollection());
- KStdAction::configureToolbars(this, SLOT(optionsConfigureToolbars()), actionCollection());
- KStdAction::preferences(d->mBosonWidget, SLOT(slotGamePreferences()), actionCollection()); // FIXME: slotEditorPreferences()
+ KStdAction::keyBindings(this, SLOT(slotConfigureKeys()), actionCollection());
+ KStdAction::preferences(bosonWidget(), SLOT(slotGamePreferences()), actionCollection()); // FIXME: slotEditorPreferences()
 
  createGUI("bosoneditorui.rc");
 }
 
-void Editor::setupStatusBar()
+void Editor::initStatusBar()
 {
  statusBar()->show();
 }
@@ -259,7 +234,7 @@ void Editor::slotSaveMapAs()
 	if (QFileInfo(fileName).extension().isEmpty()) {
 		fileName += ".bpf";
 	}
-	d->mBosonWidget->slotEditorSaveMap(fileName);
+	bosonWidget()->slotEditorSaveMap(fileName);
  }
 }
 
@@ -274,51 +249,23 @@ void Editor::slotSaveScenarioAs()
 	if (QFileInfo(fileName).extension().isEmpty()) {
 		fileName += ".bsc";
 	}
-	d->mBosonWidget->slotEditorSaveScenario(fileName);
+	bosonWidget()->slotEditorSaveScenario(fileName);
  }
 }
 
-void Editor::optionsShowToolbar()
+void Editor::slotConfigureKeys()
 {
- if (d->mToolbarAction->isChecked()) {
-	toolBar()->show();
- } else {
-	toolBar()->hide();
- }
-}
-
-void Editor::optionsShowStatusbar()
-{
- if (d->mStatusbarAction->isChecked()) {
-        statusBar()->show();
- } else {
-        statusBar()->hide();
- }
-}
-
-void Editor::optionsConfigureKeys()
-{
- KKeyDialog::configureKeys(actionCollection(), "bosonui.rc");
-}
-
-void Editor::optionsConfigureToolbars()
-{
- // use the standard toolbar editor
- KEditToolbar dlg(actionCollection());
- if (dlg.exec()) {
-	// recreate our GUI
-	createGUI();
- } 
+ KKeyDialog::configureKeys(actionCollection(), "bosoneditorui.rc");
 }
 
 void Editor::slotFileNew()
 {
-// d->mBosonWidget->startEditor();
+// bosonWidget()->startEditor();
 }
 
 void Editor::slotChangePlayer(int index)
 {
-kdWarning() << "obsolete" << endl;
+kdWarning() << k_funcinfo << "is obsolete" << endl;
 // Player* currentPlayer = d->mPlayers[index];
 
 }
@@ -337,7 +284,7 @@ void Editor::slotPlayerJoinedGame(KPlayer* player)
  // dunno if this makes sense - but currently one cannot add more players so we
  // just activate the player that was added last.
  d->mPlayerAction->setCurrentItem(players.count() - 1);
- d->mBosonWidget->slotChangeLocalPlayer(d->mPlayerAction->currentItem());
+ bosonWidget()->slotChangeLocalPlayer(d->mPlayerAction->currentItem());
 }
 
 void Editor::slotPlayerLeftGame(KPlayer* player)
@@ -364,8 +311,8 @@ void Editor::slotPlayerLeftGame(KPlayer* player)
 
 void Editor::slotChangeUnitConstruction(int index)
 {
- kdWarning() << "obsolete" << endl;
-// d->mBosonWidget->editorConstructionChanged(index, d->mPlayers[d->mPlayerAction->currentItem()]);
+ kdWarning() << k_funcinfo << "is obsolete" << endl;
+// bosonWidget()->editorConstructionChanged(index, d->mPlayers[d->mPlayerAction->currentItem()]);
 }
 
 void Editor::slotCreateUnit()
@@ -402,9 +349,3 @@ void Editor::slotCreateTiles()
  newTiles.save(fileName);
 }
 
-void Editor::slotZoom(int index)
-{
- QWMatrix m;
- m.scale(index, index);
- d->mBosonWidget->zoom(m);
-}

@@ -21,17 +21,10 @@
 #include "bosonwidget.h"
 
 #include <kapplication.h>
-#include <kglobal.h>
 #include <klocale.h>
-#include <kmenubar.h>
 #include <kkeydialog.h>
-#include <kaccel.h>
 #include <kconfig.h>
-
-#include <kedittoolbar.h>
-
 #include <kstatusbar.h>
-#include <kstdaccel.h>
 #include <kaction.h>
 #include <kstdaction.h>
 #include <kstdgameaction.h>
@@ -41,19 +34,8 @@
 
 #include "top.moc"
 
-class Top::TopPrivate
-{
-public:
-	TopPrivate()
-	{
-	}
-
-};
-
 Top::Top() : TopBase()
 {
- d = new TopPrivate;
-
  bosonWidget()->addGameCommandFrame();
 
  initKAction();
@@ -67,7 +49,6 @@ Top::Top() : TopBase()
 Top::~Top()
 {
  bosonWidget()->saveConfig();
- delete d;
 }
 
 void Top::initKAction()
