@@ -325,6 +325,12 @@ public:
 	BoNormalMap(unsigned int width, unsigned int height)
 			: BoMapCornerArray(width, height)
 	{
+		if (width == 0) {
+			width = 1;
+		}
+		if (height == 0) {
+			height = 1;
+		}
 		mNormalMap = new BoVector3[arrayPos(width - 1, height - 1) + 1];
 	}
 
