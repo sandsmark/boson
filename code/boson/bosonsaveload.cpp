@@ -45,7 +45,7 @@
 // Saving format version
 #define BOSON_SAVEGAME_FORMAT_VERSION_MAJOR 0x00
 #define BOSON_SAVEGAME_FORMAT_VERSION_MINOR 0x02
-#define BOSON_SAVEGAME_FORMAT_VERSION_RELEASE 0x00
+#define BOSON_SAVEGAME_FORMAT_VERSION_RELEASE 0x01
 #define BOSON_SAVEGAME_FORMAT_VERSION \
 	BOSON_MAKE_SAVEGAME_FORMAT_VERSION \
 		( \
@@ -420,12 +420,12 @@ bool BosonSaveLoad::loadFromFile(const QString& file)
 	return false;
  }
 
- QValueList<QByteArray> list;
- list.append(f.kgameData());
- list.append(f.playersData());
- list.append(f.canvasData());
- list.append(f.externalData());
- list.append(f.mapData());
+ QMap<QString, QByteArray> list;
+ list.insert("kgameXML", f.kgameData());
+ list.insert("playersXML", f.playersData());
+ list.insert("canvasXML", f.canvasData());
+ list.insert("externalXML", f.externalData());
+ list.insert("map", f.mapData());
 
  bool ret = loadFromFile(list);
  if (!ret) {
@@ -434,7 +434,7 @@ bool BosonSaveLoad::loadFromFile(const QString& file)
  return ret;
 }
 
-bool BosonSaveLoad::loadFromFile(const QValueList<QByteArray>& fileList)
+bool BosonSaveLoad::loadFromFile(const QMap<QString, QByteArray>& fileList)
 {
  boDebug(260) << k_funcinfo << endl;
  d->mLoadingStatus = LoadingInProgress;
@@ -449,7 +449,7 @@ bool BosonSaveLoad::loadFromFile(const QValueList<QByteArray>& fileList)
  // kgame.xml is mandatory in all boson savegame versions. We can get the
  // savegame format version from there (which is also mandatory) so we load this
  // first.
- QString kgameXML = fileList[0];
+ QString kgameXML = fileList["kgameXML"];
  if (kgameXML.isEmpty()) {
 	boError(260) << k_funcinfo << "Empty kgameXML" << endl;
 	addLoadError(SaveLoadError::LoadBSGFileError, i18n("empty kgame.xml"));
@@ -473,7 +473,7 @@ bool BosonSaveLoad::loadFromFile(const QValueList<QByteArray>& fileList)
  if (version == BOSON_SAVEGAME_FORMAT_VERSION_0_8) {
 	boDebug(260) << "trying to load a savegame from boson 0.8" << endl;
 	BosonFileConverter converter;
-	QValueList<QByteArray> list = fileList;
+	QMap<QString, QByteArray> list = fileList;
 	bool ok = converter.convertSaveGame_From_0_8_To_0_9(list);
 	if (!ok) {
 		boError(260) << "File converting failed. cannot load this file." << endl;
@@ -482,28 +482,49 @@ bool BosonSaveLoad::loadFromFile(const QValueList<QByteArray>& fileList)
 		return false;
 	}
 	return loadFromFile(list);
+ } else if (version == BOSON_SAVEGAME_FORMAT_VERSION_0_8_128) {
+	boDebug(260) << "trying to load a savegame from boson 0.8.128" << endl;
+	BosonFileConverter converter;
+	QMap<QString, QByteArray> list = fileList;
+	bool ok = converter.convertSaveGame_From_0_8_128_To_0_9(list);
+	if (!ok) {
+		boError(260) << "File converting failed. cannot load this file." << endl;
+		addLoadError(SaveLoadError::InvalidFileFormat, i18n("Failed converting savegame from boson 0.8.128. Unable to load this file."));
+		d->mLoadingStatus = InvalidFileFormat;
+		return false;
+	}
+	return loadFromFile(list);
  }
+
  if (version != latestSavegameVersion()) {
 	boError(260) << k_funcinfo << "version " << version << " could not be converted to current savegame format." << endl;
 	addLoadError(SaveLoadError::LoadInvalidVersion, i18n("File format version (%1) could not be converted to current file format. Unable to load this file.").arg(version));
 	return false;
  }
 
- if (fileList.count() != 5) {
+ if (fileList.count() != 8) {
 	boError(260) << k_funcinfo << "invalid file count: " << fileList.count() << endl;
 	addLoadError(SaveLoadError::LoadBSGFileError, i18n("Trying to load invalid number of files: %1 - must be 5.").arg(fileList.count()));
 	return false;
  }
 
+ boDebug() << k_funcinfo << "file format version is current. trying to load..." << endl;
+
  QString playersXML;
  QString canvasXML;
  QString externalXML;
- QByteArray map;
+ QString mapXML;
+ QByteArray heightMap;
+ QByteArray texMap;
+ QString descriptionXML;
 
- playersXML = QString(fileList[1]);
- canvasXML = QString(fileList[2]);
- externalXML = QString(fileList[3]);
- map = fileList[4];
+ playersXML = QString(fileList["playersXML"]);
+ canvasXML = QString(fileList["canvasXML"]);
+ externalXML = QString(fileList["externalXML"]);
+ mapXML = QString(fileList["map/mapXML"]);
+ heightMap = fileList["map/heightmap.png"];
+ texMap = fileList["map/texmap"];
+ descriptionXML = QString(fileList["map/C/descriptionXML"]);
 
  if (playersXML.isEmpty()) {
 	boError(260) << k_funcinfo << "Empty playersXML" << endl;
@@ -523,9 +544,27 @@ bool BosonSaveLoad::loadFromFile(const QValueList<QByteArray>& fileList)
 	d->mLoadingStatus = BSGFileError;
 	return false;
  }
- if (map.isEmpty()) {
-	boError(260) << k_funcinfo << "Empty map" << endl;
-	addLoadError(SaveLoadError::LoadBSGFileError, i18n("empty file: map"));
+ if (mapXML.isEmpty()) {
+	boError(260) << k_funcinfo << "Empty mapXML" << endl;
+	addLoadError(SaveLoadError::LoadBSGFileError, i18n("empty file: map/map.xml"));
+	d->mLoadingStatus = BSGFileError;
+	return false;
+ }
+ if (heightMap.isEmpty()) {
+	boError(260) << k_funcinfo << "Empty heightmap.png" << endl;
+	addLoadError(SaveLoadError::LoadBSGFileError, i18n("empty file: map/heightmap.png"));
+	d->mLoadingStatus = BSGFileError;
+	return false;
+ }
+ if (texMap.isEmpty()) {
+	boError(260) << k_funcinfo << "Empty texmap" << endl;
+	addLoadError(SaveLoadError::LoadBSGFileError, i18n("empty file: map/texmap"));
+	d->mLoadingStatus = BSGFileError;
+	return false;
+ }
+ if (descriptionXML.isEmpty()) {
+	boError(260) << k_funcinfo << "Empty description" << endl;
+	addLoadError(SaveLoadError::LoadBSGFileError, i18n("empty file: map/C/description.xml"));
 	d->mLoadingStatus = BSGFileError;
 	return false;
  }
@@ -560,7 +599,7 @@ bool BosonSaveLoad::loadFromFile(const QValueList<QByteArray>& fileList)
  // now load the map (must happen before loading units)
  // AB: can we move this before loading the players?
  emit signalLoadingType(BosonLoadingWidget::ReceiveMap);
- emit signalInitMap(map);
+// emit signalInitMap(map); // AB: kinda obsolete!
 
 
  // Load player data (e.g. unit configs, unit models, ...

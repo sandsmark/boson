@@ -25,6 +25,10 @@
 #define BOSON_SAVEGAME_FORMAT_VERSION_0_8 \
 	( BOSON_MAKE_SAVEGAME_FORMAT_VERSION (0x00, 0x01, 0x12) )
 
+// version from boson 0.8.128 (development version that got never released)
+#define BOSON_SAVEGAME_FORMAT_VERSION_0_8_128 \
+	( BOSON_MAKE_SAVEGAME_FORMAT_VERSION (0x00, 0x02, 0x00) )
+
 #define BOSON_SAVEGAME_END_COOKIE 1718
 
 
@@ -41,7 +45,7 @@ class BosonCanvas;
 class BosonPlayField;
 class Player;
 
-template <class T> class QValueList;
+template <class T, class T2> class QMap;
 
 class SaveLoadError
 {
@@ -207,7 +211,7 @@ protected:
 	 * @param files A list of all relevant files in the @ref BSGFile object.
 	 * The kgame.xml _MUST_ be the _FIRST_ entry in this list!
 	 **/
-	bool loadFromFile(const QValueList<QByteArray>& files);
+	bool loadFromFile(const QMap<QString, QByteArray>& files);
 
 	QString saveKGameAsXML();
 	QString savePlayersAsXML(Player* localPlayer);
