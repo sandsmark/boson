@@ -25,6 +25,7 @@
 #include "bodebug.h"
 #include "bosonglfont.h"
 #include "../bosonglwidget.h"
+#include "../bo3dtools.h"
 
 #include <knuminput.h>
 #include <kdialogbase.h>
@@ -71,12 +72,17 @@ BosonGLFontPreview::BosonGLFontPreview(QWidget* parent)
 
 BosonGLFontPreview::~BosonGLFontPreview()
 {
+ makeCurrent();
  delete mFont;
 }
 
 BoFontInfo BosonGLFontPreview::setFont(const BoFontInfo& font)
 {
  boDebug() << k_funcinfo << font.guiName() << endl;
+ QString errorString, errorName;
+ if (Bo3dTools::checkError(0, &errorString, &errorName)) {
+	boError() << k_funcinfo << "OpenGL error before setFont(): string=" << errorString << " name=" << errorName << endl;
+ }
  makeCurrent();
  delete mFont;
  mFont = new BosonGLFont();
@@ -85,7 +91,13 @@ BoFontInfo BosonGLFontPreview::setFont(const BoFontInfo& font)
 	return BoFontInfo();
  }
 
+ if (Bo3dTools::checkError(0, &errorString, &errorName)) {
+	boError() << k_funcinfo << "OpenGL error at the end of setFont() before slotUpdateGL(): string=" << errorString << " name=" << errorName << endl;
+ }
  slotUpdateGL();
+ if (Bo3dTools::checkError(0, &errorString, &errorName)) {
+	boError() << k_funcinfo << "OpenGL error at the end of setFont(): string=" << errorString << " name=" << errorName << endl;
+ }
  return mFont->fontInfo();
 }
 
@@ -94,14 +106,25 @@ void BosonGLFontPreview::initializeGL()
  if (isInitialized()) {
 	return;
  }
+ QString errorString, errorName;
+ if (Bo3dTools::checkError(0, &errorString, &errorName)) {
+	boError() << k_funcinfo << "OpenGL error before initializeGL(): string=" << errorString << " name=" << errorName << endl;
+ }
  glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
  glDisable(GL_DITHER);
+ if (Bo3dTools::checkError(0, &errorString, &errorName)) {
+	boError() << k_funcinfo << "OpenGL error at the end of initializeGL(): string=" << errorString << " name=" << errorName << endl;
+ }
 }
 
 void BosonGLFontPreview::resizeGL(int w, int h)
 {
  if (!isInitialized()) {
 	initGL();
+ }
+ QString errorString, errorName;
+ if (Bo3dTools::checkError(0, &errorString, &errorName)) {
+	boError() << k_funcinfo << "OpenGL error before resizeGL(): string=" << errorString << " name=" << errorName << endl;
  }
  makeCurrent();
  glMatrixMode(GL_PROJECTION);
@@ -110,6 +133,9 @@ void BosonGLFontPreview::resizeGL(int w, int h)
  gluOrtho2D(0.0, (GLfloat)width(), 0.0, (GLfloat)height());
  glMatrixMode(GL_MODELVIEW);
  glLoadIdentity();
+ if (Bo3dTools::checkError(0, &errorString, &errorName)) {
+	boError() << k_funcinfo << "OpenGL error at the end of resizeGL(): string=" << errorString << " name=" << errorName << endl;
+ }
 }
 
 void BosonGLFontPreview::paintGL()
@@ -120,6 +146,10 @@ void BosonGLFontPreview::paintGL()
  if (!isInitialized()) {
 	initGL();
  }
+ QString errorString, errorName;
+ if (Bo3dTools::checkError(0, &errorString, &errorName)) {
+	boError() << k_funcinfo << "OpenGL error before paintGL(): string=" << errorString << " name=" << errorName << endl;
+ }
  glLoadIdentity();
  glColor3ub(255, 0, 0);
  glClear(GL_COLOR_BUFFER_BIT);
@@ -129,6 +159,9 @@ void BosonGLFontPreview::paintGL()
  int y = height() / 2 + mFont->height(text, maxWidth) / 2;
  mFont->begin();
  mFont->renderText(x, y, text, maxWidth);
+ if (Bo3dTools::checkError(0, &errorString, &errorName)) {
+	boError() << k_funcinfo << "OpenGL error at the end of paintGL(): string=" << errorString << " name=" << errorName << endl;
+ }
 }
 
 class BosonGLFontChooserPrivate
