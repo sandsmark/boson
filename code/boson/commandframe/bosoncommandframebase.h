@@ -97,14 +97,12 @@ public slots:
 	void slotUpdateProductionOptions();
 
 protected:
-// FIXME: these are NOT slots anymore! we use slotSelectionChanged() instead.
 	/**
-	 * Show the selected unit in the @ref BosonUnitView
-	 * @param unit The selected unit
+	 * Clear everything that displays currently selected items/units. E.g.
+	 * clear the unitview (i.e. the big image on the top) and the list of
+	 * selected units.
 	 **/
-	virtual void slotShowSingleUnit(Unit* unit);
-
-	virtual void slotShowUnit(Unit* unit);
+	virtual void clearSelection();
 
 	/**
 	 * Sets e.g. the order buttons of possible production items, if this has

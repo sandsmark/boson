@@ -163,39 +163,49 @@ void BosonCommandFrameBase::slotSelectionChanged(BoSelection* selection)
 {
  boDebug() << k_funcinfo << endl;
  if (!selection || selection->count() == 0) {
-	slotShowSingleUnit(0);
-	setAction(0);
- } else if (selection->count() == 1) {
-	slotShowSingleUnit(selection->leader());
-	setAction(selection->leader());
+	clearSelection();
+	return;
+ }
+ Unit* leader = selection->leader();
+ if (!leader) {
+	boError() << k_funcinfo << "non-empty selection, but NULL leader" << endl;
+	clearSelection();
+	return;
  } else {
-	setAction(0);
+	// display group leader in d->mUnitView
+	if (!leader->owner()) {
+		boError() << k_funcinfo << "group leader has NULL owner" << endl;
+		clearSelection();
+		return;
+	}
+	if (leader->isDestroyed()) {
+		boWarning() << k_funcinfo << "group leader is destroyed" << endl;
+		d->mUnitView->setUnit(0);
+		setAction(0);
+	} else {
+		d->mUnitView->setUnit(leader);
+		setAction(leader);
+	}
+ }
+
+ if (selection->count() > 1) {
 	QPtrList<Unit> list = selection->allUnits();
 	QPtrListIterator<Unit> it(list);
 	for (; it.current(); ++it) {
-		slotShowUnit(it.current());
+		d->mOrderWidget->showUnit(it.current());
 	}
+	d->mOrderWidget->show();
+ } else {
+	d->mOrderWidget->hide();
  }
 }
 
-void BosonCommandFrameBase::slotShowSingleUnit(Unit* unit)
+void BosonCommandFrameBase::clearSelection()
 {
- if (!unit) {
-	// display nothing
-	d->mUnitView->setUnit(0);
-	return;
- }
- if (unit->isDestroyed() || !unit->owner()) {
-	d->mUnitView->setUnit(0);
-	return;
- }
- d->mUnitView->setUnit(unit);
-}
-
-void BosonCommandFrameBase::slotShowUnit(Unit* unit)
-{
- d->mOrderWidget->showUnit(unit);
- d->mOrderWidget->show();
+ // display nothing
+ setAction(0);
+ d->mUnitView->setUnit(0);
+ d->mOrderWidget->hide();
 }
 
 void BosonCommandFrameBase::setAction(Unit* unit)
