@@ -65,6 +65,10 @@ BosonTextureArray::~BosonTextureArray()
 bool BosonTextureArray::createTextures(QValueList<QImage> images, GLenum mode)
 {
 #ifndef NO_OPENGL
+ GLenum error = glGetError();
+ if (error != GL_NO_ERROR) {
+	kdError() << k_funcinfo << "OpenGL Error before loading textures: " << gluErrorString(error) << endl;
+ }
  // TODO: performance: use smaller textures!! so we can store more textures in
  // texture memory and don't need to swap from/to system memory
  if (mTextures || mCount) {
@@ -128,6 +132,11 @@ bool BosonTextureArray::createTextures(QValueList<QImage> images, GLenum mode)
 	// place it in? can it go to initializeGL() ?
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+	GLenum error = glGetError();
+	if (error != GL_NO_ERROR) {
+		kdError() << k_funcinfo << "OpenGL Error when loading texture " << i << ": " << gluErrorString(error) << endl;
+	}
  }
 #endif
  return true;
