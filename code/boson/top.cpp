@@ -1017,7 +1017,7 @@ bool TopWidget::eventFilter(QObject* o, QEvent* e)
 		o != d->mStartEditor &&
 		o != d->mNetworkOptions &&
 		o != d->mNewGame) {
-	return false;
+	return KDockMainWindow::eventFilter(o, e);
  }
  // FIXME: we should display for the BosonStartupBaseWidgets, too
 
@@ -1029,12 +1029,12 @@ bool TopWidget::eventFilter(QObject* o, QEvent* e)
 				p->popup(QCursor::pos());
 			}
 			return true;
-		} else {
-			return false;
 		}
+		break;
 	default:
-		return false;
+		break;
  }
+ return KDockMainWindow::eventFilter(o, e);
 }
 
 void TopWidget::hideMenubar()
