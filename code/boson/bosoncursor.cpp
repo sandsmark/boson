@@ -207,10 +207,10 @@ void BosonCursor::loadCursors()
 			pixmaps.append(d->mCursorDefault);
 			KSimpleConfig c(dir + "/default.desktop");
 			c.setGroup("Boson Cursor");
+			points.resize(i + 1);
 			points.setPoint(i, QPoint(
 					c.readNumEntry("HotspotX, 0"),
 					c.readNumEntry("HotspotY, 0")));
-			points.resize(i + 1);
 			break;
 		}
 		case Hide:
