@@ -1,0 +1,10 @@
+.deps
+.libs
+Makefile
+Makefile.in
+bosonchat.lo
+bosonsprite.lo
+glsprite.lo
+libbosonvisual.la
+libbosonvisual_la_meta_unload.cpp
+libbosonvisual_la_meta_unload.lo

@@ -6,3 +6,4 @@ Makefile.in
 *.lo
 libbosonobjects.la
 libbosonobjects_la_meta_unload.*
+libbosonitems.la

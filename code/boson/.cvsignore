@@ -16,3 +16,5 @@ bouniteditor.h
 bounit_meta_unload.cpp
 bocursor_meta_unload.cpp
 *.bsg
+borender
+borender_meta_unload.cpp
