@@ -43,6 +43,7 @@
 #include "bodebug.h"
 #include "items/bosonshot.h"
 #include "unitplugins.h"
+#include "bo3dtools.h"
 
 #include <kgame/kgameio.h>
 
@@ -102,8 +103,7 @@ public:
 	}
 	Camera& operator=(const Camera& c)
 	{
-		mCenterX = c.mCenterX;
-		mCenterY = c.mCenterY;
+		mLookAt = c.mLookAt;
 		mPosZ = c.mPosZ;
 		mRotation = c.mRotation;
 		mRadius = c.mRadius;
@@ -113,8 +113,7 @@ public:
 	}
 	void init()
 	{
-		mCenterX = 0.0;
-		mCenterY = 0.0;
+		mLookAt.set(0, 0, 0);
 		mPosZ = 10.0;
 		mRotation = 0.0;
 		mRadius = 0.0;
@@ -122,12 +121,14 @@ public:
 		mMapHeight = 0.0;
 	}
 
-	void setPos(GLfloat x, GLfloat y, GLfloat z)
+	void setLookAt(const BoVector3& pos)
 	{
-		mCenterX = x;
-		mCenterY = y;
+		mLookAt = pos;
 		checkPosition();
-		mPosZ = QMAX(CAMERA_MIN_Z, QMIN(CAMERA_MAX_Z, z));
+	}
+	const BoVector3& lookAt()
+	{
+		return mLookAt;
 	}
 	void changeZ(GLfloat diff)
 	{
@@ -161,16 +162,9 @@ public:
 		}
 		mRotation = rotation;
 	}
-	void moveBy(GLfloat x, GLfloat y)
+	void moveLookAtBy(GLfloat x, GLfloat y, GLfloat z)
 	{
-		mCenterX += x;
-		mCenterY += y;
-		checkPosition();
-	}
-	void move(GLfloat x, GLfloat y)
-	{
-		mCenterX = x;
-		mCenterY = y;
+		mLookAt.add(BoVector3(x, y, z));
 		checkPosition();
 	}
 	void setMapSize(GLfloat w, GLfloat h)
@@ -178,13 +172,13 @@ public:
 		mMapWidth = w;
 		mMapHeight = h;
 	}
-	void setX(GLfloat x) { setPos(x, mCenterY, mPosZ); }
-	void setY(GLfloat y) { setPos(mCenterX, y, mPosZ); }
-	void setZ(GLfloat z) { setPos(mCenterX, mCenterY, z); }
+//	void setX(GLfloat x) { setPos(x, mCenterY, mPosZ); }
+//	void setY(GLfloat y) { setPos(mCenterX, y, mPosZ); }
+	void setZ(GLfloat z) { mPosZ = z; }
 	void setRotation(GLfloat r) { mRotation = r; }
 	void setRadius(GLfloat r) { mRadius = r; }
-	GLfloat x() const { return mCenterX; }
-	GLfloat y() const { return mCenterY; }
+//	GLfloat x() const { return mCenterX; }
+//	GLfloat y() const { return mCenterY; }
 	GLfloat z() const { return mPosZ; }
 	GLfloat rotation() const { return mRotation; }
 	GLfloat radius() const { return mRadius; }
@@ -195,21 +189,20 @@ protected:
 		if (!mMapWidth || !mMapHeight) {
 			return;
 		}
-		if (mCenterX < 0.0) {
-			mCenterX = 0.0;
-		} else if (mCenterX > mMapWidth) {
-			mCenterX = mMapWidth;
+		if (mLookAt.x() < 0.0) {
+			mLookAt.setX(0.0);
+		} else if (mLookAt.x() > mMapWidth) {
+			mLookAt.setX(mMapWidth);
 		}
-		if (mCenterY > 0.0) {
-			mCenterY = 0.0;
-		} else if (mCenterY < -mMapHeight) {
-			mCenterY = -mMapHeight;
+		if (mLookAt.y() > 0.0) {
+			mLookAt.setY(0.0);
+		} else if (mLookAt.y() < -mMapHeight) {
+			mLookAt.setY(-mMapHeight);
 		}
 	}
 
 private:
-	GLfloat mCenterX;
-	GLfloat mCenterY;
+	BoVector3 mLookAt;
 	GLfloat mPosZ;
 
 	GLfloat mRotation;
@@ -808,7 +801,7 @@ void BosonBigDisplayBase::paintGL()
 	BosonParticleSystem* s;
 	while ((s = it.current()) != 0) {
 		++it;
-		if (sphereInFrustum(s->position().data(), s->boundingSphereRadius())) {
+		if (sphereInFrustum(s->position(), s->boundingSphereRadius())) {
 #warning FIXME
 			// BosonParticleSystem uses *OpenGL* coordinates for
 			// position, not cell/canvas coordinates.
@@ -821,7 +814,7 @@ void BosonBigDisplayBase::paintGL()
 			// cell-coordinates only is not an option, as the
 			// accuracy of opengl coordinates is needed.
 			int cellX = (int)s->position()[0];
-			int cellY = -(int)s->position()[1];
+			int cellY = -((int)s->position()[1]);
 			if (canvas()->onCanvas(cellX, cellY) && !localPlayer()->isFogged(cellX, cellY)) {
 				s->draw();
 			}
@@ -1103,7 +1096,7 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 				int moveX = d->mMouseMoveDiff.dx();
 				int moveY = d->mMouseMoveDiff.dy();
 				mapDistance(moveX, moveY, &dx, &dy);
-				camera()->moveBy(dx, dy);
+				camera()->moveLookAtBy(dx, dy, 0);
 				cameraChanged();
 			} else {
 				d->mMouseMoveDiff.stop();
@@ -1294,7 +1287,7 @@ void BosonBigDisplayBase::slotResetViewProperties()
 void BosonBigDisplayBase::slotReCenterDisplay(const QPoint& pos)
 {
 //TODO don't center the corners - e.g. 0;0 should be top left, never center 
- camera()->move(((float)pos.x()) * BO_GL_CELL_SIZE, -((float)pos.y()) * BO_GL_CELL_SIZE);
+ camera()->setLookAt(BoVector3(((float)pos.x()) * BO_GL_CELL_SIZE, -((float)pos.y()) * BO_GL_CELL_SIZE, 0));
  cameraChanged();
 }
 
@@ -1633,7 +1626,7 @@ void BosonBigDisplayBase::slotCursorEdgeTimeout()
 	}
 	d->mCursorEdgeCounter++;
 	if (d->mCursorEdgeCounter > 30) {
-		camera()->moveBy(dx, dy);
+		camera()->moveLookAtBy(dx, dy, 0);
 		cameraChanged();
 	}
  }
@@ -1644,7 +1637,7 @@ void BosonBigDisplayBase::scrollBy(int dx, int dy)
 {
  GLdouble x, y;
  mapDistance(dx, dy, &x, &y);
- camera()->moveBy(x, y);
+ camera()->moveLookAtBy(x, y, 0);
  cameraChanged();
 }
 
@@ -1712,13 +1705,13 @@ void BosonBigDisplayBase::cameraChanged()
  }
  pointByRotation(diffX, diffY, camera()->rotation(), radius);
  float lookatX, lookatY, lookatZ;  // Point that we look at
- lookatX = centerX();
- lookatY = centerY();
+ lookatX = camera()->lookAt().x();
+ lookatY = camera()->lookAt().y();
  lookatZ = 0.0;
  float eyeX, eyeY, eyeZ;  // Position of camera
  eyeX = lookatX + diffX;
  eyeY = lookatY + diffY;
- eyeZ = lookatZ + cameraZ();
+ eyeZ = lookatZ + camera()->z();
  float upX, upY, upZ;  // up vector (points straight up in viewport)
  upX = -diffX;
  upY = -diffY;
@@ -1755,19 +1748,9 @@ Camera* BosonBigDisplayBase::camera() const
  return &d->mCamera;
 }
 
-GLfloat BosonBigDisplayBase::centerX() const
+const BoVector3& BosonBigDisplayBase::cameraLookAtPos() const
 {
- return d->mCamera.x();
-}
-
-GLfloat BosonBigDisplayBase::centerY() const
-{
- return d->mCamera.y();
-}
-
-GLfloat BosonBigDisplayBase::cameraZ() const
-{
- return d->mCamera.z();
+ return d->mCamera.lookAt();
 }
 
 bool BosonBigDisplayBase::checkError() const
@@ -2019,7 +2002,7 @@ d->mFrustumMatrix[4][3] = clip[15] - clip[14];
  d->mFrustumMatrix[5][3] /= t;
 }
 
-float BosonBigDisplayBase::sphereInFrustum(const float* pos, float radius) const
+float BosonBigDisplayBase::sphereInFrustum(const BoVector3& pos, float radius) const
 {
  // FIXME: performance: we might unrull the loop and then make this function
  // inline. We call it pretty often!
