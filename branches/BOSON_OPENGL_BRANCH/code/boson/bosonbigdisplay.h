@@ -62,11 +62,12 @@ public:
 	BosonBigDisplay(BosonCanvas* c, QWidget* parent);
 	virtual ~BosonBigDisplay();
 
+	virtual void unitAction(int actionType);
+
 //	virtual void setLocalPlayer(Player* p);
 	
 public slots:
 	void slotMoveSelection(int cellX, int cellY);
-	void slotUnitAction(int actionType);
 
 signals:
 

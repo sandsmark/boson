@@ -170,6 +170,8 @@ public slots:
 	 **/
 	void slotClearGroup(int number);
 
+	void slotUnitAction(int action);
+
 	void slotUpdateIntervalChanged(unsigned int);
 	void slotCenterHomeBase();
 	void slotResetViewProperties();

@@ -238,6 +238,10 @@ void BosonWidget::initDisplayManager()
  connect(mDisplayManager, SIGNAL(signalActiveDisplay(BosonBigDisplayBase*, BosonBigDisplayBase*)),
 		this, SLOT(slotSetActiveDisplay(BosonBigDisplayBase*, BosonBigDisplayBase*)));
  canvas()->setDisplayManager(displayManager());
+
+ connect(d->mCommandFrame, SIGNAL(signalAction(int)),
+		mDisplayManager, SLOT(slotUnitAction(int)));
+
  displayManager()->setLocalPlayer(player()); // this does nothing.
 
 }
