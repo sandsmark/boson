@@ -873,10 +873,8 @@ void BoDefaultGroundRenderer::renderVisibleCells(Cell** renderCells, unsigned in
  BO_CHECK_NULL_RET(map->heightMap());
  BO_CHECK_NULL_RET(map->normalMap());
  BO_CHECK_NULL_RET(map->groundTheme());
- BO_CHECK_NULL_RET(map->textures());
 
  BosonGroundTheme* groundTheme = map->groundTheme();
- BosonTextureArray* textures = map->textures();
 
  // AB: we can increase performance even more here. lets replace d->mRenderCells
  // by two array defining the coordinates of cells and the heightmap values.
@@ -891,11 +889,10 @@ void BoDefaultGroundRenderer::renderVisibleCells(Cell** renderCells, unsigned in
  glDepthFunc(GL_LEQUAL);
 
  for (unsigned int i = 0; i < groundTheme->textureCount(); i++) {
-	GLuint tex = textures->texture(i);
 	if (i == 1) {
 		glEnable(GL_BLEND);
 	}
-	glBindTexture(GL_TEXTURE_2D, tex);
+	glBindTexture(GL_TEXTURE_2D, map->currentTexture(i));
 	renderCellsNow(renderCells, cellsCount, map->width() + 1, map->heightMap(), map->normalMap(), map->texMap(i));
  }
 
@@ -988,11 +985,9 @@ void BoFastGroundRenderer::renderVisibleCells(Cell** renderCells, unsigned int c
  BO_CHECK_NULL_RET(map->texMap());
  BO_CHECK_NULL_RET(map->heightMap());
  BO_CHECK_NULL_RET(map->groundTheme());
- BO_CHECK_NULL_RET(map->textures());
 
  BosonGroundTheme* groundTheme = map->groundTheme();
  float* heightMap = map->heightMap();
- BosonTextureArray* textures = map->textures();
 
  unsigned int* cellTextures = new unsigned int[cellsCount];
  for (unsigned int i = 0; i < cellsCount; i++) {
@@ -1022,8 +1017,7 @@ void BoFastGroundRenderer::renderVisibleCells(Cell** renderCells, unsigned int c
 
  int count = 0;
  for (unsigned int i = 0; i < groundTheme->textureCount(); i++) {
-	GLuint tex = textures->texture(i);
-	glBindTexture(GL_TEXTURE_2D, tex);
+	glBindTexture(GL_TEXTURE_2D, map->currentTexture(i));
 
 	const int offsetCount = 5;
 	const float offset = 1.0f / (float)offsetCount;

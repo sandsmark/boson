@@ -21,6 +21,7 @@
 
 #include <qstring.h>
 #include <qwindowdefs.h> // QRgb
+#include <qintdict.h>
 
 class QImage;
 
@@ -68,10 +69,7 @@ public:
 	// least if a different theme is used for the next map)
 	bool loadGroundTheme(QString dir);
 
-	inline BosonTextureArray* textures() const
-	{
-		return mTextures;
-	}
+	BosonTextureArray* textures(int texture) const;
 
 	/**
 	 * Create a list of BosonGroundTheme objects by searching for
@@ -115,6 +113,8 @@ public:
 	 **/
 	QString textureFileName(unsigned int texture) const;
 
+	int textureAnimationDelay(unsigned int texture) const;
+
 	QPixmap pixmap(unsigned int texture);
 
 protected:
@@ -124,11 +124,11 @@ protected:
 	 * @param texture Which texture should be loaded. Must be < @ref
 	 * textureCount
 	 **/
-	QImage loadTextureImage(const QString& dir, unsigned int texture);
+	void loadTextureImages(const QString& dir, unsigned int texture);
 
 private:
 	BosonGroundThemePrivate* d;
-	BosonTextureArray* mTextures;
+	QIntDict<BosonTextureArray> mTextures;
 };
 
 #endif
