@@ -29,7 +29,7 @@ SUBDIRS = docs
 
 METASOURCES = AUTO
 boson_LDFLAGS = $(all_libraries) $(KDE_RPATH)
-boson_SOURCES = boson.cpp connect.cpp bosonBigDisplay.cpp game.cpp main.cpp mainWidget.cpp miniDisplay.cpp bosonCanvas.cpp playerUnit.cpp connectDlg.cpp serverDlg.cpp boshot.cpp bosonTopLevel.cpp
+boson_SOURCES = boson.cpp connect.cpp bosonBigDisplay.cpp game.cpp main.cpp mainWidget.cpp miniDisplay.cpp bosonCanvas.cpp playerUnit.cpp connectDlg.cpp serverDlg.cpp boshot.cpp bosonTopLevel.cpp bosonCell.cpp
 boson_LDADD   =  ../visual/libbovisual.a ../common/libboson.a                  \
                        $(LIB_KDEUI) $(kde_libraries)/libsoundserver_idl.la     \
                        $(kde_libraries)/libqtmcop.la 
@@ -48,6 +48,6 @@ KDE_ICON = boson
 #garbage
 CLEANFILES = boson-*.log
 
-EXTRA_DIST = boson.cpp connect.cpp bosonBigDisplay.cpp game.cpp main.cpp mainWidget.cpp miniDisplay.cpp bosonCanvas.cpp playerUnit.cpp boson.h connect.h game.h mainWidget.h bosonCanvas.h playerUnit.h connectDlg.cpp connectDlg.h serverDlg.cpp serverDlg.h boshot.cpp boshot.h bosonTopLevel.h bosonTopLevel.cpp
+EXTRA_DIST = boson.cpp connect.cpp bosonBigDisplay.cpp game.cpp main.cpp mainWidget.cpp miniDisplay.cpp bosonCanvas.cpp playerUnit.cpp boson.h connect.h game.h mainWidget.h bosonCanvas.h playerUnit.h connectDlg.cpp connectDlg.h serverDlg.cpp serverDlg.h boshot.cpp boshot.h bosonTopLevel.h bosonTopLevel.cpp bosonCell.h bosonCell.cpp
 
 
