@@ -25,6 +25,7 @@
 
 #include <kcursor.h>
 #include <kstandarddirs.h>
+#include <ksimpleconfig.h>
 #include <kdebug.h>
 
 #define PIXMAP_CURSOR 1 // support for pixmaps as cursor
@@ -51,6 +52,7 @@ public:
 
 	QCanvas* mCanvas;
 
+	QPixmap mCursorDefault;
 	QPixmap mCursorMove;
 	QPixmap mCursorAttack;
 };
@@ -78,8 +80,7 @@ void BosonCursor::setCursor(CursorMode mode)
 #ifdef PIXMAP_CURSOR
  switch (d->mMode) {
 	case Hide:
-	case Default: // we do not (yet) have a pixmap for this
-	case OwnUnit: // we do not (yet) have a pixmap for this
+//	case Default: // we do not (yet) have a pixmap for this
 		d->mCursor->hide();
 		break;
 	default:
@@ -102,7 +103,6 @@ void BosonCursor::setCursor(CursorMode mode)
 	case Hide:
 		d->mQCursor = new QCursor(QCursor::BlankCursor);
 		break;
-	case OwnUnit:
 	case Default:
 		d->mQCursor = new QCursor(KCursor::arrowCursor());
 		break;
@@ -116,9 +116,8 @@ void BosonCursor::setCursor(QWidget* w)
 #else
  switch (cursorMode()) {
 	case Default:
-	case OwnUnit:
-		w->setCursor(cursor());
-		break;
+//		w->setCursor(cursor());
+//		break;
 	default:
 		w->setCursor(QCursor::BlankCursor);
 		break;
@@ -155,6 +154,7 @@ void BosonCursor::loadCursors()
  QString dir = KGlobal::dirs()->findResourceDir("data", "boson/themes/cursors/move.png") + QString::fromLatin1("boson/themes/cursors");
  QString move = dir + QString::fromLatin1("/move.png");
  QString attack = dir + QString::fromLatin1("/attack.png");
+ QString defaultCursor = dir + QString::fromLatin1("/default.png");
  if (d->mCursorMove.load(move)) {
 	QBitmap mask(move);
 	d->mCursorMove.setMask(mask);
@@ -167,27 +167,57 @@ void BosonCursor::loadCursors()
  } else {
 	kdError() << k_funcinfo << "Could not load " << attack << endl;
  }
+ if (d->mCursorDefault.load(defaultCursor)) {
+	QBitmap mask(defaultCursor);
+	d->mCursorAttack.setMask(mask);
+ } else {
+	kdError() << k_funcinfo << "Could not load " << defaultCursor << endl;
+ }
 
 
 #ifdef PIXMAP_CURSOR
  QValueList<QPixmap> pixmaps;
+ QPointArray points;
  for (unsigned int i = 0; i < Hide; i++) {
 	switch ((CursorMode)i) {
 		case Attack:
+		{
 			pixmaps.append(d->mCursorAttack);
+			points.resize(i + 1);
+			KSimpleConfig c(dir + "/move.desktop");
+			c.setGroup("Boson Cursor");
+			points.setPoint(i, QPoint(
+					c.readNumEntry("HotspotX", 0), 
+					c.readNumEntry("HotspotY", 0)));
 			break;
+		}
 		case Move:
+		{
 			pixmaps.append(d->mCursorMove);
+			points.resize(i + 1);
+			KSimpleConfig c(dir + "/move.desktop");
+			c.setGroup("Boson Cursor");
+			points.setPoint(i, QPoint(
+					c.readNumEntry("HotspotX", 0),
+					c.readNumEntry("HotspotY", 0)));
 			break;
-		case OwnUnit:
+		}
 		case Default:
-//			pixmaps.append();//???
+		{
+			pixmaps.append(d->mCursorDefault);
+			KSimpleConfig c(dir + "/default.desktop");
+			c.setGroup("Boson Cursor");
+			points.setPoint(i, QPoint(
+					c.readNumEntry("HotspotX, 0"),
+					c.readNumEntry("HotspotY, 0")));
+			points.resize(i + 1);
 			break;
+		}
 		case Hide:
 			break;
 	}
  }
- d->mCursorPixmaps = new QCanvasPixmapArray(pixmaps);
+ d->mCursorPixmaps = new QCanvasPixmapArray(pixmaps, points);
  d->mCursor = new QCanvasSprite(d->mCursorPixmaps, d->mCanvas);
  d->mCursor->setZ(Z_CANVAS_CURSOR);
 #endif
