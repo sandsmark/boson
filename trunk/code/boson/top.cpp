@@ -581,7 +581,7 @@ void TopWidget::slotLoadGame(const QString& fileName)
  // boGame->playerCount() is equal to the playercount in the savegame.
  // (AB: "less equal" is not allowed for savegames!)
  QDomDocument playersDoc;
- if (!playersDoc.setContent(QCString(files["players.xml"]))) {
+ if (!playersDoc.setContent(QString(files["players.xml"]))) {
 	boError() << k_funcinfo << "error loading players.xml" << endl;
 	return;
  }
