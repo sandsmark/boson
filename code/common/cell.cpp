@@ -61,7 +61,7 @@ bool Cell::canGo(uint goFlag)
 	}
 
 	if (!isKnown()) {
-	//	printf("unknown cell(1)\n");
+		printf("unknown cell(1)\n");
 		return true;
 	}
 
@@ -80,7 +80,7 @@ bool Cell::canGo(uint goFlag)
 	//  nothing ? depends on the ground
 	switch(ground) {
 		case g_unknown:
-		//	printf("unknown cell\n");
+			printf("unknown cell\n");
 			return true;
 			break;
 		case g_dwater:
@@ -101,6 +101,7 @@ bool Cell::canGo(uint goFlag)
 			break;
 	}
 	// dead code to prevent a warning
+	logf(LOG_ERROR, "Cell:canGo, unknown ground, returned true");
 	return true;
 }
 
