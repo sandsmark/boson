@@ -72,6 +72,8 @@ draw_bigbox_text("What has been changed since 0.9.1:
  <li>Sound is played using OpenAL now. Dependancy on arts and kdemultimedia
  removed.</li>
  <li>Sound is enabled by default again</li>
+ <li>Support for oil harvesting. Mineral harvesting is not yet supported due to
+ the lack of a mineral mine model.</li>
 </ul>");
 
 draw_bigbox_text("This is a list of features that we consider as
