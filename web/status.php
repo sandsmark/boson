@@ -52,7 +52,8 @@ draw_bigbox_text("What has been changed since 0.10:
  <h3>General</h3>
  <ul>
     <li>Start of porting boson to plib (far from being complete !)</li>
-    <li>Added a network sync protocol, now it is possible to <i>check</i> if the clients are in sync</li>
+    <li>Added a network sync protocol, now it is possible to <i>check</i> if the
+    clients are in sync. Additionally most sync errors can now be fixed.</li>
     <li>Improvements to effects system (load/save, species independent, delaying)</li>
  </ul>
 
