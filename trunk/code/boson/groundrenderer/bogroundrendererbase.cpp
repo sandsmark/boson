@@ -21,6 +21,7 @@
 #include "bogroundrendererbase.moc"
 
 #include "../bosonmap.h"
+#include "../bosonprofiling.h"
 #include "../defines.h"
 #include "../cell.h"
 #include "../bo3dtools.h"
@@ -40,6 +41,8 @@ static bool lineIntersects(const float* plane, const BoVector3& pos, const BoVec
 static bool lineIntersects_points(const float* plane, const BoVector3& start, const BoVector3& end, BoVector3* intersection);
 static bool lineSegmentIntersects(const float* plane, const BoVector3& start, const BoVector3& end, BoVector3* intersection);
 #define EPSILON 0.0001f // zero for floating point numbers
+
+static int g_cellsVisibleCalls = 0;
 
 
 /**
@@ -818,6 +821,8 @@ Cell** CellListBuilderTree::generateCellList(const BosonMap* map, Cell** origRen
 	BO_NULL_ERROR(map);
 	return origRenderCells;
  }
+ static int profiling_id = boProfiling->requestEventId("generateCellList");
+ BosonProfiler prof(profiling_id);
  Cell** renderCells = origRenderCells;
  if (*renderCellsSize < (int)(map->width() * map->height())) {
 	// we don't know in advance how many cells we might need, so we allocate
@@ -828,7 +833,9 @@ Cell** CellListBuilderTree::generateCellList(const BosonMap* map, Cell** origRen
  mMap = map;
  mCount = 0;
 
+ g_cellsVisibleCalls = 0;
  checkCells(renderCells, 0, 0, map->width() - 1, map->height() - 1);
+// boDebug() << k_funcinfo << g_cellsVisibleCalls << " calls - will render cells: " << mCount << endl;
 
  *renderCellsCount = mCount;
  mMap = 0;
@@ -849,58 +856,58 @@ void CellListBuilderTree::addCells(Cell** cells, int l, int t, int r, int b)
 
 bool CellListBuilderTree::cellsVisible(int x, int y, int x2, int y2, bool* partially) const
 {
+ g_cellsVisibleCalls++;
  if (x2 < x || y2 < y) {
 	*partially = false;
 	return false;
+ }
+ if (x2 >= (int)mMap->width()) {
+	boError() << k_funcinfo << "x2 too high: " << x2 << endl;
+	return false; // we want people to notice the bug
+ }
+ if (y2 >= (int)mMap->height()) {
+	boError() << k_funcinfo << "y2 too high: " << y2 << endl;
+	return false; // we want people to notice the bug
+ }
+ if (x < 0) {
+	boError() << k_funcinfo << "x is negative: " << x << endl;
+	return false; // we want people to notice the bug
+ }
+ if (y < 0) {
+	boError() << k_funcinfo << "y is negative: " << y << endl;
+	return false; // we want people to notice the bug
  }
 
  int w = (x2 + 1) - x; // + 1 because we need the right border of the cell!
  int h = (y2 + 1) - y;
  float hmid = (float)x + ((float)w) / 2.0f;
  float vmid = (float)y + ((float)h) / 2.0f;
- Cell* c = mMap->cell((int)hmid, (int)vmid);
- if (!c) {
-	c = mMap->cell(x, y);
-	if (!c) {
-		BO_NULL_ERROR(c);
-		// this should never happen, but if it does, we make sure that
-		// if the cells should be visible, they are displayed.
-		*partially = false;
-		return true;
-	}
- }
- // AB: one day we might want to take the height of all corners of all cells
- // into account. at least for 2x2 cells we should do so (for higher numbers the
- // radius will most probably cover the height anyway).
- // but atm we use the average height of the center cell only. I have not been
- // able to find any false negatives with this (except for a _very_ big height
- // difference of adjacent cells), so I think it's ok.
- // UPDATE: thats exactly what we do now.
- //         the situation has improved, we have less false negatives now.
- //         especially on "canyon"-like maps we need to improve this code even
- //         further, but doing this test for _all_ cells has no effect (except
- //         of making it really slow).
- //         we would need to take the height in the radius into account, i
- //         think. note this problem exists on maps with high z differences on
- //         adjacent cells only!
- float z = 0.0f;
- if (w * h > 4) {
-	// do it the fast way if we check more than 4 cells at once
-	z = mMap->cellAverageHeight(c->x(), c->y());
- } else {
-	int cells = 0;
-	for (int i = x; i < x2; i++) {
-		for (int j = y; j < y2; j++) {
-			z += mMap->cellAverageHeight(i, j);
-			cells++;
-		}
-	}
-	z /= cells;
- }
 
+ float topLeftZ = mMap->heightAtCorner(x, y);
+ float topRightZ = mMap->heightAtCorner(x2 + 1, y);
+ float bottomRightZ = mMap->heightAtCorner(x2 + 1, y2 + 1);
+ float bottomLeftZ = mMap->heightAtCorner(x, y2 + 1);
+ float z = topLeftZ + topRightZ + bottomRightZ + bottomLeftZ;
+ z /= 4;
+ // calculate the distance from the center (hmid,vmid,z) to all 4
+ // corners. the greatest distance is our radius.
+ // note that we use the dotProduct() instead of length(), as it is
+ // faster. sqrt(dotProduct()) is exactly the length.
+ float r1 = BoVector3(hmid - (float)x,
+		vmid - (float)y, z - topLeftZ).dotProduct();
+ float r2 = BoVector3(hmid - ((float)x + (float)w),
+		vmid - (float)y, z - topRightZ).dotProduct();
+ float r3 = BoVector3(hmid - ((float)x + (float)w),
+		vmid - ((float)y + (float)h), z - bottomRightZ).dotProduct();
+ float r4 = BoVector3(hmid - (float)x,
+		vmid - ((float)y + (float)h), z - bottomLeftZ).dotProduct();
+
+ float radius = QMAX(r1, r2);
+ radius = QMAX(radius, r3);
+ radius = QMAX(radius, r4);
+ radius = sqrtf(radius); // turn dotProduct() into length()
  BoVector3 center(hmid, -vmid, z);
 
- float radius = sqrtf((float)(w * w + h * h));
  int ret = Bo3dTools::sphereCompleteInFrustum(viewFrustum(), center, radius);
  if (ret == 0) {
 	*partially = false;
