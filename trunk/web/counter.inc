@@ -722,7 +722,7 @@ function counter2_get_browser($ua)
   {
     return "Safari";
   }
-  else if(eregi("(rv:0.9)|(rv:1.0)|(rv:1.1)|(rv:1.2)|(rv:1.3)|(rv:1.4)|(rv:1.5)", $ua))
+  else if(eregi("(rv:0.9)|(rv:1.0)|(rv:1.1)|(rv:1.2)|(rv:1.3)|(rv:1.4)|(rv:1.5)|(rv:1.6)", $ua))
   {
     return "Mozilla";
   }
