@@ -50,9 +50,12 @@ facilityProperties_t facilityProp[] = {
 	{"powerplant"	, 0, 2, 2, 3},			// FACILITY_POWERPLANT
 	{"warfactory"	, 0, 2, 2, 3}, 			// FACILITY_WAR_FACTORY
 	{"barracks"	, 0, 2, 2, 3}, 			// FACILITY_BARRACKS
-	{"bunker"	, 0, 2, 2, 3}, 			// FACILITY_BUNKER
+	{"cmdbunker"	, 0, 3, 3, 3}, 			// FACILITY_CMDBUNKER
 	{"samsite"	, 0, 1, 1, 4}, 			// FACILITY_SAMSITE
 	{"oiltower"	, 0, 1, 1, 2}, 			// FACILITY_OILTOWER
+	{"refinery"	, 0, 2, 2, 3},			// FACILITY_REFINERY
+	{"repairpad"	, 0, 3, 3, 4},			// FACILITY_REPAIRPAD
+	{"turret"	, 0, 1, 1, 5},			// FACILITY_TURRET
 	};
 
 const int facilityPropNb = (sizeof(facilityProp)/sizeof(facilityProp [0]));

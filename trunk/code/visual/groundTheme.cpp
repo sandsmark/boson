@@ -90,9 +90,13 @@ bool groundTheme::loadTransition(int i, const QString &path, QProgressDialog &pr
 	int j;
 	bool ret = true;
 	static const char *trans_ext[TILES_PER_TRANSITION] = {
-		".01", ".03", ".07", ".05",
+		".01", ".03", ".07", ".05",	// 48x48 transitions
 		".02", ".06", ".08", ".04",
-		".09", ".10", ".12", ".11"
+		".09", ".10", ".12", ".11",
+		".13", ".14", ".15", ".16",	// 96x96 transitions
+		".17", ".18", ".19", ".20",
+		".21", ".22", ".23", ".24",
+		".25", ".26", ".27", ".28",
 		};
 
 	for (j=0; j<TILES_PER_TRANSITION; j++)

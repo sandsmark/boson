@@ -120,7 +120,7 @@ QPixmap		*p;
 QPoint		*pp;
 char		buffer[100];
 
-for(j=0; j<6; j++) {
+for(j=0; j< CONSTRUCTION_STEP ; j++) {
 	sprintf(buffer, "/field.%03d.bmp", j);
 	p = new QPixmap(path + buffer);
 	if (p->isNull()) {
