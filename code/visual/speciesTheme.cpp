@@ -21,7 +21,7 @@
 #include <qstring.h>
 #include <qbitmap.h>
 #include <qwmatrix.h>
-#include <qprogressdialog.h>
+#include <qbitarray.h>
 
 #include <QwSpriteField.h>
 
@@ -34,40 +34,36 @@
 #include "speciesTheme.h"
 
 
-#define PROGRESS_N	(mobilePropNb+facilityPropNb)
-
-
 speciesTheme::speciesTheme(char *themeName)
 {
-int	i;
-QProgressDialog progress("Loading species theme...", 0, PROGRESS_N, NULL, "progress.speciesTheme", TRUE);
-QString path(kapp->kde_datadir() + "/boson/themes/species/" + themeName + "/units/" );
 
-allLoaded = true;
-progress.setProgress(0);
-progress.show();
+	mobBigOverview		= new (QPixmap*)[mobilePropNb];
+	fixBigOverview		= new (QPixmap*)[facilityPropNb];
+	mobSmallOverview	= new (QPixmap*)[mobilePropNb];
+	fixSmallOverview	= new (QPixmap*)[facilityPropNb];
 
-for(i=0; i<mobilePropNb; i++) {
-	if (!loadMob(i, path + mobileProp[i].name)) allLoaded = false;
-	progress.setProgress(i);
-	}
 
-path = kapp->kde_datadir() + "/boson/themes/species/" + themeName + "/facilities/";
-for(i=0; i<facilityPropNb; i++) {
-	if (!loadFix(i, path + facilityProp[i].name )) allLoaded = false;
-	progress.setProgress(i+mobilePropNb);
-	}
+	mobSprite		= new (QwSpritePixmapSequence*)[mobilePropNb];
+	fixSprite		= new (QwSpritePixmapSequence*)[facilityPropNb];
 
-progress.setProgress(i++);
 
-if (!allLoaded)	logf(LOG_ERROR, "SpeciesTheme : problem while loading pixmaps");
-	else	logf(LOG_INFO, "SpeciesTheme loaded : %d mobiles, %d facilities",
-			mobilePropNb, facilityPropNb);
+	mobiles			= new QBitArray(mobilePropNb);
+	facilities		= new QBitArray(facilityPropNb);
+
+	boAssert ( mobiles->fill(false) );
+	boAssert ( facilities->fill(false) );
+
+	themePath = new QString(kapp->kde_datadir() + "/boson/themes/species/" + themeName);
+
+	/* preload some units */ 
+	loadFix(FACILITY_CMDBUNKER);
+	loadMob(MOB_QUAD);
+
 }
 
 
 
-bool speciesTheme::loadMob(int index, QString const &path)
+bool speciesTheme::loadMob(int index)
 {
 int j;
 QList<QPixmap>	pix_l;
@@ -75,6 +71,7 @@ QList<QPoint>	point_l;
 QPixmap		*p;
 QPoint		*pp;
 char		buffer[100];
+QString		path(*themePath + "/units/" + mobileProp[index].name);
 
 
 for(j=0; j<12; j++) {
@@ -106,12 +103,13 @@ if (mobSmallOverview[index]->isNull()) {
 	return false;
 	}
 
+mobiles->setBit(index);
 return true;
 }
 
 
 
-bool speciesTheme::loadFix(int i, QString const &path)
+bool speciesTheme::loadFix(int i)
 {
 int j;
 QList<QPixmap>	pix_l;
@@ -119,6 +117,8 @@ QList<QPoint>	point_l;
 QPixmap		*p;
 QPoint		*pp;
 char		buffer[100];
+
+QString		path(*themePath + "/facilities/" + facilityProp[i].name);
 
 for(j=0; j< CONSTRUCTION_STEP ; j++) {
 	sprintf(buffer, "/field.%03d.bmp", j);
@@ -148,5 +148,68 @@ if (fixSmallOverview[i]->isNull()) {
 	return false;
 	}
 
+facilities->setBit(i);
 return true;
 }
+
+
+QPixmap	* speciesTheme::getBigOverview(mobType unit)
+{
+	if (!mobiles->testBit(unit))
+		loadMob(unit);
+
+	boAssert(mobiles->testBit(unit));
+	return mobBigOverview[unit];
+}
+
+
+QPixmap	* speciesTheme::getBigOverview(facilityType unit)
+{
+	if (!facilities->testBit(unit))
+		loadFix(unit);
+
+	boAssert(facilities->testBit(unit));
+	return fixBigOverview[unit];
+}
+
+
+QPixmap	* speciesTheme::getSmallOverview(mobType unit)
+{
+	if (!mobiles->testBit(unit))
+		loadMob(unit);
+
+	boAssert(mobiles->testBit(unit));
+	return mobSmallOverview[unit];
+}
+
+
+QPixmap	* speciesTheme::getSmallOverview(facilityType unit)
+{
+	if (!facilities->testBit(unit))
+		loadFix(unit);
+
+	boAssert(facilities->testBit(unit));
+	return fixSmallOverview[unit];
+}
+
+
+QwSpritePixmapSequence *speciesTheme::getPixmap(mobType unit)
+{
+	if (!mobiles->testBit(unit))
+		loadMob(unit);
+
+	boAssert(mobiles->testBit(unit));
+	return mobSprite[unit];
+}
+
+
+QwSpritePixmapSequence *speciesTheme::getPixmap(facilityType unit)
+{
+	if (!facilities->testBit(unit))
+		loadFix(unit);
+
+	boAssert(facilities->testBit(unit));
+	return fixSprite[unit];
+}
+
+
