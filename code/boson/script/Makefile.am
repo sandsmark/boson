@@ -3,7 +3,7 @@ INCLUDES = -I$(top_srcdir)/boson/script -I$(top_srcdir)/bodebug $(all_includes) 
 noinst_LTLIBRARIES = libbosonscript.la
 
 libbosonscript_la_LDFLAGS = $(KDE_RPATH) $(all_libraries) $(PYTHONLIB)
-libbosonscript_la_LIBADD = -lkdegames -lqtmcop -lsoundserver_idl -lartskde -lGLU -l3ds $(LIB_KDEUI) $(LIBPYTHON)
+libbosonscript_la_LIBADD = $(LIBPYTHON)
 libbosonscript_la_SOURCES = bosonscript.cpp pythonscript.cpp
 
 METASOURCES = AUTO
