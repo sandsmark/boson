@@ -65,7 +65,7 @@ public:
 	 * the first renderer found
 	 **/
 	bool makeRendererCurrent(const QString& className);
-	bool makeRendererCurrent(int id); // obsolete
+	bool makeRendererIdCurrent(int id); // obsolete
 
 	/**
 	 * Check for @ref currentRenderer being NULL and try to load a default
