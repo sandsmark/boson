@@ -87,6 +87,7 @@
 #include "kgameadvancemessagesdebug.h"
 #include "bpfdescriptiondialog.h"
 #include "botexmapimportdialog.h"
+#include "optionsdialog.h"
 #ifdef BOSON_USE_BOMEMORY
 #include "bomemory/bomemorydialog.h"
 #endif
@@ -1957,7 +1958,7 @@ void BosonBigDisplayBase::initUfoGameActions()
  (void)BoUfoStdAction::gameEnd(this, SIGNAL(signalEndGame()), actionCollection);
  (void)BoUfoStdAction::gameSave(this, SIGNAL(signalSaveGame()), actionCollection);
  (void)BoUfoStdAction::gamePause(boGame, SLOT(slotTogglePause()), actionCollection);
- (void)BoUfoStdAction::preferences(this, SIGNAL(signalGamePreferences()), actionCollection);
+ (void)BoUfoStdAction::preferences(this, SLOT(slotPreferences()), actionCollection);
  (void)new BoUfoAction(i18n("Center &Home Base"),
 		KShortcut(Qt::Key_H),
 		this, SLOT(slotCenterHomeBase()),
@@ -2004,7 +2005,7 @@ void BosonBigDisplayBase::initUfoEditorActions()
  // TODO
 // close->setText(i18n("&End Editor"));
  BoUfoStdAction::fileQuit(this, SIGNAL(signalQuit()), actionCollection);
- (void)BoUfoStdAction::preferences(this, SIGNAL(signalEditorPreferences()), actionCollection);
+ (void)BoUfoStdAction::preferences(this, SLOT(slotPreferences()), actionCollection);
 
  d->mActionEditorPlayer = new BoUfoSelectAction(i18n("&Player"), 0, 0, actionCollection, "editor_player");
  connect(d->mActionEditorPlayer, SIGNAL(signalActivated(int)),
@@ -2146,6 +2147,8 @@ void BosonBigDisplayBase::paintGL()
 	return;
  }
  if (!boGame) {
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	renderUfo();
 	return;
  }
  if (boGame->gameStatus() == KGame::Init) {
@@ -2229,13 +2232,7 @@ void BosonBigDisplayBase::paintGL()
  glDisable(GL_FOG);
 
  boProfiling->renderUfo(true);
- if (ufoManager()) {
-	boTextureManager->invalidateCache();
-	glColor3ub(255, 255, 255);
-	updateUfoLabels();
-	ufoManager()->dispatchEvents();
-	ufoManager()->render();
- }
+ renderUfo();
  boProfiling->renderUfo(false);
 
  boProfiling->renderText(true); // AB: actually this is more than just text
@@ -2411,6 +2408,17 @@ void BosonBigDisplayBase::renderPlacementPreview()
  // AB: see above. if GL_REPLACES ever becomes default we have to set it
  // here again.
 // glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+}
+
+void BosonBigDisplayBase::renderUfo()
+{
+ if (ufoManager()) {
+	boTextureManager->invalidateCache();
+	glColor3ub(255, 255, 255);
+	updateUfoLabels();
+	ufoManager()->dispatchEvents();
+	ufoManager()->render();
+ }
 }
 
 void BosonBigDisplayBase::renderCursor()
@@ -5646,4 +5654,48 @@ void BosonBigDisplayBase::slotEditorExportTexMap()
  }
 }
 
+void BosonBigDisplayBase::slotPreferences()
+{
+ if (!boGame) {
+	boWarning() << k_funcinfo << "NULL boGame object" << endl;
+	return;
+ }
+ OptionsDialog* dlg = new OptionsDialog(!boGame->gameMode(), this);
+ dlg->setGame(boGame);
+ dlg->setPlayer(localPlayerIO()->player());
+ dlg->slotLoad();
+
+ connect(dlg, SIGNAL(finished()), dlg, SLOT(deleteLater())); // seems not to be called if you quit with "cancel"!
+
+ connect(dlg, SIGNAL(signalCursorChanged(int, const QString&)),
+		this, SLOT(slotChangeCursor(int, const QString&)));
+// connect(dlg, SIGNAL(signalCmdBackgroundChanged(const QString&)),
+//		this, SLOT(slotCmdBackgroundChanged(const QString&)));
+ connect(dlg, SIGNAL(signalOpenGLSettingsUpdated()),
+		this, SLOT(slotUpdateOpenGLSettings()));
+ connect(dlg, SIGNAL(signalApply()),
+		this, SLOT(slotPreferencesApply()));
+// connect(dlg, SIGNAL(signalFontChanged(const BoFontInfo&)),
+//		displayManager(), SLOT(slotChangeFont(const BoFontInfo&)));
+
+ dlg->show();
+}
+
+void BosonBigDisplayBase::slotPreferencesApply()
+{
+ // apply all options from boConfig to boson, that need to be applied. all
+ // options that are stored in boConfig only don't need to be touched.
+ // AB: cursor is still a special case and not handled here.
+ // AB: FIXME: cmdbackground is not yet stored in boConfig! that option should
+ // be managed here!
+ boDebug() << k_funcinfo << endl;
+ setUpdateInterval(boConfig->updateInterval());
+ setToolTipCreator(boConfig->toolTipCreator());
+ setToolTipUpdatePeriod(boConfig->toolTipUpdatePeriod());
+}
+
+void BosonBigDisplayBase::slotUpdateOpenGLSettings()
+{
+ updateOpenGLSettings();
+}
 

@@ -135,13 +135,9 @@ protected slots:
 	void slotLoadExternalStuffFromXML(const QDomElement& root);
 	void slotSaveExternalStuffAsXML(QDomElement& root);
 
-	void slotApplyOptions();
-
 	// AB: this isn't really nice in the widget class. a dedicated
 	// scriptmanager class would be nicer.
 	void slotRunScriptLine(const QString& line);
-
-	void slotAdvance(unsigned int, bool);
 
 signals:
 	// hmm.. these *never* get emitted?
@@ -174,9 +170,6 @@ signals:
 	void signalChangeLocalPlayer(Player* p);
 
 protected slots:
-	void slotCmdBackgroundChanged(const QString& file);
-
-
 	void slotPlayerPropertyChanged(KGamePropertyBase*, KPlayer*);
 
 	virtual void slotChangeCursor(int mode, const QString& dir) = 0;
@@ -213,8 +206,6 @@ protected:
 	 * Derived classes should e.g. set the game speed.
 	 **/
 	virtual void startScenarioAndGame();
-
-	OptionsDialog* gamePreferences(bool editor);
 
 	/**
 	 * Call @ref slotChangeCursor with the config values

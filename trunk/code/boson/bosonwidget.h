@@ -59,11 +59,6 @@ public:
 
 	virtual void saveConfig();
 
-	virtual void initPlayer();
-
-public slots:
-	void slotGamePreferences();
-
 signals:
 	void signalGameOver();
 	void signalSaveGame();
@@ -71,8 +66,6 @@ signals:
 
 protected slots:
 	virtual void slotChangeCursor(int mode, const QString& dir);
-
-	void slotGameOverDialogFinished();
 
 protected:
 	virtual void initDisplayManager();

@@ -92,8 +92,6 @@ public:
 
 	BoGameChatWidget* mChat;
 
-	QPtrDict<KPlayer> mPlayers; // needed for debug only
-
 	bool mInitialized;
 
 	BosonCanvas* mCanvas;
@@ -123,7 +121,6 @@ BosonWidgetBase::~BosonWidgetBase()
 	// we do NOT delete the display manager here
 	setDisplayManager(0);
  }
- d->mPlayers.clear();
 
  delete mCursor;
  delete d->mChat;
@@ -155,11 +152,8 @@ BosonCanvas* BosonWidgetBase::canvas() const
  return d->mCanvas;
 }
 
-#include <kstandarddirs.h> //locate()
 void BosonWidgetBase::init(KDockWidget* )
 {
- // NOTE: order of init* methods is very important here, so don't change it,
- //  unless you know what you're doing!
  if (d->mInitialized) {
 	return;
  }
@@ -195,8 +189,6 @@ void BosonWidgetBase::initDisplayManager()
  // therefore we do the same connect twice if an endgame() occurs!
  connect(boGame, SIGNAL(signalAdvance(unsigned int, bool)),
 		displayManager(), SLOT(slotAdvance(unsigned int, bool)));
- connect(boGame, SIGNAL(signalAdvance(unsigned int, bool)),
-		this, SLOT(slotAdvance(unsigned int, bool)));
 
  display->setLocalPlayerIO(localPlayerIO()); // this does nothing.
 
@@ -205,6 +197,8 @@ void BosonWidgetBase::initDisplayManager()
 
  connect(display, SIGNAL(signalEndGame()), this, SIGNAL(signalEndGame()));
  connect(display, SIGNAL(signalQuit()), this, SIGNAL(signalQuit()));
+ connect(display, SIGNAL(signalCursorChanged(int, const QString&)),
+		this, SLOT(slotChangeCursor(int, const QString&)));
 
 }
 
@@ -247,18 +241,6 @@ void BosonWidgetBase::initGameMode()//FIXME: rename! we don't have a difference 
  startScenarioAndGame();
 
  initScripts();
-
-#ifdef PATHFINDER_TNG
- // FIXME: this isn't correct I suppose. But atm it's only used for debugging
- //  anyway (and I don't intend to use it for anything else)
- boDebug() << k_funcinfo << "Trying searching sample path" << endl;
- BosonPathInfo i;
- i.start = BoVector2Fixed(5, 5);
- i.dest = BoVector2Fixed(45, 35);
- boDebug() << k_funcinfo << "Let's go!" << endl;
- canvas()->pathfinder()->findPath(&i);
- boDebug() << k_funcinfo << "sample path searching complete" << endl;
-#endif
 }
 
 void BosonWidgetBase::initBigDisplay(BosonBigDisplayBase* b)
@@ -421,26 +403,6 @@ void BosonWidgetBase::slotUnfogAll(Player* pl)
  }
 }
 
-void BosonWidgetBase::slotCmdBackgroundChanged(const QString& file)
-{
- // AB: this has been disabled for now. once the commandframe has been ported to
- // OpenGL, we will support backgrounds again (I hope), but it will work in a
- // different way, we won't be able to use this code anymore.
-#if 0
- if (file.isNull()) {
-	cmdFrame()->unsetPalette();
-	return;
- }
- QPixmap p(file);
- if (p.isNull()) {
-	boError() << k_funcinfo << "Could not load " << file << endl;
-	cmdFrame()->unsetPalette();
-	return;
- }
- cmdFrame()->setPaletteBackgroundPixmap(p);
-#endif
-}
-
 void BosonWidgetBase::quitGame()
 {
 // this needs to be done first, before the players are removed
@@ -452,20 +414,6 @@ void BosonWidgetBase::quitGame()
 
 void BosonWidgetBase::saveConfig()
 {
- // note: the game is *not* saved here! just general settings like game speed,
- // player name, ...
- boDebug() << k_funcinfo << endl;
- if (!boGame) {
-	boError() << k_funcinfo << "NULL game" << endl;
-	return;
- }
- if (!localPlayer()) {
-	boError() << k_funcinfo << "NULL local player" << endl;
-	return;
- }
-
-// boConfig->save(editor); //FIXME - what is this for?
- boDebug() << k_funcinfo << "done" << endl;
 }
 
 void BosonWidgetBase::startScenarioAndGame()
@@ -534,49 +482,9 @@ void BosonWidgetBase::slotSaveExternalStuffAsXML(QDomElement& root)
  displayManager()->saveAsXML(root);
 }
 
-OptionsDialog* BosonWidgetBase::gamePreferences(bool editor)
-{
- OptionsDialog* dlg = new OptionsDialog(editor, this);
- dlg->setGame(boGame);
- dlg->setPlayer(localPlayer());
- dlg->slotLoad();
-
- connect(dlg, SIGNAL(finished()), dlg, SLOT(deleteLater())); // seems not to be called if you quit with "cancel"!
-
- connect(dlg, SIGNAL(signalCursorChanged(int, const QString&)),
-		this, SLOT(slotChangeCursor(int, const QString&)));
- connect(dlg, SIGNAL(signalCmdBackgroundChanged(const QString&)),
-		this, SLOT(slotCmdBackgroundChanged(const QString&)));
- connect(dlg, SIGNAL(signalOpenGLSettingsUpdated()),
-		displayManager(), SLOT(slotUpdateOpenGLSettings()));
- connect(dlg, SIGNAL(signalApply()),
-		this, SLOT(slotApplyOptions()));
- connect(dlg, SIGNAL(signalFontChanged(const BoFontInfo&)),
-		displayManager(), SLOT(slotChangeFont(const BoFontInfo&)));
-
- return dlg;
-}
-
-void BosonWidgetBase::slotApplyOptions()
-{
- // apply all options from boConfig to boson, that need to be applied. all
- // options that are stored in boConfig only don't need to be touched.
- // AB: cursor is still a special case and not handled here.
- // AB: FIXME: cmdbackground is not yet stored in boConfig! that option should
- // be managed here!
- boDebug() << k_funcinfo << endl;
- displayManager()->slotUpdateIntervalChanged(boConfig->updateInterval()); // FIXME: no slot anymore
- displayManager()->setToolTipCreator(boConfig->toolTipCreator());
- displayManager()->setToolTipUpdatePeriod(boConfig->toolTipUpdatePeriod());
-}
-
 void BosonWidgetBase::slotRunScriptLine(const QString& line)
 {
  mLocalPlayerInput->eventListener()->script()->execLine(line);
-}
-
-void BosonWidgetBase::slotAdvance(unsigned int, bool)
-{
 }
 
 void BosonWidgetBase::initScripts()
