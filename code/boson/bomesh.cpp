@@ -31,6 +31,11 @@
 #include <GL/gl.h>
 
 #define AB_DEBUG_1 0
+#define USE_OCCLUSION_CULLING 0 // experimental occlusion culling. this actually makes rendering SLOWER !
+
+#if USE_OCCLUSION_CULLING
+#include <GL/glext.h>
+#endif
 
 extern unsigned int glstat_item_faces, glstat_item_vertices, glstat_terrain_faces, glstat_terrain_vertices;
 
@@ -1363,7 +1368,6 @@ void BoMesh::renderMesh(const QColor* teamColor, unsigned int _lod)
 	resetColor = true;
  }
 
-#define USE_OCCLUSION_CULLING 0
 #if USE_OCCLUSION_CULLING
  if (checkVisible())
 #endif
@@ -1625,6 +1629,7 @@ bool BoMesh::checkVisible()
  if (!d->mBoundingObject) {
 	return false;
  }
+#if USE_OCCLUSION_CULLING
  GLboolean result;
 #if 1
  glDisable(GL_TEXTURE_2D);
@@ -1650,6 +1655,9 @@ bool BoMesh::checkVisible()
  glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 #endif
  return result;
+#else // USE_OCCLUSION_CULLING
+ return true;
+#endif // USE_OCCLUSION_CULLING
 }
 
 void BoMesh::computeBoundingObject()
@@ -1686,7 +1694,7 @@ void BoMesh::generateLOD(unsigned int LODCount)
 	lod[i] = d->mLODs[i];
  }
  if (oldCount == 0) {
-	boError() << k_funcinfo << "old LOD count is 0??! must be at least 1! will probably crash!" << endl;
+	boError() << k_funcinfo << "old LOD count is 0?! must be at least 1! will probably crash!" << endl;
 	lod[0] = 0;
  }
  boDebug(100) << k_funcinfo << "lods=" << LODCount
