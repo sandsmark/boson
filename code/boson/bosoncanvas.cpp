@@ -71,6 +71,9 @@ public:
 	// another list (once slotAdvance() reaches its end)
 	QMap<int, QPtrList<BosonItem> > mWork2AdvanceList;
 	QPtrList<BosonItem> mChangeAdvanceList; // work has been changed - request to change advance list
+
+	// For debugging only
+	QMap<int, int> mWorkCounts; // How many units are doing what work
 };
 
 BosonCanvas::BosonCanvas(QObject* parent)
@@ -144,6 +147,7 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
  QPtrListIterator<BosonItem> animIt(d->mAnimList);
  lockAdvanceFunction();
  boProfiling->advanceFunction(true);
+ resetWorkCounts();
 
 #if USE_ADVANCE_LISTS
  // first we need to call *all* BosonItem::advance() functions.
@@ -161,6 +165,7 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 		id = 0;
 		work = -1;
 	}
+	d->mWorkCounts[work]++;
 #if DO_ITEM_PROFILING
 	boProfiling->advanceItemStart(s->rtti(), id, work);
 	boProfiling->advanceItem(true);
@@ -423,6 +428,7 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
  }
  boProfiling->advanceMaximalAdvanceCount(false);
  boProfiling->advance(false, advanceCount);
+ boDebug() << k_funcinfo << "WorkNone: " << d->mWorkCounts[(int)UnitBase::WorkNone] << endl;
 }
 
 bool BosonCanvas::canGo(const UnitProperties* prop, const QRect& rect) const
@@ -1069,6 +1075,24 @@ void BosonCanvas::removeFromAdvanceLists(BosonItem* item)
  for (it = d->mWork2AdvanceList.begin(); it != d->mWork2AdvanceList.end(); ++it) {
 	(*it).removeRef(item);
  }
+}
+
+void BosonCanvas::resetWorkCounts()
+{
+ d->mWorkCounts[-1] = 0;
+ d->mWorkCounts[(int)UnitBase::WorkNone] = 0;
+ d->mWorkCounts[(int)UnitBase::WorkMove] = 0;
+ d->mWorkCounts[(int)UnitBase::WorkAttack] = 0;
+ d->mWorkCounts[(int)UnitBase::WorkConstructed] = 0;
+ d->mWorkCounts[(int)UnitBase::WorkDestroyed] = 0;
+ d->mWorkCounts[(int)UnitBase::WorkFollow] = 0;
+ d->mWorkCounts[(int)UnitBase::WorkPlugin] = 0;
+ d->mWorkCounts[(int)UnitBase::WorkTurn] = 0;
+}
+
+QMap<int, int>* BosonCanvas::workCounts()
+{
+ return &d->mWorkCounts;
 }
 
 
