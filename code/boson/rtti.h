@@ -28,6 +28,11 @@ public:
 		UnitStart = 200 // the IDs of the units start at this value. 
 		                // Do not insert RTTIs after this!
 	};
+
+	static bool isUnit(int rtti)
+	{
+		return (rtti >= UnitStart);
+	}
 };
 
 #endif

@@ -239,7 +239,7 @@ void BosonBigDisplay::selectArea(const QRect& rect)
  list = canvas()->collisions(rect.normalize());
 
  for (it = list.begin(); it != list.end(); ++it) {
-	if ((*it)->rtti() >= RTTI::UnitStart) { // AKA isUnit
+	if (RTTI::isUnit((*it)->rtti())) {
 		VisualUnit* unit = (VisualUnit*)*it;
 		if (unit->unitProperties()->isMobile()) { // no NULL check for performance
 			addUnitSelection(unit);
@@ -387,10 +387,11 @@ void BosonBigDisplay::slotEditorMouseEvent(QMouseEvent* e, bool* eatevent)
 
 void BosonBigDisplay::editorActionClicked(const QPoint& pos)
 {
+// FIXME: should be done on left click?
+
 // kdDebug() << k_funcinfo << endl;
  int x = pos.x() / BO_TILE_SIZE;
  int y = pos.y() / BO_TILE_SIZE;
-// FIXME: should be done on left click?
  if (d->mConstruction.unitType > -1) {
 	if (!d->mConstruction.owner) {
 		kdWarning() << k_funcinfo << ": NO OWNER" << endl;
