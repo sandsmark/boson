@@ -1,0 +1,38 @@
+#include "top.wml"
+
+    <h1>
+      Overview
+    </h1>
+    <p>&nbsp;</p>
+    <h4>The startup screen</h4>
+    <p>
+    Here you can choose your map you wish to edit. You can edit an existing map or create a new one.<br>
+    Choose you tileset, size and required players and start the editor.<br>
+    </p><p>&nbsp;</p>
+    <h4>The map</h4>
+    <p>
+    The map consists of many small tiles. For example, a desert:<br>
+    If you put many sand tiles together and add some stone tiles between them, you will get a desert.
+    </p><p>&nbsp;</p>
+
+    <h4>The goal</h4>
+    <p>
+    There are no changeable goals yet.
+    </p><p>&nbsp;</p>
+
+    <h4>The player</h4>
+    <p>
+    You have to switch between the players. You can only create facilities for one player at one time.
+    Don't forget to change the player while building units and buildings.<br>
+    If you change the tiles on map or remove facilities, the player doesn't matter.
+    </p><p>&nbsp;</p>
+
+    <h4>Properties</h4>
+    <p>
+    Under the "Editor" menu you can change the map description and the available resources.<br>
+    If you select a facility or a unit you can change the health and the already completed
+    construction steps of this element.
+    </p>
+
+#include "nav.wml" before_url="index.html" before_text="The Boson editor" after_url="map.html" after_text="Working with the map" up_url="index.html"
+#include "footer.wml"
