@@ -82,15 +82,91 @@ private:
 	QValueList<Q_UINT32> mClientsLeft;
 };
 
-class BoGameSyncMessage
+
+/**
+ * Base class for a sync message. A sync message contains a few information
+ * about one client that can be used to find out whether two clients are in sync
+ * or out of sync. Note that it is <em>not</em> necessary to provide data to fix
+ * a client if it is out of sync! This should not be done here!
+ *
+ * You should try to keep the amount of data very low, so that the sync message
+ * can be sent as often as possible without causing performance or bandwidth
+ * problems.
+ **/
+class BoSyncMessageBase
 {
 public:
+	/**
+	 * Called to create the sync message.
+	 **/
+	virtual QByteArray makeLog() = 0;
+
+	/**
+	 * When an error was detected, this method is called to find the
+	 * difference of two logs. If the error is in this sync message, it
+	 * should return a string describing the error. Otherwise it returns
+	 * QString::null to indicate that this sync message doesn't contain an
+	 * error.
+	 *
+	 * You can implement the logic for your subclass in @ref findLogError.
+	 *
+	 * Note that this method should behave like a static method (i.e. should
+	 * not touch member variables but compare the parameters only). It is
+	 * implemented as non-static in order to make @ref findLogError
+	 * possible.
+	 *
+	 * @return A string describing the error or @ref QString::null to
+	 * indicate that there is no error in the logs.
+	 **/
+	QString findError(const QByteArray& b1, const QByteArray& b2);
+
+protected:
+	/**
+	 * Find the difference in @p b1 and @p b2 (there must be one if this is
+	 * called!).
+	 *
+	 * You should not use any member variables from this class. This method
+	 * is supposed to behave like a static method, however it is implemented
+	 * as a pure virtual method in order to force the programmer to actually
+	 * write it.
+	 *
+	 * @return A string describing the error.
+	 **/
+	virtual QString findLogError(const QByteArray& b1, const QByteArray& b2) const = 0;
+};
+
+QString BoSyncMessageBase::findError(const QByteArray& b1, const QByteArray& b2)
+{
+ KMD5 md5(b1);
+ KMD5 md5_2(b2);
+ if (md5.hexDigest() == md5_2.hexDigest()) {
+	boDebug(370) << "error not in this part of the sync message" << endl;
+	return QString::null;
+ }
+ boWarning(370) << k_funcinfo << "there must be an error in this log (MD5 sums to not match)!!" << endl;
+
+ QString error = findLogError(b1, b2);
+ if (error.isEmpty()) {
+	boError(370) << k_funcinfo << "findLogError() has not returned a descriptive error string. don't know the error or cannot find it (but it must be here!)" << endl;
+	error = i18n("Unknown error");
+ }
+ return error;
+}
+
+
+class BoGameSyncMessage : public BoSyncMessageBase
+{
+public:
+	BoGameSyncMessage() : BoSyncMessageBase()
+	{
+		mGame = 0;
+	}
 	void setGame(Boson* game)
 	{
 		mGame = game;
 	}
 
-	QByteArray makeLog()
+	virtual QByteArray makeLog()
 	{
 		QByteArray b;
 		QDataStream s(b, IO_WriteOnly);
@@ -101,22 +177,11 @@ public:
 		s << (Q_ULONG)mGame->random()->getLong(100000);
 		return b;
 	}
-	static QString findError(const QByteArray& b1, const QByteArray& b2)
-	{
-		return findBosonError(b1, b2);
-	}
 
 protected:
-	static QString findBosonError(const QByteArray& b1, const QByteArray& b2)
+	virtual QString findLogError(const QByteArray& b1, const QByteArray& b2) const
 	{
-		KMD5 md5(b1);
-		KMD5 md5_2(b2);
-		if (md5.hexDigest() != md5_2.hexDigest()) {
-			boWarning(370) << k_funcinfo << "there must be an error in the players log!!" << endl;
-		} else {
-			boDebug(370) << "error is not in the players log" << endl;
-			return QString::null;
-		}
+		boDebug(370) << k_funcinfo << endl;
 		QDataStream s1(b1, IO_ReadOnly);
 		QDataStream s2(b2, IO_ReadOnly);
 		Q_ULONG random1, random2;
@@ -132,15 +197,19 @@ private:
 	Boson* mGame;
 };
 
-class BoPlayerSyncMessage
+class BoPlayerSyncMessage : public BoSyncMessageBase
 {
 public:
+	BoPlayerSyncMessage() : BoSyncMessageBase()
+	{
+		mGame = 0;
+	}
 	void setGame(Boson* game)
 	{
 		mGame = game;
 	}
 
-	QByteArray makeLog()
+	virtual QByteArray makeLog()
 	{
 		QByteArray playersBuffer;
 		QDataStream playersStream(playersBuffer, IO_WriteOnly);
@@ -155,22 +224,11 @@ public:
 		}
 		return playersBuffer;
 	}
-	static QString findError(const QByteArray& b1, const QByteArray& b2)
-	{
-		return findPlayersError(b1, b2);
-	}
 
 protected:
-	static QString findPlayersError(const QByteArray& b1, const QByteArray& b2)
+	virtual QString findLogError(const QByteArray& b1, const QByteArray& b2) const
 	{
-		KMD5 md5(b1);
-		KMD5 md5_2(b2);
-		if (md5.hexDigest() != md5_2.hexDigest()) {
-			boWarning(370) << k_funcinfo << "there must be an error in the players log!!" << endl;
-		} else {
-			boDebug(370) << "error is not in the players log" << endl;
-			return QString::null;
-		}
+		boDebug(370) << k_funcinfo << endl;
 		QDataStream s1(b1, IO_ReadOnly);
 		QDataStream s2(b2, IO_ReadOnly);
 		Q_UINT32 count, count2;
@@ -202,12 +260,25 @@ private:
 	Boson* mGame;
 };
 
-class BoCanvasSyncMessage
+class BoCanvasSyncMessage : public BoSyncMessageBase
 {
 public:
+	BoCanvasSyncMessage() : BoSyncMessageBase()
+	{
+		mGame = 0;
+		mCanvas = 0;
+		mAdvanceMessageCount = 0;
+		mInterval = 0;
+	}
 	void setGame(Boson* game)
 	{
 		mGame = game;
+	}
+	void setCanvas(BosonCanvas* canvas, unsigned int advanceMessageCount, unsigned int interval)
+	{
+		mCanvas = canvas;
+		mAdvanceMessageCount = advanceMessageCount;
+		mInterval = interval;
 	}
 
 	/**
@@ -217,41 +288,27 @@ public:
 	 * if you call it if (advanceMessageCounter % 10 == 5), then the
 	 * interval is 10.
 	 **/
-	QByteArray makeLog(BosonCanvas* canvas, unsigned int advanceMessageCount, unsigned int interval)
+	virtual QByteArray makeLog()
 	{
-		int itemCount = canvas->allItems()->count();
+		int itemCount = mCanvas->allItems()->count();
 		int size = 40;
 		if (itemCount == 0 || itemCount <= size) {
-			return makeLog(canvas, -1, -1);
+			return makeLog(-1, -1);
 		}
 
 		// this formula increases the start index by count after every
 		// log.
 		// it also makes sure that exactly size items end up in the log.
-		int start = ((advanceMessageCount / interval) * size) % itemCount;
-		return makeLog(canvas, start, size);
-	}
-	static QString findError(const QByteArray& b1, const QByteArray& b2)
-	{
-		return findCanvasError(b1, b2);
+		int start = ((mAdvanceMessageCount / mInterval) * size) % itemCount;
+		return makeLog(start, size);
 	}
 
 protected:
-	QByteArray makeLog(BosonCanvas* canvas, int start, int count);
+	QByteArray makeLog(int start, int count);
 
-	static QString findCanvasError(const QByteArray& b1, const QByteArray& b2)
+	virtual QString findLogError(const QByteArray& b1, const QByteArray& b2) const
 	{
-		if (b1.size() == 0 || b2.size() == 0) {
-			boError(370) << k_funcinfo << "empty byte array for canvas log" << endl;
-		}
-		KMD5 md5(b1);
-		KMD5 md5_2(b2);
-		if (md5.hexDigest() != md5_2.hexDigest()) {
-			boWarning(370) << k_funcinfo << "there must be an error in the canvas log!!" << endl;
-		} else {
-			boDebug(370) << "error is not in the canvas log" << endl;
-			return QString::null;
-		}
+		boDebug(370) << k_funcinfo << endl;
 		QDataStream s1(b1, IO_ReadOnly);
 		QDataStream s2(b2, IO_ReadOnly);
 		Q_UINT32 items;
@@ -357,9 +414,12 @@ protected:
 
 private:
 	Boson* mGame;
+	BosonCanvas* mCanvas;
+	unsigned int mAdvanceMessageCount;
+	unsigned int mInterval;
 };
 
-QByteArray BoCanvasSyncMessage::makeLog(BosonCanvas* canvas, int start, int count)
+QByteArray BoCanvasSyncMessage::makeLog(int start, int count)
 {
  // AB it would be sufficient to stream data of a couple of items only.
  // that would be a lot faster.
@@ -370,14 +430,14 @@ QByteArray BoCanvasSyncMessage::makeLog(BosonCanvas* canvas, int start, int coun
 
  if (start < 0 || count < 0) {
 	start = 0;
-	count = canvas->allItems()->count();
+	count = mCanvas->allItems()->count();
  }
 
  BoItemList list;
  BoItemList::Iterator it;
  int index = 0;
- for (it = canvas->allItems()->begin(); it != canvas->allItems()->end() && (int)list.count() < count; ++it) {
-	if (index >= start || index < ((start + count) % (int)canvas->allItems()->count())) {
+ for (it = mCanvas->allItems()->begin(); it != mCanvas->allItems()->end() && (int)list.count() < count; ++it) {
+	if (index >= start || index < ((start + count) % (int)mCanvas->allItems()->count())) {
 		list.append(*it);
 	}
 	index++;
@@ -407,9 +467,14 @@ QByteArray BoCanvasSyncMessage::makeLog(BosonCanvas* canvas, int start, int coun
 
 
 
-class BoLongSyncMessage
+class BoLongSyncMessage : public BoSyncMessageBase
 {
 public:
+	BoLongSyncMessage() : BoSyncMessageBase()
+	{
+		mMessageLogger = 0;
+		mGame = 0;
+	}
 	void setMessageLogger(BoMessageLogger* l)
 	{
 		mMessageLogger = l;
@@ -420,11 +485,16 @@ public:
 		mPlayerSync.setGame(mGame);
 		mBosonSync.setGame(mGame);
 	}
+	void setCanvas(BosonCanvas* canvas, unsigned int advanceMessageCount, unsigned int interval)
+	{
+		mCanvasSync.setCanvas(canvas, advanceMessageCount, interval);
+	}
 
-	QByteArray makeLog(BosonCanvas* canvas, unsigned int advanceMessageCount, unsigned int interval);
-	static QString findError(QDataStream& s1, QDataStream& s2);
+	virtual QByteArray makeLog();
 
 protected:
+	virtual QString findLogError(const QByteArray& b1, const QByteArray& b2) const;
+
 private:
 	BoMessageLogger* mMessageLogger;
 	Boson* mGame;
@@ -434,11 +504,11 @@ private:
 	BoGameSyncMessage mBosonSync;
 };
 
-QByteArray BoLongSyncMessage::makeLog(BosonCanvas* canvas, unsigned int advanceMessageCount, unsigned int interval)
+QByteArray BoLongSyncMessage::makeLog()
 {
  QMap<QString, QByteArray> streams;
 
- streams.insert("CanvasStream", mCanvasSync.makeLog(canvas, advanceMessageCount, interval));
+ streams.insert("CanvasStream", mCanvasSync.makeLog());
 
  streams.insert("BosonStream", mBosonSync.makeLog());
  streams.insert("PlayersStream", mPlayerSync.makeLog());
@@ -462,8 +532,10 @@ QByteArray BoLongSyncMessage::makeLog(BosonCanvas* canvas, unsigned int advanceM
  return b;
 }
 
-QString BoLongSyncMessage::findError(QDataStream& s1, QDataStream& s2)
+QString BoLongSyncMessage::findLogError(const QByteArray& b1, const QByteArray& b2) const
 {
+ QDataStream s1(b1, IO_ReadOnly);
+ QDataStream s2(b2, IO_ReadOnly);
  QMap<QString, QByteArray> streams, streams2;
  s1 >> streams;
  s2 >> streams2;
@@ -473,19 +545,25 @@ QString BoLongSyncMessage::findError(QDataStream& s1, QDataStream& s2)
 	error = i18n("Different streams count: %1, but should be %2").arg(streams2.count()).arg(streams.count());
 	return error;
  }
- error = BoGameSyncMessage::findError(streams["BosonStream"], streams2["BosonStream"]);
+ BoGameSyncMessage gameSync;
+ error = gameSync.findError(streams["BosonStream"], streams2["BosonStream"]);
  if (!error.isNull()) {
 	return error;
  }
- error = BoCanvasSyncMessage::findError(streams["CanvasStream"], streams2["CanvasStream"]);
+
+ BoCanvasSyncMessage canvasSync;
+ error = canvasSync.findError(streams["CanvasStream"], streams2["CanvasStream"]);
  if (!error.isNull()) {
 	return error;
  }
- error = BoPlayerSyncMessage::findError(streams["PlayersStream"], streams2["PlayersStream"]);
+
+ BoPlayerSyncMessage playerSync;
+ error = playerSync.findError(streams["PlayersStream"], streams2["PlayersStream"]);
  if (!error.isNull()) {
 	return error;
  }
- error = i18n("Error is not in canvas or in players. Somwhere else.");
+
+ error = i18n("Error not found. Bug in findLogError()");
 
  return error;
 }
@@ -618,9 +696,10 @@ bool BosonNetworkSynchronizer::receiveNetworkSyncAck(QDataStream& stream, Q_UINT
 	boWarning(370) << k_funcinfo << "network out of sync for client " << sender << endl;
 	addChatSystemMessage(i18n("Network out of sync for client %1").arg(sender));
 	if (await) {
-		QDataStream correct(await->log(), IO_ReadOnly);
-		QDataStream broken(brokenLog, IO_ReadOnly);
-		QString error = BoLongSyncMessage::findError(correct, broken);
+		QByteArray correct = await->log();
+		QByteArray broken = brokenLog;
+		BoLongSyncMessage longSync;
+		QString error = longSync.findError(correct, broken);
 		addChatSystemMessage(i18n("Error message: %1").arg(error));
 	}
  }
@@ -659,7 +738,8 @@ QByteArray BosonNetworkSynchronizer::createLongSyncLog(BosonCanvas* canvas, unsi
  BoLongSyncMessage m;
  m.setGame(mGame);
  m.setMessageLogger(mMessageLogger);
- return m.makeLog(canvas, advanceMessageCounter, interval);
+ m.setCanvas(canvas, advanceMessageCounter, interval);
+ return m.makeLog();
 }
 
 void BosonNetworkSynchronizer::addChatSystemMessage(const QString& msg)
