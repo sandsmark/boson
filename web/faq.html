@@ -85,7 +85,7 @@
 
 	<FONT FACE="helvetica" SIZE="2">
 
-	<P>As far as I know, a boson is a sub-particle, like for example an electron. But since boson.org, boson.net and boson.de are already registered, we are trying to find a new name for this game. So please make any suggestions to the <a href="mailto:boson@egroups.fr">boson mailing list</A>.</P>
+	<P>As far as I know, a boson is a sub-particle, like for example an electron. But since boson.org, boson.net and boson.de are already registered, we are trying to find a new name for this game. So please make any suggestions to the <a href="mailto:boson-devel@lists.sourceforge.net">boson mailing list</A>.</P>
 
 	</FONT>
 
@@ -105,7 +105,7 @@
 
 	<FONT FACE="helvetica" SIZE="3">
 
-	<B>What about Qt 2 / KDE 2 ?</B>
+	<B>What Qt / KDE version do I need ?</B>
 
 	</FONT>
 
@@ -119,7 +119,9 @@
 
 	<FONT FACE="helvetica" SIZE="2">
 
-	<P>Have a look at the <A HREF = "roadmap.html">roadmap</A>, it's planned for the next release <B>(0.5)</B> From then on, all boson versions will need QT2.1 and KDE 2.0 libraries.</P>
+	<P>The current CVS version and therefore the next release version
+	depends on QT3/KDE3. Make also sure to install libkdegames from the
+	kdegames package.</P>
 
 	</FONT>
 
@@ -153,8 +155,23 @@
 
 	<FONT FACE="helvetica" SIZE="2">
 
-	<P>Not yet. I do use a CVS repository, but as I don't have an internet access at home, I can't put it on aquila (the computer hosting this page).</P>
-
+	<P>Yes you can access CVS through SourceForge. See <a
+	href="http://sourceforge.net/projects/boson">the project page</a> for
+	more infos.<br>
+	You can use <br>
+        cvs -d:pserver:anonymous@cvs.boson.sourceforge.net:/cvsroot/boson login
+	<br>
+	cvs -z3 -d:pserver:anonymous@cvs.boson.sourceforge.net:/cvsroot/boson co
+	modulename<br>
+	(where modulname is one of code and data) to download the current code
+	and data.<br><br>
+	Note that you need both, code and data to use boson. You also have to
+	link the admin/ dir from code to data:<br>
+	cd data ; ln -s ../code/admin admin <br><br>
+	Now you can do the (for KDE CVS) usual <br>
+	make -f Makefile.cvs ; ./configure ; make ; make install <br>
+	in both directories.
+	</P>
 	</FONT>
 
       </TD>
