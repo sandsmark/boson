@@ -284,7 +284,7 @@ void UpgradeProperties::apply(Player* player)
 }
 
 void UpgradeProperties::applyProperty(QValueList<unsigned long int>* typeIds,
-    Player* player, const QString& data, UpgradeType type, int weaponid)
+    Player* player, const QString& data, UpgradeType type, int weaponid) const
 {
   // Note that I don't use k_funcinfo here, because I get _very_ long lines with it
   boDebug(600) << "    " << "[UpgradeProperties::applyProperty(...)] " << "Applying property (type: " << type << ") to " << typeIds->count() << " properites. weaponid: " << weaponid << endl;
@@ -421,7 +421,7 @@ void UpgradeProperties::applyProperty(QValueList<unsigned long int>* typeIds,
   }
 }
 
-template<class T> T UpgradeProperties::applyValueInternal(ValueType type, T oldvalue, T value)
+template<class T> T UpgradeProperties::applyValueInternal(ValueType type, T oldvalue, T value) const
 {
   if(type == Absolute)
   {
@@ -443,7 +443,7 @@ template<class T> T UpgradeProperties::applyValueInternal(ValueType type, T oldv
   }
 }
 
-unsigned long int UpgradeProperties::applyValue(const QString& data, unsigned long int oldvalue)
+unsigned long int UpgradeProperties::applyValue(const QString& data, unsigned long int oldvalue) const
 {
   ValueType type;
   QString valuestr;
@@ -452,7 +452,7 @@ unsigned long int UpgradeProperties::applyValue(const QString& data, unsigned lo
   return applyValueInternal(type, oldvalue, value);
 }
 
-float UpgradeProperties::applyValue(const QString& data, float oldvalue)
+float UpgradeProperties::applyValue(const QString& data, float oldvalue) const
 {
   ValueType type;
   QString valuestr;
@@ -461,7 +461,7 @@ float UpgradeProperties::applyValue(const QString& data, float oldvalue)
   return applyValueInternal(type, oldvalue, value);
 }
 
-void UpgradeProperties::parseEntry(const QString& entry, ValueType& type, QString& value)
+void UpgradeProperties::parseEntry(const QString& entry, ValueType& type, QString& value) const
 {
   if(entry.left(1) == "+" || entry.left(1) == "-")
   {
@@ -481,7 +481,7 @@ void UpgradeProperties::parseEntry(const QString& entry, ValueType& type, QStrin
 }
 
 void UpgradeProperties::applyPropertyToUnits(float oldvalue,
-    unsigned long int typeId, Player* player, UpgradeType type)
+    unsigned long int typeId, Player* player, UpgradeType type) const
 {
   boDebug(600) << "          " << "[UpgradeProperties::applyPropertyToUnits(...)]" <<
       "PARAMS: oldvalue: " << oldvalue << "; typeId: " << typeId <<
