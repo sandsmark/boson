@@ -113,7 +113,21 @@ protected:
 	 **/
 	Unit* findUnit(unsigned long int unitId, Player* searchIn) const;
 
+	/**
+	 * The factory is told to build a unit.
+	 * @param factory Where the unit is being build
+	 * @param unitType which type of unit being buid. See @ref
+	 * UnitProperties::typeId
+	 * @param x The x-coordinate of the new unit.
+	 * @param y The y-coordinate of the new unit.
+	 **/
 	bool buildUnit(Facility* factory, int unitType, int x, int y);
+
+	/**
+	 * Create a new unit. No resources of the player are reduced, the unit
+	 * is created immediately.
+	 **/
+	Unit* addUnit(int unitType, Player* owner, int x, int y);
 
 protected slots:
 	/**
