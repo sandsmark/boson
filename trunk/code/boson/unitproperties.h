@@ -217,7 +217,7 @@ public:
 	 * @return Whether the unit can shoot at all. A unit that can shoot is a
 	 * military unit and is meant to be destroyed first.
 	 **/
-	bool canShoot() const { return (!mWeapons.isEmpty()); }
+	bool canShoot() const { return (mCanShootAtAirUnits || mCanShootAtLandUnits); }
 
 	bool canRefineMinerals() const;
 	bool canRefineOil() const;
@@ -299,11 +299,9 @@ public:
 
 	void upgradeResearched(UpgradeProperties* upgrade) { mNotResearchedUpgrades.removeRef(upgrade); };
 
-	const QPtrList<BosonWeaponProperties>* weaponsList() const  { return &mWeapons; };
-	BosonWeaponProperties* weapon(int index)  { return mWeapons.at(index); };
-
 	QPtrList<BosonParticleSystem> newDestroyedParticleSystems(float x, float y, float z) const;
 
+	const QPtrList<PluginProperties>* plugins() const  { return &mPlugins; };
 
 protected:
 	void loadMobileProperties(KSimpleConfig* conf);
@@ -353,7 +351,7 @@ private:
 
 	QPtrList<UpgradeProperties> mUpgrades;
 	QPtrList<UpgradeProperties> mNotResearchedUpgrades;
-	QPtrList<BosonWeaponProperties> mWeapons;
+	//QPtrList<BosonWeaponProperties> mWeapons;
 
 	QPtrList<BosonParticleSystemProperties> mDestroyedParticleSystems;
 };

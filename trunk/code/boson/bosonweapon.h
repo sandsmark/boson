@@ -21,22 +21,25 @@
 #define BOSONWEAPON_H
 
 #include <qptrlist.h>
+
 #include "items/bosonshot.h"
+#include "pluginproperties.h"
 
 class KSimpleConfig;
 class SpeciesTheme;
 class BosonParticleSystem;
 class BosonParticleSystemProperties;
 class Unit;
+class QString;
 
 
 /**
  * @author Rivo Laks <rivolaks@hot.ee>
  **/
-class BosonWeaponProperties
+class BosonWeaponProperties : public PluginProperties
 {
   public:
-    BosonWeaponProperties(KSimpleConfig* cfg, SpeciesTheme* theme);
+    BosonWeaponProperties(const UnitProperties* prop);
     ~BosonWeaponProperties();
 
     /**
@@ -78,6 +81,10 @@ class BosonWeaponProperties
     QPtrList<BosonParticleSystem> newShootParticleSystems(float x, float y, float z) const;
     QPtrList<BosonParticleSystem> newFlyParticleSystems(float x, float y, float z) const;
     QPtrList<BosonParticleSystem> newHitParticleSystems(float x, float y, float z) const;
+
+    virtual QString name() const;
+    virtual void loadPlugin(KSimpleConfig* config);
+    virtual int pluginType() const  { return Weapon; };
 
   private:
     unsigned long int mRange;

@@ -68,14 +68,14 @@ UnitProperties::UnitProperties(SpeciesTheme* theme, const QString& fileName)
  mTheme = theme;
  mMobileProperties = 0;
  mFacilityProperties = 0;
- mWeapons.setAutoDelete(true);
+ //mWeapons.setAutoDelete(true);
 
  loadUnitType(fileName);
 }
 
 UnitProperties::~UnitProperties()
 {
- mWeapons.clear();
+ //mWeapons.clear();
  delete mMobileProperties;
  delete mFacilityProperties;
 }
@@ -217,8 +217,9 @@ void UnitProperties::loadWeapons(KSimpleConfig* conf)
  mCanShootAtLandUnits = false;
  for (int i = 0; i < num; i++) {
 	conf->setGroup(QString("Weapon_%1").arg(i));
-	BosonWeaponProperties* p = new BosonWeaponProperties(conf, mTheme);
-	mWeapons.append(p);
+	BosonWeaponProperties* p = new BosonWeaponProperties(this);
+	p->loadPlugin(conf);
+	mPlugins.append(p);
 	if(p->canShootAtAirUnits()) {
 		mCanShootAtAirUnits = true;
 	}

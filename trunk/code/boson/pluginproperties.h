@@ -47,7 +47,8 @@ public:
 		Repair = 1,
 		Harvester = 2,
 		Refine = 3,
-		Upgrade = 4
+		Upgrade = 4,
+		Weapon = 5
 	};
 	PluginProperties(const UnitProperties* parent);
 	virtual ~PluginProperties();
