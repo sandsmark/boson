@@ -77,6 +77,7 @@ public:
 
 	void setCanvas(BosonCanvas*);
 	void setPlayField(BosonPlayField*);
+	BosonPlayField* playField() const;
 
 	void setLocalPlayer(Player*);
 	Player* localPlayer();
