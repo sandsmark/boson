@@ -294,11 +294,65 @@ void ProductionPlugin::advance(unsigned int)
 
 bool ProductionPlugin::saveAsXML(QDomElement& root) const
 {
+ if (mProductions.count() == 0) {
+	return true;
+ }
+
+ // AB: we don't use a KGamePropertyList here, cause it is a bit more difficult
+ // with the QPair I guess. simply saving this by hand.
+ QStringList list;
+ QValueList< QPair<ProductionType, unsigned long int> >::Iterator it;
+ for (unsigned int i = 0; i < mProductions.count(); i++) {
+	unsigned int type = (unsigned int)(mProductions[i].first);
+	unsigned int id = mProductions[i].second;
+	QString s = QString::fromLatin1("%1 %2").arg(type).arg(id);
+	list.append(s);
+ }
+ QString productionString = list.join(QString::fromLatin1(","));
+ QDomDocument doc = root.ownerDocument();
+ QDomElement e = doc.createElement("ProductionList");
+ root.appendChild(e);
+ e.appendChild(doc.createTextNode(productionString));
  return true;
 }
 
 bool ProductionPlugin::loadFromXML(const QDomElement& root)
 {
+ mProductions.clear();
+ QDomElement e = root.namedItem("ProductionList").toElement();
+ if (e.isNull()) {
+	// nothing to load here
+	return true;
+ }
+ QString s = e.text();
+ if (s.isEmpty()) {
+	// list is here, but empty
+	return true;
+ }
+ QStringList list = QStringList::split(QString::fromLatin1(","), s);
+ QValueList< QPair<ProductionType, unsigned long int> >::Iterator it;
+ for (unsigned int i = 0; i < list.count(); i++) {
+	QStringList l = QStringList::split(" ", list[i]);
+	if (l.count() != 2) {
+		boWarning() << k_funcinfo << "type and id of a production item must be space separated" << endl;
+		return false;
+	}
+	bool ok = false;
+	unsigned int type = l[0].toUInt(&ok);
+	if (!ok) {
+		boError() << k_funcinfo << "type of production item " << i << " is not a valid number" << endl;
+		return false;
+	}
+	unsigned int id = l[1].toUInt(&ok);
+	if (!ok) {
+		boError() << k_funcinfo << "id of production item " << i << " is not a valid number" << endl;
+		return false;
+	}
+	QPair<ProductionType, unsigned long int> pair;
+	pair.first = (ProductionType)type;
+	pair.second = id;
+	mProductions.append(pair);
+ }
  return true;
 }
 
