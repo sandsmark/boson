@@ -288,6 +288,55 @@ class BoTextureArray
 class BoTextureManager
 {
   public:
+    /**
+     * @short Small helper class to count texture binds in a method
+     *
+     * You can create an object of this class in a method to count all texture
+     * binds that are made in the method. On destruction of this object, the
+     * number of texture binds is automaticall written to the pointer that
+     * you've given in the c'tor. Example:
+     * <pre>
+     * void renderSomething()
+     * {
+     *  BoTextureManager::BoTextureBindCounter bindCounter(boTextureManager, &mTextureBindsInRenderSomething);
+     *  // ... -> render something here
+     * }
+     * </pre>
+     *
+     * You can also call @ref stop if you don't want or can wait until the
+     * destruction of the object (e.g. because you don't want to count all binds
+     * in a method). The destructor won't touch the variable anymore then.
+     *
+     * Note that if @ref BoTextureManager::textureBinds is reset will there is
+     * still an object of this class present, the value of the variable will be
+     * undefined.
+     * @author Andreas Beckermann <b_mann@gmx.de>
+     **/
+    class BoTextureBindCounter
+    {
+    public:
+        BoTextureBindCounter(BoTextureManager* manager, int* counter)
+          : mManager(manager), mCounter(counter), mWritten(false)
+        {
+          *mCounter = mManager->textureBinds();
+        }
+        ~BoTextureBindCounter()
+        {
+          stop();
+        }
+        void stop()
+        {
+          if (!mWritten)
+          {
+            *mCounter = mManager->textureBinds() - *mCounter;
+          }
+        }
+      private:
+        BoTextureManager* mManager;
+        int* mCounter;
+        bool mWritten;
+    };
+  public:
     BoTextureManager();
     ~BoTextureManager();
 
