@@ -52,12 +52,12 @@ protected:
 	void resetLoadUnitPage();
 	void resetRenderPage();
 	void addItemAdvance(ProfileSlotAdvance*);
-	void addItemAdvanceSummary(); // sum and average
 	void resetEventsPage();
 	void resetFilesPage();
 
 	void initRenderItem(QListViewItemNumber* item, const QString& type, long int time, long int function);
-	void initSlotAdvanceItem(QListViewItemNumber* item, unsigned int advanceCount, const QString& type, long int time, long int function);
+
+	void initSlotAdvanceItem(QListViewItemNumber* item, int advanceCount, const QString& type, long int time, long int function);
 	void initItemAdvanceItem(QListViewItemNumber* item, ProfileItemAdvance* a, unsigned int advanceCount, const QString& type, unsigned long int time, unsigned long int function);
 	void initItemAdvanceItemSummary(QListViewItemNumber* item, const QString& description, const QString& type, unsigned long int time, unsigned long int function);
 
