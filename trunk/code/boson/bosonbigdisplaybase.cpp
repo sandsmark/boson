@@ -1933,7 +1933,7 @@ void BosonBigDisplayBase::cameraChanged()
 	// If radius is 0, up vector will be wrong so we change it
 	radius = 0.02;
  }
- pointByRotation(diffX, diffY, camera()->rotation(), radius);
+ pointByRotation(&diffX, &diffY, camera()->rotation(), radius);
  float lookatX, lookatY, lookatZ;  // Point that we look at
  lookatX = camera()->lookAt().x();
  lookatY = camera()->lookAt().y();

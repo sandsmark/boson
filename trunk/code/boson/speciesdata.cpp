@@ -290,9 +290,7 @@ void SpeciesData::addTeamColor(const QColor& color)
 
 void SpeciesData::removeTeamColor(const QColor& color)
 {
- TeamColorData* data = d->mTeamData[color.rgb()];
- delete data;
- d->mTeamData.remove(color.rgb());
+ d->mTeamData.remove(color.rgb()); // will delete the object!
 }
 
 bool SpeciesData::loadUnitOverview(const UnitProperties* prop, const QColor& teamColor)
