@@ -53,8 +53,7 @@ public:
 	void setCell(int i, int j, cell_t c);
 	/** find the unit at this position */
 	QCanvasItem		*findUnitAt(int x, int y);
-	groundType		findGroundAt(int x, int y);
-	
+	groundType		groundAt(int x, int y) {return tile( x/tileWidth(), y/tileHeight() );}
 	
 	virtual void resize (int, int);
 protected:

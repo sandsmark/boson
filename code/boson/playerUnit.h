@@ -104,8 +104,6 @@ public:
 	enum harvestState { standBy, goingTo, comingBack, harvesting };
 	
 private:
-	groundType	underlyingGround(void);
-
 	harvestState	hstate;
 	int		base_x, base_y;
 	int		harvest_x, harvest_y;
