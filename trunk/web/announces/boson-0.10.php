@@ -65,8 +65,8 @@ there are many other performance related improvements in this release.
 </p>
 
 <p class=\"announcement\">
-On a non technical side the most important important feature is probably the
-new harvesting code. Harvesting both, minerals and oil, is now supported. We
+On a non technical side the most important feature is probably the new
+harvesting code. Harvesting both, minerals and oil, is now supported. We
 believe this is a big step to make boson fully playable.
 </p>
 
