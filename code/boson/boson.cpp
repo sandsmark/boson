@@ -224,12 +224,10 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			break;
 		}
 		if (p->minerals() < prop->mineralCost()) {
-			kdDebug() << k_lineinfo << "not enough minerals to produce" << endl;
 			emit signalNotEnoughMinerals(p);
 			break;
 		}
 		if (p->oil() < prop->oilCost()) {
-			kdDebug() << k_lineinfo << "not enough oil to produce" << endl;
 			emit signalNotEnoughOil(p);
 			break;
 		}

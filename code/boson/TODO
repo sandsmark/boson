@@ -15,8 +15,6 @@ Game TODOs
   let the Cell display black. Don't use a QCanvasSprite for the fog of war.
   Terrible performance.
 - display how many (and which) units are still in queue for production
-- connect to Boson::signalNotEnough[Minerals|Oild]() and give some visual
-  feedback
 - BosonPath needs to be improved greatly
 - AI
 

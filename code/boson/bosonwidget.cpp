@@ -198,6 +198,10 @@ void BosonWidget::init()
 		this, SLOT(slotLoadScenario(const QString&)));
  connect(d->mBoson, SIGNAL(signalGameStarted()),
 		this, SIGNAL(signalGameStarted()));
+ connect(d->mBoson, SIGNAL(signalNotEnoughMinerals(Player*)),
+		this, SLOT(slotNotEnoughMinerals(Player*)));
+ connect(d->mBoson, SIGNAL(signalNotEnoughOil(Player*)),
+		this, SLOT(slotNotEnoughOil(Player*)));
 
  connect(d->mBigDisplay, SIGNAL(signalAddCell(int,int, int, unsigned char)),
 		d->mCanvas, SLOT(slotAddCell(int, int, int, unsigned char)));
@@ -1013,4 +1017,27 @@ void BosonWidget::setShowChat(bool s)
  } else {
 	d->mChat->hide();
  }
+}
+
+void BosonWidget::slotNotEnoughMinerals(Player* p)
+{
+ if (p != d->mLocalPlayer) {
+	return;
+ }
+ addChatSystemMessage(i18n("Boson"), i18n("You have not enough minerals!"));
+}
+
+void BosonWidget::slotNotEnoughOil(Player* p)
+{
+ if (p != d->mLocalPlayer) {
+	return;
+ }
+ addChatSystemMessage(i18n("Boson"), i18n("You have not enough oil!"));
+}
+
+void BosonWidget::addChatSystemMessage(const QString& fromName, const QString& text)
+{
+
+ d->mChat->addSystemMessage(fromName, text);
+ d->mBigDisplay->addChatMessage(i18n("--- %1: %2").arg(fromName).arg(text));
 }
