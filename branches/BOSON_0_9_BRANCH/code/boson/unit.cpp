@@ -956,7 +956,7 @@ bool Unit::loadFromXML(const QDomElement& root)
  bool ok = false;
  float rotation = root.attribute(QString::fromLatin1("Rotation")).toFloat(&ok);
  if (!ok) {
-	boError() << k_funcinfo << "Invalid value for Rotation tag" << endl;
+	boError(260) << k_funcinfo << "Invalid value for Rotation tag" << endl;
 	rotation = 0.0f;
  }
 
@@ -964,7 +964,7 @@ bool Unit::loadFromXML(const QDomElement& root)
  if (root.hasAttribute(QString::fromLatin1("CurrentPlugin"))) {
 	pluginIndex = root.attribute(QString::fromLatin1("CurrentPlugin")).toInt(&ok);
 	if (!ok) {
-		boError() << k_funcinfo << "Invalid value for CurrentPlugin tag" << endl;
+		boError(260) << k_funcinfo << "Invalid value for CurrentPlugin tag" << endl;
 		pluginIndex = 0;
 	}
 	if ((unsigned int)pluginIndex >= d->mPlugins.count()) {
@@ -981,7 +981,7 @@ bool Unit::loadFromXML(const QDomElement& root)
  if (root.hasAttribute(QString::fromLatin1("Target"))) {
 	targetId = root.attribute(QString::fromLatin1("Target")).toUInt(&ok);
 	if (!ok) {
-		boError() << k_funcinfo << "Invalid value for Target tag" << endl;
+		boError(260) << k_funcinfo << "Invalid value for Target tag" << endl;
 		targetId = 0;
 	}
  }
@@ -1027,7 +1027,6 @@ bool Unit::loadFromXML(const QDomElement& root)
 		p->loadFromXML(e);
 	}
  }
-
  setRotation(rotation);
  setAdvanceWork(advanceWork());
  return true;
@@ -1982,7 +1981,22 @@ bool Facility::loadFromXML(const QDomElement& root)
 	boError() << k_funcinfo << "Unit not loaded properly" << endl;
 	return false;
  }
- setConstructionStep(d->mConstructionStep);
+
+ unsigned int modelStep = 0;
+ if (d->mConstructionStep == constructionSteps()) {
+	modelStep = model()->constructionSteps(); // completed construction
+ } else {
+	modelStep = model()->constructionSteps() * d->mConstructionStep / constructionSteps();
+ }
+ setGLConstructionStep(modelStep);
+
+ // FIXME: remove. this is from Facility::setConstructionStep. we _need_ to load
+ // particles in loadFromXML() - then these lines are obsolete.
+ if (d->mConstructionStep == constructionSteps()) {
+	setParticleSystems(unitProperties()->newConstructedParticleSystems(x() + width() / 2, y() + height() / 2, z()));
+	canvas()->addParticleSystems(*particleSystems());
+ }
+
  return true;
 }
 
