@@ -77,11 +77,12 @@ int main(/*int argc, char* argv[] */)
 
 	/* the canvas is created when a game is created */
 	vcanvas = ecanvas = new editorCanvas(*bigBackground);
-	/// orzel :  not be...... but $KDEDIR and so on
-	assert (true == ecanvas->Load("/opt/be/share/apps/boson/map/basic.bpf"));
 
-
+	// first window, more may be added later with edit/new window
 	(new editorTopLevel(&app))->show();
+
+	/// XXX,orzel :  not be...... but $KDEDIR and so on
+	assert (true == ecanvas->Load("/opt/be/share/apps/boson/map/basic.bpf"));
 
 	return app.exec();
 }  
