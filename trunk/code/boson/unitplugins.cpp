@@ -511,6 +511,10 @@ bool HarvesterPlugin::loadFromXML(const QDomElement& root)
 	return false;
  }
  mineId = root.attribute(QString::fromLatin1("ResourceMine")).toUInt(&ok);
+ if (!ok) {
+	boError() << k_funcinfo << "Invalid number for ResourceMine attribute" << endl;
+	return false;
+ }
  if (refineryId != 0) {
 	// AB: retrieving from Boson is not 100% nice, but definitely necessary
 	// and valid at this point. we need to get the pointer, even if the
@@ -522,7 +526,7 @@ bool HarvesterPlugin::loadFromXML(const QDomElement& root)
 	} else {
 		mRefinery = (RefineryPlugin*)u->plugin(UnitPlugin::Refinery);
 		if (!mRefinery) {
-			boError() << k_funcinfo << "unit " << mineId << " is not a refinery" << endl;
+			boError() << k_funcinfo << "unit " << refineryId << " is not a refinery" << endl;
 			mRefinery = 0;
 		}
 	}
