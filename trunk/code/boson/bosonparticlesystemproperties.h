@@ -127,6 +127,7 @@ class BosonParticleSystemProperties
     int mGLBlendFunc;
     float mRate, mStartSize, mEndSize, mAge;
     bool mAlign;
+    bool mMoveParticlesWithSystem;
     QString mTextureName;
     QString mGLBlendFuncStr;
     const BosonParticleTextureArray* mTextures;

@@ -178,7 +178,7 @@ class BosonParticleSystem
      *
      * @param p New position of this system in OpenGL coordinates
      **/
-    inline void setPosition(BoVector3 p)  { mPos = p; };
+    void setPosition(BoVector3 p);
     /**
      * @return Current position of this system in OpenGL coordinates
      **/
@@ -201,8 +201,7 @@ class BosonParticleSystem
      *
      * @see matrix
      **/
-    void setRotation(GLfloat angle, GLfloat x, GLfloat y, GLfloat z)
-        { mRotated = true; mMatrix.rotate(angle, x, y, z); };
+    void setRotation(GLfloat angle, GLfloat x, GLfloat y, GLfloat z);
     /**
      * @return If rotation matrix of this system has been modified e.g. if
      *   @ref setRotation has been called.
@@ -262,6 +261,8 @@ class BosonParticleSystem
      **/
     void setBlendFunc(int sf, int df) { mBlendFunc[0] = sf; mBlendFunc[1] = df; };
 
+    void setMoveParticlesWithSystem(bool move)  { mMoveParticlesWithSystem = move; };
+
     /**
      * @return Number of living (active) particles in this system
      **/
@@ -299,6 +300,7 @@ class BosonParticleSystem
     float mCreateCache;  // Number of particles to create during next update
     bool mAlign;  // Whether to align particles to camera
     float mRadius;  // Radius of bounding sphere
+    bool mMoveParticlesWithSystem;  // Particles are moved with system if true
     const BosonParticleTextureArray* mTextures;  // Textures of particles
     BoVector3 mPos;
     bool mRotated;

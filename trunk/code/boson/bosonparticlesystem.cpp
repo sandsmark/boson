@@ -96,6 +96,7 @@ BosonParticleSystem::BosonParticleSystem(int maxnum,
   mTextures = textures;
   mAge = 3600;
   mProp = prop;
+  mMoveParticlesWithSystem = false;
 
   init(0);
 }
@@ -241,6 +242,45 @@ void BosonParticleSystem::updateParticle(BosonParticle* particle)
     mRadius = QMAX(mRadius, (particle->pos - mPos).dotProduct());
   }
 }
+
+void BosonParticleSystem::setPosition(BoVector3 p)
+{
+  if(mMoveParticlesWithSystem)
+  {
+    BoVector3 diff = p - mPos;
+    // Move all particles by diff
+    for(int i = 0; i < mMaxNum; i++)
+    {
+      if(mParticles[i].life > 0.0)
+      {
+        mParticles[i].pos += diff;
+      }
+    }
+  }
+  mPos = p;
+}
+
+void BosonParticleSystem::setRotation(GLfloat angle, GLfloat x, GLfloat y, GLfloat z)
+{
+  mRotated = true; mMatrix.rotate(angle, x, y, z);
+  if(mMoveParticlesWithSystem)
+  {
+    BoMatrix m;
+    m.rotate(angle, x, y, z);
+    BoVector3 newpos, oldpos;
+    // Rotate all particles
+    for(int i = 0; i < mMaxNum; i++)
+    {
+      if(mParticles[i].life > 0.0)
+      {
+        oldpos = mParticles[i].pos - mPos;
+        m.transform(&newpos, &oldpos);
+        mParticles[i].pos = newpos + mPos;
+      }
+    }
+  }
+}
+
 
 /*
  * vim: et sw=2
