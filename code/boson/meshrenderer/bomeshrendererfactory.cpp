@@ -21,9 +21,12 @@
 #include "bomeshrendererfactory.moc"
 
 #include "bomeshrendererimmediate.h"
+#include "bomeshrenderersemiimmediate.h"
 #include "bomeshrenderervertexarray.h"
 #include "bomeshrenderervbo.h"
 #include "../boversion.h"
+
+#include <bodebug.h>
 
 KInstance* BoMeshRendererFactory::mInstance = 0;
 
@@ -42,10 +45,15 @@ BoMeshRendererFactory::~BoMeshRendererFactory()
 QObject* BoMeshRendererFactory::createObject(QObject* parent, const char* name,
 		const char* className, const QStringList &args)
 {
+ Q_UNUSED(name);
+ Q_UNUSED(args);
+ Q_UNUSED(parent);
  QObject* o = 0;
  if (qstrcmp(className, "BoMeshRendererInformation") == 0) {
 	// note: the _libbomeshrendererplugin is NOT part of the string
 	o = new BoMeshRendererInformation_libbomeshrendererplugin;
+ } else if (qstrcmp(className, "BoMeshRendererSemiImmediate") == 0) {
+	o = new BoMeshRendererSemiImmediate;
  } else if (qstrcmp(className, "BoMeshRendererImmediate") == 0) {
 	o = new BoMeshRendererImmediate;
  } else if (qstrcmp(className, "BoMeshRendererVertexArray") == 0) {
@@ -53,8 +61,10 @@ QObject* BoMeshRendererFactory::createObject(QObject* parent, const char* name,
  } else if (qstrcmp(className, "BoMeshRendererVBO") == 0) {
 	o = new BoMeshRendererVBO;
  } else {
+	boError() << k_funcinfo << "no such class available: " << className << endl;
 	return 0;
  }
+ boDebug() << k_funcinfo << "created object of class " << o->className() << endl;
  emit objectCreated(o);
  return o;
 }
@@ -65,6 +75,7 @@ QStringList BoMeshRendererInformation_libbomeshrendererplugin::meshRenderers() c
  QStringList list;
  list.append("BoMeshRendererVBO");
  list.append("BoMeshRendererVertexArray");
+ list.append("BoMeshRendererSemiImmediate");
  list.append("BoMeshRendererImmediate");
  return list;
 }
