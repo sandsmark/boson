@@ -1483,7 +1483,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 				boWarning() << "cannot do anything with destroyed units" << endl;
 				continue;
 			}
-			MiningPlugin* m = (MiningPlugin*)unit->plugin(UnitPlugin::Mine);
+			MiningPlugin* m = (MiningPlugin*)unit->plugin(UnitPlugin::Mining);
 			if (!m) {
 				boError() << k_lineinfo << "This unit has no mining plugin" << endl;
 				break;
@@ -1519,7 +1519,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 				boWarning() << "cannot do anything with destroyed units" << endl;
 				continue;
 			}
-			BombingPlugin* b = (BombingPlugin*)unit->plugin(UnitPlugin::Bomb);
+			BombingPlugin* b = (BombingPlugin*)unit->plugin(UnitPlugin::Bombing);
 			if (!b) {
 				boError() << k_lineinfo << "This unit has no bombing plugin" << endl;
 				break;

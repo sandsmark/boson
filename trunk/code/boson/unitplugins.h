@@ -50,8 +50,9 @@ public:
 		Repair = 2,
 		Harvester = 3,
 		Weapon = 4, // note: this won't end up in Unit::plugin()! weapons are stored separately. also note that rtti==Weapon is *not* unique! they have their own class and rttis - see BosonWeapon
-		Bomb = 5,
-		Mine = 6,
+		Bombing = 5,
+		Mining = 6, // placing mine (the exploding ones)
+		RessourceMine = 7,
 
 		PluginEnd // MUST be the last entry!
 	};
@@ -343,7 +344,7 @@ public:
 	BombingPlugin(Unit* owner);
 	~BombingPlugin();
 
-	virtual int pluginType() const { return Bomb; }
+	virtual int pluginType() const { return Bombing; }
 
 	void bomb(int weaponId, float x, float y);
 
@@ -370,7 +371,7 @@ public:
 	MiningPlugin(Unit* owner);
 	~MiningPlugin();
 
-	virtual int pluginType() const { return Mine; }
+	virtual int pluginType() const { return Mining; }
 
 	void mine(int weaponId);
 
