@@ -33,8 +33,8 @@
 #include "bodisplaymanager.h"
 #include "global.h"
 #include "bosonbigdisplay.h"
-#include "bosonmusic.h"
 #include "commandinput.h"
+#include "sound/bosonmusic.h"
 
 #include <klocale.h>
 #include <kaction.h>

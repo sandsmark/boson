@@ -22,11 +22,11 @@
 #include "defines.h"
 #include "unitbase.h"
 #include "unitproperties.h"
-#include "bosonmusic.h"
 #include "bosonconfig.h"
-#include "bosonsound.h"
 #include "bosonprofiling.h"
 #include "bosonmodel.h"
+#include "sound/bosonmusic.h"
+#include "sound/bosonsound.h"
 
 #include <kstandarddirs.h>
 #include <ksimpleconfig.h>
