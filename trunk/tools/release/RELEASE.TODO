@@ -6,6 +6,7 @@ Remember to update/check before releasing:
   - main.cpp,bounitmain.cpp,bocursormain.cpp,boprofilingmain.cpp,borendermain.cpp,bouniteditor.ui
   - *.cpp *.h --> grep 
   - code/ChangeLog: echo "version foobar has been released on ..."
+  - boversion.h: BOSON_VERSION_STRING and BOSON_VERSION_[MINOR|MICRO]
 - code/boson/data/boson.lsm: Version, Entered-Date, Primary-site, Alternate-site, maybe. Keywords and Platform
 - website: news, download.html
 - <package>/REAMDE -> installation instructions for packages differ from the
