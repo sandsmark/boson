@@ -1333,7 +1333,7 @@ void Boson::slotPropertyChanged(KGamePropertyBase* p)
 					d->mGameTimer->stop();
 				}
 			} else {
-				if (!d->mGameTimer->isActive()) {
+				if (!d->mGameTimer->isActive() && !gamePaused()) {
 					boDebug() << "start timer - ms="
 							<< ADVANCE_INTERVAL
 							<< endl;
