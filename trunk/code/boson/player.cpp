@@ -65,6 +65,7 @@ public:
 
 Player::Player() : KPlayer()
 {
+ boDebug() << k_funcinfo << endl;
  mSpecies = 0;
  d = new PlayerPrivate;
  d->mUnits.setAutoDelete(true);

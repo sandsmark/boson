@@ -236,6 +236,7 @@ void TopWidget::initBoson()
 
 void TopWidget::initPlayer()
 {
+ boDebug() << k_funcinfo << endl;
  Player* p = new Player;
  slotChangeLocalPlayer(p);
 }
@@ -1089,6 +1090,7 @@ void TopWidget::showHideMenubar()
 
 void TopWidget::changeLocalPlayer(Player* p, bool init)
 {
+ boDebug() << k_funcinfo << endl;
  // AB: note that both, p == 0 AND p == mPlayer are valid and must be executed!
  mPlayer = p;
  if (d->mBosonWidget) {
