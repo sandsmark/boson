@@ -396,9 +396,9 @@ void UnitProperties::loadActions()
 void UnitProperties::saveMobileProperties(KSimpleConfig* conf)
 {
  conf->setGroup("Boson Mobile Unit");
- conf->writeEntry("Speed", (double)mMobileProperties->mSpeed);
- conf->writeEntry("AccelerationSpeed", (double)mMobileProperties->mAccelerationSpeed);
- conf->writeEntry("DecelerationSpeed", (double)mMobileProperties->mDecelerationSpeed);
+ conf->writeEntry("Speed", (double)(mMobileProperties->mSpeed  * 48.0f));
+ conf->writeEntry("AccelerationSpeed", (double)(mMobileProperties->mAccelerationSpeed  * 48.0f));
+ conf->writeEntry("DecelerationSpeed", (double)(mMobileProperties->mDecelerationSpeed  * 48.0f));
  conf->writeEntry("RotationSpeed", mMobileProperties->mRotationSpeed);
  conf->writeEntry("CanGoOnLand", mMobileProperties->mCanGoOnLand);
  conf->writeEntry("CanGoOnWater", mMobileProperties->mCanGoOnWater);
@@ -764,10 +764,10 @@ void UnitProperties::reset()
  mFacilityProperties = 0;
  // Mobile stuff (because unit is mobile by default)
  createMobileProperties();
- mMobileProperties->mSpeed = 0; // Hmm, this doesn't make any sense IMO
- mMobileProperties->mAccelerationSpeed = 0.5;
- mMobileProperties->mDecelerationSpeed = 1.0;
- mMobileProperties->mRotationSpeed = (int)(2 * mMobileProperties->mSpeed);
+ mMobileProperties->mSpeed = 0 / 48.0f; // Hmm, this doesn't make any sense IMO
+ mMobileProperties->mAccelerationSpeed = 0.5 / 48.0f;
+ mMobileProperties->mDecelerationSpeed = 1.0 / 48.0f;
+ mMobileProperties->mRotationSpeed = (int)(2 * mMobileProperties->mSpeed * 48.0f);
  mMobileProperties->mCanGoOnLand = true;
  mMobileProperties->mCanGoOnWater = false;
  // Sounds
