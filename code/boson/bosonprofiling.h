@@ -41,9 +41,6 @@ class BosonProfiling
 {
 public:
 	enum ProfilingEvent {
-		// note that all entries here need to be in order, so that we
-		// can iterate them easily in a Profiling dialog.
-		ProfilingStart = 0, // must remain the first entry!
 		LoadGameData1, // currently unused
 		LoadTiles,
 		LoadGameData3,
@@ -51,9 +48,7 @@ public:
 		LoadModelTextures,
 		LoadModelDisplayLists,
 		LoadModelDummy,
-		AddUnitsXML,
-
-		ProfilingEnd // must remain the last entry!
+		AddUnitsXML
 	};
 	BosonProfiling();
 	BosonProfiling(const BosonProfiling& profiling);
@@ -91,14 +86,14 @@ public:
 	 * The two timers are completely independant of each other. However the
 	 * two timers <em>must</em> have different events.
 	 **/
-	void start(ProfilingEvent event);
+	void start(int event);
 
 	/**
 	 * Stop the event timer and append the resulting time to the list. If
 	 * the list contains more than MAX_ENTRIES the first item is removed.
 	 * See also @ref start
 	 **/
-	void stop(ProfilingEvent event);
+	void stop(int event);
 
 	void loadUnit();
 	void loadUnitDone(unsigned long int typeId);

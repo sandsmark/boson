@@ -361,12 +361,12 @@ void BosonProfiling::advanceItemStop()
  d->mCurrentItemAdvanceTimes = 0;
 }
 
-void BosonProfiling::start(ProfilingEvent event)
+void BosonProfiling::start(int event)
 {
  gettimeofday(&d->mProfilingTimes[event], 0);
 }
 
-void BosonProfiling::stop(ProfilingEvent event)
+void BosonProfiling::stop(int event)
 {
  struct timeval time;
  gettimeofday(&time, 0);

@@ -376,12 +376,6 @@ QString BosonProfilingDialog::profilingName(int profilingEvent) const
 {
  QString name;
  switch ((BosonProfiling::ProfilingEvent)profilingEvent) {
-	case BosonProfiling::ProfilingStart:
-		name = i18n("ProfilingStart (Invalid here! Please send a Bug report");
-		break;
-	case BosonProfiling::ProfilingEnd:
-		name = i18n("ProfilingEnd (Invalid here! Please send a Bug report");
-		break;
 	case BosonProfiling::LoadGameData1:
 		name = i18n("LoadGameData1 (currently unused)");
 		break;
@@ -606,7 +600,7 @@ void BosonProfilingDialog::slotResetSlotAdvancePage()
 	// here...
 	for (; itemsIt.current(); ++itemsIt) {
 		QValueList<unsigned long int> values = itemsIt.current()->values();
-		for (int i = 0; i < values.count(); i++) {
+		for (unsigned int i = 0; i < values.count(); i++) {
 			itemAdvanceSums[i] += values[i];
 		}
 		itemAdvanceCount++;
