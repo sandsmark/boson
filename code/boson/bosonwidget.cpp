@@ -741,7 +741,7 @@ void BosonWidget::slotReceiveMap(const QByteArray& buffer)
  QDataStream stream(buffer, IO_ReadOnly);
  d->mPlayField->loadMap(stream);
 
- QString tiles = "earth.png"; // TODO: should be selectable
+ QString tiles = "earth"; // TODO: should be selectable
 
  // load tiles if in editor mode - otherwise this does nothing
  emit signalEditorLoadTiles(tiles);
