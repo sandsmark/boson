@@ -473,7 +473,7 @@ bool harvesterUnit::getWantedMove(bosonMsgData *msg)
 		case comingBack:
 			if ( _x() == base_x && _y() == base_y) {
 				/* we are back : empty the harvester */ 
-				puts("harvester : arrived home");
+//				puts("harvester : arrived home");
 				harvestEndMsg_t    he;
 				he.key = key;
 				sendMsg(buffer, MSG_UNIT_HARVEST_END, sizeof(he), &he);
@@ -486,12 +486,12 @@ bool harvesterUnit::getWantedMove(bosonMsgData *msg)
 			ret = playerMobUnit::getWantedMove(msg);
 			if (near (100) && underlyingGround() == GROUND_GRASS_OIL ) {
 				hstate = harvesting;
-				puts("harvester : change to \"harvesting\" state");
+//				puts("harvester : change to \"harvesting\" state");
 			} else // nothing to harvest
 			if ( near (5) ) { 
 				// orzel : look around for another cell to harvest
 				hstate = standBy;
-				printf("harvester : change to \"standby\" state, underlying is %d, not %d\n", underlyingGround(), GROUND_GRASS_OIL);
+//				printf("harvester : change to \"standby\" state, underlying is %d, not %d\n", underlyingGround(), GROUND_GRASS_OIL);
 				return false;
 			}
 			else return ret; // continue
@@ -503,7 +503,7 @@ bool harvesterUnit::getWantedMove(bosonMsgData *msg)
 				sendMsg(buffer, MSG_UNIT_HARVEST, sizeof(harvest), &harvest);
 			} else {
 				hstate = comingBack;
-				puts("harvester : change to \"comingBack\" state");
+//				puts("harvester : change to \"comingBack\" state");
 				playerMobUnit::u_goto(base_x, base_y); // go to base station
 			}
 			// send a message "i'm harvesting there"
@@ -521,7 +521,7 @@ bool harvesterUnit::getWantedShoot(bosonMsgData *)
 void harvesterUnit::u_goto(int mx, int my)
 {
 	hstate = goingTo;
-	puts("harvester : change to \"goingTo\" state");
+//	puts("harvester : change to \"goingTo\" state");
 	playerMobUnit::u_goto(mx, my);
 }
 
