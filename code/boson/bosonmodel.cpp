@@ -532,14 +532,18 @@ void debugTex(Lib3dsMaterial* mat, Lib3dsMesh* mesh)
 {
  Lib3dsTextureMap* t = &mat->texture1_map;
  boDebug() << mat->name << " -- " << t->name << endl;
- boDebug() << "rot: " << t->rotation << " offset: " << t->offset[0] << "," << t->offset[1] 
-		<< " scale: " << t->scale[0] << "," << t->scale[1] << endl;
+ boDebug() << "rot: " << t->rotation
+		<< " offset: " << t->offset[0] << "," << t->offset[1]
+		<< " scale: " << t->scale[0] << "," << t->scale[1]
+		<< " flags: " << t->flags
+		<< endl;
  boDebug() << "map_data scale: " << mesh->map_data.scale
-		<< " pos: " << mesh->map_data.pos[0] << "," << mesh->map_data.pos[1] << "," << mesh->map_data.pos[2]
+		<< " pos: " << mesh->map_data.pos[0]
+			<< "," << mesh->map_data.pos[1]
+			<< "," << mesh->map_data.pos[2]
 		<< " type: " << mesh->map_data.maptype
 		<< " tile: " << mesh->map_data.tile[0] << "," << mesh->map_data.tile[1]
 		<< endl;
- boDebug() << "t->flags: " << t->flags << endl;
 }
 
 void BosonModel::loadNode(Lib3dsNode* node, bool reload)
@@ -640,6 +644,7 @@ void BosonModel::loadNode(Lib3dsNode* node, bool reload)
 	} else {
 		//...
 		myTex = 0;
+//		boDebug() << "no mat for " << mesh->name << endl;
 	}
 
 #define NO_OPTIMIZE 1
