@@ -769,6 +769,9 @@ void BosonBigDisplayBase::initUfoGUI()
  northCenter->setConstraints("center");
  north->addWidget(northCenter);
 
+ // add your widgets to northEast, northWest or northCenter, not to north
+ north = 0;
+
  d->mResourcesBox = new BoUfoHBox();
  BoUfoVBox* resourcesLabelsBox = new BoUfoVBox();
  BoUfoVBox* resourcesValuesBox = new BoUfoVBox();
@@ -2072,11 +2075,6 @@ void BosonBigDisplayBase::renderTextGamePaused()
  QString pause = i18n("The game is paused");
  int w = d->mDefaultFont->width(pause);
  d->mDefaultFont->renderText(d->mViewport[2] / 2 - w / 2, d->mViewport[3] / 2, pause, d->mViewport[2] / 2 + w / 2, false);
-}
-
-void BosonBigDisplayBase::renderMiniMap()
-{
- d->mGLMiniMap->renderMiniMap();
 }
 
 void BosonBigDisplayBase::renderCells()
