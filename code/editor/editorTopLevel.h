@@ -80,7 +80,6 @@ public slots:
 
 protected:
 	virtual bool queryExit();
-	virtual bool queryClose();
 
 	/*
 	 * put object 
