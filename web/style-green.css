@@ -235,3 +235,19 @@ pre {
   margin-top: 10px;
   margin-bottom: 10px;
 }
+
+
+/** Announcements **/
+
+p.announcement {
+  background-color: transparent;
+  color: #00ff00;
+  margin-left: 10px;
+  margin-right: 10px;
+  text-align: justify;
+}
+
+h3.announcement {
+  background-color: transparent;
+  text-align: center;
+}

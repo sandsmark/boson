@@ -4,13 +4,14 @@ function counter()
 {
 global $visitcount;
 global $counter_file;
-$fp = fopen($counter_file, "r");
+global $basedir;
+$fp = fopen($basedir . $counter_file, "r");
 $visits = (int)fgets($fp, 80);
 fclose($fp);
 
 $visits++;
 
-$fp = fopen($counter_file, "w");
+$fp = fopen($basedir . $counter_file, "w");
 fputs($fp, (string)$visits);
 fclose($fp);
 
