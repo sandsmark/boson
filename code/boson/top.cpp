@@ -56,6 +56,7 @@
 #include <kstandarddirs.h>
 #include <kfiledialog.h>
 
+#include <qcursor.h>
 #include <qwidgetstack.h>
 #include <qtimer.h>
 #include <qhbox.h>
@@ -92,6 +93,7 @@ public:
 	BosonWidgetBase* mBosonWidget;
 
 	KToggleAction* mActionStatusbar;
+	KToggleAction* mActionMenubar;
 	KToggleAction* mActionChat;
 	KToggleAction* mActionCmdFrame;
 	KActionMenu* mActionDebugPlayers;
@@ -151,6 +153,11 @@ TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
 TopWidget::~TopWidget()
 {
  kdDebug() << k_funcinfo << endl;
+ bool editor = false;
+ if (mBoson) {
+	editor = !mBoson->gameMode();
+ }
+ boConfig->save(editor);
  kdDebug() << "endGame()" << endl;
  endGame();
  kdDebug() << "endGame() done" << endl;
@@ -184,6 +191,7 @@ void TopWidget::initActions()
 {
  // note: mBoson and similar are *not* yet constructed!
  // Main actions: Game start/end and quit
+ // FIXME: d->mGameActions actions should go into BosonWidget directly!
  d->mGameActions = new KActionCollection(this); // actions that are available in game mode only
 
  //FIXME: slotNewGame() is broken - endGame() is enough for now.
@@ -196,7 +204,8 @@ void TopWidget::initActions()
  // Settings
  (void)KStdAction::keyBindings(this, SLOT(slotConfigureKeys()), actionCollection());
 // (void)KStdAction::preferences(this, SLOT(slotGamePreferences()), d->mGameActions);
- d->mActionStatusbar = KStdAction::showStatusbar(this, SLOT(slotToggleStatusbar()), d->mGameActions);
+ d->mActionMenubar = KStdAction::showMenubar(this, SLOT(slotToggleMenubar()), actionCollection());
+ d->mActionStatusbar = KStdAction::showStatusbar(this, SLOT(slotToggleStatusbar()), d->mGameActions); // TODO: we can use the statusbar in the welcome widget, too!
 
  // Dockwidgets show/hide
  d->mActionChat = new KToggleAction(i18n("Show &Chat"),
@@ -254,8 +263,10 @@ void TopWidget::initActions()
 	actionCollection()->insert(*it);
  }
 #endif
+
  createGUI("bosonui.rc", false);
- menuBar()->hide();
+
+ hideMenubar();
 }
 
 void TopWidget::initMusic()
@@ -357,6 +368,7 @@ void TopWidget::initWelcomeWidget()
  BosonStartupBaseWidget* startup = new BosonStartupBaseWidget(mWs);
  mWs->addWidget(startup, ID_WIDGETSTACK_WELCOME);
  d->mWelcome = new BosonWelcomeWidget(startup->plainWidget());
+ d->mWelcome->installEventFilter(this);
  startup->initBackgroundOrigin();
  connect(d->mWelcome, SIGNAL(signalNewGame()), this, SLOT(slotNewGame()));
  connect(d->mWelcome, SIGNAL(signalLoadGame()), this, SLOT(slotLoadGame()));
@@ -380,6 +392,7 @@ void TopWidget::initNewGameWidget()
  BosonStartupBaseWidget* startup = new BosonStartupBaseWidget(mWs);
  mWs->addWidget(startup, ID_WIDGETSTACK_NEWGAME);
  d->mNewGame = new BosonNewGameWidget(this, startup->plainWidget());
+ d->mNewGame->installEventFilter(this);
  startup->initBackgroundOrigin();
  connect(d->mNewGame, SIGNAL(signalCancelled()), this, SLOT(slotShowMainMenu()));
  connect(d->mNewGame, SIGNAL(signalShowNetworkOptions()), this, SLOT(slotShowNetworkOptions()));
@@ -402,6 +415,7 @@ void TopWidget::initStartEditorWidget()
  BosonStartupBaseWidget* startup = new BosonStartupBaseWidget(mWs);
  mWs->addWidget(startup, ID_WIDGETSTACK_STARTEDITOR);
  d->mStartEditor = new BosonStartEditorWidget(this, startup->plainWidget());
+ d->mStartEditor->installEventFilter(this);
  startup->initBackgroundOrigin();
  connect(d->mStartEditor, SIGNAL(signalCancelled()), this, SLOT(slotShowMainMenu()));
 }
@@ -443,7 +457,7 @@ void TopWidget::showBosonWidget()
 	initBosonWidget();
  }
  raiseWidget(ID_WIDGETSTACK_BOSONWIDGET);
- menuBar()->show();
+ showHideMenubar();
 }
 
 void TopWidget::initNetworkOptions()
@@ -454,6 +468,7 @@ void TopWidget::initNetworkOptions()
  BosonStartupBaseWidget* startup = new BosonStartupBaseWidget(mWs);
  mWs->addWidget(startup, ID_WIDGETSTACK_NETWORK);
  d->mNetworkOptions = new BosonNetworkOptionsWidget(this, startup->plainWidget());
+ d->mNetworkOptions->installEventFilter(this);
  startup->initBackgroundOrigin();
  connect(d->mNetworkOptions, SIGNAL(signalOkClicked()), this, SLOT(slotHideNetworkOptions()));
 }
@@ -464,7 +479,7 @@ void TopWidget::showNetworkOptions()
 	initNetworkOptions();
  }
  raiseWidget(ID_WIDGETSTACK_NETWORK);
- menuBar()->hide();
+ showHideMenubar();
 }
 
 void TopWidget::initLoadingWidget()
@@ -475,6 +490,7 @@ void TopWidget::initLoadingWidget()
  BosonStartupBaseWidget* startup = new BosonStartupBaseWidget(mWs);
  mWs->addWidget(startup, ID_WIDGETSTACK_LOADING);
  d->mLoading = new BosonLoadingWidget(startup->plainWidget());
+ d->mLoading->installEventFilter(this);
  startup->initBackgroundOrigin();
 }
 
@@ -484,7 +500,7 @@ void TopWidget::showLoadingWidget()
 	initLoadingWidget();
  }
  raiseWidget(ID_WIDGETSTACK_LOADING);
- menuBar()->hide();
+ showHideMenubar();
 }
 
 void TopWidget::slotNewGame()
@@ -1015,11 +1031,46 @@ void TopWidget::slotRemoveActiveDisplay()
 // d->mActionStatusbar status to the actual statusbar
 void TopWidget::slotToggleStatusbar()
 {
- if(d->mActionStatusbar->isChecked()) {
+ if (d->mActionStatusbar->isChecked()) {
 	statusBar()->show();
  } else {
 	statusBar()->hide();
  }
+}
+
+// FIXME: nonsense name. this doesn't toggle anything, but it applies the
+// d->mActionMenubar status to the actual menubar
+void TopWidget::slotToggleMenubar()
+{
+ if (!mWs->visibleWidget()) {
+	return;
+ }
+ int id = mWs->id(mWs->visibleWidget());
+ switch (id) {
+	case ID_WIDGETSTACK_WELCOME:
+	case ID_WIDGETSTACK_NEWGAME:
+	case ID_WIDGETSTACK_LOADING:
+	case ID_WIDGETSTACK_NETWORK:
+		boConfig->setShowMenubarOnStartup(d->mActionMenubar->isChecked());
+		break;
+	case ID_WIDGETSTACK_BOSONWIDGET:
+		boConfig->setShowMenubarInGame(d->mActionMenubar->isChecked());
+		break;
+	case ID_WIDGETSTACK_STARTEDITOR:
+		// editor without menubar is pretty useless, i guess
+		break;
+	default:
+		kdDebug() << k_funcinfo << "unknown id " << id << endl;
+		break;
+ }
+ showHideMenubar();
+/*
+ if (d->mActionMenubar->isChecked()) {
+	menuBar()->show();
+ } else {
+	menuBar()->hide();
+ }
+*/
 }
 
 void TopWidget::slotDebugPlayer(int index)
@@ -1159,20 +1210,36 @@ void TopWidget::raiseWidget(int id)
 	case ID_WIDGETSTACK_WELCOME:
 		setMinimumSize(d->mWelcome->size());
 		setMaximumSize(d->mWelcome->size());
-		menuBar()->hide();
+		if (boConfig->showMenubarOnStartup()) {
+			showMenubar();
+		} else {
+			hideMenubar();
+		}
 		break;
 	case ID_WIDGETSTACK_NEWGAME:
 	case ID_WIDGETSTACK_LOADING:
 	case ID_WIDGETSTACK_NETWORK:
 		setMinimumSize(BOSON_MINIMUM_WIDTH, BOSON_MINIMUM_HEIGHT);
 		setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
-		menuBar()->hide();
+		if (boConfig->showMenubarOnStartup()) {
+			showMenubar();
+		} else {
+			hideMenubar();
+		}
 		break;
 	case ID_WIDGETSTACK_BOSONWIDGET:
-	case ID_WIDGETSTACK_STARTEDITOR:
+		if (boConfig->showMenubarInGame()) {
+			showMenubar();
+		} else {
+			hideMenubar();
+		}
 		setMinimumSize(BOSON_MINIMUM_WIDTH, BOSON_MINIMUM_HEIGHT);
 		setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
-		menuBar()->show();
+		break;
+	case ID_WIDGETSTACK_STARTEDITOR:
+		showMenubar();
+		setMinimumSize(BOSON_MINIMUM_WIDTH, BOSON_MINIMUM_HEIGHT);
+		setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
 		break;
 	default:
 		kdDebug() << k_funcinfo << "unknown id " << id << endl;
@@ -1198,5 +1265,76 @@ void TopWidget::slotSaveGame()
 void TopWidget::slotUpdateFPS()
 {
  emit signalFPSUpdated(d->mBosonWidget->displayManager()->activeDisplay()->fps());// damn this call sucks!
+}
+
+bool TopWidget::eventFilter(QObject* o, QEvent* e)
+{
+ // we display the popup widget for startup widgets only
+ if (o != d->mWelcome && o != d->mLoading && o != d->mStartEditor &&
+		o != d->mNetworkOptions && o != d->mNewGame) {
+	return false;
+ }
+ // FIXME: we should display for the BosonStartupBaseWidgets, too
+
+ switch (e->type()) {
+	case QEvent::MouseButtonPress:
+		if (((QMouseEvent*)e)->button() == RightButton) {
+			QPopupMenu* p = (QPopupMenu*)factory()->container("welcomepopup", this);
+			if (p) {
+				p->popup(QCursor::pos());
+			}
+			return true;
+		} else {
+			return false;
+		}
+	default:
+		return false;
+ }
+}
+
+void TopWidget::hideMenubar()
+{
+ d->mActionMenubar->setChecked(false);
+ menuBar()->hide();
+}
+
+void TopWidget::showMenubar()
+{
+ d->mActionMenubar->setChecked(true);
+ menuBar()->show();
+}
+
+void TopWidget::showHideMenubar()
+{
+ if (!mWs->visibleWidget()) {
+	return;
+ }
+ int id = mWs->id(mWs->visibleWidget());
+ switch (id) {
+	case ID_WIDGETSTACK_WELCOME:
+	case ID_WIDGETSTACK_NEWGAME:
+	case ID_WIDGETSTACK_LOADING:
+	case ID_WIDGETSTACK_NETWORK:
+		if (boConfig->showMenubarOnStartup()) {
+			showMenubar();
+		} else {
+			hideMenubar();
+		}
+		break;
+	case ID_WIDGETSTACK_BOSONWIDGET:
+		if (boConfig->showMenubarInGame()) {
+			showMenubar();
+		} else {
+			hideMenubar();
+		}
+		break;
+	case ID_WIDGETSTACK_STARTEDITOR:
+		// editor without menubar is pretty useless, i guess
+		showMenubar();
+		break;
+	default:
+		kdDebug() << k_funcinfo << "unknown id " << id << endl;
+		break;
+ }
 }
 

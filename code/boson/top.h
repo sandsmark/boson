@@ -80,34 +80,69 @@ public slots:
 	 * From there, user can start new game or quit
 	 **/
 	void slotShowMainMenu();
-	/** Shows game network options */
+
+	/**
+	 * Shows game network options 
+	 **/
 	void slotShowNetworkOptions();
-	/** Hides game network options and shows BosonStartGameWidget */
+
+	/**
+	 * Hides game network options and shows BosonStartGameWidget 
+	 **/
 	void slotHideNetworkOptions();
-	/** Toggles if chat dock is shown or hidden */
+
+	/**
+	 * Toggles if chat dock is shown or hidden 
+	 **/
 	void slotToggleChat();
-	/** Toggles if  is shown or hidden */
+
+	/**
+	 * Toggles if  is shown or hidden 
+	 **/
 	void slotToggleCmdFrame();
-	/** Toggles sound */
-	void slotToggleSound();
-	/** Toggles music */
-	void slotToggleMusic();
-	/** Toggles if  is shown or hidden */
-	void slotToggleStatusbar();
-	void slotConfigureKeys();
-	/** Toggles if Boson is shown fullscreen or normally */
-	void slotToggleFullScreen();
+
 	/** 
+	 * Toggles sound
+	 **/
+	void slotToggleSound();
+
+	/**
+	 * Toggles music 
+	 **/
+	void slotToggleMusic();
+
+	/**
+	 * Toggles if menubar is shown or hidden 
+	 **/
+	void slotToggleMenubar();
+
+	/**
+	 * Toggles if togglebar is shown or hidden 
+	 **/
+	void slotToggleStatusbar();
+
+	void slotConfigureKeys();
+
+	/**
+	 * Toggles if Boson is shown fullscreen or normally 
+	 **/
+	void slotToggleFullScreen();
+
+	/**
 	 * Ends current game and reinits all game data, so that a new game can
 	 * be started.
 	 * */
 	void slotEndGame();
+
 	/** Shows game preferences dialog */
 	void slotGamePreferences();
+
 	/** Splits active display horzontally */
 	void slotSplitDisplayHorizontal();
+
 	/** Splits active display vertically */
 	void slotSplitDisplayVertical();
+
 	/** Removes active display */
 	void slotRemoveActiveDisplay();
 
@@ -161,6 +196,17 @@ protected:
 	 * endGame and @ref reinitGame
 	 **/
 	void reinitGame();
+
+	virtual bool eventFilter(QObject* o, QEvent* e);
+
+	void hideMenubar();
+	void showMenubar();
+
+	/**
+	 * Shows or hides the menubar, depending on the currently raised widget
+	 * (i.e. startup widget or game/editor widget) and the config settings
+	 **/
+	void showHideMenubar();
 
 protected slots:
 	void slotCanvasTilesLoading(int);
