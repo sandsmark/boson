@@ -201,8 +201,6 @@ signals:
 	 **/
 	void signalLoadPlayerData(Player* player);
 
-	void signalInitMap(const QByteArray& map);
-
 protected:
 	friend class BosonStarting;
 	// TODO: move relevant stuff to BosonStarting.

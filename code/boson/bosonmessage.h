@@ -28,7 +28,7 @@ public:
 	enum BosonMessages {
 	// messages for the newgame dialog/widget:
 	// (a few might be obsolete or moved to another place)
-		InitMap = 0,
+//		InitMap = 0,
 		ChangeSpecies = 1,
 		ChangePlayField = 2,
 		ChangeTeamColor = 4,

@@ -374,8 +374,6 @@ signals:
 	 **/
 	void signalAdvance(unsigned int advanceCount, bool advanceFlag);
 
-	void signalInitMap(const QByteArray&);
-
 	void signalLoadPlayerData(Player* player);
 	void signalLoadingPlayersCount(int count);
 	void signalLoadingPlayer(int current);
