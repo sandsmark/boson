@@ -1,0 +1,25 @@
+#include "top.wml"
+    <h1>
+      Facilities - War factory
+    </h1>
+    <table border="0">
+	<tr>
+		<td><img src="../../../themes/species/human/units/fix_warfactory/overview-big.png" border="0">&nbsp;</td>
+		<td valign="top"><img src="../none.png" border="0" height="30"><br>
+		The War factory provides technology to build other buildings, see the <a href="map.html">Facilities dependency tree</a><br>
+		You can also build land units here.
+	</tr>
+	<tr><td>
+		<img src="../../../themes/species/human/units/fix_warfactory/overview-big.png">&nbsp;
+		<img src="warfactory.png">&nbsp;
+	</td></tr>
+	<tr><td><br>&nbsp</td></tr>
+    </table>
+    
+    <table border="1">
+	<tr><td>Health</td><td>250</td></tr>
+	<tr><td>Mineral cost</td><td>400</td></tr>
+    </table>
+    
+
+#include "footer.wml" before_url="barracks.html" before_text="Barracks" after_url="comsat.html" after_text="Comsat"        

@@ -1,0 +1,12 @@
+#include "top.wml"
+    <h1>
+      Building units
+    </h1>
+    <p>
+      You can instruct different buildings to construct units. Just click on a unit.<br>
+      Buildings that can construct units at the moment:<br>
+      - <a href="../facilities/barracks.html">Barracks</a><br>
+      - <a href="../facilities/warfactory.html">War factory</a><br>
+    </p>
+    
+#include "footer.wml" before_url="buildfac.html" before_text="Build facilities" after_url="../facilities/index.html" after_text="Facilities"    

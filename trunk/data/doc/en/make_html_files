@@ -1,0 +1,21 @@
+#!/bin/bash
+# making html files from WML files
+
+
+case "$1" in
+ help|-help|--help)
+	echo -f "file.wml - Make only one file"
+	;;
+ -f)	
+	wmk -f $2 -I includes -F includes
+	;;
+ *)	
+	clear
+	echo "Making html files from wml source"
+	echo "*************************************"
+	echo ""
+	wmk -F includes -a --include `pwd`/includes
+	echo ""
+        echo "*************************************"
+	;;
+esac

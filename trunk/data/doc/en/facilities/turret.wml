@@ -1,0 +1,29 @@
+#include "top.wml"
+    <h1>
+      Facilities - Turret
+    </h1>
+    <table border="0">
+	<tr>
+		<td><img src="../../../themes/species/human/units/fix_mineralrefinery/overview-big.png" border="0">&nbsp;</td>
+		<td valign="top"><img src="../none.png" border="0" height="30"><br>
+		Nothing yet.
+	</tr>
+	<tr><td>
+		<img src="../../../themes/species/human/units/fix_mineralrefinery/overview-big.png">&nbsp;
+		<img src="turret.png">&nbsp;
+	</td></tr>
+	<tr><td><br>&nbsp</td></tr>
+    </table>
+    
+    <table border="1">
+	<tr><td>Health</td><td>100</td></tr>
+	<tr><td>Mineral cost</td><td>200</td></tr>
+	<tr><td>Weapon range</td><td>4</td></tr>
+	<tr><td>Weapon damage</td><td>15</td></tr>
+	<tr><td>Reload</td><td>10</td></tr>
+	<tr><td>Shoot at land units</td><td>Yes</td></tr>
+	<tr><td>Shoot at air units</td><td>No</td></tr>
+    </table>
+    
+
+#include "footer.wml" before_url="helipad.html" before_text="Helipad" after_url="samsite.html" after_text="Sam-Site"        

@@ -1,0 +1,19 @@
+#include "top.wml"
+    <h1>
+      The game
+    </h1>
+    <p>&nbsp;</p>
+    <h3>
+      Contents:
+    </h3>
+    <dl>
+      <dd>
+        <dl>
+		<dt>2.1 <a href="scrolling.html">Scrolling</a></dt>
+		<dt>2.2 <a href="buildfac.html">Building facilities</a></dt>
+		<dt>2.3 <a href="buildunit.html">Building units</a></dt>
+        </dl>
+      </dd>
+    </dl>
+    
+#include "footer.wml" before_url="../installation.html" before_text="Installation" after_url="scrolling.html" after_text="Scrolling"        

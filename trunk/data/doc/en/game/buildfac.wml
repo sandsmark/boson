@@ -1,0 +1,13 @@
+#include "top.wml"
+    <h1>
+      Building facilities
+    </h1>
+    <p>
+      To build facilities choose the <a href="../facilities/bunker.html">Command bunker</a> and choose your building.<br>
+      You can see that the building is getting constructed. When it is finished, click with the right mouse button on a free place on the map.<br>
+      Note: <br>
+      - You have to build in the near of your other buildings.<br>
+      - If the building is not available look at the <a href="../facilities/map.html">Facilities dependency tree</a>
+      and check if you have all required buildings.
+    </p>
+#include "footer.wml" before_url="scrolling.html" before_text="Scrolling" after_url="buildunit.html" after_text="Building Units"

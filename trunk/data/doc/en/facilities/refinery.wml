@@ -1,0 +1,25 @@
+#include "top.wml"
+    <h1>
+      Facilities - Oil refinery
+    </h1>
+    <table border="0">
+	<tr>
+		<td><img src="../../../themes/species/human/units/fix_oilrefinery/overview-big.png" border="0">&nbsp;</td>
+		<td valign="top"><img src="../none.png" border="0" height="30"><br>
+		The oil refinery produces oil ;) You send a <a href="../units/oilharvester.html">oil harvester</a> to them and get oil.</td>
+	</tr>
+	<tr><td>
+		<img src="../../../themes/species/human/units/fix_oilrefinery/overview-big.png">&nbsp;
+		<img src="../../../themes/species/human/units/fix_oilrefinery/overview-small.png">&nbsp;
+	</td></tr>
+	<tr><td><br>&nbsp</td></tr>
+    </table>
+    
+    <table border="1">
+	<tr><td>Health</td><td>400</td></tr>
+	<tr><td>Mineral cost</td><td>600</td></tr>
+    </table>
+
+
+
+#include "footer.wml" before_url="mineralrefinery.html" before_text="Mineral refinery" after_url="oiltower.html" after_text="Oil tower"        

@@ -1,0 +1,29 @@
+#include "top.wml"
+    <h1>
+      Facilities - Sam-Site
+    </h1>
+    <table border="0">
+	<tr>
+		<td><img src="../../../themes/species/human/units/fix_mineralrefinery/overview-big.png" border="0">&nbsp;</td>
+		<td valign="top"><img src="../none.png" border="0" height="30"><br>
+		A sam-site can fire air missiles against aircrafts.
+	</tr>
+	<tr><td>
+		<img src="../../../themes/species/human/units/fix_mineralrefinery/overview-big.png">&nbsp;
+		<img src="samsite.png">&nbsp;
+	</td></tr>
+	<tr><td><br>&nbsp</td></tr>
+    </table>
+    
+    <table border="1">
+	<tr><td>Health</td><td>100</td></tr>
+	<tr><td>Mineral cost</td><td>150</td></tr>
+	<tr><td>Weapon range</td><td>5</td></tr>
+	<tr><td>Weapon damage</td><td>15</td></tr>
+	<tr><td>Reload</td><td>15</td></tr>
+	<tr><td>Shoot at land units</td><td>No</td></tr>
+	<tr><td>Shoot at air units</td><td>Yes</td></tr>
+    </table>
+    
+
+#include "footer.wml" before_url="turret.html" before_text="Turret" after_url="../units/index.html" after_text="Units"        

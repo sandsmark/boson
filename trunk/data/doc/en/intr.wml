@@ -1,0 +1,24 @@
+#include "top.wml"
+    <h1>
+      Introduction
+    </h1>
+    <p>&nbsp;</p>
+    <p>
+      This section covers everything you need to know about Boson to get it successfully 
+      running. 
+    </p>
+    <h3>
+      Contents:
+    </h3>
+    <dl>
+      <dd>
+        <dl>
+          <dt>1 <a href="about.html">About Boson</a></dt>
+          <dt>2 <a href="started.html">Getting started</a></dt>
+          <dt>3 <a href="installation.html">Installation</a></dt>
+        </dl>
+      </dd>
+    </dl>
+
+#include "footer.wml" before_url="index.html" before_text="Index" after_url="about.html" after_text="About Boson"    
+    

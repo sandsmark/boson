@@ -1,0 +1,23 @@
+#include "top.wml"
+    <h1>
+      Facilities - Repair pad
+    </h1>
+    <table border="0">
+	<tr>
+		<td><img src="../../../themes/species/human/units/fix_repairpad/overview-big.png" border="0">&nbsp;</td>
+		<td valign="top"><img src="../none.png" border="0" height="30"><br>
+		You can repair your units here, take a unit and klick with the right mouse button in the repairpad.
+	</tr>
+	<tr><td>
+		<img src="../../../themes/species/human/units/fix_mineralrefinery/overview-big.png">&nbsp;
+		<img src="../../../themes/species/human/units/fix_mineralrefinery/overview-small.png">&nbsp;
+	</td></tr>
+	<tr><td><br>&nbsp</td></tr>
+    </table>
+    
+    <table border="1">
+	<tr><td>Health</td><td>200</td></tr>
+	<tr><td>Mineral cost</td><td>300</td></tr>
+    </table>
+    
+#include "footer.wml" before_url="techcenter.html" before_text="Tech center" after_url="prison.html" after_text="Prison"        

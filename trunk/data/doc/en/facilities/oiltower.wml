@@ -1,0 +1,25 @@
+#include "top.wml"
+    <h1>
+      Facilities - Oil tower
+    </h1>
+    <table border="0">
+	<tr>
+		<td><img src="../../../themes/species/human/units/fix_oiltower/overview-big.png" border="0">&nbsp;</td>
+		<td valign="top"><img src="../none.png" border="0" height="30"><br>
+		You send your <a href="../units/oilharvester.html">oil harvesters</a> to the oil towers to to fill them up.
+		Than you can send it to your <a href="refinery.html">oil refinery</a> to increase your oil value.</td>
+	</tr>
+	<tr><td>
+		<img src="../../../themes/species/human/units/fix_oiltower/overview-big.png">&nbsp;
+		<img src="../../../themes/species/human/units/fix_oiltower/overview-small.png">&nbsp;
+	</td></tr>
+	<tr><td><br>&nbsp</td></tr>
+    </table>
+    
+    <table border="1">
+	<tr><td>Health</td><td>50</td></tr>
+	<tr><td>Mineral cost</td><td>100</td></tr>
+    </table>
+    
+
+#include "footer.wml" before_url="refinery.html" before_text="Oil refinery" after_url="powerplant.html" after_text="Powerplant"        
