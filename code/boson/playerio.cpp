@@ -220,12 +220,14 @@ bool PlayerIO::isValidCell(int x, int y) const
 
 Cell* PlayerIO::cell(int x, int y, bool* valid) const
 {
- bool v;
+ bool v = true;
  Cell* c = 0;
  if (!player()->map()) {
 	v = false;
  } else {
-	c = player()->map()->cell(x, y);
+	if (canSee(x, y)) {
+		c = player()->map()->cell(x, y);
+	}
  }
  if (!v) {
 	if (valid) {
