@@ -37,6 +37,13 @@ Please remember that making a function inline is not the first step of
 optimization, but the *last* step! inline only makes a difference for *very*
 often called functions
 
+- always remember that a KGameProperty has some overhead compared to normal
+  variables. this is a) a memory overhead and b) a speed overhead. we don't care
+  about a) here, since this is very small only. b) isn't important for "normal"
+  variables, but sometimes it is - when a variable gets changed very often. the
+  KGamePropertyHandler emits a signal then. you can avoid this by calling
+  setEmittingSignal(false) for this variable. also remember that the slot that
+  is connected to the signal can do some expensive work, too!
 
 ------------------------------------------------------------------------------
 See mesas README file. There are some performance hints for software rendering
