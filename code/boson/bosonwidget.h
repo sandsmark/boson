@@ -150,9 +150,11 @@ signals:
 
 	void signalGameStarted();
 
+	void signalMoveCommandFrame(int);
+
 protected slots:
-	void slotCommandFramePosition(int);
 	void slotChatFramePosition(int);
+	void slotCommandFramePosition(int);
 	
 	void slotStartScenario();
 	void slotSendChangeSpecies(const QString& species);
@@ -188,7 +190,7 @@ protected:
 	 **/
 	void recreateMap();
 
-	void recreateLayout(int commandFramePos, int chatFramePos);
+	void recreateLayout(int chatFramePos);
 
 protected slots:
 	void slotPlayerJoinedGame(KPlayer* p);

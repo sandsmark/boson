@@ -74,6 +74,7 @@ OptionsDialog::OptionsDialog(QWidget* parent, bool modal)
  d->mCommandFrame = new QComboBox(plainPage());
  d->mCommandFrame->insertItem(i18n("Left"), Left);
  d->mCommandFrame->insertItem(i18n("Right"), Right);
+ d->mCommandFrame->insertItem(i18n("Undocked"), Undocked);
  connect(d->mCommandFrame, SIGNAL(activated(int)), 
 		this, SIGNAL(signalCommandFramePositionChanged(int)));
  l->addWidget(d->mCommandFrame);
@@ -82,8 +83,8 @@ OptionsDialog::OptionsDialog(QWidget* parent, bool modal)
  QLabel* chatLabel = new QLabel(i18n("Position of Chat Frame"), plainPage());
  l->addWidget(chatLabel);
  d->mChat = new QComboBox(plainPage());
- d->mChat->insertItem(i18n("Top"), Left);
- d->mChat->insertItem(i18n("Bottom"), Right);
+ d->mChat->insertItem(i18n("Top"), Top);
+ d->mChat->insertItem(i18n("Bottom"), Bottom);
  l->addWidget(d->mChat);
  connect(d->mChat, SIGNAL(activated(int)), 
 		this, SIGNAL(signalChatFramePositionChanged(int)));

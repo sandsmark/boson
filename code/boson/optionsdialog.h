@@ -33,7 +33,8 @@ public:
 
 	enum CommandFramePosition {
 		Left = 0,
-		Right = 1
+		Right = 1,
+		Undocked = 2
 	};
 	enum ChatFramePosition {
 		Top = 0,
