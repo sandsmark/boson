@@ -542,6 +542,9 @@ void BosonBigDisplayBase::initializeGL()
  }
  */
  glClearColor(0.0, 0.0, 0.0, 0.0);
+
+#warning make configurable!
+ // AB: GL_FLAT should be available for software rendering for example!
  glShadeModel(GL_SMOOTH); // GL_SMOOTH is default - but esp. in software rendering way slower. in hardware it *may* be equal (concerning speed) to GL_FLAT
  glDisable(GL_DITHER); // we don't need this (and its enabled by default)
 
