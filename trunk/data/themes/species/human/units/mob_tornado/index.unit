@@ -61,7 +61,6 @@ Reload=20
 ShootParticles=
 SoundFly=missile_fly
 SoundHit=hit
-SoundShoot=fire_missile
 Speed=0
 Type=0
 
@@ -82,5 +81,4 @@ Reload=30
 ShootParticles=
 SoundFly=missile_fly
 SoundHit=hit
-SoundShoot=fire_missile1
 Speed=12
