@@ -47,6 +47,7 @@ class SpeciesTheme;
 class UnitProperties;
 class BosonModel;
 class BosonGLFont;
+class BoCamera;
 class QCheckBox;
 
 class KMyFloatNumInput : public KDoubleNumInput
@@ -102,6 +103,8 @@ public:
 	void load(SpeciesTheme* s, const UnitProperties* prop);
 	void loadObjectModel(SpeciesTheme* s, const QString& file);
 	void resetModel();
+
+	BoCamera* camera() const { return mCamera; }
 
 signals:
 	void signalFovYChanged(float);
@@ -223,6 +226,8 @@ private:
 	// mouse move:
 	int* mMouseDiffX;
 	int* mMouseDiffY;
+
+	BoCamera* mCamera;
 };
 
 class PreviewConfig : public QWidget

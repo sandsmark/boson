@@ -32,6 +32,10 @@
 #include "bodebug.h"
 #include "boversion.h"
 #include "boapplication.h"
+#include "bocamera.h"
+#if 0
+#include "bocamerawidget.h"
+#endif
 
 #include <kcmdlineargs.h>
 #include <kaboutdata.h>
@@ -119,6 +123,8 @@ ModelPreview::ModelPreview(QWidget* parent) : BosonGLWidget(parent)
 
  mDefaultFont = 0;
 
+ mCamera = new BoCamera;
+
  connect(this, SIGNAL(signalRotateXChanged(float)), this, SLOT(slotRotateXChanged(float)));
  connect(this, SIGNAL(signalRotateYChanged(float)), this, SLOT(slotRotateYChanged(float)));
  connect(this, SIGNAL(signalRotateZChanged(float)), this, SLOT(slotRotateZChanged(float)));
@@ -166,13 +172,18 @@ void ModelPreview::resizeGL(int w, int h)
 
 void ModelPreview::paintGL()
 {
+ BO_CHECK_NULL_RET(camera());
  glMatrixMode(GL_MODELVIEW);
  glLoadIdentity();
 
+#if 1
  glTranslatef(-mCameraX, -mCameraY, -mCameraZ);
  glRotatef(mRotateX, 1.0, 0.0, 0.0);
  glRotatef(mRotateY, 0.0, 1.0, 0.0);
  glRotatef(mRotateZ, 0.0, 0.0, 1.0);
+#else
+ camera()->applyCameraToScene();
+#endif
 
  // AB: try to keep this basically similar to BosonBigDisplay::paintGL()
  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -510,7 +521,7 @@ void ModelPreview::updateCursorDisplay(const QPoint& pos)
  // AB: maybe we should return the mesh itself?
  int picked = pickObject(pos);
  if (picked < 0) {
-	boDebug() << k_funcinfo << "no mesh under cursor" << endl;
+//	boDebug() << k_funcinfo << "no mesh under cursor" << endl;
 	return;
  }
  BoFrame* f = 0;
@@ -558,10 +569,14 @@ int ModelPreview::pickObject(const QPoint& cursor)
  glPushMatrix();
  glLoadIdentity();
 
+#if 1
  glTranslatef(-mCameraX, -mCameraY, -mCameraZ);
  glRotatef(mRotateX, 1.0, 0.0, 0.0);
  glRotatef(mRotateY, 0.0, 1.0, 0.0);
  glRotatef(mRotateZ, 0.0, 0.0, 1.0);
+#else
+ camera()->applyCameraToScene();
+#endif
  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
  glColor3f(1.0f, 1.0f, 1.0f);
 
@@ -733,6 +748,13 @@ RenderMain::RenderMain()
  initKAction();
 
  mIface = new BoDebugDCOPIface();
+
+
+#if 0
+ BoCameraWidget* cameraWidget = new BoCameraWidget(0, "bocamerawidget");
+ cameraWidget->setCamera(mPreview->camera());
+ cameraWidget->show();
+#endif
 }
 
 RenderMain::~RenderMain()
