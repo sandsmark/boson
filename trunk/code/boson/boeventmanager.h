@@ -27,6 +27,7 @@ class QDomElement;
 class BoEvent;
 class BoEventListener;
 class Player;
+template<class T1, class T2> class QMap;
 
 class BoEventManagerPrivate;
 class BoEventManager : public QObject
@@ -67,6 +68,15 @@ public:
 
 	bool saveAsXML(QDomElement& root) const;
 	bool loadFromXML(const QDomElement& root);
+
+	/**
+	 * This calls @ref BoEventListener::saveScript for all listeners.
+	 **/
+	bool saveListenerScripts(QMap<QString, QByteArray>* scripts) const;
+	/**
+	 * This calls @ref BoEventListener::loadScript for all listeners.
+	 **/
+	bool loadListenerScripts(const QMap<QString, QByteArray>& scripts);
 
 protected:
 	void deliverEvent(BoEvent* event);

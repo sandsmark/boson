@@ -48,10 +48,12 @@ public:
 	BosonScript* mScript;
 };
 
-BoEventListener::BoEventListener(BoEventManager* manager, QObject* parent) : QObject(parent)
+BoEventListener::BoEventListener(const QString& scriptFile, BoEventManager* manager, QObject* parent)
+	: QObject(parent)
 {
  d = new BoEventListenerPrivate;
  d->mConditions.setAutoDelete(true);
+ mScriptFileName = scriptFile;
  mManager = manager;
  mManager->addEventListener(this);
 }
@@ -88,6 +90,77 @@ bool BoEventListener::load(const QDomElement& root)
 	return false;
  }
  return loadConditions(conditions);
+}
+
+#warning TODO
+// TODO: BosonScript::save() saves the script _and_ the data of the script. we
+// should save the script _only_ here
+#define BOSONSCRIPT_LACKS_SCRIPT_SAVE 1
+
+bool BoEventListener::saveScript(QByteArray* script) const
+{
+ if (!d->mScript) {
+	// this event listener doesn't use scripts.
+	*script = QByteArray();
+	return true;
+ }
+#if BOSONSCRIPT_LACKS_SCRIPT_SAVE
+ *script = QByteArray();
+ QDataStream stream(*script, IO_WriteOnly);
+ if (!d->mScript->save(stream)) {
+	boError() << k_funcinfo << "saving script failed" << endl;
+	return false;
+ }
+#else
+ // this should just save the .py file into a string and return it.
+ *script = d->mScript->saveScriptFile();
+#endif
+ return true;
+}
+
+bool BoEventListener::loadScript(const QByteArray& script)
+{
+ if (script.size() == 0) {
+	return true;
+ }
+#if BOSONSCRIPT_LACKS_SCRIPT_SAVE
+ ensureScriptInterpreter();
+ QDataStream stream(script, IO_ReadOnly);
+ return d->mScript->load(stream);
+#else
+ mScriptString = script;
+ ensureScriptInterpreter(); // loads the script
+
+ // FIXME: maybe we should return the result of loadScriptFromString(), which is
+ // in ensureScriptInterpreter()
+ return true;
+#endif
+}
+
+bool BoEventListener::saveScriptData(QByteArray* script) const
+{
+ if (!d->mScript) {
+	// this event listener doesn't use scripts.
+	*script = QByteArray();
+	return true;
+ }
+ *script = QByteArray();
+ QDataStream stream(*script, IO_WriteOnly);
+ if (!d->mScript->save(stream)) {
+	boError() << k_funcinfo << "saving script failed" << endl;
+	return false;
+ }
+ return true;
+}
+
+bool BoEventListener::loadScriptData(const QByteArray& script)
+{
+ if (script.size() == 0) {
+	return true;
+ }
+ ensureScriptInterpreter();
+ QDataStream stream(script, IO_ReadOnly);
+ return d->mScript->load(stream);
 }
 
 bool BoEventListener::saveConditions(QDomElement& root) const
@@ -176,31 +249,37 @@ void BoEventListener::receiveEvent(const BoEvent* event)
  processEvent(event);
 }
 
-#include <kstandarddirs.h>// locate()
 void BoEventListener::ensureScriptInterpreter()
 {
  if (d->mScript) {
 	return;
  }
- d->mScript = BosonScript::newScriptParser(BosonScript::Python, 0);
+ if (mScriptString.isEmpty()) {
+	boWarning() << k_funcinfo << "empty script string" << endl;
+	// do NOT return. we expect d->mScript being non-NULL when this method
+	// returns
+ }
 
-#warning FIXME: load script from map file
- // AB: depending on the listener (canvas/localplayer/computerplayer/...) we
- // should load a different script. usually from the map file (as e.g. AI may
- // depend on the map - the winning conditions in the Canvas listener definitely
- // do).
- d->mScript->loadScript(locate("data", "boson/scripts/conditions1.py"));
+ d->mScript = createScriptParser();
+
+ d->mScript->loadScriptFromString(mScriptString);
  d->mScript->init();
 }
 
 
+// TODO: there may be only one instance of this class
 BoCanvasEventListener::BoCanvasEventListener(BoEventManager* manager, QObject* parent)
-	: BoEventListener(manager, parent)
+	: BoEventListener(QString::fromLatin1("game.py"), manager, parent)
 {
 }
 
 BoCanvasEventListener::~BoCanvasEventListener()
 {
+}
+
+BosonScript* BoCanvasEventListener::createScriptParser() const
+{
+ return BosonScript::newScriptParser(BosonScript::Python, 0);
 }
 
 void BoCanvasEventListener::processEvent(const BoEvent* event)
@@ -226,13 +305,26 @@ void BoCanvasEventListener::processEvent(const BoEvent* event)
 
 
 BoLocalPlayerEventListener::BoLocalPlayerEventListener(PlayerIO* io, BoEventManager* manager, QObject* parent)
-	: BoEventListener(manager, parent)
+	: BoEventListener(QString::fromLatin1("localplayer.py"), manager, parent)
 {
  mPlayerIO = io;
 }
 
 BoLocalPlayerEventListener::~BoLocalPlayerEventListener()
 {
+}
+
+BosonScript* BoLocalPlayerEventListener::createScriptParser() const
+{
+ Player* p = 0;
+ if (!playerIO()) {
+	BO_NULL_ERROR(playerIO());
+	// really bad error.
+	// fortunately it should be impossible anyway :)
+ } else {
+	p = playerIO()->player();
+ }
+ return BosonScript::newScriptParser(BosonScript::Python, p);
 }
 
 void BoLocalPlayerEventListener::processEvent(const BoEvent* event)
