@@ -84,6 +84,8 @@ protected slots:
 	virtual void slotPlayerJoinedGame(KPlayer*);
 	virtual void slotPlayerLeftGame(KPlayer*);
 
+	virtual void slotStartScenario();
+
 	void slotOutOfGame(Player* p);
 
 	void slotTileSetChanged(BosonTiles*);
