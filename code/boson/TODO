@@ -1,6 +1,5 @@
 Game TODOs
 - waypoints
-- AI
 - BosonCommandWidget should paint the order pixmap only *once* no more. E.g. we
   repaint for setGrayOut() and setProductionCount()
 - pathfinding doesn't support units with size > BO_TILE_SIZE. get rid of
