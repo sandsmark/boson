@@ -348,17 +348,25 @@ void BosonCanvas::shootAtUnit(Unit* target, Unit* attackedBy, long int damage)
  if (target->isDestroyed()) {
 	// we cannot delete it here!
 	// called from Unit::advance() so we must delay
-	if (!d->mDestroyUnits.contains(target)) {
-		// dunno if this is correct - should it be delete immediately?
-		// what about e.g. a wreckage?
-		d->mDestroyUnits.append(target);
-		(void) new BoShot(target, attackedBy, this, true);
-		boMusic->playSound(target, Unit::SoundReportDestroyed);
-	}
+	destroyUnit(target);
  } else {
 	(void) new BoShot(target, attackedBy, this);
  }
  boMusic->playSound(attackedBy, Unit::SoundShoot);
+}
+
+void BosonCanvas::destroyUnit(Unit* unit)
+{
+ if (!unit) {
+	return;
+ }
+ if (!d->mDestroyUnits.contains(unit)) {
+	// dunno if this is correct - should it be delete immediately?
+	// what about e.g. a wreckage?
+	d->mDestroyUnits.append(unit);
+	(void) new BoShot(unit, 0, this, true);
+	boMusic->playSound(unit, Unit::SoundReportDestroyed);
+ }
 }
 
 Cell* BosonCanvas::cellAt(Unit* unit) const
