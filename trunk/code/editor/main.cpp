@@ -59,18 +59,6 @@ int main(int argc, char* argv[])
 	//KCmdLineArgs::init( argc, argv, &aboutData );
 
 	BoEditorApp app;
-
-
-	/* temp XXX : logfile initialisation  */
-	logfile = fopen(BOSON_LOGFILE_EDITOR, "a+b");
-	if (!logfile) {
-		logfile = stderr;
-		logf(LOG_ERROR, "Can't open logfile, using stderr");
-		}
-	
-	logf(LOG_INFO, "========= New Log File ==============");
-
-
  
 	//BoEditorApp* boEditor = new BoEditorApp( (argc>1)?argv[1]:0l);
 

@@ -48,7 +48,7 @@ BoEditorApp::BoEditorApp()
 {
 
 	/* logfile handling */
-	logfile = fopen(BOSON_LOGFILE_CLIENT, "a+b");
+	logfile = fopen(BOSON_LOGFILE_EDITOR, "a+b");
 	if (!logfile) {
 		logfile = stderr;
 		logf(LOG_ERROR, "Can't open logfile, using stderr");
