@@ -385,6 +385,12 @@ void BosonBigDisplayBase::initializeGL()
 
  // this needs to be done in initializeGL():
  d->mDefaultFont = new BosonGLFont(QString::fromLatin1("fixed"));
+
+ // this is usually done by QT anyway - except if the window was hidden when
+ // loading was completed (for example). But we need to initialize at least the
+ // depth buffer...
+ // AB: this might even fix our resize-problem (see slotHack1() in BosonWidget)
+ resizeGL(width(), height());
 }
 
 void BosonBigDisplayBase::resizeGL(int w, int h)
@@ -584,8 +590,8 @@ void BosonBigDisplayBase::paintGL()
 		QPoint pos = mapFromGlobal(c->pos());
 		GLfloat x;
 		GLfloat y;
-		x = (GLfloat)pos.x();
-		y = (GLfloat)d->mH - (GLfloat)pos.y();
+		x = (GLfloat)pos.x() - c->hotspotX();
+		y = (GLfloat)d->mH - (GLfloat)pos.y() - c->hotspotY();
 		const GLfloat w = 50;
 		const GLfloat h = 50;
 		glBindTexture(GL_TEXTURE_2D, tex);

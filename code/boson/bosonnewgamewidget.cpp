@@ -384,11 +384,6 @@ void BosonNewGameWidget::slotMyMapChanged(int index)
   // to display the newly selected playfield
   stream << mMapIndex2Identifier[index];
   game()->sendMessage(buffer, BosonMessage::ChangePlayField);
-  // Init map to be able to check max/min players count
-  kdDebug() << k_funcinfo << " Loading map, index: " << index << ", name: " << playFieldString() << endl;
-  playField()->loadPlayField(BosonPlayField::playFieldFileName(playFieldString()));
-  mMinPlayers = playField()->scenario()->minPlayers();
-  mMaxPlayers = playField()->scenario()->maxPlayers();
 }
 
 void BosonNewGameWidget::slotMySpeciesChanged(int index)
@@ -470,7 +465,16 @@ void BosonNewGameWidget::slotMapChanged(const QString& id)
     if(it.data() == id)
     {
       int index = it.key();
+      mMap = index;
       mMapName->setText(mMapCombo->text(index));
+      if(game()->isAdmin())
+      {
+        // Init map to be able to check max/min players count
+        kdDebug() << k_funcinfo << " Loading map, index: " << index << ", name: " << playFieldString() << endl;
+        playField()->loadPlayField(BosonPlayField::playFieldFileName(playFieldString()));
+        mMinPlayers = playField()->scenario()->minPlayers();
+        mMaxPlayers = playField()->scenario()->maxPlayers();
+      }
       return;
     }
   }

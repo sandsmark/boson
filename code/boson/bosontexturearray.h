@@ -36,6 +36,8 @@ public:
 	~BosonTextureArray();
 
 	// AB: a hotspot of 0,0 (defalt) means that nothing should be changed
+	// FIXME: hotspots in this file are nonsense. we need to use them
+	// together with the vertices, not the textures.
 	void setHotspots(QPointArray hotspots);
 	QPoint hotspot(unsigned int i)
 	{
