@@ -71,13 +71,9 @@
 #include "bosontexturearray.h"
 #include "bosonglfont.h"
 
-// both must be > 0.0:
-#define NEAR 1.0f // FIXME: should be > 1.0
-#define FAR 100.0f
-
 // Camera limits
-#define CAMERA_MIN_Z NEAR + 3
-#define CAMERA_MAX_Z FAR - 50
+#define CAMERA_MIN_Z BO_GL_NEAR_PLANE + 3
+#define CAMERA_MAX_Z BO_GL_FAR_PLANE - 50
 #define CAMERA_MAX_RADIUS 80
 
 #define CLEAR_DEPTH 1.0f
@@ -788,7 +784,7 @@ void BosonBigDisplayBase::resizeGL(int w, int h)
  // better. no distortion
  GLfloat fovY = d->mFovY; // * d->mCamera.zoomFactor();
  d->mAspect = (float)w / (float)h;
- gluPerspective(fovY, d->mAspect, NEAR, FAR);
+ gluPerspective(fovY, d->mAspect, BO_GL_NEAR_PLANE, BO_GL_FAR_PLANE);
 
  // cache the composed projection matrix. we'll need it very often in
  // mapCoordinates()

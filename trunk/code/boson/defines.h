@@ -30,6 +30,10 @@
 #define BO_TILE_SIZE 48
 #define BO_GL_CELL_SIZE 1.0
 
+// both must be > 0.0:
+#define BO_GL_NEAR_PLANE 1.0f // FIXME: should be > 1.0
+#define BO_GL_FAR_PLANE 100.0f
+
 
 #define BOSON_COOKIE 992
 #define BOSON_PORT 5454
