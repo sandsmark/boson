@@ -538,8 +538,6 @@ class BosonModel::Private
 public:
 	Private()
 	{
-		mLoader = 0;
-
 		mPoints = 0;
 	}
 
@@ -553,8 +551,6 @@ public:
 	QMap<QString, QString> mTextureNames;
 	QString mDirectory;
 	QString mFile;
-
-	Bo3DSLoad* mLoader;
 
 	// consits of vertices and texture coordinates:
 	float* mPoints;
@@ -649,10 +645,19 @@ void BosonModel::loadModel()
  }
  boMem->startCatching();
  BosonProfiler profiler(BosonProfiling::LoadModel);
- d->mLoader = new Bo3DSLoad(d->mDirectory, d->mFile, this);
+
+ // we need to create on heap cause of the startCatching() call. it would be
+ // inaccurate otherwise
+ Bo3DSLoad* loader = new Bo3DSLoad(d->mDirectory, d->mFile, this);
 
  // TODO: add a profiling entry for this
- d->mLoader->loadModel();
+ loader->loadModel();
+
+ QStringList modelTextures = loader->textures();
+
+ // delete the loader before we have a chance to return from the function
+ delete loader;
+ loader = 0;
 
  if (frames() == 0) {
 	boError() << k_funcinfo << "0 frames loaded for model " << d->mFile << endl;
@@ -673,7 +678,7 @@ void BosonModel::loadModel()
  computeBoundingObjects();
 
  boProfiling->start(BosonProfiling::LoadModelTextures);
- loadTextures(d->mLoader->textures());
+ loadTextures(modelTextures);
  boProfiling->stop(BosonProfiling::LoadModelTextures);
 
  if (!BoContext::currentContext()) {
@@ -702,8 +707,6 @@ void BosonModel::loadModel()
 	mesh->createPointCache();
  }
 
- delete d->mLoader;
- d->mLoader = 0;
  boDebug(100) << k_funcinfo << "loaded from " << file() << endl;
 
  boMem->stopCatching("BosonModel::loadModel()");
@@ -830,8 +833,6 @@ unsigned int BosonModel::constructionSteps() const
 
 void BosonModel::finishLoading()
 {
- delete d->mLoader;
- d->mLoader = 0;
  d->mTextureNames.clear();
 }
 
