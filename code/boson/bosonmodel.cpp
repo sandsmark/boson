@@ -1235,3 +1235,8 @@ void BosonModel::enablePointer()
  glTexCoordPointer(2, GL_FLOAT, stride, d->mPoints + BoMesh::texelPos());
 }
 
+unsigned int BosonModel::defaultLodCount()
+{
+ return BoMesh::defaultLodCount();
+}
+

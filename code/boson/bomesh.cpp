@@ -32,6 +32,8 @@
 
 #define AB_DEBUG_1 0
 
+extern unsigned int glstat_item_faces, glstat_item_vertices, glstat_terrain_faces, glstat_terrain_vertices;
+
 class BoundingObject
 {
 public:
@@ -1140,6 +1142,11 @@ int BoMesh::texelPos()
  return BoMeshPoints::texelPos();
 }
 
+unsigned int BoMesh::defaultLodCount()
+{
+ return 5;
+}
+
 void BoMesh::setMaterial(BoMaterial* mat)
 {
  d->mMaterial = mat;
@@ -1384,6 +1391,9 @@ void BoMesh::renderMesh(const QColor* teamColor, unsigned int _lod)
 			glNormal3fv(face->normal(2).data());
 			glArrayElement(points[2]);
 #endif
+
+			glstat_item_vertices += 3;
+			glstat_item_faces++;
 
 			node = node->next();
 		}
@@ -1648,7 +1658,7 @@ void BoMesh::generateLOD()
  // these numbers can be used by renderMesh() (or indirectly by renderFrame())
  // to choose which LOD should be rendered at. 0 is always the default, i.e.
  // render all points and faces.
- unsigned int LODCount = 5; // must be at least 1, as we have at leas the full-detailed version
+ unsigned int LODCount = defaultLodCount(); // must be at least 1, as we have at leas the full-detailed version
 
  unsigned int oldCount = d->mLODCount;
  if (LODCount < oldCount) {

@@ -346,6 +346,12 @@ public:
 	static int texelPos();
 
 	/**
+	 * @return How many LOD levels mesh has by default
+	 */
+	static unsigned int defaultLodCount();
+
+
+	/**
 	 * Prepare to load the points, i.e. allocate memory for them. You can
 	 * set them using @ref setVertex and @ref setTexel.
 	 **/

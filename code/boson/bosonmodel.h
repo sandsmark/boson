@@ -312,6 +312,10 @@ public:
 	 **/
 	void enablePointer();
 
+	/**
+	 * @return How many LOD levels model has by default
+	 */
+	static unsigned int defaultLodCount();
 
 protected:
 	class BoHelper; // for computing width,height,.. of the model. this is a hack!

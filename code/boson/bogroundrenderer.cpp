@@ -899,6 +899,8 @@ void BoDefaultGroundRenderer::renderVisibleCells(Cell** renderCells, unsigned in
  glDisable(GL_BLEND);
 }
 
+extern unsigned int glstat_item_faces, glstat_item_vertices, glstat_terrain_faces, glstat_terrain_vertices;
+
 void BoDefaultGroundRenderer::renderCellsNow(Cell** cells, int count, int cornersWidth, const float* heightMap, const float* normalMap, const unsigned char* texMapStart)
 {
  // Texture offsets
@@ -963,6 +965,8 @@ void BoDefaultGroundRenderer::renderCellsNow(Cell** cells, int count, int corner
 	glNormal3fv(normalMap + (y * cornersWidth + (x + 1)) * 3);
 	glTexCoord2f(texOffsets[x % offsetCount] + offset, texOffsets[texy % offsetCount] + offset);
 	glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos, upperRightHeight);
+	glstat_terrain_faces++;
+	glstat_terrain_vertices += 4;
  }
  glEnd();
  BoMaterial::setDefaultAlpha(1.0f);

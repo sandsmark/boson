@@ -30,8 +30,12 @@
 #include <qptrlist.h>
 
 
-#define COLLAPSE_ALONG_EDGE_PENALTY 0.3f
-
+// Cost when collapsing from border to interior (very bad)
+#define COLLAPSE_BORDER_TO_INTERIOR_COST 2.0f
+// This will be added to curvature when collapsing along edge
+#define COLLAPSE_ALONG_EDGE_PENALTY 0.75f
+// Max cost when collapsing along edge
+#define COLLAPSE_ALONG_EDGE_MULIPLIER 1.0f
 
 
 BoLODBuilder::BoLODBuilder(const BoMesh* mesh, const BoMeshLOD* fullDetail)
@@ -96,12 +100,14 @@ QValueList<BoFace> BoLODBuilder::generateLOD(unsigned int lod)
  // factor defines how many vertices (of original number) will be in the lod
  // Each LOD has 2/3 vertices of the last one
 // const float percents[] = { 1.000, 0.666, 0.444, 0.296, 0.197 };
- const float percents[] = { 1.000, 0.700, 0.500, 0.300, 0.150 };
+ const float percents[] = { 1.000, 0.750, 0.500, 0.300, 0.150 };
 // const float factors[] = { 1.000, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1 };
  // maxcost defines maximum cost for vertices removed in the lod. No vertices
  //  with higher cost will be removed
  //  The higher cost is, the more model will change
- const float maxcosts[] = { 0.000, 0.200, 0.500, 0.750, 0.900 };
+ const float maxcosts[] = { 0.000, 0.200, 0.500, 0.800, 0.950 };
+ //const float maxcosts[] = { 0.00, 0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 1.00,
+ //   1.10, 1.20, 1.30, 1.40, 1.50, 1.75, 2.00 };
 // const float maxcosts[] = { 0.000, 0.400, 0.600, 0.800, 0.900 };
 
  boDebug(120) << k_funcinfo << "factor is " << percents[lod] <<
@@ -629,7 +635,7 @@ float BoLODBuilder::computeEdgeCollapseCost(BoLODVertex* u, BoLODVertex* v)
 	// u is border vertex
 	if (sides.count() > 1) {
 		// Collapsing from border to interior -> very bad
-		curvature = 1;
+		curvature = COLLAPSE_BORDER_TO_INTERIOR_COST;
 	} else {
 		// Collapsing along border -> not that bad, but not too good either
 		// Code for this is taken from Ogre engine - http://ogre.sourceforge.net
@@ -649,8 +655,9 @@ float BoLODBuilder::computeEdgeCollapseCost(BoLODVertex* u, BoLODVertex* v)
 				maxkinkiness = QMAX(maxkinkiness, (1.002f + kinkiness) * 0.5f);
 			}
 		}
-		// curvature will be between COLLAPSE_ALONG_EDGE_PENALTY and 1
-		curvature = COLLAPSE_ALONG_EDGE_PENALTY + (maxkinkiness * (1 - COLLAPSE_ALONG_EDGE_PENALTY));
+		// curvature will be between COLLAPSE_ALONG_EDGE_PENALTY and
+		//  COLLAPSE_ALONG_EDGE_PENALTY + COLLAPSE_ALONG_EDGE_MULIPLIER
+		curvature = COLLAPSE_ALONG_EDGE_PENALTY + (maxkinkiness * COLLAPSE_ALONG_EDGE_MULIPLIER);
 	}
  } else {
 	// use the triangle facing most away from the sides

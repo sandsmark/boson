@@ -837,8 +837,8 @@ void ModelPreview::slotLODChanged(int l)
 		emit signalLODChanged(0);
 		return;
 	}
-	if (l > 4) {
-		emit signalLODChanged(4);
+	if (l > BosonModel::defaultLodCount() - 1) {
+		emit signalLODChanged(BosonModel::defaultLodCount() - 1);
 		return;
 	}
   }
@@ -1317,7 +1317,7 @@ PreviewConfig::PreviewConfig(QWidget* parent) : QWidget(parent)
 
  mLOD = new KIntNumInput(this);
  mLOD->setLabel(i18n("LOD"));
- mLOD->setRange(0, 4);
+ mLOD->setRange(0, BosonModel::defaultLodCount() - 1);
  connect(mLOD, SIGNAL(valueChanged(int)), this, SIGNAL(signalLODChanged(int)));
  topLayout->addWidget(mLOD);
  topLayout->addStretch(1);

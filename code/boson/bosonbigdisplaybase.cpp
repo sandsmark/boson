@@ -83,6 +83,8 @@
 
 #include <GL/glu.h>
 
+unsigned int glstat_item_faces, glstat_item_vertices, glstat_terrain_faces, glstat_terrain_vertices;
+
 
 /**
  * @return A string that displays @p plane. The plane consists of a normal
@@ -628,6 +630,7 @@ void BosonBigDisplayBase::paintGL()
  d->mRenderedItems = 0;
  d->mRenderedCells = 0;
  d->mRenderedParticles = 0;
+ glstat_item_faces = glstat_item_vertices = glstat_terrain_faces = glstat_terrain_vertices = 0;
 
  glColor3ub(255, 255, 255);
 
@@ -760,16 +763,13 @@ void BosonBigDisplayBase::renderItems()
  // better.
  createRenderItemList(); // AB: this is very fast. < 1.5ms on experimental5 for me
 
- // FIXME: this should be somewhere else, maybe add static BoMesh::lodLevels()
-#define LOD_LEVELS 5
-
  bool useLOD = boConfig->useLOD();
  unsigned int defaultLOD = boConfig->uintValue("DefaultLOD", 0);
 
  // LOD distance levels
  // If distance between item and camera is less than LODLevels[x], lod level
  //  x is used
- static const float LODLevels[] = { 7.5f, 15.0f, 22.5f, 35.0f, 1000.0f };
+ static const float LODLevels[] = { 7.0f, 12.0f, 20.0f, 30.0f, 1000.0f };
 
  unsigned int lod = 0;
 
@@ -810,7 +810,7 @@ void BosonBigDisplayBase::renderItems()
 	if (useLOD) {
 		float dist = (camera()->cameraPos() - BoVector3(x, y, z)).length();
 		lod = defaultLOD;
-		while (lod < (LOD_LEVELS - 1)) {
+		while (lod < (BosonModel::defaultLodCount() - 1)) {
 			if (dist > LODLevels[lod]) {
 				// Object is too far for this lod
 				lod++;
@@ -1172,7 +1172,9 @@ void BosonBigDisplayBase::renderText()
  if (boConfig->debugRenderCounts()) {
 	QString text;
 	text += i18n("Items rendered: %1\n").arg(d->mRenderedItems);
+	text += i18n("  F/V: %1/%2\n").arg(glstat_item_faces).arg(glstat_item_vertices);
 	text += i18n("Cells rendered: %1\n").arg(d->mRenderedCells);
+	text += i18n("  F/V: %1/%2\n").arg(glstat_terrain_faces).arg(glstat_terrain_vertices);
 	text += i18n("Particles rendered: %1").arg(d->mRenderedParticles);
 	y -= d->mDefaultFont->renderText(x, y, text, width() - x);
 
