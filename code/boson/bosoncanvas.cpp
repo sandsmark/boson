@@ -48,6 +48,9 @@
 #include <qpainter.h>
 #endif
 
+// well... this reduces the ui-blocking effect on startup...
+#define USE_THREAD 1
+
 /**
  * Pixmap loader for the tileset. We use a different thread to provide
  * non-blocking UI.
@@ -59,15 +62,23 @@
  * The first function accessing the canvas (in terms of update()) is @ref
  * initFogOfWar which therefore checks if the thread is finished.
  **/
+#ifdef USE_THREAD
 class TileLoader : public QThread
+#else
+class TileLoader
+#endif
 {
 public:
+#ifdef USE_THREAD
 	TileLoader(BosonCanvas* c) : QThread()
+#else
+	TileLoader(BosonCanvas* c)
+#endif
 	{
 		mCanvas = c;
 		mTile = 0;
 	}
-	~TileLoader()
+	virtual ~TileLoader()
 	{
 	}
 
@@ -75,6 +86,14 @@ public:
 	{
 		mFile = f;
 	}
+
+#ifndef USE_THREAD
+	void start()
+	{
+		run();
+	}
+	bool running() const { return false; }
+#endif
 
 protected:
 	virtual void run()
