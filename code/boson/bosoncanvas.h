@@ -112,6 +112,8 @@ public:
 	 **/
 	void initFogOfWar(Player* player);
 
+	void deleteDestroyed();
+
 public slots:
 	/**
 	 * The game (@ref Boson) reports that a unit shall be added - lets do
