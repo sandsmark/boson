@@ -416,15 +416,13 @@ class BoVector3
     // Conversion from one coordinate system to another.
     inline void canvasToCell()
     {
-      mData[0] /= (float)BO_TILE_SIZE; mData[1] /= (float)BO_TILE_SIZE;
     }
     inline void cellToCanvas()
     {
-      mData[0] *= (float)BO_TILE_SIZE; mData[1] *= (float)BO_TILE_SIZE;
     }
     inline void canvasToWorld()
     {
-      mData[0] /= (float)BO_TILE_SIZE; mData[1] = -(mData[1] / (float)BO_TILE_SIZE);
+      mData[1] = -mData[1];
     }
 
     bool saveAsXML(QDomElement& root, const QString& name) const;
