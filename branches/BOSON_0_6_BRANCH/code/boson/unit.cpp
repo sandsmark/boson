@@ -340,7 +340,7 @@ bool Unit::moveTo(double x, double y, int range)
  }
  if(!owner()->isFogged((int)(x / BO_TILE_SIZE), (int)(y / BO_TILE_SIZE))) {
 	// No pathfinding if goal not reachable or occupied and we can see it
-	if(!boCanvas()->cell((int)(x / BO_TILE_SIZE), (int)(y / BO_TILE_SIZE)->canGo(unitProperties()))) {
+	if(!boCanvas()->cell((int)(x / BO_TILE_SIZE), (int)(y / BO_TILE_SIZE))->canGo(unitProperties())) {
 		return false;
 	}
  }
