@@ -760,7 +760,7 @@ bool Facility::hasProduction() const
 
 bool Facility::canPlaceProductionAt(const QPoint& pos) const
 {
- if (!hasProduction() || !completedProduction()) {
+ if (!hasProduction() || completedProduction() < 0) {
 	kdDebug() << k_lineinfo << "no completed construction" << endl;
 	return false;
  }
@@ -781,7 +781,6 @@ bool Facility::canPlaceProductionAt(const QPoint& pos) const
 
 int Facility::completedProduction() const
 {
-//FIXME: currently a construction is always completed.
  int type = currentProduction();
  if (d->mProductionState < owner()->unitProperties(type)->productionTime()) {
 	kdDebug() << "not yet completed: " << type << endl;
