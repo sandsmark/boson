@@ -32,7 +32,7 @@ public:
 	{
 	}
 
-	double mSpeed;
+	float mSpeed;
 	bool mCanGoOnLand; // a nice candidate for bitfields...
 	bool mCanGoOnWater;
 	bool mCanMineMinerals;
@@ -137,7 +137,7 @@ void UnitProperties::loadMobileProperties(KSimpleConfig* conf)
 {
  conf->setGroup("Boson Mobile Unit");
  mMobileProperties = new MobileProperties;
- mMobileProperties->mSpeed = conf->readDoubleNumEntry("Speed", 0);
+ mMobileProperties->mSpeed = (float)conf->readDoubleNumEntry("Speed", 0);
  mMobileProperties->mCanGoOnLand = conf->readBoolEntry("CanGoOnLand",
 		(isLand() || isAircraft()));
  mMobileProperties->mCanGoOnWater = conf->readBoolEntry("CanGoOnWater",
@@ -190,7 +190,7 @@ unsigned long int UnitProperties::oilCost() const
  return mOilCost;
 }
 
-double UnitProperties::speed() const
+float UnitProperties::speed() const
 {
  if (!mMobileProperties) {
 	return 0;

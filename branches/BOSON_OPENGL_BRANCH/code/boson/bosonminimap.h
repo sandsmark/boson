@@ -79,7 +79,7 @@ public slots:
 	void slotMoveRect(int x, int y);
 	void slotResizeRect(int w, int h);
 
-	void slotMoveUnit(Unit* unit, double oldX, double oldY);
+	void slotMoveUnit(Unit* unit, float oldX, float oldY);
 	void slotUnitDestroyed(Unit* unit);
 
 	void slotUnfog(int x, int y);

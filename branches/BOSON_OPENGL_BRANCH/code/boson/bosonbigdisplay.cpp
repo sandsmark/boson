@@ -62,7 +62,7 @@ public:
 	KGameCanvasChat* mChat;
 };
 
-BosonBigDisplay::BosonBigDisplay(QCanvas* c, QWidget* parent) 
+BosonBigDisplay::BosonBigDisplay(BosonCanvas* c, QWidget* parent) 
 		: BosonBigDisplayBase(c, parent)
 {
  init();
@@ -81,8 +81,8 @@ BosonBigDisplay::~BosonBigDisplay()
  delete d;
 }
 
-void BosonBigDisplay::actionClicked(const BoAction* action, QDataStream& stream, bool& send)
-{// action->pos() is already viewportToContents()'ed
+void BosonBigDisplay::actionClicked(const BoAction& action, QDataStream& stream, bool* send)
+{
 // this method should not perform any tasks but rather send the input through
 // the KGameIO. this way it is very easy (it should be at least) to write a
 // computer player
@@ -93,18 +93,18 @@ void BosonBigDisplay::actionClicked(const BoAction* action, QDataStream& stream,
  if (selection()->isEmpty()) {
 	return;
  }
- Unit* unit = ((BosonCanvas*)canvas())->findUnitAt(action->pos());
+ Unit* unit = ((BosonCanvas*)canvas())->findUnitAt(action.canvasPos());
  if (!unit) {
 	if (selection()->hasMobileUnit()) { // move the selection to pos
 		if (selection()->count() == 1) {
 			// there are special things to do for a single selected unit
 			// (e.g. mining if the unit is a harvester)
 			MobileUnit* u = (MobileUnit*)selection()->leader();
-			if (u->canMine(((BosonCanvas*)canvas())->cellAt(action->pos().x(), action->pos().y()))) {
+			if (u->canMine(((BosonCanvas*)canvas())->cellAt(action.canvasPos().x(), action.canvasPos().y()))) {
 				stream << (Q_UINT32)BosonMessage::MoveMine;
 				stream << (Q_ULONG)u->id();
-				stream << action->pos();
-				send = true;
+				stream << action.canvasPos();
+				*send = true;
 				return;
 			}
 		}
@@ -116,7 +116,7 @@ void BosonBigDisplay::actionClicked(const BoAction* action, QDataStream& stream,
 		// tell which mode we use for moving units
 		stream << (Q_UINT32)boConfig->readGroupMoveMode();
 		// tell them where to move to:
-		stream << action->pos();
+		stream << action.canvasPos();
 		// tell them how many units:
 		stream << (Q_UINT32)list.count();
 		Unit* unit = 0;
@@ -131,7 +131,7 @@ void BosonBigDisplay::actionClicked(const BoAction* action, QDataStream& stream,
 		if (unit->owner() == localPlayer()) {
 			boMusic->playSound(unit, Unit::SoundOrderMove);
 		}
-		send = true;
+		*send = true;
 	} else { // place constructions
 		// FIXME: another option: add the waypoint to the facility and
 		// apply it to any unit that gets constructed by that facility.
@@ -142,8 +142,8 @@ void BosonBigDisplay::actionClicked(const BoAction* action, QDataStream& stream,
 			return;
 		}
 		
-//		if (!fac->canPlaceProductionAt(action->pos())) { // obsolete
-		if (!((BosonCanvas*)canvas())->canPlaceUnitAt(localPlayer()->unitProperties(production->currentProduction()), action->pos(), fac)) {
+//		if (!fac->canPlaceProductionAt(action.pos())) { // obsolete
+		if (!((BosonCanvas*)canvas())->canPlaceUnitAt(localPlayer()->unitProperties(production->currentProduction()), action.canvasPos(), fac)) {
 			kdDebug() << k_funcinfo << "Cannot place production here" << endl;
 			return;
 		}
@@ -152,12 +152,12 @@ void BosonBigDisplay::actionClicked(const BoAction* action, QDataStream& stream,
 		stream << (Q_UINT32)BosonMessage::MoveBuild;
 		stream << (Q_ULONG)fac->id();
 		stream << (Q_UINT32)fac->owner()->id();
-		stream << (Q_INT32)action->pos().x() / BO_TILE_SIZE;
-		stream << (Q_INT32)action->pos().y() / BO_TILE_SIZE;
-		send = true;
+		stream << (Q_INT32)action.canvasPos().x() / BO_TILE_SIZE;
+		stream << (Q_INT32)action.canvasPos().y() / BO_TILE_SIZE;
+		*send = true;
 	}
  } else { // there is a unit - attack it?
-	if ((localPlayer()->isEnemy(unit->owner()) || action->forceAttack()) &&
+	if ((localPlayer()->isEnemy(unit->owner()) || action.forceAttack()) &&
 			selection()->canShootAt(unit)) {
 		// attack the unit
 		QPtrList<Unit> list = selection()->allUnits();
@@ -173,7 +173,7 @@ void BosonBigDisplay::actionClicked(const BoAction* action, QDataStream& stream,
 			stream << (Q_ULONG)it.current()->id(); // MUST BE UNIQUE!
 			++it;
 		}
-		send = true;
+		*send = true;
 		Unit* u = selection()->leader();
 		if (u->owner() == localPlayer()) {
 			boMusic->playSound(u, Unit::SoundOrderAttack);
@@ -214,7 +214,7 @@ void BosonBigDisplay::actionClicked(const BoAction* action, QDataStream& stream,
 				stream << (Q_ULONG)it.current()->id();
 				++it;
 			}
-			send = true;
+			*send = true;
 			// TODO:
 //			Unit* u = selection()->leader();
 //			boMusic->playSound(u, Unit::SoundOrderRepair);
@@ -253,7 +253,7 @@ void BosonBigDisplay::actionClicked(const BoAction* action, QDataStream& stream,
 				stream << (Q_ULONG)it.current()->id();
 				++it;
 			}
-			send = true;
+			*send = true;
 			// TODO:
 //			Unit* u = selection()->leader();
 //			boMusic->playSound(u, Unit::SoundOrderRefine);
@@ -267,23 +267,28 @@ void BosonBigDisplay::actionClicked(const BoAction* action, QDataStream& stream,
  }
 }
 
+/*
 void BosonBigDisplay::setLocalPlayer(Player* p)
 {
  if (localPlayer() == p) {
 	return;
  }
+
  if (localPlayer()) {
 	//AB: in theory the IO gets removed from the players' IO list. if we
 	//ever use this, then test it!
 	delete d->mMouseIO;
 	d->mMouseIO = 0;
  }
+
  BosonBigDisplayBase::setLocalPlayer(p);
+
  if (p) {
 	addMouseIO(localPlayer());
 //	d->mChat->setFromPlayer(localPlayer());
  }
 }
+ */
 
 void BosonBigDisplay::slotMoveSelection(int cellX, int cellY)
 {
@@ -302,8 +307,8 @@ void BosonBigDisplay::slotMoveSelection(int cellX, int cellY)
  QDataStream stream(buffer, IO_WriteOnly);
  bool send = false;
  BoAction action;
- action.setPos(QPoint(cellX * BO_TILE_SIZE + BO_TILE_SIZE / 2, cellY * BO_TILE_SIZE + BO_TILE_SIZE / 2));
- actionClicked(&action, stream, send);
+ action.setCanvasPos(QPoint(cellX * BO_TILE_SIZE + BO_TILE_SIZE / 2, cellY * BO_TILE_SIZE + BO_TILE_SIZE / 2));
+ actionClicked(action, stream, &send);
  if (send) {
 	QDataStream msg(buffer, IO_ReadOnly);
 	localPlayer()->forwardInput(msg, true);
@@ -317,11 +322,25 @@ void BosonBigDisplay::updateCursor()
 	kdError() << k_funcinfo << "NULL cursor!!" << endl;
 	return;
  }
- QPoint pos = viewportToContents(mapFromGlobal(QCursor::pos()));
 
+#warning REMOVE
+ // just for debugging
+ return;
+
+ 
+ QPoint widgetPos = mapFromGlobal(QCursor::pos());
+#ifndef NO_OPENGL
+ QPoint canvasPos;
+ GLdouble x, y, z;
+ mapCoordinates(widgetPos, &x, &y, &z);
+ worldToCanvas(x, y, z, &canvasPos);
+#else
+ QPoint canvasPos = viewportToContents(widgetPos);
+#endif
+ 
  if (!selection()->isEmpty()) {
 	if (selection()->leader()->owner() == localPlayer()) {
-		Unit* unit = ((BosonCanvas*)canvas())->findUnitAt(pos);
+		Unit* unit = ((BosonCanvas*)canvas())->findUnitAt(canvasPos);
 		if (unit) {
 			if (unit->owner() == localPlayer()) {
 				c->setCursor(CursorDefault);
@@ -351,8 +370,8 @@ void BosonBigDisplay::updateCursor()
 	c->setWidgetCursor(this);
  }
 
- c->move(pos.x(), pos.y());
- c->setWidgetCursor(viewport());
+ c->move(canvasPos.x(), canvasPos.y());
+ c->setWidgetCursor(this);
 }
 
 /*

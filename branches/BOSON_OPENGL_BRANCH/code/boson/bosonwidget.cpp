@@ -42,6 +42,8 @@
 #include "boselection.h"
 #include "global.h"
 #include "top.h"
+#include "bosonbigdisplay.h"
+#include "boitemlist.h"
 
 #include "defines.h"
 
@@ -138,9 +140,9 @@ inline BosonCanvas* BosonWidget::canvas() const
  return mTop->canvas();
 }
 
-inline BosonPlayField* BosonWidget::map() const
+inline BosonPlayField* BosonWidget::playField() const
 {
- return mTop->map();
+ return mTop->playField();
 }
 
 inline Player* BosonWidget::player() const
@@ -182,10 +184,10 @@ void BosonWidget::initMap()
 {
  kdDebug() << k_funcinfo << endl;
 
- canvas()->setMap(map()->map());
- minimap()->setMap(map()->map());
+ canvas()->setMap(playField()->map());
+ minimap()->setMap(playField()->map());
  minimap()->initMap();
- game()->setMap(map());
+ game()->setPlayField(playField());
 }
 
 void BosonWidget::initMiniMap()
@@ -197,8 +199,8 @@ void BosonWidget::initMiniMap()
 
  connect(game(), SIGNAL(signalAddUnit(Unit*, int, int)),
 		minimap(), SLOT(slotAddUnit(Unit*, int, int)));
- connect(canvas(), SIGNAL(signalUnitMoved(Unit*, double, double)),
-		minimap(), SLOT(slotMoveUnit(Unit*, double, double)));
+ connect(canvas(), SIGNAL(signalUnitMoved(Unit*, float, float)),
+		minimap(), SLOT(slotMoveUnit(Unit*, float, float)));
  connect(canvas(), SIGNAL(signalUnitDestroyed(Unit*)),
 		minimap(), SLOT(slotUnitDestroyed(Unit*)));
 }
@@ -237,6 +239,7 @@ void BosonWidget::initDisplayManager()
  connect(mDisplayManager, SIGNAL(signalActiveDisplay(BosonBigDisplayBase*, BosonBigDisplayBase*)),
 		this, SLOT(slotSetActiveDisplay(BosonBigDisplayBase*, BosonBigDisplayBase*)));
  canvas()->setDisplayManager(displaymanager());
+ displaymanager()->setLocalPlayer(player()); // this does nothing.
 
  initBigDisplay(displaymanager()->addInitialDisplay());
 }
@@ -259,7 +262,7 @@ void BosonWidget::initPlayer()
 	for (unsigned int i = 0; i < game()->playerCount(); i++) {
 		Player* p = (Player*)game()->playerList()->at(i);
 		if (p) {
-			p->initMap(map()->map());
+			p->initMap(playField()->map());
 		}
 	}
  }
@@ -298,9 +301,6 @@ void BosonWidget::slotChangeCursor(int mode, const QString& cursorDir_)
  switch (mode) {
 	case CursorSprite:
 		b = new BosonSpriteCursor;
-		break;
-	case CursorExperimental:
-		b = new BosonExperimentalCursor;
 		break;
 	case CursorKDE:
 		b = new BosonKDECursor;
@@ -419,7 +419,9 @@ void BosonWidget::initLayout()
 
  QVBoxLayout* topLayout = new QVBoxLayout(this);
  topLayout->addWidget(displaymanager());
- topLayout->activate();
+
+// topLayout->addWidget(mGLDisplay);
+
  if(!kapp->config()->hasGroup("BosonGameDock")) {
 	// Dock config isn't saved (probably first start). Hide chat dock (we only
 	//  show commandframe by default)
@@ -428,6 +430,7 @@ void BosonWidget::initLayout()
  else {
 	mTop->loadGameDockConfig();
  }
+// topLayout->activate();
 }
 
 void BosonWidget::slotDebug()
@@ -455,7 +458,7 @@ void BosonWidget::slotMiniMapScaleChanged(double scale)
 
 void BosonWidget::slotStartScenario()
 {
- map()->scenario()->startScenario(game());
+ playField()->scenario()->startScenario(game());
  boMusic->startLoop();
 
  // This DOES NOT work correctly
@@ -492,6 +495,7 @@ void BosonWidget::slotGamePreferences()
  dlg->setMMBScrolling(boConfig->mmbMove());
  dlg->setCursor(mode);
  dlg->setCursorEdgeSensity(boConfig->cursorEdgeSensity());
+ dlg->setUpdateInterval(boConfig->updateInterval());
 
  connect(dlg, SIGNAL(signalArrowScrollChanged(int)),
 		this, SLOT(slotArrowScrollChanged(int)));
@@ -507,6 +511,8 @@ void BosonWidget::slotGamePreferences()
 		this, SLOT(slotCmdBackgroundChanged(const QString&)));
  connect(dlg, SIGNAL(signalMiniMapScaleChanged(double)),
 		this, SLOT(slotMiniMapScaleChanged(double)));
+ connect(dlg, SIGNAL(signalUpdateIntervalChanged(unsigned int)),
+		mDisplayManager, SLOT(slotUpdateIntervalChanged(unsigned int)));
 
  dlg->show();
 }
@@ -543,7 +549,9 @@ void BosonWidget::slotRemoveUnit(Unit* unit)
 void BosonWidget::zoom(const QWMatrix& m)
 {
  if (displaymanager()->activeDisplay()) {
+#ifdef NO_OPENGL
 	displaymanager()->activeDisplay()->setWorldMatrix(m);
+#endif
  }
 }
 
@@ -612,7 +620,7 @@ void BosonWidget::slotToggleMusic()
 
 void BosonWidget::displayAllItems(bool display)
 {
- QCanvasItemList all = canvas()->allItems();
+ BoItemList all = canvas()->allBosonItems();
  for (unsigned int i = 0; i < all.count(); i++) {
 	all[i]->setVisible(display);
  }
@@ -651,7 +659,7 @@ void BosonWidget::slotSetCommandButtonsPerRow(int b)
 
 void BosonWidget::slotUnfogAll(Player* pl)
 {
- if (!map()->map()) {
+ if (!playField()->map()) {
 	kdError() << k_funcinfo << "NULL map" << endl;
 	return;
  }
@@ -663,8 +671,8 @@ void BosonWidget::slotUnfogAll(Player* pl)
  }
  for (unsigned int i = 0; i < list.count(); i++) {
 	Player* p = (Player*)list.at(i);
-	for (unsigned int x = 0; x < map()->map()->width(); x++) {
-		for (unsigned int y = 0; y < map()->map()->height(); y++) {
+	for (unsigned int x = 0; x < playField()->map()->width(); x++) {
+		for (unsigned int y = 0; y < playField()->map()->height(); y++) {
 			p->unfog(x, y);
 		}
 	}
@@ -694,19 +702,19 @@ void BosonWidget::slotSetActiveDisplay(BosonBigDisplayBase* active, BosonBigDisp
  }
 
  if (old) {
-	disconnect(old, SIGNAL(contentsMoving(int, int)),
+	disconnect(old, SIGNAL(signalTopLeftCell(int, int)),
 			minimap(), SLOT(slotMoveRect(int, int)));
 	disconnect(old, SIGNAL(signalSizeChanged(int, int)),
 			minimap(), SLOT(slotResizeRect(int, int)));
 	disconnect(minimap(), SIGNAL(signalReCenterView(const QPoint&)),
-			old, SLOT(slotReCenterView(const QPoint&)));
+			old, SLOT(slotReCenterDisplay(const QPoint&)));
  }
- connect(active, SIGNAL(contentsMoving(int, int)),
+ connect(active, SIGNAL(signalTopLeftCell(int, int)),
 		minimap(), SLOT(slotMoveRect(int, int)));
  connect(active, SIGNAL(signalSizeChanged(int, int)),
 		minimap(), SLOT(slotResizeRect(int, int)));
  connect(minimap(), SIGNAL(signalReCenterView(const QPoint&)),
-		active, SLOT(slotReCenterView(const QPoint&)));
+		active, SLOT(slotReCenterDisplay(const QPoint&)));
 
  if (old) {
 	disconnect(minimap(), SIGNAL(signalMoveSelection(int, int)),

@@ -33,6 +33,7 @@ Game TODOs
 - "welcome to Boson" text in startup screen should be translateable (we can use
   QPainter to paint it to pixmap)
 - Do not start game before all players has loaded their data
+- BosonTiles::mTilesImage is unused in game mode. free memory
 
 Editor (map, unit, scenario) TODOs
 - totally broken, currently
@@ -72,6 +73,8 @@ General TODOs
   a nice idea!
 - make sure that kdemultimedia is installed - perhaps disable .ogg support
   somehow if it isn't
+- make sure that libogg and so on is installed! even if kdemultimedia is
+  installed it may still be that ogg support is missing
 - sometimes when splitting displays (maybe only when splitting vertically) it
   happens that no mouse IO is being added (and is therefore unusable and
   unremovable

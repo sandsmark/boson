@@ -103,7 +103,7 @@ void BosonStartEditorWidget::initPlayer()
 
 void BosonStartEditorWidget::slotStart()
 {
- map()->loadPlayField(BosonPlayField::playFieldFileName(BosonPlayField::defaultPlayField()));
+ playField()->loadPlayField(BosonPlayField::playFieldFileName(BosonPlayField::defaultPlayField()));
 
  for (uint i = 1; i < game()->playerCount(); i++) {
 	// add dummy computer player
@@ -121,19 +121,19 @@ void BosonStartEditorWidget::slotCancel()
  emit signalCancelled();
 }
 
-inline Boson* BosonStartEditorWidget::game()
+Boson* BosonStartEditorWidget::game() const
 {
  return mTop->game();
 }
 
-inline Player* BosonStartEditorWidget::player()
+Player* BosonStartEditorWidget::player() const
 {
  return mTop->player();
 }
 
-inline BosonPlayField* BosonStartEditorWidget::map()
+BosonPlayField* BosonStartEditorWidget::playField() const
 {
- return mTop->map();
+ return mTop->playField();
 }
 
 void BosonStartEditorWidget::sendNewGame() 

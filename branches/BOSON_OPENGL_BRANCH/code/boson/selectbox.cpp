@@ -19,6 +19,8 @@
 
 #include "selectbox.h"
 
+//#ifdef NO_OPENGL // AB: FIXME
+#if 0
 #include <qpainter.h>
 #include <qbitmap.h>
 
@@ -37,9 +39,11 @@
 #define POWER_LEVELS 15// AB: is from common/unit.h - the number of frames for the SelectBox, each with less power
 #define PART_NB (POWER_LEVELS)
 
-SelectBox::SelectBox(double x, double y, int width, int height, double z, QCanvas* canvas, bool leader)
-	: QCanvasSprite(0, canvas)
+//SelectBox::SelectBox(float x, float y, int width, int height, float z, QCanvas* canvas, bool leader)
+SelectBox::SelectBox(BosonSprite* item, BosonCanvas* canvas, bool groupLeader)
+//	: QCanvasSprite(0, canvas)
 {
+ mSprite = new QCanvasSprite(0, canvas);
  mWidth = width + 2 * SP_H_DISTANCE;
  mHeight = height + 2 * SP_V_DISTANCE;
  setZ(z + 1);
@@ -198,10 +202,26 @@ int SelectBox::cornerLength() const
  */
 }
 
-bool SelectBox::collidesWith(const QCanvasItem*) const
+void SelectBox::setVisible(bool v)
 {
- // the selection rect never collides with anything
- return false;
+ if (mSprite) {
+	mSprite->setVisible(v);
+ }
 }
 
-	
+void SelectBox::setZ(float z)
+{
+ if (mSprite) {
+	mSprite->setZ((double)z);
+ }
+}
+
+void SelectBox::setFrame(int f)
+{
+ if (mSprite) {
+	mSprite->setFrame(f);
+ }
+}
+
+
+#endif // NO_OPENGL

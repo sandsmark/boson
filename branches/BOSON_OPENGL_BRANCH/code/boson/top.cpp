@@ -19,6 +19,7 @@
 #include "top.h"
 #include "top.moc"
 
+#include "defines.h"
 #include "bosonwidget.h"
 #include "bosonwelcomewidget.h"
 #include "bosonnewgamewidget.h"
@@ -34,7 +35,6 @@
 #include "bosonmessage.h"
 #include "bosonmap.h"
 #include "speciestheme.h"
-#include "defines.h"
 
 #include <kapplication.h>
 #include <klocale.h>
@@ -115,7 +115,7 @@ TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
  d = new TopWidgetPrivate;
  mBoson = 0;
  mPlayer = 0;
- mMap = 0;
+ mPlayField = 0;
  mCanvas = 0;
  mGame = false;
 #if KDE_VERSION < 310
@@ -240,6 +240,7 @@ void TopWidget::initActions()
 
  // Display
  // note: the icons for these action need to have konqueror installed!
+#ifdef NO_OPENGL
  (void)new KAction(i18n( "Split Display &Left/Right"), "view_left_right",
 		   CTRL+SHIFT+Key_L, this, SLOT(slotSplitDisplayHorizontal()),
 		   d->mGameActions, "splitviewh");
@@ -249,6 +250,7 @@ void TopWidget::initActions()
  (void)new KAction(i18n("&Remove Active Display"), "view_remove",
 		  CTRL+SHIFT+Key_R, this, SLOT(slotRemoveActiveDisplay()),
 		  d->mGameActions, "removeview");
+#endif
  d->mActionFullScreen = new KToggleAction(i18n("&Fullscreen Mode"), CTRL+SHIFT+Key_F,
 		this, SLOT(slotToggleFullScreen()), actionCollection(), "window_fullscreen");
  d->mActionFullScreen->setChecked(false);
@@ -292,9 +294,9 @@ void TopWidget::initPlayer()
  mPlayer = new Player;
 }
 
-void TopWidget::initMap()
+void TopWidget::initPlayField()
 {
- mMap = new BosonPlayField(this);
+ mPlayField = new BosonPlayField(this);
 }
 
 void TopWidget::initStatusBar()
@@ -583,7 +585,7 @@ void TopWidget::loadGameData1() // FIXME rename!
 		checkEvents();
 		QByteArray buffer;
 		QDataStream stream(buffer, IO_WriteOnly);
-		mMap->saveMap(stream);
+		mPlayField->saveMap(stream);
 		d->mLoading->setProgress(50);
 		checkEvents();
 		// send the loaded map via network
@@ -592,8 +594,7 @@ void TopWidget::loadGameData1() // FIXME rename!
 		checkEvents();
 	}
 	d->mLoading->setLoading(BosonLoadingWidget::ReceiveMap);
- }
- else {
+ } else {
 	// We are loading a saved game
 	// Delete mPlayer aka local player because it will be set later by Boson
 	//  (It's not known yet)
@@ -622,18 +623,15 @@ void TopWidget::loadGameData1() // FIXME rename!
 		if(status == Boson::InvalidFileFormat || status == Boson::InvalidCookie) {
 			text = i18n("This file is not Boson SaveGame!");
 			caption = i18n("Invalid file format!");
-		}
-		else if(status == Boson::InvalidVersion) {
+		} else if(status == Boson::InvalidVersion) {
 			text = i18n("This file has unsupported saving format!\n"
 					"Probably it is saved with too old version of Boson");
 			caption = i18n("Unsupported file format version!");
-		}
-		else if(status == Boson::KGameError) {
+		} else if(status == Boson::KGameError) {
 			text = i18n("Error loading saved game!");
 			caption = i18n("An error occured while loading saved game!\n"
 					"Probably the game wasn't saved properly");
-		}
-		else {
+		} else {
 			// This should never be reached
 			kdError() << k_funcinfo << "Invalid error type or no error (while loading saved game)!!!" << endl;
 		}
@@ -804,8 +802,8 @@ void TopWidget::slotReceiveMap(const QByteArray& buffer)
 {
  disconnect(mBoson, SIGNAL(signalInitMap(const QByteArray&)), this, SLOT(slotReceiveMap(const QByteArray&)));
  QDataStream stream(buffer, IO_ReadOnly);
- mMap->loadMap(stream);
- mBoson->setMap(mMap);
+ mPlayField->loadMap(stream);
+ mBoson->setPlayField(mPlayField);
 
  d->mLoading->setProgress(300);
 
@@ -914,6 +912,7 @@ void TopWidget::slotEndGame()
 
 void TopWidget::endGame()
 {
+ kdDebug() << k_funcinfo << endl;
  if (d->mBosonWidget) {
 	d->mBosonWidget->slotEndGame();
 	disconnect(d->mBosonWidget, 0, 0, 0);
@@ -926,15 +925,16 @@ void TopWidget::endGame()
  mBoson = 0;
  delete mCanvas;
  mCanvas = 0;
- delete mMap;
- mMap = 0;
+ delete mPlayField;
+ mPlayField = 0;
+ kdDebug() << k_funcinfo << "done" << endl;
 }
 
 void TopWidget::reinitGame()
 {
  initBoson();
  initPlayer();
- initMap();
+ initPlayField();
  
  // Change menus and show welcome widget
  mGame = false;

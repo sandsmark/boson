@@ -30,7 +30,7 @@ class Player;
 
 class KPlayer;
 
-class QCanvas;
+class BosonCanvas;
 
 /**
  * Since boson is able to provide different displays ("views") of the same map
@@ -57,7 +57,7 @@ public:
 	 * @ref EditorBigDisplay widgets in @ref addDisplay. @ref
 	 * BosonBigDisplay widgets are the default (TRUE)
 	 **/
-	BoDisplayManager(QCanvas* canvas, QWidget* parent, bool gameMode = true);
+	BoDisplayManager(BosonCanvas* canvas, QWidget* parent, bool gameMode = true);
 	~BoDisplayManager();
 
 	BosonBigDisplayBase* addInitialDisplay();
@@ -109,6 +109,10 @@ public slots:
 	 **/
 	void slotScroll(int direction);
 
+	void slotUpdateIntervalChanged(unsigned int);
+
+	void slotUpdate();
+	void slotUpdateCanvas(); // same as above - but called from the canvas only
 
 signals:
 	/**

@@ -40,6 +40,7 @@ public:
 	 * opposite: higher values mean higher speed.
 	 **/
 	void setGameSpeed(int ms);
+	void setUpdateInterval(int ms);
 
 	void setArrowScrollSpeed(int);
 
@@ -54,6 +55,7 @@ public:
 signals:
 	void signalArrowScrollChanged(int);
 	void signalSpeedChanged(int);
+	void signalUpdateIntervalChanged(unsigned int);
 
 	void signalCursorChanged(int index, const QString& cursorDir);
 	void signalGroupMoveChanged(int index);
@@ -66,6 +68,8 @@ protected slots:
 	 * @param ms The new game speed in ms
 	 **/
 	void slotSpeedChanged(int ms);
+
+	void slotUpdateIntervalChanged(int ms);
 
 	void slotCursorChanged(int index);
 	void slotCursorThemeChanged(int index);
