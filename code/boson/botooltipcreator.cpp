@@ -151,6 +151,21 @@ QString BoToolTipCreatorDebug::createToolTip(const BosonItem* item) const
 	}
  }
 
+#ifdef PATHFINDER_TNG
+ QValueList<QPoint> pathpoints = u->pathPointList();
+ if (pathpoints.count() == 0) {
+	tip += i18n("\nNo pathpoints");
+ } else {
+	QValueList<QPoint>::Iterator it;
+	tip += i18n("\nPathpoints: ");
+	for (it = pathpoints.begin(); it != pathpoints.end(); ++it) {
+		if (it != pathpoints.begin()) {
+			tip += i18n(",");
+		}
+		tip += i18n("(%1,%2)").arg((*it).x()).arg((*it).y());
+	}
+ }
+#endif
 
  if (u->isFacility()) {
 	Facility* fac = (Facility*)u;

@@ -27,7 +27,9 @@ Cell::Cell()
 	mY(0),
 	mItems(BoItemList(2, false)),
 	mAmountOfLand(0),
-	mAmountOfWater(0)
+	mAmountOfWater(0),
+	mRegion(0),
+	mPassable(true)
 {
 }
 

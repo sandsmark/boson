@@ -37,6 +37,7 @@
 #include "bodebug.h"
 #include "boson.h"
 #include "bosonpropertyxml.h"
+#include "bosonpath.h"
 
 #include <klocale.h>
 #include <kgame/kgamepropertyhandler.h>
@@ -77,6 +78,10 @@ public:
 		mMap = 0;
 
 		mProperties = 0;
+
+#ifdef PATHFINDER_TNG
+		mPathfinder = 0;
+#endif
 	}
 	BosonCanvasStatistics* mStatistics;
 
@@ -105,6 +110,10 @@ public:
 	// we might use unsigned long long for this.
 	// but for now we are safe.
 	KGameProperty<unsigned long int> mNextItemId;
+
+#ifdef PATHFINDER_TNG
+	BosonPath2* mPathfinder;
+#endif
 };
 
 BosonCanvas::BosonCanvas(QObject* parent)
@@ -987,6 +996,13 @@ void BosonCanvas::deleteItem(BosonItem* item)
  // remove the item from the canvas BEFORE deleting it. we might need to do some
  // cleanups and might need rtti() for them (which doesnt exist anymore in the
  // BosonItem d'tor)
+ if (RTTI::isUnit(item->rtti())) {
+#ifdef PATHFINDER_TNG
+	// Update occupied status of cells that unit occupied
+	((Unit*)item)->setMovingStatus(UnitBase::Removing);
+#endif
+ }
+
  removeAnimation(item);
  removeItem(item);
 
@@ -1554,6 +1570,13 @@ BosonItem* BosonCanvas::createItem(int rtti, Player* owner, const ItemType& type
  if (item) {
 	item->setId(id);
 	item->move(pos.x(), pos.y(), pos.z());
+#ifdef PATHFINDER_TNG
+	if (RTTI::isUnit(rtti)) {
+		// We also need to recalc occupied status for cells that unit is on.
+		// FIXME: this is hackish
+		unitMovingStatusChanges((Unit*)item, UnitBase::Moving, UnitBase::Standing);
+	}
+#endif
 	emit signalItemAdded(item);
  }
  return item;
@@ -1659,4 +1682,75 @@ unsigned long int BosonCanvas::nextItemId()
  d->mNextItemId = d->mNextItemId + 1;
  return d->mNextItemId;
 }
+
+#ifdef PATHFINDER_TNG
+void BosonCanvas::initPathfinder()
+{
+ boDebug() << k_funcinfo << endl;
+
+ if (d->mPathfinder) {
+	boError() << k_funcinfo << "Pathfinder already created!" << endl;
+	return;
+ }
+
+ boDebug() << k_funcinfo << "Constructing..." << endl;
+ d->mPathfinder = new BosonPath2(map());
+ boDebug() << k_funcinfo << "Constructing done!" << endl;
+
+ boDebug() << k_funcinfo << "Initing..." << endl;
+ d->mPathfinder->init();
+ boDebug() << k_funcinfo << "Initing done!" << endl;
+ d->mPathfinder->colorizeRegions();
+
+ boDebug() << k_funcinfo << "DONE" << endl;
+}
+
+BosonPath2* BosonCanvas::pathfinder()
+{
+ return d->mPathfinder;
+}
+#endif
+
+#ifdef PATHFINDER_TNG
+void BosonCanvas::unitMovingStatusChanges(Unit* u, int oldstatus, int newstatus)
+{
+ if (oldstatus == newstatus) {
+	// Shouldn't probably happen
+	boWarning() << k_funcinfo << "oldstatus == newstatus" << endl;
+	return;
+ }
+
+#warning PF_TNG: fixme!
+ if (u->isFlying()) {
+	// No support for flying units yet
+	return;
+ }
+
+ if ((oldstatus != UnitBase::Standing) && (newstatus != UnitBase::Standing)) {
+	// Unit was moving and will continue to be moving. No need to do anything
+	return;
+ } else {
+	// Unit either starts or stops moving
+	// It should be suffient if we go through all cells that unit is on, and
+	//  recalc their occupied status
+	int x1, x2, y1, y2;  // Rect in which cells changed
+	x1 = y1 = 1000000;
+	x2 = y2 = -1000000;
+	const QPtrVector<Cell>* cells = u->cells();
+	for (unsigned int i = 0; i < cells->count(); i++) {
+		Cell* c = cells->at(i);
+		if (!c) {
+			boError() << k_funcinfo << "NULL cell at " << i << endl;
+			continue;
+		}
+		c->recalculateLandOccupiedStatus();
+		x1 = QMIN(x1, c->x());
+		y1 = QMIN(y1, c->y());
+		x2 = QMAX(x2, c->x());
+		y2 = QMAX(y2, c->y());
+	}
+	pathfinder()->cellsOccupiedStatusChanged(x1, y1, x2, y2);
+ }
+}
+#endif
 

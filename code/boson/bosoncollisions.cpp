@@ -310,4 +310,77 @@ BoItemList* BosonCollisions::collisions(const QPoint& pos) const
  return collisionsAtCell(pos.x() / BO_TILE_SIZE, pos.y() / BO_TILE_SIZE);
 }
 
+bool BosonCollisions::collisionsInBox(const BoVector3& v1, const BoVector3& v2, BosonItem* exclude) const
+{
+ boDebug() << k_funcinfo << "v1: (" << v1.x() << "; " << v1.y() << "; " << v1.z() <<
+		");  v2: (" << v2.x() << "; " << v2.y() << "; " << v2.z() << ")" << endl;
+ if (!map()) {
+	BO_NULL_ERROR(map());
+	return false;
+ }
+
+ // Calculate rect in cell coordinates
+ int w = (int)(v2.x() - v1.x()) / BO_TILE_SIZE;
+ int h = (int)(v2.y() - v1.y()) / BO_TILE_SIZE;
+ if ((int)(v2.x() - v1.x()) % BO_TILE_SIZE != 0) {
+	w++;
+ }
+ if ((int)(v2.y() - v1.y()) % BO_TILE_SIZE != 0) {
+	h++;
+ }
+ int left, right, top, bottom;
+ left = QMAX((int)v1.x() / BO_TILE_SIZE, 0);
+ right = QMIN(left + w, QMAX((int)map()->width() - 1, 0));
+ top = QMAX((int)v1.y() / BO_TILE_SIZE, 0);
+ bottom = QMIN(top + h, QMAX((int)map()->height() - 1, 0));
+ boDebug() << k_funcinfo << "Cell rect: (" << left << ";" << top << ")-(" << right << ";" << bottom <<
+		");  size: " << w << "x" << h << endl;
+
+ // Make list of cells
+ int size = (right - left + 1) * (bottom - top + 1);
+ if (size <= 0) {
+	return false;
+ }
+ QPtrVector<Cell> cells(size);
+ int n = 0;
+ Cell* allCells = map()->cells();
+ for (int i = left; i <= right; i++) {
+	for (int j = top; j <= bottom; j++) {
+		Cell* c = &allCells[map()->cellArrayPos(i, j)];
+		if (!c) {
+			boError(310) << k_funcinfo << "NULL cell (although the coordinates should be valid: " << i << "," << j << ")" << endl;
+			continue;
+		}
+		cells.insert(n, c);
+		n++;
+	}
+ }
+ boDebug() << k_funcinfo << "Got " << cells.count() << " cells" << endl;
+
+ // Check for collisions
+ const BoItemList* cellItems;
+ BoItemList::ConstIterator it;
+ BosonItem* s;
+
+ for (unsigned int i = 0; i < cells.count(); i++) {
+	Cell* c = cells[i];
+	if (!c) {
+		boError(310) << "invalid cell at " << i << endl;
+		continue;
+	}
+	cellItems = c->items();
+	//boDebug() << "    " << k_funcinfo << "Cell " << i << " has " << cellItems->count() << " items" << endl;
+	for (it = cellItems->begin(); it != cellItems->end(); ++it) {
+		s = *it;
+		if ((s != exclude) && RTTI::isUnit(s->rtti())) {
+			//boDebug() << "        " << k_funcinfo << "Checking for collision with item " << s << " with id " << ((Unit*)s)->id() << endl;
+			if (s->bosonCollidesWith(v1, v2)) {
+				// We have a collision
+				return true;
+			}
+		}
+	}
+ }
+ return false;
+}
 

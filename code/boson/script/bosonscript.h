@@ -285,6 +285,7 @@ class BosonScript
     static void startBenchmark();
     static void endBenchmark(const QString& name);
     static void setRandomSeed(long int seed);
+    static void findPath(int x1, int y1, int x2, int y2);
     static void addParticleSystem(int player, unsigned int id, BoVector3 pos, float rot = 0.0f);
 
 

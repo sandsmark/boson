@@ -50,6 +50,7 @@ UnitBase::UnitBase(const UnitProperties* prop, Player* owner, BosonCanvas* canva
  registerData(&mWork, IdWork);
  registerData(&mAdvanceWork, IdAdvanceWork);
  registerData(&mDeletionTimer, IdDeletionTimer);
+ registerData(&mMovingStatus, IdMovingStatus);
 
  // these properties are fully internal (i.e. nothing is displayed in any
  // widget) and they change very often. So we increase speed greatly by not
@@ -59,6 +60,7 @@ UnitBase::UnitBase(const UnitProperties* prop, Player* owner, BosonCanvas* canva
 
  mWork.setLocal((int)WorkNone);
  mAdvanceWork.setLocal((int)WorkNone);
+ mMovingStatus.setLocal((int)Standing);
  mHealth.setLocal(0); // initially destroyed
  mShields.setLocal(0); // doesn't have any shields
  mShieldReloadCounter.setLocal(0);
@@ -93,6 +95,7 @@ void UnitBase::initStatic()
  addPropertyId(IdAdvanceWork, QString::fromLatin1("AdvanceWork"));
  addPropertyId(IdDeletionTimer, QString::fromLatin1("DeletionTimer"));
  addPropertyId(IdShieldReloadCounter, QString::fromLatin1("ShieldReloadCounter"));
+ addPropertyId(IdMovingStatus, QString::fromLatin1("MovingStatus"));
  initialized = true;
 }
 

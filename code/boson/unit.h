@@ -21,6 +21,8 @@
 
 #include "unitbase.h"
 #include "global.h"
+#warning FIXME!!!!!! REMOVE THIS!!! (PF_TNG include)
+#include "bosonpath.h"
 
 class Player;
 class BosonCanvas;
@@ -63,6 +65,7 @@ public:
 		IdMoveAttacking = UnitBase::IdLast + 7,
 		IdSearchPath = UnitBase::IdLast + 8,
 		IdSlowDownAtDestination = UnitBase::IdLast + 9,
+		IdPathPoints = UnitBase::IdLast + 10,
 
 		// properties in MobileUnit
 		IdMovingFailed = UnitBase::IdLast + 51,
@@ -127,6 +130,10 @@ public:
 	virtual void select(bool markAsLeader = false);
 
 	/**
+	 * Moves unit by specified amount and also calculates new z-coordinate and
+	 * rotation.
+	 * This should only be called by BosonCanvas' advance methods.
+	 *
 	 * Note that we use float all over in boson, since mesa uses float
 	 * internally. We won't gain precision by double but we will lose some
 	 * performance
@@ -259,6 +266,12 @@ public:
 	 **/
 	virtual void advanceTurn(unsigned int);
 
+	/**
+	 * @return Target of the unit.
+	 * Note that target is not neccessarily the unit that this unit attacks - it
+	 * is also used for following. In this case, the followed unit will be target
+	 * for the followers.
+	 **/
 	Unit* target() const;
 	virtual void setTarget(Unit* target);
 
@@ -266,30 +279,19 @@ public:
 
 // waypoint stuff: // also in facility - produced units receive this initial waypoint
 	/**
-	 * Add pos to the waypoint list. Please note that waypoints are actually
-	 * added later. addWaypoint() sends the point over network and only as
-	 * soon as it is received from there you can work with it. That means,
-	 * that after calling addWaypoint() @ref waypointCount has not yet been
-	 * increased!
-	 * UPDATE: this documentation is outdated! see source code
+	 * Add pos to the waypoint list.
 	 **/
 	void addWaypoint(const QPoint& pos);
-	
+
 	const QPoint& currentWaypoint() const;
 	unsigned int waypointCount() const;
-
 	/**
-	 * Removes all waypoints from the list. Note that this is done
-	 * <em>immediately</em> - in contrary to @ref addWaypoint this is not
-	 * sent over network as all function calling clearWaypoints() are
-	 * already called on all clients!
-	 * UPDATE: this documentation is outdated! see source code
+	 * Removes all waypoints from the list.
 	 **/
 	void clearWaypoints();
 
 	/**
-	 * Remove the first waypoint from the list. Note that this is done
-	 * <em>immediately</em>. See @ref clearWaypoints for more infos.
+	 * Remove the first waypoint from the list.
 	 **/
 	void waypointDone();
 
@@ -299,6 +301,11 @@ public:
 	const QValueList<QPoint>& waypointList() const;
 
 	/**
+	 * @return List of path-points
+	 **/
+	const QValueList<QPoint>& pathPointList() const;
+
+	/**
 	 * Move this unit to a specified point. Also make sure that previous
 	 * @ref work is cleared. After the path is found the unit starts to get
 	 * animated and to move to the destination.
@@ -306,7 +313,8 @@ public:
 	 * @param attack If this is true, unit will stop and attack any enemy units in range while moving
 	 **/
 	virtual void moveTo(const QPoint& pos, bool attack = false);
-	
+
+#ifndef PATHFINDER_TNG
 	/**
 	 * Nearly similar to the above version (actually this is called by the
 	 * above) but any previous @ref work is <em>not</em> cleared. This way
@@ -324,6 +332,20 @@ public:
 	 * @return true if unit can go to destination, false otherwise
 	 **/
 	bool moveTo(float x, float y, int range = 0, bool attack = false, bool slowDownAtDetination = true);
+#else
+	/**
+	 * Internal moving method.
+	 * This is the most central method for having unit starting moving to specific
+	 * point. You shouldn't use this directly, but instead use 'client methods',
+	 * which will then call this one.
+	 *
+	 * Moves unit's _center_ exactly to given position. If range is not 0, unit
+	 * will move until it's less that range _cells_ away from destination.
+	 * Destination is in canvas coords.
+	 **/
+	// TODO: maybe make it protected?
+	bool moveTo(float x, float y, int range = 0);
+#endif
 
 	/**
 	 * Turns unit smoothly to given degrees
@@ -421,6 +443,9 @@ public:
 	BosonWeapon* weapon(unsigned long int id) const;
 
 
+	virtual void setMovingStatus(MovingStatus m);
+
+
 protected:
 	void setParticleSystems(const QPtrList<BosonParticleSystem>& list);
 
@@ -466,6 +491,40 @@ protected:
 	 **/
 	int searchPath() const;
 	void setSearchPath(int search);
+
+
+#ifdef PATHFINDER_TNG
+	/**
+	 * Resets internal pathfinder's info structure
+	 **/
+	void resetPathInfo();
+
+	BosonPathInfo* pathInfo();
+#endif
+
+
+	/**
+	 * Adds so-called path point for this unit.
+	 * Path points are like waypoints, except that they are internal.
+	 **/
+	void addPathPoint(const QPoint& pos);
+	/**
+	 * @return Number of path-points
+	 **/
+	unsigned int pathPointCount() const;
+	/**
+	 * @return Current path-point (where unit should go next)
+	 **/
+	const QPoint& currentPathPoint();
+	/**
+	 * Clears list of path-points
+	 **/
+	void clearPathPoints();
+	/**
+	 * Removes first path-point from the list
+	 **/
+	void pathPointDone();
+
 
 	/**
 	 * Called when the unit wants to move to another position. It may be
@@ -548,13 +607,27 @@ public:
 
 	bool attackEnemyUnitsInRangeWhileMoving();
 
+#ifdef PATHFINDER_TNG
+	/**
+	 * Move towards p, going at most maxdist (in canvas coords).
+	 * How much unit should move, will be added to xspeed and yspeed.
+	 * (x; y) marks unit's current position
+	 * @return How much is moved (will be <= maxdist)
+	 **/
+	float moveTowardsPoint(const QPoint& p, float x, float y, float maxdist, float &xspeed, float &yspeed);
+#endif
+
 	virtual void newPath();
 
 	/**
-	 * Check if waypoint wp marks end of the path. If yes, then it stops unit,
+	 * Check if pathpoint p marks end of the path. If yes, then it stops unit,
 	 * turns to random direction and true, otherwise returns false.
 	 **/
+#ifdef PATHFINDER_TNG
+	bool checkPathPoint(const QPoint& p);
+#else
 	bool checkWaypoint(const QPoint& wp);
+#endif
 
 protected:
 	virtual void advanceMoveInternal(unsigned int advanceCount); // move one step futher to path

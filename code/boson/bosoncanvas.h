@@ -22,6 +22,9 @@
 #include "bosoncollisions.h"
 #include "defines.h"
 
+#warning FIXME!!!!!! REMOVE THIS!!! (PF_TNG include)
+#include "bosonpath.h"
+
 #include <qobject.h>
 
 class BosonMap;
@@ -36,6 +39,9 @@ class BosonParticleSystem;
 class BosonShot;
 class BosonCanvasStatistics;
 class BoVector3;
+#ifdef PATHFINDER_TNG
+class BosonPath2;
+#endif
 
 class KPlayer;
 class QDataStream;
@@ -155,6 +161,11 @@ public:
 	 **/
 	void initCell(int x, int y);
 
+#ifdef PATHFINDER_TNG
+	void initPathfinder();
+	BosonPath2* pathfinder();
+#endif
+
 	inline BosonCollisions* collisions() const { return mCollisions; }
 
 	/**
@@ -242,6 +253,10 @@ public:
 	 * Also adjust the mini map - see @ref signalUnitMoved
 	 **/
 	void unitMoved(Unit* unit, float oldX, float oldY);
+
+#ifdef PATHFINDER_TNG
+	void unitMovingStatusChanges(Unit* u, int oldstatus, int newstatus);
+#endif
 
 	/**
 	 * Called by @ref Unit. One unit damages/shoots at another unit.
@@ -342,6 +357,11 @@ public:
 	 * Convenience method. See @ref BosonCollisions::cellOccupied
 	 **/
 	bool cellOccupied(int x, int y, Unit* u, bool excludeMoving = false) const { return collisions()->cellOccupied(x, y, u, excludeMoving); }
+
+	/**
+	 * Checks if any items, except exclude, collide with given box
+	 **/
+	bool collisionsInBox(const BoVector3& v1, const BoVector3& v2, BosonItem* exclude) const { return collisions()->collisionsInBox(v1, v2, exclude); }
 
 	/**
 	 * @param pos The location where the unit should get placed.

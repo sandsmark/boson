@@ -70,6 +70,7 @@ public:
 		IdSightRange = KGamePropertyBase::IdUser + 5,
 		IdWork = KGamePropertyBase::IdUser + 10,
 		IdAdvanceWork = KGamePropertyBase::IdUser + 11,
+		IdMovingStatus = KGamePropertyBase::IdUser + 12,
 		IdDeletionTimer = KGamePropertyBase::IdUser + 15,
 
 		// last entry.
@@ -98,6 +99,27 @@ public:
 		WorkFollow = 8,
 		WorkPlugin = 9,
 		WorkTurn = 10
+	};
+
+	/**
+	 * Describes moving status of the unit
+	 * Note that if status is anything but Standing, then it means that unit is
+	 * either moving or intends to do so ASAP.
+	 *
+	 * @li Standing Unit is standing (not moving nor intending to do so)
+	 * @li Moving Unit is moving atm (or turning)
+	 * @li Waiting Unit wants to move, but it's way is blocked atm. It will continue moving asap
+	 * @li Engaging Unit was moving, but then spotted enemy and is engaging it.
+	 * @li Removing Special status notifing that unit is being deleted
+	 * @li MustSearch Special status notifing that path is not yet searched (but unit intends to move)
+	 **/
+	enum MovingStatus {
+		Standing = 0,
+		Moving = 1,
+		Waiting = 2,
+		Engaging = 3,
+		Removing = 4,
+		MustSearch = 5
 	};
 	
 	UnitBase(const UnitProperties* prop, Player* owner, BosonCanvas* canvas);
@@ -270,6 +292,14 @@ public:
 
 	inline void setMoving(bool moving) { mIsMoving = moving; };
 
+	virtual void setMovingStatus(MovingStatus m) { mMovingStatus = m; }
+
+	/**
+	 * @return What this unit is currently doing. See @ref WorkType on
+	 * information what this can be.
+	 **/
+	inline MovingStatus movingStatus() const { return (MovingStatus)mMovingStatus.value(); }
+
 //	inline QValueList<BosonWeapon>* weapons()  { return &mWeapons; };
 
 	/**
@@ -306,6 +336,7 @@ private:
 	KGameProperty<unsigned int> mSightRange;
 	KGamePropertyInt mWork;
 	KGamePropertyInt mAdvanceWork;
+	KGamePropertyInt mMovingStatus;
 
 	BosonItemPropertyHandler* mWeaponProperties;
 
