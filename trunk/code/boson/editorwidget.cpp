@@ -33,6 +33,7 @@
 #include "optionsdialog.h"
 #include "boaction.h"
 #include "bosonlocalplayerinput.h"
+#include "botexmapimportdialog.h"
 #include "commandframe/editorcommandframe.h"
 #include "sound/bosonmusic.h"
 
@@ -208,6 +209,12 @@ void EditorWidget::initKActions()
  (void)new KAction(i18n("&Export height map"), KShortcut(), this,
 		SLOT(slotExportHeightMap()), actionCollection(),
 		"editor_export_heightmap");
+ (void)new KAction(i18n("I&mport texmap"), KShortcut(), this,
+		SLOT(slotImportTexMap()), actionCollection(),
+		"editor_import_texmap");
+ (void)new KAction(i18n("E&xport texmap"), KShortcut(), this,
+		SLOT(slotExportTexMap()), actionCollection(),
+		"editor_export_texmap");
 
 // KStdAction::preferences(bosonWidget(), SLOT(slotGamePreferences()), actionCollection()); // FIXME: slotEditorPreferences()
 }
@@ -496,7 +503,7 @@ void EditorWidget::slotImportHeightMap()
  BosonMap* map = boGame->playField()->map();
  if ((unsigned int)image.width() != map->width() + 1 ||
 		(unsigned int)image.height() != map->height() + 1) {
-	KMessageBox::sorry(this, i18n("This image can't be used as height map for this map. The map is a %1x%2 map, meaning you need a %3x%4 image.\nThe image % 5selected was %6x%7").
+	KMessageBox::sorry(this, i18n("This image can't be used as height map for this map. The map is a %1x%2 map, meaning you need a %3x%4 image.\nThe image selected %5 was %6x%7").
 			arg(map->width()).arg(map->height()).
 			arg(map->width() + 1).arg(map->height() + 1).
 			arg(fileName).
@@ -537,5 +544,25 @@ void EditorWidget::slotExportHeightMap()
 	KMessageBox::sorry(this, i18n("Unable to save image to %1.").arg(fileName));
 	return;
  }
+}
+
+void EditorWidget::slotImportTexMap()
+{
+ boDebug() << k_funcinfo << endl;
+ BoTexMapImportDialog* dialog = new BoTexMapImportDialog(this);
+ connect(dialog, SIGNAL(finished()),
+		dialog, SLOT(deleteLater()));
+
+ BosonMap* map = boGame->playField()->map();
+ dialog->setMap(map);
+
+ dialog->show();
+ dialog->slotSelectTexMapImage();
+}
+
+void EditorWidget::slotExportTexMap()
+{
+ boWarning() << k_funcinfo << "TODO" << endl;
+ KMessageBox::sorry(this, i18n("Not yet implemented"));
 }
 

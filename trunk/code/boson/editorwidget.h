@@ -99,6 +99,8 @@ protected slots:
 	void slotEditHeight(bool);
 	void slotImportHeightMap();
 	void slotExportHeightMap();
+	void slotImportTexMap();
+	void slotExportTexMap();
 
 	void slotLockAction(bool);
 

@@ -76,7 +76,8 @@ BOSON_SRC = \
 	bomemorytrace.cpp \
 	boaction.cpp \
 	bosondata.cpp \
-	bosonlocalplayerinput.cpp
+	bosonlocalplayerinput.cpp \
+	botexmapimportdialog.cpp
 
 
 BOPROFILING_SRC= \
