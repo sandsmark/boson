@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -32,6 +32,7 @@
 
 #include "upoint.hpp"
 #include "udimension.hpp"
+#include "uinsets.hpp"
 
 namespace ufo {
 
@@ -53,15 +54,41 @@ public:
 	void setBounds(int x, int y, int w, int h);
 	void setBounds(const URectangle & rect);
 
-	/** Returns true when the given point pos is inside the rectangle
+	/** @return True when the given point pos is inside the rectangle
 	  * or on the edge of the rectangle
 	  */
 	bool contains(const UPoint & pos);
-	
-	/** Computes the union which contains both rectangles.
+
+	/** @return True if the width and height are equal to @p invalid
+	  * @see invalid
+	  */
+	bool isInvalid() const;
+	/** @return True if width or height is equal to 0. */
+	bool isEmpty() const;
+
+	/** Clamps this URectangle to have at most the dimension of
+	  * the given @p maxDim. Does nothing if maxDim is smaller than
+	  * the size of this rectangle.
+	  */
+	void clamp(const UDimension & maxDim);
+	/** Expands this URectangle to have at least the dimension of
+	  * the given @p minDim. Does nothing if minDim is bigger than
+	  * the size of this rectangle.
+	  */
+	void expand(const UDimension & minDim);
+
+	/** Intersects this rectangle with the given rectangle
+	  */
+	void intersect(const URectangle & rect);
+	/** Unites this rectangle with the given rectangle.
+	  * @see computeUnion
+	  */
+	void unite(const URectangle & rect);
+
+	/** @return The union of this rectangle and the given rectangle
 	  */
 	URectangle computeUnion(const URectangle & src) const;
-	
+
 	/** computes the rectangle that contains both src rectangles and
 	  * saves the values in the dest rectangle within creating a new one.
 	  * It is allowed to use one source rectangle as dest rectangle, e.g.
@@ -70,10 +97,6 @@ public:
 	  */
 	static URectangle * computeUnion(const URectangle & src1,
 		const URectangle & src2, URectangle * dest);
-	
-	/** returns true if both, width and height are != 0
-	  */
-	bool isEmpty() const;
 
 public: // Public operators
 	bool operator()() { return !(isEmpty()); }
@@ -88,7 +111,7 @@ public: // Public operators
 	  * @return Reference to this rectangle.
 	  */
 	URectangle & operator-=(const UPoint & p);
-	
+
 	/** Increases this rectangle using the given dimension
 	  * @return Reference to this rectangle.
 	  */
@@ -97,6 +120,15 @@ public: // Public operators
 	  * @return Reference to this rectangle.
 	  */
 	URectangle & operator-=(const UDimension & dim);
+
+	/** Increases this rectangle using the given insets
+	  * @return Reference to this rectangle.
+	  */
+	URectangle & operator+=(const UInsets & insets);
+	/** Shrinks this rectangle using the given insets
+	  * @return Reference to this rectangle.
+	  */
+	URectangle & operator-=(const UInsets & insets);
 
 	friend std::ostream & operator<<(std::ostream & os, const URectangle & o);
 /*
@@ -109,6 +141,8 @@ public:  // Public attributes
 	int y;
 	int w;
 	int h;
+public: // Public static attributes
+	static URectangle invalid;
 };
 
 
@@ -168,24 +202,10 @@ inline URectangle::URectangle(const UPoint & p, const UDimension & d)
 {}
 
 inline URectangle::URectangle(const UPoint & p1, const UPoint & p2) {
-	// FIXME
-	// hm, what about std::min und std:abs ?
-	// but: what about ms vc6
-	if (p2.x > p1.x) {
-		x = p1.x;
-		w = p2.x - p1.x;
-	} else {
-		x = p2.x;
-		w = p1.x - p2.x;
-	}
-
-	if (p2.y > p1.y) {
-		y = p1.y;
-		h = p2.y - p1.y;
-	} else {
-		y = p2.y;
-		h = p1.y - p2.y;
-	}
+	x = std::min(p1.x, p2.x);
+	y = std::min(p1.y, p2.y);
+	w = std::abs(p2.x - p1.x);
+	h = std::abs(p2.y - p1.y);
 }
 
 
@@ -216,6 +236,37 @@ URectangle::setBounds(const URectangle & rect) {
 	h =  rect.h;
 }
 
+inline void
+URectangle::clamp(const UDimension & maxDim) {
+	w = std::min(w, maxDim.w);
+	h = std::min(h, maxDim.h);
+}
+
+inline void
+URectangle::expand(const UDimension & minDim) {
+	w = std::max(w, minDim.w);
+	h = std::max(h, minDim.h);
+}
+
+inline void
+URectangle::intersect(const URectangle & rect) {
+	int x1 = std::max(x, rect.x);
+	int y1 = std::max(y, rect.y);
+	int x2 = std::min(x + w, rect.x + rect.w);
+	int y2 = std::min(y + h, rect.y + rect.h);
+
+	setBounds(x1, y1, x2 - x1, y2 - y1);
+}
+
+inline void
+URectangle::unite(const URectangle & rect) {
+	int x1 = std::min(x, rect.x);
+	int y1 = std::min(y, rect.y);
+	int x2 = std::max(x + w, rect.x + rect.w);
+	int y2 = std::max(y + h, rect.y + rect.h);
+
+	setBounds(x1, y1, x2 - x1, x2 - y1);
+}
 
 inline bool
 URectangle::contains(const UPoint & pos) {
@@ -245,6 +296,11 @@ URectangle::computeUnion(const URectangle & src1,
 		dest->y = y;
 	}
 	return dest;
+}
+
+inline bool
+URectangle::isInvalid() const {
+	return (*this == URectangle::invalid);
 }
 
 inline bool
@@ -284,6 +340,24 @@ inline URectangle &
 URectangle::operator-=(const UDimension & dim) {
 	this->w -= dim.w;
 	this->h -= dim.h;
+	return *this;
+}
+
+inline URectangle &
+URectangle::operator+=(const UInsets & insets) {
+	x -= insets.top;
+	y -= insets.left;
+	w += insets.getHorizontal();
+	h += insets.getVertical();
+	return *this;
+}
+
+inline URectangle &
+URectangle::operator-=(const UInsets & insets) {
+	x += insets.top;
+	y += insets.left;
+	w -= insets.getHorizontal();
+	h -= insets.getVertical();
 	return *this;
 }
 

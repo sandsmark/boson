@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -72,7 +72,7 @@ UFO_GL_PROC_UNUSED(void,glColor4bv,(const GLbyte*))
 UFO_GL_PROC_UNUSED(void,glColor4d,(GLdouble,GLdouble,GLdouble,GLdouble))
 UFO_GL_PROC_UNUSED(void,glColor4dv,(const GLdouble*))
 UFO_GL_PROC(void,glColor4f,(GLfloat,GLfloat,GLfloat,GLfloat))
-UFO_GL_PROC_UNUSED(void,glColor4fv,(const GLfloat*))
+UFO_GL_PROC(void,glColor4fv,(const GLfloat*))
 UFO_GL_PROC_UNUSED(void,glColor4i,(GLint,GLint,GLint,GLint))
 UFO_GL_PROC_UNUSED(void,glColor4iv,(const GLint*))
 UFO_GL_PROC_UNUSED(void,glColor4s,(GLshort,GLshort,GLshort,GLshort))
@@ -189,7 +189,7 @@ UFO_GL_PROC_UNUSED(void,glLightfv,(GLenum light, GLenum pname, const GLfloat *pa
 UFO_GL_PROC_UNUSED(void,glLighti,(GLenum light, GLenum pname, GLint param))
 UFO_GL_PROC_UNUSED(void,glLightiv,(GLenum light, GLenum pname, const GLint *params))
 UFO_GL_PROC(void,glLineStipple,(GLint factor, GLushort pattern))
-UFO_GL_PROC_UNUSED(void,glLineWidth,(GLfloat width))
+UFO_GL_PROC(void,glLineWidth,(GLfloat width))
 UFO_GL_PROC(void,glListBase,(GLuint base))
 UFO_GL_PROC(void,glLoadIdentity,(void))
 UFO_GL_PROC_UNUSED(void,glLoadMatrixd,(const GLdouble *m))

@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -137,6 +137,20 @@ UInternalFrame::setFrameStyle(int frameStyle) {
 
 void
 UInternalFrame::maximize() {
+}
+
+bool
+UInternalFrame::isMaximized() const {
+	return false;
+}
+
+void
+UInternalFrame::minimized() {
+}
+
+bool
+UInternalFrame::isMinimized() const {
+	return false;
 }
 
 void

@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -53,6 +53,7 @@ public: // Implements UVideoDriver
 	virtual bool init();
 	virtual bool isInitialized();
 	virtual void quit();
+	virtual std::string getName();
 
 	virtual void pumpEvents();
 
@@ -89,9 +90,10 @@ public: // plugin methods
 private: // Private attributes
 	bool m_isValid;
 	bool m_isInit;
+	bool m_createdGLDriver;
 	Display * m_x11Display;
 	Window m_rootWindow;
-	Atom m_deleteWindow;
+	Atom m_deleteWindowAtom;
 	UXDisplay * m_display;
 	std::vector<UXGLXDevice*> m_windowMap;
 
@@ -104,10 +106,7 @@ class UFO_EXPORT UXGLXDevice : public UVideoDevice {
 	UFO_DECLARE_DYNAMIC_CLASS(UXGLXDevice)
 public:
 	UXGLXDevice(UXGLXDriver * driver);
-	virtual UXFrame * getFrame() const;
 public: // Implements UVideoDevice
-	virtual void setFrame(UXFrame * frame);
-
 	virtual void setSize(int w, int h);
 	virtual UDimension getSize() const;
 
@@ -132,7 +131,10 @@ public: // Implements UVideoDevice
 	virtual void setInitialFrameState(uint32_t frameState);
 	virtual uint32_t getFrameState() const;
 
+	virtual void setFrame(UXFrame * frame);
+	virtual void notify(uint32_t type, int arg1, int arg2, int arg3, int arg4);
 public:
+	virtual UXFrame * getFrame();
 	Window getWindow() { return m_window; }
 	GLXContext getGLContext() { return m_glContext; }
 
@@ -149,8 +151,8 @@ private: // Private attributes
 	Window m_window;
 	GLXContext m_glContext;
 	UXFrame * m_frame;
-	UDimension m_size;
-	UPoint m_pos;
+	mutable UDimension m_size;
+	mutable UPoint m_pos;
 	bool m_isVisible;
 	uint32_t m_frameStyle;
 	uint32_t m_frameState;

@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -52,6 +52,7 @@ UTextEdit::UTextEdit()
 	, m_doc(NULL)
 	, m_docRenderer(NULL)
 //	, m_caret(NULL)
+	, m_maxLength(0)
 	, m_columns(0)
 	, m_rows(0)
 {
@@ -452,7 +453,7 @@ UTextEdit::processKeyEvent(UKeyEvent * e) {
 			}
 		}
 		// truncate to maximum text length
-		if (m_maxLength && m_maxLength < (int)m_doc->getLength()) {
+		if (m_maxLength && m_maxLength < int(m_doc->getLength())) {
 			m_doc->remove(m_maxLength, m_doc->getLength() - m_maxLength);
 		}
 		// should we revalidate?

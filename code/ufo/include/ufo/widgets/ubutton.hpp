@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -38,14 +38,9 @@
 namespace ufo {
 class UButtonGroup;
 
-/**
-  * The basic version of this class is a standard push button. Several derived classes
-  * provide a different behaviour, such as @ref UCheckBox or @ref URadioButton.
+/** The base class for all clickable widgets.
+  * In its basic version, it is a standard push button.
   *
-  * You can use this class as a toggle button using @ref setToggable. In that
-  * case use @ref isSelected to find out whether the button is down or up.
-  *
-  * @short The base class for all clickable widgets.
   * @author Johannes Schmidt
   */
 
@@ -72,10 +67,6 @@ public: // hides | overrides UWidget
 	UWidgetUI * getUI() const;
 	void updateUI();
 */
-public: // Overrides UCompound
-	virtual UIcon * getIcon() const;
-	virtual void setText(const std::string & text);
-
 public: // Public methods
 	/** Emulates a mouse click on that button, i.e. shows a pressed button,
 	  * releases it and calls activate.
@@ -212,6 +203,11 @@ public: // Public methods
 
 public: // Overrides UWidget
 	virtual UInsets getInsets() const;
+	virtual bool isActive() const;
+
+public: // Overrides UCompound
+	virtual UIcon * getIcon() const;
+	virtual void setText(const std::string & text);
 
 public: // deprecated
 
@@ -255,9 +251,9 @@ private:  // Private attributes
 	int m_acceleratorIndex;
 
 public: // Public signal methods
-	/** @deprecated Use @ref sigActivated instead */
+	/** deprecated */
 	USignal1<UActionEvent*> & sigButtonClicked() { return m_sigActivated; }
-	/** @deprecated Use @ref sigActivated instead */
+	/** deprecated */
 	USignal1<UActionEvent*> & sigButtonToggled() { return m_sigActivated; }
 
 	/** This signal is fired when the button has been clicked, toggled etc.

@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -35,7 +35,7 @@
 #define UFO_GL_LIB "libGL.so.1"
 #endif
 
-ufo::UGL_Driver * ufo::ugl_driver = new ufo::UGL_Driver("");
+ufo::UGL_Driver * ufo::ugl_driver = NULL;//new ufo::UGL_Driver("");
 
 ufo::UGL_Driver::UGL_Driver(const char * glPath) {
 	m_glLib = new USharedLib();

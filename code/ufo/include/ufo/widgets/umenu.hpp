@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -56,6 +56,9 @@ public: // hides | overrides UWidget
 protected: // overrides UWidget
 	/** adds a sub widget to the popup */
 	virtual void addImpl(UWidget * w, UObject * constraints, int index);
+	/** invalidate also the popup menu
+	  */
+	void invalidateSelf();
 
 public: // Public methods
 
@@ -65,19 +68,11 @@ public: // Public methods
 	/** appends a separator at the end */
 	void addSeparator();
 
-	/** returns the popupmenu */
-	UPopupMenu * getPopupMenu() const {
-		return m_popupMenu;
-	}
-
 	/** */
 	bool isPopupMenuVisible() const;
 
 	/** */
 	void setPopupMenuVisible(bool b);
-	/** invalidate also the poup menu
-	  */
-	void invalidate();
 
 protected:   // Protected methods
 	std::ostream & paramString(std::ostream & os) const;

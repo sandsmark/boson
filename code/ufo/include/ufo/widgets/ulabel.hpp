@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -37,14 +37,7 @@ namespace ufo {
 
 class UIcon;
 
-/** A static text field. Can display icons and static text. Most functionality
-  * of this class is provided by @ref UCompound. See the @ref UCompound
-  * documentation for further information.
-  *
-  * You can specify and/or the icon in the constructor and/or set it later,
-  * using @ref setText and @ref setIcon.
-  *
-  * @short Widget that displays one line of text
+/** A static text field. Can display icons and static text.
   * @author Johannes Schmidt
   */
 

@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -33,6 +33,8 @@
 
 #include "../events/ukeysym.hpp"
 
+#include <map>
+
 // FIXME should be done by ufo_config ?
 #include <windows.h>
 
@@ -55,6 +57,7 @@ public: // Implements UVideoDriver
 	virtual bool init();
 	virtual bool isInitialized();
 	virtual void quit();
+	virtual std::string getName();
 
 	virtual void pumpEvents();
 
@@ -86,6 +89,7 @@ public: // plugin methods
 private: // Private attributes
 	bool m_isValid;
 	bool m_isInit;
+	bool m_createdGLDriver;
 	UXDisplay * m_display;
 	HINSTANCE m_instance;
 	std::vector<UXWGLDevice*> m_windowMap;
@@ -99,10 +103,7 @@ class UFO_EXPORT UXWGLDevice : public UVideoDevice {
 	UFO_DECLARE_DYNAMIC_CLASS(UXWGLDevice)
 public:
 	UXWGLDevice(UXWGLDriver * driver);
-	virtual UXFrame * getFrame() const;
 public: // Implements UVideoDevice
-	virtual void setFrame(UXFrame * frame);
-
 	virtual void setSize(int w, int h);
 	virtual UDimension getSize() const;
 
@@ -118,18 +119,27 @@ public: // Implements UVideoDevice
 	virtual void swapBuffers();
 	virtual void makeContextCurrent();
 
-	virtual bool show(uint32_t flags);
+	virtual bool show();
 	virtual void hide();
 
-	virtual void privateMove(int x, int y);
-	virtual void privateResize(int w, int h);
+	virtual void setFrameStyle(uint32_t frameStyle);
+	virtual uint32_t getFrameStyle() const;
 
+	virtual void setInitialFrameState(uint32_t frameState);
+	virtual uint32_t getFrameState() const;
+
+	virtual void setFrame(UXFrame * frame);
+	virtual void notify(uint32_t type, int arg1, int arg2, int arg3, int arg4);
 public:
+	virtual UXFrame * getFrame() const;
 	bool setupPixelFormat(unsigned char layer_type);
 	HWND getWindow() { return m_window; }
 	HDC getDC();
 	HGLRC getGLContext() { return m_glContext; }
 
+	void setDecorations();
+	void setSizeHints();
+	void setWMHints();
 protected:
 	int getAttribute(int key);
 	void setAttribute(int key, int value);
@@ -143,7 +153,8 @@ private: // Private attributes
 	UDimension m_size;
 	UPoint m_pos;
 	bool m_isVisible;
-	uint32_t m_flags;
+	uint32_t m_frameStyle;
+	uint32_t m_frameState;
 	int m_depth;
 	std::string m_title;
 	std::map<int, int> m_attributes;

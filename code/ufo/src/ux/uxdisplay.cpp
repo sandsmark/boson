@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -41,19 +41,41 @@
 
 #include "ufo/widgets/urootpane.hpp"
 
+#include "ufo/gl/ugl_driver.hpp"
+
 using namespace ufo;
 
 UFO_IMPLEMENT_DYNAMIC_CLASS(UXDisplay, UAbstractDisplay)
 
 class UXDummyDriver : public UVideoDriver {
 public: // Implements UVideoDriver
-	virtual bool init() { return true; }
-	virtual bool isInitialized() { return true; }
-	virtual void quit() {}
+	UXDummyDriver() : m_isInit(false), m_createdGLDriver(false) {}
+	virtual bool init() {
+		// Load OpenGL driver
+		if (!ugl_driver) {
+			ugl_driver = new UGL_Driver("");
+			m_createdGLDriver = true;
+		}
+		m_isInit = true;
+		return true;
+	}
+	virtual bool isInitialized() { return m_isInit; }
+	virtual void quit() {
+		if (m_createdGLDriver) {
+			delete (ugl_driver);
+		}
+		m_isInit = false;
+	}
+	std::string getName() {
+		return "dummy";
+	}
 
 	virtual void pumpEvents() {}
 
 	virtual UVideoDevice * createVideoDevice() { return NULL; }
+private:
+	bool m_isInit;
+	bool m_createdGLDriver;
 };
 
 
@@ -116,8 +138,8 @@ UXFrame *
 UXDisplay::createFrame() {
 	UVideoDevice * device = m_videoDriver->createVideoDevice();
 	if (device) {
-		device->setFrameStyle(FrameTitleBar | FrameMinMaxBox | FrameCloseBox);
-		device->setInitialFrameState(FrameResizable);
+		device->setFrameStyle(FrameTitleBar | FrameMinMaxBox | FrameCloseBox | FrameResizable);
+		//device->setInitialFrameState();
 
 		UXFrame * frame = new UXFrame(device);
 		m_frames.push_back(frame);

@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -57,6 +57,7 @@ public:
 		trackPointer(m_popupWidget);
 
 		m_popupWidget->setLayout(new UBorderLayout());
+		m_popupWidget->setOpacity(0.0f);
 		m_popupWidget->add(content);
 		m_popupWidget->setLocation(m_owner->pointToRootPoint(desiredBounds.getLocation()));
 

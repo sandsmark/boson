@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -83,11 +83,17 @@ UBasicListBoxUI::paint(UGraphics * g, UWidget * w) {
 			iter != items.end();
 			++iter) {
 		if (list->isSelectedIndex(iter - items.begin())) {
-			(*iter)->paintItem(g, list, x, y, true, false,
-				//list->getSelectionForeground(), list->getSelectionBackground());
-				list->getColorGroup().highlightedText(), list->getColorGroup().highlight());
+			(*iter)->paintItem(g, list, x, y,
+				true, // is selected
+				false, // has focus
+				list->getColorGroup().highlightedText(), // foreground
+				list->getColorGroup().highlight() // background
+			);
 		} else {
-			(*iter)->paintItem(g, list, x, y, false, false, foreground, background);
+			(*iter)->paintItem(g, list, x, y,
+				false, false,
+				foreground, background
+			);
 		}
 		y += (*iter)->getItemSize(list).getHeight();
 	}

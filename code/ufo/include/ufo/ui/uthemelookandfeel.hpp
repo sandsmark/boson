@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -27,7 +27,7 @@
 
 #ifndef UTHEMELOOKANDFEEL_HPP
 #define UTHEMELOOKANDFEEL_HPP
- 
+
 #include "basic/ubasiclookandfeel.hpp"
 
 namespace ufo {
@@ -70,16 +70,17 @@ public: // plugin methods
 	static void destroyPlugin(UPluginBase * plugin);
 
 protected: // Overrides UBasicLookAndFeel
+	virtual UPalette * createPassivePalette();
 	virtual UPalette * createControlPalette();
+	virtual UPalette * createInputPalette();
+	virtual UPalette * createMenuPalette();
 	virtual UPalette * createWindowPalette();
-	/*virtual UPalette * createTextPalette();
-	virtual UPalette * createMenuPalette();*/
 
 	virtual UFont * createControlFont();
 	virtual UFont * createSystemFont();
 	virtual UFont * createTitleFont();
 	virtual UFont * createUserFont();
-	
+
 	virtual UIcon * createInternalFrameDefaultIcon();
 	virtual UIcon * createInternalFrameMaximizeIcon();
 	virtual UIcon * createInternalFrameMinimizeIcon();

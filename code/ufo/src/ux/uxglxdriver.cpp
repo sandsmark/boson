@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -59,12 +59,29 @@ UFO_IMPLEMENT_DYNAMIC_CLASS(UXGLXDriver, UVideoDriver)
 UXGLXDriver::UXGLXDriver()
 	: m_isValid(false)
 	, m_isInit(false)
+	, m_createdGLDriver(false)
 	, m_x11Display(NULL)
 	, m_rootWindow(0)
 	, m_display(NULL)
 {
 	m_display = dynamic_cast<UXDisplay*>(UDisplay::getDefault());
+}
 
+bool
+UXGLXDriver::init() {
+	// Get it from DISPLAY environment variable?
+	m_x11Display = XOpenDisplay(XDisplayName(NULL));
+
+	if (m_x11Display == NULL ) {
+		uError() << "Couldn't open X11 display\n";
+		return false;
+	}
+	// Load OpenGL driver
+	if (!ugl_driver) {
+		ugl_driver = new UGL_Driver("");
+		m_createdGLDriver = true;
+	}
+	// Load needed GLX methods
 #define UFO_GLX_PROC(ret,func,params) \
 { \
 	func = (ret (*)params)(ugl_driver->getProcAddress(#func)); \
@@ -80,17 +97,8 @@ UFO_GLX_PROC(XVisualInfo*,glXChooseVisual,(Display *dpy, int screen, int *attrib
 UFO_GLX_PROC(void,glXDestroyContext,(Display *dpy, GLXContext ctx))
 UFO_GLX_PROC(GLXContext,glXCreateContext,(Display *dpy, XVisualInfo *vis, GLXContext shareList, Bool direct))
 #undef UFO_GLX_PROC
-}
 
-bool
-UXGLXDriver::init() {
-	// Get it from DISPLAY environment variable?
-	m_x11Display = XOpenDisplay(XDisplayName(NULL));
-
-	if (m_x11Display == NULL ) {
-		uError() << "Couldn't open X11 display\n";
-		return false;
-	}
+	// check for GLX
 	if(!this->glXQueryExtension(m_x11Display, NULL, NULL)) {
 		// GLX extensions have not been found...
 		uError() << "OpenGL GLX extension not supported by display '"
@@ -98,16 +106,17 @@ UXGLXDriver::init() {
 		<< "'\n";
 	}
 
-	// The same applying to the root window
+	// Inquire the root window
 	m_rootWindow = RootWindow(m_x11Display, DefaultScreen(m_x11Display));
 
 	// Create the window deletion atom
-	m_deleteWindow = XInternAtom(
+	m_deleteWindowAtom = XInternAtom(
 		m_x11Display,
 		"WM_DELETE_WINDOW",
 		false
 	);
 
+	// init key translation map
 	initKeymap();
 	m_isInit = true;
 	return true;
@@ -122,7 +131,16 @@ void
 UXGLXDriver::quit() {
 	XSync(m_x11Display, false);
 	XCloseDisplay(m_x11Display);
+	// delete opengl driver
+	if (m_createdGLDriver) {
+		delete (ugl_driver);
+	}
 	m_isInit = false;
+}
+
+std::string
+UXGLXDriver::getName() {
+	return "GLX";
 }
 
 void
@@ -161,7 +179,7 @@ UXGLXDriver::getRootWindow() const {
 
 Atom *
 UXGLXDriver::getDeleteWindowAtom() {
-	return &m_deleteWindow;
+	return &m_deleteWindowAtom;
 }
 
 UXContext *
@@ -458,9 +476,9 @@ UXGLXDriver::pushXEvent(UXContext * context, const XEvent & event) {
 	}
 	UXFrame * frame = context->getFrame();
 	UXDisplay * display = dynamic_cast<UXDisplay*>(UDisplay::getDefault());
-	UVideoDevice * device = NULL;
+	UXGLXDevice * device = NULL;
 	if (frame) {
-		device = frame->getVideoDevice();
+		device = dynamic_cast<UXGLXDevice*>(frame->getVideoDevice());
 	}
 
 	switch (event.type) {
@@ -468,8 +486,8 @@ UXGLXDriver::pushXEvent(UXContext * context, const XEvent & event) {
 		case EnterNotify: {
 			if ((event.xcrossing.mode != NotifyGrab) &&
 					(event.xcrossing.mode != NotifyUngrab)) {
-			if (frame) {
-				//frame->sigMouseFocusGained();
+			if (device) {
+				device->notify(UEvent::MouseEntered, 0, 0, 0, 0);
 			}
 		}
 		}
@@ -480,8 +498,8 @@ UXGLXDriver::pushXEvent(UXContext * context, const XEvent & event) {
 		if ((event.xcrossing.mode != NotifyGrab) &&
 				(event.xcrossing.mode != NotifyUngrab) &&
 				(event.xcrossing.detail != NotifyInferior)) {
-			if (frame) {
-				//frame->sigMouseFocusLost();
+			if (device) {
+				device->notify(UEvent::MouseExited, 0, 0, 0, 0);
 			}
 		}
 		}
@@ -489,24 +507,18 @@ UXGLXDriver::pushXEvent(UXContext * context, const XEvent & event) {
 
 		// Gaining input focus?
 		case FocusIn: {
-			if (frame) {
-				//frame->sigIntputFocusGained();
+			if (device) {
+				device->notify(UEvent::FocusGained, 0, 0, 0, 0);
 			}
 		}
 		break;
 
-		/* Losing input focus? */
+		// Losing input focus?
 		case FocusOut: {
-			if (frame) {
-				//frame->sigIntputFocusLost();
+			if (device) {
+				device->notify(UEvent::FocusLost, 0, 0, 0, 0);
 			}
 		}
-		// what's this?
-		// taken from SDL sources (also in FocusIn).
-		// Queue leaving fullscreen mode
-		//switch_waiting = 0x01;
-		//switch_time = SDL_GetTicks() + 200;
-		//}
 		break;
 
 		// Generated upon EnterWindow and FocusIn
@@ -553,7 +565,9 @@ UXGLXDriver::pushXEvent(UXContext * context, const XEvent & event) {
 		// Mouse button release?
 		case ButtonRelease: {
 			if (event.xbutton.button == 4) {
+				// mouse wheel up
 			} else if (event.xbutton.button == 5) {
+				// mouse wheel down
 			} else {
 				display->pushMouseButtonUp(
 					context,
@@ -568,7 +582,6 @@ UXGLXDriver::pushXEvent(UXContext * context, const XEvent & event) {
 
 		// Key press?
 		case KeyPress: {
-		//std::cerr << "KeyPress (X11 keycode = " << uint32_t(event.xkey.keycode) << "\n";
 			display->pushKeyDown(context,
 				//mapX11Modifiers(event.xmotion.state),
 				mapX11Keycode(event.xkey), mapX11Unicode(event.xkey));
@@ -577,91 +590,60 @@ UXGLXDriver::pushXEvent(UXContext * context, const XEvent & event) {
 
 		// Key release?
 		case KeyRelease: {
-		//std::cerr << "KeyRelease (X11 keycode = " << uint32_t(event.xkey.keycode) << "\n";
 			display->pushKeyUp(context,
 				//mapX11Modifiers(event.xmotion.state),
 				mapX11Keycode(event.xkey), mapX11Unicode(event.xkey));
 		// Check to see if this is a repeated key */
-		//if ( ! X11_KeyRepeat(SDL_Display, &event) ) {
+		//if ( ! X11_KeyRepeat(displayy, &event) ) {
 		}
 		break;
 
 		// Have we been iconified?
 		case UnmapNotify: {
-		/* If we're active, make ourselves inactive
-		//if ( SDL_GetAppState() & SDL_APPACTIVE ) {
-			// Swap out the gamma before we go inactive
-			X11_SwapVidModeGamma(this);
-
-			// Send an internal deactivate event
-			posted = SDL_PrivateAppActive(0,
-					SDL_APPACTIVE|SDL_APPINPUTFOCUS);
-		}*/
+			if (device) {
+				device->notify(UEvent::FocusLost, 0, 0, 0, 0);
+				device->notify(UEvent::WidgetHidden, 0, 0, 0, 0);
+			}
 		}
 		break;
 
 	    /* Have we been restored? */
 	    case MapNotify: {
-		/* If we're not active, make ourselves active
-		if ( !(SDL_GetAppState() & SDL_APPACTIVE) ) {
-			// Send an internal activate event
-			posted = SDL_PrivateAppActive(1, SDL_APPACTIVE);
-
-			// Now that we're active, swap the gamma back
-			X11_SwapVidModeGamma(this);
-		}
-
-		if ( SDL_VideoSurface &&
-		     (SDL_VideoSurface->flags & SDL_FULLSCREEN) ) {
-			X11_EnterFullScreen(this);
-		} else {
-			X11_GrabInputNoLock(this, this->input_grab);
-		}
-		X11_CheckMouseModeNoLock(this);
-
-		if ( SDL_VideoSurface ) {
-			X11_RefreshDisplay(this);
-		}
-		*/
-			if (frame) {
-				frame->getRootPane()->repaint();
+			if (device) {
+				device->notify(UEvent::WidgetShown, 0, 0, 0, 0);
 			}
+			//if (frame) {
+			//	frame->getRootPane()->repaint();
+			//}
 		}
 		break;
 
 		/* Have we been resized or moved? */
 		case ConfigureNotify: {
-		/*if ( SDL_VideoSurface ) {
-		    if ((event.xconfigure.width != SDL_VideoSurface->w) ||
-		        (event.xconfigure.height != SDL_VideoSurface->h)) {
-			// FIXME: Find a better fix for the bug with KDE 1.2
-			if ( ! ((event.xconfigure.width == 32) &&
-			        (event.xconfigure.height == 32)) ) {
-				SDL_PrivateResize(event.xconfigure.width,
-				                  event.xconfigure.height);
+			//if ((event.xconfigure.x != device->getLocation().x) ||
+			//		(event.xconfigure.y != device->getLocation().y)) {
+			//if ((event.xconfigure.width != device->getSize().w) ||
+			//		(event.xconfigure.height != device->getSize().h)) {
+			if (device) {
+				// FIXME: Does the X server send resize and move events
+				// separately? On my system (Xfree4.3) it seems so.
+				device->notify(UEvent::WidgetMoved,
+					event.xconfigure.x, event.xconfigure.y, 0, 0);
+				device->notify(UEvent::WidgetResized,
+					event.xconfigure.width, event.xconfigure.height, 0, 0);
 			}
-		    } else {
-			// OpenGL windows need to know about the change
-			if ( SDL_VideoSurface->flags & SDL_OPENGL ) {
-				SDL_PrivateExpose();
-			}
-		    }
-		}*/
-			if ((event.xconfigure.width != frame->getSize().w) ||
-					(event.xconfigure.height != frame->getSize().h)) {
-				device->sigResized().emit(device);
-			}
-			if ((event.xconfigure.x != frame->getLocation().x) ||
-					(event.xconfigure.y != frame->getLocation().y)) {
-				device->sigMoved().emit(device);
-			}
+			context->setDeviceBounds(URectangle(
+				event.xconfigure.x, event.xconfigure.y,
+				event.xconfigure.width, event.xconfigure.height
+			));
+			context->getRootPane()->repaint();
 		}
 		break;
 
 		// Have we been requested to quit (or another client message?)
 		case ClientMessage: {
 		if ((event.xclient.format == 32) &&
-				(event.xclient.data.l[0] == m_deleteWindow)) {
+				(event.xclient.data.l[0] == m_deleteWindowAtom)) {
 			int visFrames = 0;
 			std::vector<UXFrame*> frames = m_display->getFrames();
 			for (int i = 0; i < frames.size(); ++i) {
@@ -681,26 +663,20 @@ UXGLXDriver::pushXEvent(UXContext * context, const XEvent & event) {
 
 		// Do we need to refresh ourselves?
 		case Expose: {
-			if (frame) {
-				frame->getRootPane()->repaint();
+			if (device) {
+				device->notify(UEvent::Repaint,
+					event.xexpose.x, event.xexpose.y,
+					event.xexpose.width, event.xexpose.height);
 			}
-		/*if ( SDL_VideoSurface && (event.xexpose.count == 0) ) {
-			X11_RefreshDisplay(this);
-		}*/
+			context->getRootPane()->repaint();
+			/*if (frame) {
+				frame->getRootPane()->repaint();
+			}*/
 		}
 		break;
 
 	    default: {
-		// Only post the event if we're watching for it
-		/*
-		if ( SDL_ProcessEvents[SDL_SYSWMEVENT] == SDL_ENABLE ) {
-			SDL_SysWMmsg wmmsg;
-
-			SDL_VERSION(&wmmsg.version);
-			wmmsg.subsystem = SDL_SYSWM_X11;
-			wmmsg.event.event = event;
-			posted = SDL_PrivateSysWMEvent(&wmmsg);
-		}*/
+			//FIXME: Should we post unknown X events?
 	    }
 	    break;
 	}
@@ -762,6 +738,7 @@ UXGLXDevice::UXGLXDevice(UXGLXDriver * driver)
 	, m_pos()
 	, m_isVisible(false)
 	, m_frameStyle(0)
+	, m_frameState(0)
 	, m_depth(0)
 {
 	//m_attributes[GLX_INDEX] = 0;
@@ -783,17 +760,6 @@ UXGLXDevice::UXGLXDevice(UXGLXDriver * driver)
 	m_attributes[GLX_ACCUM_BLUE_SIZE] = 0;
 	m_attributes[GLX_ACCUM_ALPHA_SIZE] = 0;
 }
-
-UXFrame *
-UXGLXDevice::getFrame() const {
-	return m_frame;
-}
-
-void
-UXGLXDevice::setFrame(UXFrame * frame) {
-	m_frame = frame;
-}
-
 
 void
 UXGLXDevice::setSize(int w, int h) {
@@ -888,17 +854,16 @@ UXGLXDevice::makeContextCurrent() {
 
 bool
 UXGLXDevice::show() {
-	// Here we are upon the stage. Have the visual selected.
+	// Check whether we have a valid visual and select that one.
 	XVisualInfo * visualinfo = chooseVisual();
 
 	XSetWindowAttributes winAttr;
 	XSizeHints sizeHints;
 	uint32_t mask;
 
-	// Have the windows attributes set
+	// windows attributes
 	//
-	// HINT: the masks should be updated when adding/removing callbacks.
-	//       This might speed up message processing. Is that true?
+	// FIXME: Do we need all of that X11 event masks?
 	winAttr.event_mask = StructureNotifyMask | SubstructureNotifyMask | ExposureMask |
 		ButtonPressMask | ButtonReleaseMask | KeyPressMask | KeyReleaseMask |
 		VisibilityChangeMask | EnterWindowMask | LeaveWindowMask |
@@ -908,7 +873,7 @@ UXGLXDevice::show() {
 	winAttr.background_pixel  = 0;
 	winAttr.border_pixel      = 0;
 
-	// The color map is required, too
+	// create a color map
 	winAttr.colormap = XCreateColormap(
 		m_glxDriver->getX11Display(), m_glxDriver->getRootWindow(),
 		visualinfo->visual, AllocNone
@@ -944,44 +909,7 @@ UXGLXDevice::show() {
 		m_glContext
 	);
 
-	// Assume the new window is visible by default
 	m_isVisible = true;
-/*
-	// We can have forced all new windows start in iconified state:
-	wmHints.flags = StateHint;
-	wmHints.initial_state = NormalState;
-	//(fgState.ForceIconic == FALSE) ? NormalState : IconicState;
-
-	// Prepare the window and iconified window names...
-	const char * title = m_title.c_str();
-	XStringListToTextProperty( (char **) &title, 1, &textProperty );
-
-	// Set the window's properties now
-	XSetWMProperties(
-		m_glxDriver->getX11Display(),
-		m_window,
-		&textProperty,
-		&textProperty,
-		0,
-		0,
-		&sizeHints,
-		&wmHints,
-		NULL
-	);
-	*/
-
-	/*
-	XSetStandardProperties(
-		m_display->getX11Display(),
-		m_window,
-		titleA.c_str(),
-		titleA.c_str(),
-		None,
-		NULL,
-		0,
-		NULL
-	);*/
-
 	setSizeHints();
 	setWMHints();
 	setTitle(m_title);
@@ -999,13 +927,11 @@ UXGLXDevice::show() {
 	// And finally, raise the window
 	//XMapRaised(m_glxDriver->getX11Display(), m_window);
 
-	m_isVisible = true;
 }
 
 void
 UXGLXDevice::hide() {
-	// As easy as kill bunnies with axes. Destroy the context first:
-	// nock: crazy freeglut people ;-)
+	// at first, destroy the OpenGL context
 	m_glxDriver->glXDestroyContext(m_glxDriver->getX11Display(), m_glContext);
 	m_glContext = NULL;
 
@@ -1019,6 +945,52 @@ UXGLXDevice::hide() {
 	m_isVisible = false;
 }
 
+void
+UXGLXDevice::setFrame(UXFrame * frame) {
+	m_frame = frame;
+}
+UXFrame *
+UXGLXDevice::getFrame() {
+	return m_frame;
+}
+
+
+
+void
+UXGLXDevice::notify(uint32_t type, int arg1, int arg2, int arg3, int arg4) {
+	switch (type) {
+		case UEvent::WidgetResized: {
+			UDimension newSize(arg1, arg2);
+			if (m_size != newSize) {
+				m_size = newSize;
+				// FIXME: throw event
+				//std::cerr << "WidgetResized " << arg1 << "x" << arg2 << "\n";
+				if (m_frame) {
+					m_frame->getContext()->setContextBounds(
+						URectangle(0, 0,m_size.w, m_size.h)
+					);
+				}
+			}
+
+		}
+		break;
+		case UEvent::WidgetMoved: {
+			UPoint newPos(arg1, arg2);
+			if (m_pos != newPos) {
+				m_pos = newPos;
+				// FIXME: throw event
+				//std::cerr << "WidgetMoved " << arg1 << "x" << arg2 << "\n";
+			}
+		}
+		break;
+		case UEvent::FocusGained:
+		break;
+		case UEvent::FocusLost:
+		break;
+		default:
+		break;
+	}
+}
 
 //
 // FIXME: whoops, a hack
@@ -1107,33 +1079,6 @@ UXGLXDevice::setSizeHints() {
 		XSetWMNormalHints(m_glxDriver->getX11Display(), m_window, hints);
 		XFree(hints);
 	}
-/*
-
-	// For the position and size hints -- make sure we are passing valid values
-	sizeHints.flags = 0;
-
-	//sizeHints.flags |= (fgState.Position.Use == TRUE) ? USPosition : PPosition;
-	//sizeHints.flags |= (fgState.Size.Use     == TRUE) ? USSize     : PSize;
-	sizeHints.flags |= USPosition;
-	sizeHints.flags |= USSize;
-
-	// Fill in the size hints values now (the x, y, width and height
-	// settings are obsolote, are there any more WMs that support them?)
-	sizeHints.x      = m_pos.x;
-	sizeHints.y      = m_pos.y;
-	sizeHints.width  = m_size.w;
-	sizeHints.height = m_size.h;
-
-	if (frameStyle & FrameResizable) {
-		sizeHints.min_width = 32;
-		sizeHints.min_height = 32;
-		sizeHints.max_height = 4096;
-		sizeHints.max_width = 4096;
-	} else {
-		sizeHints.min_width = sizeHints.max_width = m_size.w;
-		sizeHints.min_height = sizeHints.max_height = m_size.h;
-	}
-*/
 }
 
 void
@@ -1143,7 +1088,7 @@ UXGLXDevice::setWMHints() {
 	wmHints->flags = StateHint | InputHint;
 	wmHints->input = True;
 
-	if (m_frameStyle & FrameMinimized) {
+	if (m_frameState & FrameMinimized) {
 		wmHints->initial_state = IconicState;
     } else {
 		wmHints->initial_state = NormalState;
@@ -1158,7 +1103,7 @@ UXGLXDevice::setWMHints() {
 	int i = 0;
 
 
-	if (m_frameStyle & FrameMaximized) {
+	if (m_frameState & FrameMaximized) {
 		atoms[i] = XInternAtom(display, "_NET_WM_STATE_MAXIMIZED_VERT", false);
 		++i;
 		atoms[i] = XInternAtom (display, "_NET_WM_STATE_MAXIMIZED_HORZ", false);
@@ -1169,19 +1114,19 @@ UXGLXDevice::setWMHints() {
 	// "_NET_WM_STATE_ABOVE"
     // "_NET_WM_STATE_BELOW"
 
-	if (m_frameStyle & FrameSticky) {
+	if (m_frameState & FrameSticky) {
 		atoms[i] = XInternAtom (display, "_NET_WM_STATE_STICKY", false);
 		++i;
 	}
-	if (m_frameStyle & FrameFullScreen) {
+	if (m_frameState & FrameFullScreen) {
 		atoms[i] = XInternAtom (display, "_NET_WM_STATE_FULLSCREEN", false);
 		++i;
 	}
-	if (m_frameStyle & FrameModal) {
+	if (m_frameState & FrameModal) {
 		atoms[i] = XInternAtom (display, "_NET_WM_STATE_MODAL", false);
 		++i;
 	}
-	if (m_frameStyle & FrameSkipTaskBar) {
+	if (m_frameState & FrameSkipTaskBar) {
 		atoms[i] = XInternAtom (display, "_NET_WM_STATE_SKIP_TASKBAR", false);
 		++i;
 	}
@@ -1200,7 +1145,7 @@ UXGLXDevice::setWMHints() {
 		);
     }
 	// FIXME what's this
-	if (m_frameStyle & FrameSticky) {
+	if (m_frameState & FrameSticky) {
 		atoms[0] = 0xFFFFFFFF;
 		XChangeProperty (display, m_window,
 			XInternAtom(display, "_NET_WM_DESKTOP", false),
@@ -1406,7 +1351,7 @@ UXGLXDevice::chooseVisual() {
 			attributes
 		);
 		if (visualInfo == NULL) {
-			std::cerr << "Whee!\n"
+			std::cerr << "Fatal Error: No visual info!\n"
 			<< "  display() " << m_glxDriver->getX11Display()
 			<< "  screen " << DefaultScreen(m_glxDriver->getX11Display())
 			<< "\n";

@@ -8,7 +8,7 @@ INCLUDES = -I$(top_srcdir)/ufo/include $(all_includes)
 noinst_LTLIBRARIES = liblayouts.la
 
 liblayouts_la_SOURCES = \
-	uboxlayout.cpp \
 	uborderlayout.cpp \
+	uboxlayout.cpp \
 	uflowlayout.cpp
 

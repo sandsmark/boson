@@ -346,7 +346,7 @@ UBasicLookAndFeel::initThemeMap(UThemeMap & themeMap) {
 	themeMap["URadioButton.inactiveIcon"] = rbInactiveIcon;
 
 
-	themeMap["UComboBox.palette"] = m_controlPalette;
+	themeMap["UComboBox.palette"] = m_inputPalette;//m_controlPalette;
 	themeMap["UComboBox.font"] = m_controlFont;
 	themeMap["UComboBox.border"] = lineBorder;//lineBorder;
 	//themeMap["UComboBox.selectionBackground"] = m_selectBackground;

@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -84,6 +84,7 @@ UBasicInternalFrameUI::installUI(UWidget * w) {
 	//if ( !frame.equals(frame) ) return:
 
 	m_frame->setLayout(new UBorderLayout(0, 0));
+/*
 
 	InternalFrameTitleBar * title = createTitleBar(m_frame);
 
@@ -99,7 +100,7 @@ UBasicInternalFrameUI::installUI(UWidget * w) {
 	// of the internal frame
 	//title->validate();
 	title->setPalette(w->getPalette());
-
+*/
 	m_frame->add(m_frame->getRootPane(), UBorderLayout::Center);
 }
 
@@ -109,12 +110,12 @@ UBasicInternalFrameUI::uninstallUI(UWidget * w) {
 		// throw an exception ??
 		return ;
 	}
-	UWidgetUI::uninstallUI(w);
+	UWidgetUI::uninstallUI(w);/*
 
 	m_titleBar->sigMousePressed().disconnect(slot(*m_titleBar, &InternalFrameTitleBar::mousePressed));
 	m_titleBar->sigMouseDragged().disconnect(slot(*m_titleBar, &InternalFrameTitleBar::mouseDragged));
 
-	setTitleBar(NULL);
+	setTitleBar(NULL);*/
 	m_frame->remove(m_frame->getRootPane());
 }
 

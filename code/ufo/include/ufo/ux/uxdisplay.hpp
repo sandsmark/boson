@@ -1,11 +1,12 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
     file              : include/ufo/ux/uxdisplay
     begin             : Wed Jul 28 2004
+    $Id$
  ***************************************************************************/
 
 /***************************************************************************
@@ -228,7 +229,7 @@ protected: // Protected methods
 	virtual bool mouseButtonDown(UContext * context,
 		int x, int y, UMod_t button, bool push = true);
 	virtual bool mouseButtonUp(UContext * context,
-		int x, int y, UMod_t button, bool pus = true);
+		int x, int y, UMod_t button, bool push = true);
 	virtual bool mouseWheelDown(UContext * context,
 		int x, int y, int delta = -120, int mouseWheelNum = 0, bool push = true);
 	virtual bool mouseWheelUp(UContext * context,

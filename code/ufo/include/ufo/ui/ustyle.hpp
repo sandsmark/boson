@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -118,7 +118,7 @@ public: // basic widget templates
 
 public: // widget drawing
 	/** Paints icon and text of a compound widget. */
-	
+
 	virtual void paintBorder(UGraphics * g, UWidget * w,
 		const URectangle & rect, BorderType borderType) = 0;
 

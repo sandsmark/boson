@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -75,24 +75,25 @@ UWidget::UWidget()
 	: m_context(NULL)
 	, m_ui(NULL)
 	, m_isVisible(false)
-	, m_hasClipping(false)
+	, m_hasClipping(true)
 	, m_isEnabled(true)
 	, m_isOpaque(true)
 	, m_isFocusable(true)
 	, m_isInValidHierarchy(false)
 	, m_needsValidation(ValidationAll)
-	, m_eventState(0) // FIXME
+	, m_eventState(0)//MouseEvents | MouseMotionEvents) // FIXME
 	, m_uiAttributes(0xffffffff)
 	, m_parent(NULL)
 	, m_children()
 	, m_layout(NULL)
 	, m_popupMenu(NULL)
 	, m_bounds()
-	, m_cachedRootLocation()
+	, m_clipBounds(URectangle::invalid)
+	, m_cachedRootLocation(UPoint::invalid)
 	, m_minimumSize()
-	, m_cachedMinimumSize()
-	, m_preferredSize()
-	, m_cachedPreferredSize()
+	, m_maximumSize(UDimension::maxDimension)
+	, m_preferredSize(UDimension::invalid)
+	, m_cachedPreferredSize(UDimension::invalid)
 	, m_margin()
 	, m_horizontalAlignment(AlignLeft)
 	, m_verticalAlignment(AlignCenter)
@@ -100,6 +101,7 @@ UWidget::UWidget()
 	, m_font(NULL)
 	, m_border(NoBorder)
 	, m_palette(UPalette::nullPalette)
+	, m_opacity(1.0f)
 	//, m_bgColor(NULL)
 	//, m_fgColor(NULL)
 	, m_properties()
@@ -119,23 +121,24 @@ UWidget::UWidget(ULayoutManager * layout)
 	: m_context(NULL)
 	, m_ui(NULL)
 	, m_isVisible(false)
-	, m_hasClipping(false)
+	, m_hasClipping(true)
 	, m_isEnabled(true)
 	, m_isOpaque(true)
 	, m_isFocusable(true)
 	, m_needsValidation(ValidationAll)
-	, m_eventState(0) // FIXME
+	, m_eventState(0)//MouseEvents | MouseMotionEvents) // FIXME
 	, m_uiAttributes(0xffffffff)
 	, m_parent(NULL)
 	, m_children()
 	, m_layout(layout)
 	, m_popupMenu(NULL)
 	, m_bounds()
-	, m_cachedRootLocation()
+	, m_clipBounds(URectangle::invalid)
+	, m_cachedRootLocation(UPoint::invalid)
 	, m_minimumSize()
-	, m_cachedMinimumSize()
-	, m_preferredSize()
-	, m_cachedPreferredSize()
+	, m_maximumSize(UDimension::maxDimension)
+	, m_preferredSize(UDimension::invalid)
+	, m_cachedPreferredSize(UDimension::invalid)
 	, m_margin()
 	, m_horizontalAlignment(AlignLeft)
 	, m_verticalAlignment(AlignCenter)
@@ -143,6 +146,7 @@ UWidget::UWidget(ULayoutManager * layout)
 	, m_font(NULL)
 	, m_border(NoBorder)
 	, m_palette(UPalette::nullPalette)
+	, m_opacity(1.0f)
 	, m_properties()
 	, m_inputMap(new UInputMap())
 	, m_ancestorInputMap(new UInputMap())
@@ -200,6 +204,7 @@ UWidget::isVisible() const {
 void
 UWidget::setClipping(bool enable) {
 	m_hasClipping = enable;
+	repaint();
 }
 
 bool
@@ -223,21 +228,36 @@ UWidget::setEnabled(bool b) {
 
 void
 UWidget::setOpaque(bool o) {
-	if (o != m_isOpaque) {
+	/*if (o != m_isOpaque) {
 		m_isOpaque = o;
 		// FIXME: invalidate?
+		repaint();
+	}*/
+	if (o && (m_opacity != 1.0f)) {
+		m_opacity = 1.0f;
+		repaint();
+	} else if (!o && (m_opacity != 0.0f)) {
+		m_opacity = 0.0f;
 		repaint();
 	}
 }
 bool
 UWidget::isOpaque() const {
-	return m_isOpaque;
+	return (m_opacity == 1.0f);//m_isOpaque;
 }
 
+void
+UWidget::setOpacity(float f) {
+	m_opacity = f;
+}
+float
+UWidget::getOpacity() const {
+	return m_opacity;
+}
 
 bool
 UWidget::isActive() const {
-	return hasMouseFocus();//m_isActive;
+	return false;//hasMouseFocus();//m_isActive;
 }
 
 bool
@@ -247,7 +267,7 @@ UWidget::isInValidHierarchy() const {
 
 bool
 UWidget::isValid() const {
-	return m_needsValidation == ValidationNone;//m_isValid;
+	return !(m_needsValidation & ValidationLayout);//== ValidationNone;//m_isValid;
 }
 void
 UWidget::validate() {
@@ -305,6 +325,7 @@ void
 UWidget::validateSelf() {
 	if (//(validA & ValidationLayout) &&
 			(m_needsValidation & ValidationLayout)) {
+		m_needsValidation &= ~ValidationLayout;
 		doLayout();
 		m_needsValidation &= ~ValidationLayout;
 	}
@@ -313,10 +334,14 @@ UWidget::validateSelf() {
 void
 UWidget::invalidateSelf() {
 	m_needsValidation |= ValidationLayout;
+	m_cachedRootLocation = UPoint::invalid;
+	m_cachedPreferredSize = UDimension::invalid;
+	m_clipBounds = URectangle::invalid;
 	//if (invalidA & ValidationLayout) {
-		m_cachedRootLocation.x = m_cachedRootLocation.y = 0;
+	/*	m_cachedRootLocation.x = m_cachedRootLocation.y = 0;
 		m_cachedPreferredSize.w = m_cachedPreferredSize.h = 0;
-		m_cachedMinimumSize.w = m_cachedMinimumSize.h = 0;
+		m_clipBounds.w = m_clipBounds.h = 0;*/
+		//m_cachedMinimumSize.w = m_cachedMinimumSize.h = 0;
 	//}
 }
 void
@@ -353,72 +378,63 @@ UWidget::invalidateTree() {
 	}
 }
 
-UDimension
-UWidget::getInnerSize() const {
-	const UInsets & in = getInsets();
-	return UDimension(
-		m_bounds.w - in.getHorizontal(),
-		m_bounds.h - in.getVertical()
-	);
-}
-
-
 void
 UWidget::setBounds(int x, int y, int w, int h) {
-	UEvent::Type type = UEvent::NoEvent;
+	// check size
 	if (w != m_bounds.w || h != m_bounds.h) {
-		type = UWidgetEvent::WidgetResized;
-	}
-
-	if (x != m_bounds.x || y != m_bounds.y) {
-		type = UWidgetEvent::WidgetMoved;
-	}
-	if (type != UEvent::NoEvent) {
-		// widget bounds have changed
-		UWidgetEvent * e = new UWidgetEvent(this, type);
-		processWidgetEvent(e);
-
-		m_bounds.x = x;
-		m_bounds.y = y;
 		m_bounds.w = w;
 		m_bounds.h = h;
 
-		// FIXME
-		// invalidint gthe whole component tree is necessarry to revalidate
-		// the root location
-		//invalidate();
-		invalidateTree();
+		// check for minimum size
+		m_bounds.expand(m_minimumSize);
+		m_bounds.clamp(m_maximumSize);
+		UWidgetEvent * e = new UWidgetEvent(this, UWidgetEvent::WidgetResized);
+		processWidgetEvent(e);
 
+		// size changed, invalidate childs (and ancestors)
+		invalidateTree();
+		repaint();
+	}
+	// check location
+	if (x != m_bounds.x || y != m_bounds.y) {
+		m_bounds.x = x;
+		m_bounds.y = y;
+		UWidgetEvent * e = new UWidgetEvent(this, UWidgetEvent::WidgetMoved);
+		processWidgetEvent(e);
+
+		// position changed, invalidate ancestors
+		//invalidate();
+		// FIXME: need an invalidate position vs. invalidate size
+		invalidateTree();
 		repaint();
 	}
 }
-void
-UWidget::setBounds(const URectangle & b) {
-	setBounds(b.x,b.y, b.w, b.h);
-}
-const URectangle &
+
+URectangle
 UWidget::getBounds() const {
 	return m_bounds;
 }
 
 URectangle
-UWidget::getInnerBounds() const {
-	const UInsets & in = getInsets();
-	return URectangle(
-		in.left, in.top,
-		m_bounds.w - in.getHorizontal(), m_bounds.h - in.getVertical()
-	);
+UWidget::getClipBounds() const {
+	if (m_clipBounds.isInvalid()) {
+		m_clipBounds = URectangle(UPoint(), UDimension::maxDimension);
+		// compute recursive (expensive, but only called when invalid)
+		if (getParent()) {
+			URectangle pRect(getParent()->getClipBounds());
+			pRect -= getParent()->getInsets();
+			m_clipBounds.intersect(pRect);
+		}
+		if (hasClipping()) {
+			m_clipBounds.intersect(getRootBounds());
+		}
+	}
+	return m_clipBounds;
 }
-
-URectangle
-UWidget::getRootBounds() const {
-	return URectangle(getRootLocation(), getSize());
-}
-
 
 UPoint
 UWidget::getRootLocation() const {
-	if (m_cachedRootLocation.isNull()) {
+	if (m_cachedRootLocation.isInvalid()) {
 		m_cachedRootLocation = getLocation();
 
 		for (UWidget * w = getParent(); w != NULL; w = w->getParent()) {
@@ -508,40 +524,34 @@ UWidget::getBackground() const {
 void
 UWidget::paint(UGraphics * g) {
 	if (isVisible()) {
-		// NOTE:
-		// is this necessary? could that be in another place?
-		//
-		/*if ( !isValid() ) validate(); */
 		if (!isValid()) {
 			validate();
 		}
 
-		//glPushMatrix();
-		//{
+		// set graphics attributes
 		URectangle old_clipping;
 		if (hasClipping()) {
-			//graphics->pushClipRect();
+			// FIXME: This just silently returns. Is this correct?
+			if (getWidth() <= 0 || getHeight() <= 0) {
+				return;
+			}
 			old_clipping = g->getClipRect();
-			g->setClipRect(getRootBounds());
+			g->setClipRect(getClipBounds());
 		}
 
-		//glTranslatef(getX(), getY(), 0);
 		g->translate(getX(), getY());
 		g->setFont(getFont());
-		paintWidget(g);
 
+		paintWidget(g);
+		paintChildren(g);
 		paintBorder(g);
 
-		paintChildren(g);
-
+		// restore graphics attributes
 		g->translate(-getX(), -getY());
 
 		if (hasClipping()) {
-			//graphics->popClipRect();
 			g->setClipRect(old_clipping);
 		}
-		//}
-		//glPopMatrix();
 	}
 }
 
@@ -1292,11 +1302,14 @@ UWidget::setIndexOf(UWidget * w, int index) {
 
 	if (pos != m_children.end()) {
 		m_children.erase(pos);
-		if (index == -1 || (unsigned int) index == m_children.size()) {
+		// range checking: if invalid position, push back
+		if (index < 0 || (unsigned int)(index) >= m_children.size()) {
 			m_children.push_back(w);
 		} else {
 			m_children.insert(m_children.begin() + index, w);
 		}
+		// The child widget might be partially hidden or revealed now
+		repaint();
 	}
 }
 
@@ -1395,26 +1408,7 @@ UWidget::setMinimumSize(const UDimension & minimumSize ) {
 
 UDimension
 UWidget::getMinimumSize() const {
-	if (m_minimumSize.isEmpty() == false) {
-		return m_minimumSize;
-	}
-	if (m_cachedMinimumSize.isEmpty() == false) {
-		return m_cachedMinimumSize;
-	}
-
-	// compute new preferred size
-	if (m_ui) {
-		m_cachedMinimumSize = m_ui->getMinimumSize(this);
-	}
-	if (m_cachedMinimumSize.isEmpty() && m_layout) {
-		// try to query the layout manager
-		m_cachedMinimumSize = m_layout->getMinimumLayoutSize(this);
-	}
-
-	if (m_cachedMinimumSize.isEmpty() == false) {
-		return m_cachedMinimumSize;
-	}
-	return UDimension(0, 0);
+	return m_minimumSize;
 }
 
 
@@ -1428,21 +1422,21 @@ UWidget::setPreferredSize(const UDimension & preferredSize) {
 UDimension
 UWidget::getPreferredSize() const {
 	// check whether there is a explicetly requested preferred size
-	if (m_preferredSize.isEmpty() == false) {
+	if (m_preferredSize.isInvalid() == false) {
 		return m_preferredSize;
 	}
 	// check whether this value is already cached
-	if (m_cachedPreferredSize.isEmpty() == false) {
+	if (m_cachedPreferredSize.isInvalid() == false && isValid()) {
 		return m_cachedPreferredSize;
 	} else if (m_ui) {
 		// query the UI object for a preferred size
 		m_cachedPreferredSize = m_ui->getPreferredSize(this);
 	}
-	if (m_cachedPreferredSize.isEmpty() && m_layout) {
+	if (m_cachedPreferredSize.isInvalid() && m_layout) {
 		// try to query the layout manager
 		m_cachedPreferredSize = m_layout->getPreferredLayoutSize(this);
 	}
-	if (m_cachedPreferredSize.isEmpty() && m_bgDrawable) {
+	if (m_cachedPreferredSize.isInvalid() && m_bgDrawable) {
 		// try to query the background drawable
 		// FIXME: Should this value be cached?
 		m_cachedPreferredSize = UDimension(
@@ -1451,50 +1445,83 @@ UWidget::getPreferredSize() const {
 		);
 	}
 
-	if (m_cachedPreferredSize.isEmpty() == false) {
+	if (m_cachedPreferredSize.isInvalid() == false) {
 		return m_cachedPreferredSize;
 	}
-	return UDimension(0, 0);
+	return UDimension();
+	/*
+	// FIXME: last resort
+	if (getSize().isEmpty()) {
+		return m_minimumSize;
+	} else {
+		return getSize();
+	}*/
 }
 
-int
-UWidget::getHeightForWidth(int w) const {
-	int h = 0; // by default a widget's height does not depend on it's width
+UDimension
+UWidget::getPreferredSize(const UDimension & maxSize) const {
+	UDimension ret(m_preferredSize);
+	// check whether there is a explicetly requested preferred size
+	if (ret.isInvalid() == false) {
+		ret.clamp(maxSize);
+		return ret;
+	}
+	// this time we do not cache the values
 	if (m_ui) {
-		h = m_ui->getHeightForWidth(this, w);
+		// query the UI object for a preferred size
+		ret = m_ui->getPreferredSize(this, maxSize);
 	}
-	if (h == 0 && m_layout) {
-		h = m_layout->getLayoutHeightForWidth(this, w);
+	if (ret.isInvalid() && m_layout) {
+		// try to query the layout manager
+		ret = m_layout->getPreferredLayoutSize(this, maxSize);
 	}
-	return h;
+	if (ret.isInvalid() && m_bgDrawable) {
+		// try to query the background drawable
+		// FIXME: Should this value be cached?
+		ret = UDimension(
+			m_bgDrawable->getDrawableWidth(),
+			m_bgDrawable->getDrawableHeight()
+		);
+	}
+	ret.clamp(maxSize);
+	return ret;
+	/*
+	if (ret.isEmpty() == false) {
+		ret.clamp(maxSize);
+		return ret;
+	}
+	// FIXME: last resort
+	return UDimension();//getSize();*/
 }
 
 void
 UWidget::setMaximumSize(const UDimension & maximumSize) {
-	// FIXME: deprecated?
+	m_maximumSize = maximumSize;
+	repaint();
 }
 
 
 UDimension
 UWidget::getMaximumSize() const {
-	// FIXME: deprecated?
-	return getPreferredSize();
+	return m_maximumSize;
 }
 
 
 void
 UWidget::put(const std::string & key, UObject * value) {
 	// mem manager code
+	if (value) {
+		value->reference();
+	}
 	if (m_properties[key]) {
 		m_properties[key]->unreference();
 	}
 	m_properties[key] = value;
-	value->reference();
 }
-void
-UWidget::put(const std::string & key, const int value) {
+/*void
+UWidget::put(const std::string & key, int value) {
 	put(key, new UInteger(value));
-}
+}*/
 void
 UWidget::put(const std::string & key, const std::string & value) {
 	put(key, new UString(value));
@@ -1512,6 +1539,19 @@ UWidget::get(const std::string & key) const {
 	return NULL;
 }
 
+std::string
+UWidget::getString(const std::string & key) const {
+	UPropertiesMap::const_iterator iter;
+	iter = m_properties.find(key);
+
+	if (iter != m_properties.end()) {
+		if (UString * str = dynamic_cast<UString*>((*iter).second)) {
+			return *str;
+		}
+	}
+
+	return "";
+}
 
 
 void
@@ -1589,16 +1629,22 @@ UWidget::processKeyBindings(UKeyEvent * e) {
 
 void
 UWidget::resetFocus() {
+	URootPane * root = getRootPane(true);
 	if (isFocused() || isChildFocused()) {
 		getFocusedWidget()->releaseFocus();
-		if (getRootPane(true)) {
-			getRootPane(true)->requestFocus();
+		// focus root pane if possible
+		if (root == this) {
+			sm_inputFocusWidget = NULL;
+		} else if (root) {
+			root->requestFocus();
 		}
 	}
-	if (hasMouseFocus() && getRootPane(true)) {
+	if (hasMouseFocus() && root) {
 		UPoint mouse_pos;
 		UDisplay::getDefault()->getMouseState(&mouse_pos.x, &mouse_pos.y);
-		sm_mouseFocusWidget = getRootPane(true)->getVisibleWidgetAt(mouse_pos);
+		// getVisibleWidget does already necessary NULL return
+		// if no widget is visible
+		sm_mouseFocusWidget = root->getVisibleWidgetAt(mouse_pos);
 	}
 }
 

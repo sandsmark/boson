@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -37,17 +37,6 @@ using namespace ufo;
 UFO_IMPLEMENT_DYNAMIC_CLASS(UBorderLayout, ULayoutManager)
 UFO_IMPLEMENT_ABSTRACT_CLASS(ULayoutManager, UObject)
 
-static void
-fixSize(UDimension* size, const UWidget* w, int maxWidth) {
-	if (size->w > maxWidth) {
-		size->w = maxWidth;
-		int h = w->getHeightForWidth(maxWidth);
-		if (h > 0) {
-			size->h = h;
-		}
-	}
-}
-
 const UString * UBorderLayout::Center = new UString("center");
 const UString * UBorderLayout::North = new UString("north");
 const UString * UBorderLayout::South = new UString("south");
@@ -60,50 +49,18 @@ UBorderLayout::UBorderLayout(int hgap, int vgap)
 
 UBorderLayout::~UBorderLayout() {}
 
-UDimension
-UBorderLayout::getMinimumLayoutSize(const UWidget * parent) const {
-	UDimension ret;
-	UWidget * w = NULL;
-
-	if ( (w = getChildWidgetAt(parent, East)) ) {
-		const UDimension & wd = w->getMinimumSize();
-		ret.w = wd.w + m_hgap;
-		ret.h = wd.h;
-	}
-	if ( (w = getChildWidgetAt(parent, West)) ) {
-		const UDimension & wd = w->getMinimumSize();
-		ret.w += wd.w + m_hgap;
-		ret.h = std::max(wd.h, ret.h);
-	}
-	if ( (w = getChildWidgetAt(parent, Center)) ) {
-		const UDimension & wd = w->getMinimumSize();
-		ret.w += wd.w;
-		ret.h = std::max(wd.h, ret.h);
-	}
-	if ( (w = getChildWidgetAt(parent, North)) ) {
-		const UDimension & wd = w->getMinimumSize();
-		ret.w = std::max(wd.w, ret.w);
-		ret.h += wd.h + m_vgap;
-	}
-	if ( (w = getChildWidgetAt(parent, South)) ) {
-		const UDimension & wd = w->getMinimumSize();
-		ret.w = std::max(wd.w, ret.w);
-		ret.h += wd.h + m_vgap;
-	}
-
-	const UInsets & in = parent->getInsets();
-
-	ret.w += in.left + in.right;
-	ret.h += in.top + in.bottom;
-
-	return ret;
-}
 
 UDimension
-UBorderLayout::getPreferredLayoutSize(const UWidget * parent) const {
+UBorderLayout::getPreferredLayoutSize(const UWidget * container,
+		const UDimension & maxSizeA) const {
 	UDimension ret;
 
 	UWidget * w = NULL;
+
+	const UInsets & in = container->getInsets();
+	UDimension maxSize(maxSizeA);
+	maxSize.w -= in.getHorizontal();
+	maxSize.h -= in.getVertical();
 
 	// compute first width
 	// because NORTH is upper EAST/WEST
@@ -116,33 +73,35 @@ UBorderLayout::getPreferredLayoutSize(const UWidget * parent) const {
 	// |  S   |
 	// --------
 
-	if ( (w = getChildWidgetAt(parent, East)) ) {
-		const UDimension & wd = w->getPreferredSize();
+	if ( (w = getChildWidgetAt(container, East)) ) {
+		const UDimension & wd = w->getPreferredSize(maxSize);
 		ret.w = wd.w + m_hgap;
 		ret.h = wd.h;
+		maxSize.w -= ret.w;
 	}
-	if ( (w = getChildWidgetAt(parent, West)) ) {
-		const UDimension & wd = w->getPreferredSize();
+	if ( (w = getChildWidgetAt(container, West)) ) {
+		const UDimension & wd = w->getPreferredSize(maxSize);
 		ret.w += wd.w + m_hgap;
 		ret.h = std::max(wd.h, ret.h);
+		maxSize.w -= wd.w + m_hgap;
 	}
-	if ( (w = getChildWidgetAt(parent, Center)) ) {
-		const UDimension & wd = w->getPreferredSize();
+	if ( (w = getChildWidgetAt(container, Center)) ) {
+		const UDimension & wd = w->getPreferredSize(maxSize);
 		ret.w += wd.w;
 		ret.h = std::max(wd.h, ret.h);
+		maxSize.h -= ret.h;
 	}
-	if ( (w = getChildWidgetAt(parent, North)) ) {
-		const UDimension & wd = w->getPreferredSize();
+	if ( (w = getChildWidgetAt(container, North)) ) {
+		const UDimension & wd = w->getPreferredSize(maxSize);
+		ret.w = std::max(wd.w, ret.w);
+		ret.h += wd.h + m_vgap;
+		maxSize.h -= wd.h + m_vgap;
+	}
+	if ( (w = getChildWidgetAt(container, South)) ) {
+		const UDimension & wd = w->getPreferredSize(maxSize);
 		ret.w = std::max(wd.w, ret.w);
 		ret.h += wd.h + m_vgap;
 	}
-	if ( (w = getChildWidgetAt(parent, South)) ) {
-		const UDimension & wd = w->getPreferredSize();
-		ret.w = std::max(wd.w, ret.w);
-		ret.h += wd.h + m_vgap;
-	}
-
-	const UInsets & in = parent->getInsets();
 
 	ret.w += in.left + in.right;
 	ret.h += in.top + in.bottom;
@@ -151,8 +110,8 @@ UBorderLayout::getPreferredLayoutSize(const UWidget * parent) const {
 }
 
 void
-UBorderLayout::layoutContainer(const UWidget * parent) {
-	URectangle bounds = parent->getInnerBounds();
+UBorderLayout::layoutContainer(const UWidget * container) {
+	URectangle bounds = container->getInnerBounds();
 
 	int top = bounds.y;
 	int left = bounds.x;
@@ -161,48 +120,44 @@ UBorderLayout::layoutContainer(const UWidget * parent) {
 
 	UWidget * w = NULL;
 
-	if ( (w = getChildWidgetAt(parent, North)) ) {
-		UDimension wd = w->getPreferredSize();
-		fixSize(&wd, w, width);
+	if ( (w = getChildWidgetAt(container, North)) ) {
+		const UDimension & wd = w->getPreferredSize(UDimension(width, height));
 		w->setBounds(left, top, width, wd.h);
 		top += wd.h + m_vgap;
 		height -= wd.h + m_vgap;
 	}
-	if ( (w = getChildWidgetAt(parent, South)) ) {
-		UDimension wd = w->getPreferredSize();
-		fixSize(&wd, w, width);
+	if ( (w = getChildWidgetAt(container, South)) ) {
+		const UDimension & wd = w->getPreferredSize(UDimension(width, height));
 		w->setBounds(left, top + height - wd.h, width, wd.h);
 		height -= wd.h + m_vgap;
 	}
-	if ( (w = getChildWidgetAt(parent, West)) ) {
-		UDimension wd = w->getPreferredSize();
-		fixSize(&wd, w, width);
+	if ( (w = getChildWidgetAt(container, West)) ) {
+		const UDimension & wd = w->getPreferredSize(UDimension(width, height));
 		w->setBounds(left, top, wd.w, height);
 		left += wd.w + m_hgap;
 		width -= wd.w + m_hgap;
 	}
-	if ( (w = getChildWidgetAt(parent, East)) ) {
-		UDimension wd = w->getPreferredSize();
-		fixSize(&wd, w, width);
+	if ( (w = getChildWidgetAt(container, East)) ) {
+		const UDimension & wd = w->getPreferredSize(UDimension(width, height));
 		w->setBounds(left + width - wd.w, top, wd.w, height - top);
 		width -= wd.w + m_hgap;
 	}
-	if ( (w = getChildWidgetAt(parent, Center)) ) {
+	if ( (w = getChildWidgetAt(container, Center)) ) {
 		w->setBounds(left, top, width, height);
 	}
 }
 
 UWidget *
-UBorderLayout::getChildWidgetAt(const UWidget * parent, const UString * position) const {
+UBorderLayout::getChildWidgetAt(const UWidget * container, const UString * position) const {
 	UWidget * ret = NULL;
 	// special case for centered Widget
 	UWidget * center = NULL;
 	bool wantCenter = position->equals(Center);
 
-	int nWidgets = parent->getWidgetCount();
+	int nWidgets = container->getWidgetCount();
 
 	for (int i = 0;i < nWidgets;i++) {
-		UWidget * w = parent->getWidget(i);
+		UWidget * w = container->getWidget(i);
 
 		UString * pos = dynamic_cast<UString *>(w->get("layout"));
 		if (position->equals(pos)) {

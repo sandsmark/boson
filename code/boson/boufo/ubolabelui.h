@@ -52,6 +52,7 @@ public:
 	const std::string & getLafId();
 
 	UDimension getPreferredSize(const UWidget * w);
+	UDimension getPreferredSize(const UWidget * w, const UDimension & max);
 
 	virtual int getHeightForWidth(const UWidget * widget, int w);
 
@@ -74,7 +75,7 @@ protected:
 		Alignment vAlignment,
 		int textIconGap);
 	void stylePaintControlCaption(UGraphics * g, UWidget * w, const URectangle & rect, const std::string & text);
-	UDimension getStyleCompoundPreferredSize(const UCompound * w, const UFont * f, const std::string & text, const UIcon * icon);
+	UDimension getStyleCompoundPreferredSize(const UCompound * w, const UFont * f, const std::string & text, const UIcon * icon, const UDimension& maxSize);
 
 
 private:  // Private attributes

@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -37,7 +37,7 @@
 */
 #define UFO_MAJOR_VERSION	0
 #define UFO_MINOR_VERSION	7
-#define UFO_MICRO_VERSION	4
+#define UFO_MICRO_VERSION	5
 
 namespace ufo {
 struct UVersionInfo {

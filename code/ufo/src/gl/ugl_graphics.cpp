@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -54,7 +54,7 @@ UGL_Graphics::UGL_Graphics(UContext * context)
 	, m_color()//UColor::black)
 	, m_clearColor()//UColor::black)
 	, m_font(NULL) // FIXME ! insert valid value
-	, m_clipRect()
+	, m_clipRect(URectangle::invalid)
 {
 	//m_color->reference();
 	//m_clearColor->reference();
@@ -80,9 +80,10 @@ UGL_Graphics::resetDeviceAttributes() {
 
 	ugl_driver->glShadeModel(GL_FLAT);
 
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	ugl_driver->glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+
+	ugl_driver->glEnable(GL_BLEND);
+	ugl_driver->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 void
@@ -102,17 +103,27 @@ UGL_Graphics::resetDeviceViewMatrix() {
 	ugl_driver->glMatrixMode(GL_PROJECTION);
 	ugl_driver->glLoadIdentity();
 
+	ugl_driver->glOrtho(
+		0,
+		contextBounds.w,
+		contextBounds.h,
+		0,
+		-100,
+		100
+	);
+	ugl_driver->glTranslatef(0.375, 0.375, 0);
+
 	// set the ortho projection matrix using an offset of 3/8
 	// to eliminate graphic bugs with coordinates drawn at pixel boundaries.
 	// thanks to Paul Martz
-	ugl_driver->glOrtho(
+	/*ugl_driver->glOrtho(
 		-0.375,
 		contextBounds.w - 0.375,
 		contextBounds.h - 0.375,
 		-0.375,
 		-100,
 		100
-	);
+	);*/
 
 
 	ugl_driver->glMatrixMode(GL_MODELVIEW);
@@ -215,15 +226,9 @@ UGL_Graphics::dump() {
 
 void
 UGL_Graphics::setColor(const UColor & color) {
-	// color might be overwritten by system (or ui)
-	//if (color && m_color != color) {
-	//if (color) { // && !m_color->equals(color)) {
-	//	m_color->unreference();
-		m_color = color;
-	//	m_color->reference();
+	m_color = color;
 
-		ugl_driver->glColor3fv(m_color.getFloat());
-	//}
+	ugl_driver->glColor4fv(m_color.getFloat());
 }
 
 const UColor &
@@ -250,7 +255,7 @@ UGL_Graphics::getClearColor() const {
 void
 UGL_Graphics::setFont(const UFont * font) {
 	if (font && m_font != font) {
-		//swapChildren(m_font, font);
+		//swapPointers(m_font, font);
 		if (m_font) {
 			m_font->unreference();
 		}
@@ -282,15 +287,20 @@ UGL_Graphics::popClipRect() {
 void
 UGL_Graphics::setClipRect(const URectangle & rect) {
 	m_clipRect = rect;
+	// ensure at least zero size
+	m_clipRect.expand(UDimension(0, 0));
 
-	if (!m_clipRect.isEmpty()) {
+	if (m_clipRect.isInvalid()) {
+		ugl_driver->glDisable(GL_SCISSOR_TEST);
+	} else {
 		ugl_driver->glEnable(GL_SCISSOR_TEST);
-		//URectangle clipRect = m_context->mapToOpenGL(rect, m_context->getRootPane());
 		URectangle clipRect = mapToDevice(rect);
 
-		ugl_driver->glScissor(clipRect.x, clipRect.y, clipRect.w, clipRect.h);
-	} else {
-		ugl_driver->glDisable(GL_SCISSOR_TEST);
+		// FIXME: Is +1 correct? This allows modifying the border
+		ugl_driver->glScissor(
+			clipRect.x, clipRect.y,
+			clipRect.w + 1, clipRect.h + 1
+		);
 	}
 }
 
@@ -335,12 +345,13 @@ UGL_Graphics::getTranslationY() const {
 
 void
 UGL_Graphics::drawRect(const URectangle & rect) {
+	// -1 is correct, as lines are drawn like rectangles with
+	// width 1 measured in y direction
 	ugl_driver->glBegin(GL_LINE_LOOP);
 	ugl_driver->glVertex2i(rect.x, rect.y);
-	ugl_driver->glVertex2i(rect.x + rect.w, rect.y);
-	ugl_driver->glVertex2i(rect.x + rect.w, rect.y + rect.h);
-	ugl_driver->glVertex2i(rect.x, rect.y + rect.h);
-	ugl_driver->glVertex2i(rect.x, rect.y);
+	ugl_driver->glVertex2i(rect.x + rect.w - 1, rect.y);
+	ugl_driver->glVertex2i(rect.x + rect.w - 1, rect.y + rect.h - 1);
+	ugl_driver->glVertex2i(rect.x, rect.y + rect.h - 1);
 	ugl_driver->glEnd();
 }
 

@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -39,22 +39,16 @@ UFO_IMPLEMENT_DEFAULT_DYNAMIC_CLASS(UMenu, UMenuItem)
 UMenu::UMenu(const std::string & text, UIcon * icon)
 		: UMenuItem(text, icon)
 {
-	m_popupMenu = new UPopupMenu(this);
-	trackPointer(m_popupMenu);
-
-	// if a poup menu is opened and this Menu gets the mouse focus,
-	// this widget opens its popup menu
-	// NOTE:
-	// should this do the LAF?
-//	addMouseMotionListener(new UPopupMenuMotionListener());
+	//m_popupMenu = new UPopupMenu(this);
+	setPopupMenu(new UPopupMenu(this));
+	//trackPointer(m_popupMenu);
 }
 UMenu::UMenu(UIcon * icon)
 		: UMenuItem(icon)
 {
-	m_popupMenu = new UPopupMenu(this);
-	trackPointer(m_popupMenu);
-
-//	addMouseMotionListener(new UPopupMenuMotionListener());
+	//m_popupMenu = new UPopupMenu(this);
+	setPopupMenu(new UPopupMenu(this));
+	//trackPointer(m_popupMenu);
 }
 
 
@@ -80,8 +74,8 @@ UMenu::updateUI() {
 
 void
 UMenu::addImpl(UWidget * w, UObject * constraints, int index) {
-	if (m_popupMenu) {
-		m_popupMenu->add(w, constraints, index);
+	if (getPopupMenu()) {
+		getPopupMenu()->add(w, constraints, index);
 	}
 }
 
@@ -100,16 +94,16 @@ UMenu::isTopLevelMenu() const {
 
 void
 UMenu::addSeparator() {
-	if (m_popupMenu) {
-		m_popupMenu->addSeparator();
+	if (getPopupMenu()) {
+		getPopupMenu()->addSeparator();
 	}
 }
 
 
 bool
 UMenu::isPopupMenuVisible() const {
-	if (m_popupMenu) {
-		return m_popupMenu->isVisible();
+	if (getPopupMenu()) {
+		return getPopupMenu()->isVisible();
 	}
 	return false;
 }
@@ -123,11 +117,11 @@ UMenu::setPopupMenuVisible(bool b) {
 	if (b) {
 		if (dynamic_cast<UPopupMenu*>(getParent())) {
 			// this is a sub menu
-			m_popupMenu->setPopupLocation(UPoint(getWidth(), 0));
+			getPopupMenu()->setPopupLocation(UPoint(getWidth(), 0));
 		} else {
-			m_popupMenu->setPopupLocation(UPoint(0, getHeight()));
+			getPopupMenu()->setPopupLocation(UPoint(0, getHeight()));
 		}
-		m_popupMenu->setVisible(true);
+		getPopupMenu()->setVisible(true);
 
 		if (UMenuBar * mb = dynamic_cast<UMenuBar*>(getParent())) {
 			mb->setVisibleMenu(this);
@@ -136,15 +130,15 @@ UMenu::setPopupMenuVisible(bool b) {
 		if (UMenuBar * mb = dynamic_cast<UMenuBar*>(getParent()) ) {
 			mb->setVisibleMenu(NULL);
 		}
-		m_popupMenu->setVisible(false);
+		getPopupMenu()->setVisible(false);
 	}
 }
 
 void
-UMenu::invalidate() {
-	UWidget::invalidate();
-	if (m_popupMenu) {
-		m_popupMenu->invalidate();
+UMenu::invalidateSelf() {
+	UWidget::invalidateSelf();
+	if (getPopupMenu()) {
+		getPopupMenu()->invalidateTree();
 	}
 }
 

@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -32,8 +32,8 @@
 
 namespace ufo {
 
-/**
-  *@author Johannes Schmidt
+/** @short A class representing an integer, derived from UObject.
+  * @author Johannes Schmidt
   */
 
 class UFO_EXPORT UInteger : public UObject {

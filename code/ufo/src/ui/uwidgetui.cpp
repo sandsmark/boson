@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -54,23 +54,15 @@ UWidgetUI::createUI(UWidget * w) {
 void
 UWidgetUI::installUI(UWidget * w) {
 	UUIManager * manager = w->getUIManager();
-	//w->setBorder(manager->getBorder(getLafId() + ".border"));
-	//w->setForegroundColor(manager->getColor(getLafId() + ".foreground"));
-	//w->setBackgroundColor(manager->getColor(getLafId() + ".background"));
-	//w->setFont(manager->getFont(getLafId() + ".font"));
 
 	uint32_t attribState = w->getUIAttributesState();
-	if (/*w->getBorder() == NULL || */(attribState & UWidget::AttribPalette)) {
+	if (attribState & UWidget::AttribPalette) {
 		w->setPalette(manager->getPalette(getLafId() + ".palette"));
 		w->markUIAttribute(UWidget::AttribPalette);
 	}
-	if (/*w->getBorder() == NULL || */(attribState & UWidget::AttribBorder)) {
+	if (attribState & UWidget::AttribBorder) {
 		w->setBorder(manager->getBorder(getLafId() + ".border"));
 		w->markUIAttribute(UWidget::AttribBorder);
-	}
-	if (/*w->getForegroundColor() == NULL ||*/ (attribState & UWidget::AttribPalette)) {
-		//w->setPalette(manager->getPalette(getLafId() + ".foreground"));
-		//w->markUIAttribute(UWidget::AttribPalette);
 	}
 	if (w->getFont() == NULL || (attribState & UWidget::AttribFont)) {
 		w->setFont(manager->getFont(getLafId() + ".font"));
@@ -80,24 +72,11 @@ UWidgetUI::installUI(UWidget * w) {
 
 void
 UWidgetUI::uninstallUI(UWidget * w) {
-	//w->setBorder(NULL);
-	//w->setForegroundColor();
-	//w->setBackgroundColor();
-	//w->setFont(NULL);
-
 	uint32_t attribState = w->getUIAttributesState();
 	if (attribState & UWidget::AttribBorder) {
 		w->setBorder(NoBorder);
 		w->markUIAttribute(UWidget::AttribBorder);
-	}/*
-	if (attribState & UWidget::AttribForeground) {
-		w->setForegroundColor(NULL);
-		w->markUIAttribute(UWidget::AttribForeground);
 	}
-	if (attribState & UWidget::AttribBackground) {
-		w->setBackgroundColor(NULL);
-		w->markUIAttribute(UWidget::AttribBackground);
-	}*/
 	if (attribState & UWidget::AttribPalette) {
 		w->setPalette(UPalette::nullPalette);
 		w->markUIAttribute(UWidget::AttribPalette);
@@ -106,28 +85,27 @@ UWidgetUI::uninstallUI(UWidget * w) {
 		w->setFont(NULL);
 		w->markUIAttribute(UWidget::AttribFont);
 	}
-	// FIXME !
-	// this is just an evil workaround
-	// I need to create a better way to
-	// distinguish user and LAF attributes
-	/*w->setBorder(NoBorder);
-	w->setForegroundColor(NULL);
-	w->setBackgroundColor(NULL);
-	w->setFont(NULL);*/
 }
-//#include "ufo/ufo_gl.hpp"
+
 void
 UWidgetUI::paint(UGraphics * g, UWidget * w) {
-	if (w->isOpaque()) {
+	//if (w->isOpaque()) {
+	//float oldAlpha = g->getAlpha();
+	//g->setAlpha(w->getOpacity());
+	if (w->getOpacity()) {
 		const UDimension & size = w->getSize(); // getInnerSize();
 		//const UInsets & insets = w->getInsets();
 		if (w->hasBackground()) {
 			w->getBackground()->paintDrawable(g, 0, 0, size.w, size.h);
 		} else {
-			g->setColor(w->getBackgroundColor());
+			UColor col(w->getBackgroundColor());
+			col.getFloat()[3] = w->getOpacity();
+			g->setColor(col);
 			g->fillRect(0, 0, size.w, size.h);
 		}
 	}
+	//g->setAlpha(oldAlpha);
+	//}
 }
 
 void
@@ -152,25 +130,22 @@ UWidgetUI::getLafId() {
 
 UDimension
 UWidgetUI::getPreferredSize(const UWidget * w) {
-	return UDimension();
+	return UDimension::invalid;
+}
+
+UDimension
+UWidgetUI::getPreferredSize(const UWidget * w, const UDimension & maxSize) {
+	return getPreferredSize(w);
 }
 
 UDimension
 UWidgetUI::getMinimumSize(const UWidget * w) {
-	return getPreferredSize(w);
+	return UDimension();
 }
 
 UDimension
 UWidgetUI::getMaximumSize(const UWidget * w) {
-	return getPreferredSize(w);
-}
-
-int
-UWidgetUI::getHeightForWidth(const UWidget * , int ) {
-	// by default a widget's height does not depend on it's width.
-	// other UI classes may override this (e.g. to support multi line
-	// labels)
-	return 0;
+	return UDimension::maxDimension;
 }
 
 //

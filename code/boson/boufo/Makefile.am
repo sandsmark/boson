@@ -12,7 +12,6 @@ KDE_CXXFLAGS = $(UFO_CFLAGS)
 libboufo_la_SOURCES = \
 	boufo.cpp \
 	boufoaction.cpp \
-	uboboxlayout.cpp \
 	ubolabelui.cpp \
 	uboprogress.cpp \
 	uboprogressui.cpp

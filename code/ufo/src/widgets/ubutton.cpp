@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -177,11 +177,23 @@ UButton::isSelected() const {
 }
 void
 UButton::setSelected(bool b) {
+	// test if something changed
+	if (b == isSelected()) {
+		return;
+	}
 	if (b) {
 		m_flags |= Selected;
 	} else {
 		m_flags &= ~Selected;
 	}
+
+	// fire toggle event
+	UActionEvent * ae = new UActionEvent(this, UEvent::Action,
+		UMod::NoModifier, getActionCommand());
+	ae->reference();
+	m_sigActivated(ae);
+	ae->unreference();
+
 	repaint();
 }
 
@@ -257,8 +269,9 @@ UButton::activate() {
 		} else {
 			setSelected(!isSelected());
 		}
+	} else {
+		fireActionEvent();
 	}
-	fireActionEvent();
 }
 
 
@@ -345,6 +358,10 @@ UButton::getInsets() const {
 	}
 }
 
+bool
+UButton::isActive() const {
+	return hasMouseFocus();
+}
 
 
 //

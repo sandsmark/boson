@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -137,12 +137,14 @@ UComboBox::getItemCount() const {
 
 int
 UComboBox::getVisibleRowCount() const {
-	return m_visRowCount;
+	//m_visRowCount
+	return m_listBox->getVisibleRowCount();
 }
 
 void
 UComboBox::setVisibleRowCount(int visibleRowCountA) {
-	m_visRowCount = visibleRowCountA;
+	//m_visRowCount = visibleRowCountA;
+	m_listBox->setVisibleRowCount(visibleRowCountA);
 	repaint();
 }
 

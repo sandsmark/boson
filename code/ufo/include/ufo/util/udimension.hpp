@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -30,58 +30,112 @@
 
 #include "../uobject.hpp"
 
+#include "uinsets.hpp"
+
 namespace ufo {
 
 /**
-  *@author Johannes Schmidt
+  * This class is not part of the @ref UObject inheritance structure.
+  * Use instead @ref UDimensionObject if you need a color derived from UObject.
+  *
+  * @short An abstraction to dimension (width and height).
+  *
+  * @author Johannes Schmidt
   */
 class UFO_EXPORT UDimension {
 public:
+	/** Creates an empty dimension (width == 0 and height == 0).
+	  */
 	UDimension();
+	/** Creates a dimension with the given width and height.
+	  * @param w The width
+	  * @param h The height
+	  */
 	UDimension(int w, int h);
 
+	/** @return The width of this dimension. */
 	int getWidth() const;
+	/** @return The height of this dimension. */
 	int getHeight() const;
 
-	void setSize(int w, int h);
-	/** for convenience */
-	UDimension getSize() const;
+
+	/** @return True if the width and height are equal to @p invalid
+	  * @see invalid
+	  */
+	bool isInvalid() const;
+	/** @return True if width or height is equal to 0. */
 	bool isEmpty() const;
+
+	/** Clamps this UDimension to have at most the dimension of
+	  * the given @p maxDim. Does nothing if maxDim is smaller than
+	  * this UDimension.
+	  */
+	void clamp(const UDimension & maxDim);
+	/** Expands this UDimension to have at least the dimension of
+	  * the given @p minDim. Does nothing if minDim is bigger than
+	  * this UDimension.
+	  */
+	void expand(const UDimension & minDim);
+
+	/** Sets the size of this dimension to the given values.
+	  * @param w The new width
+	  * @param h The new height
+	  */
+	void setSize(int w, int h);
+	/** This method is for convenience and mimics the API of widget types.
+	  * @return A copy of this dimension object.
+	  */
+	UDimension getSize() const;
 public: // Public operators
+	/** @return True if width and height are both not zero. */
 	bool operator()() { return !(isEmpty()); }
+	/** @return True if width or height is equal to 0. */
 	bool operator!() { return isEmpty(); }
 
-	/** Adds dimension dim to this dimension
+	/** Adds dimension @p dim to this dimension
 	  * @return Reference to this dimension.
 	  */
 	UDimension & operator+=(const UDimension & dim);
-	/** Subtracts dimension dim from this dimension
+	/** Subtracts dimension @p dim from this dimension
 	  * @return Reference to this dimension.
 	  */
 	UDimension & operator-=(const UDimension & dim);
-	/** Multiplies c with both width and height of this dimension.
+
+	/** Increases this dimension using the given insets
+	  * @return Reference to this rectangle.
+	  */
+	UDimension & operator+=(const UInsets & insets);
+	/** Shrinks this dimension using the given insets
+	  * @return Reference to this rectangle.
+	  */
+	UDimension & operator-=(const UInsets & insets);
+
+	/** Multiplies @p c with both width and height of this dimension.
 	  * @return Reference to this dimension.
 	  */
 	UDimension & operator*=(int c);
-	/** Multiplies c with both width and height of this dimension.
+	/** Multiplies @p c with both width and height of this dimension.
 	  * @return Reference to this dimension.
 	  */
 	UDimension & operator*=(double c);
-	/** Divides both width and height by c.
+	/** Divides both width and height by @p c.
 	  * @return Reference to this dimension.
 	  */
 	UDimension & operator/=(int c);
-	/** Divides both width and height by c.
+	/** Divides both width and height by @p c.
 	  * @return Reference to this dimension.
 	  */
 	UDimension & operator/=(double c);
 
 	friend std::ostream & operator<<(std::ostream & os, const UDimension & o);
 public:  // Public attributes
-	/**  width */
+	/** The width of this dimension object. */
 	int w;
-	/**  height */
+	/** The height of this dimension object. */
 	int h;
+public: // Public static attributes
+	static UDimension maxDimension;
+	static UDimension invalid;
 };
 
 //
@@ -104,7 +158,7 @@ UFO_EXPORT bool operator!=(const UDimension & dim1,const UDimension & dim2);
 /** wrapper class for UDimension which is derived from UObject.
   *@author Johannes Schmidt
   */
-class UDimensionObject : public UDimension, public UObject {
+class UFO_EXPORT UDimensionObject : public UDimension, public UObject {
 	UFO_DECLARE_DYNAMIC_CLASS(UDimensionObject)
 public:
 	UDimensionObject();
@@ -142,7 +196,27 @@ UDimension::getWidth() const { return w; }
 inline int
 UDimension::getHeight() const { return h; }
 
+inline bool
+UDimension::isInvalid() const {
+	return (*this == UDimension::invalid);
+}
 
+inline bool
+UDimension::isEmpty() const {
+	return (!(w && h));
+}
+
+inline void
+UDimension::clamp(const UDimension & maxDim) {
+	w = std::min(w, maxDim.w);
+	h = std::min(h, maxDim.h);
+}
+
+inline void
+UDimension::expand(const UDimension & minDim) {
+	w = std::max(w, minDim.w);
+	h = std::max(h, minDim.h);
+}
 
 inline void
 UDimension::setSize(int w, int h) {
@@ -155,11 +229,6 @@ UDimension::getSize() const {
 	return UDimension(w, h);
 }
 
-
-inline bool
-UDimension::isEmpty() const {
-	return (!(w && h));
-}
 
 
 inline UDimension &
@@ -175,6 +244,21 @@ UDimension::operator-=(const UDimension & dim) {
 	h -= dim.h;
 	return *this;
 }
+
+inline UDimension &
+UDimension::operator+=(const UInsets & insets) {
+	w += insets.getHorizontal();
+	h += insets.getVertical();
+	return *this;
+}
+
+inline UDimension &
+UDimension::operator-=(const UInsets & insets) {
+	w -= insets.getHorizontal();
+	h -= insets.getVertical();
+	return *this;
+}
+
 
 inline UDimension &
 UDimension::operator*=(int c) {

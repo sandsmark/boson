@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -32,7 +32,12 @@
 
 namespace ufo {
 
-/**a 2 dimensional Point
+/**
+  * This class is not part of the @ref UObject inheritance structure.
+  * Use instead @ref UPointObject if you need a color derived from UObject.
+  *
+  * @short An abstraction of a two dimensional point (x and y).
+  *
   *@author Johannes Schmidt
   */
 
@@ -43,7 +48,7 @@ public:
 
 	int getX() const;
 	void setX(int x);
-	
+
 	int getY() const;
 	void setY(int y);
 
@@ -55,6 +60,11 @@ public:
 	/** This method is for convenience. It adds p to this point.*/
 	void translate(const UPoint & p);
 
+	/** @return True if the width and height are equal to @p invalid
+	  * @see invalid
+	  */
+	bool isInvalid() const;
+	/** @return True if both, x and y are exactly 0. */
 	bool isNull() const;
 
 	/** Adds point p to this point
@@ -90,6 +100,8 @@ public:
 public:  // Public attributes
 	int x;
 	int y;
+public: // Public static attributes
+	static UPoint invalid;
 };
 
 //
@@ -97,7 +109,7 @@ public:  // Public attributes
 //
 UFO_EXPORT UPoint operator+(const UPoint & p1, const UPoint & p2);
 UFO_EXPORT UPoint operator-(const UPoint & p1, const UPoint & p2);
-// equivalent to UPoint(0, 0) - p. 
+// equivalent to UPoint(0, 0) - p.
 UFO_EXPORT UPoint operator-(const UPoint & p);
 UFO_EXPORT UPoint operator*(const UPoint & p, int c);
 UFO_EXPORT UPoint operator*(int c, const UPoint & p);
@@ -113,7 +125,7 @@ UFO_EXPORT bool operator!=(const UPoint & p1,const UPoint & p2);
 /** wrapper class for UDimension which is derived from UObject.
   *@author Johannes Schmidt
   */
-class UPointObject : public UPoint, public UObject {
+class UFO_EXPORT UPointObject : public UPoint, public UObject {
 	UFO_DECLARE_DYNAMIC_CLASS(UPointObject)
 public:
 	UPointObject();
@@ -154,7 +166,7 @@ UPoint::setX(int x) {
 }
 inline int
 UPoint::getY() const {
-	return x;
+	return y;
 }
 inline void
 UPoint::setY(int y) {
@@ -179,6 +191,11 @@ UPoint::translate(const UPoint & p) {
 	y += p.y;
 }
 
+
+inline bool
+UPoint::isInvalid() const {
+	return (*this == UPoint::invalid);
+}
 
 inline bool
 UPoint::isNull() const {
@@ -235,7 +252,7 @@ operator<<(std::ostream & os, const UPoint & o) {
 	return os << "UPoint[" << o.x << "," << o.y << "]";
 }
 
-// 
+//
 // public operators
 // inline implementation
 //

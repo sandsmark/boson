@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -43,8 +43,10 @@
 #include "ufo/usharedlib.hpp"
 #include "ufo/ucontextgroup.hpp"
 
-#include "SDL/SDL.h"
-#include "SDL/SDL_syswm.h"
+#include "ufo/gl/ugl_driver.hpp"
+
+#include "SDL.h"
+#include "SDL_syswm.h"
 
 using namespace ufo;
 
@@ -64,6 +66,7 @@ UXSDLDriver::UXSDLDriver(const char * sdlPath)
 	, m_device(NULL)
 	, m_isValid(false)
 	, m_isInit(false)
+	, m_createdGLDriver(false)
 {
 	m_sdlLib = new USharedLib();
 
@@ -74,23 +77,24 @@ UXSDLDriver::UXSDLDriver(const char * sdlPath)
 
 		m_isValid = m_sdlLib->load(UFO_SDL_LIB);
 	}
+	s_sdl_driver = this;
 
 #define UFO_SDL_PROC(ret,func,params) \
 { \
 	func = (ret (SDLCALL *)params)(getProcAddress(#func)); \
 	if (!func) { \
+		std::cerr << "Couldn't load SDL function: " << #func << "\n"; \
 		m_isValid = false; \
 	} \
 }
 #include "ufo/ux/ux_sdl_prototypes.hpp"
 #undef UFO_SDL_PROC
 	// Removed from macro
-	//std::cerr << "Couldn't load SDL function: " << #func << "\n"; \
-	s_sdl_driver = this;
 }
 
 UXSDLDriver::~UXSDLDriver() {
 	s_sdl_driver = NULL;
+	delete (m_sdlLib);
 }
 
 bool
@@ -99,6 +103,11 @@ UXSDLDriver::init() {
 		uError() << "couldn´t initialize SDL:"
 			<< this->SDL_GetError() << "\n";
 		return false;
+	}
+	// Load OpenGL driver
+	if (!ugl_driver) {
+		ugl_driver = new UGL_Driver("");
+		m_createdGLDriver = true;
 	}
 	m_isInit = true;
 	this->SDL_EnableUNICODE(1);
@@ -119,6 +128,15 @@ void
 UXSDLDriver::quit() {
 	this->SDL_Quit();
 	m_isInit = false;
+	// delete opengl driver
+	if (m_createdGLDriver) {
+		delete (ugl_driver);
+	}
+}
+
+std::string
+UXSDLDriver::getName() {
+	return "SDL";
 }
 
 #define UX_MAX_EVENTS 16
@@ -338,7 +356,8 @@ UXSDLDriver::pushSDLEvents(UXContext * uxcontext, SDL_Event * events, int numEve
 			}
 			break;
 		case SDL_MOUSEMOTION:
-			display->pushMouseMove(uxcontext, modifiers, events[i].motion.x, events[i].motion.y);
+			display->pushMouseMove(uxcontext, modifiers,
+				events[i].motion.x, events[i].motion.y);
 			break;
 		case SDL_KEYDOWN:
 			display->pushKeyDown(uxcontext, mapSDLModifier(events[i].key.keysym.mod),
@@ -352,19 +371,23 @@ UXSDLDriver::pushSDLEvents(UXContext * uxcontext, SDL_Event * events, int numEve
 			if (uxcontext) {
 				if (s_sdl_driver) {
 					// if we have an SDL driver, reset the video mode
-					// otherwise this should be called by client code
+					// otherwise this should be called by the user
 					SDL_Surface * screen = s_sdl_driver->SDL_GetVideoSurface();
-					s_sdl_driver->SDL_SetVideoMode(events[i].resize.w, events[i].resize.h,
-						screen->format->BitsPerPixel, screen->flags);
+					s_sdl_driver->SDL_SetVideoMode(
+						events[i].resize.w, events[i].resize.h,
+						screen->format->BitsPerPixel, screen->flags
+					);
 				}
-				if (UXFrame * frame = uxcontext->getFrame()) {
-					frame->getVideoDevice()->sigResized().emit(
-						frame->getVideoDevice()
-					);
-				} else {
-					uxcontext->setDeviceBounds(
-						URectangle(0, 0, events[i].resize.w, events[i].resize.h)
-					);
+				uxcontext->setDeviceBounds(
+					URectangle(0, 0, events[i].resize.w, events[i].resize.h)
+				);
+				UVideoDevice * device = NULL;
+				if (uxcontext->getFrame()) {
+					device = uxcontext->getFrame()->getVideoDevice();
+				}
+				if (device) {
+					device->notify(UEvent::WidgetResized,
+						events[i].resize.w, events[i].resize.h, 0, 0);
 				}
 #if !defined(UFO_GFX_X11)
 				uxcontext->getContextGroup()->refresh();
@@ -598,5 +621,23 @@ UXSDLDevice::getFrameState() const {
 	return m_frameState;
 }
 
+void
+UXSDLDevice::notify(uint32_t type, int arg1, int arg2, int arg3, int arg4) {
+	switch (type) {
+		case UEvent::WidgetResized: {
+			UDimension newSize(arg1, arg2);
+			if (m_size != newSize) {
+				m_size = newSize;
+				// FIXME: throw event?
+			}
+			if (m_frame) {
+				m_frame->getContext()->setContextBounds(URectangle(0, 0, m_size.w, m_size.h));
+			}
+		}
+		break;
+		default:
+		break;
+	}
+}
 
 #endif // UFO_USE_SDL

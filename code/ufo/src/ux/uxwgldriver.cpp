@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -119,24 +119,12 @@ static UXWGLDriver * s_instance = NULL;
 UXWGLDriver::UXWGLDriver()
 	: m_isValid(false)
 	, m_isInit(false)
+	, m_createdGLDriver(false)
 	, m_display(NULL)
 	, m_instance(NULL)
 {
 	m_display = dynamic_cast<UXDisplay*>(UDisplay::getDefault());
 	s_instance = this;
-
-#define UFO_WGL_PROC(ret,func,params) \
-{ \
-	func = (ret (WINAPI *)params)(ugl_driver->getProcAddress(#func)); \
-	if (!func) { \
-		std::cerr << "Couldn't load WGL function: " << #func << "\n"; \
-		m_isValid = false; \
-	} \
-}
-UFO_WGL_PROC(BOOL,wglMakeCurrent,(HDC, HGLRC))
-UFO_WGL_PROC(HGLRC,wglCreateContext,(HDC))
-UFO_WGL_PROC(BOOL,wglDeleteContext,(HGLRC))
-#undef UFO_WGL_PROC
 }
 
 UXWGLDriver::~UXWGLDriver() {
@@ -153,6 +141,25 @@ localWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 bool
 UXWGLDriver::init() {
+	// Load OpenGL driver
+	if (!ugl_driver) {
+		ugl_driver = new UGL_Driver("");
+		m_createdGLDriver = true;
+	}
+
+#define UFO_WGL_PROC(ret,func,params) \
+{ \
+	func = (ret (WINAPI *)params)(ugl_driver->getProcAddress(#func)); \
+	if (!func) { \
+		std::cerr << "Couldn't load WGL function: " << #func << "\n"; \
+		m_isValid = false; \
+	} \
+}
+UFO_WGL_PROC(BOOL,wglMakeCurrent,(HDC, HGLRC))
+UFO_WGL_PROC(HGLRC,wglCreateContext,(HDC))
+UFO_WGL_PROC(BOOL,wglDeleteContext,(HGLRC))
+#undef UFO_WGL_PROC
+
 	WNDCLASS wc;
 	ATOM atom;
 
@@ -209,6 +216,11 @@ UXWGLDriver::quit() {
 	//XSync(m_x11Display, false);
 	//XCloseDisplay(m_x11Display);
 	m_isInit = false;
+}
+
+std::string
+UXWGLDriver::getName() {
+	return "WGL";
 }
 
 void
@@ -600,9 +612,18 @@ UXWGLDriver::windowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		ClientToScreen(hWnd, (LPPOINT)&bounds);
 		ClientToScreen(hWnd, (LPPOINT)&bounds+1);
 		if (bounds.left || bounds.top ) {
-			device->privateMove(bounds.left, bounds.top);
+			device->notify(UEvent::WidgetMoved, bounds.left, bounds.top, 0, 0);
 		}
-		device->privateResize(bounds.right - bounds.left, bounds.bottom - bounds.top);
+		device->notify(UEvent::WidgetResized,
+			bounds.right - bounds.left, bounds.bottom - bounds.top,
+			0, 0);
+		if (context) {
+			context->setDeviceBounds(URectangle(
+				bounds.left, bounds.top,
+				bounds.right - bounds.left, bounds.bottom - bounds.top
+			));
+			context->getRootPane()->repaint();
+		}
 		//if ( this->input_grab != SDL_GRAB_OFF ) {
 		//	ClipCursor(&SDL_bounds);
 		//	}
@@ -917,8 +938,10 @@ UXWGLDevice::UXWGLDevice(UXWGLDriver * driver)
 		, m_size()
 		, m_pos()
 		, m_isVisible(false)
-		, m_flags(0)
-, m_depth(0) {
+		, m_frameStyle(0)
+		, m_frameState(0)
+		, m_depth(0)
+{
 	/*
 		m_attributes[GLX_RED_SIZE] = 5;
 		m_attributes[GLX_GREEN_SIZE] = 5;
@@ -1059,7 +1082,7 @@ UXWGLDevice::makeContextCurrent() {
 }
 
 bool
-UXWGLDevice::show(uint32_t flags) {
+UXWGLDevice::show() {
 	WNDCLASS wc;
 	DWORD dwStyle;
 	DWORD dwExStyle;
@@ -1112,12 +1135,18 @@ UXWGLDevice::show(uint32_t flags) {
 	m_glContext = m_wglDriver->wglCreateContext(m_dc);
 	makeContextCurrent();
 
+	//setSizeHints();
+	setWMHints();
+	setDecorations();
 	ShowWindow(m_window, SW_SHOW);
+
 	SetForegroundWindow(m_window); // slightly higher priority?
 	SetFocus(m_window);
 	// FIXME: needed?
 	UpdateWindow(m_window);
 	ShowCursor(TRUE);
+
+
 
 	m_isVisible = true;
 	return true;
@@ -1135,6 +1164,113 @@ UXWGLDevice::hide() {
 }
 
 
+void
+UXWGLDevice::notify(uint32_t type, int arg1, int arg2, int arg3, int arg4) {
+	switch (type) {
+		case UEvent::WidgetResized: {
+			UDimension newSize(arg1, arg2);
+			if (m_size != newSize) {
+				m_size = newSize;
+				// FIXME: throw event
+				if (m_frame) {
+					m_frame->getContext()->setContextBounds(
+						URectangle(0, 0,m_size.w, m_size.h)
+					);
+				}
+			}
+
+		}
+		break;
+		case UEvent::WidgetMoved: {
+			UPoint newPos(arg1, arg2);
+			if (m_pos != newPos) {
+				m_pos = newPos;
+				// FIXME: throw event
+			}
+		}
+		break;
+		case UEvent::FocusGained:
+		break;
+		case UEvent::FocusLost:
+		break;
+		default:
+		break;
+	}
+}
+
+void
+UXWGLDevice::setDecorations() {
+	LONG style;
+	LONG new_style_bits = 0;
+	const LONG all_style_bits = WS_BORDER | WS_CAPTION | WS_SYSMENU |
+		WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
+	// WS_THICKFRAME|
+
+	style = GetWindowLong(m_window, GWL_STYLE);
+
+	new_style_bits = 0;
+
+	if (m_frameStyle & FrameNormalBorder) {
+		new_style_bits |= WS_BORDER;
+	}
+	if (m_frameStyle & FrameTitleBar) {
+		new_style_bits |= WS_CAPTION;
+	}
+	if (m_frameStyle & FrameSysMenu) {
+		new_style_bits |= WS_SYSMENU;
+	}
+	if (m_frameStyle & FrameMinimizeBox) {
+		new_style_bits |= WS_MINIMIZEBOX;
+	}
+	if (m_frameStyle & FrameMaximizeBox) {
+		new_style_bits |= WS_MAXIMIZEBOX;
+	}
+	if (m_frameStyle == FrameDefault) {
+		new_style_bits = all_style_bits;
+	}
+
+	SetWindowLong(m_window, GWL_STYLE, style);
+	SetWindowPos(m_window, NULL, 0, 0, 0, 0,
+		SWP_FRAMECHANGED | SWP_NOACTIVATE | SWP_NOMOVE |
+		SWP_NOREPOSITION | SWP_NOSIZE | SWP_NOZORDER);
+}
+
+void
+UXWGLDevice::setSizeHints() {
+}
+
+void
+UXWGLDevice::setWMHints() {
+	if (m_frameState & FrameFullScreen) {
+		// FIXME
+	} else if (m_frameState & FrameMinimized) {
+		ShowWindow (m_window, SW_RESTORE);
+    } else if (m_frameState & FrameMaximized) {
+		ShowWindow (m_window, SW_MAXIMIZE);
+    } else {
+		ShowWindow (m_window, SW_SHOWNORMAL);
+	}
+}
+
+
+void
+UXWGLDevice::setFrameStyle(uint32_t frameStyle) {
+	m_frameStyle = frameStyle;
+}
+uint32_t
+UXWGLDevice::getFrameStyle() const {
+	return m_frameStyle;
+}
+
+void
+UXWGLDevice::setInitialFrameState(uint32_t frameState) {
+	m_frameState = frameState;
+}
+uint32_t
+UXWGLDevice::getFrameState() const {
+	return m_frameState;
+}
+
 int
 UXWGLDevice::getAttribute(int key) {
 	return m_attributes[key];
@@ -1144,21 +1280,6 @@ UXWGLDevice::setAttribute(int key, int value) {
 	m_attributes[key] = value;
 }
 
-void
-UXWGLDevice::privateMove(int x, int y) {
-	m_pos.x = x;
-	m_pos.y = y;
-}
-
-void
-UXWGLDevice::privateResize(int w, int h) {
-	m_size.w = w;
-	m_size.h = h;
-
-	if (m_frame) {
-		m_frame->sigResized()(m_frame, w, h);
-	}
-}
 
 bool
 UXWGLDevice::setupPixelFormat(unsigned char layer_type) {

@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -417,7 +417,7 @@ namespace UMod {
 		Button3 = 0x2000,
 		RightButton = Button3,
 		Button4 = 0x4000,
-		Button5 = 0x8000,
+		Button5 = 0x8000
 	};
 } // namespace UMod
 

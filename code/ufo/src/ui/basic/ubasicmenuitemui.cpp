@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -71,22 +71,15 @@ UBasicMenuItemUI::paint(UGraphics * g, UWidget * w) {
 	// should this be done by the WidgetUI class?
 	// paint background
 	if (menuItem->isRollover()) {
-		//menuItem->setBackgroundColor(manager->getColor(getLafId() + ".selectionBackground"));
-
-		//glColor3fv(manager->getColor(getLafId() + ".selectionBackground")->getFloat());
-		//glRecti(insets.left, insets.top, innerSize.w, innerSize.h);
 		g->setColor(w->getColorGroup().highlight());
-		//g->setColor(manager->getColor(getLafId() + ".selectionBackground"));
 		g->fillRect(0, 0, w->getWidth(), w->getHeight());
 		//g->fillRect(insets.left, insets.top, innerSize.w, innerSize.h);
-	} else {
-		//menuItem->setBackgroundColor(manager->getColor(getLafId() + ".background"));
-		//glColor3fv(manager->getColor(getLafId() + ".background")->getFloat());
-		//glRecti(insets.left, insets.top, innerSize.w, innerSize.h);
-
-		g->setColor(w->getColorGroup().background());
+	}/* else {
+		UColor color(w->getColorGroup().background());
+		color.getFloat()[3] = w->getOpacity();
+		g->setColor(color);
 		g->fillRect(viewRect.x, viewRect.y, viewRect.w, viewRect.h);
-	}
+	}*/
 
 	UStyle * style = w->getUIManager()->getStyle();
 	if (menuItem->isPressed()) {
@@ -99,11 +92,11 @@ UBasicMenuItemUI::paint(UGraphics * g, UWidget * w) {
 
 	if (menuItem->getPopupMenu() && dynamic_cast<UPopupMenu*>(menuItem->getParent())) {
 		URectangle rect(menuItem->getWidth() - 10,
-			(menuItem->getHeight() / 2) - 3, 6, 6);
+			(menuItem->getHeight() / 2) - 3, 6, 8);
 
 		style->paintArrow(g, menuItem,
 			rect,
-			false, false,
+			false, menuItem->getPopupMenu()->isVisible(),
 			Right);
 	}
 	if (menuItem->isPressed()) {

@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -182,19 +182,19 @@ UXFrame::getFrameState() const {
 
 void
 UXFrame::setResizable(bool b) {
-	if (b == bool(m_videoDevice->getFrameState() & FrameResizable)) {
+	if (b == bool(m_videoDevice->getFrameStyle() & FrameResizable)) {
 		return;
 	}
 	if (isVisible()) {
 		//m_videoDevice->toggleFrameState(FrameFullScreen);
 	} else {
-		m_videoDevice->setInitialFrameState(m_videoDevice->getFrameState() | FrameFullScreen);
+		m_videoDevice->setFrameStyle(m_videoDevice->getFrameStyle() | FrameFullScreen);
 	}
 }
 
 bool
 UXFrame::isResizable() const {
-	return (m_videoDevice->getFrameState() & FrameResizable);
+	return (m_videoDevice->getFrameStyle() & FrameResizable);
 }
 
 void

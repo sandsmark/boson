@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -34,34 +34,64 @@
 
 namespace ufo {
 
-/**
-  *@author Johannes Schmidt
+/** @short This event is used for many synchronous messages
+  *  which indicate an action like in button, check boxes etc.
+  *
+  *
+  * @author Johannes Schmidt
   */
 
 class UFO_EXPORT UActionEvent : public UEvent {
 	UFO_DECLARE_DYNAMIC_CLASS(UActionEvent)
 public:
-	UActionEvent(UObject * sourceA, Type typeA, UMod_t modifiersA,
-			const std::string & actionCommandA)
-		: UEvent(sourceA, typeA)
-		, m_modifiers(modifiersA)
-		, m_actionCommand(actionCommandA) {}
+	/** Creates a new action event.
+	  * @param source The emitting object
+	  * @param type The event type (should be @p UEvent::Action)
+	  * @param modifiers Mouse and keyboard modifiers
+	  * @param actionCommand A string describing this action
+	  */
+	UActionEvent(UObject * source, Type type, UMod_t modifiers,
+			const std::string & actionCommand)
+		: UEvent(source, type)
+		, m_modifiers(modifiers)
+		, m_actionCommand(actionCommand)
+		, m_isRevoked(false)
+	{}
 
+	/** @return Mouse and keyboard modifiers which where pressed at the time
+	  * this event was fired. */
 	UMod_t getModifiers() {
 		return m_modifiers;
 	}
 
+	/** @return A string describing this action
+	  */
 	const std::string & getActionCommand() {
 		return m_actionCommand;
+	}
+
+	/** Tries to revoke this action. The library or application might
+	  * revoke its action.
+	  */
+	void revoke() {
+		m_isRevoked = true;
+	}
+	/** @return True if this event has been revoked.
+	  */
+	bool isRevoked() const {
+		return m_isRevoked;
 	}
 
 protected: // Protected methods
 	virtual std::ostream & paramString(std::ostream & os) const;
 
 private:  // Protected attributes
+	/** Mouse and keyboard modifiers. */
 	UMod_t m_modifiers;
-	/**  */
+	/** A string describing this action */
 	std::string m_actionCommand;
+	/** True if this event was revoked by a listener. */
+	bool m_isRevoked;
 };
 
 } // namespace ufo

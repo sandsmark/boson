@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -96,7 +96,7 @@ void readHexString(std::istream & stream, float * dst) {
 	dst[2] = (color & 0xff) / 255.0f;
 	dst[1] = ((color >> 8) & 0xff) / 255.0f;
 	dst[0] = ((color >> 16) & 0xff) / 255.0f;
-	dst[3] = 0.0f;
+	dst[3] = 1.0f;
 }
 
 void readDecString(std::istream & stream, float * dst) {
@@ -117,7 +117,7 @@ UColor::UColor() {
 	m_farr[0] = 0.0f;
 	m_farr[1] = 0.0f;
 	m_farr[2] = 0.0f;
-	m_farr[3] = 0.0f;
+	m_farr[3] = 1.0f;
 }
 
 UColor::UColor(const UColor & col) {
@@ -128,21 +128,21 @@ UColor::UColor(const UColor & col) {
 }
 
 UColor::UColor(const std::string & colorString) {
-	if (colorString == "") {
-		m_farr[0] = 0.0f;
-		m_farr[1] = 0.0f;
-		m_farr[2] = 0.0f;
-		m_farr[3] = 0.0f;
-	} else
-	// hex string
-	if (colorString[0] == '#') {
-		UIStringStream stream(colorString);
-		readHexString(stream, m_farr);
-	} else {
-	// suppose integer string
-	//if (colorString[0] == '#') {
+	// init all with zeros
+	m_farr[0] = 0.0f;
+	m_farr[1] = 0.0f;
+	m_farr[2] = 0.0f;
+	m_farr[3] = 1.0f;
+	if (colorString != "") {
+		// hex string
+		if (colorString[0] == '#') {
+			UIStringStream stream(colorString);
+			readHexString(stream, m_farr);
+		} else {
+		// suppose integer string
 		UIStringStream stream(colorString);
 		readDecString(stream, m_farr);
+		}
 	}
 }
 
@@ -240,7 +240,7 @@ UColor::darker() const {
 	temp[0] = m_farr[0] * FACTOR;
 	temp[1] = m_farr[1] * FACTOR;
 	temp[2] = m_farr[2] * FACTOR;
-	
+
 	// clamp
 	for (int i = 0;i < 3; i++) {
 		if (temp[i] < MIN_VAL) {
@@ -261,7 +261,7 @@ UColor::brighter() const {
 		temp[0] = m_farr[0] / FACTOR;
 		temp[1] = m_farr[1] / FACTOR;
 		temp[2] = m_farr[2] / FACTOR;
-	
+
 		// clamp
 		for (int i = 0;i < 3; i++) {
 			temp[i] = std::max(MIN_VAL, temp[i]);
@@ -279,7 +279,7 @@ UFO_IMPLEMENT_DEFAULT_DYNAMIC_CLASS(UColorObject, UColor)
 
 unsigned int
 UColorObject::hashCode() const {
-	return uint8_t(getRed() * 255) << 24 || uint8_t(getGreen() * 255) << 16 || 
+	return uint8_t(getRed() * 255) << 24 || uint8_t(getGreen() * 255) << 16 ||
 			uint8_t(getBlue() * 255) << 8 || uint8_t(getAlpha() * 255);
 }
 

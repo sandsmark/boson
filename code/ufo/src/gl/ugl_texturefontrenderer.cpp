@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -122,6 +122,7 @@ UFO_IMPLEMENT_ABSTRACT_CLASS(UGL_TextureFontRenderer, UFontRenderer)
 
 UGL_TextureFontRenderer::UGL_TextureFontRenderer(const UFontInfo & fontInfo)
 	: m_fontInfo(fontInfo)
+	, m_fontMetrics(NULL)
 	, m_systemName(fontInfo.face)
 	, m_data(new UGL_TextureFontData)
 	, m_isValid(false)
@@ -140,6 +141,7 @@ UGL_TextureFontRenderer::UGL_TextureFontRenderer(const UFontInfo & fontInfo)
 }
 
 UGL_TextureFontRenderer::~UGL_TextureFontRenderer() {
+	delete (m_fontMetrics);
 	delete (m_data);
 }
 
@@ -187,8 +189,8 @@ void
 UGL_TextureFontRenderer::beginDrawing(UGraphics * g) {
 	ugl_driver->glEnable(GL_TEXTURE_2D);
 
-	ugl_driver->glEnable(GL_BLEND);
-	ugl_driver->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); //
+	//ugl_driver->glEnable(GL_BLEND);
+	//ugl_driver->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); //
 
 	ugl_driver->glBindTexture(GL_TEXTURE_2D, m_data->m_textureIndex);
 
@@ -199,7 +201,7 @@ void
 UGL_TextureFontRenderer::endDrawing(UGraphics * g) {
 	ugl_driver->glEnd();
 	ugl_driver->glDisable(GL_TEXTURE_2D);
-	ugl_driver->glDisable(GL_BLEND);
+	//ugl_driver->glDisable(GL_BLEND);
 }
 
 const UFontMetrics *
