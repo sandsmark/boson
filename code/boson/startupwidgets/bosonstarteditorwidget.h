@@ -20,28 +20,12 @@
 #ifndef BOSONSTARTEDITORWIDGET_H
 #define BOSONSTARTEDITORWIDGET_H
 
-#include "bosonstartwidgetbase.h"
 #include <qwidget.h>
-#include <qmap.h>
 
-class QVBoxLayout;
-class QGridLayout;
-class QVGroupBox;
-class QComboBox;
-class QLabel;
-class QLineEdit;
-class QPushButton;
-class KIntNumInput;
-
-class Boson;
-class Player;
-class KPlayer;
-class KGamePropertyBase;
-class TopWidget;
-class BosonPlayField;
 class BosonStartupNetwork;
 
-class BosonStartEditorWidget : public BosonStartWidgetBase
+class BosonStartEditorWidgetPrivate;
+class BosonStartEditorWidget : public QWidget
 {
 	Q_OBJECT
 public:
@@ -49,38 +33,24 @@ public:
 	~BosonStartEditorWidget();
 
 public slots:
-	void slotStart();
+	virtual void slotStartGameClicked();
 
 signals:
-	void signalSetLocalPlayer(Player*);
-
-protected slots:
-	virtual void slotSendPlayFieldChanged(int index);
+	/**
+	 * Emitted when the player clicks on cancel. The widget should get
+	 * hidden now. (back to welcome widget)
+	 **/
+	void signalCancelled();
 
 protected:
-	virtual void setCurrentPlayField(BosonPlayField* field);
-//	virtual void sendNewGame();
-
-	void initNewMap();
+	BosonStartupNetwork* networkInterface() const { return mNetworkInterface; }
 
 private:
 	void initKGame();
-	void initPlayFields();
-	void initTileSets();
-	void initSpecies();
 
 private:
-	QVBoxLayout* mTopLayout;
-
-	QComboBox* mMapCombo;
-	QVGroupBox* mMapBox; // information (size, tileset, ...) about the map
-	QComboBox* mTileSetCombo;
-	KIntNumInput* mMapWidth;
-	KIntNumInput* mMapHeight;
-	KIntNumInput* mMaxPlayers;
-
-	QPushButton* mCancelButton;
-	QPushButton* mStartGameButton;
+	BosonStartEditorWidgetPrivate* d;
+	BosonStartupNetwork* mNetworkInterface;
 };
 
 #endif
