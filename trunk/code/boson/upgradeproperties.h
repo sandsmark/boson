@@ -60,7 +60,7 @@ class UpgradeProperties
      * @return Whether it is possible by player to research this upgrade (all
      * requirements are met)
      **/
-    virtual bool canBeResearched(Player* player);
+    virtual bool canBeResearched(Player* player) const;
 
     /**
      * @return Whether this upgrade/tech. is already researched
@@ -79,7 +79,7 @@ class UpgradeProperties
      * You must call setResearched(true) before this can have any effect
      * @param player owner of this class (and UnitProperties)
      **/
-    virtual void apply(Player* player);
+    virtual void apply(Player* player) const;
 
 
     /**

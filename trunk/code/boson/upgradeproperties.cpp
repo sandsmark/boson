@@ -72,7 +72,7 @@ UpgradeProperties::~UpgradeProperties()
   delete d;
 }
 
-bool UpgradeProperties::canBeResearched(Player* player)
+bool UpgradeProperties::canBeResearched(Player* player) const
 {
   if(!d->mRequireUnits.isEmpty())
   {
@@ -143,7 +143,7 @@ bool UpgradeProperties::load(KSimpleConfig* cfg, const QString& group)
 }
 
 
-void UpgradeProperties::apply(Player* player)
+void UpgradeProperties::apply(Player* player) const
 {
   boDebug(600) << k_funcinfo << "id: " << id() << endl;
   if(!isResearched())
