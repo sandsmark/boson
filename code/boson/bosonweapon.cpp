@@ -32,21 +32,28 @@
 /*****  BosonWeaponProperties  *****/
 BosonWeaponProperties::BosonWeaponProperties(KSimpleConfig* cfg, SpeciesTheme* theme)
 {
-  mId = cfg->readUnsignedLongNumEntry("Id", 0);
-  if(mId == 0)
-  {
-    kdError() << k_funcinfo << "Invalid id in group " << cfg->group() << endl;
-  }
   mRange = cfg->readUnsignedLongNumEntry("Range", 0);
   mReload = cfg->readUnsignedNumEntry("Reload", 0);
+  mSpeed = cfg->readLongNumEntry("Speed", 0);
+  mDamage = cfg->readUnsignedLongNumEntry("Damage", 0);
+  mDamageRange = (float)(cfg->readDoubleNumEntry("DamageRange", 1));
   mCanShootAtAirUnits = cfg->readBoolEntry("CanShootAtAirUnits", false);
   mCanShootAtLandUnits = cfg->readBoolEntry("CanShootAtLandUnits", false);
-  mShotProp = theme->shotProperties(cfg->readUnsignedLongNumEntry("ShotId", 0));
   mShootParticleSystems = BosonParticleSystemProperties::loadParticleSystemProperties(cfg, "ShootParticles", theme);
+  mFlyParticleSystems = BosonParticleSystemProperties::loadParticleSystemProperties(cfg, "FlyParticles", theme);
+  mHitParticleSystems = BosonParticleSystemProperties::loadParticleSystemProperties(cfg, "HitParticles", theme);
+  // We need to have some kind of model even for bullet (though it won't be shown),
+  //  because BosonShot will crash otherwise (actually it's BosonItem)
+  mModel = theme->objectModel(cfg->readEntry("Model", "missile.3ds"));
 }
 
 BosonWeaponProperties::~BosonWeaponProperties()
 {
+}
+
+BosonShot* BosonWeaponProperties::newShot(Unit* attacker, float x, float y, float z, float tx, float ty, float tz) const
+{
+  return new BosonShot(this, attacker, x, y, z, tx, ty, tz);
 }
 
 QPtrList<BosonParticleSystem> BosonWeaponProperties::newShootParticleSystems(float x, float y, float z) const
@@ -61,6 +68,29 @@ QPtrList<BosonParticleSystem> BosonWeaponProperties::newShootParticleSystems(flo
   return list;
 }
 
+QPtrList<BosonParticleSystem> BosonWeaponProperties::newFlyParticleSystems(float x, float y, float z) const
+{
+  QPtrList<BosonParticleSystem> list;
+  QPtrListIterator<BosonParticleSystemProperties> it(mFlyParticleSystems);
+  while(it.current())
+  {
+    list.append(it.current()->newSystem(x, y, z));
+    ++it;
+  }
+  return list;
+}
+
+QPtrList<BosonParticleSystem> BosonWeaponProperties::newHitParticleSystems(float x, float y, float z) const
+{
+  QPtrList<BosonParticleSystem> list;
+  QPtrListIterator<BosonParticleSystemProperties> it(mHitParticleSystems);
+  while(it.current())
+  {
+    list.append(it.current()->newSystem(x, y, z));
+    ++it;
+  }
+  return list;
+}
 
 
 /*****  BosonWeapon  *****/

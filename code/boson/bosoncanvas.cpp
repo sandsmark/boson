@@ -30,6 +30,7 @@
 #include "bosonparticlemanager.h"
 #include "defines.h"
 #include "items/bosonshot.h"
+#include "bosonweapon.h"
 #include "bosonstatistics.h"
 
 #include <kdebug.h>

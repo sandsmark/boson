@@ -315,6 +315,7 @@ protected:
 
 	void loadTextureNames(KSimpleConfig* conf);
 	void loadSoundNames(KSimpleConfig* conf);
+	void loadWeapons(KSimpleConfig* conf);
 private:
 	SpeciesTheme* mTheme;
 

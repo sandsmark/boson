@@ -36,7 +36,6 @@ class UnitBase;
 class TechnologyProperties;
 class UpgradeProperties;
 class BosonParticleSystemProperties;
-class BosonShotProperties;
 class BosonWeaponProperties;
 
 class QPixmap;
@@ -102,12 +101,8 @@ public:
 	bool loadTechnologies();
 
 	void loadParticleSystems();
-	void loadShots();
-	void loadWeapons();
 
 	BosonParticleSystemProperties* particleSystemProperties(long unsigned int id);
-	BosonShotProperties* shotProperties(long unsigned int id);
-	BosonWeaponProperties* weaponProperties(long unsigned int id);
 
 	/**
 	 * @return Pixmap for the specified action
