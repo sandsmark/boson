@@ -107,7 +107,7 @@ public:
 	 * Use @ref loadPlayField to load <em>all</em> data. preLoadPlayField is
 	 * much faster than @ref loadPlayField.
 	 **/
-	bool preLoadPlayField(const QString& identifier);
+	bool preLoadPlayField(const QString& file);
 
 	/**
 	 * Load the playfield from @p files to this object.
