@@ -2,7 +2,6 @@ Game TODOs
 - waypoints
 - unit accelleration: units should slowly start to accelerate and to brake when
   moving
-- remove wreckages after a certain timeout
 - left dbl-click should select ALL units of that type
 - auto-attacking when unit is in range
 - end of game - winner ; statistics

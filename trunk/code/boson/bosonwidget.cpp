@@ -302,10 +302,7 @@ void BosonWidget::addLocalPlayer()
  d->mBoson->addPlayer(p);
 
  CommandInput* cmdInput = new CommandInput;
- connect(d->mCommandFrame, SIGNAL(signalProduceUnit(int, UnitBase*, KPlayer*)),
-		cmdInput, SLOT(slotProduceUnit(int, UnitBase*, KPlayer*)));
- connect(d->mCommandFrame, SIGNAL(signalCellSelected(int)),
-		cmdInput, SLOT(slotPlaceCell(int)));
+ cmdInput->setCommandFrame(d->mCommandFrame);
  p->addGameIO(cmdInput);
 
  changeLocalPlayer(p);
@@ -671,7 +668,7 @@ void BosonWidget::addGameCommandFrame(QWidget* parent)
  connect(d->mBigDisplay, SIGNAL(signalSelectUnit(Unit*)), 
 		d->mCommandFrame, SLOT(slotShowUnit(Unit*)));
 
- connect(d->mBoson, SIGNAL(signalStartProduction(Facility*)),
+ connect(d->mBoson, SIGNAL(signalUpdateProduction(Facility*)),
 		d->mCommandFrame, SLOT(slotFacilityProduces(Facility*)));
  connect(d->mBoson, SIGNAL(signalCompletedProduction(Facility*)),
 		d->mCommandFrame, SLOT(slotProductionCompleted(Facility*)));

@@ -184,6 +184,8 @@ void BosonCommandFrame::initOrderButtons(unsigned int no)
 				this, SIGNAL(signalCellSelected(int)));
 		connect(b, SIGNAL(signalProduceUnit(int)),
 				this, SLOT(slotProduceUnit(int)));
+		connect(b, SIGNAL(signalStopProduction(int)),
+				this, SLOT(slotStopProduction(int)));
 	}
  }
  resetLayout();
@@ -419,6 +421,10 @@ void BosonCommandFrame::setLocalPlayer(Player* p)
 void BosonCommandFrame::slotProduceUnit(int unitType)
 {
  emit signalProduceUnit(unitType, d->mFactory, d->mOwner);
+}
+void BosonCommandFrame::slotStopProduction(int unitType)
+{
+ emit signalStopProduction(unitType, d->mFactory, d->mOwner);
 }
 
 void BosonCommandFrame::slotShowUnit(Unit* unit)

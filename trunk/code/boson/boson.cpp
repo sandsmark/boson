@@ -206,12 +206,12 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			break;
 		}
 		Facility* factory = (Facility*)findUnit(factoryId, p);
-		if (!((Unit*)factory)->isFacility()) {
-			kdError() << k_lineinfo << factoryId << " is not a facility" << endl;
-			break;
-		}
 		if (!factory) {
 			kdError() << "Cannot find unit " << factoryId << endl;
+			break;
+		}
+		if (!((Unit*)factory)->isFacility()) {
+			kdError() << k_lineinfo << factoryId << " is not a facility" << endl;
 			break;
 		}
 		if (unitType < 0) {
@@ -222,6 +222,14 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 		if (!prop) {
 			kdError() << k_lineinfo << "NULL properties (EVIL BUG)" << endl;
 			break;
+		}
+		if (factory->work() != Unit::WorkProduce) {
+			if (factory->currentProduction() == unitType) {
+				// production was stopped - continue it now
+				factory->setWork(Unit::WorkProduce);
+				emit signalUpdateProduction(factory);
+				break;
+			}
 		}
 		if (p->minerals() < prop->mineralCost()) {
 			emit signalNotEnoughMinerals(p);
@@ -234,7 +242,63 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 		p->setMinerals(p->minerals() - prop->mineralCost());
 		p->setOil(p->oil() - prop->oilCost());
 		factory->addProduction(unitType);
-		emit signalStartProduction(factory);
+		emit signalUpdateProduction(factory);
+		break;
+	}
+	case BosonMessage::MoveProduceStop:
+	{
+		kdDebug() << "MoveProduceStop" << endl;
+		Q_UINT32 owner;
+		Q_UINT32 factoryId;
+		Q_INT32 unitType;
+		stream >> owner;
+		stream >> factoryId;
+		stream >> unitType;
+		
+		Player* p = (Player*)findPlayer(owner);
+		if (!p) {
+			kdError() << k_lineinfo << "Cannot find player " << owner << endl;
+			break;
+		}
+		Facility* factory = (Facility*)findUnit(factoryId, p);
+		if (!factory) {
+			kdError() << "Cannot find unit " << factoryId << endl;
+			break;
+		}
+		if (!((Unit*)factory)->isFacility()) {
+			kdError() << k_lineinfo << factoryId << " is not a facility" << endl;
+			break;
+		}
+		if (unitType < 0) {
+			kdError() << k_lineinfo << "Invalid unitType " << unitType << endl;
+			break;
+		}
+		const UnitProperties* prop = p->unitProperties(unitType);
+		if (!prop) {
+			kdError() << k_lineinfo << "NULL properties (EVIL BUG)" << endl;
+			break;
+		}
+
+		if (factory->currentProduction() == unitType) {
+			if (factory->work() == Unit::WorkProduce) {
+				// do not abort but just pause
+				factory->setWork(Unit::WorkNone);
+				emit signalUpdateProduction(factory);
+			} else {
+				p->setMinerals(p->minerals() + prop->mineralCost());
+				p->setOil(p->oil() + prop->oilCost());
+				factory->removeProduction();
+				emit signalUpdateProduction(factory);
+			}
+		} else {
+			//FIXME: money should be paid when the production is
+			//actually started! (currently it is paid as soon as an
+			//item is added to the queue)
+			p->setMinerals(p->minerals() + prop->mineralCost());
+			p->setOil(p->oil() + prop->oilCost());
+			factory->removeProduction(unitType);
+			emit signalUpdateProduction(factory);
+		}
 		break;
 	}
 	case BosonMessage::MoveBuild:

@@ -137,11 +137,13 @@ signals:
 	void signalGameStarted();
 
 	/**
-	 * Emitted when a factory has started to produce a unit. As a rection
-	 * the cmd panel should grey out the order buttons or maybe completely
-	 * disable them.
+	 * This signal is emitted whenever the production list of factory
+	 * changes. This means whenever you add a unit to the queue (see @ref
+	 * Factory::productionList), pause a production (using @ref
+	 * Unit::setWork(Unit::WorkNone)) or continue a production (using @ref
+	 * Unit::setWork(Unit::WorkProduce)).
 	 **/
-	void signalStartProduction(Facility* factory);
+	void signalUpdateProduction(Facility* factory);
 
 	/**
 	 * Emitted when a factory has no units left to produce. Especially
