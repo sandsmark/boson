@@ -1,0 +1,248 @@
+<!DOCTYPE UI><UI version="3.1" stdsetdef="1">
+<class>BosonStartEditorWidgetBase</class>
+<widget class="QWidget">
+    <property name="name">
+        <cstring>BosonStartEditorWidgetBase</cstring>
+    </property>
+    <property name="geometry">
+        <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>715</width>
+            <height>375</height>
+        </rect>
+    </property>
+    <property name="minimumSize">
+        <size>
+            <width>0</width>
+            <height>0</height>
+        </size>
+    </property>
+    <property name="caption">
+        <string>BosonNewGameWidgetBase</string>
+    </property>
+    <grid>
+        <property name="name">
+            <cstring>unnamed</cstring>
+        </property>
+        <widget class="QGroupBox" row="0" column="0">
+            <property name="name">
+                <cstring>mEditorGroupBox</cstring>
+            </property>
+            <property name="paletteForegroundColor">
+                <color>
+                    <red>255</red>
+                    <green>255</green>
+                    <blue>255</blue>
+                </color>
+            </property>
+            <property name="title">
+                <string>Editor</string>
+            </property>
+            <grid>
+                <property name="name">
+                    <cstring>unnamed</cstring>
+                </property>
+                <widget class="QGroupBox" row="0" column="1">
+                    <property name="name">
+                        <cstring>mMapSettingsGroupBox</cstring>
+                    </property>
+                    <property name="sizePolicy">
+                        <sizepolicy>
+                            <hsizetype>5</hsizetype>
+                            <vsizetype>5</vsizetype>
+                            <horstretch>0</horstretch>
+                            <verstretch>0</verstretch>
+                        </sizepolicy>
+                    </property>
+                    <property name="paletteForegroundColor">
+                        <color>
+                            <red>255</red>
+                            <green>255</green>
+                            <blue>255</blue>
+                        </color>
+                    </property>
+                    <property name="title">
+                        <string>Map Information</string>
+                    </property>
+                    <grid>
+                        <property name="name">
+                            <cstring>unnamed</cstring>
+                        </property>
+                        <widget class="QLabel" row="1" column="0">
+                            <property name="name">
+                                <cstring>mChangeMaxWidthLabel</cstring>
+                            </property>
+                            <property name="paletteForegroundColor">
+                                <color>
+                                    <red>255</red>
+                                    <green>255</green>
+                                    <blue>255</blue>
+                                </color>
+                            </property>
+                            <property name="text">
+                                <string>Map Width:</string>
+                            </property>
+                        </widget>
+                        <widget class="QLabel" row="2" column="0">
+                            <property name="name">
+                                <cstring>mChangeMaxHeightLabel</cstring>
+                            </property>
+                            <property name="paletteForegroundColor">
+                                <color>
+                                    <red>255</red>
+                                    <green>255</green>
+                                    <blue>255</blue>
+                                </color>
+                            </property>
+                            <property name="text">
+                                <string>Map Height:</string>
+                            </property>
+                        </widget>
+                        <widget class="QLabel" row="3" column="0">
+                            <property name="name">
+                                <cstring>mChangeMaxPlayersLabel</cstring>
+                            </property>
+                            <property name="paletteForegroundColor">
+                                <color>
+                                    <red>255</red>
+                                    <green>255</green>
+                                    <blue>255</blue>
+                                </color>
+                            </property>
+                            <property name="text">
+                                <string>Max Players:</string>
+                            </property>
+                        </widget>
+                        <widget class="QSlider" row="2" column="1">
+                            <property name="name">
+                                <cstring>mChangeMaxHeight</cstring>
+                            </property>
+                            <property name="orientation">
+                                <enum>Horizontal</enum>
+                            </property>
+                        </widget>
+                        <widget class="QSlider" row="3" column="1">
+                            <property name="name">
+                                <cstring>mChangeMaxPlayers</cstring>
+                            </property>
+                            <property name="orientation">
+                                <enum>Horizontal</enum>
+                            </property>
+                        </widget>
+                        <widget class="QSlider" row="1" column="1">
+                            <property name="name">
+                                <cstring>mChangeMaxWidth</cstring>
+                            </property>
+                            <property name="orientation">
+                                <enum>Horizontal</enum>
+                            </property>
+                        </widget>
+                        <widget class="QComboBox" row="0" column="1">
+                            <property name="name">
+                                <cstring>mChangeTileset</cstring>
+                            </property>
+                        </widget>
+                        <widget class="QLabel" row="0" column="0">
+                            <property name="name">
+                                <cstring>mChangeTilesetLabel</cstring>
+                            </property>
+                            <property name="paletteForegroundColor">
+                                <color>
+                                    <red>255</red>
+                                    <green>255</green>
+                                    <blue>255</blue>
+                                </color>
+                            </property>
+                            <property name="text">
+                                <string>Tileset:</string>
+                            </property>
+                        </widget>
+                    </grid>
+                </widget>
+                <widget class="QGroupBox" row="0" column="0">
+                    <property name="name">
+                        <cstring>mChooseMapGroupBox</cstring>
+                    </property>
+                    <property name="enabled">
+                        <bool>true</bool>
+                    </property>
+                    <property name="paletteForegroundColor">
+                        <color>
+                            <red>255</red>
+                            <green>255</green>
+                            <blue>255</blue>
+                        </color>
+                    </property>
+                    <property name="title">
+                        <string>Map</string>
+                    </property>
+                    <grid>
+                        <property name="name">
+                            <cstring>unnamed</cstring>
+                        </property>
+                        <widget class="KListView" row="0" column="0" rowspan="2" colspan="1">
+                            <column>
+                                <property name="text">
+                                    <string>Map</string>
+                                </property>
+                                <property name="clickable">
+                                    <bool>false</bool>
+                                </property>
+                                <property name="resizable">
+                                    <bool>false</bool>
+                                </property>
+                            </column>
+                            <property name="name">
+                                <cstring>mChooseBosonMap</cstring>
+                            </property>
+                        </widget>
+                        <widget class="KTextBrowser" row="1" column="1">
+                            <property name="name">
+                                <cstring>mMapPropertiesTextBrowser</cstring>
+                            </property>
+                            <property name="text">
+                                <string></string>
+                            </property>
+                            <property name="wordWrap">
+                                <enum>WidgetWidth</enum>
+                            </property>
+                        </widget>
+                        <spacer row="0" column="1">
+                            <property name="name">
+                                <cstring>mMapImageSpacer</cstring>
+                            </property>
+                            <property name="orientation">
+                                <enum>Horizontal</enum>
+                            </property>
+                            <property name="sizeType">
+                                <enum>Expanding</enum>
+                            </property>
+                            <property name="sizeHint">
+                                <size>
+                                    <width>150</width>
+                                    <height>130</height>
+                                </size>
+                            </property>
+                        </spacer>
+                    </grid>
+                </widget>
+            </grid>
+        </widget>
+    </grid>
+</widget>
+<slots>
+    <slot access="protected" specifier="pure virtual">slotLocalPlayerNameChanged()</slot>
+    <slot access="protected" specifier="pure virtual">slotLocalPlayerColorChanged(int)</slot>
+    <slot access="protected" specifier="pure virtual">slotLocalPlayerMapChanged(QListViewItem*)</slot>
+    <slot access="protected" specifier="pure virtual">slotLocalPlayerSpeciesChanged(int)</slot>
+    <slot access="protected" specifier="pure virtual">slotLocalPlayerHighlightedPlayer(QListBoxItem*)</slot>
+    <slot access="protected" specifier="pure virtual">slotLocalPlayerRemovedPlayer()</slot>
+    <slot access="protected" specifier="pure virtual">slotLocalPlayerAddedComputerPlayer()</slot>
+</slots>
+<layoutdefaults spacing="6" margin="11"/>
+<includehints>
+    <includehint>klistview.h</includehint>
+    <includehint>ktextbrowser.h</includehint>
+</includehints>
+</UI>
