@@ -618,7 +618,7 @@ float BosonPath::cost(int x, int y)
     return FOGGED_COST + mMinCost;
   }
 
-  Cell* c = mUnit->boCanvas()->cell(x, y);
+  Cell* c = mUnit->canvas()->cell(x, y);
   if (!c) {
     kdError() << k_funcinfo << "NULL cell" << endl;
     return ERROR_COST;

@@ -37,8 +37,7 @@ class QLabel;
 
 /**
  * This is the "view" of the canvas - the part of the canvas that you can
- * actually see on the screen. See @ref QCanvasView documentation for more on
- * this.
+ * actually see on the screen.
  *
  * Here you can find most of the local visual stuff. E.g. the selection rect is
  * implemented here. The messages for the network (e.g. "move unit with ID z to

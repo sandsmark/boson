@@ -38,15 +38,13 @@ public:
 	~RTTI() { }
 
 	enum Rtti {
-		// QCanvasItem defines RTTIs from 0 to 8. We don't use them
-		// currently but we better start at a higher value.
-		SelectPart = 15,
-		BoShot = 16,
-		FogOfWar = 17,
-		SpriteCursor = 18,
+		SelectPart = 0,
+		BoShot = 1,
+		FogOfWar = 2,
+		SpriteCursor = 3,
 
 
-		UnitStart = 200 // the IDs of the units start at this value. 
+		UnitStart = 200 // the IDs of the units start at this value.
 		                // Do not insert RTTIs after this!
 	};
 

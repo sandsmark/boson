@@ -90,8 +90,6 @@ public:
 
 	virtual void setHealth(unsigned long int h);
 
-	inline BosonCanvas* boCanvas() const { return (BosonCanvas*)canvas(); }
-
 	virtual void select(bool markAsLeader = false);
 
 	/**

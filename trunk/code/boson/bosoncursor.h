@@ -23,9 +23,6 @@
 #include <qobject.h>
 #include <GL/gl.h>
 
-class QCanvas;
-class QCanvasPixmapArray;
-class QCanvasSprite;
 class QPoint;
 class QWidget;
 class QCursor;
@@ -34,17 +31,11 @@ class BosonTextureArray;
 
 
 
-// AB: we'll leave the QCanvas code in this file, even if its unused, so that
-// someone else can use it if he/she wants
-// #define QCANVAS_CURSOR
-// #define GL_CURSOR
-
-
 /**
  * UPDATE (02/03/09): the documentation is kind of obsolete. We use derived
  * classes now
  *
- * UÜDATE (02/07/24): again docs are obsolete - mostly BosonSpriteCursor. We use
+ * UPDATE (02/07/24): again docs are obsolete - mostly BosonSpriteCursor. We use
  * OpenGL now.
  * 
  * This is the cursor class for boson. There are two different types of cursors.

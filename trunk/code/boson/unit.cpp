@@ -194,12 +194,13 @@ void Unit::moveBy(float moveX, float moveY, float moveZ)
  // is ok, too, as item A won't be in the way in the next phase.
  // This means that be will be moved, too, but it mustn't be moved - we have a
  // collision.
+ // UDPATE: we don't use QCanvas anymore - but this is still valid!
  float oldX = x();
  float oldY = y();
- boCanvas()->removeFromCells(this);
+ canvas()->removeFromCells(this);
  BosonSprite::moveBy(moveX, moveY, moveZ);
- boCanvas()->addToCells(this);
- boCanvas()->unitMoved(this, oldX, oldY);
+ canvas()->addToCells(this);
+ canvas()->unitMoved(this, oldX, oldY);
 }
 
 void Unit::advance(int phase)
@@ -211,9 +212,8 @@ void Unit::advance(int phase)
  if (phase == 0) {
 	reloadWeapon();
  } else { // phase == 1
-	// QCanvasSprite::advance() just moves for phase == 1 ; let's do it
-	// here, too. Collision detection is done is phase == 0 - in all of the
-	// other advance*() functions.
+	// in phase 1 the unit just gets moved *without* collision detection.
+	// That should be done on phase 0 (see e.g. advanceMoveCheck())
 	if (xVelocity() || yVelocity()) {
 		moveBy(xVelocity(), yVelocity(), 0.0);
 	}
@@ -265,7 +265,7 @@ void Unit::advanceAttack()
 	return;
  }
  if (!inRange(target())) {
-	if (!boCanvas()->allBosonItems().contains(target())) {
+	if (!canvas()->allBosonItems().contains(target())) {
 		kdDebug() << "Target seems to be destroyed!" << endl;
 		stopAttacking();
 		return;
@@ -323,7 +323,7 @@ bool Unit::moveTo(float x, float y, int range)
 	range = d->mMoveRange;
  }
  if(!owner()->isFogged((int)(x / BO_TILE_SIZE), (int)(y / BO_TILE_SIZE))) {
-	Cell* c = boCanvas()->cell((int)(x / BO_TILE_SIZE), (int)(y / BO_TILE_SIZE));
+	Cell* c = canvas()->cell((int)(x / BO_TILE_SIZE), (int)(y / BO_TILE_SIZE));
 	if (!c) {
 		kdError() << k_funcinfo << "NULL cell at " << x << "," << y << endl;
 		return false;
@@ -352,7 +352,7 @@ void Unit::newPath()
 {
  kdDebug() << k_funcinfo << endl;
  if(!owner()->isFogged(d->mMoveDestX / BO_TILE_SIZE, d->mMoveDestY / BO_TILE_SIZE)) {
-	Cell* destCell = boCanvas()->cell(d->mMoveDestX / BO_TILE_SIZE,
+	Cell* destCell = canvas()->cell(d->mMoveDestX / BO_TILE_SIZE,
 			d->mMoveDestY / BO_TILE_SIZE);
 	if(!destCell || (!destCell->canGo(unitProperties()))) {
 		// If we can't move to destination, then we add waypoint with coordinates
@@ -508,8 +508,8 @@ BoItemList Unit::unitsInRange() const
  rightBottomCell(&right, &bottom);
  left = QMAX(left - (int)weaponRange(), 0);
  top = QMAX(top - (int)weaponRange(), 0);
- right = QMIN(right + (int)weaponRange(), QMAX((int)boCanvas()->mapWidth() - 1, 0));
- bottom = QMIN(bottom + (int)weaponRange(), QMAX((int)boCanvas()->mapHeight() - 1, 0));
+ right = QMIN(right + (int)weaponRange(), QMAX((int)canvas()->mapWidth() - 1, 0));
+ bottom = QMIN(bottom + (int)weaponRange(), QMAX((int)canvas()->mapHeight() - 1, 0));
  int size = (right - left + 1) * (bottom - top + 1);
  if (size <= 0) {
 	return BoItemList();
@@ -522,7 +522,7 @@ BoItemList Unit::unitsInRange() const
 	}
  }
 
- BoItemList items = boCanvas()->bosonCollisions(cells, (BosonSprite*)this, false);
+ BoItemList items = canvas()->bosonCollisions(cells, (BosonSprite*)this, false);
  items.remove((BosonSprite*)this);
  BoItemList inRange;
  BoItemList::Iterator it = items.begin();
@@ -561,7 +561,7 @@ QValueList<Unit*> Unit::unitCollisions(bool exact) const
 	return units;
  }
  kdDebug() << k_funcinfo << endl;
- BoItemList collisionList = boCanvas()->bosonCollisions(cells(), (BosonSprite*)this, exact);
+ BoItemList collisionList = canvas()->bosonCollisions(cells(), (BosonSprite*)this, exact);
  if (collisionList.isEmpty()) {
 	return units;
  }
@@ -590,7 +590,7 @@ void Unit::setAdvanceWork(WorkType w)
  setXVelocity(0);
  setYVelocity(0);
  if (w != advanceWork() || isDestroyed()) {
-	boCanvas()->setWorkChanged(this);
+	canvas()->setWorkChanged(this);
  }
  UnitBase::setAdvanceWork(w);
 }
@@ -743,10 +743,6 @@ void MobileUnit::advanceMove()
 	return;
  }
 
- /*
- int x = (int)(QCanvasSprite::x() + width() / 2);
- int y = (int)(QCanvasSprite::y() + height() / 2);
- */
 #warning FIXME!!
  int x = (int)(BosonSprite::x() + width() / 2);
  int y = (int)(BosonSprite::y() + height() / 2);
@@ -776,8 +772,8 @@ void MobileUnit::advanceMove()
  // Check if we can actually go to waypoint (maybe it was fogged)
  // FIXME: currentWaypoint should have been unfogged when path was calculated
  //  because we now recalc path after every waypoint (see ~5 lines above)
- if(!boCanvas()->cell(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE) ||
-		!boCanvas()->cell(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE)->canGo(unitProperties())) {
+ if(!canvas()->cell(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE) ||
+		!canvas()->cell(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE)->canGo(unitProperties())) {
 	kdWarning() << "cannot go to waypoint, finding new path" << endl;
 	setXVelocity(0);
 	setYVelocity(0);
@@ -832,7 +828,7 @@ void MobileUnit::advanceMoveCheck()
 	return;
  }
  kdDebug() << k_funcinfo << endl;
- if (boCanvas()->cellOccupied(currentWaypoint().x() / BO_TILE_SIZE,
+ if (canvas()->cellOccupied(currentWaypoint().x() / BO_TILE_SIZE,
 		currentWaypoint().y() / BO_TILE_SIZE, this, false)) {
 //	kdDebug() << k_funcinfo << "collisions" << endl;
 //	kdWarning() << k_funcinfo << "" << id() << " -> " << l.first()->id() 
@@ -864,7 +860,7 @@ void MobileUnit::advanceMoveCheck()
 	return;
  }
  else if (! d->mTargetCellMarked) {
-	boCanvas()->cell(currentWaypoint().x() / BO_TILE_SIZE, currentWaypoint().y() / BO_TILE_SIZE)->willBeOccupiedBy(this);
+	canvas()->cell(currentWaypoint().x() / BO_TILE_SIZE, currentWaypoint().y() / BO_TILE_SIZE)->willBeOccupiedBy(this);
 	d->mTargetCellMarked = true;
  }
  d->mMovingFailed = 0;
@@ -927,7 +923,7 @@ void MobileUnit::advanceMine()
 	return;
  }
  if (resourcesMined() < unitProperties()->maxResources()) {
-	if (canMine(boCanvas()->cellAt(this))) {
+	if (canMine(canvas()->cellAt(this))) {
 		const int step = (resourcesMined() + 10 <= unitProperties()->maxResources()) ? 10 : unitProperties()->maxResources() - resourcesMined();
 		d->mHarvesterProperties->mResourcesMined = resourcesMined() + step;
 		if (unitProperties()->canMineMinerals()) {
