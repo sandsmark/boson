@@ -65,9 +65,6 @@ BosonNewGameWidget::BosonNewGameWidget(TopWidget* top, QWidget* parent)
 
   mMainLayout = new QVBoxLayout( 0, 0, 6, "mainlayout");
 
-  mLogoSpacer = new QSpacerItem( 20, 20, QSizePolicy::Minimum, QSizePolicy::Fixed );
-  mMainLayout->addItem( mLogoSpacer );
-
   //FIXME!
   /*
   QLabel* header = new QLabel( this, "header" );
@@ -615,10 +612,5 @@ inline BosonPlayField* BosonNewGameWidget::map()
 void BosonNewGameWidget::sendNewGame() 
 {
   game()->sendMessage(0, BosonMessage::IdNewGame);
-}
-
-void BosonNewGameWidget::setLogoSpacer(int height) 
-{
-  mLogoSpacer->changeSize( 20, height, QSizePolicy::Minimum, QSizePolicy::Fixed );
 }
 

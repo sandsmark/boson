@@ -38,43 +38,56 @@ BosonWelcomeWidget::BosonWelcomeWidget(QWidget* parent) : QWidget(parent)
 {
   mBosonWelcomeWidgetLayout = new QVBoxLayout( this, 11, 6, "BosonWelcomeWidgetLayout");
 
+  // 6 + 60 + 15 == logo == 81
+
   mMainLayout = new QVBoxLayout( 0, 0, 6, "mainlayout"); 
 
-  mLogoSpacer = new QSpacerItem( 20, 20, QSizePolicy::Preferred, QSizePolicy::Minimum );
-  mMainLayout->addItem( mLogoSpacer );
+  mMainLayout->addSpacing(10);//FIXME hardcoded
+  QPixmap bannerPix(locate("data", "boson/pics/boson-startup-banner.png"));
+  mBanner = new QLabel(this);
+  mBanner->setPixmap(bannerPix);
+  mMainLayout->addWidget(mBanner);
 
-  QPixmap startupPix(locate("data", "boson/pics/startup.png"));
-  if (startupPix.isNull()) {
-	 kdFatal() << "Unable to find startup pixmap - please install the data package!" << endl;
-	 return;
-  }
-  setErasePixmap(startupPix);
-  setFixedSize(startupPix.size());
-  QSpacerItem* spacer_1 = new QSpacerItem( 20, 400, QSizePolicy::Preferred, QSizePolicy::Minimum );
-  mMainLayout->addItem( spacer_1 );
+  // 66 + 25 + 72 == 163
 
-  mLowerLayout = new QHBoxLayout( 0, 0, 6, "lowerlayout");
+  mMainLayout->addSpacing(33);
+  QPixmap textFramePix(locate("data", "boson/pics/boson-startup-textframe.png"));
+  mTextFrame = new QLabel(this);
+  mTextFrame->setPixmap(textFramePix);
+  mTextFrame->setFixedSize(textFramePix.size());
+  mMainLayout->addWidget(mTextFrame);
 
+  // 163 + 33 + 248 == 444
+
+  mMainLayout->addSpacing(20);
+
+
+  QVBoxLayout* textFrameLayout = new QVBoxLayout( mTextFrame, 15, 6, "textframelayout" );
+  textFrameLayout->addStretch(1);
+  textFrameLayout->addStretch(1);
+  textFrameLayout->addStretch(1);
+  QHBoxLayout* lowerLayout = new QHBoxLayout( textFrameLayout, -1, "lowerlayout");
+  textFrameLayout->addStretch(1);
   QHBoxLayout* buttonsLayout = new QHBoxLayout( 0, 0, 6, "buttonslayout");
 
-  mNewGameButton = new QPushButton( this, "newgamebutton" );
+  mNewGameButton = new QPushButton( mTextFrame, "newgamebutton" );
   mNewGameButton->setText( i18n( "S&tart new game" ) );
   mNewGameButton->setMinimumWidth(150);
-  buttonsLayout->addWidget( mNewGameButton );
+  buttonsLayout->addWidget( mNewGameButton, 0, 0 );
   QSpacerItem* spacer_3 = new QSpacerItem( 20, 20, QSizePolicy::Minimum, QSizePolicy::Expanding );
   buttonsLayout->addItem( spacer_3 );
 
 #ifndef NO_EDITOR
-  mEditorButton = new QPushButton( this, "editorbutton" );
+  mEditorButton = new QPushButton( mTextFrame, "editorbutton" );
   mEditorButton->setText( i18n( "Start &Editor" ) );
   mEditorButton->setMinimumWidth(150);
   buttonsLayout->addWidget( mEditorButton );
-  connect(mEditorButton, SIGNAL(clicked()), this, SIGNAL(signalStartEditor()));
+  connect(mEditorButton, SIGNAL(clicked()), mTextFrame, SIGNAL(signalStartEditor()));
 #else
   mEditorButton = 0;
 #endif
 
-  mQuitButton = new QPushButton( this, "quitbutton" );
+  mQuitButton = new QPushButton( mTextFrame, "quitbutton" );
   mQuitButton->setText( i18n( "&Quit Boson" ) );
   mQuitButton->setMinimumWidth(150);
   buttonsLayout->addWidget( mQuitButton );
@@ -83,13 +96,11 @@ BosonWelcomeWidget::BosonWelcomeWidget(QWidget* parent) : QWidget(parent)
   QSpacerItem* spacer_5 = new QSpacerItem( 20, 20, QSizePolicy::Minimum, QSizePolicy::Expanding );
   buttonsLayout->addItem( spacer_5 );
 
-  QSpacerItem* spacer_6 = new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Fixed );
-  QSpacerItem* spacer_7 = new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Fixed );
-  mLowerLayout->addItem(spacer_6);
-  mLowerLayout->addLayout(buttonsLayout);
-  mLowerLayout->addItem(spacer_7);
+  lowerLayout->addStretch(1);
+  lowerLayout->addLayout(buttonsLayout);
+  lowerLayout->addStretch(1);
 
-  mMainLayout->addLayout( mLowerLayout );
+
   mBosonWelcomeWidgetLayout->addLayout( mMainLayout );
 
   connect(mNewGameButton, SIGNAL(clicked()), this, SIGNAL(signalNewGame()));
@@ -102,11 +113,5 @@ BosonWelcomeWidget::BosonWelcomeWidget(QWidget* parent) : QWidget(parent)
 BosonWelcomeWidget::~BosonWelcomeWidget()
 {
   // no need to delete child widgets, Qt does it all for us
-}
-
-void BosonWelcomeWidget::setLogoSpacer(int height)
-{
-//FIXME
-//  mLogoSpacer->changeSize( 20, height, QSizePolicy::Minimum, QSizePolicy::Fixed );
 }
 

@@ -15,7 +15,6 @@ class QVBoxLayout;
 class QHBoxLayout;
 class QLabel;
 class QProgressBar;
-class QSpacerItem;
 
 class BosonLoadingWidget : public QWidget
 { 
@@ -39,7 +38,6 @@ class BosonLoadingWidget : public QWidget
     void setLoading(LoadingType load);
     void setProgress(int prog);
     void setSteps(int steps);
-    void setLogoSpacer(int height);
 
   protected:
     QVBoxLayout* mBosonLoadingWidgetLayout;
@@ -49,7 +47,6 @@ class BosonLoadingWidget : public QWidget
     QLabel* mPleaseWaitLabel;
     QLabel* mLoadingLabel;
     QProgressBar* mProgress;
-    QSpacerItem* mLogoSpacer;
 };
 
 #endif // BOSONLOADINGWIDGET_H

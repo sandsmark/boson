@@ -25,9 +25,6 @@ BosonLoadingWidget::BosonLoadingWidget(QWidget* parent)
 {
   mBosonLoadingWidgetLayout = new QVBoxLayout( this, 11, 6, "BosonLoadingWidgetLayout");
 
-  mLogoSpacer = new QSpacerItem( 20, 20, QSizePolicy::Minimum, QSizePolicy::Fixed );
-  mBosonLoadingWidgetLayout->addItem(mLogoSpacer);
-	
   mHeader = new QLabel( this, "header" );
   QFont header_font(  mHeader->font() );
   header_font.setPointSize( 30 );
@@ -122,7 +119,3 @@ void BosonLoadingWidget::setSteps(int steps)
   mProgress->setTotalSteps(steps);
 }
 
-void BosonLoadingWidget::setLogoSpacer(int height)
-{
-  mLogoSpacer->changeSize( 20, height, QSizePolicy::Minimum, QSizePolicy::Fixed );
-}
