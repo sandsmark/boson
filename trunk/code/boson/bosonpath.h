@@ -180,6 +180,7 @@ class BosonPath
 #define PF_TNG_COST_ENGAGING_UNIT 3.5f
 #define PF_TNG_COST_MUSTSEARCH_UNIT 0.5f
 #define PF_TNG_COST_INTERNAL_UNIT 100.0f
+#define PF_TNG_EPSILON 0.0001f
 
 
 class BosonPathSector;
@@ -496,8 +497,9 @@ template<class T> class BosonPathHeap : public QValueList<T>
       QValueListIterator<T> it;
       for(it = this->begin(); it != this->end(); ++it)
       {
-        if((x.g + x.h) <= ((*it).g + (*it).h))
+        if(((x.g + x.h) - ((*it).g + (*it).h)) < PF_TNG_EPSILON)
         {
+          // (x.g + x.h) <= ((*it).g + (*it).h)
           insert(it, x);
           break;
         }

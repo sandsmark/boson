@@ -1780,8 +1780,9 @@ void BosonPath2::findLowLevelPath(BosonPathInfo* info)
     }
     else
     {
-      if(QMAX(QABS(n.x - info->dest.x() / BO_TILE_SIZE), QABS(n.y - info->dest.y() / BO_TILE_SIZE)) <= info->range)
+      if((QMAX(QABS(n.x - info->dest.x() / BO_TILE_SIZE), QABS(n.y - info->dest.y() / BO_TILE_SIZE)) - info->range) < PF_TNG_EPSILON)
       {
+        // QMAX(...) <= info->range
         // This is the destination cell
 //        boDebug(510) << "" << k_funcinfo << "goal cell found, braking" << endl;
         pathfound = true;
@@ -1824,7 +1825,7 @@ void BosonPath2::findLowLevelPath(BosonPathInfo* info)
         n2.h = lowLevelDistToGoal(n2.x, n2.y, info);
 
         // Check if n2 is nearest node so far
-        if((n2.h + n2.g * TNG_NEAREST_G_FACTOR) < (nearest.h + nearest.g * TNG_NEAREST_G_FACTOR))
+        if(((n2.h + n2.g * TNG_NEAREST_G_FACTOR) - (nearest.h + nearest.g * TNG_NEAREST_G_FACTOR)) < -PF_TNG_EPSILON)
         {
           nearest = n2;
         }
@@ -1868,7 +1869,7 @@ void BosonPath2::findLowLevelPath(BosonPathInfo* info)
         n2.h = (*it).h;
 
         // Check if n2 is nearest node so far
-        if((n2.h + n2.g * TNG_NEAREST_G_FACTOR) < (nearest.h + nearest.g * TNG_NEAREST_G_FACTOR))
+        if(((n2.h + n2.g * TNG_NEAREST_G_FACTOR) - (nearest.h + nearest.g * TNG_NEAREST_G_FACTOR)) < -PF_TNG_EPSILON)
         {
           nearest = n2;
         }
