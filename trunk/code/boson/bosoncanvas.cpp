@@ -268,7 +268,7 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount)
 		++it;
 	}
  }
- if (d->mWorkConstructed.count() > 0 && (advanceCount % 40) == 0) {
+ if (d->mWorkConstructed.count() > 0 && (advanceCount % 30) == 0) {
 	QPtrListIterator<Unit> it(d->mWorkConstructed);
 	while (it.current()) {
 		it.current()->advanceConstruction();
