@@ -1,7 +1,7 @@
 <!DOCTYPE kpartgui SYSTEM "kpartgui.dtd">
-<kpartgui name="bosongame" version="1">
+<kpartgui name="bosongame" version="2">
 <MenuBar>
-  <Menu name="game"><text>&amp;Game</text>
+  <Menu name="game" group="gamemenu"><text>&amp;Game</text>
     <Action name="game_center_base" />
     <Action name="game_reset_view_properties" />
     <Action name="game_grab_screenshot" />
