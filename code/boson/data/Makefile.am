@@ -1,7 +1,7 @@
 
 
-appsdir = $(kde_appsdir)/Games/TacticStrategy
-apps_DATA = boson.desktop bounit.desktop
+appsdir = $(kde_appsdir)/Games/TacticStrategy/boson
+apps_DATA = boson.desktop bounit.desktop boinfo.desktop
 
 KDE_ICON = boson
 
