@@ -90,14 +90,6 @@ void EditorWidget::initDisplayManager()
 		this, SLOT(slotEditPlayerOil()));
 }
 
-void EditorWidget::initConnections()
-{
- BosonWidgetBase::initConnections();
-
- connect(boGame, SIGNAL(signalGameStarted()),
-		this, SLOT(slotGameStarted()));
-}
-
 void EditorWidget::initMap()
 {
  BosonWidgetBase::initMap();
@@ -111,43 +103,10 @@ void EditorWidget::initMap()
 		map, SLOT(slotChangeTexMap(int,int,unsigned int,unsigned int*,unsigned char*)));
 }
 
-void EditorWidget::initPlayer()
-{
- BosonWidgetBase::initPlayer();
-}
-
 void EditorWidget::slotChangeCursor(int , const QString& )
 {
  // editor mode
  changeCursor(new BosonKDECursor());
-}
-
-void EditorWidget::saveConfig()
-{
-  // note: the game is *not* saved here! just general settings like game speed,
-  // player name, ...
- boDebug() << k_funcinfo << endl;
- if (!boGame) {
-	boError() << k_funcinfo << "NULL game" << endl;
-	return;
- }
- if (!localPlayer()) {
-	boError() << k_funcinfo << "NULL local player" << endl;
-	return;
- }
- BosonWidgetBase::saveConfig();
-
-// boConfig->save(editor); //FIXME
- boDebug() << k_funcinfo << "done" << endl;
-}
-
-void EditorWidget::slotGameStarted()
-{
-}
-
-void EditorWidget::startScenarioAndGame()
-{
- BosonWidgetBase::startScenarioAndGame();
 }
 
 void EditorWidget::slotEditPlayerMinerals()

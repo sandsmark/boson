@@ -57,8 +57,6 @@ public:
 	 **/
 	virtual ~BosonWidget();
 
-	virtual void saveConfig();
-
 signals:
 	void signalGameOver();
 	void signalSaveGame();
@@ -69,8 +67,6 @@ protected slots:
 
 protected:
 	virtual void initDisplayManager();
-
-	virtual void startScenarioAndGame();
 
 private:
 	class BosonWidgetPrivate;

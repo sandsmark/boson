@@ -55,10 +55,7 @@ public:
 	 **/
 	virtual ~EditorWidget();
 
-	virtual void saveConfig();
-
 	virtual void initMap();
-	virtual void initPlayer();
 
 public slots:
 signals:
@@ -72,12 +69,8 @@ protected slots:
 
 	void slotLockAction(bool);
 
-	void slotGameStarted();
-
 protected:
 	virtual void initDisplayManager();
-	virtual void initConnections();
-	virtual void startScenarioAndGame();
 
 private:
 	class EditorWidgetPrivate;
