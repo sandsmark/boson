@@ -396,6 +396,11 @@ unsigned char* BoTexture::ensureCorrectSize(unsigned char* data, int &width, int
   {
     maxSize = boTextureManager->maxCubeTextureSize();
   }
+  else
+  {
+    boError() << k_funcinfo << "invalid type " << mType << endl;
+    return data;
+  }
 
   // Ensure correct width
   int newW = nextPower2(width);
