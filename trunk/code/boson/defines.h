@@ -46,7 +46,7 @@
 
 #define MAX_GAME_SPEED 10 // the advance period - lower means faster
 #define MIN_GAME_SPEED 800 // the advance period - higher means slower
-#define DEFAULT_GAME_SPEED 50
+#define DEFAULT_GAME_SPEED 70
 
 
 #define Z_MOBILE 400
