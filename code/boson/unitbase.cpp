@@ -49,7 +49,7 @@ UnitBase::UnitBase(const UnitProperties* prop)
 {
  d = new UnitBasePrivate;
  mOwner = 0;
- mUnitProperties = prop;
+ mUnitProperties = prop; // WARNING: this might be 0 at this point! MUST be != 0 for Unit, but ScenarioUnit uses 0 here
 
 // PolicyLocal?
  mHealth.registerData(IdHealth, dataHandler(), 
@@ -154,7 +154,11 @@ bool UnitBase::load(QDataStream& stream)
 {
  Q_INT32 typeId;
  stream >> typeId;
- mUnitProperties = speciesTheme()->unitProperties(typeId); // FIXME: make sure that speciesTheme() is != 0!!!
+ if (!speciesTheme()) {
+	kdError() << k_funcinfo << "NULL speciesTheme" << endl;
+	return false;
+ }
+ mUnitProperties = speciesTheme()->unitProperties(typeId);
  bool ret = dataHandler()->load(stream);
  return ret;
 }
