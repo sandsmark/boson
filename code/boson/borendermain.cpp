@@ -43,7 +43,6 @@
 #include <kpopupmenu.h>
 #include <kstandarddirs.h>
 #include <kdialogbase.h>
-#include <kinputdialog.h>
 #include <kcolordialog.h>
 
 #include <qtimer.h>
@@ -51,6 +50,7 @@
 #include <qlayout.h>
 #include <qpushbutton.h>
 #include <qcheckbox.h>
+#include <qinputdialog.h>
 
 #include <GL/glu.h>
 
@@ -1036,9 +1036,9 @@ void RenderMain::slotVertexPointSize()
 {
  bool ok = false;
  unsigned int size = boConfig->uintValue("VertexPointSize");
- size = (unsigned int)KInputDialog::getInteger(i18n("Vertex point size"),
+ size = (unsigned int)QInputDialog::getInteger(i18n("Vertex point size"),
 		i18n("Vertex point size (in pixels)"),
-		(int)size, 0, 500, 1, 10, &ok, this);
+		(int)size, 0, 500, 1, &ok, this);
  if (ok) {
 	boConfig->setUIntValue("VertexPointSize", size);
  }
