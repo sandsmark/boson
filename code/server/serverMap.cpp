@@ -26,6 +26,7 @@
 #include "serverCell.h"
 #include "boserver.h"
 #include "serverUnit.h"
+#include "game.h"
 
 
 void BosonServer::initMap(const char *mapfile)
@@ -68,10 +69,10 @@ for (int i=0; i< 3; i++)
 
 
 people	= field.people;
-nbPlayer= field.nbPlayer;
+gpp.nbPlayer= field.nbPlayer;
 
-assert(nbPlayer < 11);
-assert(nbPlayer > 1);
+assert(gpp.nbPlayer < 11);
+assert(gpp.nbPlayer > 1);
 
 }
 
@@ -116,7 +117,7 @@ for (i=im ; i<=iM; i++)
 			data.coo.y = j+y;
 			data.coo.g = c->getGroundType();
 			sendMsg (
-				player[u->who].buffer,
+				gpp.player[u->who].buffer,
 				MSG_MAP_DISCOVERED,
 				sizeof(data.coo), &data);
 			}
@@ -138,9 +139,9 @@ data.mobile.x = x;
 data.mobile.y = y;
 data.mobile.type = type;
 assert(who< BOSON_MAX_CONNECTION);
-assert(player[who].socketState==SSS_CONNECT_OK);
+assert(gpp.player[who].socketState==SSS_CONNECT_OK);
 
-u = new serverMobUnit(player[who].buffer, &data.mobile);
+u = new serverMobUnit(gpp.player[who].buffer, &data.mobile);
 
 /* who is interested in knowing u's arrival */
 x /= BO_TILE_SIZE;
@@ -159,12 +160,7 @@ for (i=0; i<i2; i++)
 u->setKnown(k);
 
 /* telling them */
-for ( i=0; k; i++,k>>=1) {
-	boAssert(i<3);
-	if (k&1l) sendMsg (
-		player[i].buffer,	MSG_MOBILE_CREATED,
-		sizeof(data.mobile),	&data);
-	}
+u->sendToKnown(MSG_MOBILE_CREATED, sizeof(data.mobile), &data);
 
 mobile.insert ( key++, u);
 checkUnitVisibility(u);
@@ -186,10 +182,11 @@ data.facility.key	= key;
 data.facility.x		= x;
 data.facility.y		= y;
 data.facility.type	= type;
+data.facility.state	= 0;
 assert(who< BOSON_MAX_CONNECTION);
-assert(player[who].socketState==SSS_CONNECT_OK);
+assert(gpp.player[who].socketState==SSS_CONNECT_OK);
 
-f = new serverFacility(player[who].buffer, &data.facility);
+f = new serverFacility(gpp.player[who].buffer, &data.facility);
 
 /* who is interested in knowing u's arrival */
 i2 = facilityProp[type].width;
@@ -205,7 +202,7 @@ f->setKnown(k);
 for ( i=0; k; i++,k>>=1) {
 	boAssert(i<4);
 	if (k&1l) sendMsg (
-		player[i].buffer,	MSG_FACILITY_CREATED,
+		gpp.player[i].buffer,	MSG_FACILITY_CREATED,
 		sizeof(data.facility),	&data);
 	}
 
@@ -223,3 +220,102 @@ QIntDictIterator<serverFacility> fixIt(facility);
 for (fixIt.toFirst(); fixIt; ++fixIt)
 	fixIt.current()->getWantedAction();
 }
+
+void BosonServer::checkKnownState()
+{
+QIntDictIterator<serverFacility> fixIt(facility);
+QIntDictIterator<serverMobUnit> mobIt(mobile);
+
+for (fixIt.toFirst(); fixIt; ++fixIt)
+	checkFixKnown(fixIt.current());
+
+for (mobIt.toFirst(); mobIt; ++mobIt)
+	checkMobileKnown(mobIt.current());
+
+}
+
+void BosonServer::checkFixKnown(serverFacility *f)
+{
+	int x,y;
+	int i,j, i2, j2;
+	ulong	k = 0l, k2;
+
+	x = f->_x();
+	y = f->_y();
+	///orzel : ugly
+	i2 = f->getWidth() / BO_TILE_SIZE;
+	j2 = f->getHeight() / BO_TILE_SIZE;
+
+	for (i=0; i<i2; i++)
+		for (j=0; j<j2; j++)
+			k |= map.cells[x+i][y+j].known;
+
+	i=0;
+	k2 = f->known;
+	while ( k != k2) {
+		boAssert(i<3);
+		/* until the state is coherent between unit and ground */
+		if ( (k&1l) == (k2&1l) ) {
+			/* same state for user i, it's ok*/
+			k>>=1; k2>>=1; i++; continue;
+			}
+		if ( k&1l) {
+			/* in this case the mobile should be known, but isn't */
+puts("discovering machin");
+			f->reportCreated( gpp.player[i].buffer);
+			f->setKnown(getPlayerMask(i));
+			}
+		else {
+			/* the unit isn't known anymore */
+			f->reportDestroyed( gpp.player[i].buffer);
+			f->unSetKnown(getPlayerMask(i));
+			}
+		k>>=1; k2>>=1; i++; // let's continue
+		} /* while */
+
+}
+
+
+void BosonServer::checkMobileKnown(serverMobUnit *m)
+{
+	int x,y;
+	int i,j, i2, j2;
+	ulong	k = 0l, k2;
+
+
+	x = m->_x() / BO_TILE_SIZE;
+	y = m->_y() / BO_TILE_SIZE;
+	i2 = (m->getWidth() + BO_TILE_SIZE -1 ) / BO_TILE_SIZE;
+	j2 = (m->getHeight() + BO_TILE_SIZE -1 )/ BO_TILE_SIZE;
+
+	for (i=0; i<i2; i++)
+		for (j=0; j<j2; j++)
+			k |= map.cells[x+i][y+j].known;
+
+	i=0;
+	k2 = m->known;
+	while ( k != k2) {
+		boAssert(i<3);
+		/* until the state is coherent between unit and ground */
+		if ( (k&1l) == (k2&1l) ) {
+			/* same state for user i, it's ok*/
+			k>>=1; k2>>=1; i++; continue;
+			}
+		if ( k&1l) {
+			/* in this case the mobile should be known, but isn't */
+			m->reportCreated( gpp.player[i].buffer);
+			m->setKnown(getPlayerMask(i));
+			}
+		else {
+			/* the unit isn't known anymore */
+			m->reportDestroyed( gpp.player[i].buffer);
+			m->unSetKnown(getPlayerMask(i));
+			}
+		k>>=1; k2>>=1; i++; // let's continue
+		} /* while */
+
+}
+
+
+
+

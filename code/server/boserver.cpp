@@ -20,6 +20,7 @@
 
 #include <stdio.h>
 #include "boserver.h"
+#include "game.h"
 
 #include "../common/bobuffer.h"
 
@@ -32,8 +33,8 @@ BosonServer::BosonServer(const char *mapfile, const char *name=0L)
 	: KTMainWindow(name)
 {
 
-//nbPlayer = 2;
-nbConnected = 0;
+//gpp.nbPlayer = 2;
+gpp.nbConnected = 0;
 
 initLog();
 logf(LOG_INFO, "Entering BosonServer constructor");
@@ -65,9 +66,9 @@ void BosonServer::initSocket()
 int i;
 
 for(i=0; i<BOSON_MAX_CONNECTION; i++) {
-	player[i].socketState = SSS_NO_CONNECT;
-	player[i].server = this;
-	player[i].id = i;
+	gpp.player[i].socketState = SSS_NO_CONNECT;
+	gpp.player[i].server = this;
+	gpp.player[i].id = i;
 	}
 
 socket = new KServerSocket(BOSON_DEFAULT_PORT);
@@ -103,13 +104,13 @@ void BosonServer::handleNewConnection(KSocket *newConnection)
 int i;
 
 for(i=0; i<BOSON_MAX_CONNECTION; i++)
-   if (SSS_NO_CONNECT == player[i].socketState) {
+   if (SSS_NO_CONNECT == gpp.player[i].socketState) {
 
 	/* Memorize it */
-	player[i].socketState = SSS_INIT;
-	player[i].socket = newConnection;
-	player[i].buffer = new boBuffer(newConnection->socket(), BOSON_BUFFER_SIZE );
-	player[i].lastConfirmedJiffies = 0;
+	gpp.player[i].socketState = SSS_INIT;
+	gpp.player[i].socket = newConnection;
+	gpp.player[i].buffer = new boBuffer(newConnection->socket(), BOSON_BUFFER_SIZE );
+	gpp.player[i].lastConfirmedJiffies = 0;
 
 	logf(LOG_COMM,"new incoming connection, put in slot[%d]", i);
 
@@ -124,7 +125,7 @@ for(i=0; i<BOSON_MAX_CONNECTION; i++)
 
 	connect(
 		newConnection, SIGNAL(readEvent(KSocket *)),
-		&player[i], SLOT(handleSocketMessage(KSocket*)) );
+		&gpp.player[i], SLOT(handleSocketMessage(KSocket*)) );
 	newConnection->enableRead(TRUE);
 
 	return;
@@ -161,32 +162,32 @@ switch(state) {
 	case SS_INIT :
 		if (MSG_DLG_ASK == tag) {
 			state = SS_WAITING;
-			nbConnected = 1;
+			gpp.nbConnected = 1;
 
 			data->accepted.who_you_are = playerId;
-			data->accepted.missing_player = nbPlayer - 1;;
-			data->accepted.total_player = nbPlayer;
+			data->accepted.missing_player = gpp.nbPlayer - 1;;
+			data->accepted.total_player = gpp.nbPlayer;
 			data->accepted.sizeX = map.height;
 			data->accepted.sizeY = map.width;;
-			sendMsg(player[playerId].buffer, MSG_DLG_ACCEPTED, sizeof(data->accepted), data);
+			sendMsg(gpp.player[playerId].buffer, MSG_DLG_ACCEPTED, sizeof(data->accepted), data);
 			break;
 			}
 		UNKNOWN_TAG(state);
 
 	case SS_WAITING :
 		if (MSG_DLG_ASK == tag ) {
-			nbConnected++;
+			gpp.nbConnected++;
 			data->accepted.who_you_are = playerId;
-			data->accepted.missing_player = nbPlayer-nbConnected;
-			data->accepted.total_player = nbPlayer;
+			data->accepted.missing_player = gpp.nbPlayer-gpp.nbConnected;
+			data->accepted.total_player = gpp.nbPlayer;
 			data->accepted.sizeX = map.height;
 			data->accepted.sizeY = map.width;;
-			sendMsg(player[playerId].buffer, MSG_DLG_ACCEPTED, sizeof(data->accepted), data);
-			if (nbPlayer == nbConnected) {
+			sendMsg(gpp.player[playerId].buffer, MSG_DLG_ACCEPTED, sizeof(data->accepted), data);
+			if (gpp.nbPlayer == gpp.nbConnected) {
 
 				/* first of all : tell 'verybody that the game is beginning*/
-				for(i= 0; i < nbPlayer; i++)
-					sendMsg(player[i].buffer, MSG_DLG_BEGIN, BOSON_NO_DATA);
+				for(i= 0; i < gpp.nbPlayer; i++)
+					sendMsg(gpp.player[i].buffer, MSG_DLG_BEGIN, BOSON_NO_DATA);
 
 				/* then initialize the game */
 				state		= SS_PLAYING;
@@ -194,13 +195,13 @@ switch(state) {
 				logf(LOG_INFO, "Game is beginning");
 
 				/* Beginning of synchronization */
-				jiffies		= 1;
+				gpp.jiffies	= 1;
 				confirmedJiffies= 0;
-				data->jiffies	= jiffies;
-				boAssert(jiffies == 1); ///orzel : well...
-				for(i=0; i<nbPlayer; i++) {
-				   sendMsg(player[i].buffer, MSG_TIME_INCREASE, sizeof(data->jiffies), data);
-				   player[i].buffer->flush();
+				data->jiffies	= gpp.jiffies;
+				boAssert(gpp.jiffies == 1); ///orzel : well...
+				for(i=0; i<gpp.nbPlayer; i++) {
+				   sendMsg(gpp.player[i].buffer, MSG_TIME_INCREASE, sizeof(data->jiffies), data);
+				   gpp.player[i].buffer->flush();
 				   }
 				}
 			break;
@@ -232,37 +233,37 @@ switch(tag) {
 		ASSERT_DATA_BLENGHT(sizeof(data->move));
 		mob = mobile.find(data->move.key);
 		if (mob) {
-			mob->r_moveBy(data->move, playerId, player[playerId].buffer);
+			mob->r_moveBy(data->move, playerId, gpp.player[playerId].buffer);
   			checkUnitVisibility(mob);
 			}
 		else logf(LOG_ERROR, "handleGameMessage : unexpected mobile key in moveMsg_t : %d", data->move.key);
 		break;
 	case MSG_TIME_CONFIRM :
 		ASSERT_DATA_BLENGHT(sizeof(data->jiffies));
-		boAssert(player[playerId].lastConfirmedJiffies == (jiffies-1));
-//if (!(player[playerId].lastConfirmedJiffies == (jiffies-1)))
-//	printf("jiffies = %d, lastconfirmed = %d\n", jiffies, player[playerId].lastConfirmedJiffies);
-		boAssert(data->jiffies == jiffies);
-		player[playerId].lastConfirmedJiffies = jiffies;
+		boAssert(gpp.player[playerId].lastConfirmedJiffies == (gpp.jiffies-1));
+		boAssert(data->jiffies == gpp.jiffies);
+		gpp.player[playerId].lastConfirmedJiffies = gpp.jiffies;
 		confirmedJiffies++;
-		if (confirmedJiffies == nbPlayer) {
-			usleep(1000*100); ///orzel histoire de pas faire peter les jiffies en attendant qu'il y ait un vrai TimeOut
+		if (confirmedJiffies == gpp.nbPlayer) {
+			usleep(100*100); ///orzel histoire de pas faire peter les jiffies en attendant qu'il y ait un vrai TimeOut
 
 			/* get all wanted action from everybody */
 			requestAction();
+			/* check knwon state with new mobiles' position distro */
+			checkKnownState();
 			/* increment jiffies */
-			jiffies++;
+			gpp.jiffies++;
 			confirmedJiffies = 0 ; /* nobody until now has confirmed this new jiffies */
 
 			/* tell everybody, and flush outgoing buffers */
-			data->jiffies = jiffies;
-			for(i=0; i<nbPlayer; i++) {
-				boAssert(player[i].lastConfirmedJiffies == (jiffies-1));
-				sendMsg(player[i].buffer, MSG_TIME_INCREASE, sizeof(data->jiffies), data);
-				player[i].buffer->flush();
+			data->jiffies = gpp.jiffies;
+			for(i=0; i<gpp.nbPlayer; i++) {
+				boAssert(gpp.player[i].lastConfirmedJiffies == (gpp.jiffies-1));
+				sendMsg(gpp.player[i].buffer, MSG_TIME_INCREASE, sizeof(data->jiffies), data);
+				gpp.player[i].buffer->flush();
 				}
 			/* log */
-			logf(LOG_GAME_LOW, "Jiffies++ : %u", jiffies);
+			logf(LOG_GAME_LOW, "Jiffies++ : %u", gpp.jiffies);
 			}
 		
 		break;
