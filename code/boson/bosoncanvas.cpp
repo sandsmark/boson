@@ -738,14 +738,20 @@ void BosonCanvas::destroyUnit(Unit* unit)
 	// Add destroyed particle systems
 	addParticleSystems(unit->unitProperties()->newDestroyedParticleSystems(pos[0], pos[1], pos[2]));
 	// Make explosion if needed
-	if (unit->unitProperties()->explodingDamage() > 0) {
+	const UnitProperties* prop = unit->unitProperties();
+	if (prop->explodingDamage() > 0) {
+		BosonShotExplosion* e = (BosonShotExplosion*)createShot(BosonShot::Explosion, 0, 0, unit->owner());
 		// Do we want ability to set fullDamageRange here?
-		new BosonShotExplosion(unit->owner(), this, pos, unit->unitProperties()->explodingDamage(), unit->unitProperties()->explodingDamageRange(), 0, 10);
+		if (e) {
+			e->activate(pos, prop->explodingDamage(), prop->explodingDamageRange(), 0.0f, 10);
+		}
 	}
 	// Add explosion fragments
 	for (unsigned int i = 0; i < unit->unitProperties()->explodingFragmentCount(); i++) {
-		new BosonShotFragment(unit->owner(), this, unit->speciesTheme()->objectModel("fragment"),
-				pos, unit->unitProperties());
+		BosonShotFragment* f = (BosonShotFragment*)createShot(BosonShot::Fragment, 0, 0, unit->owner());
+		if (f) {
+			f->activate(pos, unit->unitProperties());
+		}
 	}
 	// Hide unit if wreckage should be removed immediately
 	if (unit->unitProperties()->removeWreckageImmediately()) {
@@ -1065,11 +1071,11 @@ bool BosonCanvas::load(QDataStream& stream)
 	}
 	p = (Player*)boGame->findPlayer(playerid);
 	if (type == BosonShot::Bullet) {
-		s = new BosonShotBullet(p, this, p->speciesTheme()->unitProperties(unitpropid)->weaponProperties(propid));
+		s = createShot(type, unitpropid, propid, p);
 	} else if(type == BosonShot::Missile) {
-		s = new BosonShotMissile(p, this, p->speciesTheme()->unitProperties(unitpropid)->weaponProperties(propid));
+		s = createShot(type, unitpropid, propid, p);
 	} else if(type == BosonShot::Explosion) {
-		s = new BosonShotExplosion(p, this);
+		s = createShot(type, 0, 0, p);
 	} else {
 		boError() << k_funcinfo << "Invalid type: " << type << endl;
 		continue;
@@ -1207,7 +1213,9 @@ bool BosonCanvas::loadShotFromXML(const QDomElement& shot, Player* owner)
  }
 
  bool ok = false;
- unsigned long int type, unitid, weaponid;
+ unsigned long int type = 0;
+ unsigned long int unitid = 0;
+ unsigned long int weaponid = 0;
  type = shot.attribute(QString::fromLatin1("Type")).toULong(&ok);
  if (!ok) {
 	boError(260) << k_funcinfo << "Invalid Type number for Shot tag" << endl;
@@ -1235,35 +1243,20 @@ bool BosonCanvas::loadShotFromXML(const QDomElement& shot, Player* owner)
 		boError(260) << k_funcinfo << "Invalid WeaponType number for Shot tag" << endl;
 		return false;
 	}
-
-	SpeciesTheme* theme = owner->speciesTheme();
-	if (!theme) {
-		boError() << k_funcinfo << "No theme for player " << owner->id() << endl;
-		return false;
-	}
-	const UnitProperties* prop = theme->unitProperties(unitid);
-	if (!prop) {
-		boError() << "Unknown unitType " << unitid << endl;
-		return false;
-	}
-	weapon = prop->weaponProperties(weaponid);
-	if (!weapon) {
-		boError() << "Unknown weaponType " << weaponid << " for unitType " << unitid << endl;
-		return false;
-	}
  }
 
  BosonShot* s = 0;
  if (type == BosonShot::Bullet) {
-	s = new BosonShotBullet(owner, this, weapon);
+	s = createShot(type, unitid, weaponid, owner);
  } else if(type == BosonShot::Missile) {
-	s = new BosonShotMissile(owner, this, weapon);
+	s = createShot(type, unitid, weaponid, owner);
  } else if(type == BosonShot::Explosion) {
-	s = new BosonShotExplosion(owner, this);
+	// unitid / weaponid are ignored here
+	s = createShot(type, unitid, weaponid, owner);
  } else if(type == BosonShot::Mine) {
-	s = new BosonShotMine(owner, this, weapon);
+	s = createShot(type, unitid, weaponid, owner);
  } else if(type == BosonShot::Bomb) {
-	s = new BosonShotBomb(owner, this, weapon);
+	s = createShot(type, unitid, weaponid, owner);
  } else {
 	boError() << k_funcinfo << "Invalid type: " << type << endl;
 	return false;
@@ -1394,6 +1387,8 @@ BosonItem* BosonCanvas::createItem(unsigned long int rtti, unsigned long int typ
 {
  if (RTTI::isUnit(rtti)) {
 	return (BosonItem*)createUnit(type, owner);
+ } else if (RTTI::isShot(rtti)) {
+//	return (BosonItem*)createShot(type, owner);
  }
  return 0;
 }
@@ -1429,4 +1424,74 @@ Unit* BosonCanvas::createUnit(unsigned long int unitType, Player* owner)
 
  return unit;
 }
+
+BosonShot* BosonCanvas::createShot(unsigned long int shotType, unsigned long int unitType, unsigned long int weaponPropertyId, Player* owner)
+{
+ BO_CHECK_NULL_RET0(owner);
+ BosonShot* s = 0;
+ switch (shotType) {
+	case BosonShot::Bullet:
+	{
+		SpeciesTheme* t = owner->speciesTheme();
+		BO_CHECK_NULL_RET0(t);
+		const UnitProperties* unitProperties = t->unitProperties(unitType);
+		BO_CHECK_NULL_RET0(unitProperties);
+		const BosonWeaponProperties* prop = unitProperties->weaponProperties(weaponPropertyId);
+		BO_CHECK_NULL_RET0(prop);
+		s = (BosonShot*)new BosonShotBullet(owner, this, prop);
+		break;
+	}
+	case BosonShot::Missile:
+	{
+		SpeciesTheme* t = owner->speciesTheme();
+		BO_CHECK_NULL_RET0(t);
+		const UnitProperties* unitProperties = t->unitProperties(unitType);
+		BO_CHECK_NULL_RET0(unitProperties);
+		const BosonWeaponProperties* prop = unitProperties->weaponProperties(weaponPropertyId);
+		BO_CHECK_NULL_RET0(prop);
+		s = (BosonShot*)new BosonShotMissile(owner, this, prop);
+		break;
+	}
+	case BosonShot::Explosion:
+		s = (BosonShot*)new BosonShotExplosion(owner, this);
+		break;
+	case BosonShot::Mine:
+	{
+		SpeciesTheme* t = owner->speciesTheme();
+		BO_CHECK_NULL_RET0(t);
+		const UnitProperties* unitProperties = t->unitProperties(unitType);
+		BO_CHECK_NULL_RET0(unitProperties);
+		const BosonWeaponProperties* prop = unitProperties->weaponProperties(weaponPropertyId);
+		BO_CHECK_NULL_RET0(prop);
+		s = (BosonShot*)new BosonShotMine(owner, this, prop);
+		break;
+	}
+	case BosonShot::Bomb:
+	{
+		SpeciesTheme* t = owner->speciesTheme();
+		BO_CHECK_NULL_RET0(t);
+		const UnitProperties* unitProperties = t->unitProperties(unitType);
+		BO_CHECK_NULL_RET0(unitProperties);
+		const BosonWeaponProperties* prop = unitProperties->weaponProperties(weaponPropertyId);
+		BO_CHECK_NULL_RET0(prop);
+		s = (BosonShot*)new BosonShotBomb(owner, this, prop);
+		break;
+	}
+	case BosonShot::Fragment:
+	{
+		SpeciesTheme* t = owner->speciesTheme();
+		BO_CHECK_NULL_RET0(t);
+		BosonModel* model = t->objectModel("fragment");
+		BO_CHECK_NULL_RET0(model);
+		s = (BosonShot*)new BosonShotFragment(owner, this, model);
+		break;
+	}
+	default:
+		boError() << k_funcinfo << "Invalid type: " << shotType << endl;
+		s = 0;
+		break;
+ }
+ return s;
+}
+
 

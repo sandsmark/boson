@@ -378,6 +378,7 @@ protected:
 	bool loadShotFromXML(const QDomElement& shot, Player* owner);
 
 	Unit* createUnit(unsigned long int unitType, Player* owner);
+	BosonShot* createShot(unsigned long int shotType, unsigned long int unitType, unsigned long int weaponPropertyId, Player* owner);
 
 private:
 	void init();
