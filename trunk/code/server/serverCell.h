@@ -21,7 +21,7 @@
 #ifndef SERVERCELL_H 
 #define SERVERCELL_H 
 
-#include "common/groundType.h"
+#include "common/cell.h"
 #include "knownBy.h"
 
 class BosonServer;
@@ -29,13 +29,14 @@ class BosonServer;
 /** 
   * This is a cell in the server point of view
   */
-class serverCell : public knownBy
+class serverCell : public knownBy, public Cell
 {
 	friend	BosonServer; /* to write in _cell */
 
 public:
 	serverCell() { _cell = makeCell(GROUND_UNKNOWN); }
 
+	bool		canGo(int goFlag) { return Cell::canGo(goFlag, ground() ); }
 	groundType	ground(void) { return ::ground(_cell); }
 //	byte		version(void) { return version(_cell); }
 //	void		operator= (cell_t c) { _cell = c; }
