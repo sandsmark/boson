@@ -91,7 +91,7 @@ BosonMusic::BosonMusic(QObject* parent) : QObject(parent)
 	d->mPlaySound = false;
 	boConfig->setDisableSound(true);
  } else {
-	 Arts::TraderQuery query;
+	Arts::TraderQuery query;
 	query.supports("Interface", "Arts::PlayObject");
 	query.supports("Extension", "ogg");
 	vector<Arts::TraderOffer>* offers = query.query();

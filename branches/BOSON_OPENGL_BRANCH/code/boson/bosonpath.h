@@ -103,9 +103,9 @@ class BosonPath
     float dist(int ax, int ay, int bx, int by);
     float cost(int x, int y);
 #ifdef USE_STL
-    inline void getFirst(vector<PathNode>&, PathNode& n);
+    void getFirst(vector<PathNode>&, PathNode& n);
 #else
-    inline void getFirst(QValueList<PathNode>&, PathNode& n);
+    void getFirst(QValueList<PathNode>&, PathNode& n);
 #endif
     inline void neighbor(int& x, int& y, Direction d);
     inline Direction reverseDir(Direction d);

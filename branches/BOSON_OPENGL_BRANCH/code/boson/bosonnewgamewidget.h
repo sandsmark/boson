@@ -176,9 +176,9 @@ class BosonNewGameWidget : public QWidget
     void initMaps();
     void initSpecies();
     void initColors();
-    inline Boson* game() const;
-    inline Player* player() const;
-    inline BosonPlayField* playField() const;
+    Boson* game() const;
+    Player* player() const;
+    BosonPlayField* playField() const;
 
     QPtrDict<KPlayer> mItem2Player;
     KPlayer* mHighlightedPlayer;
