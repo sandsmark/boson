@@ -29,6 +29,7 @@ class BosonPlayField;
 class QDomElement;
 class QDomDocument;
 class QDataStream;
+class QTextStream;
 class BosonSaveLoad;
 
 #define boGame Boson::boson()
@@ -49,7 +50,8 @@ public:
 		IdGamePaused = 10001,
 		IdNextUnitId = 10005,
 		IdAdvanceCount = 10010,
-		IdAdvanceFlag = 10011
+		IdAdvanceFlag = 10011,
+		IdAdvanceCallsCount = 10020
 	};
 
 protected:
@@ -208,6 +210,16 @@ public:
 	 * be a big delay before additional player input can be executed.
 	 **/
 	unsigned int delayedMessageCount() const;
+
+	/**
+	 * @return Number of advance calls that have been made in this game (aka
+	 * cycles)
+	 **/
+	unsigned int advanceCallsCount() const;
+
+	void writeGameLog(QTextStream& log);
+	void saveGameLogs(const QString& prefix);
+
 
 public: // small KGame extenstions for boson
 	/**

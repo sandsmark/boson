@@ -324,6 +324,9 @@ public:
 	void setToolTipCreator(int type) { mToolTipCreator->setValue(type); }
 	int toolTipCreator() const { return mToolTipCreator->value(); }
 
+	void setGameLogInterval(int interval) { mGameLogInterval->setValue(interval); }
+	int gameLogInterval() const { return mGameLogInterval->value(); }
+
 
 
 
@@ -537,6 +540,7 @@ private:
 	BoConfigIntEntry* mCursorMode;
 	BoConfigIntEntry* mToolTipUpdatePeriod;
 	BoConfigIntEntry* mToolTipCreator;
+	BoConfigIntEntry* mGameLogInterval;
 
 	// NOT stored to config file!
 	bool mDisableSound;

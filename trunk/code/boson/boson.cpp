@@ -36,6 +36,7 @@
 #include "bodebug.h"
 #include "bosonweapon.h"
 #include "bosonsaveload.h"
+#include "bosonconfig.h"
 #include "startupwidgets/bosonloadingwidget.h"
 
 #include <klocale.h>
@@ -48,6 +49,9 @@
 #include <qptrqueue.h>
 #include <qdom.h>
 #include <qdatastream.h>
+#include <qtextstream.h>
+#include <qcstring.h>
+#include <qfile.h>
 
 #ifndef KGAME_HAVE_KGAME_PORT
 #include <qsocket.h>
@@ -69,6 +73,7 @@ public:
 	Q_UINT32 receiver;
 	Q_UINT32 sender;
 	Q_UINT32 clientId;
+	unsigned int advanceCallsCount;
 
 	QString debug(KGame* game)
 	{
@@ -175,12 +180,13 @@ public:
 	QPtrQueue<BoMessage> mDelayedMessages;
 	bool mIsLocked;
 	bool mDelayedWaiting; // FIXME bad name!
+	bool mAdvanceMessageSent;
 
 	BosonCanvas* mCanvas; // this pointer is anti-OO IMHO
 	BosonPlayField* mPlayField;
 	Player* mPlayer;
 	QPtrList<KGameComputerIO> mComputerIOList;
-	
+
 	KGamePropertyInt mGameSpeed;
 	KGamePropertyBool mGamePaused;
 
@@ -188,7 +194,12 @@ public:
 	KGameProperty<unsigned int> mAdvanceCount;
 	KGamePropertyInt mAdvanceFlag;
 
+	KGameProperty<unsigned int> mAdvanceCallsCount;
+
 	BosonSaveLoad::LoadingStatus mLoadingStatus;
+
+	QValueList<QByteArray> mGameLogs;
+	QValueList<BoMessage> mLoggedMessages;
 };
 
 Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
@@ -202,6 +213,8 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
  d->mDelayedWaiting = false;
  d->mAdvanceMessageWaiting = 0;
  d->mDelayedMessages.setAutoDelete(true);
+ d->mAdvanceMessageSent = false;
+
 
  mGameMode = true;
 
@@ -227,12 +240,16 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
 		KGamePropertyBase::PolicyLocal, "AdvanceCount");
  d->mAdvanceFlag.registerData(IdAdvanceFlag, dataHandler(),
 		KGamePropertyBase::PolicyLocal, "AdvanceFlag");
+ d->mAdvanceCallsCount.registerData(IdAdvanceCallsCount, dataHandler(),
+		KGamePropertyBase::PolicyLocal, "AdvanceCallsCount");
  d->mNextUnitId.setLocal(0);
  d->mAdvanceCount.setLocal(0);
  d->mGameSpeed.setLocal(0);
  d->mGamePaused.setLocal(false);
  d->mAdvanceFlag.setLocal(0);
+ d->mAdvanceCallsCount.setLocal(0);
  d->mAdvanceCount.setEmittingSignal(false); // wo don't need it and it would be bad for performance.
+ d->mAdvanceCallsCount.setEmittingSignal(false);
 
  setMinPlayers(1);
 }
@@ -1158,10 +1175,11 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 	case BosonMessage::AdvanceN:
 	{
 		int n = gameSpeed();
+		d->mAdvanceMessageSent = false;
 		d->mAdvanceDivider = n;
 		d->mAdvanceDividerCount = 0;
 		lock();
-		boDebug(300) << "Advance - speed (calls per " << ADVANCE_INTERVAL 
+		boDebug(300) << "Advance - speed (calls per " << ADVANCE_INTERVAL
 				<< "ms)=" << gameSpeed() << " elapsed: " 
 				<< d->mAdvanceReceived.elapsed() << endl;
 		d->mAdvanceReceived.restart();
@@ -1324,7 +1342,16 @@ void Boson::startGame()
 
 void Boson::slotSendAdvance()
 {
+ // If advance message has been sent, but not yet received, don't send another
+ //  one, because it would get delayed.
+ // Note that this is for single-player only, it would probably break network
+ if (d->mAdvanceMessageSent && !isNetwork()) {
+	boDebug(300) << k_funcinfo << advanceCallsCount() << ": message has already been sent, returning" << endl;
+	return;
+ }
+ boDebug(300) << k_funcinfo << advanceCallsCount() << ": sending advance msg" << endl;
  sendMessage(10, BosonMessage::AdvanceN);
+ d->mAdvanceMessageSent = true;
 }
 
 Unit* Boson::createUnit(unsigned long int unitType, Player* owner)
@@ -1730,6 +1757,7 @@ QValueList<QColor> Boson::availableTeamColors() const
 
 void Boson::slotReceiveAdvance()
 {
+ boDebug() << k_funcinfo << advanceCallsCount() << endl;
  bool flag = advanceFlag();
  // we need to toggle the flag *now*, in case one of the Unit::advance*()
  // methods changes the advance function. this change must not appear to the
@@ -1737,6 +1765,18 @@ void Boson::slotReceiveAdvance()
  toggleAdvanceFlag();
  emit signalAdvance(d->mAdvanceCount, flag);
 
+ // Log game state
+ QByteArray log;
+ QTextStream ts(log, IO_WriteOnly);
+ writeGameLog(ts);
+ boDebug() << k_funcinfo << "Log size: " << log.size() << endl;
+ BosonProfiler p(1745);
+ QByteArray comp = qCompress(log);
+ d->mGameLogs.append(comp);
+ boDebug() << k_funcinfo << "Done, elapsed: " << p.stop() << endl;
+ boDebug() << k_funcinfo << "Compressed log size: " << comp.size() << endl;
+
+ d->mAdvanceCallsCount = d->mAdvanceCallsCount + 1;
  d->mAdvanceCount = d->mAdvanceCount + 1; // this advance count is important for Unit e.g. - but not used in this function.
  if (d->mAdvanceCount > MAXIMAL_ADVANCE_COUNT) {
 	d->mAdvanceCount = 0;
@@ -1787,6 +1827,16 @@ void Boson::slotReceiveAdvance()
 
 void Boson::networkTransmission(QDataStream& stream, int msgid, Q_UINT32 r, Q_UINT32 s, Q_UINT32 clientId)
 {
+ // Log message
+ BoMessage log;
+ log.byteArray = ((QBuffer*)stream.device())->buffer();
+ log.msgid = msgid;
+ log.receiver = r;
+ log.sender = s;
+ log.clientId = clientId;
+ log.advanceCallsCount = advanceCallsCount();
+ d->mLoggedMessages.append(log);
+
  if (d->mIsLocked || d->mDelayedWaiting) {
 	BoMessage* m = new BoMessage;
 	m->byteArray = ((QBuffer*)stream.device())->readAll();
@@ -1800,7 +1850,7 @@ void Boson::networkTransmission(QDataStream& stream, int msgid, Q_UINT32 r, Q_UI
 	switch (msgid - KGameMessage::IdUser) {
 		case BosonMessage::AdvanceN:
 			d->mAdvanceMessageWaiting++;
-			boDebug() << k_funcinfo << "advance message got delayed" << endl;
+			boWarning(300) << k_funcinfo << "advance message got delayed @" << advanceCallsCount() << endl;
 			break;
 		default:
 			break;
@@ -1836,6 +1886,7 @@ void Boson::slotProcessDelayed() // TODO: rename: processDelayed()
  d->mDelayedWaiting = false;
  switch (m->msgid - KGameMessage::IdUser) {
 	case BosonMessage::AdvanceN:
+		boWarning() << k_funcinfo << "delayed advance msg will be sent!" << endl;
 		d->mAdvanceMessageWaiting--;
 		break;
 	default:
@@ -2210,4 +2261,63 @@ void Boson::killPlayer(Player* player)
  emit signalPlayerKilled(player);
 }
 
+void Boson::writeGameLog(QTextStream& log)
+{
+ BosonProfiler p(1744);
+
+ if (advanceCallsCount() % boConfig->gameLogInterval() != 0) {
+	return;
+ }
+
+ log << "Advance calls count: " << advanceCallsCount() << endl;
+ QPtrListIterator<KPlayer> it(*playerList());
+ while (it.current()) {
+	((Player*)it.current())->writeGameLog(log);
+	++it;
+ }
+
+ log << endl << endl;
+ boDebug() << k_funcinfo << "Done, elapsed: " << p.stop() << endl;
+}
+
+void Boson::saveGameLogs(const QString& prefix)
+{
+ BosonProfiler p(1743);
+
+ // Write gamelog
+ QFile gl(prefix + ".gamelog");
+ if (!gl.open(IO_WriteOnly)) {
+	boError() << k_funcinfo << "Can't open output file '" << prefix << ".gamelog' for writing gamelog!" << endl;
+	return;
+ }
+ QValueList<QByteArray>::iterator it;
+ for (it = d->mGameLogs.begin(); it != d->mGameLogs.end(); it++) {
+	gl.writeBlock(qUncompress(*it));
+ }
+ gl.close();
+
+ // Write network message log
+ QFile nl(prefix + ".netlog");
+ if (!nl.open(IO_WriteOnly)) {
+	boError() << k_funcinfo << "Can't open output file '" << prefix << ".netlog' for writing!" << endl;
+	return;
+ }
+ QTextStream log(&nl);
+ QValueList<BoMessage>::iterator nit;
+ for (nit = d->mLoggedMessages.begin(); nit != d->mLoggedMessages.end(); nit++) {
+	BoMessage m = *nit;
+	log << "Msg: " << m.advanceCallsCount << "  " << m.msgid << "  " << m.sender << " " << m.receiver <<
+			" " << m.clientId << "  ";
+	log.writeRawBytes(m.byteArray.data(), m.byteArray.size());
+	log << endl;
+ }
+ nl.close();
+
+ boDebug() << k_funcinfo << "Done, elapsed: " << p.stop() << endl;
+}
+
+unsigned int Boson::advanceCallsCount() const
+{
+ return d->mAdvanceCallsCount;
+}
 
