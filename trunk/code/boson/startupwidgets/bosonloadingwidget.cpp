@@ -181,43 +181,49 @@ void BosonLoadingWidget::update()
     }
     case LoadTiles:
     {
-      setProgress((int)(500 + (mCurrentTile / 1244.0 * 2500)));
+      setProgress(500);
       text = i18n("Loading map tiles...");
+      break;
+    }
+    case LoadActions:
+    {
+      setProgress(700 + (mCurrentPlayer * 2000));
+      text = i18n("Loading datas for player %1 of %2 (actions)...").arg(mCurrentPlayer + 1).arg(mTotalPlayers);
       break;
     }
     case LoadObjects:
     {
-      setProgress(3000 + (mCurrentPlayer * 2000));
+      setProgress(700 + (mCurrentPlayer * 2000) + 25);
       text = i18n("Loading datas for player %1 of %2 (objects)...").arg(mCurrentPlayer + 1).arg(mTotalPlayers);
       break;
     }
     case LoadParticleSystems:
     {
-      setProgress(3000 + (mCurrentPlayer * 2000) + 50);
+      setProgress(700 + (mCurrentPlayer * 2000) + 75);
       text = i18n("Loading datas for player %1 of %2 (particle systems)...").arg(mCurrentPlayer + 1).arg(mTotalPlayers);
       break;
     }
     case LoadUnitConfigs:
     {
-      setProgress(3000 + (mCurrentPlayer * 2000) + 150);
+      setProgress(700 + (mCurrentPlayer * 2000) + 150);
       text = i18n("Loading datas for player %1 of %2 (unit config files)...").arg(mCurrentPlayer + 1).arg(mTotalPlayers);
       break;
     }
     case LoadUnits:
     {
-      setProgress((int)(3000 + (mCurrentPlayer * 2000) + 250 + (mCurrentUnit / (float)mTotalUnits * 1650)));
+      setProgress((int)(700 + (mCurrentPlayer * 2000) + 250 + (mCurrentUnit / (float)mTotalUnits * 1650)));
       text = i18n("Loading datas for player %1 of %2 (unit model %3 of %4)...").arg(mCurrentPlayer + 1).arg(mTotalPlayers).arg(mCurrentUnit + 1).arg(mTotalUnits);
       break;
     }
     case LoadTechnologies:
     {
-      setProgress(3000 + (mCurrentPlayer * 2000) + 1950);
+      setProgress(700 + (mCurrentPlayer * 2000) + 1950);
       text = i18n("Loading datas for player %1 of %2 (technologies)...").arg(mCurrentPlayer + 1).arg(mTotalPlayers);
       break;
     }
     case LoadGeneralData:
     {
-      setProgress(3000 + (mTotalPlayers * 2000));
+      setProgress(700 + (mTotalPlayers * 2000));
       text = i18n("Loading general data...");
       break;
     }
@@ -234,23 +240,22 @@ void BosonLoadingWidget::update()
     }
     case InitGame:
     {
-      setProgress(3000 + (mTotalPlayers * 2000) + 200);
+      setProgress(700 + (mTotalPlayers * 2000) + 200);
       text = i18n("Initializing game...");
       break;
     }
     case StartingGame:
     {
-      setProgress(3000 + (mTotalPlayers * 2000) + 300);
+      setProgress(700 + (mTotalPlayers * 2000) + 300);
       text = i18n("Starting game...");
       break;
     }
     case LoadingDone:
     {
-      setProgress(3000 + (mTotalPlayers * 2500) + 400);
+      setProgress(700 + (mTotalPlayers * 2500) + 400);
       text = i18n("Loading completed.");
       break;
     }
-#warning FIXME: LoadActions
   }
   mLoadingLabel->setText(text);
   mLoadingLabel->setPaletteForegroundColor( QColor( 255, 255, 255 ));
@@ -302,5 +307,5 @@ void BosonLoadingWidget::resetProgress()
 
 void BosonLoadingWidget::updateTotalSteps()
 {
-  setTotalSteps(3400 + (mTotalPlayers * 2500));
+  setTotalSteps(1100 + (mTotalPlayers * 2000));
 }
