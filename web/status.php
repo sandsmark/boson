@@ -23,23 +23,13 @@
 $filename="status.php";
 
 /*****  Some includes  *****/
-include("common.php");
-include("sidebar.php");
-include("main.php");
-include("counter.php");
-include("boxes.php");
-include("variables.php");
+include_once("common.inc");
+include_once("sidebar.inc");
+include_once("counter.inc");
 
 /*****  Start of main stuff  *****/
 
-do_start_stuff();
-
-// Headers
-html_print_header("Status");
-print_header();
-
-// Main table
-main_table_begin();
+start_page("Status");
 
 // Sidebar
 sidebar_begin();
@@ -65,8 +55,7 @@ draw_bigbox_text("This is a list of features that we consider as
   <h2>TODO</h2>
   <ul>
     <li>Fixing all critical bugs</li>
-    <li>Campaign support for the map chooser</li>
-    <li>Better support for mines and bombs</li>
+    <li>Better support for mines</li>
   </ul>
   <h2><a name=\"done\"></a>DONE</h2>
 
@@ -79,6 +68,9 @@ draw_bigbox_text("This is a list of features that we consider as
     <li>Pathfinder is much faster now</li>
     <li>Separate process is used for audio</li>
     <li>OpenGL setting profiles (default/fastest/best quality)</li>
+    <li>Redesigned start widgets</li>
+    <li>Campaign support for the map selector</li>
+    <li>Game and network logs can be saved</li>
   </ul>
 
   <h4>Rendering</h4>
@@ -92,6 +84,8 @@ draw_bigbox_text("This is a list of features that we consider as
     <li>Models have normals now, meaning that everything should be lit correctly</li>
     <li>Better support for wind for particle systems</li>
     <li>New kind of smoke for wreckages</li>
+    <li>Improved particle systems</li>
+    <li>Weapon flashes when shooting</li>
   </ul>
 
 
@@ -103,6 +97,8 @@ draw_bigbox_text("This is a list of features that we consider as
     <li>New actions patch</li>
     <li>Basic scripting support</li>
     <li>Movies can be grabbed from running game (but it's extremely slow)</li>
+    <li>Better wreckage handling (aircraft wreckages no more hang in the air and
+        other ones slowly disappear into the ground)</li>
   </ul>
 
   <h4>Data</h4>
@@ -123,11 +119,8 @@ draw_bigbox_text("This is a list of features that we consider as
   </ul>");
 draw_bigbox_end();
 main_area_end();
-main_table_end();
 
-// Footers
-print_footer();
-html_print_footer();
+end_page();
 
 
 ?>

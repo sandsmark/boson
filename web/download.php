@@ -23,12 +23,9 @@
 $filename="download.php";
 
 /*****  Some includes  *****/
-include("common.php");
-include("sidebar.php");
-include("main.php");
-include("counter.php");
-include("boxes.php");
-include("variables.php");
+include_once("common.inc");
+include_once("sidebar.inc");
+include_once("counter.inc");
 
 /*****  Start of main stuff  *****/
 
@@ -41,14 +38,7 @@ if($dl)
   exit;
 }
 
-do_start_stuff();
-
-// Headers
-html_print_header("Downloads");
-print_header();
-
-// Main table
-main_table_begin();
+start_page("Downloads");
 
 // Sidebar
 sidebar_begin();
@@ -162,11 +152,8 @@ by executing
 draw_bigbox_end();
 
 main_area_end();
-main_table_end();
 
-// Footers
-print_footer();
-html_print_footer();
+end_page();
 
 
 ?>

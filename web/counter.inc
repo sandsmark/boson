@@ -51,9 +51,9 @@ You have been on this page <font class=\"countervalue\">$visitcount</font> times
 $counter2_inited = false;
 $counter2_disable = false;
 
-if(file_exists("${basedir}database.php"))
+if(file_exists("${basedir}database.inc"))
 {
-  include("${basedir}database.php");
+  include("${basedir}database.inc");
 }
 else
 {
@@ -81,7 +81,7 @@ function counter2($page)
   // visit timeout (in seconds)
   $visit_timeout = 60 * 60;  // 60 minutes
   // database lock file
-  $lockfile = "counter.lock";
+  $lockfile = ".counter.lock";
 
 
   // acquire database lock
@@ -280,10 +280,16 @@ function counter2($page)
   }
 
   // Log unknown user agents to a file so we can improve browser/os detection code
-  if(($browser == "Unknown") || ($os == "Unknown"))
+  if($browser == "Unknown")
   {
-    $file = fopen($basedir . "unknown_uas", "a");
-    fputs($file, "$HTTP_USER_AGENT\n");
+    $file = fopen($basedir . "unknown_browser", "a");
+    fputs($file, date("Y/m/d H:i:s")." : $REMOTE_ADDR : $HTTP_USER_AGENT\n");
+    fclose($file);
+  }
+  if($os == "Unknown")
+  {
+    $file = fopen($basedir . "unknown_os", "a");
+    fputs($file, date("Y/m/d H:i:s")." : $REMOTE_ADDR : $HTTP_USER_AGENT\n");
     fclose($file);
   }
 
@@ -694,10 +700,6 @@ function counter2_get_browser($ua)
   {
     return "Lynx";
   }
-  else if(eregi("(MSIE 3)|(MSIE 4)|(MSIE 5.0)|(MSIE 5.1)|(MSIE 5.2)|(MSIE 5.5)|(MSIE 6.0)", $ua))
-  {
-    return "Internet Explorer";
-  }
   else if(eregi("Firebird", $ua))
   {
     return "Mozilla Firebird";
@@ -722,17 +724,29 @@ function counter2_get_browser($ua)
   {
     return "Java";
   }
-  else if(eregi("(Mozilla/3)|(Mozilla/4.0)|(Mozilla/4.08)|(Mozilla/4.5)|(Mozilla/4.6)|(Mozilla/4.7)|(Mozilla/4.75)|(Mozilla/4.79)|(Netscape6)|(Netscape/7)", $ua))
-  {
-    return "Netscape";
-  }
   else if(eregi("libwww-perl", $ua))
   {
     return "libwww-perl";
   }
-  else if(eregi("(nuhk)|(Googlebot)|(Yammybot)|(Openbot)|(Slurp/cat)|(crawler)|(ContentHarvester)|(ia_archiver)|(Sniffer)|(grub)|(Pompos)|(SpiderKU)|(ZyBorg)|(Bot)|(Microsoft URL Control)|(Ask Jeeves)", $ua))
+  else if(eregi("Wget", $ua))
+  {
+    return "wget";
+  }
+  else if(eregi("Dillo", $ua))
+  {
+    return "Dillo";
+  }
+  else if(eregi("(nuhk)|(Googlebot)|(Yammybot)|(Openbot)|(Slurp/cat)|(crawler)|(ContentHarvester)|(ia_archiver)|(Sniffer)|(grub)|(Pompos)|(SpiderKU)|(ZyBorg)|(Bot)|(Microsoft URL Control)|(Ask Jeeves)|(Infoseek SideWinder)|(Scooter)|(WebCopier)|(W3C_Validator)|(Zeus", $ua))
   {
     return "SearchBot";
+  }
+  else if(eregi("(MSIE 3)|(MSIE 4)|(MSIE 5.0)|(MSIE 5.1)|(MSIE 5.2)|(MSIE 5.5)|(MSIE 6.0)", $ua))
+  {
+    return "Internet Explorer";
+  }
+  else if(eregi("(Mozilla/3)|(Mozilla/4.0)|(Mozilla/4.08)|(Mozilla/4.5)|(Mozilla/4.6)|(Mozilla/4.7)|(Mozilla/4.75)|(Mozilla/4.79)|(Netscape6)|(Netscape/7)", $ua))
+  {
+    return "Netscape";
   }
   else
   {
@@ -810,7 +824,11 @@ function counter2_get_os($ua)
   {
     return "Amiga";
   }
-  else if(eregi("(nuhk)|(Googlebot)|(Yammybot)|(Openbot)|(Slurp/cat)|(crawler)|(ContentHarvester)|(ia_archiver)|(Sniffer)|(grub)|(Pompos)|(SpiderKU)|(ZyBorg)|(Bot)|(Microsoft URL Control)|(Ask Jeeves)", $ua))
+  else if(eregi("UNIX", $ua))
+  {
+    return "UNIX";
+  }
+  else if(eregi("(nuhk)|(Googlebot)|(Yammybot)|(Openbot)|(Slurp/cat)|(crawler)|(ContentHarvester)|(ia_archiver)|(Sniffer)|(grub)|(Pompos)|(SpiderKU)|(ZyBorg)|(Bot)|(Microsoft URL Control)|(Ask Jeeves)|(Infoseek SideWinder)|(Scooter)|(WebCopier)|(W3C_Validator)|(Zeus)", $ua))
   {
     return "SearchBot";
   }

@@ -23,29 +23,23 @@
 $filename="index.php";
 
 /*****  Some includes  *****/
-include("common.php");
-include("sidebar.php");
-include("main.php");
-include("counter.php");
-include("boxes.php");
-include("variables.php");
-include("news.php");
+include_once("common.inc");
+include_once("sidebar.inc");
+include_once("counter.inc");
+include_once("news.inc");
+include_once("poll.inc");
 
 /*****  Start of main stuff  *****/
 
-do_start_stuff();
-
-// Headers
-html_print_header("Main page");
-print_header();
-
-// Main table
-main_table_begin();
+start_page("Main page");
 
 // Sidebar
 sidebar_begin();
   sidebar_links_box();
   sidebar_download_box();
+    sidebar_box_begin("Poll");
+      poll_show();
+    sidebar_box_end();
   sidebar_old_news();
   sidebar_stats_box();
 sidebar_end();
@@ -56,10 +50,21 @@ main_area_begin();
 draw_bigbox_begin("About Boson");
 echo "<tr><td>Boson is an OpenGL real-time strategy game, with the
 	feeling of Command&amp;Conquer(tm) or StarCraft(tm).
-	It is designed to run on Unix (Linux) computers, and is built on top of the 
+	It is designed to run on Unix (Linux) computers, and is built on top of the
 	KDE, Qt and kdegames libraries.<br> A minimum of two players is required,
 	since there is no artificial intelligence yet.<br><br></td></tr>";
 draw_bigbox_end();
+
+/*// We need you!
+draw_bigbox_begin("We need you!");
+echo "<tr><td>If you have any spare time and are willing to help us, please
+    <a href=\"contact.php\">contact us</a>. We are sure we can find job for
+    you!<br>
+    We are especially in need of <b>coders</b> (who can code in C++ and advisably can
+    use Qt and KDE) and <b>artists</b> (who can draw textures and make 3d models), but
+    we can also make use of documentation writers, translators and, of course,
+    testers.<br><br></td></tr>";
+draw_bigbox_end();*/
 
 // Print news
 news_box_begin();
@@ -70,11 +75,8 @@ display_main_news();
 news_box_end();
 
 main_area_end();
-main_table_end();
 
-// Footers
-print_footer();
-html_print_footer();
+end_page();
 
 
 ?>

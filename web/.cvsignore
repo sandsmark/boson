@@ -1,6 +1,7 @@
 music
 download
 counter
-counter.lock
-database.php
+.counter.lock
+.poll.lock
+database.inc
 unknown_uas

@@ -19,19 +19,23 @@
 */
 
 
-/*****  Some variables  *****/
-$latestversion="0.8";
-$latestversiondate="31st March 2003";
+/*$hostname="mysql.sourceforge.net";
+$username="boson";
+$database="boson";
+$password="Black_hOLE-7";*/
+$hostname="localhost";
+$username="rivo";
+$password="mypass";
+$database="php";
 
-$counter_file="counter";
-$news_file="news.text";
-$main_news_max=5;
-$old_news_max=10;
-$all_news_max=15;
+$link;
 
-$style="green";
-
-$visitcount;
-$lastupdate;
+function database_connect()
+{
+  global $link;
+  global $hostname, $username, $password, $database;
+  $link = mysql_connect($hostname, $username, $password) or die ("Problem with SQL connection");
+  mysql_select_db($database) or die ("Cannot select database");
+}
 
 ?>

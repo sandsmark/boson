@@ -24,23 +24,13 @@ $filename="boson-0.6.php";
 $basedir="../";
 
 /*****  Some includes  *****/
-include("${basedir}common.php");
-include("${basedir}sidebar.php");
-include("${basedir}main.php");
-include("${basedir}counter.php");
-include("${basedir}boxes.php");
-include("${basedir}variables.php");
+include_once("${basedir}common.inc");
+include_once("${basedir}sidebar.inc");
+include_once("${basedir}counter.inc");
 
 /*****  Start of main stuff  *****/
 
-do_start_stuff();
-
-// Headers
-html_print_header("Boson 0.6 announcement");
-print_header();
-
-// Main table
-main_table_begin();
+start_page("Boson 0.6 announcement");
 
 // Sidebar
 sidebar_begin();
@@ -66,9 +56,9 @@ Environment.
 <p class=\"announcement\">
 Boson still requires a minimum of two players, as there is not yet an
 artificial intelligence. The game is still under heavy development and
-0.6 is merely a milestone rather than a fully playable game. We are in need of 
+0.6 is merely a milestone rather than a fully playable game. We are in need of
 more developers, especially graphics artists. If you have any
-spare time and the ability to code in Qt/C++ or know your way around a 
+spare time and the ability to code in Qt/C++ or know your way around a
 graphics program, please feel free to pop in and offer a hand.
 </p>
 
@@ -178,11 +168,8 @@ The Boson Team
 draw_bigbox_end();
 
 main_area_end();
-main_table_end();
 
-// Footers
-print_footer();
-html_print_footer();
+end_page();
 
 
 ?>

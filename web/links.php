@@ -23,23 +23,13 @@
 $filename="links.php";
 
 /*****  Some includes  *****/
-include("common.php");
-include("sidebar.php");
-include("main.php");
-include("counter.php");
-include("boxes.php");
-include("variables.php");
+include_once("common.inc");
+include_once("sidebar.inc");
+include_once("counter.inc");
 
 /*****  Start of main stuff  *****/
 
-do_start_stuff();
-
-// Headers
-html_print_header("Links");
-print_header();
-
-// Main table
-main_table_begin();
+start_page("Links");
 
 // Sidebar
 sidebar_begin();
@@ -63,11 +53,8 @@ draw_bigbox_text("Here you will find some (hopefully) useful links:<br><br>
 draw_bigbox_end();
 
 main_area_end();
-main_table_end();
 
-// Footers
-print_footer();
-html_print_footer();
+end_page();
 
 
 ?>
