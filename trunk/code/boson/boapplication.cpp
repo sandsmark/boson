@@ -33,7 +33,18 @@ BoApplication::BoApplication(bool allowStyles, bool enableGUI)
  // correct. This is (I guess) a distribution bug in most (all?) distributions
  // out there.
  // we tell KDE here which our prefix is and add it this way to $KDEDIRS
+
+ // AB: in KDE 3.2 there is a bug that overwrites custom resourceDir settings
+ // (e.g. on debian config points to /etc/kde3) when calling addPrefix(). work
+ // around this.
+ QStringList config = KGlobal::dirs()->resourceDirs("config");
  KGlobal::dirs()->addPrefix(BOSON_PREFIX);
+ QStringList config2 = KGlobal::dirs()->resourceDirs("config");
+ for (unsigned int i = 0; i < config.count(); i++) {
+	if (!config2.contains(config[i])) {
+		KGlobal::dirs()->addResourceDir("config", config[i]);
+	}
+ }
 
  BoGlobal::initStatic();
  BoGlobal::boGlobal()->initGlobalObjects();
