@@ -340,6 +340,7 @@ public:
 	 * Order the unit to mine minerals/oil at pos
 	 **/
 	void mineAt(const QPoint& pos);
+	void refineAt(Facility* refinery);
 
 	void setRefinery(Facility* refinery);
 

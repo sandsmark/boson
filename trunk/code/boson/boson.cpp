@@ -260,12 +260,16 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 		stream >> unitId;
 		stream >> pos;
 		MobileUnit* u = (MobileUnit*)findUnit(unitId, player);
+		if (!u) {
+			kdError() << k_lineinfo << "cannot find unit " << unitId << " for player " << player << endl;
+			break;
+		}
 		if (!((Unit*)u)->isMobile()) {
 			kdError() << k_lineinfo << "only mobile units can mine" << endl;
 			break;
 		}
 		if (u->owner() != player) {
-			kdDebug() << "unit " << unitId << "only owner can move units!" << endl;
+			kdDebug() << k_funcinfo << "unit " << unitId << "only owner can move units!" << endl;
 			break;
 		}
 		if (u->isDestroyed()) {
@@ -274,6 +278,43 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 		}
 		u->mineAt(pos);
 		break;
+	}
+	case BosonMessage::MoveRefine:
+	{
+		kdDebug() << "MoveRefine" << endl;
+		Q_UINT32 refineryId;
+		Q_UINT32 unitCount;
+		stream >> refineryId;
+		stream >> unitCount;
+		Unit* refinery = findUnit(refineryId, player);
+		if (!refinery) {
+			kdError() << k_lineinfo << "cannot find refinery " << refineryId << " for player " << player << endl;
+			break;
+		}
+		if (!refinery->isFacility()) {
+			kdWarning() << k_lineinfo << "refinery must be a facility" << endl;
+			break;
+		}
+		for (unsigned int i = 0; i < unitCount; i++) {
+			Q_ULONG unitId;
+			stream >> unitId;
+			Unit* u = findUnit(unitId, player);
+			if (!u) {
+				kdError() << k_lineinfo << "cannot find unit " << unitId << " for player " << player << endl;
+				continue;
+			}
+			if (!u->isMobile()) {
+				kdError() << k_lineinfo << "must be a mobile unit" << endl;
+				continue;
+			}
+			if (u->owner() != player) {
+				kdDebug() << k_lineinfo << "unit " << unitId << " is not of " << player << endl;
+				continue;
+			}
+			((MobileUnit*)u)->refineAt((Facility*)refinery);
+		}
+		break;
+		
 	}
 	case BosonMessage::MoveProduce:
 	{
