@@ -30,6 +30,8 @@
 #include <kdebug.h>
 
 #include <qwmatrix.h>
+#include <qlabel.h>
+#include <qhbox.h>
 
 #include "topbase.moc"
 
@@ -54,8 +56,6 @@ TopBase::TopBase()
  d = new TopBasePrivate;
 
  mBosonWidget = new BosonWidget(this);
- connect(mBosonWidget, SIGNAL(signalUnitCount(int, int)), 
-		this, SLOT(slotUnitCount(int, int)));
 
  // tell the KMainWindow that this is indeed the main widget
  setCentralWidget(mBosonWidget);
@@ -96,7 +96,19 @@ void TopBase::initKAction()
 
 void TopBase::initStatusBar()
 {
- statusBar()->show();
+ KStatusBar* bar = statusBar();
+ QHBox* box = new QHBox(bar);
+ (void)new QLabel(i18n("Mobiles: "), box);
+ QLabel* mobilesLabel = new QLabel(QString::number(0), box); 
+ connect(mBosonWidget, SIGNAL(signalMobilesCount(int)),
+		mobilesLabel, SLOT(setNum(int)));
+ (void)new QLabel(i18n("Facilities: "), box);
+ QLabel* facilitiesLabel = new QLabel(QString::number(0), box);
+ connect(mBosonWidget, SIGNAL(signalFacilitiesCount(int)),
+		facilitiesLabel, SLOT(setNum(int)));
+ bar->addWidget(box);
+
+ bar->show();
 }
 
 void TopBase::saveProperties(KConfig *config)
@@ -159,7 +171,4 @@ kdDebug() << "zoom index=" << index << endl;
  mBosonWidget->zoom(m);
 }
 
-void TopBase::slotUnitCount(int mobiles, int facilities)
-{
-}
 

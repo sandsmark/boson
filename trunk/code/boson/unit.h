@@ -127,6 +127,11 @@ public:
 	QCanvasItemList unitsInRange() const;
 	QCanvasItemList enemyUnitsInRange() const;
 
+	/**
+	 * @return The absolute filename to the shooting sound of this unit.
+	 **/
+	QString soundShoot() const;
+
 protected:
 	/**
 	 * @return a list of interesting collisions, i.e. no non-units, no

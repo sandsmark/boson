@@ -476,6 +476,11 @@ QCanvasItemList Unit::enemyUnitsInRange() const
  return enemy;
 }
 
+QString Unit::soundShoot() const
+{
+ return speciesTheme()->themePath() + "sounds/shoot.wav";
+}
+
 
 /////////////////////////////////////////////////
 // MobileUnit
