@@ -50,6 +50,8 @@
 #define NEAR 1.0
 #define FAR 100.0
 
+#define GL_UPDATE_TIMER 50 // sufficient for borender
+
 static const char *description =
     I18N_NOOP("Rendering tester for Boson");
 
@@ -129,7 +131,7 @@ void ModelPreview::initializeGL()
  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
  glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
  setUpdatesEnabled(false);
- mUpdateTimer->start(50);
+ mUpdateTimer->start(GL_UPDATE_TIMER);
  slotResetView();
 }
 
