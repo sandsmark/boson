@@ -6,6 +6,9 @@ TODO:
 Generic :
 =========
 
+positionning rect in editor/boson
+move boson.h into bosonapp.h (socket handling / generic stuff)
+	      and boWindow.h (KTMainWindow ...)
 read/save Options has been removed (was using an olg buggy kdevelop code)
 bug : mobile on very-bottom-right can't be selected [still exact?]
 smoother moves (using float instead of int for VirtualSprite?)

@@ -6,7 +6,7 @@
     begin                : Sat Jan  9 19:35:36 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
-    email                : capricel@enst.fr                                     
+    email                : orzel@yalbi.com                                     
  ***************************************************************************/
 
 /***************************************************************************
@@ -83,7 +83,7 @@
 #define IDS_APP_ABOUT		"Boson Version " BOSON_VERSION_TEXT \
 				"(c) 1999" \
 				"\nThomas Capricelli" \
-				" <capricel@enst.fr>"
+				" <orzel@yalbi.com>"
 
 
 

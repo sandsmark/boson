@@ -6,7 +6,7 @@
     begin                : Sat Jan  9 19:35:36 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
-    email                : capricel@enst.fr                                     
+    email                : orzel@yalbi.com                                     
  ***************************************************************************/
 
 /***************************************************************************
@@ -70,10 +70,10 @@ enum transition_t {
  *	GROUND_LAST-1 is the last plain_pixmap
  *
  *	GROUND_LAST to
- * 	GROUND_LAST+7,  first transitions
+ * 	GROUND_LAST+TILES_PER_TRANSITION-1,  first transitions
  *
- *	GROUND_LAST+n*TILES_PER_TRANSITION to
- * 	GROUND_LAST+n*8+7,  (n-1)-eme transitions
+ *	GROUND_LAST+  n  *TILES_PER_TRANSITION to
+ * 	GROUND_LAST+(n+1)*TILES_PER_TRANSITION-1,  (n-1)-th transitions
  *
  */
 

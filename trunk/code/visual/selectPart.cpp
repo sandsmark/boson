@@ -6,7 +6,7 @@
     begin                : Sat Jun 26 16:23:00 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
-    email                : capricel@enst.fr                                     
+    email                : orzel@yalbi.com                                     
  ***************************************************************************/
 
 /***************************************************************************
@@ -57,7 +57,7 @@ void drawSelectBox(QPainter &painter, QColor c1, QColor c2)
 selectPart_up::selectPart_up(int _f, int _z)
 {
 	if (!qsps) {
-		logf(LOG_ERROR, "selectPart_up : qsps not loaded");
+		logf(LOG_WARNING, "selectPart_up : qsps not loaded");
 		initStatic();
 		}
 	setSequence(qsps);
@@ -110,7 +110,7 @@ void selectPart_up::initStatic()
 selectPart_down::selectPart_down(int _f, int _z)
 {
 	if (!qsps) {
-		logf(LOG_ERROR, "selectPart_down : qsps not loaded");
+		logf(LOG_WARNING, "selectPart_down : qsps not loaded");
 		initStatic();
 		}
 	setSequence(qsps);

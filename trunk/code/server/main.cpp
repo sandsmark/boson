@@ -1,12 +1,12 @@
 /***************************************************************************
-                          boson.cpp  -  description                              
+                          boserver.cpp  -  description                              
                              -------------------                                         
 
     version              : $Id$
     begin                : ????
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
-    email                : capricel@enst.fr                                     
+    email                : orzel@yalbi.com                                     
  ***************************************************************************/
 
 /***************************************************************************
@@ -41,7 +41,7 @@ void usage(void)
 int main(int argc, char* argv[])
 { 
 
-	KApplication	app(argc,argv,"boson");  
+	KApplication	app(argc,argv,"BoServer");  
 	int		port;
 	QString		mapname(kapp->kde_datadir() + "/boson/map/basic.bpf");
 

@@ -6,7 +6,7 @@
     begin                : Sat Jan  9 19:35:36 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
-    email                : capricel@enst.fr                                     
+    email                : orzel@yalbi.com                                     
  ***************************************************************************/
 
 /***************************************************************************
@@ -22,9 +22,9 @@
 #define BOCONFIG_H 
 
 #define BOSON_VERSION_MAJOR	0
-#define BOSON_VERSION_MINOR	2
+#define BOSON_VERSION_MINOR	3
 #define BOSON_VERSION_PATCH	0
-#define BOSON_VERSION_TEXT	"0.2.0"
+#define BOSON_VERSION_TEXT	"0.3.0"
 #define BOSON_MAGIC		"Orzel"
 #define BOSON_VERSION_MAGIC	"boson/orzel@eagle, 1999"
 #define BOSON_MAGIC_LENGHT	(sizeof(BOSON_MAGIC)/sizeof(char))

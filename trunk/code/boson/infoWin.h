@@ -1,5 +1,5 @@
 /***************************************************************************
-                          bosonView.h  -  description                              
+                         infoWin.h  -  description                              
                              -------------------                                         
 
     version              : $Id$
@@ -18,10 +18,13 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef BOSONVIEW_H 
-#define BOSONVIEW_H 
+#ifndef INFO_WIN_H
+#define INFO_WIN_H
 
-#include "visualView.h"
+
+#include <qframe.h>
+//#include <qintdict.h>
+//#include <playerUnit.h>
 
 class QPushButton;
 class QPixmap;
@@ -29,23 +32,21 @@ class playerFacility;
 class QLabel;
 class QWidgetStack;
 class QScrollView;
+//class visualBigDisplay;
 class QVBoxLayout;
 
-
-class bosonView : public visualView 
+class infoWin : public QFrame
 {
-	Q_OBJECT
+  Q_OBJECT
 
 public:
-	bosonView(visualField *, QWidget *parent=0, const char *name=0L);
+	infoWin(QWidget *parent=0, const char *name=0);
 
-	enum orderType_t { OT_NONE =-1 , OT_FACILITY=10, OT_MOBILE=11};
+	enum orderType_t { OT_NONE =0 , OT_FACILITY, OT_MOBILE};
 
-	virtual void setSelected(QPixmap *);
-	virtual void setOrders(int what , int who=-1);
-
-protected:
-	virtual void object_put(int, int);
+public slots:
+	void setSelected(QPixmap*);
+	void setOrderType(int what, int who);
 
 private slots:
 	void bc0(void) { handleOrder(0); } // button clicked
@@ -74,8 +75,8 @@ private:
 /* GUI */
 	QPushButton	*orderButton[11];
 	orderType_t	orderType;
-	constructMsg_t	construct;
 };
 
-#endif // BOSONVIEW_H
+
+#endif // INFO_WIN_H
 

@@ -6,7 +6,7 @@
     begin                : Sat Jan  9 19:35:36 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
-    email                : capricel@enst.fr                                     
+    email                : orzel@yalbi.com                                     
  ***************************************************************************/
 
 /***************************************************************************
@@ -31,6 +31,10 @@
 #include "game.h"
 
 FILE *logfile = (FILE *) 0L;
+			
+// orzel :  prevent a warning, will be removed
+extern "C" { extern void usleep(unsigned long); }
+
 
 BosonServer::BosonServer(int port, const char *mapfile, const char *name=0L)
 	: KTMainWindow(name)
@@ -121,8 +125,8 @@ if (-1 == socket->socket()) {
 	}
 else
 	logf(LOG_COMM, "KserverSocket ok", socket->socket());
-	logf(LOG_COMM, "\tsocket is %d, port = %u, address = %lu"
-		, socket->socket(), socket->getPort(), socket->getAddr());
+	logf(LOG_COMM, "\tsocket = %d, port = %u, address = %lu",
+			socket->socket(), socket->getPort(), socket->getAddr());
 
 connect(
 	socket, SIGNAL(accepted(KSocket *)),
@@ -135,8 +139,8 @@ connect(
 
 BosonServer::~BosonServer()
 {
-logf(LOG_INFO, "Closing logfile normally\n+++\n\n");
-//if (logfile != stderr) close(logfile);
+	logf(LOG_INFO, "Closing logfile normally\n+++\n\n");
+	if (logfile != stderr) close(logfile);
 }
 
 
@@ -154,11 +158,9 @@ for(i=0; i<BOSON_MAX_CONNECTION; i++)
 	gpp.player[i].buffer = new boBuffer(newConnection->socket(), BOSON_BUFFER_SIZE );
 	gpp.player[i].lastConfirmedJiffies = 0;
 
-	logf(LOG_COMM,"new incoming connection, put in slot[%d]", i);
-
-
-	logf(LOG_COMM,"socket = %d, addr = %lu",
-		newConnection->socket(), newConnection->getAddr());
+	logf(LOG_INFO, "New incoming connection, put in slot[%d]", i);
+	logf(LOG_COMM,"\tsocket = %d, addr = %lu",
+			newConnection->socket(), newConnection->getAddr());
 
 	/* Signal handling */
 	connect(
