@@ -33,103 +33,93 @@
 editorMap::editorMap(uint w, uint h, QObject *parent, const char *name=0L)
 	: physMap(w,h,parent,name)
 {
-int	i, j;
-playField field("/opt/kde/share/apps/boson/map/basic.bpf");
-
-assert(true == field.load() );
-///orzel, was ugly.. should handle load()==false correctly 
-
-map.width = field.map.width;
-map.height = field.map.height;
-
-/* creation of the ground map */
-map.cells = new (visualCell *)[map.width];
-for (i=0; i< map.width; i++)
-	map.cells[i] = new (visualCell)[map.height];
-
-/* initialisation */
-for (i=0; i< map.width; i++)
-	for (j=0; j< map.height; j++)
-		map.cells[i][j].set( field.map.cells[i][j], i, j);
-
-
-/* freeing of field.map.cells */
-for (i=0; i< map.width; i++)
-	delete [] field.map.cells[i];
-delete [] field.map.cells;
-
 }
 
 
-/*
-void editorMap::setCell(int i, int j, groundType g)
+bool editorMap::load(QString filename)
 {
-	boAssert(i>=0); boAssert(j>=0);
-	boAssert(i<width()); boAssert(j<height());
+	int	i, j;
+	playField field(filename);
 
-	(void) new playerCell(g, i, j);
+	if (false == field.load()) return false;
 
-	emit newCell(i,j,g);
-}
+	map.width = field.map.width;
+	map.height = field.map.height;
+
+	/*
+	 * creation of the ground map
+	 */
+	map.cells = new (visualCell *)[map.width];
+	for (i=0; i< map.width; i++)
+		map.cells[i] = new (visualCell)[map.height];
+
+	/* initialisation */
+	for (i=0; i< map.width; i++)
+		for (j=0; j< map.height; j++)
+			map.cells[i][j].set( field.map.cells[i][j], i, j);
+
+	printf("***********field.load : %d, map : %d\n", field.map.cells[3][3], map.cells[3][3].getGroundType());
+	printf("***********field.load : %d, map : %d\n", field.map.cells[10][9], map.cells[10][9].getGroundType());
+	printf("***********field.load : %d, map : %d\n", field.map.cells[20][13], map.cells[20][13].getGroundType());
+
+
+	/* freeing of field.map.cells */
+	for (i=0; i< map.width; i++)
+		delete [] field.map.cells[i];
+	delete [] field.map.cells;
+
+
+	/*
+	 * creation of facilities/units
+	 */  
+/* //orzel : not enabled yet
+	people  = field.people;  
+	for (i=0; i<people.nbMobiles; i++)
+	        createMobUnit(people.mobile[i]);
+	for (i=0; i<people.nbFacilities; i++)
+	        createFixUnit(people.facility[i]);  
 */
 
+	// ok, it's all right
+	isModified = false;
+	return true;
 
-void editorMap::createMob(mobileMsg_t &m)
-{
-	visualMobUnit *u;
-
-	assert(m.who < BOSON_MAX_PLAYERS);
-
-	u = new visualMobUnit(&m);
-	mobile.insert(m.key, u);
-
-	emit updateMobile(u);
 }
 
-
-void editorMap::destroyMob(destroyedMsg_t &m)
+bool editorMap::save(QString filename)
 {
-	visualMobUnit *mob ;
-	
-	mob = mobile.find(m.key);
-	if (mob) {
-		boAssert(m.x == mob->x());
-		boAssert(m.y == mob->y());
-		}
-	else {
-		logf(LOG_ERROR, "editorMap::destroyMob : can't find m.key");
-		return;
-		}
+	int	i, j;
+	bool	ret;
+	playField field(filename);
 
-	boAssert( mobile.remove(m.key) == true );
-}
+	field.nbPlayer = 0;
+	field.people.nbMobiles = 0;
+	field.people.nbFacilities = 0;
+	field.map.width = map.width;
+	field.map.height = map.height;
 
-void editorMap::createFix(facilityMsg_t &m)
-{
-	visualFacility *f;
+	/* creation of the ground map */
+	field.map.cells = new (groundType *)[map.width];
+	for (i=0; i< map.width; i++)
+		field.map.cells[i] = new (groundType)[map.height];
 
-	assert(m.who < BOSON_MAX_PLAYERS);
+	/* initialisation */
+	for (i=0; i< map.width; i++)
+		for (j=0; j< map.height; j++)
+			field.map.cells[i][j] = (map.cells[i][j]).getGroundType();
 
-	f = new visualFacility(&m);
-	facility.insert(m.key, f);
+	printf("***********field.save : %d, map : %d\n", field.map.cells[3][3], map.cells[3][3].getGroundType());
+	printf("***********field.save : %d, map : %d\n", field.map.cells[10][9], map.cells[10][9].getGroundType());
+	printf("***********field.save : %d, map : %d\n", field.map.cells[20][13], map.cells[20][13].getGroundType());
+	ret =  field.write();
 
-	emit updateFix(f);
-}
+	/* freeing of field.map.cells */
+	for (i=0; i< map.width; i++)
+		delete [] field.map.cells[i];
+	delete [] field.map.cells;
 
+	// ok, it's all right
+	isModified = false;
+	return ret;
 
-void editorMap::destroyFix(destroyedMsg_t &m)
-{
-	visualFacility * f;
-	
-	f = facility.find(m.key);
-	if (f) {
-		boAssert(m.x == f->x());
-		boAssert(m.y == f->x());
-		}
-	else {
-		logf(LOG_ERROR, "editorMap::destroyFix : can't find m.key");
-		return;
-		}
-
-	boAssert( facility.remove(m.key) == true);
 }

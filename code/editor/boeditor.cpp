@@ -20,9 +20,12 @@
 
 #include <stdio.h>
 #include <unistd.h>
-#include <boeditor.h>
+#include <assert.h>
 
 #include <qframe.h>
+#include <qdir.h>
+
+#include <kfiledialog.h>
 
 #include "../common/boconfig.h"
 #include "../common/bobuffer.h"
@@ -30,6 +33,8 @@
 
 #include "visual.h"
 #include "ressource.h"
+
+#include "boeditor.h"
 
 
 FILE *logfile = (FILE *) 0L;
@@ -58,18 +63,21 @@ BoEditorApp::BoEditorApp(char *servername)
   recentList->setAutoDelete(true);
 
   ///////////////////////////////////////////////////////////////////
-  // read the config file options
-  readOptions();
-
-  ///////////////////////////////////////////////////////////////////
   // call init() to invoke all other construction parts
   init(servername);
+
+  ///////////////////////////////////////////////////////////////////
+  // read the config file options
+  readOptions();
 }
 
 BoEditorApp::~BoEditorApp()
 {
-logf(LOG_INFO, "Closing logfile.\n+++\n\n");
-if (logfile != stderr) fclose(logfile);
+
+delete recentList;
+delete phys;
+logf(LOG_INFO, "Closing logfile\n");
+if (logfile && logfile != stderr) fclose(logfile);
 }
 
 void BoEditorApp::enableCommand(int id_)
@@ -92,6 +100,7 @@ void BoEditorApp::disableCommand(int id_)
 void BoEditorApp::init(char *servername )
 { 
 
+  filename = new QString();
   ///////////////////////////////////////////////////////////////////
   // set up the base application features
   initMenuBar();
@@ -111,11 +120,13 @@ void BoEditorApp::init(char *servername )
 
   ///////////////////////////////////////////////////////////////////
   // disable menu and toolbar items at startup
-/*  disableCommand(ID_FILE_SAVE);
-  disableCommand(ID_FILE_SAVE_AS);
+  disableCommand(ID_FILE_SAVE);
+//  disableCommand(ID_FILE_SAVE_AS);
+  disableCommand(ID_FILE_CLOSE);
   disableCommand(ID_FILE_PRINT);
+
   disableCommand(ID_EDIT_CUT);
-  disableCommand(ID_EDIT_COPY);*/
+  disableCommand(ID_EDIT_COPY);
 }
 
 
@@ -272,6 +283,8 @@ void BoEditorApp::initView()
 
 /* the physical map is created when a game is created */
 	phys = new editorMap(200,200);
+	*filename = kapp->kde_datadir() + "/boson/map/editor_test.bpf";
+	assert (true == phys->load(*filename));
 
 /* a mainView is each window containing : field, mini, order...
    this one is the first one, other can pop up as well */
@@ -290,7 +303,7 @@ void BoEditorApp::resizeEvent(QResizeEvent *evt)
     updateRects();
 }
 
-void BoEditorApp::addRecent(const char *filename)
+void BoEditorApp::addRecentFile(const char *filename)
 {
   if(filename && strlen(filename) == 0 || recentList->contains(filename))
     return;
@@ -340,34 +353,41 @@ bool BoEditorApp::queryExit()
 
 void BoEditorApp::saveOptions()
 {
-  KConfig *config = kapp->getConfig();
+	KConfig *config = kapp->getConfig();
 
-  config->setGroup("APPEARANCE");
-  config->writeEntry("MainGeometry",rMainGeom);
+	config->setGroup("APPEARANCE");
+	config->writeEntry("MainGeometry",rMainGeom);
 
 //  config->writeEntry("ShowToolbar_0",tool_bar_0->isVisible());
 //  config->writeEntry("ShowStatusbar",status_bar->isVisible());
 
-  config->writeEntry("MenuBarPos", (int)menu_bar->menuBarPos());
-  config->writeEntry("ToolBar_0_Pos", (int)tool_bar_0->barPos());
-
+	config->writeEntry("MenuBarPos", (int)menu_bar->menuBarPos());
+	config->writeEntry("ToolBar_0_Pos", (int)tool_bar_0->barPos());
+	config->writeEntry("Recent Files", *recentList);
 }
+
+
 
 void BoEditorApp::readOptions()
 {
-  ///////////////////////////////////////////////////////////////////
-  // read the config file entries
-  KConfig *config = kapp->getConfig();
+	///////////////////////////////////////////////////////////////////
+	// read the config file entries
+	KConfig *config = kapp->getConfig();
  
-  config->setGroup("APPEARANCE");
-  rMainGeom = config->readRectEntry("MainGeometry",&QRect(0,0,700,600));
+	config->setGroup("APPEARANCE");
+	rMainGeom = config->readRectEntry("MainGeometry",&QRect(0,0,700,600));
 
-//  bViewToolbar_0 = config->readBoolEntry("ShowToolbar_0", true);
-//  bViewStatusbar = config->readBoolEntry("ShowStatusbar", true);
-  bViewToolbar_0 = bViewStatusbar = true;
+//	bViewToolbar_0 = config->readBoolEntry("ShowToolbar_0", true);
+//	bViewStatusbar = config->readBoolEntry("ShowStatusbar", true);
+	bViewToolbar_0 = bViewStatusbar = true;
 
-  menu_bar_pos = (KMenuBar::menuPosition)config->readNumEntry("MenuBarPos", KMenuBar::Top); 
-  tool_bar_0_pos = (KToolBar::BarPosition)config->readNumEntry("ToolBar_0_Pos", KToolBar::Right);
+//	menu_bar_pos = (KMenuBar::menuPosition)config->readNumEntry("MenuBarPos", KMenuBar::Top); 
+//	tool_bar_0_pos = (KToolBar::BarPosition)config->readNumEntry("ToolBar_0_Pos", KToolBar::Right);
+
+	config->readListEntry("Recent Files", *recentList);
+	for (uint i =0 ; i < recentList->count(); i++)
+		file_menu_recent->insertItem(recentList->at(i));
+
 
 }
 
@@ -412,6 +432,73 @@ void BoEditorApp::slotViewStatusBar()
 }
 */
 
+
+void BoEditorApp::slotFileNewWindow()
+{
+	
+	mainView *mainview = new mainView(phys, this, "main_view_0");
+	setView(mainview);
+}
+
+void BoEditorApp::slotFileNew()
+{
+
+//	if(phys->isModified() && dlgModified() )
+		return;
+	
+//	doc->newDocument();		
+//	setCaption(kapp->appName()+": "+doc->getTitle());
+}
+
+void BoEditorApp::slotFileOpen()
+{
+//	if(!doc->saveModified())
+//		return;
+	
+	QString fileToOpen=KFileDialog::getOpenFileName(QDir::homeDirPath(), "", this, i18n("Open File..."));
+	if(!fileToOpen.isEmpty()){
+//orzel ..		doc->openDocument(fileToOpen);
+//		setCaption(kapp->appName()+": "+doc->getTitle());
+		addRecentFile(fileToOpen);
+	}
+}
+
+
+
+void BoEditorApp::slotFileOpenRecent(int id_)
+{
+//	if(!doc->saveModified())
+//		return;
+
+//	doc->openDocument(recentList->at(id_));
+//	setCaption(kapp->appName()+": "+doc->getTitle());
+}
+
+void BoEditorApp::slotFileSave()
+{
+	phys->save(*filename);
+//	doc->saveDocument(doc->getPathName()+doc->getTitle());
+}
+
+void BoEditorApp::slotFileSaveAs()
+{
+	QString newName=KFileDialog::getSaveFileName(QDir::currentDirPath(), "", this, i18n("Save As..."));
+	if(!newName.isEmpty()){
+		QFileInfo saveAsInfo(newName);
+
+		*filename = newName;
+		assert(phys->save(newName));
+		addRecentFile(newName);
+		setCaption(kapp->appName()+": "+saveAsInfo.fileName());
+	}
+}
+
+void BoEditorApp::slotFileClose()
+{
+	//close();
+}
+
+
 void BoEditorApp::slotFileRecent(int w)
 {
 }
@@ -442,8 +529,15 @@ void BoEditorApp::slotStatusHelpMsg(const char *text)
 
 BEGIN_CMD(BoEditorApp)
 
-  ON_CMD(ID_APP_EXIT,                 slotAppExit(),            i18n(""))
+  ON_CMD(ID_APP_EXIT,			slotAppExit(),		i18n("Exiting the editor..."))
+  ON_CMD(ID_FILE_NEW_WINDOW,		slotFileNewWindow(),	i18n("Opening a new view of the map..."))
+  ON_CMD(ID_FILE_NEW       ,		slotFileNew(),		i18n("Creating a new map..."))
+  ON_CMD(ID_FILE_OPEN      ,		slotFileOpen(),		i18n("Opening a file..."))
+//  ON_CMD(ID_FILE_RECENT    ,		slotFile(),		i18n(""))
 
+  ON_CMD(ID_FILE_SAVE      ,		slotFileSave(),		i18n("Saving the map"))
+  ON_CMD(ID_FILE_SAVE_AS   ,		slotFileSaveAs(),	i18n("Saving the map under a new name..."))
+  ON_CMD(ID_FILE_CLOSE     ,		slotFileClose(),	i18n("Closing the file..."))
 
 //  ON_CMD(ID_VIEW_TOOLBAR_0,           slotViewToolBar_0(),      i18n(""))
 //  ON_CMD(ID_VIEW_STATUSBAR,           slotViewStatusBar(),      i18n(""))

@@ -61,6 +61,22 @@ public:
   ~BoEditorApp();
 
  public slots:
+  /** open a new application window by creating a new instance of BoEditorApp */
+  void slotFileNewWindow();
+  /** clears the document in the actual view to reuse it as the new document */
+  void slotFileNew();
+  /** open a file and load it into the document*/
+  void slotFileOpen();
+  /** opens a file from the recent files menu */
+  void slotFileOpenRecent(int id_);
+  /** save a document */
+  void slotFileSave();
+  /** save a document by a new filename*/
+  void slotFileSaveAs();
+  /** asks for saving if the file is modified, then closes the actual file and window*/
+  void slotFileClose();
+
+
 
   /** enable menuentries/toolbar items */
    void enableCommand(int id_);
@@ -91,7 +107,7 @@ protected:
   /** resizeEvent for the main view */
   virtual void resizeEvent(QResizeEvent *evt);
   /** add filename to the recentList */
-  void addRecent(const char *filename);
+  void addRecentFile(const char *filename);
   /** method asks the modified flag and creates a modified dialog for saving */
   void dlgModified();
   /** overloaded for Message box on last window exit */
@@ -103,9 +119,9 @@ protected:
 
   /** receive Server message */
   void handleDialogMessage(bosonMsgTag, int, bosonMsgData *);
-
   /** 3rd layer : receiving playing info from server */
   void handleGameMessage(bosonMsgTag, int, bosonMsgData *);
+
 
   protected slots:      
     /** exits the application */
@@ -153,6 +169,7 @@ private:
 
 /* The map which handle grouds and units*/
     editorMap		*phys;
+    QString		*filename;
 
 };   
  
