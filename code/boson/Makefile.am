@@ -40,6 +40,7 @@ BOSON_SRC = \
 	editorwidget.cpp \
 	bosonglwidget.cpp \
 	bosonbigdisplaybase.cpp \
+	bocamera.cpp \
 	bosongroundtheme.cpp \
 	bosonconfig.cpp \
 	optionsdialog.cpp \
@@ -72,6 +73,7 @@ BOSON_SRC = \
 	bosonbigdisplayinput.cpp \
 	editorbigdisplayinput.cpp \
 	bomesh.cpp \
+	bomaterial.cpp \
 	bosonpropertyxml.cpp \
 	bomemorytrace.cpp \
 	boaction.cpp \

@@ -30,7 +30,7 @@ class BoSelection;
 class Player;
 class Unit;
 class UnitProperties;
-class Camera;
+class BoCamera;
 class BosonBigDisplayInputBase;
 class BoItemList;
 class BosonItem;
@@ -433,8 +433,8 @@ protected:
 		return sphereInFrustum(pos, radius);
 	}
 
-	void setCamera(const Camera& c);
-	Camera* camera() const;
+	void setCamera(const BoCamera& c);
+	BoCamera* camera() const;
 	/**
 	 * @return Point that the camera is looking at
 	 **/
