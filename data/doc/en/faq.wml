@@ -21,11 +21,19 @@
     <p>&nbsp;</p>
     <a name="2">- Why is boson so slow ?</a>
     <p>
-    There are many reasons, some things that can help:<br>
+    There may be many reasons, some things that can help:<br>
     - Check your hardware: <a href="started.html">here</a><br>
     - Try resizing the window and/or make it smaller<br>
     - Increase the update interval in the Boson settings<br>
-    - Change the color depth of your XServer<br>
+    - Change the color depth of your XServer to 16bit<br>
+    - Check the speed of other OpenGL games like tuxkart and tuxracer, maybe they also run slow<br>
+    - If you are using a Nvidia card you can use a script <!-- <a href="http://boson.sourceforge.net/download.html">--> called nvcheck.sh</a>
+    to check your driver installation.<br>
+    - Make sure you are using hardware accellerated OpenGL:<br>
+        <blockquote>You will need the program glxinfo, it is part of your X Server. Enter this into your console:
+        <pre>glxinfo | grep "direct rendering:"</pre>
+        If you get a yes, 3D accelleration should be ok. If this says "No", you are running software OpenGL and this is very slow.
+        </blockquote>
     </p>
 
     <p>&nbsp;</p>
