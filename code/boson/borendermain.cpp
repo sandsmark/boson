@@ -549,9 +549,11 @@ void ModelPreview::load(SpeciesTheme* s, const UnitProperties* prop)
  BO_CHECK_NULL_RET(prop);
  makeCurrent();
  s->loadUnitModel(prop);
- mModel = s->unitModel(prop->typeId());
- BO_CHECK_NULL_RET(mModel);
- emit signalMaxFramesChanged(mModel->frames() - 1);
+ BosonModel* model = s->unitModel(prop->typeId());
+ if (!model) {
+	BO_NULL_ERROR(model);
+ }
+ setModel(model);
 }
 
 void ModelPreview::loadObjectModel(SpeciesTheme* s, const QString& file)
@@ -564,12 +566,19 @@ void ModelPreview::loadObjectModel(SpeciesTheme* s, const QString& file)
  }
  makeCurrent();
  s->loadObjects();
- mModel = s->objectModel(file);
- if (!mModel) {
-	boError() << k_funcinfo << "NULL model" << endl;
-	return;
+ BosonModel* model = s->objectModel(file);
+ if (!model) {
+	BO_NULL_ERROR(model);
  }
- emit signalMaxFramesChanged(mModel->frames() - 1);
+ setModel(model);
+}
+
+void ModelPreview::setModel(BosonModel* model)
+{
+ mModel = model;
+ if (mModel) {
+	emit signalMaxFramesChanged(mModel->frames() - 1);
+ }
 }
 
 void ModelPreview::slotResetView()
@@ -837,7 +846,7 @@ void ModelPreview::slotLODChanged(int l)
 		emit signalLODChanged(0);
 		return;
 	}
-	if (l > BosonModel::defaultLodCount() - 1) {
+	if ((unsigned int)l + 1 > BosonModel::defaultLodCount()) {
 		emit signalLODChanged(BosonModel::defaultLodCount() - 1);
 		return;
 	}
