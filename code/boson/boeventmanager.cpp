@@ -181,6 +181,11 @@ bool BoEventManager::queueEvent(BoEvent* event)
 	delete event;
 	return false;
  }
+ if (!boGame->gameMode()) {
+	// in editor mode we just ignore the event.
+	delete event;
+	return true;
+ }
  boDebug(360) << k_funcinfo << "queue event " << event->name() << endl;
  unsigned long int id = d->mNextEventId;
  d->mNextEventId = d->mNextEventId + 1;
