@@ -13,11 +13,6 @@ texture_DATA = \
         camo8.jpg \
         camo9.jpg \
         camo10.jpg \
-        grid2.jpg \
-        metal16.jpg \
-        metal17.jpg \
-        steel3.jpg \
-        steel4.jpg \
 	concrt1.jpg \
 	concrt2.jpg \
 	concrt3.jpg \
@@ -28,8 +23,17 @@ texture_DATA = \
 	doors4.jpg \
 	doors5.jpg \
 	doors6.jpg \
-	grid1.jpg \
+        grid1.jpg \
+        grid2.jpg \
 	metal1.jpg \
+	metal2.jpg \
+	metal3.jpg \
+	metal4.jpg \
+	metal5.jpg \
+	metal6.jpg \
+	metal7.jpg \
+	metal8.jpg \
+	metal9.jpg \
 	metal10.jpg \
 	metal11.jpg \
 	metal12.jpg \
@@ -39,14 +43,6 @@ texture_DATA = \
         metal16.jpg \
         metal17.jpg \
         metal18.jpg \
-	metal2.jpg \
-	metal3.jpg \
-	metal4.jpg \
-	metal5.jpg \
-	metal6.jpg \
-	metal7.jpg \
-	metal8.jpg \
-	metal9.jpg \
 	minerals.jpg \
 	missile1.jpg \
 	mslback1.jpg \
@@ -54,7 +50,10 @@ texture_DATA = \
 	pipe2.jpg \
 	roof1.jpg \
 	roof2.jpg \
+        shockwav.jpg \
 	stairs1.jpg \
+        steel3.jpg \
+        steel4.jpg \
 	swtchbrd.jpg \
 	tnkhull1.jpg \
 	tracks.jpg \
