@@ -18,6 +18,7 @@
 */
 
 #include "kgameplayerdebug.h"
+#include "kgameplayerdebug.moc"
 
 #include "boson.h"
 #include "player.h"
