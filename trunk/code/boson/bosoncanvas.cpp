@@ -686,8 +686,8 @@ void BosonCanvas::setDisplayManager(BoDisplayManager* m)
 
 bool BosonCanvas::canPlaceUnitAt(const UnitProperties* prop, const QPoint& pos, Facility* factory) const
 {
- int width = prop->theme()->unitWidth(prop->typeId());
- int height= prop->theme()->unitHeight(prop->typeId());
+ int width = prop->unitWidth();
+ int height= prop->unitHeight();
  if (!width) {
 	kdError() << k_funcinfo << "null width for " << prop->typeId() << endl;
 	return false;

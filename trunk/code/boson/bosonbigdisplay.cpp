@@ -449,6 +449,13 @@ void BosonBigDisplay::updateCursor()
  mapCoordinates(widgetPos, &x, &y, &z);
  worldToCanvas(x, y, z, &canvasPos);
 
+ if (!canvas()->onCanvas(canvasPos)) {
+	d->mCursorType = CursorDefault;
+	c->setCursor(d->mCursorType);
+	c->setWidgetCursor(this);
+	return;
+ }
+
  if (!d->mLockCursor) {
 	if (!selection()->isEmpty()) {
 		if (selection()->leader()->owner() == localPlayer()) {
@@ -456,35 +463,26 @@ void BosonBigDisplay::updateCursor()
 			if (unit) {
 				if (unit->owner() == localPlayer()) {
 					d->mCursorType = CursorDefault;
-//					c->setWidgetCursor(this);
 				} else if(selection()->leader()->unitProperties()->canShoot()) {
 					if((unit->isFlying() && selection()->leader()->unitProperties()->canShootAtAirUnits()) ||
 							(!unit->isFlying() && selection()->leader()->unitProperties()->canShootAtLandUnits())) {
 						d->mCursorType = CursorAttack;
-//						c->setWidgetCursor(this);
 					}
 				}
 			} else if (selection()->leader()->isMobile()) {
 				d->mCursorType = CursorMove;
-//				c->setWidgetCursor(this);
-				c->showCursor();
 			} else {
 				d->mCursorType = CursorDefault;
-//				c->setWidgetCursor(this);
-				c->showCursor();
 			}
 		} else {
 			d->mCursorType = CursorDefault;
-//			c->setWidgetCursor(this);
 		}
 	} else {
 		d->mCursorType = CursorDefault;
-//		c->setWidgetCursor(this);
 	}
  }
 
  c->setCursor(d->mCursorType);
- c->move(canvasPos.x(), canvasPos.y());
  c->setWidgetCursor(this);
 }
 

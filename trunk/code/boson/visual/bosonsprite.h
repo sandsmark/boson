@@ -30,6 +30,10 @@ class BosonModel;
 class BosonSprite : public GLSprite
 {
 public:
+	/**
+	 * Note: when you subclass this class you must set the width/height in
+	 * order to make correct use of it! See @ref GLSprite::setWidth
+	 **/
 	BosonSprite(BosonModel* model, BosonCanvas*);
 	virtual ~BosonSprite();
 

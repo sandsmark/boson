@@ -37,7 +37,82 @@
 
 BosonModelTextures* BosonModel::mModelTextures = 0;
 
-BosonModel::BosonModel(GLuint list, int width, int height)
+class BoFrame
+{
+public:
+	BoFrame()
+	{
+		mDisplayList = 0;
+		mRadius = 0.0;
+	}
+	void setDisplayList(GLuint l) { mDisplayList = l; }
+	GLuint displayList() const { return mDisplayList; }
+	float depthMultiplier() const { return mDepthMultiplier; }
+	void setDepthMultiplier(float d) { mDepthMultiplier = d; }
+
+	GLuint mDisplayList;
+	float mDepthMultiplier;
+	float mRadius;
+};
+
+class BosonModel::BoHelper
+{
+public:
+	BoHelper()
+	{
+		mMaxX = 0.0;
+		mMinX = 0.0;
+		mMaxY = 0.0;
+		mMinY = 0.0;
+		mMaxZ = 0.0;
+		mMinZ = 0.0;
+	}
+	void addPoint(float x, float y, float z)
+	{
+		if (x > mMaxX) {
+			mMaxX = x;
+		} else if (x < mMinX) {
+			mMinX = x;
+		}
+		if (y > mMaxY) {
+			mMaxY = y;
+		} else if (y < mMinY) {
+			mMinY = y;
+		}
+		if (z > mMaxZ) {
+			mMaxZ = z;
+		} else if (z < mMinZ) {
+			mMinZ = z;
+		}
+	}
+
+	// radius of the bounding sphere
+//	float radius() const
+//	{
+	//TODO
+//	}
+
+	// well in theory mMaxX == -mMinX
+	// but usually..
+	float diffX() const { return (mMinX - mMaxX); }
+	float diffY() const { return (mMinY - mMaxY); }
+	float diffZ() const { return (mMinZ - mMaxZ); }
+
+	float lengthX() const { return (mMaxX - mMinX); }
+	float lengthY() const { return (mMaxY - mMinY); }
+	float lengthZ() const { return (mMaxZ - mMinZ); }
+
+
+
+	float mMaxX;
+	float mMinX; // lowest (i.e. negative) x-
+	float mMaxY;
+	float mMinY;
+	float mMaxZ;
+	float mMinZ;
+};
+
+BosonModel::BosonModel(GLuint list, float width, float height) // FIXME we use int here..
 {
  // dummy implementation - we don't load a model, but rather use the provided
  // list.
@@ -45,17 +120,26 @@ BosonModel::BosonModel(GLuint list, int width, int height)
  boProfiling->start(BosonProfiling::LoadModelDummy);
  init();
  mDisplayList = list;
- mFrames.insert(0, list);
+ BoFrame* frame = new BoFrame;
+ mFrames.insert(0, frame);
+ frame->setDisplayList(list);
+ frame->mRadius = width > height ? (float)width : (float)height;
+ frame->mRadius /= BO_TILE_SIZE;
+ frame->mRadius *= BO_GL_CELL_SIZE;
+
  mWidth = width;
  mHeight = height;
+
  boProfiling->stop(BosonProfiling::LoadModelDummy);
 }
 
-BosonModel::BosonModel(const QString& dir, const QString& file)
+BosonModel::BosonModel(const QString& dir, const QString& file, float width, float height)
 {
  init();
  mDirectory = dir;
  mFile = file;
+ mWidth = width;
+ mHeight = height;
 }
 
 void BosonModel::init()
@@ -65,6 +149,8 @@ void BosonModel::init()
  mWidth = 0;
  mHeight = 0;
  mFrame = 0;
+ mDepthMultiplier = 1.0;
+ mFrames.setAutoDelete(true);
  if (!mModelTextures) { // TODO static deleter!
 	mModelTextures = new BosonModelTextures();
  }
@@ -78,6 +164,7 @@ BosonModel::~BosonModel()
 	lib3ds_file_free(m3ds); // we can probably free already after creating the display lists!
 	m3ds = 0;
  }
+ mFrames.clear();
  kdDebug() << k_funcinfo << "done" << endl;
 }
 
@@ -162,7 +249,7 @@ void BosonModel::createDisplayLists()
  }
  kdDebug() << k_funcinfo << "creating " << m3ds->frames << " lists" << endl;
  GLuint listBase = glGenLists(m3ds->frames);
- int allPoints = 0;
+ float scale = 1.0; // note: all frame must share the same scaling factor. this means that the model mustn't grow in x or y direction (width or height). It can grow/shrink in z-direction however.
 
  // ok so lets start now. A .3ds file can contain several frames. A different
  // frame of the same file looks slightly differnt - e.g. useful for animation
@@ -189,11 +276,41 @@ void BosonModel::createDisplayLists()
 		renderNode(p);
 	}
 
-	mPoints = 0;
+	// ok, this way (iterating all nodes again) is not really efficient. but
+	// it is done only once, so it does not really matter. and it is worth
+	// it :)
+	BoHelper helper;
+	for (p = m3ds->nodes; p; p = p->next) {
+		computeBoundings(p, &helper);
+	}
+
 	GLuint list = listBase + m3ds->current_frame;
 	glNewList(list, GL_COMPILE);
 		glPushMatrix();
-		glScalef(0.004, 0.004, 0.004); // FIXME
+
+
+		// TODO: use BosonHelper::diff*() ! they can be used as
+		// glTranslate here! (the center of the gl coordinate system
+		// should actually be the *center* of the model)
+		
+		// note: we use BO_GL_CELL_SIZE as default size in *all*
+		// directions. one day we should use UnitProperties::unitWidth()
+		// and so on here - but for now we use this and re-scale it
+		// later (in Unit or so).
+		if (i == 0) {
+			// we compute scaling for the first frame only.
+			float scaleX = mWidth / helper.lengthX();
+			float scaleY = mHeight / helper.lengthY();
+			// we don't care about z-size here!
+			scale = QMIN(scaleX, scaleY);
+		}
+		glScalef(scale, scale, scale);
+
+		// we render from bottom to top - but for x and y in the center!
+		// FIXME: this doesn't work 100% correctly - the quad e.g. is
+		// still partially (parts of the wheels) in the grass.
+		glTranslatef(0.0, 0.0, -helper.mMinZ * scale);
+
 
 		// a .3ds file consists of nodes. I don't *know* it, but I'm
 		// pretty sure that a 3ds node is simply an object of the whole
@@ -206,12 +323,53 @@ void BosonModel::createDisplayLists()
 		}
 		glPopMatrix();
 	glEndList();
-	mFrames.insert(m3ds->current_frame, list);
-//	kdDebug() << k_funcinfo << "points in frame " << m3ds->current_frame << ": " << mPoints << endl;
-	allPoints += mPoints;
+	BoFrame* frame = new BoFrame;
+	frame->setDisplayList(list);
+	frame->setDepthMultiplier(helper.lengthZ() * scale / BO_GL_CELL_SIZE);
+//	frame->setDepthMultiplier(helper.lengthZ() / BO_GL_CELL_SIZE);
+	mFrames.insert(m3ds->current_frame, frame);
  }
  setFrame(frame());
- kdDebug() << k_funcinfo << "points in model (all frames): " << allPoints << endl;
+}
+
+void BosonModel::computeBoundings(Lib3dsNode* node, BosonModel::BoHelper* helper)
+{
+ {
+	Lib3dsNode* p;
+	for (p = node->childs; p; p = p->next) {
+		computeBoundings(p, helper);
+	}
+ }
+
+ if (node->type == LIB3DS_OBJECT_NODE) {
+	if (strcmp(node->name, "$$$DUMMY") == 0) {
+		return;
+	}
+	Lib3dsMesh* mesh = lib3ds_file_mesh_by_name(m3ds, node->name);
+	if (!mesh) {
+		return;
+	}
+	unsigned int p;
+	Lib3dsMatrix invMeshMatrix;
+	lib3ds_matrix_copy(invMeshMatrix, mesh->matrix);
+	lib3ds_matrix_inv(invMeshMatrix);
+
+	for (p = 0; p < mesh->faces; ++p) {
+		Lib3dsFace* f = &mesh->faceL[p];
+
+		Lib3dsVector v[3];
+		for (int i = 0; i < 3; i++) {
+			lib3ds_vector_transform(v[i], invMeshMatrix, mesh->pointL[f->points[i]].pos);
+			Lib3dsObjectData* d = &node->data.object;
+			Lib3dsVector tmp, actualPoint;
+			lib3ds_vector_copy(actualPoint, v[i]);
+			lib3ds_vector_sub(actualPoint, actualPoint, d->pivot);
+			lib3ds_vector_copy(tmp, actualPoint);
+			lib3ds_vector_transform(actualPoint, node->matrix, tmp);
+			helper->addPoint(actualPoint[0], actualPoint[1], actualPoint[2]);
+		}
+	}
+ }
 }
 
 // AB: note that this function was nearly completely copied from the lib3ds
@@ -280,14 +438,13 @@ void BosonModel::renderNode(Lib3dsNode* node)
 			}
 	
 			{
-				mPoints += 3;
 				Lib3dsVector v[3];
 				Lib3dsTexel tex[3];
 				for (int i = 0; i < 3; i++) {
 					lib3ds_vector_transform(v[i], invMeshMatrix, mesh->pointL[ f->points[i] ].pos);
 					if (mesh->texels != mesh->points) {
 						if (mesh->texels != 0) {
-							kdWarning() << k_funcinfo << "hmm.. points: " << mesh->points 
+							kdWarning() << k_funcinfo << "hmm.. points: " << mesh->points
 									<< " , texels: " << mesh->texels << endl;
 						}
 						myTex = 0;
@@ -339,14 +496,16 @@ void BosonModel::renderNode(Lib3dsNode* node)
 
 void BosonModel::setFrame(unsigned int frame)
 {
- if (!mFrames.contains(frame)) {
+ BoFrame* f = mFrames[frame];
+ if (!f) {
 	kdWarning() << k_funcinfo << "Invalid frame " << frame << endl;
-	if (!mFrames.contains(mFrame)) {
+	if (!mFrames[mFrame]) {
 		mFrame = 0;
 	}
 	return;
  }
  mFrame = frame;
- mDisplayList = mFrames[mFrame];
+ mDepthMultiplier = f->depthMultiplier();
+ mDisplayList = f->displayList();
 }
 
