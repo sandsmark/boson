@@ -209,9 +209,12 @@ QString SpeciesData::themePath() const
  return d->mThemePath;
 }
 
-void SpeciesData::loadUnitModel(const UnitProperties* prop, const QColor& teamColor)
+bool SpeciesData::loadUnitModel(const UnitProperties* prop, const QColor& )
 {
- BO_CHECK_NULL_RET(prop);
+ if (!prop) {
+	BO_NULL_ERROR(prop);
+	return false;
+ }
  BosonModel* m = d->mUnitModels[prop->typeId()];
 
  if (!m) {
@@ -227,17 +230,19 @@ void SpeciesData::loadUnitModel(const UnitProperties* prop, const QColor& teamCo
 	}
 	if (!found) {
 		boError() << k_funcinfo << "Cannot find model file file for " << prop->typeId() << endl;
-		return;
+		return false;
 	}
 
 	BosonModelFactory factory;
 	m = factory.createUnitModel(prop, file);
-	d->mUnitModels.insert(prop->typeId(), m);
- } else {
-//	boDebug() << "model already loaded - loading an additional teamcolor only..." << endl;
-	// we only need to load the display lists here, as everything else
-	// doesn't depend on the teamcolor :)
+	if (m) {
+		d->mUnitModels.insert(prop->typeId(), m);
+	} else {
+		boError() << k_funcinfo << "NULL model created" << endl;
+		return false;
+	}
  }
+ return true;
 }
 
 BosonModel* SpeciesData::unitModel(unsigned long int unitType) const
@@ -420,20 +425,20 @@ BosonModel* SpeciesData::objectModel(const QString& name) const
  return m;
 }
 
-void SpeciesData::loadObjects(const QColor& teamColor)
+bool SpeciesData::loadObjects(const QColor& teamColor)
 {
  QString fileName = themePath() + QString::fromLatin1("objects/objects.boson");
  if (!KStandardDirs::exists(fileName)) {
 	boDebug() << k_funcinfo << "no objects.boson file found at " << fileName << endl;
 	// We assume that this theme has no objects and don't complain
-	return;
+	return true;
  }
 
  KSimpleConfig cfg(fileName);
  QStringList objects = cfg.groupList();
  if (objects.isEmpty()) {
 	boWarning() << k_funcinfo << "No objects found in objects file (" << fileName << ")" << endl;
-	return;
+	return true;
  }
 
  boDebug() << k_funcinfo << "Loading " << objects.count()
@@ -453,6 +458,7 @@ void SpeciesData::loadObjects(const QColor& teamColor)
 		// nothing special to do here
 	}
  }
+ return true;
 }
 
 void SpeciesData::loadActions()
