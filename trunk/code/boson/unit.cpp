@@ -427,12 +427,12 @@ void Unit::updateZ(float moveByX, float moveByY, float* moveByZ, float* rotateX,
 
  // Calculate rotations
  // Calculate angle from frontz to rearz
- float xrot = Bo3dTools::rad2deg(atan(QABS(frontz - rearz) * BO_TILE_SIZE / height()));
+ float xrot = Bo3dTools::rad2deg(atan(QABS(frontz - rearz) / height()));
  *rotateX = (frontz >= rearz) ? xrot : -xrot;
 
  // Calculate y rotation
  // Calculate angle from leftz to rightz
- float yrot = Bo3dTools::rad2deg(atan(QABS(rightz - leftz) * BO_TILE_SIZE / width()));
+ float yrot = Bo3dTools::rad2deg(atan(QABS(rightz - leftz) / width()));
  *rotateY = (leftz >= rightz) ? yrot : -yrot;
 
 
@@ -575,7 +575,7 @@ Unit* Unit::bestEnemyUnitInRange()
  // Iterate through the list of enemies and pick the best ones
  for (; it != list->end(); ++it) {
 	u = ((Unit*)*it);
-	dist = QMAX(QABS((int)(u->x() - x()) / BO_TILE_SIZE), QABS((int)(u->y() - y()) / BO_TILE_SIZE));
+	dist = QMAX(QABS((int)(u->x() - x())), QABS((int)(u->y() - y())));
 	// Quick check if we can shoot at u
 	if (u->isFlying()) {
 		if (!unitProperties()->canShootAtAirUnits()) {
@@ -839,8 +839,8 @@ void Unit::moveTo(const QPoint& pos, bool attack)
  d->mTarget = 0;
 
  // We want unit's center point to be in the middle of the cell after moving.
- float x = pos.x() / BO_TILE_SIZE * BO_TILE_SIZE + (BO_TILE_SIZE / 2);
- float y = pos.y() / BO_TILE_SIZE * BO_TILE_SIZE + (BO_TILE_SIZE / 2);
+ float x = pos.x() + (1.0f/ 2);
+ float y = pos.y() + (1.0f/ 2);
 
  if (moveTo(x, y, 0)) {
 	boDebug() << k_funcinfo << "unit " << id() << ": Will move to (" << x << "; " << y << ")" << endl;
@@ -863,8 +863,8 @@ bool Unit::moveTo(float x, float y, int range)
  }
 
  // Find destination cell
- int cellX = (int)(x / BO_TILE_SIZE);
- int cellY = (int)(y / BO_TILE_SIZE);
+ int cellX = (int)(x);
+ int cellY = (int)(y);
  Cell* cell = canvas()->cell(cellX, cellY);
  if (!cell) {
 	boError() << k_funcinfo << "unit " << id() << ": Cell (" << cellX << "; " << cellY << ") at (" <<
@@ -916,8 +916,8 @@ void Unit::newPath()
  // FIXME: don't check if cell is valid/invalid if range > 0
  //  then unit would behave correctly when e.g. commanding land unit to attack
  //  a ship
- int cellX = pathInfo()->dest.x() / BO_TILE_SIZE;
- int cellY = pathInfo()->dest.y() / BO_TILE_SIZE;
+ int cellX = pathInfo()->dest.x();
+ int cellY = pathInfo()->dest.y();
  if (!ownerIO()->isFogged(cellX, cellY)) {
 	Cell* destCell = canvas()->cell(cellX, cellY);
 	if (!destCell || (!ownerIO()->canGo(this, destCell))) {
@@ -951,7 +951,7 @@ void Unit::newPath()
 
  // Pathfinder always adds our current position as the first point of the path.
  // Note that last pathpoint must always remain there (and pf end point)
- if (pathPointCount() > 2 && (currentPathPoint() / BO_TILE_SIZE == pathInfo()->start / BO_TILE_SIZE)) {
+ if (pathPointCount() > 2 && (currentPathPoint() == pathInfo()->start)) {
 	pathPointDone();
  }
 
@@ -1187,7 +1187,7 @@ bool Unit::loadFromXML(const QDomElement& root)
 
 bool Unit::inRange(unsigned long int r, Unit* target) const
 {
- return (QMAX(QABS((target->x() - x()) / BO_TILE_SIZE), QABS((target->y() - y()) / BO_TILE_SIZE)) <= (float)r);
+ return (QMAX(QABS((target->x() - x())), QABS((target->y() - y()))) <= (float)r);
 }
 
 void Unit::shootAt(BosonWeapon* w, Unit* target)
@@ -1826,8 +1826,8 @@ void MobileUnit::advanceMoveCheck()
 				canvas()->collisionsInBox(BoVector3(x() + d->lastXVelocity * 5, y() + d->lastYVelocity * 5, z()),
 				BoVector3(x() + d->lastXVelocity * 5 + width(), y() + d->lastYVelocity * 5 + height(), z() + depth()), this)) {*/
 #else
-		if (canvas()->cellOccupied(currentPathPoint().x() / BO_TILE_SIZE,
-				currentPathPoint().y() / BO_TILE_SIZE, this, false)) {
+		if (canvas()->cellOccupied(currentPathPoint().x(),
+				currentPathPoint().y(), this, false)) {
 #endif
 			// Obstacle is still there. Continue waiting
 			if (pathInfo()->waiting >= 600) {
@@ -1940,12 +1940,12 @@ void MobileUnit::advanceMoveCheck()
 		BoVector3(x() + d->lastXVelocity + width(), y() + d->lastYVelocity + height(), z() + depth()), this);
  if (!immediatecollisions.isEmpty()) {
 #else
- if (canvas()->cellOccupied(currentPathPoint().x() / BO_TILE_SIZE,
-		currentPathPoint().y() / BO_TILE_SIZE, this, false)) {
+ if (canvas()->cellOccupied(currentPathPoint().x(),
+		currentPathPoint().y(), this, false)) {
 #endif
 	boDebug(401) << k_funcinfo << "Next pathpoint is occupied, waiting" << endl;
-	const BoItemList* items = canvas()->cell(currentPathPoint().x() / BO_TILE_SIZE,
-			currentPathPoint().y() / BO_TILE_SIZE)->items();
+	const BoItemList* items = canvas()->cell(currentPathPoint().x(),
+			currentPathPoint().y())->items();
 	bool flying = isFlying();
 	for (BoItemList::ConstIterator it = items->begin(); it != items->end(); it++) {
 		if (RTTI::isUnit((*it)->rtti())) {
@@ -2102,7 +2102,7 @@ void MobileUnit::advanceFollow(unsigned int advanceCallsCount)
 	return;
  }
 // if (!isNextTo(target())) {  // This doesn't work for some reason :-(  Dunno why.
- if (QMAX(QABS(x() - target()->x()), QABS(y() - target()->y())) > BO_TILE_SIZE) {
+ if (QMAX(QABS(x() - target()->x()), QABS(y() - target()->y())) > 1.0f) {
 	// We're not next to unit
 	// AB: warning - this does a lookup on all items and therefore is slow!
 	// --> but we need it as a simple test on the pointer causes trouble if
@@ -2125,13 +2125,13 @@ void MobileUnit::advanceFollow(unsigned int advanceCallsCount)
 QRect MobileUnit::boundingRect() const
 {
 // FIXME: workaround for pathfinding which does not yet support units with size
-// > BO_TILE_SIZE
-// we simply return a boundingrect which has size BO_TILE_SIZE
- if (width() < BO_TILE_SIZE || height() < BO_TILE_SIZE) {
-	boWarning() << k_funcinfo << "width or height  < BO_TILE_SIZE - not supported!!" << endl;
+// > 1.0f
+// we simply return a boundingrect which has size 1.0f
+ if (width() < 1.0f || height() < 1.0f) {
+	boWarning() << k_funcinfo << "width or height  < 1.0f - not supported!!" << endl;
 	return BosonItem::boundingRect();
  }
- return QRect((int)x(), (int)y(), BO_TILE_SIZE, BO_TILE_SIZE);
+ return QRect((int)x(), (int)y(), (int)1.0f, (int)1.0f);
 }
 
 bool MobileUnit::loadFromXML(const QDomElement& root)

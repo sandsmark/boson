@@ -435,10 +435,10 @@ void BoGameCamera::checkCameraPosition()
   //  lookAt.z() + z()  (which should always be equal to just cameraPos.z())
   if(mCanvas)
   {
-    float camposx = cameraPos().x() * BO_TILE_SIZE;
-    float camposy = -cameraPos().y() * BO_TILE_SIZE;
-    camposx = QMAX(0, QMIN(camposx, mCanvas->mapWidth() * BO_TILE_SIZE));
-    camposy = QMAX(0, QMIN(camposy, mCanvas->mapHeight() * BO_TILE_SIZE));
+    float camposx = cameraPos().x();
+    float camposy = -cameraPos().y();
+    camposx = QMAX(0, QMIN(camposx, mCanvas->mapWidth()));
+    camposy = QMAX(0, QMIN(camposy, mCanvas->mapHeight()));
     float groundz = mCanvas->heightAtPoint(camposx, camposy);
     // FIXME: this assumes that lookAt.z() == 0, which may not always be the case
     // TODO: maybe also change radius to keep camera's angle constant
@@ -627,7 +627,7 @@ void BoGameCamera::setLookAt(const BoVector3& pos)
   checkLookAtPosition();
 
   // Calculate new z
-  float groundz = mCanvas->heightAtPoint(lookAt().x() * BO_TILE_SIZE, -lookAt().y() * BO_TILE_SIZE);
+  float groundz = mCanvas->heightAtPoint(lookAt().x(), -lookAt().y());
   // Set lookat again. Note that this time, we don't do any validation, because
   //  only z-coordinate changed.
   BoCamera::setLookAt(BoVector3(lookAt().x(), lookAt().y(), groundz));

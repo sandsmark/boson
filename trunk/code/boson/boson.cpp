@@ -860,7 +860,7 @@ bool Boson::buildProducedUnit(ProductionPlugin* factory, unsigned long int unitT
 	boDebug() << k_funcinfo << "Cannot create unit here" << endl;
 	return false;
  }
- BoVector3 pos((float)cellX * BO_TILE_SIZE, (float)cellY * BO_TILE_SIZE, 0.0f);
+ BoVector3 pos((float)cellX, (float)cellY, 0.0f);
  Unit* unit = (Unit*)d->mCanvas->createNewItem(RTTI::UnitStart + unitType, p, ItemType(unitType), pos);
  if (!unit) {
 	boError() << k_funcinfo << "NULL unit" << endl;

@@ -170,8 +170,8 @@ QValueList<QPoint> BosonPath::findPath(BosonPathInfo* pathInfo)
   int goaly = pathInfo->dest.y();
   int range = pathInfo->range;
   QPoint p = unit->boundingRect().center();
-  BosonPath path(unit, p.x() / BO_TILE_SIZE, p.y() / BO_TILE_SIZE,
-        goalx / BO_TILE_SIZE, goaly / BO_TILE_SIZE, range);
+  BosonPath path(unit, p.x(), p.y(),
+        goalx, goaly, range);
   if (!path.findPath())
   {
     boWarning(500) << "no path found" << endl;
@@ -239,7 +239,7 @@ QValueList<QPoint> BosonPath::findLocations(Player* player, int x, int y, int n,
       }
 
       // Make sure that position is valid
-      if(!canvas->onCanvas(n2.x * BO_TILE_SIZE, n2.y * BO_TILE_SIZE))
+      if(!canvas->onCanvas(n2.x, n2.y))
       {
         //boWarning() << k_lineinfo << "not on canvas" << endl;
         continue;
@@ -453,7 +453,7 @@ bool BosonPath::findFastPath()
     // Check if we can move to waypoint
     // If cost is bigger than MAX_FAST_PF_COST, then we return false and it will
     //  be handled in slow pathfinder instead.
-    if(! mUnit->canvas()->onCanvas(lastx * BO_TILE_SIZE, lasty * BO_TILE_SIZE))
+    if(! mUnit->canvas()->onCanvas(lastx, lasty))
     {
       return false;
     }
@@ -472,8 +472,8 @@ bool BosonPath::findFastPath()
   int i;
   for(i = 0; i < steps; i++)
   {
-    wp.setX(x[i] * BO_TILE_SIZE + BO_TILE_SIZE / 2);
-    wp.setY(y[i] * BO_TILE_SIZE + BO_TILE_SIZE / 2);
+    wp.setX(x[i] + 1.0f / 2);
+    wp.setY(y[i] + 1.0f / 2);
     path.append(wp);
   }
 
@@ -605,7 +605,7 @@ bool BosonPath::findSlowPath()
       n2.level = node.level + 1;
 
       // Make sure that position is valid
-      if(! mUnit->canvas()->onCanvas(n2.x * BO_TILE_SIZE, n2.y * BO_TILE_SIZE))
+      if(! mUnit->canvas()->onCanvas(n2.x, n2.y))
       {
         //boWarning() << k_lineinfo << "not on canvas" << endl;
         continue;
@@ -705,8 +705,8 @@ bool BosonPath::findSlowPath()
     int x, y;
     x = mGoalx;
     y = mGoaly;
-    wp.setX(x * BO_TILE_SIZE + BO_TILE_SIZE / 2);
-    wp.setY(y * BO_TILE_SIZE + BO_TILE_SIZE / 2);
+    wp.setX(x + 1.0f / 2);
+    wp.setY(y + 1.0f / 2);
 
     Direction d = DirNone;
 
@@ -723,8 +723,8 @@ bool BosonPath::findSlowPath()
       mPathLength++;
       d = marking(x, y).dir; // the direction to the next cell
       neighbor(x, y, d);
-      wp.setX(x * BO_TILE_SIZE + mUnit->width() / 2);
-      wp.setY(y * BO_TILE_SIZE + mUnit->height() / 2);
+      wp.setX(x + mUnit->width() / 2);
+      wp.setY(y + mUnit->height() / 2);
     }
     if (counter >= 100)
     {
@@ -745,8 +745,8 @@ bool BosonPath::findSlowPath()
     QValueList<QPoint>::iterator it;
     for(it = path.begin(); it != path.end(); ++it)
     {
-      float x = (*it).x() / (float)BO_TILE_SIZE;
-      float y = (*it).y() / (float)BO_TILE_SIZE;
+      float x = (*it).x();
+      float y = (*it).y();
       points.append(BoVector3(x, -y, 0.0f));
     }
     BoVector4 color(0.5f, 0.5f, 0.5f, 1.0f);
@@ -1746,13 +1746,13 @@ void BosonPath2::findLowLevelPath(BosonPathInfo* info)
   BosonPathNode first, n, n2;
   if(info->unit)
   {
-    first.x = (int)(info->unit->x() + info->unit->width() / 2) / BO_TILE_SIZE;
-    first.y = (int)(info->unit->y() + info->unit->height() / 2) / BO_TILE_SIZE;
+    first.x = (int)(info->unit->x() + info->unit->width() / 2);
+    first.y = (int)(info->unit->y() + info->unit->height() / 2);
   }
   else
   {
-    first.x = info->start.x() / BO_TILE_SIZE;
-    first.y = info->start.y() / BO_TILE_SIZE;
+    first.x = info->start.x();
+    first.y = info->start.y();
   }
   first.g = 0;
   first.h = lowLevelDistToGoal(first.x, first.y, info);
@@ -1794,7 +1794,7 @@ void BosonPath2::findLowLevelPath(BosonPathInfo* info)
     }
     else
     {
-      if((QMAX(QABS(n.x - info->dest.x() / BO_TILE_SIZE), QABS(n.y - info->dest.y() / BO_TILE_SIZE)) - info->range) < PF_TNG_EPSILON)
+      if((QMAX(QABS(n.x - info->dest.x()), QABS(n.y - info->dest.y())) - info->range) < PF_TNG_EPSILON)
       {
         // QMAX(...) <= info->range
         // This is the destination cell
@@ -1934,8 +1934,8 @@ void BosonPath2::findLowLevelPath(BosonPathInfo* info)
     QPoint canvas; // Point in canvas coords
     p.setX(x);
     p.setY(y);
-    canvas.setX(p.x() * BO_TILE_SIZE + BO_TILE_SIZE / 2);
-    canvas.setY(p.y() * BO_TILE_SIZE + BO_TILE_SIZE / 2);
+    canvas.setX(p.x() + 1.0f / 2);
+    canvas.setY(p.y() + 1.0f / 2);
     temp.prepend(canvas);
 //    boDebug(510) << k_funcinfo << "Added first point at (" << x << "; " << y << ")" << endl;
     while((x != first.x) || (y != first.y))
@@ -1947,8 +1947,8 @@ void BosonPath2::findLowLevelPath(BosonPathInfo* info)
       orignodes.append(QPoint(x, y));
       p.setX(x);
       p.setY(y);
-      canvas.setX(p.x() * BO_TILE_SIZE + BO_TILE_SIZE / 2);
-      canvas.setY(p.y() * BO_TILE_SIZE + BO_TILE_SIZE / 2);
+      canvas.setX(p.x() + 1.0f / 2);
+      canvas.setY(p.y() + 1.0f / 2);
       // We must prepend regions, not append them, because we go from destination
       //  to start here
       temp.prepend(canvas);
@@ -2001,8 +2001,8 @@ void BosonPath2::findLowLevelPath(BosonPathInfo* info)
       QValueList<BoVector3> points;
       for(unsigned int point = 0; point < info->llpath.count(); point++)
       {
-        float x = info->llpath[point].x() / BO_TILE_SIZE;
-        float y = info->llpath[point].y() / BO_TILE_SIZE;
+        float x = info->llpath[point].x();
+        float y = info->llpath[point].y();
 //        boDebug(510) << "  " << k_funcinfo << "Adding lineviz for point (" << x << "; " << y << ")" << endl;
         points.append(BoVector3(x, -y, 0.0f));
       }
@@ -2051,8 +2051,8 @@ void BosonPath2::findFlyingUnitPath(BosonPathInfo* info)
   BosonPathHeap<BosonPathFlyingNode> open;
 
   // Unit's position
-  int unitx = info->start.x() / BO_TILE_SIZE;
-  int unity = info->start.y() / BO_TILE_SIZE;
+  int unitx = info->start.x();
+  int unity = info->start.y();
 
   // Search area's coordinates and size.
   int areax = QMAX(unitx - TNG_FLYING_STEPS, 0);
@@ -2114,8 +2114,8 @@ void BosonPath2::findFlyingUnitPath(BosonPathInfo* info)
   tm_initmisc = pr.elapsed();
 
   // Destination in cell coordinates
-  int destcellx = info->dest.x() / BO_TILE_SIZE;
-  int destcelly = info->dest.y() / BO_TILE_SIZE;
+  int destcellx = info->dest.x();
+  int destcelly = info->dest.y();
 
 
   // Main loop
@@ -2290,8 +2290,8 @@ void BosonPath2::findFlyingUnitPath(BosonPathInfo* info)
     QPoint canvas; // Point in canvas coords
     p.setX(x);
     p.setY(y);
-    canvas.setX(p.x() * BO_TILE_SIZE + BO_TILE_SIZE / 2);
-    canvas.setY(p.y() * BO_TILE_SIZE + BO_TILE_SIZE / 2);
+    canvas.setX(p.x() + 1.0f / 2);
+    canvas.setY(p.y() + 1.0f / 2);
     temp.prepend(canvas);
 //    boDebug(510) << k_funcinfo << "Added first point at (" << x << "; " << y << ")" << endl;
     while((x != first.x) || (y != first.y))
@@ -2302,8 +2302,8 @@ void BosonPath2::findFlyingUnitPath(BosonPathInfo* info)
       y += yoffsets[(int)PARENTDIR(p.x(), p.y())];
       p.setX(x);
       p.setY(y);
-      canvas.setX(p.x() * BO_TILE_SIZE + BO_TILE_SIZE / 2);
-      canvas.setY(p.y() * BO_TILE_SIZE + BO_TILE_SIZE / 2);
+      canvas.setX(p.x() + 1.0f / 2);
+      canvas.setY(p.y() + 1.0f / 2);
       // We must prepend regions, not append them, because we go from destination
       //  to start here
       temp.prepend(canvas);
@@ -2346,8 +2346,8 @@ void BosonPath2::findFlyingUnitPath(BosonPathInfo* info)
       QValueList<BoVector3> points;
       for(unsigned int point = 0; point < info->llpath.count(); point++)
       {
-        float x = info->llpath[point].x() / BO_TILE_SIZE;
-        float y = info->llpath[point].y() / BO_TILE_SIZE;
+        float x = info->llpath[point].x();
+        float y = info->llpath[point].y();
 //        boDebug(510) << "  " << k_funcinfo << "Adding lineviz for point (" << x << "; " << y << ")" << endl;
         points.append(BoVector3(x, -y, 0.0f));
       }
@@ -2384,7 +2384,7 @@ bool BosonPath2::rangeCheck(BosonPathInfo* info)
   //  currently is.
   // It returns true if it is possible to get to better place, otherwise false
   // First check if unit is in range
-  int dist = QMAX(QABS(info->dest.x() - info->start.x()), QABS(info->dest.y() - info->start.y())) / BO_TILE_SIZE;
+  int dist = QMAX(QABS(info->dest.x() - info->start.x()), QABS(info->dest.y() - info->start.y()));
   if(dist <= info->range)
   {
     return false;
@@ -2402,8 +2402,8 @@ bool BosonPath2::rangeCheck(BosonPathInfo* info)
     return true;
   }
   // Destination in cell coordinates
-  int destCellX = info->dest.x() / BO_TILE_SIZE;
-  int destCellY = info->dest.y() / BO_TILE_SIZE;
+  int destCellX = info->dest.x();
+  int destCellY = info->dest.y();
   if(info->range == 0)
   {
     if(lowLevelCostAir(destCellX, destCellY, info) < PF_TNG_COST_STANDING_UNIT)
@@ -3353,20 +3353,20 @@ void BosonPath2::searchHighLevelPath(BosonPathInfo* info)
 void BosonPath2::findHighLevelGoal(BosonPathInfo* info)
 {
   info->possibleDestRegions.clear();
-  info->startRegion = cellRegion(info->start / BO_TILE_SIZE);
+  info->startRegion = cellRegion(info->start);
   if(!info->startRegion)
   {
     boDebug(510) << k_funcinfo << "No start region! Start point: (" << info->start.x() << "; " << info->start.y() <<
-        "); in cell coords: (" << (info->start / BO_TILE_SIZE).x() << "; " << (info->start / BO_TILE_SIZE).y() << ")" << endl;
+        "); in cell coords: (" << (info->start).x() << "; " << (info->start).y() << ")" << endl;
     return;
   }
-//  info->destRegion = cellRegion(info->dest / BO_TILE_SIZE);
+//  info->destRegion = cellRegion(info->dest);
   static int profilerId = -boProfiling->requestEventId("Stupid profiling name");
   BosonProfiler pr(profilerId);
   BosonPathRegionGroup* startGrp = info->startRegion->group;
 
-  int destx = (info->dest / BO_TILE_SIZE).x();
-  int desty = (info->dest / BO_TILE_SIZE).y();
+  int destx = (info->dest).x();
+  int desty = (info->dest).y();
 
   // Check if going to goal is possible
   // Goal area
@@ -3448,7 +3448,7 @@ float BosonPath2::highLevelDistToGoal(BosonPathRegion* r, BosonPathInfo* info)
   // If this is the start region, we use dist between start and end points
   if(r == info->startRegion)
   {
-    return TNG_HIGH_DIST_MULTIPLIER * QMAX(QABS(info->start.x() - info->dest.x()), QABS(info->start.y() - info->dest.y())) / (float)BO_TILE_SIZE;
+    return TNG_HIGH_DIST_MULTIPLIER * QMAX(QABS(info->start.x() - info->dest.x()), QABS(info->start.y() - info->dest.y()));
   }
   /*else if(r == info->destRegion)
   {
@@ -3457,10 +3457,10 @@ float BosonPath2::highLevelDistToGoal(BosonPathRegion* r, BosonPathInfo* info)
   }*/
   // Cost is bigger when point a is not near straight line between start and
   //  goal
-  float dx1 = r->centerx - info->dest.x() / (float)BO_TILE_SIZE;
-  float dy1 = r->centery - info->dest.y() / (float)BO_TILE_SIZE;
-  float dx2 = info->start.x() / (float)BO_TILE_SIZE - r->centerx;
-  float dy2 = info->start.y() / (float)BO_TILE_SIZE - r->centery;
+  float dx1 = r->centerx - info->dest.x();
+  float dy1 = r->centery - info->dest.y();
+  float dx2 = info->start.x() - r->centerx;
+  float dy2 = info->start.y() - r->centery;
   float cross = dx1 * dy2 - dx2 * dy1;
   /*double dx1 = ax - bx;
   double dy1 = ay - by;
@@ -3482,15 +3482,15 @@ float BosonPath2::highLevelCost(BosonPathRegion* r, BosonPathInfo*)
 
 float BosonPath2::lowLevelDistToGoal(int x, int y, BosonPathInfo* info)
 {
-  /*float dx1 = x - info->dest.x() / (float)BO_TILE_SIZE;
-  float dy1 = y - info->dest.y() / (float)BO_TILE_SIZE;
-  float dx2 = info->start.x() / (float)BO_TILE_SIZE - x;
-  float dy2 = info->start.y() / (float)BO_TILE_SIZE - y;
+  /*float dx1 = x - info->dest.x();
+  float dy1 = y - info->dest.y();
+  float dx2 = info->start.x() - x;
+  float dy2 = info->start.y() - y;
   float cross = dx1 * dy2 - dx2 * dy1;*/
-  int dx1 = x - info->dest.x() / BO_TILE_SIZE;
-  int dy1 = y - info->dest.y() / BO_TILE_SIZE;
-  int dx2 = info->start.x() / BO_TILE_SIZE - x;
-  int dy2 = info->start.y() / BO_TILE_SIZE - y;
+  int dx1 = x - info->dest.x();
+  int dy1 = y - info->dest.y();
+  int dx2 = info->start.x() - x;
+  int dy2 = info->start.y() - y;
   int cross = dx1 * dy2 - dx2 * dy1;
   if(cross < 0)
   {

@@ -221,8 +221,7 @@ public:
 	inline virtual int rtti() const { return RTTI::UnitStart + (int)type(); }
 
 	/**
-	 * @return How far this unit can see. This is a number of cells, so you
-	 * must *= BO_TILE_SIZE to use this on the canvas.
+	 * @return How far this unit can see. This is a number of cells
 	 **/
 	inline unsigned int sightRange() const { return mSightRange; }
 	void setSightRange(unsigned int r) { mSightRange = r; }

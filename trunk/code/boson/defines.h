@@ -27,8 +27,6 @@
 
 #include "global.h"
 
-#define BO_TILE_SIZE 48
-
 // both must be > 0.0:
 #define BO_GL_NEAR_PLANE 1.0f
 // AB: the largest possible map is 500x500. if you are at one corner (say
@@ -57,7 +55,7 @@
 #define MAX_SHIELD_RELOAD_COUNT 10 // number of advance calls after that shield get reloaded by 1
 #define MAX_WEAPONS_PER_UNIT 100
 
-#define BUILD_RANGE 10 * BO_TILE_SIZE // units can be placed within 10 tiles from its factory
+#define BUILD_RANGE 10 // units can be placed within 10 tiles from its factory
 
 #define BOSON_MINIMUM_WIDTH 640
 #define BOSON_MINIMUM_HEIGHT 480

@@ -253,10 +253,12 @@ void ProductionPlugin::advance(unsigned int)
 		int tilex, tiley; // Position of lower-left corner of facility in tiles
 		int theight, twidth; // height and width of facility in tiles
 		int currentx, currenty; // Position of tile currently tested
-		theight = unit()->height() / BO_TILE_SIZE;
-		twidth = unit()-> width() / BO_TILE_SIZE;
-		tilex = (int)(unit()->x() / BO_TILE_SIZE);
-		tiley = (int)(unit()->y() / BO_TILE_SIZE + theight);
+
+#warning converting to ints! -> we should use float here
+		theight = unit()->height();
+		twidth = unit()-> width();
+		tilex = (int)(unit()->x());
+		tiley = (int)(unit()->y() + theight);
 		int tries; // Tiles to try for free space
 		int ctry; // Current try
 		currentx = tilex - 1;
@@ -954,16 +956,16 @@ void BombingPlugin::bomb(int weaponId, float x, float y)
 
  unit()->stopMoving();
 
- int cellX = (int)(x / BO_TILE_SIZE);
- int cellY = (int)(y / BO_TILE_SIZE);
+ int cellX = (int)(x);
+ int cellY = (int)(y);
  if (!canvas()->cell(cellX, cellY)) {
 	boError() << k_funcinfo << x << "," << y << " is no valid cell!" << endl;
 	return;
  }
 
  // This is where unit has to be when making the drop
- mPosX = cellX * BO_TILE_SIZE + BO_TILE_SIZE / 2;
- mPosY = cellY * BO_TILE_SIZE + BO_TILE_SIZE / 2;
+ mPosX = cellX + 1.0f / 2;
+ mPosY = cellY + 1.0f / 2;
  boDebug() << k_funcinfo << "Drop-point: (" << mPosX << "; " << mPosY << ")" << endl;
  mWeapon = w;
 
@@ -1000,7 +1002,7 @@ void BombingPlugin::advance(unsigned int)
 	mWeapon->dropBomb();
 	// And get the hell out of there
 	// Go away from bomb's explosion radius
-	float dist = mWeapon->properties()->damageRange() * BO_TILE_SIZE + unit()->width() / 2;
+	float dist = mWeapon->properties()->damageRange() + unit()->width() / 2;
   boDebug() << k_funcinfo << "Getaway dist: " << dist << "; rot: " << unit()->rotation() << endl;
 	float newx = unitx;
 	float newy = unity;
@@ -1018,8 +1020,8 @@ void BombingPlugin::advance(unsigned int)
 	}
 
 	// Make sure coords are valid
-	newx = QMAX(unit()->width() / 2, QMIN(newx, (canvas()->mapWidth() - 1) * BO_TILE_SIZE - unit()->width() / 2));
-	newy = QMAX(unit()->height() / 2, QMIN(newy, (canvas()->mapHeight() - 1) * BO_TILE_SIZE - unit()->height() / 2));
+	newx = QMAX(unit()->width() / 2, QMIN(newx, (canvas()->mapWidth() - 1) - unit()->width() / 2));
+	newy = QMAX(unit()->height() / 2, QMIN(newy, (canvas()->mapHeight() - 1) - unit()->height() / 2));
 
   boDebug() << k_funcinfo << "Getaway point is at (" << newx << "; " << newy << ")" << endl;
 	if (!unit()->moveTo(newx, newy)) {
@@ -1114,7 +1116,7 @@ void MiningPlugin::advance(unsigned int)
 
 	// Go one cell away from the mine. Maybe go away from explosion radius?
 	// FIXME: code taken from BombingPlugin. This could probably be written better
-	float dist = 1 * BO_TILE_SIZE + unit()->width() / 2;
+	float dist = 1.0f + unit()->width() / 2.0f;
 	boDebug() << k_funcinfo << "Getaway dist: " << dist << "; rot: " << unit()->rotation() << endl;
 	float oldx = unit()->x();
 	float oldy = unit()->y();
@@ -1148,8 +1150,8 @@ void MiningPlugin::advance(unsigned int)
 		}
 
 		// Make sure coords are valid
-		newx = QMAX(0, QMIN(newx, (canvas()->mapWidth() - 1) * BO_TILE_SIZE));
-		newy = QMAX(0, QMIN(newy, (canvas()->mapHeight() - 1) * BO_TILE_SIZE));
+		newx = QMAX(0, QMIN(newx, (canvas()->mapWidth() - 1)));
+		newy = QMAX(0, QMIN(newy, (canvas()->mapHeight() - 1)));
 
 		boDebug() << k_funcinfo << "i: " << i << "; Getaway point is at (" << newx << "; " << newy << ")" << endl;
 		if (unit()->moveTo(newx, newy)) {

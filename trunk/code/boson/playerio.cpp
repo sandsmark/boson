@@ -125,7 +125,7 @@ bool PlayerIO::isFogged(const Cell* c) const
 
 bool PlayerIO::isFogged(const BoVector3& vector) const
 {
- return isFogged((int)(vector.x() / BO_TILE_SIZE), (int)(vector.y() / BO_TILE_SIZE));
+ return isFogged((int)(vector.x()), (int)(vector.y()));
 }
 
 bool PlayerIO::canSee(BosonItem* item) const
@@ -216,8 +216,8 @@ QPoint PlayerIO::homeBase() const
 	// no units for player
 	return QPoint(0, 0);
  }
- return QPoint((int)commandCenter->x() / BO_TILE_SIZE,
-		(int)commandCenter->y() / BO_TILE_SIZE);
+ return QPoint((int)commandCenter->x(),
+		(int)commandCenter->y());
 }
 
 Unit* PlayerIO::findUnitAt(const BosonCanvas* canvas, const BoVector3& canvasVector) const

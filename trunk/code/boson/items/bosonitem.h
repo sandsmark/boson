@@ -217,15 +217,15 @@ public:
 	inline float z() const { return mZ; }
 
 	/**
-	 * @param width Width in cells * BO_TILE_SIZE. FIXME: should be changed to cell value (float!!)
-	 * @param height Height in cells * BO_TILE_SIZE. FIXME: should be changed to cell value (float!!)
+	 * @param width Width in cells
+	 * @param height Height in cells
 	 **/
-	void setSize(int width, int height, float depth);
+	void setSize(float width, float height, float depth);
 
 	// note: for GLunit all frames must have the same width/height!
 	// different depth is ok!
-	inline int width() const { return mWidth; }
-	inline int height() const { return mHeight; }
+	inline float width() const { return mWidth; }
+	inline float height() const { return mHeight; }
 	/**
 	 * @return item's height in z-direction.
 	 * This does not depend on any OpenGL stuff (model, frame etc) and should be
@@ -339,8 +339,8 @@ public:
 	 **/
 	inline static void leftTopCell(int* left, int* top, float leftEdge, float topEdge)
 	{
-		*left = (int)(leftEdge / BO_TILE_SIZE);
-		*top = (int)(topEdge / BO_TILE_SIZE);
+		*left = (int)(leftEdge);
+		*top = (int)(topEdge);
 	}
 
 	/**
@@ -360,8 +360,8 @@ public:
 	 **/
 	inline static void rightBottomCell(int* right, int* bottom, float rightEdge, float bottomEdge)
 	{
-		*right = (int)(rightEdge / BO_TILE_SIZE);
-		*bottom= (int)(bottomEdge / BO_TILE_SIZE);
+		*right = (int)(rightEdge);
+		*bottom= (int)(bottomEdge);
 	}
 
 	/**
@@ -592,8 +592,8 @@ private:
 	float mX;
 	float mY;
 	float mZ;
-	int mWidth;
-	int mHeight;
+	float mWidth;
+	float mHeight;
 	float mDepth;
 
 	float mXVelocity;

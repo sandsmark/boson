@@ -96,12 +96,12 @@ BosonItem* BosonCollisions::findItemAtCell(int x, int y, float z, bool unitOnly)
 
 BosonItem* BosonCollisions::findItemAt(const BoVector3& pos) const
 {
- return findItemAtCell((int)(pos.x() / BO_TILE_SIZE), (int)(pos.y() / BO_TILE_SIZE), pos.z(), false);
+ return findItemAtCell((int)(pos.x()), (int)(pos.y()), pos.z(), false);
 }
 
 Unit* BosonCollisions::findUnitAt(const BoVector3 & pos) const
 {
- return findUnitAtCell((int)(pos.x() / BO_TILE_SIZE), (int)(pos.y() / BO_TILE_SIZE), pos.z());
+ return findUnitAtCell((int)(pos.x()), (int)(pos.y()), pos.z());
 }
 
 QValueList<Unit*> BosonCollisions::unitCollisionsInRange(const QPoint& pos, int radius) const
@@ -190,12 +190,13 @@ bool BosonCollisions::cellOccupied(int x, int y, Unit* unit, bool excludeMoving)
  return cell(x, y)->isOccupied(unit, includeMoving);
 }
 
+#warning FIXME: rect has ints only, might need float
 bool BosonCollisions::cellsOccupied(const QRect& rect) const
 {
- const int left = rect.left() / BO_TILE_SIZE;
- const int top = rect.top() / BO_TILE_SIZE;
- const int right = rect.right() / BO_TILE_SIZE + ((rect.right() % BO_TILE_SIZE == 0) ? 0 : 1);
- const int bottom = rect.bottom() / BO_TILE_SIZE + ((rect.bottom() % BO_TILE_SIZE == 0) ? 0 : 1);
+ const int left = rect.left();
+ const int top = rect.top();
+ const int right = lround(rect.right());
+ const int bottom = lround(rect.bottom());
 
  for (int x = left; x < right; x++) {
 	for (int y = top; y < bottom; y++) {
@@ -242,18 +243,13 @@ BoItemList* BosonCollisions::collisionsAtCells(const QPtrVector<Cell>* cells, co
  return collisions;
 }
 
+#warning FIXME: rect has ints only, might need float
 BoItemList* BosonCollisions::collisions(const QRect& rect, const BosonItem* item, bool exact) const
 {
  // rect is canvas coordinates!
- int w = rect.width() / BO_TILE_SIZE;
- int h = rect.height() / BO_TILE_SIZE;
- if (rect.width() % BO_TILE_SIZE != 0) {
-	w++;
- }
- if (rect.height() % BO_TILE_SIZE != 0) {
-	h++;
- }
- return collisionsAtCells(QRect(rect.left() / BO_TILE_SIZE, rect.top() / BO_TILE_SIZE, w, h), item, exact);
+ int w = lround(rect.width());
+ int h = lround(rect.height());
+ return collisionsAtCells(QRect(rect.left(), rect.top(), w, h), item, exact);
 }
 
 BoItemList* BosonCollisions::collisionsAtCells(const QRect& rect, const BosonItem* item, bool exact) const
@@ -307,7 +303,7 @@ BoItemList* BosonCollisions::collisionsAtCell(int x, int y) const
 
 BoItemList* BosonCollisions::collisions(const QPoint& pos) const
 {
- return collisionsAtCell(pos.x() / BO_TILE_SIZE, pos.y() / BO_TILE_SIZE);
+ return collisionsAtCell(pos.x(), pos.y());
 }
 
 QValueList<Unit*> BosonCollisions::collisionsInBox(const BoVector3& v1, const BoVector3& v2, BosonItem* exclude) const
@@ -321,18 +317,12 @@ QValueList<Unit*> BosonCollisions::collisionsInBox(const BoVector3& v1, const Bo
  }
 
  // Calculate rect in cell coordinates
- int w = (int)(v2.x() - v1.x()) / BO_TILE_SIZE;
- int h = (int)(v2.y() - v1.y()) / BO_TILE_SIZE;
- if ((int)(v2.x() - v1.x()) % BO_TILE_SIZE != 0) {
-	w++;
- }
- if ((int)(v2.y() - v1.y()) % BO_TILE_SIZE != 0) {
-	h++;
- }
+ int w = lround(v2.x() - v1.x());
+ int h = lround(v2.y() - v1.y());
  int left, right, top, bottom;
- left = QMAX((int)v1.x() / BO_TILE_SIZE, 0);
+ left = QMAX((int)v1.x(), 0);
  right = QMIN(left + w, QMAX((int)map()->width() - 1, 0));
- top = QMAX((int)v1.y() / BO_TILE_SIZE, 0);
+ top = QMAX((int)v1.y(), 0);
  bottom = QMIN(top + h, QMAX((int)map()->height() - 1, 0));
  boDebug() << k_funcinfo << "Cell rect: (" << left << ";" << top << ")-(" << right << ";" << bottom <<
 		");  size: " << w << "x" << h << endl;

@@ -925,8 +925,8 @@ void BosonBigDisplayBase::renderItems()
 	BosonItem* item = *it;
 
 	// FIXME: can't we use BoVector3 and it's conversion methods here?
-	GLfloat x = (item->x() + item->width() / 2) / BO_TILE_SIZE;
-	GLfloat y = -((item->y() + item->height() / 2) / BO_TILE_SIZE);
+	GLfloat x = (item->x() + item->width() / 2);
+	GLfloat y = -((item->y() + item->height() / 2));
 	GLfloat z = item->z(); // this is already in the correct format!
 
 	// AB: note units are rendered in the *center* point of their
@@ -1012,12 +1012,12 @@ void BosonBigDisplayBase::renderItems()
 		continue;
 	}
 
-	GLfloat x = (item->x() + item->width() / 2) / BO_TILE_SIZE;
-	GLfloat y = -((item->y() + item->height() / 2) / BO_TILE_SIZE);
+	GLfloat x = (item->x() + item->width() / 2);
+	GLfloat y = -((item->y() + item->height() / 2));
 	GLfloat z = item->z();
 
-	GLfloat w = ((float)item->width()) / BO_TILE_SIZE;
-	GLfloat h = ((float)item->height()) / BO_TILE_SIZE;
+	GLfloat w = ((float)item->width());
+	GLfloat h = ((float)item->height());
 	GLfloat depth = item->glDepthMultiplier();
 	glPushMatrix();
 	glTranslatef(x, y, z);
@@ -1087,8 +1087,8 @@ void BosonBigDisplayBase::renderPathLines(QValueList<QPoint>& path, bool isFlyin
 		done = true;
 		break;
 	}
-	float x = ((float)(*it).x()) / BO_TILE_SIZE;
-	float y = -((float)(*it).y()) / BO_TILE_SIZE;
+	float x = ((float)(*it).x());
+	float y = -((float)(*it).y());
 	float z = 0.05f;
 	if (isFlying) {
 		z += _z;
@@ -1115,6 +1115,9 @@ void BosonBigDisplayBase::renderPlacementPreview()
  if (!d->mPlacementPreview.hasPreview()) {
 	return;
  }
+
+ // AB: FIXME: BO_TILE_SIZE
+#if 0
  // AB: GL_MODULATE is currently default. if we every change it to
  // GL_REPLACE we should change it here:
 // glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
@@ -1133,7 +1136,10 @@ void BosonBigDisplayBase::renderPlacementPreview()
 
  bool modelPreview = d->mPlacementPreview.isModelPreview();
  bool groundPreview = d->mPlacementPreview.isGroundPreview();
+
+#warning fixme: we need floats not ints!
  QPoint pos(d->mPlacementPreview.canvasPos());
+
  int w = 0;
  int h = 0;
  if (modelPreview) {
@@ -1188,6 +1194,7 @@ void BosonBigDisplayBase::renderPlacementPreview()
  // AB: see above. if GL_REPLACES ever becomes default we have to set it
  // here again.
 // glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+#endif
 }
 
 void BosonBigDisplayBase::renderCursor()
@@ -2283,23 +2290,23 @@ void BosonBigDisplayBase::slotReCenterDisplay(const QPoint& pos)
 
 void BosonBigDisplayBase::worldToCanvas(GLfloat x, GLfloat y, GLfloat /*z*/, QPoint* pos) const
 {
- pos->setX((int)(x * BO_TILE_SIZE));
- pos->setY((int)(-y * BO_TILE_SIZE));
+ pos->setX((int)(x));
+ pos->setY((int)(-y));
  // AB: z remains as-is
 }
 
 void BosonBigDisplayBase::worldToCanvas(GLfloat x, GLfloat y, GLfloat z, BoVector3* pos) const
 {
  // we want the rounding errors here (at least for now).
- int intx = (int)(x * BO_TILE_SIZE);
- int inty = (int)(-y * BO_TILE_SIZE);
+ int intx = (int)(x);
+ int inty = (int)(-y);
  pos->set((float)intx, (float)inty, z);
 }
 
 void BosonBigDisplayBase::canvasToWorld(int x, int y, float z, GLfloat* glx, GLfloat* gly, GLfloat* glz) const
 {
- *glx = (((GLfloat)x)) / BO_TILE_SIZE;
- *gly = (((GLfloat)-y)) / BO_TILE_SIZE;
+ *glx = (((GLfloat)x));
+ *gly = (((GLfloat)-y));
  *glz = z;
 }
 
@@ -2473,7 +2480,7 @@ void BosonBigDisplayBase::removeSelectionRect(bool replace)
 	// this is not good: isFogged() should get checked *everywhere* where a
 	// player tries to select a unit!
 	// maybe in selectSingle() or so.
-	if (!localPlayerIO()->isFogged((int)(canvasVector.x() / BO_TILE_SIZE), (int)(canvasVector.y() / BO_TILE_SIZE))) {
+	if (!localPlayerIO()->isFogged((int)(canvasVector.x()), (int)(canvasVector.y()))) {
 		unit = canvas()->collisions()->findUnitAt(canvasVector);
 	}
 	if (unit) {
@@ -3557,7 +3564,7 @@ void BosonBigDisplayBase::slotAddLineVisualization(const QValueList<BoVector3>& 
  viz.points = points;
  QValueList<BoVector3>::Iterator it;
  for (it = viz.points.begin(); it != viz.points.end(); ++it) {
-	(*it).setZ(canvas()->heightAtPoint((*it).x() * BO_TILE_SIZE, -(*it).y() * BO_TILE_SIZE) + zOffset);
+	(*it).setZ(canvas()->heightAtPoint((*it).x(), -(*it).y()) + zOffset);
  }
  addLineVisualization(viz);
 }

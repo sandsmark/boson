@@ -375,7 +375,7 @@ public:
 		if (!onCanvas(pos)) {
 			return false;
 		}
-		return canPlaceUnitAtCell(unit, pos / BO_TILE_SIZE, factory);
+		return canPlaceUnitAtCell(unit, pos, factory);
 	}
 
 	void quitGame();
@@ -390,7 +390,7 @@ public:
 	bool onCanvas(const BoVector3& canvasPos) const;
 	bool onCanvas(int x, int y) const
 	{
-		return x >= 0 && y >= 0 && (unsigned int)x < mapWidth() * BO_TILE_SIZE && (unsigned int)y < mapHeight() * BO_TILE_SIZE;
+		return x >= 0 && y >= 0 && (unsigned int)x < mapWidth() && (unsigned int)y < mapHeight();
 	}
 
 	bool advanceFunctionLocked() const { return mAdvanceFunctionLocked; }

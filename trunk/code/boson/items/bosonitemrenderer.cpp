@@ -78,8 +78,8 @@ void BosonItemRenderer::renderItem(unsigned int lod)
  // this code renders an item without using a model. this is for debugging only
  // (by not loading the models we can reduce startup time greatly)
  BO_CHECK_NULL_RET(mItem);
- float w = ((float)mItem->width()) / BO_TILE_SIZE;
- float h = ((float)mItem->width()) / BO_TILE_SIZE;
+ float w = ((float)mItem->width());
+ float h = ((float)mItem->width());
  float depth = mItem->depth();
 
  // make the box a little bit smaller, looks nicer
@@ -138,8 +138,8 @@ bool BosonItemRenderer::itemInFrustum(const float* frustum) const
 	return false;
  }
  // FIXME: can't we use BoVector3 and it's conversion methods here?
- GLfloat x = (mItem->x() + mItem->width() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE;
- GLfloat y = -((mItem->y() + mItem->height() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE);
+ GLfloat x = (mItem->x() + mItem->width() / 2);
+ GLfloat y = -((mItem->y() + mItem->height() / 2));
  GLfloat z = mItem->z(); // this is already in the correct format!
  BoVector3 pos(x, y, z);
  return Bo3dTools::sphereInFrustum(frustum, pos, boundingSphereRadius());

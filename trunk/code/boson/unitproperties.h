@@ -119,17 +119,19 @@ public:
 	 **/
 	const QCString& md5() const;
 
+#warning fixme: use bofixed
 	/**
 	 * @return The unrotated width of the unit. The value is number of cells
-	 * this unit occupies * BO_TILE_SIZE
+	 * this unit occupies
 	 **/
-	unsigned int unitWidth() const { return mUnitWidth; }
+	float unitWidth() const { return mUnitWidth; }
 
+#warning fixme: use bofixed
 	/**
 	 * @return The unrotated height of the unit. The value is number of cells
-	 * this unit occupies * BO_TILE_SIZE
+	 * this unit occupies
 	 **/
-	unsigned int unitHeight() const { return mUnitHeight; }
+	float unitHeight() const { return mUnitHeight; }
 
 	/**
 	 * @return The unrotated height in z-direction of the unit.
@@ -162,8 +164,7 @@ public:
 	unsigned long int oilCost() const { return mOilCost; }
 
 	/**
-	 * return How far this unit can see. Is a number of cells, so multiply
-	 * with BO_TILE_SIZE to use it on the canvas.
+	 * return How far this unit can see. Is a number of cells
 	 **/
 	unsigned int sightRange() const { return mSightRange; }
 
@@ -400,8 +401,8 @@ protected:
 	//  editor. Don't use them unless you know what you are doing
 	void setName(const QString& name);
 	void setTypeId(unsigned long int id)  { mTypeId = id; };
-	void setUnitWidth(unsigned int unitWidth)  { mUnitWidth = unitWidth; };
-	void setUnitHeight(unsigned int unitHeight)  { mUnitHeight = unitHeight; };
+	void setUnitWidth(float unitWidth)  { mUnitWidth = unitWidth; };
+	void setUnitHeight(float unitHeight)  { mUnitHeight = unitHeight; };
 	void setUnitDepth(float unitDepth)  { mUnitDepth = unitDepth; };
 	void setHealth(unsigned long int health)  { mHealth = health; };
 	void setSightRange(unsigned int sightRange)  { mSightRange = sightRange; };
@@ -460,8 +461,8 @@ private:
 	bool mFullMode;
 
 	unsigned long int mTypeId; // note: 0 is invalid!
-	unsigned int mUnitWidth;
-	unsigned int mUnitHeight;
+	float mUnitWidth;
+	float mUnitHeight;
 	float mUnitDepth;
 	unsigned long int mHealth;
 	unsigned int mSightRange;

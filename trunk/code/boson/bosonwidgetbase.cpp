@@ -301,8 +301,8 @@ void BosonWidgetBase::initGameMode()//FIXME: rename! we don't have a difference 
  //  anyway (and I don't intend to use it for anything else)
  boDebug() << k_funcinfo << "Trying searching sample path" << endl;
  BosonPathInfo i;
- i.start = QPoint(5 * BO_TILE_SIZE, 5 * BO_TILE_SIZE);
- i.dest = QPoint(45 * BO_TILE_SIZE, 35 * BO_TILE_SIZE);
+ i.start = QPoint(5, 5);
+ i.dest = QPoint(45, 35);
  boDebug() << k_funcinfo << "Let's go!" << endl;
  canvas()->pathfinder()->findPath(&i);
  boDebug() << k_funcinfo << "sample path searching complete" << endl;

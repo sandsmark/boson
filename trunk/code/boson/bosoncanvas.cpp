@@ -572,13 +572,13 @@ bool BosonCanvas::canGo(const UnitProperties* prop, const QRect& rect) const
 {
 // boDebug() << k_funcinfo << endl;
  if (rect.x() < 0 || rect.y() < 0 ||
-		rect.x() + rect.width() >= (int)mapWidth() * BO_TILE_SIZE ||
-		rect.y() + rect.height() >= (int)mapHeight() * BO_TILE_SIZE) {
+		rect.x() + rect.width() >= (int)mapWidth() ||
+		rect.y() + rect.height() >= (int)mapHeight()) {
 	return false;
  }
- int y = rect.y() / BO_TILE_SIZE; // what about modulu? do we care ?
+ int y = rect.y(); // what about modulu? do we care ?
  do {
-	int x = rect.x() / BO_TILE_SIZE;
+	int x = rect.x();
 	do {
 		Cell* newCell = cell(x, y);
 		if (!newCell) {
@@ -603,9 +603,9 @@ bool BosonCanvas::canGo(const UnitProperties* prop, const QRect& rect) const
 			}
 		}
 		x++;
-	} while (x * BO_TILE_SIZE < rect.right());
+	} while (x < rect.right());
 	y++;
- } while (y * BO_TILE_SIZE < rect.bottom());
+ } while (y < rect.bottom());
 
  return true;
 }
@@ -661,8 +661,8 @@ void BosonCanvas::updateSight(Unit* unit, float , float)
 // (new unit placed)!
 
  unsigned int sight = unit->sightRange(); // *cell* number! not pixel number!
- unsigned int x = unit->boundingRect().center().x() / BO_TILE_SIZE;
- unsigned int y = unit->boundingRect().center().y() / BO_TILE_SIZE;
+ unsigned int x = unit->boundingRect().center().x();
+ unsigned int y = unit->boundingRect().center().y();
 
  int left = ((x > sight) ? (x - sight) : 0) - x;
  int top = ((y > sight) ? (y - sight) : 0) - y;
@@ -728,8 +728,8 @@ void BosonCanvas::shotHit(BosonShot* s)
 void BosonCanvas::explosion(const BoVector3& pos, long int damage, float range, float fullrange, Player* owner)
 {
  // Decrease health of all units within damaging range of explosion
- float r = QMAX(0, range * BO_TILE_SIZE - 1);  // - 1 is needed to prevent units on next cells from also being damaged
- float fr = QMAX(0, fullrange * BO_TILE_SIZE - 1);
+ float r = QMAX(0, range - 1);  // - 1 is needed to prevent units on next cells from also being damaged
+ float fr = QMAX(0, fullrange - 1);
  long int d;
  float dist;
  QValueList<Unit*> l = collisions()->unitCollisionsInSphere(pos, (int)r);
@@ -797,9 +797,9 @@ void BosonCanvas::unitDamaged(Unit* unit, long int damage)
 //	if (unit->health() <= (unit->unitProperties()->health() / 2.0)) {
 	if (factor >= 1.0) {
 		// If unit has less than 50% hitpoints, it's smoking
-		BoVector3 pos((unit->x() + unit->width() / 2) / (float)BO_TILE_SIZE,
-				-((unit->y() + unit->height() / 2) / (float)BO_TILE_SIZE),
-				unit->z() / (float)BO_TILE_SIZE);
+		BoVector3 pos((unit->x() + unit->width() / 2),
+				-((unit->y() + unit->height() / 2)),
+				unit->z());
 		BosonParticleSystem* s;
 		if (!unit->smokeParticleSystem()) {
 			s = BosonParticleManager::newSmallSmoke(pos);
@@ -952,7 +952,7 @@ Cell* BosonCanvas::cellAt(Unit* unit) const
 
 Cell* BosonCanvas::cellAt(float x, float y) const
 {
- return cell((int)(x / BO_TILE_SIZE), (int)(y / BO_TILE_SIZE));
+ return cell((int)(x), (int)(y));
 }
 
 BosonMap* BosonCanvas::map() const
@@ -993,12 +993,12 @@ float BosonCanvas::heightAtCorner(int x, int y) const
 float BosonCanvas::heightAtPoint(float x, float y) const
 {
  // Coordinates of the cell (x; y) is on
- int cellX = (int)(x / BO_TILE_SIZE);
- int cellY = (int)(y / BO_TILE_SIZE);
+ int cellX = (int)(x);
+ int cellY = (int)(y);
 
  // Will be used as factors for blending
- float x2 = (x / BO_TILE_SIZE) - cellX;
- float y2 = (y / BO_TILE_SIZE) - cellY;
+ float x2 = (x) - cellX;
+ float y2 = (y) - cellY;
 
  // These are heights of the corners of the cell (x; y) is on
  float h1, h2, h3, h4;
@@ -1016,12 +1016,12 @@ float BosonCanvas::heightAtPoint(float x, float y) const
 float BosonCanvas::terrainHeightAtPoint(float x, float y) const
 {
  // Coordinates of the cell (x; y) is on
- int cellX = (int)(x / BO_TILE_SIZE);
- int cellY = (int)(y / BO_TILE_SIZE);
+ int cellX = (int)(x);
+ int cellY = (int)(y);
 
  // Will be used as factors for blending
- float x2 = (x / BO_TILE_SIZE) - cellX;
- float y2 = (y / BO_TILE_SIZE) - cellY;
+ float x2 = (x) - cellX;
+ float y2 = (y) - cellY;
 
  // These are heights of the corners of the cell (x; y) is on
  float h1, h2, h3, h4;
@@ -1064,20 +1064,20 @@ void BosonCanvas::addToCells(BosonItem* item)
 
 bool BosonCanvas::canPlaceUnitAtCell(const UnitProperties* prop, const QPoint& pos, ProductionPlugin* factory) const
 {
- int width = prop->unitWidth();
- int height = prop->unitHeight();
- if (width == 0) {
-	boError() << k_funcinfo << "null width for " << prop->typeId() << endl;
+ float width = prop->unitWidth();
+ float height = prop->unitHeight();
+ if (width <= 0) {
+	boError() << k_funcinfo << "invalid width for " << prop->typeId() << endl;
 	return false;
  }
- if (height == 0) {
-	boError() << k_funcinfo << "null height for " << prop->typeId() << endl;
+ if (height <= 0) {
+	boError() << k_funcinfo << "invalid height for " << prop->typeId() << endl;
 	return false;
  }
- if (!onCanvas(pos * BO_TILE_SIZE)) {
+ if (!onCanvas(pos)) {
 	return false;
  }
- QRect r(pos.x() * BO_TILE_SIZE, pos.y() * BO_TILE_SIZE, width, height);
+ QRect r(pos.x(), pos.y(), lround(width), lround(height));
  if (!canGo(prop, r)) {
 	return false;
  }
