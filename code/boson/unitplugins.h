@@ -314,9 +314,9 @@ public:
 	virtual void advance(unsigned int);
 
 private:
-	BosonWeapon* mWeapon;
-	int mPosX;
-	int mPosY;
+	BosonWeapon* mWeapon; // FIXME: must be saved on Unit::save()
+	KGameProperty<int> mPosX;
+	KGameProperty<int> mPosY;
 };
 
 /**
@@ -338,8 +338,8 @@ public:
 	virtual void advance(unsigned int);
 
 private:
-	BosonWeapon* mWeapon;
-	int mPlacingCounter;
+	BosonWeapon* mWeapon; // FIXME: must be saved in Unit::save()
+	KGameProperty<int> mPlacingCounter;
 };
 
 #endif
