@@ -448,6 +448,9 @@ void TopWidget::slotSaveGame()
  if(file == QString::null) {
 	return;
  }
+ if (file.findRev('.') == -1) {
+	file += ".bsg";
+ }
 
  QFile f(file);
  f.open(IO_WriteOnly);
