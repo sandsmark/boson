@@ -36,7 +36,7 @@ class BosonCanvas;
  **/
 class TopWidget : public KDockMainWindow
 {
-Q_OBJECT
+	Q_OBJECT
 public:
 	/**
 	 * Default Constructor
