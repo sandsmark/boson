@@ -69,6 +69,10 @@ bool BosonTextureArray::createTexture(const QImage& image, GLuint texture)
  if (error != GL_NO_ERROR) {
 	kdError() << k_funcinfo << "OpenGL Error before loading texture" << endl;
  }
+ if (image.isNull()) {
+	kdError() << k_funcinfo << "NULL image" << endl;
+	return;
+ }
 
  QImage buffer;
 
