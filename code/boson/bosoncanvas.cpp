@@ -348,12 +348,12 @@ void BosonCanvas::shootAtUnit(Unit* target, Unit* attackedBy, long int damage)
 		// what about e.g. a wreckage?
 		d->mDestroyUnits.append(target);
 		(void) new BoShot(target, attackedBy, this, true);
-		boMusic->playSound(target->sound(Unit::SoundReportDestroyed));
+		boMusic->playSound(target, Unit::SoundReportDestroyed);
 	}
  } else {
 	(void) new BoShot(target, attackedBy, this);
  }
- boMusic->playSound(attackedBy->sound(Unit::SoundShoot));
+ boMusic->playSound(attackedBy, Unit::SoundShoot);
 }
 
 Cell* BosonCanvas::cellAt(Unit* unit) const
