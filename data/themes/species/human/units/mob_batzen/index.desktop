@@ -12,7 +12,7 @@ Producer=0
 Requirements=3
 Armor=1
 ProductionTime=80
-MissileSpeed=6
+ShotSpeed=6
 
 [Boson Mobile Unit]
 Speed=4
