@@ -237,7 +237,7 @@ void BosonWidgetBase::initChat()
 {
  // note: we can use the chat widget even for editor mode, e.g. for status
  // messages!
- d->mChatDock = mTop->createDockWidget("chat_dock", 0, 0, i18n("Chat"));
+ d->mChatDock = mTop->createDockWidget("chat_dock", 0, this, i18n("Chat"));
  d->mChatDock->setEnableDocking(KDockWidget::DockTop | KDockWidget::DockBottom);
  d->mChat = new KGameChat(boGame, BosonMessage::IdChat, d->mChatDock);
  d->mChatDock->setWidget(d->mChat);
@@ -295,8 +295,9 @@ void BosonWidgetBase::initBigDisplay(BosonBigDisplayBase* b)
 
 void BosonWidgetBase::initCommandFrame()
 {
- d->mCommandFrameDock = mTop->createDockWidget("cmdframe_dock", 0, 0, i18n("Command Frame"));
+ d->mCommandFrameDock = mTop->createDockWidget("cmdframe_dock", 0, this, i18n("Command Frame"));
  d->mCommandFrameDock->setEnableDocking(KDockWidget::DockLeft | KDockWidget::DockRight);
+ d->mCommandFrameDock->setDockSite(KDockWidget::DockNone);
  d->mCommandFrame = createCommandFrame(d->mCommandFrameDock);
  d->mCommandFrameDock->setWidget(d->mCommandFrame);
  d->mCommandFrameDock->hide();

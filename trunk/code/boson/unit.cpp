@@ -458,7 +458,7 @@ void Unit::advanceAttack(unsigned int advanceCount)
 void Unit::advanceDestroyed(unsigned int advanceCount)
 {
  // note: the unit/wreckage will get deleted pretty soon
- if (advanceCount % 50 != 0) {
+ if (advanceCount % 20 != 0) {
 	return;
  }
 }
