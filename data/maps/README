@@ -161,7 +161,8 @@ ConstructionCompleted=Anything - If this argument is given the unit will be
                                  completed on the map. Otherwise it first needs
                                  to be constructed as if it was just placed
                                  there.
-ConstructionStep=Number  - A value 0..(PIXMAP_PER_FIX-1) aka 0..4
+ConstructionStep=Number  - A value 0..UnitProperties::constructionSteps(). (see
+                           entry ConstructionSteps in the index.desktop file of the unit)
                            This specifies the initial frame number of the
                            construction animation.
                            Default is 0
