@@ -342,11 +342,8 @@ public:
 	 * @return List of active particle systems this unit has.
 	 * This may include e.g. smoke for factories.
 	 **/
-	QPtrList<BosonParticleSystem>* activeParticleSystems() const;
-	void setActiveParticleSystems(QPtrList<BosonParticleSystem> list);
-
-	BosonParticleSystem* smokeParticleSystem() const;
-	void setSmokeParticleSystem(BosonParticleSystem* s);
+	virtual QPtrList<BosonParticleSystem>* particleSystems();
+	void setParticleSystems(QPtrList<BosonParticleSystem> list);
 
 	void loadWeapons();
 
@@ -576,9 +573,6 @@ public:
 	 * otherwise @ref Unit::plugin
 	 **/
 	virtual UnitPlugin* plugin(int pluginType) const;
-
-	BosonParticleSystem* flamesParticleSystem() const;
-	void setFlamesParticleSystem(BosonParticleSystem* s);
 
 	virtual bool saveAsXML(QDomElement& root);
 	virtual bool loadFromXML(const QDomElement& root);

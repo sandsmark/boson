@@ -428,7 +428,6 @@ void BosonNewGameWidget::slotLocalPlayerAddedComputerPlayer()
  p->loadTheme(SpeciesTheme::speciesDirectory(SpeciesTheme::defaultSpecies()), color);
 
  BosonComputerIO* io = new BosonComputerIO();
- io->setReactionPeriod(50);
  p->addGameIO(io);
  boGame->addPlayer(p);
 }

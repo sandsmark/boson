@@ -23,9 +23,11 @@
 #include "../selectbox.h"
 #include "../bosonmodel.h"
 #include "../cell.h" // for deleteitem. i dont want this. how can we avoid this? don't use qptrvector probably.
+#include "../bosonparticlesystem.h"
 #include "bodebug.h"
 
 #include <qrect.h>
+#include <qptrlist.h>
 
 BosonItem::BosonItem(BosonModel* model, BosonCanvas* canvas)
 {
@@ -218,8 +220,8 @@ QRect BosonItem::boundingRectAdvanced() const
 {
  return QRect((int)(leftEdge() + xVelocity()),
 		(int)(topEdge() + yVelocity()),
-		(int)(width() + xVelocity()) - 1,
-		(int)(height() + yVelocity()) - 1);
+		width() + (int)xVelocity() - 1,
+		height() + (int)yVelocity() - 1);
 }
 
 void BosonItem::setGLDepthMultiplier(float d)
@@ -363,5 +365,32 @@ void BosonItem::renderItem()
 BosonCollisions* BosonItem::collisions() const
 {
  return canvas()->collisions();
+}
+
+void BosonItem::moveParticleSystems(float x, float y, float z)
+{
+ if (particleSystems() && particleSystems()->count() > 0) {
+	BoVector3 pos(x + width() / 2, y + height() / 2, z);
+	pos.canvasToOGL();
+	QPtrListIterator<BosonParticleSystem> it(*particleSystems());
+	for (; it.current(); ++it) {
+		it.current()->setPosition(pos);
+	}
+ }
+}
+
+void BosonItem::rotateParticleSystems(float angle, float x, float y, float z)
+{
+ if (particleSystems() && particleSystems()->count() > 0) {
+	QPtrListIterator<BosonParticleSystem> it(*particleSystems());
+	for (; it.current(); ++it) {
+		it.current()->setRotation(-angle, x, y, z);
+	}
+ }
+}
+
+QPtrList<BosonParticleSystem>* BosonItem::particleSystems()
+{
+ return 0l;
 }
 

@@ -58,7 +58,6 @@ public:
 	UnitPrivate()
 	{
 		mTarget = 0;
-		mSmokeParticleSystem = 0;
 
 		mWeapons = 0;
 	}
@@ -81,8 +80,7 @@ public:
 	BosonWeapon** mWeapons;
 
 	// OpenGL only:
-	BosonParticleSystem* mSmokeParticleSystem;  // This will be removed soon
-	QPtrList<BosonParticleSystem> mActiveParticleSystems;  // No autodelete!!!
+	QPtrList<BosonParticleSystem> mParticleSystems;  // No autodelete!!!
 };
 
 Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
@@ -324,18 +322,8 @@ void Unit::moveBy(float moveX, float moveY, float moveZ)
 
  BosonItem::moveBy(moveX, moveY, moveZ);
  canvas()->unitMoved(this, oldX, oldY);
- if(activeParticleSystems()->count() > 0) {
-	BoVector3 move(moveX, moveY, moveZ);
-	move.canvasToOGL();
-	QPtrListIterator<BosonParticleSystem> it(*activeParticleSystems());
-	for (; it.current(); ++it) {
-		it.current()->setPosition(it.current()->position() + move);
-	}
- }
- /*if (smokeParticleSystem()) {
-	 smokeParticleSystem()->moveParticles(BoVector3(moveX / BO_TILE_SIZE, -moveY / BO_TILE_SIZE, moveZ / BO_TILE_SIZE));
- }*/
 }
+
 void Unit::updateZ(float moveByX, float moveByY, float* moveByZ, float* rotateX, float* rotateY)
 {
  // rotation is not yet implemented here
@@ -856,7 +844,7 @@ void Unit::stopMoving()
  } else if (advanceWork() != work()) {
 	setAdvanceWork(work());
  }
- setMoving(true);
+ setMoving(false);
  setVelocity(0.0, 0.0, 0.0);
 }
 
@@ -1235,24 +1223,14 @@ void Unit::turnTo(int deg)
  d->mWantedRotation = deg;
 }
 
-BosonParticleSystem* Unit::smokeParticleSystem() const
+QPtrList<BosonParticleSystem>* Unit::particleSystems()
 {
- return d->mSmokeParticleSystem;
+ return &(d->mParticleSystems);
 }
 
-void Unit::setSmokeParticleSystem(BosonParticleSystem* s)
+void Unit::setParticleSystems(QPtrList<BosonParticleSystem> list)
 {
- d->mSmokeParticleSystem = s;
-}
-
-QPtrList<BosonParticleSystem>* Unit::activeParticleSystems() const
-{
- return &(d->mActiveParticleSystems);
-}
-
-void Unit::setActiveParticleSystems(QPtrList<BosonParticleSystem> list)
-{
- d->mActiveParticleSystems = list;
+ d->mParticleSystems = list;
 }
 
 void Unit::loadWeapons()
@@ -1367,8 +1345,8 @@ MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, BosonCanvas* c
  setRotation((float)(owner->game()->random()->getLong(359)));
  ((Boson*)owner->game())->slotUpdateProductionOptions();
 
- setActiveParticleSystems(unitProperties()->newConstructedParticleSystems(x() + width() / 2, y() + height() / 2, z()));
- canvas->addParticleSystems(*activeParticleSystems());
+ setParticleSystems(unitProperties()->newConstructedParticleSystems(x() + width() / 2, y() + height() / 2, z()));
+ canvas->addParticleSystems(*particleSystems());
 }
 
 MobileUnit::~MobileUnit()
@@ -1389,7 +1367,7 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCount) // this actually
 	d->mPathAge = 0;
 	mSearchPath = false;
 	// Do we have to return here?
-	return;
+	//return;
  }
 
  if (waypointCount() == 0) {
@@ -1521,15 +1499,16 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCount) // this actually
 void MobileUnit::advanceMoveCheck()
 {
  if (!canvas()->onCanvas(boundingRectAdvanced().topLeft())) {
-	boDebug(401) << k_funcinfo << "unit " << id() << ": not on canvas (topLeft): (" <<
+	boError(401) << k_funcinfo << "unit " << id() << ": not on canvas (topLeft): (" <<
 			(int)(leftEdge() + xVelocity()) << "; " << (int)(topEdge() + yVelocity()) << ")" << endl;
 	stopMoving();
 	setWork(WorkNone);
 	return;
  }
  if (!canvas()->onCanvas(boundingRectAdvanced().bottomRight())) {
-	boDebug(401) << k_funcinfo << "unit " << id() << ": not on canvas (bottomRight): (" <<
+	boError(401) << k_funcinfo << "unit " << id() << ": not on canvas (bottomRight): (" <<
 			(int)(leftEdge() + width() + xVelocity()) << "; " << (int)(topEdge() + height() + yVelocity()) << ")" << endl;
+	boError(401) << k_funcinfo << "    leftEdge: " << leftEdge() << "; width: " << width() << "; xVelo: " << xVelocity() << "; (int)xVelo: " << (int)xVelocity() << endl;
 	stopMoving();
 	setWork(WorkNone);
 	return;
@@ -1591,8 +1570,6 @@ void MobileUnit::turnTo(Direction direction)
 	boError() << k_funcinfo << "unit is already destroyed!" << endl;
 	return;
  }
- // At the moment, all units are facing south by default, but currect would be
- //  north so change direction hack as soon as it's fixed
  float dir = (int)direction * 45;
  if (rotation() != dir) {
 	Unit::turnTo((int)dir);
@@ -1732,14 +1709,7 @@ void MobileUnit::stopMoving()
 class Facility::FacilityPrivate
 {
 public:
-	FacilityPrivate()
-	{
-		mFlamesParticleSystem = 0;
-	}
-
 	KGameProperty<unsigned int> mConstructionStep;
-
-	BosonParticleSystem* mFlamesParticleSystem;
 };
 
 Facility::Facility(const UnitProperties* prop, Player* owner, BosonCanvas* canvas) : Unit(prop, owner, canvas)
@@ -1845,24 +1815,14 @@ void Facility::setConstructionStep(unsigned int step)
 	owner()->facilityCompleted(this);
 	((Boson*)owner()->game())->slotUpdateProductionOptions();
 	setAnimationMode(UnitAnimationIdle);
-	setActiveParticleSystems(unitProperties()->newConstructedParticleSystems(x() + width() / 2, y() + height() / 2, z()));
-	canvas()->addParticleSystems(*activeParticleSystems());
+	setParticleSystems(unitProperties()->newConstructedParticleSystems(x() + width() / 2, y() + height() / 2, z()));
+	canvas()->addParticleSystems(*particleSystems());
  }
 }
 
 unsigned int Facility::currentConstructionStep() const
 {
  return d->mConstructionStep;
-}
-
-BosonParticleSystem* Facility::flamesParticleSystem() const
-{
- return d->mFlamesParticleSystem;
-}
-
-void Facility::setFlamesParticleSystem(BosonParticleSystem* s)
-{
- d->mFlamesParticleSystem = s;
 }
 
 bool Facility::loadFromXML(const QDomElement& root)

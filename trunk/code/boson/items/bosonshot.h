@@ -55,7 +55,6 @@ class BosonShot : public BosonItem
 
     Player* owner() const { return mOwner; }
     inline const BosonWeaponProperties* properties() const  { return mProp; };
-    QPtrList<BosonParticleSystem>* flyParticleSystems()  { return &mFlyParticleSystems; };
 
     inline bool isActive() const  { return mActive; };
     inline virtual int rtti() const  { return RTTI::Shot; }
@@ -83,6 +82,8 @@ class BosonShot : public BosonItem
 
     void save(QDataStream& stream);
     void load(QDataStream& stream);
+
+    virtual QPtrList<BosonParticleSystem>* particleSystems() { return &mFlyParticleSystems; };
 
   private:
     BoVector3 mVelo;
