@@ -21,6 +21,8 @@
 #ifndef UNITTYPE_H 
 #define UNITTYPE_H 
 
+#include <qpoint.h>
+
 #include "groundType.h"
 
 /*
@@ -97,6 +99,8 @@ typedef unsigned int uint;
 // 43334
 int	boDist(int, int);
 int	boGridDist(int, int);
+int	boDist(QPoint p ) { return boDist( p.x(), p.y() ); }
+int	boGridDist(QPoint p ) { return boGridDist( p.x(), p.y() ); }
 
 
 
