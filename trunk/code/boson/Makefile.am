@@ -61,10 +61,6 @@ libboson_la_SOURCES = \
 	kgameunitdebug.cpp \
 	kgameplayerdebug.cpp \
 	kgamecelldebug.cpp \
-	bodisplaymanager.cpp \
-	bosonwidgetbase.cpp \
-	bosonwidget.cpp \
-	editorwidget.cpp \
 	bosonglwidget.cpp \
 	bosonbigdisplaybase.cpp \
 	bogroundrenderer.cpp \
@@ -158,6 +154,10 @@ boson_LDADD = \
 		$(top_builddir)/boson/libboson.la \
 		$(LIB_BOMEMORY)
 boson_SOURCES = \
+		bosonwidgetbase.cpp \
+		bosonwidget.cpp \
+		editorwidget.cpp \
+		bodisplaymanager.cpp \
 		top.cpp  \
 		main.cpp
 
