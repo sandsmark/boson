@@ -344,9 +344,6 @@ public:
 	void emitSignalFrame(int f) { emit mPreview->signalFrameChanged(f); }
 	void emitSignalLOD(int l) { emit mPreview->signalLODChanged(l); }
 
-protected:
-//	SpeciesTheme* findTheme(const QString& theme) const;
-
 private:
 	ModelPreview* mPreview;
 	QPtrList<SpeciesTheme> mSpecies;
