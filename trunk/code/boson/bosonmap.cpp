@@ -86,7 +86,9 @@ QString BosonMap::defaultMap()
 //look if list contains "basic" - then check whether basic.bpf exists and return. 
 // Otherwise look for the first .desktop file which has a .bpf file exisiting.
 // Return that then.
- return locate("data", "boson/map/basic.bpf");
+// UPDATE (01/12/22): only the identifier should be returned.
+
+ return QString::fromLatin1("Basic");
 }
 
 bool BosonMap::loadMap(const QString& fileName)
