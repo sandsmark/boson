@@ -23,6 +23,8 @@
 #include "bodebug.h"
 #include "defines.h"
 #include "bosondata.h"
+#include "bo3dtools.h"
+#include "bosonconfig.h"
 
 #include <ksimpleconfig.h>
 
@@ -207,7 +209,8 @@ bool BosonGroundTheme::loadGroundThemeConfig(const QString& file)
 	// the other values have usable defaults.
 	types[i].mAmountOfLand = (unsigned char)conf.readUnsignedNumEntry("AmountOfLand", 0);
 	types[i].mAmountOfWater = (unsigned char)conf.readUnsignedNumEntry("AmountOfWater", 0);
-	types[i].mMiniMapColor = conf.readUnsignedNumEntry("MiniMapColor", 0);
+	BoVector3 color = BosonConfig::readBoVector3Entry(&conf, "MiniMapColor");
+	types[i].mMiniMapColor = qRgb(color.x(), color.y(), color.z());
 
 	// ensure correct values:
 	if (types[i].mAmountOfLand + types[i].mAmountOfWater != 255) {
