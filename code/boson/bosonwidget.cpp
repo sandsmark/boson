@@ -395,12 +395,18 @@ void BosonWidget::initLayout()
 {
  d->mCommandFrameDock->manualDock(mTop->getMainDockWidget(), KDockWidget::DockLeft, 30);
  d->mChatDock->manualDock(mTop->getMainDockWidget(), KDockWidget::DockBottom, 80);
- d->mCommandFrameDock->show();  // We show only commandframe by dafault, not chat
 
  QVBoxLayout* topLayout = new QVBoxLayout(this);
  topLayout->addWidget(displaymanager());
-// topLayout->activate();
- mTop->loadGameDockConfig();
+ topLayout->activate();
+ if(!kapp->config()->hasGroup("BosonGameDock")) {
+	// Dock config isn't saved (probably first start). Hide chat dock (we only
+	//  show commandframe by default)
+	d->mChatDock->changeHideShowState();
+ }
+ else {
+	mTop->loadGameDockConfig();
+ }
 }
 
 void BosonWidget::slotDebug()
