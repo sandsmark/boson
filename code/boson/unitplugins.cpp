@@ -215,8 +215,8 @@ void ProductionPlugin::advance(unsigned int)
 
 		if(currentProductionType() != ProduceUnit) {
 			// It's technology
-			player()->technologyResearched(this, id);
 			removeProduction();
+			player()->technologyResearched(this, id);
 			return;
 		}
 
