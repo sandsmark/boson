@@ -271,8 +271,9 @@ void TopWidget::initStatusBar()
 
 void TopWidget::enableGameActions(bool enable)
 {
- if(enable && ! d->mBosonwidget)
+ if(enable && ! d->mBosonwidget) {
 	kdWarning() << k_lineinfo << "NULL BosonWidget!" << endl;
+ }
  d->mActionEndGame->setEnabled(enable);
  d->mActionPreferences->setEnabled(enable);
  d->mActionStatusbar->setEnabled(enable);
@@ -308,8 +309,9 @@ void TopWidget::initDebugPlayersMenu()
 
 void TopWidget::initWelcomeWidget()
 {
- if(d->mWelcome)
+ if(d->mWelcome) {
 	return;
+ }
  d->mWelcome = new BosonWelcomeWidget(mWs);
  connect(d->mWelcome, SIGNAL(signalNewGame()), this, SLOT(slotNewGame()));
  connect(d->mWelcome, SIGNAL(signalQuit()), this, SLOT(slotQuit()));
@@ -318,15 +320,17 @@ void TopWidget::initWelcomeWidget()
 
 void TopWidget::showWelcomeWidget()
 {
- if(!d->mWelcome)
+ if(!d->mWelcome) {
 	initWelcomeWidget();
+ }
  mWs->raiseWidget(1);
 }
 
 void TopWidget::initNewGameWidget()
 {
- if(d->mNewGame)
+ if(d->mNewGame) {
 	return;
+ }
  d->mNewGame = new BosonNewGameWidget(this, mWs);
  connect(d->mNewGame, SIGNAL(signalStartGame()), this, SLOT(slotStartGame()));
  connect(d->mNewGame, SIGNAL(signalCancelled()), this, SLOT(slotShowMainMenu()));
@@ -336,30 +340,34 @@ void TopWidget::initNewGameWidget()
 
 void TopWidget::showNewGameWidget()
 {
- if(!d->mNewGame)
+ if(!d->mNewGame) {
 	initNewGameWidget();
+ }
  mWs->raiseWidget(2);
 }
 
 void TopWidget::initBosonWidget()
 {
- if(d->mBosonwidget)
+ if(d->mBosonwidget) {
 	return;
+ }
  d->mBosonwidget = new BosonWidget(this, mWs);
  mWs->addWidget(d->mBosonwidget, 3);
 }
 
 void TopWidget::showBosonWidget()
 {
- if(!d->mBosonwidget)
+ if(!d->mBosonwidget) {
 	initBosonWidget();
+ }
  mWs->raiseWidget(3);
 }
 
 void TopWidget::initServerOptions()
 {
- if(d->mServeroptions)
+ if(d->mServeroptions) {
 	return;
+ }
  d->mServeroptions = new BosonServerOptionsWidget(this, mWs);
  connect(d->mServeroptions, SIGNAL(signalOkClicked()), this, SLOT(slotHideServerOptions()));
  mWs->addWidget(d->mServeroptions, 4);
@@ -367,23 +375,26 @@ void TopWidget::initServerOptions()
 
 void TopWidget::showServerOptions()
 {
- if(!d->mServeroptions)
+ if(!d->mServeroptions) {
 	initServerOptions();
+ }
  mWs->raiseWidget(4);
 }
 
 void TopWidget::initLoadingWidget()
 {
- if(d->mLoading)
+ if(d->mLoading) {
 	return;
+ }
  d->mLoading = new BosonLoadingWidget(mWs);
  mWs->addWidget(d->mLoading, 5);
 }
 
 void TopWidget::showLoadingWidget()
 {
- if(!d->mLoading)
+ if(!d->mLoading) {
 	initLoadingWidget();
+ }
  mWs->raiseWidget(5);
 }
 
@@ -395,22 +406,18 @@ void TopWidget::slotNewGame()
 void TopWidget::slotQuit()
 {
  // First delete all widgets to give them change to save config
- if(d->mBosonwidget)
- {
+ if(d->mBosonwidget) {
 	d->mBosonwidget->slotEndGame();
 	delete d->mBosonwidget;
  }
- if(d->mLoading)
- {
+ if(d->mLoading) {
 	// TODO: cancel loading
 	delete d->mLoading;
  }
- if(d->mServeroptions)
- {
+ if(d->mServeroptions) {
 	delete d->mServeroptions;
  }
- if(d->mNewGame)
- {
+ if(d->mNewGame) {
 	delete d->mNewGame;
  }
  delete d->mWelcome;
@@ -455,8 +462,7 @@ void TopWidget::loadGameData1()
  checkEvents();
  // Receive map (first send it if we're admin)
  connect(mBoson, SIGNAL(signalInitMap(const QByteArray&)), this, SLOT(slotReceiveMap(const QByteArray&)));
- if(mBoson->isAdmin())
- {
+ if(mBoson->isAdmin()) {
 	d->mLoading->setLoading(BosonLoadingWidget::SendMap);
 	checkEvents();
 	QByteArray buffer;
@@ -497,8 +503,7 @@ void TopWidget::loadGameData3()
 {
  d->mLoading->setLoading(BosonLoadingWidget::InitGame);
  checkEvents();
- if(mBoson->isAdmin())
- {
+ if(mBoson->isAdmin()) {
 	mBoson->sendMessage(0, BosonMessage::IdInitFogOfWar);
 	mBoson->sendMessage(0, BosonMessage::IdStartScenario);
  }
@@ -603,8 +608,7 @@ void TopWidget::slotConfigureKeys()
 {
  KKeyDialog dlg(true, this);
  dlg.insert(actionCollection());
- if(mGame)
- {
+ if(mGame) {
 	dlg.insert(d->mBosonwidget->actionCollection());
  }
  dlg.configure(true);
