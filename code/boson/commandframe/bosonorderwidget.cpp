@@ -115,7 +115,7 @@ void BosonOrderWidget::setOrderButtons(const QValueList<BoSpecificAction>& actio
 		pair.first = actions[i].productionType();
 		pair.second = actions[i].productionId();
 		int count = production->productionList().contains(pair);
-		if((actions[i].productionType() == type) && (actions[i].productionId() == id)) {
+		if ((actions[i].productionType() == type) && (actions[i].productionId() == id)) {
 			d->mOrderButton[i]->advanceProduction(production->productionProgress());
 			if (factory->currentPluginType() != UnitPlugin::Production) {
 				d->mOrderButton[i]->setProductionCount(-1);
