@@ -466,6 +466,13 @@ void BosonNewGameWidget::slotNetPlayerJoinedGame(KPlayer* p)
 		if (mainPlayer == p) {
 			// Another client connected
 			boGame->slotAddChatSystemMessage("Boson", i18n("%1 joined the game").arg(p->name()));
+			if (boGame->isAdmin()) {
+				boDebug() << k_funcinfo << "new client connected - sending current playfield" << endl;
+				QListViewItem* item = mSelectMap->currentItem();
+				if (item) {
+					networkInterface()->sendChangePlayField(d->mItem2Map[item]);
+				}
+			}
 		} else if(!mainPlayer) {
 			// first player has not ID 0. probably do a loop instead, searching for the
 			//  player with the lowest KGameMessage::rawPlayerId() in this gameID.
