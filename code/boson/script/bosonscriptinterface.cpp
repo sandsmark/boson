@@ -49,37 +49,37 @@ void BosonScriptInterface::removeLight(int id)
   emit signalRemoveLight(id);
 }
 
-BoVector4 BosonScriptInterface::lightPos(int id)
+BoVector4Float BosonScriptInterface::lightPos(int id)
 {
-  BoVector4 v;
+  BoVector4Float v;
   emit signalGetLightPos(id, &v);
   return v;
 }
 
-BoVector4 BosonScriptInterface::lightAmbient(int id)
+BoVector4Float BosonScriptInterface::lightAmbient(int id)
 {
-  BoVector4 v;
+  BoVector4Float v;
   emit signalGetLightAmbient(id, &v);
   return v;
 }
 
-BoVector4 BosonScriptInterface::lightDiffuse(int id)
+BoVector4Float BosonScriptInterface::lightDiffuse(int id)
 {
-  BoVector4 v;
+  BoVector4Float v;
   emit signalGetLightDiffuse(id, &v);
   return v;
 }
 
-BoVector4 BosonScriptInterface::lightSpecular(int id)
+BoVector4Float BosonScriptInterface::lightSpecular(int id)
 {
-  BoVector4 v;
+  BoVector4Float v;
   emit signalGetLightSpecular(id, &v);
   return v;
 }
 
-BoVector3 BosonScriptInterface::lightAttenuation(int id)
+BoVector3Float BosonScriptInterface::lightAttenuation(int id)
 {
-  BoVector3 v;
+  BoVector3Float v;
   emit signalGetLightAttenuation(id, &v);
   return v;
 }
@@ -93,26 +93,26 @@ bool BosonScriptInterface::lightEnabled(int id)
 
 
 
-void BosonScriptInterface::setLightPos(int id, const BoVector4& v)
+void BosonScriptInterface::setLightPos(int id, const BoVector4Float& v)
 {
   emit signalSetLightPos(id, v);
 }
-void BosonScriptInterface::setLightAmbient(int id, const BoVector4& v)
+void BosonScriptInterface::setLightAmbient(int id, const BoVector4Float& v)
 {
   emit signalSetLightAmbient(id, v);
 }
 
-void BosonScriptInterface::setLightDiffuse(int id, const BoVector4& v)
+void BosonScriptInterface::setLightDiffuse(int id, const BoVector4Float& v)
 {
   emit signalSetLightDiffuse(id, v);
 }
 
-void BosonScriptInterface::setLightSpecular(int id, const BoVector4& v)
+void BosonScriptInterface::setLightSpecular(int id, const BoVector4Float& v)
 {
   emit signalSetLightSpecular(id, v);
 }
 
-void BosonScriptInterface::setLightAttenuation(int id, const BoVector3& v)
+void BosonScriptInterface::setLightAttenuation(int id, const BoVector3Float& v)
 {
   emit signalSetLightAttenuation(id, v);
 }
@@ -123,23 +123,23 @@ void BosonScriptInterface::setLightEnabled(int id, bool e)
 }
 
 
-BoVector3 BosonScriptInterface::cameraPos()
+BoVector3Float BosonScriptInterface::cameraPos()
 {
-  BoVector3 v;
+  BoVector3Float v;
   emit signalGetCameraPos(&v);
   return v;
 }
 
-BoVector3 BosonScriptInterface::cameraUp()
+BoVector3Float BosonScriptInterface::cameraUp()
 {
-  BoVector3 v;
+  BoVector3Float v;
   emit signalGetCameraUp(&v);
   return v;
 }
 
-BoVector3 BosonScriptInterface::cameraLookAt()
+BoVector3Float BosonScriptInterface::cameraLookAt()
 {
-  BoVector3 v;
+  BoVector3Float v;
   emit signalGetCameraLookAt(&v);
   return v;
 }
@@ -195,17 +195,17 @@ void BosonScriptInterface::setCameraMoveMode(int v)
   emit signalSetCameraMoveMode(v);
 }
 
-void BosonScriptInterface::setCameraPos(const BoVector3& v)
+void BosonScriptInterface::setCameraPos(const BoVector3Float& v)
 {
   emit signalSetCameraPos(v);
 }
 
-void BosonScriptInterface::setCameraLookAt(const BoVector3& v)
+void BosonScriptInterface::setCameraLookAt(const BoVector3Float& v)
 {
   emit signalSetCameraLookAt(v);
 }
 
-void BosonScriptInterface::setCameraUp(const BoVector3& v)
+void BosonScriptInterface::setCameraUp(const BoVector3Float& v)
 {
   emit signalSetCameraUp(v);
 }

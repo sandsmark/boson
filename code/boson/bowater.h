@@ -98,7 +98,7 @@ class BoLake
     // This is necessary to make saved xml look exactly like loaded one.
     int loadedminx, loadedminy, loadedmaxx, loadedmaxy;
     // Center point of the lake, for in-frustum checks
-    BoVector3 center;
+    BoVector3Float center;
     // 2d radius of the lake, for in-frustum checks
     float radius;
     // Water level of the lake
@@ -108,7 +108,7 @@ class BoLake
 
     // x- and y- component: wave's direction and length
     // z-componenet: wave's height
-    BoVector3 waveVector;
+    BoVector3Float waveVector;
     float waveSpeed;
     float waveHeightMin;
     float waveHeightMax;
@@ -177,7 +177,7 @@ class BoLake
         int minx, miny;
         int maxx, maxy;
         // Center of the chunk
-        BoVector3 center;
+        BoVector3Float center;
         // Min/max ground height beneath the chunk
         float mingroundheight, maxgroundheight;
         // Number of valid corners, i.e. those that have to be rendered (are
@@ -187,15 +187,15 @@ class BoLake
         //  detail level is different from this, caches will be reallocated.
         float lastdetail;
         // Caches
-        BoVector3* vertices;
-        BoVector3* normals;
-        BoVector3* tangentlight;
-        BoVector4* tangentlight4;
-        BoVector3* halfvector;
-        BoVector4* colors;
-        BoVector3* cellnormals;
-        BoVector3* celltangentlight;
-        BoVector3* cellhalfvector;
+        BoVector3Float* vertices;
+        BoVector3Float* normals;
+        BoVector3Float* tangentlight;
+        BoVector4Float* tangentlight4;
+        BoVector3Float* halfvector;
+        BoVector4Float* colors;
+        BoVector3Float* cellnormals;
+        BoVector3Float* celltangentlight;
+        BoVector3Float* cellhalfvector;
         unsigned int* indices;
         int indices_count;
         // VBO ids
@@ -258,7 +258,7 @@ class BoWaterManager
 
     void setViewFrustum(const float* f)  { mViewFrustum = f; setDirty(true); }
     void setSun(BoLight* sun)  { mSun = sun; setDirty(true); }
-    void setCameraPos(const BoVector3& pos)  { mCameraPos = pos; setDirty(true); }
+    void setCameraPos(const BoVector3Float& pos)  { mCameraPos = pos; setDirty(true); }
     void setLocalPlayerIO(PlayerIO* playerIO)  { mLocalPlayerIO = playerIO; }
 
     void reloadConfiguration();
@@ -270,7 +270,7 @@ class BoWaterManager
     bool wavesEnabled() const  { return mEnableWaves; }
 
   protected:
-    float sphereInFrustum(const BoVector3& pos, float radius) const;
+    float sphereInFrustum(const BoVector3Float& pos, float radius) const;
 
     void renderLake(BoLake* lake);
     void renderChunk(BoLake* lake, BoLake::WaterChunk* chunk, float chunk_detail);
@@ -300,14 +300,14 @@ class BoWaterManager
         // Size in corners, _not_ including border
         int chunkcornerw, chunkcornerh;
         int texrepeat;
-        BoVector3 lightvector;
+        BoVector3Float lightvector;
         // Pointers to whereever data is stored - either vbos or plain arrays.
-        BoVector3* vertices_p;
-        BoVector3* normals_p;
-        BoVector3* tangentlights_p;
-        BoVector4* tangentlights_p4;
-        BoVector3* halfvectors_p;
-        BoVector4* colors_p;
+        BoVector3Float* vertices_p;
+        BoVector3Float* normals_p;
+        BoVector3Float* tangentlights_p;
+        BoVector4Float* tangentlights_p4;
+        BoVector3Float* halfvectors_p;
+        BoVector4Float* colors_p;
         // Same, but for indices
         unsigned int* indices_p;
         // Rendering tehniques stuff
@@ -370,7 +370,7 @@ class BoWaterManager
     bool mOpenGLInited;
     const float* mViewFrustum;
     BoLight* mSun;
-    BoVector3 mCameraPos;
+    BoVector3Float mCameraPos;
     PlayerIO* mLocalPlayerIO;
     bool mRenderEnvironmentSetUp;
 

@@ -87,18 +87,18 @@ class BoAutoCamera
     // Also, they don't commit changes
     // If now is true, value is changed immediately (only this value, if other
     //  changes are being committed at the same time, they won't be cancelled)
-    void changeLookAt(const BoVector3& diff);
-    void changeUp(const BoVector3& pos);
-    void changeCameraPos(const BoVector3& pos);
+    void changeLookAt(const BoVector3Float& diff);
+    void changeUp(const BoVector3Float& pos);
+    void changeCameraPos(const BoVector3Float& pos);
 
     // these will change the up and cameraPos vectors!
     /**
      * Set lookAt point of camera
      * Changes are not commited
      **/
-    void setLookAt(const BoVector3& pos);
-    void setUp(const BoVector3& pos);
-    void setCameraPos(const BoVector3& pos);
+    void setLookAt(const BoVector3Float& pos);
+    void setUp(const BoVector3Float& pos);
+    void setCameraPos(const BoVector3Float& pos);
 
     virtual bool loadFromXML(const QDomElement& root);
     virtual bool saveAsXML(QDomElement& root);
@@ -118,7 +118,7 @@ class BoAutoCamera
 
   private:
     BoCamera* mCamera;
-    BoVector3 mLookAtDiff, mUpDiff, mCameraPosDiff;
+    BoVector3Float mLookAtDiff, mUpDiff, mCameraPosDiff;
     int mCommitTime, mRemainingTime;
     MoveMode mMoveMode;
     float mMovedAmount;

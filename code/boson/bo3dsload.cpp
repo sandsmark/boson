@@ -338,14 +338,14 @@ void Bo3DSLoad::dumpVector(Lib3dsVector v)
 
 void Bo3DSLoad::dumpTriangle(Lib3dsVector* v, GLuint texture, Lib3dsTexel* tex)
 {
- BoVector3 vector[3];
+ BoVector3Float vector[3];
  for (int i = 0; i < 3; i++) {
 	vector[i].set(v[i]);
  }
  dumpTriangle(vector, texture, tex);
 }
 
-void Bo3DSLoad::makeVectors(BoVector3* v, const Lib3dsMesh* mesh, const Lib3dsFace* face)
+void Bo3DSLoad::makeVectors(BoVector3Float* v, const Lib3dsMesh* mesh, const Lib3dsFace* face)
 {
   // Lib3dsFace stores only the position (index) of the
   // actual point. the actual points are in mesh->pointL
@@ -354,7 +354,7 @@ void Bo3DSLoad::makeVectors(BoVector3* v, const Lib3dsMesh* mesh, const Lib3dsFa
   v[2].set(mesh->pointL[ face->points[2] ].pos);
 }
 
-void Bo3DSLoad::dumpTriangle(BoVector3* v, GLuint texture, Lib3dsTexel* tex)
+void Bo3DSLoad::dumpTriangle(BoVector3Float* v, GLuint texture, Lib3dsTexel* tex)
 {
  QString text = "triangle: ";
  for (int i = 0; i < 3; i++) {
@@ -418,14 +418,14 @@ void Bo3DSLoad::findAdjacentFaces(QPtrList<Lib3dsFace>* adjacentFaces, Lib3dsMes
 
  for (unsigned int i = 0; i < adjacentFaces->count(); i++) {
 	QPtrList<Lib3dsFace> found; // these need to get removed from faces list
-	BoVector3 current[3]; // the triangle/face we search for
+	BoVector3Float current[3]; // the triangle/face we search for
 	makeVectors(current, mesh, adjacentFaces->at(i));
 
 	QPtrListIterator<Lib3dsFace> it(faces);
 	for (; it.current(); ++it) {
-		BoVector3 v[3];
+		BoVector3Float v[3];
 		makeVectors(v, mesh, it.current());
-		if (BoVector3::isAdjacent(current, v)) {
+		if (BoVector3Float::isAdjacent(current, v)) {
 			adjacentFaces->append(it.current());
 			found.append(it.current());
 		}
@@ -508,9 +508,9 @@ void Bo3DSLoad::loadVertices(BoMesh* boMesh, Lib3dsMesh* mesh)
  lib3ds_matrix_inv(invMeshMatrix);
  BoMatrix matrix(&invMeshMatrix[0][0]);
 
- QValueVector<BoVector3> vertices(mesh->points);
- BoVector3 vector;
- BoVector3 v;
+ QValueVector<BoVector3Float> vertices(mesh->points);
+ BoVector3Float vector;
+ BoVector3Float v;
  for (unsigned int i = 0; i < mesh->points; i++) {
 	vector.set(mesh->pointL[i].pos);
 	matrix.transform(&v, &vector);
@@ -592,9 +592,9 @@ void Bo3DSLoad::loadTexels(BoMesh* boMesh, Lib3dsMesh* mesh, Lib3dsMaterial* mat
 
  // now we have the final texture matrix in texMatrix.
  // all texel coordinates have to be transformed using this matrix.
- QValueVector<BoVector3> texels(mesh->points);
- BoVector3 a;
- BoVector3 b;
+ QValueVector<BoVector3Float> texels(mesh->points);
+ BoVector3Float a;
+ BoVector3Float b;
  for (unsigned int i = 0; i < mesh->points; i++) {
 	a.set(mesh->texelL[i][0], mesh->texelL[i][1], 0.0);
 	texMatrix.transform(&b, &a);
@@ -653,9 +653,9 @@ bool Bo3DSLoad::loadMaterials(BosonModelLoaderData* modelData, Lib3dsMaterial* f
 
 	mat->setName(QString(m->name));
 
-	mat->setAmbient(BoVector4(m->ambient));
-	mat->setDiffuse(BoVector4(m->diffuse));
-	mat->setSpecular(BoVector4(m->specular));
+	mat->setAmbient(BoVector4Float(m->ambient));
+	mat->setDiffuse(BoVector4Float(m->diffuse));
+	mat->setSpecular(BoVector4Float(m->specular));
 	mat->setShininess(m->shininess);
 
 	mat->setShinStrength(m->shin_strength);

@@ -351,7 +351,7 @@ public:
 	QTimer mUpdateTimer;
 	int mUpdateInterval;
 
-	BoVector3 mCanvasVector;
+	BoVector3Fixed mCanvasVector;
 
 	BoVisibleEffects mVisibleEffects;
 
@@ -467,9 +467,9 @@ void BosonBigDisplayBase::init()
 		this, SLOT(slotCursorEdgeTimeout()));
 
  connect(BosonPathVisualization::pathVisualization(),
-		SIGNAL(signalAddLineVisualization( const QValueList<BoVector3>&, const BoVector4&, bofixed, int, bofixed)),
+		SIGNAL(signalAddLineVisualization( const QValueList<BoVector3Fixed>&, const BoVector4Float&, bofixed, int, bofixed)),
 		this,
-		SLOT(slotAddLineVisualization(const QValueList<BoVector3>&, const BoVector4&, bofixed, int, bofixed)));
+		SLOT(slotAddLineVisualization(const QValueList<BoVector3Fixed>&, const BoVector4Float&, bofixed, int, bofixed)));
 
  setUpdateInterval(boConfig->updateInterval());
 
@@ -597,9 +597,9 @@ void BosonBigDisplayBase::initializeGL()
 // glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
 
- BoVector4 lightDif(1.0f, 1.0f, 1.0f, 1.0f);
- BoVector4 lightAmb(0.5f, 0.5f, 0.5f, 1.0f);
- BoVector3 lightPos(-6000.0, 3000.0, 10000.0);
+ BoVector4Float lightDif(1.0f, 1.0f, 1.0f, 1.0f);
+ BoVector4Float lightAmb(0.5f, 0.5f, 0.5f, 1.0f);
+ BoVector3Float lightPos(-6000.0, 3000.0, 10000.0);
 
  BoLight* l = newLight();
  // This is the "main" light, i.e. the Sun. It should always have id 0
@@ -852,9 +852,9 @@ void BosonBigDisplayBase::paintGL()
 	glColor4fv((*it).color.data());
 	glPointSize((*it).pointsize);
 	glBegin(GL_LINE_STRIP);
-	QValueList<BoVector3>::iterator pit;
+	QValueList<BoVector3Fixed>::iterator pit;
 	for (pit = (*it).points.begin(); pit != (*it).points.end(); ++pit) {
-		glVertex3fv((*pit).data());
+		glVertex3fv((*pit).toFloat().data());
 	}
 	glEnd();
  }
@@ -962,7 +962,7 @@ void BosonBigDisplayBase::renderItems()
 	unsigned int lod = 0;
 	if (useLOD) {
 		// TODO: we could compare squared distances here and get rid of sqrt()
-		float dist = (camera()->cameraPos() - BoVector3(x, y, z)).length();
+		float dist = (camera()->cameraPos() - BoVector3Float(x, y, z)).length();
 		lod = item->preferredLod(dist);
 	}
 	item->renderItem(lod);
@@ -975,9 +975,9 @@ void BosonBigDisplayBase::renderItems()
 
 	if (boConfig->debugBoundingBoxes()) {
 		// Corners of bb of item
-		BoVector3 c1(item->x(), item->y(), item->z());
+		BoVector3Float c1(item->x(), item->y(), item->z());
 		c1.canvasToWorld();
-		BoVector3 c2(item->x() + item->width(), item->y() + item->height(), item->z() + item->depth());
+		BoVector3Float c2(item->x() + item->width(), item->y() + item->height(), item->z() + item->depth());
 		c2.canvasToWorld();
 		glDisable(GL_TEXTURE_2D);
 		glLineWidth(1.0);
@@ -1256,7 +1256,7 @@ void BosonBigDisplayBase::renderText()
 
  bool renderGroundRendererDebug = false;
  if (renderGroundRendererDebug) {
-	BoVector3 cursor = BoVector3(cursorCanvasVector().x(), cursorCanvasVector().y(), boGame->canvas()->heightAtPoint(cursorCanvasVector().x(), cursorCanvasVector().y()));
+	BoVector3Fixed cursor = BoVector3Fixed(cursorCanvasVector().x(), cursorCanvasVector().y(), boGame->canvas()->heightAtPoint(cursorCanvasVector().x(), cursorCanvasVector().y()));
 	cursor.canvasToWorld();
 	BoGroundRenderer* r = BoGroundRendererManager::manager()->currentRenderer();
 	if (r) {
@@ -1405,12 +1405,12 @@ int BosonBigDisplayBase::renderTextOpenGLMatrices(int x, int y)
  GLfloat depth = 0.0f;
  glReadPixels(widgetPos.x(), realy, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
 
- BoVector4 v;
+ BoVector4Float v;
  v.setX( (GLfloat)((widgetPos.x() - d->mViewport[0]) * 2) / d->mViewport[2] - 1.0f );
  v.setY( (GLfloat)((realy - d->mViewport[1]) * 2) / d->mViewport[3] - 1.0f );
  v.setZ(2 * depth - 1.0f);
  v.setW(1.0f);
- BoVector4 result;
+ BoVector4Float result;
  inverse.transform(&result, &v);
 
  // it is a column vector, but we display as a row (so ^T)
@@ -1489,9 +1489,9 @@ int BosonBigDisplayBase::renderTextOpenGLCamera(int x, int y)
  if (!boConfig->debugOpenGLCamera()) {
 	return y;
  }
- const BoVector3 lookAt = camera()->lookAt();
- const BoVector3 cameraPos = camera()->cameraPos();
- const BoVector3 up = camera()->up();
+ const BoVector3Float lookAt = camera()->lookAt();
+ const BoVector3Float cameraPos = camera()->cameraPos();
+ const BoVector3Float up = camera()->up();
  QString text;
  text += i18n("Camera:\n");
  text += i18n("LookAt: (%1; %2; %3)\n").arg(lookAt.x()).
@@ -1604,7 +1604,7 @@ void BosonBigDisplayBase::renderParticles(BoVisibleEffects& visible)
  //bool wassorted = d->mVisibleEffects.mParticlesDirty;  // only for debug, commented because of compiler warning
  if (d->mVisibleEffects.mParticlesDirty) {
 	float x, y, z;
-	BoVector3 dir;
+	BoVector3Fixed dir;
 	visible.mParticleList.clear();
 	// Add all particles to the list
 	QPtrListIterator<BosonEffectParticle> visibleIt(visible.mParticles);
@@ -1614,7 +1614,7 @@ void BosonBigDisplayBase::renderParticles(BoVisibleEffects& visible)
 		// If particleDist is non-zero, calculate vector for moving particles closer
 		//  to camera
 		if (s->particleDist() != 0.0f) {
-			dir = camera()->cameraPos() - s->position();
+			dir = (camera()->cameraPos() - s->position().toFloat()).toFixed();
 			dir.scale(s->particleDist() / dir.length());
 			s->setParticleDistVector(dir);
 		}
@@ -1652,14 +1652,14 @@ void BosonBigDisplayBase::renderParticles(BoVisibleEffects& visible)
  glDisable(GL_NORMALIZE);
 
  // Matrix stuff for aligned particles
- BoVector3 x(d->mModelviewMatrix[0], d->mModelviewMatrix[4], d->mModelviewMatrix[8]);
- BoVector3 y(d->mModelviewMatrix[1], d->mModelviewMatrix[5], d->mModelviewMatrix[9]);
+ BoVector3Fixed x(d->mModelviewMatrix[0], d->mModelviewMatrix[4], d->mModelviewMatrix[8]);
+ BoVector3Fixed y(d->mModelviewMatrix[1], d->mModelviewMatrix[5], d->mModelviewMatrix[9]);
 
  // Some cache variables
  int blendfunc = -1;
  GLuint texture = 0;
  bool betweenbeginend = false;  // If glBegin has been called, but glEnd() hasn't. Very hackish.
- BoVector3 a, b, c, e;  // Vertex positions. e is used instead of d which clashes with private class
+ BoVector3Fixed a, b, c, e;  // Vertex positions. e is used instead of d which clashes with private class
 
  QPtrListIterator<BosonParticle> it(d->mVisibleEffects.mParticleList);
  //boDebug(150) << k_funcinfo << "Drawing " << i.count() << " particles" << endl;
@@ -1698,10 +1698,10 @@ void BosonBigDisplayBase::renderParticles(BoVisibleEffects& visible)
 			c = p->pos + (( x - y) * p->size + p->system->particleDistVector());
 			e = p->pos + ((-x - y) * p->size) + p->system->particleDistVector();
 		} else {
-			a = p->pos + (BoVector3(-0.5, 0.5, 0.0) * p->size) + p->system->particleDistVector();
-			b = p->pos + (BoVector3(0.5, 0.5, 0.0) * p->size) + p->system->particleDistVector();
-			c = p->pos + (BoVector3(0.5, -0.5, 0.0) * p->size) + p->system->particleDistVector();
-			e = p->pos + (BoVector3(-0.5, -0.5, 0.0) * p->size) + p->system->particleDistVector();
+			a = p->pos + (BoVector3Fixed(-0.5, 0.5, 0.0) * p->size) + p->system->particleDistVector();
+			b = p->pos + (BoVector3Fixed(0.5, 0.5, 0.0) * p->size) + p->system->particleDistVector();
+			c = p->pos + (BoVector3Fixed(0.5, -0.5, 0.0) * p->size) + p->system->particleDistVector();
+			e = p->pos + (BoVector3Fixed(-0.5, -0.5, 0.0) * p->size) + p->system->particleDistVector();
 		}
 	} else {
 		if (p->system->alignParticles()) {
@@ -1710,18 +1710,18 @@ void BosonBigDisplayBase::renderParticles(BoVisibleEffects& visible)
 			c = p->pos + (( x - y) * p->size);
 			e = p->pos + ((-x - y) * p->size);
 		} else {
-			a = p->pos + (BoVector3(-0.5, 0.5, 0.0) * p->size);
-			b = p->pos + (BoVector3(0.5, 0.5, 0.0) * p->size);
-			c = p->pos + (BoVector3(0.5, -0.5, 0.0) * p->size);
-			e = p->pos + (BoVector3(-0.5, -0.5, 0.0) * p->size);
+			a = p->pos + (BoVector3Fixed(-0.5, 0.5, 0.0) * p->size);
+			b = p->pos + (BoVector3Fixed(0.5, 0.5, 0.0) * p->size);
+			c = p->pos + (BoVector3Fixed(0.5, -0.5, 0.0) * p->size);
+			e = p->pos + (BoVector3Fixed(-0.5, -0.5, 0.0) * p->size);
 		}
 	}
 
 	glColor4fv(p->color.data());  // Is it worth to cache color as well?
-	glTexCoord2f(0.0, 1.0);  glVertex3fv(a.data());
-	glTexCoord2f(1.0, 1.0);  glVertex3fv(b.data());
-	glTexCoord2f(1.0, 0.0);  glVertex3fv(c.data());
-	glTexCoord2f(0.0, 0.0);  glVertex3fv(e.data());
+	glTexCoord2f(0.0, 1.0);  glVertex3fv(a.toFloat().data());
+	glTexCoord2f(1.0, 1.0);  glVertex3fv(b.toFloat().data());
+	glTexCoord2f(1.0, 0.0);  glVertex3fv(c.toFloat().data());
+	glTexCoord2f(0.0, 0.0);  glVertex3fv(e.toFloat().data());
 	d->mRenderedParticles++;
  }
  glEnd();
@@ -1771,8 +1771,8 @@ void BosonBigDisplayBase::renderBulletTrailEffects(BoVisibleEffects& visible)
 			glBegin(GL_LINES);
 		}
 		glColor4fv(b->color().data());
-		glVertex3fv(b->startPoint().data());
-		glVertex3fv(b->endPoint().data());
+		glVertex3fv(b->startPoint().toFloat().data());
+		glVertex3fv(b->endPoint().toFloat().data());
 		++it;
 	}
 	glEnd();
@@ -1800,7 +1800,7 @@ void BosonBigDisplayBase::renderFadeEffects(BoVisibleEffects& visible)
 		f = it.current();
 		glBlendFunc(f->blendFunc()[0], f->blendFunc()[1]);
 		glColor4fv(f->color().data());
-		BoVector4 geo = f->geometry();  // x, y, w, h
+		BoVector4Fixed geo = f->geometry();  // x, y, w, h
 		glRectf(geo[0] * xscale, geo[1] * yscale, (geo[0] + geo[2]) * xscale, (geo[1] + geo[3]) * yscale);  // x, y, x2, y2
 		++it;
 	}
@@ -1864,7 +1864,7 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* io, QDataStream& stream, QMous
 	return;
  }
 // boDebug() << posZ << endl;
- BoVector3 canvasVector;
+ BoVector3Fixed canvasVector;
  worldToCanvas(posX, posY, posZ, &canvasVector);
 
  BoMouseEvent event;
@@ -2071,7 +2071,7 @@ void BosonBigDisplayBase::mouseEventMove(int buttonState, const BoMouseEvent& ev
 		int moveX = d->mMouseMoveDiff.dx();
 		int moveY = d->mMouseMoveDiff.dy();
 		mapDistance(moveX, moveY, &dx, &dy);
-		camera()->changeLookAt(BoVector3(dx, dy, 0));
+		camera()->changeLookAt(BoVector3Float(dx, dy, 0));
 	} else {
 		d->mMouseMoveDiff.stop();
 	}
@@ -2275,7 +2275,7 @@ void BosonBigDisplayBase::slotResetViewProperties()
 void BosonBigDisplayBase::slotReCenterDisplay(const QPoint& pos)
 {
 //TODO don't center the corners - e.g. 0;0 should be top left, never center
- camera()->setLookAt(BoVector3(((float)pos.x()), -((float)pos.y()), 0));
+ camera()->setLookAt(BoVector3Float(((float)pos.x()), -((float)pos.y()), 0));
 }
 
 void BosonBigDisplayBase::worldToCanvas(GLfloat x, GLfloat y, GLfloat /*z*/, QPoint* pos) const
@@ -2285,7 +2285,7 @@ void BosonBigDisplayBase::worldToCanvas(GLfloat x, GLfloat y, GLfloat /*z*/, QPo
  // AB: z remains as-is
 }
 
-void BosonBigDisplayBase::worldToCanvas(GLfloat x, GLfloat y, GLfloat z, BoVector3* pos) const
+void BosonBigDisplayBase::worldToCanvas(GLfloat x, GLfloat y, GLfloat z, BoVector3Fixed* pos) const
 {
  // we want the rounding errors here (at least for now).
  int intx = (int)(x);
@@ -2460,7 +2460,7 @@ void BosonBigDisplayBase::removeSelectionRect(bool replace)
 		boError() << k_funcinfo << "Cannot map coordinates" << endl;
 		return;
 	}
-	BoVector3 canvasVector;
+	BoVector3Fixed canvasVector;
 	worldToCanvas(x, y, z, &canvasVector);
 	Unit* unit = 0;
 	if (!canvas()->onCanvas(canvasVector)) {
@@ -2666,7 +2666,7 @@ void BosonBigDisplayBase::slotCursorEdgeTimeout()
 	}
 	d->mCursorEdgeCounter++;
 	if (d->mCursorEdgeCounter > 30) {
-		camera()->changeLookAt(BoVector3(dx, dy, 0));
+		camera()->changeLookAt(BoVector3Float(dx, dy, 0));
 	}
  }
 }
@@ -2677,7 +2677,7 @@ void BosonBigDisplayBase::scrollBy(int dx, int dy)
  BO_CHECK_NULL_RET(camera());
  GLfloat x, y;
  mapDistance(dx, dy, &x, &y);
- camera()->changeLookAt(BoVector3(x, y, 0));
+ camera()->changeLookAt(BoVector3Float(x, y, 0));
 }
 
 void BosonBigDisplayBase::rotateLeft(float factor)
@@ -3027,12 +3027,12 @@ void BosonBigDisplayBase::extractFrustum()
  d->mViewFrustum[5 * 4 + 3] /= t;
 }
 
-float BosonBigDisplayBase::sphereInFrustum(const BoVector3& pos, float radius) const
+float BosonBigDisplayBase::sphereInFrustum(const BoVector3Fixed& pos, float radius) const
 {
  return Bo3dTools::sphereInFrustum(d->mViewFrustum, pos, radius);
 }
 
-const BoVector3& BosonBigDisplayBase::cursorCanvasVector() const
+const BoVector3Fixed& BosonBigDisplayBase::cursorCanvasVector() const
 {
  return d->mCanvasVector;
 }
@@ -3125,7 +3125,7 @@ bool BosonBigDisplayBase::boProject(GLfloat x, GLfloat y, GLfloat z, QPoint* pos
 		x, y, z, pos);
 }
 
-bool BosonBigDisplayBase::boUnProject(const QPoint& pos, BoVector3* ret, float z) const
+bool BosonBigDisplayBase::boUnProject(const QPoint& pos, BoVector3Float* ret, float z) const
 {
  return Bo3dTools::boUnProject(d->mModelviewMatrix, d->mProjectionMatrix, d->mViewport,
 		pos, ret, z);
@@ -3537,7 +3537,7 @@ void BosonBigDisplayBase::addLineVisualization(BoLineVisualization v)
 
 // FIXME: someone who know what these are supposed to be for, could probably
 // group most parameters into a single "type" integer
-void BosonBigDisplayBase::slotAddLineVisualization(const QValueList<BoVector3>& points, const BoVector4& color, bofixed pointSize, int timeout, bofixed zOffset)
+void BosonBigDisplayBase::slotAddLineVisualization(const QValueList<BoVector3Fixed>& points, const BoVector4Float& color, bofixed pointSize, int timeout, bofixed zOffset)
 {
  if (!canvas()) {
 	return;
@@ -3547,7 +3547,7 @@ void BosonBigDisplayBase::slotAddLineVisualization(const QValueList<BoVector3>& 
  viz.timeout = timeout;
  viz.color = color;
  viz.points = points;
- QValueList<BoVector3>::Iterator it;
+ QValueList<BoVector3Fixed>::Iterator it;
  for (it = viz.points.begin(); it != viz.points.end(); ++it) {
 	(*it).setZ(canvas()->heightAtPoint((*it).x(), -(*it).y()) + zOffset);
  }
@@ -3606,37 +3606,37 @@ void BosonBigDisplayScriptConnector::connectToScript(BosonScript* script)
 
  reconnect(i, SIGNAL(signalAddLight(int*)), this, SLOT(slotAddLight(int*)));
  reconnect(i, SIGNAL(signalRemoveLight(int)), this, SLOT(slotRemoveLight(int)));
- reconnect(i, SIGNAL(signalGetLightPos(int, BoVector4*)),
-		this, SLOT(slotGetLightPos(int, BoVector4*)));
- reconnect(i, SIGNAL(signalGetLightAmbient(int, BoVector4*)),
-		this, SLOT(slotGetLightAmbient(int, BoVector4*)));
- reconnect(i, SIGNAL(signalGetLightDiffuse(int, BoVector4*)),
-		this, SLOT(slotGetLightDiffuse(int, BoVector4*)));
- reconnect(i, SIGNAL(signalGetLightSpecular(int, BoVector4*)),
-		this, SLOT(slotGetLightSpecular(int, BoVector4*)));
- reconnect(i, SIGNAL(signalGetLightAttenuation(int, BoVector3*)),
-		this, SLOT(slotGetLightAttenuation(int, BoVector3*)));
+ reconnect(i, SIGNAL(signalGetLightPos(int, BoVector4Float*)),
+		this, SLOT(slotGetLightPos(int, BoVector4Float*)));
+ reconnect(i, SIGNAL(signalGetLightAmbient(int, BoVector4Float*)),
+		this, SLOT(slotGetLightAmbient(int, BoVector4Float*)));
+ reconnect(i, SIGNAL(signalGetLightDiffuse(int, BoVector4Float*)),
+		this, SLOT(slotGetLightDiffuse(int, BoVector4Float*)));
+ reconnect(i, SIGNAL(signalGetLightSpecular(int, BoVector4Float*)),
+		this, SLOT(slotGetLightSpecular(int, BoVector4Float*)));
+ reconnect(i, SIGNAL(signalGetLightAttenuation(int, BoVector3Float*)),
+		this, SLOT(slotGetLightAttenuation(int, BoVector3Float*)));
  reconnect(i, SIGNAL(signalGetLightEnabled(int, bool*)),
 		this, SLOT(slotGetLightEnabled(int, bool*)));
- reconnect(i, SIGNAL(signalSetLightPos(int, const BoVector4&)),
-		this, SLOT(slotSetLightPos(int, const BoVector4&)));
- reconnect(i, SIGNAL(signalSetLightAmbient(int, const BoVector4&)),
-		this, SLOT(slotSetLightAmbient(int, const BoVector4&)));
- reconnect(i, SIGNAL(signalSetLightDiffuse(int, const BoVector4&)),
-		this, SLOT(slotSetLightDiffuse(int, const BoVector4&)));
- reconnect(i, SIGNAL(signalSetLightSpecular(int, const BoVector4&)),
-		this, SLOT(slotSetLightSpecular(int, const BoVector4&)));
- reconnect(i, SIGNAL(signalSetLightAttenuation(int, const BoVector3&)),
-		this, SLOT(slotSetLightAttenuation(int, const BoVector3&)));
+ reconnect(i, SIGNAL(signalSetLightPos(int, const BoVector4Float&)),
+		this, SLOT(slotSetLightPos(int, const BoVector4Float&)));
+ reconnect(i, SIGNAL(signalSetLightAmbient(int, const BoVector4Float&)),
+		this, SLOT(slotSetLightAmbient(int, const BoVector4Float&)));
+ reconnect(i, SIGNAL(signalSetLightDiffuse(int, const BoVector4Float&)),
+		this, SLOT(slotSetLightDiffuse(int, const BoVector4Float&)));
+ reconnect(i, SIGNAL(signalSetLightSpecular(int, const BoVector4Float&)),
+		this, SLOT(slotSetLightSpecular(int, const BoVector4Float&)));
+ reconnect(i, SIGNAL(signalSetLightAttenuation(int, const BoVector3Float&)),
+		this, SLOT(slotSetLightAttenuation(int, const BoVector3Float&)));
  reconnect(i, SIGNAL(signalSetLightEnabled(int, bool)),
 		this, SLOT(slotSetLightEnabled(int, bool)));
 
- reconnect(i, SIGNAL(signalGetCameraPos(BoVector3*)),
-		this, SLOT(slotGetCameraPos(BoVector3*)));
- reconnect(i, SIGNAL(signalGetCameraLookAt(BoVector3*)),
-		this, SLOT(slotGetCameraLookAt(BoVector3*)));
- reconnect(i, SIGNAL(signalGetCameraUp(BoVector3*)),
-		this, SLOT(slotGetCameraUp(BoVector3*)));
+ reconnect(i, SIGNAL(signalGetCameraPos(BoVector3Float*)),
+		this, SLOT(slotGetCameraPos(BoVector3Float*)));
+ reconnect(i, SIGNAL(signalGetCameraLookAt(BoVector3Float*)),
+		this, SLOT(slotGetCameraLookAt(BoVector3Float*)));
+ reconnect(i, SIGNAL(signalGetCameraUp(BoVector3Float*)),
+		this, SLOT(slotGetCameraUp(BoVector3Float*)));
  reconnect(i, SIGNAL(signalGetCameraRotation(float*)),
 		this, SLOT(slotGetCameraRotation(float*)));
  reconnect(i, SIGNAL(signalGetCameraRadius(float*)),
@@ -3647,12 +3647,12 @@ void BosonBigDisplayScriptConnector::connectToScript(BosonScript* script)
 		this, SLOT(slotSetUseCameraLimits(bool)));
  reconnect(i, SIGNAL(signalSetCameraMoveMode(int)),
 		this, SLOT(slotSetCameraMoveMode(int)));
- reconnect(i, SIGNAL(signalSetCameraPos(const BoVector3&)),
-		this, SLOT(slotSetCameraPos(const BoVector3&)));
- reconnect(i, SIGNAL(signalSetCameraLookAt(const BoVector3&)),
-		this, SLOT(slotSetCameraLookAt(const BoVector3&)));
- reconnect(i, SIGNAL(signalSetCameraUp(const BoVector3&)),
-		this, SLOT(slotSetCameraUp(const BoVector3&)));
+ reconnect(i, SIGNAL(signalSetCameraPos(const BoVector3Float&)),
+		this, SLOT(slotSetCameraPos(const BoVector3Float&)));
+ reconnect(i, SIGNAL(signalSetCameraLookAt(const BoVector3Float&)),
+		this, SLOT(slotSetCameraLookAt(const BoVector3Float&)));
+ reconnect(i, SIGNAL(signalSetCameraUp(const BoVector3Float&)),
+		this, SLOT(slotSetCameraUp(const BoVector3Float&)));
  reconnect(i, SIGNAL(signalSetCameraRotation(float)),
 		this, SLOT(slotSetCameraRotation(float)));
  reconnect(i, SIGNAL(signalSetCameraRadius(float)),
@@ -3680,60 +3680,60 @@ void BosonBigDisplayScriptConnector::slotRemoveLight(int id)
  mDisplay->removeLight(id);
 }
 
-void BosonBigDisplayScriptConnector::slotGetLightPos(int id, BoVector4* v)
+void BosonBigDisplayScriptConnector::slotGetLightPos(int id, BoVector4Float* v)
 {
  BoLight* l = mDisplay->light(id);
  if (!l) {
 	boError() << k_funcinfo << "no light with id " << id << endl;
-	*v = BoVector4();
+	*v = BoVector4Float();
 	return;
  } else {
 	*v = l->position();
  }
 }
 
-void BosonBigDisplayScriptConnector::slotGetLightAmbient(int id, BoVector4* v)
+void BosonBigDisplayScriptConnector::slotGetLightAmbient(int id, BoVector4Float* v)
 {
  BoLight* l = mDisplay->light(id);
  if (!l) {
 	boError() << k_funcinfo << "no light with id " << id << endl;
-	*v = BoVector4();
+	*v = BoVector4Float();
 	return;
  } else {
 	*v = l->ambient();
  }
 }
 
-void BosonBigDisplayScriptConnector::slotGetLightDiffuse(int id, BoVector4* v)
+void BosonBigDisplayScriptConnector::slotGetLightDiffuse(int id, BoVector4Float* v)
 {
  BoLight* l = mDisplay->light(id);
  if (!l) {
 	boError() << k_funcinfo << "no light with id " << id << endl;
-	*v = BoVector4();
+	*v = BoVector4Float();
 	return;
  } else {
 	*v = l->diffuse();
  }
 }
 
-void BosonBigDisplayScriptConnector::slotGetLightSpecular(int id, BoVector4* v)
+void BosonBigDisplayScriptConnector::slotGetLightSpecular(int id, BoVector4Float* v)
 {
  BoLight* l = mDisplay->light(id);
  if (!l) {
 	boError() << k_funcinfo << "no light with id " << id << endl;
-	*v = BoVector4();
+	*v = BoVector4Float();
 	return;
  } else {
 	*v = l->specular();
  }
 }
 
-void BosonBigDisplayScriptConnector::slotGetLightAttenuation(int id, BoVector3* v)
+void BosonBigDisplayScriptConnector::slotGetLightAttenuation(int id, BoVector3Float* v)
 {
  BoLight* l = mDisplay->light(id);
  if (!l) {
 	boError() << k_funcinfo << "no light with id " << id << endl;
-	*v = BoVector3();
+	*v = BoVector3Float();
 	return;
  } else {
 	*v = l->attenuation();
@@ -3752,7 +3752,7 @@ void BosonBigDisplayScriptConnector::slotGetLightEnabled(int id, bool* e)
  }
 }
 
-void BosonBigDisplayScriptConnector::slotSetLightPos(int id, const BoVector4& v)
+void BosonBigDisplayScriptConnector::slotSetLightPos(int id, const BoVector4Float& v)
 {
  BoLight* l = mDisplay->light(id);
  if (!l) {
@@ -3763,7 +3763,7 @@ void BosonBigDisplayScriptConnector::slotSetLightPos(int id, const BoVector4& v)
  }
 }
 
-void BosonBigDisplayScriptConnector::slotSetLightAmbient(int id, const BoVector4& v)
+void BosonBigDisplayScriptConnector::slotSetLightAmbient(int id, const BoVector4Float& v)
 {
  BoLight* l = mDisplay->light(id);
  if (!l) {
@@ -3774,7 +3774,7 @@ void BosonBigDisplayScriptConnector::slotSetLightAmbient(int id, const BoVector4
  }
 }
 
-void BosonBigDisplayScriptConnector::slotSetLightDiffuse(int id, const BoVector4& v)
+void BosonBigDisplayScriptConnector::slotSetLightDiffuse(int id, const BoVector4Float& v)
 {
  BoLight* l = mDisplay->light(id);
  if (!l) {
@@ -3785,7 +3785,7 @@ void BosonBigDisplayScriptConnector::slotSetLightDiffuse(int id, const BoVector4
  }
 }
 
-void BosonBigDisplayScriptConnector::slotSetLightSpecular(int id, const BoVector4& v)
+void BosonBigDisplayScriptConnector::slotSetLightSpecular(int id, const BoVector4Float& v)
 {
  BoLight* l = mDisplay->light(id);
  if (!l) {
@@ -3796,7 +3796,7 @@ void BosonBigDisplayScriptConnector::slotSetLightSpecular(int id, const BoVector
  }
 }
 
-void BosonBigDisplayScriptConnector::slotSetLightAttenuation(int id, const BoVector3& v)
+void BosonBigDisplayScriptConnector::slotSetLightAttenuation(int id, const BoVector3Float& v)
 {
  BoLight* l = mDisplay->light(id);
  if (!l) {
@@ -3818,19 +3818,19 @@ void BosonBigDisplayScriptConnector::slotSetLightEnabled(int id, bool e)
  }
 }
 
-void BosonBigDisplayScriptConnector::slotGetCameraPos(BoVector3* v)
+void BosonBigDisplayScriptConnector::slotGetCameraPos(BoVector3Float* v)
 {
  BO_CHECK_NULL_RET(mDisplay->camera());
  *v = mDisplay->camera()->cameraPos();
 }
 
-void BosonBigDisplayScriptConnector::slotGetCameraLookAt(BoVector3* v)
+void BosonBigDisplayScriptConnector::slotGetCameraLookAt(BoVector3Float* v)
 {
  BO_CHECK_NULL_RET(mDisplay->camera());
  *v = mDisplay->camera()->lookAt();
 }
 
-void BosonBigDisplayScriptConnector::slotGetCameraUp(BoVector3* v)
+void BosonBigDisplayScriptConnector::slotGetCameraUp(BoVector3Float* v)
 {
  BO_CHECK_NULL_RET(mDisplay->camera());
  *v = mDisplay->camera()->up();
@@ -3866,19 +3866,19 @@ void BosonBigDisplayScriptConnector::slotSetCameraFreeMovement(bool u)
  mDisplay->camera()->setFreeMovement(u);
 }
 
-void BosonBigDisplayScriptConnector::slotSetCameraPos(const BoVector3& v)
+void BosonBigDisplayScriptConnector::slotSetCameraPos(const BoVector3Float& v)
 {
  BO_CHECK_NULL_RET(mDisplay->autoCamera());
  mDisplay->autoCamera()->setCameraPos(v);
 }
 
-void BosonBigDisplayScriptConnector::slotSetCameraLookAt(const BoVector3& v)
+void BosonBigDisplayScriptConnector::slotSetCameraLookAt(const BoVector3Float& v)
 {
  BO_CHECK_NULL_RET(mDisplay->autoCamera());
  mDisplay->autoCamera()->setLookAt(v);
 }
 
-void BosonBigDisplayScriptConnector::slotSetCameraUp(const BoVector3& v)
+void BosonBigDisplayScriptConnector::slotSetCameraUp(const BoVector3Float& v)
 {
  BO_CHECK_NULL_RET(mDisplay->autoCamera());
  mDisplay->autoCamera()->setUp(v);

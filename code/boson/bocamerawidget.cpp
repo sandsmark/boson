@@ -67,9 +67,9 @@
  *
  * Note that no other operation except of these two may have happened!
  **/
-BoVector3 matrixUntranslate(const BoMatrix& rotationMatrix);
+BoVector3Float matrixUntranslate(const BoMatrix& rotationMatrix);
 
-BoVector3 matrixUntranslate(const BoMatrix& rotationMatrix)
+BoVector3Float matrixUntranslate(const BoMatrix& rotationMatrix)
 {
  /*
   * A rotation matrix looks like this:
@@ -102,7 +102,7 @@ BoVector3 matrixUntranslate(const BoMatrix& rotationMatrix)
   */
  if (rotationMatrix[15] != 1.0f) {
 	boError() << k_funcinfo << "not a valid matrix!" << endl;
-	return BoVector3();
+	return BoVector3Float();
  }
  const BoMatrix& m = rotationMatrix;
  // the following is simply the solution to the linear equation system above. i
@@ -128,10 +128,10 @@ BoVector3 matrixUntranslate(const BoMatrix& rotationMatrix)
  float y = (t1m0_t0m1 - m9m0_m8m1 * z) / m5m0_m4m1;
  float x = (t0 - m[8] * z - m[4] * y) / m[0];
 
- return BoVector3(x, y, z);
+ return BoVector3Float(x, y, z);
 }
 
-void extractUp(BoVector3& up, const BoVector3& x, const BoVector3& z)
+void extractUp(BoVector3Float& up, const BoVector3Float& x, const BoVector3Float& z)
 {
 // keep these formulas in mind:
 // (you can get them from x := up cross z , (we assume that no normalizing necessary!)
@@ -491,7 +491,7 @@ void BoPUIGLUCameraWidget::updateFromCamera()
 void BoPUIGLUCameraWidget::slotLookAtChanged()
 {
  BO_CHECK_NULL_RET(camera());
- BoVector3 lookAt(d->mLookAtX->value(), d->mLookAtY->value(), d->mLookAtZ->value());
+ BoVector3Float lookAt(d->mLookAtX->value(), d->mLookAtY->value(), d->mLookAtZ->value());
  camera()->setGluLookAt(camera()->cameraPos(), lookAt, camera()->up());
  emitSignalCameraChanged();
 }
@@ -499,7 +499,7 @@ void BoPUIGLUCameraWidget::slotLookAtChanged()
 void BoPUIGLUCameraWidget::slotCameraPosChanged()
 {
  BO_CHECK_NULL_RET(camera());
- BoVector3 cameraPos(d->mCameraPosX->value(), d->mCameraPosY->value(), d->mCameraPosZ->value());
+ BoVector3Float cameraPos(d->mCameraPosX->value(), d->mCameraPosY->value(), d->mCameraPosZ->value());
  camera()->setGluLookAt(cameraPos, camera()->lookAt(), camera()->up());
  emitSignalCameraChanged();
 }
@@ -507,17 +507,18 @@ void BoPUIGLUCameraWidget::slotCameraPosChanged()
 void BoPUIGLUCameraWidget::slotUpChanged()
 {
  BO_CHECK_NULL_RET(camera());
- BoVector3 up(d->mUpX->value(), d->mUpY->value(), d->mUpZ->value());
+ BoVector3Float up(d->mUpX->value(), d->mUpY->value(), d->mUpZ->value());
  camera()->setGluLookAt(camera()->cameraPos(), camera()->lookAt(), up);
  emitSignalCameraChanged();
 }
 
 void BoPUIGLUCameraWidget::updateMatrixWidget()
 {
- BoVector3 cameraPos = BoVector3(d->mCameraPosX->value(), d->mCameraPosY->value(), d->mCameraPosZ->value());
- BoVector3 lookAt = BoVector3(d->mLookAtX->value(), d->mLookAtY->value(), d->mLookAtZ->value());
- BoVector3 orientation = cameraPos - lookAt;
- d->mOrientation->setText(i18n("%1").arg(orientation.debugString()));
+ BoVector3Float cameraPos = BoVector3Float(d->mCameraPosX->value(), d->mCameraPosY->value(), d->mCameraPosZ->value());
+ BoVector3Float lookAt = BoVector3Float(d->mLookAtX->value(), d->mLookAtY->value(), d->mLookAtZ->value());
+ BoVector3Float orientation = cameraPos - lookAt;
+ QString s = QString("(%1,%2,%3").arg(orientation[0]).arg(orientation[1]).arg(orientation[2]);
+ d->mOrientation->setText(i18n("%1").arg(s));
 }
 
 
@@ -696,10 +697,10 @@ void BoPUIPlainCameraWidget::updateFromCamera()
  BO_CHECK_NULL_RET(camera());
 
  BoMatrix rotationMatrix = camera()->rotationMatrix();
- BoVector3 cameraPos = camera()->cameraPos();
+ BoVector3Float cameraPos = camera()->cameraPos();
 
  if (translateFirst()) {
-	BoVector3 tmp = cameraPos;
+	BoVector3Float tmp = cameraPos;
 	rotationMatrix.transform(&cameraPos, &tmp);
  }
  d->mCameraPosX->setValue(cameraPos.x());
@@ -721,10 +722,10 @@ void BoPUIPlainCameraWidget::slotCameraChanged()
 {
  BO_CHECK_NULL_RET(camera());
 
- BoVector3 lookAt;
- BoVector3 up;
+ BoVector3Float lookAt;
+ BoVector3Float up;
 
- BoVector3 cameraPos(d->mCameraPosX->value(), d->mCameraPosY->value(), d->mCameraPosZ->value());
+ BoVector3Float cameraPos(d->mCameraPosX->value(), d->mCameraPosY->value(), d->mCameraPosZ->value());
  BoMatrix M;
  BoMatrix rotationMatrix;
  rotationMatrix.rotate(d->mRotateX->value(), 1.0f, 0.0f, 0.0f);
@@ -748,7 +749,7 @@ void BoPUIPlainCameraWidget::slotCameraChanged()
 		// but we will never reach this point.
 		return;
 	}
-	BoVector3 tmp = cameraPos;
+	BoVector3Float tmp = cameraPos;
 	inv.transform(&cameraPos, &tmp);
  }
  M.toGluLookAt(&lookAt, &up, cameraPos);
@@ -765,7 +766,7 @@ bool BoPUIPlainCameraWidget::translateFirst() const
 
 void BoPUIPlainCameraWidget::updateMatrixWidget()
 {
- BoVector3 cameraPos = BoVector3(d->mCameraPosX->value(), d->mCameraPosY->value(), d->mCameraPosZ->value());
+ BoVector3Float cameraPos = BoVector3Float(d->mCameraPosX->value(), d->mCameraPosY->value(), d->mCameraPosZ->value());
  BoMatrix rotationMatrix;
  rotationMatrix.rotate(d->mRotateX->value(), 1.0f, 0.0f, 0.0f);
  rotationMatrix.rotate(d->mRotateY->value(), 0.0f, 1.0f, 0.0f);
@@ -803,12 +804,12 @@ void BoPUIPlainCameraWidget::updateMatrixWidget()
  M.loadIdentity();
 
  if (translateFirst()) {
-	BoVector3 tmp = cameraPos;
+	BoVector3Float tmp = cameraPos;
 	rotationMatrix.transform(&cameraPos, &tmp);
  }
 
- BoVector3 lookAt;
- BoVector3 up;
+ BoVector3Float lookAt;
+ BoVector3Float up;
  plainMatrix.toGluLookAt(&lookAt, &up, cameraPos);
 
  M.setLookAtRotation(cameraPos, lookAt, up);
@@ -913,7 +914,7 @@ void BoPUIGameCameraWidget::updateFromCamera()
 void BoPUIGameCameraWidget::slotLookAtChanged()
 {
  BO_CHECK_NULL_RET(camera());
- BoVector3 lookAt(d->mLookAtX->value(), d->mLookAtY->value(), d->mLookAtZ->value());
+ BoVector3Float lookAt(d->mLookAtX->value(), d->mLookAtY->value(), d->mLookAtZ->value());
  camera()->setLookAt(lookAt);
  emitSignalCameraChanged();
 }
@@ -997,7 +998,7 @@ void BoPUIOrbiterCameraWidget::updateFromCamera()
  }
 
 // BoMatrix rotationMatrix = camera()->rotationMatrix();
-// BoVector3 cameraPos = camera()->cameraPos();
+// BoVector3Float cameraPos = camera()->cameraPos();
 
  updateMatrixWidget();
 }
@@ -1255,9 +1256,9 @@ void BoPUILightCameraWidget::slotLightChanged()
  mContext->makeCurrent();
 
  mLight->setDirectional(mDirectional->isChecked());
- mLight->setAmbient(BoVector4(mAmbientR->value(), mAmbientG->value(), mAmbientB->value(), mAmbientA->value()));
- mLight->setDiffuse(BoVector4(mDiffuseR->value(), mDiffuseG->value(), mDiffuseB->value(), mDiffuseA->value()));
- mLight->setSpecular(BoVector4(mSpecularR->value(), mSpecularG->value(), mSpecularB->value(), mSpecularA->value()));
+ mLight->setAmbient(BoVector4Float(mAmbientR->value(), mAmbientG->value(), mAmbientB->value(), mAmbientA->value()));
+ mLight->setDiffuse(BoVector4Float(mDiffuseR->value(), mDiffuseG->value(), mDiffuseB->value(), mDiffuseA->value()));
+ mLight->setSpecular(BoVector4Float(mSpecularR->value(), mSpecularG->value(), mSpecularB->value(), mSpecularA->value()));
  mLight->setConstantAttenuation(mConstantAttenuation->value());
  mLight->setLinearAttenuation(mLinearAttenuation->value());
  mLight->setQuadraticAttenuation(mQuadraticAttenuation->value());

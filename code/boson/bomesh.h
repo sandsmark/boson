@@ -67,19 +67,19 @@ public:
 	/**
 	 * Use @þ normal for all vertices in this face
 	 **/
-	void setAllNormals(const BoVector3 normal)
+	void setAllNormals(const BoVector3Float normal)
 	{
 		setNormal(0, normal);
 		setNormal(1, normal);
 		setNormal(2, normal);
 	}
-	void setNormal(unsigned int i, const BoVector3 normal)
+	void setNormal(unsigned int i, const BoVector3Float normal)
 	{
 		// values > 2 are not allowed
 		i = i % 3;
 		mNormals[i] = normal;
 	}
-	inline const BoVector3& normal(unsigned int i) const
+	inline const BoVector3Float& normal(unsigned int i) const
 	{
 		// we don't do i = i % 3; as of performance reasons
 		return mNormals[i];
@@ -99,7 +99,7 @@ private:
 
 	unsigned long int mSmoothGroup;
 
-	BoVector3 mNormals[3];
+	BoVector3Float mNormals[3];
 };
 
 /**
@@ -246,7 +246,7 @@ public:
 	 * @param vertex The vertex in the face this normal applies to. This
 	 * must be 0..2 or -1 for all vertices.
 	 **/
-	void setNormal(unsigned int face, int vertex, const BoVector3& normal);
+	void setNormal(unsigned int face, int vertex, const BoVector3Float& normal);
 
 	/**
 	 * Called by @ref movePoints. This adds @p moveBy to every @ref
@@ -378,7 +378,7 @@ public:
 	// AB: if BoLODBuilder ever needs to add points/vertices, we should add
 	// a addVertex() method, which _appends_ a vertex to the internal array.
 	// existing vertices should not be removed.
-	void setVertices(const QValueVector<BoVector3>& vertices);
+	void setVertices(const QValueVector<BoVector3Float>& vertices);
 
 	void calculateNormals();
 
@@ -389,7 +389,7 @@ public:
 	 *
 	 * Note that the third component of every texel is discarded.
 	 **/
-	void setTexels(const QValueVector<BoVector3>& texels);
+	void setTexels(const QValueVector<BoVector3Float>& texels);
 
 	/**
 	 * Try to connect all faces in the mesh, so that we can use
@@ -475,8 +475,8 @@ public:
 	 * <em>global</em> to the model (as in @ref BoFace::pointIndex), while
 	 * this method uses indices that are local to this mesh.
 	 **/
-	BoVector3 vertex(unsigned int p) const;
-	BoVector3 texel(unsigned int p) const;
+	BoVector3Float vertex(unsigned int p) const;
+	BoVector3Float texel(unsigned int p) const;
 
 
 	/**
@@ -542,7 +542,7 @@ public:
 	 * @param vertices Must be an array of 8. The vertices of the bounding
 	 * box are returned here.
 	 **/
-	void getBoundingBox(BoVector3* vertices) const;
+	void getBoundingBox(BoVector3Float* vertices) const;
 
 	/**
 	 * Return the bounding box after transforming the mesh by @p matrix. See
@@ -598,11 +598,11 @@ protected:
 	 * with lod at all.
 	 * @param lod See @ref levelOfDetail
 	 **/
-	BoVector3 vertex(unsigned int face, unsigned int i, unsigned int lod) const;
+	BoVector3Float vertex(unsigned int face, unsigned int i, unsigned int lod) const;
 
 	void calculateNormals(unsigned int lod);
 
-	void setNormal(unsigned int face, int vertex, const BoVector3& normal);
+	void setNormal(unsigned int face, int vertex, const BoVector3Float& normal);
 
 	/**
 	 * Calculate values for @ref maxZPoint and similar functions.

@@ -29,7 +29,6 @@ class BosonModel;
 class BosonAnimation;
 class BoFrame;
 class Player;
-class BoVector3;
 class BosonItem;
 
 class QColor;

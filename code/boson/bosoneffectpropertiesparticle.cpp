@@ -128,10 +128,10 @@ bool BosonEffectPropertiesParticleGeneric::load(KSimpleConfig* cfg, const QStrin
     return false;
   }
 
-  mMinVelo = BosonConfig::readBoVector3Entry(cfg, "MinVelocity", mMinVelo);
-  mMaxVelo = BosonConfig::readBoVector3Entry(cfg, "MaxVelocity", mMaxVelo);
-  mMinPos = BosonConfig::readBoVector3Entry(cfg, "MinPos", mMinPos);
-  mMaxPos = BosonConfig::readBoVector3Entry(cfg, "MaxPos", mMaxPos);
+  mMinVelo = BosonConfig::readBoVector3FixedEntry(cfg, "MinVelocity", mMinVelo);
+  mMaxVelo = BosonConfig::readBoVector3FixedEntry(cfg, "MaxVelocity", mMaxVelo);
+  mMinPos = BosonConfig::readBoVector3FixedEntry(cfg, "MinPos", mMinPos);
+  mMaxPos = BosonConfig::readBoVector3FixedEntry(cfg, "MaxPos", mMaxPos);
   mNormalizePos = cfg->readBoolEntry("NormalizePos", mNormalizePos);
   if(mNormalizePos)
   {
@@ -144,8 +144,8 @@ bool BosonEffectPropertiesParticleGeneric::load(KSimpleConfig* cfg, const QStrin
     mMinVeloScale = (float)(cfg->readDoubleNumEntry("MinVeloScale", mMinVeloScale));
     mMaxVeloScale = (float)(cfg->readDoubleNumEntry("MaxVeloScale", mMaxVeloScale));
   }
-  mStartColor = BosonConfig::readBoVector4Entry(cfg, "StartColor", mStartColor);
-  mEndColor = BosonConfig::readBoVector4Entry(cfg, "EndColor", mEndColor);
+  mStartColor = BosonConfig::readBoVector4FloatEntry(cfg, "StartColor", mStartColor);
+  mEndColor = BosonConfig::readBoVector4FloatEntry(cfg, "EndColor", mEndColor);
   mMinLife = (float)(cfg->readDoubleNumEntry("MinLife", mMinLife));
   mMaxLife = (float)(cfg->readDoubleNumEntry("MaxLife", mMaxLife));
   mMaxNum = cfg->readNumEntry("MaxNum", mMaxNum);
@@ -184,10 +184,10 @@ bool BosonEffectPropertiesParticleGeneric::load(KSimpleConfig* cfg, const QStrin
   return true;
 }
 
-BosonEffect* BosonEffectPropertiesParticleGeneric::newEffect(const BoVector3& pos, const BoVector3& rot) const
+BosonEffect* BosonEffectPropertiesParticleGeneric::newEffect(const BoVector3Fixed& pos, const BoVector3Fixed& rot) const
 {
   BosonEffectParticleGeneric* e = new BosonEffectParticleGeneric(this, mMaxNum, mTextures);
-  BoVector3 worldpos = pos;
+  BoVector3Fixed worldpos = pos;
   worldpos.canvasToWorld();
   e->setPosition(worldpos);
   e->setAge(mAge);
@@ -213,7 +213,7 @@ void BosonEffectPropertiesParticleGeneric::initParticle(BosonEffectParticle* eff
   particle->maxage = particle->life;
   particle->color = mStartColor;
   particle->size = mStartSize;
-  BoVector3 pos;  // particle's relative position to particle system
+  BoVector3Float pos;  // particle's relative position to particle system
   pos.set(BosonEffect::getFloat(mMinPos[0], mMaxPos[0]), BosonEffect::getFloat(mMinPos[1], mMaxPos[1]),
       BosonEffect::getFloat(mMinPos[2], mMaxPos[2]));
   if(mNormalizePos)
@@ -228,23 +228,25 @@ void BosonEffectPropertiesParticleGeneric::initParticle(BosonEffectParticle* eff
   BosonEffectParticleGeneric* e = (BosonEffectParticleGeneric*)effect;
   if(e->isRotated())
   {
-    BoVector3 pos2 = pos;
-    BoVector3 velo(BosonEffect::getFloat(mMinVelo[0], mMaxVelo[0]),
+    BoVector3Float pos2 = pos;
+    BoVector3Float velo(BosonEffect::getFloat(mMinVelo[0], mMaxVelo[0]),
         BosonEffect::getFloat(mMinVelo[1], mMaxVelo[1]), BosonEffect::getFloat(mMinVelo[2], mMaxVelo[2]));
     e->matrix().transform(&pos, &pos2);
-    e->matrix().transform(&(particle->velo), &velo);
+    BoVector3Float particleVelo = particle->velo.toFloat();
+    e->matrix().transform(&particleVelo, &velo);
+    particle->velo = particleVelo.toFixed();
   }
   else
   {
     particle->velo.set(BosonEffect::getFloat(mMinVelo[0], mMaxVelo[0]),
         BosonEffect::getFloat(mMinVelo[1], mMaxVelo[1]), BosonEffect::getFloat(mMinVelo[2], mMaxVelo[2]));
   }
-  particle->pos += pos;
+  particle->pos += pos.toFixed();
   if(mNormalizeVelo)
   {
     particle->velo.scale(BosonEffect::getFloat(mMinVeloScale, mMaxVeloScale) / particle->velo.length());
   }
-  particle->velo += (wind() * e->mass());
+  particle->velo += (wind().toFixed() * e->mass());
 }
 
 void BosonEffectPropertiesParticleGeneric::updateParticle(BosonEffectParticle* effect, BosonParticle* p) const
@@ -305,12 +307,12 @@ bool BosonEffectPropertiesParticleTrail::load(KSimpleConfig* cfg, const QString&
 
   mSpacing = (float)(cfg->readDoubleNumEntry("Spacing", mSpacing)) / 48.0f;
   mMass = (float)(cfg->readDoubleNumEntry("Mass", mMass));
-  mMinOffset = BosonConfig::readBoVector3Entry(cfg, "MinOffset", mMinOffset);
-  mMaxOffset = BosonConfig::readBoVector3Entry(cfg, "MaxOffset", mMaxOffset);
-  mMinVelo = BosonConfig::readBoVector3Entry(cfg, "MinVelocity", mMinVelo);
-  mMaxVelo = BosonConfig::readBoVector3Entry(cfg, "MaxVelocity", mMaxVelo);
-  mStartColor = BosonConfig::readBoVector4Entry(cfg, "StartColor", mStartColor);
-  mEndColor = BosonConfig::readBoVector4Entry(cfg, "EndColor", mEndColor);
+  mMinOffset = BosonConfig::readBoVector3FixedEntry(cfg, "MinOffset", mMinOffset);
+  mMaxOffset = BosonConfig::readBoVector3FixedEntry(cfg, "MaxOffset", mMaxOffset);
+  mMinVelo = BosonConfig::readBoVector3FixedEntry(cfg, "MinVelocity", mMinVelo);
+  mMaxVelo = BosonConfig::readBoVector3FixedEntry(cfg, "MaxVelocity", mMaxVelo);
+  mStartColor = BosonConfig::readBoVector4FloatEntry(cfg, "StartColor", mStartColor);
+  mEndColor = BosonConfig::readBoVector4FloatEntry(cfg, "EndColor", mEndColor);
   mStartSize = (float)(cfg->readDoubleNumEntry("StartSize", mStartSize));
   mEndSize = (float)(cfg->readDoubleNumEntry("EndSize", mEndSize));
   // * 20  because in units' config files is speed/tick, but here we want speed/sec
@@ -343,11 +345,11 @@ bool BosonEffectPropertiesParticleTrail::load(KSimpleConfig* cfg, const QString&
   return true;
 }
 
-BosonEffect* BosonEffectPropertiesParticleTrail::newEffect(const BoVector3& pos, const BoVector3& rot) const
+BosonEffect* BosonEffectPropertiesParticleTrail::newEffect(const BoVector3Fixed& pos, const BoVector3Fixed& rot) const
 {
   // Calculate maximum number of particles that system can have
   int maxparticles = (int)(mMaxSpeed * mMaxLife / mSpacing) + 1;
-  BoVector3 worldpos = pos;
+  BoVector3Fixed worldpos = pos;
   worldpos.canvasToWorld();
 
   BosonEffectParticleTrail* e = new BosonEffectParticleTrail(this, maxparticles, mTextures, worldpos);
@@ -371,17 +373,21 @@ void BosonEffectPropertiesParticleTrail::initParticle(BosonEffectParticle* effec
   particle->maxage = particle->life;
   particle->color = mStartColor;
   particle->size = mStartSize;
-  BoVector3 offset;  // particle's relative position to particle system
+  BoVector3Fixed offset;  // particle's relative position to particle system
   offset.set(BosonEffect::getFloat(mMinOffset[0], mMaxOffset[0]), BosonEffect::getFloat(mMinOffset[1], mMaxOffset[1]),
       BosonEffect::getFloat(mMinOffset[2], mMaxOffset[2]));
   BosonEffectParticleTrail* e = (BosonEffectParticleTrail*)effect;
   if(e->isRotated())
   {
-    BoVector3 offset2 = offset;
-    BoVector3 velo(BosonEffect::getFloat(mMinVelo[0], mMaxVelo[0]),
+    BoVector3Float _offset = offset.toFloat();
+    BoVector3Float offset2 = _offset;
+    BoVector3Float velo(BosonEffect::getFloat(mMinVelo[0], mMaxVelo[0]),
         BosonEffect::getFloat(mMinVelo[1], mMaxVelo[1]), BosonEffect::getFloat(mMinVelo[2], mMaxVelo[2]));
-    e->matrix().transform(&offset, &offset2);
-    e->matrix().transform(&(particle->velo), &velo);
+    e->matrix().transform(&_offset, &offset2);
+    BoVector3Float particleVelo;
+    e->matrix().transform(&particleVelo, &velo);
+    particle->velo = particleVelo.toFixed();
+    offset = _offset.toFixed();
   }
   else
   {
@@ -389,7 +395,7 @@ void BosonEffectPropertiesParticleTrail::initParticle(BosonEffectParticle* effec
         BosonEffect::getFloat(mMinVelo[1], mMaxVelo[1]), BosonEffect::getFloat(mMinVelo[2], mMaxVelo[2]));
   }
   particle->pos += offset;
-  particle->velo += (wind() * e->mass());
+  particle->velo += (wind().toFixed() * e->mass());
 }
 
 void BosonEffectPropertiesParticleTrail::updateParticle(BosonEffectParticle* effect, BosonParticle* p) const

@@ -76,8 +76,8 @@ public slots:
 
 protected:
 	//AB: use BoMouseEvent as 1st parameter
-	bool actionPlace(const BoVector3& pos);
-	bool actionChangeHeight(const BoVector3& pos, bool up);
+	bool actionPlace(const BoVector3Fixed& pos);
+	bool actionChangeHeight(const BoVector3Fixed& pos, bool up);
 
 	/**
 	 * Editor mode can select just everything, even destroyed units

@@ -80,7 +80,7 @@ BosonLocalPlayerInput* BosonBigDisplayInputBase::localPlayerInput() const
  return (BosonLocalPlayerInput*)localPlayerIO()->findRttiIO(BosonLocalPlayerInput::LocalPlayerInputRTTI);
 }
 
-const BoVector3& BosonBigDisplayInputBase::cursorCanvasVector() const
+const BoVector3Fixed& BosonBigDisplayInputBase::cursorCanvasVector() const
 {
  return bigDisplay()->cursorCanvasVector();
 }

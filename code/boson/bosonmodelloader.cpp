@@ -524,8 +524,8 @@ bool BosonModelLoaderOptimizer::mergeMeshes(QValueList<const BoMesh*> meshes)
  mesh->setIsTeamColor(mesh0->isTeamColor());
 
  mesh->allocatePoints(points);
- QValueVector<BoVector3> vertices(points);
- QValueVector<BoVector3> texels(points);
+ QValueVector<BoVector3Float> vertices(points);
+ QValueVector<BoVector3Float> texels(points);
  unsigned int pointIndex = 0;
  unsigned int faceIndex = 0;
  for (it = meshes.begin(); it != meshes.end(); ++it) {

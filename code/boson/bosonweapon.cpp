@@ -73,7 +73,7 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg, bool full)
   mCanShootAtAirUnits = cfg->readBoolEntry("CanShootAtAirUnits", false);
   mCanShootAtLandUnits = cfg->readBoolEntry("CanShootAtLandUnits", false);
   mHeight = cfg->readDoubleNumEntry("Height", 0.25);
-  mOffset = BosonConfig::readBoVector3Entry(cfg, "Offset");
+  mOffset = BosonConfig::readBoVector3FixedEntry(cfg, "Offset");
   mAutoUse = cfg->readBoolEntry("AutoUse", true);
   if(mAutoUse && (mShotType == BosonShot::Mine || mShotType == BosonShot::Bomb))
   {
@@ -145,7 +145,7 @@ void BosonWeaponProperties::reset()
   mCanShootAtAirUnits = false;
   mCanShootAtLandUnits = false;
   mHeight = 0.25;
-  mOffset = BoVector3();
+  mOffset = BoVector3Fixed();
   mShootEffectIds.clear();
   mFlyEffectIds.clear();
   mHitEffectIds.clear();
@@ -156,7 +156,7 @@ void BosonWeaponProperties::reset()
   mSounds.insert(SoundWeaponHit, "hit");
 }
 
-BosonShot* BosonWeaponProperties::newShot(Unit* attacker, BoVector3 pos, BoVector3 target) const
+BosonShot* BosonWeaponProperties::newShot(Unit* attacker, BoVector3Fixed pos, BoVector3Fixed target) const
 {
   if(!attacker)
   {
@@ -176,14 +176,16 @@ BosonShot* BosonWeaponProperties::newShot(Unit* attacker, BoVector3 pos, BoVecto
   }
   else if(shotType() == BosonShot::Missile)
   {
-    BoVector3 realpos;
+    BoVector3Float realPosFloat;
     BoMatrix m;
     m.rotate(attacker->rotation(), 0, 0, 1);
-    m.transform(&realpos, &mOffset);
-    realpos += pos;
+    BoVector3Float offset = mOffset.toFloat();
+    m.transform(&realPosFloat, &offset);
+    BoVector3Fixed realPos = realPosFloat.toFixed();
+    realPos += pos;
     ItemType type(BosonShot::Missile, unitProperties()->typeId(), id());
-    s = (BosonShot*)canvas->createNewItem(RTTI::Shot, attacker->owner(), type, realpos);
-    ((BosonShotMissile*)s)->init(realpos, target);
+    s = (BosonShot*)canvas->createNewItem(RTTI::Shot, attacker->owner(), type, realPos);
+    ((BosonShotMissile*)s)->init(realPos, target);
   }
   else if(shotType() == BosonShot::Mine)
   {
@@ -193,14 +195,16 @@ BosonShot* BosonWeaponProperties::newShot(Unit* attacker, BoVector3 pos, BoVecto
   }
   else if(shotType() == BosonShot::Bomb)
   {
-    BoVector3 realpos;
+    BoVector3Float realPosFloat;
     BoMatrix m;
     m.rotate(attacker->rotation(), 0, 0, 1);
-    m.transform(&realpos, &mOffset);
-    realpos += pos;
+    BoVector3Float offset = mOffset.toFloat();
+    m.transform(&realPosFloat, &offset);
+    BoVector3Fixed realPos = realPosFloat.toFixed();
+    realPos += pos;
     ItemType type(BosonShot::Bomb, unitProperties()->typeId(), id());
     s = (BosonShot*)canvas->createNewItem(RTTI::Shot, attacker->owner(), type, pos);
-    ((BosonShotBomb*)s)->init(realpos);
+    ((BosonShotBomb*)s)->init(realPos);
   }
   else
   {
@@ -210,17 +214,17 @@ BosonShot* BosonWeaponProperties::newShot(Unit* attacker, BoVector3 pos, BoVecto
   return s;
 }
 
-QPtrList<BosonEffect> BosonWeaponProperties::newShootEffects(BoVector3 pos, bofixed rotation) const
+QPtrList<BosonEffect> BosonWeaponProperties::newShootEffects(BoVector3Fixed pos, bofixed rotation) const
 {
-  return BosonEffectProperties::newEffects(&mShootEffects, pos, BoVector3(0, 0, rotation));
+  return BosonEffectProperties::newEffects(&mShootEffects, pos, BoVector3Fixed(0, 0, rotation));
 }
 
-QPtrList<BosonEffect> BosonWeaponProperties::newFlyEffects(BoVector3 pos, bofixed rotation) const
+QPtrList<BosonEffect> BosonWeaponProperties::newFlyEffects(BoVector3Fixed pos, bofixed rotation) const
 {
-  return BosonEffectProperties::newEffects(&mFlyEffects, pos, BoVector3(0, 0, rotation));
+  return BosonEffectProperties::newEffects(&mFlyEffects, pos, BoVector3Fixed(0, 0, rotation));
 }
 
-QPtrList<BosonEffect> BosonWeaponProperties::newHitEffects(BoVector3 pos) const
+QPtrList<BosonEffect> BosonWeaponProperties::newHitEffects(BoVector3Fixed pos) const
 {
   return BosonEffectProperties::newEffects(&mHitEffects, pos);
 }
@@ -346,20 +350,20 @@ bool BosonWeapon::canShootAt(Unit* u) const
 
 void BosonWeapon::shoot(Unit* u)
 {
-  shoot(BoVector3(u->centerX(), u->centerY(), u->z()) + u->unitProperties()->hitPoint());
+  shoot(BoVector3Fixed(u->centerX(), u->centerY(), u->z()) + u->unitProperties()->hitPoint());
 }
 
-void BosonWeapon::shoot(const BoVector3& target)
+void BosonWeapon::shoot(const BoVector3Fixed& target)
 {
   if (!unit())
   {
     boError() << k_funcinfo << "NULL unit" << endl;
     return;
   }
-  shoot(BoVector3(unit()->centerX(), unit()->centerY(), unit()->z()), target);
+  shoot(BoVector3Fixed(unit()->centerX(), unit()->centerY(), unit()->z()), target);
 }
 
-void BosonWeapon::shoot(const BoVector3& pos, const BoVector3& target)
+void BosonWeapon::shoot(const BoVector3Fixed& pos, const BoVector3Fixed& target)
 {
   if (!unit())
   {
@@ -379,10 +383,10 @@ bool BosonWeapon::layMine()
     boDebug() << k_funcinfo << "weapon is not minelayer or not reloaded" << endl;
     return false;
   }
-  BoVector3 pos(unit()->centerX(), unit()->centerY(), 0);
+  BoVector3Fixed pos(unit()->centerX(), unit()->centerY(), 0);
   pos.setZ(unit()->canvas()->heightAtPoint(pos.x(), pos.y()));
   // Substract half the object size from pos, so that mine's center will be at pos
-  pos += BoVector3(-0.25, -0.25, 0);  // FIXME: use real object size
+  pos += BoVector3Fixed(-0.25, -0.25, 0);  // FIXME: use real object size
   shoot(pos, pos);
   boDebug() << k_funcinfo << "done" << endl;
   return true;
@@ -395,9 +399,9 @@ bool BosonWeapon::dropBomb()
     boDebug() << k_funcinfo << "weapon is not bomb or not reloaded" << endl;
     return false;
   }
-  BoVector3 pos(unit()->centerX(), unit()->centerY(), unit()->z());
+  BoVector3Fixed pos(unit()->centerX(), unit()->centerY(), unit()->z());
   // Substract half the object size from pos, so that bomb's center will be at pos
-  pos += BoVector3(-0.25, -0.25, 0);  // FIXME: use real object size
+  pos += BoVector3Fixed(-0.25, -0.25, 0);  // FIXME: use real object size
   shoot(pos, pos);
   boDebug() << k_funcinfo << "done" << endl;
   return true;

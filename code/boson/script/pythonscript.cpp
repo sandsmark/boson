@@ -990,7 +990,7 @@ PyObject* PythonScript::py_setCameraLookAt(PyObject*, PyObject* args)
   {
     return 0;
   }
-  currentScript()->setCameraLookAt(BoVector3(x, y, z));
+  currentScript()->setCameraLookAt(BoVector3Float(x, y, z));
   Py_INCREF(Py_None);
   return Py_None;
 }
@@ -1003,7 +1003,7 @@ PyObject* PythonScript::py_setCameraPos(PyObject*, PyObject* args)
   {
     return 0;
   }
-  currentScript()->setCameraPos(BoVector3(x, y, z));
+  currentScript()->setCameraPos(BoVector3Float(x, y, z));
   Py_INCREF(Py_None);
   return Py_None;
 }
@@ -1016,7 +1016,7 @@ PyObject* PythonScript::py_setCameraUp(PyObject*, PyObject* args)
   {
     return 0;
   }
-  currentScript()->setCameraUp(BoVector3(x, y, z));
+  currentScript()->setCameraUp(BoVector3Float(x, y, z));
   Py_INCREF(Py_None);
   return Py_None;
 }
@@ -1063,21 +1063,21 @@ PyObject* PythonScript::py_commitCameraChanges(PyObject*, PyObject* args)
 PyObject* PythonScript::py_cameraLookAt(PyObject*, PyObject*)
 {
   BO_CHECK_NULL_RET0(currentScript());
-  BoVector3 pos = currentScript()->cameraLookAt();
+  BoVector3Float pos = currentScript()->cameraLookAt();
   return Py_BuildValue((char*)"[f, f, f]", pos.x(), pos.y(), pos.z());
 }
 
 PyObject* PythonScript::py_cameraPos(PyObject*, PyObject*)
 {
   BO_CHECK_NULL_RET0(currentScript());
-  BoVector3 pos = currentScript()->cameraPos();
+  BoVector3Float pos = currentScript()->cameraPos();
   return Py_BuildValue((char*)"[f, f, f]", pos.x(), pos.y(), pos.z());
 }
 
 PyObject* PythonScript::py_cameraUp(PyObject*, PyObject*)
 {
   BO_CHECK_NULL_RET0(currentScript());
-  BoVector3 pos = currentScript()->cameraUp();
+  BoVector3Float pos = currentScript()->cameraUp();
   return Py_BuildValue((char*)"[f, f, f]", pos.x(), pos.y(), pos.z());
 }
 
@@ -1110,7 +1110,7 @@ PyObject* PythonScript::py_lightPos(PyObject*, PyObject* args)
     return 0;
   }
 
-  BoVector4 pos = currentScript()->lightPos(id);
+  BoVector4Float pos = currentScript()->lightPos(id);
   return Py_BuildValue((char*)"(ffff)", pos.x(), pos.y(), pos.z(), pos.w());
 }
 
@@ -1123,7 +1123,7 @@ PyObject* PythonScript::py_lightAmbient(PyObject*, PyObject* args)
     return 0;
   }
 
-  BoVector4 a = currentScript()->lightAmbient(id);
+  BoVector4Float a = currentScript()->lightAmbient(id);
   return Py_BuildValue((char*)"(ffff)", a.x(), a.y(), a.z(), a.w());
 }
 
@@ -1136,7 +1136,7 @@ PyObject* PythonScript::py_lightDiffuse(PyObject*, PyObject* args)
     return 0;
   }
 
-  BoVector4 d = currentScript()->lightDiffuse(id);
+  BoVector4Float d = currentScript()->lightDiffuse(id);
   return Py_BuildValue((char*)"(ffff)", d.x(), d.y(), d.z(), d.w());
 }
 
@@ -1149,7 +1149,7 @@ PyObject* PythonScript::py_lightSpecular(PyObject*, PyObject* args)
     return 0;
   }
 
-  BoVector4 s = currentScript()->lightSpecular(id);
+  BoVector4Float s = currentScript()->lightSpecular(id);
   return Py_BuildValue((char*)"(ffff)", s.x(), s.y(), s.z(), s.w());
 }
 
@@ -1162,7 +1162,7 @@ PyObject* PythonScript::py_lightAttenuation(PyObject*, PyObject* args)
     return 0;
   }
 
-  BoVector3 a = currentScript()->lightAttenuation(id);
+  BoVector3Float a = currentScript()->lightAttenuation(id);
   return Py_BuildValue((char*)"(fff)", a.x(), a.y(), a.z());
 }
 
@@ -1189,7 +1189,7 @@ PyObject* PythonScript::py_setLightPos(PyObject*, PyObject* args)
     return 0;
   }
 
-  currentScript()->setLightPos(id, BoVector4(x, y, z, w));
+  currentScript()->setLightPos(id, BoVector4Float(x, y, z, w));
 
   Py_INCREF(Py_None);
   return Py_None;
@@ -1205,7 +1205,7 @@ PyObject* PythonScript::py_setLightAmbient(PyObject*, PyObject* args)
     return 0;
   }
 
-  currentScript()->setLightAmbient(id, BoVector4(r, g, b, a));
+  currentScript()->setLightAmbient(id, BoVector4Float(r, g, b, a));
 
   Py_INCREF(Py_None);
   return Py_None;
@@ -1221,7 +1221,7 @@ PyObject* PythonScript::py_setLightDiffuse(PyObject*, PyObject* args)
     return 0;
   }
 
-  currentScript()->setLightDiffuse(id, BoVector4(r, g, b, a));
+  currentScript()->setLightDiffuse(id, BoVector4Float(r, g, b, a));
 
   Py_INCREF(Py_None);
   return Py_None;
@@ -1237,7 +1237,7 @@ PyObject* PythonScript::py_setLightSpecular(PyObject*, PyObject* args)
     return 0;
   }
 
-  currentScript()->setLightSpecular(id, BoVector4(r, g, b, a));
+  currentScript()->setLightSpecular(id, BoVector4Float(r, g, b, a));
 
   Py_INCREF(Py_None);
   return Py_None;
@@ -1253,7 +1253,7 @@ PyObject* PythonScript::py_setLightAttenuation(PyObject*, PyObject* args)
     return 0;
   }
 
-  currentScript()->setLightAttenuation(id, BoVector3(c, l, q));
+  currentScript()->setLightAttenuation(id, BoVector3Float(c, l, q));
 
   Py_INCREF(Py_None);
   return Py_None;
@@ -1355,7 +1355,7 @@ PyObject* PythonScript::py_addEffect(PyObject*, PyObject* args)
   {
     return 0;
   }
-  BosonScript::addEffect(id, BoVector3(x, y, z), rot);
+  BosonScript::addEffect(id, BoVector3Fixed(x, y, z), rot);
   Py_INCREF(Py_None);
   return Py_None;
 }

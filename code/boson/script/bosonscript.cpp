@@ -353,7 +353,7 @@ void BosonScript::mineUnit(int player, int id, float x, float y)
   // TODO: it sucks to do this here, perhaps we could have something like a
   //  MoveMineAt message which orders unit to move at specific point, not at
   //  some unit (then Boson would take care of finding resource mine unit).
-  Unit* resourceUnit = canvas()->findUnitAt(BoVector3(x, y, 0.0));
+  Unit* resourceUnit = canvas()->findUnitAt(BoVector3Fixed(x, y, 0.0));
   if(!resourceUnit)
   {
     boError() << k_funcinfo << "No units found at (" << x << "; " << y << ")" << endl;
@@ -975,17 +975,17 @@ void BosonScript::setCameraMoveMode(int mode)
   interface()->setCameraMoveMode(mode);
 }
 
-void BosonScript::setCameraPos(const BoVector3& pos)
+void BosonScript::setCameraPos(const BoVector3Float& pos)
 {
   interface()->setCameraPos(pos);
 }
 
-void BosonScript::setCameraLookAt(const BoVector3& pos)
+void BosonScript::setCameraLookAt(const BoVector3Float& pos)
 {
   interface()->setCameraLookAt(pos);
 }
 
-void BosonScript::setCameraUp(const BoVector3& up)
+void BosonScript::setCameraUp(const BoVector3Float& up)
 {
   interface()->setCameraUp(up);
 }
@@ -1005,17 +1005,17 @@ void BosonScript::commitCameraChanges(int ticks)
   interface()->commitCameraChanges(ticks);
 }
 
-BoVector3 BosonScript::cameraLookAt()
+BoVector3Float BosonScript::cameraLookAt()
 {
   return interface()->cameraLookAt();
 }
 
-BoVector3 BosonScript::cameraPos()
+BoVector3Float BosonScript::cameraPos()
 {
   return interface()->cameraPos();
 }
 
-BoVector3 BosonScript::cameraUp()
+BoVector3Float BosonScript::cameraUp()
 {
   return interface()->cameraUp();
 }
@@ -1036,27 +1036,27 @@ float BosonScript::cameraZ()
 }
 
 /*****  Light methods  *****/
-BoVector4 BosonScript::lightPos(int id)
+BoVector4Float BosonScript::lightPos(int id)
 {
   return interface()->lightPos(id);
 }
 
-BoVector4 BosonScript::lightAmbient(int id)
+BoVector4Float BosonScript::lightAmbient(int id)
 {
   return interface()->lightAmbient(id);
 }
 
-BoVector4 BosonScript::lightDiffuse(int id)
+BoVector4Float BosonScript::lightDiffuse(int id)
 {
   return interface()->lightDiffuse(id);
 }
 
-BoVector4 BosonScript::lightSpecular(int id)
+BoVector4Float BosonScript::lightSpecular(int id)
 {
   return interface()->lightSpecular(id);
 }
 
-BoVector3 BosonScript::lightAttenuation(int id)
+BoVector3Float BosonScript::lightAttenuation(int id)
 {
   return interface()->lightAttenuation(id);
 }
@@ -1066,27 +1066,27 @@ bool BosonScript::lightEnabled(int id)
   return interface()->lightEnabled(id);
 }
 
-void BosonScript::setLightPos(int id, BoVector4 pos)
+void BosonScript::setLightPos(int id, BoVector4Float pos)
 {
   interface()->setLightPos(id, pos);
 }
 
-void BosonScript::setLightAmbient(int id, BoVector4 a)
+void BosonScript::setLightAmbient(int id, BoVector4Float a)
 {
   interface()->setLightAmbient(id, a);
 }
 
-void BosonScript::setLightDiffuse(int id, BoVector4 d)
+void BosonScript::setLightDiffuse(int id, BoVector4Float d)
 {
   interface()->setLightDiffuse(id, d);
 }
 
-void BosonScript::setLightSpecular(int id, BoVector4 s)
+void BosonScript::setLightSpecular(int id, BoVector4Float s)
 {
   interface()->setLightSpecular(id, s);
 }
 
-void BosonScript::setLightAttenuation(int id, BoVector3 a)
+void BosonScript::setLightAttenuation(int id, BoVector3Float a)
 {
   interface()->setLightAttenuation(id, a);
 }
@@ -1143,7 +1143,7 @@ void BosonScript::findPath(int x1, int y1, int x2, int y2)
 #endif
 }
 
-void BosonScript::addEffect(unsigned int id, BoVector3 pos, float zrot)
+void BosonScript::addEffect(unsigned int id, BoVector3Fixed pos, bofixed zrot)
 {
   if(!game())
   {
@@ -1157,7 +1157,7 @@ void BosonScript::addEffect(unsigned int id, BoVector3 pos, float zrot)
     boError() << k_funcinfo << "No effect properties with id " << id << endl;
     return;
   }
-  QPtrList<BosonEffect> list = BosonEffectProperties::newEffects(prop, pos, BoVector3(0, 0, zrot));
+  QPtrList<BosonEffect> list = BosonEffectProperties::newEffects(prop, pos, BoVector3Fixed(0, 0, zrot));
   BosonCanvas* c = boGame->canvasNonConst();
   c->addEffects(list);
 }

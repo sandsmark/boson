@@ -96,12 +96,12 @@ BosonItem* BosonCollisions::findItemAtCell(int x, int y, bofixed z, bool unitOnl
  return ret;
 }
 
-BosonItem* BosonCollisions::findItemAt(const BoVector3& pos) const
+BosonItem* BosonCollisions::findItemAt(const BoVector3Fixed& pos) const
 {
  return findItemAtCell((int)(pos.x()), (int)(pos.y()), pos.z(), false);
 }
 
-Unit* BosonCollisions::findUnitAt(const BoVector3 & pos) const
+Unit* BosonCollisions::findUnitAt(const BoVector3Fixed& pos) const
 {
  return findUnitAtCell((int)(pos.x()), (int)(pos.y()), pos.z());
 }
@@ -133,7 +133,7 @@ QValueList<Unit*> BosonCollisions::unitCollisionsInRange(const BoVector2Fixed& p
  return list;
 }
 
-QValueList<Unit*> BosonCollisions::unitCollisionsInSphere(const BoVector3& pos, bofixed radius) const
+QValueList<Unit*> BosonCollisions::unitCollisionsInSphere(const BoVector3Fixed& pos, bofixed radius) const
 {
  // FIXME: code duplicated from unitCollisionsInRange
  boDebug(310) << k_funcinfo << endl;
@@ -290,7 +290,7 @@ BoItemList* BosonCollisions::collisions(const BoVector2Fixed& pos) const
  return collisionsAtCell((int)pos.x(), (int)pos.y());
 }
 
-QValueList<Unit*> BosonCollisions::collisionsInBox(const BoVector3& v1, const BoVector3& v2, BosonItem* exclude) const
+QValueList<Unit*> BosonCollisions::collisionsInBox(const BoVector3Fixed& v1, const BoVector3Fixed& v2, BosonItem* exclude) const
 {
  boDebug() << k_funcinfo << "v1: (" << v1.x() << "; " << v1.y() << "; " << v1.z() <<
 		");  v2: (" << v2.x() << "; " << v2.y() << "; " << v2.z() << ")" << endl;

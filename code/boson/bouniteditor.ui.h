@@ -449,7 +449,7 @@ void BoUnitEditor::slotUpdateUnitProperties()
     mUnit->setConstructedEffectIds(stringToList(mUnitConstructedEffects->text()));
     mUnit->setExplodingDamageRange(mUnitExplodingDamageRange->value());
     mUnit->setExplodingDamage(mUnitExplodingDamage->value());
-    BoVector3 hitpoint(mUnitHitPointX->value(), mUnitHitPointY->value(), mUnitHitPointZ->value());
+    BoVector3Fixed hitpoint(mUnitHitPointX->value(), mUnitHitPointY->value(), mUnitHitPointZ->value());
     mUnit->setHitPoint(hitpoint);
 }
 
@@ -550,7 +550,7 @@ void BoUnitEditor::slotUpdateWidgets()
     mUnitConstructedEffects->setText(listToString(mUnit->constructedEffectIds()));
     mUnitExplodingDamageRange->setValue(mUnit->explodingDamageRange());
     mUnitExplodingDamage->setValue(mUnit->explodingDamage());
-    BoVector3 hitpoint = mUnit->hitPoint();
+    BoVector3Fixed hitpoint = mUnit->hitPoint();
     mUnitHitPointX->setValue(hitpoint.x());
     mUnitHitPointY->setValue(hitpoint.y());
     mUnitHitPointZ->setValue(hitpoint.z());
@@ -573,7 +573,7 @@ void BoUnitEditor::slotUpdateWeaponProps()
     w->setSpeed((long unsigned int)mWeaponSpeed->value());
     w->setModelFileName(mWeaponModel->text());
     w->setHeight(mWeaponHeight->value());
-    BoVector3 offset(mWeaponOffsetX->value(), mWeaponOffsetY->value(), mWeaponOffsetZ->value());
+    BoVector3Fixed offset(mWeaponOffsetX->value(), mWeaponOffsetY->value(), mWeaponOffsetZ->value());
     w->setShootEffectIds(stringToList(mWeaponShootEffects->text()));
     w->setFlyEffectIds(stringToList(mWeaponFlyEffects->text()));
     w->setHitEffectIds(stringToList(mWeaponHitEffects->text()));
@@ -647,7 +647,7 @@ void BoUnitEditor::slotUpdateWeaponWidgets()
     mWeaponSpeed->setValue(w->speed());
     mWeaponModel->setText(w->modelFileName());
     mWeaponHeight->setValue(w->height());
-    BoVector3 o = w->offset();
+    BoVector3Fixed o = w->offset();
     mWeaponOffsetX->setValue(o.x());
     mWeaponOffsetY->setValue(o.y());
     mWeaponOffsetZ->setValue(o.z());

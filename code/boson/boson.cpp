@@ -879,7 +879,7 @@ bool Boson::buildProducedUnit(ProductionPlugin* factory, unsigned long int unitT
 	boDebug() << k_funcinfo << "Cannot create unit here" << endl;
 	return false;
  }
- BoVector3 pos3(pos.x(), pos.y(), 0.0f);
+ BoVector3Fixed pos3(pos.x(), pos.y(), 0.0f);
  Unit* unit = (Unit*)d->mCanvas->createNewItem(RTTI::UnitStart + unitType, p, ItemType(unitType), pos3);
  if (!unit) {
 	boError() << k_funcinfo << "NULL unit" << endl;
@@ -894,7 +894,7 @@ bool Boson::buildProducedUnit(ProductionPlugin* factory, unsigned long int unitT
  BoEvent* productionPlaced = new BoEvent("ProducedUnitWithTypePlaced", QString::number(unit->type()));
  productionPlaced->setUnitId(unit->id());
  productionPlaced->setUnitId(unit->owner()->id());
- productionPlaced->setLocation(BoVector3(unit->x(), unit->y(), unit->z()));
+ productionPlaced->setLocation(BoVector3Fixed(unit->x(), unit->y(), unit->z()));
  boGame->queueEvent(productionPlaced);
 
  // the current production is done.

@@ -55,7 +55,7 @@ class BosonEffectPropertiesParticle : public BosonEffectProperties
     static void initStatic(const QString& texdir);
 
 
-    inline static BoVector3 wind()  { return BoVector3(0.2, 0.1, 0); };
+    inline static BoVector3Float wind()  { return BoVector3Float(0.2, 0.1, 0); };
 
 
   protected:
@@ -87,7 +87,7 @@ class BosonEffectPropertiesParticleGeneric : public BosonEffectPropertiesParticl
     virtual bool load(KSimpleConfig* cfg, const QString& group, bool inherited = false);
 
 
-    virtual BosonEffect* newEffect(const BoVector3& pos, const BoVector3& rot = BoVector3()) const;
+    virtual BosonEffect* newEffect(const BoVector3Fixed& pos, const BoVector3Fixed& rot = BoVector3Fixed()) const;
 
 
     int initialParticles() const  { return mInitNum; }
@@ -109,11 +109,11 @@ class BosonEffectPropertiesParticleGeneric : public BosonEffectPropertiesParticl
 
 
   protected:
-    BoVector3 mMinVelo, mMaxVelo;
-    BoVector3 mMinPos, mMaxPos;
+    BoVector3Fixed mMinVelo, mMaxVelo;
+    BoVector3Fixed mMinPos, mMaxPos;
     bool mNormalizePos, mNormalizeVelo;
     float mMinPosScale, mMaxPosScale, mMinVeloScale, mMaxVeloScale;
-    BoVector4 mStartColor, mEndColor;
+    BoVector4Float mStartColor, mEndColor;
     float mMinLife, mMaxLife;
     int mMaxNum, mInitNum;
     int mGLBlendFunc, mGLSrcBlendFunc;
@@ -145,7 +145,7 @@ class BosonEffectPropertiesParticleTrail : public BosonEffectPropertiesParticle
     virtual bool load(KSimpleConfig* cfg, const QString& group, bool inherited = false);
 
 
-    virtual BosonEffect* newEffect(const BoVector3& pos, const BoVector3& rot = BoVector3()) const;
+    virtual BosonEffect* newEffect(const BoVector3Fixed& pos, const BoVector3Fixed& rot = BoVector3Fixed()) const;
 
 
     /**
@@ -165,12 +165,12 @@ class BosonEffectPropertiesParticleTrail : public BosonEffectPropertiesParticle
 
   protected:
     float mSpacing;
-    BoVector3 mMinVelo, mMaxVelo;
-    BoVector3 mMinOffset, mMaxOffset;
+    BoVector3Fixed mMinVelo, mMaxVelo;
+    BoVector3Fixed mMinOffset, mMaxOffset;
     float mStartSize;
     float mEndSize;
-    BoVector4 mStartColor;
-    BoVector4 mEndColor;
+    BoVector4Float mStartColor;
+    BoVector4Float mEndColor;
     float mMass, mParticleDist;
     float mMaxSpeed;
     float mMinLife, mMaxLife;

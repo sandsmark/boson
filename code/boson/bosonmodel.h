@@ -25,11 +25,12 @@ class KSimpleConfig;
 class QColor;
 class QString;
 class QStringList;
-class BoVector3;
 class BoMatrix;
 class BoMesh;
 class BoMaterial;
 class BosonModelLoaderData;
+template<class T> class BoVector3;
+typedef BoVector3<float> BoVector3Float;
 template<class T> class QPtrList;
 template<class T, class T2> class QMap;
 template<class T> class QIntDict;
@@ -349,13 +350,13 @@ public:
 	 * just like it is used in @ref BoFace::pointIndex. Note that in
 	 * @ref BoMes::vertex the indices are local to the mesh!
 	 **/
-	BoVector3 vertex(unsigned int v) const;
+	BoVector3Float vertex(unsigned int v) const;
 
 	/**
 	 * @return The texel at @p t. Note that @p t is treated the same way as
 	 * in @ref vertex!
 	 **/
-	BoVector3 texel(unsigned int t) const;
+	BoVector3Float texel(unsigned int t) const;
 
 protected:
 	class BoHelper; // for computing width,height,.. of the model. this is a hack!
@@ -423,8 +424,8 @@ public:
 	 * @return Whether the triangle @p face1 is adjacent to the triangle @p
 	 * face2. That means that at least 2 points (i.e. vectors) are equal.
 	 **/
-	static bool isAdjacent(BoVector3* face1, BoVector3* face2);
-	static int findPoint(const BoVector3& point, const BoVector3* array);
+	static bool isAdjacent(BoVector3Float* face1, BoVector3Float* face2);
+	static int findPoint(const BoVector3Float& point, const BoVector3Float* array);
 
 private:
 	void init();

@@ -23,10 +23,15 @@
 
 #include <qwidget.h>
 
-class BoVector3;
-class BoVector4;
 class QHBoxLayout;
 class QVBoxLayout;
+class bofixed;
+template<class T> class BoVector3;
+template<class T> class BoVector4;
+typedef BoVector3<bofixed> BoVector3Fixed;
+typedef BoVector3<float> BoVector3Float;
+typedef BoVector4<bofixed> BoVector4Fixed;
+typedef BoVector4<float> BoVector4Float;
 
 class BoVector3InputPrivate;
 class BoVector3Input : public QWidget
@@ -44,11 +49,11 @@ public:
 	float maxValue() const;
 
 
-	void setValue3(const BoVector3&);
-	BoVector3 value3() const;
+	void setValue3(const BoVector3Float&);
+	BoVector3Float value3() const;
 
 signals:
-	void signalValueChanged(const BoVector3&);
+	void signalValueChanged(const BoVector3Float&);
 
 protected slots:
 	virtual void slotValueChanged(float);
@@ -70,11 +75,11 @@ public:
 
 	virtual void setRange(float min, float max, float step = 0.1f);
 
-	void setValue4(const BoVector4&);
-	BoVector4 value4() const;
+	void setValue4(const BoVector4Float&);
+	BoVector4Float value4() const;
 
 signals:
-	void signalValueChanged(const BoVector4&);
+	void signalValueChanged(const BoVector4Float&);
 
 protected slots:
 	virtual void slotValueChanged(float);

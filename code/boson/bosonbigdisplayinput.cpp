@@ -216,7 +216,7 @@ void BosonBigDisplayInput::actionClicked(const BoMouseEvent& event)
 }
 
 
-bool BosonBigDisplayInput::actionHarvest(const BoVector3& canvasVector)
+bool BosonBigDisplayInput::actionHarvest(const BoVector3Fixed& canvasVector)
 {
  if (!canvas()) {
 	BO_NULL_ERROR(canvas());
@@ -264,7 +264,7 @@ bool BosonBigDisplayInput::actionHarvest(const BoVector3& canvasVector)
  return taken;
 }
 
-bool BosonBigDisplayInput::actionMoveWithoutAttack(const BoVector3& canvasVector)
+bool BosonBigDisplayInput::actionMoveWithoutAttack(const BoVector3Fixed& canvasVector)
 {
  if (!selection()) {
 	BO_NULL_ERROR(selection());
@@ -287,7 +287,7 @@ bool BosonBigDisplayInput::actionMoveWithoutAttack(const BoVector3& canvasVector
  return true;
 }
 
-bool BosonBigDisplayInput::actionMoveWithAttack(const BoVector3& canvasVector)
+bool BosonBigDisplayInput::actionMoveWithAttack(const BoVector3Fixed& canvasVector)
 {
  if (!localPlayerIO()) {
 	BO_NULL_ERROR(localPlayerIO());
@@ -310,7 +310,7 @@ bool BosonBigDisplayInput::actionMoveWithAttack(const BoVector3& canvasVector)
  return true;
 }
 
-bool BosonBigDisplayInput::actionBuild(const BoVector3& canvasVector)
+bool BosonBigDisplayInput::actionBuild(const BoVector3Fixed& canvasVector)
 {
  if (!localPlayerIO()) {
 	BO_NULL_ERROR(localPlayerIO());
@@ -355,7 +355,7 @@ bool BosonBigDisplayInput::actionBuild(const BoVector3& canvasVector)
  return true;
 }
 
-bool BosonBigDisplayInput::actionAttack(const BoVector3& canvasVector)
+bool BosonBigDisplayInput::actionAttack(const BoVector3Fixed& canvasVector)
 {
  if (!localPlayerIO()) {
 	BO_NULL_ERROR(localPlayerIO());
@@ -382,7 +382,7 @@ bool BosonBigDisplayInput::actionAttack(const BoVector3& canvasVector)
  return true;
 }
 
-bool BosonBigDisplayInput::actionDropBomb(const BoVector3& canvasVector)
+bool BosonBigDisplayInput::actionDropBomb(const BoVector3Fixed& canvasVector)
 {
  if (!localPlayerIO()) {
 	BO_NULL_ERROR(localPlayerIO());
@@ -406,7 +406,7 @@ bool BosonBigDisplayInput::actionDropBomb(const BoVector3& canvasVector)
  return true;
 }
 
-bool BosonBigDisplayInput::actionRepair(const BoVector3& canvasVector)
+bool BosonBigDisplayInput::actionRepair(const BoVector3Fixed& canvasVector)
 {
  if (!selection()) {
 	BO_NULL_ERROR(selection());
@@ -438,7 +438,7 @@ bool BosonBigDisplayInput::actionRepair(const BoVector3& canvasVector)
  return true;
 }
 
-bool BosonBigDisplayInput::actionRefine(const BoVector3& canvasVector)
+bool BosonBigDisplayInput::actionRefine(const BoVector3Fixed& canvasVector)
 {
  if (!selection()) {
 	BO_NULL_ERROR(selection());
@@ -481,7 +481,7 @@ bool BosonBigDisplayInput::actionRefine(const BoVector3& canvasVector)
  return true;
 }
 
-bool BosonBigDisplayInput::actionFollow(const BoVector3& canvasVector)
+bool BosonBigDisplayInput::actionFollow(const BoVector3Fixed& canvasVector)
 {
  if (!localPlayerIO()) {
 	BO_NULL_ERROR(localPlayerIO());
@@ -686,7 +686,7 @@ void BosonBigDisplayInput::slotMoveSelection(int cellX, int cellY)
 	return;
  }
  BoMouseEvent event;
- event.setCanvasVector(BoVector3((float)(cellX + 1.0f / 2),
+ event.setCanvasVector(BoVector3Fixed((float)(cellX + 1.0f / 2),
 		(float)(cellY + 1.0f / 2),
 		0.0f));
  actionClicked(event);

@@ -110,7 +110,7 @@ class BosonWeaponProperties : public PluginProperties
      * Offset is relative to the center point of unit and is used when creating
      * new shot.
      **/
-    inline BoVector3 offset() const  { return mOffset; }
+    inline BoVector3Fixed offset() const  { return mOffset; }
 
     inline BosonShot::Type shotType() const  { return mShotType; }
     /**
@@ -150,11 +150,11 @@ class BosonWeaponProperties : public PluginProperties
      * @return Created shot. Note that it's not added to canvas.
      * Note that pos or target may not be used depending on shot's type
      **/
-    BosonShot* newShot(Unit* attacker, BoVector3 pos, BoVector3 target) const;
+    BosonShot* newShot(Unit* attacker, BoVector3Fixed pos, BoVector3Fixed target) const;
 
-    QPtrList<BosonEffect> newShootEffects(BoVector3 pos, bofixed rotation) const;
-    QPtrList<BosonEffect> newFlyEffects(BoVector3 pos, bofixed rotation) const;
-    QPtrList<BosonEffect> newHitEffects(BoVector3 pos) const;
+    QPtrList<BosonEffect> newShootEffects(BoVector3Fixed pos, bofixed rotation) const;
+    QPtrList<BosonEffect> newFlyEffects(BoVector3Fixed pos, bofixed rotation) const;
+    QPtrList<BosonEffect> newHitEffects(BoVector3Fixed pos) const;
 
     QValueList<unsigned long int> shootEffectIds() const  { return mShootEffectIds; }
     QValueList<unsigned long int> flyEffectIds() const  { return mFlyEffectIds; }
@@ -183,7 +183,7 @@ class BosonWeaponProperties : public PluginProperties
     void setShootEffectIds(QValueList<unsigned long int> ids)  { mShootEffectIds = ids; }
     void setFlyEffectIds(QValueList<unsigned long int> ids)  { mFlyEffectIds = ids; }
     void setHitEffectIds(QValueList<unsigned long int> ids)  { mHitEffectIds = ids; }
-    void setOffset(BoVector3 o)  { mOffset = o; }
+    void setOffset(BoVector3Fixed o)  { mOffset = o; }
     void setHeight(bofixed height)  { mHeight = height; }
     void setSound(int event, QString filename);
     void setAutoUse(bool use)  { mAutoUse = use; }
@@ -217,7 +217,7 @@ class BosonWeaponProperties : public PluginProperties
     QValueList<unsigned long int> mShootEffectIds;
     QValueList<unsigned long int> mFlyEffectIds;
     QValueList<unsigned long int> mHitEffectIds;
-    BoVector3 mOffset;
+    BoVector3Fixed mOffset;
     QMap<int, QString> mSounds;
     QIntDict<BoAction> mActions;
     bool mAutoUse;
@@ -279,7 +279,7 @@ class BosonWeapon : public UnitPlugin
     inline const BosonWeaponProperties* properties() const  { return mProp; }
 
     void shoot(Unit* u);
-    void shoot(const BoVector3& target);
+    void shoot(const BoVector3Fixed& target);
 
     /**
      * Lay mine at current location of unit
@@ -300,7 +300,7 @@ class BosonWeapon : public UnitPlugin
   protected:
     inline void reload()  { if(mReloadCounter > 0) { mReloadCounter = mReloadCounter - 1; } }
 
-    void shoot(const BoVector3& pos, const BoVector3& target);
+    void shoot(const BoVector3Fixed& pos, const BoVector3Fixed& target);
 
     void registerWeaponData(int weaponNumber, KGamePropertyBase* prop, int id, bool local = true);
 

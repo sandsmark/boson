@@ -69,13 +69,13 @@ class BosonEffect
      *  coordinates).
      * Note that for some effects, position isn't used.
      **/
-    const BoVector3& position() const  { return mPosition; }
+    const BoVector3Fixed& position() const  { return mPosition; }
 
     /**
      * Set effect's position.
      * Reimplement in subclasses, if necessary.
      **/
-    virtual void setPosition(const BoVector3& pos)  { mPosition = pos; }
+    virtual void setPosition(const BoVector3Fixed& pos)  { mPosition = pos; }
 
     /**
      * @return Rotation of this particle effect.
@@ -83,7 +83,7 @@ class BosonEffect
      * Also note that all rotations should be done in order z, x, y, which is
      *  same as in the rendering code
      **/
-    const BoVector3& rotation() const  { return mRotation; }
+    const BoVector3Fixed& rotation() const  { return mRotation; }
 
     /**
      * Sets effect's rotation to given values
@@ -93,7 +93,7 @@ class BosonEffect
      * Note that all rotations should be done in order z, x, y, which is same
      *  as in the rendering code
      **/
-    virtual void setRotation(const BoVector3& rotation)  { mRotation = rotation; }
+    virtual void setRotation(const BoVector3Fixed& rotation)  { mRotation = rotation; }
 
 
     /**
@@ -174,8 +174,8 @@ class BosonEffect
     }
 
   protected:
-    BoVector3 mPosition;
-    BoVector3 mRotation;
+    BoVector3Fixed mPosition;
+    BoVector3Fixed mRotation;
     bool mActive;
     bool mStarted;
     float mDelay;
@@ -216,7 +216,7 @@ class BosonEffectFog : public BosonEffect
     /**
      * Constructs new fog effect.
      **/
-    BosonEffectFog(const BoVector4& color, float start, float end, float radius = 0);
+    BosonEffectFog(const BoVector4Float& color, float start, float end, float radius = 0);
 
 
     virtual Type type() const  { return Fog; }
@@ -244,7 +244,7 @@ class BosonEffectFog : public BosonEffect
     /**
      * @return Color of the fog
      **/
-    const BoVector4& color() const  { return mColor; }
+    const BoVector4Float& color() const  { return mColor; }
 
 
     virtual bool saveAsXML(QDomElement& root) const;
@@ -256,7 +256,7 @@ class BosonEffectFog : public BosonEffect
     float mStart;
     float mEnd;
     float mRadius;
-    BoVector4 mColor;
+    BoVector4Float mColor;
 };
 
 
@@ -304,14 +304,14 @@ class BosonEffectFade : public BosonEffect
      * @return Current color of the effect.
      * This will change over time for dynamic effects.
      **/
-    const BoVector4& color() const  { return mColor; }
+    const BoVector4Float& color() const  { return mColor; }
     /**
      * @return Current geometry of the effect.
      * This is a BoVector4 containing (in this order) x-coordinate of the
      *  lower-left corner of the rectangle, y-coordinate of the same corner,
      *  width, height.
      **/
-    const BoVector4& geometry() const  { return mGeometry; }
+    const BoVector4Fixed& geometry() const  { return mGeometry; }
     /**
      * @return Integer array (with 2 elements) containing OpenGL blending
      *  funtions for this effect.
@@ -326,8 +326,8 @@ class BosonEffectFade : public BosonEffect
   protected:
     const BosonEffectPropertiesFade* mProperties;
     float mTimeLeft;
-    BoVector4 mColor;
-    BoVector4 mGeometry;
+    BoVector4Float mColor;
+    BoVector4Fixed mGeometry;
     int mBlendFunc[2];
 };
 
@@ -361,7 +361,7 @@ class BosonEffectLight : public BosonEffect
 
     virtual void start();
 
-    virtual void setPosition(const BoVector3& pos);
+    virtual void setPosition(const BoVector3Fixed& pos);
 
     /**
      * Make light obsolete (meaning that it will be deleted in the next advance
@@ -399,7 +399,7 @@ class BosonEffectBulletTrail : public BosonEffect
     /**
      * Construct new line effect using specified properties
      **/
-    BosonEffectBulletTrail(const BosonEffectPropertiesBulletTrail* prop, const BoVector3& pos);
+    BosonEffectBulletTrail(const BosonEffectPropertiesBulletTrail* prop, const BoVector3Fixed& pos);
     virtual ~BosonEffectBulletTrail();
 
 
@@ -409,9 +409,9 @@ class BosonEffectBulletTrail : public BosonEffect
     virtual void update(float elapsed);
 
 
-    const BoVector3& startPoint() const  { return mStart; }
-    const BoVector3& endPoint() const  { return mEnd; }
-    const BoVector4& color() const;
+    const BoVector3Fixed& startPoint() const  { return mStart; }
+    const BoVector3Fixed& endPoint() const  { return mEnd; }
+    const BoVector4Float& color() const;
     float width() const;
 
 
@@ -429,11 +429,11 @@ class BosonEffectBulletTrail : public BosonEffect
 
   protected:
     const BosonEffectPropertiesBulletTrail* mProperties;
-    BoVector3 mLastPos;
+    BoVector3Fixed mLastPos;
     short int mAdvanced;
     bool mShouldMakeObsolete;
-    BoVector3 mStart;
-    BoVector3 mEnd;
+    BoVector3Fixed mStart;
+    BoVector3Fixed mEnd;
 };
 
 /*

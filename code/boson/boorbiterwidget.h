@@ -22,10 +22,11 @@
 
 #include "bosonglwidget.h"
 
-class BoVector3;
 class BoQuaternion;
 class BoCamera;
 class BoMouseMoveDiff;
+template<class T> class BoVector3;
+typedef BoVector3<float> BoVector3Float;
 
 class BoOrbiterWidgetPrivate;
 
@@ -84,8 +85,8 @@ protected:
 	void paintOrbiterObject();
 	void paintOrbiterRotation(float radius); // the lines of the orbit
 
-	void updateOrbiterPosition(const BoVector3& cameraPos, const BoQuaternion& q);
-	void updateOrbiterPosition(const BoVector3& cameraPos, const BoVector3& lookAt, const BoVector3& up);
+	void updateOrbiterPosition(const BoVector3Float& cameraPos, const BoQuaternion& q);
+	void updateOrbiterPosition(const BoVector3Float& cameraPos, const BoVector3Float& lookAt, const BoVector3Float& up);
 
 private:
 	BoOrbiterWidgetPrivate* d;

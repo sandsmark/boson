@@ -33,10 +33,11 @@ class UnitPlugin;
 class RepairPlugin;
 class BosonWeapon;
 class BosonPathInfo;
-class BoVector3;
 template<class T> class BoVector2;
+template<class T> class BoVector3;
 template<class T> class BoRect;
 typedef BoVector2<bofixed> BoVector2Fixed;
+typedef BoVector3<bofixed> BoVector3Fixed;
 typedef BoRect<bofixed> BoRectFixed;
 template<class T> class QValueList;
 template<class T> class QPtrList;
@@ -430,7 +431,7 @@ public:
 	/**
 	 * @return Square of distance between center point of this unit and pos
 	 **/
-	float distance(const BoVector3& pos) const;
+	float distance(const BoVector3Fixed& pos) const;
 
 	/**
 	 * @return Weapon with given id for this unit. 0 if it doesn't exist.

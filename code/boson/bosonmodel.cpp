@@ -520,7 +520,7 @@ public:
 		mMinZ = 0.0;
 	}
 	
-	void addPoint(const BoVector3& v)
+	void addPoint(const BoVector3Float& v)
 	{
 		addPoint(v[0], v[1], v[2]);
 	}
@@ -1038,7 +1038,7 @@ void BosonModel::computeBoundings(BoFrame* frame, BoHelper* helper) const
  BO_CHECK_NULL_RET(frame);
  BO_CHECK_NULL_RET(helper);
 
- BoVector3 v;
+ BoVector3Float v;
  for (unsigned int i = 0; i < frame->meshCount(); i++) {
 	const BoMesh* mesh = frame->mesh(i);
 	const BoMatrix* m = frame->matrix(i);
@@ -1051,7 +1051,7 @@ void BosonModel::computeBoundings(BoFrame* frame, BoHelper* helper) const
 		continue;
 	}
 	for (unsigned int j = 0; j < mesh->points(); j++) {
-		BoVector3 vector(mesh->vertex(j));
+		BoVector3Float vector(mesh->vertex(j));
 		m->transform(&v, &vector);
 		helper->addPoint(v);
 	}
@@ -1285,9 +1285,9 @@ void BosonModel::stopModelRendering()
  renderer->stopModelRendering();
 }
 
-BoVector3 BosonModel::vertex(unsigned int i) const
+BoVector3Float BosonModel::vertex(unsigned int i) const
 {
- BoVector3 v;
+ BoVector3Float v;
  if (!pointArray()) {
 	return v;
  }
@@ -1301,9 +1301,9 @@ BoVector3 BosonModel::vertex(unsigned int i) const
  return v;
 }
 
-BoVector3 BosonModel::texel(unsigned int i) const
+BoVector3Float BosonModel::texel(unsigned int i) const
 {
- BoVector3 t;
+ BoVector3Float t;
  if (!pointArray()) {
 	return t;
  }

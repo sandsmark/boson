@@ -138,10 +138,10 @@ bool BosonItemRenderer::itemInFrustum(const float* frustum) const
 	return false;
  }
  // FIXME: can't we use BoVector3 and it's conversion methods here?
- GLfloat x = (mItem->x() + mItem->width() / 2);
- GLfloat y = -((mItem->y() + mItem->height() / 2));
- GLfloat z = mItem->z(); // this is already in the correct format!
- BoVector3 pos(x, y, z);
+ bofixed x = (mItem->x() + mItem->width() / 2);
+ bofixed y = -((mItem->y() + mItem->height() / 2));
+ bofixed z = mItem->z(); // this is already in the correct format!
+ BoVector3Fixed pos(x, y, z);
  return Bo3dTools::sphereInFrustum(frustum, pos, boundingSphereRadius());
 }
 

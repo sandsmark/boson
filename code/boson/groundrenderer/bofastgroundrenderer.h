@@ -26,7 +26,6 @@ class QString;
 
 class BosonMap;
 class BoMatrix;
-class BoVector3;
 
 class QRect;
 

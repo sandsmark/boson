@@ -98,7 +98,7 @@ void BoCamera::setAutoCamera(BoAutoCamera* a)
   }
 }
 
-void BoCamera::setGluLookAt(const BoVector3& cameraPos, const BoVector3& lookAt, const BoVector3& up)
+void BoCamera::setGluLookAt(const BoVector3Float& cameraPos, const BoVector3Float& lookAt, const BoVector3Float& up)
 {
   mLookAt = lookAt;
   mCameraPos = cameraPos;
@@ -106,17 +106,17 @@ void BoCamera::setGluLookAt(const BoVector3& cameraPos, const BoVector3& lookAt,
   setCameraChanged(true);
 }
 
-void BoCamera::changeLookAt(const BoVector3& diff)
+void BoCamera::changeLookAt(const BoVector3Float& diff)
 {
   setLookAt(lookAt() + diff);
 }
 
-void BoCamera::changeCameraPos(const BoVector3& diff)
+void BoCamera::changeCameraPos(const BoVector3Float& diff)
 {
   setCameraPos(cameraPos() + diff);
 }
 
-void BoCamera::changeUp(const BoVector3& diff)
+void BoCamera::changeUp(const BoVector3Float& diff)
 {
   setUp(up() + diff);
 }
@@ -238,31 +238,31 @@ void BoCamera::applyCameraToScene()
   setCameraChanged(false);
 }
 
-const BoVector3& BoCamera::cameraPos()
+const BoVector3Float& BoCamera::cameraPos()
 {
   return mCameraPos;
 }
 
-const BoVector3& BoCamera::up()
+const BoVector3Float& BoCamera::up()
 {
   return mUp;
 }
 
-void BoCamera::setLookAt(const BoVector3& pos)
+void BoCamera::setLookAt(const BoVector3Float& pos)
 {
   mLookAt = pos;
   setPositionDirty();
   setCameraChanged(true);
 }
 
-void BoCamera::setCameraPos(const BoVector3& pos)
+void BoCamera::setCameraPos(const BoVector3Float& pos)
 {
   mCameraPos = pos;
   setPositionDirty();
   setCameraChanged(true);
 }
 
-void BoCamera::setUp(const BoVector3& up)
+void BoCamera::setUp(const BoVector3Float& up)
 {
   mUp = up;
   setPositionDirty();
@@ -362,8 +362,8 @@ void BoGameCamera::updateCamera()
   Bo3dTools::pointByRotation(&diffX, &diffY, rotation(), radius);
 
   // We don't want any validation here (we'd get infinite loops otherwise)
-  BoCamera::setCameraPos(BoVector3(lookAt().x() + diffX, lookAt().y() + diffY, lookAt().z() + z()));
-  BoCamera::setUp(BoVector3(-diffX, -diffY, 0.0f));
+  BoCamera::setCameraPos(BoVector3Float(lookAt().x() + diffX, lookAt().y() + diffY, lookAt().z() + z()));
+  BoCamera::setUp(BoVector3Float(-diffX, -diffY, 0.0f));
 
   setPositionDirty(false);
   setCameraChanged(true);
@@ -391,7 +391,7 @@ void BoGameCamera::checkLookAtPosition()
   // We must first update lookAt position by calling
 //  bool dirty = positionDirty();
 //  setPositionDirty(false);
-  BoVector3 lookAt_ = lookAt();
+  BoVector3Float lookAt_ = lookAt();
 //  setPositionDirty(dirty);
 
   if(lookAt_.x() < 0.0f)
@@ -554,7 +554,7 @@ bool BoGameCamera::loadFromXML(const QDomElement& root)
   return ret;
 }
 
-const BoVector3& BoGameCamera::cameraPos()
+const BoVector3Float& BoGameCamera::cameraPos()
 {
   if(positionDirty())
   {
@@ -563,7 +563,7 @@ const BoVector3& BoGameCamera::cameraPos()
   return BoCamera::cameraPos();
 }
 
-const BoVector3& BoGameCamera::up()
+const BoVector3Float& BoGameCamera::up()
 {
   if(positionDirty())
   {
@@ -615,7 +615,7 @@ void BoGameCamera::changeRotation(GLfloat diff)
   setRotation(rotation() + diff);
 }
 
-void BoGameCamera::setLookAt(const BoVector3& pos)
+void BoGameCamera::setLookAt(const BoVector3Float& pos)
 {
   BO_CHECK_NULL_RET(mCanvas);
 #ifdef NEW_Z_CALCULATIONS
@@ -630,7 +630,7 @@ void BoGameCamera::setLookAt(const BoVector3& pos)
   float groundz = mCanvas->heightAtPoint(lookAt().x(), -lookAt().y());
   // Set lookat again. Note that this time, we don't do any validation, because
   //  only z-coordinate changed.
-  BoCamera::setLookAt(BoVector3(lookAt().x(), lookAt().y(), groundz));
+  BoCamera::setLookAt(BoVector3Float(lookAt().x(), lookAt().y(), groundz));
 
   // Set the z value (height from ground) to new value, so that
   //  mWantedAbsoluteZ remains same (this code is from changeZ())
@@ -667,7 +667,7 @@ void BoGameCamera::setLookAt(const BoVector3& pos)
 #endif
 }
 
-void BoGameCamera::setCameraPos(const BoVector3& pos)
+void BoGameCamera::setCameraPos(const BoVector3Float& pos)
 {
   BoCamera::setCameraPos(pos);
 
@@ -769,12 +769,12 @@ BoLightCamera::~BoLightCamera()
 {
 }
 
-void BoLightCamera::setLightPos(const BoVector3& pos)
+void BoLightCamera::setLightPos(const BoVector3Float& pos)
 {
-  setGluLookAt(pos, BoVector3(), BoVector3());
+  setGluLookAt(pos, BoVector3Float(), BoVector3Float());
 }
 
-void BoLightCamera::setGluLookAt(const BoVector3& c, const BoVector3& l, const BoVector3& u)
+void BoLightCamera::setGluLookAt(const BoVector3Float& c, const BoVector3Float& l, const BoVector3Float& u)
 {
   BoCamera::setGluLookAt(c, l, u);
   if(!mContext)

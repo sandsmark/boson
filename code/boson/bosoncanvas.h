@@ -36,9 +36,12 @@ class ProductionPlugin;
 class BosonEffect;
 class BosonShot;
 class BosonCanvasStatistics;
-class BoVector3;
 class BosonPath2;
 class BoEventListener;
+template<class T> class BoVector2;
+template<class T> class BoVector3;
+typedef BoVector2<bofixed> BoVector2Fixed;
+typedef BoVector3<bofixed> BoVector3Fixed;
 
 class KPlayer;
 class QDataStream;
@@ -157,7 +160,7 @@ public:
 	 * This will also do the necessary steps for newly added items, such as
 	 * loading unit defaults and adding the unit to the @p owner.
 	 **/
-	BosonItem* createNewItem(int rtti, Player* owner, const ItemType& type, const BoVector3& pos);
+	BosonItem* createNewItem(int rtti, Player* owner, const ItemType& type, const BoVector3Fixed& pos);
 
 	/**
 	 * Test whether the unit can go over rect. This method only tests for
@@ -265,7 +268,7 @@ public:
 	 * @param range Radius of explosion. All units range or less cells away will be damaged
 	 * @param owner Player who caused the explosion. Used for statistics. May be null
 	 **/
-	void explosion(const BoVector3& pos, long int damage, bofixed range, bofixed fullrange, Player* owner);
+	void explosion(const BoVector3Fixed& pos, long int damage, bofixed range, bofixed fullrange, Player* owner);
 
 	/**
 	 * Called when unit is damaged (usually by missile).
@@ -319,12 +322,12 @@ public:
 	/**
 	 * Convenience method. See @ref BosonCollisions::findUnitAt
 	 **/
-	Unit* findUnitAt(const BoVector3& pos) const { return collisions()->findUnitAt(pos); }
+	Unit* findUnitAt(const BoVector3Fixed& pos) const { return collisions()->findUnitAt(pos); }
 
 	/**
 	 * Convenience method. See @ref BosonCollisions::findItemAt
 	 **/
-	BosonItem* findItemAt(const BoVector3& pos) const { return collisions()->findItemAt(pos); }
+	BosonItem* findItemAt(const BoVector3Fixed& pos) const { return collisions()->findItemAt(pos); }
 
 	/**
 	 * Convenience method. See @ref BosonCollisions::findUnitAtCell
@@ -349,7 +352,7 @@ public:
 	/**
 	 * Checks if any items, except exclude, collide with given box
 	 **/
-	QValueList<Unit*> collisionsInBox(const BoVector3& v1, const BoVector3& v2, BosonItem* exclude) const { return collisions()->collisionsInBox(v1, v2, exclude); }
+	QValueList<Unit*> collisionsInBox(const BoVector3Fixed& v1, const BoVector3Fixed& v2, BosonItem* exclude) const { return collisions()->collisionsInBox(v1, v2, exclude); }
 
 	/**
 	 * @param pos The location where the unit should get placed.
@@ -367,7 +370,7 @@ public:
 	void removeFromCells(BosonItem* u);
 
 	bool onCanvas(const BoVector2Fixed& pos) const;
-	bool onCanvas(const BoVector3& pos) const;
+	bool onCanvas(const BoVector3Fixed& pos) const;
 	bool onCanvas(bofixed x, bofixed y) const
 	{
 		return x >= 0.0f && y >= 0.0f && x <= mapWidth() && y <= mapHeight();
@@ -455,7 +458,7 @@ protected:
 	 *
 	 * @param id A unique ID for the item. See @ref BosonItem::setId
 	 **/
-	BosonItem* createItem(int rtti, Player* owner, const ItemType& type, const BoVector3& pos, unsigned long int id);
+	BosonItem* createItem(int rtti, Player* owner, const ItemType& type, const BoVector3Fixed& pos, unsigned long int id);
 
 	Unit* createUnit(Player* owner, unsigned long int unitType);
 	BosonShot* createShot(Player* owner, unsigned long int shotType, unsigned long int unitType, unsigned long int weaponPropertyId);

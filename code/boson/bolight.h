@@ -77,15 +77,15 @@ class BoLight
     bool isEnabled() const  { return mEnabled; }
     void setEnabled(bool e);
 
-    const BoVector4& ambient() const  { return mAmbient; }
-    const BoVector4& diffuse() const  { return mDiffuse; }
-    const BoVector4& specular() const  { return mSpecular; }
+    const BoVector4Float& ambient() const  { return mAmbient; }
+    const BoVector4Float& diffuse() const  { return mDiffuse; }
+    const BoVector4Float& specular() const  { return mSpecular; }
 
-    void setAmbient(const BoVector4& a);
-    void setDiffuse(const BoVector4& d);
-    void setSpecular(const BoVector4& s);
+    void setAmbient(const BoVector4Float& a);
+    void setDiffuse(const BoVector4Float& d);
+    void setSpecular(const BoVector4Float& s);
 
-    const BoVector4& position() const  { return mPos; }
+    const BoVector4Float& position() const  { return mPos; }
 
     /**
      * Set the position of the light. The w component of @p pos must bei either
@@ -98,25 +98,25 @@ class BoLight
      * specifies the position of the light. The light of a positional light goes
      * in all directions, unless you make it a spotlight.
      **/
-    void setPosition(const BoVector4& pos);
+    void setPosition(const BoVector4Float& pos);
 
     /**
      * @return The (x,y,z) vector of the position
      **/
-    BoVector3 position3() const  { return BoVector3(mPos.x(), mPos.y(), mPos.z()); }
+    BoVector3Float position3() const  { return BoVector3Float(mPos.x(), mPos.y(), mPos.z()); }
 
     /**
      * Change the position (or for a directional light the direction) of the
      * light. The w component (whether the light is directional or positional)
      * is not changed.
      **/
-    void setPosition3(const BoVector3& pos)  { setPosition(BoVector4(pos.x(), pos.y(), pos.z(), mPos.w())); }
+    void setPosition3(const BoVector3Float& pos)  { setPosition(BoVector4Float(pos.x(), pos.y(), pos.z(), mPos.w())); }
 
     /**
      * Make the light a directional light of @p directional is TRUE, otherwise
      * make it a positional light.
      **/
-    void setDirectional(bool directional)  { setPosition(BoVector4(mPos.x(), mPos.y(), mPos.z(), directional ? 0.0f : 1.0f)); }
+    void setDirectional(bool directional)  { setPosition(BoVector4Float(mPos.x(), mPos.y(), mPos.z(), directional ? 0.0f : 1.0f)); }
 
     /**
      * @return Whether the light is directional. A directional light is
@@ -135,23 +135,23 @@ class BoLight
     void setConstantAttenuation(float a);
     void setLinearAttenuation(float a);
     void setQuadraticAttenuation(float a);
-    void setAttenuation(const BoVector3& a);
+    void setAttenuation(const BoVector3Float& a);
 
     float constantAttenuation() const  { return mAttenuation.x(); }
     float linearAttenuation() const  { return mAttenuation.y(); }
     float quadraticAttenuation() const  { return mAttenuation.z(); }
-    BoVector3 attenuation() const  { return mAttenuation; }
+    BoVector3Float attenuation() const  { return mAttenuation; }
 
     int id() const  { return mId; }
 
     void refreshPosition();
 
   private:
-    BoVector4 mAmbient;
-    BoVector4 mDiffuse;
-    BoVector4 mSpecular;
-    BoVector4 mPos;
-    BoVector3 mAttenuation;
+    BoVector4Float mAmbient;
+    BoVector4Float mDiffuse;
+    BoVector4Float mSpecular;
+    BoVector4Float mPos;
+    BoVector3Float mAttenuation;
     bool mEnabled;
     int mId;
 };

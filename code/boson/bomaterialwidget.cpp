@@ -80,19 +80,19 @@ BoMaterialWidget::BoMaterialWidget(QWidget* parent, const char* name) : QWidget(
  d->mAmbient = new BoVector4Input(this);
  d->mAmbient->setLabel(i18n("Ambient:"), AlignLeft | AlignVCenter);
  d->mAmbient->setRange(0.0f, 1.0f, 0.1f);
- connect(d->mAmbient, SIGNAL(signalValueChanged(const BoVector4&)), this, SLOT(slotUpdateMaterial()));
+ connect(d->mAmbient, SIGNAL(signalValueChanged(const BoVector4Float&)), this, SLOT(slotUpdateMaterial()));
  layout->addWidget(d->mAmbient);
 
  d->mDiffuse = new BoVector4Input(this);
  d->mDiffuse->setLabel(i18n("Diffuse:"), AlignLeft | AlignVCenter);
  d->mDiffuse->setRange(0.0f, 1.0f, 0.1f);
- connect(d->mDiffuse, SIGNAL(signalValueChanged(const BoVector4&)), this, SLOT(slotUpdateMaterial()));
+ connect(d->mDiffuse, SIGNAL(signalValueChanged(const BoVector4Float&)), this, SLOT(slotUpdateMaterial()));
  layout->addWidget(d->mDiffuse);
 
  d->mSpecular = new BoVector4Input(this);
  d->mSpecular->setLabel(i18n("Specular:"), AlignLeft | AlignVCenter);
  d->mSpecular->setRange(0.0f, 1.0f, 0.1f);
- connect(d->mSpecular, SIGNAL(signalValueChanged(const BoVector4&)), this, SLOT(slotUpdateMaterial()));
+ connect(d->mSpecular, SIGNAL(signalValueChanged(const BoVector4Float&)), this, SLOT(slotUpdateMaterial()));
  layout->addWidget(d->mSpecular);
 
  d->mShininess = new BoFloatNumInput(this);

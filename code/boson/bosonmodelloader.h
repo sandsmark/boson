@@ -21,7 +21,6 @@
 
 #include <qstring.h>
 
-class BoVector3;
 class BoMatrix;
 class BoMesh;
 class BoFrame;

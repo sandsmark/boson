@@ -23,7 +23,6 @@
 
 class BosonBigDisplayBase;
 class BoSelection;
-class BoVector3;
 class BoSpecificAction;
 
 class BosonBigDisplayInput : public BosonBigDisplayInputBase
@@ -45,15 +44,15 @@ public slots:
 
 protected:
 	//AB: use BoMouseEvent as 1st parameter
-	bool actionMoveWithAttack(const BoVector3& pos);
-	bool actionMoveWithoutAttack(const BoVector3& pos);
-	bool actionAttack(const BoVector3& pos);
-	bool actionDropBomb(const BoVector3& pos);
-	bool actionBuild(const BoVector3& pos);
-	bool actionFollow(const BoVector3& pos);
-	bool actionRepair(const BoVector3& pos);
-	bool actionRefine(const BoVector3& pos);
-	bool actionHarvest(const BoVector3& pos);
+	bool actionMoveWithAttack(const BoVector3Fixed& pos);
+	bool actionMoveWithoutAttack(const BoVector3Fixed& pos);
+	bool actionAttack(const BoVector3Fixed& pos);
+	bool actionDropBomb(const BoVector3Fixed& pos);
+	bool actionBuild(const BoVector3Fixed& pos);
+	bool actionFollow(const BoVector3Fixed& pos);
+	bool actionRepair(const BoVector3Fixed& pos);
+	bool actionRefine(const BoVector3Fixed& pos);
+	bool actionHarvest(const BoVector3Fixed& pos);
 
 	CanSelectUnit canSelect(Unit* unit) const;
 

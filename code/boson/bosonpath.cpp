@@ -739,13 +739,13 @@ bool BosonPath::findSlowPath()
 
 #ifdef VISUALIZE_PATHS
   {
-    QValueList<BoVector3> points;
+    QValueList<BoVector3Fixed> points;
     QValueList<BoVector2Fixed>::iterator it;
     for(it = path.begin(); it != path.end(); ++it)
     {
-      points.append(BoVector3((*it).x(), -(*it).y(), 0.0f));
+      points.append(BoVector3Fixed((*it).x(), -(*it).y(), 0.0f));
     }
-    BoVector4 color(0.5f, 0.5f, 0.5f, 1.0f);
+    BoVector4Float color(0.5f, 0.5f, 0.5f, 1.0f);
     bofixed pointSize = 2.0f;
     int timeout = 100;
     bofixed zOffset = 0.5f;
@@ -1994,18 +1994,18 @@ void BosonPath2::findLowLevelPath(BosonPathInfo* info)
 #ifdef VISUALIZE_PATHS
     // Add LineVisualization stuff
     {
-      QValueList<BoVector3> points;
+      QValueList<BoVector3Fixed> points;
       for(unsigned int point = 0; point < info->llpath.count(); point++)
       {
         bofixed x = info->llpath[point].x();
         bofixed y = info->llpath[point].y();
 //        boDebug(510) << "  " << k_funcinfo << "Adding lineviz for point (" << x << "; " << y << ")" << endl;
-        points.append(BoVector3(x, -y, 0.0f));
+        points.append(BoVector3Fixed(x, -y, 0.0f));
       }
       bofixed pointSize = 3.0f;
       int timeout = 100;
       bofixed zOffset = 0.5f;
-      BoVector4 color(1.0f, 0.5f, 0.0f, 0.8f); // orange
+      BoVector4Float color(1.0f, 0.5f, 0.0f, 0.8f); // orange
       BosonPathVisualization::pathVisualization()->addLineVisualization(points, color, pointSize, timeout, zOffset);
     }
 #endif
@@ -2339,18 +2339,18 @@ void BosonPath2::findFlyingUnitPath(BosonPathInfo* info)
 #ifdef VISUALIZE_PATHS
     // Add LineVisualization stuff
     {
-      QValueList<BoVector3> points;
+      QValueList<BoVector3Fixed> points;
       for(unsigned int point = 0; point < info->llpath.count(); point++)
       {
         bofixed x = info->llpath[point].x();
         bofixed y = info->llpath[point].y();
 //        boDebug(510) << "  " << k_funcinfo << "Adding lineviz for point (" << x << "; " << y << ")" << endl;
-        points.append(BoVector3(x, -y, 0.0f));
+        points.append(BoVector3Fixed(x, -y, 0.0f));
       }
       bofixed pointSize = 3.0f;
       int timeout = 100;
       bofixed zOffset = 0.5f;
-      BoVector4 color(1.0f, 0.5f, 0.0f, 0.8f); // orange
+      BoVector4Float color(1.0f, 0.5f, 0.0f, 0.8f); // orange
       BosonPathVisualization::pathVisualization()->addLineVisualization(points, color, pointSize, timeout, zOffset);
     }
 #endif
@@ -3320,12 +3320,12 @@ void BosonPath2::searchHighLevelPath(BosonPathInfo* info)
 #ifdef VISUALIZE_PATHS
     // Add LineVisualization stuff
     {
-      QValueList<BoVector3> points;
+      QValueList<BoVector3Fixed> points;
       for(unsigned int point = 0; point < path->path.count(); point++)
       {
         bofixed x = path->path[point]->centerx;
         bofixed y = path->path[point]->centery;
-        points.append(BoVector3(x, -y, 0.0f));
+        points.append(BoVector3Fixed(x, -y, 0.0f));
       }
       bofixed pointSize = 5.0f;
       int timeout = 200;
@@ -3639,14 +3639,14 @@ BosonPathVisualization* BosonPathVisualization::pathVisualization()
   return mPathVisualization;
 }
 
-void BosonPathVisualization::addLineVisualization(const QValueList<BoVector3>& points, const BoVector4& color, bofixed pointSize, int timeout, bofixed zOffset)
+void BosonPathVisualization::addLineVisualization(const QValueList<BoVector3Fixed>& points, const BoVector4Float& color, bofixed pointSize, int timeout, bofixed zOffset)
 {
   emit signalAddLineVisualization(points, color, pointSize, timeout, zOffset);
 }
 
-void BosonPathVisualization::addLineVisualization(const QValueList<BoVector3>& points, bofixed pointSize, int timeout, bofixed zOffset)
+void BosonPathVisualization::addLineVisualization(const QValueList<BoVector3Fixed>& points, bofixed pointSize, int timeout, bofixed zOffset)
 {
-  addLineVisualization(points, BoVector4(1.0f, 1.0f, 1.0f, 1.0f), pointSize, timeout, zOffset);
+  addLineVisualization(points, BoVector4Float(1.0f, 1.0f, 1.0f, 1.0f), pointSize, timeout, zOffset);
 }
 /*
  * vim: et sw=2

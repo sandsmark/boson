@@ -26,7 +26,6 @@ typedef struct _object PyObject;
 struct PyMethodDef;
 typedef struct _ts PyThreadState;
 class QString;
-class BoVector3;
 
 class PythonScript : public BosonScript
 {

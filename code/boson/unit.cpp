@@ -1469,7 +1469,7 @@ float Unit::distance(const Unit* u) const
  return dx*dx + dy*dy + dz*dz;
 }
 
-float Unit::distance(const BoVector3& pos) const
+float Unit::distance(const BoVector3Fixed& pos) const
 {
  // !!! This method returns square of actual distance. You may want to use sqrt() !!!
  float dx = pos.x() - centerX();
@@ -1831,13 +1831,13 @@ void MobileUnit::advanceMoveCheck()
 		// I know, this code is _very_ ugly and unreadable, but once we'll have
 		//  polygonal pathfinder, I'll change/cleanup/rewrite this
 		QValueList<Unit*> immediatecollisions;
-		immediatecollisions = canvas()->collisionsInBox(BoVector3(x() + d->lastXVelocity, y() + d->lastYVelocity, z()),
-				BoVector3(x() + d->lastXVelocity + width(), y() + d->lastYVelocity + height(), z() + depth()), this);
+		immediatecollisions = canvas()->collisionsInBox(BoVector3Fixed(x() + d->lastXVelocity, y() + d->lastYVelocity, z()),
+				BoVector3Fixed(x() + d->lastXVelocity + width(), y() + d->lastYVelocity + height(), z() + depth()), this);
 		if(!immediatecollisions.isEmpty()) {
-/*		if(canvas()->collisionsInBox(BoVector3(x() + d->lastXVelocity, y() + d->lastYVelocity, z()),
-				BoVector3(x() + d->lastXVelocity + width(), y() + d->lastYVelocity + height(), z() + depth()), this) &&
-				canvas()->collisionsInBox(BoVector3(x() + d->lastXVelocity * 5, y() + d->lastYVelocity * 5, z()),
-				BoVector3(x() + d->lastXVelocity * 5 + width(), y() + d->lastYVelocity * 5 + height(), z() + depth()), this)) {*/
+/*		if(canvas()->collisionsInBox(BoVector3Fixed(x() + d->lastXVelocity, y() + d->lastYVelocity, z()),
+				BoVector3Fixed(x() + d->lastXVelocity + width(), y() + d->lastYVelocity + height(), z() + depth()), this) &&
+				canvas()->collisionsInBox(BoVector3Fixed(x() + d->lastXVelocity * 5, y() + d->lastYVelocity * 5, z()),
+				BoVector3Fixed(x() + d->lastXVelocity * 5 + width(), y() + d->lastYVelocity * 5 + height(), z() + depth()), this)) {*/
 #else
 		if (canvas()->cellOccupied((int)currentPathPoint().x(),
 				(int)currentPathPoint().y(), this, false)) {
@@ -1967,8 +1967,8 @@ void MobileUnit::advanceMoveCheck()
  //  action to prevent this, e.g. slow down)
 #ifdef USE_NEW_COLLISION_DETECTION
  QValueList<Unit*> immediatecollisions;
- immediatecollisions = canvas()->collisionsInBox(BoVector3(x() + d->lastXVelocity, y() + d->lastYVelocity, z()),
-		BoVector3(x() + d->lastXVelocity + width(), y() + d->lastYVelocity + height(), z() + depth()), this);
+ immediatecollisions = canvas()->collisionsInBox(BoVector3Fixed(x() + d->lastXVelocity, y() + d->lastYVelocity, z()),
+		BoVector3Fixed(x() + d->lastXVelocity + width(), y() + d->lastYVelocity + height(), z() + depth()), this);
  if (!immediatecollisions.isEmpty()) {
 #else
  if (canvas()->cellOccupied((int)currentPathPoint().x(),
@@ -2007,8 +2007,8 @@ void MobileUnit::advanceMoveCheck()
  }
 #ifdef USE_NEW_COLLISION_DETECTION
  QValueList<Unit*> fiveadvcollisions;
- fiveadvcollisions = canvas()->collisionsInBox(BoVector3(x() + d->lastXVelocity * 5, y() + d->lastYVelocity * 5, z()),
-		BoVector3(x() + d->lastXVelocity * 5 + width(), y() + d->lastYVeloity * 5 + height(), z() + depth()), this);
+ fiveadvcollisions = canvas()->collisionsInBox(BoVector3Fixed(x() + d->lastXVelocity * 5, y() + d->lastYVelocity * 5, z()),
+		BoVector3Fixed(x() + d->lastXVelocity * 5 + width(), y() + d->lastYVeloity * 5 + height(), z() + depth()), this);
  if (!fiveadvcollisions.isEmpty()) {
 	// Unit will collide with smth in 5 adv. calls. Stop.
 	// Maybe it would be better to slow down quickly instead...
@@ -2021,8 +2021,8 @@ void MobileUnit::advanceMoveCheck()
 	return;
  }
  QValueList<Unit*> tenadvcollisions;
- tenadvcollisions = canvas()->collisionsInBox(BoVector3(x() + d->lastXVelocity * 10, y() + d->lastYVelocity * 10, z()),
-		BoVector3(x() + d->lastXVelocity * 10 + width(), y() + d->lastYVelocity * 10 + height(), z() + depth()), this);
+ tenadvcollisions = canvas()->collisionsInBox(BoVector3Fixed(x() + d->lastXVelocity * 10, y() + d->lastYVelocity * 10, z()),
+		BoVector3Fixed(x() + d->lastXVelocity * 10 + width(), y() + d->lastYVelocity * 10 + height(), z() + depth()), this);
  if (!tenadvcollisions.isEmpty()) {
 	// Unit will collide with smth in 10 adv. calls. Decelerate
 	decelerate();

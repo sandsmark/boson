@@ -321,9 +321,9 @@ void BoMeshRendererVertexArray::fillModelPointsArray(BosonModel* model, float* a
 			for (int v = 0; v < 3; v++) {
 				BO_CHECK_NULL_RET(face->pointIndex());
 				int p = face->pointIndex()[v];
-				BoVector3 vertex = model->vertex(p);
-				BoVector3 texel = model->texel(p);
-				BoVector3 normal = face->normal(v);
+				BoVector3Float vertex = model->vertex(p);
+				BoVector3Float texel = model->texel(p);
+				BoVector3Float normal = face->normal(v);
 				point[v * 8 + 0] = vertex[0];
 				point[v * 8 + 1] = vertex[1];
 				point[v * 8 + 2] = vertex[2];

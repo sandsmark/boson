@@ -62,7 +62,7 @@ public:
 	QValueList<unsigned long int> mExplodingFragmentFlyEffectIds;
 	QPtrList<BosonEffectProperties> mExplodingFragmentHitEffects;
 	QValueList<unsigned long int> mExplodingFragmentHitEffectIds;
-	BoVector3 mHitPoint;  // FIXME: better name
+	BoVector3Fixed mHitPoint;  // FIXME: better name
 };
 
 class UnitProperties::MobileProperties
@@ -180,7 +180,7 @@ bool UnitProperties::loadUnitType(const QString& fileName, bool fullmode)
 	d->mExplodingFragmentFlyEffects = BosonEffectProperties::loadEffectProperties(d->mExplodingFragmentFlyEffectIds);
 	d->mExplodingFragmentHitEffects = BosonEffectProperties::loadEffectProperties(d->mExplodingFragmentHitEffectIds);
  }
- d->mHitPoint = BosonConfig::readBoVector3Entry(&conf, "HitPoint", BoVector3(0, 0, mUnitDepth / 2.0f));  // FIXME: better name
+ d->mHitPoint = BosonConfig::readBoVector3FixedEntry(&conf, "HitPoint", BoVector3Fixed(0, 0, mUnitDepth / 2.0f));  // FIXME: better name
 
  d->mDestroyedEffectIds = BosonConfig::readUnsignedLongNumList(&conf, "DestroyedEffects");
  d->mConstructedEffectIds = BosonConfig::readUnsignedLongNumList(&conf, "ConstructedEffects");
@@ -228,7 +228,7 @@ void UnitProperties::saveUnitType(const QString& fileName)
  BosonConfig::writeUnsignedLongNumList(&conf, "Requirements", d->mRequirements);
  conf.writeEntry("ExplodingDamage", mExplodingDamage);
  conf.writeEntry("ExplodingDamageRange", (double)mExplodingDamageRange);
- BoVector3 tmpHitPoint(d->mHitPoint);
+ BoVector3Fixed tmpHitPoint(d->mHitPoint);
  BosonConfig::writeEntry(&conf, "HitPoint", d->mHitPoint);
  conf.writeEntry("Producer", mProducer);
 
@@ -589,20 +589,20 @@ const PluginProperties* UnitProperties::properties(int pluginType) const
 
 QPtrList<BosonEffect> UnitProperties::newDestroyedEffects(float x, float y, float z) const
 {
- return BosonEffectProperties::newEffects(&d->mDestroyedEffects, BoVector3(x, y, z));
+ return BosonEffectProperties::newEffects(&d->mDestroyedEffects, BoVector3Fixed(x, y, z));
 }
 
 QPtrList<BosonEffect> UnitProperties::newConstructedEffects(float x, float y, float z) const
 {
- return BosonEffectProperties::newEffects(&d->mConstructedEffects, BoVector3(x, y, z));
+ return BosonEffectProperties::newEffects(&d->mConstructedEffects, BoVector3Fixed(x, y, z));
 }
 
-QPtrList<BosonEffect> UnitProperties::newExplodingFragmentFlyEffects(BoVector3 pos) const
+QPtrList<BosonEffect> UnitProperties::newExplodingFragmentFlyEffects(BoVector3Fixed pos) const
 {
  return BosonEffectProperties::newEffects(&d->mExplodingFragmentFlyEffects, pos);
 }
 
-QPtrList<BosonEffect> UnitProperties::newExplodingFragmentHitEffects(BoVector3 pos) const
+QPtrList<BosonEffect> UnitProperties::newExplodingFragmentHitEffects(BoVector3Fixed pos) const
 {
  return BosonEffectProperties::newEffects(&d->mExplodingFragmentHitEffects, pos);
 }
@@ -780,12 +780,12 @@ void UnitProperties::reset()
  d->mTextureNames.clear();
 }
 
-void UnitProperties::setHitPoint(const BoVector3& hitpoint)
+void UnitProperties::setHitPoint(const BoVector3Fixed& hitpoint)
 {
  d->mHitPoint = hitpoint;
 }
 
-const BoVector3& UnitProperties::hitPoint() const
+const BoVector3Fixed& UnitProperties::hitPoint() const
 {
  return d->mHitPoint;
 }

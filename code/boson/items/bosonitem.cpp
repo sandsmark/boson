@@ -218,11 +218,11 @@ void BosonItem::makeCells(Cell* allCells, QPtrVector<Cell>* cells, const BoRectF
 
 bool BosonItem::bosonCollidesWith(BosonItem* item) const
 {
- BoVector3 itempos(item->x() + xVelocity(), item->y() + yVelocity(), item->z() + zVelocity());
- return bosonCollidesWith(itempos, itempos + BoVector3(item->width(), item->height(), item->depth()));
+ BoVector3Fixed itempos(item->x() + xVelocity(), item->y() + yVelocity(), item->z() + zVelocity());
+ return bosonCollidesWith(itempos, itempos + BoVector3Fixed(item->width(), item->height(), item->depth()));
 }
 
-bool BosonItem::bosonCollidesWith(const BoVector3& v1, const BoVector3& v2) const
+bool BosonItem::bosonCollidesWith(const BoVector3Fixed& v1, const BoVector3Fixed& v2) const
 {
 // boDebug() << "  ++> " << k_funcinfo << "Item coords: (" << x() << "; " << y() << "; " << z() <<
 //		"); size: (" << width() << "; " << height() << "; " << depth() << ")" << endl;
@@ -354,7 +354,7 @@ BosonCollisions* BosonItem::collisions() const
 void BosonItem::setEffectsPosition(bofixed x, bofixed y, bofixed z)
 {
  if (effects() && effects()->count() > 0) {
-	BoVector3 pos(x + width() / 2, y + height() / 2, z);
+	BoVector3Fixed pos(x + width() / 2, y + height() / 2, z);
 	pos.canvasToWorld();
 	QPtrListIterator<BosonEffect> it(*effects());
 	for (; it.current(); ++it) {
@@ -365,7 +365,7 @@ void BosonItem::setEffectsPosition(bofixed x, bofixed y, bofixed z)
 
 void BosonItem::setEffectsRotation(bofixed xrot, bofixed yrot, bofixed zrot)
 {
- BoVector3 rot(xrot, yrot, zrot);
+ BoVector3Fixed rot(xrot, yrot, zrot);
  if (effects() && effects()->count() > 0) {
 	QPtrListIterator<BosonEffect> it(*effects());
 	for (; it.current(); ++it) {

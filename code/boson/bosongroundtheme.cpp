@@ -210,7 +210,7 @@ bool BosonGroundTheme::loadGroundThemeConfig(const QString& file)
 	}
 	types[i].mFile = texFile;
 	// the other values have usable defaults.
-	BoVector3 color = BosonConfig::readBoVector3Entry(&conf, "MiniMapColor");
+	BoVector3Float color = BosonConfig::readBoVector3FloatEntry(&conf, "MiniMapColor");
 	types[i].mMiniMapColor = qRgb((int)color.x(), (int)color.y(), (int)color.z());
 	types[i].mAnimationDelay = conf.readUnsignedNumEntry("AnimationDelay", 1);
 	types[i].mPixmapFile = conf.readEntry("Pixmap", QString::null);

@@ -374,7 +374,7 @@ public:
 		return mNormalMap + normalMapArrayPos(x, y);
 	}
 
-	void setNormalAt(int x, int y, const BoVector3& n)
+	void setNormalAt(int x, int y, const BoVector3Float& n)
 	{
 		if (x < 0 || y < 0) {
 			return;

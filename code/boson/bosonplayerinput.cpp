@@ -781,7 +781,7 @@ bool BosonPlayerInput::playerInput(QDataStream& stream, Player* player)
 			break;
 		}
 
-		BoVector3 pos3(pos.x(), pos.y(), 0.0f);
+		BoVector3Fixed pos3(pos.x(), pos.y(), 0.0f);
 		Unit* u = (Unit*)canvas()->createNewItem(RTTI::UnitStart + unitType, p, ItemType(unitType), pos3);
 		// Facilities will be fully constructed by default
 		if (u->isFacility()) {

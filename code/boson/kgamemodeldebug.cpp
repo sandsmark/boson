@@ -148,15 +148,15 @@ public:
 	class TrackKeyDataLin3 : public TrackKeyData {
 	public:
 		TrackKeyDataLin3() : TrackKeyData() { }
-		BoVector3 value;
-		BoVector3 dd;
-		BoVector3 ds;
+		BoVector3Float value;
+		BoVector3Float dd;
+		BoVector3Float ds;
 	};
 
 	class TrackKeyDataQuat : public TrackKeyData {
 	public:
 		TrackKeyDataQuat() : TrackKeyData() { }
-		BoVector3 axis;
+		BoVector3Float axis;
 		float angle;
 		BoQuaternion q;
 		BoQuaternion dd;
@@ -371,9 +371,9 @@ public:
 	}
 	virtual int type() const { return (int)Bo3DSTrackKey::TrackLin3; }
 
-	BoVector3 eval(float t) const
+	BoVector3Float eval(float t) const
 	{
-		return BoVector3();
+		return BoVector3Float();
 	}
 
 protected:
@@ -541,9 +541,9 @@ protected:
 		key->mTCB.copyTCB(_key->tcb);
 		key->quatData()->axis.set(_key->axis);
 		key->quatData()->angle = _key->angle;
-		key->quatData()->q.set(_key->q[3], BoVector3(_key->q));
-		key->quatData()->dd.set(_key->dd[3], BoVector3(_key->dd));
-		key->quatData()->ds.set(_key->ds[3], BoVector3(_key->ds));
+		key->quatData()->q.set(_key->q[3], BoVector3Float(_key->q));
+		key->quatData()->dd.set(_key->dd[3], BoVector3Float(_key->dd));
+		key->quatData()->ds.set(_key->ds[3], BoVector3Float(_key->ds));
 	}
 };
 
@@ -879,9 +879,9 @@ void BoTrackWidget::configureKey(QListViewItem* item, Bo3DSTrackKey* key, int ty
 	}
 	case Bo3DSTrackKey::TrackLin3:
 	{
-		item->setText(mKeyData0, key->lin3Data()->value.debugString(prec));
-		item->setText(mKeyData1, key->lin3Data()->dd.debugString(prec));
-		item->setText(mKeyData2, key->lin3Data()->ds.debugString(prec));
+		item->setText(mKeyData0, debugStringVector(key->lin3Data()->value, prec));
+		item->setText(mKeyData1, debugStringVector(key->lin3Data()->dd, prec));
+		item->setText(mKeyData2, debugStringVector(key->lin3Data()->ds, prec));
 		break;
 	}
 	case Bo3DSTrackKey::TrackBool:
@@ -896,7 +896,7 @@ void BoTrackWidget::configureKey(QListViewItem* item, Bo3DSTrackKey* key, int ty
 	}
 	case Bo3DSTrackKey::TrackQuat:
 	{
-		item->setText(mKeyData0, key->quatData()->axis.debugString(prec));
+		item->setText(mKeyData0, debugStringVector(key->quatData()->axis, prec));
 		item->setText(mKeyData1, QString::number(key->quatData()->angle, 'f', prec));
 		item->setText(mKeyData2, key->quatData()->q.debugString(prec));
 		item->setText(mKeyData3, key->quatData()->dd.debugString(prec));
@@ -1170,8 +1170,8 @@ protected:
 		lib3ds_matrix_inv(invMeshMatrix);
 		matrix.loadMatrix(&invMeshMatrix[0][0]);
 
-		BoVector3 meshVertex[3];
-		BoVector3 v;
+		BoVector3Float meshVertex[3];
+		BoVector3Float v;
 		for (int j = 0; j < 3; j++) {
 			v.set(mesh->pointL[ face->points[j] ].pos);
 			matrix.transform(&meshVertex[j], &v);
@@ -1208,10 +1208,10 @@ protected:
 			item->setText(texelColumn[j], texel);
 		}
 
-		BoVector3 p, q;
+		BoVector3Float p, q;
 		p = meshVertex[2] - meshVertex[1];
 		q = meshVertex[0] - meshVertex[1];
-		BoVector3 normal = BoVector3::crossProduct(p, q);
+		BoVector3Float normal = BoVector3Float::crossProduct(p, q);
 		if (normal.length() != 0.0f) {
 			normal.normalize();
 		}
@@ -1310,7 +1310,7 @@ void BoNodeObjectDataWidget::setNodeObjectData(Lib3dsObjectData* d)
 	quatToAxisRotation(d->rot, &rX, &rY, &rZ, &angle);
 	rotAngle = QString("(%1,%2,%3) -> %4 degrees").arg(rX).arg(rY).arg(rZ).arg(angle);
 #endif
-	BoQuaternion q(d->rot[3], BoVector3(d->rot));
+	BoQuaternion q(d->rot[3], BoVector3Float(d->rot));
 	q.matrix().toRotation(&rX, &rY, &rZ);
 	rotX = QString::number(rX);
 	rotY = QString::number(rY);

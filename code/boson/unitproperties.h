@@ -27,7 +27,6 @@ class PluginProperties;
 class BosonWeaponProperties;
 class BosonEffect;
 class BosonEffectProperties;
-class BoVector3;
 class BoAction;
 class QCString;
 class QString;
@@ -35,6 +34,8 @@ template<class T> class QValueList;
 template<class T> class QPtrList;
 template<class T> class QIntDict;
 template<class T1, class T2> class QMap;
+template<class T> class BoVector3;
+typedef BoVector3<bofixed> BoVector3Fixed;
 
 class KSimpleConfig;
 
@@ -350,7 +351,7 @@ public:
 	 * some effects. Hitpoint is relative to the center of the unit.
 	 * It should be a point on the surface of the unit.
 	 **/
-	 const BoVector3& hitPoint() const;
+	 const BoVector3Fixed& hitPoint() const;
 
 	/**
 	 * @return BosonWeaponProperties with id id or NULL if they doesn't exist
@@ -366,8 +367,8 @@ public:
 	unsigned int explodingFragmentCount() const { return mExplodingFragmentCount; };
 	long int explodingFragmentDamage() const { return mExplodingFragmentDamage; };
 	const bofixed& explodingFragmentDamageRange() const { return mExplodingFragmentDamageRange; };
-	QPtrList<BosonEffect> newExplodingFragmentFlyEffects(BoVector3 pos) const;
-	QPtrList<BosonEffect> newExplodingFragmentHitEffects(BoVector3 pos) const;
+	QPtrList<BosonEffect> newExplodingFragmentFlyEffects(BoVector3Fixed pos) const;
+	QPtrList<BosonEffect> newExplodingFragmentHitEffects(BoVector3Fixed pos) const;
 
 	bool removeWreckageImmediately() const { return mRemoveWreckageImmediately; }
 
@@ -418,7 +419,7 @@ protected:
 	void setConstructedEffectIds(QValueList<unsigned long int> ids);
 	void setExplodingDamageRange(bofixed range)  { mExplodingDamageRange = range; };
 	void setExplodingDamage(long int damage)  { mExplodingDamage = damage; };
-	void setHitPoint(const BoVector3& hitpoint);
+	void setHitPoint(const BoVector3Fixed& hitpoint);
 	void setRemoveWreckageImmediately(bool remove)  { mRemoveWreckageImmediately = remove; }
 
 	// These only have effect if there is mobile or facility properties
