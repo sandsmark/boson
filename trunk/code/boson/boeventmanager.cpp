@@ -207,6 +207,7 @@ void BoEventManager::deliverEvent(BoEvent* event)
  while (it.current()) {
 	if (e->hasLocation()) {
 		if (!it.current()->canSee(e)) {
+			++it;
 			continue;
 		}
 	}
