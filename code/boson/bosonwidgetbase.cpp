@@ -385,7 +385,7 @@ void BosonWidgetBase::slotDebug()
  KGameCellDebug* cells = new KGameCellDebug(b);
  cells->setMap(map);
 
- connect(dlg, SIGNAL(finished()), dlg, SLOT(slotDelayedDestruct()));
+ connect(dlg, SIGNAL(finished()), dlg, SLOT(deleteLater()));
  connect(dlg, SIGNAL(signalRequestIdName(int,bool,QString&)),
 		this, SLOT(slotDebugRequestIdName(int,bool,QString&)));
  dlg->show();
@@ -394,7 +394,7 @@ void BosonWidgetBase::slotDebug()
 void BosonWidgetBase::slotProfiling()
 {
  BosonProfilingDialog* dlg = new BosonProfilingDialog(this, false); // note that dialog won't get updated while it is running, even if its non-modal!
- connect(dlg, SIGNAL(finished()), dlg, SLOT(slotDelayedDestruct()));
+ connect(dlg, SIGNAL(finished()), dlg, SLOT(deleteLater()));
  dlg->exec();
 }
 

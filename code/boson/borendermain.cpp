@@ -434,7 +434,7 @@ void RenderMain::slotDebugModels()
  KDialogBase* dialog = new KDialogBase(KDialogBase::Plain, i18n("Debug Models"),
 		KDialogBase::Cancel, KDialogBase::Cancel, this,
 		"debugmodelsdialog", false, true);
- connect(dialog, SIGNAL(finished()), dialog, SLOT(slotDelayedDestruct()));
+ connect(dialog, SIGNAL(finished()), dialog, SLOT(deleteLater()));
  QWidget* w = dialog->plainPage();
  QVBoxLayout* l = new QVBoxLayout(w);
  KGameModelDebug* models = new KGameModelDebug(w);
