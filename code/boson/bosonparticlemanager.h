@@ -54,6 +54,7 @@ class BosonParticleManager
 
     static void updateFadeOutParticle(BosonParticleSystem* system, BosonParticle* particle);
     static void updateFireParticle(BosonParticleSystem* system, BosonParticle* particle);
+    static void updateExplosionParticle(BosonParticleSystem* system, BosonParticle* particle);
 
     inline static float getFloat(float min, float max) { return ((float)(mRandom->getDouble())) * (max - min) + min; };
 
