@@ -29,17 +29,24 @@ class BoVector3
     BoVector3(GLfloat x, GLfloat y, GLfloat z)  { set(x, y, z); };
     ~BoVector3() {};
 
-    inline void set(GLfloat x, GLfloat y, GLfloat z)  { mData[0] = x;  mData[1] = y;  mData[2] = z; };
     inline void reset()  { mData[0] = mData[1] = mData[2] = 0; };
+
+    inline void set(GLfloat x, GLfloat y, GLfloat z)  { mData[0] = x;  mData[1] = y;  mData[2] = z; };
+    inline void setX(GLfloat x) { mData[0] = x; }
+    inline void setY(GLfloat y) { mData[1] = y; }
+    inline void setZ(GLfloat z) { mData[2] = z; }
+
     inline void addScaled(BoVector3 v, GLfloat s)  { mData[0] += v.mData[0] * s;  mData[1] += v.mData[1] * s;  mData[2] += v.mData[2] * s; };
     inline void setScaledSum(BoVector3 a, BoVector3 b,  GLfloat s)
         { mData[0] = a.mData[0] + b.mData[0] * s;   mData[1] = a.mData[1] + b.mData[1] * s;   mData[2] = a.mData[2] + b.mData[2] * s; };
 
+    inline GLfloat* data() { return mData; }
     inline void operator=(BoVector3 v)  { mData[0] = v.mData[0];  mData[1] = v.mData[1];  mData[2] = v.mData[2]; };
     inline void operator=(const GLfloat* v)  { mData[0] = v[0];  mData[1] = v[1];  mData[2] = v[2]; };
     inline GLfloat operator[](int i)  { return mData[i]; };
 
 
+  private:
     GLfloat mData[3];
 };
 
@@ -50,18 +57,25 @@ class BoVector4
     BoVector4(GLfloat x, GLfloat y, GLfloat z, GLfloat w)  { set(x, y, z, w); };
     ~BoVector4() {};
 
-    inline void set(GLfloat x, GLfloat y, GLfloat z, GLfloat w)  { mData[0] = x;  mData[1] = y;  mData[2] = z; mData[3] = w; };
     inline void reset()  {  mData[0] = mData[1] = mData[2] = mData[3] = 0; };
+
+    inline void set(GLfloat x, GLfloat y, GLfloat z, GLfloat w)  { mData[0] = x;  mData[1] = y;  mData[2] = z; mData[3] = w; };
+    inline void setX(GLfloat x) { mData[0] = x; }
+    inline void setY(GLfloat y) { mData[1] = y; }
+    inline void setZ(GLfloat z) { mData[2] = z; }
+    inline void setW(GLfloat w) { mData[3] = w; }
+
     inline void addScaled(BoVector4 v, GLfloat s)
         { mData[0] += v.mData[0] * s;  mData[1] += v.mData[1] * s;  mData[2] += v.mData[2] * s;  mData[3] += v.mData[3] * s; };
     inline void setScaledSum(BoVector4 a, BoVector4 b,  GLfloat s)
         { mData[0] = a.mData[0] + b.mData[0] * s;   mData[1] = a.mData[1] + b.mData[1] * s;   mData[2] = a.mData[2] + b.mData[2] * s;   mData[3] = a.mData[3] + b.mData[3] * s; };
 
+    inline GLfloat* data() { return mData; }
     inline void operator=(BoVector4 v)  { mData[0] = v.mData[0];  mData[1] = v.mData[1];  mData[2] = v.mData[2];  mData[3] = v.mData[3]; };
     inline void operator=(const GLfloat* v)  { mData[0] = v[0];  mData[1] = v[1];  mData[2] = v[2];  mData[3] = v[3]; };
     inline GLfloat operator[](int i)  { return mData[i]; };
 
-
+  private:
     GLfloat mData[4];
 };
 
@@ -98,6 +112,10 @@ class BoMatrix
     {
       loadMatrix(m);
     }
+    BoMatrix(GLenum matrix)
+    {
+      loadMatrix(matrix);
+    }
     ~BoMatrix() { }
 
     void loadIdentity()
@@ -108,6 +126,14 @@ class BoMatrix
       }
       mData[i] = mData[5] = mData[10] = mData[15] = 1.0;
     }
+
+    /**
+     * Load the specified OpenGL matrix.
+     * @param GL_MODELVIEW_MATRIX, GL_PROJECTION_MATRIX or GL_TEXTURE_MATRIX.
+     * Note that all other values (also e.g. GL_TEXTURE) will result in the
+     * identity matrix and generate an error
+     **/
+    void loadMatrix(GLenum matrix);
     void loadMatrix(const GLfloat* m);
 
     const GLfloat* data() const { return mData; }
@@ -115,6 +141,35 @@ class BoMatrix
     {
       debugMatrix(data());
     }
+
+    /**
+     * @return TRUE if <em>all</em> elements of this matrix are 0. Otherwise
+     * FALSE.
+     **/
+    bool isNull() const
+    {
+      for (int i = 0; i < 16; i++) {
+        if (mData[i] != 0.0) {
+          return false;
+        }
+      }
+      return true;
+    }
+    /**
+     * @return TRUE if this is the identity matrix, otherwise FALSE.
+     **/
+    bool isIdentity() const
+    {
+      for (int i = 0; i < 16; i++) {
+        if (mData[i] != 0.0) {
+          if (mData[i] != 1.0 || i % 5 != 0) {
+            return false;
+          }
+        }
+      }
+      return true;
+    }
+
     static void debugMatrix(const GLfloat* matrix);
 
   private:

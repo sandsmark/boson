@@ -22,6 +22,7 @@
 #include "defines.h"
 #include "bosonmodeltextures.h"
 #include "bosonprofiling.h"
+#include "bo3dtools.h"
 
 #include <kdebug.h>
 
@@ -564,7 +565,7 @@ void BosonModel::loadNode(Lib3dsNode* node, bool reload)
 		myTex = 0;
 	}
 
-	GLfloat texMatrix[16];
+	BoMatrix texMatrix;
 	if (mat && myTex) {
 		// *ggg* this is a nice workaround.
 		// it's hard to do this with a Lib3dsMatrix by several
@@ -599,29 +600,17 @@ void BosonModel::loadNode(Lib3dsNode* node, bool reload)
 			// doesn't seem to be used in our models
 			glScalef(scale, scale, 1.0);
 		}
-		glGetFloatv(GL_TEXTURE_MATRIX, texMatrix);
-		bool ok = false;
-		for (int i = 0; i < 16 && !ok; i++) {
-			if (texMatrix[i] != 0.0) {
-				ok = true;
-			}
-		}
-		if (!ok) {
+		texMatrix.loadMatrix(GL_TEXTURE_MATRIX);
+		if (texMatrix.isNull()) {
 			kdWarning() << k_funcinfo << "Invalid texture matrix was generated!" << endl;
-			// we load the identity matrix instead
-			// all elements are already 0
-			texMatrix[0] = texMatrix[5] = texMatrix[10] = texMatrix[15] = 1.0;
+			texMatrix.loadIdentity();
 		}
 
 		glPopMatrix();
 		glMatrixMode(GL_MODELVIEW);
 	} else {
-		// we load the identity matrix - this is just "in case".
+		// we use the default identity matrix - this is just "in case".
 		// we must not use this matrix at all!
-		for (int i = 0; i < 16; i++) {
-			texMatrix[i] = 0.0;
-		}
-		texMatrix[0] = texMatrix[5] = texMatrix[10] = texMatrix[15] = 1.0;
 	}
 
 	// now start the actual display list for this node.
@@ -646,12 +635,10 @@ void BosonModel::loadNode(Lib3dsNode* node, bool reload)
 				// mesh->texelL[f->points[i]] is our
 				// vector. it has x and y only, z is
 				// therefore 0.0
-				float a[3];
-				float b[3];
-				a[0] = mesh->texelL[f->points[i]][0];
-				a[1] = mesh->texelL[f->points[i]][1];
-				a[2] = 0.0;
-				myTransform(b, texMatrix, a);
+				BoVector3 a;
+				BoVector3 b;
+				a.set(mesh->texelL[f->points[i]][0], mesh->texelL[f->points[i]][1], 0.0);
+				myTransform(b.data(), texMatrix.data(), a.data());
 				tex[i][0] = b[0];
 				tex[i][1] = b[1];
 			}
@@ -771,7 +758,7 @@ void BosonModel::dumpTriangle(Lib3dsVector* v, GLuint texture, Lib3dsTexel* tex)
  kdDebug() << text << endl;
 }
 
-void BosonModel::myTransform(GLfloat* r, GLfloat* m, GLfloat* v)
+void BosonModel::myTransform(GLfloat* r, const GLfloat* m, const GLfloat* v)
 {
  // r = m * v, m is a 4x4 OpenGL matrix, r and v are both a 3x1 column vector.
  // the forth element is unused in boson and therefore we use silently 0.
