@@ -37,7 +37,7 @@ public:
 	bool isKnown(void) { return flags&known_f; }	// known_f : known / unknown
 	void setGround(groundType);
 	/** tel if a given mobile can "go" on this cell */
-	bool canGo(mobType type);
+	bool canGo(uint goFlag);
 
 	enum cell_flags {
 		known_f	= 0x01,
