@@ -18,7 +18,6 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-include("database.php");
 
 function counter($file = "")
 {
@@ -50,6 +49,17 @@ You have been on this page <font class=\"countervalue\">$visitcount</font> times
 // New counter
 
 $counter2_inited = false;
+$counter2_disable = false;
+
+if(file_exists("${basedir}database.php"))
+{
+  include("${basedir}database.php");
+}
+else
+{
+  // No database
+  $counter2_disable = true;
+}
 
 /**
  * Main function
@@ -61,6 +71,12 @@ function counter2($page)
 {
   global $HTTP_USER_AGENT, $REMOTE_ADDR;
   global $basedir;
+
+  global $counter2_disable;
+  if($counter2_disable)
+  {
+    return;
+  }
 
   // visit timeout (in seconds)
   $visit_timeout = 60 * 60;  // 60 minutes
@@ -290,6 +306,12 @@ function counter2($page)
 
 function counter2_download($file)
 {
+  global $counter2_disable;
+  if($counter2_disable)
+  {
+    return;
+  }
+
   counter2_init();
 
   // counter_downloads
@@ -314,6 +336,12 @@ function counter2_download($file)
 
 function counter2_get_pageviews($page)
 {
+  global $counter2_disable;
+  if($counter2_disable)
+  {
+    return 0;
+  }
+
   counter2_init();
 
   $query = "SELECT * FROM counter_pages WHERE page = '$page'";
@@ -331,6 +359,12 @@ function counter2_get_pageviews($page)
 }
 function counter2_get_downloads($file)
 {
+  global $counter2_disable;
+  if($counter2_disable)
+  {
+    return 0;
+  }
+
   counter2_init();
 
   $query = "SELECT * FROM counter_download WHERE file = '$file'";
@@ -352,6 +386,12 @@ $barheight = 10;
 
 function counter2_statspage($pagelink)
 {
+  global $counter2_disable;
+  if($counter2_disable)
+  {
+    return;
+  }
+
   counter2_init();
 
   $daylimit = 20;
