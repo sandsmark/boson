@@ -51,6 +51,7 @@ public:
 	KGamePropertyInt mGameSpeed;
 
 	KGameProperty<unsigned long int> mNextUnitId;
+	KGameProperty<unsigned int> mAdvanceCount;
 };
 
 Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
@@ -78,7 +79,11 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
 		KGamePropertyBase::PolicyLocal, "GameSpeed"); // PolicyClean?
  d->mNextUnitId.registerData(IdNextUnitId, dataHandler(),
 		KGamePropertyBase::PolicyLocal, "NextUnitId");
- d->mNextUnitId = 0;
+ d->mAdvanceCount.registerData(IdAdvanceCount, dataHandler(),
+		KGamePropertyBase::PolicyLocal, "AdvanceCount");
+ d->mNextUnitId.setLocal(0);
+ d->mAdvanceCount.setLocal(0);
+ d->mAdvanceCount.setEmittingSignal(false); // wo don't need it and it would be bad for performance.
 }
 
 Boson::~Boson()
@@ -141,7 +146,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 				kdDebug() << "cannot move destroyed units" << endl;
 				continue;
 			}
-			kdDebug() << "move " << unitId << endl;
+//			kdDebug() << "move " << unitId << endl;
 			if (unit->unitProperties()->isMobile()) {
 				unit->moveTo(pos);
 			}
@@ -382,7 +387,11 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 		break;
 	}
 	case BosonMessage::Advance:
-		emit signalAdvance();
+		emit signalAdvance(d->mAdvanceCount);
+		d->mAdvanceCount = d->mAdvanceCount + 1;
+		if (d->mAdvanceCount >= MAXIMAL_ADVANCE_COUNT) {
+			d->mAdvanceCount = 0;
+		}
 		break;
 	case BosonMessage::InitMap:
 		emit signalInitMap(buffer);
@@ -569,7 +578,6 @@ int Boson::gameSpeed() const
 
 void Boson::slotSetGameSpeed(int speed)
 {
-kdDebug() << k_funcinfo << speed << endl;
  if (d->mGameSpeed == speed) {
 	return; // do not restart timer
  }

@@ -147,12 +147,24 @@ public:
 
 	void quitGame();
 
+	void setWorkChanged(Unit* u, int);
+
 public slots:
 	/**
 	 * The game (@ref Boson) reports that a unit shall be added - lets do
 	 * that :-)
 	 **/
 	void slotAddUnit(Unit* unit, int x, int y);
+
+	/**
+	 * @param See @ref Boson::signalAdvance
+	 **/
+	void slotAdvance(unsigned int advanceCount);
+	
+	/**
+	 * Reimplemented for internal reasons. Don't use it. It is obsolete. Use
+	 * @ref slotAdvance instead.
+	 **/
 	virtual void advance();
 
 	void slotAddCell(int x, int y, int groundType, unsigned char b);
@@ -165,6 +177,14 @@ signals:
 protected:
 	void loadTiles(const QString&);
 
+	/**
+	 * Change the work of all units which have called @ref setWork using
+	 * @ref Unit::setWork. This is used to increase the speed of @ref
+	 * slotAdvance
+	 * @param oldWork See @ref UnitBase::WorkType
+	 **/
+	void changeWork();
+	
 protected slots:
 
 

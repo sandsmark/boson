@@ -191,15 +191,9 @@ public:
 	const QString& unitPath() const { return mUnitPath; };
 
 	/**
-	 * @return The number of @ref Unit::advance calls to achieve another
-	 * construction step. See @ref Facility::constructionSteps
-	 **/
-	int constructionDelay() const;
-
-	/**
 	 * The time that a unit needs to be produced
 	 * 
-	 * Note that in contrary to @ref constructionDelay which influences the
+	 * Note that in contrary to @ref Facility::constructionDelay which influences the
 	 * construction of a building after if was placed on the map the
 	 * productionTime is the time that is needed to <em>build</em> the unit,
 	 * so <em>before</em> it is being placed on the map.
