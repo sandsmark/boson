@@ -126,9 +126,6 @@ void  boShot::timerEvent( QTimerEvent * )
 
 bool boShot::loadBig(shot_style style, int version)
 {
-	// orzel, because shots # are from 1->4, will change soon, XXX
-	version++;
-
 
 	boAssert(style!=SHOT_SHOT);
 	if (SHOT_SHOT==style) return false;
@@ -151,19 +148,22 @@ bool boShot::loadBig(shot_style style, int version)
 			logf(LOG_ERROR, "unexpected style in boShot,loadBig");
 			return false;
 		case SHOT_UNIT:
+			boAssert(version<UNITS_SHOTS_NB);
 			if (qba_units.testBit(version)) return true;
 			frame_nb =  UNITS_SHOT_FRAMES;
 			path+= "units/";
 			break;
 
 		case SHOT_FACILITY:
+			boAssert(version<FIX_SHOTS_NB);
 			if (qba_fix.testBit(version)) return true;
 			frame_nb =  FIX_SHOT_FRAMES;
 			path+= "facilities/";
 			break;
 	}
 
-	sprintf(buffer, "expl.%02d", version);
+	// orzel, +1 because shots # are from 1->4, will change soon, XXX
+	sprintf(buffer, "expl.%02d", version+1);
 	path += buffer;
 //	printf("path is %s\n", (const char*)path);
 
