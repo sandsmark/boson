@@ -1,10 +1,10 @@
 [Boson Mobile Unit]
-AccelerationSpeed=0.2
+AccelerationSpeed=3.5
 CanGoOnLand=true
 CanGoOnWater=true
-DecelerationSpeed=0.5
-RotationSpeed=7
-Speed=7
+DecelerationSpeed=3
+RotationSpeed=140
+Speed=2.8
 
 [Boson Unit]
 Armor=4
@@ -72,7 +72,7 @@ Type=0
 [Weapon_1]
 CanShootAtAirUnits=false
 CanShootAtLandUnits=true
-AccelerationSpeed=0.8
+AccelerationSpeed=2
 Damage=250
 DamageRange=3
 FlyEffects=5001,5010
@@ -88,4 +88,4 @@ ShootEffects=
 SoundFly=missile_fly
 SoundHit=hit
 SoundShoot=shoot
-Speed=25
+Speed=6

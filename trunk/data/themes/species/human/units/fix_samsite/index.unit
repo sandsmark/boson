@@ -55,4 +55,4 @@ ShootEffects=
 SoundFly=missile_fly
 SoundHit=hit
 SoundShoot=shoot
-Speed=30
+Speed=7

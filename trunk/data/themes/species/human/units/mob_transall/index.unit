@@ -1,7 +1,7 @@
 [Boson Mobile Unit]
 CanGoOnLand=true
 CanGoOnWater=true
-Speed=5
+Speed=2.2
 
 [Boson Unit]
 Armor=0
@@ -48,7 +48,7 @@ ReportUnderAttack=report_underattack
 Shoot=shoot
 
 [Weapon_0]
-AccelerationSpeed=0.0005
+AccelerationSpeed=0.01
 CanShootAtAirUnits=false
 CanShootAtLandUnits=true
 Damage=600
@@ -65,6 +65,6 @@ Reload=300
 ShootEffects=
 SoundFly=missile_fly
 SoundShoot=shoot
-Speed=0.03
+Speed=0.6
 Type=4
 AutoUse=false
