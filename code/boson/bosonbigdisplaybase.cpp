@@ -1386,11 +1386,11 @@ void BosonBigDisplayBase::renderCells()
 #if 0
 	tiles->generateTextures();
 	textures = tiles->textures();
+#endif
 	if (!textures) {
 		boWarning() << k_funcinfo << "NULL textures for cells" << endl;
 		return;
 	}
-#endif
  }
 
  if (d->mRenderCellsCount == 0) {
