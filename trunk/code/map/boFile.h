@@ -18,13 +18,13 @@
  *                                                                         *
  ***************************************************************************/
 
+//just a local copy with no private, nor protected :-)
+//just a local copy with no private, nor protected :-)
+//just a local copy with no private, nor protected :-)
+//just a local copy with no private, nor protected :-)
+//just a local copy with no private, nor protected :-)
+//just a local copy with no private, nor protected :-)
 
-//just a local copy with no private, nor protected :-)
-//just a local copy with no private, nor protected :-)
-//just a local copy with no private, nor protected :-)
-//just a local copy with no private, nor protected :-)
-//just a local copy with no private, nor protected :-)
-//just a local copy with no private, nor protected :-)
 
 #ifndef BOFILE_H 
 #define BOFILE_H 
@@ -39,7 +39,6 @@ class QDataStream;
 class QFile;
 class mobileMsg_t;
 class facilityMsg_t;
-class Cell;
 //class QString;
 
 
@@ -57,35 +56,32 @@ public:
 	boFile();
 virtual	~boFile();
 
-
 	bool	openRead(const char *);
 	bool	openWrite(const char *);
 	bool	Close();
 
 /* header */
-	QString		worldName;
+	QString		_worldName;
 	int		map_width;
 	int		map_height;
-	int		nbPlayer;
+	uint		nbPlayer;
 	int		nbMobiles;
 	int		nbFacilities;
 
-	void	load(Cell &);
+	void	load(cell_t &);
 	void	load(mobileMsg_t &);
 	void	load(facilityMsg_t &);
 
-	void	write(Cell &);
+	void	write(cell_t );
 	void	write(mobileMsg_t &m);
 	void	write(facilityMsg_t &f);
 
 	bool	isOk() {return !error; }
 
-
-
 	enum {
 		None,		// nothing has happened
 		Read,		// a file is being read
-		Write,		// a file is being written
+		Write		// a file is being written
 	}		BFstate;
 	QDataStream	*stream;
 	QFile		*f;
