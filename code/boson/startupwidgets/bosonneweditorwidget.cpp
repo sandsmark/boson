@@ -163,7 +163,7 @@ void BosonNewEditorWidget::slotNetStart()
 
  if (playFieldIdentifier.isNull()) { // "New Map" selected
 	unsigned int width = mChangeMaxWidth->value();
-	unsigned int height = mChangeMaxWidth->value();
+	unsigned int height = mChangeMaxHeight->value();
 	if (!BosonMap::isValidMapGeo(width, height)) {
 		boError() << k_funcinfo << "invalid map geo" << endl;
 		KMessageBox::sorry(this, i18n("The desired map geo is not valid\nWidth=%1\nHeight=%2").arg(width).arg(height));
