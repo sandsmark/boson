@@ -1,0 +1,34 @@
+[Boson Facility]
+CanRefineMinerals=false
+CanRefineOil=false
+ConstructionSteps=25
+
+[Boson Unit]
+Armor=0
+DestroyedParticles=1010,3010
+Health=250
+Id=2
+IsFacility=true
+MineralCost=250
+Name=Power Plant
+OilCost=80
+Producer=10
+ProductionTime=250
+Requirements=5
+Shield=0
+SightRange=5
+SupportMiniMap=false
+TerrainType=0
+UnitDepth=1
+UnitHeight=2
+UnitWidth=2
+Weapons=0
+
+[Sounds]
+OrderAttack=order_attack
+OrderMove=order_move
+OrderSelect=order_select
+ReportDestroyed=report_destroyed
+ReportProduced=report_produced
+ReportUnderAttack=report_underattack
+Shoot=shoot

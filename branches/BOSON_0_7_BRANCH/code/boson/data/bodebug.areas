@@ -1,0 +1,16 @@
+# entries for bodebug. same format as in kdebug.areas
+#
+#Format : number<tab>description
+
+100	BosonModel
+110	Boson Textures
+200	Boson Sound
+210	OptionsDialog
+250	BosonScenario
+300	Boson Advance
+310	Collisions
+
+# Use 400-449 for Unit::advance*()
+401	AdvanceMove
+
+500	BosonPath

@@ -1,0 +1,25 @@
+#include "top.wml"
+    <h1>
+      Facilities - Oil Refinery
+    </h1>
+    <p>&nbsp;</p>
+    <table border="0">
+	<tr>
+		<td><img src="oil_refinery.png" border="0">&nbsp;</td>
+		<td valign="top"><img src="../none.png" border="0" height="30"><br>
+		The Oil Refinery produces oil ;) You can send a <a href="../units/oil_harvester.html">Oil Harvester</a>
+		to them to get more oil.</td>
+	</tr>
+    </table>
+    
+<:
+use get_values;
+
+# ( facility type, facility name)
+get_values->getval("fix", "oilrefinery");
+:>
+
+
+
+#include "nav.wml" before_url="mineralrefinery.html" before_text="Mineral Refinery" after_url="oiltower.html" after_text="Oil Tower" up_url="index.html"
+#include "footer.wml"

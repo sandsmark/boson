@@ -1,0 +1,8 @@
+Makefile
+Makefile.in
+.deps
+.libs
+*.moc
+*.lo
+libbosoncommandframe.la
+libbosoncommandframe_la_meta_unload.*

@@ -1,0 +1,25 @@
+#include "top.wml"
+    <h1>
+      The Boson editor
+    </h1>
+    <p>&nbsp;</p>
+    <p>
+	The editor allows you to create your own boson maps and games.
+    </p>
+    <h3>
+      Contents:
+    </h3>
+    <dl>
+      <dd>
+        <dl>
+                <dt>5.1 <a href="elements.html">Elements of a game</a></dt>
+                <dt>5.2 <a href="startup.html">The startup screen</a></dt>
+                <dt>5.2 <a href="map.html">Working with the map</a></dt>
+                <dt>5.3 <a href="facilities.html">Building facilities</a></dt>
+        </dl>
+      </dd>
+    </dl>
+    
+
+#include "nav.wml" before_url="../units/tornado.html" before_text="Tornado" after_url="elements.html" after_text="Elements of a game" up_url="../index.html"
+#include "footer.wml"
