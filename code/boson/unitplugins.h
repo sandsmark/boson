@@ -22,7 +22,9 @@
 #include "global.h"
 
 #include <kgame/kgameproperty.h>
-#include <kgame/kgamepropertylist.h>
+
+#include <qvaluelist.h>
+#include <qpair.h>
 
 class Unit;
 class SpeciesTheme;

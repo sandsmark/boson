@@ -342,6 +342,57 @@ bool BosonFileConverter::convertSaveGame_From_0_8_128_To_0_9(QMap<QString, QByte
 	boError() << k_funcinfo << "not a boson 0.8.128 file. missing map file" << endl;
 	return false;
  }
+ QDomDocument kgameDoc;
+ if (!loadXMLDoc(&kgameDoc, QString(fileList["kgameXML"]))) {
+	boError() << k_funcinfo << "unable to load kgame.xml" << endl;
+	return false;
+ }
+ QDomElement kgameRoot = kgameDoc.documentElement();
+ if (kgameRoot.isNull()) {
+	boError() << k_funcinfo << "no root element found in kgame.xml" << endl;
+	return false;
+ }
+ QDomElement dataHandler = kgameRoot.namedItem("DataHandler").toElement();
+ if (!dataHandler.isNull()) {
+	boError() << k_funcinfo << "no DataHandler tag found in kgame.xml" << endl;
+	return false;
+ }
+ QDomNodeList properties = dataHandler.elementsByTagName("KGameProperty");
+ QString nextUnitId;
+ for (unsigned int i = 0; i < properties.count(); i++) {
+	QDomElement e = properties.item(i).toElement();
+	if (e.isNull()) {
+		continue;
+	}
+	if (e.attribute("Id") == QString::number(6)) {
+		// IdGameStatus should not be present in savegames.
+		dataHandler.removeChild(e);
+	}
+	if (e.attribute("Id") != QString::number(10005)) {
+		continue;
+	}
+	nextUnitId = e.text();
+	dataHandler.removeChild(e);
+	break;
+ }
+ if (nextUnitId.isEmpty()) {
+	boError() << k_funcinfo << "missing nextUnitId" << endl;
+	return false;
+ }
+ QDomDocument canvasDoc(QString::fromLatin1("Canvas"));
+ QDomElement canvasRoot = canvasDoc.documentElement();
+ if (!loadXMLDoc(&canvasDoc, QString(fileList["canvasXML"]))) {
+	boError() << k_funcinfo << "unable to load canvas.xml" << endl;
+	return false;
+ }
+ QDomElement canvasDataHandler = canvasDoc.createElement(QString::fromLatin1("DataHandler"));
+ canvasRoot.appendChild(canvasDataHandler);
+ QDomElement nextItemId = canvasDoc.createElement("KGameProperty");
+ canvasDataHandler.appendChild(nextItemId);
+ nextItemId.setAttribute("Id", 10000);
+ nextItemId.appendChild(canvasDoc.createTextNode(nextUnitId));
+
+
 
  // we need to split "map" up.
  // in boson 0.8.128 (and previous) the map was stored using
@@ -465,18 +516,10 @@ bool BosonFileConverter::convertSaveGame_From_0_8_128_To_0_9(QMap<QString, QByte
  stream >> descriptionXML;
  map_description = descriptionXML.local8Bit(); // AB: i have _no_ idea whether this is correct. but I need a QCString, not a QString and this one seems (!) to be the better choice than utf8().
 
- QDomDocument kgameDoc(QString::fromLatin1("Boson"));
- if (!loadXMLDoc(&kgameDoc, QString(fileList["kgameXML"]))) {
-	boError() << k_funcinfo << "unable to load kgame.xml" << endl;
-	return false;
- }
- QDomElement kgameRoot = kgameDoc.documentElement();
- if (kgameRoot.isNull()) {
-	boError() << k_funcinfo << "no root element found in kgame.xml" << endl;
-	return false;
- }
+
  kgameRoot.setAttribute(QString::fromLatin1("SaveGameVersion"), (unsigned int)BOSON_SAVEGAME_FORMAT_VERSION_0_9);
  QCString kgameXML = kgameDoc.toCString();
+ QCString canvasXML = canvasDoc.toCString();
 
  fileList.remove("map");
  fileList.insert("map/mapXML", map_mapXML);
@@ -484,6 +527,7 @@ bool BosonFileConverter::convertSaveGame_From_0_8_128_To_0_9(QMap<QString, QByte
  fileList.insert("map/texmap", map_texMap);
  fileList.insert("C/descriptionXML", map_description);
  fileList.insert("kgameXML", kgameXML);
+ fileList.insert("canvasXML", canvasXML);
 
  delete[] heightMap;
  heightMap = 0;
@@ -763,6 +807,8 @@ bool BosonFileConverter::convertScenario_From_0_8_To_0_9(const QByteArray& scena
 				step.appendChild(canvasDoc.createTextNode(QString::number(*u->constructionStep)));
 			}
 		}
+		QDomElement canvasDataHandler = canvasDoc.createElement("DataHandler");
+		root.appendChild(canvasDataHandler);
 	}
  }
 

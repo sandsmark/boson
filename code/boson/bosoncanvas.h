@@ -131,8 +131,15 @@ class BosonCanvas : public QObject
 {
 	Q_OBJECT
 public:
+	enum PropertyIds {
+		IdNextItemId = 10000 // must be >= KGamePropertyBase::IdUser
+	};
+
+public:
 	BosonCanvas(QObject* parent);
 	~BosonCanvas();
+
+	unsigned long int nextItemId();
 
 	BosonCanvasStatistics* canvasStatistics() const;
 

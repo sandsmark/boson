@@ -42,6 +42,8 @@
 
 #include <klocale.h>
 #include <kgame/kgameio.h>
+#include <kgame/kgamemessage.h>
+#include <kgame/kgamepropertyhandler.h>
 
 #include <qbuffer.h>
 #include <qtimer.h>
@@ -53,6 +55,7 @@
 #include <qtextstream.h>
 #include <qcstring.h>
 #include <qfile.h>
+//#include <qintdict.h>
 
 #ifndef KGAME_HAVE_KGAME_HOSTNAME
 // AB: !KGAME_HAVE_KGAME_PORT implies !KGAME_HAVE_KGAME_HOSTNAME
@@ -538,8 +541,6 @@ public:
 	KGamePropertyInt mGameSpeed;
 	KGamePropertyBool mGamePaused;
 
-	KGameProperty<unsigned long int> mNextUnitId;
-
 	BosonSaveLoad::LoadingStatus mLoadingStatus;
 
 	QValueList<QByteArray> mGameLogs;
@@ -577,9 +578,6 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
 		KGamePropertyBase::PolicyClean, "GameSpeed");
  d->mGamePaused.registerData(IdGamePaused, dataHandler(),
 		KGamePropertyBase::PolicyClean, "GamePaused");
- d->mNextUnitId.registerData(IdNextUnitId, dataHandler(),
-		KGamePropertyBase::PolicyLocal, "NextUnitId");
- d->mNextUnitId.setLocal(0);
  d->mGameSpeed.setLocal(0);
  d->mGamePaused.setLocal(false);
 
@@ -663,7 +661,6 @@ void Boson::quitGame()
  }
  d->mGameTimer->stop();
  setGameStatus(KGame::End);
- d->mNextUnitId = 0;
 
  // remove all players from game
  removeAllPlayers();
@@ -1636,13 +1633,6 @@ void Boson::startGame()
 void Boson::slotSendAdvance()
 {
  d->mAdvance->sendAdvance();
-}
-
-unsigned long int Boson::nextUnitId()
-{
- d->mNextUnitId = d->mNextUnitId + 1;
-//boDebug() << "next id: " << d->mNextUnitId << endl;
- return d->mNextUnitId;
 }
 
 Unit* Boson::findUnit(unsigned long int id, Player* searchIn) const

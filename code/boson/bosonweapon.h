@@ -26,6 +26,8 @@
 #include "bo3dtools.h"
 
 #include <qptrlist.h>
+#include <qintdict.h>
+#include <qmap.h>
 
 class KSimpleConfig;
 class SpeciesTheme;

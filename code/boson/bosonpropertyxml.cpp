@@ -265,3 +265,37 @@ void BosonCustomPropertyXML::slotRequestSetValue(KGamePropertyBase* prop, const 
  }
 }
 
+QString BosonPropertyXML::propertyValue(const QDomElement& root, unsigned long int id)
+{
+ QDomNodeList list = root.elementsByTagName(QString::fromLatin1("KGameProperty"));
+ for (unsigned int i = 0; i < list.count(); i++) {
+	QDomElement element = list.item(i).toElement();
+	if (!element.isNull()) {
+		boError() << k_funcinfo << "item " << i << " is not an element" << endl;
+		continue;
+	}
+	if (element.attribute(QString::fromLatin1("Id")).compare(QString::number(id)) == 0) {
+		return element.text();
+	}
+ }
+ return QString::null;
+}
+
+bool BosonPropertyXML::removeProperty(QDomElement& root, unsigned long int id)
+{
+ bool ret = false;
+ QDomNodeList list = root.elementsByTagName(QString::fromLatin1("KGameProperty"));
+ for (unsigned int i = 0; i < list.count(); i++) {
+	QDomElement element = list.item(i).toElement();
+	if (!element.isNull()) {
+		boError() << k_funcinfo << "item " << i << " is not an element" << endl;
+		continue;
+	}
+	if (element.attribute(QString::fromLatin1("Id")).compare(QString::number(id)) == 0) {
+		root.removeChild(element);
+		ret = true;
+	}
+ }
+ return ret;
+}
+
