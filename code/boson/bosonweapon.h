@@ -275,6 +275,13 @@ class BosonWeapon : public UnitPlugin
      **/
     bool layMine();
 
+    /**
+     * Drop bomb from the current location of unit
+     * If bomb is dropped, returns true. If weapon is not a bomb, not reloaded
+     * or some other error occurs, returns false
+     **/
+    bool dropBomb();
+
   protected:
     inline void reload()  { if(mReloadCounter > 0) { mReloadCounter = mReloadCounter - 1; } }
 
