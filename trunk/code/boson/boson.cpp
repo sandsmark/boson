@@ -1327,7 +1327,7 @@ bool Boson::buildProducedUnit(ProductionPlugin* factory, unsigned long int unitT
 	boError() << k_funcinfo << "NULL owner" << endl;
 	return false;
  }
- if (!((BosonCanvas*)d->mCanvas)->canPlaceUnitAt(p->unitProperties(unitType), QPoint(x, y), 0)) {
+ if (!(d->mCanvas)->canPlaceUnitAt(p->unitProperties(unitType), QPoint(x, y), 0)) {
 	boDebug() << k_funcinfo << "Cannot create unit here" << endl;
 	return false;
  }
