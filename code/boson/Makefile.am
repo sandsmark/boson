@@ -158,6 +158,7 @@ boson_SOURCES = \
 		bosoncommandframeinterface.cpp \
 		bosonlocalplayerinput.cpp \
 		kgameunitdebug.cpp \
+		kgameadvancemessagesdebug.cpp \
 		kgameplayerdebug.cpp \
 		kgamecelldebug.cpp \
 		gameoverdialog.cpp \

@@ -41,6 +41,7 @@
 #include "sound/bosonaudiointerface.h"
 #include "kgameunitdebug.h"
 #include "kgameplayerdebug.h"
+#include "kgameadvancemessagesdebug.h"
 #include "bosonprofilingdialog.h"
 #include "bosondata.h"
 #include "bosongroundtheme.h"
@@ -1193,6 +1194,10 @@ void TopWidget::slotDebugKGame()
  b = dlg->addVBoxPage(i18n("Debug &Boson Players"));
  KGamePlayerDebug* player = new KGamePlayerDebug(b);
  player->setBoson(boGame);
+
+ b = dlg->addVBoxPage(i18n("Debug &Advance messages"));
+ KGameAdvanceMessagesDebug* messages = new KGameAdvanceMessagesDebug(b);
+ messages->setBoson(boGame);
 
 #if 0
  if (boGame->playField()) {
