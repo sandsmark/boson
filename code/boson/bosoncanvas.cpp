@@ -170,6 +170,8 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
  }
 
  deleteUnusedShots();
+ 
+ updateParticleSystems(0.05);  // With default game speed, delay between advance messages is 1.0 / 20 = 0.05 sec
 
  if (advanceCount == MAXIMAL_ADVANCE_COUNT) {
 	boDebug() << "MAXIMAL_ADVANCE_COUNT" << endl;
