@@ -182,7 +182,7 @@ protected:
 	 * glGetFloatv(GL_TEXTURE_MATRIX, matrix)
 	 * @param inputVector An array of 3 that should get transformed
 	 **/
-	void myTransform(GLfloat* resultVector, GLfloat* matrix, GLfloat* inputVector);
+	void myTransform(GLfloat* resultVector, const GLfloat* matrix, const GLfloat* inputVector);
 
 private:
 	void init();

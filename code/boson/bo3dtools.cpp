@@ -28,6 +28,19 @@ void BoMatrix::loadMatrix(const GLfloat* m)
  }
 }
 
+void BoMatrix::loadMatrix(GLenum matrix)
+{
+ switch (matrix) {
+   case GL_MODELVIEW_MATRIX:
+   case GL_PROJECTION_MATRIX:
+   case GL_TEXTURE_MATRIX:
+     break;
+   default:
+     kdError() << k_funcinfo << "Invalid matrix enum " << (int)matrix << endl;
+ }
+ glGetFloatv(matrix, mData);
+}
+
 void BoMatrix::debugMatrix(const GLfloat* m)
 {
  kdDebug() << k_funcinfo << endl;
