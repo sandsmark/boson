@@ -38,6 +38,35 @@ typedef bondbgstream & (*BONDBGFUNC)(bondbgstream &); // manipulator function
 
 #define k_lineinfo "[" << __FILE__ << ":" << __LINE__ << "] "
 
+
+// 4 macros for boson:
+
+/**
+ * Output a NULL pointer error for @p p (including the variable name).
+ * Won't check whether p is actually NULL.
+ *
+ * Usually you will use BO_CHECK_NULL* instead.
+ **/
+#define BO_NULL_ERROR(p) boError() << k_funcinfo << "NULL pointer: " << #p << endl;
+
+/**
+ * Ensure that the pointer p is non-NULL. If it is NULL output an error. will
+ * also output the supplied variable name.
+ **/
+#define BO_CHECK_NULL(p) if (!p) { BO_NULL_ERROR(p) }
+
+/**
+ * Just like BO_CHECK_NULL, but will also return the current function (without
+ * return value)
+ **/
+#define BO_CHECK_NULL_RET(p) if (!p) { BO_NULL_ERROR(p) return; }
+
+/**
+ * Just like BO_CHECK_NULL, but will also return the current function, return
+ * value is 0.
+ **/
+#define BO_CHECK_NULL_RET0(p) if (!p) { BO_NULL_ERROR(p) return 0; }
+
 /**
  * bodbgstream is a text stream that allows you to print debug messages.
  * Using the overloaded "<<" operator you can send messages. Usually 
