@@ -195,8 +195,9 @@ public:
 	 * the @ref setAnimated was already called.
 	 * @param x The destination x-coordinate on the canvas
 	 * @param y The destination y-coordinate on the canvas
+	 * @return true if unit can go to destination, false otherwise
 	 **/
-	void moveTo(int x, int y);
+	bool moveTo(int x, int y);
 
 	/**
 	 * Just stop moving. Don't call this if you don't want to stop attacking

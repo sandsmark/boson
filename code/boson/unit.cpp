@@ -272,21 +272,25 @@ unsigned int Unit::waypointCount() const
 void Unit::moveTo(const QPoint& pos)
 {
  d->mTarget = 0;
- moveTo(pos.x(), pos.y());
- setWork(WorkMove); 
+ if(moveTo(pos.x(), pos.y())) {
+	setWork(WorkMove);
+ }
+ else {
+	setWork(WorkNone);
+ }
 }
 
-void Unit::moveTo(int x, int y)
+bool Unit::moveTo(int x, int y)
 {
  stopMoving();
 
  if(!owner()->isFogged(x / BO_TILE_SIZE, y / BO_TILE_SIZE)) {
 	// No pathfinding if goal not reachable or occupied and we can see it
 	if(!boCanvas()->cell(x / BO_TILE_SIZE, y / BO_TILE_SIZE)->canGo(unitProperties())) {
-		return;
+		return false;
 	}
 	if(boCanvas()->cellOccupied(x / BO_TILE_SIZE, y / BO_TILE_SIZE) && work() != WorkAttack) {
-		return;
+		return false;
 	}
  }
 
@@ -297,6 +301,7 @@ void Unit::moveTo(int x, int y)
  //  to true and then find path later in advanceMove()
  //newPath();
  searchpath = true;
+ return true;
 }
 
 bool Unit::newPath()
