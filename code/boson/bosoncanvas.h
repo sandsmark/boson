@@ -34,6 +34,7 @@ class BosonItem;
 class ProductionPlugin;
 class BosonParticleSystem;
 class BosonShot;
+class BosonCanvasStatistics;
 class BoVector3;
 
 class KPlayer;
@@ -60,6 +61,8 @@ class BosonCanvas : public QObject
 public:
 	BosonCanvas(QObject* parent);
 	~BosonCanvas();
+
+	BosonCanvasStatistics* canvasStatistics() const;
 
 	/**
 	 * Create the @ref Cell array
@@ -142,22 +145,6 @@ public:
 	 * Be <em>very</em> careful when you call this manually!
 	 **/
 	void removeItem(BosonItem* item);
-
-	/**
-	 * WARNING: you must call @ref updateItemCount before calling this!
-	 * Otherwise you'll get old results!
-	 * @return The number of items on the canvas with @p rtti. See @ref
-	 * BosonItem::rtti. Note that <em>all</em> units get added to @p rtti =
-	 * @ref RTTI::UnitStart!
-	 **/
-	unsigned int itemCount(int rtti) const;
-
-	/**
-	 * Update the values for @ref itemCount. This function iterates over all
-	 * items and therefore might take a little bit time. Don't call it when
-	 * you render frames or so!
-	 **/
-	void updateItemCount();
 
 	/**
 	 * @return A complete list of <em>all</em> items on the canvas. See @ref
@@ -250,22 +237,22 @@ public:
 	/**
 	 * Convenience method. See @ref BosonCollisions::findUnitAt
 	 **/
-	Unit* findUnitAt(const BoVector3& pos) { return collisions()->findUnitAt(pos); }
+	Unit* findUnitAt(const BoVector3& pos) const { return collisions()->findUnitAt(pos); }
 
 	/**
 	 * Convenience method. See @ref BosonCollisions::findItemAt
 	 **/
-	BosonItem* findItemAt(const BoVector3& pos) { return collisions()->findItemAt(pos); }
+	BosonItem* findItemAt(const BoVector3& pos) const { return collisions()->findItemAt(pos); }
 
 	/**
 	 * Convenience method. See @ref BosonCollisions::findUnitAtCell
 	 **/
-	Unit* findUnitAtCell(int x, int y, float z) { return collisions()->findUnitAtCell(x, y, z); }
+	Unit* findUnitAtCell(int x, int y, float z) const { return collisions()->findUnitAtCell(x, y, z); }
 
 	/**
 	 * Convenience method. See @ref BosonCollisions::findItemAtCell
 	 **/
-	BosonItem* findItemAtCell(int x, int y, float z, bool unitOnly) { return collisions()->findItemAtCell(x, y, z, unitOnly); }
+	BosonItem* findItemAtCell(int x, int y, float z, bool unitOnly) const { return collisions()->findItemAtCell(x, y, z, unitOnly); }
 
 	/**
 	 * Convenience method. See @ref BosonCollisions::cellOccupied
@@ -307,12 +294,6 @@ public:
 
 	void quitGame();
 
-	/**
-	 * Remove all remaining units of player (if any). After this point the
-	 * player is not able to do anything!
-	 **/
-	void killPlayer(Player* player);
-
 	void addToCells(BosonItem* u);
 	void removeFromCells(BosonItem* u);
 
@@ -328,9 +309,9 @@ public:
 
 	bool advanceFunctionLocked() const { return mAdvanceFunctionLocked; }
 
-	int particleSystemsCount() const;
+	unsigned int particleSystemsCount() const;
 	void updateParticleSystems(float elapsed);
-	QPtrList<BosonParticleSystem>* particleSystems();
+	QPtrList<BosonParticleSystem>* particleSystems() const;
 	void addParticleSystem(BosonParticleSystem* s);
 	void addParticleSystems(const QPtrList<BosonParticleSystem> systems);
 
@@ -341,9 +322,6 @@ public:
 	 * delete units from anywhere else!
 	 **/
 	void deleteUnits(QPtrList<Unit>* units);
-
-	QMap<int, int>* workCounts() const;
-	void resetWorkCounts();
 
 	bool load(QDataStream& stream);
 	bool save(QDataStream& stream);
@@ -370,7 +348,6 @@ public slots:
 signals:
 	void signalUnitMoved(Unit* unit, float oldX, float oldY);
 	void signalUnitRemoved(Unit* unit);
-	void signalOutOfGame(Player*);
 
 	/**
 	 * Emitted by @ref removeItem just after the item is removed from the

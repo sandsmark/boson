@@ -32,7 +32,6 @@ class BosonBigDisplay;
 class BosonBigDisplayBase;
 class Unit;
 class Player;
-class TopWidget;
 class BoDisplayManager;
 class Boson;
 class BosonMiniMap;
@@ -61,7 +60,7 @@ public:
 	/**
 	 * Default Constructor
 	 **/
-	BosonWidget(TopWidget* top, QWidget* parent);
+	BosonWidget(QWidget* parent);
 
 	/**
 	 * Default Destructor
@@ -83,7 +82,7 @@ signals:
 protected slots:
 	virtual void slotChangeCursor(int mode, const QString& dir);
 
-	void slotOutOfGame(Player* p);
+	void slotPlayerKilled(Player* p);
 	void slotGameOverDialogFinished();
 
 protected:

@@ -75,8 +75,8 @@ public:
 	QPtrList<Player> mPlayers;
 };
 
-EditorWidget::EditorWidget(TopWidget* top, QWidget* parent)
-    : BosonWidgetBase(top, parent)
+EditorWidget::EditorWidget(QWidget* parent)
+    : BosonWidgetBase(parent)
 {
  d = new EditorWidgetPrivate;
 }
@@ -104,8 +104,6 @@ void EditorWidget::initDisplayManager()
 void EditorWidget::initConnections()
 {
  BosonWidgetBase::initConnections();
-// connect(canvas(), SIGNAL(signalOutOfGame(Player*)),
-//		this, SLOT(slotOutOfGame(Player*)));
 
  connect(boGame, SIGNAL(signalPlayerJoinedGame(KPlayer*)),
 		this, SLOT(slotPlayerJoinedGame(KPlayer*)));
@@ -160,10 +158,6 @@ void EditorWidget::slotChangeCursor(int , const QString& )
 {
  // editor mode
  changeCursor(new BosonKDECursor());
-}
-
-void EditorWidget::slotOutOfGame(Player* p)
-{
 }
 
 void EditorWidget::initKActions()

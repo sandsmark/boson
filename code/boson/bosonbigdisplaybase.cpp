@@ -23,6 +23,7 @@
 #include "defines.h"
 #include "bosonwidget.h"
 #include "bosoncanvas.h"
+#include "bosoncanvasstatistics.h"
 #include "bosonmap.h"
 #include "cell.h"
 #include "boitemlist.h"
@@ -1154,7 +1155,8 @@ void BosonBigDisplayBase::renderText()
  x = border;
  y = d->mViewport[3] - border;
  if (boConfig->debugItemWorkStatistics()) {
-	QMap<int, int> workCounts = *canvas()->workCounts();
+	BosonCanvasStatistics* statistics = canvas()->canvasStatistics();
+	QMap<int, int> workCounts = *statistics->workCounts();
 	QString text;
 	text += i18n("Item work statistics:\n");
 	text += i18n("Total items: %1\n").arg(canvas()->allItemsCount());

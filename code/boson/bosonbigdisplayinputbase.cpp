@@ -51,9 +51,11 @@ BoSelection* BosonBigDisplayInputBase::selection() const
  return bigDisplay()->selection();
 }
 
+#include "boson.h"
 BosonCanvas* BosonBigDisplayInputBase::canvas() const
 {
- return bigDisplay()->canvas();
+// return bigDisplay()->canvas();
+ return boGame->canvasNonConst(); // FIXME: we need a non-const version here but dont have it in the big display
 }
 
 BosonCollisions* BosonBigDisplayInputBase::collisions() const

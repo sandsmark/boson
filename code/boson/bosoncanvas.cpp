@@ -33,6 +33,7 @@
 #include "bosonweapon.h"
 #include "bosonstatistics.h"
 #include "bosonprofiling.h"
+#include "bosoncanvasstatistics.h"
 #include "bodebug.h"
 #include "boson.h"
 
@@ -53,9 +54,11 @@ public:
 	BosonCanvasPrivate()
 		: mAllItems(BoItemList(0, false))
 	{
+		mStatistics = 0;
 		mMap = 0;
 	}
-	
+	BosonCanvasStatistics* mStatistics;
+
 	QPtrList<Unit> mDestroyedUnits;
 
 	BosonMap* mMap; // just a pointer - no memory allocated
@@ -63,8 +66,6 @@ public:
 	QPtrList<BosonItem> mAnimList; // see BosonCanvas::slotAdvance()
 
 	BoItemList mAllItems;
-	QMap<int, unsigned int> mItemCount;
-
 	QPtrList<BosonParticleSystem> mParticles;
 
 	// by default ALL items are in "work" == -1. if an item changes its work
@@ -72,9 +73,6 @@ public:
 	// another list (once slotAdvance() reaches its end)
 	QMap<int, QPtrList<BosonItem> > mWork2AdvanceList;
 	QPtrList<BosonItem> mChangeAdvanceList; // work has been changed - request to change advance list
-
-	// For debugging only
-	QMap<int, int> mWorkCounts; // How many units are doing what work
 };
 
 BosonCanvas::BosonCanvas(QObject* parent)
@@ -90,15 +88,22 @@ void BosonCanvas::init()
  d->mParticles.setAutoDelete(true);
  mAdvanceFunctionLocked = false;
  mCollisions = new BosonCollisions();
+ d->mStatistics = new BosonCanvasStatistics(this);
 }
 
 BosonCanvas::~BosonCanvas()
 {
 boDebug()<< k_funcinfo << endl;
  quitGame();
+ delete d->mStatistics;
  delete mCollisions;
  delete d;
 boDebug()<< k_funcinfo <<"done"<< endl;
+}
+
+BosonCanvasStatistics* BosonCanvas::canvasStatistics() const
+{
+ return d->mStatistics;
 }
 
 void BosonCanvas::quitGame()
@@ -154,7 +159,7 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
  QPtrListIterator<BosonItem> animIt(d->mAnimList);
  lockAdvanceFunction();
  boProfiling->advanceFunction(true);
- resetWorkCounts();
+ d->mStatistics->resetWorkCounts();
 
 #if USE_ADVANCE_LISTS
  // first we need to call *all* BosonItem::advance() functions.
@@ -172,7 +177,7 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 		id = 0;
 		work = -1;
 	}
-	d->mWorkCounts[work]++;
+	d->mStatistics->increaseWorkCount(work);
 #if DO_ITEM_PROFILING
 	boProfiling->advanceItemStart(s->rtti(), id, work);
 	boProfiling->advanceItem(true);
@@ -731,7 +736,7 @@ void BosonCanvas::destroyUnit(Unit* unit)
 	}
 	// Check if owner is out of game
 	if (owner->checkOutOfGame()) {
-		killPlayer(owner);
+		boGame->killPlayer(owner);
 	}
  }
 }
@@ -823,17 +828,6 @@ float BosonCanvas::heightAtPoint(float x, float y) const
  // Blend all corners together and return the result
  // FIXME: this can probably be written _much_ more understandably and maybe faster
  return ((h1 * (1 - x2)) + (h2 * x2) * (1 - y2)) + ((h3 * (1 - x2)) + (h4 * x2) * y2);
-}
-
-void BosonCanvas::killPlayer(Player* player)
-{
- while (player->allUnits()->count() > 0) {
-	destroyUnit(player->allUnits()->first());
- }
- player->setMinerals(0);
- player->setOil(0);
- boDebug() << k_funcinfo << "player " << player->id() << " is out of game" << endl;
- emit signalOutOfGame(player);
 }
 
 void BosonCanvas::removeFromCells(BosonItem* item)
@@ -935,33 +929,12 @@ void BosonCanvas::removeItem(BosonItem* item)
  emit signalRemovedItem(item);
 }
 
-unsigned int BosonCanvas::itemCount(int rtti) const
+unsigned int BosonCanvas::particleSystemsCount() const
 {
- return d->mItemCount[rtti];
+ return particleSystems()->count();
 }
 
-void BosonCanvas::updateItemCount()
-{
- d->mItemCount.clear();
- BoItemList::Iterator it = d->mAllItems.begin();
- for (; it != d->mAllItems.end(); ++it) {
-	int rtti = (*it)->rtti();
-	if (RTTI::isUnit(rtti)) {
-		rtti = RTTI::UnitStart;
-	}
-	if (!d->mItemCount.contains(rtti)) {
-		d->mItemCount.insert(rtti, 0);
-	}
-	d->mItemCount[rtti] += 1;
- }
-}
-
-int BosonCanvas::particleSystemsCount() const
-{
- return d->mParticles.count();
-}
-
-QPtrList<BosonParticleSystem>* BosonCanvas::particleSystems()
+QPtrList<BosonParticleSystem>* BosonCanvas::particleSystems() const
 {
  return &(d->mParticles);
 }
@@ -1257,24 +1230,6 @@ void BosonCanvas::removeFromAdvanceLists(BosonItem* item)
  for (it = d->mWork2AdvanceList.begin(); it != d->mWork2AdvanceList.end(); ++it) {
 	(*it).removeRef(item);
  }
-}
-
-void BosonCanvas::resetWorkCounts()
-{
- d->mWorkCounts[-1] = 0;
- d->mWorkCounts[(int)UnitBase::WorkNone] = 0;
- d->mWorkCounts[(int)UnitBase::WorkMove] = 0;
- d->mWorkCounts[(int)UnitBase::WorkAttack] = 0;
- d->mWorkCounts[(int)UnitBase::WorkConstructed] = 0;
- d->mWorkCounts[(int)UnitBase::WorkDestroyed] = 0;
- d->mWorkCounts[(int)UnitBase::WorkFollow] = 0;
- d->mWorkCounts[(int)UnitBase::WorkPlugin] = 0;
- d->mWorkCounts[(int)UnitBase::WorkTurn] = 0;
-}
-
-QMap<int, int>* BosonCanvas::workCounts() const
-{
- return &d->mWorkCounts;
 }
 
 bool BosonCanvas::onCanvas(const BoVector3& pos) const

@@ -32,7 +32,6 @@ class BosonBigDisplay;
 class BosonBigDisplayBase;
 class Unit;
 class Player;
-class TopWidget;
 class BoDisplayManager;
 class Boson;
 class BosonMiniMap;
@@ -62,7 +61,7 @@ public:
 	/**
 	 * Default Constructor
 	 **/
-	EditorWidget(TopWidget* top, QWidget* parent);
+	EditorWidget(QWidget* parent);
 
 	/**
 	 * Default Destructor
@@ -83,8 +82,6 @@ protected slots:
 	virtual void slotPlayerJoinedGame(KPlayer*);
 	virtual void slotPlayerLeftGame(KPlayer*);
 
-
-	void slotOutOfGame(Player* p);
 
 	void slotGroundThemeChanged(BosonGroundTheme*);
 
