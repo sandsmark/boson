@@ -47,6 +47,8 @@ protected:
 
 	bool useVBO() const;
 
+	bool hasVBOExtension() const;
+
 };
 
 #endif
