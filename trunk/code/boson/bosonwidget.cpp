@@ -285,7 +285,7 @@ void BosonWidget::saveConfig()
 
 void BosonWidget::slotGameOverDialogFinished()
 {
- d->mGameOverDialog->delayedDestruct();
+ d->mGameOverDialog->deleteLater();
  emit signalGameOver();
 }
 

@@ -666,16 +666,11 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			}
 
 		if (p->minerals() < mineralCost) {
-			if (p == localPlayer()) {
-				slotAddChatSystemMessage(i18n("You have not enough minerals!"));
-
-			}
+			slotAddChatSystemMessage(i18n("You have not enough minerals!"), p);
 			break;
 		}
 		if (p->oil() < oilCost) {
-			if (p == localPlayer()) {
-				slotAddChatSystemMessage(i18n("You have not enough oil!"));
-			}
+			slotAddChatSystemMessage(i18n("You have not enough oil!"), p);
 			break;
 		}
 		p->setMinerals(p->minerals() - mineralCost);
@@ -2175,12 +2170,14 @@ bool Boson::savegame(QDataStream& stream, bool network, bool saveplayers)
 		boError() << k_funcinfo << "Error when saving units" << endl;
 	}
  }
- 
- // Save external stuff (camera, shots, particle systems...)
- if (!d->mCanvas->save(stream)) {
-	boError() << k_funcinfo << "Error when saving canvas" << endl;
+
+ if (gameStatus() != KGame::Init) {
+	// Save external stuff (camera, shots, particle systems...)
+	if (!d->mCanvas->save(stream)) {
+		boError() << k_funcinfo << "Error when saving canvas" << endl;
+	}
+	emit signalSaveExternalStuff(stream);
  }
- emit signalSaveExternalStuff(stream);
 
  // Save end cookie
  stream << (Q_UINT32)BOSON_SAVEGAME_END_COOKIE;
@@ -2310,11 +2307,13 @@ bool Boson::loadgame(QDataStream& stream, bool network, bool reset)
 	}
  }
 
- // Load external stuff (camera, shots, particle systems...)
- if (!d->mCanvas->load(stream)) {
-	boError() << k_funcinfo << "Error when loading canvas" << endl;
+ if (started) {
+	// Load external stuff (camera, shots, particle systems...)
+	if (!d->mCanvas->load(stream)) {
+		boError() << k_funcinfo << "Error when loading canvas" << endl;
+	}
+	emit signalLoadExternalStuff(stream);
  }
- emit signalLoadExternalStuff(stream);
 
  // Check end cookie
  Q_UINT32 endcookie;
@@ -2354,15 +2353,15 @@ void Boson::slotUpdateProductionOptions()
  emit signalUpdateProductionOptions();
 }
 
-void Boson::slotAddChatSystemMessage(const QString& fromName, const QString& text)
+void Boson::slotAddChatSystemMessage(const QString& fromName, const QString& text, const Player* forPlayer)
 {
  // just forward it to BosonWidgetBase
- emit signalAddChatSystemMessage(fromName, text);
+ emit signalAddChatSystemMessage(fromName, text, forPlayer);
 }
 
-void Boson::slotAddChatSystemMessage(const QString& text)
+void Boson::slotAddChatSystemMessage(const QString& text, const Player* forPlayer)
 {
- slotAddChatSystemMessage(i18n("Boson"), text);
+ slotAddChatSystemMessage(i18n("Boson"), text, forPlayer);
 }
 
 void Boson::slotDebugOutput(const QString& area, const char* data, int level)
