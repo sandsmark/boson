@@ -272,6 +272,16 @@ public:
 	 **/
 	unsigned int maxResources() const;
 
+	/**
+	 * @return PluginProperties::miningSpeed
+	 **/
+	unsigned int miningSpeed() const;
+
+	/**
+	 * @return PluginProperties::unloadingSpeed
+	 **/
+	unsigned int unloadingSpeed() const;
+
 private:
 	KGameProperty<int> mResourcesX;
 	KGameProperty<int> mResourcesY;

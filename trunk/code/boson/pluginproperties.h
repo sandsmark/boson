@@ -28,11 +28,6 @@ class SpeciesTheme;
 
 class KSimpleConfig;
 
-// AB: we might implement weapons as PluginProperties, in order to support
-// several weapons!
-// disadvantage: canShootAt*() would get slower, since we need to iterate. but I
-// guess it is not speed critical
-
 // note that we can have PluginProperties that do <em>not</em> have any UnitPlugin, and
 // we can also have UnitPlugins that <em>don't</em> have any 
 /**
@@ -143,16 +138,30 @@ public:
 	 **/
 	unsigned int maxResources() const { return mMaxResources; }
 
+	/**
+	 * @return Maximal amount of resources that can be mined during one advance call
+	 **/
+	unsigned int miningSpeed() const { return mMiningSpeed; }
+
+	/**
+	 * @return Maximal amount of resources that can be unloaded during one advance call
+	 **/
+	unsigned int unloadingSpeed() const { return mUnloadingSpeed; }
+
 protected:
 	friend class BoUnitEditor;
 	void setCanMineMinerals(bool canMineMinerals)  { mCanMineMinerals = canMineMinerals; };
 	void setCanMineOil(bool canMineOil)  { mCanMineOil = canMineOil; };
-	void setMaxResources(unsigned int maxResources)  { mMaxResources = maxResources; }
+	void setMaxResources(unsigned int maxResources)  { mMaxResources = maxResources; };
+	void setMiningSpeed(unsigned int miningSpeed)  { mMiningSpeed = miningSpeed; };
+	void setUnloadingSpeed(unsigned int unloadingSpeed)  { mUnloadingSpeed = unloadingSpeed; };
 
 private:
 	bool mCanMineMinerals;
 	bool mCanMineOil;
 	unsigned int mMaxResources;
+	unsigned int mMiningSpeed;
+	unsigned int mUnloadingSpeed;
 };
 
 #endif

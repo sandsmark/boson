@@ -439,7 +439,7 @@ void HarvesterPlugin::advanceMine()
  }
  if (resourcesMined() < prop->maxResources()) {
 	if (canMine(canvas()->cellAt(unit()))) {
-		const int step = (resourcesMined() + 10 <= prop->maxResources()) ? 10 : prop->maxResources() - resourcesMined();
+		const int step = (resourcesMined() + miningSpeed() <= prop->maxResources()) ? miningSpeed() : prop->maxResources() - resourcesMined();
 		mResourcesMined = resourcesMined() + step;
 		if (prop->canMineMinerals()) {
 			player()->statistics()->increaseMinedMinerals(step);
@@ -510,7 +510,7 @@ void HarvesterPlugin::advanceRefine()
 	return;
  } else {
 	if (unit()->isNextTo(refinery())) {
-		const int step = (resourcesMined() >= 10) ? 10 : resourcesMined();
+		const int step = (resourcesMined() >= unloadingSpeed()) ? unloadingSpeed() : resourcesMined();
 		mResourcesMined = resourcesMined() - step;
 		const HarvesterProperties* prop = (HarvesterProperties*)unit()->properties(PluginProperties::Harvester);
 		if (!prop) {
@@ -627,8 +627,25 @@ unsigned int HarvesterPlugin::maxResources() const
 {
  const HarvesterProperties* prop = (HarvesterProperties*)unit()->properties(PluginProperties::Harvester);
  if (!prop) {
-	return false;
+	return 0;
  }
  return prop->maxResources();
 }
 
+unsigned int HarvesterPlugin::miningSpeed() const
+{
+ const HarvesterProperties* prop = (HarvesterProperties*)unit()->properties(PluginProperties::Harvester);
+ if (!prop) {
+	return 0;
+ }
+ return prop->miningSpeed();
+}
+
+unsigned int HarvesterPlugin::unloadingSpeed() const
+{
+ const HarvesterProperties* prop = (HarvesterProperties*)unit()->properties(PluginProperties::Harvester);
+ if (!prop) {
+	return 0;
+ }
+ return prop->unloadingSpeed();
+}

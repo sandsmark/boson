@@ -149,6 +149,8 @@ void HarvesterProperties::loadPlugin(KSimpleConfig* config)
 	mCanMineOil = false;
  }
  mMaxResources = config->readUnsignedNumEntry("MaxResources", 100);
+ mMiningSpeed = config->readUnsignedNumEntry("MiningSpeed", 10);
+ mUnloadingSpeed = config->readUnsignedNumEntry("UnloadingSpeed", 10);
 }
 
 void HarvesterProperties::savePlugin(KSimpleConfig* config)
