@@ -282,6 +282,8 @@ protected slots:
 	 **/
 	void slotCheckGameDockStatus();
 
+	void slotBoDebugLogDialog();
+
 private:
 	void initDisplayManager();
 	void initBoson();
