@@ -278,6 +278,12 @@ public:
 
 	QValueList<int> productionList() const;
 
+	/**
+	 * @return The percentage of the production progress. 0 means the
+	 * production just started, 100 means the production is completed.
+	 **/
+	inline double productionProgress() const;
+
 protected:
 	virtual void advanceProduction();
 

@@ -236,7 +236,6 @@ void BosonCommandWidget::setUnit(Unit* unit)
 
  show();
  setProductionCount(0);
- setEnabled(true);
  setGrayOut(false);
 }
 
@@ -269,8 +268,8 @@ void BosonCommandWidget::setUnit(int unitType, Player* owner)
  d->mReload->hide();
 
  show();
- // note: setEnabled() and setGrayOut() are handled in BosonCommandFrame for
- // this! (same for setProductionCount())
+ // note: setGrayOut() and setProductionCount() are handled in 
+ // BosonCommandFrame for this!
 }
 
 void BosonCommandWidget::setCell(int tileNo, BosonTiles* tileSet)
@@ -289,7 +288,6 @@ void BosonCommandWidget::setCell(int tileNo, BosonTiles* tileSet)
 
  show();
  setProductionCount(0);
- setEnabled(true);
  setGrayOut(false);
 }
 
