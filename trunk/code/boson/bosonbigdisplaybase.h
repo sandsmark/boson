@@ -730,10 +730,14 @@ protected slots:
 	void slotSetCameraPos(const BoVector3Float&);
 	void slotSetCameraLookAt(const BoVector3Float&);
 	void slotSetCameraUp(const BoVector3Float&);
+	void slotAddCameraPosPoint(const BoVector3Float&, float);
+	void slotAddCameraLookAtPoint(const BoVector3Float&, float);
+	void slotAddCameraUpPoint(const BoVector3Float&, float);
 	void slotSetCameraRotation(float);
 	void slotSetCameraRadius(float);
 	void slotSetCameraZ(float);
 	void slotSetCameraMoveMode(int);
+	void slotSetCameraInterpolationMode(int);
 	void slotCommitCameraChanges(int);
 	void slotSetAcceptUserInput(bool);
 

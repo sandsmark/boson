@@ -133,6 +133,7 @@
 //#include <iostream.h>
 #include <math.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 
 #include "bosonfont/bosonglfont.h"
@@ -2686,8 +2687,6 @@ void BosonBigDisplayBase::updateUfoLabelOpenGLCamera()
  text += i18n("Radius: %1\n").arg(camera()->radius());
  text += i18n("Height: %1\n").arg(camera()->z());
  text += i18n("Rotation: %1\n").arg(camera()->rotation());
- text += i18n("Time: %1/%2\n").arg(autoCamera()->remainingTime()).arg(autoCamera()->commitTime());
- text += i18n("% moved: %1\n").arg(autoCamera()->movedAmount() * 100);
 
  d->mOpenGLCamera->setText(text);
 }
@@ -4236,9 +4235,7 @@ QByteArray BosonBigDisplayBase::grabMovieFrame()
 
 void BosonBigDisplayBase::advanceCamera()
 {
- if (autoCamera()->commitTime() > 0) {
-	autoCamera()->advance();
- }
+ autoCamera()->advance();
 }
 
 void BosonBigDisplayBase::updateOpenGLSettings()
@@ -4593,6 +4590,12 @@ void BosonBigDisplayScriptConnector::connectToScript(BosonScript* script)
 		this, SLOT(slotSetCameraLookAt(const BoVector3Float&)));
  reconnect(i, SIGNAL(signalSetCameraUp(const BoVector3Float&)),
 		this, SLOT(slotSetCameraUp(const BoVector3Float&)));
+ reconnect(i, SIGNAL(signalAddCameraPosPoint(const BoVector3Float&, float)),
+		this, SLOT(slotAddCameraPosPoint(const BoVector3Float&, float)));
+ reconnect(i, SIGNAL(signalAddCameraLookAtPoint(const BoVector3Float&, float)),
+		this, SLOT(slotAddCameraLookAtPoint(const BoVector3Float&, float)));
+ reconnect(i, SIGNAL(signalAddCameraUpPoint(const BoVector3Float&, float)),
+		this, SLOT(slotAddCameraUpPoint(const BoVector3Float&, float)));
  reconnect(i, SIGNAL(signalSetCameraRotation(float)),
 		this, SLOT(slotSetCameraRotation(float)));
  reconnect(i, SIGNAL(signalSetCameraRadius(float)),
@@ -4601,6 +4604,8 @@ void BosonBigDisplayScriptConnector::connectToScript(BosonScript* script)
 		this, SLOT(slotSetCameraZ(float)));
  reconnect(i, SIGNAL(signalSetCameraMoveMode(int)),
 		this, SLOT(slotSetCameraMoveMode(int)));
+ reconnect(i, SIGNAL(signalSetCameraInterpolationMode(int)),
+		this, SLOT(slotSetCameraInterpolationMode(int)));
  reconnect(i, SIGNAL(signalCommitCameraChanges(int)),
 		this, SLOT(slotCommitCameraChanges(int)));
  reconnect(i, SIGNAL(signalSetAcceptUserInput(bool)),
@@ -4826,6 +4831,24 @@ void BosonBigDisplayScriptConnector::slotSetCameraUp(const BoVector3Float& v)
  mDisplay->autoCamera()->setUp(v);
 }
 
+void BosonBigDisplayScriptConnector::slotAddCameraPosPoint(const BoVector3Float& v, float time)
+{
+ BO_CHECK_NULL_RET(mDisplay->autoCamera());
+ mDisplay->autoCamera()->addCameraPosPoint(v, time);
+}
+
+void BosonBigDisplayScriptConnector::slotAddCameraLookAtPoint(const BoVector3Float& v, float time)
+{
+ BO_CHECK_NULL_RET(mDisplay->autoCamera());
+ mDisplay->autoCamera()->addLookAtPoint(v, time);
+}
+
+void BosonBigDisplayScriptConnector::slotAddCameraUpPoint(const BoVector3Float& v, float time)
+{
+ BO_CHECK_NULL_RET(mDisplay->autoCamera());
+ mDisplay->autoCamera()->addUpPoint(v, time);
+}
+
 void BosonBigDisplayScriptConnector::slotSetCameraRotation(float v)
 {
  BO_CHECK_NULL_RET(mDisplay->autoCamera());
@@ -4848,6 +4871,12 @@ void BosonBigDisplayScriptConnector::slotSetCameraMoveMode(int v)
 {
  BO_CHECK_NULL_RET(mDisplay->autoCamera());
  mDisplay->autoCamera()->setMoveMode((BoAutoCamera::MoveMode)v);
+}
+
+void BosonBigDisplayScriptConnector::slotSetCameraInterpolationMode(int v)
+{
+ BO_CHECK_NULL_RET(mDisplay->autoCamera());
+ mDisplay->autoCamera()->setInterpolationMode((BoAutoCamera::InterpolationMode)v);
 }
 
 void BosonBigDisplayScriptConnector::slotCommitCameraChanges(int ticks)
