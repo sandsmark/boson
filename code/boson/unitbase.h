@@ -60,7 +60,7 @@ public:
 	 **/
 	enum PropertyIds {
 		// UnitBase uses IDs from 512 to 1023.
-		IdHealth = 512 + 0,
+		//IdHealth = 512 + 0,
 		IdArmor = 512 + 1,
 		IdShields = 512 + 2,
 		IdShieldReloadCounter = 512 + 3,
@@ -69,6 +69,7 @@ public:
 		IdAdvanceWork = 512 + 11,
 		IdMovingStatus = 512 + 12,
 		IdDeletionTimer = 512 + 15,
+		IdHealthPercentage = 512 + 20
 	};
 
 	/**
@@ -179,16 +180,23 @@ public:
 	 * armor?
 	 * @return The health of the unit.
 	 **/
-	inline virtual unsigned long int health() const { return mHealth; };
+	virtual unsigned long int health() const;
 
 	/**
 	 * Change the health/power of this unit.
 	 **/
-	inline virtual void setHealth(unsigned long int h) { mHealth = h; }
+	virtual void setHealth(unsigned long int h);
+
+	/**
+	 * @return how many percentage of maximum health this unit has
+	 * Note that the returned value is in range 0-1, not 0-100!
+	 **/
+	inline virtual bofixed healthPercentage() const { return mHealthPercentage; }
+	inline virtual void setHealthPercentage(bofixed h) { mHealthPercentage = h; }
 
 	bool isDestroyed() const
 	{
-		return (health() == 0);
+		return (healthPercentage() == 0);
 	}
 
 	/**
@@ -321,7 +329,7 @@ private:
 	KGameProperty<unsigned long int> mShields;
 	KGameProperty<unsigned long int> mShieldReloadCounter;
 	KGameProperty<unsigned int> mDeletionTimer;
-	KGameProperty<unsigned long int> mHealth;
+	KGameProperty<bofixed> mHealthPercentage;
 	KGameProperty<unsigned int> mSightRange;
 	KGamePropertyInt mWork;
 	KGamePropertyInt mAdvanceWork;

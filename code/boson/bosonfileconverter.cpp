@@ -22,6 +22,8 @@
 #include "bodebug.h"
 #include "defines.h"
 #include "boversion.h"
+#include "rtti.h"
+#include "unitbase.h"
 
 #include <qdatastream.h>
 #include <qcolor.h>
@@ -29,6 +31,10 @@
 #include <qdom.h>
 #include <qimage.h>
 #include <qstringlist.h>
+#include <qmap.h>
+
+#include <math.h>
+
 
 // version number as used by boson 0.8.128 (aka 0x00,0x08,0x80 - development
 // version. got never released)
@@ -946,7 +952,7 @@ bool BosonFileConverter::convertPlayField_From_0_10_81_To_0_10_82(QMap<QString, 
  return true;
 }
 
-bool BosonFileConverter::convertPlayField_From_0_10_82_To_0_11(QMap<QString, QByteArray>& files)
+bool BosonFileConverter::convertPlayField_From_0_10_82_To_0_10_83(QMap<QString, QByteArray>& files)
 {
  QDomDocument kgameDoc(QString::fromLatin1("Boson"));
  if (!loadXMLDoc(&kgameDoc, files["kgame.xml"])) {
@@ -955,12 +961,7 @@ bool BosonFileConverter::convertPlayField_From_0_10_82_To_0_11(QMap<QString, QBy
  }
  QDomElement kgameRoot = kgameDoc.documentElement();
 
-#if BOSON_VERSION_MICRO < 0x80 || BOSON_VERSION_MINOR >= 0x11
-#error replace the following by BOSON_SAVEGAME_FORMAT_VERSION_0_11
-#endif
-#define BO_VERSION BOSON_MAKE_SAVEGAME_FORMAT_VERSION(0x00, 0x02, 0x07)
- kgameRoot.setAttribute("Version", BO_VERSION);
-#undef BO_VERSION
+ kgameRoot.setAttribute("Version", BOSON_MAKE_SAVEGAME_FORMAT_VERSION(0x00, 0x02, 0x07));
 
  unsigned int players = 0;
  {
@@ -984,18 +985,171 @@ bool BosonFileConverter::convertPlayField_From_0_10_82_To_0_11(QMap<QString, QBy
 
  // Default scripts
  QByteArray gamePy;
- addGamePyScript_From_0_10_82_To_0_11(gamePy);
+ addGamePyScript_From_0_10_82_To_0_10_83(gamePy);
  files.insert("scripts/eventlistener/game.py", gamePy);
  QByteArray localplayerPy;
- addLocalPlayerPyScript_From_0_10_82_To_0_11(localplayerPy);
+ addLocalPlayerPyScript_From_0_10_82_To_0_10_83(localplayerPy);
  files.insert("scripts/eventlistener/localplayer.py", localplayerPy);
  for (unsigned int i = 0; i < players; i++) {
 	QByteArray aiPy;
-	addAIPyScript_From_0_10_82_To_0_11(aiPy, i);
+	addAIPyScript_From_0_10_82_To_0_10_83(aiPy, i);
 	files.insert(QString("scripts/eventlistener/ai-player_%1.py").arg(i), aiPy);
  }
 
  files.insert("kgame.xml", kgameDoc.toString().utf8());
+ return true;
+}
+
+bool BosonFileConverter::convertPlayField_From_0_10_83_To_0_11(QMap<QString, QByteArray>& files)
+{
+ QDomDocument kgameDoc(QString::fromLatin1("Boson"));
+ QDomDocument canvasDoc(QString::fromLatin1("Canvas"));
+ QDomDocument playersDoc(QString::fromLatin1("Players"));
+ if (!loadXMLDoc(&kgameDoc, files["kgame.xml"])) {
+	boError() << k_funcinfo << "could not load kgame.xml" << endl;
+	return false;
+ }
+ if (!loadXMLDoc(&canvasDoc, files["canvas.xml"])) {
+	boError() << k_funcinfo << "could not load canvas.xml" << endl;
+	return false;
+ }
+ if (!loadXMLDoc(&playersDoc, files["players.xml"])) {
+	boError() << k_funcinfo << "could not load players.xml" << endl;
+	return false;
+ }
+ QDomElement kgameRoot = kgameDoc.documentElement();
+ QDomElement canvasRoot = canvasDoc.documentElement();
+ QDomElement playersRoot = playersDoc.documentElement();
+
+#if BOSON_VERSION_MICRO < 0x80 || BOSON_VERSION_MINOR >= 0x11
+#error replace the following by BOSON_SAVEGAME_FORMAT_VERSION_0_11
+#endif
+#define BO_VERSION BOSON_MAKE_SAVEGAME_FORMAT_VERSION(0x00, 0x02, 0x08)
+ kgameRoot.setAttribute("Version", BO_VERSION);
+#undef BO_VERSION
+
+ // Find out which species (eithe human or neutral) players have
+ QDomNodeList playerList = playersRoot.elementsByTagName("Player");
+ bool ishuman[playerList.count()];
+ for (unsigned int i = 0; i < playerList.count(); i++) {
+	QDomElement e = playerList.item(i).toElement();
+	int id = e.attribute("PlayerId").toInt();
+	int isneutral = e.attribute("IsNeutral").toInt();
+	ishuman[id] = !(isneutral);
+ }
+
+ // Unit type <-> health  map
+ // Human species
+ QMap<int, int> humanhealths;
+ humanhealths.insert(18, 200);
+ humanhealths.insert( 4, 250);
+ humanhealths.insert( 5, 800);
+ humanhealths.insert(14, 400);
+ humanhealths.insert( 1, 400);
+ humanhealths.insert(13, 400);
+ humanhealths.insert( 8, 400);
+ humanhealths.insert( 2, 300);
+ humanhealths.insert(11, 200);
+ humanhealths.insert( 9, 350);
+ humanhealths.insert( 6, 150);
+ humanhealths.insert(10, 150);
+ humanhealths.insert( 3, 600);
+ humanhealths.insert(10011, 150);
+ humanhealths.insert(10006, 130);
+ humanhealths.insert(10034, 200);
+ humanhealths.insert(10008, 200);
+ humanhealths.insert(10003, 150);
+ humanhealths.insert(10002, 150);
+ humanhealths.insert(10001,  80);
+ humanhealths.insert(10009, 230);
+ humanhealths.insert(10005, 200);
+ humanhealths.insert(10000, 250);
+ humanhealths.insert(10000, 100);
+ humanhealths.insert(10010, 200);
+ humanhealths.insert(10004, 180);
+ humanhealths.insert(10007, 300);
+ humanhealths.insert(10035, 100);
+ humanhealths.insert(10018, 100);
+ // Neutral species
+ QMap<int, int> neutralhealths;
+ neutralhealths.insert( 1, 100);
+ neutralhealths.insert(26,  20);
+ neutralhealths.insert(25,  20);
+ neutralhealths.insert( 2, 100);
+ neutralhealths.insert(36,  60);
+ neutralhealths.insert(35,  35);
+ neutralhealths.insert(38,  60);
+ neutralhealths.insert(37,  35);
+ neutralhealths.insert(40,  60);
+ neutralhealths.insert(39,  35);
+ neutralhealths.insert( 3, 100);
+ neutralhealths.insert(45,  50);
+ neutralhealths.insert(46,  70);
+ neutralhealths.insert(12, 400);
+ neutralhealths.insert(11, 150);
+ neutralhealths.insert( 4, 100);
+ neutralhealths.insert(56,  30);
+ neutralhealths.insert(57,  15);
+ neutralhealths.insert(55,  20);
+ neutralhealths.insert(30,  30);
+ neutralhealths.insert( 5, 100);
+ neutralhealths.insert( 6, 100);
+ neutralhealths.insert( 7, 100);
+ neutralhealths.insert(16,  70);
+ neutralhealths.insert(17,  70);
+ neutralhealths.insert(15,  70);
+ neutralhealths.insert(21, 100);
+ neutralhealths.insert(22, 100);
+ neutralhealths.insert(20, 100);
+ neutralhealths.insert(51, 120);
+ neutralhealths.insert(52,  60);
+ neutralhealths.insert(50, 100);
+
+
+ // Go through all units
+ QDomNodeList itemsList = canvasRoot.elementsByTagName("Items");
+ for (unsigned int i = 0; i < itemsList.count(); i++) {
+	QDomElement e = itemsList.item(i).toElement();
+	int playerid = e.attribute("PlayerId").toInt();
+	bool isplayerhuman = ishuman[playerid];
+	// Go through all units and change their absolute health to relative one
+	QDomNodeList itemList = e.elementsByTagName("Item");
+	for (unsigned int j = 0; j < itemList.count(); j++) {
+		QDomElement item = itemList.item(j).toElement();
+		// We're interested only in units
+		int rtti = item.attribute("Rtti").toInt();
+		if (RTTI::isUnit(rtti)) {
+			// It's unit
+			int type = item.attribute("Type").toInt();
+			if (!(isplayerhuman ? humanhealths : neutralhealths).contains(type)) {
+				boError() << k_funcinfo << "Invalid unit type " << type << " for " <<
+						(isplayerhuman ? "human" : "neutral") << " unit with id " << item.attribute("Id") <<
+						"! Skipping." << endl;
+				// Don't return, convert other units
+				continue;
+			}
+			// Replace health of the unit
+			QDomElement dataHandler = item.namedItem(QString::fromLatin1("DataHandler")).toElement();
+			QDomNodeList properties = dataHandler.elementsByTagName(QString::fromLatin1("KGameProperty"));
+			for (unsigned int k = 0; k < properties.count(); k++) {
+				QDomElement prop = properties.item(k).toElement();
+				int propertyid = prop.attribute("Id").toInt();
+				// Health property had id 512
+				if (propertyid == 512) {
+					QDomNode healthnode = prop.firstChild();
+					int maxhealth = (isplayerhuman ? humanhealths : neutralhealths)[type];
+					bofixed healthpercentage = (bofixed)healthnode.nodeValue().toInt() / maxhealth;
+					healthnode.setNodeValue(QString::number(healthpercentage));
+					prop.setAttribute("Id", QString::number(UnitBase::IdHealthPercentage));
+					break;
+				}
+			}
+		}
+	}
+ }
+
+ files.insert("kgame.xml", kgameDoc.toString().utf8());
+ files.insert("canvas.xml", canvasDoc.toString().utf8());
  return true;
 }
 
@@ -1019,12 +1173,12 @@ void BosonFileConverter::removePropertyIds_0_9_1(const QDomNodeList& itemsList, 
  }
 }
 
-bool BosonFileConverter::addGamePyScript_From_0_10_82_To_0_11(QByteArray& gamePy)
+bool BosonFileConverter::addGamePyScript_From_0_10_82_To_0_10_83(QByteArray& gamePy)
 {
   return true;
 }
 
-bool BosonFileConverter::addLocalPlayerPyScript_From_0_10_82_To_0_11(QByteArray& localplayerPy)
+bool BosonFileConverter::addLocalPlayerPyScript_From_0_10_82_To_0_10_83(QByteArray& localplayerPy)
 {
   QString script =
     "import dayandnight\n"
@@ -1046,7 +1200,7 @@ bool BosonFileConverter::addLocalPlayerPyScript_From_0_10_82_To_0_11(QByteArray&
   return true;
 }
 
-bool BosonFileConverter::addAIPyScript_From_0_10_82_To_0_11(QByteArray& aiPy, int playerid)
+bool BosonFileConverter::addAIPyScript_From_0_10_82_To_0_10_83(QByteArray& aiPy, int playerid)
 {
   QString script =
     "import ai\n"

@@ -41,7 +41,6 @@ UnitBase::UnitBase(const UnitProperties* prop, Player* owner, BosonCanvas* canva
  mUnitProperties = prop; // WARNING: this might be 0 at this point! MUST be != 0 for Unit, but ScenarioUnit uses 0 here
 
 // PolicyLocal?
- registerData(&mHealth, IdHealth);
  registerData(&mArmor, IdArmor);
  registerData(&mShields, IdShields);
  registerData(&mShieldReloadCounter, IdShieldReloadCounter);
@@ -50,6 +49,7 @@ UnitBase::UnitBase(const UnitProperties* prop, Player* owner, BosonCanvas* canva
  registerData(&mAdvanceWork, IdAdvanceWork);
  registerData(&mDeletionTimer, IdDeletionTimer);
  registerData(&mMovingStatus, IdMovingStatus);
+ registerData(&mHealthPercentage, IdHealthPercentage);
 
  // these properties are fully internal (i.e. nothing is displayed in any
  // widget) and they change very often. So we increase speed greatly by not
@@ -60,12 +60,12 @@ UnitBase::UnitBase(const UnitProperties* prop, Player* owner, BosonCanvas* canva
  mWork.setLocal((int)WorkIdle);
  mAdvanceWork.setLocal((int)WorkIdle);
  mMovingStatus.setLocal((int)Standing);
- mHealth.setLocal(0); // initially destroyed
  mShields.setLocal(0); // doesn't have any shields
  mShieldReloadCounter.setLocal(0);
  mArmor.setLocal(0); // doesn't have any armor
  mSightRange.setLocal(0);
  mDeletionTimer.setLocal(0);
+ mHealthPercentage.setLocal(0); // initially destroyed
 }
 
 UnitBase::~UnitBase()
@@ -94,7 +94,6 @@ void UnitBase::initStatic()
  if (initialized) {
 	return;
  }
- addPropertyId(IdHealth, QString::fromLatin1("Health"));
  addPropertyId(IdArmor, QString::fromLatin1("Armor"));
  addPropertyId(IdShields, QString::fromLatin1("Shields"));
  addPropertyId(IdSightRange, QString::fromLatin1("SightRange"));
@@ -103,6 +102,7 @@ void UnitBase::initStatic()
  addPropertyId(IdDeletionTimer, QString::fromLatin1("DeletionTimer"));
  addPropertyId(IdShieldReloadCounter, QString::fromLatin1("ShieldReloadCounter"));
  addPropertyId(IdMovingStatus, QString::fromLatin1("MovingStatus"));
+ addPropertyId(IdHealthPercentage, QString::fromLatin1("HealthPercentage"));
  initialized = true;
 }
 
@@ -124,6 +124,16 @@ void UnitBase::setArmor(unsigned long int a)
 void UnitBase::setShields(unsigned long int s)
 {
  mShields = s;
+}
+
+unsigned long int UnitBase::health() const
+{
+ return (int)(healthPercentage() * mUnitProperties->health());
+}
+
+void UnitBase::setHealth(unsigned long int h)
+{
+ setHealthPercentage((bofixed)h / mUnitProperties->health());
 }
 
 unsigned long int UnitBase::type() const
