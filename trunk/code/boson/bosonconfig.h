@@ -236,6 +236,8 @@ public:
 	bool alignSelectionBoxes() const { return mAlignSelectionBoxes->value(); }
 	void setRMBAction(UnitAction action) { mRMBAction->setValue((int)action); }
 	UnitAction RMBAction() const { return (UnitAction)(mRMBAction->value()); }
+	void setMouseWheelAction(CameraAction action) { mMouseWheelAction->setValue((int)action); }
+	CameraAction mouseWheelAction() const { return (CameraAction)(mMouseWheelAction->value()); }
 
 	void setUnitSoundActivated(UnitSoundEvent e, bool activated);
 	bool unitSoundActivated(UnitSoundEvent e) const;
@@ -319,6 +321,7 @@ private:
 	BoConfigIntEntry* mMipmapMinificationFilter;
 	BoConfigBoolEntry* mAlignSelectionBoxes;
 	BoConfigIntEntry* mRMBAction;
+	BoConfigIntEntry* mMouseWheelAction;
 
 	// NOT stored to config file!
 	bool mDisableSound;

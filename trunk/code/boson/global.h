@@ -118,5 +118,11 @@ enum OrderType {
 	OrderAction = 4
 };
 
+enum CameraAction {
+	CameraMove = 0,
+	CameraZoom = 1,
+	CameraRotate = 2
+};
+
 
 #endif

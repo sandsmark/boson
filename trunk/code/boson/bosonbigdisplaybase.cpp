@@ -1020,28 +1020,49 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
  switch (e->type()) {
 	case QEvent::Wheel:
 	{
-		// FIXME: use wheel for zooming
 		QWheelEvent* wheel = (QWheelEvent*)e;
-		int x, y;
-
 		float delta = -wheel->delta() / 120;//120: see QWheelEvent::delta()
-		if (wheel->state() & ControlButton) {
-			x = width();
-			y = height();
-		} else {
-			x = 20;
-			y = 20;
-			delta *= QApplication::wheelScrollLines();
-		}
+		if (boConfig->mouseWheelAction() == CameraMove) {
+			int x, y;
 
-		if (wheel->orientation() == Horizontal) {
-			x *= (int)delta;
-			y = 0;
+			if (wheel->state() & ControlButton) {
+				x = width();
+				y = height();
+			} else {
+				x = 20;
+				y = 20;
+				delta *= QApplication::wheelScrollLines();
+			}
+
+			if (wheel->orientation() == Horizontal) {
+				x *= (int)delta;
+				y = 0;
+			} else {
+				x = 0;
+				y *= (int)delta;
+			}
+			scrollBy(x, y);
+		} else if (boConfig->mouseWheelAction() == CameraZoom) {
+			float zoom;
+			if (wheel->state() & ControlButton) {
+				zoom = delta * 3;
+			} else {
+				zoom = delta * 1;
+			}
+			camera()->changeZ(zoom);
+			cameraChanged();
+		} else if (boConfig->mouseWheelAction() == CameraRotate) {
+			float rotate;
+			if (wheel->state() & ControlButton) {
+				rotate = delta * 30;
+			} else {
+				rotate = delta * 10;
+			}
+			camera()->changeRotation(rotate);
+			cameraChanged();
 		} else {
-			x = 0;
-			y *= (int)delta;
+			boWarning() << k_funcinfo << "Invalid mouseWheelAction: " << boConfig->mouseWheelAction() << endl;
 		}
-		scrollBy(x, y);
 		e->accept();
 		break;
 	}
@@ -1057,7 +1078,6 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 			if (e->state() & LeftButton) {
 				camera()->changeZ(d->mMouseMoveDiff.dy());
 				cameraChanged();
-				boDebug() << "posZ: " << camera()->z() << endl;
 			} else if (e->state() & RightButton) {
 				camera()->changeRotation(d->mMouseMoveDiff.dx());
 				camera()->changeRadius(d->mMouseMoveDiff.dy());
