@@ -137,7 +137,7 @@ signals:
 protected:
 	void initWidget(WidgetId widgetId);
 	void removeWidget(WidgetId widgetId);
-	void showWidget(WidgetId widgetId);  // TODO: make protected
+	void showWidget(WidgetId widgetId);
 
 	virtual bool eventFilter(QObject* o, QEvent* e);
 

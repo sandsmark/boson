@@ -25,27 +25,19 @@
 class BosonPlayField;
 class Player;
 class KPlayer;
+class BosonStartupNetwork;
 
 class BosonStartWidgetBase : public QWidget
 {
 	Q_OBJECT
 public:
-	BosonStartWidgetBase(QWidget* parent);
+	BosonStartWidgetBase(BosonStartupNetwork* interface,QWidget* parent);
 	virtual ~BosonStartWidgetBase();
 
 	/**
 	 * @return The identifier of the currently selected playfield.
 	 **/
 	const QString& playFieldIdentifier() const { return mMapId; }
-
-	/**
-	 * Send the new playfield identifier through network, so that all
-	 * clients can display the new playfield.
-	 *
-	 * Note that this method can safely be called directly, as it cares
-	 * about network (in contrary to @ref slotPlayFieldChanged).
-	 **/
-	void sendPlayFieldChanged(const QString& identifier);
 
 public slots:
 	/**
@@ -59,12 +51,7 @@ public slots:
 	virtual void slotSendPlayFieldChanged(int index);
 
 	/**
-	 * Called when user clicks on "Start game" button (see also @ref
-	 * slotStartGameClicked)
-	 * This widget should then be hidden and game should be started. Must be
-	 * implemented by derived classes.
-	 *
-	 * You should call @ref sendNewGame at the end of your implementation.
+	 * You should call @ref BosonStartupNetwork::sendNewGame at the end of your implementation.
 	 **/
 	virtual void slotStart() = 0;
 
@@ -72,6 +59,8 @@ public slots:
 	 * Should be used to start the game. Note that this will send a message
 	 * indicating that start game was clicked and once it arrives again @ref
 	 * slotStart will be called.
+	 *
+	 * This is e.g. necessary for --start on cmd line.
 	 **/
 	virtual void slotStartGameClicked();
 
@@ -91,7 +80,9 @@ protected:
 	 * classes also might do some final changes, e.g. apply all changes to
 	 * the textfields in the widget (e.g. player name).
 	 **/
-	virtual void sendNewGame() = 0;
+//	virtual void sendNewGame() = 0;
+
+	BosonStartupNetwork* networkInterface() const { return mNetworkInterface; }
 
 protected slots:
 	/**
@@ -109,6 +100,8 @@ private:
 
 private:
 	QString mMapId;
+
+	BosonStartupNetwork* mNetworkInterface;
 };
 
 #endif

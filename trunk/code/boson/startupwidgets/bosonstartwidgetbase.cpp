@@ -21,21 +21,21 @@
 #include "bosonstartwidgetbase.moc"
 
 #include "../defines.h"
-#include "../bosonconfig.h"
 #include "../bosonmessage.h"
 #include "../boson.h"
 #include "../bosonplayfield.h"
+#include "bosonstartupnetwork.h"
 #include "bodebug.h"
 
 #include <klocale.h>
 
-BosonStartWidgetBase::BosonStartWidgetBase(QWidget* parent)
+BosonStartWidgetBase::BosonStartWidgetBase(BosonStartupNetwork* interface, QWidget* parent)
     : QWidget(parent)
 {
- if (!boGame) {
-	boError() << k_funcinfo << "NULL Boson object" << endl;
-	return;
- }
+ BO_CHECK_NULL_RET(boGame);
+ BO_CHECK_NULL_RET(interface);
+
+ mNetworkInterface = interface;
 
  initKGame();
 
@@ -44,12 +44,11 @@ BosonStartWidgetBase::BosonStartWidgetBase(QWidget* parent)
 
 BosonStartWidgetBase::~BosonStartWidgetBase()
 {
- // Save stuff like player name, color etc.
- boConfig->saveLocalPlayerMap(playFieldIdentifier());
 }
 
 void BosonStartWidgetBase::initKGame()
 {
+ BO_CHECK_NULL_RET(boGame);
  connect(boGame, SIGNAL(signalPlayFieldChanged(const QString&)), 
 		this, SLOT(slotPlayFieldChanged(const QString&)));
  connect(boGame, SIGNAL(signalStartGameClicked()),
@@ -73,6 +72,7 @@ void BosonStartWidgetBase::initPlayFields()
 
 void BosonStartWidgetBase::slotSendPlayFieldChanged(int index)
 {
+ BO_CHECK_NULL_RET(boGame);
  if (!boGame->isAdmin()) {
 	boWarning() << "Only admin can change the playfield" << endl;
 	//TODO: revert the change
@@ -90,22 +90,7 @@ void BosonStartWidgetBase::slotSendPlayFieldChanged(int index)
 	}
 	identifier = list[index];
  }
- sendPlayFieldChanged(identifier);
-}
-
-void BosonStartWidgetBase::sendPlayFieldChanged(const QString& identifier)
-{
- if (!identifier.isNull() && !BosonPlayField::availablePlayFields().contains(identifier)) {
-	boError() << k_funcinfo << "Invalid playfield identifier " << identifier << endl;
-	return;
- }
- // a NULL identifier means "new map", for the start editor widget
- QByteArray buffer;
- QDataStream stream(buffer, IO_WriteOnly);
- // transmit the identifier/name so that the remote newgame dialogs will be able
- // to display the newly selected playfield
- stream << identifier;
- boGame->sendMessage(buffer, BosonMessage::ChangePlayField);
+ networkInterface()->sendChangePlayField(identifier);
 }
 
 void BosonStartWidgetBase::slotPlayFieldChanged(const QString& id)
@@ -120,6 +105,6 @@ void BosonStartWidgetBase::slotPlayFieldChanged(const QString& id)
 
 void BosonStartWidgetBase::slotStartGameClicked()
 {
- boGame->sendMessage(0, BosonMessage::IdStartGameClicked);
+ networkInterface()->sendStartGameClicked();
 }
 

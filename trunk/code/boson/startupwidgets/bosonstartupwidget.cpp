@@ -26,6 +26,7 @@
 #include "bosonstarteditorwidget.h"
 #include "bosonnetworkoptionswidget.h"
 #include "kloadsavegamewidget.h"
+#include "bosonstartupnetwork.h"
 #include "bodebug.h"
 #include "../boson.h"
 #include "../defines.h"
@@ -55,12 +56,16 @@ public:
 
 		mBackgroundPix = 0;
 		mLogoPix = 0;
+
+		mNetworkInterface = 0;
 	}
 
 	QWidgetStack* mWidgetStack;
 
 	QPixmap* mBackgroundPix;
 	QPixmap* mLogoPix;
+
+	BosonStartupNetwork* mNetworkInterface;
 };
 
 BosonStartupWidget::BosonStartupWidget(QWidget* parent) : QWidget(parent)
@@ -99,6 +104,9 @@ void BosonStartupWidget::init()
  topLayout->addWidget(logo, 0, AlignHCenter);
  topLayout->addSpacing(10); // FIXME hardcoded
  topLayout->addWidget(d->mWidgetStack, 1);
+
+ d->mNetworkInterface = new BosonStartupNetwork(this);
+ d->mNetworkInterface->setGame(boGame);
 
  installEventFilter(this); // for the popup menu
 }
@@ -153,7 +161,7 @@ void BosonStartupWidget::slotNewGame(KCmdLineArgs* args)
 	if (identifier.right(4) != QString::fromLatin1(".bpf")) {
 		identifier = identifier + QString::fromLatin1(".bpf");
 	}
-	w->sendPlayFieldChanged(identifier);
+	d->mNetworkInterface->sendChangePlayField(identifier);
  }
  if (args->isSet("computer")) {
 	QString count = args->getOption("computer");
@@ -201,7 +209,7 @@ void BosonStartupWidget::slotStartEditor(KCmdLineArgs* args)
 	if (identifier.right(4) != QString::fromLatin1(".bpf")) {
 		identifier = identifier + QString::fromLatin1(".bpf");
 	}
-	w->sendPlayFieldChanged(identifier);
+	d->mNetworkInterface->sendChangePlayField(identifier);
  }
 
 
@@ -264,7 +272,7 @@ void BosonStartupWidget::initWidget(WidgetId widgetId)
 	}
 	case IdNewGame:
 	{
-		BosonNewGameWidget* newGame = new BosonNewGameWidget(this);
+		BosonNewGameWidget* newGame = new BosonNewGameWidget(d->mNetworkInterface, this);
 		connect(newGame, SIGNAL(signalCancelled()),
 				this, SLOT(slotShowWelcomeWidget()));
 		connect(newGame, SIGNAL(signalShowNetworkOptions()),
@@ -290,7 +298,7 @@ void BosonStartupWidget::initWidget(WidgetId widgetId)
 	}
 	case IdStartEditor:
 	{
-		BosonStartEditorWidget* startEditor = new BosonStartEditorWidget(this);
+		BosonStartEditorWidget* startEditor = new BosonStartEditorWidget(d->mNetworkInterface, this);
 		connect(startEditor, SIGNAL(signalCancelled()),
 				this, SLOT(slotShowWelcomeWidget()));
 		connect(startEditor, SIGNAL(signalSetLocalPlayer(Player*)),
@@ -476,6 +484,7 @@ void BosonStartupWidget::slotShowWelcomeWidget()
  }
  d->mWidgetStack->raiseWidget((int)IdWelcome);
  emit signalResetGame();
+ d->mNetworkInterface->setGame(boGame);
 
  // the startup widget gets hidden when game is started, so when we want to show
  // the welcome widget we also need to show the startup widget
