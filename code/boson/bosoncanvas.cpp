@@ -138,6 +138,7 @@ void BosonCanvas::slotAddUnit(Unit* unit, int x, int y)
 void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 {
 #define USE_ADVANCE_LISTS 1
+#define DO_ITEM_PROFILING 0
  boProfiling->advance(true, advanceCount);
  QPtrListIterator<BosonItem> animIt(d->mAnimList);
  lockAdvanceFunction();
@@ -159,11 +160,15 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 		id = 0;
 		work = -1;
 	}
+#if DO_ITEM_PROFILING
 	boProfiling->advanceItemStart(s->rtti(), id, work);
 	boProfiling->advanceItem(true);
+#endif
 	s->advance(advanceCount);
+#if DO_ITEM_PROFILING
 	boProfiling->advanceItem(false);
 	boProfiling->advanceItemStop();
+#endif
  }
 
  // now the rest - mainly call BosonItem::advanceFunction().
@@ -235,25 +240,33 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 			id = 0;
 			work = -1;
 		}
+#if DO_ITEM_PROFILING
 		boProfiling->advanceItemStart(s->rtti(), id, work);
 		boProfiling->advanceItemFunction(true);
+#endif
 		if (advanceFlag) { // bah - inside the loop..
 			s->advanceFunction(advanceCount); // once this was called this object is allowed to change its advanceFunction()
 		} else {
 			s->advanceFunction2(advanceCount); // once this was called this object is allowed to change its advanceFunction()
 		}
+#if DO_ITEM_PROFILING
 		boProfiling->advanceItemFunction(false);
+#endif
 
 		// AB: moveBy() is *NOT* called if advanceFunction() isn't
 		// called for an item!!
 		// --> i.e. if it isn't in one of the lists that are executed
 		// here
+#if DO_ITEM_PROFILING
 		boProfiling->advanceItemMove(true);
+#endif
 		if (s->xVelocity() || s->yVelocity() || s->zVelocity()) {
 			s->moveBy(s->xVelocity(), s->yVelocity(), s->zVelocity());
 		}
+#if DO_ITEM_PROFILING
 		boProfiling->advanceItemMove(false);
 		boProfiling->advanceItemStop();
+#endif
 	}
  }
 
@@ -291,8 +304,10 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 			id = 0;
 			work = -1;
 		}
+#if DO_ITEM_PROFILING
 		boProfiling->advanceItemStart(s->rtti(), id, work);
 		boProfiling->advanceItem(true);
+#endif
 
 		// TODO: group some stuff.
 		// e.g. we reload weapons and shields here whenever we call
@@ -302,18 +317,26 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 		// that doesnt matter anyway) and this function would execute
 		// faster.
 		s->advance(advanceCount);
+#if DO_ITEM_PROFILING
 		boProfiling->advanceItem(false);
 		boProfiling->advanceItemFunction(true);
+#endif
 		s->advanceFunction(advanceCount); // once this was called this object is allowed to change its advanceFunction()
+#if DO_ITEM_PROFILING
 		boProfiling->advanceItemFunction(false);
+#endif
 
 		// AB: warning: this might cause trouble at this point! see Unit::moveBy()
+#if DO_ITEM_PROFILING
 		boProfiling->advanceItemMove(true);
+#endif
 		if (s->xVelocity() || s->yVelocity() || s->zVelocity()) {
 			s->moveBy(s->xVelocity(), s->yVelocity(), s->zVelocity());
 		}
+#if DO_ITEM_PROFILING
 		boProfiling->advanceItemMove(false);
 		boProfiling->advanceItemStop();
+#endif
 		++animIt;
 	}
  } else {
@@ -330,21 +353,31 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 			id = 0;
 			work = 0;
 		}
+#if DO_ITEM_PROFILING
 		boProfiling->advanceItemStart(s->rtti(), id, work);
 		boProfiling->advanceItem(true);
+#endif
 		s->advance(advanceCount);
+#if DO_ITEM_PROFILING
 		boProfiling->advanceItem(false);
 		boProfiling->advanceItemFunction(true);
+#endif
 		s->advanceFunction2(advanceCount); // once this was called this object is allowed to change its advanceFunction2()
+#if DO_ITEM_PROFILING
 		boProfiling->advanceItemFunction(false);
+#endif
 
 		// AB: warning: this might cause trouble at this point! see Unit::moveBy()
+#if DO_ITEM_PROFILING
 		boProfiling->advanceItemMove(true);
+#endif
 		if (s->xVelocity() || s->yVelocity() || s->zVelocity()) {
 			s->moveBy(s->xVelocity(), s->yVelocity(), s->zVelocity());
 		}
+#if DO_ITEM_PROFILING
 		boProfiling->advanceItemMove(false);
 		boProfiling->advanceItemStop();
+#endif
 		++animIt;
 	}
  }
