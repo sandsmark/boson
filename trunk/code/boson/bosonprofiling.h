@@ -23,6 +23,7 @@
 
 class QString;
 class QDataStream;
+class ProfilingEntry;
 class BosonProfilingDialog;
 class RenderGLTimes;
 class ProfileSlotAdvance;
@@ -108,6 +109,13 @@ public:
 	void advanceDeleteUnusedShots(bool start);
 	void advanceParticles(bool start);
 	void advanceMaximalAdvanceCount(bool start); // in MAXIMAL_ADVANCE_COUNT we do some interesting stuff (especially deleting unused stuff - e.g. wreckages
+	// these are tricky now - they get called multiple times in every
+	// advance call (note that this is a pretty big overhead!)
+	void advanceItemStart(int rtti, unsigned int unitId, int work); // begin a new unit
+	void advanceItem(bool start);
+	void advanceItemFunction(bool start);
+	void advanceItemMove(bool start);
+	void advanceItemStop(); // complete a unit
 
 	/**
 	 * Save The current profiling data to @p fileName.
@@ -131,6 +139,9 @@ public:
 	bool load(QDataStream& stream);
 
 private:
+	void init();
+
+private:
 	class BosonProfilingPrivate;
 	BosonProfilingPrivate* d;
 	friend class BosonProfilingDialog;
@@ -142,6 +153,8 @@ unsigned long int compareTimes(const struct timeval& t1, const struct timeval& t
 unsigned long int compareTimes2(const struct timeval* t1); // takes an array of 2 and compares them
 QDataStream& operator<<(QDataStream& s, const struct timeval& t);
 QDataStream& operator>>(QDataStream& s, struct timeval& t);
+QDataStream& operator<<(QDataStream& s, const ProfilingEntry& e);
+QDataStream& operator>>(QDataStream& s, ProfilingEntry& e);
 QDataStream& operator<<(QDataStream& s, const RenderGLTimes& t);
 QDataStream& operator>>(QDataStream& s, RenderGLTimes& t);
 QDataStream& operator<<(QDataStream& s, const ProfileSlotAdvance& t);

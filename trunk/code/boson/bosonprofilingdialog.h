@@ -24,6 +24,8 @@
 #include "global.h"
 
 class QListViewItem;
+class ProfileSlotAdvance;
+class ProfileItemAdvance;
 
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
@@ -48,11 +50,26 @@ protected:
 	void resetLoadUnitPage();
 	void resetRenderPage();
 	void resetSlotAdvancePage();
+	void addItemAdvance(ProfileSlotAdvance*);
+	void addItemAdvanceSummary(); // sum and average
 	void resetEventsPage();
 	void resetFilesPage();
 
 	void initRenderItem(QListViewItem* item, const QString& type, long int time, long int function);
 	void initSlotAdvanceItem(QListViewItem* item, unsigned int advanceCount, const QString& type, long int time, long int function);
+	void initItemAdvanceItem(QListViewItem* item, ProfileItemAdvance* a, unsigned int advanceCount, const QString& type, unsigned long int time, unsigned long int function);
+	void initItemAdvanceItemSummary(QListViewItem* item, const QString& description, const QString& type, unsigned long int time, unsigned long int function);
+	
+	/**
+	 * Apply the times to the columns of @p item.
+	 * @param startColumn where the first time relevant entry goes to. There
+	 * need to be 4 columns available - time, time (ms), time (s), %
+	 * @param time How much time the action took.
+	 * @param function How much time the complete function where this action
+	 * was measured took. This is used for the %.
+	 **/
+	void applyTimes(QListViewItem* item, int startColumn, unsigned long int time, unsigned long int function);
+
 	QString profilingName(int profilingEvent) const;
 
 protected slots:

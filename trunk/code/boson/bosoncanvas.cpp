@@ -146,28 +146,62 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 	// AB: do NOT add something here - if you add something for units then
 	// check for isDestroyed() !!
 	while (animIt.current()) {
+		unsigned int id;
+		int work;
 		BosonItem* s = animIt.current();
+		if (RTTI::isUnit(s->rtti())) {
+			id = ((Unit*)s)->id();
+			work = (int)((Unit*)s)->work();
+		} else {
+			id = 0;
+			work = 0;
+		}
+		boProfiling->advanceItemStart(s->rtti(), id, work);
+		boProfiling->advanceItem(true);
 		s->advance(advanceCount);
+		boProfiling->advanceItem(false);
+		boProfiling->advanceItemFunction(true);
 		s->advanceFunction(advanceCount); // once this was called this object is allowed to change its advanceFunction()
+		boProfiling->advanceItemFunction(false);
 
 		// AB: warning: this might cause trouble at this point! see Unit::moveBy()
+		boProfiling->advanceItemMove(true);
 		if (s->xVelocity() || s->yVelocity()) {
 			s->moveBy(s->xVelocity(), s->yVelocity(), 0.0);
 		}
+		boProfiling->advanceItemMove(false);
+		boProfiling->advanceItemStop();
 		++animIt;
 	}
  } else {
 	// note: the advance methods must not change the advanceFunction2()s
 	// here!
 	while (animIt.current()) {
+		unsigned int id;
+		int work;
 		BosonItem* s = animIt.current();
+		if (RTTI::isUnit(s->rtti())) {
+			id = ((Unit*)s)->id();
+			work = (int)((Unit*)s)->work();
+		} else {
+			id = 0;
+			work = 0;
+		}
+		boProfiling->advanceItemStart(s->rtti(), id, work);
+		boProfiling->advanceItem(true);
 		s->advance(advanceCount);
+		boProfiling->advanceItem(false);
+		boProfiling->advanceItemFunction(true);
 		s->advanceFunction2(advanceCount); // once this was called this object is allowed to change its advanceFunction2()
+		boProfiling->advanceItemFunction(false);
 
 		// AB: warning: this might cause trouble at this point! see Unit::moveBy()
+		boProfiling->advanceItemMove(true);
 		if (s->xVelocity() || s->yVelocity()) {
 			s->moveBy(s->xVelocity(), s->yVelocity(), 0.0);
 		}
+		boProfiling->advanceItemMove(false);
+		boProfiling->advanceItemStop();
 		++animIt;
 	}
  }
