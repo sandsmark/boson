@@ -362,8 +362,10 @@ bool BosonPath::findPath()
       mPathLength++;
       d = mark[x][y].dir; // the direction to the next cell
       neighbor(x, y, d);
-      wp.setX(x * BO_TILE_SIZE + BO_TILE_SIZE / 2);
-      wp.setY(y * BO_TILE_SIZE + BO_TILE_SIZE / 2);
+//      wp.setX(x * BO_TILE_SIZE + BO_TILE_SIZE / 2);
+//      wp.setY(y * BO_TILE_SIZE + BO_TILE_SIZE / 2);
+      wp.setX(x * BO_TILE_SIZE + mUnit->width() / 2);
+      wp.setY(y * BO_TILE_SIZE + mUnit->height() / 2);
     }
     if (counter >= 100) 
     {
@@ -510,7 +512,7 @@ void BosonPath::debug() const
  kdDebug() << k_funcinfo << "(end)" << endl;
 }
 
-inline bool BosonPath:: inRange(int x, int y)
+inline bool BosonPath::inRange(int x, int y)
 {
   /// TODO: maybe use different check (not manhattan dist.)
   if(QABS(x - mGoalx) > mRange || QABS(y - mGoaly) > mRange)

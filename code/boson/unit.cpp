@@ -132,12 +132,8 @@ void Unit::setTarget(Unit* target)
  if (!d->mTarget) {
 	return;
  }
- if (weaponDamage() == 0) {
-	kdWarning() << "Cannot attack: waponDamage() == 0" << endl;
-	return;
- }
- if (!d->mTarget->isDestroyed()) {
-	setWork(WorkAttack);
+ if (d->mTarget->isDestroyed()) {
+	 d->mTarget = 0;
  }
 }
 
@@ -265,8 +261,11 @@ void Unit::advanceAttack()
 		return;
 	}
 	kdDebug() << "unit not in range - moving..." << endl;
-	moveTo(target()->x(), target()->y());
-	setAdvanceWork(WorkMove);
+	if (!moveTo(target()->x(), target()->y())) {
+		setWork(WorkNone);
+	} else {
+		setAdvanceWork(WorkMove);
+	}
 	return;
  }
  shootAt(target());
@@ -321,8 +320,12 @@ bool Unit::moveTo(int x, int y)
 	if(!boCanvas()->cell(x / BO_TILE_SIZE, y / BO_TILE_SIZE)->canGo(unitProperties())) {
 		return false;
 	}
-	if(boCanvas()->cellOccupied(x / BO_TILE_SIZE, y / BO_TILE_SIZE) && work() != WorkAttack) {
-		return false;
+	if(boCanvas()->cellOccupied(x / BO_TILE_SIZE, y / BO_TILE_SIZE)) {
+		if (work() != WorkAttack && work() != WorkRefine) {
+			return false;
+		}
+		// if work() != WorkMove then we probably actually want to move
+		// to the occupied cell.
 	}
  }
 
@@ -349,19 +352,24 @@ void Unit::newPath()
 	Cell* destCell = boCanvas()->cell(d->mMoveDestX / BO_TILE_SIZE,
 			d->mMoveDestY / BO_TILE_SIZE);
 	if(!destCell || (!destCell->canGo(unitProperties())) ||
-			(boCanvas()->cellOccupied(d->mMoveDestX / BO_TILE_SIZE, d->mMoveDestY / BO_TILE_SIZE, this) && work() != WorkAttack)) {
+			(boCanvas()->cellOccupied(d->mMoveDestX / BO_TILE_SIZE, d->mMoveDestY / BO_TILE_SIZE, this) && 
+			(work() != WorkAttack && work() != WorkRefine))) {
 		// If we can't move to destination, then we add waypoint with coordinates
 		//  -1; -1 and in MobileUnit::advanceMove(), if currentWaypoint()'s
 		//  coordinates are -1; -1 then we stop moving.
 		clearWaypoints(true);
 		addWaypoint(QPoint(-1, -1));
+//		kdDebug()<< "nope" << endl;
 		return;
 	}
  }
  int range = 0;
  // Only go until enemy is in range if we are attacking
- if(work() == WorkAttack)
+ if(work() == WorkAttack) {
 	range = weaponRange();
+ } else if (work() == WorkRefine) {//|| work() == WorkRepair
+	range = 1;
+ }
  QValueList<QPoint> path = BosonPath::findPath(this, d->mMoveDestX, d->mMoveDestY, range);
  clearWaypoints(true); // send it over network. the list is cleared just before the addWaypoints() below take effect
  for (int unsigned i = 0; i < path.count(); i++) {
@@ -637,24 +645,52 @@ bool Unit::collidesWith(const QCanvasItem* item) const
  }
 }
 
+bool Unit::isNextTo(Unit* target) const
+{
+ //const int r = BO_TILE_SIZE;
+ const int r = 10;
+ // in theory r = 1 should be enough... both of the above make problems under
+ // certain circumstances
+ if (QABS(rightEdge() - target->leftEdge()) <= r ||
+		QABS(leftEdge() - target->rightEdge()) <= r ||
+		rightEdge() <= target->rightEdge() && leftEdge() <= target->leftEdge()// will never happen with current pixmaps
+		) { 
+	if (QABS(topEdge() - target->bottomEdge() <= r) ||
+			QABS(bottomEdge() - target->topEdge()) <= r||
+			topEdge() <= target->topEdge() && bottomEdge() <= target->bottomEdge()// will never happen with current pixmaps
+			) {
+		kdDebug() << "ok - inrange" << endl;
+		return true;
+	}
+ }
+ return false;
+}
+
 
 /////////////////////////////////////////////////
 // MobileUnit
 /////////////////////////////////////////////////
+
+class HarvesterProperties
+{
+public:
+	KGameProperty<int> mResourcesX;
+	KGameProperty<int> mResourcesY;
+	KGameProperty<unsigned int> mResourcesMined;
+};
 
 class MobileUnit::MobileUnitPrivate
 {
 public:
 	MobileUnitPrivate()
 	{
+		mHarvesterProperties = 0;
 	}
 
 	KGameProperty<double> mSpeed;
-
 	KGameProperty<unsigned int> mMovingFailed;
 
-	KGameProperty<unsigned int> mResourcesMined;
-
+	HarvesterProperties* mHarvesterProperties;
 };
 
 MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, QCanvas* canvas) : Unit(prop, owner, canvas)
@@ -664,13 +700,23 @@ MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, QCanvas* canva
 		KGamePropertyBase::PolicyLocal, "Speed");
  d->mMovingFailed.registerData(IdMob_MovingFailed, dataHandler(), 
 		KGamePropertyBase::PolicyLocal, "MovingFailed");
- d->mResourcesMined.registerData(IdMob_ResourcesMined, dataHandler(), 
-		KGamePropertyBase::PolicyLocal, "ResourcesMined");
  d->mSpeed.setLocal(0);
  d->mMovingFailed.setLocal(0);
- d->mResourcesMined.setLocal(0);
 
  d->mMovingFailed.setEmittingSignal(false);
+
+ if (unitProperties()->canMineMinerals() || unitProperties()->canMineOil()) {
+	d->mHarvesterProperties = new HarvesterProperties;
+	d->mHarvesterProperties->mResourcesMined.registerData(IdMob_ResourcesMined, dataHandler(), 
+			KGamePropertyBase::PolicyLocal, "ResourcesMined");
+	d->mHarvesterProperties->mResourcesMined.setLocal(0);
+	d->mHarvesterProperties->mResourcesX.registerData(IdMob_ResourcesX, dataHandler(), 
+			KGamePropertyBase::PolicyLocal, "ResourcesX");
+	d->mHarvesterProperties->mResourcesX.setLocal(0);
+	d->mHarvesterProperties->mResourcesY.registerData(IdMob_ResourcesY, dataHandler(), 
+			KGamePropertyBase::PolicyLocal, "ResourcesY");
+	d->mHarvesterProperties->mResourcesY.setLocal(0);
+ }
 }
 
 MobileUnit::~MobileUnit()
@@ -714,22 +760,26 @@ void MobileUnit::advanceMove()
 		}
 		// TODO: make sure that target() hasn't moved!
 		// if it has moved also adjust waypoints
+	} else if (work() == WorkRefine) {
+		if (isNextTo(refinery())) {
+			kdDebug() << k_funcinfo << "refinery in range now" << endl;
+			stopMoving();
+			return;
+		}
 	}
  }
 
  QPoint wp = currentWaypoint(); // where we go to
  // If both waypoint's coordinates are -1, then it means that path to
  //  destination can't be found and we should stop
- if((wp.x() == -1) &&(wp.y() == -1))
- {
+ if((wp.x() == -1) &&(wp.y() == -1)) {
 	stopMoving();
 	return;
  }
 
  // If both waypoint's coordinates are -2, then it means that path was partial
  //  and we have to search new one
- if((wp.x() == -2) &&(wp.y() == -2))
- {
+ if((wp.x() == -2) &&(wp.y() == -2)) {
 	clearWaypoints();
 	newPath();
 	return;
@@ -739,7 +789,7 @@ void MobileUnit::advanceMove()
  // Check if we can actually go to waypoint (maybe it was fogged)
  if(!boCanvas()->cell(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE) ||
 		(boCanvas()->cellOccupied(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE, this, true) &&
-		work() != WorkAttack) || 
+		(work() != WorkAttack && work() != WorkAttack)) || 
 		!boCanvas()->cell(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE)->canGo(unitProperties())) {
 	kdDebug() << "cannot go to waypoint, finding new path" << endl;
 	kdDebug() << "waypoint is at (" << wp.x() << ", " << wp.y() << "), my pos: (" << x() << ", " << y() << ")" << endl;
@@ -761,11 +811,11 @@ void MobileUnit::advanceMove()
  if((x == wp.x()) && (y == wp.y())) {
 	QPoint wp = currentWaypoint(); // where we go to
 
-	kdDebug() << k_funcinfo << ": unit is at waypoint" << endl;
+	kdDebug() << k_funcinfo << "unit is at waypoint" << endl;
  	waypointDone();
 	
 	if(waypointCount() == 0) {
-		kdDebug() << k_funcinfo << ": no more waypoints. Stopping moving" << endl;
+		kdDebug() << k_funcinfo << "no more waypoints. Stopping moving" << endl;
 		// What to do?
 		stopMoving();
 		return;
@@ -774,7 +824,7 @@ void MobileUnit::advanceMove()
 	wp = currentWaypoint();
 	// Check if we can actually go to waypoint
 	if((boCanvas()->cellOccupied(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE, this, true) &&
-			work() != WorkAttack) ||
+			(work() != WorkAttack && work() != WorkRefine)) ||
 			!boCanvas()->cell(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE)->canGo(unitProperties())) {
 		setXVelocity(0);
 		setYVelocity(0);
@@ -813,39 +863,6 @@ void MobileUnit::advanceMove()
 
  // set the new direction according to new speed
  turnTo();
-
-// Dont't test for unit collisions here, because advanceMoveCheck() will be called anyway
-/* QCanvasItemList collisionList = collisions(exact);
- if(! collisionList.isEmpty())
- {
-	QCanvasItemList::Iterator it;
-	for( it = collisionList.begin(); it != collisionList.end(); ++it)
-	{
-		if(RTTI::isUnit((*it)->rtti()))
-		{
-			if(! ((Unit)*it)->isDestroyed())
-			{
-				// Unit on way: find new path
-				clearWaypoints();
-				// Find our position
-				QRect pos = boundingRect();
-				int x = pos.center().x();
-				int y = pos.center().y();
-				// Find path to target
-				BosonPath path(this, x / BO_TILE_SIZE, y / BO_TILE_SIZE,
-						pos.x() / BO_TILE_SIZE, pos.y() / BO_TILE_SIZE);
-				path.findPath();
-				for(vector<WayPoint>::iterator i = path.path.begin();
-						path != path.path.end(); ++i)
-				{
-					addWaypoint((*i));
-				}
-				// Call move method again
-				advanceMove();
-			}
-		}
-	}
- }*/
 }
 
 void MobileUnit::advanceGroupMove(Unit* leader)
@@ -957,30 +974,110 @@ void MobileUnit::leaderMoved(double x, double y)
 void MobileUnit::advanceMine()
 {
  kdDebug() << k_funcinfo << endl;
-
- if (canMine(boCanvas()->cellAt(this))) {
-	d->mResourcesMined = d->mResourcesMined + 1;
-	if (unitProperties()->canMineMinerals()) {
-		owner()->statistics()->increaseMinedMinerals(1);
-	} else if (unitProperties()->canMineOil()) {
-		owner()->statistics()->increaseMinedOil(1);
-	}
-	kdDebug() << "resources mined: " << d->mResourcesMined << endl;
- } else {
-	kdDebug() << k_funcinfo << "cannot mine here" << endl;
+ if (!d->mHarvesterProperties) {
 	setWork(WorkNone);
 	return;
  }
- if (d->mResourcesMined >= unitProperties()->maxResources()) {
-	setWork(WorkNone);
+ if (resourcesMined() < unitProperties()->maxResources()) {
+	if (canMine(boCanvas()->cellAt(this))) {
+		const int step = (resourcesMined() + 10 <= unitProperties()->maxResources()) ? 10 : unitProperties()->maxResources() - resourcesMined();
+		d->mHarvesterProperties->mResourcesMined = resourcesMined() + step;
+		if (unitProperties()->canMineMinerals()) {
+			owner()->statistics()->increaseMinedMinerals(step);
+		} else if (unitProperties()->canMineOil()) {
+			owner()->statistics()->increaseMinedOil(step);
+		}
+		kdDebug() << "resources mined: " << resourcesMined() << endl;
+	} else {
+		kdDebug() << k_funcinfo << "cannot mine here" << endl;
+		setWork(WorkNone);
+		return;
+	}
+ } else {
 	kdDebug() << k_funcinfo << "Maximal amount of resources mined." << endl;
-	kdDebug() << "TODO: return to refinery" << endl;
+	setWork(WorkRefine);
+ }
+}
+
+void MobileUnit::advanceRefine() 
+{
+ kdDebug() << k_funcinfo << endl;
+ if (!d->mHarvesterProperties) {
+	setWork(WorkNone);
+	return;
+ }
+ if (resourcesMined() == 0) {
+	kdDebug() << k_funcinfo << "refining done" << endl;
+	setWork(WorkMine);
+	mineAt(QPoint(resourcesX(), resourcesY()));
+	return;
+ }
+ if (!refinery()) {
+	// TODO: pick closest refinery
+	QPtrList<Unit> list = owner()->allUnits();
+	QPtrListIterator<Unit> it(list);
+	const UnitProperties* prop = unitProperties();
+	while (it.current() && !refinery()) {
+		const UnitProperties* unitProp = it.current()->unitProperties();
+		if (!it.current()->isFacility()) {
+			++it;
+			continue;
+		}
+		if (prop->canMineMinerals() && unitProp->canRefineMinerals()) {
+			setRefinery((Facility*)it.current());
+		} else if (prop->canMineOil() && unitProp->canRefineOil()) {
+			setRefinery((Facility*)it.current());
+		}
+		++it;
+	}
+	if (!refinery()) {
+		kdDebug() << k_funcinfo << "no suitable refinery found" << endl;
+		setWork(WorkNone);
+		return;
+	} else {
+		kdDebug() << k_funcinfo << "refinery: " << refinery()->id() << endl;
+	}
+ }
+ if (refinery()) {
+	if (isNextTo(refinery())) {
+		const int step = (resourcesMined() >= 10) ? 10 : resourcesMined();
+		d->mHarvesterProperties->mResourcesMined = resourcesMined() - step;
+		if (unitProperties()->canMineMinerals()) {
+			owner()->setMinerals(owner()->minerals() + step);
+			owner()->statistics()->increaseRefinedMinerals(step);
+		} else if (unitProperties()->canMineOil()) {
+			owner()->setOil(owner()->oil() + step);
+			owner()->statistics()->increaseRefinedOil(step);
+		}
+	} else {
+		// move...
+		kdDebug() << k_funcinfo << "move to refinery " << refinery()->id() << endl;
+		if (!moveTo(refinery()->x(), refinery()->y())) {
+			kdDebug() << k_funcinfo << "Cannot find way to refinery" << endl;
+			setWork(WorkNone);
+		} else {
+			setAdvanceWork(WorkMove);
+		}
+	}
+ } else {
+	kdWarning() << k_funcinfo << "Invalid target unit " << refinery()->id() << endl;
+	setWork(WorkNone);
  }
 }
 
 unsigned int MobileUnit::resourcesMined() const
 {
- return d->mResourcesMined;
+ return d->mHarvesterProperties ? d->mHarvesterProperties->mResourcesMined : 0;
+}
+
+int MobileUnit::resourcesX() const
+{
+ return d->mHarvesterProperties ? d->mHarvesterProperties->mResourcesX : 0;
+}
+
+int MobileUnit::resourcesY() const
+{
+ return d->mHarvesterProperties ? d->mHarvesterProperties->mResourcesY : 0;
 }
 
 bool MobileUnit::canMine(Cell* cell) const
@@ -1003,6 +1100,38 @@ void MobileUnit::mineAt(const QPoint& pos)
  moveTo(pos);
  setWork(WorkMine);
  setAdvanceWork(WorkMove);
+ d->mHarvesterProperties->mResourcesX = pos.x();
+ d->mHarvesterProperties->mResourcesY = pos.y();
+}
+
+Facility* MobileUnit::refinery() const
+{
+ if (!target() || !target()->isFacility()) {
+	return 0;
+ }
+ Facility* fac = (Facility*)target();
+ const UnitProperties* prop = unitProperties();
+ const UnitProperties* facProp = fac->unitProperties();
+ if (prop->canMineMinerals() && facProp->canRefineMinerals()) {
+	return fac;
+ } else if (prop->canMineOil() && facProp->canRefineOil()) {
+	return fac;
+ }
+ return 0;
+}
+
+void MobileUnit::setRefinery(Facility* refinery)
+{
+ if (!refinery) {
+	return;
+ }
+ const UnitProperties* prop = unitProperties();
+ const UnitProperties* facProp = refinery->unitProperties();
+ if (prop->canMineMinerals() && facProp->canRefineMinerals()) {
+	setTarget(refinery);
+ } else if (prop->canMineOil() && facProp->canRefineOil()) {
+	setTarget(refinery);
+ }
 }
 
 /////////////////////////////////////////////////
@@ -1282,7 +1411,7 @@ double Facility::constructionProgress() const
 
 void Facility::setTarget(Unit* u)
 {
- if (!isConstructionComplete()) {
+ if (u && !isConstructionComplete()) {
 	kdWarning() << "not yet constructed completely" << endl;
 	return;
  }
