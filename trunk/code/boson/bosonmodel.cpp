@@ -300,15 +300,14 @@ void BosonModel::renderNode(Lib3dsNode* node)
 					myTex = 0; // teamcolor objects are *not* textured
 //					glColor3f(); // TODO
 				}
+				glBindTexture(GL_TEXTURE_2D, myTex);
 				if (myTex) {
-					glBindTexture(GL_TEXTURE_2D, myTex);
 					glBegin(GL_TRIANGLES);
 						glTexCoord2fv(tex[0]); glVertex3fv(v[0]);
 						glTexCoord2fv(tex[1]); glVertex3fv(v[1]);
 						glTexCoord2fv(tex[2]); glVertex3fv(v[2]);
 					glEnd();
 				} else {
-					glBindTexture(GL_TEXTURE_2D, 0);
 					glBegin(GL_TRIANGLES);
 						glVertex3fv(v[0]);
 						glVertex3fv(v[1]);
