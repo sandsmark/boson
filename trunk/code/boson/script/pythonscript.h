@@ -103,6 +103,23 @@ class PythonScript : public BosonScript
     static PyObject* py_cameraZ(PyObject* self, PyObject* args);
 
 
+    // Lights
+    static PyObject* py_lightPos(PyObject* self, PyObject* args);
+    static PyObject* py_lightAmbient(PyObject* self, PyObject* args);
+    static PyObject* py_lightDiffuse(PyObject* self, PyObject* args);
+    static PyObject* py_lightSpecular(PyObject* self, PyObject* args);
+    static PyObject* py_lightEnabled(PyObject* self, PyObject* args);
+
+    static PyObject* py_setLightPos(PyObject* self, PyObject* args);
+    static PyObject* py_setLightAmbient(PyObject* self, PyObject* args);
+    static PyObject* py_setLightDiffuse(PyObject* self, PyObject* args);
+    static PyObject* py_setLightSpecular(PyObject* self, PyObject* args);
+    static PyObject* py_setLightEnabled(PyObject* self, PyObject* args);
+
+    static PyObject* py_addLight(PyObject* self, PyObject* args);
+    static PyObject* py_removeLight(PyObject* self, PyObject* args);
+
+
     // AI
     static PyObject* py_aiDelay(PyObject* self, PyObject* args);
 

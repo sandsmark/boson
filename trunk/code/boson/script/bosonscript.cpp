@@ -36,6 +36,7 @@
 #include "../unitplugins.h"
 #include "../bosonprofiling.h"
 #include "../bosonpath.h"
+#include "../bolight.h"
 #include "bodebug.h"
 
 #include "pythonscript.h"
@@ -129,6 +130,17 @@ int BosonScript::playerId() const
   }
 
   return player()->id();
+}
+
+BoLight* BosonScript::light(int id)
+{
+  if(!display())
+  {
+    boError() << k_funcinfo << "NULL display" << endl;
+    return 0;
+  }
+
+  return display()->light(id);
 }
 
 /*****  Player methods  *****/
@@ -757,6 +769,152 @@ float BosonScript::cameraRadius()
 float BosonScript::cameraZ()
 {
   return camera()->z();
+}
+
+/*****  Light methods  *****/
+BoVector4 BosonScript::lightPos(int id)
+{
+  BoLight* l = light(id);
+  if(!l)
+  {
+    boError() << k_funcinfo << "No light with id " << id << endl;
+    return BoVector4();
+  }
+
+  return l->position();
+}
+
+BoVector4 BosonScript::lightAmbient(int id)
+{
+  BoLight* l = light(id);
+  if(!l)
+  {
+    boError() << k_funcinfo << "No light with id " << id << endl;
+    return BoVector4();
+  }
+
+  return l->ambient();
+}
+
+BoVector4 BosonScript::lightDiffuse(int id)
+{
+  BoLight* l = light(id);
+  if(!l)
+  {
+    boError() << k_funcinfo << "No light with id " << id << endl;
+    return BoVector4();
+  }
+
+  return l->diffuse();
+}
+
+BoVector4 BosonScript::lightSpecular(int id)
+{
+  BoLight* l = light(id);
+  if(!l)
+  {
+    boError() << k_funcinfo << "No light with id " << id << endl;
+    return BoVector4();
+  }
+
+  return l->specular();
+}
+
+bool BosonScript::lightEnabled(int id)
+{
+  BoLight* l = light(id);
+  if(!l)
+  {
+    boError() << k_funcinfo << "No light with id " << id << endl;
+    return false;
+  }
+
+  return l->isEnabled();
+}
+
+void BosonScript::setLightPos(int id, BoVector4 pos)
+{
+  BoLight* l = light(id);
+  if(!l)
+  {
+    boError() << k_funcinfo << "No light with id " << id << endl;
+    return;
+  }
+
+  l->setPosition(pos);
+}
+
+void BosonScript::setLightAmbient(int id, BoVector4 a)
+{
+  BoLight* l = light(id);
+  if(!l)
+  {
+    boError() << k_funcinfo << "No light with id " << id << endl;
+    return;
+  }
+
+  l->setAmbient(a);
+}
+
+void BosonScript::setLightDiffuse(int id, BoVector4 d)
+{
+  BoLight* l = light(id);
+  if(!l)
+  {
+    boError() << k_funcinfo << "No light with id " << id << endl;
+    return;
+  }
+
+  l->setDiffuse(d);
+}
+
+void BosonScript::setLightSpecular(int id, BoVector4 s)
+{
+  BoLight* l = light(id);
+  if(!l)
+  {
+    boError() << k_funcinfo << "No light with id " << id << endl;
+    return;
+  }
+
+  l->setSpecular(s);
+}
+
+void BosonScript::setLightEnabled(int id, bool enable)
+{
+  BoLight* l = light(id);
+  if(!l)
+  {
+    boError() << k_funcinfo << "No light with id " << id << endl;
+    return;
+  }
+
+  l->setEnabled(enable);
+}
+
+int BosonScript::addLight()
+{
+  if(!display())
+  {
+    boError() << k_funcinfo << "NULL display" << endl;
+    return -1;
+  }
+  BoLight* l = display()->newLight();
+  if(!l)
+  {
+    return -1;
+  }
+  return l->id();
+}
+
+void BosonScript::removeLight(int id)
+{
+  if(!display())
+  {
+    boError() << k_funcinfo << "NULL display" << endl;
+    return;
+  }
+  display()->removeLight(id);
 }
 
 /*****  AI methods  *****/

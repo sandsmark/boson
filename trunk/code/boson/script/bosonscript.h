@@ -28,6 +28,8 @@ class BoGameCamera;
 class BoAutoGameCamera;
 class BosonCanvas;
 class Boson;
+class BoLight;
+class BoVector4;
 
 class QString;
 class QDataStream;
@@ -94,6 +96,7 @@ class BosonScript
 
     static BoAutoGameCamera* autoCamera();
     static BoGameCamera* camera();
+    static BoLight* light(int id);
     static BosonCanvas* canvas()  { return mCanvas; }
 
 
@@ -253,6 +256,23 @@ class BosonScript
     static float cameraRotation();
     static float cameraRadius();
     static float cameraZ();
+
+
+    // Lights
+    static BoVector4 lightPos(int id);
+    static BoVector4 lightAmbient(int id);
+    static BoVector4 lightDiffuse(int id);
+    static BoVector4 lightSpecular(int id);
+    static bool lightEnabled(int id);
+
+    static void setLightPos(int id, BoVector4 pos);
+    static void setLightAmbient(int id, BoVector4 a);
+    static void setLightDiffuse(int id, BoVector4 a);
+    static void setLightSpecular(int id, BoVector4 a);
+    static void setLightEnabled(int id, bool enable);
+
+    static int addLight();
+    static void removeLight(int id);
 
 
     // AI

@@ -80,6 +80,19 @@ PyMethodDef PythonScript::mCallbacks[] = {
   { (char*)"cameraRotation", py_cameraRotation, METH_VARARGS, 0 },
   { (char*)"cameraRadius", py_cameraRadius, METH_VARARGS, 0 },
   { (char*)"cameraZ", py_cameraZ, METH_VARARGS, 0 },
+  // Lights
+  { (char*)"lightPos", py_lightPos, METH_VARARGS, 0 },
+  { (char*)"lightAmbient", py_lightAmbient, METH_VARARGS, 0 },
+  { (char*)"lightDiffuse", py_lightDiffuse, METH_VARARGS, 0 },
+  { (char*)"lightSpecular", py_lightSpecular, METH_VARARGS, 0 },
+  { (char*)"lightEnabled", py_lightEnabled, METH_VARARGS, 0 },
+  { (char*)"setLightPos", py_setLightPos, METH_VARARGS, 0 },
+  { (char*)"setLightAmbient", py_setLightAmbient, METH_VARARGS, 0 },
+  { (char*)"setLightDiffuse", py_setLightDiffuse, METH_VARARGS, 0 },
+  { (char*)"setLightSpecular", py_setLightSpecular, METH_VARARGS, 0 },
+  { (char*)"setLightEnabled", py_setLightEnabled, METH_VARARGS, 0 },
+  { (char*)"addLight", py_addLight, METH_VARARGS, 0 },
+  { (char*)"removeLight", py_removeLight, METH_VARARGS, 0 },
   // AI
   { (char*)"aiDelay", py_aiDelay, METH_VARARGS, 0 },
   // Other
@@ -805,6 +818,162 @@ PyObject* PythonScript::py_cameraZ(PyObject*, PyObject*)
 {
   return Py_BuildValue((char*)"f", BosonScript::cameraZ());
 }
+
+
+/*****  Light functions  *****/
+PyObject* PythonScript::py_lightPos(PyObject*, PyObject* args)
+{
+  int id;
+  if(!PyArg_ParseTuple(args, (char*)"i", &id))
+  {
+    return 0;
+  }
+
+  BoVector4 pos = BosonScript::lightPos(id);
+  return Py_BuildValue((char*)"(ffff)", pos.x(), pos.y(), pos.z(), pos.w());
+}
+
+PyObject* PythonScript::py_lightAmbient(PyObject*, PyObject* args)
+{
+  int id;
+  if(!PyArg_ParseTuple(args, (char*)"i", &id))
+  {
+    return 0;
+  }
+
+  BoVector4 a = BosonScript::lightAmbient(id);
+  return Py_BuildValue((char*)"(ffff)", a.x(), a.y(), a.z(), a.w());
+}
+
+PyObject* PythonScript::py_lightDiffuse(PyObject*, PyObject* args)
+{
+  int id;
+  if(!PyArg_ParseTuple(args, (char*)"i", &id))
+  {
+    return 0;
+  }
+
+  BoVector4 d = BosonScript::lightDiffuse(id);
+  return Py_BuildValue((char*)"(ffff)", d.x(), d.y(), d.z(), d.w());
+}
+
+PyObject* PythonScript::py_lightSpecular(PyObject*, PyObject* args)
+{
+  int id;
+  if(!PyArg_ParseTuple(args, (char*)"i", &id))
+  {
+    return 0;
+  }
+
+  BoVector4 s = BosonScript::lightSpecular(id);
+  return Py_BuildValue((char*)"(ffff)", s.x(), s.y(), s.z(), s.w());
+}
+
+PyObject* PythonScript::py_lightEnabled(PyObject*, PyObject* args)
+{
+  int id;
+  if(!PyArg_ParseTuple(args, (char*)"i", &id))
+  {
+    return 0;
+  }
+
+  return Py_BuildValue((char*)"i", BosonScript::lightEnabled(id) ? 1 : 0);
+}
+
+
+PyObject* PythonScript::py_setLightPos(PyObject*, PyObject* args)
+{
+  int id;
+  float x, y, z, w;
+  if(!PyArg_ParseTuple(args, (char*)"i(ffff)", &id, &x, &y, &z, &w))
+  {
+    return 0;
+  }
+
+  BosonScript::setLightPos(id, BoVector4(x, y, z, w));
+
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+PyObject* PythonScript::py_setLightAmbient(PyObject*, PyObject* args)
+{
+  int id;
+  float r, g, b, a;
+  if(!PyArg_ParseTuple(args, (char*)"i(ffff)", &id, &r, &g, &b, &a))
+  {
+    return 0;
+  }
+
+  BosonScript::setLightAmbient(id, BoVector4(r, g, b, a));
+
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+PyObject* PythonScript::py_setLightDiffuse(PyObject*, PyObject* args)
+{
+  int id;
+  float r, g, b, a;
+  if(!PyArg_ParseTuple(args, (char*)"i(ffff)", &id, &r, &g, &b, &a))
+  {
+    return 0;
+  }
+
+  BosonScript::setLightDiffuse(id, BoVector4(r, g, b, a));
+
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+PyObject* PythonScript::py_setLightSpecular(PyObject*, PyObject* args)
+{
+  int id;
+  float r, g, b, a;
+  if(!PyArg_ParseTuple(args, (char*)"i(ffff)", &id, &r, &g, &b, &a))
+  {
+    return 0;
+  }
+
+  BosonScript::setLightSpecular(id, BoVector4(r, g, b, a));
+
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+PyObject* PythonScript::py_setLightEnabled(PyObject*, PyObject* args)
+{
+  int id, enable;
+  if(!PyArg_ParseTuple(args, (char*)"ii", &id, &enable))
+  {
+    return 0;
+  }
+
+  BosonScript::setLightEnabled(id, enable);
+
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+
+PyObject* PythonScript::py_addLight(PyObject*, PyObject*)
+{
+  return Py_BuildValue((char*)"i", BosonScript::addLight());
+}
+
+PyObject* PythonScript::py_removeLight(PyObject*, PyObject* args)
+{
+  int id;
+  if(!PyArg_ParseTuple(args, (char*)"i", &id))
+  {
+    return 0;
+  }
+
+  BosonScript::removeLight(id);
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
 
 
 /*****  AI functions  *****/
