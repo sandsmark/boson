@@ -49,6 +49,7 @@
 #include <qptrdict.h>
 #include <kpopupmenu.h>
 #include <kmessagebox.h>
+#include <kconfig.h>
 
 #define ID_DEBUG_KILLPLAYER 0
 #define ID_WIDGETSTACK_WELCOME 1
@@ -523,6 +524,11 @@ void TopWidget::loadGameData3()
  d->mLoading->setLoading(BosonLoadingWidget::StartingGame);
  checkEvents();
 
+ connect(d->mBosonWidget, SIGNAL(signalMobilesCount(int)), this, SIGNAL(signalSetMobilesCount(int)));
+ connect(d->mBosonWidget, SIGNAL(signalFacilitiesCount(int)), this, SIGNAL(signalSetFacilitiesCount(int)));
+ connect(d->mBosonWidget, SIGNAL(signalOilUpdated(int)), this, SIGNAL(signalOilUpdated(int)));
+ connect(d->mBosonWidget, SIGNAL(signalMineralsUpdated(int)), this, SIGNAL(signalMineralsUpdated(int)));
+
  showBosonWidget();
  delete d->mNewGame;
  d->mNewGame = 0;
@@ -531,11 +537,6 @@ void TopWidget::loadGameData3()
  enableGameActions(true);
  initDebugPlayersMenu();
  checkDockStatus();
-
- connect(d->mBosonWidget, SIGNAL(signalMobilesCount(int)), this, SIGNAL(signalSetMobilesCount(int)));
- connect(d->mBosonWidget, SIGNAL(signalFacilitiesCount(int)), this, SIGNAL(signalSetFacilitiesCount(int)));
- connect(d->mBosonWidget, SIGNAL(signalOilUpdated(int)), this, SIGNAL(signalOilUpdated(int)));
- connect(d->mBosonWidget, SIGNAL(signalMineralsUpdated(int)), this, SIGNAL(signalMineralsUpdated(int)));
 
  connect(d->mBosonWidget, SIGNAL(signalChatDockHidden()), this, SLOT(slotChatDockHidden()));
  connect(d->mBosonWidget, SIGNAL(signalCmdFrameDockHidden()), this, SLOT(slotCmdFrameDockHidden()));
@@ -761,6 +762,11 @@ void TopWidget::loadGameDockConfig()
 #if KDE_VERSION < 310
  d->mLoadingDockConfig = false;
 #endif
+ KConfig* conf = kapp->config();
+ conf->setGroup("BosonGameDock");
+ bool fs = conf->readBoolEntry("FullScreen", false);
+ d->mActionFullScreen->setChecked(fs);
+ slotToggleFullScreen();
 }
 
 void TopWidget::loadInitialDockConfig()
@@ -772,16 +778,27 @@ void TopWidget::loadInitialDockConfig()
 #if KDE_VERSION < 310
  d->mLoadingDockConfig = false;
 #endif
+ KConfig* conf = kapp->config();
+ conf->setGroup("BosonInitialDock");
+ bool fs = conf->readBoolEntry("FullScreen", false);
+ d->mActionFullScreen->setChecked(fs);
+ slotToggleFullScreen();
 }
 
 void TopWidget::saveGameDockConfig()
 {
  writeDockConfig(kapp->config(), "BosonGameDock");
+ KConfig* conf = kapp->config();
+ conf->setGroup("BosonGameDock");
+ conf->writeEntry("FullScreen", d->mActionFullScreen->isChecked());
 }
 
 void TopWidget::saveInitialDockConfig()
 {
  writeDockConfig(kapp->config(), "BosonInitialDock");
+ KConfig* conf = kapp->config();
+ conf->setGroup("BosonInitialDock");
+ conf->writeEntry("FullScreen", d->mActionFullScreen->isChecked());
 }
 
 #if KDE_VERSION < 310
