@@ -20,7 +20,6 @@
 
 # include files
 INCLUDES= -I../visual $(all_includes)
-boson_appsdir = $(kde_appsdir)/Games/Boson
 
 LDFLAGS =  -s 
 
@@ -28,32 +27,25 @@ LDFLAGS =  -s
 bin_PROGRAMS = boson 
 SUBDIRS = docs 
 
-
-#boson
-boson_METASOURCES = USE_AUTOMOC
+METASOURCES = AUTO
 boson_LDFLAGS = $(all_libraries) $(KDE_RPATH)
 boson_SOURCES = boson.cpp connect.cpp bosonBigDisplay.cpp game.cpp main.cpp mainWidget.cpp miniDisplay.cpp bosonCanvas.cpp playerUnit.cpp connectDlg.cpp serverDlg.cpp boshot.cpp bosonTopLevel.cpp
 boson_LDADD   =  ../visual/libbovisual.a ../common/libboson.a $(LIB_KDEUI)
 
 
-#(un)install stuff
-install-data-local:
-	$(mkinstalldirs) $(boson_appsdir)/
-	$(INSTALL_DATA) .directory $(boson_appsdir)/.directory
-	$(INSTALL_DATA) boson.kdelnk $(boson_appsdir)/boson.kdelnk
-	$(mkinstalldirs) $(kde_icondir)/
-	$(INSTALL_DATA) boson.xpm $(kde_icondir)/boson.xpm
-	$(mkinstalldirs) $(kde_minidir)/
-	$(INSTALL_DATA) mini-boson.xpm $(kde_minidir)/mini-boson.xpm
+appsdir = $(kde_appsdir)/Games/Boson
+rcdir = $(kde_datadir)/boson
 
-uninstall-local:
-	-rm -f $(boson_appsdir)/boson.kdelnk
-	-rm -f $(kde_icondir)/boson.xpm
-	-rm -f $(kde_minidir)/mini-boson.xpm
+apps_DATA = boson.desktop .directory
+EXTRA_DIST = $(apps_DATA)
 
+KDE_ICON = boson
+
+#rc_DATA = kwrite_browser.rc kwriteui.rc kwrite_shell.rc
 
 #garbage
-CLEANFILES = $(boson_METASOURCES) boson-*.log
+CLEANFILES = boson-*.log
 
 EXTRA_DIST = boson.cpp connect.cpp bosonBigDisplay.cpp game.cpp main.cpp mainWidget.cpp miniDisplay.cpp bosonCanvas.cpp playerUnit.cpp boson.h connect.h game.h mainWidget.h bosonCanvas.h playerUnit.h ressource.h connectDlg.cpp connectDlg.h serverDlg.cpp serverDlg.h boshot.cpp boshot.h bosonTopLevel.h bosonTopLevel.cpp
+
 
