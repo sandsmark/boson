@@ -119,7 +119,7 @@ KSpriteToolTip::~KSpriteToolTip()
 {
 }
 
-static void KSpriteToolTip::initTipManager()
+void KSpriteToolTip::initTipManager()
 {
  if (tipManager) {
 	return;
