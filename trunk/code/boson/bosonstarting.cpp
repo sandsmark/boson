@@ -130,6 +130,7 @@ void BosonStarting::startNewGame()
  boDebug() << k_funcinfo << endl;
  if (!mPlayField) {
 	boError() << k_funcinfo << "NULL playfield" << endl;
+	emit signalStartingFailed();
 	return;
  }
  // mPlayField should be empty - ensure this by deleting the map
@@ -185,8 +186,8 @@ void BosonStarting::slotReceiveMap(const QByteArray& buffer)
 {
  boDebug() << k_funcinfo << endl;
  if (!boGame) {
-	emit signalStartingFailed(); // TODO: display welcome widget or so
 	boError() << k_funcinfo << "NULL boson object" << endl;
+	emit signalStartingFailed();
 	return;
  }
 
@@ -196,11 +197,12 @@ void BosonStarting::slotReceiveMap(const QByteArray& buffer)
 	boError() << k_funcinfo
 		<< "Boson must be in init status to receive map!" << endl
 		<< "Current status: " << boGame->gameStatus() << endl;
+	emit signalStartingFailed();
 	return;
  }
  if (!mPlayField) {
 	boError() << k_funcinfo << "NULL playfield" << endl;
-	emit signalStartingFailed(); // TODO: display welcome widget or so
+	emit signalStartingFailed();
 	return;
  }
 
@@ -208,7 +210,7 @@ void BosonStarting::slotReceiveMap(const QByteArray& buffer)
  QDataStream stream(buffer, IO_ReadOnly);
  if (!mPlayField->loadPlayFieldFromRemote(stream)) {
 	boError() << k_funcinfo << "Remote has sent a broken playfield stream" << endl;
-	emit signalStartingFailed(); // TODO: display welcome widget or so
+	emit signalStartingFailed();
 	return;
  }
  boGame->setPlayField(mPlayField);
@@ -242,7 +244,7 @@ void BosonStarting::slotReceiveMap(const QByteArray& buffer)
 
 void BosonStarting::slotLoadTiles()
 {
- // Load map tiles. This takes most startup time
+ // Load map tiles.
 
  // This slot method is called from slotReceiveMap(), which in turn is called when map
  // is received in Boson class.
@@ -252,14 +254,17 @@ void BosonStarting::slotLoadTiles()
 
  if (!boGame) {
 	boError() << k_funcinfo << "NULL boson object" << endl;
+	emit signalStartingFailed();
 	return;
  }
  if (!playField()) {
 	boError() << k_funcinfo << "NULL playField" << endl;
+	emit signalStartingFailed();
 	return;
  }
  if (!playField()->map()) {
 	boError() << k_funcinfo << "NULL map" << endl;
+	emit signalStartingFailed();
 	return;
  }
  boGame->lock();
@@ -357,9 +362,8 @@ void BosonStarting::loadPlayerData()
  }
 
  if (!mPlayer) {
-	// TODO: loading failed. we have to return to welcome widget now and
-	// display a message box!
 	boError() << k_funcinfo << "NULL player!" << endl;
+	emit signalStartingFailed();
 	return;
  }
 
