@@ -348,12 +348,14 @@ public:
 	unsigned int deletionTimer() const;
 
 	/**
-	 * @return true if unit is moving (work() == WorkMove)
+	 * @return true if unit is moving
 	 **/
-	inline bool isMoving()
+	inline bool isMoving() const
 	{
-		return (work() == WorkMove);
+		return mIsMoving;
 	}
+
+	inline void setMoving(bool moving) { mIsMoving = moving; };
 
 //	inline QValueList<BosonWeapon>* weapons()  { return &mWeapons; };
 
@@ -380,6 +382,7 @@ protected:
 private:
 	Player* mOwner;
 	unsigned long int mId; // not a KGameProperty, to make saving to XML (i.e. scenario files) more easy.
+	bool mIsMoving;
 
 	static QMap<int, QString>* mPropertyMap;
 

@@ -44,6 +44,7 @@ UnitBase::UnitBase(const UnitProperties* prop)
  mWeaponProperties = 0; // created on the fly in weaponDataHandler()
  mOwner = 0;
  mUnitProperties = prop; // WARNING: this might be 0 at this point! MUST be != 0 for Unit, but ScenarioUnit uses 0 here
+ mIsMoving = false;
 
 // PolicyLocal?
  registerData(&mHealth, IdHealth);

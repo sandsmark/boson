@@ -446,6 +446,7 @@ bool Unit::attackEnemyUnitsInRange()
 
 	// We use target to store best enemy in range so we don't have to look for it every time.
 	// If there's no target or target isn't in range anymore, find new best enemy unit in range
+	// FIXME: check for max(Land|Air)WeaponRange
 	if (!target() || target()->isDestroyed() ||
 			!inRange(unitProperties()->maxWeaponRange(), target())) {
 		d->mTarget = bestEnemyUnitInRange();
@@ -763,6 +764,7 @@ bool Unit::moveTo(float x, float y, int range, bool attack)
  // Do not find path here!!! It would break pathfinding for groups. Instead, we
  //  set mSearchPath to true and find path in MobileUnit::advanceMove()
  mSearchPath = true;
+ setMoving(true);
 
  if (attack) {
 	d->mMoveAttacking = 1;
@@ -775,6 +777,9 @@ bool Unit::moveTo(float x, float y, int range, bool attack)
 
 void Unit::newPath()
 {
+ // FIXME: don't check if cell is valid/invalid if range > 0
+ //  then unit would behave correctly when e.g. commanding land unit to attack
+ //  a ship
  if (!canvas()->cell(d->mMoveDestX / BO_TILE_SIZE, d->mMoveDestY / BO_TILE_SIZE)) {
 	boError() << k_funcinfo << "invalid cell " << d->mMoveDestX / BO_TILE_SIZE << "," << d->mMoveDestY / BO_TILE_SIZE << endl;
 	return;
@@ -827,11 +832,12 @@ void Unit::stopMoving()
 
  // Call this only if we are only moving - stopMoving() is also called e.g. on
  // WorkAttack, when the unit is not yet in range.
- if (isMoving()) {
+ if (work() == WorkMove) {
 	setWork(WorkNone);
  } else if (advanceWork() != work()) {
 	setAdvanceWork(work());
  }
+ setMoving(true);
  setVelocity(0.0, 0.0, 0.0);
 }
 
@@ -1221,7 +1227,7 @@ MobileUnit::~MobileUnit()
  delete d;
 }
 
-void MobileUnit::advanceMoveInternal(unsigned int) // this actually needs to be called for every advanceCount.
+void MobileUnit::advanceMoveInternal(unsigned int advanceCount) // this actually needs to be called for every advanceCount.
 {
  if (speed() == 0) {
 	boWarning(401) << k_funcinfo << "unit " << id() << ": speed == 0" << endl;
@@ -1232,6 +1238,7 @@ void MobileUnit::advanceMoveInternal(unsigned int) // this actually needs to be 
  if (mSearchPath) {
 	newPath();
 	mSearchPath = false;
+	// Do we have to return here?
 	return;
  }
 
@@ -1263,13 +1270,20 @@ void MobileUnit::advanceMoveInternal(unsigned int) // this actually needs to be 
 		}
 		// TODO: make sure that target() hasn't moved!
 		// if it has moved also adjust waypoints
+		// RL: I'm not sure if it's needed because path will be recalced every time
+		//  new cell is reached anyway
 	}
  } else if (moveAttacking()) {
-	// Check for any enemy units in range
-	if (attackEnemyUnitsInRange()) {
-		boDebug(401) << k_funcinfo << "unit " << id() << ": Enemy units found in range, attacking" << endl;
-		setVelocity(0.0, 0.0, 0.0);  // To prevent moving
-		return;
+	// Attack any enemy units in range
+	// Don't check for enemies every time (if we don't have a target) because it
+	//  slows things down
+	if (target() || (advanceCount % 20 == 0)) {
+		if (attackEnemyUnitsInRange()) {
+			boDebug(401) << k_funcinfo << "unit " << id() << ": Enemy units found in range, attacking" << endl;
+			setVelocity(0.0, 0.0, 0.0);  // To prevent moving
+			setMoving(false);
+			return;
+		}
 	}
  }
 
@@ -1289,11 +1303,11 @@ void MobileUnit::advanceMoveInternal(unsigned int) // this actually needs to be 
 
  // First check if we're at waypoint
  if ((x == wp.x()) && (y == wp.y())) {
-	boDebug(401) << k_funcinfo << "unit " << id() << ": unit is at waypoint" << endl;
+	//boDebug(401) << k_funcinfo << "unit " << id() << ": unit is at waypoint" << endl;
 	waypointDone();
 
 	if (waypointCount() == 0) {
-		boDebug(401) << k_funcinfo << "unit " << id() << ": no more waypoints. Stopping moving" << endl;
+		//boDebug(401) << k_funcinfo << "unit " << id() << ": no more waypoints. Stopping moving" << endl;
 		stopMoving();
 		if (work() == WorkNone) {
 			// Turn a bit
@@ -1341,6 +1355,7 @@ void MobileUnit::advanceMoveInternal(unsigned int) // this actually needs to be 
 
  // Set velocity for actual moving
  setVelocity(xspeed, yspeed, 0.0);
+ setMoving(true);
 
  // set the new direction according to new speed
  turnTo();
@@ -1349,18 +1364,20 @@ void MobileUnit::advanceMoveInternal(unsigned int) // this actually needs to be 
 void MobileUnit::advanceMoveCheck()
 {
  if (!canvas()->onCanvas(boundingRectAdvanced().topLeft())) {
-	boDebug(401) << k_funcinfo << "unit " << id() << ": not on canvas (topLeft)" << endl;
+	boDebug(401) << k_funcinfo << "unit " << id() << ": not on canvas (topLeft): (" <<
+			(int)(leftEdge() + xVelocity()) << "; " << (int)(topEdge() + yVelocity()) << ")" << endl;
 	stopMoving();
 	setWork(WorkNone);
 	return;
  }
  if (!canvas()->onCanvas(boundingRectAdvanced().bottomRight())) {
-	boDebug(401) << k_funcinfo << "unit " << id() << ": not on canvas (bottomRight)" << endl;
+	boDebug(401) << k_funcinfo << "unit " << id() << ": not on canvas (bottomRight): (" <<
+			(int)(leftEdge() + width() + xVelocity()) << "; " << (int)(topEdge() + height() + yVelocity()) << ")" << endl;
 	stopMoving();
 	setWork(WorkNone);
 	return;
  }
- boDebug(401) << k_funcinfo << "unit " << id() << endl;
+ //boDebug(401) << k_funcinfo << "unit " << id() << endl;
  if (canvas()->cellOccupied(currentWaypoint().x() / BO_TILE_SIZE,
 		currentWaypoint().y() / BO_TILE_SIZE, this, false)) {
 //	boDebug(401) << k_funcinfo << "collisions" << endl;
@@ -1372,8 +1389,11 @@ void MobileUnit::advanceMoveCheck()
 
 	d->mMovingFailed = d->mMovingFailed + 1;
 	setVelocity(0.0, 0.0, 0.0);
+	// If we haven't yet recalculated path, consider unit to be moving
+	setMoving(d->mPathRecalculated == 0);
 
 	const int recalculate = 50; // recalculate when 50 advanceMove() failed
+	
 	if (d->mPathRecalculated >= 2) {
 		boDebug(401) << k_funcinfo << "unit: " << id() << ": Path recalculated 3 times and it didn't help, giving up and stopping" << endl;
 		stopMoving();
@@ -1393,7 +1413,7 @@ void MobileUnit::advanceMoveCheck()
  }
  d->mMovingFailed = 0;
  d->mPathRecalculated = 0;
- boDebug(401) << k_funcinfo << "unit " << id() << ": done" << endl;
+ //boDebug(401) << k_funcinfo << "unit " << id() << ": done" << endl;
 }
 
 void MobileUnit::setSpeed(float speed)
