@@ -77,18 +77,6 @@ public:
 		IdHarvestingType = UnitBase::IdLast + 304
 	};
 
-	enum AnimationModes {
-		// the numbers are just cosmetic and do not need to be in order.
-		// the idle mode is an exception - it MUST be 0.
-		// AB: TODO: add BosonItem::disableAnimation for the
-		// construction animations! they are done differently
-		AnimationIdle = 0, // default mode
-		AnimationMove = 1,
-		AnimationMine = 2,
-		AnimationRefine = 3,
-		AnimationWreckage = 100
-	};
-
 	Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas);
 	virtual ~Unit();
 
@@ -405,6 +393,18 @@ protected:
 	 * @return Whether unit should attack any enemy units in range while moving
 	 **/
 	int moveAttacking() const;
+
+	/**
+	 * Called when the unit wants to move to another position. It may be
+	 * possible that the heights of the cells at the new position are
+	 * different and therefore the unit needs to move in z direction and
+	 * maybe rotate around x and y axis.
+	 *
+	 * Currently rotateX and rotateY are set to 0.0, since it is not yet
+	 * implemented. moveZ is simply set to the highest z value of the
+	 * corners of all cells it occupies.
+	 **/
+	void updateZ(float moveByX, float moveByY, float* moveZ, float* rotateX, float* rotateY);
 
 protected:
 	bool mSearchPath;
