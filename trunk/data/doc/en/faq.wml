@@ -9,8 +9,9 @@
     <ol>
       <li><a href="#1">- When is Boson finished ?</a></li>
       <li><a href="#2">- Why is Boson so slow ?</a></li>
-      <li><a href="#3">- Are there other supported languages than english ?</a></li>
-      <li><a href="#4">- Boson crashes my computer, what can I do ?</a></li>
+      <li><a href="#3">- How can I submit a bug report ?</a></li>
+      <li><a href="#4">- Are there other supported languages than english ?</a></li>
+      <li><a href="#5">- Boson crashes my computer, what can I do ?</a></li>
     </ol>
     
     <p>&nbsp;</p>
@@ -28,15 +29,20 @@
     </p>
 
     <p>&nbsp;</p>
-    <a name="3">- Are there other supported languages than english ?</a>
+    <a name="3">- How can I submit a bug report ?</a>
+    <p>You can submit a bugreport through <a href="http://bugs.kde.org/wizard.cgi" target="_blank">bugs.kde.org</a><br>
+    Or simply start Bosony you will find the "Report Bug..." entry in the "Help" menu.</p>
+    
+    <p>&nbsp;</p>
+    <a name="4">- Are there other supported languages than english ?</a>
     <p>No, Boson is a game in development, text changes very often. It is to hard to maintain different languages yet.
     </p>
 
     <p>&nbsp;</p>
-    <a name="4">- Boson crashes my computer, what can I do ?</a>
-    <p>It looks like sometimes there is a problem with Boson/KDE/OpenGL/malloc/driver combination.<br>
-    If you have total crashes or kernel memory errors please start boson under an other window manager like fvwm2 or failsave.
-    If that doesn't solve the problem please contact us.    
+    <a name="5">- Boson crashes my computer, what can I do ?</a>
+    <p>It looks like sometimes there is a problem with a Boson/KDE/OpenGL/malloc/driver combination.<br>
+    If you have total crashes or kernel memory errors please start Boson under an other window manager like fvwm2 or failsave.<br>
+    The system crashes should go away but please contact us because we need more people with the same problem.
     </p>
 
 #include "nav.wml" before_url="units/aircraft.html" before_text="Aircraft" after_url="credits.html" after_text="Credits" up_url="index.html"
