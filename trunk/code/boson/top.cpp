@@ -26,6 +26,7 @@
 #include "boson.h"
 #include "player.h"
 #include "bosonplayfield.h"
+#include "bosonmap.h"
 #include "bosoncanvas.h"
 #include "bosonmessage.h"
 #include "speciestheme.h"
@@ -604,12 +605,24 @@ void TopWidget::loadGameData1() // FIXME rename!
 
 void TopWidget::loadGameData2() //FIXME rename!
 {
- // This method is called from slotInitMap(), which in turn is called when map
+ // This method is called from slotReceiveMap(), which in turn is called when map
  //  is received in Boson class
  // When map is received then, when we're starting new game, loadGameData1()
  //  has already returned, if we're loading saved game, then it hasn't, because
  //  map is initialized immediately when it's loaded from file
 
+ if (!mBoson) {
+	kdError() << k_funcinfo << "NULL boson object" << endl;
+	return;
+ }
+ if (!playField()) {
+	kdError() << k_funcinfo << "NULL playField" << endl;
+	return;
+ }
+ if (!playField()->map()) {
+	kdError() << k_funcinfo << "NULL map" << endl;
+	return;
+ }
  boProfiling->start(BosonProfiling::LoadGameData2);
  // Init canvas
  d->mLoading->setLoading(BosonLoadingWidget::InitClasses);
@@ -623,15 +636,18 @@ void TopWidget::loadGameData2() //FIXME rename!
  // Load map tiles. This takes most time
  d->mLoading->setProgress(600);
  d->mLoading->setLoading(BosonLoadingWidget::LoadTiles);
- connect(mCanvas, SIGNAL(signalTilesLoading(int)), this, SLOT(slotCanvasTilesLoading(int)));
- connect(mCanvas, SIGNAL(signalTilesLoaded()), this, SLOT(slotCanvasTilesLoaded()));
+ // just in case.. disconnect before connecting. the map should be newly
+ // created, bu i don't know if this will stay this way.
+ disconnect(playField()->map(), 0, this, 0);
+ connect(playField()->map(), SIGNAL(signalTilesLoading(int)), this, SLOT(slotCanvasTilesLoading(int)));
+ connect(playField()->map(), SIGNAL(signalTilesLoaded()), this, SLOT(slotCanvasTilesLoaded()));
  checkEvents();
  // Note that next call doesn't return before tiles are fully loaded (because
  //  second argument is false; if it would be true, then it would return
  //  immediately). This is needed for loading saved game. GUI is
  //  still non-blocking though, because qApp->processEvents() is called while
  //  loading tiles
- mCanvas->loadTiles(QString("earth"), false);
+ playField()->map()->loadTiles(QString("earth"), false);
 
  // also loads the cursor and the map display list!
  d->mBosonWidget->addInitialDisplay();
@@ -668,7 +684,7 @@ void TopWidget::loadGameData3() // FIXME rename!
 		progress += UNITDATAS_LOADINGFACTOR;
 	}
  }
- // these are sounds like minimap activated. 
+ // these are sounds like minimap activated.
  // FIXME: are there sounds of other player (i.e. non-localplayers) we need,
  // too?
  // FIXME: do we need to support player-independant sounds?

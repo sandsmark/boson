@@ -22,10 +22,15 @@
 
 #include "defines.h"
 #include "cell.h"
+#include "bosontiles.h"
 
+#include <qtimer.h>
+#include <qdatetime.h>
 #include <qdatastream.h>
 #include <qdom.h>
 
+#include <kglobal.h>
+#include <kstandarddirs.h>
 #include <kdebug.h>
 
 #define TAG_FIELD "boeditor_magic_0_6"
@@ -38,6 +43,7 @@ public:
 	BosonMapPrivate()
 	{
 	}
+	QString mTilesDir;
 };
 
 BosonMap::BosonMap(QObject* parent) : QObject(parent)
@@ -47,6 +53,7 @@ BosonMap::BosonMap(QObject* parent) : QObject(parent)
 
 BosonMap::~BosonMap()
 {
+ delete mTiles;
  if (mCells) {
 	delete[] mCells;
  }
@@ -550,9 +557,36 @@ void BosonMap::slotChangeCell(int x, int y, int groundType, unsigned char b)
  }
 }
 
-void BosonMap::setTileSet(BosonTiles* t)
+void BosonMap::loadTiles(const QString& tiles, bool withtimer)
 {
- mTiles = t;
- emit signalTileSetChanged(t);
+ delete mTiles;
+ mTiles = new BosonTiles(this);
+ connect(mTiles, SIGNAL(signalTilesLoading(int)),
+		this, SIGNAL(signalTilesLoading(int)));
+ connect(mTiles, SIGNAL(signalTilesLoaded()),
+		this, SIGNAL(signalTilesLoaded()));
+ QString dir = KGlobal::dirs()->findResourceDir("data", QString("boson/themes/grounds/%1/index.desktop").arg(tiles)) + QString("boson/themes/grounds/%1").arg(tiles);
+ if (dir == QString::null) {
+	kdError() << k_funcinfo << "Cannot find tileset " << tiles << endl;
+	return;
+ }
+ d->mTilesDir = dir;
+ if (withtimer) {
+	QTimer::singleShot(0, this, SLOT(slotLoadTiles()));
+ } else {
+	slotLoadTiles();
+ }
 }
+
+void BosonMap::slotLoadTiles()
+{
+ kdDebug() << k_funcinfo << endl;
+ QTime time;
+ time.start();
+ mTiles->loadTiles(d->mTilesDir);
+ kdDebug() << k_funcinfo << "loading took: " << time.elapsed() << endl;
+
+ emit signalTileSetChanged(mTiles);
+}
+
 

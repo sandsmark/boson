@@ -32,7 +32,7 @@
 #include <qgl.h>
 
 
-BosonTiles::BosonTiles() : QObject()
+BosonTiles::BosonTiles(QObject* parent) : QObject(parent)
 {
  mTilesImage = new QImage(big_w() * BO_TILE_SIZE, big_h() * BO_TILE_SIZE, 32);
  mTextures = 0;

@@ -25,23 +25,14 @@
 #include "bosonmap.h"
 #include "unitproperties.h"
 #include "boshot.h"
-#include "bosontiles.h"
 #include "speciestheme.h"
 #include "boitemlist.h"
+#include "defines.h"
 
 #include <kdebug.h>
 #include <klocale.h>
-#include <kstandarddirs.h>
 
-#include <qptrdict.h>
-#include <qbitmap.h>
-#include <qdatetime.h>
-#include <qtimer.h>
 #include <qpointarray.h>
-
-#include <unistd.h>
-
-#include "defines.h"
 
 #include "bosoncanvas.moc"
 
@@ -53,10 +44,8 @@ public:
 	{
 		mMap = 0;
 
-		mTiles = 0;
 	}
 	
-	QPixmap mPix;
 	QPtrList<Unit> mDestroyedUnits;
 	QPtrList<BoShot> mDeleteShot;
 
@@ -65,9 +54,6 @@ public:
 	QPtrList<BosonSprite> mAnimList; // see BosonCanvas::slotAdvance()
 
 	BoItemList mAllItems;
-
-	BosonTiles* mTiles;
-	QString mTilesDir;
 };
 
 BosonCanvas::BosonCanvas(QObject* parent)
@@ -82,19 +68,12 @@ void BosonCanvas::init()
  d->mDestroyedUnits.setAutoDelete(false);
  d->mDeleteShot.setAutoDelete(true);
  mAdvanceFunctionLocked = false;
-
- d->mTiles = new BosonTiles();
- connect(d->mTiles, SIGNAL(signalTilesLoaded()),
-		this, SIGNAL(signalTilesLoaded()));
- connect(d->mTiles, SIGNAL(signalTilesLoading(int)),
-		this, SIGNAL(signalTilesLoading(int)));
 }
 
 BosonCanvas::~BosonCanvas()
 {
 kdDebug()<< k_funcinfo << endl;
  quitGame();
- delete d->mTiles;
  delete d;
 kdDebug()<< k_funcinfo <<"done"<< endl;
 }
@@ -243,36 +222,6 @@ bool BosonCanvas::canGo(const UnitProperties* prop, const QRect& rect) const
 void BosonCanvas::setMap(BosonMap* map)
 {
  d->mMap = map;
-}
-
-void BosonCanvas::loadTiles(const QString& tiles, bool withtimer)
-{
- QString dir = KGlobal::dirs()->findResourceDir("data", QString("boson/themes/grounds/%1/index.desktop").arg(tiles)) + QString("boson/themes/grounds/%1").arg(tiles);
- if (dir == QString::null) {
-	kdError() << k_funcinfo << "Cannot find tileset " << tiles << endl;
-	return;
- }
- d->mTilesDir = dir;
- if (withtimer) {
-	QTimer::singleShot(0, this, SLOT(slotLoadTiles()));
- } else {
-	slotLoadTiles();
- }
-}
-
-void BosonCanvas::slotLoadTiles()
-{
- kdDebug() << k_funcinfo << endl;
- if (!d->mMap) {
-	kdError() << k_funcinfo << "NULL map" << endl;
-	return;
- }
- QTime time;
- time.start();
- d->mTiles->loadTiles(d->mTilesDir);
- kdDebug() << k_funcinfo << "loading took: " << time.elapsed() << endl;
-
- d->mMap->setTileSet(d->mTiles);
 }
 
 void BosonCanvas::addAnimation(BosonSprite* item)

@@ -44,7 +44,7 @@ public:
 	 * Use @ref loadTiles to write the single tiles into the pixmap and @ref
 	 * save to save the pixmap.
 	 **/
-	BosonTiles();
+	BosonTiles(QObject* parent);
 
 	~BosonTiles();
 
