@@ -752,7 +752,7 @@ void BosonCanvas::destroyUnit(Unit* unit)
 			boDebug() << k_funcinfo << "Setting age to 0 for particle system" << it.current() << endl;
 			it.current()->setAge(0);
 		}
-		unit->particleSystems()->clear();
+		unit->clearParticleSystems();
 	}
 
 	// the unit is added to a list - now displayed as a wreckage only.

@@ -212,15 +212,17 @@ class BosonShotMissile : public BosonShot
   public:
     BosonShotMissile(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop, BoVector3 pos, BoVector3 target);
     BosonShotMissile(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop);
+    ~BosonShotMissile();
 
     virtual bool saveAsXML(QDomElement& root);
     virtual bool loadFromXML(const QDomElement& root);
 
-    virtual QPtrList<BosonParticleSystem>* particleSystems() const  { return mFlyParticleSystems; }
+    virtual const QPtrList<BosonParticleSystem>* particleSystems() const  { return mFlyParticleSystems; }
 
     inline virtual int type() const { return BosonShot::Missile; }
 
   protected:
+    void setParticleSystems(const QPtrList<BosonParticleSystem>& list);
     virtual void advanceMoveInternal();
 
     virtual void moveToTarget();
@@ -341,6 +343,7 @@ class BosonShotFragment : public BosonShot
     BosonShotFragment(Player* owner, BosonCanvas* canvas, BosonModel* model, BoVector3 pos,
         const UnitProperties* unitproperties);
     BosonShotFragment(Player* owner, BosonCanvas* canvas, BosonModel* model);
+    ~BosonShotFragment();
 
     void activate(const BoVector3& pos, const UnitProperties* unitProperties);
 
@@ -353,11 +356,12 @@ class BosonShotFragment : public BosonShot
 
     inline virtual int type() const { return BosonShot::Fragment; }
 
-    virtual QPtrList<BosonParticleSystem>* particleSystems() const  { return mParticleSystems; }
+    virtual const QPtrList<BosonParticleSystem>* particleSystems() const  { return mParticleSystems; }
 
     virtual void explode();
 
   protected:
+    void setParticleSystems(const QPtrList<BosonParticleSystem>& list);
     virtual void advanceMoveInternal();
 
   private:
