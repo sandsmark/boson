@@ -35,7 +35,7 @@ Shoot=shoot
 
 [Weapon_0]
 CanShootAtAirUnits=true
-CanShootAtLandUnits=false
+CanShootAtLandUnits=true
 Damage=10
 DamageRange=1
 FlyParticles=
@@ -49,7 +49,7 @@ ShootParticles=
 Speed=0
 
 [Weapon_1]
-CanShootAtAirUnits=false
+CanShootAtAirUnits=true
 CanShootAtLandUnits=true
 Damage=25
 DamageRange=2
