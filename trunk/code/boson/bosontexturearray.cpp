@@ -142,6 +142,8 @@ bool BosonTextureArray::createTexture(const QImage& image, GLuint texture, bool 
 	// adjust the coordinates in glTexCoord
 	resetTexParameter();
 
+#warning FIXME
+	// we use the alpha channel for the cursor *only* !!
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, buffer.width(),
 			buffer.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE,
 			buffer.bits());
