@@ -35,7 +35,7 @@ class OptionsDialog : public KDialogBase
 {
 	Q_OBJECT
 public:
-	OptionsDialog(QWidget* parent, bool modal = false);
+	OptionsDialog(bool editor, QWidget* parent, bool modal = false);
 	~OptionsDialog();
 
 	void setGame(Boson* boson);

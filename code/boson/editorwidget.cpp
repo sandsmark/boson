@@ -31,6 +31,7 @@
 #include "commandinput.h"
 #include "bodebug.h"
 #include "bpfdescriptiondialog.h"
+#include "optionsdialog.h"
 #include "commandframe/editorcommandframe.h"
 #include "sound/bosonmusic.h"
 
@@ -155,6 +156,7 @@ void EditorWidget::initKActions()
 // KStdAction::save(this, SLOT(slotSavePlayField()), actionCollection(), "file_save_playfield");
  KStdAction::saveAs(this, SLOT(slotSavePlayFieldAs()), actionCollection(), "file_save_playfield_as");
  KStdAction::quit(this, SIGNAL(signalQuit()), actionCollection());
+ (void)KStdAction::preferences(this, SLOT(slotEditorPreferences()), actionCollection());
 
  d->mPlayerAction = new KSelectAction(i18n("&Player"), KShortcut(), actionCollection(), "editor_player");
  connect(d->mPlayerAction, SIGNAL(activated(int)),
@@ -381,5 +383,15 @@ void EditorWidget::slotEditMapDescription()
  dialog->exec();
 
  delete dialog;
+}
+
+void EditorWidget::slotEditorPreferences()
+{
+ OptionsDialog* dlg = gamePreferences(true);
+ if (!dlg) {
+	boError() << k_funcinfo << "NULL options dialog" << endl;
+	return;
+ }
+ dlg->show();
 }
 

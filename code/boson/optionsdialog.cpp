@@ -42,18 +42,22 @@ public:
 	CursorOptions* mCursorOptions;
 };
 
-OptionsDialog::OptionsDialog(QWidget* parent, bool modal)
+OptionsDialog::OptionsDialog(bool editor, QWidget* parent, bool modal)
 		: KDialogBase(Tabbed, i18n("Boson Options"), Ok|Apply|Default,
 		Cancel, parent, "bosonoptionsdialog", modal, true)
 {
  d = new OptionsDialogPrivate;
 
- initGeneralPage();
- initCursorPage();
+ if (!editor) {
+	initGeneralPage();
+	initCursorPage();
+ }
  initScrollingPage();
- initSoundsPage();
+ if (!editor) {
+	initSoundsPage();
+ }
  initOpenGLPage();
- initChatPage();
+ initChatPage(); // in editor for chat messages
 }
 
 OptionsDialog::~OptionsDialog()
@@ -135,6 +139,9 @@ void OptionsDialog::setPlayer(Player* p)
 
 void OptionsDialog::setCursor(CursorMode mode)
 {
+ if (!d->mCursorOptions) {
+	return;
+ }
  d->mCursorOptions->setCursor(mode);
 }
 
