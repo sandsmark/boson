@@ -228,37 +228,37 @@ MinVelocity=-0.2,-0.2,-0.2
 MaxVelocity=0.2,0.2,0.2
 MinPos=-0.05,-0.05,-0.05
 MaxPos=0.05,0.05,0.05
-StartColor=0.5,0.5,0.5,0.7
+StartColor=0.5,0.5,0.5,0.4
 EndColor=0.6,0.6,0.6,0.0
 MinLife=3.0
 MaxLife=5.0
-MaxNum=200
+MaxNum=175
 InitNum=0
 BlendFunc=GL_ONE_MINUS_SRC_ALPHA
-Rate=25
-Size=0.7
+Rate=35
+Size=0.5
 SystemLife=3600
 Align=true
 Texture=smoke.png
 
 [MissileFireTrace]
 Id=5002
-MinVelocity=-0.2,-0.2,-0.2
-MaxVelocity=0.2,0.2,0.2
-MinPos=-0.05,-0.05,-0.05
-MaxPos=0.05,0.05,0.05
-StartColor=0.5,0.5,0.5,0.7
-EndColor=0.6,0.6,0.6,0.0
-MinLife=3.0
-MaxLife=5.0
-MaxNum=200
+MinVelocity=-0.7,-0.7,-0.7
+MaxVelocity=0.7,0.7,0.7
+MinPos=0.0,0.0,0.0
+MaxPos=0.0,0.0,0.0
+StartColor=1.0,0.6,0.2,0.3
+EndColor=1.0,0.2,0.0,0.0
+MinLife=0.3
+MaxLife=0.3
+MaxNum=40
 InitNum=0
-BlendFunc=GL_ONE_MINUS_SRC_ALPHA
-Rate=25
-Size=0.7
+BlendFunc=GL_ONE
+Rate=80
+Size=0.45
 SystemLife=3600
 Align=true
-Texture=smoke.png
+Texture=explosion.png
 
 
 
