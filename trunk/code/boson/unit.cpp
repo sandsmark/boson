@@ -1007,7 +1007,9 @@ void MobileUnit::turnTo(Direction direction)
 	kdError() << k_funcinfo << "unit is already destroyed!" << endl;
 	return;
  }
- setFrame((int)direction);
+ // At the moment, all units are facing south by default, but currect would be
+ //  north so change direction hack as soon as it's fixed
+ setRotation((float)((((int)direction + 4) % 8) * -45));
 }
 
 void MobileUnit::turnTo()

@@ -592,10 +592,13 @@ void BosonBigDisplayBase::paintGL()
 		continue;
 	}
 	glTranslatef(x, y, z);
+	glPushMatrix();
+	glRotatef(item->rotation(), 0, 0, 1);
 
 	// FIXME: performance: we could create a displaylist that contains the selectbox and simply change item->displayList()
 	// when the item is selected/unselected
 	glCallList(item->displayList());
+	glPopMatrix();
 
 	if (item->isSelected()) {
 		// FIXME: performance: create a display lists in the SelectBox which also contains the scale!
@@ -610,7 +613,7 @@ void BosonBigDisplayBase::paintGL()
 		glPopMatrix();
 	}
 
-	glTranslatef(-x, -y, -z); 
+	glTranslatef(-x, -y, -z);
  }
  boProfiling->renderUnits(false);
 

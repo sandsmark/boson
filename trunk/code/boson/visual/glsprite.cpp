@@ -27,6 +27,7 @@ GLSprite::GLSprite(BosonModel* model, BosonCanvas* canvas)
  mCanvas = canvas;
  mX = mY = mZ = 0.0;
  mWidth = mHeight = 0;
+ mRotation = 0;
  mGLDepthMultiplier = 1.0;
  mDisplayList = 0;
  mFrame = 0;
