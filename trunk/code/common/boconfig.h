@@ -37,9 +37,11 @@
 #ifdef EAGLE
 #define BOSON_LOGFILE_SERVER	"/tmp/boson-server.log"
 #define BOSON_LOGFILE_CLIENT	"/tmp/boson-client.log"
+#define BOSON_LOGFILE_EDITOR	"/tmp/boson-editor.log"
 #else
 #define BOSON_LOGFILE_SERVER	"boson-server.log"
 #define BOSON_LOGFILE_CLIENT	"boson-client.log"
+#define BOSON_LOGFILE_EDITOR	"boson-editor.log"
 #endif
 
 #endif // BOCONFIG_H
