@@ -79,7 +79,7 @@ public:
 	static ChatFramePosition readChatFramePosition(KConfig* conf = 0);
 
 	static void saveCursorMode(CursorMode mode, KConfig* conf = 0);
-	static CursorMode readCursorMode(KConfig* conf);
+	static CursorMode readCursorMode(KConfig* conf = 0);
 
 	void setSound(bool s);
 	bool sound() const;
