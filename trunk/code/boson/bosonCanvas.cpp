@@ -35,8 +35,8 @@ bosonCanvas::bosonCanvas( QPixmap p, uint w, uint h)
 {
 	mobile.resize(149);
 	facility.resize(149);
-	mobile.setAutoDelete(TRUE);
-	facility.setAutoDelete(TRUE);   
+//	mobile.setAutoDelete(TRUE);
+//	facility.setAutoDelete(TRUE);   
 }
 
 
@@ -104,8 +104,7 @@ void bosonCanvas::destroyMob(destroyedMsg_t &m)
 	QPoint p  = mob->center();
 	new boShot ( p.x(), p.y(), mob->z(), boShot::SHOT_UNIT);
 
-	emit mobileDestroyed( m.key);
-
+	mob->destroyed();
 	boAssert( mobile.remove(m.key) == true );
 }
 
@@ -165,8 +164,7 @@ void bosonCanvas::destroyFix(destroyedMsg_t &msg)
 	QPoint p = f->center();
 	new boShot ( p.x(), p.y(), f->z(), boShot::SHOT_FACILITY);
 
-	emit fixDestroyed( msg.key);
-
+	f->destroyed();
 	boAssert( facility.remove(msg.key) == true);
 }
 
