@@ -619,6 +619,10 @@ bool Unit::collidesWith(const QCanvasItem* item) const
  // New collision-check method for units
 
  if(!RTTI::isUnit(item->rtti())) {
+	// Never collide with selectpart, shot or fog of war
+	if(item->rtti() == RTTI::SelectPart || item->rtti() == RTTI::BoShot || item->rtti() == RTTI::FogOfWar) {
+		return false;
+	}
 	if(item->rtti() == QCanvasItem::Rtti_Rectangle) {
 		QRect itemrect = ((QCanvasRectangle*)item)->boundingRectAdvanced();
 		return itemrect.intersects(boundingRectAdvanced());
