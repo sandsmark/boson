@@ -1070,6 +1070,8 @@ class BoFaceView : public KListView
 public:
 	BoFaceView(QWidget* parent) : KListView(parent)
 	{
+		mUseLib3dsCoordinates = true;
+
 		QFontMetrics metrics(font());
 		setShowToolTips(true);
 		addColumn(i18n("Face"));
@@ -1095,7 +1097,15 @@ public:
 	{
 	}
 
-	QListViewItem* addFace(int index, Lib3dsFace* face, Lib3dsMesh* mesh, bool lib3dsCoordinates = true)
+	/**
+	 * Applies to new faces only!
+	 **/
+	void setUseLib3dsCoordinates(bool c)
+	{
+		mUseLib3dsCoordinates = c;
+	}
+
+	QListViewItem* addFace(int index, Lib3dsFace* face, Lib3dsMesh* mesh)
 	{
 		QListViewItem* item = new QListViewItem(this);
 		QString no;
@@ -1126,7 +1136,7 @@ public:
 		}
 
 		for (int j = 0; j < 3; j++) {
-			if (lib3dsCoordinates) {
+			if (mUseLib3dsCoordinates) {
 				v.set(mesh->pointL[ face->points[j] ].pos);
 			} else {
 				v = meshVertex[j];
@@ -1149,6 +1159,9 @@ public:
 		item->setText(8, QString("%1;%2;%3").arg(normal[0]).arg(normal[1]).arg(normal[2]));
 		return item;
 	}
+
+private:
+	bool mUseLib3dsCoordinates;
 };
 
 BoNodeObjectDataWidget::BoNodeObjectDataWidget(QWidget* parent) : QWidget(parent, "nodeobjectdatawidget")
@@ -1877,9 +1890,10 @@ void KGameModelDebug::slotDisplayMesh(QListViewItem* item)
  }
 
  // faces
+ d->mFaceList->setUseLib3dsCoordinates(d->mUseLib3dsCoordinates->isChecked());
  for (unsigned int i = 0; i < mesh->faces; i++) {
 	Lib3dsFace* face = &mesh->faceL[i];
-	QListViewItem* item = d->mFaceList->addFace(i, face, mesh, d->mUseLib3dsCoordinates->isChecked());
+	QListViewItem* item = d->mFaceList->addFace(i, face, mesh);
 	d->mListItem2Face.insert(item, face);
  }
 
@@ -2010,12 +2024,14 @@ void KGameModelDebug::slotConnectToFace(QListViewItem* item)
  }
  Bo3DSLoad::findAdjacentFaces(&connected, mesh, face);
  QPtrList<Lib3dsFace> faces;
+ d->mConnectedFacesList->setUseLib3dsCoordinates(d->mUseLib3dsCoordinates->isChecked());
+ d->mUnconnectedFacesList->setUseLib3dsCoordinates(d->mUseLib3dsCoordinates->isChecked());
  for (unsigned int i = 0; i < mesh->faces; i++) {
 	Lib3dsFace* f = &mesh->faceL[i];
 	if (connected.contains(f)) {
-		d->mConnectedFacesList->addFace(i, f, mesh, d->mUseLib3dsCoordinates->isChecked());
+		d->mConnectedFacesList->addFace(i, f, mesh);
 	} else {
-		d->mUnconnectedFacesList->addFace(i, f, mesh, d->mUseLib3dsCoordinates->isChecked());
+		d->mUnconnectedFacesList->addFace(i, f, mesh);
 	}
  }
 #endif
