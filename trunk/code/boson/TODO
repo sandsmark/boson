@@ -41,6 +41,8 @@ Game TODOs
 - Add screenshots support to saving/loading widget
 - call updateCursor() every advance call, so that the cursor changes also if a
   unit moved below it.
+  UPDATE: don't do this. we call it on mouse move already - this would mainly
+  hurting performance. instead we should use a separate timer for this.
 - Add support for playing sound in a loop. E.g. for missile fly sound
 - Add support for miner sounds (mining/unloading)
 
