@@ -72,9 +72,9 @@ bosonTopLevel::bosonTopLevel(BosonApp * /*parent*/, const char *name, WFlags f)
 	connect(bocanvas , SIGNAL(pingUpdated(int)), label, SLOT(setNum(int)));
 	ksb->addWidget(qhb);
 
-	resize (790, 590);
 
-	/* .. */
+	/* global UI */
+	resize (790, 590);
 	orderType = OT_NONE;
 	setCentralWidget(&mw);
 
@@ -85,6 +85,7 @@ bosonTopLevel::bosonTopLevel(BosonApp * /*parent*/, const char *name, WFlags f)
 		orderButton[i]->hide();
 		}
 
+	///orzel : use signalMapping facility in Qt > 2.0
 	connect(orderButton[0], SIGNAL(clicked(void)), this, SLOT(bc0(void)));
 	connect(orderButton[1], SIGNAL(clicked(void)), this, SLOT(bc1(void)));
 	connect(orderButton[2], SIGNAL(clicked(void)), this, SLOT(bc2(void)));

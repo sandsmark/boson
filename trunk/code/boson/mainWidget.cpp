@@ -50,7 +50,6 @@ mainWidget::mainWidget( bosonTopLevel *parent, const char *name)
 	mini = new visualMiniDisplay( parent, vb);
 	mainFrame = new QFrame(vb);
 
-	mini->setGeometry (   0,   0, 200,200);
 	makeCommandGui();
 
 	/* focus handling */
