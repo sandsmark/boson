@@ -1039,12 +1039,13 @@ const int yoffsets[] = { -1, -1,  0,  1,  1,  1,  0, -1};
 #define TNG_LOW_DIST_MULTIPLIER 1.75f
 //#define TNG_MAX_BORDER_COST (cost / 2.0f)
 #define TNG_MAX_BORDER_COST 20
-#define LOW_CROSS_DIVIDER 1000.0f
-#define HIGH_CROSS_DIVIDER 1000.0f
+#define LOW_CROSS_DIVIDER 100.0f
+#define HIGH_CROSS_DIVIDER 400.0f
 #define TNG_NEAREST_G_FACTOR 0.2f
 #define TNG_LOW_BASE_COST 1.5f
 #define TNG_FLYING_STEPS 15
 #define TNG_RANGE_STEPS TNG_FLYING_STEPS
+#define TNG_FLYING_TUNRING_COST 1.0f
 
 #define REVERSEDIR(d) ((d + 4) % 8)
 
@@ -1998,6 +1999,9 @@ void BosonPath2::findFlyingUnitPath(BosonPathInfo* info)
   first.depth = 0;
   first.g = 0;
   first.h = lowLevelDistToGoal(first.x, first.y, info);
+  // We set first cell's parent dir to 8, then turning penalty will be added to
+  //  it's all neighbors (instead of all but one), so they'll all be equal
+  PARENTDIR(first.x, first.y) = 8;
 
 //  boDebug(510) << "    " << k_funcinfo << "OPEN_ADD: " << "pos: (" << first.x << "; " << first.y <<
 //      "); g: " << first.g << "; h: " << first.h << endl;
@@ -2086,6 +2090,12 @@ void BosonPath2::findFlyingUnitPath(BosonPathInfo* info)
       {
         // Not visited yet - calculate costs
         n2.g = n.g + lowLevelCostAir(n2.x, n2.y, info);
+        // Penalty for turning
+        if(PARENTDIR(n.x, n.y) != REVERSEDIR(i))
+        {
+          // Direction is different from last direction
+          n2.g += TNG_FLYING_TUNRING_COST;
+        }
         n2.h = lowLevelDistToGoal(n2.x, n2.y, info);
 
         // Check if n2 is nearest node so far
@@ -2124,6 +2134,11 @@ void BosonPath2::findFlyingUnitPath(BosonPathInfo* info)
 
         // Calculate costs
         n2.g = n.g + lowLevelCostAir(n2.x, n2.y, info);
+        if(PARENTDIR(n.x, n.y) != REVERSEDIR(i))
+        {
+          // Direction is different from last direction
+          n2.g += TNG_FLYING_TUNRING_COST;
+        }
         if((*it).g < n2.g)
         {
           // Old path is better - leave it untouched
@@ -3361,17 +3376,22 @@ float BosonPath2::highLevelCost(BosonPathRegion* r, BosonPathInfo*)
 
 float BosonPath2::lowLevelDistToGoal(int x, int y, BosonPathInfo* info)
 {
-  float dx1 = x - info->dest.x() / (float)BO_TILE_SIZE;
+  /*float dx1 = x - info->dest.x() / (float)BO_TILE_SIZE;
   float dy1 = y - info->dest.y() / (float)BO_TILE_SIZE;
   float dx2 = info->start.x() / (float)BO_TILE_SIZE - x;
   float dy2 = info->start.y() / (float)BO_TILE_SIZE - y;
-  float cross = dx1 * dy2 - dx2 * dy1;
+  float cross = dx1 * dy2 - dx2 * dy1;*/
+  int dx1 = x - info->dest.x() / BO_TILE_SIZE;
+  int dy1 = y - info->dest.y() / BO_TILE_SIZE;
+  int dx2 = info->start.x() / BO_TILE_SIZE - x;
+  int dy2 = info->start.y() / BO_TILE_SIZE - y;
+  int cross = dx1 * dy2 - dx2 * dy1;
   if(cross < 0)
   {
     cross = -cross;
   }
 
-  return (cross / LOW_CROSS_DIVIDER) + TNG_LOW_DIST_MULTIPLIER * QMAX(QABS(dx1), QABS(dy1));
+  return (cross / (float)LOW_CROSS_DIVIDER) + TNG_LOW_DIST_MULTIPLIER * QMAX(QABS(dx1), QABS(dy1));
 }
 
 float BosonPath2::lowLevelCost(int x, int y, BosonPathInfo* info)
