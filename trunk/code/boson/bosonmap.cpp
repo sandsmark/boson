@@ -25,6 +25,7 @@
 #include "bosongroundtheme.h"
 #include "boson.h" // for an ugly boGame->gameMode() hack!
 #include "bodebug.h"
+#include "bosondata.h"
 
 #include <qtimer.h>
 #include <qdatetime.h>
@@ -64,7 +65,6 @@ BosonMap::BosonMap(QObject* parent) : QObject(parent)
 
 BosonMap::~BosonMap()
 {
- delete mGroundTheme;
  delete[] mCells;
  delete[] mHeightMap;
  delete[] mTexMap;
@@ -104,8 +104,12 @@ bool BosonMap::loadMapFromFile(const QByteArray& map)
 	boError() << k_funcinfo << "Could not load map geo" << endl;
 	return false;
  }
+ if (!loadGroundTheme(stream)) {
+	boError() << k_funcinfo << "Could not load the ground theme" << endl;
+	return false;
+ }
  if (!stream.atEnd()) {
-	boWarning() << k_funcinfo << "stream is not at end after map geo!" << endl;
+	boWarning() << k_funcinfo << "stream is not at end after groundTheme!" << endl;
  }
  return true;
  // AB: cells are NOT loaded here anymore!
@@ -124,6 +128,10 @@ bool BosonMap::loadCompleteMap(QDataStream& stream)
  boDebug() << k_funcinfo << endl;
  if (!loadMapGeo(stream)) {
 	boError() << k_funcinfo << "Could not load map geo" << endl;
+	return false;
+ }
+ if (!loadGroundTheme(stream)) {
+	boError() << k_funcinfo << "Could not load the ground theme" << endl;
 	return false;
  }
  if (!loadHeightMap(stream)) {
@@ -201,6 +209,19 @@ bool BosonMap::loadMapGeo(QDataStream& stream)
  }
  // AB: is it clever to load a height map here? we have to allocate a lot of
  // memory for it - even when preloading maps that will never get used
+ return true;
+}
+
+bool BosonMap::loadGroundTheme(QDataStream& stream)
+{
+ QString id;
+ stream >> id;
+ mGroundTheme = (BosonGroundTheme*)BosonData::bosonData()->groundTheme(id);
+ boDebug() << k_funcinfo << mGroundTheme << endl;
+ if (!mGroundTheme) {
+	boError() << k_funcinfo << "Cannot find groundTheme with id=" << id << endl;
+	return false;
+ }
  return true;
 }
 
@@ -436,6 +457,10 @@ bool BosonMap::saveMapToFile(QDataStream& stream)
 	boError() << k_funcinfo << "Could not save map geo" << endl;
 	return false;
  }
+ if (!saveGroundTheme(stream)) {
+	boError() << k_funcinfo << "Could not save groundTheme" << endl;
+	return false;
+ }
 #if 0
  // obsolete.
  if (!saveCells(stream)) {
@@ -453,6 +478,10 @@ bool BosonMap::saveCompleteMap(QDataStream& stream)
  // we should compress it!
  if (!saveMapGeo(stream)) {
 	boError() << k_funcinfo << "Could not save map geo" << endl;
+	return false;
+ }
+ if (!saveGroundTheme(stream)) {
+	boError() << k_funcinfo << "Could not save groundTheme" << endl;
 	return false;
  }
  if (!saveHeightMap(stream)) {
@@ -478,6 +507,24 @@ bool BosonMap::saveMapGeo(QDataStream& stream)
 // boDebug() << k_funcinfo << endl;
  stream << (Q_INT32)width();
  stream << (Q_INT32)height();
+ return true;
+}
+
+bool BosonMap::saveGroundTheme(QDataStream& stream)
+{
+ if (!mGroundTheme) {
+	BO_NULL_ERROR(mGroundTheme);
+	return false;
+ }
+ if (mGroundTheme->identifier().isEmpty()) {
+	// we might use an empty identifier to store the complete theme into the
+	// stream (including textures). Advantage: someone (3rd party) who
+	// designs a map doesn't need to install his custom groundTheme, but can
+	// install a single .bpf file only.
+	boError() << k_funcinfo << "empty groundTheme identifier" << endl;
+	return false;
+ }
+ stream << mGroundTheme->identifier();
  return true;
 }
 
@@ -687,15 +734,8 @@ void BosonMap::slotChangeCell(int x, int y, unsigned char amountOfLand, unsigned
 
 void BosonMap::loadGroundTheme(const QString& theme)
 {
- delete mGroundTheme;
- mGroundTheme = new BosonGroundTheme();
- QString dir = KGlobal::dirs()->findResourceDir("data", QString("boson/themes/grounds/%1/index.ground").arg(theme));
- if (dir.isNull()) {
-	boError() << k_funcinfo << "Cannot find tileset " << theme << endl;
-	return;
- }
- dir += QString("boson/themes/grounds/%1/").arg(theme);
- mGroundTheme->loadGroundTheme(this, dir);
+ BosonData::bosonData()->loadGroundTheme(theme);
+ mGroundTheme = (BosonGroundTheme*)BosonData::bosonData()->groundTheme(theme);
 }
 
 void BosonMap::resize(unsigned int width, unsigned int height)
@@ -912,29 +952,38 @@ void BosonMap::setTextureGroundType(unsigned int texture, int groundType, QRgb m
 
 unsigned char BosonMap::amountOfLand(unsigned int texture) const
 {
- if (texture >= d->mTextureGroundType.count()) {
-	boError() << k_funcinfo << "invalid texture " << texture << endl;
+ if (!mGroundTheme) {
+	boWarning() << k_funcinfo << "NULL groundTheme" << endl;
 	return 0;
  }
- return d->mTextureGroundType[texture].mAmountOfLand;
+ return mGroundTheme->amountOfLand(texture);
 }
 
 unsigned char BosonMap::amountOfWater(unsigned int texture) const
 {
- if (texture >= d->mTextureGroundType.count()) {
-	boError() << k_funcinfo << "invalid texture " << texture << endl;
+ if (!mGroundTheme) {
+	boWarning() << k_funcinfo << "NULL groundTheme" << endl;
 	return 0;
  }
- return d->mTextureGroundType[texture].mAmountOfWater;
+ return mGroundTheme->amountOfWater(texture);
 }
 
 int BosonMap::groundType(unsigned int texture) const
 {
- if (texture >= d->mTextureGroundType.count()) {
-	boError() << k_funcinfo << "invalid texture " << texture << endl;
+ if (!mGroundTheme) {
+	boWarning() << k_funcinfo << "NULL groundTheme" << endl;
 	return 0;
  }
- return d->mTextureGroundType[texture].mGroundType;
+ return mGroundTheme->groundType(texture);
+}
+
+QRgb BosonMap::miniMapColor(unsigned int texture) const
+{
+ if (!mGroundTheme) {
+	boWarning() << k_funcinfo << "NULL groundTheme" << endl;
+	return 0;
+ }
+ return mGroundTheme->miniMapColor(texture);
 }
 
 void BosonMap::recalculateCell(int x, int y)
@@ -1068,15 +1117,7 @@ void BosonMap::slotChangeTexMap(int x, int y, unsigned int texture, unsigned cha
  }
 }
 
-// AB: maybe this should be in BosonGroundTheme!
-QRgb BosonMap::miniMapColor(unsigned int texture) const
-{
- if (texture >= d->mTextureGroundType.count()) {
-	boError() << k_funcinfo << "invalid texture " << texture << endl;
-	return 0;
- }
- return d->mTextureGroundType[texture].mMiniMapColor;
-}
+
 
 int BosonMap::mapFileFormatVersion()
 {
