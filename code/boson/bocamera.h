@@ -181,8 +181,6 @@ class BoCamera
 
     void setPositionDirty() { mPosDirty = true; }
 
-    void resetDifferences();
-
   private:
     void init();
     static void initStatic();
