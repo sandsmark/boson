@@ -74,6 +74,13 @@ public:
 	bool importHeightMapImage(const QImage& image);
 
 	/**
+	 * @return a @ref QByteArray with the heightmap encoded as a .png  image. You
+	 * can write this directly to the disk or use a @ref QImage constructor
+	 * that takes a @ref QByteArray.
+	 **/
+	QByteArray exportHeightMap() const;
+
+	/**
 	 * Load the important data (description for example) from the playField.
 	 * Use @ref loadPlayField to load <em>all</em> data. preLoadPlayField is
 	 * much faster than @ref loadPlayField.
