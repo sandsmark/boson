@@ -23,7 +23,6 @@
 
 #include <qdatastream.h>
 
-#include <kdebug.h>
 #include <typeinfo>
 
 class KGame;
@@ -625,7 +624,6 @@ public:
 				setLocal(v);
 				break;
 			default: // NEVER!
-				kdError(11001) << "Undefined Policy in property " << id() << endl;
 				return;
 		}
 	}

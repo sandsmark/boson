@@ -27,6 +27,7 @@
 #include "bosonmap.h"
 
 #include <qptrvector.h>
+#include <qptrlist.h>
 
 class PlayerIOPrivate
 {
