@@ -3,24 +3,17 @@
 TODO:
 
 
-0.1 release : (june, 15th?)
+0.1 release :
 =============
 
-les mobiles ne peuvent se deplacer que la ou ils ont le droit.
-floating toolbar with move command
-nouvelle page web.
-virer carrement le menu.
-DND de la carte sur la minimap
-bug : select mobile, move, somewhere, can't move somewhere else...
+mobiles can go only on the ground they are allowed to.
+make a toolbar with concerned buttons (move, stop, etc..)
+take out the menu
+DND of the map onto the minimap
 how to handle non 1x1 tiles ? 
 does units::rect need to be virtual anymore ?
-bug : mobile on very-bottom-right can't be selected
-what about drag and dropping units ? :-)
-how to handle selection drawing ?
-menu clean-up :-), and also toolbar and so on.
 when clicking (no box) on two mobiles, both are selected, but shouldn't
 	then -> client units : shouldn't move over each other
-use different pixmap according to 'direction'
 server : check that each unit does max 1 move each jiffie
 version check whithin the ask_connect msg
 
@@ -50,6 +43,9 @@ check that loading of pixmap has been done well
 #	server : add a 'known' state to serverUnits
 #	broadcast 'moving' to all people knowing me, and then update 'known'
 #everything should be seen by others if ground is known.
+#use different pixmap according to 'direction'
+#new web page (ben ?)
+#bug : select mobile, move, somewhere, can't move somewhere else...
 
 check Makefile.am for installation "make install"
 
@@ -68,8 +64,6 @@ with an online computer
 0.2 release:
 ============
 
-make a toolbar with concerned buttons (move, stop, etc..)
-handling non squared 48^2 transitions
 basic map editor
 	ben's editor :
 	>All I want is a
@@ -82,15 +76,19 @@ basic map editor
 	>that isn't that important...
 server GUI
 client and server should be peer-killed proof
+bug : mobile on very-bottom-right can't be selected [still exact?]
+what about drag and dropping units ? :-)
 
 smooth  known-unknown transition
 see again "virtual(?) Unit::getWidth" and checkUnitDiscovered badly centered
+
+black background ??
 
 
 0.5 release: (first public release)
 ============
 
-list of places to announce (mailing-list, portal, friends, school, packager ..)
+list of places to announce (mailing-list, portal, friends, school, packager,kde ..)
 mailing list ?
 
 then:
