@@ -181,7 +181,7 @@ void EditorCommandFrame::placeMobiles(Player* owner)
  QValueList<long unsigned int>::iterator it;
  QValueList<BoSpecificAction> actions;
  for (it = units.begin(); it != units.end(); ++it) {
-	BoSpecificAction a(owner->speciesTheme()->unitProperties(*it)->produceAction());
+	BoSpecificAction a(theme->unitProperties(*it)->produceAction());
 	a.setType(ActionPlacementPreview);
 	a.setProductionId(*it);
 	a.setProductionOwner(owner);
@@ -206,7 +206,7 @@ void EditorCommandFrame::placeFacilities(Player* owner)
  QValueList<long unsigned int>::iterator it;
  QValueList<BoSpecificAction> actions;
  for (it = units.begin(); it != units.end(); ++it) {
-	BoSpecificAction a(owner->speciesTheme()->unitProperties(*it)->produceAction());
+	BoSpecificAction a(theme->unitProperties(*it)->produceAction());
 	a.setType(ActionPlacementPreview);
 	a.setProductionId(*it);
 	a.setProductionOwner(owner);
