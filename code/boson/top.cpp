@@ -406,6 +406,8 @@ void TopWidget::showStartEditorWidget()
 void TopWidget::initBosonWidget()
 {
  if(d->mBosonWidget) {
+	//should not happen!
+	kdWarning() << k_funcinfo << "widget already allocated!" << endl;
 	return;
  }
  d->mBosonWidget = new BosonWidget(this, mWs);
