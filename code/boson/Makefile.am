@@ -2,7 +2,7 @@
 
 # this has all of the subdirectories that make will recurse into.  if
 # there are none, comment this out
-SUBDIRS = data items commandframe sound startupwidgets bodebug info
+SUBDIRS = data bosonwidgets items commandframe sound startupwidgets bodebug info
 
 bin_PROGRAMS = boson bounit boprofiling bocursor borender boinfo
 
@@ -16,7 +16,7 @@ BOSON_SRC = \
 	unitbase.cpp \
 	boitemlist.cpp \
 	boselection.cpp \
-	kspritetooltip.cpp \
+	bogltooltip.cpp \
 	bosonmap.cpp \
 	bosonscenario.cpp \
 	bosonplayfield.cpp \
