@@ -161,7 +161,7 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 			work = (int)((Unit*)s)->work();
 		} else {
 			id = 0;
-			work = 0;
+			work = -1;
 		}
 		boProfiling->advanceItemStart(s->rtti(), id, work);
 		boProfiling->advanceItem(true);
