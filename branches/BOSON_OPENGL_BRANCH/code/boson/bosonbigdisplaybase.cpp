@@ -57,7 +57,6 @@
 
 #else
 
-#include <GL/glx.h>
 #include "bosontexturearray.h"
 #include "bosonglfont.h"
 
