@@ -738,7 +738,7 @@ function counter2_get_browser($ua)
   {
     return "Java";
   }
-  else if(eregi("libwww-perl", $ua))
+  else if(eregi("(libwww-perl)|(LWP::Simple)", $ua))
   {
     return "libwww-perl";
   }
@@ -750,7 +750,7 @@ function counter2_get_browser($ua)
   {
     return "Dillo";
   }
-  else if(eregi("(nuhk)|(Googlebot)|(msnbot)|(Yammybot)|(Openbot)|(Slurp/cat)|(crawler)|(ContentHarvester)|(ia_archiver)|(Sniffer)|(grub)|(Pompos)|(SpiderKU)|(ZyBorg)|(Bot)|(Microsoft URL Control)|(Ask Jeeves)|(Infoseek SideWinder)|(Scooter)|(WebCopier)|(W3C_Validator)|(Zeus)", $ua))
+  else if(eregi("(nuhk)|(Googlebot)|(Mediapartners-Google)|(msnbot)|(Yammybot)|(Openbot)|(Slurp)|(crawler)|(ContentHarvester)|(ia_archiver)|(Sniffer)|(grub)|(Pompos)|(SpiderKU)|(ZyBorg)|(Bot)|(Microsoft URL Control)|(Ask Jeeves)|(Infoseek SideWinder)|(Scooter)|(WebCopier)|(W3C_Validator)|(Zeus)|(Baiduspider)|(lwp-trivial)|(Digger)|(larbin)|(QuepasaCreep)|(Ocelli)|(spider)", $ua))
   {
     return "SearchBot";
   }
@@ -758,7 +758,7 @@ function counter2_get_browser($ua)
   {
     return "Internet Explorer";
   }
-  else if(eregi("(Mozilla/3)|(Mozilla/4.0)|(Mozilla/4.08)|(Mozilla/4.5)|(Mozilla/4.6)|(Mozilla/4.7)|(Mozilla/4.75)|(Mozilla/4.79)|(Netscape6)|(Netscape/7)", $ua))
+  else if(eregi("(Mozilla/3)|(Mozilla/4.0)|(Mozilla/4.08)|(Mozilla/4.5)|(Mozilla/4.6)|(Mozilla/4.7)|(Mozilla/4.75)|(Mozilla/4.79)|(Netscape6)|(Netscape/7)|(Netscape)", $ua))
   {
     return "Netscape";
   }
@@ -842,7 +842,7 @@ function counter2_get_os($ua)
   {
     return "UNIX";
   }
-  else if(eregi("(nuhk)|(Googlebot)|(msnbot)|(Yammybot)|(Openbot)|(Slurp/cat)|(crawler)|(ContentHarvester)|(ia_archiver)|(Sniffer)|(grub)|(Pompos)|(SpiderKU)|(ZyBorg)|(Bot)|(Microsoft URL Control)|(Ask Jeeves)|(Infoseek SideWinder)|(Scooter)|(WebCopier)|(W3C_Validator)|(Zeus)", $ua))
+  else if(eregi("(nuhk)|(Googlebot)|(Mediapartners-Google)|(msnbot)|(Yammybot)|(Openbot)|(Slurp)|(crawler)|(ContentHarvester)|(ia_archiver)|(Sniffer)|(grub)|(Pompos)|(SpiderKU)|(ZyBorg)|(Bot)|(Microsoft URL Control)|(Ask Jeeves)|(Infoseek SideWinder)|(Scooter)|(WebCopier)|(W3C_Validator)|(Zeus)|(Baiduspider)|(lwp-trivial)|(Digger)|(larbin)|(QuepasaCreep)|(Ocelli)|(spider)", $ua))
   {
     return "SearchBot";
   }
