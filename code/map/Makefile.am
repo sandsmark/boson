@@ -23,7 +23,7 @@ INCLUDES= $(all_includes)
 
 #LDFLAGS =  -s 
 
-noinst_PROGRAMS = createGround boeditor
+noinst_PROGRAMS = createGround # boeditor
 
 
 #boeditor
