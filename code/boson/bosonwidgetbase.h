@@ -135,7 +135,6 @@ public slots:
 	 **/
 	void slotUnfogAll(Player* player = 0);
 
-	void slotDumpGameLog();
 	void slotShowLight0Widget();
 	void slotReloadModelTextures();
 	void slotReloadMeshRenderer();
@@ -216,7 +215,6 @@ protected slots:
 
 	void slotDebugMode(int);
 	void slotDebugPlayer(int);
-	void slotDebugToggleWireFrames(bool);
 	void slotDebugMemory();
 	void slotGrabScreenshot();
 	void slotGrabProfiling();
@@ -240,20 +238,6 @@ protected slots:
 	 **/
 	void slotAddChatSystemMessage(const QString& fromName, const QString& text, const Player* forPlayer = 0);
 
-
-	void slotSetDebugMapCoordinates(bool);
-	void slotSetDebugPFData(bool);
-	void slotSetDebugShowCellGrid(bool);
-	void slotSetDebugMatrices(bool);
-	void slotSetDebugItemWorks(bool);
-	void slotSetDebugCamera(bool);
-	void slotSetDebugRenderCounts(bool);
-	void slotSetDebugBoundingBoxes(bool);
-	void slotSetDebugFPS(bool);
-	void slotSetDebugAdvanceCalls(bool);
-	void slotSetDebugTextureMemory(bool);
-	void slotSetShowResources(bool show);
-	void slotSetEnableColormap(bool);
 
 	void slotScroll(int direction);
 	void slotRotateLeft();
