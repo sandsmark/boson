@@ -167,32 +167,32 @@ BosonWidget::~BosonWidget()
  kdDebug() << k_funcinfo << "done" << endl;
 }
 
-inline BosonCanvas* BosonWidget::canvas()
+inline BosonCanvas* BosonWidget::canvas() const
 {
  return d->mTop->canvas();
 }
 
-inline BosonMiniMap* BosonWidget::minimap()
+inline BosonMiniMap* BosonWidget::minimap() const
 {
  return d->mMiniMap;
 }
 
-inline BoDisplayManager* BosonWidget::displaymanager()
+inline BoDisplayManager* BosonWidget::displaymanager() const
 {
  return d->mDisplayManager;
 }
 
-inline BosonPlayField* BosonWidget::map()
+inline BosonPlayField* BosonWidget::map() const
 {
  return d->mTop->map();
 }
 
-inline Player* BosonWidget::player()
+inline Player* BosonWidget::player() const
 {
  return d->mTop->player();
 }
 
-inline Boson* BosonWidget::game()
+inline Boson* BosonWidget::game() const
 {
  return d->mTop->game();
 }
