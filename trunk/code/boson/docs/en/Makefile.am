@@ -9,14 +9,14 @@ EXTRA_DIST =
 #	-rm -f $(kde_htmldir)/en/boson/*.html
 
 
-HTML_DOCS = index-1.html index-2.html index-3.html index-4.html index-5.html index-6.html index.html
+HTML_DOCS = index-1.html index-2.html index-3.html index-4.html index-5.html index.html
 
 # help files
 data_DATA = $(HTML_DOCS)
 datadir = $(DESTDIR)$(kde_htmldir)/en/boson
 
 $(HTML_DOCS) : index.sgml
-	sgml2html index.sgml
+	ksgml2html index.sgml en
 
 CLEANFILES = $(HTML_DOCS)
 
