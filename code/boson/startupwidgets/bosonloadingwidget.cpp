@@ -9,12 +9,12 @@
 #include "bosonloadingwidget.h"
 #include "bosonloadingwidget.moc"
 
+#include <klocale.h>
+
 #include <qlabel.h>
 #include <qprogressbar.h>
 #include <qpushbutton.h>
 #include <qlayout.h>
-
-#include <klocale.h>
 
 /* 
  *  Constructs a BosonLoadingWidget which is a child of 'parent', with the 

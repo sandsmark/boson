@@ -2,7 +2,7 @@
 
 # this has all of the subdirectories that make will recurse into.  if
 # there are none, comment this out
-SUBDIRS = data visual commandframe sound
+SUBDIRS = data visual commandframe sound startupwidgets
 
 bin_PROGRAMS = boson bounit boprofiling bocursor
 
@@ -11,10 +11,6 @@ INCLUDES = -I$(kde_includes)/arts $(all_includes)
 BOSON_SRC = \
 	main.cpp \
 	top.cpp  \
-	bosonwelcomewidget.cpp \
-	bosonnewgamewidget.cpp \
-	bosonserveroptionswidget.cpp \
-	bosonloadingwidget.cpp \
 	cell.cpp \
 	unitproperties.cpp \
 	pluginproperties.cpp \
@@ -55,8 +51,6 @@ BOSON_SRC = \
 	bosonstatistics.cpp \
 	gameoverdialog.cpp \
 	unitplugins.cpp \
-	bosonstarteditorwidget.cpp \
-	bosonstartupbasewidget.cpp \
 	editorbigdisplay.cpp \
 	bosontexturearray.cpp \
 	bosonmodel.cpp \
@@ -75,6 +69,7 @@ boson_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 boson_LDADD = $(top_builddir)/boson/visual/libbosonvisual.la \
 		$(top_builddir)/boson/sound/libbosonsound.la \
 		$(top_builddir)/boson/commandframe/libbosoncommandframe.la \
+		$(top_builddir)/boson/startupwidgets/libbosonstartupwidgets.la \
 		-lkdegames -lqtmcop -lsoundserver_idl -lartskde \
 		-lGLU -l3ds \
 		$(LIB_KDEUI)

@@ -22,11 +22,6 @@
 #include "defines.h"
 #include "bosonwidget.h"
 #include "editorwidget.h"
-#include "bosonwelcomewidget.h"
-#include "bosonnewgamewidget.h"
-#include "bosonserveroptionswidget.h" // TODO rename: bosonnetworkoptionswidget
-#include "bosonloadingwidget.h"
-#include "bosonstartupbasewidget.h"
 #include "bosonconfig.h"
 #include "boson.h"
 #include "player.h"
@@ -37,7 +32,12 @@
 #include "bosonprofiling.h"
 #include "bodisplaymanager.h"
 #include "bosonbigdisplaybase.h"
-#include "bosonstarteditorwidget.h"
+#include "startupwidgets/bosonwelcomewidget.h"
+#include "startupwidgets/bosonnewgamewidget.h"
+#include "startupwidgets/bosonloadingwidget.h"
+#include "startupwidgets/bosonstarteditorwidget.h"
+#include "startupwidgets/bosonnetworkoptionswidget.h"
+#include "startupwidgets/bosonstartupbasewidget.h"
 #include "sound/bosonmusic.h"
 
 #include <kapplication.h>
@@ -70,7 +70,7 @@
 class TopWidget::TopWidgetPrivate
 {
 public:
-	TopWidgetPrivate() 
+	TopWidgetPrivate()
 	{
 		mWelcome = 0;
 		mNewGame = 0;
@@ -270,14 +270,14 @@ void TopWidget::initStatusBar()
 
 void TopWidget::enableGameActions(bool enable)
 {
- if(enable && ! d->mBosonWidget) {
+ if (enable && ! d->mBosonWidget) {
 	kdWarning() << k_lineinfo << "NULL BosonWidgetBase!" << endl;
  }
 }
 
 void TopWidget::initWelcomeWidget()
 {
- if(d->mWelcome) {
+ if (d->mWelcome) {
 	return;
  }
  BosonStartupBaseWidget* startup = new BosonStartupBaseWidget(mWs);
@@ -293,7 +293,7 @@ void TopWidget::initWelcomeWidget()
 
 void TopWidget::showWelcomeWidget()
 {
- if(!d->mWelcome) {
+ if (!d->mWelcome) {
 	initWelcomeWidget();
  }
  raiseWidget(ID_WIDGETSTACK_WELCOME);
@@ -301,7 +301,7 @@ void TopWidget::showWelcomeWidget()
 
 void TopWidget::initNewGameWidget()
 {
- if(d->mNewGame) {
+ if (d->mNewGame) {
 	return;
  }
  BosonStartupBaseWidget* startup = new BosonStartupBaseWidget(mWs);
@@ -316,7 +316,7 @@ void TopWidget::initNewGameWidget()
 
 void TopWidget::showNewGameWidget()
 {
- if(!d->mNewGame) {
+ if (!d->mNewGame) {
 	initNewGameWidget();
  }
  raiseWidget(ID_WIDGETSTACK_NEWGAME);
@@ -324,7 +324,7 @@ void TopWidget::showNewGameWidget()
 
 void TopWidget::initStartEditorWidget()
 {
- if(d->mStartEditor) {
+ if (d->mStartEditor) {
 	return;
  }
  BosonStartupBaseWidget* startup = new BosonStartupBaseWidget(mWs);
@@ -337,7 +337,7 @@ void TopWidget::initStartEditorWidget()
 
 void TopWidget::showStartEditorWidget()
 {
- if(!d->mStartEditor) {
+ if (!d->mStartEditor) {
 	initStartEditorWidget();
  }
  raiseWidget(ID_WIDGETSTACK_STARTEDITOR);
@@ -345,7 +345,7 @@ void TopWidget::showStartEditorWidget()
 
 void TopWidget::initBosonWidget(bool loading)
 {
- if(d->mBosonWidget) {
+ if (d->mBosonWidget) {
 	//should not happen!
 	kdWarning() << k_funcinfo << "widget already allocated!" << endl;
 	return;

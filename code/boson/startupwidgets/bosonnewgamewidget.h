@@ -48,7 +48,7 @@ class TopWidget;
 class BosonPlayField;
 
 class BosonNewGameWidget : public QWidget
-{ 
+{
   Q_OBJECT
   public:
     /** Constructs BosonNewGameWidget
@@ -190,7 +190,7 @@ class BosonNewGameWidget : public QWidget
     int mMap;
     int mMinPlayers;
     int mMaxPlayers;
-    
+
     QMap<int, QString> mMapIndex2Identifier; // index -> playfield identifier
     QMap<int, QString> mSpeciesIndex2Identifier; // index -> species identifier
 };

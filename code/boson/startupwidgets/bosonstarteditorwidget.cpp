@@ -20,15 +20,15 @@
 #include "bosonstarteditorwidget.h"
 #include "bosonstarteditorwidget.moc"
 
-#include "defines.h"
-#include "bosonconfig.h"
-#include "bosonmessage.h"
-#include "player.h"
-#include "speciestheme.h"
-#include "boson.h"
-#include "top.h"
-#include "bosonplayfield.h"
-#include "speciestheme.h"
+#include "../defines.h"
+#include "../bosonconfig.h"
+#include "../bosonmessage.h"
+#include "../player.h"
+#include "../speciestheme.h"
+#include "../boson.h"
+#include "../top.h"
+#include "../bosonplayfield.h"
+#include "../speciestheme.h"
 
 #include <klocale.h>
 #include <kdebug.h>
