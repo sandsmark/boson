@@ -79,6 +79,7 @@ enum transition_t {
 
 #define SMALL_TILES_PER_TRANSITION	12
 #define BIG_TILES_PER_TRANSITION	16
+// *4 because their are 4 tiles for every big transition
 #define TILES_PER_TRANSITION		(SMALL_TILES_PER_TRANSITION+4*BIG_TILES_PER_TRANSITION)
 // number of different QPixmap use for ground
 #define NB_GROUND_TILES			(GROUND_LAST + TRANS_LAST * TILES_PER_TRANSITION)
@@ -93,7 +94,7 @@ enum transition_t {
 // conversion number -> ref/tiles
 // only valid if g is really a transition 
 #define GET_TRANS_REF(g)	(((g)-GROUND_LAST) / TILES_PER_TRANSITION )
-#define GET_TRANS_TILE(g)	(((g)-GROUND_LAST) % TILES_PER_TRANSITION )
+#define GET_TRANS_TILE(g)	(((g)-GROUND_LAST) % TILES_PER_TRANSITION ) ///orzel : may be broken for big transition
 
 // self-explaining names
 #define IS_TRANS(g)		( (g) >= GROUND_LAST && (g)< NB_GROUND_TILES )
