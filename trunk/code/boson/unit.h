@@ -156,11 +156,6 @@ public:
 
 	unsigned int reloadState() const;
 
-	/**
-	 * @return The absolute filename to the specified sound.
-	 **/
-	QString sound(UnitSound sound) const;
-
 protected:
 	void shootAt(Unit* target);
 
