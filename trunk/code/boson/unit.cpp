@@ -396,7 +396,7 @@ void Unit::advance(unsigned int advanceCount)
 { // time critical function !!!
 // Mostly animation:
  BosonItem::advance(advanceCount);
- 
+
  if (isDestroyed()) {
 	return;
  }
@@ -408,7 +408,7 @@ void Unit::advance(unsigned int advanceCount)
 	}
  }
 
-// Reload shields
+ // Reload shields
  if (shields() < unitProperties()->shields()) {
 	reloadShields(); // AB: maybe we make that method inline one day.
  }
