@@ -145,14 +145,18 @@ BosonPath::~BosonPath()
 
 static int pathSlow = 0, pathRange = 0, pathFast = 0;
 
-QValueList<QPoint> BosonPath::findPath(Unit* unit, int goalx, int goaly, int range)
+QValueList<QPoint> BosonPath::findPath(BosonPathInfo* pathInfo)
 {
   QValueList<QPoint> points;
-  if (!unit)
+  if (!pathInfo || !pathInfo->unit)
   {
     boError(500) << k_funcinfo << "NULL unit" << endl;
     return points;
   }
+  Unit* unit = pathInfo->unit;
+  int goalx = pathInfo->dest.x();
+  int goaly = pathInfo->dest.y();
+  int range = pathInfo->range;
   QPoint p = unit->boundingRect().center();
   BosonPath path(unit, p.x() / BO_TILE_SIZE, p.y() / BO_TILE_SIZE,
         goalx / BO_TILE_SIZE, goaly / BO_TILE_SIZE, range);

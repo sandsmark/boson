@@ -30,6 +30,7 @@
 // When we can't go to destination, we add point (PF_CANNOT_GO; PF_CANNOT_GO)
 #define PF_CANNOT_GO -3
 
+class BosonPathInfo;
 
 
 /***  OLD PATHFINDER  ***/
@@ -90,7 +91,7 @@ class BosonPath
      * @param goalx the x <em>coordinate</em> of the goal. Not the cell!
      * @param goaly the y <em>coordinate</em> of the goal. Not the cell!
      **/
-    static QValueList<QPoint> findPath(Unit* unit, int goalx, int goaly, int range = 0);
+    static QValueList<QPoint> findPath(BosonPathInfo* info);
 
     enum ResourceType { Minerals, Oil, EnemyBuilding, EnemyUnit };
     static QValueList<QPoint> findLocations(Player* player, int x, int y, int n, int radius, ResourceType type);
@@ -188,7 +189,6 @@ class BosonPathRegion;
 class BosonPathRegionGroup;
 class BosonPathNode;
 class BosonPath2;
-class BosonPathInfo;
 class BosonPathHighLevelPath;
 
 class BosonMap;
