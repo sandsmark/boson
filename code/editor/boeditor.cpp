@@ -431,9 +431,10 @@ void BoEditorApp::slotViewStatusBar()
 
 void BoEditorApp::slotFileNewWindow()
 {
-	
+/*
 	mainView *mainview = new mainView(field, this, "main_view_0");
 	setView(mainview);
+*/
 }
 
 void BoEditorApp::slotFileNew()
