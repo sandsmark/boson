@@ -913,10 +913,17 @@ void BosonCanvas::deleteItem(BosonItem* item)
  // cleanups and might need rtti() for them (which doesnt exist anymore in the
  // BosonItem d'tor)
  if (RTTI::isUnit(item->rtti())) {
+	Unit* u = (Unit*)item;
 #ifdef PATHFINDER_TNG
 	// Update occupied status of cells that unit occupied
-	((Unit*)item)->setMovingStatus(UnitBase::Removing);
+	u->setMovingStatus(UnitBase::Removing);
 #endif
+	// In editor mode, we need to do couple of things before deleting the unit,
+	//  to prevent crashes later (e.g. when selecting units)
+	if (!boGame->gameMode()) {
+		u->owner()->unitDestroyed(u);
+		emit signalUnitRemoved(u);
+	}
  }
 
  removeItem(item);
