@@ -20,7 +20,7 @@
 #ifndef BOSONPARTICLESYSTEMPROPERTIES_H
 #define BOSONPARTICLESYSTEMPROPERTIES_H
 
-#include <kapplication.h>
+#include <krandomsequence.h>
 
 #include <qstring.h>
 #include <qdict.h>
@@ -89,7 +89,7 @@ class BosonParticleSystemProperties
      **/
     virtual BosonParticleSystem* newSystem(BoVector3 pos, float rotation = 0.0) const;
 
-    inline static float getFloat(float min, float max)  { return ((float)(kapp->random())) * (max - min) + min; };
+    inline static float getFloat(float min, float max) { return ((float)(mRandom->getDouble())) * (max - min) + min; }
 
     inline static BoVector3 wind()  { return BoVector3(0.25, 0.15, 0); };
 
@@ -126,6 +126,7 @@ class BosonParticleSystemProperties
     bool mAlign;
     const BosonParticleTextureArray* mTextures;
     unsigned long int mId;
+    static KRandomSequence* mRandom;
 };
 
 #endif
