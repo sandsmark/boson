@@ -44,6 +44,7 @@ class BoCameraWidget;
 class BoMatrix;
 class BoQuaternion;
 class BoVector3;
+class BoFrame;
 class KCmdLineArgs;
 class QCheckBox;
 
@@ -142,6 +143,7 @@ public slots:
 	{
 		mWireFrame = on;
 	}
+	void slotConstructionChanged(bool on);
 
 protected:
 	virtual bool eventFilter(QObject* o, QEvent* e);
@@ -162,6 +164,8 @@ protected:
 		}
 		return false;
 	}
+
+	BoFrame* frame(unsigned int f) const;
 
 	void updateCamera(const BoVector3& cameraPos, const BoQuaternion& q);
 	void updateCamera(const BoVector3& cameraPos, const BoMatrix& rotationMatrix);
@@ -189,6 +193,7 @@ private:
 	bool mPlacementPreview;
 	bool mDisallowPlacement;
 	bool mWireFrame;
+	bool mConstruction;
 
 	BoMouseMoveDiff* mMouseMoveDiff;
 
@@ -212,6 +217,7 @@ signals:
 	void signalPlacementPreviewChanged(bool); // display preview placement - if false display normal model
 	void signalDisallowPlacementChanged(bool); // only valid of placementpreview is also on. if true display the model that is shown when the unit can't be placed - otherwise the model that is shown if it can be placed.
 	void signalWireFrameChanged(bool);
+	void signalConstructionChanged(bool);
 
 public slots:
 	void slotCameraChanged();
@@ -230,6 +236,7 @@ private:
 	QCheckBox* mPlacementPreview;
 	QCheckBox* mDisallowPlacement;
 	QCheckBox* mWireFrame;
+	QCheckBox* mConstruction;
 	BoCameraWidget* mCameraWidget;
 };
 

@@ -119,6 +119,7 @@ ModelPreview::ModelPreview(QWidget* parent) : BosonGLWidget(parent)
  mPlacementPreview = false;
  mDisallowPlacement = false;
  mWireFrame = false;
+ mConstruction = false;
 
  mDefaultFont = 0;
 
@@ -218,7 +219,7 @@ void ModelPreview::renderModel(int mode)
 // glCullFace(GL_BACK);
 
  if (mModel && mCurrentFrame >= 0) {
-	BoFrame* f = mModel->frame(mCurrentFrame);
+	BoFrame* f = frame(mCurrentFrame);
 	if (f) {
 		if (mPlacementPreview) {
 			glEnable(GL_BLEND);
@@ -419,7 +420,7 @@ void ModelPreview::renderMeshSelection()
 	return;
  }
  BoMesh* mesh = 0;
- BoFrame* f = mModel->frame(mCurrentFrame);
+ BoFrame* f = frame(mCurrentFrame);
  if ((unsigned int)mSelectedMesh >= f->meshCount()) {
 	f = 0;
 	mesh = 0;
@@ -476,11 +477,13 @@ void ModelPreview::renderText()
  if (mMeshUnderMouse >= 0) {
 	BoMesh* mesh = 0;
 	if (mModel && mCurrentFrame >= 0) {
-		BoFrame* f = mModel->frame(mCurrentFrame);
-		if ((unsigned int)mMeshUnderMouse >= f->meshCount()) {
-			f = 0;
-		} else {
-			mesh = f->mesh(mMeshUnderMouse);
+		BoFrame* f = frame(mCurrentFrame);
+		if (f) {
+			if ((unsigned int)mMeshUnderMouse >= f->meshCount()) {
+				f = 0;
+			} else {
+				mesh = f->mesh(mMeshUnderMouse);
+			}
 		}
 	}
 	if (mesh) {
@@ -496,7 +499,7 @@ void ModelPreview::renderText()
  if (mSelectedMesh >= 0) {
 	BoMesh* mesh = 0;
 	if (mModel && mCurrentFrame >= 0) {
-		BoFrame* f = mModel->frame(mCurrentFrame);
+		BoFrame* f = frame(mCurrentFrame);
 		if ((unsigned int)mSelectedMesh < f->meshCount()) {
 			mesh = f->mesh(mSelectedMesh);
 		}
@@ -523,6 +526,18 @@ void ModelPreview::renderText()
  glMatrixMode(GL_MODELVIEW);
  glPopMatrix();
 
+}
+
+BoFrame* ModelPreview::frame(unsigned int f) const
+{
+ if (!haveModel()) {
+	return 0;
+ }
+ if (mConstruction) {
+	return mModel->constructionStep(f);
+ } else {
+	return mModel->frame(f);
+ }
 }
 
 void ModelPreview::load(SpeciesTheme* s, const UnitProperties* prop)
@@ -565,6 +580,22 @@ void ModelPreview::slotResetView()
  resizeGL(width(), height());
 }
 
+void ModelPreview::slotConstructionChanged(bool on)
+{
+ mConstruction = on;
+ int max = 0;
+ if (mModel) {
+	if (mConstruction) {
+		max = mModel->constructionSteps() - 1;
+	} else {
+		max = mModel->frames() - 1;
+	}
+ }
+ max = QMAX(0, max);
+ boDebug() << k_funcinfo << max << endl;
+ emit signalMaxFramesChanged(max);
+}
+
 void ModelPreview::resetModel()
 {
  mModel = 0;
@@ -584,7 +615,7 @@ void ModelPreview::updateCursorDisplay(const QPoint& pos)
  if (picked < 0) {
 	return;
  }
- BoFrame* f = mModel->frame(mCurrentFrame);
+ BoFrame* f = frame(mCurrentFrame);
  if (!f) {
 	return;
  }
@@ -601,7 +632,7 @@ int ModelPreview::pickObject(const QPoint& cursor)
  if (!haveModel()) {
 	return -1;
  }
- f = mModel->frame(mCurrentFrame);
+ f = frame(mCurrentFrame);
  if (!f) {
 	return -1;
  }
@@ -783,8 +814,14 @@ void ModelPreview::slotFrameChanged(int f)
 		emit signalFrameChanged(0);
 		return;
 	}
-	if ((unsigned int)f >= mModel->frames()) {
-		emit signalFrameChanged(mModel->frames() - 1);
+	int frames = 0;
+	if (mConstruction) {
+		frames = mModel->constructionSteps();
+	} else {
+		frames = mModel->frames();
+	}
+	if (f >= frames) {
+		emit signalFrameChanged(frames - 1);
 		return;
 	}
   }
@@ -861,6 +898,7 @@ RenderMain::RenderMain()
  connect(mConfig, SIGNAL(signalPlacementPreviewChanged(bool)), mPreview, SLOT(slotPlacementPreviewChanged(bool)));
  connect(mConfig, SIGNAL(signalDisallowPlacementChanged(bool)), mPreview, SLOT(slotDisallowPlacementChanged(bool)));
  connect(mConfig, SIGNAL(signalWireFrameChanged(bool)), mPreview, SLOT(slotWireFrameChanged(bool)));
+ connect(mConfig, SIGNAL(signalConstructionChanged(bool)), mPreview, SLOT(slotConstructionChanged(bool)));
 
 
  mPreview->slotResetView();
@@ -1295,6 +1333,10 @@ PreviewConfig::PreviewConfig(QWidget* parent) : QWidget(parent)
  mWireFrame = new QCheckBox(i18n("Show wireframe"), this);
  connect(mWireFrame, SIGNAL(toggled(bool)), this, SIGNAL(signalWireFrameChanged(bool)));
  topLayout->addWidget(mWireFrame);
+
+ mConstruction = new QCheckBox(i18n("Show construction"), this);
+ connect(mConstruction, SIGNAL(toggled(bool)), this, SIGNAL(signalConstructionChanged(bool)));
+ topLayout->addWidget(mConstruction);
 
  mCameraWidget = new BoCameraWidget(this, "bocamerawidget");
  topLayout->addWidget(mCameraWidget);
