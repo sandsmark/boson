@@ -24,6 +24,7 @@
 #include "unitpropertyhandler.h" // not related to unitproperties!
 #include "player.h"
 #include "speciestheme.h"
+#include "bosoncanvas.h"
 #include "bosonpropertyxml.h"
 #include "bodebug.h"
 
@@ -35,7 +36,8 @@
 QMap<int, QString>* UnitBase::mPropertyMap = 0;
 static KStaticDeleter< QMap<int, QString> > sd;
 
-UnitBase::UnitBase(const UnitProperties* prop)
+UnitBase::UnitBase(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
+	: BosonItem(owner->speciesTheme() ? owner->speciesTheme()->unitModel(prop->typeId()) : 0, canvas)
 {
  if (!mPropertyMap) {
 	initStatic();
