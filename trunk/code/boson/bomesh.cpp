@@ -986,12 +986,12 @@ void BoMeshLOD::createPointCache()
  // point cache will be 2,3,1,5,4,7 (assuming we don't use GL_TRIANGLES)
  boMem->freeUIntArray(mPointsCache);
  mPointsCacheCount = 0;
+ if (d->mAllFaces.count() < 1) {
+	return;
+ }
  BoFaceNode* node = nodes();
  if (!node) {
 	boError(100) << k_funcinfo << "NULL node" << endl;
-	return;
- }
- if (d->mAllFaces.count() < 1) {
 	return;
  }
  int nodesCount = 0;
@@ -1334,6 +1334,9 @@ void BoMesh::calculateNormals(unsigned int _lod)
 
 void BoMesh::renderMesh(const QColor* teamColor, unsigned int _lod)
 {
+ if (_lod >= lodCount()) {
+	_lod = lodCount() - 1;
+ }
  BoMeshLOD* lod = levelOfDetail(_lod);
  if (!lod) {
 	BO_NULL_ERROR(lod);
