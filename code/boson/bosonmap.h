@@ -141,12 +141,12 @@ signals:
 	void signalTileSetChanged(BosonTiles*);
 
 	/**
-	 * See @ref BosonMap::signalTilesLoading
+	 * See @ref BosonTiles::signalTilesLoading
 	 **/
 	void signalTilesLoading(int tiles);
 
 	/**
-	 * See @ref BosonMap::signalTilesLoaded
+	 * See @ref BosonTiles::signalTilesLoaded
 	 **/
 	void signalTilesLoaded();
 
