@@ -418,18 +418,6 @@ bool BosonWidgetBase::music() const
  return boAudio->music();
 }
 
-void BosonWidgetBase::slotToggleSound()
-{
- boAudio->setSound(!boAudio->sound());
- boConfig->setSound(boAudio->sound());
-}
-
-void BosonWidgetBase::slotToggleMusic()
-{
- boAudio->setMusic(!boAudio->music());
- boConfig->setMusic(boAudio->music());
-}
-
 void BosonWidgetBase::slotAddChatSystemMessage(const QString& fromName, const QString& text, const Player* forPlayer)
 {
  if (forPlayer && forPlayer != localPlayer()) {

@@ -128,11 +128,6 @@ public:
 
 
 public slots:
-//	void slotPreferences();
-
-	void slotToggleSound();
-	void slotToggleMusic();
-
 	/**
 	 * Unfogs the map for the specified player
 	 * @param player The player that shall see the map or NULL for all
