@@ -113,10 +113,13 @@ int BosonTiles::big_y(int g)
  return ((g / big_w()) * BO_TILE_SIZE);
 }
 
-bool BosonTiles::loadTiles(const QString& dir, bool debug)
+bool BosonTiles::loadTiles(QString dir, bool debug)
 {
  // dir is e.g. /opt/kde3/share/apps/boson/themes/grounds/earth/ -> "earth" is
  // the important part!
+ if (dir.right(1) != QString::fromLatin1("/")) {
+	dir += QString::fromLatin1("/");
+ }
  mDebug = debug;
  mTilesImage->fill(0x00000000); // black filling, FOW _is_ black
 
@@ -376,3 +379,11 @@ QString BosonTiles::trans_ext(int t)
  }
  return s;
 }
+
+QPixmap BosonTiles::pixmap() const
+{
+ QPixmap p;
+ p.convertFromImage(*mTilesImage);
+ return p;
+}
+
