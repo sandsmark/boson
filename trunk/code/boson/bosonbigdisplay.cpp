@@ -559,7 +559,7 @@ void BosonBigDisplay::slotEditorMouseEvent(QMouseEvent* e, bool* eatevent)
 		break;
 	case QEvent::MouseButtonRelease:
 		if (e->button() == LeftButton) {
-			removeSelectionRect();
+//			removeSelectionRect();
 		} else if (e->button() == RightButton) {
 			if (d->mIsRMBMove) {
 				d->mIsRMBMove = false;
@@ -571,7 +571,7 @@ void BosonBigDisplay::slotEditorMouseEvent(QMouseEvent* e, bool* eatevent)
 	case QEvent::MouseMove:
 	{
 		if (e->state() & LeftButton) {
-			moveSelectionRect(pos);
+//			moveSelectionRect(pos);
 		} else if (e->state() & RightButton) {
 			d->mIsRMBMove = true;
 			scrollBy(pos.x() - d->mRMBMove.x(), pos.y() - d->mRMBMove.y());
@@ -581,7 +581,9 @@ void BosonBigDisplay::slotEditorMouseEvent(QMouseEvent* e, bool* eatevent)
 	}
 	case QEvent::MouseButtonPress:
 		if (e->button() == LeftButton) {
-			startSelection(pos);
+			if (((BosonCanvas*)canvas())->findUnitAt(pos)) {
+				startSelection(pos);
+			}
 		} else if (e->button() == MidButton) {
 			center(pos.x(), pos.y());
 		} else if (e->button() == RightButton) {
