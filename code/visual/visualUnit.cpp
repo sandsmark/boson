@@ -31,19 +31,31 @@
 
 #define PF_DELTA	5   // facilities selection box are DELTA pixels more inside rect()
 
+
+/*
+ * visualUnit
+ */
+
+void visualUnit::unSelect()
+{
+	if (sp_up) delete sp_up;
+	if (sp_down) delete sp_down;
+	sp_down = 0l;
+	sp_up = 0l;
+}
+
+
 /*
  * visualMobUnit
  */
 
 visualMobUnit::visualMobUnit(mobileMsg_t *msg, QObject* parent=0, const char *name=0L)
 	: mobUnit(msg,parent,name)
-	, QwSprite(vpp.species[msg->who]->getPixmap(msg->type))
+	, visualUnit(vpp.species[msg->who]->getPixmap(msg->type))
 {
 
 	z(Z_MOBILE + 3 * type);
 	moveTo(msg->x, msg->y);
-
-	sp_down = 0l; sp_up = 0l;
 }
 
 visualMobUnit::~visualMobUnit()
@@ -60,19 +72,10 @@ void visualMobUnit::select()
 	boAssert(!sp_up);
 	boAssert(!sp_down);
 
-	sp_up = new selectPart_up(5, z());
+	sp_up = new selectPart_up(power, z());
 	sp_up->moveTo(r.right(), r.top());
-	sp_down = new selectPart_down(4, z());
+	sp_down = new selectPart_down(10, z());
 	sp_down->moveTo(r.left(), r.bottom());
-}
-
-
-void visualMobUnit::unSelect()
-{
-	if (sp_up) delete sp_up;
-	if (sp_down) delete sp_down;
-	sp_down = 0l;
-	sp_up = 0l;
 }
 
 
@@ -81,14 +84,12 @@ void visualMobUnit::unSelect()
  */
 visualFacility::visualFacility(facilityMsg_t *msg, QObject* parent=0L, const char *name=0L)
 	: Facility(msg,parent,name)
-	, QwSprite(vpp.species[msg->who]->getPixmap(msg->type))
+	, visualUnit(vpp.species[msg->who]->getPixmap(msg->type))
 {
 	z(Z_FACILITY);
 	moveTo(BO_TILE_SIZE * msg->x , BO_TILE_SIZE * msg->y);
 
 	frame(msg->state);
-
-	sp_down = 0l; sp_up = 0l;
 }
 
 
@@ -107,19 +108,10 @@ void visualFacility::select()
 	boAssert(!sp_up);
 	boAssert(!sp_down);
 
-	sp_up = new selectPart_up(3, z());
+	sp_up = new selectPart_up(power, z());
 	sp_up->moveTo(r.right() - PF_DELTA, r.top() + PF_DELTA);
-	sp_down = new selectPart_down(2, z());
+	sp_down = new selectPart_down(10, z());
 	sp_down->moveTo(r.left() + PF_DELTA, r.bottom() - PF_DELTA);
-}
-
-
-void visualFacility::unSelect()
-{
-	if (sp_up) delete sp_up;
-	if (sp_down) delete sp_down;
-	sp_down = 0l;
-	sp_up = 0l;
 }
 
 
