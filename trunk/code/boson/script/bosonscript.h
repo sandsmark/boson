@@ -82,12 +82,12 @@ class BosonScript
      * Loads script from file.
      * File should be complete path to the script.
      **/
-    virtual void loadScript(QString file) = 0;
+    virtual bool loadScript(QString file) = 0;
 
     /**
      * Loads script from given string.
      **/
-    virtual void loadScriptFromString(const QString& string) = 0;
+    virtual bool loadScriptFromString(const QString& string) = 0;
 
     /**
      * Calls "advance" function in the script.

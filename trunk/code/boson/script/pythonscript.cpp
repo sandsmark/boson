@@ -207,7 +207,7 @@ void PythonScript::freePythonLock()
   makeScriptCurrent(0);
 }
 
-void PythonScript::loadScript(QString file)
+bool PythonScript::loadScript(QString file)
 {
   boDebug() << k_funcinfo << "file: " << file << endl;
   QFileInfo fi(file);
@@ -215,7 +215,7 @@ void PythonScript::loadScript(QString file)
   if(!fi.exists())
   {
     boError() << k_funcinfo << "No such file: '" << fi.absFilePath() << "'. Aborting." << endl;
-    return;
+    return false;
   }
   QString filePath = fi.dirPath(true);
 
@@ -223,7 +223,7 @@ void PythonScript::loadScript(QString file)
   if(!f.open(IO_ReadOnly))
   {
     boError() << k_funcinfo << "Can't open file '" << file << "' for reading. Aborting." << endl;
-    return;
+    return false;
   }
 
   QString contents;
@@ -231,10 +231,10 @@ void PythonScript::loadScript(QString file)
   contents += QString("sys.path.insert(0, '%1')\n").arg(filePath.ascii());
   contents += "sys.path.insert(0, '')\n";
   contents += f.readAll();
-  loadScriptFromString(contents);
+  return loadScriptFromString(contents);
 }
 
-void PythonScript::loadScriptFromString(const QString& string)
+bool PythonScript::loadScriptFromString(const QString& string)
 {
   getPythonLock();
 
@@ -248,7 +248,7 @@ void PythonScript::loadScriptFromString(const QString& string)
     boError() << k_funcinfo << "obj is NULL" << endl;
     boError() << k_funcinfo << "Probably there's a parse error in the script. Aborting." << endl;
     freePythonLock();
-    return;
+    return false;
   }
   mDict = PyModule_GetDict(m);
 
@@ -256,6 +256,7 @@ void PythonScript::loadScriptFromString(const QString& string)
   mLoadedScripts += '\n';
 
   freePythonLock();
+  return true;
 }
 
 void PythonScript::callFunction(const QString& function)
