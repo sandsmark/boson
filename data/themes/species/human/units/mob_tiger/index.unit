@@ -60,4 +60,4 @@ SoundFly=
 SoundHit=hit
 SoundShoot=shoot
 Speed=0
-Type=0
+Type=Bullet

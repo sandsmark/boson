@@ -62,7 +62,7 @@ ShootEffects=
 SoundFly=missile_fly
 SoundHit=hit
 Speed=0
-Type=0
+Type=Bullet
 
 [Weapon_1]
 CanShootAtAirUnits=false
@@ -82,3 +82,4 @@ ShootEffects=
 SoundFly=missile_fly
 SoundHit=hit
 Speed=5
+Type=Missile
