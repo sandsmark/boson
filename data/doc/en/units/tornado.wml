@@ -20,5 +20,5 @@ use get_values;
 get_values->getval("mob", "tornado");
 :>
 
-#include "nav.wml" before_url="ship.html" before_text="Ship" after_url="../editor/index.html" after_text="The boson editor" up_url="index.html"
+#include "nav.wml" before_url="ship.html" before_text="Ship" after_url="../editor/index.html" after_text="The Boson editor" up_url="index.html"
 #include "footer.wml"

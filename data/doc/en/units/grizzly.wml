@@ -7,7 +7,7 @@
 	<tr>
 		<td><img src="grizzly.png" border="0">&nbsp;</td>
 		<td valign="top"><img src="../none.png" border="0" height="30"><br>
-		There is no description yet.
+		The Grizzly is a big good armored tank.
 	</tr>
     </table>
         
@@ -18,5 +18,5 @@ use get_values;
 get_values->getval("mob", "grizzly");
 :>
 
-#include "nav.wml" before_url="oil_harvester.html" before_text="Oil harvester" after_url="leopard.html" after_text="Leopard" up_url="index.html"
+#include "nav.wml" before_url="oil_harvester.html" before_text="Oil Harvester" after_url="leopard.html" after_text="Leopard" up_url="index.html"
 #include "footer.wml"
