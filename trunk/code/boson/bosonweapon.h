@@ -20,10 +20,11 @@
 #ifndef BOSONWEAPON_H
 #define BOSONWEAPON_H
 
-#include <qptrlist.h>
-
 #include "items/bosonshot.h"
 #include "pluginproperties.h"
+#include "unitplugins.h"
+
+#include <qptrlist.h>
 
 class KSimpleConfig;
 class SpeciesTheme;
@@ -109,15 +110,39 @@ class BosonWeaponProperties : public PluginProperties
 /**
  * @author Rivo Laks <rivolaks@hot.ee>
  **/
-class BosonWeapon
+class BosonWeapon : public UnitPlugin
 {
   public:
-    BosonWeapon(BosonWeaponProperties* prop, Unit* unit);
+    enum PropertyIds {
+      IdReloadCounter = KGamePropertyBase::IdUser + 0,
+
+      LastPropertyId
+    };
+
+    /**
+     * @param weaponNumber The number of the weapon of the unit.
+     **/
+    BosonWeapon(int weaponNumber, BosonWeaponProperties* prop, Unit* unit);
     ~BosonWeapon();
 
-    inline void reload()  { if(mReloadCounter > 0) { mReloadCounter--; } };
+    /**
+     * Implemented for internal resons only. Not used.
+     * @return The plugin type for @ref UnitPlugin. Note that this is not used
+     * and note that this value is <em>not</em> unique for the weapon! All
+     * weapons have the same pluginType!
+     **/
+    virtual int pluginType() const { return UnitPlugin::Weapon; }
 
-    bool canShootAt(Unit* u);
+    /**
+     * Reload the weapon.
+     **/
+    virtual void advance(unsigned int advanceCount)
+    {
+      Q_UNUSED(advanceCount);
+      reload();
+    }
+
+    bool canShootAt(Unit* u) const;
     inline bool reloaded() const  { return (mReloadCounter == 0); };
 
     inline const BosonWeaponProperties* properties() const  { return mProp; };
@@ -125,10 +150,18 @@ class BosonWeapon
     void shoot(Unit* u);
     void shoot(float x, float y, float z);
 
+  protected:
+    inline void reload()  { if(mReloadCounter > 0) { mReloadCounter = mReloadCounter - 1; } }
+
+    void registerWeaponData(int weaponNumber, KGamePropertyBase* prop, int id, bool local = true);
+
   private:
     const BosonWeaponProperties* mProp;
-    Unit* mUnit;
-    int mReloadCounter;
+    KGameProperty<int> mReloadCounter;
 };
 
 #endif // BOSONWEAPON_H
+
+/*
+ * vim: et sw=2
+ */

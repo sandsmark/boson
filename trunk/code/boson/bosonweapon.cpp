@@ -19,7 +19,6 @@
 
 #include "bosonweapon.h"
 
-
 #include "speciestheme.h"
 #include "bosonparticlesystem.h"
 #include "bosonparticlemanager.h"
@@ -116,18 +115,65 @@ QPtrList<BosonParticleSystem> BosonWeaponProperties::newHitParticleSystems(float
 
 
 /*****  BosonWeapon  *****/
-BosonWeapon::BosonWeapon(BosonWeaponProperties* prop, Unit* unit)
+BosonWeapon::BosonWeapon(int weaponNumber, BosonWeaponProperties* prop, Unit* _unit) : UnitPlugin(_unit)
 {
   mProp = prop;
-  mUnit = unit;
-  mReloadCounter = 0;
+  if (!unit())
+  {
+    boError() << k_funcinfo << "NULL unit" << endl;
+  }
+  registerWeaponData(weaponNumber, &mReloadCounter, IdReloadCounter);
+  mReloadCounter.setLocal(0);
 }
 
 BosonWeapon::~BosonWeapon()
 {
 }
 
-bool BosonWeapon::canShootAt(Unit* u)
+void BosonWeapon::registerWeaponData(int weaponNumber, KGamePropertyBase* prop, int id, bool local)
+{
+ if(!unit())
+ {
+   boError() << k_funcinfo << "NULL unit" << endl;
+   return;
+ }
+ if(!prop)
+ {
+   boError() << k_funcinfo << "NULL property" << endl;
+   return;
+ }
+ if (id < KGamePropertyBase::IdUser)
+ {
+   boWarning() << k_funcinfo << "ID < KGamePropertyBase::IdUser" << endl;
+   // do not return - might still work
+ }
+ QString name;
+ switch (id)
+ {
+   // AB: in UnitBase we use propertyName() for this, in order to be able to use
+   // the name in the scenario files, too.
+   // it is easier to use a simple switch here, but that means that we won't be
+   // able to use the weapon properties in the scenario files (not with names at
+   // least)!
+   // I hope we won't need this anyway for weapons.
+   case IdReloadCounter:
+     name = QString::fromLatin1("ReloadCounter");
+     break;
+   default:
+     break;
+ }
+ if (name.isNull())
+ {
+   boDebug() << k_funcinfo << "No weapon property name for " << id << endl;
+   // a name isn't necessary, so don't return
+ }
+ id += weaponNumber * 100; // we support up to 100 IDs per weapon. we'll never use them.
+ prop->registerData(id, unit()->weaponDataHandler(),
+		local ? KGamePropertyBase::PolicyLocal : KGamePropertyBase::PolicyClean,
+		name);
+}
+
+bool BosonWeapon::canShootAt(Unit* u) const
 {
   if(u->isFlying())
   {
@@ -146,10 +192,15 @@ void BosonWeapon::shoot(Unit* u)
 
 void BosonWeapon::shoot(float x, float y, float z)
 {
-  BoVector3 pos(mUnit->x() + mUnit->width() / 2, mUnit->y() + mUnit->height() / 2, mUnit->z());
-  mUnit->canvas()->newShot(mProp->newShot(mUnit, pos[0], pos[1], pos[2], x, y, z));
-  mUnit->canvas()->addParticleSystems(mProp->newShootParticleSystems(pos[0], pos[1], pos[2]));
-  mUnit->playSound(SoundShoot);  // TODO: weapon-specific sounds
+  if (!unit())
+  {
+    boError() << k_funcinfo << "NULL unit" << endl;
+    return;
+  }
+  BoVector3 pos(unit()->x() + unit()->width() / 2, unit()->y() + unit()->height() / 2, unit()->z());
+  canvas()->newShot(mProp->newShot(unit(), pos[0], pos[1], pos[2], x, y, z));
+  canvas()->addParticleSystems(mProp->newShootParticleSystems(pos[0], pos[1], pos[2]));
+  unit()->playSound(SoundShoot);  // TODO: weapon-specific sounds
   mReloadCounter = mProp->reloadingTime();
 }
 

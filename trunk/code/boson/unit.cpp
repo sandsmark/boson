@@ -55,8 +55,8 @@ public:
 	UnitPrivate()
 	{
 		mTarget = 0;
-		mSmokeParticleSystem = 0;
 		mActiveWeapon = 0;
+		mSmokeParticleSystem = 0;
 	}
 	KGamePropertyList<QPoint> mWaypoints;
 	KGameProperty<int> mMoveDestX;
@@ -92,6 +92,8 @@ Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
  mAdvanceFunction = &Unit::advanceNone;
  mAdvanceFunction2 = &Unit:: advanceNone;
  setOwner(owner);
+ d->mPlugins.clear();
+ d->mWeapons.clear();
 
  // note: these width and height can be used for e.g. pathfinding. It does not
  // depend in any way on the .3ds file or another OpenGL thing.
@@ -142,6 +144,8 @@ Unit::~Unit()
  d->mWaypoints.setEmittingSignal(false); // just to prevent warning in Player::slotUnitPropertyChanged()
  d->mWaypoints.clear();
  unselect();
+ d->mPlugins.clear();
+ d->mWeapons.clear();
  delete d;
 }
 
@@ -154,6 +158,7 @@ void Unit::initStatic()
  addPropertyId(IdMoveDestX, QString::fromLatin1("MoveDestX"));
  addPropertyId(IdMoveDestY, QString::fromLatin1("MoveDestY"));
  addPropertyId(IdMoveRange, QString::fromLatin1("MoveRange"));
+ addPropertyId(IdWantedRotation, QString::fromLatin1("WantedRotation"));
 
  // MobileUnit
  addPropertyId(IdSpeed, QString::fromLatin1("Speed"));
@@ -333,7 +338,7 @@ void Unit::advance(unsigned int advanceCount)
  // Reload weapons
  QPtrListIterator<BosonWeapon> it(d->mWeapons);
  while (it.current()) {
-	it.current()->reload();
+	it.current()->advance(advanceCount);
 	++it;
  }
 // Reload shields
@@ -894,7 +899,12 @@ void Unit::loadWeapons()
  QPtrListIterator<PluginProperties> it(*(unitProperties()->plugins()));
  while (it.current()) {
 	if (it.current()->pluginType() == PluginProperties::Weapon) {
-		d->mWeapons.append(new BosonWeapon((BosonWeaponProperties*)(it.current()), this));
+		if (d->mWeapons.count() < MAX_WEAPONS_PER_UNIT) {
+			d->mWeapons.append(new BosonWeapon(d->mWeapons.count(), (BosonWeaponProperties*)(it.current()), this));
+		} else {
+			boError() << k_funcinfo << "Too many weapons in this unit! type=" << type() << endl;
+			return;
+		}
 	}
 	++it;
  }

@@ -222,7 +222,18 @@ public:
 	 **/
 	void setOwner(Player* owner);
 
+	/**
+	 * @return The @ref KGamePropertyHandler for all @ref KGameProperty
+	 * objects of this unit. Note that you should use @ref weaponDataHandler
+	 * for weapon properties instead.
+	 **/
 	KGamePropertyHandler* dataHandler() const { return mProperties; }
+
+	/**
+	 * @return The @ref KGamePropertyHandler for weapon properties. The
+	 * handler is created if it does not yet exist.
+	 **/
+	KGamePropertyHandler* weaponDataHandler();
 
 	/**
 	 * The ID of the unit. This ID is unique for this game.
@@ -381,6 +392,7 @@ private:
 	KGamePropertyInt mAdvanceWork;
 
 	KGamePropertyHandler* mProperties;
+	KGamePropertyHandler* mWeaponProperties;
 
 	const UnitProperties* mUnitProperties;
 
