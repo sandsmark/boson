@@ -55,10 +55,6 @@
 // #define AB_TEST 1
 
 
-// Whether to use just one vbo/array for vertex, normal and texel data.
-//  Otherwise they'll be stored in separate arrays/vbos
-#define USE_ONE_VBO
-
 bool BosonModel::mUseVBO = false;
 
 class BoMeshSorter
@@ -657,12 +653,7 @@ BosonModel::~BosonModel()
 #ifdef GL_ARB_vertex_buffer_object
  if (useVBO()) {
 	// Delete VBOs
-#ifdef USE_ONE_VBO
 	glDeleteBuffersARB(1, &d->mVBOVertices);
-#else
-	unsigned int buffers[3] = { d->mVBOVertices, d->mVBONormals, d->mVBOTexels };
-	glDeleteBuffersARB(3, buffers);
-#endif
  }
 #endif
  delete d;
@@ -1166,18 +1157,12 @@ void BosonModel::mergeArrays()
 		totaloldsize / 1024.0 << " KB in BoMesh)" << endl;
 
  // Create arrays for vertices, normals and texels
-#ifdef USE_ONE_VBO
+
  // Everything will be put to one big array. d->mVBONormals and d->mVBOTexels
  //  are offsets for main array (d->mVBOVertices)
  d->mVertexArray = new float[elements * 8];
  d->mVBONormals = elements * 3;  // Offsets to d->mVertexArray
  d->mVBOTexels = elements * 6;
-#else
- // There are separate arrays for vertices/normals/texels
- d->mVertexArray = new float[elements * 3];
- d->mNormalArray = new float[elements * 3];
- d->mTexelArray = new float[elements * 2];
-#endif
 
 
  // Move vertices and friends from meshes to arrays
@@ -1190,11 +1175,7 @@ void BosonModel::mergeArrays()
 		BO_NULL_ERROR(m);
 		continue;
 	}
-#ifdef USE_ONE_VBO
 	unsigned int pointsMoved = m->movePoints(d->mVertexArray, d->mVertexArray + d->mVBONormals, d->mVertexArray + d->mVBOTexels, index);
-#else
-	unsigned int pointsMoved = m->movePoints(d->mVertexArray, d->mNormalArray, d->mTexelArray, index);
-#endif
 	index += pointsMoved;
  }
 
@@ -1202,21 +1183,9 @@ void BosonModel::mergeArrays()
  if (useVBO()) {
 	boDebug() << k_funcinfo << "Generating VBOs" << endl;
 	// Generate VBOs
-#ifdef USE_ONE_VBO
 	glGenBuffersARB(1, &d->mVBOVertices);
 	glBindBufferARB(GL_ARRAY_BUFFER_ARB, d->mVBOVertices);
 	glBufferDataARB(GL_ARRAY_BUFFER_ARB, elements * 8 * sizeof(float), d->mVertexArray, GL_STATIC_DRAW_ARB);
-#else
-	glGenBuffersARB(1, &d->mVBOVertices);
-	glBindBufferARB(GL_ARRAY_BUFFER_ARB, d->mVBOVertices);
-	glBufferDataARB(GL_ARRAY_BUFFER_ARB, elements * 3 * sizeof(float), d->mVertexArray, GL_STATIC_DRAW_ARB);
-	glGenBuffersARB(1, &d->mVBONormals);
-	glBindBufferARB(GL_ARRAY_BUFFER_ARB, d->mVBONormals);
-	glBufferDataARB(GL_ARRAY_BUFFER_ARB, elements * 3 * sizeof(float), d->mNormalArray, GL_STATIC_DRAW_ARB);
-	glGenBuffersARB(1, &d->mVBOTexels);
-	glBindBufferARB(GL_ARRAY_BUFFER_ARB, d->mVBOTexels);
-	glBufferDataARB(GL_ARRAY_BUFFER_ARB, elements * 2 * sizeof(float), d->mTexelArray, GL_STATIC_DRAW_ARB);
-#endif
 
 	// No need to keep copys of arrays
 	delete[] d->mVertexArray;
@@ -1270,36 +1239,21 @@ void BosonModel::prepareRendering()
  if (useVBO()) {
 //	boDebug() << k_funcinfo << "Binding VBOs with ids " << d->mVBOVertices << ", " << d->mVBONormals << ", " << d->mVBOTexels << endl;
 #define BUFFER_OFFSET(i) ((char *)NULL + (i * sizeof(float)))
-#ifdef USE_ONE_VBO
 	glBindBufferARB(GL_ARRAY_BUFFER_ARB, d->mVBOVertices);
 	glVertexPointer(3, GL_FLOAT, 0, BUFFER_OFFSET(0));
 	// If one vbo/buffer is used, d->mVBONormals and d->mVBOTexels are offsets for
 	//  main array (d->mVBOVertices)
 	glNormalPointer(GL_FLOAT, 0, BUFFER_OFFSET(d->mVBONormals));
 	glTexCoordPointer(2, GL_FLOAT, 0, BUFFER_OFFSET(d->mVBOTexels));
-#else
-	glBindBufferARB(GL_ARRAY_BUFFER_ARB, d->mVBOVertices);
-	glVertexPointer(3, GL_FLOAT, 0, BUFFER_OFFSET(0));
-	glBindBufferARB(GL_ARRAY_BUFFER_ARB, d->mVBONormals);
-	glNormalPointer(GL_FLOAT, 0, BUFFER_OFFSET(0));
-	glBindBufferARB(GL_ARRAY_BUFFER_ARB, d->mVBOTexels);
-	glTexCoordPointer(2, GL_FLOAT, 0, BUFFER_OFFSET(0));
-#endif
  }
  else
 #endif // GL_ARB_vertex_buffer_object
  {
-#ifdef USE_ONE_VBO
 	// If one vbo/buffer is used, d->mVBONormals and d->mVBOTexels are offsets for
 	//  main array (d->mVBOVertices)
 	glVertexPointer(3, GL_FLOAT, 0, d->mVertexArray);
 	glNormalPointer(GL_FLOAT, 0, d->mVertexArray + d->mVBONormals);
 	glTexCoordPointer(2, GL_FLOAT, 0, d->mVertexArray + d->mVBOTexels);
-#else
-	glVertexPointer(3, GL_FLOAT, 0, d->mVertexArray);
-	glNormalPointer(GL_FLOAT, 0, d->mNormalArray);
-	glTexCoordPointer(2, GL_FLOAT, 0, d->mTexelArray);
-#endif
  }
 }
 
