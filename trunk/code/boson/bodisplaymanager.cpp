@@ -27,6 +27,7 @@
 #include "bosoncanvas.h"
 #include "bodebug.h"
 #include "boaction.h"
+#include "bocamerawidget.h"
 
 #include <klocale.h>
 
@@ -114,6 +115,8 @@ public:
 		mLayout = 0;
 
 		mActiveDisplay = 0;
+
+		mLightWidget = 0;
 	}
 
 	QVBoxLayout* mLayout;
@@ -125,6 +128,8 @@ public:
 	QIntDict<BoSelection> mSelectionGroups;
 
 	bool mGrabMovie;
+
+	BoLightCameraWidget* mLightWidget;
 };
 
 BoDisplayManager::BoDisplayManager(QWidget* parent) : QWidget(parent, "bosondisplaymanager")
@@ -133,6 +138,7 @@ BoDisplayManager::BoDisplayManager(QWidget* parent) : QWidget(parent, "bosondisp
  d->mDisplayList.setAutoDelete(true);
  d->mBoxList.setAutoDelete(true);
  d->mGrabMovie = false;
+ d->mLightWidget = 0;
 
  d->mSelectionGroups.setAutoDelete(true);
  for (int i = 0; i < 10; i++) {
@@ -144,6 +150,7 @@ BoDisplayManager::BoDisplayManager(QWidget* parent) : QWidget(parent, "bosondisp
 BoDisplayManager::~BoDisplayManager()
 {
  boDebug() << k_funcinfo << endl;
+ delete d->mLightWidget;
  d->mSelectionGroups.clear();
  boDebug() << k_funcinfo << "clearing display list" << endl;
  d->mDisplayList.clear();
@@ -211,6 +218,8 @@ void BoDisplayManager::removeActiveDisplay()
  if (!d->mActiveDisplay) {
 	return;
  }
+ delete d->mLightWidget;
+ d->mLightWidget = 0;
  BosonBigDisplayBase* old = d->mActiveDisplay;
  QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
  while (it.current()) {
@@ -351,6 +360,8 @@ void BoDisplayManager::setCanvas(BosonCanvas* c)
 void BoDisplayManager::quitGame()
 {
  boDebug() << k_funcinfo << endl;
+ delete d->mLightWidget;
+ d->mLightWidget = 0;
  QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
  while (it.current()) {
 	it.current()->quitGame();
@@ -827,5 +838,16 @@ void BoDisplayManager::grabMovieFrame()
 	allMovieFrames.clear();
  }
 #endif
+}
+
+void BoDisplayManager::slotShowLight0Widget()
+{
+ if (!d->mActiveDisplay) {
+	return;
+ }
+ delete d->mLightWidget;
+ d->mLightWidget = new BoLightCameraWidget(0);
+ d->mLightWidget->show();
+ d->mLightWidget->setLight(d->mActiveDisplay->light(0), d->mActiveDisplay->context());
 }
 

@@ -718,6 +718,9 @@ void BosonWidgetBase::initKActions()
 
  (void)new KAction(i18n("&Reload model textures"), KShortcut(), this,
 		SLOT(slotReloadModelTextures()), actionCollection(), "debug_lazy_reload_model_textures");
+ (void)new KAction(i18n("Light0..."), KShortcut(), displayManager(),
+		SLOT(slotShowLight0Widget()), actionCollection(),
+		"debug_light0");
 
  cheating->setChecked(DEFAULT_CHEAT_MODE);
  slotToggleCheating(DEFAULT_CHEAT_MODE);

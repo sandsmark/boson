@@ -18,6 +18,7 @@
     <Action name="debug_boundingboxes" />
     <Action name="debug_fps" />
     <Action name="debug_gamelog" />
+    <Action name="debug_light0" />
     <Menu name="debug_lazy"><text>&amp;Lazyness</text>
       <Action name="debug_lazy_reload_model_textures" />
     </Menu>
