@@ -1841,3 +1841,8 @@ void BosonCanvas::unitMovingStatusChanges(Unit* u, int oldstatus, int newstatus)
 #endif
 }
 
+BoEventListener* BosonCanvas::eventListener() const
+{
+ return d->mEventListener;
+}
+
