@@ -233,16 +233,12 @@ void BosonServer::checkFixKnown(serverFacility *f)
 			/* same state for user i, it's ok*/
 			k>>=1; k2>>=1; i++; continue;
 			}
-		if ( k&1l) {
-			/* in this case the mobile should be known, but isn't */
-			f->reportCreated(i);
-			f->setKnown(getPlayerMask(i));
-			}
+		if ( k&1l) /* in this case the mobile should be known, but isn't */
+			f->reportUnHidden(i);
 		else {
 			boAssert( k2&1l );
 			/* the unit isn't known anymore */
-			f->reportDestroyed(i);
-			f->unSetKnown(getPlayerMask(i));
+			f->reportHidden(i);
 			}
 		k>>=1; k2>>=1; i++; // let's continue
 		} /* while */
@@ -278,16 +274,12 @@ void BosonServer::checkMobileKnown(serverMobUnit *m)
 			/* same state for user i, it's ok*/
 			k>>=1; k2>>=1; i++; continue;
 			}
-		if ( k&1l) {
-			/* in this case the mobile should be known, but isn't */
-			m->reportCreated(i);
-			m->setKnown(getPlayerMask(i));
-			}
+		if ( k&1l) /* in this case the mobile should be known, but isn't */
+			m->reportUnHidden(i);
 		else {
 			boAssert( k2&1l );
 			/* the unit isn't known anymore */
-			m->reportDestroyed(i);
-			m->unSetKnown(getPlayerMask(i));
+			m->reportHidden(i);
 			}
 		k>>=1; k2>>=1; i++; // let's continue
 		} /* while */
