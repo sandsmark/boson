@@ -39,6 +39,7 @@ BosonGLFont::BosonGLFont(const QString& family)
  }
  mFont = QFont(family);
  mFont.setStyleHint(QFont::AnyStyle, QFont::PreferBitmap);
+ mFont.setFixedPitch(true);
 
  mFontDisplayList = 0;
  mFontMetrics = 0;
