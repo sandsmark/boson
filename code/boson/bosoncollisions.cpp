@@ -27,6 +27,8 @@
 #include "bodebug.h"
 #include "defines.h"
 
+#include <qptrvector.h>
+
 BosonCollisions::BosonCollisions()
 {
  init();
