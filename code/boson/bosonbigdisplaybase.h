@@ -250,7 +250,7 @@ protected:
 	GLfloat cameraY() const;
 	GLfloat cameraZ() const;
 
-	bool checkError();
+	bool checkError() const;
 
 	void calcFPS();
 #endif
