@@ -41,6 +41,7 @@
 #include <klocale.h>
 #include <kaction.h>
 #include <kdeversion.h>
+#include <kmessagebox.h>
 #include <kdebug.h>
 
 #include <qtimer.h>
@@ -227,13 +228,23 @@ void EditorWidget::saveConfig()
 
 void EditorWidget::slotSavePlayFieldAs()
 {
+ kdDebug() << k_funcinfo << endl;
  QString startIn; // shall we provide this??
  QString fileName = KFileDialog::getSaveFileName(startIn, "*.bpf", this);
  if (fileName != QString::null) {
 	if (QFileInfo(fileName).extension().isEmpty()) {
 		fileName += ".bpf";
 	}
-//	editorSavePlayField(fileName); //TODO
+	bool ok = playField()->savePlayField(fileName);
+	if (!ok) {
+		kdError() << k_funcinfo << "An error occured" << endl;
+
+		// TODO: get an error message from the playfield and display the
+		// reason for the error
+		KMessageBox::sorry(this, i18n("Could not save to %1").arg(fileName));
+	} else {
+		kdDebug() << k_funcinfo << "Saved successful to " << fileName << endl;
+	}
  }
 }
 
