@@ -65,7 +65,9 @@ public:
 		mGameTimer = 0;
 		mCanvas = 0;
 
+#ifdef ENABLE_DELAYING
 		mAdvanceDividerCount = 0;
+#endif
 	}
 
 	QTimer* mGameTimer;
