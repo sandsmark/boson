@@ -227,9 +227,9 @@ libboinfo_la_SOURCES = \
 boinfo_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 boinfo_LDADD = \
 		$(top_builddir)/boson/libboinfo.la \
-		$(top_builddir)/bogl/libbogl.la \
 		$(top_builddir)/bodebug/libbodebug.la \
 		$(top_builddir)/boson/info/libbosoninfo.la \
+		$(top_builddir)/bogl/libbogl.la \
 		$(LIB_BOMEMORY) \
 		$(GLLIB) \
 		-lkio $(LIB_KDEUI)
