@@ -288,7 +288,6 @@ void EditorWidget::slotPlayerJoinedGame(KPlayer* player)
  if (!player) {
 	return;
  }
- BosonWidgetBase::slotPlayerJoinedGame(player);
  Player* p = (Player*)player;
  QStringList players = d->mPlayerAction->items();
  d->mPlayers.append(p);
@@ -302,7 +301,6 @@ void EditorWidget::slotPlayerLeftGame(KPlayer* player)
 	return;
  }
  boDebug() << k_funcinfo << player->id() << endl;
- BosonWidgetBase::slotPlayerLeftGame(player);
  Player* p = (Player*)p;
  if (d->mPlayers.count() == 0) {
 	return;

@@ -72,15 +72,6 @@ public:
 
 
 	/**
-	 * Set the @ref KToggleAction that is responsible for the chat widget to
-	 * either checked or not checked.
-	 *
-	 * This depends on whether the chat (dock-)widget is currently visible.
-	 **/
-	void setActionChat(bool chatVisible);
-
-
-	/**
 	 * Set the displaymanager. The displaymanager will be reparened to this
 	 * widget, but ownership is <em>NOT</em> taken.
 	 *
@@ -135,21 +126,13 @@ public slots:
 	 **/
 	void slotUnfogAll(Player* player = 0);
 
-	void slotShowLight0Widget();
-	void slotReloadModelTextures();
-
 	/**
 	 * Sends signals to update mobiles/facilities count for player p
 	 **/
 	void slotUnitCountChanged(Player* p);
 
 protected slots:
-	virtual void slotPlayerJoinedGame(KPlayer*);
-	virtual void slotPlayerLeftGame(KPlayer*);
-
 	void slotHack1();
-
-	void slotToggleCheating(bool on);
 
 	// These are used to save/load camera, unit groups etc.
 	void slotLoadExternalStuffFromXML(const QDomElement& root);
@@ -195,24 +178,10 @@ signals:
 	 * Load the dock(-widget) layout for game mode.
 	 **/
 	void signalLoadBosonGameDock();
-	void signalToggleChatVisible();
-	/**
-	 * Ask the receiver of this signal (i.e. the parent) to check the dock
-	 * status (whether the chat/cmdframe widgets are visible) and set the
-	 * @ref KToggleAction objects accordingly. See also @ref setActionChat
-	 * and @ref setActionCmdFrame
-	 **/
-	void signalCheckDockStatus();
 
 	void signalChangeLocalPlayer(Player* p);
 
 protected slots:
-	void slotChatDockHidden();
-
-	void slotDebugPlayer(int);
-	void slotDebugMemory();
-	void slotGrabScreenshot();
-
 	void slotCmdBackgroundChanged(const QString& file);
 
 
@@ -257,15 +226,6 @@ protected:
 	 **/
 	virtual void startScenarioAndGame();
 
-	/**
-	 * Find a filename for prefix-nnn.suffx where nnn is a number. The
-	 * returned string will either be a filename where something can be
-	 * stored (i.e. no file of this name exists yet) or QString::null.
-	 **/
-	QString findSaveFileName(const QString& prefix, const QString& suffix);
-
-	void setActionEnabled(const char* name, bool enabled);
-
 	OptionsDialog* gamePreferences(bool editor);
 
 	/**
@@ -278,13 +238,6 @@ private:
 
 	void initLayout();
 	void initScripts();
-
-	/**
-	 * Initialize the debug player menu and the usual player menu in editor
-	 * mode. This iterates all available players and calls @ref
-	 * slotPlayerJoinedGame on them
-	 **/
-	void initPlayersMenu();
 
 private:
 	class BosonWidgetBasePrivate;
