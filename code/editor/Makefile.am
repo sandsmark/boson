@@ -40,10 +40,10 @@ boeditor_LDADD   =  ../visual/libbovisual.a ../common/libboson.a $(LIB_KFILE)
 install-data-local:
 	$(mkinstalldirs) $(boson_appsdir)/
 	$(INSTALL_DATA) boeditor.kdelnk $(boson_appsdir)/boeditor.kdelnk
-	$(mkinstalldirs) $(kde_icondir)/
-	$(INSTALL_DATA) boeditor.xpm $(kde_icondir)/boeditor.xpm
-	$(mkinstalldirs) $(kde_minidir)/
-	$(INSTALL_DATA) mini-boeditor.xpm $(kde_minidir)/mini-boeditor.xpm
+#	$(mkinstalldirs) $(kde_icondir)/
+#	$(INSTALL_DATA) boeditor.xpm $(kde_icondir)/boeditor.xpm
+#	$(mkinstalldirs) $(kde_minidir)/
+#	$(INSTALL_DATA) mini-boeditor.xpm $(kde_minidir)/mini-boeditor.xpm
 
 uninstall-local:
 	-rm -f $(boson_appsdir)/boeditor.kdelnk
