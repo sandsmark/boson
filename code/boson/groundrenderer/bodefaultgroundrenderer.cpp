@@ -74,13 +74,12 @@ void BoDefaultGroundRenderer::renderVisibleCells(Cell** renderCells, unsigned in
  }
 
  if (boConfig->enableColormap()) {
+	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_LIGHTING);
 	glDisable(GL_TEXTURE_2D);
 	renderCellColors(renderCells, cellsCount, map->width(), map->colorMap()->colorMap(), map->heightMap());
-	if (boConfig->useLight()) {
-		glEnable(GL_LIGHTING);
-	}
-	glEnable(GL_TEXTURE_2D);
+	glPopAttrib();
+
  }
 
  glDisable(GL_BLEND);
