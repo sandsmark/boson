@@ -77,6 +77,14 @@ void BoParticleManager::draw(QPtrList<BosonParticleSystem>* systems, const BoVec
     // Sort the list
     sort();
     mParticlesDirty = false;
+
+    // Call pre-draw methods
+    it.toFirst();
+    while((s = it.current()) != 0)
+    {
+      ++it;
+      s->preDraw();
+    }
   }
   else
   {
@@ -86,14 +94,6 @@ void BoParticleManager::draw(QPtrList<BosonParticleSystem>* systems, const BoVec
       boWarning() << k_funcinfo << "mParticlesDirty is false, but camera has moved" << endl;
       mCameraPos = camera;
     }
-  }
-
-  // Call pre-draw methods
-  it.toFirst();
-  while((s = it.current()) != 0)
-  {
-    ++it;
-    s->preDraw();
   }
 
   /// Draw particles
