@@ -148,15 +148,18 @@ void BosonShot::advance(unsigned int phase)
 float BosonShot::rotationToPoint(float x, float y)
 {
   float add = 0;
+  float arg = 0;
   if(x > 0)
   {
     if(y < 0)
     {
       add = 0;
+      arg = x / -y;
     }
     else
     {
       add = 90;
+      arg = y / x;
     }
   }
   else
@@ -164,12 +167,14 @@ float BosonShot::rotationToPoint(float x, float y)
     if(y > 0)
     {
       add = 180;
+      arg = -x / y;
     }
     else
     {
       add = 270;
+      arg = -y / -x;
     }
   }
 
-  return (atan(QABS(x) / QABS(y)) * (360 / 6.2831853)) + add;
+  return (atan(arg) * (360 / 6.2831853)) + add;
 }
