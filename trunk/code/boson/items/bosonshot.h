@@ -100,7 +100,7 @@ class BosonShot : public BosonItem
   public:
     BosonShot(BosonShotProperties* prop, Unit* attacker, float x, float y, float z, float tx, float ty, float tz);
 
-    virtual void advance(unsigned int phase)
+    virtual void advance(unsigned int phase);
 
 //    inline BoVector3 pos()  { return mPos; }
 
