@@ -25,7 +25,7 @@ fi
 
 echo "WARNING: This script tries to delete a boson installation completely from your system!"
 echo "There might be bugs here which migh lead to files being deleted that don't belong to boson"
-echo "Type yes if you want to execute anyeay"
+echo "Type yes if you want to execute anyway"
 read answer
 if [ "x$answer" != "xyes" ]; then
 	echo "Aborting"
@@ -39,6 +39,7 @@ delete_files "$KDEDIR/share/config/bodebug*"
 delete_files "$KDEDIR/share/icons/*/*/apps/boson.png"
 delete_files "$KDEDIR/share/applnk/Games/TacticStrategy/boson.desktop"
 delete_files "$KDEDIR/share/applnk/Games/TacticStrategy/bounit.desktop"
+delete_files "$KDEDIR/lib/kde3/plugins/designer/bosonwidgets.*"
 delete_dir "$KDEDIR/share/doc/HTML/en/boson"
 delete_dir "$KDEDIR/share/apps/boson"
 delete_dir "$KDEDIR/share/apps/borender"
