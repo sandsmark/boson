@@ -28,6 +28,7 @@ class QString;
 class KConfig;
 class QDataStream;
 class QPoint;
+class QDomElement;
 
 
 /**
@@ -426,6 +427,9 @@ class BoVector3
       mData[0] /= (float)BO_TILE_SIZE; mData[1] = -(mData[1] / (float)BO_TILE_SIZE);
     }
 
+    bool saveAsXML(QDomElement& root, const QString& name) const;
+    bool loadFromXML(const QDomElement& root, const QString& name);
+
 
   private:
     friend class BoMatrix;
@@ -633,6 +637,10 @@ class BoVector4
      * Convenience method for BoVector4::debugString(*this)
      **/
     QString debugString(int prec = 6) const;
+
+    bool saveAsXML(QDomElement& root, const QString& name) const;
+    bool loadFromXML(const QDomElement& root, const QString& name);
+
 
   private:
     friend class BoMatrix;
