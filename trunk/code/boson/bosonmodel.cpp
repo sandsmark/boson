@@ -625,6 +625,10 @@ void BosonModel::loadNode(Lib3dsNode* node, bool reload)
 	}
 
 #define NO_OPTIMIZE 1
+#if NO_OPTIMIZE
+	bool popTextureMatrix = false;
+#endif
+
 
 #if NO_OPTIMIZE
 	// now start the actual display list for this node.
@@ -637,9 +641,20 @@ void BosonModel::loadNode(Lib3dsNode* node, bool reload)
 	// coordinates (which are assigned to the vertices)? is the texture
 	// matrix used for them as well? If yes this optimize approach can't
 	// work.
+	// AB: UPDATE: these optimizations do NOT influence the appearance.
 
-	BoMatrix texMatrix;
+	BoMatrix texMatrix;sss
 #endif
+
+	if (QString::fromLatin1(mesh->name).find("teamcolor", 0, false) == 0) {
+		myTex = 0; // teamcolor objects are *not* textured
+		if (mTeamColor) {
+			glPushAttrib(GL_CURRENT_BIT);
+			glColor3ub((GLubyte)mTeamColor->red(), (GLubyte)mTeamColor->green(), (GLubyte)mTeamColor->blue());
+			resetColor = true;
+		}
+	}
+
 	if (mat && myTex) {
 		// *ggg* this is a nice workaround.
 		// it's hard to do this with a Lib3dsMatrix by several
@@ -682,6 +697,8 @@ void BosonModel::loadNode(Lib3dsNode* node, bool reload)
 		}
 
 		glPopMatrix();
+#else
+		popTextureMatrix = true;
 #endif
 		glMatrixMode(GL_MODELVIEW);
 	} else {
@@ -695,15 +712,6 @@ void BosonModel::loadNode(Lib3dsNode* node, bool reload)
 #endif
 	d->mNodeDisplayLists.append(node->user.d);
 	glBindTexture(GL_TEXTURE_2D, myTex);
-
-	if (QString::fromLatin1(mesh->name).find("teamcolor", 0, false) == 0) {
-		myTex = 0; // teamcolor objects are *not* textured
-		if (mTeamColor) {
-			glPushAttrib(GL_CURRENT_BIT);
-			glColor3ub((GLubyte)mTeamColor->red(), (GLubyte)mTeamColor->green(), (GLubyte)mTeamColor->blue());
-			resetColor = true;
-		}
-	}
 
 	glBegin(GL_TRIANGLES); // note: you shouldn't do calculations after a glBegin() but we compile a display list only, so its ok
 	for (p = 0; p < mesh->faces; p++) {
@@ -748,7 +756,7 @@ void BosonModel::loadNode(Lib3dsNode* node, bool reload)
 	}
 	glEnd();
 #if NO_OPTIMIZE
-	if (mat && myTex) {
+	if (popTextureMatrix) {
 		glMatrixMode(GL_TEXTURE);
 		glPopMatrix();
 		glMatrixMode(GL_MODELVIEW);
