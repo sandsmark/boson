@@ -55,7 +55,7 @@ draw_bigbox_begin("Status");
 draw_bigbox_text("Boson is currently still under heavy development.<br><br>");
 
 draw_bigbox_subheader("<a name=\"features\"></a>Feature list");
-draw_bigbox_text("This is a list of features that we consider as
+$var_boxtext = "This is a list of features that we consider as
   &quot;to-be-done&quot; for the next release.
   <h2>TODO</h2>
   <ul>
@@ -67,8 +67,8 @@ draw_bigbox_text("This is a list of features that we consider as
   <ul>
     <li>Units can be rendered as wireframes</li>
   </ul>
-  </blockquote>
-  ");*/
+  </blockquote>";
+draw_bigbox_text($var_boxtxt);
 draw_bigbox_end();
 main_area_end();
 main_table_end();
