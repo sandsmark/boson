@@ -22,6 +22,7 @@
 #include "player.h"
 #include "unitproperties.h"
 #include "speciestheme.h"
+#include "unit.h"
 
 #include <klocale.h>
 
@@ -120,3 +121,11 @@ void BosonUnitView::showGeneral()
  d->mId->show();
 }
 
+void BosonUnitView::slotUnitChanged(Unit* u)
+{
+ if(unit() != u) {
+	return;
+ }
+ d->mHealth->setText(i18n("Health: %1").arg(u->health()));
+ BosonCommandWidget::slotUnitChanged(u);
+}

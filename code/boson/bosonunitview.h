@@ -38,6 +38,9 @@ public:
 	 **/
 	virtual void setUnit(Unit* unit);
 
+public slots:
+	void slotUnitChanged(Unit*);
+
 protected:
 
         /**
