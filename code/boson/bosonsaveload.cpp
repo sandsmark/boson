@@ -291,6 +291,18 @@ bool BosonSaveLoad::saveToFiles(QMap<QString, QByteArray>& files, Player* localP
  return true;
 }
 
+bool BosonSaveLoad::savePlayFieldToFiles(QMap<QString, QByteArray>& files, Player* localPlayer)
+{
+ // first we save a complete game.
+ bool ret = saveToFiles(files, localPlayer);
+ if (!ret) {
+	boError() << k_funcinfo << "saving failed" << endl;
+	return ret;
+ }
+ ret = convertSaveGameToPlayField(files);
+ return ret;
+}
+
 bool BosonSaveLoad::saveToFile(Player* localPlayer, const QString& file)
 {
  QMap<QString, QByteArray> files;
@@ -421,6 +433,7 @@ QCString BosonSaveLoad::savePlayersAsXML(Player* localPlayer)
  }
 
  KGame::KGamePlayerList* list = d->mBoson->playerList();
+ boDebug() << k_funcinfo << "saving " << list->count() << " players" << endl;
  for (KPlayer* p = list->first(); p; p = list->next()) {
 	// KGame also stored ID, RTTI and KPlayer::calcIOValue() here.
 	// I believe we won't need them. ID might be useful for network games,
@@ -687,4 +700,97 @@ bool BosonSaveLoad::loadExternalFromXML(const QString& xml)
 
  return true;
 }
+bool BosonSaveLoad::convertSaveGameToPlayField(QMap<QString, QByteArray>& files)
+{
+ // now we remove / change what does not belong there
+ QDomDocument kgameDoc("Boson");
+ if (!loadXMLDoc(&kgameDoc, QString(files["kgame.xml"]))) {
+	boError() << k_funcinfo << "invalid kgame.xml file saved" << endl;
+	return false;
+ }
+ QDomElement kgameRoot = kgameDoc.documentElement();
+ kgameRoot.removeChild(kgameRoot.namedItem("DataHandler"));
+
+ QDomDocument playersDoc("Players");
+ if (!loadXMLDoc(&playersDoc, QString(files["players.xml"]))) {
+	boError() << k_funcinfo << "invalid players.xml file saved" << endl;
+	return false;
+ }
+ QDomElement playersRoot = playersDoc.documentElement();
+ playersRoot.removeAttribute("LocalPlayerId");
+ QDomNodeList playerList = playersRoot.elementsByTagName("Player");
+ if (playerList.count() == 0) {
+	boError() << k_funcinfo << "no players in game" << endl;
+	return false;
+ }
+ QMap<int, int> playerId2Number;
+ for (unsigned int i = 0; i < playerList.count(); i++) {
+	QDomElement p = playerList.item(i).toElement();
+	p.removeAttribute("NetworkPriority");
+	p.removeAttribute("UnitPropId");
+	p.removeAttribute("TeamColor");
+	p.removeAttribute("SpeciesTheme");
+	p.removeChild(p.namedItem("Statistics"));
+	p.removeChild(p.namedItem("Fogged"));
+	bool ok = false;
+	unsigned int id = p.attribute("Id").toUInt(&ok);
+	if (!ok) {
+		boError() << k_funcinfo << "invalid value for Id attribute of Player tag" << endl;
+		return false;
+	}
+	p.setAttribute("Id", i);
+	playerId2Number.insert(id, i);
+	QDomElement handler = p.namedItem("DataHandler").toElement();
+	if (handler.isNull()) {
+		continue;
+	}
+	BosonPropertyXML::removeProperty(handler, KGamePropertyBase::IdGroup);
+	BosonPropertyXML::removeProperty(handler, KGamePropertyBase::IdUserId);
+	BosonPropertyXML::removeProperty(handler, KGamePropertyBase::IdAsyncInput);
+	BosonPropertyXML::removeProperty(handler, KGamePropertyBase::IdTurn);
+	BosonPropertyXML::removeProperty(handler, KGamePropertyBase::IdName);
+ }
+
+ QDomDocument canvasDoc("Canvas");
+ if (!loadXMLDoc(&canvasDoc, QString(files["canvas.xml"]))) {
+	boError() << k_funcinfo << "invalid canvas.xml file saved" << endl;
+	return false;
+ }
+ QDomElement canvasRoot = canvasDoc.documentElement();
+ QDomNodeList itemsList = canvasRoot.elementsByTagName("Items");
+ for (unsigned int i = 0; i < itemsList.count(); i++) {
+	QDomElement items = itemsList.item(i).toElement();
+	bool ok = false;
+	unsigned int id = items.attribute("OwnerId").toUInt(&ok);
+	if (!ok) {
+		boError() << k_funcinfo << "invalid value for OwnerId attribute of Items tag" << endl;
+		return false;
+	}
+	if (!playerId2Number.contains(id)) {
+		boError() << k_funcinfo << "unknown Id " << id << " for OwnerId attribute of Items tag" << endl;
+		return false;
+	}
+	items.setAttribute("Id", playerId2Number[id]);
+	QDomNodeList itemList = items.elementsByTagName("Item");
+	for (unsigned int j = 0; j < itemList.count(); j++) {
+		QDomElement item = itemList.item(j).toElement();
+		item.setAttribute("Id", 0);
+	}
+	QDomElement handler = items.namedItem("DataHandler").toElement();
+	if (handler.isNull()) {
+		continue;
+	}
+	BosonPropertyXML::removeProperty(handler, BosonCanvas::IdNextItemId);
+ }
+
+ QByteArray kgameXML = kgameDoc.toCString();
+ QByteArray playersXML = playersDoc.toCString();
+ QByteArray canvasXML = canvasDoc.toCString();
+ files.remove("external.xml");
+ files.insert("kgame.xml", kgameXML);
+ files.insert("players.xml", playersXML);
+ files.insert("canvas.xml", canvasXML);
+ return true;
+}
+
 

@@ -259,20 +259,10 @@ void EditorWidget::slotSavePlayFieldAs()
 
 void EditorWidget::savePlayField(const QString& fileName)
 {
-boError() << k_funcinfo << "saving a playfield is currently broken" << endl;
-#if 0
- boGame->playField()->applyScenario(boGame); // this must be called before we are able to save the playfield! otherwise the old units will be used
- bool ok = boGame->playField()->savePlayField(fileName);
- if (!ok) {
-	boError() << k_funcinfo << "An error occured" << endl;
-
-	// TODO: get an error message from the playfield and display the
-	// reason for the error
-	KMessageBox::sorry(this, i18n("Could not save to %1").arg(fileName));
- } else {
-	boDebug() << k_funcinfo << "Saved successful to " << fileName << endl;
+ bool ret = boGame->savePlayFieldToFile(fileName);
+ if (!ret) {
+	KMessageBox::sorry(this, i18n("An error occurred while saving the playfield. Unable to save."));
  }
-#endif
 }
 
 void EditorWidget::slotSavePlayField()

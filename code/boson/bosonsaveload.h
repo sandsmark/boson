@@ -162,6 +162,7 @@ public:
 
 	bool saveToFile(Player* localPlayer, const QString& file);
 	bool saveToFiles(QMap<QString, QByteArray>& files, Player* localPlayer);
+	bool savePlayFieldToFiles(QMap<QString, QByteArray>& files, Player* localPlayer);
 	static bool saveToFile(const QMap<QString, QByteArray>& files, const QString& file);
 
 	LoadingStatus loadingStatus() const;
@@ -216,6 +217,8 @@ protected:
 	bool loadPlayersFromXML(const QString&);
 	bool loadCanvasFromXML(const QString&);
 	bool loadExternalFromXML(const QString&);
+
+	bool convertSaveGameToPlayField(QMap<QString, QByteArray>& files);
 
 	/**
 	 * Add an error message to the error queue.

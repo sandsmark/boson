@@ -187,6 +187,7 @@ public:
 	}
 
 	bool saveToFile(const QString& file);
+	bool savePlayFieldToFile(const QString& file);
 
 	virtual bool savegame(QDataStream& stream, bool network, bool saveplayers = true);
 	virtual bool loadgame(QDataStream& stream, bool network, bool reset);

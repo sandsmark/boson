@@ -1910,9 +1910,29 @@ void Boson::initSaveLoad(BosonSaveLoad* b)
 bool Boson::saveToFile(const QString& file)
 {
  boDebug() << k_funcinfo << file << endl;
+ QMap<QString, QByteArray> files;
  BosonSaveLoad* save = new BosonSaveLoad(this);
- bool ret = save->saveToFile(d->mPlayer, file);
+ bool ret = save->saveToFiles(files, d->mPlayer);
  delete save;
+ if (!ret) {
+	boError() << k_funcinfo << "saving failed" << endl;
+	return ret;
+ }
+ ret = BosonSaveLoad::saveToFile(files, file);
+ return ret;
+}
+
+bool Boson::savePlayFieldToFile(const QString& file)
+{
+ boDebug() << k_funcinfo << file << endl;
+ QMap<QString, QByteArray> files;
+ BosonSaveLoad* save = new BosonSaveLoad(this);
+ bool ret = save->savePlayFieldToFiles(files, d->mPlayer);
+ if (!ret) {
+	boError() << k_funcinfo << "saving failed" << endl;
+	return ret;
+ }
+ ret = BosonSaveLoad::saveToFile(files, file);
  return ret;
 }
 
