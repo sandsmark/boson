@@ -45,17 +45,11 @@ class BosonMiniMap::BosonMiniMapPrivate
 public:
 	BosonMiniMapPrivate()
 	{
-		mMapWidth = -1;
-		mMapHeight = -1;
-
 		mPixmap = 0;
 		mZoomIn = 0;
 		mZoomOut = 0;
 		mZoomDefault = 0;
 	}
-
-	int mMapWidth;
-	int mMapHeight;
 
 	QPointArray mSelectionRect;
 
@@ -75,7 +69,6 @@ BosonMiniMap::BosonMiniMap(QWidget* parent) : QWidget(parent)
  d = new BosonMiniMapPrivate;
  mGround = 0;
  mUnZoomedGround = 0;
- mMap = 0;
  mLocalPlayer = 0;
  mCanvas = 0;
  mUseFog = false;
@@ -116,12 +109,14 @@ BosonMiniMap::~BosonMiniMap()
 
 int BosonMiniMap::mapWidth() const
 {
- return d->mMapWidth;
+ BO_CHECK_NULL_RET0(map())
+ return map()->width();
 }
 
 int BosonMiniMap::mapHeight() const
 {
- return d->mMapHeight;
+ BO_CHECK_NULL_RET0(map())
+ return map()->height();
 }
 
 QPixmap* BosonMiniMap::ground() const
@@ -129,18 +124,12 @@ QPixmap* BosonMiniMap::ground() const
  return mGround;
 }
 
-void BosonMiniMap::slotCreateMap(int w, int h)
+void BosonMiniMap::createMap()
 {
- if (!w && !h) {
-	return;
- }
- if(mGround) {
-	delete mGround;
-	mGround = 0;
- }
- d->mMapWidth = w;
- d->mMapHeight = h;
- mUnZoomedGround = new QPixmap(w, h);
+ BO_CHECK_NULL_RET(map())
+ delete mGround;
+ mGround = 0;
+ mUnZoomedGround = new QPixmap(mapWidth(), mapHeight());
  mUnZoomedGround->fill(COLOR_UNKNOWN);
  createGround();
 
@@ -149,16 +138,44 @@ void BosonMiniMap::slotCreateMap(int w, int h)
  updateGeometry();
 }
 
-void BosonMiniMap::slotAddCell(int x, int y, int groundType, unsigned char)
+void BosonMiniMap::slotChangeCell(int x, int y, int groundType, unsigned char version)
 {
+ if (!ground()) {
+	boError() << k_funcinfo << "map not yet created" << endl;
+	return;
+ }
+ BO_CHECK_NULL_RET(mCanvas)
  if (x < 0 || x >= mapWidth()) {
 	return;
  }
  if (y < 0 || y >= mapHeight()) {
 	return;
  }
+ // AB: note that mLocalPlayer == NULL is valid in editor mode here!
+ if (mLocalPlayer && mLocalPlayer->isFogged(x, y)) {
+	// we can't see this cell
+	return;
+ }
+ if (mCanvas->findUnitAtCell(x, y)) {
+	// there is a unit on the cell, so do not paint the cell.
+	return;
+ }
+ changeCell(x, y, groundType, version);
+
+ // we need to repaint now - especially in editor mode when a cell was changed.
+ d->mPixmap->repaint(false);// performance - units will be added and therefore repaint()
+}
+
+void BosonMiniMap::changeCell(int x, int y, int groundType, unsigned char)
+{
  if (!ground()) {
 	boError() << k_funcinfo << "map not yet created" << endl;
+	return;
+ }
+ if (x < 0 || x >= mapWidth()) {
+	return;
+ }
+ if (y < 0 || y >= mapHeight()) {
 	return;
  }
  switch (groundType) {
@@ -177,16 +194,13 @@ void BosonMiniMap::slotAddCell(int x, int y, int groundType, unsigned char)
 		setPoint(x, y, COLOR_UNKNOWN);
 		break;
  }
-// d->mPixmap->repaint(false);// performance - units will be added and therefore repaint()
-// is already called
+// d->mPixmap->repaint(false);// performance - this gets called for map init -
+// more will happen with the mini map anyway, so it'll be repainted later
 }
 
 void BosonMiniMap::setPoint(int x, int y, const QColor& color)
 {
- if (!ground()) {
-	boError() << k_funcinfo << "NULL ground" << endl;
-	return;
- }
+ BO_CHECK_NULL_RET(ground())
  QPainter p;
  QPainter p2;
  p.begin(ground());
@@ -226,13 +240,8 @@ void BosonMiniMap::mousePressEvent(QMouseEvent *e)
 
 void BosonMiniMap::slotAddUnit(Unit* unit, int x, int y)
 {
- if (!unit) {
-	boError() << k_funcinfo << "NULL unit" << endl;
-	return;
- }
- if(!mLocalPlayer) {
-	return;
- }
+ BO_CHECK_NULL_RET(mLocalPlayer)
+ BO_CHECK_NULL_RET(unit)
  // x and y are pixel coordinates
  x = x / BO_TILE_SIZE;
  y = y / BO_TILE_SIZE;
@@ -265,27 +274,27 @@ void BosonMiniMap::slotMoveRect(const QPoint& topLeft, const QPoint& topRight, c
  d->mPixmap->repaint(false);
 }
 
-void BosonMiniMap::setMap(BosonMap* map)
-{
- mMap = map;
-}
-
 void BosonMiniMap::setCanvas(BosonCanvas* c)
 {
  mCanvas = c;
 }
 
+BosonMap* BosonMiniMap::map() const
+{
+ if (!mCanvas) {
+	return 0;
+ }
+ return mCanvas->map();
+}
+
 void BosonMiniMap::initMap()
 {
- if (!mMap) {
-	boError() << k_funcinfo << "NULL map" << endl;
-	return;
- }
- slotCreateMap(mMap->width(), mMap->height());
+ BO_CHECK_NULL_RET(map())
+ createMap();
  bool oldFog = mUseFog;
  mUseFog = true;
- for (unsigned int i = 0; i < mMap->width(); i++) {
-	for (unsigned int j = 0; j < mMap->height(); j++) {
+ for (unsigned int i = 0; i < map()->width(); i++) {
+	for (unsigned int j = 0; j < map()->height(); j++) {
 		slotUnfog(i, j);
 	}
  }
@@ -294,30 +303,19 @@ void BosonMiniMap::initMap()
 
 void BosonMiniMap::slotMoveUnit(Unit* unit, float oldX, float oldY)
 {
- if (!mMap) {
-	boError() << k_funcinfo << "NULL map" << endl;
-	return;
- }
- if (!unit) {
-	boError() << k_funcinfo << "NULL unit" << endl;
-	return;
- }
- if(!mLocalPlayer) {
-	return;
- }
+ BO_CHECK_NULL_RET(map())
+ BO_CHECK_NULL_RET(mLocalPlayer)
+ BO_CHECK_NULL_RET(unit)
  int x = (int)(oldX / BO_TILE_SIZE);
  int y = (int)(oldY / BO_TILE_SIZE);
- if((x == (int)(unit->x() / BO_TILE_SIZE)) && (y == (int)(unit->y() / BO_TILE_SIZE))) {
+ if ((x == (int)(unit->x() / BO_TILE_SIZE)) && (y == (int)(unit->y() / BO_TILE_SIZE))) {
 	// Unit is still on the same cell. Don't update (performance)
 	return;
  }
  if (!mLocalPlayer->isFogged(x, y)) {
-	Cell* c = mMap->cell(x, y);
-	if (!c) {
-		boError() << k_funcinfo << "NULL cell" << endl;
-		return;
-	}
-	slotAddCell(x, y, c->groundType(), c->version());
+	Cell* cell = map()->cell(x, y);
+	BO_CHECK_NULL_RET(cell)
+	changeCell(x, y, cell->groundType(), cell->version());
  }
  x = (int)unit->x();
  y = (int)unit->y();
@@ -326,45 +324,43 @@ void BosonMiniMap::slotMoveUnit(Unit* unit, float oldX, float oldY)
 
 void BosonMiniMap::slotUnitDestroyed(Unit* unit)
 {
- if (!unit) {
-	boError() << k_funcinfo << "NULL unit" << endl;
-	return;
- }
+ BO_CHECK_NULL_RET(unit)
+ BO_CHECK_NULL_RET(map())
  int x = (int)(unit->x() / BO_TILE_SIZE);
  int y = (int)(unit->y() / BO_TILE_SIZE);
- Cell* c = mMap->cell(x, y);
- if (!c) {
-	boError() << k_funcinfo << "NULL cell" << endl;
-	return;
- }
+ Cell* cell = map()->cell(x, y);
+ BO_CHECK_NULL_RET(cell)
  slotUnfog(x, y);
 }
 
 void BosonMiniMap::slotUnfog(int x, int y)
 {
+ BO_CHECK_NULL_RET(map())
  if (!mUseFog) {
 	return;
  }
- Cell* c = mMap->cell(x, y);
- if (!c) {
+ Cell* cell = map()->cell(x, y);
+ if (!cell) {
 	boError() << k_funcinfo << "invalid cell " << x << "," << y << endl;
 	return;
  }
- slotAddCell(x, y, c->groundType(), c->version());
  QValueList<Unit*> list = mCanvas->unitsAtCell(x, y);
  if (!list.isEmpty()) {
 	Unit* u = list.first();
 	slotAddUnit(u, (int)u->x(), (int)u->y());
+ } else {
+	slotChangeCell(x, y, cell->groundType(), cell->version());
  }
 }
 
 void BosonMiniMap::slotFog(int x, int y)
 {
+ BO_CHECK_NULL_RET(map())
  if (!mUseFog) {
 	return;
  }
- Cell* c = mMap->cell(x, y);
- if (!c) {
+ Cell* cell = map()->cell(x, y);
+ if (!cell) {
 	boError() << k_funcinfo << "invalid cell " << x << "," << y << endl;
 	return;
  }
@@ -382,13 +378,10 @@ void BosonMiniMap::initFogOfWar(Player* p)
 	boError() << k_funcinfo << "NULL player" << endl;
 	return;
  }
- if (!mMap) {
-	boError() << k_funcinfo << "NULL map" << endl;
-	return;
- }
+ BO_CHECK_NULL_RET(map())
  mUseFog = true;
- for (unsigned int i = 0; i < mMap->width(); i++) {
-	for (unsigned int j = 0; j < mMap->height(); j++) {
+ for (unsigned int i = 0; i < map()->width(); i++) {
+	for (unsigned int j = 0; j < map()->height(); j++) {
 		if (p && p->isFogged(i, j)) {
 			slotFog(i, j);
 		} else {
@@ -411,6 +404,8 @@ double BosonMiniMap::zoom() const
 void BosonMiniMap::slotShowMap(bool s)
 {
  if (s) {
+	boDebug() << width() << "x" << height() << endl;
+	boDebug() << ground()->width() << "x" << ground()->height() << endl;
 	show();
  } else {
 	hide();
@@ -492,10 +487,10 @@ bool BosonMiniMap::eventFilter(QObject* o, QEvent* e)
  // display then!
  d->mPainterMoveX = moveX[0];
  d->mPainterMoveY = moveY[0];
- 
+
  // Using bitBlt() is MUCH faster than using QPainter::drawPixmap(), especially
  //  when you scale QPainter (difference may be hundreds of times)
- bitBlt(d->mPixmap, 0, 0, ground(), (int)-(d->mPainterMoveX * scale() * zoom()), 
+ bitBlt(d->mPixmap, 0, 0, ground(), (int)-(d->mPainterMoveX * scale() * zoom()),
 		(int)-(d->mPainterMoveY * scale() * zoom()),
 		d->mPixmap->width(), d->mPixmap->height());
 
@@ -516,7 +511,7 @@ bool BosonMiniMap::eventFilter(QObject* o, QEvent* e)
 
 void BosonMiniMap::createGround()
 {
- if(mGround) {
+ if (mGround) {
 	delete mGround;
  }
  mGround = new QPixmap((int)(mapWidth() * zoom() * scale()), (int)(mapHeight() * zoom() * scale()));

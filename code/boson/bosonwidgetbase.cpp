@@ -170,7 +170,6 @@ void BosonWidgetBase::initMap()
  }
  BosonMap* map = boGame->playField()->map();
  canvas()->setMap(map);
- minimap()->setMap(map);
  minimap()->initMap();
  displayManager()->mapChanged();
 // boGame->setPlayField(playField()); // already done on startup in BosonStarting

@@ -109,6 +109,8 @@ void EditorWidget::initMap()
 		this, SLOT(slotTileSetChanged(BosonTiles*)));
  connect(boGame, SIGNAL(signalChangeCell(int,int,int,unsigned char)),
 		boGame->playField()->map(), SLOT(slotChangeCell(int,int,int,unsigned char)));
+ connect(boGame, SIGNAL(signalChangeCell(int,int,int,unsigned char)),
+		minimap(), SLOT(slotChangeCell(int,int,int,unsigned char)));
 }
 
 void EditorWidget::initPlayer()
