@@ -2,9 +2,9 @@
     <h1>
       Facilities dependency tree
     </h1>
+
 <:
 use make_tech_tree;
-
 make_tech_tree->draw_map();
 :>
 

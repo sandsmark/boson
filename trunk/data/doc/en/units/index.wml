@@ -4,7 +4,7 @@
 <h1>Units</h1>
 
 
-<grid layout=4x3 padding=15 border=0>
+<grid layout=5x2 padding=15 border=0>
 #include "simple_facilities.wml" type="Units" name="Mineral Harvester" \
         name2="mineralharvester" type2="mob"
 #include "simple_facilities.wml" type="Units" name="Oil Harvester" \

@@ -3,7 +3,7 @@
 
 <h1>Facilities</h1>
 
-<grid layout=4x4 padding=15 border=0>
+<grid layout=5x3 padding=15 border=0>
 #include "simple_facilities.wml" type="Facilities" name="Map" \
         name2="map" type2="fix"
 #include "simple_facilities.wml" type="Facilities" name="Command Bunker" \
