@@ -268,6 +268,7 @@ bool SpeciesTheme::loadUnitPixmap(const QString &fileName, QPixmap &pix, bool wi
  d->mCanChangeTeamColor = false;
  
  QImage image(fileName);
+ image.setAlphaBuffer(false);
  QImage *mask = 0;
  int x, y, w, h;
  unsigned char *yp = 0; //AB: what is this??
@@ -305,7 +306,6 @@ bool SpeciesTheme::loadUnitPixmap(const QString &fileName, QPixmap &pix, bool wi
 	mask->setColor( 1, 0 );
 	mask->fill(0xff); 
  }
-	
  if (withMask) {
 	for ( y = 0; y < h; y++ ) {
 		yp = mask->scanLine(y);	// mask
@@ -320,7 +320,10 @@ bool SpeciesTheme::loadUnitPixmap(const QString &fileName, QPixmap &pix, bool wi
 				continue;
 			}
 			if (with_team_color) {
-				if ( (qRed(*p) > 0x80) && (qGreen(*p) < 0x70) && (qBlue(*p) < 0x70)) {
+				if ( ((qRed(*p) > 0x80) &&
+						(qGreen(*p) < 0x70) &&
+						(qBlue(*p) < 0x70)) ||
+						qAlpha(*p) < 255 ) {
 					*p = teamColor().rgb();
 				}
 			}
