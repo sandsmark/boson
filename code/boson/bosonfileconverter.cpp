@@ -118,6 +118,7 @@ bool MapToTexMap_From_0_8_To_0_9::convert(int* groundTypes, QByteArray* newMap, 
  // now we can start to convert.
  writeMapStream << (Q_UINT32)mMapWidth;
  writeMapStream << (Q_UINT32)mMapHeight;
+ writeMapStream << QString::fromLatin1("earth");
  writeTexMapStream << (Q_UINT32)BO_COMPAT_0_8_TEXTURE_COUNT;
 
 

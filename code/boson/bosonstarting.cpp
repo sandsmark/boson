@@ -31,6 +31,7 @@
 #include "speciestheme.h"
 #include "bosonprofiling.h"
 #include "startupwidgets/bosonloadingwidget.h"
+#include "bosondata.h"
 #include "bodebug.h"
 
 #include <klocale.h>
@@ -270,7 +271,8 @@ void BosonStarting::slotLoadTiles()
  disconnect(playField()->map(), 0, this, 0);
  checkEvents();
 
- playField()->map()->loadGroundTheme(QString("earth"));
+ // actually load the theme, including textures.
+ BosonData::bosonData()->loadGroundTheme(QString::fromLatin1("earth"));
 
  boProfiling->stop(BosonProfiling::LoadTiles);
 
