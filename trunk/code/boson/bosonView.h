@@ -23,17 +23,55 @@
 
 #include "visualView.h"
 
+class QPushButton;
+class QPixmap;
+class playerFacility;
+class QLabel;
+class QWidgetStack;
+class QScrollView;
+class QVBoxLayout;
+
+
 class bosonView : public visualView 
 {
 	Q_OBJECT
 
 public:
-	bosonView(visualField *, QObject *parent=0, const char *name=0L);
+	bosonView(visualField *, QWidget *parent=0, const char *name=0L);
 
-	/* to handle orderButton 'clicked' event */
-	void u_goto(void);
+	enum orderType_t { OT_NONE =-1 , OT_FACILITY=10, OT_MOBILE=11};
+
+	virtual void setSelected(QPixmap *);
+	virtual void setOrders(int what , int who=-1);
+
+private slots:
+	void bc0(void) { handleOrder(0); } // button clicked
+	void bc1(void) { handleOrder(1); } // button clicked
+	void bc2(void) { handleOrder(2); } // button clicked
+	void bc3(void) { handleOrder(3); } // button clicked
+	void bc4(void) { handleOrder(4); } // button clicked
+	void bc5(void) { handleOrder(5); } // button clicked
+	void bc6(void) { handleOrder(6); } // button clicked
+	void bc7(void) { handleOrder(7); } // button clicked
+	void bc8(void) { handleOrder(8); } // button clicked
+	void bc9(void) { handleOrder(9); } // button clicked
+	void bc10(void) { handleOrder(10); } // button clicked
+
+private:
+/* state view (for selected items) */
+	QWidgetStack	*stack;
+	QLabel		*view_one;
+	QScrollView	*view_many;
+	QPixmap		*view_none;
+
+private:
+	void	handleOrder(int);
+//	visualBigDisplay	*field;
+
+/* GUI */
+	QPushButton	*orderButton[11];
+	orderType_t	orderType;
 };
 
 #endif // BOSONVIEW_H
-
 

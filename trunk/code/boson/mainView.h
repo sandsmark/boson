@@ -27,7 +27,6 @@ class	visualMiniDisplay;
 class	visualBigDisplay;
 class	bosonView;
 class	bosonField;
-class	infoWin;
 
 class mainView : public QWidget 
 {
@@ -43,8 +42,6 @@ private:
 	visualMiniDisplay	*mini;
 	visualBigDisplay	*big;
 	bosonView		*view;
-	/* Window displayer information */
-	infoWin			*info;
 };
 
 

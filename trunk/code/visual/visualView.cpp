@@ -24,13 +24,13 @@
 #include "visual.h"
 
 
-visualView::visualView(visualField *f, QObject *parent, const char *name=0L)
-	: QObject(parent, name)
+visualView::visualView(visualField *f, QWidget *parent, const char *name=0L)
+	: QFrame(parent, name)
 	,fixSelected( 0L )
 	,selectionMode(SELECT_NONE)
 {
 	/* map geometry */
-	viewL = viewH = 5; ///orzel : arbitraire, (doit etre/)sera fixe par un mainMap..
+	viewL = viewH = 5; ///orzel : senseless, will be set by mainMap later
 	viewX = viewY = 0;
 	field = f;
 }
@@ -85,6 +85,7 @@ void visualView::checkMove()
 	viewY = QMAX(viewY, 0);
 }
 
+
 visualFacility * visualView::unSelectFix(void)
 {
 visualFacility *f = fixSelected;
@@ -98,6 +99,7 @@ emit setSelected((QPixmap *)0l);
 return f;
 }
 
+
 visualMobUnit *visualView::unSelectMob(long key)
 {
 visualMobUnit *m = mobSelected[key];
@@ -106,14 +108,13 @@ m->unSelect();
 
 if (mobSelected.isEmpty()) {
 	emit setSelected((QPixmap *)0l);
-	emit setOrders(0);
+	emit setOrders(-1);
 	/*orderButton[0]->hide();
 	orderButton[0]->disconnect(this); */
 	}
 
 return m;
 }
-
 
 void visualView::unSelectAll(void)
 {
@@ -130,7 +131,7 @@ void visualView::unSelectAll(void)
 	if (!mobSelected.isEmpty()) mobSelected.clear();
 
 	selectionWho =  -1; ///orzel : should be a WHO_NOBOCY;
-	emit setOrders(0);
+	emit setOrders(-1);
 }
 
 
@@ -142,10 +143,10 @@ void visualView::selectFix(visualFacility *f)
 	
 	switch (f->getType()) {
 		case FACILITY_CMDBUNKER:
-			emit setOrders(1, f->who);
+			emit setOrders(10, f->who);
 			break;
 		case FACILITY_WAR_FACTORY:
-			emit setOrders(2, f->who);
+			emit setOrders(11, f->who);
 			break;
 		default:
 			break;

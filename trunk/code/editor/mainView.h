@@ -43,8 +43,6 @@ private:
     visualMiniDisplay	*mini;
     editorBigDisplay	*big;
     visualView		*view;
-/* Window displayer information */
-    infoWin		*info;
 };
 
 

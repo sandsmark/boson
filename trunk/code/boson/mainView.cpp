@@ -21,7 +21,6 @@
 #include <qlayout.h>
 #include <qkeycode.h>
 
-#include "infoWin.h"
 #include "bosonField.h"
 #include "visualMiniDisplay.h"
 #include "visualBigDisplay.h"
@@ -40,15 +39,13 @@ mainView::mainView(bosonField *field, QWidget *parent=0, const char *name=0)
 
 	topLayout->addLayout(leftLayout,0);
 
-		view = new bosonView(field); // the view associated with this window
+		view = new bosonView(field, this, "bosonView");
+		
 		mini = new visualMiniDisplay(view, this);
 		mini->setFixedSize(200,200);
+		
 		leftLayout->addWidget(mini);
-
-		info = new infoWin(this, "infowin");
-		connect (view, SIGNAL(setSelected(QPixmap*)), info, SLOT(setSelected(QPixmap*)));
-		connect (view, SIGNAL(setOrders(int,int)), info, SLOT(setOrderType(int,int)));
-		leftLayout->addWidget(info, 10);
+		leftLayout->addWidget(view, 10);
 
 /* This is the main map, the game area */
 	big = new visualBigDisplay(view, this);
@@ -57,6 +54,7 @@ mainView::mainView(bosonField *field, QWidget *parent=0, const char *name=0)
 /* finish the stuff */
 //	leftLayout->addStretch(10);
 	topLayout->activate();
+	setMinimumSize(800, 624);
 }
 
 #define ARROW_KEY_STEP	2

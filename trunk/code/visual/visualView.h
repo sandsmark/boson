@@ -21,6 +21,8 @@
 #ifndef VISUALVIEW_H 
 #define VISUALVIEW_H 
 
+#include <qframe.h>
+
 #include <visualUnit.h>
 #include "visualField.h"
 
@@ -39,13 +41,15 @@ enum selectionMode_t {
   * This class is the global object concerning a view : where, how large..
   * It's used by mainMap and miniMap
   * It's also the place where selections are handled
+  * 
+  * it inherits from QFrame only because it will _also_ be part of the GUI in boson or boeditor
   */
-class visualView : public QObject
+class visualView : public QFrame
 {
 	Q_OBJECT
 
 public:
-	visualView(visualField *, QObject *parent=0, const char *name=0L);
+	visualView(visualField *, QWidget *parent=0, const char *name=0L);
 
 	/*
 	 * size / position handling
@@ -95,9 +99,9 @@ public:
 	void		unSelectAll(void);
 	/** add to selection all units in this area */
 	void		selectArea(int x1, int y1, int x2, int y2);
-signals:
-	void		setSelected(QPixmap *); //null -> nothing is selected
-	void		setOrders(int what , int who=-1);
+
+	virtual void	setSelected(QPixmap *)=0; //null -> nothing is selected
+	virtual void	setOrders(int what , int who=-1)=0;
 
 	/*
 public slots:

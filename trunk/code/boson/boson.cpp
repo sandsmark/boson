@@ -253,7 +253,7 @@ void BosonApp::initView(int w, int h)
 	mainView *mainview = new mainView(field, this, "main_view_0");
 	setView(mainview);
 	mainview->show();
-	resize(780, 580);
+	resize(800, 626);
 }
 
 
