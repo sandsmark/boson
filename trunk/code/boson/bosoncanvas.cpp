@@ -880,7 +880,7 @@ float BosonCanvas::heightAtPoint(float x, float y) const
 
  // Blend all corners together and return the result
  // FIXME: this can probably be written _much_ more understandably and maybe faster
- return ((h1 * (1 - x2)) + (h2 * x2) * (1 - y2)) + ((h3 * (1 - x2)) + (h4 * x2) * y2);
+ return ((h1 * (1 - x2) + (h2 * x2)) * (1 - y2)) + ((h3 * (1 - x2) + (h4 * x2)) * y2);
 }
 
 void BosonCanvas::removeFromCells(BosonItem* item)
