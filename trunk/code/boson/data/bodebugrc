@@ -42,3 +42,6 @@
 [300]
 InfoOutput=4
 
+#  Collisions is off by default
+[310]
+InfoOutput=4

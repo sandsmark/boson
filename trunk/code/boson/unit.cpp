@@ -786,12 +786,12 @@ QValueList<Unit*> Unit::unitCollisions(bool exact) const
  if (isFlying()) { // flying units never collide - different altitudes
 	return units;
  }
- boDebug() << k_funcinfo << endl;
+ boDebug(310) << k_funcinfo << endl;
  BoItemList collisionList = canvas()->bosonCollisions(cells(), (BosonItem*)this, exact);
  if (collisionList.isEmpty()) {
 	return units;
  }
- 
+
  BoItemList::Iterator it;
  for (it = collisionList.begin(); it != collisionList.end(); ++it) {
 	if (!RTTI::isUnit((*it)->rtti())) {
