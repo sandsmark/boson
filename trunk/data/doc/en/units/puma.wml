@@ -1,4 +1,4 @@
 #include "facilities.wml" type="Units" name="Puma" \
         description="" \
         name2="puma" type2="mob" \
-        before_url="transall.html" before_text="Transall" after_url="../editor/index.html." after_text="The Boson editor" up_url="index.html"
+        before_url="transall.html" before_text="Transall" after_url="koyote.html" after_text="Koyote" up_url="index.html"
