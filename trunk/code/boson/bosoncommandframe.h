@@ -139,15 +139,10 @@ public slots:
 	void slotSetButtonsPerRow(int b);
 
 	/**
-	 * Re-Enable the order buttons. See @ref slotFacilityProduces
+	 * Should be called when the production of the factory changes, i.e. is
+	 * stopped/paused or started.
 	 **/
-	void slotProductionCompleted(Facility* factory);
-
-	/**
-	 * Gray out the order buttons that can currently not be used, as another
-	 * units is being produced. (maybe even disable the buttons)
-	 **/
-	void slotFacilityProduces(Facility* factory);
+	void slotUpdateProduction(Facility* factory);
 
 	/**
 	 * If the selected unit is a facility that has not been constructed

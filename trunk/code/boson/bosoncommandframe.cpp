@@ -225,7 +225,8 @@ void BoOrderWidget::setOrderButtons(QValueList<int> produceList, Player* owner, 
  }
  for (unsigned int i = 0; i < produceList.count(); i++) {
 	d->mOrderButton[i]->setUnit(produceList[i], owner);
-	if (unitType > 0) {
+	d->mTopLayout->activate();
+	if (unitType >= 0) {
 		int count = factory->productionList().contains(produceList[i]);
 		if (produceList[i] != unitType) {
 			d->mOrderButton[i]->setProductionCount(count);
@@ -636,18 +637,7 @@ void BosonCommandFrame::slotShowUnit(Unit* unit)
  d->mOrderWidget->show();
 }
 
-void BosonCommandFrame::slotFacilityProduces(Facility* f)
-{
- if (!f) {
-	kdError() << k_funcinfo << "NULL facility" << endl;
-	return;
- }
- if (((Facility*)d->mSelectedUnit) == f) {
-	slotSetAction(f);
- }
-}
-
-void BosonCommandFrame::slotProductionCompleted(Facility* f)
+void BosonCommandFrame::slotUpdateProduction(Facility* f)
 {
  if (!f) {
 	kdError() << k_funcinfo << "NULL facility" << endl;
@@ -691,7 +681,7 @@ void BosonCommandFrame::slotUpdate()
  }
  if (!d->mOrderWidget->isHidden()) {
 	if (!((Facility*)d->mSelectedUnit)->hasProduction()) {
-		slotProductionCompleted((Facility*)d->mSelectedUnit);
+		slotUpdateProduction((Facility*)d->mSelectedUnit);
 	} else {
 		d->mOrderWidget->productionAdvanced(d->mSelectedUnit, 
 				((Facility*)d->mSelectedUnit)->productionProgress());
