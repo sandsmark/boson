@@ -77,6 +77,7 @@ signals:
 /* moving */
 	int 	dest_x, dest_y;
 	int	asked_dx, asked_dy;
+	mobUnitState	asked_state;
 
 /* attack */
 	Unit 	*target;

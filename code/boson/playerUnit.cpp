@@ -66,11 +66,11 @@ bool playerMobUnit::getWantedMove(bosonMsgData *msg)
 	switch(state){
 		default:
 			logf(LOG_ERROR, "playerMobUnit::getWantedMove : unknown state");
-			return 0;
+			return false;
 			break;
 
 		case MUS_NONE:
-			return 0;
+			return false;
 			break;
 
 		case MUS_TURNING:
@@ -89,10 +89,11 @@ bool playerMobUnit::getWantedMove(bosonMsgData *msg)
 			if (newdir != direction) {
 				turnTo(newdir); ///orzel : is this really useful
 				msg->move.dx = msg->move.dy = 0; msg->move.direction = direction;
-				return 1;
+				asked_state = MUS_TURNING;
+				return true;
 				}
 			turnTo(newdir); // turning anyway
-			if (state != MUS_MOVING) return 0;
+			if (state != MUS_MOVING) return false;
 
 		case MUS_MOVING:
 			ldx = dest_x - x() ; ldy= dest_y - y();
@@ -113,23 +114,24 @@ bool playerMobUnit::getWantedMove(bosonMsgData *msg)
 				}
 			msg->move.dx = asked_dx ; msg->move.dy = asked_dy; msg->move.direction = direction;
 
-			if (checkMove( asked_dx, asked_dy)) return 1;
+			asked_state = MUS_MOVING;
+			if (checkMove( asked_dx, asked_dy)) return true;
 
 			if (asked_dy && checkMove( 0, asked_dy)) {
 				msg->move.dx = asked_dx = 0;
-				return 1;
+				return true;
 				}
 			if (asked_dx && checkMove( asked_dx, 0)) {
 				msg->move.dy = asked_dy = 0;
-				return 1;
+				return true;
 				}
 
 			/* failed : can't move any more */
-			state = MUS_NONE;
+			asked_state = state = MUS_NONE;
 			asked_dx = asked_dy = 0; // so that willBe returns the good position
 			//logf(LOG_GAME_LOW, "ckeckMove failed stopping: mobile[%p] has stopped\n", this);
 			logf(LOG_WARNING, "ckeckMove failed : mobile[%p] has stopped\n", this);
-			return 0; 
+			return false; 
 
 			break;
 		}
@@ -287,7 +289,7 @@ if ( who!=who_am_i) {
 
 /* else */
 
-if ( MUS_MOVING != state && (dx!=0 || dy!=0) ) {
+if ( MUS_MOVING != asked_state && (dx!=0 || dy!=0) ) {
 	logf(LOG_ERROR, "playerMobUnit::s_moveBy while not moving, ignored");
 	return;
 	}
