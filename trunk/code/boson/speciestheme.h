@@ -73,7 +73,7 @@ public:
 
 	bool loadUnitGraphics(const UnitProperties* prop);
 
-	/***
+	/**
 	 * @return The pixmap array for unitType or NULL if none was found for
 	 * this unitType. See also @ref UnitProperties::typeId
 	 **/
@@ -90,14 +90,14 @@ public:
 	 **/
 	QCanvasPixmapArray* bigShot(bool isFacility, unsigned int version) const;
 
-	/***
+	/**
 	 * @return The big overview pixmap (the one that is displayed when the
 	 * unit is selected) for unitType or NULL if none was found for
 	 * this unitType. See also @ref UnitProperties::typeId
 	 **/
 	QPixmap* bigOverview(int unitType);
 
-	/***
+	/**
 	 * @return The small pixmap (the one that is displayed on the order
 	 * buttons in @ref BosonCommandFrame to construct this unit) for 
 	 * unitType or NULL if none was found for this unitType. See also 
