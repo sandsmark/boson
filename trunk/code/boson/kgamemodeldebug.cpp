@@ -381,7 +381,7 @@ public:
 			bboxMin = QString("(%1,%2,%3)").arg(d->bbox_min[0]).arg(d->bbox_min[1]).arg(d->bbox_min[2]);
 			bboxMax = QString("(%1,%2,%3)").arg(d->bbox_max[0]).arg(d->bbox_max[1]).arg(d->bbox_max[2]);
 			pos = QString("(%1,%2,%3)").arg(d->pos[0]).arg(d->pos[1]).arg(d->pos[2]);
-			rot = QString("(%1,%2,%3)").arg(d->rot[0]).arg(d->rot[1]).arg(d->rot[2]);
+			rot = QString("(%1,%2,%3,%4)").arg(d->rot[0]).arg(d->rot[1]).arg(d->rot[2]).arg(d->rot[3]);
 			scl = QString("(%1,%2,%3)").arg(d->scl[0]).arg(d->scl[1]).arg(d->scl[2]);
 			morphSmooth = QString::number(d->morph_smooth);
 			morphSmooth = QString(d->morph_smooth);
