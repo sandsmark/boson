@@ -8,5 +8,6 @@ METASOURCES = AUTO
 
 libbosonwidgets_la_SOURCES = \
 	bogamechat.cpp \
-	bosonplayfieldview.cpp
+	bosonplayfieldview.cpp \
+	bonuminput.cpp
 
