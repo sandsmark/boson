@@ -7,6 +7,7 @@
 #include <bosonmap.h>
 #include <bosoncanvas.h>
 #include <bosondata.h>
+#include <boeventloop.h>
 
 #include <kcmdlineargs.h>
 
@@ -23,6 +24,7 @@ BosonCanvas* g_canvas = 0;
 int main(int argc, char** argv)
 {
  KCmdLineArgs::init(argc, argv, "tester", "tester", "tester", "version xyz");
+ BoEventLoop eventLoop;
  BoApplication app;
  if (!createGame()) {
 	return 1;
@@ -80,6 +82,7 @@ static bool createMap()
 	return false;
  }
 
+ qDebug("using %s", available[0].latin1());
  field->preLoadPlayField(available[0]);
 
  QMap<QString, QByteArray> files;
