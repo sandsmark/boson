@@ -110,6 +110,10 @@ protected:
 						boWarning() << k_funcinfo << "Invalid productiontype when producing!" << endl;
 						return QString::null;
 					}
+				} else if (commandWidget()->action().type() == ActionPlacementPreview) {
+					// Used by editor when placing units
+					const UnitProperties* prop = commandWidget()->productionOwner()->unitProperties(commandWidget()->productionId());
+					text = i18n("%1\nMinerals: %2\nOil: %3").arg(prop->name()).arg(prop->mineralCost()).arg(prop->oilCost());
 				} else {
 					text = commandWidget()->action().text();
 				}

@@ -872,6 +872,10 @@ void BosonBigDisplayBase::paintGL()
  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
  boProfiling->renderClear(false);
 
+ d->mRenderedItems = 0;
+ d->mRenderedCells = 0;
+ d->mRenderedParticles = 0;
+
  glColor3ub(255, 255, 255);
 
  // note: we don't call gluLookAt() here because of performance. instead we just
@@ -895,9 +899,6 @@ void BosonBigDisplayBase::paintGL()
  }
 
  boProfiling->renderUnits(true);
- d->mRenderedItems = 0;
- d->mRenderedCells = 0;
- d->mRenderedParticles = 0;
 
  if (boConfig->wireFrames()) {
 	glDisable(GL_TEXTURE_2D);
