@@ -36,8 +36,7 @@ void addModel(char** list, int pos, const char* file); // add a model file to th
 
 void parseModel(const char* file);
 void parseMesh(Lib3dsMesh* mesh);
-int hasPoint(Lib3dsFace* face, int point);
-int isPointEqual(Lib3dsMesh* mesh, int p1, int p2); // compares point (vertex), texel, flag
+
 void optimizeMesh(Lib3dsMesh* mesh);
 void optimizePoints(Lib3dsMesh* mesh);
 void optimizeFaces(Lib3dsMesh* mesh);
@@ -46,9 +45,14 @@ void dumpMesh(Lib3dsMesh* mesh);
 void stripify(struct Face* faces, int facesCount);
 void makeStrip(struct Face* face, struct Face* prev, struct Face* prev2, struct List* strip);
 
+int hasPoint(Lib3dsFace* face, int point);
+int isPointEqual(Lib3dsMesh* mesh, int p1, int p2); // compares point (vertex), texel, flag
+
+
 int debug;
 int first_mesh_only;
 struct StripifyData stripifyData;
+const char* outputFile = 0;
 
 struct List* new_list_item(struct List* previous)
 {
@@ -163,6 +167,10 @@ int main(int argc, const char** argv)
 		first_mesh_only = 1;
 		continue;
 	}
+	if (strcmp("-s", argv[i]) == 0) {
+		arg = 1;
+		continue;
+	}
 	if (strcmp("-h", argv[i]) == 0 || strcmp("--help", argv[i]) == 0) {
 		usage(argv[0]);
 		exit(0);
@@ -172,6 +180,15 @@ int main(int argc, const char** argv)
 			// this should be a model file
 			addModel(models, modelCount, argv[i]);
 			modelCount++;
+			break;
+		case 1:
+			// "-s" was given, i.e. save to specified file
+			if (outputFile) {
+				printf("ERROR: outputFile not NULL. did you give -s twice?\n");
+				exit(1);
+			}
+			outputFile = argv[i];
+			arg = 0;
 			break;
 		default:
 			// oops - what happened here??
@@ -183,6 +200,10 @@ int main(int argc, const char** argv)
 	printf("No model specified!\n");
 	usage(argv[0]);
 	exit(0);
+ }
+ if (outputFile && modelCount > 1) {
+	printf("ERROR: can open only one model when save is requested\n");
+	exit(1);
  }
 
  for (i = 0; i < modelCount; i++) {
@@ -221,6 +242,10 @@ void parseModel(const char* filename)
 	if (first_mesh_only) {
 		break;
 	}
+ }
+ if (outputFile) {
+	lib3ds_file_save(file, outputFile);
+	printf("Saved to %s\n", outputFile);
  }
  lib3ds_file_free(file);
 }
