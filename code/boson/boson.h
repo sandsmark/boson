@@ -102,6 +102,8 @@ signals:
 	 **/
 	void signalScenarioChanged(const QString& scenarioIdentifier);
 
+	void signalInitFogOfWar();
+
 protected:
 	virtual bool playerInput(QDataStream& stream, KPlayer* player);
 

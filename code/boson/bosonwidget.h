@@ -137,6 +137,8 @@ protected slots:
 
 	void slotPlayerPropertyChanged(KGamePropertyBase*, KPlayer*);
 
+	void slotInitFogOfWar();
+
 protected:
 	void changeSpecies(const QString& species);
 	void addLocalPlayer();

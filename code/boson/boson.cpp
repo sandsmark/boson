@@ -264,6 +264,9 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 	case BosonMessage::InitMap:
 		emit signalInitMap(buffer);
 		break;
+	case BosonMessage::IdInitFogOfWar:
+		emit signalInitFogOfWar();
+		break;
 	case BosonMessage::IdStartScenario:
 		if (isRunning()) {
 			return;

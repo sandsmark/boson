@@ -30,7 +30,8 @@ public:
 		ChangeSpecies = 1, // for new game dialog
 		ChangeMap = 2, // for new game dialog
 		ChangeScenario = 3, // for new game dialog
-		IdStartScenario = 10, // for new game dialog
+		IdInitFogOfWar = 10,
+		IdStartScenario = 11,
 		AddUnit = 50, // whenever a unit is added
 		Advance = 51, // call BosonCanvas::advance()
 		IdChat = 52, // a chat message
