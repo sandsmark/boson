@@ -535,8 +535,10 @@ void VisualMobileUnit::advanceMove()
  }
 
  if (xVelocity() == 0 && yVelocity() == 0) {
-	kdDebug() << id() << " has not arrived but cannot move further" << endl;
-	stopMoving();
+	// do *not* stop - try to move in the next advance phase. TODO: move
+	// around the unit!
+//	kdDebug() << id() << " has not arrived but cannot move further" << endl;
+//	stopMoving();
  }
 }
 
