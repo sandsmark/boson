@@ -166,8 +166,8 @@ switch(state) {
 			data->accepted.who_you_are = playerId;
 			data->accepted.missing_player = gpp.nbPlayer - 1;;
 			data->accepted.total_player = gpp.nbPlayer;
-			data->accepted.sizeX = map.height;
-			data->accepted.sizeY = map.width;;
+			data->accepted.sizeX = map_height;
+			data->accepted.sizeY = map_width;;
 			sendMsg(gpp.player[playerId].buffer, MSG_DLG_ACCEPTED, sizeof(data->accepted), data);
 			break;
 			}
@@ -179,8 +179,8 @@ switch(state) {
 			data->accepted.who_you_are = playerId;
 			data->accepted.missing_player = gpp.nbPlayer-gpp.nbConnected;
 			data->accepted.total_player = gpp.nbPlayer;
-			data->accepted.sizeX = map.height;
-			data->accepted.sizeY = map.width;;
+			data->accepted.sizeX = map_height;
+			data->accepted.sizeY = map_width;;
 			sendMsg(gpp.player[playerId].buffer, MSG_DLG_ACCEPTED, sizeof(data->accepted), data);
 			if (gpp.nbPlayer == gpp.nbConnected) {
 
@@ -190,7 +190,7 @@ switch(state) {
 
 				/* then initialize the game */
 				state		= SS_PLAYING;
-				initPeople();
+				loadUnits();
 				logf(LOG_INFO, "Game is beginning");
 
 				/* Beginning of synchronization */
@@ -270,16 +270,5 @@ switch(tag) {
 
 // logf(LOG_INFO, "handleGameMessage : receiving tag %d from player %d, quite normal", tag, playerId);
 
-}
-
-
-void BosonServer::initPeople(void)
-{
-	int i;
-
-	for (i=0; i<people.nbMobiles; i++)
-		createMobUnit(people.mobile[i]);
-	for (i=0; i<people.nbFacilities; i++)
-		createFixUnit(people.facility[i]);
 }
 
