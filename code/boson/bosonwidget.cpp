@@ -90,9 +90,6 @@ void BosonWidget::initConnections()
  // this does the actual game. note that editor must not have this!
  connect(boGame, SIGNAL(signalAdvance(unsigned int, bool)),
 		canvas(), SLOT(slotAdvance(unsigned int, bool)));
-
- connect(boGame, SIGNAL(signalInitFogOfWar()),
-		this, SLOT(slotInitFogOfWar()));
 }
 
 void BosonWidget::initPlayer()

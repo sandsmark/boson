@@ -318,9 +318,7 @@ void BosonStarting::slotLoadGameData3() // FIXME rename!
 
  if (boGame->isAdmin() && !mLoading) {
 	// Send InitFogOfWar and StartScenario messages if we're starting new game
-	if (boGame->gameMode()) {
-		boGame->sendMessage(0, BosonMessage::IdInitFogOfWar);
-	}
+	boGame->sendMessage(0, BosonMessage::IdInitFogOfWar);
 	boGame->sendMessage(0, BosonMessage::IdStartScenario);
  } else if (mLoading) {
 	// If we're loading saved game, init fog of war for local player
