@@ -55,6 +55,6 @@ extern FILE *logfile;
 
 #endif
 
-int logf(boLogLevel level, char *fmt, ...);
+int logf(boLogLevel level, const char *fmt, ...);
 
 #endif /* LOG_H */
