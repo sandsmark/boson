@@ -156,8 +156,12 @@ bool BosonPlayField::preLoadAllPlayFields()
 		}
 		campaign->addPlayField(playField);
 	}
-	if (!campaign->playFieldCount() == 0) {
-		boWarning() << k_funcinfo << "could not load any playfields for campaign " << *campaignIt << endl;
+	if (campaign->playFieldCount() == 0) {
+		QString campaignName = *campaignIt;
+		if (campaignName.isEmpty()) {
+			campaignName = QString::fromLatin1("default");
+		}
+		boWarning() << k_funcinfo << "could not load any playfields for campaign " << campaignName << endl;
 	}
 	if (!BosonData::bosonData()->insertCampaign(BosonCampaign::campaignDataObject(campaign))) {
 		boWarning() << k_funcinfo << "error on inserting campaign " << *campaignIt << endl;
@@ -690,7 +694,7 @@ QStringList BosonPlayField::findAvailablePlayFields()
 QStringList BosonPlayField::findAvailableCampaigns()
 {
  QStringList list;
- list.append(QString::null);
+ list.append(QString::fromLatin1(""));
  QStringList files = BosonData::availableFiles(QString::fromLatin1("maps/*/*.bpf"));
  QStringList::Iterator it = files.begin();
  for (; it != files.end(); ++it) {
