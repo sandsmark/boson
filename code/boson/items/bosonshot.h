@@ -262,6 +262,8 @@ class BosonShotExplosion : public BosonShot
     BosonShotExplosion(Player* owner, BosonCanvas* canvas, BoVector3 pos, long int damage, float damagerange, float fulldamagerange, int delay);
     BosonShotExplosion(Player* owner, BosonCanvas* canvas);
 
+    void activate(const BoVector3& pos, long int damange, float damageRange, float fulldamagerange, int delay);
+
     virtual bool saveAsXML(QDomElement& root);
     virtual bool loadFromXML(const QDomElement& root);
     virtual bool save(QDataStream& stream);
