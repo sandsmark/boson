@@ -481,6 +481,7 @@ UTextureFontRenderer::listFonts() {
 		if (tga_index != std::string::npos) {
 			unsigned int index = 0;
 			UFontInfo info("", 14, UFontInfo::Normal);
+			info.face = (*iter).substr(0, (*iter).find("_"));
 			while (index != std::string::npos) {
 				index = (*iter).find("_", index + 1);
 				if ((*iter)[index + 1] == 'B') {
