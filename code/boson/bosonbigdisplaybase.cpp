@@ -1077,7 +1077,7 @@ void BosonBigDisplayBase::renderText()
 	inverse.transform(&result, &v);
 
 	// it is a column vector, but we display as a row (so ^T)
-	QString text = i18n("CursorPos = (Projection * Modelview)^(-1) * (%1 , %2 , %3 , %3)^T:").
+	QString text = i18n("CursorPos = (Projection * Modelview)^(-1) * (%1 , %2 , %3 , %4)^T:").
 			arg(v[0], 6, 'f', 3).
 			arg(v[1], 6, 'f', 3).
 			arg(v[2], 6, 'f', 3).
