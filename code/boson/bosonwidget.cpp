@@ -345,6 +345,8 @@ void BosonWidget::slotDebug()
  KGameUnitDebug* units = new KGameUnitDebug(b);
  units->setBoson(d->mBoson);
  connect(dlg, SIGNAL(finished()), dlg, SLOT(slotDelayedDestruct()));
+ connect(dlg, SIGNAL(signalRequestIdName(int,bool,QString&)),
+		this, SLOT(slotDebugRequestIdName(int,bool,QString&)));
  dlg->show();
 }
 
@@ -1347,3 +1349,67 @@ void BosonWidget::slotScroll(int dir)
  }
 }
 
+void BosonWidget::slotDebugRequestIdName(int msgid, bool , QString& name)
+{
+ // we don't use i18n() for debug messages... not worth the work
+ switch (msgid) {
+	case BosonMessage::InitMap:
+		name = "Init Map";
+		break;
+	case BosonMessage::ChangeSpecies:
+		name = "Change Species";
+		break;
+	case BosonMessage::ChangePlayField:
+		name = "Change PlayField";
+		break;
+	case BosonMessage::ChangeTeamColor:
+		name = "Change TeamColor";
+		break;
+	case BosonMessage::IdInitFogOfWar:
+		name = "Init Fog of War";
+		break;
+	case BosonMessage::IdStartScenario:
+		name = "Start Scenario";
+		break;
+	case BosonMessage::AddUnit:
+		name = "Add Unit";
+		break;
+	case BosonMessage::AddUnitsXML:
+		name = "Add Units from XML";
+		break;
+	case BosonMessage::Advance:
+		name = "Advance";
+		break;
+	case BosonMessage::IdChat:
+		name = "Chat Message";
+		break;
+	case BosonMessage::IdGameIsStarted:
+		name = "Game is started";
+		break;
+	case BosonMessage::MoveMove:
+		name = "PlayerInput: Move";
+		break;
+	case BosonMessage::MoveAttack:
+		name = "PlayerInput: Attack";
+		break;
+	case BosonMessage::MoveBuild:
+		name = "PlayerInput: Build";
+		break;
+	case BosonMessage::MoveProduce:
+		name = "PlayerInput: Produce";
+		break;
+	case BosonMessage::MoveProduceStop:
+		name = "PlayerInput: Produce Stop";
+		break;
+	case BosonMessage::MoveMine:
+		name = "PlayerInput: Mine";
+		break;
+	case BosonMessage::UnitPropertyHandler:
+	default:
+		// a unit property was changed
+		// all ids > UnitPropertyHandler will be a unit property. we
+		// don't check further...
+		break;
+ }
+// kdDebug() << name << endl;
+}
