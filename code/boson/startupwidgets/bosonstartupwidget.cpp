@@ -373,6 +373,7 @@ void BosonStartupWidget::slotShowWelcomeWidget()
  if (w) {
 	d->mWidgetStack->addWidget(w, (int)IdWelcome);
  }
+ d->mWidgetStack->raiseWidget((int)IdWelcome);
  emit signalResetGame();
 }
 
