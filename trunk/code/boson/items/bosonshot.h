@@ -49,8 +49,12 @@ class BosonShot : public BosonItem
   public:
     enum PropertyIds
     {
-        // BosonShot uses IDs from 512 to 1023
-        // (derived classes use 1024 to 28671)
+        // BosonShot uses IDs from 4096 to 4159
+        // derived classes may use 4160 to 8191.
+        // WARNING: because we need to add every Id with a name to the
+        // (static!!) property map, IDs must be unique among different classes.
+        // Therefore we must not use the same ID twice, even if that's in
+        // different classes.
     };
 
     /**
@@ -184,6 +188,7 @@ class BosonShotBullet : public BosonShot
   public:
     enum PropertyIds
     {
+      // 4160 to 4223 (4160+63) allowed here
     };
 
     BosonShotBullet(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop);
@@ -227,11 +232,12 @@ class BosonShotMissile : public BosonShot
   public:
     enum PropertyIds
     {
-      IdTotalDist = 1024 + 0,
-      IdPassedDist = 1024 + 1,
-      IdZ = 1024 + 2,
-      IdEffectVelocity = 1024 + 3,
-      IdMaxHeight = 1024 + 4
+      // 4224 to 4287 (4224+63) allowed here
+      IdTotalDist = 4224 + 0,
+      IdPassedDist = 4224 + 1,
+      IdZ = 4224 + 2,
+      IdEffectVelocity = 4224 + 3,
+      IdMaxHeight = 4224 + 4
     };
 
     BosonShotMissile(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop);
@@ -277,10 +283,11 @@ class BosonShotExplosion : public BosonShot
   public:
     enum PropertyIds
     {
-      IdDamage = 1024 + 0,
-      IdDamageRange = 1024 + 1,
-      IdFullDamageRange  = 1024 + 2,
-      IdDelay = 1024 + 3
+      // 4288 to 4351 (4288+63) allowed here
+      IdDamage = 4288 + 0,
+      IdDamageRange = 4288 + 1,
+      IdFullDamageRange  = 4288 + 2,
+      IdDelay = 4288 + 3
     };
 
     BosonShotExplosion(Player* owner, BosonCanvas* canvas);
@@ -323,7 +330,8 @@ class BosonShotMine : public BosonShot
   public:
     enum PropertyIds
     {
-      IdActivated = 1024 + 0,
+      // 4352 to 4415 (4352+63) allowed here
+      IdActivated = 4352 + 0,
     };
 
     BosonShotMine(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop);
@@ -359,7 +367,8 @@ class BosonShotBomb : public BosonShot
   public:
     enum PropertyIds
     {
-      IdActivated = 1024 + 0,
+      // 4416 to 4479 (4416+63) allowed here
+      IdActivated = 4416 + 0,
     };
 
     BosonShotBomb(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop);
@@ -392,6 +401,11 @@ class BosonShotBomb : public BosonShot
 class BosonShotFragment : public BosonShot
 {
   public:
+    enum PropertyIds
+    {
+      // 4480 to 4543 (4480+63) allowed here
+    };
+
     BosonShotFragment(Player* owner, BosonCanvas* canvas);
     ~BosonShotFragment();
 
