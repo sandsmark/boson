@@ -104,7 +104,7 @@
 #include <GL/glext.h>
 #endif
 
-#define UFO_LABELS_ONLY 0
+#define UFO_LABELS_ONLY 1
 
 class BoVisibleEffects
 {

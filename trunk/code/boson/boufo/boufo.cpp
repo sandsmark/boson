@@ -25,8 +25,8 @@
 #include <ufo/events/ukeysym.hpp>
 #include <ufo/widgets/uslider.hpp>
 #include <ufo/ui/uuidefs.hpp>
-//#include <ufo/ui/uuimanager.hpp>
 #include "ubolabelui.h"
+#include "uboboxlayout.h"
 
 // AB: make sure that we are compatible to system that have QT_NO_STL defined
 #ifndef QT_NO_STL
@@ -37,6 +37,8 @@
 #include "boufo.moc"
 
 #include <klocale.h>
+#include <kglobal.h>
+#include <kstandarddirs.h>
 
 #include <qobject.h>
 #include <qdom.h>
@@ -411,12 +413,23 @@ BoUfoManager::BoUfoManager(int w, int h, bool opaque)
 {
  boDebug() << k_funcinfo << w << "x" << h << endl;
  if (!ufo::UToolkit::getToolkit()) {
-	(void)new ufo::UXToolkit();
+	ufo::UXToolkit* tk = new ufo::UXToolkit();
+	QString data_dir;
+	data_dir = KGlobal::dirs()->findResourceDir("data", "boson/pics/boson-startup-logo.png");
+	if (data_dir.isEmpty()) {
+		boWarning() << k_funcinfo << "cannot determine data_dir" << endl;
+	} else {
+		data_dir += "boson/ufo";
+		tk->putProperty("data_dir", data_dir.latin1());
+
+		QString font_dir = data_dir + "/font";
+		tk->putProperty("font_dir", font_dir.latin1());
+	}
  } else {
 	// TODO: make sure that it is a UXToolkit
 	boDebug() << k_funcinfo << "have already a toolkit" << endl;
  }
- mDisplay = new ufo::UXDisplay();
+ mDisplay = new ufo::UXDisplay("dummy");
 
  ufo::URectangle deviceRect(0, 0, w, h);
  ufo::URectangle contextRect(0, 0, w, h);
@@ -686,7 +699,7 @@ void BoUfoWidget::init(ufo::UWidget* w)
  // AB: suddenly this crash seems to be gone
 #endif
  BoUfoWidgetDeleter* deleter = new BoUfoWidgetDeleter(this);
- mWidget->addChild(deleter); // this means basically addChild(this).
+ mWidget->trackPointer(deleter); // this means basically trackPointer(this).
 
 
  CONNECT_UFO_TO_QT(BoUfoWidget, mWidget, MouseEntered);
@@ -806,14 +819,15 @@ void BoUfoWidget::setLayoutClass(LayoutClass layout)
 	case UFlowLayout:
 		setLayout(new ufo::UFlowLayout());
 		break;
-	case UBoxLayout:
-		setLayout(new ufo::UBoxLayout());
 		break;
+	case UBoxLayout:
 	case UHBoxLayout:
-		setLayout(new ufo::UBoxLayout(ufo::UBoxLayout::XAxis));
+//		setLayout(new ufo::UBoxLayout(ufo::UBoxLayout::XAxis));
+		setLayout(new ufo::UBoBoxLayout(true));
 		break;
 	case UVBoxLayout:
-		setLayout(new ufo::UBoxLayout(ufo::UBoxLayout::YAxis));
+//		setLayout(new ufo::UBoxLayout(ufo::UBoxLayout::YAxis));
+		setLayout(new ufo::UBoBoxLayout(false));
 		break;
 	case UBorderLayout:
 		setLayout(new ufo::UBorderLayout());
@@ -978,11 +992,11 @@ QString BoUfoWidget::backgroundImageFile() const
 void BoUfoWidget::setForegroundColor(const QColor& c)
 {
  ufo::UColor color(c.red(), c.green(), c.blue());
- widget()->setForegroundColor(&color);
+ widget()->setForegroundColor(color);
  std::vector<ufo::UWidget*> widgets = widget()->getWidgets();
  std::vector<ufo::UWidget*>::iterator it;
  for (it = widgets.begin(); it != widgets.end(); ++it) {
-	(*it)->setForegroundColor(&color);
+	(*it)->setForegroundColor(color);
  }
 }
 

@@ -1,5 +1,0 @@
-dnl AB: we require libufo >= 0.7.3
-PKG_CHECK_MODULES(UFO, ufo >= 0.7.3)
-AC_SUBST(UFO_CFLAGS)
-AC_SUBST(UFO_LIBS)
-
