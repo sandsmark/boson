@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -111,19 +111,26 @@ public slots:
 protected slots:
 
 	void slotModelChanged(int index);
+	void slotFrameChanged(int frame);
 	void slotConstructMeshList();
+	void slotConstructNodeList();
 	void slotDisplayMaterial(QListBoxItem*);
 	void slotDisplayMesh(QListViewItem*);
+	void slotDisplayNode(QListViewItem*);
 	void slotConnectToFace(QListViewItem*);
 
 protected:
 	void updateMaterialPage();
 	void updateMeshPage();
+	void updateNodePage();
+
+	void addNodeToList(QListViewItem* parent, Lib3dsNode* node);
 
 private:
 	void init();
 	void initMaterialPage();
 	void initMeshPage();
+	void initNodePage();
 
 	void addTextureMap(const QString& text, _Lib3dsTextureMap* map);
 
