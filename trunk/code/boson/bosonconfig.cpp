@@ -458,45 +458,42 @@ bool BosonConfig::unitSoundActivated(UnitSoundEvent e) const
 
 QValueList<unsigned long int> BosonConfig::readUnsignedLongNumList(KConfig* cfg, QString key)
 {
-  QValueList<unsigned long int> list;
-  QValueList<int> tmplist = cfg->readIntListEntry(key);
-  QValueList<int>::Iterator it;
-  for(it = tmplist.begin(); it != tmplist.end(); it++)
-  {
-    list.append((unsigned long int)(*it));
-  }
-  return list;
+ QValueList<unsigned long int> list;
+ QValueList<int> tmplist = cfg->readIntListEntry(key);
+ QValueList<int>::Iterator it;
+ for (it = tmplist.begin(); it != tmplist.end(); it++) {
+	list.append((unsigned long int)(*it));
+ }
+ return list;
 }
 
 void BosonConfig::writeUnsignedLongNumList(KConfig* cfg, QString key, QValueList<unsigned long int> list)
 {
-  QValueList<int> tmplist;
-  QValueList<unsigned long int>::Iterator it;
-  for(it = list.begin(); it != list.end(); it++)
-  {
-    tmplist.append((int)(*it));
-  }
+ QValueList<int> tmplist;
+ QValueList<unsigned long int>::Iterator it;
+ for (it = list.begin(); it != list.end(); it++) {
+	tmplist.append((int)(*it));
+ }
 	cfg->writeEntry(key, tmplist);
 }
 
 QValueList<float> BosonConfig::readFloatNumList(KConfig* cfg, QString key)
 {
-  QStringList strlist = cfg->readListEntry(key);
-  QValueList<float> list;
-  for(QStringList::Iterator it = strlist.begin(); it != strlist.end(); it++)
-  {
-    list.append((*it).toFloat());
-  }
-  return list;
+ QStringList strlist = cfg->readListEntry(key);
+ QValueList<float> list;
+ for (QStringList::Iterator it = strlist.begin(); it != strlist.end(); it++) {
+	list.append((*it).toFloat());
+ }
+ return list;
 }
 
 void BosonConfig::writeFloatNumList(QValueList<float> list, KConfig* cfg, QString key)
 {
-  QStringList strlist;
-  QString str;
-  for(QValueList<float>::Iterator it = list.begin(); it != list.end(); it++)
-  {
-    strlist.append(str.setNum(*it));
-  }
-  cfg->writeEntry(key, strlist);
+ QStringList strlist;
+ QString str;
+ for (QValueList<float>::Iterator it = list.begin(); it != list.end(); it++) {
+	strlist.append(str.setNum(*it));
+ }
+ cfg->writeEntry(key, strlist);
 }
+
