@@ -632,7 +632,7 @@ void MobileUnit::advanceMove()
 
  QPoint wp = currentWaypoint(); // where we go to
  // Check if we can actually go to waypoint (maybe it was fogged)
- if((boCanvas()->cellOccupied(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE) && !mAttacking) ||
+ if((boCanvas()->cellOccupied(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE, this) && !mAttacking) ||
 		!boCanvas()->cell(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE)->canGo(unitProperties()))
  {
 	if(! newPath())
@@ -664,7 +664,7 @@ void MobileUnit::advanceMove()
 	}
 	wp = currentWaypoint();
 	// Check if we can actually go to waypoint
-	if((boCanvas()->cellOccupied(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE) && !mAttacking) ||
+	if((boCanvas()->cellOccupied(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE, this) && !mAttacking) ||
 			!boCanvas()->cell(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE)->canGo(unitProperties()))
 	{
 		if(! newPath())
@@ -781,7 +781,7 @@ bool MobileUnit::newPath()
 	if(! boCanvas()->cell(mMoveDestX / BO_TILE_SIZE, mMoveDestY / BO_TILE_SIZE)->
 			canGo(unitProperties()))
 		return false;
-	if(boCanvas()->cellOccupied(mMoveDestX / BO_TILE_SIZE, mMoveDestY / BO_TILE_SIZE) && !mAttacking)
+	if(boCanvas()->cellOccupied(mMoveDestX / BO_TILE_SIZE, mMoveDestY / BO_TILE_SIZE, this) && !mAttacking)
 		return false;
  }
  QValueList<QPoint> path = BosonPath::findPath(this, mMoveDestX, mMoveDestY);
@@ -789,7 +789,7 @@ bool MobileUnit::newPath()
 	return false;
  for (int unsigned i = 0; i < path.count(); i++)
 	addWaypoint(path[i]);
- mPathrecalc = 20;
+ mPathrecalc = 50;
  return true;
 }
 
@@ -983,21 +983,14 @@ void Facility::advanceProduction()
 		twidth = width() / BO_TILE_SIZE;
 		tilex = (int)(x() / BO_TILE_SIZE);
 		tiley = (int)(y() / BO_TILE_SIZE + theight);
-		kdDebug() << "Guessed position in tiles: " << tilex << ", " << tiley << endl;
-		kdDebug() << "Guessed size in tiles: " << twidth << "x" << theight << endl;
 		int tries; // Tiles to try for free space
 		int ctry; // Current try
 		currentx = tilex - 1;
 		currenty = tiley - 1;
 		int debugnum = 1;
-		kdDebug() << "********** Start of unit auto-placement search **********" << endl;
-		kdDebug() << "Pre-search currents: currentx: " << currentx << "; currenty: " << currenty << endl;
 		for(int i=1; i <= 3; i++) {
-			kdDebug() << "  Round is now " << i << endl;
 			tries = 2 * i * twidth + 2 * i * theight + 4;
-			kdDebug() << "      Tries is now " << tries << endl;
 			currenty++;
-			kdDebug() << "      Currents are: currentx: " << currentx << "; currenty: " << currenty << endl;
 			for(ctry = 1; ctry <= tries; ctry++) {
 				kdDebug() << "    Try " << ctry << " of " << tries << endl;
 				if(ctry <= twidth + i) {
@@ -1011,19 +1004,8 @@ void Facility::advanceProduction()
 				} else {
 					currentx++;
 				}
-/*				if(ctry <= twidth + i) {
-					currentx++;
-				} else if(ctry <= twidth + theight + 2 * i) {
-					currenty--;
-				} else if(ctry <= twidth + theight + twidth + 3) {
-					currentx--;
-				} else {
-					currenty++;
-				}*/
-				
-				kdDebug() << "      Search tile no " << debugnum++ << ": currentx: " << currentx << "; currenty: " << currenty << endl;
+
 				if(! boCanvas()->cellOccupied(currentx, currenty)) {
-					kdDebug() << "      Cell not occupied - proceeding" << endl;
 					// Free cell - place unit at it
 					d->mProductionState = d->mProductionState + 1;
 					((Boson*)owner()->game())->buildProducedUnit(this, type, currentx, currenty);
