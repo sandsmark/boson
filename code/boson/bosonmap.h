@@ -86,6 +86,62 @@ private:
 	unsigned int mHeight;
 };
 
+class BoHeightMap: public BoMapCornerArray
+{
+public:
+	BoHeightMap(unsigned int width, unsigned int height)
+			: BoMapCornerArray(width, height)
+	{
+		mHeightMap = new float[arrayPos(width - 1, height - 1) + 1];
+	}
+
+	inline float* heightMap() const { return mHeightMap; }
+
+	/**
+	 * @return The height at @p x, @þ y. This function is safe, i.e. if @þ x
+	 * or @p y are invalid we won't crash.
+	 **/
+	float heightAt(int x, int y) const
+	{
+		if (x < 0 || y < 0) {
+			return 1.0f;
+		}
+		if ((unsigned int)x >= width() || (unsigned int)y >= height()) {
+			return 1.0f;
+		}
+		return mHeightMap[arrayPos(x, y)];
+	}
+
+	void setHeightAt(int x, int y, float h)
+	{
+		if (x < 0 || y < 0) {
+			return;
+		}
+		if ((unsigned int)x >= width() || (unsigned int)y >= height()) {
+			return;
+		}
+		// AB: see pixelToHeight() for explanation on these
+		// restrictions
+		h = QMIN(h, 15.0f);
+		h = QMAX(h, -10.5f);
+		mHeightMap[arrayPos(x, y)] = h;
+	}
+
+	/**
+	 * Fill the entire heightMap with @p height
+	 **/
+	void fill(float h)
+	{
+		for (unsigned int x = 0; x < width(); x++) {
+			for (unsigned int y = 0; y < height(); y++) {
+				setHeightAt(x, y, h);
+			}
+		}
+	}
+private:
+	float* mHeightMap;
+};
+
 class BoTexMap : public BoMapCornerArray
 {
 public:
@@ -357,7 +413,7 @@ public:
 	 **/
 	void fill(unsigned int texture);
 
-	inline float* heightMap() const { return mHeightMap; }
+	inline float* heightMap() const { return mHeightMap->heightMap(); }
 
 	/**
 	 * Note that you can specify (width() + 1) * (height() + 1) corners here!
@@ -588,7 +644,7 @@ private:
 	class BosonMapPrivate;
 	BosonMapPrivate* d;
 	Cell* mCells;
-	float* mHeightMap;
+	BoHeightMap* mHeightMap;
 	BoTexMap* mTexMap;
 	bool mModified;
 
