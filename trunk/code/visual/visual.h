@@ -26,17 +26,9 @@
 class groundTheme;
 class speciesTheme;
 
-class visualProperties_t {
-
-public:
-	groundTheme	*ground;
-	speciesTheme	*species[BOSON_MAX_PLAYERS];
-	int		nb_player;
+extern	groundTheme	*ground;
+extern	speciesTheme	*species[BOSON_MAX_PLAYERS];
+extern	int		nb_player;
 	
-};
-
-
-extern visualProperties_t vpp;
-
 
 #endif // VISUAL_H 

@@ -21,11 +21,16 @@
 
 #include "game.h"
 
-visualProperties_t vpp = {
-	0l,
-	{0l, 0l}
-	};
+/*
+ * visual/visual.h
+ */
+groundTheme		*ground = 0;
+speciesTheme		*species[BOSON_MAX_PLAYERS] = {0l, 0l};
+int			nb_player;
 
+/*
+ * boson/game.h
+ */
 speciesTheme		*myspecy	= 0l;
 int			who_am_i	= 0;
 /* The map which handle grouds and units*/

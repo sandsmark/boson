@@ -53,7 +53,7 @@ void visualCell::set(groundType g)
 {
 	setGroundType(g);
 	if (GROUND_UNKNOWN != g) {
-		setSequence(vpp.ground->getPixmap(g));
+		setSequence(::ground->getPixmap(g));
 		show ();
 	}
 	else	hide();

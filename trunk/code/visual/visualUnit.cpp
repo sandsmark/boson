@@ -51,7 +51,7 @@ void visualUnit::unSelect()
 
 visualMobUnit::visualMobUnit(mobileMsg_t *msg, QObject* parent=0, const char *name=0L)
 	: mobUnit(msg,parent,name)
-	, visualUnit(vpp.species[msg->who]->getPixmap(msg->type))
+	, visualUnit(species[msg->who]->getPixmap(msg->type))
 {
 
 	z(Z_MOBILE + 3 * type);
@@ -84,7 +84,7 @@ void visualMobUnit::select()
  */
 visualFacility::visualFacility(facilityMsg_t *msg, QObject* parent=0L, const char *name=0L)
 	: Facility(msg,parent,name)
-	, visualUnit(vpp.species[msg->who]->getPixmap(msg->type))
+	, visualUnit(species[msg->who]->getPixmap(msg->type))
 {
 	z(Z_FACILITY);
 	moveTo(BO_TILE_SIZE * msg->x , BO_TILE_SIZE * msg->y);
