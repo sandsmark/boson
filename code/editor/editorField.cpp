@@ -46,8 +46,9 @@ bool editorField::load(QString filename)
 	mobileMsg_t	mob;
 	facilityMsg_t	fix;
 	Cell		c;
+	static	bool	cells_allocated = false;
 
-	freeRessources();
+	if (cells_allocated) freeRessources();
 
 	if (!openRead(filename.data())) return false;
 
@@ -55,6 +56,8 @@ bool editorField::load(QString filename)
 	cells = new (visualCell *)[map_width];
 	for (i=0; i< map_width; i++)
 		cells[i] = new (visualCell)[map_height];
+
+	cells_allocated = true;
 	
 	/* initialisation */
 	for (i=0; i< map_width; i++)
