@@ -140,6 +140,8 @@ private slots:
 	 **/
 	void slotNetConnectionBroken();
 
+	void slotAddChatSystemMessage(const QString&, const QString&, const Player*);
+
 signals:
 	void signalShowNetworkOptions();
 //	void signalSetLocalPlayer(Player* player);

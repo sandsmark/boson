@@ -162,6 +162,8 @@ BosonNewGameWidget::BosonNewGameWidget(BosonStartupNetwork* interface, QWidget* 
 		this, SLOT(slotNetSetLocalPlayer(Player*)));
  connect(boGame, SIGNAL(signalConnectionBroken()),
 		this, SLOT(slotNetConnectionBroken()));
+ connect(boGame, SIGNAL(signalAddChatSystemMessage(const QString&, const QString&, const Player*)),
+		this, SLOT(slotAddChatSystemMessage(const QString&, const QString&, const Player*)));
 
  connect(networkInterface(), SIGNAL(signalSetAdmin(bool)),
 		this, SLOT(slotNetSetAdmin(bool)));
@@ -452,24 +454,37 @@ void BosonNewGameWidget::slotNetPlayerJoinedGame(KPlayer* p)
  if (mPlayers->count() == 1) {
 	// Localplayer joined the game. No chat message, but select it
 	mPlayers->setSelected(t, true);
+	mInited = true;
  } else if (mInited) {
 	// Display chat message
-	if(!p->isVirtual()) {
+	if (!p->isVirtual()) {
 		// Localplayer added AI player
-		mChat->chatWidget()->addSystemMessage("Boson", i18n("You added AI player %1 to the game").arg(p->name()));
+		boGame->slotAddChatSystemMessage("Boson", i18n("You added AI player %1 to the game").arg(p->name()));
 	} else {
 		int gameID = KGameMessage::rawGameId(p->id());  // gameID == clientID
 		KPlayer* mainPlayer = boGame->findPlayer(KGameMessage::createPlayerId(1, gameID));
 		if (mainPlayer == p) {
 			// Another client connected
-			mChat->chatWidget()->addSystemMessage("Boson", i18n("%1 joined the game").arg(p->name()));
+			boGame->slotAddChatSystemMessage("Boson", i18n("%1 joined the game").arg(p->name()));
 		} else if(!mainPlayer) {
 			// first player has not ID 0. probably do a loop instead, searching for the
 			//  player with the lowest KGameMessage::rawPlayerId() in this gameID.
-			mChat->chatWidget()->addSystemMessage("Boson", i18n("%1 joined (?) the game").arg(p->name()));
+			boGame->slotAddChatSystemMessage("Boson", i18n("%1 joined (?) the game").arg(p->name()));
 		} else {
 			// AI player was added
-			mChat->chatWidget()->addSystemMessage("Boson", i18n("%1 added AI player %2 to the game").arg(mainPlayer->name()).arg(p->name()));
+			boGame->slotAddChatSystemMessage("Boson", i18n("%1 added AI player %2 to the game").arg(mainPlayer->name()).arg(p->name()));
+		}
+	}
+	for (int i = 0; i < (int)boGame->playerCount() - 1; i++) {
+		Player* p2 = (Player*)boGame->playerList()->at(i);
+		if (p2 == (Player*)p) {
+			continue;
+		}
+		if (((Player*)p)->teamColor() == p2->teamColor()) {
+			boDebug() << k_funcinfo << "new players' teamcolor already exists - chosing a different one" << endl;
+			QColor color = boGame->availableTeamColors().first();
+			networkInterface()->sendChangeTeamColor((Player*)p, color);
+			break;
 		}
 	}
  }
@@ -498,6 +513,7 @@ void BosonNewGameWidget::slotNetPlayerLeftGame(KPlayer* p)
 	// Neutral player shouldn't be removed because it's not added until the game
 	//  starts.
 	boError() << k_funcinfo << "Neutral player removed from game?!" << endl;
+	boGame->slotAddChatSystemMessage(i18n("Internal error: Neutral player has been removed from the game"));
 	return;
  }
 
@@ -507,7 +523,7 @@ void BosonNewGameWidget::slotNetPlayerLeftGame(KPlayer* p)
 	// If we're connecting, players are still stored in inactive list
 	if (!boGame->inactivePlayerList()->containsRef(p)) {
 		boDebug() << k_funcinfo << "We were kicked out!" << endl;
-		mChat->chatWidget()->addSystemMessage("Boson", i18n("You were kicked from the game by ADMIN"));
+		boGame->slotAddChatSystemMessage("Boson", i18n("You were kicked from the game by ADMIN"));
 		boDebug() << k_funcinfo << "disconnect" << endl;
 		boGame->disconnect();
 		boDebug() << k_funcinfo << "disconnect DONE" << endl;
@@ -515,7 +531,7 @@ void BosonNewGameWidget::slotNetPlayerLeftGame(KPlayer* p)
 	}
  }
  if (mInited) {
-	mChat->chatWidget()->addSystemMessage("Boson", i18n("%1 left the game").arg(p->name()));
+	boGame->slotAddChatSystemMessage("Boson", i18n("%1 left the game").arg(p->name()));
  }
 
  this->disconnect(p);
@@ -662,9 +678,9 @@ void BosonNewGameWidget::slotNetPlayerNameChanged(Player* p)
 
 		if (mInited) {
 			if (p == localPlayer()) {
-				mChat->chatWidget()->addSystemMessage("Boson", i18n("You are now known as %1").arg(p->name()));
+				boGame->slotAddChatSystemMessage("Boson", i18n("You are now known as %1").arg(p->name()));
 			} else {
-				mChat->chatWidget()->addSystemMessage("Boson", i18n("%1 is now known as %2").arg(i->text()).arg(p->name()));
+				boGame->slotAddChatSystemMessage("Boson", i18n("%1 is now known as %2").arg(i->text()).arg(p->name()));
 			}
 		}
 
@@ -699,7 +715,7 @@ void BosonNewGameWidget::slotNetConnectionBroken()
  boDebug() << k_funcinfo << endl;
  if (mInited) {
 	// Connection to server was broken. Probably master quit ot something
-	mChat->chatWidget()->addSystemMessage("Boson", i18n("Connection to server was broken!"));
+	boGame->slotAddChatSystemMessage("Boson", i18n("Connection to server was broken!"));
  } else {
 	// We tried to connect to server, but couldn't
 	mInited = true;
@@ -933,7 +949,7 @@ void BosonNewGameWidget::slotSetAdmin(bool admin)
 void BosonNewGameWidget::slotOfferingConnections()
 {
  boDebug() << k_funcinfo << endl;
- mChat->chatWidget()->addSystemMessage("Boson", i18n("You are now running as server and are offering connections"));
+ boGame->slotAddChatSystemMessage("Boson", i18n("You are now running as server and are offering connections"));
 }
 
 void BosonNewGameWidget::slotConnectingToServer()
@@ -945,7 +961,7 @@ void BosonNewGameWidget::slotConnectingToServer()
 void BosonNewGameWidget::slotConnectedToServer()
 {
  boDebug() << k_funcinfo << endl;
- mChat->chatWidget()->addSystemMessage("Boson", i18n("You are now connected to the server %1:%2").arg(boGame->bosonHostName()).arg(boGame->bosonPort()));
+ boGame->slotAddChatSystemMessage("Boson", i18n("You are now connected to the server %1:%2").arg(boGame->bosonHostName()).arg(boGame->bosonPort()));
  mInited = true;
  // Select localplayer
  QPtrDictIterator<KPlayer> it(d->mItem2Player);
@@ -957,5 +973,16 @@ void BosonNewGameWidget::slotConnectedToServer()
 	++it;
  }
  mPlayers->ensureCurrentVisible();
+}
+
+void BosonNewGameWidget::slotAddChatSystemMessage(const QString& fromName, const QString& text, const Player* forPlayer)
+{
+ BO_CHECK_NULL_RET(mChat);
+ BO_CHECK_NULL_RET(mChat->chatWidget());
+
+ if (forPlayer && forPlayer != localPlayer()) {
+	return;
+ }
+ mChat->chatWidget()->addSystemMessage(fromName, text);
 }
 
