@@ -234,7 +234,6 @@ void BoSelection::activate(bool on)
 
 void BoSelection::saveAsXML(QDomElement& root)
 {
- boDebug() << k_funcinfo << endl;
  QDomDocument doc = root.ownerDocument();
  QDomElement units = doc.createElement(QString::fromLatin1("Units"));
 
