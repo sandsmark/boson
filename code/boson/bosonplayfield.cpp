@@ -357,71 +357,6 @@ bool BosonPlayField::preLoadPlayField(const QString& file)
 
  delete mFile;
  mFile = 0;
-
- // we have a problem.
- // the minimap for the startupwidgets requires the cells to be loaded which
- // basically means that we have to load *all* data (except heightmaps) for the
- // startup widgets.
- // so "preLoadPlayField()" now loads the *complete* playfield. this is *really*
- // bad, as it takes too much memory!
- // we could solve this by
- // - load on demand only
- //   --> long loading times (about 0.2-1 seconds) when the player selects a map
- //   in the startup widgets
- // - clear the preloaded maps once a game is started
- //   --> we'd have to preload again when another game is started. anyway I
- //   think this is the best solution. TODO
-#if 0
- loadPlayField(QString::null); // we don't need to provide the filename again.
-#endif
- return true;
-}
-
-bool BosonPlayField::loadPlayField(const QString& file)
-{
- if (isLoaded()) {
-	// no need to load again :-)
-	boDebug() << k_funcinfo << "playfield " << file << " has already been loaded" << endl;
-	return true;
- }
- boDebug() << k_funcinfo << endl;
- if (!preLoadPlayField(file)) {
-	return false;
- }
- if (!file.isNull()) {
-	if (file != mFileName) {
-		boError() << k_funcinfo << "file " << mFileName
-				<< " was preloaded - but we are trying to load "
-				<< file << " now!" << endl;
-		return false;
-	}
- }
-
- delete mFile;
- mFile = new BPFFile(mFileName, true);
-
- if (!mFile) {
-	boError() << k_funcinfo << "NULL file" << endl;
-	return false;
- }
-
- QByteArray heightMap = mFile->heightMapData();
- QByteArray texMap = mFile->texMapData();
- if (!mFile->hasMapDirectory()) {
-	if (!loadMapFromFile_0_8(mFile->mapData(), heightMap, texMap)) {
-		boError() << k_funcinfo << "Error loading map from " << file << endl;
-		return false;
-	}
- } else {
-	// AB: a map directory implies that map/map.xml is present.
-	if (!loadMapFromFile(mFile->mapXMLData(), heightMap, texMap)) {
-		boError() << k_funcinfo << "Error loading map from " << file << endl;
-		return false;
-	}
- }
- delete mFile;
- mFile = 0;
- mLoaded = true;
  return true;
 }
 
@@ -475,49 +410,6 @@ bool BosonPlayField::loadDescriptionFromFile(const QByteArray& xml)
  delete mDescription;
  mDescription = new BPFDescription(QString(xml));
  return true;
-}
-
-bool BosonPlayField::loadMapFromFile_0_8(const QByteArray& map, const QByteArray& heightMapImage, const QByteArray& texMap)
-{
- boDebug() << k_funcinfo << endl;
- if (map.size() == 0) {
-	boError() << k_funcinfo << "empty byte array for map" << endl;
-	return false;
- }
- if (texMap.size() == 0) {
-	// there is no texmap in the file. Probably a map from boson <= 0.8
-	// convert it to our new format first.
-	boDebug() << k_funcinfo << "no texmap in file. trying to convert from boson 0.8 file format..." << endl;
-	QByteArray newMap;
-	QByteArray newTexMap;
-
-	BosonFileConverter converter;
-	if (!converter.convertMapFile_From_0_8_To_0_9(map, &newMap, &newTexMap)) {
-		boError() << k_funcinfo << "conversion from 0.8 to 0.9 failed." << endl;
-		return false;
-	}
-
-	if (newTexMap.size() == 0) {
-		boError() << k_funcinfo << "empty texmap" << endl;
-		return false;
-	}
-	return loadMapFromFile(newMap, heightMapImage, newTexMap);
- }
-
- // when we come to this it is neither a 0.8 file nor a 0.9 file. a 0.8.128
- // might be left (aka 0x00,0x08,0x80 -> development version that was never
- // released).
- // the map files are mostly equal there (they just aren't in map/ subdir)
- // except of "map", which is in binary. we use an xml file in 0.9.
-
- boDebug() << k_funcinfo << "trying to convert from 0.8.128 to 0.9" << endl;
- QByteArray newMap;
- BosonFileConverter converter;
- if (!converter.convertMapFile_From_0_8_128_To_0_9(map, &newMap)) {
-	boError() << k_funcinfo << "conversion from 0.8.128 to 0.9 failed." << endl;
-	return false;
- }
- return loadMapFromFile(newMap, heightMapImage, texMap);
 }
 
 bool BosonPlayField::loadMapFromFile(const QByteArray& mapXML, const QByteArray& heightMapImage, const QByteArray& texMap)
