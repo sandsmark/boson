@@ -98,11 +98,6 @@ public:
 
 public slots:
 
-
-	void slotEditorWillPlaceCell(int);
-	void slotEditorWillPlaceUnit(int unitType, UnitBase* fac, KPlayer*);
-
-
 	// old KActions suck!
 	void slotScrollUp() { slotScroll(ScrollUp); }
 	void slotScrollRight() { slotScroll(ScrollRight); }
