@@ -25,6 +25,9 @@
 #include <qptrlist.h>
 #include <qlabel.h>
 #include <qmap.h>
+#include <qbitmap.h>
+#include <qpixmap.h>
+#include <qpainter.h>
 
 #include <kdebug.h>
 
@@ -77,6 +80,7 @@ void BoColorChooser::init()
  QPtrListIterator<QLabel> it(d->mLabels);
  while (it.current()) {
 	it.current()->installEventFilter(this);
+	it.current()->resize(it.current()->minimumSize());
 	d->mTaken.insert(it.current(), false);
 	++it;
  }
@@ -125,10 +129,11 @@ void BoColorChooser::applyColors()
  QPtrListIterator<QLabel> labelIt(d->mLabels);
  while (labelIt.current() && colorIt != d->mColors.end()) {
 	QLabel* label = labelIt.current();
+	label->setPaletteBackgroundColor(*colorIt);
 	if (d->mTaken[label]) {
-		label->setPaletteBackgroundColor(takenColor());
+		markTaken(label);
 	} else {
-		label->setPaletteBackgroundColor(*colorIt);
+		label->setPixmap(QPixmap());
 	}
 	++colorIt;
 	++labelIt;
@@ -136,14 +141,26 @@ void BoColorChooser::applyColors()
 
  // in case colors.count() < d->mLabels.count()
  while (labelIt.current()) {
-	labelIt.current()->setPaletteBackgroundColor(takenColor());
+	markTaken(labelIt.current());
 	++labelIt;
  }
 }
 
-QColor BoColorChooser::takenColor() const
+void BoColorChooser::markTaken(QLabel* label)
 {
- return QColor(255, 255, 255);
+ if (!label) {
+	kdError() << k_funcinfo << "NULL label" << endl;
+	return;
+ }
+ QBitmap mask(label->width(), label->height(), true);
+ QPixmap pix(label->width(), label->height());
+ QPainter p(&mask);
+ p.setPen(Qt::color1);
+ p.drawLine(0, 0, mask.width()-1, mask.height()-1);
+ p.drawLine(mask.width()-1, 0, 0, mask.height()-1);
+ pix.fill(Qt::black);
+ pix.setMask(mask);
+ label->setPixmap(pix);
 }
 
 void BoColorChooser::setAllTaken(bool taken)
