@@ -433,6 +433,20 @@ void BosonWidget::slotAddUnit(Unit* unit, int, int)
 	return;
  }
  d->mUnitTips->add(unit->type(), player->speciesTheme()->unitProperties(unit)->name()); // doesn't add if this tip was added before
+ QPtrList<Unit> units = player->allUnits();
+ int mobiles = 0;
+ int facilities = 0;
+ QPtrListIterator<Unit> it(units);
+ while (it.current()) {
+	if ((*it)->unitProperties()->isMobile()) {
+		mobiles++;
+	} else {
+		facilities++;
+	}
+	++it;
+ }
+ emit signalUnitCount(mobiles, facilities);
+ // TODO: also emit when a unit is destroyed!
 }
 
 void BosonWidget::quitGame()

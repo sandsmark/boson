@@ -123,8 +123,7 @@ public:
 	QIntDict<Player> mPlayers;
 };
 
-Editor::Editor()
-    : KMainWindow( 0 )
+Editor::Editor() : KMainWindow( 0 )
 {
  d = new EditorPrivate;
 

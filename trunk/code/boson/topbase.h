@@ -16,27 +16,35 @@
     the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
     Boston, MA 02111-1307, USA.
 */
-#ifndef __TOP_H__
-#define __TOP_H__
+#ifndef __TOPBASE_H__
+#define __TOPBASE_H__
 
-#include "topbase.h"
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif 
+
+#include <kmainwindow.h>
+
+class BosonWidget;
 
 /**
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
  **/
-class Top : public TopBase
+class TopBase : public KMainWindow
 {
 	Q_OBJECT
 public:
 	/**
 	 * Default Constructor
 	 **/
-	Top();
+	TopBase();
 
 	/**
 	 * Default Destructor
 	 **/
-	virtual ~Top();
+	virtual ~TopBase();
+
+protected:
 
 protected:
 	/**
@@ -52,17 +60,30 @@ protected:
 	 **/
 	void readProperties(KConfig *);
 
+	BosonWidget* bosonWidget() { return mBosonWidget; }
+
 private slots:
-	void slotGameNew();
-	void slotConfigureKeys();
+	void slotZoom(int index);
+
+	void slotShowToolbar();
+	void slotShowStatusbar();
+	void slotConfigureToolbars();
+
+	void slotUnitCount(int mobiles, int facilities);
 
 private:
-	void initKAction();
 	void initStatusBar();
 
+	/**
+	 * Initialize th KActions which are shared by both, editor and game.
+	 **/
+	void initKAction();
+
 private:
-	class TopPrivate;
-	TopPrivate* d;
+	class TopBasePrivate;
+	TopBasePrivate* d;
+
+	BosonWidget* mBosonWidget;
 };
 
-#endif // __TOP_H__
+#endif // __TOPBASE_H__

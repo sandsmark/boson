@@ -114,6 +114,11 @@ signals:
 	 **/
 	void signalEditorLoadTiles(const QString& tileSet);
 
+	/**
+	 * Emitted when the number of units of the local player changes.
+	 **/
+	void signalUnitCount(int mobileUnits, int facilities);
+
 protected slots:
 	void slotStartScenario();
 	void slotSendChangeSpecies(const QString& species);
