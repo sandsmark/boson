@@ -175,7 +175,7 @@ protected:
 		QDataStream s2(b2, IO_ReadOnly);
 		Q_UINT32 count, count2;
 		s1 >> count;
-		s1 >> count2;
+		s2 >> count2;
 		if (count != count2) {
 			return i18n("Have players: %1 should be: %2").arg(count2).arg(count);
 		}
