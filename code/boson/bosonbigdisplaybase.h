@@ -268,13 +268,6 @@ public slots:
 	 **/
 	void slotUnitChanged(Unit* unit);
 
-	/**
-	 * Called when the player clicks (RMB) on the minimap. When there is a
-	 * unit selected it should move to that point in game mode. See @ref
-	 * BosonBigDisplayInputBase::slotMoveSelection
-	 **/
-	void slotMoveSelection(int x, int y);
-
 signals:
 	void signalMakeActive(BosonBigDisplayBase*);
 

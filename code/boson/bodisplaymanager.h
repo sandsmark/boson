@@ -175,6 +175,12 @@ public slots:
 
 	void slotUnitRemoved(Unit* u);
 
+	/**
+	 * Move the selection of the @ref activeDisplay to the cell at (x,y).
+	 * See also @ref BosonBigDisplayInputBase::slotMoveSelection
+	 **/
+	void slotMoveActiveSelection(int x, int y);
+
 	void slotSetDebugMapCoordinates(bool);
 	void slotSetDebugShowCellGrid(bool);
 	void slotSetDebugMatrices(bool);

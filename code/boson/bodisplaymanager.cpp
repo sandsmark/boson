@@ -483,6 +483,14 @@ void BoDisplayManager::slotPlaceCell(int tile)
  activeDisplay()->displayInput()->placeCell(tile);
 }
 
+void BoDisplayManager::slotMoveActiveSelection(int x, int y)
+{
+ BO_CHECK_NULL_RET(activeDisplay());
+ BO_CHECK_NULL_RET(activeDisplay()->displayInput());
+
+ activeDisplay()->displayInput()->slotMoveSelection(x, y); // FIXME: not a slot anymore
+}
+
 void BoDisplayManager::slotDeleteSelectedUnits()
 {
  if (!activeDisplay()) {
