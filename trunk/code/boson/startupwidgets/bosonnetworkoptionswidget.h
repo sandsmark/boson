@@ -37,7 +37,7 @@ class TopWidget;
 class Boson;
 
 class BosonNetworkOptionsWidget : public QWidget
-{ 
+{
   Q_OBJECT
   public:
     BosonNetworkOptionsWidget(TopWidget* top, QWidget* parent);
@@ -48,7 +48,7 @@ class BosonNetworkOptionsWidget : public QWidget
     void slotStartNetwork();
     void slotConnectionTypeChanged(int);
     void slotConnectionBroken();
-    
+
   signals:
     void signalOkClicked();
 

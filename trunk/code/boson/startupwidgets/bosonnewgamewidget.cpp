@@ -20,17 +20,17 @@
 #include "bosonnewgamewidget.h"
 #include "bosonnewgamewidget.moc"
 
-#include "defines.h"
-#include "bosonconfig.h"
-#include "bosonmessage.h"
-#include "player.h"
-#include "speciestheme.h"
-#include "bosoncomputerio.h"
-#include "boson.h"
-#include "top.h"
-#include "bosonplayfield.h"
-#include "speciestheme.h"
-#include "bosonscenario.h"
+#include "../defines.h"
+#include "../bosonconfig.h"
+#include "../bosonmessage.h"
+#include "../player.h"
+#include "../speciestheme.h"
+#include "../bosoncomputerio.h"
+#include "../boson.h"
+#include "../top.h"
+#include "../bosonplayfield.h"
+#include "../speciestheme.h"
+#include "../bosonscenario.h"
 
 #include <klocale.h>
 #include <kgame/kgameproperty.h>

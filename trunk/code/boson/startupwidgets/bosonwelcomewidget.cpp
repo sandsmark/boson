@@ -20,7 +20,7 @@
 #include "bosonwelcomewidget.h"
 #include "bosonwelcomewidget.moc"
 
-#include "defines.h"
+#include "../defines.h"
 
 #include <klocale.h>
 #include <kstandarddirs.h>

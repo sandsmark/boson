@@ -1,0 +1,8 @@
+Makefile
+Makefile.in
+.deps
+.libs
+*.moc
+*.lo
+libbosonstartupwidgets.la
+libbosonstartupwidgets_la_meta_unload.*

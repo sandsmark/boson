@@ -17,10 +17,17 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "bosonserveroptionswidget.h"
-#include "bosonserveroptionswidget.moc"
+#include "bosonnetworkoptionswidget.h"
+#include "bosonnetworkoptionswidget.moc"
+
+#include "../top.h"
+#include "../boson.h"
+#include "../defines.h"
 
 #include <knuminput.h>
+#include <klocale.h>
+#include <kmessagebox.h>
+
 #include <qbuttongroup.h>
 #include <qgroupbox.h>
 #include <qlabel.h>
@@ -28,13 +35,6 @@
 #include <qpushbutton.h>
 #include <qradiobutton.h>
 #include <qlayout.h>
-
-#include <klocale.h>
-#include <kmessagebox.h>
-
-#include "top.h"
-#include "boson.h"
-#include "defines.h"
 
 /*
  *  Constructs a BosonNetworkOptionsWidget which is a child of 'parent', with the 
@@ -45,7 +45,7 @@ BosonNetworkOptionsWidget::BosonNetworkOptionsWidget(TopWidget* top, QWidget* pa
 {
   mTop = top;
 
-  mBosonNetworkOptionsWidgetLayout = new QVBoxLayout( this, 11, 6, "BosonNetworkOptionsWidgetLayout"); 
+  mBosonNetworkOptionsWidgetLayout = new QVBoxLayout( this, 11, 6, "BosonNetworkOptionsWidgetLayout");
 
   mHeader = new QLabel( this, "header" );
   QFont header_font(  mHeader->font() );

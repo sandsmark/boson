@@ -22,7 +22,7 @@ class QProgressBar;
 #define MAPTILES_LOADINGFACTOR 2200
 
 class BosonLoadingWidget : public QWidget
-{ 
+{
   Q_OBJECT
   public:
     enum LoadingType
@@ -38,14 +38,14 @@ class BosonLoadingWidget : public QWidget
         StartingGame,
         LoadingDone
       };
-    
+
     BosonLoadingWidget(QWidget* parent);
     ~BosonLoadingWidget();
 
     void setLoading(LoadingType load);
     void setProgress(int prog);
     void setSteps(int steps);
-    
+
     void showProgressBar(bool show = true);
 
   protected:
@@ -59,3 +59,4 @@ class BosonLoadingWidget : public QWidget
 };
 
 #endif // BOSONLOADINGWIDGET_H
+
