@@ -107,8 +107,8 @@ bool BosonTextureArray::createTexture(const QImage& image, GLuint texture, bool 
 	// note: GL_*_MIPMAP_* is slower! GL_NEAREST would be fastest
 	// AB: a config option would be nice here - slow machines use other
 	// values than fast machines
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); // note: this makes mipmaps senseless!
-//	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+//	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); // note: this makes mipmaps senseless!
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
 	int error = gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, buffer.width(),
 			buffer.height(), GL_RGBA, GL_UNSIGNED_BYTE,
 			buffer.bits());
