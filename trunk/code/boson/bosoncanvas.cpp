@@ -449,13 +449,20 @@ void BosonCanvas::initFogOfWar(Player* p)
 
 QValueList<Unit*> BosonCanvas::unitCollisionsInRange(const QPoint& pos, int radius)
 {
-// FIXME: QT bug ? the height and width of the qrect must be -= 1 !
-// qcanvas::collisions() treats width==height==10 as width==height==11
+// qt bug (confirmed). will be fixed in 3.1
+#if QT_VERSION >= 310
+ QCanvasItemList l = collisions(QRect(
+		(pos.x() - radius > 0) ? pos.x() - radius : 0,
+		(pos.y() - radius > 0) ? pos.y() - radius : 0,
+		pos.x() + radius,
+		pos.y() + radius));
+#else
  QCanvasItemList l = collisions(QRect(
 		(pos.x() - radius > 0) ? pos.x() - radius : 0,
 		(pos.y() - radius > 0) ? pos.y() - radius : 0,
 		pos.x() + radius - 1,
 		pos.y() + radius - 1));
+#endif
 		
 			
  QValueList<Unit*> list;
@@ -488,10 +495,14 @@ QValueList<Unit*> BosonCanvas::unitsAtCell(int x, int y)
  if (!cell(x, y)) {
 	return list;
  }
-// FIXME: QT bug ? the height and width of the qrect must be -= 1 !
-// qcanvas::collisions() treats width==height==10 as width==height==11
+// qt bug (confirmed). will be fixed in 3.1
+#if QT_VERSION >= 310
+ QCanvasItemList l = collisions(QRect(x * BO_TILE_SIZE, y * BO_TILE_SIZE,
+			BO_TILE_SIZE, BO_TILE_SIZE));
+#else
  QCanvasItemList l = collisions(QRect(x * BO_TILE_SIZE, y * BO_TILE_SIZE,
 			BO_TILE_SIZE-1, BO_TILE_SIZE-1));
+#endif
  for (unsigned int i = 0; i < l.count(); i++) {
 	if (!RTTI::isUnit(l[i]->rtti())) {
 		// this item is not important for us here
@@ -515,10 +526,14 @@ bool BosonCanvas::cellOccupied(int x, int y)
  return !(unitsAtCell(x, y).isEmpty());
  // alternative version (faster but duplicated code):
  /*
-// FIXME: QT bug ? the height and width of the qrect must be -= 1 !
-// qcanvas::collisions() treats width==height==10 as width==height==11
+// qt bug (confirmed). will be fixed in 3.1
+#if QT_VERSION >= 310
+ QCanvasItemList list = collisions(QRect(x * BO_TILE_SIZE, y * BO_TILE_SIZE,
+		BO_TILE_SIZE, BO_TILE_SIZE));
+#else
  QCanvasItemList list = collisions(QRect(x * BO_TILE_SIZE, y * BO_TILE_SIZE,
 		BO_TILE_SIZE-1, BO_TILE_SIZE-1));
+#endif
  if(list.isEmpty()) {
 	return false;
  }

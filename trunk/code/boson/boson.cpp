@@ -587,13 +587,20 @@ bool Boson::buildProducedUnit(Facility* factory, int unitType, int x, int y)
 	kdWarning() << "Unit can not be produced here" << endl;
 	return false;
  }
-// FIXME: QT bug ? the height and width of the qrect must be -= 1 !
-// qcanvas::collisions() treats width==height==10 as width==height==11
+// qt bug (confirmed). will be fixed in 3.1
+#if QT_VERSION >= 310
+ QCanvasItemList list = d->mCanvas->collisions(QRect(
+		x * BO_TILE_SIZE,
+		y * BO_TILE_SIZE, 
+		a->image(0)->width(),
+		a->image(0)->height()));
+#else
  QCanvasItemList list = d->mCanvas->collisions(QRect(
 		x * BO_TILE_SIZE,
 		y * BO_TILE_SIZE, 
 		a->image(0)->width() - 1,
 		a->image(0)->height() - 1));
+#endif
  QCanvasItemList::Iterator it;
  for (it = list.begin(); it != list.end(); ++it) {
 	if (!RTTI::isUnit((*it)->rtti())) {

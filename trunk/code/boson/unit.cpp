@@ -456,10 +456,14 @@ QCanvasItemList Unit::unitsInRange() const
  
  QRect r = boundingRect();
  r.setTop((r.top() > (int)range()) ? r.top() - range() : 0);
-// FIXME: QT bug ? the height and width of the qrect must be -= 1 !
-// qcanvas::collisions() treats width==height==10 as width==height==11
+// qt bug (confirmed). will be fixed in 3.1
+#if QT_VERSION >= 310
+ r.setBottom(r.bottom() + range());
+ r.setRight(r.right() + range());
+#else
  r.setBottom(r.bottom() + range() - 1);
  r.setRight(r.right() + range() - 1);
+#endif
  r.setLeft((r.left() > (int)range()) ? r.left() - range() : 0);
 
  QCanvasItemList items = canvas()->collisions(r);
