@@ -180,7 +180,7 @@ protected slots:
 	
 	void slotStartScenario();
 	void slotSendChangeSpecies(const QString& species);
-	void slotSendChangeTeamColor(QRgb color);
+	void slotSendChangeTeamColor(const QColor& color);
 
 	void slotUnfog(int x, int y);
 	void slotFog(int x, int y);
@@ -197,7 +197,7 @@ protected slots:
 protected:
 	void addChatSystemMessage(const QString& fromName, const QString& text);
 	
-	void sendChangeTeamColor(Player* player, QRgb color);
+	void sendChangeTeamColor(Player* player, const QColor& color);
 	void changeSpecies(const QString& species);
 	void addLocalPlayer();
 

@@ -23,11 +23,13 @@
 #include <qcolor.h>
 #include <qvaluelist.h>
 
+class UnitProperties;
+class UnitBase;
+
 class QPixmap;
 class QCanvasPixmapArray;
 class QStringList;
-class UnitProperties;
-class UnitBase;
+class QColor;
 
 /**
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
@@ -41,7 +43,7 @@ public:
 	 * Constructing is quite fast, as @ref loadTheme does no preloading of
 	 * unit pixmaps.
 	 **/
-	SpeciesTheme(const QString& species, QRgb teamColor = qRgb(0,0,0));
+	SpeciesTheme(const QString& species, const QColor& color);
 	
 	~SpeciesTheme();
 
@@ -54,10 +56,10 @@ public:
 	 * first time. 
 	 * @param species The theme name to be loaded. Must not be i18n'ed as it
 	 * is used in the directoryname.
-	 * @param teamColor The color of this team or QRgb(0,0,0) for a default
+	 * @param teamColor The color of this team or QColor(0,0,0) for a default
 	 * color
 	 **/
-	bool loadTheme(const QString& species, QRgb teamColor = qRgb(0,0,0));
+	bool loadTheme(const QString& species, const QColor&);
 
 	/**
 	 * Load the unit unitType. This must be done before @ref pixmapArray,
@@ -105,7 +107,7 @@ public:
 	 * @return The color of the team of this player. See also @ref
 	 * setTeamColor
 	 **/
-	QRgb teamColor() const { return mTeamColor; }
+	const QColor& teamColor() const { return mTeamColor; }
 
 	/**
 	 * Change the team color. You can only call this function if no pixmaps
@@ -115,12 +117,12 @@ public:
 	 * loadUnitPixmap
 	 * @return True if the color could be changed, otherwise false.
 	 **/
-	bool setTeamColor(QRgb color);
+	bool setTeamColor(const QColor& color);
 
 	/**
 	 * @return A default color. This color differs after every call.
 	 **/
-	static QRgb defaultColor();
+	static QColor defaultColor();
 
 	/**
 	 * Reads the default entries from the config file of the specified unit
@@ -184,7 +186,7 @@ public:
 	 **/
 	QString identifier() const;
 	
-	static QValueList<QRgb> defaultColors();
+	static QValueList<QColor> defaultColors();
 
 protected:
 	/**
@@ -215,7 +217,7 @@ private:
 	SpeciesThemePrivate* d;
 
 	QString mThemePath;
-	QRgb mTeamColor;
+	QColor mTeamColor;
 	QCanvasPixmapArray* mShot;
 };
 

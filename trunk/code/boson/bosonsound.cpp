@@ -19,10 +19,10 @@
 
 #include "bosonsound.h"
 #include "bosonmusic.h"
-#include "defines.h"
 #include "unitproperties.h"
 #include "unit.h"
 #include "bosonconfig.h"
+#include "defines.h"
 
 #include <kglobal.h>
 #include <kapplication.h>

@@ -22,10 +22,9 @@
 #include "cell.h"
 #include "bosonmap.h"
 #include "bosoncanvas.h"
-#include "speciestheme.h"
 #include "unit.h"
-#include "defines.h"
 #include "player.h"
+#include "defines.h"
 
 #include <kdebug.h>
 
@@ -147,7 +146,12 @@ void BosonMiniMap::setPoint(int x, int y, const QColor& color)
  }
  QPainter p;
  p.begin(ground());
- p.fillRect(x*pointSize(), y*pointSize(), pointSize(), pointSize(), QBrush(color));
+ if (color.isValid()) {
+	p.fillRect(x*pointSize(), y*pointSize(), pointSize(), pointSize(), QBrush(color));
+ } else {
+	kdWarning() << k_funcinfo << "invalid color" << endl;
+	p.fillRect(x*pointSize(), y*pointSize(), pointSize(), pointSize(), QBrush(COLOR_UNKNOWN));
+ }
  p.end();
 }
 
@@ -189,16 +193,12 @@ void BosonMiniMap::slotAddUnit(Unit* unit, int x, int y)
  if (mLocalPlayer->isFogged(x, y)) {
 	return;
  }
- SpeciesTheme* theme = unit->speciesTheme();
- QColor color;
- if (!theme) {
-	kdError() << k_funcinfo << ": NULL species theme" << endl;
-	color = COLOR_UNKNOWN;
- } else {
-	color = theme->teamColor();
- }
+ QColor color = unit->owner()->teamColor();
  if (unit->isFacility()) {
+//	kdDebug() << "paint fac" << endl;
+//	kdDebug() << color.red() << " " << color.green() << " " << color.blue() << endl;
 	setPoint(x, y, color);
+//	kdDebug() << "paint fac done" << endl;
  } else {
 	setPoint(x, y, color);
  }

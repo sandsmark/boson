@@ -26,7 +26,6 @@
 #include <klocale.h>
 
 #include <qlabel.h>
-#include <qlayout.h>
 #include <qvbox.h>
 
 #include "bosonunitview.moc"

@@ -19,7 +19,6 @@
 
 #include "bosoncursor.h"
 
-#include <kstandarddirs.h>
 #include <ksimpleconfig.h>
 #include <kdebug.h>
 

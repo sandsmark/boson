@@ -54,7 +54,7 @@ public:
 
 	Unit* createUnit(int unitType, Player* owner); // public for Player::load
 
-	QValueList<QRgb> availableTeamColors() const;
+	QValueList<QColor> availableTeamColors() const;
 
 	/**
 	 * The factory completed to produce a unit and is now told to build

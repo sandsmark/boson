@@ -84,7 +84,7 @@ void KGameDialogComputerConfig::slotAddComputerPlayer()
  // FIXME: MUST be sent over network! problem: at this point the ID of the
  // player is unknown. Possible solution would be to load the theme as soon as
  // the player is being added.
- QRgb color = g->availableTeamColors().first();
+ QColor color = g->availableTeamColors().first();
  p->loadTheme(SpeciesTheme::speciesDirectory(SpeciesTheme::defaultSpecies()), color);
 
  BosonComputerIO* io = new BosonComputerIO();

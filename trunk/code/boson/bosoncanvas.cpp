@@ -18,7 +18,6 @@
 */
 
 #include "bosoncanvas.h"
-#include "boson.h"
 #include "player.h"
 #include "cell.h"
 #include "unit.h"
@@ -31,7 +30,6 @@
 #include <klocale.h>
 #include <kstandarddirs.h>
 
-#include <qintdict.h>
 #include <qptrdict.h>
 #include <qbitmap.h>
 

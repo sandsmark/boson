@@ -63,7 +63,6 @@ public:
 		IdShields = KGamePropertyBase::IdUser + 2,
 		IdId = KGamePropertyBase::IdUser + 3, // useful? perhaps use dataHandler()->id() instead
 		IdCost = KGamePropertyBase::IdUser + 4,
-//		IdType = KGamePropertyBase::IdUser + 5, // obsolete
 		IdWork = KGamePropertyBase::IdUser + 6,
 		IdSpeed = KGamePropertyBase::IdUser + 7,
 		IdDamage = KGamePropertyBase::IdUser + 8,

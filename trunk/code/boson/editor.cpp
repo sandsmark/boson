@@ -39,8 +39,6 @@
 #include <kshortcut.h>
 
 #include <qintdict.h>
-#include <qwmatrix.h>
-#include <qvbox.h>
 
 #include "editor.moc"
 
