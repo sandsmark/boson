@@ -1066,7 +1066,7 @@ void TopWidget::slotAddLocalPlayer()
  }
  boDebug() << k_funcinfo << endl;
  Player* p = new Player;
- boGame->addPlayer(p);
+ boGame->bosonAddPlayer(p);
  slotChangeLocalPlayer(p);
 }
 

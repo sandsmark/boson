@@ -579,7 +579,7 @@ void BosonNewGameWidget::slotLocalPlayerAddedComputerPlayer()
 
  BosonComputerIO* io = new BosonComputerIO();
  p->addGameIO(io);
- boGame->addPlayer(p);
+ boGame->bosonAddPlayer(p);
 }
 
 void BosonNewGameWidget::slotLocalPlayerRemovedPlayer()
