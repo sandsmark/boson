@@ -5,18 +5,20 @@ ConstructionSteps=22
 
 [Boson Unit]
 Armor=2
+ConstructedParticles=
 DestroyedParticles=1010,3011,6011,7010,4001
 ExplodingDamage=0
 ExplodingDamageRange=0
-Health=700
+Health=800
 HitPoint=0,0,0.68
 Id=5
 IsFacility=true
 MineralCost=1000
 Name=Command Bunker
-OilCost=200
+OilCost=400
 Producer=10
-ProductionTime=600
+ProductionTime=1200
+Requirements=
 Shield=0
 SightRange=5
 SupportMiniMap=false

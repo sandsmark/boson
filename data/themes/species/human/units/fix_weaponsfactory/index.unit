@@ -5,18 +5,19 @@ ConstructionSteps=25
 
 [Boson Unit]
 Armor=0
+ConstructedParticles=
 DestroyedParticles=1010,3001,6001,7010
 ExplodingDamage=0
 ExplodingDamageRange=0
-Health=400
+Health=600
 HitPoint=-0.5,-0.2,0.99
 Id=3
 IsFacility=true
-MineralCost=500
+MineralCost=650
 Name=Weapons Factory
-OilCost=200
+OilCost=300
 Producer=10
-ProductionTime=450
+ProductionTime=500
 Requirements=5,2
 Shield=0
 SightRange=5
