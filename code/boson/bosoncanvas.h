@@ -463,7 +463,17 @@ protected:
 	Unit* createUnit(Player* owner, unsigned long int unitType);
 	BosonShot* createShot(Player* owner, unsigned long int shotType, unsigned long int unitType, unsigned long int weaponPropertyId);
 
-	bool loadItemFromXML(const QDomElement& unit, Player* owner);
+	/**
+	 * Parses @p item and will create a @ref BosonItem correspoding to the
+	 * attributes and elements found there.
+	 * @return A new @ref BosonItem object accorind to @p item
+	 **/
+	BosonItem* createItemFromXML(const QDomElement& item, Player* owner);
+
+	/**
+	 * Call @ref createItemFromXML and @ref BosonItem::loadFromXML
+	 **/
+	bool loadItemFromXML(const QDomElement& item, Player* owner);
 
 	void lockAdvanceFunction() { mAdvanceFunctionLocked = true; }
 	void unlockAdvanceFunction() { mAdvanceFunctionLocked = false; }
