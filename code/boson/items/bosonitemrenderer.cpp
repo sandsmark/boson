@@ -77,6 +77,7 @@ void BosonItemRenderer::setGLDepthMultiplier(float d)
 
 void BosonItemRenderer::setGLConstructionStep(unsigned int s)
 {
+ BO_CHECK_NULL_RET(model());
  // note: in case of s >= model()->constructionSteps() we use the last
  // constructionStep that is defined in the model until an actual frame is set.
  BoFrame* f = model()->constructionStep(s);
@@ -92,11 +93,13 @@ void BosonItemRenderer::setGLConstructionStep(unsigned int s)
 
 unsigned int BosonItemRenderer::glConstructionSteps() const
 {
+ BO_CHECK_NULL_RET0(model());
  return model()->constructionSteps();
 }
 
 void BosonItemRenderer::setFrame(int _frame)
 {
+ BO_CHECK_NULL_RET(model());
  if (mGLConstructionStep < glConstructionSteps() && showGLConstructionSteps()) {
 	// this unit (?) has not yet been constructed
 	// completely.
@@ -143,6 +146,7 @@ void BosonItemRenderer::setCurrentFrame(BoFrame* frame)
 
 void BosonItemRenderer::setAnimationMode(int mode)
 {
+ BO_CHECK_NULL_RET(model());
  if (mGLConstructionStep < glConstructionSteps()) {
 	return;
  }
@@ -203,6 +207,7 @@ unsigned int BosonItemRenderer::preferredLod(float dist) const
 
 void BosonItemRenderer::setShowGLConstructionSteps(bool s)
 {
+ BO_CHECK_NULL_RET(model());
  mShowGLConstructionSteps = s;
  if (mShowGLConstructionSteps) {
 	setGLConstructionStep(mGLConstructionStep);
