@@ -1005,7 +1005,7 @@ void BosonWidgetBase::setLocalPlayerRecursively(Player* p)
 void BosonWidgetBase::slotGrabScreenshot()
 {
  boDebug() << k_funcinfo << "Taking screenshot!" << endl;
- QPixmap ss = QPixmap::grabWindow(mTop->winId());
+ QPixmap shot = QPixmap::grabWindow(mTop->winId());
  QString file = findSaveFileName("boson", "png");
  if (file.isNull()) {
 	boWarning() << k_funcinfo << "Can't find free filename???" << endl;
@@ -1013,7 +1013,13 @@ void BosonWidgetBase::slotGrabScreenshot()
  }
  // TODO: chat message about file location!
  boDebug() << k_funcinfo << "Saving screenshot to " << file << endl;
- ss.save(file, "PNG");
+ bool ok = shot.save(file, "PNG");
+ if (!ok) {
+	boError() << k_funcinfo << "Error saving screenshot to " << file << endl;
+	boGame->slotAddChatSystemMessage(i18n("An error occured while saving screenshot to %1").arg(file));
+ } else {
+	boGame->slotAddChatSystemMessage(i18n("Screenshot saved to %1").arg(file));
+ }
 }
 
 void BosonWidgetBase::slotGrabProfiling()
@@ -1025,7 +1031,13 @@ void BosonWidgetBase::slotGrabProfiling()
  }
  // TODO: chat message about file location!
  boDebug() << k_funcinfo << "Saving profiling to " << file << endl;
- boProfiling->saveToFile(file);
+ bool ok = boProfiling->saveToFile(file);
+ if (!ok) {
+	boError() << k_funcinfo << "Error saving profiling to " << file << endl;
+	boGame->slotAddChatSystemMessage(i18n("An error occured while saving profiling log to %1").arg(file));
+ } else {
+	boGame->slotAddChatSystemMessage(i18n("Profiling log saved to %1").arg(file));
+ }
 }
 
 QString BosonWidgetBase::findSaveFileName(const QString& prefix, const QString& suffix)
