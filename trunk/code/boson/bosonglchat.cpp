@@ -190,11 +190,13 @@ void BosonGLChat::slotTimeout()
  }
 }
 
-void BosonGLChat::renderMessages(int x, int y, BosonGLFont* font)
+void BosonGLChat::renderMessages(int x, int y, int maxW, int maxH, BosonGLFont* font)
 {
-// TODO: line break?
  if (!font) {
 	boError() << k_funcinfo << "NULL font" << endl;
+	return;
+ }
+ if (d->mMessages.count() == 0) {
 	return;
  }
  // AB: this is a redundant call, since we use the same in BosonBigDisplayBase::paintGL().
@@ -204,12 +206,15 @@ void BosonGLChat::renderMessages(int x, int y, BosonGLFont* font)
 
  QStringList::Iterator it = d->mMessages.end();
  --it;
- for (; it != d->mMessages.begin(); --it) {
-	glRasterPos2i(x, y);
-	glCallLists((*it).length(), GL_UNSIGNED_BYTE, (GLubyte*)(*it).latin1());
-	y += font->height();
+ bool done = false;
+ while (!done) {
+	int height = font->height(*it, maxW);
+	y += font->renderText(x, y + height, *it, maxW);
+	if (it != d->mMessages.begin()) {
+		--it;
+	} else {
+		done = true;
+	}
  }
- glRasterPos2i(x, y);
- glCallLists((*it).length(), GL_UNSIGNED_BYTE, (GLubyte*)(*it).latin1()); // list.begin()
 }
 

@@ -82,7 +82,7 @@ public:
 	 *
 	 * This method also assumes that the current projection matrix orthogal.
 	 **/
-	void renderMessages(int x, int y, BosonGLFont* font);
+	void renderMessages(int x, int y, int maxWidth, int maxHeight, BosonGLFont* font);
 
 protected slots:
 	void slotUnsetKGame();
