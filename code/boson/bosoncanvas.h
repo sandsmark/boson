@@ -384,7 +384,7 @@ public:
 	void addEffects(const QPtrList<BosonEffect> effects);
 
 	bool loadFromXML(const QDomElement& root);
-	bool saveAsXML(QDomElement& root);
+	bool saveAsXML(QDomElement& root) const;
 
 	/**
 	 * Load the conditions for the @ref BoCanvasEventListener (i.e. the

@@ -1620,7 +1620,7 @@ bool BosonCanvas::loadEffectsFromXML(const QDomElement& root)
  return ret;
 }
 
-bool BosonCanvas::saveAsXML(QDomElement& root)
+bool BosonCanvas::saveAsXML(QDomElement& root) const
 {
  boDebug() << k_funcinfo << endl;
 
