@@ -384,7 +384,7 @@ bool BosonScenario::initializeScenario()
  return true;
 }
 
-void BosonScenario::applyScenario(Boson* boson)
+void BosonScenario::applyScenario(const Boson* boson)
 {
  if (!boson) {
 	boError(250) << k_funcinfo << "NULL game" << endl;
@@ -426,13 +426,10 @@ void BosonScenario::applyScenario(Boson* boson)
  root.appendChild(players);
 
  boDebug(250) << k_funcinfo << "saving " << d->mMaxPlayers << " players" << endl;
- for (int i = 0; i < d->mMaxPlayers; i++) {
-	Player* p = (Player*)boson->playerList()->at(i);
-	if (!p) {
-		// cannot happen, since d->mMaxPlayers == boGame->playerCount()
-		boError(250) << k_funcinfo << "NULL player " << i << endl;
-		continue;
-	}
+ QPtrListIterator<KPlayer> it(*boson->playerList());
+ unsigned int i = 0;
+ for (; it.current(); ++it, i++) {
+	Player* p = (Player*)it.current();
 	QDomElement playerNode = d->mInternalDoc.createElement("Player");
 	players.appendChild(playerNode);
 	initPlayerNode(playerNode, i);
