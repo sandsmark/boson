@@ -29,8 +29,6 @@ class QCursor;
 class BosonCanvas;
 class BosonTextureArray;
 
-
-
 /**
  * Note: the docs are partially obsolete. I updated some parts, but not all.
  *
@@ -111,11 +109,6 @@ public:
 	virtual QCursor cursor() const;
 
 	/**
-	 * @return @ref QCursor::pos by default
-	 **/
-	virtual QPoint pos() const;
-
-	/**
 	 * Insert a mode to the internal dictionary. You can load your
 	 * cursors using this function. You probably want to use an enum in your
 	 * game for the mode id, like "Attack" and "Move" and so on.
@@ -132,6 +125,12 @@ public:
 	 * documentation for more information.
 	 **/
 	virtual bool insertMode(int mode, QString baseDir, QString cursor) = 0;
+
+	/**
+	 * Render the cursor on the screen with x,y as the central point. Does
+	 * nothing for non-OpenGL cursors.
+	 **/
+	virtual void renderCursor(GLfloat , GLfloat ) {}
 
 	static QStringList availableThemes();
 	static QString defaultTheme();
@@ -215,6 +214,8 @@ public:
 	bool insertMode(int mode, BosonSpriteCursorData* data);
 	void setCurrentTextureArray(BosonTextureArray* array);
 	void setCurrentData(BosonSpriteCursorData* data);
+
+	virtual void renderCursor(GLfloat x, GLfloat y);
 
 protected slots:
 	void slotAdvance();

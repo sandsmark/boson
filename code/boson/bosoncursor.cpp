@@ -20,7 +20,7 @@
 #include "bosoncursor.h"
 
 #include "rtti.h"
-#include "bosoncanvas.h"
+#include "bosontexturearray.h"
 
 #include <ksimpleconfig.h>
 #include <kstandarddirs.h>
@@ -31,9 +31,7 @@
 #include <qbitmap.h>
 #include <qtimer.h>
 #include <qintdict.h>
-#include <qlabel.h>
-
-#include <X11/Xlib.h>
+#include <qimage.h>
 
 #include "bosoncursor.moc"
 
@@ -49,18 +47,12 @@ BosonCursor::~BosonCursor()
 
 void BosonCursor::setCursor(int mode)
 {
-// kdDebug() << k_funcinfo << mode << endl;
  mMode = (int)mode;
 }
 
 QCursor BosonCursor::cursor() const
 {
  return QCursor(QCursor::ArrowCursor);
-}
-
-QPoint BosonCursor::pos() const
-{
- return QCursor::pos();
 }
 
 QStringList BosonCursor::availableThemes()
@@ -208,9 +200,6 @@ bool BosonKDECursor::insertMode(int , QString , QString )
 /////////////////////////////////////////
 /////// BosonSpriteCursor ///////////////
 /////////////////////////////////////////
-
-#include "bosontexturearray.h"
-#include <qimage.h>
 
 BosonSpriteCursorData::BosonSpriteCursorData()
 {
@@ -380,6 +369,26 @@ void BosonSpriteCursor::setCurrentData(BosonSpriteCursorData* data)
  }
  if (mCurrentData->mArray->count() > 1) {
 	d->mAnimateTimer.start(100);
+ }
+}
+
+void BosonSpriteCursor::renderCursor(GLfloat x, GLfloat y)
+{
+ GLuint tex = currentTexture();
+ if (tex != 0) {
+	glEnable(GL_BLEND);
+	x -= hotspotX();
+	y -= hotspotY();
+	const GLfloat w = BO_TILE_SIZE;
+	const GLfloat h = BO_TILE_SIZE;
+	glBindTexture(GL_TEXTURE_2D, tex);
+	glBegin(GL_QUADS);
+		glTexCoord2f(0.0, 0.0); glVertex3f(x, y, 0.0);
+		glTexCoord2f(0.0, 1.0); glVertex3f(x, y + h, 0.0);
+		glTexCoord2f(1.0, 1.0); glVertex3f(x + w, y + h, 0.0);
+		glTexCoord2f(1.0, 0.0); glVertex3f(x + w, y, 0.0);
+	glEnd();
+	glDisable(GL_BLEND);
  }
 }
 

@@ -671,35 +671,15 @@ void BosonBigDisplayBase::paintGL()
  glMatrixMode(GL_MODELVIEW);
  glPushMatrix();
  glLoadIdentity();
- if (cursor() && cursor()->isA("BosonSpriteCursor")) {
-	BosonSpriteCursor* c = (BosonSpriteCursor*)cursor();
-
-	// FIXME: we could also use glRasterPos2i() and draw the image, just
-	// like we do for the text, instead of texture objects.
-	// Which version would be faster?
-	GLuint tex = c->currentTexture();
-	if (tex != 0) {
-		glEnable(GL_BLEND);
-		QPoint pos = mapFromGlobal(c->pos());
-		GLfloat x;
-		GLfloat y;
-		x = (GLfloat)pos.x() - c->hotspotX();
-		y = (GLfloat)d->mViewport[3] - (GLfloat)pos.y() - c->hotspotY();
-		const GLfloat w = BO_TILE_SIZE;
-		const GLfloat h = BO_TILE_SIZE;
-		glBindTexture(GL_TEXTURE_2D, tex);
-		glBegin(GL_QUADS);
-			glTexCoord2f(0.0, 0.0); glVertex3f(x, y, 0.0);
-			glTexCoord2f(0.0, 1.0); glVertex3f(x, y + h, 0.0);
-			glTexCoord2f(1.0, 1.0); glVertex3f(x + w, y + h, 0.0);
-			glTexCoord2f(1.0, 0.0); glVertex3f(x + w, y, 0.0);
-		glEnd();
-		glDisable(GL_BLEND);
-	}
+ if (cursor()) {
+	QPoint pos = mapFromGlobal(QCursor::pos());
+	GLfloat x = (GLfloat)pos.x();
+	GLfloat y = (GLfloat)d->mViewport[3] - (GLfloat)pos.y();
+	cursor()->renderCursor(x, y);
  }
  glDisable(GL_TEXTURE_2D);
  if (checkError()) {
-	kdError() << k_funcinfo << "cursor rendered" << endl;
+	kdError() << k_funcinfo << "GL error when cursor rendered" << endl;
  }
  renderText();
 
