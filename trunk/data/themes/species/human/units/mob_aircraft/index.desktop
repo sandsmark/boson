@@ -10,6 +10,7 @@ Damage=10
 Reload=30
 CanShootAtAirUnits=true
 CanShootAtLandUnits=true
+Producer=2
 
 [Boson Mobile Unit]
 Speed=6

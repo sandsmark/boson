@@ -5,3 +5,4 @@ Name=Barracks
 Id=4
 Health=100
 MineralCost=100
+Producer=10

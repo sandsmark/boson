@@ -5,7 +5,8 @@ Name=War Factory
 Id=3
 Health=100
 MineralCost=100
+Producer=10
 
 [Boson Facility]
 CanProduce=true
-ProduceList=10000,10001,10002,10003,10004,10005
+ProducerList=0

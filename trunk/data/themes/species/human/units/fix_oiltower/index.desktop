@@ -5,3 +5,4 @@ Name=Oil Tower
 Id=7
 Health=100
 MineralCost=100
+Producer=10
