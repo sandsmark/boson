@@ -649,3 +649,12 @@ QByteArray BosonPlayField::exportHeightMap() const
  return mMap->saveHeightMapImage();
 }
 
+QByteArray BosonPlayField::exportTexMap(unsigned int texture) const
+{
+ if (!mMap) {
+	BO_NULL_ERROR(mMap);
+	return QByteArray();
+ }
+ return mMap->saveTexMapImage(texture);
+}
+

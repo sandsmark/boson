@@ -428,6 +428,9 @@ public:
 
 	QByteArray saveHeightMapImage();
 
+	QByteArray saveTexMapImage(unsigned int texture);
+
+
 	/**
 	 * @return TRUE if the current map geo is valid.
 	 **/

@@ -34,6 +34,7 @@
 #include "boaction.h"
 #include "bosonlocalplayerinput.h"
 #include "botexmapimportdialog.h"
+#include "bosongroundtheme.h"
 #include "commandframe/editorcommandframe.h"
 #include "sound/bosonmusic.h"
 
@@ -47,6 +48,10 @@
 #include <qptrlist.h>
 #include <qvalidator.h>
 #include <qimage.h>
+#include <qlabel.h>
+#include <qcombobox.h>
+#include <qlayout.h>
+#include <qpushbutton.h>
 
 #include "editorwidget.moc"
 
@@ -562,7 +567,52 @@ void EditorWidget::slotImportTexMap()
 
 void EditorWidget::slotExportTexMap()
 {
- boWarning() << k_funcinfo << "TODO" << endl;
- KMessageBox::sorry(this, i18n("Not yet implemented"));
+ boDebug() << k_funcinfo << endl;
+ BO_CHECK_NULL_RET(boGame);
+ BO_CHECK_NULL_RET(boGame->playField());
+ BO_CHECK_NULL_RET(boGame->playField()->map());
+ BO_CHECK_NULL_RET(boGame->playField()->map()->groundTheme());
+
+ BosonMap* map = boGame->playField()->map();
+ QStringList textures;
+ for (unsigned int i = 0; i < map->groundTheme()->textureCount(); i++) {
+	textures.append(map->groundTheme()->textureFileName(i));
+ }
+
+ QDialog* d = new QDialog(0, 0, true);
+ QVBoxLayout* layout = new QVBoxLayout(d);
+ QLabel* label = new QLabel(i18n("Select texture to export:"), d);
+ QComboBox* combo = new QComboBox(d);
+ QPushButton* button = new QPushButton(i18n("Ok"), d);
+ connect(button, SIGNAL(clicked()), d, SLOT(accept()));
+ combo->insertStringList(textures);
+ layout->addWidget(label);
+ layout->addWidget(combo);
+ layout->addWidget(button);
+ d->exec();
+ unsigned int tex = (unsigned int)combo->currentItem();
+ boDebug() << k_funcinfo << "tex: " << tex << endl;
+ delete d;
+
+ QString fileName = KFileDialog::getSaveFileName(QString::null, "*.png", this);
+ if (fileName.isNull()) {
+	return;
+ }
+ QByteArray buffer = boGame->playField()->exportTexMap(tex);
+ if (buffer.size() == 0) {
+	boError() << k_funcinfo << "Could not export texmap" << endl;
+	KMessageBox::sorry(this, i18n("Unable to export texmap"));
+	return;
+ }
+ QImage image(buffer);
+ if (image.isNull()) {
+	boError() << k_funcinfo << "an invalid image has been generated" << endl;
+	KMessageBox::sorry(this, i18n("An invalid texmap image has been generated."));
+ }
+ if (!image.save(fileName, "PNG")) {
+	boError() << k_funcinfo << "unable to save image to " << fileName << endl;
+	KMessageBox::sorry(this, i18n("Unable to save image to %1.").arg(fileName));
+	return;
+ }
 }
 
