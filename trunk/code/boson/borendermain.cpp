@@ -126,7 +126,15 @@ void postBosonConfigInit();
 ModelPreview::ModelPreview(const QPtrList<SpeciesTheme>& species, QWidget* parent)
 	: BosonUfoGLWidget(parent, "modelpreview")
 {
- mSpecies = species;
+ mSpecies.setAutoDelete(true);
+ QStringList list = SpeciesTheme::availableSpecies();
+ for (unsigned int i = 0; i < list.count(); i++) {
+	QString dir = list[i];
+	dir = dir.left(dir.length() - QString("index.species").length());
+	SpeciesTheme* s = new SpeciesTheme(dir, QColor());
+	mSpecies.append(s);
+	s->readUnitConfigs(false);
+ }
  mUpdateTimer = new QTimer(this);
  connect(mUpdateTimer, SIGNAL(timeout()), this, SLOT(slotUpdateGL()));
  qApp->setGlobalMouseTracking(true);
@@ -141,6 +149,8 @@ ModelPreview::ModelPreview(const QPtrList<SpeciesTheme>& species, QWidget* paren
  mSelectedMesh = -1;
  mMeshUnderMouseLabel = 0;
  mSelectedMeshLabel = 0;
+ mLightWidget = 0;
+ mMaterialWidget = 0;
 
  mMouseMoveDiff = new BoMouseMoveDiff;
 
@@ -172,6 +182,8 @@ ModelPreview::ModelPreview(const QPtrList<SpeciesTheme>& species, QWidget* paren
 
 ModelPreview::~ModelPreview()
 {
+ delete mMaterialWidget;
+ delete mLightWidget;
  qApp->setGlobalMouseTracking(false);
  resetModel();
  BoMeshRendererManager::manager()->unsetCurrentRenderer();
@@ -179,6 +191,7 @@ ModelPreview::~ModelPreview()
  delete mMouseMoveDiff;
  delete mLight;
  delete mCamera;
+ mSpecies.clear();
 }
 
 void ModelPreview::initializeGL()
@@ -335,13 +348,11 @@ void ModelPreview::initUfoGUI()
 
  updateMeshUnderMouseLabel();
 
+ initUfoAction();
+}
 
-
-
-
-
-
-
+void ModelPreview::initUfoAction()
+{
  BoUfoActionCollection::initActionCollection(ufoManager());
  BoUfoActionCollection* actionCollection = ufoManager()->actionCollection();
  BO_CHECK_NULL_RET(actionCollection);
@@ -382,7 +393,8 @@ void ModelPreview::initUfoGUI()
  BoUfoToggleAction* vertexPoints = new BoUfoToggleAction(i18n("Show vertex points"),
 		KShortcut(), 0, 0,
 		actionCollection, "options_show_vertex_points");
- connect(vertexPoints, SIGNAL(signalToggled(bool)), this, SLOT(slotShowVertexPoints(bool)));
+ connect(vertexPoints, SIGNAL(signalToggled(bool)),
+		this, SLOT(slotShowVertexPoints(bool)));
  vertexPoints->setChecked(boConfig->boolValue("ShowVertexPoints"));
 
  // TODO BoUfoStdAction
@@ -396,38 +408,38 @@ void ModelPreview::initUfoGUI()
 		this, SLOT(slotChangeGridUnitSize()),
 		actionCollection, "options_grid_unit_size");
  (void)new BoUfoAction(i18n("Background color..."), 0,
-		this, SIGNAL(signalChangeBackgroundColor()),
+		this, SLOT(slotChangeBackgroundColor()),
 		actionCollection, "options_background_color");
  (void)new BoUfoAction(i18n("Light..."), 0,
-		this, SIGNAL(signalShowLightWidget()),
+		this, SLOT(slotShowLightWidget()),
 		actionCollection, "options_light"); // AB: actually thisis NOT a setting
  (void)new BoUfoAction(i18n("Materials..."), 0,
-		this, SIGNAL(signalShowMaterialsWidget()),
+		this, SLOT(slotShowMaterialsWidget()),
 		actionCollection, "options_materials"); // AB: actually this is NOT a setting
  (void)new BoUfoAction(i18n("Font..."), 0,
-		this, SIGNAL(signalShowChangeFont()),
+		this, SLOT(slotShowChangeFont()),
 		actionCollection, "options_font"); // AB: actually this is NOT a setting
 
 
  (void)new BoUfoAction(i18n("Debug &Models"), 0,
-		this, SIGNAL(signalDebugModels()),
+		this, SLOT(slotDebugModels()),
 		actionCollection, "debug_models");
 #ifdef BOSON_USE_BOMEMORY
  (void)new BoUfoAction(i18n("Debug M&emory"), 0,
-		this, SIGNAL(signalDebugMemory()),
+		this, SLOT(slotDebugMemory()),
 		actionCollection, "debug_memory");
 #endif
  (void)new BoUfoAction(i18n("Debug &Species"), 0,
-		this, SIGNAL(signalDebugSpecies()),
+		this, SLOT(slotDebugSpecies()),
 		actionCollection, "debug_species");
  (void)new BoUfoAction(i18n("Show OpenGL states"), KShortcut(),
-		this, SIGNAL(signalShowGLStates()),
+		this, SLOT(slotShowGLStates()),
 		actionCollection, "debug_show_opengl_states");
  (void)new BoUfoAction(i18n("&Reload model textures"), KShortcut(),
-		this, SIGNAL(signalReloadModelTextures()),
+		this, SLOT(slotReloadModelTextures()),
 		actionCollection, "debug_lazy_reload_model_textures");
  (void)new BoUfoAction(i18n("Reload &meshrenderer plugin"), KShortcut(),
-		this, SIGNAL(signalReloadMeshRenderer()),
+		this, SLOT(slotReloadMeshRenderer()),
 		actionCollection, "debug_lazy_reload_meshrenderer");
 
 
@@ -816,6 +828,165 @@ void ModelPreview::slotChangeGridUnitSize()
 // emit signalChangeVertexPointSize(); // obsolete
 }
 
+void ModelPreview::slotChangeBackgroundColor()
+{
+ QColor color = boConfig->colorValue("BoRenderBackgroundColor", Qt::black);
+ int result = KColorDialog::getColor(color, color, this);
+ if (result == KColorDialog::Accepted) {
+	boConfig->setColorValue("BoRenderBackgroundColor", color);
+ }
+}
+
+void ModelPreview::slotShowLightWidget()
+{
+ if (!mLightWidget) {
+	mLightWidget = new BoLightCameraWidget1(0, true);
+	mLightWidget->setLight(light(), context());
+ }
+ mLightWidget->show();
+}
+
+void ModelPreview::slotDebugModels()
+{
+ KDialogBase* dialog = new KDialogBase(KDialogBase::Plain, i18n("Debug Models"),
+		KDialogBase::Cancel, KDialogBase::Cancel, this,
+		"debugmodelsdialog", false, true);
+ connect(dialog, SIGNAL(finished()), dialog, SLOT(deleteLater()));
+ QWidget* w = dialog->plainPage();
+ QVBoxLayout* l = new QVBoxLayout(w);
+ KGameModelDebug* models = new KGameModelDebug(w);
+ l->addWidget(models);
+
+ QPtrListIterator<SpeciesTheme> it(mSpecies);
+ for (; it.current(); ++it) {
+	SpeciesTheme* theme = it.current();
+
+	// units
+	QValueList<const UnitProperties*> prop = it.current()->allUnits();
+	QValueList<const UnitProperties*>::Iterator propIt;
+	for (propIt = prop.begin(); propIt != prop.end(); ++propIt) {
+		QStringList fileNames = SpeciesTheme::unitModelFiles();
+		bool found = false;
+		QString file;
+		for (QStringList::Iterator fit = fileNames.begin(); fit != fileNames.end(); ++fit) {
+			if (KStandardDirs::exists((*propIt)->unitPath() + *fit)) {
+				file = *fit;
+				found = true;
+				break;
+			}
+		}
+		if (!found) {
+			boError() << k_funcinfo << "Cannot find model file file for " << (*propIt)->typeId() << endl;
+			continue;
+		}
+		file = (*propIt)->unitPath() + file;
+		models->addFile(file, QString("%1/%2").arg(theme->identifier()).arg((*propIt)->name()));
+	}
+
+	// objects
+	QStringList objectFiles;
+	QStringList objects = theme->allObjects(&objectFiles);
+	for (unsigned int i = 0; i < objects.count(); i++) {
+		QString file = theme->themePath() + QString::fromLatin1("objects/") + objectFiles[i];
+		models->addFile(file, objects[i]);
+	}
+
+	// add any files that we might have missed
+	models->addFiles(theme->themePath());
+ }
+ models->slotUpdate();
+
+ dialog->show();
+}
+
+void ModelPreview::slotDebugMemory()
+{
+#ifdef BOSON_USE_BOMEMORY
+ boDebug() << k_funcinfo << endl;
+ BoMemoryDialog* dialog = new BoMemoryDialog(this);
+ connect(dialog, SIGNAL(finished()), dialog, SLOT(deleteLater()));
+ boDebug() << k_funcinfo << "update data" << endl;
+ dialog->slotUpdate();
+ dialog->show();
+ boDebug() << k_funcinfo << "done" << endl;
+#endif
+}
+
+void ModelPreview::slotDebugSpecies()
+{
+ KDialogBase* dialog = new KDialogBase(KDialogBase::Plain, i18n("Debug Species"),
+		KDialogBase::Cancel, KDialogBase::Cancel, this,
+		"debugspeciesdialog", false, true);
+ connect(dialog, SIGNAL(finished()), dialog, SLOT(deleteLater()));
+ QWidget* w = dialog->plainPage();
+ QVBoxLayout* l = new QVBoxLayout(w);
+ KGameSpeciesDebug* species = new KGameSpeciesDebug(w);
+ l->addWidget(species);
+ species->loadSpecies();
+
+ dialog->show();
+}
+
+void ModelPreview::slotShowMaterialsWidget()
+{
+ if (!mMaterialWidget) {
+	mMaterialWidget = new BoMaterialWidget(0);
+ }
+ mMaterialWidget->clearMaterials();
+if (!model()) {
+	return;
+ }
+ BosonModel* model = this->model();
+ for (unsigned int i = 0; i < model->materialCount(); i++) {
+	mMaterialWidget->addMaterial(model->material(i));
+ }
+ mMaterialWidget->show();
+}
+
+void ModelPreview::slotShowGLStates()
+{
+ boDebug() << k_funcinfo << endl;
+ BoGLStateWidget* w = new BoGLStateWidget(0, 0, WDestructiveClose);
+ w->show();
+}
+
+void ModelPreview::slotReloadMeshRenderer()
+{
+ bool unusable = false;
+ bool r = BoMeshRendererManager::manager()->reloadPlugin(&unusable);
+ if (r) {
+	return;
+ }
+ boError() << "meshrenderer reloading failed" << endl;
+ if (unusable) {
+	KMessageBox::sorry(this, i18n("Reloading meshrenderer failed, library is now unusable. quitting."));
+	exit(1);
+ } else {
+	KMessageBox::sorry(this, i18n("Reloading meshrenderer failed but library should still be usable"));
+ }
+}
+
+void ModelPreview::slotReloadModelTextures()
+{
+ BO_CHECK_NULL_RET(BosonModelTextures::modelTextures());
+#warning TODO! (reloading textures)
+ //BosonModelTextures::modelTextures()->reloadTextures();
+}
+
+void ModelPreview::slotShowChangeFont()
+{
+ BoFontInfo f;
+ f = fontInfo();
+ int result = BosonGLFontChooser::getFont(f, this);
+ if (result == QDialog::Accepted) {
+	setFont(f);
+	boConfig->setStringValue("GLFont", fontInfo().toString());
+ }
+}
+
+
+
+
 void ModelPreview::slotSetVertexPointSize(int size)
 {
  boDebug() << k_funcinfo << size << endl;
@@ -872,7 +1043,115 @@ void ModelPreview::slotUnitChanged(int index)
  BoUfoAction* p = (BoUfoAction*)sender();
  uncheckAllBut(p);
  SpeciesTheme* s = mAction2Species[p];
- emit signalUnitChanged(s, index);
+ BO_CHECK_NULL_RET(s);
+
+ QValueList<const UnitProperties*> props = s->allUnits();
+ if (index >= (int)props.count()) {
+	boError() << k_funcinfo << "index " << index << " out of range" << endl;
+	return;
+ }
+ unsigned long int type = props[index]->typeId();
+ const UnitProperties* prop = s->unitProperties(type);
+ if (!prop) {
+	boError() << k_funcinfo << "could not find unitproperties for index=" << index << " type=" << type << endl;
+	return;
+ }
+
+ changeUnit(s, prop);
+}
+
+void ModelPreview::changeUnit(SpeciesTheme* s, const UnitProperties* prop)
+{
+ BO_CHECK_NULL_RET(s);
+ BO_CHECK_NULL_RET(prop);
+ // TODO: check/uncheck the menu items!
+
+ if (mMaterialWidget) {
+	mMaterialWidget->clearMaterials();
+	mMaterialWidget->hide();
+ }
+ load(s, prop);
+}
+
+void ModelPreview::changeObject(SpeciesTheme* s, const QString& objectModel)
+{
+ BO_CHECK_NULL_RET(s);
+ if (mMaterialWidget) {
+	mMaterialWidget->clearMaterials();
+	mMaterialWidget->hide();
+ }
+ loadObjectModel(s, objectModel);
+}
+
+SpeciesTheme* ModelPreview::findTheme(const QString& theme) const
+{
+ SpeciesTheme* s = 0;
+ QPtrListIterator<SpeciesTheme> it(mSpecies);
+ for (; it.current() && !s; ++it) {
+	if (it.current()->identifier().lower() == theme.lower()) {
+		s = it.current();
+	}
+ }
+ return s;
+}
+
+void ModelPreview::changeUnit(const QString& theme, const QString& unit)
+{
+ SpeciesTheme* s = 0;
+ const UnitProperties* prop = 0;
+
+ s = findTheme(theme);
+ if (!s) {
+	boError() << k_funcinfo << "Could not find theme " << theme << endl;
+	return;
+ }
+ QValueList<const UnitProperties*> units = s->allUnits();
+ QValueList<const UnitProperties*>::Iterator i = units.begin();
+ for (; i != units.end() && !prop; ++i) {
+	const UnitProperties* p = *i;
+	// warning: this might cause trouble once we start translations! but we
+	// also have a way to use IDs directly so this is just a minor problem
+	if (p->name().lower() == unit.lower()) {
+		prop = p;
+	}
+ }
+ if (!prop) {
+	boError() << "Could not find unit " << unit << endl;
+ }
+ changeUnit(s, prop);
+}
+
+void ModelPreview::changeUnit(const QString& theme, unsigned long int type)
+{
+ SpeciesTheme* s = 0;
+ QPtrListIterator<SpeciesTheme> it(mSpecies);
+ for (; it.current() && !s; ++it) {
+	if (it.current()->identifier().lower() == theme.lower()) {
+		s = it.current();
+	}
+ }
+ if (!s) {
+	boError() << k_funcinfo << "Could not find theme " << theme << endl;
+	return;
+ }
+ const UnitProperties* prop = s->unitProperties(type);
+ if (!prop) {
+	boError() << k_funcinfo << "Could not find unit " << type << endl;
+	return;
+ }
+ changeUnit(s, prop);
+}
+
+void ModelPreview::changeObject(const QString& theme, const QString& object)
+{
+ SpeciesTheme* s = 0;
+
+ s = findTheme(theme);
+ if (!s) {
+	boError() << k_funcinfo << "Could not find theme " << theme << endl;
+	return;
+ }
+ changeObject(s, object);
 }
 
 void ModelPreview::slotObjectChanged(int index)
@@ -884,7 +1163,15 @@ void ModelPreview::slotObjectChanged(int index)
  BoUfoAction* p = (BoUfoAction*)sender();
  uncheckAllBut(p);
  SpeciesTheme* s = mAction2Species[p];
- emit signalObjectChanged(s, index);
+ BO_CHECK_NULL_RET(s);
+
+ QString object = s->allObjects()[index];
+ if (object.isEmpty()) {
+	boError() << k_funcinfo << "Can't find " << object << " (==" << index << ")" << endl;
+	return;
+ }
+ boDebug() << k_funcinfo << object << endl;
+ changeObject(s, object);
 }
 
 void ModelPreview::resetModel()
@@ -1329,16 +1616,6 @@ void ModelPreview::slotEnableMaterials(bool e)
 
 RenderMain::RenderMain() : KMainWindow()
 {
- mSpecies.setAutoDelete(true);
- QStringList list = SpeciesTheme::availableSpecies();
- for (unsigned int i = 0; i < list.count(); i++) {
-	QString dir = list[i];
-	dir = dir.left(dir.length() - QString("index.species").length());
-	SpeciesTheme* s = new SpeciesTheme(dir, QColor());
-	mSpecies.append(s);
-	s->readUnitConfigs(false);
- }
-
  QWidget* w = new QWidget(this);
  QHBoxLayout* layout = new QHBoxLayout(w);
 
@@ -1351,49 +1628,9 @@ RenderMain::RenderMain() : KMainWindow()
  mPreview->show();
 
  mPreview->initGL();
- mLightWidget = new BoLightCameraWidget1(0, true);
- mLightWidget->hide();
- mLightWidget->setLight(mPreview->light(), mPreview->context());
-
- mMaterialWidget = new BoMaterialWidget(0);
- mMaterialWidget->hide();
-
-#if 0
- connect(mPreview, SIGNAL(signalChangeVertexPointSize()),
-		this, SLOT(slotVertexPointSize()));
- connect(mPreview, SIGNAL(signalChangeGridUnitSize()),
-		this, SLOT(slotGridUnitSize()));
-#endif
- connect(mPreview, SIGNAL(signalChangeBackgroundColor()),
-		this, SLOT(slotBackgroundColor()));
- connect(mPreview, SIGNAL(signalShowLightWidget()),
-		this, SLOT(slotShowLightWidget()));
- connect(mPreview, SIGNAL(signalShowMaterialsWidget()),
-		this, SLOT(slotShowMaterialsWidget()));
- connect(mPreview, SIGNAL(signalShowChangeFont()),
-		this, SLOT(slotChangeFont()));
- connect(mPreview, SIGNAL(signalDebugModels()),
-		this, SLOT(slotDebugModels()));
- connect(mPreview, SIGNAL(signalDebugMemory()),
-		this, SLOT(slotDebugMemory()));
- connect(mPreview, SIGNAL(signalDebugSpecies()),
-		this, SLOT(slotDebugSpecies()));
- connect(mPreview, SIGNAL(signalShowGLStates()),
-		this, SLOT(slotShowGLStates()));
- connect(mPreview, SIGNAL(signalReloadModelTextures()),
-		this, SLOT(slotReloadModelTextures()));
- connect(mPreview, SIGNAL(signalReloadMeshRenderer()),
-		this, SLOT(slotReloadMeshRenderer()));
- connect(mPreview, SIGNAL(signalUnitChanged(SpeciesTheme*, int)),
-		this, SLOT(slotUnitChanged(SpeciesTheme*, int)));
- connect(mPreview, SIGNAL(signalObjectChanged(SpeciesTheme*, int)),
-		this, SLOT(slotObjectChanged(SpeciesTheme*, int)));
-
 
  mPreview->slotResetView();
  setCentralWidget(w);
-
- initKAction();
 
  mIface = new BoDebugDCOPIface();
 }
@@ -1401,15 +1638,7 @@ RenderMain::RenderMain() : KMainWindow()
 RenderMain::~RenderMain()
 {
  boConfig->save(false);
- delete mMaterialWidget;
- mSpecies.clear();
  delete mIface;
-}
-
-void RenderMain::connectBoth(QObject* o1, QObject* o2, const char* signal, const char* slot)
-{
- connect(o1, signal, o2, slot);
- connect(o2, signal, o1, slot);
 }
 
 bool RenderMain::loadCamera(KCmdLineArgs* args)
@@ -1492,441 +1721,21 @@ bool RenderMain::loadCamera(KCmdLineArgs* args)
  return true;
 }
 
-void RenderMain::slotUnitChanged(int index)
-{
- if (!sender() || !sender()->inherits("KAction")) {
-	boError() << k_funcinfo << "sender() must inherit KAction" << endl;
-	return;
- }
- if (index < 0) {
-	boError() << k_funcinfo << "index < 0" << endl;
-	return;
- }
- KAction* p = (KAction*)sender();
- uncheckAllBut(p);
- SpeciesTheme* s = mAction2Species[p];
- slotUnitChanged(s, index);
-}
 
-void RenderMain::slotUnitChanged(SpeciesTheme* s, int index)
-{
- BO_CHECK_NULL_RET(s);
- boDebug() << k_funcinfo << index << endl;
- QValueList<const UnitProperties*> props = s->allUnits();
- if (index >= (int)props.count()) {
-	boError() << k_funcinfo << "index " << index << " out of range" << endl;
-	return;
- }
- unsigned long int type = props[index]->typeId();
- const UnitProperties* prop = s->unitProperties(type);
- if (!prop) {
-	boError() << k_funcinfo << "could not find unitproperties for index=" << index << " type=" << type << endl;
-	return;
- }
- changeUnit(s, prop);
-}
-
-void RenderMain::slotObjectChanged(int index)
-{
- if (!sender() || !sender()->inherits("KAction")) {
-	boError() << k_funcinfo << "sender() must inherit KAction" << endl;
-	return;
- }
- if (index < 0) {
-	boError() << k_funcinfo << "index < 0" << endl;
-	return;
- }
- KAction* a = (KAction*)sender();
- uncheckAllBut(a);
- SpeciesTheme* s = mAction2Species[a];
- slotObjectChanged(s, index);
-}
-
-void RenderMain::slotObjectChanged(SpeciesTheme* s, int index)
-{
- BO_CHECK_NULL_RET(s);
- boDebug() << k_funcinfo << index << endl;
- QString object = s->allObjects()[index];
- if (object.isEmpty()) {
-	boError() << k_funcinfo << "Can't find " << object << " (==" << index << ")" << endl;
-	return;
- }
- boDebug() << k_funcinfo << object << endl;
- changeObject(s, object);
-}
-
-void RenderMain::slotDebugModels()
-{
- KDialogBase* dialog = new KDialogBase(KDialogBase::Plain, i18n("Debug Models"),
-		KDialogBase::Cancel, KDialogBase::Cancel, this,
-		"debugmodelsdialog", false, true);
- connect(dialog, SIGNAL(finished()), dialog, SLOT(deleteLater()));
- QWidget* w = dialog->plainPage();
- QVBoxLayout* l = new QVBoxLayout(w);
- KGameModelDebug* models = new KGameModelDebug(w);
- l->addWidget(models);
-
- QPtrListIterator<SpeciesTheme> it(mSpecies);
- for (; it.current(); ++it) {
-	SpeciesTheme* theme = it.current();
-
-	// units
-	QValueList<const UnitProperties*> prop = it.current()->allUnits();
-	QValueList<const UnitProperties*>::Iterator propIt;
-	for (propIt = prop.begin(); propIt != prop.end(); ++propIt) {
-		QStringList fileNames = SpeciesTheme::unitModelFiles();
-		bool found = false;
-		QString file;
-		for (QStringList::Iterator fit = fileNames.begin(); fit != fileNames.end(); ++fit) {
-			if (KStandardDirs::exists((*propIt)->unitPath() + *fit)) {
-				file = *fit;
-				found = true;
-				break;
-			}
-		}
-		if (!found) {
-			boError() << k_funcinfo << "Cannot find model file file for " << (*propIt)->typeId() << endl;
-			continue;
-		}
-		file = (*propIt)->unitPath() + file;
-		models->addFile(file, QString("%1/%2").arg(theme->identifier()).arg((*propIt)->name()));
-	}
-
-	// objects
-	QStringList objectFiles;
-	QStringList objects = theme->allObjects(&objectFiles);
-	for (unsigned int i = 0; i < objects.count(); i++) {
-		QString file = theme->themePath() + QString::fromLatin1("objects/") + objectFiles[i];
-		models->addFile(file, objects[i]);
-	}
-
-	// add any files that we might have missed
-	models->addFiles(theme->themePath());
- }
- models->slotUpdate();
-
- dialog->show();
-}
-
-void RenderMain::slotDebugMemory()
-{
-#ifdef BOSON_USE_BOMEMORY
- boDebug() << k_funcinfo << endl;
- BoMemoryDialog* dialog = new BoMemoryDialog(this);
- connect(dialog, SIGNAL(finished()), dialog, SLOT(deleteLater()));
- boDebug() << k_funcinfo << "update data" << endl;
- dialog->slotUpdate();
- dialog->show();
- boDebug() << k_funcinfo << "done" << endl;
-#endif
-}
-
-void RenderMain::slotDebugSpecies()
-{
- KDialogBase* dialog = new KDialogBase(KDialogBase::Plain, i18n("Debug Species"),
-		KDialogBase::Cancel, KDialogBase::Cancel, this,
-		"debugspeciesdialog", false, true);
- connect(dialog, SIGNAL(finished()), dialog, SLOT(deleteLater()));
- QWidget* w = dialog->plainPage();
- QVBoxLayout* l = new QVBoxLayout(w);
- KGameSpeciesDebug* species = new KGameSpeciesDebug(w);
- l->addWidget(species);
- species->loadSpecies();
-
- dialog->show();
-}
-
-void RenderMain::slotVertexPointSize()
-{
-#if 0
- bool ok = false;
- unsigned int size = boConfig->uintValue("VertexPointSize");
- size = (unsigned int)QInputDialog::getInteger(i18n("Vertex point size"),
-		i18n("Vertex point size (in pixels)"),
-		(int)size, 0, 500, 1, &ok, this);
- if (ok) {
-	boConfig->setUIntValue("VertexPointSize", size);
- }
-#else
- KMessageBox::sorry(this, i18n("Please use the libufo menu entry!"));
-#endif
-}
-
-void RenderMain::slotGridUnitSize()
-{
-#if 0
- bool ok = false;
- double size = boConfig->doubleValue("GridUnitSize", 0.1);
- size = QInputDialog::getDouble(i18n("Grid unit size"),
-		i18n("Grid unit size"),
-		size, 0.0, 1.0, 2, &ok, this);
- if (ok) {
-	boConfig->setDoubleValue("GridUnitSize", size);
- }
-#else
- KMessageBox::sorry(this, i18n("Please use the libufo menu entry!"));
-#endif
-}
-
-void RenderMain::slotShowVertexPoints(bool s)
-{
- boConfig->setBoolValue("ShowVertexPoints", s);
-}
-
-void RenderMain::slotBackgroundColor()
-{
- QColor color = boConfig->colorValue("BoRenderBackgroundColor", Qt::black);
- int result = KColorDialog::getColor(color, color, this);
- if (result == KColorDialog::Accepted) {
-	boConfig->setColorValue("BoRenderBackgroundColor", color);
- }
-}
-
-SpeciesTheme* RenderMain::findTheme(const QString& theme) const
-{
- SpeciesTheme* s = 0;
- QPtrListIterator<SpeciesTheme> it(mSpecies);
- for (; it.current() && !s; ++it) {
-	if (it.current()->identifier().lower() == theme.lower()) {
-		s = it.current();
-	}
- }
- return s;
-}
 
 void RenderMain::changeUnit(const QString& theme, const QString& unit)
 {
- SpeciesTheme* s = 0;
- const UnitProperties* prop = 0;
-
- s = findTheme(theme);
- if (!s) {
-	boError() << k_funcinfo << "Could not find theme " << theme << endl;
-	return;
- }
- QValueList<const UnitProperties*> units = s->allUnits();
- QValueList<const UnitProperties*>::Iterator i = units.begin();
- for (; i != units.end() && !prop; ++i) {
-	const UnitProperties* p = *i;
-	// warning: this might cause trouble once we start translations! but we
-	// also have a way to use IDs directly so this is just a minor problem
-	if (p->name().lower() == unit.lower()) {
-		prop = p;
-	}
- }
- if (!prop) {
-	boError() << "Could not find unit " << unit << endl;
- }
- changeUnit(s, prop);
+ mPreview->changeUnit(theme, unit);
 }
 
 void RenderMain::changeUnit(const QString& theme, unsigned long int type)
 {
- SpeciesTheme* s = 0;
- QPtrListIterator<SpeciesTheme> it(mSpecies);
- for (; it.current() && !s; ++it) {
-	if (it.current()->identifier().lower() == theme.lower()) {
-		s = it.current();
-	}
- }
- if (!s) {
-	boError() << k_funcinfo << "Could not find theme " << theme << endl;
-	return;
- }
- const UnitProperties* prop = s->unitProperties(type);
- if (!prop) {
-	boError() << k_funcinfo << "Could not find unit " << type << endl;
-	return;
- }
- changeUnit(s, prop);
+ mPreview->changeUnit(theme, type);
 }
 
 void RenderMain::changeObject(const QString& theme, const QString& object)
 {
- SpeciesTheme* s = 0;
-
- s = findTheme(theme);
- if (!s) {
-	boError() << k_funcinfo << "Could not find theme " << theme << endl;
-	return;
- }
- changeObject(s, object);
-}
-
-void RenderMain::changeUnit(SpeciesTheme* s, const UnitProperties* prop)
-{
- BO_CHECK_NULL_RET(s);
- BO_CHECK_NULL_RET(prop);
- // TODO: check/uncheck the menu items!
-
- mMaterialWidget->clearMaterials();
- mMaterialWidget->hide();
- mPreview->load(s, prop);
-}
-
-void RenderMain::changeObject(SpeciesTheme* s, const QString& objectModel)
-{
- BO_CHECK_NULL_RET(s);
- mMaterialWidget->clearMaterials();
- mMaterialWidget->hide();
- mPreview->loadObjectModel(s, objectModel);
-}
-
-void RenderMain::initKAction()
-{
- KStdAction::quit(this, SLOT(close()), actionCollection());
-
- KActionMenu* modelMenu = new KActionMenu(i18n("&Model"),
-		 actionCollection(), "model");
- QPtrListIterator<SpeciesTheme> it(mSpecies);
- for (; it.current(); ++it) {
-	SpeciesTheme* s = it.current();
-	KActionMenu* menu = new KActionMenu(s->identifier(), actionCollection(),
-			QString("model_species_%1").arg(s->identifier()));
-	modelMenu->insert(menu);
-
-	KSelectAction* selectUnit = new KSelectAction(i18n("&Units"), 0, this, SLOT(slotUnitChanged(int)));
-	KSelectAction* selectObject = new KSelectAction(i18n("&Objects"), 0, this, SLOT(slotUnitChanged(int)));
-	menu->insert(selectUnit);
-	menu->insert(selectObject);
-	mAction2Species.insert(selectUnit, s);
-	mAction2Species.insert(selectObject, s);
-
-	connect(selectUnit, SIGNAL(activated(int)),
-			this, SLOT(slotUnitChanged(int)));
-	connect(selectObject, SIGNAL(activated(int)),
-			this, SLOT(slotObjectChanged(int)));
-
-	QValueList<const UnitProperties*> units = s->allUnits();
-	QStringList list;
-	for (unsigned int j = 0; j < units.count(); j++) {
-		list.append(units[j]->name());
-	}
-	selectUnit->setItems(list);
-	selectObject->setItems(s->allObjects());
- }
-
- KToggleAction* vertexPoints = new KToggleAction(i18n("Show vertex points"),
-		0, 0, 0,
-		actionCollection(), "options_show_vertex_points");
- connect(vertexPoints, SIGNAL(toggled(bool)), this, SLOT(slotShowVertexPoints(bool)));
- vertexPoints->setChecked(boConfig->boolValue("ShowVertexPoints"));
- (void)new KAction(i18n("Vertex point size..."), 0, this,
-		SLOT(slotVertexPointSize()),
-		actionCollection(), "options_vertex_point_size");
- (void)new KAction(i18n("Grid unit size..."), 0, this,
-		SLOT(slotGridUnitSize()),
-		actionCollection(), "options_grid_unit_size");
- (void)new KAction(i18n("Background color..."), 0, this,
-		SLOT(slotBackgroundColor()),
-		actionCollection(), "options_background_color");
- (void)new KAction(i18n("Light..."), 0, this, SLOT(slotShowLightWidget()),
-		actionCollection(), "options_light"); // AB: actually this is NOT a setting
- (void)new KAction(i18n("Materials..."), 0, this, SLOT(slotShowMaterialsWidget()),
-		actionCollection(), "options_materials"); // AB: actually this is NOT a setting
- (void)new KAction(i18n("Font..."), 0, this, SLOT(slotChangeFont()),
-		actionCollection(), "options_font"); // AB: actually this is NOT a setting
-
-
- (void)new KAction(i18n("Debug &Models"), 0, this, SLOT(slotDebugModels()),
-		actionCollection(), "debug_models");
-#ifdef BOSON_USE_BOMEMORY
- (void)new KAction(i18n("Debug M&emory"), 0, this, SLOT(slotDebugMemory()),
-		actionCollection(), "debug_memory");
-#endif
- (void)new KAction(i18n("Debug &Species"), 0, this, SLOT(slotDebugSpecies()),
-		actionCollection(), "debug_species");
- (void)new KAction(i18n("Show OpenGL states"), KShortcut(), this,
-		SLOT(slotShowGLStates()), actionCollection(),
-		"debug_show_opengl_states");
- (void)new KAction(i18n("&Reload model textures"), KShortcut(), this,
-		SLOT(slotReloadModelTextures()), actionCollection(), "debug_lazy_reload_model_textures");
- (void)new KAction(i18n("Reload &meshrenderer plugin"), KShortcut(), this,
-		SLOT(slotReloadMeshRenderer()), actionCollection(),
-		"debug_lazy_reload_meshrenderer");
-
- createGUI(locate("data", "boson/borenderui.rc"));
-}
-
-void RenderMain::uncheckAllBut(KAction* action)
-{
- if (!action || !action->isA("KSelectAction")) {
-	boError() << k_funcinfo << "not a valid KSelectAction" << endl;
-	return;
- }
- QPtrDictIterator<SpeciesTheme> it(mAction2Species);
- for (; it.current(); ++it) {
-	KAction* a = (KAction*)it.currentKey();
-	if (a == action) {
-		continue;
-	}
-	if (!a->isA("KSelectAction")) {
-		continue;
-	}
-	a->blockSignals(true);
-	((KSelectAction*)a)->setCurrentItem(-1);
-	a->blockSignals(false);
- }
-}
-
-void RenderMain::slotShowLightWidget()
-{
- mLightWidget->show();
-}
-
-void RenderMain::slotShowMaterialsWidget()
-{
- mMaterialWidget->clearMaterials();
- if (!mPreview || !mPreview->model()) {
-	return;
- }
- BosonModel* model = mPreview->model();
- for (unsigned int i = 0; i < model->materialCount(); i++) {
-	mMaterialWidget->addMaterial(model->material(i));
- }
- mMaterialWidget->show();
-}
-
-void RenderMain::slotShowGLStates()
-{
- boDebug() << k_funcinfo << endl;
- BoGLStateWidget* w = new BoGLStateWidget(0, 0, WDestructiveClose);
- w->show();
-}
-
-void RenderMain::slotReloadMeshRenderer()
-{
- bool unusable = false;
- bool r = BoMeshRendererManager::manager()->reloadPlugin(&unusable);
- if (r) {
-	return;
- }
- boError() << "meshrenderer reloading failed" << endl;
- if (unusable) {
-	KMessageBox::sorry(this, i18n("Reloading meshrenderer failed, library is now unusable. quitting."));
-	exit(1);
- } else {
-	KMessageBox::sorry(this, i18n("Reloading meshrenderer failed but library should still be usable"));
- }
-}
-
-void RenderMain::slotReloadModelTextures()
-{
- BO_CHECK_NULL_RET(BosonModelTextures::modelTextures());
-#warning TODO! (reloading textures)
- //BosonModelTextures::modelTextures()->reloadTextures();
-}
-
-void RenderMain::slotChangeFont()
-{
- mPreview->initializeGL();
- BoFontInfo f;
- f = mPreview->fontInfo();
- int result = BosonGLFontChooser::getFont(f, this);
- if (result == QDialog::Accepted) {
-	mPreview->setFont(f);
-	boConfig->setStringValue("GLFont", mPreview->fontInfo().toString());
- }
+ mPreview->changeObject(theme, object);
 }
 
 int main(int argc, char **argv)
