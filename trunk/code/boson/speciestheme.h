@@ -37,13 +37,21 @@ class SpeciesTheme
 public:
 	/**
 	 * Construct and load a theme. See @ref loadTheme.
+	 *
+	 * Constructing is quite fast, as @ref loadTheme does no preloading of
+	 * unit pixmaps.
 	 **/
 	SpeciesTheme(const QString& species, QRgb teamColor = qRgb(0,0,0));
 	
 	~SpeciesTheme();
 
 	/**
-	 * Load a theme.
+	 * Load a theme. Look for index.desktop files in the units directory,
+	 * read and store these information - see @ref readUnitConfigs.
+	 *
+	 * Note that loadTheme is quite fast as it does <em>not</em> preload the
+	 * pixmaps of the units. These are loaded as soon as a unit is accessed
+	 * first time. 
 	 * @param species The theme name to be loaded. Must not be i18n'ed as it
 	 * is used in the directoryname.
 	 * @param teamColor The color of this team or QRgb(0,0,0) for a default
