@@ -1480,7 +1480,7 @@ void BoMesh::calculateNormals(unsigned int _lod)
 		lod->setNormal(face, -1, facenormals[face]);
 	}
  }
- delete[] faceNormals;
+ delete[] facenormals;
 }
 
 void BoMesh::renderMesh(const BoMatrix* matrix, const QColor* teamColor, unsigned int _lod)
