@@ -443,10 +443,8 @@ void BoMesh::init()
 
 int BoMesh::pointSize()
 {
- // 3 vertex components, 3 normal components, 2 texel components
- // note that this means that we have a normal for every vertex (lot of redundant
- // data)!
- return (3 + 3 + 2);
+ // 3 vertex components, 2 texel components
+ return (3 + 2);
 }
 
 int BoMesh::vertexPos()
@@ -457,11 +455,6 @@ int BoMesh::vertexPos()
 int BoMesh::texelPos()
 {
  return 3;
-}
-
-int BoMesh::normalPos()
-{
- return 5;
 }
 
 void BoMesh::setMaterial(BoMaterial* mat)
@@ -897,8 +890,7 @@ void BoMesh::allocatePoints(unsigned int points)
  }
  d->mPointCount = points;
 
- // note that a lot of space is wasted - some objects are not textured, all
- // vertices have normals, ...
+ // note that a lot of space is wasted - some objects are not textured
  // but we can render more efficient this way.
  d->mAllocatedPoints = boMem->allocateFloatArray(d->mPointCount * pointSize());
  d->mPoints = d->mAllocatedPoints;
@@ -906,8 +898,10 @@ void BoMesh::allocatePoints(unsigned int points)
  // AB: we initialize the array elements now. this is close to useless since we
  // overwrite it later anyway. but valgrind complains for meshes that don't use
  // textures (since we copy uninitialized values around).
- for (unsigned int i = 0; i < points * pointSize(); i++) {
-	d->mAllocatedPoints[i] = 0.0f;
+ for (unsigned int i = 0; i < d->mPointCount; i++) {
+	for (int j = 0; j < pointSize(); j++) {
+		d->mAllocatedPoints[i * pointSize() + j] = 0.0f;
+	}
  }
 }
 
@@ -951,50 +945,19 @@ void BoMesh::setNormal(unsigned int index, const BoVector3& normal)
 
  // atm all vertices of a face share the same (surface-)normal. this might
  // change!
- for (unsigned int i = index; i < index + 3; i++) {
-	d->mPoints[i * pointSize() + normalPos() + 0] = normal[0];
-	d->mPoints[i * pointSize() + normalPos() + 1] = normal[1];
-	d->mPoints[i * pointSize() + normalPos() + 2] = normal[2];
- }
-
- // AB: some comments on our current data structure:
- // we store the normals in d->mPoints, together with vertices and texels. so we
- // can easily use glDrawElements() and even interleaved arrays. this should
- // increase speed slightly, but most probably really slightly only. I am not
- // sure whether the decision was a good idea, because:
- // - in order to use glDrawElements() we need to be able to use *one* index to
- // reference vertex/texel and normal coordinates. this means we cannot "share"
- // vertices anymore between different faces. a face can't use the same index
- // anymore, even if (for one point) vertex and texel is equal - as the normal
- // won't be equal. this increases memory usage greatly!
- // - we need to store the normal for *every* vertex, not just for every face
- // (i.e. every third vertex). again a lot of wasted memory.
- //
- // I decided for this because of several reasons:
- // - it might be possible that we *will* use a different normal for every
- // vertex one day. a surface is meant to look "flat" if we use one normal only
- // but "curved" if every vertex has it's own normal.
- // - we have a bigger set of options available. we can use glDrawElements()
- // just as well as glVertex(), glNormal(), ...
- //   -> this allows more flexible code and (as long as we use glDrawElements()
- //   only) more readable code. This is something *very* important to me!
- //   (especially as I am still working on normals and lighting. it's not
- //   working yet, so having more flexibility and more readable code is
- //   important)
- // - it is slightly faster
- // note that it is really only slightly faster. The main advantagea of
- // glDrawElements() to a loop of glNormal(); glArrayElement(); are cache
- // issues. that might s(!) ave us a few ms/s but nothing really important.
- // alone it would not be worth the additional memory usage!
+ int face = index / 3;
+ d->mAllFaces[face].setAllNormals(normal);
 }
 
 BoVector3 BoMesh::normal(unsigned int p) const
 {
  if (p >= points()) {
-	boError() << k_funcinfo << "invalid point " << p << endl;
+	boError() << k_funcinfo << "invalid point " << p << " max=" << points() << endl;
 	return BoVector3();
  }
- return BoVector3(&d->mPoints[p * pointSize() + normalPos()]);
+ int face = p / 3;
+ int vertex = p % 3;
+ return d->mAllFaces[face].normal(vertex);
 }
 
 void BoMesh::calculateNormals()
@@ -1068,67 +1031,38 @@ void BoMesh::renderMesh(const QColor* teamColor)
 	if (!d->mPointsCache || d->mPointsCacheCount == 0) {
 		boError() << k_funcinfo << "no point cache!" << endl;
 	} else {
-#if 0
-		// AB: the code below is obsolete. it assumes that the normal is
-		// *not* in d->mPoints but in the face only.
-		if (type() != GL_TRIANGLES) {
-			glDrawElements(type(), d->mPointsCacheCount, GL_UNSIGNED_INT, d->mPointsCache);
-		} else {
-			glBegin(type());
-			// we cannot use the points cache, as we also need the
-			// normals. for now we iterate over the nodes, which is
-			// just as fine, as we cannot use glDrawElements()
-			// anyway (as normals are not (yet?) compatible with it)
-			BoNode* node = nodes();
-			while (node) {
-				const int* points = node->pointIndex();
-				const float* normal;
-				if (BoMaterial::normals() == 0) {
-					normal = normal(points[0]);
-				} else {
-					BoVector3 v, w;
-					if (BoMaterial::normals() == 1 || BoMaterial::normals() == 3) {
-						v = vertex(points[2] - d->mPointsMovedBy) - vertex(points[1] - d->mPointsMovedBy);
-						w = vertex(points[0] - d->mPointsMovedBy) - vertex(points[1] - d->mPointsMovedBy);
-					} else if (BoMaterial::normals() == 2 || BoMaterial::normals() == 4) {
-						v = vertex(points[1] - d->mPointsMovedBy) - vertex(points[0] - d->mPointsMovedBy);
-						w = vertex(points[2] - d->mPointsMovedBy) - vertex(points[0] - d->mPointsMovedBy);
-					} else {
-						boError() << k_funcinfo << "normals setting: " << BoMaterial::normals() << endl;
-					}
-					BoVector3 norm;
-					if (BoMaterial::normals() == 1 || BoMaterial::normals() == 2) {
-						norm = BoVector3::crossProduct(v, w);
-					} else if (BoMaterial::normals() == 3 || BoMaterial::normals() == 4) {
-						norm = BoVector3::crossProduct(w, v);
-					}
-					norm.normalize();
-					normal = norm.data();
-				}
+		glBegin(type());
 
-				glNormal3fv(normal);
-				glArrayElement(points[0]);
-				glArrayElement(points[1]);
-				glArrayElement(points[2]);
-				node = node->next();
-			}
-#if 0
-			for (unsigned int i = 0; i < d->mPointsCacheCount; i++) {
-//				glNormal3fv();
-				glArrayElement(d->mPointsCache[i]);
-			}
-#endif
-			glEnd();
-
-			// reset the normal...
-			// (better solution: don't enable light when rendering
-			// selection rect!)
-			const float n[] = { 0.0f, 0.0f, 1.0f };
-			glNormal3fv(n);
-		}
+		BoNode* node = nodes();
+		while (node) {
+			const BoFace* face = node->face();
+			const int* points = face->pointIndex();
+#if BOMESH_USE_1_NORMAL_PER_FACE
+			// here we assume that the same normal is used for all
+			// vertices of this face. this is the default.
+			glNormal3fv(face->normal(0).data());
+			glArrayElement(points[0]);
+			glArrayElement(points[1]);
+			glArrayElement(points[2]);
 #else
-		glDrawElements(type(), d->mPointsCacheCount, GL_UNSIGNED_INT, d->mPointsCache);
+			glNormal3fv(face->normal(0).data());
+			glArrayElement(points[0]);
+			glNormal3fv(face->normal(1).data());
+			glArrayElement(points[1]);
+			glNormal3fv(face->normal(2).data());
+			glArrayElement(points[2]);
 #endif
+
+			node = node->next();
+		}
+
+		glEnd();
+
+		// reset the normal...
+		// (better solution: don't enable light when rendering
+		// selection rect!)
+		const float n[] = { 0.0f, 0.0f, 1.0f };
+		glNormal3fv(n);
 	}
  }
 

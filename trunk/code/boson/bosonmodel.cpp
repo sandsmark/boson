@@ -1106,6 +1106,5 @@ void BosonModel::enablePointer()
  int stride = BoMesh::pointSize() * sizeof(float);
  glVertexPointer(3, GL_FLOAT, stride, d->mPoints + BoMesh::vertexPos());
  glTexCoordPointer(2, GL_FLOAT, stride, d->mPoints + BoMesh::texelPos());
- glNormalPointer(GL_FLOAT, stride, d->mPoints + BoMesh::normalPos());
 }
 

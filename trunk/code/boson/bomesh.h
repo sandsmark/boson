@@ -29,6 +29,20 @@ class BoMaterial;
 class BoAdjacentDataBase;
 class QColor;
 
+// AB: there are two different ways for normals: store one normal per face
+// ("surface normal") or store one normal per vertex, i.e. 3 per face ("vertex
+// normal").
+// the "surface normal" is said to produce objects that appear "flat", whereas
+// the "vertex normals" are used for "curved" objects. so vertex normals would
+// be nicer, but take three times as much memory.
+// i seriously think that we don't need vertex normals. our camera rarely moves
+// *that* close that you can see whether the mesh appears slightly more flat or
+// not.
+// atm we don't have code for vertex normals anyway.
+//
+// use 0 here to use vertex normals.
+#define BOMESH_USE_1_NORMAL_PER_FACE 1
+
 class BoFace
 {
 public:
@@ -52,8 +66,48 @@ public:
 		return mPointIndex;
 	}
 
+	/**
+	 * Use @þ normal for all vertices in this face
+	 **/
+	void setAllNormals(const BoVector3 normal)
+	{
+#if BOMESH_USE_1_NORMAL_PER_FACE
+		setNormal(0, normal);
+#else
+		setNormal(0, normal);
+		setNormal(1, normal);
+		setNormal(2, normal);
+#endif
+	}
+	void setNormal(unsigned int i, const BoVector3 normal)
+	{
+#if BOMESH_USE_1_NORMAL_PER_FACE
+		i = 0;
+#else
+		// values > 2 are not allowed
+		i = i % 3;
+#endif
+		mNormals[i] = normal;
+	}
+	inline const BoVector3& normal(unsigned int i) const
+	{
+#if BOMESH_USE_1_NORMAL_PER_FACE
+		Q_UNUSED(i);
+		return mNormals[0];
+#else
+		// we don't do i = i % 3; as of performance reasons
+		return mNormals[i];
+#endif
+	}
+
 private:
 	int mPointIndex[3];
+
+#if BOMESH_USE_1_NORMAL_PER_FACE
+	BoVector3 mNormals[1];
+#else
+	BoVector3 mNormals[3];
+#endif
 };
 
 /**
@@ -163,7 +217,7 @@ public:
 	~BoMesh();
 
 	/**
-	 * The size of a single points (vertex and texel and normal). Size means
+	 * The size of a single points (vertex and texel). Size means
 	 * the number of floats here.
 	 **/
 	static int pointSize();
@@ -174,11 +228,6 @@ public:
 	static int vertexPos();
 
 	static int texelPos();
-
-	/**
-	 * @return The position of the normal in a point (see @ref pointSize)
-	 */
-	static int normalPos();
 
 	/**
 	 * Use material @p mat when rendering this mesh.
