@@ -1,0 +1,106 @@
+Game TODOs
+- waypoints
+- unit accelleration: units should slowly start to accelerate and to brake when
+  moving
+- rewrite fog of war (QCanvas suckz): use QCanvasSprite::hide() on all units
+  and. We could also use QCanvas::drawForeground() to get rid of the
+  QCanvasSprites. But there is also a problem when scrolling the widget - all
+  units are visible for a moment then (until the fow is drawn). Bug is in
+  QCanvas: when the widget is scrolled QCanvas does not use double buffering
+  let the Cell display black. Don't use a QCanvasSprite for the fog of war.
+  Terrible performance.
+- AI
+- follow-mode for units
+- BosonCommandWidget should paint the order pixmap only *once* no more. E.g. we
+  repaint for setGrayOut() and setProductionCount()
+- BosonSpriteCursor::slotAdvance() calls canvas->update(). it should not as it
+  hurts performance. But it is necessary for slow game speed :(
+- mine/harvest minerals/oil is only at an experimantal state ; same about
+  refining
+- oil towers: they should be placed on an oil field. oil tankers go to the
+  towers and receive the oil from them, which they take to the refinery
+- pathfinding doesn't support units with size > BO_TILE_SIZE. get rid of
+  MobileUnit::boundingRect() hack
+- let the player configure how often the different advance methods are called.
+  E.g. advanceNone() when work()==WorkNone and so on. We should use a
+  KGameProperty with PolicyClean, since it *must* be *exactly* the same value on
+  every client. A frontend with settings like "best performance" == call
+  advance methods seldom and stuff like this would also be nice
+- pause
+- display "filling" status of harvesters instead of firepower. use different
+  colors!
+- TopWidget::slotNewGame() is broken
+- "welcome to Boson" text in startup screen should be translateable (we can use
+  QPainter to paint it to pixmap)
+- Do not start game before all players has loaded their data
+
+Editor (map, unit, scenario) TODOs
+- totally broken, currently
+- don't place units on invalid tiles (e.g. ship on grass)
+- unit editor: check if images are in the directory, provide possibility to copy
+  them
+- unit editor: add an additional page for the description of the unit (longer
+  text - should go into the handbook). Should be able to contain images and so
+  on. Maybe use plain docbook or so
+- use another options dialog. we MUST NOT provide the possibility to change the
+  game speed!!
+- don't load BosonTiles twice: once for QCanvas::setTiles and once for
+  BoOrderWidget
+- write EditorWidget for editor which should replace BosonWidget that doesn't
+  support editor anymore
+
+General TODOs
+- zooming (QCanvas::setWorldMatrix()) - mostly done
+- SpeciesTheme loads all pixmaps into memory - share it between different
+  players (if they have the same themes)
+- find out whether signalUnitPropertyChanged() is a good thing at all. Might
+  save some performance if we don't use it.
+- use typeId = 0 as invalid (NOT -1!)
+- add revision (CVS) number of files to the connection protocol. If the versions
+  differ then deny connection. This ensures that all clients are at the smae
+  version. We need the revision number of each file - how to do add this
+  automatically?
+  We can do this using static const char filename_id = "$Id:";
+- BosonTiles: pehaps use KPixmapSplitter (kdelibs/kdefx)
+- IdReloadState also makes Player emit signalUnitChanged() - this might become a
+  performance problem!! we need it for BosonCommandWidget
+- transmit everything on startup over network (== map, unitProperties). This
+  saves us from a cheating player who (maybe just accidently) changed the files
+  (units/*/index.desktop especially).
+- splitViews: we could use one view for players that are allied with the local
+  player. we need to transmit the position of the view over network... would be
+  a nice idea!
+- make sure that kdemultimedia is installed - perhaps disable .ogg support
+  somehow if it isn't
+- sometimes when splitting displays (maybe only when splitting vertically) it
+  happens that no mouse IO is being added (and is therefore unusable and
+  unremovable
+- canvas text: we want a static non-moving text in the upper right corner
+  displaying the resources of the player. up to now all implementations flicker
+  in any way...  update: do we need it anyway? We have same labels on statusbar
+  and they're ok for me...
+- use KDock for the dispalys
+- color combobox should have same width as other comboboxes
+- hostname lineedit in BosonNetworkOptionsWidget seems to have wrong
+  BackgroundOrigin  update: it's not wrong, it's disabled-color
+- BsoonPath::PathNode needs to be public to compile in gcc 2.96
+  Why? It is used internally only... Failing e.g. here:
+  inline bool operator<(const BosonPath::PathNode& a, const BosonPath::PathNode& b)
+- pixmaps on startup widgets should be centered horizontally
+- Use KMD5 to calculate checksum of map and unitProperties at the beginning of
+  game and transfer only needed things over network. Saves some traffic
+- Minimap doesn't support units with width or height not equal to BO_TILE_SIZE
+
+Data TODOs
+- sound for minimap activated/deactivated
+- sound for destroyed facilities - shouldn't be speech i guess
+- missile sound - e.g. for the samsite
+- shipyard
+- airport 
+- rewrite installation code:
+  -> when a dir is renamed currently the old remains on disk and therefore is
+     read by the game
+- the text on the startup pixmap should be translatable. maybe we can use a
+  QPainter to paint on it?
+- can we use a coded gradient instead of the startup-bg pix? would allow every
+  size then
