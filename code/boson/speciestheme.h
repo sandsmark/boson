@@ -118,7 +118,17 @@ public:
 
 	QPixmap* upgradePixmapByName(QString name);
 
+	/**
+	 * @return The @ref BosonModel object for the specified unit type in
+	 * this theme. Will load the model if it is not yet loaded.
+	 **/
 	BosonModel* unitModel(unsigned long int unitType);
+
+	/**
+	 * @return The model filename. This is the relative filename, i.e.
+	 * currently just "unit.3ds".
+	 **/
+	static QString unitModelFile();
 
 	BosonModel* objectModel(QString file);
 

@@ -346,6 +346,11 @@ bool SpeciesTheme::loadTechnologies()
  return true;
 }
 
+QString SpeciesTheme::unitModelFile()
+{
+ return QString::fromLatin1("unit.3ds");
+}
+
 BosonModel* SpeciesTheme::unitModel(unsigned long int unitType)
 {
  BosonModel* model = d->mUnitModels[unitType];
@@ -809,7 +814,7 @@ void SpeciesTheme::loadUnitModel(const UnitProperties* prop)
 	kdError() << k_funcinfo << "Cannot find unit.3ds file for " << prop->typeId() << endl;
 	return;
  }
- BosonModel* m = new BosonModel(prop->unitPath(), QString::fromLatin1("unit.3ds"),
+ BosonModel* m = new BosonModel(prop->unitPath(), unitModelFile(),
 		((float)prop->unitWidth()) * BO_GL_CELL_SIZE / BO_TILE_SIZE,
 		((float)prop->unitHeight()) * BO_GL_CELL_SIZE / BO_TILE_SIZE);
  m->setLongNames(prop->longTextureNames());
