@@ -959,6 +959,9 @@ unsigned int BosonModel::frames() const
 
 BoFrame* BosonModel::constructionStep(unsigned int step)
 {
+ if (d->mConstructionSteps.count() == 0) {
+	return 0;
+ }
  if (step >= d->mConstructionSteps.count()) {
 	step = d->mConstructionSteps.count() - 1;
  }
@@ -1049,6 +1052,9 @@ QIntDict<BoMesh> BosonModel::allMeshes() const
 
 BoFrame* BosonModel::frame(unsigned int index) const
 {
+ if (index >= d->mFrames.count()) {
+	return 0;
+ }
  return d->mFrames[index];
 }
 
