@@ -219,11 +219,6 @@
                 </widget>
             </grid>
         </widget>
-        <widget class="BoGameChat" row="1" column="0" rowspan="1" colspan="2">
-            <property name="name">
-                <cstring>boGameChat1</cstring>
-            </property>
-        </widget>
     </grid>
 </widget>
 <connections>
@@ -287,6 +282,5 @@
     <includehint>klistbox.h</includehint>
     <includehint>bosonwidgets/bosonplayfieldview.h</includehint>
     <includehint>ktextbrowser.h</includehint>
-    <includehint>bosonwidgets/bogamechat.h</includehint>
 </includehints>
 </UI>
