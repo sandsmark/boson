@@ -694,7 +694,7 @@ void BoTexture::reload()
 
   // Load the texture
   QString oldpath = mFilePath;
-  load(mFilePath);
+  load(oldpath);
   mFilePath = oldpath;
 }
 
