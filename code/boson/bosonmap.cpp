@@ -39,23 +39,12 @@
 
 #define BOSONMAP_VERSION 0x01 // current version
 
-struct TextureGroundType
-{
-	int mGroundType; // AB: we need a groundType enum for this. of any kind... this variable mustn't depend on that enum though.
-	unsigned char mAmountOfLand;
-	unsigned char mAmountOfWater;
-
-	// AB: maybe add a minimap color here!
-	QRgb mMiniMapColor;
-};
-
 class BosonMap::BosonMapPrivate
 {
 public:
 	BosonMapPrivate()
 	{
 	}
-	QValueVector<TextureGroundType> mTextureGroundType;
 };
 
 BosonMap::BosonMap(QObject* parent) : QObject(parent)
@@ -359,6 +348,10 @@ bool BosonMap::loadTexMap(QDataStream& stream)
 	boError() << k_funcinfo << "width=" << width() << " height=" << height() << endl;
 	return false;
  }
+ if (!mGroundTheme) {
+	BO_NULL_ERROR(mGroundTheme);
+	return false;
+ }
  boDebug() << k_funcinfo << "loading texmap from stream" << endl;
  QString cookie;
  Q_UINT32 version;
@@ -385,15 +378,6 @@ bool BosonMap::loadTexMap(QDataStream& stream)
  }
  mTexMap = new unsigned char[texMapArrayPos(mTextureCount - 1, width(), height())];
  for (unsigned int i = 0; i < mTextureCount; i++) {
-	Q_INT32 groundType; //AB: note this is NOT Cell::groundType()! although it means the same thing! but it operates on different numbers
-	QRgb miniMapColor;
-	Q_UINT8 amountOfLand;
-	Q_UINT8 amountOfWater;
-	stream >> groundType;
-	stream >> miniMapColor;
-	stream >> amountOfLand;
-	stream >> amountOfWater;
-	setTextureGroundType(i, groundType, miniMapColor, amountOfLand, amountOfWater);
 	for (unsigned int x = 0; x < width() + 1; x++) {
 		for (unsigned int y = 0; y < height() + 1; y++) {
 			Q_UINT8 c;
@@ -413,35 +397,28 @@ bool BosonMap::saveTexMap(QDataStream& stream)
 	BO_NULL_ERROR(mTexMap);
 	return false;
  }
- if (mTextureCount > 100) {
+ if (!mGroundTheme) {
+	BO_NULL_ERROR(mGroundTheme);
+	return false;
+ }
+ if (mGroundTheme->textureCount() > 100) {
 	// this *cant* be true (would be > 100*500*500 bytes on a 500x500 map)
 	boError() << k_funcinfo << "texture count > 100: " << mTextureCount << " - won't save anything." << endl;
 	return false;
  }
- if (textureCount()< 1) {
+ if (mGroundTheme->textureCount() < 1) {
 	boError() << k_funcinfo << "need at least one texture!" << endl;
-	return false;
- }
- if (d->mTextureGroundType.count() < textureCount()) {
-	boError() << k_funcinfo << "groundType information for "
-			<< d->mTextureGroundType.count()
-			<< " groundTypes available only. need "
-			<< textureCount() << endl;
 	return false;
  }
  stream << BOSONMAP_TEXMAP_MAGIC_COOKIE;
  stream << (Q_UINT32)BOSONMAP_VERSION;
- stream << (Q_UINT32)mTextureCount;
- for (unsigned int i = 0; i < mTextureCount; i++) {
-	// which type of ground is this (grass, desert, water, vulcan, ...)
-	stream << (Q_INT32)groundType(i);
-	stream << (QRgb)miniMapColor(i);
 
-	// amount of land/water of this texture
-	stream << (Q_UINT8)amountOfLand(i);
-	stream << (Q_UINT8)amountOfWater(i);
+ // there is a groundTheme identifier in the "map" file, but an invalid texture
+ // count would suck greatly (->crash). so we stream it.
+ stream << (Q_UINT32)mGroundTheme->textureCount();
 
-	// now the actual texmap for this texture
+ // now the actual texmap for this texture
+ for (unsigned int i = 0; i < mGroundTheme->textureCount(); i++) {
 	for (unsigned int x = 0; x < width() + 1; x++) {
 		for (unsigned int y = 0; y < height() + 1; y++) {
 			stream << (Q_UINT8)mTexMap[texMapArrayPos(i, x, y)];
@@ -921,12 +898,8 @@ bool BosonMap::generateCellsFromTexMap()
 	boError() << k_funcinfo << "invalid map size - width=" << width() << " height=" << height() << endl;
 	return false;
  }
- if (textureCount() == 0) {
+ if (mGroundTheme->textureCount() == 0) {
 	boError() << k_funcinfo << "0 textures in map" << endl;
-	return false;
- }
- if (d->mTextureGroundType.count() < textureCount()) {
-	boError() << k_funcinfo << "have groundType information on " << d->mTextureGroundType.count() << " groundTypes only, need " << textureCount() << endl;
 	return false;
  }
  for (unsigned int x = 0; x < width(); x++) {
@@ -935,46 +908,6 @@ bool BosonMap::generateCellsFromTexMap()
 	}
  }
  return true;
-}
-
-void BosonMap::setTextureGroundType(unsigned int texture, int groundType, QRgb miniMapColor, unsigned char amountOfLand, unsigned char amountOfWater)
-{
- struct TextureGroundType type;
- type.mGroundType = groundType;
- type.mMiniMapColor = miniMapColor;
- type.mAmountOfLand = amountOfLand;
- type.mAmountOfWater = amountOfWater;
- if (d->mTextureGroundType.count() < texture + 1) {
-	d->mTextureGroundType.resize(texture + 1);
- }
- d->mTextureGroundType[texture] = type;
-}
-
-unsigned char BosonMap::amountOfLand(unsigned int texture) const
-{
- if (!mGroundTheme) {
-	boWarning() << k_funcinfo << "NULL groundTheme" << endl;
-	return 0;
- }
- return mGroundTheme->amountOfLand(texture);
-}
-
-unsigned char BosonMap::amountOfWater(unsigned int texture) const
-{
- if (!mGroundTheme) {
-	boWarning() << k_funcinfo << "NULL groundTheme" << endl;
-	return 0;
- }
- return mGroundTheme->amountOfWater(texture);
-}
-
-int BosonMap::groundType(unsigned int texture) const
-{
- if (!mGroundTheme) {
-	boWarning() << k_funcinfo << "NULL groundTheme" << endl;
-	return 0;
- }
- return mGroundTheme->groundType(texture);
 }
 
 QRgb BosonMap::miniMapColor(unsigned int texture) const
@@ -991,6 +924,7 @@ void BosonMap::recalculateCell(int x, int y)
  Cell* c = cell(x, y);
  BO_CHECK_NULL_RET(c);
  BO_CHECK_NULL_RET(mTexMap);
+ BO_CHECK_NULL_RET(mGroundTheme);
  if (x < 0 || (uint)x >= width()) {
 	boError() << k_funcinfo << "invalid x: " << x << endl;
 	return;
@@ -1023,8 +957,8 @@ void BosonMap::recalculateCell(int x, int y)
 			// no need to do anything.
 			continue;
 		}
-		int l = (int)amountOfLand(i);
-		int w = (int)amountOfWater(i);
+		int l = (int)mGroundTheme->amountOfLand(i);
+		int w = (int)mGroundTheme->amountOfWater(i);
 		if (l != 0) {
 			land += (int)(l * a / 255);
 		}

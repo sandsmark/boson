@@ -234,6 +234,10 @@ public:
 	{
 		return mTexMap[texMapArrayPos(texture, x, y)];
 	}
+
+	/**
+	 * @return @ref BosonGroundTheme::miniMapColor
+	 **/
 	QRgb miniMapColor(unsigned int texture) const;
 
 	/**
@@ -282,30 +286,6 @@ public:
 	static int heightToPixel(float height);
 
 	bool generateCellsFromTexMap();
-
-	/**
-	 * @return BosonGroundTheme::amountOfLand
-	 **/
-	unsigned char amountOfLand(unsigned int texture) const;
-
-	/**
-	 * @return BosonGroundTheme::amountOfWater
-	 **/
-	unsigned char amountOfWater(unsigned int texture) const;
-
-	/**
-	 * This value is intended for the texturing code only (although it could
-	 * be used for pathfinding, too - see below). We need the type of the
-	 * ground in order to pick the correct texture. amount of land/water is
-	 * not sufficient for that, as e.g. desert and water both have
-	 * amountOfLand=255, amountOfWater=0.
-	 *
-	 * @return The type of ground at cells with @p texture. Note that this
-	 * type is dependable for pathfinding in the same way as @ref
-	 * amountOfLand. Also note that textures are mixed in boson, so there
-	 * can (and probably will) be different groundTypes on a single cell!
-	 **/
-	int groundType(unsigned int texture) const;
 
 	/**
 	 * @return The file format version of the map, that is used when
@@ -381,17 +361,6 @@ protected:
 	bool loadCells(QDataStream& stream);
 
 	bool loadHeightMap(QDataStream& stream);
-
-	/**
-	 * Called when loading the @ref texMap - see @ref loadTexMap.
-	 *
-	 * This specifies what kind of ground is used, i.e.
-	 * grass/desert/water/whatever. The values must "fit", i.e. for
-	 * groundType = grass you must not use amountOfLand=0 ;
-	 * amountOfWater=255.
-	 **/
-	void setTextureGroundType(unsigned int texture, int groundType, QRgb miniMapColor, unsigned char amountOfLand, unsigned char amountOfWater);
-
 
 	/**
 	 * Recalculate the amountOfLand/Water values for the cell at @þ x,@p y.
