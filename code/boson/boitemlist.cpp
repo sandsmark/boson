@@ -29,14 +29,6 @@ BoItemList::BoItemList() : QValueList<BosonItem*>()
  registerList();
 }
 
-BoItemList::BoItemList(int dummy, bool _registerList) : QValueList<BosonItem*>()
-{
- Q_UNUSED(dummy);
- if (_registerList) {
-	registerList();
- }
-}
-
 BoItemList::BoItemList(const BoItemList& list, bool _registerList) : QValueList<BosonItem*>(list)
 {
  if (_registerList) {
