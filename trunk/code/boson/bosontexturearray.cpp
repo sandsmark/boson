@@ -48,7 +48,7 @@ BosonTextureArray::BosonTextureArray(QValueList<QImage> images, bool useMipmaps)
 {
  init();
  if (!createTextures(images, useMipmaps)) {
-	boWarning() << k_funcinfo << "Could not create textures" << endl;
+	boWarning(110) << k_funcinfo << "Could not create textures" << endl;
  }
 }
 
@@ -62,7 +62,7 @@ void BosonTextureArray::init()
 
 BosonTextureArray::~BosonTextureArray()
 {
-// boDebug() << k_funcinfo << endl;
+// boDebug(110) << k_funcinfo << endl;
  if (mTextures && mCount) {
 	for (unsigned int i = 0; i < mCount; i++) {
 		BoTextureInfo* t = mAllTextures.take(mTextures[i]);
@@ -73,23 +73,23 @@ BosonTextureArray::~BosonTextureArray()
 	delete[] mWidths;
 	delete[] mHeights;
  } else {
-	boDebug() << k_funcinfo << "no textures allocated" << endl;
+	boDebug(110) << k_funcinfo << "no textures allocated" << endl;
  }
-// boDebug() << k_funcinfo << "done" << endl;
+// boDebug(110) << k_funcinfo << "done" << endl;
 }
 
 bool BosonTextureArray::createTexture(const QImage& image, GLuint texture, bool useMipmaps)
 {
  if (!QGLContext::currentContext()) {
-	boError() << k_funcinfo << "NULL current context!!" << endl;
+	boError(110) << k_funcinfo << "NULL current context!!" << endl;
 	return false; // baaaad - we should delay loading or so
  }
  GLenum error = glGetError();
  if (error != GL_NO_ERROR) {
-	boError() << k_funcinfo << "OpenGL Error before loading texture" << endl;
+	boError(110) << k_funcinfo << "OpenGL Error before loading texture" << endl;
  }
  if (image.isNull()) {
-	boError() << k_funcinfo << "NULL image" << endl;
+	boError(110) << k_funcinfo << "NULL image" << endl;
 	return false;
  }
 
@@ -105,7 +105,7 @@ bool BosonTextureArray::createTexture(const QImage& image, GLuint texture, bool 
 	buffer = image;
  }
  if (buffer.isNull()) {
-	boWarning() << k_funcinfo << "using fallback image" << endl;
+	boWarning(110) << k_funcinfo << "using fallback image" << endl;
 	buffer = QImage(w, h, 32);
 	buffer.fill(Qt::red.rgb()); // fallback
 	// should not appear at all...
@@ -127,7 +127,7 @@ bool BosonTextureArray::createTexture(const QImage& image, GLuint texture, bool 
 			buffer.height(), GL_RGBA, GL_UNSIGNED_BYTE,
 			buffer.bits());
 	if (error) {
-		boWarning() << k_funcinfo << "gluBuild2DMipmaps returned error: " << error << endl;
+		boWarning(110) << k_funcinfo << "gluBuild2DMipmaps returned error: " << error << endl;
 	}
  } else {
 	// AB: we dont build mipmaps for cell and cursor textures (e.g.) those
@@ -143,7 +143,7 @@ bool BosonTextureArray::createTexture(const QImage& image, GLuint texture, bool 
 
  error = glGetError();
  if (error != GL_NO_ERROR) {
-	boError() << k_funcinfo << "OpenGL Error when loading texture " << texture << endl;
+	boError(110) << k_funcinfo << "OpenGL Error when loading texture " << texture << endl;
 	return false;
  }
  return true;
@@ -151,7 +151,7 @@ bool BosonTextureArray::createTexture(const QImage& image, GLuint texture, bool 
 
 void BosonTextureArray::resetAllTexParameter()
 {
- boDebug() << k_funcinfo << "reset " << mAllTextures.count() << " textures" << endl;
+ boDebug(110) << k_funcinfo << "reset " << mAllTextures.count() << " textures" << endl;
  QIntDictIterator<BoTextureInfo> it(mAllTextures);
  for (; it.current(); ++it) {
 	GLuint tex = it.currentKey();
@@ -183,16 +183,16 @@ bool BosonTextureArray::createTextures(QValueList<QImage> images, bool useMipmap
 {
  GLenum error = glGetError();
  if (error != GL_NO_ERROR) {
-	boError() << k_funcinfo << "OpenGL Error before loading textures: " << gluErrorString(error) << endl;
+	boError(110) << k_funcinfo << "OpenGL Error before loading textures: " << gluErrorString(error) << endl;
  }
  // TODO: performance: use smaller textures!! so we can store more textures in
  // texture memory and don't need to swap from/to system memory
  if (mTextures || mCount) {
-	boDebug() << k_funcinfo << "textures already generated?!" << endl;
+	boDebug(110) << k_funcinfo << "textures already generated?!" << endl;
 	return false;
  }
  if (!QGLContext::currentContext()) {
-	boError() << k_funcinfo << "NULL current context!!" << endl;
+	boError(110) << k_funcinfo << "NULL current context!!" << endl;
 	return false; // baaaad - we should delay loading or so
  }
  QImage buffer;
@@ -208,7 +208,7 @@ bool BosonTextureArray::createTextures(QValueList<QImage> images, bool useMipmap
 	mAllTextures.insert(mTextures[i], t);
  }
 
-// boDebug() << k_funcinfo << "count=" << mCount << endl;
+// boDebug(110) << k_funcinfo << "count=" << mCount << endl;
 
  for (unsigned int i = 0; i < mCount; i++) {
 	//FIXME: minimum size should be 64x64!!

@@ -243,6 +243,7 @@ void ModelPreview::slotFrameChanged(int f)
 
 RenderMain::RenderMain()
 {
+ mSpecies.setAutoDelete(true);
  QStringList list = SpeciesTheme::availableSpecies();
  for (unsigned int i = 0; i < list.count(); i++) {
 	QString dir = list[i];
@@ -282,6 +283,7 @@ RenderMain::RenderMain()
 
 RenderMain::~RenderMain()
 {
+ mSpecies.clear();
 }
 
 void RenderMain::connectBoth(QObject* o1, QObject* o2, const char* signal, const char* slot)
