@@ -86,8 +86,6 @@ public:
 	 **/
 	void setKGameChat(KGameChat* c);
 	
-	void setKGame(KGame* g); // FIXME: remove when kde 3.0 beta2 or final is out!
-
 	void addChatMessage(const QString&);
 
 public slots:
