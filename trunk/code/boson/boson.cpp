@@ -41,6 +41,8 @@
 
 
 FILE *logfile = (FILE *) 0L;
+/* the different topLevel Window */
+QList<bosonTopLevel>	topLevels;
 
 BosonApp::BosonApp()
 {

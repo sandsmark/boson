@@ -48,36 +48,32 @@ public:
 	/** destructor */
 	~BosonApp();
 
-
-public slots:
+protected slots:
 	/** first communication layer : socket */
 	void handleSocketMessage(KSocket *);
 
-protected slots:
-	/** socket initialisation : try to connect to the BosonServer */
-	void initSocket(char *servername=0l);
-
 	/** slots used when the connection is lost, whoever detected this */
 	void connectionLost(KSocket *s);
-
-	/** second communication layer : client/server */
-	void handleDialogMessage(bosonMsgTag, int, bosonMsgData *);
-	/** third (and last) communication layer : game */
-	void handleGameMessage(bosonMsgTag, int, bosonMsgData *);
 
 	/** called whenever the server launched by serverDlg died */
 	void serverDied(KProcess *);
 
 private:
+	/** socket initialisation : try to connect to the BosonServer */
+	void initSocket(char *servername=0l);
+	/** second communication layer : client/server */
+	void handleDialogMessage(bosonMsgTag, int, bosonMsgData *);
+
+	/** initialisation functions */
 	void init(void); // internal
 	void initCanvas(int, int);
+	/** called when the server told us the game has finished */
 	void gameEnd( endMsg_t::endReasonType reason );
-
-	QList<bosonTopLevel> topLevels;
-
-signals:
-	void ressourcesUpdated(void);
 };
+
+///orzel : ugly global variable, only used once in connect.cpp by bosonCanvas
+/* the different topLevel Window */
+extern QList<bosonTopLevel>	topLevels;
 
 #endif // BOSON_H
  
