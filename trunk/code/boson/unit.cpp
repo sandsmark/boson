@@ -531,6 +531,10 @@ bool Unit::attackEnemyUnitsInRange()
 	}
  }
 
+ // It might be that none of the unit's weapons is reloaded, but target has been
+ //  found. So we check for this now.
+ targetfound = targetfound || (target());
+
  return targetfound;
 }
 
