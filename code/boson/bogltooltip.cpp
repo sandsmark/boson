@@ -263,7 +263,10 @@ bool BoGLToolTip::eventFilter(QObject* o, QEvent* event)
 void BoGLToolTip::slotTimeOut()
 {
  BO_CHECK_NULL_RET(mView);
- BO_CHECK_NULL_RET(mView->canvas());
+ if (!mView->canvas()) {
+	// this is NOT an error
+	return;
+ }
  BO_CHECK_NULL_RET(mView->canvas()->collisions());
  if (!mView->hasMouse()) {
 	hideTip();
