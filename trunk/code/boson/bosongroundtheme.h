@@ -109,6 +109,12 @@ public:
 	unsigned char amountOfWater(unsigned int texture) const;
 	QRgb miniMapColor(unsigned int texture) const;
 
+	/**
+	 * @return The name of the file (relative to the groundTheme directory)
+	 * for @p texture.
+	 **/
+	QString textureFileName(unsigned int texture) const;
+
 	QPixmap pixmap(unsigned int texture);
 
 	/**
@@ -128,26 +134,11 @@ public:
 protected:
 	/**
 	 * @param dir The directory to load the image from. Including the theme
-	 * name part (e.g. "earth"). Must end with a "/".
-	 * @param groundType Which texture should be loaded. See @ref
-	 * BosonMap::groundType
-	 * @param amountOfLand See @ref BosonMap::amountOfLand. This can be used
-	 * when the correct groundType can't be found in the theme, to pick a
-	 * close replacement.
-	 * @param amountOfWater See @ref BosonMap::amountOfWater. This can be used
-	 * when the correct groundType can't be found in the theme, to pick a
-	 * close replacement.
+	 * name part (e.g. "earth"). Should end with a "/".
+	 * @param texture Which texture should be loaded. Must be < @ref
+	 * textureCount
 	 **/
-	QImage loadTextureImage(const QString& dir, int groundType, unsigned char amountOfLand, unsigned char amountOfWater);
-
-	bool loadGround(int j, const QString& path);
-
-	/**
-	 * @return a name (e.g. "desert") for the specified groundType. Note
-	 * that this name is necesary for creating the file path of the tiles so
-	 * don't change it.
-	 **/
-	static QString groundType2Name(int groundType);
+	QImage loadTextureImage(const QString& dir, unsigned int texture);
 
 private:
 	BosonGroundThemePrivate* d;

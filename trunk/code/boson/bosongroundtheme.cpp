@@ -243,9 +243,9 @@ bool BosonGroundTheme::loadGroundTheme(QString dir)
 
  QValueList<QImage> images;
  for (unsigned int i = 0; i < textureCount(); i++) {
-	QImage image = loadTextureImage(dir, groundType(i), amountOfLand(i), amountOfWater(i));
+	QImage image = loadTextureImage(dir, i);
 	if (image.isNull()) {
-		boError() << k_funcinfo << "Null image" << endl;
+		boError() << k_funcinfo << "could not load texture " << i << endl;
 		return false;
 	}
 	images.append(image);
@@ -280,6 +280,14 @@ QRgb BosonGroundTheme::miniMapColor(unsigned int texture) const
  return d->mGroundTypes[texture].mMiniMapColor;
 }
 
+QString BosonGroundTheme::textureFileName(unsigned int texture) const
+{
+ if (texture >= textureCount()) {
+	return QString::null;
+ }
+ return d->mGroundTypes[texture].mFile;
+}
+
 int BosonGroundTheme::groundType(unsigned int texture) const
 {
  if (texture >= textureCount()) {
@@ -293,23 +301,18 @@ unsigned int BosonGroundTheme::textureCount() const
  return d->mGroundTypes.count();
 }
 
-QImage BosonGroundTheme::loadTextureImage(const QString& dir, int groundType, unsigned char amountOfLand, unsigned char amountOfWater)
+QImage BosonGroundTheme::loadTextureImage(const QString& dir, unsigned int texture)
 {
- QString file = dir + groundType2Name(groundType) + QString("-00.png");
+ QString file = dir + textureFileName(texture);
  QImage image(file);
  if (image.isNull()) {
-	boWarning() << k_funcinfo << "Could not find texture image for " << groundType << ". expected file: " << file << endl;
-
-
-	// if the groundType cannot be found we should try to find a close
-	// replacement using amountOfLand/Water.
-	Q_UNUSED(amountOfLand);
-	Q_UNUSED(amountOfWater);
+	boWarning() << k_funcinfo << "Could not find texture image for " << texture << ". expected file: " << file << endl;
 
 	// load dummy image.
 	image = QImage(64, 64, 32);
 	image.fill(Qt::green.rgb());
  }
+
  return image;
 }
 
@@ -318,29 +321,11 @@ const QString& BosonGroundTheme::identifier() const
  return d->mId;
 }
 
-QString BosonGroundTheme::groundType2Name(int groundType)
-{
-#warning TODO: add an enum
- switch (groundType) {
-	case 0: // GroundGrass
-		return QString::fromLatin1("grass");
-	case 1: // GroundDesert
-		return QString::fromLatin1("desert");
-	case 2: // GroundWater
-		return QString::fromLatin1("water");
-	default:
-		boError() << "Invalid GroundType " << groundType << endl;
-		break;
- }
- return QString::null;
-}
-
 QPixmap BosonGroundTheme::pixmap(unsigned int texture)
 {
  QPixmap pix;
  if (texture < textureCount()) {
-	QImage image = loadTextureImage(d->mGroundThemeDir, groundType(texture),
-			amountOfLand(texture), amountOfWater(texture));
+	QImage image = loadTextureImage(d->mGroundThemeDir, texture);
 	if (!pix.convertFromImage(image)) {
 		pix = QPixmap();
 	}
