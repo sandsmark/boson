@@ -111,6 +111,8 @@ public:
 
 	void editorSavePlayField(const QString& fileName);
 
+	void debugKillPlayer(KPlayer* p);
+
 
 public slots:
 	void slotDebug();
@@ -144,8 +146,8 @@ public slots:
 	void slotRemoveActiveDisplay();
 
 signals:
-	void signalPlayerJoinedGame(KPlayer* p); // used by the map editor
-	void signalPlayerLeftGame(KPlayer* p); // used by the map editor
+	void signalPlayerJoinedGame(KPlayer* p); // used by the map editor (and debug)
+	void signalPlayerLeftGame(KPlayer* p); // used by the map editor (and debug)
 
 	/**
 	 * Emitted when a new tileset shall be loaded. This is usually emitted
@@ -214,6 +216,8 @@ protected slots:
 	 * Make display the currently active view
 	 **/
 	void slotSetActiveDisplay(BosonBigDisplay* display);
+
+	void slotOutOfGame(Player* p);
 
 protected:
 	void addChatSystemMessage(const QString& fromName, const QString& text);

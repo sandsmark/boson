@@ -598,14 +598,21 @@ void BosonCanvas::destroyUnit(Unit* unit)
  }
  // the unit is added to a list - now displayed as a wreckage only.
  if (!d->mDestroyedUnits.contains(unit)) {
+	Player* owner = unit->owner();
 	d->mDestroyedUnits.append(unit);
 	unit->setWork(UnitBase::WorkNone); // maybe add a WorkDestroyed? no need to currently
 	unit->setAnimated(false);
-	unit->owner()->unitDestroyed(unit); // remove from player without deleting
+	if (unit->health() != 0) {
+		unit->setHealth(0);
+	}
+	owner->unitDestroyed(unit); // remove from player without deleting
 	kdDebug() << "destroy unit " << unit->id() << endl;
 	boMusic->playSound(unit, Unit::SoundReportDestroyed);
 	(void) new BoShot(unit, 0, this, true);
 	emit signalUnitDestroyed(unit);
+	if (owner->checkOutOfGame()) {
+		killPlayer(owner);
+	}
  }
 }
 
@@ -984,5 +991,16 @@ void BosonCanvas::update()
 	p.end();
  }
 #endif
+}
+
+void BosonCanvas::killPlayer(Player* player)
+{
+ while (player->allUnits().count() > 0) {
+	destroyUnit(player->allUnits().first());
+ }
+ player->setMinerals(0);
+ player->setOil(0);
+ kdDebug() << "player " << player->id() << " is out of game" << endl;
+ emit signalOutOfGame(player);
 }
 

@@ -26,6 +26,8 @@
 #include <kmainwindow.h>
 #include <ktoolbar.h>
 
+class KPlayer;
+
 class BosonCommandBar : public KToolBar
 {
 	Q_OBJECT
@@ -98,6 +100,10 @@ protected:
 	 **/
 	void initCommandFrame();
 
+protected slots:
+	virtual void slotPlayerJoinedGame(KPlayer*);
+	virtual void slotPlayerLeftGame(KPlayer*);
+
 private slots:
 	void slotZoom(int index);
 
@@ -107,6 +113,8 @@ private slots:
 	void slotConfigureToolbars();
 	void slotMoveCommandFrame(int pos);
 	void slotDebugMode(int);
+
+	void slotDebugPlayer(int);
 
 private:
 	void initStatusBar();

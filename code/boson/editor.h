@@ -56,6 +56,10 @@ protected:
 
 	void createTiles(bool debug);
 
+protected slots:
+	virtual void slotPlayerJoinedGame(KPlayer* p);
+	virtual void slotPlayerLeftGame(KPlayer* p);
+
 private slots:
 	void slotFileNew();
 
@@ -66,8 +70,6 @@ private slots:
 
 	void slotConfigureKeys();
 
-	void slotPlayerJoinedGame(KPlayer* p);
-	void slotPlayerLeftGame(KPlayer* p);
 	void slotGameStarted();
 
 	void slotPlaceFacilities();

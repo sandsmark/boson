@@ -32,14 +32,20 @@
 #include <kpopupmenu.h>
 #include <kshortcut.h>
 
+#include <kgame/kplayer.h>
+
 #include <qwmatrix.h>
 #include <qlabel.h>
 #include <qhbox.h>
 #include <qvbox.h>
+#include <qptrdict.h>
 
 #include "topbase.moc"
 
 #define MAX_BUTTONS_PER_ROW 4
+
+
+#define ID_DEBUG_KILLPLAYER 0
 
 BosonCommandBar::BosonCommandBar(QMainWindow* parent, QMainWindow::ToolBarDock dock) 
 		: KToolBar(parent, dock, false, i18n("CommandFrame"), false, false)
@@ -146,6 +152,8 @@ public:
 		mToolbarAction = 0;
 		mStatusbarAction = 0;
 		mZoomAction = 0;
+
+		mDebugPlayersAction = 0;
 	}
 
 	KToggleAction* mToolbarAction;
@@ -155,6 +163,9 @@ public:
 
 	KToolBar* mCommandBar;
 	QVBox* mCommandFrame; // kind of.. also contains the minimap
+
+	QPtrDict<KPlayer> mPlayers;
+	KActionMenu* mDebugPlayersAction;
 };
 
 TopBase::TopBase()
@@ -168,6 +179,10 @@ TopBase::TopBase()
  setCentralWidget(mBosonWidget);
 
  initKAction();
+ connect(mBosonWidget, SIGNAL(signalPlayerJoinedGame(KPlayer*)),
+		this, SLOT(slotPlayerJoinedGame(KPlayer*)));
+ connect(mBosonWidget, SIGNAL(signalPlayerLeftGame(KPlayer*)),
+		this, SLOT(slotPlayerLeftGame(KPlayer*)));
  initStatusBar();
 }
 
@@ -202,6 +217,7 @@ void TopBase::initKAction()
  l.append("Debug Selection");
  s->setItems(l);
  s->setCurrentItem(0);
+ d->mDebugPlayersAction = new KActionMenu("Players", actionCollection(), "debug_players");
 
  d->mToolbarAction = KStdAction::showToolbar(this, SLOT(slotShowToolbar()), actionCollection());
  d->mStatusbarAction = KStdAction::showStatusbar(this, SLOT(slotShowStatusbar()), actionCollection());
@@ -379,4 +395,71 @@ void TopBase::slotDebugMode(int index)
 {
  kdDebug() << index << endl;
  boConfig->setDebugMode((BosonConfig::DebugMode)index);
+}
+
+void TopBase::slotPlayerJoinedGame(KPlayer* player)
+{
+ if (!player) {
+	return;
+ }
+
+// note: NOT listed in the *ui.rc files! we create it dynamically when the player enters ; not using the xml framework
+ KActionMenu* menu = new KActionMenu(player->name(), this, QString("debug_players_%1").arg(player->name())); 
+
+ connect(menu->popupMenu(), SIGNAL(activated(int)), 
+		this, SLOT(slotDebugPlayer(int)));
+ menu->popupMenu()->insertItem("Kill Player", ID_DEBUG_KILLPLAYER);
+
+ d->mDebugPlayersAction->insert(menu);
+ d->mPlayers.insert(menu, player);
+}
+
+void TopBase::slotPlayerLeftGame(KPlayer* player)
+{
+ if (!player) {
+	return;
+ }
+ QPtrDictIterator<KPlayer> it(d->mPlayers);
+ while (it.current() && it.current() != player) {
+	++it;
+ }
+ if (!it.current()) {
+	kdError() << k_funcinfo << "player not found" << endl;
+	return;
+ }
+
+ // untested code!
+ kdDebug() << k_funcinfo << "removing menu..." << endl;
+ KActionMenu* m = (KActionMenu*)it.currentKey();
+ d->mPlayers.remove(m);
+ delete m;
+ 
+}
+
+void TopBase::slotDebugPlayer(int index)
+{
+ kdDebug() << k_funcinfo << endl;
+ QPtrDictIterator<KPlayer> it(d->mPlayers);
+ KPopupMenu* menu = (KPopupMenu*)sender();
+ KPlayer* p = 0;
+ while (it.current() && !p) {
+	KActionMenu* m = (KActionMenu*)it.currentKey();
+	if (m->popupMenu() == menu) {
+		p = it.current();
+	}
+	++it;
+ }
+ if (!p) {
+	kdError() << k_funcinfo << "player not found" << endl;
+	return;
+ }
+
+ switch (index) {
+	case ID_DEBUG_KILLPLAYER:
+		mBosonWidget->debugKillPlayer(p);
+		break;
+	default:
+		kdError() << k_funcinfo << "unknown index " << index << endl;
+		break;
+ }
 }
