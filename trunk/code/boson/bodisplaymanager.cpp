@@ -21,10 +21,14 @@
 #include "bodisplaymanager.moc"
 
 #include "bosonbigdisplay.h"
+#include "player.h"
+
+#include <klocale.h>
 
 #include <qstyle.h>
 #include <qlayout.h>
 #include <qvbox.h>
+#include <qpainter.h>
 
 #include <kdebug.h>
 
@@ -273,24 +277,6 @@ void BoDisplayManager::setLocalPlayer(Player* p)
  }
 }
 
-void BoDisplayManager::slotUpdateMinerals(int m)
-{
- QPtrListIterator<BosonBigDisplay> it(d->mDisplayList);
- while (it.current()) {
-	it.current()->slotUpdateMinerals(m);
-	++it;
- }
-}
-
-void BoDisplayManager::slotUpdateOil(int o)
-{
- QPtrListIterator<BosonBigDisplay> it(d->mDisplayList);
- while (it.current()) {
-	it.current()->slotUpdateOil(o);
-	++it;
- }
-}
-
 BoBox* BoDisplayManager::findBox(BosonBigDisplay* b)
 {
  QPtrListIterator<BoBox> it(d->mBoxList); 
@@ -314,3 +300,45 @@ void BoDisplayManager::recreateLayout()
  }
  d->mLayout->activate();
 }
+
+void BoDisplayManager::paintResources()
+{
+//FIXME: paint on upper right display, not on active
+ BosonBigDisplay* b = activeDisplay();
+ if (!b) {
+	kdError() << k_funcinfo << "NULL display" << endl;
+	return;
+ }
+ Player* p = b->localPlayer();
+ if (!p) {
+	return;
+ }
+ //AB: we could make this configurable
+ QFont font;
+ QColor color = white;
+
+ QPainter painter(b->viewport());
+ painter.setFont(font);
+ painter.setPen(color);
+
+ QFontMetrics metrics(font);
+ QString mineralText = i18n("Minerals: ");
+ QString oilText = i18n("Oil: ");
+ QString minerals = QString::number(p->minerals());
+ QString oil = QString::number(p->oil());
+ int w = QMAX(metrics.width(mineralText + minerals), metrics.width(oilText + oil)) + 5;
+ int x = b->visibleWidth() - w - 10;
+ int y = 10;
+ painter.drawText(x, y, w, metrics.height(), AlignLeft, mineralText);
+ painter.drawText(x, y, w, metrics.height(), AlignRight, minerals);
+ y += metrics.height() + 5;
+ painter.drawText(x, y, w, metrics.height(), AlignLeft, oilText);
+ painter.drawText(x, y, w, metrics.height(), AlignRight, minerals);
+ painter.end();
+}
+
+void BoDisplayManager::paintChatMessages()
+{
+ // TODO
+}
+

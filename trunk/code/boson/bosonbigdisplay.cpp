@@ -75,9 +75,6 @@ public:
 
 		mCursor = 0;
 
-//		mMinerals = 0;
-//		mOil = 0;
-
 		mUnitTips = 0;
 	}
 
@@ -93,9 +90,6 @@ public:
 	ConstructUnit mConstruction;
 	
 	BosonCursor* mCursor;
-
-//	QLabel* mMinerals;
-//	QLabel* mOil;
 
 	KGameCanvasChat* mChat;
 	
@@ -133,15 +127,6 @@ void BosonBigDisplay::init()
  connect(this, SIGNAL(contentsMoving(int, int)), 
 		this, SLOT(slotContentsMoving(int, int)));
 
- /*
- d->mMinerals = new QLabel(this, "MineralsLabel", 
-		WX11BypassWM | WRepaintNoErase | WStaticContents |
-		WRepaintNoErase); // does this have effect at all?
- d->mMinerals->hide();
- d->mOil= new QLabel(this, "MineralsLabel", WX11BypassWM);
- d->mOil->hide();
- */
- 
  d->mChat = new KGameCanvasChat(this);
  d->mChat->setCanvas(canvas());
  d->mChat->setZ(Z_CANVASTEXT);
@@ -548,18 +533,17 @@ void BosonBigDisplay::setLocalPlayer(Player* p)
  }
 }
 
+Player* BosonBigDisplay::localPlayer() const
+{
+ return d->mLocalPlayer;
+}
+
 void BosonBigDisplay::resizeEvent(QResizeEvent* e)
 {
  QCanvasView::resizeEvent(e);
  // FIXME: is width()/height() correct? rather the ones from viewport()!
  // use the same line as im resizeContents()!
  emit signalSizeChanged(width(), height());
-
-/*
- int x = visibleWidth() - 5 - QMAX(d->mMinerals->width(), d->mOil->width());
- d->mMinerals->move(x, 5);
- d->mOil->move(x, d->mMinerals->y() + d->mMinerals->height() + 2);
- */
 
  slotContentsMoving(contentsX(), contentsY());
 }
@@ -711,28 +695,9 @@ void BosonBigDisplay::resizeContents(int w, int h)
  emit signalSizeChanged(br.width(), br.height());
 }
 
-void BosonBigDisplay::slotUpdateMinerals(int minerals)
-{
- QString text = i18n("Minerals: %1").arg(minerals);
-// updateLabel(d->mMinerals, text);
-}
-
-void BosonBigDisplay::slotUpdateOil(int oil)
-{
- QString text = i18n("Oil: %1").arg(oil);
-// updateLabel(d->mOil, text);
-}
-
 void BosonBigDisplay::slotContentsMoving(int newx, int newy)
 {
-// int x = visibleWidth() - 5 - QMAX(d->mMinerals->width(), d->mOil->width());
-// d->mMinerals->move(x, 5);
-
-	
-// canvas()->setChanged(QRect(contentsX() + x , contentsY() + 5, 40, 40));
-// canvas()->setAllChanged();
-//TODO: use a QLabel here (just like d->mMinerals and d->mOil)
-// d->mChat->move(newx + 10, newy + visibleHeight() - 10); // FIXME: hardcoded!
+// d->mChat->move(newx + 10, newy + visibleHeight() - 10);
 }
 
 void BosonBigDisplay::setKGameChat(KGameChat* c)
@@ -787,19 +752,11 @@ void BosonBigDisplay::setActive()
 
 void BosonBigDisplay::setContentsPos(int x, int y)
 {
- if (x < 0) {
-	x = 0;
- }
- if (y < 0) {
-	y = 0;
- }
-#ifndef DISABLE_BOSON_CANVASTEXT
+// this hack is not really perfect. we still have some flickering in the
+// resources display since it is redrawn on *every* QCanvas::update() call now.
+// But hey - at least its working now :-)
  viewport()->setUpdatesEnabled(false);
-#endif
  QScrollView::setContentsPos(x, y);
-#ifndef DISABLE_BOSON_CANVASTEXT
  viewport()->setUpdatesEnabled(true);
  viewport()->update();
-#endif
-
 }

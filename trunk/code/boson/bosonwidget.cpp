@@ -187,10 +187,7 @@ void BosonWidget::init()
 		this, SLOT(slotOutOfGame(Player*)));
 
  d->mDisplayManager = new BoDisplayManager(d->mCanvas, this);
- connect(this, SIGNAL(signalMineralsUpdated(int)),
-		d->mDisplayManager, SLOT(slotUpdateMinerals(int)));
- connect(this, SIGNAL(signalOilUpdated(int)),
-		d->mDisplayManager, SLOT(slotUpdateOil(int)));
+ d->mCanvas->setDisplayManager(d->mDisplayManager);
 
  d->mBoson = new Boson(this);
  d->mBoson->setCanvas(d->mCanvas); // should not be stored here - but seems to be necessary :-(
