@@ -44,7 +44,7 @@ struct fixChangedMsg_t	{ int key, state; };
 /* MSG_MOBILE_CREATED */
 struct mobileMsg_t	{ int who, key, x, y; mobType type; };
 /* MSG_MOBILE_MOVE_*  */
-struct moveMsg_t	{ int key, dx, dy ;};
+struct moveMsg_t	{ int key, dx, dy, direction ;};
 /* MSG_*_DESTROYED */
 struct destroyedMsg_t	{ int key, x, y; }; // x and y are for checking 
 

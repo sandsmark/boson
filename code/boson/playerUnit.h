@@ -29,6 +29,7 @@
 
 enum mobUnitState {
 	MUS_NONE,
+	MUS_TURNING,
 	MUS_MOVING,
 	MUS_,
 	};
@@ -44,19 +45,19 @@ class playerMobUnit : public mobUnit, public QwSprite
   virtual	int _x(void) {return x();}
   virtual	int _y(void) {return y();}
 
-  void	turnLeft(void);
-  void	turnRight(void);
-
-  int	getWantedMove(int &dx, int &dy);
+  int	getWantedMove(int &dx, int &dy, int &direction);
   int	getWantedAction();
 
-//  virtual QRect	rect(void);
-  
 /* Server orders */
-  void  s_moveBy(int dx, int dy);
+  void  s_moveBy(int dx, int dy, int direction);
 
 /* Qw stuff */
   virtual int rtti() { return S_MOBILE; }
+
+ protected:
+  int	getLeft(int a=1) {return (direction+12-a)%12; }
+  int	getRight(int a=1) {return (direction+a)%12; }
+  void	turnTo(int newdir);
 
  public slots:
 /* orders from user */
@@ -64,7 +65,7 @@ class playerMobUnit : public mobUnit, public QwSprite
   void  u_stop(void);	
 
  private :
-  uint		direction;	// [0-11] is the angle ...
+  int		direction;	// [0-11] is the angle ...
   mobUnitState	state;
 
   /* moving */
@@ -83,14 +84,14 @@ class playerFacility : public Facility, public QwSprite
  public:
   playerFacility(facilityMsg_t *msg, QObject* parent=0L, const char *name=0L);
 //  virtual QRect	rect(void);
-  virtual	int _x(void) {return x();}
-  virtual	int _y(void) {return y();}
+  virtual int	_x(void) {return x();}
+  virtual int	_y(void) {return y();}
 
 /* Server orders */
-  void  s_setState(int );
+  void		s_setState(int );
 
 /* Qw stuff */
-  virtual int rtti() { return S_FACILITY; }
+  virtual int	rtti() { return S_FACILITY; }
 };
 
 #endif // PLAYER_UNIT_H
