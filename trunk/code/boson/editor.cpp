@@ -84,6 +84,7 @@ int main(int argc, char **argv)
 	boConfig->setDisableSound(true);
  }
  Editor *widget = new Editor;
+ app.setMainWidget(widget);
 
  bool showMaximized = true;
  if (showMaximized) {
