@@ -624,7 +624,6 @@ bool BoUfoManager::sendResizeEvent(int w, int h)
 
 bool BoUfoManager::sendMousePressEvent(QMouseEvent* e)
 {
- boDebug() << k_funcinfo << endl;
  if (!e) {
 	BO_NULL_ERROR(e);
 	return false;
