@@ -1164,6 +1164,7 @@ void BosonBigDisplayBase::renderText()
 	text += i18n("Radius: %1\n").arg(camera()->radius());
 	text += i18n("Height: %1\n").arg(camera()->z());
 	text += i18n("Rotation: %1\n").arg(camera()->rotation());
+	text += i18n("CommitTime: %1\n").arg(camera()->commitTime());
 
 	y -= d->mDefaultFont->renderText(x, y, text, width() - x);
 	y -= d->mDefaultFont->height();
@@ -1681,10 +1682,10 @@ void BosonBigDisplayBase::mouseEventWheel(float delta, Orientation orientation, 
 		} else {
 			delta *= 1; // no effect, btw
 		}
-		camera()->changeZ(delta);
+		camera()->changeZ(delta, true);
 		z = canvas()->map()->cellAverageHeight((int)(camera()->lookAt().x()), (int)-(camera()->lookAt().y()));
 		if (camera()->z() < z + BoCamera::minCameraZ()) {
-			camera()->changeZ(z + BoCamera::minCameraZ() - camera()->z());
+			camera()->changeZ(z + BoCamera::minCameraZ() - camera()->z(), true);
 		}
 		cameraChanged();
 		break;
@@ -1694,7 +1695,7 @@ void BosonBigDisplayBase::mouseEventWheel(float delta, Orientation orientation, 
 		} else {
 			delta *= 10;
 		}
-		camera()->changeRotation(delta);
+		camera()->changeRotation(delta, true);
 		cameraChanged();
 		break;
 	default:
@@ -1718,16 +1719,16 @@ void BosonBigDisplayBase::mouseEventMove(int buttonState, const BoMouseEvent& ev
 	// during a game.
 	if (buttonState & LEFT_BUTTON) {
 		d->mMouseMoveDiff.startZoom();
-		camera()->changeZ(d->mMouseMoveDiff.dy());
+		camera()->changeZ(d->mMouseMoveDiff.dy(), true);
 		float z = canvas()->map()->cellAverageHeight((int)(camera()->lookAt().x()), (int)-(camera()->lookAt().y()));
 		if (camera()->z() < z + BoCamera::minCameraZ()) {
-			camera()->changeZ(z + BoCamera::minCameraZ() - camera()->z());
+			camera()->changeZ(z + BoCamera::minCameraZ() - camera()->z(), true);
 		}
 		cameraChanged();
 	} else if (buttonState & RIGHT_BUTTON) {
 		d->mMouseMoveDiff.startRotate();
-		camera()->changeRotation(d->mMouseMoveDiff.dx());
-		camera()->changeRadius(d->mMouseMoveDiff.dy());
+		camera()->changeRotation(d->mMouseMoveDiff.dx(), true);
+		camera()->changeRadius(d->mMouseMoveDiff.dy(), true);
 		cameraChanged();
 	}
  } else if (buttonState & LEFT_BUTTON) {
@@ -1768,12 +1769,10 @@ void BosonBigDisplayBase::mouseEventMove(int buttonState, const BoMouseEvent& ev
 		int moveX = d->mMouseMoveDiff.dx();
 		int moveY = d->mMouseMoveDiff.dy();
 		mapDistance(moveX, moveY, &dx, &dy);
-		// FIXME: we must also change camera's z-coordinate here to ensure that no
-		//  cells go through near clip.
-		camera()->moveLookAtBy(dx, dy, 0);
+		camera()->changeLookAt(BoVector3(dx, dy, 0), true);
 		float z = canvas()->map()->cellAverageHeight((int)(camera()->lookAt().x()), (int)-(camera()->lookAt().y()));
 		if (camera()->z() < z + BoCamera::minCameraZ()) {
-			camera()->changeZ(z + BoCamera::minCameraZ() - camera()->z());
+			camera()->changeZ(z + BoCamera::minCameraZ() - camera()->z(), true);
 		}
 		cameraChanged();
 	} else {
@@ -1986,14 +1985,14 @@ void BosonBigDisplayBase::slotResetViewProperties()
  BO_CHECK_NULL_RET(canvas());
  d->mFovY = 60.0;
  d->mAspect = 1.0;
- setCamera(BoCamera(canvas()->mapWidth(), canvas()->mapHeight()));
+ setCamera(BoCamera(0.0f, (float)(canvas()->mapWidth()), -((float)(canvas()->mapHeight())), 0.0f));
  resizeGL(d->mViewport[2], d->mViewport[3]);
 }
 
 void BosonBigDisplayBase::slotReCenterDisplay(const QPoint& pos)
 {
 //TODO don't center the corners - e.g. 0;0 should be top left, never center 
- camera()->setLookAt(BoVector3(((float)pos.x()) * BO_GL_CELL_SIZE, -((float)pos.y()) * BO_GL_CELL_SIZE, 0));
+ camera()->setLookAt(BoVector3(((float)pos.x()) * BO_GL_CELL_SIZE, -((float)pos.y()) * BO_GL_CELL_SIZE, 0), true);
  cameraChanged();
 }
 
@@ -2444,7 +2443,7 @@ void BosonBigDisplayBase::slotCursorEdgeTimeout()
 	}
 	d->mCursorEdgeCounter++;
 	if (d->mCursorEdgeCounter > 30) {
-		camera()->moveLookAtBy(dx, dy, 0);
+		camera()->changeLookAt(BoVector3(dx, dy, 0), true);
 		cameraChanged();
 	}
  }
@@ -2455,7 +2454,7 @@ void BosonBigDisplayBase::scrollBy(int dx, int dy)
 {
  GLfloat x, y;
  mapDistance(dx, dy, &x, &y);
- camera()->moveLookAtBy(x, y, 0);
+ camera()->changeLookAt(BoVector3(x, y, 0), true);
  cameraChanged();
 }
 
@@ -2918,7 +2917,7 @@ float BosonBigDisplayBase::sphereInFrustum(const BoVector3& pos, float radius) c
 void BosonBigDisplayBase::mapChanged()
 {
  BO_CHECK_NULL_RET(canvas());
- camera()->setMapSize(canvas()->mapWidth(), canvas()->mapHeight());
+ camera()->setMoveRect(0, canvas()->mapWidth(), -(canvas()->mapHeight()), 0);
 }
 
 const QPoint& BosonBigDisplayBase::cursorCanvasPos() const
@@ -3159,3 +3158,11 @@ void BosonBigDisplayBase::setInputInitialized(bool initialized)
  d->mInputInitialized = initialized;
 }
 
+void BosonBigDisplayBase::advanceCamera()
+{
+  if(camera()->commitTime() > 0)
+  {
+    camera()->advance();
+    cameraChanged();
+  }
+}

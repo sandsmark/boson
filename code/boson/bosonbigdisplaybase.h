@@ -253,6 +253,9 @@ public:
 	void saveAsXML(QDomElement& root);
 	void loadFromXML(const QDomElement& root);
 
+	BoCamera* camera() const;
+	void advanceCamera();
+
 public slots:
 	void slotCenterHomeBase();
 	void slotResetViewProperties();
@@ -434,7 +437,6 @@ protected:
 	}
 
 	void setCamera(const BoCamera& c);
-	BoCamera* camera() const;
 	/**
 	 * @return Point that the camera is looking at
 	 **/

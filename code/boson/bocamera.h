@@ -27,149 +27,174 @@
 class QDomElement;
 
 /**
+ * Camera class for Boson
+ *
  * @author Rivo Laks <rivolaks@hot.ee>
  **/
 class BoCamera
 {
-public:
-	BoCamera();
-	// AB: IMHO its a bad idea to place the map width/height into camera
-	// code
-	BoCamera(GLfloat mapWidth, GLfloat mapHeight);
+  public:
+    BoCamera();
+    /**
+     * Construct camera which will move only in given rectangle
+     **/
+    BoCamera(GLfloat minX, GLfloat maxX, GLfloat minY, GLfloat maxY);
 
-	BoCamera(const BoCamera& c)
-	{
-		*this = c;
-	}
-
-	/**
-	 * Apply the camera to the scene by doing the necessary OpenGL
-	 * transformation on the modelview matrix.
-	 *
-	 * This will first load the identity matrix, so any previous changes are
-	 * lost. use glPushMatrix()/glPopMatrix() if you need your old settings
-	 * back at a later point.
-	 **/
-	void applyCameraToScene();
-
-	BoCamera& operator=(const BoCamera& c);
-
-	static float minCameraZ();
-	static float maxCameraZ();
-	static float maxCameraRadius();
-
-	/**
-	 * Set the gluLookAt() paremeters directly. Note that when you use
-	 * this @ref radius and @ref rotation will remain undefined.
-	 **/
-	void setGluLookAt(const BoVector3& lookAt, const BoVector3& cameraPos, const BoVector3& up);
-
-	/**
-	 * @param pos The point to look at, as used in gluLookAt().
-	 **/
-	void setLookAt(const BoVector3& pos);
-
-	/**
-	 * @return The point we are looking at. This is the lookAt vector, as it
-	 * can get used by gluLookAt().
-	 **/
-	const BoVector3& lookAt() const
-	{
-		return mLookAt;
-	}
-	/**
-	 * @return The eye vector (camera position), as it can get used by
-	 * gluLookAt().
-	 **/
-	const BoVector3& cameraPos() const
-	{
-		return mCameraPos;
-	}
-
-	/**
-	 * @return The up vector, as it can get used by gluLookAt(). The up
-	 * vector is the vector pointing straight "up" from the position of the
-	 * camera. it can change when the camera is rotated.
-	 **/
-	const BoVector3& up() const
-	{
-		return mUp;
-	}
-
-	void changeZ(GLfloat diff);
-	void changeRadius(GLfloat diff);
-	void changeRotation(GLfloat diff);
-	void moveLookAtBy(GLfloat x, GLfloat y, GLfloat z);
-
-	/**
-	 * Set limits for the camera. The camera tries not to move beyond the
-	 * map size.
-	 **/
-	void setMapSize(GLfloat w, GLfloat h)
-	{
-		mMapWidth = w;
-		mMapHeight = h;
-	}
-
-	void loadFromXML(const QDomElement& root);
-	void saveAsXML(QDomElement& root);
-
-	void setZ(GLfloat z)
-	{
-		mPosZ = z;
-	}
-
-	// these will change the up and cameraPos vectors!
-	// TODO: document what they actually do
-	void setRotation(GLfloat r);
-	void setRadius(GLfloat r);
+    BoCamera(const BoCamera& c)  { *this = c; };
 
 
-	GLfloat z() const
-	{
-		return mPosZ;
-	}
-	GLfloat rotation() const
-	{
-		return mRotation;
-	}
-	GLfloat radius() const
-	{
-		return mRadius;
-	}
+    /**
+    * Apply the camera to the scene by doing the necessary OpenGL
+    * transformation on the modelview matrix.
+    *
+    * This will first load the identity matrix, so any previous changes are
+    * lost. use glPushMatrix()/glPopMatrix() if you need your old settings
+    * back at a later point.
+    **/
+    void applyCameraToScene();
 
 
-protected:
-	void checkPosition();
+    /**
+     * Advances camera. This smoothly (and linearly) applies changes made to
+     * camera.
+     **/
+    void advance();
 
-	/**
-	 * Update the parameters for gluLookAt() (@ref lookAt, @ref cameraPos
-	 * and @ref * up) according to the new values from @ref radius and
-	 * @ref rotation.
-	 *
-	 * Note that the @ref lookAt vector isn't changed here, as the kind of
-	 * BoCamera's rotation and radius don't influence it.
-	 **/
-	void updateFromRadiusAndRotation();
+    /**
+     * Commits changes made to camera in ticks game ticks. If ticks <= 0, then
+     * changes will take effect immediately.
+     **/
+    void commitChanges(int ticks);
 
-private:
-	void init();
-	static void initStatic();
+    int commitTime()  { return mCommitTime; };
 
-private:
-	BoVector3 mLookAt;
-	BoVector3 mUp;
+    void resetDifferences();
 
-	GLfloat mPosZ;
 
-	GLfloat mRotation;
-	GLfloat mRadius;
+    BoCamera& operator=(const BoCamera& c);
 
-	BoVector3 mCameraPos;
 
-	// AB: why float?
-	GLfloat mMapWidth;
-	GLfloat mMapHeight;
+    static float minCameraZ();
+    static float maxCameraZ();
+    static float maxCameraRadius();
+
+
+    /**
+    * Set the gluLookAt() paremeters directly. Note that when you use
+    * this @ref radius and @ref rotation will remain undefined.
+    **/
+    void setGluLookAt(const BoVector3& lookAt, const BoVector3& cameraPos, const BoVector3& up);
+
+    /**
+    * @return The eye vector (camera position), as it can get used by
+    * gluLookAt().
+    **/
+    const BoVector3& cameraPos();
+
+    /**
+    * @return The up vector, as it can get used by gluLookAt(). The up
+    * vector is the vector pointing straight "up" from the position of the
+    * camera. it can change when the camera is rotated.
+    **/
+    const BoVector3& up();
+
+
+    // These will _move_ given things by given values
+    // Also, they don't commit changes
+    // If now is true, value is changed immediately (only this value, if other
+    //  changes are being committed at the same time, they won't be cancelled)
+    void changeZ(GLfloat diff, bool now = false);
+    void changeRadius(GLfloat diff, bool now = false);
+    void changeRotation(GLfloat diff, bool now = false);
+    void changeLookAt(const BoVector3& diff, bool now = false);
+
+    // these will change the up and cameraPos vectors!
+    /**
+     * Set camera's rotation (in degrees). Rotation is measured from y-axis, if
+     * it's 0, camera will look along y-axis.
+     * Changes are not commited
+     **/
+    void setRotation(GLfloat r, bool now = false);
+    /**
+     * Set distance between look-at point and camera's position on xy-plane.
+     * It means that if there would be a cylinder which lower center point would
+     * be at lookAt point and it's radius would be r, then camera would be
+     * somewhere along the edge of upper cap of this cylinder.
+     * Changes are not commited
+     **/
+    void setRadius(GLfloat r, bool now = false);
+    /**
+     * Set distance between lookAt point and camera in z-axis
+     * Changes are not commited
+     **/
+    void setZ(GLfloat z, bool now = false);
+    /**
+     * Set lookAt point of camera
+     * Changes are not commited
+     **/
+    void setLookAt(const BoVector3& pos, bool now = false);
+
+    GLfloat z() const  { return mPosZ; };
+    GLfloat rotation() const  { return mRotation; };
+    GLfloat radius() const  { return mRadius; };
+    /**
+    * @return The point we are looking at. This is the lookAt vector, as it
+    * can get used by gluLookAt().
+    **/
+    const BoVector3& lookAt() const  { return mLookAt; };
+
+    /**
+    * Set limits for the camera. The camera tries not to move beyond the
+    * given rectangle.
+    **/
+    void setMoveRect(GLfloat minX, GLfloat maxX, GLfloat minY, GLfloat maxY);
+
+    void loadFromXML(const QDomElement& root);
+    void saveAsXML(QDomElement& root);
+
+
+  protected:
+    /**
+     * Checks if camera is inside rectangle set by setMoveRect method.
+     * If it's not inside this rectangle, it will be moved into it.
+     **/
+    void checkPosition();
+
+    /**
+    * Update the parameters for gluLookAt() (@ref cameraPos
+    * and @ref up) according to the new values from @ref radius,
+    * @ref rotation and @ref lookAt.
+    * Don't call this manually, call @ref setPositionDirty instead. This will
+    * be automatically called by @ref cameraPos and @ref up, if it's dirty.
+    **/
+    void updatePosition();
+
+    void checkRotation();
+
+    void setPositionDirty()  { mPosDirty = true; };
+
+  private:
+    void init();
+    static void initStatic();
+
+  private:
+    BoVector3 mLookAt;
+
+    GLfloat mPosZ;
+    GLfloat mRotation;
+    GLfloat mRadius;
+
+    BoVector3 mUp;
+    BoVector3 mCameraPos;
+    bool mPosDirty;
+
+    GLfloat mMinX, mMaxX, mMinY, mMaxY;
+
+    BoVector3 mLookAtDiff;
+    GLfloat mPosZDiff;
+    GLfloat mRotationDiff;
+    GLfloat mRadiusDiff;
+    int mCommitTime;
 };
 
 #endif
