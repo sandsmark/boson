@@ -86,19 +86,8 @@ BosonItem::~BosonItem()
  }
 }
 
-void BosonItem::setWidth(int w)
-{
- mWidth = w;
-}
-
-void BosonItem::setHeight(int h)
-{
- mHeight = h;
-}
-
 QPointArray BosonItem::cells() const
 {
- // FIXME: test a little bit! UPDATE: should be working!
  QPointArray c;
  int left, right, top, bottom;
  int n = 0;
@@ -110,7 +99,7 @@ QPointArray BosonItem::cells() const
  bottom = QMIN(bottom, QMAX((int)canvas()->mapHeight() - 1, 0));
  int size = (right - left + 1) * (bottom - top + 1);
  if (size <= 0) {
-	return QPointArray();
+	return c;
  }
  c.resize(size);
  for (int i = left; i <= right; i++) {
@@ -300,3 +289,20 @@ void BosonItem::animate()
  }
 }
 
+void BosonItem::addToCells()
+{
+ canvas()->addToCells(this);
+}
+
+void BosonItem::removeFromCells()
+{
+ canvas()->removeFromCells(this);
+}
+
+void BosonItem::setSize(int width, int height)
+{
+ removeFromCells();
+ mWidth = width;
+ mHeight = height;
+ addToCells();
+}

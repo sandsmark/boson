@@ -84,8 +84,11 @@ public:
 	 **/
 	inline float z() const { return mZ; }
 
-	void setWidth(int w); // width in cells * BO_TILE_SIZE // FIXME: should be changed to cell value (float!!)
-	void setHeight(int w); // height in cells * BO_TILE_SIZE // FIXME: should be changed to cell value (float!!)
+	/**
+	 * @param width Width in cells * BO_TILE_SIZE. FIXME: should be changed to cell value (float!!)
+	 * @param height Height in cells * BO_TILE_SIZE. FIXME: should be changed to cell value (float!!)
+	 **/
+	void setSize(int width, int height);
 
 	// note: for GLunit all frames must have the same width/height!
 	// different depth is ok!
@@ -106,11 +109,10 @@ public:
 	}
 	virtual void moveBy(float dx, float dy, float dz)
 	{
-		// in Unit we MUST add a addToCells() / removeFromCells() !!
 		if (dx || dy || dz) {
-			setX(x() + dx);
-			setY(y() + dy);
-			setZ(z() + dz);
+			removeFromCells();
+			setPos(x() + dx, y() + dy, z() + dz);
+			addToCells();
 		}
 	}
 
@@ -249,11 +251,9 @@ public:
 	 * floating point operations!
 	 **/
 	inline float rotation() const { return mRotation; }
-
 	void setRotation(float r) { mRotation = r; }
 
 	inline float xRotation() const { return mXRotation; }
-
 	void setXRotation(float r) { mXRotation = r; }
 
 
@@ -288,11 +288,35 @@ private:
 	unsigned int frameCount() const;
 
 private:
-	inline void setX(float x) { mX = x; }
-	inline void setY(float y) { mY = y; }
-	inline void setZ(float z) { mZ = z; }
+	/**
+	 * Change position of the item. WARNING: you <em>must</em> call @ref
+	 * removeFromCells <em>before</em> calling this function!
+	 *
+	 * You should call @ref addToCells after this function.
+	 **/
+	inline void setPos(float x, float y, float z)
+	{
+		mX = x;
+		mY = y;
+		mZ = z;
+	}
 
 	void setCurrentFrame(BoFrame* frame);
+
+	/**
+	 * Add the item to the cells on the canvas. This should get called
+	 * whenever the item has been moved in any way (i.e. also when its size
+	 * was changed)
+	 **/
+	void addToCells();
+
+	/**
+	 * Remove the item from the cells it was added to. This <em>must</em>
+	 * (really!!) be called before the item is moved or resized.
+	 *
+	 * Otherwise you'll most certainly get a crash at a later point.
+	 **/
+	void removeFromCells();
 
 private:
 	BosonCanvas* mCanvas;

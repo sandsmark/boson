@@ -98,8 +98,7 @@ Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
 
  // note: these width and height can be used for e.g. pathfinding. It does not
  // depend in any way on the .3ds file or another OpenGL thing.
- setWidth(prop->unitWidth());
- setHeight(prop->unitWidth());
+ setSize(prop->unitWidth(), prop->unitHeight());
 
  registerData(&d->mDirection, IdDirection);
  registerData(&d->mWaypoints, IdWaypoints);
@@ -330,11 +329,7 @@ void Unit::moveBy(float moveX, float moveY, float moveZ)
  float oldX = x();
  float oldY = y();
 
- //TODO: these calls should be in BosonItem, since they are valid for all
- //items, not just for units!
- canvas()->removeFromCells(this);
  BosonItem::moveBy(moveX, moveY, moveZ);
- canvas()->addToCells(this);
  canvas()->unitMoved(this, oldX, oldY);
  if (smokeParticleSystem()) {
 	 smokeParticleSystem()->moveParticles(BoVector3(moveX / BO_TILE_SIZE, -moveY / BO_TILE_SIZE, moveZ / BO_TILE_SIZE));
