@@ -70,7 +70,7 @@ void BoUnitEditor::slotTypeChanged()
 void BoUnitEditor::slotUnitSelected( int index)
 {
     // Ask is user wants to save current properties
-    if(mUnitLoaded) {
+    if(mUnitLoaded && mConfigChanged) {
 	int answer = KMessageBox::questionYesNoCancel(this,
 						      i18n("Do you want to save current unit properties?"),
 						      i18n("Save current unit?"));
@@ -92,11 +92,15 @@ void BoUnitEditor::slotAddTexture()
 			    mUnitTextureTo->text());
     mUnitTextureFrom->clear();
     mUnitTextureTo->clear();
+    mConfigChanged = true;
+    updateConfigWidgets();
 }
 
 void BoUnitEditor::slotRemoveTexture()
 {
     delete mUnitTexturesList->currentItem();
+    mConfigChanged = true;
+    updateConfigWidgets();
 }
 
 void BoUnitEditor::slotCurrentTextureChanged()
@@ -119,6 +123,8 @@ void BoUnitEditor::slotAutoPickId()
 	id++;
     }
     mUnitId->setValue(id);
+    mConfigChanged = true;
+    updateConfigWidgets();
 }
 
 void BoUnitEditor::slotSaveUnit()
@@ -161,22 +167,28 @@ void BoUnitEditor::slotSaveUnit()
     }
     slotUpdateUnitProperties();
     mUnit->saveUnitType(d.absPath() + "/index.unit");
+    mConfigChanged = false;
+    updateConfigWidgets();
 }
 
 void BoUnitEditor::slotNewUnit()
 {
     // Ask is user wants to save current properties
-    int answer = KMessageBox::questionYesNoCancel(this,
-						  i18n("Do you want to save current unit properties?"),
-						  i18n("Save current unit?"));
-    if(answer == KMessageBox::Cancel) {
-	return;
-    } else if(answer == KMessageBox::Yes) {
-	slotSaveUnit();
+    if(mConfigChanged) {
+	int answer = KMessageBox::questionYesNoCancel(this,
+						      i18n("Do you want to save current unit properties?"),
+						      i18n("Save current unit?"));
+	if(answer == KMessageBox::Cancel) {
+	    return;
+	} else if(answer == KMessageBox::Yes) {
+	    slotSaveUnit();
+	}
     }
     // Clear everything to default values
     mUnit->reset();
     slotUpdateWidgets();
+    mConfigChanged = false;
+    updateConfigWidgets();
 }
 
 QStringList BoUnitEditor::verifyProperties()
@@ -206,6 +218,12 @@ void BoUnitEditor::slotLoadUnit( QString dir )
     mUnit->loadUnitType(dir + "/index.unit", false);
     slotUpdateWidgets();
     mUnitLoaded = true;
+    // If unit has any weapons, make the first one selected
+    if(mUnit->canShoot()) {
+	mWeaponsList->setSelected(0, true);
+    }
+    mConfigChanged = false;
+    updateConfigWidgets();
 }
 
 void BoUnitEditor::slotEditSearchPaths()
@@ -244,8 +262,15 @@ void BoUnitEditor::init()
     mWeaponHitParticles->setValidator(v);
     
     // Clear everything to default values
-    mUnit->reset();
+    if(mUnits.isEmpty()) {
+	mUnit->reset();
+    } else {
+	mUnitsList->setSelected(0, true);
+	//slotLoadUnit(mUnits[0]);
+    }
     slotUpdateWidgets();
+    mConfigChanged = false;
+    updateConfigWidgets();
 }
 
 void BoUnitEditor::slotHideSearchPaths()
@@ -305,13 +330,15 @@ void BoUnitEditor::destroy()
 void BoUnitEditor::slotOpenUnit()
 {
     // Ask is user wants to save current properties
-    int answer = KMessageBox::questionYesNoCancel(this,
-						  i18n("Do you want to save current unit properties?"),
-						  i18n("Save current unit?"));
-    if(answer == KMessageBox::Cancel) {
-	return;
-    } else if(answer == KMessageBox::Yes) {
-	slotSaveUnit();
+    if(mConfigChanged) {
+	int answer = KMessageBox::questionYesNoCancel(this,
+						      i18n("Do you want to save current unit properties?"),
+						      i18n("Save current unit?"));
+	if(answer == KMessageBox::Cancel) {
+	    return;
+	} else if(answer == KMessageBox::Yes) {
+	    slotSaveUnit();
+	}
     }
     
     // Open new unit
@@ -414,7 +441,6 @@ void BoUnitEditor::slotUpdateUnitProperties()
 	    mUnit->addTextureMapping(it.current()->text(0), it.current()->text(1));
 	}
     }
-//    mUnit->addSound(SoundShoot, mUnitSoundShoot->text());
     mUnit->addSound(SoundOrderMove, mUnitSoundOrderMove->text());
     mUnit->addSound(SoundOrderAttack, mUnitSoundOrderAttack->text());
     mUnit->addSound(SoundOrderSelect, mUnitSoundOrderSelect->text());
@@ -518,7 +544,6 @@ void BoUnitEditor::slotUpdateWidgets()
     for(tit = textures.begin(); tit != textures.end(); ++tit) {
 	(void)new QListViewItem(mUnitTexturesList, tit.key(), tit.data());
     }
-//    mUnitSoundShoot->setText(mUnit->sound(SoundShoot));
     mUnitSoundOrderMove->setText(mUnit->sound(SoundOrderMove));
     mUnitSoundOrderAttack->setText(mUnit->sound(SoundOrderAttack));
     mUnitSoundOrderSelect->setText(mUnit->sound(SoundOrderSelect));
@@ -546,6 +571,7 @@ void BoUnitEditor::slotUpdateWeaponProps()
     w->setWeaponName(mWeaponName->text());
     w->setDamage(mWeaponDamage->value());
     w->setDamageRange(mWeaponDamageRange->value());
+    w->setFullDamageRange(mWeaponFullDamageRange->value());
     w->setReloadingTime(mWeaponReload->value());
     w->setRange(mWeaponRange->value());
     w->setCanShootAtAirUnits(mWeaponCanShootAtAirUnits->isChecked());
@@ -559,6 +585,7 @@ void BoUnitEditor::slotUpdateWeaponProps()
     w->setShootParticleSystemIds(stringToList(mWeaponShootParticles->text()));
     w->setFlyParticleSystemIds(stringToList(mWeaponFlyParticles->text()));
     w->setHitParticleSystemIds(stringToList(mWeaponHitParticles->text()));
+    w->setSound(SoundWeaponShoot, mWeaponSoundShoot->text());
 }
 
 
@@ -571,15 +598,21 @@ void BoUnitEditor::slotAddWeapon()
     mWeaponsList->insertItem("New weapon", mWeapons.count() - 1);
     mWeaponsList->setCurrentItem(mWeapons.count() - 1);
     slotWeaponSelected(mWeapons.count() - 1);
+    mConfigChanged = true;
+    updateConfigWidgets();
 }
 
 void BoUnitEditor::slotWeaponSelected( int index )
 {
+    // Selecting another weapon modifies widget's contents, but we want to maintain old configChanged status
+    bool configWasChanged = mConfigChanged;
     if(mCurrentWeapon != -1) {
 	slotUpdateWeaponProps();
     }
     mCurrentWeapon = index;
     slotUpdateWeaponWidgets();
+    mConfigChanged = configWasChanged;
+    updateConfigWidgets();
 }
 
 
@@ -596,6 +629,8 @@ void BoUnitEditor::slotRemoveWeapon()
 	mCurrentWeapon--;
     }
     slotUpdateWeaponWidgets();
+    mConfigChanged = true;
+    updateConfigWidgets();
 }
 
 
@@ -612,6 +647,7 @@ void BoUnitEditor::slotUpdateWeaponWidgets()
     mWeaponName->setText(w->weaponName());
     mWeaponDamage->setValue(w->damage());
     mWeaponDamageRange->setValue(w->damageRange());
+    mWeaponFullDamageRange->setValue(w->fullDamageRange());
     mWeaponReload->setValue(w->reloadingTime());
     mWeaponRange->setValue(w->range());
     mWeaponCanShootAtAirUnits->setChecked(w->canShootAtAirUnits());
@@ -627,4 +663,19 @@ void BoUnitEditor::slotUpdateWeaponWidgets()
     mWeaponShootParticles->setText(listToString(w->shootParticleSystemIds()));
     mWeaponFlyParticles->setText(listToString(w->flyParticleSystemIds()));
     mWeaponHitParticles->setText(listToString(w->hitParticleSystemIds()));
+    mWeaponSoundShoot->setText(w->sound(SoundWeaponShoot));
+}
+
+
+void BoUnitEditor::slotConfigChanged()
+{
+    // Unit config has changed
+    mConfigChanged = true;
+    updateConfigWidgets();
+}
+
+
+void BoUnitEditor::updateConfigWidgets()
+{
+    mUnitSaveButton->setEnabled(mConfigChanged);
 }
