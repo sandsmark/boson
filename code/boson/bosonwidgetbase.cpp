@@ -604,7 +604,7 @@ void BosonWidgetBase::slotSetActiveDisplay(BosonBigDisplayBase* active, BosonBig
 
 void BosonWidgetBase::slotCmdBackgroundChanged(const QString& file)
 {
- if (file == QString::null) {
+ if (file.isNull()) {
 	d->mCommandFrame->unsetPalette();
 	return;
  }

@@ -31,7 +31,7 @@
 #include "../boson.h"
 #include "../defines.h"
 
-#include <kmainwindow.h> // AB: urghs
+#include <kmainwindow.h> // AB: urghs accessing the parent is BAAD
 #include <kstandarddirs.h>
 #include <kmessagebox.h>
 #include <klocale.h>

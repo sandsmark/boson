@@ -1087,7 +1087,7 @@ void BosonProfilingDialog::slotSaveToFile()
 {
  QString file;
  file = KFileDialog::getSaveFileName();
- if (file == QString::null) {
+ if (file.isNull()) {
 	return;
  }
  if (!d->data()->saveToFile(file)) {
@@ -1099,7 +1099,7 @@ void BosonProfilingDialog::slotLoadFromFile()
 {
  QString file;
  file = KFileDialog::getOpenFileName();
- if (file == QString::null) {
+ if (file.isNull()) {
 	return;
  }
  loadFromFile(file);

@@ -146,7 +146,7 @@ bool BosonStarting::loadGame(const QString& loadingFileName)
  // If mLoading true, then we're loading saved game; if it's false, we're
  //  starting new game
  mLoading = true;
- if (loadingFileName == QString::null) {
+ if (loadingFileName.isNull()) {
 	boError() << k_funcinfo << "Cannot load game with NULL filename" << endl;
 	//TODO: set Boson::loadingStatus()
 	return false;

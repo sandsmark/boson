@@ -625,7 +625,7 @@ void BosonMap::loadTiles(const QString& tiles, bool withtimer)
  connect(mTiles, SIGNAL(signalTilesLoaded()),
 		this, SIGNAL(signalTilesLoaded()));
  QString dir = KGlobal::dirs()->findResourceDir("data", QString("boson/themes/grounds/%1/index.ground").arg(tiles)) + QString("boson/themes/grounds/%1").arg(tiles);
- if (dir == QString::null) {
+ if (dir.isNull()) {
 	boError() << k_funcinfo << "Cannot find tileset " << tiles << endl;
 	return;
  }

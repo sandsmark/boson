@@ -586,7 +586,7 @@ void BoInfoDialog::slotSaveToFile()
 {
  QString file;
  file = KFileDialog::getSaveFileName();
- if (file == QString::null) {
+ if (file.isNull()) {
 	return;
  }
  QFileInfo fileInfo(file);
@@ -606,7 +606,7 @@ void BoInfoDialog::slotLoadFromFile()
 {
  QString file;
  file = KFileDialog::getOpenFileName();
- if (file == QString::null) {
+ if (file.isNull()) {
 	return;
  }
  loadFromFile(file);

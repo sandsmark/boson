@@ -69,7 +69,7 @@ protected:
 			text = mainTip();
 		}
 
-		if (text == QString::null) {
+		if (text.isNull()) {
 			return;
 		}
 		tip(QRect(commandWidget()->rect()), text);
