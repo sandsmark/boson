@@ -193,6 +193,9 @@ void Unit::initStatic()
  addPropertyId(IdResourcesX, QString::fromLatin1("ResourcesX"));
  addPropertyId(IdResourcesY, QString::fromLatin1("ResourcesY"));
  addPropertyId(IdHarvestingType, QString::fromLatin1("HarvestingType"));
+ addPropertyId(IdBombingPosX, QString::fromLatin1("BombingPosX"));
+ addPropertyId(IdBombingPosY, QString::fromLatin1("BombingPosY"));
+ addPropertyId(IdMinePlacingCounter, QString::fromLatin1("MinePlacingCounter"));
 
  mInitialized = true;
 }
@@ -917,6 +920,28 @@ bool Unit::saveAsXML(QDomElement& root)
  }
  root.setAttribute(QString::fromLatin1("Target"), (unsigned int)targetId);
 
+ if (d->mPlugins.count() != 0) {
+	QDomDocument doc = root.ownerDocument();
+	QDomElement pluginElement = doc.createElement(QString::fromLatin1("UnitPlugin"));
+	QPtrListIterator<UnitPlugin> it(d->mPlugins);
+	for (; it.current(); ++it) {
+		it.current()->saveAsXML(pluginElement);
+
+		// we won't add the element at all, if it wasn't used.
+		if (pluginElement.hasAttributes() || pluginElement.hasChildNodes()) {
+			pluginElement.setAttribute(QString::fromLatin1("Type"), it.current()->pluginType());
+
+			// AB: atm we support a single instance only anyway.
+			pluginElement.setAttribute(QString::fromLatin1("Instance"), 0);
+			root.appendChild(pluginElement);
+
+			// create an element for the next plugin
+			pluginElement = doc.createElement(QString::fromLatin1("UnitPlugin"));
+		}
+	}
+ }
+
+
  // TODO: somehow save active particle systems
 
  return true;
@@ -966,6 +991,40 @@ bool Unit::loadFromXML(const QDomElement& root)
 	d->mTarget = boGame->findUnit(targetId, 0);
 	if (!d->mTarget) {
 		boWarning(260) << k_funcinfo << "Could not find target with unitId=" << targetId << endl;
+	}
+ }
+
+ if (d->mPlugins.count() != 0) {
+	QDomNodeList list = root.elementsByTagName(QString::fromLatin1("UnitPlugin"));
+	for (unsigned int i = 0; i < list.count(); i++) {
+		QDomElement e = list.item(i).toElement();
+		if (e.isNull()) {
+			continue;
+		}
+		unsigned int type;
+		unsigned int instance;
+		bool ok = false;
+		type = e.attribute(QString::fromLatin1("Type")).toUInt(&ok);
+		if (!ok) {
+			boError() << k_funcinfo << "Type of UnitPlugin " << i << " is not a valid number" << endl;
+			return false;
+		}
+		instance = e.attribute(QString::fromLatin1("Instance")).toUInt(&ok);
+		if (!ok) {
+			boError() << k_funcinfo << "Instance of UnitPlugin " << i << " is not a valid number" << endl;
+			return false;
+		}
+		if (instance != 0) {
+			boError() << k_funcinfo << "instance != 0 for UnitPlugin " << i << " is not yet supported." << endl;
+			return false;
+		}
+		UnitPlugin* p = plugin(type);
+		Q_UNUSED(instance);
+		if (!p) {
+			boWarning() << k_funcinfo << "UnitPlugin " << type << " not found for unit " << id() << endl;
+			continue;
+		}
+		p->loadFromXML(e);
 	}
  }
 
@@ -1197,11 +1256,13 @@ void Unit::loadWeapons()
 		count++;
 		// Check for bombing weapons and create bombing plugin if necessary
 		if (!hasbomb && ((BosonWeaponProperties*)it.current())->shotType() == BosonShot::Bomb) {
+#warning FIXME: this does _not_ belog to plugins, but to weapons!
 			d->mPlugins.append(new BombingPlugin(this));
 			hasbomb = true;
 		}
 		// Check for mine weapons and create mining plugin if necessary
 		if (!hasmine && ((BosonWeaponProperties*)it.current())->shotType() == BosonShot::Mine) {
+#warning FIXME: this does _not_ belog to plugins, but to weapons!
 			d->mPlugins.append(new MiningPlugin(this));
 			hasmine = true;
 		}
