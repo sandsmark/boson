@@ -27,7 +27,3 @@ install-data-local:
 		done \
 	done
 
-# Add all of your pixmaps here
-#grounds_DATA = earth.png
-
-#EXTRA_DIST = $(grounds_DATA)
