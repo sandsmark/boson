@@ -69,6 +69,11 @@
 #define NEAR 1.0 // FIXME: should be > 1.0
 #define FAR 100.0
 
+// Camera limits
+#define CAMERA_MIN_Z NEAR + 3
+#define CAMERA_MAX_Z FAR - 50
+#define CAMERA_MAX_RADIUS 40
+
 
 float textureUpperLeft[2] = { 0.0, 1.0 };
 float textureLowerLeft[2] = { 0.0, 0.0 };
@@ -104,7 +109,7 @@ public:
 	{
 		mCenterX = x;
 		mCenterY = y;
-		mPosZ = QMAX(NEAR + 1.0, QMIN(FAR - 15.0, z));
+		mPosZ = QMAX(CAMERA_MIN_Z, QMIN(CAMERA_MAX_Z, z));
 	}
 	void setX(GLfloat x) { setPos(x, mCenterY, mPosZ); }
 	void setY(GLfloat y) { setPos(mCenterX, y, mPosZ); }
@@ -644,6 +649,7 @@ void BosonBigDisplayBase::paintGL()
 		if (w != 1.0 || h != 1.0 || depth != 1.0) {
 			glScalef(w, h, depth);
 		}
+		glRotatef(d->mCamera.rotation(), 0.0, 0.0, 1.0);
 		glCallList(item->selectBox()->displayList());
 		glPopMatrix();
 	}
@@ -913,16 +919,21 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 			// during a game.
 			if (e->state() & LeftButton) {
 				Camera camera = d->mCamera;
-				float diff = d->mMouseMoveDiff.dy();
-				float factor = cameraZ() / (cameraZ() + diff);
-				camera.setZ(cameraZ() * factor);
+				float newz = cameraZ() + d->mMouseMoveDiff.dy();
+				if(newz < CAMERA_MIN_Z) {
+					newz = CAMERA_MIN_Z;
+				} else if(newz > CAMERA_MAX_Z) {
+					newz = CAMERA_MAX_Z;
+				}
+				float factor = newz / cameraZ();
+				camera.setZ(newz);
 				camera.setRadius(camera.radius() * factor);
 				setCamera(camera);
 				boDebug() << "posZ: " << d->mCamera.z() << endl;
 			} else if (e->state() & RightButton) {
 				Camera camera = d->mCamera;
 				float radius, rot;
-				radius = camera.radius() + camera.z() / 20 * d->mMouseMoveDiff.dy();
+				radius = camera.radius() + camera.z() / CAMERA_MAX_RADIUS * d->mMouseMoveDiff.dy();
 				if(radius < 0) {
 					radius = 0;
 				} else if(radius > camera.z()) {
@@ -1442,6 +1453,9 @@ void BosonBigDisplayBase::selectArea(bool replace)
  list = canvas()->bosonCollisions(r);
  for (it = list.begin(); it != list.end(); ++it) {
 	if (!RTTI::isUnit((*it)->rtti())) {
+		continue;
+	}
+	if(localPlayer()->isFogged((*it)->x() / BO_TILE_SIZE, (*it)->y() / BO_TILE_SIZE)) {
 		continue;
 	}
 	Unit* unit = (Unit*)*it;

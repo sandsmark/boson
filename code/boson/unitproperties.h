@@ -334,7 +334,7 @@ protected:
 	// Methods to set values. They are only meant to be used by upgrades and unit
 	//  editor. Don't use them unless you know what you are doing
 	void setName(const QString& name);
-	void setUnitPath(const QString& unitPath); // AB: WHY THE HECK IS THIS HERE ????? unitPath MUST NOT be changeable
+	void setId(unsigned long int id)  { mTypeId = id; };
 	void setUnitWidth(unsigned int unitWidth)  { mUnitWidth = unitWidth; };
 	void setUnitHeight(unsigned int unitHeight)  { mUnitHeight = unitHeight; };
 	void setUnitDepth(unsigned int unitDepth)  { mUnitDepth = unitDepth; };
@@ -350,11 +350,22 @@ protected:
 	void setArmor(unsigned long int armor)  { mArmor = armor; };
 	void setShields(unsigned long int shields)  { mShields = shields; };
 
+	// These only have effect if there is mobile or facility properties
+	void setCanRefineMinerals(bool r);
+	void setCanRefineOil(bool r);
+	void setConstructionSteps(unsigned int steps);
+	void setSpeed(float speed);
+	void setCanGoOnLand(bool c);
+	void setCanGoOnWater(bool c);
+
+	void clearPlugins();
+	void createMobileProperties();
+	void createFacilityProperties();
+
 	friend class BoUnitEditor;
 
 private:
 	void init();
-	void setSpeed(float speed);
 
 private:
 	// AB: i consider this as a design problem. direct access to private
