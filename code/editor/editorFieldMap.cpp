@@ -21,7 +21,8 @@
 #include <qpopupmenu.h>
 
 #include "editorFieldMap.h"
-  
+#include "viewMap.h"
+#include "visualCell.h"
 
 editorFieldMap::editorFieldMap(viewMap *v, QWidget *p, const char *n, WFlags f)
 	:fieldMap(v,p,n,f)
@@ -33,10 +34,10 @@ editorFieldMap::editorFieldMap(viewMap *v, QWidget *p, const char *n, WFlags f)
 	// global menu
 	popup = new QPopupMenu();
 
-	popup->insertItem("grass");
-	popup->insertItem("desert");
-	popup->insertItem("water");
-	popup->insertItem("deep water");
+	popup->insertItem("grass",	GROUND_GRASS);
+	popup->insertItem("water",	GROUND_WATER);
+	popup->insertItem("desert",	GROUND_DESERT);
+	popup->insertItem("deep water",	GROUND_DEEP_WATER);
 
 	connect(popup, SIGNAL(activated(int)), this, SLOT(setCell(int)));
 
@@ -81,8 +82,11 @@ editorFieldMap::editorFieldMap(viewMap *v, QWidget *p, const char *n, WFlags f)
 }
 
 
-void editorFieldMap::setCell(int)
+void editorFieldMap::setCell(int g)
 {
+	printf("set g=%d\n", g);
+	selectedCell->set((groundType)g);
+	view->phys->update();
 }
 
 void editorFieldMap::setTransTile(int)
