@@ -50,6 +50,21 @@ public:
 	KListView* mProduction;
 
 	QIntDict<Unit> mUnits;
+
+	// column ids:
+	int mId;
+	int mOwner;
+	int mRTTI;
+	int mX;
+	int mY;
+	int mZ;
+	int mName;
+	int mHealth;
+	int mSpeed;
+	int mWork;
+	int mWidth;
+	int mHeight;
+	
 };
 
 KGameUnitDebug::KGameUnitDebug(QWidget* parent) : QWidget(parent)
@@ -59,20 +74,21 @@ KGameUnitDebug::KGameUnitDebug(QWidget* parent) : QWidget(parent)
  QHBoxLayout* layout = new QHBoxLayout(topLayout);
  
  d->mUnitList = new KListView(this);
- d->mUnitList->addColumn(i18n("Id"));
- d->mUnitList->addColumn(i18n("Owner"));
- d->mUnitList->addColumn(i18n("RTTI"));
- d->mUnitList->addColumn(i18n("X"));
- d->mUnitList->addColumn(i18n("Y"));
- d->mUnitList->addColumn(i18n("Z"));
- d->mUnitList->addColumn(i18n("Name"));
- d->mUnitList->addColumn(i18n("Health"));
+ d->mId = d->mUnitList->addColumn(i18n("Id"));
+ d->mOwner = d->mUnitList->addColumn(i18n("Owner"));
+ d->mRTTI = d->mUnitList->addColumn(i18n("RTTI"));
+ d->mX = d->mUnitList->addColumn(i18n("X"));
+ d->mY = d->mUnitList->addColumn(i18n("Y"));
+ d->mZ = d->mUnitList->addColumn(i18n("Z"));
+ d->mWork = d->mUnitList->addColumn(i18n("Work"));
+ d->mName = d->mUnitList->addColumn(i18n("Name"));
+ d->mHealth = d->mUnitList->addColumn(i18n("Health"));
 // d->mUnitList->addColumn(i18n("Costs"));
- d->mUnitList->addColumn(i18n("Speed"));
+ d->mSpeed = d->mUnitList->addColumn(i18n("Speed"));
 // connect(d->mUnitList, SIGNAL(executed(QListBoxItem*)), 
 //		this, SLOT(slotSelectUnit(QListBoxItem*)));
- d->mUnitList->addColumn(i18n("Image Width"));
- d->mUnitList->addColumn(i18n("Image Height"));
+ d->mWidth = d->mUnitList->addColumn(i18n("Width"));
+ d->mHeight = d->mUnitList->addColumn(i18n("Height"));
  layout->addWidget(d->mUnitList);
 
  QVBoxLayout* l = new QVBoxLayout(layout);
@@ -146,17 +162,18 @@ void KGameUnitDebug::slotUpdate()
 void KGameUnitDebug::addUnit(Unit* unit)
 {
  QListViewItem* item = new QListViewItem(d->mUnitList);
- item->setText(0, QString::number(unit->id()));
- item->setText(1, QString::number(unit->owner() ? unit->owner()->id() : 0));
- item->setText(2, QString::number(unit->rtti()));
- item->setText(3, QString::number(unit->x()));
- item->setText(4, QString::number(unit->y()));
- item->setText(5, QString::number(unit->z()));
- item->setText(6, unit->name());
- item->setText(7, QString::number(unit->health()));
- item->setText(8, QString::number(unit->speed()));
- item->setText(9, QString::number(unit->width()));
- item->setText(10, QString::number(unit->height()));
+ item->setText(d->mId, QString::number(unit->id()));
+ item->setText(d->mOwner, QString::number(unit->owner() ? unit->owner()->id() : 0));
+ item->setText(d->mRTTI, QString::number(unit->rtti()));
+ item->setText(d->mX, QString::number(unit->x()));
+ item->setText(d->mY, QString::number(unit->y()));
+ item->setText(d->mZ, QString::number(unit->z()));
+ item->setText(d->mWork, QString::number((int)unit->work()));
+ item->setText(d->mName, unit->name());
+ item->setText(d->mHealth, QString::number(unit->health()));
+ item->setText(d->mSpeed, QString::number(unit->speed()));
+ item->setText(d->mWidth, QString::number(unit->width()));
+ item->setText(d->mHeight, QString::number(unit->height()));
 }
 
 void KGameUnitDebug::updateWaypoints(QListViewItem* item)

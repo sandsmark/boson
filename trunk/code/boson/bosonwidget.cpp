@@ -492,6 +492,16 @@ void BosonWidget::slotStartScenario()
 
 void BosonWidget::slotGamePreferences()
 {
+ CursorMode mode;
+ if (d->mCursor->isA("BosonSpriteCursor")) {
+	mode = CursorSprite;
+ } else if (d->mCursor->isA("BosonExperimentalCursor")) {
+	mode = CursorExperimental;
+ } else if (d->mCursor->isA("BosonKDECursor")) {
+	mode = CursorKDE;
+ } else {
+	mode = CursorNormal;
+ }
 
  OptionsDialog* dlg = new OptionsDialog(this);
  connect(dlg, SIGNAL(finished()), dlg, SLOT(slotDelayedDestruct())); // seems not to be called if you quit with "cancel"!
@@ -502,6 +512,7 @@ void BosonWidget::slotGamePreferences()
  dlg->setMiniMapScale(boConfig->miniMapScale());
  dlg->setRMBScrolling(boConfig->rmbMove());
  dlg->setMMBScrolling(boConfig->mmbMove());
+ dlg->setCursor(mode);
  dlg->setCursorEdgeSensity(boConfig->cursorEdgeSensity());
 
  connect(dlg, SIGNAL(signalArrowScrollChanged(int)),

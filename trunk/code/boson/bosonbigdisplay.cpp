@@ -166,9 +166,12 @@ void BosonBigDisplay::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseEvent
 				d->mSelection->selectUnit(unit);
 			}
 		}
+		e->accept();
 		break;
 	}
 	case QEvent::Wheel:
+		// qt already gives us wheel support :-)
+		e->ignore();
 		break;
 	case QEvent::MouseButtonRelease:
 		if (e->button() == LeftButton) {
@@ -227,6 +230,7 @@ void BosonBigDisplay::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseEvent
 		break;
 	default:
 		kdWarning() << "unexpected mouse event " << e->type() << endl;
+		e->ignore();
 		break;
  }
 }
@@ -285,12 +289,6 @@ void BosonBigDisplay::removeSelectionRect()
 		}
 	}
  }
-}
-
-void BosonBigDisplay::clearSelection()
-{
- d->mSelection->clear();
- updateCursor();
 }
 
 bool BosonBigDisplay::selectAll(const UnitProperties* prop)

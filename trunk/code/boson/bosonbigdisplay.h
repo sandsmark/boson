@@ -143,11 +143,6 @@ signals:
 
 protected:
 	/**
-	 * Clears the selection list 
-	 **/
-	void clearSelection();
-
-	/**
 	 * Selects units in the specified rect. See also @ref BoSelection
 	 **/
 	void selectArea();
