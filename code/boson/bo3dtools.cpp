@@ -25,6 +25,7 @@
 #include <qdatastream.h>
 
 #include <math.h>
+#include <GL/glu.h>
 
 #include <lib3ds/mesh.h>
 
@@ -1150,6 +1151,63 @@ void Bo3dTools::enableReadDepthBufferWorkaround(float _1_0_depthValue)
 void Bo3dTools::disableReadDepthBufferWorkaround()
 {
   workaround_depth_value_enabled = false;
+}
+
+bool Bo3dTools::checkError(GLenum* error, QString* errorString, QString* errorName)
+{
+  bool ret = true;
+  GLenum e = glGetError();
+  QString s;
+  switch(e)
+  {
+    case GL_INVALID_ENUM:
+      s =  "GL_INVALID_ENUM";
+      break;
+    case GL_INVALID_VALUE:
+      s = "GL_INVALID_VALUE";
+      break;
+    case GL_INVALID_OPERATION:
+      s = "GL_INVALID_OPERATION";
+      break;
+    case GL_STACK_OVERFLOW:
+      s = "GL_STACK_OVERFLOW";
+      break;
+    case GL_STACK_UNDERFLOW:
+      s = "GL_STACK_UNDERFLOW";
+      break;
+    case GL_OUT_OF_MEMORY:
+      s = "GL_OUT_OF_MEMORY";
+      break;
+    case GL_NO_ERROR:
+      ret = false;
+      break;
+    default:
+      s = QString("Unknown OpenGL Error: %1").arg((int)e);
+      break;
+  }
+  if(!s.isEmpty())
+  {
+    boError() << s << endl;
+  }
+  QString string;
+  if(e != GL_NO_ERROR)
+  {
+    string = QString((char*)gluErrorString(e));
+    boError() << "Error string: " << string << endl;
+  }
+  if(error)
+  {
+    *error = e;
+  }
+  if(errorString)
+  {
+    *errorString = string;
+  }
+  if(errorName)
+  {
+    *errorName = s;
+  }
+  return ret;
 }
 
 /*
