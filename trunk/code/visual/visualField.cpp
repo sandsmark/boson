@@ -95,7 +95,7 @@ void visualField::resize (int w, int h)
 
 	/* map geometry */
 	maxX = w; maxY = h;
-	QwSpriteField::resize(w,h);
+	QwSpriteField::resize(w * BO_TILE_SIZE ,h * BO_TILE_SIZE);
 }
 
 
