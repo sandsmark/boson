@@ -20,8 +20,8 @@
 #define UNIT_H
 
 #include "unitbase.h"
-#include "global.h"
 #include "visual/bosonsprite.h"
+#include "global.h"
 
 #include <qvaluelist.h>
 

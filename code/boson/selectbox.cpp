@@ -19,6 +19,7 @@
 
 #include "selectbox.h"
 
+#include "defines.h"
 #include "bosontexturearray.h"
 
 #include <kdebug.h>

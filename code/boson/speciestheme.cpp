@@ -25,7 +25,6 @@
 #include "bosonmusic.h"
 #include "bosonsound.h"
 #include "bosonprofiling.h"
-#include "bosontexturearray.h"
 #include "bosonmodel.h"
 
 #include <kstandarddirs.h>
@@ -68,7 +67,6 @@ public:
 	QIntDict<UnitProperties> mUnitProperties;
 	QIntDict<QPixmap> mSmallOverview;
 	QIntDict<QPixmap> mBigOverview;
-	QIntDict<BosonTextureArray> mSpriteTextures;
 	QIntDict<BosonModel> mUnitModels;
 
 	// TODO: the shots have no OpenGL implementation yet!
@@ -100,7 +98,6 @@ SpeciesTheme::SpeciesTheme(const QString& speciesDir, const QColor& teamColor)
  d->mSmallOverview.setAutoDelete(true);
  d->mBigOverview.setAutoDelete(true);
  d->mActionPixmaps.setAutoDelete(true);
- d->mSpriteTextures.setAutoDelete(true);
  d->mUnitModels.setAutoDelete(true);
  d->mCanChangeTeamColor = true;
 
@@ -120,7 +117,6 @@ SpeciesTheme::~SpeciesTheme()
 
 void SpeciesTheme::reset()
 {
- d->mSpriteTextures.clear();
  d->mUnitModels.clear();
  d->mSmallOverview.clear();
  d->mBigOverview.clear();

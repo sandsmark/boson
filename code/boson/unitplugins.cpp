@@ -96,7 +96,7 @@ unsigned long int ProductionPlugin::completedProduction() const
  if (type == 0) {
 	return 0;
  }
- if (mProductionState < player()->unitProperties(type)->productionTime()) {
+ if (mProductionState < speciesTheme()->unitProperties(type)->productionTime()) {
 	kdDebug() << "not yet completed: " << type << endl;
 	return 0;
  }
@@ -143,7 +143,7 @@ void ProductionPlugin::removeProduction(unsigned long int unitType)
 
 double ProductionPlugin::productionProgress() const
 {
- unsigned int productionTime = player()->unitProperties(currentProduction())->productionTime();
+ unsigned int productionTime = speciesTheme()->unitProperties(currentProduction())->productionTime();
  double percentage = (double)(mProductionState * 100) / (double)productionTime;
  return percentage;
 }
@@ -154,9 +154,9 @@ bool ProductionPlugin::canPlaceProductionAt(const QPoint& pos)
 	kdDebug() << k_lineinfo << "no completed construction" << endl;
 	return false;
  }
- QValueList<Unit*> list = unit()->canvas()->unitCollisionsInRange(pos, BUILD_RANGE);
+ QValueList<Unit*> list = canvas()->unitCollisionsInRange(pos, BUILD_RANGE);
 
- const UnitProperties* prop = player()->unitProperties(currentProduction());
+ const UnitProperties* prop = speciesTheme()->unitProperties(currentProduction());
  if (!prop) {
 	kdError() << k_lineinfo << "NULL unit properties - EVIL BUG!" << endl;
 	return false;
@@ -199,7 +199,7 @@ void ProductionPlugin::advance(unsigned int)
  // it gets executed on *every* client but sendInput() should be used on *one*
  // client only!
  // a unit is completed as soon as mProductionState == player()->unitProperties(type)->productionTime()
- unsigned int productionTime = player()->unitProperties(type)->productionTime();
+ unsigned int productionTime = speciesTheme()->unitProperties(type)->productionTime();
  if (mProductionState <= productionTime) {
 	if (mProductionState == productionTime) {
 		kdDebug() << "unit " << type << " completed :-)" << endl;
@@ -209,11 +209,11 @@ void ProductionPlugin::advance(unsigned int)
 		// facility's lower-left tile, are tested counter-clockwise. Unit is placed
 		// to first free tile.
 		// No auto-placing for facilities
-		if(!player()->unitProperties(type)) {
+		if(!speciesTheme()->unitProperties(type)) {
 			kdError() << k_lineinfo << "Unknown type " << type << endl;
 			return;
 		}
-		if(player()->unitProperties(type)->isFacility()) {
+		if(speciesTheme()->unitProperties(type)->isFacility()) {
 			return;
 		}
 		int tilex, tiley; // Position of lower-left corner of facility in tiles
@@ -245,9 +245,9 @@ void ProductionPlugin::advance(unsigned int)
 				}
 
 				//TODO: use BosonCanvas::canPlaceUnitAt()
-//				if(unit()->canvas()->cellOccupied(currentx, currenty)) {
+//				if(canvas()->cellOccupied(currentx, currenty)) {
 //				FIXME: should not depend on Facility*
-				if(unit()->canvas()->canPlaceUnitAt(unit()->speciesTheme()->unitProperties(type), QPoint(currentx * BO_TILE_SIZE, currenty * BO_TILE_SIZE), (Facility*)unit())) {
+				if(canvas()->canPlaceUnitAt(speciesTheme()->unitProperties(type), QPoint(currentx * BO_TILE_SIZE, currenty * BO_TILE_SIZE), (Facility*)unit())) {
 					// Free cell - place unit at it
 					mProductionState = mProductionState + 1;
 					//FIXME: buildProduction should not
