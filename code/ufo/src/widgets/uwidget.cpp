@@ -1414,9 +1414,7 @@ UWidget::getMinimumSize() const {
 	if (m_cachedMinimumSize.isEmpty() == false) {
 		return m_cachedMinimumSize;
 	}
-	// FIXME:
-	// last resort
-	return getPreferredSize();
+	return UDimension(0, 0);
 }
 
 
@@ -1456,12 +1454,7 @@ UWidget::getPreferredSize() const {
 	if (m_cachedPreferredSize.isEmpty() == false) {
 		return m_cachedPreferredSize;
 	}
-	// FIXME: last resort
-	if (getSize().isEmpty()) {
-		return m_minimumSize;
-	} else {
-		return getSize();
-	}
+	return UDimension(0, 0);
 }
 
 int
