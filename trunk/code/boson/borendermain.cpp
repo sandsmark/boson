@@ -197,12 +197,27 @@ void ModelPreview::paintGL()
 void ModelPreview::load(SpeciesTheme* s, const UnitProperties* prop)
 {
  resetModel();
- if (!s || !prop) {
-	boError() << k_funcinfo << endl;
-	return;
- }
+ BO_CHECK_NULL_RET(s);
+ BO_CHECK_NULL_RET(prop);
  s->loadUnitModel(prop);
  mModel = s->unitModel(prop->typeId());
+ BO_CHECK_NULL_RET(mModel);
+ emit signalMaxFramesChanged(mModel->frames() - 1);
+}
+
+void ModelPreview::loadObjectModel(SpeciesTheme* s, const QString& file)
+{
+ resetModel();
+ BO_CHECK_NULL_RET(s);
+ if (file.isEmpty()) {
+	boError() << k_funcinfo << "empty filename" << endl;
+	return;
+ }
+ mModel = s->objectModel(file);
+ if (!mModel) {
+	boError() << k_funcinfo << "NULL model" << endl;
+	return;
+ }
  emit signalMaxFramesChanged(mModel->frames() - 1);
 }
 
@@ -331,16 +346,17 @@ void RenderMain::connectBoth(QObject* o1, QObject* o2, const char* signal, const
 
 void RenderMain::slotUnitChanged(int index)
 {
- if (!sender() || !sender()->isA("KPopupMenu")) {
-	boError() << k_funcinfo << "sender() must be a KPopupMenu" << endl;
+ if (!sender() || !sender()->inherits("KAction")) {
+	boError() << k_funcinfo << "sender() must inherit KAction" << endl;
 	return;
  }
  if (index < 0) {
 	boError() << k_funcinfo << "index < 0" << endl;
 	return;
  }
- KPopupMenu* p = (KPopupMenu*)sender();
- SpeciesTheme* s = mPopup2Species[p];
+ KAction* p = (KAction*)sender();
+ uncheckAllBut(p);
+ SpeciesTheme* s = mAction2Species[p];
  boDebug() << k_funcinfo << index << endl;
  QValueList<const UnitProperties*> props = s->allUnits();
  if (index >= (int)props.count()) {
@@ -354,6 +370,29 @@ void RenderMain::slotUnitChanged(int index)
 	return;
  }
  changeUnit(s, prop);
+}
+
+void RenderMain::slotObjectChanged(int index)
+{
+ if (!sender() || !sender()->inherits("KAction")) {
+	boError() << k_funcinfo << "sender() must inherit KAction" << endl;
+	return;
+ }
+ if (index < 0) {
+	boError() << k_funcinfo << "index < 0" << endl;
+	return;
+ }
+ KAction* a = (KAction*)sender();
+ SpeciesTheme* s = mAction2Species[a];
+ BO_CHECK_NULL_RET(s);
+ boDebug() << k_funcinfo << index << endl;
+ QString objectModel = s->allObjectModels()[index];
+ if (objectModel.isEmpty()) {
+	boError() << k_funcinfo << "Can't find " << objectModel << " (==" << index << ")" << endl;
+	return;
+ }
+ boDebug() << k_funcinfo << objectModel << endl;
+ changeObject(s, objectModel);
 }
 
 void RenderMain::slotDebugModels()
@@ -376,16 +415,25 @@ void RenderMain::slotDebugModels()
  dialog->show();
 }
 
-void RenderMain::changeUnit(const QString& theme, const QString& unit)
+
+SpeciesTheme* RenderMain::findTheme(const QString& theme) const
 {
  SpeciesTheme* s = 0;
- const UnitProperties* prop = 0;
  QPtrListIterator<SpeciesTheme> it(mSpecies);
  for (; it.current() && !s; ++it) {
 	if (it.current()->identifier().lower() == theme.lower()) {
 		s = it.current();
 	}
  }
+ return s;
+}
+
+void RenderMain::changeUnit(const QString& theme, const QString& unit)
+{
+ SpeciesTheme* s = 0;
+ const UnitProperties* prop = 0;
+
+ s = findTheme(theme);
  if (!s) {
 	boError() << k_funcinfo << "Could not find theme " << theme << endl;
 	return;
@@ -429,17 +477,17 @@ void RenderMain::changeUnit(const QString& theme, unsigned long int type)
 
 void RenderMain::changeUnit(SpeciesTheme* s, const UnitProperties* prop)
 {
- if (!s) {
-	boError() << k_funcinfo << "NULL species" << endl;
-	return;
- }
- if (!prop) {
-	boError() << k_funcinfo << "NULL UnitProperties" << endl;
-	return;
- }
+ BO_CHECK_NULL_RET(s);
+ BO_CHECK_NULL_RET(prop);
  // TODO: check/uncheck the menu items!
 
  mPreview->load(s, prop);
+}
+
+void RenderMain::changeObject(SpeciesTheme* s, const QString& objectModel)
+{
+ BO_CHECK_NULL_RET(s);
+ mPreview->loadObjectModel(s, objectModel);
 }
 
 void RenderMain::initKAction()
@@ -451,22 +499,50 @@ void RenderMain::initKAction()
 	SpeciesTheme* s = it.current();
 	KActionMenu* menu = new KActionMenu(s->identifier(), actionCollection(),
 			"view_species");
-	menu->popupMenu()->setCheckable(true);
-	mPopup2Species.insert(menu->popupMenu(), s);
+	KSelectAction* selectUnit = new KSelectAction(i18n("&Units"), 0, this, SLOT(slotUnitChanged(int)));
+	KSelectAction* selectObject = new KSelectAction(i18n("&Objects"), 0, this, SLOT(slotUnitChanged(int)));
+	menu->insert(selectUnit);
+	menu->insert(selectObject);
+	mAction2Species.insert(selectUnit, s);
+	mAction2Species.insert(selectObject, s);
 
-	connect(menu->popupMenu(), SIGNAL(activated(int)),
+	connect(selectUnit, SIGNAL(activated(int)),
 			this, SLOT(slotUnitChanged(int)));
+	connect(selectObject, SIGNAL(activated(int)),
+			this, SLOT(slotObjectChanged(int)));
 
 	QValueList<const UnitProperties*> units = s->allUnits();
+	QStringList list;
 	for (unsigned int j = 0; j < units.count(); j++) {
-		menu->popupMenu()->insertItem(units[j]->name(), j);
+		list.append(units[j]->name());
 	}
+	selectUnit->setItems(list);
+	selectObject->setItems(s->allObjectModels());
  }
 
  (void)new KAction(i18n("Debug &Models"), 0, this, SLOT(slotDebugModels()),
 		actionCollection(), "debug_models");
 
  createGUI(locate("data", "boson/borenderui.rc"));
+}
+
+void RenderMain::uncheckAllBut(KAction* action)
+{
+ if (!action || !action->isA("KSelectAction")) {
+	boError() << k_funcinfo << "not a valid KSelectAction" << endl;
+	return;
+ }
+ QPtrDictIterator<SpeciesTheme> it(mAction2Species);
+ for (; it.current(); ++it) {
+	KAction* a = (KAction*)it.currentKey();
+	if (a == action) {
+		continue;
+ }
+	if (!a->isA("KSelectAction")) {
+		continue;
+	}
+	((KSelectAction*)a)->setCurrentItem(-1);
+ }
 }
 
 
