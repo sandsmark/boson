@@ -337,7 +337,9 @@ void BosonOpenGLCursor::renderCursor(GLfloat x, GLfloat y)
 	const GLfloat w = 48.0f;
 	const GLfloat h = 48.0f;
 
+	glPushAttrib(GL_ENABLE_BIT);
 	glEnable(GL_BLEND);
+	glEnable(GL_TEXTURE_2D);
 	glPushMatrix();
 	glTranslatef(x - mCurrentData->mHotspotX, y - mCurrentData->mHotspotY, 0.0);
 	glRotatef(d->mCurrentRotate, 0.0, 0.0, 1.0);
@@ -349,7 +351,7 @@ void BosonOpenGLCursor::renderCursor(GLfloat x, GLfloat y)
 		glTexCoord2f(1.0, 0.0); glVertex3f(w, 0, 0.0);
 	glEnd();
 	glPopMatrix();
-	glDisable(GL_BLEND);
+	glPopAttrib();
  }
 }
 
