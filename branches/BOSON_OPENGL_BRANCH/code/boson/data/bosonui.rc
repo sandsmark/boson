@@ -1,5 +1,5 @@
 <!DOCTYPE kpartgui SYSTEM "kpartgui.dtd">
-<kpartgui name="boson" version="1">
+<kpartgui name="boson" version="2">
 <MenuBar>
   <Menu name="game"><text>&amp;Game</text>
     <Action name="game_center_base" />
@@ -15,6 +15,7 @@
   </Menu>
   <Menu name="debug"><text>&amp;Debug</text>
     <Action name="debug_kgame" />
+    <Action name="debug_profiling" />
     <Action name="debug_unfog" />
     <Action name="debug_mode" />
     <Action name="debug_players" />

@@ -21,6 +21,7 @@
 
 #include "defines.h"
 #include "bosontexturearray.h"
+#include "bosonprofiling.h"
 
 #include <kdebug.h>
 
@@ -36,21 +37,28 @@
 
 BosonModel::BosonModel(GLuint list, int width, int height)
 {
+ // dummy implementation - we don't load a model, but rather use the provided
+ // list.
+ // Mostly used because we do not yet have models for all units
+ boProfiling->start(BosonProfiling::LoadModelDummy);
  init();
  mDisplayList = list;
  mFrames.insert(0, list);
  mWidth = width;
  mHeight = height;
+ boProfiling->stop(BosonProfiling::LoadModelDummy);
 }
 
 BosonModel::BosonModel(const QString& dir, const QString& file)
 {
+ boProfiling->start(BosonProfiling::LoadModel);
  init();
  mDirectory = dir;
  QString fullFile = baseDirectory() + file;
  m3ds = lib3ds_file_load(fullFile);
  if (!m3ds) {
 	kdError() << k_funcinfo << "Can't load " << fullFile << endl;
+	boProfiling->stop(BosonProfiling::LoadModel);
 	return;
  }
 // kdDebug() << k_funcinfo << "current frame: " << m3ds->current_frame << endl;
@@ -59,15 +67,21 @@ BosonModel::BosonModel(const QString& dir, const QString& file)
  Lib3dsNode* node = m3ds->nodes;
  if (!node) {
 	kdError() << k_funcinfo << "Could not load file " << fullFile << " correctly" << endl;
+	boProfiling->stop(BosonProfiling::LoadModel);
 	return;
  }
  glEnable(GL_TEXTURE_2D);
  glEnable(GL_DEPTH_TEST);
+ boProfiling->start(BosonProfiling::LoadModelTextures);
  loadTextures();
+ boProfiling->stop(BosonProfiling::LoadModelTextures);
+ boProfiling->start(BosonProfiling::LoadModelDisplayLists);
  createDisplayLists();
+ boProfiling->stop(BosonProfiling::LoadModelDisplayLists);
  
  if (!mDisplayList) {
 	kdError() << k_funcinfo << "Still null display list" << endl;
+	boProfiling->stop(BosonProfiling::LoadModel);
 	return;
  }
  kdDebug() << k_funcinfo << "loaded from " << fullFile << endl;
@@ -75,6 +89,7 @@ BosonModel::BosonModel(const QString& dir, const QString& file)
  // WARNING: FIXME!
  mWidth = BO_TILE_SIZE;
  mHeight = BO_TILE_SIZE;
+ boProfiling->stop(BosonProfiling::LoadModel);
 }
 
 void BosonModel::init()

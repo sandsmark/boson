@@ -18,11 +18,7 @@
 */
 
 #include "bosonprofiling.h"
-
-#include <sys/time.h>
-
-#include <qmap.h>
-#include <qvaluelist.h>
+#include "bosonprofilingprivate.h"
 
 #include <kstaticdeleter.h>
 #include <kdebug.h>
@@ -32,22 +28,7 @@ BosonProfiling* BosonProfiling::mProfiling = 0;
 
 #define COMPARE_TIMES(time1, time2) ( ((time2.tv_sec - time1.tv_sec) * 1000000) + (time2.tv_usec - time1.tv_usec) )
 
-class BosonProfiling::BosonProfilingPrivate
-{
-public:
-	BosonProfilingPrivate()
-	{
-	}
-	typedef QValueList<long int> TimesList;
-
-	struct timeval mTimeLoadUnit;
-	struct timeval mTimeRenderFunction; // entire function
-	struct timeval mTimeRenderPart; // a part of the function
-
-	QMap<int, TimesList> mUnitTimes;
-	QValueList<RenderGLTimes> mRenderTimes;
-	RenderGLTimes mCurrentRenderTimes;
-};
+#define MAX_ENTRIES 300
 
 BosonProfiling::BosonProfiling()
 {
@@ -88,9 +69,10 @@ void BosonProfiling::render(bool start)
 	struct timeval time;
 	gettimeofday(&time, 0);
 	d->mCurrentRenderTimes.mFunction = COMPARE_TIMES(d->mTimeRenderFunction, time);
-
-	// TODO: limit the size of the list (100-200 or so)
 	d->mRenderTimes.append(d->mCurrentRenderTimes);
+	if (d->mRenderTimes.count() >= MAX_ENTRIES) {
+		d->mRenderTimes.remove(d->mRenderTimes.begin());
+	}
  }
 }
 
@@ -148,17 +130,19 @@ void BosonProfiling::debugRender()
 		<< "Function: " << d->mCurrentRenderTimes.mFunction << endl;
 }
 
-int BosonProfiling::renderCount() const
+void BosonProfiling::start(ProfilingEvent event)
 {
- return d->mRenderTimes.count();
+ gettimeofday(&d->mProfilingTimes[event], 0);
 }
 
-RenderGLTimes BosonProfiling::renderTimes(unsigned int i) const
+void BosonProfiling::stop(ProfilingEvent event)
 {
- if (i >= d->mRenderTimes.count()) {
-	kdError() << k_funcinfo << "only " << d->mRenderTimes.count() << " elements!" << endl;
-	return RenderGLTimes();
+ struct timeval time;
+ gettimeofday(&time, 0);
+
+ d->mTimes[event].append(COMPARE_TIMES(d->mProfilingTimes[event], time));
+ if (d->mTimes[event].count() >= MAX_ENTRIES) {
+	d->mTimes[event].remove(d->mTimes[event].begin());
  }
- return d->mRenderTimes[i];
 }
 

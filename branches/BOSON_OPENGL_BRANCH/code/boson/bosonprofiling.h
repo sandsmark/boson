@@ -21,6 +21,8 @@
 
 #define boProfiling BosonProfiling::bosonProfiling()
 
+class BosonProfilingDialog;
+
 /**
  * Information about the rendering times. Helper class for @ref BosonProfiling.
  *
@@ -61,17 +63,38 @@ public:
 
 };
 
+// note that there are several workarounds in this class to reduce the number of
+// #includes as far as possible. i want to be able to place this header to about
+// every other class without increasing compile-time.
+// all QValueList,QMap,... #includes are in the .cpp file
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
 class BosonProfiling
 {
 public:
+	enum ProfilingEvent {
+		// note that all entries here need to be in order, so that we
+		// can iterate them easily in a Profiling dialog.
+		ProfilingStart = 0, // must remain the first entry!
+		LoadGameData1,
+		LoadGameData2,
+		LoadGameData3,
+		LoadModel,
+		LoadModelTextures,
+		LoadModelDisplayLists,
+		LoadModelDummy,
+
+		ProfilingEnd // must remain the last entry!
+	};
 	BosonProfiling();
 	~BosonProfiling();
 
 	static void initProfiling();
 	static BosonProfiling* bosonProfiling() { return mProfiling; }
+
+	void start(ProfilingEvent event);
+	void stop(ProfilingEvent event);
 
 	void loadUnit();
 	void loadUnitDone(int typeId);
@@ -81,13 +104,12 @@ public:
 	void renderCells(bool start);
 	void renderUnits(bool start);
 	void renderText(bool start);
-	int renderCount() const;
-	RenderGLTimes renderTimes(unsigned int i) const;
 	void debugRender();
 
 private:
 	class BosonProfilingPrivate;
 	BosonProfilingPrivate* d;
+	friend class BosonProfilingDialog;
 
 	static BosonProfiling* mProfiling;
 };
