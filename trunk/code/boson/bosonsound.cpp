@@ -33,6 +33,7 @@
 #include <arts/flowsystem.h>
 #include <arts/connect.h>
 #include <arts/artsflow.h>
+#include <kdeversion.h>
 
 #include <qstringlist.h>
 #include <qintdict.h>
@@ -41,6 +42,7 @@
 class BoPlayObject
 {
 public:
+#if KDE_VERSION >= 301
 	BoPlayObject(BosonSound* parent, const QString& file)
 	{
 		mFile = file;
@@ -156,6 +158,19 @@ private:
 	QString mFile;
 	Arts::PlayObject mPlayObject;
 	bool mPlayed;
+#else
+#warning KDE versions before 3.0.1 have broken sound support. Sound is disabled.
+	BoPlayObject(BosonSound* , const QString& ) {}
+	~BoPlayObject() {}
+	
+	const QString& file() const { return QString::null; }
+	Arts::PlayObject object() const { return Arts::PlayObject::null(); }
+	bool isNull() const { return true; }
+	void play() {}
+	void playFromBeginning() {}
+	void reload() {}
+	void rewind() {}
+#endif
 };
 
 class BosonSound::BosonSoundPrivate
@@ -186,6 +201,10 @@ BosonSound::BosonSound()
  d = new BosonSoundPrivate;
  d->mSounds.setAutoDelete(true);
  
+#if KDE_VERSION < 301
+ d->mPlaySounds = false;
+ return;
+#endif
 /*
  // taken from noatun's code:
  d->mAmanPlay = Arts::DynamicCast(server().server().createObject("Arts::Synth_AMAN_PLAY"));
@@ -249,8 +268,6 @@ BosonSound::~BosonSound()
 	}
  }
 
- kdDebug() << k_funcinfo << "deleted " << sounds << " playobjects" << endl;
- 
  if (d->mId != -1) {
 	d->mEffectStack.remove(d->mId);
  }
@@ -283,6 +300,9 @@ void BosonSound::addUnitSounds(const UnitProperties* prop)
 
 void BosonSound::loadDefaultEvent(int event, const QString& filter)
 {
+#if KDE_VERSION < 301
+ return;
+#endif
  if (boConfig->disableSound()) {
 	return;
  }
@@ -314,6 +334,9 @@ void BosonSound::loadDefaultEvent(int event, const QString& filter)
 
 void BosonSound::addSound(int id, const QString& file)
 {
+#if KDE_VERSION < 301
+ return;
+#endif
  if (boConfig->disableSound()) {
 	return;
  }
@@ -366,10 +389,13 @@ void BosonSound::addEvent(int unitType, int event, QDir& dir)
 
 void BosonSound::addEventSound(int unitType, int event, const QString& file)
 {
+#if KDE_VERSION < 301
+ return;
+#endif
  if (boConfig->disableSound()) {
 	return;
  }
- kdDebug() << k_funcinfo << "adding: " << unitType << "->" << event << " = " << file << endl;
+// kdDebug() << k_funcinfo << "adding: " << unitType << "->" << event << " = " << file << endl;
  BoPlayObject* playObject = new BoPlayObject(this, file);
  if (!playObject->isNull()) {
 	// that's really ugly code:
