@@ -674,7 +674,7 @@ void BosonCanvas::setDisplayManager(BoDisplayManager* m)
  d->mDisplayManager = m;
 }
 
-bool BosonCanvas::canPlaceUnitAt(const UnitProperties* prop, const QPoint& pos, Facility* factory) const
+bool BosonCanvas::canPlaceUnitAt(const UnitProperties* prop, const QPoint& pos, ProductionPlugin* factory) const
 {
  int width = prop->unitWidth();
  int height= prop->unitHeight();
@@ -701,8 +701,13 @@ bool BosonCanvas::canPlaceUnitAt(const UnitProperties* prop, const QPoint& pos, 
 	// not perfect - there is alays a distance from center() to the edge of
 	// both units which should also added to this. but this is not a maths
 	// contest, so its ok this way
-	int dx = QABS(r.center().x() - factory->boundingRect().center().x());
-	int dy = QABS(r.center().y() - factory->boundingRect().center().y());
+	Unit* factoryUnit = factory->unit();
+	if (!factoryUnit) {
+		kdError() << k_funcinfo << "production plugin has NULL owner" << endl;
+		return false;
+	}
+	int dx = QABS(r.center().x() - factoryUnit->boundingRect().center().x());
+	int dy = QABS(r.center().y() - factoryUnit->boundingRect().center().y());
 	if (dx * dx + dy * dy <= BUILD_RANGE * BUILD_RANGE) {
 		return true;
 	}
@@ -710,7 +715,7 @@ bool BosonCanvas::canPlaceUnitAt(const UnitProperties* prop, const QPoint& pos, 
 	// must be in BUILD_RANGE of any facility of the player
 	QValueList<Unit*> list = unitCollisionsInRange(r.center(), BUILD_RANGE);
 	for (unsigned int i = 0; i < list.count(); i++) {
-		if (list[i]->isFacility() && list[i]->owner() == factory->owner()) {
+		if (list[i]->isFacility() && list[i]->owner() == factory->player()) {
 			return true;
 		}
 	}

@@ -247,7 +247,7 @@ void ProductionPlugin::advance(unsigned int)
 				//TODO: use BosonCanvas::canPlaceUnitAt()
 //				if(canvas()->cellOccupied(currentx, currenty)) {
 //				FIXME: should not depend on Facility*
-				if(canvas()->canPlaceUnitAt(speciesTheme()->unitProperties(type), QPoint(currentx * BO_TILE_SIZE, currenty * BO_TILE_SIZE), (Facility*)unit())) {
+				if(canvas()->canPlaceUnitAt(speciesTheme()->unitProperties(type), QPoint(currentx * BO_TILE_SIZE, currenty * BO_TILE_SIZE), this)) {
 					// Free cell - place unit at it
 					mProductionState = mProductionState + 1;
 					//FIXME: buildProduction should not

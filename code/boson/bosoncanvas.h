@@ -35,6 +35,7 @@ class BoDisplayManager;
 class BosonTiles;
 class BoItemList;
 class BosonSprite;
+class ProductionPlugin;
 
 class KPlayer;
 
@@ -171,15 +172,12 @@ public:
 	bool cellsOccupied(const QRect& rect, Unit* u = 0, bool excludeMoving = false) const;
 
 	/**
-	 * @param owner If non-NULL and unit is a facilty we also check whether
-	 * a player unit is in BUILD_RANGE. Otherwise only @ref cellOccupied is
-	 * checked.
-	 * @param factory If NULL BUILD_RANGE is ignored. Otherwise facilities
+	 * @param factory If NULL then BUILD_RANGE is ignored. Otherwise facilities
 	 * must be in range of BUILD_RANGE of any player unit and mobile units
 	 * in BUILD_RANGE of the facility.
 	 * @return TRUE if the unit can be placed at pos, otherwise FALSE
 	 **/
-	bool canPlaceUnitAt(const UnitProperties* unit, const QPoint& pos, Facility* factory) const;
+	bool canPlaceUnitAt(const UnitProperties* unit, const QPoint& pos, ProductionPlugin* factory) const;
 
 	void quitGame();
 

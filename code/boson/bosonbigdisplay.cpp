@@ -245,7 +245,7 @@ bool BosonBigDisplay::actionBuild(QDataStream& stream, const QPoint& canvasPos)
 	return false;
  }
 
- if (!(canvas())->canPlaceUnitAt(localPlayer()->unitProperties(production->currentProduction()), canvasPos, fac)) {
+ if (!(canvas())->canPlaceUnitAt(localPlayer()->unitProperties(production->currentProduction()), canvasPos, production)) {
 	kdDebug() << k_funcinfo << "Cannot place production here" << endl;
 	return false;
  }
