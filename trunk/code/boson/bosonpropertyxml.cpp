@@ -22,6 +22,7 @@
 
 #include "bodebug.h"
 #include "bomath.h"
+#include "bo3dtools.h"
 
 #include <kgame/kgameproperty.h>
 #include <kgame/kgamepropertylist.h>
@@ -205,6 +206,29 @@ QTextStream& operator>>(QTextStream& s, QPoint& p)
  return s;
 }
 
+QTextStream& operator<<(QTextStream& s, const BoVector2Fixed& v)
+{
+ // inefficient but easy to code and read.
+ // just stream x coordinate, followed by y coordinate, separated by
+ // space.
+ s << (float)v.x();
+ s << char(' ');
+ s << (float)v.y();
+ return s;
+}
+
+QTextStream& operator>>(QTextStream& s, BoVector2Fixed& v)
+{
+ float x, y;
+ QChar c;
+ s >> x;
+ s >> c; // single space
+ s >> y;
+ v.setX(x);
+ v.setY(y);
+ return s;
+}
+
 BosonCustomPropertyXML::BosonCustomPropertyXML(QObject* parent) : BosonPropertyXML(parent)
 {
  connect(this, SIGNAL(signalRequestValue(KGamePropertyBase*, QString&)),
@@ -238,6 +262,18 @@ void BosonCustomPropertyXML::slotRequestValue(KGamePropertyBase* prop, QString& 
 			s << ' ';
 			s << *it;
 		}
+	} else if (typeid(*prop) == typeid(KGamePropertyList<BoVector2Fixed>)) {
+		KGamePropertyList<BoVector2Fixed>* list = (KGamePropertyList<BoVector2Fixed>*)prop;
+		// inefficient but easy to code and read.
+		// first we stream the length of the array and then every vector.
+		// each separated by a space.
+		QTextStream s(&value, IO_WriteOnly);
+		s << QString::number(list->count());
+		KGamePropertyList<BoVector2Fixed>::Iterator it;
+		for (it = list->begin(); it != list->end(); ++it) {
+			s << ' ';
+			s << *it;
+		}
 	}
  }
 
@@ -259,6 +295,18 @@ void BosonCustomPropertyXML::slotRequestSetValue(KGamePropertyBase* prop, const 
 		unsigned int count = 0;
 		QChar c;
 		QPoint point;
+		QTextStream s((QString*)&value, IO_ReadOnly);
+		s >> count;
+		for (unsigned int i = 0; i < count; i++) {
+			s >> c;
+			s >> point;
+			list->append(point);
+		}
+	} else if (typeid(*prop) == typeid(KGamePropertyList<BoVector2Fixed>)) {
+		KGamePropertyList<BoVector2Fixed>* list = (KGamePropertyList<BoVector2Fixed>*)prop;
+		unsigned int count = 0;
+		QChar c;
+		BoVector2Fixed point;
 		QTextStream s((QString*)&value, IO_ReadOnly);
 		s >> count;
 		for (unsigned int i = 0; i < count; i++) {
