@@ -89,10 +89,113 @@ public:
 	{
 	}
 
-	static void sortByDepth(QValueList<Mesh>* meshes);
+	static void sortByMaxZ(BoFrame* frame, QValueList<Mesh>* meshes)
+	{
+		makeList(frame, meshes);
+		sortByMaxZ(meshes);
+	}
+	static void sortByMinZ(BoFrame* frame, QValueList<Mesh>* meshes)
+	{
+		makeList(frame, meshes);
+		sortByMinZ(meshes);
+	}
+
+	static void sortByMaxZ(QValueList<Mesh>* meshes)
+	{
+		sortByZ(meshes, true);
+	}
+	static void sortByMinZ(QValueList<Mesh>* meshes)
+	{
+		sortByZ(meshes, false);
+	}
+	static void sortByMaxSize(BoFrame* frame, QValueList<Mesh>* meshes) // sort by volume
+	{
+		makeList(frame, meshes);
+		sortByMaxSize(meshes);
+	}
+	static void sortByMaxSize(QValueList<Mesh>* meshes); // sort by volume
+
+protected:
+	static void sortByZ(QValueList<Mesh>* meshes, bool byMaxZ);
+	static void makeList(BoFrame* frame, QValueList<Mesh>* meshes)
+	{
+		if (!frame || !meshes) {
+			return;
+		}
+		meshes->clear();
+		for (unsigned int i = 0; i < frame->meshCount(); i++) {
+			BoMeshSorter::Mesh mesh;
+			mesh.mesh = frame->mesh(i);
+			mesh.matrix = frame->matrix(i);
+			meshes->append(mesh);
+		}
+	}
+	/**
+	 * @return The volume of the bounding box of this mesh
+	 **/
+	static float volume(BoMesh* mesh)
+	{
+		if (!mesh) {
+			return 0.0f;
+		}
+		// AB: this is a naive implementation.
+		// we just use min/max x/y/z. but imagine a perfect cube which
+		// is rotated by 45 degree - it's actual volume would be still
+		// the same, but here we would generate a different box which
+		// the original cube fits in (and isn't rotated). that volume
+		// would be a lot bigger than...
+		float dx = mesh->maxX() - mesh->minX();
+		float dy = mesh->maxY() - mesh->minY();
+		float dz = mesh->maxZ() - mesh->minZ();
+		float volume = dx * dy * dz;
+		if (volume < 0.0f) {
+			return -volume;
+		}
+		return volume;
+	}
 };
 
-void BoMeshSorter::sortByDepth(QValueList<BoMeshSorter::Mesh>* meshes)
+void BoMeshSorter::sortByMaxSize(QValueList<BoMeshSorter::Mesh>* meshes)
+{
+ BO_CHECK_NULL_RET(meshes);
+ if (meshes->count() == 0) {
+	boError() << k_funcinfo << "no meshes" << endl;
+	return;
+ }
+ if (meshes->count() == 1) {
+	return;
+ }
+ QValueList<BoMeshSorter::Mesh> list;
+
+ QValueList<BoMeshSorter::Mesh>::Iterator it;
+ for (it = meshes->begin(); it != meshes->end(); ++it) {
+	BoMeshSorter::Mesh mesh = *it;
+
+	// do some necessary calculations
+	mesh.mesh->calculateMaxMin();
+
+	float v = volume(mesh.mesh);
+	bool found = false;
+	QValueList<BoMeshSorter::Mesh>::Iterator it2;
+	for (it2 = list.begin(); it2 != list.end() && !found; ++it2) {
+		if (v >= volume((*it2).mesh)) {
+			list.insert(it2, mesh);
+			found = true;
+		}
+	}
+	if (!found) {
+		list.append(mesh);
+	}
+ }
+
+ if (list.count() != meshes->count()) {
+	boError() << k_funcinfo << "invalid result! count=" << list.count() << " should be: " << meshes->count() << endl;
+	return;
+ }
+ *meshes = list;
+}
+
+void BoMeshSorter::sortByZ(QValueList<BoMeshSorter::Mesh>* meshes, bool byMaxZ)
 {
  BO_CHECK_NULL_RET(meshes);
  if (meshes->count() == 0) {
@@ -115,9 +218,16 @@ void BoMeshSorter::sortByDepth(QValueList<BoMeshSorter::Mesh>* meshes)
 	bool found = false;
 	QValueList<BoMeshSorter::Mesh>::Iterator it2;
 	for (it2 = list.begin(); it2 != list.end() && !found; ++it2) {
-		if (z >= (*it2).mesh->maxZ()) {
-			list.insert(it2, mesh);
-			found = true;
+		if (byMaxZ) {
+			if (z >= (*it2).mesh->maxZ()) {
+				list.insert(it2, mesh);
+				found = true;
+			}
+		} else {
+			if (z <= (*it2).mesh->maxZ()) {
+				list.insert(it2, mesh);
+				found = true;
+			}
 		}
 	}
 	if (!found) {
@@ -131,6 +241,7 @@ void BoMeshSorter::sortByDepth(QValueList<BoMeshSorter::Mesh>* meshes)
  }
  *meshes = list;
 }
+
 
 BoFrame::BoFrame()
 {
@@ -148,10 +259,6 @@ BoFrame::BoFrame(const BoFrame& f, unsigned int firstMesh, unsigned int meshCoun
 	boWarning() << k_funcinfo << "no mesh copied" << endl;
 	return;
  }
- if (f.mMeshCount == 0 || !f.mMeshes || !f.mMatrices) {
-	boError() << k_funcinfo << "oops - can't copy from invalid mesh!" << endl;
-	return;
- }
  if (firstMesh + meshCount > f.mMeshCount) {
 	boError() << k_funcinfo << "can't copy " << meshCount
 			<< " meshes starting at " << firstMesh
@@ -159,13 +266,22 @@ BoFrame::BoFrame(const BoFrame& f, unsigned int firstMesh, unsigned int meshCoun
 			<< " meshes!" << endl;
 	meshCount = f.mMeshCount - firstMesh;
  }
- allocMeshes(meshCount);
- int pos = 0;
- for (unsigned int i = firstMesh; i < firstMesh + meshCount; i++) {
-	mMeshes[pos] = f.mMeshes[i]; // copy the pointer only
-	mMatrices[pos]->loadMatrix(*f.mMatrices[i]);
-	pos++;
+ unsigned int* meshes = new unsigned int[meshCount];
+ for (unsigned int i = 0; i < meshCount; i++) {
+	meshes[i] = meshes[firstMesh + i];
  }
+
+ copyMeshes(f, meshes, meshCount);
+ delete[] meshes;
+}
+
+BoFrame::BoFrame(const BoFrame& f, unsigned int* meshes, unsigned int meshCount)
+{
+ init();
+ mDisplayList = f.mDisplayList;
+ mDepthMultiplier = f.mDepthMultiplier;
+ mRadius = f.mRadius;
+ copyMeshes(f, meshes, meshCount);
 }
 
 void BoFrame::init()
@@ -190,6 +306,42 @@ BoFrame::~BoFrame()
  }
  delete[] mMeshes;
  delete[] mMatrices;
+}
+
+void BoFrame::copyMeshes(const BoFrame& f, unsigned int* meshes, unsigned int count)
+{
+ if (f.mMeshCount == 0 || !f.mMeshes || !f.mMatrices) {
+	boError() << k_funcinfo << "oops - can't copy from invalid mesh!" << endl;
+	return;
+ }
+ BO_CHECK_NULL_RET(meshes);
+ if (count == 0) {
+	boWarning() << k_funcinfo << "no mesh copied" << endl;
+	return;
+ }
+ if (count > f.mMeshCount) {
+	boError() << k_funcinfo << "cannot copy " << count
+			<< " meshes as frame contains " << f.mMeshCount
+			<< " meshes only" << endl;
+	return;
+ }
+
+ // before allocating anything we first check whether all indices are valid
+ for (unsigned int i = 0; i < count; i++) {
+	if (meshes[i] >= f.mMeshCount) {
+		boError() << k_funcinfo << "index " << meshes[i] << " at " << i
+				<< " is not valid! only " << f.mMeshCount
+				<< " available in the frame" << endl;
+		return;
+	}
+ }
+
+ allocMeshes(count);
+ for (unsigned int i = 0; i < count; i++) {
+	unsigned int index = meshes[i];
+	mMeshes[i] = f.mMeshes[index]; // copy the pointer only
+	mMatrices[i]->loadMatrix(*f.mMatrices[index]);
+ }
 }
 
 void BoFrame::allocMeshes(int meshes)
@@ -292,13 +444,8 @@ void BoFrame::sortByDepth()
  // about speed of the algorithms (it is called once per model on startup only).
 
  QValueList<BoMeshSorter::Mesh> meshes;
- for (unsigned int i = 0; i < meshCount(); i++) {
-	BoMeshSorter::Mesh mesh;
-	mesh.mesh = mMeshes[i];
-	mesh.matrix = mMatrices[i];
-	meshes.append(mesh);
- }
- BoMeshSorter::sortByDepth(&meshes);
+// BoMeshSorter::sortByMaxZ(this, &meshes);
+ BoMeshSorter::sortByMaxSize(this, &meshes);
 
  // meshes is now sorted by maxZ.
  QValueList<BoMeshSorter::Mesh>::Iterator it;
@@ -634,13 +781,23 @@ void BosonModel::generateConstructionFrames()
  unsigned int nodes = frame0->meshCount();
  boDebug(100) << k_funcinfo << "Generating " << nodes << " construction frames" << endl;
 
- for (unsigned int i = 0; i < nodes; i++) {
-	// copy i meshes, starting at start (until the end)
-	// --> meshes are sorted by z. first mesh has lowest z.
-	int start = (nodes - 1) - i;
-	BoFrame* step = new BoFrame(*frame0, start, i + 1);
+ QValueList<BoMeshSorter::Mesh> meshes;
+ BoMeshSorter::sortByMinZ(frame0, &meshes);
+
+ unsigned int* indices = new unsigned int[meshes.count()];
+ for (unsigned int i = 0; i < meshes.count(); i++) {
+	for (unsigned int j = 0; j < frame0->meshCount(); j++) {
+		// a damn slow linear search... but who cares for a 20 entry
+		// lists on startup...
+		BoMesh* mesh = meshes[i].mesh;
+		if (frame0->mesh(j) == mesh) {
+			indices[i] = j;
+		}
+	}
+	BoFrame* step = new BoFrame(*frame0, indices, i + 1);
 	d->mConstructionSteps.insert(i, step);
  }
+ delete[] indices;
 }
 
 unsigned int BosonModel::frames() const
