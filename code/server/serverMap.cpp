@@ -262,12 +262,12 @@ void BosonServer::checkFixKnown(serverFacility *f)
 		if ( k&1l) {
 			/* in this case the mobile should be known, but isn't */
 puts("discovering machin");
-			f->reportCreated( gpp.player[i].buffer);
+			f->reportCreated(i);
 			f->setKnown(getPlayerMask(i));
 			}
 		else {
 			/* the unit isn't known anymore */
-			f->reportDestroyed( gpp.player[i].buffer);
+			f->reportDestroyed(i);
 			f->unSetKnown(getPlayerMask(i));
 			}
 		k>>=1; k2>>=1; i++; // let's continue
@@ -303,12 +303,12 @@ void BosonServer::checkMobileKnown(serverMobUnit *m)
 			}
 		if ( k&1l) {
 			/* in this case the mobile should be known, but isn't */
-			m->reportCreated( gpp.player[i].buffer);
+			m->reportCreated(i);
 			m->setKnown(getPlayerMask(i));
 			}
 		else {
 			/* the unit isn't known anymore */
-			m->reportDestroyed( gpp.player[i].buffer);
+			m->reportDestroyed(i);
 			m->unSetKnown(getPlayerMask(i));
 			}
 		k>>=1; k2>>=1; i++; // let's continue

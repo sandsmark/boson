@@ -67,7 +67,7 @@ void serverMobUnit::r_moveBy(moveMsg_t &msg, int playerId, boBuffer * buffer)
 }
 
 
-void serverMobUnit::reportCreated(boBuffer * b)
+void serverMobUnit::reportCreated(int i)
 {
 	bosonMsgData	data;
 		
@@ -77,10 +77,10 @@ void serverMobUnit::reportCreated(boBuffer * b)
 	data.mobile.y = __y;
 	data.mobile.type = type;
 
-	sendMsg ( b, MSG_MOBILE_CREATED, sizeof(data.mobile),	&data);
+	sendMsg ( gpp.player[i].buffer, MSG_MOBILE_CREATED, sizeof(data.mobile), &data);
 }
 
-void serverMobUnit::reportDestroyed(boBuffer * b)
+void serverMobUnit::reportDestroyed(int i)
 {
 	bosonMsgData	data;
 
@@ -88,7 +88,7 @@ void serverMobUnit::reportDestroyed(boBuffer * b)
 	data.destroyed.x = __x;
 	data.destroyed.y = __y;
 
-	sendMsg ( b, MSG_MOBILE_DESTROYED, sizeof(data.destroyed), &data);
+	sendMsg ( gpp.player[i].buffer, MSG_MOBILE_DESTROYED, sizeof(data.destroyed), &data);
 }
 
 
@@ -122,7 +122,7 @@ void serverFacility::getWantedAction()
 		}
 }
 
-void serverFacility::reportCreated(boBuffer * b)
+void serverFacility::reportCreated(int i)
 {
 	bosonMsgData	data;
 		
@@ -133,11 +133,11 @@ void serverFacility::reportCreated(boBuffer * b)
 	data.facility.type = type;
 	data.facility.state = state;
 
-	sendMsg ( b, MSG_FACILITY_CREATED, sizeof(data.facility), &data);
+	sendMsg ( gpp.player[i].buffer, MSG_FACILITY_CREATED, sizeof(data.facility), &data);
 }
 
 
-void serverFacility::reportDestroyed(boBuffer * b)
+void serverFacility::reportDestroyed(int i)
 {
 	bosonMsgData	data;
 
@@ -145,7 +145,7 @@ void serverFacility::reportDestroyed(boBuffer * b)
 	data.destroyed.x = __x;
 	data.destroyed.y = __y;
 
-	sendMsg ( b, MSG_FACILITY_DESTROYED, sizeof(data.destroyed), &data);
+	sendMsg ( gpp.player[i].buffer, MSG_FACILITY_DESTROYED, sizeof(data.destroyed), &data);
 }
 
 
