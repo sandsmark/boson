@@ -658,6 +658,9 @@ void BosonBigDisplayBase::paintGL()
 	initGL();
 	return;
  }
+ if (!boGame) {
+	return;
+ }
  if (boGame->gameStatus() == KGame::Init) {
 	return;
  }
