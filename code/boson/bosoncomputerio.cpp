@@ -77,7 +77,8 @@ void BosonComputerIO::reaction()
  if (boConfig->aiDelay() == 0.0) {
 	return;
  }
- BosonProfiler p(900);
+ static int id = boProfiling->requestEventId("BosonComputerIO::reaction()");
+ BosonProfiler p(id);
 
  if (mScript) {
 	mScript->advance();
