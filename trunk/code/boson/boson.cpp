@@ -65,6 +65,216 @@ Boson* Boson::mBoson = 0;
 
 #define ADVANCE_INTERVAL 250 // ms
 
+/**
+ * @short Class that maintains advance messages and advance calls.
+ *
+ * A <em>advance message</em> is a message from the network with ID @ref
+ * BoMessage::AdvanceN or similar. It tells boson to make a certain number of
+ * <em>advance calls</em>, at the moment this number is defined by @ref
+ * Boson::gameSpeed.
+ *
+ * An <em>advance call</em>, often referred to as <em>game cycle</em> is just a
+ * call to the advance method (currently @ref receiveAdvanceCall), which causes
+ * an advance signal (see @ref Boson::signalAdvance). When this signal is
+ * emitted, all units are advanced. This is the central place where unit
+ * movement and friends occur.
+ *
+ * In this class the precise process, how advance calls are made and how many
+ * calls happen after a advance message is defined.
+ *
+ * An advance message is received by @ref receiveAdvanceMessage. This will
+ * result in an immediate advance call, and also in a certain number of
+ * addition calls, that are delayed by a certain time. The exact amount of
+ * time is interpolated from the expected time when the next advance message
+ * arrives.
+ *
+ * An advance call is executed by @ref receiveAdvanceCall.
+ **/
+class BoAdvance
+{
+public:
+	BoAdvance(Boson* boson)
+	{
+		mBoson = boson;
+
+		mAdvanceDividerCount = 0;
+		mAdvanceDivider = 1;
+		mAdvanceMessageSent = false;
+
+		initProperties(mBoson->dataHandler());
+	}
+
+	unsigned int advanceCount() const
+	{
+		return mAdvanceCount;
+	}
+	unsigned int advanceCallsCount() const
+	{
+		return mAdvanceCallsCount;
+	}
+	bool advanceFlag() const
+	{
+		return mAdvanceFlag;
+	}
+	void toggleAdvanceFlag()
+	{
+		mAdvanceFlag = !mAdvanceFlag;
+	}
+
+	void initProperties(KGamePropertyHandler* dataHandler)
+	{
+		mAdvanceCount.registerData(Boson::IdAdvanceCount, dataHandler,
+				KGamePropertyBase::PolicyLocal, "AdvanceCount");
+		mAdvanceCount.registerData(Boson::IdAdvanceCount, dataHandler,
+				KGamePropertyBase::PolicyLocal, "AdvanceCount");
+		mAdvanceFlag.registerData(Boson::IdAdvanceFlag, dataHandler,
+				KGamePropertyBase::PolicyLocal, "AdvanceFlag");
+		mAdvanceCallsCount.registerData(Boson::IdAdvanceCallsCount, dataHandler,
+				KGamePropertyBase::PolicyLocal, "AdvanceCallsCount");
+
+		mAdvanceCount.setLocal(0);
+		mAdvanceFlag.setLocal(0);
+		mAdvanceCallsCount.setLocal(0);
+		mAdvanceCount.setEmittingSignal(false); // wo don't need it and it would be bad for performance.
+		mAdvanceCallsCount.setEmittingSignal(false);
+		mAdvanceFlag.setEmittingSignal(false);
+	}
+
+	void receiveAdvanceMessage(int gameSpeed)
+	{
+		mAdvanceMessageSent = false;
+		mAdvanceDivider = gameSpeed;
+		mAdvanceDividerCount = 0;
+		mBoson->lock();
+		boDebug(300) << "Advance - speed (calls per " << ADVANCE_INTERVAL
+				<< "ms)=" << gameSpeed << " elapsed: "
+				<< mAdvanceReceived.elapsed() << endl;
+		mAdvanceReceived.restart();
+		mBoson->slotReceiveAdvance();
+	}
+
+	void sendAdvance() // slot?
+	{
+		// If advance message has been sent, but not yet received, don't send another
+		//  one, because it would get delayed.
+		// Note that this is for single-player only, it would probably break network
+		if (mAdvanceMessageSent && !mBoson->isNetwork()) {
+			boDebug(300) << k_funcinfo << mBoson->advanceCallsCount() << "message has already been sent, returning" << endl;
+			return;
+		}
+		boDebug(300) << k_funcinfo << mBoson->advanceCallsCount() << "sending advance msg" << endl;
+		mBoson->sendMessage(0, BosonMessage::AdvanceN);
+		mAdvanceMessageSent = true;
+	}
+
+	/**
+	 * Execute an advance call.
+	 *
+	 * This does the central advance call mechanism in Boson, most
+	 * importantly it will make @ref Boson emit @ref Boson::signalAdvance.
+	 *
+	 * Once the signal is emitted, this function is meant to calculate the
+	 * time until the next advanceCall should be made, if there are any
+	 * calls left from the last advance message. If this was the last
+	 * advance call for the advance message, we are done and wait for the
+	 * next message.
+	 *
+	 * In an optimal case, the time until the next advance call should be
+	 * made is exactly message_interval / calls_per_message. E.g. when we
+	 * send an advance message ever second and want 10 calls per message, we
+	 * do an advance call every 0.6 seconds. But in practice this won't
+	 * work, due to several unpredictable delays at about every place. So we
+	 * need to do some magic here.
+	 *
+	 * Therefore this is a <em>complex</em> method! This can be improved
+	 * greatly, but you can also do a lot wrong here (e.g. concerning
+	 * networking). Take care when you change something here.
+	 **/
+	void receiveAdvanceCall();
+
+private:
+	Boson* mBoson;
+
+	QTime mAdvanceReceived; // when the last advance *message* was received
+	int mAdvanceDivider; // pretty much exactly gameSpeed()
+	int mAdvanceDividerCount; // how many advance *calls* have been made since the last advance *message*
+	bool mAdvanceMessageSent;
+
+
+	KGameProperty<unsigned int> mAdvanceCount;
+
+	KGamePropertyInt mAdvanceFlag;
+
+	KGameProperty<unsigned int> mAdvanceCallsCount;
+};
+
+
+void BoAdvance::receiveAdvanceCall()
+{
+// boDebug() << k_funcinfo << advanceCallsCount() << endl;
+ bool flag = advanceFlag();
+ // we need to toggle the flag *now*, in case one of the Unit::advance*()
+ // methods changes the advance function. this change must not appear to the
+ // currently used function, but to the other one.
+ toggleAdvanceFlag();
+ emit mBoson->signalAdvance(advanceCount(), flag);
+
+ // Log game state
+ if (advanceCallsCount() % boConfig->gameLogInterval() == 0) {
+	mBoson->makeGameLog();
+ }
+
+ mAdvanceCallsCount = mAdvanceCallsCount + 1;
+ mAdvanceCount = mAdvanceCount + 1; // this advance count is important for Unit e.g. - but not used in this function.
+ if (mAdvanceCount > MAXIMAL_ADVANCE_COUNT) {
+	mAdvanceCount = 0;
+ }
+
+ // we also have "mAdvanceDividerCount". the mAdvanceCount is important in Unit,
+ // mAdvanceDividerCount is limited to boson only. some explanations:
+ // Only a single advance message is sent over network every ADVANCE_INTERVAL
+ // ms, independant from the game speed.
+ // This single advance message results in a certain number of advance calls
+ // (btw: in codes, comments, logs and so on I always make a different between
+ // "advance message" and "advance calls" as explained here). mAdvanceDivider is
+ // this number of advance calls to-be-generated and is reset to the gameSpeed()
+ // when the message is received.
+ // The mAdvanceDividerCount is reset to 0 once the advance message is received.
+ //
+ // The code below tries to make one advance call every
+ // ADVANCE_INTERVAL/mAdvanceDivider ms. This means in the ideal case all
+ // advance calls from this and from the next advance message would be in the
+ // same interval.
+ //
+ // Please remember that there are several additional tasks that need to be done
+ // - e.g. unit moving, OpenGL rendering, ... so 
+ if (mAdvanceDividerCount + 1 == mAdvanceDivider)  {
+	boDebug(300) << k_funcinfo << "delayed messages: "
+			<< mBoson->delayedMessageCount() << endl;
+	mBoson->unlock();
+ } else if (mAdvanceDividerCount + 1 < mAdvanceDivider) {
+	int next;
+	if (mBoson->delayedAdvanceMessageCount() == 0) {
+		int t = ADVANCE_INTERVAL * mAdvanceDividerCount / mAdvanceDivider;// time that should have been elapsed
+		int diff = QMAX(5, mAdvanceReceived.elapsed() - t + 5); // we are adding 5ms "safety" diff
+		next = QMAX(0, ADVANCE_INTERVAL / mAdvanceDivider - diff);
+	} else {
+		next = 0;
+	}
+	if (mBoson->delayedMessageCount() > 20) {
+		boWarning() << k_funcinfo << "more than 20 messages delayed!!" << endl;
+		next = 0;
+	}
+//	boDebug() << "next: " << next << endl;
+	QTimer::singleShot(next, mBoson, SLOT(slotReceiveAdvance()));
+	mAdvanceDividerCount++;
+ } else {
+	boError() << k_funcinfo << "count > divider --> This must never happen!!" << endl;
+ }
+}
+
+
+
 class BoMessage
 {
 public:
@@ -155,6 +365,136 @@ public:
 	}
 };
 
+
+class BoMessageDelayer
+{
+public:
+	BoMessageDelayer(Boson* b)
+	{
+		mBoson = b;
+		mDelayedMessages.setAutoDelete(true);
+		mIsLocked = false;
+		mDelayedWaiting = false;
+		mAdvanceMessageWaiting = 0;
+	}
+	~BoMessageDelayer()
+	{
+		mDelayedMessages.clear();
+	}
+
+	/**
+	 * Lock message delivery. All incoming messages are delayed until @ref
+	 * unlock is called.
+	 **/
+	void lock()
+	{
+		boDebug(300) << k_funcinfo << endl;
+		mIsLocked = true;
+	}
+
+	/**
+	 * Unlock message delivery (see @ref lock) and deliver all delayed
+	 * messages.
+	 **/
+	void unlock()
+	{
+		boDebug(300) << k_funcinfo << endl;
+		mIsLocked = false;
+		while (!mDelayedMessages.isEmpty() && !mIsLocked) {
+			processDelayed();
+		}
+	}
+
+	unsigned int delayedMessageCount() const
+	{
+		return mDelayedMessages.count();
+	}
+
+	unsigned int delayedAdvanceMessageCount() const
+	{
+		return mAdvanceMessageWaiting;
+	}
+
+	/**
+	 * Process a network message. Call this before @ref
+	 * KGame::networkTransmission is executed!
+	 *
+	 * This will test whether the message should get delayed and, if that is
+	 * the case, it will do so. @ref KGame::networkTransmission should not
+	 * be called then. Otherwise you can simply proceed and call @ref
+	 * KGame::networkTransmission for this message.
+	 *
+	 * @return TRUE if the message can be delivered normally, FALSE if it
+	 * got delayed.
+	 **/
+	bool processMessage(QDataStream& stream, int msgid, Q_UINT32 r, Q_UINT32 s, Q_UINT32 clientId)
+	{
+		if (mIsLocked || mDelayedWaiting) {
+			BoMessage* m = new BoMessage;
+			m->byteArray = ((QBuffer*)stream.device())->readAll();
+			m->msgid = msgid;
+			m->receiver = r;
+			m->sender = s;
+			m->clientId = clientId;
+			boDebug() << k_funcinfo << "delayed " << m->debug(mBoson) << endl;
+			mDelayedMessages.enqueue(m);
+			mDelayedWaiting = true;
+			switch (msgid - KGameMessage::IdUser) {
+				case BosonMessage::AdvanceN:
+					mAdvanceMessageWaiting++;
+					boWarning(300) << k_funcinfo << "advance message got delayed @" << mBoson->advanceCallsCount() << endl;
+					break;
+				default:
+					break;
+			}
+
+			// message delayed.
+			return false;
+		}
+		return true; // not delayed.
+	}
+
+protected:
+	/**
+	 * Process the first delayed message for delivery. Called by @ref unlock
+	 * to deliver delayed messages.
+	 *
+	 * Note that a delayed message might call @ref lock before all delayed
+	 * messages have been deliverd! (this happens e.g. when 2 advance
+	 * messages got delayed)
+	 **/
+	void processDelayed()
+	{
+		BoMessage* m = mDelayedMessages.dequeue();
+		if (!m) {
+			boWarning() << k_funcinfo << "no message here" << endl;
+			return;
+		}
+		QDataStream s(m->byteArray, IO_ReadOnly);
+		mDelayedWaiting = false;
+		switch (m->msgid - KGameMessage::IdUser) {
+			case BosonMessage::AdvanceN:
+				boWarning(300) << k_funcinfo << "delayed advance msg will be sent!" << endl;
+				mAdvanceMessageWaiting--;
+				break;
+			default:
+				break;
+		}
+		mBoson->networkTransmission(s, m->msgid, m->receiver, m->sender, m->clientId);
+		mDelayedWaiting = !mDelayedMessages.isEmpty();
+		delete m;
+	}
+
+private:
+	Boson* mBoson;
+	QPtrQueue<BoMessage> mDelayedMessages;
+	bool mIsLocked;
+	bool mDelayedWaiting; // FIXME bad name!
+	int mAdvanceMessageWaiting;
+};
+
+
+
 class Boson::BosonPrivate
 {
 public:
@@ -165,22 +505,13 @@ public:
 		mPlayField = 0;
 		mPlayer = 0;
 
-		mAdvanceDividerCount = 0;
-
 		mLoadingStatus = BosonSaveLoad::NotLoaded;
+
+		mAdvance = 0;
+		mMessageDelayer = 0;
 	}
 
 	QTimer* mGameTimer;
-
-// stuff for the message-delaying feature
-	QTime mAdvanceReceived; // when the last advance *message* was received
-	int mAdvanceDivider; // pretty much exactly gameSpeed()
-	int mAdvanceDividerCount; // how many advance *calls* have been made since the last advance *message*
-	int mAdvanceMessageWaiting;
-	QPtrQueue<BoMessage> mDelayedMessages;
-	bool mIsLocked;
-	bool mDelayedWaiting; // FIXME bad name!
-	bool mAdvanceMessageSent;
 
 	BosonCanvas* mCanvas; // this pointer is anti-OO IMHO
 	BosonPlayField* mPlayField;
@@ -191,29 +522,24 @@ public:
 	KGamePropertyBool mGamePaused;
 
 	KGameProperty<unsigned long int> mNextUnitId;
-	KGameProperty<unsigned int> mAdvanceCount;
-	KGamePropertyInt mAdvanceFlag;
-
-	KGameProperty<unsigned int> mAdvanceCallsCount;
 
 	BosonSaveLoad::LoadingStatus mLoadingStatus;
 
 	QValueList<QByteArray> mGameLogs;
 	QValueList<BoMessage> mLoggedMessages;
+
+	BoAdvance* mAdvance;
+	BoMessageDelayer* mMessageDelayer;
 };
 
 Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
 {
  setPolicy(PolicyClean);
  d = new BosonPrivate;
+ d->mAdvance = new BoAdvance(this);
+ d->mMessageDelayer = new BoMessageDelayer(this);
 
  d->mGameTimer = new QTimer(this);
- d->mAdvanceDivider = 1;
- d->mIsLocked = false;
- d->mDelayedWaiting = false;
- d->mAdvanceMessageWaiting = 0;
- d->mDelayedMessages.setAutoDelete(true);
- d->mAdvanceMessageSent = false;
 
 
  mGameMode = true;
@@ -236,27 +562,16 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
 		KGamePropertyBase::PolicyClean, "GamePaused");
  d->mNextUnitId.registerData(IdNextUnitId, dataHandler(),
 		KGamePropertyBase::PolicyLocal, "NextUnitId");
- d->mAdvanceCount.registerData(IdAdvanceCount, dataHandler(),
-		KGamePropertyBase::PolicyLocal, "AdvanceCount");
- d->mAdvanceFlag.registerData(IdAdvanceFlag, dataHandler(),
-		KGamePropertyBase::PolicyLocal, "AdvanceFlag");
- d->mAdvanceCallsCount.registerData(IdAdvanceCallsCount, dataHandler(),
-		KGamePropertyBase::PolicyLocal, "AdvanceCallsCount");
  d->mNextUnitId.setLocal(0);
- d->mAdvanceCount.setLocal(0);
  d->mGameSpeed.setLocal(0);
  d->mGamePaused.setLocal(false);
- d->mAdvanceFlag.setLocal(0);
- d->mAdvanceCallsCount.setLocal(0);
- d->mAdvanceCount.setEmittingSignal(false); // wo don't need it and it would be bad for performance.
- d->mAdvanceCallsCount.setEmittingSignal(false);
 
  setMinPlayers(1);
 }
 
 Boson::~Boson()
 {
- d->mDelayedMessages.clear();
+ delete d->mAdvance;
  delete d->mGameTimer;
  delete d;
 }
@@ -408,7 +723,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 		if (unitsToMove.count() == 1) {
 			unitsToMove.first()->moveTo(pos, attack);
 		} else {
-  		QPtrListIterator<Unit> it(unitsToMove);
+		QPtrListIterator<Unit> it(unitsToMove);
 			it.toFirst();
 			while (it.current()) {
 				it.current()->moveTo(pos, attack);
@@ -1174,16 +1489,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 	}
 	case BosonMessage::AdvanceN:
 	{
-		int n = gameSpeed();
-		d->mAdvanceMessageSent = false;
-		d->mAdvanceDivider = n;
-		d->mAdvanceDividerCount = 0;
-		lock();
-		boDebug(300) << "Advance - speed (calls per " << ADVANCE_INTERVAL
-				<< "ms)=" << gameSpeed() << " elapsed: " 
-				<< d->mAdvanceReceived.elapsed() << endl;
-		d->mAdvanceReceived.restart();
-		slotReceiveAdvance();
+		d->mAdvance->receiveAdvanceMessage(gameSpeed());
 		break;
 	}
 	case BosonMessage::ChangeMap:
@@ -1342,16 +1648,7 @@ void Boson::startGame()
 
 void Boson::slotSendAdvance()
 {
- // If advance message has been sent, but not yet received, don't send another
- //  one, because it would get delayed.
- // Note that this is for single-player only, it would probably break network
- if (d->mAdvanceMessageSent && !isNetwork()) {
-	boDebug(300) << k_funcinfo << advanceCallsCount() << ": message has already been sent, returning" << endl;
-	return;
- }
- boDebug(300) << k_funcinfo << advanceCallsCount() << ": sending advance msg" << endl;
- sendMessage(10, BosonMessage::AdvanceN);
- d->mAdvanceMessageSent = true;
+ d->mAdvance->sendAdvance();
 }
 
 Unit* Boson::createUnit(unsigned long int unitType, Player* owner)
@@ -1757,74 +2054,7 @@ QValueList<QColor> Boson::availableTeamColors() const
 
 void Boson::slotReceiveAdvance()
 {
-// boDebug() << k_funcinfo << advanceCallsCount() << endl;
- bool flag = advanceFlag();
- // we need to toggle the flag *now*, in case one of the Unit::advance*()
- // methods changes the advance function. this change must not appear to the
- // currently used function, but to the other one.
- toggleAdvanceFlag();
- emit signalAdvance(d->mAdvanceCount, flag);
-
- // Log game state
- if (advanceCallsCount() % boConfig->gameLogInterval() == 0) {
-	QByteArray log;
-	QTextStream ts(log, IO_WriteOnly);
-	writeGameLog(ts);
-//	boDebug() << k_funcinfo << "Log size: " << log.size() << endl;
-	BosonProfiler p(1745);
-	QByteArray comp = qCompress(log);
-	d->mGameLogs.append(comp);
-//	boDebug() << k_funcinfo << "Done, elapsed: " << p.stop() << endl;
-//	boDebug() << k_funcinfo << "Compressed log size: " << comp.size() << endl;
- }
-
- d->mAdvanceCallsCount = d->mAdvanceCallsCount + 1;
- d->mAdvanceCount = d->mAdvanceCount + 1; // this advance count is important for Unit e.g. - but not used in this function.
- if (d->mAdvanceCount > MAXIMAL_ADVANCE_COUNT) {
-	d->mAdvanceCount = 0;
- }
-
- // we also have "mAdvanceDividerCount". the mAdvanceCount is important in Unit,
- // mAdvanceDividerCount is limited to boson only. some explanations:
- // Only a single advance message is sent over network every ADVANCE_INTERVAL
- // ms, independant from the game speed.
- // This single advance message results in a certain number of advance calls
- // (btw: in codes, comments, logs and so on I always make a different between
- // "advance message" and "advance calls" as explained here). mAdvanceDivider is
- // this number of advance calls to-be-generated and is reset to the gameSpeed()
- // when the message is received.
- // The mAdvanceDividerCount is reset to 0 once the advance message is received.
- //
- // The code below tries to make one advance call every
- // ADVANCE_INTERVAL/mAdvanceDivider ms. This means in the ideal case all
- // advance calls from this and from the next advance message would be in the
- // same interval.
- //
- // Please remember that there are several additional tasks that need to be done
- // - e.g. unit moving, OpenGL rendering, ... so 
- if (d->mAdvanceDividerCount + 1 == d->mAdvanceDivider)  {
-	boDebug(300) << k_funcinfo << "delayed messages: "
-			<< delayedMessageCount() << endl;
-	unlock();
- } else if (d->mAdvanceDividerCount + 1 < d->mAdvanceDivider) {
-	int next;
-	if (d->mAdvanceMessageWaiting == 0) {
-		int t = ADVANCE_INTERVAL * d->mAdvanceDividerCount / d->mAdvanceDivider;// time that should have been elapsed
-		int diff = QMAX(5, d->mAdvanceReceived.elapsed() - t + 5); // we are adding 5ms "safety" diff
-		next = QMAX(0, ADVANCE_INTERVAL / d->mAdvanceDivider - diff);
-	} else {
-		next = 0;
-	}
-	if (delayedMessageCount() > 20) {
-		boWarning() << k_funcinfo << "more than 20 messages delayed!!" << endl;
-		next = 0;
-	}
-//	boDebug() << "next: " << next << endl;
-	QTimer::singleShot(next,  this, SLOT(slotReceiveAdvance()));
-	d->mAdvanceDividerCount++;
- } else {
-	boError() << k_funcinfo << "count > divider --> This must never happen!!" << endl;
- }
+ d->mAdvance->receiveAdvanceCall();
 }
 
 void Boson::networkTransmission(QDataStream& stream, int msgid, Q_UINT32 r, Q_UINT32 s, Q_UINT32 clientId)
@@ -1839,64 +2069,27 @@ void Boson::networkTransmission(QDataStream& stream, int msgid, Q_UINT32 r, Q_UI
  log.advanceCallsCount = advanceCallsCount();
  d->mLoggedMessages.append(log);
 
- if (d->mIsLocked || d->mDelayedWaiting) {
-	BoMessage* m = new BoMessage;
-	m->byteArray = ((QBuffer*)stream.device())->readAll();
-	m->msgid = msgid;
-	m->receiver = r;
-	m->sender = s;
-	m->clientId = clientId;
-	boDebug() << k_funcinfo << "delayed " << m->debug(this) << endl;
-	d->mDelayedMessages.enqueue(m);
-	d->mDelayedWaiting = true;
-	switch (msgid - KGameMessage::IdUser) {
-		case BosonMessage::AdvanceN:
-			d->mAdvanceMessageWaiting++;
-			boWarning(300) << k_funcinfo << "advance message got delayed @" << advanceCallsCount() << endl;
-			break;
-		default:
-			break;
-	}
+ if (!d->mMessageDelayer->processMessage(stream, msgid, r, s, clientId)) {
+	// the message got delayed. don't deliver it now.
 	return;
  }
+ // not delayed - deliver it
  KGame::networkTransmission(stream, msgid, r, s, clientId);
 }
 
 void Boson::lock()
 {
- boDebug(300) << k_funcinfo << endl;
- d->mIsLocked = true;
+ d->mMessageDelayer->lock();
 }
 
 void Boson::unlock()
 {
- boDebug(300) << k_funcinfo << endl;
- d->mIsLocked = false;
- while (!d->mDelayedMessages.isEmpty() && !d->mIsLocked) {
-	slotProcessDelayed();
- }
+ d->mMessageDelayer->unlock();
 }
 
+// obsolete.
 void Boson::slotProcessDelayed() // TODO: rename: processDelayed()
 {
- BoMessage* m = d->mDelayedMessages.dequeue();
- if (!m) {
-	boWarning() << k_funcinfo << "no message here" << endl;
-	return;
- }
- QDataStream s(m->byteArray, IO_ReadOnly);
- d->mDelayedWaiting = false;
- switch (m->msgid - KGameMessage::IdUser) {
-	case BosonMessage::AdvanceN:
-		boWarning(300) << k_funcinfo << "delayed advance msg will be sent!" << endl;
-		d->mAdvanceMessageWaiting--;
-		break;
-	default:
-		break;
- }
- networkTransmission(s, m->msgid, m->receiver, m->sender, m->clientId);
- d->mDelayedWaiting = !d->mDelayedMessages.isEmpty();
- delete m;
 }
 
 void Boson::initSaveLoad(BosonSaveLoad* b)
@@ -2168,14 +2361,9 @@ int Boson::loadingStatus() const
  return (int)d->mLoadingStatus;
 }
 
-void Boson::toggleAdvanceFlag()
-{
- d->mAdvanceFlag = !d->mAdvanceFlag;
-}
-
 bool Boson::advanceFlag() const
 {
- return d->mAdvanceFlag;
+ return d->mAdvance->advanceFlag();
 }
 
 void Boson::slotUpdateProductionOptions()
@@ -2201,7 +2389,12 @@ void Boson::slotDebugOutput(const QString& area, const char* data, int level)
 
 unsigned int Boson::delayedMessageCount() const
 {
- return d->mDelayedMessages.count();
+ return d->mMessageDelayer->delayedMessageCount();
+}
+
+unsigned int Boson::delayedAdvanceMessageCount() const
+{
+ return d->mMessageDelayer->delayedAdvanceMessageCount();
 }
 
 bool Boson::loadXMLDoc(QDomDocument* doc, const QString& xml)
@@ -2263,6 +2456,19 @@ void Boson::killPlayer(Player* player)
  emit signalPlayerKilled(player);
 }
 
+void Boson::makeGameLog()
+{
+ QByteArray log;
+ QTextStream ts(log, IO_WriteOnly);
+ writeGameLog(ts);
+// boDebug() << k_funcinfo << "Log size: " << log.size() << endl;
+ BosonProfiler p(1745);
+ QByteArray comp = qCompress(log);
+ d->mGameLogs.append(comp);
+// boDebug() << k_funcinfo << "Done, elapsed: " << p.stop() << endl;
+// boDebug() << k_funcinfo << "Compressed log size: " << comp.size() << endl;
+}
+
 void Boson::writeGameLog(QTextStream& log)
 {
  BosonProfiler p(1744);
@@ -2316,6 +2522,6 @@ void Boson::saveGameLogs(const QString& prefix)
 
 unsigned int Boson::advanceCallsCount() const
 {
- return d->mAdvanceCallsCount;
+ return d->mAdvance->advanceCallsCount();
 }
 
