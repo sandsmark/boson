@@ -775,8 +775,8 @@ void BosonShotBomb::advanceMoveInternal()
 
 /*****  BosonShotFragment  *****/
 
-#define FRAGMENT_MIN_SPEED 3
-#define FRAGMENT_MAX_SPEED 8
+#define FRAGMENT_MIN_SPEED (3 / 48.0f)
+#define FRAGMENT_MAX_SPEED (8 / 48.0f)
 #define FRAGMENT_MIN_Z_SPEED 0.03
 #define FRAGMENT_MAX_Z_SPEED 0.1
 #define FRAGMENT_GRAVITY -0.006
