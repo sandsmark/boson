@@ -57,6 +57,17 @@ echo "
 **  draw_screenshot(<description>, <date added>, <thumbnail filename>, <big version filename>);
 **  Note that filenames do not contain directory
 **/
+draw_screenshot("Here you can see a attack of a aircraft while rotating the camera. Note that
+    this screenshot is taken from development version and unit models and other
+    things are not final.",
+    "NEW: 09. Sep. 2002 (CVS)", "thumb_war1.png", "war1.png");
+draw_screenshot("The Big War - Note that
+    this screenshot is taken from development version and unit models and other
+    things are not final.",
+    "NEW: 09. Sep. 2002 (CVS)", "thumb_war2.png", "war2.png");
+echo "
+</tr>
+<tr>";
 draw_screenshot("This shows new OpenGL support and camera rotation. Note that
     this screenshot is taken from development version and unit models and other
     things are not final.",
