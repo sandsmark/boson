@@ -620,7 +620,7 @@ public:
 		return BoMapCornerArray::arrayPos(x, y, width() + 1);
 	}
 
-	int currentTexture(int texture) const;
+	int currentTexture(int texture, int advanceCallsCount) const;
 	inline const float* heightMap() const { return mHeightMap->heightMap(); }
 	inline const float* normalMap() const { return mNormalMap->normalMap(); }
 	inline BoColorMap* colorMap() const { return mColorMap; }

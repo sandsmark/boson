@@ -26,6 +26,7 @@
 #include "../cell.h"
 #include "../bosongroundtheme.h"
 #include "../bomaterial.h"
+#include "../boson.h"
 #include <bodebug.h>
 
 #include <GL/gl.h>
@@ -81,7 +82,7 @@ void BoFastGroundRenderer::renderVisibleCells(Cell** renderCells, unsigned int c
  unsigned int renderedQuads = 0;
  int count = 0;
  for (unsigned int i = 0; i < groundTheme->textureCount(); i++) {
-	glBindTexture(GL_TEXTURE_2D, map->currentTexture(i));
+	glBindTexture(GL_TEXTURE_2D, map->currentTexture(i, boGame->advanceCallsCount()));
 
 	const int offsetCount = 5;
 	const float offset = 1.0f / (float)offsetCount;
