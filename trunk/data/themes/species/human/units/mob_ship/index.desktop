@@ -12,9 +12,19 @@ UnitWidth=2.0
 UnitHeight=2.0
 ProductionTime=100
 DestroyedParticles=1001
-Weapons=1001
+Weapons=1
 
 [Boson Mobile Unit]
 Speed=3
 CanGoOnLand=false
 CanGoOnWater=true
+
+[Weapon_0]
+Ranage=5
+Reload=15
+CanShootAtAirUnits=false
+CanShootAtLandUnits=true
+Damage=12
+Speed=0
+DamageRange=1
+HitParticles=2002

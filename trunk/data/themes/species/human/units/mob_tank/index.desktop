@@ -11,10 +11,19 @@ Requirements=12,3
 Armor=3
 ProductionTime=90
 DestroyedParticles=1002,3001,4001
-Weapons=1002
+Weapons=1
 
 [Boson Mobile Unit]
 Speed=3
 CanGoOnLand=true
 CanGoOnWater=false
 
+[Weapon_0]
+Range=5
+Reload=45
+CanShootAtAirUnits=false
+CanShootAtLandUnits=true
+Damage=40
+Speed=0
+DamageRange=1
+HitParticles=2001

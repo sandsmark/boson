@@ -258,6 +258,51 @@ FrameSpeedWreckage=Number
         of the unit when it is destroyed
 -------------------------------------------------------------------------------
 
+Of course every unit may have weapons. Number of weapons must be set in main
+group if you use them - see above for information about it.
+For every weapon, there must be group with name "Weapon_x" where x is number of
+weapon, starting with 0. E.g. if unit has 3 weapons, it must have groups
+"Weapon_0", "Weapon_1" and "Weapon_2".
+Note that unit may have only one repairing weapon. If you specify multiple
+repairing weapons, only first one is used
+-------------------------------------------------------------------------------
+[Weapon_x]
+Damage=Number  - The damage this unit makes to other units when firing. Can
+                    also be negative - the unit repairs then.
+                    Default is 0.
+Range=Number  - Range of this weapon.
+                    Must be >= 0. Default is 0.
+Reload=Number  - The time to reload the weapon. "Time" means number of
+                    advance calls (default is 1 per 50ms = 20 calls/sec).
+                    Must be >= 0. Default is 0.
+CanShootAtAirUnits=bool  - Can this unit shoot at aircrafts?
+                    Default false.
+CanShootAtLandUnits=bool  - Can this unit shoot at ground units? True or False.
+                    Default false.
+Speed=Number  - Speed of shot of this weapon. If it's 0, shot will hit target
+                    immediately (speed is infinite). Default is 0
+DamageRange=Number  - In how big range this weapon's shot damages other units?
+                    E.g. if it's 2, all units 2 or less cells away from
+                    explosion will get damaged.
+                    Must be >= 0. Default is 0.
+Model=filename  - Model of missile of this weapon. If weapon's speed is 0, model
+                    will never be visible, so you won't need it.
+                    Default is "missile.3ds"
+ShootParticles=list  - list of ids of particle systems created when this weapon
+                    shoots.
+                    Default is empty list.
+FlyParticles=list  - list of ids of particle systems created when missile of
+                    this weapon flies. All particle systems are also moved when
+                    missile moves.
+                    Default is empty list.
+ShootParticles=list  - list of ids of particle systems created when shot of this
+                    weapon hits it's target point (target point is _not_ unit,
+                    it might be any point).
+                    Default is empty list.
+
+
+-------------------------------------------------------------------------------
+
 
 
 Now lets get to the "misc" stuff. You can define several plugins - look into
