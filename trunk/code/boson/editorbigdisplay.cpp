@@ -342,7 +342,7 @@ void EditorBigDisplay::unitAction(int actionType)
 		d->mActionLocked = true;
 		break;
 	default:
-		d->mActionLocked = false;
+		unlockAction();
 		break;
  }
 }
@@ -350,6 +350,11 @@ void EditorBigDisplay::unitAction(int actionType)
 bool EditorBigDisplay::actionLocked() const
 {
  return d->mActionLocked;
+}
+
+void EditorBigDisplay::unlockAction()
+{
+ d->mActionLocked = false;
 }
 
 UnitAction EditorBigDisplay::actionType() const

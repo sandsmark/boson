@@ -109,6 +109,7 @@ protected:
 	virtual void updateCursor() {}
 
 	virtual bool actionLocked() const;
+	virtual void unlockAction();
 	virtual UnitAction actionType() const;
 
 	/**

@@ -1472,6 +1472,9 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 			} else if (e->button() == RIGHT_BUTTON) {
 				if (d->mMouseMoveDiff.isRMBMove()) {
 					d->mMouseMoveDiff.stop();
+				} else if (actionLocked()) {
+					unlockAction();
+					updateCursor();
 				} else {
 					bool send = false;
 					BoAction action;

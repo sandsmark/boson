@@ -372,6 +372,7 @@ protected:
 	void addMouseIO(Player* p);
 
 	virtual bool actionLocked() const = 0;
+	virtual void unlockAction() = 0;
 	virtual UnitAction actionType() const = 0;
 	virtual CanSelectUnit canSelect(Unit* unit) const = 0;
 

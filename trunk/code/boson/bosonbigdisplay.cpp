@@ -152,7 +152,7 @@ void BosonBigDisplay::actionClicked(const BoAction& action, QDataStream& stream,
 			boError() << k_funcinfo << "Unknown actiontype for locked action: " << d->mActionType << endl;
 			break;
 	}
-	d->mLockAction = false;
+	unlockAction();
 	return;
  }
 
@@ -634,7 +634,7 @@ void BosonBigDisplay::unitAction(int actionType)
 
 		QDataStream msg(b, IO_WriteOnly);
 		localPlayer()->forwardInput(msg);
-		d->mLockAction = false;
+		unlockAction();
 		return;
 	}
 	default:
@@ -648,6 +648,11 @@ void BosonBigDisplay::unitAction(int actionType)
 bool BosonBigDisplay::actionLocked() const
 {
  return d->mLockAction;
+}
+
+void BosonBigDisplay::unlockAction()
+{
+ d->mLockAction = false;
 }
 
 UnitAction BosonBigDisplay::actionType() const
