@@ -1,7 +1,13 @@
 ## Makefile.am for boson
 
 SUBDIRS = data \
-	bosonwidgets items commandframe startupwidgets sound info script \
+	bosonwidgets \
+	items \
+	commandframe \
+	startupwidgets \
+	sound \
+	info \
+	script \
 	bosonfont \
 	meshrenderer \
 	groundrenderer
@@ -13,9 +19,9 @@ noinst_LTLIBRARIES = \
 		libborender.la \
 		libboinfo.la \
 		libbo3dsdebug.la
-bin_PROGRAMS = boson bounit boprofiling bocursor borender boinfo bo3dsdebug
+bin_PROGRAMS = boson borender bounit boprofiling bocursor boinfo bo3dsdebug
 
-INCLUDES = -I$(kde_includes)/arts -I$(top_srcdir)/bodebug $(all_includes)
+INCLUDES = -I$(top_srcdir)/bodebug $(all_includes)
 
 
 libboson_la_SOURCES = \
@@ -128,7 +134,8 @@ libboson_la_LIBADD = \
 		$(LIB_KDEUI) \
 		$(LIB_KIO) \
 		$(GLLIB) -l3ds \
-		$(LIB_XRANDR)
+		$(LIB_XRANDR) \
+		$(LIB_BOMEMORY)
 
 boson_LDFLAGS = $(KDE_RPATH) $(all_libraries) -Xlinker -export-dynamic
 boson_LDADD = \
@@ -154,6 +161,7 @@ boprofiling_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 boprofiling_LDADD = \
 		$(top_builddir)/boson/libboprofiling.la \
 		$(top_builddir)/bodebug/libbodebug.la \
+		$(LIB_BOMEMORY) \
 		$(LIB_KDEUI) \
 		$(LIB_KIO)
 boprofiling_SOURCES = \
@@ -171,6 +179,7 @@ bocursor_LDADD = \
 		$(top_builddir)/bodebug/libbodebug.la \
 		$(top_builddir)/boson/libbocursor.la \
 		$(top_builddir)/boson/info/libbosoninfo.la \
+		$(LIB_BOMEMORY) \
 		$(LIB_KDEUI) \
 		$(LIB_KIO) \
 		$(GLLIB)
@@ -196,6 +205,7 @@ boinfo_LDADD = \
 		$(top_builddir)/boson/libboinfo.la \
 		$(top_builddir)/bodebug/libbodebug.la \
 		$(top_builddir)/boson/info/libbosoninfo.la \
+		$(LIB_BOMEMORY) \
 		$(GLLIB) \
 		-lkio $(LIB_KDEUI)
 boinfo_SOURCES = \
@@ -211,6 +221,7 @@ bo3dsdebug_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 bo3dsdebug_LDADD = \
 		$(top_builddir)/boson/libbo3dsdebug.la \
 		$(top_builddir)/bodebug/libbodebug.la \
+		$(LIB_BOMEMORY) \
 		-l3ds \
 		$(GLLIB) \
 		-lkio $(LIB_KDEUI)

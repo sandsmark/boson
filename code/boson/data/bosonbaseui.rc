@@ -29,6 +29,7 @@
     <Menu name="debug_colormap"><text>&amp;Color map</text>
       <Action name="debug_colormap_enable" />
     </Menu>
+    <Action name="debug_memory" />
   </Menu>
   <Menu name="settings" group="settingsmenu"><text>&amp;Settings</text>
     <Action name="options_show_chat" append="show_merge" />

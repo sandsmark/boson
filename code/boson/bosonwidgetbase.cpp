@@ -52,6 +52,9 @@
 #include "bomeshrenderermanager.h"
 #include "bogroundrenderermanager.h"
 #include "boglstatewidget.h"
+#ifdef BOSON_USE_BOMEMORY
+#include "bomemory/bomemorydialog.h"
+#endif
 
 #include <kapplication.h>
 #include <klocale.h>
@@ -236,7 +239,7 @@ void BosonWidgetBase::initDisplayManager()
  connect(boGame, SIGNAL(signalAdvance(unsigned int, bool)),
 		this, SLOT(slotAdvance(unsigned int, bool)));
 
- displayManager()->setLocalPlayerIO(localPlayer()->playerIO()); // this does nothing.
+ displayManager()->setLocalPlayerIO(localPlayerIO()); // this does nothing.
 
  connect(localPlayer(), SIGNAL(signalUnitChanged(Unit*)),
 		mDisplayManager, SLOT(slotUnitChanged(Unit*)));
@@ -688,6 +691,11 @@ void BosonWidgetBase::initKActions()
  (void)new KAction(i18n("Crash boson"), KShortcut(), this,
 		SLOT(slotCrashBoson()), actionCollection(),
 		"debug_crash_boson");
+#ifdef BOSON_USE_BOMEMORY
+ (void)new KAction(i18n("Debug M&emory"), KShortcut(), this,
+		SLOT(slotDebugMemory()), actionCollection(),
+		"debug_memory");
+#endif
 
  cheating->setChecked(DEFAULT_CHEAT_MODE);
  slotToggleCheating(DEFAULT_CHEAT_MODE);
@@ -747,6 +755,19 @@ void BosonWidgetBase::startScenarioAndGame()
 void BosonWidgetBase::slotDebugMode(int index)
 {
  boConfig->setDebugMode((BosonConfig::DebugMode)index);
+}
+
+void BosonWidgetBase::slotDebugMemory()
+{
+#ifdef BOSON_USE_BOMEMORY
+ boDebug() << k_funcinfo << endl;
+ BoMemoryDialog* dialog = new BoMemoryDialog(this);
+ connect(dialog, SIGNAL(finished()), dialog, SLOT(deleteLater()));
+ boDebug() << k_funcinfo << "update data" << endl;
+ dialog->slotUpdate();
+ dialog->show();
+ boDebug() << k_funcinfo << "done" << endl;
+#endif
 }
 
 void BosonWidgetBase::initPlayersMenu()
@@ -1226,5 +1247,13 @@ void BosonWidgetBase::initMap()
 void BosonWidgetBase::slotCrashBoson()
 {
  ((QObject*)0)->name();
+}
+
+PlayerIO* BosonWidgetBase::localPlayerIO() const
+{
+ if (localPlayer()) {
+	return localPlayer()->playerIO();
+ }
+ return 0;
 }
 

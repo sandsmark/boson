@@ -20,6 +20,7 @@
 #include "borendermain.h"
 #include "borendermain.moc"
 
+#include "defines.h"
 #include "speciestheme.h"
 #include "bosonconfig.h"
 #include "bosonmodel.h"
@@ -41,6 +42,9 @@
 #include "bomeshrenderermanager.h"
 #include "boglstatewidget.h"
 #include "info/boinfo.h"
+#ifdef BOSON_USE_BOMEMORY
+#include "bomemory/bomemorydialog.h"
+#endif
 
 #include <kcmdlineargs.h>
 #include <kaboutdata.h>
@@ -1235,6 +1239,19 @@ void RenderMain::slotDebugModels()
  dialog->show();
 }
 
+void RenderMain::slotDebugMemory()
+{
+#ifdef BOSON_USE_BOMEMORY
+ boDebug() << k_funcinfo << endl;
+ BoMemoryDialog* dialog = new BoMemoryDialog(this);
+ connect(dialog, SIGNAL(finished()), dialog, SLOT(deleteLater()));
+ boDebug() << k_funcinfo << "update data" << endl;
+ dialog->slotUpdate();
+ dialog->show();
+ boDebug() << k_funcinfo << "done" << endl;
+#endif
+}
+
 void RenderMain::slotDebugSpecies()
 {
  KDialogBase* dialog = new KDialogBase(KDialogBase::Plain, i18n("Debug Species"),
@@ -1434,6 +1451,10 @@ void RenderMain::initKAction()
 
  (void)new KAction(i18n("Debug &Models"), 0, this, SLOT(slotDebugModels()),
 		actionCollection(), "debug_models");
+#ifdef BOSON_USE_BOMEMORY
+ (void)new KAction(i18n("Debug M&emory"), 0, this, SLOT(slotDebugMemory()),
+		actionCollection(), "debug_memory");
+#endif
  (void)new KAction(i18n("Debug &Species"), 0, this, SLOT(slotDebugSpecies()),
 		actionCollection(), "debug_species");
  (void)new KAction(i18n("Show OpenGL states"), KShortcut(), this,

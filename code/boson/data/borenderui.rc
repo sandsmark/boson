@@ -10,6 +10,7 @@
       <Action name="debug_lazy_reload_model_textures" />
       <Action name="debug_lazy_reload_meshrenderer" />
     </Menu>
+    <Action name="debug_memory" />
   </Menu>
   <Menu name="settings" group="settingsmenu"><text>&amp;Settings</text>
     <Action name="options_show_vertex_points" />
