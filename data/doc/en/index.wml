@@ -107,10 +107,10 @@
       </dd>
     </dl>
     
-    <hr>
+    <hr color=#004000>
     <h2>
       The Boson Handbook - maintained by <a href="mailto:halux2001@users.sourceforge.net">Felix Seeger</a>
     </h2>
 
-#include "nav.wml" after_url="intr.html" after_text="Introduction"      
+#include "nav.wml" after_url="intr.html" after_text="Introduction" before_text="&nbsp;"
 #include "footer.wml"
