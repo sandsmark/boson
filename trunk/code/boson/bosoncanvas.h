@@ -401,7 +401,6 @@ public:
 	bool advanceFunctionLocked() const { return mAdvanceFunctionLocked; }
 
 	unsigned int effectsCount() const;
-	void updateEffects(float elapsed);
 	QPtrList<BosonEffect>* effects() const;
 	void addEffect(BosonEffect* e);
 	void addEffects(const QPtrList<BosonEffect> effects);
@@ -538,6 +537,7 @@ private:
 	void init();
 
 private:
+	friend class BoCanvasAdvance;
 	class BosonCanvasPrivate;
 	BosonCanvasPrivate* d;
 	BosonCollisions* mCollisions;
