@@ -120,7 +120,7 @@ echo "
 counter();
 
 // "Valid html" logo
-echo "
+/*echo "
 <br>
 <!-- We have Valid HTML 4.01! -->
 <a href=\"http://www.sourceforge.net/projects/boson\" target=\"_blank\">
@@ -134,7 +134,7 @@ echo "
 <a href=\"http://jigsaw.w3.org/css-validator/validator?uri=http://boson.sourceforge.net/style-${style}.css\" target=\"_blank\">
   <img style=\"border:0;width:88px;height:31px\"
        src=\"${basedir}pictures/valid-css.png\"
-       alt=\"Valid CSS!\"></a>";
+       alt=\"Valid CSS!\"></a>";*/
 
 // Copyright
 echo "
@@ -172,6 +172,7 @@ function sidebar_stories_box()
 sidebar_box_begin("Boson stories");
 draw_link("Story #1&nbsp;&nbsp;(Oct. 17, 2002)", "stories/story-20021017.php");
 draw_link("Story #2&nbsp;&nbsp;(Nov. 08, 2002)", "stories/story-20021108.php");
+draw_link("Story #3&nbsp;&nbsp;(March 31, 2003)", "stories/story-20030331.php");
 sidebar_box_end();
 }
 

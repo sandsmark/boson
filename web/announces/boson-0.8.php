@@ -36,7 +36,7 @@ include("${basedir}variables.php");
 do_start_stuff();
 
 // Headers
-html_print_header("Boson 0.7 announcement");
+html_print_header("Boson 0.8 announcement");
 print_header();
 
 // Main table

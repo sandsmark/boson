@@ -56,6 +56,7 @@ draw_bigbox_text("Boson stories:
     <ul>
     <li><a href=\"stories/story-20021017.php\">Story #1&nbsp;&nbsp;(Oct. 17, 2002)</a></li>
     <li><a href=\"stories/story-20021108.php\">Story #2&nbsp;&nbsp;(Nov. 08, 2002)</a></li>
+    <li><a href=\"stories/story-20030331.php\">Story #3&nbsp;&nbsp;(March 31, 2003)</a></li>
     </ul>");
 draw_bigbox_end();
 
