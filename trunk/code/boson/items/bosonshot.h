@@ -37,19 +37,23 @@ class BosonWeaponProperties;
 class BosonShot : public BosonItem
 {
   public:
-    BosonShot(const BosonWeaponProperties* prop, Unit* attacker, float x, float y, float z, float tx, float ty, float tz);
+    /**
+     * @param prop The kind of weapon that fired this shot
+     * @param owner The player that shot. This is usually @ref Unit::owner of
+     * the unit that is attacking.
+     * @param canvas The @ref BosonCanvas object
+     **/
+    BosonShot(const BosonWeaponProperties* prop, Player* owner, BosonCanvas* canvas, float x, float y, float z, float tx, float ty, float tz);
 
     virtual void advance(unsigned int phase);
 
 //    inline BoVector3 pos()  { return mPos; }
 
-    inline Player* owner()  { return mOwner; };
+    Player* owner()  { return mOwner; };
     inline const BosonWeaponProperties* properties() const  { return mProp; };
-
-    inline QPtrList<BosonParticleSystem>* flyParticleSystems()  { return &mFlyParticleSystems; };
+    QPtrList<BosonParticleSystem>* flyParticleSystems()  { return &mFlyParticleSystems; };
 
     inline bool isActive() const  { return mActive; };
-
     inline virtual int rtti() const  { return RTTI::Shot; }
 
   protected:
@@ -66,3 +70,6 @@ class BosonShot : public BosonItem
 };
 
 #endif // BOSONSHOT_H
+/*
+ * vim:et sw=2
+ */

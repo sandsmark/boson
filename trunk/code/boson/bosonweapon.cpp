@@ -26,6 +26,7 @@
 #include "unit.h"
 #include "global.h"
 #include "bosoncanvas.h"
+#include "bodebug.h"
 
 #include <ksimpleconfig.h>
 
@@ -69,7 +70,12 @@ void BosonWeaponProperties::savePlugin(KSimpleConfig* cfg)
 
 BosonShot* BosonWeaponProperties::newShot(Unit* attacker, float x, float y, float z, float tx, float ty, float tz) const
 {
-  return new BosonShot(this, attacker, x, y, z, tx, ty, tz);
+  if(!attacker)
+  {
+    boError() << k_funcinfo << "NULL attacker" << endl;
+    return 0;
+  }
+  return new BosonShot(this, attacker->owner(), attacker->canvas(), x, y, z, tx, ty, tz);
 }
 
 QPtrList<BosonParticleSystem> BosonWeaponProperties::newShootParticleSystems(float x, float y, float z) const
@@ -146,3 +152,7 @@ void BosonWeapon::shoot(float x, float y, float z)
   mUnit->playSound(SoundShoot);  // TODO: weapon-specific sounds
   mReloadCounter = mProp->reloadingTime();
 }
+
+/*
+ * vim: et sw=2
+ */
