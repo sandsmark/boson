@@ -928,6 +928,9 @@ void BoUfoActionCollection::insert(BoUfoAction* action)
 
 void BoUfoActionCollection::remove(BoUfoAction* action, bool deleteIt)
 {
+ if (d->mActionDict.isEmpty()) {
+	return;
+ }
  char unnamed[100];
  const char* name = action->name();
  if (qstrcmp(name, "unnamed") == 0) {
