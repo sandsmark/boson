@@ -491,7 +491,7 @@ bool BosonFileConverter::convertSaveGame_From_0_8_128_To_0_9(QMap<QString, QByte
  return true;
 }
 
-bool BosonFileConverter::convertScenario_From_0_8_To_0_9(const QString& scenarioXML, QString* playersXML, QString* canvasXML)
+bool BosonFileConverter::convertScenario_From_0_8_To_0_9(const QByteArray& scenarioXML, QByteArray* playersXML, QByteArray* canvasXML)
 {
  if (!playersXML) {
 	BO_NULL_ERROR(playersXML);
@@ -629,7 +629,11 @@ bool BosonFileConverter::convertScenario_From_0_8_To_0_9(const QString& scenario
 	for (unsigned int j = 0; j < units.count(); j++) {
 		QDomElement u = units.item(j).toElement();
 		UnitNode* unit = &p->units[j];
-		unit->type = u.attribute("Type").toUInt(&ok);
+		if (!u.hasAttribute("Type")) {
+			unit->type = u.attribute("UnitType").toUInt(&ok);
+		} else {
+			unit->type = u.attribute("Type").toUInt(&ok);
+		}
 		if (!ok) {
 			boWarning() << k_funcinfo << "invalid type value"  << endl;
 			unit->type = 0;
@@ -759,8 +763,8 @@ bool BosonFileConverter::convertScenario_From_0_8_To_0_9(const QString& scenario
  }
 
  delete[] scenarioPlayers;
- *playersXML = playersDoc.toString();
- *canvasXML= canvasDoc.toString();
+ *playersXML = playersDoc.toCString();
+ *canvasXML= canvasDoc.toCString();
 
  return true;
 }

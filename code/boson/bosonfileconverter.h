@@ -77,7 +77,7 @@ public:
 	 * In boson 0.9 the scenario.xml file is replaced by players.xml and
 	 * canvas.xml - such as they also appear in savegames.
 	 **/
-	bool convertScenario_From_0_8_To_0_9(const QString& scenarioXML, QString* playersXML, QString* canvasXML);
+	bool convertScenario_From_0_8_To_0_9(const QByteArray& scenarioXML, QByteArray* playersXML, QByteArray* canvasXML);
 
 protected:
 	bool loadXMLDoc(QDomDocument* doc, const QString& xml) const;
