@@ -50,10 +50,9 @@ void BosonBigDisplayInput::actionClicked(const BoAction& action, QDataStream& st
 // this method should not perform any tasks but rather send the input through
 // the KGameIO. this way it is very easy (it should be at least) to write a
 // computer player
- if (!selection()) {
-	boError() << k_funcinfo << "NULL selection" << endl;
-	return;
- }
+ BO_CHECK_NULL_RET(selection());
+ BO_CHECK_NULL_RET(canvas());
+ BO_CHECK_NULL_RET(localPlayer());
  if (selection()->isEmpty()) {
 	return;
  }
@@ -127,7 +126,7 @@ void BosonBigDisplayInput::actionClicked(const BoAction& action, QDataStream& st
 	return;
  }
 
- Unit* unit = 0l;
+ Unit* unit = 0;
  if (!localPlayer()->isFogged((int)(action.canvasVector().x() / BO_TILE_SIZE), (int)(action.canvasVector().y() / BO_TILE_SIZE))) {
 	unit = canvas()->findUnitAt(action.canvasVector());
  }
@@ -215,6 +214,14 @@ void BosonBigDisplayInput::actionClicked(const BoAction& action, QDataStream& st
 
 bool BosonBigDisplayInput::actionMine(QDataStream& stream, const BoVector3& canvasVector)
 {
+ if (!canvas()) {
+	BO_NULL_ERROR(canvas());
+	return false;
+ }
+ if (!selection()) {
+	BO_NULL_ERROR(selection());
+	return false;
+ }
  MobileUnit* u = (MobileUnit*)selection()->leader();
  HarvesterPlugin* h = (HarvesterPlugin*)u->plugin(UnitPlugin::Harvester);
  if (!h) {
@@ -231,6 +238,14 @@ bool BosonBigDisplayInput::actionMine(QDataStream& stream, const BoVector3& canv
 
 bool BosonBigDisplayInput::actionMove(QDataStream& stream, const BoVector3& canvasVector)
 {
+ if (!selection()) {
+	BO_NULL_ERROR(selection());
+	return false;
+ }
+ if (!localPlayer()) {
+	BO_NULL_ERROR(localPlayer());
+	return false;
+ }
  // AB: note that only x and y are relevant from canvasVector !
  // z is ignored
  QPtrList<Unit> list = selection()->allUnits();
@@ -260,6 +275,18 @@ bool BosonBigDisplayInput::actionMove(QDataStream& stream, const BoVector3& canv
 
 bool BosonBigDisplayInput::actionBuild(QDataStream& stream, const BoVector3& canvasVector)
 {
+ if (!localPlayer()) {
+	BO_NULL_ERROR(localPlayer());
+	return false;
+ }
+ if (!selection()) {
+	BO_NULL_ERROR(selection());
+	return false;
+ }
+ if (!canvas()) {
+	BO_NULL_ERROR(canvas());
+	return false;
+ }
  Unit* factory = selection()->leader();
  if (!factory) {
 	return false;
@@ -292,6 +319,18 @@ bool BosonBigDisplayInput::actionBuild(QDataStream& stream, const BoVector3& can
 
 bool BosonBigDisplayInput::actionAttack(QDataStream& stream, const BoVector3& canvasVector)
 {
+ if (!localPlayer()) {
+	BO_NULL_ERROR(localPlayer());
+	return false;
+ }
+ if (!selection()) {
+	BO_NULL_ERROR(selection());
+	return false;
+ }
+ if (!canvas()) {
+	BO_NULL_ERROR(canvas());
+	return false;
+ }
  Unit* unit = canvas()->findUnitAt(canvasVector);
  QPtrList<Unit> list = selection()->allUnits();
  QPtrListIterator<Unit> it(list);
@@ -315,6 +354,14 @@ bool BosonBigDisplayInput::actionAttack(QDataStream& stream, const BoVector3& ca
 
 bool BosonBigDisplayInput::actionAttackPos(QDataStream& stream, const BoVector3& canvasVector)
 {
+ if (!localPlayer()) {
+	BO_NULL_ERROR(localPlayer());
+	return false;
+ }
+ if (!selection()) {
+	BO_NULL_ERROR(selection());
+	return false;
+ }
  // AB: note that only x and y are relevant from canvasVector !
  // z is ignored
  QPtrList<Unit> list = selection()->allUnits();
@@ -344,6 +391,14 @@ bool BosonBigDisplayInput::actionAttackPos(QDataStream& stream, const BoVector3&
 
 bool BosonBigDisplayInput::actionRepair(QDataStream& stream, const BoVector3& canvasVector)
 {
+ if (!selection()) {
+	BO_NULL_ERROR(selection());
+	return false;
+ }
+ if (!canvas()) {
+	BO_NULL_ERROR(canvas());
+	return false;
+ }
  Unit* unit = canvas()->findUnitAt(canvasVector);
  QPtrList<Unit> allUnits = selection()->allUnits();
  QPtrList<Unit> list;
@@ -378,6 +433,14 @@ bool BosonBigDisplayInput::actionRepair(QDataStream& stream, const BoVector3& ca
 
 bool BosonBigDisplayInput::actionRefine(QDataStream& stream, const BoVector3& canvasVector)
 {
+ if (!selection()) {
+	BO_NULL_ERROR(selection());
+	return false;
+ }
+ if (!canvas()) {
+	BO_NULL_ERROR(canvas());
+	return false;
+ }
  Unit* unit = canvas()->findUnitAt(canvasVector);
  const RefineryProperties* prop = (RefineryProperties*)unit->properties(PluginProperties::Refinery);
  if (!prop) {
@@ -422,6 +485,18 @@ bool BosonBigDisplayInput::actionRefine(QDataStream& stream, const BoVector3& ca
 
 bool BosonBigDisplayInput::actionFollow(QDataStream& stream, const BoVector3& canvasVector)
 {
+ if (!localPlayer()) {
+	BO_NULL_ERROR(localPlayer());
+	return false;
+ }
+ if (!selection()) {
+	BO_NULL_ERROR(selection());
+	return false;
+ }
+ if (!canvas()) {
+	BO_NULL_ERROR(canvas());
+	return false;
+ }
  Unit* unit = canvas()->findUnitAt(canvasVector);
  QPtrList<Unit> list = selection()->allUnits();
  QPtrListIterator<Unit> it(list);
@@ -445,6 +520,9 @@ bool BosonBigDisplayInput::actionFollow(QDataStream& stream, const BoVector3& ca
 
 void BosonBigDisplayInput::updatePlacementPreviewData()
 {
+ BO_CHECK_NULL_RET(localPlayer());
+ BO_CHECK_NULL_RET(selection());
+ BO_CHECK_NULL_RET(canvas());
  bigDisplay()->setPlacementPreviewData(0, false);
  if (!actionLocked() || actionType() != ActionBuild) {
 	return;
@@ -477,6 +555,8 @@ void BosonBigDisplayInput::updatePlacementPreviewData()
 
 void BosonBigDisplayInput::unitAction(int actionType)
 {
+ BO_CHECK_NULL_RET(localPlayer());
+ BO_CHECK_NULL_RET(selection());
  switch ((UnitAction)actionType) {
 	case ActionFollow:
 	case ActionMine:
@@ -533,10 +613,9 @@ void BosonBigDisplayInput::updateCursor()
 	boError() << k_funcinfo << "NULL cursor!!" << endl;
 	return;
  }
- if (!localPlayer()) {
-	boError() << k_funcinfo << "NULL local player" << endl;
-	return;
- }
+ BO_CHECK_NULL_RET(localPlayer());
+ BO_CHECK_NULL_RET(selection());
+ BO_CHECK_NULL_RET(canvas());
 
  if (!canvas()->onCanvas(cursorCanvasVector())) {
 	if (actionLocked()) {  // TODO: show "can't do that" cursor if action is locked
@@ -610,7 +689,7 @@ BosonBigDisplayInputBase::CanSelectUnit BosonBigDisplayInput::canSelect(Unit* un
 bool BosonBigDisplayInput::selectAll(const UnitProperties* prop, bool replace)
 {
  if (!localPlayer()) {
-	boError() << k_funcinfo << "NULL localplayer" << endl;
+	BO_NULL_ERROR(localPlayer());
 	return false;
  }
  if (prop->isFacility()) {
@@ -638,14 +717,8 @@ bool BosonBigDisplayInput::selectAll(const UnitProperties* prop, bool replace)
 
 void BosonBigDisplayInput::slotMoveSelection(int cellX, int cellY)
 {
- if (!localPlayer()) {
-	boError() << "NULL local player" << endl;
-	return;
- }
- if (!selection()) {
-	boError() << k_funcinfo << "NULL selection" << endl;
-	return;
- }
+ BO_CHECK_NULL_RET(localPlayer());
+ BO_CHECK_NULL_RET(selection());
  if (selection()->isEmpty()) {
 	return;
  }
