@@ -255,6 +255,7 @@ void Player::unitDestroyed(Unit* unit)
  if (unit->unitProperties()->supportMiniMap()) {
 	if (!hasMiniMap()) {
 		BoEvent* event = new BoEvent("LostMinimap");
+		event->setPlayerId(id());
 		event->setLocation(BoVector3(unit->x(), unit->y(), unit->z()));
 		boGame->queueEvent(event);
 	}
@@ -536,6 +537,7 @@ void Player::facilityCompleted(Facility* fac)
  }
  if (fac->unitProperties()->supportMiniMap()) {
 	BoEvent* event = new BoEvent("GainedMinimap");
+	event->setPlayerId(id());
 	event->setLocation(BoVector3(fac->x(), fac->y(), fac->z()));
 	boGame->queueEvent(event);
  }
