@@ -55,13 +55,13 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg, bool full)
   mShotType = (BosonShot::Type)(cfg->readNumEntry("Type", (int)BosonShot::Missile));
   mRange = cfg->readUnsignedLongNumEntry("Range", 0);
   mReload = cfg->readUnsignedNumEntry("Reload", 0);
-  mSpeed = (float)(cfg->readDoubleNumEntry("Speed", 0));
+  mSpeed = (float)(cfg->readDoubleNumEntry("Speed", 0)) / 48.0f;
   if(mSpeed == 0 && mShotType == BosonShot::Missile)
   {
     boWarning() << k_funcinfo << "Type is missile, but speed is 0, setting type to bullet" << endl;
     mShotType = BosonShot::Bullet;
   }
-  mAccelerationSpeed = (float)(cfg->readDoubleNumEntry("AccelerationSpeed", 0.2));
+  mAccelerationSpeed = (float)(cfg->readDoubleNumEntry("AccelerationSpeed", 0.2)) / 48.0f;
   mDamage = cfg->readUnsignedLongNumEntry("Damage", 0);
   mDamageRange = (float)(cfg->readDoubleNumEntry("DamageRange", 1));
   mFullDamageRange = (float)(cfg->readDoubleNumEntry("FullDamageRange", 0.25 * mDamageRange));
@@ -74,7 +74,6 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg, bool full)
   mCanShootAtLandUnits = cfg->readBoolEntry("CanShootAtLandUnits", false);
   mHeight = (float)(cfg->readDoubleNumEntry("Height", 0.25));
   mOffset = BosonConfig::readBoVector3Entry(cfg, "Offset");
-  mOffset.cellToCanvas();
   mAutoUse = cfg->readBoolEntry("AutoUse", true);
   if(mAutoUse && (mShotType == BosonShot::Mine || mShotType == BosonShot::Bomb))
   {
@@ -117,15 +116,14 @@ void BosonWeaponProperties::savePlugin(KSimpleConfig* cfg)
   cfg->writeEntry("Name", mName);
   cfg->writeEntry("Range", mRange);
   cfg->writeEntry("Reload", mReload);
-  cfg->writeEntry("Speed", mSpeed);
+  cfg->writeEntry("Speed", mSpeed * 48.0f);
+  cfg->writeEntry("AccelerationSpeed", mAccelerationSpeed * 48.0f);
   cfg->writeEntry("Damage", mDamage);
   cfg->writeEntry("DamageRange", mDamageRange);
   cfg->writeEntry("CanShootAtAirUnits", mCanShootAtAirUnits);
   cfg->writeEntry("CanShootAtLandUnits", mCanShootAtLandUnits);
   cfg->writeEntry("Height", (double)mHeight);
-  BoVector3 offset(mOffset);
-  offset.canvasToCell();
-  BosonConfig::writeEntry(cfg, "Offset", offset);
+  BosonConfig::writeEntry(cfg, "Offset", mOffset);
   BosonConfig::writeUnsignedLongNumList(cfg, "ShootEffects", mShootEffectIds);
   BosonConfig::writeUnsignedLongNumList(cfg, "FlyEffects", mFlyEffectIds);
   BosonConfig::writeUnsignedLongNumList(cfg, "HitEffects", mHitEffectIds);
@@ -140,6 +138,7 @@ void BosonWeaponProperties::reset()
   mRange = 0;
   mReload = 0;
   mSpeed = 0;
+  mAccelerationSpeed = 0;
   mDamage = 0;
   mDamageRange = 1;
   mFullDamageRange = 0.25 * mDamageRange;
@@ -347,7 +346,7 @@ bool BosonWeapon::canShootAt(Unit* u) const
 
 void BosonWeapon::shoot(Unit* u)
 {
-  shoot(BoVector3(u->x() + u->width() / 2, u->y() + u->height() / 2, u->z()) + u->unitProperties()->hitPoint());
+  shoot(BoVector3(u->centerX(), u->centerY(), u->z()) + u->unitProperties()->hitPoint());
 }
 
 void BosonWeapon::shoot(const BoVector3& target)
@@ -357,7 +356,7 @@ void BosonWeapon::shoot(const BoVector3& target)
     boError() << k_funcinfo << "NULL unit" << endl;
     return;
   }
-  shoot(BoVector3(unit()->x() + unit()->width() / 2, unit()->y() + unit()->height() / 2, unit()->z()), target);
+  shoot(BoVector3(unit()->centerX(), unit()->centerY(), unit()->z()), target);
 }
 
 void BosonWeapon::shoot(const BoVector3& pos, const BoVector3& target)
@@ -380,7 +379,7 @@ bool BosonWeapon::layMine()
     boDebug() << k_funcinfo << "weapon is not minelayer or not reloaded" << endl;
     return false;
   }
-  BoVector3 pos(unit()->x() + unit()->width() / 2, unit()->y() + unit()->height() / 2, 0);
+  BoVector3 pos(unit()->centerX(), unit()->centerY(), 0);
   pos.setZ(unit()->canvas()->heightAtPoint(pos.x(), pos.y()));
   // Substract half the object size from pos, so that mine's center will be at pos
   pos += BoVector3(-0.25, -0.25, 0);  // FIXME: use real object size
@@ -396,7 +395,7 @@ bool BosonWeapon::dropBomb()
     boDebug() << k_funcinfo << "weapon is not bomb or not reloaded" << endl;
     return false;
   }
-  BoVector3 pos(unit()->x() + unit()->width() / 2, unit()->y() + unit()->height() / 2, unit()->z());
+  BoVector3 pos(unit()->centerX(), unit()->centerY(), unit()->z());
   // Substract half the object size from pos, so that bomb's center will be at pos
   pos += BoVector3(-0.25, -0.25, 0);  // FIXME: use real object size
   shoot(pos, pos);
