@@ -66,7 +66,8 @@ void bosonField::createMob(mobileMsg_t &m)
 		default:
 			u = new playerMobUnit(&m);
 			break;
-		case MOB_HARVESTER:
+		case MOB_MINERAL_HARVESTER:
+		case MOB_OIL_HARVESTER:
 			u = new harvesterUnit(&m);
 			break;
 	};
