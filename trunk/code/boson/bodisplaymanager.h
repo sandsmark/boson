@@ -38,19 +38,6 @@ class QDomElement;
 template<class T> class QPtrList;
 
 /**
- * Since boson is able to provide different displays ("views") of the same map
- * we need to manage all of these display. THat is done here. You will add the
- * first display using @ref addInitialDisplay and then all following displays
- * using one of @ref splitActiveDisplayVertical or @ref
- * splitActiveDisplayHorizontal.
- *
- * The active display is the display that currently that receives the input from
- * the player (usually it also has the focus). E.g. if the player selected a
- * unit in two displays and then right-clicks on a point in the mini map only
- * the selected unit in the activeDisplay should move to that point.
- *
- * You can change the active display using @ref setActiveDisplay.
- * @short Manager for all displays ("views") of boson.
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
 class BoDisplayManager : public QWidget
@@ -105,10 +92,6 @@ public:
 
 	void quitGame();
 
-	void removeActiveDisplay();
-	BosonBigDisplayBase* splitActiveDisplayVertical();
-	BosonBigDisplayBase* splitActiveDisplayHorizontal();
-
 	void addChatMessage(const QString& text);
 
 	/**
@@ -126,8 +109,6 @@ public:
 	 * @return BosonBigDisplayBase::fps for the @ref activeDisplay
 	 **/
 	double fps() const;
-
-	QPtrList<BosonBigDisplayBase>* displayList();
 
 public slots:
 	/**
@@ -261,8 +242,6 @@ signals:
 
 protected:
 	BosonBigDisplayBase* addDisplay(QWidget* parent);
-	BoBox* findBox(BosonBigDisplayBase*) const;
-	void recreateLayout();
 
 	void grabMovieFrame();
 

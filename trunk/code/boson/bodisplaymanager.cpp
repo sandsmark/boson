@@ -32,9 +32,7 @@
 
 #include <klocale.h>
 
-#include <qstyle.h>
 #include <qlayout.h>
-#include <qvbox.h>
 #include <qintdict.h>
 #include <qdom.h>
 #include <qfile.h>
@@ -43,70 +41,6 @@
 
 #include "bodisplaymanager.moc"
 
-
-class BoBox : public QWidget
-{
-public:
-	BoBox(QWidget* parent) : QWidget(parent, "bosondisplaybox")
-	{
-		mLayout = 0;
-	}
-	~BoBox()
-	{
-	}
-
-	bool hasDisplay(BosonBigDisplayBase* display)
-	{
-		return mDisplays.containsRef(display);
-	}
-
-	void insert(unsigned int index, BosonBigDisplayBase* display)
-	{
-		if (hasDisplay(display)) {
-			boError() << k_funcinfo << "already have that display" << endl;
-			remove(display);
-		}
-		mDisplays.insert(index, display);
-		recreateLayout();
-	}
-	
-	void remove(BosonBigDisplayBase* b)
-	{
-		if (!hasDisplay(b)) {
-			boError() << k_funcinfo << "don't have that display" << endl;
-			return;
-		}
-		mDisplays.removeRef(b);
-		recreateLayout();
-	}
-	
-	unsigned int count() const
-	{
-		return mDisplays.count();
-	}
-
-	int find(BosonBigDisplayBase* b)
-	{
-		return mDisplays.findRef(b);
-	}
-
-protected:
-	void recreateLayout()
-	{
-		delete mLayout;
-		mLayout = new QHBoxLayout(this);
-		QPtrListIterator<BosonBigDisplayBase> it(mDisplays);
-		while (it.current()) {
-			mLayout->addWidget(it.current());
-			++it;
-		}
-		mLayout->activate();
-	}
-
-private:
-	QPtrList<BosonBigDisplayBase> mDisplays;
-	QHBoxLayout* mLayout;
-};
 
 class BoDisplayManager::BoDisplayManagerPrivate
 {
@@ -122,8 +56,6 @@ public:
 
 	QVBoxLayout* mLayout;
 
-	QPtrList<BosonBigDisplayBase> mDisplayList;
-	QPtrList<BoBox> mBoxList;
 	BosonBigDisplayBase* mActiveDisplay;
 
 	QIntDict<BoSelection> mSelectionGroups;
@@ -136,8 +68,6 @@ public:
 BoDisplayManager::BoDisplayManager(QWidget* parent) : QWidget(parent, "bosondisplaymanager")
 {
  d = new BoDisplayManagerPrivate;
- d->mDisplayList.setAutoDelete(true);
- d->mBoxList.setAutoDelete(true);
  d->mGrabMovie = false;
  d->mLightWidget = 0;
 
@@ -153,10 +83,8 @@ BoDisplayManager::~BoDisplayManager()
  boDebug() << k_funcinfo << endl;
  delete d->mLightWidget;
  d->mSelectionGroups.clear();
- boDebug() << k_funcinfo << "clearing display list" << endl;
- d->mDisplayList.clear();
- boDebug() << k_funcinfo << "clearing box list" << endl;
- d->mBoxList.clear();
+ boDebug() << k_funcinfo << "deleting display" << endl;
+ delete d->mActiveDisplay;
  delete d;
  boDebug() << k_funcinfo << "done" << endl;
 }
@@ -184,19 +112,6 @@ void BoDisplayManager::markActive(BosonBigDisplayBase* display, bool active)
 	return;
  }
  display->setActive(active);
-
- // obsolete for OpenGL?
- /*
- if (active) {
-	if (d->mDisplayList.count() > 1) {
-		display->setLineWidth(style().pixelMetric(QStyle::PM_DefaultFrameWidth, this) + 3);
-	} else {
-		display->setLineWidth(style().pixelMetric(QStyle::PM_DefaultFrameWidth, this));
-	}
- } else {
-	display->setLineWidth(style().pixelMetric(QStyle::PM_DefaultFrameWidth, this));
- }
- */
 }
 
 BosonBigDisplayBase* BoDisplayManager::activeDisplay() const
@@ -204,102 +119,20 @@ BosonBigDisplayBase* BoDisplayManager::activeDisplay() const
  return d->mActiveDisplay;
 }
 
-/*
-QPtrList<BosonBigDisplayBase> BoDisplayManager::displays() const
-{
- return d->mDisplayList;
-}*/
-
-void BoDisplayManager::removeActiveDisplay()
-{
- if (d->mDisplayList.count() <  2) {
-	boWarning() << k_funcinfo << "need at lest two displays" << endl;
-	return;
- }
- if (!d->mActiveDisplay) {
-	return;
- }
- delete d->mLightWidget;
- d->mLightWidget = 0;
- BosonBigDisplayBase* old = d->mActiveDisplay;
- QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
- while (it.current()) {
-	if (it.current() != old) {
-		it.current()->makeActive();
-		break;
-	}
-	++it;
- }
- BoBox* box = findBox(old);
- if (!box) {
-	boError() << k_funcinfo << "Cannot find parent box" << endl;
-	return;
- }
-
- box->remove(old);
- d->mDisplayList.removeRef(old);
-
- if (box->count() == 0) {
-	d->mBoxList.removeRef(box);
- }
-
- // we need to mark twice - once above and once here - it may be that
- // d->mDisplayList.count() is 1 now
- markActive(d->mActiveDisplay, true);
- recreateLayout();
-}
-
-BosonBigDisplayBase* BoDisplayManager::splitActiveDisplayVertical()
-{
- if (!activeDisplay()) {
-	return 0;
- }
- boDebug() << k_funcinfo << endl;
- 
-// we are not actually splitting the view but the entire row...
-// ok splitting the view only is a TODO. but not an important one
- int index = d->mBoxList.findRef(findBox(activeDisplay()));
- if (index < 0) {
-	boDebug() << k_funcinfo << "Cannot find parent box for active display" << endl;
-	return 0;
- }
- BoBox* box = new BoBox(this);
- BosonBigDisplayBase* b = addDisplay(box);
- box->insert(0, b);
- box->show();
- d->mBoxList.insert(index + 1, box);
- recreateLayout();
- return b;
-}
-
-BosonBigDisplayBase* BoDisplayManager::splitActiveDisplayHorizontal()
-{
- if (!activeDisplay()) {
-	return 0;
- }
- boDebug() << k_funcinfo << endl;
- BoBox* box = findBox(activeDisplay());
- if (!box) {
-	boDebug() << k_funcinfo << "Cannot find parent box for active display" << endl;
-	return 0;
- }
- BosonBigDisplayBase* b = addDisplay(box);
- box->insert(box->find(activeDisplay()) + 1, b);
- return b;
-}
-
 BosonBigDisplayBase* BoDisplayManager::addInitialDisplay()
 {
- if (d->mDisplayList.count() != 0) {
+ if (d->mActiveDisplay) {
 	boDebug() << k_funcinfo << "already have displays - returning first..." << endl;
-	return d->mDisplayList.getFirst();
+	return d->mActiveDisplay;
  }
- BoBox* box = new BoBox(this);
- d->mBoxList.append(box);
- BosonBigDisplayBase* b = addDisplay(box);
- box->insert(0, b);
- box->show();
- recreateLayout();
+ BosonBigDisplayBase* b = addDisplay(this);
+
+ delete d->mLayout;
+ d->mLayout = new QVBoxLayout(this);
+ d->mLayout->addWidget(b);
+ d->mLayout->activate();
+
+ slotMakeActiveDisplay(b);
  return b;
 }
 
@@ -307,6 +140,10 @@ BosonBigDisplayBase* BoDisplayManager::addDisplay(QWidget* parent)
 {
  if (!parent) {
 	boError() << k_funcinfo << "parent must not be 0" << endl;
+	return 0;
+ }
+ if (d->mActiveDisplay) {
+	boError() << k_funcinfo << "multiple displays not supported anymore" << endl;
 	return 0;
  }
  boDebug() << k_funcinfo << endl;
@@ -318,7 +155,6 @@ BosonBigDisplayBase* BoDisplayManager::addDisplay(QWidget* parent)
 		this, SLOT(slotChangeViewport(BosonBigDisplayBase*,
 		const QPoint&, const QPoint&, const QPoint&, const QPoint&)));
 
- d->mDisplayList.append(b);
  connect(b, SIGNAL(signalMakeActive(BosonBigDisplayBase*)),
 		this, SLOT(slotMakeActiveDisplay(BosonBigDisplayBase*)));
  return b;
@@ -326,21 +162,15 @@ BosonBigDisplayBase* BoDisplayManager::addDisplay(QWidget* parent)
 
 void BoDisplayManager::setCursor(BosonCursor* cursor)
 {
- QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
- while (it.current()) {
-	it.current()->setCursor(cursor);
-	++it;
- }
+ BO_CHECK_NULL_RET(d->mActiveDisplay);
+ d->mActiveDisplay->setCursor(cursor);
 }
 
 void BoDisplayManager::setLocalPlayerIO(PlayerIO* io)
 {
- QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
- while (it.current()) {
-	boDebug() << k_funcinfo << endl;
-	it.current()->setLocalPlayerIO(io);
-	++it;
- }
+ BO_CHECK_NULL_RET(d->mActiveDisplay);
+ boDebug() << k_funcinfo << endl;
+ d->mActiveDisplay->setLocalPlayerIO(io);
 }
 
 void BoDisplayManager::setCanvas(BosonCanvas* c)
@@ -360,38 +190,12 @@ void BoDisplayManager::quitGame()
  boDebug() << k_funcinfo << endl;
  delete d->mLightWidget;
  d->mLightWidget = 0;
- QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
- while (it.current()) {
-	it.current()->quitGame();
-	++it;
+ if (d->mActiveDisplay) {
+	d->mActiveDisplay->quitGame();
  }
  for (int i = 0; i < 10; i++) {
 	slotClearGroup(i);
  }
-}
-
-BoBox* BoDisplayManager::findBox(BosonBigDisplayBase* b) const
-{
- QPtrListIterator<BoBox> it(d->mBoxList);
- while (it.current()) {
-	if (it.current()->hasDisplay(b)) {
-		return it.current();
-	}
-	++it;
- }
- return 0;
-}
-
-void BoDisplayManager::recreateLayout()
-{
- delete d->mLayout;
- d->mLayout = new QVBoxLayout(this);
- QPtrListIterator<BoBox> it(d->mBoxList);
- while (it.current()) {
-	d->mLayout->addWidget(it.current());
-	++it;
- }
- d->mLayout->activate();
 }
 
 void BoDisplayManager::slotScroll(int dir)
@@ -456,23 +260,17 @@ void BoDisplayManager::slotZoomOut()
 
 void BoDisplayManager::slotAdvance(unsigned int, bool)
 {
- QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
- while (it.current()) {
-	it.current()->setParticlesDirty(true);
-	it.current()->advanceCamera();
-	it.current()->advanceLineVisualization();
-	++it;
- }
+ BO_CHECK_NULL_RET(d->mActiveDisplay);
+ d->mActiveDisplay->setParticlesDirty(true);
+ d->mActiveDisplay->advanceCamera();
+ d->mActiveDisplay->advanceLineVisualization();
  grabMovieFrame();
 }
 
 void BoDisplayManager::slotUpdateIntervalChanged(unsigned int ms)
 {
- QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
- while (it.current()) {
-	it.current()->setUpdateInterval(ms);
-	++it;
- }
+ BO_CHECK_NULL_RET(d->mActiveDisplay);
+ d->mActiveDisplay->setUpdateInterval(ms);
 }
 
 void BoDisplayManager::slotCenterHomeBase()
@@ -586,11 +384,8 @@ void BoDisplayManager::slotDeleteSelectedUnits()
 
 void BoDisplayManager::addChatMessage(const QString& text)
 {
- QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
- while (it.current()) {
-	it.current()->addChatMessage(text);
-	++it;
- }
+ BO_CHECK_NULL_RET(d->mActiveDisplay);
+ d->mActiveDisplay->addChatMessage(text);
 }
 
 void BoDisplayManager::slotUnitRemoved(Unit* u)
@@ -605,38 +400,26 @@ void BoDisplayManager::slotUnitChanged(Unit* unit)
  // this slot is meant for the case that unit has been destroyed but is
  // selected. we don't check for unit->isDestroyed() here (which would be
  // faster) but forward the pointer to the displays, to avoid including unit.h
- QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
- while (it.current()) {
-	it.current()->slotUnitChanged(unit);
-	++it;
- }
+ BO_CHECK_NULL_RET(d->mActiveDisplay);
+ d->mActiveDisplay->slotUnitChanged(unit);
 }
 
 void BoDisplayManager::unlockAction()
 {
- QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
- while (it.current()) {
-	it.current()->displayInput()->unlockAction();
-	++it;
- }
+ BO_CHECK_NULL_RET(d->mActiveDisplay);
+ d->mActiveDisplay->displayInput()->unlockAction();
 }
 
 void BoDisplayManager::setToolTipUpdatePeriod(int ms)
 {
- QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
- while (it.current()) {
-	it.current()->setToolTipUpdatePeriod(ms);
-	++it;
- }
+ BO_CHECK_NULL_RET(d->mActiveDisplay);
+ d->mActiveDisplay->setToolTipUpdatePeriod(ms);
 }
 
 void BoDisplayManager::setToolTipCreator(int type)
 {
- QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
- while (it.current()) {
-	it.current()->setToolTipCreator(type);
-	++it;
- }
+ BO_CHECK_NULL_RET(d->mActiveDisplay);
+ d->mActiveDisplay->setToolTipCreator(type);
 }
 
 void BoDisplayManager::loadFromXML(const QDomElement& root)
@@ -653,8 +436,8 @@ void BoDisplayManager::loadFromXML(const QDomElement& root)
 	return;
  }
 
- if (d->mDisplayList.at(0)) {
-	d->mDisplayList.at(0)->loadFromXML(display);
+ if (d->mActiveDisplay) {
+	d->mActiveDisplay->loadFromXML(display);
  } else {
 	boError(260) << k_funcinfo << "No displays ?!" << endl;
  }
@@ -700,8 +483,8 @@ void BoDisplayManager::saveAsXML(QDomElement& root)
  //  saved here as well.
  QDomElement displays = doc.createElement(QString::fromLatin1("Displays"));
  QDomElement display = doc.createElement(QString::fromLatin1("Display"));
- if (d->mDisplayList.at(0)) {
-	d->mDisplayList.at(0)->saveAsXML(display);
+ if (d->mActiveDisplay) {
+	d->mActiveDisplay->saveAsXML(display);
  } else {
 	boError(260) << k_funcinfo << "No displays ?!" << endl;
  }
@@ -744,18 +527,10 @@ void BoDisplayManager::slotAction(const BoSpecificAction& action)
  activeDisplay()->displayInput()->action(action);
 }
 
-QPtrList<BosonBigDisplayBase>* BoDisplayManager::displayList()
-{
- return &d->mDisplayList;
-}
-
 void BoDisplayManager::slotUpdateOpenGLSettings()
 {
- QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
- while (it.current()) {
-	it.current()->updateOpenGLSettings();
-	++it;
- }
+ BO_CHECK_NULL_RET(d->mActiveDisplay);
+ d->mActiveDisplay->updateOpenGLSettings();
 }
 
 void BoDisplayManager::slotChangeFont(const BoFontInfo& font)

@@ -131,15 +131,6 @@ public slots:
 	 * */
 	void slotEndGame();
 
-	/** Splits active display horzontally */
-	void slotSplitDisplayHorizontal();
-
-	/** Splits active display vertically */
-	void slotSplitDisplayVertical();
-
-	/** Removes active display */
-	void slotRemoveActiveDisplay();
-
 	void slotGameOver();
 
 #if KDE_VERSION < 310
