@@ -142,7 +142,7 @@ bool SpeciesTheme::loadUnit(int type)
  QString path = prop->unitPath();
 
 // sprites first
- QString fileName = path + "field.%1.bmp";
+ QString fileName = path + "field-%1.png";
  int pixmaps = prop->isFacility() ? PIXMAP_PER_FIX : PIXMAP_PER_MOBILE;
  for(int i = 0; i < pixmaps; i++) {
 	QPixmap p; // created by loadUnitPixmap()
@@ -166,8 +166,8 @@ bool SpeciesTheme::loadUnit(int type)
 	kdError() << "BigOverview of " << type << " already there" << endl;
  } else {
 	QPixmap* p = new QPixmap;
-	if (!loadUnitPixmap(path + "overview.big.bmp", *p, false)) {
-		kdError() << "SpeciesTheme : Can't load " << path + "overview.big.bmp" << endl;
+	if (!loadUnitPixmap(path + "overview-big.png", *p, false)) {
+		kdError() << "SpeciesTheme : Can't load " << path + "overview-big.png" << endl;
 		delete p;
 		return false;
 	}
@@ -179,8 +179,8 @@ bool SpeciesTheme::loadUnit(int type)
 	kdError() << "SmallOverview of " << type << " already there" << endl;
  } else {
 	QPixmap* p = new QPixmap;
-	if (!loadUnitPixmap(path + "overview.small.bmp", *p, false)) {
-		kdError() << "SpeciesTheme : Can't load " << path + "overview.small.bmp" << endl;
+	if (!loadUnitPixmap(path + "overview-small.png", *p, false)) {
+		kdError() << "SpeciesTheme : Can't load " << path + "overview-small.png" << endl;
 		return false;
 	}
 	d->mSmallOverview.insert(type, p);
@@ -251,14 +251,14 @@ bool SpeciesTheme::loadUnitPixmap(const QString &fileName, QPixmap &pix, bool wi
  h = image.height();
 
  if (image.depth() != 32) {
-	kdError() << k_funcinfo << ": depth != 32" << endl;
+	kdError() << k_funcinfo << fileName << ": depth != 32" << endl;
  }
  if (w < 32) {
-	kdError() << k_funcinfo << ": w < 32" << endl;
+	kdError() << k_funcinfo << fileName << ": w < 32" << endl;
 	return false;
  }
  if (h < 32) {
-	kdError() << k_funcinfo << ": h < 32" << endl;
+	kdError() << k_funcinfo << fileName << ": h < 32" << endl;
 	return false;
  }
 
@@ -337,12 +337,15 @@ bool SpeciesTheme::loadShotPixmap(const QString& fileName, QPixmap& pix)
 	return false;
  }
  if (image.width() < 25) {
-	kdError() << "Shot pixmap width < 25" << endl;
+	kdError() << fileName << ": width < 25" << endl;
 	return false;
  }
  if (image.height() < 25) {
-	kdError() << "Shot pixmap height < 25" << endl;
+	kdError() << fileName << ": height < 25" << endl;
 	return false;
+ }
+ if (image.depth() != 32) {
+	kdError() << fileName << ": depth != 32" << endl;
  }
 
  QImage mask(image.width(), image.height(), 1, 2, QImage::LittleEndian);
@@ -496,7 +499,7 @@ bool SpeciesTheme::loadShot()
  if (mShot) {
 	return true;
  }
- QString fileName = themePath() + "explosions/shots/shot.00.%1.bmp"; // FIXME: shot.00 is hardcoded. is .01, .02 ... possible?
+ QString fileName = themePath() + "explosions/shots/shot_00-%1.png"; // FIXME: shot.00 is hardcoded. is .01, .02 ... possible?
 
  QValueList<QPixmap> pixList;
  QPointArray points(SHOT_FRAMES);
@@ -533,7 +536,7 @@ bool SpeciesTheme::loadBigShot(bool isFacility, unsigned int version)
 		(isFacility ? "facilities/" : "units/");
  QString v;
  v.sprintf("%02d", version);
- QString fileName = path + QString("expl.%1.").arg(v) + "%1.bmp";
+ QString fileName = path + QString("expl_%1-").arg(v) + "%1.png";
 
  QValueList<QPixmap> pixList;
  QPointArray points(frames);
