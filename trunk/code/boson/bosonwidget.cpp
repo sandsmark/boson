@@ -59,6 +59,7 @@
 #include <qevent.h>
 #include <qtimer.h>
 #include <qvbox.h>
+#include <qptrlist.h>
 
 #include "bosonwidget.moc"
 
@@ -1055,4 +1056,26 @@ void BosonWidget::addChatSystemMessage(const QString& fromName, const QString& t
 void BosonWidget::slotSetCommandButtonsPerRow(int b)
 {
  d->mCommandFrame->slotSetButtonsPerRow(b);
+}
+
+void BosonWidget::slotUnfogAll(Player* player)
+{
+ if (!d->mMap) {
+	kdError() << k_funcinfo << "NULL map" << endl;
+	return;
+ }
+ QPtrList<KPlayer> list;
+ if (!player) {
+	list = *d->mBoson->playerList();
+ } else {
+	list.append(player);
+ }
+ for (unsigned int i = 0; i < list.count(); i++) {
+	Player* p = (Player*)list.at(i);
+	for (unsigned int x = 0; x < d->mMap->width(); x++) {
+		for (unsigned int y = 0; y < d->mMap->height(); y++) {
+			p->unfog(x, y);
+		}
+	}
+ }
 }
