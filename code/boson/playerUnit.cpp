@@ -325,7 +325,6 @@ void playerMobUnit::getWantedAction()
 
 bool playerMobUnit::getWantedShoot(bosonMsgData *msg)
 {
-	int	dx, dy;
 	int	range = mobileProp[type].range;
 	QRect	r;
 
@@ -343,9 +342,9 @@ bool playerMobUnit::getWantedShoot(bosonMsgData *msg)
 		return false;
 	}
 
-	r = _target->rect();
-	dx = x() - r.x(); dy = y() - r.y();
-	if (range*range < dx*dx + dy*dy) return false; // too far
+	QPoint p = _target->center() - QPoint( x(), y());
+	// XXX should use a unit->distance(QPoint)
+	if (range*range < p.x()*p.x()+p.y()*p.y()) return false; // too far
 
 	shoot_timer--;
 	if (shoot_timer<=0) shoot_timer = 30;
@@ -443,22 +442,22 @@ void playerMobUnit::u_stop(void)
 
 void playerMobUnit::u_attack(bosonUnit *u)
 {
-	QRect	r;
+	QPoint	p;
 
 	bosonUnit::u_attack(u);
 
 	connect( u, SIGNAL(sig_moveTo(int,int)), this, SLOT(targetMoveTo(int,int)) );
 
 	if (u->inherits("playerMobUnit"))
-		r = ((playerMobUnit*)u)->rect();
+		p = ((playerMobUnit*)u)->center();
 	else if (u->inherits("playerFacility"))
-		r = ((playerFacility*)u)->rect();
+		p = ((playerFacility*)u)->center();
 	else {
 		logf(LOG_ERROR, "u_attack, what's this bosonUnit ???");
 		return;
 	}
 
-	do_goto(r.x(), r.y());
+	do_goto(p.x(), p.y());
 }
 
 
