@@ -118,7 +118,7 @@ UBoProgressUI::getLafId() {
 
 // AB: these are the default values. pretty random values though
 // -> a user can and probably will use widget->setPreferredSize() anyway
-#define PREFERRED_WIDTH 100
+#define PREFERRED_WIDTH 20
 #define PREFERRED_HEIGHT 10
 
 UDimension
