@@ -38,6 +38,10 @@
 # AbortFatal=1
 #
 
+# BoLOD is off by default
+[120]
+InfoOutput=4
+
 # Advance is off by default
 [300]
 InfoOutput=4

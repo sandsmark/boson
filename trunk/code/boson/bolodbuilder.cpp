@@ -44,7 +44,7 @@ BoLODBuilder::BoLODBuilder(const BoMesh* mesh, const BoMeshLOD* fullDetail)
  buildLOD();
 
  long int elapsed = profiler.stop();
- boDebug() << k_funcinfo << "building lod took " << elapsed << "us" << endl;
+ boDebug(120) << k_funcinfo << "building lod took " << elapsed << "us" << endl;
 }
 
 BoLODBuilder::~BoLODBuilder()
@@ -60,7 +60,7 @@ BoVector3 BoLODBuilder::normal(unsigned int _face, unsigned int vertex) const
 {
  const BoFace* f = face(_face);
  if (!f) {
-	boError() << k_funcinfo << "NULL face " << _face << endl;
+	boError(120) << k_funcinfo << "NULL face " << _face << endl;
 	return BoVector3();
  }
  return f->normal(vertex);
@@ -84,7 +84,7 @@ const BoFace* BoLODBuilder::face(unsigned int f) const
 QValueList<BoFace> BoLODBuilder::generateLOD(unsigned int lod)
 {
  if (lod >= 5) {
-	boWarning() << k_funcinfo << "Only 5 LOD levels are supported!" << endl;
+	boWarning(120) << k_funcinfo << "Only 5 LOD levels are supported!" << endl;
 	lod = 4;
  }
 
@@ -99,9 +99,9 @@ QValueList<BoFace> BoLODBuilder::generateLOD(unsigned int lod)
 #endif
 
 #ifdef USE_COST_FACTORS
- boDebug() << k_funcinfo << "factor is " << factors[lod] << endl;
+ boDebug(120) << k_funcinfo << "factor is " << factors[lod] << endl;
 #else
- boDebug() << k_funcinfo << "factor is " << factors[lod] << "; target is " << (int)(pointCount() * factors[lod]) <<
+ boDebug(120) << k_funcinfo << "factor is " << factors[lod] << "; target is " << (int)(pointCount() * factors[lod]) <<
 		" of " << pointCount() << " vertices" << endl;
 #endif
  BosonProfiler profiler(702);
@@ -117,7 +117,7 @@ QValueList<BoFace> BoLODBuilder::generateLOD(unsigned int lod)
  faceList = getLOD(factors[lod]);
 
  long int elapsed = profiler.stop();
- boDebug() << k_funcinfo << "lod: " << lod << "; took " << elapsed << "us" << endl;
+ boDebug(120) << k_funcinfo << "lod: " << lod << "; took " << elapsed << "us" << endl;
 
  return faceList;
 }
@@ -173,7 +173,7 @@ public:
 BoLODFace::BoLODFace(BoLODVertex* v0, BoLODVertex* v1, BoLODVertex* v2)
 {
  if (v0 == v1 || v1 == v2 || v2 == v0) {
-	boError() << k_funcinfo << "Vertices (" << v0->id << ", " << v1->id << ", " << v2->id << ") must be unique!" << endl;
+	boError(120) << k_funcinfo << "Vertices (" << v0->id << ", " << v1->id << ", " << v2->id << ") must be unique!" << endl;
 	// return here?
  }
  vertex[0] = v0;
@@ -225,15 +225,15 @@ void BoLODFace::computeNormal()
 void BoLODFace::replaceVertex(BoLODVertex* vold, BoLODVertex* vnew)
 {
  if (!vold || !vnew) {
-	boError() << k_funcinfo << "vold (" << vold << ") or vnew (" << vnew << ") is NULL!" << endl;
+	boError(120) << k_funcinfo << "vold (" << vold << ") or vnew (" << vnew << ") is NULL!" << endl;
 	return;
  }
  if (vold != vertex[0] && vold != vertex[1] && vold != vertex[2]) {
-	boError() << k_funcinfo << "vold must be one of current vertices!" << endl;
+	boError(120) << k_funcinfo << "vold must be one of current vertices!" << endl;
 	return;
  }
  if (vnew == vertex[0] || vnew == vertex[1] || vnew == vertex[2]) {
-	boError() << k_funcinfo << "vnew must not be one of current vertices!" << endl;
+	boError(120) << k_funcinfo << "vnew must not be one of current vertices!" << endl;
 	return;
  }
  if (vold == vertex[0]) {
@@ -242,7 +242,7 @@ void BoLODFace::replaceVertex(BoLODVertex* vold, BoLODVertex* vnew)
 	vertex[1] = vnew;
  } else {
 	if (vold != vertex[2]) {
-		boError() << k_funcinfo << "No such vertex: " << vold->id << endl;
+		boError(120) << k_funcinfo << "No such vertex: " << vold->id << endl;
 		return;
 	}
 	vertex[2] = vnew;
@@ -250,7 +250,7 @@ void BoLODFace::replaceVertex(BoLODVertex* vold, BoLODVertex* vnew)
  int i;
  vold->face.removeItem(this);
  if (vnew->face.containsRef(this)) {
-	boError() << "vnew must not have this face!" << endl;
+	boError(120) << "vnew must not have this face!" << endl;
 	return;
  }
  vnew->face.appendItem(this);
@@ -260,7 +260,7 @@ void BoLODFace::replaceVertex(BoLODVertex* vold, BoLODVertex* vnew)
  }
  for (i = 0; i < 3; i++) {
 	if (vertex[i]->face.containsRef(this) != 1) {
-		boError() << k_funcinfo << "vertex " << i << " doesn't have this face!" << endl;
+		boError(120) << k_funcinfo << "vertex " << i << " doesn't have this face!" << endl;
 		return;
 	}
 	for (int j = 0; j < 3; j++) {
@@ -283,7 +283,7 @@ BoLODVertex::BoLODVertex(BoVector3 v, unsigned int _id)
 BoLODVertex::~BoLODVertex()
 {
  if (face.count() != 0) {
-	boError() << k_funcinfo << "vertex " << id << " still has " << face.count() << " faces!" << endl;
+	boError(120) << k_funcinfo << "vertex " << id << " still has " << face.count() << " faces!" << endl;
  }
  while (neighbor.count()) {
 	neighbor[0]->neighbor.removeItem(this);
@@ -301,7 +301,7 @@ bool BoLODVertex::isBorder()
 		}
 	}
 	if (count <= 0) {
-		boError() << k_funcinfo << "count <= 0" << endl;
+		boError(120) << k_funcinfo << "count <= 0" << endl;
 	}
 	if (count == 1) {
 		return true;
@@ -382,7 +382,7 @@ BoLODVertex* BoLODHeap::heapPop()
 {
  BoLODVertex* rv = take(0);
  if (!rv) {
-	boError() << k_funcinfo << "First element of heap is NULL!" << endl;
+	boError(120) << k_funcinfo << "First element of heap is NULL!" << endl;
 	return 0;
  }
  rv->heapspot = -1;
@@ -407,7 +407,7 @@ void BoLODHeap::swap(int v1, int v2)
 
 void BoLODBuilder::buildLOD()
 {
- //boDebug() << k_funcinfo << "mesh has " << pointCount() << " vertices in " << facesCount() <<
+ //boDebug(120) << k_funcinfo << "mesh has " << pointCount() << " vertices in " << facesCount() <<
 //		" faces" << endl;
 
  // Compute progressive mesh
@@ -420,40 +420,40 @@ void BoLODBuilder::buildLOD()
  mHeap = new BoLODHeap;
 
 
- //boDebug() << k_funcinfo << "adding vertices" << endl;
+ //boDebug(120) << k_funcinfo << "adding vertices" << endl;
  // Make BoLODVertex objects for all vertices
  for (unsigned int i = 0; i < pointCount(); i++) {
 	BoVector3 p(vertex(i));
 	BoLODVertex* v = new BoLODVertex(p, i);
 	mVertices.insert(i, v);
-	//boDebug() << k_funcinfo << "added vertex " << i << " at " << v << " with pos (" <<
+	//boDebug(120) << k_funcinfo << "added vertex " << i << " at " << v << " with pos (" <<
 	//		p.x() << ", " << p.y() << ", " << p.z() << ")" << endl;
  }
- //boDebug() << k_funcinfo << "vertices added" << endl;
+ //boDebug(120) << k_funcinfo << "vertices added" << endl;
 
- //boDebug() << k_funcinfo << "adding faces" << endl;
+ //boDebug(120) << k_funcinfo << "adding faces" << endl;
  // And make BoLODFace objects for all faces
  for (unsigned int i = 0; i < facesCount(); i++) {
-	//boDebug() << k_funcinfo << "adding face " << i << " with vertices: " <<
+	//boDebug(120) << k_funcinfo << "adding face " << i << " with vertices: " <<
 	//		mVertices[face(i)->pointIndex()[0]]->id << ", " <<
 	//		mVertices[face(i)->pointIndex()[1]]->id << " and " << mVertices[face(i)->pointIndex()[2]]->id << endl;
 	BoLODFace* f = new BoLODFace(mVertices[face(i)->pointIndex()[0]],
 			mVertices[face(i)->pointIndex()[1]], mVertices[face(i)->pointIndex()[2]]);
 	mFaces.insert(i, f);
  }
- //boDebug() << k_funcinfo << "faces added" << endl;
+ //boDebug(120) << k_funcinfo << "faces added" << endl;
 
  // For all the edges, compute the difference it would make
  // to the model if it was collapsed.  The least of these
  // per vertex is cached in each vertex object.
- //boDebug() << k_funcinfo << "calculating costs" << endl;
+ //boDebug(120) << k_funcinfo << "calculating costs" << endl;
  for (unsigned int i = 0; i < mVertices.count(); i++) {
 	computeEdgeCostAtVertex(mVertices[i]);
 	mHeap->addVertex(mVertices[i]);
  }
- //boDebug() << k_funcinfo << "cost calculated" << endl;
+ //boDebug(120) << k_funcinfo << "cost calculated" << endl;
 
- //boDebug() << k_funcinfo << "generating lists" << endl;
+ //boDebug(120) << k_funcinfo << "generating lists" << endl;
  while (mVertices.count()) {
 	// get the next vertex to collapse
 	BoLODVertex* mn = mHeap->heapPop();
@@ -463,13 +463,13 @@ void BoLODBuilder::buildLOD()
 	mCost[mn->id] = mn->cost;
 	collapse(mn, mn->collapse);
  }
- //boDebug() << k_funcinfo << "lists generated" << endl;
+ //boDebug(120) << k_funcinfo << "lists generated" << endl;
  if (mFaces.count() == 0) {
-	boError() << k_funcinfo << mFaces.count() << " faces still in list!" << endl;
+	boError(120) << k_funcinfo << mFaces.count() << " faces still in list!" << endl;
 	mFaces.deleteAllItems();
  }
  if (mVertices.count() == 0) {
-	boError() << k_funcinfo << mVertices.count() << " vertices still in list!" << endl;
+	boError(120) << k_funcinfo << mVertices.count() << " vertices still in list!" << endl;
 	mVertices.deleteAllItems();
  }
 
@@ -480,15 +480,15 @@ QValueList<BoFace> BoLODBuilder::getLOD(float factor)
 {
 #ifndef USE_COST_FACTORS
  unsigned int target = (unsigned int)(factor * pointCount());
- //boDebug() << k_funcinfo << "factor is " << factor << "; target is " << target << " of " <<
+ //boDebug(120) << k_funcinfo << "factor is " << factor << "; target is " << target << " of " <<
 //		pointCount() << " vertices" << endl;
 #endif
 
  if (mOrder.count() != pointCount()) {
-	boError() << k_funcinfo << "mOrder has only " << mOrder.count() << " of " << pointCount() << " elements!" << endl;
+	boError(120) << k_funcinfo << "mOrder has only " << mOrder.count() << " of " << pointCount() << " elements!" << endl;
  }
  if (mMap.count() != pointCount()) {
-	boError() << k_funcinfo << "mMap has only " << mMap.count() << " of " << pointCount() << " elements!" << endl;
+	boError(120) << k_funcinfo << "mMap has only " << mMap.count() << " of " << pointCount() << " elements!" << endl;
  }
 
  unsigned int i;
@@ -520,7 +520,7 @@ QValueList<BoFace> BoLODBuilder::getLOD(float factor)
 #endif
 	// Hard stop if there's less than 12 faces left
 	if (mFaces.count() <= 12) {
-		boDebug() << k_funcinfo << "Only " << mFaces.count() << " faces left. Stop." << endl;
+		boDebug(120) << k_funcinfo << "Only " << mFaces.count() << " faces left. Stop." << endl;
 		break;
 	}
 
@@ -528,12 +528,12 @@ QValueList<BoFace> BoLODBuilder::getLOD(float factor)
 	BoLODVertex* mn = vclist.take(vclist.count() - 1);
 #ifdef USE_COST_FACTORS
 	if (mCost[mn->id] > factor) {
-		boDebug() << k_funcinfo << count++ << ". vertex with id " << mn->id << " has cost (" <<
+		boDebug(120) << k_funcinfo << count++ << ". vertex with id " << mn->id << " has cost (" <<
 				mCost[mn->id] << ") bigger than limit (" << factor << "). Break." << endl;
 		break;
 	}
 #endif
-	boDebug() << "Removing " << count++ << ". vertex with id " << mn->id << " and cost " << mCost[mn->id] << endl;
+	boDebug(120) << "Removing " << count++ << ". vertex with id " << mn->id << " and cost " << mCost[mn->id] << endl;
 	// Collapse this edge
 	collapse(mn, mn->collapse, false);
  }
@@ -569,7 +569,7 @@ void BoLODBuilder::computeEdgeCostAtVertex(BoLODVertex* v)
 	// v doesn't have neighbors so it costs nothing to collapse
 	v->collapse = 0;
 	v->cost = -0.01f;
-	//boDebug() << k_funcinfo << "Vertex " << v->id << " doesn't have neighbors (cost is -0.01)" << endl;
+	//boDebug(120) << k_funcinfo << "Vertex " << v->id << " doesn't have neighbors (cost is -0.01)" << endl;
 	return;
  }
  v->cost = 1000000;
@@ -583,7 +583,7 @@ void BoLODBuilder::computeEdgeCostAtVertex(BoLODVertex* v)
 		v->cost = c;             // cost of the collapse
 	}
  }
- //boDebug() << k_funcinfo << "Collapse cost for vertex " << v->id << " (to " << v->collapse->id <<
+ //boDebug(120) << k_funcinfo << "Collapse cost for vertex " << v->id << " (to " << v->collapse->id <<
 //		") is " << v->cost << (v->isBorder() ? " (border)" : "") << endl;
 }
 
