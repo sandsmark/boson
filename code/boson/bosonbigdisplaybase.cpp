@@ -62,6 +62,7 @@
 #include <qcursor.h>
 #include <qpointarray.h>
 #include <qbuffer.h>
+#include <qimage.h>
 
 #if HAVE_SYS_TIME_H
 #include <sys/time.h>
@@ -2861,7 +2862,10 @@ QByteArray BosonBigDisplayBase::grabMovieFrame()
  QByteArray ba;
  QBuffer b(ba);
  b.open(IO_WriteOnly);
- shot.save(&b, "JPEG", 90);
+ QImageIO io(&b, "JPEG");
+ io.setImage(shot.convertToImage());
+ io.setQuality(90);
+ io.write();
  return ba;
 }
 
