@@ -28,8 +28,12 @@ class Unit;
 class UnitProperties;
 class BoVector3;
 class BoItemList;
+class BosonCanvas;
 class BosonStatistics;
+class SpeciesTheme;
 template<class T> class QPtrVector;
+class KGameIO;
+class QObject;
 
 class PlayerIOPrivate;
 
@@ -56,6 +60,41 @@ public:
 	Player* player() const { return mPlayer; }
 
 	/**
+	 * Connect to the specified signal of the player. Works like any usual
+	 * @ref QObject::connect, but the first parameter (the emitter of the
+	 * signal) is always the @ref player.
+	 **/
+	bool connect(const char* signal, const QObject* receiver, const char* member);
+	bool disconnect(const char* signal, const QObject* receiver, const char* member);
+
+	/**
+	 * @return Player::hasRtti
+	 **/
+	bool hasRtti(int rtti) const;
+
+	KGameIO* findRttiIO(int rtti) const;
+
+	/**
+	 * @return Player::addGameIO
+	 **/
+	bool addGameIO(KGameIO* io);
+
+	/**
+	 * @return Player::speciesTheme
+	 **/
+	SpeciesTheme* speciesTheme() const;
+
+	/**
+	 * @return Player::unitProperties
+	 **/
+	const UnitProperties* unitProperties(unsigned long int type) const;
+
+	/**
+	 * @return Player::allUnits
+	 **/
+	QPtrList<Unit>* allMyUnits() const;
+
+	/**
 	 * @return Whether the coordinates @p cellX, @p cellY are fogged for
 	 * this player.
 	 **/
@@ -64,6 +103,11 @@ public:
 	 * @overload
 	 **/
 	bool isFogged(const Cell* c) const;
+
+	/**
+	 * Like @ref isFogged, but takes a vector of canvas coordinates
+	 **/
+	bool isFogged(const BoVector3& canvasVector) const;
 
 	/**
 	 * @return The cell at @p x, @p y (see @ref BosonMap::cell) if that cell
@@ -90,10 +134,15 @@ public:
 	 * @overload
 	 **/
 	bool canSee(const Cell* c) const { return !isFogged(c); }
+
 	/**
 	 * @overload
 	 **/
-	bool canSee(const BoVector3& canvasVector) const;
+	bool canSee(const BoVector3& canvasVector) const
+	{
+		return !isFogged(canvasVector);
+	}
+
 	/**
 	 * @overload
 	 * This version checks whehter the specified @ref BosonItem can be seen.
@@ -106,8 +155,14 @@ public:
 	 **/
 	bool ownsUnit(const Unit* unit) const;
 
-	bool isEnemy(Player* player) const;
-	bool isEnemyUnit(const Unit* unit) const;
+	bool hasMiniMap() const;
+
+	bool isEnemy(const Player* player) const;
+	bool isEnemy(const Unit* unit) const;
+	bool isNeutral(const Player*) const;
+	bool isNeutral(const Unit*) const;
+	bool isAllied(const Player*) const;
+	bool isAllied(const Unit*) const;
 
 	/**
 	 * @return @ref Player::teamColor
@@ -153,7 +208,7 @@ public:
 	 * that is visible to this player, also a unit that is not owned by this
 	 * player.
 	 **/
-//	Unit* findUnitAt(const BoVector3& canvasVector) const; // FIXME TODO
+	Unit* findUnitAt(const BosonCanvas* canvas, const BoVector3& canvasVector) const;
 
 	BoItemList* unitsAtCells(const QPtrVector<Cell>* cells) const;
 
