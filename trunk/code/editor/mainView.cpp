@@ -51,7 +51,7 @@ mainView::mainView(editorField *field, QWidget *parent=0, const char *name=0)
 	big = new editorBigDisplay(view, this);
 	topLayout->addWidget(big,10);
 
-	connect (view, SIGNAL(setSelectedTile(groundType)), big, SLOT(setSelectedTile(groundType)));
+	connect (view, SIGNAL(setSelectedObject(object_type, int)), big, SLOT(setSelectedObject(object_type, int)));
 
 /* finish the stuff */
 //	leftLayout->addStretch(10);
