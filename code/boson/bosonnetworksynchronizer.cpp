@@ -29,6 +29,7 @@
 #include "items/bosonitem.h"
 #include "unit.h"
 #include "player.h"
+#include "bosonmap.h"
 #include "bosonpath.h"
 #include <bodebug.h>
 
@@ -45,6 +46,29 @@
 #include <qvaluelist.h>
 #include <qmap.h>
 #include <qintdict.h>
+
+
+// AB: generally I consider macros evil, but it time has shown that they _do_
+// make sense here. they reduce the probability of typos _greatly_
+
+// compare name and name2, and give an error message containing both values.
+// you need to do this on your own, if QString::arg() is not defined for the
+// type of name/name2
+
+ // declare name and name2
+#define DECLARE(type, name) type name, name##2;
+
+ // unstream name and name2 (streams must be named "s1" and "s2")
+#define UNSTREAM(name) s1 >> name; s2 >> name##2;
+
+// compare name and name2 and add an error to the QString variable "error". note
+// that this works only if type of name/name2 is compatible with QString::arg().
+#define COMPARE(name) if (name != name##2) { error += i18n("Variables not equal: %1(%2) and %3(%4)\n").arg(#name).arg(name).arg(#name "2").arg(name##2); }
+
+// convenience macros that combine the above macros.
+#define DECLARE_UNSTREAM(type, name) DECLARE(type, name) UNSTREAM(name)
+#define DECLARE_UNSTREAM_COMPARE(type, name) DECLARE(type, name) UNSTREAM(name) COMPARE(name)
+
 
 class BoAwaitAck
 {
@@ -185,11 +209,11 @@ protected:
 		boDebug(370) << k_funcinfo << endl;
 		QDataStream s1(b1, IO_ReadOnly);
 		QDataStream s2(b2, IO_ReadOnly);
-		Q_ULONG random1, random2;
-		s1 >> random1;
-		s2 >> random2;
-		if (random1 != random2) {
-			return i18n("Random numbers differ. Found: %1 should be: %2").arg(random2).arg(random1);
+
+		DECLARE_UNSTREAM(Q_ULONG, random);
+
+		if (random != random2) {
+			return i18n("Random numbers differ. Found: %1 should be: %2").arg(random2).arg(random);
 		}
 		return i18n("There is an error in the game (i.e. the Boson class) log (MD5 sums don't match), but it could not be found.");
 	}
@@ -232,22 +256,15 @@ protected:
 		boDebug(370) << k_funcinfo << endl;
 		QDataStream s1(b1, IO_ReadOnly);
 		QDataStream s2(b2, IO_ReadOnly);
-		Q_UINT32 count, count2;
-		s1 >> count;
-		s2 >> count2;
+		DECLARE_UNSTREAM(Q_UINT32, count);
 		if (count != count2) {
 			return i18n("Have players: %1 should be: %2").arg(count2).arg(count);
 		}
 		for (unsigned int i = 0; i < count; i++) {
-			Q_UINT32 fogged, fogged2;
-			Q_UINT32 minerals, minerals2;
-			Q_UINT32 oil, oil2;
-			s1 >> fogged;
-			s2 >> fogged2;
-			s1 >> minerals;
-			s2 >> minerals2;
-			s1 >> oil;
-			s2 >> oil2;
+			DECLARE_UNSTREAM(Q_UINT32, fogged);
+			DECLARE_UNSTREAM(Q_UINT32, minerals);
+			DECLARE_UNSTREAM(Q_UINT32, oil);
+
 #define CHECK(x,x2) if (x != x2) { return i18n("Different players in players log: variable %1: found %2, expected %3").arg(#x).arg(x2).arg(x); }
 			CHECK(fogged, fogged2);
 			CHECK(minerals, minerals2);
@@ -260,27 +277,193 @@ protected:
 private:
 	Boson* mGame;
 };
-
-#if 0
 class BoPathSyncMessage : public BoSyncMessageBase
 {
 public:
 	BoPathSyncMessage() : BoSyncMessageBase()
 	{
+		mMap = 0;
+		mPathFinder = 0;
 	}
-	virtual QByteArray makeLog()
-	{
-		return QByteArray();
-	}
+	void setMap(BosonMap* m) { mMap = m; }
+	void setPathfinder(BosonPath2* p) { mPathFinder = p; }
+	virtual QByteArray makeLog();
 
 protected:
-	virtual QString findLogError(const QByteArray& b1, const QByteArray& b2) const
+	virtual QString findLogError(const QByteArray& b1, const QByteArray& b2) const;
+
+	// AB: this is mostly a debugging method. we really should not stream
+	// _all_ of this data.
+	static bool streamRegion(QDataStream& stream, BosonPathRegion* r)
 	{
-		boDebug(370) << k_funcinfo << endl;
-		return QString::null;
+		if (!r) {
+			return false;
+		}
+		stream << (Q_INT32)r->id;
+		stream << (Q_INT32)r->passabilityType;
+		stream << (Q_INT32)r->cellsCount;
+		stream << (float)r->centerx;
+		stream << (float)r->centery;
+		stream << (float)r->cost;
+		stream << (Q_UINT32)r->neighbors.count();
+		for (unsigned int i = 0; i < r->neighbors.count(); i++) {
+			if (!r->neighbors[i].region) {
+				boError(370) << k_funcinfo << "NULL neighbor region " << i << endl;
+				return false;
+			}
+			stream << (Q_INT32)r->neighbors[i].region->id;
+			stream << (float)r->neighbors[i].cost;
+			stream << (Q_INT32)r->neighbors[i].bordercells;
+		}
+		if (r->group) {
+			// TODO
+		}
+		if (r->parent) {
+			// TODO?
+		}
 	}
+
+	static bool unstreamRegion(QDataStream& stream, Q_INT32& id, Q_INT32& passabilityType, Q_INT32& cellsCount, float& centerx, float& centery, float& cost,
+			Q_UINT32& nCount, QValueVector<Q_INT32>& nIds, QValueVector<float>& nCost, QValueVector<Q_INT32>& nBorderCells)
+	{
+		stream >> id;
+		stream >> passabilityType;
+		stream >> cellsCount;
+		stream >> centerx;
+		stream >> centery;
+		stream >> cost;
+		stream >> nCount;
+		nIds.resize(nCount);
+		nCost.resize(nCount);
+		nBorderCells.resize(nCount);
+		for (unsigned int i = 0; i < nCount; i++) {
+			Q_UINT32 id;
+			float cost;
+			Q_UINT32 borderCells;
+			stream >> id;
+			stream >> cost;
+			stream >> borderCells;
+			nIds[i] = id;
+			nCost[i] = cost;
+			nBorderCells[i] = borderCells;
+		}
+		return true;
+	}
+private:
+	BosonMap* mMap;
+	BosonPath2* mPathFinder;
 };
-#endif
+
+QByteArray BoPathSyncMessage::makeLog()
+{
+ QByteArray b;
+ // TODO: do NOT stream all sectors! (too much data)
+ QDataStream stream(b, IO_WriteOnly);
+ stream << (Q_UINT32)mPathFinder->sectorWidth();
+ stream << (Q_UINT32)mPathFinder->sectorHeight();
+ unsigned int count = 0;
+ for (unsigned int x = 0; x * mPathFinder->sectorWidth() < mMap->width(); x++) {
+	for (unsigned int y = 0; y * mPathFinder->sectorHeight() < mMap->height(); y++) {
+		count++;
+	}
+ }
+ stream << (Q_UINT32)count;
+ for (unsigned int x = 0; x * mPathFinder->sectorWidth() < mMap->width(); x++) {
+	for (unsigned int y = 0; y * mPathFinder->sectorHeight() < mMap->height(); y++) {
+		BosonPathSector* s = mPathFinder->sector(x, y);
+		if (!s) {
+			boError(370) << k_funcinfo << "NULL sector at " << x << "," << y << endl;
+			return QByteArray();
+		}
+		if (s->pathfinder != mPathFinder) {
+			boError(370) << k_funcinfo << "unexpected pathfinder pointer" << endl;
+			return QByteArray();
+		}
+		stream << (Q_INT32)s->x;
+		stream << (Q_INT32)s->y;
+		stream << (Q_INT32)s->w;
+		stream << (Q_INT32)s->h;
+
+		stream << (Q_UINT32)s->regions.count();
+		for (unsigned int i = 0; i < s->regions.count(); i++) {
+			BosonPathRegion* r = s->regions[i];
+			if (!r) {
+				boError(370) << k_funcinfo << "NULL region at " << i << " in sector " << x << "," << y << endl;
+				return QByteArray();
+			}
+			if (r->sector != s) {
+				boError(370) << k_funcinfo << "r->sector is not parent sector of region!" << endl;
+				return QByteArray();
+			}
+			if (!streamRegion(stream, r)) {
+				boError(370) << k_funcinfo << "could not stream region " << i << " in sector " << x << "," << y << endl;
+				return QByteArray();
+			}
+		}
+	}
+ }
+ return b;
+}
+
+QString BoPathSyncMessage::findLogError(const QByteArray& b1, const QByteArray& b2) const
+{
+ boDebug(370) << k_funcinfo << endl;
+ QDataStream s1(b1, IO_ReadOnly);
+ QDataStream s2(b2, IO_ReadOnly);
+ QString error;
+ DECLARE_UNSTREAM_COMPARE(Q_UINT32, sectorWidth);
+ DECLARE_UNSTREAM_COMPARE(Q_UINT32, sectorHeight);
+ DECLARE_UNSTREAM_COMPARE(Q_UINT32, sectorCount);
+ for (unsigned int i = 0; i < sectorCount; i++) {
+	DECLARE_UNSTREAM_COMPARE(Q_INT32, x);
+	DECLARE_UNSTREAM_COMPARE(Q_INT32, y);
+	DECLARE_UNSTREAM_COMPARE(Q_INT32, w);
+	DECLARE_UNSTREAM_COMPARE(Q_INT32, h);
+	DECLARE_UNSTREAM_COMPARE(Q_UINT32, regionCount);
+
+	for (unsigned int j = 0; j < regionCount; j++) {
+		DECLARE(Q_INT32, id);
+		DECLARE(Q_INT32, passabilityType);
+		DECLARE(Q_INT32, cellsCount);
+		DECLARE(float, centerx);
+		DECLARE(float, centery);
+		DECLARE(float, cost);
+		DECLARE(Q_UINT32, nCount);
+		DECLARE(QValueVector<Q_INT32>, nIds);
+		DECLARE(QValueVector<float>, nCost);
+		DECLARE(QValueVector<Q_INT32>, nBorderCells);
+		unstreamRegion(s1, id, passabilityType, cellsCount, centerx, centery, cost, nCount, nIds, nCost, nBorderCells);
+		unstreamRegion(s2, id2, passabilityType2, cellsCount2, centerx2, centery2, cost2, nCount2, nIds2, nCost2, nBorderCells2);
+
+		COMPARE(id);
+		COMPARE(passabilityType);
+		COMPARE(cellsCount);
+		COMPARE(centerx);
+		COMPARE(centery);
+		COMPARE(cost);
+		COMPARE(nCount);
+		if (nIds.count() != nIds2.count()) {
+			return error;
+		}
+		for (unsigned int k = 0; k < nCount; k++) {
+			if (nIds[k] != nIds2[k]) {
+				error += i18n("neightbor ids at %1 don't match in region %2 of sector %3\n").arg(k).arg(j).arg(i);
+			}
+			if (nCost[k] != nCost2[k]) {
+				error += i18n("neightbor costs at %1 don't match in region %2 of sector %3\n").arg(k).arg(j).arg(i);
+			}
+			if (nBorderCells[k] != nBorderCells[k]) {
+				error += i18n("neightbor bordercells at %1 don't match in region %2 of sector %3\n").arg(k).arg(j).arg(i);
+			}
+		}
+	}
+ }
+
+
+
+ return error;
+}
+
 
 // just for debugging currently. remove asap!
 #warning remove asap
@@ -336,10 +519,7 @@ protected:
 		boDebug(370) << k_funcinfo << endl;
 		QDataStream s1(b1, IO_ReadOnly);
 		QDataStream s2(b2, IO_ReadOnly);
-		Q_UINT32 items;
-		Q_UINT32 items2;
-		s1 >> items;
-		s2 >> items2;
+		DECLARE_UNSTREAM(Q_UINT32, items);
 		if (items != items2) {
 			return i18n("Different item counts in canvas log: found %1, expected %2").arg(items2).arg(items);
 		}
@@ -349,10 +529,8 @@ protected:
 				return error;
 			}
 		}
-		Q_UINT32 units;
-		Q_UINT32 units2;
-		s1 >> units;
-		s2 >> units2;
+
+		DECLARE_UNSTREAM(Q_UINT32, units);
 		if (units != units2) {
 			return i18n("Different unit counts in canvas log: found %1, expected %2").arg(units2).arg(units);
 		}
@@ -387,24 +565,27 @@ protected:
 	}
 	static QString findItemError(QDataStream& s1, QDataStream& s2)
 	{
-		Q_UINT32 id, id2;
-		float x, x2;
-		float y, y2;
-		float z, z2;
-		float rotation, rotation2;
-		float xrotation, xrotation2;
-		float yrotation, yrotation2;
+		QString error;
+
+		DECLARE(Q_UINT32, id);
+		DECLARE(float, x);
+		DECLARE(float, y);
+		DECLARE(float, z);
+		DECLARE(float, rotation);
+		DECLARE(float, xrotation);
+		DECLARE(float, yrotation);
+
 		unstreamItem(s1, id, x, y, z, rotation, xrotation, yrotation);
 		unstreamItem(s2, id2, x2, y2, z2, rotation2, xrotation2, yrotation2);
-#define CHECK(x,x2) if (x != x2) { return i18n("Different items in canvas log: variable %1: found %2, expected %3").arg(#x).arg(x2).arg(x); }
-		CHECK(x, x2);
-		CHECK(y, y2);
-		CHECK(z, z2);
-		CHECK(rotation, rotation2);
-		CHECK(xrotation, xrotation2);
-		CHECK(yrotation, yrotation2);
-#undef CHECK
-		return QString::null;
+
+		COMPARE(x);
+		COMPARE(y);
+		COMPARE(z);
+		COMPARE(rotation);
+		COMPARE(xrotation);
+		COMPARE(yrotation);
+
+		return error;
 	}
 
 	static void streamUnit(QDataStream& stream, Unit* u)
@@ -486,28 +667,29 @@ protected:
 	static QString findUnitError(QDataStream& s1, QDataStream& s2)
 	{
 		QString error;
-		Q_UINT32 id, id2;
-		Q_INT32 work, work2;
-		Q_UINT32 health, health2;
+
+		DECLARE(Q_UINT32, id);
+		DECLARE(Q_INT32, work);
+		DECLARE(Q_UINT32, health);
 #if !PATH_LOG
 		unstreamUnit(s1, id, work, health);
 		unstreamUnit(s2, id2, work2, health2);
 #else
-		Q_UINT32 hlstep, hlstep2;
-		QPoint start, start2;
-		QPoint dest, dest2;
-		Q_INT32 range, range2;
-		Q_INT32 startRegId, startRegId2;
-		Q_INT32 destRegId, destRegId2;
-		Q_INT32 passability, passability2;
-		Q_INT32 waiting, waiting2;
-		Q_INT32 pathrecalced, pathrecalced2;
-		Q_INT8 passable, passable2;
-		Q_INT8 canL, canL2;
-		Q_INT8 canW, canW2;
-		Q_INT8 flying, flying2;
-		Q_INT8 moveAttacking, moveAttacking2;
-		Q_INT8 slowDown, slowDown2;
+		DECLARE(Q_UINT32, hlstep);
+		DECLARE(QPoint, start);
+		DECLARE(QPoint, dest);
+		DECLARE(Q_INT32, range);
+		DECLARE(Q_INT32, startRegId);
+		DECLARE(Q_INT32, destRegId);
+		DECLARE(Q_INT32, passability);
+		DECLARE(Q_INT32, waiting);
+		DECLARE(Q_INT32, pathrecalced);
+		DECLARE(Q_INT8, passable);
+		DECLARE(Q_INT8, canL);
+		DECLARE(Q_INT8, canW);
+		DECLARE(Q_INT8, flying);
+		DECLARE(Q_INT8, moveAttacking);
+		DECLARE(Q_INT8, slowDown);
 		unstreamUnit(s1, id, work, health,
 				hlstep, start, dest, range, startRegId, destRegId, passable,
 				canL, canW, flying, passability, moveAttacking, slowDown,
@@ -517,32 +699,37 @@ protected:
 				canL2, canW2, flying2, passability2, moveAttacking2, slowDown2,
 				waiting2, pathrecalced2);
 #endif
-#define CHECK(x,x2) if (x != x2) { error += i18n("Different units in canvas log: variable %1: found %2, expected %3 (compared units %4 and %5)\n").arg(#x).arg(x2).arg(x).arg(id).arg(id2); }
-		CHECK(id, id2);
-		CHECK(work, work2);
-		CHECK(health, health2);
+		if (id != id2) {
+			error += i18n("Different unit ids: %1 != %2\n").arg(id).arg(id2);
+			// it makes no sense to collect more
+			return error;
+		}
+#define CHECK(x) if (x != x##2) { error += i18n("Unit %1: ").arg(id); COMPARE(x) }
+		CHECK(id);
+		CHECK(work);
+		CHECK(health);
 #if PATH_LOG
-		CHECK(hlstep, hlstep2);
+		CHECK(hlstep);
 		if (start != start2) {
-			error += i18n("start != start2: (%1,%2) != (%3,%4) for units %5 and %6").
-					arg(start.x()).arg(start.y()).arg(start2.x()).arg(start2.y()).arg(id).arg(id2);
+			error += i18n("Unit %1: start != start2: (%2,%3) != (%4,%5)\n").
+					arg(id).arg(start.x()).arg(start.y()).arg(start2.x()).arg(start2.y());
 		}
 		if (dest != dest2) {
-			error += i18n("dest != dest2: (%1,%2) != (%3,%4) for units %5 and %6").
-					arg(dest.x()).arg(dest.y()).arg(dest2.x()).arg(dest2.y()).arg(id).arg(id2);
+			error += i18n("Unit %1: dest != dest2: (%1,%2) != (%3,%4)\n").
+					arg(id).arg(dest.x()).arg(dest.y()).arg(dest2.x()).arg(dest2.y());
 		}
-		CHECK(range, range2);
-		CHECK(startRegId, startRegId2);
-		CHECK(destRegId, destRegId2);
-		CHECK(passable, passable2);
-		CHECK(canL, canL2);
-		CHECK(canW, canW2);
-		CHECK(flying, flying2);
-		CHECK(passability, passability2);
-		CHECK(moveAttacking, moveAttacking2);
-		CHECK(slowDown, slowDown2);
-		CHECK(waiting, waiting2);
-		CHECK(pathrecalced, pathrecalced2);
+		CHECK(range);
+		CHECK(startRegId);
+		CHECK(destRegId);
+		CHECK(passable);
+		CHECK(canL);
+		CHECK(canW);
+		CHECK(flying);
+		CHECK(passability);
+		CHECK(moveAttacking);
+		CHECK(slowDown);
+		CHECK(waiting);
+		CHECK(pathrecalced);
 #endif
 #undef CHECK
 		return error;
@@ -626,6 +813,8 @@ public:
 	void setCanvas(BosonCanvas* canvas, unsigned int advanceMessageCount, unsigned int interval)
 	{
 		mCanvasSync.setCanvas(canvas, advanceMessageCount, interval);
+		mPathSync.setMap(canvas->map());
+		mPathSync.setPathfinder(canvas->pathfinder());
 	}
 
 	virtual QByteArray makeLog();
@@ -640,14 +829,15 @@ private:
 	BoPlayerSyncMessage mPlayerSync;
 	BoCanvasSyncMessage mCanvasSync;
 	BoGameSyncMessage mBosonSync;
+	BoPathSyncMessage mPathSync;
 };
 
 QByteArray BoLongSyncMessage::makeLog()
 {
  QMap<QString, QByteArray> streams;
 
+ streams.insert("PathStream", mPathSync.makeLog());
  streams.insert("CanvasStream", mCanvasSync.makeLog());
-
  streams.insert("BosonStream", mBosonSync.makeLog());
  streams.insert("PlayersStream", mPlayerSync.makeLog());
 
@@ -689,6 +879,11 @@ QString BoLongSyncMessage::findLogError(const QByteArray& b1, const QByteArray& 
 	return error;
  }
 
+ BoPathSyncMessage pathSync;
+ error = pathSync.findError(streams["PathStream"], streams2["PathStream"]);
+ if (!error.isNull()) {
+	return error;
+ }
  BoCanvasSyncMessage canvasSync;
  error = canvasSync.findError(streams["CanvasStream"], streams2["CanvasStream"]);
  if (!error.isNull()) {
@@ -839,6 +1034,7 @@ bool BosonNetworkSynchronizer::receiveNetworkSyncAck(QDataStream& stream, Q_UINT
 		BoLongSyncMessage longSync;
 		QString error = longSync.findError(correct, broken);
 		addChatSystemMessage(i18n("Error message: %1").arg(error));
+		boDebug(370) << k_funcinfo << "Error message: " << error << endl;
 	}
  }
 
@@ -885,4 +1081,16 @@ void BosonNetworkSynchronizer::addChatSystemMessage(const QString& msg)
  BO_CHECK_NULL_RET(mGame);
  mGame->slotAddChatSystemMessage(i18n("NetworkSync"), msg);
 }
+
+
+
+
+
+
+
+#undef DECLARE
+#undef UNSTREAM
+#undef DECLARE_UNSTREAM
+#undef DECLARE_UNSTREAM_COMPARE
+#undef DECLARE_UNSTREAM_COMPARE
 
