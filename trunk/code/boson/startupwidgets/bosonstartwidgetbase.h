@@ -59,13 +59,21 @@ public slots:
 	virtual void slotSendPlayFieldChanged(int index);
 
 	/**
-	 * Called when user clicks on "Start game" button.
+	 * Called when user clicks on "Start game" button (see also @ref
+	 * slotStartGameClicked)
 	 * This widget should then be hidden and game should be started. Must be
 	 * implemented by derived classes.
 	 *
 	 * You should call @ref sendNewGame at the end of your implementation.
 	 **/
 	virtual void slotStart() = 0;
+
+	/**
+	 * Should be used to start the game. Note that this will send a message
+	 * indicating that start game was clicked and once it arrives again @ref
+	 * slotStart will be called.
+	 **/
+	virtual void slotStartGameClicked();
 
 signals:
 	/**

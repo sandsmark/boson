@@ -448,11 +448,18 @@ void BosonNewGameWidget::slotColorChanged(Player*)
  initColors();
 }
 
+void BosonNewGameWidget::slotStartGameClicked()
+{
+ if (!boGame->isAdmin()) {
+	KMessageBox::sorry(this, i18n("Only ADMIN can start a game"));
+	return;
+ }
+ BosonStartWidgetBase::slotStartGameClicked();
+}
 void BosonNewGameWidget::slotStart()
 {
  if (!boGame->isAdmin()) {
 	// should not happen anyway
-	KMessageBox::sorry(this, i18n("Only ADMIN can start a game"));
 	return;
  }
  if ((int)boGame->playerCount() > mMaxPlayers) {

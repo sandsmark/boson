@@ -122,7 +122,7 @@ BosonStartEditorWidget::BosonStartEditorWidget(QWidget* parent)
  mStartGameButton = new QPushButton( this, "startgamebutton" );
  mStartGameButton->setText( i18n( "S&tart Editor" ) );
  startGameLayout->addWidget( mStartGameButton );
- connect(mStartGameButton, SIGNAL(clicked()), this, SLOT(slotStart()));
+ connect(mStartGameButton, SIGNAL(clicked()), this, SLOT(slotStartGameClicked()));
 
  initPlayFields();
  initTileSets();

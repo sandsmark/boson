@@ -1017,6 +1017,13 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 		setGameMode(false);
 		QTimer::singleShot(0, this, SIGNAL(signalStartNewGame()));
 		break;
+	case BosonMessage::IdStartGameClicked:
+		// this is kind of a workaround.
+		// for --start we need to call slotStart() in the start widgets
+		// only once the (e.g.) playfield messages have arrived. for
+		// this we use a message and *then* call slotStart() there.
+		QTimer::singleShot(0, this, SIGNAL(signalStartGameClicked()));
+		break;
 	case BosonMessage::IdGameIsStarted:
 		if (!isRunning()) {
 			boError() << "Received IdGameIstarted but it isn't" << endl;
