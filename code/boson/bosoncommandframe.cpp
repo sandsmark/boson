@@ -267,7 +267,7 @@ void BosonCommandFrame::slotSetProduction(Unit* unit)
  if (!unit->isFacility()) {
 	return;
  }
- if (!((Facility*)unit)->completedConstruction()) {
+ if (!((Facility*)unit)->isConstructionComplete()) {
 	slotShowConstructionProgress((Facility*)unit);
 	return;
  }
@@ -534,7 +534,7 @@ void BosonCommandFrame::slotUpdate()
 {
  if (d->mFacility) {
 	slotShowConstructionProgress(d->mFacility);
-	if (d->mFacility->completedConstruction()) {
+	if (d->mFacility->isConstructionComplete()) {
 		slotSetProduction(d->mFacility);
 	}
  } else if (d->mFactory) {

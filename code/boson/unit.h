@@ -320,7 +320,7 @@ public:
 	 * productions of a facility!
 	 * @return If this unit has been built (constructed) completely
 	 **/
-	inline bool completedConstruction() const;
+	inline bool isConstructionComplete() const;
 
 	inline double constructionProgress() const;
 
@@ -383,13 +383,13 @@ public:
 	inline double productionProgress() const;
 
 	/**
-	 * Reimplemented. Does nothing if @ref completedConstruction is false -
+	 * Reimplemented. Does nothing if @ref isConstructionComplete is false -
 	 * otherwise the same as @ref Unit::setTarget
 	 **/
 	virtual void setTarget(Unit*);
 
 	/**
-	 * Does nothing if @ref completedConstruction is false - otherwise the
+	 * Does nothing if @ref isConstructionComplete is false - otherwise the
 	 * same as @ref Unit::moveTo
 	 **/
 	virtual void moveTo(int x, int y);
@@ -399,7 +399,7 @@ public:
 	/**
 	 * Advance the construction animation. This is usually called when
 	 * placing the unit until the construction is completed. See @ref
-	 * completedConstruction
+	 * isConstructionComplete
 	 **/
 	virtual void advanceConstruction();
 

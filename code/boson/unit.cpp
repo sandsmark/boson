@@ -1034,7 +1034,7 @@ void Facility::addProduction(int unitType)
 	kdError() << id() << " cannot produce " << unitType << endl;
 	return;
  }
- if (!completedConstruction()) {
+ if (!isConstructionComplete()) {
 	kdWarning() << "not yet constructed completely" << endl;
 	return;
  }
@@ -1072,7 +1072,7 @@ QValueList<int> Facility::productionList() const
 
 void Facility::advanceProduction()
 {
- if (!completedConstruction()) {
+ if (!isConstructionComplete()) {
 	kdWarning() << "not yet constructed completely" << endl;
 	return;
  }
@@ -1156,7 +1156,7 @@ double Facility::productionProgress() const
  return percentage;
 }
 
-bool Facility::completedConstruction() const
+bool Facility::isConstructionComplete() const
 {
  if (work() == WorkConstructed) {
 	return false;
@@ -1176,7 +1176,7 @@ double Facility::constructionProgress() const
 
 void Facility::setTarget(Unit* u)
 {
- if (!completedConstruction()) {
+ if (!isConstructionComplete()) {
 	kdWarning() << "not yet constructed completely" << endl;
 	return;
  }
@@ -1185,7 +1185,7 @@ void Facility::setTarget(Unit* u)
 
 void Facility::moveTo(int x, int y)
 {
- if (!completedConstruction()) {
+ if (!isConstructionComplete()) {
 	kdWarning() << "not yet constructed completely" << endl;
 	return;
  }

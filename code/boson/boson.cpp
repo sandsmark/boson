@@ -268,7 +268,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			kdError() << k_lineinfo << "NULL properties (EVIL BUG)" << endl;
 			break;
 		}
-		if (!factory->completedConstruction()) {
+		if (!factory->isConstructionComplete()) {
 			kdWarning() << "Factory " << factoryId << " not yet constructed" << endl;
 			break;
 		}
