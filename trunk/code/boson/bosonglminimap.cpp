@@ -640,6 +640,7 @@ public:
 	BoTexture* mGLMapTexture;
 
 	bool mUpdatesEnabled;
+	int mMiniMapChangesSinceRendering;
 };
 
 BosonGLMiniMapRenderer::BosonGLMiniMapRenderer(const int* viewport)
@@ -659,6 +660,7 @@ BosonGLMiniMapRenderer::BosonGLMiniMapRenderer(const int* viewport)
  d->mMapTextureWidth = 0;
  d->mMapTextureHeight = 0;
  d->mUpdatesEnabled = true;
+ d->mMiniMapChangesSinceRendering = 0;
 
  mPosX = distanceFromEdge();
  mPosY = distanceFromEdge();
@@ -746,6 +748,7 @@ void BosonGLMiniMapRenderer::createMap(unsigned int w, unsigned int h, BosonGrou
 
 void BosonGLMiniMapRenderer::render()
 {
+ d->mMiniMapChangesSinceRendering = 0;
  renderGimmicks();
  switch (mType) {
 	case MiniMap:
@@ -798,6 +801,9 @@ void BosonGLMiniMapRenderer::renderMiniMap()
  d->mModelviewMatrix.scale(mZoom, mZoom, 1.0f); // AB: maybe do this on the texture matrix stack
 // glScalef(mZoom, mZoom, 1.0f); // AB: maybe do this on the texture matrix stack
 
+ if (!d->mUpdatesEnabled) {
+	setUpdatesEnabled(true);
+ }
  d->mGLMapTexture->bind();
 
  renderQuad();
@@ -868,6 +874,14 @@ void BosonGLMiniMapRenderer::setPoint(int x, int y, const QColor& color)
 	d->mGLMapTexture->bind();
 	glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE,
 			&d->mMapTexture[(y * d->mMapTextureWidth + x) * 4]);
+	d->mMiniMapChangesSinceRendering++;
+	if (d->mMiniMapChangesSinceRendering > 20) {
+		// we've done many changes to the minimap without ever rendering
+		// a single change. probably there are lots of changes going on
+		// and we expect even more.
+		// disable updates until minimap is being rendered again
+		setUpdatesEnabled(false);
+	}
  }
 }
 
