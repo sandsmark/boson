@@ -67,12 +67,6 @@ BOSON_SRC = \
 	bosonprofilingdialog.cpp \
 	bosonmodeltextures.cpp
 
-BOUNIT_SRC = \
-	unitproperties.cpp \
-	pluginproperties.cpp \
-	bosonunitdialog.cpp \
-	bounitmain.cpp
-
 BOPROFILING_SRC= \
 	bosonprofilingdialog.cpp \
 	bosonprofiling.cpp \
@@ -84,7 +78,7 @@ boson_SOURCES = $(BOSON_SRC)
 
 bounit_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 bounit_LDADD = -lkio $(LIB_KDEUI)
-bounit_SOURCES = $(BOUNIT_SRC)
+bounit_SOURCES = bounitmain.cpp bosonsearchpathswidget.ui bouniteditor.ui
 
 boprofiling_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 boprofiling_LDADD = -lkio $(LIB_KDEUI)

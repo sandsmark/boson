@@ -17,7 +17,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "bosonunitdialog.h"
+#include "bouniteditor.h"
 
 #include <kapplication.h>
 #include <kcmdlineargs.h>
@@ -27,7 +27,7 @@
 static const char *description =
     I18N_NOOP("Unit Editor for Boson");
 
-static const char *version = "v0.7pre";
+static const char *version = "1.0pre";
 
 static KCmdLineOptions options[] =
 {
@@ -41,28 +41,24 @@ int main(int argc, char **argv)
 		version,
 		description,
 		KAboutData::License_GPL,
-		"(C) 1999-2000,2001-2002 The Boson team",
+		"(C) 2002 The Boson team",
 		0,
 		"http://boson.eu.org");
- about.addAuthor("Thomas Capricelli", I18N_NOOP("Initial Game Design & Coding"), "orzel@kde.org", "http://orzel.freehackers.org");
- about.addAuthor("Benjamin Adler", I18N_NOOP("Graphics & Homepage Design"), "benadler@bigfoot.de");
- about.addAuthor( "Andreas Beckermann", I18N_NOOP("Coding & Current Maintainer"), "b_mann@gmx.de" );
+ about.addAuthor( "Rivo Laks", I18N_NOOP("Design & Coding"), "rivolaks@hot.ee" );
 
  KCmdLineArgs::init(argc, argv, &about);
  KCmdLineArgs::addCmdLineOptions(options);
  KApplication app;
- KGlobal::locale()->insertCatalogue("libkdegames");
-
-    // register ourselves as a dcop client
-//    app.dcopClient()->registerAs(app.name(), false);
 
  KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
- BosonUnitDialog* dlg = new BosonUnitDialog(0);
+ BoUnitEditor* dlg = new BoUnitEditor(0);
  app.setMainWidget(dlg);
  dlg->show();
  
  args->clear();
- return app.exec();
+ int r = app.exec();
+ delete dlg;
+ return r;
 }
 
 
