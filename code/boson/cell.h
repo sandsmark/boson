@@ -138,8 +138,9 @@ public:
 	 **/
 	static GroundType to(TransType trans);
 
-protected:
 	static int getTransTile(int g);
+
+protected:
 
 	void setVersion(unsigned char v)
 	{
