@@ -156,7 +156,7 @@ void BosonModelTextures::reloadTextures()
  }
 }
 
-const QString& BosonModelTextures::texturePath() const 
+const QString& BosonModelTextures::texturePath() const
 {
  return d->mTexturePath;
 }
