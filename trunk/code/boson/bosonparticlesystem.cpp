@@ -86,7 +86,7 @@ void BosonParticle::update(float elapsed)
 /*****  BosonParticleSystem  *****/
 
 BosonParticleSystem::BosonParticleSystem(int maxnum,
-    float createrate, bool align, BosonParticleTextureArray textures,
+    float createrate, bool align, const BosonParticleTextureArray* textures,
     const BosonParticleSystemProperties* prop)
 {
   // Set some variables first
@@ -200,7 +200,18 @@ void BosonParticleSystem::initParticle(BosonParticle* particle)
   // Note that most stuff isn't initialized here, it's done in
   //  BosonParticleSystemProperties
   particle->pos = mPos;
-  particle->tex = mTextures.mTextureIds[0];
+  if(!mTextures)
+  {
+    boError() << k_funcinfo << "NULL textures" << endl;
+  }
+  else if(!mTextures->mTextureIds)
+  {
+    boError() << k_funcinfo << "NULL texture array" << endl;
+  }
+  else
+  {
+    particle->tex = mTextures->mTextureIds[0];
+  }
   particle->system = this;
   if(mProp)
   {

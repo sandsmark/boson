@@ -36,27 +36,25 @@
 #include <GL/gl.h>
 
 /// Start of static initialization stuff
-QMap<QString, BosonParticleTextureArray> BosonParticleSystemProperties::mTextureArrays;
+QDict<BosonParticleTextureArray> BosonParticleSystemProperties::mTextureArrays;
 QString BosonParticleSystemProperties::mTexturePath;
 
-BosonParticleTextureArray BosonParticleSystemProperties::getTextures(const QString& name)
+const BosonParticleTextureArray* BosonParticleSystemProperties::getTextures(const QString& name)
 {
-  if(!mTextureArrays.contains(name))
+  if(!mTextureArrays.find(name))
   {
     boDebug(150) << k_funcinfo << "Adding texture with name " << name << " to textures arrays map" << endl;
-    BosonParticleTextureArray t;
     QDir d(mTexturePath);
     QStringList files = d.entryList(name + "*.png", QDir::Files, QDir::Name);
-    t.mTextureCount = files.count();
     boDebug(150) << k_funcinfo << "Found " << files.count() << " suitable files" << endl;
-    t.mTextureIds = new GLuint[t.mTextureCount];
-    glGenTextures(t.mTextureCount, t.mTextureIds);
+    BosonParticleTextureArray* t = new BosonParticleTextureArray(files.count());
+    glGenTextures(t->mTextureCount, t->mTextureIds);
     
     int i = 0;
     for(QStringList::Iterator it = files.begin(); it != files.end(); it++)
     {
-      BosonTextureArray::createTexture(mTexturePath + "/" + *it, t.mTextureIds[i], boConfig->modelTexturesMipmaps());
-      boDebug(150) << k_funcinfo << "Created new texture from file " << *it  << "; id: " << i << "; OGL name: " << t.mTextureIds[i] << endl;
+      BosonTextureArray::createTexture(mTexturePath + "/" + *it, t->mTextureIds[i], boConfig->modelTexturesMipmaps());
+      boDebug(150) << k_funcinfo << "Created new texture from file " << *it  << "; id: " << i << "; OGL name: " << t->mTextureIds[i] << endl;
       i++;
     }
 /*    GLuint tex;
@@ -66,6 +64,7 @@ BosonParticleTextureArray BosonParticleSystemProperties::getTextures(const QStri
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     BosonTextureArray::createTexture(image, tex, boConfig->modelTexturesMipmaps());*/
     mTextureArrays.insert(name, t);
+    mTextureArrays.setAutoDelete(true);
   }
   return mTextureArrays[name];
 }
@@ -185,12 +184,12 @@ void BosonParticleSystemProperties::updateParticle(BosonParticleSystem*, BosonPa
   // Note that we use our own texture array here, not the one stored in
   //  BosonParticleSystem (which is only used for drawing). It doesn't matter,
   //  because they are identical (in theory ;-)) anyway.
-  int t = (int)((1.0 - factor) * (mTextures.mTextureCount + 1)); // +1 for last texture to be shown
-  if(t >= mTextures.mTextureCount)
+  int t = (int)((1.0 - factor) * (mTextures->mTextureCount + 1)); // +1 for last texture to be shown
+  if(t >= (int)mTextures->mTextureCount)
   {
-    t = mTextures.mTextureCount - 1;
+    t = mTextures->mTextureCount - 1;
   }
-  particle->tex = mTextures.mTextureIds[t];
+  particle->tex = mTextures->mTextureIds[t];
 }
 
 QPtrList<BosonParticleSystemProperties> BosonParticleSystemProperties::loadParticleSystemProperties(KSimpleConfig* cfg, QString key, SpeciesTheme* theme)

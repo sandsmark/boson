@@ -160,7 +160,7 @@ class BosonParticleSystem
      * @param prop Properties of this system.
      **/
     BosonParticleSystem(int maxnum, float createrate,
-        bool align, BosonParticleTextureArray textures,
+        bool align, const BosonParticleTextureArray* textures,
         const BosonParticleSystemProperties* prop);
     /**
      * Destructs BosonParticleSystem. This deletes all particles
@@ -298,7 +298,7 @@ class BosonParticleSystem
     float mCreateCache;  // Number of particles to create during next update
     bool mAlign;  // Whether to align particles to camera
     float mRadius;  // Radius of bounding sphere
-    BosonParticleTextureArray mTextures;  // Textures of particles
+    const BosonParticleTextureArray* mTextures;  // Textures of particles
     BoVector3 mPos;
     bool mRotated;
     float mAge;
