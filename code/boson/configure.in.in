@@ -1,5 +1,5 @@
 dnl TODO: we need to find out which version is installed and which we need
-AC_DEFUN(AC_CHECK_LIB3DS,
+AC_DEFUN([AC_CHECK_LIB3DS],
 [
 AC_MSG_CHECKING([for lib3ds/file.h])
 AC_FIND_FILE(lib3ds/file.h,  [$kde_incdirs], lib3ds)
@@ -12,7 +12,7 @@ fi
 ])
 AC_CHECK_LIB3DS
 
-AC_DEFUN(AC_BOSON_HAVE_GL_HEADERS,
+AC_DEFUN([AC_BOSON_HAVE_GL_HEADERS],
 [
 dnl first search for GL/gl.h and GL/glu.h
  bo_have_gl=""
@@ -58,7 +58,7 @@ dnl     without including it itself
 ])
 AC_BOSON_HAVE_GL_HEADERS
 
-AC_DEFUN(AC_BOSON_HAVE_GL_LIBS,
+AC_DEFUN([AC_BOSON_HAVE_GL_LIBS],
 [
  AC_LANG_SAVE
  AC_LANG_CPLUSPLUS
@@ -134,13 +134,13 @@ gluLookAt(0.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 100.0, 0.0);
 AC_BOSON_HAVE_GL_LIBS
 
 
-AC_DEFUN(AC_BOSON_PREFIX,
+AC_DEFUN([AC_BOSON_PREFIX],
 [
   AC_DEFINE_UNQUOTED(BOSON_PREFIX, "$prefix", [ ])
 ])
 AC_BOSON_PREFIX
 
-AC_DEFUN(AC_BOSON_STATIC,
+AC_DEFUN([AC_BOSON_STATIC],
 [
   if test "x$enable_static" = "xyes"; then
       AC_DEFINE_UNQUOTED(BOSON_COMPILE_STATIC, 1, [ ])
@@ -151,7 +151,7 @@ AC_DEFUN(AC_BOSON_STATIC,
 AC_BOSON_STATIC
 
 
-AC_DEFUN(AC_BOSON_CHECK_VIDMODE,
+AC_DEFUN([AC_BOSON_CHECK_VIDMODE],
 [
   AC_LANG_SAVE
   AC_LANG_C
@@ -194,7 +194,7 @@ XF86VidModeQueryExtension(dpy, &ev, &er);
   AC_SUBST(LIB_VIDMODE)
 ])
 
-AC_DEFUN(AC_BOSON_CHECK_XRANDR,
+AC_DEFUN([AC_BOSON_CHECK_XRANDR],
 [
   AC_LANG_SAVE
   AC_LANG_C
