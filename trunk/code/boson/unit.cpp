@@ -643,7 +643,6 @@ void Unit::stopAttacking()
 
 bool Unit::save(QDataStream& stream)
 {
- //TODO: d->mTarget
  //we should probably add pure virtual methods save() and load() to the plugins,
  //in order to store non-KGameProperty data there, too
  // note that UnitBase::save() also saves KGameProperty data of plugins and
@@ -655,12 +654,27 @@ bool Unit::save(QDataStream& stream)
  stream << (float)x();
  stream << (float)y();
  stream << (float)z();
- // now we need to store the active weapon:
- int weapon = -1;
- if (activeWeapon()) {
-	weapon = d->mWeapons.findRef(activeWeapon());
+
+ // store the current plugin:
+ int pluginIndex = 0;
+ if (currentPlugin()) {
+	pluginIndex = d->mPlugins.findRef(currentPlugin());
  }
- stream << (Q_INT32)weapon;
+ stream << (Q_INT32)pluginIndex;
+
+ // also store the target:
+ unsigned long int targetId = 0;
+ if (target()) {
+	targetId = target()->id();
+ }
+ stream << (Q_UINT32)targetId;
+
+ // now we need to store the active weapon:
+ int weaponIndex = -1;
+ if (activeWeapon()) {
+	weaponIndex = d->mWeapons.findRef(activeWeapon());
+ }
+ stream << (Q_INT32)weaponIndex;
  return true;
 }
 
@@ -677,19 +691,43 @@ bool Unit::load(QDataStream& stream)
  float x;
  float y;
  float z;
- Q_INT32 weapon;
+ Q_INT32 pluginIndex;
+ Q_UINT32 targetId;
+ Q_INT32 weaponIndex;
 
  stream >> x;
  stream >> y;
  stream >> z;
- stream >> weapon;
- if (weapon < 0) {
+ stream >> pluginIndex;
+ stream >> targetId;
+ stream >> weaponIndex;
+
+ if (pluginIndex < 0) {
+	mCurrentPlugin = 0;
+ } else {
+	if ((unsigned int)pluginIndex >= d->mPlugins.count()) {
+		boWarning() << k_funcinfo << "Invalid current plugin index: " << pluginIndex << endl;
+	} else {
+		mCurrentPlugin = d->mPlugins.at(pluginIndex);
+	}
+ }
+
+ // note: don't use setTarget() here, as it does some additional calculations
+ if (targetId == 0) {
+	d->mTarget = 0;
+ } else {
+	d->mTarget = boGame->findUnit(targetId, 0);
+	if (!d->mTarget) {
+		boWarning() << k_funcinfo << "Could not find target with unitId=" << targetId << endl;
+	}
+ }
+ if (weaponIndex < 0) {
 	d->mActiveWeapon = 0;
  } else {
-	if ((unsigned int)weapon >= d->mWeapons.count()) {
-		boError() << k_funcinfo << "Invalid active weapon: " << weapon << endl;
+	if ((unsigned int)weaponIndex >= d->mWeapons.count()) {
+		boWarning() << k_funcinfo << "Invalid active weapon index: " << weaponIndex << endl;
 	} else {
-		d->mActiveWeapon = d->mWeapons.at(weapon);
+		d->mActiveWeapon = d->mWeapons.at(weaponIndex);
 	}
  }
 
@@ -956,7 +994,6 @@ class MobileUnit::MobileUnitPrivate
 public:
 	MobileUnitPrivate()
 	{
-		mTargetCellMarked = false;
 	}
 
 	KGameProperty<float> mSpeed;
@@ -969,6 +1006,7 @@ public:
 MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas) : Unit(prop, owner, canvas)
 {
  d = new MobileUnitPrivate;
+ d->mTargetCellMarked = false;
 
  registerData(&d->mSpeed, IdSpeed);
  registerData(&d->mMovingFailed, IdMovingFailed);
@@ -1170,8 +1208,7 @@ void MobileUnit::advanceMoveCheck()
 		d->mPathRecalculated = d->mPathRecalculated + 1;
 	}
 	return;
- }
- else if (! d->mTargetCellMarked) {
+ } else if (!d->mTargetCellMarked) {
 	canvas()->cell(currentWaypoint().x() / BO_TILE_SIZE, currentWaypoint().y() / BO_TILE_SIZE)->willBeOccupiedBy(this);
 	d->mTargetCellMarked = true;
  }
