@@ -43,19 +43,21 @@ public:
 	enum shot_style { SHOT_SHOT, SHOT_UNIT, SHOT_FACILITY };
 
 	boShot(int _x, int _y, int _z, shot_style s);
-/* QCanvas stuff */
+	/* QCanvas stuff */
 	virtual int	rtti() const { return S_SHOT; }
 
 protected:
-	void  timerEvent( QTimerEvent * );
-private:
-	bool	loadBig(shot_style style, int version);
+	void	timerEvent( QTimerEvent * );
 
-	static	QBitArray	qba_units;
-	static	QBitArray	qba_fix;
-	static	QCanvasPixmapArray  *shotSequ;
-	static	QCanvasPixmapArray  *fixSequ[FIX_SHOTS_NB];
-	static	QCanvasPixmapArray  *unitSequ[UNITS_SHOTS_NB];
+private:
+	static	QBitArray		qba_units;			// which unit explosions are already loaded
+	static	QCanvasPixmapArray	*unitSequ[UNITS_SHOTS_NB];	// explosions sequences for units
+	static	QBitArray		qba_fix;			// which facilities explosions are already loaded
+	static	QCanvasPixmapArray	*fixSequ[FIX_SHOTS_NB];		// explosions sequences for facilities
+	static	QCanvasPixmapArray	*shotSequ;			// explosions sequence for small shots
+
+	static	bool loadBig(shot_style style, int version);		// load one unit/facilitye pixmaps set
+
 	int	counter;
 	int	maxCounter;
 	

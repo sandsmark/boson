@@ -30,6 +30,7 @@
 
 
 QCanvasPixmapArray	*boShot::shotSequ;
+
 QCanvasPixmapArray	*boShot::unitSequ[UNITS_SHOTS_NB];
 QCanvasPixmapArray	*boShot::fixSequ[FIX_SHOTS_NB];
 
@@ -38,7 +39,7 @@ QBitArray		boShot::qba_fix(FIX_SHOTS_NB);
 
 
 
-static bool loadPixmap(const QString &path, QPixmap **pix);
+static bool loadPixmap(const QString &path, QPixmap **pix);	// load one frame of the animation
 
 #define SHOTS "shots/explosion%1"
 #define _SHOTS "shots/explosion0000"
