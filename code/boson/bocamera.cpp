@@ -25,17 +25,32 @@
 #include "bodebug.h"
 #include "bosonglwidget.h" // BoContext
 #include "bolight.h"
+#include "bosoncanvas.h"
 
 #include <qdom.h>
 
 // Camera limits
-#define CAMERA_MIN_Z BO_GL_NEAR_PLANE + 3
+// These are min/max height of the camera (between camera's _position_, not
+//  lookat point, and ground)
+#define CAMERA_MIN_Z 2
 #define CAMERA_MAX_Z 100
-#define CAMERA_MAX_RADIUS 80
+#define CAMERA_MAX_RADIUS 70
+// This is tangens of the minimum camera angle allowed (if angle is 90, camera
+//  is looking straight at the ground from top; if angle is 0, camera is looking
+//  at the horizon)
+// This is tan(30 degrees) atm, i.e. min camera angle is 30 degrees
+//#define MIN_CAMERA_ANGLE_TAN 0.57735027
+// 30 degrees limit is fatal to performance atm, so we use 45 degrees instead
+#define MIN_CAMERA_ANGLE_TAN 1.0
+// This helps to avoid tiny rounding errors which would be causing infinite loops
+#define CAMERA_Z_ROUNDING_ERROR 0.001
 
 #include <GL/glu.h>
 
 #include <math.h>
+
+
+/*****  BoCamera  *****/
 
 BoCamera::BoCamera()
 {
@@ -63,7 +78,6 @@ BoCamera::~BoCamera()
 void BoCamera::init()
 {
   mAutoCamera = 0;
-  mLookAt.set(0.0f, 0.0f, 0.0f);
 
   setPositionDirty();
   setAutoCamera(new BoAutoCamera(this));
@@ -91,10 +105,23 @@ void BoCamera::changeLookAt(const BoVector3& diff)
   setLookAt(lookAt() + diff);
 }
 
+void BoCamera::changeCameraPos(const BoVector3& diff)
+{
+  setCameraPos(cameraPos() + diff);
+}
+
+void BoCamera::changeUp(const BoVector3& diff)
+{
+  setUp(up() + diff);
+}
+
 bool BoCamera::loadFromXML(const QDomElement& root)
 {
   bool ok;
   float lookatx, lookaty, lookatz;
+  float cameraposx, cameraposy, cameraposz;
+  float upx, upy, upz;
+
   lookatx = root.attribute("LookAtX").toFloat(&ok);
   if(!ok)
   {
@@ -113,20 +140,67 @@ bool BoCamera::loadFromXML(const QDomElement& root)
     boError(230) << k_funcinfo << "Invalid value for LookAtZ tag" << endl;
     lookatz = 0.0f;
   }
-//  boDebug(260) << k_funcinfo << "Setting lookat to (" << lookatx << ", " << lookaty << ", " << lookatz << ")" << endl;
   mLookAt.set(lookatx, lookaty, lookatz);
-//  boDebug(260) << k_funcinfo << "lookat is now (" << lookAt().x() << ", " << lookAt().y() << ", " << lookAt().z() << ")" << endl;
+
+  cameraposx = root.attribute("CameraPosX").toFloat(&ok);
+  if(!ok)
+  {
+    boError(230) << k_funcinfo << "Invalid value for CameraPosX tag" << endl;
+    cameraposx = 0.0f;
+  }
+  cameraposy = root.attribute("CameraPosY").toFloat(&ok);
+  if(!ok)
+  {
+    boError(230) << k_funcinfo << "Invalid value for CameraPosY tag" << endl;
+    cameraposy = 0.0f;
+  }
+  cameraposz = root.attribute("CameraPosZ").toFloat(&ok);
+  if(!ok)
+  {
+    boError(230) << k_funcinfo << "Invalid value for CameraPosZ tag" << endl;
+    cameraposz = 0.0f;
+  }
+  mCameraPos.set(cameraposx, cameraposy, cameraposz);
+
+  upx = root.attribute("UpX").toFloat(&ok);
+  if(!ok)
+  {
+    boError(230) << k_funcinfo << "Invalid value for UpX tag" << endl;
+    upx = 0.0f;
+  }
+  upy = root.attribute("UpY").toFloat(&ok);
+  if(!ok)
+  {
+    boError(230) << k_funcinfo << "Invalid value for UpY tag" << endl;
+    upy = 0.0f;
+  }
+  upz = root.attribute("UpZ").toFloat(&ok);
+  if(!ok)
+  {
+    boError(230) << k_funcinfo << "Invalid value for UpZ tag" << endl;
+    upz = 0.0f;
+  }
+  mUp.set(upx, upy, upz);
+
   setPositionDirty();
   return true;
  }
 
 bool BoCamera::saveAsXML(QDomElement& root)
 {
- root.setAttribute("LookAtX", lookAt().x());
- root.setAttribute("LookAtY", lookAt().y());
- root.setAttribute("LookAtZ", lookAt().z());
- // TODO: save diffs too?
- return true;
+  root.setAttribute("LookAtX", lookAt().x());
+  root.setAttribute("LookAtY", lookAt().y());
+  root.setAttribute("LookAtZ", lookAt().z());
+
+  root.setAttribute("CameraPosX", cameraPos().x());
+  root.setAttribute("CameraPosX", cameraPos().y());
+  root.setAttribute("CameraPosX", cameraPos().z());
+
+  root.setAttribute("UpX", up().x());
+  root.setAttribute("UpY", up().y());
+  root.setAttribute("UpZ", up().z());
+
+  return true;
 }
 
 // FIXME: make it const!
@@ -172,6 +246,20 @@ void BoCamera::setLookAt(const BoVector3& pos)
   setPositionDirty();
 }
 
+void BoCamera::setCameraPos(const BoVector3& pos)
+{
+  mCameraPos = pos;
+  setPositionDirty();
+}
+
+void BoCamera::setUp(const BoVector3& up)
+{
+  mUp = up;
+  setPositionDirty();
+}
+
+
+/*****  BoGameCamera  *****/
 
 BoGameCamera::BoGameCamera()
         : BoCamera()
@@ -179,11 +267,11 @@ BoGameCamera::BoGameCamera()
   init();
 }
 
-BoGameCamera::BoGameCamera(GLfloat minX, GLfloat maxX, GLfloat minY, GLfloat maxY)
+BoGameCamera::BoGameCamera(const BosonCanvas* canvas)
         : BoCamera()
 {
   init();
-  setMoveRect(minX, maxX, minY, maxY);
+  mCanvas = canvas;
 }
 
 
@@ -194,10 +282,7 @@ BoGameCamera& BoGameCamera::operator=(const BoGameCamera& c)
   mRotation = c.mRotation;
   mRadius = c.mRadius;
 
-  mMinX = c.mMinX;
-  mMaxX = c.mMaxX;
-  mMinY = c.mMinY;
-  mMaxY = c.mMaxY;
+  mCanvas = c.mCanvas;
   setAutoCamera(new BoAutoGameCamera(*c.autoGameCamera()));
 
   return *this;
@@ -207,7 +292,7 @@ void BoGameCamera::init()
 {
   setAutoCamera(new BoAutoGameCamera(this));
   initStatic();
-  setMoveRect(-100000, 100000, -100000, 100000); // just very big values
+  mCanvas = 0;
   mPosZ = 8.0f;
   mRotation = 0.0f;
   mRadius = 5.0f;
@@ -225,8 +310,6 @@ void BoGameCamera::initStatic()
       CAMERA_MIN_Z));
   boConfig->addDynamicEntry(new BoConfigDoubleEntry(boConfig, "CameraMaxZ",
       CAMERA_MAX_Z));
-  boConfig->addDynamicEntry(new BoConfigDoubleEntry(boConfig, "CameraMaxRadius",
-      CAMERA_MAX_RADIUS));
 }
 
 float BoGameCamera::minCameraZ()
@@ -241,14 +324,9 @@ float BoGameCamera::maxCameraZ()
   return (float)boConfig->doubleValue("CameraMaxZ");
 }
 
-float BoGameCamera::maxCameraRadius()
+void BoGameCamera::updateCamera()
 {
-  initStatic();
-  return (float)boConfig->doubleValue("CameraMaxRadius");
-}
-
-void BoGameCamera::updatePosition()
-{
+  boDebug() << k_funcinfo << endl;
   float diffX = 0.0f;
   float diffY = 0.0f;
   float radius = this->radius();
@@ -259,135 +337,122 @@ void BoGameCamera::updatePosition()
   }
   Bo3dTools::pointByRotation(&diffX, &diffY, rotation(), radius);
 
-  BoVector3 cameraPos(lookAt().x() + diffX, lookAt().y() + diffY, lookAt().z() + z());
-  BoVector3 up(-diffX, -diffY, 0.0f);
-  setGluLookAt(cameraPos, lookAt(), up);
+  // We don't want any validation here (we'd get infinite loops otherwise)
+  BoCamera::setCameraPos(BoVector3(lookAt().x() + diffX, lookAt().y() + diffY, lookAt().z() + z()));
+  BoCamera::setUp(BoVector3(-diffX, -diffY, 0.0f));
 
   setPositionDirty(false);
 }
 
-float BoGameCamera::calculateNewZ(GLfloat diff) const
+void BoGameCamera::checkLookAtPosition()
 {
-  // FIXME: z limits should depend on the ground height
-  float newz = mPosZ + diff;
-  if(newz < CAMERA_MIN_Z)
+  boDebug() << k_funcinfo << endl;
+  // We use canvas for checking here, so if we don't have it, return
+  if(!mCanvas)
   {
-    newz = CAMERA_MIN_Z;
+    boDebug() << k_funcinfo << "NULL canvas" << endl;
+    return;
   }
-  else if(newz > CAMERA_MAX_Z)
-  {
-    newz = CAMERA_MAX_Z;
-  }
-  return newz;
-}
 
-void BoGameCamera::changeZ(GLfloat diff)
-{
-  // FIXME: z limits should depend on the ground height
-  // Make sure new z-coordinate is within limits
-  float newz = calculateNewZ(diff);
-
-  // Change radius too, so that camera angle will remain same
-  // TODO: maybe provide another method for that, e.g. changeZWithRadius().
-  //  Then changeZ() would change _only_ z
-  float factor = newz / mPosZ;
-  setZ(newz);
-  setRadius(radius() * factor);
-}
-
-float BoGameCamera::calculateNewRadius(GLfloat diff) const
-{
-  float radius = this->radius() + mPosZ / CAMERA_MAX_RADIUS * diff;
-  // Make sure radius is within limits
-  if(radius < 0.0f)
-  {
-    radius = 0.0f;
-  }
-  else if(radius > mPosZ)
-  {
-    radius = mPosZ;
-  }
-  return radius;
-}
-
-void BoGameCamera::changeRadius(GLfloat diff)
-{
-  // How much radius is changed depends on z position
-  float radius = calculateNewRadius(diff);
-  // Make sure radius is within limits
-  if(radius < 0.0f)
-  {
-    radius = 0.0f;
-  }
-  else if(radius > mPosZ)
-  {
-    radius = mPosZ;
-  }
-  // Update
-  setRadius(radius);
-}
-
-void BoGameCamera::changeRotation(GLfloat diff)
-{
-  setRotation(rotation() + diff);
-}
-
-void BoGameCamera::checkPosition()
-{
   // note that we use this in setGluLooKAt() as well, so don't use radius() and
   // rotation() here!
   bool changed = false;
 
   // workaround. AB: i believe cameraPos() and up() must be const.
-  bool dirty = positionDirty();
-  setPositionDirty(false);
-  BoVector3 cameraPos_ = cameraPos();
+  // We must first update lookAt position by calling
+//  bool dirty = positionDirty();
+//  setPositionDirty(false);
   BoVector3 lookAt_ = lookAt();
-  BoVector3 up_ = up();
-  setPositionDirty(dirty);
+//  setPositionDirty(dirty);
 
-  if(lookAt().x() < mMinX)
+  if(lookAt_.x() < 0.0f)
   {
-    lookAt_.setX(mMinX);
+    lookAt_.setX(0.0f);
     changed = true;
   }
-  else if(lookAt().x() > mMaxX)
+  else if(lookAt_.x() > (float)mCanvas->mapWidth())
   {
-    lookAt_.setX(mMaxX);
+    lookAt_.setX((float)mCanvas->mapWidth());
     changed = true;
   }
-  if(lookAt().y() < mMinY)
+  if(lookAt_.y() > 0.0f)
   {
-    lookAt_.setY(mMinY);
+    lookAt_.setY(0.0f);
     changed = true;
   }
-  else if(lookAt().y() > mMaxY)
+  else if(lookAt_.y() < -((float)mCanvas->mapHeight()))
   {
-    lookAt_.setY(mMaxY);
+    lookAt_.setY(-((float)mCanvas->mapHeight()));
     changed = true;
   }
   if(changed)
   {
-    setGluLookAt(cameraPos_, lookAt_, up_);
-    setPositionDirty();
+    // We can't use setLookAt here, because it calls this method and we'd get
+    //  infinite loop. So we use setGluLookAt();
+    setGluLookAt(cameraPos(), lookAt_, up());
+  }
+}
+
+void BoGameCamera::checkCameraPosition()
+{
+  boDebug() << k_funcinfo << endl;
+  // Maybe rename to checkCameraHeight() as it only checks height
+  //  (z-coordinate)? Note that camera's height != z(), because z() only gives
+  //  height measured from lookat point, so to get real height you'll have to do
+  //  lookAt.z() + z()  (which should always be equal to just cameraPos.z())
+  if(mCanvas)
+  {
+    float camposx = cameraPos().x() * BO_TILE_SIZE;
+    float camposy = -cameraPos().y() * BO_TILE_SIZE;
+    camposx = QMAX(0, QMIN(camposx, mCanvas->mapWidth() * BO_TILE_SIZE));
+    camposy = QMAX(0, QMIN(camposy, mCanvas->mapHeight() * BO_TILE_SIZE));
+    float groundz = mCanvas->heightAtPoint(camposx, camposy);
+    boDebug() << k_funcinfo << "ground z at (" << camposx << "; " << camposy << "): " << groundz << endl;
+    // FIXME: this assumes that lookAt.z() == 0, which may not always be the case
+    // TODO: maybe also change radius to keep camera's angle constant
+    if(cameraPos().z() < groundz + minCameraZ())
+    {
+      // We may have tiny rounding errors here, so we set z to little bigger
+      //  number than the limit in order to avoid infinite loop
+      //  (otherwise we may have  groundz + minCameraZ() = 0.0000001, which will
+      //  be rounded to 0 when calling setZ(), and then setZ() sets z to 0 and
+      //  this function compares values and finds out that 0 < 0.0000001, so it
+      //  calls setZ() ... )
+      setZ(groundz + minCameraZ() + CAMERA_Z_ROUNDING_ERROR);
+    }
+    else if(cameraPos().z() > groundz + maxCameraZ())
+    {
+      setZ(groundz + maxCameraZ() - CAMERA_Z_ROUNDING_ERROR);
+    }
   }
 }
 
 void BoGameCamera::checkRotation()
 {
+  boDebug() << k_funcinfo << endl;
   if(mRotation > 360.0f)
   {
-    mRotation -= 360.0f;
-    setPositionDirty();
+    setRotation(mRotation - 360.0f);
   }
   else if(mRotation < 0.0f)
   {
-    mRotation += 360.0f;
-    setPositionDirty();
+    setRotation(mRotation + 360.0f);
   }
 }
 
-
+void BoGameCamera::checkRadius()
+{
+  boDebug() << k_funcinfo << endl;
+  // Make sure radius is within limits
+  if(radius() < 0.0f)
+  {
+    setRadius(0.0f);
+  }
+  else if(radius() * MIN_CAMERA_ANGLE_TAN > z())
+  {
+    setRadius(z() / MIN_CAMERA_ANGLE_TAN);
+  }
+}
 
 bool BoGameCamera::saveAsXML(QDomElement& root)
 {
@@ -432,7 +497,7 @@ const BoVector3& BoGameCamera::cameraPos()
 {
   if(positionDirty())
   {
-    updatePosition();
+    updateCamera();
   }
   return BoCamera::cameraPos();
 }
@@ -441,46 +506,117 @@ const BoVector3& BoGameCamera::up()
 {
   if(positionDirty())
   {
-    updatePosition();
+    updateCamera();
   }
   return BoCamera::up();
 }
 
+void BoGameCamera::changeZ(GLfloat diff)
+{
+  boDebug() << k_funcinfo << "diff: " << diff << endl;
+  // Calculate new z
+  float oldz = mPosZ;
+  float newz = oldz + diff;
+  float factor = newz / oldz;
+  boDebug() << k_funcinfo << "oldz: " << oldz << "; newz: " << newz << "; factor: " << factor << endl;
+
+  // Set new z coordinate (also validates camera's position (i.e. makes sure
+  //  it's not inside the terrain))
+  setZ(newz);
+
+  if(mPosZ != newz)
+  {
+    boDebug() << k_funcinfo << "z changed to: " << mPosZ << endl;
+    if(mPosZ == oldz)
+    {
+      // Special case - z coordinate didn't change. Probably camera is at it's
+      //  max/min height. Return.
+      return;
+    }
+    // checkCameraPosition changed z coordinate (it was set to too low/high).
+    // recalculate z change factor
+    factor = mPosZ / oldz;
+    boDebug() << k_funcinfo << "new factor: " << factor << endl;
+  }
+
+  // Change radius too, so that camera angle will remain same
+  // TODO: maybe provide another method for that, e.g. changeZWithRadius().
+  //  Then changeZ() would change _only_ z
+  setRadius(mRadius * factor);
+}
+
+void BoGameCamera::changeRadius(GLfloat diff)
+{
+  boDebug() << k_funcinfo << endl;
+  // How much radius is changed depends on z position
+  float radius = this->radius() + mPosZ / CAMERA_MAX_RADIUS * diff;
+  // Update radius
+  setRadius(radius);
+}
+
+void BoGameCamera::changeRotation(GLfloat diff)
+{
+  boDebug() << k_funcinfo << endl;
+  setRotation(rotation() + diff);
+}
+
 void BoGameCamera::setLookAt(const BoVector3& pos)
 {
+  boDebug() << k_funcinfo << endl;
   BoCamera::setLookAt(pos);
-  checkPosition();
+
+  // Validate lookat point and camera's position
+  checkLookAtPosition();
+  checkCameraPosition();
+}
+
+void BoGameCamera::setCameraPos(const BoVector3& pos)
+{
+  BoCamera::setCameraPos(pos);
+
+  // Validate position
+  checkCameraPosition();
 }
 
 void BoGameCamera::setRadius(GLfloat r)
 {
+  boDebug() << k_funcinfo << endl;
   mRadius = r;
   setPositionDirty();
+
+  // Make sure new radius is valid
+  checkRadius();
+
+  // Validate camera's position
+  checkCameraPosition();
 }
 
 void BoGameCamera::setRotation(GLfloat r)
 {
+  boDebug() << k_funcinfo << endl;
   boDebug(230) << k_funcinfo << endl;
   mRotation = r;
-  checkRotation();
   setPositionDirty();
+
+  // Makes sure 0 <= rotation < 360
+  checkRotation();
+
+  // Validates camera's position
+  checkCameraPosition();
 }
 
 void BoGameCamera::setZ(GLfloat z)
 {
+  boDebug() << k_funcinfo << endl;
   mPosZ = z;
   setPositionDirty();
+
+  // Validate camera pos
+  checkCameraPosition();
 }
 
-void BoGameCamera::setMoveRect(GLfloat minX, GLfloat maxX, GLfloat minY, GLfloat maxY)
-{
-  boDebug(230) << k_funcinfo << "(" << minX << "; " << maxX << ";  " << minY << "; " << maxY << ")" << endl;
-  mMinX = minX;
-  mMaxX = maxX;
-  mMinY = minY;
-  mMaxY = maxY;
-}
 
+/*****  BoLightCamera  *****/
 
 BoLightCamera::BoLightCamera(BoLight* light, BoContext* ctx) : BoCamera()
 {

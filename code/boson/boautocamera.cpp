@@ -58,9 +58,29 @@ void BoAutoCamera::changeLookAt(const BoVector3& diff)
   mLookAtDiff = diff;
 }
 
+void BoAutoCamera::changeUp(const BoVector3& diff)
+{
+  mUpDiff = diff;
+}
+
+void BoAutoCamera::changeCameraPos(const BoVector3& diff)
+{
+  mCameraPosDiff = diff;
+}
+
 void BoAutoCamera::setLookAt(const BoVector3& pos)
 {
   mLookAtDiff = pos - camera()->lookAt();
+}
+
+void BoAutoCamera::setUp(const BoVector3& pos)
+{
+  mUpDiff = pos - camera()->up();
+}
+
+void BoAutoCamera::setCameraPos(const BoVector3& pos)
+{
+  mCameraPosDiff = pos - camera()->cameraPos();
 }
 
 void BoAutoCamera::commitChanges(int ticks)
@@ -159,6 +179,22 @@ bool BoAutoCamera::advance2()
     camera()->setLookAt(camera()->mLookAt + lookAtChange);
     changed = true;
   }
+  if(!mUpDiff.isNull())
+  {
+    // How much lookAt point will move
+    BoVector3 upChange(mUpDiff * factor);
+    // Change lookAt point and difference
+    camera()->setUp(camera()->mUp + upChange);
+    changed = true;
+  }
+  if(!mCameraPosDiff.isNull())
+  {
+    // How much lookAt point will move
+    BoVector3 cameraPosChange(mCameraPosDiff * factor);
+    // Change lookAt point and difference
+    camera()->setCameraPos(camera()->mCameraPos + cameraPosChange);
+    changed = true;
+  }
 
   return changed;
 }
@@ -166,6 +202,8 @@ bool BoAutoCamera::advance2()
 void BoAutoCamera::resetDifferences()
 {
   mLookAtDiff.reset();
+  mUpDiff.reset();
+  mCameraPosDiff.reset();
   mCommitTime = 0;
   mRemainingTime = 0;
   mMovedAmount = 0.0f;
@@ -211,30 +249,9 @@ void BoAutoGameCamera::init()
   mRadiusDiff = 0.0f;
 }
 
-void BoAutoGameCamera::updatePosition()
-{
-  float diffX = 0.0f;
-  float diffY = 0.0f;
-  float radius = gameCamera()->radius();
-  if(radius <= 0.02f)
-  {
-    // If radius is 0, up vector will be wrong so we change it
-    radius = 0.02f;
-  }
-  Bo3dTools::pointByRotation(&diffX, &diffY, gameCamera()->rotation(), radius);
-
-  BoVector3 cameraPos(gameCamera()->lookAt().x() + diffX, gameCamera()->lookAt().y() + diffY, gameCamera()->lookAt().z() + gameCamera()->z());
-  BoVector3 up(-diffX, -diffY, 0.0f);
-  gameCamera()->setGluLookAt(cameraPos, gameCamera()->lookAt(), up);
-
-  setPositionDirty(false);
-}
-
 void BoAutoGameCamera::changeZ(GLfloat diff)
 {
-  // FIXME: z limits should depend on the ground height
-  // Make sure new z-coordinate is within limits
-  float newz = gameCamera()->calculateNewZ(diff);
+  float newz = gameCamera()->z() + diff;
 
   // Change radius too, so that camera angle will remain same
   // TODO: maybe provide another method for that, e.g. changeZWithRadius().
@@ -246,8 +263,7 @@ void BoAutoGameCamera::changeZ(GLfloat diff)
 
 void BoAutoGameCamera::changeRadius(GLfloat diff)
 {
-  // How much radius is changed depends on z position
-  float radius = gameCamera()->calculateNewRadius(diff);
+  float radius = gameCamera()->radius() + diff;
   mRadiusDiff = radius;
 }
 
@@ -299,14 +315,14 @@ bool BoAutoGameCamera::advance2()
   if(mPosZDiff)
   {
     float diff = (mPosZDiff * factor);
-    gameCamera()->mPosZ += diff;
+    gameCamera()->setZ(gameCamera()->mPosZ + diff);
     changed = true;
   }
 
   if(mRotationDiff)
   {
     float diff = (mRotationDiff * factor);
-    gameCamera()->mRotation += diff;
+    gameCamera()->setRotation(gameCamera()->mRotation + diff);
     gameCamera()->checkRotation();
     changed = true;
   }
@@ -314,7 +330,7 @@ bool BoAutoGameCamera::advance2()
   if(mRadiusDiff)
   {
     float diff = (mRadiusDiff * factor);
-    gameCamera()->mRadius += diff;
+    gameCamera()->setRadius(gameCamera()->mRadius + diff);
     changed = true;
   }
   return changed;

@@ -120,7 +120,7 @@ public:
 	{
 		mVisible = false;
 	}
-	
+
 	void widgetRect(QRect* rect) const
 	{
 		QRect r(mStartPos, mEndPos);
@@ -132,7 +132,7 @@ public:
 		mStartPos = pos;
 		setEndWidgetPos(mStartPos);
 	}
-	
+
 	void setEndWidgetPos(const QPoint& pos)
 	{
 		mEndPos = pos;
@@ -468,6 +468,8 @@ void BosonBigDisplayBase::setCanvas(BosonCanvas* canvas)
 			displayInput(), SLOT(slotMoveSelection(int, int)));
  }
 
+ d->mCamera.setCanvas(mCanvas);
+
  slotResetViewProperties();
 
  BO_CHECK_NULL_RET(mCanvas->map());
@@ -681,10 +683,10 @@ void BosonBigDisplayBase::paintGL()
  // TODO: performance: make textures resident
  // maybe use priorities to achieve this
  // TODO: performance: from the URL above:
- // Transparency may be implemented with stippling instead of blending 
+ // Transparency may be implemented with stippling instead of blending
  // If you need simple transparent objects consider using polygon stippling
  // instead of alpha blending. The later is typically faster and may actually
- // look better in some situations. [L,S] 
+ // look better in some situations. [L,S]
  // --> what is this "stippling" and can we use it?
 
  boProfiling->renderClear(true);
@@ -1750,7 +1752,6 @@ void BosonBigDisplayBase::mouseEventWheel(float delta, Orientation orientation, 
 		break;
 	}
 	case CameraZoom:
-		float z;
 		if (boEvent.controlButton()) {
 			delta *= 3;
 		} else {
@@ -1788,10 +1789,6 @@ void BosonBigDisplayBase::mouseEventMove(int buttonState, const BoMouseEvent& ev
 	if (buttonState & LEFT_BUTTON) {
 		d->mMouseMoveDiff.start(LEFT_BUTTON);
 		camera()->changeZ(d->mMouseMoveDiff.dy());
-		float z = canvas()->map()->cellAverageHeight((int)(camera()->lookAt().x()), (int)-(camera()->lookAt().y()));
-		if (camera()->z() < z + BoGameCamera::minCameraZ()) {
-			camera()->changeZ(z + BoGameCamera::minCameraZ() - camera()->z());
-		}
 		cameraChanged();
 	} else if (buttonState & RIGHT_BUTTON) {
 		d->mMouseMoveDiff.start(RIGHT_BUTTON);
@@ -1838,10 +1835,6 @@ void BosonBigDisplayBase::mouseEventMove(int buttonState, const BoMouseEvent& ev
 		int moveY = d->mMouseMoveDiff.dy();
 		mapDistance(moveX, moveY, &dx, &dy);
 		camera()->changeLookAt(BoVector3(dx, dy, 0));
-		float z = canvas()->map()->cellAverageHeight((int)(camera()->lookAt().x()), (int)-(camera()->lookAt().y()));
-		if (camera()->z() < z + BoGameCamera::minCameraZ()) {
-			camera()->changeZ(z + BoGameCamera::minCameraZ() - camera()->z());
-		}
 		cameraChanged();
 	} else {
 		d->mMouseMoveDiff.stop();
@@ -2068,13 +2061,13 @@ void BosonBigDisplayBase::slotResetViewProperties()
  BO_CHECK_NULL_RET(canvas());
  d->mFovY = 60.0;
  d->mAspect = 1.0;
- setCamera(BoGameCamera(0.0f, (float)(canvas()->mapWidth()), -((float)(canvas()->mapHeight())), 0.0f));
+ setCamera(BoGameCamera(canvas()));
  resizeGL(d->mViewport[2], d->mViewport[3]);
 }
 
 void BosonBigDisplayBase::slotReCenterDisplay(const QPoint& pos)
 {
-//TODO don't center the corners - e.g. 0;0 should be top left, never center 
+//TODO don't center the corners - e.g. 0;0 should be top left, never center
  camera()->setLookAt(BoVector3(((float)pos.x()) * BO_GL_CELL_SIZE, -((float)pos.y()) * BO_GL_CELL_SIZE, 0));
  cameraChanged();
 }
@@ -2185,7 +2178,7 @@ void BosonBigDisplayBase::quitGame()
  d->mRenderedItems = 0;
  d->mRenderedCells = 0;
 // setCamera(BoGameCamera()); do not do this! it calls cameraChanged() which generates cell list and all that stuff
- d->mCamera = BoGameCamera();
+ d->mCamera = BoGameCamera(canvas());
  if (d->mGLMiniMap) {
 	d->mGLMiniMap->quitGame();
  }
@@ -2518,10 +2511,6 @@ void BosonBigDisplayBase::zoom(float delta)
  BO_CHECK_NULL_RET(canvas()->map());
 
  camera()->changeZ(delta);
- float z = canvas()->map()->cellAverageHeight((int)(camera()->lookAt().x()), (int)-(camera()->lookAt().y()));
- if (camera()->z() < z + BoGameCamera::minCameraZ()) {
-	camera()->changeZ(z + BoGameCamera::minCameraZ() - camera()->z());
- }
  cameraChanged();
 }
 
@@ -2837,7 +2826,6 @@ void BosonBigDisplayBase::mapChanged()
 {
  BO_CHECK_NULL_RET(canvas());
  boDebug() << k_funcinfo << endl;
- camera()->setMoveRect(0, canvas()->mapWidth(), -(canvas()->mapHeight()), 0);
  if (d->mGLMiniMap) {
 	d->mGLMiniMap->createMap(canvas()->map(), d->mViewport);
  } else {
