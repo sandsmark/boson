@@ -1162,7 +1162,7 @@ void Unit::playSound(UnitSoundEvent event)
 
 void Unit::turnTo(int deg)
 {
- boDebug() << k_funcinfo << id() << ": turning to " << deg << endl;
+// boDebug() << k_funcinfo << id() << ": turning to " << deg << endl;
  d->mWantedRotation = deg;
 }
 
