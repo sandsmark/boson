@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2004 Andreas Beckermann <b_mann@gmx.de>
+    Copyright (C) 2004-2005 Andreas Beckermann <b_mann@gmx.de>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,10 +24,9 @@
 #include "bosonsound.h"
 #include "../boaudiocommand.h"
 
-#include <kmimetype.h>
-
 #include <qdict.h>
 #include <qfile.h>
+#include <qfileinfo.h>
 
 #include <AL/al.h>
 #include <AL/alc.h>
@@ -175,8 +174,8 @@ bool BosonAudioAL::loadFileToBuffer(ALuint buffer, const QString& file)
 	boError() << k_funcinfo << "unable to open file " << file << endl;
 	return false;
  }
- KMimeType::Ptr mimeType = KMimeType::findByURL(file, 0, true, true);
- if (mimeType->name() == QString::fromLatin1("audio/x-mp3")) {
+ QFileInfo info(f);
+ if (info.extension(false) == QString::fromLatin1("mp3")) {
 	boDebug(200) << k_funcinfo << "loading mp3 file " << file << endl;
 	if (alutLoadMP3_LOKI) {
 		char* data = new char[f.size()];
@@ -223,8 +222,7 @@ bool BosonAudioAL::loadFileToBuffer(ALuint buffer, const QString& file)
 	} else {
 		return false;
 	}
- } else if (mimeType->name() == QString::fromLatin1("audio/x-vorbis") ||
-		mimeType->name() == QString::fromLatin1("application/ogg")) {
+ } else if (info.extension(false) == QString::fromLatin1("ogg")) {
 	boDebug(200) << k_funcinfo << "loading ogg vorbis file " << file << endl;
 	if (alutLoadVorbis_LOKI) {
 		char* data = new char[f.size()];
@@ -245,7 +243,7 @@ bool BosonAudioAL::loadFileToBuffer(ALuint buffer, const QString& file)
 		return false;
 	}
  }
- boError(200) << k_funcinfo << "dont know how to handle mimetpye " << mimeType->name() << " of file " << file << endl;
+ boError(200) << k_funcinfo << "dont know how to handle extension " << info.extension() << " of file " << file << endl;
  return false;
 }
 
