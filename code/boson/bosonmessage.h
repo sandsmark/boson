@@ -10,6 +10,7 @@ public:
 		Advance = 4,
 		IdChat = 5,
 		IdStopMoving = 6,
+		IdStartScenario = 7,
 
 	// Player Moves:
 		MoveMove = 100, // Unit(s) is/are moved

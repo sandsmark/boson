@@ -39,7 +39,7 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
  d = new BosonPrivate;
 
  d->mGameTimer = new QTimer(this);
- 
+
  connect(this, SIGNAL(signalNetworkData(int, const QByteArray&, Q_UINT32, Q_UINT32)),
 		this, SLOT(slotNetworkData(int, const QByteArray&, Q_UINT32, Q_UINT32)));
  connect(this, SIGNAL(signalSave(QDataStream&)),
@@ -233,6 +233,9 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 		break;
 	case BosonMessage::InitMap:
 		emit signalInitMap(buffer);
+		break;
+	case BosonMessage::IdStartScenario:
+		emit signalStartScenario();
 		break;
 	default:
 		kdWarning() << "unhandled msgid " << msgid << endl;
