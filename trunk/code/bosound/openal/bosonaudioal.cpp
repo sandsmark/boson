@@ -254,6 +254,7 @@ void BosonAudioAL::executeCommand(BoAudioCommand* command)
  BO_CHECK_NULL_RET(command);
 
  if (isNull()) {
+	delete command;
 	return;
  }
 

@@ -102,5 +102,5 @@ bool BosonAudio::sound() const
 
 void BosonAudio::executeCommand(BoAudioCommand* command)
 {
- Q_UNUSED(command);
+ delete command;
 }
