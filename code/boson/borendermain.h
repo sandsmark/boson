@@ -284,6 +284,7 @@ protected slots:
 	void slotUnitChanged(int);
 	void slotObjectChanged(int);
 	void slotDebugModels();
+	void slotDebugSpecies();
 
 private:
 	PreviewConfig* mConfig;
