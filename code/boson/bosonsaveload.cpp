@@ -40,6 +40,7 @@
 #include <qdatastream.h>
 #include <qptrqueue.h>
 #include <qvaluelist.h>
+#include <qregexp.h>
 
 SaveLoadError::SaveLoadError(ErrorType type, const QString& text, const QString& caption)
 {
@@ -238,10 +239,19 @@ bool BosonSaveLoad::saveToFiles(QMap<QString, QByteArray>& files)
 	return false;
  }
 
+ if (!saveEventListenerScripts(&files)) {
+	boError() << k_funcinfo << "could not save event listener scripts" << endl;
+	return false;
+ }
+
  files.insert("kgame.xml", kgameXML);
  files.insert("players.xml", playersXML);
  files.insert("canvas.xml", canvasXML);
  files.insert("external.xml", externalXML);
+
+ if (!convertPlayerIdsToIndices(files)) {
+	return false;
+ }
 
  return true;
 }
@@ -487,6 +497,12 @@ bool BosonSaveLoad::startFromFiles(const QMap<QString, QByteArray>& files)
 	}
  }
 
+ if (!loadEventListenerScripts(files)) {
+	boError(270) << k_funcinfo << "could not load eventlistener scripts" << endl;
+	addLoadError(SaveLoadError::General, i18n("error while loading event listener scripts"));
+	return false;
+ }
+
  return true;
 }
 
@@ -720,7 +736,73 @@ bool BosonSaveLoad::convertSaveGameToPlayField(QMap<QString, QByteArray>& files)
  files.insert("kgame.xml", kgameXML);
  files.insert("players.xml", playersXML);
  files.insert("canvas.xml", canvasXML);
+
+ QStringList list = files.keys();
+ list = list.grep(QRegExp("^scripts\\/.*\\/data\\/"));
+ for (QStringList::Iterator it = list.begin(); it != list.end(); ++it) {
+	files.remove(*it);
+ }
  return true;
 }
 
+
+bool BosonSaveLoad::loadEventListenerScripts(const QMap<QString, QByteArray>& files)
+{
+ if (!boGame) {
+	return false;
+ }
+ if (!boGame->eventManager()) {
+	return false;
+ }
+ return boGame->eventManager()->loadListenerScripts(files);
+}
+
+bool BosonSaveLoad::saveEventListenerScripts(QMap<QString, QByteArray>* files)
+{
+ if (!boGame) {
+	return false;
+ }
+ if (!boGame->eventManager()) {
+	return false;
+ }
+ return boGame->eventManager()->saveListenerScripts(files);
+}
+
+bool BosonSaveLoad::convertPlayerIdsToIndices(QMap<QString, QByteArray>& files) const
+{
+ QStringList removeFiles;
+ QMap<QString, QByteArray> addFiles;
+ QRegExp hasPlayerId("-player_([0-9]+)");
+ for (QMap<QString, QByteArray>::iterator it = files.begin(); it != files.end(); ++it) {
+	int pos = hasPlayerId.search(it.key());
+	if (pos < 0) {
+		continue;
+	}
+	QString number = hasPlayerId.cap(0);
+	bool ok;
+	unsigned int id = number.toUInt(&ok);
+	if (!ok) {
+		boError() << k_funcinfo << it.key() << " does not contain a valid number" << endl;
+		return false;
+	}
+	Player* p = (Player*)boGame->findPlayer(id);
+	if (!p) {
+		boError() << k_funcinfo << "no player with id " << id << " in game" << endl;
+		return false;
+	}
+	QString file = it.key();
+	QByteArray b = it.data();
+	int index = boGame->playerList()->findRef(p);
+	file.replace(hasPlayerId, QString("-player_%1").arg(index));
+	removeFiles.append(it.key());
+	addFiles.insert(file, b);
+ }
+ for (QStringList::iterator it = removeFiles.begin(); it != removeFiles.end(); ++it) {
+	files.remove(*it);
+ }
+ for (QMap<QString, QByteArray>::iterator it = addFiles.begin(); it != addFiles.end(); ++it) {
+	files.insert(it.key(), it.data());
+ }
+ return true;
+}
 

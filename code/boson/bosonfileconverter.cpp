@@ -849,7 +849,7 @@ bool BosonFileConverter::convertPlayField_From_0_10_80_To_0_10_81(QMap<QString, 
  return true;
 }
 
-bool BosonFileConverter::convertPlayField_From_0_10_81_To_0_11(QMap<QString, QByteArray>& files)
+bool BosonFileConverter::convertPlayField_From_0_10_81_To_0_10_82(QMap<QString, QByteArray>& files)
 {
  QDomDocument kgameDoc(QString::fromLatin1("Boson"));
  QDomDocument canvasDoc(QString::fromLatin1("Canvas"));
@@ -863,13 +863,7 @@ bool BosonFileConverter::convertPlayField_From_0_10_81_To_0_11(QMap<QString, QBy
  }
  QDomElement kgameRoot = kgameDoc.documentElement();
  QDomElement canvasRoot = canvasDoc.documentElement();
-
-#if BOSON_VERSION_MICRO < 0x80 || BOSON_VERSION_MINOR >= 0x11
-#error replace the following by BOSON_SAVEGAME_FORMAT_VERSION_0_11
-#endif
-#define BO_VERSION BOSON_MAKE_SAVEGAME_FORMAT_VERSION(0x00, 0x02, 0x06)
- kgameRoot.setAttribute("Version", BO_VERSION);
-#undef BO_VERSION
+ kgameRoot.setAttribute("Version", BOSON_MAKE_SAVEGAME_FORMAT_VERSION(0x00, 0x02, 0x06));
 
  for (QDomNode node = canvasRoot.firstChild(); !node.isNull(); node = node.nextSibling()) {
 	QDomElement items = node.toElement();
@@ -952,6 +946,50 @@ bool BosonFileConverter::convertPlayField_From_0_10_81_To_0_11(QMap<QString, QBy
  return true;
 }
 
+bool BosonFileConverter::convertPlayField_From_0_10_82_To_0_11(QMap<QString, QByteArray>& files)
+{
+ QDomDocument kgameDoc(QString::fromLatin1("Boson"));
+ if (!loadXMLDoc(&kgameDoc, files["kgame.xml"])) {
+	boError() << k_funcinfo << "could not load kgame.xml" << endl;
+	return false;
+ }
+ QDomElement kgameRoot = kgameDoc.documentElement();
+
+#if BOSON_VERSION_MICRO < 0x80 || BOSON_VERSION_MINOR >= 0x11
+#error replace the following by BOSON_SAVEGAME_FORMAT_VERSION_0_11
+#endif
+#define BO_VERSION BOSON_MAKE_SAVEGAME_FORMAT_VERSION(0x00, 0x02, 0x07)
+ kgameRoot.setAttribute("Version", BO_VERSION);
+#undef BO_VERSION
+
+ unsigned int players = 0;
+ {
+	QDomDocument playersDoc(QString::fromLatin1("Players"));
+	if (!loadXMLDoc(&playersDoc, files["players.xml"])) {
+		boError() << k_funcinfo << "could not load players.xml" << endl;
+		return false;
+	}
+	QDomElement playersRoot = playersDoc.documentElement();
+	for (QDomNode node = playersRoot.firstChild(); !node.isNull(); node = node.nextSibling()) {
+		QDomElement items = node.toElement();
+		if (items.isNull()) {
+			continue;
+		}
+		if (items.tagName() != "Player") {
+			continue;
+		}
+		players++;
+	}
+ }
+ files.insert("scripts/eventlistener/game.py", QByteArray());
+ files.insert("scripts/eventlistener/localplayer.py", QByteArray());
+ for (unsigned int i = 0; i < players; i++) {
+	files.insert(QString("scripts/eventlistener/ai-player_%1.py").arg(i), QByteArray());
+ }
+
+ files.insert("kgame.xml", kgameDoc.toString().utf8());
+ return true;
+}
 
 void BosonFileConverter::removePropertyIds_0_9_1(const QDomNodeList& itemsList, const QStringList& ids)
 {

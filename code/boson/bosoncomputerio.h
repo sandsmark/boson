@@ -24,6 +24,7 @@
 class Player;
 class Unit;
 class BosonScript;
+class BoComputerPlayerEventListener;
 
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
@@ -34,10 +35,10 @@ class BosonComputerIO : public KGameComputerIO
 
 public:
 	BosonComputerIO();
-	BosonComputerIO(KPlayer*);
 	~BosonComputerIO();
 
 	virtual int rtti() const { return KGameIO::ComputerIO; }
+	virtual void initIO(KPlayer*);
 
 	void initScript();
 
@@ -47,6 +48,7 @@ protected:
 
 private:
 	BosonScript* mScript;
+	BoComputerPlayerEventListener* mEventListener;
 };
 
 #endif

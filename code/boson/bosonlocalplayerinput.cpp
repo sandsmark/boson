@@ -68,6 +68,7 @@ void BosonLocalPlayerInput::initIO(KPlayer* p)
     PlayerIO* io = ((Player*)p)->playerIO();
     BoEventManager* manager = ((Boson*)game())->eventManager();
     mEventListener = new BoLocalPlayerEventListener(io, manager, this);
+    mEventListener->initScript();
   }
 }
 

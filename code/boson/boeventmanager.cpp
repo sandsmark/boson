@@ -50,6 +50,8 @@ public:
 	QPtrList<BoEventListener> mEventListeners;
 
 	QValueVector<QCString> mEventNames;
+
+	QMap<QString, QByteArray> mAvailableScripts;
 };
 
 BoEventManager::BoEventManager(QObject* parent) : QObject(parent)
@@ -67,6 +69,7 @@ BoEventManager::BoEventManager(QObject* parent) : QObject(parent)
 
 BoEventManager::~BoEventManager()
 {
+ d->mAvailableScripts.clear();
  delete d;
 }
 
@@ -177,67 +180,106 @@ bool BoEventManager::saveListenerScripts(QMap<QString, QByteArray>* scripts) con
 	boError() << k_funcinfo << "scripts map must be empty" << endl;
 	return false;
  }
+
+ // save in 2 steps.
+ // 1. save the actual scripts (d->mAvailableScripts)
+ // 2. save the current script data (i.e. the variable values).
+ //
+ // note that in 1. we may save more scripts than we actually use - e.g. if
+ // player n is a human player, we still save the ai script of that player
+ // (later we may replace the human player by a computer player).
+
+ // save all available scripts
+ for (QMap<QString, QByteArray>::iterator it = d->mAvailableScripts.begin(); it != d->mAvailableScripts.end(); ++it) {
+	if (it.key().contains("/data/")) {
+		continue;
+	}
+	scripts->insert(it.key(), it.data());
+ }
+
+ // save the current data of all currently used scripts
  QPtrListIterator<BoEventListener> it(d->mEventListeners);
  for (; it.current(); ++it) {
-	QByteArray script;
-	QByteArray scriptData;
-	if (!it.current()->saveScript(&script)) {
-		boError() << k_funcinfo << "unable to save listener script" << endl;
-		return false;
-	}
-	if (!it.current()->saveScriptData(&scriptData)) {
-		boError() << k_funcinfo << "unable to save listener script data" << endl;
-		return false;
-	}
-
 	QString name = it.current()->scriptFileName();
 	if (name.isEmpty()) {
 		boError() << k_funcinfo << "listener did not return a name" << endl;
 		return false;
 	}
 
-	QString scriptName = QString::fromLatin1("scripts/") + name;
-	QString scriptDataName = QString::fromLatin1("scripts/data/") + name;
-	if (scripts->contains(scriptName)) {
-		boError() << k_funcinfo << "script with name " << scriptName << " already present" << endl;
+	QString scriptDataName = QString::fromLatin1("scripts/eventlistener/data/") + name;
+
+	QByteArray scriptData;
+	if (!it.current()->saveScriptData(&scriptData)) {
+		boError() << k_funcinfo << "unable to save listener script" << endl;
 		return false;
 	}
+
 	if (scripts->contains(scriptDataName)) {
 		boError() << k_funcinfo << "script with name " << scriptDataName << " already present" << endl;
 		return false;
 	}
-	scripts->insert(scriptName, script);
 	scripts->insert(scriptDataName, scriptData);
  }
  return true;
 }
 
-bool BoEventManager::loadListenerScripts(const QMap<QString, QByteArray>& scripts)
+bool BoEventManager::loadListenerScripts(const QMap<QString, QByteArray>& files)
 {
+ boDebug() << k_funcinfo << endl;
+ d->mAvailableScripts.clear();
+ for (QMap<QString, QByteArray>::const_iterator it = files.begin(); it != files.end(); ++it) {
+	if (it.key().startsWith("scripts/eventlistener/")) {
+		d->mAvailableScripts.insert(it.key(), it.data());
+	}
+ }
+
+ // AB: note that even if we don't need a script from d->mAvailableScripts here
+ // now, then we still need to leave it the in memory. we might need it later,
+ // e.g. when a human player is replaced by a computer io.
+
  QPtrListIterator<BoEventListener> it(d->mEventListeners);
  for (; it.current(); ++it) {
 	QString name = it.current()->scriptFileName();
-	if (name.isEmpty()) {
-		boError() << k_funcinfo << "script filename is empty" << endl;
+	QString fullScriptName = QString::fromLatin1("scripts/eventlistener/") + name;
+	if (!d->mAvailableScripts.contains(fullScriptName)) {
+		boError() << k_funcinfo << "no script with name " << fullScriptName << " available" << endl;
 		return false;
 	}
-	QByteArray script = scripts[QString::fromLatin1("scripts/") + name];
-	QByteArray scriptData = scripts[QString::fromLatin1("scripts/data/") + name];
-	if (scriptData.size() == 0) {
-		if (!it.current()->loadScript(script)) {
-			boError() << k_funcinfo << "unable to load listener script" << endl;
-			return false;
-		}
-	} else {
-		if (!it.current()->loadScriptData(scriptData)) {
-			boError() << k_funcinfo << "unable to load listener script data" << endl;
-			return false;
-		}
+	if (!it.current()->initScript()) {
+		boError() << k_funcinfo << "unable to initialize script of event listener" << endl;
+		return false;
 	}
  }
  return true;
 }
 
+bool BoEventManager::loadEventListenerScript(BoEventListener* listener)
+{
+ if (!listener) {
+	BO_NULL_ERROR(listener);
+	return false;
+ }
+ QString name = listener->scriptFileName();
+ if (name.isEmpty()) {
+	boError() << k_funcinfo << "script filename is empty" << endl;
+	return false;
+ }
+ QString fullScriptName = QString::fromLatin1("scripts/eventlistener/") + name;
+ QString fullScriptDataName = QString::fromLatin1("scripts/eventlistener/data/") + name;
+ if (!d->mAvailableScripts.contains(fullScriptName)) {
+	// event manager hasn't loaded the scripts yet.
+	// note this is perfectly valid!
+	return true;
+ }
+ boDebug() << k_funcinfo << "loading listener script " << name << endl;
+ QByteArray script = d->mAvailableScripts[fullScriptName];
+ QByteArray scriptData = d->mAvailableScripts[fullScriptDataName];
+ if (!listener->loadScript(script, scriptData)) {
+	boError() << k_funcinfo << "unable to load listener script" << endl;
+	return false;
+ }
+ return true;
+}
 
 bool BoEventManager::queueEvent(BoEvent* event)
 {
