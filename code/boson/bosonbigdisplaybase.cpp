@@ -464,6 +464,9 @@ void BosonBigDisplayBase::paintGL()
  // http://www.mesa3d.org/brianp/sig97/perfopt.htm
  // in 3.5!
 
+ // TODO: performance: sort by z-coordinates. not just the units, but also
+ // cells! i.e. render cells *after* units!
+
  boProfiling->renderClear(true);
  glClear(GL_COLOR_BUFFER_BIT);
  boProfiling->renderClear(false);

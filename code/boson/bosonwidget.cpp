@@ -353,8 +353,6 @@ void BosonWidget::slotChangeCursor(int mode, const QString& cursorDir_)
  // some cursors need special final initializations. do them now
  switch (mode) {
 	case CursorSprite:
-		((BosonSpriteCursor*)mCursor)->setCanvas(canvas(),
-				CursorDefault, Z_CANVAS_CURSOR);
 		break;
 	case CursorExperimental:
 		break;

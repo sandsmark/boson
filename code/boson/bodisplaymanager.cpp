@@ -340,10 +340,6 @@ void BoDisplayManager::setCursor(BosonCursor* cursor)
 	it.current()->setCursor(cursor);
 	++it;
  }
- if (cursor) {
-	disconnect(cursor, 0, this, 0);
-	connect(cursor, SIGNAL(signalUpdate()), this, SLOT(slotUpdate()));
- }
 }
 
 void BoDisplayManager::setLocalPlayer(Player* p)
