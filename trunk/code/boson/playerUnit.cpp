@@ -113,25 +113,38 @@ bool playerMobUnit::getWantedMove(bosonMsgData *msg)
 				turnTo ( ( abs(vp1) < abs(vp3) )? getLeft():getRight() ); // change it
 
 			if ( ( abs(ldx) + abs(ldy) ) < abs (mobileProp[type].speed) ) { ///orzel should be square
-				asked_dx = ldx; asked_dy = ldy;
+				present_dx = ldx; present_dy = ldy;
 				}
-			msg->move.dx = asked_dx ; msg->move.dy = asked_dy; msg->move.direction = direction;
+			msg->move.dx = asked_dx = present_dx ; msg->move.dy = asked_dy = present_dy; msg->move.direction = direction;
 
 			asked_state = MUS_MOVING;
 			if (checkMove( asked_dx, asked_dy)) return true;
 
-			if (asked_dy && checkMove( 0, asked_dy)) {
-				msg->move.dx = asked_dx = 0;
-				return true;
-				}
-			if (asked_dx && checkMove( asked_dx, 0)) {
-				msg->move.dy = asked_dy = 0;
-				return true;
-				}
+			if (asked_dy > asked_dx) {
+				/* we are going mainly along y axis, so try that first*/
+				if (asked_dy && checkMove( 0, asked_dy)) {
+					msg->move.dx = asked_dx = 0;
+					return true;
+					}
+				if (asked_dx && checkMove( asked_dx, 0)) {
+					msg->move.dy = asked_dy = 0;
+					return true;
+					}
+			} else {
+				/* we are going mainly along x axis, so try that first*/
+				if (asked_dx && checkMove( asked_dx, 0)) {
+					msg->move.dy = asked_dy = 0;
+					return true;
+					}
+				if (asked_dy && checkMove( 0, asked_dy)) {
+					msg->move.dx = asked_dx = 0;
+					return true;
+					}
+			}
 
 			/* failed : can't move any more */
 			asked_state = state = MUS_NONE;
-			asked_dx = asked_dy = 0; // so that willBe returns the good position
+			present_dx = present_dy = 0; // so that willBe returns the good position
 			//logf(LOG_GAME_LOW, "ckeckMove failed stopping: mobile[%p] has stopped\n", this);
 			logf(LOG_WARNING, "ckeckMove failed : mobile[%p] has stopped\n", this);
 			return false; 
@@ -216,12 +229,12 @@ void playerMobUnit::turnTo(int newdir)
 	assert(newdir>=0); assert(newdir<12);
 	//if (direction==newdir) return;
 	direction = newdir;
-	asked_dx =  pos_x[direction];
-	asked_dy =  pos_y[direction];
+	present_dx =  pos_x[direction];
+	present_dy =  pos_y[direction];
 	double factor = (double) mobileProp[type].speed / 100.;
 	if (factor<1.) {
-		asked_dx =(int) ((double)asked_dx*factor);
-		asked_dy =(int) ((double)asked_dy*factor);
+		present_dx =(int) ((double)present_dx*factor);
+		present_dy =(int) ((double)present_dy*factor);
 		}
 	else logf(LOG_ERROR, "turnTo : unexpected mobileProp.speed..."); ///orzel : test should be removed
 
@@ -300,13 +313,6 @@ if ( MUS_MOVING != asked_state && (dx!=0 || dy!=0) ) {
 	return;
 	}
 
-//printf("      dx = %d,       dy = %d\n", dx, dy);
-//printf("asked_dx = %d, asked_dy = %d\n", asked_dx, asked_dy);
-
-/*
-if (asked_dx !=0 && asked_dy !=0 && (dx != asked_dx || dy != asked_dy) )
-	logf(LOG_ERROR, "playerMobUnit::s_moveBy : unexpected dx,dy");
-*/
 if (dir != direction)
 	logf(LOG_ERROR, "playerMobUnit::s_moveBy : unexpected direction");
 
@@ -315,7 +321,7 @@ doMoveBy(dx,dy);
 if (x()==dest_x && y()==dest_y) {
 	//puts("going to MUS_NONE");
 	state = MUS_NONE;
-	asked_dx = asked_dy = 0; // so that willBe returns the good position
+	present_dx = present_dy = 0; // so that willBe returns the good position
 	logf(LOG_GAME_LOW, "mobile[%p] has stopped\n", this);
 	}
 

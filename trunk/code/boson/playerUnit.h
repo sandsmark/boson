@@ -79,6 +79,7 @@ public slots:
 /* moving */
 	int 	dest_x, dest_y;
 	int	asked_dx, asked_dy;
+	int	present_dx, present_dy;
 	mobUnitState	asked_state;
 
 /* attack */
