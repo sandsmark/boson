@@ -62,12 +62,15 @@ public:
 	BosonTiles* mTiles;
 
 	CellType mCellType; // plain tiles, small tiles, ...
+
+	OrderType mOrderType;
 };
 
 BosonOrderWidget::BosonOrderWidget(QWidget* parent) : QWidget(parent)
 {
  d = new BosonOrderWidgetPrivate;
  d->mCellType = CellPlain;
+ d->mOrderType = OrderNothing;
 }
 
 BosonOrderWidget::~BosonOrderWidget()
@@ -179,6 +182,7 @@ void BosonOrderWidget::setOrderButtons(QValueList<QPair<ProductionType, unsigned
 		resetButton(d->mOrderButton[i]);
 	}
  }
+ d->mOrderType = OrderProduce;
 }
 
 void BosonOrderWidget::hideOrderButtons()
@@ -188,6 +192,7 @@ void BosonOrderWidget::hideOrderButtons()
 	it.current()->setUnit(0);
 	++it;
  }
+ d->mOrderType = OrderNothing;
 }
 
 void BosonOrderWidget::slotRedrawTiles()
@@ -237,6 +242,7 @@ void BosonOrderWidget::slotRedrawTiles()
 		boError() << "unexpected production index " << d->mCellType << endl;
 		break;
  }
+ d->mOrderType = OrderCell;
 }
 
 void BosonOrderWidget::setCellType(CellType index)
@@ -290,7 +296,7 @@ void BosonOrderWidget::showUnits(QPtrList<Unit> units)
  i = 0;
  QPtrListIterator<Unit> it(units);
  for (; it.current(); ++it, i++) {
-	if (d->mOrderButton[i]->commandType() == BosonOrderButton::CommandUnitSelected) {
+	if (d->mOrderButton[i]->orderType() == OrderUnitSelected) {
 		if (d->mOrderButton[i]->unit() == it.current()) {
 			boDebug() << "unit already displayed - update..." << endl;
 			d->mOrderButton[i]->slotUnitChanged(it.current());
@@ -300,6 +306,7 @@ void BosonOrderWidget::showUnits(QPtrList<Unit> units)
 		d->mOrderButton[i]->setUnit(it.current());
 	}
  }
+ d->mOrderType = OrderUnitSelected;
 }
 
 void BosonOrderWidget::productionAdvanced(Unit* factory, double percentage)
@@ -319,7 +326,7 @@ void BosonOrderWidget::productionAdvanced(Unit* factory, double percentage)
  }
  for (unsigned int i = 0; i < d->mOrderButton.count(); i++) {
 	BosonOrderButton* c = d->mOrderButton[i];
-	if (c->commandType() == BosonOrderButton::CommandProduce) {
+	if (c->orderType() == OrderProduce) {
 		if ((c->productionType() == production->currentProductionType()) && (c->productionId() == production->currentProductionId())) {
 			c->advanceProduction(percentage);
 		}
@@ -338,4 +345,8 @@ void BosonOrderWidget::resetButton(BosonOrderButton* button)
  button->setGrayOut(false);
 }
 
+OrderType BosonOrderWidget::orderType() const
+{
+ return d->mOrderType;
+}
 

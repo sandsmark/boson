@@ -55,6 +55,9 @@ protected:
 	virtual void setSelectedUnit(Unit* unit);
 
 	/**
+	 * Display the production options (i.e. whatever the @p unit can
+	 * produce) in the @ref selectionWidget.
+	 *
 	 * Note: a NULL unit is valid, but will hide all order buttons, i.e.
 	 * don't call this if there are multiple units selected, as they won't
 	 * be shown anymore.
