@@ -69,6 +69,7 @@ protected slots:
 private:
 	void init(void); // internal
 	void initCanvas(int, int);
+	void gameEnd( endMsg_t::endReasonType reason );
 
 signals:
 	void ressourcesUpdated(void);

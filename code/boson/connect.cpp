@@ -119,13 +119,16 @@ void BosonApp::handleDialogMessage(bosonMsgTag tag, int blen, bosonMsgData *data
 playerState oldState = State;
 
 if ( tag>MSG_END_DIALOG_LAYER )
-    if ( PS_PLAYING == State) {
-	handleGameMessage(tag,blen,data);
-	return;
+	if ( PS_PLAYING == State) {
+
+		if ( MSG_DLG_END == tag)
+			gameEnd( data->end.endReason);
+		else	handleGameMessage(tag,blen,data);
+		return;
 	}
-    else {
-	logf(LOG_ERROR, "receiving Game-related tag while not in PS_PLAYING state, ignored");
-	return;
+	else {
+		logf(LOG_ERROR, "receiving Game-related tag while not in PS_PLAYING state, ignored");
+		return;
 	}
 
 if ( ! (tag>MSG_END_SOCKET_LAYER && tag<MSG_END_DIALOG_LAYER)) {
@@ -314,4 +317,23 @@ switch(tag) {
 
 	} // switch
 }
+
+void BosonApp::gameEnd( endMsg_t::endReasonType reason)
+{
+	if ( endMsg_t::playerDiedEnd != reason) {
+		logf(LOG_ERROR, "unknown reason for gameEnd from server");
+	}
+
+	delete Socket;
+
+  	KMessageBox::error(0l,
+			"Connection with one of the other player has been lost\n"
+			"Game is over :-(",
+			"Some other player has quitted");
+	
+	socketState	= PSS_CONNECT_DOWN;
+	State		= PS_NO_CONNECT;
+
+}
+
 
