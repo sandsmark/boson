@@ -14,12 +14,12 @@ install-data-local:
 			rm -rf $(DESTDIR)$(groundsdir)/$$i;\
 		fi ;\
 		echo "installing $$i" ;\
-		dirs=`cd $(srcdir)/$$i && find . -type d -not -regex ".*CVS.*"`;\
+		dirs=`cd $(srcdir)/$$i && find . -type d | grep -v CVS`;\
 		mkdir -p $(DESTDIR)$(groundsdir)/$$i ;\
 		for j in $$dirs; do \
 			mkdir -p $(DESTDIR)$(groundsdir)/$$i/$$j ;\
 		done ;\
-		files=`cd $(srcdir)/$$i && find . -type f -not -regex ".*CVS.*"` ;\
+		files=`cd $(srcdir)/$$i && find . -type f | grep -v CVS` ;\
 		for f in $$files; do \
 			if test -f $(srcdir)/$$i/$$f; then \
 				$(INSTALL_DATA) $(srcdir)/$$i/$$f $(DESTDIR)$(groundsdir)/$$i/$$f ;\
