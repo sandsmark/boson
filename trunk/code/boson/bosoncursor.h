@@ -179,6 +179,26 @@ public:
 	 **/
 	void insertMode(int mode, QCanvasPixmapArray* pixmaps, QCursor* cursor);
 
+	/**
+	 * Hides the cursor. Equivalent to calling cursorSprite()->hide().
+	 *
+	 * Note that the current cursor settings does not change, e.g. if you
+	 * use setCursor(-1) then your cursor does not display anything and will
+	 * always be hidden (until you call @ref setCursor again), while this
+	 * simply hides it.
+	 *
+	 * You may use it in your @ref QWidget::leaveEvent implementation.
+	 **/
+	void hideCursor();
+
+	/**
+	 * Show the cursor again. Equivalent to calling cursorSprite()->show().
+	 *
+	 * You may use it in your @ref QWidget::enterEvent implementation.
+	 * See also @ref hideCursor
+	 **/
+	void showCursor();
+
 
 protected:
 	QCursor* loadQCursor(QString baseDir, QString cursor);

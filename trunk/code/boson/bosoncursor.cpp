@@ -159,8 +159,9 @@ void BosonCursor::setCanvas(QCanvas* canvas, int mode, int z)
  if (d->mCursor) {
 	d->mCursor->setCanvas(canvas);
  } else {
-	d->mCursor = new QCanvasSprite(d->mCursorPixmaps[mode], d->mCanvas);
+	d->mCursor = new QCanvasSprite(0, d->mCanvas);
 	d->mCursor->setZ(z);
+	setCursor(mode);
  }
 #endif
 }
@@ -260,3 +261,19 @@ void BosonCursor::slotAdvance()
  d->mCursor->setFrame((d->mCursor->frame() + 1 + d->mCursor->frameCount()) % d->mCursor->frameCount());
 #endif
 }
+
+void BosonCursor::hideCursor()
+{
+#ifndef NO_PIXMAP_CURSOR
+ d->mCursor->hide();
+#endif
+}
+
+void BosonCursor::showCursor()
+{
+#ifndef NO_PIXMAP_CURSOR
+ d->mCursor->show();
+#endif
+
+}
+

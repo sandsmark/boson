@@ -150,6 +150,7 @@ void BosonBigDisplay::init()
  d->mCursor->insertMode(CursorAttack, cursorDir, QString::fromLatin1("attack"));
  d->mCursor->insertMode(CursorDefault, cursorDir, QString::fromLatin1("default"));
  d->mCursor->setCanvas(canvas(), CursorDefault, Z_CANVAS_CURSOR);
+ d->mCursor->setWidgetCursor(this);
 }
 
 BosonBigDisplay::~BosonBigDisplay()
@@ -691,3 +692,14 @@ void BosonBigDisplay::addChatMessage(const QString& message)
 {
  d->mChat->addMessage(message);
 }
+
+void BosonBigDisplay::enterEvent(QEvent*)
+{
+ d->mCursor->showCursor();
+}
+
+void BosonBigDisplay::leaveEvent(QEvent*)
+{
+ d->mCursor->hideCursor();
+}
+
