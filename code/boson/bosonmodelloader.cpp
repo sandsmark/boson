@@ -26,8 +26,6 @@
 #include "bodebug.h"
 
 #include <qstring.h>
-#include <qptrdict.h>
-#include <qstringlist.h>
 #include <qintdict.h>
 
 

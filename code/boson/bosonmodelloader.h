@@ -20,9 +20,6 @@
 #define BOSONMODELLOADER_H
 
 #include <qstring.h>
-#include <qptrdict.h>
-
-#include <GL/gl.h>
 
 class BoVector3;
 class BoMatrix;

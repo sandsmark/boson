@@ -19,7 +19,6 @@
 
 #include "bo3dsload.h"
 
-#include "defines.h"
 #include "bo3dtools.h"
 #include "bomesh.h"
 #include "bomaterial.h"
@@ -27,13 +26,8 @@
 #include "bosonmodelloader.h"
 #include "bodebug.h"
 
-#include <ksimpleconfig.h>
-#include <kstaticdeleter.h>
-
-#include <qimage.h>
 #include <qptrlist.h>
 #include <qstringlist.h>
-#include <qintdict.h>
 
 #include <lib3ds/file.h>
 #include <lib3ds/node.h>
