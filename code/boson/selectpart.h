@@ -76,12 +76,13 @@ public:
 protected:
 	QCanvasPixmapArray* initStatic(SelectPartType type);
 
-	static void drawSelectBox(QPainter& painter, bool bw, int power = 0);
+	static void drawSelectBox(QPainter& painter, bool mask);
+	static void drawHealthBox(QPainter& painter, bool mask, int power = 0);
 
 	/**
 	 * @return The width of the health bar when health is at factor.
-	 * @param frame The frame number. Note that frame==0 means full
-	 * health!!!
+	 * @param frame The frame number. Note that frame==frames()-1 means full
+	 * health
 	 **/
 	static int barWidth(int frame);
 
