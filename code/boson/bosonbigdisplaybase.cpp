@@ -416,6 +416,8 @@ void BosonBigDisplayBase::init()
 
  setUpdatesEnabled(false);
 
+ setFocusPolicy(WheelFocus);
+
  if (!isValid()) {
 	boError() << k_funcinfo << "No OpenGL support present on this system??" << endl;
 	return;
