@@ -165,6 +165,7 @@ protected:
 		return false;
 	}
 
+	void setModel(BosonModel*);
 	BoFrame* frame(unsigned int f) const;
 
 	void updateCamera(const BoVector3& cameraPos, const BoQuaternion& q);
