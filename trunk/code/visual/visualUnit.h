@@ -36,7 +36,7 @@ class visualUnit : public QCanvasSprite
 {
 public:
 	visualUnit(QCanvasPixmapArray* s) : QCanvasSprite(s, vcanvas)
-		{ power = MAX_POWER; sp_down = 0l; sp_up = 0l; contain = 0;  show(); }
+		{ power = MAX_POWER; sp_down = 0l; sp_up = 0l; contain = 0; _destroyed=false; show(); }
 	
 	void	unSelect();
 	void	updateContain(uint c) { contain = c;}
@@ -48,9 +48,11 @@ protected:
 	/* attachement */
 	selectPart	*sp_up;
 	selectPart	*sp_down;
-	
+	bool		_destroyed;
+
 public:
 	uint	contain;
+
 };
 
 
@@ -68,6 +70,7 @@ public:
 	virtual int rtti() const { return S_MOBILE+type; }
 	/* attachement */
 	void  select();
+	void  destroy(void) { setFrame(PIXMAP_MOBILE_DESTROYED); unSelect(); _destroyed = true;}
 
 };
 
@@ -87,6 +90,7 @@ public:
 	virtual int	rtti() const { return S_FACILITY+type; }
 	/* attachement */
 	void  select();
+	void  destroy(void) { setFrame(PIXMAP_FIX_DESTROYED); unSelect(); _destroyed = true; }
 
 };
 
