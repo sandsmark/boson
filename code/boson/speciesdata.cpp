@@ -435,7 +435,7 @@ QPixmap* SpeciesData::smallOverview(unsigned long int unitType, const QColor& te
  TeamColorData* data = teamColorData(teamColor);
  if (!data) {
 	boError() << k_funcinfo << "NULL teamcolor data" << endl;
-	return false;
+	return 0;
  }
  return data->mSmallOverview[unitType];
 }
