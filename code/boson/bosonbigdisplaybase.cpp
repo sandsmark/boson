@@ -1911,6 +1911,11 @@ void BosonBigDisplayBase::mouseEventMove(int buttonState, const BoMouseEvent& ev
 		// other modifiers are ignored
 		d->mSelectionRect.setVisible(true);
 		moveSelectionRect(event.widgetPos());
+	} else if (!boGame->gameMode() && displayInput()->actionType() != ActionChangeHeight) {
+		// In editor mode, try to place unit/ground whenever mouse moves. This
+		//  enables you to edit big areas easily. But it's not done for height
+		//  changing (yet).
+		displayInput()->actionClicked(event);
 	}
  } else if (buttonState & RIGHT_BUTTON) {
 	// RMB+MouseMove does *not* depend on CTRL or Shift. the
