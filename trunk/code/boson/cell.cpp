@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -28,6 +28,8 @@ Cell::Cell()
  setGroundType(GroundUnknown);
  mX = 0;
  mY = 0;
+ mRadius = 0;
+ mZ = 0;
 }
 
 Cell::~Cell()

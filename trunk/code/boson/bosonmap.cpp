@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -227,6 +227,13 @@ bool BosonMap::loadHeightMap(QDataStream& stream)
 		stream >> mHeightMap[y * (width() + 1) + x];
 	}
  }
+
+ // Recalculate cell values
+ for (unsigned int x = 0; x < width(); x++) {
+	for (unsigned int y = 0; y < height(); y++) {
+		recalculateCellValues(x, y);
+	}
+ }
  return true;
 }
 
@@ -358,6 +365,9 @@ bool BosonMap::loadHeightMapImage(const QByteArray& heightMap)
 		mHeightMap[y * (width() + 1) + x] = pixelToHeight(line[imageX]);
 	}
  }
+
+ // No need to recalculate cell values here since actual values will be loaded
+ //  from network stream later... right?
  return true;
 }
 
@@ -637,6 +647,15 @@ void BosonMap::setHeightAtCorner(int x, int y, float h)
  h = QMIN(h, 15.0f);
  h = QMAX(h, -10.5f);
  mHeightMap[y * (width() + 1) + x] = h;
+
+ // Recalculate cell values
+ // This is not best, especially when this method is called for multiple
+ //  corners, but it's used by only editor and I don't care so much about
+ //  editor's speed
+ recalculateCellValues(x - 1, y - 1);
+ recalculateCellValues(x, y - 1);
+ recalculateCellValues(x - 1, y);
+ recalculateCellValues(x, y);
 }
 
 void BosonMap::slotChangeCell(int x, int y, int groundType, unsigned char b)
@@ -743,3 +762,29 @@ int BosonMap::heightToPixel(float height)
  return (int)(height * 10 + 105);
 }
 
+void BosonMap::recalculateCellValues(int x, int y)
+{
+ if (!isValidCell(x, y)) {
+	return;
+ }
+
+ float minz = 1000; // Will be changed anyway
+ float maxz = -1000;
+
+ for (int i = x; i <= x + 1; i++) {
+	for (int j = y; j <= y + 1; j++) {
+		minz = QMIN(minz, heightAtCorner(i, j));
+		maxz = QMAX(maxz, heightAtCorner(i, j));
+	}
+ }
+
+ float z = (maxz - minz) / 2;
+
+ Cell* c = cell(x, y);
+ if (!c) {
+	boError() << k_funcinfo << "NULL cell at (" << x << ", " << y << ")" << endl;
+ }
+
+ c->setAverageHeight((minz + maxz) / 2);
+ c->setBoundingSphereRadius(sqrt(2 * (BO_GL_CELL_SIZE/2) * (BO_GL_CELL_SIZE/2) + z * z));
+}
