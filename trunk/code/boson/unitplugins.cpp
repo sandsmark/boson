@@ -386,6 +386,7 @@ void RepairPlugin::repair(Unit* u)
 		u->setWork(Unit::WorkNone);
 	} else {
 		u->setWork(Unit::WorkMove);
+		u->addWaypoint(BoVector2(unit()->x(), unit()->y()));
 	}
  } else {
 	if (!unit()->moveTo(u->x(), u->y(), 1)) {
@@ -393,6 +394,7 @@ void RepairPlugin::repair(Unit* u)
 		unit()->setWork(Unit::WorkNone);
 	} else {
 		unit()->setAdvanceWork(Unit::WorkMove);
+		unit()->addWaypoint(BoVector2(u->x(), u->y()));
 	}
  }
 }
@@ -639,7 +641,13 @@ void HarvesterPlugin::advanceMine()
  // Check if unit is at mining location. If not, go there
  if (!isAtResourceMine()) {
 	Unit* u = mResourceMine->unit();
-	unit()->moveTo(u->x(), u->y(), 1);
+	if(!unit()->moveTo(u->x(), u->y(), 1)) {
+		boDebug() << k_funcinfo << "Cannot move to refinery (id=" << u->id() <<
+				") at (" << u->x() << "; " << u->y() << ")" << endl;
+		unit()->setWork(Unit::WorkNone);
+		return;
+	}
+	unit()->addWaypoint(BoVector2(u->x(), u->y()));
 	unit()->setAdvanceWork(Unit::WorkMove);
 	return;
  }
@@ -701,7 +709,13 @@ void HarvesterPlugin::advanceRefine()
 
  if (!isAtRefinery()) {
 	Unit* u = mRefinery->unit();
-	unit()->moveTo(u->x(), u->y(), 1);
+	if(!unit()->moveTo(u->x(), u->y(), 1)) {
+		boDebug() << k_funcinfo << "Cannot move to refinery (id=" << u->id() <<
+				") at (" << u->x() << "; " << u->y() << ")" << endl;
+		unit()->setWork(Unit::WorkNone);
+		return;
+	}
+	unit()->addWaypoint(BoVector2(u->x(), u->y()));
 	unit()->setAdvanceWork(Unit::WorkMove);
 	return;
  }
@@ -826,6 +840,7 @@ void HarvesterPlugin::mineAt(ResourceMinePlugin* resource)
  }
  unit()->setPluginWork(UnitPlugin::Harvester);
  unit()->setAdvanceWork(Unit::WorkMove);
+ unit()->addWaypoint(BoVector2(resource->unit()->x(), resource->unit()->y()));
  mResourceMine = resource;
 
  mHarvestingType = 1;
@@ -853,6 +868,7 @@ void HarvesterPlugin::refineAt(RefineryPlugin* refinery)
  }
  unit()->setPluginWork(UnitPlugin::Harvester);
  unit()->setAdvanceWork(Unit::WorkMove);
+ unit()->addWaypoint(BoVector2(refinery->unit()->x(), refinery->unit()->y()));
  mRefinery = refinery;
 
  mHarvestingType = 2; // refining
@@ -990,7 +1006,7 @@ void BombingPlugin::advance(unsigned int)
 	} else {
 		unit()->pathInfo()->slowDownAtDest = false;
 		unit()->pathInfo()->moveAttacking = false;
-		unit()->addWaypoint(BoVector2(bofixed(mPosX), bofixed(mPosY)));
+		unit()->addWaypoint(BoVector2(mPosX, mPosY));
 		unit()->setAdvanceWork(Unit::WorkMove);
 	}
 	return;
@@ -1156,6 +1172,7 @@ void MiningPlugin::advance(unsigned int)
 
 		boDebug() << k_funcinfo << "i: " << i << "; Getaway point is at (" << newx << "; " << newy << ")" << endl;
 		if (unit()->moveTo(newx, newy)) {
+			unit()->addWaypoint(BoVector2(newx, newy));
 			unit()->setWork(Unit::WorkMove);  // We don't want to return here anymore
 			couldmove = true;
 			break;
