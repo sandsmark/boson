@@ -70,14 +70,10 @@ public:
 	static QString defaultScenario();
 
 	/**
-	 * Add the units of this player to boson. See @ref Boson::slotSendAddUnit
-	 * @param player Player number. 0..maxPlayers() 
-	 **/
-	void addPlayerUnits(Boson* boson, int playerNumber);
-
-	/**
-	 * Add all available player units to the game. This is like
-	 * calling @ref addPlayerUnits for all players (0..maxPlayers()).
+	 * Add all available player units to the game, add minerals, ...
+	 *
+	 * This is like calling @ref initPlayer for all players 
+	 * (0..maxPlayers()).
 	 **/
 	void startScenario(Boson* boson);
 
@@ -86,6 +82,14 @@ public:
 	static QString scenarioFileName(const QString& scenarioIdentifier);
 
 protected:
+	/**
+	 * Add the units of this player to boson, add minerals, ... 
+	 *
+	 * See @ref Boson::slotSendAddUnit
+	 * @param player Player number. 0..maxPlayers() 
+	 **/
+	void initPlayer(Boson* boson, int playerNumber);
+
 	/**
 	 * Save the scenario to the stream.
 	 **/
@@ -124,6 +128,9 @@ protected:
 	bool loadScenarioSettings(QDomElement&);
 	bool loadPlayers(QDomElement&);
 	bool loadPlayer(QDomElement&);
+
+	bool readMinerals(QDomElement&, unsigned long int& minerals);
+	bool readOil(QDomElement&, unsigned long int& oil);
 
 
 private:

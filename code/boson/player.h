@@ -38,8 +38,8 @@ class Player : public KPlayer
 public:
 	enum PropertyIds {
 		IdFogged = KGamePropertyBase::IdUser + 1,
-		IdMineralCost = KGamePropertyBase::IdUser + 2,
-		IdOilCost = KGamePropertyBase::IdUser + 3
+		IdMinerals = KGamePropertyBase::IdUser + 2,
+		IdOil = KGamePropertyBase::IdUser + 3
 	};
 	Player();
 	virtual ~Player();
@@ -94,6 +94,8 @@ signals:
 	void signalLoadUnit(int unitType, unsigned long int id, Player* owner);
 
 	void signalUnitChanged(Unit* unit);
+
+	void signalUnitPropertyChanged(KGamePropertyBase*);
 
 	void signalFog(int x, int y);
 	void signalUnfog(int x, int y);
