@@ -24,8 +24,6 @@
 
 #include <arts/kartsserver.h>
 
-class Unit;
-class UnitProperties;
 class QString;
 class KArtsServer;
 class BoPlayObject;
@@ -49,10 +47,14 @@ public:
 	void play(int id);
 
 	/**
-	 * Add a unit to BosonSound. All sounds in @ref UnitProperties::sounds
-	 * are automatically added.
+	 * Add a sounds to BosonSound. Calls @ref addEvent for every entry in
+	 * sounds.
+	 * @param speciesPath Path to the species directory. See @ref
+	 * SpeciesTheme::themePath
+	 * @param sounds lists of sound names in speciesPath/sounds/. Note that
+	 * BosonSound will add a _n.ogg, where n (or nn) is a number.
 	 **/
-	void addUnitSounds(const UnitProperties* prop);
+	void addUnitSounds(const QString& speciesPath, const QStringList& sounds);
 
 	/**
 	 * Add a sound. This is not a unit specific sound but something
