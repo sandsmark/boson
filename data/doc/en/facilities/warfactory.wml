@@ -21,5 +21,5 @@ get_values->getval("fix", "warfactory", 2);
 :>
     
 
-#include "nav.wml" before_url="barracks.html" before_text="Barracks" after_url="comsat.html" after_text="Comsat"        
+#include "nav.wml" before_url="barracks.html" before_text="Barracks" after_url="comsat.html" after_text="Comsat" up_url="index.html"
 #include "footer.wml"

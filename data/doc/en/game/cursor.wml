@@ -10,5 +10,5 @@
     </table>
 
         
-#include "nav.wml" before_url="scrolling.html" before_text="Scrolling" after_url="buildfac.html" after_text="Building facilities"    
+#include "nav.wml" before_url="scrolling.html" before_text="Scrolling" after_url="buildfac.html" after_text="Building facilities" up_url="index.html"
 #include "footer.wml"

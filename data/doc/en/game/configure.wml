@@ -53,5 +53,5 @@
      Disable sounds
      </p>
 -->
-#include "nav.wml" before_url="index.html" before_text="In the game" after_url="scrolling.html" after_text="Scrolling"
+#include "nav.wml" before_url="index.html" before_text="In the game" after_url="scrolling.html" after_text="Scrolling" up_url="index.html"
 #include "footer.wml"

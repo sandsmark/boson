@@ -20,5 +20,5 @@ get_values->getval("fix", "comsat", 2);
 :>
     
 
-#include "nav.wml" before_url="warfactory.html" before_text="War Factory" after_url="techcenter.html" after_text="Tech Center"        
+#include "nav.wml" before_url="warfactory.html" before_text="War Factory" after_url="techcenter.html" after_text="Tech Center" up_url="index.html"
 #include "footer.wml"

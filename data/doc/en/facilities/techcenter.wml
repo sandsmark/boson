@@ -20,5 +20,5 @@ get_values->getval("fix", "techcenter", 2);
 :>
     
 
-#include "nav.wml" before_url="comsat.html" before_text="Comsat" after_url="repairpad.html" after_text="Repair Pad"        
+#include "nav.wml" before_url="comsat.html" before_text="Comsat" after_url="repairpad.html" after_text="Repair Pad" up_url="index.html"
 #include "footer.wml"

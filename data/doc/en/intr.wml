@@ -20,5 +20,5 @@
       </dd>
     </dl>
 
-#include "nav.wml" before_url="index.html" before_text="Index" after_url="about.html" after_text="About Boson"    
+#include "nav.wml" before_url="index.html" before_text="Index" after_url="about.html" after_text="About Boson" up_url="index.html"
 #include "footer.wml"

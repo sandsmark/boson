@@ -20,5 +20,5 @@ get_values->getval("fix", "mineralrefinery", 2);
 :>
 
 
-#include "nav.wml" before_url="bunker.html" before_text="Command Bunker" after_url="refinery.html" after_text="Oil Refinery"        
+#include "nav.wml" before_url="bunker.html" before_text="Command Bunker" after_url="refinery.html" after_text="Oil Refinery" up_url="index.html"
 #include "footer.wml"

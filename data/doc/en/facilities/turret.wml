@@ -21,5 +21,5 @@ get_values->getval("fix", "turret", 2);
 :>
     
 
-#include "nav.wml" before_url="helipad.html" before_text="Helipad" after_url="samsite.html" after_text="Sam-Site"        
+#include "nav.wml" before_url="helipad.html" before_text="Helipad" after_url="samsite.html" after_text="Sam-Site" up_url="index.html"
 #include "footer.wml"

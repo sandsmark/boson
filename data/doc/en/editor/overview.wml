@@ -9,5 +9,5 @@
     This is a step by step manual to create a new map but it starts with some theory about a game editor.<br><br>
     </p>
     
-#include "nav.wml" before_url="index.html" before_text="The Boson editor" after_url="elements.html" after_text="Elements of a game"
+#include "nav.wml" before_url="index.html" before_text="The Boson editor" after_url="elements.html" after_text="Elements of a game" up_url="index.html"
 #include "footer.wml"

@@ -42,5 +42,5 @@
       &quot;music&quot; is optional.
     </p>
 
-#include "nav.wml" before_url="about.html" before_text="About Boson" after_url="installation.html" after_text="Installation"        
+#include "nav.wml" before_url="about.html" before_text="About Boson" after_url="installation.html" after_text="Installation" up_url="index.html"
 #include "footer.wml"

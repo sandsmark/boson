@@ -22,5 +22,5 @@ get_values->getval("fix", "oilrefinery", 2);
 
 
 
-#include "nav.wml" before_url="mineralrefinery.html" before_text="Mineral Refinery" after_url="oiltower.html" after_text="Oil Tower"        
+#include "nav.wml" before_url="mineralrefinery.html" before_text="Mineral Refinery" after_url="oiltower.html" after_text="Oil Tower" up_url="index.html"
 #include "footer.wml"

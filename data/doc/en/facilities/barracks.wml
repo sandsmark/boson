@@ -19,6 +19,6 @@ use get_values;
 get_values->getval("fix", "barracks", 2);
 :>
 
-#include "nav.wml" before_url="powerplant.html" before_text="Powerplant" after_url="warfactory.html" after_text="War Factory"        
+#include "nav.wml" before_url="powerplant.html" before_text="Powerplant" after_url="warfactory.html" after_text="War Factory" up_url="index.html"
 #include "footer.wml"
 
