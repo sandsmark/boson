@@ -63,6 +63,7 @@ public:
 	int mUnitPropID; // used for KGamePropertyHandler
 
 	QBitArray mFogged; // TODO: use KGameProperty
+	unsigned int mFoggedCount; // helper variable, doesn't need to be saved
 	KGameProperty<unsigned long int> mMinerals;
 	KGameProperty<unsigned long int> mOil;
 	KGamePropertyBool mIsNeutralPlayer;
@@ -80,6 +81,7 @@ Player::Player(bool isNeutralPlayer) : KPlayer()
  boDebug() << k_funcinfo << endl;
  mSpecies = 0;
  d = new PlayerPrivate;
+ d->mFoggedCount = 0;
  setAsyncInput(true);
  connect(this, SIGNAL(signalNetworkData(int, const QByteArray&, Q_UINT32, KPlayer*)),
 		this, SLOT(slotNetworkData(int, const QByteArray&, Q_UINT32, KPlayer*)));
@@ -134,6 +136,7 @@ void Player::quitGame(bool destruct)
  boDebug() << k_funcinfo << endl;
  d->mMobilesCount = 0;
  d->mFacilitiesCount = 0;
+ d->mFoggedCount = 0;
  mOutOfGame = false;
  d->mMap = 0;
 
@@ -433,6 +436,11 @@ void Player::initMap(BosonMap* map, bool fogged)
 	return;
  }
  d->mFogged.fill(fogged, d->mMap->width() * d->mMap->height());
+ if (fogged) {
+	d->mFoggedCount = d->mFogged.size();
+ } else {
+	d->mFoggedCount = 0;
+ }
 }
 
 void Player::fog(int x, int y)
@@ -440,13 +448,22 @@ void Player::fog(int x, int y)
  if (!d->mMap) {
 	return;
  }
- if (x + d->mMap->width() * y >= d->mFogged.size()) {
+ unsigned int index = x + d->mMap->width() * y;
+ if (index >= d->mFogged.size()) {
 	boError() << k_funcinfo << "x=" << x << ",y=" << y << " out of range ("
 			<< d->mFogged.size() << ")" << endl;
 	return;
  }
+ bool isFogged = d->mFogged.at(index);
 //boDebug() << k_funcinfo << x << "," << y << endl;
- d->mFogged.setBit(x + d->mMap->width() * y);
+ d->mFogged.setBit(index);
+ if (!isFogged) {
+	if (d->mFoggedCount >= d->mFogged.size()) {
+		boError() << k_funcinfo << "invalid fogged count value " << d->mFoggedCount << endl;
+	} else {
+		d->mFoggedCount++;
+	}
+ }
  // emit signal (actual fog on map + minimap)
  // TODO: any way to emit only for the local player?
  emit signalFog(x, y);
@@ -459,12 +476,21 @@ void Player::unfog(int x, int y)
 	return;
  }
 //boDebug() << k_funcinfo << x << "," << y << endl;
- if (x + d->mMap->width() * y >= d->mFogged.size()) {
+ unsigned int index = x + d->mMap->width() * y;
+ if (index >= d->mFogged.size()) {
 	boError() << k_funcinfo << "x=" << x << ",y=" << y << " out of range ("
 			<< d->mFogged.size() << ")" << endl;
 	return;
  }
- d->mFogged.clearBit(x + d->mMap->width() * y);
+ bool isFogged = d->mFogged.at(index);
+ d->mFogged.clearBit(index);
+ if (isFogged) {
+	if (d->mFoggedCount == 0) {
+		boError() << k_funcinfo << "invalid fogged count value " << d->mFoggedCount << endl;
+	} else {
+		d->mFoggedCount--;
+	}
+ }
  // emit signal (actual fog on map + minimap)
  // TODO: any way to emit only for the local player?
  emit signalUnfog(x, y);
@@ -870,16 +896,24 @@ bool Player::loadFogOfWar(const QDomElement& root)
  if (element.isNull()) {
 	boError() << k_funcinfo << "No Fogged tag found" << endl;
 	d->mFogged.fill(true);
+	d->mFoggedCount = d->mFogged.size();
 	return false;
  }
  QString text = element.text();
  if (text.isEmpty()) {
 	boError() << k_funcinfo << "no content for Fogged tag found" << endl;
 	d->mFogged.fill(true);
+	d->mFoggedCount = d->mFogged.size();
 	return false;
  }
  boDebug() << k_funcinfo << "decoding" << endl;
  d->mFogged = BoBinCoder::toBinary(text);
+ d->mFoggedCount = 0;
+ for (unsigned int i = 0; i < d->mFogged.size(); i++) {
+	if (d->mFogged.at(i)) {
+		d->mFoggedCount++;
+	}
+ }
  boDebug() << k_funcinfo << "decoded: " << d->mFogged.size() << endl;
  if (d->mMap) {
 	if (d->mMap->width() * d->mMap->height() != d->mFogged.size()) {
@@ -911,3 +945,9 @@ void Player::emitSignalShowMiniMap(bool show)
 {
  emit signalShowMiniMap(show);
 }
+
+unsigned int Player::foggedCells() const
+{
+ return d->mFoggedCount;
+}
+

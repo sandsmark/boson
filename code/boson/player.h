@@ -139,6 +139,11 @@ public:
 	 **/
 	bool isFogged(int x, int y) const;
 
+	/**
+	 * @return How many cells are currently fogged for this player
+	 **/
+	unsigned int foggedCells() const;
+
 	unsigned long int minerals() const;
 	unsigned long int oil() const;
 	void setMinerals(unsigned long int m);
