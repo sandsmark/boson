@@ -52,7 +52,7 @@ public:
 
 	/**
 	 * Called when the user right-clicks on the big display.
-	 * 
+	 *
 	 * Should e.g. move a unit
 	 * @param event Contains information about the mouse event (position,
 	 * additional buttons, ...)
@@ -76,7 +76,7 @@ public slots:
 
 protected:
 	//AB: use BoMouseEvent as 1st parameter
-	bool actionPlace(const BoVector3Fixed& pos);
+	bool actionPlace(const BoVector3Fixed& pos, bool exact);
 	bool actionChangeHeight(const BoVector3Fixed& pos, bool up);
 
 	/**

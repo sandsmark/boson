@@ -182,7 +182,7 @@ void EditorBigDisplayInput::actionClicked(const BoMouseEvent& event)
  }
  if (actionLocked()) {
 	if (actionType() == ActionPlacementPreview) {
-		actionPlace(event.canvasVector());
+		actionPlace(event.canvasVector(), event.controlButton());
 		return;
 	} else if (actionType() == ActionChangeHeight) {
 		bool up = !event.controlButton();
@@ -191,7 +191,7 @@ void EditorBigDisplayInput::actionClicked(const BoMouseEvent& event)
  }
 }
 
-bool EditorBigDisplayInput::actionPlace(const BoVector3Fixed& canvasVector)
+bool EditorBigDisplayInput::actionPlace(const BoVector3Fixed& canvasVector, bool exact)
 {
  boDebug() << k_funcinfo << endl;
  if (!canvas()) {
@@ -207,9 +207,14 @@ bool EditorBigDisplayInput::actionPlace(const BoVector3Fixed& canvasVector)
 	return false;
  }
  bool ret = false;
- int x = (int)(canvasVector.x());
- int y = (int)(canvasVector.y());
- if (!canvas()->cell(x, y)) {
+ bofixed x = canvasVector.x();
+ bofixed y = canvasVector.y();
+ if(!exact || d->mPlacement.isGround())
+ {
+	x = (int)x;
+	x = (int)x;
+ }
+ if (!canvas()->cell((int)x, (int)y)) {
 	return false;
  }
  if (d->mPlacement.isUnit()) {

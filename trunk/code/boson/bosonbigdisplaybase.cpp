@@ -317,6 +317,8 @@ public:
 
 		mToolTips = 0;
 
+		mControlPressed = false;
+
 		mGLMiniMap = 0;
 
 		mScriptConnector = 0;
@@ -399,6 +401,8 @@ public:
 	int mTextureBindsItems;
 	int mTextureBindsWater;
 	int mTextureBindsParticles;
+
+	bool mControlPressed;
 
 	BosonGLMiniMap* mGLMiniMap;
 
@@ -1349,8 +1353,15 @@ void BosonBigDisplayBase::renderPlacementPreview()
 	w = d->mPlacementPreview.unitProperties()->unitWidth();
 	h = d->mPlacementPreview.unitProperties()->unitHeight();
  }
- bofixed x = ((rintf(pos.x()) + w / 2));
- bofixed y = ((rintf(pos.y()) + h / 2));
+ bofixed x;
+ bofixed y;
+ if (d->mControlPressed && !boGame->gameMode()) {
+	x = pos.x() + w / 2;
+	y = pos.y() + h / 2;
+ } else {
+	x = ((rintf(pos.x()) + w / 2));
+	y = ((rintf(pos.y()) + h / 2));
+ }
  const float z = canvas()->map()->cellAverageHeight((int)x, (int)y) + 0.1f;
  glTranslatef(x, -y, z);
  if (modelPreview) {
@@ -2768,10 +2779,7 @@ void BosonBigDisplayBase::worldToCanvas(GLfloat x, GLfloat y, GLfloat /*z*/, QPo
 
 void BosonBigDisplayBase::worldToCanvas(GLfloat x, GLfloat y, GLfloat z, BoVector3Fixed* pos) const
 {
- // we want the rounding errors here (at least for now).
- int intx = (int)(x);
- int inty = (int)(-y);
- pos->set((float)intx, (float)inty, z);
+ pos->set(x, -y, z);
 }
 
 void BosonBigDisplayBase::canvasToWorld(int x, int y, float z, GLfloat* glx, GLfloat* gly, GLfloat* glz) const
@@ -2881,6 +2889,10 @@ bool BosonBigDisplayBase::eventFilter(QObject* o, QEvent* e)
 		if (!d->mCursorEdgeTimer.isActive()) {
 			slotCursorEdgeTimeout();
 		}
+		break;
+	case QEvent::KeyPress:
+	case QEvent::KeyRelease:
+		d->mControlPressed = (((QKeyEvent*)e)->stateAfter() & Qt::ControlButton);
 		break;
 	default:
 		break;
