@@ -36,7 +36,7 @@ install-data-local:
 		fi ;\
 		echo "installing $$i" ;\
 		mkdir -p $(DESTDIR)$(unitsdir)/$$i ;\
-		files=`cd $(srcdir)/$$i && find . -type f -not -regex ".*CVS.*"` ;\
+		files=`cd $(srcdir)/$$i && find . -type f | grep -v CVS` ;\
 		for f in $$files; do \
 			if test -f $(srcdir)/$$i/$$f; then \
 				$(INSTALL_DATA) $(srcdir)/$$i/$$f $(DESTDIR)$(unitsdir)/$$i/$$f ;\
