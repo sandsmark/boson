@@ -578,6 +578,22 @@ bool BosonFileConverter::convertPlayField_From_0_9_1_To_0_10(QMap<QString, QByte
  }
  QDomElement canvasRoot = canvasDoc.documentElement();
  QDomNodeList itemsList = canvasRoot.elementsByTagName("Items");
+ // remove Item Type==7 (oiltower), which doesnt exist anymore
+ for (unsigned int i = 0; i < itemsList.count(); i++) {
+	QValueList<QDomElement> removeItems;
+	QDomElement itemsTag = itemsList.item(i).toElement();
+	QDomNodeList items = itemsTag.elementsByTagName(QString::fromLatin1("Item"));
+	for (unsigned int j = 0; j < items.count(); j++) {
+		QDomElement e = items.item(j).toElement();
+		if (e.attribute("Type").compare("7") == 0) {
+			removeItems.append(e);
+		}
+	}
+	while (removeItems.count() != 0) {
+		itemsTag.removeChild(removeItems.first());
+		removeItems.pop_front();
+	}
+ }
 
  if (itemsList.count() != playerList.count()) {
 	boError() << k_funcinfo << "itemsList.count() != playerList.count()" << endl;
