@@ -1,4 +1,16 @@
 [article]
+date=January 3rd 2003 04:30
+title=Boson 0.7 RPMs for Mandrake available
+text=
+    <a href="mailto:bstoke@bstoke.co.uk">Steve</a> provided us with RPM packages
+    for Mandrake 9.0 (on i386). You can download them at <a
+    href="http://sourceforge.net/project/showfiles.php?group_id=15087&release_id=121263">SourceForge</a>.
+    Thanks a lot Steve!<br>
+    These packages already contain the smaller-textures fix announced two months
+    ago.
+    <br><br>
+
+[article]
 date=December 16th 2002 20:40
 title=Handbook available online
 text=The Boson handbook is now available online. You can have a look at
