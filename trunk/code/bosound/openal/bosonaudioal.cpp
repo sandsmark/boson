@@ -139,6 +139,26 @@ bool BosonAudioAL::checkALError()
  ALenum e = alGetError();
  if (e != AL_NO_ERROR) {
 	boError() << k_funcinfo << (int)e << endl;
+	switch (e) {
+		case AL_INVALID_NAME:
+			boError() << k_funcinfo << "AL_INVALID_NAME" << endl;
+			break;
+		case AL_ILLEGAL_ENUM:
+			boError() << k_funcinfo << "AL_ILLEGAL_ENUM" << endl;
+			break;
+		case AL_INVALID_VALUE:
+			boError() << k_funcinfo << "AL_INVALID_VALUE" << endl;
+			break;
+		case AL_ILLEGAL_COMMAND:
+			boError() << k_funcinfo << "AL_ILLEGAL_COMMAND" << endl;
+			break;
+		case AL_OUT_OF_MEMORY:
+			boError() << k_funcinfo << "AL_OUT_OF_MEMORY" << endl;
+			break;
+		default:
+			boError() << k_funcinfo << "error not recognized" << endl;
+			break;
+	}
 	return true;
  }
  return false;
