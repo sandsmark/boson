@@ -73,6 +73,10 @@ public:
 
 	bool addDummyWaterXML_From_0_10_To_0_10_80(QByteArray& waterXML);
 
+	bool addGamePyScript_From_0_10_82_To_0_11(QByteArray& gamePy);
+	bool addLocalPlayerPyScript_From_0_10_82_To_0_11(QByteArray& localplayerPy);
+	bool addAIPyScript_From_0_10_82_To_0_11(QByteArray& aiPy, int playerid);
+
 protected:
 	bool loadXMLDoc(QDomDocument* doc, const QString& xml) const;
 

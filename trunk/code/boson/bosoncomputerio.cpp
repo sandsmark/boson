@@ -45,13 +45,11 @@ BosonComputerIO::BosonComputerIO() : KGameComputerIO()
  if (boConfig->aiDelay() != 0.0) {
 	setReactionPeriod(1);
  }
- mScript = 0;
  mEventListener = 0;
 }
 
 BosonComputerIO::~BosonComputerIO()
 {
- delete mScript;
  delete mEventListener;
 }
 
@@ -71,20 +69,6 @@ void BosonComputerIO::initIO(KPlayer* p)
  mEventListener->initScript();
 }
 
-void BosonComputerIO::initScript()
-{
- if (!player()) {
-	boError() << k_funcinfo << "No player set!!!" << endl;
-	return;
- }
-
- boDebug() << k_funcinfo << "Player id: " << boPlayer()->id() << endl;
-
- mScript = BosonScript::newScriptParser(BosonScript::Python, boPlayer());
- mScript->loadScript(locate("data", "boson/scripts/boson-script.py"));
- mScript->init();
-}
-
 void BosonComputerIO::reaction()
 {
  if (boConfig->aiDelay() == 0.0) {
@@ -92,8 +76,4 @@ void BosonComputerIO::reaction()
  }
  static int id = boProfiling->requestEventId("BosonComputerIO::reaction()");
  BosonProfiler p(id);
-
- if (mScript) {
-	mScript->advance();
- }
 }

@@ -54,10 +54,14 @@ template<class T> class QValueList;
  **/
 class BosonScriptInterface : public QObject
 {
-    Q_OBJECT
+  Q_OBJECT
   public:
     BosonScriptInterface(QObject* parent = 0, const char* name = 0);
     ~BosonScriptInterface();
+
+    /*  Events  */
+    int addEventHandler(const QString& eventname, const QString& functionname, const QString& args);
+    void removeEventHandler(int id);
 
     /*  Light  */
      /**
@@ -100,6 +104,10 @@ class BosonScriptInterface : public QObject
 
 
   signals:
+    /*  Events  */
+    void signalAddEventHandler(const QString& eventname, const QString& functionname, const QString& args, int* id);
+    void signalRemoveEventHandler(int id);
+
     /*  Light  */
     void signalAddLight(int* id);
     void signalRemoveLight(int id);

@@ -31,6 +31,18 @@ BosonScriptInterface::~BosonScriptInterface()
 {
 }
 
+int BosonScriptInterface::addEventHandler(const QString& eventname, const QString& functionname, const QString& args)
+{
+  int id = -1;
+  emit signalAddEventHandler(eventname, functionname, args, &id);
+  return id;
+}
+
+void BosonScriptInterface::removeEventHandler(int id)
+{
+  emit signalRemoveEventHandler(id);
+}
+
 int BosonScriptInterface::addLight()
 {
  int id = -2;

@@ -69,6 +69,12 @@ public:
 	bool saveScriptData(QByteArray* scriptData) const;
 	bool loadScript(const QByteArray& script, const QByteArray& scriptData);
 
+	/**
+	 * @return Script object of this event listener.
+	 * Note that it can also be 0
+	 **/
+	BosonScript* script() const;
+
 	bool saveConditions(QDomElement& root) const;
 	bool loadConditions(const QDomElement& root);
 
@@ -84,10 +90,15 @@ public:
 	 **/
 	virtual bool canSee(const BoEvent* event) const = 0;
 
+public slots:
+	void addEventHandler(const QString& eventname, const QString& functionname, const QString& args, int* id);
+	void removeEventHandler(int id);
+
 protected:
 	virtual void processEvent(const BoEvent* event) = 0;
 
 	void deliverToConditions(const BoEvent* event);
+	void deliverToScript(const BoEvent* event);
 
 	/**
 	 * This should return the @ref BosonScript::newScriptParser with the

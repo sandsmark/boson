@@ -28,6 +28,7 @@
 
 #include "bodebug.h"
 #include "../bo3dtools.h"
+#include "../boevent.h"
 
 
 PyThreadState* PythonScript::mThreadState = 0;
@@ -37,6 +38,9 @@ bool PythonScript::mScriptingInited = false;
 /*****  BoScript methods table (these are accessible from scripts)  *****/
 // Keep this up to date!
 PyMethodDef PythonScript::mCallbacks[] = {
+  // Events
+  { (char*)"addEventHandler", py_addEventHandler, METH_VARARGS, 0 },
+  { (char*)"removeEventHandler", py_removeEventHandler, METH_VARARGS, 0 },
   // Players
   { (char*)"areEnemies", py_areEnemies, METH_VARARGS, 0 },
   { (char*)"allPlayers", py_allPlayers, METH_VARARGS, 0 },
@@ -226,12 +230,7 @@ bool PythonScript::loadScript(QString file)
     return false;
   }
 
-  QString contents;
-  contents += "import sys\n";
-  contents += QString("sys.path.insert(0, '%1')\n").arg(filePath.ascii());
-  contents += "sys.path.insert(0, '')\n";
-  contents += f.readAll();
-  return loadScriptFromString(contents);
+  return loadScriptFromString(f.readAll());
 }
 
 bool PythonScript::loadScriptFromString(const QString& string)
@@ -241,7 +240,13 @@ bool PythonScript::loadScriptFromString(const QString& string)
   PyObject* m = PyImport_AddModule((char*)"__main__");
   PyObject* maindict = PyModule_GetDict(m);
 
-  PyObject* obj = PyRun_String(string.ascii(), Py_file_input, maindict, maindict);
+  QString code;
+  code += "import sys\n";
+  code += QString("sys.path.insert(0, '%1')\n").arg(BosonScript::scriptsPath());
+  code += "sys.path.insert(0, '')\n";
+  code += string;
+
+  PyObject* obj = PyRun_String(code.ascii(), Py_file_input, maindict, maindict);
   if(!obj)
   {
     PyErr_Print();
@@ -371,6 +376,64 @@ void PythonScript::execLine(const QString& line)
   freePythonLock();
 }
 
+void PythonScript::callEventHandler(const BoEvent* e, const QString& function, const QString& args)
+{
+  if(!e)
+  {
+    boError() << k_funcinfo << "NULL event!" << endl;
+    return;
+  }
+  if(function.isEmpty())
+  {
+    boError() << k_funcinfo << "function name is empty!" << endl;
+    return;
+  }
+
+  PyObject* funcargs = PyTuple_New(args.length());
+
+  for(unsigned int i = 0; i < args.length(); i++)
+  {
+    PyObject* o = 0;
+    if(args.at(i) == 'p')
+    {
+      o = PyInt_FromLong(e->playerId());
+    }
+    else if(args.at(i) == 'u')
+    {
+      o = PyInt_FromLong(e->unitId());
+    }
+    else if(args.at(i) == 'l')
+    {
+      PyObject* location = PyTuple_New(3);
+      PyTuple_SetItem(location, 0, PyFloat_FromDouble(e->location().x()));
+      PyTuple_SetItem(location, 1, PyFloat_FromDouble(e->location().y()));
+      PyTuple_SetItem(location, 2, PyFloat_FromDouble(e->location().z()));
+      o = location;
+    }
+    else if(args.at(i) == 'n')
+    {
+      o = PyString_FromString(e->name());
+    }
+    else if(args.at(i) == 'a')
+    {
+      o = PyString_FromString(e->data1().latin1());
+    }
+    else if(args.at(i) == 'b')
+    {
+      o = PyString_FromString(e->data2().latin1());
+    }
+    else
+    {
+      boError() << k_funcinfo << "Unknown format char '" << QString(args.at(i)) << "' in format string '" <<
+          args << "'" << endl;
+    }
+
+    PyTuple_SetItem(funcargs, i, o);
+  }
+
+  callFunction(function.latin1(), funcargs);
+}
+
 void PythonScript::advance()
 {
   callFunction("advance");
@@ -473,6 +536,37 @@ bool PythonScript::load(QDataStream& stream)
   delete[] data;
 
   return true;
+}
+
+
+/*****  Event functions  *****/
+PyObject* PythonScript::py_addEventHandler(PyObject*, PyObject* args)
+{
+  char* eventname = 0;
+  char* funcname = 0;
+  char* funcargs = 0;
+  if(!PyArg_ParseTuple(args, (char*)"sss", &eventname, &funcname, &funcargs))
+  {
+    return 0;
+  }
+
+  int id = BosonScript::currentScript()->addEventHandler(eventname, funcname, funcargs);
+
+  return Py_BuildValue((char*)"i", id);
+}
+
+PyObject* PythonScript::py_removeEventHandler(PyObject*, PyObject* args)
+{
+  int id;
+  if(!PyArg_ParseTuple(args, (char*)"i", &id))
+  {
+    return 0;
+  }
+
+  BosonScript::currentScript()->removeEventHandler(id);
+
+  Py_INCREF(Py_None);
+  return Py_None;
 }
 
 /*****  Player functions  *****/

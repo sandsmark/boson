@@ -105,8 +105,6 @@ public:
 		mActionChat = 0;
 		mActionCmdFrame = 0;
 
-		mLocalPlayerScript = 0;
-
 		mCanvas = 0;
 
 		mLightWidget = 0;
@@ -123,8 +121,6 @@ public:
 	QPtrDict<KPlayer> mPlayers; // needed for debug only
 
 	bool mInitialized;
-
-	BosonScript* mLocalPlayerScript;
 
 	BosonCanvas* mCanvas;
 
@@ -160,7 +156,6 @@ BosonWidgetBase::~BosonWidgetBase()
  delete mCursor;
  delete d->mCommandFrame;
  delete d->mChat;
- delete d->mLocalPlayerScript;
 
  delete d;
  boDebug() << k_funcinfo << "done" << endl;
@@ -1139,36 +1134,17 @@ void BosonWidgetBase::slotSetEnableColormap(bool enable)
 
 void BosonWidgetBase::slotRunScriptLine(const QString& line)
 {
- d->mLocalPlayerScript->execLine(line);
+#warning TODO!!
+// d->mLocalPlayerScript->execLine(line);
 }
 
 void BosonWidgetBase::slotAdvance(unsigned int, bool)
 {
- d->mLocalPlayerScript->advance();
 }
 
 void BosonWidgetBase::initScripts()
 {
- // Init computer player scripts
- QPtrListIterator<KPlayer> it(*boGame->playerList());
- for (; it.current(); ++it) {
-	QPtrListIterator<KGameIO> ioit(*it.current()->ioList());
-	for (; ioit.current(); ++ioit) {
-		if (ioit.current()->rtti() == KGameIO::ComputerIO) {
-			BosonComputerIO* io = (BosonComputerIO*)ioit.current();
-			io->initScript();
-		}
-	}
- }
-
- // Init script for local player
- delete d->mLocalPlayerScript;
- d->mLocalPlayerScript = BosonScript::newScriptParser(BosonScript::Python, localPlayer());
- // No script will be loaded
- d->mLocalPlayerScript->loadScript(locate("data", "boson/scripts/localplayer-script.py"));
- d->mLocalPlayerScript->init();
-
- displayManager()->activeDisplay()->setLocalPlayerScript(d->mLocalPlayerScript);
+// displayManager()->activeDisplay()->setLocalPlayerScript(d->mLocalPlayerScript);
 }
 
 void BosonWidgetBase::slotDumpGameLog()

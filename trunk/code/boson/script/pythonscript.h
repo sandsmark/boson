@@ -53,6 +53,13 @@ class PythonScript : public BosonScript
 
     virtual void execLine(const QString& line);
 
+    virtual void callEventHandler(const BoEvent* e, const QString& function, const QString& args);
+
+
+    // Events
+    static PyObject* py_addEventHandler(PyObject* self, PyObject* args);
+    static PyObject* py_removeEventHandler(PyObject* self, PyObject* args);
+
 
     // Players
     static PyObject* py_areEnemies(PyObject* self, PyObject* args);

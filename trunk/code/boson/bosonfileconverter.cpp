@@ -981,10 +981,18 @@ bool BosonFileConverter::convertPlayField_From_0_10_82_To_0_11(QMap<QString, QBy
 		players++;
 	}
  }
- files.insert("scripts/eventlistener/game.py", QByteArray());
- files.insert("scripts/eventlistener/localplayer.py", QByteArray());
+
+ // Default scripts
+ QByteArray gamePy;
+ addGamePyScript_From_0_10_82_To_0_11(gamePy);
+ files.insert("scripts/eventlistener/game.py", gamePy);
+ QByteArray localplayerPy;
+ addLocalPlayerPyScript_From_0_10_82_To_0_11(localplayerPy);
+ files.insert("scripts/eventlistener/localplayer.py", localplayerPy);
  for (unsigned int i = 0; i < players; i++) {
-	files.insert(QString("scripts/eventlistener/ai-player_%1.py").arg(i), QByteArray());
+	QByteArray aiPy;
+	addAIPyScript_From_0_10_82_To_0_11(aiPy, i);
+	files.insert(QString("scripts/eventlistener/ai-player_%1.py").arg(i), aiPy);
  }
 
  files.insert("kgame.xml", kgameDoc.toString().utf8());
@@ -1009,6 +1017,50 @@ void BosonFileConverter::removePropertyIds_0_9_1(const QDomNodeList& itemsList, 
 		}
 	}
  }
+}
+
+bool BosonFileConverter::addGamePyScript_From_0_10_82_To_0_11(QByteArray& gamePy)
+{
+  return true;
+}
+
+bool BosonFileConverter::addLocalPlayerPyScript_From_0_10_82_To_0_11(QByteArray& localplayerPy)
+{
+  QString script =
+    "import dayandnight\n"
+    "\n"
+    "player = -1\n"
+    "\n"
+    "def init(id):\n"
+    "  global player\n"
+    "  player = id\n"
+    "  dayandnight.init()\n"
+    "\n"
+    "def setPlayerId(id):\n"
+    "  global player\n"
+    "  player = id\n"
+    "\n"
+    "def advance():\n"
+    "  dayandnight.advance()\n";
+  localplayerPy.duplicate(script.latin1(), script.length());
+  return true;
+}
+
+bool BosonFileConverter::addAIPyScript_From_0_10_82_To_0_11(QByteArray& aiPy, int playerid)
+{
+  QString script =
+    "import ai\n"
+    "\n"
+    "def init(id):\n"
+    "  ai.init(id)\n"
+    "\n"
+    "def setPlayerId(id):\n"
+    "  ai.setPlayerId(id)\n"
+    "\n"
+    "def advance():\n"
+    "  ai.advance()\n";
+  aiPy.duplicate(script.latin1(), script.length());
+  return true;
 }
 
 

@@ -28,6 +28,7 @@
 #include "playerio.h"
 #include "unitproperties.h"
 #include "script/bosonscript.h"
+#include "script/bosonscriptinterface.h"
 #include "speciestheme.h"
 #include "player.h"
 
@@ -35,6 +36,16 @@
 
 #include <qptrlist.h>
 #include <qdom.h>
+#include <qintdict.h>
+
+
+class BoEventHandlerInfo
+{
+public:
+	QString function;
+	QString args;
+	QString eventname;
+};
 
 class BoEventListenerPrivate
 {
@@ -45,6 +56,9 @@ public:
 	}
 	QPtrList<BoCondition> mConditions;
 
+	QIntDict<BoEventHandlerInfo> mEventHandlers;
+	int mNextEventHandlerId;
+
 	BosonScript* mScript;
 };
 
@@ -53,6 +67,7 @@ BoEventListener::BoEventListener(BoEventManager* manager, QObject* parent)
 {
  d = new BoEventListenerPrivate;
  d->mConditions.setAutoDelete(true);
+ d->mEventHandlers.setAutoDelete(true);
  mManager = manager;
  mManager->addEventListener(this);
 }
@@ -63,6 +78,7 @@ BoEventListener::~BoEventListener()
 	mManager->removeEventListener(this);
  }
  d->mConditions.clear();
+ d->mEventHandlers.clear();
  delete d;
 }
 
@@ -159,8 +175,28 @@ bool BoEventListener::loadScript(const QByteArray& script, const QByteArray& scr
 	// if we'd return without calling init(), we might cause even more
 	// trouble when other script functions will be called.
  }
+
+ connect(d->mScript->interface(), SIGNAL(signalAddEventHandler(const QString&, const QString&, const QString&, int*)),
+		this, SLOT(addEventHandler(const QString&, const QString&, const QString&, int*)));
+ connect(d->mScript->interface(), SIGNAL(signalRemoveEventHandler(int)),
+		this, SLOT(removeEventHandler(int)));
+
  d->mScript->init();
+
+ BoEventHandlerInfo* info = new BoEventHandlerInfo;
+ info->function = "advance";
+ info->eventname = "Advance";
+ info->args = "";
+ d->mEventHandlers.insert(1, info);
+ d->mNextEventHandlerId = 2;
+
+
  return ret;
+}
+
+BosonScript* BoEventListener::script() const
+{
+ return d->mScript;
 }
 
 bool BoEventListener::saveConditions(QDomElement& root) const
@@ -236,15 +272,45 @@ void BoEventListener::deliverToConditions(const BoEvent* event)
  boDebug(360) << k_funcinfo << "done" << endl;
 }
 
+void BoEventListener::deliverToScript(const BoEvent* event)
+{
+ QIntDictIterator<BoEventHandlerInfo> it(d->mEventHandlers);
+ for( ; it.current(); ++it) {
+	BoEventHandlerInfo* info = it.current();
+	if (info->eventname.latin1() == event->name()) {
+		d->mScript->callEventHandler(event, info->function, info->args);
+	}
+ }
+}
+
 void BoEventListener::receiveEvent(const BoEvent* event)
 {
  BO_CHECK_NULL_RET(event);
  deliverToConditions(event);
 
+ deliverToScript(event);
+
  // AB: we might split the event handling up now, e.g. all player events go to
  // processPlayerEvent(), the rest to processEvent().
  processEvent(event);
 }
+
+void BoEventListener::addEventHandler(const QString& eventname, const QString& functionname, const QString& args, int* id)
+{
+ BoEventHandlerInfo* info = new BoEventHandlerInfo;
+ info->function = functionname;
+ info->eventname = eventname;
+ info->args = args;
+ d->mEventHandlers.insert(d->mNextEventHandlerId, info);
+ *id = d->mNextEventHandlerId;
+ d->mNextEventHandlerId++;
+}
+
+void BoEventListener::removeEventHandler(int id)
+{
+ d->mEventHandlers.remove(id);
+}
+
 
 // TODO: there may be only one instance of this class
 BoCanvasEventListener::BoCanvasEventListener(BoEventManager* manager, QObject* parent)
