@@ -286,10 +286,11 @@ void BosonCommandFrame::slotUpdate()
 		setAction(selectedUnit());
 	}
  }
- if (!orderWidget()->isHidden()) { // FIXME
+ if (!orderWidget()->isHidden()) {
 	ProductionPlugin* production = (ProductionPlugin*)selectedUnit()->plugin(UnitPlugin::Production);
-	if (!production || !production->hasProduction()) {
-		slotUpdateProduction(selectedUnit());
+	if (production && production->hasProduction()) {
+//		slotUpdateProduction(selectedUnit());
+		orderWidget()->productionAdvanced(selectedUnit(), production->productionProgress());
 	}
  }
 }
