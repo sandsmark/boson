@@ -1,0 +1,13 @@
+- waypoints
+- constructing - maybe use Boson::slotDelayedAddUnit() or so?
+- unit editor (should be quite easy cause of config files)
+- zooming (QCanvas::setWorldMatrix())
+- add unitProperties() to Player
+- rename Unit->UnitBase ; VisualUnit->Unit
+- SpeciesTheme loads all pixmaps into memory - share it between different
+  players (if they have the same themes)
+
+- bosoncommandframe: a qgridlayout with a orderbutton count of (16?) - must be dividable by 3. the
+  bottom 3 buttons are: left is a down (aka next page) , middle is free, right
+  is a up (aka previous page) button. SO we can add any number of pixmaps with
+  this limited number of orderbuttons.
