@@ -6,6 +6,7 @@
 class Player;
 class QCanvas;
 class VisualUnit;
+class VisualFacility;
 
 class BosonPrivate;
 class Boson : public KGame
@@ -66,6 +67,8 @@ protected:
 	 * @param searchIn The player to search the unit in. 0 for all players
 	 **/
 	VisualUnit* findUnit(unsigned long int unitId, Player* searchIn) const;
+
+	bool constructUnit(VisualFacility* factory, int unitType, int x, int y);
 
 protected slots:
 	/**

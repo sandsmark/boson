@@ -165,19 +165,31 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 	case BosonMessage::MoveConstruct:
 	{
 		kdDebug() << "moveConstruct" << endl;
-		Q_LONG unitType;
+		Q_UINT32 factoryId;
+//		Q_INT32 unitType;
 		Q_UINT32 owner;
 		Q_INT32 x;
 		Q_INT32 y;
-		stream >> unitType;
+		stream >> factoryId;
 		stream >> owner;
 		stream >> x;
 		stream >> y;
+//		stream >> unitType;
 		
 		Player* p = (Player*)findPlayer(owner);
-		VisualUnit* unit = createUnit(unitType, p);
-		unit->setId(nextUnitId());
-		emit signalAddUnit(unit, x, y);
+		if (!p) {
+			kdError() << "Cannot construct without owner" << endl;
+			break;
+		}
+		VisualFacility* factory = (VisualFacility*)findUnit(factoryId, p);
+		if (!factory) {
+			kdError() << "Cannot construct without factory" << endl;
+			break;
+		}
+		unsigned int unitType = factory->completedConstruction();
+		if (constructUnit(factory, unitType, x, y)) {
+			factory->removeConstruction();
+		}
 		break;
 	}
 	default:
@@ -416,3 +428,40 @@ void Boson::slotReplacePlayerIO(KPlayer* player, bool* remove)
  }
  kdDebug() << "slotReplacePlayer()" << endl;
 }
+
+bool Boson::constructUnit(VisualFacility* factory, int unitType, int x, int y)
+{
+ if (!factory) {
+	kdError() << "NULL factory cannot produce" << endl;
+	return false;
+ }
+ Player* p = factory->owner();
+ if (!p) {
+	kdError() << "NULL owner" << endl;
+	return false;
+ }
+ QCanvasPixmapArray* a = p->speciesTheme()->pixmapArray(unitType);
+ if (!a) {
+	kdError() << "NULL pximap array for " << unitType << endl;
+	return false;
+ }
+ QCanvasItemList list = d->mCanvas->collisions(QRect(x * BO_TILE_SIZE,
+		y * BO_TILE_SIZE, a->image(0)->width(), // -1?
+		a->image(0)->height())); // -1?
+ QCanvasItemList::Iterator it;
+ for (it = list.begin(); it != list.end(); ++it) {
+	if ((*it)->rtti() < RTTI::UnitStart) {
+		continue; // this item is not interesting here
+	}
+	VisualUnit* unit = (VisualUnit*)*it;
+	if (!unit->isDestroyed()) {
+		kdDebug() << "Cannot create unit here" << endl;
+		return false;
+	}
+ }
+ VisualUnit* unit = createUnit(unitType, p);
+ unit->setId(nextUnitId());
+ emit signalAddUnit(unit, x, y);
+ return true;
+}
+
