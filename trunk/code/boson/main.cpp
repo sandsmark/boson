@@ -20,6 +20,7 @@
 #include "top.h"
 
 #include "bosonconfig.h"
+#include "boversion.h"
 
 #include <kapplication.h>
 #include <kaboutdata.h>
@@ -29,7 +30,7 @@
 static const char *description =
     I18N_NOOP("A realtime strategy game for KDE");
 
-static const char *version = "v0.8pre";
+static const char *version = BOSON_VERSION_STRING;
 
 static KCmdLineOptions options[] =
 {

@@ -20,6 +20,7 @@
 #include "bouniteditor.h"
 
 #include "bodebugdcopiface.h"
+#include "boversion.h"
 
 #include <kapplication.h>
 #include <kcmdlineargs.h>
@@ -29,7 +30,7 @@
 static const char *description =
     I18N_NOOP("Unit Editor for Boson");
 
-static const char *version = "0.8pre";
+static const char *version = BOSON_VERSION_STRING;
 
 static KCmdLineOptions options[] =
 {
