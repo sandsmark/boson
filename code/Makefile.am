@@ -4,7 +4,7 @@ SUBDIRS = common map server boson
 
 EXTRA_DIST = AUTHORS COPYING ChangeLog INSTALL README TODO 
 
-MAKE = /usr/bin/nice -20 make -j 3
+MAKE = nice -20 make -j 3
 
 orzel.clean : maintainer-clean
 	rm -f configure Makefile{,.in}
