@@ -67,6 +67,30 @@ void BosonScenario::setPlayers(unsigned int min, int max)
  d->mMaxPlayers = max;
 }
 
+bool BosonScenario::loadScenarioFromDocument(const QString& xml)
+{
+ if (xml.isEmpty()) {
+	boError(250) << k_funcinfo << "empty xml document" << endl;
+	return false;
+ }
+ QDomDocument doc(QString::fromLatin1("BosonScenario"));
+ QString errorMsg;
+ int lineNo, columnNo;
+ if (!doc.setContent(xml, &errorMsg, &lineNo, &columnNo)) {
+	boError(250) << k_funcinfo << "parse error in line " << lineNo
+			<< " column " << columnNo << " error message: "
+			<< errorMsg << endl;
+	return false;
+ }
+ QDomElement root = doc.documentElement();
+ if (root.childNodes().count() < 2) {
+	// there must be at least scenario settings and one player
+	boError(250) << k_funcinfo << "no scenario found in file" << endl;
+	return false;
+ }
+ return loadScenario(root);
+}
+
 bool BosonScenario::loadScenario(QDomElement& root)
 {
  // TODO: check for syntax errors
@@ -129,7 +153,19 @@ bool BosonScenario::loadScenario(QDomElement& root)
  return false;
 }
 
-bool BosonScenario::saveScenario(QDomElement& root)
+QString BosonScenario::saveScenarioToDocument() const
+{
+ QDomDocument doc(QString::fromLatin1("BosonScenario"));
+ QDomElement root = doc.createElement(QString::fromLatin1("BosonScenario"));
+ doc.appendChild(root);
+ bool ret = saveScenario(root);
+ if (!ret) {
+	return QString::null;
+ }
+ return doc.toString();
+}
+
+bool BosonScenario::saveScenario(QDomElement& root) const
 {
  // we manage our own xml document of the scenario. we simply need to append all
  // childs of our own document to the provided root

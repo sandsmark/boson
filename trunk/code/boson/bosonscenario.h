@@ -57,6 +57,14 @@ public:
 	unsigned int minPlayers() const;
 
 	/**
+	 * Load the scenario from a @ref QDomDocument. This string @p xml should
+	 * come from a @ref saveScenarioToDocument. We use @ref loadScenario to
+	 * actually load the scenario.
+	 * @return TRUE on success, otherwise FALSE.
+	 **/
+	bool loadScenarioFromDocument(const QString& xml);
+
+	/**
 	 * Load the scenario from node.
 	 *
 	 * Note that this is not actually loaded, but should be fully parsed
@@ -78,9 +86,18 @@ public:
 	bool initializeScenario();
 
 	/**
+	 * Create a temporary @ref QDomDocument and save the scenario to it. See
+	 * also @ref saveScenario.
+	 *
+	 * @return QDomDocument::toString() for the created scenario document,
+	 * or @ref QString::null if an error occured.
+	 **/
+	QString saveScenarioToDocument() const;
+
+	/**
 	 * Save the local xml document (i.e. the scenario) to root.
 	 **/
-	bool saveScenario(QDomElement& root);
+	bool saveScenario(QDomElement& root) const;
 
 	/**
 	 * Clear the local xml document and apply the scenario that is
