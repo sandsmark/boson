@@ -22,7 +22,6 @@
 #include "common/bomap.h"
 #include "common/bobuffer.h"
 
-#include "serverUnit.h"
 #include "boserver.h"
 #include "player.h"
 #include "game.h"

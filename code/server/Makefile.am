@@ -28,7 +28,7 @@ bin_PROGRAMS = boserver
 #boserver
 METASOURCES = AUTO
 boserver_LDFLAGS = $(all_libraries) $(KDE_RPATH)
-boserver_SOURCES = boserver.cpp main.cpp connect.cpp serverUnit.cpp serverMap.cpp player.cpp game.cpp
+boserver_SOURCES = boserver.cpp main.cpp connect.cpp serverUnit.cpp serverMap.cpp player.cpp game.cpp serverCell.cpp
 boserver_LDADD   = ../common/libboson.a $(LIB_KDEUI)
 
 # garbage

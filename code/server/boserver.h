@@ -54,7 +54,7 @@ class serverFacility;
 /** 
   * This is the main widget of the Boson Server GUI
   */
-class BosonServer : public KMainWindow, public boFile
+class BosonServer : public KMainWindow, public boFile, public serverCellMap
 {
   Q_OBJECT
 
@@ -65,9 +65,6 @@ class BosonServer : public KMainWindow, public boFile
   void	handleDialogMessage(uint playerId, bosonMsgTag, int, bosonMsgData *);
   void	playerHasDied(uint playerId);
 
-	void		reportMob(serverMobUnit *);
-	void		reportFix(serverFacility *);
-	groundType	groundAt(QPoint pos) {return cell(pos.x(), pos.y()).ground(); }
 	int		maxX() { return map_width; }
 	int		maxY() { return map_height; }
 
@@ -99,16 +96,10 @@ class BosonServer : public KMainWindow, public boFile
 
   bool		loadGround();
   bool		loadUnits();
-	serverCell	&cell(int x, int y) {return cells[ x + y * map_width ]; }
-	bool		isValid(int x, int y) { return x>=0 && y>=0 && x<map_width && y<map_height; }
-	bool		findFreePos(int &x, int &y, mobType t);
-	bool		testFreePos(int x, int y, mobType t);
-  
+
   serverState	state;
   KServerSocket	*socket;
   uint		confirmedJiffies;
-
-  serverCell	*cells;
 
   QIntDict<serverMobUnit>	mobile;
   QIntDict<serverFacility>	facility;

@@ -25,6 +25,8 @@
 #include "knownBy.h"
 
 class BosonServer;
+class serverMobUnit;
+class serverFacility;
 
 /** 
   * This is a cell in the server point of view
@@ -44,4 +46,28 @@ private:
 	cell_t	_cell;
 };
 
+
+class serverCellMap : public CellMap
+{
+public:
+       	serverCellMap(void);
+       	virtual ~serverCellMap(void){ if (_width!=-1) delete [] cells; }
+
+	virtual enum groundType	groundAt(QPoint p)  { return cell(p.x(), p.y()).ground() ;}
+	/** return the cell at (i,j) */
+	virtual Cell	&ccell(int i, int j) { return cell(i,j); }		// simple cast
+protected:
+	// called from serverMap.cpp
+	/** initialise the object */
+       	void initCellMap(int w, int h) { cells = new serverCell[w*h]; _width = w; _height = h; }
+	/** convenient access function for serverCell instead of Cell */
+	serverCell	&cell(int x, int y) {return cells[ x + y * _width ]; }
+	bool		findFreePos(int &x, int &y, enum mobType t);
+	bool		testFreePos(int x, int y, enum mobType t);
+  
+	void		reportMob(serverMobUnit *u);
+	void		reportFix(serverFacility * f);
+
+	serverCell	*cells;
+}; 
 #endif // SERVERCELL_H
