@@ -228,7 +228,7 @@ public:
 	Unit* target() const;
 	virtual void setTarget(Unit* target);
 
-	bool inRange(long unsigned int, Unit* unit) const;
+	bool inRange(unsigned long int, Unit* unit) const;
 
 // waypoint stuff: // also in facility - produced units receive this initial waypoint
 	/**
