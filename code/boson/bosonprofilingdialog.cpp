@@ -246,21 +246,45 @@ void BosonProfilingDialog::resetRenderPage()
  BosonProfiling::BosonProfilingPrivate* pd = d->data()->d;
  QValueList<RenderGLTimes>::Iterator it = pd->mRenderTimes.begin();
  int i = 0;
+ // average values:
+ long int aClear = 0;
+ long int aCells = 0;
+ long int aUnits = 0;
+ long int aFOW = 0;
+ long int aText = 0;
+ long int aFunction = 0;
  for (; it != pd->mRenderTimes.end(); ++it, i++) {
 	QListViewItemNumber* item = new QListViewItemNumber(d->mRender);
 	item->setText(0, QString::number(i));
-	item->setText(1, i18n("Function"));
-	item->setText(2, QString::number((*it).mFunction));
-	item->setText(3, QString::number((double)(*it).mFunction / 1000));
-	item->setText(4, QString::number((double)(*it).mFunction / 1000000));
+	initRenderItem(item, i18n("Function"), (*it).mFunction);
+	aFunction += (*it).mFunction;
 
-	createRenderItem(item, i18n("Clearing"), (*it).mClear);
-	createRenderItem(item, i18n("Cells"), (*it).mCells);
-	createRenderItem(item, i18n("Units"), (*it).mUnits);
-	createRenderItem(item, i18n("FOW"), (*it).mFOW);
-	createRenderItem(item, i18n("Text"), (*it).mText);
+	initRenderItem(new QListViewItemNumber(item), i18n("Clearing"), (*it).mClear);
+	aClear += (*it).mClear;
+	initRenderItem(new QListViewItemNumber(item), i18n("Cells"), (*it).mCells);
+	aCells += (*it).mCells;
+	initRenderItem(new QListViewItemNumber(item), i18n("Units"), (*it).mUnits);
+	aUnits += (*it).mUnits;
+	initRenderItem(new QListViewItem(item), i18n("FOW"), (*it).mFOW);
+	aFOW += (*it).mFOW;
+	initRenderItem(new QListViewItem(item), i18n("Text"), (*it).mText);
+	aText += (*it).mText;
 	item->setOpen(true);
  }
+
+ unsigned int count = pd->mRenderTimes.count();
+ if (!count) {
+	return;
+ }
+ QListViewItemNumber* average = new QListViewItemNumber(d->mRender);
+ average->setText(0, i18n("Average - use with care"));
+ initRenderItem(average, i18n("Function"), aFunction / count);
+ initRenderItem(new QListViewItemNumber(average), i18n("Clearing"), aClear / count);
+ initRenderItem(new QListViewItemNumber(average), i18n("Cells"), aCells / count);
+ initRenderItem(new QListViewItemNumber(average), i18n("Units"), aUnits / count);
+ initRenderItem(new QListViewItem(average), i18n("FOW"), aFOW / count);
+ initRenderItem(new QListViewItem(average), i18n("Text"), aText / count);
+ average->setOpen(true);
 }
 
 void BosonProfilingDialog::resetFilesPage()
@@ -272,9 +296,8 @@ void BosonProfilingDialog::resetFilesPage()
  }
 }
 
-void BosonProfilingDialog::createRenderItem(QListViewItem* parent, const QString& type, long int time)
+void BosonProfilingDialog::initRenderItem(QListViewItem* item, const QString& type, long int time)
 {
- QListViewItemNumber* item = new QListViewItemNumber(parent);
  item->setText(1, type);
  item->setText(2, QString::number(time));
  item->setText(3, QString::number((double)time / 1000));
