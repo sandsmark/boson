@@ -50,7 +50,7 @@ Range=Number        - The weapon range (>= 0) of this unit.
                       Default is 0.
 SightRange=Number   - The sight range (>= 0) of this unit. 
                       the sight range is how far (in cells!) this unit can see.
-                      Default is 10 (currently).
+                      Default is 5 (currently).
 Damage=Number       - The damage this unit makes to other units when firing. Can
                       also be negative - the unit repairs then. 
                       Default is 0.
