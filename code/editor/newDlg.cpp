@@ -73,7 +73,7 @@ newDlg::newDlg(QWidget *parent, const char *name)
 	scb_width->setGeometry( 360, 160, 190, 15);
 
 	connect( scb_width, SIGNAL(valueChanged(int)), _width, SLOT(setNum(int)));
-	connect( scb_width, SIGNAL(sliderReleased(void)), this, SLOT(redrawPreview(void)));
+	connect( scb_width, SIGNAL(valueChanged(int)), this, SLOT(redrawPreview(int)));
 
 
 	label = new QLabel("Height :", this);
@@ -88,7 +88,7 @@ newDlg::newDlg(QWidget *parent, const char *name)
 	scb_height->setGeometry( 360, 210, 190, 15);
 
 	connect( scb_height, SIGNAL(valueChanged(int)), _height, SLOT(setNum(int)));
-	connect( scb_height, SIGNAL(sliderReleased(void)), this, SLOT(redrawPreview(void)));
+	connect( scb_height, SIGNAL(valueChanged(int)), this, SLOT(redrawPreview(int)));
 
 
 	/* preview window */
@@ -130,7 +130,7 @@ void newDlg::qcb_activated(int which)
 	redrawPreview();
 }
 
-void newDlg::redrawPreview(void)
+void newDlg::redrawPreview(int)
 {
 	pix->resize(scb_width->value(), scb_height->value());
 	switch(type) {

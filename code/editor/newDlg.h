@@ -46,7 +46,7 @@ public:
 
 private slots:
 	void	qcb_activated(int);
-	void	redrawPreview(void);
+	void	redrawPreview(int not_used = 0);
 private:
 	QPixmap		*pix;
 	QLabel		*_height, *_width, *_pixLabel;
