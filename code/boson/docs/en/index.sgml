@@ -2,10 +2,10 @@
 <article>
 <title>The Boson Handbook
 <author>Thomas Capricelli <tt>capricel@enst.fr</tt>
-<date>Version 0.1 , Sun Sep 12 13:28:38 CEST 1999
+<date>Version 0.2 , Sun Sep 12 13:28:38 CEST 1999
 
 <abstract>
-This Handbook describes Boson Version 0.1
+This Handbook describes Boson Version 0.2
 </abstract>
 
 <toc>
@@ -31,7 +31,7 @@ Please contact : <tt/Thomas Capricelli/
 <sect1>Changes
 <p>
 
-Boson 0.1 is the first release, it's meant to be a developper-only release and
+Boson 0.2 is the first release, it's meant to be a developper-only release and
 isn't yet intended for playing.
 
 This release features :
@@ -168,7 +168,7 @@ a big jump.
 
 <sect1>Nothing happens when I click on the K-menu/Games/boson item.
 <p>
-	If you haven't installed the boson-pics-0.1 package, boson will die as soon as launched.
+	If you haven't installed the boson-pics-0.2 package, boson will die as soon as launched.
 Install the package. If it's still won't be launched, do it in a terminal emulator (kvt, konsole, xterm)
 and send me 
 <itemize>
