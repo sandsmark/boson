@@ -72,8 +72,8 @@ public:
 			playerMobUnit(mobileMsg_t *);
 
 	void		getWantedAction();
- 
 	void		shooted(int _power);
+	void		destroy(void);
 /* Server orders */
 	void		s_moveTo(state_t nstate);
 
@@ -151,7 +151,7 @@ public:
 /* Server orders */
 	void	s_setState(int );
 	void	shooted(int _power);
-
+	void	destroy(void);
 
 };
 

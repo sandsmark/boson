@@ -32,6 +32,7 @@
 #include "game.h"
 
 
+
 /*
  *  bosonUnit
  */
@@ -60,7 +61,6 @@ void bosonUnit::u_attack(bosonUnit *u)
 
 	connect( u, SIGNAL(dying(bosonUnit*)), this, SLOT(targetDying(bosonUnit*)) );
 }
-
 
 /*
  * playerMobUnit
@@ -488,6 +488,13 @@ bool playerMobUnit::near(int d)
 	return (a*a + b*b) < (d*d);
 }
 
+void playerMobUnit::destroy(void)
+{
+	setFrame(PIXMAP_MOBILE_DESTROYED);
+	_destroyed = true;
+	unSelect();
+	emit dying(this);
+}
 
 /*
  * playerFacility
@@ -522,6 +529,13 @@ void playerFacility::shooted(int _power)
 	if (sp_up) sp_up->setFrame(_power);
 }
   
+void playerFacility::destroy(void)
+{
+	setFrame(PIXMAP_FIX_DESTROYED);
+	_destroyed = true;
+	unSelect();
+	emit dying(this);
+}
 
 
 #define underlyingGround() vcanvas->groundAt( x()+10, y()+10)
