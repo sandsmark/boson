@@ -35,20 +35,22 @@
 #define ERROR_COST 100000
 #define MAX_PATH_COST 5000
 #define FOGGED_COST 2.5
+#define SEARCH_STEPS 10  // How many steps of path to find
 
 class BosonPath::Marking
 {
   public:
-    Marking() { dir = DirNone; f = -1; g = -1; }
+    Marking() { dir = DirNone; f = -1; g = -1; level = -1; }
     Direction dir;
     float f;
     float g;
+    short int level;
 };
 
 class BosonPath::PathNode
 {
   public:
-    PathNode() { x = 0; y = 0; g = 0; h = 0; };
+    PathNode() { x = 0; y = 0; g = 0; h = 0; level = -1; };
     int x; // x-coordinate of cell
     int y; // y-coordinate of cell
 
@@ -56,6 +58,21 @@ class BosonPath::PathNode
 // description is correct
     float g; // path cost of this node?? -> "cost" of the cells (ALL cells that the unit has crossed up to here)
     float h; // distance of all cells the unit has crossed up to here
+    short int level; // node is level steps away from start. It's needed to search only 10 steps of path at once
+};
+
+/** Describes found path
+  * Possible values are:
+  * NoPath - no path was found
+  * FullPath - full path to goal was found
+  * PartialPath - SEARCH_STEPS steps of path was found and no further was searched
+  * AbortedPath - pathfinding was aborted, but some steps were found
+  */
+enum PathStyle {
+  NoPath = 0,
+  FullPath = 1,
+  PartialPath = 2,
+  AbortedPath = 3
 };
 
 inline bool operator < (const BosonPath::PathNode& a, const BosonPath::PathNode& b)
@@ -91,23 +108,19 @@ BosonPath::~BosonPath()
 QValueList<QPoint> BosonPath::findPath(Unit* unit, int goalx, int goaly)
 {
   QValueList<QPoint> points;
-  if (!unit) 
+  if (!unit)
   {
     kdError() << k_funcinfo << "NULL unit" << endl;
     return points;
   }
   QPoint p = unit->boundingRect().center();
-  BosonPath path(unit, p.x() / BO_TILE_SIZE, p.y() / BO_TILE_SIZE, 
+  BosonPath path(unit, p.x() / BO_TILE_SIZE, p.y() / BO_TILE_SIZE,
         goalx / BO_TILE_SIZE, goaly / BO_TILE_SIZE);
   if (!path.findPath())
   {
     kdWarning() << "no path found" << endl;
-    return points;
   }
-  for (QValueList<QPoint>::iterator it = path.path.begin(); it != path.path.end(); ++it)
-  {
-    points.append(*it);
-  }
+  points = path.path; // faster than manually coping all points
   return points;
 }
 
@@ -118,7 +131,7 @@ bool BosonPath::findPath()
   mNodesRemoved = 0;
   mPathLength = 0;
   mPathCost = 0;
-  bool pathfound = false;
+  PathStyle pathfound = NoPath;
   Marking mark[mUnit->canvas()->width() / BO_TILE_SIZE][mUnit->canvas()->height() / BO_TILE_SIZE];
 #ifdef USE_STL
   vector<PathNode> open;
@@ -132,6 +145,7 @@ bool BosonPath::findPath()
   // It will be at start
   node.x = mStartx;
   node.y = mStarty;
+  node.level = 0;
 
   // Real cost will be 0 (we haven't moved yet)
   node.g = 0;
@@ -144,6 +158,7 @@ bool BosonPath::findPath()
   // mark values on 'virtual map'
   mark[node.x][node.y].f = node.g + node.h;
   mark[node.x][node.y].g = node.g;
+  mark[node.x][node.y].level = 0; // same as node.level
   
   // Create second node
   PathNode n2;
@@ -164,7 +179,16 @@ bool BosonPath::findPath()
     // First check if we're at goal already
     if((node.x == mGoalx) && (node.y == mGoaly))
     {
-      pathfound = true;
+      pathfound = FullPath;
+      break;
+    }
+
+    // Break if SEARCH_STEPS steps of path is found
+    if(node.level >= SEARCH_STEPS)
+    {
+      mGoalx = node.x;
+      mGoaly = node.y;
+      pathfound = PartialPath;
       break;
     }
     
@@ -188,7 +212,7 @@ bool BosonPath::findPath()
       mGoalx = node.x;
       mGoaly = node.y;
       // and abort
-      pathfound = false;
+      pathfound = AbortedPath;
       break;
     }
 
@@ -200,6 +224,8 @@ bool BosonPath::findPath()
       n2.y = node.y;
       // then call method to modify position accordingly to direction
       neighbor(n2.x, n2.y, d);
+      // new node's level = old node's level + 1
+      n2.level = node.level + 1;
 
       // Make sure that position is valid
       if(! mUnit->canvas()->onCanvas(n2.x * BO_TILE_SIZE, n2.y * BO_TILE_SIZE))
@@ -227,7 +253,6 @@ bool BosonPath::findPath()
       }
       else // we can go on this cell
       {
-//        kdDebug() << k_lineinfo << "can go on cell" << endl;
         n2.g = node.g + nodecost;
       }
 
@@ -242,6 +267,7 @@ bool BosonPath::findPath()
         // Store costs
         mark[n2.x][n2.y].f = n2.g + n2.h;
         mark[n2.x][n2.y].g = n2.g;
+        mark[n2.x][n2.y].level = n2.level;
         // Push node to OPEN
         open.push_back(n2);
 #ifdef USE_STL
@@ -280,11 +306,13 @@ bool BosonPath::findPath()
             }
             // Mark new direction from this node to previous one
             mark[n2.x][n2.y].dir = reverseDir(d);
-            // Then modify costs of spot
+            // Then modify costs and level of spot
             mark[n2.x][n2.y].g = n2.g;
             mark[n2.x][n2.y].f = n2.g + n2.h;
-            // Replace cost of node that was in OPEN
+            mark[n2.x][n2.y].level = n2.level;
+            // Replace cost and level of node that was in OPEN
             (*find).g = n2.g;
+            (*find).level = n2.level;
 #ifdef USE_STL
             push_heap(open.begin(), find + 1, comp);
 #else
@@ -298,9 +326,10 @@ bool BosonPath::findPath()
 
 
 
-
   // Pathfinding finished, but was the path found
-  if((node.x == mGoalx) && (node.y == mGoaly) && (node.g < MAX_PATH_COST))
+  // We now check value of pathfound to see if path was found
+//  if((node.x == mGoalx) && (node.y == mGoaly) && (node.g < MAX_PATH_COST))
+  if(pathfound != NoPath)
   {
     // Something was
     // Path cost is equal to cost of last node
@@ -318,10 +347,9 @@ bool BosonPath::findPath()
 
     Direction d = DirNone;
 
-// Add waypoints to temporary path in reversed direction (goal to start)
-// We don't add start
+    // Add waypoints to temporary path in reversed direction (goal to start)
+    // We don't add start
     int counter = 0;  // failsave
-//    kdDebug() << k_lineinfo << " before loop: x:" << x << "; y:" << y << endl;
     // the directions pointing to the cells are in mark[x1][y1] -> x1,y1 starts
     // at x,y (aka mGoalx,mGoaly) nad go to mStartx,mStarty
     while(((x != mStartx) || (y != mStarty)) && counter < 100)
@@ -331,26 +359,27 @@ bool BosonPath::findPath()
       temp.push_back(wp);
       mPathLength++;
       d = mark[x][y].dir; // the direction to the next cell
-//      kdDebug() << k_lineinfo << " loop: x:" << x << "; y:" << y << "; d:" << (int)d << endl;
       neighbor(x, y, d);
       wp.setX(x * BO_TILE_SIZE + BO_TILE_SIZE / 2);
       wp.setY(y * BO_TILE_SIZE + BO_TILE_SIZE / 2);
-//      kdDebug() << k_lineinfo << " loop: x:" << x << "; y:" << y << "; d:" << (int)d << endl;
     }
     if (counter >= 100) 
     {
       kdWarning() << k_lineinfo << "oops - counter >= 100" << endl;
     }
-//    kdDebug() << "loop done" << endl;
 
     // Write normal-ordered path to path
     for(int i = temp.size() - 1; i >= 0; --i)
     {
-//      kdDebug() << "add path" << endl;
       wp.setX(temp[i].x());
       wp.setY(temp[i].y());
       path.push_back(wp);
     }
+
+    // If no full path was found, then we add another point with coordinates
+    //  -2; -2 to the path, indicating that this is just partial path.
+    if(pathfound != FullPath)
+      path.push_back(QPoint(-2, -2));
   }
   else
   {
@@ -359,12 +388,14 @@ bool BosonPath::findPath()
     kdDebug() << "node.y=" << node.y << ",goaly=" << mGoaly << endl;
     kdDebug() << "node.g=" << node.g << ",MAX_PATH_COST=" << MAX_PATH_COST << endl;
     // Path wasn't found
+    // If path wasn't found we add one point with coordinates -1; -1 to path.
+    //  In Unit::advanceMove(), there is check for this and if coordinates are
+    //  those, then moving is stopped
+    path.push_back(QPoint(-1, -1));
   }
 
-//  kdDebug() << k_funcinfo << "end" << endl;
-//  debug();
   kdDebug() << "BosonPath::findPath() : path found, took " << time.elapsed() << " ms" << endl;
-  return pathfound;
+  return (pathfound != NoPath);
 }
 
 float BosonPath::dist(int ax, int ay, int bx, int by)
