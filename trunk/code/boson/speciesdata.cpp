@@ -435,10 +435,10 @@ void SpeciesData::loadParticleSystemProperties()
 	boWarning() << k_funcinfo << "No particle systems found in particles file (" << f.name() << ")" << endl;
 	return;
  }
- boDebug() << k_funcinfo << "Loading " << particles.count() << " particle systems from config file" << endl;
+ boDebug(150) << k_funcinfo << "Loading " << particles.count() << " particle systems from config file" << endl;
  QStringList::Iterator it;
  for (it = particles.begin(); it != particles.end(); ++it) {
-	boDebug() << k_funcinfo << "Loading particle system from group " << *it << endl;
+	boDebug(150) << k_funcinfo << "Loading particle system from group " << *it << endl;
 	cfg.setGroup(*it);
 	BosonParticleSystemProperties* particleprop = new BosonParticleSystemProperties(&cfg);
 	if (!d->mParticleProperties.find(particleprop->id())) {
