@@ -1,0 +1,21 @@
+[TestTech]
+Id=12
+Name=X-120 cannons for Quad
+MineralCost=500
+OilCost=200
+Producer=0
+ProductionTime=20
+Pixmap=testtech.png
+RequireUnits=10005
+
+[TestTech2]
+Id=48
+Name=Basic facility armor (for all facilities)
+MineralCost=400
+OilCost=50
+Producer=10
+ProductionTime=15
+Pixmap=testtech2.png
+RequireUnits=12,3
+ApplyToFacilities=true
+Armor=2
