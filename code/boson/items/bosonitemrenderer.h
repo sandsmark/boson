@@ -113,6 +113,11 @@ public:
 	 **/
 	bool itemInFrustum(const float* frustum) const;
 
+	BosonItem* item() const
+	{
+		return mItem;
+	}
+
 protected:
 	const QColor* teamColor() const;
 
