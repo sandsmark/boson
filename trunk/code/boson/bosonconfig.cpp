@@ -236,7 +236,7 @@ void BosonConfig::reset(KConfig* conf)
  conf->setGroup(oldGroup);
 }
 
-void BosonConfig::save(KConfig* conf)
+void BosonConfig::save(bool editor, KConfig* conf)
 {
  if (!conf) {
 	conf = kapp->config();
@@ -247,6 +247,9 @@ void BosonConfig::save(KConfig* conf)
  saveMusic(conf);
  saveSound(conf);
  saveCommandButtonsPerRow(conf);
+ if (!editor) {
+	// place configs here that should not be saved in editor mode
+ }
 
  conf->setGroup(oldGroup);
 }

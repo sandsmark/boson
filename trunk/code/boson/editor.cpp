@@ -158,7 +158,7 @@ Editor::Editor() : TopBase()
 
 Editor::~Editor()
 {
- bosonWidget()->saveConfig();
+ bosonWidget()->saveConfig(true);
  delete d;
 }
 

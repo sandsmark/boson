@@ -826,7 +826,7 @@ void BosonWidget::slotEditorSaveScenario(const QString& fileName)
  setModified(false);
 }
 
-void BosonWidget::saveConfig()
+void BosonWidget::saveConfig(bool editor)
 {
  // note: the game is *not* saved here! just general settings like game speed,
  // player name, ...
@@ -839,10 +839,12 @@ void BosonWidget::saveConfig()
 	return;
  }
  kdDebug() << k_funcinfo << endl;
- BosonConfig::saveLocalPlayerName(d->mLocalPlayer->name());
- BosonConfig::saveGameSpeed(d->mBoson->gameSpeed());
+ if (!editor) {
+	BosonConfig::saveLocalPlayerName(d->mLocalPlayer->name());
+	BosonConfig::saveGameSpeed(d->mBoson->gameSpeed());
+ }
  BosonConfig::saveChatFramePosition(d->mChatPos);
- boConfig->save();
+ boConfig->save(editor);
  kdDebug() << k_funcinfo << "done" << endl;
 }
 

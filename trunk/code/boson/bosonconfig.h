@@ -78,7 +78,7 @@ public:
 	void setCommandButtonsPerRow(int b);
 	int commandButtonsPerRow() const;
 
-	void save(KConfig* conf = 0);
+	void save(bool editor = false, KConfig* conf = 0);
 	void reset(KConfig* conf = 0);
 
 protected:
