@@ -29,7 +29,6 @@
 #include <kdebug.h>
 #include <klocale.h>
 #include <kstandarddirs.h>
-#include <arts/soundserver.h>
 
 #include <qintdict.h>
 #include <qptrdict.h>
@@ -63,8 +62,6 @@ public:
 	QCanvasPixmapArray* mFogPixmap;
 
 	BosonMap* mMap; // just a pointer - no memory allocated
-
-	Arts::SimpleSoundServer* mSoundServer;
 };
 
 BosonCanvas::BosonCanvas(QObject* parent)
@@ -84,15 +81,6 @@ BosonCanvas::BosonCanvas(QPixmap p, unsigned int w, unsigned int h)
 void BosonCanvas::init()
 {
  d = new BosonCanvasPrivate;
- // note: I do not know anything about this sound/arts stuff. It is just a
- // cut'n'paste from the original Boson code
- new Arts::Dispatcher(); // AB: what is this?
- // AB: the following code is slightly adjusted - based on the example in the
- // KDE2Development book
- d->mSoundServer = new Arts::SimpleSoundServer(Arts::Reference("global:Arts_SimpleSoundServer"));
- if (d->mSoundServer->isNull()) {
-	kdWarning() << "Sound could not be initialized - sound disabled" << endl;
- }
  d->mDestroyedUnits.setAutoDelete(true);
  d->mFogOfWar.setAutoDelete(true);
 }
@@ -106,7 +94,6 @@ BosonCanvas::~BosonCanvas()
  deleteDestroyed(); // already called before
  d->mAnimList.clear();
  d->mFogOfWar.clear();
- delete d->mSoundServer;
  delete d;
 }
 
@@ -369,11 +356,7 @@ void BosonCanvas::shootAtUnit(Unit* target, Unit* attackedBy, long int damage)
 
 void BosonCanvas::play(const QString& fileName)
 {
- if (d->mSoundServer->isNull()) {
-	return;
- }
-// kdDebug() << "play " << fileName << endl;
- d->mSoundServer->play(fileName.latin1());
+ emit signalPlaySound(fileName);
 }
 
 Cell* BosonCanvas::cellAt(Unit* unit) const

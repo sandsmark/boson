@@ -113,10 +113,10 @@ BosonCommandFrame::BosonCommandFrame(QWidget* parent, bool editor) : QFrame(pare
 	initEditor();
  }
 
- QVBoxLayout* layout = new QVBoxLayout(this);
+ QVBoxLayout* layout = new QVBoxLayout(this, 5, 5); // FIXME: hardcoded - maybe use KDialog::marginHint(), KDialog::spacingHint()  -> but might be a problem cause we use setLineWidth(5)
 
  d->mUnitView = new BosonUnitView(this);
- layout->addWidget(d->mUnitView, 0);
+ layout->addWidget(d->mUnitView, 0, AlignHCenter);
 
  if (d->mTransRef) {
 	layout->addWidget(d->mTransRef);

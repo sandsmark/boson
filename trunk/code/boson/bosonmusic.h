@@ -43,6 +43,8 @@ public:
 	 **/
 	void play();
 
+	void stop();
+
 	/**
 	 * Load a file
 	 * @param file Absolute path to the file
@@ -72,6 +74,21 @@ public:
 	void startLoop(const QStringList& files);
 
 	bool isLoop() const;
+
+	bool sound() const;
+	bool music() const;
+
+	void setMusic(bool);
+	void setSound(bool);
+
+public slots:
+	/**
+	 * Play a single file. This does not really belong to music but rather
+	 * to sound - but a special class fo this would probably too much
+	 * overhead.
+	 * @param file File to be played. Absolute filename.
+	 **/
+	void slotPlaySound(const QString& file);
 
 protected slots:
 	void slotUpdateTicker();

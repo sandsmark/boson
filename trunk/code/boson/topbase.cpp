@@ -81,6 +81,13 @@ void TopBase::initKAction()
  d->mStatusbarAction = KStdAction::showStatusbar(this, SLOT(slotShowStatusbar()), actionCollection());
 
  KStdAction::configureToolbars(this, SLOT(slotConfigureToolbars()), actionCollection());
+ KToggleAction* sound = new KToggleAction(i18n("Soun&d"), 0, mBosonWidget, 
+		SLOT(slotToggleSound()), actionCollection(), "options_sound");
+ sound->setChecked(mBosonWidget->sound());
+ 
+ KToggleAction* music = new KToggleAction(i18n("&Music"), 0, mBosonWidget, 
+		SLOT(slotToggleMusic()), actionCollection(), "options_music");
+ music->setChecked(mBosonWidget->music());
 
  d->mZoomAction = new KSelectAction(i18n("&Zoom"), QKeySequence(), actionCollection(), "options_zoom");
  connect(d->mZoomAction, SIGNAL(activated(int)), 
@@ -91,7 +98,7 @@ void TopBase::initKAction()
  items.append(QString::number(150));
  d->mZoomAction->setItems(items);
 
-// createGUI();
+ // no createGUI() - will be done in derived classes
 }
 
 void TopBase::initStatusBar()

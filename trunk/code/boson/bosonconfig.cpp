@@ -91,3 +91,49 @@ void BosonConfig::saveCommandFramePosition(int pos, KConfig* conf)
  conf->writeEntry("CommandFramePosition", pos);
  conf->setGroup(oldGroup);
 }
+
+void BosonConfig::saveSound(bool sound, KConfig* conf)
+{
+ if (!conf) {
+	conf = kapp->config();
+ }
+ QString oldGroup = conf->group();
+ conf->setGroup("Boson");
+ conf->writeEntry("Sound", sound);
+ conf->setGroup(oldGroup);
+}
+
+bool BosonConfig::sound(KConfig* conf)
+{
+ if (!conf) {
+	conf = kapp->config();
+ }
+ QString oldGroup = conf->group();
+ conf->setGroup("Boson");
+ bool sound = conf->readBoolEntry("Sound", true);
+ conf->setGroup(oldGroup);
+ return sound;
+}
+
+void BosonConfig::saveMusic(bool music, KConfig* conf)
+{
+ if (!conf) {
+	conf = kapp->config();
+ }
+ QString oldGroup = conf->group();
+ conf->setGroup("Boson");
+ conf->writeEntry("Music", music);
+ conf->setGroup(oldGroup);
+}
+
+bool BosonConfig::music(KConfig* conf)
+{
+ if (!conf) {
+	conf = kapp->config();
+ }
+ QString oldGroup = conf->group();
+ conf->setGroup("Boson");
+ bool music = conf->readBoolEntry("Music", true);
+ conf->setGroup(oldGroup);
+ return music;
+}
