@@ -183,10 +183,6 @@ void EditorWidget::initKActions()
 		SLOT(slotEditMapDescription()), actionCollection(),
 		"editor_map_description");
 
- (void)new KAction(i18n("Player &Settings"), KShortcut(), this,
-		SLOT(slotEditPlayerSettings()), actionCollection(),
-		"editor_player_settings");
-
 // KStdAction::preferences(bosonWidget(), SLOT(slotGamePreferences()), actionCollection()); // FIXME: slotEditorPreferences()
 }
 
@@ -385,11 +381,5 @@ void EditorWidget::slotEditMapDescription()
  dialog->exec();
 
  delete dialog;
-}
-
-void EditorWidget::slotEditPlayerSettings()
-{
- BO_CHECK_NULL_RET(boGame);
-
 }
 
