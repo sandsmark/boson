@@ -146,8 +146,6 @@ draw_bigbox_text("This is a list of features that we consider as
   <ul>
     <li>Convert playfields in data module to use the new file format without
     conversion on startup</li>
-    <li>Find out whether save/load is still working</li>
-    <li>Find out whether playfield saving is still working</li>
   </ul>");
 draw_bigbox_end();
 main_area_end();
