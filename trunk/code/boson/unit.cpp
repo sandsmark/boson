@@ -861,35 +861,57 @@ void Facility::advanceProduction()
 		kdDebug() << "Guessed position in tiles: " << tilex << ", " << tiley << endl;
 		kdDebug() << "Guessed size in tiles: " << twidth << "x" << theight << endl;
 		int tries; // Tiles to try for free space
-		tries = 2 * twidth + 2* theight + 4;
 		int ctry; // Current try
 		currentx = tilex - 1;
-		currenty = tiley;
-		bool found = false; // Whether free cell was found
-		for(ctry = 1; ctry <= tries; ctry++)
+		currenty = tiley - 1;
+		int debugnum = 1;
+		kdDebug() << "********** Start of unit auto-placement search **********" << endl;
+		kdDebug() << "Pre-search currents: currentx: " << currentx << "; currenty: " << currenty << endl;
+		for(int i=1; i <= 3; i++)
 		{
-			if(ctry <= twidth + 1)
-				currentx++;
-			else if(ctry <= twidth + theight + 2)
-				currenty--;
-			else if(ctry <= twidth + theight + twidth + 3)
-				currentx--;
-			else
-				currenty++;
-			if(! boCanvas()->cellOccupied(currentx, currenty))
+			kdDebug() << "  Round is now " << i << endl;
+			tries = 2 * i * twidth + 2 * i * theight + 4;
+			kdDebug() << "      Tries is now " << tries << endl;
+			currenty++;
+			kdDebug() << "      Currents are: currentx: " << currentx << "; currenty: " << currenty << endl;
+			for(ctry = 1; ctry <= tries; ctry++)
 			{
-				// Free cell - place unit at it
-				d->mProductionState = d->mProductionState + 1;
-				QByteArray b;
-				QDataStream stream(b, IO_WriteOnly);
-				stream << (Q_UINT32)BosonMessage::MoveBuild;
-				stream << (Q_UINT32)id();
-				stream << (Q_UINT32)owner()->id();
-				stream << (Q_INT32)currentx;
-				stream << (Q_INT32)currenty;
-				owner()->game()->sendPlayerInput(stream, this->owner());
-				found = true;
-				return;
+				kdDebug() << "    Try " << ctry << " of " << tries << endl;
+				if(ctry <= twidth + i)
+					currentx++;
+				else if(ctry <= twidth + i + theight + 2 * i - 1)
+					currenty--;
+				else if(ctry <= twidth + i + 2 * (theight + 2 * i - 1))
+					currentx--;
+				else if(ctry <= twidth + i + 3 * (theight + 2 * i - 1))
+					currenty++;
+				else
+					currentx++;
+/*				if(ctry <= twidth + i)
+					currentx++;
+				else if(ctry <= twidth + theight + 2 * i)
+					currenty--;
+				else if(ctry <= twidth + theight + twidth + 3)
+					currentx--;
+				else
+					currenty++;*/
+				
+				kdDebug() << "      Search tile no " << debugnum++ << ": currentx: " << currentx << "; currenty: " << currenty << endl;
+				if(! boCanvas()->cellOccupied(currentx, currenty))
+				{
+					kdDebug() << "      Cell not occupied - proceeding" << endl;
+					// Free cell - place unit at it
+					d->mProductionState = d->mProductionState + 1;
+					QByteArray b;
+					QDataStream stream(b, IO_WriteOnly);
+					stream << (Q_UINT32)BosonMessage::MoveBuild;
+					stream << (Q_UINT32)id();
+					stream << (Q_UINT32)owner()->id();
+					stream << (Q_INT32)currentx;
+					stream << (Q_INT32)currenty;
+					owner()->game()->sendPlayerInput(stream, this->owner());
+					return;
+				}
 			}
 		}
 		kdDebug() << "Cannot find free cell around facility :-(" << endl;
