@@ -229,9 +229,6 @@ public:
 	 **/
 	bool canShoot() const { return (mCanShootAtAirUnits || mCanShootAtLandUnits); }
 
-	bool canRefineMinerals() const;
-	bool canRefineOil() const;
-
 	/**
 	 * @return Which type of factory can produce this unit. See
 	 * data/themes/species/human/units/README for more in this.
@@ -373,8 +370,6 @@ protected:
 	void setHitPoint(const BoVector3& hitpoint);
 
 	// These only have effect if there is mobile or facility properties
-	void setCanRefineMinerals(bool r);
-	void setCanRefineOil(bool r);
 	void setConstructionSteps(unsigned int steps);
 	void setSpeed(float speed);
 	void setCanGoOnLand(bool c);

@@ -159,4 +159,50 @@ void HarvesterProperties::savePlugin(KSimpleConfig* config)
  config->writeEntry("CanMineMinerals", mCanMineMinerals);
  config->writeEntry("CanMineOil", mCanMineOil);
  config->writeEntry("MaxResources", mMaxResources);
+ config->writeEntry("MiningSpeed", mMiningSpeed);
+ config->writeEntry("UnloadingSpeed", mUnloadingSpeed);
+}
+
+
+RefineryProperties::RefineryProperties(const UnitProperties* parent)
+		: PluginProperties(parent)
+{
+ mCanRefineMinerals = false;
+ mCanRefineOil = false;
+}
+
+RefineryProperties::~RefineryProperties()
+{
+}
+
+QString RefineryProperties::propertyGroup()
+{
+ return QString::fromLatin1("RefineryPlugin");
+}
+
+QString RefineryProperties::name() const
+{
+ return i18n("Refinery Plugin");
+}
+
+void RefineryProperties::loadPlugin(KSimpleConfig* config)
+{
+ if (!config->hasGroup(propertyGroup())) {
+	boError() << k_funcinfo << "unit has no refinery plugin" << endl;
+	return;
+ }
+ config->setGroup(propertyGroup());
+ mCanRefineMinerals = config->readBoolEntry("CanRefineMinerals", false);
+ mCanRefineOil = config->readBoolEntry("CanRefineOil", false);
+ if (mCanRefineMinerals && mCanRefineOil) {
+	boWarning() << k_funcinfo << "unit can't refine minerals *and* oil" << endl;
+	mCanRefineOil = false;
+ }
+}
+
+void RefineryProperties::savePlugin(KSimpleConfig* config)
+{
+ config->setGroup(propertyGroup());
+ config->writeEntry("CanRefineMinerals", mCanRefineMinerals);
+ config->writeEntry("CanRefineOil", mCanRefineOil);
 }

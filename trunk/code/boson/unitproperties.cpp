@@ -73,8 +73,6 @@ public:
 	{
 	}
 
-	bool mCanRefineMinerals;
-	bool mCanRefineOil;
 	unsigned int mConstructionFrames;
 };
 
@@ -236,9 +234,6 @@ void UnitProperties::loadFacilityProperties(KSimpleConfig* conf)
 {
  conf->setGroup("Boson Facility");
  createFacilityProperties();
- mFacilityProperties->mCanRefineMinerals = conf->readBoolEntry("CanRefineMinerals",
-		false);
- mFacilityProperties->mCanRefineOil = conf->readBoolEntry("CanRefineOil", false);
  mFacilityProperties->mConstructionFrames = conf->readUnsignedNumEntry("ConstructionSteps", 20);
 }
 
@@ -252,6 +247,10 @@ void UnitProperties::loadAllPluginProperties(KSimpleConfig* conf)
  }
  if (conf->hasGroup(HarvesterProperties::propertyGroup())) {
 	loadPluginProperties(new HarvesterProperties(this), conf);
+ }
+ if (conf->hasGroup(RefineryProperties::propertyGroup())) {
+	boDebug() << k_funcinfo << "loading refinery plugin props" << endl;
+	loadPluginProperties(new RefineryProperties(this), conf);
  }
 }
 
@@ -334,8 +333,6 @@ void UnitProperties::saveMobileProperties(KSimpleConfig* conf)
 void UnitProperties::saveFacilityProperties(KSimpleConfig* conf)
 {
  conf->setGroup("Boson Facility");
- conf->writeEntry("CanRefineMinerals", mFacilityProperties->mCanRefineMinerals);
- conf->writeEntry("CanRefineOil", mFacilityProperties->mCanRefineOil);
  conf->writeEntry("ConstructionSteps", mFacilityProperties->mConstructionFrames);
 }
 
@@ -460,22 +457,6 @@ bool UnitProperties::canGoOnWater() const
  return mMobileProperties->mCanGoOnWater;
 }
 
-bool UnitProperties::canRefineMinerals() const
-{
- if (!mFacilityProperties) {
-	return false;
- }
- return mFacilityProperties->mCanRefineMinerals;
-}
-
-bool UnitProperties::canRefineOil() const
-{
- if (!mFacilityProperties) {
-	return false;
- }
- return mFacilityProperties->mCanRefineOil;
-}
-
 unsigned int UnitProperties::constructionSteps() const
 {
  if (!mFacilityProperties) {
@@ -566,20 +547,6 @@ void UnitProperties::addPlugin(PluginProperties* prop)
  d->mPlugins.append(prop);
 }
 
-void UnitProperties::setCanRefineMinerals(bool r)
-{
- if (mFacilityProperties) {
-	mFacilityProperties->mCanRefineMinerals = r;
- }
-}
-
-void UnitProperties::setCanRefineOil(bool r)
-{
- if (mFacilityProperties) {
-	mFacilityProperties->mCanRefineOil = r;
- }
-}
-
 void UnitProperties::setConstructionSteps(unsigned int steps)
 {
  if (mFacilityProperties) {
@@ -668,6 +635,13 @@ void UnitProperties::reset()
  mProducer = 0;
  mExplodingDamage = 0;
  mExplodingDamageRange = 0;
+ // Delete old mobile/facility properties
+ if (mMobileProperties) {
+	delete mMobileProperties;
+ }
+ if (mFacilityProperties) {
+	delete mFacilityProperties;
+ }
  // Mobile stuff (because unit is mobile by default)
  createMobileProperties();
  mMobileProperties->mSpeed = 0; // Hmm, this doesn't make any sense IMO

@@ -185,15 +185,16 @@ void BosonBigDisplayInput::actionClicked(const BoAction& action, QDataStream& st
 				return;
 			}
 			*send = true;
-		} else if ((unit->unitProperties()->canRefineMinerals() &&
-				selection()->hasMineralHarvester()) ||
-				(unit->unitProperties()->canRefineOil() &&
-				selection()->hasOilHarvester())) {
-			// go to the refinery
-			if (!actionRefine(stream, action.canvasPos())) {
-				return;
+		} else if (unit->properties(PluginProperties::Refinery)) {
+			const RefineryProperties* prop = (RefineryProperties*)unit->properties(PluginProperties::Refinery);
+			if((prop->canRefineMinerals() && selection()->hasMineralHarvester()) ||
+					(prop->canRefineOil() && selection()->hasOilHarvester())) {
+				// go to the refinery
+				if (!actionRefine(stream, action.canvasPos())) {
+					return;
+				}
+				*send = true;
 			}
-			*send = true;
 		} else if (selection()->hasMobileUnit() && unit->isMobile()) {
 			// Follow
 			if (!actionFollow(stream, action.canvasPos())) {
@@ -375,21 +376,18 @@ bool BosonBigDisplayInput::actionRepair(QDataStream& stream, const QPoint& canva
 bool BosonBigDisplayInput::actionRefine(QDataStream& stream, const QPoint& canvasPos)
 {
  Unit* unit = canvas()->findUnitAt(canvasPos);
-// if (!unit->properites(PluginProperties::Refine)) {
-//	boError() << k_funcinfo << unit->id() << "cannot refine" << endl;
-//	return;
-// }
-// bool minerals = (RefineProperties*)unit)->properties(PluginProperties::Refine)->canRefineMinerals();
- bool minerals = unit->unitProperties()->canRefineMinerals();
+ const RefineryProperties* prop = (RefineryProperties*)unit->properties(PluginProperties::Refinery);
+ if (!prop) {
+	boError() << k_funcinfo << unit->id() << "cannot refine" << endl;
+ }
  QPtrList<Unit> allUnits = selection()->allUnits();
  QPtrList<Unit> list;
  QPtrListIterator<Unit> unitsIt(allUnits);
  while (unitsIt.current()) {
-	HarvesterProperties* prop = (HarvesterProperties*)unitsIt.current()->properties(PluginProperties::Harvester);
+	HarvesterProperties* hprop = (HarvesterProperties*)unitsIt.current()->properties(PluginProperties::Harvester);
 	if (prop) {
-		if (prop->canMineMinerals() && minerals) {
-			list.append(unitsIt.current());
-		} else if (prop->canMineOil() && !minerals) {
+		if ((prop->canRefineMinerals() && hprop->canMineMinerals()) ||
+				(prop->canRefineOil() && hprop->canMineOil())) {
 			list.append(unitsIt.current());
 		}
 	}
