@@ -1305,7 +1305,9 @@ void Unit::setAdvanceWork(WorkType w)
 {
  // velicities should be 0 anyway - this is the final fallback in case it was
  // missing by any reason
- setVelocity(0.0, 0.0, 0.0);
+ // AB: this could break loading games! so we do NOT do it anymore. remove this,
+ // if it doesn't cause problems.
+// setVelocity(0.0, 0.0, 0.0);
 
  if (advanceWork() != w) {
 	// we change the list only if work() actually changed (in favor of

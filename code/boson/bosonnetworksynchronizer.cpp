@@ -1459,6 +1459,119 @@ bool BosonNetworkSyncer::receiveNetworkSync(QDataStream& stream)
 	}
  }
 
+ {
+	QDomElement canvasElement = root.namedItem("Canvas").toElement();
+	if (canvasElement.isNull()) {
+		boError() << k_funcinfo << "no Canvas tag found" << endl;
+		return false;
+	}
+
+	BosonCanvas* canvas = mGame->canvasNonConst();
+	// AB: atm we cannot do canvas->loadFromXML(canvasElement), because some
+	// things are not supported yet.
+	// we would first have to clear the canvas (delete all items) and then
+	// load it again.
+	// that would also require a very dependable saving/loading code for
+	// items (e.g. all path related data has to be saved).
+	//
+	// so atm we just load the most important data from the canvasElement.
+
+	boDebug() << k_funcinfo << "TODO: load the data handler" << endl;
+	boDebug() << k_funcinfo << "TODO: clear the items on the canvas, then load all items. this is necessary if item count on 2 clients differ." << endl;
+	boDebug() << k_funcinfo << "TODO: load effects" << endl;
+	boDebug() << k_funcinfo << "TODO: load event listener" << endl;
+
+	// AB: the perfect solution would just do something like
+	// canvas->clear();
+	// canvas->loadFromXML(canvasElement();
+	// here!
+
+
+	QMap<unsigned long int, BosonItem*> id2Item;
+	BoItemList* allItems = canvas->allItems();
+	BoItemList::Iterator it = allItems->begin();
+	for (it = allItems->begin(); it != allItems->end(); ++it) {
+		id2Item.insert((*it)->id(), *it);
+	}
+
+	QValueList<QDomElement> allItemElements;
+	QDomNode n = canvasElement.firstChild();
+	while (!n.isNull()) {
+		QDomElement e = n.toElement();
+		n = n.nextSibling();
+		if (e.isNull()) {
+			continue;
+		}
+		if (e.tagName() != "Items") {
+			continue;
+		}
+		QDomNode n2 = e.firstChild();
+		while (!n2.isNull()) {
+			QDomElement e2 = n2.toElement();
+			n2 = n2.nextSibling();
+			if (e2.isNull()) {
+				continue;
+			}
+			if (e2.tagName() != "Item") {
+				continue;
+			}
+			allItemElements.append(e2);
+		}
+	}
+
+	// AB: atm we require that all items have been created already.
+	// otherwise we cannot load.
+
+	QValueList<QDomElement>::Iterator elementIt = allItemElements.begin();
+	for (; elementIt != allItemElements.end(); ++elementIt) {
+		QDomElement e = *elementIt;
+		bool ok;
+		unsigned long int id;
+		if (!e.hasAttribute(QString::fromLatin1("Id"))) {
+			boError() << k_funcinfo << "missing attribute: Id for Item tag" << endl;
+			return false;
+		}
+		id = e.attribute(QString::fromLatin1("Id")).toULong(&ok);
+		if (!ok) {
+			boError() << k_funcinfo << "Id for Item tag not a valid number" << endl;
+			return false;
+		}
+		BosonItem* item = id2Item[id];
+		if (!item) {
+			boError() << k_funcinfo << "cannot find item with Id" << id << endl;
+			return false;
+		}
+
+		// we have to load the position manually, as this is not done by
+		// loadFromXML(). it should be done in
+		// BosonCanvas::createItemFromXML()
+		bofixed x, y, z;
+		x = e.attribute("x").toFloat(&ok);
+		if (!ok) {
+			boError() << k_funcinfo << "invalid x attribute" << endl;
+			return false;
+		}
+		y = e.attribute("y").toFloat(&ok);
+		if (!ok) {
+			boError() << k_funcinfo << "invalid y attribute" << endl;
+			return false;
+		}
+		z = e.attribute("z").toFloat(&ok);
+		if (!ok) {
+			boError() << k_funcinfo << "invalid z attribute" << endl;
+			return false;
+		}
+
+		// AB: this might be tricky, as BosonItem::moveBy() is virtual.
+		// but it seems that no implementation does dangerous things.
+		item->move(x, y, z);
+
+		if (!item->loadFromXML(e)) {
+			boError() << k_funcinfo << "failed loading item " << item->id() << endl;
+			return false;
+		}
+	}
+ }
 
  return true;
 }
@@ -1493,12 +1606,14 @@ QByteArray BosonNetworkSyncer::createSyncMessage()
 	root.appendChild(players);
  }
 
- // TODO: fix upgrade loading (they are saved, but atm can't be loaded from xml)
- // TODO: save BosonCanvas (including all items)
+ {
+	QDomElement canvas = doc.createElement("Canvas");
+	mGame->canvas()->saveAsXML(canvas);
+	root.appendChild(canvas);
+ }
+
  // TODO: save Boson (especially random number - we probably need a design
  // change for the random number class here)
-
- boWarning() << k_funcinfo << "TODO: save the whole canvas to the xml document" << endl;
  boWarning() << k_funcinfo << "TODO: save the Boson object to the xml document" << endl;
 
 
