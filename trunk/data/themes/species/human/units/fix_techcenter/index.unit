@@ -1,18 +1,34 @@
-[Boson Unit]
-IsFacility=true
-TerrainType=0
-Name=Techcenter
-Id=12
-Health=300
-MineralCost=400
-OilCost=100
-Producer=10
-Requirements=5,2,3
-UnitWidth=2.0
-UnitHeight=2.0
-ProductionTime=200
-DestroyedParticles=1011,3010
-
 [Boson Facility]
+CanRefineMinerals=false
+CanRefineOil=false
 ConstructionSteps=27
 
+[Boson Unit]
+Armor=0
+DestroyedParticles=1011,3010
+Health=500
+Id=12
+IsFacility=true
+MineralCost=600
+Name=Techcenter
+OilCost=200
+Producer=10
+ProductionTime=500
+Requirements=5,2,3
+Shield=0
+SightRange=5
+SupportMiniMap=false
+TerrainType=0
+UnitDepth=1
+UnitHeight=2
+UnitWidth=2
+Weapons=0
+
+[Sounds]
+OrderAttack=order_attack
+OrderMove=order_move
+OrderSelect=order_select
+ReportDestroyed=report_destroyed
+ReportProduced=report_produced
+ReportUnderAttack=report_underattack
+Shoot=shoot
