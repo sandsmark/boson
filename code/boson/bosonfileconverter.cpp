@@ -764,13 +764,23 @@ bool BosonFileConverter::convertPlayField_From_0_10_To_0_11(QMap<QString, QByteA
  QDomElement effects = canvasDoc.createElement("Effects");
  canvasRoot.appendChild(effects);
 
+ if (files["map/water.xml"].size() == 0) {
+	boDebug() << k_funcinfo << "Adding dummy water.xml file" << endl;
+	// Old file format - add dummy water.xml file
+	if(!addDummyWaterXML_From_0_10_To_0_11(files["map/water.xml"]))
+	{
+		boError() << k_funcinfo << "Couldn't add dummy water.xml file" << endl;
+		return false;
+	}
+ }
+
  files.insert("kgame.xml", kgameDoc.toString().utf8());
  files.insert("canvas.xml", canvasDoc.toString().utf8());
  files.insert("players.xml", playersDoc.toString().utf8());
  return true;
 }
 
-bool BosonFileConverter::addDummyWaterXML(QByteArray& waterXML)
+bool BosonFileConverter::addDummyWaterXML_From_0_10_To_0_11(QByteArray& waterXML)
 {
  QDomDocument doc(QString::fromLatin1("Water"));
  QDomElement root = doc.createElement(QString::fromLatin1("Water"));
