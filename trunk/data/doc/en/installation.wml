@@ -11,7 +11,7 @@
      - boson-music-XXX.tar.bz2 (optional)<br><br>
     You can also fetch boson-all-XXX.tar.bz2 which contains just everything.<br><br>
 
-    You have to do this for every package you downloaded:
+    Now you have to do that for every package:
     <pre>
     tar xjvf boson-YYY-XXX.tar.bz2
     cd "package_name"
@@ -36,7 +36,7 @@
     </pre>
     Compilation of code:
     <pre>
-    cd "package_name"
+    cd "code"
     make -f Makefile.cvs
     ./configure
     make
@@ -46,11 +46,10 @@
     <pre>
     cd data && ln -s ../code/admin admin 
     make -f Makefile.cvs
-    ./configure --prefix=/opt/kde3
+    ./configure
     make
     su -c "make install"
     </pre>
-    
     <br>
     <h4>RPM / binary releases</h4>
     <p>

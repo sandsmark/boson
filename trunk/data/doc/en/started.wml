@@ -23,13 +23,15 @@
         <li><a href="http://www.vorbis.org" target="_blank">libvorbis</a> (for sound and music)</li>
         <li><a href="http://lib3ds.sourceforge.net" target="_blank">lib3ds</a> (Units and building rendering)</li>
         <li><a href="http://www.xfree86.org" target="_blank">OpenGL</a> - The OpenGL library (should be included in your XFree server or graphics card driver)</li>
-        <li><a href="http://www.thewml.org" target="_blank">WML</a> - For the handbook and if you don't use a package</li>
+        <li><a href="http://www.thewml.org" target="_blank">WML</a> - For the handbook, if you don't use a package or an official release</li>
     </ul>
     <!--
     Works on:
      Athlon 750 Mhz, 256, Geforce2 MX, X4.2, kde3.1
      PIII 450; 512; voodoo3; X4.2; kde3.0.2
      -->
+    </p>
+    <p>
       Please note that since we do not yet provide precompiled binaries you will
       need to install the development packages of these libraries as well (the
       development packages usually have a -devel or -dev in their name).<br>

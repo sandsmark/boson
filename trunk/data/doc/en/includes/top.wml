@@ -7,5 +7,5 @@
     <meta name="Author" content="Felix Seeger - For questions: felix.seeger@gmx.de">
   </head>
 
-  <body>
+  <body $(body_args)>
 

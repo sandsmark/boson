@@ -7,7 +7,8 @@
 	<tr>
 		<td><img src="oil_refinery.png" border="0">&nbsp;</td>
 		<td valign="top"><img src="../none.png" border="0" height="30"><br>
-		The Oil Refinery produces oil ;) You send a <a href="../units/oil_harvester.html">Oil Harvester</a> to them to get more oil.</td>
+		The Oil Refinery produces oil ;) You can send a <a href="../units/oil_harvester.html">Oil Harvester</a>
+		to them to get more oil.</td>
 	</tr>
 	<tr><td><br>&nbsp</td></tr>
     </table>

@@ -8,6 +8,7 @@
       Buildings that can construct units at the moment:<br>
       - <a href="../facilities/barracks.html">Barracks</a><br>
       - <a href="../facilities/warfactory.html">War factory</a><br>
+      <!-- - <a href="../facilities/hangar.html">Hangar</a><br> -->
     </p>
     
 #include "nav.wml" before_url="buildfac.html" before_text="Build facilities" after_url="moving.html" after_text="Selecting and moving units"    
