@@ -60,6 +60,7 @@
 #include "bomaterial.h"
 #include "info/boinfo.h"
 #include "script/bosonscript.h"
+#include "script/bosonscriptinterface.h"
 #include "bosonpath.h"
 #include "bofullscreen.h"
 #include "speciesdata.h"
@@ -281,6 +282,8 @@ public:
 		mRenderItemList = 0;
 
 		mGLMiniMap = 0;
+
+		mScriptConnector = 0;
 	}
 
 	PlayerIO* mLocalPlayerIO;
@@ -338,6 +341,8 @@ public:
 	BosonGLMiniMap* mGLMiniMap;
 
 	QValueList<BoLineVisualization> mLineVisualizationList;
+
+	BosonBigDisplayScriptConnector* mScriptConnector;
 };
 
 BosonBigDisplayBase::BosonBigDisplayBase(QWidget* parent)
@@ -360,6 +365,7 @@ BosonBigDisplayBase::~BosonBigDisplayBase()
  qApp->removeEventFilter(this);
 
  quitGame();
+ delete d->mScriptConnector;
  BoMeshRendererManager::manager()->unsetCurrentRenderer();
  BoGroundRendererManager::manager()->unsetCurrentRenderer();
  delete d->mRenderItemList;
@@ -387,10 +393,7 @@ void BosonBigDisplayBase::init()
  d->mDebugMapCoordinatesZ = 0.0f;
  d->mFovY = 60.0f;
 
- BosonScript::setDisplay(this); // AB: EVIL! this is part of BosonScript init
-// process, but initializing is partially done in BosonWidgetBase, partially
-// here. this is *bad*
-
+ d->mScriptConnector = new BosonBigDisplayScriptConnector(this);
  d->mRenderItemList = new BoItemList(1, false);
 
  mSelection = new BoSelection(this);
@@ -441,6 +444,13 @@ void BosonBigDisplayBase::init()
 
  qApp->setGlobalMouseTracking(true);
  qApp->installEventFilter(this);
+}
+
+void BosonBigDisplayBase::setLocalPlayerScript(BosonScript* script)
+{
+ // AB: there is no need to save the pointer atm.
+ // we just need to do these connects.
+ d->mScriptConnector->connectToScript(script);
 }
 
 void BosonBigDisplayBase::setCanvas(BosonCanvas* canvas)
@@ -3562,5 +3572,344 @@ void BosonBigDisplayBase::setFont(const BoFontInfo& font)
  delete d->mDefaultFont;
  boDebug() << k_funcinfo << font.name() << " " << font.pointSize() << endl;
  d->mDefaultFont = new BosonGLFont(font);
+}
+
+BosonBigDisplayScriptConnector::BosonBigDisplayScriptConnector(BosonBigDisplayBase* parent)
+	: QObject(parent, "script_to_display_connector")
+{
+ mDisplay = parent;
+ if (!mDisplay) {
+	BO_NULL_ERROR(mDisplay);
+ }
+}
+
+BosonBigDisplayScriptConnector::~BosonBigDisplayScriptConnector()
+{
+}
+
+void BosonBigDisplayScriptConnector::reconnect(const QObject* sender, const char* signal, const QObject* receiver, const char* slot)
+{
+ // make sure noone else connects to that signal
+ disconnect(sender, signal, 0, 0);
+ connect(sender, signal, receiver, slot);
+}
+
+void BosonBigDisplayScriptConnector::connectToScript(BosonScript* script)
+{
+ BO_CHECK_NULL_RET(script);
+ BosonScriptInterface* i = script->interface();
+ BO_CHECK_NULL_RET(i);
+
+ // AB: the slots often provide the return value for a signal, so there must be
+ // at most 1 slot to a signal. reconnect() ensures that.
+
+ reconnect(i, SIGNAL(signalAddLight(int*)), this, SLOT(slotAddLight(int*)));
+ reconnect(i, SIGNAL(signalRemoveLight(int)), this, SLOT(slotRemoveLight(int)));
+ reconnect(i, SIGNAL(signalGetLightPos(int, BoVector4*)),
+		this, SLOT(slotGetLightPos(int, BoVector4*)));
+ reconnect(i, SIGNAL(signalGetLightAmbient(int, BoVector4*)),
+		this, SLOT(slotGetLightAmbient(int, BoVector4*)));
+ reconnect(i, SIGNAL(signalGetLightDiffuse(int, BoVector4*)),
+		this, SLOT(slotGetLightDiffuse(int, BoVector4*)));
+ reconnect(i, SIGNAL(signalGetLightSpecular(int, BoVector4*)),
+		this, SLOT(slotGetLightSpecular(int, BoVector4*)));
+ reconnect(i, SIGNAL(signalGetLightAttenuation(int, BoVector3*)),
+		this, SLOT(slotGetLightAttenuation(int, BoVector3*)));
+ reconnect(i, SIGNAL(signalGetLightEnabled(int, bool*)),
+		this, SLOT(slotGetLightEnabled(int, bool*)));
+ reconnect(i, SIGNAL(signalSetLightPos(int, const BoVector4&)),
+		this, SLOT(slotSetLightPos(int, const BoVector4&)));
+ reconnect(i, SIGNAL(signalSetLightAmbient(int, const BoVector4&)),
+		this, SLOT(slotSetLightAmbient(int, const BoVector4&)));
+ reconnect(i, SIGNAL(signalSetLightDiffuse(int, const BoVector4&)),
+		this, SLOT(slotSetLightDiffuse(int, const BoVector4&)));
+ reconnect(i, SIGNAL(signalSetLightSpecular(int, const BoVector4&)),
+		this, SLOT(slotSetLightSpecular(int, const BoVector4&)));
+ reconnect(i, SIGNAL(signalSetLightAttenuation(int, const BoVector3&)),
+		this, SLOT(slotSetLightAttenuation(int, const BoVector3&)));
+ reconnect(i, SIGNAL(signalSetLightEnabled(int, bool)),
+		this, SLOT(slotSetLightEnabled(int, bool)));
+
+ reconnect(i, SIGNAL(signalGetCameraPos(BoVector3*)),
+		this, SLOT(slotGetCameraPos(BoVector3*)));
+ reconnect(i, SIGNAL(signalGetCameraLookAt(BoVector3*)),
+		this, SLOT(slotGetCameraLookAt(BoVector3*)));
+ reconnect(i, SIGNAL(signalGetCameraUp(BoVector3*)),
+		this, SLOT(slotGetCameraUp(BoVector3*)));
+ reconnect(i, SIGNAL(signalGetCameraRotation(float*)),
+		this, SLOT(slotGetCameraRotation(float*)));
+ reconnect(i, SIGNAL(signalGetCameraRadius(float*)),
+		this, SLOT(slotGetCameraRadius(float*)));
+ reconnect(i, SIGNAL(signalGetCameraZ(float*)),
+		this, SLOT(slotGetCameraZ(float*)));
+ reconnect(i, SIGNAL(signalSetUseCameraLimits(bool)),
+		this, SLOT(slotSetUseCameraLimits(bool)));
+ reconnect(i, SIGNAL(signalSetCameraMoveMode(bool)),
+		this, SLOT(slotSetCameraMoveMode(bool)));
+ reconnect(i, SIGNAL(signalSetCameraPos(const BoVector3&)),
+		this, SLOT(slotSetCameraPos(const BoVector3&)));
+ reconnect(i, SIGNAL(signalSetCameraLookAt(const BoVector3&)),
+		this, SLOT(slotSetCameraLookAt(const BoVector3&)));
+ reconnect(i, SIGNAL(signalSetCameraUp(const BoVector3&)),
+		this, SLOT(slotSetCameraUp(const BoVector3&)));
+ reconnect(i, SIGNAL(signalSetCameraRotation(float)),
+		this, SLOT(slotSetCameraRotation(float)));
+ reconnect(i, SIGNAL(signalSetCameraRadius(float)),
+		this, SLOT(slotSetCameraRadius(float)));
+ reconnect(i, SIGNAL(signalSetCameraZ(float)),
+		this, SLOT(slotSetCameraZ(float)));
+ reconnect(i, SIGNAL(signalSetCameraMoveMode(int)),
+		this, SLOT(slotSetCameraMoveMode(int)));
+ reconnect(i, SIGNAL(signalCommitCameraChanges(int)),
+		this, SLOT(slotCommitCameraChanges(int)));
+}
+
+void BosonBigDisplayScriptConnector::slotAddLight(int* id)
+{
+ BoLight* l = mDisplay->newLight();
+ if (!l) {
+	*id = -1;
+ } else {
+	*id = l->id();
+ }
+}
+
+void BosonBigDisplayScriptConnector::slotRemoveLight(int id)
+{
+ mDisplay->removeLight(id);
+}
+
+void BosonBigDisplayScriptConnector::slotGetLightPos(int id, BoVector4* v)
+{
+ BoLight* l = mDisplay->light(id);
+ if (!l) {
+	boError() << k_funcinfo << "no light with id " << id << endl;
+	*v = BoVector4();
+	return;
+ } else {
+	*v = l->position();
+ }
+}
+
+void BosonBigDisplayScriptConnector::slotGetLightAmbient(int id, BoVector4* v)
+{
+ BoLight* l = mDisplay->light(id);
+ if (!l) {
+	boError() << k_funcinfo << "no light with id " << id << endl;
+	*v = BoVector4();
+	return;
+ } else {
+	*v = l->ambient();
+ }
+}
+
+void BosonBigDisplayScriptConnector::slotGetLightDiffuse(int id, BoVector4* v)
+{
+ BoLight* l = mDisplay->light(id);
+ if (!l) {
+	boError() << k_funcinfo << "no light with id " << id << endl;
+	*v = BoVector4();
+	return;
+ } else {
+	*v = l->diffuse();
+ }
+}
+
+void BosonBigDisplayScriptConnector::slotGetLightSpecular(int id, BoVector4* v)
+{
+ BoLight* l = mDisplay->light(id);
+ if (!l) {
+	boError() << k_funcinfo << "no light with id " << id << endl;
+	*v = BoVector4();
+	return;
+ } else {
+	*v = l->specular();
+ }
+}
+
+void BosonBigDisplayScriptConnector::slotGetLightAttenuation(int id, BoVector3* v)
+{
+ BoLight* l = mDisplay->light(id);
+ if (!l) {
+	boError() << k_funcinfo << "no light with id " << id << endl;
+	*v = BoVector3();
+	return;
+ } else {
+	*v = l->attenuation();
+ }
+}
+
+void BosonBigDisplayScriptConnector::slotGetLightEnabled(int id, bool* e)
+{
+ BoLight* l = mDisplay->light(id);
+ if (!l) {
+	boError() << k_funcinfo << "no light with id " << id << endl;
+	*e = false;
+	return;
+ } else {
+	*e = l->isEnabled();
+ }
+}
+
+void BosonBigDisplayScriptConnector::slotSetLightPos(int id, const BoVector4& v)
+{
+ BoLight* l = mDisplay->light(id);
+ if (!l) {
+	boError() << k_funcinfo << "no light with id " << id << endl;
+	return;
+ } else {
+	l->setPosition(v);
+ }
+}
+
+void BosonBigDisplayScriptConnector::slotSetLightAmbient(int id, const BoVector4& v)
+{
+ BoLight* l = mDisplay->light(id);
+ if (!l) {
+	boError() << k_funcinfo << "no light with id " << id << endl;
+	return;
+ } else {
+	l->setAmbient(v);
+ }
+}
+
+void BosonBigDisplayScriptConnector::slotSetLightDiffuse(int id, const BoVector4& v)
+{
+ BoLight* l = mDisplay->light(id);
+ if (!l) {
+	boError() << k_funcinfo << "no light with id " << id << endl;
+	return;
+ } else {
+	l->setDiffuse(v);
+ }
+}
+
+void BosonBigDisplayScriptConnector::slotSetLightSpecular(int id, const BoVector4& v)
+{
+ BoLight* l = mDisplay->light(id);
+ if (!l) {
+	boError() << k_funcinfo << "no light with id " << id << endl;
+	return;
+ } else {
+	l->setSpecular(v);
+ }
+}
+
+void BosonBigDisplayScriptConnector::slotSetLightAttenuation(int id, const BoVector3& v)
+{
+ BoLight* l = mDisplay->light(id);
+ if (!l) {
+	boError() << k_funcinfo << "no light with id " << id << endl;
+	return;
+ } else {
+	l->setAttenuation(v);
+ }
+}
+
+void BosonBigDisplayScriptConnector::slotSetLightEnabled(int id, bool e)
+{
+ BoLight* l = mDisplay->light(id);
+ if (!l) {
+	boError() << k_funcinfo << "no light with id " << id << endl;
+	return;
+ } else {
+	l->setEnabled(e);
+ }
+}
+
+void BosonBigDisplayScriptConnector::slotGetCameraPos(BoVector3* v)
+{
+ BO_CHECK_NULL_RET(mDisplay->camera());
+ *v = mDisplay->camera()->cameraPos();
+}
+
+void BosonBigDisplayScriptConnector::slotGetCameraLookAt(BoVector3* v)
+{
+ BO_CHECK_NULL_RET(mDisplay->camera());
+ *v = mDisplay->camera()->lookAt();
+}
+
+void BosonBigDisplayScriptConnector::slotGetCameraUp(BoVector3* v)
+{
+ BO_CHECK_NULL_RET(mDisplay->camera());
+ *v = mDisplay->camera()->up();
+}
+
+void BosonBigDisplayScriptConnector::slotGetCameraRotation(float* v)
+{
+ BO_CHECK_NULL_RET(mDisplay->camera());
+ *v = mDisplay->camera()->rotation();
+}
+
+void BosonBigDisplayScriptConnector::slotGetCameraRadius(float* v)
+{
+ BO_CHECK_NULL_RET(mDisplay->camera());
+ *v = mDisplay->camera()->radius();
+}
+
+void BosonBigDisplayScriptConnector::slotGetCameraZ(float* v)
+{
+ BO_CHECK_NULL_RET(mDisplay->camera());
+ *v = mDisplay->camera()->z();
+}
+
+void BosonBigDisplayScriptConnector::slotSetUseCameraLimits(bool u)
+{
+ BO_CHECK_NULL_RET(mDisplay->camera());
+ mDisplay->camera()->setUseLimits(u);
+}
+
+void BosonBigDisplayScriptConnector::slotSetCameraFreeMovement(bool u)
+{
+ BO_CHECK_NULL_RET(mDisplay->camera());
+ mDisplay->camera()->setFreeMovement(u);
+}
+
+void BosonBigDisplayScriptConnector::slotSetCameraPos(const BoVector3& v)
+{
+ BO_CHECK_NULL_RET(mDisplay->autoCamera());
+ mDisplay->autoCamera()->setCameraPos(v);
+}
+
+void BosonBigDisplayScriptConnector::slotSetCameraLookAt(const BoVector3& v)
+{
+ BO_CHECK_NULL_RET(mDisplay->autoCamera());
+ mDisplay->autoCamera()->setLookAt(v);
+}
+
+void BosonBigDisplayScriptConnector::slotSetCameraUp(const BoVector3& v)
+{
+ BO_CHECK_NULL_RET(mDisplay->autoCamera());
+ mDisplay->autoCamera()->setUp(v);
+}
+
+void BosonBigDisplayScriptConnector::slotSetCameraRotation(float v)
+{
+ BO_CHECK_NULL_RET(mDisplay->autoCamera());
+ mDisplay->autoCamera()->setRotation(v);
+}
+
+void BosonBigDisplayScriptConnector::slotSetCameraRadius(float v)
+{
+ BO_CHECK_NULL_RET(mDisplay->autoCamera());
+ mDisplay->autoCamera()->setRadius(v);
+}
+
+void BosonBigDisplayScriptConnector::slotSetCameraZ(float v)
+{
+ BO_CHECK_NULL_RET(mDisplay->autoCamera());
+ mDisplay->autoCamera()->setZ(v);
+}
+
+void BosonBigDisplayScriptConnector::slotSetCameraMoveMode(int v)
+{
+ BO_CHECK_NULL_RET(mDisplay->autoCamera());
+ mDisplay->autoCamera()->setMoveMode((BoAutoCamera::MoveMode)v);
+}
+
+void BosonBigDisplayScriptConnector::slotCommitCameraChanges(int ticks)
+{
+ BO_CHECK_NULL_RET(mDisplay->autoCamera());
+ mDisplay->autoCamera()->commitChanges(ticks);
 }
 

@@ -21,14 +21,10 @@
 #define BOSONSCRIPT_H
 
 class BoVector3;
-class BosonBigDisplayBase;
 class Player;
 class Boson;
-class BoGameCamera;
-class BoAutoGameCamera;
 class BosonCanvas;
 class Boson;
-class BoLight;
 class BoVector4;
 
 class QString;
@@ -37,6 +33,7 @@ class QPoint;
 
 template<class T> class QValueList;
 
+class BosonScriptInterface;
 
 /**
  * Base class for scripting interfaces in Boson
@@ -54,6 +51,22 @@ class BosonScript
     static BosonScript* newScriptParser(Language lang, Player* p);
 
     virtual ~BosonScript();
+
+    BosonScriptInterface* interface() const
+    {
+      return mInterface;
+    }
+
+    /**
+     * @return NULL usually. Only when the interpreter is currently running this
+     * returns the BosonScript object the interpreter runs in. See @ref
+     * makeScriptCurrent
+     **/
+    static BosonScript* currentScript()
+    {
+      return mCurrentScript;
+    }
+
 
     /**
      * Loads script from file.
@@ -92,16 +105,11 @@ class BosonScript
     int playerId() const;
 
 
-    static void setDisplay(BosonBigDisplayBase* d)  { mDisplay = d; }
     static void setGame(Boson* g)  { mGame = g; }
     static void setCanvas(BosonCanvas* c)  { mCanvas = c; }
 
-    static BosonBigDisplayBase* display()  { return mDisplay; }
     static Boson* game()  { return mGame; };
 
-    static BoAutoGameCamera* autoCamera();
-    static BoGameCamera* camera();
-    static BoLight* light(int id);
     static BosonCanvas* canvas()  { return mCanvas; }
 
 
@@ -297,42 +305,42 @@ class BosonScript
 
 
     // Camera
-    static void setCameraRotation(float r);
-    static void setCameraRadius(float r);
-    static void setCameraZ(float z);
-    static void setCameraMoveMode(int mode);
-    static void setCameraLookAt(const BoVector3& pos);
-    static void setCameraPos(const BoVector3& pos);
-    static void setCameraUp(const BoVector3& up);
-    static void setCameraLimits(bool on);
-    static void setCameraFreeMode(bool on);
-    static void commitCameraChanges(int ticks);
+    void setCameraRotation(float r);
+    void setCameraRadius(float r);
+    void setCameraZ(float z);
+    void setCameraMoveMode(int mode);
+    void setCameraLookAt(const BoVector3& pos);
+    void setCameraPos(const BoVector3& pos);
+    void setCameraUp(const BoVector3& up);
+    void setCameraLimits(bool on);
+    void setCameraFreeMode(bool on);
+    void commitCameraChanges(int ticks);
 
-    static BoVector3 cameraLookAt();
-    static BoVector3 cameraPos();
-    static BoVector3 cameraUp();
-    static float cameraRotation();
-    static float cameraRadius();
-    static float cameraZ();
+    BoVector3 cameraLookAt();
+    BoVector3 cameraPos();
+    BoVector3 cameraUp();
+    float cameraRotation();
+    float cameraRadius();
+    float cameraZ();
 
 
     // Lights
-    static BoVector4 lightPos(int id);
-    static BoVector4 lightAmbient(int id);
-    static BoVector4 lightDiffuse(int id);
-    static BoVector4 lightSpecular(int id);
-    static BoVector3 lightAttenuation(int id);
-    static bool lightEnabled(int id);
+    BoVector4 lightPos(int id);
+    BoVector4 lightAmbient(int id);
+    BoVector4 lightDiffuse(int id);
+    BoVector4 lightSpecular(int id);
+    BoVector3 lightAttenuation(int id);
+    bool lightEnabled(int id);
 
-    static void setLightPos(int id, BoVector4 pos);
-    static void setLightAmbient(int id, BoVector4 a);
-    static void setLightDiffuse(int id, BoVector4 a);
-    static void setLightSpecular(int id, BoVector4 a);
-    static void setLightAttenuation(int id, BoVector3 a);
-    static void setLightEnabled(int id, bool enable);
+    void setLightPos(int id, BoVector4 pos);
+    void setLightAmbient(int id, BoVector4 a);
+    void setLightDiffuse(int id, BoVector4 a);
+    void setLightSpecular(int id, BoVector4 a);
+    void setLightAttenuation(int id, BoVector3 a);
+    void setLightEnabled(int id, bool enable);
 
-    static int addLight();
-    static void removeLight(int id);
+    int addLight();
+    void removeLight(int id);
 
 
     // AI
@@ -352,12 +360,32 @@ class BosonScript
 
     static void sendInput(int player, QDataStream& stream);
 
+    /**
+     * Most script interpreters use a C interface and therefore require
+     * callbacks to be functions (i.e. no methods). However, very often we need
+     * a pointer back to the actual BosonScript object that the interpreter runs
+     * in.
+     *
+     * For this purpose makeScriptCurrent() exists. You <em>must</em> call this
+     * <em>before</em> you execute any line with the interpreter. When you the
+     * interpreter is done, you are supposed to call makeScriptCurrent(0).
+     *
+     * That call will make sure that @ref currentScript is always valid.
+     **/
+    static void makeScriptCurrent(BosonScript*);
+
   private:
+    static BosonScript* mCurrentScript;
+    BosonScriptInterface* mInterface;
+
     Player* mPlayer;
 
-    static BosonBigDisplayBase* mDisplay;
     static BosonCanvas* mCanvas;
     static Boson* mGame;
 };
 
 #endif //BOSONSCRIPT_H
+
+/*
+ * vim: et sw=2
+ */

@@ -29,88 +29,77 @@ INCLUDES = -I$(top_srcdir)/bodebug $(all_includes)
 libboson_la_SOURCES = \
 	boapplication.cpp \
 	boglobal.cpp \
-	cell.cpp \
+	bosonconfig.cpp \
+	bosondata.cpp \
+	bo3dtools.cpp \
+	unitbase.cpp \
+	unit.cpp \
 	unitproperties.cpp \
 	pluginproperties.cpp \
-	unitbase.cpp \
-	boitemlisthandler.cpp \
+	unitplugins.cpp \
+	upgradeproperties.cpp \
+	bosonweapon.cpp \
 	boitemlist.cpp \
+	boitemlisthandler.cpp \
 	boselection.cpp \
 	botooltipcreator.cpp \
 	bogltooltip.cpp \
+	bosonplayfield.cpp \
 	bosonmap.cpp \
+	bosongroundtheme.cpp \
+	cell.cpp \
+	bofile.cpp \
+	bpfdescription.cpp \
 	bosonfileconverter.cpp \
 	bosoncampaign.cpp \
-	bosonplayfield.cpp \
+	boson.cpp \
+	bomessage.cpp \
 	bosoncanvas.cpp \
 	bosoncanvasstatistics.cpp \
 	bosoncollisions.cpp \
-	boson.cpp \
 	bosonnetworksynchronizer.cpp \
-	bosoncommandframeinterface.cpp \
-	bosonplayerinput.cpp \
-	bomessage.cpp \
 	bosonsaveload.cpp \
 	speciestheme.cpp \
 	speciesdata.cpp \
 	player.cpp \
 	playerio.cpp \
-	bo3dtools.cpp \
 	bomatrixwidget.cpp \
 	bosonglminimap.cpp \
-	kgameunitdebug.cpp \
-	kgameplayerdebug.cpp \
-	kgamecelldebug.cpp \
 	bosonglwidget.cpp \
-	bosonbigdisplaybase.cpp \
-	bogroundrenderer.cpp \
-	bogroundrenderermanager.cpp \
 	bocamera.cpp \
 	boautocamera.cpp \
 	bocamerawidget.cpp \
 	boorbiterwidget.cpp \
-	bosongroundtheme.cpp \
-	bosonconfig.cpp \
-	optionsdialog.cpp \
-	optionswidgets.cpp \
 	bosoncomputerio.cpp \
 	bosonpath.cpp \
-	unit.cpp \
 	selectbox.cpp \
 	bosoncursor.cpp \
 	bosonstatistics.cpp \
-	gameoverdialog.cpp \
-	unitplugins.cpp \
 	bosontexturearray.cpp \
+	\
 	bosonmodel.cpp \
 	bosonmodelloader.cpp \
 	bo3dsload.cpp \
-	bosonglchat.cpp \
-	bosonprofiling.cpp \
-	bosonprofilingdialog.cpp \
-	bosonmodeltextures.cpp \
-	upgradeproperties.cpp \
-	bosonstarting.cpp \
-	bofile.cpp \
-	bpfdescription.cpp \
-	bosonweapon.cpp \
-	bpfdescriptiondialog.cpp \
-	bosonbigdisplayinputbase.cpp \
-	bosonbigdisplayinput.cpp \
-	editorbigdisplayinput.cpp \
+	boacload.cpp \
 	bomesh.cpp \
 	bomeshrenderer.cpp \
 	bomeshrenderermanager.cpp \
 	bolodbuilder.cpp \
 	bomaterial.cpp \
+	\
+	bosonglchat.cpp \
+	bosonprofiling.cpp \
+	bosonprofilingdialog.cpp \
+	bosonmodeltextures.cpp \
+	bosonstarting.cpp \
+	bpfdescriptiondialog.cpp \
 	bomaterialwidget.cpp \
 	bovectorinput.cpp \
 	bosonpropertyxml.cpp \
 	bomemorytrace.cpp \
 	boaction.cpp \
-	bosondata.cpp \
-	bosonlocalplayerinput.cpp \
 	botexmapimportdialog.cpp \
+	bosonplayerinput.cpp \
 	bobincoder.cpp \
 	bolight.cpp \
 	bopluginmanager.cpp \
@@ -120,7 +109,6 @@ libboson_la_SOURCES = \
 	bosoneffectproperties.cpp \
 	bosoneffectparticle.cpp \
 	bosoneffectpropertiesparticle.cpp \
-	boacload.cpp \
 	boevent.cpp \
 	boeventmatching.cpp \
 	boeventlistener.cpp \
@@ -158,7 +146,21 @@ boson_SOURCES = \
 		bosonwidget.cpp \
 		editorwidget.cpp \
 		bodisplaymanager.cpp \
+		bosonbigdisplaybase.cpp \
+		bosonbigdisplayinputbase.cpp \
+		bosonbigdisplayinput.cpp \
+		editorbigdisplayinput.cpp \
+		optionsdialog.cpp \
+		optionswidgets.cpp \
+		bogroundrenderer.cpp \
+		bogroundrenderermanager.cpp \
 		top.cpp  \
+		bosoncommandframeinterface.cpp \
+		bosonlocalplayerinput.cpp \
+		kgameunitdebug.cpp \
+		kgameplayerdebug.cpp \
+		kgamecelldebug.cpp \
+		gameoverdialog.cpp \
 		main.cpp
 
 bounit_LDFLAGS = $(KDE_RPATH) $(all_libraries)
