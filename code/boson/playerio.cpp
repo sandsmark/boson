@@ -268,6 +268,11 @@ bool PlayerIO::canResearchTech(unsigned long int id) const
  return player()->canResearchTech(id);
 }
 
+bool PlayerIO::hasTechnology(unsigned long int id) const
+{
+ return player()->hasTechnology(id);
+}
+
 bool PlayerIO::canGo(const UnitProperties* prop, const Cell* cell, bool _default) const
 {
  if (!prop || !cell) {

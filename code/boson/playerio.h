@@ -198,6 +198,7 @@ public:
 
 	bool canBuild(unsigned long int unitType) const;
 	bool canResearchTech(unsigned long int id) const;
+	bool hasTechnology(unsigned long int id) const;
 
 	/**
 	 * @return Whether a unit with @p prop can gto on @p cell. When the

@@ -366,7 +366,7 @@ void BosonCommandFrame::setProduction(Unit* unit)
  // Filter out things that player can't actually build (requirements aren't met yet)
  QValueList<unsigned long int>::Iterator tit;  // tit = Technology ITerator ;-)
  for (tit = techList.begin(); tit != techList.end(); tit++) {
-	if ((!speciesTheme->technology(*tit)->isResearched()) && (localPlayerIO()->canResearchTech(*tit))) {
+	if ((!localPlayerIO()->hasTechnology(*tit)) && (localPlayerIO()->canResearchTech(*tit))) {
 		BoSpecificAction a(speciesTheme->technology(*tit)->produceAction());
 		a.setType(ActionProduceTech);
 		a.setProductionId(*tit);
