@@ -672,6 +672,9 @@ void BosonCanvasRenderer::renderItems(const BoItemList* allCanvasItems)
 
  bool useLOD = boConfig->boolValue("UseLOD");
 
+ if (Bo3dTools::checkError()) {
+	boError() << k_funcinfo << "OpenGL error before rendering items" << endl;
+ }
  BoItemList::Iterator it = d->mRenderItemList->begin();
  for (; it != d->mRenderItemList->end(); ++it) {
 	BosonItem* item = *it;
@@ -717,12 +720,18 @@ void BosonCanvasRenderer::renderItems(const BoItemList* allCanvasItems)
 		renderBoundingBox(item);
 	}
  }
+ if (Bo3dTools::checkError()) {
+	boError() << k_funcinfo << "OpenGL error before rendering selections" << endl;
+ }
 
  BoItemList* selectedItems = new BoItemList(0, false);
  createSelectionsList(selectedItems, d->mRenderItemList);
  renderSelections(selectedItems);
  delete selectedItems;
  selectedItems = 0;
+ if (Bo3dTools::checkError()) {
+	boError() << k_funcinfo << "OpenGL error after rendering selections" << endl;
+ }
 
  boTextureManager->invalidateCache();
  d->mRenderedItems += d->mRenderItemList->count();
