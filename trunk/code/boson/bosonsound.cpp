@@ -220,10 +220,16 @@ BosonSound::BosonSound()
  Arts::connect(d->mEffectStack, d->mAmanPlay);
 
  // the volume control
-/* d->mVolumeControl = Arts::DynamicCast(server().server().createObject("Arts::StereoVolumeControl"));
+/*
+ d->mVolumeControl = Arts::DynamicCast(server().server().createObject("Arts::StereoVolumeControl"));
+ if (d->mVolumeControl.isNull()) {
+	kdError() << k_funcinfo << "NULL volume control" << endl;
+	d->mPlaySounds = false; // something evil happened...
+ }
  d->mVolumeControl.start();
  d->mId = d->mEffectStack.insertBottom(d->mVolumeControl, "VolumeControl");
 */
+
  d->mPlaySounds = true;
 }
 
@@ -267,6 +273,9 @@ KArtsServer& BosonSound::server() const
 
 void BosonSound::addUnitSounds(const UnitProperties* prop)
 {
+ if (boConfig->disableSound()) {
+	return;
+ }
  QStringList sounds = KGlobal::dirs()->findAllResources("data", "boson/themes/species/*/units/*/sounds/*.ogg");
  sounds += KGlobal::dirs()->findAllResources("data", "boson/themes/species/*/units/*/sounds/*.wav");
 
@@ -281,6 +290,9 @@ void BosonSound::addUnitSounds(const UnitProperties* prop)
 
 void BosonSound::loadDefaultEvent(int event, const QString& filter)
 {
+ if (boConfig->disableSound()) {
+	return;
+ }
  if (d->mDefaultSounds.contains(event)) {
 	return;
  }
@@ -306,6 +318,9 @@ void BosonSound::loadDefaultEvent(int event, const QString& filter)
 
 void BosonSound::addSound(int id, const QString& file)
 {
+ if (boConfig->disableSound()) {
+	return;
+ }
  if (d->mSounds.find(id)) {
 	return;
  }
@@ -354,6 +369,9 @@ void BosonSound::addEvent(int unitType, int event, const QStringList& sounds)
 
 void BosonSound::addEventSound(int unitType, int event, const QString& file)
 {
+ if (boConfig->disableSound()) {
+	return;
+ }
  kdDebug() << k_funcinfo << "adding: " << unitType << "->" << event << " = " << file << endl;
  KPlayObjectFactory factory(server().server());
  BoPlayObject* playObject = new BoPlayObject(this, file);
@@ -368,6 +386,9 @@ void BosonSound::addEventSound(int unitType, int event, const QString& file)
 
 void BosonSound::play(int id)
 {
+ if (boConfig->disableSound()) {
+	return;
+ }
  if (!d->mPlaySounds) { 
 	return; // something evil happened to our sound server...
  }
@@ -383,6 +404,9 @@ void BosonSound::play(int id)
 
 void BosonSound::play(Unit* unit, int event)
 {
+ if (boConfig->disableSound()) {
+	return;
+ }
  if (!d->mPlaySounds) { 
 	return; // something evil happened to our sound server...
  }

@@ -22,6 +22,7 @@
 #include "unit.h"
 #include "speciestheme.h"
 #include "bosonsound.h"
+#include "bosonconfig.h"
 #include "defines.h"
 
 #include <kglobal.h>
@@ -110,6 +111,9 @@ void BosonMusic::initBosonMusic()
 
 void BosonMusic::play()
 {
+ if (boConfig->disableSound()) {
+	return;
+ }
  if (!d->mPlayObject || d->mPlayObject->isNull()) {
 	return;
  }
@@ -127,6 +131,9 @@ void BosonMusic::stop()
 
 bool BosonMusic::load(const QString& file)
 {
+ if (boConfig->disableSound()) {
+	return false;
+ }
  kdDebug() << k_funcinfo << file << endl;
  delete d->mPlayObject;
  KPlayObjectFactory factory(server().server());
@@ -218,11 +225,17 @@ return;
 
 void BosonMusic::playSound(const QString& species, int id)
 {
+ if (boConfig->disableSound()) {
+	return;
+ }
  bosonSound(species)->play(id);
 }
 
 void BosonMusic::playSound(Unit* unit, int event)
 {
+ if (boConfig->disableSound()) {
+	return;
+ }
  bosonSound(unit->speciesTheme()->themePath())->play(unit, event);
 }
 
