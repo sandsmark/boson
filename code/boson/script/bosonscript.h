@@ -62,6 +62,11 @@ class BosonScript
     virtual void loadScript(QString file) = 0;
 
     /**
+     * Loads script from given string.
+     **/
+    virtual void loadScriptFromString(const QString& string) = 0;
+
+    /**
      * Calls "advance" function in the script.
      * Should be called every advance call
      **/

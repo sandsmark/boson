@@ -212,7 +212,23 @@ void PythonScript::loadScript(QString file)
     boError() << k_funcinfo << "No such file: '" << fi.absFilePath() << "'. Aborting." << endl;
     return;
   }
+  QString filePath = fi.dirPath(true);
 
+  QFile f(file);
+  if(!f.open(IO_ReadOnly))
+  {
+    boError() << k_funcinfo << "Can't open file '" << file << "' for reading. Aborting." << endl;
+    return;
+  }
+
+  QString contents;
+  contents += "import sys\n";
+  contents += QString("sys.path.insert(0, '%1')\n").arg(filePath.ascii());
+  contents += "sys.path.insert(0, '')\n";
+  contents += f.readAll();
+  loadScriptFromString(contents);
+
+#if 0
   QString filePath = fi.dirPath(true);
   //boDebug() << k_funcinfo << "filePath: " << filePath << endl;
   QString fileName = fi.baseName();
@@ -247,6 +263,28 @@ void PythonScript::loadScript(QString file)
     return;
   }
   mDict = PyModule_GetDict(pModule);
+
+  freePythonLock();
+#endif
+}
+
+void PythonScript::loadScriptFromString(const QString& string)
+{
+  getPythonLock();
+
+  PyObject* m = PyImport_AddModule((char*)"__main__");
+  PyObject* maindict = PyModule_GetDict(m);
+
+  PyObject* obj = PyRun_String(string.ascii(), Py_file_input, maindict, maindict);
+  if(!obj)
+  {
+    PyErr_Print();
+    boError() << k_funcinfo << "obj is NULL" << endl;
+    boError() << k_funcinfo << "Probably there's a parse error in the script. Aborting." << endl;
+    freePythonLock();
+    return;
+  }
+  mDict = PyModule_GetDict(m);
 
   freePythonLock();
 }
@@ -289,6 +327,54 @@ void PythonScript::callFunction(const QString& function, PyObject* args)
   }
 
   freePythonLock();
+}
+
+int PythonScript::callFunctionWithReturn(const QString& function)
+{
+  return callFunctionWithReturn(function, 0);
+}
+
+int PythonScript::callFunctionWithReturn(const QString& function, PyObject* args)
+{
+  // AB: this is duplicated code from callFunction().
+  // probably we need a callFunctionInteral which returns the returned PyObject.
+  // callFunction() would then simply Py_DECREF() it, and here we would also
+  // parse it.
+  boDebug(700) << k_funcinfo << "function: " << function << endl;
+
+  if(!mDict)
+  {
+    boError() << k_funcinfo << "No file loaded!" << endl;
+    return -1;
+  }
+
+  getPythonLock();
+
+  PyObject* func = PyDict_GetItemString(mDict, (char*)function.ascii());
+  if(!func)
+  {
+    PyErr_Print();
+    boError() << k_funcinfo << "No such function: " << function << endl;
+    freePythonLock();
+    return -1;
+  }
+
+  int ret = -1;
+  PyObject* pValue = PyObject_CallObject(func, args);
+  if(!pValue)
+  {
+    PyErr_Print();
+    boError() << k_funcinfo << "Error while calling function " << function << endl;
+    ret = -1;
+  }
+  else
+  {
+    PyArg_Parse(pValue, (char*)"i", &ret);
+    Py_DECREF(pValue);
+  }
+
+  freePythonLock();
+  return ret;
 }
 
 void PythonScript::execLine(const QString& line)
@@ -1253,53 +1339,6 @@ PyObject* PythonScript::QValueListToPyList(QValueList<int>* list)
   return pylist;
 }
 
-int PythonScript::callFunctionWithReturn(const QString& function)
-{
-  return callFunctionWithReturn(function, 0);
-}
-
-int PythonScript::callFunctionWithReturn(const QString& function, PyObject* args)
-{
-  // AB: this is duplicated code from callFunction().
-  // probably we need a callFunctionInteral which returns the returned PyObject.
-  // callFunction() would then simply Py_DECREF() it, and here we would also
-  // parse it.
-  boDebug(700) << k_funcinfo << "function: " << function << endl;
-
-  if(!mDict)
-  {
-    boError() << k_funcinfo << "No file loaded!" << endl;
-    return -1;
-  }
-
-  getPythonLock();
-
-  PyObject* func = PyDict_GetItemString(mDict, (char*)function.ascii());
-  if(!func)
-  {
-    PyErr_Print();
-    boError() << k_funcinfo << "No such function: " << function << endl;
-    freePythonLock();
-    return -1;
-  }
-
-  int ret = -1;
-  PyObject* pValue = PyObject_CallObject(func, args);
-  if(!pValue)
-  {
-    PyErr_Print();
-    boError() << k_funcinfo << "Error while calling function " << function << endl;
-    ret = -1;
-  }
-  else
-  {
-    PyArg_Parse(pValue, "i", &ret);
-    Py_DECREF(pValue);
-  }
-
-  freePythonLock();
-  return ret;
-}
 
 /*
  * vim: et sw=2
