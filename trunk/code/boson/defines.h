@@ -45,6 +45,7 @@
 
 #define BOSON_MINIMUM_WIDTH 640
 #define BOSON_MINIMUM_HEIGHT 480
+#define MAX_PROFILING_ENTRIES 300
 
 
 // random values for map - must be replaced by useful values! afaics these are

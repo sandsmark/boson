@@ -116,6 +116,11 @@ public:
 	void renderFOW(bool start);
 	void renderText(bool start);
 
+	/**
+	 * @return The number of recoreded frames
+	 **/
+	unsigned int renderEntries() const;
+
 	// AB: the syntax of these is the same as for render() above. e.g. you
 	// mustn't call the advance*() stuff here recursive or so
 	void advance(bool start, unsigned int advanceCount);

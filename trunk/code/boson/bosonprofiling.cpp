@@ -21,6 +21,7 @@
 #include "bosonprofilingprivate.h"
 #include "bodebug.h"
 #include "bosonconfig.h"
+#include "defines.h"
 
 #include <kstaticdeleter.h>
 
@@ -31,7 +32,6 @@ BosonProfiling* BosonProfiling::mProfiling = 0;
 
 #define COMPARE_TIMES(time1, time2) ( ((time2.tv_sec - time1.tv_sec) * 1000000) + (time2.tv_usec - time1.tv_usec) )
 
-#define MAX_ENTRIES 300
 #define PROFILING_VERSION 0x07 // increase if you change the file format of saved files!
 
 unsigned long int compareTimes(const struct timeval& t1, const struct timeval& t2)
@@ -236,7 +236,7 @@ void BosonProfiling::render(bool start)
  } else {
 	d->mCurrentRenderTimes->mFunction.stop();
 	d->mRenderTimes.append(d->mCurrentRenderTimes);
-	if (d->mRenderTimes.count() > MAX_ENTRIES) {
+	if (d->mRenderTimes.count() > MAX_PROFILING_ENTRIES) {
 		d->mRenderTimes.removeFirst();
 	}
 	d->mCurrentRenderTimes = 0;
@@ -283,6 +283,11 @@ void BosonProfiling::renderText(bool start)
  d->mCurrentRenderTimes->mText.getTime(start);
 }
 
+unsigned int BosonProfiling::renderEntries() const
+{
+ return d->mRenderTimes.count();
+}
+
 void BosonProfiling::advance(bool start, unsigned int advanceCount)
 {
  if (start) {
@@ -295,7 +300,7 @@ void BosonProfiling::advance(bool start, unsigned int advanceCount)
  } else {
 	d->mCurrentSlotAdvanceTimes->mFunction.stop();
 	d->mSlotAdvanceTimes.append(d->mCurrentSlotAdvanceTimes);
-	if (d->mSlotAdvanceTimes.count() > MAX_ENTRIES) {
+	if (d->mSlotAdvanceTimes.count() > MAX_PROFILING_ENTRIES) {
 		d->mSlotAdvanceTimes.removeFirst();
 	}
 	if (d->mCurrentSlotAdvanceTimes->mAdvanceCount != advanceCount) {
@@ -367,7 +372,7 @@ void BosonProfiling::stop(ProfilingEvent event)
  gettimeofday(&time, 0);
 
  d->mTimes[event].append(COMPARE_TIMES(d->mProfilingTimes[event], time));
- if (d->mTimes[event].count() > MAX_ENTRIES) {
+ if (d->mTimes[event].count() > MAX_PROFILING_ENTRIES) {
 	d->mTimes[event].remove(d->mTimes[event].begin());
  }
 }
