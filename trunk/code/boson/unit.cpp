@@ -933,6 +933,11 @@ void MobileUnit::advanceMine()
  }
 }
 
+unsigned int MobileUnit::resourcesMined() const
+{
+ return d->mResourcesMined;
+}
+
 bool MobileUnit::canMine(Cell* cell) const
 {
  if (unitProperties()->canMineMinerals() &&
