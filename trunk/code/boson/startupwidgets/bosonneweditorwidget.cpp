@@ -31,6 +31,7 @@
 #include "../bpfdescription.h"
 #include "../bosonscenario.h"
 #include "../bosonmap.h"
+#include "../bosongroundtheme.h"
 #include "../bosondata.h"
 #include "../cell.h"
 #include "../bosonwidgets/bosonplayfieldview.h"
@@ -194,7 +195,14 @@ void BosonNewEditorWidget::slotNetStart()
 		return;
 	}
 
-	map->fill((int)Cell::GroundGrass);
+	unsigned int texture = 0; // TODO: add a "fill with" combobox containing all available textures to the start new editor widget
+	if (texture >= theme->textureCount()) {
+		boError() << k_funcinfo << "invalid texture " << texture << endl;
+		KMessageBox::sorry(this, i18n("Could not fill the map with texture %1 - only %2 textures in groundTheme %3").arg(texture).arg(theme->textureCount()).arg(themeId));
+		delete map;
+		return;
+	}
+	map->fill(texture);
 
 	QByteArray b;
 	QDataStream stream(b, IO_WriteOnly);
