@@ -396,13 +396,10 @@ void BoAdvance::receiveAdvanceCall()
 		int diff = QMAX(5, mAdvanceReceived.elapsed() - t + 5); // we are adding 5ms "safety" diff
 		next = QMAX(0, ADVANCE_INTERVAL / mAdvanceDivider - diff);
 	} else {
+		// we have delayed advance messages already, so we should flush
+		// the remaining calls for the current message asap
 		next = 0;
 	}
-	if (mBoson->delayedMessageCount() > 20) {
-		boWarning() << k_funcinfo << "more than 20 messages delayed!!" << endl;
-		next = 0;
-	}
-//	boDebug() << "next: " << next << endl;
 	QTimer::singleShot(next, mBoson, SLOT(slotReceiveAdvance()));
 	mAdvanceDividerCount++;
  } else {
@@ -1686,6 +1683,9 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 	case BosonMessage::AdvanceN:
 	{
 		d->mAdvance->receiveAdvanceMessage(gameSpeed());
+		if (delayedMessageCount() > 20) {
+			boWarning() << k_funcinfo << "more than 20 messages delayed!!" << endl;
+		}
 		break;
 	}
 	case BosonMessage::ChangeMap:
