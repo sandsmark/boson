@@ -47,6 +47,7 @@ public:
 	}
 	~BoPlayObject()
 	{
+		mPlayObject->halt();
 		delete mPlayObject;
 	}
 	const QString& file() const { return mFile; }
@@ -159,7 +160,18 @@ BosonSound::BosonSound()
 
 BosonSound::~BosonSound()
 {
+ kdDebug() << k_funcinfo << endl;
  d->mSounds.clear();
+ UnitSounds::Iterator unitsIt;
+ for (unitsIt = d->mUnitSounds.begin(); unitsIt != d->mUnitSounds.end(); ++unitsIt) {
+	SoundEvents::Iterator eventsIt;
+	for (eventsIt = (*unitsIt).begin(); eventsIt != (*unitsIt).end(); ++eventsIt) {
+		QPtrListIterator<BoPlayObject> it = (*eventsIt);
+		while (it.current()) {
+			delete it.current();
+		}
+	}
+ }
  delete d;
 }
 

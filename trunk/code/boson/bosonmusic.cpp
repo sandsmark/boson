@@ -27,6 +27,7 @@
 #include <kglobal.h>
 #include <kstandarddirs.h>
 #include <kapplication.h>
+#include <kstaticdeleter.h>
 #include <kdebug.h>
 #include <arts/kplayobject.h>
 #include <arts/kplayobjectfactory.h>
@@ -42,7 +43,7 @@
 
 #define TICKER_VALUE 500 // same as in kaboodle
 
-
+static KStaticDeleter<BosonMusic> sd;
 BosonMusic* BosonMusic::mBosonMusic = 0;
 
 
@@ -86,9 +87,11 @@ BosonMusic::BosonMusic(QObject* parent) : QObject(parent)
 
 BosonMusic::~BosonMusic()
 {
+kdDebug() << k_funcinfo << endl;
  d->mBosonSound.clear();
  delete d->mTicker;
  if (d->mPlayObject) {
+	d->mPlayObject->halt();
 	delete d->mPlayObject;
  }
  delete d;
@@ -99,7 +102,7 @@ void BosonMusic::initBosonMusic()
  if (mBosonMusic) {
 	return;
  }
- mBosonMusic = new BosonMusic(0);
+ sd.setObject(mBosonMusic, new BosonMusic(0));
 }
 
 void BosonMusic::play()
