@@ -284,8 +284,8 @@ void UpgradeProperties::applyProperty(QValueList<unsigned long int>* typeIds,
   // Note that I don't use k_funcinfo here, because I get _very_ long lines with it
   boDebug(600) << "    " << "[UpgradeProperties::applyProperty(...)] " << "Applying property (type: " << type << ") to " << typeIds->count() << " props. weaponid: " << weaponid << endl;
   QValueList<unsigned long int>::Iterator it;
-  unsigned long int oldvalueuint;
-  float oldvaluef;
+  unsigned long int oldvalueuint = 0;
+  float oldvaluef = 0.0f;
   for(it = typeIds->begin(); it != typeIds->end(); it++)
   {
     UnitProperties* prop = player->speciesTheme()->nonConstUnitProperties(*it);
@@ -348,6 +348,8 @@ void UpgradeProperties::applyProperty(QValueList<unsigned long int>* typeIds,
         }
         default:
         {
+          oldvalueuint = 0;
+          oldvaluef = 0.0f;
           boError(600) << "[UpgradeProperties::applyProperty(...)]" << "Invalid UpgradeType: " << type << endl;
           break;
         }
@@ -403,6 +405,8 @@ void UpgradeProperties::applyProperty(QValueList<unsigned long int>* typeIds,
         }
         default:
         {
+          oldvalueuint = 0;
+          oldvaluef = 0.0f;
           boError(600) << "[UpgradeProperties::applyProperty(...)]" << "Invalid UpgradeType: " << type << endl;
           break;
         }
