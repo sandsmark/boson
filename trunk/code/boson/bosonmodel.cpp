@@ -489,33 +489,34 @@ void BosonModel::computeBoundings(Lib3dsNode* node, BosonModel::BoHelper* helper
 	}
  }
 
- if (node->type == LIB3DS_OBJECT_NODE) {
-	if (strcmp(node->name, "$$$DUMMY") == 0) {
-		return;
-	}
-	Lib3dsMesh* mesh = lib3ds_file_mesh_by_name(m3ds, node->name);
-	if (!mesh) {
-		return;
-	}
-	unsigned int p;
-	Lib3dsMatrix invMeshMatrix;
-	lib3ds_matrix_copy(invMeshMatrix, mesh->matrix);
-	lib3ds_matrix_inv(invMeshMatrix);
+ if (node->type != LIB3DS_OBJECT_NODE) {
+	return;
+ }
+ if (strcmp(node->name, "$$$DUMMY") == 0) {
+	return;
+ }
+ Lib3dsMesh* mesh = lib3ds_file_mesh_by_name(m3ds, node->name);
+ if (!mesh) {
+	return;
+ }
+ unsigned int p;
+ Lib3dsMatrix invMeshMatrix;
+ lib3ds_matrix_copy(invMeshMatrix, mesh->matrix);
+ lib3ds_matrix_inv(invMeshMatrix);
 
-	for (p = 0; p < mesh->faces; ++p) {
-		Lib3dsFace* f = &mesh->faceL[p];
+ for (p = 0; p < mesh->faces; ++p) {
+	Lib3dsFace* f = &mesh->faceL[p];
 
-		Lib3dsVector v[3];
-		for (int i = 0; i < 3; i++) {
-			lib3ds_vector_transform(v[i], invMeshMatrix, mesh->pointL[f->points[i]].pos);
-			Lib3dsObjectData* d = &node->data.object;
-			Lib3dsVector tmp, actualPoint;
-			lib3ds_vector_copy(actualPoint, v[i]);
-			lib3ds_vector_sub(actualPoint, actualPoint, d->pivot);
-			lib3ds_vector_copy(tmp, actualPoint);
-			lib3ds_vector_transform(actualPoint, node->matrix, tmp);
-			helper->addPoint(actualPoint[0], actualPoint[1], actualPoint[2]);
-		}
+	Lib3dsVector v[3];
+	for (int i = 0; i < 3; i++) {
+		lib3ds_vector_transform(v[i], invMeshMatrix, mesh->pointL[f->points[i]].pos);
+		Lib3dsObjectData* d = &node->data.object;
+		Lib3dsVector tmp, actualPoint;
+		lib3ds_vector_copy(actualPoint, v[i]);
+		lib3ds_vector_sub(actualPoint, actualPoint, d->pivot);
+		lib3ds_vector_copy(tmp, actualPoint);
+		lib3ds_vector_transform(actualPoint, node->matrix, tmp);
+		helper->addPoint(actualPoint[0], actualPoint[1], actualPoint[2]);
 	}
  }
 }
@@ -609,10 +610,6 @@ void BosonModel::loadNode(Lib3dsNode* node, bool reload)
 	}
  }
 
- unsigned int p;
- Lib3dsMatrix invMeshMatrix;
- lib3ds_matrix_copy(invMeshMatrix, mesh->matrix);
- lib3ds_matrix_inv(invMeshMatrix);
  GLuint myTex = 0;
  bool resetColor = false; // needs to be true after we changed the current color
 
@@ -626,137 +623,35 @@ void BosonModel::loadNode(Lib3dsNode* node, bool reload)
  // so optimization should happen here - if possible at all...
 
 
- // AB: WARNING: from now on we demand that all faces in a mesh
- // use the same material and therefore the same texture!
- // --> maybe we want to change this one day in order to provide
- // more details or so. but i hope for now we gain some speed of
- // it. so we can group all faces into a single glBegin() call!
- Lib3dsMaterial* mat = 0;
- for (p = 0; p < mesh->faces; ++p) {
-	Lib3dsFace* f = &mesh->faceL[p];
-	Lib3dsMaterial* mat2 = 0;
-	if (f->material[0]) {
-		mat2 = lib3ds_file_material_by_name(m3ds, f->material);
-		if (p == 0) {
-			mat = mat2;
-		}
-		if (mat != mat2) {
-			boWarning(100) << "face " << p << " uses different material than previous faces" << endl;
-		}
-	}
- }
-
- if (mat) {
-	// this is the texture map of the object.
-	// t->name is the (file-)name and in
-	// mesh->texelL you can find the texture
-	// coordinates for glTexCoord*()
-	// note that mesh->texels can be 0 - then the
-	// mesh doesn't have any texture. otherwise it
-	// must be equal to mesh->points
-	Lib3dsTextureMap* t = &mat->texture1_map;
-	QString texName = cleanTextureName(t->name);
-	if (texName.isEmpty() || mesh->texels == 0) {
+ QString textureName = BoMesh::textureName(mesh, m3ds);
+ if (textureName == QString::null) {
+	myTex = 0;
+ } else {
+	QString tex;
+	tex = cleanTextureName(textureName);
+	if (tex.isEmpty()) {
 		myTex = 0;
 	} else {
-		myTex = mModelTextures->texture(texName);
+		myTex = mModelTextures->texture(tex);
 		if (!myTex) {
-			boWarning(100) << k_funcinfo << "Texture " << t->name << " was not loaded" << endl;
+			boWarning(100) << k_funcinfo << "Texture " << tex << " was not loaded" << endl;
 		}
 	}
- } else {
-	myTex = 0;
-//	boDebug() << "no mat for " << mesh->name << endl;
  }
-
-#define NO_OPTIMIZE 0
-#if NO_OPTIMIZE
- bool popTextureMatrix = false;
-#endif
-
-
-#if NO_OPTIMIZE
- // now start the actual display list for this node.
- glNewList(node->user.d, GL_COMPILE);
-#endif
- // AB: the next few lines try to optimize. but there might be a bug.
- // imagine the texture map gets rotated - we can emulate this by
- // rotating the texture coordinates as well - but how are the other
- // coordinates calculated? those that are between the specified texture
- // coordinates (which are assigned to the vertices)? is the texture
- // matrix used for them as well? If yes this optimize approach can't
- // work.
- // AB: UPDATE: these optimizations do NOT influence the appearance.
-
- // AB: for NO_OPTIMIZE this will *always* be the identity matrix
- // note that NO_OPTIMIZE will be removed, since it doesn't bring us anything
- // anymore
- BoMatrix texMatrix;
-
-
- if (mat && myTex) {
-	// *ggg* this is a nice workaround.
-	// it's hard to do this with a Lib3dsMatrix by several
-	// reasons - so we do these calculations in OpenGL
-	// (*NOT* in a display list - immediate mode) and then
-	// get the texture matrix.
-	// With this matrix we can easily calculate the actual
-	// texture coordinates.
-	// btw: this means that all calculations are done only
-	// once (on startup) and therefore we'll have some
-	// speedup
-
-	// AB: this part isn't time critical anymore. you can
-	// call even OpenGL commands without runtime slowdowns.
-	// We calculate the actual texture map coordinates only
-	// once and then use the final calculations in the
-	// display list.
-	glMatrixMode(GL_TEXTURE);
-	glPushMatrix();
-	glLoadIdentity(); // should already be there
-	Lib3dsTextureMap* t = &mat->texture1_map;
-	if ((t->scale[0] || t->scale[1]) && (t->scale[0] != 1.0 || t->scale[1] != 1.0)) {
-		// 3ds does these things pretty unhandy. it doesn't
-		// scale as opengl does, but rather emulates scaling the
-		// texture itself (i.e. when the texture is centered on
-		// an object it will still be centered after scaling).
-		// so we need to translate them before scaling.
-		glTranslatef((1.0 - t->scale[0]) / 2, (1.0 - t->scale[1]) / 2, 0.0);
-		glScalef(t->scale[0], t->scale[1], 1.0);
-	}
-	if (t->rotation != 0.0) {
-		glRotatef(-t->rotation, 0.0, 0.0, 1.0);
-	}
-	glTranslatef(-t->offset[0], -t->offset[1], 0.0);
-	glTranslatef(mesh->map_data.pos[0], mesh->map_data.pos[1], mesh->map_data.pos[2]);
-	float scale = mesh->map_data.scale;
-	if (scale != 0.0 && scale != 1.0) {
-		// doesn't seem to be used in our models
-		glScalef(scale, scale, 1.0);
-	}
-#if !NO_OPTIMIZE
-	texMatrix.loadMatrix(GL_TEXTURE_MATRIX);
-	if (texMatrix.isNull()) {
-		boWarning(100) << k_funcinfo << "Invalid texture matrix was generated!" << endl;
-		texMatrix.loadIdentity();
-	}
-
-	glPopMatrix();
-#else
-	popTextureMatrix = true;
-#endif
-	glMatrixMode(GL_MODELVIEW);
- } else {
-	// we use the default identity matrix - this is just "in case".
-	// we must not use this matrix at all!
- }
-
-
 
 #warning memory leak
  //AB: memory leak!
  //AB: we need to do this once per modelnode only (for every player)
  BoMesh* boMesh = new BoMesh(mesh);
+
+ boMesh->setMaterial(BoMesh::material(mesh, m3ds));
+ boMesh->setTextured(myTex != 0);
+ boMesh->setTextureObject(myTex);
+ boMesh->loadVertices();
+ boMesh->loadTexels();
+
+
+
 #if USE_STRIP
 	boMesh->connectFaces();
 #else
@@ -765,13 +660,11 @@ void BosonModel::loadNode(Lib3dsNode* node, bool reload)
  // TODO: count number of nodes in this mesh and compare to mesh->faces
 
 
-#if !NO_OPTIMIZE
  // now start the actual display list for this node.
  glNewList(node->user.d, GL_COMPILE);
-#endif
  d->mNodeDisplayLists.append(node->user.d);
 
- if (BosonModel::isTeamColor(mesh)) {
+ if (BoMesh::isTeamColor(mesh)) {
 	myTex = 0; // teamcolor objects are *not* textured
 	if (mTeamColor) {
 		glPushAttrib(GL_CURRENT_BIT);
@@ -784,15 +677,8 @@ void BosonModel::loadNode(Lib3dsNode* node, bool reload)
 
  // note: you shouldn't do calculations after a glBegin() but we compile a display list only, so its ok
  glBegin(boMesh->type());
- renderMesh(boMesh, mesh, myTex, invMeshMatrix, &texMatrix);
+ boMesh->renderMesh();
  glEnd();
-#if NO_OPTIMIZE
- if (popTextureMatrix) {
-	glMatrixMode(GL_TEXTURE);
-	glPopMatrix();
-	glMatrixMode(GL_MODELVIEW);
- }
-#endif
 
  if (resetColor) {
 	// we need to reset the color (mainly for the placement preview)
@@ -800,36 +686,6 @@ void BosonModel::loadNode(Lib3dsNode* node, bool reload)
 	resetColor = false;
  }
  glEndList();
-}
-
-void BosonModel::renderPoint(Lib3dsMesh* mesh, Lib3dsFace* f, int point, bool textured, Lib3dsMatrix invMeshMatrix, const BoMatrix* texMatrix)
-{
- if (point < 0 || point > 2) {
-	boError() << k_funcinfo << "invalid point " << point << endl;
-	return;
- }
- Lib3dsVector v;
- Lib3dsTexel tex;
- int facePoint = f->points[point];
- lib3ds_vector_transform(v, invMeshMatrix,
-		mesh->pointL[ facePoint ].pos);
- if (textured) {
-	// mesh->texelL[f->points[renderPoint]] is our
-	// vector. it has x and y only, z is
-	// therefore 0.0
-	BoVector3 a;
-	BoVector3 b;
-#if NO_OPTIMIZE
-	b.set(mesh->texelL[facePoint][0], mesh->texelL[facePoint][1], 0.0);
-#else
-	a.set(mesh->texelL[facePoint][0], mesh->texelL[facePoint][1], 0.0);
-	texMatrix->transform(&b, &a);
-#endif
-	tex[0] = b[0];
-	tex[1] = b[1];
-	glTexCoord2fv(tex);
- }
- glVertex3fv(v);
 }
 
 
@@ -1000,20 +856,6 @@ BosonAnimation* BosonModel::animation(int mode) const
 
 
 
-
-// note: these functions are *not* optimized for speed, as they are used on
-// startup only.
-
-bool BosonModel::isAdjacent(BoVector3* v1, BoVector3* v2)
-{
- return BoVector3::isAdjacent(v1, v2);
-}
-
-int BosonModel::findPoint(const BoVector3& point, const BoVector3* array)
-{
- return BoVector3::findPoint(point, array);
-}
-
 // yes, i know this would be a great function for a recursive algorithm. but i
 // don't like recursion, so i do it with loops.
 void BosonModel::findAdjacentFaces(QPtrList<Lib3dsFace>* adjacentFaces, Lib3dsMesh* mesh, Lib3dsFace* search)
@@ -1061,83 +903,5 @@ void BosonModel::findAdjacentFaces(QPtrList<Lib3dsFace>* adjacentFaces, Lib3dsMe
 
 }
 
-int countAdjacentFaces(Lib3dsMesh* mesh, const QPtrList<Lib3dsFace>& faces, Lib3dsFace* face)
-{
- QPtrListIterator<Lib3dsFace> it(faces);
- int count = 0;
- BoVector3 faceVector[3];
- BoVector3 v[3];
- for (int i = 0; i < 3; i++) {
-	faceVector[i].set(mesh->pointL[ face->points[i] ].pos);
- }
- for (; it.current(); ++it) {
-	Lib3dsFace* f = it.current();
-	if (f == face) {
-		continue;
-	}
-	for (int i = 0; i < 3; i++) {
-		v[i].set(mesh->pointL[ f->points[i] ].pos);
-	}
-	if (BoVector3::isAdjacent(faceVector, v)) {
-		count++;
-	}
- }
- return count;
-}
 
-bool BosonModel::isTeamColor(const Lib3dsMesh* mesh)
-{
- if (!mesh) {
-	BO_NULL_ERROR(mesh);
-	return false;
- }
- if (QString::fromLatin1(mesh->name).find("teamcolor", 0, false) == 0) {
-	return true;
- }
- return false;
-}
-
-// FIXME: the data in mesh should be copied to BoMesh instead
-// FIXME: same about textured
-// FIXME: same about invMeshmatrix
-void BosonModel::renderMesh(BoMesh* boMesh, Lib3dsMesh* mesh, bool textured, Lib3dsMatrix invMeshMatrix, BoMatrix* texMatrix)
-{
- // TODO: count number of nodes in this mesh and compare to mesh->faces
- BoNode* node = boMesh->faces();
- if (!node) {
-	boError() << k_funcinfo << "NULL node" << endl;
- }
- if (boMesh->type() == GL_TRIANGLE_STRIP && false) {
-	 boDebug() << "painting _STRIP" << endl;
-	if (!node->next()) {
-		boError() << k_funcinfo << "less than 2 faces in mesh " << mesh->name << "! this is not supported" << endl;
-		return;
-	}
-	int firstPoint;
-	int secondPoint;
-	int thirdPoint;
-	node->decodeRelevantPoint(&firstPoint, &secondPoint, &thirdPoint);
-
-	renderPoint(mesh, node->face(), firstPoint, textured, invMeshMatrix, texMatrix);
-	renderPoint(mesh, node->face(), secondPoint, textured, invMeshMatrix, texMatrix);
-	renderPoint(mesh, node->face(), thirdPoint, textured, invMeshMatrix, texMatrix);
-
-	// we skip the entire first face. all points have been rendered above.
-	node = node->next();
-	for (; node; node = node->next()) {
-		int point = node->relevantPoint();
-		if (point < 0 || point > 2) {
-			boError( )<< k_funcinfo "oops - invalid point " << point << endl;
-			continue;
-		}
-		renderPoint(mesh, node->face(), point, textured, invMeshMatrix, texMatrix);
-	}
- } else {
-	for (; node; node = node->next()) {
-		for (int i = 0; i < 3; i++) {
-			renderPoint(mesh, node->face(), i, textured, invMeshMatrix, texMatrix);
-		}
-	}
- }
-}
 
