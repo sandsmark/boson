@@ -37,6 +37,8 @@
 #include "../bosonprofiling.h"
 #include "../bosonpath.h"
 #include "../bolight.h"
+#include "../speciestheme.h"
+#include "../bosonparticlesystemproperties.h"
 #include "bodebug.h"
 
 #include "pythonscript.h"
@@ -962,3 +964,31 @@ void BosonScript::setRandomSeed(long int seed)
 {
   boGame->sendSystemMessage(seed, KGameMessage::IdSyncRandom);
 }
+
+void BosonScript::addParticleSystem(int player, unsigned int id, BoVector3 pos, float rot)
+{
+  if(!game())
+  {
+    boError() << k_funcinfo << "NULL game" << endl;
+    return;
+  }
+
+  Player* p = (Player*)(game()->findPlayer(player));
+
+  if(!p)
+  {
+    boError() << k_funcinfo << "No player with id " << player << endl;
+    return;
+  }
+
+  const BosonParticleSystemProperties* prop = p->speciesTheme()->particleSystemProperties(id);
+  if(!prop)
+  {
+    boError() << k_funcinfo << "No particle system properties with id " << id << " for player " << player << endl;
+    return;
+  }
+  BosonParticleSystem* s = prop->newSystem(pos, rot);
+  BosonCanvas* c = const_cast<BosonCanvas*>(boGame->canvas());
+  c->addParticleSystem(s);
+}
+
