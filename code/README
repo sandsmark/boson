@@ -26,6 +26,7 @@ Minimum software requirements:
 	libvorbis (for sound and music) - see http://www.vorbis.com
 	lib3ds (Units and building rendering) - see http://lib3ds.sf.net
 	OpenGL - The OpenGL library (should be included in your XFree Server or graphics card driver)
+	wml - Optional, for the handbook - see http://www.thewml.org
 
 
 Installation:
