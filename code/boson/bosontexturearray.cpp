@@ -58,8 +58,6 @@ void BosonTextureArray::init()
 {
  mTextures = 0;
  mCount = 0;
- mWidths = 0;
- mHeights = 0;
 }
 
 BosonTextureArray::~BosonTextureArray()
@@ -73,8 +71,6 @@ BosonTextureArray::~BosonTextureArray()
 	}
 	glDeleteTextures(mCount, &mTextures[0]);
 	delete[] mTextures;
-	delete[] mWidths;
-	delete[] mHeights;
  } else {
 	boDebug(110) << k_funcinfo << "no textures allocated" << endl;
  }
@@ -98,7 +94,6 @@ bool BosonTextureArray::createTexture(const QImage& image, GLuint texture, bool 
 
  QImage buffer;
 
- //FIXME: minimum size should be 64x64!!
  int w = nextPower2(image.width());
  int h = nextPower2(image.height());
 
@@ -117,8 +112,7 @@ bool BosonTextureArray::createTexture(const QImage& image, GLuint texture, bool 
  buffer = BosonGLWidget::convertToGLFormat(buffer);
  glBindTexture(GL_TEXTURE_2D, texture);
 
- // note: width and height MUST be a power of 2!! they must be >= 64
- // and should be <= 256
+ // note: width and height MUST be a power of 2!! they should be <= 256
  // (we already scaled above - this is rather meant as a reminder)
 
  // AB: performance: GL_UNSIGNED_BYTE is said to be the fastest format
@@ -205,8 +199,6 @@ bool BosonTextureArray::createTextures(QValueList<QImage> images, bool useMipmap
  QImage buffer;
  mCount = images.count();
  mTextures = new GLuint[mCount];
- mWidths = new int[mCount];
- mHeights = new int[mCount];
  glGenTextures(mCount, &mTextures[0]);
  for (unsigned int i = 0; i < mCount; i++) {
 	BoTextureInfo* t = new BoTextureInfo;
@@ -218,13 +210,6 @@ bool BosonTextureArray::createTextures(QValueList<QImage> images, bool useMipmap
 // boDebug(110) << k_funcinfo << "count=" << mCount << endl;
 
  for (unsigned int i = 0; i < mCount; i++) {
-	//FIXME: minimum size should be 64x64!!
-
-
-	// the original size (NOT the texture size)
-	mWidths[i] = images[i].width();
-	mHeights[i] = images[i].height();
-
 	createTexture(images[i], mTextures[i], useMipmaps);
  }
  return true;
@@ -232,8 +217,6 @@ bool BosonTextureArray::createTextures(QValueList<QImage> images, bool useMipmap
 
 int BosonTextureArray::nextPower2(int n)
 {
- // FIXME: texture must be >= 64x64
- // maybe we should always return a value >= 64
  if (n <= 0) {
 	return 1;
  }

@@ -64,40 +64,14 @@ public:
 	}
 
 	/**
-	 * @param images The width and height all images should be 2^m, minimal
-	 * 64x64. The size should not (for compatibility reasons) exceed
+	 * @param images The width and height all images should be 2^m. 
+	 * The size should not (for compatibility reasons) exceed
 	 * 256x256. If the width or height do not meet the 2^m condition the
 	 * image is scaled.
 	 **/
 	bool createTextures(QValueList<QImage> images, bool useMipmaps = true);
 	
 	static bool createTexture(const QImage& image, GLuint texture, bool useMipmaps = true);
-
-	/**
-	 * BosonTextureArray scales images if they don't fit the necessary sizes
-	 * (i.e. 2^m). If you need the original sizes you can use this.
-	 * @return The width of the original image of the ith texture
-	 **/
-	inline int width(unsigned int i) const
-	{
-		if (i >= mCount) {
-			return 0;
-		}
-		return mWidths ? mWidths[i] : 0;
-	}
-
-	/**
-	 * BosonTextureArray scales images if they don't fit the necessary sizes
-	 * (i.e. 2^m). If you need the original sizes you can use this.
-	 * @return The height of the original image of the ith texture
-	 **/
-	inline int height(unsigned int i) const
-	{
-		if (i >= mCount) {
-			return 0;
-		}
-		return mHeights ? mHeights[i] : 0;
-	}
 
 	/**
 	 * Set the texture parameter (i.e. magnification and minification
@@ -127,8 +101,6 @@ private:
 	static QIntDict<BoTextureInfo> mAllTextures; // contains *all* textures. useful for the opntions dialog, where we can change texture parameters on runtime.
 	unsigned int mCount;
 	GLuint* mTextures;
-	int* mWidths;
-	int* mHeights;
 };
 
 #endif
