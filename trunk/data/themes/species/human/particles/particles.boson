@@ -583,7 +583,7 @@ EndSize=2.5
 SystemLife=1
 Texture=smoke
 
-[GeneralSmokeTrace]
+[DaisyCutter-GeneralSmokeTrace]
 Id=11110
 MinVelocity=0.2,0.2,0.2
 MaxVelocity=0.2,0.2,0.2
@@ -603,7 +603,7 @@ SystemLife=3600
 Align=true
 Texture=smoke
 
-[MissileFireTrace]
+[DaisyCutter-MissileFireTrace]
 Id=11120
 MinVelocity=0,0,0
 MaxVelocity=0,0,0
