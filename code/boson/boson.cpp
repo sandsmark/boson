@@ -569,10 +569,8 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 			flag = 0;
 		}
 		if (flag == 0) {
-			if (isServer()) {
+			if (isAdmin()) {
 				connect(d->mGameTimer, SIGNAL(timeout()), this, SLOT(slotSendAdvance()));
-			} else if (!isServer()) {
-				boWarning() << "is not server - cannot start the game!" << endl;
 			}
 		} else if (flag == 1) {
 			boWarning() << k_funcinfo << "starting to re-play from log..." << endl;
