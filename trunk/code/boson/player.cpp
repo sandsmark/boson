@@ -85,58 +85,53 @@ Player::~Player()
 
 void Player::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 sender, KPlayer*)
 {
-// note: this is kind of obsolete. IdStopMoving is the only ID still used here -
-// and that is rather for debugging. It is not needed. (Only historical
-// reasons).
-// The entire KGameProperty stuff is also unused as properties of a unit all
-// have PolicyLocal. 
+ // there are only very few messages handled here. Only those that have
+ // PolicyClean or PolicyDirty. All others are in slotUnitPropertiesChanged()
 
- kdDebug() << k_funcinfo << " is obsolete" << endl;
-
-/*
  QDataStream stream(buffer, IO_ReadOnly);
  bool issender = true;
  if (game()) {
 	issender = sender == game()->gameId();
  }
-// kdDebug() << "slotNetworkData" << endl;
 // first check if the message is a property of a unit
  QPtrListIterator<Unit> it(d->mUnits);
- while(it.current() && !it.current()->dataHandler()->processMessage(stream, msgid, issender)) {
+ while(it.current() && !it.current()->dataHandler()->processMessage(stream, msgid + KGamePropertyBase::IdUser, issender)) {
 	++it;
  }
  Unit* unit = it.current();
  if (unit) { // this was a unit property
-	// note this part is completely obsolete!
+	// there are only very few messages which are handled here! try to avoid
+	// this!
 	QDataStream stream2(buffer, IO_ReadOnly);
-	int propertyId;
+	int propertyId = 0;
 	KGameMessage::extractPropertyHeader(stream2, propertyId);
-	kdDebug() << "unit property" << endl;
-
-	switch (propertyId) { // arghh - ID of datahandler()
-		case UnitBase::IdWork:
-		case Unit::IdDirection:
-		case Unit::IdWaypoints:
+	switch (propertyId) {
+		case KGamePropertyBase::IdCommand: // KGamePropertyList or KGamePropertyArray
+		{
+			int cmd = 0;
+			KGameMessage::extractPropertyCommand(stream2, propertyId, cmd);
+			switch (propertyId) {
+				case Unit::IdWaypoints:
+					// waypoints have PolicyClean, so they 
+					// send a message which is handled here.
+					break;
+				default:
+					break;
+			}
 			break;
-		case UnitBase::IdSpeed:
-		case UnitBase::IdHealth:
-		case UnitBase::IdArmor:
-		case UnitBase::IdShields:
-		case UnitBase::IdCost: // can change during the game, too!!
-			// currently unused - nevertheless display the value if
-			// selected
-			kdDebug() << "emit unit changed" << endl;
-			emit signalUnitChanged(unit);
-			break;
+		}
+		case Unit::IdWork:
+		//...
 		default:
+			// completely unused
 			break;
 	}
 	return;
- }*/
+ }
 
  // this wasn't a unit property but a normal message
  switch (msgid) {
-	// none here currently
+	// nothing done here currently
 	default:
 		kdWarning() << "Unknown message " << msgid << endl;
 		break;

@@ -61,7 +61,7 @@ public:
 
 	BosonMap* mMap; // just a pointer - no memory allocated
 
-	QMap<Unit*, int> mWorkChanged; // Unit::setWork() has been called on these units
+	QMap<Unit*, int> mWorkChanged; // Unit::setWork() has been called on these units. FIXME: the int parameter is obsolete
 
 	QPtrList<QCanvasItem> mAnimList; // see BosonCanvas::slotAdvance()
 	QPtrList<Unit> mWorkNone;
@@ -671,6 +671,9 @@ bool BosonCanvas::cellOccupied(int x, int y)
 bool BosonCanvas::cellOccupied(int x, int y, Unit* unit)
 {
 // qt bug (confirmed). will be fixed in 3.1
+ if (unit->isFlying()) {
+	return false; // even if there are other flying units - different altitudes!
+ }
 #if QT_VERSION >= 310
  QCanvasItemList list = collisions(QRect(x * BO_TILE_SIZE, y * BO_TILE_SIZE,
 		BO_TILE_SIZE, BO_TILE_SIZE));
@@ -701,12 +704,12 @@ bool BosonCanvas::cellOccupied(int x, int y, Unit* unit)
 }
 
 
-void BosonCanvas::setWorkChanged(Unit* u, int oldWork)
+void BosonCanvas::setWorkChanged(Unit* u, int oldWork) // FIXME: oldWork is obsolete
 {
  if (d->mWorkChanged.contains(u)) {
 	d->mWorkChanged.remove(u);
  }
- d->mWorkChanged.insert(u, oldWork);
+ d->mWorkChanged.insert(u, oldWork); // FIXME: use a QPtrList or so. oldWork is obsolete
 }
 
 void BosonCanvas::changeWork()
@@ -717,26 +720,15 @@ void BosonCanvas::changeWork()
  QMap<Unit*, int>::Iterator it;
  for (it = d->mWorkChanged.begin(); it != d->mWorkChanged.end(); ++it) {
 	Unit* u = it.key();
-	switch (it.data()) { // oldwork
-		case UnitBase::WorkNone:
-			d->mWorkNone.removeRef(u);
-			break;
-		case UnitBase::WorkProduce:
-			d->mWorkProduce.removeRef(u);
-			break;
-		case UnitBase::WorkMove:
-			d->mWorkMove.removeRef(u);
-			break;
-		case UnitBase::WorkMine:
-			d->mWorkMine.removeRef(u);
-			break;
-		case UnitBase::WorkAttack:
-			d->mWorkAttack.removeRef(u);
-			break;
-		case UnitBase::WorkConstructed:
-			d->mWorkConstructed.removeRef(u);
-			break;
-	}
+
+	// remove from all lists.
+	d->mWorkNone.removeRef(u);
+	d->mWorkProduce.removeRef(u);
+	d->mWorkMove.removeRef(u);
+	d->mWorkMine.removeRef(u);
+	d->mWorkAttack.removeRef(u);
+	d->mWorkConstructed.removeRef(u);
+
 	if (d->mDestroyedUnits.contains(u)) {
 		continue;
 	}
@@ -767,3 +759,4 @@ void BosonCanvas::changeWork()
  }
  d->mWorkChanged.clear();
 }
+
