@@ -25,7 +25,7 @@
 #define SP_THICK	4
 #define SP_CORNER_LEN	15
 #define SP_CORNER_POS	8
-#define SP_W		35
+#define SP_W		(PART_NB*2)
 #define SP_H		(SP_CORNER_LEN+SP_CORNER_POS)
 
 extern QCanvas	*vcanvas;
@@ -49,10 +49,10 @@ selectPart::selectPart(int _f, int _z, sp_type type)
 		if (!qsps_up) qsps_up = initStatic(PART_UP);
 		setSequence(qsps_up);
 	}
-	boAssert(_f>=0);
-	boAssert(_f<PART_NB);
-	if (_f<0 ) _f = 0;
-	if (_f>= PART_NB ) _f = PART_NB-1;
+	// no segfault with buggy values for _f
+	boAssert(_f>=0); if (_f<0 ) _f = 0;
+	boAssert(_f<=PART_NB); if (_f>= PART_NB ) _f = PART_NB-1;
+	// actually do it
 	setFrame(_f);
 	setZ ( _z + 1);
 
@@ -66,7 +66,7 @@ selectPart::selectPart(int _f, int _z, sp_type type)
 void drawSelectBox(QPainter &painter, QColor c1, QColor c2, int power)
 {
 	QPen	pen(Qt::red);
-	int	len =  3 * ( PART_NB-1-power);
+	int	len =  2 * ( PART_NB-1-power);
 
 	painter.setPen(pen);
 	/* "scrollbar" */

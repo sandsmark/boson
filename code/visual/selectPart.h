@@ -24,10 +24,10 @@
 
 #include <qcanvas.h>
 #include "sprites.h"		// S_PART
-#include "common/unit.h"	// MAX_POWER
+#include "common/unit.h"	// POWER_LEVELS
 
 
-#define PART_NB		(MAX_POWER)
+#define PART_NB		(POWER_LEVELS)
 
 class selectPart : public QCanvasSprite
 {

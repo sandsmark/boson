@@ -36,7 +36,7 @@ class serverUnit : public knownBy
 {
 public:
 	serverUnit(boBuffer *b, unitMsg_t *msg)
-		{ buffer = b; __x=msg->x; __y=msg->y; state = 0; power = MAX_POWER; contain = 0; counter = -1; }
+		{ buffer = b; __x=msg->x; __y=msg->y; state = 0; power = POWER_LEVELS-1; contain = 0; counter = -1; }
 
 protected:
 	boBuffer	*buffer;
