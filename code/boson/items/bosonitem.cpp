@@ -94,7 +94,7 @@ QPointArray BosonItem::cells() const
  rightBottomCell(&right, &bottom);
  right = QMIN(right, QMAX((int)canvas()->mapWidth() - 1, 0));
  bottom = QMIN(bottom, QMAX((int)canvas()->mapHeight() - 1, 0));
- return cells(left, right, top, bottom, canvas());
+ return cells(left, right, top, bottom);
 }
 
 QPointArray BosonItem::cells(int left, int right, int top, int bottom)
