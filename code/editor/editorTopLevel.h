@@ -149,6 +149,7 @@ private:
 	QPushButton	*tiles[TILES_NB];
 	QPushButton	*bigTiles[BIG_TILES_NB];
 
+	BoEditorApp	*beapp;
 
 
 };

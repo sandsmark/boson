@@ -71,7 +71,24 @@ static void fillGroundPixmap( QPixmap *p, int g)
 editorTopLevel::editorTopLevel( BoEditorApp *app,  const char *name, WFlags f)
 	: visualTopLevel(name,f)
 	, mw(this)
+	, beapp(app)
 {
+
+	/* init the statusBar
+	 * remember that ecanvas has been initialised in main.cpp before any editorTopLevel
+	 */
+	QLabel *label;
+	QHBox *qhb;
+	KStatusBar *ksb = statusBar();
+
+	qhb   = new QHBox(ksb, "unitsInfoBox");
+	label = new QLabel(" Mobiles : ", qhb);
+	label = new QLabel("?", qhb);
+	connect(ecanvas , SIGNAL(mobileNbUpdated(int)), label, SLOT(setNum(int)));
+	label = new QLabel("  Facilities : ", qhb);
+	label = new QLabel("?", qhb);
+	connect(ecanvas , SIGNAL(facilityNbUpdated(int)), label, SLOT(setNum(int)));
+	ksb->addWidget(qhb);
 
 	/* toplevelwindow-specific actions */
 	(void) new KAction(
@@ -502,6 +519,7 @@ void editorTopLevel::slot_editDestroy(void)
 		/* destroy fix */
 		mkey = fixSelected->key;
 		unSelectFix();
+		_canvas->destroyFixUnit(mkey);
 		_canvas->facilities.remove(mkey);
 	} else {
 		/* destroy mobiles */
@@ -509,7 +527,7 @@ void editorTopLevel::slot_editDestroy(void)
 		for (selIt.toFirst(); selIt;) {			// ++ not needed, selIt should be increased
 			mkey = selIt.currentKey(); 		// by the .remove() in unselect
 			unSelectMob(mkey);
-			_canvas->mobiles.remove(mkey);
+			_canvas->destroyMobUnit(mkey);
 		}
 	}
 	_canvas->update();
@@ -530,9 +548,8 @@ void editorTopLevel::updateViews(void)
 
 bool editorTopLevel::queryExit()
 {
-//	logf(LOG_INFO, "queryExit called");
-	BoEditorApp *app = (BoEditorApp *) kapp;
-	return app->slot_close();
+	logf(LOG_INFO, "queryExit called");
+	return beapp->slot_close();
 }
 
 
