@@ -238,6 +238,8 @@ public:
 	UnitAction RMBAction() const { return (UnitAction)(mRMBAction->value()); }
 	void setMouseWheelAction(CameraAction action) { mMouseWheelAction->setValue((int)action); }
 	CameraAction mouseWheelAction() const { return (CameraAction)(mMouseWheelAction->value()); }
+	void setMouseWheelShiftAction(CameraAction action) { mMouseWheelShiftAction->setValue((int)action); }
+	CameraAction mouseWheelShiftAction() const { return (CameraAction)(mMouseWheelShiftAction->value()); }
 
 	void setUnitSoundActivated(UnitSoundEvent e, bool activated);
 	bool unitSoundActivated(UnitSoundEvent e) const;
@@ -322,6 +324,7 @@ private:
 	BoConfigBoolEntry* mAlignSelectionBoxes;
 	BoConfigIntEntry* mRMBAction;
 	BoConfigIntEntry* mMouseWheelAction;
+	BoConfigIntEntry* mMouseWheelShiftAction;
 
 	// NOT stored to config file!
 	bool mDisableSound;
