@@ -1,8 +1,8 @@
 <!DOCTYPE kpartgui SYSTEM "kpartgui.dtd">
 <kpartgui name="boson" version="4">
 <MenuBar>
-  <DefineGroup name="filemenu" />
   <DefineGroup name="editormenu" />
+  <DefineGroup name="filemenu" />
   <DefineGroup name="gamemenu" />
   <DefineGroup name="settingsmenu" />
   <DefineGroup name="windowmenu" />
