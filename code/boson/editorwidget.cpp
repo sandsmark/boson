@@ -442,7 +442,7 @@ void EditorWidget::slotEditHeight(bool on)
 {
  if (on) {
 	BoSpecificAction action;
-  action.setType(ActionChangeHeight);
+	action.setType(ActionChangeHeight);
 	displayManager()->slotAction(action);
  } else {
 	displayManager()->unlockAction();
