@@ -36,14 +36,14 @@
 
 #define EX(s) ((s)*BO_TILE_SIZE)
 mobileProperties_t mobileProp[] = {
-	{"ship",		EX(2), EX(2),  4, 5,	200, 100, 3, BO_GO_SEA},	// MOB_SHIP
-	{"quad",		EX(1), EX(1),  3, 2,	200, 100, 2, BO_GO_EARTH},	// MOB_QUAD
-	{"oilharvester",	EX(1), EX(1),  2, 0,	200, 100, 1, BO_GO_EARTH},	// MOB_OIL_HARVESTER
-	{"mineralharvester",	EX(1), EX(1),  2, 0,	200, 100, 1, BO_GO_EARTH},	// MOB_MINERAL_HARVESTER
-	{"aircraft",		EX(2), EX(2),  4, 4,	200, 100, 3, BO_GO_AIR},	// MOB_AIRCRAFT
+	{"ship",		EX(2), EX(2),  4, 5,	150, 20, 3, BO_GO_SEA},	// MOB_SHIP
+	{"quad",		EX(1), EX(1),  3, 2,	 50, 20, 2, BO_GO_EARTH},	// MOB_QUAD
+	{"oilharvester",	EX(1), EX(1),  2, 0,	100, 20, 1, BO_GO_EARTH},	// MOB_OIL_HARVESTER
+	{"mineralharvester",	EX(1), EX(1),  2, 0,	100, 20, 1, BO_GO_EARTH},	// MOB_MINERAL_HARVESTER
+	{"aircraft",		EX(2), EX(2),  4, 4,	120, 20, 3, BO_GO_AIR},	// MOB_AIRCRAFT
 	};
-//	                        width          visibility    oil  speed
-//	                               height     range mineral      goFlag
+//	                        width          visibility    oil speed
+//	                               height     range mineral     goFlag
 
 /*
 	char 	*name;		// Guess it, geek..
@@ -56,17 +56,17 @@ mobileProperties_t mobileProp[] = {
 */
 	
 facilityProperties_t facilityProp[] = {
-	{"comsat"	, EX(2), EX(2), 7,  0,	300, 100},	// FACILITY_COMSAT
-	{"helipad"	, EX(2), EX(2), 6,  0,	300, 100},	// FACILITY_HELIPAD
-	{"powerplant"	, EX(2), EX(2), 3,  0,	300, 100},	// FACILITY_POWERPLANT
-	{"warfactory"	, EX(2), EX(2), 3,  0,	300, 100},	// FACILITY_WAR_FACTORY
-	{"barracks"	, EX(2), EX(2), 3,  0,	300, 100},	// FACILITY_BARRACKS
-	{"cmdbunker"	, EX(3), EX(3), 3,  0,	300, 100},	// FACILITY_CMDBUNKER
-	{"samsite"	, EX(1), EX(1), 4,  0,	300, 100},	// FACILITY_SAMSITE
-	{"oiltower"	, EX(1), EX(1), 2,  0,	300, 100},	// FACILITY_OILTOWER
-	{"refinery"	, EX(2), EX(2), 3,  0,	300, 100},	// FACILITY_REFINERY
-	{"repairpad"	, EX(2), EX(2), 4,  0,	300, 100},	// FACILITY_REPAIRPAD
-	{"turret"	, EX(1), EX(1), 5,  5,	300, 100},	// FACILITY_TURRET
+	{"comsat"	, EX(2), EX(2), 7,  0,	1000, 40},	// FACILITY_COMSAT
+	{"helipad"	, EX(2), EX(2), 6,  0,	800, 40},	// FACILITY_HELIPAD
+	{"powerplant"	, EX(2), EX(2), 3,  0,	1200, 40},	// FACILITY_POWERPLANT
+	{"warfactory"	, EX(2), EX(2), 3,  0,	3000, 40},	// FACILITY_WAR_FACTORY
+	{"barracks"	, EX(2), EX(2), 3,  0,	800, 40},	// FACILITY_BARRACKS
+	{"cmdbunker"	, EX(3), EX(3), 3,  0,	3000, 40},	// FACILITY_CMDBUNKER
+	{"samsite"	, EX(1), EX(1), 4, 25,	800, 40},	// FACILITY_SAMSITE
+	{"oiltower"	, EX(1), EX(1), 2,  0,	100, 40},	// FACILITY_OILTOWER
+	{"refinery"	, EX(2), EX(2), 3,  0,	800, 40},	// FACILITY_REFINERY
+	{"repairpad"	, EX(2), EX(2), 4,  0,	1000, 40},	// FACILITY_REPAIRPAD
+	{"turret"	, EX(1), EX(1), 5,  5,	200, 40},	// FACILITY_TURRET
 	};
 //	                                        mineral
 //	                  width         visibility
