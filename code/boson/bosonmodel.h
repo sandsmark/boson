@@ -139,6 +139,7 @@ private:
 	BoMesh** mMeshes;
 };
 
+class BosonModelPrivate;
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
  */
@@ -380,13 +381,12 @@ private:
 	void init();
 
 private:
-	class Private;
 	friend class KGameModelDebug;
 
 private:
 	static BosonModelTextures* mModelTextures;
 
-	Private* d;
+	BosonModelPrivate* d;
 
 	float mWidth;
 	float mHeight;

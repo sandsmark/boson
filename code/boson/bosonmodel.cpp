@@ -540,10 +540,10 @@ public:
 };
 
 
-class BosonModel::Private
+class BosonModelPrivate
 {
 public:
-	Private()
+	BosonModelPrivate()
 	{
 		mPoints = 0;
 	}
@@ -575,7 +575,7 @@ BosonModel::BosonModel(const QString& dir, const QString& file, float width, flo
 
 void BosonModel::init()
 {
- d = new Private;
+ d = new BosonModelPrivate;
  mWidth = 0;
  mHeight = 0;
  d->mMeshes.setAutoDelete(true);
