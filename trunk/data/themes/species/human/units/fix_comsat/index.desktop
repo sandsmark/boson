@@ -15,3 +15,8 @@ ProductionTime=110
 [Boson Facility]
 ConstructionSteps=18
 
+[OpenGL]
+FrameStartIdle=0
+FrameRangeIdle=50
+FrameSpeedIdle=1
+
