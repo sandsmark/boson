@@ -18,7 +18,6 @@
 */
 
 #include "bosonaudio.h"
-#include "bosonaudio.moc"
 
 #include "../defines.h"
 #include "bodebug.h"
@@ -32,7 +31,7 @@
 #include <qstringlist.h>
 #include <qdict.h>
 
-static bool BosonAudio::mCreated = false;
+bool BosonAudio::mCreated = false;
 
 
 class BosonAudioPrivate
