@@ -402,8 +402,8 @@ void BosonWidget::initGameCommandFrame()
  d->mCommandFrameDock->hide();
  d->mCommandFrame->reparentMiniMap(minimap());
 
- connect(game(), SIGNAL(signalUpdateProduction(Facility*)),
-		d->mCommandFrame, SLOT(slotUpdateProduction(Facility*)));
+ connect(game(), SIGNAL(signalUpdateProduction(Unit*)),
+		d->mCommandFrame, SLOT(slotUpdateProduction(Unit*)));
  connect(d->mCommandFrameDock, SIGNAL(iMBeingClosed()), this, SIGNAL(signalCmdFrameDockHidden()));
  connect(d->mCommandFrameDock, SIGNAL(hasUndocked()), this, SIGNAL(signalCmdFrameDockHidden()));
 

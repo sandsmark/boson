@@ -111,7 +111,7 @@ BoShot::~BoShot()
  delete d;
 }
 
-void BoShot::advance(int phase)
+void BoShot::advance(int phase) // AB: phase is obsolete for BosonCanvas
 {
  if (phase == 1) {
 	if (d->mDelay > 0) {

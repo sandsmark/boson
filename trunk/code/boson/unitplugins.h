@@ -24,15 +24,86 @@
 
 class Unit;
 class SpeciesTheme;
+class UnitProperties;
+class BosonCanvas;
+class Cell;
+class Player;
 
-class ProductionPlugin
+class UnitPlugin
+{
+	public:
+	enum UnitPlugins {
+		PluginStart = 0, // MUST be the first!
+		Production = 1,
+		Repair = 2,
+		Harvester = 3,
+
+		PluginEnd // MUST be the last entry!
+	};
+
+	UnitPlugin(Unit* unit);
+	virtual ~UnitPlugin();
+
+	inline Unit* unit() const { return mUnit; }
+
+	/**
+	 * Convenience method for unit()->speciesTheme()
+	 **/
+	SpeciesTheme* speciesTheme() const;
+
+	/**
+	 * Convenience method for unit()->owner()
+	 **/
+	Player* player() const;
+
+	/**
+	 * Convenience method for unit()->unitProperties()
+	 **/
+	const UnitProperties* unitProperties() const;
+
+	/**
+	 * Convenience method for unit()->canvas()
+	 **/
+	BosonCanvas* canvas() const;
+
+	/**
+	 * Convenience method for unit()->dataHandler()
+	 **/
+	KGamePropertyHandler* dataHandler() const;
+
+	virtual int pluginType() const = 0;
+
+	/**
+	 * Note that this must not change! If you make this configurable you
+	 * should use a KGameProperty with clean policy in a global class or at
+	 * least in Player.
+	 *
+	 * This value MUST be exactly the same on ALL clients!
+	 * @return How often the @ref advance mehtod gets called for this @ref
+	 * pluginType.
+	virtual unsigned int advanceInterval() const = 0;
+	 **/
+
+	/**
+	 * Note that this functions must not change @ref Unit::currentPlugin!
+	 * @param advanceCount See @ref BosonCanvas::slotAdvance. You can use
+	 * this to do expensive calculations only as seldom as possible. Note
+	 * that there is still some overhead, since this advance method still
+	 * gets called!
+	 **/
+	virtual void advance(unsigned int advanceCount) = 0;
+
+private:
+	Unit* mUnit;
+};
+
+class ProductionPlugin : public UnitPlugin
 {
 public:
 	ProductionPlugin(Unit* unit);
 	~ProductionPlugin();
 
-	SpeciesTheme* speciesTheme() const;
-	inline Unit* unit() const { return mUnit; }
+	virtual int pluginType() const { return Production; }
 
 	/**
 	 * @return Whether there are any productions pending for this unit.
@@ -89,10 +160,9 @@ public:
 
 	bool canPlaceProductionAt(const QPoint& pos);
 
-	void advance();
+	virtual void advance(unsigned int);
 
 private:
-	Unit* mUnit;
 	KGamePropertyList<unsigned long int> mProductions;
 	KGameProperty<unsigned int> mProductionState;
 };
@@ -104,13 +174,13 @@ private:
  * Nevertheless I don't entegrate the functionality into Unit since it should
  * get some more testing
  **/
-class RepairPlugin
+class RepairPlugin : public UnitPlugin
 {
 public:
 	RepairPlugin(Unit* owner);
 	~RepairPlugin();
 
-	Unit* unit() const { return mUnit; }
+	virtual int pluginType() const { return Repair; }
 
 	/**
 	 * Order to repair unit. For a repairyard this means the unit will move
@@ -131,10 +201,46 @@ public:
 	 **/
 	void repairInRange();
 
+
+	// does nothing, yet. plugin is experimental anyway.
+	virtual void advance(unsigned int) {}
+
 private:
-	Unit* mUnit;
-//	KGameProperty<unsigned int> mAdvanceCount;
-//	KGamePropertyList<unsigned long int> mRepairList;
+};
+
+class HarvesterPlugin : public UnitPlugin
+{
+public:
+	HarvesterPlugin(Unit* owner);
+	~HarvesterPlugin();
+
+	virtual int pluginType() const { return Harvester; }
+
+	virtual void advance(unsigned int);
+	void advanceMine();
+	void advanceRefine();
+
+	int resourcesX() const { return mResourcesX; }
+	int resourcesY() const { return mResourcesY; }
+	unsigned int resourcesMined() const { return mResourcesMined; }
+
+	void mineAt(const QPoint& pos);
+	void refineAt(Unit* refinery);
+
+	void setRefinery(Unit* refinery);
+
+	bool canMine(Cell* cell) const;
+
+	inline Unit* refinery() const { return mRefinery; }
+
+private:
+	KGameProperty<int> mResourcesX;
+	KGameProperty<int> mResourcesY;
+	KGameProperty<unsigned int> mResourcesMined;
+
+	KGameProperty<int> mHarvestingType; // either mining or refining
+
+	Unit* mRefinery; // TODO we need to store this when Unit::save() is called!
 };
 
 #endif

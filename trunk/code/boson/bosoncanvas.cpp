@@ -39,6 +39,7 @@
 #include <qbitmap.h>
 #include <qdatetime.h>
 #include <qtimer.h>
+#include <qpointarray.h>
 
 #include <unistd.h>
 
@@ -117,16 +118,11 @@ private:
 class FogOfWar
 {
 public:
-	FogOfWar(QCanvasPixmapArray* a, BosonCanvas* c) 
+	FogOfWar(BosonCanvas* )
 		// TODO
 	{
 	}
 	virtual int rtti() const { return RTTI::FogOfWar; }
-
-	virtual bool collidesWith(const QCanvasItem*) const
-	{
-		return false;
-	}
 
 	void setVisible(bool) {}
 	void move(float , float ) { }
@@ -139,7 +135,7 @@ public:
 	BosonCanvasPrivate()
 	{
 		mMap = 0;
-		mFogPixmap = 0;
+//		mFogPixmap = 0;
 
 		mLoader = 0;
 
@@ -150,7 +146,7 @@ public:
 	QPtrList<Unit> mDestroyedUnits;
 	QPtrList<BoShot> mDeleteShot;
 	QPtrDict<FogOfWar> mFogOfWar;
-	QCanvasPixmapArray* mFogPixmap;
+//	QCanvasPixmapArray* mFogPixmap;
 	BoDisplayManager* mDisplayManager;
 
 	BosonMap* mMap; // just a pointer - no memory allocated
@@ -159,10 +155,7 @@ public:
 
 	QPtrList<BosonSprite> mAnimList; // see BosonCanvas::slotAdvance()
 	QPtrList<Unit> mWorkNone;
-	QPtrList<Unit> mWorkProduce;
 	QPtrList<Unit> mWorkMove;
-	QPtrList<Unit> mWorkMine;
-	QPtrList<Unit> mWorkRefine;
 	QPtrList<Unit> mWorkAttack;
 	QPtrList<Unit> mWorkFollow;
 	QPtrList<Unit> mWorkConstructed;
@@ -187,6 +180,8 @@ void BosonCanvas::init()
 
  d->mLoader = new TileLoader(this);
  connect(d->mLoader->tileSet(), SIGNAL(signalTilesLoading(int)), this, SIGNAL(signalTilesLoading(int)));
+
+ mUnitPluginsLocked = false;
 }
 
 BosonCanvas::~BosonCanvas()
@@ -194,7 +189,7 @@ BosonCanvas::~BosonCanvas()
 kdDebug()<< k_funcinfo << endl;
  quitGame();
  delete d->mLoader;
- delete d->mFogPixmap;
+// delete d->mFogPixmap;
  delete d;
 kdDebug()<< k_funcinfo <<"done"<< endl;
 }
@@ -207,10 +202,7 @@ void BosonCanvas::quitGame()
  d->mDeleteShot.clear();
 
  d->mWorkNone.clear();
- d->mWorkProduce.clear();
  d->mWorkMove.clear();
- d->mWorkMine.clear();
- d->mWorkRefine.clear();
  d->mWorkAttack.clear();
  d->mWorkFollow.clear();
  d->mWorkConstructed.clear();
@@ -298,12 +290,6 @@ Unit* BosonCanvas::findUnitAt(const QPoint& pos)
  return 0;
 }
 
-void BosonCanvas::advance()
-{
-// we use slotAdvance() now.
- kdError() << k_funcinfo << "is obsolete!!" << endl;
-}
-
 void BosonCanvas::slotAdvance(unsigned int advanceCount)
 {
 // we cannot use QCanvas::advance() as it advances the animated items in an
@@ -323,13 +309,17 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount)
 // the lists.
 	
  QPtrListIterator<BosonSprite> animIt(d->mAnimList);
+ lockUnitPlugins(); // plugins must not change while their advance() methods get called
  while (animIt.current()) {
 	// the only thing done here is to increase the reload counter. perhaps
 	// we should add a separate list containing all units which are
 	// realoading instead? would save a lot of function calls...
-	animIt.current()->advance(0);
+	// UPDATE: now we also call the UnitPlugin::advance() here, if work() ==
+	// WorkPlugin && currentPlugin() != 0
+	animIt.current()->advance(advanceCount);
 	++animIt;
  }
+ unlockUnitPlugins();
 
  if (d->mWorkNone.count() > 0 && (advanceCount % 10) == 0) {
 	QPtrListIterator<Unit> it(d->mWorkNone);
@@ -338,42 +328,13 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount)
 		++it;
 	}
  }
- if (d->mWorkProduce.count() > 0 && (advanceCount % 1) == 0) {// always true. should be be bigger, like % 10 or so. we need to change something in the production logic for this.
-	QPtrListIterator<Unit> it(d->mWorkProduce);
-	while (it.current()) {
-		if (!it.current()->productionPlugin()) {
-			kdWarning() << k_lineinfo << "unit cannot produce" << endl;
-			it.current()->setWork(Unit::WorkNone);
-		} else {
-			it.current()->productionPlugin()->advance();
-		}
-		++it;
-	}
- }
+
  if ((d->mWorkMove.count() > 0) && (advanceCount % 1) == 0) { // always true
 	QPtrListIterator<Unit> it(d->mWorkMove);
 	while (it.current()) {
 		if (!it.current()->isDestroyed()) {
 			it.current()->advanceMove(); // move
 			it.current()->advanceMoveCheck(); // safety check for advanceMove(). See comments in Unit::moveBy()
-		}
-		++it;
-	}
- }
- if (d->mWorkMine.count() > 0 && (advanceCount % 40) == 0) {
-	QPtrListIterator<Unit> it(d->mWorkMine);
-	while (it.current()) {
-		if (!it.current()->isDestroyed()) {
-			it.current()->advanceMine();
-		}
-		++it;
-	}
- }
- if (d->mWorkRefine.count() > 0 && (advanceCount % 40) == 0) {
-	QPtrListIterator<Unit> it(d->mWorkRefine);
-	while (it.current()) {
-		if (!it.current()->isDestroyed()) {
-			it.current()->advanceRefine();
 		}
 		++it;
 	}
@@ -409,7 +370,14 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount)
  }
  animIt.toFirst();
  while (animIt.current()) {
-	animIt.current()->advance(1);
+	// now move *without* collision detection. collision detection should
+	// have been done above - especially in advanceMoveCheck() methods.
+	// AB: do NOT add something here - if you add something for units then
+	// check for isDestroyed() !!
+	BosonSprite* s = animIt.current();
+	if (s->xVelocity() || s->yVelocity()) {
+		s->moveBy(s->xVelocity(), s->yVelocity(), 0.0);
+	}
 	++animIt;
  }
 
@@ -688,6 +656,7 @@ void BosonCanvas::fogLocal(int x, int y)
  // only the *local* fow, i.e. the fog of the local player.
  // Same is valid for unfogLocal.
 
+/*
  if (!d->mFogPixmap) {
 	return;
  }
@@ -705,6 +674,7 @@ void BosonCanvas::fogLocal(int x, int y)
  fog->setZ(Z_FOG_OF_WAR);
  fog->setVisible(true);
  d->mFogOfWar.insert(c, fog);
+ */
 }
 
 void BosonCanvas::unfogLocal(int x, int y)
@@ -725,6 +695,7 @@ void BosonCanvas::unfogLocal(int x, int y)
 
 void BosonCanvas::initFogOfWar(Player* p)
 {
+/*
  if (!d->mFogPixmap) {
 	QString fogPath = locate("data", "boson/themes/fow.xpm");
 	d->mFogPixmap = new QCanvasPixmapArray(fogPath);
@@ -757,6 +728,7 @@ void BosonCanvas::initFogOfWar(Player* p)
 		}
 	}
  }
+ */
 }
 
 QValueList<Unit*> BosonCanvas::unitCollisionsInRange(const QPoint& pos, int radius) const
@@ -860,10 +832,7 @@ void BosonCanvas::changeWork()
 
 	// remove from all lists.
 	d->mWorkNone.removeRef(u);
-	d->mWorkProduce.removeRef(u);
 	d->mWorkMove.removeRef(u);
-	d->mWorkMine.removeRef(u);
-	d->mWorkRefine.removeRef(u);
 	d->mWorkAttack.removeRef(u);
 	d->mWorkFollow.removeRef(u);
 	d->mWorkConstructed.removeRef(u);
@@ -879,17 +848,8 @@ void BosonCanvas::changeWork()
 		case UnitBase::WorkNone:
 			d->mWorkNone.append(u);
 			break;
-		case UnitBase::WorkProduce:
-			d->mWorkProduce.append(u);
-			break;
 		case UnitBase::WorkMove:
 			d->mWorkMove.append(u);
-			break;
-		case UnitBase::WorkMine:
-			d->mWorkMine.append(u);
-			break;
-		case UnitBase::WorkRefine:
-			d->mWorkRefine.append(u);
 			break;
 		case UnitBase::WorkAttack:
 			d->mWorkAttack.append(u);
@@ -899,6 +859,9 @@ void BosonCanvas::changeWork()
 			break;
 		case UnitBase::WorkConstructed:
 			d->mWorkConstructed.append(u);
+			break;
+		case UnitBase::WorkPlugin:
+			// nothing to do here. handled in Unit::advance()
 			break;
 		case UnitBase::WorkDestroyed:
 			// nothing to do here. is in d->mDestroyedUnits
@@ -1076,7 +1039,7 @@ BoItemList BosonCanvas::bosonCollisions(const QPoint& pos) const
  // pos is canvas coordinates!
  QPointArray cells(1);
  cells[0] = pos / BO_TILE_SIZE;
- kdDebug() << k_funcinfo << cells[0].x() << " " << cells[0].y() << endl;
+// kdDebug() << k_funcinfo << cells[0].x() << " " << cells[0].y() << endl;
  return bosonCollisions(cells, 0, true); // FIXME: ecact = true has no effect
 }
 

@@ -21,7 +21,6 @@
 
 #include "bosonbigdisplaybase.h"
 
-#include <qcanvas.h>
 #include <qptrlist.h>
 
 class KGameIO;

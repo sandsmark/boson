@@ -158,7 +158,7 @@ public slots:
 	 * Should be called when the production of the factory changes, i.e. is
 	 * stopped/paused or started.
 	 **/
-	void slotUpdateProduction(Facility* factory);
+	void slotUpdateProduction(Unit* factory);
 
 	/**
 	 * If the selected unit is a facility that has not been constructed

@@ -73,7 +73,8 @@ public:
 	void setMiner(MobileUnit* miner)
 	{
 		const HarvesterProperties* prop = (HarvesterProperties*)miner->properties(PluginProperties::Harvester);
-		if (!prop->canMineMinerals() && !prop->canMineOil()) {
+		HarvesterPlugin* h = (HarvesterPlugin*)miner->plugin(UnitPlugin::Harvester);
+		if (!prop || (!prop->canMineMinerals() && !prop->canMineOil()) || !h) {
 			return;
 		}
 		if (prop->canMineMinerals()) {
@@ -83,7 +84,7 @@ public:
 		}
 
 		unsigned int max = prop->maxResources();
-		unsigned int r = miner->resourcesMined();
+		unsigned int r = h->resourcesMined();
 		double p = (double)(r * 100) / (double)max;
 		mProgress->setValue((int)p);
 	}
@@ -224,7 +225,7 @@ void BoOrderWidget::setOrderButtons(QValueList<unsigned long int> produceList, P
  unsigned long int unitType = 0;
  ProductionPlugin* production = 0;
  if (factory) {
-	production = factory->productionPlugin();
+	production = (ProductionPlugin*)factory->plugin(UnitPlugin::Production);
 	if (!production) {
 		kdDebug() << k_funcinfo << "factory cannot produce" << endl;
 	} else if (production->hasProduction()) {
@@ -241,7 +242,7 @@ void BoOrderWidget::setOrderButtons(QValueList<unsigned long int> produceList, P
 			d->mOrderButton[i]->setGrayOut(true);
 		} else {
 			d->mOrderButton[i]->advanceProduction(production->productionProgress());
-			if (factory->work() != Unit::WorkProduce) {
+			if (factory->currentPluginType() != UnitPlugin::Production) {
 				d->mOrderButton[i]->setProductionCount(-1);
 			} else {
 				d->mOrderButton[i]->setProductionCount(count);
@@ -389,7 +390,7 @@ void BoOrderWidget::productionAdvanced(Unit* factory, double percentage)
 	kdError() << k_lineinfo << "NOT factory" << endl;
 	return;
  }
- ProductionPlugin* production = ((Facility*)factory)->productionPlugin();
+ ProductionPlugin* production = (ProductionPlugin*)factory->plugin(UnitPlugin::Production);
  if (!production) {
 	kdError() << k_funcinfo << factory->id() << " cannot produce" << endl;
 	return;
@@ -588,14 +589,13 @@ void BosonCommandFrame::slotSetAction(Unit* unit)
  d->mOrderWidget->showUnitActions(unit);
  d->mOrderWidget->show();
 
- const UnitProperties* prop = unit->unitProperties();
  if (unit->isFacility()) {
 	Facility* fac = (Facility*)d->mSelectedUnit;
 	if (!fac->isConstructionComplete()) {
 		slotShowConstructionProgress(fac);
 		return;
 	}
-	ProductionPlugin* production = fac->productionPlugin();
+	ProductionPlugin* production = (ProductionPlugin*)fac->plugin(UnitPlugin::Production);
 	if (production) {
 		if (!fac->unitProperties()->properties(PluginProperties::Production)) {
 			// must not happen if the units has the production
@@ -711,13 +711,13 @@ void BosonCommandFrame::slotShowUnit(Unit* unit)
  d->mOrderWidget->show();
 }
 
-void BosonCommandFrame::slotUpdateProduction(Facility* f)
+void BosonCommandFrame::slotUpdateProduction(Unit* f)
 {
  if (!f) {
 	kdError() << k_funcinfo << "NULL facility" << endl;
 	return;
  }
- if (((Facility*)d->mSelectedUnit) == f) {
+ if ((d->mSelectedUnit) == f) {
 	slotSetAction(f);
  }
 }
@@ -754,9 +754,9 @@ void BosonCommandFrame::slotUpdate()
 	}
  }
  if (!d->mOrderWidget->isHidden()) {
-	ProductionPlugin* production = ((Facility*)d->mSelectedUnit)->productionPlugin();
+	ProductionPlugin* production = (ProductionPlugin*)d->mSelectedUnit->plugin(UnitPlugin::Production);
 	if (!production || !production->hasProduction()) {
-		slotUpdateProduction((Facility*)d->mSelectedUnit);
+		slotUpdateProduction(d->mSelectedUnit);
 	} else {
 		d->mOrderWidget->productionAdvanced(d->mSelectedUnit, 
 				production->productionProgress());
@@ -764,7 +764,7 @@ void BosonCommandFrame::slotUpdate()
 	}
  }
  if (!d->mMinerWidget->isHidden()) {
-	if (d->mSelectedUnit->work() == Unit::WorkMine) {
+	if (d->mSelectedUnit->currentPluginType() == UnitPlugin::Harvester) {
 		used = true;
 	}
 	d->mMinerWidget->setMiner((MobileUnit*)d->mSelectedUnit);

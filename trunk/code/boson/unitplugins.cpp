@@ -18,6 +18,7 @@
 */
 #include "unitplugins.h"
 
+#include "defines.h"
 #include "unit.h"
 #include "unitproperties.h"
 #include "pluginproperties.h"
@@ -26,19 +27,51 @@
 #include "bosoncanvas.h"
 #include "boson.h"
 #include "boitemlist.h"
-
-#include "defines.h"
+#include "bosonstatistics.h"
+#include "cell.h"
 
 #include <kdebug.h>
 
-ProductionPlugin::ProductionPlugin(Unit* unit)
+UnitPlugin::UnitPlugin(Unit* unit)
 {
  mUnit = unit;
- KGamePropertyHandler* dataHandler = mUnit->dataHandler();
+}
 
- mProductions.registerData(Unit::IdPlugin_Productions, dataHandler, 
+UnitPlugin::~UnitPlugin()
+{
+}
+
+SpeciesTheme* UnitPlugin::speciesTheme() const
+{
+ return unit()->speciesTheme();
+}
+
+Player* UnitPlugin::player() const
+{
+ return unit()->owner();
+}
+
+const UnitProperties* UnitPlugin::unitProperties() const
+{
+ return unit()->unitProperties();
+}
+
+KGamePropertyHandler* UnitPlugin::dataHandler() const
+{
+ return unit()->dataHandler();
+}
+
+BosonCanvas* UnitPlugin::canvas() const
+{
+ return unit()->canvas();
+}
+
+
+ProductionPlugin::ProductionPlugin(Unit* unit) : UnitPlugin(unit)
+{
+ mProductions.registerData(Unit::IdPlugin_Productions, dataHandler(),
 		KGamePropertyBase::PolicyLocal, "Productions");
- mProductionState.registerData(Unit::IdPlugin_ProductionState, dataHandler, 
+ mProductionState.registerData(Unit::IdPlugin_ProductionState, dataHandler(),
 		KGamePropertyBase::PolicyLocal, "ProductionState");
  mProductionState.setLocal(0);
  mProductions.setEmittingSignal(false); // just to prevent warning in Player::slotUnitPropertyChanged()
@@ -47,11 +80,6 @@ ProductionPlugin::ProductionPlugin(Unit* unit)
 
 ProductionPlugin::~ProductionPlugin()
 {
-}
-
-SpeciesTheme* ProductionPlugin::speciesTheme() const
-{
- return unit()->speciesTheme();
 }
 
 unsigned long int ProductionPlugin::completedProduction() const
@@ -63,7 +91,7 @@ unsigned long int ProductionPlugin::completedProduction() const
  if (type == 0) {
 	return 0;
  }
- if (mProductionState < unit()->owner()->unitProperties(type)->productionTime()) {
+ if (mProductionState < player()->unitProperties(type)->productionTime()) {
 	kdDebug() << "not yet completed: " << type << endl;
 	return 0;
  }
@@ -87,7 +115,7 @@ void ProductionPlugin::addProduction(unsigned long int unitType)
  }
  mProductions.append(unitType);
  if (start) {
-	unit()->setWork(Unit::WorkProduce);
+	unit()->setPluginWork(pluginType());
  }
 }
 
@@ -110,7 +138,7 @@ void ProductionPlugin::removeProduction(unsigned long int unitType)
 
 double ProductionPlugin::productionProgress() const
 {
- unsigned int productionTime = unit()->owner()->unitProperties(currentProduction())->productionTime();
+ unsigned int productionTime = player()->unitProperties(currentProduction())->productionTime();
  double percentage = (double)(mProductionState * 100) / (double)productionTime;
  return percentage;
 }
@@ -123,7 +151,7 @@ bool ProductionPlugin::canPlaceProductionAt(const QPoint& pos)
  }
  QValueList<Unit*> list = unit()->canvas()->unitCollisionsInRange(pos, BUILD_RANGE);
 
- const UnitProperties* prop = unit()->owner()->unitProperties(currentProduction());
+ const UnitProperties* prop = player()->unitProperties(currentProduction());
  if (!prop) {
 	kdError() << k_lineinfo << "NULL unit properties - EVIL BUG!" << endl;
 	return false;
@@ -132,7 +160,7 @@ bool ProductionPlugin::canPlaceProductionAt(const QPoint& pos)
 	// a facility can be placed within BUILD_RANGE of *any* friendly
 	// facility on map
 	for (unsigned int i = 0; i < list.count(); i++) {
-		if (list[i]->isFacility() && list[i]->owner() == unit()->owner()) {
+		if (list[i]->isFacility() && list[i]->owner() == player()) {
 			kdDebug() << "Facility in BUILD_RANGE" << endl;
 			// TODO: also check whether a unit is already at that position!!
 			return true;
@@ -151,7 +179,7 @@ bool ProductionPlugin::canPlaceProductionAt(const QPoint& pos)
 }
 
 
-void ProductionPlugin::advance()
+void ProductionPlugin::advance(unsigned int)
 {
  unsigned long int type = currentProduction();
  if (type <= 0) { // no production
@@ -165,8 +193,8 @@ void ProductionPlugin::advance()
  // FIXME: this code is broken!
  // it gets executed on *every* client but sendInput() should be used on *one*
  // client only!
- // a unit is completed as soon as mProductionState == owner()->unitProperties(type)->productionTime()
- unsigned int productionTime = unit()->owner()->unitProperties(type)->productionTime();
+ // a unit is completed as soon as mProductionState == player()->unitProperties(type)->productionTime()
+ unsigned int productionTime = player()->unitProperties(type)->productionTime();
  if (mProductionState <= productionTime) {
 	if (mProductionState == productionTime) {
 		kdDebug() << "unit " << type << " completed :-)" << endl;
@@ -176,11 +204,11 @@ void ProductionPlugin::advance()
 		// facility's lower-left tile, are tested counter-clockwise. Unit is placed
 		// to first free tile.
 		// No auto-placing for facilities
-		if(!unit()->owner()->unitProperties(type)) {
+		if(!player()->unitProperties(type)) {
 			kdError() << k_lineinfo << "Unknown type " << type << endl;
 			return;
 		}
-		if(unit()->owner()->unitProperties(type)->isFacility()) {
+		if(player()->unitProperties(type)->isFacility()) {
 			return;
 		}
 		int tilex, tiley; // Position of lower-left corner of facility in tiles
@@ -219,7 +247,7 @@ void ProductionPlugin::advance()
 					mProductionState = mProductionState + 1;
 					//FIXME: buildProduction should not
 					//depend on Facility! should be Unit
-					((Boson*)unit()->owner()->game())->buildProducedUnit((Facility*)unit(), type, currentx, currenty);
+					((Boson*)player()->game())->buildProducedUnit((Facility*)unit(), type, currentx, currenty);
 					return;
 				}
 			}
@@ -231,17 +259,8 @@ void ProductionPlugin::advance()
  }
 }
 
-RepairPlugin::RepairPlugin(Unit* unit)
+RepairPlugin::RepairPlugin(Unit* unit) : UnitPlugin(unit)
 {
- mUnit = unit;
-
- /*
- KGamePropertyHandler* dataHandler = mUnit->dataHandler();
- mRepairList.registerData(Unit::IdPlugin_RepairList, dataHandler, 
-		KGamePropertyBase::PolicyLocal, "RepairList");
- mRepairList.setEmittingSignal(false); // just to prevent warning in Player::slotUnitPropertyChanged()
- */
-
 }
 
 RepairPlugin::~RepairPlugin()
@@ -281,7 +300,7 @@ void RepairPlugin::repairInRange()
 	if (u->health() >= u->unitProperties()->health()) {
 		continue;
 	}
-	if (!unit()->owner()->isEnemy(u->owner())) {
+	if (!player()->isEnemy(u->owner())) {
 		kdDebug() << "repair " << u->id() << endl;
 		int diff = u->health() - u->unitProperties()->health();
 		if (diff > 0) {
@@ -299,4 +318,204 @@ void RepairPlugin::repairInRange()
  }
 }
 
+HarvesterPlugin::HarvesterPlugin(Unit* unit)
+		: UnitPlugin(unit)
+{
+ // FIXME: we should clean the property IDs. They should be in UnitPlugin, not
+ // in Unit.
+ mResourcesMined.registerData(Unit::IdMob_ResourcesMined, dataHandler(),
+		KGamePropertyBase::PolicyLocal, "ResourcesMined");
+ mResourcesMined.setLocal(0);
+ mResourcesX.registerData(Unit::IdMob_ResourcesX, dataHandler(),
+		KGamePropertyBase::PolicyLocal, "ResourcesX");
+ mResourcesX.setLocal(0);
+ mResourcesY.registerData(Unit::IdMob_ResourcesY, dataHandler(),
+		KGamePropertyBase::PolicyLocal, "ResourcesY");
+ mResourcesY.setLocal(0);
+ mHarvestingType.registerData(Unit::IdMob_HarvestingType, dataHandler(),
+		KGamePropertyBase::PolicyLocal, "HarvestingType");
+ mHarvestingType.setLocal(0);
+}
 
+HarvesterPlugin::~HarvesterPlugin()
+{
+}
+
+void HarvesterPlugin::advance(unsigned int)
+{
+ if (mHarvestingType == 0) {
+	unit()->setWork(Unit::WorkNone);
+	return;
+ } else if (mHarvestingType == 1) {
+	advanceMine();
+ } else if (mHarvestingType == 2) {
+	advanceRefine();
+ }
+}
+
+void HarvesterPlugin::advanceMine()
+{
+ const HarvesterProperties* prop = (HarvesterProperties*)unit()->properties(PluginProperties::Harvester);
+ if (!prop) {
+	kdError() << k_funcinfo << "NULL harvester properties" << endl;
+	unit()->setWork(Unit::WorkNone);
+	return;
+ }
+ if (resourcesMined() < prop->maxResources()) {
+	if (canMine(canvas()->cellAt(unit()))) {
+		const int step = (resourcesMined() + 10 <= prop->maxResources()) ? 10 : prop->maxResources() - resourcesMined();
+		mResourcesMined = resourcesMined() + step;
+		if (prop->canMineMinerals()) {
+			player()->statistics()->increaseMinedMinerals(step);
+		} else if (prop->canMineOil()) {
+			player()->statistics()->increaseMinedOil(step);
+		}
+		kdDebug() << "resources mined: " << resourcesMined() << endl;
+	} else {
+		kdDebug() << k_funcinfo << "cannot mine here" << endl;
+		unit()->setWork(Unit::WorkNone);
+		return;
+	}
+ } else {
+	kdDebug() << k_funcinfo << "Maximal amount of resources mined." << endl;
+	mHarvestingType = 2; // refining
+ }
+}
+
+void HarvesterPlugin::advanceRefine()
+{
+ kdDebug() << k_funcinfo << endl;
+ if (resourcesMined() == 0) {
+	kdDebug() << k_funcinfo << "refining done" << endl;
+	if (resourcesX() != -1 && resourcesY() != -1) {
+		mineAt(QPoint(resourcesX(), resourcesY()));
+	} else {
+		unit()->setWork(Unit::WorkNone);
+	}
+	return;
+ }
+ if (!refinery()) {
+	// TODO: pick closest refinery
+	QPtrList<Unit> list = player()->allUnits();
+	QPtrListIterator<Unit> it(list);
+	const HarvesterProperties* prop = (HarvesterProperties*)unit()->properties(PluginProperties::Harvester);
+	if (!prop) {
+		kdError() << k_funcinfo << "NULL harvester plugin" << endl;
+		unit()->setWork(Unit::WorkNone);
+		return;
+	}
+	Facility* ref = 0;
+	while (it.current() && !ref) {
+		const UnitProperties* unitProp = it.current()->unitProperties();
+		if (!it.current()->isFacility()) {
+			++it;
+			continue;
+		}
+		if (prop->canMineMinerals() && unitProp->canRefineMinerals()) {
+			ref = (Facility*)it.current();
+		} else if (prop->canMineOil() && unitProp->canRefineOil()) {
+			ref = (Facility*)it.current();
+		}
+		++it;
+	}
+	if (!ref) {
+		kdDebug() << k_funcinfo << "no suitable refinery found" << endl;
+		unit()->setWork(Unit::WorkNone);
+	} else {
+		kdDebug() << k_funcinfo << "refinery: " << ref->id() << endl;
+		refineAt(ref);
+	}
+	return;
+ } else {
+	if (unit()->isNextTo(refinery())) {
+		const int step = (resourcesMined() >= 10) ? 10 : resourcesMined();
+		mResourcesMined = resourcesMined() - step;
+		const HarvesterProperties* prop = (HarvesterProperties*)unit()->properties(PluginProperties::Harvester);
+		if (!prop) {
+			kdError() << k_funcinfo << "NULL harvester plugin" << endl;
+			unit()->setWork(Unit::WorkNone);
+			return;
+		}
+		if (prop->canMineMinerals()) {
+			player()->setMinerals(player()->minerals() + step);
+			player()->statistics()->increaseRefinedMinerals(step);
+		} else if (prop->canMineOil()) {
+			player()->setOil(player()->oil() + step);
+			player()->statistics()->increaseRefinedOil(step);
+		}
+	} else {
+	}
+ }
+}
+
+void HarvesterPlugin::mineAt(const QPoint& pos)
+{
+ //TODO: don't move if unit cannot mine more minerals/oil or no minerals/oil at all
+ kdDebug() << k_funcinfo << endl;
+ unit()->moveTo(pos);
+ unit()->setPluginWork(UnitPlugin::Harvester);
+ unit()->setAdvanceWork(Unit::WorkMove);
+ mResourcesX = pos.x();
+ mResourcesY = pos.y();
+ mHarvestingType = 1;
+}
+
+
+void HarvesterPlugin::refineAt(Unit* refinery)
+{
+ if (!refinery) {
+	kdError() << k_funcinfo << "NULL refinery" << endl;
+	return;
+ }
+ if (!refinery->unitProperties()->canRefineMinerals() &&
+		!refinery->unitProperties()->canRefineOil()) {
+	kdError() << k_funcinfo << refinery->id() << " not a refinery" << endl;
+ }
+ kdDebug() << k_funcinfo << endl;
+ setRefinery(refinery);
+ unit()->setPluginWork(pluginType());
+ mHarvestingType = 2; // refining
+ // move...
+ kdDebug() << k_funcinfo << "move to refinery " << refinery->id() << endl;
+ if (!unit()->moveTo(refinery->x(), refinery->y(), 1)) {
+	kdDebug() << k_funcinfo << "Cannot find way to refinery" << endl;
+	unit()->setWork(Unit::WorkNone);
+ } else {
+	unit()->setAdvanceWork(Unit::WorkMove);
+ }
+}
+
+
+void HarvesterPlugin::setRefinery(Unit* refinery)
+{
+ if (!refinery || refinery->isDestroyed()) {
+	return;
+ }
+ const HarvesterProperties* prop = (HarvesterProperties*)unit()->properties(PluginProperties::Harvester);
+ if (!prop) {
+	return;
+ }
+ const UnitProperties* refProp = refinery->unitProperties(); // TODO: replace by pluginProperties
+ if (prop->canMineMinerals() && refProp->canRefineMinerals()) {
+	mRefinery = refinery;
+ } else if (prop->canMineOil() && refProp->canRefineOil()) {
+	mRefinery = refinery;
+ }
+}
+
+bool HarvesterPlugin::canMine(Cell* cell) const
+{
+ const HarvesterProperties* prop = (HarvesterProperties*)unit()->properties(PluginProperties::Harvester);
+ if (!prop) {
+	return false;
+ }
+ if (prop->canMineMinerals() &&
+		cell->groundType() == Cell::GroundGrassMineral) {
+	return true;
+ }
+ if (prop->canMineOil() && 
+		cell->groundType() == Cell::GroundGrassOil) {
+	return true;
+ }
+ return false;
+}

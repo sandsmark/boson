@@ -21,6 +21,7 @@
 #include "unitbase.h"
 
 #include "unitproperties.h"
+#include "pluginproperties.h"
 #include "player.h"
 #include "speciestheme.h"
 
@@ -43,6 +44,7 @@ public:
 	KGameProperty<unsigned long int> mId; // is a KGameProperty clever here?
 	KGameProperty<unsigned int> mDeletionTimer;
 	KGameProperty<unsigned int> mReloadState;
+
 };
 
 
@@ -153,6 +155,9 @@ void UnitBase::setOwner(Player* owner)
 
 bool UnitBase::save(QDataStream& stream)
 {
+ // TODO: we need to save and load Unit::mCurrentPlugin->pluginType() !!
+ // note that multiple plugins of the same type are not *yet* supported! but
+ // they might be one day..
  stream << (Q_INT32)unitProperties()->typeId();
  bool ret = dataHandler()->save(stream);
  return ret;
@@ -222,9 +227,9 @@ void UnitBase::resetReload()
  d->mReloadState = unitProperties()->reload();
 }
 
-
 const PluginProperties* UnitBase::properties(int pluginType) const
 {
  return unitProperties()->properties(pluginType);
 }
+
 

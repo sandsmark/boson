@@ -48,7 +48,7 @@ public:
 
 	virtual int rtti() const { return RTTI::BoShot; }
 
-	virtual void advance(int phase);
+	virtual void advance(int phase); //AB: "phase" is obsolete for BosonCanvas!
 
 protected:
 	void deleteMe();

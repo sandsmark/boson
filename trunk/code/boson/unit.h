@@ -23,7 +23,7 @@
 #include "global.h"
 #include "visual/bosonsprite.h"
 
-#include <qcanvas.h>
+#include <qvaluelist.h>
 
 class Player;
 class BosonCanvas;
@@ -32,6 +32,7 @@ class UnitProperties;
 class Cell;
 class Facility;
 class ProductionPlugin;
+class UnitPlugin;
 class RepairPlugin;
 
 class KGameUnitDebug;
@@ -56,10 +57,15 @@ public:
 		IdMoveDestY = UnitBase::IdLast + 4,
 		IdMoveRange = UnitBase::IdLast + 5,
 		IdMob_MovingFailed = UnitBase::IdLast + 20,
+
+// move to properties:
 		IdMob_ResourcesMined = UnitBase::IdLast + 21,
 		IdMob_ResourcesX= UnitBase::IdLast + 22,
 		IdMob_ResourcesY= UnitBase::IdLast + 23,
-		IdMob_PathRecalculated = UnitBase::IdLast + 24,
+		IdMob_HarvestingType = UnitBase::IdLast + 24,
+
+
+		IdMob_PathRecalculated = UnitBase::IdLast + 25,
 		IdFix_ConstructionState = UnitBase::IdLast + 30,
 
 		IdUnitPropertyLast
@@ -90,6 +96,27 @@ public:
 
 	virtual void setHealth(unsigned long int h);
 
+	/**
+	 * @return The current plugin, used in e.g. @ref advance or NULL if
+	 * none. Always NULL if @ref work != WorkPlugin
+	 **/
+	inline UnitPlugin* currentPlugin() const { return mCurrentPlugin; }
+	
+	/**
+	 * @return The @refUnitPlugin::pluginType of the @ref currentPlugin or
+	 * 0 if there is no plugin.
+	 **/
+	int currentPluginType() const;
+
+	/**
+	 * @param pluginType See @ref UnitPlugin::UnitPlugins
+	 **/
+	virtual UnitPlugin* plugin(int pluginType) const;
+
+	virtual void setWork(WorkType w);
+	void setPluginWork(int pluginType);
+
+
 	virtual void select(bool markAsLeader = false);
 
 	/**
@@ -109,10 +136,12 @@ public:
 	 * below. They are called from @ref BosonCanvas::slotAdvance(). For
 	 * every @ref UnitBase::WorkType there is at least one advance function which
 	 * implements its behaviour.
-	 * @param phase 0 is most game logic, 1 is nothing but moving. Collision
-	 * detection, path finding and all like this should be done in phase 0
+	 *
+	 * Please note that the @ref UnitPlugin::advance methods get called
+	 * here, too!
+	 * @param advanceCount Used by @ref UnitPlugin::advance
 	 **/
-	virtual void advance(int phase);
+	virtual void advance(int advanceCount);
 
 	/**
 	 * Move the unit. By default this does nothing. Reimplemented in @ref
@@ -125,13 +154,6 @@ public:
 	 * calculated by @ref advanceMove was actually valid.
 	 **/
 	virtual void advanceMoveCheck() { }
-
-	/**
-	 * Mine, mine, mine ...
-	 **/
-	virtual void advanceMine() { }
-
-	virtual void advanceRefine() { }
 
 	/**
 	 * Attack a unit. The target was set before using @ref setTarget
@@ -293,6 +315,7 @@ protected:
 private:
 	class UnitPrivate;
 	UnitPrivate* d;
+	UnitPlugin* mCurrentPlugin; // TODO: save/load the current plugin
 
 	friend class KGameUnitDebug;
 };
@@ -324,55 +347,17 @@ public:
 	 **/
 	void turnTo();
 
-	virtual void advanceMine();
-	virtual void advanceRefine();
 	virtual void advanceMove(); // move one step futher to path
 	virtual void advanceMoveCheck();
 	virtual void advanceFollow();
 
 
 	/**
-	 * @return The number of resources that have been mined by this unit.
-	 * Always 0 if this unit can't mine oil/minerals
-	 **/
-	unsigned int resourcesMined() const;
-	
-	/**
-	 * @return The x-coordinate of the resource field or 0 if none has been
-	 * set or this unit cannot mine.
-	 **/
-	int resourcesX() const;
-	/**
-	 * @return The y-coordinate of the resource field or 0 if none has been
-	 * set or this unit cannot mine.
-	 **/
-	int resourcesY() const;
-
-	/**
-	 * @return TRUE if this unit can mine the minerals at cell (if any), 
-	 * otherwise FALSE.
-	 **/
-	bool canMine(Cell* cell) const;
-
-	/**
-	 * Order the unit to mine minerals/oil at pos
-	 **/
-	void mineAt(const QPoint& pos);
-	void refineAt(Facility* refinery);
-
-	/**
 	 * Move this unit to the repairYard and repair it there.
+	 * TODO: move to plugin
 	 **/
 	void repairAt(Facility* repairYard);
 
-	void setRefinery(Facility* refinery);
-
-	/**
-	 * We use @ref target for the refinery. If @ref target is not a refinery
-	 * we return NULL
-	 * @return NULL if no valid refinery is set, otherwise the refinery.
-	 **/
-	Facility* refinery() const;
 	virtual QRect boundingRect() const;
 
 	virtual void clearWaypoints();
@@ -447,10 +432,13 @@ public:
 	 **/
 	virtual void advanceConstruction();
 
-	virtual ProductionPlugin* productionPlugin() const;
 	virtual RepairPlugin* repairPlugin() const;
 
-protected:
+	/**
+	 * @return NULL if the facility has not yet been fully constructed,
+	 * otherwise @ref Unit::plugin
+	 **/
+	virtual UnitPlugin* plugin(int pluginType) const;
 
 private:
 	class FacilityPrivate;

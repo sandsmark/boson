@@ -24,12 +24,11 @@
 
 #include <ksimpleconfig.h>
 #include <kstandarddirs.h>
+#include <kcursor.h>
 #include <kdebug.h>
 
-#include <kcursor.h>
 #include <qpainter.h>
 #include <qwidget.h>
-#include <qcanvas.h>
 #include <qbitmap.h>
 #include <qtimer.h>
 #include <qintdict.h>
