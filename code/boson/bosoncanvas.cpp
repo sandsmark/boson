@@ -1054,9 +1054,30 @@ bool BosonCanvas::loadFromXML(const QDomElement& root)
 	return false;
  }
 
+ if (!loadItemsFromXML(root)) {
+	boError(260) << k_funcinfo << "unable to load items from XML" << endl;
+	return false;
+ }
 
+ QDomElement handler = root.namedItem("DataHandler").toElement();
+ if (handler.isNull()) {
+	boError(260) << k_funcinfo << "DataHandler not found" << endl;
+	return false;
+ }
+ BosonPropertyXML propertyXML;
+ if (!propertyXML.loadFromXML(handler, d->mProperties)) {
+	boError(260) << k_funcinfo << "unable to load the datahandler" << endl;
+	return false;
+ }
+ boDebug(260) << k_funcinfo << "done" << endl;
+ return true;
+}
+
+bool BosonCanvas::loadItemsFromXML(const QDomElement& root)
+{
  QDomNodeList list = root.elementsByTagName(QString::fromLatin1("Items"));
- unsigned int itemCount = 0;
+ QValueList<QDomElement> allItemElements;
+ QValueList<BosonItem*> allItems;
  for (unsigned int i = 0; i < list.count(); i++) {
 	QDomElement items = list.item(i).toElement();
 	if (items.isNull()) {
@@ -1087,22 +1108,29 @@ bool BosonCanvas::loadFromXML(const QDomElement& root)
 		if (item.isNull()) {
 			continue;
 		}
-		if (!loadItemFromXML(item, owner)) {
-			boError(260) << k_funcinfo << "Item " << j << " was not loaded correctly" << endl;
+		BosonItem* i = createItemFromXML(item, owner);
+		if (!i) {
+			boError(260) << k_funcinfo << "failed creating item " << j << endl;
 			continue;
 		}
-		itemCount++;
+		allItemElements.append(item);
+		allItems.append(i);
 	}
  }
- QDomElement handler = root.namedItem("DataHandler").toElement();
- if (handler.isNull()) {
-	boError() << k_funcinfo << "DataHandler not found" << endl;
+ if (allItemElements.count() != allItems.count()) {
+	boError(260) << k_funcinfo << "item count != element count" << endl;
 	return false;
  }
- BosonPropertyXML propertyXML;
- if (!propertyXML.loadFromXML(handler, d->mProperties)) {
-	boError() << k_funcinfo << "unable to load the datahandler" << endl;
-	return false;
+ boDebug(260) << k_funcinfo << "created " << allItems.count() << " items" << endl;
+ unsigned int itemCount = 0;
+ for (unsigned int i = 0; i < allItems.count(); i++) {
+	QDomElement e = allItemElements[i];
+	BosonItem* item = allItems[i];
+	if (!loadItemFromXML(e, item)) {
+		boError(260) << k_funcinfo << "failed loading item" << endl;
+		continue;
+	}
+	itemCount++;
  }
  boDebug(260) << k_funcinfo << "loaded " << itemCount << " items" << endl;
  return true;
@@ -1255,17 +1283,19 @@ BosonItem* BosonCanvas::createItemFromXML(const QDomElement& item, Player* owner
  return 0;
 }
 
-bool BosonCanvas::loadItemFromXML(const QDomElement& item, Player* owner)
+bool BosonCanvas::loadItemFromXML(const QDomElement& element, BosonItem* item)
 {
- BosonItem* i = createItemFromXML(item, owner);
- if (!i) {
+ if (!item) {
 	return false;
  }
- if (!i->loadFromXML(item)) {
+ if (!item->loadFromXML(element)) {
 	boError(260) << k_funcinfo << "Could not load item correctly" << endl;
-	if (RTTI::isUnit(i->rtti())) {
+	if (RTTI::isUnit(item->rtti())) {
 		// need to remove from player again
-		owner->unitDestroyed((Unit*)i);
+		Player* owner = ((Unit*)item)->owner();
+		if (owner) {
+			owner->unitDestroyed((Unit*)item);
+		}
 	}
 	return false;
  }
