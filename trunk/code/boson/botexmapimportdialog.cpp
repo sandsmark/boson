@@ -171,7 +171,7 @@ void BoTexMapImportDialog::slotSelectTexMapImage()
  if ((unsigned int)image.width() != d->mMap->width() + 1 ||
 		(unsigned int)image.height() != d->mMap->height() + 1) {
 	boError() << k_funcinfo << "invalid image size" << endl;
-	KMessageBox::sorry(this, i18n("This image can't be used as texmap for this map. The map is a %1x2 map, meaning you need a %3x4 image.\nThe selected image (%5) is a %6x%7 image.").
+	KMessageBox::sorry(this, i18n("This image can't be used as texmap for this map. The map is a %1x%2 map, meaning you need a %3x%4 image.\nThe selected image (%5) is a %6x%7 image.").
 			arg(d->mMap->width()).arg(d->mMap->height()).
 			arg(d->mMap->width() + 1).arg(d->mMap->height() + 1).
 			arg(fileName).
