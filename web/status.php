@@ -55,6 +55,8 @@ draw_bigbox_text("What has been changed since 0.9 (will go into 0.9.1):
  <li>Minor file format fix, that causes less trouble with network</li>
  <li>Ground texture pixmaps are loaded correctly in the editor</li>
  <li>Factory productions are saved correctly</li>
+ <li>Try to find a usable GL font, even if Qt doesn't find any</li>
+ <li>Don't crash when using proprietary NVidia drivers and no usable font was found (reported to NVidia nearly a year ago)</li>
 </ul>");
 /*
 draw_bigbox_text("This is a list of features that we consider as
