@@ -66,6 +66,7 @@ protected:
 	void initScrollingPage();
 	void initSoundsPage();
 	void initOpenGLPage();
+	void initChatPage();
 
 	void addOptions(OptionsWidget* o);
 

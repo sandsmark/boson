@@ -59,6 +59,7 @@ OptionsDialog::OptionsDialog(QWidget* parent, bool modal)
  initScrollingPage();
  initSoundsPage();
  initOpenGLPage();
+ initChatPage();
 }
 
 OptionsDialog::~OptionsDialog()
@@ -107,6 +108,13 @@ void OptionsDialog::initOpenGLPage()
  OpenGLOptions* o = new OpenGLOptions(vbox);
  connect(o, SIGNAL(signalUpdateIntervalChanged(unsigned int)),
 		this, SIGNAL(signalUpdateIntervalChanged(unsigned int)));
+ addOptions(o);
+}
+
+void OptionsDialog::initChatPage()
+{
+ QVBox* vbox = addVBoxPage(i18n("C&hat"));
+ ChatOptions* o = new ChatOptions(vbox);
  addOptions(o);
 }
 

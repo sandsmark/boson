@@ -172,4 +172,23 @@ private:
 	KIntNumInput* mUpdateInterval;
 };
 
+class ChatOptions : public QVBox, public OptionsWidget
+{
+	Q_OBJECT
+public:
+	ChatOptions(QWidget* parent);
+	~ChatOptions();
+
+	virtual void apply();
+	virtual void setDefaults();
+	virtual void load();
+
+	void setScreenRemoveTime(unsigned int s);
+	void setScreenMaxItems(int s);
+
+private:
+	KIntNumInput* mScreenRemoveTime;
+	KIntNumInput* mScreenMaxItems;
+};
+
 #endif

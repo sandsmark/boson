@@ -356,3 +356,48 @@ void OpenGLOptions::setUpdateInterval(int ms)
  mUpdateInterval->setValue(ms);
 }
 
+ChatOptions::ChatOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
+{
+ QHBox* hbox = new QHBox(this);
+ mScreenRemoveTime = new KIntNumInput(DEFAULT_CHAT_SCREEN_REMOVE_TIME, this);
+ mScreenRemoveTime->setRange(0, 400);
+ mScreenRemoveTime->setLabel(i18n("Remove from screen after seconds (0 to remove never)"));
+
+ hbox = new QHBox(this);
+ mScreenMaxItems = new KIntNumInput(DEFAULT_CHAT_SCREEN_REMOVE_TIME, this);
+ mScreenMaxItems->setRange(-1, 40);
+ mScreenMaxItems->setLabel(i18n("Maximal items on the screen (-1 is unlimited)"));
+}
+
+ChatOptions::~ChatOptions()
+{
+}
+
+void ChatOptions::apply()
+{
+ boConfig->setChatScreenRemoveTime(mScreenRemoveTime->value());
+ boConfig->setChatScreenMaxItems(mScreenMaxItems->value());
+}
+
+void ChatOptions::setDefaults()
+{
+ setScreenRemoveTime(DEFAULT_CHAT_SCREEN_REMOVE_TIME);
+ setScreenMaxItems(DEFAULT_CHAT_SCREEN_REMOVE_TIME);
+}
+
+void ChatOptions::load()
+{
+ setScreenRemoveTime(boConfig->chatScreenRemoveTime());
+ setScreenMaxItems(boConfig->chatScreenMaxItems());
+}
+
+void ChatOptions::setScreenRemoveTime(unsigned int s)
+{
+ mScreenRemoveTime->setValue(s);
+}
+
+void ChatOptions::setScreenMaxItems(int m)
+{
+ mScreenMaxItems->setValue(m);
+}
+
