@@ -998,6 +998,29 @@ float BosonCanvas::heightAtPoint(float x, float y) const
  // These are heights of the corners of the cell (x; y) is on
  float h1, h2, h3, h4;
 
+ h1 = heightAtCorner(cellX, cellY) + boWaterManager->waterDepth(cellX, cellY);
+ h2 = heightAtCorner(cellX + 1, cellY) + boWaterManager->waterDepth(cellX + 1, cellY);
+ h3 = heightAtCorner(cellX, cellY + 1) + boWaterManager->waterDepth(cellX, cellY + 1);
+ h4 = heightAtCorner(cellX + 1, cellY + 1) + boWaterManager->waterDepth(cellX + 1, cellY + 1);
+
+ // Blend all corners together and return the result
+ // FIXME: this can probably be written _much_ more understandably and maybe faster
+ return ((h1 * (1 - x2) + (h2 * x2)) * (1 - y2)) + ((h3 * (1 - x2) + (h4 * x2)) * y2);
+}
+
+float BosonCanvas::terrainHeightAtPoint(float x, float y) const
+{
+ // Coordinates of the cell (x; y) is on
+ int cellX = (int)(x / BO_TILE_SIZE);
+ int cellY = (int)(y / BO_TILE_SIZE);
+
+ // Will be used as factors for blending
+ float x2 = (x / BO_TILE_SIZE) - cellX;
+ float y2 = (y / BO_TILE_SIZE) - cellY;
+
+ // These are heights of the corners of the cell (x; y) is on
+ float h1, h2, h3, h4;
+
  h1 = heightAtCorner(cellX, cellY);
  h2 = heightAtCorner(cellX + 1, cellY);
  h3 = heightAtCorner(cellX, cellY + 1);

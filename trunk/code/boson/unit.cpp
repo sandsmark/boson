@@ -54,8 +54,6 @@
 
 #define MAX_PATH_AGE 5
 
-#define USE_SMOOTH_HEIGHT
-
 // If defined, new (not cell based) collision detection method is used
 // WARNING: new collision detection is buggy and doesn't work really well (with
 //  current pathfinder(s))
@@ -354,95 +352,57 @@ void Unit::moveBy(float moveX, float moveY, float moveZ)
 
 void Unit::updateZ(float moveByX, float moveByY, float* moveByZ, float* rotateX, float* rotateY)
 {
- // rotation is not yet implemented here
- *rotateX = 0.0f;
- *rotateY = 0.0f;
-
-#ifndef USE_SMOOTH_HEIGHT
- const float* heightMap = canvas()->heightMap();
- BO_CHECK_NULL_RET(heightMap);
- int heightMapWidth = canvas()->mapWidth() + 1;
-
-
- // FIXME: currently this is a 2-minute implementation. we simply ensure
- // that he unit is always on top of all cells it occupies.
- // This should be taken into account when calculating the moving
- // distance. Also it should be rotated. e.g. if 3 of 4 corners are at
- // 0.0 and the forth corner is at 1.0 then it currently has z=1.0, but
- // it should be rotated as real units would be.
- // facilities are a special case - we have not yet fully decided what
- // will happen if they are not on a "flat" surface. probably they won't
- // get rotated, but will have a "box" below them which make the surface
- // flat (i.e. the current implementation will remain for facilities).
- // but thats not fully sure.
-
- // we emulate cells() here. this is a) faster and we can b) prevent some
- // redundant checls (even faster).
- int left, top, right, bottom;
- leftTopCell(&left, &top, leftEdge() + moveByX, topEdge() + moveByY);
- rightBottomCell(&right, &bottom, rightEdge() + moveByX, bottomEdge() + moveByY);
- right = QMIN(right, QMAX((int)canvas()->mapWidth() - 1, 0));
-
- // ensure that the values are valid
- bottom = QMIN(bottom, QMAX((int)canvas()->mapHeight() - 1, 0));
- left = QMAX(left, 0);
- top = QMAX(top, 0);
- right = QMAX(left, right);
- bottom = QMAX(top, bottom);
-
- // we need left/right and upper/lower corner. so:
- right++;
- bottom++;
-
- // a final sanity check:
- if (right >= heightMapWidth) {
-	boError() << k_funcinfo << "invalid right corner: " << right << endl;
-	return;
- }
- if (bottom >= (int)canvas()->mapHeight() + 1) {
-	boError() << k_funcinfo << "invalid bottom corner: " << bottom << endl;
-	return;
- }
-
- float newZ = heightMap[top * heightMapWidth + left];
- for (int x = left; x <= right; x++) {
-	for (int y = top; y <= bottom; y++) {
-		if (heightMap[y * heightMapWidth + x] > newZ) {
-			newZ = heightMap[y * heightMapWidth + x];
-		}
-	}
- }
-#else
+ // Center point of the unit.
  float centerx = x() + moveByX + width() / 2;
  float centery = y() + moveByY + height() / 2;
 
- float newZ = canvas()->heightAtPoint(centerx, centery);
+ // Calculate unit's rotation (depends on ground height).
+ // These are offsets (from center point) to front and right side of the unit.
+ float frontx = 0.0f, fronty = 0.0f, sidex = 0.0f, sidey = 0.0f;
+ // Calculate front offset
+ Bo3dTools::pointByRotation(&frontx, &fronty, rotation(), height() / 2);
+ // Calculate right side offset
+ float myrot = rotation() + 90;
+ if (myrot > 360) {
+	myrot -= 360;
+ }
+ Bo3dTools::pointByRotation(&sidex, &sidey, myrot, width() / 2);
 
- // Calculate rotation stuff
- float realx = 0.0f, realy = 0.0f;
- // Calculate x rotation
- Bo3dTools::pointByRotation(&realx, &realy, rotation(), height() / 2);
- float rearz, frontz;
- frontz = canvas()->heightAtPoint(centerx + realx, centery + realy);
- rearz = canvas()->heightAtPoint(centerx - realx, centery - realy);
+ // Find necessary height values.
+ float rearz, frontz, rightz, leftz, newZ;
+ // For flying units and ships, we take water level into surface; for land
+ //  units, we don't.
+ if (unitProperties()->isAircraft() || unitProperties()->canGoOnWater()) {
+	newZ = canvas()->heightAtPoint(centerx, centery);
+	frontz = canvas()->heightAtPoint(centerx + frontx, centery + fronty);
+	rearz = canvas()->heightAtPoint(centerx - frontx, centery - fronty);
+	rightz = canvas()->heightAtPoint(centerx + sidex, centery + sidey);
+	leftz = canvas()->heightAtPoint(centerx - sidex, centery - sidey);
+	if (!unitProperties()->isAircraft()) {
+		// We want ships to be a bit inside the water.
+		newZ -= 0.05;
+		// rearz, frontz, rightz and leftz are only used for rotation calculation,
+		//  so there's no need to change them.
+	}
+ } else {
+   // Land unit
+	newZ = canvas()->terrainHeightAtPoint(centerx, centery);
+	frontz = canvas()->terrainHeightAtPoint(centerx + frontx, centery + fronty);
+	rearz = canvas()->terrainHeightAtPoint(centerx - frontx, centery - fronty);
+	rightz = canvas()->terrainHeightAtPoint(centerx + sidex, centery + sidey);
+	leftz = canvas()->terrainHeightAtPoint(centerx - sidex, centery - sidey);
+ }
+
+ // Calculate rotations
  // Calculate angle from frontz to rearz
  float xrot = Bo3dTools::rad2deg(atan(QABS(frontz - rearz) * BO_TILE_SIZE / height()));
  *rotateX = (frontz >= rearz) ? xrot : -xrot;
 
  // Calculate y rotation
- float myrot = rotation() + 90;
- if (myrot > 360) {
-	myrot -= 360;
- }
- Bo3dTools::pointByRotation(&realx, &realy, myrot, width() / 2);
- float rightz, leftz;
- rightz = canvas()->heightAtPoint(centerx + realx, centery + realy);
- leftz = canvas()->heightAtPoint(centerx - realx, centery - realy);
  // Calculate angle from leftz to rightz
  float yrot = Bo3dTools::rad2deg(atan(QABS(rightz - leftz) * BO_TILE_SIZE / width()));
  *rotateY = (leftz >= rightz) ? yrot : -yrot;
 
-#endif
 
  if (isFlying()) {
 	newZ += 2.0f;  // Flying units are always 2 units above the ground
