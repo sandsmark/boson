@@ -22,9 +22,6 @@
 #define MAX_MAP_HEIGHT 500
 #define MAX_MAP_WIDTH 500
 
-#define MOBILES 50// FIXME: obsolete
-#define FACILITIES 50 // FIXME: obsolete
-
 #define ARROW_KEY_STEP 10 
 
 #define MAX_GAME_SPEED 10 // the advance period - lower means faster
