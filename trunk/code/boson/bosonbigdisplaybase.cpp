@@ -2132,6 +2132,9 @@ void BosonBigDisplayBase::renderPlacementPreview()
 
 void BosonBigDisplayBase::renderUfo()
 {
+ if (Bo3dTools::checkError()) {
+	boError() << k_funcinfo << "OpenGL error before method" << endl;
+ }
  if (ufoManager()) {
 	boTextureManager->invalidateCache();
 	glColor3ub(255, 255, 255);
@@ -2139,10 +2142,16 @@ void BosonBigDisplayBase::renderUfo()
 	ufoManager()->dispatchEvents();
 	ufoManager()->render();
  }
+ if (Bo3dTools::checkError()) {
+	boError() << k_funcinfo << "OpenGL error" << endl;
+ }
 }
 
 void BosonBigDisplayBase::renderCursor()
 {
+ if (Bo3dTools::checkError()) {
+	boError() << k_funcinfo << "OpenGL error before method" << endl;
+ }
  if (cursor()) {
 	// FIXME: use cursorCanvasVector()
 	QPoint pos = mapFromGlobal(QCursor::pos());
@@ -2711,7 +2720,9 @@ bool BosonBigDisplayBase::eventFilter(QObject* o, QEvent* e)
 		d->mShiftPressed = (((QKeyEvent*)e)->stateAfter() & Qt::ShiftButton);
 
 		// key events are sent to ufo here, mouse events elsewhere
-		ufoManager()->sendEvent(e);
+		if (ufoManager()) {
+			ufoManager()->sendEvent(e);
+		}
 		break;
 	default:
 		break;
