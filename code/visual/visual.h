@@ -24,12 +24,11 @@
 #include "common/boconfig.h"
 #include "visualCanvas.h"
 
-class groundTheme;
+//class QPixmap;
 class speciesTheme;
 class visualCanvas;
 
 extern	visualCanvas	*vcanvas;
-extern	groundTheme	*ground;
 extern	speciesTheme	*species[BOSON_MAX_PLAYERS];
 extern	int		nb_player;
 	

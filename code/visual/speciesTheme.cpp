@@ -18,7 +18,6 @@
  *                                                                         *
  ***************************************************************************/
 
-#include <qstring.h>
 #include <qbitmap.h>
 #include <qwmatrix.h>
 #include <qbitarray.h>
@@ -55,10 +54,10 @@ speciesTheme::speciesTheme(char *themeName, QRgb color)
 	boAssert ( mobiles->fill(false) );
 	boAssert ( facilities->fill(false) );
 
-	themePath	= new QString (KGlobal::instance()->dirs()->findResourceDir("data", "boson/map/basic.bpf") );
-	*themePath	+= "boson/themes/species/";
-	*themePath	+= themeName;
-	*themePath	+= "/";
+	themePath	= KGlobal::instance()->dirs()->findResourceDir("data", "boson/map/basic.bpf");
+	themePath	+= "boson/themes/species/";
+	themePath	+= themeName;
+	themePath	+= "/";
 
 	/* preload some units */ 
 	loadFix(FACILITY_CMDBUNKER);
@@ -105,7 +104,7 @@ QList<QPoint>	point_l;
 QPixmap		*p;
 QPoint		*pp;
 char		buffer[100];
-QString		path(*themePath + "/units/" + mobileProp[index].name);
+QString		path(themePath + "/units/" + mobileProp[index].name);
 
 
 for(j=0; j<12; j++) {
@@ -227,7 +226,7 @@ QPixmap		*p;
 QPoint		*pp;
 char		buffer[100];
 
-QString		path(*themePath + "/facilities/" + facilityProp[i].name);
+QString		path(themePath + "/facilities/" + facilityProp[i].name);
 
 for(j=0; j< CONSTRUCTION_STEP ; j++) {
 	sprintf(buffer, "/field.%03d.bmp", j);

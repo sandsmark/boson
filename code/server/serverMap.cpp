@@ -24,7 +24,6 @@
 
 #include "common/map.h"
 
-#include "serverCell.h"
 #include "boserver.h"
 #include "serverUnit.h"
 #include "game.h"
@@ -71,14 +70,14 @@ for (i=im ; i<=iM; i++)
 	if ( i*i+j*j < dist) {
 		assert(i+x<map_width);
 		assert(j+y<map_height);
-		c = &cells[i+x][j+y];
+		c = &cell( i+x, j+y );
 		if ( ! c->isKnownBy(mask)) {
 			c->setKnown(mask);
 			/* here, send a message for every changed state */
 			coo.x = i+x;
 			coo.y = j+y;
-			coo.g = c->getGroundType();
-			if (GROUND_UNKNOWN != coo.g)
+			coo.c = c->_cell;;
+			if (GROUND_UNKNOWN != c->getGroundType() )
 				sendMsg (
 					player[u->who].buffer,
 					MSG_MAP_DISCOVERED,
@@ -132,7 +131,7 @@ void BosonServer::placeMob(serverMobUnit *u)
 	k = getPlayerMask(u->who);
 	for (i=0; i<i2; i++)
 		for (j=0; j<j2; j++)
-			k |= cells[xx+i][yy+j].known;
+			k |= cell( xx+i, yy+j).known;
 	u->setKnown(k);
 
 	/* telling them */
@@ -175,7 +174,7 @@ void BosonServer::placeFix(serverFacility * f)
 	k = getPlayerMask(f->who);
 	for (i=0; i<i2; i++)
 		for (j=0; j<j2; j++)
-			k |= cells[xx+i][yy+j].known;
+			k |= cell( xx+i, yy+j).known;
 	f->setKnown(k);
 
 	/* telling them */
@@ -221,7 +220,7 @@ void BosonServer::checkFixKnown(serverFacility *f)
 
 	for (i=0; i<i2; i++)
 		for (j=0; j<j2; j++)
-			k |= cells[x+i][y+j].known;
+			k |= cell( x+i, y+j).known;
 
 	i=0; // 'i' is now the player index
 	k2 = f->known;
@@ -262,7 +261,7 @@ void BosonServer::checkMobileKnown(serverMobUnit *m)
 
 	for (i=0; i<i2; i++)
 		for (j=0; j<j2; j++)
-			k |= cells[x+i][y+j].known;
+			k |= cell( x+i, y+j).known;
 
 	i=0;
 	k2 = m->known;
@@ -290,20 +289,18 @@ bool BosonServer::loadGround()
 	int i,j;
 
 	/* creation of the ground map */
-	cells = new (serverCell *)[map_width];
-	for (i=0; i< map_width; i++)
-		cells[i] = new (serverCell)[map_height];
-	
+	cells = new serverCell[map_width*map_height];
+
 	/* initialisation */
 	for (i=0; i< map_width; i++)
 		for (j=0; j< map_height; j++) {
-			load ( cells[i][j]);
+			load ( cell( i, j)._cell );
 		}
 	
 	/* checking */
 	for (int i=0; i< 3; i++)
 		for (int j=0; j< 3; j++)
-			boAssert(0 <= cells[i][j].getGroundType());
+			boAssert(0 <= cell(i,j).getGroundType());
 
 	return isOk();
 }

@@ -21,8 +21,8 @@
 #ifndef SPECIESTHEME_H 
 #define SPECIESTHEME_H 
 
+#include <qstring.h>
 
-#include "common/cell.h"
 #include "common/unitType.h"
 #include "common/unit.h"
 
@@ -62,7 +62,7 @@ protected:
 	bool		loadPixmap(const QString &path, QPixmap **p, bool withMask = true);
 
 private:
-	QString		*themePath;
+	QString		themePath;
 	QRgb		team_color;
 
 	QBitArray	*mobiles, *facilities;

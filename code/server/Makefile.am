@@ -29,7 +29,7 @@ bin_PROGRAMS = boserver
 boserver_METASOURCES = USE_AUTOMOC
 boserver_LDFLAGS = $(all_libraries) $(KDE_RPATH)
 
-boserver_SOURCES = boserver.cpp main.cpp connect.cpp serverUnit.cpp serverMap.cpp player.cpp serverCell.cpp game.cpp
+boserver_SOURCES = boserver.cpp main.cpp connect.cpp serverUnit.cpp serverMap.cpp player.cpp game.cpp
 boserver_LDADD   = ../common/libboson.a $(LIB_KDEUI)
 
 #(un)install
@@ -50,5 +50,5 @@ uninstall-local:
 # garbage
 CLEANFILES = $(boserver_METASOURCES) boson-*.log
 
-EXTRA_DIST = main.cpp boserver.cpp boserver.h connect.h connect.cpp serverUnit.cpp serverUnit.h serverMap.cpp player.cpp serverCell.h serverCell.cpp game.h game.cpp
+EXTRA_DIST = main.cpp boserver.cpp boserver.h connect.h connect.cpp serverUnit.cpp serverUnit.h serverMap.cpp player.cpp serverCell.h game.h game.cpp
 

@@ -33,6 +33,9 @@
 #include "mainWidget.h"		// myself
 
 
+#define COMMAND_FRAME_WIDTH 220
+
+
 mainWidget::mainWidget( editorTopLevel *parent, const char *name)
 	:QWidget(parent, name)
 { 
@@ -41,10 +44,10 @@ mainWidget::mainWidget( editorTopLevel *parent, const char *name)
 	mini = new visualMiniDisplay( parent, this);
 	big = new editorBigDisplay( parent, this);
 
-	mini->setGeometry (   0,   0, 200,200);
+	mini->setGeometry (   0,   0, COMMAND_FRAME_WIDTH, COMMAND_FRAME_WIDTH);
 
-	// big->setGeometry  (200,  0, width() - 200, height() );
-	// etl->mainFrame->setGeometry (  0,200, 200, height() - 200);
+	// big->setGeometry  ( COMMAND_FRAME_WIDTH,  0, width() - COMMAND_FRAME_WIDTH, height() );
+	// etl->mainFrame->setGeometry (  0, COMMAND_FRAME_WIDTH,  COMMAND_FRAME_WIDTH, height() - COMMAND_FRAME_WIDTH);
 
 	connect (etl, SIGNAL(setSelectedObject(object_type, int)), big, SLOT(setSelectedObject(object_type, int)));
 	connect (etl, SIGNAL(setWho(int)), big, SLOT(setWho(int)));
@@ -58,8 +61,10 @@ mainWidget::mainWidget( editorTopLevel *parent, const char *name)
 
 void mainWidget::resizeEvent ( QResizeEvent * )
 {
-	big->setGeometry  (200,  0, width() - 200, height() );
-	etl->mainFrame->setGeometry (  0,200, 200, height() - 200);
+	big->setGeometry  ( COMMAND_FRAME_WIDTH,  0, width() - COMMAND_FRAME_WIDTH, height() );
+	etl->mainFrame->setGeometry (  0, COMMAND_FRAME_WIDTH, COMMAND_FRAME_WIDTH, height() - COMMAND_FRAME_WIDTH);
+
+	printf("big geometry %d,%d,%d,%d\n", big->x(), big->y(), big->width(), big->height() );
 }
 
 #define ARROW_KEY_STEP	2

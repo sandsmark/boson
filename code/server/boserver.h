@@ -36,6 +36,7 @@
 #include "common/log.h"
 #include "common/boFile.h"
 
+#include "serverCell.h"
 #include "serverUnit.h"		// for Facility
 #include "connect.h"
 #include "player.h"
@@ -94,12 +95,13 @@ class BosonServer : public KTMainWindow, public boFile
 
   bool		loadGround();
   bool		loadUnits();
+  serverCell	&cell(int x, int y) {return cells[ x + y * map_width ]; }
   
   serverState	state;
   KServerSocket	*socket;
   uint		confirmedJiffies;
 
-  serverCell	**cells;
+  serverCell	*cells;
 
   QIntDict<serverMobUnit>	mobile;
   QIntDict<serverFacility>	facility;

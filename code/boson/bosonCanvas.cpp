@@ -30,8 +30,8 @@
 #include "boshot.h"
 #include "game.h" 	// who_am_i
   
-bosonCanvas::bosonCanvas(uint w, uint h)
-	: visualCanvas(w,h)
+bosonCanvas::bosonCanvas( QPixmap p, uint w, uint h)
+	: visualCanvas(p,w,h)
 {
 	mobile.resize(149);
 	facility.resize(149);
@@ -39,18 +39,6 @@ bosonCanvas::bosonCanvas(uint w, uint h)
 	facility.setAutoDelete(TRUE);   
 }
 
-
-/*
-void bosonCanvas::setCell(int i, int j, groundType g)
-{
-	boAssert(i>=0); boAssert(j>=0);
-	boAssert(i<width()); boAssert(j<height());
-
-	(void) new playerCell(g, i, j);
-
-	emit newCell(i,j,g);
-}
-*/
 
 void bosonCanvas::hideMob(destroyedMsg_t &m)
 {
@@ -62,7 +50,6 @@ void bosonCanvas::hideMob(destroyedMsg_t &m)
 
 	// XXX emit something for the minimap
 }
-
 
 
 void bosonCanvas::unHideMob(mobileMsg_t &m)

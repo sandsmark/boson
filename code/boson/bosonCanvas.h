@@ -31,7 +31,6 @@
 
 class QRect;
 class QPainter;
-class Cell;
 class Unit;
 
 
@@ -44,7 +43,7 @@ class bosonCanvas : public visualCanvas
 	Q_OBJECT
 
 public:
-  bosonCanvas(uint l, uint h);
+	bosonCanvas( QPixmap, uint l, uint h);
 
   void createMob(mobileMsg_t &);
   void unHideMob(mobileMsg_t &);

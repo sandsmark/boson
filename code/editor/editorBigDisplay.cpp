@@ -22,7 +22,6 @@
 #include "common/map.h"
 
 #include "editorBigDisplay.h"
-#include "visualCell.h"
 #include "editorCanvas.h"
 
 editorBigDisplay::editorBigDisplay(editorTopLevel *v, QWidget *p, const char *n, WFlags f)

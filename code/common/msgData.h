@@ -43,7 +43,7 @@ struct acceptedMsg_t	{ int who_you_are, missing_player, total_player, sizeX, siz
 /* MSG_DLG_REFUSED */ /// orzel still unused
 struct refusedMsg_t	{ refusedType why_not; };
 /* MSG_MAP_ */
-struct cooMsg_t		{ int x, y; groundType g; };
+struct cooMsg_t		{ int x, y; cell_t c; };
 /* MSG_FACILITY_CREATED */
 struct facilityMsg_t	{ int who, key, x, y, state; facilityType type; };
 /* MSG_FACILITY_CHANGED */

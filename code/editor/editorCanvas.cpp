@@ -21,18 +21,17 @@
 #include "common/log.h"
 
 #include "editorCanvas.h"
-#include "visualCell.h"
-  
-editorCanvas::editorCanvas()
-	: visualCanvas()
+
+#include "common/map.h"
+
+editorCanvas::editorCanvas(QPixmap p)
+	: visualCanvas(p, 50, 50) // XXXX hardcoded until QCanvas allow on-the-fly creation
 {
 	mobiles.resize(149);
 	facilities.resize(149);
 	mobiles.setAutoDelete(TRUE);
 	facilities.setAutoDelete(TRUE);   
 	key = 253;
-
-	cells_allocated = false;
 }
 
 
@@ -41,33 +40,23 @@ bool editorCanvas::Load(QString filename)
 	int i,j;
 	mobileMsg_t	mob;
 	facilityMsg_t	fix;
-	Cell		c;
+	cell_t		c;
 
 	freeRessources();
 
 	if (!openRead(filename.data())) return false;
 	
 
-	resize(map_width, map_height);
-
-	/* creation of the ground map */
-	cells = new (visualCell *)[map_width];
-	for (i=0; i< map_width; i++)
-		cells[i] = new (visualCell)[map_height];
-	cells_allocated = true;
-
-	
 	/* initialisation */
 	for (i=0; i< map_width; i++)
 		for (j=0; j< map_height; j++) {
 //			printf("loading cell %d,%d\n", i, j );
 			boFile::load( c);
-			// bypassing it until qcanvas-port-related bug is done
-			continue;
-			if (c.getGroundType() != GROUND_UNKNOWN) {
-				cells[i][j].set(c.getGroundType(), i, j);
-				cells[i][j]._setFrame(c.getItem());
-			} else {
+//			printf("(%3d,%3d) : ", i, j);
+			setCell( i, j, c);
+//			printf("%d\n", c);
+/*			if (c.getGroundType() != GROUND_UNKNOWN)
+			else {
 				// orzel : ugly, should be handled a _lot_ more nicely
 				cells[i][j].set( GROUND_WATER, i, j);
 				cells[i][j].setZ( Z_INVISIBLE);
@@ -77,12 +66,13 @@ bool editorCanvas::Load(QString filename)
 					(j>0 && IS_BIG_TRANS(cells[i][j-1].getGroundType())) ||
 					(i>0 && j>0 && IS_BIG_TRANS(cells[i-1][j-1].getGroundType())) );
 			}
+*/
 		}
 	
 	/* checking */
 	for (int i=0; i< 3; i++)
 		for (int j=0; j< 3; j++)
-			boAssert(0 <= cells[i][j].getGroundType());
+			boAssert ( ground (tile(i,j)) );
 
 
 	for (i=0; i<nbMobiles; i++) {
@@ -121,7 +111,7 @@ bool editorCanvas::Save(QString filename)
 	/* initialisation */
 	for (i=0; i< map_width; i++)
 		for (j=0; j< map_height; j++)
-			write(cells[i][j]);
+			write( (cell_t) tile(i,j));
 	
 	for (mobIt.toFirst(); mobIt; ++mobIt) {
 		mobIt.current()->fill(mob);
@@ -148,7 +138,20 @@ bool editorCanvas::New(groundType fill_ground, uint w, uint h, const QString &na
 	freeRessources();
 
 	/* QCanvas configuratoin */
-	resize(w,h);
+
+/*
+	// XXX orzel : temp, until GUI is really functionnal 
+	QString themePath = KGlobal::instance()->dirs()->findResourceDir("data", "boson/map/basic.bpf");
+	themePath	+= "boson/themes/grounds/earth.bmp";
+	printf("loading groundTheme : %s\n", themePath.latin1() );
+	QPixmap *p = new QPixmap(themePath);
+	if (p->isNull() ) {
+		printf("can't load earth.jpeg\n");
+		exit(1);
+	}
+
+	::visualCanvas(*p,w,h);
+*/
 	
 	/* boFile configuration */
 	nbPlayer = 2;  // XXX still hardcoded .......
@@ -156,18 +159,10 @@ bool editorCanvas::New(groundType fill_ground, uint w, uint h, const QString &na
 	map_height = h;
 	_worldName = name;
 
-	/* creation of the ground map */
-	cells = new (visualCell *)[map_width];
-	for (i=0; i< map_width; i++)
-		cells[i] = new (visualCell)[map_height];
-	cells_allocated = true;
-	
 	/* initialisation */
 	for (i=0; i< map_width; i++)
-		for (j=0; j< map_height; j++) {
-			cells[i][j].set( fill_ground, i, j);
-			cells[i][j]._setFrame((3*i+5*j)%4);
-		}
+		for (j=0; j< map_height; j++)
+			esetCell( i, j, cell ( fill_ground, (3*i+5*j)%4 ));
 
 	modified = true;
 	
@@ -177,22 +172,11 @@ bool editorCanvas::New(groundType fill_ground, uint w, uint h, const QString &na
 
 void editorCanvas::freeRessources()
 {
-	int i;
-
-	if (!cells_allocated) return;
-
-	/* freeing of cells */
-	for (i=0; i< map_width; i++)
-		delete [] cells[i];
-	delete [] cells;
-
 	/* freeing of mobiles */
 	mobiles.clear();
 	/* freeing of facilities */
 	facilities.clear();
 	modified = false;
-	
-	cells_allocated = false;
 }
 
 
@@ -266,7 +250,7 @@ void editorCanvas::destroyFixUnit(destroyedMsg_t &msg)
 
 void editorCanvas::deleteCell(int x, int y)
 {
-	groundType	oldg =  cells[x][y].getGroundType();
+	groundType	oldg =  ground ( tile(x,y) );
 	
 
 	/* deal with improper value */
@@ -282,8 +266,7 @@ void editorCanvas::deleteCell(int x, int y)
 
 	/* actually delete the cell */
 	modified = true;
-	cells[x][y].set(GROUND_UNKNOWN);
-	cells[x][y].setZ( Z_INVISIBLE);
+	esetCell(x,y, cell(GROUND_UNKNOWN, 0) );
 
 	/* deal with big tiles */
 	if ( IS_BIG_TRANS( oldg )) {
@@ -300,25 +283,25 @@ void editorCanvas::deleteCell(int x, int y)
 	
 	/* deal with alread UNKNOWN tiles */
 	if ( GROUND_UNKNOWN == oldg ) {
-		if ( IS_BIG_TRANS (cells[x-1][y].getGroundType()) )
+		if ( IS_BIG_TRANS ( ground(tile(x-1,y))))
 			deleteCell(x-1,y);
-		else if ( IS_BIG_TRANS (cells[x][y-1].getGroundType()) )
+		else if ( IS_BIG_TRANS ( ground(tile(x,y-1))))
 			deleteCell(x,y-1);
-		else if ( IS_BIG_TRANS (cells[x-1][y-1].getGroundType()) )
+		else if ( IS_BIG_TRANS ( ground(tile(x-1,y-1))))
 			deleteCell(x-1,y-1);
 		return;
 	}
 }
 
-void editorCanvas::setCell(int x, int y, groundType g )
+void editorCanvas::esetCell(int x, int y, cell_t c)
 {
 //	printf ("setting %d,%d at %d\n", x, y, g);
 	modified = true;
-	if ( IS_BIG_TRANS(g) || IS_BIG_TRANS( cells[x][y].getGroundType() ) ) {
+	if ( IS_BIG_TRANS( ground(c) ) || IS_BIG_TRANS( ground(tile(x,y))) ) {
 		deleteCell(x,y+1);
 		deleteCell(x+1,y);
 		deleteCell(x+1,y+1);
 	}
-	cells[x][y].set(g);
+	visualCanvas::setCell(x,y,c);
 }
 

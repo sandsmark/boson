@@ -30,9 +30,8 @@
 
 class QRect;
 class QPainter;
-class Cell;
-class visualCell;
 class Unit;
+class QPixmap;
 
 
 /** 
@@ -43,7 +42,7 @@ class editorCanvas : public visualCanvas, public boFile
 	Q_OBJECT
 
 public:
-  editorCanvas();
+  editorCanvas(QPixmap);
   ~editorCanvas() { freeRessources(); }
 
   void createMobUnit(mobileMsg_t &);
@@ -60,7 +59,7 @@ public:
 
 	/* concerning contents */
 	visualFacility	*getFacility(long key) { return facilities.find(key); }
-	void		changeCell(int x, int y, groundType g) { deleteCell(x,y); setCell(x,y,g); }
+	void		changeCell(int x, int y, cell_t c) { deleteCell(x,y); esetCell(x,y,c); }
 
 public:
 //private:
@@ -69,16 +68,11 @@ public:
 
 private:
 	void		deleteCell(int, int);
-	void		setCell(int, int, groundType );
+	void		esetCell(int, int, cell_t );
 
 	long		key;
 	void		freeRessources();
 	bool		modified;
-	bool		cells_allocated;
-
-public: //needed by visualBigDisplay
-	visualCell	**cells;
-
 };
 
 #endif // EDITORFIELD_H

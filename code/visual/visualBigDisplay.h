@@ -32,11 +32,8 @@
 #include "speciesTheme.h"
 //#include "visualTopLevel.h"
 
-class Cell;
 class Unit;
-class groundTheme;
 class QPixmap;
-class visualCell;
 class visualTopLevel;
 class orderWin;
 
@@ -69,10 +66,9 @@ protected:
   virtual void flush(const QRect& area);
   //virtual void updateGeometries();
 
-/* display */
-  void drawCell(int i, int j, QPainter *p=0L);
-  void drawRelative(int x, int y, QPixmap *p, QPainter *p=0L);
-  void drawRectSelect(int x1, int y1, int x2, int y2, QPainter &qp) {qp.drawRect(x1, y1, x2-x1, y2-y1);}
+	// display
+	void drawRectSelect(int x1, int y1, int x2, int y2, QPainter &qp)
+		{ qp.drawRect(x1, y1, x2-x1, y2-y1); }
 
 /* events */
 //  virtual void drawContents( QPainter*, int cx, int cy, int cw, int ch );

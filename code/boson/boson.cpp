@@ -27,10 +27,13 @@
 #include <klocale.h>
 #include <kmenubar.h>
 #include <khelpmenu.h>
+#include <kstddirs.h>
 
 #include "common/boconfig.h"
 #include "common/log.h"
 
+#include "bosonTopLevel.h"
+#include "bosonCanvas.h"
 #include "boson.h"
 #include "ressource.h"
 #include "game.h"
@@ -85,6 +88,29 @@ void BosonApp::initSocket(char *servername)
 		return;
 	}
 	logf(LOG_INFO, "initSocket : connectDlg accepted, going on");
+}
+
+
+void BosonApp::initCanvas(int w, int h)
+{
+	/* the field is created when a game is created */
+	QString themePath = KGlobal::instance()->dirs()->findResourceDir("data", "boson/map/basic.bpf");
+	themePath	+= "boson/themes/grounds/earth.bmp";
+
+	printf("initView : loading groundTheme : %s\n", themePath.latin1() );
+
+	QPixmap *p = new QPixmap(themePath);
+	if (p->isNull() ) {
+		printf("can't load earth.jpeg\n");
+		exit(1);
+	}
+
+	/* the canvas is created when a game is created */
+	vcanvas = bocanvas = new bosonCanvas(*p, w, h);
+
+	(new bosonTopLevel() )->show();
+	logf(LOG_INFO, "canvas and TopLevel window created");
+
 }
 
 
