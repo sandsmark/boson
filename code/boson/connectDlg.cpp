@@ -161,8 +161,9 @@ void connectDlg::tryServer(void)
 	socketState = PSS_INIT;
 	
 	/* KSocket configuration */
-	connect (
-		Socket, SIGNAL(readEvent(KSocket *)), 
+	connect ( Socket, SIGNAL(closeEvent(KSocket *)), 
+		_parent, SLOT(connectionLost(KSocket*) ) );
+	connect ( Socket, SIGNAL(readEvent(KSocket *)), 
 		_parent, SLOT(handleSocketMessage(KSocket*) ) );
 	Socket->enableRead(TRUE);
 	
