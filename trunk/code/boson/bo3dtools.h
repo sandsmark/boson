@@ -1655,6 +1655,11 @@ class Bo3dTools
     static bool mapCoordinates(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, const QPoint& pos, GLfloat* posX, GLfloat* posY, GLfloat* posZ, bool useRealDepth = true);
 
     /**
+     * @overload
+     **/
+    static bool mapCoordinates(const BoGLMatrices& matrices, const QPoint& pos, GLfloat* posX, GLfloat* posY, GLfloat* posZ, bool useRealDepth = true);
+
+    /**
      * Map distances from window to world coordinates.
      *
      * Sometimes you need to know how much a certain amount of pixels (from a

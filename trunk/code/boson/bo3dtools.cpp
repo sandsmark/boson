@@ -1419,6 +1419,12 @@ bool Bo3dTools::boUnProject(const BoMatrix& modelviewMatrix, const BoMatrix& pro
   return true;
 }
 
+bool Bo3dTools::mapCoordinates(const BoGLMatrices& m, const QPoint& pos, GLfloat* posX, GLfloat* posY, GLfloat* posZ, bool useRealDepth)
+{
+  return mapCoordinates(m.modelviewMatrix(), m.projectionMatrix(), m.viewport(),
+      pos, posX, posY, posZ, useRealDepth);
+}
+
 bool Bo3dTools::mapCoordinates(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, const QPoint& pos, GLfloat* posX, GLfloat* posY, GLfloat* posZ, bool useRealDepth)
 {
   GLint realy = viewport[3] - (GLint)pos.y() - 1;
