@@ -990,9 +990,14 @@ PyObject* PythonScript::py_startBenchmark(PyObject*, PyObject*)
   return Py_None;
 }
 
-PyObject* PythonScript::py_endBenchmark(PyObject*, PyObject*)
+PyObject* PythonScript::py_endBenchmark(PyObject*, PyObject* args)
 {
-  BosonScript::endBenchmark();
+  char* name = 0;
+  if(!PyArg_ParseTuple(args, (char*)"|s", &name))
+  {
+    return 0;
+  }
+  BosonScript::endBenchmark(QString(name));
   Py_INCREF(Py_None);
   return Py_None;
 }

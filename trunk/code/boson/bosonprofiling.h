@@ -136,8 +136,20 @@ public:
 	void loadUnit();
 	void loadUnitDone(unsigned long int typeId);
 
+	/**
+	 * Starts benchmark
+	 * During benchmark, all profiling info about advance calls and rendered
+	 * frames is logged and some statistics are printed out when you call
+	 * @ref endBenchmark()
+	 **/
 	void startBenchmark();
-	void endBenchmark();
+	/**
+	 * Ends benchmark and prints out some useful info about logged things.
+	 *
+	 * @param name Optional name of the benchmark. If given it's printed out, so
+	 * you can later indentify your benchmark
+	 **/
+	void endBenchmark(const QString& name);
 
 	// WARNING: do !NOT! call render*() or advance*() before you called
 	// render(true)/advance(true) or after render(false)/advance(false) !

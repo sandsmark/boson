@@ -281,7 +281,7 @@ class BosonScript
 
     // Other
     static void startBenchmark();
-    static void endBenchmark();
+    static void endBenchmark(const QString& name);
     static void setRandomSeed(long int seed);
 
 
