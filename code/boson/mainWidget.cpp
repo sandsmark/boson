@@ -55,8 +55,6 @@ mainWidget::mainWidget( bosonTopLevel *parent, const char *name)
 	setFocusPolicy (StrongFocus);		// accept key event
 	setFocus();
 
-	ressourcesUpdated();
-
 }
 
 void mainWidget::resizeEvent ( QResizeEvent * )
@@ -86,18 +84,6 @@ void mainWidget::keyReleaseEvent ( QKeyEvent * e )
 }
 
 
-void mainWidget::ressourcesUpdated(void)
-{
-	char buffer[1024];
-	
-	sprintf(buffer, "Oil : %d", oil);
-	oil_text->setText(buffer);
-
-	sprintf(buffer, "Mineral : %d", mineral);
-	mineral_text->setText(buffer);
-}
-
-
 void mainWidget::makeCommandGui(void)
 {
 	mainFrame = new QFrame(this);
@@ -105,12 +91,6 @@ void mainWidget::makeCommandGui(void)
 	mainFrame->setFrameStyle(QFrame::Sunken | QFrame::Panel);
 	mainFrame->setLineWidth(5);
 	
-	/* ressources */
-	oil_text	= new QLabel("Oil : ", mainFrame, "oil_text");
-	oil_text->setGeometry(10,8,80,10);
-	mineral_text	= new QLabel("Mineral : ", mainFrame, "mineral_text");
-	mineral_text->setGeometry(100,8,80,10);
-
 	/* stack */
 	stack = new QWidgetStack(mainFrame, "qwidgetstack");
 	stack->setFrameStyle(QFrame::Raised | QFrame::Panel);

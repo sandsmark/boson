@@ -43,8 +43,6 @@ class mainWidget : public QWidget
 public:
 	mainWidget( bosonTopLevel *parent=0, const char *name=0);
 
-public slots:
-	void	ressourcesUpdated(void);
 protected:
 	virtual void keyReleaseEvent (QKeyEvent * e );
 	virtual void resizeEvent ( QResizeEvent *e );
@@ -67,10 +65,6 @@ private:
 	QLabel		*view_one;
 	QScrollView	*view_many;
 	QPixmap		*view_none;
-	
-	/* ressources */ 
-	QLabel		*oil_text, *mineral_text;
-
 };
 
 
