@@ -18,108 +18,182 @@
  *                                                                         *
  ***************************************************************************/
 
-#include <assert.h>
+//#include <assert.h>
 
 //#include <kapp.h>
 //#include <kmsgbox.h>
 
 #include "../common/log.h"
-#include "../common/playField.h"
-#include "../common/boconfig.h" // MAX_PLAYERS
-#include "../common/map.h"
+//#include "../common/boconfig.h" // MAX_PLAYERS
+//#include "../common/map.h"
 
 #include "editorField.h"
   
 editorField::editorField(uint w, uint h, QObject *parent, const char *name=0L)
 	: visualField(w,h,parent,name)
 {
+	mobiles.resize(149);
+	facilities.resize(149);
+	mobiles.setAutoDelete(TRUE);
+	facilities.setAutoDelete(TRUE);   
+	key = 253;
 }
 
 
 bool editorField::load(QString filename)
 {
-	int	i, j;
-	playField field(filename);
+	int i,j;
+	mobileMsg_t	mob;
+	facilityMsg_t	fix;
 
-	if (false == field.load()) return false;
 
-	map.width = field.map.width;
-	map.height = field.map.height;
+	if (!openRead(filename.data())) return false;
 
-	/*
-	 * creation of the ground map
-	 */
-	map.cells = new (visualCell *)[map.width];
-	for (i=0; i< map.width; i++)
-		map.cells[i] = new (visualCell)[map.height];
-
+	/* creation of the ground map */
+	cells = new (visualCell *)[map_width];
+	for (i=0; i< map_width; i++)
+		cells[i] = new (visualCell)[map_height];
+	
 	/* initialisation */
-	for (i=0; i< map.width; i++)
-		for (j=0; j< map.height; j++)
-			map.cells[i][j].set( field.map.cells[i][j], i, j);
-
-	printf("***********field.load : %d, map : %d\n", field.map.cells[3][3], map.cells[3][3].getGroundType());
-	printf("***********field.load : %d, map : %d\n", field.map.cells[10][9], map.cells[10][9].getGroundType());
-	printf("***********field.load : %d, map : %d\n", field.map.cells[20][13], map.cells[20][13].getGroundType());
-
-
-	/* freeing of field.map.cells */
-	for (i=0; i< map.width; i++)
-		delete [] field.map.cells[i];
-	delete [] field.map.cells;
+	for (i=0; i< map_width; i++)
+		for (j=0; j< map_height; j++)
+			cells[i][j].set( boFile::load(), i, j );
+	
+	/* checking */
+	for (int i=0; i< 3; i++)
+		for (int j=0; j< 3; j++)
+			boAssert(0 <= cells[i][j].getGroundType());
 
 
-	/*
-	 * creation of facilities/units
-	 */  
-/* //orzel : not enabled yet
-	people  = field.people;  
-	for (i=0; i<people.nbMobiles; i++)
-	        createMobUnit(people.mobile[i]);
-	for (i=0; i<people.nbFacilities; i++)
-	        createFixUnit(people.facility[i]);  
-*/
+	for (i=0; i<nbMobiles; i++) {
+		boFile::load(mob);
+		if (!isOk()) return false;
+		createMobUnit(mob);
+	}
+
+	for (i=0; i<nbFacilities; i++) {
+		boFile::load(fix);
+		if (!isOk()) return false;
+		createFixUnit(fix);
+	}
 
 	// ok, it's all right
+	Close();
 	isModified = false;
-	return true;
-
+	return isOk();
 }
+
 
 bool editorField::save(QString filename)
 {
-	int	i, j;
-	bool	ret;
-	playField field(filename);
+	int i,j;
+	mobileMsg_t	mob;
+	facilityMsg_t	fix;
+	QIntDictIterator<visualMobUnit> mobIt(mobiles);
+	QIntDictIterator<visualFacility> fixIt(facilities);
 
-	field.nbPlayer = 0;
-	field.people.nbMobiles = 0;
-	field.people.nbFacilities = 0;
-	field.map.width = map.width;
-	field.map.height = map.height;
 
-	/* creation of the ground map */
-	field.map.cells = new (groundType *)[map.width];
-	for (i=0; i< map.width; i++)
-		field.map.cells[i] = new (groundType)[map.height];
+	if (!openWrite(filename.data())) return false;
 
 	/* initialisation */
-	for (i=0; i< map.width; i++)
-		for (j=0; j< map.height; j++)
-			field.map.cells[i][j] = (map.cells[i][j]).getGroundType();
+	for (i=0; i< map_width; i++)
+		for (j=0; j< map_height; j++)
+			write(cells[i][j].getGroundType());
+	
+	for (mobIt.toFirst(); mobIt; ++mobIt) {
+		mobIt.current()->fill(mob);
+		boFile::write(mob);
+		}
 
-	printf("***********field.save : %d, map : %d\n", field.map.cells[3][3], map.cells[3][3].getGroundType());
-	printf("***********field.save : %d, map : %d\n", field.map.cells[10][9], map.cells[10][9].getGroundType());
-	printf("***********field.save : %d, map : %d\n", field.map.cells[20][13], map.cells[20][13].getGroundType());
-	ret =  field.write();
+	for (fixIt.toFirst(); fixIt; ++fixIt) {
+		fixIt.current()->fill(fix);
+		boFile::write(fix);
+		}
 
-	/* freeing of field.map.cells */
-	for (i=0; i< map.width; i++)
-		delete [] field.map.cells[i];
-	delete [] field.map.cells;
 
 	// ok, it's all right
+	Close();
 	isModified = false;
-	return ret;
-
+	return isOk();
 }
+
+
+void editorField::freeCells()
+{
+	int i;
+	/* freeing of cells */
+	for (i=0; i< map_width; i++)
+		delete [] cells[i];
+	delete [] cells;
+}
+
+
+void editorField::createMobUnit(mobileMsg_t &msg)
+{
+	visualMobUnit *m;
+
+	msg.key = key++;
+
+	m = new visualMobUnit(&msg);
+	mobiles.insert(msg.key, m);
+
+//	emit updateMobile(m);
+}
+
+
+/*
+void editorField::destroyMobUnit(destroyedMsg_t &msg)
+{
+	visualMobUnit *mob ;
+	
+	mob = mobile.find(msg.key);
+	if (mob) {
+		boAssert(msg.x == mob->x());
+		boAssert(msg.y == mob->y());
+		}
+	else {
+		logf(LOG_ERROR, "bosonField::destroyMob : can't find msg.key");
+		return;
+		}
+
+	boAssert( mobile.remove(msg.key) == true );
+}
+*/
+
+void editorField::createFixUnit(facilityMsg_t &msg)
+{
+	visualFacility *f;
+
+	msg.key = key ++;
+	msg.state = CONSTRUCTION_STEP - 1 ;
+
+	f = new visualFacility(&msg);
+	facilities.insert(msg.key, f);
+
+//	emit updateFix(f);
+}
+
+
+/*
+void editorField::destroyFixUnit(destroyedMsg_t &msg)
+{
+	visualFacility * f;
+	
+	f = facility.find(msg.key);
+	if (f) {
+		boAssert(msg.x == f->x());
+		boAssert(msg.y == f->x());
+		}
+	else {
+		logf(LOG_ERROR, "bosonField::destroyFix : can't find msg.key");
+		return;
+		}
+
+	boAssert( facility.remove(msg.key) == true);
+}
+*/
+
+
+
+
+

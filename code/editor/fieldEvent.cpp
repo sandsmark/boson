@@ -32,7 +32,7 @@
 // orzel : quite ugly ....
 #define mobileList	(((editorField*)(view->field))->mobile)
 #define facilityList	(((editorField*)(view->field))->facility)
-#define eMap		(((editorField*)(view->field))->map)
+#define eMap		(((editorField*)(view->field)))
 
 /* ugly orzel hack......*/
 void visualBigDisplay::mousePressEvent(QMouseEvent *e)
@@ -105,10 +105,10 @@ void editorBigDisplay::mousePressEvent(QMouseEvent *e)
 		x = e->x() / BO_TILE_SIZE; y = e->y() / BO_TILE_SIZE;
 		x += view->X(); y += view->Y();
 		boAssert(x>0);
-		boAssert(x<eMap.width);
+//		boAssert(x<eMap->width);
 		boAssert(y>0);
-		boAssert(y<eMap.height);
-		selectedCell = &(eMap.cells[x][y]);
+//		boAssert(y<eMap->height);
+		selectedCell = &(eMap->cells[x][y]);
 		popup->exec(QCursor::pos());
 		return;
 	}

@@ -23,10 +23,9 @@
 
 #include <qintdict.h>
 
-#include "../common/msgData.h"
-#include "../common/playField.h" // origPeople
+#include "../common/boFile.h"
 //#include "../common/unitType.h"
-#include "../common/unit.h"	// Facility
+//#include "../common/unit.h"	// Facility
 
 #include "visualUnit.h"		// visualMobUnit
 #include "visualField.h"
@@ -37,45 +36,40 @@ class Cell;
 class Unit;
 
 
-struct visualMap {
-	visualCell	**cells;
-	int		width;
-	int		height;
-};
-
-
 /** 
   * This class encapsulate the "physical" idea of the map : size, contents..
   */
-class editorField : public visualField 
+class editorField : public visualField, public boFile
 {
 	Q_OBJECT
 
 public:
   editorField(uint l, uint h, QObject *parent=0, const char *name=0L);
 
-  void createMob(mobileMsg_t &);
-  void destroyMob(destroyedMsg_t &);
+  void createMobUnit(mobileMsg_t &);
+  void destroyMobUnit(destroyedMsg_t &);
 
-  void createFix(facilityMsg_t &);
-  void destroyFix(destroyedMsg_t &);
+  void createFixUnit(facilityMsg_t &);
+  void destroyFixUnit(destroyedMsg_t &);
 
   bool load(QString filename);
   bool save(QString filename);
 
 /* concerning contents */
-  visualFacility *getFacility(long key) { return facility.find(key); }
+  visualFacility *getFacility(long key) { return facilities.find(key); }
 
-public: ///orzel : temp
-
-  visualMap	map;
-  origPeople	people;
-
-  bool		isModified;
-
+public:
 //private:
-	QIntDict<visualMobUnit>		mobile;
-	QIntDict<visualFacility>	facility;
+	QIntDict<visualMobUnit>		mobiles;
+	QIntDict<visualFacility>	facilities;
+
+private:
+	long		key;
+	void		freeCells();
+	bool		isModified;
+
+public: //needed by visualBigDisplay
+	visualCell	**cells;
 
 };
 

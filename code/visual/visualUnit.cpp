@@ -84,6 +84,10 @@ visualFacility::visualFacility(facilityMsg_t *msg, QObject* parent=0L, const cha
 	, QwSprite(vpp.species[msg->who]->getPixmap(msg->type))
 {
 	z(Z_FACILITY);
+	moveTo(BO_TILE_SIZE * msg->x , BO_TILE_SIZE * msg->y);
+
+	frame(msg->state);
+
 	sp_down = 0l; sp_up = 0l;
 }
 

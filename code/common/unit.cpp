@@ -41,6 +41,13 @@ mobUnit::mobUnit(mobileMsg_t *msg, QObject* parent, const char *name)
 	isShown = TRUE; ///orzel : should be removed since Qw handles this now...
 }
 
+void mobUnit::fill(mobileMsg_t &msg)
+{
+	msg.who = who;
+	msg.x   = _x();
+	msg.y   = _y();
+	msg.type= type;
+}
 
 QRect mobUnit::rect(void)
 {
@@ -71,5 +78,13 @@ QRect Facility::rect(void)
 		BO_TILE_SIZE * facilityProp[type].height);
 }
 
+
+void Facility::fill(facilityMsg_t &msg)
+{
+	msg.who = who;
+	msg.x   = _x();
+	msg.y   = _y();
+	msg.type= type;
+}
 
 
