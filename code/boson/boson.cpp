@@ -1691,6 +1691,7 @@ bool Boson::loadgame(QDataStream& stream, bool network, bool reset)
  for (; it.current(); ++it) {
 	if (!((Player*)it.current())->loadUnits(stream)) {
 		boError() << k_funcinfo << "Error when loading units" << endl;
+		return false;
 	}
  }
 
