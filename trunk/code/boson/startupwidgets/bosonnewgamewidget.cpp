@@ -28,7 +28,6 @@
 #include "../boson.h"
 #include "../bosoncampaign.h"
 #include "../bosonplayfield.h"
-#include "../bosoncampaign.h"
 #include "../bpfdescription.h"
 #include "../bosonscenario.h"
 #include "../bosondata.h"
@@ -154,10 +153,11 @@ void BosonNewGameWidget::initPlayFields()
 	boError() << k_funcinfo << "no campaigns found. At least the default campaign (random maps) is mandatory!" << endl;
 	return;
  }
- if (list[0] != QString::fromLatin1("")) {
-	boError() << k_funcinfo  << "first campaign must be the default campaign! fist is: " << list[0] << endl;
+ if (!list.contains(QString::fromLatin1(""))) {
+	boError() << k_funcinfo  << "no default campaign found! (code bug)" << endl;
 	return;
  }
+ list.remove(QString::fromLatin1(""));
 
  BosonCampaign* defaultCampaign = boData->campaign(QString::fromLatin1(""));
  BO_CHECK_NULL_RET(defaultCampaign);
@@ -167,7 +167,7 @@ void BosonNewGameWidget::initPlayFields()
  campaigns->setOpen(true);
  campaigns->setSelectable(false);
  campaigns->setText(0, i18n("Campaigns"));
- for (unsigned int i = 1; i < list.count(); i++) {
+ for (unsigned int i = 0; i < list.count(); i++) {
 	BosonCampaign* campaign = boData->campaign(list[i]);
 	if (!campaign) {
 		BO_NULL_ERROR(campaign);
