@@ -224,7 +224,7 @@ BosonNewGameWidget::BosonNewGameWidget(TopWidget* top, QWidget* parent)
   connect(removeplayerbutton, SIGNAL(clicked()), this, SLOT(slotRemovePlayer()));
   connect(cancelbutton, SIGNAL(clicked()), this, SLOT(slotCancel()));
   connect(serverbutton, SIGNAL(clicked()), this, SLOT(slotServerOptions()));
-  connect(startgamebutton, SIGNAL(clicked()), this, SLOT(slotSendNewGame()));
+  connect(startgamebutton, SIGNAL(clicked()), this, SLOT(slotStart()));
   connect(addaibutton, SIGNAL(clicked()), this, SLOT(slotAddAIPlayer()));
   connect(playerslist, SIGNAL(highlighted(QListBoxItem*)), this, SLOT(slotPlayerSelected(QListBoxItem*)));
 
@@ -510,7 +510,6 @@ void BosonNewGameWidget::slotStart()
   else
   {
     slotSendNewGame();
-//    emit signalStartGame();
   }
 }
 
