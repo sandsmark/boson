@@ -690,6 +690,7 @@ MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, BosonCanvas* c
 
 MobileUnit::~MobileUnit()
 {
+ delete d->mHarvesterProperties;
  delete d;
 }
 
