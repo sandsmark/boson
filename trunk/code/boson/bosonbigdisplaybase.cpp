@@ -786,10 +786,10 @@ void BosonBigDisplayBase::paintGL()
 	// Units will be tinted accordingly to how much health they have left
 	if (RTTI::isUnit(item->rtti())) {
 		if (((Unit*)item)->isDestroyed()) {
-			glColor3f(0.35, 0.35, 0.35);
+			glColor3f(0.4, 0.4, 0.4);
 		} else {
-			float f = ((Unit*)item)->health() / (float)((Unit*)item)->unitProperties()->health() * 0.5;
-			glColor3f(0.5 + f, 0.5 + f, 0.5 + f);
+			float f = ((Unit*)item)->health() / (float)((Unit*)item)->unitProperties()->health() * 0.3;
+			glColor3f(0.7 + f, 0.7 + f, 0.7 + f);
 		}
 	} else {
 		glColor3ub(255, 255, 255);
