@@ -1,0 +1,15 @@
+*.lo
+*.o
+*.moc*
+Makefile
+Makefile.in
+boson-server.log
+boson-client.log
+.deps
+
+configure
+config.log
+config.h
+config.status
+stamp-h
+pics
