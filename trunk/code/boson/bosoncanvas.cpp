@@ -500,3 +500,23 @@ QValueList<Unit*> BosonCanvas::unitsAtCell(int x, int y)
  return list;
 }
 
+bool BosonCanvas::cellOccupied(int x, int y)
+{
+	QCanvasItemList list = collisions(QRect(x * BO_TILE_SIZE, y * BO_TILE_SIZE,
+			BO_TILE_SIZE, BO_TILE_SIZE));
+	if(list.isEmpty())
+		return false;
+	for (unsigned int i = 0; i < list.count(); i++)
+	{
+		if (!RTTI::isUnit(list[i]->rtti()))
+			continue;
+		Unit* u = (Unit*)list[i];
+		if(u->isDestroyed())
+			continue;
+		if(u->isFlying())
+			continue;
+		return true;
+	}
+	return false;
+}
+
