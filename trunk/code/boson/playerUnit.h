@@ -46,8 +46,10 @@ public:
 
 	virtual void	u_attack(bosonUnit *);
 public slots:
+//  	void	targetMoveTo(int, int);
   	void	targetDying(bosonUnit *);
 signals:
+	void	sig_moveTo(int newx, int newy); // never emitted for a facility !
 	void	dying(bosonUnit *);
 protected:
 	/* attack */
@@ -62,28 +64,31 @@ class playerMobUnit : public bosonUnit, public visualMobUnit
 Q_OBJECT
 
 public:
+	struct	state_t {
+		int x;
+		int y;
+		int dir;
+	};
+
 			playerMobUnit(mobileMsg_t *);
 
 	void		getWantedAction();
  
 	void		shooted(int _power);
 /* Server orders */
-	void		doMoveTo(int newx, int newy);
-	void		s_moveTo(int newx, int newy, int direction);
+	void		doMoveTo(state_t nstate);
+	void		s_moveTo(state_t nstate);
 
 protected:
 	int		getLeft(int a=1) {return (direction+12-a)%12; }
 	int		getRight(int a=1) {return (direction+a)%12; }
 	void		turnTo(int newdir);
-	bool		checkMove(int dx, int dy);
+	bool		checkMove(state_t nstate);
    	bool		near(int distance);
 
-	virtual bool	getWantedMove(bosonMsgData *);
+	virtual bool	getWantedMove(state_t &);
 	virtual bool	getWantedShoot(bosonMsgData *);
 	
-signals:
-	void		sig_moveTo(int newx, int newy);
-
 public slots:
 	/* orders from user */
 	virtual void	u_goto(int, int); // not the same as QCanvasSprite::moveTo
@@ -98,7 +103,7 @@ private :
 
 /* moving */
 	int 		dest_x, dest_y;
-	int		asked_x, asked_y;
+	state_t		asked;
 	int		present_dx, present_dy;
 	mobUnitState	asked_state;
 
@@ -113,7 +118,7 @@ public:
 	harvesterUnit(mobileMsg_t *m) : playerMobUnit(m) 
 		{ hstate = standBy; base_x = m->x; base_y = m->y; }
 
-	virtual bool	getWantedMove(bosonMsgData *);
+	virtual bool	getWantedMove(state_t &);
 	virtual bool	getWantedShoot(bosonMsgData *);
 	virtual void	u_goto(int, int);
 	
@@ -135,6 +140,7 @@ Q_OBJECT
 
 public:
 	playerFacility(facilityMsg_t *msg);
+	~playerFacility();
 
 	void	getWantedAction();
 

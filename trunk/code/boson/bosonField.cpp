@@ -1,5 +1,5 @@
 /***************************************************************************
-                          bosonCanvas.cpp  -  description                              
+                          bosonField.cpp  -  description                              
                              -------------------                                         
 
     version              : $Id$
@@ -26,12 +26,12 @@
 #include "common/boconfig.h" // MAX_PLAYERS
 #include "common/map.h"
 
-#include "bosonCanvas.h"
+#include "bosonField.h"
 #include "boshot.h"
 #include "game.h" 	// who_am_i
   
-bosonCanvas::bosonCanvas( QPixmap p, uint w, uint h)
-	: visualCanvas(p,w,h)
+bosonField::bosonField(uint w, uint h)
+	: visualField(w,h)
 {
 	mobile.resize(149);
 	facility.resize(149);
@@ -40,33 +40,46 @@ bosonCanvas::bosonCanvas( QPixmap p, uint w, uint h)
 }
 
 
-void bosonCanvas::hideMob(destroyedMsg_t &m)
+/*
+void bosonField::setCell(int i, int j, groundType g)
+{
+	boAssert(i>=0); boAssert(j>=0);
+	boAssert(i<width()); boAssert(j<height());
+
+	(void) new playerCell(g, i, j);
+
+	emit newCell(i,j,g);
+}
+*/
+
+void bosonField::hideMob(destroyedMsg_t &m)
 {
 	playerMobUnit *u;
 
 	u = mobile.find(m.key);
 	if (u) u->doHide();
-	else logf(LOG_ERROR, "bosonCanvas::unHideMob : can't find m.key");
+	else logf(LOG_ERROR, "bosonField::unHideMob : can't find m.key");
 
 	// XXX emit something for the minimap
 }
 
 
-void bosonCanvas::unHideMob(mobileMsg_t &m)
+
+void bosonField::unHideMob(mobileMsg_t &m)
 {
 	playerMobUnit *u;
 
 	assert(m.who < nb_player);
 	u = mobile.find(m.key);
 	if (u) u->doShow();
-	else logf(LOG_ERROR, "bosonCanvas::unHideMob : can't find m.key");
+	else logf(LOG_ERROR, "bosonField::unHideMob : can't find m.key");
 
 	// XXX emit something for the minimap
 }
 
 
 
-void bosonCanvas::createMob(mobileMsg_t &m)
+void bosonField::createMob(mobileMsg_t &m)
 {
 	playerMobUnit *u;
 
@@ -88,13 +101,13 @@ void bosonCanvas::createMob(mobileMsg_t &m)
 }
 
 
-void bosonCanvas::destroyMob(destroyedMsg_t &m)
+void bosonField::destroyMob(destroyedMsg_t &m)
 {
 	playerMobUnit *mob ;
 	
 	mob = mobile.find(m.key);
 	if (!mob) {
-		logf(LOG_ERROR, "bosonCanvas::destroyMob : can't find m.key");
+		logf(LOG_ERROR, "bosonField::destroyMob : can't find m.key");
 		return;
 	}
 
@@ -108,31 +121,31 @@ void bosonCanvas::destroyMob(destroyedMsg_t &m)
 }
 
 
-void bosonCanvas::hideFix(destroyedMsg_t &m)
+void bosonField::hideFix(destroyedMsg_t &m)
 {
 	playerFacility *f;
 
 	f = facility.find(m.key);
 	if (f) f->doHide();
-	else logf(LOG_ERROR, "bosonCanvas::unHideFix : can't find m.key");
+	else logf(LOG_ERROR, "bosonField::unHideFix : can't find m.key");
 
 	// XXX emit something for the minimap
 }
 
-void bosonCanvas::unHideFix(facilityMsg_t &m)
+void bosonField::unHideFix(facilityMsg_t &m)
 {
 	playerFacility *f;
 
 	assert(m.who < nb_player);
 	f = facility.find(m.key);
 	if (f) f->doShow();
-	else logf(LOG_ERROR, "bosonCanvas::unHideFix : can't find m.key");
+	else logf(LOG_ERROR, "bosonField::unHideFix : can't find m.key");
 
 	// XXX emit something for the minimap
 }
 
 
-void bosonCanvas::createFix(facilityMsg_t &m)
+void bosonField::createFix(facilityMsg_t &m)
 {
 	playerFacility *f;
 
@@ -148,13 +161,13 @@ void bosonCanvas::createFix(facilityMsg_t &m)
 }
 
 
-void bosonCanvas::destroyFix(destroyedMsg_t &msg)
+void bosonField::destroyFix(destroyedMsg_t &msg)
 {
 	playerFacility * f;
 	
 	f = facility.find(msg.key);
 	if (!f) {
-		logf(LOG_ERROR, "bosonCanvas::destroyFix : can't find msg.key");
+		logf(LOG_ERROR, "bosonField::destroyFix : can't find msg.key");
 		return;
 	}
 	boCheck(msg.x, f->x());
@@ -167,25 +180,24 @@ void bosonCanvas::destroyFix(destroyedMsg_t &msg)
 }
 
 
-void bosonCanvas::move(moveMsg_t &msg)
+void bosonField::move(moveMsg_t &msg)
 {
 	playerMobUnit * m;
 	
 	m = mobile.find(msg.key);
 	if (!m) {
-		logf(LOG_ERROR, "bosonCanvas::move : can't find msg.key");
+		logf(LOG_ERROR, "bosonField::move : can't find msg.key");
 		return;
 	}
 
-	playerMobUnit::state_t	ns;
-
-	ns.x = msg.newx;
-	ns.y = msg.newy;
-	ns.dir = msg.direction;
-	m->s_moveTo(ns);
+	playerMobUnit::state_t state;
+	state.x = msg.newx;
+	state.y = msg.newy;
+	state.dir = msg.direction;
+	m->s_moveTo(state);
 }
 
-void bosonCanvas::requestAction(void)
+void bosonField::requestAction(void)
 {
 	QIntDictIterator<playerMobUnit> mobIt(mobile);
 	QIntDictIterator<playerFacility> fixIt(facility);
@@ -196,7 +208,7 @@ void bosonCanvas::requestAction(void)
 		fixIt.current()->getWantedAction();
 }
 
-void bosonCanvas::shooted(powerMsg_t &m)
+void bosonField::shooted(powerMsg_t &m)
 {
 	playerMobUnit	* mob;
 	playerFacility	* fix;
@@ -210,32 +222,32 @@ void bosonCanvas::shooted(powerMsg_t &m)
 	} else if (fix) {
 		/* shooting a facility */
 		fix->shooted(m.power);
-	} else	logf(LOG_ERROR, "bosonCanvas::shooted : unexpected key in powerMsg_t : %d", m.key);
+	} else	logf(LOG_ERROR, "bosonField::shooted : unexpected key in powerMsg_t : %d", m.key);
 
 }
 
 
-void bosonCanvas::updateRess(unitRessMsg_t &m)
+void bosonField::updateRess(unitRessMsg_t &m)
 {
 	playerMobUnit	* mob = mobile.find(m.key);
 	
 	if (mob) {
 		mob->updateContain(m.contain);
-	} else logf(LOG_ERROR, "bosonCanvas::updateRess : unexpected key in unitRessMsg_t : %d", m.key);
+	} else logf(LOG_ERROR, "bosonField::updateRess : unexpected key in unitRessMsg_t : %d", m.key);
 }
 
 
-void bosonCanvas::shoot(shootMsg_t &m)
+void bosonField::shoot(shootMsg_t &m)
 {
 	playerMobUnit	* mob;
 	playerFacility	* fix;
 	QRect		r;
-	double		_z;
+	int		_z;
 
 	mob = mobile.find(m.target_key);
 	fix = facility.find(m.target_key);
 	if (!mob && !fix) {
-		logf(LOG_ERROR, "bosonCanvas::shoot : unexpected target_key in shootMsg_t : %d", m.target_key);
+		logf(LOG_ERROR, "bosonField::shoot : unexpected target_key in shootMsg_t : %d", m.target_key);
 		return;
 	}
 	
