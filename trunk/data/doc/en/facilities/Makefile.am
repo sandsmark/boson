@@ -9,8 +9,8 @@ SUBDIRS =
 BO_DOC_DIR = facilities
 
 # list all wml files here
-BO_DOCS = index.wml barracks.wml bunker.wml comsat.wml helipad.wml map.wml \
-	mineralrefinery.wml oiltower.wml powerplant.wml prison.wml \
+BO_DOCS = index.wml bunker.wml comsat.wml helipad.wml map.wml \
+	mineralrefinery.wml oiltower.wml powerplant.wml \
 	refinery.wml repairpad.wml samsite.wml techcenter.wml turret.wml \
 	warfactory.wml
 

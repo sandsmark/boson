@@ -11,12 +11,5 @@
 	</tr>
     </table>
     
-<:
-use get_values;
-
-# ( facility type, facility name)
-get_values->getval("fix", "prison");
-:>
-
 #include "nav.wml" before_url="repairpad.html" before_text="Repair Pad" after_url="helipad.html" after_text="Helipad" up_url="index.html"
 #include "footer.wml"

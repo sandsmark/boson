@@ -57,15 +57,13 @@
 	      <dt>3.4 <a href="facilities/refinery.html">Oil Refinery</a></dt>
               <dt>3.5 <a href="facilities/oiltower.html">Oil Tower</a></dt>
               <dt>3.6 <a href="facilities/powerplant.html">Power Plant</a></dt>
-              <dt>3.7 <a href="facilities/barracks.html">Barracks</a></dt>
-              <dt>3.8 <a href="facilities/warfactory.html">War Factory</a></dt>
-              <dt>3.9 <a href="facilities/comsat.html">Comsat</a></dt>
-              <dt>3.10 <a href="facilities/techcenter.html">Techcenter</a></dt>
-              <dt>3.11 <a href="facilities/repairpad.html">Repair Pad</a></dt>
-              <dt>3.12 <a href="facilities/prison.html">Prison</a></dt>
-              <dt>3.13 <a href="facilities/helipad.html">Helipad</a></dt>
-              <dt>3.14 <a href="facilities/turret.html">Turret</a></dt>
-              <dt>3.15 <a href="facilities/samsite.html">Sam-Site</a></dt>
+              <dt>3.7 <a href="facilities/warfactory.html">War Factory</a></dt>
+              <dt>3.8 <a href="facilities/comsat.html">Comsat</a></dt>
+              <dt>3.9 <a href="facilities/techcenter.html">Techcenter</a></dt>
+              <dt>3.10 <a href="facilities/repairpad.html">Repair Pad</a></dt>
+              <dt>3.11 <a href="facilities/helipad.html">Helipad</a></dt>
+              <dt>3.12 <a href="facilities/turret.html">Turret</a></dt>
+              <dt>3.13 <a href="facilities/samsite.html">Sam-Site</a></dt>
             </dl>
           </dd>
           
