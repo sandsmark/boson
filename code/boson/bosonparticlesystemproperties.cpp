@@ -123,6 +123,7 @@ void BosonParticleSystemProperties::reset()
   mEndSize = 1;
   mAge = 0;
   mAlign = true;
+  mMoveParticlesWithSystem = false;
   mTextureName = "explosion";
 }
 
@@ -183,6 +184,7 @@ void BosonParticleSystemProperties::load(KSimpleConfig* cfg, const QString& grou
   mEndSize = (float)(cfg->readDoubleNumEntry("EndSize", mEndSize));
   mAge = (float)(cfg->readDoubleNumEntry("SystemLife", mAge));
   mAlign = cfg->readBoolEntry("Align", mAlign);
+  mMoveParticlesWithSystem = cfg->readBoolEntry("MoveParticlesWithSystem", mMoveParticlesWithSystem);
   mTextureName = cfg->readEntry("Texture", mTextureName);
 }
 
@@ -198,6 +200,7 @@ BosonParticleSystem* BosonParticleSystemProperties::newSystem(BoVector3 pos, flo
   {
     s->setRotation(rotation, 0, 0, 1);
   }
+  s->setMoveParticlesWithSystem(mMoveParticlesWithSystem);
   s->createParticles(mInitNum);
 
   return s;
