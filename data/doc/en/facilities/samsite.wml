@@ -7,9 +7,8 @@
 	<tr>
 		<td><img src="samsite.png" border="0">&nbsp;</td>
 		<td valign="top"><img src="../none.png" border="0" height="30"><br>
-		A Sam-Site can fire air missiles against Tornados.
+		A Sam-Site can fire air missiles against <a href="../units/tornados.html">Tornados</a>.
 	</tr>
-	<tr><td><br>&nbsp</td></tr>
     </table>
     
 <:

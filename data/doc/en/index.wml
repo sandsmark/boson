@@ -100,5 +100,10 @@
       </dd>
     </dl>
     
+    <hr>
+    <h2>
+      The Boson Handbook - maintained by <a href="mailto:felix.seeger@gmx.de">Felix Seeger</a>
+    </h2>
+
 #include "nav.wml" after_url="intr.html" after_text="Introduction"      
 #include "footer.wml"
