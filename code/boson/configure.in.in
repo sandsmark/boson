@@ -263,7 +263,6 @@ XF86VidModeQueryExtension(dpy, &ev, &er);
   LIBS="$bo_save_libs"
   AC_SUBST(LIB_VIDMODE)
 ])
-AC_BOSON_CHECK_VIDMODE
 
 AC_DEFUN(AC_BOSON_CHECK_XRANDR,
 [
