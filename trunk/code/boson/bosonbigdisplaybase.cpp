@@ -1069,7 +1069,7 @@ void BosonBigDisplayBase::renderPlacementPreview()
 	BoFrame* f = d->mPlacementPreview.model()->frame(0);
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	d->mPlacementPreview.model()->enablePointer();
+	d->mPlacementPreview.model()->prepareRendering();
 	f->renderFrame(&localPlayerIO()->teamColor());
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);

@@ -482,7 +482,7 @@ void BosonItem::renderItem(unsigned int lod)
 {
  BO_CHECK_NULL_RET(mModel);
  BO_CHECK_NULL_RET(mCurrentFrame);
- mModel->enablePointer();
+ mModel->prepareRendering();
  mCurrentFrame->renderFrame(teamColor(), lod);
 }
 

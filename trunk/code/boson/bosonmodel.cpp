@@ -1157,7 +1157,7 @@ float* BosonModel::pointArray() const
  return d->mPoints;
 }
 
-void BosonModel::enablePointer()
+void BosonModel::prepareRendering()
 {
  // TODO: performance:
  // we should manage a single (giantic) array, which contains the of ALL models.

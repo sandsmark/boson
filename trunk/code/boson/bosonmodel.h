@@ -294,10 +294,13 @@ public:
 	float* pointArray() const;
 
 	/**
-	 * Enable @ref pointArray pointer to be used for vertex arrays. The
-	 * client state must have been set already.
+	 * Prepare this model for being rendered next. This must be called once
+	 * before rendering anything (frame, mesh, ..) in this model.
+	 *
+	 * This will e.g. enable @ref pointArray pointer to be used for
+	 * vertex arrays. The client state must have been set already.
 	 **/
-	void enablePointer();
+	void prepareRendering();
 
 	/**
 	 * @return How many LOD levels this model has
