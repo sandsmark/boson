@@ -43,8 +43,8 @@ protected:
 private slots:
 	void setCell(int);
 	void setTransTile(int);
-	void setTransType(int);
-	void setTransItem(int);
+	void setTransRef(int);
+	void setItem(int);
 
 private:
 	QPopupMenu	*popup;

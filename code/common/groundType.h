@@ -80,13 +80,16 @@ enum transition_t {
 #define TILES_PER_TRANSITION 28
 #define SMALL_TILES_PER_TRANSITION 12
 
-#define GET_TRANS_NUMBER(transNb,transPart)  ((groundType)(GROUND_LAST+(TILES_PER_TRANSITION*(transNb)) + (transPart)))
-#define GET_TRANS_REF(g)	(((g)-GROUND_LAST)/TILES_PER_TRANSITION )
+#define GET_TRANS_NUMBER(transRef,transTile)	\
+	( (groundType)(GROUND_LAST+(TILES_PER_TRANSITION*(transRef)) + (transTile)))
+
+#define GET_TRANS_REF(g)	(((g)-GROUND_LAST) / TILES_PER_TRANSITION )
+#define GET_TRANS_TILE(g)	(((g)-GROUND_LAST) % TILES_PER_TRANSITION )
 #define IS_TRANS(g)		( (g) >= GROUND_LAST && (g)< GROUND_LAST + TRANS_LAST * TILES_PER_TRANSITION)
-#define IS_SMALL_TRANS(g)	( IS_TRANS((g)) && ((g)-GROUND_LAST) % TILES_PER_TRANSITION < SMALL_TILES_PER_TRANSITION)
-#define IS_BIG_TRANS(g)		( IS_TRANS((g)) && !IS_SMALL_TRANS((g)) )
+#define IS_SMALL_TRANS(g)	( IS_TRANS((g)) && (GET_TRANS_TILE(g) <  SMALL_TILES_PER_TRANSITION))
+#define IS_BIG_TRANS(g)		( IS_TRANS((g)) && (GET_TRANS_TILE(g) >= SMALL_TILES_PER_TRANSITION))
 #define IS_PLAIN(g)		( (g) >= 0 && (g) < GROUND_LAST)
-#define IS_GROUND(g)		( IS_TRANS(g) || IS_PLAIN(g))
+#define IS_GROUND(g)		( (g) >= 0 && (g)< GROUND_LAST + TRANS_LAST * TILES_PER_TRANSITION)
 
 
 /* Transition description */
