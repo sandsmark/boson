@@ -22,8 +22,10 @@
 #include "bosonmap.h"
 #include "bosonfileconverter.h"
 #include "bosonscenario.h"
+#include "bosondata.h"
 #include "bodebug.h"
 #include "bofile.h"
+#include "bosonprofiling.h"
 #include "bpfdescription.h"
 #include "defines.h"
 
@@ -32,13 +34,61 @@
 #include <qfileinfo.h>
 
 #include <kstandarddirs.h>
-#include <kstaticdeleter.h>
 #include <klocale.h>
 
 #include "bosonplayfield.moc"
 
-KStaticDeleter< QDict<BosonPlayField> > sd;
-QDict<BosonPlayField>* BosonPlayField::mPlayFields = 0;
+class BosonPlayFieldData : public BosonDataObject
+{
+public:
+	BosonPlayFieldData(const QString& mapFile, BosonPlayField* field);
+
+	virtual ~BosonPlayFieldData()
+	{
+		delete mPlayField;
+	}
+
+	virtual QString idString() const
+	{
+		return mId;
+	}
+	virtual void* pointer() const
+	{
+		return (void*)playField();
+	}
+	BosonPlayField* playField() const
+	{
+		return mPlayField;
+	}
+
+	virtual bool load();
+private:
+	BosonPlayField* mPlayField;
+	QString mId;
+};
+
+BosonPlayFieldData::BosonPlayFieldData(const QString& mapFile, BosonPlayField* field)
+	: BosonDataObject(mapFile)
+{
+ mPlayField = field;
+ if (!mPlayField->preLoadPlayField(mapFile)) {
+	boError() << k_funcinfo << "unable to load playField from " << mapFile << endl;
+	mId = QString::null;
+	return;
+ }
+ mId = mPlayField->identifier();
+ if (mId.isEmpty()) {
+	boError() << k_funcinfo << "no identifier in " << mapFile << endl;
+	mId = QString::null;
+	return;
+ }
+}
+
+bool BosonPlayFieldData::load()
+{
+ BosonProfiler profiler(BosonProfiling::LoadPlayField);
+ return true;
+}
 
 
 BosonPlayField::BosonPlayField(QObject* parent) : QObject(parent, "BosonPlayField")
@@ -66,65 +116,63 @@ BosonPlayField::~BosonPlayField()
 
 void BosonPlayField::initStatic()
 {
- if (!mPlayFields) {
-	sd.setObject(mPlayFields, new QDict<BosonPlayField>);
-	mPlayFields->setAutoDelete(true);
-
-	QTime t;
-	t.start();
-	// note: this might take some time, since we use gzip compressed files
-	// which get extracted here.
-	// TODO: free the memory once a map is being started!!
-	preLoadAllPlayFields();
-	boDebug() << k_funcinfo << t.elapsed() << endl;
- }
-}
-
-void BosonPlayField::preLoadAllPlayFields()
-{
- // TODO: profiling!
- // TODO: ensure that UI doesn't block (i.e. call process events)
- QStringList list = KGlobal::dirs()->findAllResources("data", "boson/maps/*.bpf");
- if (list.isEmpty()) {
-	boError() << k_funcinfo << "Cannot find any playfield?!" << endl;
+ static bool initialized = false;
+ if (initialized) {
 	return;
  }
- for (unsigned int i = 0; i < list.count(); i++) {
-	if (mPlayFields->find(BPFFile::fileNameToIdentifier(list[i]))) {
-		continue;
-	}
-	boDebug() << k_funcinfo << list[i] << endl;
-	BosonPlayField* playField = new BosonPlayField();
-	bool ok = playField->preLoadPlayField(list[i]);
-	if (!ok) {
-		boError() << k_funcinfo << "Could not load " << list[i] << endl;
-		delete playField;
-		continue;
-	}
-	mPlayFields->insert(playField->mIdentifier, playField);
- }
- if (mPlayFields->count() == 0) {
-	boError() << k_funcinfo << "no valid map found!" << endl;
- }
+ initialized = true;
+ boDebug() << k_funcinfo << endl;
+ preLoadAllPlayFields();
 }
 
-BosonPlayField* BosonPlayField::playField(const QString& identifier)
+bool BosonPlayField::preLoadAllPlayFields()
 {
- return mPlayFields->find(identifier);
+ boDebug() << k_funcinfo << endl;
+
+ // TODO: ensure that UI doesn't block (i.e. call process events)
+ BosonProfiler profiler(BosonProfiling::PreLoadPlayFields);
+ if (BosonData::bosonData()->availablePlayFields().count() > 0) {
+	boWarning() << k_funcinfo << "playFields already loaded" << endl;
+	return true;
+ }
+ QStringList list = BosonData::availableFiles(QString::fromLatin1("maps/*.bpf"));
+ if (list.isEmpty()) {
+	boWarning() << k_funcinfo << "Cannot find any playFields" << endl;
+	return false;
+ }
+ QStringList::Iterator it;
+ for (it = list.begin(); it != list.end(); ++it) {
+	BosonPlayFieldData* data = new BosonPlayFieldData(*it, new BosonPlayField());
+	if (data->idString().isEmpty()) {
+		boError() << k_funcinfo << *it << " could not be loaded" << endl;
+		delete data;
+		continue;
+	}
+	if (!BosonData::bosonData()->insertPlayField(data)) {
+		delete data;
+	}
+ }
+ if (BosonData::bosonData()->availablePlayFields().count() == 0) {
+	boError() << k_funcinfo << "no playFields could be loaded!" << endl;
+	return false;
+ }
+ return true;
 }
 
 void BosonPlayField::clearAllPreLoadedPlayFields()
 {
+boWarning() << k_funcinfo << "obsolete" << endl;
+#if 0
  if (!mPlayFields) {
 	return;
  }
  mPlayFields->clear();
+#endif
 }
-
 
 QString BosonPlayField::defaultPlayField()
 {
- QStringList l = availablePlayFields();
+ QStringList l = boData->availablePlayFields();
  if (l.contains(DEFAULT_PLAYFIELD)) {
 	return DEFAULT_PLAYFIELD;
  }
@@ -133,34 +181,6 @@ QString BosonPlayField::defaultPlayField()
  }
  boWarning() << k_funcinfo << "cannot find " << DEFAULT_PLAYFIELD << " map - using " << l[0] << " instead" << endl;
  return l[0];
-}
-
-QStringList BosonPlayField::availablePlayFields()
-{
- QStringList list;
- QDictIterator<BosonPlayField> it(*mPlayFields);
- for (; it.current(); ++it) {
-	list.append(it.currentKey());
- }
- return list;
-}
-
-QString BosonPlayField::playFieldName(const QString& id)
-{
- BosonPlayField* f = mPlayFields->find(id);
- if (!f) {
-	return QString::null;
- }
- return f->playFieldName();
-}
-
-QString BosonPlayField::playFieldComment(const QString& id)
-{
- BosonPlayField* f = mPlayFields->find(id);
- if (!f) {
-	return QString::null;
- }
- return f->playFieldComment();
 }
 
 bool BosonPlayField::preLoadPlayField(const QString& file)

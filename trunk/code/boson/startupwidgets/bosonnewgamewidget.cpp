@@ -30,6 +30,7 @@
 #include "../bosonplayfield.h"
 #include "../bpfdescription.h"
 #include "../bosonscenario.h"
+#include "../bosondata.h"
 #include "../bosonwidgets/bosonplayfieldview.h"
 #include "bosonstartupnetwork.h"
 #include "bodebug.h"
@@ -141,11 +142,11 @@ void BosonNewGameWidget::initPlayer()
 
 void BosonNewGameWidget::initPlayFields()
 {
- QStringList list = BosonPlayField::availablePlayFields();
+ QStringList list = boData->availablePlayFields();
  boDebug() << k_funcinfo << list.count() << endl;
  for (unsigned int i = 0; i < list.count(); i++) {
 	QListViewItem* item = new QListViewItem(mChooseBosonMap);
-	item->setText(0, BosonPlayField::playFieldName(list[i]));
+	item->setText(0, boData->playField(list[i])->playFieldName());
 	mChooseBosonMap->insertItem(item);
 	d->mItem2Map.insert(item, list[i]);
  }
@@ -276,7 +277,7 @@ void BosonNewGameWidget::slotNetPlayFieldChanged(BosonPlayField* field)
  BO_CHECK_NULL_RET(field);
  BO_CHECK_NULL_RET(field->scenario());
  boDebug() << k_funcinfo << "id: " << field->identifier() << endl;
- QStringList list = BosonPlayField::availablePlayFields();
+ QStringList list = boData->availablePlayFields();
  QMap<QListViewItem*, QString>::Iterator it;
  QListViewItem* item = 0;
  for (it = d->mItem2Map.begin(); it != d->mItem2Map.end() && !item; ++it) {

@@ -21,8 +21,11 @@
 
 #include <qstring.h>
 
+#define boData BosonData::bosonData()
+
 class QStringList;
 class BosonGroundTheme;
+class BosonPlayField;
 
 class BosonDataObject
 {
@@ -103,10 +106,14 @@ public:
 	static BosonData* bosonData() { return mBosonData; }
 
 	bool insertGroundTheme(BosonDataObject* object);
-	BosonGroundTheme* groundTheme(const QString& id) const;
 	bool loadGroundTheme(const QString& id);
-
+	BosonGroundTheme* groundTheme(const QString& id) const;
 	QStringList availableGroundThemes() const;
+
+	bool insertPlayField(BosonDataObject* object);
+	bool loadPlayField(const QString& id);
+	BosonPlayField* playField(const QString& id) const;
+	QStringList availablePlayFields() const;
 
 	/**
 	 * @return A list of available files that match @p searchPattern. See

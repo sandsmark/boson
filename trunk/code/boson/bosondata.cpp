@@ -38,6 +38,7 @@ public:
 	}
 
 	QDict<BosonDataObject> mGroundThemes;
+	QDict<BosonDataObject> mPlayFields;
 };
 
 void BosonData::initBosonData()
@@ -45,6 +46,7 @@ void BosonData::initBosonData()
  if (mBosonData) {
 	return;
  }
+ boDebug() << k_funcinfo << endl;
  sd.setObject(mBosonData, new BosonData());
 }
 
@@ -52,10 +54,13 @@ BosonData::BosonData()
 {
  d = new BosonDataPrivate;
  d->mGroundThemes.setAutoDelete(true);
+ d->mPlayFields.setAutoDelete(true);
 }
 
 BosonData::~BosonData()
 {
+ d->mPlayFields.clear();
+ d->mGroundThemes.clear();
  delete d;
 }
 
@@ -101,5 +106,44 @@ bool BosonData::loadGroundTheme(const QString& id)
 	return false;
  }
  return d->mGroundThemes[id]->load();
+}
+
+bool BosonData::insertPlayField(BosonDataObject* field)
+{
+ if (!field) {
+	return true;
+ }
+ if (d->mPlayFields[field->idString()]) {
+	return false;
+ }
+ d->mPlayFields.insert(field->idString(), field);
+ return true;
+}
+
+BosonPlayField* BosonData::playField(const QString& id) const
+{
+ if (!d->mPlayFields[id]) {
+	return 0;
+ }
+ return (BosonPlayField*)d->mPlayFields[id]->pointer();
+}
+
+QStringList BosonData::availablePlayFields() const
+{
+ QStringList list;
+ QDictIterator<BosonDataObject> it(d->mPlayFields);
+ for (; it.current(); ++it) {
+	list.append(it.currentKey());
+ }
+ return list;
+}
+
+bool BosonData::loadPlayField(const QString& id)
+{
+ if (!d->mPlayFields[id]) {
+	boWarning() << k_funcinfo << "no playField with id=" << id << endl;
+	return false;
+ }
+ return d->mPlayFields[id]->load();
 }
 

@@ -95,7 +95,7 @@ void BosonStarting::startNewGame()
 	BosonPlayField* loadField = 0;
 	if (!mPlayFieldId.isNull()) {
 		boDebug() << k_funcinfo << "use " << mPlayFieldId << endl;
-		loadField = BosonPlayField::playField(mPlayFieldId);
+		loadField = boData->playField(mPlayFieldId);
 	} else {
 		// here we should be in editor mode creating a new map
 		boDebug() << k_funcinfo << "editor mode: create new map" << endl;
@@ -415,7 +415,7 @@ void BosonStarting::startScenario()
 	boError() << k_funcinfo << "scenario doesn't need to be started on loading" << endl;
 	return;
  }
- BosonPlayField* field = BosonPlayField::playField(mPlayFieldId);
+ BosonPlayField* field = boData->playField(mPlayFieldId);
  // TODO: on error we should abort starting the game, i.e. 
  // return to the welcome widget (and displaying a msg box) or so
  if (!field) {
