@@ -106,12 +106,6 @@ playerMobUnit::playerMobUnit(mobileMsg_t *msg)
 #define SQ(x)			( (x) * (x) )
 
 
-bool playerMobUnit::checkMove(QPoint pos)
-{
-	return bocanvas->cell(pos).canGo( goFlag() );
-}
-
-
 bool playerMobUnit::getWantedMove(QPoint &wstate)
 {
 
@@ -148,24 +142,26 @@ bool playerMobUnit::getWantedMove(QPoint &wstate)
 			if ( abs(dv.x()) > abs(dv.y()) ) {
 				// x is greater
 				local = asked + QPoint( (dv.x()>0)?1:-1, 0); // try first along the x axis
-				if (!checkMove(local))  {
+				if (!bocanvas->checkMove(local, goFlag() ))  {
 					local = asked + QPoint( 0, (dv.y()>0)?1:-1); // the along the y axis
-					if (!checkMove(local))
+					if (!bocanvas->checkMove(local, goFlag() ))
 						ret = false;
 				}
 
 			} else {
 				// y is greater
 				local = asked + QPoint( 0, (dv.y()>0)?1:-1); // try first along the y axis
-				if (!checkMove(local)) {
+				if (!bocanvas->checkMove(local, goFlag() )) {
 					local = asked + QPoint( (dv.x()>0)?1:-1, 0); // then along the x axis
-					if (!checkMove(local))
+					if (!bocanvas->checkMove(local, goFlag() ))
 						ret = false;
 				}
 			}
 			bocanvas->setCellFlag ( r, (BO_GO_AIR==goFlag())? Cell::flying_unit_f:Cell::field_unit_f );
-			wstate = asked = local;
-			asked_state = MUS_MOVING;
+			wstate = local;	
+			local -= asked;		//  wstate=asked are the new position, local = dz, the delta between t and t+1
+			asked = wstate;
+			asked_state = MUS_MOVING; 	///orzel:  asked_state still useful here ?
 			// request those cells so that nobody takes them
 //			printf("ret is %s, failed_move = %d\n", ret?"true":"false", failed_move);
 			if (!ret)
@@ -174,7 +170,7 @@ bool playerMobUnit::getWantedMove(QPoint &wstate)
  				if (failed_move>4) state = MUS_NONE; // prevent 'keep on trying when it can obviously not go further'
 				return false;
 			}
-			r.moveTopLeft(asked);
+			r.moveBy(local.x(), local.y());
 			bocanvas->setCellFlag ( r, Cell::request_f );
 			if (failed_move>3) failed_move = 0; // prevent 3-timeunit loop
 

@@ -112,7 +112,6 @@ protected:
 	int		getLeft(int a=1) {return (direction+DIRECTION_STEPS-a)%DIRECTION_STEPS; }
 	int		getRight(int a=1) {return (direction+a)%DIRECTION_STEPS; }
 	void		turnTo(int newdir);
-	bool		checkMove(QPoint pos);
    	bool		near(int distance);
 
 	virtual bool	getWantedMove(QPoint &);

@@ -72,12 +72,15 @@ public:
 	void 	setCellFlag(QRect r, Cell::cell_flags flag);
 	void 	unsetCellFlag(QRect r, Cell::cell_flags flag);
 
-/* concerning contents */
-  playerFacility *getFacility(long key) { return facility.find(key); }
+	/* concerning contents */
+	playerFacility *getFacility(long key) { return facility.find(key); }
+	bool		checkMove(QPoint pos, uint goFlag) {
+		return cell(pos).canGo( goFlag, ground( tile(pos.x(), pos.y())));
+	}
 
-//private :
-  QIntDict<playerMobUnit>	mobile;
-  QIntDict<playerFacility>	facility;
+	//private :
+	QIntDict<playerMobUnit>	mobile;
+	QIntDict<playerFacility> facility;
 
 signals:
 	void reCenterView(int x, int y);
