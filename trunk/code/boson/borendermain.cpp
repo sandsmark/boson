@@ -704,7 +704,6 @@ void ModelPreview::mouseMoveEvent(QMouseEvent* e)
 	int dy = mMouseMoveDiff->dx(); // rotation around y axis
 
 	BoQuaternion q = camera()->quaternion();
-	BoQuaternion inv = q.inverse();
 	BoVector3 cameraPos;
 	q.transform(&cameraPos, &camera()->cameraPos());
 
@@ -720,7 +719,7 @@ void ModelPreview::mouseMoveEvent(QMouseEvent* e)
 	// multiply.
 	q2.multiply(q);
 
-	inv = q2.inverse();
+	BoQuaternion inv = q2.conjugate(); // equal to inverse() (as q2 is normalized) but faster
 	inv.transform(&cameraPos, &cameraPos);
 
 	updateCamera(cameraPos, q2);
