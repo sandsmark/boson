@@ -8,10 +8,19 @@ TODO:
 
 bug : segfault some times after failing to load some pixmap (fe ComStat/Field.003.bmp)
 configuration for server
+move logfile initialisation into common/
+Initial dialog:
+	give 'world' name
+	give 'species' names
+	version check whithin the ask_connect msg
+Unit drawing into minimap : moving, etc...
+make a toolbar with concerned buttons (move, stop, etc..)
+take out the menu
+DND of the map onto the minimap
+how to handle non 1x1 tiles ? 
 does units::rect need to be virtual anymore ?
 when clicking (no box) on two mobiles, both are selected, but shouldn't
 server : check that each unit does max 1 move each jiffie
-version check whithin the ask_connect msg
 
 graphism 
 	>now, we have: The picture, the health bar, the status, the progress bar,
