@@ -153,12 +153,15 @@ protected:
 			return false;
 		}
 
+		// FIXME: baseMenus/addMenus is not correct anymore - these maps
+		// may contains Action items, too
 		QMap<QString, QDomElement> baseMenus;
 		QMap<QString, QDomElement> addMenus;
-		getChildTags(QString("Menu"), baseMenuBar, addMenuBar, baseMenus, addMenus);
+		QStringList tags;
+		tags.append("Menu");
+		tags.append("Action");
+		getChildTags(tags, baseMenuBar, addMenuBar, baseMenus, addMenus);
 
-#warning TODO actions outside of a Menu
-		// TODO: Action tags that don't belong to a <Menu>
 		QMap<QString, QDomElement>::Iterator it;
 		for (it = addMenus.begin(); it != addMenus.end(); ++it) {
 			QString name = it.key();
@@ -166,12 +169,16 @@ protected:
 			if (baseMenus.contains(name)) {
 				boDebug() << "merging menus " << name << endl;
 				QDomElement baseMenu = baseMenus[name];
+				if (baseMenu.tagName() != "Menu") {
+					boWarning() << k_funcinfo << name << " is not a menu. ignoring." << endl;
+					continue;
+				}
 				if (!mergeMenu(baseMenu, addMenu)) {
 					return false;
 				}
 			} else {
 				boDebug() << "adding " << it.key() << endl;
-				boWarning() << k_funcinfo << "custom menus ignore MergeLocal tags" << endl;
+				boWarning() << k_funcinfo << "custom menus/toplevel items ignore MergeLocal tags" << endl;
 #warning FIXME
 				// FIXME: append the child before a MergeLocal
 				// tag!!
@@ -181,7 +188,7 @@ protected:
 		return true;
 	}
 
-	void getChildTags(const QString& tagName, QDomElement& baseRoot, QDomElement& addRoot, QMap<QString, QDomElement>& baseMenus, QMap<QString, QDomElement>& addMenus)
+	void getChildTags(const QStringList& tagNames, QDomElement& baseRoot, QDomElement& addRoot, QMap<QString, QDomElement>& baseMenus, QMap<QString, QDomElement>& addMenus)
 	{
 		QDomNode node = baseRoot.firstChild();
 		while (!node.isNull()) {
@@ -190,7 +197,7 @@ protected:
 			if (e.isNull()) {// not an element
 				continue;
 			}
-			if (e.tagName() != tagName) {
+			if (!tagNames.contains(e.tagName())) {
 				continue;
 			}
 			QString name = e.attribute("name");
@@ -204,7 +211,7 @@ protected:
 			if (e.isNull()) {// not an element
 				continue;
 			}
-			if (e.tagName() != tagName) {
+			if (!tagNames.contains(e.tagName())) {
 				continue;
 			}
 			QString name = e.attribute("name");
@@ -391,12 +398,6 @@ bool BoUfoXMLBuilder::makeUfoMenuBar(BoUfoMenuBar* bar)
 
 bool BoUfoXMLBuilder::makeUfoMenu(const QDomElement& parentElement, BoUfoMenuBarMenu* ufoMenu)
 {
- // note: plib does not support
- // - menu items that are directly in a menubar (without a
- //   submenu)
- // - menus inside menus
- //   (this is very important to us)
-
  if (parentElement.isNull()) {
 	return false;
  }
@@ -452,6 +453,8 @@ public:
 	KShortcut mDefaultShortcut;
 	QString mText;
 	KShortcut mShortcut;
+
+	QPtrList<ufo::UWidget> mWidgets;
 };
 
 BoUfoAction::BoUfoAction(const QString& text, const KShortcut& cut, const QObject* receiver, const char* slot, BoUfoActionCollection* parent, const char* name)
@@ -498,6 +501,56 @@ void BoUfoAction::slotActivated()
  emit signalActivated();
 }
 
+void BoUfoAction::addWidget(ufo::UWidget* w)
+{
+ d->mWidgets.removeRef(w);
+ d->mWidgets.append(w);
+}
+
+void BoUfoAction::removeWidget(ufo::UWidget* w)
+{
+ d->mWidgets.removeRef(w);
+}
+
+QPtrList<ufo::UWidget> BoUfoAction::widgets() const
+{
+ return d->mWidgets;
+}
+
+void BoUfoAction::uslotActivated(ufo::UActionEvent*)
+{
+ slotActivated();
+}
+
+void BoUfoAction::uslotHighlighted(ufo::UActionEvent*)
+{
+}
+
+void BoUfoAction::uslotWidgetRemoved(ufo::UWidget* w)
+{
+ removeWidget(w);
+}
+
+
+void BoUfoAction::plug(ufo::UWidget* w)
+{
+ // TODO: toolbar?
+ ufo::UMenuBar* menuBar = dynamic_cast<ufo::UMenuBar*>(w);
+ ufo::UMenu* menu = dynamic_cast<ufo::UMenu*>(w);
+ if (menuBar || menu) {
+	ufo::UMenuItem* menuItem = new ufo::UMenuItem(text().latin1());
+	menuItem->sigActivated().connect(slot(*this, &BoUfoAction::uslotActivated));
+	menuItem->sigHighlighted().connect(slot(*this, &BoUfoAction::uslotHighlighted));
+
+	// AB: this is required to avoid invalid pointers. I'd like to
+	// use a sigWidgetDeleted() signal instead.
+	menuItem->sigWidgetRemoved().connect(slot(*this, &BoUfoAction::uslotWidgetRemoved));
+
+	w->add(menuItem);
+	addWidget(menuItem);
+ }
+}
+
 BoUfoToggleAction::BoUfoToggleAction(const QString& text, const KShortcut& cut, const QObject* receiver, const char* slot, BoUfoActionCollection* parent, const char* name)
 	: BoUfoAction(text, cut, receiver, slot, parent, name)
 {
@@ -508,19 +561,147 @@ BoUfoToggleAction::~BoUfoToggleAction()
 {
 }
 
+void BoUfoToggleAction::plug(ufo::UWidget* w)
+{
+#if UFO_MAJOR_VERSION == 0 && UFO_MINOR_VERSION <= 7 && UFO_MICRO_VERSION <= 2 && 0
+ // AB: libufo <= 0.7.2 had a broken UCheckBoxMenuItem
+ // implementation.
+ BoUfoAction::plug(w);
+ return;
+#endif
+ ufo::UMenuBar* menuBar = dynamic_cast<ufo::UMenuBar*>(w);
+ ufo::UMenu* menu = dynamic_cast<ufo::UMenu*>(w);
+ if (menuBar || menu) {
+	ufo::UCheckBoxMenuItem* menuItem = new ufo::UCheckBoxMenuItem(text().latin1());
+	menuItem->setSelected(checked());
+	menuItem->sigActivated().connect(slot(*((BoUfoAction*)this), &BoUfoAction::uslotActivated));
+	menuItem->sigHighlighted().connect(slot(*((BoUfoAction*)this), &BoUfoAction::uslotHighlighted));
+
+	// AB: this is required to avoid invalid pointers. I'd like to
+	// use a sigWidgetDeleted() signal instead.
+	menuItem->sigWidgetRemoved().connect(slot(*((BoUfoAction*)this), &BoUfoAction::uslotWidgetRemoved));
+
+	w->add(menuItem);
+	addWidget(menuItem);
+ }
+}
+
 void BoUfoToggleAction::slotActivated()
 {
- BoUfoAction::slotActivated();
+ static bool recursive = false;
+ if (recursive) {
+	return;
+ }
+ boDebug() << k_funcinfo << endl;
+ recursive = true;
 
- mChecked = !mChecked;
+ setChecked(!mChecked);
+
+ recursive = false;
+ BoUfoAction::slotActivated();
  emit signalToggled(checked());
 }
 
 void BoUfoToggleAction::setChecked(bool c)
 {
+ static bool recursive = false;
+ if (recursive) {
+	return;
+ }
+ recursive = true;
  mChecked = c;
- emit signalInternalToggle(c);
+ QPtrList<ufo::UWidget> list = widgets();
+ QPtrListIterator<ufo::UWidget> it(list);
+ while (it.current()) {
+	ufo::UCheckBoxMenuItem* checkBox = dynamic_cast<ufo::UCheckBoxMenuItem*>(it.current());
+	if (checkBox) {
+		checkBox->setSelected(checked());
+	}
+	++it;
+ }
+ recursive = false;
 }
+
+
+
+class BoUfoActionMenuPrivate
+{
+public:
+	BoUfoActionMenuPrivate()
+	{
+	}
+	QPtrList<BoUfoAction> mActions;
+};
+
+
+// AB: KActionMenu maintains a single internal popup menu that is added to every
+// widget the action is plugged to.
+// however we cannot do this, as UMenu::add() takes ownership of the widgets.
+// so whenever this action is plugged to a menu/toolbar/... we need to create a
+// new UMenu.
+BoUfoActionMenu::BoUfoActionMenu(const QString& text, BoUfoActionCollection* parent, const char* name)
+	: BoUfoAction(text, KShortcut(), 0, 0, parent, name)
+{
+ d = new BoUfoActionMenuPrivate;
+}
+
+BoUfoActionMenu::~BoUfoActionMenu()
+{
+ delete d;
+}
+
+void BoUfoActionMenu::plug(ufo::UWidget* w)
+{
+ ufo::UMenuBar* menuBar = dynamic_cast<ufo::UMenuBar*>(w);
+ ufo::UMenu* menu = dynamic_cast<ufo::UMenu*>(w);
+ if (menuBar || menu) {
+	ufo::UMenu* m = new ufo::UMenu(text().latin1());
+
+	// AB: this is required to avoid invalid pointers. I'd like to
+	// use a sigWidgetDeleted() signal instead.
+	m->sigWidgetRemoved().connect(slot(*((BoUfoAction*)this), &BoUfoAction::uslotWidgetRemoved));
+
+	w->add(m);
+	addWidget(m);
+ }
+ redoMenus();
+}
+
+void BoUfoActionMenu::insert(BoUfoAction* a) // TODO: index
+{
+ d->mActions.append(a);
+ redoMenus();
+}
+
+void BoUfoActionMenu::remove(BoUfoAction* a)
+{
+ d->mActions.removeRef(a);
+ redoMenus();
+}
+
+void BoUfoActionMenu::redoMenus()
+{
+ QPtrList<ufo::UWidget> list = widgets();
+// boDebug() << k_funcinfo << "widgets=" << list.count() << " actions=" << d->mActions.count() << endl;
+ QPtrListIterator<ufo::UWidget> it(list);
+ while (it.current()) {
+	ufo::UMenu* menu = dynamic_cast<ufo::UMenu*>(it.current());
+	++it;
+	if (menu) {
+		// AB: this is dangerous. it is correct only, if all child
+		// widgets are actually menu items.
+		menu->getPopupMenu()->removeAll();
+
+		QPtrListIterator<BoUfoAction> it(d->mActions);
+		while (it.current()) {
+			it.current()->plug(menu);
+			++it;
+		}
+	}
+ }
+}
+
+
 
 class BoUfoActionCollectionPrivate
 {
@@ -712,6 +893,7 @@ BoUfoMenuBarMenu::~BoUfoMenuBarMenu()
 
 void BoUfoMenuBarMenu::addSeparator()
 {
+ // FIXME: UMenu has its own separator - we should use them!
  addMenuItem(i18n("--------"), 0, 0);
 }
 
@@ -749,38 +931,21 @@ void BoUfoMenuBarMenu::createUfoSubMenu(ufo::UWidget* parentWidget)
 
 		// TODO: we could provide an icon
 		ufo::UMenu* menu = new ufo::UMenu(m->text().latin1());
-		menu->sigActivated().connect(slot(*((BoUfoMenuBarItem*)m), &BoUfoMenuBarMenu::uslotActivated));
-		menu->sigHighlighted().connect(slot(*((BoUfoMenuBarItem*)m), &BoUfoMenuBarItem::uslotHighlighted));
-
 		parentWidget->add(menu);
 
 		m->createUfoSubMenu(menu);
 	} else {
 		BoUfoMenuBarItem* item = items()[i];
 		BoUfoAction* action = item->action();
-		ufo::UMenuItem* menuItem = 0;
 		if (!action) {
 			// e.g. a separator
+			ufo::UMenuItem* menuItem = 0;
 			menuItem = new ufo::UMenuItem(item->text().latin1());
-		} else if (action->inherits("BoUfoToggleAction")) {
-			BoUfoToggleAction* toggle = (BoUfoToggleAction*)action;
-#if UFO_MAJOR_VERSION == 0 && UFO_MINOR_VERSION <= 7 && UFO_MICRO_VERSION <= 2
-			// AB: libufo <= 0.7.2 had a broken UCheckBoxMenuItem
-			// implementation.
-			ufo::UMenuItem* c = new ufo::UMenuItem(item->text().latin1());
-#else
-			ufo::UCheckBoxMenuItem* c = new ufo::UCheckBoxMenuItem(item->text());
-			c->setSelected(toggle->checked());
-#endif
-			menuItem = c;
+			parentWidget->add(menuItem);
 		} else {
-			menuItem = new ufo::UMenuItem(item->text().latin1());
+			boDebug() << k_funcinfo << "plugging action " << action->name() << endl;
+			action->plug(parentWidget);
 		}
-		item->setUfoItem(menuItem);
-		menuItem->sigActivated().connect(slot(*item, &BoUfoMenuBarItem::uslotActivated));
-		menuItem->sigHighlighted().connect(slot(*item, &BoUfoMenuBarItem::uslotHighlighted));
-
-		parentWidget->add(menuItem);
 	}
  }
 }
@@ -791,46 +956,10 @@ BoUfoMenuBarItem::BoUfoMenuBarItem(BoUfoAction* action, const QString& text, QOb
 {
  mAction = action;
  mText = text;
- mUfoItem = 0;
-
- if (mAction && mAction->inherits("BoUfoToggleAction")) {
-	connect(mAction, SIGNAL(signalInternalToggle(bool)),
-			this, SLOT(slotInternalToggle(bool)));
- }
 }
 
 BoUfoMenuBarItem::~BoUfoMenuBarItem()
 {
 }
 
-void BoUfoMenuBarItem::slotInternalToggle(bool checked)
-{
- BO_CHECK_NULL_RET(ufoItem());
- ufo::UCheckBoxMenuItem* c = dynamic_cast<ufo::UCheckBoxMenuItem*>(ufoItem());
- BO_CHECK_NULL_RET(c);
- c->setSelected(checked);
-}
-
-void BoUfoMenuBarItem::uslotActivated(ufo::UActionEvent*)
-{
- emit signalActivated();
-}
-
-void BoUfoMenuBarItem::uslotHighlighted(ufo::UActionEvent*)
-{
-}
-
-void BoUfoMenuBarItem::uslotWidgetRemoved(ufo::UWidget*)
-{
- mUfoItem = 0;
-}
-
-void BoUfoMenuBarItem::setUfoItem(ufo::UMenuItem* i)
-{
- mUfoItem = i;
- // AB: this is required to avoid invalid pointers. I'd like to
- // use a sigWidgetDeleted() signal instead.
- i->sigWidgetRemoved().connect(slot(*this, &BoUfoMenuBarItem::uslotWidgetRemoved));
-
-}
 

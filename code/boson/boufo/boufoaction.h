@@ -29,6 +29,7 @@ class KShortcut;
 class BoUfoManager;
 
 template<class T> class QValueList;
+template<class T> class QPtrList;
 
 namespace ufo {
 	class UMenuBar;
@@ -51,17 +52,29 @@ public:
 
 	const QString& text() const;
 
+	virtual void plug(ufo::UWidget*);
+
 public slots:
 	/**
 	 * Just emit @ref signalActivated
 	 **/
 	virtual void slotActivated();
 
+protected:
+	void addWidget(ufo::UWidget*);
+	void removeWidget(ufo::UWidget*);
+	QPtrList<ufo::UWidget> widgets() const;
+
 signals:
 	void signalActivated();
 
 private:
 	void init(BoUfoActionCollection* parent, const QString& text, const KShortcut& cut, const QObject* receiver, const char* slot);
+
+protected:
+	void uslotActivated(ufo::UActionEvent*);
+	void uslotHighlighted(ufo::UActionEvent*);
+	void uslotWidgetRemoved(ufo::UWidget*);
 
 private:
 	BoUfoActionPrivate* d;
@@ -75,6 +88,8 @@ public:
 	BoUfoToggleAction(const QString& text, const KShortcut& cut, const QObject* receiver, const char* slot, BoUfoActionCollection* parent, const char* name);
 	~BoUfoToggleAction();
 
+	virtual void plug(ufo::UWidget*);
+
 	void setChecked(bool);
 	bool checked() const
 	{
@@ -87,14 +102,30 @@ public slots:
 signals:
 	void signalToggled(bool);
 
-	/**
-	 * Emitter internally by @ref setChecked. You should use @ref
-	 * signalToggled.
-	 **/
-	void signalInternalToggle(bool);
-
 private:
 	bool mChecked;
+};
+
+class BoUfoActionMenuPrivate;
+class BoUfoActionMenu : public BoUfoAction
+{
+	Q_OBJECT
+public:
+	BoUfoActionMenu(const QString& text, BoUfoActionCollection* parent, const char* name);
+	~BoUfoActionMenu();
+
+	virtual void plug(ufo::UWidget*);
+
+	// does NOT take ownership
+//	void insert(BoUfoAction* a, int index); // TODO
+	void insert(BoUfoAction* a);
+	void remove(BoUfoAction* a);
+
+protected:
+	void redoMenus();
+
+private:
+	BoUfoActionMenuPrivate* d;
 };
 
 class BoUfoActionCollectionPrivate;
@@ -158,19 +189,6 @@ public:
 	{
 		return mAction;
 	}
-	void setUfoItem(ufo::UMenuItem* i);
-	ufo::UMenuItem* ufoItem() const
-	{
-		return mUfoItem;
-	}
-
-public:
-	void uslotActivated(ufo::UActionEvent*);
-	void uslotHighlighted(ufo::UActionEvent*);
-	void uslotWidgetRemoved(ufo::UWidget*);
-
-private slots:
-	void slotInternalToggle(bool);
 
 signals:
 	void signalActivated();
@@ -178,7 +196,6 @@ signals:
 private:
 	QString mText;
 	BoUfoAction* mAction;
-	ufo::UMenuItem* mUfoItem;
 };
 
 
