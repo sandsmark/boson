@@ -147,17 +147,13 @@ bool SpeciesTheme::loadTheme(const QString& speciesDir, const QColor& teamColor)
  }
 
  // don't preload units here as the species can still be changed in new game
- // dialog
+ // dialog 
  return true;
 }
 
-bool SpeciesTheme::loadUnit(int type)
+bool SpeciesTheme::loadUnitGraphics(const UnitProperties* prop)
 {
- const UnitProperties* prop = unitProperties(type);
- if (!prop) {
-	kdError() << "Could not load unit type " << type << endl;
-	return false;
- }
+ int type = prop->typeId();
  QValueList<QPixmap> pixmapList;
  QString path = prop->unitPath();
 
@@ -207,9 +203,20 @@ bool SpeciesTheme::loadUnit(int type)
 	d->mSmallOverview.insert(type, p);
  }
 
+ return true;
+}
+
+bool SpeciesTheme::loadUnit(int type)
+{
+ const UnitProperties* prop = unitProperties(type);
+ if (!prop) {
+	kdError() << "Could not load unit type " << type << endl;
+	return false;
+ }
+ loadUnitGraphics(prop);
+
  BosonSound* sound = boMusic->bosonSound(themePath());
  sound->addUnitSounds(prop);
- return true;
 }
 
 QCanvasPixmapArray* SpeciesTheme::pixmapArray(int unitType)
@@ -316,10 +323,30 @@ bool SpeciesTheme::loadUnitPixmap(const QString &fileName, QPixmap &pix, bool wi
 				continue;
 			}
 			if (with_team_color) {
-				if ( ((qRed(*p) > 0x80) &&
+				if (qAlpha(*p) < 255) {
+					// alpha == 0 means "fill completely
+					// with team color", alpha == 255 means
+					// "don't fill with team color".
+#if 1
+					float factor = ((float)(-qAlpha(*p)+255))/255;
+					int dred = qRed(*p) - qRed(teamColor().rgb());
+					int dblue = qBlue(*p) - qBlue(teamColor().rgb());
+					int dgreen = qGreen(*p) - qGreen(teamColor().rgb());
+					dred *= (int)factor;
+					dgreen *= (int)factor;
+					dblue *= (int)factor;
+					unsigned int c = qRgb(qRed(*p)-dred, qGreen(*p)-dgreen, qBlue(*p)-dblue);
+					*p = c;
+#elif 2
+					int d = (int)teamColor().rgb() - *p;
+					d *= (int)factor;
+					*p = *p + d;
+#else
+					*p = teamColor().rgb();
+#endif
+				} else if ( ((qRed(*p) > 0x80) &&
 						(qGreen(*p) < 0x70) &&
-						(qBlue(*p) < 0x70)) ||
-						qAlpha(*p) < 255 ) {
+						(qBlue(*p) < 0x70))) {
 					*p = teamColor().rgb();
 				}
 			}

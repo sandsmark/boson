@@ -71,6 +71,8 @@ public:
 	 **/
 	bool loadUnit(int unitType);
 
+	bool loadUnitGraphics(const UnitProperties* prop);
+
 	/***
 	 * @return The pixmap array for unitType or NULL if none was found for
 	 * this unitType. See also @ref UnitProperties::typeId
