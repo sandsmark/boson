@@ -84,7 +84,8 @@ public:
 	 * If you <em>really</em> need some speedup and can't use @ref cell you
 	 * may want to use this one. @ref cells + cellArrayPos(x,y) will return
 	 * the same cell as @ref cell as long as @p x and @p y are valid for
-	 * this map. You need to ensure that on your own.
+	 * this map. You need to ensure that on your own. (e.g. using @ref
+	 * isValidCell)
 	 *
 	 * You are meant to prefer @ref cell.
 	 * @return The position of the cell at @p x, @p y in the array @p cells
@@ -94,6 +95,20 @@ public:
 	inline int cellArrayPos(int x, int y) const
 	{
 		return x + y * width();
+	}
+
+	/**
+	 * @return Whether x,y are valid cell positions for this map.
+	 **/
+	inline bool isValidCell(int x, int y) const
+	{
+		if (x < 0 || (unsigned int)x >= width()) {
+			return false;
+		}
+		if (y < 0 || (unsigned int)y >= height()) {
+			return false;
+		}
+		return true;
 	}
 
 	bool loadMap(QDomElement& node);
