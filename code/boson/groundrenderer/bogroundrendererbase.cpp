@@ -854,15 +854,28 @@ bool CellListBuilderTree::cellsVisible(int x, int y, int x2, int y2, bool* parti
 	return false;
  }
 
- // TODO
- // AB: maybe we should use average z, at least if cell count is <= 4.
- // (for larger values the radius will cover it anyway i guess)
- float z = 0.0f;
-
  int w = (x2 + 1) - x; // + 1 because we need the right border of the cell!
  int h = (y2 + 1) - y;
  float hmid = (float)x + ((float)w) / 2.0f;
  float vmid = (float)y + ((float)h) / 2.0f;
+ Cell* c = mMap->cell((int)hmid, (int)vmid);
+ if (!c) {
+	c = mMap->cell(x, y);
+	if (!c) {
+		BO_NULL_ERROR(c);
+		// this should never happen, but if it does, we make sure that
+		// if the cells should be visible, they are displayed.
+		*partially = false;
+		return true;
+	}
+ }
+ // AB: one day we might want to take the height of all corners of all cells
+ // into account. at least for 2x2 cells we should do so (for higher numbers the
+ // radius will most probably cover the height anyway).
+ // but atm we use the average height of the center cell only. I have not been
+ // able to find any false negatives with this (except for a _very_ big height
+ // difference of adjacent cells), so I think it's ok.
+ float z = mMap->cellAverageHeight(c->x(), c->y());
 
  BoVector3 center(hmid, -vmid, z);
 
