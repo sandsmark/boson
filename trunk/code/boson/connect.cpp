@@ -123,9 +123,9 @@ switch(state) {
 			logf(LOG_INFO, "Server has accepted our request, map is (%d,%d)",
 				data->accepted.sizeX,
 				data->accepted.sizeY);
-gameProperties.who_am_i = data->accepted.who_you_are;
-gameProperties.nb_player = data->accepted.total_player;
-gameProperties.myspecies = gameProperties.species[data->accepted.who_you_are];
+gpp.who_am_i = data->accepted.who_you_are;
+gpp.nb_player = data->accepted.total_player;
+gpp.myspecies = gpp.species[data->accepted.who_you_are];
 			break;
 		case MSG_DLG_REFUSED :
 			state = PS_NO_CONNECT;
@@ -183,11 +183,12 @@ switch(tag) {
 
 	case MSG_FACILITY_CREATED :
 		ASSERT_DATA_BLENGHT(sizeof(data->facility));
-		logf(LOG_GAME_HIGH, "Facility(%d) created at %d,%d, key=%d", 
+		logf(LOG_GAME_HIGH, "Facility(%d) created at %d,%d, key=%d, state=%d", 
 			(int)data->facility.type,
 			data->facility.x,
 			data->facility.y,
 			data->facility.key
+			data->facility.state
 			);
 		phys->createFix(data->facility);
 		break;
@@ -206,6 +207,11 @@ switch(tag) {
 		break;
 
 
+	case MSG_FACILITY_DESTROYED :
+		ASSERT_DATA_BLENGHT(sizeof(data->destroyed));
+		logf(LOG_GAME_HIGH, "Facility(%d) destroyed", data->destroyed.key);
+		phys->destroyFix(data->destroyed);
+		break;
 
 
 	case MSG_MOBILE_CREATED :
@@ -219,6 +225,13 @@ switch(tag) {
 			);
 		phys->createMob(data->mobile);
 		break;
+
+	case MSG_MOBILE_DESTROYED :
+		ASSERT_DATA_BLENGHT(sizeof(data->destroyed));
+		logf(LOG_GAME_HIGH, "mobile(%d) destroyed", data->destroyed.key);
+		phys->destroyMob(data->destroyed);
+		break;
+
 	case MSG_MOBILE_MOVE_C :
 		ASSERT_DATA_BLENGHT(sizeof(data->move));
 		phys->move(data->move);

@@ -42,13 +42,13 @@ maxX = w; maxY = h;
 /* Dictionaries */
 mobile.resize(149);
 facility.resize(149);
-mobile.setAutoDelete(TRUE);
-facility.setAutoDelete(TRUE);
+mobile.setAutoDelete(true);
+facility.setAutoDelete(true);
 
 /* Themes selection (should be moved thereafter) */
-gameProperties.ground		= new groundTheme("ben");
-gameProperties.species[1]	= new speciesTheme("Blue");
-gameProperties.species[0]	= new speciesTheme("Red");
+gpp.ground	= new groundTheme("ben");
+gpp.species[1]	= new speciesTheme("Blue");
+gpp.species[0]	= new speciesTheme("Red");
 
 }
 
@@ -82,6 +82,23 @@ void physMap::createMob(mobileMsg_t &m)
 }
 
 
+void physMap::destroyMob(destroyedMsg_t &m)
+{
+	playerMobUnit *mob ;
+	
+	mob = mobile.find(m.key);
+	if (mob) {
+		boAssert(m.x == mob->x());
+		boAssert(m.y == mob->y());
+		}
+	else {
+		logf(LOG_ERROR, "physMap::destroyMob : can't find m.key");
+		return;
+		}
+
+	boAssert( mobile.remove(m.key) == true );
+}
+
 void physMap::createFix(facilityMsg_t &m)
 {
 	playerFacility *f;
@@ -92,6 +109,24 @@ void physMap::createFix(facilityMsg_t &m)
 	facility.insert(m.key, f);
 
 	emit updateFix(f);
+}
+
+
+void physMap::destroyFix(destroyedMsg_t &m)
+{
+	playerFacility * f;
+	
+	f = facility.find(m.key);
+	if (f) {
+		boAssert(m.x == f->x());
+		boAssert(m.y == f->x());
+		}
+	else {
+		logf(LOG_ERROR, "physMap::destroyFix : can't find m.key");
+		return;
+		}
+
+	boAssert( facility.remove(m.key) == true);
 }
 
 

@@ -18,8 +18,8 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef GAME_H 
-#define GAME_H 
+#ifndef BOSON_GAME_H 
+#define BOSON_GAME_H 
 
 #include "../common/boconfig.h"
 
@@ -38,7 +38,7 @@ public:
 };
 
 
-extern gameProperties_t gameProperties;
+extern gameProperties_t gpp;
 
 
-#endif // GAME_H 
+#endif // BOSON_GAME_H 

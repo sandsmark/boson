@@ -38,13 +38,15 @@ struct refusedMsg_t	{ refusedType why_not; };
 /* MSG_MAP_ */
 struct cooMsg_t		{ int x, y; groundType g; };
 /* MSG_FACILITY_CREATED */
-struct facilityMsg_t	{ int who, key, x, y; facilityType type; };
+struct facilityMsg_t	{ int who, key, x, y, state; facilityType type; };
 /* MSG_FACILITY_CHANGED */
 struct fixChangedMsg_t	{ int key, state; };
 /* MSG_MOBILE_CREATED */
 struct mobileMsg_t	{ int who, key, x, y; mobType type; };
 /* MSG_MOBILE_MOVE_*  */
 struct moveMsg_t	{ int key, dx, dy ;};
+/* MSG_*_DESTROYED */
+struct destroyedMsg_t	{ int key, x, y; }; // x and y are for checking 
 
 typedef union {
 /* Dialog layer */
@@ -57,6 +59,7 @@ typedef union {
 	fixChangedMsg_t	fixChanged;
 	mobileMsg_t	mobile;
 	moveMsg_t	move;
+	destroyedMsg_t  destroyed;
 /* MSG_TIME */
 	unsigned int	jiffies;
 /* used by  {send,recv}Msg */

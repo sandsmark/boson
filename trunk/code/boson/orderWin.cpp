@@ -126,7 +126,7 @@ for (int i=0; i<ORDER_BUTTONS_NB; i++) {
 void orderWin::selectFix(playerFacility *f)
 {
 fixSelected = f;
-view_one->setPixmap(*gameProperties.myspecies->getBigOverview(f));
+view_one->setPixmap(*gpp.species[f->who]->getBigOverview(f));
 logf(LOG_GAME_LOW, "select facility");
 
 }
@@ -138,7 +138,7 @@ if (mobSelected.isEmpty()) {
 /*	connect(orderButton[1], SIGNAL(clicked()), this, SLOT(u_stop()));
 	orderButton[1]->show(); */
 	selectionWho = m->who;
-	if (selectionWho == gameProperties.who_am_i) {
+	if (selectionWho == gpp.who_am_i) {
 		connect(orderButton[0], SIGNAL(clicked()), this, SLOT(u_goto()));
 		orderButton[0]->show();
 		}
@@ -150,7 +150,7 @@ else {
 	}
 
 mobSelected.insert(key, m);
-view_one->setPixmap(*gameProperties.myspecies->getBigOverview(m));
+view_one->setPixmap(*gpp.species[m->who]->getBigOverview(m));
 logf(LOG_GAME_LOW, "select mobile");
 }
 
@@ -158,7 +158,7 @@ logf(LOG_GAME_LOW, "select mobile");
 void orderWin::u_goto(void)
 {
 boAssert( SELECT_NONE == getSelectionMode() );
-boAssert(selectionWho == gameProperties.who_am_i);
+boAssert(selectionWho == gpp.who_am_i);
 ///orzel : should change the cursor over fieldMap
 setSelectionMode(SELECT_MOVE);
 }
@@ -179,7 +179,7 @@ if (mobSelected.isEmpty()) {
 	}
 
 for (mobIt.toFirst(); mobIt; ++mobIt) {
-	boAssert(mobIt.current()->who == gameProperties.who_am_i);
+	boAssert(mobIt.current()->who == gpp.who_am_i);
 	mobIt.current()->u_goto(mx,my);
 	}
 

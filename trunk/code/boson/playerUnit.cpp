@@ -34,7 +34,7 @@
 
 playerMobUnit::playerMobUnit(mobileMsg_t *msg, QObject* parent=0, const char *name=0L)
 	:mobUnit(msg,parent,name)
-	, QwSprite(gameProperties.species[msg->who]->getPixmap(msg->type))
+	, QwSprite(gpp.species[msg->who]->getPixmap(msg->type))
 	, state(MUS_NONE)
 {
 	z(Z_MOBILE);
@@ -84,7 +84,15 @@ void playerMobUnit::s_moveBy(int dx, int dy)
 {
 //orzel : use some kind of fuel
 //printf("Moved  : d(%d.%d)\n", dx, dy);
-if (MUS_MOVING != state) {
+if ( who!=gpp.who_am_i) {
+	/* this not my unit */
+	moveBy(dx,dy);
+	return;
+	}
+
+/* else */
+
+if ( MUS_MOVING != state) {
 	logf(LOG_ERROR, "playerMobUnit::s_moveBy while not moving, ignored");
 	return;
 	}
@@ -131,10 +139,11 @@ void playerMobUnit::u_stop(void)
  */
 playerFacility::playerFacility(facilityMsg_t *msg, QObject* parent=0L, const char *name=0L)
 	: Facility(msg,parent,name)
-	, QwSprite(gameProperties.species[msg->who]->getPixmap(msg->type))
+	, QwSprite(gpp.species[msg->who]->getPixmap(msg->type))
 {
 	z(Z_FACILITY);
 	moveTo(BO_TILE_SIZE * msg->x , BO_TILE_SIZE * msg->y);
+	frame(msg->state);
 }
 
 
