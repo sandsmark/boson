@@ -21,6 +21,8 @@
 
 #include <kdialogbase.h>
 
+class KSimpleConfig;
+
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
@@ -39,9 +41,20 @@ protected slots:
 protected:
 	void loadConfig(const QString& file);
 
+	void loadProperties();
+	void loadMobileProperties();
+	void loadFacilityProperties();
+	void loadPixmaps();
+
+	void saveProperties(KSimpleConfig* config);
+	void saveMobileProperties(KSimpleConfig* config);
+	void saveFacilityProperties(KSimpleConfig* config);
+
 private:
 	void initDirectoriesPage();
 	void initPropertiesPage();
+	void initMobileProperties(QWidget* page);
+	void initFacilityProperties(QWidget* page);
 	void initPixmapsPage();
 
 private:

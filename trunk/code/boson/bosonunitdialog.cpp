@@ -27,6 +27,7 @@
 #include <kfiledialog.h>
 #include <knuminput.h>
 #include <ksimpleconfig.h>
+#include <kmessagebox.h>
 #include <kdebug.h>
 
 #include <qvbox.h>
@@ -37,6 +38,9 @@
 #include <qlabel.h>
 #include <qlineedit.h>
 #include <qcombobox.h>
+#include <qcheckbox.h>
+#include <qlineedit.h>
+#include <qvaluelist.h>
 
 #include "bosonunitdialog.moc"
 
@@ -100,16 +104,32 @@ public:
 		mUnitId = 0;
 		mUnitName = 0;
 		mHealth = 0;
-//		mMineralCosts = 0;
+		mArmor = 0;
+		mShield = 0;
+		mMineralCosts = 0;
+		mOilCosts = 0;
 		mWeaponRange = 0;
+		mSightRange = 0;
 		mWeaponDamage = 0;
 		mWeaponReload = 0;
 		mTerrainType = 0;
+		mProductionTime = 0;
+		mCanShootAtAir = 0;
+		mCanShootAtLand = 0;
+		mProducer = 0;
+		mSupportMiniMap = 0;
 		
 		mUnitMobileProperties = 0;
 		mSpeed = 0;
+		mCanGoOnLand = 0;
+		mCanGoOnWater = 0;
+		mCanMineMinerals = 0;
+		mCanMineOil = 0;
+		mMaxResources = 0;
 		
 		mUnitFacilityProperties = 0;
+		mCanProduce = 0;
+		mProducerList = 0;
 
 		mDestroyedPixmap = 0;
 	}
@@ -124,16 +144,32 @@ public:
 	KIntNumInput* mUnitId;
 	QLineEdit* mUnitName;
 	KIntNumInput* mHealth;
-//	KIntNumInput* mMineralCosts;
+	KIntNumInput* mShield;
+	KIntNumInput* mArmor;
+	KIntNumInput* mMineralCosts;
+	KIntNumInput* mOilCosts;
 	KIntNumInput* mWeaponRange;
+	KIntNumInput* mSightRange;
 	KIntNumInput* mWeaponDamage;
 	KIntNumInput* mWeaponReload;
 	QComboBox* mTerrainType;
+	KIntNumInput* mProductionTime;
+	QCheckBox* mCanShootAtAir;
+	QCheckBox* mCanShootAtLand;
+	QComboBox* mProducer;
+	QCheckBox* mSupportMiniMap;
 
 	QWidget* mUnitMobileProperties;
 	KDoubleNumInput* mSpeed;
-	
+	QCheckBox* mCanGoOnLand;
+	QCheckBox* mCanGoOnWater;
+	QCheckBox* mCanMineMinerals;
+	QCheckBox* mCanMineOil;
+	KIntNumInput* mMaxResources;
+
 	QWidget* mUnitFacilityProperties;
+	QCheckBox* mCanProduce;
+	QLineEdit* mProducerList;
 
 	BosonUnitPixmap* mDestroyedPixmap;
 	QPtrList<BosonUnitPixmap> mUnitPixmaps;
@@ -168,7 +204,9 @@ void BosonUnitDialog::initDirectoriesPage()
 
 void BosonUnitDialog::initPropertiesPage()
 {
- QVBox* page = addVBoxPage(i18n("&Properties"));
+ QHBox* propertiesPage = addHBoxPage(i18n("&Properties"));
+ QVBox* page = new QVBox(propertiesPage);
+ QVBox* specialProperties = new QVBox(propertiesPage);
 
  d->mUnitType = new QVButtonGroup(i18n("Unit type"), page);
  (void)new QRadioButton(i18n("Is facility"), d->mUnitType);
@@ -194,22 +232,37 @@ void BosonUnitDialog::initPropertiesPage()
  d->mHealth->setLabel(i18n("Health/Power of the unit"), AlignVCenter);
  layout->addMultiCellWidget(d->mHealth, 2, 2, 0, 1);
 
-#warning costs
-// d->mMineralCosts = new KIntNumInput(d->mUnitProperties);
-// d->mMineralCosts->setLabel(i18n("Mineral Costs"), AlignVCenter);
-// layout->addMultiCellWidget(d->mMineralCosts, 3, 3, 0, 1);
+ d->mArmor = new KIntNumInput(0, d->mUnitProperties);
+ d->mArmor->setLabel(i18n("Armor of the unit (unused)"), AlignVCenter);
+ layout->addMultiCellWidget(d->mArmor, 3, 3, 0, 1);
+
+ d->mShield= new KIntNumInput(0, d->mUnitProperties);
+ d->mShield->setLabel(i18n("Shield of the unit (unsupported)"), AlignVCenter);
+ layout->addMultiCellWidget(d->mShield, 4, 4, 0, 1);
+
+ d->mMineralCosts = new KIntNumInput(d->mUnitProperties);
+ d->mMineralCosts->setLabel(i18n("Mineral Costs"), AlignVCenter);
+ layout->addMultiCellWidget(d->mMineralCosts, 5, 5, 0, 1);
+
+ d->mOilCosts = new KIntNumInput(d->mUnitProperties);
+ d->mOilCosts->setLabel(i18n("Oil Costs"), AlignVCenter);
+ layout->addMultiCellWidget(d->mOilCosts, 6, 6, 0, 1);
  
  d->mWeaponRange = new KIntNumInput(d->mUnitProperties);
- d->mWeaponRange->setLabel(i18n("Range"), AlignVCenter);
- layout->addMultiCellWidget(d->mWeaponRange, 4, 4, 0, 1);
+ d->mWeaponRange->setLabel(i18n("Weapon Range"), AlignVCenter);
+ layout->addMultiCellWidget(d->mWeaponRange, 7, 7, 0, 1);
+
+ d->mSightRange = new KIntNumInput(d->mUnitProperties);
+ d->mSightRange->setLabel(i18n("Sight Range"), AlignVCenter);
+ layout->addMultiCellWidget(d->mSightRange, 8, 8, 0, 1);
 
  d->mWeaponDamage = new KIntNumInput(d->mUnitProperties);
  d->mWeaponDamage->setLabel(i18n("Damage this unit causes"), AlignVCenter);
- layout->addMultiCellWidget(d->mWeaponDamage, 5, 5, 0, 1);
+ layout->addMultiCellWidget(d->mWeaponDamage, 9, 9, 0, 1);
  
  d->mWeaponReload = new KIntNumInput(d->mUnitProperties);
  d->mWeaponReload->setLabel(i18n("Weapon reload"), AlignVCenter);
- layout->addMultiCellWidget(d->mWeaponReload, 6, 6, 0, 1);
+ layout->addMultiCellWidget(d->mWeaponReload, 10, 10, 0, 1);
 
  QLabel* terrainTypeLabel = new QLabel(i18n("Terrain"), d->mUnitProperties);
  layout->addWidget(terrainTypeLabel, 7, 0);
@@ -217,24 +270,97 @@ void BosonUnitDialog::initPropertiesPage()
  d->mTerrainType->insertItem(i18n("Land"));
  d->mTerrainType->insertItem(i18n("Water"));
  d->mTerrainType->insertItem(i18n("Air"));
- layout->addWidget(d->mTerrainType, 7, 1);
- 
+ layout->addWidget(d->mTerrainType, 11, 1);
 
+ d->mProductionTime = new KIntNumInput(d->mUnitProperties);
+ d->mProductionTime->setLabel(i18n("Production Time"), AlignVCenter);
+ layout->addMultiCellWidget(d->mProductionTime, 12, 12, 0, 1);
+
+ QLabel* shootAirLabel = new QLabel(i18n("Can Shoot at Air Units"), d->mUnitProperties);
+ layout->addWidget(shootAirLabel, 13, 0);
+ d->mCanShootAtAir = new QCheckBox(d->mUnitProperties);
+ layout->addWidget(d->mCanShootAtAir, 13, 1);
+
+ QLabel* shootLandLabel = new QLabel(i18n("Can Shoot at Land Units"), d->mUnitProperties);
+ layout->addWidget(shootLandLabel, 14, 0);
+ d->mCanShootAtLand = new QCheckBox(d->mUnitProperties);
+ layout->addWidget(d->mCanShootAtLand, 14, 1);
+
+ QLabel* producerLabel = new QLabel(i18n("Producer"), d->mUnitProperties);
+ layout->addWidget(producerLabel, 15, 0);
+ d->mProducer = new QComboBox(d->mUnitProperties);
+ d->mProducer->insertItem(i18n("%1 (War Factory)").arg(0));
+ d->mProducer->insertItem(i18n("%1 (Shipyard)").arg(1));
+ d->mProducer->insertItem(i18n("%1 (Airport)").arg(2));
+ d->mProducer->insertItem(i18n("%1 (Command Bunker)").arg(10));
+ layout->addWidget(d->mProducer, 15, 1);
+
+ QLabel* miniMapLabel = new QLabel(i18n("Supports Mini Map"), d->mUnitProperties);
+ layout->addWidget(miniMapLabel, 16, 0);
+ d->mSupportMiniMap= new QCheckBox(d->mUnitProperties);
+ layout->addWidget(d->mSupportMiniMap, 16, 1);
+
+ 
+ initMobileProperties(specialProperties);
+ initFacilityProperties(specialProperties);
+}
+
+void BosonUnitDialog::initMobileProperties(QWidget* page)
+{
 // Mobile Unit Properties 
  d->mUnitMobileProperties = new QWidget(page);
  d->mUnitMobileProperties->setEnabled(false);
- QGridLayout* mobileLayout = new QGridLayout(d->mUnitMobileProperties, -1, 2, marginHint(), spacingHint());
+ QGridLayout* layout = new QGridLayout(d->mUnitMobileProperties, -1, 2, marginHint(), spacingHint());
+ 
  d->mSpeed = new KDoubleNumInput(d->mUnitMobileProperties);
  d->mSpeed->setLabel(i18n("Speed"), AlignVCenter);
  d->mSpeed->setRange(0.0, 100.0);
- mobileLayout->addMultiCellWidget(d->mSpeed, 0, 0, 0, 1);
+ layout->addMultiCellWidget(d->mSpeed, 0, 0, 0, 1);
 
+ QLabel* canGoLandLabel = new QLabel(i18n("Can Go on Land"), d->mUnitMobileProperties);
+ layout->addWidget(canGoLandLabel, 1, 0);
+ d->mCanGoOnLand = new QCheckBox(d->mUnitMobileProperties);
+ layout->addWidget(d->mCanGoOnLand, 1, 1);
 
+ QLabel* canGoWaterLabel = new QLabel(i18n("Can Go on Water"), d->mUnitMobileProperties);
+ layout->addWidget(canGoWaterLabel, 2, 0);
+ d->mCanGoOnWater = new QCheckBox(d->mUnitMobileProperties);
+ layout->addWidget(d->mCanGoOnWater, 2, 1);
+
+ QLabel* canMineMineralsLabel = new QLabel(i18n("Can Mine Minerals"), d->mUnitMobileProperties);
+ layout->addWidget(canMineMineralsLabel, 3, 0);
+ d->mCanMineMinerals= new QCheckBox(d->mUnitMobileProperties);
+ layout->addWidget(d->mCanMineMinerals, 3, 1);
+
+ QLabel* canMineOilLabel = new QLabel(i18n("Can Mine Oil"), d->mUnitMobileProperties);
+ layout->addWidget(canMineOilLabel, 3, 0);
+ d->mCanMineOil = new QCheckBox(d->mUnitMobileProperties);
+ layout->addWidget(d->mCanMineOil, 3, 1);
+
+ d->mMaxResources = new KIntNumInput(d->mUnitMobileProperties);
+ d->mMaxResources->setLabel(i18n("Max Resources"), AlignVCenter);
+ d->mMaxResources->setRange(0, 10000);
+ layout->addMultiCellWidget(d->mMaxResources, 0, 0, 0, 1);
+
+}
+
+void BosonUnitDialog::initFacilityProperties(QWidget* page)
+{
 // Facility Properties 
  d->mUnitFacilityProperties = new QWidget(page);
  d->mUnitFacilityProperties->setEnabled(false);
+ QGridLayout* layout = new QGridLayout(d->mUnitFacilityProperties, -1, 2, marginHint(), spacingHint());
 
- 
+ QLabel* canProduceLabel = new QLabel(i18n("Can Produce"), d->mUnitFacilityProperties);
+ layout->addWidget(canProduceLabel, 0, 0);
+ d->mCanProduce = new QCheckBox(d->mUnitFacilityProperties);
+ layout->addWidget(d->mCanProduce, 0, 1);
+
+ QLabel* producerListLabel = new QLabel(i18n("Producer List (comma separated)"), d->mUnitFacilityProperties);
+ layout->addWidget(producerListLabel, 1, 0);
+ d->mProducerList = new QLineEdit(d->mUnitFacilityProperties);
+ layout->addWidget(d->mProducerList, 1, 1);
+
  d->mCreateUnit = new QPushButton(i18n("Create Unit"), page);
  connect(d->mCreateUnit, SIGNAL(pressed()), this, SLOT(slotCreateUnit()));
 }
@@ -276,6 +402,13 @@ void BosonUnitDialog::slotChangeUnitDir()
  d->mUnit = new UnitProperties;
  d->mUnit->loadUnitType(file);
 
+ loadProperties();
+ loadMobileProperties();
+ loadFacilityProperties();
+}
+
+void BosonUnitDialog::loadProperties()
+{
  //TODO set the labels/lineedits/...
  if (d->mUnit->isFacility()) {
 	d->mUnitType->setButton(0);
@@ -287,15 +420,72 @@ void BosonUnitDialog::slotChangeUnitDir()
  d->mUnitId->setValue(d->mUnit->typeId());
  d->mUnitName->setText(d->mUnit->name());
  d->mHealth->setValue(d->mUnit->health());
-// d->mMineralCosts->setValue(d->mUnit->mineralCost());
+ d->mArmor->setValue(d->mUnit->armor());
+ d->mShield->setValue(d->mUnit->shields());
+ d->mMineralCosts->setValue(d->mUnit->mineralCost());
+ d->mOilCosts->setValue(d->mUnit->oilCost());
  d->mWeaponRange->setValue(d->mUnit->range());
+ d->mSightRange->setValue(d->mUnit->sightRange());
  d->mWeaponDamage->setValue(d->mUnit->damage());
  d->mWeaponReload->setValue(d->mUnit->reload());
  d->mTerrainType->setCurrentItem(d->mUnit->isLand() ? 0 : d->mUnit->isShip() ?
 		1 : d->mUnit->isAircraft() ? 2 : 0);
+ d->mProductionTime->setValue(d->mUnit->productionTime());
+ d->mCanShootAtAir->setChecked(d->mUnit->canShootAtAirUnits());
+ d->mCanShootAtLand->setChecked(d->mUnit->canShootAtLandUnits());
+ switch (d->mUnit->producer()) {
+	case 0:
+		d->mProducer->setCurrentItem(0);
+		break;
+	case 1:
+		d->mProducer->setCurrentItem(1);
+		break;
+	case 2:
+		d->mProducer->setCurrentItem(2);
+		break;
+	case 10:
+		d->mProducer->setCurrentItem(3);
+		break;
+	default:
+		d->mProducer->setCurrentItem(-1);
+		kdWarning() << "Value " << d->mUnit->producer() << " not yet supported" << endl;
+		break;
+ }
+ d->mSupportMiniMap->setChecked(d->mUnit->supportMiniMap());
+}
+ 
+void BosonUnitDialog::loadMobileProperties()
+{
+ if (d->mUnit->isFacility()) {
+	return;
+ }
  d->mSpeed->setValue(d->mUnit->speed());
- kdDebug() << d->mUnit->speed() << endl;
+ d->mCanGoOnLand->setChecked(d->mUnit->canGoOnLand());
+ d->mCanGoOnWater->setChecked(d->mUnit->canGoOnWater());
+ d->mCanMineMinerals->setChecked(d->mUnit->canMineMinerals());
+ d->mCanMineOil->setChecked(d->mUnit->canMineOil());
+ d->mMaxResources->setValue(d->mUnit->maxResources());
+}
 
+void BosonUnitDialog::loadFacilityProperties()
+{
+ if (!d->mUnit->isFacility()) {
+	return;
+ }
+ d->mCanProduce->setChecked(d->mUnit->canProduce());
+ QString producerList;
+ QValueList<int> list = d->mUnit->producerList();
+ for (unsigned int i = 0; i < list.count(); i++) {
+	if (producerList.length() > 0) {
+		producerList += QString::fromLatin1(",");
+	}
+	producerList += QString::number(list[i]);
+ }
+ d->mProducerList->setText(producerList);
+}
+
+void BosonUnitDialog::loadPixmaps()
+{
  QString fileName = d->mUnit->unitPath() + QString("field-%1.png");
  unsigned int pixmaps = d->mUnit->isFacility() ? PIXMAP_PER_FIX : PIXMAP_PER_MOBILE;
  for (unsigned int i = 0; i < pixmaps; i++) {
@@ -327,35 +517,94 @@ void BosonUnitDialog::slotCreateUnit()
  if (!dir.right(1) != QString::fromLatin1("/")) {
 	dir += QString::fromLatin1("/");
  }
+
+ KSimpleConfig cfg(dir + QString::fromLatin1("index.desktop"));
+ saveProperties(&cfg);
+}
+
+void BosonUnitDialog::saveProperties(KSimpleConfig* cfg)
+{
  bool isFacility = d->mUnitType->find(0)->isDown();
  int terrainType = d->mTerrainType->currentItem();
 
- KSimpleConfig cfg(dir + QString::fromLatin1("index.desktop"));
- cfg.setGroup(QString::fromLatin1("Boson Unit"));
- cfg.writeEntry("IsFacility", isFacility);
- cfg.writeEntry("Name", d->mUnitName->text());
- cfg.writeEntry("Id", (int)d->mUnitId->value());
- cfg.writeEntry("Health", (unsigned long int)d->mHealth->value());
-// cfg.writeEntry("MineralCost", (unsigned long int)d->mMineralCosts->value());
-// cfg.writeEntry("OilCost", (unsigned long int)d->mOilCosts->value());
- cfg.writeEntry("Range", (unsigned long int)d->mWeaponRange->value());
- cfg.writeEntry("Damage", (long int)d->mWeaponDamage->value());
- cfg.writeEntry("Reload", (unsigned int)d->mWeaponReload->value());
- cfg.writeEntry("TerrainType", (int)d->mTerrainType->currentItem());
-
- if (isFacility) {
-	kdDebug() << "Save facility" << endl;
-	cfg.setGroup(QString::fromLatin1("Boson Facility"));
-	cfg.writeEntry("CanProduce", false); // TODO
-//	cfg.writeEntry("ProduceList"); // TODO
- } else {
-	kdDebug() << "Save mobile unit" << endl;
-	cfg.setGroup(QString::fromLatin1("Boson Mobile Unit"));
-	cfg.writeEntry("Speed", (double)d->mSpeed->value());
-	cfg.writeEntry("CanGoOnLand", (terrainType == 0 || terrainType == 2));
-	cfg.writeEntry("CanGoOnWater", (terrainType == 1 || terrainType == 2));
+ cfg->setGroup(QString::fromLatin1("Boson Unit"));
+ cfg->writeEntry("IsFacility", isFacility);
+ cfg->writeEntry("Name", d->mUnitName->text());
+ cfg->writeEntry("Id", (int)d->mUnitId->value());
+ cfg->writeEntry("Health", (unsigned long int)d->mHealth->value());
+ cfg->writeEntry("Armor", (unsigned long int)d->mArmor->value());
+ cfg->writeEntry("Shield", (unsigned long int)d->mShield->value());
+ cfg->writeEntry("MineralCost", (unsigned long int)d->mMineralCosts->value());
+ cfg->writeEntry("OilCost", (unsigned long int)d->mOilCosts->value());
+ cfg->writeEntry("Range", (unsigned long int)d->mWeaponRange->value());
+ cfg->writeEntry("SightRange", (unsigned long int)d->mSightRange->value());
+ cfg->writeEntry("Damage", (long int)d->mWeaponDamage->value());
+ cfg->writeEntry("Reload", (unsigned int)d->mWeaponReload->value());
+ cfg->writeEntry("TerrainType", (int)d->mTerrainType->currentItem());
+ cfg->writeEntry("ProductionTime", (unsigned int)d->mProductionTime->value());
+ cfg->writeEntry("CanShootAtAirUnits", (bool)d->mCanShootAtAir->isChecked());
+ cfg->writeEntry("CanShootAtAirLand", (bool)d->mCanShootAtLand->isChecked());
+ switch (d->mProducer->currentItem()) {
+	case 0:
+		cfg->writeEntry("Producer", (unsigned int)0);
+		break;
+	case 1:
+		cfg->writeEntry("Producer", (unsigned int)1);
+		break;
+	case 2:
+		cfg->writeEntry("Producer", (unsigned int)2);
+		break;
+	case 3:
+		cfg->writeEntry("Producer", (unsigned int)10);
+		break;
+	default:
+		kdWarning() << "producer index " << d->mProducer->currentItem() << " not yet supported" << endl;
+		break;
  }
+ cfg->writeEntry("SupportMiniMap", (bool)d->mSupportMiniMap->isChecked());
 
+ if (!isFacility) {
+	saveMobileProperties(cfg);
+ } else {
+	saveFacilityProperties(cfg);
+ }
+}
+
+void BosonUnitDialog::saveMobileProperties(KSimpleConfig* cfg)
+{
+ kdDebug() << "Save mobile unit" << endl;
+ cfg->setGroup(QString::fromLatin1("Boson Mobile Unit"));
+ cfg->writeEntry("Speed", (double)d->mSpeed->value());
+ cfg->writeEntry("CanGoOnLand", (bool)d->mCanGoOnLand->isChecked());
+ cfg->writeEntry("CanGoOnWater", (bool)d->mCanGoOnWater->isChecked());
+ cfg->writeEntry("CanMineMinerals", (bool)d->mCanMineMinerals->isChecked());
+ cfg->writeEntry("CanMineOil", (bool)d->mCanMineOil->isChecked());
+ cfg->writeEntry("MaxResources", (unsigned int)d->mMaxResources->value());
+ 
+}
+
+void BosonUnitDialog::saveFacilityProperties(KSimpleConfig* cfg)
+{
+ kdDebug() << "Save facility" << endl;
+ cfg->setGroup(QString::fromLatin1("Boson Facility"));
+ cfg->writeEntry("CanProduce", (bool)d->mCanProduce->isChecked());
+ 
+ QStringList list = QStringList::split(QString::fromLatin1(","), d->mProducerList->text());
+ QString producerList;
+ for (unsigned int i = 0; i < list.count(); i++) {
+	bool ok = true;
+	int v = list[i].toUInt(&ok);
+	if (!ok) {
+		KMessageBox::information(this, i18n("Please don't use spaces in the producer list! Skipping entry..."));
+	} else {
+		if (producerList.length() > 0) {
+			producerList += QString::fromLatin1(",");
+		}
+		producerList += list[i];
+	}
+	
+ }
+ cfg->writeEntry("ProducerList", producerList);
 }
 
 void BosonUnitDialog::slotTypeChanged(int id)
