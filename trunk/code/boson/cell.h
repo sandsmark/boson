@@ -188,6 +188,13 @@ public:
 	inline bool isOccupied(bool includeMoving = true) const { return mItems.isOccupied(includeMoving); }
 	inline void isOccupied(Unit* forUnit, bool& hasmoving, bool& hasany) const { mItems.isOccupied(forUnit, hasmoving, hasany); }
 
+	// AB: bah. I want to have models for minerals/oil and use a BosonItem,
+	// instead of hardcoding them into the ground.
+	// we should iterate through mItems and search for the oil/minerals RTTI
+	// once we have implemented that!
+	bool hasOil() const { return (groundType() == GroundGrassOil); }
+	bool hasMinerals() const { return (groundType() == GroundGrassMineral); }
+
 	inline const BoItemList* items() const { return &mItems; }
 	unsigned int unitCount() const { return mItems.count(); }
 

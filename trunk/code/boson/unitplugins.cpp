@@ -567,11 +567,11 @@ void HarvesterPlugin::setRefinery(Unit* refinery)
 
 bool HarvesterPlugin::canMine(Cell* cell) const
 {
- if (canMineMinerals() && cell->groundType() == Cell::GroundGrassMineral) {
+ if (canMineMinerals() && cell->hasMinerals() && cell->canGo(unitProperties())) {
 	return true;
  }
  // FIXME: there's no "oil cells" anymore
- if (canMineOil() && cell->groundType() == Cell::GroundGrassOil) {
+ if (canMineOil() && cell->hasOil() && cell->canGo(unitProperties())) {
 	return true;
  }
  return false;
