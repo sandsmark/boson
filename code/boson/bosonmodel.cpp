@@ -50,6 +50,9 @@
 // they are disabled currently cause plain vertex arrays are more flexible.
 #define USE_DISPLAYLISTS 0
 
+// some testings for me. this is here for my own use only currently.
+// #define AB_TEST 1
+
 BosonModelTextures* BosonModel::mModelTextures = 0;
 static KStaticDeleter<BosonModelTextures> sd;
 
@@ -58,7 +61,7 @@ BoFrame::BoFrame()
  init();
 }
 
-BoFrame::BoFrame(const BoFrame& f, int meshCount)
+BoFrame::BoFrame(const BoFrame& f, int firstMesh, int meshCount)
 {
  init();
  mDisplayList = f.mDisplayList;
@@ -66,14 +69,30 @@ BoFrame::BoFrame(const BoFrame& f, int meshCount)
  mRadius = f.mRadius;
 
  if (meshCount == 0) {
+	boWarning() << k_funcinfo << "no mesh copied" << endl;
 	return;
  }
+ if (firstMesh < 0) {
+	boError() << k_funcinfo << "first mesh: " << firstMesh << " < 0" << endl;
+	firstMesh = 0;
+ }
  if (f.mMeshCount == 0 || !f.mMeshes || !f.mMatrices) {
+	boError() << k_funcinfo << "oops - can't copy from invalid mesh!" << endl;
+	return;
+ }
+ if (firstMesh + meshCount > f.mMeshCount) {
+	boError() << k_funcinfo << "can't copy " << meshCount
+			<< " meshes starting at " << firstMesh
+			<< ", as there are only " << f.mMeshCount
+			<< " meshes!" << endl;
+	meshCount = f.mMeshCount - firstMesh;
  }
  allocMeshes(meshCount);
- for (int i = 0; i < meshCount; i++) {
-	mMeshes[i] = f.mMeshes[i]; // copy the pointer only
-	mMatrices[i].loadMatrix(f.mMatrices[i]);
+ int pos = 0;
+ for (int i = firstMesh; i < firstMesh + meshCount; i++) {
+	mMeshes[pos] = f.mMeshes[i]; // copy the pointer only
+	mMatrices[pos]->loadMatrix(*f.mMatrices[i]);
+	pos++;
  }
 }
 
@@ -91,6 +110,11 @@ BoFrame::~BoFrame()
 {
  if (mDisplayList != 0) {
 	glDeleteLists(mDisplayList, 1);
+ }
+ if (mMatrices) {
+	for (int i = 0; i < mMeshCount; i++) {
+		delete mMatrices[i];
+	}
  }
  delete[] mMeshes;
  delete[] mMatrices;
@@ -111,10 +135,11 @@ void BoFrame::allocMeshes(int meshes)
 	delete[] mMeshes;
  }
  mMeshes = new BoMesh*[meshes];
- mMatrices = new BoMatrix[meshes];
+ mMatrices = new BoMatrix*[meshes];
  mMeshCount = meshes; // unused?
  for (int i = 0; i < meshes; i++) {
 	mMeshes[i] = 0;
+	mMatrices[i] = new BoMatrix;
  }
 }
 
@@ -132,13 +157,13 @@ void BoFrame::setMesh(int index, BoMesh* mesh)
 
 BoMatrix* BoFrame::matrix(int index) const
 {
- return &mMatrices[index];
+ return mMatrices[index];
 }
 
 void BoFrame::renderFrame()
 {
  for (int i = 0; i < mMeshCount; i++) {
-	BoMatrix* m = &mMatrices[i];
+	BoMatrix* m = mMatrices[i];
 	BoMesh* mesh = mMeshes[i];
 	if (!m) {
 		boError() << k_funcinfo << "NULL matrix at " << i << endl;
@@ -159,6 +184,68 @@ void BoFrame::renderFrame()
 		mesh->renderMesh();
 	}
 	glPopMatrix();
+ }
+}
+
+void BoFrame::mergeMeshes()
+{
+#ifdef AB_TEST
+ QValueList<int> redundantMatrices;
+ for (int i = 0; i < meshCount(); i++) {
+	for (int j = i + 1; j < meshCount(); j++) {
+		if (mMeshes[i]->textured() && !mMeshes[j]->textured()) {
+			continue;
+		}
+		if (mMeshes[i]->textureObject() != mMeshes[j]->textureObject()) {
+			continue;
+		}
+		if (mMatrices[i]->isEqual(*mMatrices[j])) {
+			if (!redundantMatrices.contains(j)) {
+				redundantMatrices.append(j);
+			}
+		}
+	}
+ }
+#endif
+// boDebug() << "redundant matrices: " << redundantMatrices.count() << endl;
+}
+
+void BoFrame::sortByDepth()
+{
+ // sort the meshes by depth, so that closer meshes are drawn first, then
+ // meshes that are farther away.
+ // note that this function is not time critical, so you don't have to care
+ // about speed of the algorithms (it is called once per model on startup only).
+
+ QPtrList<BoMesh> meshes;
+ QMap<BoMesh*, BoMatrix*> matrices;
+ for (int i = 0; i < meshCount(); i++) {
+	// do some necessary calculations
+	mMeshes[i]->calculateMaxMin();
+	matrices.insert(mMeshes[i], mMatrices[i]);
+
+	float z = mMeshes[i]->maxZ();
+	bool found = false;
+	for (unsigned int j = 0; j < meshes.count() && !found; j++) {
+		if (z >= meshes.at(j)->maxZ()) {
+			meshes.insert(j, mMeshes[i]);
+			found = true;
+		}
+	}
+	if (!found) {
+		meshes.append(mMeshes[i]);
+
+	}
+ }
+
+ // meshes is now sorted by maxZ.
+ int current = 0;
+ QPtrListIterator<BoMesh> it(meshes);
+ for (; it.current(); ++it) {
+	BoMesh* mesh = it.current();
+	mMeshes[current] = mesh;
+	mMatrices[current] = matrices[mesh];
+	current++;
  }
 }
 
@@ -355,6 +442,8 @@ void BosonModel::loadModel()
  d->mLoader->loadModel();
 
  mergeArrays();
+ mergeMeshesInFrames();
+ sortByDepth();
 
  applyMasterScale();
 
@@ -464,7 +553,10 @@ void BosonModel::generateConstructionFrames()
  boDebug(100) << k_funcinfo << "Generating " << nodes << " construction frames" << endl;
 
  for (unsigned int i = 0; i < nodes; i++) {
-	BoFrame* step = new BoFrame(*frame0, i); // copy the first i meshes from frame0
+	// copy i meshes, starting at start (until the end)
+	// --> meshes are sorted by z. first mesh has lowest z.
+	int start = (nodes - 1) - i;
+	BoFrame* step = new BoFrame(*frame0, start, i + 1);
 	d->mConstructionSteps.insert(i, step);
  }
 #if !USE_DISPLAYLISTS
@@ -483,32 +575,6 @@ void BosonModel::generateConstructionFrames()
 
 	glNewList(list, GL_COMPILE);
 	step->renderFrame();
-	/*
-	for (int j = 0; j < step->meshCount(); j++) {
-		glPushMatrix();
-
-		BoMatrix* m = step->matrix(j);
-		BoMesh* mesh = step->mesh(j);
-		if (!m) {
-			boError(100) << k_funcinfo << "NULL matrix at " << j << endl;
-			continue;
-		}
-		if (!mesh) {
-			boError(100) << k_funcinfo << "NULL mesh at " << j << endl;
-			continue;
-		}
-		if (mesh->displayList() == 0) {
-			boWarning() << k_funcinfo << "no display list for mesh " << j << endl;
-			continue;
-		}
-
-		glMultMatrixf(m->data());
-
-		glCallList(mesh->displayList());
-
-		glPopMatrix();
-	}
-	*/
 	glEndList();
 	step->setDisplayList(list);
  }
@@ -741,6 +807,25 @@ void BosonModel::mergeArrays()
  for (; it.current(); ++it) {
 	it.current()->movePoints(d->mPoints, index);
 	index += it.current()->points();
+ }
+}
+
+void BosonModel::mergeMeshesInFrames()
+{
+#ifdef AB_TEST
+// boDebug() << k_funcinfo << file() << endl;
+ QIntDictIterator<BoFrame> it(d->mFrames);
+ for (; it.current(); ++it) {
+	it.current()->mergeMeshes();
+ }
+#endif
+}
+
+void BosonModel::sortByDepth()
+{
+ QIntDictIterator<BoFrame> it(d->mFrames);
+ for (; it.current(); ++it) {
+	it.current()->sortByDepth();
  }
 }
 

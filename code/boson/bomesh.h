@@ -142,6 +142,10 @@ public:
 	 * will copy all points (vertices and texture coordinates). The points
 	 * are inserted starting at @p index - all local indices are changed
 	 * (i.e. increased by @p index).
+	 *
+	 * Note that the points are moved only, not changed. I.e. as long as you
+	 * use the correct (maybe modified) index @ref point will return the
+	 * same point.
 	 **/
 	void movePoints(float* array, int index);
 
@@ -232,6 +236,48 @@ public:
 	 **/
 	BoVector3 point(unsigned int p) const;
 	unsigned int points() const;
+
+	/**
+	 * Calculate values for @ref maxZPoint and similar functions. This needs
+	 * to get called whenever the values might change!
+	 **/
+	void calculateMaxMin();
+
+	/**
+	 * @return The maximal x value in this mesh. Call @ref calculateMaxMin
+	 * before you use this
+	 **/
+	float maxX() const;
+
+	/**
+	 * @return The minimal x value in this mesh. Call @ref calculateMaxMin
+	 * before you use this
+	 **/
+	float minX() const;
+
+	/**
+	 * @return The maximal y value in this mesh. Call @ref calculateMaxMin
+	 * before you use this
+	 **/
+	float maxY() const;
+
+	/**
+	 * @return The minimal y value in this mesh. Call @ref calculateMaxMin
+	 * before you use this
+	 **/
+	float minY() const;
+
+	/**
+	 * @return The maximal z value in this mesh. Call @ref calculateMaxMin
+	 * before you use this
+	 **/
+	float maxZ() const;
+
+	/**
+	 * @return The minimal z value in this mesh. Call @ref calculateMaxMin
+	 * before you use this
+	 **/
+	float minZ() const;
 
 protected:
 	void createNodes(unsigned int faces);
