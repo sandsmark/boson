@@ -20,8 +20,6 @@
 #include "top.moc"
 
 #include "defines.h"
-#include "bosonwidget.h"
-#include "editorwidget.h"
 #include "bosonconfig.h"
 #include "boson.h"
 #include "bosonsaveload.h"
@@ -73,7 +71,6 @@ public:
 		mStartup = 0;
 
 		mDisplayManager = 0;
-		mBosonWidget = 0;
 
 		mStarting = 0;
 
@@ -85,7 +82,6 @@ public:
 	BosonStartupWidget* mStartup;
 
 	BoDisplayManager* mDisplayManager;
-	BosonWidgetBase* mBosonWidget;
 
 	QTimer mStatusBarTimer;
 
@@ -288,23 +284,6 @@ void TopWidget::initStatusBar()
  bar->hide();
 }
 
-void TopWidget::initBosonWidget()
-{
- if (d->mBosonWidget) {
-	//should not happen!
-	boWarning() << k_funcinfo << "widget already allocated!" << endl;
-	return;
- }
- BO_CHECK_NULL_RET(d->mDisplayManager);
- BO_CHECK_NULL_RET(boGame);
-
- d->mBosonWidget = new BosonWidgetBase(mMainDock);
- d->mBosonWidget->setDisplayManager(d->mDisplayManager);
-
- setFocusPolicy(StrongFocus);
-
-}
-
 void TopWidget::slotStartNewGame()
 {
  BO_CHECK_NULL_RET(boGame);
@@ -326,7 +305,7 @@ void TopWidget::slotStartNewGame()
 
  d->mStartup->showLoadingWidget();
 
- initBosonWidget();
+ setFocusPolicy(StrongFocus);
 
  // this will take care of all data loading, like models, textures and so. this
  // also initializes the map and will send IdStartScenario - in short this will
@@ -406,15 +385,11 @@ void TopWidget::slotCancelLoadSave()
  if (boGame && boGame->gameStatus() != KGame::Init) {
 	// called from a running game - but the player doesn't want to load/save a
 	// game anymore
-	if (!d->mBosonWidget) {
-		boError() << k_funcinfo << "NULL bosonwidget" << endl;
-		return;
-	}
 	if (d->mStartup) {
 		d->mStartup->hide();
 	}
-	d->mBosonWidget->show();
-	mMainDock->setWidget(d->mBosonWidget);
+	d->mDisplayManager->show();
+	mMainDock->setWidget(d->mDisplayManager);
  } else {
 	if (!d->mStartup) {
 		boError() << k_funcinfo << "NULL startup widget??" << endl;
@@ -437,8 +412,6 @@ void TopWidget::endGame()
 	boGame->quitGame();
  }
  d->mStatusBarTimer.stop();
- delete d->mBosonWidget;
- d->mBosonWidget = 0;
  Boson::deleteBoson();  // Easiest way to reset game info
  delete d->mStarting;
  d->mStarting = 0;
@@ -483,6 +456,7 @@ void TopWidget::slotGameOver()
  // if you replace this by something else you must call slotResetGame()
  // manually!
  d->mStartup->slotShowWelcomeWidget();
+ d->mDisplayManager->hide();
  mMainDock->setWidget(d->mStartup);
 }
 
@@ -711,9 +685,8 @@ void TopWidget::slotGameStarted()
 
  d->mDisplayManager->setCanvas(boGame->canvasNonConst());
 
- // now show the bosonwidget and hide the startup widgets.
- mMainDock->setWidget(d->mBosonWidget);
- d->mBosonWidget->show();
+ mMainDock->setWidget(d->mDisplayManager);
+ d->mDisplayManager->show();
  d->mStartup->hide();
  setMinimumSize(BOSON_MINIMUM_WIDTH, BOSON_MINIMUM_HEIGHT);
  setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
@@ -759,7 +732,6 @@ void TopWidget::slotGameStarted()
 	}
 	boMusic->startLoop();
  }
- d->mBosonWidget->initGameMode(); // just does initLayout(), can be removed
 }
 
 void TopWidget::slotResetGame()
@@ -794,9 +766,7 @@ void TopWidget::slotLoadGame(KCmdLineArgs* args)
  }
  d->mStartup->slotLoadGame();
  d->mStartup->show();
- if (d->mBosonWidget) {
-	d->mBosonWidget->hide();
- }
+ d->mDisplayManager->hide();
  mMainDock->setWidget(d->mStartup);
 }
 
@@ -809,9 +779,7 @@ void TopWidget::slotSaveGame()
  }
  d->mStartup->slotSaveGame();
  d->mStartup->show();
- if (d->mBosonWidget) {
-	d->mBosonWidget->hide();
- }
+ d->mDisplayManager->hide();
  mMainDock->setWidget(d->mStartup);
 }
 

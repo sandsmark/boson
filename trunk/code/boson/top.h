@@ -204,12 +204,6 @@ private:
 	void initBoson();
 	void initStatusBar();
 
-	void slotWaitForMap();
-
-	void initBosonWidget(); // a special case for initStartupWidget - this must get called from outside a show*Widget().
-
-
-
 private:
 	KDockWidget* mMainDock;
 
