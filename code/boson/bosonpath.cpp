@@ -25,8 +25,8 @@ class Node
 {
   public:
     Node() { x = 0; y = 0; g = 0; h = 0; };
-    short int x;
-    short int y;
+    int x;
+    int y;
     float g;
     float h;
 };
@@ -90,10 +90,13 @@ bool BosonPath::findPath()
   // Main loop
   while(! open.empty())
   {
-    getFirst(open, node);
-    // if f < 0 then it's not in OPEN
-    mark[node.x][node.y].f = -1;
-    mNodesRemoved++;
+    if (node.x != mGoalx || node.y != mGoaly)
+    { // this is usually the case - except if we cannot go on the intended goal
+      getFirst(open, node);
+      // if f < 0 then it's not in OPEN
+      mark[node.x][node.y].f = -1;
+      mNodesRemoved++;
+    }
 
 
     // First check if we're at goal already
@@ -133,10 +136,10 @@ bool BosonPath::findPath()
       // First, set new node's position to be old's one
       n2.x = node.x;
       n2.y = node.y;
-      kdDebug() << k_lineinfo << n2.x << " " << n2.y << endl;
+//      kdDebug() << k_lineinfo << n2.x << " " << n2.y << endl;
       // then call method to modify position accordingly to direction
       neighbor(n2.x, n2.y, d);
-      kdDebug() << k_lineinfo << "neighbor: " << n2.x << " " << n2.y << endl;
+//      kdDebug() << k_lineinfo << "neighbor: " << n2.x << " " << n2.y << endl;
 
       // Make sure that position is valid
       if(! mUnit->canvas()->onCanvas(n2.x * BO_TILE_SIZE, n2.y * BO_TILE_SIZE))
@@ -150,12 +153,21 @@ bool BosonPath::findPath()
       // If cost is ERROR_COST, then we can't go there
       if(nodecost == ERROR_COST)
       {
+        if(n2.x == mGoalx && n2.y == mGoaly)
+        {
+          // change our goal
+          mGoalx = node.x;
+          mGoaly = node.y;
+          kdDebug() << "oops - cannot go on target cell :-(" << endl;
+          kdDebug() << "new goal x=" << mGoalx << ",y=" << mGoaly << endl;
+	  continue;
+	}
         kdDebug() << k_lineinfo << "ERROR_COST" << endl;
         continue;
       }
       else
       {
-        kdDebug() << k_lineinfo << "can go on cell" << endl;
+//        kdDebug() << k_lineinfo << "can go on cell" << endl;
         n2.g = node.g + nodecost;
       }
 
@@ -229,16 +241,19 @@ bool BosonPath::findPath()
 // Add waypoints to temporary path in reversed direction (goal to start)
 // We don't add start
     int counter = 0;  // failsave
-    while(((x != mStartx) || (y != mStarty)) && counter < 30)
+//    kdDebug() << k_lineinfo << " before loop: x:" << x << "; y:" << y << endl;
+    while(((x != mStartx) || (y != mStarty)) && counter < 100)
     {
       counter++;
       // Add waypoint
       temp.push_back(wp);
       mPathLength++;
       d = mark[x][y].dir;
-      neighbor((short)x, (short)y, d);
+//      kdDebug() << k_lineinfo << " loop: x:" << x << "; y:" << y << "; d:" << (int)d << endl;
+      neighbor(x, y, d);
       wp.setX(x * BO_TILE_SIZE + BO_TILE_SIZE / 2);
       wp.setY(y * BO_TILE_SIZE + BO_TILE_SIZE / 2);
+//      kdDebug() << k_lineinfo << " loop: x:" << x << "; y:" << y << "; d:" << (int)d << endl;
     }
     if (counter >= 100) 
     {
@@ -249,7 +264,7 @@ bool BosonPath::findPath()
     vector<QPoint>::iterator i;
     for(i = temp.end() - 1; i != temp.begin(); --i)
     {
-      kdDebug() << "add path" << endl;
+//      kdDebug() << "add path" << endl;
       wp.setX((*i).x());
       wp.setY((*i).y());
       path.push_back(wp);
@@ -269,8 +284,8 @@ bool BosonPath::findPath()
     // Path wasn't found
   }
 
-  kdDebug() << k_funcinfo << "end - debug:" << endl;
-  debug();
+  kdDebug() << k_funcinfo << "end" << endl;
+//  debug();
   return pathfound;
 }
 
@@ -293,7 +308,7 @@ float BosonPath::dist(int ax, int ay, int bx, int by)
   return dist;
 }
 
-inline void BosonPath::neighbor(short int& x, short int& y, Direction d)
+inline void BosonPath::neighbor(int& x, int& y, Direction d)
 {
   if((d == DirNE) || (d == DirNorth) || (d == DirNW))
   {
@@ -360,7 +375,7 @@ inline Direction BosonPath::reverseDir(Direction d)
 
 void BosonPath::debug() const
 {
- kdDebug() << "Path Debug" << endl;
+ kdDebug() << k_funcinfo << endl;
  if (!mUnit) {
 	kdError() << "NULL unit" << endl;
 	return;
@@ -374,5 +389,6 @@ void BosonPath::debug() const
 	kdDebug() << "waypoint " << j << ":" << endl;
 	kdDebug() << "x,y=" << (*i).x() << "," << (*i).y() << endl;
  }
- kdDebug() << "Path Debug (end)" << endl;
+ kdDebug() << k_funcinfo << "(end)" << endl;
 }
+
