@@ -21,21 +21,22 @@ sub getval() {
 	# I know that this is not the best way, but it is enough for now
 	if ($level == 1) {
 		$data_level_addon = "../../";
-		$doc_level_addon = "./";
 	}
 	elsif ($level == 2) {
 		$data_level_addon = "../../../";
-		$doc_level_addon = "../";
 	}
 	elsif ($level == 3) {
 		$data_level_addon = "../../../../";
-		$doc_level_addon = "../../";
 	}
 	
-
+	my $path1;
+	my $path2;
+	$path1 = "$ENV{TOP_SRCDIR}/themes/species/human/units/$type\_$name/index.desktop";
+	$path2 = "$ENV{TOP_SRCDIR}/doc/en/values.list";
+	
 	# Open index.destop and values.list
-	open( FILE, "<$data_level_addon/themes/species/human/units/$type\_$name/index.desktop") || die "Cannot open $data_level_addon/themes/species/human/units/$type\_$name/index.desktop";
-	open( FILE2, "<$doc_level_addon/values.list") || die "Cannot open $doc_level_addon/values.list";
+	open( FILE, "<$path1") || die "Cannot open $type\_$name/index.desktop: $ENV{TOP_SRCDIR}/themes/species/human/units/$type\_$name/index.desktop";
+	open( FILE2, "<$path2") || die "Cannot open values.list: $ENV{TOP_SRCDIR}/doc/en/values.list";
 	my @CONTENT;
 	my @CONTENT2;
 	
@@ -65,7 +66,6 @@ sub getval() {
 			}
 		}
 	}
-	print "</table>\n";
-}
+	print "</table>\n";}
 
 1;
