@@ -18,6 +18,10 @@
  *                                                                         *
  ***************************************************************************/
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <klocale.h>
 #include <kcmdlineargs.h>
 #include <kaboutdata.h>
@@ -31,7 +35,7 @@ int main(int argc, char* argv[])
 	KAboutData aboutData(
 		"boson"
 		, I18N_NOOP("Boson game")
-		, "0.5" // XXX should use the #define somewhere
+		, VERSION
 		, I18N_NOOP("A realtime strategy game for KDE")
 		, KAboutData::License_GPL
 		, "(c) 1999-2000, The boson team"

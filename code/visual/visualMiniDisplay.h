@@ -23,7 +23,8 @@
 
 #include "common/groundType.h"
 
-#include <qframe.h> ///orzel qwidget.h
+#include <qwidget.h>
+//#include <qframe.h> ///orzel qwidget.h XXXX
 
 class Unit;
 class QPixmap;

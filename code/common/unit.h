@@ -39,12 +39,6 @@ enum workType {
 	WORK_ 
 	};
 
-/*
- * common header for facilityMsg_t and mobileMsg_t  XXX make *Msg_t inherit unitMsg_t...
- */
-struct unitMsg_t    { uint who; int key, x, y; };
-
-
 /** 
   * This class is the base for all boson units
   */
