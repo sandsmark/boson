@@ -42,6 +42,7 @@ editorCanvas::editorCanvas(QPixmap p)
 
 bool editorCanvas::Load(QString filename)
 {
+	uint ii;
 	int i,j;
 	mobileMsg_t	mob;
 	facilityMsg_t	fix;
@@ -75,13 +76,15 @@ bool editorCanvas::Load(QString filename)
 			boAssert ( ground (tile(i,j)) );
 
 
-	for (i=0; i<nbMobiles; i++) {
+	logf(LOG_INFO, "loading map, %d mobiles, %d facilities", nbMobiles, nbFacilities);
+
+	for (ii=0; ii<nbMobiles; ii++) {
 		boFile::load(mob);
 		if (!isOk()) return false;
 		createMobUnit(mob);
 	}
 
-	for (i=0; i<nbFacilities; i++) {
+	for (ii=0; ii<nbFacilities; ii++) {
 		boFile::load(fix);
 		if (!isOk()) return false;
 		createFixUnit(fix);
