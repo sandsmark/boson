@@ -814,7 +814,7 @@ void BosonBigDisplayBase::paintGL()
  boProfiling->renderUnits(false, d->mRenderedItems);
 
  if (checkError()) {
-	boError() << k_funcinfo << "after unit rendering" << endl;
+	boError() << k_funcinfo << "after item rendering" << endl;
  }
 
  // Facility-placing preview code
