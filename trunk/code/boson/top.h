@@ -211,9 +211,11 @@ protected slots:
 	void slotStartGame();
 
 	/**
-	 * @param loading We are loading a game when TRUE.
+	 * Assign the map (from starting/loading a game) to the game.
+	 *
+	 * From this point on we can actually use the map.
 	 **/
-	void slotAssignMap(bool loading);
+	void slotAssignMap();
 
 private slots:
 	/**

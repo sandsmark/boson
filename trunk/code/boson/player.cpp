@@ -45,8 +45,7 @@ public:
 		mUnitPropID = 0;
 		mMap = 0;
 
-		mMobilesCount = 0;
-		mFacilitiesCount = 0;
+		mStatistics = 0;
 	}
 
 	QPtrList<Unit> mUnits;
@@ -68,9 +67,7 @@ Player::Player() : KPlayer()
 {
  mSpecies = 0;
  d = new PlayerPrivate;
- d->mStatistics = new BosonStatistics;
  d->mUnits.setAutoDelete(true);
- mOutOfGame = false;
  setAsyncInput(true);
  connect(this, SIGNAL(signalNetworkData(int, const QByteArray&, Q_UINT32, KPlayer*)),
 		this, SLOT(slotNetworkData(int, const QByteArray&, Q_UINT32, KPlayer*)));
@@ -79,21 +76,40 @@ Player::Player() : KPlayer()
 		KGamePropertyBase::PolicyLocal, "MineralCost");
  d->mOil.registerData(IdOil, dataHandler(),
 		KGamePropertyBase::PolicyLocal, "OilCost");
- d->mMinerals.setLocal(0);
- d->mOil.setLocal(0);
+
+ quitGame(); // this will reset some variables
 }
 
 Player::~Player()
 {
  kdDebug() << k_funcinfo << endl;
+ quitGame(true);
+ dataHandler()->clear(); // this must not be in quitGame()
+ delete mSpecies;
+ delete d;
+ kdDebug() << k_funcinfo << "done" << endl;
+}
+
+void Player::quitGame(bool destruct)
+{
+ kdDebug() << k_funcinfo << endl;
+ d->mMobilesCount = 0;
+ d->mFacilitiesCount = 0;
+ mOutOfGame = false;
+ d->mMap = 0;
+
  kdDebug() << k_funcinfo << "clearing units" << endl;
  d->mUnits.clear();
  kdDebug() << k_funcinfo << "units cleared" << endl;
- dataHandler()->clear();
- delete mSpecies;
  delete d->mStatistics;
- delete d;
- kdDebug() << k_funcinfo << "done" << endl;
+ d->mStatistics = 0;
+
+ if (!destruct) {
+	d->mStatistics = new BosonStatistics;
+	d->mMinerals.setLocal(0);
+	d->mOil.setLocal(0);
+	d->mFogged.resize(0);
+ }
 }
 
 void Player::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 sender, KPlayer*)
@@ -412,15 +428,16 @@ const UnitProperties* Player::unitProperties(unsigned long int unitType) const
  return speciesTheme()->unitProperties(unitType);
 }
 
-void Player::setMap(BosonMap* map)
+void Player::initMap(BosonMap* map, bool fogged)
 {
  d->mMap = map;
-}
-
-void Player::initFogOfWar(bool fogged)
-{
  if (!d->mMap) {
 	d->mFogged.resize(0);
+	return;
+ }
+ if (d->mFogged.size() != 0) {
+	// the fog of war was initialized before. probably we are loading a
+	// game.
 	return;
  }
  d->mFogged.fill(fogged, d->mMap->width() * d->mMap->height());

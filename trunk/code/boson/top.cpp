@@ -80,6 +80,12 @@ public:
 		mNetworkOptions = 0;
 		mLoadingWidget = 0;
 		mBosonWidget = 0;
+
+		mActionStatusbar = 0;
+		mActionMenubar = 0;
+		mActionFullScreen = 0;
+
+		mStarting = 0;
 	};
 
 	BosonWelcomeWidget* mWelcome;
@@ -112,10 +118,6 @@ TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
  d->mLoadingDockConfig = false;
 #endif
  mLoading = false;
-
- d->mStarting = new BosonStarting(this); // manages startup of games
- connect(d->mStarting, SIGNAL(signalStartGame()), this, SLOT(slotStartGame()));
- connect(d->mStarting, SIGNAL(signalAssignMap(bool)), this, SLOT(slotAssignMap(bool)));
 
  mMainDock = createDockWidget("mainDock", 0, this, i18n("Map"));
  mWs = new QWidgetStack(mMainDock);
@@ -535,8 +537,8 @@ void TopWidget::slotLoadGame()
 	// ... and show messagebox
 	KMessageBox::sorry(this, text, caption);
 
-	// We also need to re-init player
-	initPlayer();
+	// We also need to re-init the game (player, ...)
+	reinitGame();
 
 	// Then return to welcome screen
 	showStartupWidget(ID_WIDGETSTACK_WELCOME);
@@ -577,14 +579,14 @@ void TopWidget::slotHideNetworkOptions()
  showStartupWidget(ID_WIDGETSTACK_NEWGAME);
 }
 
-void TopWidget::slotAssignMap(bool loading)
+void TopWidget::slotAssignMap()
 {
  if (boGame->gameStatus() != KGame::Init) {
 	kdWarning() << k_funcinfo << "not in Init status" << endl;
 	return;
  }
  kdDebug() << k_funcinfo << endl;
- d->mBosonWidget->initMap(!loading);
+ d->mBosonWidget->initMap();
 }
 
 void TopWidget::slotStartGame()
@@ -696,6 +698,13 @@ void TopWidget::endGame()
 
 void TopWidget::reinitGame()
 {
+ endGame();
+
+ delete d->mStarting;
+ d->mStarting = new BosonStarting(this); // manages startup of games
+ connect(d->mStarting, SIGNAL(signalStartGame()), this, SLOT(slotStartGame()));
+ connect(d->mStarting, SIGNAL(signalAssignMap()), this, SLOT(slotAssignMap()));
+
  initBoson();
  initPlayer();
  initPlayField();

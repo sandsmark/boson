@@ -277,7 +277,7 @@ void BosonWidget::initKActions()
 			QString("select_group {%1}").arg(i));
 	(void)new KAction(i18n("Create Group %1").arg(i == 0 ? 10 : i), 
 			Qt::CTRL + Qt::Key_0 + i, displayManager(), 
-			SLOT(slotSelectGroup(int)), actionCollection(),
+			SLOT(slotCreateGroup(int)), actionCollection(),
 			QString("create_group {%1}").arg(i));
  }
 #endif

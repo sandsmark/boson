@@ -81,7 +81,7 @@ signals:
 	 * This signal is necessary for loading code, which needs the map before
 	 * units can be loaded.
 	 **/
-	void signalAssignMap(bool loading);
+	void signalAssignMap();
 
 protected slots:
 	void slotReceiveMap(const QByteArray&);

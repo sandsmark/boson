@@ -59,6 +59,7 @@ void BosonStarting::startNewGame()
  kdDebug() << k_funcinfo << endl;
  mLoading = false; // we are starting a new game
  mLoadingWidget->setProgress(0);
+ mLoadingWidget->showProgressBar(true);
  if (boGame->isAdmin()) {
 	mLoadingWidget->setLoading(BosonLoadingWidget::SendMap);
 	QByteArray buffer;
@@ -150,7 +151,7 @@ void BosonStarting::slotReceiveMap(const QByteArray& buffer)
 	return;
  }
  boGame->setPlayField(mPlayField);
- emit signalAssignMap(mLoading); // for the BosonWidgetBase
+ emit signalAssignMap(); // for the BosonWidgetBase
 
  mLoadingWidget->setProgress(300);
 

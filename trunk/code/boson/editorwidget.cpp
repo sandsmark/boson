@@ -116,9 +116,9 @@ void EditorWidget::initConnections()
 		this, SLOT(slotPlayerLeftGame(KPlayer*)));
 }
 
-void EditorWidget::initMap(bool initFogOfWar)
+void EditorWidget::initMap()
 {
- BosonWidgetBase::initMap(initFogOfWar);
+ BosonWidgetBase::initMap();
  if (!playField() || !playField()->map()) {
 	kdError() << k_funcinfo << endl;
 	return;

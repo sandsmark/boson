@@ -112,7 +112,7 @@ public:
 
 	void init();
 	virtual void initPlayer();
-	virtual void initMap(bool initFogOfWar);
+	virtual void initMap();
 	virtual void quitGame();
 
 public slots:
