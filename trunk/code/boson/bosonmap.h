@@ -15,6 +15,22 @@ class BosonMapPrivate;
  * This class represents a Boson map file (*.bpf). Use @ref loadMap to load the
  * file and you get the min/max players of the map (currently both have the same
  * value) as well as all of the units/facilities.
+ *
+ * BosonMap supports loading of binary files as well as XML files. The XML file
+ * can also be compressed using gzip (automatically done by @ref saveMap). The
+ * binary file is faster to read and smaller than the XML file (if it is
+ * <em>not</em> compressed). A compressed XML file is usually even smaller.
+ *
+ * Boson uses internally a binary format to send information over the network.
+ * Therefore the binary loading methods are also used to load the XML file. The
+ * XML file is first parsed completely and stored in a @ref QDomDocument object.
+ * This object is then queried and all information are streamed using @ref
+ * QDataStream. These streames are now read by BosonMap to actually load the
+ * file. This concept might be a little bit confusing but this way we ensure
+ * that changes in the binary format and/or XML format result in change of the
+ * other format as well, i.e. we don't have broken formats around (ideally at
+ * least)
+ * @author Andreas Beckermann <b_mann@gmx.de>
  **/
 class BosonMap
 {
