@@ -343,10 +343,13 @@ bool BosonPlayField::savePlayField(const QString& fileName)
  }
 
  BPFFile* f = new BPFFile(fileName, false);
+ if (!f->directory()) {
+	boError() << k_funcinfo << "lkfsjsfklj" << endl;
+	return false;
+ }
 
-#warning TODO
- QString user = "foobar";
- QString group = "foobar";
+ QString user = f->directory()->user();
+ QString group = f->directory()->group();
  f->writeFile(QString::fromLatin1("%1/map.xml").arg(topDir), user, group, map.length(), map.data());
  f->writeFile(QString::fromLatin1("%1/scenario.xml").arg(topDir), user, group, scenario.length(), scenario.data());
  f->writeFile(QString::fromLatin1("%1/heightmap.png").arg(topDir), user, group, heightMap.size(), heightMap.data());
