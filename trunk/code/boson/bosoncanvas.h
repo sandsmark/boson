@@ -78,7 +78,7 @@ public:
 
 	inline BosonCollisions* collisions() const { return mCollisions; }
 
-	BosonItem* createItem(unsigned long int rtti, unsigned long int type, Player* owner);
+	BosonItem* createItem(int rtti, unsigned long int type, Player* owner);
 
 	/**
 	 * Test whether the unit can go over rect. This method only tests for

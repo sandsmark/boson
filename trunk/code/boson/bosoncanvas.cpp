@@ -1383,7 +1383,7 @@ void BosonCanvas::deleteUnits(QPtrList<Unit>* units)
  }
 }
 
-BosonItem* BosonCanvas::createItem(unsigned long int rtti, unsigned long int type, Player* owner)
+BosonItem* BosonCanvas::createItem(int rtti, unsigned long int type, Player* owner)
 {
  if (RTTI::isUnit(rtti)) {
 	return (BosonItem*)createUnit(type, owner);
