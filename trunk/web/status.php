@@ -55,7 +55,7 @@ draw_bigbox_text("What has been changed since 0.9.1:
     <li>Resolution changing using Xrandr is supported (XFree 4.3 required)</li>
     <li>Dependency changes:</li>
     <ul>
-    <li>Added: <a href=\"http://www.openal.org/\">OpenAL</a></li>
+    <li>Added: <a href=\"http://www.openal.org/\" target=\"_blank\">OpenAL</a></li>
     <li>Removed: arts, kdemultimedia, kdegames</li>
     </ul>
  </ul>
@@ -124,15 +124,15 @@ draw_bigbox_text("What has been changed since 0.9.1:
  <ul>
     <li>Very basic support for ac3d models</li>
     <li>Support for textured fonts. They are faster, more powerful and stable.
-    Thanks a lot to <a href=\"http://plib.sf.net\">plib</a> where this code has
+    Thanks a lot to <a href=\"http://plib.sf.net\" target=\"_blank\">plib</a> where this code has
     been shamelessy stolen</li>
     <li>Texture compression is used, if available which can reduce texture size an
     therefore improve speed</li>
     <li>The path a unit is using is displayed when it is selected</li>
     <li>The menu is properly removed when a game is ended, fixing menu duplication
-    (see <a href=\"http://bugs.kde.org/show_bug.cgi?id=66715\">66715</a>)</li>
+    (see <a href=\"http://bugs.kde.org/show_bug.cgi?id=66715\" target=\"_blank\">66715</a>)</li>
     <li>Boson now provides it's own copy of kgame</li>
-    <li>Emergency save added, it saves all game data. A developer can now took at a replay of this session</li>
+    <li><a href=\"http://boson.halux2001.de/handbook/en/faq.html#gen_3\" target=\"_blank\">Emergency save</a> added, it saves all game data. A developer can now look at a replay of this session</li>
     <li>Gcc 3.4 fixes</li>
  </ul>
 
