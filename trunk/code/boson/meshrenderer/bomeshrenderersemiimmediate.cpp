@@ -73,7 +73,7 @@ unsigned int BoMeshRendererSemiImmediate::render(const QColor* teamColor, BoMesh
  int type = lod->type();
  BoFaceNode* nodes = lod->nodes();
 
- if (!nodes) {
+ if (!nodes || pointsCacheCount == 0) {
 	// nothing to do.
 	return 0;
  }
