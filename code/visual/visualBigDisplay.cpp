@@ -60,10 +60,10 @@ void visualBigDisplay::viewportMouseMoveEvent(QMouseEvent *e)
 	QPainter p;
 	QPen pen(red, 2);
 
-	switch( vtl->getSelectionMode()) {
+	switch( vtl->selectionMode()) {
 		default:
 		case visualTopLevel::SELECT_NONE:
-//			logf(LOG_WARNING, "visualBigDisplay::viewportMouseMoveEvent : unknown selectionMode(1), mode is %d", vtl->getSelectionMode());
+//			logf(LOG_WARNING, "visualBigDisplay::viewportMouseMoveEvent : unknown selectionMode(1), mode is %d", vtl->selectionMode());
 			break;
 		case visualTopLevel::SELECT_RECT:
 			p.begin( viewport() );
@@ -106,9 +106,9 @@ void visualBigDisplay::viewportMouseReleaseEvent(QMouseEvent *)
 	QPainter p;
 	QPen pen(red, 2);
 
-	switch( vtl->getSelectionMode()) {
+	switch( vtl->selectionMode()) {
 		default:
-			logf(LOG_WARNING, "visualBigDisplay::viewportMouseReleaseEvent : unknown selectionMode(2), mode is %d", vtl->getSelectionMode());
+			logf(LOG_WARNING, "visualBigDisplay::viewportMouseReleaseEvent : unknown selectionMode(2), mode is %d", vtl->selectionMode());
 			break;
 
 		case visualTopLevel::SELECT_NONE:
@@ -171,7 +171,7 @@ void visualBigDisplay::viewportMousePressEvent(QMouseEvent *e)
 	
 	if (e->button() & LeftButton) {	
 
-		if (vtl->getSelectionMode() == visualTopLevel::SELECT_PUT) {
+		if (vtl->selectionMode() == visualTopLevel::SELECT_PUT) {
 			object_put( QPoint(e->x(), e->y()) );
 			return;
 		}
@@ -186,7 +186,7 @@ void visualBigDisplay::viewportMousePressEvent(QMouseEvent *e)
 		if (!sfg) {
 			// nothing has been found : it's a ground-click
 			// Here, we have to draw a "selection box"...
-			if ( vtl->getSelectionMode() == visualTopLevel::SELECT_FILL)
+			if ( vtl->selectionMode() == visualTopLevel::SELECT_FILL)
 				return;
 			// else :
 			vtl->setSelectionMode( visualTopLevel::SELECT_RECT);
