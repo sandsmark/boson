@@ -21,14 +21,9 @@
 #ifndef PLAYER_UNIT_H 
 #define PLAYER_UNIT_H 
 
-#include <QwSpriteField.h>
-
-#include "../common/unit.h"
+#include "../visual/visualUnit.h"
 #include "sprites.h"
 
-
-class selectPart_up;
-class selectPart_down;
 
 enum mobUnitState {
 	MUS_NONE,
@@ -37,32 +32,20 @@ enum mobUnitState {
 	MUS_,
 	};
 
-class playerMobUnit : public mobUnit, public QwSprite
+class playerMobUnit : public visualMobUnit
 {
  Q_OBJECT
 
  public:
   
   playerMobUnit(mobileMsg_t *, QObject* parent=0, const char *name=0L);
-  ~playerMobUnit();
-
-  /** make the connection with <i>non-virtual</i> QwSpriteField functions */
-  virtual	int _x(void) {return x();}
-  virtual	int _y(void) {return y();}
 
   int	getWantedMove(int &dx, int &dy, int &direction);
   int	getWantedAction();
 
-/* attachement */
-  void  select();
-  void  unSelect();
-
 /* Server orders */
   void  doMoveBy(int dx, int dy);
   void  s_moveBy(int dx, int dy, int direction);
-
-/* Qw stuff */
-  virtual int rtti() const { return S_MOBILE+type; }
 
  protected:
   int	getLeft(int a=1) {return (direction+12-a)%12; }
@@ -79,10 +62,6 @@ class playerMobUnit : public mobUnit, public QwSprite
   int		direction;	// [0-11] is the angle ...
   mobUnitState	state;
 
-/* attachement */
-  selectPart_up *sp_up;
-  selectPart_down *sp_down;
-
   /* moving */
   int 	dest_x, dest_y;
   int	asked_dx, asked_dy;
@@ -93,31 +72,16 @@ class playerMobUnit : public mobUnit, public QwSprite
 
 
 
-class playerFacility : public Facility, public QwSprite
+class playerFacility : public visualFacility
 {
 
  public:
   playerFacility(facilityMsg_t *msg, QObject* parent=0L, const char *name=0L);
-  ~playerFacility();
-  /** make the connection with <i>non-virtual</i> QwSpriteField functions */
-  virtual int	_x(void) {return x();}
-  virtual int	_y(void) {return y();}
-
-/* attachement */
-  void  select();
-  void  unSelect();
 
 /* Server orders */
   void		s_setState(int );
 
-/* Qw stuff */
-  virtual int	rtti() const { return S_FACILITY+type; }
-
  private:
-/* attachement */
-  selectPart_up *sp_up;
-  selectPart_down *sp_down;
-
 };
 
 #endif // PLAYER_UNIT_H

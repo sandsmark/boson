@@ -21,14 +21,14 @@
 #include <qlayout.h>
 
 #include "orderWin.h"
-#include "physMap.h"
+#include "playerMap.h"
 #include "miniMap.h"
 #include "fieldMap.h"
 #include "viewMap.h"
 
 #include "mainView.h"		// myself
 
-mainView::mainView(physMap *phys, QWidget *parent=0, const char *name=0)
+mainView::mainView(playerMap *phys, QWidget *parent=0, const char *name=0)
 	:QWidget(parent, name)
 { 
 	QHBoxLayout	*topLayout = new QHBoxLayout(this);

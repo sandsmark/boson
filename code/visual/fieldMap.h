@@ -28,21 +28,22 @@
 
 #include <QwSpriteField.h>
 
-#include "../common/msgData.h"
+//#include "../common/msgData.h"
 #include "../common/groundType.h"
 #include "../common/unitType.h"
 #include "../common/unit.h"	// Facility
 
 #include "speciesTheme.h"
-#include "orderWin.h"
-#include "game.h"
+//#include "orderWin.h"
+//#include "game.h"
 
 class Cell;
 class Unit;
 class groundTheme;
 class QPixmap;
-class playerCell;
+class visualCell;
 class viewMap;
+class orderWin;
 
 
 /** 

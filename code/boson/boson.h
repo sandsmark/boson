@@ -41,7 +41,7 @@
 // application specific includes
 #include "../common/msgData.h"
 
-#include "physMap.h"
+#include "playerMap.h"
 #include "mainView.h"
 #include "connect.h"
 
@@ -153,7 +153,7 @@ private:
 
 
 /* The map which handle grouds and units*/
-    physMap		*phys;
+    playerMap		*phys;
 /* synchronization */
     uint		jiffies;
 /* deal with the communication layer */

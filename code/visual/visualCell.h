@@ -1,9 +1,9 @@
 /***************************************************************************
-                          miniDisplay.cpp  -  description                              
+                          visualCell.h  -  description                              
                              -------------------                                         
 
     version              : $Id$
-    begin                : Sat Feb 17, 1999
+    begin                : Sat Jan  9 19:35:36 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
     email                : capricel@enst.fr                                     
@@ -18,39 +18,29 @@
  *                                                                         *
  ***************************************************************************/
 
-#include <qpainter.h>
-#include <qpixmap.h>
-//#include <qcolor.h>
+#ifndef VISUAL_CELL_H 
+#define VISUAL_CELL_H 
 
-//#include "../common/log.h"
-#include "../map/map.h"
+#include <QwSpriteField.h>
 
-#include "miniMap.h"
-//#include "playerCell.h"
-//#include "speciesTheme.h"
-//#include "groundTheme.h"
-//#include "viewMap.h"
-#include "playerUnit.h"
-#include "game.h"
+#include "../common/cell.h"
 
+#include "sprites.h"
 
-void miniMap::drawMobile(playerMobUnit *unit)
+/** 
+  * This class represents one cell of the main game board
+  */
+
+class visualCell : public Cell, public QwSprite
 {
-	QPainter p;
-	p.begin(ground);
-	setPoint(unit->_x()/BO_TILE_SIZE, unit->_y()/BO_TILE_SIZE, (unit->who==gpp.who_am_i)?magenta:darkMagenta, &p);
-	p.end();
-	repaint(FALSE);
-}
 
 
-void miniMap::drawFix(playerFacility *fix)
-{
-	QPainter p;
-	p.begin(ground);
-	setPoint(fix->_x(), fix->_y(), (fix->who==gpp.who_am_i)?magenta:darkMagenta, &p);
-	p.end();
-	repaint(FALSE);
-}
+public:
+  visualCell(groundType g, int i, int j);
 
+/* Qw stuff */
+  virtual int rtti() const { return S_GROUND + ground; }
 
+};
+
+#endif // VISUAL_CELL_H

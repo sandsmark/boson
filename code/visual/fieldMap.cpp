@@ -1,5 +1,5 @@
 /***************************************************************************
-                          miniMap.h  -  description                              
+                          fieldMap.cpp  -  description                              
                              -------------------                                         
 
     version              : $Id$
@@ -18,54 +18,41 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef MINI_MAP_H 
-#define MINI_MAP_H 
+#include <assert.h>
 
-#include "../common/groundType.h"
+#include <kapp.h>
 
-#include <qframe.h> ///orzel qwidget.h
+#include "../common/log.h"
 
-class Cell;
-class Unit;
-class QPixmap;
-class playerCell;
-class viewMap;
-class playerMobUnit;
-class playerFacility;
+#include "fieldMap.h"
+#include "visualCell.h"
+#include "speciesTheme.h"
+#include "groundTheme.h"
+#include "viewMap.h"
+  
 
-/** 
-  * This is the little map, which "zoom" the battle field
-  */
-class miniMap : public QWidget
+fieldMap::fieldMap(orderWin *o, viewMap *v, QWidget*parent, const char *name, WFlags f)
+	: QWidget(parent, name, f)
+	, QwAbsSpriteFieldView(v->phys)
 {
 
-  Q_OBJECT
+//setBackgroundColor(black);
+//setBackgroundMode(fixedColor);
 
-public:
-  miniMap(viewMap *v, QWidget *parent=0, const char *name=0L);
+/* related orderWindows */
+order = o;
 
-signals:
-  void	reCenterView(int x, int y);
-  void  reSizeView(int l, int h);
+/* the viewMap */
+view = v;
 
-public slots:
-  void newCell(int,int, groundType);
-  void drawMobile(playerMobUnit *mob);
-  void drawFix(playerFacility *fix);
+// connect(, SIGNAL(), this, SLOT());
+connect(view, SIGNAL(repaint(bool)), this, SLOT(repaint(bool)));
+connect(this, SIGNAL(relativeReCenterView(int, int)), view, SLOT(relativeReCenterView(int, int)));
+connect(this, SIGNAL(reSizeView(int, int)), view, SLOT(reSizeView(int, int)));
 
-protected:
-  void setPoint(int x, int y, const QColor &color, QPainter *p=0L);
+}
 
-/* events */
-  virtual void paintEvent(QPaintEvent *evt);
-  virtual void mousePressEvent(QMouseEvent *e);
-
-private:
-
-  viewMap	*view;
-  QPixmap	*ground;
-
-};
-
-#endif // MINI_MAP_H
-
+fieldMap::~fieldMap()
+{
+	QwAbsSpriteFieldView::view(0);
+}

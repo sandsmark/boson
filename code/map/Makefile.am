@@ -28,11 +28,15 @@ CXXFLAGS = -pipe -Wall -g # -O2
 LDFLAGS =  -s 
 
 noinst_PROGRAMS = boeditor
+
+
 #boeditor
 #boeditor_METASOURCES = USE_AUTOMOC
 boeditor_SOURCES = boeditor.cpp
 boeditor_LDADD   = ../common/libboson.a -lkdecore -lqt # -lXext -lX11 $(LIBSOCKET)
 boeditor_LDFLAGS = $(all_libraries) $(KDE_RPATH)
+
+
 #basic.bpf
 data_DATA = basic.bpf
 datadir = $(kde_datadir)/boson/map

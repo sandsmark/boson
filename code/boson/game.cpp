@@ -21,9 +21,12 @@
 
 #include "game.h"
 
-gameProperties_t gpp = {
+visualProperties_t vpp = {
 	0l,
-	{0l, 0l},
+	{0l, 0l}
+	};
+
+bosonProperties_t gpp = {
 	0l,
-	1
+	0
 	};

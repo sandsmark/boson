@@ -27,11 +27,11 @@
 #include "../map/map.h"
 
 #include "fieldMap.h"
-#include "playerCell.h"
+#include "visualCell.h"
 #include "speciesTheme.h"
 #include "groundTheme.h"
 #include "viewMap.h"
-#include "game.h"
+#include "visual.h"
 
 QRect fieldMap::viewArea() const
 {

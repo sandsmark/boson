@@ -310,7 +310,7 @@ void BosonApp::initView()
 { 
 
 /* the physical map is created when a game is created */
-	phys = new physMap(200,200);
+	phys = new playerMap(200,200);
 
 /* a mainView is each window containing : field, mini, order...
    this one is the first one, other can pop up as well */

@@ -26,14 +26,14 @@
 class	miniMap;
 class	fieldMap;
 class	viewMap;
-class	physMap;
+class	playerMap;
 class	orderWin;
 
 class mainView : public QWidget 
 {
 	Q_OBJECT
 public:
-	mainView(physMap *phys, QWidget *parent=0, const char *name=0);
+	mainView(playerMap *phys, QWidget *parent=0, const char *name=0);
 
 private:
 /* the map object we are playing in */

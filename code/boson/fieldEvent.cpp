@@ -25,7 +25,12 @@
 
 #include "viewMap.h"
 #include "fieldMap.h"
+#include "orderWin.h"
+#include "playerMap.h"
 
+
+#define mobileList (((playerMap*)(view->phys))->mobile)
+#define facilityList (((playerMap*)(view->phys))->facility)
 
 static int selectX, selectY;
 static int oldX, oldY;
@@ -59,8 +64,8 @@ if (e->button() & LeftButton) {
 		unSelectAll();
 		}
 
-	QIntDictIterator<playerMobUnit> mobIt(view->phys->mobile);
-	QIntDictIterator<playerFacility> fixIt(view->phys->facility);
+	QIntDictIterator<playerMobUnit> mobIt(mobileList);
+	QIntDictIterator<playerFacility> fixIt(facilityList);
 
 	playerMobUnit	*m;
 	playerFacility	*f;
@@ -136,8 +141,8 @@ void fieldMap::mouseReleaseEvent(QMouseEvent *e)
 {
 QPainter p;
 QPen pen(green, 2);
-QIntDictIterator<playerMobUnit>	mobIt(view->phys->mobile);
-QIntDictIterator<playerFacility> fixIt(view->phys->facility);
+QIntDictIterator<playerMobUnit> mobIt(mobileList);
+QIntDictIterator<playerFacility> fixIt(facilityList);
 playerMobUnit	*m;
 int		t;
 
