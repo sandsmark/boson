@@ -23,6 +23,7 @@
 #include "bodefaultgroundrenderer.h"
 #include "bofastgroundrenderer.h"
 #include "boveryfastgroundrenderer.h"
+#include "boquickgroundrenderer.h"
 #include "../boversion.h"
 
 #include <bodebug.h>
@@ -57,6 +58,8 @@ QObject* BoGroundRendererFactory::createObject(QObject* parent, const char* name
 	o = new BoFastGroundRenderer();
  } else if (qstrcmp(className, "BoVeryFastGroundRenderer") == 0) {
 	o = new BoVeryFastGroundRenderer();
+ } else if (qstrcmp(className, "BoQuickGroundRenderer") == 0) {
+	o = new BoQuickGroundRenderer();
  } else {
 	boError() << k_funcinfo << "no such class available: " << className << endl;
 	return 0;
@@ -72,6 +75,7 @@ QStringList BoPluginInformation_libbogroundrendererplugin::plugins() const
  QStringList list;
  list.append("BoFastGroundRenderer");
  list.append("BoVeryFastGroundRenderer");
+ list.append("BoQuickGroundRenderer");
  list.append("BoDefaultGroundRenderer");
  return list;
 }
