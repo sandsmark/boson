@@ -1,12 +1,13 @@
 #!/bin/bash
 
-BOSON_BASE="$HOME/kde/boson/release/head"
+# BOSON_BASE="$HOME/kde/boson/release/head"
+BOSON_BASE="."
 BOSON_TOOLS="$BOSON_BASE/tools"
 BOSON_CODE="$BOSON_BASE/code"
 BOSON_DATA="$BOSON_BASE/data"
 BOSON_MUSIC="$BOSON_BASE/music"
 
-BOSON_RELEASE="BOSON_0_8_RELEASE"
+BOSON_RELEASE=""
 
 # Configuration ends here
 
@@ -140,7 +141,8 @@ if [ ! -d "$BOSON_DATA" ]; then
 	exit 1
 fi
 if [ ! -d "$BOSON_MUSIC" ]; then
-	echo "Didn't find music dir $BOSON_MUSIC"
+	echo "Didn't find music dir $BOSON_MUSIC."
+	echo "Do mkdir music ; cd music ; wget boson.sf.net/music/*.tar.bz2 first!"
 	exit 1
 fi
 
