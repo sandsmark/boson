@@ -3,7 +3,7 @@
 $(name)
 </b>
 <br>
-<a href="$(name2).html"><img src="$(name2)_small.png" height="100" border="0"></a>
+    <a href="$(name2).html"><img src="$(name2)_small.jpg" height="100" border="0"></a>
 <:
 use get_values;
 
