@@ -20,8 +20,6 @@
 #include "bosonsound.h"
 
 #include "../defines.h"
-#include "../unitproperties.h"
-#include "../speciestheme.h"
 #include "../bosonconfig.h"
 #include "bosonmusic.h"
 
@@ -274,16 +272,27 @@ KArtsServer& BosonSound::server() const
  return boMusic->server();
 }
 
-void BosonSound::addUnitSounds(const UnitProperties* prop)
+void BosonSound::addUnitSounds(const QString& speciesPath, const QStringList& sounds)
 {
  if (boConfig->disableSound()) {
 	return;
  }
- QString dir = prop->theme()->themePath() + QString::fromLatin1("sounds/");
- QMap<int, QString> sounds = prop->sounds();
- QMap<int, QString>::Iterator it = sounds.begin();
+ if (speciesPath.isEmpty()) {
+	return;
+ }
+ if (sounds.count() == 0) {
+	return;
+ }
+ QString path = speciesPath;
+ if (path.right(1) != QString::fromLatin1("/")) {
+	path += QString::fromLatin1("/");
+ }
+ path += QString::fromLatin1("sounds/");
+ QStringList::ConstIterator it = sounds.begin();
  for (; it != sounds.end(); ++it) {
-	addEvent(dir, it.data());
+	if (!(*it).isEmpty()) {
+		addEvent(path, *it);
+	}
  }
 }
 

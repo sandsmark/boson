@@ -214,7 +214,13 @@ bool SpeciesTheme::loadUnit(unsigned long int type)
 	boProfiling->loadUnitDone(type);
 	return false;
  }
- mSound->addUnitSounds(prop);
+ QStringList sounds;
+ QMap<int, QString> unitSounds = prop->sounds();
+ QMap<int,QString>::Iterator it = unitSounds.begin();
+ for (; it != unitSounds.end(); ++it) {
+	sounds.append(*it);
+ }
+ mSound->addUnitSounds(themePath(), sounds);
  boProfiling->loadUnitDone(type);
  return true;
 }

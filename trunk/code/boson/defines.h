@@ -30,19 +30,20 @@
 #define BOSON_COOKIE 992
 
 
+// obsolete
 #define PIXMAP_PER_MOBILE 9 // 8 different directions + 1 "destroyed" pix
 #define PIXMAP_PER_FIX 5 // number of construction steps + 1 "destroyed" pix
 #define PIXMAP_FIX_DESTROYED (PIXMAP_PER_FIX - 1)
 #define PIXMAP_MOBILE_DESTROYED (PIXMAP_PER_MOBILE - 1)
 #define FACILITY_CONSTRUCTION_STEPS (PIXMAP_PER_FIX - 1)
-
-#define MAXIMAL_ADVANCE_COUNT 200 // maximal value of advanceCount param emitted by Boson::signalAdvance
-
 #define SHOT_FRAMES 5
 #define MOBILE_SHOT_FRAMES 16
 #define FACILITY_SHOT_FRAMES 16
 #define MOBILE_SHOT_NB 4 // FIXME hardcoded
 #define FACILITY_SHOT_NB 4// FIXME hardcoded
+// obsolete (end)
+
+#define MAXIMAL_ADVANCE_COUNT 200 // maximal value of advanceCount param emitted by Boson::signalAdvance
 
 #define BOSON_MAX_PLAYERS 10 // test if this is working - 2 is tested
 
@@ -62,6 +63,5 @@
 
 #define BOSON_PORT 5454
 
-#define DEFAULT_CANVASTEXT_COLOR Qt::white
-
 #endif
+
