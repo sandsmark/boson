@@ -5,13 +5,15 @@ ConstructionSteps=20
 
 [Boson Unit]
 Armor=0
-DestroyedParticles=1010,3011
-Health=250
+DestroyedParticles=1010,3011,7002
+ExplodingDamage=0
+ExplodingDamageRange=0
+Health=300
 Id=13
 IsFacility=true
-MineralCost=100
+MineralCost=1000
 Name=Mineral Refinery
-OilCost=0
+OilCost=200
 Producer=10
 ProductionTime=400
 Requirements=5,2

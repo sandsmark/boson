@@ -5,7 +5,9 @@ Speed=4
 
 [Boson Unit]
 Armor=1
-DestroyedParticles=1002,3001
+DestroyedParticles=1002,3001,7001
+ExplodingDamage=0
+ExplodingDamageRange=0
 Health=130
 Id=10006
 IsFacility=false
@@ -38,7 +40,7 @@ CanShootAtAirUnits=true
 CanShootAtLandUnits=true
 Damage=30
 DamageRange=1
-FlyParticles=5001
+FlyParticles=5001,5002
 HitParticles=2001
 MaxHeight=1
 Name=Missiles
