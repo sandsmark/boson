@@ -20,7 +20,7 @@
     <br><br><br>
     <h3>General</h3>
     <a name="gen_1">- When is Boson finished ?</a>
-    <p>&gt;&gt; When boson is up and running with a level already loaded in the moment you 
+    <p>&gt;&gt; When boson is up and running with a level already loaded in the moment you
     think about starting boson - then we can release 1.0 ;-) &lt;&lt;
     </p>
     <br>
@@ -29,7 +29,9 @@
     <p>
     You can submit a bugreport through <a href="http://bugs.kde.org/wizard.cgi" target="_blank">bugs.kde.org</a>.<br>
     Or simply start Boson, you will find the "Report Bug..." entry in the "Help" menu.<br>
-    Please include a backtrace if you have one. Also, if self compiled, configuring with --enable-debug=full helps us.
+    If you don't get a menu on startup than hit the right mouse button and select "Show Menubar".<br>
+    Please include a backtrace if you have one. Also, if self compiled, configuring with "--enable-debug=full" helps us.<br>
+    If you have speed problems, please klick <a href="#game_2">here</a>.
     </p>
     <br>
     
@@ -52,7 +54,7 @@
     To enable the application menubar press the right mouse button on the welcome screen and click on "Show Menubar".
     </p>
     <br>
-    
+
     <a name="game_2">- Why is boson so slow ?</a>
     <p>
     There may be many reasons, some things that can help:<br>
@@ -60,15 +62,28 @@
     - Try resizing the window and/or make it smaller<br>
     - Increase the update interval in the Boson settings<br>
     - Change the color depth of your XServer to 16bit<br>
-    - If you use a very big map (300x300 and more) things can be slow down<br>
     - Check the speed of other OpenGL games like tuxkart and tuxracer, maybe they also run slow<br>
-    - If you are using a Nvidia card you can use a script called<a href="http://boson.sourceforge.net/download/nvcheck.sh"> nvcheck.sh</a>
-    to check your driver installation.<br>
-    - Make sure you are using hardware accellerated OpenGL:<br>
-        <blockquote>You will need the program glxinfo, it is part of your X Server. Enter this into your console:
-        <pre>glxinfo | grep "direct rendering:"</pre>
-        If you get a yes, 3D accelleration should be ok. If this says "No", you are running software OpenGL and this is very slow.
+    - Start the program called "<a href="game/apps.html">boinfo</a>" and check if the values under this tabs are correct:<br>
+        <blockquote>
+        <table border="0" class="nav">
+            <tr><th colspan="2" align="left">OpenGL</th></tr>
+            <tr><td>Have OpenGL data</td><td>Yes</td></tr>
+            <tr><td>Is Direct</td><td>Yes</th></tr>
+            <tr><th colspan="2" align="left">NVidia</td></tr>
+            <tr><td>Textfield *</td><td>No errors found...</td></tr>
+            <tr><th colspan="2" align="left">Operating System</th></tr>
+            <tr><td>TDFX *</td><td>Yes</td></tr>
+            <tr><td>Have MTRR</td><td>Yes</td></tr>
+        </table>
+         * If you are using this driver
         </blockquote>
+    <br>
+    If all that doesn't help you can send a bugreport to the <a href="mailto:boson-devel@lists.sourceforge.net">mailing list</a>.
+    Please don't send other bugs to the mailinglist, see <a href="#gen_3">here</a>.<br>
+    To find speed problems we need more information:<br>
+    - Save the information from "<a href="game/apps.html">boinfo</a>". You can save them under "Files".<br>
+    - Some seconds after startup of a game you will get a message that you can make profiling snapshots with Ctrl+P.<br>
+    &nbsp; Send both files with a description of your speed problem to our mailinglist.
     </p>
     <br>
     <!-- END_FAQ -->
