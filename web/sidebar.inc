@@ -167,6 +167,7 @@ draw_link("Boson 0.6.1", "announces/boson-0.6.1.php");
 draw_link("Boson 0.7", "announces/boson-0.7.php");
 draw_link("Boson 0.8", "announces/boson-0.8.php");
 draw_link("Boson 0.9", "announces/boson-0.9.php");
+draw_link("Boson 0.9.1", "announces/boson-0.9.1.php");
 sidebar_box_end();
 }
 
