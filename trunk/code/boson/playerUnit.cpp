@@ -114,15 +114,14 @@ bool playerMobUnit::checkMove(QPoint pos)
 
 bool playerMobUnit::getWantedMove(QPoint &wstate)
 {
-	int ldx, ldy;
-	int vp1, vp2, vp3;
-	int range = mobileProp[type].range;
 
 
 	QRect	r = gridRect();
-	asked	= r.topLeft();		// destinaton asked, let's begin where we already are
+	asked = r.topLeft();		// destinaton asked, let's begin where we already are
 	QPoint	dv = dest - asked;	// delta do the destination
 	QPoint	local = asked;		// temporory variable
+
+	int	range = mobileProp[type].range;
 	bool	ret;
 
 	if ( dv == QPoint(0,0) ) state = MUS_NONE;
