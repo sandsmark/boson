@@ -52,6 +52,7 @@ BosonEffectPropertiesManager* BosonEffectPropertiesManager::bosonEffectPropertie
 {
   if(!mManager)
   {
+#warning TODO: use static deleter
     mManager = new BosonEffectPropertiesManager();
   }
   return mManager;
@@ -104,6 +105,7 @@ void BosonEffectPropertiesManager::loadEffectProperties()
     else
     {
       boError(150) << k_funcinfo << "effect with id " << effectprop->id() << " already there!" << endl;
+      delete effectProp;
     }
   }
   // BosonEffectProperties (more specifically, collection properties) need
