@@ -86,6 +86,8 @@ int main(void)
 {
 
 playField *field = new playField(PF_NAME); /// basic BosonPlayField...
+
+printf("\nMap creation...\n");
 createSeaMap( MAP_WIDTH, MAP_HEIGHT, *field);
 createIsland(12, 15, TRANS_GW, *field,15, 20);
 createIsland(15, 23, TRANS_GD, *field, 2, 3, true);
@@ -95,15 +97,15 @@ createIsland(30, 15, TRANS_GW, *field);
 field->nbPlayer = 2;
 
 /* fill people  */
-
 field->people = people;
 
+printf("Creation .................Ok\nWrite to disk.............");
 if (!field->write()) {
 	puts("Error : impossible to create file");
 	exit(1);
 	}
 
-puts("Ok, file created");
+printf("Ok\nTest : reload from disk...");
 
 delete field;
 
@@ -115,7 +117,7 @@ if (!field->load()) {
 	exit(1);
 	}
 
-puts("Ok, file re-read, checking...");
+printf("Ok\nTest : checking data......");
 
 if (field->map.width != MAP_WIDTH)
 	puts("width NOK");
@@ -126,6 +128,8 @@ if (field->people.nbMobiles != sizeof(mobile)/sizeof(mobile[0]))
 if (field->people.nbFacilities != sizeof(facility)/sizeof(facility[0]))
 	puts("nbFacilities NOK");
 
+printf("Ok\n\n");
+
 return 0;
 }
 
@@ -135,7 +139,7 @@ void createSeaMap(int width, int height, playField &field)
 {
 int i,j;
 
-printf("Filling the area with water\n");
+printf("\tFilling the area with water\n");
 /* fill map struct */
 field.map.width = width;
 field.map.height= height;
@@ -155,7 +159,7 @@ void createIsland(int x, int y, int trans, playField &field, int width, int heig
 {
 int i, j;
 
-printf("Drawing island in %d,%d, size %dx%d, %s %s\n",
+printf("\tDrawing \'rectangle\' in %d,%d, size %dx%d, %s %s\n",
 	x, y, width, height,
 	groundTransProp[trans].name,
 	inverted?"(inverted)":""
