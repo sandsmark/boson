@@ -103,6 +103,8 @@ public slots:
 	/** Removes active display */
 	void slotRemoveActiveDisplay();
 
+	void slotGameOver();
+
 #if KDE_VERSION < 310
 	virtual void setGeometry(const QRect&);
 #endif
@@ -129,6 +131,8 @@ protected:
 
 	virtual bool queryClose();
 	virtual bool queryExit();
+
+	void endGame();
 
 protected slots:
 	void slotCanvasTilesLoading(int);

@@ -597,6 +597,7 @@ void TopWidget::loadGameData3() // FIXME rename!
 
  connect(d->mBosonWidget, SIGNAL(signalChatDockHidden()), this, SLOT(slotChatDockHidden()));
  connect(d->mBosonWidget, SIGNAL(signalCmdFrameDockHidden()), this, SLOT(slotCmdFrameDockHidden()));
+ connect(d->mBosonWidget, SIGNAL(signalGameOver()), this, SLOT(slotGameOver()));
 
  d->mLoading->setProgress(5000);
  d->mLoading->setLoading(BosonLoadingWidget::LoadingDone);  // FIXME: This is probably meaningless
@@ -715,7 +716,11 @@ void TopWidget::slotEndGame()
  if(answer == KMessageBox::No) {
 	return;
  }
+ endGame();
+}
 
+void TopWidget::endGame()
+{
  d->mBosonWidget->slotEndGame();
  saveGameDockConfig();
  disconnect(d->mBosonWidget, 0, 0, 0);
@@ -737,6 +742,11 @@ void TopWidget::slotEndGame()
  slotToggleStatusbar();
  enableGameActions(false);
  showWelcomeWidget();
+}
+
+void TopWidget::slotGameOver()
+{
+ endGame();
 }
 
 void TopWidget::slotGamePreferences()
