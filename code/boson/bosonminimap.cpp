@@ -327,7 +327,11 @@ void BosonMiniMap::moveUnit(Unit* unit, const QPointArray& newCells, const QPoin
 		// already. maybe we should do this anyway?
 		continue;
 	}
-	setPoint(x, y, color);
+	if (!unit->isDestroyed()) {
+		setPoint(x, y, color);
+	} else {
+		updateCell(x, y);
+	}
  }
  d->mPixmap->repaint(false);
 }
@@ -407,12 +411,7 @@ void BosonMiniMap::initMap()
 void BosonMiniMap::slotUnitDestroyed(Unit* unit)
 {
  BO_CHECK_NULL_RET(unit)
- BO_CHECK_NULL_RET(map())
- int x = (int)(unit->x() / BO_TILE_SIZE);
- int y = (int)(unit->y() / BO_TILE_SIZE);
- Cell* cell = map()->cell(x, y);
- BO_CHECK_NULL_RET(cell)
- slotUnfog(x, y);
+ moveUnit(unit, makeCellList(unit, unit->x(), unit->y()), QPointArray());
 }
 
 void BosonMiniMap::slotUnfog(int x, int y)
