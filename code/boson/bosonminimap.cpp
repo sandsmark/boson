@@ -103,7 +103,7 @@ BosonMiniMap::BosonMiniMap(QWidget* parent, const char* name) : QWidget(parent, 
 
  QGridLayout* grid  = new QGridLayout(this, 5, 3);
  d->mPixmap = new QWidget(this);
- d->mPixmap->installEventFilter(this);
+ this->installEventFilter(this);
 
  grid->addMultiCellWidget(d->mPixmap, 0, 5, 0, 1);
  d->mZoomIn = new QPushButton(this, "zoomin");
@@ -742,6 +742,8 @@ void BosonMiniMap::repaintMiniMapPixmap()
  if (isUpdatesEnabled()) {
 	// Do not repaint immediately, but post an event instead
 	// This code is taken from QWidget::update()
-	QApplication::postEvent(d->mPixmap, new QPaintEvent(d->mPixmap->visibleRect(), false));
+	// AB: we post the event to this, but use the visible rect of the
+	// pixmap.
+	QApplication::postEvent(this, new QPaintEvent(d->mPixmap->visibleRect(), false));
  }
 }
