@@ -51,6 +51,7 @@
 #include "bocamera.h"
 #include "boautocamera.h"
 #include "bogroundrenderer.h"
+#include "bolight.h"
 #include "info/boinfo.h"
 #include "script/bosonscript.h"
 
@@ -79,9 +80,6 @@
 
 #include "bosontexturearray.h"
 #include "bosonglfont.h"
-
-#warning move to class !
-static float lightPos[] = {-6000.0, 3000.0, 10000.0, 1.0};
 
 #include <GL/glu.h>
 
@@ -326,6 +324,8 @@ public:
 	unsigned int mRenderedParticles;
 
 	BoGroundRenderer* mGroundRenderer;
+
+	QIntDict<BoLight> mLights;
 };
 
 BosonBigDisplayBase::BosonBigDisplayBase(QWidget* parent)
@@ -484,15 +484,21 @@ void BosonBigDisplayBase::initializeGL()
 // glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
 
- float lightAmb[] = {0.8f, 0.8f, 0.8f, 1.0f};
- float lightDif[] = {1.0f, 1.0f, 1.0f, 1.0f};
+ BoVector4 lightDif(0.8f, 0.8f, 0.8f, 1.0f);
+ BoVector4 lightAmb(0.2f, 0.2f, 0.2f, 1.0f);
+ BoVector4 lightPos(-6000.0, 3000.0, 10000.0, 1.0);
 
- glLightfv(GL_LIGHT0, GL_AMBIENT, lightAmb);
- glLightfv(GL_LIGHT0, GL_DIFFUSE, lightDif);
- glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
+ BoLight* l = newLight();
+ // This is the "main" light, i.e. the Sun. It should always have id 0
+ if (l->id() != 0) {
+	boWarning() << k_funcinfo << "Main light has id " << l->id() << endl;
+ }
+ l->setAmbient(lightAmb);
+ l->setDiffuse(lightDif);
+ l->setSpecular(lightDif);
+ l->setPosition(lightPos);
 
- // light makes things slower!
- glEnable(GL_LIGHT0);
+ l->setEnabled(true);
 
  if (checkError()) {
 	boError() << k_funcinfo << endl;
@@ -2298,9 +2304,6 @@ void BosonBigDisplayBase::cameraChanged()
 
  camera()->applyCameraToScene();
 
- // Reposition light
- glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
-
  if (checkError()) {
 	boError() << k_funcinfo << "after BoGameCamera::applyCameraToScene()" << endl;
  }
@@ -2978,3 +2981,25 @@ void BosonBigDisplayBase::generateMovieFrame(const QByteArray& data, BoPixmapRen
 #endif
 }
 
+BoLight* BosonBigDisplayBase::light(int id) const
+{
+ return d->mLights[id];
+}
+
+BoLight* BosonBigDisplayBase::newLight()
+{
+ BoLight* light = new BoLight;
+ if(light->id()) {
+	// Light could not be created
+	delete light;
+	return 0;
+ }
+ d->mLights.insert(light->id(), light);
+ return light;
+}
+
+void BosonBigDisplayBase::removeLight(int id)
+{
+ BoLight* l = d->mLights.take(id);
+ delete l;
+}

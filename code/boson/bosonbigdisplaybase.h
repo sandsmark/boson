@@ -37,6 +37,7 @@ class BosonBigDisplayInputBase;
 class BoItemList;
 class BosonItem;
 class BoPixmapRenderer;
+class BoLight;
 
 class KGameChat;
 class KGameIO;
@@ -261,6 +262,10 @@ public:
 	BoGameCamera* camera() const;
 	BoAutoGameCamera* autoCamera() const;
 	void advanceCamera();
+
+	BoLight* light(int id) const;
+	BoLight* newLight();
+	void removeLight(int id);
 
 	void changeGroundRenderer(int renderer);
 
