@@ -58,6 +58,9 @@ public:
 	 **/
 	void initFogOfWar(Player* p);
 
+	void setPointSize(int p);
+	int pointSize() const;
+
 signals:
 	void signalReCenterView(const QPoint& pos);
 

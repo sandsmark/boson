@@ -34,7 +34,6 @@ General TODOs
 - use typeId = 0 as invalid (NOT -1!)
 - the selection rect is not drawn correctly if it is started when the mouse is
   already moving
-- bigger minimap
 - add revision (CVS) number of files to the connection protocol. If the versions
   differ then deny connection. This ensures that all clients are at the smae
   version. We need the revision number of each file - how to do add this
