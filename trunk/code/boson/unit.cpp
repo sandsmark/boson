@@ -890,7 +890,8 @@ void MobileUnit::advanceMoveCheck()
 	setWork(WorkNone);
 	return;
  }
- if (boCanvas()->cellsOccupied(boundingRectAdvanced(), this, false)) {
+ if (boCanvas()->cellOccupied(currentWaypoint().x() / BO_TILE_SIZE,
+		currentWaypoint().y() / BO_TILE_SIZE, this, false)) {
 //	kdDebug() << k_funcinfo << "collisions" << endl;
 //	kdWarning() << k_funcinfo << "" << id() << " -> " << l.first()->id() 
 //		<< " (count=" << l.count() <<")"  << endl;
