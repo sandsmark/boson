@@ -588,10 +588,7 @@ public:
 
 	unsigned int mRenderedItems;  // units rendered when paintGL was last called
 	unsigned int mRenderedCells;  // same, but for cells
-	unsigned int mRenderedModelVertices;
-	unsigned int mRenderedCellVertices;
-	unsigned int mRenderedParticleVertices;
-	unsigned int mRenderedOtherVertices;
+	unsigned int mRenderedParticles;
 };
 
 BosonBigDisplayBase::BosonBigDisplayBase(QWidget* parent)
@@ -868,10 +865,8 @@ void BosonBigDisplayBase::paintGL()
 
  boProfiling->renderUnits(true);
  d->mRenderedItems = 0;
- d->mRenderedModelVertices = 0;
- d->mRenderedCellVertices = 0;
- d->mRenderedParticleVertices = 0;
- d->mRenderedOtherVertices = 0;
+ d->mRenderedCells = 0;
+ d->mRenderedParticles = 0;
 
  if (boConfig->wireFrames()) {
 	glDisable(GL_TEXTURE_2D);
@@ -1026,7 +1021,7 @@ void BosonBigDisplayBase::renderItems()
 	} else {
 		glColor3ub(255, 255, 255);
 	}
-	d->mRenderedModelVertices += item->renderItem();
+	item->renderItem();
 	glColor3ub(255, 255, 255);
 	glPopMatrix();
 
@@ -1044,7 +1039,6 @@ void BosonBigDisplayBase::renderItems()
 			glRotatef(camera()->rotation(), 0.0, 0.0, 1.0);
 		}
 		glCallList(item->selectBox()->displayList());
-		d->mRenderedOtherVertices += item->selectBox()->verticesCount();
 		glPopMatrix();
 	}
 
@@ -1108,7 +1102,7 @@ void BosonBigDisplayBase::renderPlacementPreview()
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	d->mPlacementPreview.model()->enablePointer();
-	d->mRenderedOtherVertices += f->renderFrame(&localPlayer()->teamColor());
+	f->renderFrame(&localPlayer()->teamColor());
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
  } else if (cellPreview) {
@@ -1126,7 +1120,6 @@ void BosonBigDisplayBase::renderPlacementPreview()
 		glTexCoord2fv(textureUpperRight);
 		glVertex3f(BO_GL_CELL_SIZE, 0.0f, 0.0f);
 	glEnd();
-	d->mRenderedOtherVertices += 4;
  }
  glTranslatef(-x, y, -z);
  glColor4ub(255, 255, 255, 255);
@@ -1168,7 +1161,6 @@ void BosonBigDisplayBase::renderSelectionRect()
 		glVertex3f(x + w, y - h, 0.0f);
 		glVertex3f(x, y - h, 0.0f);
 	glEnd();
-	d->mRenderedOtherVertices += 4;
 
 	glColor3ub(255, 255, 255);
 	glPopMatrix();
@@ -1320,19 +1312,9 @@ void BosonBigDisplayBase::renderText()
 	QString text;
 	text += i18n("Items rendered: %1\n").arg(d->mRenderedItems);
 	text += i18n("Cells rendered: %1\n").arg(d->mRenderedCells);
-	text += i18n("Vertices:  total: %1\n").
-			arg(d->mRenderedModelVertices + d->mRenderedCellVertices +
-			d->mRenderedParticleVertices + d->mRenderedOtherVertices);
+	text += i18n("Particles rendered: %1").arg(d->mRenderedParticles);
 	y -= d->mDefaultFont->renderText(x, y, text, width() - x);
 
-	x += 25;
-	text = QString::null;
-	text += i18n("Models: %1\n").arg(d->mRenderedModelVertices);
-	text += i18n("Cells: %1\n").arg(d->mRenderedCellVertices);
-	text += i18n("Particles: %1\n").arg(d->mRenderedParticleVertices);
-	text += i18n("Other: %1\n").arg(d->mRenderedOtherVertices);
-	y -= d->mDefaultFont->renderText(x, y, text, width() - x);
-	x -= 25;
  }
 
 // now the chat messages
@@ -1417,20 +1399,19 @@ void BosonBigDisplayBase::renderCells()
 	float lowerRightHeight = *(heightMapUpperLeft + heightMapWidth + 1);
 	glBegin(GL_QUADS);
 		glTexCoord2fv(textureUpperLeft);
-		glVertex3f(x, y, upperLeftHeight);
+		glVertex3f(cellXPos, cellYPos, upperLeftHeight);
 
 		glTexCoord2fv(textureLowerLeft);
-		glVertex3f(x, y - BO_GL_CELL_SIZE, lowerLeftHeight);
+		glVertex3f(cellXPos, cellYPos - BO_GL_CELL_SIZE, lowerLeftHeight);
 
 		glTexCoord2fv(textureLowerRight);
-		glVertex3f(x + BO_GL_CELL_SIZE, y - BO_GL_CELL_SIZE, lowerRightHeight);
+		glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos - BO_GL_CELL_SIZE, lowerRightHeight);
 
 		glTexCoord2fv(textureUpperRight);
-		glVertex3f(x + BO_GL_CELL_SIZE, y, upperRightHeight);
+		glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos, upperRightHeight);
 	glEnd();
 
 	d->mRenderedCells++;
-	d->mRenderedCellVertices += 4;
  }
  if (d->mDebugShowCellGrid) {
 	glDisable(GL_LIGHTING);
@@ -1451,7 +1432,6 @@ void BosonBigDisplayBase::renderCells()
 			glVertex3f(cellXPos, cellYPos - BO_GL_CELL_SIZE, heightMap[(y+1) * heightMapWidth + x] + dist);
 			glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos - BO_GL_CELL_SIZE, heightMap[(y+1) * heightMapWidth + (x+1)] + dist);
 			glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos, heightMap[y * heightMapWidth + (x+1)] + dist);
-		d->mRenderedCellVertices += 4;
 	}
 	glEnd();
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -1601,7 +1581,7 @@ void BosonBigDisplayBase::renderParticles()
 	glTexCoord2f(1.0, 1.0);  glVertex3fv(b.data());
 	glTexCoord2f(1.0, 0.0);  glVertex3fv(c.data());
 	glTexCoord2f(0.0, 0.0);  glVertex3fv(e.data());
-	d->mRenderedParticleVertices += 4;
+	d->mRenderedParticles++;
  }
  glEnd();
 

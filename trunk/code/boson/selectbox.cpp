@@ -269,9 +269,3 @@ void SelectBox::update(double div)
  mDisplayList = mBoxData->list(div);
 }
 
-unsigned int SelectBox::verticesCount() const
-{
- // FIXME: hardcoded
- return 72;
-}
-

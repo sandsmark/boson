@@ -384,9 +384,8 @@ BoMatrix* BoFrame::matrix(int index) const
  return mMatrices[index];
 }
 
-unsigned int BoFrame::renderFrame(const QColor* teamColor)
+void BoFrame::renderFrame(const QColor* teamColor)
 {
- unsigned int vertexes = 0;
  for (unsigned int i = 0; i < mMeshCount; i++) {
 	BoMatrix* m = mMatrices[i];
 	BoMesh* mesh = mMeshes[i];
@@ -406,11 +405,10 @@ unsigned int BoFrame::renderFrame(const QColor* teamColor)
 	} else
 #endif
 	{
-		vertexes += mesh->renderMesh(teamColor);
+		mesh->renderMesh(teamColor);
 	}
 	glPopMatrix();
  }
- return vertexes;
 }
 
 void BoFrame::mergeMeshes()
