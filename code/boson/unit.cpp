@@ -1135,6 +1135,13 @@ bool Facility::completedConstruction() const
  return true;
 }
 
+double Facility::constructionProgress() const
+{
+ unsigned int constructionTime = (constructionSteps() - 1) * constructionDelay();
+ double percentage = (double)(d->mConstructionState * 100) / (double)constructionTime;
+ return percentage;
+}
+
 void Facility::setTarget(Unit* u)
 {
  if (!completedConstruction()) {
