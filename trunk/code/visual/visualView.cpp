@@ -114,8 +114,21 @@ if (mobSelected.isEmpty()) {
 return m;
 }
 
+
 void visualView::unSelectAll(void)
 {
+	QIntDictIterator<visualMobUnit> selIt(mobSelected);
+
+	/* deal with fix */
+	unSelectFix();
+
+	/* deal with mobiles */
+	for (selIt.toFirst(); selIt;) { 		// ++ not needed, selIt should be increased
+		unSelectMob(selIt.currentKey());	// by the .remove() in unselect
+	}
+	boAssert(mobSelected.isEmpty());
+	if (!mobSelected.isEmpty()) mobSelected.clear();
+
 	selectionWho =  -1; ///orzel : should be a WHO_NOBOCY;
 	emit setOrders(0);
 }

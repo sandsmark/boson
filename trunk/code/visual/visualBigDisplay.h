@@ -87,10 +87,6 @@ protected:
   virtual void mouseMoveEvent(QMouseEvent *e);
   virtual void mouseReleaseEvent(QMouseEvent *e);
   virtual void resizeEvent(QResizeEvent *e);
-  void  unSelectFix(void) { view->unSelectFix(); }
-  void  unSelectMob(long key) { view->unSelectMob(key); }
-  void	unSelectAll(void);
-
 
   visualView	*view;
 
