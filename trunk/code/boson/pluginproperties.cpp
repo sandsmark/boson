@@ -211,8 +211,8 @@ void RefineryProperties::savePlugin(KSimpleConfig* config)
 RessourceMineProperties::RessourceMineProperties(const UnitProperties* parent)
 	: PluginProperties(parent)
 {
- mMinerals = 0;
- mOil = 0;
+ mMinerals = false;
+ mOil = false;
 }
 
 RessourceMineProperties::~RessourceMineProperties()
@@ -235,6 +235,7 @@ void RessourceMineProperties::loadPlugin(KSimpleConfig* config)
 	boError() << k_funcinfo << "unit has no harvester plugin" << endl;
 	return;
  }
+ config->setGroup(propertyGroup());
  mMinerals = config->readBoolEntry("CanProvideMinerals", false);
  mOil = config->readBoolEntry("CanProvideOil", false);
 }
