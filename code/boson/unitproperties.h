@@ -342,6 +342,11 @@ public:
 	 **/
 	 const BoVector3& hitPoint() const;
 
+	/**
+	 * @return BosonWeaponProperties with id id or NULL if they doesn't exist
+	 **/
+	const BosonWeaponProperties* weaponProperties(unsigned long int id) const;
+
 protected:
 	void loadMobileProperties(KSimpleConfig* conf);
 	void loadFacilityProperties(KSimpleConfig* conf);

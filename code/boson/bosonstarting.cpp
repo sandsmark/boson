@@ -220,6 +220,20 @@ void BosonStarting::slotReceiveMap(const QByteArray& buffer)
  boGame->setPlayField(mPlayField);
  emit signalAssignMap(); // for the BosonWidgetBase
 
+ // If we're loading saved game, local player isn't set and inited, because it
+ //  was not known (not loaded) when BosonWidgetBase was constructed. Set and init
+ //  it now
+ if (mLoading) {
+	boDebug() << k_funcinfo << "set local player for loaded games now" << endl;
+	if (!boGame->localPlayer()) {
+		boWarning() << k_funcinfo << "NULL player" << endl;
+		return;
+	}
+#warning FIXME for LOADING code
+//	slotChangeLocalPlayer(boGame->localPlayer()); //AB: can we place this after signalStartGame?
+	mPlayer = boGame->localPlayer();
+ }
+
  // we need to do this with timer because we can't add checkEvents() here. there is a
  // (more or less) KGame bug in KDE < 3.1 that causes KGame to go into an
  // infinite loop when calling checkEvents() from a slot that gets called from a
@@ -338,20 +352,7 @@ void BosonStarting::slotLoadGameData3() // FIXME rename!
 
 void BosonStarting::loadPlayerData()
 {
- // If we're loading saved game, local player isn't set and inited, because it
- //  was not known (not loaded) when BosonWidgetBase was constructed. Set and init
- //  it now
  boDebug() << k_funcinfo << endl;
- if (mLoading) {
-	boDebug() << k_funcinfo << "set local player for loaded games now" << endl;
-	if (!boGame->localPlayer()) {
-		boWarning() << k_funcinfo << "NULL player" << endl;
-		return;
-	}
-#warning FIXME for LOADING code
-//	slotChangeLocalPlayer(boGame->localPlayer()); //AB: can we place this after signalStartGame?
-	mPlayer = boGame->localPlayer();
- }
 
  // Load unit datas (pixmaps and sounds), but only if we're starting new game,
  //  because if we're loading saved game, then units are already constructed

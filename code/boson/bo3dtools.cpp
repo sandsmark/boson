@@ -24,6 +24,7 @@
 
 #include <qstring.h>
 #include <qptrlist.h>
+#include <qdatastream.h>
 
 #include <math.h>
 
@@ -159,6 +160,21 @@ void BoVector3::save(KConfig* cfg, QString key)
   list.append(mData[1]);
   list.append(mData[2]);
   BosonConfig::writeFloatNumList(list, cfg, key);
+}
+
+QDataStream& operator<<(QDataStream& s, const BoVector3& v)
+{
+  return s << (float)v.mData[0] << (float)v.mData[1] << (float)v.mData[2];
+}
+
+QDataStream& operator>>(QDataStream& s, BoVector3& v)
+{
+  float x, y, z;
+  s >> x >> y >> z;
+  v.mData[0] = x;
+  v.mData[1] = y;
+  v.mData[2] = z;
+  return s;
 }
 
 BoVector4 BoVector4::load(KConfig* cfg, QString key)

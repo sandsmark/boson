@@ -24,6 +24,7 @@
 
 class QString;
 class KConfig;
+class QDataStream;
 
 float rotationToPoint(float x, float y);
 void pointByRotation(float* x, float* y, const float angle, const float radius);
@@ -120,8 +121,14 @@ class BoVector3
    
   private:
     friend class BoMatrix;
+    friend QDataStream& operator<<(QDataStream& s, const BoVector3& v);
+    friend QDataStream& operator>>(QDataStream& s, BoVector3& v);
+
     GLfloat mData[3];
 };
+
+QDataStream& operator<<(QDataStream& s, const BoVector3& v);
+QDataStream& operator>>(QDataStream& s, BoVector3& v);
 
 /**
  * @author Rivo Laks <rivolaks@hot.ee>

@@ -30,6 +30,8 @@ class Player;
 class BosonParticleSystem;
 class BosonWeaponProperties;
 
+class QDataStream;
+
 
 /**
  * @author Rivo Laks <rivolaks@hot.ee>
@@ -44,6 +46,10 @@ class BosonShot : public BosonItem
      * @param canvas The @ref BosonCanvas object
      **/
     BosonShot(const BosonWeaponProperties* prop, Player* owner, BosonCanvas* canvas, BoVector3 pos, BoVector3 target);
+    /**
+     * Constructs new BosonShot and loads variables from stream
+     **/
+    BosonShot(const BosonWeaponProperties* prop, Player* owner, BosonCanvas* canvas, QDataStream& stream);
 
 //    inline BoVector3 pos()  { return mPos; }
 
@@ -74,6 +80,9 @@ class BosonShot : public BosonItem
 
     void advanceMoveInternal();
     void advanceMoveCheck();
+
+    void save(QDataStream& stream);
+    void load(QDataStream& stream);
 
   private:
     BoVector3 mVelo;

@@ -312,8 +312,6 @@ bool Player::saveUnits(QDataStream& stream)
 	// we need the type first!
 	stream << (unsigned long int)unit->type();
 	stream << (unsigned long int)unit->id();
-	stream << (double)unit->x();
-	stream << (double)unit->y();
 
 	stream << (int)unit->dataHandler()->id();
 
@@ -367,12 +365,9 @@ bool Player::loadUnits(QDataStream& stream)
  for (unsigned int i = 0; i < unitCount; i++) {
 	unsigned long int type;
 	unsigned long int id;
-	double x, y;
 	int dataHandlerID;
 	stream >> type;
 	stream >> id;
-	stream >> x;
-	stream >> y;
 	stream >> dataHandlerID;
 
 	// Create unit with Boson
@@ -391,8 +386,6 @@ bool Player::loadUnits(QDataStream& stream)
 			SLOT(slotUnitPropertyChanged(KGamePropertyBase*)));
 	unit->setId(id);
 
-	// Emit signal for canvas and minimap and BosonWidget
-	emit signalUnitLoaded(unit, (int)x, (int)y);
 	// Call unit's loading methods
 	if (!unit->load(stream)) {
 		boError() << k_funcinfo << "Error while loading unit with id=" << id << endl;

@@ -77,7 +77,7 @@ public:
 	QPtrList<BosonWeapon> mWeapons;
 
 	// OpenGL only:
-	BosonParticleSystem* mSmokeParticleSystem;
+	BosonParticleSystem* mSmokeParticleSystem;  // This will be removed soon
 	QPtrList<BosonParticleSystem> mActiveParticleSystems;  // No autodelete!!!
 };
 
@@ -821,11 +821,12 @@ bool Unit::load(QDataStream& stream)
  stream >> pluginIndex;
  stream >> targetId;
 
- if (pluginIndex < 0) {
+ if (pluginIndex <= 0) {
 	mCurrentPlugin = 0;
  } else {
 	if ((unsigned int)pluginIndex >= d->mPlugins.count()) {
 		boWarning() << k_funcinfo << "Invalid current plugin index: " << pluginIndex << endl;
+		mCurrentPlugin = 0;
 	} else {
 		mCurrentPlugin = d->mPlugins.at(pluginIndex);
 	}
@@ -842,9 +843,7 @@ bool Unit::load(QDataStream& stream)
  }
 
  move(x, y, z);
- if (isDestroyed()) {
-	boError() << k_funcinfo << "unit is already destroyed" << endl;
- }
+ setAdvanceWork(advanceWork());
  return true;
 }
 
@@ -1592,3 +1591,24 @@ void Facility::setFlamesParticleSystem(BosonParticleSystem* s)
  d->mFlamesParticleSystem = s;
 }
 
+bool Facility::load(QDataStream& stream)
+{
+ if (!Unit::load(stream)) {
+	boError() << "Unit not loaded properly" << endl;
+	return false;
+ }
+
+ setConstructionStep(d->mConstructionStep);
+
+ return true;
+}
+
+bool Facility::save(QDataStream& stream)
+{
+ if (!Unit::save(stream)) {
+	boError() << "Unit not loaded properly" << endl;
+	return false;
+ }
+
+ return true;
+}

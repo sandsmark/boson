@@ -37,6 +37,7 @@ class BosonShot;
 class BoVector3;
 
 class KPlayer;
+class QDataStream;
 template<class T> class QPtrList;
 template<class T> class QValueList;
 
@@ -314,6 +315,10 @@ public:
 	QPtrList<BosonParticleSystem>* particleSystems();
 	void addParticleSystem(BosonParticleSystem* s);
 	void addParticleSystems(const QPtrList<BosonParticleSystem> systems);
+
+	void load(QDataStream& stream);
+	void save(QDataStream& stream);
+
 
 public slots:
 	/**

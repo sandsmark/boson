@@ -53,7 +53,9 @@ Boson* Boson::mBoson = 0;
 #define ADVANCE_INTERVAL 250 // ms
 
 // Saving format version (000005 = 00.00.05)
-#define BOSON_SAVEGAME_FORMAT_VERSION 0x000009
+#define BOSON_SAVEGAME_FORMAT_VERSION 0x000013
+
+#define BOSON_SAVEGAME_END_COOKIE 1718
 
 class BoMessage
 {
@@ -157,6 +159,8 @@ public:
 		mAdvanceDividerCount = 0;
 
 		mLoadingStatus = Boson::NotLoaded;
+
+		mCurrentSavegameVersion = 0x000000;
 	}
 
 	QTimer* mGameTimer;
@@ -183,6 +187,8 @@ public:
 	KGamePropertyInt mAdvanceFlag;
 
 	Boson::LoadingStatus mLoadingStatus;
+
+	unsigned long int mCurrentSavegameVersion;
 };
 
 Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
@@ -201,10 +207,6 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
 
  connect(this, SIGNAL(signalNetworkData(int, const QByteArray&, Q_UINT32, Q_UINT32)),
 		this, SLOT(slotNetworkData(int, const QByteArray&, Q_UINT32, Q_UINT32)));
- connect(this, SIGNAL(signalSave(QDataStream&)),
-		this, SLOT(slotSave(QDataStream&)));
- connect(this, SIGNAL(signalLoad(QDataStream&)),
-		this, SLOT(slotLoad(QDataStream&)));
  connect(this, SIGNAL(signalReplacePlayerIO(KPlayer*, bool*)),
 		this, SLOT(slotReplacePlayerIO(KPlayer*, bool*)));
  connect(this, SIGNAL(signalPlayerJoinedGame(KPlayer*)),
@@ -1292,16 +1294,6 @@ void Boson::slotPropertyChanged(KGamePropertyBase* p)
  }
 }
 
-void Boson::slotSave(QDataStream& /*stream*/)
-{ // save non-KGameProperty datas here
-// stream <<
-}
-
-void Boson::slotLoad(QDataStream& /*stream*/)
-{
-// boDebug() << "next id: " << d->mNextUnitId << endl;
-}
-
 void Boson::slotSendAddUnit(unsigned long int unitType, int x, int y, Player* owner)
 { // used by the editor directly
  if (!isServer()) {
@@ -1653,7 +1645,7 @@ bool Boson::savegame(QDataStream& stream, bool network, bool saveplayers)
  stream << (Q_UINT8)128;
  stream << (Q_UINT8)'B' << (Q_UINT8)'S' << (Q_UINT8)'G';  // BSG = Boson SaveGame
  // Magic cookie
- stream << (Q_UINT32)cookie();
+ stream << (Q_INT32)cookie();
  // Version information (for future format changes and backwards compatibility)
  stream << (Q_UINT32)BOSON_SAVEGAME_FORMAT_VERSION;
 
@@ -1693,6 +1685,13 @@ bool Boson::savegame(QDataStream& stream, bool network, bool saveplayers)
 		boError() << k_funcinfo << "Error when saving units" << endl;
 	}
  }
+ 
+ // Save external stuff (camera, shots, particle systems...)
+ emit signalSaveExternalStuff(stream);
+
+ // Save end cookie
+ stream << (Q_UINT32)BOSON_SAVEGAME_END_COOKIE;
+
 
  boDebug() << k_funcinfo << " done" << endl;
  return true;
@@ -1714,7 +1713,8 @@ bool Boson::loadgame(QDataStream& stream, bool network, bool reset)
 
  // Load magic data
  Q_UINT8 a, b1, b2, b3;
- Q_INT32 c, v;
+ Q_INT32 c;
+ Q_UINT32 v;
  stream >> a >> b1 >> b2 >> b3;
  if ((a != 128) || (b1 != 'B' || b2 != 'S' || b3 != 'G')) {
 	// Error - not Boson SaveGame
@@ -1725,18 +1725,19 @@ bool Boson::loadgame(QDataStream& stream, bool network, bool reset)
  stream >> c;
  if (c != cookie()) {
 	// Error - wrong cookie
-	boError() << k_funcinfo << "Invalid cookie in header" << endl;
+	boError() << k_funcinfo << "Invalid cookie in header (found: " << c << "; should be: " << cookie() << ")" << endl;
 	d->mLoadingStatus = InvalidCookie;
 	return false;
  }
  stream >> v;
- if (v != BOSON_SAVEGAME_FORMAT_VERSION) {
+ if (v != latestSavegameVersion()) {
 	// Error - older version
 	// TODO: It may be possible to load this version
-	boError() << k_funcinfo << "Unsupported format version" << endl;
+	boError() << k_funcinfo << "Unsupported format version (found: " << v << "; latest: " << latestSavegameVersion() << ")" << endl;
 	d->mLoadingStatus = InvalidVersion;
 	return false;
  }
+ d->mCurrentSavegameVersion = v;
 
  // Players count for loading progressbar
  Q_UINT32 playerscount;
@@ -1777,6 +1778,7 @@ bool Boson::loadgame(QDataStream& stream, bool network, bool reset)
 	d->mLoadingStatus = KGameError;
 	return false;
  }
+ boDebug() << k_funcinfo << "kgame loading successful" << endl;
 
  // KGame::loadgame() also loads the gamestatus. some functions depend on KGame
  // to be in Init status as long as it is still loading, so we set it manually
@@ -1794,6 +1796,8 @@ bool Boson::loadgame(QDataStream& stream, bool network, bool reset)
  }
 
  if (started) {
+	// Set local player. This has to be done before loading units
+	d->mPlayer = (Player*)findPlayer(localId);
 	// AB: needs to be emitted after KGame::loadgame() which adds the
 	// players
 	emit signalLoadingType(BosonLoadingWidget::ReceiveMap);
@@ -1813,11 +1817,15 @@ bool Boson::loadgame(QDataStream& stream, bool network, bool reset)
 	}
  }
 
- boDebug() << k_funcinfo << "kgame loading successful" << endl;
+ // Load external stuff (camera, shots, particle systems...)
+ emit signalLoadExternalStuff(stream);
 
- if (started) { // AB (02/09/04): by any reason this was "!started" before - can't work, as localId is not initialized then. is this fix correct?
-	// Set local player
-	d->mPlayer = (Player*)findPlayer(localId);
+ // Check end cookie
+ Q_UINT32 endcookie;
+ stream >> endcookie;
+ if (endcookie != BOSON_SAVEGAME_END_COOKIE) {
+	boError() << k_funcinfo << "Invalid end cookie!" << endl;
+	return false;
  }
 
  d->mLoadingStatus = LoadingCompleted;
@@ -1828,6 +1836,16 @@ bool Boson::loadgame(QDataStream& stream, bool network, bool reset)
 Boson::LoadingStatus Boson::loadingStatus() const
 {
  return d->mLoadingStatus;
+}
+
+unsigned long int Boson::latestSavegameVersion()
+{
+ return BOSON_SAVEGAME_FORMAT_VERSION;
+}
+
+unsigned long int Boson::currentSavegameVersion()
+{
+ return d->mCurrentSavegameVersion;
 }
 
 void Boson::toggleAdvanceFlag()

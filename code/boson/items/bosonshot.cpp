@@ -28,6 +28,7 @@
 #include <ksimpleconfig.h>
 
 #include <qptrlist.h>
+#include <qdatastream.h>
 
 #include <GL/gl.h>
 
@@ -95,6 +96,15 @@ BosonShot::BosonShot(const BosonWeaponProperties* prop, Player* owner, BosonCanv
   mParticleVelo = sqrt(mVelo[0] * mVelo[0] + mVelo[1] * mVelo[1]) / (float)BO_TILE_SIZE;
 }
 
+BosonShot::BosonShot(const BosonWeaponProperties* prop, Player* owner, BosonCanvas* canvas, QDataStream& stream) :
+    BosonItem(prop ? prop->model() : 0, canvas)
+{
+  mOwner = owner;
+  mProp = prop;
+  setSize(BO_TILE_SIZE / 2, BO_TILE_SIZE / 2); // AB: pretty much a random value
+  load(stream);
+}
+
 // move the shot by one step
 // (actually only set the velocity - it is moved by BosonCanvas::slotAdvance())
 void BosonShot::advanceMoveInternal()
@@ -160,6 +170,42 @@ void BosonShot::advanceMoveCheck()
   }
   setVelocity(velocityX, velocityY, zVelocity());
 }
+
+void BosonShot::save(QDataStream& stream)
+{
+  stream << (float)x();
+  stream << (float)y();
+  stream << (float)z();
+  stream << mVelo;
+  stream << (Q_UINT32)mStep;
+  stream << (Q_UINT32)mTotalSteps;
+  stream << (float)mLength;
+  stream << (float)mZ;
+  stream << (float)mParticleVelo;
+  stream << (float)rotation();
+}
+
+void BosonShot::load(QDataStream& stream)
+{
+  Q_UINT32 step, totalsteps;
+  float x, y, z;
+  float rot;
+
+  stream >> x >> y >> z;
+  stream >> mVelo;
+  stream >> step >> totalsteps;
+  stream >> mLength >> mZ >> mParticleVelo;
+  stream >> rot;
+
+  mStep = step;
+  mTotalSteps = totalsteps;
+  mActive = (mStep < mTotalSteps);
+  move(x, y, z);
+  boDebug() << k_funcinfo << "Moving to (" << x << "; " << y << "; " << z << ")" << endl;
+  setRotation(rot);
+  setAnimated(true);
+}
+
 
 /*
  * vim: et sw=2
