@@ -345,6 +345,12 @@ void BoDisplayManager::quitGame()
 	it.current()->quitGame();
 	++it;
  }
+ for (int i = 0; i < 10; i++) {
+	slotClearGroup(i);
+ }
+ d->mDisplayList.clear();
+ d->mBoxList.clear();
+ d->mActiveDisplay = 0;
 }
 
 BoBox* BoDisplayManager::findBox(BosonBigDisplayBase* b) const

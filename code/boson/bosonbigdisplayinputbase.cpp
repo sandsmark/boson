@@ -39,6 +39,7 @@ BosonBigDisplayInputBase::BosonBigDisplayInputBase(BosonBigDisplayBase* parent) 
  mCursorType = CursorDefault;
  mActionLocked = false;
  mActionType = ActionAttack; // dummy initialization
+ mLocalPlayerInput = 0;
 }
 
 BosonBigDisplayInputBase::~BosonBigDisplayInputBase()

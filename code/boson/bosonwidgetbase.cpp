@@ -125,6 +125,8 @@ BosonWidgetBase::~BosonWidgetBase()
 	setDisplayManager(0);
  }
  d->mPlayers.clear();
+ // LocalPlayerInput has been deleted already
+ mLocalPlayerInput = 0;
  if (mTop && mTop->factory()) {
 	mTop->factory()->removeClient(this);
  }
