@@ -45,6 +45,12 @@
 
 #define ADVANCE_INTERVAL 250 // ms
 
+// the advance message <-> advance call thing is pretty new. i want to have
+// debug output from it in bug reports, so please do not define this.
+// on the other hand i often need to test a few things where i don't need those
+// messages. defining this lets easily disable the debug output.
+//#define NO_ADVANCE_DEBUG
+
 class BoMessage
 {
 public:
@@ -658,9 +664,11 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 		d->mAdvanceDivider = n;
 		d->mAdvanceDividerCount = 0;
 		lock();
+#ifndef NO_ADVANCE_DEBUG
 		kdDebug() << "Advance - speed (calls per " << ADVANCE_INTERVAL 
 				<< "ms)=" << gameSpeed() << " elapsed: " 
 				<< d->mAdvanceDistance.elapsed() << endl;
+#endif
 		d->mAdvanceDistance.restart();
 		slotReceiveAdvance();
 		break;
@@ -1075,8 +1083,10 @@ void Boson::slotReceiveAdvance()
 	d->mAdvanceCount = 0;
  }
  if (d->mAdvanceDividerCount + 1 == d->mAdvanceDivider)  {
+#ifndef NO_ADVANCE_DEBUG
 	kdDebug() << k_funcinfo << "delayed messages: " 
 			<< d->mDelayedMessages.count() << endl;
+#endif
 	unlock();
  } else if (d->mAdvanceDividerCount + 1< d->mAdvanceDivider) {
 	int next;
@@ -1126,13 +1136,17 @@ void Boson::networkTransmission(QDataStream& stream, int msgid, Q_UINT32 r, Q_UI
 
 void Boson::lock()
 {
+#ifndef NO_ADVANCE_DEBUG
  kdDebug() << k_funcinfo << endl;
+#endif
  d->mIsLocked = true;
 }
 
 void Boson::unlock()
 {
+#ifndef NO_ADVANCE_DEBUG
  kdDebug() << k_funcinfo << endl;
+#endif
  d->mIsLocked = false;
  while (!d->mDelayedMessages.isEmpty() && !d->mIsLocked) {
 	slotProcessDelayed();
