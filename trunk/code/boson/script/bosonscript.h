@@ -25,9 +25,13 @@ class BosonBigDisplayBase;
 class Player;
 class Boson;
 class BoCamera;
+class BosonCanvas;
 
 class QString;
 class QDataStream;
+class QPoint;
+
+template<class T> class QValueList;
 
 #define boScript BosonScript::bosonScript()
 
@@ -82,22 +86,49 @@ class BosonScript
 
     void setDisplay(BosonBigDisplayBase* d)  { mDisplay = d; }
     void setPlayer(Player* p)  { mPlayer = p; }
+    void setCanvas(BosonCanvas* c)  { mCanvas = c; }
 
-    BosonBigDisplayBase* display() const { return mDisplay; }
-    Player* player() const { return mPlayer; }
+    BosonBigDisplayBase* display() const  { return mDisplay; }
+    Player* player() const  { return mPlayer; }
     Boson* game() const;
     BoCamera* camera() const;
+    BosonCanvas* canvas() const  { return mCanvas; }
 
 
     // Players
     bool areEnemies(int playerId1, int playerId2) const;
     int playerId() const;
+    QValueList<int> allPlayers() const;
+
+
     // Resources
+    unsigned long int mineralsAmount() const;
+    unsigned long int oilAmount() const;
+
+
     // Units
     void moveUnit(int id, int x, int y);
     void moveUnitWithAttacking(int id, int x, int y);
     void attack(int attackerId, int targetId);
     void stopUnit(int id);
+
+    QValueList<int> unitsOnCell(int x, int y);
+    QValueList<int> unitsInRect(int x1, int y1, int x2, int y2);
+    bool cellOccupied(int x, int y);
+
+    QPoint unitPosition(int id);
+    int unitOwner(int id);
+    int unitType(int id);
+    bool isUnitMobile(int id);
+    bool canUnitShoot(int id);
+
+    bool isMyUnit(int id);
+    bool isUnitAlive(int id);
+
+    QValueList<int> allMyUnits();
+    QValueList<int> allPlayerUnits(int id);
+
+
     // Camera
     void moveCamera(BoVector3 pos);
     void moveCameraBy(BoVector3 pos);
@@ -112,6 +143,10 @@ class BosonScript
     float cameraRadius() const;
     float cameraZ() const;
 
+
+    // AI
+    float aiDelay() const;
+
   protected:
     BosonScript();
 
@@ -123,6 +158,7 @@ class BosonScript
 
     BosonBigDisplayBase* mDisplay;
     Player* mPlayer;
+    BosonCanvas* mCanvas;
 };
 
 #endif //BOSONSCRIPT_H

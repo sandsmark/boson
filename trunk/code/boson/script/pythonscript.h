@@ -43,15 +43,39 @@ class PythonScript : public BosonScript
 
 
     // Players
-
     static PyObject* py_areEnemies(PyObject* self, PyObject* args);
     static PyObject* py_playerId(PyObject* self, PyObject* args);
+    static PyObject* py_allPlayers(PyObject* self, PyObject* args);
+
+
     // Resources
+    static PyObject* py_minerals(PyObject* self, PyObject* args);
+    static PyObject* py_oil(PyObject* self, PyObject* args);
+
+
     // Units
     static PyObject* py_moveUnit(PyObject* self, PyObject* args);
     static PyObject* py_moveUnitWithAttacking(PyObject* self, PyObject* args);
     static PyObject* py_attack(PyObject* self, PyObject* args);
     static PyObject* py_stopUnit(PyObject* self, PyObject* args);
+
+    static PyObject* py_unitsOnCell(PyObject* self, PyObject* args);
+    static PyObject* py_unitsInRect(PyObject* self, PyObject* args);
+    static PyObject* py_cellOccupied(PyObject* self, PyObject* args);
+
+    static PyObject* py_unitPosition(PyObject* self, PyObject* args);
+    static PyObject* py_unitOwner(PyObject* self, PyObject* args);
+    static PyObject* py_unitType(PyObject* self, PyObject* args);
+    static PyObject* py_isUnitMobile(PyObject* self, PyObject* args);
+    static PyObject* py_canUnitShoot(PyObject* self, PyObject* args);
+
+    static PyObject* py_isMyUnit(PyObject* self, PyObject* args);
+    static PyObject* py_isUnitAlive(PyObject* self, PyObject* args);
+
+    static PyObject* py_allMyUnits(PyObject* self, PyObject* args);
+    static PyObject* py_allPlayerUnits(PyObject* self, PyObject* args);
+
+
     // Camera
     static PyObject* py_moveCamera(PyObject* self, PyObject* args);
     static PyObject* py_moveCameraBy(PyObject* self, PyObject* args);
@@ -59,6 +83,7 @@ class PythonScript : public BosonScript
     static PyObject* py_setCameraRadius(PyObject* self, PyObject* args);
     static PyObject* py_setCameraZ(PyObject* self, PyObject* args);
     static PyObject* py_setCameraMoveMode(PyObject* self, PyObject* args);
+
     static PyObject* py_commitCameraChanges(PyObject* self, PyObject* args);
 
     static PyObject* py_cameraPos(PyObject* self, PyObject* args);
@@ -66,6 +91,13 @@ class PythonScript : public BosonScript
     static PyObject* py_cameraRadius(PyObject* self, PyObject* args);
     static PyObject* py_cameraZ(PyObject* self, PyObject* args);
 
+
+    // AI
+    static PyObject* py_aiDelay(PyObject* self, PyObject* args);
+
+
+  protected:
+    static PyObject* QValueListToPyList(QValueList<int>* list);
 
   private:
     static PyMethodDef mCallbacks[];

@@ -193,6 +193,8 @@ void BosonWidgetBase::init()
 // setFocus(); // nonsense, since its still hidden
 
  initPlayersMenu();
+
+ boScript->setCanvas(canvas());
 }
 
 void BosonWidgetBase::initMap()
