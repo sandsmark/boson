@@ -42,24 +42,25 @@ int	i;
 QProgressDialog progress("Loading species theme...", 0, PROGRESS_N, NULL, "progress.speciesTheme", TRUE);
 QString path(kapp->kde_datadir() + "/boson/pics/speciesThemes/" + themeName + "/" );
 
-isLoaded = true;
+allLoaded = true;
 progress.setProgress(0);
 progress.show();
 
 for(i=0; i<mobilePropNb; i++) {
-	if (!loadMob(i, path + mobileProp[i].name)) isLoaded = false;
+	if (!loadMob(i, path + mobileProp[i].name)) allLoaded = false;
 	progress.setProgress(i);
 	}
 
 for(i=0; i<facilityPropNb; i++) {
-	if (!loadFix(i, path + facilityProp[i].name )) isLoaded = false;
+	if (!loadFix(i, path + facilityProp[i].name )) allLoaded = false;
 	progress.setProgress(i+mobilePropNb);
 	}
 
 progress.setProgress(i++);
 
-if (isLoaded) logf(LOG_INFO, "SpeciesTheme loaded : %d mobiles, %d facilities", mobilePropNb, facilityPropNb);
-	else printf("\nSpeciesTheme : problem while loading pixmaps\n");
+if (!allLoaded)	logf(LOG_ERROR, "SpeciesTheme : problem while loading pixmaps");
+	else	logf(LOG_INFO, "SpeciesTheme loaded : %d mobiles, %d facilities",
+			mobilePropNb, facilityPropNb);
 }
 
 
@@ -72,6 +73,7 @@ QList<QPoint>	point_l;
 QPixmap		*p;
 QPoint		*pp;
 char		buffer[100];
+bool		ret = true;
 
 
 for(j=0; j<12; j++) {
@@ -79,7 +81,8 @@ for(j=0; j<12; j++) {
 	p = new QPixmap(path + buffer);
 	if (p->isNull()) {
 		printf("SpeciesTheme : Can't load(mob) %s/Field.%02d.bmp ...\n", (const char *)path, j);
-		return false;
+		ret = false;
+		continue;
 		}
 	p->setMask( p->createHeuristicMask() );
 	pix_l.append(p);
@@ -93,17 +96,17 @@ mobSprite[index] = new QwSpritePixmapSequence(pix_l, point_l);
 mobBigOverview[index] = new QPixmap(path + "/Overview.big.bmp");
 if (mobBigOverview[index]->isNull()) {
 	printf("SpeciesTheme : Can't load %s ...\n", (const char *)(path+"/Overview.big.bmp"));
-	return false;
+	ret = false;
 	}
 
 /* small overview */
 mobSmallOverview[index] = new QPixmap(path + "/Overview.small.bmp");
 if (mobSmallOverview[index]->isNull()) {
 	printf("SpeciesTheme : Can't load %s ...\n", (const char *)(path+"/Overview.small.bmp"));
-	return false;
+	ret = false;
 	}
 
-return true;
+return ret;
 }
 
 
@@ -111,19 +114,20 @@ return true;
 bool speciesTheme::loadFix(int i, QString const &path)
 {
 int j;
-//QwSpritePixmap *p;
 QList<QPixmap>	pix_l;
 QList<QPoint>	point_l;
 QPixmap		*p;
 QPoint		*pp;
 char		buffer[100];
+bool		ret = true;
 
 for(j=0; j<6; j++) {
 	sprintf(buffer, "/Field.%03d.bmp", j);
 	p = new QPixmap(path + buffer);
 	if (p->isNull()) {
 		printf("SpeciesTheme : Can't load(fix) %s/Field.%03d.bmp ...\n", (const char *)path, j);
-		return false;
+		ret = false;
+		continue;
 		}
 	p->setMask( p->createHeuristicMask() );
 	pix_l.append(p);
@@ -137,14 +141,14 @@ fixSprite[i] = new QwSpritePixmapSequence(pix_l, point_l);
 fixBigOverview[i] = new QPixmap(path + "/Overview.big.xpm");
 if (fixBigOverview[i]->isNull()) {
 	printf("SpeciesTheme : Can't load %s ...\n", (const char *)(path+"/Overview.big.xpm"));
-	return false;
+	ret = false;
 	}
 /* small overview */
 fixSmallOverview[i] = new QPixmap(path + "/Overview.small.bmp");
 if (fixSmallOverview[i]->isNull()) {
 	printf("SpeciesTheme : Can't load %s ...\n", (const char *)(path+"/Overview.small.bmp"));
-	return false;
+	ret = false;
 	}
 
-return true;
+return ret;
 }

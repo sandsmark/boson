@@ -58,14 +58,14 @@ class speciesTheme
   QPixmap	*getSmallOverview(playerMobUnit *u) { return getSmallOverview(u->getType()); }
   QPixmap	*getSmallOverview(Facility *u) { return getSmallOverview(u->getType()); }
 
-  bool		isOk(void) { return isLoaded; }
+  bool		isOk(void) { return allLoaded; }
 
   protected:
   bool 		loadMob(int index, QString const &path);
   bool		loadFix(int i, QString const &path);
 
   private:
-  bool		isLoaded;
+  bool		allLoaded;
 
 ///orzel: ugly, will be moved with dynamic allocation in constructors for those tabs
 #define mobilePropNb	10
