@@ -3,7 +3,6 @@ Game TODOs
 - unit accelleration: units should slowly start to accelerate and to brake when
   moving
 - left dbl-click should select ALL units of that type
-- end of game - winner ; statistics
 - fullscreen mode
 - scroll if cursor at the edge of the window
 - rewrite fog of war (QCanvas suckz): use QCanvasSprite::hide() on all units
