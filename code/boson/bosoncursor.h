@@ -248,48 +248,6 @@ public:
 	virtual bool insertMode(int mode, QString baseDir, QString cursor);
 };
 
-#if 0
-class BosonExperimentalCursor : public BosonCursor
-{
-//	Q_OBJECT // moc is stupid
-public:
-	BosonExperimentalCursor();
-	virtual ~BosonExperimentalCursor();
-
-	virtual void setCursor(int mode);
-	virtual void setWidgetCursor(QWidget* w);
-
-	virtual void move(double x, double y);
-	bool insertMode(int mode, QCanvasPixmapArray* pixmaps);
-
-	virtual void hideCursor();
-
-	virtual void showCursor();
-
-	virtual bool insertMode(int mode, QString baseDir, QString cursor);
-
-
-	virtual void removeOldCursor();
-	virtual void paintCursor(QPainter* p, const QPoint& origin);
-	inline virtual QRect oldCursor() const;
-
-
-//protected slots: // grr... moc is really stupid
-	void slotAdvance();
-
-protected:
-	QCanvasPixmapArray* loadCursor(QString baseDir, QString cursor);
-
-private:
-	void init();
-
-private:
-	class BosonExperimentalCursorPrivate;
-	BosonExperimentalCursorPrivate* d;
-};
-#endif // 0
-
-
 #ifndef NO_OPENGL
 #include <GL/gl.h>
 class BosonTextureArray;
@@ -359,3 +317,4 @@ private:
 
 
 #endif
+
