@@ -134,6 +134,20 @@ class BosonEffect
      **/
     virtual void start();
 
+    /**
+     * @return effect's owner id.
+     * Owner id is id of the BosonItem which owns this effect. This means that
+     *  effect is "tied" to this item and whenever the item moves or rotates,
+     *  the effect is also moved/rotated.
+     *  If effect is not owned by any item, it's ownerId is 0.
+     **/
+    unsigned int ownerId() const  { return mOwnerId; }
+    /**
+     * Sets effect's owner id to given value.
+     * See @ref ownerId for explanation about owner ids.
+     **/
+    void setOwnerId(unsigned int id)  { mOwnerId = id; }
+
 
     virtual bool saveAsXML(QDomElement& root) const;
     virtual bool loadFromXML(const QDomElement& root);
@@ -159,6 +173,7 @@ class BosonEffect
     bool mActive;
     bool mStarted;
     float mDelay;
+    unsigned int mOwnerId;
     // TODO: maybe remove mProperties pointers from subclasses and use only
     //  this one?
     const BosonEffectProperties* mGeneralProperties;

@@ -22,6 +22,10 @@
 
 #include <math.h>
 
+#include <qdom.h>
+
+#include <kmdcodec.h>
+
 #include "bosontexturearray.h"
 #include "bosoneffectpropertiesparticle.h"
 #include "bodebug.h"
@@ -47,15 +51,62 @@ bool BosonEffectParticle::saveAsXML(QDomElement& root) const
     return false;
   }
 
-  // Save mBlendFunc
-  // Save mParticleDist
-  // Save mParticleCount
+  root.setAttribute("BoundingSphereRadius", mBoundingSphereRadius);
+  root.setAttribute("BlendFunc.src", mBlendFunc[0]);
+  root.setAttribute("BlendFunc.dst", mBlendFunc[1]);
+  root.setAttribute("ParticleDist", mParticleDist);
+  root.setAttribute("ParticleCount", mParticleCount);
+  root.setAttribute("Align", mAlign ? 1 : 0);
+  mParticleDistVector.saveAsXML(root, "ParticleDistVector");
+
   return true;
 }
 
 bool BosonEffectParticle::loadFromXML(const QDomElement& root)
 {
   if(!BosonEffect::loadFromXML(root))
+  {
+    return false;
+  }
+
+  bool ok;
+  mBoundingSphereRadius = root.attribute("BoundingSphereRadius").toFloat(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading BoundingSphereRadius attribute ('" << root.attribute("BoundingSphereRadius") << "')" << endl;
+    return false;
+  }
+  mBlendFunc[0] = root.attribute("BlendFunc.src").toInt(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading BlendFunc.src attribute ('" << root.attribute("BlendFunc.src") << "')" << endl;
+    return false;
+  }
+  mBlendFunc[1] = root.attribute("BlendFunc.dst").toInt(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading BlendFunc.dst attribute ('" << root.attribute("BlendFunc.dst") << "')" << endl;
+    return false;
+  }
+  mParticleDist = root.attribute("ParticleDist").toFloat(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading ParticleDist attribute ('" << root.attribute("ParticleDist") << "')" << endl;
+    return false;
+  }
+  mParticleCount = root.attribute("ParticleCount").toUInt(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading ParticleCount attribute ('" << root.attribute("ParticleCount") << "')" << endl;
+    return false;
+  }
+  mAlign = (root.attribute("Align").toInt(&ok));
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading Align attribute ('" << root.attribute("Align") << "')" << endl;
+    return false;
+  }
+  if(!mParticleDistVector.loadFromXML(root, "ParticleDistVector"))
   {
     return false;
   }
@@ -316,6 +367,59 @@ bool BosonEffectParticleGeneric::saveAsXML(QDomElement& root) const
     return false;
   }
 
+  root.setAttribute("Num", mNum);
+  root.setAttribute("Rate", mRate);
+  root.setAttribute("CreateCache", mCreateCache);
+  root.setAttribute("MoveParticlesWithSystem", mMoveParticlesWithSystem ? 1 : 0);
+  root.setAttribute("Rotated", mRotated ? 1 : 0);
+  root.setAttribute("Age", mAge);
+  root.setAttribute("Mass", mMass);
+  root.setAttribute("MaxParticleSize", mMaxParticleSize);
+
+  // Init byte array and data stream
+  QByteArray ba;
+  QDataStream stream(ba, IO_WriteOnly);
+
+  // Save matrix
+  for(int i = 0; i < 4; i++)
+  {
+    for(int j = 0; j < 4; j++)
+    {
+      stream << mMatrix.element(i, j);
+    }
+  }
+
+  // Save particles
+  int particlessaved = 0;
+  for(unsigned int i = 0; i < mParticleCount; i++)
+  {
+    if(mParticles[i].life > 0.0)
+    {
+      stream << mParticles[i].velo;
+      stream << mParticles[i].maxage;
+      stream << mParticles[i].color;
+      stream << mParticles[i].pos;
+      stream << mParticles[i].size;
+      stream << mParticles[i].life;
+      stream << mParticles[i].distance;
+      particlessaved++;
+    }
+  }
+  if(particlessaved != mNum)
+  {
+    boError() << k_funcinfo << "mNum was invalid!!!" << endl;
+    return false;
+  }
+
+  // Encode ba to base64
+  QString base64data = KCodecs::base64Encode(ba);
+  // Save as QDomText
+  QDomDocument doc = root.ownerDocument();
+  QDomElement data = doc.createElement("Data");
+  QDomText domtext = doc.createTextNode(base64data);
+  root.appendChild(data);
+  data.appendChild(domtext);
+
   return true;
 }
 
@@ -324,6 +428,107 @@ bool BosonEffectParticleGeneric::loadFromXML(const QDomElement& root)
   if(!BosonEffectParticle::loadFromXML(root))
   {
     return false;
+  }
+
+  bool ok;
+  mNum = root.attribute("Num").toInt(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading Num attribute ('" << root.attribute("Num") << "')" << endl;
+    return false;
+  }
+  mRate = root.attribute("Rate").toFloat(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading Rate attribute ('" << root.attribute("Rate") << "')" << endl;
+    return false;
+  }
+  mCreateCache = root.attribute("CreateCache").toFloat(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading CreateCache attribute ('" << root.attribute("CreateCache") << "')" << endl;
+    return false;
+  }
+  mMoveParticlesWithSystem = (root.attribute("MoveParticlesWithSystem").toInt(&ok));
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading mMoveParticlesWithSystem attribute ('" << root.attribute("mMoveParticlesWithSystem") << "')" << endl;
+    return false;
+  }
+  mRotated = (root.attribute("Rotated").toInt(&ok));
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading Rotated attribute ('" << root.attribute("Rotated") << "')" << endl;
+    return false;
+  }
+  mAge = root.attribute("Age").toFloat(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading Age attribute ('" << root.attribute("Age") << "')" << endl;
+    return false;
+  }
+  mMass = root.attribute("Mass").toFloat(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading Mass attribute ('" << root.attribute("Mass") << "')" << endl;
+    return false;
+  }
+  mMaxParticleSize = root.attribute("MaxParticleSize").toFloat(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading MaxParticleSize attribute ('" << root.attribute("MaxParticleSize") << "')" << endl;
+    return false;
+  }
+
+  QDomElement dataelement = root.namedItem("Data").toElement();
+  if(dataelement.isNull())
+  {
+    boError() << k_funcinfo << "Data element not found!" << endl;
+    return false;
+  }
+  QString base64data = dataelement.text();
+  if(base64data.isEmpty())
+  {
+    boDebug() << k_funcinfo << "Empty or invalid text in Data element!" << endl;
+    return false;
+  }
+  QByteArray ba;
+  KCodecs::base64Decode(base64data.utf8(), ba);  // Is utf8() safe to use here?
+
+  // Init data stream
+  QDataStream stream(ba, IO_ReadOnly);
+
+  // Load matrix
+  for(int i = 0; i < 4; i++)
+  {
+    for(int j = 0; j < 4; j++)
+    {
+      float e;
+      stream >> e;
+      mMatrix.setElement(i, j, e);
+    }
+  }
+
+  // Load particles
+  for(int i = 0; i < mNum; i++)
+  {
+    mParticles[i].system = this;
+    stream >> mParticles[i].velo;
+    stream >> mParticles[i].maxage;
+    stream >> mParticles[i].color;
+    stream >> mParticles[i].pos;
+    stream >> mParticles[i].size;
+    stream >> mParticles[i].life;
+    stream >> mParticles[i].distance;
+
+    // Update particle's texture (can't be saved because texture id can change)
+    float factor = mParticles[i].life / mParticles[i].maxage;
+    int t = (int)((1.0 - factor) * ((int)mTextures->count() + 1)); // +1 for last texture to be shown
+    if(t >= (int)mTextures->count())
+    {
+      t = mTextures->count() - 1;
+    }
+    mParticles[i].tex = mTextures->texture(t);
   }
 
   return true;
@@ -512,6 +717,60 @@ bool BosonEffectParticleTrail::saveAsXML(QDomElement& root) const
     return false;
   }
 
+  root.setAttribute("Num", mNum);
+  root.setAttribute("CreateCache", mCreateCache);
+  root.setAttribute("Rotated", mRotated ? 1 : 0);
+  root.setAttribute("Mass", mMass);
+  root.setAttribute("MaxParticleSize", mMaxParticleSize);
+  root.setAttribute("Obsolete", mObsolete ? 1 : 0);
+  root.setAttribute("Spacing", mSpacing);
+  mOffset.saveAsXML(root, "Offset");
+  mLastPos.saveAsXML(root, "LastPos");
+
+  // Init byte array and data stream
+  QByteArray ba;
+  QDataStream stream(ba, IO_WriteOnly);
+
+  // Save matrix
+  for(int i = 0; i < 4; i++)
+  {
+    for(int j = 0; j < 4; j++)
+    {
+      stream << mMatrix.element(i, j);
+    }
+  }
+
+  // Save particles
+  int particlessaved = 0;
+  for(unsigned int i = 0; i < mParticleCount; i++)
+  {
+    if(mParticles[i].life > 0.0)
+    {
+      stream << mParticles[i].velo;
+      stream << mParticles[i].maxage;
+      stream << mParticles[i].color;
+      stream << mParticles[i].pos;
+      stream << mParticles[i].size;
+      stream << mParticles[i].life;
+      stream << mParticles[i].distance;
+      particlessaved++;
+    }
+  }
+  if(particlessaved != mNum)
+  {
+    boError() << k_funcinfo << "mNum was invalid!!!" << endl;
+    return false;
+  }
+
+  // Encode ba to base64
+  QString base64data = KCodecs::base64Encode(ba);
+  // Save as QDomText
+  QDomDocument doc = root.ownerDocument();
+  QDomElement data = doc.createElement("Data");
+  QDomText domtext = doc.createTextNode(base64data);
+  root.appendChild(data);
+  data.appendChild(domtext);
+
   return true;
 }
 
@@ -520,6 +779,103 @@ bool BosonEffectParticleTrail::loadFromXML(const QDomElement& root)
   if(!BosonEffectParticle::loadFromXML(root))
   {
     return false;
+  }
+
+  bool ok;
+  mNum = root.attribute("Num").toInt(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading Num attribute ('" << root.attribute("Num") << "')" << endl;
+    return false;
+  }
+  mCreateCache = root.attribute("CreateCache").toFloat(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading CreateCache attribute ('" << root.attribute("CreateCache") << "')" << endl;
+    return false;
+  }
+  mRotated = (root.attribute("Rotated").toInt(&ok));
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading Rotated attribute ('" << root.attribute("Rotated") << "')" << endl;
+    return false;
+  }
+  mMass = root.attribute("Mass").toFloat(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading Mass attribute ('" << root.attribute("Mass") << "')" << endl;
+    return false;
+  }
+  mMaxParticleSize = root.attribute("MaxParticleSize").toFloat(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading MaxParticleSize attribute ('" << root.attribute("MaxParticleSize") << "')" << endl;
+    return false;
+  }
+  mObsolete = (root.attribute("Obsolete").toInt(&ok));
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading Obsolete attribute ('" << root.attribute("Obsolete") << "')" << endl;
+    return false;
+  }
+  mSpacing = root.attribute("Spacing").toFloat(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading Spacing attribute ('" << root.attribute("Spacing") << "')" << endl;
+    return false;
+  }
+  mOffset.loadFromXML(root, "Offset");
+  mLastPos.loadFromXML(root, "LastPos");
+
+  QDomElement dataelement = root.namedItem("Data").toElement();
+  if(dataelement.isNull())
+  {
+    boError() << k_funcinfo << "Data element not found!" << endl;
+    return false;
+  }
+  QString base64data = dataelement.text();
+  if(base64data.isEmpty())
+  {
+    boDebug() << k_funcinfo << "Empty or invalid text in Data element!" << endl;
+    return false;
+  }
+  QByteArray ba;
+  KCodecs::base64Decode(base64data.utf8(), ba);  // Is utf8() safe to use here?
+
+  // Init data stream
+  QDataStream stream(ba, IO_ReadOnly);
+
+  // Load matrix
+  for(int i = 0; i < 4; i++)
+  {
+    for(int j = 0; j < 4; j++)
+    {
+      float e;
+      stream >> e;
+      mMatrix.setElement(i, j, e);
+    }
+  }
+
+  // Load particles
+  for(int i = 0; i < mNum; i++)
+  {
+    mParticles[i].system = this;
+    stream >> mParticles[i].velo;
+    stream >> mParticles[i].maxage;
+    stream >> mParticles[i].color;
+    stream >> mParticles[i].pos;
+    stream >> mParticles[i].size;
+    stream >> mParticles[i].life;
+    stream >> mParticles[i].distance;
+
+    // Update particle's texture (can't be saved because texture id can change)
+    float factor = mParticles[i].life / mParticles[i].maxage;
+    int t = (int)((1.0 - factor) * ((int)mTextures->count() + 1)); // +1 for last texture to be shown
+    if(t >= (int)mTextures->count())
+    {
+      t = mTextures->count() - 1;
+    }
+    mParticles[i].tex = mTextures->texture(t);
   }
 
   return true;

@@ -27,8 +27,6 @@
 
 class Unit;
 class Player;
-class BosonEffect;
-class BosonEffectProperties;
 class BosonWeaponProperties;
 class UnitProperties;
 
@@ -187,19 +185,15 @@ class BosonShotBullet : public BosonShot
 
     void setTarget(const BoVector3& target);
 
-    virtual const QPtrList<BosonEffect>* effects() const  { return mFlyEffects; }
-
     inline virtual int type() const { return BosonShot::Bullet; }
 
     virtual void explode();
 
   protected:
-    void setEffects(const QPtrList<BosonEffect>& list);
     virtual void moveToTarget();
 
   private:
     BoVector3 mTarget;
-    QPtrList<BosonEffect>* mFlyEffects;
 };
 
 
@@ -222,12 +216,9 @@ class BosonShotMissile : public BosonShot
 
     void init(const BoVector3& pos, const BoVector3& target);
 
-    virtual const QPtrList<BosonEffect>* effects() const  { return mFlyEffects; }
-
     inline virtual int type() const { return BosonShot::Missile; }
 
   protected:
-    void setEffects(const QPtrList<BosonEffect>& list);
     virtual void advanceMoveInternal();
 
     virtual void moveToTarget();
@@ -240,7 +231,6 @@ class BosonShotMissile : public BosonShot
     float mZ;
     float mEffectVelo;
     float mMaxHeight;
-    QPtrList<BosonEffect>* mFlyEffects;
 };
 
 
@@ -365,16 +355,12 @@ class BosonShotFragment : public BosonShot
 
     inline virtual int type() const { return BosonShot::Fragment; }
 
-    virtual const QPtrList<BosonEffect>* effects() const  { return mEffects; }
-
     virtual void explode();
 
   protected:
-    void setEffects(const QPtrList<BosonEffect>& list);
     virtual void advanceMoveInternal();
 
   private:
-    QPtrList<BosonEffect>* mEffects;
     BoVector3 mVelo;
     const UnitProperties* mUnitProperties;
 };

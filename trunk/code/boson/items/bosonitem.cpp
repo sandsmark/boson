@@ -134,6 +134,7 @@ BosonItem::BosonItem(Player* owner, BosonModel* model, BosonCanvas* canvas)
  mAnimationCounter = 0;
  mCurrentFrame = 0;
  mIsVisible = true;
+ mEffects = 0;
 
  mXVelocity = 0.0f;
  mYVelocity = 0.0f;
@@ -187,6 +188,7 @@ BosonItem::~BosonItem()
 	}
  }
  delete mCells;
+ delete mEffects;
 }
 
 
@@ -511,11 +513,43 @@ void BosonItem::setEffectsRotation(float xrot, float yrot, float zrot)
 
 const QPtrList<BosonEffect>* BosonItem::effects() const
 {
- return 0l;
+ return mEffects;
+}
+
+void BosonItem::setEffects(const QPtrList<BosonEffect>& effects, bool addtocanvas)
+{
+ // FIXME: do we need to do anything with old effects?
+ delete mEffects;
+ mEffects = new QPtrList<BosonEffect>(effects);
+ // Make effects owned by us
+ QPtrListIterator<BosonEffect> it(*mEffects);
+ while (it.current()) {
+	it.current()->setOwnerId(id());
+	++it;
+ }
+ // Add effects to canvas if necessary
+ if (addtocanvas) {
+	canvas()->addEffects(*mEffects);
+ }
+}
+
+void BosonItem::addEffect(BosonEffect* e, bool addtocanvas)
+{
+ if (!mEffects) {
+	mEffects = new QPtrList<BosonEffect>;
+ }
+ mEffects->append(e);
+ // Add effect to canvas if necessary
+ if (addtocanvas) {
+	canvas()->addEffect(e);
+ }
 }
 
 void BosonItem::clearEffects()
 {
+ if (mEffects) {
+	mEffects->clear();
+ }
 }
 
 bool BosonItem::saveAsXML(QDomElement& root)

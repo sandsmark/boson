@@ -68,6 +68,7 @@ BosonEffect::BosonEffect(const BosonEffectProperties* prop)
   mActive = true;
   mStarted = false;
   mDelay = 0.0f;
+  mOwnerId = 0;
   if(prop)
   {
     mDelay = prop->delay();
@@ -103,27 +104,63 @@ bool BosonEffect::saveAsXML(QDomElement& root) const
   if(mGeneralProperties)
   {
     root.setAttribute(QString::fromLatin1("PropId"), mGeneralProperties->id());
-    // TODO: owner id. Maybe make effects global?
   }
-  // Position
-  root.setAttribute(QString::fromLatin1("Posx"), position().x());
-  root.setAttribute(QString::fromLatin1("Posy"), position().y());
-  root.setAttribute(QString::fromLatin1("Posz"), position().z());
-  // Rotation
-  root.setAttribute(QString::fromLatin1("Rotx"), rotation().x());
-  root.setAttribute(QString::fromLatin1("Roty"), rotation().y());
-  root.setAttribute(QString::fromLatin1("Rotz"), rotation().z());
+  else
+  {
+    // Effects without properties can't be saved for now. So we return false,
+    //  which prevents saving anything
+    return false;
+  }
+  // Position and rotation
+  mPosition.saveAsXML(root, "Position");
+  mRotation.saveAsXML(root, "Rotation");
 
   // Misc
   root.setAttribute(QString::fromLatin1("Active"), mActive ? 1 : 0);
   root.setAttribute(QString::fromLatin1("Started"), mStarted ? 1 : 0);
   root.setAttribute(QString::fromLatin1("Delay"), mDelay);
+  root.setAttribute(QString::fromLatin1("OwnerId"), mOwnerId);
 
   return true;
 }
 
 bool BosonEffect::loadFromXML(const QDomElement& root)
 {
+  bool ok;
+  mActive = (root.attribute("Active").toInt(&ok));
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading Active attribute ('" << root.attribute("Active") << "')" << endl;
+    return false;
+  }
+  mStarted = (root.attribute("Started").toInt(&ok));
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading Started attribute ('" << root.attribute("Started") << "')" << endl;
+    return false;
+  }
+  mDelay = root.attribute("Delay").toFloat(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading Delay attribute ('" << root.attribute("Delay") << "')" << endl;
+    return false;
+  }
+  mOwnerId = root.attribute("OwnerId").toUInt(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading OwnerId attribute ('" << root.attribute("OwnerId") << "')" << endl;
+    return false;
+  }
+
+  if(!mPosition.loadFromXML(root, "Position"))
+  {
+    return false;
+  }
+  if(!mRotation.loadFromXML(root, "Rotation"))
+  {
+    return false;
+  }
+
   return true;
 }
 
@@ -157,6 +194,11 @@ bool BosonEffectFog::saveAsXML(QDomElement& root) const
     return false;
   }
 
+  mColor.saveAsXML(root, "Color");
+  root.setAttribute(QString::fromLatin1("Start"), mStart);
+  root.setAttribute(QString::fromLatin1("End"), mEnd);
+  root.setAttribute(QString::fromLatin1("Radius"), mRadius);
+
   return true;
 }
 
@@ -164,6 +206,30 @@ bool BosonEffectFog::loadFromXML(const QDomElement& root)
 {
   if(!BosonEffect::loadFromXML(root))
   {
+    return false;
+  }
+
+  bool ok;
+  if(mColor.loadFromXML(root, "Color"))
+  {
+    return false;
+  }
+  mStart = root.attribute("Start").toFloat(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading Start attribute ('" << root.attribute("Start") << "')" << endl;
+    return false;
+  }
+  mEnd = root.attribute("End").toFloat(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading End attribute ('" << root.attribute("End") << "')" << endl;
+    return false;
+  }
+  mRadius = root.attribute("Radius").toFloat(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading Radius attribute ('" << root.attribute("Radius") << "')" << endl;
     return false;
   }
 
@@ -218,6 +284,12 @@ bool BosonEffectFade::saveAsXML(QDomElement& root) const
     return false;
   }
 
+  root.setAttribute(QString::fromLatin1("TimeLeft"), mTimeLeft);
+  mColor.saveAsXML(root, "Color");
+  mGeometry.saveAsXML(root, "Geometry");
+  root.setAttribute(QString::fromLatin1("BlendFunc.src"), mBlendFunc[0]);
+  root.setAttribute(QString::fromLatin1("BlendFunc.dst"), mBlendFunc[1]);
+
   return true;
 }
 
@@ -228,6 +300,33 @@ bool BosonEffectFade::loadFromXML(const QDomElement& root)
     return false;
   }
 
+  bool ok;
+  mTimeLeft = root.attribute("TimeLeft").toFloat(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading TimeLeft attribute ('" << root.attribute("TimeLeft") << "')" << endl;
+    return false;
+  }
+  if(!mColor.loadFromXML(root, "Color"))
+  {
+    return false;
+  }
+  if(!mGeometry.loadFromXML(root, "Geometry"))
+  {
+    return false;
+  }
+  mBlendFunc[0] = root.attribute("BlendFunc.src").toInt(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading BlendFunc.src attribute ('" << root.attribute("BlendFunc.src") << "')" << endl;
+    return false;
+  }
+  mBlendFunc[1] = root.attribute("BlendFunc.dst").toInt(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading BlendFunc.dst attribute ('" << root.attribute("BlendFunc.dst") << "')" << endl;
+    return false;
+  }
   return true;
 }
 
@@ -332,6 +431,8 @@ bool BosonEffectLight::saveAsXML(QDomElement& root) const
     return false;
   }
 
+  root.setAttribute(QString::fromLatin1("TimeLeft"), mTimeLeft);
+
   return true;
 }
 
@@ -340,6 +441,37 @@ bool BosonEffectLight::loadFromXML(const QDomElement& root)
   if(!BosonEffect::loadFromXML(root))
   {
     return false;
+  }
+
+  bool ok;
+  mTimeLeft = root.attribute("TimeLeft").toFloat(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading TimeLeft attribute ('" << root.attribute("TimeLeft") << "')" << endl;
+    return false;
+  }
+
+  // Create light only if we've started
+  if(!hasStarted())
+  {
+    return true;
+  }
+
+  // This creates BoLight object
+  start();
+  if(!mLight)
+  {
+    float factor = mTimeLeft / mProperties->life();  // This goes from 1 to 0 during effect's lifetime
+    BoVector4 ambient, diffuse, specular;
+    BoVector3 attenuation;
+    ambient.setBlended(mProperties->startAmbient(), factor, mProperties->endAmbient(), 1.0 - factor);
+    diffuse.setBlended(mProperties->startDiffuse(), factor, mProperties->endDiffuse(), 1.0 - factor);
+    specular.setBlended(mProperties->startSpecular(), factor, mProperties->endSpecular(), 1.0 - factor);
+    attenuation.setBlended(mProperties->startAttenuation(), factor, mProperties->endAttenuation(), 1.0 - factor);
+    mLight->setAmbient(ambient);
+    mLight->setDiffuse(diffuse);
+    mLight->setSpecular(specular);
+    mLight->setAttenuation(attenuation);
   }
 
   return true;
@@ -438,6 +570,12 @@ bool BosonEffectBulletTrail::saveAsXML(QDomElement& root) const
     return false;
   }
 
+  mLastPos.saveAsXML(root, "LastPos");
+  mStart.saveAsXML(root, "Start");
+  mEnd.saveAsXML(root, "End");
+  root.setAttribute("Advanced", mAdvanced);
+  root.setAttribute("ShouldMakeObsolete", mShouldMakeObsolete ? 1 : 0);
+
   return true;
 }
 
@@ -445,6 +583,32 @@ bool BosonEffectBulletTrail::loadFromXML(const QDomElement& root)
 {
   if(!BosonEffect::loadFromXML(root))
   {
+    return false;
+  }
+
+  if(!mLastPos.loadFromXML(root, "LastPos"))
+  {
+    return false;
+  }
+  if(!mStart.loadFromXML(root, "Start"))
+  {
+    return false;
+  }
+  if(!mEnd.loadFromXML(root, "End"))
+  {
+    return false;
+  }
+  bool ok;
+  mShouldMakeObsolete = (root.attribute("ShouldMakeObsolete").toInt(&ok));
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading ShouldMakeObsolete attribute ('" << root.attribute("ShouldMakeObsolete") << "')" << endl;
+    return false;
+  }
+  mAdvanced = root.attribute("Advanced").toShort(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading Advanced attribute ('" << root.attribute("Advanced") << "')" << endl;
     return false;
   }
 

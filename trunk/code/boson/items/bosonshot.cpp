@@ -243,7 +243,6 @@ BosonShotBullet::BosonShotBullet(Player* owner, BosonCanvas* canvas, const Boson
   }
 
   mTarget = target;
-  mFlyEffects = 0;
 
   explode();
 }
@@ -257,8 +256,6 @@ BosonShotBullet::BosonShotBullet(Player* owner, BosonCanvas* canvas, const Boson
     setActive(false);
     return;
   }
-
-  mFlyEffects = 0;
 }
 
 void BosonShotBullet::moveToTarget()
@@ -280,15 +277,7 @@ void BosonShotBullet::explode()
 
   BosonShot::explode();
 
-  delete mFlyEffects;
-  mFlyEffects = 0;
-}
-
-void BosonShotBullet::setEffects(const QPtrList<BosonEffect>& list)
-{
-  delete mFlyEffects;
-  mFlyEffects = new QPtrList<BosonEffect>(list);
-  canvas()->addEffects(*mFlyEffects);
+  clearEffects();
 }
 
 
@@ -303,7 +292,6 @@ BosonShotMissile::BosonShotMissile(Player* owner, BosonCanvas* canvas, const Bos
     setActive(false);
     return;
   }
-  mFlyEffects = 0;
   init(pos, target);
 }
 
@@ -316,12 +304,10 @@ BosonShotMissile::BosonShotMissile(Player* owner, BosonCanvas* canvas, const Bos
     setActive(false);
     return;
   }
-  mFlyEffects = 0;
 }
 
 BosonShotMissile::~BosonShotMissile()
 {
- delete mFlyEffects;
 }
 
 void BosonShotMissile::init(const BoVector3& pos, const BoVector3& target)
@@ -368,13 +354,6 @@ void BosonShotMissile::init(const BoVector3& pos, const BoVector3& target)
   setRotation(Bo3dTools::rotationToPoint(mVelo[0], mVelo[1]));
   mZ = 0; // For parable calculations only, must be 0 at the beginning
   mPassedDist = 0;
-}
-
-void BosonShotMissile::setEffects(const QPtrList<BosonEffect>& list)
-{
-  delete mFlyEffects;
-  mFlyEffects = new QPtrList<BosonEffect>(list);
-  canvas()->addEffects(*mFlyEffects);
 }
 
 // move the shot by one step
@@ -856,20 +835,11 @@ BosonShotFragment::BosonShotFragment(Player* owner, BosonCanvas* canvas, BosonMo
 BosonShotFragment::BosonShotFragment(Player* owner, BosonCanvas* canvas, BosonModel* model) :
     BosonShot(owner, canvas, model)
 {
-  mEffects = 0;
   mUnitProperties = 0;
 }
 
 BosonShotFragment::~BosonShotFragment()
 {
- delete mEffects;
-}
-
-void BosonShotFragment::setEffects(const QPtrList<BosonEffect>& list)
-{
-  delete mEffects;
-  mEffects = new QPtrList<BosonEffect>(list);
-  canvas()->addEffects(*mEffects);
 }
 
 void BosonShotFragment::activate(const BoVector3& pos, const UnitProperties* unitproperties)
