@@ -384,6 +384,7 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
 Boson::~Boson()
 {
  KCrash::setEmergencySaveFunction(NULL);
+ delete d->mPlayerInputHandler;
  delete d->mMessageDelayer;
  delete d->mAdvance;
  delete d->mGameTimer;
