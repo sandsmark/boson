@@ -28,7 +28,7 @@ class QImage;
 /**
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
  **/
-class BosonTiles : public QPixmap
+class BosonTiles //: public QPixmap
 {
 public:
 	/**
@@ -40,15 +40,6 @@ public:
 	 **/
 	BosonTiles();
 
-	/**
-	 * Construct a BosonTiles object from fileName. This loads the already
-	 * created pixmap.
-	 *
-	 * You'll use this c'tor within the map editor and split the pixmap into
-	 * several small pixmaps (the cells/tiles themselves) using @ref
-	 * plainTile, @ref big1, @ref big2, @ref small and @ref tile.
-	 **/
-	BosonTiles(const QString& fileName);
 	~BosonTiles();
 
 	QPixmap plainTile(Cell::GroundType type);
@@ -104,7 +95,7 @@ protected:
 	static QString trans_ext(int t);
 	
 private:
-	QImage* mTilesImage; // only used by loadTiles()
+	QImage* mTilesImage;
 
 	bool mDebug; // used in putOne()
 };

@@ -754,8 +754,8 @@ void BosonWidget::slotReceiveMap(const QByteArray& buffer)
  }
 // kdDebug() << "init minimap" << endl;
  d->mMiniMap->initMap(); // very fast function
- kdDebug() << "init map" << endl;
- d->mCanvas->initMap(tiles); // takes most of startup time!
+ kdDebug() << "load tiles" << endl;
+ d->mCanvas->loadTiles(tiles); // takes most of startup time!
 
  kdDebug() << k_funcinfo << " done" << endl;
 }
