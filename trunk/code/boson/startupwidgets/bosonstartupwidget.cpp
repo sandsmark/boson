@@ -22,7 +22,7 @@
 
 #include "bosonwelcomewidget.h"
 #include "bosonloadingwidget.h"
-#include "bosonnewgamewidget.h"
+#include "bosonstartgamewidget.h"
 #include "bosonstarteditorwidget.h"
 #include "bosonnetworkoptionswidget.h"
 #include "kloadsavegamewidget.h"
@@ -31,7 +31,7 @@
 #include "../boson.h"
 #include "../defines.h"
 
-#include <kmainwindow.h> // AB: urghs accessing the parent is BAAD
+#include <kmainwindow.h> // AB: urghs
 #include <kstandarddirs.h>
 #include <kmessagebox.h>
 #include <klocale.h>
@@ -149,7 +149,7 @@ void BosonStartupWidget::slotNewGame(KCmdLineArgs* args)
  if (!args) {
 	return;
  }
- BosonNewGameWidget* w = (BosonNewGameWidget*)d->mWidgetStack->widget(IdNewGame);
+ BosonStartGameWidget* w = (BosonStartGameWidget*)d->mWidgetStack->widget(IdNewGame);
  if (!w) {
 	boError() << k_funcinfo << "Oops - NULL newgame widget" << endl;
 	return;
@@ -181,7 +181,7 @@ void BosonStartupWidget::slotNewGame(KCmdLineArgs* args)
 		// note: we don't have to care about which playfield was loaded,
 		// as we can *always* add unlimited players. player number is
 		// checked when starting game only
-		w->slotAddAIPlayer();
+		w->addAIPlayer();
 	}
  }
 
@@ -272,10 +272,10 @@ void BosonStartupWidget::initWidget(WidgetId widgetId)
 	}
 	case IdNewGame:
 	{
-		BosonNewGameWidget* newGame = new BosonNewGameWidget(d->mNetworkInterface, this);
-		connect(newGame, SIGNAL(signalCancelled()),
+		BosonStartGameWidget* startGame = new BosonStartGameWidget(d->mNetworkInterface, this);
+		connect(startGame, SIGNAL(signalCancelled()),
 				this, SLOT(slotShowWelcomeWidget()));
-		connect(newGame, SIGNAL(signalShowNetworkOptions()),
+		connect(startGame, SIGNAL(signalShowNetworkOptions()),
 				this, SLOT(slotShowNetworkOptions()));
 
 		// the new game widget requires a local player. this gets added
@@ -284,7 +284,7 @@ void BosonStartupWidget::initWidget(WidgetId widgetId)
 		// event loop only, NOT immediately!
 		emit signalAddLocalPlayer();
 
-		w = newGame;
+		w = startGame;
 		break;
 	}
 	case IdNetwork:
@@ -410,14 +410,14 @@ void BosonStartupWidget::slotShowNetworkOptions()
 
 void BosonStartupWidget::slotHideNetworkOptions()
 {
- BosonNewGameWidget* newGame = (BosonNewGameWidget*)d->mWidgetStack->widget(IdNewGame);
- if (!newGame) {
+ BosonStartGameWidget* startGame = (BosonStartGameWidget*)d->mWidgetStack->widget(IdNewGame);
+ if (!startGame) {
 	// strange as network widget gets shown for newgame widget only
 	boError() << k_funcinfo << "NULL new game widget??" << endl;
 	return;
  }
  removeWidget(IdNetwork);
- newGame->slotSetAdmin(boGame->isAdmin());
+ startGame->slotSetAdmin(boGame->isAdmin());
  showWidget(IdNewGame);
 }
 

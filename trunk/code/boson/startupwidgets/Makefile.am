@@ -3,6 +3,7 @@ INCLUDES = -I$(top_srcdir)/boson/bodebug $(all_includes)
 noinst_LTLIBRARIES = libbosonstartupwidgets.la
 
 libbosonstartupwidgets_la_SOURCES = \
+	bosonnewgamewidgetbase.ui \
 	bosonstartupnetwork.cpp \
 	bosonstartupwidget.cpp \
 	bosonwelcomewidget.cpp\
@@ -11,7 +12,8 @@ libbosonstartupwidgets_la_SOURCES = \
 	bosonstartwidgetbase.cpp \
 	bosonnewgamewidget.cpp \
 	bosonstarteditorwidget.cpp \
-	kloadsavegamewidget.cpp
+	kloadsavegamewidget.cpp \
+	bosonstartgamewidget.cpp
 
 METASOURCES = AUTO
 
