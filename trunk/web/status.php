@@ -38,8 +38,8 @@ draw_bigbox_text("Boson is currently still under heavy development.
 	<br><br>In the latest CVS version, the biggest changes, compared to latest stable release ($latestversion),
 	are OpenGL support (Boson is now 3D), support for upgrades, a nicer commandframe and many other little modifications.
 	Also, a large number of bugs have been fixed.<br><br>We're currently heading for release of version 0.7
-	which will probably be released late 2002 or early 2003 (Note that these
-	dates are <b>not</b> official and may change).<br><br>");
+	which will probably be released in November 2002(Note that this
+	dates is <b>not</b> official and may change).<br><br>");
 
 draw_bigbox_subheader("<a name=\"features\"></a>Feature list");
 draw_bigbox_text("This is a list of features that I consider as
@@ -47,7 +47,7 @@ draw_bigbox_text("This is a list of features that I consider as
 	the list of features for the next release, but just a TODO list!
 	<h2>TODO</h2>
 	<ul>
-	  <li>Use UnitProperties in bounit</li>
+	  <li>Unit editor must be updated and it must use UnitProperties</li>
 	  <li>All units must have their own 3D model</li>
 	  <li>Generate the technology tree dynamically for documentation.</li>
 	</ul>
