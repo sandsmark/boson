@@ -59,7 +59,7 @@ public:
 protected:
 	bool 		loadMob(int index);
 	bool		loadFix(int index);
-	bool		loadPixmap(const QString &path, QPixmap **p, bool withMask = true);
+	bool		loadPixmap(const QString &path, QPixmap **p, bool withMask = true, bool with_team_color=true);
 
 private:
 	QString		themePath;
