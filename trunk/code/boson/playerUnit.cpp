@@ -97,7 +97,6 @@ playerMobUnit::playerMobUnit(mobileMsg_t *msg)
 {
 	turnTo(random()%DIRECTION_STEPS);
 
-	// CELLS
 	bocanvas->setCellFlag ( gridRect(), (BO_GO_AIR==goFlag())? Cell::flying_unit_f:Cell::field_unit_f );
 }
 
@@ -181,7 +180,7 @@ bool playerMobUnit::getWantedMove(QPoint &wstate)
 			}
 			// it's ok, let's request the move and tell it to bocanvas
 			///orzel : XXX probaly a but if the SERVER refuses the move because another player has already moved on this tile
-			bocanvas->setCellFlag ( r, Cell::request_f );
+			bocanvas->setCellFlag ( r, (BO_GO_AIR==goFlag())? Cell::request_flying_f:Cell::request_f );
 			return true;
 	}
 
@@ -359,21 +358,18 @@ void playerMobUnit::do_moveTo(QPoint npos)
 {
 	QPoint	dv = npos - gridRect().topLeft();
 	dv *= BO_TILE_SIZE;	// pixelwise
+	QRect r = gridRect();
 
 	boAssert(int(x())%BO_TILE_SIZE==0);
 	boAssert(int(y())%BO_TILE_SIZE==0);
 
 	// free the requested cells
-	bocanvas->unsetCellFlag ( gridRect(), Cell::request_f );
+	bocanvas->unsetCellFlag ( r, (BO_GO_AIR==goFlag())? Cell::request_flying_f:Cell::request_f );
 
-
-	bocanvas->unsetCellFlag ( gridRect(), (BO_GO_AIR==goFlag())? Cell::flying_unit_f:Cell::field_unit_f );
-
-	move(BO_TILE_SIZE*npos.x() , BO_TILE_SIZE*npos.y() );
-
+	// actually move the mobile, updating flags in cells
+	bocanvas->unsetCellFlag ( r, (BO_GO_AIR==goFlag())? Cell::flying_unit_f:Cell::field_unit_f );
+	move( BO_TILE_SIZE*npos.x(), BO_TILE_SIZE*npos.y() );
 	bocanvas->setCellFlag ( gridRect(), (BO_GO_AIR==goFlag())? Cell::flying_unit_f:Cell::field_unit_f );
-
-	// CELLS
 
 	emit sig_moveTo(npos);
 
@@ -505,7 +501,6 @@ void playerMobUnit::destroy(void)
 playerFacility::playerFacility(facilityMsg_t *msg)
 	: visualFacility(msg)
 {
-	// CELLS 
 	bocanvas->setCellFlag ( gridRect(), Cell::building_f );
 
 }
