@@ -91,6 +91,7 @@ int main(int argc, char **argv)
  // initialization
  BosonConfig::setPostInitFunction(&postBosonConfigInit);
 
+ QCString argv0(argv[0]);
  KCmdLineArgs::init(argc, argv, &about);
  KCmdLineArgs::addCmdLineOptions(options);
 #ifdef BOSON_LINK_STATIC
@@ -98,7 +99,7 @@ int main(int argc, char **argv)
 #endif
 
  BoEventLoop eventLoop(0, "main event loop");
- BoApplication app;
+ BoApplication app(argv0);
  KGlobal::locale()->insertCatalogue("libkdegames");
 
     // register ourselves as a dcop client
