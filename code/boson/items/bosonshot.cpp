@@ -847,11 +847,11 @@ void BosonShotBomb::advanceMoveInternal()
 
 /*****  BosonShotFragment  *****/
 
-#define FRAGMENT_MIN_SPEED 2
-#define FRAGMENT_MAX_SPEED 3.5
+#define FRAGMENT_MIN_SPEED 15
+#define FRAGMENT_MAX_SPEED 20
 #define FRAGMENT_MIN_Z_SPEED 0.02
 #define FRAGMENT_MAX_Z_SPEED 0.06
-#define FRAGMENT_GRAVITY -0.003
+#define FRAGMENT_GRAVITY -0.01
 
 BosonShotFragment::BosonShotFragment(Player* owner, BosonCanvas* canvas, BosonModel* model, BoVector3 pos,
     const UnitProperties* unitproperties) :
@@ -870,7 +870,7 @@ BosonShotFragment::BosonShotFragment(Player* owner, BosonCanvas* canvas, BosonMo
   mParticleSystems = new QPtrList<BosonParticleSystem>(mUnitProperties->newExplodingFragmentFlyParticleSystems(BoVector3()));
   canvas->addParticleSystems(*mParticleSystems);
 
-  move(pos.x(), pos.y(), pos.z() + 0.7);  // +0.7 prevents immediate contact with the terrain
+  move(pos.x(), pos.y(), pos.z() + 0.2);  // +0.2 prevents immediate contact with the terrain
   setRotation(rotationToPoint(mVelo.x(), mVelo.y()));
   setVisible(true);
 }

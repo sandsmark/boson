@@ -242,7 +242,7 @@ void BosonParticleSystemProperties::initParticle(BosonParticleSystem* s, BosonPa
   {
     particle->velo.scale(getFloat(mMinVeloScale, mMaxVeloScale) / particle->velo.length());
   }
-  //particle->velo += wind();
+  particle->velo += wind();
 }
 
 void BosonParticleSystemProperties::updateParticle(BosonParticleSystem*, BosonParticle* particle) const
