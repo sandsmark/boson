@@ -45,27 +45,14 @@
 /*****  BosonShot  *****/
 
 BosonShot::BosonShot(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop) :
-    BosonItem(owner, prop ? prop->model() : 0, canvas)
+    BosonItem(owner, canvas)
 {
-  init();
-
   mProp = prop;
 }
 
-BosonShot::BosonShot(Player* owner, BosonCanvas* canvas, BosonModel* model) :
-    BosonItem(owner, model, canvas)
-{
-  init();
-
-  mProp = 0;
-}
-
 BosonShot::BosonShot(Player* owner, BosonCanvas* canvas) :
-    BosonItem(owner, 0, canvas)
+    BosonItem(owner, canvas)
 {
-  boDebug() << k_funcinfo << endl;
-  init();
-
   mProp = 0;
 }
 
@@ -73,8 +60,22 @@ BosonShot::~BosonShot()
 {
 }
 
-void BosonShot::init()
+BosonModel* BosonShot::getModelForItem() const
 {
+  if(!mProp)
+  {
+    return 0;
+  }
+  return mProp->model();
+}
+
+bool BosonShot::init()
+{
+  bool ret = BosonItem::init();
+  if(!ret)
+  {
+    return ret;
+  }
   boDebug(350) << "MISSILE: " << k_funcinfo << "Creating new shot" << endl;
   // FIXME: can't we use values from objects config file here?
   setSize(BO_TILE_SIZE / 2, BO_TILE_SIZE / 2, BO_GL_CELL_SIZE / 2); // AB: pretty much a random value
@@ -88,17 +89,18 @@ void BosonShot::init()
   {
     boError(350) << k_funcinfo << "NULL owner!" << endl;
     setActive(false);
-    return;
+    return false;
   }
   if(!canvas())
   {
     boError(350) << k_funcinfo << "NULL canvas" << endl;
     setActive(false);
-    return;
+    return false;
   }
 
   // Initialization
   mActive = true;
+  return true;
 }
 
 //AB: note this this is primary optimized for SAFETY, NOT for performance. it is
@@ -232,30 +234,25 @@ float BosonShot::fullDamageRange() const
 
 /*****  BosonShotBullet  *****/
 
-BosonShotBullet::BosonShotBullet(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop, const BoVector3& target) :
-    BosonShot(owner, canvas, prop)
-{
-  if(!properties())
-  {
-    boError(350) << k_funcinfo << "NULL weapon properties!" << endl;
-    setActive(false);
-    return;
-  }
-
-  mTarget = target;
-
-  explode();
-}
-
 BosonShotBullet::BosonShotBullet(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop) :
     BosonShot(owner, canvas, prop)
 {
+}
+
+bool BosonShotBullet::init()
+{
+  bool ret = BosonShot::init();
+  if(!ret)
+  {
+    return ret;
+  }
   if(!properties())
   {
     boError(350) << k_funcinfo << "NULL weapon properties!" << endl;
     setActive(false);
-    return;
+    return false;
   }
+  return true;
 }
 
 void BosonShotBullet::moveToTarget()
@@ -283,27 +280,9 @@ void BosonShotBullet::explode()
 
 /*****  BosonShotMissile  *****/
 
-BosonShotMissile::BosonShotMissile(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop, const BoVector3& pos, const BoVector3& target) :
-    BosonShot(owner, canvas, prop)
-{
-  if(!properties())
-  {
-    boError(350) << k_funcinfo << "NULL weapon properties!" << endl;
-    setActive(false);
-    return;
-  }
-  init(pos, target);
-}
-
 BosonShotMissile::BosonShotMissile(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop) :
     BosonShot(owner, canvas, prop)
 {
-  if(!properties())
-  {
-    boError(350) << k_funcinfo << "NULL weapon properties!" << endl;
-    setActive(false);
-    return;
-  }
 }
 
 BosonShotMissile::~BosonShotMissile()
@@ -518,12 +497,6 @@ void BosonShotMissile::moveToTarget()
 
 /*****  BosonShotExplosion  *****/
 
-BosonShotExplosion::BosonShotExplosion(Player* owner, BosonCanvas* canvas, const BoVector3& pos, long int damage, float damagerange, float fulldamagerange, int delay) :
-    BosonShot(owner, canvas)
-{
-  activate(pos, damage, damagerange, fulldamagerange, delay);
-}
-
 BosonShotExplosion::BosonShotExplosion(Player* owner, BosonCanvas* canvas) :
     BosonShot(owner, canvas)
 {
@@ -607,12 +580,6 @@ void BosonShotExplosion::advanceMoveInternal()
 
 /*****  BosonShotMine  *****/
 
-BosonShotMine::BosonShotMine(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop, const BoVector3& pos) :
-    BosonShot(owner, canvas, prop)
-{
-  init(pos);
-}
-
 BosonShotMine::BosonShotMine(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop) :
     BosonShot(owner, canvas, prop)
 {
@@ -694,16 +661,6 @@ void BosonShotMine::advanceMoveInternal()
 
 
 /*****  BosonShotBomb  *****/
-
-BosonShotBomb::BosonShotBomb(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop, const BoVector3& pos) :
-    BosonShot(owner, canvas, prop)
-{
-  // Speeds
-  setAccelerationSpeed(properties()->accelerationSpeed());
-  setMaxSpeed(properties()->speed());
-
-  init(pos);
-}
 
 BosonShotBomb::BosonShotBomb(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop) :
     BosonShot(owner, canvas, prop)
@@ -825,21 +782,21 @@ void BosonShotBomb::advanceMoveInternal()
 #define FRAGMENT_MAX_Z_SPEED 0.1
 #define FRAGMENT_GRAVITY -0.006
 
-BosonShotFragment::BosonShotFragment(Player* owner, BosonCanvas* canvas, BosonModel* model, const BoVector3& pos,
-    const UnitProperties* unitproperties) :
-    BosonShot(owner, canvas, model)
-{
-  activate(pos, unitproperties);
-}
-
-BosonShotFragment::BosonShotFragment(Player* owner, BosonCanvas* canvas, BosonModel* model) :
-    BosonShot(owner, canvas, model)
+BosonShotFragment::BosonShotFragment(Player* owner, BosonCanvas* canvas) :
+    BosonShot(owner, canvas)
 {
   mUnitProperties = 0;
 }
 
 BosonShotFragment::~BosonShotFragment()
 {
+}
+
+BosonModel* BosonShotFragment::getModelForItem() const
+{
+  BO_CHECK_NULL_RET0(owner());
+  BO_CHECK_NULL_RET0(owner()->speciesTheme());
+  return owner()->speciesTheme()->objectModel("fragment");
 }
 
 void BosonShotFragment::activate(const BoVector3& pos, const UnitProperties* unitproperties)

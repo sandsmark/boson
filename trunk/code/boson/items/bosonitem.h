@@ -149,13 +149,34 @@ public:
 	 * Note: when you subclass this class you must set the width/height in
 	 * order to make correct use of it! See @ref setSize
 	 **/
-	BosonItem(Player* owner, BosonModel* model, BosonCanvas*);
+	BosonItem(Player* owner, BosonCanvas*);
 	virtual ~BosonItem();
+
+	/**
+	 * @return The model that should be used for this item. This model will
+	 * get assigned to this model after construction using @ref
+	 * BosonItemRenderer::setModel.
+	 **/
+	virtual BosonModel* getModelForItem() const = 0;
+
+	/**
+	 * Called after the constructor. You can do all kinds of initializations
+	 * here - try to use this instead of the constructor whenever possible.
+	 *
+	 * This is in particular useful when you need to ensure that a certain
+	 * condition applies, e.g. that canvas() is non-NULL. You can simply
+	 * return FALSE in that case and the item will be deleted.
+	 *
+	 * @return TRUE on success or FALSE on failure (the item will be deleted
+	 * then)
+	 **/
+	virtual bool init() { return true; }
 
 	BosonItemRenderer* itemRenderer() const { return mRenderer; }
 	inline BosonCanvas* canvas() const { return mCanvas; }
 	BosonCollisions* collisions() const;
 	inline Player* owner() const { return mOwner; }
+
 
 	/**
 	 * @return Unique identifier of this object type. E.g. RTTI::Unit for

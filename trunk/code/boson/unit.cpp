@@ -116,28 +116,6 @@ Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
  registerData(&d->mPathPoints, IdPathPoints);
  registerData(&d->mWantedRotation, IdWantedRotation);
  d->mWantedRotation.setLocal(0);
-
-// create the plugins
-// note: we use fixed KGame-property IDs, so we can't add any plugin twice. if
-// we ever want to support this, we need to use dynamically assigned (see
-// KGameProperty docs) - i use fixed ids to make debugging easier.
- if (prop->properties(PluginProperties::Production)) {
-	d->mPlugins.append(new ProductionPlugin(this));
- }
- if (prop->properties(PluginProperties::Repair)) {
-	d->mPlugins.append(new RepairPlugin(this));
- }
- if (prop->properties(PluginProperties::Harvester)) {
-	d->mPlugins.append(new HarvesterPlugin(this));
- }
- if (prop->properties(PluginProperties::Refinery)) {
-	d->mPlugins.append(new RefineryPlugin(this));
- }
- if (prop->properties(PluginProperties::ResourceMine)) {
-	d->mPlugins.append(new ResourceMinePlugin(this));
- }
-
- loadWeapons();
 }
 
 Unit::~Unit()
@@ -160,6 +138,49 @@ Unit::~Unit()
  }
 #endif
  delete d;
+}
+
+bool Unit::init()
+{
+ bool ret = BosonItem::init();
+ if (!ret) {
+	return ret;
+ }
+ if (!speciesTheme()) {
+	BO_NULL_ERROR(speciesTheme());
+	return false;
+ }
+ const UnitProperties* prop = unitProperties();
+ if (!prop) {
+	BO_NULL_ERROR(prop);
+	return false;
+ }
+ if (!owner()) {
+	BO_NULL_ERROR(owner());
+	return false;
+ }
+// create the plugins
+// note: we use fixed KGame-property IDs, so we can't add any plugin twice. if
+// we ever want to support this, we need to use dynamically assigned (see
+// KGameProperty docs) - i use fixed ids to make debugging easier.
+ if (prop->properties(PluginProperties::Production)) {
+	d->mPlugins.append(new ProductionPlugin(this));
+ }
+ if (prop->properties(PluginProperties::Repair)) {
+	d->mPlugins.append(new RepairPlugin(this));
+ }
+ if (prop->properties(PluginProperties::Harvester)) {
+	d->mPlugins.append(new HarvesterPlugin(this));
+ }
+ if (prop->properties(PluginProperties::Refinery)) {
+	d->mPlugins.append(new RefineryPlugin(this));
+ }
+ if (prop->properties(PluginProperties::ResourceMine)) {
+	d->mPlugins.append(new ResourceMinePlugin(this));
+ }
+
+ loadWeapons();
+ return true;
 }
 
 void Unit::initStatic()
@@ -1535,15 +1556,6 @@ MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, BosonCanvas* c
 {
  d = new MobileUnitPrivate;
 
- setWork(WorkNone);
-
- ((Boson*)owner->game())->slotUpdateProductionOptions();
-
- // FIXME: loading!
- setEffects(unitProperties()->newConstructedEffects(x() + width() / 2, y() + height() / 2, z()));
-
- setRotation((float)(owner->game()->random()->getLong(359)));
- updateRotation();
  setMaxSpeed(prop->speed());
  setAccelerationSpeed(prop->accelerationSpeed());
  setDecelerationSpeed(prop->decelerationSpeed());
@@ -1554,6 +1566,25 @@ MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, BosonCanvas* c
 MobileUnit::~MobileUnit()
 {
  delete d;
+}
+
+bool MobileUnit::init()
+{
+  bool ret = Unit::init();
+  if (!ret) {
+	 return ret;
+  }
+
+ setWork(WorkNone);
+
+ ((Boson*)owner()->game())->slotUpdateProductionOptions();
+
+ // FIXME: loading!
+ setEffects(unitProperties()->newConstructedEffects(x() + width() / 2, y() + height() / 2, z()));
+
+ setRotation((float)(owner()->game()->random()->getLong(359)));
+ updateRotation();
+ return true;
 }
 
 void MobileUnit::advanceMoveInternal(unsigned int advanceCount) // this actually needs to be called for every advanceCount.
@@ -2239,14 +2270,22 @@ Facility::Facility(const UnitProperties* prop, Player* owner, BosonCanvas* canva
  registerData(&d->mConstructionStep, IdConstructionStep);
 
  d->mConstructionStep.setLocal(0);
-
- setWork(WorkConstructed);
 }
 
 Facility::~Facility()
 {
  // TODO: write a plugin framework and manage plugins in a list.
  delete d;
+}
+
+bool Facility::init()
+{
+ bool ret = Unit::init();
+ if (!ret) {
+	return ret;
+ }
+ setWork(WorkConstructed);
+ return true;
 }
 
 unsigned int Facility::constructionSteps() const
