@@ -97,6 +97,7 @@ public:
 
 private:
 	static BoMaterial* mCurrentMaterial;
+	static unsigned int mCurrentTexture;
 
 private:
 	QString mName;
