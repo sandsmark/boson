@@ -5,7 +5,7 @@ Speed=5
 
 [Boson Unit]
 Armor=0
-DestroyedParticles=1002,3003,6001
+DestroyedParticles=1002,3003,6001,7001
 Health=80
 Id=10001
 IsFacility=false
