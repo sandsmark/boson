@@ -25,10 +25,8 @@
 #include "bosonbigdisplayinput.h"
 #include "editorbigdisplayinput.h"
 #include "bosonconfig.h"
-#include "player.h"
 #include "boselection.h"
 #include "bodebug.h"
-#include "unit.h"
 
 #include <klocale.h>
 
