@@ -97,7 +97,6 @@ public:
 
 	void productionAdvanced(Unit* factory, double percentage);
 
-	void setCellType(CellType type);
 	void setGroundTheme(BosonGroundTheme* theme);
 
 	/**
