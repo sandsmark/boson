@@ -233,6 +233,8 @@ signals:
 	void signalUnitMoved(Unit* unit, double oldX, double oldY);
 	void signalUnitDestroyed(Unit* unit);
 	void signalOutOfGame(Player*);
+	void signalTilesLoading(int);
+	void signalTilesLoaded();
 
 protected:
 	/**

@@ -21,6 +21,8 @@
 
 #include "cell.h"
 
+#include <qobject.h>
+
 class QImage;
 class QPixmap;
 class QString;
@@ -28,8 +30,9 @@ class QString;
 /**
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
  **/
-class BosonTiles
+class BosonTiles : public QObject
 {
+Q_OBJECT
 public:
 	/**
 	 * Create an empty BosonTiles object. You want to use this if you are
@@ -93,11 +96,17 @@ protected:
 	static QString groundType2Name(Cell::GroundType t);
 	static QString transition2Name(Cell::TransType t);
 	static QString trans_ext(int t);
-	
+
+signals:
+	void signalTilesLoading(int);
+	void signalTilesLoaded();
+
 private:
 	QImage* mTilesImage;
 
 	bool mDebug; // used in putOne()
+	int mLoaded; // Number of tiles loaded
+	int mSignalCounter;
 };
 
 #endif
