@@ -22,10 +22,9 @@
 #define GROUNDTYPE_H 
 
 enum groundType {
-	GROUND_UNKNOWN = -1,
-
-	GROUND_DEEP_WATER = 0,
-	GROUND_WATER = 1,
+	GROUND_UNKNOWN = 0,
+	GROUND_DEEP_WATER,
+	GROUND_WATER,
 	GROUND_GRASS,
 	GROUND_DESERT,
 
@@ -46,7 +45,6 @@ enum transType {
 
 
 enum transition_t {
-//	TRANS_PLAIN,
 	TRANS_UL=0,	// up left
 	TRANS_UR=1,	// up right
 	TRANS_DL,	// down left
@@ -66,8 +64,8 @@ enum transition_t {
 
 /*
  *  Numbering : 
- *	-1 is no_pixmap
- *	0  is GRASS
+ *	0  is GROUND_UNKNOWN
+ *	1  is GROUND_DEEP_WATER
  *	....
  *	GROUND_LAST-1 is the last plain_pixmap
  *
@@ -79,14 +77,13 @@ enum transition_t {
  *
  */
 
-#define TILES_PER_TRANSITION 28
-#define SMALL_TILES_PER_TRANSITION 12
-
-
-#define NB_GROUND_TILES		(GROUND_LAST + TRANS_LAST * TILES_PER_TRANSITION)
+#define SMALL_TILES_PER_TRANSITION	12
+#define BIG_TILES_PER_TRANSITION	16
+#define TILES_PER_TRANSITION		(SMALL_TILES_PER_TRANSITION+4*BIG_TILES_PER_TRANSITION)
+#define NB_GROUND_TILES			(GROUND_LAST + TRANS_LAST * TILES_PER_TRANSITION)
 
 #define GET_TRANS_NUMBER(transRef,transTile)	\
-	( (groundType)(GROUND_LAST+(TILES_PER_TRANSITION*(transRef)) + (transTile)))
+	( (groundType)  ( GROUND_LAST + (TILES_PER_TRANSITION*(transRef)) + (transTile) ))
 
 #define GET_TRANS_REF(g)	(((g)-GROUND_LAST) / TILES_PER_TRANSITION )
 #define GET_TRANS_TILE(g)	(((g)-GROUND_LAST) % TILES_PER_TRANSITION )

@@ -25,8 +25,13 @@
 #include "common/log.h"
 #include "common/map.h"
 
-#define		BIG_W	28
-#define		BIG_H	24
+#define		BIG_W	32
+#define		BIG_H	( (NB_GROUND_TILES*4 + BIG_W-1) / BIG_W )
+
+/*
+ * BIG_W		should be 4*n, cause this way it's easier to watch the generated file
+ * NB_GROUND_TILES*4	is 1244 (on may, 14th 200), so BIG_H should be 39
+ */
 
 
 QImage		theBig( BIG_W*BO_TILE_SIZE, BIG_H*BO_TILE_SIZE, 32);
@@ -39,7 +44,10 @@ void begin (const char *themeName)
 	int i ; 
 	QString transS;
 
-	themePath	= "/usr/share/apps//boson.qt2//themes/grounds/earth/";
+	themePath	= "/usr/share/apps//boson.qt2//themes/grounds/";
+	themePath	+= themeName;
+	themePath	+= "/";
+
 
 	for (i=0; i< TRANS_LAST; i++) { // pre-load transitions name
 		transS	 = groundProp[groundTransProp[i].from].name;
@@ -56,18 +64,19 @@ void end(void)
 	theBig.save("earth.png", "PNG");
 }
 
-void putOne(int z, QImage &p)
+void putOne(int z, QImage &p, int xoffset=0, int yoffset=0)
 {
 	int x = (z % BIG_W) * BO_TILE_SIZE;
 	int y = (z / BIG_W) * BO_TILE_SIZE;
 	int i,j;
 
 	printf("\nputOne(%d), on %d,%d (%d,%d)", z, x, y, x/BO_TILE_SIZE, y/BO_TILE_SIZE);
+	if (xoffset || yoffset)
+		printf(", offset : %d,%d", xoffset, yoffset);
 
 	for(i=0; i< BO_TILE_SIZE; i++)
-		for(j=0; j< BO_TILE_SIZE; j++) {
-			theBig.setPixel( x+i, y+j, p.pixel(i,j) );
-		}
+		for(j=0; j< BO_TILE_SIZE; j++)
+			theBig.setPixel( x+i, y+j, p.pixel(i+xoffset,j+yoffset) );
 }
 
 void loadGround(int j, const QString &path)
@@ -88,13 +97,18 @@ void loadGround(int j, const QString &path)
 			return;
 		}
 		putOne(4*j+i, p);
+		if (IS_BIG_TRANS(j)) {
+			putOne( 4*(j+1)+i, p, BO_TILE_SIZE, 0);
+			putOne( 4*(j+2)+i, p, 0, BO_TILE_SIZE);
+			putOne( 4*(j+3)+i, p, BO_TILE_SIZE, BO_TILE_SIZE);
+		}
 	}
 }
 
 void loadTransition(groundType gt)
 {
 	int ref = GET_TRANS_REF(gt);
-	int tile = GET_TRANS_TILE(gt);
+	int t, tile;
 
 	static const char *trans_ext[TILES_PER_TRANSITION] = {
 		".01", ".03", ".07", ".05",	// 48x48 transitions
@@ -107,7 +121,16 @@ void loadTransition(groundType gt)
 		};
 
 	boAssert(IS_TRANS(gt));
-//	printf("ref=%d, tile=%d", ref, tile); fflush(stdout);
+
+	t = GET_TRANS_TILE(gt);
+	if (t<SMALL_TILES_PER_TRANSITION)
+		tile = t;
+	else {
+		t-= SMALL_TILES_PER_TRANSITION;		// bigtile #
+		t/=4;					// which one
+		tile = t+SMALL_TILES_PER_TRANSITION;	// tile is the index into trans_ext
+	}
+
 	loadGround(gt, transName[ref] + trans_ext[tile]);
 }
 
@@ -115,10 +138,11 @@ void loadTransition(groundType gt)
 int main (int argc, char **argv)
 {
 
-	int i;
+	int i, j;
 
+	stderr = stdout;
 	/* logfile handling */
-	logfile = stderr;
+	logfile = stdout;
 	logf(LOG_ERROR, "logfile : using stderr");
 	logf(LOG_INFO, "========= New Log File ==============");
 
@@ -126,9 +150,14 @@ int main (int argc, char **argv)
 
 	for (i=0; i< GROUND_LAST; i++) // load non-transitions
 		loadGround(i, themePath + groundProp[i].name);
-	for (; i< NB_GROUND_TILES ; i++) // load non-transitions
-		loadTransition( (groundType) i);
-		
+		;
+	for (i=0; i< TRANS_LAST; i++) {
+		for (j=0; j< SMALL_TILES_PER_TRANSITION; j++)
+			loadTransition( (groundType) GET_TRANS_NUMBER(i,j) );
+			;
+		for ( ; j< TILES_PER_TRANSITION; j+=4)
+			loadTransition( (groundType) GET_TRANS_NUMBER(i,j) );
+	}
 
 	end();
 	printf("\n");
