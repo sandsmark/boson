@@ -339,6 +339,9 @@ bool Player::load(QDataStream& stream)
  stream >> teamColor;
  if (themeIdentifier != QString::null) {
 	loadTheme(SpeciesTheme::speciesDirectory(themeIdentifier), teamColor);
+ } else {
+	boError() << k_funcinfo << "NULL species theme identifier" << endl;
+	return false;
  }
 
  // Load unitpropID
