@@ -187,12 +187,12 @@ unsigned int BosonStatistics::pointsPerProducedFacility()
 
 int BosonStatistics::pointsPerLostMobileUnit()
 {
- return -6;
+ return -2;
 }
 
 int BosonStatistics::pointsPerLostFacility()
 {
- return -12;
+ return -5;
 }
 
 unsigned int BosonStatistics::winningPoints()
