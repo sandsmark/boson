@@ -579,7 +579,7 @@ Unit* Unit::bestEnemyUnitInRange()
 {
  // Return if unit can't shoot
  if (!unitProperties()->canShoot()) {
-	return 0l;
+	return 0;
  }
  // Return if no enemies in range
  BoItemList* list = enemyUnitsInRange(unitProperties()->maxWeaponRange());
@@ -588,14 +588,14 @@ Unit* Unit::bestEnemyUnitInRange()
  }
 
  // Initialize some variables
- Unit* best = 0l;
+ Unit* best = 0;
  BoItemList::Iterator it = list->begin();
- Unit* u = 0l;
+ Unit* u = 0;
  bofixed dist = 0;
  // Candidates to best unit, see below
- Unit* c1 = 0l;
- Unit* c2 = 0l;
- Unit* c3 = 0l;
+ Unit* c1 = 0;
+ Unit* c2 = 0;
+ Unit* c3 = 0;
 
  // Iterate through the list of enemies and pick the best ones
  for (; it != list->end(); ++it) {
