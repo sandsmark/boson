@@ -88,7 +88,7 @@ public:
 	mobType		getType(void) {return type;}
 
 	virtual uint	getVisibility(void) {return mobileProp[type].visibility; }
-	virtual QRect	rect(void);
+	virtual QRect	rect(void) { return QRect(0,0,mobileProp[type].width,mobileProp[type].height); }
 
 	int		goFlag(void) { return mobileProp[type].goFlag;}
 
