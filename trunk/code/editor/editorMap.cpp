@@ -1,5 +1,5 @@
 /***************************************************************************
-                          playerMap.cpp  -  description                              
+                          editorMap.cpp  -  description                              
                              -------------------                                         
 
     version              : $Id$
@@ -27,16 +27,16 @@
 #include "../common/boconfig.h" // MAX_PLAYERS
 #include "../map/map.h"
 
-#include "playerMap.h"
+#include "editorMap.h"
   
-playerMap::playerMap(uint w, uint h, QObject *parent, const char *name=0L)
+editorMap::editorMap(uint w, uint h, QObject *parent, const char *name=0L)
 	: physMap(w,h,parent,name)
 {
 }
 
 
 /*
-void playerMap::setCell(int i, int j, groundType g)
+void editorMap::setCell(int i, int j, groundType g)
 {
 	boAssert(i>=0); boAssert(j>=0);
 	boAssert(i<width()); boAssert(j<height());
@@ -48,7 +48,7 @@ void playerMap::setCell(int i, int j, groundType g)
 */
 
 
-void playerMap::createMob(mobileMsg_t &m)
+void editorMap::createMob(mobileMsg_t &m)
 {
 	visualMobUnit *u;
 
@@ -61,7 +61,7 @@ void playerMap::createMob(mobileMsg_t &m)
 }
 
 
-void playerMap::destroyMob(destroyedMsg_t &m)
+void editorMap::destroyMob(destroyedMsg_t &m)
 {
 	visualMobUnit *mob ;
 	
@@ -71,14 +71,14 @@ void playerMap::destroyMob(destroyedMsg_t &m)
 		boAssert(m.y == mob->y());
 		}
 	else {
-		logf(LOG_ERROR, "playerMap::destroyMob : can't find m.key");
+		logf(LOG_ERROR, "editorMap::destroyMob : can't find m.key");
 		return;
 		}
 
 	boAssert( mobile.remove(m.key) == true );
 }
 
-void playerMap::createFix(facilityMsg_t &m)
+void editorMap::createFix(facilityMsg_t &m)
 {
 	visualFacility *f;
 
@@ -91,7 +91,7 @@ void playerMap::createFix(facilityMsg_t &m)
 }
 
 
-void playerMap::destroyFix(destroyedMsg_t &m)
+void editorMap::destroyFix(destroyedMsg_t &m)
 {
 	visualFacility * f;
 	
@@ -101,7 +101,7 @@ void playerMap::destroyFix(destroyedMsg_t &m)
 		boAssert(m.y == f->x());
 		}
 	else {
-		logf(LOG_ERROR, "playerMap::destroyFix : can't find m.key");
+		logf(LOG_ERROR, "editorMap::destroyFix : can't find m.key");
 		return;
 		}
 

@@ -41,7 +41,7 @@
 // application specific includes
 #include "../common/msgData.h"
 
-#include "playerMap.h"
+#include "editorMap.h"
 #include "mainView.h"
 
 /**
@@ -148,7 +148,7 @@ private:
 
 
 /* The map which handle grouds and units*/
-    playerMap		*phys;
+    editorMap		*phys;
 
 };   
  

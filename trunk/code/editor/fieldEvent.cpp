@@ -26,11 +26,11 @@
 #include "viewMap.h"
 #include "fieldMap.h"
 //#include "orderWin.h"
-#include "playerMap.h"
+#include "editorMap.h"
 
 
-#define mobileList (((playerMap*)(view->phys))->mobile)
-#define facilityList (((playerMap*)(view->phys))->facility)
+#define mobileList (((editorMap*)(view->phys))->mobile)
+#define facilityList (((editorMap*)(view->phys))->facility)
 
 static int selectX, selectY;
 static int oldX, oldY;
