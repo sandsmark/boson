@@ -318,6 +318,7 @@ public:
 		mToolTips = 0;
 
 		mControlPressed = false;
+		mShiftPressed = false;
 
 		mGLMiniMap = 0;
 
@@ -403,6 +404,7 @@ public:
 	int mTextureBindsParticles;
 
 	bool mControlPressed;
+	bool mShiftPressed;
 
 	BosonGLMiniMap* mGLMiniMap;
 
@@ -1330,7 +1332,7 @@ void BosonBigDisplayBase::renderPlacementPreview()
  // GL_REPLACE we should change it here:
 // glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
  GLubyte color;
- if (d->mPlacementPreview.canPlace()) {
+ if (d->mPlacementPreview.canPlace() || d->mShiftPressed) {
 	color = 255;
  } else {
 	color = PLACEMENTPREVIEW_DISALLOW_COLOR;
@@ -2908,6 +2910,7 @@ bool BosonBigDisplayBase::eventFilter(QObject* o, QEvent* e)
 	case QEvent::KeyPress:
 	case QEvent::KeyRelease:
 		d->mControlPressed = (((QKeyEvent*)e)->stateAfter() & Qt::ControlButton);
+		d->mShiftPressed = (((QKeyEvent*)e)->stateAfter() & Qt::ShiftButton);
 		break;
 	default:
 		break;

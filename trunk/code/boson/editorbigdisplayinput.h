@@ -76,7 +76,7 @@ public slots:
 
 protected:
 	//AB: use BoMouseEvent as 1st parameter
-	bool actionPlace(const BoVector3Fixed& pos, bool exact);
+	bool actionPlace(const BoVector3Fixed& pos, bool exact, bool force);
 	bool actionChangeHeight(const BoVector3Fixed& pos, bool up);
 
 	/**

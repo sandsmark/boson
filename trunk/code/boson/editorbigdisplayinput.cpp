@@ -182,7 +182,7 @@ void EditorBigDisplayInput::actionClicked(const BoMouseEvent& event)
  }
  if (actionLocked()) {
 	if (actionType() == ActionPlacementPreview) {
-		actionPlace(event.canvasVector(), event.controlButton());
+		actionPlace(event.canvasVector(), event.controlButton(), event.shiftButton());
 		return;
 	} else if (actionType() == ActionChangeHeight) {
 		bool up = !event.controlButton();
@@ -191,7 +191,7 @@ void EditorBigDisplayInput::actionClicked(const BoMouseEvent& event)
  }
 }
 
-bool EditorBigDisplayInput::actionPlace(const BoVector3Fixed& canvasVector, bool exact)
+bool EditorBigDisplayInput::actionPlace(const BoVector3Fixed& canvasVector, bool exact, bool force)
 {
  boDebug() << k_funcinfo << endl;
  if (!canvas()) {
@@ -227,7 +227,12 @@ bool EditorBigDisplayInput::actionPlace(const BoVector3Fixed& canvasVector, bool
 		boError() << k_funcinfo << "invalid unittype " << d->mPlacement.unitType() << endl;
 		return false;
 	}
-	if (!canvas()->canPlaceUnitAt(prop, BoVector2Fixed(x, y), 0)) {
+	// Don't allow forcing mobile unit placement. If mobile units are inside
+	//  another unit, they won't be able to move
+	if (prop->isMobile()) {
+		force = false;
+	}
+	if (!force && !canvas()->canPlaceUnitAt(prop, BoVector2Fixed(x, y), 0)) {
 		boDebug() << k_funcinfo << "Can't place unit at " << x << " " << y << endl;
 		boGame->slotAddChatSystemMessage(i18n("You can't place a %1 there!").arg(prop->name()));
 		ret = false;
