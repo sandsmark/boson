@@ -64,7 +64,7 @@ bool boPath::addCheckLoop(QPoint p)
 void bosonUnit::targetDying(bosonUnit *t)
 {
 	boAssert (target == t);
-	target = 0l;
+	stop_attacking();
 }
 
 
@@ -577,6 +577,12 @@ void playerFacility::u_attack(bosonUnit *u)
 	bosonUnit::u_attack(u);
 
 	connect( u, SIGNAL(sig_moveTo(QPoint)), this, SLOT(targetMoveTo(QPoint)) );
+}
+
+
+void playerFacility::u_stop(void)
+{
+	stop_attacking();
 }
 
 
