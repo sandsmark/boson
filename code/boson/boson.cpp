@@ -361,13 +361,8 @@ void BoAdvance::receiveAdvanceCall()
  toggleAdvanceFlag();
  emit mBoson->signalAdvance(advanceCount(), flag);
 
- // Log game state
- if (advanceCallsCount() % boConfig->gameLogInterval() == 0) {
-	mBoson->makeGameLog();
- }
-
  mAdvanceCallsCount = mAdvanceCallsCount + 1;
- mAdvanceCount = mAdvanceCount + 1; // this advance count is important for Unit e.g. - but not used in this function.
+ mAdvanceCount = mAdvanceCount + 1;
  if (mAdvanceCount > MAXIMAL_ADVANCE_COUNT) {
 	mAdvanceCount = 0;
  }
@@ -2115,6 +2110,11 @@ QValueList<QColor> Boson::availableTeamColors() const
 
 void Boson::slotReceiveAdvance()
 {
+ // Log game state
+ if (advanceCallsCount() % boConfig->gameLogInterval() == 0) {
+	makeGameLog();
+ }
+
  d->mAdvance->receiveAdvanceCall();
 }
 
