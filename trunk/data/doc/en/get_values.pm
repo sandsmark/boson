@@ -73,3 +73,18 @@ sub getval() {
         print "</td></tr></table></table>\n";}
 
 1;
+
+__END__
+
+
+
+# TODO
+
+- The current parser is not good, it looks in every line and if it finds a new group a new <table> is created.
+  It should be group based: foreach line in each group parse line
+- The values.list file needs groups, so we can say don't give me the name for the unit, but the name for the weapons
+- Allow translations in the values.list, we than don't read a value from a line, we read a value (which will be searched in the config file) and a translation
+  Also the hard coded headers for the tables should go to values.list file
+
+
+ 

@@ -10,6 +10,11 @@
 	It is designed to run on Unix (Linux) computers, and is built on top of the libkdegames, kde and Qt libraries.<br>
 	A minimum of two players is required, since there is no artificial intelligence yet.
     </p>
-    
+
+    <hr>
+    <h2>
+      The Boson Handbook - maintained by <a href="mailto:felix.seeger@gmx.de">Felix Seeger</a>
+    </h2>
+
 #include "nav.wml" before_url="intr.html" before_text="Introduction" after_url="started.html" after_text="Getting started" up_url="index.html"
 #include "footer.wml"
