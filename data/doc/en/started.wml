@@ -7,8 +7,7 @@
       <ul>
        <li>500 MHz ix86 Prozessor *</li>
        <li>256 MB RAM</li>
-       <li>3D accelerator card (a driver from the vendor is recommended because they are those which give the best
-performance)
+       <li>3D accelerator card (a driver from the vendor is recommended because they are those which give the best performance)
        <li>Optional: Sound card</li>
      </ul>
      Minimum software requirements:
@@ -20,12 +19,12 @@ performance)
         <li><a href="http://lib3ds.sourceforge.net" target="_blank">lib3ds</a> (Units and building rendering)</li>
         <li><a href="http://www.python.org" target="_blank">Python 2.0</a> or better (2.3 is recommended) </li>
         <li><a href="http://www.openal.org" target="_blank"> OpenAL (audio library)</li>
-        <li><a href="http://www.thewml.org" target="_blank">WML</a> - For the handbook, if you don't use a binary package</li>
-        <li>Image::Magick - For the handbook technologie dependency tree image, if you don't use a binary package and want this image.</li>
+        <li><a href="http://www.thewml.org" target="_blank">WML</a> and Perl - For the handbook, if you don't use a binary package</li>
+        <li>Perl Image::Magick - For the handbook technologie dependency tree image, if you don't use a binary package and want this image.</li>
     </ul>
     <p>
-    * We've never tested Boson on other platforms but it should work.<br>
-    &nbsp; Please send bug/sucesses reports to our <a href="mailto:boson-devel@lists.sourceforge.net">mailing list</a>.
+    * Boson is known to work on AMD64, on other platforms it should work, but it is untested.<br>
+    &nbsp;&nbsp; Please send bug/sucesses reports to our <a href="mailto:boson-devel@lists.sourceforge.net">mailing list</a>.
     <p>
       Please note that since we do not yet provide precompiled binaries you will
       need to install the development packages of these libraries as well (the

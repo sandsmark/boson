@@ -25,7 +25,7 @@
     <p>
     CVS login:
     <pre>
-    export CVSROOT=":pserver:anonymous@cvs.boson.sourceforge.net:/cvsroot/boson"
+    export CVSROOT=":pserver:anonymous@cvs.sourceforge.net:/cvsroot/boson"
     cvs login
     </pre>
     Please just press the Enter key when you are prompted for a password.<br>
@@ -33,23 +33,22 @@
     <pre>
     cvs -z3 co -P code
     cvs -z3 co -P data
-    cvs -z3 co -P tools
     </pre>
     Compilation of code:
     <pre>
-    cd code && ln -s ../tools/admin admin 
+    cd code
     make -f Makefile.cvs
     ./configure
     make
-    su -c "make install"
+    make install
     </pre>
     Compilation of data:
     <pre>
-    cd data && ln -s ../tools/admin admin 
+    cd data
     make -f Makefile.cvs
     ./configure
     make
-    su -c "make install"
+    make install
     </pre>
     <br>
     <h4>RPM / binary releases</h4>
@@ -59,6 +58,6 @@
     If you feel like building a RPM for boson (for any platform), we'll be happy to put a link here and/or add them to our site.<br>
 
 
- 
+
 #include "nav.wml" before_url="started.html" before_text="Getting started" after_url="game/index.html" after_text="In the game" up_url="index.html"
 #include "footer.wml"
