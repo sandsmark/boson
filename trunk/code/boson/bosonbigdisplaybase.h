@@ -366,7 +366,6 @@ public:
 	void removeLight(int id);
 
 	void updateOpenGLSettings();
-	void changeGroundRenderer(int renderer);
 
 	/**
 	 * Grab a frame for a movie. The returned @ref QByteArray contains
