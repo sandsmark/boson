@@ -411,6 +411,15 @@ void BosonBigDisplayBase::initializeGL()
  glShadeModel(GL_FLAT); // GL_SMOOTH is default - but esp. in software rendering way slower. in hardware it *may* be equal (concerning speed) to GL_FLAT
  glDisable(GL_DITHER); // we don't need this, I guess (and its enabled by default)
 
+ // for anti-aliased lines (currently unused):
+ glHint(GL_LINE_SMOOTH_HINT, GL_FASTEST);
+ // for anti-aliased points (currently unused):
+ glHint(GL_POINT_SMOOTH_HINT, GL_FASTEST);
+ // for anti-aliased polygons (currently unused):
+ glHint(GL_POLYGON_SMOOTH_HINT, GL_FASTEST);
+
+ glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
+
  if (checkError()) {
 	kdError() << k_funcinfo << endl;
  }
