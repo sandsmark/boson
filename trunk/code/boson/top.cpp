@@ -82,7 +82,7 @@ public:
 	KToggleAction* mActionMenubar;
 	KToggleAction* mActionFullScreen;
 
-	QTimer mFpstimer;
+	QTimer mStatusBarTimer;
 
 	BosonStarting* mStarting;
 
@@ -121,6 +121,9 @@ TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
  connect(d->mStartup, SIGNAL(signalCancelLoadSave()),
 		this, SLOT(slotCancelLoadSave()));
  d->mStartup->slotShowWelcomeWidget(); // we could skip this using cmd line parameters
+
+ connect(&d->mStatusBarTimer, SIGNAL(timeout()), this, SLOT(slotUpdateStatusBar()));
+
  mMainDock->setWidget(d->mStartup);
 
  setView(mMainDock);
@@ -274,6 +277,18 @@ void TopWidget::initStatusBar()
  QLabel* oilLabel = new QLabel(QString::number(0), resources);
  connect(this, SIGNAL(signalOilUpdated(int)), oilLabel, SLOT(setNum(int)));
  bar->addWidget(resources);
+
+ QHBox* debug = new QHBox(bar);
+ (void)new QLabel(i18n("Particles: "), debug);
+ QLabel* particlesLabel = new QLabel(QString::number(0), debug);
+ connect(this, SIGNAL(signalParticlesCountUpdated(int)), particlesLabel, SLOT(setNum(int)));
+ (void)new QLabel(i18n("Canvas items: "), debug);
+ QLabel* itemsLabel = new QLabel(QString::number(0), debug);
+ connect(this, SIGNAL(signalCanvasItemsCountUpdated(int)), itemsLabel, SLOT(setNum(int)));
+ (void)new QLabel(i18n("Animated items: "), debug);
+ QLabel* animatedLabel = new QLabel(QString::number(0), debug);
+ connect(this, SIGNAL(signalCanvasAnimationsCountUpdated(int)), animatedLabel, SLOT(setNum(int)));
+ bar->addWidget(debug);
 
  QHBox* fps = new QHBox(bar);
  (void)new QLabel(i18n("FPS: "), fps);
@@ -537,8 +552,7 @@ void TopWidget::slotStartGame(const QString& playFieldId)
  slotToggleStatusbar();// AB: doesn't really toggle!
  d->mBosonWidget->initGameMode(playFieldId);
  enableGameActions(true);
- d->mFpstimer.start(1000);
- connect(&d->mFpstimer, SIGNAL(timeout()), this, SLOT(slotUpdateFPS()));
+ d->mStatusBarTimer.start(1000);
 }
 
 void TopWidget::slotToggleSound()
@@ -580,8 +594,7 @@ void TopWidget::endGame()
  if (d->mBosonWidget) {
 	d->mBosonWidget->quitGame();
 	disconnect(d->mBosonWidget, 0, 0, 0);
-	d->mFpstimer.stop();
-	disconnect(&d->mFpstimer, 0, 0, 0);
+	d->mStatusBarTimer.stop();
 	saveGameDockConfig();
  }
  // Delete all objects
@@ -788,9 +801,17 @@ bool TopWidget::queryExit()
  return true;
 }
 
-void TopWidget::slotUpdateFPS()
+void TopWidget::slotUpdateStatusBar()
 {
- emit signalFPSUpdated(d->mBosonWidget->displayManager()->activeDisplay()->fps());// damn this call sucks!
+ BosonBigDisplayBase* display = d->mBosonWidget->displayManager()->activeDisplay();// damn this call sucks!
+ BO_CHECK_NULL_RET(display)
+ BO_CHECK_NULL_RET(mCanvas)
+ // AB: some statusbar labels are *not* updated here (e.g. minerals and units),
+ // but whenever their value actually changes.
+ emit signalFPSUpdated(display->fps());
+ emit signalParticlesCountUpdated(mCanvas->particleSystemsCount());
+ emit signalCanvasItemsCountUpdated(mCanvas->allItemsCount());
+ emit signalCanvasAnimationsCountUpdated(mCanvas->animationsCount());
 }
 
 void TopWidget::hideMenubar()
