@@ -23,7 +23,7 @@
 // _do_ use the local boFile.h copy !
 #include "boFile.h"
 #include "common/msgData.h"
-#include "common/cell.h"
+//#include "common/cell.h"
 
 #include "map.h"
 
@@ -90,7 +90,7 @@ mobileMsg_t mobile[] = {
 int main(void)
 {
 int	i, j;
-Cell	c;
+cell_t	c;
 
 boFile *field = new boFile(); /// basic BosonPlayField...
 
@@ -111,17 +111,18 @@ field->map_width	= MAP_WIDTH;
 field->map_height	= MAP_HEIGHT;
 field->nbMobiles	= sizeof(mobile)/sizeof(mobile[0]);
 field->nbFacilities	= sizeof(facility)/sizeof(facility[0]);
-field->worldName	= "Test world 1";
+field->_worldName	= "Test world 1";
 
 printf("Creation .................Ok\nWrite to disk.............");
 
 field->openWrite(PF_NAME);
 
+/***** cell_t ******/
+
 	/* initialisation */
 	for (i=0; i< MAP_WIDTH; i++)
 		for (j=0; j< MAP_HEIGHT; j++) {
-			c.setGroundType(cells[i][j]);
-			c.setItem( ((i+7*j)%4));
+			c = cells[i][j];
 			field->write(c);
 		}
 	
@@ -156,7 +157,7 @@ field->openRead(PF_NAME);
 	for (i=0; i< field->map_width; i++)
 		for (j=0; j< field->map_height; j++) {
 			field->load (c);
-			ncells[i][j] = c.getGroundType();
+			ncells[i][j] = c;
 		}
 	
 	for (i=0; i< field->nbMobiles; i++)
