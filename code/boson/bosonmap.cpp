@@ -326,7 +326,8 @@ bool BosonMap::loadHeightMapImage(const QByteArray& heightMap)
  if ((unsigned int)map.height() != height() + 1) {
 	boError() << k_funcinfo << "invalid height of heightmap: " <<
 			map.height() << " must be: " << height() + 1 << endl;
-	return loadHeightMapImage(QByteArray());
+	loadHeightMapImage(QByteArray());
+	return false;
  }
  if ((unsigned int)map.width() != width() + 1) {
 	boError() << k_funcinfo << "invalid widthof heightmap: "
