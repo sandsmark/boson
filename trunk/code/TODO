@@ -4,6 +4,7 @@ TODO:
 Generic :
 =========
 
+minimap size dynamically choosen (50x50 should use 2x2 pixels/tile)
 
 nmap makes the server crashes. should logDD("new attempt rejected");
 
