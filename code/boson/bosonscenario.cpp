@@ -43,14 +43,222 @@ struct ScenarioUnit
 	int y;
 };
 
+class ScenarioPlayer
+{
+public:
+	ScenarioPlayer()
+	{
+		mMinerals = 0;
+		mOil = 0;
+	}
+	
+	bool savePlayer(QDataStream& stream)
+	{
+		stream << (Q_LONG)minerals();
+		stream << (Q_LONG)oil();
+		stream << (Q_UINT32)unitCount();
+		QValueList<ScenarioUnit>::Iterator it;
+		for (it = mUnits.begin(); it != mUnits.end(); ++it) {
+			ScenarioUnit s = (*it);
+			stream << (Q_INT32)TAG_UNIT;
+			stream << (Q_INT32)s.unitType;
+			stream << (Q_INT32)s.x;
+			stream << (Q_INT32)s.y;
+		}
+		return true;
+	}
+
+	bool savePlayer(QDomDocument& doc, QDomElement& node)
+	{
+		QDomText m = doc.createTextNode("Minerals");
+		node.appendChild(m);
+		m.setData(QString::number(minerals()));
+
+		QDomText o = doc.createTextNode("Oil");
+		node.appendChild(o);
+		o.setData(QString::number(oil()));
+
+		QValueList<ScenarioUnit>::Iterator it;
+		for (it = mUnits.begin(); it != mUnits.end(); ++it) {
+			ScenarioUnit s = (*it);
+			QDomElement unit = doc.createElement("Unit");
+			node.appendChild(unit);
+			unit.setAttribute("UnitType", s.unitType);
+			unit.setAttribute("x", s.x);
+			unit.setAttribute("y", s.y);
+		}
+		return true;
+	}
+
+	bool loadPlayer(QDataStream& stream)
+	{
+		Q_ULONG minerals;
+		Q_ULONG oil;
+		Q_UINT32 unitCount;
+		stream >> minerals;
+		stream >> oil;
+		stream >> unitCount;
+
+		setMinerals(minerals);
+		setOil(oil);
+
+		for (unsigned int i = 0; i < unitCount; i++) {
+			Q_INT32 tag_unit;
+			Q_INT32 unitType;
+			Q_INT32 x;
+			Q_INT32 y;
+	
+			stream >> tag_unit;
+			stream >> unitType;
+			stream >> x;
+			stream >> y;
+	
+			if (tag_unit != TAG_UNIT) {
+				kdError() << "Missing TAG_UNIT" << endl;
+				return false;
+			}
+			
+			ScenarioUnit s;
+			s.unitType = unitType;
+			s.x = x;
+			s.y = y;
+			mUnits.append(s);
+		}
+		return true;
+	}
+	
+	bool loadPlayer(QDomElement& node)
+	{
+
+		bool ok = false; // toInt() parameter
+		QByteArray buffer;
+		QDataStream stream(buffer, IO_WriteOnly);
+
+		unsigned long int minerals = 0;
+		unsigned long int oil = 0;
+
+		if (!readMinerals(node, minerals)) {
+			return false;
+		}
+		if (!readOil(node, oil)) {
+			return false;
+		}
+		stream << (Q_ULONG)minerals;
+		stream << (Q_ULONG)oil;
+ 
+		QDomNodeList list = node.elementsByTagName("Unit");
+		stream << (Q_UINT32)list.count();
+		for (unsigned int i = 0; i < list.count(); i++) {
+			QDomElement unit = list.item(i).toElement();
+			if (unit.isNull()) {
+				kdError() << "Unit is not a QDomElement" << endl;
+				return false;
+			}
+			if (!unit.hasAttribute("UnitType")) {
+				kdError() << "Missing UnitType" << endl;
+				return false;
+			}
+			if (!unit.hasAttribute("x")) {
+				kdError() << "Missing x" << endl;
+				return false;
+			}
+			if (!unit.hasAttribute("y")) {
+				kdError() << "Missing y" << endl;
+				return false;
+			}
+			Q_INT32 unitType;
+			Q_INT32 x;
+			Q_INT32 y;
+		
+			unitType = unit.attribute("UnitType").toInt(&ok);
+			if (!ok) {
+				kdError() << k_funcinfo << "UnitType was no number" << endl;
+				return false;
+			}
+			x = unit.attribute("x").toInt(&ok);
+			if (!ok) {
+				kdError() << k_funcinfo << "x was no number" << endl;
+				return false;
+			}
+			y = unit.attribute("y").toInt(&ok);
+			if (!ok) {
+				kdError() << k_funcinfo << "y was no number" << endl;
+				return false;
+			}
+	
+			stream << (Q_INT32)TAG_UNIT;
+			stream << unitType;
+			stream << x;
+			stream << y;
+		}
+		QDataStream readStream(buffer, IO_ReadOnly);
+		return loadPlayer(readStream);
+	}
+
+	unsigned int unitCount() const
+	{
+		return mUnits.count();
+	}
+	
+	ScenarioUnit unit(unsigned int i)
+	{
+		return mUnits[i];
+	}
+
+	void setMinerals(unsigned long int m) { mMinerals = m; }
+	unsigned long int minerals() const { return mMinerals; }
+
+	void setOil(unsigned long int o) { mOil = o; }
+	unsigned long int oil() const { return mOil; }
+
+protected:
+	bool readMinerals(QDomElement& node, unsigned long int& minerals)
+	{
+		QDomNodeList list = node.elementsByTagName("Minerals");
+		if (list.count() != 1) {
+			kdWarning() << "Must have exactly one \"Minerals\" per player" << endl;
+			return false;
+		}
+		 bool ok = false;
+		 QDomElement e = list.item(0).toElement();
+		 minerals = e.text().toULong(&ok);
+		if (!ok) {
+			kdError() << "Invalid minerals" << endl;
+			return false;
+		}
+		return true;
+	}
+
+	bool readOil(QDomElement& node, unsigned long int& oil)
+	{
+		QDomNodeList list = node.elementsByTagName("Oil");
+		if (list.count() != 1) {
+			kdWarning() << "Must have exactly one \"Oil\" per player" << endl;
+			return false;
+		}
+		bool ok = false;
+		QDomElement e = list.item(0).toElement();
+		oil = e.text().toULong(&ok);
+		if (!ok) {
+			kdError() << "Invalid oil" << endl;
+			return false;
+		}
+		return true;
+	}
+
+
+private:
+	QValueList<ScenarioUnit> mUnits;
+	unsigned long int mMinerals;
+	unsigned long int mOil;
+};
+
 
 class BosonScenario::BosonScenarioPrivate
 {
 public:
 	BosonScenarioPrivate()
 	{
-		mUnits = 0;
-
 		mMaxPlayers = 0;
 		mMinPlayers = 0;
 	}
@@ -60,9 +268,7 @@ public:
 	int mMaxPlayers; // -1 == unlimited
 	unsigned int mMinPlayers;
 
-	QValueList<ScenarioUnit>* mUnits;
-	QMap<int, unsigned long int> mPlayer2Minerals;
-	QMap<int, unsigned long int> mPlayer2Oil;
+	QValueList<ScenarioPlayer> mPlayers;
 };
 
 BosonScenario::BosonScenario()
@@ -78,10 +284,6 @@ BosonScenario::BosonScenario(const QString& fileName)
 
 BosonScenario::~BosonScenario()
 {
- if (d->mUnits) {
-	d->mUnits->clear();
-	delete d->mUnits;
- }
  delete d;
 }
 
@@ -98,8 +300,6 @@ QString BosonScenario::defaultScenario()
 
 bool BosonScenario::loadScenario(const QString& fileName)
 {
-// kdDebug() << k_funcinfo << endl;
-
  // open stream
  QIODevice* dev = KFilterDev::deviceForFile(fileName);
  if (!dev) {
@@ -304,6 +504,10 @@ bool BosonScenario::loadScenarioSettings(QDomElement& node)
 
 bool BosonScenario::loadScenarioSettings(QDataStream& stream)
 {
+ if (d->mPlayers.count() != 0) {
+	kdError() << k_funcinfo << "called before!!" << endl;
+	d->mPlayers.clear();
+ }
  Q_UINT32 minPlayers;
  Q_INT32 maxPlayers;
  stream >> minPlayers;
@@ -326,7 +530,9 @@ bool BosonScenario::loadScenarioSettings(QDataStream& stream)
  }
  d->mMinPlayers = minPlayers;
  d->mMaxPlayers = maxPlayers;
- d->mUnits = new QValueList<ScenarioUnit>[d->mMaxPlayers];
+ for (int i = 0; i < d->mMaxPlayers; i++) {
+	d->mPlayers.append(ScenarioPlayer());
+ }
  return true;
 }
 
@@ -340,12 +546,12 @@ bool BosonScenario::saveScenarioSettings(QDataStream& stream)
 
 bool BosonScenario::loadPlayers(QDataStream& stream)
 {
- if (!d->mUnits) {
-	kdError() << k_funcinfo << ": NULL units" << endl;
+ if (maxPlayers() != (int)d->mPlayers.count()) {
+	kdError() << k_funcinfo << "maxPlayers() != d->mPlayers.count()" << endl;
 	return false;
  }
  for (int i = 0; i < d->mMaxPlayers; i++) {
-	if (!loadPlayer(stream, i)) {
+	if (!d->mPlayers[i].loadPlayer(stream)) {
 		kdError() << "Could not load player " << i << endl;
 		return false;
 	}
@@ -355,10 +561,6 @@ bool BosonScenario::loadPlayers(QDataStream& stream)
 
 bool BosonScenario::loadPlayers(QDomElement& node)
 {
- if (!d->mUnits) {
-	kdError() << k_funcinfo << ": NULL units" << endl;
-	return false;
- }
  QDomNodeList list = node.elementsByTagName("Player");
  if (list.count() < minPlayers()) {
 	kdError() << "Not enough players in file - expected " << minPlayers() 
@@ -376,6 +578,7 @@ bool BosonScenario::loadPlayers(QDomElement& node)
 		kdError() << i << " is not a QDomElement" << endl;
 		return false;
 	}
+
 	if (!loadPlayer(player)) {
 		kdError() << "Could not load player " << i << endl;
 		return false;
@@ -390,120 +593,39 @@ bool BosonScenario::loadPlayer(QDomElement& node)
 	kdError() << "Missing PlayerNumber" << endl;
 	return false;
  }
- bool ok = false; // toInt() parameter
- QByteArray buffer;
- QDataStream stream(buffer, IO_WriteOnly);
 
- unsigned long int minerals = 0;
- unsigned long int oil = 0;
-
- if (!readMinerals(node, minerals)) {
-	return false;
- }
- if (!readOil(node, oil)) {
-	return false;
- }
- stream << (Q_ULONG)minerals;
- stream << (Q_ULONG)oil;
- 
- QDomNodeList list = node.elementsByTagName("Unit");
- stream << (Q_UINT32)list.count();
- for (unsigned int i = 0; i < list.count(); i++) {
-	QDomElement unit = list.item(i).toElement();
-	if (unit.isNull()) {
-		kdError() << "Unit is not a QDomElement" << endl;
-		return false;
-	}
-	if (!unit.hasAttribute("UnitType")) {
-		kdError() << "Missing UnitType" << endl;
-		return false;
-	}
-	if (!unit.hasAttribute("x")) {
-		kdError() << "Missing x" << endl;
-		return false;
-	}
-	if (!unit.hasAttribute("y")) {
-		kdError() << "Missing y" << endl;
-		return false;
-	}
-	Q_INT32 unitType;
-	Q_INT32 x;
-	Q_INT32 y;
-
-	unitType = unit.attribute("UnitType").toInt(&ok);
-	if (!ok) {
-		kdError() << k_funcinfo << "UnitType was no number" << endl;
-		return false;
-	}
-	x = unit.attribute("x").toInt(&ok);
-	if (!ok) {
-		kdError() << k_funcinfo << "x was no number" << endl;
-		return false;
-	}
-	y = unit.attribute("y").toInt(&ok);
-	if (!ok) {
-		kdError() << k_funcinfo << "y was no number" << endl;
-		return false;
-	}
-	
-	stream << (Q_INT32)TAG_UNIT;
-	stream << unitType;
-	stream << x;
-	stream << y;
- }
-
+ bool ok = false;
  unsigned int playerNumber = node.attribute("PlayerNumber").toUInt(&ok);
  if (!ok) {
 	kdError() << k_funcinfo << "PlayerNumber was no number" << endl;
 	playerNumber = 0;
  }
 
- QDataStream readStream(buffer, IO_ReadOnly);
- return loadPlayer(readStream, playerNumber);
-}
+ if ((int)playerNumber >= maxPlayers()) {
+	kdError() << k_funcinfo << ": don't know player " << playerNumber 
+			<< endl;
+	return false;
+ }
+ if (maxPlayers() != (int)d->mPlayers.count()) {
+	kdError() << k_funcinfo << "maxPlayers() != d->mPlayers.count()" << endl;
+	return false;
+ }
 
-bool BosonScenario::readMinerals(QDomElement& node, unsigned long int& minerals)
-{
- QDomNodeList list = node.elementsByTagName("Minerals");
- if (list.count() != 1) {
-	kdWarning() << "Must have exactly one \"Minerals\" per player" << endl;
-	return false;
- }
- bool ok = false;
- QDomElement e = list.item(0).toElement();
- minerals = e.text().toULong(&ok);
- if (!ok) {
-	kdError() << "Invalid minerals" << endl;
-	return false;
- }
- return true;
-}
-
-bool BosonScenario::readOil(QDomElement& node, unsigned long int& oil)
-{
- QDomNodeList list = node.elementsByTagName("Oil");
- if (list.count() != 1) {
-	kdWarning() << "Must have exactly one \"Oil\" per player" << endl;
-	return false;
- }
- bool ok = false;
- QDomElement e = list.item(0).toElement();
- oil = e.text().toULong(&ok);
- if (!ok) {
-	kdError() << "Invalid oil" << endl;
-	return false;
- }
- return true;
+ d->mPlayers[playerNumber].loadPlayer(node);
 }
 
 bool BosonScenario::savePlayers(QDomElement& node)
 {
+ if (maxPlayers() != (int)d->mPlayers.count()) {
+	kdError() << k_funcinfo << "maxPlayers() != d->mPlayers.count()" << endl;
+	return false;
+ }
  QDomDocument doc = node.ownerDocument();
-
  for (int i = 0; i < maxPlayers(); i++) {
 	QDomElement player = doc.createElement("Player");
 	node.appendChild(player);
-	if (!savePlayer(player, i)) {
+	player.setAttribute("PlayerNumber", i);
+	if (!d->mPlayers[i].savePlayer(doc, player)) {
 		kdError() << "Error saving units of player " << i << endl;
 		return false;
 	}
@@ -513,55 +635,15 @@ bool BosonScenario::savePlayers(QDomElement& node)
 
 bool BosonScenario::savePlayers(QDataStream& stream)
 {
+ if (maxPlayers() != (int)d->mPlayers.count()) {
+	kdError() << k_funcinfo << "maxPlayers() != d->mPlayers.count()" << endl;
+	return false;
+ }
  for (int i = 0; i < maxPlayers(); i++) {
-	if (!savePlayer(stream, i)) {
+	if (d->mPlayers[i].savePlayer(stream)) {
 		kdError() << "Error saving units of player " << i << endl;
 		return false;
 	}
- }
- return true;
-}
-
-bool BosonScenario::savePlayer(QDomElement& node, unsigned int playerNumber)
-{
- QDomDocument doc = node.ownerDocument();
- node.setAttribute("PlayerNumber", playerNumber);
-
- if (!d->mUnits) {
-	kdError() << k_funcinfo << ": NULL units" << endl;
-	return false;
- }
- if (d->mUnits->count() <= playerNumber) {
-	kdError() << k_funcinfo << ": Unknown player " << playerNumber << endl;
-	return false;
- }
- if (!d->mPlayer2Minerals.contains(playerNumber)) {
-	kdWarning() << "No minerals for player " << playerNumber << endl;
-	// just use 0
-	d->mPlayer2Minerals.insert(playerNumber, 0);
- }
- if (!d->mPlayer2Oil.contains(playerNumber)) {
-	kdWarning() << "No oil for player " << playerNumber << endl;
-	// just use 0
-	d->mPlayer2Oil.insert(playerNumber, 0);
- }
-
- QDomText minerals = doc.createTextNode("Minerals");
- node.appendChild(minerals);
- minerals.setData(QString::number(d->mPlayer2Minerals[playerNumber]));
-
- QDomText oil = doc.createTextNode("Oil");
- node.appendChild(oil);
- oil.setData(QString::number(d->mPlayer2Oil[playerNumber]));
- 
- QValueList<ScenarioUnit>::Iterator it;
- for (it = d->mUnits[playerNumber].begin(); it != d->mUnits[playerNumber].end(); ++it) {
-	ScenarioUnit s = (*it);
-	QDomElement unit = doc.createElement("Unit");
-	node.appendChild(unit);
-	unit.setAttribute("UnitType", s.unitType);
-	unit.setAttribute("x", s.x);
-	unit.setAttribute("y", s.y);
  }
  return true;
 }
@@ -611,78 +693,6 @@ bool BosonScenario::verifyScenario(QDataStream& stream)
  return true;
 }
 
-bool BosonScenario::loadPlayer(QDataStream& stream, unsigned int playerNumber)
-{
- if (!d->mUnits) {
-	kdError() << k_funcinfo << ": Unit array not yet created" 
-			<< endl;
-	return false;
- }
- if ((int)playerNumber >= maxPlayers()) {
-	kdError() << k_funcinfo << ": don't know player " << playerNumber 
-			<< endl;
-	return false;
- }
-
- Q_ULONG minerals;
- Q_ULONG oil;
- Q_UINT32 unitCount;
- stream >> minerals;
- stream >> oil;
- stream >> unitCount;
-
- d->mPlayer2Minerals.insert(playerNumber, minerals);
- d->mPlayer2Oil.insert(playerNumber, oil);
-
- for (unsigned int i = 0; i < unitCount; i++) {
-	Q_INT32 tag_unit;
-	Q_INT32 unitType;
-	Q_INT32 x;
-	Q_INT32 y;
-
-	stream >> tag_unit;
-	stream >> unitType;
-	stream >> x;
-	stream >> y;
-
-	if (tag_unit != TAG_UNIT) {
-		kdError() << "Missing TAG_UNIT" << endl;
-		return false;
-	}
-		
-	ScenarioUnit s;
-	s.unitType = unitType;
-	s.x = x;
-	s.y = y;
-	d->mUnits[playerNumber].append(s);
- }
- return true;
-}
-
-bool BosonScenario::savePlayer(QDataStream& stream, unsigned int playerNumber)
-{
- if (!d->mUnits) {
-	kdError() << k_funcinfo << ": NULL units" << endl;
-	return false;
- }
- if (d->mUnits->count() >= playerNumber) {
-	kdError() << k_funcinfo << ": Unknown player " << playerNumber << endl;
-	return false;
- }
- stream << (Q_LONG)d->mPlayer2Minerals[playerNumber];
- stream << (Q_LONG)d->mPlayer2Oil[playerNumber];
- stream << (Q_UINT32)d->mUnits[playerNumber].count();
- QValueList<ScenarioUnit>::Iterator it;
- for (it = d->mUnits[playerNumber].begin(); it != d->mUnits[playerNumber].end(); ++it) {
-	ScenarioUnit s = (*it);
-	stream << (Q_INT32)TAG_UNIT;
-	stream << (Q_INT32)s.unitType;
-	stream << (Q_INT32)s.x;
-	stream << (Q_INT32)s.y;
- }
- return true;
-}
-
 bool BosonScenario::isValid() const
 {
  if (d->mMinPlayers != (uint)d->mMaxPlayers) { // FIXME
@@ -697,8 +707,8 @@ bool BosonScenario::isValid() const
 	kdError() << "minplayers > " << BOSON_MAX_PLAYERS << endl;
 	return false;
  }
- if (!d->mUnits) {
-	kdError() << "no units!" << endl;
+ if (maxPlayers() != (int)d->mPlayers.count()) {
+	kdError() << k_funcinfo << "maxPlayers() != d->mPlayers.count()" << endl;
 	return false;
  }
 
@@ -728,28 +738,18 @@ void BosonScenario::initPlayer(Boson* boson, int playerNumber)
  }
  kdDebug() << k_funcinfo << " player " << playerNumber << "==" << p->id() 
 		<< endl;
- if ((int)d->mUnits->count() < playerNumber) {
+ if (playerNumber >= (int)d->mPlayers.count()) {
 	kdError() << k_funcinfo << ": don't have player " << playerNumber 
 			<< endl;
 	return;
  }
- if (!d->mPlayer2Minerals.contains(playerNumber)) {
-	kdWarning() << "No Minerals for " << playerNumber << endl;
-	p->setMinerals(0); // just use 0
- } else {
-	p->setMinerals(d->mPlayer2Minerals[playerNumber]);
- }
- if (!d->mPlayer2Oil.contains(playerNumber)) {
-	kdWarning() << "No Oil for " << playerNumber << endl;
-	p->setOil(0); // just use 0
- } else {
-	p->setOil(d->mPlayer2Oil[playerNumber]);
- }
+ p->setMinerals(d->mPlayers[playerNumber].minerals());
+ p->setOil(d->mPlayers[playerNumber].oil());
 
  // now add the units
- unsigned int unitCount = d->mUnits[playerNumber].count();
+ unsigned int unitCount = d->mPlayers[playerNumber].unitCount();
  for (unsigned int i = 0; i < unitCount; i++) {
-	ScenarioUnit s = (d->mUnits[playerNumber])[i]; // ieek
+	ScenarioUnit s = d->mPlayers[playerNumber].unit(i);
 	addUnit(boson, p, s.unitType, s.x, s.y);
  }
 }

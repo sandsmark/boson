@@ -34,14 +34,6 @@ class QStringList;
 class BosonScenario
 {
 public:
-	/*
-	enum PropertyId {
-		IdMaxPlayers = 0,
-		IdMinPlayers = 1,
-		IdMapHeight = 2,
-		IdMapWidth = 3,
-	};*/
-
 	BosonScenario();
 	BosonScenario(const QString& fileName);
 	~BosonScenario();
@@ -113,25 +105,17 @@ protected:
 	bool verifyScenario(QDataStream& stream); // TODO
 	bool loadScenarioSettings(QDataStream& stream);
 	bool loadPlayers(QDataStream& stream);
-	bool loadPlayer(QDataStream& stream, unsigned int playerNumber);
-
 
 	bool saveValidityHeader(QDataStream& stream);
 	bool saveScenarioSettings(QDataStream& stream);
 	bool savePlayers(QDataStream& stream);
-	bool savePlayer(QDataStream& stream, unsigned int playerNumber);
 
 	bool saveScenarioSettings(QDomElement&);
 	bool savePlayers(QDomElement&);
-	bool savePlayer(QDomElement&, unsigned int playerNumber);
 
 	bool loadScenarioSettings(QDomElement&);
 	bool loadPlayers(QDomElement&);
 	bool loadPlayer(QDomElement&);
-
-	bool readMinerals(QDomElement&, unsigned long int& minerals);
-	bool readOil(QDomElement&, unsigned long int& oil);
-
 
 private:
 	void init();
