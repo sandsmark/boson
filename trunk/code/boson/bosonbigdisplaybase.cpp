@@ -415,7 +415,7 @@ void BosonBigDisplayBase::initializeGL()
 	return;
  }
  */
- qglClearColor(Qt::black);
+ glClearColor(0.0, 0.0, 0.0, 0.0);
  glShadeModel(GL_FLAT); // GL_SMOOTH is default - but esp. in software rendering way slower. in hardware it *may* be equal (concerning speed) to GL_FLAT
  glDisable(GL_DITHER); // we don't need this, I guess (and its enabled by default)
 
@@ -525,6 +525,8 @@ void BosonBigDisplayBase::paintGL()
  boProfiling->renderClear(true);
  glClear(GL_COLOR_BUFFER_BIT);
  boProfiling->renderClear(false);
+
+ glColor3f(1.0, 1.0, 1.0);
 
  // the guy who wrote http://www.mesa3d.org/brianp/sig97/perfopt.htm is *really* clever!
  // this trick avoids clearing the depth buffer:
@@ -709,7 +711,7 @@ void BosonBigDisplayBase::paintGL()
 	GLfloat x1, y1, x2, y2;
 	GLfloat z; // currently the z-coordinate of the rect is not used - we set our own below
 
-	qglColor(Qt::red); // FIXME hardcoded
+	glColor3f(1.0, 0.0, 0.0); // FIXME hardcoded
 	
 	d->mSelectionRect.start(&x1, &y1, &z);
 	d->mSelectionRect.end(&x2, &y2, &z);
