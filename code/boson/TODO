@@ -14,13 +14,6 @@ Game TODOs
   Terrible performance.
 - BosonPath needs to be improved greatly - in progress
 - AI
-- BosonCanvas::unitsAtCell() uses QCanvas::collisions() and is therefore quite
-  slow. it is used by BosonPath which is not (yet) time critical but it can be
-  improved. *maybe* we'll add a QPtrList to all cells which contains all units
-  at this cell. So we'd have to use collisions() only to check *which* parts
-  (coordinates, rect, whatever) of the cell(s) is occupied by the unit. This
-  would improve the speed heavily but adding a QPtrList to every cell would be
-  terrible for memory usage... it *might* be worth...
 - follow-mode for units
 - _much_ better moving for multiple units in group
 - BosonCommandWidget should paint the order pixmap only *once* no more. E.g. we
