@@ -54,6 +54,14 @@ Generic :
 #81 f: plain rectangular selection boxes (QCanvas has something to do that)
 #82 f: new team-coloration stuff
 #83 f: destroyed things should dissapear after some times..
-#84 b: launching server from client failed
 #85 b: keeping on cliking on ennemy make them die quickly.. 
+#86 b: don't spread boson-*.log everywhere
+#87 b: in connectDialog, 'cancel' removes the dialog but doesn't quit boson
+#88 f: drag&dropping MMB should move the map accordingly, not centered it
+
+
+Fixed after 0.5:
+================
+#84 b: launching server from client failed
+
 
