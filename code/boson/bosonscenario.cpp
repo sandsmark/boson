@@ -50,7 +50,6 @@ public:
 			kdError() << k_funcinfo << "missing y" << endl;
 			return false;
 		}
-
 		node = mNode.cloneNode(true).toElement();
 		return true;
 	}
@@ -97,19 +96,19 @@ public:
 	}
 	bool savePlayer(QDomDocument& doc, QDomElement& node)
 	{
-		QDomText m = doc.createTextNode("Minerals");
+		QDomElement m = doc.createElement("Minerals");
+		m.appendChild(doc.createTextNode(QString::number(minerals())));
 		node.appendChild(m);
-		m.setData(QString::number(minerals()));
 
-		QDomText o = doc.createTextNode("Oil");
+		QDomElement o = doc.createElement("Oil");
+		o.appendChild(doc.createTextNode(QString::number(oil())));
 		node.appendChild(o);
-		o.setData(QString::number(oil()));
 
 		QPtrListIterator<ScenarioUnit> it(mUnits);
 		while (it.current()) {
 			QDomElement unit = doc.createElement("Unit");
-			node.appendChild(unit);
 			it.current()->save(unit);
+			node.appendChild(unit);
 			++it;
 		}
 		return true;
@@ -299,8 +298,11 @@ bool BosonScenario::loadScenario(QDomElement& root)
 bool BosonScenario::saveScenario(QDomElement& root)
 {
  QDomDocument doc = root.ownerDocument();
+ QDomNode node = doc.createElement("BosonScenario");
+ root.appendChild(node);
+ 
  QDomElement settings = doc.createElement("ScenarioSettings");
- root.appendChild(settings);
+ node.appendChild(settings);
  
  if (!saveScenarioSettings(settings)) {
 	kdError() << "Could not save scenario settings to XML" << endl;
@@ -308,7 +310,7 @@ bool BosonScenario::saveScenario(QDomElement& root)
  }
 
  QDomElement players = doc.createElement("ScenarioPlayers");
- root.appendChild(players);
+ node.appendChild(players);
  if (!savePlayers(players)) {
 	kdError() << "Could not save players to XML" << endl;
 	return false;
