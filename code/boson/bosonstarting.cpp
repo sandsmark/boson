@@ -25,7 +25,6 @@
 #include "player.h"
 #include "bosonplayfield.h"
 #include "bosonmap.h"
-#include "bosonscenario.h" // should not be here!
 #include "bosonmessage.h"
 #include "speciestheme.h"
 #include "bosonprofiling.h"
