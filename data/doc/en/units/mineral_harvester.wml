@@ -18,4 +18,5 @@
 	<tr><td>Resources</td><td>100</td></tr>
     </table>
     
-#include "footer.wml" before_url="../index.html" before_text="Units" after_url="oil_harvester.html" after_text="Oil Harvester"    
+#include "nav.wml" before_url="../index.html" before_text="Units" after_url="oil_harvester.html" after_text="Oil Harvester"    
+#include "footer.wml"

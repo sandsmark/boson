@@ -1,6 +1,6 @@
 #include "top.wml"
     <h1>
-      Facilities - War factory
+      Facilities - War Factory
     </h1>
     <table border="0">
 	<tr>
@@ -18,4 +18,5 @@
     </table>
     
 
-#include "footer.wml" before_url="barracks.html" before_text="Barracks" after_url="comsat.html" after_text="Comsat"        
+#include "nav.wml" before_url="barracks.html" before_text="Barracks" after_url="comsat.html" after_text="Comsat"        
+#include "footer.wml"

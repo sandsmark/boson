@@ -1,12 +1,12 @@
 #include "top.wml"
     <h1>
-      Facilities - Mineral refinery
+      Facilities - Mineral Refinery
     </h1>
     <table border="0">
 	<tr>
 		<td><img src="mineral_refinery.png" border="0">&nbsp;</td>
 		<td valign="top"><img src="../none.png" border="0" height="30"><br>
-		Nothing yet.
+		Send a <a href="../units/mineral_harvester.html">Mineral Harvester</a> to mineral refinery to get more minerals.</td>
 	</tr>
 	<tr><td><br>&nbsp</td></tr>
     </table>
@@ -17,4 +17,5 @@
     </table>
 
 
-#include "footer.wml" before_url="bunker.html" before_text="Command bunker" after_url="refinery.html" after_text="Oil refinery"        
+#include "nav.wml" before_url="bunker.html" before_text="Command Bunker" after_url="refinery.html" after_text="Oil Refinery"        
+#include "footer.wml"

@@ -26,4 +26,5 @@
     <a name="5">When is Boson finished?</a>
     <p>When it's done.</p>
 
-#include "footer.wml" before_url="units/aircraft.html" before_text="Aircraft" after_url="credits.html" after_text="Credits" 
+#include "nav.wml" before_url="units/aircraft.html" before_text="Aircraft" after_url="credits.html" after_text="Credits" 
+#include "footer.wml"

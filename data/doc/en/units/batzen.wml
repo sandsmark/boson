@@ -23,4 +23,5 @@
 	<tr><td>Shoot at air units</td><td>No</td></tr>
     </table>
 
-#include "footer.wml" before_url="quad.html" before_text="Quad" after_url="tank.html" after_text="Tank"    
+#include "nav.wml" before_url="quad.html" before_text="Quad" after_url="tank.html" after_text="Tank"    
+#include "footer.wml"

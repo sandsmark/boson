@@ -23,4 +23,5 @@
       </dd>
     </dl>
     
-#include "footer.wml" before_url="../facilities/samsite.html" before_text="Sam-Site" after_url="mineral_harvester.html" after_text="Mineral Harvester" 
+#include "nav.wml" before_url="../facilities/samsite.html" before_text="Sam-Site" after_url="mineral_harvester.html" after_text="Mineral Harvester" 
+#include "footer.wml"

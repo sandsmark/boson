@@ -17,4 +17,5 @@
     </table>
     
 
-#include "footer.wml" before_url="repairpad.html" before_text="Repair pad" after_url="helipad.html" after_text="Helipad"        
+#include "nav.wml" before_url="repairpad.html" before_text="Repair Pad" after_url="helipad.html" after_text="Helipad"        
+#include "footer.wml"

@@ -22,4 +22,5 @@
 	<tr><td>Shoot at air units</td><td>No</td></tr>
     </table>
 
-#include "footer.wml" before_url="oil_harvester.html" before_text="Oil Harvester" after_url="batzen.html" after_text="Batzen"    
+#include "nav.wml" before_url="oil_harvester.html" before_text="Oil Harvester" after_url="batzen.html" after_text="Batzen"    
+#include "footer.wml"

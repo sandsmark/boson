@@ -16,5 +16,6 @@
 	<tr><td>Mineral cost</td><td>300</td></tr>
     </table>
 
-#include "footer.wml" before_url="powerplant.html" before_text="Powerplant" after_url="warfactory.html" after_text="War factory"        
+#include "nav.wml" before_url="powerplant.html" before_text="Powerplant" after_url="warfactory.html" after_text="War Factory"        
+#include "footer.wml"
 

@@ -6,7 +6,7 @@
 	<tr>
 		<td><img src="helipad.png" border="0">&nbsp;</td>
 		<td valign="top"><img src="../none.png" border="0" height="30"><br>
-		Nothing yet.
+		A Helipad is needed to build a <a href="samsite.html">Sam-Site</a>
 	</tr>
 	<tr><td><br>&nbsp</td></tr>
     </table>
@@ -17,4 +17,5 @@
     </table>
     
 
-#include "footer.wml" before_url="prison.html" before_text="Prison" after_url="turret.html" after_text="Turret"        
+#include "nav.wml" before_url="prison.html" before_text="Prison" after_url="turret.html" after_text="Turret"        
+#include "footer.wml"

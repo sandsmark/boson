@@ -13,7 +13,7 @@ BO_DOCS=about.wml credits.wml faq.wml index.wml installation.wml intr.wml \
 	started.wml
 
 # list additional data here - these files will get installed
-doc_DATA=main.css 
+doc_DATA=main.css none.png boson.png
 
 # Condiguration ends here!
 

@@ -23,4 +23,5 @@
 	<tr><td>Shoot at air units</td><td>No</td></tr>
     </table>
 
-#include "footer.wml" before_url="batzen.html" before_text="Batzen" after_url="ship.html" after_text="Ship"    
+#include "nav.wml" before_url="batzen.html" before_text="Batzen" after_url="ship.html" after_text="Ship"    
+#include "footer.wml"
