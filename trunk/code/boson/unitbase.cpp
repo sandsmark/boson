@@ -272,3 +272,8 @@ bool UnitBase::isMobile() const
 {
  return unitProperties()->isMobile();
 }
+
+bool UnitBase::isFlying() const
+{
+ return (unitProperties() ? unitProperties()->isAircraft() : false);
+}

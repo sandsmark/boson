@@ -379,12 +379,13 @@ float BosonPath::cost(int x, int y)
       y * BO_TILE_SIZE, BO_TILE_SIZE, BO_TILE_SIZE));
   if(! list.isEmpty())
   {
+    bool flying = mUnit->isFlying();
     for(QCanvasItemList::Iterator it = list.begin(); it != list.end(); ++it)
     {
       if(RTTI::isUnit((*it)->rtti()))
       {
         Unit* unit = (Unit*)*it;
-        if(! unit->isDestroyed() && unit != mUnit)
+        if(unit != mUnit && unit->isFlying() == flying && !unit->isDestroyed())
         {
           kdDebug() << k_lineinfo << ": unit on cell " << x << "," << y << ": " << unit->id() << endl;
           return ERROR_COST;

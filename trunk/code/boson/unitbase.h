@@ -210,6 +210,17 @@ public:
 	 * See @ref UnitProperties::isMobile
 	 **/
 	bool isMobile() const;
+
+	/**
+	 * One day we might have units which can go on air <em>and</em> on land
+	 * or which just can land. Examples might be helicopters or planes at an
+	 * airport. For these units we need to know whether they are flying or
+	 * not.
+	 * @return Whether this unit is currently flying. Always false if @ref
+	 * unitProperties()->isAircraft is false. Currently this is juste the 
+	 * same as @ref unitProperties()->isAircraft.
+	 **/
+	bool isFlying() const;
 	
 private:
 	class UnitBasePrivate;

@@ -635,7 +635,7 @@ QValueList<Unit*> Unit::unitCollisions(bool exact) const
 	return units;
  }
  
- bool isAircraft = unitProperties()->isAircraft();
+ bool flying = isFlying();
  QCanvasItemList::Iterator it;
  for (it = collisionList.begin(); it != collisionList.end(); ++it) {
 	if (!RTTI::isUnit((*it)->rtti())) {
@@ -645,7 +645,7 @@ QValueList<Unit*> Unit::unitCollisions(bool exact) const
 	if (unit->isDestroyed()) {
 		continue;
 	}
-	if (isAircraft == unit->unitProperties()->isAircraft()) {
+	if (flying == unit->isFlying()) {
 		units.append(unit);
 	}
  }
