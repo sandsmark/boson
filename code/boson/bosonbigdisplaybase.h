@@ -31,7 +31,7 @@ class Player;
 class PlayerIO;
 class Unit;
 class UnitProperties;
-class BoCamera;
+class BoGameCamera;
 class BosonBigDisplayInputBase;
 class BoItemList;
 class BosonItem;
@@ -256,7 +256,7 @@ public:
 	void saveAsXML(QDomElement& root);
 	void loadFromXML(const QDomElement& root);
 
-	BoCamera* camera() const;
+	BoGameCamera* camera() const;
 	void advanceCamera();
 
 	void changeGroundRenderer(int renderer);
@@ -447,7 +447,7 @@ protected:
 		return sphereInFrustum(pos, radius);
 	}
 
-	void setCamera(const BoCamera& c);
+	void setCamera(const BoGameCamera& c);
 	/**
 	 * @return Point that the camera is looking at
 	 **/

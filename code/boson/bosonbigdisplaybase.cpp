@@ -362,7 +362,7 @@ public:
 
 	BosonGLChat* mChat;
 
-	BoCamera mCamera;
+	BoGameCamera mCamera;
 
 	GLint mViewport[4]; // x,y,w,h of the viewport. see setViewport
 	BoMatrix mProjectionMatrix;
@@ -683,7 +683,7 @@ void BosonBigDisplayBase::paintGL()
 
  glColor3ub(255, 255, 255);
 
- // note: we don't call BoCamera::applyCameraToScene() here because of performance. instead we just
+ // note: we don't call BoGameCamera::applyCameraToScene() here because of performance. instead we just
  // push the matrix here and pop it at the end of paintGL() again.
  // applyCameraToScene() is called only whenever cameraChanged() is called.
  glPushMatrix();
@@ -1558,8 +1558,8 @@ void BosonBigDisplayBase::mouseEventWheel(float delta, Orientation orientation, 
 		}
 		camera()->changeZ(delta, true);
 		z = canvas()->map()->cellAverageHeight((int)(camera()->lookAt().x()), (int)-(camera()->lookAt().y()));
-		if (camera()->z() < z + BoCamera::minCameraZ()) {
-			camera()->changeZ(z + BoCamera::minCameraZ() - camera()->z(), true);
+		if (camera()->z() < z + BoGameCamera::minCameraZ()) {
+			camera()->changeZ(z + BoGameCamera::minCameraZ() - camera()->z(), true);
 		}
 		cameraChanged();
 		break;
@@ -1595,8 +1595,8 @@ void BosonBigDisplayBase::mouseEventMove(int buttonState, const BoMouseEvent& ev
 		d->mMouseMoveDiff.startZoom();
 		camera()->changeZ(d->mMouseMoveDiff.dy(), true);
 		float z = canvas()->map()->cellAverageHeight((int)(camera()->lookAt().x()), (int)-(camera()->lookAt().y()));
-		if (camera()->z() < z + BoCamera::minCameraZ()) {
-			camera()->changeZ(z + BoCamera::minCameraZ() - camera()->z(), true);
+		if (camera()->z() < z + BoGameCamera::minCameraZ()) {
+			camera()->changeZ(z + BoGameCamera::minCameraZ() - camera()->z(), true);
 		}
 		cameraChanged();
 	} else if (buttonState & RIGHT_BUTTON) {
@@ -1645,8 +1645,8 @@ void BosonBigDisplayBase::mouseEventMove(int buttonState, const BoMouseEvent& ev
 		mapDistance(moveX, moveY, &dx, &dy);
 		camera()->changeLookAt(BoVector3(dx, dy, 0), true);
 		float z = canvas()->map()->cellAverageHeight((int)(camera()->lookAt().x()), (int)-(camera()->lookAt().y()));
-		if (camera()->z() < z + BoCamera::minCameraZ()) {
-			camera()->changeZ(z + BoCamera::minCameraZ() - camera()->z(), true);
+		if (camera()->z() < z + BoGameCamera::minCameraZ()) {
+			camera()->changeZ(z + BoGameCamera::minCameraZ() - camera()->z(), true);
 		}
 		cameraChanged();
 	} else {
@@ -1848,7 +1848,7 @@ void BosonBigDisplayBase::slotResetViewProperties()
  BO_CHECK_NULL_RET(canvas());
  d->mFovY = 60.0;
  d->mAspect = 1.0;
- setCamera(BoCamera(0.0f, (float)(canvas()->mapWidth()), -((float)(canvas()->mapHeight())), 0.0f));
+ setCamera(BoGameCamera(0.0f, (float)(canvas()->mapWidth()), -((float)(canvas()->mapHeight())), 0.0f));
  resizeGL(d->mViewport[2], d->mViewport[3]);
 }
 
@@ -1962,8 +1962,8 @@ void BosonBigDisplayBase::quitGame()
  d->mMouseMoveDiff.moveToPos(0, 0);
  d->mRenderedItems = 0;
  d->mRenderedCells = 0;
-// setCamera(BoCamera()); do not do this! it calls cameraChanged() which generates cell list and all that stuff
- d->mCamera = BoCamera();
+// setCamera(BoGameCamera()); do not do this! it calls cameraChanged() which generates cell list and all that stuff
+ d->mCamera = BoGameCamera();
 
  setInputInitialized(false);
 }
@@ -2336,7 +2336,7 @@ void BosonBigDisplayBase::calculateWorldRect(const QRect& rect, float* minX, flo
  *maxY *= -1;
 }
 
-void BosonBigDisplayBase::setCamera(const BoCamera& camera)
+void BosonBigDisplayBase::setCamera(const BoGameCamera& camera)
 {
  d->mCamera = camera;
  cameraChanged();
@@ -2355,7 +2355,7 @@ void BosonBigDisplayBase::cameraChanged()
  glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
 
  if (checkError()) {
-	boError() << k_funcinfo << "after BoCamera::applyCameraToScene()" << endl;
+	boError() << k_funcinfo << "after BoGameCamera::applyCameraToScene()" << endl;
  }
 
  // the applyCameraToScene() above is the most important call for the modelview matrix.
@@ -2386,7 +2386,7 @@ void BosonBigDisplayBase::cameraChanged()
  emit signalChangeViewport(this, cellTL, cellTR, cellBL, cellBR);
 }
 
-BoCamera* BosonBigDisplayBase::camera() const
+BoGameCamera* BosonBigDisplayBase::camera() const
 {
  return &d->mCamera;
 }

@@ -93,7 +93,7 @@ void BosonScript::sendInput(int playerId, QDataStream& stream)
   p->forwardInput(stream);
 }
 
-BoCamera* BosonScript::camera()
+BoGameCamera* BosonScript::camera()
 {
   if(!display())
   {
@@ -674,7 +674,7 @@ void BosonScript::setCameraZ(float z)
 void BosonScript::setCameraMoveMode(int mode)
 {
   boDebug() << k_funcinfo << "mode: " << mode << endl;
-  camera()->setMoveMode((BoCamera::MoveMode)mode);
+  camera()->setMoveMode((BoGameCamera::MoveMode)mode);
 }
 
 void BosonScript::commitCameraChanges(int ticks)
