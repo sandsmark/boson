@@ -1862,6 +1862,13 @@ void MobileUnit::advanceMoveCheck()
 		return;
 	}
  }
+ if (!canvas()->cell(currentPathPoint().x(), currentPathPoint().y())) {
+	boError(401) << k_funcinfo << "NULL cell " << currentPathPoint().x() << "," << currentPathPoint().y() << endl;
+	setMovingStatus(Standing);
+	stopMoving();
+	setWork(WorkNone);
+	return;
+ }
 
  // Check if top-left point of the unit will be on canvas after moving
  if (!canvas()->onCanvas(boundingRectAdvanced().topLeft())) {
