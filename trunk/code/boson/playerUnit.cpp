@@ -113,7 +113,7 @@ bool playerMobUnit::getWantedMove(QPoint &wstate)
 	QRect	nr = r;			// temporary variable
 	asked = r.topLeft();		// destinaton asked, let's begin where we already are
 	QPoint	dv = dest - asked;	// delta do the destination
-	uint	gf = goFlat();		// caching
+	uint	gf = goFlag();		// caching
 
 	int	range = mobileProp[type].range;
 	bool	ret;
@@ -139,27 +139,27 @@ bool playerMobUnit::getWantedMove(QPoint &wstate)
 			//
 			ret = true;
 			// so that we do not prevent ourselves to move : 
-			bocanvas->unsetCellFlag ( r, (BO_GO_AIR==goFlag)? Cell::flying_unit_f:Cell::field_unit_f );
+			bocanvas->unsetCellFlag ( r, (BO_GO_AIR==gf)? Cell::flying_unit_f:Cell::field_unit_f );
 			if ( abs(dv.x()) > abs(dv.y()) ) {
 				// x is greater
 				nr.moveBy( (dv.x()>0)?1:-1, 0); // try first along the x axis
-				if (!bocanvas->checkMove(nr, goFlag ))  {
+				if (!bocanvas->checkMove(nr, gf ))  {
 					nr.moveBy( (dv.x()>0)?-1:1,  (dv.y()>0)?1:-1); // then along the y axis
-					if (!bocanvas->checkMove(nr, goFlag ))
+					if (!bocanvas->checkMove(nr, gf ))
 						ret = false;
 				}
 
 			} else {
 				// y is greater
 				nr.moveBy( 0,  (dv.y()>0)?1:-1); // try first along the y axis
-				if (!bocanvas->checkMove(nr, goFlag )) {
+				if (!bocanvas->checkMove(nr, gf )) {
 					nr.moveBy( (dv.x()>0)?1:-1,  (dv.y()>0)?-1:1); // try first along the x axis
-					if (!bocanvas->checkMove(nr, goFlag ))
+					if (!bocanvas->checkMove(nr, gf ))
 						ret = false;
 				}
 			}
 			// restore the state for ourselves
-			bocanvas->setCellFlag ( r, (BO_GO_AIR==goFlag)? Cell::flying_unit_f:Cell::field_unit_f );
+			bocanvas->setCellFlag ( r, (BO_GO_AIR==gf)? Cell::flying_unit_f:Cell::field_unit_f );
 			if (!ret)
 			{
  				failed_move++;
@@ -177,7 +177,7 @@ bool playerMobUnit::getWantedMove(QPoint &wstate)
 			}
 			// it's ok, let's request the move
 			///orzel : XXX probaly a but if the SERVER refuses the move because another player has already moved on this tile
-			bocanvas->setCellFlag ( nr, (BO_GO_AIR==goFlag)? Cell::request_flying_f:Cell::request_f );
+			bocanvas->setCellFlag ( nr, (BO_GO_AIR==gf)? Cell::request_flying_f:Cell::request_f );
 			return true;
 	}
 
