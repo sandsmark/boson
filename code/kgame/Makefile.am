@@ -22,7 +22,7 @@ LIBKDEGAMES_H = kchatbase.h kgameprogress.h kstdgameaction.h
 
 libkgameincludedir=$(includedir)/kgame
 libkgame_la_SOURCES = $(KMESSAGE) $(KGAME) $(DIALOGS) $(LIBKDEGAMES)
-libkgame_la_LIBADD = $(LIB_KDEUI) $(top_builddir)/bodebug/libbodebug.la
+libkgame_la_LIBADD = $(top_builddir)/bodebug/libbodebug.la
 libkgame_la_LDFLAGS = $(all_libraries)
 
 noinst_HEADERS = $(KMESSAGE_H) $(KGAME_H) $(DIALOGS_H) $(LIBKDEGAMES_H)
