@@ -54,6 +54,21 @@ fi
 ])
 AC_CHECK_LIB3DS
 
+AC_DEFUN(AC_HAVE_KGAME_VERSION,
+[
+AC_MSG_CHECKING([for kgame/kgameversion.h])
+AC_FIND_FILE(kgame/kgameversion.h,  [$kde_incdirs], kgameversion_h)
+if test "$kgameversion_h" = NO ; then
+  AC_MSG_RESULT([no])
+  AC_DEFINE_UNQUOTED(HAVE_KGAME_VERSION_H, 0, [ ])
+else
+  AC_MSG_RESULT([$kgameversion_h])
+  AC_DEFINE_UNQUOTED(HAVE_KGAME_VERSION_H, 1, [ ])
+fi
+])
+AC_HAVE_KGAME_VERSION
+
+
 AC_DEFUN(AC_BOSON_HAVE_GL,
 [
 AC_HAVE_GL

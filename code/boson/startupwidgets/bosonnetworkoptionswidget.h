@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@ class QPushButton;
 class QRadioButton;
 
 class Boson;
+class KGame;
 
 class BosonNetworkOptionsWidget : public QWidget
 {
@@ -47,6 +48,9 @@ class BosonNetworkOptionsWidget : public QWidget
     void slotStartNetwork();
     void slotConnectionTypeChanged(int);
     void slotConnectionBroken();
+
+  protected slots:
+    void slotClientJoinedGame(Q_UINT32 clientId, KGame* client);
 
   signals:
     void signalOkClicked();
