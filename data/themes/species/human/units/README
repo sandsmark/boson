@@ -101,6 +101,10 @@ CanGoOnLand=boolean  - Whether this unit can go over land.
 CanGoOnWater=boolean - Whether this unit can go over water. 
                        This is true by default for TerrainType = Water or 
 		       Aircraft.
+CanMineMinerals=boolean - Whether this unit can mine minerals.
+                          Default is false.
+CanMineOil=boolean   - Whether this unit can mine oil.
+                       Default is false .
 
 -------------------------------------------------------------------------------
 
