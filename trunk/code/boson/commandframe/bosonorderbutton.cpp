@@ -349,7 +349,7 @@ void BosonOrderButton::displayUnitPixmap(Unit* unit)
  displayUnitPixmap(unit->type(), unit->owner());
 }
 
-void BosonOrderButton::displayUnitPixmap(unsigned long int unitType, Player* owner)
+void BosonOrderButton::displayUnitPixmap(unsigned long int unitType, const Player* owner)
 {
  if (!owner) {
 	boError(220) << k_funcinfo << "NULL owner" << endl;

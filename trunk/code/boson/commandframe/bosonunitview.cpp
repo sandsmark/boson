@@ -102,17 +102,18 @@ void BosonUnitView::setUnit(Unit* u)
  if (!unit) {
 	return;
  }
- if (!unit->owner()) {
+ const Player* owner = unit->owner();
+ if (!owner) {
 	boError(220) << k_funcinfo << "no owner" << endl;
 	return;
  }
- if (!unit->owner()->speciesTheme()) {
+ if (!owner->speciesTheme()) {
 	boError(220) << k_funcinfo << "No speciesTheme" << endl;
 	return;
  }
  d->mName->setText(unit->unitProperties()->name());
  d->mHealth->setText(i18n("Health: %1").arg(unit->health()));
- d->mOwner->setText(i18n("Player: %1").arg(unit->owner()->name()));
+ d->mOwner->setText(i18n("Player: %1").arg(owner->name()));
  d->mId->setText(i18n("Id: %1").arg(unit->id()));
  d->mArmor->setText(i18n("Armor: %1").arg(unit->armor()));
  d->mShields->setText(i18n("Shields: %1 (%2)").arg(unit->shields()).arg(unit->unitProperties()->shields()));
@@ -120,7 +121,7 @@ void BosonUnitView::setUnit(Unit* u)
  showGeneral();
 }
 
-void BosonUnitView::displayUnitPixmap(unsigned long int unitType, Player* owner)
+void BosonUnitView::displayUnitPixmap(unsigned long int unitType, const Player* owner)
 {
  if (!owner) {
 	boError(220) << k_funcinfo << "NULL owner" << endl;
