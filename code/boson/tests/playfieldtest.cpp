@@ -20,6 +20,7 @@ static bool testMap(const QString& map);
 static bool testValid(BosonPlayField* field);
 static bool testValidMap(const BosonMap* map);
 static bool compareXML(const QByteArray& b1, const QByteArray& b2);
+static bool compareElements(const QDomElement& r1, const QDomElement& r2);
 static bool comparePNG(const QByteArray& b1, const QByteArray& b2);
 
 QStringList availablePlayFields;
@@ -144,7 +145,66 @@ static bool compareXML(const QByteArray& b1, const QByteArray& b2)
  if (doc1.toString() == doc2.toString()) {
 	return false;
  }
- return true;
+
+ // if stings do not match, this can have many reasons. e.g. attributes have
+ // different order - but the docs are still equal. so we need to do further
+ // testing
+ QDomElement root1 = doc1.documentElement();
+ QDomElement root2 = doc2.documentElement();
+ if (compareElements(root1, root2)) {
+	boError() << k_funcinfo << "xml files differ" << endl;
+	return true;
+ }
+ return false;
+}
+
+// return TRUE if files differ
+static bool compareElements(const QDomElement& r1, const QDomElement& r2)
+{
+ if (r1.tagName() != r2.tagName()) {
+	boError() << k_funcinfo << "tagnames of elements differ: " << r1.tagName() << " != " << r2.tagName() << endl;
+	return true;
+ }
+ QDomNamedNodeMap m1 = r1.attributes();
+ QDomNamedNodeMap m2 = r2.attributes();
+ if (m1.count() != m2.count()) {
+	boError() << k_funcinfo << "element1 has " << m1.count() << " attributes, element2 " << m2.count() << " attributes. tagname=" << r1.tagName() << endl;
+	return true;
+ }
+ for (unsigned int i = 0; i < m1.count(); i++) {
+	QString name = m1.item(i).nodeName();
+	if (!r1.hasAttribute(name)) {
+		boError() << k_funcinfo << "tester is buggy" << endl;
+		return true;
+	}
+	if (!r2.hasAttribute(name)) {
+		boError() << k_funcinfo << "element1 has attribute " << name << " but element2 ahs not" << endl;
+		return true;
+	}
+	QString v = r1.attribute(name);
+	if (r2.attribute(name) != v) {
+		boError() << k_funcinfo << "attribute " << name << " in element1 is " << v << ", in element2 " << r2.attribute(name) << endl;
+		return true;
+	}
+ }
+
+
+ QDomNode child1 = r1.firstChild();
+ QDomNode child2 = r2.firstChild();
+ for (; !child1.isNull(); child1 = child1.nextSibling(), child2 = child2.nextSibling()) {
+	if (child1.isElement() != child2.isElement()) {
+		boError() << k_funcinfo << "isElement flag differs for childs. tagname of parent=" << r1.tagName() << endl;
+		return true;
+	}
+	QDomElement e1 = child1.toElement();
+	QDomElement e2 = child2.toElement();
+	if (compareElements(e1, e2)) {
+		return true;
+	}
+ }
+
+
+ return false;
 }
 
 // return TRUE if files differ, otherwise FALSE
