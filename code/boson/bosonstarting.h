@@ -71,6 +71,11 @@ signals:
 	 **/
 	void signalStartGame();
 
+	/**
+	 * See @ref Top::slotStartGameLoadWorkaround
+	 **/
+	void signalStartGameLoadWorkaround();
+
 	void signalStartingFailed();
 
 	/**

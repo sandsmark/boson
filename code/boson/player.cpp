@@ -380,6 +380,7 @@ bool Player::loadUnits(QDataStream& stream)
 
 	// Create unit with Boson
 	Unit* unit = ((Boson*)game())->loadUnit(type, this);
+
 	// Set additional properties
 	d->mUnits.append(unit);
 	unit->dataHandler()->registerHandler(dataHandlerID, this,
@@ -400,8 +401,7 @@ bool Player::loadUnits(QDataStream& stream)
 	// Increase unit count
 	if (unit->isMobile()) {
 		d->mMobilesCount++;
-	}
-	else {
+	} else {
 		d->mFacilitiesCount++;
 	}
  }

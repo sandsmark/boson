@@ -106,7 +106,10 @@ bool BosonStarting::loadGame(const QString& loadingFileName)
  // Close file
  f.close();
  mLoading = false;
+
+ kdDebug() << k_funcinfo << "mit signalStartGame()" << endl;
  emit signalStartGame(); // FIXME - also in loadgamedata3
+ emit signalStartGameLoadWorkaround();
  return loaded;
 }
 
