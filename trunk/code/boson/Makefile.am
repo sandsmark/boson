@@ -3,30 +3,18 @@
 # this has all of the subdirectories that make will recurse into.  if
 # there are none, comment this out
 SUBDIRS = data visual
-#boson editor
 
 bin_PROGRAMS = boson bounit boprofiling
-#boeditor 
 
 INCLUDES = -I$(kde_includes)/arts $(all_includes)
 
-# all boson(game)-only parts
-BOSON_SRC = main.cpp \
+BOSON_SRC = \
+	main.cpp \
 	top.cpp  \
 	bosonwelcomewidget.cpp \
 	bosonnewgamewidget.cpp \
 	bosonserveroptionswidget.cpp \
-	bosonloadingwidget.cpp
-#optionsdialog.cpp # should be boson-only but... currently we need it for both.
-
-# all map editor-only parts. 
-BOEDITOR_SRC = editor.cpp \
-	bosonunitdialog.cpp \
-	editorinput.cpp \
-	topbase.cpp
-
-# all used-by-both files.
-COMMON_SRC = \
+	bosonloadingwidget.cpp \
 	cell.cpp \
 	unitproperties.cpp \
 	pluginproperties.cpp \
@@ -51,7 +39,9 @@ COMMON_SRC = \
 	kgameplayerdebug.cpp \
 	kgamecelldebug.cpp \
 	bodisplaymanager.cpp \
+	bosonwidgetbase.cpp \
 	bosonwidget.cpp \
+	editorwidget.cpp \
 	boshot.cpp \
 	bosontiles.cpp \
 	bosonconfig.cpp \
@@ -92,11 +82,7 @@ BOPROFILING_SRC= \
 
 boson_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 boson_LDADD = $(top_builddir)/boson/visual/libbosonvisual.la -lkdegames -lqtmcop -lsoundserver_idl -lartskde -lGLU -l3ds $(LIB_KDEUI)
-boson_SOURCES = $(BOSON_SRC) $(COMMON_SRC)
-
-#boeditor_LDFLAGS = $(KDE_RPATH) $(all_libraries)
-#boeditor_LDADD = $(top_builddir)/boson/visual/libbosonvisual.la -lkdegames -lqtmcop -lsoundserver_idl -lartskde $(LIB_KDEUI) 
-#boeditor_SOURCES = $(BOEDITOR_SRC) $(COMMON_SRC)
+boson_SOURCES = $(BOSON_SRC)
 
 bounit_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 bounit_LDADD = -lkio $(LIB_KDEUI)
