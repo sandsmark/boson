@@ -64,3 +64,41 @@ fi
 AC_BOSON_HAVE_GL
 
 
+AC_DEFUN(AC_CHECK_KGAME_SAVEGAME,
+[
+dnl KGame::savegame() didn't exist in KDE 3.0 -> so we need to check for its existence
+AC_MSG_CHECKING([for KGame::savegame()])
+AC_LANG_SAVE
+AC_LANG_CPLUSPLUS
+bo_save_flags="$CXXFLAGS"
+CXXFLAGS="$CXXFLAGS $all_includes"
+AC_TRY_COMPILE([
+  #include <kgame/kgame.h>
+  #include <qdatastream.h>
+  class Test : public KGame
+  {
+  public:
+    void test()
+    {
+      QDataStream stream;
+      savegame(stream, false, false);
+    }
+  protected:
+    virtual bool playerInput(QDataStream&,KPlayer*){ return true;}
+  };
+],[
+  Test g;
+],kgame_savegame=yes,kgame_savegame=no)
+AC_MSG_RESULT([$kgame_savegame])
+
+CXXFLAGS="$bo_save_flags"
+AC_LANG_RESTORE
+
+if test "$kgame_savegame" != "yes"; then
+  AC_DEFINE_UNQUOTED(HAVE_KGAME_SAVEGAME, 0, [ ])
+else
+  AC_DEFINE_UNQUOTED(HAVE_KGAME_SAVEGAME, 1, [ ])
+fi
+])
+AC_CHECK_KGAME_SAVEGAME
+
