@@ -259,7 +259,7 @@ bool BosonBigDisplayInput::actionMoveWithAttack(const BoVector3& canvasVector)
  // z is ignored
  localPlayerInput()->moveWithAttack(selection()->allUnits(), (int)canvasVector.x(), (int)canvasVector.y());
  if (selection()->leader()->owner() == localPlayer()) {
-	selection()->leader()->playSound(SoundOrderAttack);
+	selection()->leader()->playSound(SoundOrderMove);
  }
  return true;
 }
