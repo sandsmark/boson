@@ -75,6 +75,7 @@ BosonMiniMap::BosonMiniMap(QWidget* parent) : QWidget(parent)
 {
  d = new BosonMiniMapPrivate;
  mGround = 0;
+ mUnZoomedGround = 0;
  mMap = 0;
  mLocalPlayer = 0;
  mCanvas = 0;
@@ -131,14 +132,18 @@ void BosonMiniMap::slotCreateMap(int w, int h)
  if (!w && !h) {
 	return;
  }
- delete mGround;
+ if(mGround) {
+	delete mGround;
+	mGround = 0;
+ }
  d->mMapWidth = w;
  d->mMapHeight = h;
- mGround = new QPixmap(mapWidth(), mapHeight());
- mGround->fill(COLOR_UNKNOWN);
+ mUnZoomedGround = new QPixmap(w, h);
+ mUnZoomedGround->fill(COLOR_UNKNOWN);
+ createGround();
 
- d->mPixmap->setFixedWidth(mGround->width());
- d->mPixmap->setFixedHeight(mGround->height());
+ d->mPixmap->setFixedWidth(mapWidth());
+ d->mPixmap->setFixedHeight(mapHeight());
  updateGeometry();
 }
 
@@ -181,16 +186,25 @@ void BosonMiniMap::setPoint(int x, int y, const QColor& color)
 	return;
  }
  QPainter p;
+ QPainter p2;
  p.begin(ground());
  p.setPen(color);
+ p.setBrush(color);
+ p2.begin(mUnZoomedGround);
+ p2.setPen(color);
+ int pointsize = (int)(d->mScale * d->mZoom);
  if (color.isValid()) {
-	p.drawPoint(x, y);
+	p.drawRect(x * pointsize, y * pointsize, pointsize, pointsize);
+	p2.drawPoint(x, y);
  } else {
 	kdWarning() << k_funcinfo << "invalid color" << endl;
 	p.setPen(COLOR_UNKNOWN);
-	p.drawPoint(x, y);
+	p2.setPen(COLOR_UNKNOWN);
+	p.drawRect(x * pointsize, y * pointsize, pointsize, pointsize);
+	p2.drawPoint(x, y);
  }
  p.end();
+ p2.end();
 }
 
 void BosonMiniMap::mousePressEvent(QMouseEvent *e)
@@ -234,14 +248,24 @@ void BosonMiniMap::slotAddUnit(Unit* unit, int x, int y)
 
 void BosonMiniMap::slotMoveRect(int x, int y)
 {
- d->mSelectionPos = QPoint(x / BO_TILE_SIZE, y / BO_TILE_SIZE);
- d->mPixmap->repaint(false);
+ x /= BO_TILE_SIZE;
+ y /= BO_TILE_SIZE;
+ if((x != d->mSelectionPos.x()) || (y != d->mSelectionPos.y())) {
+	d->mSelectionPos = QPoint(x, y);
+	d->mPixmap->repaint(false);
+ }
 }
 
 void BosonMiniMap::slotResizeRect(int w, int h)
 {
- d->mSelectionSize = QSize(w / BO_TILE_SIZE, h / BO_TILE_SIZE);
- d->mPixmap->repaint(false);
+ // There is bug somewhere and because of this, we need to make selection size
+ //  bigger by 2 every time
+ w = w / BO_TILE_SIZE + 2;
+ h = h / BO_TILE_SIZE + 2;
+ if((w != d->mSelectionSize.width()) || (h != d->mSelectionSize.height())) {
+	d->mSelectionSize = QSize(w, h);
+	d->mPixmap->repaint(false);
+ }
 }
 
 void BosonMiniMap::setMap(BosonMap* map)
@@ -286,6 +310,10 @@ void BosonMiniMap::slotMoveUnit(Unit* unit, double oldX, double oldY)
  }
  int x = (int)(oldX / BO_TILE_SIZE);
  int y = (int)(oldY / BO_TILE_SIZE);
+ if((x == (int)(unit->x() / BO_TILE_SIZE)) && (y == (int)(unit->y() / BO_TILE_SIZE))) {
+	// Unit is still on the same cell. Don't update (performance)
+	return;
+ }
  if (!mLocalPlayer->isFogged(x, y)) {
 	Cell* c = mMap->cell(x, y);
 	if (!c) {
@@ -386,7 +414,7 @@ void BosonMiniMap::slotShowMap(bool s)
 
 void BosonMiniMap::slotZoomIn()
 {
- if (boConfig->miniMapZoom() + ZOOM_STEP >= 3.0) {
+ if (boConfig->miniMapZoom() + ZOOM_STEP > 3.0) {
 	return;
  }
  boConfig->setMiniMapZoom(boConfig->miniMapZoom() + ZOOM_STEP);
@@ -421,34 +449,54 @@ bool BosonMiniMap::eventFilter(QObject* o, QEvent* e)
 		|| zoom() != boConfig->miniMapZoom()) {
 	d->mScale = boConfig->miniMapScale();
 	d->mZoom = boConfig->miniMapZoom();
-	d->mPixmap->setFixedWidth((int)(mGround->width() * scale()));
-	d->mPixmap->setFixedHeight((int)(mGround->height() * scale()));
+	d->mPixmap->setFixedWidth((int)(mapWidth() * scale()));
+	d->mPixmap->setFixedHeight((int)(mapHeight() * scale()));
 	d->mPixmap->erase();
+
+	// Resize pixmap (slow)
+	createGround();
  }
  QRect selectionRect(d->mSelectionPos, d->mSelectionSize);
+ if (zoom() > 1.0) {
+	d->mPainterMoveX = d->mSelectionPos.x() + mapWidth() / zoom() <= mapWidth() ?
+			-d->mSelectionPos.x() :
+			-(mapWidth() - mapWidth() / zoom());
+	d->mPainterMoveY = d->mSelectionPos.y() + mapHeight() / zoom() <= mapHeight() ?
+			-d->mSelectionPos.y() :
+			-(mapHeight() - mapHeight() / zoom());
+ }
+ // Using bitBlt() is MUCH faster than using QPainter::drawPixmap(), especially
+ //  when you scale QPainter (difference may be hundreds of times)
+ bitBlt(d->mPixmap, 0, 0, ground(), -(d->mPainterMoveX * scale() * zoom()), -(d->mPainterMoveY * scale() * zoom()),
+		d->mPixmap->width(), d->mPixmap->height());
+ 
+ // the little rectangle
  QPainter p;
  p.begin(d->mPixmap);
  p.scale(scale(), scale());
  p.scale(zoom(), zoom());
- if (zoom() > 1.0) {
-	d->mPainterMoveX = d->mSelectionPos.x() + mGround->width() / zoom() <= mGround->width() ?
-			-d->mSelectionPos.x() :
-			-(mGround->width() - mGround->width() / zoom());
-	d->mPainterMoveY = d->mSelectionPos.y() + mGround->height() / zoom() <= mGround->height() ?
-			-d->mSelectionPos.y() :
-			-(mGround->height() - mGround->height() / zoom());
-	p.translate(d->mPainterMoveX, d->mPainterMoveY);
- }
- p.drawPixmap(0, 0, *ground());
- 
- // the little rectangle
- // there seems to be a small bug - if you scroll to the lower right corner
- // there are at both sides (right + bottom) a few pixels left. the rect should
- // be at the border (frame?).
+ p.translate(d->mPainterMoveX, d->mPainterMoveY);
  p.setPen(white);
  p.setRasterOp(XorROP);
  p.drawRect(selectionRect);
 
  p.end();
  return QWidget::eventFilter(o, e);
+}
+
+void BosonMiniMap::createGround()
+{
+  struct timeval time1, time2;
+  gettimeofday(&time1, 0);
+ if(mGround) {
+	delete mGround;
+ }
+ mGround = new QPixmap(mapWidth() * zoom() * scale(), mapHeight() * zoom() * scale());
+ QPainter p;
+ p.begin(mGround);
+ p.scale(zoom() * scale(), zoom() * scale());
+ p.drawPixmap(0, 0, *mUnZoomedGround);
+ p.end();
+ gettimeofday(&time2, 0);
+ cerr << "<createGround: " << time2.tv_usec - time1.tv_usec << ">" << endl;
 }
