@@ -49,8 +49,8 @@ public:
 	};
 
 	/**
-	 * Shows small overview pixmap of unit, it's health and reload state (if it
-	 * can shoot)
+	 * Shows small overview pixmap of unit, it's health and maybe some other
+	 * information
 	 * This is used when you select multiple units
 	 **/
 	virtual void setUnit(Unit* unit);
@@ -207,7 +207,6 @@ private:
 
 	BoButton* mPixmap;
 	BoProgress* mHealth;
-	BoProgress* mReload;
 };
 
 class BoButton : public QPushButton
