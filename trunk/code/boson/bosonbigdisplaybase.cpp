@@ -426,6 +426,11 @@ void BosonBigDisplayBase::init()
  connect(&d->mCursorEdgeTimer, SIGNAL(timeout()),
 		this, SLOT(slotCursorEdgeTimeout()));
 
+ connect(BosonPathVisualization::pathVisualization(),
+		SIGNAL(signalAddLineVisualization( const QValueList<BoVector3>&, const BoVector4&, float, int, float)),
+		this,
+		SLOT(slotAddLineVisualization(const QValueList<BoVector3>&, const BoVector4&, float, int, float)));
+
  setUpdateInterval(boConfig->updateInterval());
 }
 
@@ -3424,6 +3429,26 @@ void BosonBigDisplayBase::slotInitMiniMapFogOfWar()
 void BosonBigDisplayBase::addLineVisualization(BoLineVisualization v)
 {
  d->mLineVisualizationList.append(v);
+}
+
+
+// FIXME: someone who know what these are supposed to be for, could probably
+// group most parameters into a single "type" integer
+void BosonBigDisplayBase::slotAddLineVisualization(const QValueList<BoVector3>& points, const BoVector4& color, float pointSize, int timeout, float zOffset)
+{
+ if (!canvas()) {
+	return;
+ }
+ BoLineVisualization viz;
+ viz.pointsize = pointSize;
+ viz.timeout = timeout;
+ viz.color = color;
+ viz.points = points;
+ QValueList<BoVector3>::Iterator it;
+ for (it = viz.points.begin(); it != viz.points.end(); ++it) {
+	(*it).setZ(canvas()->heightAtPoint((*it).x() * BO_TILE_SIZE, -(*it).y() * BO_TILE_SIZE) + zOffset);
+ }
+ addLineVisualization(viz);
 }
 
 void BosonBigDisplayBase::advanceLineVisualization()

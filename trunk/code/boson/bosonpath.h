@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2001-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,6 +19,8 @@
 #ifndef BOSONPATH_H
 #define BOSONPATH_H
 
+#include <qobject.h>
+
 /***  COMMON STUFF  ***/
 
 // When destination is reached (path ends) and unit should stop moving, we add
@@ -31,6 +33,8 @@
 #define PF_CANNOT_GO -3
 
 class BosonPathInfo;
+class BoVector3;
+class BoVector4;
 
 
 /***  OLD PATHFINDER  ***/
@@ -106,9 +110,6 @@ class BosonPath
      */
     float pathCost() const { return mPathCost; };
 
-    static void setDisplay(BosonBigDisplayBase* d)  { mDisplay = d; }
-    static void setCanvas(BosonCanvas* c)  { mCanvas = c; }
-
   protected:
     /**
      * In this list are waypoints of path
@@ -143,9 +144,6 @@ class BosonPath
     int mPathLength;
     float mPathCost;
     int mRange;
-
-    static BosonBigDisplayBase* mDisplay;
-    static BosonCanvas* mCanvas;
 
     class BosonPath::Marking
     {
@@ -283,8 +281,6 @@ class BosonPath2
 
 
     void colorizeRegions();
-    void setDisplay(BosonBigDisplayBase* d)  { mDisplay = d; }
-    void setCanvas(BosonCanvas* c)  { mCanvas = c; }
 
 
     /**
@@ -368,8 +364,6 @@ class BosonPath2
     QPtrList<BosonPathHighLevelPath> mHLPathCache;
     bool* mRegionIdUsed;
     QPtrVector<BosonPathRegion> mRegions;
-    BosonBigDisplayBase* mDisplay;
-    BosonCanvas* mCanvas;
 };
 
 /**
@@ -649,6 +643,48 @@ class BosonPathHighLevelNode
     float h;
 };
 
+/**
+ * @short interface between @ref BosonBigDisplayBase / @ref BosonCanvas and @ref
+ * BosonPath.
+ *
+ * The @ref BosonPath (and friends) classes are supposed to tell this class
+ * about path visualization issues (e.g. where to paint which lines and so on).
+ * This class then takes care about letting @ref BosonBigDisplayBase and / or 
+ * @ref BosonCanvas know about these (e.g. by emitting a signal).
+ **/
+class BosonPathVisualization : public QObject
+{
+  Q_OBJECT
+  public:
+    ~BosonPathVisualization();
+
+    /**
+     * @return The static BosonPathVisualization object. There is only a single
+     * object in the game.
+     **/
+    static BosonPathVisualization* pathVisualization();
+
+    /**
+     * @param points The points of the line visualization. Note that the z
+     * coordinates are overwritten later, you do not have to specify them!
+     **/
+    void addLineVisualization(const QValueList<BoVector3>& points, const BoVector4& color, float pointSize = 1.0f, int timeout = 60, float zOffset = 0.5f);
+
+    /**
+     * @overload
+     * Just like above, but with a default color
+     **/
+    void addLineVisualization(const QValueList<BoVector3>& points, float pointSize = 1.0f, int timeout = 60, float zOffset = 0.5f);
+
+  signals:
+    void signalAddLineVisualization(const QValueList<BoVector3>& points, const BoVector4& color, float pointSize, int timeout, float zOffset);
+
+  private:
+    BosonPathVisualization(QObject* parent);
+
+  private:
+    static BosonPathVisualization* mPathVisualization;
+};
 
 
 #endif // BOSONPATH_H
