@@ -186,7 +186,7 @@ void visualBigDisplay::viewportMousePressEvent(QMouseEvent *e)
 		if (!sfg) {
 			// nothing has been found : it's a ground-click
 			// Here, we have to draw a "selection box"...
-			if ( vtl->getSelectionMode() != visualTopLevel::SELECT_FILL)
+			if ( vtl->getSelectionMode() == visualTopLevel::SELECT_FILL)
 				return;
 			// else :
 			vtl->setSelectionMode( visualTopLevel::SELECT_RECT);
