@@ -62,7 +62,8 @@ draw_bigbox_text("What has been changed since 0.9.1:
 
  <h3>Sound</h3>
  <ul>
-     <li>Sound is played using OpenAL now</li>
+     <li>Sound is played using OpenAL now (if you use arts you need a patched OpenAL,
+     or use \"artsshell suspend ; ./boson\"</li>
      <li>Dependency on arts and kdemultimedia removed</li>
      <li>Sound is enabled by default again</li>
 </ul>
@@ -96,7 +97,7 @@ draw_bigbox_text("What has been changed since 0.9.1:
 
  <h3>Scripts / AI</h3>
  <ul>
-    <li>AI now produces units, thanks to Carlo (aka alea)</li>
+    <li>AI now produces units and supports mining, thanks to Carlo (aka alea)</li>
     <li>New ai script functions</li>
     <li>Free mode and no-limits mode for camera (to get used by scripts)</li>
 </ul>
@@ -112,7 +113,7 @@ draw_bigbox_text("What has been changed since 0.9.1:
      <li>Some neutral objects added (mineralmine, trees, stone, house...)</li>
      <li>New explosions</li>
      <li>Two textured fonts added</li>
-     <li>Scaled down a texture</li>
+     <li>Scaled down some textures</li>
      <li>General map changes</li>
      <li>New map: We are under attack</li>
      <li>Documentation updates</li>
