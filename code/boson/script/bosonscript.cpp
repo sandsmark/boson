@@ -653,6 +653,33 @@ bool BosonScript::canUnitShoot(int id)
   return u->unitProperties()->canShoot();
 }
 
+bool BosonScript::canUnitTypeShoot(int playerid, int type)
+{
+  QValueList<int> list;
+  if(!game())
+  {
+    boError() << k_funcinfo << "NULL game" << endl;
+    return false;
+  }
+
+  Player* p = (Player*)(game()->findPlayer(playerid));
+
+  if(!p)
+  {
+    boError() << k_funcinfo << "No player with id " << playerid << endl;
+    return false;
+  }
+
+  const UnitProperties* prop = p->speciesTheme()->unitProperties(type);
+  if(!prop)
+  {
+    boError() << k_funcinfo << "No unit properties with typeid " << type << " for player with id " << playerid << endl;
+    return false;
+  }
+
+  return prop->canShoot();
+}
+
 bool BosonScript::canUnitProduce(int id)
 {
   if(!game())
@@ -694,6 +721,38 @@ bool BosonScript::canUnitMineMinerals(int id)
   return false;
 }
 
+bool BosonScript::canUnitTypeMineMinerals(int playerid, int type)
+{
+  QValueList<int> list;
+  if(!game())
+  {
+    boError() << k_funcinfo << "NULL game" << endl;
+    return false;
+  }
+
+  Player* p = (Player*)(game()->findPlayer(playerid));
+
+  if(!p)
+  {
+    boError() << k_funcinfo << "No player with id " << playerid << endl;
+    return false;
+  }
+
+  const UnitProperties* prop = p->speciesTheme()->unitProperties(type);
+  if(!prop)
+  {
+    boError() << k_funcinfo << "No unit properties with typeid " << type << " for player with id " << playerid << endl;
+    return false;
+  }
+
+  const HarvesterProperties* harvester = (const HarvesterProperties*)prop->properties(PluginProperties::Harvester);
+  if(harvester && harvester->canMineMinerals())
+  {
+    return true;
+  }
+  return false;
+}
+
 bool BosonScript::canUnitMineOil(int id)
 {
   if(!game())
@@ -711,6 +770,38 @@ bool BosonScript::canUnitMineOil(int id)
 
   HarvesterPlugin* res = (HarvesterPlugin*)u->plugin(UnitPlugin::Harvester);
   if(res && res->canMineOil())
+  {
+    return true;
+  }
+  return false;
+}
+
+bool BosonScript::canUnitTypeMineOil(int playerid, int type)
+{
+  QValueList<int> list;
+  if(!game())
+  {
+    boError() << k_funcinfo << "NULL game" << endl;
+    return false;
+  }
+
+  Player* p = (Player*)(game()->findPlayer(playerid));
+
+  if(!p)
+  {
+    boError() << k_funcinfo << "No player with id " << playerid << endl;
+    return false;
+  }
+
+  const UnitProperties* prop = p->speciesTheme()->unitProperties(type);
+  if(!prop)
+  {
+    boError() << k_funcinfo << "No unit properties with typeid " << type << " for player with id " << playerid << endl;
+    return false;
+  }
+
+  const HarvesterProperties* harvester = (const HarvesterProperties*)prop->properties(PluginProperties::Harvester);
+  if(harvester && harvester->canMineOil())
   {
     return true;
   }

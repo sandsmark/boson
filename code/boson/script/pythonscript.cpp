@@ -65,9 +65,12 @@ PyMethodDef PythonScript::mCallbacks[] = {
   { (char*)"unitWork", py_unitWork, METH_VARARGS, 0 },
   { (char*)"isUnitMobile", py_isUnitMobile, METH_VARARGS, 0 },
   { (char*)"canUnitShoot", py_canUnitShoot, METH_VARARGS, 0 },
+  { (char*)"canUnitTypeShoot", py_canUnitTypeShoot, METH_VARARGS, 0 },
   { (char*)"canUnitProduce", py_canUnitProduce, METH_VARARGS, 0 },
   { (char*)"canUnitMineMinerals", py_canUnitMineMinerals, METH_VARARGS, 0 },
+  { (char*)"canUnitTypeMineMinerals", py_canUnitTypeMineMinerals, METH_VARARGS, 0 },
   { (char*)"canUnitMineOil", py_canUnitMineOil, METH_VARARGS, 0 },
+  { (char*)"canUnitTypeMineOil", py_canUnitTypeMineOil, METH_VARARGS, 0 },
   { (char*)"productionTypes", py_productionTypes, METH_VARARGS, 0 },
   { (char*)"isUnitAlive", py_isUnitAlive, METH_VARARGS, 0 },
   { (char*)"allPlayerUnits", py_allPlayerUnits, METH_VARARGS, 0 },
@@ -687,6 +690,17 @@ PyObject* PythonScript::py_canUnitShoot(PyObject*, PyObject* args)
   return Py_BuildValue((char*)"i", BosonScript::canUnitShoot(id) ? 1 : 0);
 }
 
+PyObject* PythonScript::py_canUnitTypeShoot(PyObject*, PyObject* args)
+{
+  int playerid, type;
+  if(!PyArg_ParseTuple(args, (char*)"ii", &playerid, &type))
+  {
+    return 0;
+  }
+
+  return Py_BuildValue((char*)"i", BosonScript::canUnitTypeShoot(playerid, type) ? 1 : 0);
+}
+
 PyObject* PythonScript::py_canUnitProduce(PyObject*, PyObject* args)
 {
   int id;
@@ -698,7 +712,7 @@ PyObject* PythonScript::py_canUnitProduce(PyObject*, PyObject* args)
   return Py_BuildValue((char*)"i", BosonScript::canUnitProduce(id) ? 1 : 0);
 }
 
-PyObject* PythonScript::py_canUnitMineMinerals(PyObject* self, PyObject* args)
+PyObject* PythonScript::py_canUnitMineMinerals(PyObject*, PyObject* args)
 {
   int id;
   if(!PyArg_ParseTuple(args, (char*)"i", &id))
@@ -709,7 +723,18 @@ PyObject* PythonScript::py_canUnitMineMinerals(PyObject* self, PyObject* args)
   return Py_BuildValue((char*)"i", BosonScript::canUnitMineMinerals(id) ? 1 : 0);
 }
 
-PyObject* PythonScript::py_canUnitMineOil(PyObject* self, PyObject* args)
+PyObject* PythonScript::py_canUnitTypeMineMinerals(PyObject*, PyObject* args)
+{
+  int playerid, type;
+  if(!PyArg_ParseTuple(args, (char*)"ii", &playerid, &type))
+  {
+    return 0;
+  }
+
+  return Py_BuildValue((char*)"i", BosonScript::canUnitTypeMineMinerals(playerid, type) ? 1 : 0);
+}
+
+PyObject* PythonScript::py_canUnitMineOil(PyObject*, PyObject* args)
 {
   int id;
   if(!PyArg_ParseTuple(args, (char*)"i", &id))
@@ -718,6 +743,17 @@ PyObject* PythonScript::py_canUnitMineOil(PyObject* self, PyObject* args)
   }
 
   return Py_BuildValue((char*)"i", BosonScript::canUnitMineOil(id) ? 1 : 0);
+}
+
+PyObject* PythonScript::py_canUnitTypeMineOil(PyObject*, PyObject* args)
+{
+  int playerid, type;
+  if(!PyArg_ParseTuple(args, (char*)"ii", &playerid, &type))
+  {
+    return 0;
+  }
+
+  return Py_BuildValue((char*)"i", BosonScript::canUnitTypeMineOil(playerid, type) ? 1 : 0);
 }
 
 PyObject* PythonScript::py_productionTypes(PyObject*, PyObject* args)
