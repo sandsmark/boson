@@ -50,7 +50,7 @@ struct unitMsg_t    { uint who; int key, x, y; };
 /* MSG_DLG_ASK */
 //struct askMsg_t		{ int major, minor, patch; };
 /* MSG_DLG_ACCEPTED */
-struct acceptedMsg_t	{ uint who_you_are; int missing_player, total_player, sizeX, sizeY; };
+struct acceptedMsg_t	{ uint who_you_are, missing_player, total_player, sizeX, sizeY; };
 /* MSG_DLG_REFUSED */
 //struct refusedMsg_t	{ refusedType why_not; };
 /* MSG_DLG_END */
