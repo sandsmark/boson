@@ -370,9 +370,14 @@ void playerMobUnit::u_attack(Unit *u)
 		disconnect(target, 0, this, 0); // target isn't connected to 'this' anymore
 	}
 
+	if (u == (Unit *)this) {
+		/* attacking myself */
+		logf(LOG_INFO, "%p attacking itself, aborting", this);
+		target = 0;
+		return;
+	}
 	target		= u;
 	shoot_timer	= -1;
-	//puts("assigning target");
 
 	connect( u, SIGNAL(dying(Unit*)), this, SLOT(targetDying(Unit*)) );
 	connect( u, SIGNAL(sig_move(int,int)), this, SLOT(targetMoveBy(int,int)) );
