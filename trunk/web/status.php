@@ -140,6 +140,7 @@ draw_bigbox_text("This is a list of features that we consider as
     <li>Find out whether save/load is still working</li>
     <li>Find out whether playfield saving is still working</li>
     <li>Look for more textures which can be scaled down</li>
+    <li>Fix #79494</li>
   </ul>");
 draw_bigbox_end();
 main_area_end();
