@@ -61,6 +61,11 @@
 //  shouldn't occupy multiple cells while firing at enemies.
 #define CHECK_ENEMIES_ONLY_AT_WAYPOINT
 
+
+// AB: debugging code, used to find a network bug. will be removed soon
+#define NET_DEBUG 0
+
+#if NET_DEBUG
 void printBinaryFloat(const char* name, float var)
 {
  fprintf(stderr, "    %s: %f: ", name, var);
@@ -92,6 +97,7 @@ void printBinaryFloat(const char* name, float var)
  e -= 127;
  fprintf(stderr, " - sign=%d, e=%d, m=%f\n", sign, e, m);
 }
+#endif
 
 
 bool Unit::mInitialized = false;
@@ -1723,6 +1729,7 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCallsCount) // this act
 	// Move towards it
 	dist -= moveTowardsPoint(pp, x + xspeed, y + yspeed, dist, xspeed, yspeed);
 
+#if NET_DEBUG
 	boDebug(401) << k_funcinfo << "Moving from (" << x << "; " << y <<
 			") to (" << x + xspeed << "; " << y + yspeed <<
 			"); pp: (" << pp.x() << "; " << pp.y() <<
@@ -1733,16 +1740,21 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCallsCount) // this act
 	printBinaryFloat("yspeed", yspeed);
 	printBinaryFloat("pp.x()", pp.x());
 	printBinaryFloat("pp.y()", pp.y());
+#endif
 	// Check if we reached that pathpoint
 	if ((x + xspeed == pp.x()) && (y + yspeed == pp.y())) {
 		// Unit has reached pathpoint
 		boDebug(401) << k_funcinfo << "unit " << id() << ": unit is at pathpoint" << endl;
 		pathPointDone();
+#if NET_DEBUG
 		BoVector2 nextpp = currentPathPoint();
 		boDebug(401) << k_funcinfo << "next pathpoint is (" << nextpp.x() << "; " << nextpp.y() << ")" << endl;
+#endif
 		// Check for enemies
 		if (attackEnemyUnitsInRangeWhileMoving()) {
+#if NET_DEBUG
 			boDebug(401) << k_funcinfo << "enemies found in range, breaking" << endl;
+#endif
 			break;
 		}
 	}
@@ -1946,6 +1958,7 @@ void MobileUnit::advanceMoveCheck()
  if (canvas()->cellOccupied((int)currentPathPoint().x(),
 		(int)currentPathPoint().y(), this, false)) {
 #endif
+#if NET_DEBUG
 	boDebug(401) << k_funcinfo << "Next pathpoint is occupied, waiting" << endl;
 	const BoItemList* items = canvas()->cell((int)currentPathPoint().x(),
 			(int)currentPathPoint().y())->items();
@@ -1962,6 +1975,7 @@ void MobileUnit::advanceMoveCheck()
 			boDebug(401) << k_funcinfo << "Unit " << u->id() << " found on occupied cell" << endl;
 		}
 	}
+#endif
 	// If we'd continue moving with set velocity, we'd collide with something.
 	// Stop.
 
