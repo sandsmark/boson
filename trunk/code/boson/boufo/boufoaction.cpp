@@ -295,7 +295,7 @@ bool BoUfoXMLBuilder::mergeMenu(QDomElement& baseMenu, QDomElement& addMenu)
 			// so that we can remove child from this
 			// doc
 			it = it.nextSibling().toElement();
-			if (child.tagName() != QString("Action")) {
+			if (child.tagName() != QString("Action") && child.tagName() != QString("Menu")) {
 				continue;
 			}
 			if (child.attribute("append").isEmpty() != name.isEmpty()) {
