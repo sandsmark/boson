@@ -431,6 +431,16 @@ void Unit::advanceAttack(unsigned int advanceCount)
 	}
 	return;
  }
+ float rot = rotationToPoint(target()->x() - x(), target()->y() - y());
+ if(rot < rotation() - 5 || rot > rotation() + 5) {
+	if(QABS(rotation() - rot) > (2 * speed())) {
+		turnTo((int)rot);
+		setAdvanceWork(WorkTurn);
+		return;
+	} else {
+		setRotation(rot);
+	}
+ }
  boDebug() << "    " << k_funcinfo << "shooting at target" << endl;
  shootAt(d->mActiveWeapon, target());
  boDebug() << "    " << k_funcinfo << "done shooting" << endl;
