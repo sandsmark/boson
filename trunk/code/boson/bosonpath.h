@@ -6,6 +6,8 @@
 #include <vector.h>
 #include <stl_heap.h>
 
+#include <qvaluelist.h>
+
 class Unit;
 class Node;
 class QPoint;
@@ -52,6 +54,13 @@ class BosonPath
      * @return TRUE if path was found, FALSE otherwise
      */
     bool findPath();
+
+    /**
+     * @param unit The unit that will be moved
+     * @param goalx the x <em>coordinate</em> of the goal. Not the cell!
+     * @param goaly the y <em>coordinate</em> of the goal. Not the cell!
+     **/
+    static QValueList<QPoint> findPath(Unit* unit, int goalx, int goaly);
     
     /**
      * In this vector are waypoints of path
