@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ static BoGlobalObject<BosonProfiling> globalProfiling(BoGlobalObjectBase::BoGlob
 
 #define COMPARE_TIMES(time1, time2) ( ((time2.tv_sec - time1.tv_sec) * 1000000) + (time2.tv_usec - time1.tv_usec) )
 
-#define PROFILING_VERSION 0x08 // increase if you change the file format of saved files!
+#define PROFILING_VERSION 0x09 // increase if you change the file format of saved files!
 
 unsigned long int compareTimes(const struct timeval& t1, const struct timeval& t2)
 {
@@ -194,6 +194,7 @@ void BosonProfiling::init()
  d->mGLUpdateInterval = 0; // profiling logs can make use of the OpenGL update interval - makes anlalyzations easier
  d->mGameSpeed = -1;
  d->mVersion = PROFILING_VERSION;
+ d->mNextDynamicEventId = 1;
 }
 
 BosonProfiling::~BosonProfiling()
@@ -390,6 +391,21 @@ long int BosonProfiling::stop(int event, bool appendToList)
  return _elapsed;
 }
 
+int BosonProfiling::requestEventId(const QString& name)
+{
+ int id = BosonProfiling::LastFixedEventId + d->mNextDynamicEventId;
+ d->mNextDynamicEventId++;
+ d->mDynamicEventId2Name.insert(id, name);
+ return id;
+}
+
+QString BosonProfiling::eventName(int id) const
+{
+ if (!d->mDynamicEventId2Name.contains(id)) {
+	return QString::null;
+ }
+ return d->mDynamicEventId2Name[id];
+}
 
 bool BosonProfiling::saveToFile(const QString& fileName)
 {
@@ -433,6 +449,9 @@ bool BosonProfiling::save(QDataStream& stream) const
 		stream << *it.current();
 	}
  }
+
+ stream << (Q_INT32)d->mNextDynamicEventId;
+ stream << d->mDynamicEventId2Name;
 
  return true;
 }
@@ -503,6 +522,14 @@ bool BosonProfiling::load(QDataStream& stream)
 	stream >> *t;
 	d->mSlotAdvanceTimes.append(t);
  }
+
+ if (version >= 0x09) {
+	Q_INT32 id;
+	stream >> id;
+	d->mNextDynamicEventId = id;
+	stream >> d->mDynamicEventId2Name;
+ }
+
  return true;
 }
 

@@ -258,6 +258,8 @@ public:
 
 	QMap<int, struct timeval> mProfilingTimes;
 	QMap<int, TimesList> mTimes;
+	int mNextDynamicEventId;
+	QMap<int, QString> mDynamicEventId2Name;
 
 	unsigned int mGLUpdateInterval;
 	int mGameSpeed;

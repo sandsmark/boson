@@ -101,6 +101,7 @@ void BosonStarting::slotStart()
 
 bool BosonStarting::start()
 {
+ BosonProfiler profiler(BosonProfiling::BosonStartingStart);
  d->mStartingCompleted.clear();
 
  // Reset progressbar
@@ -144,10 +145,6 @@ bool BosonStarting::start()
 	return false;
  }
  boDebug() << k_funcinfo << "playfield loaded" << endl;
-
- // - the scenario (see BosonScenario::loadScenarioFromDocument())
-
-
 
  boGame->setPlayField(mDestPlayField);
  emit signalAssignMap(); // for the BosonWidgetBase
@@ -305,6 +302,7 @@ void BosonStarting::slotLoadPlayerData(Player* p)
 {
  BO_CHECK_NULL_RET(p);
  BO_CHECK_NULL_RET(p->speciesTheme());
+
  boDebug() << k_funcinfo << p->id() << endl;
  // Order of calls below is very important!!! Don't change this unless you're sure you know what you're doing!!!
  emit signalLoadingType(BosonLoadingWidget::LoadActions);

@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -49,6 +49,7 @@ public:
 		LoadModelDisplayLists = 5,
 		LoadModelDummy = 6,
 		AddUnitsXML = 7,
+		BosonStartingStart = 8,
 		SaveGameToXML = 20,
 		SaveKGameToXML = 21,
 		SavePlayersToXML = 22,
@@ -64,7 +65,11 @@ public:
 		SaveGameLogs = 201,
 		MakeGameLog = 202,
 		GenerateLOD = 300,
-		BuildLOD = 301
+		BuildLOD = 301,
+
+
+		LastFixedEventId = 5000000
+		// do not add any entries after this point
 	};
 	BosonProfiling();
 	BosonProfiling(const BosonProfiling& profiling);
@@ -100,6 +105,34 @@ public:
 	 * to this one!
 	 **/
 	int gameSpeed() const;
+
+	/**
+	 * Sample use:
+	 * <pre>
+	 * static int myId = boProfiling->requestEventId("MyEvent");
+	 * boProfiling->start(myId);
+	 * doSomeStuff();
+	 * boProfiling->stop(myId);
+	 * </pre>
+	 *
+	 * Note that you should use static in your code for myId, so that it
+	 * will get only a single Id in the application. Calling requestEventId
+	 * twice will give you two totally different events, which is probably
+	 * not what you want.
+	 * @return A dynamic event Id for @ref start. Two different calls will
+	 * return two different ids.
+	 * @param name A name for the even that will be used for displaying it
+	 * in the dialog. Two different events with the same name are totally
+	 * valid
+	 **/
+	int requestEventId(const QString& name);
+
+	/**
+	 * @return The name for the event Id @p id, as provided to @ref
+	 * requestEventId or @ref QString::null if no such id was requested
+	 * before.
+	 **/
+	QString eventName(int id) const;
 
 	/**
 	 * Start the timer for profiling. Note that nesting timers <em>are</em>
