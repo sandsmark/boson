@@ -99,10 +99,18 @@ float BoCamera::maxCameraRadius()
  return (float)boConfig->doubleValue("CameraMaxRadius");
 }
 
+void BoCamera::setGluLookAt(const BoVector3& lookAt, const BoVector3& cameraPos, const BoVector3& up)
+{
+ mLookAt = lookAt;
+ mCameraPos = cameraPos;
+ mUp = up;
+// checkPosition();
+}
+
 void BoCamera::setLookAt(const BoVector3& pos)
 {
  mLookAt = pos;
- updateFromRadiusAndRotation(); // eye and up vectors will/may change as well
+ updateFromRadiusAndRotation(); // cameraPos and up vectors will/may change as well
  checkPosition();
 }
 
@@ -203,6 +211,8 @@ void BoCamera::saveAsXML(QDomElement& root)
 
 void BoCamera::checkPosition()
 {
+ // note that we use this in setGluLooKAt() as well, so don't use radius() and
+ // rotation() here!
  if (!mMapWidth || !mMapHeight) {
 	return;
  }
@@ -231,7 +241,7 @@ void BoCamera::applyCameraToScene()
  glMatrixMode(GL_MODELVIEW);
  glLoadIdentity();
 
- gluLookAt(eye().x(), eye().y(), eye().z(),
+ gluLookAt(cameraPos().x(), cameraPos().y(), cameraPos().z(),
 		lookAt().x(), lookAt().y(), lookAt().z(),
 		up().x(), up().y(), up().z());
 }
@@ -250,13 +260,12 @@ void BoCamera::updateFromRadiusAndRotation()
  eyeX = lookAt().x() + diffX;
  eyeY = lookAt().y() + diffY;
  eyeZ = lookAt().z() + z();
- mCameraPos.set(eyeX, eyeY, eyeZ);
  float upX, upY, upZ;  // up vector (points straight up in viewport)
  upX = -diffX;
  upY = -diffY;
  upZ = 0.0f;
 
- mEye.set(eyeX, eyeY, eyeZ);
+ mCameraPos.set(eyeX, eyeY, eyeZ);
  mUp.set(upX, upY, upZ);
 }
 
