@@ -49,7 +49,6 @@ editorView::editorView (visualField *p, QWidget *parent, const char *name=0L)
 	:visualView(p,parent,name)
 {
 	int		i;
-	QCheckBox	*qcheck;
 
 	setFrameStyle(QFrame::Sunken | QFrame::Panel);
 	setLineWidth(5);
