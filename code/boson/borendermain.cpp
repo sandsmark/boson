@@ -995,7 +995,7 @@ RenderMain::RenderMain()
  mConfig->setCamera(mPreview->camera());
 
  mPreview->initGL();
- mLightWidget = new BoLightCameraWidget(0);
+ mLightWidget = new BoLightCameraWidget(0, true);
  mLightWidget->hide();
  mLightWidget->setLight(mPreview->light(), mPreview->context());
 
