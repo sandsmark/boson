@@ -53,7 +53,7 @@
 #define NO_ADVANCE_DEBUG
 
 // Saving format version (000005 = 00.00.05)
-#define BOSON_SAVEGAME_FORMAT_VERSION 000005
+#define BOSON_SAVEGAME_FORMAT_VERSION 000006
 
 class BoMessage
 {
