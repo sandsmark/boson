@@ -40,6 +40,7 @@
 #include <qvbox.h>
 #include <qpointarray.h>
 #include <qptrdict.h>
+#include <qptrvector.h>
 
 #include "kgameunitdebug.moc"
 

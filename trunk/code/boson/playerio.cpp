@@ -25,6 +25,8 @@
 #include "unit.h"
 #include "bosoncanvas.h"
 
+#include <qptrvector.h>
+
 class PlayerIOPrivate
 {
 public:
