@@ -47,7 +47,6 @@ public:
 		IdMoveDestX = UnitBase::IdLast + 3,
 		IdMoveDestY = UnitBase::IdLast + 4,
 		IdMovingFailed = UnitBase::IdLast + 5,
-		IdReloadState = UnitBase::IdLast + 6,
 		IdFix_ConstructionState = UnitBase::IdLast + 20,
 		IdFix_Productions = UnitBase::IdLast + 21,
 		IdFix_ProductionState = UnitBase::IdLast + 22
@@ -217,8 +216,6 @@ public:
 
 	QCanvasItemList unitsInRange() const;
 	QCanvasItemList enemyUnitsInRange() const;
-
-	inline unsigned int reloadState() const;
 
 	/**
 	 * Calls @ref BosonCanvas setWorkChanged

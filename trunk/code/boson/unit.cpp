@@ -42,7 +42,6 @@ public:
 		mLeader = false;
 	}
 	KGamePropertyInt mDirection;
-	KGameProperty<unsigned int> mReloadState;
 
 	KGamePropertyList<QPoint> mWaypoints;
 	KGameProperty<int> mMoveDestX;
@@ -73,11 +72,7 @@ Unit::Unit(const UnitProperties* prop, Player* owner, QCanvas* canvas)
  d->mMoveDestY.registerData(IdMoveDestY, dataHandler(), 
 		KGamePropertyBase::PolicyLocal, "MoveDestY");
 
- d->mReloadState.registerData(IdReloadState, dataHandler(), 
-		KGamePropertyBase::PolicyLocal, "ReloadState");
-
  d->mDirection.setLocal(0); // not yet used
- d->mReloadState.setLocal(0);
  setAnimated(true);
  searchpath = false;
 }
@@ -203,9 +198,7 @@ void Unit::advance(int phase)
 	return;
  }
  if (phase == 0) {
-	if (d->mReloadState > 0) {
-		d->mReloadState = d->mReloadState - 1;
-	}
+	reloadWeapon();
  } else { // phase == 1
 	// QCanvasSprite::advance() just moves for phase == 1 ; let's do it
 	// here, too. Collision detection is done is phase == 0 - in all of the
@@ -213,7 +206,6 @@ void Unit::advance(int phase)
 	moveBy(xVelocity(), yVelocity());
  }
 }
-
 
 void Unit::advanceMine()
 {
@@ -472,7 +464,7 @@ void Unit::attackUnit(Unit* target)
 
 void Unit::shootAt(Unit* target)
 {
- if (d->mReloadState != 0) {
+ if (reloadState() != 0) {
 //	kdDebug() << "gotta reload first" << endl;
 	return;
  }
@@ -487,7 +479,7 @@ void Unit::shootAt(Unit* target)
  }
  kdDebug() << "shoot at unit " << target->id() << endl;
  ((BosonCanvas*)canvas())->shootAtUnit(target, this, damage());
- d->mReloadState = unitProperties()->reload();
+ reloadWeapon();
 }
 
 QCanvasItemList Unit::unitsInRange() const
@@ -562,11 +554,6 @@ QValueList<Unit*> Unit::unitCollisions(bool exact) const
 	units.append(unit);
  }
  return units;
-}
-
-unsigned int Unit::reloadState() const
-{
- return d->mReloadState;
 }
 
 void Unit::setWork(WorkType w)
