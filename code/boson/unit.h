@@ -136,20 +136,10 @@ public:
 	virtual void moveBy(bofixed x, bofixed y, bofixed z);
 
 	/**
-	 * There is not much to do here. Keep the stuff in this function as
-	 * simple as possible as it's called for <em>every</em> unit on
-	 * <em>every</em> advance call. An example of what could be done here is
-	 * to increase the realod state.
-	 *
-	 * The really interesting things get done in the advanceXYZ() functions
-	 * below. They are called from @ref BosonCanvas::slotAdvance(). For
-	 * every @ref UnitBase::WorkType there is at least one advance function which
-	 * implements its behaviour.
-	 *
-	 * Please note that the @ref UnitPlugin::advance methods get called
-	 * here, too!
+	 * Reload shields and weapons. @p count specifies how much reloading
+	 * should be done (note that this is <em>not</em> the advanceCallsCount
 	 **/
-	virtual void advance(unsigned int advanceCallsCount);
+	virtual void reload(unsigned int count);
 
 	/**
 	 * Call the advance*() function that is currently used. The advance

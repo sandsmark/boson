@@ -471,12 +471,21 @@ public:
 	void animate(unsigned int advanceCallsCount);
 
 	/**
-	 * See @ref Unit::advance
+	 * Reloads everything that can be reloaded. For example in @ref Unit
+	 * this does weapon reloading and shield reloading currently.
 	 *
-	 * This implementation does nothing. No need to call this when you
-	 * implement it.
+	 * This could also do self-reperature, if the item provides such
+	 * features.
+	 *
+	 * This method is not called every advance call, but in a certain
+	 * interval only. The parameter @p count specifies how much reloading
+	 * should be done. For example if this is called every 5 advance calls,
+	 * then @p count will probably be 5.
 	 **/
-	virtual void advance(unsigned int ) { }
+	virtual void reload(unsigned int count)
+	{
+		Q_UNUSED(count);
+	}
 
 	/**
 	 * See @ref Unit::advanceFunction

@@ -261,7 +261,18 @@ class BosonWeapon : public UnitPlugin
     virtual void advance(unsigned int advanceCallsCount)
     {
       Q_UNUSED(advanceCallsCount);
-      reload();
+    }
+
+    inline void reload(unsigned int reloadBy)
+    {
+      if(mReloadCounter > (int)reloadBy)
+      {
+        mReloadCounter = mReloadCounter - reloadBy;
+      }
+      else
+      {
+        mReloadCounter = 0;
+      }
     }
 
     virtual bool saveAsXML(QDomElement& root) const;
@@ -298,8 +309,6 @@ class BosonWeapon : public UnitPlugin
     virtual void itemRemoved(BosonItem*) {}
 
   protected:
-    inline void reload()  { if(mReloadCounter > 0) { mReloadCounter = mReloadCounter - 1; } }
-
     void shoot(const BoVector3Fixed& pos, const BoVector3Fixed& target);
 
     void registerWeaponData(int weaponNumber, KGamePropertyBase* prop, int id, bool local = true);
