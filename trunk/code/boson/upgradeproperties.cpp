@@ -419,13 +419,8 @@ void UpgradeProperties::applyProperty(QValueList<unsigned long int>* typeIds,
   }
 }
 
-unsigned long int UpgradeProperties::applyValue(const QString& data, unsigned long int oldvalue)
+template<class T> T UpgradeProperties::applyValueInternal(ValueType type, T oldvalue, T value)
 {
-  ValueType type;
-  QString valuestr;
-  parseEntry(data, type, valuestr);
-  unsigned long int value = valuestr.toULong();
-
   if(type == Absolute)
   {
     return value;
@@ -446,32 +441,22 @@ unsigned long int UpgradeProperties::applyValue(const QString& data, unsigned lo
   }
 }
 
+unsigned long int UpgradeProperties::applyValue(const QString& data, unsigned long int oldvalue)
+{
+  ValueType type;
+  QString valuestr;
+  parseEntry(data, type, valuestr);
+  unsigned long int value = valuestr.toULong();
+  return applyValueInternal(type, oldvalue, value);
+}
+
 float UpgradeProperties::applyValue(const QString& data, float oldvalue)
 {
-  // Some duplicated code, but it's hard to avoid it
   ValueType type;
   QString valuestr;
   parseEntry(data, type, valuestr);
   float value = valuestr.toFloat();
-
-  if(type == Absolute)
-  {
-    return value;
-  }
-  else if(type == Relative)
-  {
-    return oldvalue + value;
-  }
-  else if(type == Percent)
-  {
-    return value * oldvalue / 100.0;
-  }
-  else
-  {
-    // Shouldn't happen
-    boError(600) << k_funcinfo << "Invalid type: " << type << endl;
-    return oldvalue;
-  }
+  return applyValueInternal(type, oldvalue, value);
 }
 
 void UpgradeProperties::parseEntry(const QString& entry, ValueType& type, QString& value)
