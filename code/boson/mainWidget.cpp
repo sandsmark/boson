@@ -117,7 +117,7 @@ void mainWidget::makeCommandGui(void)
 	stack->setGeometry(10,23,180,110);
 
 	/* stack/one */
-	view_none = new QPixmap(); // XXX legal ? 
+	view_none = new QPixmap();
 
 	view_one = new QLabel(stack,"preview");
 	view_one->setPixmap(*view_none);

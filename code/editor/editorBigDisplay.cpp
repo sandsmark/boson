@@ -90,7 +90,7 @@ void editorBigDisplay::actionClicked(int mx, int my, int state)
 			break;
 	}
 
-	_canvas->update();
+	_canvas->update(); // could be smarter.
 }
 
 void editorBigDisplay::setSelectedObject(object_type t, int n)

@@ -63,8 +63,6 @@ void mainWidget::resizeEvent ( QResizeEvent * )
 {
 	big->setGeometry  ( COMMAND_FRAME_WIDTH,  0, width() - COMMAND_FRAME_WIDTH, height() );
 	etl->mainFrame->setGeometry (  0, COMMAND_FRAME_WIDTH, COMMAND_FRAME_WIDTH, height() - COMMAND_FRAME_WIDTH);
-
-	printf("big geometry %d,%d,%d,%d\n", big->x(), big->y(), big->width(), big->height() );
 }
 
 #define ARROW_KEY_STEP	2

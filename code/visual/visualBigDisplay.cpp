@@ -53,14 +53,14 @@ visualBigDisplay::~visualBigDisplay()
 }
 
 
-void visualBigDisplay::mouseMoveEvent(QMouseEvent *e)
+void visualBigDisplay::viewportMouseMoveEvent(QMouseEvent *e)
 {
 	QPainter p;
 	QPen pen(green, 2);
 	
 	switch( vtl->getSelectionMode()) {
 		default:
-			logf(LOG_WARNING, "visualBigDisplay::mouseMoveEvent : unknown selectionMode(1), mode is %d", vtl->getSelectionMode());
+			logf(LOG_WARNING, "visualBigDisplay::viewportMouseMoveEvent : unknown selectionMode(1), mode is %d", vtl->getSelectionMode());
 		case visualTopLevel::SELECT_NONE:
 			break;
 		case visualTopLevel::SELECT_RECT:
@@ -92,14 +92,14 @@ void visualBigDisplay::mouseMoveEvent(QMouseEvent *e)
 	}
 }
 
-void visualBigDisplay::mouseReleaseEvent(QMouseEvent *e)
+void visualBigDisplay::viewportMouseReleaseEvent(QMouseEvent *e)
 {
 	QPainter p;
 	QPen pen(green, 2);
 
 	switch( vtl->getSelectionMode()) {
 		default:
-			logf(LOG_WARNING, "visualBigDisplay::mouseReleaseEvent : unknown selectionMode(2), mode is %d", vtl->getSelectionMode());
+			logf(LOG_WARNING, "visualBigDisplay::viewportMouseReleaseEvent : unknown selectionMode(2), mode is %d", vtl->getSelectionMode());
 		case visualTopLevel::SELECT_NONE:
 		case visualTopLevel::SELECT_FILL:
 			break;
@@ -150,7 +150,7 @@ void visualBigDisplay::putSomething(void)
 */
 
 
-void visualBigDisplay::mousePressEvent(QMouseEvent *e)
+void visualBigDisplay::viewportMousePressEvent(QMouseEvent *e)
 {
 	int x, y;
 	
