@@ -22,7 +22,7 @@
 INCLUDES= -I../visual $(all_includes)
 boson_appsdir = $(kde_appsdir)/Games/Boson
 
-LDFLAGS =  -s 
+#LDFLAGS =  -s 
 
 
 bin_PROGRAMS = boeditor 

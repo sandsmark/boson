@@ -21,7 +21,7 @@
 # include files
 INCLUDES= $(all_includes)
 
-LDFLAGS =  -s 
+#LDFLAGS =  -s 
 
 noinst_PROGRAMS = createGround boeditor
 
