@@ -502,7 +502,16 @@ int BosonGLFont::width(const QString& text)
  if (!mFont) {
 	return 0;
  }
- return mFont->width(text);
+ int wmax = 0;
+ QStringList lines = QStringList::split('\n', text);
+ QStringList::Iterator it;
+ for (it = lines.begin(); it != lines.end(); ++it) {
+	int w = mFont->width(*it);
+	if (w > wmax) {
+		wmax = w;
+	}
+ }
+ return wmax;
 }
 
 int BosonGLFont::wrapAtPos(const GLubyte* string, int length) const
