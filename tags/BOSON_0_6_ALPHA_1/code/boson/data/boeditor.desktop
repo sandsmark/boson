@@ -1,0 +1,17 @@
+[Desktop Entry]
+Comment= Boson Level Editor
+Comment[fr]= Editeur de niveau pour Boson
+Name=BoEditor
+Name[de]=BoEditor
+Name[fr]=BoEditor
+Name[it]=BoEditor
+Exec=boeditor
+MapNotify=true
+TerminalOptions=
+Icon=boeditor
+Path=
+DocPath=boeditor/index.html
+Type=Application
+Terminal=0
+InitialPreference=8
+

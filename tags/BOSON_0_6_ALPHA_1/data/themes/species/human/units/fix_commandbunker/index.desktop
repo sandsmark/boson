@@ -1,0 +1,12 @@
+[Boson Unit]
+IsFacility=true
+TerrainType=0
+Name=Command Bunker
+Id=5
+Health=400
+MineralCost=600
+Producer=10
+
+[Boson Facility]
+CanProduce=true
+ProducerList=10

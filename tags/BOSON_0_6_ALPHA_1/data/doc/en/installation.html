@@ -1,0 +1,75 @@
+<html>
+  <head>
+    <title>The Boson Handbook</title>
+    <meta http-equiv="Content-Type" content="text/html;">
+    <link rel="stylesheet" href="main.css" type="text/css">
+    <meta name="Description" content="Indexpage for the Boson handbook">
+    <meta name="Author" content="Timo H&uuml;bel - For questions: shagrath@gmx.net">
+  </head>
+
+  <body>
+    <h1>
+      Installation
+    </h1>
+    <p>
+      First you need to untar the code (if you downloaded a .tar.bz2 package -
+      skip this for cvs):
+      <pre>
+        tar xjvf code.tar.bz2
+        tar xjvf data.tar.bz2
+      </pre>
+      If you are using the cvs version you need to link the admin dir from code
+      to data first:
+      <pre>
+        cd data
+        ln -s ../code/admin
+      </pre>
+      Now you can enter the code dir and start compiling:
+      <pre>
+        cd code
+        ./configure
+        make
+        su
+        make install
+      </pre>
+      Note that you should not be root for compiling, but you usually need to be
+      root for make install.<br>
+      Repeat this for the data:
+      <pre>
+        cd data
+        ./configure
+        make
+        su
+        make install
+      </pre>
+      In case that the above fails because there is no ./configure you need to
+      generate it first:
+      <pre>
+        make -f Makefile.cvs
+      </pre>
+      Now boson should be installed on your system.
+    </p>
+    
+    <!-- footer -->
+    <p>&nbsp;</p>
+    <table width="100%" border="0">
+      <tr>
+        <td align="left" width="33%">
+          <a href="started.html">< Prev</a><br>
+          Getting started
+        </td>
+        <td align="center" width="33%">
+          <a href="index.html">Index</a>
+        </td>
+        <td align="right" width="33%">
+          <a href="ingame.html">Next ></a><br>
+          In the game
+        </td>
+      </tr>
+    </table>
+    <hr>
+    <h2>
+      The Boson Handbook - maintained by <a href="mailto:shagrath@gmx.net">T. H&uuml;bel</a>
+    </h2>
+  <body>
+</html>

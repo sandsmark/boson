@@ -1,0 +1,8 @@
+[Boson Unit]
+IsFacility=true
+TerrainType=0
+Name=Refinery
+Id=8
+Health=250
+MineralCost=400
+Producer=10

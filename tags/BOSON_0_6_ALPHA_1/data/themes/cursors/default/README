@@ -1,0 +1,34 @@
+Every action has an own directory (e.g. "move/" or "attack/"). All must be
+provided.
+
+Every dir has a index.desktop file, that describes the cursor. Contents:
+
+[Boson Cursor]
+CursorPrefix=text    -  The prefix of the filename. Default: "cursor-". Then
+                        *must* follow a 4-digit number (0000, 0001, 0002, ...)
+                        and then .png! Only .png are supported.
+FrameCount=number    -  The number of files you provide. This must be at least
+                        1! Note that file naming starts with zero!
+                        Default is 1.
+HotspotX_n=number    -  The horizontal hotspot of the cursor - file n. Example:
+                        HotspotX_0=0
+                        This means that the file cursor-0000.png has the
+                        horizontal hotspot at 0.
+                        HotspotX_32=68
+                        Means that the file cursor-0032.png has the
+                        horizontal hotspot at 68.
+
+                        If you don't specify all of the hotspots, the alway the
+                        last read is used. E.g. You have
+                        HotspotX_0=3
+                        HotspotX_32=22
+                        Then all frames cursor-0000.png up to cursor-0031.png
+                        have HotspotX=3. All following files have HotspotX=22
+HotspotY_n=number    -  See above.
+
+
+X-Cursors (The animated ones are actually sprites) have a very easy filename
+syntax. They are just named like "action.png". E.g.:
+move.png
+where the animated cursors are in
+move/

@@ -1,0 +1,16 @@
+[Boson Unit]
+IsFacility=false
+TerrainType=1
+Name=Ship
+Id=10000
+Health=120
+MineralCost=200
+Range=5
+Damage=25
+Reload=20
+Producer=1
+
+[Boson Mobile Unit]
+Speed=3
+CanGoOnLand=false
+CanGoOnWater=true

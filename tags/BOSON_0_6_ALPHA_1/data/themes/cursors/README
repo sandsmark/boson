@@ -1,0 +1,6 @@
+Cursors are fully themeable. That means you can change the type of the cursor
+"on the fly" while you are running boson.
+Feel free to add new cursor subdirs here - but make sure that you really provide
+all necessary files!
+
+See default/README for more info on this.

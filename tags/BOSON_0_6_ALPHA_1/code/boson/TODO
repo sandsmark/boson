@@ -1,0 +1,71 @@
+Game TODOs
+- waypoints
+- unit accelleration: units should slowly start to accelerate and to brake when
+  moving
+- left dbl-click should select ALL units of that type
+- scroll if cursor at the edge of the window
+- rewrite fog of war (QCanvas suckz): use QCanvasSprite::hide() on all units
+  and. We could also use QCanvas::drawForeground() to get rid of the
+  QCanvasSprites. But there is also a problem when scrolling the widget - all
+  units are visible for a moment then (until the fow is drawn). Bug is in
+  QCanvas: when the widget is scrolled QCanvas does not use double buffering
+  let the Cell display black. Don't use a QCanvasSprite for the fog of war.
+  Terrible performance.
+- BosonPath needs to be improved greatly - in progress
+- AI
+- follow-mode for units
+- _much_ better moving for multiple units in group
+- BosonCommandWidget should paint the order pixmap only *once* no more. E.g. we
+  repaint for setGrayOut() and setProductionCount()
+- BosonSpriteCursor::slotAdvance() calls canvas->update(). it should not as it
+  hurts performance. But it is necessary for slow game speed :(
+- refine minerals/oil
+- mine/harvest minerals/oil is only at an experimantal state
+- oil towers: they should be placed on an oil field. oil tankers go to the
+  towers and receive the oil from them, which they take to the refinery
+
+
+Editor (map, unit, scenario) TODOs
+- don't place units on invalid tiles (e.g. ship on grass)
+- unit editor: check if images are in the directory, provide possibility to copy
+  them
+- unit editor: add an additional page for the description of the unit (longer
+  text - should go into the handbook). Should be able to contain images and so
+  on. Maybe use plain docbook or so
+- use another options dialog. we MUST NOT provide the possibility to change the
+  game speed!!
+- don't load BosonTiles twice: once for QCanvas::setTiles and once for
+  BoOrderWidget
+
+General TODOs
+- zooming (QCanvas::setWorldMatrix()) - mostly done
+- SpeciesTheme loads all pixmaps into memory - share it between different
+  players (if they have the same themes)
+- find out whether signalUnitPropertyChanged() is a good thing at all. Might
+  save some performance if we don't use it.
+- use typeId = 0 as invalid (NOT -1!)
+- add revision (CVS) number of files to the connection protocol. If the versions
+  differ then deny connection. This ensures that all clients are at the smae
+  version. We need the revision number of each file - how to do add this
+  automatically?
+  We can do this using static const char filename_id = "$Id:";
+- BosonTiles: pehaps use KPixmapSplitter (kdelibs/kdefx)
+- IdReloadState also makes Player emit signalUnitChanged() - this might become a
+  performance problem!! we need it for BosonCommandWidget
+- transmit everything on startup over network (== map, unitProperties). This
+  saves us from a cheating player who (maybe just accidently) changed the files
+  (units/*/index.desktop especially).
+- decrease game speed ; increase unit speed. Saves cpu power
+- splitViews: we could use one view for players that are allied with the local
+  player. we need to transmit the position of the view over network... would be
+  a nice idea!
+- make sure that kdemultimedia is installed - perhaps disable .ogg support
+  somehow if it isn't
+
+Data TODOs
+- sound for minimap activated/deactivated
+- sound for destroyed facilities - shouldn't be speech i guess
+- missile sound - e.g. for the samsite
+- make use of biglogo.png
+- shipyard
+- airport 

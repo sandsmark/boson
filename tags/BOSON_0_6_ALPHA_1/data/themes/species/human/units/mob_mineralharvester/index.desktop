@@ -1,0 +1,16 @@
+[Boson Unit]
+IsFacility=false
+TerrainType=0
+Name=Mineral Harvester
+Id=10003
+Health=150
+MineralCost=300
+Producer=0
+
+[Boson Mobile Unit]
+Speed=3
+CanGoOnLand=true
+CanGoOnWater=false
+CanMineMinerals=true
+CanMineOil=false
+MaxResources=100

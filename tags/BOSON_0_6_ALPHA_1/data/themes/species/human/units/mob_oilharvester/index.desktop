@@ -1,0 +1,16 @@
+[Boson Unit]
+IsFacility=false
+TerrainType=0
+Name=Oil Harvester
+Id=10002
+Health=150
+MineralCost=300
+Producer=0
+
+[Boson Mobile Unit]
+Speed=3
+CanGoOnLand=true
+CanGoOnWater=false
+CanMineMinerals=false
+CanMineOil=true
+MaxResources=100
