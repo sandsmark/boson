@@ -6,7 +6,7 @@
 #export DH_VERBOSE=1
 
 # This is the debhelper compatibility version to use.
-export DH_COMPAT=3
+export DH_COMPAT=4
 
 # These are used for cross-compiling and for saving the configure script
 # from having to guess our platform (since we know it already)
@@ -14,7 +14,9 @@ DEB_HOST_GNU_TYPE   ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
 DEB_BUILD_GNU_TYPE  ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 
 # If KDEDIR is set we will install to KDEDIR
-export KDEDIR=""
+# but KDEDIR="" will lead to prefix="" in the Makefiles. so we use /usr as
+# KDEDIR, as it is the correct value for debian.
+KDEDIR="/usr"
 
 ifneq (,$(findstring debug,$(DEB_BUILD_OPTIONS)))
 	CFLAGS += -g
@@ -61,8 +63,14 @@ install: build
 	dh_clean -k
 	dh_installdirs
 
-	# Add here commands to install the package into debian/boson-code.
-	$(MAKE) install prefix=$(CURDIR)/debian/boson-code/usr
+	# Add here commands to install the package into debian/tmp/
+	$(MAKE) install DESTDIR=$(CURDIR)/debian/tmp/
+
+
+	# this will go through the <package>.install files and copy the files
+	# from debian/tmp/ to their correct location in the debian trees (e.g.
+	# debian/boson-species-human/)
+	dh_install
 
 
 # Build architecture-independent files here.
