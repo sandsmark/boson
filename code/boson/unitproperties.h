@@ -322,6 +322,8 @@ public:
 	 * @return maximum range of weapons of this unit e.g. range of weapon with the longest range
 	 **/
 	unsigned long int maxWeaponRange() const  { return mMaxWeaponRange; };
+	unsigned long int maxAirWeaponRange() const  { return mMaxAirWeaponRange; };
+	unsigned long int maxLandWeaponRange() const  { return mMaxLandWeaponRange; };
 
 	/**
 	 * @return Damage done by explosion when this unit is destroyed
@@ -441,6 +443,8 @@ private:
 	bool mCanShootAtAirUnits;
 	bool mCanShootAtLandUnits;
 	unsigned long int mMaxWeaponRange;
+	unsigned long int mMaxLandWeaponRange;
+	unsigned long int mMaxAirWeaponRange;
 	long int mExplodingDamage;
 	float mExplodingDamageRange;
 
