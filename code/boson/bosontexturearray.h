@@ -20,7 +20,6 @@
 #define BOSONTEXTUREARRAY_H
 
 #include <qvaluelist.h>
-#include <qpointarray.h>
 #include <GL/gl.h>
 
 class QImage;
@@ -34,15 +33,6 @@ public:
 	 * Frees all textures
 	 **/
 	~BosonTextureArray();
-
-	// AB: a hotspot of 0,0 (defalt) means that nothing should be changed
-	// FIXME: hotspots in this file are nonsense. we need to use them
-	// together with the vertices, not the textures.
-	void setHotspots(QPointArray hotspots);
-	QPoint hotspot(unsigned int i)
-	{
-		return (i >= mCount) ? QPoint(0,0) : mHotspots[i];
-	}
 
 	inline unsigned int count() const
 	{
@@ -117,7 +107,6 @@ private:
 	GLuint* mTextures;
 	int* mWidths;
 	int* mHeights;
-	QPointArray mHotspots;
 
 	GLenum mMode;
 };

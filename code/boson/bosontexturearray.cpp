@@ -160,16 +160,3 @@ int BosonTextureArray::nextPower2(int n) const
  return i;
 }
 
-void BosonTextureArray::setHotspots(QPointArray points)
-{
- if (!mCount) {
-	kdWarning() << k_funcinfo << "load the textures first!" << endl;
-	return;
- }
- if (points.count() != mCount) {
-	kdError() << k_funcinfo << "invalid list count" << endl;
-	return;
- }
- mHotspots = points.copy();
-}
-
