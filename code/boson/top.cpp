@@ -156,11 +156,6 @@ TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
  initKActions();
  initStatusBar();
 
- // this will also call slotResetGame() and therefore init the game
- d->mStartup->slotShowWelcomeWidget();
-
- loadInitialDockConfig();
-
  d->mIface = new BoDebugDCOPIface();
 
  initDisplayManager();
