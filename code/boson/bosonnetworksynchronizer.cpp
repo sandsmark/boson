@@ -48,6 +48,12 @@
 #include <qintdict.h>
 
 
+// debugging code to find a network bug. will be removed soon
+#warning remove asap
+#define NET_DEBUG 0
+#define NET_DEBUG_2 0
+
+
 // AB: generally I consider macros evil, but it time has shown that they _do_
 // make sense here. they reduce the probability of typos _greatly_
 
@@ -317,6 +323,7 @@ protected:
 		stream << (bofixed)r->centery;
 		stream << (bofixed)r->cost;
 		stream << (Q_UINT32)r->neighbors.count();
+#if NET_DEBUG
 		for (unsigned int i = 0; i < r->neighbors.count(); i++) {
 			if (!r->neighbors[i].region) {
 				boError(370) << k_funcinfo << "NULL neighbor region " << i << endl;
@@ -332,11 +339,16 @@ protected:
 		if (r->parent) {
 			// TODO?
 		}
+#endif
 		return true;
 	}
 
 	static bool unstreamRegion(QDataStream& stream, Q_INT32& id, Q_INT32& passabilityType, Q_INT32& cellsCount, bofixed& centerx, bofixed& centery, bofixed& cost,
-			Q_UINT32& nCount, QValueVector<Q_INT32>& nIds, QValueVector<bofixed>& nCost, QValueVector<Q_INT32>& nBorderCells)
+			Q_UINT32& nCount
+#if NET_DEBUG
+			, QValueVector<Q_INT32>& nIds, QValueVector<bofixed>& nCost, QValueVector<Q_INT32>& nBorderCells
+#endif
+			)
 	{
 		stream >> id;
 		stream >> passabilityType;
@@ -345,6 +357,7 @@ protected:
 		stream >> centery;
 		stream >> cost;
 		stream >> nCount;
+#if NET_DEBUG
 		nIds.resize(nCount);
 		nCost.resize(nCount);
 		nBorderCells.resize(nCount);
@@ -359,6 +372,7 @@ protected:
 			nCost[i] = cost;
 			nBorderCells[i] = borderCells;
 		}
+#endif
 		return true;
 	}
 private:
@@ -441,11 +455,21 @@ QString BoPathSyncMessage::findLogError(const QByteArray& b1, const QByteArray& 
 		DECLARE(bofixed, centery);
 		DECLARE(bofixed, cost);
 		DECLARE(Q_UINT32, nCount);
+#if NET_DEBUG
 		DECLARE(QValueVector<Q_INT32>, nIds);
 		DECLARE(QValueVector<bofixed>, nCost);
 		DECLARE(QValueVector<Q_INT32>, nBorderCells);
-		unstreamRegion(s1, id, passabilityType, cellsCount, centerx, centery, cost, nCount, nIds, nCost, nBorderCells);
-		unstreamRegion(s2, id2, passabilityType2, cellsCount2, centerx2, centery2, cost2, nCount2, nIds2, nCost2, nBorderCells2);
+#endif
+		unstreamRegion(s1, id, passabilityType, cellsCount, centerx, centery, cost, nCount
+#if NET_DEBUG
+				, nIds, nCost, nBorderCells
+#endif
+				);
+		unstreamRegion(s2, id2, passabilityType2, cellsCount2, centerx2, centery2, cost2, nCount2
+#if NET_DEBUG
+				, nIds2, nCost2, nBorderCells2
+#endif
+				);
 
 		COMPARE(id);
 		COMPARE(passabilityType);
@@ -454,6 +478,7 @@ QString BoPathSyncMessage::findLogError(const QByteArray& b1, const QByteArray& 
 		COMPARE(centery);
 		COMPARE(cost);
 		COMPARE(nCount);
+#if NET_DEBUG
 		if (nIds.count() != nIds2.count()) {
 			return error;
 		}
@@ -468,6 +493,7 @@ QString BoPathSyncMessage::findLogError(const QByteArray& b1, const QByteArray& 
 				error += i18n("neightbor bordercells at %1 don't match in region %2 of sector %3\n").arg(k).arg(j).arg(i);
 			}
 		}
+#endif
 	}
  }
 
@@ -477,9 +503,7 @@ QString BoPathSyncMessage::findLogError(const QByteArray& b1, const QByteArray& 
 }
 
 
-// just for debugging currently. remove asap!
-#warning remove asap
-#define PATH_LOG 1
+#define PATH_LOG NET_DEBUG
 class BoCanvasSyncMessage : public BoSyncMessageBase
 {
 public:
@@ -758,13 +782,6 @@ private:
 
 QByteArray BoCanvasSyncMessage::makeLog(int start, int count)
 {
- // AB it would be sufficient to stream data of a couple of items only.
- // that would be a lot faster.
- // e.g. only every nth item, where n is rotating, i.e. first log uses
- // items (n=10) 0, 10, 20, ... second log uses items 1, 11, 21, ... and
- // so on. we'd still cover all items but would have to stream a lot data
- // less
-
  if (start < 0 || count < 0) {
 	start = 0;
 	count = mCanvas->allItems()->count();
@@ -848,7 +865,9 @@ QByteArray BoLongSyncMessage::makeLog()
 {
  QMap<QString, QByteArray> streams;
 
+#if NET_DEBUG_2
  streams.insert("PathStream", mPathSync.makeLog());
+#endif
  streams.insert("CanvasStream", mCanvasSync.makeLog());
  streams.insert("BosonStream", mBosonSync.makeLog());
  streams.insert("PlayersStream", mPlayerSync.makeLog());
@@ -891,11 +910,13 @@ QString BoLongSyncMessage::findLogError(const QByteArray& b1, const QByteArray& 
 	return error;
  }
 
+#if NET_DEBUG_2
  BoPathSyncMessage pathSync;
  error = pathSync.findError(streams["PathStream"], streams2["PathStream"]);
  if (!error.isNull()) {
 	return error;
  }
+#endif
  BoCanvasSyncMessage canvasSync;
  error = canvasSync.findError(streams["CanvasStream"], streams2["CanvasStream"]);
  if (!error.isNull()) {
