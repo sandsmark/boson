@@ -33,7 +33,7 @@
 #include "visual.h"
   
 
-visualField::visualField(uint w, uint h, QObject *parent, const char *name=0L)
+visualField::visualField(uint w, uint h, QObject *parent, const char *name)
 	: QObject(parent, name)
 	, QwSpriteField (w * BO_TILE_SIZE ,h * BO_TILE_SIZE)
 {
@@ -45,7 +45,7 @@ visualField::visualField(uint w, uint h, QObject *parent, const char *name=0L)
 
 
 
-visualField::visualField(QObject *parent, const char *name=0L)
+visualField::visualField(QObject *parent, const char *name)
 	: QObject(parent, name)
 	, QwSpriteField ()
 {

@@ -61,7 +61,7 @@ public:
 		SELECT_RECT,		/* is drawing a selection rect */
 		SELECT_PUT,		/* something is being put on the field */
 		SELECT_FILL,		/* something is being filled (editor) */
-		SELECT_, 
+		SELECT_ 
 		};
 
 

@@ -12,4 +12,5 @@ boson-editor.log
 *.bpf
 boeditor
 diff
+.libs
 

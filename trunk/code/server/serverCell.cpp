@@ -20,7 +20,7 @@
 
 #include "serverCell.h"
 
-serverCell::serverCell(groundType g = GROUND_UNKNOWN)
+serverCell::serverCell(groundType g)
 	:Cell(g)
 {
 }

@@ -26,6 +26,7 @@
 #include <kmessagebox.h>
 #include <klocale.h>
 #include <kmenubar.h>
+#include <khelpmenu.h>
 
 #include "common/boconfig.h"
 #include "common/log.h"
@@ -181,6 +182,8 @@ void BosonApp::initMenuBar()
   ///////////////////////////////////////////////////////////////////
   // INSERT YOUR APPLICATION SPECIFIC MENUENTRIES HERE
 
+	KHelpMenu *m_helpMenu = new KHelpMenu(this, instance()->aboutData(), true, actionCollection());
+	menu_bar->insertItem(i18n("&Help"), m_helpMenu->menu() );   
 
   /*
   menu_bar->insertSeparator(); 

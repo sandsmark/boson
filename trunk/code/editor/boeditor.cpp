@@ -28,6 +28,7 @@
 #include <kfiledialog.h>
 #include <klocale.h>
 #include <kmenubar.h>
+#include <khelpmenu.h>
 #include <kmessagebox.h>
 
 #include "common/boconfig.h"
@@ -212,6 +213,10 @@ void BoEditorApp::initMenuBar()
   menu_bar = menuBar();
   menu_bar->insertItem(i18n("&File"), file_menu);
   menu_bar->insertItem(i18n("&Edit"), edit_menu);
+
+  KHelpMenu *m_helpMenu = new KHelpMenu(this, instance()->aboutData(), true,
+			                                       actionCollection()); 
+  menu_bar->insertItem(i18n("&Help"), m_helpMenu->menu() );
 //  menu_bar->insertItem(i18n("&View"), view_menu);
 
   ///////////////////////////////////////////////////////////////////

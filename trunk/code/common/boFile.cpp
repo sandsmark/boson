@@ -55,7 +55,7 @@ bool boFile::openRead(const char *filename)
 	/* open  stream */
 	f = new QFile(filename);
 	if (!f->open(IO_ReadOnly)){
-		puts("boFile : Can't open file");
+		logf(LOG_ERROR, "boFile : Can't open file \"%s\"", filename);
 		return false;
 		}
 	stream = new QDataStream(f);

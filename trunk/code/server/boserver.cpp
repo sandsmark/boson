@@ -39,7 +39,7 @@ FILE *logfile = (FILE *) 0L;
 extern "C" { extern void usleep(unsigned long); }
 
 
-BosonServer::BosonServer(int port, const char *mapfile, const char *name=0L)
+BosonServer::BosonServer(int port, const char *mapfile, const char *name)
 	: KTMainWindow(name)
 {
 	QLabel		*label;

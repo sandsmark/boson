@@ -62,7 +62,7 @@ void visualUnit::doShow()
  * visualMobUnit
  */
 
-visualMobUnit::visualMobUnit(mobileMsg_t *msg, QObject* parent=0, const char *name=0L)
+visualMobUnit::visualMobUnit(mobileMsg_t *msg, QObject* parent, const char *name)
 	: mobUnit(msg,parent,name)
 	, visualUnit(msg->key, species[msg->who]->getPixmap(msg->type))
 {
@@ -95,7 +95,7 @@ void visualMobUnit::select()
 /*
  * visualFacility
  */
-visualFacility::visualFacility(facilityMsg_t *msg, QObject* parent=0L, const char *name=0L)
+visualFacility::visualFacility(facilityMsg_t *msg, QObject* parent, const char *name)
 	: Facility(msg,parent,name)
 	, visualUnit(msg->key, species[msg->who]->getPixmap(msg->type))
 {

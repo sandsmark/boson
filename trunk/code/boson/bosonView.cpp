@@ -44,7 +44,7 @@
 
 
 
-bosonView::bosonView(QWidget *parent, const char *name=0L)
+bosonView::bosonView(QWidget *parent, const char *name)
 	:visualView(::field,parent,name)
 {
 	int i;

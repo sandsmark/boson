@@ -28,7 +28,7 @@
 
 #include "mainView.h"		// myself
 
-mainView::mainView(QWidget *parent=0, const char *name=0)
+mainView::mainView(QWidget *parent, const char *name)
 	:QWidget(parent, name)
 { 
 	QHBoxLayout	*topLayout = new QHBoxLayout(this);

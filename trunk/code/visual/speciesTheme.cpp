@@ -27,6 +27,7 @@
 #include <QwSpriteField.h>
 
 #include <kstddirs.h>
+#include <kinstance.h>
 
 #include "common/log.h"
 #include "common/unit.h"
@@ -55,7 +56,10 @@ speciesTheme::speciesTheme(char *themeName, QRgb color)
 	boAssert ( mobiles->fill(false) );
 	boAssert ( facilities->fill(false) );
 
-	themePath = new QString( locate ("data", "boson/themes/species/") + themeName);
+	themePath	= new QString (KGlobal::instance()->dirs()->findResourceDir("data", "boson/map/basic.bpf") );
+	*themePath	+= "boson/themes/species/";
+	*themePath	+= themeName;
+	*themePath	+= "/";
 
 	/* preload some units */ 
 	loadFix(FACILITY_CMDBUNKER);

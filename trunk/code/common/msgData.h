@@ -33,7 +33,7 @@ enum refusedType {
 	REFUSED_BAD_VERSION,	/* Your client version isn't compatible with the server's one, not used yet */
 	REFUSED_PRIVATE,	/* this is a private game, you haven't been invited, not used yet */
 	REFUSED_TOO_LOW,	/* your connection is too low, not used yet */
-	REFUSED_,
+	REFUSED_
 	};
 
 /* MSG_DLG_ASK */ ///orzel still unused
@@ -218,7 +218,7 @@ enum bosonMsgTag {
 	MSG_PERSO_KNOWELDGE,
 	MSG_PERSO_,
 
-	MSG_LAST,
+	MSG_LAST
 	};
 
 /* ilen is for integer-lenght */

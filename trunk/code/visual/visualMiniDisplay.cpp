@@ -25,7 +25,7 @@
 #include "visualMiniDisplay.h"
 #include "visualView.h"
 
-visualMiniDisplay::visualMiniDisplay(visualView *v, QWidget*parent, const char *name=0L)
+visualMiniDisplay::visualMiniDisplay(visualView *v, QWidget*parent, const char *name)
 	: QWidget(parent, name)
 {
 
