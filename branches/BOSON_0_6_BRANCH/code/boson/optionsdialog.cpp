@@ -71,7 +71,7 @@ public:
 };
 
 OptionsDialog::OptionsDialog(QWidget* parent, bool modal)
-		: KDialogBase(Tabbed, i18n("Boson Options"), Ok|Cancel|Default,
+		: KDialogBase(Tabbed, i18n("Boson Options"), Ok|Default,
 		Cancel, parent, "bosonoptionsdialog", modal, true)
 {
  d = new OptionsDialogPrivate;
