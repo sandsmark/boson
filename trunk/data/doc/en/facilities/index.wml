@@ -1,17 +1,36 @@
-#include "indexes.wml" title="Facilities" description="Here you can learn all important things about the buildings."
+#include "top.wml"
+#use wml::std::grid
 
-<dt>3.1 <a href="map.html">Facilities dependency tree</a></dt>
-<dt>3.2 <a href="bunker.html">Command Bunker</a></dt>
-<dt>3.3 <a href="mineralrefinery.html">Mineral Refinery</a></dt>
-<dt>3.4 <a href="refinery.html">Oil Refinery</a></dt>
-<dt>3.5 <a href="oiltower.html">Oil Tower</a></dt>
-<dt>3.6 <a href="powerplant.html">Power Plant</a></dt>
-<dt>3.7 <a href="warfactory.html">War Factory</a></dt>
-<dt>3.8 <a href="comsat.html">Comsat</a></dt>
-<dt>3.9 <a href="techcenter.html">Tech Center</a></dt>
-<dt>3.10 <a href="repairpad.html">Repair Pad</a></dt>
-<dt>3.11 <a href="helipad.html">Helipad</a></dt>
-<dt>3.12 <a href="turret.html">Turret</a></dt>
-<dt>3.13 <a href="samsite.html">Sam-Site</a></dt>
+<h1>Facilities</h1>
 
-#include "indexes_footer.wml" before_url="../game/technologies.html" before_text="Technologies" after_url="map.html" after_text="Facilities dependency tree" up_url="../index.html"
+<grid layout=4x4 padding=15 border=0>
+#include "simple_facilities.wml" type="Facilities" name="Map" \
+        name2="map" type2="fix"
+#include "simple_facilities.wml" type="Facilities" name="Command Bunker" \
+        name2="commandbunker" type2="fix"
+#include "simple_facilities.wml" type="Facilities" name="Mineral Refinery" \
+        name2="mineralrefinery" type2="fix"
+#include "simple_facilities.wml" type="Facilities" name="Oil Refinery" \
+        name2="oilrefinery" type2="fix"
+#include "simple_facilities.wml" type="Facilities" name="Oil Tower" \
+        name2="oiltower" type2="fix"
+#include "simple_facilities.wml" type="Facilities" name="Power Plant" \
+        name2="powerplant" type2="fix"
+#include "simple_facilities.wml" type="Facilities" name="War Factory" \
+        name2="warfactory" type2="fix"
+#include "simple_facilities.wml" type="Facilities" name="Comsat" \
+        name2="comsat" type2="fix"
+#include "simple_facilities.wml" type="Facilities" name="Tech Center" \
+        name2="techcenter" type2="fix"
+#include "simple_facilities.wml" type="Facilities" name="Repair Pad" \
+        name2="repairpad" type2="fix"
+#include "simple_facilities.wml" type="Facilities" name="Helipad" \
+        name2="helipad" type2="fix"
+#include "simple_facilities.wml" type="Facilities" name="Turret" \
+        name2="turret" type2="fix"
+#include "simple_facilities.wml" type="Facilities" name="Sam-Site" \
+        name2="samsite" type2="fix"
+</grid>
+
+#include "nav.wml" before_url="../game/technologies.html" before_text="Technologies" after_url="map.html" after_text="Facilities dependency tree" up_url="../index.html"
+#include "footer.wml"

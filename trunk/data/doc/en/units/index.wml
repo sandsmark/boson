@@ -1,39 +1,29 @@
 #include "top.wml"
+#use wml::std::grid
+
 <h1>Units</h1>
 
-<table cellpadding="15">
-<tr><td>
+
+<grid layout=4x3 padding=15 border=0>
 #include "simple_facilities.wml" type="Units" name="Mineral Harvester" \
         name2="mineralharvester" type2="mob"
-</td><td>
 #include "simple_facilities.wml" type="Units" name="Oil Harvester" \
         name2="oilharvester" type2="mob"
-</td><td>
 #include "simple_facilities.wml" type="Units" name="Grizzly" \
         name2="grizzly" type2="mob"
-</td><td>
 #include "simple_facilities.wml" type="Units" name="Leopard" \
         name2="leopard" type2="mob"
-</td></tr>
-
-<tr><td>
 #include "simple_facilities.wml" type="Units" name="Panther" \
         name2="panther" type2="mob"
-</td><td>
 #include "simple_facilities.wml" type="Units" name="Piranha" \
         name2="piranha" type2="mob"
-</td><td>
 #include "simple_facilities.wml" type="Units" name="Tiger" \
         name2="tiger" type2="mob"
-</td><td>
 #include "simple_facilities.wml" type="Units" name="Ship" \
         name2="ship" type2="mob"
-</td></tr>
-
-<tr><td>
 #include "simple_facilities.wml" type="Units" name="Tornado" \
         name2="tornado" type2="mob"
-</td></tr>
-</table>
+</grid>
 
-#include "indexes_footer.wml" before_url="../facilities/samsite.html" before_text="Sam-Site" after_url="mineral_harvester.html" after_text="Mineral Harvester"  up_url="../index.html"
+#include "nav.wml" before_url="../facilities/samsite.html" before_text="Sam-Site" after_url="mineralharvester.html" after_text="Mineral Harvester"  up_url="../index.html"
+#include "footer.wml"
