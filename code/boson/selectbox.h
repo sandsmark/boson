@@ -25,16 +25,6 @@
 class BosonSprite;
 class BosonCanvas;
 
-#ifndef NO_OPENGL
-
-#warning SelectBox is not yet implemented for OpenGL
-
-#else 
-
-#warning SelectBox is currently broken
-
-#endif
-
 #if 1
 
 #include <GL/gl.h>
@@ -56,6 +46,7 @@ public:
 protected:
 	void loadBoxes();
 	static void drawCube();
+	static void drawHealthBar(int frame);
 
 private:
 	QMap<int, GLuint> mDisplayLists;
