@@ -66,9 +66,9 @@ def oldAIAdvance():
   if not aicycle == aidelay:
     return
   boprint("debug", "oldAIAdvance() executing")
-  reset aicycle
   global player
   boprint("info", "oldAIAdvance() called for player: %s" % player)
+  # reset aicycle
   aicycle = 0
   # check if target is still alive
   if aitarget == -1 or BoScript.isUnitAlive(aitarget) == 0:
