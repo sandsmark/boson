@@ -54,12 +54,12 @@ public:
 	{
 		mMouseIO = 0;
 		
-		mChat = 0;
+//		mChat = 0;
 	}
 
 	KGameMouseIO* mMouseIO;
 
-	KGameCanvasChat* mChat;
+//	KGameCanvasChat* mChat;
 };
 
 BosonBigDisplay::BosonBigDisplay(BosonCanvas* c, QWidget* parent) 
