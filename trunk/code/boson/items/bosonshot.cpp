@@ -370,9 +370,9 @@ bool BosonShotMissile::saveAsXML(QDomElement& root)
   }
 
   // Too many attributes?
-  root.setAttribute("xVelo", mVelo.x());
-  root.setAttribute("yVelo", mVelo.y());
-  root.setAttribute("zVelo", mVelo.z());
+  root.setAttribute("xVelocity", mVelo.x());
+  root.setAttribute("yVelocity", mVelo.y());
+  root.setAttribute("zVelocity", mVelo.z());
   root.setAttribute("Targetx", mTarget.x());
   root.setAttribute("Targety", mTarget.y());
   root.setAttribute("Targetz", mTarget.z());
@@ -397,23 +397,35 @@ bool BosonShotMissile::loadFromXML(const QDomElement& root)
   float targetx, targety, targetz;
   float speed;
 
-  xvelo = root.attribute("xVelo").toFloat(&ok);
+  xvelo = root.attribute("xVelocity").toFloat(&ok);
   if(!ok)
   {
-    boError() << k_funcinfo << "Invalid value for xVelo tag" << endl;
-    return false;
+    xvelo = root.attribute("xVelo").toFloat(&ok);
+    if (!ok)
+    {
+      boError() << k_funcinfo << "Invalid value for xVelocity tag" << endl;
+      return false;
+    }
   }
-  yvelo = root.attribute("yVelo").toFloat(&ok);
+  yvelo = root.attribute("yVelocity").toFloat(&ok);
   if(!ok)
   {
-    boError() << k_funcinfo << "Invalid value for yVelo tag" << endl;
-    return false;
+    yvelo = root.attribute("yVelo").toFloat(&ok);
+    if (!ok)
+    {
+      boError() << k_funcinfo << "Invalid value for yVelocity tag" << endl;
+      return false;
+    }
   }
-  zvelo = root.attribute("zVelo").toFloat(&ok);
+  zvelo = root.attribute("zVelocity").toFloat(&ok);
   if(!ok)
   {
-    boError() << k_funcinfo << "Invalid value for zVelo tag" << endl;
-    return false;
+    zvelo = root.attribute("zVelo").toFloat(&ok);
+    if (!ok)
+    {
+      boError() << k_funcinfo << "Invalid value for zVelocity tag" << endl;
+      return false;
+    }
   }
   targetx = root.attribute("Targetx").toFloat(&ok);
   if(!ok)
@@ -883,7 +895,7 @@ BosonShotFragment::BosonShotFragment(Player* owner, BosonCanvas* canvas, BosonMo
   mVelo.normalize();
   mVelo.scale(FRAGMENT_MIN_SPEED + (r->getDouble() * (FRAGMENT_MAX_SPEED - FRAGMENT_MIN_SPEED)));
   mVelo.setZ(FRAGMENT_MIN_Z_SPEED + (r->getDouble() * (FRAGMENT_MAX_Z_SPEED - FRAGMENT_MIN_Z_SPEED)));
-  boDebug() << k_funcinfo << "Velo is: (" << mVelo.x() << "; " << mVelo.y() << "; " << mVelo.z() << ")" << endl;
+  boDebug() << k_funcinfo << "Velocity is: (" << mVelo.x() << "; " << mVelo.y() << "; " << mVelo.z() << ")" << endl;
 
   mParticleSystems = new QPtrList<BosonParticleSystem>(mUnitProperties->newExplodingFragmentFlyParticleSystems(BoVector3()));
   canvas->addParticleSystems(*mParticleSystems);
@@ -908,9 +920,9 @@ bool BosonShotFragment::saveAsXML(QDomElement& root)
     return false;
   }
 
-  root.setAttribute("Velox", mVelo.x());
-  root.setAttribute("Veloy", mVelo.y());
-  root.setAttribute("Veloz", mVelo.z());
+  root.setAttribute("Velocityx", mVelo.x());
+  root.setAttribute("Velocityy", mVelo.y());
+  root.setAttribute("Velocityz", mVelo.z());
   root.setAttribute("UnitProperties", (unsigned int)mUnitProperties->typeId());
 
   return true;
@@ -928,23 +940,35 @@ bool BosonShotFragment::loadFromXML(const QDomElement& root)
   float velox, veloy, veloz;
   unsigned int props;
 
-  velox = root.attribute("Velox").toFloat(&ok);
+  velox = root.attribute("Velocityx").toFloat(&ok);
   if(!ok)
   {
-    boError() << k_funcinfo << "Invalid value for Velox tag" << endl;
-    return false;
+    velox = root.attribute("Velox").toFloat(&ok);
+    if (!ok)
+    {
+      boError() << k_funcinfo << "Invalid value for Velocityx tag" << endl;
+      return false;
+    }
   }
-  veloy = root.attribute("Veloy").toFloat(&ok);
+  veloy = root.attribute("Velocityy").toFloat(&ok);
   if(!ok)
   {
-    boError() << k_funcinfo << "Invalid value for Veloy tag" << endl;
-    return false;
+    veloy = root.attribute("Veloy").toFloat(&ok);
+    if (!ok)
+    {
+      boError() << k_funcinfo << "Invalid value for Velocityy tag" << endl;
+      return false;
+    }
   }
-  veloz = root.attribute("Veloz").toFloat(&ok);
+  veloz = root.attribute("Velocityz").toFloat(&ok);
   if(!ok)
   {
-    boError() << k_funcinfo << "Invalid value for Veloz tag" << endl;
-    return false;
+    veloz = root.attribute("Veloz").toFloat(&ok);
+    if (!ok)
+    {
+      boError() << k_funcinfo << "Invalid value for Velocityz tag" << endl;
+      return false;
+    }
   }
 
   props = root.attribute("UnitProperties").toUInt(&ok);
