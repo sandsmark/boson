@@ -61,3 +61,4 @@ SoundFly=missile_fly
 SoundHit=hit
 SoundShoot=shoot
 Speed=0
+Model=bullet

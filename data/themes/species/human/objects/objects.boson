@@ -17,3 +17,8 @@ Height=0.5
 File=fragment1.3ds
 Width=0.1
 Height=0.1
+
+[bullet]
+File=bullet.3ds
+Width=0.1
+Height=0.1
