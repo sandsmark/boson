@@ -748,6 +748,28 @@ void ModelPreview::mouseMoveEvent(QMouseEvent* e)
  }
 }
 
+void ModelPreview::wheelEvent(QWheelEvent* e)
+{
+ BO_CHECK_NULL_RET(camera());
+ float delta = e->delta() / 120;
+ if (e->orientation() == Horizontal) {
+ } else {
+ }
+ BoVector3 lookAt = camera()->lookAt();
+ BoVector3 eye = camera()->cameraPos();
+ BoVector3 up = camera()->up();
+
+ BoVector3 orientation = eye - lookAt;
+ orientation.normalize();
+ if (orientation.isNull()) {
+	// FIXME: this should be disallowed!
+	orientation = BoVector3(1.0f, 0.0f, 0.0f);
+ }
+ eye.add(orientation * -delta);
+ lookAt.add(orientation * -delta);
+ updateCamera(eye, lookAt, up);
+}
+
 void ModelPreview::slotFrameChanged(int f)
 {
  if (f != 0) {

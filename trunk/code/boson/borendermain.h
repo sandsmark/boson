@@ -148,6 +148,7 @@ protected:
 	virtual void mouseMoveEvent(QMouseEvent*);
 	virtual void mousePressEvent(QMouseEvent*);
 	virtual void mouseReleaseEvent(QMouseEvent*);
+	virtual void wheelEvent(QWheelEvent*);
 
 	void renderModel(int mode = -1);
 	void renderGrid();
