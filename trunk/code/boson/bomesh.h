@@ -135,7 +135,15 @@ public:
 	 * Prepare to load the points, i.e. allocate memory for them. You can
 	 * set them using @ref setVertex and @ref setTexel.
 	 **/
-	void allocatePoints(unsigned int points, bool texels);
+	void allocatePoints(unsigned int points);
+
+	/**
+	 * Move the points from the local array to the specified array. This
+	 * will copy all points (vertices and texture coordinates). The points
+	 * are inserted starting at @p index - all local indices are changed
+	 * (i.e. increased by @p index).
+	 **/
+	void movePoints(float* array, int index);
 
 	/**
 	 * You must call @ref allocatePoints before calling this!
@@ -200,6 +208,7 @@ public:
 	bool textured() const;
 
 	void renderMesh();
+	void renderMeshPoints();
 	void renderPoint(int index);
 
 	// AB: these are bad. we should remove then - then we could load the

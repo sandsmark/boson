@@ -44,10 +44,11 @@ BosonItem::BosonItem(BosonModel* model, BosonCanvas* canvas)
  mFrame = 0;
  mGLConstructionStep = 0;
  mAnimationCounter = 0;
+ mCurrentFrame = 0;
 
- mXVelocity = 0.0;
- mYVelocity = 0.0;
- mZVelocity = 0.0;
+ mXVelocity = 0.0f;
+ mYVelocity = 0.0f;
+ mZVelocity = 0.0f;
 
  mCurrentAnimation = 0;
  // 1.732 == sqrt(3) i.e. lenght of vector whose all components are 1
@@ -269,6 +270,11 @@ unsigned int BosonItem::frameCount() const
 
 void BosonItem::setCurrentFrame(BoFrame* frame)
 {
+ mCurrentFrame = frame;
+
+ // the following values cache values from BoFrame, so that we can use them in
+ // inline functions (or with direct access). otherwise we'd have to #include
+ // bosonmodel.h in bosonitem.h (-> bad)
  setDisplayList(frame->displayList());
  setGLDepthMultiplier(frame->depthMultiplier());
 }
@@ -335,3 +341,22 @@ void BosonItem::setSize(int width, int height)
  mCellsDirty = true;
  addToCells();
 }
+
+void BosonItem::renderItem()
+{
+ // TODO: performance:
+ // we should manage a single (giantic) array, which contains the of ALL models.
+ // then we could set the pointers once only and can render after that.
+ // additionally we could search for redundant indices - i.e. if there are
+ // different points with exactly the same coordinates (vertices and texture)
+ // then we could replace the index of one of them by the index of the other one
+ // and store only one of them
+ glVertexPointer(3, GL_FLOAT, 5 * sizeof(float), mModel->pointArray());
+ glTexCoordPointer(2, GL_FLOAT, 5 * sizeof(float), mModel->pointArray() + 3);
+ if (displayList() != 0) {
+	glCallList(displayList());
+ } else {
+	mCurrentFrame->renderFrame();
+ }
+}
+

@@ -758,6 +758,8 @@ void BosonBigDisplayBase::paintGL()
  // format to make culling work!
  glEnable(GL_CULL_FACE);
  glCullFace(GL_BACK);
+ glEnableClientState(GL_VERTEX_ARRAY);
+ glEnableClientState(GL_TEXTURE_COORD_ARRAY);
  for (; it != allItems.end(); ++it) {
 	//FIXME: order by z-coordinates! first those which are
 	//closer to surface, then flying units
@@ -791,11 +793,6 @@ void BosonBigDisplayBase::paintGL()
 	// AB: note units are rendered in the *center* point of their
 	// width/height.
 	// but concerning z-position they are rendered from bottom to top!
-
-	if (item->displayList() == 0) {
-		boWarning() << k_funcinfo << "NULL display list for item rtti=" << item->rtti() << endl;
-		continue;
-	}
 
 	// FIXME: we have to copy the complete list of cells here, since it is
 	// calculated on the fly by cells()! nicer version would be to add
@@ -837,7 +834,7 @@ void BosonBigDisplayBase::paintGL()
 	} else {
 		glColor3ub(255, 255, 255);
 	}
-	glCallList(item->displayList());
+	item->renderItem();
 	glColor3ub(255, 255, 255);
 	glPopMatrix();
 
@@ -860,6 +857,8 @@ void BosonBigDisplayBase::paintGL()
 	glTranslatef(-x, -y, -z);
 	renderedUnits++;
  }
+ glDisableClientState(GL_VERTEX_ARRAY);
+ glDisableClientState(GL_TEXTURE_COORD_ARRAY);
  glDisable(GL_CULL_FACE);
  boProfiling->renderUnits(false, renderedUnits);
 

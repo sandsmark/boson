@@ -46,6 +46,10 @@
 // i am expecting the strips to be faster
 #define USE_STRIP 0
 
+// we use vertex arrays - we can also use display lists to make it faster.
+// they are disabled currently cause plain vertex arrays are more flexible.
+#define USE_DISPLAYLISTS 0
+
 BosonModelTextures* BosonModel::mModelTextures = 0;
 static KStaticDeleter<BosonModelTextures> sd;
 
@@ -131,6 +135,33 @@ BoMatrix* BoFrame::matrix(int index) const
  return &mMatrices[index];
 }
 
+void BoFrame::renderFrame()
+{
+ for (int i = 0; i < mMeshCount; i++) {
+	BoMatrix* m = &mMatrices[i];
+	BoMesh* mesh = mMeshes[i];
+	if (!m) {
+		boError() << k_funcinfo << "NULL matrix at " << i << endl;
+		continue;
+	}
+	if (!mesh) {
+		boError() << k_funcinfo << "NULL mesh at " << i << endl;
+		continue;
+	}
+	glPushMatrix();
+	glMultMatrixf(m->data());
+#if USE_DISPLAYLISTS
+	if (mesh->displayList()) {
+		glCallList(mesh->displayList());
+	} else
+#endif
+	{
+		mesh->renderMesh();
+	}
+	glPopMatrix();
+ }
+}
+
 class BosonModel::BoHelper
 {
 public:
@@ -208,6 +239,8 @@ public:
 	Private()
 	{
 		mLoader = 0;
+
+		mPoints = 0;
 	}
 
 	QIntDict<BoMesh> mMeshes;
@@ -222,6 +255,9 @@ public:
 	QString mFile;
 
 	Bo3DSLoad* mLoader;
+
+	// consits of vertices and texture coordinates:
+	float* mPoints;
 };
 
 BosonModel::BosonModel(const QString& dir, const QString& file, float width, float height)
@@ -269,6 +305,7 @@ BosonModel::~BosonModel()
  d->mAnimations.clear();
  boDebug(100) << k_funcinfo << "delete meshes" << endl;
  d->mMeshes.clear();
+ delete[] d->mPoints;
  delete d;
  boDebug(100) << k_funcinfo << "done" << endl;
 }
@@ -317,6 +354,8 @@ void BosonModel::loadModel()
  // TODO: add a profiling entry for this
  d->mLoader->loadModel();
 
+ mergeArrays();
+
  applyMasterScale();
 
  boProfiling->start(BosonProfiling::LoadModelTextures);
@@ -348,12 +387,12 @@ void BosonModel::loadModel()
 #else
 	mesh->addFaces();
 #endif
-
-	mesh->loadDisplayList();
  }
 
 
+#if USE_DISPLAYLISTS
  createDisplayLists();
+#endif
  boProfiling->stop(BosonProfiling::LoadModelDisplayLists);
 
  delete d->mLoader;
@@ -369,6 +408,25 @@ void BosonModel::createDisplayLists()
 	boWarning() << k_funcinfo << "no frames" << endl;
 	return;
  }
+
+ glEnableClientState(GL_VERTEX_ARRAY);
+ glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+ // a display list makes our vertex pointer totally useless! the data are
+ // evaluated *now* when we compile the list - not later anymore!
+ glVertexPointer(3, GL_FLOAT, 5 * sizeof(float), pointArray());
+ glTexCoordPointer(2, GL_FLOAT, 5 * sizeof(float), pointArray() + 3);
+
+
+ // AB: instead of creating display lists for every mesh we could generate a
+ // single display list per frame containing all of the data. this would save
+ // several glCallLists() calls and might be faster - but takes a lot more
+ // memory for many frames
+ boDebug(100) << k_funcinfo << "creating lists for " << d->mMeshes.count() << " meshes" << endl;
+ QIntDictIterator<BoMesh> it(d->mMeshes);
+ for (; it.current(); ++it) {
+	it.current()->loadDisplayList();
+ }
+
  boDebug(100) << k_funcinfo << "creating " << d->mFrames.count() << " lists" << endl;
  GLuint listBase = glGenLists(d->mFrames.count());
  if (listBase == 0) {
@@ -381,87 +439,66 @@ void BosonModel::createDisplayLists()
 
 	GLuint list = listBase + i;
 	glNewList(list, GL_COMPILE);
-
-	for (int j = 0; j < f->meshCount(); j++) {
-		glPushMatrix();
-
-		BoMatrix* m = f->matrix(j);
-		BoMesh* mesh = f->mesh(j);
-		if (!m) {
-			boError() << k_funcinfo << "NULL matrix at " << j << endl;
-			continue;
-		}
-		if (!mesh) {
-			boError() << k_funcinfo << "NULL mesh at " << j << endl;
-			continue;
-		}
-
-		glMultMatrixf(m->data());
-
-		// AB: try to merge the meshes into the frame display list. -->
-		// bigger lists, but might be faster.
-#define USE_MANY_LISTS 1
-#if USE_MANY_LISTS
-		glCallList(mesh->displayList());
-#else
-
-		if (mesh->textured()) {
-			glBindTexture(GL_TEXTURE_2D, mesh->textureObject());
-		}
-		glBegin(mesh->type());
-		mesh->renderMesh();
-		glEnd();
-#endif
-
-		// AB: performance: we could try to use glLoadMatrix
-		// instead of glMultMatrixf and then get rid of the
-		// glPushMatrix()/glPopMatrix. try which version is
-		// faster!
-		glPopMatrix();
-	}
-
+	f->renderFrame();
 	glEndList();
 
 	f->setDisplayList(list);
  }
+ glDisableClientState(GL_VERTEX_ARRAY);
+ glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
-void BosonModel::generateConstructionLists()
+void BosonModel::generateConstructionFrames()
 {
- // construction lists are always generated from the 1st frame!
+ // construction frames are always generated from the 1st frame!
  BoFrame* frame0 = frame(0);
  if (!frame0) {
 	boError(100) << k_funcinfo << "No frame was loaded yet!" << endl;
 	return;
  }
+ if (d->mConstructionSteps.count() != 0) {
+	boWarning(100) << k_funcinfo << "construction frames already generated" << endl;
+	return;
+ }
  unsigned int nodes = frame0->meshCount();
- boDebug(100) << k_funcinfo << "Generating " << nodes << " construction lists" << endl;
+ boDebug(100) << k_funcinfo << "Generating " << nodes << " construction frames" << endl;
 
+ for (unsigned int i = 0; i < nodes; i++) {
+	BoFrame* step = new BoFrame(*frame0, i); // copy the first i meshes from frame0
+	d->mConstructionSteps.insert(i, step);
+ }
+#if !USE_DISPLAYLISTS
+ return;
+#endif
  GLuint base = glGenLists(nodes);
  if (base == 0) {
 	boError(100) << k_funcinfo << "NULL display lists created" << endl;
 	return;
  }
- for (unsigned int i = 0; i < nodes; i++) {
+ QIntDictIterator<BoFrame> it(d->mConstructionSteps);
+ int i = 0;
+ for (; it.current(); ++it, i++) {
 	GLuint list = base + i;
-	BoFrame* step = new BoFrame(*frame0, i); // copy the first i meshes from frame0
+	BoFrame* step = it.current();
 
-	// AB: FIXME: this code is pretty much redundant. we use the same code as
-	// in createDisplayLists(), but for a limted number of nodes only. we
-	// could merge both in a new function!
 	glNewList(list, GL_COMPILE);
-
-	for (unsigned int j = 0; j < i; j++) {
+	step->renderFrame();
+	/*
+	for (int j = 0; j < step->meshCount(); j++) {
 		glPushMatrix();
 
 		BoMatrix* m = step->matrix(j);
 		BoMesh* mesh = step->mesh(j);
 		if (!m) {
-			boError() << k_funcinfo << "NULL matrix at " << j << endl;
+			boError(100) << k_funcinfo << "NULL matrix at " << j << endl;
 			continue;
 		}
 		if (!mesh) {
-			boError() << k_funcinfo << "NULL mesh at " << j << endl;
+			boError(100) << k_funcinfo << "NULL mesh at " << j << endl;
+			continue;
+		}
+		if (mesh->displayList() == 0) {
+			boWarning() << k_funcinfo << "no display list for mesh " << j << endl;
 			continue;
 		}
 
@@ -471,9 +508,9 @@ void BosonModel::generateConstructionLists()
 
 		glPopMatrix();
 	}
+	*/
 	glEndList();
 	step->setDisplayList(list);
-	d->mConstructionSteps.insert(i, step);
  }
 }
 
@@ -664,7 +701,6 @@ void BosonModel::applyMasterScale()
 	}
 
 	for (int j = 0; j < f->meshCount(); j++) {
-		BoMesh* mesh = f->mesh(j);
 		BoMatrix* matrix = f->matrix(j);
 		BoMatrix m;
 		m.scale(scale,scale,scale);
@@ -681,4 +717,35 @@ void BosonModel::applyMasterScale()
  }
 }
 
+void BosonModel::mergeArrays()
+{
+ if (d->mPoints) {
+	// this is dangerous!
+	// crash is probably close (broken indices)
+	boError() << k_funcinfo << "points already allocated" << endl;
+	return;
+ }
+ // count the points in the meshes first.
+ unsigned int size = 0;
+ QIntDictIterator<BoMesh> it(d->mMeshes);
+ for (; it.current(); ++it) {
+	// 3 vertices per point + 2 texels per point
+	// note that we waste some space here - some objects are not textured.
+	// but when we allocate this  way we can render more efficient.
+	size += it.current()->points() * 5;
+ }
+
+ d->mPoints = new float[size];
+ it.toFirst();
+ int index = 0;
+ for (; it.current(); ++it) {
+	it.current()->movePoints(d->mPoints, index);
+	index += it.current()->points();
+ }
+}
+
+float* BosonModel::pointArray() const
+{
+ return d->mPoints;
+}
 

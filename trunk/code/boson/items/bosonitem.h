@@ -150,16 +150,16 @@ public:
 	 **/
 	inline bool isSelected() const { return mSelectBox != 0; }
 
-	inline void setDisplayList(GLuint l)
-	{
-		mDisplayList = l;
-	}
+	/**
+	 * Render the item. This assumes the modelview matrix was already
+	 * translated and rotated to the correct position.
+	 **/
+	void renderItem();
 
 	inline GLuint displayList() const
 	{
 		return mDisplayList;
 	}
-
 
 	/**
 	 * @return The select box of this item, or NULL if it is not selected.
@@ -383,6 +383,16 @@ private:
 	void setCurrentFrame(BoFrame* frame);
 
 	/**
+	 * Cache the display list from the current frame. Don't use this
+	 * directly - use @ref setCurrentFrame (or rather @ref setFrame) instead.
+	 **/
+	inline void setDisplayList(GLuint l)
+	{
+		mDisplayList = l;
+	}
+
+
+	/**
 	 * Add the item to the cells on the canvas. This should get called
 	 * whenever the item has been moved in any way (i.e. also when its size
 	 * was changed)
@@ -419,6 +429,7 @@ private:
 	float mXRotation;
 	float mYRotation;
 	float mGLDepthMultiplier;
+	BoFrame* mCurrentFrame;
 	GLuint mDisplayList;
 	unsigned int mGLConstructionStep;
 	unsigned int mFrame;

@@ -239,7 +239,7 @@ void SpeciesData::loadUnitModel(const UnitProperties* prop, const QColor& color)
  m->setTeamColor(color);
  m->loadModel();
  if (prop->isFacility()) {
-	m->generateConstructionLists();
+	m->generateConstructionFrames();
  }
 
  // now we load animation information. this is just which frame is used for
