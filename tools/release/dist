@@ -5,16 +5,16 @@ BOSON_CODE="$BOSON_BASE/code"
 BOSON_DATA="$BOSON_BASE/data"
 BOSON_MUSIC="$BOSON_BASE/music"
 
-#BOSON_RELEASE="BOSON_0_6_1_RELEASE"
+BOSON_RELEASE="BOSON_0_7_RELEASE"
 
 # Configuration ends here
 
 BO_VERSION=$1
 DEST_BASE="$PWD/$BO_VERSION"
-DEST_ALL="$DEST_BASE/all/boson"
-DEST_CODE="$DEST_BASE/code/code"
-DEST_DATA="$DEST_BASE/data/data"
-DEST_MUSIC="$DEST_BASE/music/music"
+DEST_ALL="$DEST_BASE/all/boson-all-$BO_VERSION"
+DEST_CODE="$DEST_BASE/code/boson-code-$BO_VERSION"
+DEST_DATA="$DEST_BASE/data/boson-data-$BO_VERSION"
+DEST_MUSIC="$DEST_BASE/music/boson-music-$BO_VERSION"
 
 function clean_all()
 {
