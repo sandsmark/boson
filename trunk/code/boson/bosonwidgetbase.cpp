@@ -410,13 +410,6 @@ void BosonWidgetBase::slotRemoveUnit(Unit* unit)
  emit signalFacilitiesCount(unit->owner()->facilitiesCount());
 }
 
-void BosonWidgetBase::setZoomFactor(float factor)
-{
- if (displayManager()->activeDisplay()) {
-	displayManager()->activeDisplay()->setZoomFactor(factor);
- }
-}
-
 void BosonWidgetBase::slotFog(int x, int y)
 {
  // very time critical function!!
@@ -640,17 +633,6 @@ void BosonWidgetBase::initKActions()
  (void)new KAction(i18n("&Grab Screenshot"), KShortcut(Qt::CTRL + Qt::Key_G),
 		this, SLOT(slotGrabScreenshot()), actionCollection(), "grab_screenshot");
 
- // Zoom
- d->mActionZoom = new KSelectAction(i18n("&Zoom"), KShortcut(), actionCollection(), "options_zoom");
- connect(d->mActionZoom, SIGNAL(activated(int)), this, SLOT(slotZoom(int)));
- QStringList items;
- items.append(QString::number(50));
- items.append(QString::number(100));
- items.append(QString::number(150));
- items.append(i18n("Free Zoom"));
- d->mActionZoom->setItems(items);
-
-
  // Debug - no i18n!
  (void)new KAction("Profiling", KShortcut(), this,
 		SLOT(slotProfiling()), actionCollection(), "debug_profiling");
@@ -836,14 +818,6 @@ void BosonWidgetBase::slotStartScenario()
 void BosonWidgetBase::slotDebugMode(int index)
 {
  boConfig->setDebugMode((BosonConfig::DebugMode)index);
-}
-
-void BosonWidgetBase::slotZoom(int index)
-{
-boDebug() << "zoom index=" << index << endl;
- float percent = d->mActionZoom->items()[index].toFloat(); // bahh!!! 
- float factor = (float)percent / 100;
- setZoomFactor(factor);
 }
 
 void BosonWidgetBase::initPlayersMenu()

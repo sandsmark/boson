@@ -29,6 +29,97 @@
 
 #include "bosonconfig.h"
 
+/*****  Misc methods  *****/
+
+float rotationToPoint(float x, float y)
+{
+  float add = 0;
+  float arg = 0;
+  if(x > 0)
+  {
+    if(y < 0)
+    {
+      add = 0;
+      arg = x / -y;
+    }
+    else
+    {
+      add = 90;
+      arg = y / x;
+    }
+  }
+  else
+  {
+    if(y > 0)
+    {
+      add = 180;
+      arg = -x / y;
+    }
+    else
+    {
+      add = 270;
+      arg = -y / -x;
+    }
+  }
+
+  return (atan(arg) * (360 / 6.2831853)) + add;
+}
+
+void pointByRotation(float &x, float &y, const float angle, const float radius)
+{
+  // Some quick tests
+  if(angle == 0)
+  {
+    x = 0;
+    y = -radius;
+    return;
+  }
+  else if(angle == 90)
+  {
+    x = radius;
+    y = 0;
+    return;
+  }
+  else if(angle == 180)
+  {
+    x = 0;
+    y = radius;
+    return;
+  }
+  else if(angle == 270)
+  {
+    x = -radius;
+    y = 0;
+    return;
+  }
+  double tmpx, tmpy;
+  tmpy = 1;
+  tmpx = tan(angle / (360 / 6.2831853));
+  double length = sqrt(tmpx * tmpx + tmpy * tmpy);
+  tmpx = tmpx / length * radius;
+  tmpy = tmpy / length * radius;
+  if(angle < 90)
+  {
+    x = tmpx;
+    y = -tmpy;
+  }
+  else if(angle < 180)
+  {
+    x = -tmpx;
+    y = tmpy;
+  }
+  else if(angle < 270)
+  {
+    x = -tmpx;
+    y = tmpy;
+  }
+  else
+  {
+    x = tmpx;
+    y = -tmpy;
+  }
+}
+
 
 /*****  BoVector*  *****/
 

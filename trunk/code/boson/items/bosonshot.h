@@ -45,14 +45,12 @@ class BosonShot : public BosonItem
 
     inline Player* owner()  { return mOwner; };
     inline const BosonWeaponProperties* properties() const  { return mProp; };
-    
+
     inline QPtrList<BosonParticleSystem>* flyParticleSystems()  { return &mFlyParticleSystems; };
 
     inline bool isActive() const  { return mActive; };
 
     inline virtual int rtti() const  { return RTTI::Shot; }
-    
-    float rotationToPoint(float x, float y);
 
   protected:
     BoVector3 mVelo;
