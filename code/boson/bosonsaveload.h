@@ -41,6 +41,72 @@ class BosonPlayField;
 class Player;
 class KPlayer;
 
+class SaveLoadError
+{
+public:
+	enum ErrorType {
+		Unknown = 0,
+		General = 1,
+		LoadBSGFileError = 2,
+		LoadInvalidXML = 3
+	};
+
+	/**
+	 * @param text An additional text describing the error. There are
+	 * predefined messages available in this class, depending on the @p
+	 * type. When you provide a @p text it will be displayed as additional
+	 * information.
+	 **/
+	SaveLoadError(ErrorType type, const QString& text = QString::null, const QString& caption = QString::null);
+
+	const QString& caption() const
+	{
+		return mCaption;
+	}
+	/**
+	 * @return An error message. This message depends on the @ref type, but
+	 * you can provide additional information in the constructor. Note that
+	 * this message can be several lines long.
+	 **/
+	QString message() const;
+
+	ErrorType type() const
+	{
+		return mType;
+	}
+
+private:
+	ErrorType mType;
+	QString mCaption;
+	QString mText;
+};
+
+class LoadError : public SaveLoadError
+{
+public:
+	/**
+	 * @param text An additional text describing the error. There are
+	 * predefined messages available in this class, depending on the @p
+	 * type. When you provide a @p text it will be displayed as additional
+	 * information.
+	 * @param caption You will probably never need to touch this.
+	 **/
+	LoadError(ErrorType type, const QString& text = QString::null, const QString& caption = QString::null);
+};
+
+class SaveError : public SaveLoadError
+{
+public:
+	/**
+	 * @param text An additional text describing the error. There are
+	 * predefined messages available in this class, depending on the @p
+	 * type. When you provide a @p text it will be displayed as additional
+	 * information.
+	 * @param caption You will probably never need to touch this.
+	 **/
+	SaveError(ErrorType type, const QString& text = QString::null, const QString& caption = QString::null);
+};
+
 class BosonSaveLoadPrivate;
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
@@ -141,6 +207,13 @@ protected:
 	bool loadPlayersFromXML(const QString&);
 	bool loadCanvasFromXML(const QString&);
 	bool loadExternalFromXML(const QString&);
+
+	/**
+	 * Add an error message to the error queue.
+	 **/
+	void addError(SaveLoadError* error);
+	void addSaveError(SaveLoadError::ErrorType, const QString& text = QString::null, const QString& caption = QString::null);
+	void addLoadError(SaveLoadError::ErrorType, const QString& text = QString::null, const QString& caption = QString::null);
 
 private:
 	void initBoson();
