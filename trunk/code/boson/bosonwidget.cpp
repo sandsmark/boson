@@ -880,7 +880,7 @@ void BosonWidget::slotDebugRequestIdName(int msgid, bool , QString& name)
 	case BosonMessage::AddUnitsXML:
 		name = "Add Units from XML";
 		break;
-	case BosonMessage::Advance10:
+	case BosonMessage::AdvanceN:
 		name = "Advance";
 		break;
 	case BosonMessage::IdChat:

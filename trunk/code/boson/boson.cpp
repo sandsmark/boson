@@ -44,6 +44,7 @@
 #include "boson.moc"
 
 #define ENABLE_DELAYING
+#define ADVANCE_INTERVAL 250 // ms
 
 #ifdef ENABLE_DELAYING
 class BoMessage
@@ -127,7 +128,7 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
 		KGamePropertyBase::PolicyLocal, "AdvanceCount");
  d->mNextUnitId.setLocal(0);
  d->mAdvanceCount.setLocal(0);
- d->mGameSpeed.setLocal(0);
+ d->mGameSpeed.setLocal(0); 
  d->mAdvanceCount.setEmittingSignal(false); // wo don't need it and it would be bad for performance.
 }
 
@@ -652,13 +653,16 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 		}
 		break;
 	}
-	case BosonMessage::Advance10:
+	case BosonMessage::AdvanceN:
 	{
 #ifdef ENABLE_DELAYING
-		d->mAdvanceDivider = 10;
+		int n = gameSpeed();
+		d->mAdvanceDivider = n;
 		d->mAdvanceDividerCount = 0;
 		lock();
-		kdDebug() << "Advance - speed (ms)=" << gameSpeed() << " elapsed: " << d->mAdvanceDistance.elapsed() << endl;
+		kdDebug() << "Advance - speed (calls per " << ADVANCE_INTERVAL 
+				<< "ms)=" << gameSpeed() << " elapsed: " 
+				<< d->mAdvanceDistance.elapsed() << endl;
 		d->mAdvanceDistance.restart();
 #endif
 		slotReceiveAdvance();
@@ -762,8 +766,7 @@ void Boson::startGame()
 
 void Boson::slotSendAdvance()
 {
- QByteArray b;
- sendMessage(b, BosonMessage::Advance10);
+ sendMessage(10, BosonMessage::AdvanceN);
 }
 
 Unit* Boson::createUnit(int unitType, Player* owner)
@@ -846,11 +849,11 @@ void Boson::slotSetGameSpeed(int speed)
 	kdError() << "Invalid speed value " << speed << endl;
 	return;
  }
- if ((speed > MIN_GAME_SPEED || speed < MAX_GAME_SPEED) && speed != 0) {
-	kdWarning() << "unexpected speed " << speed << endl;
+ if ((speed < MIN_GAME_SPEED || speed > MAX_GAME_SPEED) && speed != 0) {
+	kdWarning() << "unexpected speed " << speed << " - pausing" << endl;
+	d->mGameSpeed = 0;
 	return;
  }
-// kdDebug() << k_funcinfo << ": " << speed << endl;
  kdDebug() << k_funcinfo << "Setting speed to " << speed << endl;
  d->mGameSpeed = speed;
 }
@@ -861,12 +864,18 @@ void Boson::slotPropertyChanged(KGamePropertyBase* p)
 	case IdGameSpeed:
 		kdDebug() << k_funcinfo << "speed has changed, new speed: " << gameSpeed() << endl;
 		if (isServer()) {
-			if (d->mGameTimer->isActive()) {
-				d->mGameTimer->stop();
-			}
-			if (d->mGameSpeed != 0) {
-				kdDebug() << "start timer - ms=" << gameSpeed() << endl;
-				d->mGameTimer->start(gameSpeed());
+			if (d->mGameSpeed == 0) {
+				if (d->mGameTimer->isActive()) {
+					kdDebug() << "pausing" << endl;
+					d->mGameTimer->stop();
+				}
+			} else {
+				if (!d->mGameTimer->isActive()) {
+					kdDebug() << "start timer - ms=" 
+							<< ADVANCE_INTERVAL 
+							<< endl;
+					d->mGameTimer->start(ADVANCE_INTERVAL);
+				}
 			}
 		}
 		break;
@@ -1058,6 +1067,7 @@ QValueList<QColor> Boson::availableTeamColors() const
 void Boson::slotReceiveAdvance()
 {
  emit signalAdvance(d->mAdvanceCount);
+ d->mCanvas->update();
 #ifdef ENABLE_DELAYING
  d->mAdvanceCount = d->mAdvanceCount + 1;
  if (d->mAdvanceCount >= MAXIMAL_ADVANCE_COUNT) {
@@ -1070,9 +1080,9 @@ void Boson::slotReceiveAdvance()
  } else if (d->mAdvanceDividerCount + 1< d->mAdvanceDivider) {
 	int next;
 	if (d->mAdvanceMessageWaiting == 0) {
-		int t = (gameSpeed() + d->mAdvanceDivider * 2) * d->mAdvanceDividerCount / d->mAdvanceDivider; // time that should have been elapsed
-		int diff = QMAX(10, d->mAdvanceDistance.elapsed() - t + 10); // we are adding 1ms "safety" diff
-		next = QMAX(0, (gameSpeed() + d->mAdvanceDivider * 2) / d->mAdvanceDivider - diff);
+		int t = ADVANCE_INTERVAL * d->mAdvanceDividerCount / d->mAdvanceDivider;// time that should have been elapsed
+		int diff = QMAX(5, d->mAdvanceDistance.elapsed() - t + 5); // we are adding 5ms "safety" diff
+		next = QMAX(0, ADVANCE_INTERVAL / d->mAdvanceDivider - diff);
 	} else {
 		next = 0;
 	}
@@ -1102,9 +1112,13 @@ void Boson::networkTransmission(QDataStream& stream, int msgid, Q_UINT32 r, Q_UI
 	m->clientId = clientId;
 	d->mDelayedMessages.enqueue(m);
 	d->mDelayedWaiting = true;
-	if (msgid == KGameMessage::IdUser + BosonMessage::Advance10) {
-		d->mAdvanceMessageWaiting++;
-		kdDebug() << k_funcinfo << "advance message got delayed" << endl;
+	switch (msgid - KGameMessage::IdUser) {
+		case BosonMessage::AdvanceN:
+			d->mAdvanceMessageWaiting++;
+			kdDebug() << k_funcinfo << "advance message got delayed" << endl;
+			break;
+		default:
+			break;
 	}
 	return;
  }
@@ -1141,8 +1155,12 @@ void Boson::slotProcessDelayed() // TODO: rename: processDelayed()
  }
  QDataStream s(m->byteArray, IO_ReadOnly);
  d->mDelayedWaiting = false;
- if (m->msgid == KGameMessage::IdUser + BosonMessage::Advance10) {
-	d->mAdvanceMessageWaiting--;
+ switch (m->msgid - KGameMessage::IdUser) {
+	case BosonMessage::AdvanceN:
+		d->mAdvanceMessageWaiting--;
+		break;
+	default:
+		break;
  }
  networkTransmission(s, m->msgid, m->receiver, m->sender, m->clientId);
  d->mDelayedWaiting = !d->mDelayedMessages.isEmpty();
