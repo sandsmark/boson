@@ -117,7 +117,8 @@ void bosonField::destroyMob(destroyedMsg_t &m)
 	boCheck(m.x, mob->x());
 	boCheck(m.y, mob->y());
 
-	new boShot( mob->_x(), mob->_y(), mob->z(), true);
+	QRect r  = mob->rect();
+	new boShot ( r.x() + (r.width()>>1), r.y() + (r.height()>>1), mob->z(), true);
 
 	boAssert( mobile.remove(m.key) == true );
 }
@@ -175,7 +176,8 @@ void bosonField::destroyFix(destroyedMsg_t &msg)
 	boCheck(msg.x, f->x());
 	boCheck(msg.y, f->y());
 
-	new boShot( f->_x(), f->_y(), f->z(), true);
+	QRect r  = f->rect();
+	new boShot ( r.x() + (r.width()>>1), r.y() + (r.height()>>1), f->z(), true);
 
 	boAssert( facility.remove(msg.key) == true);
 }

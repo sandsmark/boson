@@ -34,6 +34,10 @@ QwSpritePixmapSequence * boShot::bigShotSequ = 0l;
 static QwSpritePixmapSequence *loadBig(void);
 static bool loadPixmap(const QString &path, QPixmap **pix);
 
+
+#define BIG_W	71
+#define BIG_H	100
+
 /*
  *  boshot
  */
@@ -41,12 +45,17 @@ boShot::boShot(int _x, int _y, int _z, bool isBig)
 {
 
 	if (isBig) {
+
 		/* BIG explosion (unit destroyed) */
 		if (!bigShotSequ)
 			bigShotSequ = loadBig();
 		setSequence(bigShotSequ);	// set image set
 		maxCounter = BIG_SHOT_FRAMES;
+		_x -= BIG_W >> 1; // re-center the shot
+		_y -= BIG_H >> 1;
+
 	} else {
+
 		/* small shot (unit hitten) */
 		if (!shotSequ) { // static imagepool initialization
 			QString path(kapp->kde_datadir() + "/boson/themes/species/human/explosions/shot/explosion%02d");
@@ -55,6 +64,7 @@ boShot::boShot(int _x, int _y, int _z, bool isBig)
 
 		setSequence(shotSequ);		// set image set
 		maxCounter = SHOT_FRAMES;
+
 	}
 
 
