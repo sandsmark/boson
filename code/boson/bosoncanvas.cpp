@@ -788,9 +788,10 @@ BoItemList BosonCanvas::bosonCollisions(const QPointArray& cells, const BosonIte
  // FIXME: if exact is true we assume that cells == item->cells() !!
 // AB: item can be NULL, too!
  BoItemList collisions;
- BoItemList seen;
  const BoItemList* cellItems;
  Cell* c = 0;
+ BoItemList::ConstIterator it;
+ BosonItem* s;
  for (unsigned int i = 0; i < cells.count(); i++) {
 	c = cell(cells[i].x(), cells[i].y());
 	if (!c) {
@@ -804,12 +805,10 @@ BoItemList BosonCanvas::bosonCollisions(const QPointArray& cells, const BosonIte
 		continue;
 	}
 	cellItems = c->items();
-	BoItemList::ConstIterator it;
 	for (it = cellItems->begin(); it != cellItems->end(); ++it) {
-		BosonItem* s = *it;
+		s = *it;
 		if (s != item) {
-			if (seen.findIndex(s) < 0 && (!item || !exact || item->bosonCollidesWith(s))) {
-				seen.append(s);
+			if (collisions.findIndex(s) < 0 && (!item || !exact || item->bosonCollidesWith(s))) {
 				collisions.append(s);
 			}
 		}
