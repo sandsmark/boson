@@ -227,7 +227,7 @@ void serverHarvester::getWantedAction(void)
 {
 	if (counter<0) return;
 
-	boAssert(counter<=EMPTYING_DURATION);
+	boAssert(counter<=DURATION_EMPTYING);
 	if ( ! --counter ) {
 
 		counter = -1; // not needed anymore
@@ -259,7 +259,7 @@ void serverHarvester::emptying(void)
 	}
 	/* destroy (hide) the client harvester */
 	reportHidden();
-	counter = EMPTYING_DURATION;
+	counter = DURATION_EMPTYING;
 
 }
 
@@ -271,7 +271,8 @@ serverFacility::serverFacility(boBuffer *b, facilityMsg_t *msg)
 	:Facility(msg)
 	,serverUnit( b, (unitMsg_t*)msg)
 {
-	counter = BUILDING_SPEED;
+	action = FIX_ACTION_BUILDING;
+	counter = DURATION_BUILDING;
 }
 
 
@@ -299,17 +300,41 @@ bool serverFacility::shooted(void)
 void serverFacility::getWantedAction(void)
 {
 
-	fixChangedMsg_t msg;
 
-	boAssert(state>=0);
-	boAssert(state<CONSTRUCTION_STEPS);
-	if (state!=(CONSTRUCTION_STEPS-1) && --counter <1) {
-		counter = BUILDING_SPEED;
-		state++;
-		msg.key   = key;
-		msg.state = state;
-		sendToKnown (MSG_FACILITY_CHANGED, MSG(msg) );
-	}
+	if (FIX_ACTION_NONE == action || --counter>0) return; // nothing to do
+	switch(action) {
+		case FIX_ACTION_NONE:
+			break;
+		case FIX_ACTION_BUILDING: {
+			fixChangedMsg_t msg;
+			boAssert(state>=0);
+			boAssert(state<CONSTRUCTION_STEPS);
+			if (state<CONSTRUCTION_STEPS-1) {
+				// next building step
+				counter = DURATION_BUILDING;
+				state++;
+				msg.key   = key;
+				msg.state = state;
+				sendToKnown (MSG_FACILITY_CHANGED, MSG(msg) );
+			} else action = FIX_ACTION_NONE;	// finished
+			break;
+		}
+
+		case FIX_ACTION_CONSTRUCT: {
+			mobileMsg_t data;
+			QPoint p = gridRect().center();
+
+			data.who = who;
+			data.x = p.x();
+			data.y = p.y();
+			data.type = action_data.mob;
+			server->createMobUnit(data);
+
+			logf(LOG_INFO, "creating a mobile unit");
+			action = FIX_ACTION_NONE;	// finished
+			break;
+		}
+	} // action
 }
 
 
@@ -399,4 +424,32 @@ QRect serverFacility::rect(void)
 	r.moveBy( __x*BO_TILE_SIZE, __y*BO_TILE_SIZE );
 	return r;
 }
+
+
+void serverFacility::u_createMob(mobType t)
+{
+	if ( FACILITY_WAR_FACTORY != type ) {
+		logf(LOG_ERROR, "u_createMob called while not a FACILITY_WAR_FACTORY");
+		return;
+	}
+	if (FIX_ACTION_NONE != action) {
+		logf(LOG_ERROR, "u_createMob called whith action already in progress");
+		return;
+	}
+	action = FIX_ACTION_CONSTRUCT;
+	counter = DURATION_CONSTRUCT;
+	action_data.mob = t;
+
+}
+
+
+void serverFacility::u_createFix(facilityType )
+{
+	if ( FACILITY_CMDBUNKER != type ) {
+		logf(LOG_ERROR, "u_createFix called while not a FACILITY_CMDBUNKER");
+		return;
+	}
+	logf(LOG_ERROR, "u_createFix not implemented yet");
+}
+
 
