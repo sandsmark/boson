@@ -224,8 +224,8 @@ BoGLToolTip::BoGLToolTip(BosonBigDisplayBase* v) : QObject(v)
  connect(&d->mTimer, SIGNAL(timeout()), this, SLOT(slotTimeOut()));
  connect(&d->mUpdateTimer, SIGNAL(timeout()), this, SLOT(slotUpdate()));
 
- setUpdatePeriod(boConfig->toolTipUpdatePeriod());
- setToolTipCreator(boConfig->toolTipCreator());
+ setUpdatePeriod(boConfig->intValue("ToolTipUpdatePeriod"));
+ setToolTipCreator(boConfig->intValue("ToolTipCreator"));
 }
 
 BoGLToolTip::~BoGLToolTip()

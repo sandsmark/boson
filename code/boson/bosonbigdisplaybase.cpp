@@ -304,7 +304,7 @@ void BoCursorEdgeScrolling::slotCursorEdgeTimeout()
  }
  float x = 0;
  float y = 0;
- const int sensity = boConfig->cursorEdgeSensity();
+ const int sensity = boConfig->uintValue("CursorEdgeSensity");
  QWidget* w = qApp->mainWidget();
  BO_CHECK_NULL_RET(w);
  QPoint pos = w->mapFromGlobal(QCursor::pos());
@@ -569,7 +569,7 @@ void BosonCanvasRenderer::renderGround(const BosonMap* map)
  BO_CHECK_NULL_RET(map);
  BoTextureManager::BoTextureBindCounter bindCounter(boTextureManager, &d->mTextureBindsCells);
  glEnable(GL_DEPTH_TEST);
- if (boConfig->useLight()) {
+ if (boConfig->boolValue("UseLight")) {
 	glEnable(GL_LIGHTING);
 	glEnable(GL_COLOR_MATERIAL);
 	glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
@@ -668,14 +668,14 @@ void BosonCanvasRenderer::renderItems(const BoItemList* allCanvasItems)
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
  }
  glEnable(GL_DEPTH_TEST);
- if (boConfig->useLight()) {
+ if (boConfig->boolValue("UseLight")) {
 	glEnable(GL_LIGHTING);
 	glEnable(GL_NORMALIZE);
  }
 
  createRenderItemList(d->mRenderItemList, allCanvasItems); // AB: this is very fast. < 1.5ms on experimental5 for me
 
- bool useLOD = boConfig->useLOD();
+ bool useLOD = boConfig->boolValue("UseLOD");
 
  BoItemList::Iterator it = d->mRenderItemList->begin();
  for (; it != d->mRenderItemList->end(); ++it) {
@@ -784,7 +784,7 @@ void BosonCanvasRenderer::renderSelections(const BoItemList* selectedItems)
 	if (w != 1.0 || h != 1.0 || depth != 1.0) {
 		glScalef(w, h, depth);
 	}
-	if (boConfig->alignSelectionBoxes()) {
+	if (boConfig->boolValue("AlignSelectionBoxes")) {
 		glRotatef(camera()->rotation(), 0.0, 0.0, 1.0);
 	}
 	GLuint list = d->mSelectBoxData->list(item->selectBox()->factor());
@@ -1574,7 +1574,7 @@ void BosonBigDisplayBase::init()
 		this,
 		SLOT(slotAddLineVisualization(const QValueList<BoVector3Fixed>&, const BoVector4Float&, bofixed, int, bofixed)));
 
- setUpdateInterval(boConfig->updateInterval());
+ setUpdateInterval(boConfig->uintValue("GLUpdateInterval"));
 
  qApp->setGlobalMouseTracking(true);
  qApp->installEventFilter(this);
@@ -2275,7 +2275,7 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* io, QDataStream& stream, QMous
 		} else if (e->button() == MidButton) {
 			// nothing to be done here
 		} else if (e->button() == RIGHT_BUTTON) {
-			if (boConfig->rmbMove()) {
+			if (boConfig->boolValue("RMBMove")) {
 				//AB: this might be obsolete..
 				d->mMouseMoveDiff.moveEvent(e->pos()); // set position, but do not yet start!
 			}
@@ -2308,9 +2308,9 @@ void BosonBigDisplayBase::mouseEventWheel(float delta, Orientation orientation, 
 {
  int action;
  if (boEvent.shiftButton()) {
-	action = boConfig->mouseWheelShiftAction();
+	action = boConfig->intValue("MouseWheelShiftAction");
  } else {
-	action = boConfig->mouseWheelAction();
+	action = boConfig->intValue("MouseWheelAction");
  }
  switch (action) {
 	case CameraMove:
@@ -2393,7 +2393,7 @@ void BosonBigDisplayBase::mouseEventMove(int buttonState, const BoMouseEvent& ev
 	// RMB+MouseMove does *not* depend on CTRL or Shift. the
 	// map is moved in all cases (currently - we have some
 	// free buttons here :))
-	if (boConfig->rmbMove()) {
+	if (boConfig->boolValue("RMBMove")) {
 		// problem is that QCursor::setPos() also causes
 		// a mouse move event. we can use this hack in
 		// order to check whether it is a real mouse
@@ -2456,7 +2456,7 @@ void BosonBigDisplayBase::mouseEventRelease(ButtonState button, const BoMouseEve
 	case MidButton:
 	{
 		// we ignore all modifiers here, currently.
-		if (boConfig->mmbMove()) {
+		if (boConfig->boolValue("MMBMove")) {
 			float posX, posY, posZ;
 			event.worldPos(&posX, &posY, &posZ);
 			int cellX, cellY;
@@ -4071,7 +4071,7 @@ void BosonBigDisplayBase::resetGameMode()
 {
  BO_CHECK_NULL_RET(ufoManager());
 
- slotChangeCursor(boConfig->cursorMode(), boConfig->cursorDir());
+ slotChangeCursor(boConfig->intValue("CursorMode"), boConfig->stringValue("CursorDir"));
 
  d->mUfoGameWidget->setGameMode(true);
 
@@ -4154,16 +4154,16 @@ void BosonBigDisplayBase::slotScroll(int dir)
 {
  switch ((ScrollDirection)dir) {
 	case ScrollUp:
-		scrollBy(0, -boConfig->arrowKeyStep());
+		scrollBy(0, -boConfig->uintValue("ArrowKeyStep"));
 		break;
 	case ScrollRight:
-		scrollBy(boConfig->arrowKeyStep(), 0);
+		scrollBy(boConfig->uintValue("ArrowKeyStep"), 0);
 		break;
 	case ScrollDown:
-		scrollBy(0, boConfig->arrowKeyStep());
+		scrollBy(0, boConfig->uintValue("ArrowKeyStep"));
 		break;
 	case ScrollLeft:
-		scrollBy(-boConfig->arrowKeyStep(), 0);
+		scrollBy(-boConfig->uintValue("ArrowKeyStep"), 0);
 		break;
 	default:
 		return;
@@ -4177,9 +4177,9 @@ void BosonBigDisplayBase::slotPreferencesApply()
  // options that are stored in boConfig only don't need to be touched.
  // AB: cursor is still a special case and not handled here.
  boDebug() << k_funcinfo << endl;
- setUpdateInterval(boConfig->updateInterval());
- setToolTipCreator(boConfig->toolTipCreator());
- setToolTipUpdatePeriod(boConfig->toolTipUpdatePeriod());
+ setUpdateInterval(boConfig->uintValue("GLUpdateInterval"));
+ setToolTipCreator(boConfig->intValue("ToolTipCreator"));
+ setToolTipUpdatePeriod(boConfig->intValue("ToolTipUpdatePeriod"));
 }
 
 void BosonBigDisplayBase::slotUpdateOpenGLSettings()
@@ -4198,8 +4198,8 @@ void BosonBigDisplayBase::slotChangeCursor(int mode, const QString& cursorDir)
  }
  if (d->mCursorCollection->changeCursor(mode, cursorDir)) {
 	// TODO: rename setCursorMode() to setCursorType()
-	boConfig->setCursorMode(d->mCursorCollection->cursorType());
-	boConfig->setCursorDir(d->mCursorCollection->cursorDir());
+	boConfig->setIntValue("CursorMode", d->mCursorCollection->cursorType());
+	boConfig->setStringValue("CursorDir", d->mCursorCollection->cursorDir());
  }
 }
 

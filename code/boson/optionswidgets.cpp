@@ -88,7 +88,7 @@ GeneralOptions::GeneralOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
  mCmdBackground->insertStringList(mCmdBackgrounds);
 
  mRMBMovesWithAttack = new QCheckBox("Units attack enemies in sight while moving", this);
- mRMBMovesWithAttack->setChecked(boConfig->RMBMovesWithAttack());
+ mRMBMovesWithAttack->setChecked(boConfig->boolValue("RMBMovesWithAttack"));
 }
 
 GeneralOptions::~GeneralOptions()
@@ -106,13 +106,13 @@ void GeneralOptions::apply()
  if (mGameSpeed->value() != game()->gameSpeed()) {
 	game()->slotSetGameSpeed(mGameSpeed->value());
  }
- boConfig->setMiniMapScale(mMiniMapScale->value());
+ boConfig->setDoubleValue("MiniMapScale", mMiniMapScale->value());
  QString file;
  if (mCmdBackground->currentItem() > 0) {
 	file = mCmdBackgrounds[mCmdBackground->currentItem() - 1];
  }
  emit signalCmdBackgroundChanged(file);
- boConfig->setRMBMovesWithAttack(mRMBMovesWithAttack->isChecked());
+ boConfig->setBoolValue("RMBMovesWithAttack", mRMBMovesWithAttack->isChecked());
  boDebug(210) << k_funcinfo << "done" << endl;
 }
 
@@ -123,8 +123,8 @@ void GeneralOptions::load()
 	return;
  }
  setGameSpeed(game()->gameSpeed());
- setMiniMapScale(boConfig->miniMapScale());
- setRMBMovesWithAttack(boConfig->RMBMovesWithAttack());
+ setMiniMapScale(boConfig->doubleValue("MiniMapScale"));
+ setRMBMovesWithAttack(boConfig->boolValue("RMBMovesWithAttack"));
  // TODO: cmdbackground
 }
 
@@ -222,19 +222,18 @@ void CursorOptions::setDefaults()
 
 void CursorOptions::load()
 {
- setCursor((CursorMode)boConfig->cursorMode());
+ setCursor((CursorMode)boConfig->intValue("CursorMode"));
  int dirIndex = -1;
- if (boConfig->cursorDir().isNull()) {
+ if (boConfig->stringValue("CursorDir").isNull()) {
 	dirIndex = 0;
  } else {
-	dirIndex = BosonCursor::availableThemes().findIndex(boConfig->cursorDir());
+	dirIndex = BosonCursor::availableThemes().findIndex(boConfig->stringValue("CursorDir"));
  }
  if (dirIndex < 0) {
-	boWarning() << k_funcinfo << "could not find cusor theme " << boConfig->cursorDir() << endl;
+	boWarning() << k_funcinfo << "could not find cusor theme " << boConfig->stringValue("CursorDir") << endl;
 	dirIndex = 0;
  }
  mCursorTheme->setCurrentItem(dirIndex);
- QString dir = boConfig->cursorDir();
 }
 
 void CursorOptions::setCursor(CursorMode mode)
@@ -297,18 +296,18 @@ ScrollingOptions::~ScrollingOptions()
 void ScrollingOptions::apply()
 {
  boDebug(210) << k_funcinfo << endl;
- boConfig->setRMBMove(mRMBScrolling->isChecked());
- boConfig->setMMBMove(mMMBScrolling->isChecked());
+ boConfig->setBoolValue("RMBMove", mRMBScrolling->isChecked());
+ boConfig->setBoolValue("MMBMove", mMMBScrolling->isChecked());
  if (mCursorEdgeSensity->value() < 0) {
 	mCursorEdgeSensity->setValue(0);
  }
- boConfig->setCursorEdgeSensity(mCursorEdgeSensity->value());
+ boConfig->setUIntValue("CursorEdgeSensity", mCursorEdgeSensity->value());
  if (mArrowSpeed->value() < 0) {
 	mArrowSpeed->setValue(0);
  }
- boConfig->setArrowKeyStep(mArrowSpeed->value());
- boConfig->setMouseWheelAction((CameraAction)(mMouseWheelAction->currentItem()));
- boConfig->setMouseWheelShiftAction((CameraAction)(mMouseWheelShiftAction->currentItem()));
+ boConfig->setUIntValue("ArrowKeyStep", mArrowSpeed->value());
+ boConfig->setIntValue("MouseWheelAction", (CameraAction)(mMouseWheelAction->currentItem()));
+ boConfig->setIntValue("MouseWheelShiftAction", (CameraAction)(mMouseWheelShiftAction->currentItem()));
  boDebug(210) << k_funcinfo << "done" << endl;
 }
 
@@ -324,12 +323,12 @@ void ScrollingOptions::setDefaults()
 
 void ScrollingOptions::load()
 {
- setArrowScrollSpeed(boConfig->arrowKeyStep());
- setCursorEdgeSensity(boConfig->cursorEdgeSensity());
- setRMBScrolling(boConfig->rmbMove());
- setMMBScrolling(boConfig->mmbMove());
- setMouseWheelAction(boConfig->mouseWheelAction());
- setMouseWheelShiftAction(boConfig->mouseWheelShiftAction());
+ setArrowScrollSpeed(boConfig->uintValue("ArrowKeyStep"));
+ setCursorEdgeSensity(boConfig->uintValue("CursorEdgeSensity"));
+ setRMBScrolling(boConfig->boolValue("RMBMove"));
+ setMMBScrolling(boConfig->boolValue("MMBMove"));
+ setMouseWheelAction((CameraAction)boConfig->intValue("MouseWheelAction"));
+ setMouseWheelShiftAction((CameraAction)boConfig->intValue("MouseWheelShiftAction"));
 }
 
 void ScrollingOptions::setCursorEdgeSensity(int s)
@@ -398,7 +397,7 @@ void SoundOptions::apply()
  for (; it != mCheckBox2UnitSoundEvent.end(); ++it) {
 	boConfig->setUnitSoundActivated(it.data(), !it.key()->isChecked());
  }
- boConfig->setDeactivateWeaponSounds(weaponsounds->isChecked());
+ boConfig->setBoolValue("DeactivateWeaponSounds", weaponsounds->isChecked());
  boDebug(210) << k_funcinfo << "done" << endl;
 }
 
@@ -414,7 +413,7 @@ void SoundOptions::setDefaults()
 void SoundOptions::load()
 {
  setUnitSoundsDeactivated(boConfig);
- weaponsounds->setChecked(boConfig->deactivateWeaponSounds());
+ weaponsounds->setChecked(boConfig->boolValue("DeactivateWeaponSounds"));
 }
 
 void SoundOptions::setUnitSoundsDeactivated(BosonConfig* conf)
@@ -677,24 +676,24 @@ void OpenGLOptions::apply()
  QString changesThatNeedRestart;
  bool resetTexParameter = false;
  bool reloadTextures = false;
- boConfig->setUpdateInterval((unsigned int)mUpdateInterval->value());
- if (boConfig->textureFilter() != textureFilter()) {
-	boConfig->setTextureFilter(textureFilter());
+ boConfig->setUIntValue("GLUpdateInterval", (unsigned int)mUpdateInterval->value());
+ if (boConfig->intValue("TextureFilter") != textureFilter()) {
+	boConfig->setIntValue("TextureFilter", textureFilter());
 	resetTexParameter = true;
 	// TODO: reload only if mipmapping was turned on/off
 	reloadTextures = true;
  }
- if (boConfig->textureAnisotropy() != textureAnisotropy()) {
-	boConfig->setTextureAnisotropy(textureAnisotropy());
+ if (boConfig->intValue("TextureAnisotropy") != textureAnisotropy()) {
+	boConfig->setIntValue("TextureAnisotropy", textureAnisotropy());
 	resetTexParameter = true;
  }
 
- if(boConfig->textureCompression() != mUseCompressedTextures->isChecked()) {
-	boConfig->setTextureCompression(mUseCompressedTextures->isChecked());
+ if(boConfig->boolValue("TextureCompression") != mUseCompressedTextures->isChecked()) {
+	boConfig->setBoolValue("TextureCompression", mUseCompressedTextures->isChecked());
 	reloadTextures = true;
  }
- if(boConfig->textureColorMipmaps() != mUseColoredMipmaps->isChecked()) {
-	boConfig->setTextureColorMipmaps(mUseColoredMipmaps->isChecked());
+ if(boConfig->boolValue("TextureColorMipmaps") != mUseColoredMipmaps->isChecked()) {
+	boConfig->setBoolValue("TextureColorMipmaps", mUseColoredMipmaps->isChecked());
 	reloadTextures = true;
  }
 
@@ -713,10 +712,10 @@ void OpenGLOptions::apply()
 	boTextureManager->reloadTextures();
  }
 
- boConfig->setAlignSelectionBoxes(mAlignSelectBoxes->isChecked());
- boConfig->setUseLight(mUseLight->isChecked());
- boConfig->setUseMaterials(mUseMaterials->isChecked());
- boConfig->setUseLOD(useLOD());
+ boConfig->setBoolValue("AlignSelectionBoxes", mAlignSelectBoxes->isChecked());
+ boConfig->setBoolValue("UseLight", mUseLight->isChecked());
+ boConfig->setBoolValue("UseMaterials", mUseMaterials->isChecked());
+ boConfig->setBoolValue("UseLOD", useLOD());
  boConfig->setUIntValue("DefaultLOD", defaultLOD());
 
  if (mFontChanged) {
@@ -794,15 +793,15 @@ void OpenGLOptions::setDefaults()
 void OpenGLOptions::load()
 {
  setRenderingSpeed(boConfig->intValue("RenderingSpeed", Defaults));
- setUpdateInterval(boConfig->updateInterval());
- setTextureFilter(boConfig->textureFilter());
- setTextureAnisotropy(boConfig->textureAnisotropy());
- mUseCompressedTextures->setChecked(boConfig->textureCompression());
- mUseColoredMipmaps->setChecked(boConfig->textureColorMipmaps());
- setAlignSelectionBoxes(boConfig->alignSelectionBoxes());
- mUseLight->setChecked(boConfig->useLight());
- mUseMaterials->setChecked(boConfig->useMaterials());
- setUseLOD(boConfig->useLOD());
+ setUpdateInterval(boConfig->uintValue("GLUpdateInterval"));
+ setTextureFilter(boConfig->intValue("TextureFilter"));
+ setTextureAnisotropy(boConfig->intValue("TextureAnisotropy"));
+ mUseCompressedTextures->setChecked(boConfig->boolValue("TextureCompression"));
+ mUseColoredMipmaps->setChecked(boConfig->boolValue("TextureColorMipmaps"));
+ setAlignSelectionBoxes(boConfig->boolValue("AlignSelectionBoxes"));
+ mUseLight->setChecked(boConfig->boolValue("UseLight"));
+ mUseMaterials->setChecked(boConfig->boolValue("UseMaterials"));
+ setUseLOD(boConfig->boolValue("UseLOD"));
  setDefaultLOD(boConfig->uintValue("DefaultLOD", 0));
  mEnableATIDepthWorkaround->setChecked(boConfig->boolValue("EnableATIDepthWorkaround"));
  mATIDepthWorkaroundValue->setText(QString::number(boConfig->doubleValue("ATIDepthWorkaroundValue")));
@@ -1007,11 +1006,11 @@ WaterOptions::~WaterOptions()
 void WaterOptions::apply()
 {
  boDebug(210) << k_funcinfo << endl;
- boConfig->setWaterWaves(mWaves->isChecked());
- boConfig->setWaterReflections(mReflections->isChecked());
- boConfig->setWaterTranslucency(mTranslucency->isChecked());
- boConfig->setWaterBumpmapping(mBumpmapping->isChecked());
- boConfig->setWaterAnimatedBumpmaps(mAnimatedBumpmaps->isChecked());
+ boConfig->setBoolValue("WaterWaves", mWaves->isChecked());
+ boConfig->setBoolValue("WaterReflections", mReflections->isChecked());
+ boConfig->setBoolValue("WaterTranslucency", mTranslucency->isChecked());
+ boConfig->setBoolValue("WaterBumpmapping", mBumpmapping->isChecked());
+ boConfig->setBoolValue("WaterAnimatedBumpmaps", mAnimatedBumpmaps->isChecked());
  boWaterManager->reloadConfiguration();
  boDebug(210) << k_funcinfo << "done" << endl;
 }
@@ -1027,11 +1026,11 @@ void WaterOptions::setDefaults()
 
 void WaterOptions::load()
 {
- mWaves->setChecked(boConfig->waterWaves());
- mReflections->setChecked(boConfig->waterReflections());
- mTranslucency->setChecked(boConfig->waterTranslucency());
- mBumpmapping->setChecked(boConfig->waterBumpmapping());
- mAnimatedBumpmaps->setChecked(boConfig->waterAnimatedBumpmaps());
+ mWaves->setChecked(boConfig->boolValue("WaterWaves"));
+ mReflections->setChecked(boConfig->boolValue("WaterReflections"));
+ mTranslucency->setChecked(boConfig->boolValue("WaterTranslucency"));
+ mBumpmapping->setChecked(boConfig->boolValue("WaterBumpmapping"));
+ mAnimatedBumpmaps->setChecked(boConfig->boolValue("WaterAnimatedBumpmaps"));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1059,8 +1058,8 @@ ChatOptions::~ChatOptions()
 void ChatOptions::apply()
 {
  boDebug(210) << k_funcinfo << endl;
- boConfig->setChatScreenRemoveTime(mScreenRemoveTime->value());
- boConfig->setChatScreenMaxItems(mScreenMaxItems->value());
+ boConfig->setUIntValue("ChatScreenRemoveTime", mScreenRemoveTime->value());
+ boConfig->setIntValue("ChatScreenMaxItems", mScreenMaxItems->value());
  boDebug(210) << k_funcinfo << "done" << endl;
 }
 
@@ -1072,8 +1071,8 @@ void ChatOptions::setDefaults()
 
 void ChatOptions::load()
 {
- setScreenRemoveTime(boConfig->chatScreenRemoveTime());
- setScreenMaxItems(boConfig->chatScreenMaxItems());
+ setScreenRemoveTime(boConfig->uintValue("ChatScreenRemoveTime"));
+ setScreenMaxItems(boConfig->intValue("ChatScreenMaxItems"));
 }
 
 void ChatOptions::setScreenRemoveTime(unsigned int s)
@@ -1122,11 +1121,11 @@ void ToolTipOptions::apply()
  QValueList<int> tips = factory.availableTipCreators();
  int index = mToolTipCreator->currentItem();
  if (index >= 0 && index < (int)tips.count()) {
-	boConfig->setToolTipCreator(tips[index]);
+	boConfig->setIntValue("ToolTipCreator", tips[index]);
  } else {
 	boWarning() << k_funcinfo << "invalid tooltip creator index=" << index << endl;
  }
- boConfig->setToolTipUpdatePeriod(mUpdatePeriod->value());
+ boConfig->setIntValue("ToolTipUpdatePeriod", mUpdatePeriod->value());
 }
 
 void ToolTipOptions::setDefaults()
@@ -1145,12 +1144,12 @@ void ToolTipOptions::setDefaults()
 
 void ToolTipOptions::load()
 {
- mUpdatePeriod->setValue(boConfig->toolTipUpdatePeriod());
+ mUpdatePeriod->setValue(boConfig->intValue("ToolTipUpdatePeriod"));
  BoToolTipCreatorFactory factory;
  QValueList<int> tips = factory.availableTipCreators();
  int index = -1;
  for (unsigned int i = 0; i < tips.count(); i++) {
-	if (tips[i] == boConfig->toolTipCreator()) {
+	if (tips[i] == boConfig->intValue("ToolTipCreator")) {
 		index = i;
 	}
  }

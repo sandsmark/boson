@@ -143,12 +143,12 @@ void BosonUfoChat::addMessage(KPlayer* p, const QString& text)
 
 void BosonUfoChat::addMessage(const QString& text)
 {
- if (boConfig->chatScreenMaxItems() == 0) {
+ if (boConfig->intValue("ChatScreenMaxItems") == 0) {
 	// No messages allowed
 	return;
  }
- if (boConfig->chatScreenMaxItems() > 0 &&
-		d->mMessages.count() + 1 > (unsigned int)boConfig->chatScreenMaxItems()) {
+ if (boConfig->intValue("ChatScreenMaxItems") > 0 &&
+		d->mMessages.count() + 1 > (unsigned int)boConfig->intValue("ChatScreenMaxItems")) {
 	removeFirstMessage();
  }
  d->mMessages.append(text);
@@ -180,13 +180,13 @@ const QStringList& BosonUfoChat::messages() const
 
 void BosonUfoChat::slotTimeout()
 {
- if (boConfig->chatScreenRemoveTime() > 0) {
+ if (boConfig->uintValue("ChatScreenRemoveTime") > 0) {
 	QPtrListIterator<unsigned int> it(d->mTimes);
 	for (; it.current(); ++it) {
 		(*it.current())++;
 	}
 
-	while (d->mTimes.count() > 0 && *d->mTimes.first() > boConfig->chatScreenRemoveTime()) {
+	while (d->mTimes.count() > 0 && *d->mTimes.first() > boConfig->uintValue("ChatScreenRemoveTime")) {
 		removeFirstMessage();
 	}
  }

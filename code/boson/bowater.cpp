@@ -710,11 +710,11 @@ void BoWaterManager::initOpenGL()
   mWaterShininess = 32.0f;
 
   // Load config.
-  mEnableReflections = boConfig->waterReflections();
-  mEnableBumpmapping = boConfig->waterBumpmapping();
-  mEnableAnimBumpmaps = boConfig->waterAnimatedBumpmaps();
-  mEnableTranslucency = boConfig->waterTranslucency();
-  mEnableWaves = boConfig->waterWaves();
+  mEnableReflections = boConfig->boolValue("WaterReflections");
+  mEnableBumpmapping = boConfig->boolValue("WaterBumpmapping");
+  mEnableAnimBumpmaps = boConfig->boolValue("WaterAnimatedBumpmaps");
+  mEnableTranslucency = boConfig->boolValue("WaterTranslucency");
+  mEnableWaves = boConfig->boolValue("WaterWaves");
   // TODO: settings for: VBO, specular
 
   // Check if loaded config is actually supported
@@ -724,19 +724,19 @@ void BoWaterManager::initOpenGL()
   {
     boWarning() << k_funcinfo << "Reflections are enabled, but not supported. Disabling." << endl;
     mEnableReflections = false;
-    boConfig->setWaterReflections(false);
+    boConfig->setBoolValue("WaterReflections", false);
   }
   if(mEnableBumpmapping && !((boTextureManager->textureUnits() > 1) && mSupports_env_combine && mSupports_env_dot3 && (mSupports_blendcolor || mSupports_blendcolor_ext)))
   {
     boWarning() << k_funcinfo << "Bumpmapping is enabled, but not supported. Disabling." << endl;
     mEnableBumpmapping = false;
-    boConfig->setWaterBumpmapping(false);
+    boConfig->setBoolValue("WaterBumpmapping", false);
   }
   if(mEnableTranslucency && !((boTextureManager->textureUnits() > 1) && mSupports_env_combine))
   {
     boWarning() << k_funcinfo << "Translucency is enabled, but not supported. Disabling." << endl;
     mEnableTranslucency = false;
-    boConfig->setWaterTranslucency(false);
+    boConfig->setBoolValue("WaterTranslucency", false);
   }
 
   mEnableVBO = false;
@@ -752,32 +752,32 @@ void BoWaterManager::reloadConfiguration()
   bool configDirty = false;
   bool texturesHaveChanged = false;
 
-  if(boConfig->waterReflections() != mEnableReflections)
+  if(boConfig->boolValue("WaterReflections") != mEnableReflections)
   {
-    mEnableReflections = boConfig->waterReflections();
+    mEnableReflections = boConfig->boolValue("WaterReflections");
     // No need to set configDirty to true
     texturesHaveChanged = true;
   }
-  if(boConfig->waterAnimatedBumpmaps() != mEnableAnimBumpmaps)
+  if(boConfig->boolValue("WaterAnimatedBumpmaps") != mEnableAnimBumpmaps)
   {
-    mEnableAnimBumpmaps = boConfig->waterAnimatedBumpmaps();
+    mEnableAnimBumpmaps = boConfig->boolValue("WaterAnimatedBumpmaps");
     // No need to set configDirty to true
     texturesHaveChanged = true;
   }
-  if(boConfig->waterBumpmapping() != mEnableBumpmapping)
+  if(boConfig->boolValue("WaterBumpmapping") != mEnableBumpmapping)
   {
-    mEnableBumpmapping = boConfig->waterBumpmapping();
+    mEnableBumpmapping = boConfig->boolValue("WaterBumpmapping");
     configDirty = true;
     texturesHaveChanged = true;
   }
-  if(boConfig->waterTranslucency() != mEnableTranslucency)
+  if(boConfig->boolValue("WaterTranslucency") != mEnableTranslucency)
   {
-    mEnableTranslucency = boConfig->waterTranslucency();
+    mEnableTranslucency = boConfig->boolValue("WaterTranslucency");
     configDirty = true;
   }
-  if(boConfig->waterWaves() != mEnableWaves)
+  if(boConfig->boolValue("WaterWaves") != mEnableWaves)
   {
-    mEnableWaves = boConfig->waterWaves();
+    mEnableWaves = boConfig->boolValue("WaterWaves");
     configDirty = true;
   }
 

@@ -201,9 +201,9 @@ void BosonProfiling::init()
  d->mGameSpeed = -1;
  d->mVersion = PROFILING_VERSION;
  d->mNextDynamicEventId = 1;
- mMaxEventEntries = boConfig->maxProfilingEventEntries();
- mMaxAdvanceEntries = boConfig->maxProfilingAdvanceEntries();
- mMaxRenderingEntries = boConfig->maxProfilingRenderingEntries();
+ mMaxEventEntries = boConfig->uintValue("MaxProfilingEventEntries");
+ mMaxAdvanceEntries = boConfig->uintValue("MaxProfilingAdvanceEntries");
+ mMaxRenderingEntries = boConfig->uintValue("MaxProfilingRenderingEntries");
 }
 
 BosonProfiling::~BosonProfiling()

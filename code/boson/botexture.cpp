@@ -872,9 +872,9 @@ void BoTextureManager::initOpenGL()
     glGetIntegerv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &mMaxAnisotropy);
   }
   boDebug() << k_funcinfo << "Max anisotropy: " << mMaxAnisotropy << endl;
-  if(boConfig->textureAnisotropy() > mMaxAnisotropy)
+  if(boConfig->intValue("TextureAnisotropy") > mMaxAnisotropy)
   {
-    boConfig->setTextureAnisotropy(mMaxAnisotropy);
+    boConfig->setIntValue("TextureAnisotropy", mMaxAnisotropy);
   }
 
 
@@ -1052,22 +1052,22 @@ void BoTextureManager::reloadTextures()
 
 bool BoTextureManager::useColoredMipmaps() const
 {
-  return boConfig->textureColorMipmaps();
+  return boConfig->boolValue("TextureColorMipmaps");
 }
 
 bool BoTextureManager::useTextureCompression() const
 {
-  return boConfig->textureCompression();
+  return boConfig->boolValue("TextureCompression");
 }
 
 int BoTextureManager::textureFilter() const
 {
-  return boConfig->textureFilter();
+  return boConfig->intValue("TextureFilter");
 }
 
 int BoTextureManager::textureAnisotropy() const
 {
-  return boConfig->textureAnisotropy();
+  return boConfig->intValue("TextureAnisotropy");
 }
 
 

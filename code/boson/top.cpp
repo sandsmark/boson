@@ -101,8 +101,8 @@ TopWidget::TopWidget() : KMainWindow(0, "topwindow")
  d->mWidgetStack = new QWidgetStack(this);
  setCentralWidget(d->mWidgetStack);
 
- boAudio->setSound(boConfig->sound());
- boAudio->setMusic(boConfig->music());
+ boAudio->setSound(boConfig->boolValue("Sound"));
+ boAudio->setMusic(boConfig->boolValue("Music"));
 
  d->mStartup = new BosonStartupWidget(d->mWidgetStack);
  connect(d->mStartup, SIGNAL(signalAddLocalPlayer()),

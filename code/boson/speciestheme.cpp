@@ -616,7 +616,7 @@ void SpeciesTheme::playSound(const BosonWeaponProperties* weaponProp, WeaponSoun
  if (!sound()) {
 	return;
  }
- if (boConfig->deactivateWeaponSounds()) {
+ if (boConfig->boolValue("DeactivateWeaponSounds")) {
 	return;
  }
  sound()->playSound(weaponProp->sound(event));

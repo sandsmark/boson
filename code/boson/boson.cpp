@@ -1038,7 +1038,7 @@ QValueList<QColor> Boson::availableTeamColors() const
 void Boson::slotReceiveAdvance()
 {
  // Log game state
- if (advanceCallsCount() % boConfig->gameLogInterval() == 0) {
+ if (advanceCallsCount() % boConfig->intValue("GameLogInterval") == 0) {
 	//makeGameLog();
  }
 #ifdef COLLECT_UNIT_LOGS

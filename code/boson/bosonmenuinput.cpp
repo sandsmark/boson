@@ -203,11 +203,11 @@ void BosonMenuInputData::initUfoActions(bool gameMode)
  BoUfoToggleAction* sound = new BoUfoToggleAction(i18n("Soun&d"),
 		KShortcut(), this, SIGNAL(signalToggleSound()),
 		actionCollection(), "options_sound");
- sound->setChecked(boConfig->sound());
+ sound->setChecked(boConfig->boolValue("Sound"));
  BoUfoToggleAction* music = new BoUfoToggleAction(i18n("M&usic"), KShortcut(),
 		this, SIGNAL(signalToggleMusic()),
 		actionCollection(), "options_music");
- music->setChecked(boConfig->music());
+ music->setChecked(boConfig->boolValue("Music"));
  (void)new BoUfoAction(i18n("Maximal entries per event..."), KShortcut(), this,
 		SIGNAL(signalChangeMaxProfilingEventEntries()), actionCollection(), "options_profiling_max_event_entries");
  (void)new BoUfoAction(i18n("Maximal advance call entries..."), KShortcut(), this,
@@ -890,13 +890,13 @@ void BosonMenuInput::slotZoomOut()
 void BosonMenuInput::slotToggleSound()
 {
  boAudio->setSound(!boAudio->sound());
- boConfig->setSound(boAudio->sound());
+ boConfig->setBoolValue("Sound", boAudio->sound());
 }
 
 void BosonMenuInput::slotToggleMusic()
 {
  boAudio->setMusic(!boAudio->music());
- boConfig->setMusic(boAudio->music());
+ boConfig->setBoolValue("Music", boAudio->music());
 }
 
 void BosonMenuInput::slotToggleFullScreen(bool fullScreen)
@@ -911,39 +911,39 @@ void BosonMenuInput::slotToggleFullScreen(bool fullScreen)
 void BosonMenuInput::slotChangeMaxProfilingEventEntries()
 {
  bool ok = true;
- unsigned int max = boConfig->maxProfilingEventEntries();
+ unsigned int max = boConfig->uintValue("MaxProfilingEventEntries");
  max = (unsigned int)QInputDialog::getInteger(i18n("Profiling event entries"),
 		i18n("Maximal number of profiling entries per event"),
 		(int)max, 0, 100000, 1, &ok, 0);
  if (ok) {
-	boConfig->setMaxProfilingEventEntries(max);
-	boProfiling->setMaxEventEntries(boConfig->maxProfilingEventEntries());
+	boConfig->setUIntValue("MaxProfilingEventEntries", max);
+	boProfiling->setMaxEventEntries(boConfig->uintValue("MaxProfilingEventEntries"));
  }
 }
 
 void BosonMenuInput::slotChangeMaxProfilingAdvanceEntries()
 {
  bool ok = true;
- unsigned int max = boConfig->maxProfilingAdvanceEntries();
+ unsigned int max = boConfig->uintValue("MaxProfilingAdvanceEntries");
  max = (unsigned int)QInputDialog::getInteger(i18n("Profiling advance entries"),
 		i18n("Maximal number of profiled advance calls"),
 		(int)max, 0, 100000, 1, &ok, 0);
  if (ok) {
-	boConfig->setMaxProfilingAdvanceEntries(max);
-	boProfiling->setMaxAdvanceEntries(boConfig->maxProfilingAdvanceEntries());
+	boConfig->setUIntValue("MaxProfilingAdvanceEntries", max);
+	boProfiling->setMaxAdvanceEntries(boConfig->uintValue("MaxProfilingAdvanceEntries"));
  }
 }
 
 void BosonMenuInput::slotChangeMaxProfilingRenderingEntries()
 {
  bool ok = true;
- unsigned int max = boConfig->maxProfilingRenderingEntries();
+ unsigned int max = boConfig->uintValue("MaxProfilingRenderingEntries");
  max = (unsigned int)QInputDialog::getInteger(i18n("Profiling rendering entries"),
 		i18n("Maximal number of profiled frames"),
 		(int)max, 0, 100000, 1, &ok, 0);
  if (ok) {
-	boConfig->setMaxProfilingRenderingEntries(max);
-	boProfiling->setMaxRenderingEntries(boConfig->maxProfilingRenderingEntries());
+	boConfig->setUIntValue("MaxProfilingRenderingEntries", max);
+	boProfiling->setMaxRenderingEntries(boConfig->uintValue("MaxProfilingRenderingEntries"));
  }
 }
 
