@@ -56,8 +56,8 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg, bool full)
   mCanShootAtAirUnits = cfg->readBoolEntry("CanShootAtAirUnits", false);
   mCanShootAtLandUnits = cfg->readBoolEntry("CanShootAtLandUnits", false);
   mMaxHeight = (float)(cfg->readDoubleNumEntry("MaxHeight", 1));
-  mShootParticleSystemOffset = BoVector3::load(cfg, "Offset");
-  mShootParticleSystemOffset.scale(BO_TILE_SIZE);
+  mOffset = BoVector3::load(cfg, "Offset");
+  mOffset.scale(BO_TILE_SIZE);
   mShootParticleSystemIds = BosonConfig::readUnsignedLongNumList(cfg, "ShootParticles");
   mFlyParticleSystemIds = BosonConfig::readUnsignedLongNumList(cfg, "FlyParticles");
   mHitParticleSystemIds = BosonConfig::readUnsignedLongNumList(cfg, "HitParticles");
@@ -88,7 +88,7 @@ void BosonWeaponProperties::savePlugin(KSimpleConfig* cfg)
   cfg->writeEntry("CanShootAtAirUnits", mCanShootAtAirUnits);
   cfg->writeEntry("CanShootAtLandUnits", mCanShootAtLandUnits);
   cfg->writeEntry("MaxHeight", (double)mMaxHeight);
-  mShootParticleSystemOffset.save(cfg, "Offset");
+  mOffset.save(cfg, "Offset");
   BosonConfig::writeUnsignedLongNumList(cfg, "ShootParticles", mShootParticleSystemIds);
   BosonConfig::writeUnsignedLongNumList(cfg, "FlyParticles", mFlyParticleSystemIds);
   BosonConfig::writeUnsignedLongNumList(cfg, "HitParticles", mHitParticleSystemIds);
@@ -105,6 +105,7 @@ void BosonWeaponProperties::reset()
  mCanShootAtAirUnits = false;
  mCanShootAtLandUnits = false;
  mMaxHeight = 1;
+ mOffset = BoVector3();
  mShootParticleSystemIds.clear();
  mFlyParticleSystemIds.clear();
  mHitParticleSystemIds.clear();
@@ -118,12 +119,12 @@ BosonShot* BosonWeaponProperties::newShot(Unit* attacker, BoVector3 pos, BoVecto
     boError() << k_funcinfo << "NULL attacker" << endl;
     return 0;
   }
-  return new BosonShot(this, attacker->owner(), attacker->canvas(), pos + mShootParticleSystemOffset, target);
+  return new BosonShot(this, attacker->owner(), attacker->canvas(), pos + mOffset, target);
 }
 
 QPtrList<BosonParticleSystem> BosonWeaponProperties::newShootParticleSystems(BoVector3 pos, float rotation) const
 {
-  BoVector3 realpos = pos + mShootParticleSystemOffset;
+  BoVector3 realpos = pos + mOffset;
   QPtrList<BosonParticleSystem> list;
   QPtrListIterator<BosonParticleSystemProperties> it(mShootParticleSystems);
   while(it.current())
