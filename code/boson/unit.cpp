@@ -2481,6 +2481,9 @@ bool Facility::init()
 	return ret;
  }
  setWork(WorkConstructed);
+ if (itemRenderer()) {
+	itemRenderer()->setAnimationMode(UnitAnimationConstruction);
+ }
  return true;
 }
 
@@ -2550,11 +2553,7 @@ void Facility::setConstructionStep(unsigned int step)
  if (step > constructionSteps()) {
 	step = constructionSteps();
  }
- // warning: constructionSteps() and BosonModel::constructionSteps() are
- // *totally* different values!!
- if (itemRenderer()) {
-	itemRenderer()->setGLConstructionStep(step, constructionSteps()); // the displayed construction step. note that currentConstructionStep() is a *different* value!
- }
+
  d->mConstructionStep = step;
  if (step == constructionSteps()) {
 	setWork(WorkIdle);
@@ -2582,14 +2581,15 @@ bool Facility::loadFromXML(const QDomElement& root)
  if (d->mConstructionStep > constructionSteps()) {
 	d->mConstructionStep = constructionSteps();
  }
- if (itemRenderer()) {
-	 itemRenderer()->setGLConstructionStep(d->mConstructionStep, constructionSteps());
- }
 
  // FIXME: remove. this is from Facility::setConstructionStep. we _need_ to load
  // effects in loadFromXML() - then these lines are obsolete.
  if (d->mConstructionStep == constructionSteps()) {
 	setEffects(unitProperties()->newConstructedEffects(x() + width() / 2, y() + height() / 2, z()));
+ } else {
+	if (itemRenderer()) {
+		itemRenderer()->setAnimationMode(UnitAnimationConstruction);
+	}
  }
 
  return true;

@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2004 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -52,21 +52,6 @@ public:
 	virtual bool setModel(BosonModel*) { return true; }
 
 	/**
-	 * See @ref glDepthMultiplier. Note that the depth of the unit
-	 * (i.e. the height in z-direction) is allowed to change for
-	 * different frames, but the depth multiplier not!
-	 **/
-	void setGLDepthMultiplier(float d);
-
-	/**
-	 * @return The factor you need to multiply 1.0 with to
-	 * achieve the depth (height in z-direction) of the unit. Note that this
-	 * value <em>must not</em> be used in pathfinding or so, but only in
-	 * OpenGL!
-	 **/
-	inline float glDepthMultiplier() const { return mGLDepthMultiplier; }
-
-	/**
 	 * For OpenGL performance <em>only</em>! Do <em>not</em> use outside
 	 * OpenGL! Especially not in pathfinding!
 	 * @ return The radius of the bounding sphere. See @ref
@@ -76,27 +61,12 @@ public:
 
 	void setBoundingSphereRadius(float r) { mBoundingSphereRadius = r; }
 
-	virtual void setShowGLConstructionSteps(bool s)
-	{
-		mShowGLConstructionSteps = s;
-	}
-	bool showGLConstructionSteps() const
-	{
-		return mShowGLConstructionSteps;
-	}
-
-	virtual void setGLConstructionStep(unsigned int unitConstructionStep, unsigned int totalUnitConstructionSteps)
-	{
-		Q_UNUSED(unitConstructionStep);
-		Q_UNUSED(totalUnitConstructionSteps);
-	}
-
 	virtual unsigned int preferredLod(float distanceFromCamera) const
 	{
 		Q_UNUSED(distanceFromCamera);
 		return 0;
 	}
-	
+
 	virtual void setAnimationMode(int ) { }
 
 	virtual void animate() { }
@@ -124,9 +94,6 @@ protected:
 private:
 	BosonItem* mItem;
 
-	bool mShowGLConstructionSteps;
-	float mGLDepthMultiplier;
-
 	float mBoundingSphereRadius;
 };
 
@@ -148,9 +115,7 @@ public:
 	virtual void renderItem(unsigned int lod = 0);
 
 	/**
-	 * Set the animation mode. Only possible if the construction of the unit
-	 * is completed (i.e. the construction step is greater or equal to @ref
-	 * glConstructionSteps).
+	 * Set the animation mode.
 	 *
 	 * See @ref BosonModel::animation for more information about @p mode.
 	 **/
@@ -163,34 +128,6 @@ public:
 	virtual void animate();
 
 	/**
-	 * Set the @ref BosonModel construction step that corresponds to the @p
-	 * unitConstructionStep in the item.
-	 * @param unitConstructionStep The current construction step of the @ref
-	 * Facility , i.e. @ref Facility::currentConstructionStep.
-	 * @param totalUnitConstructionStep The total number of construction
-	 * steps that the facility has, i.e. @ref Facility::constructionSteps.
-	 **/
-	virtual void setGLConstructionStep(unsigned int unitConstructionStep, unsigned int totalUnitConstructionSteps)
-	{
-		unsigned int modelStep = 0;
-		if (unitConstructionStep >= totalUnitConstructionSteps) {
-			modelStep = glConstructionSteps();
-		} else {
-			modelStep = glConstructionSteps() * unitConstructionStep / totalUnitConstructionSteps;
-		}
-		setGLConstructionStep(modelStep);
-	}
-
-	/**
-	 * Convenience method. Note that the glConstructionSteps differ from the
-	 * @ref Facility::constructionSteps completely!
-	 * @return model()->constructionSteps()
-	 **/
-	unsigned int glConstructionSteps() const;
-
-	virtual void setShowGLConstructionSteps(bool show);
-
-	/**
 	 * @return See @ref BosonModel::lodCount.
 	 **/
 	unsigned int lodCount() const;
@@ -201,31 +138,9 @@ public:
 	virtual unsigned int preferredLod(float distanceFromCamera) const;
 
 private:
-	/**
-	 * Change the currently displayed frame. Note that you can't set the
-	 * construction frames here, as they are generated on the fly and don't
-	 * reside as an actual frame in the .3ds file.
-	 *
-	 * You usually don't want to call this, but rather @ref setAnimationMode
-	 * instead.
-	 **/
-	void setFrame(int _frame);
-	inline int frame() const { return mFrame; }
-	unsigned int frameCount() const;
-	void setGLConstructionStep(unsigned int step);
-
-private:
-	void setCurrentFrame(BoFrame* frame);
-
-private:
 	BosonModel* mModel;
 	BosonAnimation* mCurrentAnimation;
-
-	BoFrame* mCurrentFrame;
-	unsigned int mGLConstructionStep;
-	unsigned int mFrame;
-	unsigned int mAnimationCounter;
-
+	float mCurrentFrame;
 };
 
 #endif

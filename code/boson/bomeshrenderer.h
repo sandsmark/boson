@@ -112,7 +112,7 @@ class BoMeshRendererPrivate;
  * while (model) {
  *   renderer->setModel(model);
  *   while (mesh) {
- *     renderer->renderMesh(teamColor, mesh, lod_number);
+ *     renderer->renderMesh(teamColor, mesh);
  *   }
  * }
  * renderer->stopModelRendering();
@@ -188,7 +188,7 @@ public:
 	 * @param mesh The mesh MUST belong to the model that has been set by
 	 * @ref setModel
 	 **/
-	void renderMesh(const QColor* teamColor, BoMesh* mesh, unsigned int lod);
+	void renderMesh(const QColor* teamColor, BoMesh* mesh);
 
 	QString statisticsData() const;
 
@@ -206,7 +206,7 @@ protected:
 	/**
 	 * @return How many points have been rendered
 	 **/
-	virtual unsigned int render(const QColor* teamColor, BoMesh* mesh, BoMeshLOD* lod) = 0;
+	virtual unsigned int render(const QColor* teamColor, BoMesh* mesh) = 0;
 
 	/**
 	 * Called by @ref initializeData before @ref initModelData is called. The
@@ -217,7 +217,6 @@ protected:
 	 **/
 	virtual BoMeshRendererModelData* createModelData() const;
 	virtual BoMeshRendererMeshData* createMeshData() const;
-	virtual BoMeshRendererMeshLODData* createMeshLODData() const;
 
 	/**
 	 * Initialize the meshrenderer data of @p model for use with this
@@ -251,24 +250,6 @@ protected:
 	virtual void initMeshData(BoMesh* mesh, unsigned int meshIndex);
 
 	/**
-	 * Initialize the meshrenderer data for @p meshLOD. The data is used by
-	 * this renderer only and deleted once the renderer is changed.
-	 *
-	 * See @ref BoMeshRendererMeshLODData
-	 * @param meshIndex The index of the @ref BoMesh the @p lod belongs to 
-	 * in the @ref BosonModel file. This parameter is for convenience.
-	 * @param lod The level of detail number (i.e. the one given to @ref
-	 * BoMesh::levelOfDetail) of the @p meshLOD. This parameter is for
-	 * your convenience.
-	 *
-	 * Note that at the point of this being called <em>all</em> @ref
-	 * BosonModel::meshRendererModelData, @ref BoMesh::meshRendererMeshData
-	 * and @ref BoMeshLOD::meshRendererMeshLODData objects of the model are
-	 * already valid!
-	 **/
-	virtual void initMeshLODData(BoMeshLOD* meshLOD, unsigned int meshIndex, unsigned int lod);
-
-	/**
 	 * Here you should delete all data that you allocated in @ref
 	 * initModelData. The @ref BosonModel::setMeshRendererModelData is
 	 * deleted automatically, you don't have to care about it.
@@ -277,10 +258,8 @@ protected:
 	 **/
 	virtual void deinitModelData(BosonModel* model);
 	virtual void deinitMeshData(BoMesh* mesh);
-	virtual void deinitMeshLODData(BoMeshLOD* meshLOD);
 
 	unsigned int lodCount(const BoMesh* mesh) const;
-	BoMeshLOD* levelOfDetail(const BoMesh* mesh, unsigned int lod) const;
 
 	virtual void addFrameStatistics();
 	virtual void completeFrameStatistics();

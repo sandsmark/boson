@@ -33,7 +33,7 @@ public:
 protected:
 	virtual void initFrame();
 	virtual void deinitFrame();
-	virtual unsigned int render(const QColor* teamColor, BoMesh* mesh, BoMeshLOD* lod);
+	virtual unsigned int render(const QColor* teamColor, BoMesh* mesh);
 };
 
 #endif

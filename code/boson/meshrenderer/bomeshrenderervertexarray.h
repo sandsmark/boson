@@ -22,20 +22,6 @@
 #include "../bomeshrenderer.h"
 #include "../bosonmodel.h"
 
-class BoMeshRendererModelDataVA : public BoMeshRendererModelData
-{
-public:
-	BoMeshRendererModelDataVA();
-	~BoMeshRendererModelDataVA();
-
-	float* mPoints;
-	unsigned int mPointCount;
-
-	// convenience for initialization
-	unsigned int mMaxLODCount;
-	unsigned int* mOffsets;
-	unsigned int* mPointCounts;
-};
 
 
 class BoMeshRendererVertexArray: public BoMeshRenderer
@@ -50,18 +36,7 @@ public:
 protected:
 	virtual void initFrame();
 	virtual void deinitFrame();
-	virtual unsigned int render(const QColor* teamColor, BoMesh* mesh, BoMeshLOD* lod);
-
-	virtual BoMeshRendererModelData* createModelData() const;
-	virtual BoMeshRendererMeshData* createMeshData() const;
-	virtual BoMeshRendererMeshLODData* createMeshLODData() const;
-
-	virtual void initModelData(BosonModel* model);
-	virtual void initMeshData(BoMesh* mesh, unsigned int meshIndex);
-	virtual void initMeshLODData(BoMeshLOD* meshLOD, unsigned int meshIndex, unsigned int lod);
-
-	unsigned int countModelPoints(const BosonModel* model) const;
-	void fillModelPointsArray(BosonModel* model, float* array, unsigned int maxLODCount, unsigned int* offsets, unsigned int* pointCount);
+	virtual unsigned int render(const QColor* teamColor, BoMesh* mesh);
 
 private:
 	const BosonModel* mPreviousModel;

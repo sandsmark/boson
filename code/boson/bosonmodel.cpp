@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -23,7 +23,6 @@
 #include "bosonmodeltextures.h"
 #include "bosonprofiling.h"
 #include "bo3dtools.h"
-#include "bosonmodelloader.h"
 #include "bosonglwidget.h" // BoContext
 #include "bodebug.h"
 #include "bomesh.h"
@@ -32,246 +31,25 @@
 #include "bomemorytrace.h"
 #include "bomeshrenderer.h"
 #include "bomeshrenderermanager.h"
+#include "bobmfload.h"
 
 #include <ksimpleconfig.h>
+#include <kmdcodec.h>
+#include <kglobal.h>
+#include <kstandarddirs.h>
+#include <kprocess.h>
 
 #include <qstringlist.h>
 #include <qvaluelist.h>
 #include <qintdict.h>
 #include <qptrvector.h>
+#include <qfile.h>
 
 #include <math.h>
 #if HAVE_GL_GLEXT_H
 #include <GL/glext.h>
 #endif
 
-// use GL_TRIANGLE_STRIP ? (experimental and not working!)
-// AB: there are 2 different optimizing approaches. one is to use
-// GL_TRIANGLE_STRIP, the other one is using a single glBegin()/glEnd() call (we
-// need to place all textures of that model into a single big texture map and
-// adjust the coordinates accordingly). unfortunately they exclude each other.
-// so we need to be compare both approaches to find out which is better.
-// i am expecting the strips to be faster
-#define USE_STRIP 0
-
-// some testings for me. this is here for my own use only currently.
-// #define AB_TEST 1
-
-
-class BoMeshSorter
-{
-public:
-	class Mesh
-	{
-	public:
-		Mesh()
-		{
-			matrix = 0;
-			mesh = 0;
-			hidden = false;
-		}
-		Mesh(const Mesh& m)
-		{
-			*this = m;
-		}
-		Mesh& operator=(const Mesh& m)
-		{
-			mesh = m.mesh;
-			matrix = m.matrix;
-			hidden = m.hidden;
-			return *this;
-		}
-		BoMatrix* matrix;
-		BoMesh* mesh;
-		bool hidden;
-	};
-
-	BoMeshSorter()
-	{
-	}
-	~BoMeshSorter()
-	{
-	}
-
-	static void sortByMaxZ(BoFrame* frame, QValueList<Mesh>* meshes)
-	{
-		makeList(frame, meshes);
-		sortByMaxZ(meshes);
-	}
-	static void sortByMinZ(BoFrame* frame, QValueList<Mesh>* meshes)
-	{
-		makeList(frame, meshes);
-		sortByMinZ(meshes);
-	}
-
-	static void sortByMaxZ(QValueList<Mesh>* meshes)
-	{
-		sortByZ(meshes, true);
-	}
-	static void sortByMinZ(QValueList<Mesh>* meshes)
-	{
-		sortByZ(meshes, false);
-	}
-	static void sortByMaxSize(BoFrame* frame, QValueList<Mesh>* meshes) // sort by volume
-	{
-		makeList(frame, meshes);
-		sortByMaxSize(meshes);
-	}
-	static void sortByMaxSize(QValueList<Mesh>* meshes); // sort by volume
-
-protected:
-	static void sortByZ(QValueList<Mesh>* meshes, bool byMaxZ);
-	static void makeList(BoFrame* frame, QValueList<Mesh>* meshes)
-	{
-		if (!frame || !meshes) {
-			return;
-		}
-		meshes->clear();
-		for (unsigned int i = 0; i < frame->meshCount(); i++) {
-			BoMeshSorter::Mesh mesh;
-			mesh.mesh = frame->mesh(i);
-			mesh.matrix = frame->matrix(i);
-			mesh.hidden = frame->hidden(i);
-			meshes->append(mesh);
-		}
-	}
-	/**
-	 * @return The volume of the box with the specified values
-	 **/
-	static float volume(float minX, float maxX, float minY, float maxY, float minZ, float maxZ)
-	{
-		float dx = maxX - minX;
-		float dy = maxY - minY;
-		float dz = maxZ - minZ;
-		float volume = dx * dy * dz;
-		if (volume < 0.0f) {
-			return -volume;
-		}
-		return volume;
-	}
-};
-
-void BoMeshSorter::sortByMaxSize(QValueList<BoMeshSorter::Mesh>* meshes)
-{
- BO_CHECK_NULL_RET(meshes);
- if (meshes->count() == 0) {
-	boError() << k_funcinfo << "no meshes" << endl;
-	return;
- }
- if (meshes->count() == 1) {
-	return;
- }
- QMap<float, QValueList<BoMeshSorter::Mesh>* > map;
-
- QValueList<BoMeshSorter::Mesh>::Iterator it;
- for (it = meshes->begin(); it != meshes->end(); ++it) {
-	BoMeshSorter::Mesh mesh = *it;
-
-	if (!mesh.mesh) {
-		boError() << k_funcinfo << "NULL mesh" << endl;
-		continue;
-	}
-
-	// do some necessary calculations
-	// AB: this is a naive implementation.
-	// we just use min/max x/y/z. but imagine a perfect cube which
-	// is rotated by 45 degree - it's actual volume would be still
-	// the same, but here we would generate a different box which
-	// the original cube fits in (and isn't rotated). that volume
-	// would be a lot bigger than...
-	float minX, maxX, minY, maxY, minZ, maxZ;
-	mesh.mesh->getBoundingBox(*mesh.matrix, &minX, &maxX, &minY, &maxY, &minZ, &maxZ);
-	float v = volume(minX, maxX, minY, maxY, minZ, maxZ);
-
-	QValueList<BoMeshSorter::Mesh>* list = 0;
-	if (!map.contains(v)) {
-		list = new QValueList<BoMeshSorter::Mesh>();
-		map.insert(v, list);
-	} else {
-		list = map[v];
-	}
-	list->append(mesh);
- }
-
- unsigned int meshesCount = meshes->count();
- meshes->clear();
- QMap<float, QValueList<BoMeshSorter::Mesh>* >::Iterator mapIt;
- for (mapIt = map.begin(); mapIt != map.end(); ++mapIt) {
-	QValueList<BoMeshSorter::Mesh>* list = mapIt.data();
-	QValueList<BoMeshSorter::Mesh>::Iterator listIt;
-	for (listIt = list->begin(); listIt != list->end(); ++listIt) {
-		meshes->prepend(*listIt);
-	}
-	delete list;
- }
- map.clear(); // all inserted pointers are already deleted
-
- if (meshesCount != meshes->count()) {
-	boError() << k_funcinfo << "invalid result! count=" << meshes->count() << " should be: " << meshesCount << endl;
- }
-}
-
-void BoMeshSorter::sortByZ(QValueList<BoMeshSorter::Mesh>* meshes, bool byMaxZ)
-{
- BO_CHECK_NULL_RET(meshes);
- if (meshes->count() == 0) {
-	boError() << k_funcinfo << "no meshes" << endl;
-	return;
- }
- if (meshes->count() == 1) {
-	return;
- }
- QMap<float, QValueList<BoMeshSorter::Mesh>* > map;
-
- QValueList<BoMeshSorter::Mesh>::Iterator it;
- for (it = meshes->begin(); it != meshes->end(); ++it) {
-	BoMeshSorter::Mesh mesh = *it;
-
-	// do some necessary calculations
-	float tmp, minZ, maxZ;
-	mesh.mesh->getBoundingBox(*mesh.matrix, &tmp, &tmp, &tmp, &tmp, &minZ, &maxZ);
-
-	float z = 0.0f;
-	if (byMaxZ) {
-		z = maxZ;
-	} else {
-		z = minZ;
-	}
-
-	QValueList<BoMeshSorter::Mesh>* list = 0;
-	if (!map.contains(z)) {
-		list = new QValueList<BoMeshSorter::Mesh>();
-		map.insert(z, list);
-	} else {
-		list = map[z];
-	}
-	list->append(mesh);
- }
-
- unsigned int meshesCount = meshes->count();
- meshes->clear();
- QMap<float, QValueList<BoMeshSorter::Mesh>* >::Iterator mapIt;
- for (mapIt = map.begin(); mapIt != map.end(); ++mapIt) {
-	QValueList<BoMeshSorter::Mesh>* list = mapIt.data();
-	if (byMaxZ) {
-		QValueList<BoMeshSorter::Mesh>::Iterator listIt;
-		for (listIt = list->begin(); listIt != list->end(); ++listIt) {
-			meshes->prepend(*listIt);
-		}
-	} else {
-		QValueList<BoMeshSorter::Mesh>::Iterator listIt;
-		for (listIt = list->begin(); listIt != list->end(); ++listIt) {
-			meshes->append(*listIt);
-		}
-	}
-	delete list;
- }
- map.clear(); // all inserted pointers are already deleted
-
- if (meshesCount != meshes->count()) {
-	boWarning() << k_funcinfo << "oops - something weird happened: meshesCount=" << meshesCount << " meshes->count()=" << meshes->count() << endl;
- }
-}
 
 
 BoFrame::BoFrame()
@@ -279,38 +57,40 @@ BoFrame::BoFrame()
  init();
 }
 
-BoFrame::BoFrame(const BoFrame& f, unsigned int firstMesh, unsigned int meshCount)
+BoFrame::BoFrame(const BoFrame& f, unsigned int firstNode, unsigned int nodeCount)
 {
  init();
  mDepthMultiplier = f.mDepthMultiplier;
  mRadius = f.mRadius;
 
- if (meshCount == 0) {
-	boWarning() << k_funcinfo << "no mesh copied" << endl;
+ if (nodeCount == 0) {
+	boWarning() << k_funcinfo << "no nodes copied" << endl;
 	return;
  }
- if (firstMesh + meshCount > f.mMeshCount) {
-	boError() << k_funcinfo << "can't copy " << meshCount
-			<< " meshes starting at " << firstMesh
-			<< ", as there are only " << f.mMeshCount
-			<< " meshes!" << endl;
-	meshCount = f.mMeshCount - firstMesh;
+ if (firstNode + nodeCount > f.mNodeCount) {
+	boError() << k_funcinfo << "can't copy " << nodeCount
+			<< " nodes starting at " << firstNode
+			<< ", as there are only " << f.mNodeCount
+			<< " nodes!" << endl;
+	nodeCount = f.mNodeCount - firstNode;
  }
- unsigned int* meshes = new unsigned int[meshCount];
- for (unsigned int i = 0; i < meshCount; i++) {
-	meshes[i] = meshes[firstMesh + i];
+ unsigned int* nodes = new unsigned int[nodeCount];
+ for (unsigned int i = 0; i < nodeCount; i++) {
+	// FIXME: is this ok? Shouldn't one 'nodes' be e.g. 'f.nodes' ?
+//	nodes[i] = nodes[firstNode + i];
+	nodes[i] = firstNode + i;
  }
 
- copyMeshes(f, meshes, meshCount);
- delete[] meshes;
+ copyNodes(f, nodes, nodeCount);
+ delete[] nodes;
 }
 
-BoFrame::BoFrame(const BoFrame& f, unsigned int* meshes, unsigned int meshCount)
+BoFrame::BoFrame(const BoFrame& f, unsigned int* nodes, unsigned int nodeCount)
 {
  init();
  mDepthMultiplier = f.mDepthMultiplier;
  mRadius = f.mRadius;
- copyMeshes(f, meshes, meshCount);
+ copyNodes(f, nodes, nodeCount);
 }
 
 void BoFrame::init()
@@ -319,63 +99,60 @@ void BoFrame::init()
  mRadius = 0.0f;
  mMatrices = 0;
  mMeshes = 0;
- mMeshCount = 0;
- mHidden = 0;
+ mNodeCount = 0;
 }
 
 BoFrame::~BoFrame()
 {
  if (mMatrices) {
-	for (unsigned int i = 0; i < mMeshCount; i++) {
+	for (unsigned int i = 0; i < mNodeCount; i++) {
 		delete mMatrices[i];
 	}
  }
  delete[] mMeshes;
  delete[] mMatrices;
- delete[] mHidden;
 }
 
-void BoFrame::copyMeshes(const BoFrame& f, unsigned int* meshes, unsigned int count)
+void BoFrame::copyNodes(const BoFrame& f, unsigned int* nodes, unsigned int count)
 {
- if (f.mMeshCount == 0 || !f.mMeshes || !f.mMatrices || !f.mHidden) {
-	boError() << k_funcinfo << "oops - can't copy from invalid mesh!" << endl;
+ if (f.mNodeCount == 0 || !f.mMeshes || !f.mMatrices) {
+	boError() << k_funcinfo << "oops - can't copy from invalid frame!" << endl;
 	return;
  }
- BO_CHECK_NULL_RET(meshes);
+ BO_CHECK_NULL_RET(nodes);
  if (count == 0) {
-	boWarning() << k_funcinfo << "no mesh copied" << endl;
+	boWarning() << k_funcinfo << "no nodes copied" << endl;
 	return;
  }
- if (count > f.mMeshCount) {
+ if (count > f.mNodeCount) {
 	boError() << k_funcinfo << "cannot copy " << count
-			<< " meshes as frame contains " << f.mMeshCount
-			<< " meshes only" << endl;
+			<< " nodes as frame contains " << f.mNodeCount
+			<< " nodes only" << endl;
 	return;
  }
 
  // before allocating anything we first check whether all indices are valid
  for (unsigned int i = 0; i < count; i++) {
-	if (meshes[i] >= f.mMeshCount) {
-		boError() << k_funcinfo << "index " << meshes[i] << " at " << i
-				<< " is not valid! only " << f.mMeshCount
+	if (nodes[i] >= f.mNodeCount) {
+		boError() << k_funcinfo << "index " << nodes[i] << " at " << i
+				<< " is not valid! only " << f.mNodeCount
 				<< " available in the frame" << endl;
 		return;
 	}
  }
 
- allocMeshes(count);
+ allocNodes(count);
  for (unsigned int i = 0; i < count; i++) {
-	unsigned int index = meshes[i];
+	unsigned int index = nodes[i];
 	mMeshes[i] = f.mMeshes[index]; // copy the pointer only
 	mMatrices[i]->loadMatrix(*f.mMatrices[index]);
-	mHidden[i] = f.mHidden[index];
  }
 }
 
-void BoFrame::allocMeshes(int meshes)
+void BoFrame::allocNodes(int nodes)
 {
- if (mMeshCount != 0) {
-	boError() << k_funcinfo << "meshes already loaded" << endl;
+ if (mNodeCount != 0) {
+	boError() << k_funcinfo << "nodes already loaded" << endl;
 	return;
  }
  if (mMatrices) {
@@ -386,25 +163,19 @@ void BoFrame::allocMeshes(int meshes)
 	boError() << k_funcinfo << "meshes already allocated??" << endl;
 	delete[] mMeshes;
  }
- if (mHidden) {
-	boError() << k_funcinfo << "\"hidden\" flags already allocated??" << endl;
-	delete[] mHidden;
- }
- mMeshes = new BoMesh*[meshes];
- mMatrices = new BoMatrix*[meshes];
- mHidden = new bool[meshes];
- mMeshCount = meshes; // unused?
- for (int i = 0; i < meshes; i++) {
+ mMeshes = new BoMesh*[nodes];
+ mMatrices = new BoMatrix*[nodes];
+ mNodeCount = nodes; // unused?
+ for (int i = 0; i < nodes; i++) {
 	mMeshes[i] = 0;
 	mMatrices[i] = new BoMatrix;
-	mHidden[i] = false;
  }
 }
 
 void BoFrame::setMesh(unsigned int index, BoMesh* mesh)
 {
- if (index >= mMeshCount) {
-	boError() << k_funcinfo << "invalid mesh " << index << " , count=" << mMeshCount << endl;
+ if (index >= mNodeCount) {
+	boError() << k_funcinfo << "invalid mesh " << index << " , count=" << mNodeCount << endl;
 	return;
  }
  BO_CHECK_NULL_RET(mesh);
@@ -413,27 +184,14 @@ void BoFrame::setMesh(unsigned int index, BoMesh* mesh)
  mMeshes[index] = mesh;
 }
 
-void BoFrame::setHidden(unsigned int index, bool hidden)
-{
- if (index >= mMeshCount) {
-	boError() << k_funcinfo << "invalid mesh " << index << " , count=" << mMeshCount << endl;
-	return;
- }
- BO_CHECK_NULL_RET(mHidden);
- mHidden[index] = hidden;
-}
-
 BoMatrix* BoFrame::matrix(int index) const
 {
  return mMatrices[index];
 }
 
-void BoFrame::renderFrame(const QColor* teamColor, unsigned int lod, int mode)
+void BoFrame::renderFrame(const QColor* teamColor, int mode)
 {
- for (unsigned int i = 0; i < mMeshCount; i++) {
-	if (mHidden[i]) {
-		continue;
-	}
+ for (unsigned int i = 0; i < mNodeCount; i++) {
 	BoMatrix* m = mMatrices[i];
 	BoMesh* mesh = mMeshes[i];
 	if (!m) {
@@ -447,153 +205,85 @@ void BoFrame::renderFrame(const QColor* teamColor, unsigned int lod, int mode)
 	if (mode == GL_SELECT) {
 		glLoadName(i);
 	}
-	mesh->renderMesh(m, teamColor, lod);
+	// TODO: either store (bool flags) or test if mMatrices[i] is identity
+	//  matrix. If it is, we can avoid glMultMatrix() call
+	mesh->renderMesh(m, teamColor);
  }
 }
 
-void BoFrame::mergeMeshes()
+
+
+BoLOD::BoLOD()
 {
-#ifdef AB_TEST
- QValueList<int> redundantMatrices;
- for (unsigned int i = 0; i < meshCount(); i++) {
-	for (unsigned int j = i + 1; j < meshCount(); j++) {
-		if (mMeshes[i]->textured() && !mMeshes[j]->textured()) {
-			continue;
-		}
-		if (mMeshes[i]->textureObject() != mMeshes[j]->textureObject()) {
-			continue;
-		}
-		if (mMatrices[i]->isEqual(*mMatrices[j])) {
-			if (!redundantMatrices.contains(j)) {
-				redundantMatrices.append(j);
-			}
-		}
-	}
- }
-#endif
-// boDebug() << "redundant matrices: " << redundantMatrices.count() << endl;
+ mMeshCount = 0;
+ mMeshes = 0;
+ mFrameCount = 0;
+ mFrames = 0;
 }
 
-void BoFrame::sortByDepth()
+BoLOD::~BoLOD()
 {
- // sort the meshes by depth, so that closer meshes are drawn first, then
- // meshes that are farther away.
- // note that this function is not time critical, so you don't have to care
- // about speed of the algorithms (it is called once per model on startup only).
-
- QValueList<BoMeshSorter::Mesh> meshes;
-// BoMeshSorter::sortByMaxZ(this, &meshes);
- BoMeshSorter::sortByMaxSize(this, &meshes);
-
- BO_CHECK_NULL_RET(mMeshes);
- BO_CHECK_NULL_RET(mMatrices);
- BO_CHECK_NULL_RET(mHidden);
-
- // meshes is now sorted by maxZ.
- QValueList<BoMeshSorter::Mesh>::Iterator it;
- int i = 0;
- for (it = meshes.begin(); it != meshes.end(); ++it) {
-	BoMesh* mesh = (*it).mesh;
-	BoMatrix* matrix = (*it).matrix;
-	bool hidden = (*it).hidden;
-	if (!mesh || !matrix) {
-		boError() << k_funcinfo << "oops" << endl;
-		continue;
-	}
-	mMeshes[i] = mesh;
-	mMatrices[i] = matrix;
-	mHidden[i] = hidden;
-	i++;
+ for (unsigned int i = 0; i < mMeshCount; i++) {
+	delete mMeshes[i];
  }
+ for (unsigned int i = 0; i < mFrameCount; i++) {
+	delete mFrames[i];
+ }
+ delete[] mMeshes;
+ delete[] mFrames;
 }
 
-class BosonModel::BoHelper
+void BoLOD::allocateMeshes(unsigned int count)
 {
-public:
-	BoHelper()
-	{
-		mMaxX = 0.0;
-		mMinX = 0.0;
-		mMaxY = 0.0;
-		mMinY = 0.0;
-		mMaxZ = 0.0;
-		mMinZ = 0.0;
-	}
+ mMeshes = new BoMesh*[count];
 
-	void addPoint(const BoVector3Float& v)
-	{
-		addPoint(v[0], v[1], v[2]);
-	}
-	void addPoint(float x, float y, float z)
-	{
-		if (x > mMaxX) {
-			mMaxX = x;
-		} else if (x < mMinX) {
-			mMinX = x;
-		}
-		if (y > mMaxY) {
-			mMaxY = y;
-		} else if (y < mMinY) {
-			mMinY = y;
-		}
-		if (z > mMaxZ) {
-			mMaxZ = z;
-		} else if (z < mMinZ) {
-			mMinZ = z;
-		}
-	}
+ for (unsigned int i = 0; i < count; i++) {
+	mMeshes[i] = new BoMesh;
+ }
 
-	// radius of the bounding sphere
-//	float radius() const
-//	{
-	//TODO
-//	}
+ mMeshCount = count;
+}
 
-	// well in theory mMaxX == -mMinX
-	// but usually..
-	float diffX() const { return (mMinX - mMaxX); }
-	float diffY() const { return (mMinY - mMaxY); }
-	float diffZ() const { return (mMinZ - mMaxZ); }
+void BoLOD::allocateFrames(unsigned int count)
+{
+ mFrames = new BoFrame*[count];
 
-	float lengthX() const { return (mMaxX - mMinX); }
-	float lengthY() const { return (mMaxY - mMinY); }
-	float lengthZ() const { return (mMaxZ - mMinZ); }
+ for (unsigned int i = 0; i < count; i++) {
+	mFrames[i] = new BoFrame;
+ }
 
-	/**
-	 * @return the scaling factor required for the data in this object to
-	 * fit a width of @p w and a height of @p h. When all points added using
-	 * @ref addPoints are scaled by that value, the model won't be higher
-	 * than @p h * and won't be wider than @p w.
-	 **/
-	float scale(float w, float h) const
-	{
-		if (fabsf(lengthX() < 0.0001)) {
-			boWarning() << k_funcinfo << "invalid length in x direction: " << lengthX() << endl;
-			return 1.0f;
-		}
-		if (fabsf(lengthY() < 0.0001)) {
-			boWarning() << k_funcinfo << "invalid length in y direction: " << lengthY() << endl;
-			return 1.0f;
-		}
-		float scaleX = w / lengthX();
-		float scaleY = h / lengthY();
-		// we don't care about z-size here!
-		float scale = QMIN(scaleX, scaleY);
-		if (fabsf(scale) < 0.0001) {
-			return 1.0f;
-		}
-		return scale;
-	}
+ mFrameCount = count;
+}
+
+unsigned int BoLOD::addFrames(unsigned int count)
+{
+ unsigned int total = mFrameCount + count;
+
+ BoFrame** oldframes = mFrames;
+ mFrames = new BoFrame*[total];
+
+ // Copy old frame pointers
+ unsigned int i;
+ for (i = 0; i < mFrameCount; i++) {
+	mFrames[i] = oldframes[i];
+ }
+ mFrameCount = total;
+ delete[] oldframes;
+
+ return i;
+}
+
+void BoLOD::setFrame(unsigned int i, BoFrame* f)
+{
+ mFrames[i] = f;
+}
+
+BoMesh* BoLOD::mesh(unsigned int i) const
+{
+ return mMeshes[i];
+}
 
 
-
-	float mMaxX;
-	float mMinX; // lowest (i.e. negative) x
-	float mMaxY;
-	float mMinY;
-	float mMaxZ;
-	float mMinZ;
-};
 
 
 class BosonModelPrivate
@@ -601,71 +291,67 @@ class BosonModelPrivate
 public:
 	BosonModelPrivate()
 	{
+		mLODs = 0;
+		mLODDistances = 0;
+		mLODCount = 0;
+		mMaterials = 0;
+		mMaterialCount = 0;
+		mPointArraySize = 0;
 		mPoints = 0;
-
 	}
 
-	QPtrVector<BoMesh> mMeshes;
-	QPtrVector<BoFrame> mFrames;
+	BoLOD* mLODs;
+	float* mLODDistances;
+	unsigned int mLODCount;
+	BoMaterial* mMaterials;
+	unsigned int mMaterialCount;
 
-	QPtrVector<BoMaterial> mAllMaterials;
-
-	QPtrVector<BoFrame> mConstructionSteps;
 	QIntDict<BosonAnimation> mAnimations;
-	QMap<QString, QString> mTextureNames;
 	QString mDirectory;
 	QString mFile;
 
 	unsigned int mPointArraySize;
 	float* mPoints;
 
-	unsigned int mLODCount;
+	float mBoundingSphereRadius;
+
+	QCString mMD5;
 };
 
-BosonModel::BosonModel(const QString& dir, const QString& file, float width, float height)
+BosonModel::BosonModel(const QString& dir, const QString& file)
 {
  init();
  d->mDirectory = dir;
  d->mFile = file;
- mWidth = width;
- mHeight = height;
 }
 
 void BosonModel::init()
 {
  d = new BosonModelPrivate;
- mWidth = 0;
- mHeight = 0;
- d->mMeshes.setAutoDelete(true);
- d->mFrames.setAutoDelete(true);
- d->mConstructionSteps.setAutoDelete(true);
  d->mAnimations.setAutoDelete(true);
- d->mAllMaterials.setAutoDelete(true);
- d->mLODCount = 1;
- d->mPointArraySize = 0;
+ d->mBoundingSphereRadius = 0.0f;
  mMeshRendererModelData = 0;
 
- // add the default mode 0
- insertAnimationMode(0, 0, 1, 1);
+ // add the default mode 0 (always shows the first frame)
+ insertAnimationMode(0, 0, 0, 0.0f, false);
 }
 
 BosonModel::~BosonModel()
 {
  boDebug(100) << k_funcinfo << endl;
- finishLoading();
  BoMeshRendererManager::manager()->removeModel(this);
  BosonModelTextures::modelTextures()->removeModel(this);
  if (mMeshRendererModelData) {
 	boWarning(100) << k_funcinfo << "meshrenderer forgot to delete model data" << endl;
  }
  delete mMeshRendererModelData;
- boDebug(100) << k_funcinfo << "delete " << d->mFrames.count() << " frames" << endl;
- d->mFrames.clear();
- boDebug(100) << k_funcinfo << "delete " << d->mConstructionSteps.count() << " construction frames" << endl;
- d->mConstructionSteps.clear();
+
+ boDebug(100) << k_funcinfo << "delete " << d->mLODCount << " lods" << endl;
+ delete[] d->mLODs;
+ delete[] d->mLODDistances;
  d->mAnimations.clear();
- boDebug(100) << k_funcinfo << "delete meshes" << endl;
- d->mMeshes.clear();
+ boDebug(100) << k_funcinfo << "delete " << d->mMaterialCount << " materials" << endl;
+ delete[] d->mMaterials;
  delete[] d->mPoints;
  delete d;
  boDebug(100) << k_funcinfo << "done" << endl;
@@ -673,12 +359,23 @@ BosonModel::~BosonModel()
 
 BoMaterial* BosonModel::material(unsigned int index) const
 {
- return d->mAllMaterials[index];
+ return &d->mMaterials[index];
 }
 
 unsigned int BosonModel::materialCount() const
 {
- return d->mAllMaterials.count();
+ return d->mMaterialCount;
+}
+
+void BosonModel::allocateMaterials(unsigned int count)
+{
+ if (d->mMaterials) {
+	boWarning() << k_funcinfo << "Materials already allocated!" << endl;
+	delete[] d->mMaterials;
+ }
+
+ d->mMaterials = new BoMaterial[count];
+ d->mMaterialCount = count;
 }
 
 const QString& BosonModel::baseDirectory() const
@@ -690,30 +387,15 @@ QString BosonModel::file() const
 {
  return baseDirectory() + d->mFile;
 }
-
-void BosonModel::setLongNames(QMap<QString, QString> names)
-{
- d->mTextureNames = names;
-}
-
-QString BosonModel::cleanTextureName(const char* name) const
-{
- QString s = QString(name).lower();
- if (d->mTextureNames.contains(s)) {
-	return d->mTextureNames[s];
- }
- return s;
-}
-
 void BosonModel::loadTextures(const QStringList& list)
 {
  QStringList::ConstIterator it = list.begin();
  for (; it != list.end(); ++it) {
-	BosonModelTextures::modelTextures()->insert(this, cleanTextureName(*it));
+	BosonModelTextures::modelTextures()->insert(this, *it);
  }
 }
 
-void BosonModel::loadModel()
+void BosonModel::loadModel(const QString& configfilename)
 {
  if (d->mFile.isEmpty() || d->mDirectory.isEmpty()) {
 	boError(100) << k_funcinfo << "No file has been specified for loading" << endl;
@@ -721,64 +403,45 @@ void BosonModel::loadModel()
  }
  BosonProfiler profiler(BosonProfiling::LoadModel);
 
- BosonModelLoader loader(d->mDirectory, d->mFile, this);
+ // Calculate MD5 hash of the original model file and it's config file
+ QString fileName = d->mDirectory + d->mFile;
+ QFile modelfile(fileName);
+ if (!modelfile.open(IO_ReadOnly)) {
+	boError() << k_funcinfo << "could not open model file " << fileName << endl;
+	return;
+ }
+ QFile configfile(configfilename);
+ if (!configfile.open(IO_ReadOnly)) {
+	boError() << k_funcinfo << "could not open config file " << configfilename << endl;
+	return;
+ }
+ KMD5 md5(modelfile.readAll());
+ md5.update(configfile.readAll());
+ d->mMD5 = md5.hexDigest();
 
- // TODO: add a profiling entry for this
+ // Get filename of the cached model.
+ // This converts the original model file if cached model file doesn't exist.
+ QString cachedmodel = cachedModelFilename(d->mMD5, fileName, configfilename);
+ if (cachedmodel.isNull()) {
+	// Conversion failed
+	return;
+ }
+
+
+ // Load the model
+ BoBMFLoad loader(cachedmodel, this);
  if (!loader.loadModel()) {
-	boError() << k_funcinfo << "model " << d->mFile << " could not be loaded!" << endl;
+	// TODO: add a profiling entry for this
+	boError() << k_funcinfo << "error while loading from .bmf file " << cachedmodel << endl;
 	return;
  }
 
- BosonModelLoaderData* data = loader.data();
- if (!data) {
-	BO_NULL_ERROR(data);
+ if (lodCount() == 0) {
+	boError() << k_funcinfo << "0 lods loaded for model " << cachedmodel << endl;
 	return;
  }
 
- if (!loadModelData(data)) {
-	boError() << k_funcinfo << "unable to load model data for " << d->mFile << endl;
-	return;
- }
-
-
- if (frames() == 0) {
-	boError() << k_funcinfo << "0 frames loaded for model " << d->mFile << endl;
-	return;
- }
- if (meshCount() == 0) {
-	boError() << k_funcinfo << "0 meshes loaded for model " << d->mFile << endl;
-	return;
- }
-
- boDebug(100) << k_funcinfo << "calculate normals" << endl;
- for (unsigned int i = 0; i < meshCount(); i++) {
-	BoMesh* m = mesh(i);
-	if (!m) {
-		BO_NULL_ERROR(m);
-		continue;
-	}
-	m->calculateNormals();
- }
-
- // scale the model to mWidth * mHeight. vertices are not touched, the scaling
- // factor is integrated into the mesh matrices.
- applyMasterScale();
- computeBoundingObjects();
-
- boDebug(100) << k_funcinfo << "generating LODs for meshes" << endl;
- // AB: first apply the master scale, then the LOD: in order to find out how
- // much surface / volume the model can take at most, we need the final
- // matrices.
- // computing the master scaling factor first, we can easily use width() and
- // height().
- generateLOD();
- boDebug(100) << k_funcinfo << "generating LODs for meshes done" << endl;
-
- boDebug(100) << k_funcinfo << "merge arrays" << endl;
- mergeArrays();
- mergeMeshesInFrames();
- sortByDepth();
-
+ // Load the textures
  QStringList modelTextures;
  for (unsigned int i = 0; i < materialCount(); i++) {
 	BoMaterial* mat = material(i);
@@ -786,10 +449,7 @@ void BosonModel::loadModel()
 		BO_NULL_ERROR(mat);
 		continue;
 	}
-	QString tex = cleanTextureName(mat->textureName());
-	if (!tex.isEmpty()) {
-		modelTextures.append(tex);
-	}
+	modelTextures.append(mat->textureName());
  }
 
  boProfiling->start(BosonProfiling::LoadModelTextures);
@@ -801,413 +461,166 @@ void BosonModel::loadModel()
 	return;
  }
 
+ // Set texture objects for materials
  for (unsigned int i = 0; i < materialCount(); i++) {
 	BoMaterial* mat = material(i);
 	if (!mat) {
 		BO_NULL_ERROR(mat);
 		continue;
 	}
-	QString tex = cleanTextureName(mat->textureName());
 	BoTexture* myTex = 0;
-	if (!tex.isEmpty()) {
-		myTex = BosonModelTextures::modelTextures()->texture(tex);
+	if (!mat->textureName().isEmpty()) {
+		myTex = BosonModelTextures::modelTextures()->texture(mat->textureName());
 	}
 	mat->setTextureObject(myTex);
  }
-
- for (unsigned int i = 0; i < meshCount(); i++) {
-	BoMesh* m = mesh(i);
-	if (!m) {
-		BO_NULL_ERROR(m);
-		continue;
-	}
-#if USE_STRIP
-	m->connectNodes();
-#else
-	m->addNodes();
-#endif
-	m->createPointCache();
- }
-
 
  // must happen when the model has been loaded completely
  boDebug(100) << k_funcinfo << "adding model to meshrenderer" << endl;
  BoMeshRendererManager::manager()->addModel(this);
 
- boDebug(100) << k_funcinfo << "loaded from " << file() << endl;
+ boDebug(100) << k_funcinfo << "loaded from " << fileName << "(cached file: " << cachedmodel << ")" << endl;
 }
 
-bool BosonModel::loadModelData(BosonModelLoaderData* data)
+QString BosonModel::cachedModelFilename(const QCString& md5, const QString& originalmodel, const QString& configfile)
 {
- if (!data) {
-	BO_NULL_ERROR(data);
-	return false;
- }
+ QString cachedmodel = KGlobal::dirs()->findResource("data", QString("%1/model-%2.bmf").arg("boson/modelcache").arg(md5));
 
- // AB: note that we must copy the pointers, not just the data.
- // the objects might reference each other through their pointers.
- // AB: also note that when we copy a pointer, we take ownership and delete it
- // when the model is deleted
-
- if (data->meshCount() == 0) {
-	boError() << k_funcinfo << "no mesh in model!" << endl;
-	return false;
- }
- if (d->mMeshes.count() != 0) {
-	boWarning() << k_funcinfo << "meshes already loaded?? deleting existing meshes - this might crash if the pointers are still used!" << endl;
-	d->mMeshes.resize(0);
- }
- d->mMeshes.resize(data->meshCount());
- for (unsigned int i = 0; i < data->meshCount(); i++) {
-	d->mMeshes.insert(i, data->mesh(i));
- }
- data->clearMeshes(false);
-
- if (data->frameCount() == 0) {
-	boError() << k_funcinfo << "no frame in model" << endl;
-	return false;
- }
- if (d->mFrames.count() != 0) {
-	boWarning() << k_funcinfo << "frames already loaded?? deleting existing frames - this might crash if the pointers are still used!" << endl;
-	d->mFrames.resize(0);
- }
- d->mFrames.resize(data->frameCount());
- for (unsigned int i = 0; i < data->frameCount(); i++) {
-	d->mFrames.insert(i, data->frame(i));
- }
- data->clearFrames(false);
-
- if (data->materialCount() != 0) {
-	if (d->mAllMaterials.count() != 0) {
-		boWarning() << k_funcinfo << "materials already loaded?! deleting them - this might crash when they are still needed" << endl;
-		d->mAllMaterials.resize(0);
+ if (!cachedmodel) {
+	// Cached model wasn't found
+	// Convert the model now.
+	// Get the path where the cached model can be saved
+	cachedmodel = KGlobal::dirs()->saveLocation("data", "boson/modelcache/");
+	if (cachedmodel.isNull()) {
+		boError() << k_funcinfo << "Failed to get save location for cached model" << endl;
+		return QString::null;
 	}
-	d->mAllMaterials.resize(data->materialCount());
-	for (unsigned int i = 0; i < data->materialCount(); i++) {
-		d->mAllMaterials.insert(i, data->material(i));
+	cachedmodel += QString("model-%1.bmf").arg(md5);
+	// Create KProcess object
+	KProcess proc;
+	proc << "bobmfconverter";
+	// Add default cmdline args
+	proc << "-lods" << "5" <<  "-keepframes" <<  "-texnametolower" <<  "-useboth";
+	proc << "-o" << cachedmodel;
+	if (!configfile.isNull()) {
+		proc << "-c" << configfile;
+	}
+	proc << originalmodel;
+	proc << "-comment" << QString("Automatically converted from file '%1'").arg(originalmodel);
+
+	// FIXME: KProcess:Block ain't pretty here...
+	if (!proc.start(KProcess::Block)) {
+		boError() << k_funcinfo << "Error while trying to convert the model" << endl;
+		return QString::null;
 	}
  }
- data->clearMaterials(false);
 
- return true;
+ return cachedmodel;
 }
 
-void BosonModel::generateConstructionFrames()
+void BosonModel::generateConstructionAnimation(unsigned int steps)
 {
- // construction frames are always generated from the 1st frame!
- BoFrame* frame0 = frame(0);
- if (!frame0) {
-	boError(100) << k_funcinfo << "No frame was loaded yet!" << endl;
+ if (d->mAnimations[UnitAnimationConstruction]) {
+	// Construction animation is already there. Probably it was speicifed in unit
+	//  config file.
 	return;
  }
- if (d->mConstructionSteps.count() != 0) {
-	boWarning(100) << k_funcinfo << "construction frames already generated" << endl;
+
+ if (steps == 0) {
+	// is that ok? maybe create empty animation or...?
 	return;
  }
- unsigned int nodes = frame0->meshCount();
- boDebug(100) << k_funcinfo << "Generating " << nodes << " construction frames" << endl;
 
- QValueList<BoMeshSorter::Mesh> meshes;
- BoMeshSorter::sortByMinZ(frame0, &meshes);
+ unsigned int animstart = 0;
+ for (unsigned int i = 0; i < lodCount(); i++) {
+	BoLOD* l = lod(i);
+	// Find the base frame (1st frame)
+	BoFrame* base = l->frame(0);
+	// Allocate extra frames
+	unsigned int offset = l->addFrames(steps);
+	if (animstart != 0 && animstart != offset) {
+		boError() << k_funcinfo << "Animation start mismatch: animstart: " << animstart <<
+				"; offset: " << offset << endl;
+	}
+	animstart = offset;
 
- unsigned int* indices = new unsigned int[meshes.count()];
- d->mConstructionSteps.resize(meshes.count());
- for (unsigned int i = 0; i < meshes.count(); i++) {
-	for (unsigned int j = 0; j < frame0->meshCount(); j++) {
-		// a damn slow linear search... but who cares for a 20 entry
-		// lists on startup...
-		BoMesh* mesh = meshes[i].mesh;
-		if (frame0->mesh(j) == mesh) {
-			indices[i] = j;
+	// Make construction animation for that lod
+	for (unsigned int j = 0; j < steps; j++) {
+		// Create a frame (copy of base frame)
+		BoFrame* f = new BoFrame(*base, (unsigned int)0, base->nodeCount());
+		// Calculate the dist to move. The first frame will be moved by
+		//  2*boundingSphereRadius(), the last one by 0
+		float dist = (1.5 * boundingSphereRadius()) * ((steps-j) / (float)steps);
+		// Move all nodes in the frame downwards
+		BoMatrix m;
+		m.translate(0, 0, -dist);
+		for (unsigned int n = 0; n < f->nodeCount(); n++)
+		{
+			BoMatrix m2(m);
+			m2.multiply(f->matrix(n));
+			f->matrix(n)->loadMatrix(m2);
 		}
+		// Add the frame to lod
+		l->setFrame(offset + j, f);
 	}
-	BoFrame* step = new BoFrame(*frame0, indices, i + 1);
-	d->mConstructionSteps.insert(i, step);
  }
- delete[] indices;
+
+ // Add construction animation
+ insertAnimationMode(UnitAnimationConstruction, animstart, animstart + steps - 1, 1 / 20.0f, true);
 }
 
-unsigned int BosonModel::frames() const
-{
- return d->mFrames.count();
-}
-
-BoFrame* BosonModel::constructionStep(unsigned int step)
-{
- if (d->mConstructionSteps.count() == 0) {
-	return 0;
- }
- if (step >= d->mConstructionSteps.count()) {
-	step = d->mConstructionSteps.count() - 1;
- }
- return d->mConstructionSteps[step];
-}
-
-unsigned int BosonModel::constructionSteps() const
-{
- return d->mConstructionSteps.count();
-}
-
-void BosonModel::finishLoading()
-{
- d->mTextureNames.clear();
-}
-
-void BosonModel::insertAnimationMode(int mode, int start, unsigned int range, unsigned int speed)
+void BosonModel::insertAnimationMode(int mode, unsigned int start, unsigned int end, float speed, bool loop)
 {
  if (mode == 0) {
 	// mode == 0 is a special mode. we default to it when everything fails,
 	// so this *must* be valid.
-	if (start < 0 || range == 0 || speed == 0) {
-		boWarning(100) << k_funcinfo << "invalid values for default mode! start=" << start << ",range=" << range << ",speed=" << speed << endl;
+	if (end < start || speed < 0.0f) {
+		boWarning(100) << k_funcinfo << "invalid values for default mode! start=" << start << ",end=" << end << ",speed=" << speed << endl;
 		start = 0;
-		range = 1;
-		speed = 1;
+		end = 0;
+		speed = 0.0f;
 	}
 	if (d->mAnimations[0]) {
 		// default mode already there - replace it!
 		d->mAnimations.remove(0);
 	}
  } else {
-	if (start < 0 || range == 0 || speed == 0) {
+	if (end < start || speed < 0.0f) {
+		boWarning(100) << k_funcinfo << "invalid values for animation " << mode << "! start=" << start << ",end=" << end << ",speed=" << speed << endl;
 		return;
 	}
  }
- BosonAnimation* anim = new BosonAnimation(start, range, speed);
+ BosonAnimation* anim = new BosonAnimation(start, end, speed, loop);
  d->mAnimations.insert(mode, anim);
 }
 
 void BosonModel::loadAnimationMode(int mode, KSimpleConfig* conf, const QString& name)
 {
- int start = -1;
- unsigned int range = 0;
- unsigned int speed = 0;
- // different default values for mode 0:
- if (mode == 0) {
-	start = 0;
-	range = 1;
-	speed = 1;
+ unsigned int start = 0;
+ unsigned int end = 0;
+ float speed = 1.0f;
+ bool loop = true;
+
+ // Base name of the keys of this animation
+ QString basekey = QString("Animation-%1-").arg(name);
+
+ // Check if animation with this name is in config file. There has to be at
+ //  least -Start key
+ if (!conf->hasKey(basekey + "Start")) {
+	return;
  }
- start = conf->readNumEntry(QString::fromLatin1("FrameStart") + name, start);
- range = conf->readUnsignedNumEntry(QString::fromLatin1("FrameRange") + name, range);
- speed = conf->readUnsignedNumEntry(QString::fromLatin1("FrameSpeed") + name, speed);
- insertAnimationMode(mode, start, range, speed);
+
+ start = conf->readUnsignedNumEntry(basekey + "Start", start);
+ end = conf->readUnsignedNumEntry(basekey + "End", end);
+ speed = (float)(conf->readDoubleNumEntry(basekey + "Speed", speed));
+ loop = conf->readBoolEntry(basekey + "Loop", loop);
+
+ insertAnimationMode(mode, start, end, speed, loop);
 }
 
 BosonAnimation* BosonModel::animation(int mode) const
 {
  return d->mAnimations[mode];
-}
-
-
-
-BoMesh* BosonModel::mesh(unsigned int index) const
-{
- return d->mMeshes[index];
-}
-
-unsigned int BosonModel::meshCount() const
-{
- return d->mMeshes.count();
-}
-
-QIntDict<BoMesh> BosonModel::allMeshes() const
-{
- QIntDict<BoMesh> meshes;
- for (unsigned int i = 0; i < meshCount(); i++) {
-	BoMesh* m = mesh(i);
-	if (!m) {
-		BO_NULL_ERROR(m);
-		continue;
-	}
-	meshes.insert(i, m);
- }
- return meshes;
-}
-
-BoFrame* BosonModel::frame(unsigned int index) const
-{
- if (index >= d->mFrames.count()) {
-	return 0;
- }
- return d->mFrames[index];
-}
-
-void BosonModel::computeBoundings(BoFrame* frame, BoHelper* helper) const
-{
- BO_CHECK_NULL_RET(frame);
- BO_CHECK_NULL_RET(helper);
-
- BoVector3Float v;
- for (unsigned int i = 0; i < frame->meshCount(); i++) {
-	const BoMesh* mesh = frame->mesh(i);
-	const BoMatrix* m = frame->matrix(i);
-	if (!mesh) {
-		boError() << k_funcinfo << "NULL mesh at " << i << endl;
-		continue;
-	}
-	if (!m) {
-		boError() << k_funcinfo << "NULL matrix at " << i << endl;
-		continue;
-	}
-	for (unsigned int j = 0; j < mesh->points(); j++) {
-		BoVector3Float vector(mesh->vertex(j));
-		m->transform(&v, &vector);
-		helper->addPoint(v);
-	}
-
- }
-}
-
-void BosonModel::applyMasterScale()
-{
- // note: all frame must share the same scaling factor. this means that the model mustn't grow in x or y direction (width or height). It can grow/shrink in z-direction however.
- float scale = 1.0f;
- boDebug(100) << k_funcinfo << scale << endl;
-
- if (frames() < 1) {
-	boWarning() << k_funcinfo << "no frames found!" << endl;
-	return;
- }
-
- for (unsigned int i = 0; i < frames(); i++) {
-	BoFrame* f = frame(i);
-
-	BoHelper helper;
-	computeBoundings(f, &helper);
-	if (i == 0) {
-		scale = helper.scale(mWidth, mHeight);
-	}
-
-	for (unsigned int j = 0; j < f->meshCount(); j++) {
-		BoMatrix* matrix = f->matrix(j);
-		BoMatrix m;
-		m.scale(scale,scale,scale);
-
-		// we render from bottom to top - but for x and y in the center!
-		// FIXME: this doesn't work 100% correctly - the quad e.g. is
-		// still partially (parts of the wheels) in the grass.
-		// FIXME:do we actually have to multiply mMinZ by scale? scale
-		// is already in m... AB: I do not change this as I am not
-		// totally sure and we dont have models that behave incorrectly
-		// atm
-		m.translate(0.0, 0.0, -helper.mMinZ * scale);
-
-		m.multiply(matrix);
-		matrix->loadMatrix(m);
-	}
-	f->setDepthMultiplier(helper.lengthZ() * scale);
- }
-}
-
-void BosonModel::computeBoundingObjects()
-{
- // we use bounding boxes everywhere at the moment.
- // most (culling-)algorithms can be implemented easier with boxes, but
- // sometimes (e.g. for the hp culling extension) the object must be as small as
- // possible - such as spheres for certain meshes. one day we may support that
- // (the hp extension is too slow for us, but maybe we have other uses one day).
-
- // compute a bounding box for all meshes first.
- for (unsigned int i = 0; i < meshCount(); i++) {
-	BoMesh* m = mesh(i);
-	m->computeBoundingObject();
- }
-
- // here we should compute a bounding object for the complete frame, which take
- // care of frame matrices.
- // we will need this object (box) for borender, for a grid.
- for (unsigned int i = 0; i < frames(); i++) {
-	BoFrame* f = frame(i);
-
- }
-}
-
-void BosonModel::generateLOD()
-{
- unsigned int lodCount = boConfig->intValue("DefaultLodCount");
- if (lodCount == 0) {
-	boWarning() << k_funcinfo << "LOD count of 0 is not allowed" << endl;
-	lodCount = 1;
- }
- if (lodCount > 5) {
-	// AB: this is a BoLODBuilder limitation.
-	// (not that as of 03/12/13 the same limitation is in choosing the
-	// LOD that is used, as the LODLevels array has 5 entries only)
-	boWarning() << k_funcinfo << "more than 5 LODs not supported" << endl;
-	lodCount = 5;
- }
-
- d->mLODCount = lodCount;
- for (unsigned int i = 0; i < meshCount(); i++) {
-	BoMesh* m = mesh(i);
-	if (!m) {
-		BO_NULL_ERROR(m);
-		continue;
-	}
-	m->generateLOD(lodCount, this);
- }
-}
-
-void BosonModel::mergeArrays()
-{
- if (d->mPoints) {
-	// this is dangerous!
-	// crash is probably close (broken indices)
-	boError() << k_funcinfo << "points already allocated" << endl;
-	return;
- }
- // count the points in the meshes first.
- unsigned int size = 0;
- for (unsigned int i = 0; i < meshCount(); i++) {
-	BoMesh* m = mesh(i);
-	if (!m) {
-		BO_NULL_ERROR(m);
-		continue;
-	}
-	size += m->points() * BoMesh::pointSize();
- }
-
- delete[] d->mPoints;
- d->mPoints = new float[size];
- d->mPointArraySize = size;
- int index = 0;
- for (unsigned int i = 0; i < meshCount(); i++) {
-	BoMesh* m = mesh(i);
-	if (!m) {
-		BO_NULL_ERROR(m);
-		continue;
-	}
-	unsigned int pointsMoved = m->movePoints(d->mPoints, index);
-	index += pointsMoved;
- }
-}
-
-void BosonModel::mergeMeshesInFrames()
-{
-#ifdef AB_TEST
-// boDebug() << k_funcinfo << file() << endl;
- for (unsigned int i = 0; i < frames(); i++) {
-	BoFrame* f = frame(i);
-	if (!f) {
-		BO_NULL_ERROR(i);
-		continue;
-	}
-	f->mergeMeshes();
- }
-#endif
-}
-
-void BosonModel::sortByDepth()
-{
- for (unsigned int i = 0; i < frames(); i++) {
-	BoFrame* f = frame(i);
-	if (!f) {
-		BO_NULL_ERROR(i);
-		continue;
-	}
-	f->sortByDepth();
- }
 }
 
 float* BosonModel::pointArray() const
@@ -1218,6 +631,22 @@ float* BosonModel::pointArray() const
 unsigned int BosonModel::pointArraySize() const
 {
  return d->mPointArraySize;
+}
+
+void BosonModel::allocatePointArray(unsigned int size)
+{
+ if (d->mPoints) {
+	boWarning() << k_funcinfo << "Point array already allocated!" << endl;
+	delete[] d->mPoints;
+ }
+ d->mPoints = new float[size * BoMesh::pointSize()];
+ d->mPointArraySize = size;
+
+ static int usedpoints = 0;
+
+ usedpoints += size;
+ boDebug() << k_funcinfo << usedpoints << " points are used now, taking " <<
+		(usedpoints * BoMesh::pointSize() * sizeof(float)) / 1024 << "kb" << endl;
 }
 
 void BosonModel::prepareRendering()
@@ -1234,31 +663,60 @@ void BosonModel::prepareRendering()
  }
 }
 
+void BosonModel::allocateLODs(unsigned int count)
+{
+ if (d->mLODs) {
+	boWarning() << k_funcinfo << "LODs already allocated!" << endl;
+	delete[] d->mLODs;
+	delete[] d->mLODDistances;
+ }
+
+ d->mLODs = new BoLOD[count];
+ d->mLODDistances = new float[count];
+ d->mLODCount = count;
+
+ // Calculate initial distances for lods
+ float dist = 0.0f;
+ for (unsigned int i = 0; i < count; i++) {
+	setLodDistance(i, dist);
+	// dists will be 0, 10, 25, 45, 70, ...
+	dist = dist + (10 * (0.5 + i * 0.5));
+ }
+}
+
 unsigned int BosonModel::lodCount() const
 {
  return d->mLODCount;
 }
 
+BoLOD* BosonModel::lod(unsigned int index) const
+{
+ return &d->mLODs[index];
+}
+
+float BosonModel::lodDistance(unsigned int index) const
+{
+ return d->mLODDistances[index];
+}
+
+void BosonModel::setLodDistance(unsigned int index, float distance) const
+{
+ d->mLODDistances[index] = distance;
+}
+
+
 unsigned int BosonModel::preferredLod(float dist) const
 {
- unsigned int lod = 0;
-
- // LOD distance levels
- // If distance between item and camera is less than LODLevels[x], lod level
- // x is used
- static const float LODLevels[] = { 7.0f, 12.0f, 20.0f, 30.0f, 1000.0f };
-
- while (lod < lodCount() - 1) {
-	if (dist > LODLevels[lod]) {
-		// Object is too far for this lod
-		lod++;
-	} else {
-		// Use this lod
-		break;
+ // For each lod, minimum distance of the model from the camera is stored
+ for (unsigned int lod = lodCount() - 1; lod > 0; lod--) {
+	if (dist >= lodDistance(lod)) {
+		// This is the correct lod
+		return lod;
 	}
  }
 
- return lod;
+ // None of the reduce-detail lods were fitting. Use the full-detail one
+ return 0;
 }
 
 void BosonModel::setMeshRendererModelData(BoMeshRendererModelData* data)
@@ -1285,35 +743,13 @@ void BosonModel::stopModelRendering()
  renderer->stopModelRendering();
 }
 
-BoVector3Float BosonModel::vertex(unsigned int i) const
+float BosonModel::boundingSphereRadius() const
 {
- BoVector3Float v;
- if (!pointArray()) {
-	return v;
- }
- if (i >= pointArraySize()) {
-	boError() << k_funcinfo << "invalid index " << i << " maximal " << pointArraySize() << " points available" << endl;
-	return v;
- }
- v.setX(d->mPoints[i * BoMesh::pointSize() + BoMesh::vertexPos() + 0]);
- v.setY(d->mPoints[i * BoMesh::pointSize() + BoMesh::vertexPos() + 1]);
- v.setZ(d->mPoints[i * BoMesh::pointSize() + BoMesh::vertexPos() + 2]);
- return v;
+ return d->mBoundingSphereRadius;
 }
 
-BoVector3Float BosonModel::texel(unsigned int i) const
+void BosonModel::setBoundingSphereRadius(float r)
 {
- BoVector3Float t;
- if (!pointArray()) {
-	return t;
- }
- if (i >= pointArraySize()) {
-	boError() << k_funcinfo << "invalid index " << i << " maximal " << pointArraySize() << " points available" << endl;
-	return t;
- }
- t.setX(d->mPoints[i * BoMesh::pointSize() + BoMesh::texelPos() + 0]);
- t.setY(d->mPoints[i * BoMesh::pointSize() + BoMesh::texelPos() + 1]);
- t.setZ(0.0f);
- return t;
+ d->mBoundingSphereRadius = r;
 }
 

@@ -44,6 +44,7 @@ void BoMeshRendererSemiImmediate::setModel(BosonModel* model)
  int stride = BoMesh::pointSize() * sizeof(float);
  float* points = model->pointArray();
  glVertexPointer(3, GL_FLOAT, stride, points + BoMesh::vertexPos());
+ glNormalPointer(GL_FLOAT, stride, points + BoMesh::normalPos());
  glTexCoordPointer(2, GL_FLOAT, stride, points + BoMesh::texelPos());
 }
 
@@ -55,6 +56,7 @@ void BoMeshRendererSemiImmediate::initFrame()
  glCullFace(GL_BACK);
 
  glEnableClientState(GL_VERTEX_ARRAY);
+ glEnableClientState(GL_NORMAL_ARRAY);
  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
  // AB: we enable the alpha test and discard any texture fragments which are
@@ -69,17 +71,13 @@ void BoMeshRendererSemiImmediate::deinitFrame()
  glPopAttrib();
 
  glDisableClientState(GL_VERTEX_ARRAY);
+ glDisableClientState(GL_NORMAL_ARRAY);
  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
-unsigned int BoMeshRendererSemiImmediate::render(const QColor* teamColor, BoMesh* mesh, BoMeshLOD* lod)
+unsigned int BoMeshRendererSemiImmediate::render(const QColor* teamColor, BoMesh* mesh)
 {
- unsigned int* pointsCache = lod->pointsCache();
- unsigned int pointsCacheCount = lod->pointsCacheCount();
- int type = lod->type();
- BoFaceNode* nodes = lod->nodes();
-
- if (!nodes || pointsCacheCount == 0) {
+ if (mesh->pointCount() == 0) {
 	// nothing to do.
 	return 0;
  }
@@ -119,39 +117,14 @@ unsigned int BoMeshRendererSemiImmediate::render(const QColor* teamColor, BoMesh
  }
 
  unsigned int renderedPoints = 0;
- {
-	if (!pointsCache || pointsCacheCount == 0) {
-		boError() << k_funcinfo << "no point cache!" << endl;
-	} else {
-		glBegin(type);
+ glBegin(mesh->renderMode());
 
-		BoFaceNode* node = nodes;
-		while (node) {
-			const BoFace* face = node->face();
-			const int* points = face->pointIndex();
-
-			// AB: this is only partially immediate mode!
-			glNormal3fv(face->normal(0).data());
-			glArrayElement(points[0]);
-			glNormal3fv(face->normal(1).data());
-			glArrayElement(points[1]);
-			glNormal3fv(face->normal(2).data());
-			glArrayElement(points[2]);
-
-			renderedPoints += 3;
-
-			node = node->next();
-		}
-
-		glEnd();
-
-		// reset the normal...
-		// (better solution: don't enable light when rendering
-		// selection rect!)
-		const float n[] = { 0.0f, 0.0f, 1.0f };
-		glNormal3fv(n);
-	}
+ for(unsigned int i = 0; i < mesh->pointCount(); i++) {
+	glArrayElement(mesh->pointOffset() + i);
+	renderedPoints++;
  }
+
+ glEnd();
 
 
  if (resetColor) {

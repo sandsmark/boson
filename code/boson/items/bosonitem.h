@@ -316,11 +316,6 @@ public:
 	unsigned int preferredLod(float dist) const;
 
 	/**
-	 * @return itemRenderer()->glDepthMultiplier()
-	 **/
-	float glDepthMultiplier() const;
-
-	/**
 	 * Tell the @ref itemRenderer to operate in editor mode, e.g. display
 	 * non-constructed facilities in constructed state
 	 **/

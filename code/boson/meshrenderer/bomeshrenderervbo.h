@@ -33,19 +33,13 @@ public:
 protected:
 	virtual void initFrame();
 	virtual void deinitFrame();
-	virtual unsigned int render(const QColor* teamColor, BoMesh* mesh, BoMeshLOD* lod);
+	virtual unsigned int render(const QColor* teamColor, BoMesh* mesh);
 
 	virtual BoMeshRendererModelData* createModelData() const;
-	virtual BoMeshRendererMeshData* createMeshData() const;
-	virtual BoMeshRendererMeshLODData* createMeshLODData() const;
 
 	virtual void initModelData(BosonModel* model);
-	virtual void initMeshData(BoMesh* mesh, unsigned int meshIndex);
-	virtual void initMeshLODData(BoMeshLOD* meshLOD, unsigned int meshIndex, unsigned int lod);
 
 	virtual void deinitModelData(BosonModel* model);
-	virtual void deinitMeshData(BoMesh* mesh);
-	virtual void deinitMeshLODData(BoMeshLOD* meshLOD);
 
 	bool useVBO() const;
 

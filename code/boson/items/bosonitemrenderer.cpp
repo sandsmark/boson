@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2004 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,15 +24,13 @@
 #include "bosonitem.h"
 #include "bodebug.h"
 
+
 BosonItemRenderer::BosonItemRenderer(BosonItem* item)
 {
  mItem = item;
 
- mGLDepthMultiplier = 1.0f;
- mShowGLConstructionSteps = true;
-
- // 1.732 == sqrt(3) i.e. lenght of vector whose all components are 1
- mBoundingSphereRadius = 1.732f; // TODO: can we extract this from the model? this probably needs to change with different frames!
+ // 0.866 == sqrt(3*0.5) i.e. lenght of vector whose all components are 0.5
+ mBoundingSphereRadius = 0.866f;
 }
 
 
@@ -64,11 +62,6 @@ void BosonItemRenderer::stopItemRendering()
 const QColor* BosonItemRenderer::teamColor() const
 {
  return mItem->teamColor();
-}
-
-void BosonItemRenderer::setGLDepthMultiplier(float d)
-{
- mGLDepthMultiplier = d;
 }
 
 void BosonItemRenderer::renderItem(unsigned int lod)
@@ -150,12 +143,8 @@ BosonItemModelRenderer::BosonItemModelRenderer(BosonItem* item)
 	: BosonItemRenderer(item)
 {
  mModel = 0;
-
- mCurrentFrame = 0;
  mCurrentAnimation = 0;
- mFrame = 0;
- mGLConstructionStep = 0;
- mAnimationCounter = 0;
+ mCurrentFrame = 0.0f;
 }
 
 BosonItemModelRenderer::~BosonItemModelRenderer()
@@ -170,84 +159,10 @@ bool BosonItemModelRenderer::setModel(BosonModel* model)
 	return false;
  }
 
+ setBoundingSphereRadius(model->boundingSphereRadius());
+
  setAnimationMode(UnitAnimationIdle);
-
- // FIXME the correct frame must be set after this constructor!
- if (mGLConstructionStep >= glConstructionSteps() && showGLConstructionSteps()) {
-	setCurrentFrame(mModel->frame(frame()));
- } else {
-	setCurrentFrame(mModel->constructionStep(mGLConstructionStep));
- }
  return true;
-}
-
-void BosonItemModelRenderer::setGLConstructionStep(unsigned int s)
-{
- BO_CHECK_NULL_RET(model());
- // note: in case of s >= model()->constructionSteps() we use the last
- // constructionStep that is defined in the model until an actual frame is set.
- BoFrame* f = model()->constructionStep(s);
- if (!f) {
-	boWarning() << k_funcinfo << "NULL construction step " << s << endl;
-	return;
- }
- mGLConstructionStep = s;
- if (showGLConstructionSteps()) {
-	setCurrentFrame(f);
- }
-}
-
-unsigned int BosonItemModelRenderer::glConstructionSteps() const
-{
- BO_CHECK_NULL_RET0(model());
- return model()->constructionSteps();
-}
-
-void BosonItemModelRenderer::setFrame(int _frame)
-{
- BO_CHECK_NULL_RET(model());
- if (mGLConstructionStep < glConstructionSteps() && showGLConstructionSteps()) {
-	// this unit (?) has not yet been constructed
-	// completely.
-	// Note that mGLConstructionStep is totally different
-	// from Unit::constructionStep() !
-	_frame = frame();
- }
-
- // FIXME: this if is pretty much nonsense, since e.g. frame()
- // might be 0 and _frame, too - but the frame still changed,
- // since we had a construction list before!
- // we mustn't change the frame when moving and so on. these are
- // old QCanvas compatible functions. need to be fixed.
- if (_frame != frame()) {
-		BoFrame* f = model()->frame(_frame);
-		if (f) {
-			setCurrentFrame(f);
-			mFrame = _frame;
-		} else {
-			boWarning() << k_funcinfo << "invalid frame " << _frame << endl;
-		}
-	}
-}
-
-unsigned int BosonItemModelRenderer::frameCount() const
-{
- return model() ? model()->frames() : 0;
-}
-
-void BosonItemModelRenderer::setCurrentFrame(BoFrame* frame)
-{
- if (!frame) {
-	boError() << k_funcinfo << "NULL frame" << endl;
-	return;
- }
- mCurrentFrame = frame;
-
- // the following values cache values from BoFrame, so that we can use them in
- // inline functions (or with direct access). otherwise we'd have to #include
- // bosonmodel.h in bosonitem.h (-> bad)
-
- setGLDepthMultiplier(frame->depthMultiplier());
 }
 
 void BosonItemModelRenderer::setAnimationMode(int mode)
@@ -256,9 +171,6 @@ void BosonItemModelRenderer::setAnimationMode(int mode)
  if (!model()) {
 	boError() << k_funcinfo << "in item id=" << item()->id() << " rtti=" << item()->rtti() << endl;
 	BO_NULL_ERROR(model());
-	return;
- }
- if (mGLConstructionStep < glConstructionSteps()) {
 	return;
  }
  BosonAnimation* anim = model()->animation(mode);
@@ -273,31 +185,33 @@ void BosonItemModelRenderer::setAnimationMode(int mode)
 	}
  }
  mCurrentAnimation = anim;
- setFrame(mCurrentAnimation->start());
+ mCurrentFrame = mCurrentAnimation->start();
 }
 
 void BosonItemModelRenderer::animate()
 {
- if (!mCurrentAnimation || !mCurrentAnimation->speed()) {
+ if (!mCurrentAnimation) {
 	return;
  }
- mAnimationCounter++;
- if (mAnimationCounter >= mCurrentAnimation->speed()) {
-	unsigned int f = frame() + 1;
-	if (f >= mCurrentAnimation->start() + mCurrentAnimation->range()) {
-		f = mCurrentAnimation->start();
+ if (mCurrentAnimation->speed() == 0) {
+	return;
+ }
+
+ mCurrentFrame += mCurrentAnimation->speed();
+ if (mCurrentFrame > mCurrentAnimation->end()) {
+	if (mCurrentAnimation->loop()) {
+		mCurrentFrame -= mCurrentAnimation->range();
+	} else {
+		mCurrentFrame = mCurrentAnimation->end();
 	}
-	setFrame(f);
-	mAnimationCounter = 0;
  }
 }
 
 void BosonItemModelRenderer::renderItem(unsigned int lod)
 {
  BO_CHECK_NULL_RET(mModel);
- BO_CHECK_NULL_RET(mCurrentFrame);
  mModel->prepareRendering();
- mCurrentFrame->renderFrame(teamColor(), lod);
+ mModel->lod(lod)->frame((unsigned int)mCurrentFrame)->renderFrame(teamColor());
 }
 
 unsigned int BosonItemModelRenderer::lodCount() const
@@ -314,21 +228,5 @@ unsigned int BosonItemModelRenderer::preferredLod(float dist) const
 	return 0;
  }
  return mModel->preferredLod(dist);
-}
-
-void BosonItemModelRenderer::setShowGLConstructionSteps(bool s)
-{
- BO_CHECK_NULL_RET(item());
- if (!model()) {
-	boError() << k_funcinfo << "in item id=" << item()->id() << " rtti=" << item()->rtti() << endl;
-	BO_NULL_ERROR(model());
-	return;
- }
- BosonItemRenderer::setShowGLConstructionSteps(s);
- if (showGLConstructionSteps()) {
-	setGLConstructionStep(mGLConstructionStep);
- } else {
-	setCurrentFrame(mModel->frame(frame()));
- }
 }
 
