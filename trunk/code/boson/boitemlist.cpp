@@ -184,9 +184,9 @@ void BoItemList::isOccupied(Unit* forUnit, bool& hasmoving, bool& hasany) const
  }
 }
 
-#ifdef PATHFINDER_TNG
 void BoItemList::recalculateLandOccupiedStatus()
 {
+#ifdef PATHFINDER_TNG
  mLandOccupied = false;
 
  for (ConstIterator it = begin(); it != end(); ++it) {
@@ -202,10 +202,12 @@ void BoItemList::recalculateLandOccupiedStatus()
 		return;
 	}
  }
+#endif // PATHFINDER_TNG
 }
 
 void BoItemList::recalculateAirOccupiedStatus()
 {
+#ifdef PATHFINDER_TNG
  mAirOccupied = false;
 
  for (ConstIterator it = begin(); it != end(); ++it) {
@@ -221,6 +223,7 @@ void BoItemList::recalculateAirOccupiedStatus()
 		return;
 	}
  }
+#endif // PATHFINDER_TNG
 }
 
 float BoItemList::passageCost() const
@@ -234,6 +237,7 @@ float BoItemList::passageCost() const
  //  of just  WAITING_COST.
  //  Maybe use maximum of costs of all units on this cell, not sum of them?
  float cost = 0.0f;
+#ifdef PATHFINDER_TNG
  for (ConstIterator it = begin(); it != end(); ++it) {
 	if (RTTI::isUnit((*it)->rtti())) {
 		Unit* u = (Unit*)*it;
@@ -258,9 +262,7 @@ float BoItemList::passageCost() const
 		}
 	}
  }
+#endif // PATHFINDER_TNG
  return cost;
 }
-// No (dummy) implementation for old pathfinder, but they're only used by new
-//  one anyway, so it should be ok
-#endif
 

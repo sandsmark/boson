@@ -146,11 +146,11 @@ class BosonPath
 
 
 
-#ifdef PATHFINDER_TNG
 /***********************************************************
 *****           N E W   P A T H F I N D E R
 ***********************************************************/
 
+// AB: i am sure we can avoid lots of these
 #include <qptrvector.h>
 #include <qvaluevector.h>
 #include <qptrlist.h>
@@ -190,6 +190,7 @@ class BosonBigDisplayBase;
 class BosonCanvas;
 
 
+
 /**
  * @short Next-generation pathfinder for Boson
  *
@@ -216,6 +217,7 @@ class BosonPath2
      * Construct pathfinder, using given map
      **/
     BosonPath2(BosonMap* map);
+    ~BosonPath2();
 
 
     /**
@@ -354,7 +356,6 @@ class BosonPath2
     QPtrList<BosonPathHighLevelPath> mHLPathCache;
     bool* mRegionIdUsed;
     QPtrVector<BosonPathRegion> mRegions;
-    QPtrList<BosonPathRegionGroup> mRegionGroups;
     BosonBigDisplayBase* mDisplay;
     BosonCanvas* mCanvas;
 };
@@ -620,7 +621,6 @@ class BosonPathHighLevelNode
     float h;
 };
 
-#endif // PATHFINDER_TNG
 
 
 #endif // BOSONPATH_H
