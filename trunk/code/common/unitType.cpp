@@ -19,10 +19,10 @@
  ***************************************************************************/
 
 #include "unitType.h"
+#include "map.h"
 
 /*
 	char 	*name;		// The name of the funny thing...
-	uint	orders;		// which orders it's able to understand
 	int	width;		// pixel-size
 	int	height;		// pixel-size
 	int	visibility;	// how far it can see
@@ -33,32 +33,34 @@
 */
 
 mobileProperties_t mobileProp[] = {
-	{"ship",	0, 96, 96,  2, 100,	3, BO_GO_SEA},		// MOB_SHIP
-	{"quad",	0, 32, 32,  3, 70,	4, BO_GO_EARTH},	// MOB_QUAD
-	{"aircraft",	0, 72, 72,  3, 100,	6, BO_GO_AIR},		// MOB_AIRCRAFT
+	{"ship",	96, 96,  2, 100,	3, BO_GO_SEA},		// MOB_SHIP
+	{"quad",	32, 32,  3, 70,		4, BO_GO_EARTH},	// MOB_QUAD
+	{"aircraft",	72, 72,  3, 100,	6, BO_GO_AIR},		// MOB_AIRCRAFT
 	};
 
 /*
 	char 	*name;		// Guess it, geek..
-	uint	orders;		// which orders it's able to understand
 	int	width;		// tile-size
 	int	height;		// tile-size
 	int	visibility;	// how far it can see
 	int	range;		// how far it can send weapons
 */
+	
+#define EX(s) (s*BO_TILE_SIZE)
 facilityProperties_t facilityProp[] = {
-	{"comsat"	, 0, 2, 2, 7, 0},			// FACILITY_COMSAT
-	{"helipad"	, 0, 2, 2, 6, 0},			// FACILITY_HELIPAD
-	{"powerplant"	, 0, 2, 2, 3, 0},			// FACILITY_POWERPLANT
-	{"warfactory"	, 0, 2, 2, 3, 0}, 			// FACILITY_WAR_FACTORY
-	{"barracks"	, 0, 2, 2, 3, 0}, 			// FACILITY_BARRACKS
-	{"cmdbunker"	, 0, 3, 3, 3, 0}, 			// FACILITY_CMDBUNKER
-	{"samsite"	, 0, 1, 1, 4, 0}, 			// FACILITY_SAMSITE
-	{"oiltower"	, 0, 1, 1, 2, 0}, 			// FACILITY_OILTOWER
-	{"refinery"	, 0, 2, 2, 3, 0},			// FACILITY_REFINERY
-	{"repairpad"	, 0, 2, 2, 4, 0},			// FACILITY_REPAIRPAD
-	{"turret"	, 0, 1, 1, 5, 90},			// FACILITY_TURRET
+	{"comsat"	, EX(2), EX(2), 7, 0},			// FACILITY_COMSAT
+	{"helipad"	, EX(2), EX(2), 6, 0},			// FACILITY_HELIPAD
+	{"powerplant"	, EX(2), EX(2), 3, 0},			// FACILITY_POWERPLANT
+	{"warfactory"	, EX(2), EX(2), 3, 0}, 			// FACILITY_WAR_FACTORY
+	{"barracks"	, EX(2), EX(2), 3, 0}, 			// FACILITY_BARRACKS
+	{"cmdbunker"	, EX(3), EX(3), 3, 0}, 			// FACILITY_CMDBUNKER
+	{"samsite"	, EX(1), EX(1), 4, 0}, 			// FACILITY_SAMSITE
+	{"oiltower"	, EX(1), EX(1), 2, 0}, 			// FACILITY_OILTOWER
+	{"refinery"	, EX(2), EX(2), 3, 0},			// FACILITY_REFINERY
+	{"repairpad"	, EX(2), EX(2), 4, 0},			// FACILITY_REPAIRPAD
+	{"turret"	, EX(1), EX(1), 5, 90},			// FACILITY_TURRET
 	};
+#undef EX
 
 const int facilityPropNb = (sizeof(facilityProp)/sizeof(facilityProp [0]));
 const int mobilePropNb = (sizeof(mobileProp)/sizeof(mobileProp [0]));

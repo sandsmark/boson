@@ -25,7 +25,7 @@
 
 #include "../common/unitType.h"
 #include "../common/msgData.h"
-#include "../common/map.h"
+//#include "../common/map.h"
 
 
 enum workType {
@@ -104,8 +104,8 @@ class Facility : public Unit
 
   facilityType	getType(void) {return type;}
 
-  virtual	int	getWidth(void) { return facilityProp[type].width * BO_TILE_SIZE;}
-  virtual	int	getHeight(void) { return facilityProp[type].height * BO_TILE_SIZE;}
+  virtual	int	getWidth(void) { return facilityProp[type].width;}
+  virtual	int	getHeight(void) { return facilityProp[type].height;}
   virtual	uint	getVisibility(void) {return facilityProp[type].visibility; }
   		QRect	rect(void);
 
