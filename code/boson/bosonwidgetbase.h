@@ -198,9 +198,6 @@ protected slots:
 
 	void slotPlayerPropertyChanged(KGamePropertyBase*, KPlayer*);
 
-	void slotNotEnoughMinerals(Player*);
-	void slotNotEnoughOil(Player*);
-
 	virtual void slotChangeCursor(int mode, const QString& dir) = 0;
 
 	void slotAddUnit(Unit* unit, int x, int y);
@@ -215,9 +212,14 @@ protected slots:
 
 	void slotDebugRequestIdName(int msgid, bool userid, QString& name);
 
+	/**
+	 * Directly add a chat message from the system (i.e. the game)
+	 * <em>without</em> sending it over network.
+	 **/
+	void slotAddChatSystemMessage(const QString& fromName, const QString& text);
+
 protected:
 	void checkDockStatus();
-	void addChatSystemMessage(const QString& fromName, const QString& text);
 	
 	void initBigDisplay(BosonBigDisplayBase*);
 

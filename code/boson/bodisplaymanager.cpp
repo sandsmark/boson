@@ -393,7 +393,7 @@ void BoDisplayManager::slotUpdateIntervalChanged(unsigned int ms)
  while (it.current()) {
 	it.current()->setUpdateInterval(ms);
 	++it;
- }	
+ }
 }
 
 void BoDisplayManager::slotCenterHomeBase()
@@ -478,5 +478,14 @@ void BoDisplayManager::slotPlaceCell(int tile)
 	return;
  }
  activeDisplay()->placeCell(tile);
+}
+
+void BoDisplayManager::addChatMessage(const QString& text)
+{
+ QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
+ while (it.current()) {
+	it.current()->addChatMessage(text);
+	++it;
+ }
 }
 

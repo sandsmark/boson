@@ -160,6 +160,22 @@ public slots:
 	 **/
 	void slotUpdateProductionOptions();
 
+	/**
+	 * Add a system message for the local player only. Note that this does
+	 * <em>not</em> send a chat message over network. It is displayed on
+	 * this client only.
+	 *
+	 * You can find this method in this class, because it is accessible from
+	 * mostly everywhere, where it might be needed
+	 **/
+	void slotAddChatSystemMessage(const QString& fromName, const QString& text);
+
+	/**
+	 * Convinence method for the above slot. Simply uses "Boson" as
+	 * fromName.
+	 **/
+	void slotAddChatSystemMessage(const QString& text);
+
 signals:
 	/**
 	 * Emitted once the game admin starts the game, i.e. clicks on "start
@@ -237,10 +253,9 @@ signals:
 	 **/
 	void signalUpdateProductionOptions();
 
-	void signalNotEnoughMinerals(Player* p);
-	void signalNotEnoughOil(Player* p);
-
 	void signalChangeCell(int x, int y, int groundType, unsigned char );
+
+	void signalAddChatSystemMessage(const QString& fromName, const QString& text);
 
 protected:
 	virtual bool playerInput(QDataStream& stream, KPlayer* player);

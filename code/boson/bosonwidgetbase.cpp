@@ -211,6 +211,9 @@ void BosonWidgetBase::initConnections()
 
  connect(game(), SIGNAL(signalGameStarted()),
 		this, SIGNAL(signalGameStarted()));
+
+ connect(game(), SIGNAL(signalAddChatSystemMessage(const QString&,const QString&)),
+		this, SLOT(slotAddChatSystemMessage(const QString&,const QString&)));
 }
 
 void BosonWidgetBase::initDisplayManager()
@@ -487,30 +490,13 @@ void BosonWidgetBase::slotToggleMusic()
  boConfig->setMusic(boMusic->music());
 }
 
-void BosonWidgetBase::slotNotEnoughMinerals(Player* p)
+void BosonWidgetBase::slotAddChatSystemMessage(const QString& fromName, const QString& text)
 {
- if (p != localPlayer()) {
-	return;
- }
- addChatSystemMessage(i18n("Boson"), i18n("You have not enough minerals!"));
-}
-
-void BosonWidgetBase::slotNotEnoughOil(Player* p)
-{
- if (p != localPlayer()) {
-	return;
- }
- addChatSystemMessage(i18n("Boson"), i18n("You have not enough oil!"));
-}
-
-void BosonWidgetBase::addChatSystemMessage(const QString& fromName, const QString& text)
-{
+ // add a chat system-message *without* sending it over network (makes no sense
+ // for system messages)
  d->mChat->addSystemMessage(fromName, text);
 
- // FIXME: only to the current display or to all displays ??
- if (displayManager()->activeDisplay()) {
-	displayManager()->activeDisplay()->addChatMessage(i18n("--- %1: %2").arg(fromName).arg(text));
- }
+ displayManager()->addChatMessage(i18n("--- %1: %2").arg(fromName).arg(text));
 }
 
 void BosonWidgetBase::slotSetCommandButtonsPerRow(int b)
@@ -537,6 +523,7 @@ void BosonWidgetBase::slotUnfogAll(Player* pl)
 			p->unfog(x, y);
 		}
 	}
+	game()->slotAddChatSystemMessage(i18n("Debug"), i18n("Unfogged player %1 - %2").arg(p->id()).arg(p->name()));
  }
 }
 
@@ -605,6 +592,7 @@ void BosonWidgetBase::slotSetActiveDisplay(BosonBigDisplayBase* active, BosonBig
 void BosonWidgetBase::debugKillPlayer(KPlayer* p)
 {
  canvas()->killPlayer((Player*)p);
+ game()->slotAddChatSystemMessage(i18n("Debug"), i18n("Killed player %1 - %2").arg(p->id()).arg(p->name()));
 }
 
 void BosonWidgetBase::slotCmdBackgroundChanged(const QString& file)

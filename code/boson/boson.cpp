@@ -554,11 +554,16 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			}
 
 		if (p->minerals() < mineralCost) {
-			emit signalNotEnoughMinerals(p);
+			if (p == localPlayer()) {
+				slotAddChatSystemMessage(i18n("You have not enough minerals!"));
+
+			}
 			break;
 		}
 		if (p->oil() < oilCost) {
-			emit signalNotEnoughOil(p);
+			if (p == localPlayer()) {
+				slotAddChatSystemMessage(i18n("You have not enough oil!"));
+			}
 			break;
 		}
 		p->setMinerals(p->minerals() - mineralCost);
@@ -1284,6 +1289,7 @@ void Boson::slotPlayerJoinedGame(KPlayer* p)
 	// note the IO is added on only *one* client!
 	d->mComputerIOList.append((KGameComputerIO*)io);
  }
+ slotAddChatSystemMessage(i18n("Player %1 - %2 joined").arg(p->id()).arg(p->name()));
 }
 
 void Boson::slotPlayerLeftGame(KPlayer* p)
@@ -1295,6 +1301,7 @@ void Boson::slotPlayerLeftGame(KPlayer* p)
  if (io) {
 	d->mComputerIOList.removeRef((KGameComputerIO*)io);
  }
+ slotAddChatSystemMessage(i18n("Player %1 - %2 left the game").arg(p->id()).arg(p->name()));
 }
 
 void Boson::slotAdvanceComputerPlayers(unsigned int /*advanceCount*/, bool /*advanceFlag*/)
@@ -1566,3 +1573,15 @@ void Boson::slotUpdateProductionOptions()
 {
  emit signalUpdateProductionOptions();
 }
+
+void Boson::slotAddChatSystemMessage(const QString& fromName, const QString& text)
+{
+ // just forward it to BosonWidgetBase
+ emit signalAddChatSystemMessage(fromName, text);
+}
+
+void Boson::slotAddChatSystemMessage(const QString& text)
+{
+ slotAddChatSystemMessage(i18n("Boson"), text);
+}
+
