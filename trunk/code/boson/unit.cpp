@@ -1636,17 +1636,18 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCount) // this actually
 
  // We move through the pathpoints, until we've passed dist distance
  while (dist > 0) {
-	// Make sure we have more pathpoints left
-	if (pathPointCount() == 0) {
-		// Pathpoints' count can _not_ be 0, there is always special point at the end
-		boError(401) << k_funcinfo << "unit " << id() << ": No pathpoints!!!" << endl;
-		return;
-	}
-
 	// Take next pathpoint
 	if (checkPathPoint(currentPathPoint())) {
 		break;
 	}
+	// Check if we have any pathpoints left
+	if (pathPointCount() == 0) {
+		// Probably end of the path was reached.
+		// Last pathpoint had to be PF_END_CODE; PF_END_CODE, so checkPathPoint()
+		//  already stopped movement, so we can just return here
+		return;
+	}
+
 	pp = currentPathPoint();
 	boDebug(401) << k_funcinfo << "unit " << id() << ": Current pp: (" << pp.x() << "; "<< pp.y() << ")" << endl;
 

@@ -864,6 +864,7 @@ void BombingPlugin::advance(unsigned int)
 		unit()->setWork(Unit::WorkNone);
 	} else {
 		unit()->pathInfo()->slowDownAtDest = false;
+		unit()->addWaypoint(QPoint(mPosX, mPosY));
 		unit()->setAdvanceWork(Unit::WorkMove);
 	}
 	return;
