@@ -153,6 +153,16 @@ public:
 	}
 
 	/**
+	 * @return The content of the binary tex map file. This is
+	 * <em>not</em> an image! This file specifies which corner of a cell will
+	 * have how much percent of which texture.
+	 **/
+	QByteArray texMapData() const
+	{
+		return fileData(QString::fromLatin1("texmap"));
+	}
+
+	/**
 	 * @return The content of the scenario.xml file
 	 **/
 	QByteArray scenarioData() const
