@@ -140,6 +140,7 @@ static bool lineSegmentIntersects(const float* plane, const BoVector3& start, co
 
 void BoGroundRendererBase::calculateWorldRect(const QRect& rect, int mapWidth, int mapHeight, float* minX, float* minY, float* maxX, float* maxY)
 {
+ BO_CHECK_NULL_RET(viewFrustum());
  GLfloat posX, posY;
  GLfloat posZ;
 

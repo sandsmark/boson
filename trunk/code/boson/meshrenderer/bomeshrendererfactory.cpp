@@ -49,9 +49,9 @@ QObject* BoMeshRendererFactory::createObject(QObject* parent, const char* name,
  Q_UNUSED(args);
  Q_UNUSED(parent);
  QObject* o = 0;
- if (qstrcmp(className, "BoMeshRendererInformation") == 0) {
+ if (qstrcmp(className, "BoPluginInformation") == 0) {
 	// note: the _libbomeshrendererplugin is NOT part of the string
-	o = new BoMeshRendererInformation_libbomeshrendererplugin;
+	o = new BoPluginInformation_libbomeshrendererplugin;
  } else if (qstrcmp(className, "BoMeshRendererSemiImmediate") == 0) {
 	o = new BoMeshRendererSemiImmediate;
  } else if (qstrcmp(className, "BoMeshRendererImmediate") == 0) {
@@ -70,7 +70,7 @@ QObject* BoMeshRendererFactory::createObject(QObject* parent, const char* name,
 }
 
 
-QStringList BoMeshRendererInformation_libbomeshrendererplugin::meshRenderers() const
+QStringList BoPluginInformation_libbomeshrendererplugin::plugins() const
 {
  QStringList list;
  list.append("BoMeshRendererVBO");

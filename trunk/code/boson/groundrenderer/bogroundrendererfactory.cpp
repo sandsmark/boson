@@ -46,9 +46,9 @@ QObject* BoGroundRendererFactory::createObject(QObject* parent, const char* name
  Q_UNUSED(args);
  Q_UNUSED(parent);
  QObject* o = 0;
- if (qstrcmp(className, "BoGroundRendererInformation") == 0) {
+ if (qstrcmp(className, "BoPluginInformation") == 0) {
 	// note: the _libbomeshrendererplugin is NOT part of the string
-	o = new BoGroundRendererInformation_libbogroundrendererplugin;
+	o = new BoPluginInformation_libbogroundrendererplugin;
  } else if (qstrcmp(className, "BoDefaultGroundRenderer") == 0) {
 	o = new BoDefaultGroundRenderer;
  } else if (qstrcmp(className, "BoFastGroundRenderer") == 0) {
@@ -63,7 +63,7 @@ QObject* BoGroundRendererFactory::createObject(QObject* parent, const char* name
 }
 
 
-QStringList BoGroundRendererInformation_libbogroundrendererplugin::groundRenderers() const
+QStringList BoPluginInformation_libbogroundrendererplugin::plugins() const
 {
  QStringList list;
  list.append("BoFastGroundRenderer");

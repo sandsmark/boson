@@ -21,6 +21,7 @@
 
 #include <klibloader.h>
 #include "../bomeshrenderer.h"
+#include "../bopluginmanager.h"
 
 // AB: we should move this macro to a more generic place when we start to use
 // several kinds of plugins (atm this is the only dynamically loaded plugin
@@ -63,18 +64,18 @@ private:
 	static KInstance* mInstance;
 };
 
-class BoMeshRendererInformation_libbomeshrendererplugin : public BoMeshRendererInformation
+class BoPluginInformation_libbomeshrendererplugin : public BoPluginInformation
 {
 	Q_OBJECT
 public:
-	BoMeshRendererInformation_libbomeshrendererplugin() : BoMeshRendererInformation()
+	BoPluginInformation_libbomeshrendererplugin() : BoPluginInformation()
 	{
 	}
-	~BoMeshRendererInformation_libbomeshrendererplugin()
+	~BoPluginInformation_libbomeshrendererplugin()
 	{
 	}
 
-	virtual QStringList meshRenderers() const;
+	virtual QStringList plugins() const;
 
 };
 
