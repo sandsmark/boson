@@ -193,6 +193,9 @@ void KGameUnitDebug::slotUpdate()
  if (!d->mBoson) {
 	return;
  }
+ if (!d->mBoson->canvas()) {
+	return;
+ }
 
  QPtrList<Unit> units;
  BoItemList::ConstIterator itemIt = boGame->canvas()->allItems()->begin();
