@@ -41,7 +41,8 @@ public:
 		building_f = 	0x02,
 		field_unit_f =	0x04,
 		flying_unit_f =	0x08,
-		request_f =	0x10
+		request_f =	0x10,
+		request_flying_f =	0x20
 	} flags;
 
 	void	setFlag(cell_flags f) { flags = (cell_flags) (flags|f); } //  { flags |= f;} gives warning ??
