@@ -295,7 +295,7 @@ protected:
 	float sphereInFrustum(float x, float y, float z, float radius) const;
 
 	void setCamera(const Camera& c);
-	Camera* camera();
+	Camera* camera() const;
 	GLfloat centerX() const;
 	GLfloat centerY() const;
 	GLfloat cameraZ() const;

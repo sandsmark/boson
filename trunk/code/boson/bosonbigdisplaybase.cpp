@@ -86,11 +86,15 @@ class Camera
 public:
 	Camera()
 	{
-		mCenterX = 0.0;
-		mCenterY = 0.0;
-		mPosZ = 10.0;
-		mRot = 0.0;
-		mRadius = 0.0;
+		init();
+	}
+	// AB: IMHO its a bad idea to place the map width/height into camera
+	// code
+	Camera(GLfloat mapWidth, GLfloat mapHeight)
+	{
+		init();
+		mMapWidth = mapWidth;
+		mMapHeight = mapHeight;
 	}
 	Camera(const Camera& c)
 	{
@@ -101,11 +105,21 @@ public:
 		mCenterX = c.mCenterX;
 		mCenterY = c.mCenterY;
 		mPosZ = c.mPosZ;
-		mRot = c.mRot;
+		mRotation = c.mRotation;
 		mRadius = c.mRadius;
 		mMapWidth = c.mMapWidth;
 		mMapHeight = c.mMapHeight;
 		return *this;
+	}
+	void init()
+	{
+		mCenterX = 0.0;
+		mCenterY = 0.0;
+		mPosZ = 10.0;
+		mRotation = 0.0;
+		mRadius = 0.0;
+		mMapWidth = 0.0;
+		mMapHeight = 0.0;
 	}
 
 	void setPos(GLfloat x, GLfloat y, GLfloat z)
@@ -118,9 +132,9 @@ public:
 	void changeZ(GLfloat diff)
 	{
 		float newz = mPosZ + diff;
-		if(newz < CAMERA_MIN_Z) {
+		if (newz < CAMERA_MIN_Z) {
 			newz = CAMERA_MIN_Z;
-		} else if(newz > CAMERA_MAX_Z) {
+		} else if (newz > CAMERA_MAX_Z) {
 			newz = CAMERA_MAX_Z;
 		}
 		float factor = newz / mPosZ;
@@ -130,22 +144,22 @@ public:
 	void changeRadius(GLfloat diff)
 	{
 		float radius = mRadius + mPosZ / CAMERA_MAX_RADIUS * diff;  // How much radius is changed depends on z position
-		if(radius < 0) {
-			radius = 0;
-		} else if(radius > mPosZ) {
+		if (radius < 0.0) {
+			radius = 0.0;
+		} else if (radius > mPosZ) {
 			radius = mPosZ;
 		}
 		mRadius = radius;
 	}
 	void changeRotation(GLfloat diff)
 	{
-		float rot = mRot + diff;
-		if(rot < 0) {
-			rot += 360;
-		} else if(rot > 360) {
-			rot -= 360;
+		float rotation = mRotation + diff;
+		if (rotation < 0.0) {
+			rotation += 360.0;
+		} else if (rotation > 360.0) {
+			rotation -= 360.0;
 		}
-		mRot = rot;
+		mRotation = rotation;
 	}
 	void moveBy(GLfloat x, GLfloat y)
 	{
@@ -164,38 +178,44 @@ public:
 		mMapWidth = w;
 		mMapHeight = h;
 	}
-	void checkPosition()
-	{
-		if(mCenterX < 0) {
-			mCenterX = 0;
-		} else if(mCenterX > mMapWidth) {
-			mCenterX = mMapWidth;
-		}
-		if(mCenterY > 0) {
-			mCenterY = 0;
-		} else if(mCenterY < -mMapHeight) {
-			mCenterY = -mMapHeight;
-		}
-	}
 	void setX(GLfloat x) { setPos(x, mCenterY, mPosZ); }
 	void setY(GLfloat y) { setPos(mCenterX, y, mPosZ); }
 	void setZ(GLfloat z) { setPos(mCenterX, mCenterY, z); }
-	void setRotation(GLfloat r) { mRot = r; }
+	void setRotation(GLfloat r) { mRotation = r; }
 	void setRadius(GLfloat r) { mRadius = r; }
 	GLfloat x() const { return mCenterX; }
 	GLfloat y() const { return mCenterY; }
 	GLfloat z() const { return mPosZ; }
-	GLfloat rotation() const { return mRot; }
+	GLfloat rotation() const { return mRotation; }
 	GLfloat radius() const { return mRadius; }
+
+protected:
+	void checkPosition()
+	{
+		if (!mMapWidth || !mMapHeight) {
+			return;
+		}
+		if (mCenterX < 0.0) {
+			mCenterX = 0.0;
+		} else if (mCenterX > mMapWidth) {
+			mCenterX = mMapWidth;
+		}
+		if (mCenterY > 0.0) {
+			mCenterY = 0.0;
+		} else if (mCenterY < -mMapHeight) {
+			mCenterY = -mMapHeight;
+		}
+	}
 
 private:
 	GLfloat mCenterX;
 	GLfloat mCenterY;
 	GLfloat mPosZ;
 
-	GLfloat mRot;
+	GLfloat mRotation;
 	GLfloat mRadius;
 
+	// AB: why float?
 	GLfloat mMapWidth;
 	GLfloat mMapHeight;
 };
@@ -431,7 +451,6 @@ void BosonBigDisplayBase::init()
  mSelection = new BoSelection(this);
  d->mChat = new BosonGLChat(this);
 
- slotResetViewProperties();
  for (int i = 0; i < 4; i++) {
 	d->mViewport[i] = 0;
  }
@@ -444,6 +463,7 @@ void BosonBigDisplayBase::init()
 		d->mFrustumMatrix[i][j] = 0.0;
 	}
  }
+ slotResetViewProperties();
 
  if (!isValid()) {
 	boError() << k_funcinfo << "No OpenGL support present on this system??" << endl;
@@ -1246,8 +1266,7 @@ void BosonBigDisplayBase::slotResetViewProperties()
 {
  d->mFovY = 60.0;
  d->mAspect = 1.0;
- setCamera(Camera());
- camera()->setMapSize(mCanvas->mapWidth(), mCanvas->mapHeight());
+ setCamera(Camera(mCanvas->mapWidth(), mCanvas->mapHeight()));
  resizeGL(d->mViewport[2], d->mViewport[3]);
 // a1 = 0;
 // a2 = 0;
@@ -1712,9 +1731,9 @@ void BosonBigDisplayBase::cameraChanged()
  emit signalChangeViewport(cellTL, cellTR, cellBL, cellBR);
 }
 
-Camera* BosonBigDisplayBase::camera()
+Camera* BosonBigDisplayBase::camera() const
 {
- return &(d->mCamera);
+ return &d->mCamera;
 }
 
 GLfloat BosonBigDisplayBase::centerX() const
