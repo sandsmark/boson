@@ -219,6 +219,7 @@ bool SpeciesTheme::loadTechnologies()
 		d->mTechnologies.insert(tech->id(), tech);
 	} else {
 		boError() << k_funcinfo << "Technology with id " << tech->id() << " already there!" << endl;
+		delete tech;
 	}
  }
  return true;
