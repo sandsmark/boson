@@ -71,18 +71,34 @@ QValueList<Unit*> BoItemList::units(bool collidingOnly, bool includeMoving, Unit
 
 bool BoItemList::isOccupied(Unit* forUnit, bool includeMoving) const
 {
- // Note that we can make performance improvements here!
- // We currently first create the list (in items()) and then test if it is
- // empty. If we would place the code from items() here we could return as soon
- // as the first item appears. In case of lots of items this would be faster.
- //
- // But since that means code duplication and since we currently don't have many
- // units on a cell usually we do it the "slow" way.
- QValueList<QCanvasItem*> list;
- list = items(true, includeMoving, forUnit);
- if (forUnit) {
-	list.remove((QCanvasItem*)forUnit);
+ // Note that some code here is taken from units() (code duplication), but it
+ //  makes this method much faster
+
+ // Flying units never collide - different altitudes
+ if(forUnit->isFlying()) {
+	return false;
  }
- return (list.count() != 0);
+
+ for (ConstIterator it = begin(); it != end(); ++it) {
+	if (RTTI::isUnit((*it)->rtti())) {
+		Unit* u = (Unit*)*it;
+		if (forUnit == u) {
+			continue;
+		}
+		if (u->isDestroyed()) {
+			continue;
+		}
+		if (u->isMoving()) {
+			if (includeMoving) {
+				return true;
+			}
+		}
+		else {
+			return true;
+		}
+	}
+ }
+
+ return false;
 }
 
