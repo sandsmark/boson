@@ -30,6 +30,7 @@
   <Menu name="debug"><text>&amp;Debug</text>
     <Action name="debug_kgame" />
     <Action name="debug_unfog" />
+    <Action name="debug_mode" />
   </Menu>
 </MenuBar>
 <ToolBar>

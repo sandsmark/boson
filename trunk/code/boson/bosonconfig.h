@@ -55,6 +55,11 @@ public:
 	BosonConfig(KConfig* conf = 0);
 	~BosonConfig();
 
+	enum DebugMode {
+		DebugNormal = 0, // no debugging
+		DebugSelection = 1
+	};
+
 	static BosonConfig* bosonConfig() { return mBosonConfig; }
 	
 	static void initBosonConfig();
@@ -77,6 +82,13 @@ public:
 	bool music() const;
 	void setCommandButtonsPerRow(int b);
 	int commandButtonsPerRow() const;
+
+	DebugMode debugMode() const;
+	/**
+	 * Change the debugging mode. Note that this isn't saved to the config,
+	 * so this is lost on quit.
+	 **/
+	void setDebugMode(DebugMode m);
 
 	void save(bool editor = false, KConfig* conf = 0);
 	void reset(KConfig* conf = 0);
