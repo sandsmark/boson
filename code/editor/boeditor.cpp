@@ -118,7 +118,9 @@ void BoEditorApp::init(char *filename )
   if (!bViewStatusbar)
     enableStatusBar(KStatusBar::Hide);
 
-  menu_bar->setMenuBarPos(menu_bar_pos);
+//orzel : should be re-tested, was removed because menuBar wasn't appearing
+//	probably because of a corrupted config file
+//  menu_bar->setMenuBarPos(menu_bar_pos);
   tool_bar_0->setBarPos(tool_bar_0_pos);
 
   ///////////////////////////////////////////////////////////////////
@@ -383,8 +385,8 @@ void BoEditorApp::readOptions()
 //	bViewStatusbar = config->readBoolEntry("ShowStatusbar", true);
 	bViewToolbar_0 = bViewStatusbar = true;
 
-//	menu_bar_pos = (KMenuBar::menuPosition)config->readNumEntry("MenuBarPos", KMenuBar::Top); 
-//	tool_bar_0_pos = (KToolBar::BarPosition)config->readNumEntry("ToolBar_0_Pos", KToolBar::Right);
+	menu_bar_pos = (KMenuBar::menuPosition)config->readNumEntry("MenuBarPos", KMenuBar::Top); 
+	tool_bar_0_pos = (KToolBar::BarPosition)config->readNumEntry("ToolBar_0_Pos", KToolBar::Right);
 
 	config->readListEntry("Recent Files", *recentList);
 	for (uint i =0 ; i < recentList->count(); i++)
@@ -454,13 +456,17 @@ void BoEditorApp::slotFileNew()
 
 void BoEditorApp::slotFileOpen()
 {
-//	if(!doc->saveModified())
-//		return;
+	if(field->isModified()) {
+  		KMsgBox::message(this, i18n("Warning"),	i18n("Present file isn't saved"));	
+		return;
+	}
 	
 	QString fileToOpen=KFileDialog::getOpenFileName(QDir::homeDirPath(), "", this, i18n("Open File..."));
 	if(!fileToOpen.isEmpty()){
-//orzel ..		doc->openDocument(fileToOpen);
-//		setCaption(kapp->appName()+": "+doc->getTitle());
+		QFileInfo saveAsInfo(fileToOpen);
+
+		field->load(fileToOpen);
+		setCaption(kapp->appName()+": "+saveAsInfo.fileName());
 		addRecentFile(fileToOpen);
 	}
 }
@@ -478,8 +484,9 @@ void BoEditorApp::slotFileOpenRecent(int id_)
 
 void BoEditorApp::slotFileSave()
 {
-	field->save(*currentFile);
-//	doc->saveDocument(doc->getPathName()+doc->getTitle());
+	if (currentFile)
+		field->save(*currentFile);
+	else slotFileSaveAs();
 }
 
 void BoEditorApp::slotFileSaveAs()

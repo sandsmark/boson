@@ -83,7 +83,7 @@ bool editorField::load(QString filename)
 
 	// ok, it's all right
 	Close();
-	isModified = false;
+	modified = false;
 	return isOk();
 }
 
@@ -117,7 +117,7 @@ bool editorField::save(QString filename)
 
 	// ok, it's all right
 	Close();
-	isModified = false;
+	modified = false;
 	return isOk();
 }
 
