@@ -51,6 +51,18 @@ groundTheme::groundTheme(char *themeName)
 
 }
 
+groundTheme::~groundTheme()
+{
+	unsigned int i,n;
+	
+	for (i=0, n=transitions->size(); i<n; i++)
+		if (transitions[i])
+			delete groundPix[i];
+	delete groundPix;
+	delete themePath;
+	delete transitions;
+}
+
 bool groundTheme::loadGround(int i, const QString &path)
 {
   	groundPix[i] = new QwSpritePixmapSequence(path+".%.2d.bmp",0l, 4);

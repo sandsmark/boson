@@ -39,6 +39,7 @@ class groundTheme
 {
 public:
 	groundTheme(char *themeName);
+	~groundTheme();
 
 	QwSpritePixmapSequence *getPixmap(groundType gt);
 
