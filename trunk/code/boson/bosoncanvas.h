@@ -94,6 +94,12 @@ public:
 	 **/
 	void shootAtUnit(Unit* target, Unit* damagedBy, long int damage);
 
+	/**
+	 * Mark the unit as destroyed and play the destroyed sound.
+	 * The unit will be deleted after a certain time.
+	 **/
+	void destroyUnit(Unit* unit);
+
 	void updateSight(Unit*, double oldX, double oldY);
 
 	Cell* cellAt(Unit* unit) const;

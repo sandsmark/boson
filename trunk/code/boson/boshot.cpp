@@ -51,14 +51,19 @@ BoShot::BoShot(Unit* target, Unit* attacker, QCanvas* canvas, bool destroyed)
 	delete this;
 	return;
  }
- if (!attacker) {
-	kdError() << k_funcinfo << ": NULL attacker" << endl;
-	delete this;
-	return;
+
+ SpeciesTheme* theme;
+ if (!destroyed) {
+	if (!attacker) {
+		kdError() << k_funcinfo << ": NULL attacker" << endl;
+		delete this;
+		return;
+	} else {
+		theme = attacker->speciesTheme();
+	}
+ } else {
+		theme = target->speciesTheme();
  }
-
-
- SpeciesTheme* theme = attacker->speciesTheme();
  if (!theme) {
 	kdError() << k_funcinfo << ": NULL attacker theme" << endl;
 	delete this;
