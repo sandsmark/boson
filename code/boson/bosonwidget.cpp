@@ -138,22 +138,22 @@ BosonWidget::~BosonWidget()
  kdDebug() << k_funcinfo << "done" << endl;
 }
 
-inline BosonCanvas* BosonWidget::canvas() const
+BosonCanvas* BosonWidget::canvas() const
 {
  return mTop->canvas();
 }
 
-inline BosonPlayField* BosonWidget::playField() const
+BosonPlayField* BosonWidget::playField() const
 {
  return mTop->playField();
 }
 
-inline Player* BosonWidget::player() const
+Player* BosonWidget::player() const
 {
  return mTop->player();
 }
 
-inline Boson* BosonWidget::game() const
+Boson* BosonWidget::game() const
 {
  return mTop->game();
 }
