@@ -75,10 +75,11 @@ class BosonParticleSystemProperties
   public:
     /**
      * Constructs BosonParticleSystemProperties and loads all values from given
-     * config file. Group must have been set previously
+     * group in given config file.
      * @param cfg KSimpleConfig object used for loading values
+     * @param group Group where values are loaded from
      **/
-    BosonParticleSystemProperties(KSimpleConfig* cfg);
+    BosonParticleSystemProperties(KSimpleConfig* cfg, const QString& group);
     virtual ~BosonParticleSystemProperties();
 
     /**
@@ -110,6 +111,8 @@ class BosonParticleSystemProperties
 
   protected:
     static const BosonParticleTextureArray* getTextures(const QString& name);
+    void load(KSimpleConfig* cfg, const QString& group);
+    void reset();
 
   private:
     /*float mMinXVelo, mMinYVelo, mMinZVelo;
@@ -124,6 +127,8 @@ class BosonParticleSystemProperties
     int mGLBlendFunc;
     float mRate, mStartSize, mEndSize, mAge;
     bool mAlign;
+    QString mTextureName;
+    QString mGLBlendFuncStr;
     const BosonParticleTextureArray* mTextures;
     unsigned long int mId;
     static KRandomSequence* mRandom;

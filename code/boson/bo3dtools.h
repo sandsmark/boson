@@ -131,12 +131,12 @@ class BoVector3
     /**
      * Loads BoVector3 from KConfig
      **/
-    static BoVector3 load(KConfig* cfg, QString key);
+    static BoVector3 load(const KConfig* cfg, const QString key, const BoVector3& aDefault = BoVector3());
 
     /**
      * Saves BoVector3 to KConfig
      **/
-    void save(KConfig* cfg, QString key);
+    void save(KConfig* cfg, const QString key) const;
 
     /**
      * @return TRUE when @p v is at the same position (x,y,z are all equal).
@@ -227,7 +227,7 @@ class BoVector4
     /**
      * Loads BoVector4 from KConfig
      **/
-    static BoVector4 load(KConfig* cfg, QString key);
+    static BoVector4 load(const KConfig* cfg, const QString key, const BoVector4& aDefault = BoVector4());
 
     static QString debugString(const BoVector4& v);
     static void debugVector(const BoVector4& v);

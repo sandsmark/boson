@@ -460,7 +460,7 @@ bool BosonConfig::unitSoundActivated(UnitSoundEvent e) const
  return !mUnitSoundsDeactivated->contains((int)e);
 }
 
-QValueList<unsigned long int> BosonConfig::readUnsignedLongNumList(KConfig* cfg, QString key)
+QValueList<unsigned long int> BosonConfig::readUnsignedLongNumList(const KConfig* cfg, const QString key)
 {
  QValueList<unsigned long int> list;
  QValueList<int> tmplist = cfg->readIntListEntry(key);
@@ -471,7 +471,7 @@ QValueList<unsigned long int> BosonConfig::readUnsignedLongNumList(KConfig* cfg,
  return list;
 }
 
-void BosonConfig::writeUnsignedLongNumList(KConfig* cfg, QString key, QValueList<unsigned long int> list)
+void BosonConfig::writeUnsignedLongNumList(KConfig* cfg, const QString key, QValueList<unsigned long int> list)
 {
  QValueList<int> tmplist;
  QValueList<unsigned long int>::Iterator it;
@@ -481,7 +481,7 @@ void BosonConfig::writeUnsignedLongNumList(KConfig* cfg, QString key, QValueList
 	cfg->writeEntry(key, tmplist);
 }
 
-QValueList<float> BosonConfig::readFloatNumList(KConfig* cfg, QString key)
+QValueList<float> BosonConfig::readFloatNumList(const KConfig* cfg, const QString key)
 {
  QStringList strlist = cfg->readListEntry(key);
  QValueList<float> list;
@@ -491,7 +491,7 @@ QValueList<float> BosonConfig::readFloatNumList(KConfig* cfg, QString key)
  return list;
 }
 
-void BosonConfig::writeFloatNumList(QValueList<float> list, KConfig* cfg, QString key)
+void BosonConfig::writeFloatNumList(QValueList<float> list, KConfig* cfg, const QString key)
 {
  QStringList strlist;
  QString str;

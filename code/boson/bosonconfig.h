@@ -282,14 +282,14 @@ public:
 	 * Loads list of unsinged long int's from KConfig (which only supports loading
 	 * list of _int's_)
 	 **/
-	static QValueList<unsigned long int> readUnsignedLongNumList(KConfig* cfg, QString key);
-	static void writeUnsignedLongNumList(KConfig* cfg, QString key, QValueList<unsigned long int> list);
+	static QValueList<unsigned long int> readUnsignedLongNumList(const KConfig* cfg, const QString key);
+	static void writeUnsignedLongNumList(KConfig* cfg, const QString key, QValueList<unsigned long int> list);
 
 	/**
 	 * Loads list of float's from KConfig
 	 **/
-	static QValueList<float> readFloatNumList(KConfig* cfg, QString key);
-	static void writeFloatNumList(QValueList<float> list, KConfig* cfg, QString key);
+	static QValueList<float> readFloatNumList(const KConfig* cfg, const QString key);
+	static void writeFloatNumList(QValueList<float> list, KConfig* cfg, const QString key);
 
 
 protected:

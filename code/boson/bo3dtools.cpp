@@ -141,18 +141,17 @@ float BoVector3::length() const
  return sqrt(dotProduct());
 }
 
-BoVector3 BoVector3::load(KConfig* cfg, QString key)
+BoVector3 BoVector3::load(const KConfig* cfg, const QString key, const BoVector3& aDefault)
 {
   QValueList<float> list = BosonConfig::readFloatNumList(cfg, key);
   if(list.count() == 0)
   {
-    // Probably value wasn't specified. Default to 0;0;0
-    return BoVector3();
+    return BoVector3(aDefault);
   }
   else if(list.count() != 3)
   {
     boError() << k_funcinfo << "BoVector3 entry must have 3 floats, not " << list.count() << endl;
-    return BoVector3();
+    return BoVector3(aDefault);
   }
   return BoVector3(list[0], list[1], list[2]);
 }
@@ -198,7 +197,7 @@ int BoVector3::findPoint(const BoVector3& point, const BoVector3* array)
   return -1;
 }
 
-void BoVector3::save(KConfig* cfg, QString key)
+void BoVector3::save(KConfig* cfg, QString key) const
 {
   QValueList<float> list;
   list.append(mData[0]);
@@ -237,18 +236,18 @@ QDataStream& operator>>(QDataStream& s, BoVector3& v)
   return s;
 }
 
-BoVector4 BoVector4::load(KConfig* cfg, QString key)
+BoVector4 BoVector4::load(const KConfig* cfg, const QString key, const BoVector4& aDefault)
 {
   QValueList<float> list = BosonConfig::readFloatNumList(cfg, key);
   if(list.count() == 0)
   {
-    // Probably value wasn't specified. Default to 0;0;0;0
-    return BoVector4();
+    // Probably value wasn't specified.
+    return BoVector4(aDefault);
   }
   else if(list.count() != 4)
   {
     boError() << k_funcinfo << "BoVector4 entry must have 4 floats, not " << list.count() << endl;
-    return BoVector4();
+    return BoVector4(aDefault);
   }
   return BoVector4(list[0], list[1], list[2], list[3]);
 }

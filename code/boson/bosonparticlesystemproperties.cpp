@@ -87,35 +87,75 @@ void BosonParticleSystemProperties::initStatic(const QString& texdir)
 /// End of static initialization stuff (below this is real code ;-))
 
 
-BosonParticleSystemProperties::BosonParticleSystemProperties(KSimpleConfig* cfg)
+BosonParticleSystemProperties::BosonParticleSystemProperties(KSimpleConfig* cfg, const QString& group)
+{
+  reset();
+  load(cfg, group);
+  mTextures = getTextures(mTextureName);
+}
+
+BosonParticleSystemProperties::~BosonParticleSystemProperties()
+{
+}
+
+void BosonParticleSystemProperties::reset()
+{
+  // Reset all variables to their default values
+  mMinVelo.reset();
+  mMaxVelo.reset();
+  mMinPos.reset();
+  mMaxPos.reset();
+  mNormalize = false;
+  mMinScale = 1.0;
+  mMaxScale = 1.0;
+  mStartColor.reset();
+  mEndColor.reset();
+  mMinLife = 1.0;
+  mMaxLife = 1.0;
+  mMaxNum = 100;
+  mInitNum = 0;
+  mGLBlendFuncStr = "GL_ONE_MINUS_SRC_ALPHA";
+  mRate = 0,
+  mStartSize = 1;
+  mEndSize = 1;
+  mAge = 0;
+  mAlign = true;
+  mTextureName = "explosion";
+}
+
+void BosonParticleSystemProperties::load(KSimpleConfig* cfg, const QString& group)
 {
   // Load all values
+  cfg->setGroup(group);
+  QString inherits = cfg->readEntry("Inherits", QString::null);
+  if(inherits != QString::null)
+  {
+    boDebug(150) << k_funcinfo << "Loading inhereted system from group " << inherits << endl;
+    load(cfg, inherits);
+    cfg->setGroup(group);
+  }
   mId = cfg->readUnsignedLongNumEntry("Id", 0);
   if(mId == 0)
   {
     boError(150) << k_funcinfo << "Invalid id in group " << cfg->group() << endl;
   }
-  mMinVelo = BoVector3::load(cfg, "MinVelocity");
-  mMaxVelo = BoVector3::load(cfg, "MaxVelocity");
-  mMinPos = BoVector3::load(cfg, "MinPos");
-  mMaxPos = BoVector3::load(cfg, "MaxPos");
-  mNormalize = cfg->readBoolEntry("Normalize", false);
+  mMinVelo = BoVector3::load(cfg, "MinVelocity", mMinVelo);
+  mMaxVelo = BoVector3::load(cfg, "MaxVelocity", mMaxVelo);
+  mMinPos = BoVector3::load(cfg, "MinPos", mMinPos);
+  mMaxPos = BoVector3::load(cfg, "MaxPos", mMaxPos);
+  mNormalize = cfg->readBoolEntry("Normalize", mNormalize);
   if(mNormalize)
   {
-    mMinScale = (float)(cfg->readDoubleNumEntry("MinScale", 1));
-    mMaxScale = (float)(cfg->readDoubleNumEntry("MaxScale", 1));
+    mMinScale = (float)(cfg->readDoubleNumEntry("MinScale", mMinScale));
+    mMaxScale = (float)(cfg->readDoubleNumEntry("MaxScale", mMaxScale));
   }
-  mStartColor = BoVector4::load(cfg, "StartColor");
-  mEndColor = BoVector4::load(cfg, "EndColor");
-  mMinLife = (float)(cfg->readDoubleNumEntry("MinLife", 0));
-  mMaxLife = (float)(cfg->readDoubleNumEntry("MaxLife", 0));
-  mMaxNum = cfg->readNumEntry("MaxNum", 100);
-  mInitNum = cfg->readNumEntry("InitNum", 0);
-/*  if(mInitNum == 0)
-  {
-    mInitNum = 10;  // Needed because of stupid bug
-  }*/
-  QString mGLBlendFuncStr = cfg->readEntry("BlendFunc", "GL_ONE_MINUS_SRC_ALPHA");
+  mStartColor = BoVector4::load(cfg, "StartColor", mStartColor);
+  mEndColor = BoVector4::load(cfg, "EndColor", mEndColor);
+  mMinLife = (float)(cfg->readDoubleNumEntry("MinLife", mMinLife));
+  mMaxLife = (float)(cfg->readDoubleNumEntry("MaxLife", mMaxLife));
+  mMaxNum = cfg->readNumEntry("MaxNum", mMaxNum);
+  mInitNum = cfg->readNumEntry("InitNum", mInitNum);
+  mGLBlendFuncStr = cfg->readEntry("BlendFunc", mGLBlendFuncStr);
   if(mGLBlendFuncStr == "GL_ONE_MINUS_SRC_ALPHA")
   {
     mGLBlendFunc = GL_ONE_MINUS_SRC_ALPHA;
@@ -129,17 +169,12 @@ BosonParticleSystemProperties::BosonParticleSystemProperties(KSimpleConfig* cfg)
     boError(150) << k_funcinfo << "Invalid BlendFunc entry in config file: " << mGLBlendFuncStr << endl;
     mGLBlendFunc = GL_ONE_MINUS_SRC_ALPHA;
   }
-  mRate = (float)(cfg->readDoubleNumEntry("Rate", 0));
-  mStartSize = (float)(cfg->readDoubleNumEntry("StartSize", 1));
-  mEndSize = (float)(cfg->readDoubleNumEntry("EndSize", 1));
-  mAge = (float)(cfg->readDoubleNumEntry("SystemLife", 0));
-  mAlign = cfg->readBoolEntry("Align", true);
-  QString textureName = cfg->readEntry("Texture", "explosion");
-  mTextures = getTextures(textureName);
-}
-
-BosonParticleSystemProperties::~BosonParticleSystemProperties()
-{
+  mRate = (float)(cfg->readDoubleNumEntry("Rate", mRate));
+  mStartSize = (float)(cfg->readDoubleNumEntry("StartSize", mStartSize));
+  mEndSize = (float)(cfg->readDoubleNumEntry("EndSize", mEndSize));
+  mAge = (float)(cfg->readDoubleNumEntry("SystemLife", mAge));
+  mAlign = cfg->readBoolEntry("Align", mAlign);
+  QString mTextureName = cfg->readEntry("Texture", mTextureName);
 }
 
 BosonParticleSystem* BosonParticleSystemProperties::newSystem(BoVector3 pos, float rotation) const
