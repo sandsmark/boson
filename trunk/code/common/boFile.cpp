@@ -23,6 +23,7 @@
 
 #include "common/log.h"
 #include "common/msgData.h"
+#include "common/boconfig.h" // MAX_PLAYER
 #include "boFile.h"
 
 
