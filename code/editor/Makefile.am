@@ -20,6 +20,7 @@
 
 # include files
 INCLUDES= -I../visual $(all_includes)
+boson_appsdir = $(kde_appsdir)/Games/Boson
 
 # compilation
 CXXFLAGS = -pipe -Wall -g # -O2
@@ -41,15 +42,15 @@ boeditor_LDADD   =  ../visual/libbovisual.a ../common/libboson.a -lkfile -lkfm -
 
 #(un)install stuff
 install-data-local:
-	$(mkinstalldirs) $(kde_appsdir)/
-	$(INSTALL_DATA) boeditor.kdelnk $(kde_appsdir)/Games/boeditor.kdelnk
+	$(mkinstalldirs) $(boson_appsdir)/
+	$(INSTALL_DATA) boeditor.kdelnk $(boson_appsdir)/boeditor.kdelnk
 	$(mkinstalldirs) $(kde_icondir)/
 	$(INSTALL_DATA) boeditor.xpm $(kde_icondir)/boeditor.xpm
 	$(mkinstalldirs) $(kde_minidir)/
 	$(INSTALL_DATA) mini-boeditor.xpm $(kde_minidir)/mini-boeditor.xpm
 
 uninstall-local:
-	-rm -f $(kde_appsdir)/boeditor.kdelnk
+	-rm -f $(boson_appsdir)/boeditor.kdelnk
 	-rm -f $(kde_icondir)/boeditor.xpm
 	-rm -f $(kde_minidir)/mini-boeditor.xpm
 
