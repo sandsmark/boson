@@ -331,6 +331,11 @@ BosonShotMissile::BosonShotMissile(Player* owner, BosonCanvas* canvas, const Bos
   mFlyParticleSystems = 0;
 }
 
+BosonShotMissile::~BosonShotMissile()
+{
+  delete mFlyParticleSystems;
+}
+
 // move the shot by one step
 // (actually only set the velocity - it is moved by BosonCanvas::slotAdvance())
 void BosonShotMissile::advanceMoveInternal()
@@ -802,6 +807,11 @@ BosonShotFragment::BosonShotFragment(Player* owner, BosonCanvas* canvas, BosonMo
 {
   mParticleSystems = 0;
   mUnitProperties = 0;
+}
+
+BosonShotFragment::~BosonShotFragment()
+{
+  delete mParticleSystems;
 }
 
 void BosonShotFragment::activate(const BoVector3& pos, const UnitProperties* unitproperties)
