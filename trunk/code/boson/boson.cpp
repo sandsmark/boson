@@ -119,6 +119,7 @@ char charbuf[1024];
 
 if (gethostname(charbuf, 1023)) {
 	printf("can't get hostname, aborting\n");
+	return;
 	}
 
 /* let's say the server is on the local machine, hum..  */

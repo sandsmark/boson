@@ -75,7 +75,6 @@ QList<QPoint>	point_l;
 QPixmap		*p;
 QPoint		*pp;
 char		buffer[100];
-bool		ret = true;
 
 
 for(j=0; j<12; j++) {
@@ -83,8 +82,7 @@ for(j=0; j<12; j++) {
 	p = new QPixmap(path + buffer);
 	if (p->isNull()) {
 		printf("SpeciesTheme : Can't load(mob) %s/Field.%02d.bmp ...\n", (const char *)path, j);
-		ret = false;
-		continue;
+		return false;
 		}
 	p->setMask( p->createHeuristicMask() );
 	pix_l.append(p);
@@ -98,17 +96,17 @@ mobSprite[index] = new QwSpritePixmapSequence(pix_l, point_l);
 mobBigOverview[index] = new QPixmap(path + "/overview.big.bmp");
 if (mobBigOverview[index]->isNull()) {
 	printf("SpeciesTheme : Can't load %s ...\n", (const char *)(path+"/overview.big.bmp"));
-	ret = false;
+	return false;
 	}
 
 /* small overview */
 mobSmallOverview[index] = new QPixmap(path + "/overview.small.bmp");
 if (mobSmallOverview[index]->isNull()) {
 	printf("SpeciesTheme : Can't load %s ...\n", (const char *)(path+"/overview.small.bmp"));
-	ret = false;
+	return false;
 	}
 
-return ret;
+return true;
 }
 
 
@@ -121,15 +119,13 @@ QList<QPoint>	point_l;
 QPixmap		*p;
 QPoint		*pp;
 char		buffer[100];
-bool		ret = true;
 
 for(j=0; j<6; j++) {
 	sprintf(buffer, "/field.%03d.bmp", j);
 	p = new QPixmap(path + buffer);
 	if (p->isNull()) {
 		printf("SpeciesTheme : Can't load(fix) %s/Field.%03d.bmp ...\n", (const char *)path, j);
-		ret = false;
-		continue;
+		return false;
 		}
 	p->setMask( p->createHeuristicMask() );
 	pix_l.append(p);
@@ -143,14 +139,14 @@ fixSprite[i] = new QwSpritePixmapSequence(pix_l, point_l);
 fixBigOverview[i] = new QPixmap(path + "/overview.big.bmp");
 if (fixBigOverview[i]->isNull()) {
 	printf("SpeciesTheme : Can't load %s ...\n", (const char *)(path+"/overview.big.bmp"));
-	ret = false;
+	return false;
 	}
 /* small overview */
 fixSmallOverview[i] = new QPixmap(path + "/overview.small.bmp");
 if (fixSmallOverview[i]->isNull()) {
 	printf("SpeciesTheme : Can't load %s ...\n", (const char *)(path+"/overview.small.bmp"));
-	ret = false;
+	return false;
 	}
 
-return ret;
+return true;
 }

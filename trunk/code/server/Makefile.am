@@ -35,8 +35,7 @@ boserver_METASOURCES = USE_AUTOMOC
 boserver_LDFLAGS = $(all_libraries) $(KDE_RPATH)
 
 boserver_SOURCES = boserver.cpp main.cpp connect.cpp serverUnit.cpp serverMap.cpp player.cpp serverCell.cpp game.cpp
-boserver_LDADD   = ../common/libboson.a  -lkfile -lkfm -lkdeui -lkdecore -lqt -lXext -lX11 $(LIBSOCKET)
-
+boserver_LDADD   = ../common/libboson.a  -lkdeui -lkdecore -lqt -lXext -lX11 $(LIBSOCKET)
 
 #(un)install
 install-data-local:
