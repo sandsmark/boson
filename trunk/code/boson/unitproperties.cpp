@@ -116,6 +116,7 @@ void UnitProperties::init()
  mTheme = 0;
  mMobileProperties = 0;
  mFacilityProperties = 0;
+ mProduceAction = 0;
  d->mPlugins.setAutoDelete(true);
 }
 
@@ -123,6 +124,7 @@ UnitProperties::~UnitProperties()
 {
  delete mMobileProperties;
  delete mFacilityProperties;
+ delete mProduceAction;
  delete d;
 }
 
