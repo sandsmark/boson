@@ -111,9 +111,10 @@ QString BosonItemProperties::propertyName(int id)
 }
 
 
-BosonItem::BosonItem(BosonModel* model, BosonCanvas* canvas)
+BosonItem::BosonItem(Player* owner, BosonModel* model, BosonCanvas* canvas)
 	: BosonItemProperties()
 {
+ mOwner = owner;
  mCanvas = canvas;
  mModel = model;
 

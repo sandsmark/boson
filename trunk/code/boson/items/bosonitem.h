@@ -35,6 +35,7 @@ class QRect;
 class Cell;
 class BosonParticleSystem;
 class BosonItemPropertyHandler;
+class Player;
 
 class KGamePropertyHandler;
 class KGamePropertyBase;
@@ -147,12 +148,13 @@ public:
 	 * Note: when you subclass this class you must set the width/height in
 	 * order to make correct use of it! See @ref setSize
 	 **/
-	BosonItem(BosonModel* model, BosonCanvas*);
+	BosonItem(Player* owner, BosonModel* model, BosonCanvas*);
 	virtual ~BosonItem();
 
 	inline BosonCanvas* canvas() const { return mCanvas; }
 	inline BosonModel* model() const { return mModel; }
 	BosonCollisions* collisions() const;
+	inline Player* owner() const { return mOwner; }
 
 	/**
 	 * @return Unique identifier of this object type. E.g. RTTI::Unit for
@@ -612,6 +614,7 @@ private:
 	BosonCanvas* mCanvas;
 	BosonModel* mModel;
 	BosonAnimation* mCurrentAnimation;
+	Player* mOwner;
 	// FIXME: use KGameProperty here. We can do so, since we don't use
 	// QCanvasSprite anymore.
 	unsigned long int mId;
