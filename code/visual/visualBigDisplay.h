@@ -50,6 +50,7 @@ public:
   ~visualBigDisplay();
 
 	virtual QSize sizeHint() const { return QSize(100,100); } // minimum size
+	void	ready4put(QSize s);
 
 signals:
 	void	relativeReCenterView (QPoint p);
@@ -80,6 +81,7 @@ protected:
 
 	QPoint	oldPos;
 	QPoint	selectPos;
+	QSize	putSize;
 
 };
 

@@ -43,6 +43,9 @@ class mainWidget : public QHBox
 public:
 	mainWidget( bosonTopLevel *parent=0, const char *name=0);
 
+	visualMiniDisplay *miniDisplay() {return mini; }
+	bosonBigDisplay *bigDisplay() { return big; }
+
 protected:
 	virtual void keyReleaseEvent (QKeyEvent * e );
 

@@ -151,6 +151,8 @@ void bosonTopLevel::_object_put(QPoint p)
 
 void bosonTopLevel::handleOrder(int order)
 {
+	setSelectionMode( visualTopLevel::SELECT_NONE);
+	mw.bigDisplay()->viewport()->setMouseTracking(false);
 	switch(orderType) {
 		default:
 		case OT_NONE:
@@ -159,6 +161,8 @@ void bosonTopLevel::handleOrder(int order)
 			break;
 		case OT_FACILITY:
 			fixConstruct.type = (facilityType) order;
+			mw.bigDisplay()->ready4put( QSize (facilityProp[order].width, facilityProp[order].height) );
+			mw.bigDisplay()->viewport()->setMouseTracking(true);
 			setSelectionMode( SELECT_PUT);
 			break;
 		case OT_MOBILE:

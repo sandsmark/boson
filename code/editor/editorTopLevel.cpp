@@ -286,6 +286,9 @@ void editorTopLevel::handleButton(int but)
 	groundType g;
 
 	boAssert(but>=0);
+
+	setSelectionMode( visualTopLevel::SELECT_NONE);
+
 	switch(which) {
 		default:
 			logf(LOG_ERROR, "editorTopLevel::handleButton, unexpected which..");
@@ -296,7 +299,8 @@ void editorTopLevel::handleButton(int but)
 			otype = OT_FACILITY;
 			setSelected( species[who]->getBigOverview( (facilityType)but ));
 			emit setSelectedObject (otype, but);		// need to be after the setSelected
-			setSelectionMode( editorTopLevel::SELECT_PUT);
+			mw.bigDisplay()->ready4put( QSize (facilityProp[but].width, facilityProp[but].height) );
+			setSelectionMode( visualTopLevel::SELECT_PUT);
 			break;
 
 		case W_UNITS:
@@ -304,7 +308,8 @@ void editorTopLevel::handleButton(int but)
 			otype = OT_UNIT;
 			setSelected( species[who]->getBigOverview( (mobType)but ));
 			emit setSelectedObject (otype, but);		// need to be after the setSelected
-			setSelectionMode( editorTopLevel::SELECT_PUT);
+			mw.bigDisplay()->ready4put( QSize (mobileProp[but].width, mobileProp[but].height) );
+			setSelectionMode( visualTopLevel::SELECT_PUT);
 			break;
 
 		case W_BIG_GROUND_1:
@@ -332,7 +337,7 @@ void editorTopLevel::handleButton(int but)
 			otype = OT_GROUND;
 			setSelected( & QPixmap ( * tiles[but]->pixmap()) );
 			emit setSelectedObject (otype, g);		// need to be after the setSelected
-			if (g<GROUND_GRASS_MINERAL) setSelectionMode( editorTopLevel::SELECT_FILL);
+			if (g<GROUND_GRASS_MINERAL) setSelectionMode( visualTopLevel::SELECT_FILL);
 			break;
 
 		case W_SMALL_PLAIN:
@@ -341,7 +346,7 @@ void editorTopLevel::handleButton(int but)
 			otype = OT_GROUND;
 			setSelected( & QPixmap ( * tiles[but]->pixmap()) );
 			emit setSelectedObject (otype, g);		// need to be after the setSelected
-			if (g<GROUND_GRASS_MINERAL) setSelectionMode( editorTopLevel::SELECT_FILL);
+			if (g<GROUND_GRASS_MINERAL) setSelectionMode( visualTopLevel::SELECT_FILL);
 			break;
 
 	} // switch(which)
@@ -493,11 +498,25 @@ void editorTopLevel::updateViews(void)
 }
 
 
-
 bool editorTopLevel::queryExit()
 {
 //	logf(LOG_INFO, "queryExit called");
 	BoEditorApp *app = (BoEditorApp *) kapp;
 	return app->slot_close();
+}
+
+
+void editorTopLevel::setSelectionMode(selectionMode_t t)
+{
+	visualTopLevel::setSelectionMode(t);
+
+	switch(t) {
+		case SELECT_PUT:
+			mw.bigDisplay()->viewport()->setMouseTracking(true);
+			break;
+		default:
+			mw.bigDisplay()->viewport()->setMouseTracking(false);
+			break;
+	}
 }
 
