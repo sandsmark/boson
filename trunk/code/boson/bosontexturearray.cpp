@@ -61,25 +61,27 @@ BosonTextureArray::BosonTextureArray(QValueList<QImage> images, bool useMipmaps,
 
 void BosonTextureArray::init()
 {
+ boDebug(110) << k_funcinfo << endl;
  mTextures = 0;
  mCount = 0;
 }
 
 BosonTextureArray::~BosonTextureArray()
 {
-// boDebug(110) << k_funcinfo << endl;
+ boDebug(110) << k_funcinfo << endl;
  if (mTextures && mCount) {
 	glBindTexture(GL_TEXTURE_2D, 0); // in case we want to delete currently bound texture
 	for (unsigned int i = 0; i < mCount; i++) {
 		BoTextureInfo* t = mAllTextures.take(mTextures[i]);
 		delete t;
 	}
+	boDebug(110) << k_funcinfo << "delete " << mCount << " texture objects" << endl;
 	glDeleteTextures(mCount, &mTextures[0]);
 	delete[] mTextures;
  } else {
 	boDebug(110) << k_funcinfo << "no textures allocated" << endl;
  }
-// boDebug(110) << k_funcinfo << "done" << endl;
+ boDebug(110) << k_funcinfo << "done" << endl;
 }
 
 bool BosonTextureArray::createTexture(const QImage& image, GLuint texture, bool useMipmaps, bool useAlpha)
