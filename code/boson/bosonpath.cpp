@@ -85,27 +85,28 @@ inline bool operator < (const BosonPath::PathNode& a, const BosonPath::PathNode&
 *    what you are doing and if you make any bigger changes, send note to author!
 */
 
-BosonPath::BosonPath(Unit* unit, int startx, int starty, int goalx, int goaly)
+BosonPath::BosonPath(Unit* unit, int startx, int starty, int goalx, int goaly, int range)
 {
   mUnit = unit;
   mStartx = startx;
   mStarty = starty;
   mGoalx = goalx;
   mGoaly = goaly;
+  mRange = range;
   /// TODO: those variables needs tuning and *lots* of testing!
   mModifier = 3;
   mCrossDivider = 10;
   mMinCost = 3;
   mAbortPath = 2000;
 
-  kdDebug() << k_funcinfo << "start: " << mStartx << "," << mStarty << " goal: " << mGoalx << "," << mGoaly << endl;
+  kdDebug() << k_funcinfo << "start: " << mStartx << "," << mStarty << " goal: " << mGoalx << "," << mGoaly << " range: " << mRange << endl;
 }
 
 BosonPath::~BosonPath()
 {
 }
 
-QValueList<QPoint> BosonPath::findPath(Unit* unit, int goalx, int goaly)
+QValueList<QPoint> BosonPath::findPath(Unit* unit, int goalx, int goaly, int range)
 {
   QValueList<QPoint> points;
   if (!unit)
@@ -115,7 +116,7 @@ QValueList<QPoint> BosonPath::findPath(Unit* unit, int goalx, int goaly)
   }
   QPoint p = unit->boundingRect().center();
   BosonPath path(unit, p.x() / BO_TILE_SIZE, p.y() / BO_TILE_SIZE,
-        goalx / BO_TILE_SIZE, goaly / BO_TILE_SIZE);
+        goalx / BO_TILE_SIZE, goaly / BO_TILE_SIZE, range);
   if (!path.findPath())
   {
     kdWarning() << "no path found" << endl;
@@ -163,24 +164,24 @@ bool BosonPath::findPath()
   // Create second node
   PathNode n2;
 
-  
+
   // Main loop
   while(! open.empty())
   {
-    if (node.x != mGoalx || node.y != mGoaly)
+    // First check if we're at goal already
+    if(inRange(node.x, node.y))
+    {
+      mGoalx = node.x;
+      mGoaly = node.y;
+      pathfound = FullPath;
+      break;
+    }
+    else
     { // this is usually the case - except if we cannot go on the intended goal
       getFirst(open, node);
       // if f < 0 then it's not in OPEN
       mark[node.x][node.y].f = -1;
       mNodesRemoved++;
-    }
-
-
-    // First check if we're at goal already
-    if((node.x == mGoalx) && (node.y == mGoaly))
-    {
-      pathfound = FullPath;
-      break;
     }
 
     // Break if SEARCH_STEPS steps of path is found
@@ -239,7 +240,8 @@ bool BosonPath::findPath()
       // If cost is ERROR_COST, then we can't go there
       if(nodecost == ERROR_COST)
       {
-        if(n2.x == mGoalx && n2.y == mGoaly)
+        /// TODO: this may lead to problems when all cells in range have ERROR_COST
+        if(n2.x == mGoalx && n2.y == mGoaly && mRange == 0)
         {
           // change our goal
           mGoalx = node.x;
@@ -533,3 +535,10 @@ void BosonPath::debug() const
  kdDebug() << k_funcinfo << "(end)" << endl;
 }
 
+inline bool BosonPath:: inRange(int x, int y)
+{
+  /// TODO: maybe use different check (not manhattan dist.)
+  if(QABS(x - mGoalx) > mRange || QABS(y - mGoaly) > mRange)
+    return false;
+  return true;
+}
