@@ -77,7 +77,7 @@ bool BoEvent::save(QDomElement& root, const QMap<int, int>* playerId2Index) cons
 		index = playerId();
 	} else {
 		if (!playerId2Index->contains(playerId())) {
-			boError(360) << k_funcinfo << "map does not contain playerId" << playerId() << endl;
+			boError(360) << k_funcinfo << "map does not contain playerId " << playerId() << endl;
 			return false;
 		}
 		index = (*playerId2Index)[playerId()];
