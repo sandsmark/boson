@@ -179,7 +179,9 @@ signals:
 	void signalPlaceCell(int groundType);
 
 	/**
-	 * Emitted when user clicks on action button (e.g move)
+	 * Emitted when user clicks on action button (e.g move). Also used for
+	 * the placement preview, when the player clicks on a constructed
+	 * facility and wants it to be placed on the map.
 	 */
 	void signalAction(int actionType);
 

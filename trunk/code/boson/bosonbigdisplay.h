@@ -99,9 +99,15 @@ protected:
 	virtual void updateCursor();
 
 	virtual bool actionLocked() const;
+	/**
+	 * @return The currently active @ref UnitAction if @ref actionLocked is
+	 * TRUE. Otherwise undefined.
+	 **/
+	virtual UnitAction actionType() const;
 	virtual CanSelectUnit canSelect(Unit* unit) const;
 	virtual bool selectAll(const UnitProperties* prop, bool replace);
-	virtual BosonBigDisplayBase::PlacementPreview placementPreview() const;
+
+	virtual void updatePlacementPreviewData();
 
 //	void addMouseIO(Player* p);
 

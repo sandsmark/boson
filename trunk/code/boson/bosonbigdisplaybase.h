@@ -42,7 +42,7 @@ template<class T> class QPtrList;
 class BoAction
 {
 public:
-	BoAction() 
+	BoAction()
 	{
 		mX = 0.0;
 		mY = 0.0;
@@ -54,7 +54,7 @@ public:
 	{
 	}
 
-	void setCanvasPos(const QPoint& pos) 
+	void setCanvasPos(const QPoint& pos)
 	{
 		mCanvasPos = pos;
 	}
@@ -241,15 +241,6 @@ protected:
 		CanSelectDestroyed = 2, // can't be selected - is destroyed
 		CanSelectError = 3 // can't be selected - unknown reason
 	};
-  
-	// This is used for placement-preview
-	class PlacementPreview
-	{
-		public:
-			bool draw;  // Whether to draw preview
-			float x, y, w, h;  // Size of placement rect in cell coordinates
-			bool canPlace;  // If unit can be placed to current position. Used to select color (white/red)
-	};
 
 protected:
 	virtual void initializeGL();
@@ -381,8 +372,26 @@ protected:
 	void addMouseIO(Player* p);
 
 	virtual bool actionLocked() const = 0;
+	virtual UnitAction actionType() const = 0;
 	virtual CanSelectUnit canSelect(Unit* unit) const = 0;
-	virtual BosonBigDisplayBase::PlacementPreview placementPreview() const = 0;
+
+	/**
+	 * Called when the placement preview should get updated. Note that you
+	 * need to check whether a facility is actually selected and that it can
+	 * actually place a unit.
+	 *
+	 * Note that this gets called (at least) whenever the mouse is moved, so
+	 * don't do expensive calculations here.
+	 **/
+	virtual void updatePlacementPreviewData() = 0;
+
+	/**
+	 * @param prop The unit that should get placed or NULL if none.
+	 * @param canPlace Whether @p prop can be placed at the current cursor
+	 * position (current == the moment when @ref updatePlacementPreviewData
+	 * has been called)
+	 **/
+	void setPlacementPreviewData(const UnitProperties* prop, bool canPlace);
 
 private:
 	void init();

@@ -43,6 +43,7 @@
 #include "bodebug.h"
 #include "items/bosonshot.h"
 #include "unitplugins.h"
+#include "bosonmodel.h"
 #include "bo3dtools.h"
 
 #include <kgame/kgameio.h>
@@ -370,6 +371,10 @@ public:
 		mFps = 0;
 		mFpsTime = 0;
 		mDefaultFont = 0;
+
+		mPlacementPreviewProperties = 0;
+		mPlacementPreviewDisplayList = 0;
+		mPlacementPreviewCanPlace = false;
 	}
 
 	Player* mLocalPlayer;
@@ -417,6 +422,11 @@ public:
 
 	BoParticleList mParticleList;
 	bool mParticlesDirty;
+
+	const UnitProperties* mPlacementPreviewProperties;
+	GLuint mPlacementPreviewDisplayList;
+	bool mPlacementPreviewCanPlace;
+	QPoint mPlacementCanvasPos;
 };
 
 BosonBigDisplayBase::BosonBigDisplayBase(BosonCanvas* c, QWidget* parent)
@@ -792,25 +802,33 @@ void BosonBigDisplayBase::paintGL()
  }
 
  // Facility-placing preview code
- PlacementPreview p = placementPreview();
- if (p.draw) {
-	if (p.canPlace) {
-		glColor4f(1.0, 1.0, 1.0, 0.5);
+ if (actionLocked() && actionType() == ActionBuild && d->mPlacementPreviewDisplayList != 0 && d->mPlacementPreviewProperties) {
+#warning FIXME: z value!
+	const float z = 0.1;
+	QPoint pos(d->mPlacementCanvasPos / BO_TILE_SIZE);
+	int w = d->mPlacementPreviewProperties->unitWidth() / BO_TILE_SIZE;
+	int h = d->mPlacementPreviewProperties->unitHeight() / BO_TILE_SIZE;
+	float x = ((float)(pos.x() + w / 2)) * BO_GL_CELL_SIZE;
+	float y = ((float)(pos.y() + h / 2)) * BO_GL_CELL_SIZE;
+	glTranslatef(x, -y, z);
+	// AB: GL_MODULATE is currently default. if we every change it to
+	// GL_REPLACE we should change it here:
+//	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	GLubyte color;
+	if (d->mPlacementPreviewCanPlace) {
+		color = 255;
 	} else {
-		glColor4f(1.0, 0.0, 0.0, 0.5);
+		color = PLACEMENTPREVIEW_DISALLOW_COLOR;
 	}
-	glDisable(GL_TEXTURE_2D);
 	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glBegin(GL_QUADS);
-		glVertex3f(p.x, -(p.y), 0.01);
-		glVertex3f(p.x + p.w, -(p.y), 0.01);
-		glVertex3f(p.x + p.w, -(p.y + p.h), 0.01);
-		glVertex3f(p.x, -(p.y + p.h), 0.01);
-	glEnd();
-	glColor3f(1.0, 1.0, 1.0);  // reset color
+	glColor4ub(255, color, color, PLACEMENTPREVIEW_ALPHA);
+	glCallList(d->mPlacementPreviewDisplayList);
+	glColor4ub(255, 255, 255, 255);
 	glDisable(GL_BLEND);
-	glEnable(GL_TEXTURE_2D);
+	// AB: see above. if GL_REPLACES ever becomes default we have to set it
+	// here again.
+//	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	glTranslatef(-x, y, -z);
  }
 
 
@@ -847,6 +865,7 @@ void BosonBigDisplayBase::paintGL()
  glDisable(GL_LIGHTING);
 
  if (cursor()) {
+//	renderCursor();
 	QPoint pos = mapFromGlobal(QCursor::pos());
 	GLfloat x = (GLfloat)pos.x();
 	GLfloat y = (GLfloat)d->mViewport[3] - (GLfloat)pos.y();
@@ -1192,7 +1211,6 @@ void BosonBigDisplayBase::renderParticles()
  //boDebug(150) << k_funcinfo << "        Particles drawing: " << end.tv_usec - tmsort.tv_usec << " us" << endl;
 }
 
-
 void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseEvent* e, bool *eatevent)
 {
  GLdouble posX = 0.0;
@@ -1314,6 +1332,7 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 		GLdouble x = 0.0, y = 0.0, z = 0.0;
 		mapCoordinates(widgetPos, &x, &y, &z);
 		worldToCanvas(x, y, z, &(d->mCanvasPos));
+		updatePlacementPreviewData();
 		updateCursor();
 		e->accept();
 		break;
@@ -1385,7 +1404,7 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 				//TODO: port editor to KGameIO - otherwise
 				//eatevent and send are useless
 
-			 	// AB: is *eatevent the correct parameter? KGame should
+				// AB: is *eatevent the correct parameter? KGame should
 				// *not* send the stream if this is false!
 				bool send = false;
 				BoAction action;
@@ -1394,7 +1413,7 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 				if (e->state() & ControlButton) {
 					action.setForceAttack(true);
 				}
-			 	actionClicked(action, stream, &send);
+				actionClicked(action, stream, &send);
 				if (send) {
 					*eatevent = true;
 				}
@@ -2269,5 +2288,42 @@ const QPoint& BosonBigDisplayBase::cursorCanvasPos() const
 void BosonBigDisplayBase::slotAdvance(unsigned int /*advanceCount*/, bool)
 {
  d->mParticlesDirty = true;
+}
+
+void BosonBigDisplayBase::setPlacementPreviewData(const UnitProperties* prop, bool canPlace)
+{
+ if (!prop) {
+	d->mPlacementPreviewProperties = 0;
+	d->mPlacementPreviewDisplayList = 0;
+	d->mPlacementPreviewCanPlace = false;
+	return;
+ }
+ if (!localPlayer()) {
+	boError() << k_funcinfo << "NULL local player" << endl;
+	setPlacementPreviewData(0, false);
+	return;
+ }
+ if (!localPlayer()->speciesTheme()) {
+	boError() << k_funcinfo << "NULL theme" << endl;
+	setPlacementPreviewData(0, false);
+ }
+ if (d->mPlacementPreviewProperties != prop) {
+	BosonModel* m = localPlayer()->speciesTheme()->unitModel(prop->typeId()); // AB: this does a lookup in a list and therefore should be avoided (this method gets called at least whenever the mouse is moved!)
+	if (!m) {
+		boError() << k_funcinfo << "NULL model for " << prop->typeId() << endl;
+		setPlacementPreviewData(0, false);
+		return;
+	}
+	BoFrame* f = m->frame(0);
+	if (!f) {
+		boError() << k_funcinfo << "NULL frame 0" << endl;
+		setPlacementPreviewData(0, false);
+		return;
+	}
+	d->mPlacementPreviewProperties = prop;
+	d->mPlacementPreviewDisplayList = f->displayList();
+ }
+ d->mPlacementPreviewCanPlace = canPlace;
+ d->mPlacementCanvasPos = cursorCanvasPos();
 }
 

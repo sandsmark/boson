@@ -26,6 +26,7 @@
 #include "../player.h"
 #include "../speciestheme.h"
 #include "../boselection.h"
+#include "../unitplugins.h"
 #include "../defines.h"
 #include "bodebug.h"
 
@@ -308,14 +309,27 @@ void BosonCommandFrameBase::slotPlaceUnit(ProductionType t, unsigned long int un
 	return;
  }
  emit signalPlaceUnit(unitType, localPlayer());
+ emit signalAction(ActionBuild); // placement preview
 }
 
 void BosonCommandFrameBase::slotProduce(ProductionType type, unsigned long int id)
 {
+ boDebug() << k_funcinfo << endl;
  if (selectedUnit()) {
 	if (localPlayer() != selectedUnit()->owner()) {
 		boError() << k_funcinfo << "local owner != selected unit owner" << endl;
 		return;
+	}
+	ProductionPlugin* pp = (ProductionPlugin*)selectedUnit()->plugin(UnitPlugin::Production);
+	if (!pp) {
+		boWarning() << k_funcinfo << "NULL production plugin?!" << endl;
+		return;
+	}
+	if (pp->completedProductionType() == type && pp->completedProductionId() == id) {
+		// the player did not start to place the completed production.
+		// enable the placement preview (aka lock the action)
+		emit signalAction(ActionBuild);
+		return; // do NOT start to produce more here.
 	}
  }
  emit signalProduce(type, id, (UnitBase*)selectedUnit(), localPlayer());

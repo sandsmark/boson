@@ -90,7 +90,7 @@ void BosonBigDisplay::actionClicked(const BoAction& action, QDataStream& stream,
 	return;
  }
 
- if (d->mLockAction) {
+ if (actionLocked()) {
 	switch (d->mActionType) {
 		case ActionMove:
 		{
@@ -137,6 +137,13 @@ void BosonBigDisplay::actionClicked(const BoAction& action, QDataStream& stream,
 			}
 			break;
 		}
+		case ActionBuild:
+		{
+			if (actionBuild(stream, action.canvasPos())) {
+				*send = true;
+			}
+			break;
+		}
 		default:
 			boError() << k_funcinfo << "Unknown actiontype for locked action: " << d->mActionType << endl;
 			break;
@@ -162,7 +169,7 @@ void BosonBigDisplay::actionClicked(const BoAction& action, QDataStream& stream,
 			}
 		}
 
-		if(boConfig->RMBAction() == ActionAttack) {
+		if (boConfig->RMBAction() == ActionAttack) {
 			if (!actionAttackPos(stream, action.canvasPos())) {
 				return;
 			}
@@ -172,14 +179,12 @@ void BosonBigDisplay::actionClicked(const BoAction& action, QDataStream& stream,
 			}
 		}
 		*send = true;
-	} else { // place constructions
-		// FIXME: another option: add the waypoint to the facility and
+	} else {
+		// TODO: another option: add the waypoint to the facility and
 		// apply it to any unit that gets constructed by that facility.
 		// For this we'd probably have to use LMB for unit placing
-		if (!actionBuild(stream, action.canvasPos())) {
-			return;
-		}
-		*send = true;
+		// AB: the facility-placement gets done for actionLocked()==true
+		// now ! (ActionBuild)
 	}
  } else { // there is a unit - attack it?
 	if ((localPlayer()->isEnemy(unit->owner()) || action.forceAttack()) &&
@@ -509,6 +514,10 @@ void BosonBigDisplay::updateCursor()
 	boError() << k_funcinfo << "NULL cursor!!" << endl;
 	return;
  }
+ if (!localPlayer()) {
+	boError() << k_funcinfo << "NULL local player" << endl;
+	return;
+ }
 
  if (!canvas()->onCanvas(cursorCanvasPos())) {
 	d->mCursorType = CursorDefault;
@@ -516,31 +525,42 @@ void BosonBigDisplay::updateCursor()
 	c->setWidgetCursor(this);
 	return;
  }
+ if (actionLocked()) {
+	c->setCursor(d->mCursorType);
+	c->setWidgetCursor(this);
+	return;
+ }
 
- if (!d->mLockAction) {
-	if (!selection()->isEmpty()) {
-		if (selection()->leader()->owner() == localPlayer()) {
-			Unit* unit = ((BosonCanvas*)canvas())->findUnitAt(cursorCanvasPos());
-			if (unit && (!selection()->leader()->owner()->isFogged(cursorCanvasPos().x() / BO_TILE_SIZE, cursorCanvasPos().y() / BO_TILE_SIZE))) {
-				if (unit->owner() == localPlayer()) {
-					d->mCursorType = CursorDefault;
-				} else if(selection()->leader()->unitProperties()->canShoot()) {
-					if((unit->isFlying() && selection()->leader()->unitProperties()->canShootAtAirUnits()) ||
-							(!unit->isFlying() && selection()->leader()->unitProperties()->canShootAtLandUnits())) {
-						d->mCursorType = CursorAttack;
-					}
-				}
-			} else if (selection()->leader()->isMobile()) {
-				d->mCursorType = CursorMove;
-			} else {
-				d->mCursorType = CursorDefault;
-			}
+ if (!selection()->isEmpty() && selection()->leader()->owner() == localPlayer()) {
+	Unit* leader = selection()->leader();
+	if (localPlayer()->isFogged(cursorCanvasPos().x() / BO_TILE_SIZE, cursorCanvasPos().y() / BO_TILE_SIZE)) {
+		if (leader->isMobile()) {
+			d->mCursorType = CursorMove;
 		} else {
 			d->mCursorType = CursorDefault;
 		}
 	} else {
-		d->mCursorType = CursorDefault;
+		Unit* unit = canvas()->findUnitAt(cursorCanvasPos());
+		if (unit) {
+			if (unit->owner() == localPlayer()) {
+				d->mCursorType = CursorDefault;
+				// we might add something like 
+				// if (leader->isDamaged() && unit->canRepair())
+				// here
+			} else if (leader->unitProperties()->canShoot()) {
+				if ((unit->isFlying() && leader->unitProperties()->canShootAtAirUnits()) ||
+						(!unit->isFlying() && leader->unitProperties()->canShootAtLandUnits())) {
+					d->mCursorType = CursorAttack;
+				}
+			}
+		} else if (leader->isMobile()) {
+			d->mCursorType = CursorMove;
+		} else {
+			d->mCursorType = CursorDefault;
+		}
 	}
+ } else {
+	d->mCursorType = CursorDefault;
  }
 
  c->setCursor(d->mCursorType);
@@ -577,12 +597,14 @@ void BosonBigDisplay::unitAction(int actionType)
 	case ActionMove:
 		d->mCursorType = CursorMove;
 		break;
+	case ActionBuild:
+		break;
 	case ActionAttack:
 		d->mCursorType = CursorAttack;
 		break;
 	case ActionStop:
 	{
-		if(selection()->isEmpty()) {
+		if (selection()->isEmpty()) {
 			boError() << k_funcinfo << "Selection is empty!" << endl;
 			return;
 		}
@@ -620,6 +642,11 @@ void BosonBigDisplay::unitAction(int actionType)
 bool BosonBigDisplay::actionLocked() const
 {
  return d->mLockAction;
+}
+
+UnitAction BosonBigDisplay::actionType() const
+{
+ return d->mActionType;
 }
 
 BosonBigDisplayBase::CanSelectUnit BosonBigDisplay::canSelect(Unit* unit) const
@@ -669,27 +696,35 @@ bool BosonBigDisplay::selectAll(const UnitProperties* prop, bool replace)
  return false;
 }
 
-BosonBigDisplayBase::PlacementPreview BosonBigDisplay::placementPreview() const
+void BosonBigDisplay::updatePlacementPreviewData()
 {
- BosonBigDisplayBase::PlacementPreview p;
- p.draw = false;
- Unit* factory = selection()->leader();
- if (factory) {
-	ProductionPlugin* production = (ProductionPlugin*)(factory->plugin(UnitPlugin::Production));
-	if (production && production->completedProductionId() > 0 && production->completedProductionType() == ProduceUnit) {
-		// We have completed production
-		const UnitProperties* u = localPlayer()->unitProperties(production->currentProductionId());
-		if (u->isFacility()) {
-			// Mobiles are auto-placed, no preview is needed for them
-			p.w = u->unitWidth() / (float)BO_TILE_SIZE;
-			p.h = u->unitHeight() / (float)BO_TILE_SIZE;
-			QPoint pos(cursorCanvasPos() / BO_TILE_SIZE);
-			p.x = pos.x();
-			p.y = pos.y();
-			p.canPlace = (canvas())->canPlaceUnitAt(u, pos, production);
-			p.draw = true;
-		}
-	}
+ setPlacementPreviewData(0, false);
+ if (!actionLocked() || actionType() != ActionBuild) {
+	return;
  }
- return p;
+ if (!selection() || selection()->isEmpty() || !selection()->leader()) {
+	return;
+ }
+ if (!localPlayer()) {
+	boError() << k_funcinfo << "NULL local player" << endl;
+	return;
+ }
+ Unit* leader = selection()->leader();
+ if (leader->owner() != localPlayer()) {
+	return;
+ }
+ ProductionPlugin* pp = (ProductionPlugin*)leader->plugin(UnitPlugin::Production);
+ if (!pp || pp->completedProductionId() == 0 || pp->completedProductionType() != ProduceUnit) {
+	return;
+ }
+ const UnitProperties* prop = localPlayer()->unitProperties(pp->completedProductionId());
+ if (!prop) {
+	return;
+ }
+ // note: this applies to mobiles as well as for facilities!
+ // (mobiles are usually auto placed, but manual placement might get used if
+ // auto-placement failed)
+ setPlacementPreviewData(prop, canvas()->canPlaceUnitAt(prop, cursorCanvasPos() / BO_TILE_SIZE, pp));
 }
+
+
