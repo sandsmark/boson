@@ -19,8 +19,11 @@
  ***************************************************************************/
 
 #include <stdlib.h>	// rand
-
 #include <assert.h>
+
+// Arts / sound stuff
+#include <arts/qiomanager.h>
+#include <arts/soundserver.h>                                                                                                                                     
 
 #include "common/log.h"
 #include "common/boconfig.h" // MAX_PLAYERS
@@ -32,12 +35,16 @@
 
 #undef DEBUG_REQUEST_F
 
+Arts::SimpleSoundServer		*soundserver;
+
 /*
  *  BOSON CANVAS
  */
 bosonCanvas::bosonCanvas( QPixmap p, uint w, uint h)
 	: visualCanvas(p,w,h)
 {
+
+	// units containers
 	mobile.resize(149);
 	facility.resize(149);
 
@@ -46,7 +53,20 @@ bosonCanvas::bosonCanvas( QPixmap p, uint w, uint h)
 	// ping initialisation, not relevant
 	last_sync = time(NULL);
 
+	// cells
 	cells = new Cell[w*h];
+
+	// sound initialisation 
+	Arts::QIOManager qiomanager;			// defined in qiomanager.h
+	Arts::Dispatcher dispatcher(&qiomanager);	// defined in dispatcher.h
+
+	soundserver = new Arts::SimpleSoundServer( Arts::Reference("global:Arts_SimpleSoundServer") ); 
+	if (!soundserver)
+		logf(LOG_ERROR, "null Arts::SimpleSoundServer, sound disabled");
+
+	if(soundserver->isNull())
+		logf(LOG_ERROR, "can't open artsd connection for sound, SOUND DISABLED");
+	else	logf(LOG_ERROR, "non null artsd connection established (server = %p), SOUND should be ok", soundserver);
 }
 
 
@@ -329,4 +349,14 @@ void bosonCanvas::setCell(int i, int j, cell_t c)
 {
 	visualCanvas::setCell(i,j,c);
 }
+
+void bosonCanvas::play(char *filename)
+{
+	if(soundserver->isNull()) return; // no sound available
+
+	QString path = *dataPath + "sound/" + filename;
+	logf(LOG_INFO, "(sound) playing : %s", path.latin1());
+	soundserver->play(path.latin1());
+}
+
 
