@@ -114,7 +114,6 @@ void BosonServer::createMobUnit(mobileMsg_t &data)
 	checkUnitVisibility(u);
 }
 
-
 /*
  * basic placing function
  * should be smarter by veryfing that (x,y) is free, and else
@@ -260,6 +259,9 @@ void BosonServer::checkMobileKnown(serverMobUnit *m)
 	y = m->_y() / BO_TILE_SIZE;
 	i2 = (m->getWidth() + BO_TILE_SIZE -1 ) / BO_TILE_SIZE;
 	j2 = (m->getHeight() + BO_TILE_SIZE -1 )/ BO_TILE_SIZE;
+	
+	boAssert(x>=0); boAssert(y>=0);
+	boAssert(x<200); boAssert(y<200);
 
 	for (i=0; i<i2; i++)
 		for (j=0; j<j2; j++)

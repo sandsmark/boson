@@ -99,6 +99,11 @@ void serverMobUnit::r_moveBy(moveMsg_t &msg, int playerId, boBuffer * buffer)
 		logf(LOG_ERROR, "Player %d asking to move player's %d unit, dismissed", playerId, who);
 		return;
 		}
+	
+	boAssert(msg.dx >-200);
+	boAssert(msg.dy >-200);
+	boAssert(msg.dx < 200);
+	boAssert(msg.dy < 200);
 
 	__x += msg.dx;
 	__y += msg.dy;
