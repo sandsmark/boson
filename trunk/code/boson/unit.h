@@ -131,43 +131,89 @@ public:
 	 * here, too!
 	 * @param advanceCount Used by @ref UnitPlugin::advance
 	 **/
-	virtual void advance(int advanceCount);
+	virtual void advance(unsigned int advanceCount);
 
 	/**
-	 * Move the unit. By default this does nothing. Reimplemented in @ref
-	 * MobileUnit
+	 * Call the advance*() function that is currently used. The advance
+	 * function is changed by @ref Unit::setWork usually. It can be changed in
+	 * special situations by @ref setAdvanceWork directly.
+	 * Both functions use @ref setAdvanceFunction
+	 *
+	 * Note that we store a pointer to the advance function internally. This
+	 * is done for performance reasons - advance gets called pretty often
+	 * for a lot of units and with this we avoid any switch on @ref
+	 * advanceWork
 	 **/
-	virtual void advanceMove() { }
+	inline virtual void advanceFunction(unsigned int advanceCount)
+	{
+		(this->*mAdvanceFunction)(advanceCount);
+		mAdvanceFunction = mAdvanceFunction2;
+	}
 
 	/**
-	 * Also reimplemented in @ref MobileUnit. Used to check whether the path
-	 * calculated by @ref advanceMove was actually valid.
+	 * See @ref advanceFunction.
+	 *
+	 * We store 2 advance pointers because the units are iterated in loops.
+	 * The first unit might change the advance function of the second unit -
+	 * but we must call the previous advance function of the second unit.
+	 *
+	 * See also @ref Boson::advanceFlag and @ref Boson::toggleAdvanceFlag
 	 **/
-	virtual void advanceMoveCheck() { }
+	inline virtual void advanceFunction2(unsigned int advanceCount)
+	{
+		(this->*mAdvanceFunction2)(advanceCount);
+		mAdvanceFunction2 = mAdvanceFunction;
+	}
+
+
+	/**
+	 * Convenience method for moving the unit - @ref advanceMoveCheck must
+	 * be called after @ref advanceMoveInternal, so you should never call @ref
+	 * advanceMoveInternal directly, but rather use this.
+	 **/
+	void advanceMove(unsigned int advanceCount)
+	{
+		advanceMoveInternal(advanceCount);
+		advanceMoveCheck();
+	}
+
 
 	/**
 	 * Attack a unit. The target was set before using @ref setTarget
 	 **/
-	virtual void advanceAttack();
+	virtual void advanceAttack(unsigned int advanceCount);
 
 	/**
 	 * Follow another unit.
 	 * Note that this method is somewhat similar to @ref advanceAttack
 	 **/
-	virtual void advanceFollow() { }
+	virtual void advanceFollow(unsigned int) { }
 
 	/**
 	 * This is called when there is nothing else to do for this unit.
 	 * Usually the unit will check for enemy units in range and fire at
 	 * them.
 	 **/
-	virtual void advanceNone();
+	virtual void advanceNone(unsigned int advanceCount);
 
 	/**
 	 * Move the construction animation one step forward. Does nothing by
 	 * default - reimplemented in @ref Facility
 	 **/
-	virtual void advanceConstruction() { }
+	virtual void advanceConstruction(unsigned int) { }
+	
+	/**
+	 * Called when the unit has been destroyed. Maybe compute a destruction
+	 * animation here, or animate the wreckage.
+	 *
+	 * Should do - just like all advance*() methods - as little as possible.
+	 **/
+	virtual void advanceDestroyed(unsigned int advanceCount);
+
+	/**
+	 * Call the @ref UnitPlugin::advance method of the @ref currentPlugin
+	 **/
+	virtual void advancePlugin(unsigned int advanceCount);
 
 	/**
 	 * @return the @ref ProductionPlugin if this unit is able to produce
@@ -299,14 +345,39 @@ protected:
 	 **/
 	void newPath();
 
+	/**
+	 * Move the unit. By default this does nothing. Reimplemented in @ref
+	 * MobileUnit
+	 **/
+	virtual void advanceMoveInternal(unsigned int) { }
+
+	/**
+	 * Also reimplemented in @ref MobileUnit. Used to check whether the path
+	 * calculated by @ref advanceMove was actually valid.
+	 **/
+	virtual void advanceMoveCheck() { }
+
 protected:
 	bool mSearchPath;
+
+private:
+	typedef void (Unit::*MemberFunction)(unsigned int advanceCount);
+	void setAdvanceFunction(MemberFunction, bool advanceFlag);
 
 private:
 	class UnitPrivate;
 	UnitPrivate* d;
 	UnitPlugin* mCurrentPlugin; // TODO: save/load the current plugin
 
+	// now we come to the interesting slightly hackish performance part :-)
+	// we store a pointer to the advance*() method that is currently used.
+	// we do NULL checking on this pointer - but it *must not* happen, that
+	// this pointer is null (advanceNone instead).
+	// we store 2 pointers - see advanceFunction2() on this.
+	MemberFunction mAdvanceFunction;
+	MemberFunction mAdvanceFunction2;
+
+	// will save us some trouble :)
 	friend class KGameUnitDebug;
 };
 
@@ -337,9 +408,8 @@ public:
 	 **/
 	void turnTo();
 
-	virtual void advanceMove(); // move one step futher to path
-	virtual void advanceMoveCheck();
-	virtual void advanceFollow();
+
+	virtual void advanceFollow(unsigned int advanceCount);
 
 
 	/**
@@ -355,6 +425,18 @@ public:
 
 	virtual bool load(QDataStream& stream);
 	virtual bool save(QDataStream& stream);
+
+protected:
+	virtual void advanceMoveInternal(unsigned int advanceCount); // move one step futher to path
+
+	/**
+	 * Note: this is not actually an advance*() method, like @ref
+	 * advanceWork and the like. advanceMoveCheck() must get called
+	 * (manually) after any advance*() method that moves a unit.
+	 *
+	 * This is most notably @ref advanceMove
+	 **/
+	virtual void advanceMoveCheck();
 
 private:
 	// a d pointer is probably not very good here - far too much memory consumption
@@ -420,7 +502,7 @@ public:
 	 * placing the unit until the construction is completed. See @ref
 	 * isConstructionComplete
 	 **/
-	virtual void advanceConstruction();
+	virtual void advanceConstruction(unsigned int advanceCount);
 
 	virtual RepairPlugin* repairPlugin() const;
 

@@ -80,18 +80,6 @@ class UnitPlugin
 	virtual int pluginType() const = 0;
 
 	/**
-	 * Note that this must not change! If you make this configurable you
-	 * should use a KGameProperty with clean policy in a global class or at
-	 * least in Player.
-	 *
-	 * This value MUST be exactly the same on ALL clients!
-	 * @return How often the @ref advance mehtod gets called for this @ref
-	 * pluginType.
-	virtual unsigned int advanceInterval() const = 0;
-	 **/
-
-	/**
-	 * Note that this functions must not change @ref Unit::currentPlugin!
 	 * @param advanceCount See @ref BosonCanvas::slotAdvance. You can use
 	 * this to do expensive calculations only as seldom as possible. Note
 	 * that there is still some overhead, since this advance method still

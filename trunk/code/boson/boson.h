@@ -42,7 +42,8 @@ public:
 	enum PropertyIds {
 		IdGameSpeed = 10000, // dont wanna #include <kgameproperty.h> - better: KGamePropertyBase::IdUser+...
 		IdNextUnitId = 10001,
-		IdAdvanceCount = 10002
+		IdAdvanceCount = 10002,
+		IdAdvanceFlag = 10003
 	};
 
 	/**
@@ -130,6 +131,15 @@ public:
 
 	LoadingStatus loadingStatus();
 
+	/**
+	 * See @ref Unit::advanceFunction2 for more info about this.
+	 * @return TRUE if @ref Unit::advanceFunction should get/is called or
+	 * FALSE if @ref Unit::advanceFunction2 is active.
+	 **/
+	bool advanceFlag() const;
+
+	void toggleAdvanceFlag();
+
 public slots:
 	void slotSetGameSpeed(int speed);
 
@@ -143,7 +153,7 @@ public slots:
 	 **/
 	void slotSendAddUnit(unsigned long int unitType, int x, int y, Player* owner);
 
-	void slotAdvanceComputerPlayers(unsigned int advanceCount);
+	void slotAdvanceComputerPlayers(unsigned int advanceCount, bool advanceFlag);
 
 signals:
 	/**
@@ -175,8 +185,9 @@ signals:
 	 * decide what should be done - e.g. there is no need to check for new
 	 * enemies every advance call. This value is increased after the signal
 	 * was emitted and reset to 0 when a certain value is reached.
+	 * @param advanceFlag see @ref advanceFlag
 	 **/
-	void signalAdvance(unsigned int advanceCount);
+	void signalAdvance(unsigned int advanceCount, bool advanceFlag);
 
 	void signalInitMap(const QByteArray&);
 

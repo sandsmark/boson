@@ -69,12 +69,23 @@ public:
 	/**
 	 * See @ref Unit::advance
 	 **/
-	virtual void advance(int ) {}
+	virtual void advance(unsigned int ) {}
 
-	
+	/**
+	 * See @ref Unit::advanceFunction
+	 **/
+	inline virtual void advanceFunction(unsigned int /*advanceCount*/) { }
+
+	/**
+	 * See @ref Unit::advanceFunction2
+	 **/
+	inline virtual void advanceFunction2(unsigned int /*advanceCount*/) { }
+
 private:
 	bool mIsAnimated;
 	SelectBox* mSelectBox;
+
 };
 
 #endif
+

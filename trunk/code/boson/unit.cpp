@@ -20,7 +20,6 @@
 #include "unit.h"
 #include "player.h"
 #include "bosoncanvas.h"
-#include "boson.h"
 #include "cell.h"
 #include "speciestheme.h"
 #include "unitproperties.h"
@@ -28,11 +27,11 @@
 #include "selectbox.h"
 #include "bosonmessage.h"
 #include "bosonstatistics.h"
-#include "kspritetooltip.h"
 #include "unitplugins.h"
 #include "boitemlist.h"
 #include "bosonmodel.h"
 #include "pluginproperties.h"
+//#include "kspritetooltip.h" // FIXME
 
 #include <kgame/kgamepropertylist.h>
 #include <kgame/kgame.h>
@@ -73,6 +72,8 @@ Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
 {
  d = new UnitPrivate;
  mCurrentPlugin = 0;
+ mAdvanceFunction = &Unit::advanceNone;
+ mAdvanceFunction2 = &Unit:: advanceNone;
  setOwner(owner);
 
  d->mDirection.registerData(IdDirection, dataHandler(), 
@@ -197,15 +198,14 @@ void Unit::setWork(WorkType w)
  if (currentPlugin() && w != WorkPlugin) {
 	mCurrentPlugin = 0;
  }
+ if (w == WorkNone) {
+	kdDebug() << "none - 0. ; " << id() << endl;
+ }
  UnitBase::setWork(w);
 }
 
 void Unit::setPluginWork(int pluginType)
 {
- if (canvas()->unitPluginsLocked()) {
-	kdWarning() << k_funcinfo << "Plugins locked!" << endl;
-	return;
- }
  UnitPlugin* p = plugin(pluginType);
  if (!p) {
 	kdError() << k_funcinfo << id() << " does not have plugin " << pluginType << endl;
@@ -273,7 +273,7 @@ void Unit::moveBy(float moveX, float moveY, float moveZ)
  canvas()->unitMoved(this, oldX, oldY);
 }
 
-void Unit::advance(int advanceCount)
+void Unit::advance(unsigned int advanceCount)
 { // time critical function !!!
  if (isDestroyed()) {
 	return;
@@ -288,20 +288,16 @@ void Unit::advance(int advanceCount)
  } else {
 	d->shieldReloadCounter++;
  }
- if (work() == WorkPlugin) {
-	if (!currentPlugin()) {
-		kdWarning() << k_funcinfo << "NULL plugin but WorkPlugin!" << endl;
-		setWork(WorkNone);
-	} else {
-		currentPlugin()->advance(advanceCount);
-	}
- }
 }
 
-void Unit::advanceNone()
+void Unit::advanceNone(unsigned int advanceCount)
 {
 // this is called when the unit has nothing specific to do. Usually we just want
 // to fire at every enemy in range.
+
+ if (advanceCount % 10 != 0) {
+	return;
+ }
 
  if (weaponDamage() > 0) {
 	BoItemList list = enemyUnitsInRange();
@@ -329,8 +325,11 @@ void Unit::advanceNone()
  }
 }
 
-void Unit::advanceAttack()
+void Unit::advanceAttack(unsigned int advanceCount)
 {
+ if (advanceCount % 5 != 0) {
+	return;
+ }
  kdDebug() << k_funcinfo << endl;
  if (!target()) {
 	kdWarning() << k_funcinfo << "cannot attack NULL target" << endl;
@@ -361,6 +360,24 @@ void Unit::advanceAttack()
 	stopAttacking();
  }
 
+}
+
+void Unit::advanceDestroyed(unsigned int advanceCount)
+{
+ // note: the unit/wreckage will get deleted pretty soon
+ if (advanceCount % 50 != 0) {
+	return;
+ }
+}
+
+void Unit::advancePlugin(unsigned int advanceCount)
+{
+ if (!currentPlugin()) {
+	kdWarning() << k_funcinfo << "NULL plugin!" << endl;
+	setWork(WorkNone);
+ } else {
+	currentPlugin()->advance(advanceCount);
+ }
 }
 
 void Unit::addWaypoint(const QPoint& pos)
@@ -670,10 +687,48 @@ void Unit::setAdvanceWork(WorkType w)
  // missing by any reason
  setXVelocity(0);
  setYVelocity(0);
- if (w != advanceWork() || isDestroyed()) {
-	canvas()->setWorkChanged(this);
- }
+
  UnitBase::setAdvanceWork(w);
+
+ // we even do this if nothing changed - just in case...
+ switch (w) {
+	case WorkNone:
+		kdDebug() << k_funcinfo << "none" << endl;
+		setAdvanceFunction(&Unit::advanceNone, owner()->advanceFlag());
+		break;
+	case WorkMove:
+		setAdvanceFunction(&Unit::advanceMove, owner()->advanceFlag());
+		break;
+	case WorkAttack:
+		setAdvanceFunction(&Unit::advanceAttack, owner()->advanceFlag());
+		break;
+	case WorkConstructed:
+		setAdvanceFunction(&Unit::advanceConstruction, owner()->advanceFlag());
+		break;
+	case WorkDestroyed:
+		setAdvanceFunction(&Unit::advanceDestroyed, owner()->advanceFlag());
+		break;
+	case WorkFollow:
+		setAdvanceFunction(&Unit::advanceFollow, owner()->advanceFlag());
+		break;
+	case WorkPlugin:
+		setAdvanceFunction(&Unit::advancePlugin, owner()->advanceFlag());
+		break;
+ }
+}
+
+void Unit::setAdvanceFunction(MemberFunction func, bool advanceFlag)
+{
+ if (canvas()->advanceFunctionLocked()) {
+	if (advanceFlag) {
+		mAdvanceFunction = func;
+	} else {
+		mAdvanceFunction2 = func;
+	}
+ } else {
+	mAdvanceFunction = func;
+	mAdvanceFunction2 = func;
+ }
 }
 
 bool Unit::isNextTo(Unit* target) const
@@ -741,14 +796,13 @@ MobileUnit::~MobileUnit()
  delete d;
 }
 
-void MobileUnit::advanceMove()
+void MobileUnit::advanceMoveInternal(unsigned int) // this actually needs to be called for every advanceCount.
 {
  if (speed() == 0) {
 	kdWarning() << "speed == 0" << endl;
 	stopMoving();
 	return;
  }
-
 
  if(mSearchPath) {
 	newPath();
@@ -790,7 +844,7 @@ void MobileUnit::advanceMove()
  QPoint wp = currentWaypoint(); // where we go to
  // If both waypoint's coordinates are -1, then it means that path to
  //  destination can't be found and we should stop
- if((wp.x() == -1) &&(wp.y() == -1)) {
+ if ((wp.x() == -1) && (wp.y() == -1)) {
 	stopMoving();
 	return;
  }
@@ -975,8 +1029,11 @@ void MobileUnit::turnTo()
  }
 }
 
-void MobileUnit::advanceFollow()
+void MobileUnit::advanceFollow(unsigned int advanceCount)
 {
+ if (advanceCount % 5 != 0) {
+	return;
+ }
  if (!target()) {
 	kdWarning() << k_funcinfo << "cannot follow NULL unit" << endl;
 	stopAttacking();  // stopAttacking should maybe be renamed to stopEverything
@@ -1092,8 +1149,11 @@ unsigned int Facility::constructionSteps() const
  return unitProperties()->constructionSteps();
 }
 
-void Facility::advanceConstruction()
+void Facility::advanceConstruction(unsigned int advanceCount)
 {
+ if (advanceCount % 20 != 0) {
+	return;
+ }
  if (isDestroyed()) {
 	kdError() << k_funcinfo << "unit is already destroyed" << endl;
 	return;
