@@ -83,7 +83,7 @@ alIsBuffer(0);
   CXXFLAGS=$bo_save_cxxflags
 
   LIB_OPENAL="$bo_lib_openal"
-  BO_LIB_OPENAL="$bo_lib_openal \$(top_builddir)/bosound/openal/libbosonsoundal.la"
+  BO_LIB_OPENAL="\$(top_builddir)/bosound/openal/libbosonsoundal.la"
 fi
 
 OPENAL_SUBDIR=
