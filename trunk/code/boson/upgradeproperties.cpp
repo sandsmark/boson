@@ -734,10 +734,6 @@ void UpgradeProperties::convertEntries()
       // Can be both unit's or weapon's key
       it.data() = QString::number(it.data().toFloat() / 20.0f);
     }
-    else if(key == "UnitProductionTime")
-    {
-      it.data() = QString::number(it.data().toFloat() * 20.0f);
-    }
     // Convert from seconds to adv.calls  (multiply by 20)
     else if(key == "UnitProductionTime")
     {
