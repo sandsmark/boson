@@ -275,6 +275,9 @@ void Unit::moveBy(float moveX, float moveY, float moveZ)
  // BosonCanvas::slotAdvance()
  float oldX = x();
  float oldY = y();
+
+ //TODO: these calls should be in BosonSprite, since they are valid for all
+ //items, not just for units!
  canvas()->removeFromCells(this);
  BosonSprite::moveBy(moveX, moveY, moveZ);
  canvas()->addToCells(this);
@@ -595,17 +598,14 @@ bool Unit::load(QDataStream& stream)
  float z;
  Q_INT8 visible;
  Q_INT32 frame;
- 
+
  stream >> x;
  stream >> y;
  stream >> z;
  stream >> visible;
  stream >> frame;
 
- setX(x);
- setY(y);
- setZ(z);
-// setVisible(visible);//obsolete
+ move(x, y, z);
  if (isDestroyed()) {
 	kdError() << k_funcinfo << "unit is already destroyed" << endl;
  } else {
