@@ -699,6 +699,9 @@ void BosonCanvas::destroyUnit(Unit* unit)
 	Player* owner = unit->owner();
 	d->mDestroyedUnits.append(unit);
 
+	// This stops everything
+	unit->stopAttacking();
+
 	if (unit->particleSystems() && unit->particleSystems()->count() > 0) {
 		QPtrListIterator<BosonParticleSystem> it(*(unit->particleSystems()));
 		for (; it.current(); ++it) {
