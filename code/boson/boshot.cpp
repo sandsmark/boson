@@ -115,6 +115,8 @@ void  boShot::timerEvent( QTimerEvent * )
 
 bool boShot::loadBig(shot_style style, int version)
 {
+	// orzel, because shots # are from 1->4, will change soon, XXX
+	version++;
 
 
 	boAssert(style!=SHOT_SHOT);
@@ -157,7 +159,7 @@ bool boShot::loadBig(shot_style style, int version)
 	for(j=0; j< frame_nb; j++) {
 		sprintf(buffer, ".%04d.bmp", j);
 		if (!loadPixmap(path + buffer, &p)) {
-			logf(LOG_ERROR, "boshot::loadBig Can't load %s/big.%02d.bmp...\n", (const char *)path, j);
+			logf(LOG_ERROR, "boshot::loadBig Can't load %s.%04d.bmp...\n", (const char *)path, j);
 			return false;
 		}
 		pix_l.append(p);
