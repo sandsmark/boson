@@ -596,7 +596,8 @@ void BosonBigDisplayBase::paintGL()
  glDisable(GL_DEPTH_TEST);
 
 
-#if 0
+ // Fog Of War
+ boProfiling->renderFOW(true);
  glColor3f(0.0, 0.0, 0.0);
  GLfloat cellYPos = -BO_GL_CELL_SIZE;
  GLfloat cellXPos = 0.0;
@@ -617,7 +618,7 @@ void BosonBigDisplayBase::paintGL()
 	}
  glEnd();
  glColor3f(1.0, 1.0, 1.0);
-#endif
+ boProfiling->renderFOW(false);
 
 
  boProfiling->renderText(true); // AB: actually this is text and cursor
@@ -819,7 +820,6 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 				int moveX = d->mMouseMoveDiff.dx();
 				int moveY = d->mMouseMoveDiff.dy();
 				mapDistance(moveX, moveY, &dx, &dy);
-				kdDebug() << "moveX=" << moveX << " moveY=" << moveY << " dx=" << dx << ",dy=" << dy << endl;
 				setCameraPos(cameraX() + dx, cameraY() + dy, cameraZ());
 			} else {
 				d->mMouseMoveDiff.stop();
@@ -1037,33 +1037,9 @@ bool BosonBigDisplayBase::mapCoordinates(const QPoint& pos, GLdouble* posX, GLdo
  GLdouble tanAlphaY = (nearY - farY) / (nearZ - farZ);
  *posY = (GLfloat)(nearY - tanAlphaY * nearZ);
 
+ // AB: what should we do with posZ ??
+
  return true;
-
-#if 0
- if (checkError()) {
-	kdError() << k_funcinfo << "GL error before glReadPixels" << endl;
- }
- glReadPixels(pos.x(), view[3] - pos.y(), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ);
- if (checkError()) {
-	kdError() << k_funcinfo << "GL error after glReadPixels" << endl;
- }
-
- kdDebug() << "winZ = " << winZ << endl;
- if (!gluUnProject(winX, winY, winZ,
-		model, proj, view,
-		posX, posY, posZ)) {
-	kdWarning() << k_funcinfo << "oops" << endl;
-	return false;
- }
- kdDebug() << winX << "->" << *posX << "," << winY << "->" << *posY << "," << winZ << "->" << *posZ << endl;
-
- if (checkError()) {
-	kdError() << k_funcinfo << "GL error" << endl;
- }
-
-// kdDebug() << "click on: " << *posX << "," << *posY << "," <<*posZ << endl;
- return true;
-#endif
 }
 
 bool BosonBigDisplayBase::mapDistance(int windx, int windy, GLdouble* dx, GLdouble* dy) const

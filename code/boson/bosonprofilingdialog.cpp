@@ -221,6 +221,7 @@ void BosonProfilingDialog::resetRenderPage()
 	createRenderItem(item, i18n("Clearing"), (*it).mClear);
 	createRenderItem(item, i18n("Cells"), (*it).mCells);
 	createRenderItem(item, i18n("Units"), (*it).mUnits);
+	createRenderItem(item, i18n("FOW"), (*it).mFOW);
 	createRenderItem(item, i18n("Text"), (*it).mText);
 	createRenderItem(item, i18n("Function"), (*it).mFunction);
 	item->setOpen(true);
