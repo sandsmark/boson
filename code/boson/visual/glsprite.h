@@ -89,7 +89,7 @@ public:
 	bool isVisible() const { return mIsVisible; }
 	virtual void setAnimated(bool a) = 0;
 	
-	void move(float x, float y) { move(x, y, 0.0); }
+	void move(float x, float y) { move(x, y, z()); }
 	void move(float nx, float ny, float nz) { moveBy(nx - x(), ny - y(), nz - z()); }
 	void moveBy(float dx, float dy) { moveBy(dx, dy, 0.0); }
 	virtual void moveBy(float dx, float dy, float dz)

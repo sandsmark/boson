@@ -58,14 +58,6 @@
 #define BOSON_MINIMUM_WIDTH 640
 #define BOSON_MINIMUM_HEIGHT 480
 
-#define Z_MOBILE 400
-#define Z_FACILITY 300
-#define Z_DESTROYED_MOBILE 200
-#define Z_DESTROYED_FACILITY 100
-#define Z_FOG_OF_WAR (Z_MOBILE + 50000) // must be > any unit 
-#define Z_CANVAS_CURSOR (Z_FOG_OF_WAR + 100) // should always be on top (if used at all)
-#define Z_CANVASTEXT (Z_FOG_OF_WAR + 10000) // must be greater than anything else
-
 #define BUILD_RANGE 5 * BO_TILE_SIZE // units can be placed within 10 tiles from its factory
 
 #define BOSON_PORT 5454
