@@ -56,6 +56,7 @@
 #define MAX_WEAPONS_PER_UNIT 100
 
 #define BUILD_RANGE 10 // units can be placed within 10 tiles from its factory
+#define REFINERY_FORBID_RANGE 6 // refineries must be at least 6 cells away from resource mines
 
 #define BOSON_MINIMUM_WIDTH 640
 #define BOSON_MINIMUM_HEIGHT 480
