@@ -24,6 +24,8 @@
 #include <qlayout.h>
 #include <qlabel.h>
 
+#include <math.h>
+
 #include "bo3dtools.h"
 #include "bodebug.h"
 
