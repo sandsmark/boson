@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2001 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,43 +16,49 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef KSPRITETOOLTIP_H
-#define KSPRITETOOLTIP_H
+#ifndef BOGLTOOLTIP_H
+#define BOGLTOOLTIP_H
 
-#include <qtooltip.h>
+#include <qobject.h>
 
-class QCanvasView;
-class QCanvasItem;
+class BosonBigDisplayBase;
+class BosonItem;
+class QString;
 
+class BoGLToolTipPrivate;
 /**
- * Simply create a new KSpriteToolTip for every @ref QCanvasView your
- * application offers. Then add tooltips using @ref add. You may either provide
- * the @ref QCanvasItem::rtti or a pointer to a @ref QCanvasItem.
- *
- * Note that the @ref QCanvasItem::rtti matches <em>all</em> items with this
- * rtti, but the pointer version only this single item.
- *
- * If you provide a tooltip on a special @ref QCanvasItem which already exists
- * an rtti-tooltip for, then only the @ref QCanvasItem tip is used.
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class KSpriteToolTip : public QToolTip
+class BoGLToolTip : public QObject
 {
+	Q_OBJECT
 public:
-	KSpriteToolTip(QCanvasView* v);
-	virtual ~KSpriteToolTip();
+	BoGLToolTip(BosonBigDisplayBase*);
+	virtual ~BoGLToolTip();
+
+	virtual bool eventFilter(QObject* o, QEvent* e);
+
+	/**
+	 * @return TRUE when the @ref currentTip should get displayed in this
+	 * frame.
+	 **/
+	bool showTip() const { return mShowTip; }
+
+	const QString& currentTip() const { return mCurrentTip; }
 
 	/**
 	 * Initialize the global/static tip manager. This is done automatically
-	 * in the KSpriteToolTip c'tor, so you usually don't need to call this.
+	 * in the BoGLToolTip c'tor, so you usually don't need to call this.
 	 **/
 	static void initTipManager();
 
+	static int toolTipDelay();
+
 	/**
 	 * Add a tip that gets displayed for every item which @ref
-	 * QCanvasItem::rtti equals rtti. Note that you can override this tip if
-	 * you add a tip providing the pointer of the @ref QCanvasItem
-	 * @param rtti The @ref QCanvasItem::rtti this tip is displayed for
+	 * BosonItem::rtti equals rtti. Note that you can override this tip if
+	 * you add a tip providing the pointer of the @ref BosonItem
+	 * @param rtti The @ref BosonItem::rtti this tip is displayed for
 	 * @param tip Well... the tip!
 	 **/
 	static void add(int rtti, const QString& tip);
@@ -63,23 +69,29 @@ public:
 	 * your destructor!
 	 *
 	 * This tip overrides any rtti-dependant tip.
-	 * @param item The @ref QCanvasItem this tip is displayed for
+	 * @param item The @ref BosonItem this tip is displayed for
 	 * @param tip Well... the tip!
 	 **/
-	static void add(QCanvasItem* item, const QString& tip);
-	static void remove(QCanvasItem* item);
+	static void add(BosonItem* item, const QString& tip);
+	static void remove(BosonItem* item);
 	static void remove(int rtti);
 
 	static void ignore(int rtti);
-	static void ignore(QCanvasItem* item);
+	static void ignore(BosonItem* item);
 	static void unignore(int rtti);
-	static void unignore(QCanvasItem* item);
+	static void unignore(BosonItem* item);
 	
 protected:
-	virtual void maybeTip(const QPoint& pos);
+	void hideTip();
+
+protected slots:
+	void slotTimeOut();
 
 private:
-	QCanvasView* mView;
+	BoGLToolTipPrivate* d;
+	BosonBigDisplayBase* mView;
+	QString mCurrentTip;
+	bool mShowTip;
 };
 
 #endif

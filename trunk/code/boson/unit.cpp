@@ -31,7 +31,7 @@
 #include "boitemlist.h"
 #include "bosonmodel.h"
 #include "pluginproperties.h"
-//#include "kspritetooltip.h" // FIXME
+#include "bogltooltip.h"
 #include "boson.h"
 #include "bosonparticlesystem.h"
 #include "bosonweapon.h"
@@ -117,8 +117,7 @@ Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
  d->mWantedRotation.setLocal(0);
  d->mMoveAttacking.setLocal(0);
 
- // TODO: the tooltips do not yet work with OpenGL!!
-// KSpriteToolTip::add(rtti(), unitProperties()->name());
+ BoGLToolTip::add(rtti(), unitProperties()->name());
  if (!model()) {
 	boError() << k_funcinfo << "NULL model - this will most probably crash!" << endl;
 	return;
@@ -146,7 +145,7 @@ Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
 
 Unit::~Unit()
 {
-// KSpriteToolTip::remove(this);
+ BoGLToolTip::remove(this);
  d->mWaypoints.setEmittingSignal(false); // just to prevent warning in Player::slotUnitPropertyChanged()
  d->mWaypoints.clear();
  unselect();

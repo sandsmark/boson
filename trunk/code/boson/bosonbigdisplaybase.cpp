@@ -46,6 +46,7 @@
 #include "bosonmodel.h"
 #include "bo3dtools.h"
 #include "bosonbigdisplayinputbase.h"
+#include "bogltooltip.h"
 #include "info/boinfo.h"
 
 #include <kgame/kgameio.h>
@@ -390,6 +391,7 @@ public:
 		mPlacementPreviewCanPlace = false;
 
 		mInput = 0;
+		mToolTips = 0;
 
 		mRenderCells = 0;
 		mRenderCellsSize = 0;
@@ -454,6 +456,7 @@ public:
 	GLuint mCellPlacementTexture;
 
 	BosonBigDisplayInputBase* mInput;
+	BoGLToolTip* mToolTips;
 
 	bool mDebugMapCoordinates;
 };
@@ -475,6 +478,7 @@ BosonBigDisplayBase::~BosonBigDisplayBase()
 // delete d->mUnitTips;
  delete d->mDefaultFont;
  delete[] d->mRenderCells;
+ delete d->mToolTips;
  delete d;
  boDebug() << k_funcinfo << "done" << endl;
 }
@@ -492,6 +496,7 @@ void BosonBigDisplayBase::init()
 
  mSelection = new BoSelection(this);
  d->mChat = new BosonGLChat(this);
+ d->mToolTips = new BoGLToolTip(this);
 
  for (int i = 0; i < 4; i++) {
 	d->mViewport[i] = 0;
@@ -1123,9 +1128,66 @@ void BosonBigDisplayBase::renderText()
 	glRasterPos2i(d->mViewport[2] / 2 - w / 2, d->mViewport[3] / 2);
 	glCallLists(pause.length(), GL_UNSIGNED_BYTE, (GLubyte*)pause.latin1());
  }
+ if (d->mToolTips->showTip()) {
+	renderToolTip();
+ }
 
  glColor3f(1.0, 1.0, 1.0);
  glDisable(GL_BLEND);
+}
+
+void BosonBigDisplayBase::renderToolTip()
+{
+ const int cursorOffset = 15;
+ const int minTooltipWidth = 100;
+// const int minTooltipHeight = 100;
+ QPoint pos = mapFromGlobal(QCursor::pos());
+ // AB: glListBase() must already be valid and the raster pos must be at the
+ // correct position.
+ BosonGLFont* font = d->mDefaultFont;
+ BO_CHECK_NULL_RET(font);
+ QString tip = d->mToolTips->currentTip();
+ int tipWidth = font->width(tip);
+ tipWidth = QMIN(tipWidth, minTooltipWidth);
+ int x;
+ int y;
+ int w = 0;
+ // we try to show the tip to the right of the cursor, if we have at least
+ // tipWidth space, otherwise to the left if we have enough space there.
+ // if both doesn't apply, we just pick the direction where we have most space
+ if (width() - (pos.x() + cursorOffset) >= tipWidth) {
+	// to the right of the cursor
+	x = pos.x() + cursorOffset;
+	w = width() - x;
+ } else if (pos.x() - cursorOffset >= tipWidth) {
+	// to the left of the cursor
+	x = pos.x() - cursorOffset - tipWidth;
+	w = tipWidth;
+ } else {
+	// not enough space anyway - pick where we can get most space
+	if (pos.x() > width() / 2) {
+		x = pos.x() + cursorOffset;
+		w = width() - x;
+	} else {
+		x = QMAX(0, pos.x() - cursorOffset - tipWidth);
+		w = pos.x() - cursorOffset;
+	}
+ }
+
+ int h = font->height(tip, w);
+ if (pos.y() + cursorOffset + h < height()) {
+	y = d->mViewport[3] - (pos.y() + cursorOffset);
+ } else if (pos.y() >= h + cursorOffset) {
+	y = d->mViewport[3] - (pos.y() - (cursorOffset + h));
+ } else {
+	if (pos.y() < height() / 2) {
+		y = d->mViewport[3] - (pos.y() + cursorOffset);
+	} else {
+		y = d->mViewport[3] - (pos.y() - (cursorOffset + h));
+	}
+ }
+
+ font->renderText(x, y, tip, w);
 }
 
 void BosonBigDisplayBase::renderCells()
@@ -2224,7 +2286,7 @@ void BosonBigDisplayBase::generateCellList()
 	for (int y = cellMinY; y <= cellMaxY; y++) {
 		// WARNING: x,y MUST be valid!!! there is *no* additional check
 		// here!
-		Cell* c = &allCells[x + y * map->width()];
+		Cell* c = &allCells[map->cellArrayPos(x, y)];
 		
 		GLfloat glX = (float)c->x() * BO_GL_CELL_SIZE + BO_GL_CELL_SIZE / 2;
 		GLfloat glY = -((float)c->y() * BO_GL_CELL_SIZE + BO_GL_CELL_SIZE / 2);
