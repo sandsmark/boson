@@ -517,7 +517,7 @@ void TopWidget::slotHideNetworkOptions()
 
 void TopWidget::loadGameData1() // FIXME rename!
 {
- d->mLoading->setSteps(5000);
+ d->mLoading->setSteps(3400 + mBoson->playerCount() * UNITDATAS_LOADINGFACTOR);
  d->mLoading->setProgress(0);
  checkEvents();
  // Receive map (first send it if we're admin)
@@ -562,24 +562,15 @@ void TopWidget::loadGameData2() //FIXME rename!
 void TopWidget::loadGameData3() // FIXME rename!
 {
  // Load unit pixmaps
- // FIXME: load for *all* players
- d->mLoading->setProgress(3000);
- d->mLoading->setLoading(BosonLoadingWidget::LoadUnits);
- checkEvents();
- // First get all id's of units
- QValueList<int> unitIds = player()->speciesTheme()->allFacilities();
- unitIds += player()->speciesTheme()->allMobiles();
- QValueList<int>::iterator it;
- int current = 0;
- int total = unitIds.count();
- for(it = unitIds.begin(); it != unitIds.end(); ++it) {
-	current++;
-	player()->speciesTheme()->loadUnit(*it);
-	d->mLoading->setProgress((int)(3000 + ((double)current / total * 1600)));
+ QPtrListIterator<KPlayer> it(*(mBoson->playerList()));
+ int progress = 3000;
+ while (it.current()) {
+	loadUnitDatas(((Player*)it.current()), progress);
+	++it;
+	progress += UNITDATAS_LOADINGFACTOR;
  }
 
-
- d->mLoading->setProgress(4600);
+ d->mLoading->setProgress(progress);
  d->mLoading->setLoading(BosonLoadingWidget::InitGame);
  checkEvents();
  if(mBoson->isAdmin()) {
@@ -588,7 +579,8 @@ void TopWidget::loadGameData3() // FIXME rename!
 	}
 	mBoson->sendMessage(0, BosonMessage::IdStartScenario);
  }
- d->mLoading->setProgress(4700);
+ progress += 100;
+ d->mLoading->setProgress(progress);
  d->mLoading->setLoading(BosonLoadingWidget::StartingGame);
  checkEvents();
 
@@ -614,7 +606,8 @@ void TopWidget::loadGameData3() // FIXME rename!
  connect(d->mBosonWidget, SIGNAL(signalCmdFrameDockHidden()), this, SLOT(slotCmdFrameDockHidden()));
  connect(d->mBosonWidget, SIGNAL(signalGameOver()), this, SLOT(slotGameOver()));
 
- d->mLoading->setProgress(5000);
+ progress += 300;
+ d->mLoading->setProgress(progress);
  d->mLoading->setLoading(BosonLoadingWidget::LoadingDone);  // FIXME: This is probably meaningless
 
  mGame = true;
@@ -622,7 +615,7 @@ void TopWidget::loadGameData3() // FIXME rename!
 
 void TopWidget::slotCanvasTilesLoading(int progress)
 {
- d->mLoading->setProgress((int)(600 + (progress / 1244.0 * 2200)));
+ d->mLoading->setProgress((int)(600 + (progress / 1244.0 * MAPTILES_LOADINGFACTOR)));
  // No checkEvents() here as events are already processed in BosonTiles::???
 }
 
@@ -631,6 +624,24 @@ void TopWidget::slotCanvasTilesLoaded()
  checkEvents();
  d->mLoading->setProgress(3000);
  QTimer::singleShot(0, this, SLOT(loadGameData3()));
+}
+
+void TopWidget::loadUnitDatas(Player* p, int progress)
+{
+ d->mLoading->setProgress(progress);
+ d->mLoading->setLoading(BosonLoadingWidget::LoadUnits);
+ checkEvents();
+ // First get all id's of units
+ QValueList<int> unitIds = p->speciesTheme()->allFacilities();
+ unitIds += p->speciesTheme()->allMobiles();
+ QValueList<int>::iterator it;
+ int current = 0;
+ int total = unitIds.count();
+ for(it = unitIds.begin(); it != unitIds.end(); ++it) {
+	current++;
+	p->speciesTheme()->loadUnit(*it);
+	d->mLoading->setProgress((int)(progress + ((double)current / total * UNITDATAS_LOADINGFACTOR)));
+ }
 }
 
 void TopWidget::slotReceiveMap(const QByteArray& buffer)
