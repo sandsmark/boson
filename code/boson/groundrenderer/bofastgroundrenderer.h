@@ -43,5 +43,13 @@ public:
 	virtual void renderVisibleCells(Cell** cells, unsigned int cellsCount, const BosonMap* map);
 };
 
+class BoFastGroundRendererNoTree : public BoFastGroundRenderer
+{
+	Q_OBJECT
+public:
+	BoFastGroundRendererNoTree() : BoFastGroundRenderer(false)
+	{
+	}
+};
 #endif
 
