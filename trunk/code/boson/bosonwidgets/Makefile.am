@@ -1,7 +1,7 @@
 
 SUBDIRS = . plugin
 
-INCLUDES = $(all_includes)
+INCLUDES = -I$(top_builddir)/boson/bosonwidgets $(all_includes)
 noinst_LTLIBRARIES = libbosonwidgets.la
 
 METASOURCES = AUTO
@@ -9,5 +9,7 @@ METASOURCES = AUTO
 libbosonwidgets_la_SOURCES = \
 	bogamechat.cpp \
 	bosonplayfieldview.cpp \
-	bonuminput.cpp
+	bonuminput.cpp \
+	bocolorchooserbase.ui \
+	bocolorchooser.cpp
 

@@ -1,7 +1,7 @@
 
 AM_CXXFLAGS = -DQT_PLUGIN
 
-INCLUDES = $(all_includes)
+INCLUDES = -I$(top_builddir)/boson/bosonwidgets $(all_includes)
 kde_widget_LTLIBRARIES = bosonwidgets.la
 
 METASOURCES = AUTO
