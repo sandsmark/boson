@@ -41,7 +41,7 @@ struct visualMap {
 	visualCell	**cells;
 	int		width;
 	int		height;
-	};
+};
 
 
 /** 
@@ -49,9 +49,9 @@ struct visualMap {
   */
 class editorField : public visualField 
 {
-  Q_OBJECT
+	Q_OBJECT
 
- public:
+public:
   editorField(uint l, uint h, QObject *parent=0, const char *name=0L);
 
   void createMob(mobileMsg_t &);
@@ -66,15 +66,16 @@ class editorField : public visualField
 /* concerning contents */
   visualFacility *getFacility(long key) { return facility.find(key); }
 
-  public: ///orzel : temp
-
-  QIntDict<visualMobUnit>	mobile;
-  QIntDict<visualFacility>	facility;
+public: ///orzel : temp
 
   visualMap	map;
   origPeople	people;
 
   bool		isModified;
+
+//private:
+	QIntDict<visualMobUnit>		mobile;
+	QIntDict<visualFacility>	facility;
 
 };
 

@@ -32,202 +32,72 @@
 #define mobileList (((bosonField*)(view->field))->mobile)
 #define facilityList (((bosonField*)(view->field))->facility)
 
-static int selectX, selectY;
-static int oldX, oldY;
-
 void visualBigDisplay::mousePressEvent(QMouseEvent *e)
 {
-int x, y;
-
-bool found = FALSE;
-
-x = e->x();
-y = e->y();
-
-if (e->button() & MidButton) {
-	emit relativeReCenterView( x/BO_TILE_SIZE , y/BO_TILE_SIZE);
-	return;
-	}
-
-if (e->button() & RightButton) {
-	x += view->X()*BO_TILE_SIZE; y += view->Y()*BO_TILE_SIZE;
-	//orzel : ugly fix..
-	((bosonView*)view)->leftClicked( x, y);
-	return;
-	}
-
-if (e->button() & LeftButton) {	
-	/* Here we transpose coo into the map referential */
-	x += view->X()*BO_TILE_SIZE; y += view->Y()*BO_TILE_SIZE;
-
-
-	/* Control -> multiselection, else... */
-	if (! (e->state()&ControlButton)) {
-		unSelectAll();
-		}
-
-	QIntDictIterator<playerMobUnit> mobIt(mobileList);
-	QIntDictIterator<playerFacility> fixIt(facilityList);
-
-	playerMobUnit	*m;
-	playerFacility	*f;
-
-//printf("\n\nselection , x=%d,y=%d\n", x, y);
-	for (fixIt.toFirst(); fixIt; ++fixIt) {
-		f = fixIt.current();
-/*		printf("f->rect() : (x,y)=%d,%d, (w,h)=%d,%d\n", 
-			f->rect().x(),
-			f->rect().y(),
-			f->rect().width(),
-			f->rect().height()
-			); */
-		if (f->rect().contains( QPoint( x, y) )) {
-			unSelectAll();
-			view->selectFix(f);
-			found = TRUE;
-			break;
-			}
-		}
-
-	for (mobIt.toFirst(); mobIt; ++mobIt) {
-		m = mobIt.current();
-/*		printf("m->rect() : (x,y)=%d,%d, (w,h)=%d,%d\n", 
-			m->rect().x(),
-			m->rect().y(),
-			m->rect().width(),
-			m->rect().height()
-			); */
-		if (m->rect().contains( QPoint( x, y) )) {
-			unSelectFix();
-		
-			if ((e->state()&ControlButton) && view->mobSelected.find(mobIt.currentKey()))
-				unSelectMob(mobIt.currentKey());
-			else
-				view->selectMob(mobIt.currentKey(), m);
-			found = TRUE;
-			}
-		}
-
-	if (!found) {
-	// Here, we have to draw a "selection box"...
-		view->setSelectionMode( SELECT_RECT);
-		oldX = selectX = e->x();
-		oldY = selectY = e->y();
-		unSelectFix();
-		}
-	}
-}
-
-void visualBigDisplay::mouseMoveEvent(QMouseEvent *e)
-{
-QPainter p;
-QPen pen(green, 2);
-
-if (SELECT_RECT != view->getSelectionMode()) return;
-
-p.begin(this);
-p.setPen(pen);
-p.setRasterOp(XorROP);
-/* erase previous rect */
-if (oldX != selectX && oldY != selectY)	
-	drawRectSelect(selectX, selectY, oldX, oldY, p);
-/* draw present rect */
-oldX = e->x();
-oldY = e->y();
-if (oldX != selectX && oldY != selectY)	
-	drawRectSelect(selectX, selectY, oldX, oldY, p);
-p.end();
-}
-
-void visualBigDisplay::mouseReleaseEvent(QMouseEvent *e)
-{
-QPainter p;
-QPen pen(green, 2);
-QIntDictIterator<playerMobUnit> mobIt(mobileList);
-QIntDictIterator<playerFacility> fixIt(facilityList);
-playerMobUnit	*m;
-int		t;
-
-if (SELECT_RECT != view->getSelectionMode()) return;
-
-p.begin(this);
-p.setPen(pen);
-p.setRasterOp(XorROP);
-/* erase rect */
-if (oldX != selectX && oldY != selectY)	
-	drawRectSelect(selectX, selectY, oldX, oldY, p);
-p.end();
-view->setSelectionMode( SELECT_NONE);
-
-/* generate multiple selection */
-
-if (selectX > oldX) {
-	t = oldX; 
-	oldX = selectX;
-	selectX = t;
-	}
-
-if (selectY > oldY) {
-	t = oldY; 
-	oldY = selectY;
-	selectY = t;
-	}
-
-selectX += BO_TILE_SIZE * view->X();
-selectY += BO_TILE_SIZE * view->Y();
-oldX += BO_TILE_SIZE * view->X();
-oldY += BO_TILE_SIZE *view->Y();
+	int x, y;
 	
-for (mobIt.toFirst(); mobIt; ++mobIt) {
-	m = mobIt.current();
-	if (selectX<=m->_x() && oldX>m->_x() + m->getWidth() &&
-	    selectY<=m->_y() && oldY>m->_y() + m->getHeight() && !view->mobSelected.find(mobIt.currentKey()) ) {
-		view->selectMob(mobIt.currentKey(), m);
+	
+	x = e->x();
+	y = e->y();
+	
+	if (e->button() & MidButton) {
+		emit relativeReCenterView( x/BO_TILE_SIZE , y/BO_TILE_SIZE);
+		return;
 		}
-	}
 
-selectX -= BO_TILE_SIZE * view->X();
-selectY -= BO_TILE_SIZE * view->Y();
-oldX -= BO_TILE_SIZE * view->X();
-oldY -= BO_TILE_SIZE * view->Y();
-repaint (selectX, selectY, oldX, oldY, FALSE);
+	/* Now we transpose coo into the map referential */
+	x += view->X()*BO_TILE_SIZE; y += view->Y()*BO_TILE_SIZE;
+	
+	if (e->button() & LeftButton) {	
+		/* Control -> multiselection, else... */
+		if (! (e->state()&ControlButton)) {
+			unSelectAll();
+			}
+	
+		QwSpriteFieldGraphic *sfg = view->field->findUnitAt( x, y);
+
+		if (!sfg) {
+			// nothing has been found : it's a ground-click
+			// Here, we have to draw a "selection box"...
+			view->setSelectionMode( SELECT_RECT);
+			oldX = selectX = e->x();
+			oldY = selectY = e->y();
+			unSelectFix();
+			return;
+		}
+	
+	
+		if ( IS_MOBILE(sfg->rtti())) {
+			visualMobUnit *m = (visualMobUnit *) sfg;
+	
+			unSelectFix();
+			if ((e->state()&ControlButton) && view->mobSelected.find(m->key))
+				unSelectMob(m->key);
+			else
+				view->selectMob(m->key, m);
+
+			return;
+		}
+
+		if ( IS_FACILITY(sfg->rtti())) {
+			visualFacility *f = (visualFacility *) sfg;
+			unSelectAll();		// anyway 
+			view->selectFix(f);
+
+			return;
+		}
+
+		// should never be reached !
+		logf(LOG_ERROR, "boson/fieldEvent.c, unexpeted field->findUnitAt() result");
+	
+	} // LeftButton 
+
+	if (e->button() & RightButton) {
+		//orzel : ugly fix..
+		((bosonView*)view)->leftClicked( x, y);
+		return;
+		}
+	
 }
 
-void visualBigDisplay::resizeEvent(QResizeEvent *e)
-{
-emit reSizeView((width()+BO_TILE_SIZE+1)/BO_TILE_SIZE, (height()+BO_TILE_SIZE+1)/BO_TILE_SIZE);
-}
 
-
-
-
-void visualBigDisplay::unSelectAll(void)
-{
-QIntDictIterator<visualMobUnit> selIt(view->mobSelected);
-
-
-/* deal with fix */
-unSelectFix();
-
-/* deal with mobiles */
-for (selIt.toFirst(); selIt;) { // ++ not needed, selIt should be increased
-	selIt.current()->unSelect();
-	unSelectMob(selIt.currentKey()); // by the .remove() in unselect
-	}
-boAssert(view->mobSelected.isEmpty());
-if (!view->mobSelected.isEmpty()) view->mobSelected.clear();
-
-view->unSelectAll();
-//logf(LOG_INFO, "deselecting all");
-}
-
-///orzel : those two should become inlined in .h
-void visualBigDisplay::unSelectFix(void)
-{
-	view->unSelectFix();
-}
-
-void visualBigDisplay::unSelectMob(long key)
-{
-	view->unSelectMob(key);
-}
