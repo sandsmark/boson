@@ -135,9 +135,13 @@ void BosonBigDisplayInput::actionClicked(const BoMouseEvent& event)
 		if (selection()->count() == 1) {
 			// there are special things to do for a single selected unit
 			// (e.g. mining if the unit is a harvester)
+			/*
+			 * AB: obsolete, as harvesting will take place on units
+			 * (->mines) only!
 			if (actionHarvest(event.canvasVector())) {
 				return;
 			}
+			*/
 		}
 
 		if (boConfig->RMBMovesWithAttack()) {
@@ -168,7 +172,7 @@ void BosonBigDisplayInput::actionClicked(const BoMouseEvent& event)
 		// a non-friendly unit, but the selection cannot shoot
 		// we probably won't do anything here
 		// IDEA: what about "I cannot shoot that!" sound?
-	} else {
+	} else if (localPlayer()->isAllied(unit->owner())) {
 		// click on a friendly unit
 		if (unit->isFacility() && unit->plugin(UnitPlugin::Repair)) {
 			// some kind of repairyard - repair all units
@@ -198,6 +202,14 @@ void BosonBigDisplayInput::actionClicked(const BoMouseEvent& event)
 			// (at least no valid)
 			// add other possibilities here
 		}
+	} else if (localPlayer()->isNeutral(unit->owner())) {
+		// click on a neutral unit
+		// note: this is NOT a friendly unit, so we won' repair it or
+		// so. but we won't shoot at it either (by default).
+
+		if (actionHarvest(event.canvasVector())) {
+			return;
+		}
 	}
  }
 
@@ -214,16 +226,36 @@ bool BosonBigDisplayInput::actionHarvest(const BoVector3& canvasVector)
 	BO_NULL_ERROR(selection());
 	return false;
  }
- MobileUnit* u = (MobileUnit*)selection()->leader();
- HarvesterPlugin* h = (HarvesterPlugin*)u->plugin(UnitPlugin::Harvester);
- if (!h) {
+ Unit* resourceUnit = canvas()->findUnitAt(canvasVector);
+ if (!resourceUnit) {
 	return false;
  }
- if (h->canMine((canvas())->cellAt(canvasVector.x(), canvasVector.y()))) {
-	localPlayerInput()->harvest(u, (int)canvasVector.x(), (int)canvasVector.y());
-	return true;
+ ResourceMinePlugin* resource = (ResourceMinePlugin*)resourceUnit->plugin(UnitPlugin::ResourceMine);
+ if (!resource) {
+	// there is no mine at destination
+	return false;
  }
- return false;
+ boDebug() << k_funcinfo << "clicked on a resource mine" << endl;
+
+ bool taken = false;
+ QPtrList<Unit> units = selection()->allUnits();
+ QPtrListIterator<Unit> it(units);
+ while (it.current()) {
+	Unit* u = it.current();
+	++it;
+
+	HarvesterPlugin* h = (HarvesterPlugin*)u->plugin(UnitPlugin::Harvester);
+	if (!h) {
+		continue;
+	}
+	boDebug() << u->id() << " is a harvester" << endl;
+	if (h->canMine(resource)) {
+		boDebug() << k_funcinfo << u->id() << " will harvest at " << canvasVector.x() << "," << canvasVector.y() << " which is " << h->unit()->id() << endl;
+		localPlayerInput()->harvest(u, (int)canvasVector.x(), (int)canvasVector.y());
+		taken = true;
+	}
+ }
+ return taken;
 }
 
 bool BosonBigDisplayInput::actionMoveWithoutAttack(const BoVector3& canvasVector)
