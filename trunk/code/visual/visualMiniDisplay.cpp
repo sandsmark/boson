@@ -174,7 +174,7 @@ void visualMiniDisplay::setPoint(int x, int y, const QColor &color, QPainter *p)
 void visualMiniDisplay::mousePressEvent(QMouseEvent *e)
 {
 	if (e->button() & LeftButton) {
-		emit reCenterView(QPoint(e->x(), e->y()));
+		emit reCenterView( e->pos() );
 		return;
 		}
 
