@@ -31,6 +31,8 @@ BosonSprite::BosonSprite(BosonModel* model, BosonCanvas* canvas)
 {
  if (canvas) {
 	canvas->addItem(this);
+ } else {
+	kdWarning() << k_funcinfo << "NULL canvas" << endl;
  }
  mIsAnimated = false;
  mSelectBox = 0;
@@ -39,24 +41,9 @@ BosonSprite::BosonSprite(BosonModel* model, BosonCanvas* canvas)
 BosonSprite::~BosonSprite()
 {
  unselect();
- if (boCanvas()) {
-	boCanvas()->removeItem(this);
-	boCanvas()->removeAnimation(this);
- }
-}
-
-void BosonSprite::setCanvas(BosonCanvas* c)
-{
- if (boCanvas()) {
-	boCanvas()->removeItem(this);
-	boCanvas()->removeAnimation(this);
- }
- GLSprite::setCanvas(c);
- if (boCanvas()) {
-	boCanvas()->addItem(this);
-	// FIXME: in case the item was animated before it should be added here
-	// again
-	// boCanvas()->addAnimation(this);
+ if (canvas()) {
+	canvas()->removeItem(this);
+	canvas()->removeAnimation(this);
  }
 }
 
@@ -70,8 +57,8 @@ QPointArray BosonSprite::cells() const
  rightBottomCell(&right, &bottom);
  left = QMAX(left, 0);
  top = QMAX(top, 0);
- right = QMIN(right, QMAX((int)boCanvas()->mapWidth() - 1, 0));
- bottom = QMIN(bottom, QMAX((int)boCanvas()->mapHeight() - 1, 0));
+ right = QMIN(right, QMAX((int)canvas()->mapWidth() - 1, 0));
+ bottom = QMIN(bottom, QMAX((int)canvas()->mapHeight() - 1, 0));
  int size = (right - left + 1) * (bottom - top + 1);
  if (size <= 0) {
 	return QPointArray();
@@ -135,9 +122,9 @@ void BosonSprite::setAnimated(bool a)
  if (mIsAnimated != a) {
 	mIsAnimated = a;
 	if (a) {
-		boCanvas()->addAnimation(this);
+		canvas()->addAnimation(this);
 	} else {
-		boCanvas()->removeAnimation(this);
+		canvas()->removeAnimation(this);
 	}
  }
 }
@@ -148,8 +135,7 @@ void BosonSprite::select(bool markAsLeader)
 	// already selected
 	return;
  }
- mSelectBox = new SelectBox(this, boCanvas(), markAsLeader);
- 
+ mSelectBox = new SelectBox(this, canvas(), markAsLeader);
 }
 
 void BosonSprite::unselect()
@@ -157,3 +143,4 @@ void BosonSprite::unselect()
  delete mSelectBox;
  mSelectBox = 0;
 }
+
