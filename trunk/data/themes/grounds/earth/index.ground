@@ -1,19 +1,29 @@
 [Boson Ground]
 Identifier=earth
-Textures=3
+Textures=5
 
 [Texture_0]
-File=grass-00.png
+File=grass.jpg
 AmountOfLand=255
 MiniMapColor=4278222848
 
 [Texture_1]
-File=desert-00.png
+File=desert.jpg
 AmountOfLand=255
 MiniMapColor=4286611456
 
 [Texture_2]
-File=water-00.png
+File=water.jpg
 AmountOfWater=255
 MiniMapColor=4278190335
 
+[Texture_3]
+File=mud.jpg
+AmountOfWater=180
+MiniMapColor=4278190335
+
+[Texture_4]
+File=snow.jpg
+AmountOfWater=100
+AmountOfLand=130
+MiniMapColor=4278190335
