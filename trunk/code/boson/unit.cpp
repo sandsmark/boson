@@ -64,14 +64,13 @@ public:
 	KGameProperty<int> mMoveDestX;
 	KGameProperty<int> mMoveDestY;
 	KGameProperty<int> mMoveRange;
+	KGameProperty<int> mWantedRotation;
 
 	// be *very* careful with those - NewGameDialog uses Unit::save() which
 	// saves all KGameProperty objects. If non-KGameProperty properties are
 	// changed before all players entered the game we'll have a broken
 	// network game.
 	Unit* mTarget;
-
-	int wantedDirection;//AB: KGameProperty?
 
 	QPtrList<UnitPlugin> mPlugins; // you don't need to save/load this - gets constructed in the c'tor anyway.
 
@@ -103,12 +102,14 @@ Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
  registerData(&d->mMoveDestX, IdMoveDestX);
  registerData(&d->mMoveDestY, IdMoveDestY);
  registerData(&d->mMoveRange, IdMoveRange);
+ registerData(&d->mWantedRotation, IdWantedRotation);
 
  d->mDirection.setLocal(0); // not yet used
  setAnimated(true);
  d->mMoveDestX.setLocal(0);
  d->mMoveDestY.setLocal(0);
  d->mMoveRange.setLocal(0);
+ d->mWantedRotation.setLocal(0);
 
  // TODO: the tooltips do not yet work with OpenGL!!
 // KSpriteToolTip::add(rtti(), unitProperties()->name());
@@ -467,13 +468,13 @@ void Unit::advanceTurn(unsigned int)
  // TODO: maybe we can cache it somewhere so we'd only have to calculate it
  //  when we want to turn. OTOH, it shouldn't be very expensive calculation
  if (dir >= 180) {
-	if ((d->wantedDirection < dir) && (d->wantedDirection >= dir - 180)) {
+	if ((d->mWantedRotation < dir) && (d->mWantedRotation >= dir - 180)) {
 		turnright = false;
 	} else {
 		turnright = true;
 	}
  } else {
-	if ((d->wantedDirection > dir) && (d->wantedDirection <= dir + 180)) {
+	if ((d->mWantedRotation > dir) && (d->mWantedRotation <= dir + 180)) {
 		turnright = true;
 	} else {
 		turnright = false;
@@ -482,7 +483,7 @@ void Unit::advanceTurn(unsigned int)
 
  // FIXME: This algorithm _sucks_. Replace it with something better
  for (int i = 0; i < TURN_STEP; i++) {
-	if (dir == d->wantedDirection) {
+	if (dir == d->mWantedRotation) {
 		break;
 	}
 	if (turnright) {
@@ -500,7 +501,7 @@ void Unit::advanceTurn(unsigned int)
 
  setRotation((float)dir);
 
- if (d->wantedDirection == dir) {
+ if (d->mWantedRotation == dir) {
 	if (work() == WorkTurn) {
 		setWork(WorkNone);
 	} else if (advanceWork() != work()) {
@@ -878,7 +879,7 @@ void Unit::playSound(UnitSoundEvent event)
 void Unit::turnTo(int deg)
 {
  boDebug() << k_funcinfo << deg << endl;
- d->wantedDirection = deg;
+ d->mWantedRotation = deg;
 }
 
 BosonParticleSystem* Unit::smokeParticleSystem() const
