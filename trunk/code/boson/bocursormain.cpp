@@ -93,6 +93,7 @@ void CursorPreview::paintGL()
  if (!cursor()) {
 	return;
  }
+ glColor3f(255, 255, 255);
  QPoint pos = mapFromGlobal(QCursor::pos());
  GLfloat x, y;
  x = (GLfloat)pos.x();
@@ -100,6 +101,7 @@ void CursorPreview::paintGL()
  cursor()->renderCursor(x, y);
 
  // display the hotspot
+ glBindTexture(GL_TEXTURE_2D, 0);
  glBegin(GL_LINES);
 	glVertex3f(x, 0.0, 0.0);
 	glVertex3f(x, height(), 0.0);
