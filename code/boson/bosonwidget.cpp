@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -76,10 +76,6 @@ void BosonWidget::initConnections()
  BosonWidgetBase::initConnections();
  connect(boGame, SIGNAL(signalPlayerKilled(Player*)),
 		this, SLOT(slotPlayerKilled(Player*)));
-
- // this does the actual game. note that editor must not have this!
- connect(boGame, SIGNAL(signalAdvance(unsigned int, bool)),
-		canvas(), SLOT(slotAdvance(unsigned int, bool)));
 }
 
 void BosonWidget::initPlayer()
