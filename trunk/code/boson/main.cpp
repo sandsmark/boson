@@ -30,7 +30,8 @@
 #include <kcmdlineargs.h>
 #include <klocale.h>
 
-#define HARDCODE_NOSOUND 1
+// sound is enabled by default atm
+#define HARDCODE_NOSOUND 0
 
 static const char *description =
     I18N_NOOP("A realtime strategy game for KDE");
