@@ -192,14 +192,6 @@ public:
 
 	void setUpdateInterval(unsigned int ms);
 
-	void setDebugMapCoordinates(bool debug);
-	void setDebugShowCellGrid(bool debug);
-	void setDebugMatrices(bool debug);
-	void setDebugItemWorks(bool debug);
-	void setDebugCamera(bool debug);
-	void setDebugRenderCounts(bool debug);
-	void setDebugBoundingBoxes(bool debug);
-
 	/**
 	 * Scroll by a certain distance.
 	 *

@@ -253,6 +253,14 @@ BosonConfig::BosonConfig(KConfig* conf)
  mDisableSound = false;
  mAIDelay = 3.0;
  mWantDirect = true;
+ mWireFrames = false;
+ mDebugOpenGLMatrices = false;
+ mDebugMapCoordinates = false;
+ mDebugShowCellGrid = false;
+ mDebugItemWorkStatistics = false;
+ mDebugOpenGLCamera = false;
+ mDebugRenderCounts = false;
+ mDebugBoundingBoxes = false;
 
  // load from config
  reset(conf);
