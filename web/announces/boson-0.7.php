@@ -82,6 +82,7 @@ To compile and install Boson, you will need the following:<br>
  - Gcc, Gnu make (<a href=\"http://www.gnu.org\">http://www.gnu.org</a>)<br>
  - Qt 3.0.x (<a href=\"http://www.trolltech.com\">http://www.trolltech.com</a>)<br>
  - KDE 3.x (<a href=\"http://www.kde.org\">http://www.kde.org</a>)<br>
+ - lib3ds (<a href=\"http://lib3ds.sourceforge.net\">http://lib3ds.sourceforge.net</a>)<br>
 </p>
 
 <p class=\"announcement\">
