@@ -31,6 +31,7 @@ class BosonCanvas;
 class Cell;
 class Player;
 class PluginProperties;
+class Boson;
 
 class UnitPlugin
 {
@@ -78,6 +79,11 @@ class UnitPlugin
 	 * Convenience method for unit()->dataHandler()
 	 **/
 	KGamePropertyHandler* dataHandler() const;
+
+	/**
+	 * Convenience method for player()->game()
+	 **/
+	Boson* game() const;
 
 	virtual int pluginType() const = 0;
 
