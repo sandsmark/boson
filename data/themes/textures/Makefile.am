@@ -1,6 +1,12 @@
 # add your texture to texture_DATA (space separated) to make it install!
 texture_DATA = \
 	black.jpg \
+	doors7.jpg \
+	metal19.jpg \
+	panels1.jpg \
+	rotor1.jpg \
+	wall4.jpg \
+	warn1.jpg \
 	broken1.jpg \
 	broken2.jpg \
 	camo1.jpg \
