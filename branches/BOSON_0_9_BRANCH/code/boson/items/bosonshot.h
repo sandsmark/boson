@@ -212,6 +212,7 @@ class BosonShotMissile : public BosonShot
   public:
     BosonShotMissile(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop, BoVector3 pos, BoVector3 target);
     BosonShotMissile(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop);
+    ~BosonShotMissile();
 
     virtual bool saveAsXML(QDomElement& root);
     virtual bool loadFromXML(const QDomElement& root);
@@ -341,6 +342,7 @@ class BosonShotFragment : public BosonShot
     BosonShotFragment(Player* owner, BosonCanvas* canvas, BosonModel* model, BoVector3 pos,
         const UnitProperties* unitproperties);
     BosonShotFragment(Player* owner, BosonCanvas* canvas, BosonModel* model);
+    ~BosonShotFragment();
 
     void activate(const BoVector3& pos, const UnitProperties* unitProperties);
 
