@@ -26,7 +26,6 @@
 #include "common/boconfig.h"
 #include "common/bomap.h"
 
-#include "speciesTheme.h"
 #include "visual.h"
 #include "sprites.h"
   
@@ -37,8 +36,6 @@ visualCanvas::visualCanvas( QPixmap p, uint w, uint h)
 	/* map geometry */
 	maxX = w; maxY = h;
 	_pm = p;
-
-	initTheme();
 }
 
 
@@ -51,29 +48,6 @@ visualCanvas::visualCanvas(void)
 }
 	
 	
-	
-void visualCanvas::initTheme(void)
-{
-
-species[1]	= new speciesTheme("human", qRgb(0, 0, 255) );
-/*
-	if (!species[1]->isOk()) KMsgBox::message(0l,
-		i18n("Pixmap loading error"),
-		i18n("Error while loading \"blue\" specie theme,\nsome images will show up awfully"),
-		KMsgBox::EXCLAMATION);
-*/
-
-species[0]	= new speciesTheme("human", qRgb( 0, 255, 0) );
-/*
-	if (!species[0]->isOk()) KMsgBox::message(0l,
-		i18n("Pixmap loading error"),
-		i18n("Error while loading \"red\" specie theme,\nsome images will show up awfully"),
-		KMsgBox::EXCLAMATION);
-*/
-
-
-}
-
 
 void visualCanvas::resize (int w, int h)
 {
