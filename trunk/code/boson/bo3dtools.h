@@ -413,6 +413,8 @@ class BoMatrix
 
     static void debugMatrix(const GLfloat* matrix);
 
+    inline GLfloat operator[](int i) const { return mData[i]; }
+
   private:
     GLfloat mData[16];
 };
