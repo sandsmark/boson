@@ -19,13 +19,13 @@
 #ifndef BOSONTEXTUREARRAY_H
 #define BOSONTEXTUREARRAY_H
 
-#include <qvaluelist.h>
 #include <qintdict.h>
 #include <GL/gl.h>
 
 class BoTextureInfo;
 
 class QImage;
+template<class T> class QValueList;
 
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>

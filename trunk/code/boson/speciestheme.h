@@ -23,8 +23,6 @@
 #include "global.h"
 #include <qstring.h>
 #include <qcolor.h>
-#include <qvaluelist.h>
-#include <qintdict.h>
 
 #include <GL/gl.h>
 
@@ -41,6 +39,8 @@ class BosonWeaponProperties;
 class QPixmap;
 class QStringList;
 class QColor;
+template<class T> class QValueList;
+template<class T> class QIntDict;
 
 /**
  * Stores player's species - this includes units' textures and models, sounds,

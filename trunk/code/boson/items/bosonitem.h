@@ -20,13 +20,13 @@
 #define BOSONSPRITE_H
 
 #include "../defines.h"
-#include "../bosonmodel.h"
 
 #include <GL/gl.h>
 
 class BosonCanvas;
 class SelectBox;
 class BosonModel;
+class BosonAnimation;
 class BoFrame;
 class QPointArray;
 class QRect;

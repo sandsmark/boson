@@ -22,8 +22,6 @@
 #include "defines.h"
 
 #include <qobject.h>
-#include <qvaluelist.h>
-#include <qptrlist.h>
 
 class BosonMap;
 class Cell;
@@ -38,6 +36,8 @@ class BosonParticleSystem;
 class BosonShot;
 
 class KPlayer;
+template<class T> class QPtrList;
+template<class T> class QValueList;
 
 
 

@@ -115,7 +115,7 @@ class BosonWeapon
     BosonWeapon(BosonWeaponProperties* prop, Unit* unit);
     ~BosonWeapon();
 
-    inline void reload()  { if(mReloadCounter > 0) mReloadCounter--; };
+    inline void reload()  { if(mReloadCounter > 0) { mReloadCounter--; } };
 
     bool canShootAt(Unit* u);
     inline bool reloaded() const  { return (mReloadCounter == 0); };

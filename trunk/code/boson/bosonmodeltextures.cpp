@@ -37,6 +37,8 @@ public:
 	}
 	QMap<QString, GLuint> mName2Texture;
 	QMap<GLuint, QValueList<BosonModel*> > mModels;
+
+	QString mTexturePath;
 };
 
 BosonModelTextures::BosonModelTextures()
@@ -46,12 +48,12 @@ BosonModelTextures::BosonModelTextures()
 
 void BosonModelTextures::init()
 {
+ d = new BosonModelTexturesPrivate;
  // we cache the texture path. only a *very* slightly speedup and that only on
  // startup, but since this class has only a single object the extra variable
  // doesn't matter at all.
- mTexturePath = KGlobal::dirs()->findResourceDir("data", "boson/themes/textures/concrt1.jpg"); // FIXME: we depend on existence of this texture!
- mTexturePath += QString::fromLatin1("boson/themes/textures/");
- d = new BosonModelTexturesPrivate;
+ d->mTexturePath = KGlobal::dirs()->findResourceDir("data", "boson/themes/textures/concrt1.jpg"); // FIXME: we depend on existence of this texture!
+ d->mTexturePath += QString::fromLatin1("boson/themes/textures/");
 }
 
 BosonModelTextures::~BosonModelTextures()
@@ -154,3 +156,7 @@ void BosonModelTextures::reloadTextures()
  }
 }
 
+const QString& BosonModelTextures::texturePath() const 
+{
+ return d->mTexturePath;
+}

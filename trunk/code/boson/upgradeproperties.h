@@ -19,14 +19,13 @@
 #ifndef UPGRADEPROPERTIES_H
 #define UPGRADEPROPERTIES_H
 
-#include <qvaluelist.h>
-
 #include "pluginproperties.h"
 
 class Player;
 class QString;
 class KSimpleConfig;
 class UnitProperties;
+template<class T> class QValueList;
 
 /**
  * @short Base class for properties of upgrades and technologies
@@ -120,16 +119,19 @@ class UpgradePropertiesBase
     /**
      * @return List of units required by this upgrade
      **/
-    QValueList<unsigned long int> requiredUnits() const { return mRequireUnits; };
+    QValueList<unsigned long int> requiredUnits() const;
     /**
      * @return List of technologies required by this upgrade
      **/
-    QValueList<unsigned long int> requiredTechnologies() const { return mRequireTechnologies; };
+    QValueList<unsigned long int> requiredTechnologies() const;
 
   protected:
     QValueList<unsigned long int> readUIntList(KSimpleConfig* cfg, const char* key) const;
 
   protected:
+    class UpgradePropertiesBasePrivate;
+    UpgradePropertiesBasePrivate* d;
+
     unsigned long int mHealth;
     unsigned long int mWeaponRange;
     unsigned int mSightRange;
@@ -166,9 +168,6 @@ class UpgradePropertiesBase
     unsigned int mProducer;
     unsigned int mProductionTime;
     QString mPixmapName;
-    QValueList<unsigned long int> mRequireUnits;
-    QValueList<unsigned long int> mRequireTechnologies;
-    QValueList<unsigned long int> mApplyToTypes;
     bool mApplyToFacilities;
     bool mApplyToMobiles;
 };

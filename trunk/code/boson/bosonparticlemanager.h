@@ -22,8 +22,7 @@
 
 #include <krandomsequence.h>
 
-#include <qmap.h>
-#include <qptrlist.h>
+#include <qstring.h>
 
 #include <GL/gl.h>
 
@@ -36,6 +35,8 @@ class QString;
 class KSimpleConfig;
 class KConfig;
 class SpeciesTheme;
+template<class T, class T2> class QMap;
+template<class T> class QPtrList;
 
 /*class BosonParticleManager
 {

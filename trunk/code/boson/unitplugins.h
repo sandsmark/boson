@@ -19,10 +19,10 @@
 #ifndef UNITPLUGINS_H
 #define UNITPLUGINS_H
 
+#include "global.h"
+
 #include <kgame/kgameproperty.h>
 #include <kgame/kgamepropertylist.h>
-
-#include "global.h"
 
 class Unit;
 class SpeciesTheme;

@@ -33,9 +33,21 @@
 
 
 /**********  UpgradePropertiesBase  **********/
+class UpgradePropertiesBase::UpgradePropertiesBasePrivate
+{
+public:
+  UpgradePropertiesBasePrivate()
+  {
+  }
+
+  QValueList<unsigned long int> mRequireUnits;
+  QValueList<unsigned long int> mRequireTechnologies;
+  QValueList<unsigned long int> mApplyToTypes;
+};
 
 UpgradePropertiesBase::UpgradePropertiesBase(bool isTechnology, unsigned long int id)
 {
+  d = new UpgradePropertiesBasePrivate;
   mTechnology = isTechnology;
 
   mResearched = false;
@@ -50,14 +62,15 @@ UpgradePropertiesBase::UpgradePropertiesBase(bool isTechnology, unsigned long in
 
 UpgradePropertiesBase::~UpgradePropertiesBase()
 {
+  delete d;
 }
 
 bool UpgradePropertiesBase::canBeResearched(Player* player)
 {
-  if(!mRequireUnits.isEmpty())
+  if(!d->mRequireUnits.isEmpty())
   {
     QValueList<unsigned long int>::Iterator it;
-    for(it = mRequireUnits.begin(); it != mRequireUnits.end(); ++it)
+    for(it = d->mRequireUnits.begin(); it != d->mRequireUnits.end(); ++it)
     {
       if(!player->hasUnitWithType(*it))
       {
@@ -66,10 +79,10 @@ bool UpgradePropertiesBase::canBeResearched(Player* player)
     }
   }
 
-  if(!mRequireTechnologies.isEmpty())
+  if(!d->mRequireTechnologies.isEmpty())
   {
     QValueList<unsigned long int>::Iterator it;
-    for(it = mRequireTechnologies.begin(); it != mRequireTechnologies.end(); ++it)
+    for(it = d->mRequireTechnologies.begin(); it != d->mRequireTechnologies.end(); ++it)
     {
       if(!player->hasTechnology(*it))
       {
@@ -97,8 +110,8 @@ void UpgradePropertiesBase::load(KSimpleConfig* cfg)
     mProducer = cfg->readUnsignedNumEntry("Producer", 0);
     mProductionTime = cfg->readUnsignedNumEntry("ProductionTime", 100);
     mPixmapName = cfg->readEntry("Pixmap", "none.png");
-    mRequireUnits = readUIntList(cfg, "RequireUnits");
-    mApplyToTypes = readUIntList(cfg, "ApplyToTypes");
+    d->mRequireUnits = readUIntList(cfg, "RequireUnits");
+    d->mApplyToTypes = readUIntList(cfg, "ApplyToTypes");
     mApplyToFacilities = cfg->readBoolEntry("ApplyToFacilities", false);
     mApplyToMobiles = cfg->readBoolEntry("ApplyToMobiles", false);
   }
@@ -111,7 +124,7 @@ void UpgradePropertiesBase::load(KSimpleConfig* cfg)
     }
     cfg->setGroup(QString("Upgrade_%1").arg(mId));
   }
-  mRequireTechnologies = readUIntList(cfg, "RequireTechnologies");
+  d->mRequireTechnologies = readUIntList(cfg, "RequireTechnologies");
 
   // Load upgrade properties
   mHealthSpecified = cfg->hasKey("Health");
@@ -228,7 +241,7 @@ void UpgradePropertiesBase::apply(Player* player)
   }
 
   // Add unit types to list
-  QValueList<unsigned long int> list = mApplyToTypes;
+  QValueList<unsigned long int> list = d->mApplyToTypes;
   if(isTechnology())
   {
     if(mApplyToFacilities)
@@ -315,6 +328,17 @@ void UpgradePropertiesBase::apply(Player* player)
 }
 
 
+QValueList<unsigned long int> UpgradePropertiesBase::requiredUnits() const
+{
+  return d->mRequireUnits;
+}
+
+
+QValueList<unsigned long int> UpgradePropertiesBase::requiredTechnologies() const
+{
+  return d->mRequireTechnologies;
+}
+
 /**********  UpgradeProperties  **********/
 
 UpgradeProperties::UpgradeProperties(const UnitProperties* parent, unsigned long int id) :
@@ -334,7 +358,7 @@ QString UpgradeProperties::name() const
 void UpgradeProperties::loadPlugin(KSimpleConfig* cfg)
 {
   load(cfg);
-  mApplyToTypes.append(unitProperties()->typeId());
+  d->mApplyToTypes.append(unitProperties()->typeId());
 }
 
 void UpgradeProperties::savePlugin(KSimpleConfig* cfg)
@@ -351,3 +375,8 @@ TechnologyProperties::TechnologyProperties() : UpgradePropertiesBase(true)
 TechnologyProperties::~TechnologyProperties()
 {
 }
+
+
+/*
+ * vim:et sw=2
+ */

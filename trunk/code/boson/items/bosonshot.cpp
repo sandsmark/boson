@@ -29,6 +29,8 @@
 
 #include <ksimpleconfig.h>
 
+#include <qptrlist.h>
+
 #include <GL/gl.h>
 
 #include <math.h>

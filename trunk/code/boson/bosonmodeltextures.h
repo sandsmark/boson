@@ -67,7 +67,7 @@ public:
 	/**
 	 * @return The absolute path to all textures
 	 **/
-	const QString& texturePath() const { return mTexturePath; }
+	const QString& texturePath() const;
 
 	void reloadTextures();
 
@@ -81,8 +81,6 @@ private:
 private:
 	class BosonModelTexturesPrivate;
 	BosonModelTexturesPrivate* d;
-
-	QString mTexturePath;
 };
 
 #endif
