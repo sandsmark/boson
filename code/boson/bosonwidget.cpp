@@ -172,7 +172,6 @@ void BosonWidget::init()
 // AB: but nevertheless this might be necessary - e.g. Boson::signalAddUnit()
 // sends a request to add a unit but Boson should rather create it itself.
  d->mBoson = new Boson(this);
- d->mBoson->slotSetGameSpeed(BosonConfig::readGameSpeed());
  connect(d->mBoson, SIGNAL(signalAdvance()),
 		d->mCanvas, SLOT(advance()));
  connect(d->mBoson, SIGNAL(signalAddUnit(Unit*, int, int)),
@@ -227,7 +226,7 @@ void BosonWidget::init()
 
  setFocusPolicy(StrongFocus); // accept key event
  setFocus();
- d->mBoson->slotSetGameSpeed(DEFAULT_GAME_SPEED);
+ d->mBoson->slotSetGameSpeed(BosonConfig::readGameSpeed());
 
  d->mCommandPos = (int)OptionsDialog::Left;
  d->mChatPos = (int)OptionsDialog::Bottom;
