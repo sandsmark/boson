@@ -614,6 +614,11 @@ public:
 
     }
 
+    ~GLStates()
+    {
+        delete[] mLightStates;
+    }
+
     void getStates()
     {
         // FIXME: AB: is sizeof(array) == arrayizse portable?
