@@ -227,8 +227,8 @@ void BoLake::findWater(int x, int y, const QRect& searcharea)
       chunk->maxy = QMIN(maxy, cy + CHUNK_SIZE);
       chunk->center = BoVector3((chunk->minx + chunk->maxx) / 2.0f, -(chunk->miny + chunk->maxy) / 2.0f, level);
       chunk->lastdetail = -1.0f;
-      boDebug() << "        " << k_funcinfo << "Create chunk, coords: ("
-          << chunk->minx << "; " << chunk->miny << ")-(" << chunk->maxx << "; " << chunk->maxy << ")" << endl;
+//      boDebug() << "        " << k_funcinfo << "Create chunk, coords: ("
+//          << chunk->minx << "; " << chunk->miny << ")-(" << chunk->maxx << "; " << chunk->maxy << ")" << endl;
       chunks.append(chunk);
     }
   }
@@ -289,10 +289,10 @@ void BoLake::findWater(int x, int y, const QRect& searcharea)
     chunks.removeRef(chunk);
   }
 
-  boDebug() << k_funcinfo << "findWater(" << x << ", " << y << ", (" << searcharea.left() <<
-      "; " << searcharea.top() << ")-(" << searcharea.right() << "; " << searcharea.bottom() <<
-      ")) found " << cornercount << " corners on " << size << "-corner area (" << chunks.count() <<
-      " chunks)" << endl;
+//  boDebug() << k_funcinfo << "findWater(" << x << ", " << y << ", (" << searcharea.left() <<
+//      "; " << searcharea.top() << ")-(" << searcharea.right() << "; " << searcharea.bottom() <<
+//      ")) found " << cornercount << " corners on " << size << "-corner area (" << chunks.count() <<
+//      " chunks)" << endl;
   /*printf("Lake layout (%d, %d)-(%d, %d):\n", minx, miny, maxx, maxy);
   for(int myy = miny; myy <= maxy; myy++)
   {
