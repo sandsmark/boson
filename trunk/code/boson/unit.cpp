@@ -199,10 +199,12 @@ void Unit::moveBy(double moveX, double moveY)
  // collision.
  double oldX = x();
  double oldY = y();
+ boCanvas()->removeFromCells(this);
  QCanvasSprite::moveBy(moveX, moveY);
  if (d->mSelectBox) {
 	d->mSelectBox->moveBy(moveX, moveY);
  }
+ boCanvas()->addToCells(this);
  boCanvas()->unitMoved(this, oldX, oldY);
 }
 

@@ -21,6 +21,7 @@ BOEDITOR_SRC = editor.cpp bosonunitdialog.cpp
 # bosonwidget.cpp...
 COMMON_SRC = \
 	cell.cpp unitproperties.cpp unitbase.cpp \
+	boitemlist.cpp \
 	kspritetooltip.cpp \
 	bosonmap.cpp \
 	bosonscenario.cpp \

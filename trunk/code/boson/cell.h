@@ -19,6 +19,8 @@
 #ifndef CELL_H
 #define CELL_H
 
+#include "boitemlist.h"
+
 class UnitProperties;
 
 /**
@@ -167,6 +169,28 @@ public:
 
 	static int getTransTile(int g);
 
+	/**
+	 * Add a unit to this cell. All this function does is to increase the
+	 * value returned by @ref unitCount by one.
+	 **/
+	void addUnit(QCanvasItem* u) { mItems.appendUnit(u); }
+
+	/**
+	 * Remove a previously added unit from the cell
+	 **/
+	void removeUnit(QCanvasItem* u) { mItems.removeUnit(u); }
+
+
+	/**
+	 * @param Consider moving units as collisions, too if TRUE, otherwise
+	 * not.
+	 * @return @ref BoItemList::isOccupied
+	 **/
+	bool isOccupied(Unit* forUnit, bool includeMoving = true) const { return mItems.isOccupied(forUnit, includeMoving); }
+
+	const BoItemList* items() const { return &mItems; }
+	unsigned int unitCount() const { return mItems.count(); }
+
 protected:
 	void setVersion(unsigned char v)
 	{
@@ -178,6 +202,8 @@ protected:
 private:
 	GroundType mType;
 	unsigned char mVersion;
+
+	BoItemList mItems;
 };
 
 #endif
