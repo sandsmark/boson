@@ -66,7 +66,7 @@ void BosonComputerIO::reaction()
  while(!attacker) {
 	mUnit++;
 
-	if(mUnit >= units->count()) {
+	if(mUnit >= (int)units->count()) {
 		mUnit = -1;
 		return;
 	}
