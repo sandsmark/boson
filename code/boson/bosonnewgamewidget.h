@@ -39,6 +39,7 @@ class QListBox;
 class QListBoxItem;
 class QPushButton;
 class QColor;
+class QSpacerItem;
 
 class Boson;
 class Player;
@@ -62,8 +63,9 @@ class BosonNewGameWidget : public QWidget
 
     QString& playfield();
 
+    void setLogoSpacer(int height);
+
   private:
-    QLabel* mHeader;
     QLabel* mColorLabel;
     QLabel* mMapLabel;
     //KColorCombo* colorcombo;
@@ -170,6 +172,7 @@ class BosonNewGameWidget : public QWidget
     QHBoxLayout* mAddAIGroupLayout;
     QVBoxLayout* mPlayersLayout;
     QHBoxLayout* mStartGameLayout;
+    QSpacerItem* mLogoSpacer;
 
   private:
     void initKGame();

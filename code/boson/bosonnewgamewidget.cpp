@@ -65,16 +65,22 @@ BosonNewGameWidget::BosonNewGameWidget(TopWidget* top, QWidget* parent)
 
   mMainLayout = new QVBoxLayout( 0, 0, 6, "mainlayout");
 
-  mHeader = new QLabel( this, "header" );
-  QFont header_font(  mHeader->font() );
+  mLogoSpacer = new QSpacerItem( 20, 20, QSizePolicy::Minimum, QSizePolicy::Fixed );
+  mMainLayout->addItem( mLogoSpacer );
+
+  //FIXME!
+  /*
+  QLabel* header = new QLabel( this, "header" );
+  QFont header_font(  header->font() );
   header_font.setPointSize( 30 );
   header_font.setBold( TRUE );
-  mHeader->setFont( header_font ); 
-  mHeader->setText( i18n( "Start New Game" ) );
-  mHeader->setAlignment( int( QLabel::AlignCenter ) );
-  mMainLayout->addWidget( mHeader );
+  header->setFont( header_font ); 
+  header->setText( i18n( "Start New Game" ) );
+  header->setAlignment( int( QLabel::AlignCenter ) );
+  mMainLayout->addWidget( header );
   QSpacerItem* spacer = new QSpacerItem( 20, 20, QSizePolicy::Minimum, QSizePolicy::Preferred );
   mMainLayout->addItem( spacer );
+  */
 
   mUpperLayout = new QHBoxLayout( 0, 0, 6, "upperlayout"); 
 
@@ -609,5 +615,10 @@ inline BosonPlayField* BosonNewGameWidget::map()
 void BosonNewGameWidget::sendNewGame() 
 {
   game()->sendMessage(0, BosonMessage::IdNewGame);
+}
+
+void BosonNewGameWidget::setLogoSpacer(int height) 
+{
+  mLogoSpacer->changeSize( 20, height, QSizePolicy::Minimum, QSizePolicy::Fixed );
 }
 

@@ -40,6 +40,9 @@ BosonWelcomeWidget::BosonWelcomeWidget(QWidget* parent) : QWidget(parent)
 
   mMainLayout = new QVBoxLayout( 0, 0, 6, "mainlayout"); 
 
+  mLogoSpacer = new QSpacerItem( 20, 20, QSizePolicy::Preferred, QSizePolicy::Minimum );
+  mMainLayout->addItem( mLogoSpacer );
+
   QPixmap startupPix(locate("data", "boson/pics/startup.png"));
   if (startupPix.isNull()) {
 	 kdFatal() << "Unable to find startup pixmap - please install the data package!" << endl;
@@ -47,7 +50,7 @@ BosonWelcomeWidget::BosonWelcomeWidget(QWidget* parent) : QWidget(parent)
   }
   setErasePixmap(startupPix);
   setFixedSize(startupPix.size());
-  QSpacerItem* spacer_1 = new QSpacerItem( 20, 420, QSizePolicy::Preferred, QSizePolicy::Minimum );
+  QSpacerItem* spacer_1 = new QSpacerItem( 20, 400, QSizePolicy::Preferred, QSizePolicy::Minimum );
   mMainLayout->addItem( spacer_1 );
 
   mLowerLayout = new QHBoxLayout( 0, 0, 6, "lowerlayout");
@@ -99,5 +102,11 @@ BosonWelcomeWidget::BosonWelcomeWidget(QWidget* parent) : QWidget(parent)
 BosonWelcomeWidget::~BosonWelcomeWidget()
 {
   // no need to delete child widgets, Qt does it all for us
+}
+
+void BosonWelcomeWidget::setLogoSpacer(int height)
+{
+//FIXME
+//  mLogoSpacer->changeSize( 20, height, QSizePolicy::Minimum, QSizePolicy::Fixed );
 }
 
