@@ -110,9 +110,10 @@ bool playerMobUnit::getWantedMove(QPoint &wstate)
 
 
 	QRect	r = gridRect();
+	QRect	nr = r;			// temporary variable
 	asked = r.topLeft();		// destinaton asked, let's begin where we already are
 	QPoint	dv = dest - asked;	// delta do the destination
-	QPoint	local = asked;		// temporory variable
+	uint	gf = goFlat();		// caching
 
 	int	range = mobileProp[type].range;
 	bool	ret;
@@ -136,51 +137,47 @@ bool playerMobUnit::getWantedMove(QPoint &wstate)
 			//
 			// "Raw" move algorithm
 			//
-			bocanvas->unsetCellFlag ( r, (BO_GO_AIR==goFlag())? Cell::flying_unit_f:Cell::field_unit_f );
 			ret = true;
+			// so that we do not prevent ourselves to move : 
+			bocanvas->unsetCellFlag ( r, (BO_GO_AIR==goFlag)? Cell::flying_unit_f:Cell::field_unit_f );
 			if ( abs(dv.x()) > abs(dv.y()) ) {
 				// x is greater
-				local = asked + QPoint( (dv.x()>0)?1:-1, 0); // try first along the x axis
-				if (!bocanvas->checkMove(local, goFlag() ))  {
-					local = asked + QPoint( 0, (dv.y()>0)?1:-1); // the along the y axis
-					if (!bocanvas->checkMove(local, goFlag() ))
+				nr.moveBy( (dv.x()>0)?1:-1, 0); // try first along the x axis
+				if (!bocanvas->checkMove(nr, goFlag ))  {
+					nr.moveBy( (dv.x()>0)?-1:1,  (dv.y()>0)?1:-1); // then along the y axis
+					if (!bocanvas->checkMove(nr, goFlag ))
 						ret = false;
 				}
 
 			} else {
 				// y is greater
-				local = asked + QPoint( 0, (dv.y()>0)?1:-1); // try first along the y axis
-				if (!bocanvas->checkMove(local, goFlag() )) {
-					local = asked + QPoint( (dv.x()>0)?1:-1, 0); // then along the x axis
-					if (!bocanvas->checkMove(local, goFlag() ))
+				nr.moveBy( 0,  (dv.y()>0)?1:-1); // try first along the y axis
+				if (!bocanvas->checkMove(nr, goFlag )) {
+					nr.moveBy( (dv.x()>0)?1:-1,  (dv.y()>0)?-1:1); // try first along the x axis
+					if (!bocanvas->checkMove(nr, goFlag ))
 						ret = false;
 				}
 			}
-			bocanvas->setCellFlag ( r, (BO_GO_AIR==goFlag())? Cell::flying_unit_f:Cell::field_unit_f );
-			wstate = local;	
-			local -= asked;		//  wstate=asked are the new position, local = dz, the delta between t and t+1
-			asked = wstate;
-			asked_state = MUS_MOVING; 	///orzel:  asked_state still useful here ?
-			// request those cells so that nobody takes them
-//			printf("ret is %s, failed_move = %d\n", ret?"true":"false", failed_move);
+			// restore the state for ourselves
+			bocanvas->setCellFlag ( r, (BO_GO_AIR==goFlag)? Cell::flying_unit_f:Cell::field_unit_f );
 			if (!ret)
 			{
  				failed_move++;
  				if (failed_move>4) state = MUS_NONE; // prevent 'keep on trying when it can obviously not go further'
 				return false;
 			}
-			r.moveBy(local.x(), local.y());
+			asked = wstate = nr.topLeft();	
+			asked_state = MUS_MOVING; 	///orzel:  asked_state still useful here ?
 			if (failed_move>3) failed_move = 0; // prevent 3-timeunit loop
-
 			if (!path.addCheckLoop(asked)) {
 				// loop
 				logf(LOG_WARNING, "loop detected, stopping");
 				state = MUS_NONE;
 				return false;
 			}
-			// it's ok, let's request the move and tell it to bocanvas
+			// it's ok, let's request the move
 			///orzel : XXX probaly a but if the SERVER refuses the move because another player has already moved on this tile
-			bocanvas->setCellFlag ( r, (BO_GO_AIR==goFlag())? Cell::request_flying_f:Cell::request_f );
+			bocanvas->setCellFlag ( nr, (BO_GO_AIR==goFlag)? Cell::request_flying_f:Cell::request_f );
 			return true;
 	}
 
@@ -363,13 +360,15 @@ void playerMobUnit::do_moveTo(QPoint npos)
 	boAssert(int(x())%BO_TILE_SIZE==0);
 	boAssert(int(y())%BO_TILE_SIZE==0);
 
-	// free the requested cells
-	bocanvas->unsetCellFlag ( r, (BO_GO_AIR==goFlag())? Cell::request_flying_f:Cell::request_f );
-
 	// actually move the mobile, updating flags in cells
 	bocanvas->unsetCellFlag ( r, (BO_GO_AIR==goFlag())? Cell::flying_unit_f:Cell::field_unit_f );
 	move( BO_TILE_SIZE*npos.x(), BO_TILE_SIZE*npos.y() );
-	bocanvas->setCellFlag ( gridRect(), (BO_GO_AIR==goFlag())? Cell::flying_unit_f:Cell::field_unit_f );
+
+
+	// update cells
+	r = gridRect();
+	bocanvas->setCellFlag ( r, (BO_GO_AIR==goFlag())? Cell::flying_unit_f:Cell::field_unit_f );
+	bocanvas->unsetCellFlag ( r, (BO_GO_AIR==goFlag())? Cell::request_flying_f:Cell::request_f );
 
 	emit sig_moveTo(npos);
 
