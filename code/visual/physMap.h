@@ -50,17 +50,18 @@ class visualMobUnit;
   */
 class physMap : public QObject, public QwSpriteField
 {
-  Q_OBJECT
 
- public:
-  physMap(uint l, uint h, QObject *parent=0, const char *name=0L);
+	Q_OBJECT
+
+public:
+	physMap(uint l, uint h, QObject *parent=0, const char *name=0L);
 
 /* geometry ? , still public */
-  int		maxX, maxY;	// size of the map
+	int		maxX, maxY;	// size of the map
 ///orzel should be maxX * BO_TILE_SIZE = width(), maxY * BO_TILE_SIZE
 
 /* modify contents */
-  void setCell(int i, int j, groundType g);
+	void setCell(int i, int j, groundType g);
 
 /*
   void createMob(mobileMsg_t &);
@@ -70,10 +71,10 @@ class physMap : public QObject, public QwSpriteField
   void destroyFix(destroyedMsg_t &);
 */
 
-  signals:
-  void newCell(int,int, groundType g);
-  void updateMobile(visualMobUnit *); // for miniMap
-  void updateFix(visualFacility *); // for miniMap
+signals:
+	void newCell(int,int, groundType g);
+	void updateMobile(visualMobUnit *); // for miniMap
+	void updateFix(visualFacility *); // for miniMap
 };
 
 #endif // PHYS_MAP_H

@@ -54,7 +54,7 @@ class fieldMap : public QWidget, public QwAbsSpriteFieldView
   Q_OBJECT
 
 public:
-  fieldMap(orderWin *, viewMap *v, QWidget *parent=0, const char *name=0L, WFlags f=0);
+  fieldMap(/*orderWin *,*/ viewMap *v, QWidget *parent=0, const char *name=0L, WFlags f=0);
   ~fieldMap();
 
 
@@ -92,7 +92,7 @@ private:
 
   viewMap	*view;
 public: ///orzel : what about that ?
-  orderWin	*order;
+//  orderWin	*order;
 };
 
 #endif // FIELD_MAP_H

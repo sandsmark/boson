@@ -46,7 +46,7 @@ mainView::mainView(playerMap *phys, QWidget *parent=0, const char *name=0)
 		leftLayout->addWidget(order, 10);
 
 /* This is the main map, the game area */
-	field = new fieldMap(order, view, this);
+	field = new fieldMap(/*order,*/ view, this);
 	topLayout->addWidget(field,10);
 
 /* finish the stuff */

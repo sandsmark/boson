@@ -27,7 +27,7 @@ LDFLAGS =  -s
 
 # libbovisual.a
 noinst_LIBRARIES = libbovisual.a
-libbovisual_a_SOURCES = fieldDisplay.cpp fieldMap.cpp groundTheme.cpp miniDisplay.cpp miniEvent.cpp miniMap.cpp physMap.cpp selectPart.cpp speciesTheme.cpp viewMap.cpp visualCell.cpp visualUnit.cpp
+libbovisual_a_SOURCES = fieldDisplay.cpp fieldMap.cpp groundTheme.cpp miniDisplay.cpp miniEvent.cpp miniMap.cpp physMap.cpp selectPart.cpp speciesTheme.cpp viewMap.cpp visualCell.cpp visualUnit.cpp viewSelect.cpp
 libbovisual_a_METASOURCES = USE_AUTOMOC
 
 #garbage
