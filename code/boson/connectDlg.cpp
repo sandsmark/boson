@@ -20,9 +20,7 @@
 
 #include <stdlib.h>	// atoi
 #include <netdb.h>	// gethostbyname()
-#include <unistd.h>	// gethostname()
 
-//#include <qpushbutton.h>
 #include <qlineedit.h>
 #include <qlabel.h>
 #include <qpixmap.h>
@@ -57,11 +55,7 @@ connectDlg::connectDlg(BosonApp *p, char *servername , const char *name)
 	grid->addColSpacing(0, 10);
 	grid->addColSpacing(3, 10);
 
-	/* server params */
-	if (gethostname(host, 1999)) {
-		logf(LOG_ERROR, "can't get hostname, using \"boson.eu.org\"");
-		strcpy(host, "boson.eu.org");
-	}
+	strcpy(host, "localhost");
 
 	label = new QLabel("Boson Server :", plainPage());
 	grid->addWidget(label, 0, 1);
