@@ -310,32 +310,6 @@ BosonBigDisplayBase* BoDisplayManager::addDisplay(QWidget* parent)
  return b;
 }
 
-void BoDisplayManager::slotEditorWillPlaceCell(int c)
-{
- if (mGameMode) {
-	return;
- }
- kdWarning() << k_funcinfo << "obsolete function call!" << endl;
- QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
- while (it.current()) {
-//	((EditorBigDisplay*)it.current())->slotWillPlaceCell(c);
-	++it;
- }
-}
-
-void BoDisplayManager::slotEditorWillPlaceUnit(int type, UnitBase* fac, KPlayer* p)
-{
- if (mGameMode) {
-	return;
- }
- kdWarning() << k_funcinfo << "obsolete function call!" << endl;
- QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
- while (it.current()) {
-//	((EditorBigDisplay*)it.current())->slotWillConstructUnit(type, fac, p);
-	++it;
- }
-}
-
 void BoDisplayManager::setCursor(BosonCursor* cursor)
 {
  QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
