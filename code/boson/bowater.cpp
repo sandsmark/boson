@@ -374,6 +374,7 @@ BoWaterManager::BoWaterManager()
   mWaterBump = 0;
   mEnvMap = 0;
   mWaterAnimBump.setAutoDelete(true);
+  mWaterAnimBumpCurrent = 0.0f;
 }
 
 BoWaterManager::~BoWaterManager()
