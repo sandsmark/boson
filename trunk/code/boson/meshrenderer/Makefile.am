@@ -5,6 +5,7 @@ boson_plugin_LTLIBRARIES = libbomeshrendererplugin.la
 libbomeshrendererplugin_la_SOURCES = \
 		bomeshrendererfactory.cpp \
 		bomeshrendererimmediate.cpp \
+		bomeshrenderersemiimmediate.cpp \
 		bomeshrenderervertexarray.cpp \
 		bomeshrenderervbo.cpp
 

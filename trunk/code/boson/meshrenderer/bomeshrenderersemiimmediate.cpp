@@ -16,8 +16,8 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#include "bomeshrendererimmediate.h"
-#include "bomeshrendererimmediate.moc"
+#include "bomeshrenderersemiimmediate.h"
+#include "bomeshrenderersemiimmediate.moc"
 
 #include "../bomeshrenderer.h"
 #include "../bosonmodel.h"
@@ -26,38 +26,48 @@
 
 #include <bodebug.h>
 
-BoMeshRendererImmediate::BoMeshRendererImmediate() : BoMeshRenderer()
+BoMeshRendererSemiImmediate::BoMeshRendererSemiImmediate() : BoMeshRenderer()
 {
 }
 
-BoMeshRendererImmediate::~BoMeshRendererImmediate()
+BoMeshRendererSemiImmediate::~BoMeshRendererSemiImmediate()
 {
 }
 
-void BoMeshRendererImmediate::setModel(BosonModel* model)
+void BoMeshRendererSemiImmediate::setModel(BosonModel* model)
 {
  BoMeshRenderer::setModel(model);
  if (!model) {
 	return;
  }
+
+ int stride = BoMesh::pointSize() * sizeof(float);
+ float* points = model->pointArray();
+ glVertexPointer(3, GL_FLOAT, stride, points + BoMesh::vertexPos());
+ glTexCoordPointer(2, GL_FLOAT, stride, points + BoMesh::texelPos());
 }
 
-void BoMeshRendererImmediate::startModelRendering()
+void BoMeshRendererSemiImmediate::startModelRendering()
 {
  glPushAttrib(GL_POLYGON_BIT); // GL_CULL_FACE
 
  glEnable(GL_CULL_FACE);
  glCullFace(GL_BACK);
+
+ glEnableClientState(GL_VERTEX_ARRAY);
+ glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
-void BoMeshRendererImmediate::stopModelRendering()
+void BoMeshRendererSemiImmediate::stopModelRendering()
 {
  glPopAttrib();
+
+ glDisableClientState(GL_VERTEX_ARRAY);
+ glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
-void BoMeshRendererImmediate::render(const QColor* teamColor, BoMesh* mesh, BoMeshLOD* lod)
+void BoMeshRendererSemiImmediate::render(const QColor* teamColor, BoMesh* mesh, BoMeshLOD* lod)
 {
- BO_CHECK_NULL_RET(model());
  unsigned int* pointsCache = lod->pointsCache();
  unsigned int pointsCacheCount = lod->pointsCacheCount();
  int type = lod->type();
@@ -109,14 +119,11 @@ void BoMeshRendererImmediate::render(const QColor* teamColor, BoMesh* mesh, BoMe
 
 			// AB: this is only partially immediate mode!
 			glNormal3fv(face->normal(0).data());
-			glTexCoord2fv(model()->texel(points[0]).data()); // AB: this is pretty slow, as it creates a BoVector3 object!
-			glVertex3fv(model()->vertex(points[0]).data()); // AB: this is pretty slow, as it creates a BoVector3 object!
+			glArrayElement(points[0]);
 			glNormal3fv(face->normal(1).data());
-			glTexCoord2fv(model()->texel(points[1]).data());
-			glVertex3fv(model()->vertex(points[1]).data());
+			glArrayElement(points[1]);
 			glNormal3fv(face->normal(2).data());
-			glTexCoord2fv(model()->texel(points[2]).data());
-			glVertex3fv(model()->vertex(points[2]).data());
+			glArrayElement(points[2]);
 
 			vertices += 3;
 			faces++;
