@@ -35,6 +35,8 @@
 #include <lib3ds/vector.h>
 #include <lib3ds/material.h>
 
+void myTransform(float* resultVector, float* matrix, float* inputVector);
+
 BosonModelTextures* BosonModel::mModelTextures = 0;
 
 BoFrame::BoFrame()
@@ -482,8 +484,6 @@ void BosonModel::renderNode(Lib3dsNode* node)
 			kdError() << k_funcinfo << "NULL display list created" << endl;
 			return;
 		}
-		glNewList(node->user.d, GL_COMPILE);
-		mNodeDisplayLists.append(node->user.d);
 
 		unsigned int p;
 		Lib3dsMatrix invMeshMatrix;
@@ -545,11 +545,27 @@ void BosonModel::renderNode(Lib3dsNode* node)
 			myTex = 0;
 		}
 
-		glBindTexture(GL_TEXTURE_2D, myTex);
+		GLfloat texMatrix[16];
 		if (mat && myTex) {
-			Lib3dsTextureMap* t = &mat->texture1_map;
+			// *ggg* this is a nice workaround.
+			// it's hard to do this with a Lib3dsMatrix by several
+			// reasons - so we do these calculations in OpenGL
+			// (*NOT* in a display list - immediate mode) and then
+			// get the texture matrix.
+			// With this matrix we can easily calculate the actual
+			// texture coordinates.
+			// btw: this means that all calculations are done only
+			// once (on startup) and therefore we'll have some
+			// speedup
+
+			// AB: this part isn't time critical anymore. you can
+			// call even OpenGL commands without runtime slowdowns.
+			// We calculate the actual texture map coordinates only
+			// once and then use the final calculations in the
+			// display list.
 			glMatrixMode(GL_TEXTURE);
 			glPushMatrix();
+			Lib3dsTextureMap* t = &mat->texture1_map;
 			if (t->scale[0] || t->scale[1]) {
 				glScalef(t->scale[0], t->scale[1], 1.0);
 			}
@@ -563,7 +579,23 @@ void BosonModel::renderNode(Lib3dsNode* node)
 				// doesn't seem to be used in our models
 				glScalef(scale, scale, 1.0);
 			}
+			glGetFloatv(GL_TEXTURE_MATRIX, texMatrix);
+
+			glPopMatrix();
+			glMatrixMode(GL_MODELVIEW);
+		} else {
+			// we load the identity matrix - this is just "in case".
+			// we must not use this matrix at all!
+			for (int i = 0; i < 16; i++) {
+				texMatrix[i] = 0.0;
+			}
+			texMatrix[0] = texMatrix[5] = texMatrix[10] = texMatrix[15] = 1.0;
 		}
+
+		// now start the actual display list for this node.
+		glNewList(node->user.d, GL_COMPILE);
+		mNodeDisplayLists.append(node->user.d);
+		glBindTexture(GL_TEXTURE_2D, myTex);
 
 		glBegin(GL_TRIANGLES); // note: you shouldn't do calculations after a glBegin() but we compile a display list only, so its ok
 		for (p = 0; p < mesh->faces; p++) {
@@ -579,8 +611,17 @@ void BosonModel::renderNode(Lib3dsNode* node)
 					}
 					myTex = 0;
 				} else {
-					tex[i][0] = mesh->texelL[f->points[i]][0];
-					tex[i][1] = mesh->texelL[f->points[i]][1];
+					// mesh->texelL[f->points[i]] is our
+					// vector. it has x and y only, z is
+					// therefore 0.0
+					float a[3];
+					float b[3];
+					a[0] = mesh->texelL[f->points[i]][0];
+					a[1] = mesh->texelL[f->points[i]][1];
+					a[2] = 0.0;
+					myTransform(b, texMatrix, a);
+					tex[i][0] = b[0];
+					tex[i][1] = b[1];
 				}
 			}
 			if (QString::fromLatin1(mesh->name).find("teamcolor", 0, false) == 0) {
@@ -602,10 +643,6 @@ void BosonModel::renderNode(Lib3dsNode* node)
 			
 		}
 		glEnd();
-		if (mat && myTex) {
-			glPopMatrix();
-			glMatrixMode(GL_MODELVIEW);
-		}
 		if (resetColor) {
 			glColor3f(1.0, 1.0, 1.0);
 		}
@@ -618,7 +655,7 @@ void BosonModel::renderNode(Lib3dsNode* node)
 		// I assume thats e.g. the rotation of the node. maybe
 		// even scaling.
 		glMultMatrixf(&node->matrix[0][0]);
-		
+
 		// the pivot point is the center of the object, I guess.
 		glTranslatef(-d->pivot[0], -d->pivot[1], -d->pivot[2]);
 
@@ -686,5 +723,16 @@ void BosonModel::dumpTriangle(Lib3dsVector* v, GLuint texture, Lib3dsTexel* tex)
 	text += "(no texture)";
  }
  kdDebug() << text << endl;
+}
+
+void myTransform(float* r, float* m, float* v)
+{
+ // r = m * v, m is a 4x4 OpenGL matrix, r and v are both a 3x1 column vector.
+ // the forth element is unused in boson and therefore we use silently 0.
+#define M(row, col) m[col * 4 + row] // AB: shamelessy stolen from mesa's math subdir
+ // we don't optimize this function for execution speed, so a loop is fine
+ for (int i = 0; i < 4; i++) {
+	r[i] = M(i, 0) * v[0] + M(i, 1) * v[1] + M(i, 2) * v[2] + M(i, 3) * v[3];
+ }
 }
 
