@@ -100,7 +100,7 @@ void BosonOrderWidget::resetLayout()
  delete d->mOrderLayout;
  delete d->mTopLayout;
  d->mTopLayout = new QVBoxLayout(this);
- int buttons = boConfig->commandButtonsPerRow();
+ int buttons = DEFAULT_CMD_BUTTONS_PER_ROW;
  d->mOrderLayout = new QGridLayout(d->mTopLayout, -1, -1);
  d->mTopLayout->addStretch(1);
  for (unsigned int i = 0; i < d->mOrderButton.count(); i++) {
@@ -110,12 +110,6 @@ void BosonOrderWidget::resetLayout()
  int row = ((d->mOrderButton.count() - 1) / buttons) + 1;
  d->mOrderLayout->setRowStretch(row, 1);
  d->mOrderLayout->activate();
-}
-
-void BosonOrderWidget::setButtonsPerRow(int b)
-{
- boConfig->setCommandButtonsPerRow(b);
- resetLayout();
 }
 
 void BosonOrderWidget::setOrderButtons(QValueList<BoSpecificAction> actions)

@@ -41,9 +41,6 @@ class BosonCommandFrame : public BosonCommandFrameBase
 public:
 	~BosonCommandFrame();
 
-public slots:
-	virtual void slotSetButtonsPerRow(int b);
-
 protected:
 	/**
 	 * Mostly sets the plugin widget, such as the construction progress bar.

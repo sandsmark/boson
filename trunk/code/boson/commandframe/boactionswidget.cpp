@@ -63,8 +63,6 @@ BoActionsWidget::~BoActionsWidget()
 
 void BoActionsWidget::ensureButtons(unsigned int number)
 {
- // Ensure at least boConfig->commandButtonsPerRow() are there
- //number = QMIN((unsigned int)boConfig->commandButtonsPerRow(), number);
  if (d->mOrderButton.count() >= number) {
 	return;
  }
@@ -86,7 +84,7 @@ void BoActionsWidget::resetLayout()
  delete d->mOrderLayout;
  delete d->mTopLayout;
  d->mTopLayout = new QVBoxLayout(this);
- int buttons = boConfig->commandButtonsPerRow();
+ int buttons = DEFAULT_CMD_BUTTONS_PER_ROW;
  d->mOrderLayout = new QGridLayout(d->mTopLayout, -1, -1);
  d->mTopLayout->addStretch(1);
  for (unsigned int i = 0; i < d->mOrderButton.count(); i++) {
@@ -96,12 +94,6 @@ void BoActionsWidget::resetLayout()
  int row = ((d->mOrderButton.count() - 1) / buttons) + 1;
  d->mOrderLayout->setRowStretch(row, 1);
 d->mOrderLayout->activate();
-}
-
-void BoActionsWidget::setButtonsPerRow(int b)
-{
- boConfig->setCommandButtonsPerRow(b);
- resetLayout();
 }
 
 void BoActionsWidget::hideButtons()

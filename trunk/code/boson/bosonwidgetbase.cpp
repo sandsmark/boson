@@ -67,6 +67,7 @@
 #include <qfileinfo.h>
 #include <qdatastream.h>
 #include <qdom.h>
+#include <qimage.h>
 
 #include "bosonwidgetbase.moc"
 
@@ -530,11 +531,6 @@ void BosonWidgetBase::slotAddChatSystemMessage(const QString& fromName, const QS
  displayManager()->addChatMessage(i18n("--- %1: %2").arg(fromName).arg(text));
 }
 
-void BosonWidgetBase::slotSetCommandButtonsPerRow(int b)
-{
- cmdFrame()->slotSetButtonsPerRow(b);
-}
-
 void BosonWidgetBase::slotUnfogAll(Player* pl)
 {
  if (!boGame) {
@@ -951,16 +947,21 @@ void BosonWidgetBase::setLocalPlayerRecursively(Player* p)
 
 void BosonWidgetBase::slotGrabScreenshot()
 {
+ BO_CHECK_NULL_RET(displayManager());
+ BO_CHECK_NULL_RET(displayManager()->activeDisplay());
  boDebug() << k_funcinfo << "Taking screenshot!" << endl;
 
- // FIXME: maybe use a signal (i.e. move the code to TopWidget)
+// QImage image = displayManager()->activeDisplay()->screenShot();
  QPixmap shot = QPixmap::grabWindow(parentWidget()->winId());
+ if (shot.isNull()) {
+	boError() << k_funcinfo << "NULL image returned" << endl;
+	return;
+ }
  QString file = findSaveFileName("boson", "jpg");
  if (file.isNull()) {
 	boWarning() << k_funcinfo << "Can't find free filename???" << endl;
 	return;
  }
- // TODO: chat message about file location!
  boDebug() << k_funcinfo << "Saving screenshot to " << file << endl;
  bool ok = shot.save(file, "JPEG", 90);
  if (!ok) {

@@ -358,8 +358,3 @@ void BosonCommandFrame::showUnitActions(Unit* unit)
  }
 }
 
-void BosonCommandFrame::slotSetButtonsPerRow(int b)
-{
- BosonCommandFrameBase::slotSetButtonsPerRow(b);
- d->mUnitActions->setButtonsPerRow(b);
-}

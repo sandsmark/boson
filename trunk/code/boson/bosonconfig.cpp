@@ -264,7 +264,6 @@ BosonConfig::BosonConfig(KConfig* conf)
  mRMBMove = new BoConfigBoolEntry(this, "RMBMove", DEFAULT_USE_RMB_MOVE);
  mShowMenubarInGame = new BoConfigBoolEntry(this, "ShowMenubarInGame", true);
  mShowMenubarOnStartup = new BoConfigBoolEntry(this, "ShowMenubarOnStartup", false);
- mCommandButtonsPerRow = new BoConfigIntEntry(this, "CommandButtonsPerRow", DEFAULT_CMD_BUTTONS_PER_ROW);
  mArrowKeyStep = new BoConfigUIntEntry(this, "ArrowKeyStep", DEFAULT_ARROW_SCROLL_SPEED);
  mCursorEdgeSensity = new BoConfigUIntEntry(this, "CursorEdgeSensity", DEFAULT_CURSOR_EDGE_SENSITY);
  mUpdateInterval = new BoConfigUIntEntry(this, "GLUpdateInterval", DEFAULT_UPDATE_INTERVAL);
