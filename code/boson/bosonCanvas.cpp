@@ -52,6 +52,7 @@ bosonCanvas::bosonCanvas( QPixmap p, uint w, uint h)
 
 	// ping initialisation, not relevant
 	last_sync = time(NULL);
+	radar_pulse = 0;
 
 	// cells
 	cells = new Cell[w*h];

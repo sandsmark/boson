@@ -52,6 +52,7 @@ void bosonBigDisplay::actionClicked(int mx, int my, int /*state*/)
 			boAssert(mobIt.current()->who == who_am_i);
 			((playerMobUnit *)mobIt.current())->u_goto(QPoint(mx,my));
 		}
+		if (!mobIt.isEmpty())bocanvas->play("mobile_going.wav");
 		return;
 	}
 	
@@ -63,6 +64,7 @@ void bosonBigDisplay::actionClicked(int mx, int my, int /*state*/)
 			boAssert(mobIt.current()->who == who_am_i);
 			((playerMobUnit *)mobIt.current())->u_attack(m);
 		}
+		if (!mobIt.isEmpty()) bocanvas->play("mobile_attacking.wav");
 
 		return;
 	}
@@ -75,6 +77,7 @@ void bosonBigDisplay::actionClicked(int mx, int my, int /*state*/)
 			boAssert(mobIt.current()->who == who_am_i);
 			((playerMobUnit *)mobIt.current())->u_attack(f);
 		}
+		if (!mobIt.isEmpty()) bocanvas->play("mobile_attacking.wav");
 
 		return;
 	}
