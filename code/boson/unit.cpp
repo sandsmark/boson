@@ -45,7 +45,7 @@ public:
 		mSelectBoxDown = 0;
 	}
 	KGamePropertyInt mDirection;
-	KGamePropertyInt mReloadState;
+	KGameProperty<unsigned int> mReloadState;
 
 	KGamePropertyList<QPoint> mWaypoints;
 
@@ -459,7 +459,7 @@ void Unit::shootAt(Unit* target)
  }
  kdDebug() << "shoot at unit " << target->id() << endl;
  ((BosonCanvas*)canvas())->shootAtUnit(target, this, damage());
- d->mReloadState = reload();
+ d->mReloadState = unitProperties()->reload();
 }
 
 QCanvasItemList Unit::unitsInRange() const
@@ -530,6 +530,10 @@ QValueList<Unit*> Unit::unitCollisions(bool exact) const
  return units;
 }
 
+unsigned int Unit::reloadState() const
+{
+ return d->mReloadState;
+}
 
 
 

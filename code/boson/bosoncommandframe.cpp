@@ -26,6 +26,7 @@
 #include "bosonunitview.h"
 #include "cell.h"
 #include "bosontiles.h"
+#include "bosoncommandwidget.h"
 
 #include <kstandarddirs.h>
 #include <klocale.h>
@@ -39,7 +40,6 @@
 #include <qpixmap.h>
 #include <qscrollview.h>
 #include <qlabel.h>
-#include <qtooltip.h>
 #include <qcombobox.h>
 #include <qcheckbox.h>
 #include <qmap.h>
@@ -72,7 +72,6 @@ public:
 	BosonCommandFramePrivate()
 	{
 		mScrollView = 0;
-		mOrderMap = 0;
 		mOrderLayout = 0;
 		mOrderWidget = 0;
 
@@ -87,10 +86,9 @@ public:
 		mFactory = 0;
 	}
 
-	QIntDict<QPushButton> mOrderButton;
+	QIntDict<BosonCommandWidget> mOrderButton;
 	QWidget* mOrderWidget;
 	OrderScrollView* mScrollView;
-	QSignalMapper* mOrderMap;
 
 	QVBoxLayout* mOrderLayout;
 	QPtrList<QHBoxLayout> mHOrderLayoutList;
@@ -140,9 +138,6 @@ BosonCommandFrame::BosonCommandFrame(QWidget* parent, bool editor) : QFrame(pare
 // d->mOrderLayout = new QVBoxLayout(d->mScrollView->viewport(), ORDER_SPACING, ORDER_SPACING);
  d->mOrderLayout = new QVBoxLayout(d->mOrderWidget, 0, ORDER_SPACING);
  
-
- d->mOrderMap = new QSignalMapper(d->mOrderWidget);
- connect(d->mOrderMap, SIGNAL(mapped(int)), this, SLOT(slotHandleOrder(int)));
  show();
 }
 
@@ -170,7 +165,6 @@ void BosonCommandFrame::initEditor()
  d->mInverted = new QCheckBox(this);
  d->mInverted->setText(i18n("Invert"));
  connect(d->mInverted, SIGNAL(toggled(bool)), this, SLOT(slotRedrawTiles()));
-
 }
 
 BosonCommandFrame::~BosonCommandFrame()
@@ -196,12 +190,14 @@ void BosonCommandFrame::initOrderButtons(unsigned int no)
 			h = new QHBoxLayout(d->mOrderLayout, ORDER_SPACING);
 			d->mHOrderLayoutList.append(h);
 		}
-		QPushButton* b = new QPushButton(d->mOrderWidget);
+		BosonCommandWidget* b = new BosonCommandWidget(d->mOrderWidget);
 		h->addWidget(b);
 		b->hide();
 		d->mOrderButton.insert(i, b);
-		connect(b, SIGNAL(clicked()), d->mOrderMap, SLOT(map()));
-		d->mOrderMap->setMapping(b, i);
+		connect(b, SIGNAL(signalPlaceCell(int)), 
+				this, SIGNAL(signalCellSelected(int)));
+		connect(b, SIGNAL(signalProduceUnit(int)),
+				this, SLOT(slotProduceUnit(int)));
 	}
  }
 }
@@ -276,87 +272,18 @@ void BosonCommandFrame::slotSetConstruction(Unit* unit)
 void BosonCommandFrame::hideOrderButtons()
 {
  d->mFactory = 0;
- QIntDictIterator<QPushButton> it(d->mOrderButton);
+ QIntDictIterator<BosonCommandWidget> it(d->mOrderButton);
  while (it.current()) {
 	it.current()->hide();
 	++it;
  }
 }
 
-void BosonCommandFrame::setOrderPixmap(unsigned int id, const QPixmap& p)
-{
- if (!d->mOrderButton[id]) {
-	kdError() << k_funcinfo << "cannot find order button " << id << endl;
-	return;
- }
- d->mOrderButton[id]->setPixmap(p);
- d->mOrderButton[id]->setFixedSize(d->mOrderButton[id]->sizeHint());
- d->mOrderButton[id]->show();
-}
-
-void BosonCommandFrame::setOrderTooltip(unsigned int id, const QString& text)
-{
- if (!d->mOrderButton[id]) {
-	kdError() << k_funcinfo << "cannot find order button " << id << endl;
-	return;
- }
- QToolTip::remove(d->mOrderButton[id]);
- QToolTip::add(d->mOrderButton[id], text);
-}
-
 void BosonCommandFrame::setOrderButtons(QValueList<int> produceList, Player* owner)
 {
  initOrderButtons(produceList.count());
  for (unsigned int i = 0; i < produceList.count(); i++) {
-	setOrderButton(i, produceList[i], owner);
- }
-}
-
-void BosonCommandFrame::setOrderButton(unsigned int button, int unitType, Player* owner)
-{
- if (!owner) {
-	kdError() << k_funcinfo << ": no owner" << endl;
-	return;
- }
- if (!owner->speciesTheme()) {
-	kdError() << k_funcinfo << ": player has no species theme" << endl;
-	return;
- }
-
- QPixmap* small = owner->speciesTheme()->smallOverview(unitType);
- if (!small) {
-	kdError() << k_funcinfo << ": cannot find small overview for " 
-			<< unitType << endl;
-	return;
- }
- setOrderPixmap(button, *small);
- d->mOrder2Type.insert(button, unitType);
-
- const UnitProperties* prop = owner->speciesTheme()->unitProperties(unitType);
- if (!prop) {
-	kdError() << k_funcinfo << "No unit properties for " << unitType 
-			<< endl;
-	return;
- }
- setOrderTooltip(button, prop->name());
-}
-
-void BosonCommandFrame::slotHandleOrder(int index)
-{
- switch (d->mOrderType) {
-	case PlainTiles:
-	case Small:
-	case Big1:
-	case Big2:
-		emit signalCellSelected(d->mOrder2Type[index], '0');
-		break;
-	case Facilities:
-	case Mobiles:
-		emit signalUnitSelected(d->mOrder2Type[index], d->mFactory, d->mOwner);
-		break;
-	default:
-		kdError() << "unexpected construction index " << index << endl;
-		break;
+	d->mOrderButton[i]->setUnit(produceList[i], owner);
  }
 }
 
@@ -417,9 +344,7 @@ void BosonCommandFrame::slotRedrawTiles()
 		initOrderButtons(Cell::GroundLast - 1);
 		for (int i = 0; i < 5; i++) {
 			int groundType = i + 1;
-			QPixmap p = d->mTiles->plainTile((Cell::GroundType)groundType);
-			setOrderPixmap(i, p);
-			d->mOrder2Type.insert(i, groundType);
+			d->mOrderButton[i]->setCell(groundType, d->mTiles);
 		}
 		break;
 	case Small:
@@ -427,32 +352,25 @@ void BosonCommandFrame::slotRedrawTiles()
 		initOrderButtons(9);
 		for (int i = 0; i < 9; i++) {
 			int tile = Cell::smallTileNumber(i, trans, inverted);
-			setOrderPixmap(i, d->mTiles->tile(tile));
-			d->mOrder2Type.insert(i, tile);
+			d->mOrderButton[i]->setCell(tile, d->mTiles);
 		}
 		break;
 	case Big1:
 		hideOrderButtons();
 		initOrderButtons(4);
 		for (int i = 0; i < 4; i++) {
-			QPixmap p = d->mTiles->big1(i, trans, inverted);
-			setOrderPixmap(i, p);
-			d->mOrder2Type.insert(i, Cell::getBigTransNumber(
-					trans, (inverted ? 4 : 0) + i));
-			// FIXME: big tiles are currently placed as small ones
-			// only
+			d->mOrderButton[i]->setCell(Cell::getBigTransNumber(
+					trans, (inverted ? 4 : 0) + i), 
+					d->mTiles);
 		}
 		break;
 	case Big2:
 		hideOrderButtons();
 		initOrderButtons(4);
 		for (int i = 0; i < 4; i++) {
-			QPixmap p = d->mTiles->big2(i, trans, inverted);
-			setOrderPixmap(i, p);
-			d->mOrder2Type.insert(i, Cell::getBigTransNumber(
-					trans, (inverted ? 12 : 8) + i));
-			// FIXME: big tiles are currently placed as small ones
-			// only
+			d->mOrderButton[i]->setCell(Cell::getBigTransNumber(
+					trans, (inverted ? 12 : 8) + i), 
+					d->mTiles);
 		}
 		break;
 	case Facilities:
@@ -469,3 +387,9 @@ void BosonCommandFrame::setLocalPlayer(Player* p)
 {
  d->mOwner = p;
 }
+
+void BosonCommandFrame::slotProduceUnit(int unitType)
+{
+ emit signalProduceUnit(unitType, d->mFactory, d->mOwner);
+}
+

@@ -138,6 +138,9 @@ public:
 	 **/
 	QString soundShoot() const;
 
+
+	unsigned int reloadState() const;
+
 protected:
 	void shootAt(Unit* target);
 
