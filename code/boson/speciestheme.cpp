@@ -172,15 +172,17 @@ bool SpeciesTheme::loadUnitGraphics(const UnitProperties* prop)
 // sprites first
  QString fileName = path + "field-%1.png";
  int images = prop->isFacility() ? PIXMAP_PER_FIX : PIXMAP_PER_MOBILE;
- for(int i = 0; i < images; i++) {
-	QImage image;
-	QString number;
-	number.sprintf("%04d", i);
-	if (!loadUnitImage(fileName.arg(number), image, true, (images - 1 != i))) { // latest(destroyed) isn't team-colored
-		kdError() << "Cannot load " << fileName.arg(number) << endl;
-		return false;
+ if (!QFile::exists(prop->unitPath() + QString::fromLatin1("unit.3ds"))) {
+	for(int i = 0; i < images; i++) {
+		QImage image;
+		QString number;
+		number.sprintf("%04d", i);
+		if (!loadUnitImage(fileName.arg(number), image, true, (images - 1 != i))) { // latest(destroyed) isn't team-colored
+			kdError() << "Cannot load " << fileName.arg(number) << endl;
+			return false;
+		}
+		imageList.append(image);
 	}
-	imageList.append(image);
  }
  loadUnitTextures(prop->typeId(), imageList);
  loadUnitModel(prop);
