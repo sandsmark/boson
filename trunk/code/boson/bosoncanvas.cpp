@@ -505,10 +505,9 @@ void BosonCanvas::destroyUnit(Unit* unit)
 	}
 
 	QPtrListIterator<BosonParticleSystem> it(*(unit->activeParticleSystems()));
-	while (it.current() != 0) {
+	for (; it.current(); ++it) {
 		boDebug() << "Setting age to 0 for particle system" << it.current() << endl;
 		it.current()->setAge(0);
-		++it;
 	}
 	unit->activeParticleSystems()->clear();
 
@@ -934,9 +933,8 @@ void BosonCanvas::addParticleSystem(BosonParticleSystem* s)
 void BosonCanvas::addParticleSystems(const QPtrList<BosonParticleSystem> systems)
 {
  QPtrListIterator<BosonParticleSystem> it(systems);
- BosonParticleSystem* s;
- while ((s = it.current()) != 0) {
-	++it;
-	addParticleSystem(s);
+ for (; it.current(); ++it) {
+	addParticleSystem(it.current());
  }
 }
+
