@@ -44,6 +44,7 @@ class BoVisibleEffects;
 class BosonMap;
 class BosonEffect;
 class BoSpecificAction;
+class BoGLMatrices;
 
 class KGameChat;
 class KGameIO;
@@ -66,7 +67,7 @@ class BosonCanvasRendererPrivate;
 class BosonCanvasRenderer
 {
 public:
-	BosonCanvasRenderer(const BoMatrix& modelviewMatrix, GLfloat* viewFrustum, GLint* viewport);
+	BosonCanvasRenderer(const BoGLMatrices& gameMatrices);
 	~BosonCanvasRenderer();
 
 	void setCamera(BoGameCamera* camera);
@@ -87,7 +88,7 @@ public:
 
 	BoGameCamera* camera() const;
 	PlayerIO* localPlayerIO() const;
-	GLfloat* viewFrustum() const;
+	const GLfloat* viewFrustum() const;
 
 protected:
 	void renderGround(const BosonMap*);
@@ -227,6 +228,39 @@ public:
 };
 
 /**
+ * Small class that takes care of scrolling when the cursor is at the edge of
+ * the window
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+class BoCursorEdgeScrolling : public QObject
+{
+	Q_OBJECT
+public:
+	BoCursorEdgeScrolling(QObject* parent);
+	~BoCursorEdgeScrolling();
+
+	void setCamera(BoGameCamera* camera) { mCamera = camera; }
+	BoGameCamera* camera() const { return mCamera; }
+	void setMatrices(const BoGLMatrices* matrices) { mMatrices = matrices; }
+	const BoGLMatrices* matrices() const { return mMatrices; }
+
+	void quitGame();
+
+protected:
+	virtual bool eventFilter(QObject* o, QEvent* e);
+
+protected slots:
+	void slotCursorEdgeTimeout();
+
+private:
+	BoGameCamera* mCamera;
+	const BoGLMatrices* mMatrices;
+	QTimer* mCursorEdgeTimer;
+	int mCursorEdgeCounter;
+};
+
+
+/**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
 class BosonBigDisplayBase : public BosonUfoGLWidget
@@ -248,8 +282,7 @@ public:
 	void addLineVisualization(BoLineVisualization v);
 	void advanceLineVisualization();
 
-	BosonCursor* cursor() const { return mCursor; }
-	void setCursor(BosonCursor* c);
+	BosonCursor* cursor() const;
 	BoSelection* selection() const { return mSelection; }
 
 	void setFont(const BoFontInfo& font);
@@ -408,7 +441,6 @@ signals:
 
 protected slots:
 	void slotMouseEvent(KGameIO* , QDataStream& stream, QMouseEvent* e, bool *eatevent);
-	void slotCursorEdgeTimeout();
 
 	/**
 	 * Called when @ref BosonCanvas::signalRemovedItem is emitted. Note that
@@ -691,6 +723,7 @@ private:
 	BosonCursor* mCursor;
 	BoSelection* mSelection;
 };
+
 
 /**
  * This class connects to the relevant signals of @ref BosonScriptInterface. All
