@@ -426,7 +426,7 @@ void BosonCanvas::explosion(const BoVector3& pos, long int damage, float range, 
  float fr = QMAX(0, fullrange * BO_TILE_SIZE - 1);
  long int d;
  float dist;
- QValueList<Unit*> l = unitCollisionsInSphere(pos, r);
+ QValueList<Unit*> l = unitCollisionsInSphere(pos, (int)r);
  for (unsigned int i = 0; i < l.count(); i++) {
 	dist = l[i]->distance(pos);
 	if (dist <= fr * fr || r == fr) {
@@ -666,10 +666,10 @@ QValueList<Unit*> BosonCanvas::unitCollisionsInSphere(const BoVector3& pos, int 
  // FIXME: code duplicated from unitCollisionsInRange
  boDebug(310) << k_funcinfo << endl;
  BoItemList l = collisions(QRect(
-		(pos.x() - radius > 0) ? pos.x() - radius : 0,
-		(pos.y() - radius > 0) ? pos.y() - radius : 0,
-		pos.x() + radius,
-		pos.y() + radius));
+		(pos.x() - radius > 0) ? (int)pos.x() - radius : 0,
+		(pos.y() - radius > 0) ? (int)pos.y() - radius : 0,
+		(int)pos.x() + radius,
+		(int)pos.y() + radius));
 			
  QValueList<Unit*> list;
  for (unsigned int i = 0; i < l.count(); i++) {

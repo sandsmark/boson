@@ -1795,7 +1795,7 @@ void BosonBigDisplayBase::slotCenterHomeBase()
 	// no units for player
 	return;
  }
- pos = QPoint(commandCenter->x() / BO_TILE_SIZE, commandCenter->y() / BO_TILE_SIZE);
+ pos = QPoint((int)commandCenter->x() / BO_TILE_SIZE, (int)commandCenter->y() / BO_TILE_SIZE);
 
  slotReCenterDisplay(pos);
 }
@@ -2103,7 +2103,7 @@ void BosonBigDisplayBase::slotCursorEdgeTimeout()
 	d->mCursorEdgeCounter = 0;
  } else {
 	GLdouble dx, dy;
-	mapDistance(x, y, &dx, &dy);
+	mapDistance((int)x, (int)y, &dx, &dy);
 	if (!d->mCursorEdgeTimer.isActive()) {
 		d->mCursorEdgeTimer.start(20);
 	}
