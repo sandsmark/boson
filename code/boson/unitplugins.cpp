@@ -44,23 +44,23 @@ ProductionPlugin::ProductionPlugin(Unit* unit)
  mProductionState.setEmittingSignal(false); // called quite often - not emitting will increase speed a little bit
 }
 
-int ProductionPlugin::completedProduction() const
+unsigned long int ProductionPlugin::completedProduction() const
 {
  if (!hasProduction()) {
-	return -1;
+	return 0;
  }
- int type = currentProduction();
- if (type < 0) {
-	return -1;
+ unsigned long int type = currentProduction();
+ if (type <= 0) {
+	return 0;
  }
  if (mProductionState < unit()->owner()->unitProperties(type)->productionTime()) {
 	kdDebug() << "not yet completed: " << type << endl;
-	return -1;
+	return 0;
  }
  return type;
 }
 
-void ProductionPlugin::addProduction(int unitType)
+void ProductionPlugin::addProduction(unsigned long int unitType)
 {
  if (!unit()->speciesTheme()->productions(unit()->unitProperties()->producerList()).contains(unitType)) {
 	kdError() << k_funcinfo << " cannot produce " << unitType << endl;
@@ -82,7 +82,7 @@ void ProductionPlugin::removeProduction()
  mProductionState = 0; // start next production (if any)
 }
 
-void ProductionPlugin::removeProduction(int unitType)
+void ProductionPlugin::removeProduction(unsigned long int unitType)
 {
  for (unsigned int i = 0; i < productionList().count(); i++) {
 	if (mProductions[i] == unitType) {
@@ -138,8 +138,8 @@ bool ProductionPlugin::canPlaceProductionAt(const QPoint& pos)
 
 void ProductionPlugin::advance()
 {
- int type = currentProduction();
- if (type < 0) { // no production
+ unsigned long int type = currentProduction();
+ if (type <= 0) { // no production
 	unit()->setWork(Unit::WorkNone);
 	mProductionState = 0;
 	return;

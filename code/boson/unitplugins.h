@@ -44,16 +44,16 @@ public:
 	 * @return The unit type ID (see @ref UnitProperties::typeId) of the
 	 * completed production (if any).
 	 **/
-	int completedProduction() const;
+	unsigned long int completedProduction() const;
 
 	/**
 	 * @return The unit type ID of the current production. -1 if there is no
 	 * production.
 	 **/
-	inline int currentProduction() const
+	inline unsigned long int currentProduction() const
 	{
 		if (!hasProduction()) {
-			return -1;
+			return 0;
 		}
 		return mProductions.first();
 	}
@@ -67,16 +67,16 @@ public:
 	 * Remove first occurance of unitType in the production list. Does not
 	 * remove anything if unitType is not in the list.
 	 **/
-	void removeProduction(int unitType);
+	void removeProduction(unsigned long int unitType);
 
 	/**
 	 * Add unitType (see @ref UnitProprties::typeId) to the construction
 	 * list.
 	 **/
-	void addProduction(int unitType);
+	void addProduction(unsigned long int unitType);
 
-	QValueList<int> productionList() const { return mProductions; }
-	bool contains(int unitType) { return productionList().contains(unitType); }
+	QValueList<unsigned long int> productionList() const { return mProductions; }
+	bool contains(unsigned long int unitType) { return productionList().contains(unitType); }
 
 	/**
 	 * @return The percentage of the production progress. 0 means the
@@ -90,7 +90,7 @@ public:
 
 private:
 	Unit* mUnit;
-	KGamePropertyList<int> mProductions;
+	KGamePropertyList<unsigned long int> mProductions;
 	KGameProperty<unsigned int> mProductionState;
 };
 

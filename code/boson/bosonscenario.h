@@ -76,8 +76,8 @@ public:
 	static bool saveUnit(QDomElement& node, Unit* unit);
 	static bool loadUnit(QDomElement& node, Unit* unit);
 
-	static bool saveBasicUnit(QDomElement& node, int unitType, unsigned int x, unsigned int y);
-	static bool loadBasicUnit(QDomElement& node, int& unitType, unsigned int& x, unsigned int& y);
+	static bool saveBasicUnit(QDomElement& node, unsigned long int unitType, unsigned int x, unsigned int y);
+	static bool loadBasicUnit(QDomElement& node, unsigned long int& unitType, unsigned int& x, unsigned int& y);
 
 	static bool savePlayer(QDomElement& node, Player* p);
 	static bool loadPlayer(QDomElement& node, Player* p);

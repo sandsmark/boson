@@ -369,15 +369,15 @@ bool BosonScenario::loadPlayer(QDomElement& node, Player* p)
 }
 
 
-bool BosonScenario::saveBasicUnit(QDomElement& node, int unitType, unsigned int x, unsigned int y)
+bool BosonScenario::saveBasicUnit(QDomElement& node, unsigned long int unitType, unsigned int x, unsigned int y)
 {
- node.setAttribute("UnitType", unitType);
+ node.setAttribute("UnitType", (unsigned int)unitType);
  node.setAttribute("x", x);
  node.setAttribute("y", y);
  return true;
 }
 
-bool BosonScenario::loadBasicUnit(QDomElement& node, int& unitType, unsigned int& x, unsigned int& y)
+bool BosonScenario::loadBasicUnit(QDomElement& node, unsigned long int& unitType, unsigned int& x, unsigned int& y)
 {
  if (!node.hasAttribute("UnitType")) {
 	kdError() << k_funcinfo << "missing UnitType" << endl;

@@ -69,7 +69,7 @@ public:
 	/**
 	 * Convenience method for theme()->unitProperties()
 	 **/
-	const UnitProperties* unitProperties(int unitType) const;
+	const UnitProperties* unitProperties(unsigned long int unitType) const;
 
 	void fog(int x, int y);
 	void unfog(int x, int y);
@@ -126,15 +126,15 @@ public:
 	 * @return TRUE if this player can build units with type unitType, FALSE
 	 * otherwise
 	 **/
-	bool canBuild(int unitType) const;
+	bool canBuild(unsigned long int unitType) const;
 
 	/**
 	 * @return TRUE if player has unit with type type, FALSE otherwise
 	 **/
-	bool hasUnitWithType(int type) const;
+	bool hasUnitWithType(unsigned long int type) const;
 
 signals:
-	void signalLoadUnit(int unitType, unsigned long int id, Player* owner);
+	void signalLoadUnit(unsigned long int unitType, unsigned long int id, Player* owner);
 
 	void signalUnitChanged(Unit* unit);
 

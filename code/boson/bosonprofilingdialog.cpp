@@ -183,7 +183,7 @@ void BosonProfilingDialog::resetLoadUnitPage()
 {
  d->mUnits->clear();
  BosonProfiling::BosonProfilingPrivate* pd = d->data()->d;
- QMap<int, BosonProfiling::BosonProfilingPrivate::TimesList>::Iterator it = pd->mUnitTimes.begin();
+ QMap<unsigned long int, BosonProfiling::BosonProfilingPrivate::TimesList>::Iterator it = pd->mUnitTimes.begin();
  for (; it != pd->mUnitTimes.end(); ++it) {
 	QListViewItem* unit = new QListViewItem(d->mUnits);
 	QString unitType;

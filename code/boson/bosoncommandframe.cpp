@@ -176,10 +176,10 @@ void BoOrderWidget::ensureButtons(unsigned int number)
 		d->mOrderButton.insert(i, b);
 		connect(b, SIGNAL(signalPlaceCell(int)), 
 				this, SIGNAL(signalPlaceCell(int)));
-		connect(b, SIGNAL(signalProduceUnit(int)),
-				this, SIGNAL(signalProduceUnit(int)));
-		connect(b, SIGNAL(signalStopProduction(int)),
-				this, SIGNAL(signalStopProduction(int)));
+		connect(b, SIGNAL(signalProduceUnit(unsigned long int)),
+				this, SIGNAL(signalProduceUnit(unsigned long int)));
+		connect(b, SIGNAL(signalStopProduction(unsigned long int)),
+				this, SIGNAL(signalStopProduction(unsigned long int)));
 		connect(b, SIGNAL(signalAction(int)),
 				this, SIGNAL(signalAction(int)));
 	}
@@ -216,11 +216,11 @@ void BoOrderWidget::setButtonsPerRow(int b)
  resetLayout();
 }
 
-void BoOrderWidget::setOrderButtons(QValueList<int> produceList, Player* owner, Facility* factory)
+void BoOrderWidget::setOrderButtons(QValueList<unsigned long int> produceList, Player* owner, Facility* factory)
 {
  ensureButtons(produceList.count() + d->mButtonOffset);
  hideOrderButtons();
- int unitType = -1;
+ unsigned long int unitType = 0;
  ProductionPlugin* production = 0;
  if (factory) {
 	production = factory->productionPlugin();
@@ -233,7 +233,7 @@ void BoOrderWidget::setOrderButtons(QValueList<int> produceList, Player* owner, 
  for (unsigned int i = d->mButtonOffset; i < produceList.count() + d->mButtonOffset; i++) {
 	d->mOrderButton[i]->setUnit(produceList[i], owner);
 	d->mTopLayout->activate();
-	if (unitType >= 0 && production) {
+	if (unitType > 0 && production) {
 		int count = production->productionList().contains(produceList[i]);
 		if (produceList[i] != unitType) {
 			d->mOrderButton[i]->setProductionCount(count);
@@ -487,10 +487,10 @@ BosonCommandFrame::BosonCommandFrame(QWidget* parent, bool editor) : QFrame(pare
 
 // the order buttons
  d->mOrderWidget = new BoOrderWidget(editor, actionWidget);
- connect(d->mOrderWidget, SIGNAL(signalProduceUnit(int)),
-		this, SLOT(slotProduceUnit(int)));
- connect(d->mOrderWidget, SIGNAL(signalStopProduction(int)),
-		this, SLOT(slotStopProduction(int)));
+ connect(d->mOrderWidget, SIGNAL(signalProduceUnit(unsigned long int)),
+		this, SLOT(slotProduceUnit(unsigned long int)));
+ connect(d->mOrderWidget, SIGNAL(signalStopProduction(unsigned long int)),
+		this, SLOT(slotStopProduction(unsigned long int)));
  connect(d->mOrderWidget, SIGNAL(signalPlaceCell(int)),
 		this, SIGNAL(signalCellSelected(int)));
  connect(d->mOrderWidget, SIGNAL(signalAction(int)),
@@ -587,10 +587,10 @@ void BosonCommandFrame::slotSetAction(Unit* unit)
 	}
 	ProductionPlugin* production = fac->productionPlugin();
 	if (production) {
-		QValueList<int> produceList = fac->speciesTheme()->productions(prop->producerList());
+		QValueList<unsigned long int> produceList = fac->speciesTheme()->productions(prop->producerList());
 		// Filter out things that player can't actually build (requisities aren't
 		//  met yet)
-		QValueList<int>::Iterator it;
+		QValueList<unsigned long int>::Iterator it;
 		it = produceList.begin();
 		while(it != produceList.end()) {
 			if(!owner->canBuild(*it)) {
@@ -679,11 +679,11 @@ void BosonCommandFrame::setLocalPlayer(Player* p)
  d->mOwner = p;
 }
 
-void BosonCommandFrame::slotProduceUnit(int unitType)
+void BosonCommandFrame::slotProduceUnit(unsigned long int unitType)
 {
  emit signalProduceUnit(unitType, (UnitBase*)d->mSelectedUnit, d->mOwner);
 }
-void BosonCommandFrame::slotStopProduction(int unitType)
+void BosonCommandFrame::slotStopProduction(unsigned long int unitType)
 {
  emit signalStopProduction(unitType, (UnitBase*)d->mSelectedUnit, d->mOwner);
 }

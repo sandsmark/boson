@@ -190,7 +190,7 @@ bool SpeciesTheme::loadTheme(const QString& speciesDir, const QColor& teamColor)
 
 bool SpeciesTheme::loadUnitGraphics(const UnitProperties* prop)
 {
- int type = prop->typeId();
+ unsigned long int type = prop->typeId();
  QValueList<QImage> imageList;
  QString path = prop->unitPath();
 
@@ -255,7 +255,7 @@ bool SpeciesTheme::loadUnitGraphics(const UnitProperties* prop)
  return true;
 }
 
-bool SpeciesTheme::loadUnit(int type)
+bool SpeciesTheme::loadUnit(unsigned long int type)
 {
  boProfiling->loadUnit();
  const UnitProperties* prop = unitProperties(type);
@@ -308,7 +308,7 @@ bool SpeciesTheme::loadActionGraphics()
  return true;
 }
 
-int SpeciesTheme::unitWidth(int unitType)
+int SpeciesTheme::unitWidth(unsigned long int unitType)
 {
 #ifndef NO_OPENGL
  BosonTextureArray* array = d->mSpriteTextures[unitType];
@@ -340,7 +340,7 @@ int SpeciesTheme::unitWidth(int unitType)
 #endif
 }
 
-int SpeciesTheme::unitHeight(int unitType)
+int SpeciesTheme::unitHeight(unsigned long int unitType)
 {
 #ifndef NO_OPENGL
  BosonTextureArray* array = d->mSpriteTextures[unitType];
@@ -373,7 +373,7 @@ int SpeciesTheme::unitHeight(int unitType)
 }
 
 #ifndef NO_OPENGL
-BosonTextureArray* SpeciesTheme::textureArray(int unitType)
+BosonTextureArray* SpeciesTheme::textureArray(unsigned long int unitType)
 {
  BosonTextureArray* array = d->mSpriteTextures[unitType];
  if (!array) {
@@ -388,7 +388,7 @@ BosonTextureArray* SpeciesTheme::textureArray(int unitType)
  return array;
 }
 
-BosonModel* SpeciesTheme::unitModel(int unitType)
+BosonModel* SpeciesTheme::unitModel(unsigned long int unitType)
 {
  BosonModel* model = d->mUnitModels[unitType];
  if (!model) {
@@ -403,7 +403,7 @@ BosonModel* SpeciesTheme::unitModel(int unitType)
  return model;
 }
 
-GLuint SpeciesTheme::textureNumber(int unitType, int dir)
+GLuint SpeciesTheme::textureNumber(unsigned long int unitType, int dir)
 {
  BosonTextureArray* array = d->mSpriteTextures[unitType];
  if (!array) {
@@ -425,7 +425,7 @@ GLuint SpeciesTheme::textureNumber(int unitType, int dir)
  return array->texture(dir);
 }
 
-GLuint SpeciesTheme::displayList(int unitType)
+GLuint SpeciesTheme::displayList(unsigned long int unitType)
 {
  BosonModel* model = d->mUnitModels[unitType];
  if (!model) {
@@ -441,7 +441,7 @@ GLuint SpeciesTheme::displayList(int unitType)
 }
 #else
 
-QCanvasPixmapArray* SpeciesTheme::pixmapArray(int unitType)
+QCanvasPixmapArray* SpeciesTheme::pixmapArray(unsigned long int unitType)
 {
  QCanvasPixmapArray* array = d->mSprite[unitType];
  if (!array) {
@@ -458,7 +458,7 @@ QCanvasPixmapArray* SpeciesTheme::pixmapArray(int unitType)
 
 #endif // !NO_OPENGL
 
-QPixmap* SpeciesTheme::bigOverview(int unitType)
+QPixmap* SpeciesTheme::bigOverview(unsigned long int unitType)
 {
  QPixmap* pix = d->mBigOverview[unitType];
  if (!pix) {
@@ -473,7 +473,7 @@ QPixmap* SpeciesTheme::bigOverview(int unitType)
  return pix;
 }
 
-QPixmap* SpeciesTheme::smallOverview(int unitType)
+QPixmap* SpeciesTheme::smallOverview(unsigned long int unitType)
 {
  QPixmap* pix = d->mSmallOverview[unitType];
  if (!pix) {
@@ -784,9 +784,9 @@ const UnitProperties* SpeciesTheme::unitProperties(UnitBase* unit) const
  return unitProperties(unit->type());
 }
 
-const UnitProperties* SpeciesTheme::unitProperties(int unitType) const
+const UnitProperties* SpeciesTheme::unitProperties(unsigned long int unitType) const
 {
- if (unitType < 0) {
+ if (unitType <= 0) {
 	kdError() << k_funcinfo << "invalid unit type " << unitType << endl;
 	return 0;
  }
@@ -797,9 +797,9 @@ const UnitProperties* SpeciesTheme::unitProperties(int unitType) const
  return d->mUnitProperties[unitType];
 }
 
-QValueList<int> SpeciesTheme::allFacilities() const
+QValueList<unsigned long int> SpeciesTheme::allFacilities() const
 {
- QValueList<int> list;
+ QValueList<unsigned long int> list;
  QIntDictIterator<UnitProperties> it(d->mUnitProperties);
  while (it.current()) {
 	if (it.current()->isFacility()) {
@@ -810,9 +810,9 @@ QValueList<int> SpeciesTheme::allFacilities() const
  return list;
 }
 
-QValueList<int> SpeciesTheme::allMobiles() const
+QValueList<unsigned long int> SpeciesTheme::allMobiles() const
 {
- QValueList<int> list;
+ QValueList<unsigned long int> list;
  QIntDictIterator<UnitProperties> it(d->mUnitProperties);
  while (it.current()) {
 	if (it.current()->isMobile()) {
@@ -823,9 +823,9 @@ QValueList<int> SpeciesTheme::allMobiles() const
  return list;
 }
 
-QValueList<int> SpeciesTheme::productions(QValueList<int> producers) const
+QValueList<unsigned long int> SpeciesTheme::productions(QValueList<int> producers) const
 {
- QValueList<int> list;
+ QValueList<unsigned long int> list;
  QIntDictIterator<UnitProperties> it(d->mUnitProperties);
  while (it.current()) {
 	if (producers.contains(it.current()->producer())) {
@@ -982,7 +982,7 @@ QValueList<QColor> SpeciesTheme::defaultColors()
 }
 
 #ifndef NO_OPENGL
-void SpeciesTheme::loadUnitTextures(int unitType, QValueList<QImage> list)
+void SpeciesTheme::loadUnitTextures(unsigned long int unitType, QValueList<QImage> list)
 {
  if (list.isEmpty()) {
 	kdError() << k_funcinfo << "empty list" << endl;
@@ -1007,7 +1007,7 @@ void SpeciesTheme::loadUnitModel(const UnitProperties* prop)
  d->mUnitModels.insert(prop->typeId(), m);
 }
 
-GLuint SpeciesTheme::createDisplayList(int typeId)
+GLuint SpeciesTheme::createDisplayList(unsigned long int typeId)
 {
  BosonTextureArray* texArray = textureArray(typeId);
  if (!texArray) {

@@ -42,6 +42,14 @@ class QStringList;
 class QColor;
 
 /**
+ * Stores player's species - this includes units' sprites (if you're using
+ * QCanvas) or textures and models (if you're using OpenGL), sounds, properties
+ * and overviews as well as action pixmaps (attack, move and stop) and player's
+ * teamcolor.
+ *
+ * This class provides methods for loading and teamcoloring pixmaps and for
+ * retrieving them later.
+ *
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
  **/
 class SpeciesTheme
@@ -79,7 +87,7 @@ public:
 	 *
 	 * You can use this to preload units.
 	 **/
-	bool loadUnit(int unitType);
+	bool loadUnit(unsigned long int unitType);
 
 	/**
 	 * Load pixmaps of available actions (attack, move ...). This must be
@@ -92,22 +100,22 @@ public:
 	 **/
 	QPixmap* actionPixmap(UnitAction action);
 
-	int unitWidth(int unitType);
-	int unitHeight(int unitType);
+	int unitWidth(unsigned long int unitType);
+	int unitHeight(unsigned long int unitType);
 
 #ifndef NO_OPENGL
-	BosonTextureArray* textureArray(int unitType);
-	GLuint textureNumber(int unitType, int direction);
+	BosonTextureArray* textureArray(unsigned long int unitType);
+	GLuint textureNumber(unsigned long int unitType, int direction);
 	// TODO an OpenGL implementation for shot()
 
-	GLuint displayList(int unitType);
-	BosonModel* unitModel(int unitType);
+	GLuint displayList(unsigned long int unitType);
+	BosonModel* unitModel(unsigned long int unitType);
 #else
 	/**
 	 * @return The pixmap array for unitType or NULL if none was found for
 	 * this unitType. See also @ref UnitProperties::typeId
 	 **/
-	QCanvasPixmapArray* pixmapArray(int unitType);
+	QCanvasPixmapArray* pixmapArray(unsigned long int unitType);
 
 
 	/**
@@ -127,7 +135,7 @@ public:
 	 * unit is selected) for unitType or NULL if none was found for
 	 * this unitType. See also @ref UnitProperties::typeId
 	 **/
-	QPixmap* bigOverview(int unitType);
+	QPixmap* bigOverview(unsigned long int unitType);
 
 	/**
 	 * @return The small pixmap (the one that is displayed on the order
@@ -135,7 +143,7 @@ public:
 	 * unitType or NULL if none was found for this unitType. See also 
 	 * @ref UnitProperties::typeId
 	 **/
-	QPixmap* smallOverview(int unitType);
+	QPixmap* smallOverview(unsigned long int unitType);
 
 	/**
 	 * @return The color of the team of this player. See also @ref
@@ -170,7 +178,7 @@ public:
 	void loadNewUnit(UnitBase* unit);
 
 	const UnitProperties* unitProperties(UnitBase* unit) const;
-	const UnitProperties* unitProperties(int unitType) const;
+	const UnitProperties* unitProperties(unsigned long int unitType) const;
 
 	/**
 	 * @return the path to the species theme (ending with
@@ -182,19 +190,19 @@ public:
 	 * @return The typeIds of all facilities in this theme. See also @ref
 	 * UnitProperties::typeId
 	 **/
-	QValueList<int> allFacilities() const;
+	QValueList<unsigned long int> allFacilities() const;
 
 	/**
 	 * @return The typeIds of all mobile units in this theme. See also @ref
 	 * UnitProperties::typeId
 	 **/
-	QValueList<int> allMobiles() const;
+	QValueList<unsigned long int> allMobiles() const;
 
 	/**
 	 * @return A list of all units that have a @ref UnitProperties::producer
 	 * specified in producerList.
 	 **/
-	QValueList<int> productions(QValueList<int> producerList) const;
+	QValueList<unsigned long int> productions(QValueList<int> producerList) const;
 
 	/**
 	 * Reset this theme. Delete all pixmaps, unitProperties, ...
@@ -256,9 +264,9 @@ protected:
 	void readUnitConfigs();
 
 #ifndef NO_OPENGL
-	void loadUnitTextures(int type, QValueList<QImage> list);
+	void loadUnitTextures(unsigned long int type, QValueList<QImage> list);
 	void loadUnitModel(const UnitProperties* prop);
-	GLuint createDisplayList(int typeId);
+	GLuint createDisplayList(unsigned long int typeId);
 #endif
 
 private:

@@ -285,7 +285,7 @@ bool Player::save(QDataStream& stream)
  for (unsigned int i = 0; i < unitCount; i++) {
 	Unit* unit = d->mUnits.at(i);
 	// we need the type first!
-	stream << (int)unit->type();
+	stream << (unsigned long int)unit->type();
 	stream << (unsigned long int)unit->id();
 	stream << (double)unit->x();
 	stream << (double)unit->y();
@@ -333,7 +333,7 @@ bool Player::load(QDataStream& stream)
  stream >> unitCount;
  d->mUnitPropID = unitPropId;
  for (unsigned int i = 0; i < unitCount; i++) {
-	int type;
+	unsigned long int type;
 	unsigned long int id;
 	double x, y;
 	int dataHandlerID;
@@ -385,7 +385,7 @@ QPtrList<Unit> Player::allUnits() const
  return d->mUnits;
 }
 
-const UnitProperties* Player::unitProperties(int unitType) const
+const UnitProperties* Player::unitProperties(unsigned long int unitType) const
 {
  if (!speciesTheme()) {
 	kdError() << k_funcinfo << "NULL theme" << endl;
@@ -535,13 +535,13 @@ int Player::facilitiesCount()
  return d->mFacilitiesCount;
 }
 
-bool Player::canBuild(int unitType) const
+bool Player::canBuild(unsigned long int unitType) const
 {
- QValueList<int> neededTypes = speciesTheme()->unitProperties(unitType)->requisities();
+ QValueList<unsigned long int> neededTypes = speciesTheme()->unitProperties(unitType)->requisities();
  if(neededTypes.isEmpty()) {
 	return true;
  }
- QValueList<int>::Iterator it;
+ QValueList<unsigned long int>::Iterator it;
  for(it = neededTypes.begin(); it != neededTypes.end(); ++it) {
 	// FIXME: this is SLOW. Cache values and refresh them when new unit is
 	//  created or destroyed
@@ -552,7 +552,7 @@ bool Player::canBuild(int unitType) const
  return true;
 }
 
-bool Player::hasUnitWithType(int type) const
+bool Player::hasUnitWithType(unsigned long int type) const
 {
  QPtrListIterator<Unit> it(d->mUnits);
  while (it.current()) {

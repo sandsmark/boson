@@ -36,7 +36,7 @@ public:
 	struct timeval mTimeRenderFunction; // entire function
 	struct timeval mTimeRenderPart; // a part of the function
 
-	QMap<int, TimesList> mUnitTimes;
+	QMap<unsigned long int, TimesList> mUnitTimes;
 
 	QValueList<RenderGLTimes> mRenderTimes;
 	RenderGLTimes mCurrentRenderTimes;

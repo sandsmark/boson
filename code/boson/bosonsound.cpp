@@ -353,7 +353,7 @@ void BosonSound::addSound(int id, const QString& file)
  }
 }
 
-void BosonSound::addEvent(int unitType, int event, QDir& dir)
+void BosonSound::addEvent(unsigned long int unitType, int event, QDir& dir)
 {
  QString filter;
  switch (event) {
@@ -388,7 +388,7 @@ void BosonSound::addEvent(int unitType, int event, QDir& dir)
  (d->mUnitSounds[unitType])[event].setAutoDelete(true);
 }
 
-void BosonSound::addEventSound(int unitType, int event, const QString& file)
+void BosonSound::addEventSound(unsigned long int unitType, int event, const QString& file)
 {
 #if KDE_VERSION < 301
  return;

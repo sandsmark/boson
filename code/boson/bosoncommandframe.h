@@ -53,7 +53,7 @@ public:
 	void hideOrderButtons();
 	void setButtonsPerRow(int);
 
-	void setOrderButtons(QValueList<int> produceList, Player* owner, Facility* factory = 0);
+	void setOrderButtons(QValueList<unsigned long int> produceList, Player* owner, Facility* factory = 0);
 
 	void showUnit(Unit* unit); // TODO if this is the only unit -> use slotShowSingleUnit
 
@@ -78,8 +78,8 @@ public slots:
 	void slotRedrawTiles();
 
 signals:
-	void signalProduceUnit(int unitType);
-	void signalStopProduction(int unitType);
+	void signalProduceUnit(unsigned long int unitType);
+	void signalStopProduction(unsigned long int unitType);
 	void signalPlaceCell(int groundType);
 	void signalAction(int actionType);
 
@@ -164,8 +164,8 @@ signals:
 	/**
 	 * Emitted when a unit should be produced.
 	 **/
-	void signalProduceUnit(int unitType, UnitBase* factory, KPlayer* owner);
-	void signalStopProduction(int unitType, UnitBase* factory, KPlayer* owner);
+	void signalProduceUnit(unsigned long int unitType, UnitBase* factory, KPlayer* owner);
+	void signalStopProduction(unsigned long int unitType, UnitBase* factory, KPlayer* owner);
 
 	/**
 	 * @param groundType The tile number. See @ref BosonTiles::tile to get
@@ -179,8 +179,8 @@ signals:
 	void signalAction(int actionType);
 
 protected slots:
-	void slotProduceUnit(int unitType);
-	void slotStopProduction(int unitType);
+	void slotProduceUnit(unsigned long int unitType);
+	void slotStopProduction(unsigned long int unitType);
 
 	void slotUpdate();
 
