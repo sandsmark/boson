@@ -28,6 +28,8 @@
 
 #include <math.h>
 
+#include <lib3ds/mesh.h>
+
 #include "bosonconfig.h"
 
 // Degrees to radians conversion (AB: from mesa/src/macros.h)
@@ -153,6 +155,47 @@ BoVector3 BoVector3::load(KConfig* cfg, QString key)
   return BoVector3(list[0], list[1], list[2]);
 }
 
+void BoVector3::makeVectors(BoVector3* v, const Lib3dsMesh* mesh, const Lib3dsFace* face)
+{
+  // Lib3dsFace stores only the position (index) of the
+  // actual point. the actual points are in mesh->pointL
+  v[0].set(mesh->pointL[ face->points[0] ].pos);
+  v[1].set(mesh->pointL[ face->points[1] ].pos);
+  v[2].set(mesh->pointL[ face->points[2] ].pos);
+}
+
+bool BoVector3::isAdjacent(const BoVector3* v1, const BoVector3* v2)
+{
+  if (!v1 || !v2)
+  {
+    return false;
+  }
+  int equal = 0;
+  for (int i = 0; i < 3; i++)
+  {
+    if (v1[i].isEqual(v2[0]) || v1[i].isEqual(v2[1]) || v1[i].isEqual(v2[2]))
+    {
+      equal++;
+    }
+  }
+
+  // v1 is adjacent to v2 if at least 2 points are equal.
+  // equal vectors (i.e. all points are equal) are possible, too.
+  return (equal >= 2);
+}
+
+int BoVector3::findPoint(const BoVector3& point, const BoVector3* array)
+{
+  for (int i = 0; i < 3; i++)
+  {
+    if (array[i].isEqual(point))
+    {
+      return i;
+    }
+  }
+  return -1;
+}
+
 void BoVector3::save(KConfig* cfg, QString key)
 {
   QValueList<float> list;
@@ -165,6 +208,11 @@ void BoVector3::save(KConfig* cfg, QString key)
 QString BoVector3::debugString(const BoVector3& v)
 {
   return QString("%1,%2,%3").arg(v.x()).arg(v.y()).arg(v.z());
+}
+
+QString BoVector3::debugString() const
+{
+  return BoVector3::debugString(*this);
 }
 
 void BoVector3::debugVector(const BoVector3& v)
@@ -211,6 +259,11 @@ QString BoVector4::debugString(const BoVector4& v)
 void BoVector4::debugVector(const BoVector4& v)
 {
   boDebug() << "vector: " << debugString(v) << endl;
+}
+
+QString BoVector4::debugString() const
+{
+  return BoVector4::debugString(*this);
 }
 
 
