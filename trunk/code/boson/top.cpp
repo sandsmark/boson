@@ -520,12 +520,16 @@ void TopWidget::slotStartNewGame()
 
  boGame->createCanvas();
 
+ d->mBosonWidget->setCanvas(boGame->canvasNonConst());
+
  // this will take care of all data loading, like models, textures and so. this
  // also initializes the map and will send IdStartScenario - in short this will
  // start the game. Once it's done it'll send IdGameIsStarted (see
  // Boson::signalGameStarted())
+ //
+ // Note that this return immediately - the loading is started using a
+ // QTimer::singleShot()
  d->mStarting->startNewGame();
- d->mBosonWidget->setCanvas(boGame->canvasNonConst());
 }
 
 void TopWidget::slotLoadGame(const QString& fileName)
