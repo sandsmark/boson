@@ -43,7 +43,13 @@ public:
 
 	QPixmap* ground() const;
 
+	/**
+	 * @return Number of horizontal cells on this map
+	 **/
 	int mapWidth() const;
+	/**
+	 * @return Number of vertical cells on this map
+	 **/
 	int mapHeight() const;
 
 	void setMap(BosonMap* map);
@@ -76,8 +82,11 @@ public slots:
 	void slotAddCell(int x, int y, int groundType, unsigned char b);
 	void slotAddUnit(Unit* unit, int x, int y);
 
-	void slotMoveRect(int x, int y);
-	void slotResizeRect(int w, int h);
+	/**
+	 * Change the appearance of the rect that displays the current viewport.
+	 * All params are cell coordinates.
+	 **/
+	void slotMoveRect(const QPoint& topLeft, const QPoint& topRight, const QPoint& bottomLeft, const QPoint& bottomRight);
 
 	void slotMoveUnit(Unit* unit, float oldX, float oldY);
 	void slotUnitDestroyed(Unit* unit);

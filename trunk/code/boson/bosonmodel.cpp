@@ -180,6 +180,12 @@ void BosonModel::createDisplayLists()
  kdDebug() << k_funcinfo << "creating " << m3ds->frames << " lists" << endl;
  GLuint listBase = glGenLists(m3ds->frames);
  int allPoints = 0;
+
+ // ok so lets start now. A .3ds file can contain several frames. A different
+ // frame of the same file looks slightly differnt - e.g. useful for animation
+ // (mainly even).
+ // You can read a frame with lib3ds by calling lib3ds_file_eval() first for
+ // every frame.
  for (int i = 0; i < m3ds->frames; i++) {
 	m3ds->current_frame = i;
 	lib3ds_file_eval(m3ds, m3ds->current_frame);
@@ -189,10 +195,22 @@ void BosonModel::createDisplayLists()
 	glNewList(list, GL_COMPILE);
 		glPushMatrix();
 		glScalef(0.004, 0.004, 0.004); // FIXME
+
+		// a .3ds file consists of nodes. I don't *know* it, but I'm
+		// pretty sure that a 3ds node is simply an object of the whole
+		// object file. One object (node) for example may be a "wheel".
+		// A node can have child-nodes, too.
+		// Here we parse all top-level nodes. child nodes get parsed in
+		// renderNode().
 		for (; p; p = p->next) {
 			glPushMatrix();
 			Lib3dsObjectData* d = &p->data.object;
+
+			// I assume thats e.g. the rotation of the node. maybe
+			// even scaling.
 			glMultMatrixf(&p->matrix[0][0]);
+
+			// the pivot point is the center of the object, I guess.
 			glTranslatef(-d->pivot[0], -d->pivot[1], -d->pivot[2]);
 			renderNode(p);
 			glPopMatrix();
@@ -233,6 +251,7 @@ void BosonModel::renderNode(Lib3dsNode* node)
 	// what about runtime?
 	if (!node->user.d) {
 #endif
+		//AB: what exactly is a "mesh" ?
 		Lib3dsMesh* mesh = lib3ds_file_mesh_by_name(m3ds, node->name);
 		if (!mesh) {
 			return;
@@ -255,6 +274,13 @@ void BosonModel::renderNode(Lib3dsNode* node)
 				mat = lib3ds_file_material_by_name(m3ds, f->material);
 			}
 			if (mat) {
+				// this is the texture map of the object.
+				// t->name is the (file-)name and in
+				// mesh->texelL you can find the texture
+				// coordinates for glTexCoord*()
+				// note that mesh->texels can be 0 - then the
+				// mesh doesn't have any texture. otherwise it
+				// must be equal to mesh->points
 				Lib3dsTextureMap* t = &mat->texture1_map;
 				if (!mTextures.contains(t->name)) {
 					if (QString(t->name) != "") {
