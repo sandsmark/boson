@@ -347,9 +347,10 @@ bool BosonMap::loadHeightMapImage(const QByteArray& heightMap)
 	// AB: we use 32bpp (qt doesnt support 16bpp on X11)
 	// AB: hmm accordint to "file" we use 6bpp only... ok thats easier
 	// then :)
+	int imageX = 0;
 	unsigned char* line = map.scanLine(y);
-	for (unsigned int x = 0; x < height() + 1; x += increment) {
-		mHeightMap[y * (width() + 1) + x] = pixelToHeight(line[x]);
+	for (unsigned int x = 0; x < height() + 1; x++, imageX += increment) {
+		mHeightMap[y * (width() + 1) + x] = pixelToHeight(line[imageX]);
 	}
  }
  return true;
