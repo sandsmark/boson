@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -130,19 +130,8 @@ TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
  mMainDock->setEnableDocking(KDockWidget::DockNone);
  initGameDockWidgets(false);
 
- if (!BosonGroundTheme::createGroundThemeList()) {
-	boError() << k_funcinfo << "Unable to create groundTheme list" << endl;
-	KMessageBox::sorry(this, i18n("Unable to load groundThemes. Check your installation!"));
-	exit(1);
- }
- if (!BosonPlayField::preLoadAllPlayFields()) {
-	boError() << k_funcinfo << "Unable to preload playFields" << endl;
-	KMessageBox::sorry(this, i18n("Unable to preload playFields. Check your installation!"));
-	exit(1);
- }
  boAudio->setSound(boConfig->sound());
  boAudio->setMusic(boConfig->music());
-
 
  d->mStartup = new BosonStartupWidget(mMainDock);
  connect(d->mStartup, SIGNAL(signalAddLocalPlayer()),
@@ -191,6 +180,22 @@ TopWidget::~TopWidget()
  delete d->mIface;
  delete d;
  boDebug() << k_funcinfo << "done" << endl;
+}
+
+QString TopWidget::checkInstallation()
+{
+ QPixmap p1(locate("data", "boson/pics/boson-startup-bg.png"));
+ QPixmap p2(locate("data", "boson/pics/boson-startup-logo.png"));
+  if (p1.isNull() || p2.isNull()) {
+	return i18n("You seem not to have Boson data files installed!\n Please install data package of Boson and restart Boson.");
+}
+ if (!BosonGroundTheme::createGroundThemeList()) {
+	return i18n("Unable to load groundThemes. Check your installation!");
+ }
+ if (!BosonPlayField::preLoadAllPlayFields()) {
+	return i18n("Unable to preload playFields. Check your installation!");
+ }
+ return QString::null;
 }
 
 void TopWidget::initDisplayManager()
