@@ -109,10 +109,6 @@ void UnitProperties::loadUnitType(const QString& fileName)
  }
  mName = conf.readEntry("Name", i18n("Unknown"));
  mHealth = conf.readUnsignedLongNumEntry("Health", 100);
- if(mHealth <= 0) {
-	kdWarning() << k_funcinfo << "Invalid Health value: " << mHealth << " for unit " << typeId() << ", defaulting to 100" << endl;
-	mHealth = 100;
- }
  mMineralCost= conf.readUnsignedLongNumEntry("MineralCost", 100);
  mOilCost = conf.readUnsignedLongNumEntry("OilCost", 0);
  mWeaponDamage = conf.readLongNumEntry("WeaponDamage", 0);
