@@ -57,8 +57,16 @@ public:
 	UnitAction actionType() const { return mActionType; }
 
 	bool actionLocked() const { return mActionLocked; }
-	void unlockAction() { mActionLocked = false; }
-	void lockAction() { mActionLocked = true; }
+	void unlockAction()
+	{
+		mActionLocked = false;
+		emit signalLockAction(mActionLocked);
+	}
+	void lockAction()
+	{
+		mActionLocked = true;
+		emit signalLockAction(mActionLocked);
+	}
 
 	void setCursorType(CursorType type) { mCursorType = type; }
 	CursorType cursorType() const { return mCursorType; }
@@ -136,6 +144,14 @@ public:
 	 * See @ref EditorBigDisplayInput::deleteSelectedUnits
 	 **/
 	virtual void deleteSelectedUnits() { }
+
+signals:
+	/**
+	 * Emitted when the action gets locked or unlocked (see @ref lockAction
+	 * and @ref unlockAction). You may want to display the fact that the
+	 * action is locked now somewhere.
+	 **/
+	void signalLockAction(bool locked);
 
 public slots:
 	/**

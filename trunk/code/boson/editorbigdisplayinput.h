@@ -81,6 +81,7 @@ public slots:
 protected:
 	//AB: use BoAction as 2nd parameter
 	bool actionPlace(QDataStream& stream, const QPoint& pos);
+	bool actionChangeHeight(QDataStream& stream, const QPoint& pos, bool up);
 
 	/**
 	 * Editor mode can select just everything, even destroyed units

@@ -8,8 +8,9 @@
     <Action name="game_grab_profiling"/>
   </Menu>
   <Menu name="editor" group="editormenu"><text>&amp;Editor</text>
-    <Action name="editor_player" />
-    <Action name="editor_place"  />
+    <Action name="editor_player"/>
+    <Action name="editor_place" />
+    <Action name="editor_height" />
     <Action name="editor_create_unit"  />
     <Action name="editor_create_tiles" />
     <Action name="editor_create_debug_tiles" />
@@ -22,9 +23,9 @@
   <Action name="editor_player" />
   <Separator />
   <Action name="editor_place" />
-  <Action name="splitviewh" />
-  <Action name="splitviewv" />
-  <Action name="removeview" />
+  <Separator />
+  <Action name="editor_height" />
+  <Separator />
   <Action name="window_fullscreen" />
 </ToolBar>
 </kpartgui>

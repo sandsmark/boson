@@ -913,6 +913,33 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 		}
 		break;
 	}
+	case BosonMessage::MoveChangeHeight:
+	{
+		boDebug() << k_lineinfo << "change height" << endl;
+		Q_UINT32 count;
+		Q_INT32 cornerX;
+		Q_INT32 cornerY;
+		float height;
+		stream >> count;
+		for (unsigned int i = 0; i < count; i++) {
+			stream >> cornerX;
+			stream >> cornerY;
+			stream >> height;
+			// note: cornerX == mapWidth() and cornerY == mapHeight()
+			// are valid!
+			if (cornerX < 0 || (unsigned int)(cornerX - 1) >= d->mCanvas->mapWidth()) {
+				boError() << k_funcinfo << "invalid x coordinate " << cornerX << endl;
+				continue;
+			}
+			if (cornerY < 0 || (unsigned int)(cornerY - 1) >= d->mCanvas->mapHeight()) {
+				boError() << k_funcinfo << "invalid y coordinate " << cornerY << endl;
+				continue;
+			}
+			boDebug() << k_funcinfo << "new height at " << cornerX << "," << cornerY << " is " << height << endl;
+			d->mCanvas->setHeightAtCorner(cornerX, cornerY, height);
+		}
+		break;
+	}
 	default:
 		boWarning() << k_funcinfo << "unexpected playerInput " << msgid << endl;
 		break;

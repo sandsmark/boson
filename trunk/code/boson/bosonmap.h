@@ -170,6 +170,22 @@ public:
 
 	inline float* heightMap() const { return mHeightMap; }
 
+	/**
+	 * Note that you can specify (width() + 1) * (height() + 1) corners here!
+	 * I.e. if you do this
+	 * <pre>
+	 * heightAtCorner(width(), height())
+	 * </pre>
+	 * it will be valid (althought cell() would return NULL). This example
+	 * would return the height of the <em>lower right</em> corner of the
+	 * cell at (width()-1, height()-1), i.e. the cell in the lower right
+	 * corner of the map.
+	 * @return The height of the upper left corner of the cell at @p x, @p
+	 * y or 1.0 if invalid coordinates were specified.
+	 **/
+	float heightAtCorner(int x, int y) const;
+	void setHeightAtCorner(int x, int y, float height);
+
 public slots:
 	void slotChangeCell(int x, int y, int groundType, unsigned char b);
 

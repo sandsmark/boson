@@ -56,12 +56,14 @@ public:
 
 		mPlayerAction = 0;
 		mPlaceAction = 0;
+		mChangeHeight = 0;
 	}
 
 	CommandInput* mCmdInput;
 
 	KSelectAction* mPlayerAction;
 	KSelectAction* mPlaceAction;
+	KToggleAction* mChangeHeight;
 
 	QPtrList<Player> mPlayers;
 };
@@ -86,6 +88,9 @@ void EditorWidget::initDisplayManager()
 		displayManager(), SLOT(slotPlaceUnit(unsigned long int, Player*)));
  connect(cmdFrame(), SIGNAL(signalPlaceCell(int)),
 		displayManager(), SLOT(slotPlaceCell(int)));
+
+ connect(displayManager(), SIGNAL(signalLockAction(bool)),
+		this, SLOT(slotLockAction(bool)));
 }
 
 void EditorWidget::initConnections()
@@ -192,6 +197,10 @@ void EditorWidget::initKActions()
  (void)new KAction(i18n("Edit &Oil"), KShortcut(), this,
 		SLOT(slotEditPlayerOil()), actionCollection(),
 		"editor_player_oil");
+ d->mChangeHeight = new KToggleAction(i18n("Edit &Height"), KShortcut(),
+		this, 0, actionCollection(), "editor_height");
+ connect(d->mChangeHeight, SIGNAL(toggled(bool)),
+		this, SLOT(slotEditHeight(bool)));
 
 // KStdAction::preferences(bosonWidget(), SLOT(slotGamePreferences()), actionCollection()); // FIXME: slotEditorPreferences()
 }
@@ -442,3 +451,22 @@ void EditorWidget::slotEditPlayerOil()
  localPlayer()->setOil(v);
 }
 
+void EditorWidget::slotEditHeight(bool on)
+{
+ if (on) {
+	// "unit"action is not a good name anymore...
+	displayManager()->slotUnitAction(ActionChangeHeight);
+ }
+}
+
+void EditorWidget::slotLockAction(bool locked)
+{
+ if (locked) {
+	// we might display something in the cmdframe or in the toolbar or so.
+	// the cursor will get updated anyway.
+	return;
+ }
+ if (d->mChangeHeight->isChecked()) {
+	d->mChangeHeight->setChecked(false);
+ }
+}

@@ -597,6 +597,43 @@ Cell* BosonMap::cell(int x, int y) const
  return mCells + cellArrayPos(x, y);
 }
 
+float BosonMap::heightAtCorner(int x, int y) const
+{
+ if (!mHeightMap) {
+	boError() << k_funcinfo << "NULL height map" << endl;
+	return 1.0f;
+ }
+ // note: isValidCell(x,y) might return false, even though the coordinates are
+ // valid.
+ // if x=width() and y=height() we will return the lower right corner of the
+ // cell at x=width()-1 and y=height()-1.
+ // This value is equal to the upper left corner of x=width() and y=height() if
+ // such a cell would exist.
+ if (x < 0 || (unsigned int)(x + 1) >= width()) {
+	return 1.0f;
+ }
+ if (y < 0 || (unsigned int)(y + 1) >= height()) {
+	return 1.0f;
+ }
+ return mHeightMap[y * (width() + 1) + x];
+}
+
+void BosonMap::setHeightAtCorner(int x, int y, float h)
+{
+ BO_CHECK_NULL_RET(mHeightMap);
+ if (x < 0 || (unsigned int)(x + 1) >= width()) {
+	return;
+ }
+ if (y < 0 || (unsigned int)(y + 1) >= height()) {
+	return;
+ }
+
+ // AB: see pixelToHeight() for explanation on these restrictions
+ h = QMIN(h, 15.0f);
+ h = QMAX(h, -10.5f);
+ mHeightMap[y * (width() + 1) + x] = h;
+}
+
 void BosonMap::slotChangeCell(int x, int y, int groundType, unsigned char b)
 {
 //boDebug() << x << " -> " << y << endl;
