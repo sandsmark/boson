@@ -379,6 +379,10 @@ public:
 		mPlacementPreviewCanPlace = false;
 
 		mInput = 0;
+
+		mRenderCells = 0;
+		mRenderCellsSize = 0;
+		mRenderCellsCount = 0;
 	}
 
 	Player* mLocalPlayer;
@@ -400,7 +404,14 @@ public:
 	GLfloat mAspect; // see gluPerspective
 
 	BosonGLFont* mDefaultFont;// AB: maybe we should support several fonts
-	QPtrList<Cell> mRenderCells;
+
+	//AB: we should use a float* here which can be used as vertex array. we
+	//should store x,y,z and texture x,y there. for this we need to have
+	//cells in a single texture!
+	//--> then we could also use GL_QUAD_STRIP
+	Cell** mRenderCells;
+	int mRenderCellsSize; // max. number of cells in the array
+	int mRenderCellsCount; // actual number of cells in the array
 
 	long long int mFpsTime;
 	double mFps;
@@ -450,6 +461,7 @@ BosonBigDisplayBase::~BosonBigDisplayBase()
  delete d->mChat;
 // delete d->mUnitTips;
  delete d->mDefaultFont;
+ delete[] d->mRenderCells;
  delete d;
  boDebug() << k_funcinfo << "done" << endl;
 }
@@ -1058,7 +1070,7 @@ void BosonBigDisplayBase::renderCells()
 	}
  }
 
- if (d->mRenderCells.count() == 0) {
+ if (d->mRenderCellsCount == 0) {
 	// this happens either when we have to generate the list first or if no
 	// cell is visible at all. The latter case isn't speed relevant, so we
 	// can simply re-generate then.
@@ -1083,13 +1095,12 @@ void BosonBigDisplayBase::renderCells()
  // AB: we can increase performance even more here. lets replace d->mRenderCells
  // by two array defining the coordinates of cells and the heightmap values.
  // we could use that as vertex array for example.
- QPtrListIterator<Cell> cellIt(d->mRenderCells);
  GLuint texture = 0;
  int tile = -1;
  int heightMapWidth = map->width() + 1;
 // int heightMapHeight = map->height() + 1;
- for (; cellIt.current(); ++cellIt) {
-	Cell* c = cellIt.current();
+ for (int i = 0; i < d->mRenderCellsCount; i++) {
+	Cell* c = d->mRenderCells[i];
 	int x = c->x();
 	int y = c->y();
 	if (localPlayer()->isFogged(x, y)) {
@@ -1940,7 +1951,7 @@ void BosonBigDisplayBase::generateCellList()
  }
 
  // re-generate the list of to-be-rendered cells:
- d->mRenderCells.clear();
+// d->mRenderCells.clear();
  Cell* allCells = map->cells();
  if (!allCells) {
 	boError() << k_funcinfo << "NULL cells!" << endl;
@@ -1986,6 +1997,13 @@ void BosonBigDisplayBase::generateCellList()
  int cellMinY = (int)(minY / BO_GL_CELL_SIZE);
  int cellMaxY = (int)(maxY / BO_GL_CELL_SIZE) + 1;
 
+ int size = (cellMaxX - cellMinX + 1) * (cellMaxY - cellMinY + 1);
+ if (size > d->mRenderCellsSize) {
+	delete[] d->mRenderCells;
+	d->mRenderCells = new Cell*[size];
+	d->mRenderCellsSize = size;
+ }
+
  // all cells between those min/max values above might be visible. unfortunately
  // we need to add *all* visible cells to our list, but we need to add as *few*
  // as possible.
@@ -1997,6 +2015,7 @@ void BosonBigDisplayBase::generateCellList()
  // slow.
 
  float radius = sqrt(2 * (BO_GL_CELL_SIZE/2) * (BO_GL_CELL_SIZE/2));
+ int count = 0;
  for (int x = cellMinX; x <= cellMaxX; x++) {
 	for (int y = cellMinY; y <= cellMaxY; y++) {
 		// WARNING: x/y MUST be valid!!! there is *no* additional check
@@ -2007,10 +2026,14 @@ void BosonBigDisplayBase::generateCellList()
 		GLfloat glY = -((float)c->y() * BO_GL_CELL_SIZE + BO_GL_CELL_SIZE / 2);
 	
 		if (sphereInFrustum(glX, glY, 0.0, radius)) {
-			d->mRenderCells.append(c);
+			// AB: instead of storing the cell here we should store
+			// cell coordinates and create a vertex array with that
+			d->mRenderCells[count] = c;
+			count++;
 		}
 	}
  }
+ d->mRenderCellsCount = count;
 }
 
 void BosonBigDisplayBase::setCamera(const Camera& camera)
