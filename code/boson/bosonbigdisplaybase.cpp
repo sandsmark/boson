@@ -845,12 +845,13 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 	kdError() << k_funcinfo << "Cannot map coordinates" << endl;
 	return;
  }
- QPoint canvasPos; // FIXME we should write a canvas that uses GL-coordinates instead. currently we are maintaining 3 kinds of coordinates - canvas,window,world(GL)
+ QPoint canvasPos;
  worldToCanvas(posX, posY, posZ, &canvasPos);
 
  switch (e->type()) {
 	case QEvent::Wheel:
 	{
+		// FIXME: use wheel for zooming
 		QWheelEvent* wheel = (QWheelEvent*)e;
 		int x, y;
 
@@ -879,32 +880,37 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 	{
 		d->mMouseMoveDiff.moveToPos(e->pos());
 		if (e->state() & AltButton) {
-			// we don't support zooming. you can achieve nearly the
-			// same by changing d->mCamera.z()
-//			// zooming
-//			kdDebug() << "zoom factor: " << d->mCamera.zoomFactor()<< endl;
-//			setZoomFactor(d->mCamera.zoomFactor() + ((float)d->mMouseMoveDiff.dy()) / 10);
-		} else if (e->state() & LeftButton) {
-			if (e->state() & ControlButton) {
+			// The Alt button is the camera modifier in boson.
+			// Better don't do important stuff (like unit movement
+			// or selections) here, since a single push on Alt gives
+			// the focus to the mneu which might be very confusing
+			// during a game.
+			if (e->state() & LeftButton) {
+				Camera camera = d->mCamera;
+				camera.setZ(cameraZ() + d->mMouseMoveDiff.dy());
+				setCamera(camera);
+				kdDebug() << "posZ: " << d->mCamera.z() << endl;
+			} else if (e->state() & RightButton) {
 				Camera camera = d->mCamera;
 				camera.increaseCenterDiffXBy(d->mMouseMoveDiff.dx());
 				camera.increaseCenterDiffYBy(-d->mMouseMoveDiff.dy());
 //				a1 += d->mMouseMoveDiff.dx();
 //				a2 += d->mMouseMoveDiff.dy();
 				setCamera(camera);
-			} else if (e->state() & ShiftButton) {
-				// move the z-position of the cameraa
-				Camera camera = d->mCamera;
-				camera.setZ(cameraZ() + d->mMouseMoveDiff.dy());
-				setCamera(camera);
-				kdDebug() << "posZ: " << d->mCamera.z() << endl;
-			} else if (e->state() & AltButton) {
-				// we can't use Alt+LMB since KDE already uses it to move the window :(
+			}
+		} else if (e->state() & LeftButton) {
+			if (e->state() & ControlButton) {
+				// not yet used
 			} else {
+				// selection rect gets drawn for both - shift
+				// down and no modifier pressed.
 				d->mSelectionRect.setVisible(true);
 				moveSelectionRect(posX, posY, posZ);
 			}
 		} else if (e->state() & RightButton) {
+			// RMB+MouseMove does *not* depend on CTRL or Shift. the
+			// map is moved in all cases (currently - we have some
+			// free buttons here :))
 			if (boConfig->rmbMove()) {
 				// problem is that QCursor::setPos() also causes
 				// a mouse move event. we can use this hack in
@@ -940,10 +946,11 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 	case QEvent::MouseButtonDblClick:
 		makeActive();
 		if (e->button() == LeftButton) {
+			bool replace = !(e->state() & ShiftButton);
 			Unit* unit = ((BosonCanvas*)canvas())->findUnitAt(canvasPos);
 			if (unit) {
-				if (!selectAll(unit->unitProperties())) {
-					selection()->selectUnit(unit);
+				if (!selectAll(unit->unitProperties(), replace)) {
+					selection()->selectUnit(unit, replace);
 				}
 			}
 		}
@@ -986,15 +993,15 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 		e->accept();
 		break;
 	case QEvent::MouseButtonRelease:
-		if (e->button() == LeftButton) {
+		if (e->state() & AltButton) {
+			// the camera modifier. no cleanups to be done.
+		} else if (e->button() == LeftButton) {
 			if (e->state() & ControlButton) {
-				// rotating
+				// unused
 			} else if (e->state() & ShiftButton) {
-				// z-position
-			} else if (e->state() & AltButton) {
-				// unused, since Alt+LMB is already used by KDE to move the window :(
+				removeSelectionRect(false);
 			} else {
-				removeSelectionRect();
+				removeSelectionRect(true);
 			}
 		} else if (e->button() == RightButton) {
 			if (d->mMouseMoveDiff.isRMBMove()) {
@@ -1216,7 +1223,7 @@ bool BosonBigDisplayBase::eventFilter(QObject* o, QEvent* e)
  return QGLWidget::eventFilter(o, e);
 }
 
-bool BosonBigDisplayBase::selectAll(const UnitProperties* prop)
+bool BosonBigDisplayBase::selectAll(const UnitProperties* prop, bool replace)
 {
  if (!localPlayer()) {
 	kdError() << k_funcinfo << "NULL localplayer" << endl;
@@ -1236,7 +1243,7 @@ bool BosonBigDisplayBase::selectAll(const UnitProperties* prop)
 	}
 	++it;
  }
- selection()->selectUnits(list);
+ selection()->selectUnits(list, replace);
  return true;
 }
 
@@ -1302,12 +1309,12 @@ void BosonBigDisplayBase::moveSelectionRect(GLfloat x, GLfloat y, GLfloat z)
  }
 }
 
-void BosonBigDisplayBase::removeSelectionRect()
+void BosonBigDisplayBase::removeSelectionRect(bool replace)
 {
  if (d->mSelectionRect.isVisible()) {
 	// here as there is a performance problem in
 	// mousemove:
-	selectArea();
+	selectArea(replace);
 
 	d->mSelectionRect.setVisible(false);
 	if (!selection()->isEmpty()) {
@@ -1325,20 +1332,23 @@ void BosonBigDisplayBase::removeSelectionRect()
 	QPoint canvasPos;
 	worldToCanvas(x, y, z, &canvasPos);
 	Unit* unit = canvas()->findUnitAt(canvasPos);
-	selection()->clear();
 	if (unit) {
 		kdDebug() << k_funcinfo << "unit" << endl;
-		selection()->selectUnit(unit);
+		selection()->selectUnit(unit, replace);
 		// cannot be placed into mSelection cause we don't have localPlayer
 		// there
 		if (localPlayer() == unit->owner()) {
 			unit->playSound(SoundOrderSelect);
 		}
+	} else {
+		if (replace) {
+			selection()->clear();
+		}
 	}
  }
 }
 
-void BosonBigDisplayBase::selectArea()
+void BosonBigDisplayBase::selectArea(bool replace)
 {
  if (!d->mSelectionRect.isVisible()) {
 	kdDebug() << k_funcinfo << "no rect" << endl;
@@ -1391,11 +1401,13 @@ void BosonBigDisplayBase::selectArea()
 
  if (unitList.count() > 0) {
 	kdDebug() << "select " << unitList.count() << " units" << endl;
-	selection()->selectUnits(unitList);
+	selection()->selectUnits(unitList, replace);
  } else if (fallBackUnit) {
-	selection()->selectUnit(fallBackUnit);
+	selection()->selectUnit(fallBackUnit, replace);
  } else {
-	selection()->clear();
+	if (replace) {
+		selection()->clear();
+	}
  }
 }
 
