@@ -514,7 +514,7 @@ void BosonWidgetBase::slotCmdBackgroundChanged(const QString& file)
 void BosonWidgetBase::initKActions()
 {
  QSignalMapper* scrollMapper = new QSignalMapper(this);
- connect(scrollMapper, SIGNAL(mapped(int)), displayManager(), SLOT(slotScroll(int)));
+ connect(scrollMapper, SIGNAL(mapped(int)), this, SLOT(slotScroll(int)));
  KAction* a;
  KShortcut scrollUp(Qt::Key_Up);
  scrollUp.append(KKeySequence(KKey(Qt::Key_W)));
@@ -541,26 +541,26 @@ void BosonWidgetBase::initKActions()
 		"scroll_right");
  scrollMapper->setMapping(a, ScrollRight);
  KShortcut rotateLeft(Qt::Key_Q);
- a = new KAction(i18n("Rotate Left"), rotateLeft, displayManager(),
+ a = new KAction(i18n("Rotate Left"), rotateLeft, this,
 		SLOT(slotRotateLeft()), actionCollection(),
 		"rotate_left");
  KShortcut rotateRight(Qt::Key_E);
- a = new KAction(i18n("Rotate Right"), rotateRight, displayManager(),
+ a = new KAction(i18n("Rotate Right"), rotateRight, this,
 		SLOT(slotRotateRight()), actionCollection(),
 		"rotate_right");
  KShortcut zoomIn(Qt::Key_F);
- a = new KAction(i18n("Zoom In"), zoomIn, displayManager(),
+ a = new KAction(i18n("Zoom In"), zoomIn, this,
 		SLOT(slotZoomIn()), actionCollection(),
 		"zoom_in");
  KShortcut zoomOut(Qt::Key_V);
- a = new KAction(i18n("Zoom out"), zoomOut, displayManager(),
+ a = new KAction(i18n("Zoom out"), zoomOut, this,
 		SLOT(slotZoomOut()), actionCollection(),
 		"zoom_out");
 
 
  // FIXME: the editor should not have a "game" menu, so what to do with this?
  (void)new KAction(i18n("&Reset View Properties"), KShortcut(Qt::Key_R),
-		displayManager(), SLOT(slotResetViewProperties()), actionCollection(), "game_reset_view_properties");
+		this, SLOT(slotResetViewProperties()), actionCollection(), "game_reset_view_properties");
 
  // Dockwidgets show/hide
  d->mActionChat = new KToggleAction(i18n("Show Cha&t"),
@@ -745,7 +745,7 @@ void BosonWidgetBase::startScenarioAndGame()
  // FIXME: this is hackish but I don't know any other way of checking if game
  //  is loaded or new one here. Feel free to improve
  if (boGame->loadingStatus() != BosonSaveLoad::LoadingCompleted) {
-	displayManager()->slotCenterHomeBase();
+	slotCenterHomeBase();
  }
 }
 
@@ -1299,3 +1299,73 @@ void BosonWidgetBase::slotEditConditions()
  }
 }
 
+void BosonWidgetBase::slotScroll(int dir)
+{
+ BO_CHECK_NULL_RET(displayManager());
+ BosonBigDisplayBase* display = displayManager()->activeDisplay();
+ BO_CHECK_NULL_RET(display);
+ switch ((ScrollDirection)dir) {
+	case ScrollUp:
+		display->scrollBy(0, -boConfig->arrowKeyStep());
+		break;
+	case ScrollRight:
+		display->scrollBy(boConfig->arrowKeyStep(), 0);
+		break;
+	case ScrollDown:
+		display->scrollBy(0, boConfig->arrowKeyStep());
+		break;
+	case ScrollLeft:
+		display->scrollBy(-boConfig->arrowKeyStep(), 0);
+		break;
+	default:
+		return;
+ }
+}
+
+void BosonWidgetBase::slotRotateLeft()
+{
+ BO_CHECK_NULL_RET(displayManager());
+ BosonBigDisplayBase* display = displayManager()->activeDisplay();
+ BO_CHECK_NULL_RET(display);
+ display->rotateLeft();
+}
+
+void BosonWidgetBase::slotRotateRight()
+{
+ BO_CHECK_NULL_RET(displayManager());
+ BosonBigDisplayBase* display = displayManager()->activeDisplay();
+ BO_CHECK_NULL_RET(display);
+ display->rotateRight();
+}
+
+void BosonWidgetBase::slotZoomIn()
+{
+ BO_CHECK_NULL_RET(displayManager());
+ BosonBigDisplayBase* display = displayManager()->activeDisplay();
+ BO_CHECK_NULL_RET(display);
+ display->zoomIn();
+}
+
+void BosonWidgetBase::slotZoomOut()
+{
+ BO_CHECK_NULL_RET(displayManager());
+ BosonBigDisplayBase* display = displayManager()->activeDisplay();
+ BO_CHECK_NULL_RET(display);
+ display->zoomOut();
+}
+
+void BosonWidgetBase::slotCenterHomeBase()
+{
+ BO_CHECK_NULL_RET(displayManager());
+ BosonBigDisplayBase* display = displayManager()->activeDisplay();
+ BO_CHECK_NULL_RET(display);
+ display->slotCenterHomeBase();
+}
+
+void BosonWidgetBase::slotResetViewProperties()
+{
+ BO_CHECK_NULL_RET(displayManager());
+ BosonBigDisplayBase* display = displayManager()->activeDisplay();
+ BO_CHECK_NULL_RET(display);
+ display->slotResetViewProperties();
+}

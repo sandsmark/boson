@@ -221,7 +221,7 @@ void BosonWidget::initKActions()
 	createMapper->setMapping(a, i);
  }
  (void)new KAction(i18n("Center &Home Base"), KShortcut(Qt::Key_H), 
-		displayManager(), SLOT(slotCenterHomeBase()), actionCollection(), "game_center_base");
+		this, SLOT(slotCenterHomeBase()), actionCollection(), "game_center_base");
 // (void)KStdAction::gameNew(this, SLOT(), actionCollection()); //TODO
  (void)KStdGameAction::save(this, SIGNAL(signalSaveGame()), actionCollection());
  (void)KStdGameAction::pause(boGame, SLOT(slotTogglePause()), actionCollection());

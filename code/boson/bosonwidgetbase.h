@@ -277,6 +277,14 @@ protected slots:
 	void slotSetShowResources(bool show);
 	void slotSetEnableColormap(bool);
 
+	void slotScroll(int direction);
+	void slotRotateLeft();
+	void slotRotateRight();
+	void slotZoomIn();
+	void slotZoomOut();
+	void slotCenterHomeBase();
+	void slotResetViewProperties();
+
 protected:
 	void initBigDisplay(BosonBigDisplayBase*);
 
