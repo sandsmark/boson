@@ -345,7 +345,7 @@ bool BosonCommandFrame::checkUpdateTimer() const
 
 void BosonCommandFrame::showUnitActions(Unit* unit)
 {
- if (!unit) {
+ if (!unit || unit->owner() != localPlayer()) {
 	d->mUnitActions->hide();
  } else {
 	d->mUnitActions->showUnitActions(unit);
