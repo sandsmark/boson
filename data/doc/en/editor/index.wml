@@ -14,7 +14,8 @@
         <dl>
 		<dt>5.1 <a href="overview.html">Overview</a></dt>
 		<dt>5.2 <a href="elements.html">Elements of a game</a></dt>
-                <dt>5.3 <a href="facilities.html">Building facilities</a></dt>
+                <dt>5.3 <a href="map.html">Working with the map</a></dt>
+                <dt>5.4 <a href="facilities.html">Building facilities</a></dt>
         </dl>
       </dd>
     </dl>
