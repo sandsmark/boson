@@ -748,11 +748,11 @@ QPtrList<BosonBigDisplayBase>* BoDisplayManager::displayList()
  return &d->mDisplayList;
 }
 
-void BoDisplayManager::slotChangeGroundRenderer(int g)
+void BoDisplayManager::slotUpdateOpenGLSettings()
 {
  QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
  while (it.current()) {
-	it.current()->changeGroundRenderer(g);
+	it.current()->updateOpenGLSettings();
 	++it;
  }
 }

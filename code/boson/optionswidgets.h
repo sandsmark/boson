@@ -240,6 +240,7 @@ protected slots:
 signals:
 	void signalGroundRendererChanged(int);
 	void signalFontChanged(const BoFontInfo& font);
+	void signalOpenGLSettingsUpdated();
 
 private:
 	QComboBox* mRenderingSpeed;
@@ -261,6 +262,7 @@ private:
 	QPushButton* mFont;
 	BoFontInfo* mFontInfo;
 	bool mFontChanged;
+	QCheckBox* mSmoothShading;
 };
 
 class ChatOptions : public QVBox, public OptionsWidget

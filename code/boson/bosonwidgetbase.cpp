@@ -1059,8 +1059,8 @@ OptionsDialog* BosonWidgetBase::gamePreferences(bool editor)
 		this, SLOT(slotChangeCursor(int, const QString&)));
  connect(dlg, SIGNAL(signalCmdBackgroundChanged(const QString&)),
 		this, SLOT(slotCmdBackgroundChanged(const QString&)));
- connect(dlg, SIGNAL(signalGroundRendererChanged(int)),
-		displayManager(), SLOT(slotChangeGroundRenderer(int)));
+ connect(dlg, SIGNAL(signalOpenGLSettingsUpdated()),
+		displayManager(), SLOT(slotUpdateOpenGLSettings()));
  connect(dlg, SIGNAL(signalApply()),
 		this, SLOT(slotApplyOptions()));
  connect(dlg, SIGNAL(signalFontChanged(const BoFontInfo&)),

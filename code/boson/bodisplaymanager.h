@@ -218,7 +218,7 @@ public slots:
 
 	void slotAction(const BoSpecificAction&);
 
-	void slotChangeGroundRenderer(int);
+	void slotUpdateOpenGLSettings();
 
 	void slotChangeFont(const BoFontInfo& font);
 
