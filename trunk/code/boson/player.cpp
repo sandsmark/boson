@@ -396,11 +396,6 @@ void Player::setMinerals(unsigned long int m)
  d->mMinerals = m;
 }
 
-void Player::productionAdvanced(Unit* factory, double percentage)
-{
- emit signalProductionAdvanced(factory, percentage);
-}
-
 const QColor& Player::teamColor() const
 {
  return speciesTheme()->teamColor();

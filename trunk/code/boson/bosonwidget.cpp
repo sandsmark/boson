@@ -657,8 +657,6 @@ void BosonWidget::addGameCommandFrame(QWidget* parent)
 { // remember to call this *after* init() - otherwise connect()s won't work
  d->mCommandFrame = new BosonCommandFrame(parent, false);
 
-// connect(d->mCommandFrame, SIGNAL(signalProduceUnit(int, Unit*, Player*)),
-//		d->mBigDisplay, SLOT(slotWillConstructUnit(int, Unit*, Player*))); // in addEditorCommandFrame()
  connect(d->mBigDisplay, SIGNAL(signalSingleUnitSelected(Unit*)),
 		d->mCommandFrame, SLOT(slotShowSingleUnit(Unit*)));
  connect(d->mBigDisplay, SIGNAL(signalSingleUnitSelected(Unit*)),
