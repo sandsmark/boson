@@ -32,6 +32,7 @@
 #include "bodebug.h"
 //#include "kspritetooltip.h"//TODO
 
+#include <kapplication.h>
 #include <kgame/kgameio.h>
 #include <klocale.h>
 
@@ -189,9 +190,8 @@ void EditorBigDisplay::actionClicked(const BoAction& action, QDataStream& stream
 
 //	setModified(true); // TODO: in BosonPlayField
  } else if (d->mPlacement.isCell()) {
-	boDebug() << "place ground " << d->mPlacement.cell() << endl;
-
-	unsigned char version = 0; // FIXME: random()%4;
+	unsigned char version = kapp->random() % 4;
+	boDebug() << k_funcinfo << "place ground " << d->mPlacement.cell() << ",version=" << version << endl;
 
 	stream << (Q_UINT32)BosonMessage::MoveEditor;
 	stream << (Q_UINT32)BosonMessage::MovePlaceCell;
@@ -202,18 +202,7 @@ void EditorBigDisplay::actionClicked(const BoAction& action, QDataStream& stream
 	stream << (Q_INT32)y;
 	*send = true;
 
-	/*
-	emit signalPlaceCell(x, y, d->mPlacement.cell(), version);
-	if (Cell::isBigTrans(d->mPlacement.cell())) {
-		emit signalPlaceCell(x + 1, y,
-				d->mPlacement.cell() + 1, version);
-		emit signalPlaceCell(x, y + 1,
-				d->mPlacement.cell() + 2, version);
-		emit signalPlaceCell(x + 1, y + 1,
-				d->mPlacement.cell() + 3, version);
-	}
-	*/
-//	setModified(true); // TODO: in BosonPlayField
+//	setModified(true); // TODO: in BosonPlayField (call it when the message is received?
  }
 }
 
