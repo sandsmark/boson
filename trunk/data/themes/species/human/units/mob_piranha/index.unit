@@ -1,0 +1,30 @@
+[Boson Unit]
+IsFacility=false
+TerrainType=0
+Name=Piranha
+Id=10009
+Health=100
+MineralCost=150
+OilCost=80
+Producer=0
+Requirements=3
+Armor=1
+ProductionTime=80
+Weapons=1
+DestroyedParticles=1002
+
+[Boson Mobile Unit]
+Speed=4
+CanGoOnLand=true
+CanGoOnWater=false
+
+[Weapon_0]
+Range=6
+Reload=45
+CanShootAtAirUnits=false
+CanShootAtLandUnits=false
+Damage=120
+Speed=8
+DamageRange=1
+HitParticles=2001
+FlyParticles=5001
