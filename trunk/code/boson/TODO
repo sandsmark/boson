@@ -53,6 +53,8 @@ Game TODOs
   as units do - but at least the current plugin must be stored/loaded
 - many methods depend on a factory to be a facility. remove this dependance. a
   production plugin can be part of a mobile unit, too
+- BUG: units go through near clip and are "broken" when you zoom in above some
+  tall facility or aircraft
 
 Editor (map, unit, scenario) TODOs
 - totally broken, currently
