@@ -29,6 +29,7 @@
 #include "items/bosonitem.h"
 #include "unit.h"
 #include "player.h"
+#include "bosonpath.h"
 #include <bodebug.h>
 
 #include <kgame/kmessageclient.h>
@@ -260,6 +261,30 @@ private:
 	Boson* mGame;
 };
 
+#if 0
+class BoPathSyncMessage : public BoSyncMessageBase
+{
+public:
+	BoPathSyncMessage() : BoSyncMessageBase()
+	{
+	}
+	virtual QByteArray makeLog()
+	{
+		return QByteArray();
+	}
+
+protected:
+	virtual QString findLogError(const QByteArray& b1, const QByteArray& b2) const
+	{
+		boDebug(370) << k_funcinfo << endl;
+		return QString::null;
+	}
+};
+#endif
+
+// just for debugging currently. remove asap!
+#warning remove asap
+#define PATH_LOG 1
 class BoCanvasSyncMessage : public BoSyncMessageBase
 {
 public:
@@ -387,27 +412,136 @@ protected:
 		stream << (Q_UINT32)u->id();
 		stream << (Q_INT32)u->work();
 		stream << (Q_UINT32)u->health();
+#if PATH_LOG
+		// stream some info from the pathinfo object.
+		// we ignore:
+		// - u
+		// - hlpath
+		// - llpath
+		// - possibleDestRegions
+		BosonPathInfo* i = u->pathInfo();
+		if (u != i->unit && i->unit) {
+			boError() << k_funcinfo "u != unit in for pathinfo" << endl;
+		}
+		stream << (Q_UINT32)i->hlstep;
+		stream << i->start;
+		stream << i->dest;
+		stream << (Q_INT32)i->range;
+		if (i->startRegion) {
+			stream << (Q_INT32)i->startRegion->id;
+		} else {
+			stream << (Q_INT32)-1;
+		}
+		if (i->destRegion) {
+			stream << (Q_INT32)i->destRegion->id;
+		} else {
+			stream << (Q_INT32)-1;
+		}
+		stream << (Q_INT8)i->passable;
+		stream << (Q_INT8)i->canMoveOnLand;
+		stream << (Q_INT8)i->canMoveOnWater;
+		stream << (Q_INT8)i->flying;
+		stream << (Q_INT32)i->passability;
+		stream << (Q_INT8)i->moveAttacking;
+		stream << (Q_INT8)i->slowDownAtDest;
+		stream << (Q_INT32)i->waiting;
+		stream << (Q_INT32)i->pathrecalced;
+#endif
 	}
+#if !PATH_LOG
 	static void unstreamUnit(QDataStream& stream, Q_UINT32& id, Q_INT32& work, Q_UINT32& health)
+#else
+	static void unstreamUnit(QDataStream& stream, Q_UINT32& id, Q_INT32& work, Q_UINT32& health,
+			Q_UINT32& hlstep, QPoint& start, QPoint&  dest, Q_INT32& range, Q_INT32& startRegId, Q_INT32& destRegId, Q_INT8& passable,
+			Q_INT8& canL, Q_INT8& canW, Q_INT8& flying, Q_INT32& passability, Q_INT8& moveAttacking, Q_INT8& slowDownAtDest,
+			Q_INT32& waiting, Q_INT32& pathrecalced)
+#endif
 	{
 		stream >> id;
 		stream >> work;
 		stream >> health;
+#if PATH_LOG
+		stream >> hlstep;
+		stream >> start;
+		stream >> dest;
+		stream >> range;
+		stream >> startRegId;
+		stream >> destRegId;
+		stream >> passable;
+		stream >> canL;
+		stream >> canW;
+		stream >> flying;
+		stream >> passability;
+		stream >> moveAttacking;
+		stream >> slowDownAtDest;
+		stream >> waiting;
+		stream >> pathrecalced;
+#endif
 	}
 
 	static QString findUnitError(QDataStream& s1, QDataStream& s2)
 	{
+		QString error;
 		Q_UINT32 id, id2;
 		Q_INT32 work, work2;
 		Q_UINT32 health, health2;
+#if !PATH_LOG
 		unstreamUnit(s1, id, work, health);
 		unstreamUnit(s2, id2, work2, health2);
-#define CHECK(x,x2) if (x != x2) { return i18n("Different units in canvas log: variable %1: found %2, expected %3 (compared units %4 and %5").arg(#x).arg(x2).arg(x).arg(id).arg(id2); }
+#else
+		Q_UINT32 hlstep, hlstep2;
+		QPoint start, start2;
+		QPoint dest, dest2;
+		Q_INT32 range, range2;
+		Q_INT32 startRegId, startRegId2;
+		Q_INT32 destRegId, destRegId2;
+		Q_INT32 passability, passability2;
+		Q_INT32 waiting, waiting2;
+		Q_INT32 pathrecalced, pathrecalced2;
+		Q_INT8 passable, passable2;
+		Q_INT8 canL, canL2;
+		Q_INT8 canW, canW2;
+		Q_INT8 flying, flying2;
+		Q_INT8 moveAttacking, moveAttacking2;
+		Q_INT8 slowDown, slowDown2;
+		unstreamUnit(s1, id, work, health,
+				hlstep, start, dest, range, startRegId, destRegId, passable,
+				canL, canW, flying, passability, moveAttacking, slowDown,
+				waiting, pathrecalced);
+		unstreamUnit(s2, id2, work2, health2,
+				hlstep2, start2, dest2, range2, startRegId2, destRegId2, passable2,
+				canL2, canW2, flying2, passability2, moveAttacking2, slowDown2,
+				waiting2, pathrecalced2);
+#endif
+#define CHECK(x,x2) if (x != x2) { error += i18n("Different units in canvas log: variable %1: found %2, expected %3 (compared units %4 and %5)\n").arg(#x).arg(x2).arg(x).arg(id).arg(id2); }
 		CHECK(id, id2);
 		CHECK(work, work2);
 		CHECK(health, health2);
+#if PATH_LOG
+		CHECK(hlstep, hlstep2);
+		if (start != start2) {
+			error += i18n("start != start2: (%1,%2) != (%3,%4) for units %5 and %6").
+					arg(start.x()).arg(start.y()).arg(start2.x()).arg(start2.y()).arg(id).arg(id2);
+		}
+		if (dest != dest2) {
+			error += i18n("dest != dest2: (%1,%2) != (%3,%4) for units %5 and %6").
+					arg(dest.x()).arg(dest.y()).arg(dest2.x()).arg(dest2.y()).arg(id).arg(id2);
+		}
+		CHECK(range, range2);
+		CHECK(startRegId, startRegId2);
+		CHECK(destRegId, destRegId2);
+		CHECK(passable, passable2);
+		CHECK(canL, canL2);
+		CHECK(canW, canW2);
+		CHECK(flying, flying2);
+		CHECK(passability, passability2);
+		CHECK(moveAttacking, moveAttacking2);
+		CHECK(slowDown, slowDown2);
+		CHECK(waiting, waiting2);
+		CHECK(pathrecalced, pathrecalced2);
+#endif
 #undef CHECK
-		return QString::null;
+		return error;
 	}
 
 
