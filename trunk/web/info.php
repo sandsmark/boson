@@ -59,7 +59,7 @@ draw_bigbox_text("These requirements apply to the latest stable release
     * Optional: Sound card<br>
     <br>
     <b>Minimum software requirements:</b><br>
-    * XFree 4.x server (with OpenGL support, 4.3 and Xrandr for resolution changing) - see <a href=\"http://www.xfree86.org/\" target=\"_blank\">http://www.xfree86.org/</a><br>
+    * XFree 4.x server (with OpenGL support) - see <a href=\"http://www.xfree86.org/\" target=\"_blank\">http://www.xfree86.org/</a><br>
     * OpenGL - The OpenGL library (should be included in your XFree Server or graphics card driver)<br>
     * Qt 3.1 or better - see <a href=\"http://www.trolltech.com/\" target=\"_blank\">http://www.trolltech.com/</a><br>
     * kdelibs 3.1 or better (3.0 is untested) - see <a href=\"http://www.kde.org/\" target=\"_blank\">http://www.kde.org/</a><br>
