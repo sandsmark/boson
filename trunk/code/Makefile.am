@@ -3,7 +3,7 @@ SUBDIRS = common map server boson
 
 EXTRA_DIST = AUTHORS COPYING ChangeLog INSTALL README TODO 
 
-MAKE = nice -20 make -j 3
+#MAKE = nice -20 make -j 3
 
 api :
 	kdoc -p -dapi/ -ufile:/home/orzel/c/boson/api/ boson */*h
