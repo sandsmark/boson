@@ -640,3 +640,12 @@ bool BosonPlayField::importHeightMapImage(const QImage& image)
  return mMap->importHeightMapImage(image);
 }
 
+QByteArray BosonPlayField::exportHeightMap() const
+{
+ if (!mMap) {
+	BO_NULL_ERROR(mMap);
+	return QByteArray();
+ }
+ return mMap->saveHeightMapImage();
+}
+

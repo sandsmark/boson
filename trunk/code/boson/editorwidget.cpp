@@ -205,6 +205,9 @@ void EditorWidget::initKActions()
  (void)new KAction(i18n("&Import height map"), KShortcut(), this,
 		SLOT(slotImportHeightMap()), actionCollection(),
 		"editor_import_heightmap");
+ (void)new KAction(i18n("&Export height map"), KShortcut(), this,
+		SLOT(slotExportHeightMap()), actionCollection(),
+		"editor_export_heightmap");
 
 // KStdAction::preferences(bosonWidget(), SLOT(slotGamePreferences()), actionCollection()); // FIXME: slotEditorPreferences()
 }
@@ -478,7 +481,7 @@ void EditorWidget::slotImportHeightMap()
  BO_CHECK_NULL_RET(boGame->playField());
  BO_CHECK_NULL_RET(boGame->playField()->map());
  boDebug() << k_funcinfo << endl;
- QString fileName = KFileDialog::getOpenFileName(QString::null, QString::null, this);
+ QString fileName = KFileDialog::getOpenFileName(QString::null, "*.png", this);
  if (fileName.isNull()) {
 	return;
  }
@@ -506,5 +509,33 @@ void EditorWidget::slotImportHeightMap()
  }
  boGame->playField()->importHeightMapImage(image);
  // TODO: update unit positions!
+}
+
+void EditorWidget::slotExportHeightMap()
+{
+ BO_CHECK_NULL_RET(boGame);
+ BO_CHECK_NULL_RET(boGame->playField());
+ BO_CHECK_NULL_RET(boGame->playField()->map());
+ boDebug() << k_funcinfo << endl;
+ QString fileName = KFileDialog::getSaveFileName(QString::null, "*.png", this);
+ if (fileName.isNull()) {
+	return;
+ }
+ QByteArray buffer = boGame->playField()->exportHeightMap();
+ if (buffer.size() == 0) {
+	boError() << k_funcinfo << "Could not export heightMap" << endl;
+	KMessageBox::sorry(this, i18n("Unable to export heightMap"));
+	return;
+ }
+ QImage image(buffer);
+ if (image.isNull()) {
+	boError() << k_funcinfo << "an invalid image has been generated" << endl;
+	KMessageBox::sorry(this, i18n("An invalid heightmop image has been generated."));
+ }
+ if (!image.save(fileName, "PNG")) {
+	boError() << k_funcinfo << "unable to save image to " << fileName << endl;
+	KMessageBox::sorry(this, i18n("Unable to save image to %1.").arg(fileName));
+	return;
+ }
 }
 
