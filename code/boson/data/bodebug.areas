@@ -11,3 +11,5 @@
 
 # Use 400-449 for Unit::advance*()
 401	AdvanceMove
+
+500	BosonPath
