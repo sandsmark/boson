@@ -99,7 +99,26 @@ public:
 	static void deleteBoson();
 
 public:
-	void setCanvas(BosonCanvas*);
+	/**
+	 * Create a new @ref BosonCanvas object. The object will be deleted when
+	 * this Boson object is destroyed, see @ref deleteBoson.
+	 **/
+	void createCanvas();
+
+	/**
+	 * @return The @ref BosonCanvas object. See also @ref createCanvas.
+	 *
+	 * Note That I do <em>not</em> want to see a non-const pointer returned
+	 * in this class! Boson is a static object that is available
+	 * _everywhere_ in this program and I do not want to allow access to the
+	 * @ref BosonCanvas object all over this application.
+	 *
+	 * This pointer is meant to be used for e.g. statistic information (how
+	 * many units are on the map, how many particle systems, ...)
+	 **/
+	const BosonCanvas* canvas() const;
+	BosonCanvas* canvasNonConst() const; // FIXME: remove!
+
 	void setPlayField(BosonPlayField*);
 	BosonPlayField* playField() const;
 
@@ -111,14 +130,22 @@ public:
 
 	int gameSpeed() const;
 	bool gamePaused() const;
-	bool isServer() const;
 
-	virtual KPlayer* createPlayer(int rtti, int io, bool isVirtual);
 	void removeAllPlayers();
 
 	Unit* loadUnit(unsigned long int unitType, Player* owner);
 
 	QValueList<QColor> availableTeamColors() const;
+
+	/**
+	 * Kill the @p player, i.e. remove all it's units (if any) from the
+	 * game. Once this was called the player is not able to do anything
+	 * anymore.
+	 *
+	 * Note that the @p player will remain in the game, but can watch only
+	 * after this point. The player is not removed from the network.
+	 **/
+	void killPlayer(Player* player);
 
 	/**
 	 * @param unitId The unit to search for
@@ -144,9 +171,24 @@ public:
 	void sendAddUnits(const QString& xmlDocument, Player* owner);
 
 	virtual void networkTransmission(QDataStream&, int msgid, Q_UINT32 receiver, Q_UINT32 sender, Q_UINT32 clientID);
+
+	/**
+	 * Lock message delivery until @ref unlock is called.
+	 *
+	 * Messages are not lost, but just delayed.
+	 **/
 	virtual void lock();
+
+	/**
+	 * Unlock message delivery (see @ref lock) and deliver all delayed
+	 * messages (see @ref slotProcessDelayed)
+	 **/
 	virtual void unlock();
 
+	/**
+	 * Set the game/editor mode. Use TRUE here for normal game mode, FALSE
+	 * for editor mode.
+	 **/
 	void setGameMode(bool isGame = true) { mGameMode = isGame; }
 	
 	/**
@@ -162,7 +204,6 @@ public:
 	bool saveToFile(const QString& file);
 
 	virtual bool savegame(QDataStream& stream, bool network, bool saveplayers = true);
-	virtual bool load(QDataStream& stream, bool reset = true);
 	virtual bool loadgame(QDataStream& stream, bool network, bool reset);
 
 	LoadingStatus loadingStatus() const;
@@ -179,8 +220,6 @@ public:
 	 **/
 	void toggleAdvanceFlag();
 
-	virtual bool save(QDataStream& stream, bool savePlayers = true);
-
 	/**
 	 * @return The number of delayed messages. When a certain number of
 	 * messages has been delayed you are in serious trouble, as there will
@@ -193,12 +232,35 @@ public:
 	 **/
 	unsigned long int latestSavegameVersion();
 
+
+public: // small KGame extenstions for boson
+	/**
+	 * Used internally by @ref KGame. Simply create and return a new @ref
+	 * Player object.
+	 **/
+	virtual KPlayer* createPlayer(int rtti, int io, bool isVirtual);
+
+	/**
+	 * Simply calls @ref loadgame. This is an old function, that resides
+	 * here due to an old KGame bug.
+	 **/
+	virtual bool load(QDataStream& stream, bool reset = true);
+
+	/**
+	 * Dummy implementation that simply calls @ref KGame::save or @ref
+	 * savegame, depending on the @ref KGame version. @ref KGame from KDE
+	 * 3.0 didn't have @ref savegame, so we need to emulate it on our own
+	 * here.
+	 **/
+	virtual bool save(QDataStream& stream, bool savePlayers = true);
+
 	/**
 	 * @return The port that is used for network games. The port we listen
 	 * to when we are server or the peerPort when we are connected to
 	 * another client.
 	 **/
 	Q_UINT16 bosonPort();
+	bool isServer() const;
 
 public slots:
 	void slotSetGameSpeed(int speed);
@@ -334,18 +396,6 @@ signals:
 	void signalUpdateProductionOptions();
 
 	/**
-	 * Tell the map to change a cell at @p x, @p y to @p groundType and @p
-	 * version. This must not be connected to a slot in game mode (but it
-	 * also must not be emitted then).
-	 *
-	 * Note that we you can use this to update the minimap as well, but be
-	 * aware that when the minimap slot gets called the map itself might not
-	 * have been updated yet, since we can't safely predict the order in which
-	 * slots get called.
-	 **/
-//	void signalChangeCell(int x, int y, int groundType, unsigned char version ); // obsolete
-
-	/**
 	 * Tell the map to change @ref BosonMap::texMap at coordinates @p x, @p
 	 * y.
 	 *
@@ -359,6 +409,18 @@ signals:
 	void signalSaveExternalStuff(QDataStream& stream);
 	void signalLoadExternalStuffFromXML(const QDomElement& root);
 	void signalSaveExternalStuffAsXML(QDomElement& root);
+
+	/**
+	 * Emitted when a player is killed, i.e. has lost. The player
+	 * still remains in the network (i.e. the game), he just cannot
+	 * play anymore.
+	 * This is emitted mainly by @ref killPlayer.
+	 *
+	 * The player is <em>not</em> removed from network and can take part in
+	 * the next game for example. When the player is removed from the
+	 * network @ref signalPlayerLeftGame is emitted.
+	 **/
+	void signalPlayerKilled(Player*);
 
 protected:
 	virtual bool playerInput(QDataStream& stream, KPlayer* player);

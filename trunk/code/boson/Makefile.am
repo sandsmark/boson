@@ -24,6 +24,7 @@ BOSON_SRC = \
 	bosonscenario.cpp \
 	bosonplayfield.cpp \
 	bosoncanvas.cpp \
+	bosoncanvasstatistics.cpp \
 	bosoncollisions.cpp \
 	boson.cpp \
 	speciestheme.cpp \

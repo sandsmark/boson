@@ -54,8 +54,8 @@ public:
 	GameOverDialog* mGameOverDialog;
 };
 
-BosonWidget::BosonWidget(TopWidget* top, QWidget* parent)
-    : BosonWidgetBase(top, parent)
+BosonWidget::BosonWidget(QWidget* parent)
+    : BosonWidgetBase(parent)
 {
  d = new BosonWidgetPrivate;
 }
@@ -79,8 +79,8 @@ void BosonWidget::initDisplayManager()
 void BosonWidget::initConnections()
 {
  BosonWidgetBase::initConnections();
- connect(canvas(), SIGNAL(signalOutOfGame(Player*)),
-		this, SLOT(slotOutOfGame(Player*)));
+ connect(boGame, SIGNAL(signalPlayerKilled(Player*)),
+		this, SLOT(slotPlayerKilled(Player*)));
 
  // this does the actual game. note that editor must not have this!
  connect(boGame, SIGNAL(signalAdvance(unsigned int, bool)),
@@ -186,7 +186,7 @@ void BosonWidget::slotGamePreferences()
  dlg->show();
 }
 
-void BosonWidget::slotOutOfGame(Player* p)
+void BosonWidget::slotPlayerKilled(Player* p)
 {
  // TODO write BosonGameOverWidget, add it to widgetstack in TopWidget and then
  //  use it instead

@@ -158,7 +158,7 @@ public:
 
 	void setLocalPlayer(Player* p);
 
-	BosonCanvas* canvas() const { return mCanvas; }
+	const BosonCanvas* canvas() const { return mCanvas; }
 
 	/**
 	 * Emit @ref signalMakeActive to inform @ref BosonWidget and @ref

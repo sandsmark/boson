@@ -26,6 +26,7 @@
 class KPlayer;
 class KGamePropertyBase;
 class KActionCollection;
+class KDockWidget;
 class QDataStream;
 class QDomElement;
 
@@ -36,7 +37,6 @@ class BosonBigDisplay;
 class BosonBigDisplayBase;
 class Unit;
 class Player;
-class TopWidget;
 class BoDisplayManager;
 class Boson;
 class BosonMiniMap;
@@ -70,12 +70,30 @@ public:
 	/**
 	 * Default Constructor
 	 **/
-	BosonWidgetBase(TopWidget* top, QWidget* parent);
+	BosonWidgetBase(QWidget* parent);
 
 	/**
 	 * Default Destructor
 	 **/
 	virtual ~BosonWidgetBase();
+
+
+	/**
+	 * Set the @ref KToggleAction that is responsible for the chat widget to
+	 * either checked or not checked.
+	 *
+	 * This depends on whether the chat (dock-)widget is currently visible.
+	 **/
+	void setActionChat(bool chatVisible);
+
+	/**
+	 * Set the @ref KToggleAction that is responsible for the cmdframe to
+	 * either checked or not checked.
+	 *
+	 * This depends on whether the cmdframe (dock-)widget is currently visible.
+	 **/
+	void setActionCmdFrame(bool cmdFrameVisible);
+
 
 	/**
 	 * Set the displaymanager. The displaymanager will be reparened to this
@@ -89,7 +107,6 @@ public:
 
 	void setLocalPlayer(Player* p, bool init);
 
-	TopWidget* top() const { return mTop; }
 	BosonCanvas* canvas() const;
 	inline BosonMiniMap* minimap() const { return mMiniMap; }
 	inline BoDisplayManager* displayManager() const { return mDisplayManager; }
@@ -108,11 +125,6 @@ public:
 
 	void setShowChat(bool s);
 
-	bool isCmdFrameVisible() const;
-	bool isChatVisible() const;
-	void setChatVisible(bool visible);
-	void setCmdFrameVisible(bool visible);
-
 	/**
 	 * Add and initialize the first @ref BosonBigDisplayBase. Note that at
 	 * this point all tiles have to be loaded. See @ref BosonMap::tileSet
@@ -123,7 +135,7 @@ public:
 	 **/
 	void addInitialDisplay();
 
-	void init();
+	void init(KDockWidget* chatDock, KDockWidget* commandFrameDock);
 	virtual void initPlayer();
 	virtual void initMap();
 	virtual void quitGame();
@@ -205,6 +217,18 @@ signals:
 	void signalQuit();
 	void signalEndGame();
 
+	/**
+	 * Load the dock(-widget) layout for game mode.
+	 **/
+	void signalLoadBosonGameDock();
+	void signalToggleChatVisible();
+	void signalToggleCmdFrameVisible();
+	/**
+	 * Ask the receiver of this signal (i.e. the parent) to check the dock
+	 * status (whether the chat/cmdframe widgets are visible) and set the
+	 * @ref KToggleAction objects accordingly. See also @ref setActionChat
+	 * and @ref setActionCmdFrame
+	 **/
 	void signalCheckDockStatus();
 
 	void signalChangeLocalPlayer(Player* p);
@@ -216,8 +240,6 @@ protected slots:
 	void slotDebugMode(int);
 	void slotDebugPlayer(int);
 	void slotDebugToggleWireFrames(bool);
-	void slotToggleCmdFrameVisible();
-	void slotToggleChatVisible();
 	void slotGrabScreenshot();
 	void slotGrabProfiling();
 
@@ -232,7 +254,7 @@ protected slots:
 	virtual void slotChangeCursor(int mode, const QString& dir) = 0;
 
 	void slotAddUnit(Unit* unit, int x, int y);
-	void slotRemoveUnit(Unit* unit);
+	void slotUnitRemoved(Unit* unit);
 
 	/**
 	 * Directly add a chat message from the system (i.e. the game)
@@ -253,7 +275,6 @@ protected slots:
 
 protected:
 	void setLocalPlayerRecursively(Player* p);
-	void checkDockStatus();
 	
 	void initBigDisplay(BosonBigDisplayBase*);
 
@@ -293,10 +314,10 @@ protected:
 	OptionsDialog* gamePreferences(bool editor);
 
 private:
-	void initChat();
+	void initChat(KDockWidget* chatDock);
 
 	void initMiniMap();
-	void initCommandFrame();
+	void initCommandFrame(KDockWidget* commandFrameDock);
 	void initLayout();
 	void initLocalPlayerInput();
 	void initScripts();
@@ -316,7 +337,6 @@ private:
 
 	BosonCursor* mCursor;
 
-	TopWidget* mTop;
 	BosonMiniMap* mMiniMap;
 	BoDisplayManager* mDisplayManager;
 	BosonLocalPlayerInput* mLocalPlayerInput;

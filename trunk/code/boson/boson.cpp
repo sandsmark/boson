@@ -263,9 +263,27 @@ void Boson::deleteBoson()
  mBoson = 0;
 }
 
-void Boson::setCanvas(BosonCanvas* c)
+void Boson::createCanvas()
 {
- d->mCanvas = c;
+ if (d->mCanvas) {
+	boWarning() << k_funcinfo << "there is already a canvas created! no touching that object..." << endl;
+	// do NOT delete it, as it might be used somewhere else as wel else as
+	// welll
+	return;
+ }
+ d->mCanvas = new BosonCanvas(this);
+ connect(this, SIGNAL(signalAddUnit(Unit*, int, int)),
+		d->mCanvas, SLOT(slotAddUnit(Unit*, int, int)));
+}
+
+BosonCanvas* Boson::canvasNonConst() const
+{
+ return d->mCanvas;
+}
+
+const BosonCanvas* Boson::canvas() const
+{
+ return d->mCanvas;
 }
 
 void Boson::setPlayField(BosonPlayField* p)
@@ -293,6 +311,9 @@ void Boson::quitGame()
 {
  boDebug() << k_funcinfo << endl;
 // reset everything
+ if (d->mCanvas) {
+	d->mCanvas->deleteDestroyed();
+ }
  d->mGameTimer->stop();
  setGameStatus(KGame::End);
  d->mNextUnitId = 0;
@@ -1196,7 +1217,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 		p = (Player*)findPlayer(id);
 		BO_CHECK_NULL_RET(p);
 		BO_CHECK_NULL_RET(d->mCanvas);
-		d->mCanvas->killPlayer(p);
+		killPlayer(p);
 		slotAddChatSystemMessage(i18n("Debug"), i18n("Killed player %1 - %2").arg(p->id()).arg(p->name()));
 	}
 	case BosonMessage::IdModifyMinerals:
@@ -2495,4 +2516,18 @@ Q_UINT16 Boson::bosonPort()
  return 0;
 #endif
 }
+
+void Boson::killPlayer(Player* player)
+{
+ if (d->mCanvas) {
+	while (player->allUnits()->count() > 0) {
+		d->mCanvas->destroyUnit(player->allUnits()->first());
+	}
+ }
+ player->setMinerals(0);
+ player->setOil(0);
+ boDebug() << k_funcinfo << "player " << player->id() << " is out of game" << endl;
+ emit signalPlayerKilled(player);
+}
+
 

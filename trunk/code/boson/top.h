@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -27,7 +27,9 @@ class Boson;
 class Player;
 class BosonPlayField;
 class BosonCanvas;
+class BosonWidgetBase;
 class KCmdLineArgs;
+class KDialogBase;
 
 /**
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
@@ -60,8 +62,7 @@ public:
 	 **/
 	~TopWidget();
 
-	BosonPlayField* playField() const { return mPlayField; };
-	BosonCanvas* canvas() const { return mCanvas; };
+	BosonPlayField* playField() const { return mPlayField; }
 
 	void loadGameDockConfig();
 	void loadInitialDockConfig();
@@ -193,6 +194,34 @@ protected:
 
 	void changeLocalPlayer(Player* p, bool init = true);
 
+	/**
+	 * Display the dialog @p dialog. This function takes care of deleting
+	 * the dialog once it gets closed.
+	 *
+	 * This should not be used for modal dialogs, as (1) it is started using
+	 * @ref KDialogBase::exec, not @ref KDialogBase::show and (2) since it
+	 * is modal you can just delete it as soon as it returns.
+	 **/
+	void displayNonModalDialog(KDialogBase* dialog);
+
+	/**
+	 * Initialize and display the game dock widgets (at the moment the chat
+	 * and the commandframe dock widgets).
+	 *
+	 * Note that it is perfectly valid to call this twice - the widgets will
+	 * be displayed only, as initializing has been done in the first call.
+	 * @param display By default this method initializes and displays the
+	 * dock widgets. If you use FALSE here, only initializing occurs.
+	 **/
+	void initGameDockWidgets(bool display = true);
+
+	/**
+	 * @param deinit By default this just hides the dock widgets. If @p
+	 * deinit is TRUE it also deinitializes any previously set widgets,
+	 * i.e. it will call KDockWidget::setWidget(0).
+	 **/
+	void hideGameDockWidgets(bool deinit = false);
+
 protected slots:
 	void slotChangeLocalPlayer(Player* p) { changeLocalPlayer(p); }
 	void slotUpdateStatusBar();
@@ -240,6 +269,23 @@ protected slots:
 	void slotDebugKGame();
 	void slotDebugRequestIdName(int msgid, bool userid, QString& name);
 
+	/**
+	 * Load the dock(-widget) layout for game mode. See also @ref
+	 * BosonWidgetBase::signalLoadBosonGameDock
+	 **/
+	void slotLoadBosonGameDock();
+
+	void slotToggleChatDockVisible();
+	void slotToggleCmdFrameDockVisible();
+
+	/**
+	 * Check whether the game dock widgets (see @ref initGameDockWidgets)
+	 * are currently visible or not. According to that set the @ref KAction
+	 * (probably @ref KToggleAction) objects of @ref BosonWidgetBase.
+	 **/
+	void slotCheckGameDockStatus();
+
+	void slotRemoveFromGUIFactory(QObject*);
 
 private:
 	void initDisplayManager();
@@ -258,10 +304,9 @@ private:
 
 
 private:
-	Player* mPlayer;
-	BosonPlayField* mPlayField;
-	BosonCanvas* mCanvas;
 	KDockWidget* mMainDock;
+
+	BosonPlayField* mPlayField;
 
 	class TopWidgetPrivate;
 	TopWidgetPrivate* d;

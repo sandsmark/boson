@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@
 #include "player.h"
 #include "bosonplayfield.h"
 #include "bosoncanvas.h"
+#include "bosoncanvasstatistics.h"
 #include "bosonmessage.h"
 #include "speciestheme.h"
 #include "bosonprofiling.h"
@@ -86,7 +87,10 @@ public:
 		mStarting = 0;
 
 		mIface = 0;
-	};
+
+		mChatDock = 0;
+		mCommandFrameDock = 0;
+	}
 
 	BosonStartupWidget* mStartup;
 
@@ -106,13 +110,15 @@ public:
 #endif
 
 	BoDebugDCOPIface* mIface;
+
+	KDockWidget* mChatDock;
+	KDockWidget* mCommandFrameDock;
 };
 
 TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
 {
  d = new TopWidgetPrivate;
  mPlayField = 0;
- mCanvas = 0;
 #if KDE_VERSION < 310
  d->mLoadingDockConfig = false;
 #endif
@@ -120,6 +126,7 @@ TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
  mMainDock = createDockWidget("mainDock", 0, this, i18n("Map"));
  mMainDock->setDockSite(KDockWidget::DockCorner);
  mMainDock->setEnableDocking(KDockWidget::DockNone);
+ initGameDockWidgets(false);
 
  // this is for broken installations. people tend to install to /usr/local or
  // similar (which is 100% correct), but don't set $KDEDIRS (note that S)
@@ -195,6 +202,95 @@ void TopWidget::initDisplayManager()
 {
  d->mDisplayManager = new BoDisplayManager(0);
  d->mDisplayManager->hide();
+}
+
+void TopWidget::initGameDockWidgets(bool display)
+{
+ if (!d->mChatDock) {
+	d->mChatDock = createDockWidget("chat_dock", 0, 0, i18n("Chat"));
+ }
+ if (!d->mCommandFrameDock) {
+	d->mCommandFrameDock = createDockWidget("cmdframe_dock", 0, 0, i18n("Command Frame"));
+ }
+
+ d->mChatDock->setEnableDocking(KDockWidget::DockTop | KDockWidget::DockBottom);
+ d->mChatDock->setDockSite(KDockWidget::DockNone);
+
+ d->mCommandFrameDock->setEnableDocking(KDockWidget::DockLeft | KDockWidget::DockRight);
+ d->mCommandFrameDock->setDockSite(KDockWidget::DockNone);
+
+ // we are initializing, so we should do the initial docking positions as well.
+ // will be overridden once a dock layout is loaded.
+ d->mChatDock->manualDock(getMainDockWidget(), KDockWidget::DockBottom, 80);
+ d->mCommandFrameDock->manualDock(getMainDockWidget(), KDockWidget::DockLeft, 30);
+
+ if (!display) {
+	hideGameDockWidgets();
+ } else {
+	makeDockVisible(d->mChatDock);
+	makeDockVisible(d->mCommandFrameDock);
+ }
+}
+
+void TopWidget::slotLoadBosonGameDock()
+{
+ if (!kapp->config()->hasGroup("BosonGameDock")) {
+	boDebug() << k_funcinfo << "dock config does not exist" << endl;
+	// Dock config isn't saved (probably first start). Hide chat dock (we only
+	//  show commandframe by default)
+	d->mChatDock->changeHideShowState();
+	if (d->mDisplayManager) {
+		d->mDisplayManager->updateGeometry();  // Hack? Bug in BoDisplayManager?
+	}
+ } else {
+	boDebug() << k_funcinfo << "dock config exists, loading" << endl;
+	loadGameDockConfig();
+ }
+ slotCheckGameDockStatus();
+}
+
+void TopWidget::slotCheckGameDockStatus()
+{
+ if (d->mBosonWidget) {
+	d->mBosonWidget->setActionChat(d->mChatDock->isVisible());
+	d->mBosonWidget->setActionCmdFrame(d->mCommandFrameDock->isVisible());
+ }
+}
+
+void TopWidget::hideGameDockWidgets(bool deinit)
+{
+ makeDockInvisible(d->mChatDock);
+ makeDockInvisible(d->mCommandFrameDock);
+
+ if (deinit) {
+	d->mChatDock->setWidget(0);
+	d->mCommandFrameDock->setWidget(00);
+ }
+}
+
+void TopWidget::slotToggleChatDockVisible()
+{
+ d->mChatDock->changeHideShowState();
+ slotCheckGameDockStatus();
+}
+
+void TopWidget::slotToggleCmdFrameDockVisible()
+{
+ d->mCommandFrameDock->changeHideShowState();
+ slotCheckGameDockStatus();
+}
+
+void TopWidget::slotRemoveFromGUIFactory(QObject* obj)
+{
+ if (!obj) {
+	return;
+ }
+ if (obj->inherits("BosonWidgetBase")) {
+	BosonWidgetBase* w = (BosonWidgetBase*)obj;
+	if (factory()) {
+		factory()->removeClient(w);
+	}
+ }
 }
 
 void TopWidget::saveProperties(KConfig *config)
@@ -299,10 +395,7 @@ void TopWidget::initPlayField()
 
 void TopWidget::initCanvas()
 {
- BO_CHECK_NULL_RET(boGame);
- delete mCanvas;
- mCanvas = new BosonCanvas(this);
- boGame->setCanvas(mCanvas);
+ boGame->createCanvas();
 }
 
 void TopWidget::initStatusBar()
@@ -363,15 +456,30 @@ void TopWidget::initBosonWidget()
  }
  BO_CHECK_NULL_RET(d->mDisplayManager);
  if (boGame->gameMode()) {
-	BosonWidget* w = new BosonWidget(this, mMainDock);
+	BosonWidget* w = new BosonWidget(mMainDock);
 	connect(w, SIGNAL(signalSaveGame()), this, SLOT(slotSaveGame()));
 	connect(w, SIGNAL(signalLoadGame()), this, SLOT(slotLoadGame()));
 	connect(w, SIGNAL(signalGameOver()), this, SLOT(slotGameOver()));
 	d->mBosonWidget = w;
  } else {
-	EditorWidget* w = new EditorWidget(this, mMainDock);
+	EditorWidget* w = new EditorWidget(mMainDock);
 	d->mBosonWidget = w;
  }
+
+ connect(d->mBosonWidget, SIGNAL(destroyed(QObject*)), this, SLOT(slotRemoveFromGUIFactory(QObject*)));
+ connect(d->mBosonWidget, SIGNAL(signalLoadBosonGameDock()), this, SLOT(slotLoadBosonGameDock()));
+ connect(d->mBosonWidget, SIGNAL(signalToggleChatVisible()), this, SLOT(slotToggleChatDockVisible()));
+ connect(d->mBosonWidget, SIGNAL(signalToggleCmdFrameVisible()), this, SLOT(slotToggleCmdFrameDockVisible()));
+ connect(d->mBosonWidget, SIGNAL(signalCheckDockStatus()), this, SLOT(slotCheckGameDockStatus()));
+ connect(d->mBosonWidget, SIGNAL(signalChangeLocalPlayer(Player*)), this, SLOT(slotChangeLocalPlayer(Player*)));
+ connect(d->mBosonWidget, SIGNAL(signalEndGame()), this, SLOT(slotEndGame()));
+ connect(d->mBosonWidget, SIGNAL(signalQuit()), this, SLOT(close()));
+ connect(d->mBosonWidget, SIGNAL(signalMobilesCount(int)), this, SIGNAL(signalSetMobilesCount(int)));
+ connect(d->mBosonWidget, SIGNAL(signalFacilitiesCount(int)), this, SIGNAL(signalSetFacilitiesCount(int)));
+ connect(d->mBosonWidget, SIGNAL(signalOilUpdated(int)), this, SIGNAL(signalOilUpdated(int)));
+ connect(d->mBosonWidget, SIGNAL(signalMineralsUpdated(int)), this, SIGNAL(signalMineralsUpdated(int)));
+
+ initGameDockWidgets(false);
  d->mBosonWidget->setDisplayManager(d->mDisplayManager);
 
  // at this point the startup widget should already have called
@@ -382,19 +490,10 @@ void TopWidget::initBosonWidget()
 	// it is not)
  }
  changeLocalPlayer(boGame->localPlayer(), false);
- d->mBosonWidget->init(); // this depends on several virtual methods and therefore can't be called in the c'tor
+ d->mBosonWidget->init(d->mChatDock, d->mCommandFrameDock); // this depends on several virtual methods and therefore can't be called in the c'tor
+
  factory()->addClient(d->mBosonWidget); // XMLClient-stuff. needs to be called *after* creation of KAction objects, so outside BosonWidget might be a good idea :-)
 // createGUI("bosonui.rc", false);
-// mWs->addWidget(d->mBosonWidget, IdBosonWidget);
-
- connect(d->mBosonWidget, SIGNAL(signalChangeLocalPlayer(Player*)), this, SLOT(slotChangeLocalPlayer(Player*)));
- connect(d->mBosonWidget, SIGNAL(signalEndGame()), this, SLOT(slotEndGame()));
- connect(d->mBosonWidget, SIGNAL(signalQuit()), this, SLOT(close()));
- connect(d->mBosonWidget, SIGNAL(signalMobilesCount(int)), this, SIGNAL(signalSetMobilesCount(int)));
- connect(d->mBosonWidget, SIGNAL(signalFacilitiesCount(int)), this, SIGNAL(signalSetFacilitiesCount(int)));
- connect(d->mBosonWidget, SIGNAL(signalOilUpdated(int)), this, SIGNAL(signalOilUpdated(int)));
- connect(d->mBosonWidget, SIGNAL(signalMineralsUpdated(int)), this, SIGNAL(signalMineralsUpdated(int)));
-
 
  // finally add the initial display
  // note that this call also loads the cursor
@@ -620,7 +719,7 @@ void TopWidget::endGame()
  }
  if (d->mBosonWidget) {
 	d->mBosonWidget->quitGame();
-	disconnect(d->mBosonWidget, 0, 0, 0);
+//	disconnect(d->mBosonWidget, 0, 0, 0); // we must not do this, so that slotRemoveFromGUIFactory() is called. do we need this disconnect at all?
 	d->mStatusBarTimer.stop();
 	// This prevent wrong dock config from getting saved when loading fails
 	if (boGame->gameStatus() != KGame::Init) {
@@ -630,10 +729,9 @@ void TopWidget::endGame()
  delete d->mBosonWidget;
  d->mBosonWidget = 0;
  Boson::deleteBoson();  // Easiest way to reset game info
- delete mCanvas;
- mCanvas = 0;
  delete mPlayField;
  mPlayField = 0;
+ hideGameDockWidgets(true);
  boDebug() << k_funcinfo << "done" << endl;
 }
 
@@ -864,20 +962,23 @@ void TopWidget::slotUpdateStatusBar()
 {
  BO_CHECK_NULL_RET(d->mBosonWidget);
  BO_CHECK_NULL_RET(d->mBosonWidget->displayManager());
- BO_CHECK_NULL_RET(mCanvas);
+ const BosonCanvas* canvas = boGame->canvas();
+ BO_CHECK_NULL_RET(canvas);
+ BosonCanvasStatistics* stat = canvas->canvasStatistics();
+ BO_CHECK_NULL_RET(stat);
  // AB: some statusbar labels are *not* updated here (e.g. minerals and units),
  // but whenever their value actually changes.
- emit signalParticlesCountUpdated(mCanvas->particleSystemsCount());
- emit signalCanvasItemsCountUpdated(mCanvas->allItemsCount());
- emit signalCanvasAnimationsCountUpdated(mCanvas->animationsCount());
+ emit signalParticlesCountUpdated(stat->particleSystemsCount());
+ emit signalCanvasItemsCountUpdated(stat->allItemsCount());
+ emit signalCanvasAnimationsCountUpdated(stat->animationsCount());
 
  // AB: this *might* be an expensive calculation. this can be a pretty big loop
  // (> 1000 entries), but there are simple calculations only. maybe we should
  // add a slotUpdateStatusBarExpensive() or so which gets called every 5 seconds
  // only
- mCanvas->updateItemCount();
- emit signalUnitsUpdated(mCanvas->itemCount(RTTI::UnitStart));
- emit signalShotsUpdated(mCanvas->itemCount(RTTI::Shot));
+ stat->updateItemCount();
+ emit signalUnitsUpdated(stat->itemCount(RTTI::UnitStart));
+ emit signalShotsUpdated(stat->itemCount(RTTI::Shot));
 }
 
 void TopWidget::hideMenubar()
@@ -1115,17 +1216,22 @@ void TopWidget::slotDebugKGame()
 	cells->setMap(map);
  }
 
- connect(dlg, SIGNAL(finished()), dlg, SLOT(deleteLater()));
  connect(dlg, SIGNAL(signalRequestIdName(int,bool,QString&)),
 		this, SLOT(slotDebugRequestIdName(int,bool,QString&)));
- dlg->show();
+
+ displayNonModalDialog(dlg);
 }
 
 void TopWidget::slotProfiling()
 {
  BosonProfilingDialog* dlg = new BosonProfilingDialog(this, false); // note that dialog won't get updated while it is running, even if its non-modal!
- connect(dlg, SIGNAL(finished()), dlg, SLOT(deleteLater()));
- dlg->show();
+ displayNonModalDialog(dlg);
+}
+
+void TopWidget::displayNonModalDialog(KDialogBase* dialog)
+{
+ connect(dialog, SIGNAL(finished()), dialog, SLOT(deleteLater()));
+ dialog->show();
 }
 
 void TopWidget::slotDebugRequestIdName(int msgid, bool , QString& name)
