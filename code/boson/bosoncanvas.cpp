@@ -1087,93 +1087,114 @@ bool BosonCanvas::loadFromXML(const QDomElement& root)
 		boError(260) << k_funcinfo << i << " is not an element" << endl;
 		return false;
 	}
-	if (!e.hasAttribute(QString::fromLatin1("Owner"))) {
-		boError(260) << k_funcinfo << "missing attribute: Owner for Shot " << i << endl;
-		continue;
-	}
-	if (!e.hasAttribute(QString::fromLatin1("Type"))) {
-		boError(260) << k_funcinfo << "missing attribute: Type for Shot " << i << endl;
-		continue;
-	}
-
-	bool ok = false;
-	unsigned long int type, unitid, weaponid, ownerid;
-	ownerid = e.attribute(QString::fromLatin1("Owner")).toULong(&ok);
+	bool ok = loadShotFromXML(e);
 	if (!ok) {
-		boError(260) << k_funcinfo << "Invalid Owner number for Shot " << i << endl;
+		boError(260) << k_funcinfo << "Shot " << i << " was not loaded correctly" << endl;
 		continue;
 	}
-	type = e.attribute(QString::fromLatin1("Type")).toULong(&ok);
+ }
+ return true;
+}
+
+bool BosonCanvas::loadUnitFromXML(const QDomElement& unit)
+{
+ if (unit.isNull()) {
+	return false;
+ }
+ return true;
+}
+bool BosonCanvas::loadShotFromXML(const QDomElement& shot)
+{
+ if (shot.isNull()) {
+	return false;
+ }
+ if (!shot.hasAttribute(QString::fromLatin1("Owner"))) {
+	boError(260) << k_funcinfo << "missing attribute: Owner for Shot tag" << endl;
+	return false;
+ }
+ if (!shot.hasAttribute(QString::fromLatin1("Type"))) {
+	boError(260) << k_funcinfo << "missing attribute: Type for Shot tag" << endl;
+	return false;
+ }
+
+ bool ok = false;
+ unsigned long int type, unitid, weaponid, ownerid;
+ ownerid = shot.attribute(QString::fromLatin1("Owner")).toULong(&ok);
+ if (!ok) {
+	boError(260) << k_funcinfo << "Invalid Owner number for Shot tag" << endl;
+	return false;
+ }
+ type = shot.attribute(QString::fromLatin1("Type")).toULong(&ok);
+ if (!ok) {
+	boError(260) << k_funcinfo << "Invalid Type number for Shot tag" << endl;
+	return false;
+ }
+
+ const BosonWeaponProperties* weapon = 0;
+ Player* owner = (Player*)(boGame->findPlayer(ownerid));
+ if (!owner) {
+	boError() << k_funcinfo << "No player with id " << ownerid << endl;
+	return false;
+ }
+
+ if (type == BosonShot::Bullet || type == BosonShot::Missile) {
+	// Bullet and missile always have properties, others don't
+	if (!shot.hasAttribute(QString::fromLatin1("UnitType"))) {
+		boError(260) << k_funcinfo << "missing attribute: UnitType for Shot tag" << endl;
+		return false;
+	}
+	if (!shot.hasAttribute(QString::fromLatin1("WeaponType"))) {
+		boError(260) << k_funcinfo << "missing attribute: WeaponType for Shot tag" << endl;
+		return false;
+	}
+	unitid = shot.attribute(QString::fromLatin1("UnitType")).toULong(&ok);
 	if (!ok) {
-		boError(260) << k_funcinfo << "Invalid Type number for Shot " << i << endl;
-		continue;
+		boError(260) << k_funcinfo << "Invalid UnitType number for Shot tag" << endl;
+		return false;
+	}
+	weaponid = shot.attribute(QString::fromLatin1("WeaponType")).toULong(&ok);
+	if (!ok) {
+		boError(260) << k_funcinfo << "Invalid WeaponType number for Shot tag" << endl;
+		return false;
 	}
 
-	const BosonWeaponProperties* weapon = 0;
-	Player* owner = (Player*)(boGame->findPlayer(ownerid));
-	if (!owner) {
-		boError() << k_funcinfo << "No player with id " << ownerid << endl;
+	SpeciesTheme* theme = owner->speciesTheme();
+	if (!theme) {
+		boError() << k_funcinfo << "No theme for player " << ownerid << endl;
+		return false;
 	}
+	const UnitProperties* prop = theme->unitProperties(unitid);
+	if (!prop) {
+		boError() << "Unknown unitType " << unitid << endl;
+		return false;
+	}
+	weapon = prop->weaponProperties(weaponid);
+	if (!weapon) {
+		boError() << "Unknown weaponType " << weaponid << " for unitType " << unitid << endl;
+		return false;
+	}
+ }
 
-	if (type == BosonShot::Bullet || type == BosonShot::Missile) {
-		// Bullet and missile always have properties, others don't
-		if (!e.hasAttribute(QString::fromLatin1("UnitType"))) {
-			boError(260) << k_funcinfo << "missing attribute: UnitType for Shot " << i << endl;
-			continue;
-		}
-		if (!e.hasAttribute(QString::fromLatin1("WeaponType"))) {
-			boError(260) << k_funcinfo << "missing attribute: WeaponType for Shot " << i << endl;
-			continue;
-		}
-		unitid = e.attribute(QString::fromLatin1("UnitType")).toULong(&ok);
-		if (!ok) {
-			boError(260) << k_funcinfo << "Invalid UnitType number for Shot " << i << endl;
-			continue;
-		}
-		weaponid = e.attribute(QString::fromLatin1("WeaponType")).toULong(&ok);
-		if (!ok) {
-			boError(260) << k_funcinfo << "Invalid WeaponType number for Shot " << i << endl;
-			continue;
-		}
-
-		SpeciesTheme* theme = owner->speciesTheme();
-		if (!theme) {
-			boError() << k_funcinfo << "No theme for player " << ownerid << endl;
-			continue;
-		}
-		const UnitProperties* prop = theme->unitProperties(unitid);
-		if (!prop) {
-			boError() << "Unknown unitType " << unitid << endl;
-			return 0;
-		}
-		weapon = prop->weaponProperties(weaponid);
-		if (!weapon) {
-			boError() << "Unknown weaponType " << weaponid << " for unitType " << unitid << endl;
-			return 0;
-		}
-	}
-
-	BosonShot* s;
-	if (type == BosonShot::Bullet) {
-		s = new BosonShotBullet(owner, this, weapon);
-	} else if(type == BosonShot::Missile) {
-		s = new BosonShotMissile(owner, this, weapon);
-	} else if(type == BosonShot::Explosion) {
-		s = new BosonShotExplosion(owner, this);
-	} else if(type == BosonShot::Mine) {
-		s = new BosonShotMine(owner, this, weapon);
-	} else if(type == BosonShot::Bomb) {
-		s = new BosonShotBomb(owner, this, weapon);
-	} else {
-		boError() << k_funcinfo << "Invalid type: " << type << endl;
-		continue;
-	}
-	// Call shot's loading methods
-	if (!s->loadFromXML(e)) {
-		boWarning(260) << k_funcinfo << "Could not load shot " << i << " correctly" << endl;
-		delete s;
-		continue;
-	}
+ BosonShot* s = 0;
+ if (type == BosonShot::Bullet) {
+	s = new BosonShotBullet(owner, this, weapon);
+ } else if(type == BosonShot::Missile) {
+	s = new BosonShotMissile(owner, this, weapon);
+ } else if(type == BosonShot::Explosion) {
+	s = new BosonShotExplosion(owner, this);
+ } else if(type == BosonShot::Mine) {
+	s = new BosonShotMine(owner, this, weapon);
+ } else if(type == BosonShot::Bomb) {
+	s = new BosonShotBomb(owner, this, weapon);
+ } else {
+	boError() << k_funcinfo << "Invalid type: " << type << endl;
+	return false;
+ }
+ // Call shot's loading methods
+ if (!s->loadFromXML(shot)) {
+	boWarning(260) << k_funcinfo << "Could not load shot correctly" << endl;
+	delete s;
+	return false;
  }
  return true;
 }
