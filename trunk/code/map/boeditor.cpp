@@ -95,16 +95,17 @@ boFile *field = new boFile(); /// basic BosonPlayField...
 
 printf("\nMap creation...\n");
 createSeaMap( MAP_WIDTH, MAP_HEIGHT);
-createIsland(12, 15, TRANS_GW, 15, 20);
-createIsland(15, 23, TRANS_GD, 2, 3, true);
-createIsland(30, 15, TRANS_GW);
+createIsland( 12, 15, TRANS_GW, 15, 20);
+createIsland( 15, 23, TRANS_GD, 2, 3, true);
+createIsland( 30, 15, TRANS_GW);
 
 /* fill header */
-field->nbPlayer = 2;
-field->map_width = MAP_WIDTH;
-field->map_height = MAP_HEIGHT;
-field->nbMobiles = sizeof(mobile)/sizeof(mobile[0]);
-field->nbFacilities = sizeof(facility)/sizeof(facility[0]);
+field->nbPlayer		= 2;
+field->map_width	= MAP_WIDTH;
+field->map_height	= MAP_HEIGHT;
+field->nbMobiles	= sizeof(mobile)/sizeof(mobile[0]);
+field->nbFacilities	= sizeof(facility)/sizeof(facility[0]);
+field->worldName	= "Test world 1";
 
 printf("Creation .................Ok\nWrite to disk.............");
 

@@ -29,6 +29,8 @@
 #ifndef BOFILE_H 
 #define BOFILE_H 
 
+#include <qstring.h>
+
 #include "../common/unitType.h"
 #include "../common/groundType.h"
 
@@ -38,6 +40,7 @@ class QFile;
 class mobileMsg_t;
 class facilityMsg_t;
 class Cell;
+//class QString;
 
 
 #define stateAssert(s)								\
@@ -54,11 +57,13 @@ public:
 	boFile();
 virtual	~boFile();
 
+
 	bool	openRead(const char *);
 	bool	openWrite(const char *);
 	bool	Close();
 
 /* header */
+	QString		worldName;
 	int		map_width;
 	int		map_height;
 	int		nbPlayer;
@@ -74,6 +79,8 @@ virtual	~boFile();
 	void	write(facilityMsg_t &f);
 
 	bool	isOk() {return !error; }
+
+
 
 	enum {
 		None,		// nothing has happened
