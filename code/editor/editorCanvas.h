@@ -59,7 +59,7 @@ public:
 
 	/* concerning contents */
 	visualFacility	*getFacility(long key) { return facilities.find(key); }
-	void		changeCell(int x, int y, cell_t c) { deleteCell(x,y); esetCell(x,y,c); }
+	void		changeCell(int x, int y, cell_t c);
 
 public:
 //private:
@@ -67,9 +67,6 @@ public:
 	QIntDict<visualFacility>	facilities;
 
 private:
-	void		deleteCell(int, int);
-	void		esetCell(int, int, cell_t );
-
 	long		key;
 	void		freeRessources();
 	bool		modified;
