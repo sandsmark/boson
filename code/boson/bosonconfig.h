@@ -192,12 +192,6 @@ public:
 	static void saveGameSpeed(int speed, KConfig* conf = 0);
 	static int readGameSpeed(KConfig* conf = 0);
 
-	static void saveCursorMode(CursorMode mode, KConfig* conf = 0);
-	static CursorMode readCursorMode(KConfig* conf = 0);
-
-	static void saveCursorDir(const QString& dir, KConfig* conf = 0);
-	static QString readCursorDir(KConfig* conf = 0);
-
 // below we have config options that are stored in this class (and saved in
 // save())
 public:
@@ -258,6 +252,12 @@ public:
 
 	bool useLight() const { return mUseLight->value(); }
 	void setUseLight(bool l) const { return mUseLight->setValue(l); }
+
+	void setCursorMode(int mode) { mCursorMode->setValue(mode); }
+	int cursorMode() const { return mCursorMode->value(); }
+
+	void setCursorDir(const QString& dir) { mCursorDir->setValue(dir); }
+	QString cursorDir() const { return mCursorDir->value(); }
 
 
 // below we have config values that are *not* stored when quitting boson
@@ -353,6 +353,8 @@ private:
 	BoConfigIntEntry* mMouseWheelShiftAction;
 	BoConfigBoolEntry* mDeactivateWeaponSounds;
 	BoConfigBoolEntry* mUseLight;
+	BoConfigStringEntry* mCursorDir;
+	BoConfigIntEntry* mCursorMode;
 
 	// NOT stored to config file!
 	bool mDisableSound;
