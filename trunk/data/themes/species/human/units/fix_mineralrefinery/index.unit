@@ -24,9 +24,6 @@ UnitHeight=2
 UnitWidth=2
 Weapons=0
 
-[ProductionPlugin]
-ProducerList=2
-
 [Sounds]
 OrderAttack=order_attack
 OrderMove=order_move
