@@ -13,6 +13,11 @@ public:
 
 protected slots:
 	void slotChangeUnitDir();
+	void slotCreateUnit();
+	void slotTypeChanged(int);
+
+protected:
+	void loadConfig(const QString& file);
 
 private:
 	void initDirectories();

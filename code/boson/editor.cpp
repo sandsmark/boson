@@ -139,20 +139,20 @@ void Editor::setupActions()
 // KStdAction::saveAs(this, SLOT(fileSaveAs()), actionCollection());
  KStdAction::quit(kapp, SLOT(quit()), actionCollection());
 
- (void)new KAction(i18n("Save Map as..."), QKeySequence(), this,
+ (void)new KAction(i18n("Save &Map as..."), QKeySequence(), this,
 		  SLOT(slotSaveMapAs()), actionCollection(),
 		  "file_save_map_as");
- (void)new KAction(i18n("Save Scenario as..."), QKeySequence(), this,
+ (void)new KAction(i18n("Save &Scenario as..."), QKeySequence(), this,
 		  SLOT(slotSaveScenarioAs()), actionCollection(), 
 		  "file_save_scenario_as");
 // Debug - no i18n!
  (void)new KAction("Debug", QKeySequence(), d->mBosonWidget, SLOT(slotDebug()), actionCollection(), "game_debug");
 
 
- d->mPlayerAction = new KSelectAction(i18n("Player"), QKeySequence(), actionCollection(), "editor_player");
+ d->mPlayerAction = new KSelectAction(i18n("&Player"), QKeySequence(), actionCollection(), "editor_player");
  connect(d->mPlayerAction, SIGNAL(activated(int)), 
 		d->mBosonWidget, SLOT(slotChangeLocalPlayer(int)));
- d->mBuildAction = new KSelectAction(i18n("Units"), QKeySequence(), actionCollection(), "editor_build");
+ d->mBuildAction = new KSelectAction(i18n("&Units"), QKeySequence(), actionCollection(), "editor_build");
  connect(d->mBuildAction, SIGNAL(activated(int)), 
 		d->mBosonWidget, SLOT(slotEditorConstructionChanged(int)));
 
@@ -186,7 +186,7 @@ void Editor::setupActions()
  }
  d->mBuildAction->setItems(buildList);
 
- (void)new KAction(i18n("Create Custom Unit"), QKeySequence(), this,
+ (void)new KAction(i18n("&Create Custom Unit"), QKeySequence(), this,
 		  SLOT(slotCreateUnit()), actionCollection(),
 		  "editor_create_unit");
 
