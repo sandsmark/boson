@@ -29,3 +29,15 @@ Damage=8
 Speed=0
 DamageRange=1
 HitParticles=2002
+
+[Weapon_1]
+Model=missile.3ds
+Range=6
+Reload=30
+CanShootAtAirUnits=true
+CanShootAtLandUnits=true
+Damage=25
+Speed=15
+DamageRange=2
+HitParticles=2001
+FlyParticles=5001
