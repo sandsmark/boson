@@ -1,7 +1,7 @@
 [Boson Mobile Unit]
 CanGoOnLand=true
 CanGoOnWater=false
-Speed=8
+Speed=3
 
 [Boson Unit]
 Armor=0
@@ -54,4 +54,4 @@ ShootEffects=
 SoundFly=
 SoundHit=hit
 SoundShoot=shoot
-Speed=8
+Speed=3.5

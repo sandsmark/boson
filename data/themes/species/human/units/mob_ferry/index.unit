@@ -1,7 +1,7 @@
 [Boson Mobile Unit]
 CanGoOnLand=false
 CanGoOnWater=true
-Speed=5
+Speed=2
 
 [Boson Unit]
 Armor=0
