@@ -124,6 +124,15 @@ protected:
 				else if(commandWidget()->action() == ActionStop) {
 					text = i18n("Stop");
 				}
+				else if(commandWidget()->action() == ActionFollow) {
+					text = i18n("Follow");
+				}
+				else if(commandWidget()->action() == ActionMine) {
+					text = i18n("Mine");
+				}
+				else if(commandWidget()->action() == ActionRepair) {
+					text = i18n("Repair");
+				}
 				break;
 		}
 		return text;
