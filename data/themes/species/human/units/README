@@ -82,6 +82,10 @@ Producer=Number     - Specifies which kind of factory is able to produce this
                       factories will also depend on the Producer type.
                       The default is the value of "TerrainType" for mobile units
                       and 10 (= command bunker) for facilities.
+SupportMiniMap=bool - If true then this player has a minimap when he has a unit
+                      of this type. The minimap disappears when all units of the
+                      player which have SupportMiniMap=true are gone.
+                      Default is false.
 -------------------------------------------------------------------------------
 
 The entries marked with * are mandatory.
