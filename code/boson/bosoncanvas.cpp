@@ -1224,6 +1224,7 @@ bool BosonCanvas::saveAsXML(QDomElement& root)
 			boError() << k_funcinfo << "Could not save shot " << s << endl;
 			continue;
 		}
+		shot.setAttribute("Owner", (unsigned int)s->owner()->id());
 		shots.appendChild(shot);
 	}
  }

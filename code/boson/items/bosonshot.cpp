@@ -145,7 +145,6 @@ bool BosonShot::saveAsXML(QDomElement& root)
   root.setAttribute("y", y());
   root.setAttribute("z", z());
 
-  root.setAttribute("Owner", (unsigned int)owner()->id());
   root.setAttribute("Type", type());
   if(properties())
   {
