@@ -23,7 +23,7 @@
 #include "bodebug.h"
 #include "bosonbigdisplaybase.h"
 #include "bosoncanvas.h"
-#include "bosonglfont.h"
+#include "bosonfont/bosonglfont.h"
 #include "items/bosonitem.h"
 #include "bosonconfig.h"
 
@@ -317,6 +317,7 @@ void BoGLToolTip::renderToolTip(int cursorX, int cursorY, const int* viewport, B
 	return;
  }
  BO_CHECK_NULL_RET(font);
+ font->begin();
 
  int tipWidth = font->width(tip);
  tipWidth = QMIN(tipWidth, minToolTipWidth);

@@ -24,6 +24,8 @@
 
 #include <qfontmetrics.h>
 
+class BoFont;
+
 /**
  * We store a font in this class with a few other values, like width and height.
  * We can use these cached values in order to prevent loading the metrics in
@@ -56,9 +58,24 @@ public:
 	 **/
 	BosonGLFont(const QString& family);
 	~BosonGLFont();
-	inline QFontMetrics* metrics() const { return mFontMetrics; }
-	inline int height() const { return mFontMetrics->height(); }
+
+	bool loadGLXFont(const QString& family);
+	bool loadTXFFont(const QString& fileName);
+
+	/**
+	 * Start rendering a font. Call this once before you render the fonts -
+	 * it will do necessary stuff, such as setting the display list base and
+	 * binding the texture.
+	 **/
+	void begin();
+
+	int height() const;
 	int width(const QString& text);
+
+	/**
+	 * @return The width of the widest char in this font
+	 **/
+	int widestChar() const;
 
 	/**
 	 * @return The height of the text as it will be rendered by @ref
@@ -69,7 +86,7 @@ public:
 	/**
 	 * @return The base of the OpenGL display lists.
 	 **/
-	inline GLuint displayList() const { return mFontDisplayList; }
+//	inline GLuint displayList() const { return mFontDisplayList; }
 
 	/**
 	 * Warning: this function will change the glRasterPos()! (not
@@ -108,10 +125,10 @@ protected:
 
 	int renderLine(int x, int y, const QString& text, int maxWidth, bool background = true);
 
+	int renderStringInternal(int x, int y, const GLubyte* string, unsigned int len);
+
 private:
-	QFont mFont;
-	QFontMetrics* mFontMetrics;
-	GLuint mFontDisplayList; 
+	BoFont* mFont;
 };
 
 #endif // BOSONGLFONT_H
