@@ -161,24 +161,6 @@ void visualBigDisplay::resizeEvent(QResizeEvent *e)
 }
 
 
-void visualBigDisplay::unSelectAll(void)
-{
-	QIntDictIterator<visualMobUnit> selIt(view->mobSelected);
-
-	/* deal with fix */
-	unSelectFix();
-
-	/* deal with mobiles */
-	for (selIt.toFirst(); selIt;) { 		// ++ not needed, selIt should be increased
-		unSelectMob(selIt.currentKey());	// by the .remove() in unselect
-	}
-	boAssert(view->mobSelected.isEmpty());
-	if (!view->mobSelected.isEmpty()) view->mobSelected.clear();
-
-	view->unSelectAll();
-}
-
-
 void visualBigDisplay::mousePressEvent(QMouseEvent *e)
 {
 	int x, y;
@@ -198,7 +180,7 @@ void visualBigDisplay::mousePressEvent(QMouseEvent *e)
 	if (e->button() & LeftButton) {	
 		/* Control -> multiselection, else... */
 		if (! (e->state()&ControlButton)) {
-			unSelectAll();
+			view->unSelectAll();
 			}
 	
 		QwSpriteFieldGraphic *sfg = view->field->findUnitAt( x, y);
@@ -209,7 +191,7 @@ void visualBigDisplay::mousePressEvent(QMouseEvent *e)
 			view->setSelectionMode( SELECT_RECT);
 			oldX = selectX = e->x();
 			oldY = selectY = e->y();
-			unSelectFix();
+			view->unSelectFix();
 			return;
 		}
 	
@@ -217,9 +199,9 @@ void visualBigDisplay::mousePressEvent(QMouseEvent *e)
 		if ( IS_MOBILE(sfg->rtti())) {
 			visualMobUnit *m = (visualMobUnit *) sfg;
 	
-			unSelectFix();
+			view->unSelectFix();
 			if ((e->state()&ControlButton) && view->mobSelected.find(m->key))
-				unSelectMob(m->key);
+				view->unSelectMob(m->key);
 			else
 				view->selectMob(m->key, m);
 
@@ -229,7 +211,7 @@ void visualBigDisplay::mousePressEvent(QMouseEvent *e)
 
 		if ( IS_FACILITY(sfg->rtti())) {
 			visualFacility *f = (visualFacility *) sfg;
-			unSelectAll();		// anyway 
+			view->unSelectAll();		// anyway 
 			view->selectFix(f);
 
 			view->field->update();
