@@ -599,7 +599,6 @@ void BosonCommandFrame::slotSetAction(Unit* unit)
  kdDebug() << k_funcinfo << endl;
 
  if (d->mSelectedUnit->plugin(UnitPlugin::Production)) {
-	kdDebug() << k_funcinfo << "prod" << endl;
 	ProductionPlugin* production = (ProductionPlugin*)d->mSelectedUnit->plugin(UnitPlugin::Production);
 	if (!d->mSelectedUnit->properties(PluginProperties::Production)) {
 		// must not happen if the units has the production
