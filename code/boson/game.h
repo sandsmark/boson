@@ -43,5 +43,9 @@ typedef unsigned int uint;
 	extern playerSocketState	socketState;
 	extern playerState		State;
 	extern boBuffer			*buffer;
+	
+/* possesions */
+	extern uint			oil;
+	extern uint			mineral;
 
 #endif // BOSON_GAME_H 

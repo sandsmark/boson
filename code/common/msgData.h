@@ -58,6 +58,8 @@ struct destroyedMsg_t	{ int key, x, y; }; // x and y are for checking
 struct constructMsg_t	{ int x, y; union {mobType mob; facilityType fix;} type;}; // where and what
 /* MSG_UNIT_SHOOT */
 struct shootMsg_t	{ int key, target_key; };
+/* MSG_PERSO_RESSOURCES */
+struct ressMsg_t	{ uint oil, mineral; };
 
 typedef union {
 /* Dialog layer */
@@ -73,6 +75,7 @@ typedef union {
 	destroyedMsg_t  destroyed;
 	constructMsg_t  construct;
 	shootMsg_t	shoot;
+	ressMsg_t	ressources;
 /* MSG_TIME */
 	unsigned int	jiffies;
 /* used by  {send,recv}Msg */
@@ -192,9 +195,7 @@ enum bosonMsgTag {
 	MSG_FACILITY_DAMAGE,
 
 /* Player's global management */
-	MSG_PERSO_MONEY,
-	MSG_PERSO_PETROL,
-	MSG_PERSO_WOOD,
+	MSG_PERSO_RESSOURCES,
 	MSG_PERSO_KNOWELDGE,
 	MSG_PERSO_,
 

@@ -356,12 +356,8 @@ switch(tag) {
 			confirmedJiffies = 0 ; /* nobody until now has confirmed this new jiffies */
 
 			/* tell everybody, and flush outgoing buffers */
-			data->jiffies = jiffies;
-			for(i=0; i<nbPlayer; i++) {
-				boAssert(player[i].lastConfirmedJiffies == (jiffies-1));
-				sendMsg(player[i].buffer, MSG_TIME_INCREASE, sizeof(data->jiffies), data);
-				player[i].buffer->flush();
-				}
+			for(i=0; i<nbPlayer; i++) player[i].flush();
+
 			/* log */
 			logf(LOG_COMM, "Jiffies++ : %u", jiffies);
 			}

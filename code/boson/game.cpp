@@ -38,3 +38,7 @@ playerSocketState	socketState	= PSS_INIT;
 playerState		State		= PS_INIT;
 boBuffer		*buffer		= 0l;
 
+/* possesions */
+uint			oil		= 0;
+uint			mineral		= 0;
+
