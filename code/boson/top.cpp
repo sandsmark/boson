@@ -274,7 +274,8 @@ void TopWidget::initBoson()
  // this signal gets emitted when starting a game (new games as well as loading
  // games). the admin sends the map and all clients (including admin) will
  // receive and use it.
- connect(boGame, SIGNAL(signalInitMap(const QByteArray&)), d->mStarting, SLOT(slotReceiveMap(const QByteArray&)));
+ connect(boGame, SIGNAL(signalInitMap(const QByteArray&)),
+		d->mStarting, SLOT(slotReceiveMap(const QByteArray&)));
 
 
  // for editor (new maps)
@@ -647,27 +648,27 @@ void TopWidget::reinitGame()
  d->mStarting = new BosonStarting(this); // manages startup of games
  connect(d->mStarting, SIGNAL(signalAssignMap()), this, SLOT(slotAssignMap()));
  connect(d->mStarting, SIGNAL(signalLoadingReset()),
-			d->mStartup, SLOT(slotLoadingReset()));
+		d->mStartup, SLOT(slotLoadingReset()));
  connect(d->mStarting, SIGNAL(signalLoadingSetAdmin(bool)),
-			d->mStartup, SLOT(slotLoadingSetAdmin(bool)));
+		d->mStartup, SLOT(slotLoadingSetAdmin(bool)));
  connect(d->mStarting, SIGNAL(signalLoadingSetLoading(bool)),
-			d->mStartup, SLOT(slotLoadingSetLoading(bool)));
+		d->mStartup, SLOT(slotLoadingSetLoading(bool)));
  connect(d->mStarting, SIGNAL(signalLoadingType(int)),
-			d->mStartup, SLOT(slotLoadingType(int)));
+		d->mStartup, SLOT(slotLoadingType(int)));
  connect(d->mStarting, SIGNAL(signalLoadingPlayersCount(int)),
-			d->mStartup, SLOT(slotLoadingPlayersCount(int)));
+		d->mStartup, SLOT(slotLoadingPlayersCount(int)));
  connect(d->mStarting, SIGNAL(signalLoadingPlayer(int)),
-			d->mStartup, SLOT(slotLoadingPlayer(int)));
+		d->mStartup, SLOT(slotLoadingPlayer(int)));
  connect(d->mStarting, SIGNAL(signalLoadingUnitsCount(int)),
-			d->mStartup, SLOT(slotLoadingUnitsCount(int)));
+		d->mStartup, SLOT(slotLoadingUnitsCount(int)));
  connect(d->mStarting, SIGNAL(signalLoadingUnit(int)),
-			d->mStartup, SLOT(slotLoadingUnit(int)));
+		d->mStartup, SLOT(slotLoadingUnit(int)));
  connect(d->mStarting, SIGNAL(signalLoadingShowProgressBar(bool)),
-			d->mStartup, SLOT(slotLoadingShowProgressBar(bool)));
+		d->mStartup, SLOT(slotLoadingShowProgressBar(bool)));
+ connect(d->mStarting, SIGNAL(signalStartingFailed()),
+		this, SLOT(slotStartingFailed()));
 
  initBoson();
- // do NOT add a player here! we do that in newgame widget (using a signal)
-// initPlayer();
  initPlayField();
 
  d->mActionStatusbar->setChecked(false);
@@ -1067,6 +1068,15 @@ void TopWidget::slotNewGame(KCmdLineArgs* args)
 	return;
  }
  d->mStartup->slotNewGame(args);
+}
+
+void TopWidget::slotStartingFailed()
+{
+ boDebug() << k_funcinfo << endl;
+
+ // TODO: display reason
+ KMessageBox::sorry(this, i18n("Game starting failed"));
+ slotGameOver();
 }
 
 void TopWidget::slotStartEditor(KCmdLineArgs* args)

@@ -222,6 +222,7 @@ protected slots:
 	void slotSaveGame();
 
 	void slotGameStarted();
+	void slotStartingFailed();
 
 	/**
 	 * See @ref Boson::signalPlayFieldChanged.
