@@ -76,7 +76,12 @@ public:
 	 * necessarily to (x,y) !)
 	 * @param x The left position of the text
 	 * @param y The position directly <em>above</em> the text. This function
-	 * won't render text above y, but below only.
+	 * won't render text above y, but below only. This is in OpenGL
+	 * window-coordinates, that means that 0 is bottom.
+	 * @param maxWidth The maximal amount of space the text is allowed to
+	 * take. Text that is wider than this is automatically wrapped. If you
+	 * don't have special requirements for your text you should simply use
+	 * @ref BosonGLWidget::width - @p x
 	 * @param background If TRUE this will add an alpha blended background
 	 * of the text so that it is even visible if the background color of the
 	 * screen is the same as the text color.

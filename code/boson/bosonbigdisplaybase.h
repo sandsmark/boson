@@ -368,6 +368,7 @@ protected:
 
 	void createRenderItemList();
 
+	void renderItems();
 	void renderCursor();
 	void renderSelectionRect();
 	void renderPlacementPreview();
@@ -386,9 +387,13 @@ protected:
 	 **/
 	void renderParticles();
 
-	void renderMatrix(int x, int y, const BoMatrix* matrix, const QString& text);
-
-	void renderString(int x, int y, const QString& text);
+	/**
+	 * @param y The <em>top</em> of the text to-be rendered. See also @ref
+	 * BosonGLFont::renderText
+	 * @return The height of the rendered text (see @ref
+	 * BosonGLFont::renderText)
+	 **/
+	int renderMatrix(int x, int y, const BoMatrix* matrix, const QString& text);
 
 	virtual void enterEvent(QEvent*);
 	virtual void leaveEvent(QEvent*);

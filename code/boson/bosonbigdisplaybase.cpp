@@ -866,6 +866,13 @@ void BosonBigDisplayBase::paintGL()
 	boError() << k_funcinfo << "before unit rendering" << endl;
  }
 
+ boProfiling->renderUnits(true);
+ d->mRenderedItems = 0;
+ d->mRenderedModelVertices = 0;
+ d->mRenderedCellVertices = 0;
+ d->mRenderedParticleVertices = 0;
+ d->mRenderedOtherVertices = 0;
+
  if (boConfig->wireFrames()) {
 	glDisable(GL_TEXTURE_2D);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -878,86 +885,15 @@ void BosonBigDisplayBase::paintGL()
 	glEnable(GL_NORMALIZE);
  }
 
- boProfiling->renderUnits(true);
- d->mRenderedItems = 0;
- d->mRenderedModelVertices = 0;
- d->mRenderedCellVertices = 0;
- d->mRenderedParticleVertices = 0;
- d->mRenderedOtherVertices = 0;
-
  // AB: these are problematic for triangle strips! they need to be in a special
  // format to make culling work!
  glEnable(GL_CULL_FACE);
  glCullFace(GL_BACK);
-
  glEnableClientState(GL_VERTEX_ARRAY);
  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
- // we build the list of items that will be rendered independantly from actually
- // rendering them.
- // this adds overhead of an additional loop, but a) is better design (this task
- // isn't so speed critical) and b) allows us e.g. to sort or to use separate
- // loops for rendering items and rendering selection rects. short: it is
- // better.
- createRenderItemList(); // AB: this is very fast. < 1.5ms on experimental5 for me
- BoItemList::Iterator it = d->mRenderItemList->begin();
- for (; it != d->mRenderItemList->end(); ++it) {
-	BosonItem* item = *it;
+ renderItems();
 
-	// FIXME: can't we use BoVector3 and it's conversion methods here?
-	GLfloat x = (item->x() + item->width() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE;
-	GLfloat y = -((item->y() + item->height() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE);
-	GLfloat z = item->z(); // this is already in the correct format!
-
-	// AB: note units are rendered in the *center* point of their
-	// width/height.
-	// but concerning z-position they are rendered from bottom to top!
-
-	glTranslatef(x, y, z);
-	glPushMatrix();
-	glRotatef(-(item->rotation()), 0.0, 0.0, 1.0);
-	glRotatef(item->xRotation(), 1.0, 0.0, 0.0);
-	glRotatef(item->yRotation(), 0.0, 1.0, 0.0);
-
-	// FIXME: performance: we could create a displaylist that contains the selectbox and simply change item->displayList()
-	// when the item is selected/unselected
-	// Units will be tinted accordingly to how much health they have left
-	if (RTTI::isUnit(item->rtti())) {
-		if (((Unit*)item)->isDestroyed()) {
-			glColor3f(0.4f, 0.4f, 0.4f);
-		} else {
-			float f = ((Unit*)item)->health() / (float)((Unit*)item)->unitProperties()->health() * 0.3;
-			glColor3f(0.7f + f, 0.7f + f, 0.7f + f);
-		}
-	} else {
-		glColor3ub(255, 255, 255);
-	}
-	d->mRenderedModelVertices += item->renderItem();
-	glColor3ub(255, 255, 255);
-	glPopMatrix();
-
-	if (item->isSelected()) {
-		// FIXME: performance: create a display lists in the SelectBox which also contains the scale!
-		// FIXME: should selection boxes be drawn with lighting disabled?
-		GLfloat w = ((float)item->width()) * BO_GL_CELL_SIZE / BO_TILE_SIZE;
-		GLfloat h = ((float)item->height()) * BO_GL_CELL_SIZE / BO_TILE_SIZE;
-		GLfloat depth = item->glDepthMultiplier();
-		glPushMatrix();
-		if (w != 1.0 || h != 1.0 || depth != 1.0) {
-			glScalef(w, h, depth);
-		}
-		if (boConfig->alignSelectionBoxes()) {
-			glRotatef(camera()->rotation(), 0.0, 0.0, 1.0);
-		}
-		glCallList(item->selectBox()->displayList());
-		d->mRenderedOtherVertices += item->selectBox()->verticesCount();
-		glPopMatrix();
-	}
-
-	glTranslatef(-x, -y, -z);
- }
- d->mRenderedItems += d->mRenderItemList->count();
- d->mRenderItemList->clear();
  glDisableClientState(GL_VERTEX_ARRAY);
  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
  glDisable(GL_CULL_FACE);
@@ -1047,6 +983,75 @@ void BosonBigDisplayBase::paintGL()
  if (d->mUpdateInterval) {
 	d->mUpdateTimer.start(d->mUpdateInterval);
  }
+}
+
+void BosonBigDisplayBase::renderItems()
+{
+ // we build the list of items that will be rendered independantly from actually
+ // rendering them.
+ // this adds overhead of an additional loop, but a) is better design (this task
+ // isn't so speed critical) and b) allows us e.g. to sort or to use separate
+ // loops for rendering items and rendering selection rects. short: it is
+ // better.
+ createRenderItemList(); // AB: this is very fast. < 1.5ms on experimental5 for me
+ BoItemList::Iterator it = d->mRenderItemList->begin();
+ for (; it != d->mRenderItemList->end(); ++it) {
+	BosonItem* item = *it;
+
+	// FIXME: can't we use BoVector3 and it's conversion methods here?
+	GLfloat x = (item->x() + item->width() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE;
+	GLfloat y = -((item->y() + item->height() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE);
+	GLfloat z = item->z(); // this is already in the correct format!
+
+	// AB: note units are rendered in the *center* point of their
+	// width/height.
+	// but concerning z-position they are rendered from bottom to top!
+
+	glTranslatef(x, y, z);
+	glPushMatrix();
+	glRotatef(-(item->rotation()), 0.0, 0.0, 1.0);
+	glRotatef(item->xRotation(), 1.0, 0.0, 0.0);
+	glRotatef(item->yRotation(), 0.0, 1.0, 0.0);
+
+	// FIXME: performance: we could create a displaylist that contains the selectbox and simply change item->displayList()
+	// when the item is selected/unselected
+	// Units will be tinted accordingly to how much health they have left
+	if (RTTI::isUnit(item->rtti())) {
+		if (((Unit*)item)->isDestroyed()) {
+			glColor3f(0.4f, 0.4f, 0.4f);
+		} else {
+			float f = ((Unit*)item)->health() / (float)((Unit*)item)->unitProperties()->health() * 0.3;
+			glColor3f(0.7f + f, 0.7f + f, 0.7f + f);
+		}
+	} else {
+		glColor3ub(255, 255, 255);
+	}
+	d->mRenderedModelVertices += item->renderItem();
+	glColor3ub(255, 255, 255);
+	glPopMatrix();
+
+	if (item->isSelected()) {
+		// FIXME: performance: create a display lists in the SelectBox which also contains the scale!
+		// FIXME: should selection boxes be drawn with lighting disabled?
+		GLfloat w = ((float)item->width()) * BO_GL_CELL_SIZE / BO_TILE_SIZE;
+		GLfloat h = ((float)item->height()) * BO_GL_CELL_SIZE / BO_TILE_SIZE;
+		GLfloat depth = item->glDepthMultiplier();
+		glPushMatrix();
+		if (w != 1.0 || h != 1.0 || depth != 1.0) {
+			glScalef(w, h, depth);
+		}
+		if (boConfig->alignSelectionBoxes()) {
+			glRotatef(camera()->rotation(), 0.0, 0.0, 1.0);
+		}
+		glCallList(item->selectBox()->displayList());
+		d->mRenderedOtherVertices += item->selectBox()->verticesCount();
+		glPopMatrix();
+	}
+
+	glTranslatef(-x, -y, -z);
+ }
+ d->mRenderedItems += d->mRenderItemList->count();
+ d->mRenderItemList->clear();
 }
 
 void BosonBigDisplayBase::renderPlacementPreview()
@@ -1172,87 +1177,72 @@ void BosonBigDisplayBase::renderSelectionRect()
 
 void BosonBigDisplayBase::renderText()
 {
- glListBase(d->mDefaultFont->displayList()); // AB: this is a redundant call, since we don't change it somewhere in paintGL(). but we might support different fonts one day and so we need it anyway.
+ glListBase(d->mDefaultFont->displayList());
  const int border = 5;
- const int alphaborder = 2;
 
-// first the resource display
- // AB: we can avoid these calls to i18n() here! e.g. cache it somewhere and
- // update every 5 seconds or so (maybe less)
- // remember that painGL() is very speed sensitive!
+ // first the resource display
  QString minerals = i18n("Minerals: %1").arg(localPlayer()->minerals());
  QString oil = i18n("Oil:      %1").arg(localPlayer()->oil());
+ QString text = QString::fromLatin1("%1\n%2").arg(minerals).arg(oil);
+
  int w = QMAX(d->mDefaultFont->width(minerals), d->mDefaultFont->width(oil));
  int x = d->mViewport[2] - w - border;
- int y = d->mViewport[3] - d->mDefaultFont->height() - border;
-
- // Alpha-blended rectangle
- glEnable(GL_BLEND);
- glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
- glRecti(x - alphaborder, y + d->mDefaultFont->height() + alphaborder,
-		x + w + alphaborder,
-		y - d->mDefaultFont->height() - alphaborder); // y is at bottom of first line, subtract fontheight and we're at the bottom of 2nd line
- glColor3ub(255, 255, 255);
- glRasterPos2i(x, y);
- glCallLists(minerals.length(), GL_UNSIGNED_BYTE, (GLubyte*)minerals.latin1());
- y -= d->mDefaultFont->height();
- glRasterPos2i(x, y);
- glCallLists(oil.length(), GL_UNSIGNED_BYTE, (GLubyte*)oil.latin1());
+ int y = d->mViewport[3] - border;
+ y -= d->mDefaultFont->renderText(x, y, text, width() - x);
 
  if (d->mDebugMapCoordinates) {
-	QString s = QString::fromLatin1("World: (%1,%2,%2) Canvas: (%4,%5) Window: %6,%7").
+	QString world = QString::fromLatin1("World:  (%1,%2,%2)").
 			arg((double)d->mDebugMapCoordinatesX, 6, 'f', 3).
 			arg((double)d->mDebugMapCoordinatesY, 6, 'f', 3).
-			arg((double)d->mDebugMapCoordinatesZ, 6, 'f', 3).
+			arg((double)d->mDebugMapCoordinatesZ, 6, 'f', 3);
+	QString canvas = QString::fromLatin1("Canvas: (%1,%2)").
 			arg(d->mCanvasPos.x(), 4, 10).
-			arg(d->mCanvasPos.y(), 4, 10).
+			arg(d->mCanvasPos.y(), 4, 10);
+	QString window = QString::fromLatin1("Window: %1,%2").
 			arg(mapFromGlobal(QCursor::pos()).x(), 4, 10).
 			arg(mapFromGlobal(QCursor::pos()).y(), 4, 10);
-	w = d->mDefaultFont->width(s);
+	QString text = QString::fromLatin1("%1\n%2\n%3").arg(world).arg(canvas).arg(window);
+	int w1 = d->mDefaultFont->width(world);
+	int w2 = d->mDefaultFont->width(canvas);
+	int w3 = d->mDefaultFont->width(window);
+	if (w1 >= w2) {
+		w = w1;
+	}
+	if (w3 > w) {
+		w = w3;
+	}
 	x = d->mViewport[2] - border - w;
 	y -= d->mDefaultFont->height();
-	y -= alphaborder * 2;
-
-	glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
-	glRecti(x - alphaborder, y + d->mDefaultFont->height() + alphaborder,
-			x + w + alphaborder,
-			y - alphaborder);
-	glDisable(GL_BLEND);
-
-	glColor3ub(255, 255, 255);
-	glRasterPos2i(x, y);
-	glCallLists(s.length(), GL_UNSIGNED_BYTE, (GLubyte*)s.latin1());
+	d->mDefaultFont->renderText(x, y, text, d->mViewport[2] - x);
  }
  if (d->mDebugMatrices) {
 	int x = border;
 	int y = d->mViewport[3] - border;
 	BoMatrix model(d->mModelviewMatrix);
 	BoMatrix proj(d->mProjectionMatrix);
-	renderMatrix(x, y, &model, i18n("Modelview matrix:"));
-	y -= (5 * d->mDefaultFont->height() + 20);
-	renderMatrix(x, y, &proj, i18n("Projection matrix:"));
-	y -= (5 * d->mDefaultFont->height() + 20);
+	y -= renderMatrix(x, y, &model, i18n("Modelview matrix:"));
+	y -= d->mDefaultFont->height();
+	y -= renderMatrix(x, y, &proj, i18n("Projection matrix:"));
 
 	proj.multiply(model.data());
-	renderMatrix(x, y, &proj, i18n("Projection * Modelview:"));
-	y -= (5 * d->mDefaultFont->height() + 20);
+	y -= renderMatrix(x, y, &proj, i18n("Projection * Modelview:"));
+	y -= d->mDefaultFont->height();
 
 	BoMatrix inverse;
 	// AB: we could calculate this for mapCoordinates whenever camera
 	// changes!
 	proj.invert(&inverse); // invert (proj*model)
-	renderMatrix(x, y, &inverse, i18n("(Projection * Modelview)^(-1):"));
-	y -= (5 * d->mDefaultFont->height() + 20);
+	y -= renderMatrix(x, y, &inverse, i18n("(Projection * Modelview)^(-1):"));
+	y -= d->mDefaultFont->height();
 
 	BoMatrix identity(inverse);
 	identity.multiply(proj.data());
-	renderMatrix(x, y, &identity, i18n("Should be close to identity:"));
-	y -= (5 * d->mDefaultFont->height() + 20);
-
+	y -= renderMatrix(x, y, &identity, i18n("Should be close to identity:"));
+	y -= d->mDefaultFont->height();
 
 
 	// some kind of d->mDebugMapCoordinates... but we do our own
-	// calculations instead of glUnProject.
+	// calculations instead of gluUnProject.
 	QPoint widgetPos = mapFromGlobal(QCursor::pos());
 	GLint realy = d->mViewport[3] - (GLint)widgetPos.y() - 1;
 	GLfloat depth = 0.0f;
@@ -1285,79 +1275,63 @@ void BosonBigDisplayBase::renderText()
 			arg(result[0] / result[3]).
 			arg(result[1] / result[3]).
 			arg(result[2] / result[3]);
-	glEnable(GL_BLEND);
-	glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
-	glRecti(x, y + d->mDefaultFont->height(),
-			x + d->mDefaultFont->width(text), y);
-	glRecti(x, y,
-			x + d->mDefaultFont->width(resultText), y - d->mDefaultFont->height());
-	glRecti(x, y - d->mDefaultFont->height(),
-			x + d->mDefaultFont->width(realCoords), y - 2 * d->mDefaultFont->height());
-	glColor3ub(255, 255, 255);
-	glDisable(GL_BLEND);
-	glRasterPos2i(x, y);
-	glCallLists(text.length(), GL_UNSIGNED_BYTE, (GLubyte*)text.latin1());
-	y -= d->mDefaultFont->height();
-	glRasterPos2i(x, y);
-	glCallLists(resultText.length(), GL_UNSIGNED_BYTE, (GLubyte*)resultText.latin1());
-	y -= d->mDefaultFont->height();
-	glRasterPos2i(x, y);
-	glCallLists(realCoords.length(), GL_UNSIGNED_BYTE, (GLubyte*)realCoords.latin1());
+
+	y -= d->mDefaultFont->renderText(x, y, text, width() - x);
+	y -= d->mDefaultFont->renderText(x, y, resultText, width() - x);
+	y -= d->mDefaultFont->renderText(x, y, realCoords, width() - x);
  }
  x = border;
  y = d->mViewport[3] - border;
  if (d->mDebugItemWorks) {
 	QMap<int, int> workCounts = *canvas()->workCounts();
-	renderString(x, y, i18n("Item work statistics:"));
-	y -= d->mDefaultFont->height();
-	renderString(x, y, i18n("Total items: %1").arg(canvas()->allItemsCount()));
-	y -= d->mDefaultFont->height();
-	renderString(x, y, i18n("-1 (items): %1").arg(workCounts[-1]));
-	y -= d->mDefaultFont->height();
-	renderString(x, y, i18n("Doing nothing:     %1").arg(workCounts[(int)UnitBase::WorkNone]));
-	y -= d->mDefaultFont->height();
-	renderString(x, y, i18n("Moving or turning: %1").arg(workCounts[(int)UnitBase::WorkMove] +
-			workCounts[(int)UnitBase::WorkTurn]));
-	y -= d->mDefaultFont->height();
-	renderString(x, y, i18n("Attacking:         %1").arg(workCounts[(int)UnitBase::WorkAttack]));
-	y -= d->mDefaultFont->height();
-	renderString(x, y, i18n("Other:             %1").arg(workCounts[(int)UnitBase::WorkConstructed] +
-			workCounts[(int)UnitBase::WorkDestroyed] + workCounts[(int)UnitBase::WorkFollow] +
-			workCounts[(int)UnitBase::WorkPlugin]));
-	y -= d->mDefaultFont->height();
+	QString text;
+	text += i18n("Item work statistics:\n");
+	text += i18n("Total items: %1\n").arg(canvas()->allItemsCount());
+	text += i18n("-1 (items): %1\n").arg(workCounts[-1]),
+	text += i18n("Doing nothing:     %1\n").arg(workCounts[(int)UnitBase::WorkNone]);
+	text += i18n("Moving or turning: %1\n").
+			arg(workCounts[(int)UnitBase::WorkMove] +
+			workCounts[(int)UnitBase::WorkTurn]);
+	text += i18n("Attacking:         %1\n").
+			arg(workCounts[(int)UnitBase::WorkAttack]);
+	text += i18n("Other:             %1\n").
+			arg(workCounts[(int)UnitBase::WorkConstructed] +
+			workCounts[(int)UnitBase::WorkDestroyed] +
+			workCounts[(int)UnitBase::WorkFollow] +
+			workCounts[(int)UnitBase::WorkPlugin]);
+
+	y -= d->mDefaultFont->renderText(x, y, text, width() - x);
 	y -= d->mDefaultFont->height();
  }
  if (d->mDebugCamera) {
-	renderString(x, y, i18n("Camera:"));
-	y -= d->mDefaultFont->height();
 	const BoVector3 lookAt = camera()->lookAt();
-	renderString(x, y, i18n("LookAt: (%1; %2; %3)").arg(lookAt.x()).arg(lookAt.y()).arg(lookAt.z()));
-	y -= d->mDefaultFont->height();
-	renderString(x, y, i18n("Radius: %1").arg(camera()->radius()));
-	y -= d->mDefaultFont->height();
-	renderString(x, y, i18n("Height: %1").arg(camera()->z()));
-	y -= d->mDefaultFont->height();
-	renderString(x, y, i18n("Rotation: %1").arg(camera()->rotation()));
-	y -= d->mDefaultFont->height();
+	QString text;
+	text += i18n("Camera:\n");
+	text += i18n("LookAt: (%1; %2; %3)\n").arg(lookAt.x()).
+			arg(lookAt.y()).arg(lookAt.z());
+	text += i18n("Radius: %1\n").arg(camera()->radius());
+	text += i18n("Height: %1\n").arg(camera()->z());
+	text += i18n("Rotation: %1\n").arg(camera()->rotation());
+
+	y -= d->mDefaultFont->renderText(x, y, text, width() - x);
 	y -= d->mDefaultFont->height();
  }
  if (d->mDebugRenderCounts) {
-	renderString(x, y, i18n("Items rendered: %1").arg(d->mRenderedItems));
-	y -= d->mDefaultFont->height();
-	renderString(x, y, i18n("Cells rendered: %1").arg(d->mRenderedCells));
-	y -= d->mDefaultFont->height();
-	renderString(x, y, i18n("Vertices:  total: %1").arg(d->mRenderedModelVertices + d->mRenderedCellVertices +
-			d->mRenderedParticleVertices + d->mRenderedOtherVertices));
-	y -= d->mDefaultFont->height();
+	QString text;
+	text += i18n("Items rendered: %1\n").arg(d->mRenderedItems);
+	text += i18n("Cells rendered: %1\n").arg(d->mRenderedCells);
+	text += i18n("Vertices:  total: %1\n").
+			arg(d->mRenderedModelVertices + d->mRenderedCellVertices +
+			d->mRenderedParticleVertices + d->mRenderedOtherVertices);
+	y -= d->mDefaultFont->renderText(x, y, text, width() - x);
+
 	x += 25;
-	renderString(x, y, i18n("Models: %1").arg(d->mRenderedModelVertices));
-	y -= d->mDefaultFont->height();
-	renderString(x, y, i18n("Cells: %1").arg(d->mRenderedCellVertices));
-	y -= d->mDefaultFont->height();
-	renderString(x, y, i18n("Particles: %1").arg(d->mRenderedParticleVertices));
-	y -= d->mDefaultFont->height();
-	renderString(x, y, i18n("Other: %1").arg(d->mRenderedOtherVertices));
-	y -= d->mDefaultFont->height();
+	text = QString::null;
+	text += i18n("Models: %1\n").arg(d->mRenderedModelVertices);
+	text += i18n("Cells: %1\n").arg(d->mRenderedCellVertices);
+	text += i18n("Particles: %1\n").arg(d->mRenderedParticleVertices);
+	text += i18n("Other: %1\n").arg(d->mRenderedOtherVertices);
+	y -= d->mDefaultFont->renderText(x, y, text, width() - x);
 	x -= 25;
  }
 
@@ -1375,9 +1349,6 @@ void BosonBigDisplayBase::renderText()
 	QPoint pos = mapFromGlobal(QCursor::pos());
 	d->mToolTips->renderToolTip(pos.x(), pos.y(), d->mViewport, d->mDefaultFont);
  }
-
- glColor3ub(255, 255, 255);
- glDisable(GL_BLEND);
 }
 
 void BosonBigDisplayBase::renderCells()
@@ -1492,15 +1463,11 @@ void BosonBigDisplayBase::renderCells()
  }
 }
 
+
 void BosonBigDisplayBase::renderParticles()
 {
- //struct timeval start, end, tmvisiblecheck, tmsort;
- //gettimeofday(&start, 0);
-
  // Return if there aren't any particle systems
  if (canvas()->particleSystemsCount() == 0) {
-	//gettimeofday(&end, 0);
-	//boDebug(150) << k_funcinfo << "Returning (no particle systems); time elapsed: " << end.tv_usec - start.tv_usec << " us" << endl;
 	return;
  }
 
@@ -1525,12 +1492,9 @@ void BosonBigDisplayBase::renderParticles()
 		}
 	}
  }
- //gettimeofday(&tmvisiblecheck, 0);
 
  // Return if none of particle systems are visible
  if (visible.count() == 0) {
-	//gettimeofday(&end, 0);
-	//boDebug(150) << k_funcinfo << "Returning (no visible particle systems); time elapsed: " << end.tv_usec - start.tv_usec << " us" << endl;
 	return;
  }
 
@@ -1566,8 +1530,6 @@ void BosonBigDisplayBase::renderParticles()
 
 	// If there's no particles, return
 	if (d->mParticleList.count() == 0) {
-		//gettimeofday(&end, 0);
-		//boDebug(150) << k_funcinfo << "Returning (no visible particles); time elapsed: " << end.tv_usec - start.tv_usec << " us" << endl;
 		return;
 	}
 
@@ -1575,7 +1537,6 @@ void BosonBigDisplayBase::renderParticles()
 	d->mParticleList.sort();
 	d->mParticlesDirty = false;
  }
- //gettimeofday(&tmsort, 0);
 
  /// Draw particles
  glEnable(GL_DEPTH_TEST);
@@ -1648,14 +1609,9 @@ void BosonBigDisplayBase::renderParticles()
  glDepthMask(GL_TRUE);
  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
  glDisable(GL_BLEND);
- //gettimeofday(&end, 0);
- //boDebug(150) << k_funcinfo << "Returning (all particles drawn); time elapsed: " << end.tv_usec - start.tv_usec << " us" << endl;
- //boDebug(150) << k_funcinfo << "        Visibility check:  " << tmvisiblecheck.tv_usec - start.tv_usec << " us" << endl;
- //boDebug(150) << k_funcinfo << "        Particles sorting: " << tmsort.tv_usec - tmvisiblecheck.tv_usec << " us (wassorted: " << wassorted << ")" << endl;
- //boDebug(150) << k_funcinfo << "        Particles drawing: " << end.tv_usec - tmsort.tv_usec << " us" << endl;
 }
 
-void BosonBigDisplayBase::renderMatrix(int x, int y, const BoMatrix* matrix, const QString& text)
+int BosonBigDisplayBase::renderMatrix(int x, int y, const BoMatrix* matrix, const QString& text)
 {
  y -= d->mDefaultFont->height(); // y is now at the bottom of the first line
  glListBase(d->mDefaultFont->displayList());
@@ -1670,45 +1626,9 @@ void BosonBigDisplayBase::renderMatrix(int x, int y, const BoMatrix* matrix, con
 			arg(matrix->data()[i + 12], 6, 'f', 3);
 	w = QMAX(w, d->mDefaultFont->width(lines[i]));
  }
- glEnable(GL_BLEND);
- glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
- glRecti(x, y + d->mDefaultFont->height(),
-		x + d->mDefaultFont->width(text),
-		y);
- glRecti(x, y,
-		x + w,
-		y - 4 * d->mDefaultFont->height());
-
- glColor3ub(255, 255, 255);
-
- glRasterPos2i(x, y);
- glCallLists(text.length(), GL_UNSIGNED_BYTE, (GLubyte*)text.latin1());
- y -= d->mDefaultFont->height();
-
-
- for (int i = 0; i < 4; i++) {
-	glRasterPos2i(x, y);
-	glCallLists(lines[i].length(), GL_UNSIGNED_BYTE, (GLubyte*)lines[i].latin1());
-	y -= d->mDefaultFont->height();
- }
- glDisable(GL_BLEND);
+ QString string = QString::fromLatin1("%1\n%2\n%3\n%4\n%5").arg(text).arg(lines[0]).arg(lines[1]).arg(lines[2]).arg(lines[3]);
+ return d->mDefaultFont->renderText(x, y, string, width() - x);
 }
-
-void BosonBigDisplayBase::renderString(int x, int y, const QString& text)
-{
- y -= d->mDefaultFont->height(); // y is now at the bottom of the first line
- glEnable(GL_BLEND);
- glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
- glRecti(x, y + d->mDefaultFont->height(),
-		x + d->mDefaultFont->width(text),
-		y);
- glColor3ub(255, 255, 255);
- glRasterPos2i(x, y);
- glCallLists(text.length(), GL_UNSIGNED_BYTE, (GLubyte*)text.latin1());
- glDisable(GL_BLEND);
-}
-
-
 
 // one day we might support swapping LMB and RMB so let's use defines already to
 // make that easier.
