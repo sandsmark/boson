@@ -641,14 +641,10 @@ void UnitProperties::clearPlugins(bool deleteweapons)
  } else {
 	d->mPlugins.clear();
  }
- if (mMobileProperties) {
-	delete mMobileProperties;
-	mMobileProperties = 0;
- }
- if (mFacilityProperties) {
-	delete mFacilityProperties;
-	mFacilityProperties = 0;
- }
+ delete mMobileProperties;
+ mMobileProperties = 0;
+ delete mFacilityProperties;
+ mFacilityProperties = 0;
 }
 
 void UnitProperties::createMobileProperties()
@@ -776,14 +772,10 @@ void UnitProperties::reset()
  mExplodingDamage = 0;
  mExplodingDamageRange = 0;
  // Delete old mobile/facility properties
- if (mMobileProperties) {
-	delete mMobileProperties;
-	mMobileProperties = 0;
- }
- if (mFacilityProperties) {
-	delete mFacilityProperties;
-	mFacilityProperties = 0;
- }
+ delete mMobileProperties;
+ mMobileProperties = 0;
+ delete mFacilityProperties;
+ mFacilityProperties = 0;
  // Mobile stuff (because unit is mobile by default)
  createMobileProperties();
  mMobileProperties->mSpeed = 0; // Hmm, this doesn't make any sense IMO
