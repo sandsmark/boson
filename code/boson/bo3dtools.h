@@ -180,6 +180,11 @@ class BoVector3
     }
 
     /**
+     * @return The cross product of v and w.
+     **/
+    static BoVector3 crossProduct(const BoVector3& v, const BoVector3& w);
+
+    /**
      * @return A pointer to the internal array.
      **/
     inline const GLfloat* data() const { return mData; }
@@ -241,9 +246,12 @@ class BoVector3
     }
 
     /**
-     * @return Cross product of this vector and v
+     * @return See @ref crossProduct. Cross product of this vector with @p v
      **/
-    BoVector3 operator*(const BoVector3& v) const;
+    inline BoVector3 operator*(const BoVector3& v) const
+    {
+      return crossProduct(*this, v);
+    }
 
     /**
      * @return A copy of this vector, scaled by 1 / @p f

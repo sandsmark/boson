@@ -141,12 +141,12 @@ float BoVector3::length() const
   return sqrt(dotProduct());
 }
 
-BoVector3 BoVector3::operator*(const BoVector3& v) const
+BoVector3 BoVector3::crossProduct(const BoVector3& v, const BoVector3& w)
 {
   BoVector3 r;
-  r.setX((y() * v.z()) - (z() * v.y()));
-  r.setX((z() * v.x()) - (x() * v.z()));
-  r.setX((x() * v.y()) - (y() * v.x()));
+  r.setX((v.y() * w.z()) - (v.z() * w.y()));
+  r.setY((v.z() * w.x()) - (v.x() * w.z()));
+  r.setZ((v.x() * w.y()) - (v.y() * w.x()));
   return r;
 }
 
