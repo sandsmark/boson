@@ -4,7 +4,7 @@ TerrainType=0
 Name=War Factory
 Id=3
 Health=100
-Prize=100
+MineralCost=100
 
 [Boson Facility]
 CanProduce=true

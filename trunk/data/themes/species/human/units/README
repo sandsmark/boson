@@ -44,7 +44,9 @@ Shield=Number       - Not yet supported.
                       Default is 0.
 Armor=Number        - Not yet supported. 
                       Default is 0.
-Prize=Number        - How much do you have to pay if you build this? 
+MineralCost=Number  - How much mineral do you have to pay if you build this? 
+                      Default is 0.
+OilCost=Number      - How much oil do you have to pay if you build this? 
                       Default is 0.
 Range=Number        - The weapon range (>= 0) of this unit. 
                       Default is 0.

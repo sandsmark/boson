@@ -4,4 +4,4 @@ TerrainType=0
 Name=Helipad
 Id=1
 Health=100
-Prize=100
+MineralCost=100

@@ -4,4 +4,4 @@ TerrainType=0
 Name=Oil Tower
 Id=7
 Health=100
-Prize=100
+MineralCost=100

@@ -4,4 +4,4 @@ TerrainType=0
 Name=Refinery
 Id=8
 Health=100
-Prize=100
+MineralCost=100
