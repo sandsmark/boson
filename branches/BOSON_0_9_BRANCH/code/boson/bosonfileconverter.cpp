@@ -36,7 +36,6 @@
 
 // version number as used by boson 0.9
 #define BOSONMAP_VERSION_0_9 0x01
-#define BOSON_SAVEGAME_FORMAT_VERSION_0_9 ( ((0x00) << 16) | ((0x02) << 8) | (0x01) )
 
 // compatibility for boson 0.8
 #define BO_COMPAT_0_8_TEXTURE_COUNT 3 // we use 3 textured by default for old maps (grass, desert, water).
