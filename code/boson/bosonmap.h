@@ -490,6 +490,32 @@ public:
 		return true;
 	}
 
+	/**
+	 * Note that you can specify (width() + 1) * (height() + 1) corners here!
+	 * I.e. if you do this
+	 * <pre>
+	 * int pos = cornerArrayPos(width(), height())
+	 * </pre>
+	 * it will be valid (althought cell() would return NULL). This example
+	 * would return the position of the <em>lower right</em> corner of the
+	 * cell at (width()-1, height()-1), i.e. the cell in the lower right
+	 * corner of the map.
+	 *
+	 * @param x The x-coordinate of the wanted corner. Note that counting
+	 * begins at top-left, i.e. 0 is the left corner of the leftmost cell
+	 * and @ref width is the right corner of the rightmost cell.
+	 * @param y The y-coordinate of the wanted corner. Note that counting
+	 * begins at top-left, i.e. 0 is the top corner of the topmost cell
+	 * and @ref height is the bottom corner of the bottom cell.
+	 * @return The array-coordinates of the corner at x,y. This array
+	 * position can be used for all map-arrays which are based on corners
+	 * (currently that are height map and texmap).
+	 **/
+	inline int cornerArrayPos(int x, int y) const
+	{
+		return BoMapCornerArray::arrayPos(x, y, width() + 1);
+	}
+
 	int currentTexture(int texture) const;
 	inline float* heightMap() const { return mHeightMap->heightMap(); }
 	inline BoVector3* normalMap() const { return mNormalMap->normalMap(); }
@@ -560,49 +586,10 @@ public:
 	 **/
 	float heightAtCorner(int x, int y) const;
 	void setHeightAtCorner(int x, int y, float height);
-
 	float cellAverageHeight(int x, int y);
 
-	/**
-	 * Note that you can specify (width() + 1) * (height() + 1) corners here!
-	 * I.e. if you do this
-	 * <pre>
-	 * int pos = cornerArrayPos(width(), height())
-	 * </pre>
-	 * it will be valid (althought cell() would return NULL). This example
-	 * would return the position of the <em>lower right</em> corner of the
-	 * cell at (width()-1, height()-1), i.e. the cell in the lower right
-	 * corner of the map.
-	 *
-	 * @param x The x-coordinate of the wanted corner. Note that counting
-	 * begins at top-left, i.e. 0 is the left corner of the leftmost cell
-	 * and @ref width is the right corner of the rightmost cell.
-	 * @param y The y-coordinate of the wanted corner. Note that counting
-	 * begins at top-left, i.e. 0 is the top corner of the topmost cell
-	 * and @ref height is the bottom corner of the bottom cell.
-	 * @return The array-coordinates of the corner at x,y. This array
-	 * position can be used for all map-arrays which are based on corners
-	 * (currently that are height map and texmap).
-	 **/
-	inline int cornerArrayPos(int x, int y) const
-	{
-		return BoMapCornerArray::arrayPos(x, y, width() + 1);
-	}
 
 
-
-
-	/**
-	 * Load an image from @p buffer and convert it to the internal
-	 * heightmap format of @ref BosonMap.
-	 *
-	 * This function can be used to import a height map in the editor or
-	 * (more important) to load the heightmap from a .bpf file (where it is
-	 * stored as a png image).
-	 **/
-	bool loadHeightMapImage(const QByteArray& buffer);
-
-	bool importHeightMapImage(const QImage& image);
 
 	bool saveMapToFile(QDataStream& stream);
 
@@ -631,9 +618,19 @@ public:
 	 **/
 	bool loadCompleteMap(QDataStream& stream);
 
-	QByteArray saveHeightMapImage();
+	/**
+	 * Load an image from @p buffer and convert it to the internal
+	 * heightmap format of @ref BosonMap.
+	 *
+	 * This function can be used to import a height map in the editor or
+	 * (more important) to load the heightmap from a .bpf file (where it is
+	 * stored as a png image).
+	 **/
+	bool loadHeightMapImage(const QByteArray& buffer);
 
-	QByteArray saveTexMapImage(unsigned int texture);
+	bool importHeightMapImage(const QImage& image);
+
+	QByteArray saveHeightMapImage();
 
 	/**
 	 * Load the @ref texMap from @p stream.
@@ -644,6 +641,8 @@ public:
 	 **/
 	bool loadTexMap(QDataStream& stream);
 	bool saveTexMap(QDataStream& stream);
+
+	QByteArray saveTexMapImage(unsigned int texture);
 
 	/**
 	 * Load a @ref groundTheme - see @ref BosonGroundTheme. The groundTheme
