@@ -177,12 +177,15 @@ public slots:
 	}
 
 protected:
+	virtual bool eventFilter(QObject* o, QEvent* e);
 	virtual void mouseMoveEvent(QMouseEvent*);
 	virtual void mousePressEvent(QMouseEvent*);
 	virtual void mouseReleaseEvent(QMouseEvent*);
 
-	void renderModel();
+	void renderModel(int mode = -1);
 	void renderGrid();
+	void renderMeshSelection();
+	void renderText();
 
 	bool haveModel() const
 	{
@@ -192,12 +195,20 @@ protected:
 		return false;
 	}
 
+	/**
+	 * Update the text that displays information on what is under the cursor
+	 **/
+	void updateCursorDisplay(const QPoint& pos);
+	int pickObject(const QPoint& pos);
+
 private:
 	friend class RenderMain; // we need to emit signals from outside, in order to save lots of forwarding code
 	QTimer* mUpdateTimer;
 	BosonModel* mModel;
 	int mCurrentFrame;
 	int mCurrentLOD;
+	int mMeshUnderMouse;
+	int mSelectedMesh;
 
 	BosonGLFont* mDefaultFont;
 
@@ -269,7 +280,7 @@ private:
  **/
 class RenderMain : public KMainWindow
 {
- 	Q_OBJECT
+	Q_OBJECT
 public:
 	RenderMain();
 	~RenderMain();

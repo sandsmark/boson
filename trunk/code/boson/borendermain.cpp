@@ -23,6 +23,7 @@
 #include "speciestheme.h"
 #include "bosonconfig.h"
 #include "bosonmodel.h"
+#include "bomesh.h"
 #include "bosonglfont.h"
 #include "bosonprofiling.h"
 #include "unitproperties.h"
@@ -98,10 +99,15 @@ ModelPreview::ModelPreview(QWidget* parent) : BosonGLWidget(parent)
 {
  mUpdateTimer = new QTimer(this);
  connect(mUpdateTimer, SIGNAL(timeout()), this, SLOT(slotUpdateGL()));
+ qApp->setGlobalMouseTracking(true);
+ qApp->installEventFilter(this);
+ setFocusPolicy(StrongFocus);
 
  mCurrentFrame = 0;
  mModel = 0;
  mCurrentLOD = 0;
+ mMeshUnderMouse = -1;
+ mSelectedMesh = -1;
 
  mMouseDiffX = 0;
  mMouseDiffY = 0;
@@ -128,6 +134,7 @@ ModelPreview::ModelPreview(QWidget* parent) : BosonGLWidget(parent)
 
 ModelPreview::~ModelPreview()
 {
+ qApp->setGlobalMouseTracking(false);
  resetModel();
  delete mUpdateTimer;
 }
@@ -169,12 +176,16 @@ void ModelPreview::paintGL()
 
  // AB: try to keep this basically similar to BosonBigDisplay::paintGL()
  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
- glColor3f(1.0f, 1.0f, 1.0f);
+ glColor3ub(255, 255, 255);
 
  renderModel();
 // renderGrid();
 
  glDisable(GL_DEPTH_TEST);
+
+ renderMeshSelection();
+
+ renderText();
 
  GLenum e = glGetError();
  if (e != GL_NO_ERROR) {
@@ -182,7 +193,7 @@ void ModelPreview::paintGL()
  }
 }
 
-void ModelPreview::renderModel()
+void ModelPreview::renderModel(int mode)
 {
  if (!haveModel()) {
 	return;
@@ -226,7 +237,7 @@ void ModelPreview::renderModel()
 		// FIXME: this isn't good here...
 		mModel->enablePointer();
 
-		f->renderFrame(0, mCurrentLOD);
+		f->renderFrame(0, mCurrentLOD, mode);
 		if (mPlacementPreview) {
 			// AB: do not reset the actual color - if it will get
 			// used it will be set again anyway.
@@ -393,6 +404,57 @@ void ModelPreview::renderGrid()
  // can't be rotated,scaled,... we need to use textured fonts.
 }
 
+void ModelPreview::renderMeshSelection()
+{
+ if (mSelectedMesh >= 0) {
+ }
+}
+
+void ModelPreview::renderText()
+{
+ BO_CHECK_NULL_RET(mDefaultFont);
+
+ glMatrixMode(GL_PROJECTION);
+ glPushMatrix();
+ glLoadIdentity();
+ gluOrtho2D(0.0f, (GLfloat)width(), 0.0f, (GLfloat)height());
+ glMatrixMode(GL_MODELVIEW);
+ glPushMatrix();
+ glLoadIdentity();
+
+ glListBase(mDefaultFont->displayList());
+ const int border = 5;
+ int y = height() - border;
+
+ glColor3ub(255, 255, 255);
+ QString meshName;
+ if (mMeshUnderMouse >= 0) {
+	BoMesh* mesh = 0;
+	if (mModel && mCurrentFrame >= 0) {
+		BoFrame* f = mModel->frame(mCurrentFrame);
+		if ((unsigned int)mMeshUnderMouse >= f->meshCount()) {
+			f = 0;
+		} else {
+			mesh = f->mesh(mMeshUnderMouse);
+		}
+	}
+	if (mesh) {
+		meshName = mesh->name();
+	}
+ }
+ if (meshName.isNull()) {
+	meshName = i18n("(no mesh under cursor)");
+ }
+ QString text = i18n("Mesh under cursor: %1").arg(meshName);
+ y -= mDefaultFont->renderText(border, y, text, width() - 2 * border);
+
+ glMatrixMode(GL_PROJECTION);
+ glPopMatrix();
+ glMatrixMode(GL_MODELVIEW);
+ glPopMatrix();
+
+}
+
 void ModelPreview::load(SpeciesTheme* s, const UnitProperties* prop)
 {
  resetModel();
@@ -438,6 +500,128 @@ void ModelPreview::resetModel()
  mModel = 0;
  mCurrentFrame = 0;
  mCurrentLOD = 0;
+ mMeshUnderMouse = -1;
+ mSelectedMesh = -1;
+}
+
+void ModelPreview::updateCursorDisplay(const QPoint& pos)
+{
+ mMeshUnderMouse = -1;
+ // AB: maybe we should return the mesh itself?
+ int picked = pickObject(pos);
+ if (picked < 0) {
+	boDebug() << k_funcinfo << "no mesh under cursor" << endl;
+	return;
+ }
+ BoFrame* f = 0;
+ if (mModel && mCurrentFrame >= 0) {
+	f = mModel->frame(mCurrentFrame);
+ }
+ if (!f) {
+	return;
+ }
+ if ((unsigned int)picked >= f->meshCount()) {
+	boError() << k_funcinfo << "invalid mesh number: " << picked << endl;
+	return;
+ }
+ mMeshUnderMouse = picked;
+}
+
+int ModelPreview::pickObject(const QPoint& cursor)
+{
+ BoFrame* f = 0;
+ if (mModel && mCurrentFrame >= 0) {
+	f = mModel->frame(mCurrentFrame);
+ }
+ if (!f) {
+	return -1;
+ }
+ const int bufferSize = 256;
+ unsigned int buffer[bufferSize];
+ int viewport[4];
+
+ glGetIntegerv(GL_VIEWPORT, viewport);
+
+ glSelectBuffer(bufferSize, buffer);
+
+
+ glRenderMode(GL_SELECT);
+ glInitNames();
+ glPushName(0);
+
+ glMatrixMode(GL_PROJECTION);
+ glPushMatrix();
+ glLoadIdentity();
+ gluPickMatrix((GLdouble)cursor.x(), (GLdouble)(viewport[3] - cursor.y()), 1.0, 10, viewport);
+ gluPerspective(mFovY, (float)viewport[2] / (float)viewport[3], NEAR, FAR);
+ glMatrixMode(GL_MODELVIEW);
+ glPushMatrix();
+ glLoadIdentity();
+
+ glTranslatef(-mCameraX, -mCameraY, -mCameraZ);
+ glRotatef(mRotateX, 1.0, 0.0, 0.0);
+ glRotatef(mRotateY, 0.0, 1.0, 0.0);
+ glRotatef(mRotateZ, 0.0, 0.0, 1.0);
+ glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+ glColor3f(1.0f, 1.0f, 1.0f);
+
+
+ renderModel(GL_SELECT);
+
+
+ glMatrixMode(GL_PROJECTION);
+ glPopMatrix();
+ glMatrixMode(GL_MODELVIEW);
+ glPopMatrix();
+ int hits = glRenderMode(GL_RENDER);
+ int pos = 0;
+ unsigned int closestZ = 0xFFFFFFFF;
+ int mesh = -1;
+ for (int i = 0; i < hits; i++) {
+	unsigned int names = buffer[pos];
+	pos++;
+	unsigned int minZ = buffer[pos];
+	pos++;
+//	unsigned int maxZ = buffer[pos];
+	pos++;
+	if (names != 1) {
+		boWarning() << k_funcinfo << "more than 1 name - not supported!" << endl;
+		for (unsigned int j = 0; j < names; j++) {
+			pos++;
+		}
+		continue;
+	}
+	unsigned int name = buffer[pos];
+	BoMesh* m = 0;
+	if (name <= f->meshCount()) {
+		m = f->mesh(name);
+	}
+	if (m) {
+//		boDebug() << k_funcinfo << m->name() << endl;
+		if (minZ < closestZ) {
+			mesh = name;
+		}
+	} else {
+		boWarning() << k_funcinfo << "no such mesh: " << name << endl;
+	}
+	pos++;
+ }
+
+ return mesh;
+}
+
+bool ModelPreview::eventFilter(QObject* o, QEvent* e)
+{
+ switch (e->type()) {
+	case QEvent::MouseMove:
+		if (hasMouse()) {
+			updateCursorDisplay(((QMouseEvent*)e)->pos());
+		}
+		break;
+	default:
+		break;
+ }
+ return QObject::eventFilter(o, e);
 }
 
 void ModelPreview::mousePressEvent(QMouseEvent* e)
