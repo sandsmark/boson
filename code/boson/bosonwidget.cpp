@@ -661,9 +661,7 @@ void BosonWidget::addGameCommandFrame(QWidget* parent)
  d->mCommandFrame->reparentMiniMap(d->mMiniMap);
 
  connect(d->mBoson, SIGNAL(signalUpdateProduction(Facility*)),
-		d->mCommandFrame, SLOT(slotFacilityProduces(Facility*)));
- connect(d->mBoson, SIGNAL(signalCompletedProduction(Facility*)),
-		d->mCommandFrame, SLOT(slotProductionCompleted(Facility*)));
+		d->mCommandFrame, SLOT(slotUpdateProduction(Facility*)));
 
  slotChatFramePosition(BosonConfig::readChatFramePosition());
 }

@@ -435,6 +435,8 @@ void BosonCommandWidget::unset()
 	disconnect(d->mUnit->owner(), 0, this, 0);
  }
  d->mUnit = 0;
+ d->mUnitType = 0;
+ d->mTileNumber = 0;
  d->mCommandType = CommandNothing;
  d->mOwner = 0;
  QToolTip::remove(this);

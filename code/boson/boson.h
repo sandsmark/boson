@@ -147,16 +147,10 @@ signals:
 	 * changes. This means whenever you add a unit to the queue (see @ref
 	 * Factory::productionList), pause a production (using @ref
 	 * Unit::setWork(Unit::WorkNone)) or continue a production (using @ref
-	 * Unit::setWork(Unit::WorkProduce)).
+	 * Unit::setWork(Unit::WorkProduce)). This is also emitted once a
+	 * production has been completed.
 	 **/
 	void signalUpdateProduction(Facility* factory);
-
-	/**
-	 * Emitted when a factory has no units left to produce. Especially
-	 * useful to re-enable the disabled orderbuttons. See @ref
-	 * signalProduceUnit
-	 **/
-	void signalCompletedProduction(Facility* factory);
 
 	void signalNotEnoughMinerals(Player* p);
 	void signalNotEnoughOil(Player* p);
