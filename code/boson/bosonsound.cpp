@@ -47,8 +47,10 @@ public:
 	}
 	~BoPlayObject()
 	{
-		mPlayObject->halt();
-		delete mPlayObject;
+		if (mPlayObject) {
+			mPlayObject->halt();
+			delete mPlayObject;
+		}
 	}
 	const QString& file() const { return mFile; }
 	KPlayObject* object() const { return mPlayObject; }
