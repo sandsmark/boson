@@ -109,7 +109,7 @@ public:
 	{
 		mPosX = x;
 		mPosY = y;
-		mPosZ = QMAX(NEAR + 1.0, QMIN(FAR - 1.0, z));
+		mPosZ = QMAX(NEAR + 1.0, QMIN(FAR - 15.0, z));
 	}
 	void setX(GLfloat x) { setPos(x, mPosY, mPosZ); }
 	void setY(GLfloat y) { setPos(mPosX, y, mPosZ); }
