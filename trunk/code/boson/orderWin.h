@@ -23,8 +23,8 @@
 
 
 #include <qframe.h>
-#include <qintdict.h>
-#include <playerUnit.h>
+//#include <qintdict.h>
+//#include <playerUnit.h>
 
 class QPushButton;
 class QPixmap;
@@ -37,17 +37,6 @@ class QVBoxLayout;
 
 #define ORDER_BUTTONS_NB  (8)
 
-enum selectionMode_t {
-	SELECT_NONE, 		/* is doing nothing */
-/*	SELECT_FACILITY, 
-	SELECT_MOBILE, */
-	SELECT_RECT,		/* is drawing a selection rect */
-	SELECT_MOVE,		// is waiting for 'where to move' 
-/*	SELECT_, 
-	SELECT_, 
-	SELECT_,  */
-	};
-
 
 class orderWin : public QFrame
 {
@@ -56,21 +45,6 @@ class orderWin : public QFrame
 public:
 	orderWin(QWidget *parent=0, const char *name=0);
 
-	selectionMode_t	getSelectionMode(void) {return selectionMode;}
-	void setSelectionMode(selectionMode_t t) {selectionMode=t;}
-	void selectFix(playerFacility *);
-	void selectMob(long key, playerMobUnit *);
-	playerFacility	*unSelectFix(void);
-	playerMobUnit	*unSelectMob(long key);
-	void		unSelectAll(void);
-
-/* to handle orderButton 'clicked' event */
-public slots:
-  void u_goto(void);
-
-/* from display classes */
-  void leftClicked(int, int);		// selecting, moving...
-
 private:
 /* state view (for selected items) */
 	QWidgetStack	*stack;
@@ -78,13 +52,6 @@ private:
 	QScrollView	*view_many;
 	QPixmap		*view_none;
 
-/* selection handling */
-	selectionMode_t		selectionMode;
-	int			selectionWho; // -1 is nobody
-
-public: ///orzel : bof...
-	playerFacility		*fixSelected;
-	QIntDict<playerMobUnit>	mobSelected;
 private:
 //	fieldMap	*field;
 

@@ -25,7 +25,7 @@
 
 #include "viewMap.h"
 #include "fieldMap.h"
-#include "orderWin.h"
+//#include "orderWin.h"
 #include "playerMap.h"
 
 
@@ -54,8 +54,8 @@ if (e->button() & LeftButton) {
 	x += view->X()*BO_TILE_SIZE; y += view->Y()*BO_TILE_SIZE;
 
 
-	if (SELECT_MOVE == order->getSelectionMode()) {
-		order->leftClicked( x, y);
+	if (SELECT_MOVE == view->getSelectionMode()) {
+		view->leftClicked( x, y);
 		return;
 		}
 
@@ -81,7 +81,7 @@ if (e->button() & LeftButton) {
 			); */
 		if (f->rect().contains( QPoint( x, y) )) {
 			unSelectAll();
-			order->selectFix(f);
+			view->selectFix(f);
 			found = TRUE;
 			break;
 			}
@@ -98,17 +98,17 @@ if (e->button() & LeftButton) {
 		if (m->rect().contains( QPoint( x, y) )) {
 			unSelectFix();
 		
-			if ((e->state()&ControlButton) && order->mobSelected.find(mobIt.currentKey()))
+			if ((e->state()&ControlButton) && view->mobSelected.find(mobIt.currentKey()))
 				unSelectMob(mobIt.currentKey());
 			else
-				order->selectMob(mobIt.currentKey(), m);
+				view->selectMob(mobIt.currentKey(), m);
 			found = TRUE;
 			}
 		}
 
 	if (!found) {
 	// Here, we have to draw a "selection box"...
-		order->setSelectionMode( SELECT_RECT);
+		view->setSelectionMode( SELECT_RECT);
 		oldX = selectX = e->x();
 		oldY = selectY = e->y();
 		unSelectFix();
@@ -121,7 +121,7 @@ void fieldMap::mouseMoveEvent(QMouseEvent *e)
 QPainter p;
 QPen pen(green, 2);
 
-if (SELECT_RECT != order->getSelectionMode()) return;
+if (SELECT_RECT != view->getSelectionMode()) return;
 
 p.begin(this);
 p.setPen(pen);
@@ -146,7 +146,7 @@ QIntDictIterator<playerFacility> fixIt(facilityList);
 playerMobUnit	*m;
 int		t;
 
-if (SELECT_RECT != order->getSelectionMode()) return;
+if (SELECT_RECT != view->getSelectionMode()) return;
 
 p.begin(this);
 p.setPen(pen);
@@ -155,7 +155,7 @@ p.setRasterOp(XorROP);
 if (oldX != selectX && oldY != selectY)	
 	drawRectSelect(selectX, selectY, oldX, oldY, p);
 p.end();
-order->setSelectionMode( SELECT_NONE);
+view->setSelectionMode( SELECT_NONE);
 
 /* generate multiple selection */
 
@@ -179,8 +179,8 @@ oldY += BO_TILE_SIZE *view->Y();
 for (mobIt.toFirst(); mobIt; ++mobIt) {
 	m = mobIt.current();
 	if (selectX<=m->_x() && oldX>m->_x() + m->getWidth() &&
-	    selectY<=m->_y() && oldY>m->_y() + m->getHeight() && !order->mobSelected.find(mobIt.currentKey()) ) {
-		order->selectMob(mobIt.currentKey(), m);
+	    selectY<=m->_y() && oldY>m->_y() + m->getHeight() && !view->mobSelected.find(mobIt.currentKey()) ) {
+		view->selectMob(mobIt.currentKey(), m);
 		}
 	}
 
@@ -201,7 +201,7 @@ emit reSizeView((width()+BO_TILE_SIZE+1)/BO_TILE_SIZE, (height()+BO_TILE_SIZE+1)
 
 void fieldMap::unSelectAll(void)
 {
-QIntDictIterator<playerMobUnit> selIt(order->mobSelected);
+QIntDictIterator<visualMobUnit> selIt(view->mobSelected);
 
 
 /* deal with fix */
@@ -212,20 +212,20 @@ for (selIt.toFirst(); selIt;) { // ++ not needed, selIt should be increased
 	selIt.current()->unSelect();
 	unSelectMob(selIt.currentKey()); // by the .remove() in unselect
 	}
-boAssert(order->mobSelected.isEmpty());
-if (!order->mobSelected.isEmpty()) order->mobSelected.clear();
+boAssert(view->mobSelected.isEmpty());
+if (!view->mobSelected.isEmpty()) view->mobSelected.clear();
 
-order->unSelectAll();
+view->unSelectAll();
 //logf(LOG_INFO, "deselecting all");
 }
 
 ///orzel : those two should become inlined in .h
 void fieldMap::unSelectFix(void)
 {
-	order->unSelectFix();
+	view->unSelectFix();
 }
 
 void fieldMap::unSelectMob(long key)
 {
-	order->unSelectMob(key);
+	view->unSelectMob(key);
 }

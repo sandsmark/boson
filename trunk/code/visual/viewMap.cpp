@@ -23,6 +23,8 @@
 
 viewMap::viewMap(physMap *p, QObject *parent, const char *name=0L)
 	: QObject(parent, name)
+	,fixSelected( 0L )
+	,selectionMode(SELECT_NONE)
 {
 	/* map geometry */
 	viewL = viewH = 5; ///orzel : arbitraire, (doit etre/)sera fixe par un mainMap..
@@ -60,3 +62,4 @@ void viewMap::reSizeView(int l, int h)
 
 	reCenterView(Xcenter, Ycenter);
 }
+

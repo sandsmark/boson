@@ -31,7 +31,7 @@
 #include "viewMap.h"
   
 
-fieldMap::fieldMap(orderWin *o, viewMap *v, QWidget*parent, const char *name, WFlags f)
+fieldMap::fieldMap(/*orderWin *o,*/ viewMap *v, QWidget*parent, const char *name, WFlags f)
 	: QWidget(parent, name, f)
 	, QwAbsSpriteFieldView(v->phys)
 {
@@ -40,7 +40,7 @@ fieldMap::fieldMap(orderWin *o, viewMap *v, QWidget*parent, const char *name, WF
 //setBackgroundMode(fixedColor);
 
 /* related orderWindows */
-order = o;
+//order = o;
 
 /* the viewMap */
 view = v;
