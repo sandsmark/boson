@@ -19,10 +19,12 @@
 
 #include "bosontexturearray.h"
 
+#ifndef NO_OPENGL
 #include <qimage.h>
 #include <qgl.h>
 
 #include <kdebug.h>
+#endif
 
 BosonTextureArray::BosonTextureArray()
 {
@@ -59,6 +61,7 @@ BosonTextureArray::~BosonTextureArray()
 
 bool BosonTextureArray::createTextures(QValueList<QImage> images, GLenum mode)
 {
+#ifndef NO_OPENGL
  // TODO: performance: use smaller textures!! so we can store more textures in
  // texture memory and don't need to swap from/to system memory
  if (mTextures || mCount) {
@@ -122,6 +125,7 @@ bool BosonTextureArray::createTextures(QValueList<QImage> images, GLenum mode)
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
  }
+#endif
 }
 
 int BosonTextureArray::nextPower2(int n) const
