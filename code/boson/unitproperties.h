@@ -207,6 +207,14 @@ public:
 	bool canMineOil() const;
 
 	/**
+	 * @return The maximal amount of resources (oil or minerals) that can be
+	 * mined until the unit must return to a refinery. The type of resources
+	 * depends on @ref canMineMinerals and @ref canMineOil (only one of them
+	 * can be true)
+	 **/
+	unsigned int maxResources() const;
+
+	/**
 	 * @return A list of all @ref producer IDs this unit can produce (if
 	 * any).
 	 **/

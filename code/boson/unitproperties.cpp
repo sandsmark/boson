@@ -34,6 +34,7 @@ public:
 	bool mCanGoOnWater;
 	bool mCanMineMinerals;
 	bool mCanMineOil;
+	unsigned int mMaxResources;
 };
 
 class UnitProperties::FacilityProperties
@@ -127,10 +128,15 @@ void UnitProperties::loadMobileProperties(KSimpleConfig* conf)
  conf->setGroup("Boson Mobile Unit");
  mMobileProperties = new MobileProperties;
  mMobileProperties->mSpeed = conf->readDoubleNumEntry("Speed", 0);
- mMobileProperties->mCanGoOnLand = conf->readBoolEntry("CanGoOnLand", (isLand() || isAircraft()));
- mMobileProperties->mCanGoOnWater = conf->readBoolEntry("CanGoOnWater", (isShip() || isAircraft()));
- mMobileProperties->mCanMineMinerals = conf->readBoolEntry("CanMineMinerals", false);
- mMobileProperties->mCanMineOil= conf->readBoolEntry("CanMineOil", false);
+ mMobileProperties->mCanGoOnLand = conf->readBoolEntry("CanGoOnLand",
+		(isLand() || isAircraft()));
+ mMobileProperties->mCanGoOnWater = conf->readBoolEntry("CanGoOnWater",
+		(isShip() || isAircraft()));
+ mMobileProperties->mCanMineMinerals = conf->readBoolEntry("CanMineMinerals", 
+		false);
+ mMobileProperties->mCanMineOil = conf->readBoolEntry("CanMineOil", false);
+ mMobileProperties->mMaxResources = conf->readUnsignedNumEntry("MaxResources",
+		(canMineMinerals() || canMineOil()) ? 100 : 0);
 }
 
 void UnitProperties::loadFacilityProperties(KSimpleConfig* conf)
@@ -230,5 +236,13 @@ bool UnitProperties::canMineOil() const
 	return false;
  }
  return mMobileProperties->mCanMineOil;
+}
+
+unsigned int UnitProperties::maxResources() const
+{
+ if (!canMineMinerals() && !canMineOil()) {
+	return 0;
+ }
+ return mMobileProperties->mMaxResources;
 }
 
