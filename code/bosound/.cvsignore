@@ -8,3 +8,4 @@ libbosonsound.la
 libbosonsound_la_meta_unload.*
 libbosonsoundcommon.la
 libbosonsoundcommon_la_meta_unload.*
+bosonaudioprocess
