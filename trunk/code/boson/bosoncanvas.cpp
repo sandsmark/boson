@@ -158,13 +158,21 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 		BosonItem* s = animIt.current();
 		if (RTTI::isUnit(s->rtti())) {
 			id = ((Unit*)s)->id();
-			work = (int)((Unit*)s)->work();
+			work = (int)((Unit*)s)->advanceWork();
 		} else {
 			id = 0;
 			work = -1;
 		}
 		boProfiling->advanceItemStart(s->rtti(), id, work);
 		boProfiling->advanceItem(true);
+
+		// TODO: group some stuff.
+		// e.g. we reload weapons and shields here whenever we call
+		// this. instead we could reaload every 5th or 10th call only,
+		// but then by 5 or 10 instead of 1. the units would reload with
+		// the same speed (except for up to 4 or 9 advance calls - but
+		// that doesnt matter anyway) and this function would execute
+		// faster.
 		s->advance(advanceCount);
 		boProfiling->advanceItem(false);
 		boProfiling->advanceItemFunction(true);
@@ -258,8 +266,8 @@ bool BosonCanvas::canGo(const UnitProperties* prop, const QRect& rect) const
 {
 // boDebug() << k_funcinfo << endl;
  if (rect.x() < 0 || rect.y() < 0 ||
-		rect.x() + rect.width() >= mapWidth() * BO_TILE_SIZE ||
-		rect.y() + rect.height() >= mapHeight() * BO_TILE_SIZE) {
+		rect.x() + rect.width() >= (int)mapWidth() * BO_TILE_SIZE ||
+		rect.y() + rect.height() >= (int)mapHeight() * BO_TILE_SIZE) {
 	return false;
  }
  int y = rect.y() / BO_TILE_SIZE; // what about modulu? do we care ?
