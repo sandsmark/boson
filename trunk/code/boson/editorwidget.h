@@ -95,8 +95,6 @@ protected slots:
 	void slotPlace(int index);
 	void slotEditMapDescription();
 
-	void slotEditPlayerSettings();
-
 	void slotGameStarted();
 
 protected:
