@@ -139,7 +139,7 @@ protected:
 
 	bool loadPlayerData();
 	void loadUnitDatas(Player* p);
-	bool startScenario();
+	bool startScenario(const QMap<QString, QByteArray>& files);
 	bool start();
 	bool loadTiles();
 
