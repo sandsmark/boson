@@ -479,7 +479,13 @@ public:
 	bool mWantDirect;
 };
 
-BosonGLWidget::BosonGLWidget(QWidget* parent, const char* name, bool direct) : QWidget(parent, name)
+// WNoAutoErase: Qt 3.2
+BosonGLWidget::BosonGLWidget(QWidget* parent, const char* name, bool direct)
+#if QT_VERSION >= 0x030200
+	: QWidget(parent, name, Qt::WNoAutoErase)
+#else
+	: QWidget(parent, name)
+#endif
 {
  boDebug() << k_funcinfo << endl;
  d = new BosonGLWidgetPrivate;
