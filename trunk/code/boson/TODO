@@ -50,8 +50,6 @@ Editor (map, unit, scenario) TODOs
 - unit editor: add an additional page for the description of the unit (longer
   text - should go into the handbook). Should be able to contain images and so
   on. Maybe use plain docbook or so
-- use another options dialog. we MUST NOT provide the possibility to change the
-  game speed!!
 
 General TODOs
 - find out whether signalUnitPropertyChanged() is a good thing at all. Might
