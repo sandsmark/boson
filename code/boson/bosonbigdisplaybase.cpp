@@ -726,13 +726,11 @@ void BosonBigDisplayBase::paintGL()
  glCullFace(GL_BACK);
  glEnableClientState(GL_VERTEX_ARRAY);
  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
- glEnableClientState(GL_NORMAL_ARRAY);
 
  renderItems();
 
  glDisableClientState(GL_VERTEX_ARRAY);
  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
- glDisableClientState(GL_NORMAL_ARRAY);
  glDisable(GL_CULL_FACE);
  if (boConfig->wireFrames()) {
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
