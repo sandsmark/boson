@@ -537,6 +537,20 @@ Please check whether you installed KDE correctly.
 ])
 ])
 
+AC_DEFUN([KDE_SET_DEFAULT_BINDIRS],
+[
+    kde_default_bindirs="/usr/bin /usr/local/bin /opt/local/bin /usr/X11R6/bin /opt/kde/bin /opt/kde3/bin /usr/kde/bin /usr/local/kde/bin"
+    test -n "$KDEDIR" && kde_default_bindirs="$KDEDIR/bin $kde_default_bindirs"
+    if test -n "$KDEDIRS"; then
+       kde_save_IFS=$IFS
+       IFS=:
+       for dir in $KDEDIRS; do
+            kde_default_bindirs="$dir/bin $kde_default_bindirs "
+       done
+       IFS=$kde_save_IFS
+    fi
+])
+
 AC_DEFUN([KDE_SUBST_PROGRAMS],
 [
         KDE_SET_DEFAULT_BINDIRS
