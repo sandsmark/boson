@@ -526,7 +526,7 @@ void BoUfoWidget::init(ufo::UWidget* w)
 void BoUfoWidget::invalidate()
 {
  boDebug() << k_funcinfo << endl;
- widget()->invalidate();
+ widget()->invalidateTree();
 }
 
 void BoUfoWidget::addWidget(BoUfoWidget* w)
