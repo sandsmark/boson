@@ -66,6 +66,15 @@ QString SaveLoadError::message() const
 	case Unknown:
 		m = i18n("Unknown error");
 		break;
+	case General:
+		m = i18n("General error");
+		break;
+	case LoadBSGFileError:
+		m = i18n(".bsg file error");
+		break;
+	case LoadInvalidXML:
+		m = i18n("Invalid XML");
+		break;
 	default:
 		m = i18n("Unknown error type (%1)").arg((int)type());
  }
@@ -474,7 +483,12 @@ bool BosonSaveLoad::loadFromFile(const QString& file)
 	return false;
  }
 
- d->mBoson->reset();
+ bool ok = d->mBoson->reset();
+ if (!ok) {
+	addLoadError(SaveLoadError::General, i18n("KGame::reset() failed"));
+	d->mLoadingStatus = KGameError;
+	return false;
+ }
  if (d->mBoson->playerCount() != 0) {
 	boError(260) << k_funcinfo << "not all players removed!" << endl;
 	addLoadError(SaveLoadError::LoadBSGFileError, i18n("bug: not all players removed from game"));
