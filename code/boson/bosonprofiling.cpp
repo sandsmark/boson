@@ -359,6 +359,7 @@ void BosonProfiling::advanceItemStop()
 
 void BosonProfiling::start(int event)
 {
+ // AB: d->mProfilingTimes[event] is a map lookup and therefore pretty slow!
  gettimeofday(&d->mProfilingTimes[event], 0);
 }
 
@@ -366,6 +367,7 @@ long int BosonProfiling::elapsed(int event) const
 {
  struct timeval time;
  gettimeofday(&time, 0);
+ // AB: d->mProfilingTimes[event] is a map lookup and therefore pretty slow!
  return COMPARE_TIMES(d->mProfilingTimes[event], time);
 }
 
