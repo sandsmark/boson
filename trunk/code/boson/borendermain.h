@@ -31,15 +31,7 @@
 #include <knuminput.h>
 
 #define MIN_FOVY 0.0
-#define MAX_FOVY 360.0
-#define MAX_ROTATE 360.0
-#define MIN_ROTATE -360.0
-#define MIN_CAMERA_X -100.0
-#define MAX_CAMERA_X 100.0
-#define MIN_CAMERA_Y MIN_CAMERA_X
-#define MAX_CAMERA_Y MAX_CAMERA_X
-#define MIN_CAMERA_Z 1.0
-#define MAX_CAMERA_Z 100.0
+#define MAX_FOVY 180.0
 
 
 class BoMouseMoveDiff;
@@ -48,6 +40,11 @@ class UnitProperties;
 class BosonModel;
 class BosonGLFont;
 class BoCamera;
+class BoCameraWidget;
+class BoMatrix;
+class BoQuaternion;
+class BoVector3;
+class KCmdLineArgs;
 class QCheckBox;
 
 class KMyFloatNumInput : public KDoubleNumInput
@@ -108,12 +105,15 @@ public:
 
 signals:
 	void signalFovYChanged(float);
+
 	void signalRotateXChanged(float);
 	void signalRotateYChanged(float);
 	void signalRotateZChanged(float);
 	void signalCameraXChanged(float);
 	void signalCameraYChanged(float);
 	void signalCameraZChanged(float);
+	void signalCameraChanged();
+
 	void signalFrameChanged(int);
 	void signalLODChanged(int);
 
@@ -126,42 +126,6 @@ public slots:
 		if (f >= MIN_FOVY && f <= MAX_FOVY) {
 			mFovY = f;
 			resizeGL(width(), height());
-		}
-	}
-	void slotRotateXChanged(float r)
-	{
-		if (r >= MIN_ROTATE && r <= MAX_ROTATE) {
-			mRotateX = r;
-		}
-	}
-	void slotRotateYChanged(float r)
-	{
-		if (r >= MIN_ROTATE && r <= MAX_ROTATE) {
-			mRotateY = r;
-		}
-	}
-	void slotRotateZChanged(float r)
-	{
-		if (r >= MIN_ROTATE && r <= MAX_ROTATE) {
-			mRotateZ = r;
-		}
-	}
-	void slotCameraXChanged(float c)
-	{
-		if (c >= MIN_CAMERA_X && c <= MAX_CAMERA_X) {
-			mCameraX = c;
-		}
-	}
-	void slotCameraYChanged(float c)
-	{
-		if (c >= MIN_CAMERA_Y && c <= MAX_CAMERA_Y) {
-			mCameraY = c;
-		}
-	}
-	void slotCameraZChanged(float c)
-	{
-		if (c >= MIN_CAMERA_Z && c <= MAX_CAMERA_Z) {
-			mCameraZ = c;
 		}
 	}
 	void slotFrameChanged(int f);
@@ -198,6 +162,10 @@ protected:
 		return false;
 	}
 
+	void updateCamera(const BoVector3& cameraPos, const BoQuaternion& q);
+	void updateCamera(const BoVector3& cameraPos, const BoMatrix& rotationMatrix);
+	void updateCamera(const BoVector3& cameraPos, const BoVector3& lookAt, const BoVector3& up);
+
 	/**
 	 * Update the text that displays information on what is under the cursor
 	 **/
@@ -216,8 +184,6 @@ private:
 	BosonGLFont* mDefaultFont;
 
 	float mFovY; // we allow real zooming here!
-	float mCameraX, mCameraY, mCameraZ;
-	float mRotateX, mRotateY, mRotateZ;
 
 	bool mPlacementPreview;
 	bool mDisallowPlacement;
@@ -235,14 +201,10 @@ public:
 	PreviewConfig(QWidget* parent);
 	~PreviewConfig();
 
+	void setCamera(BoCamera* camera);
+
 signals:
 	void signalFovYChanged(float);
-	void signalRotateXChanged(float);
-	void signalRotateYChanged(float);
-	void signalRotateZChanged(float);
-	void signalCameraXChanged(float);
-	void signalCameraYChanged(float);
-	void signalCameraZChanged(float);
 	void signalFrameChanged(int);
 	void signalLODChanged(int);
 	void signalResetDefaults();
@@ -250,14 +212,11 @@ signals:
 	void signalDisallowPlacementChanged(bool); // only valid of placementpreview is also on. if true display the model that is shown when the unit can't be placed - otherwise the model that is shown if it can be placed.
 	void signalWireFrameChanged(bool);
 
+public slots:
+	void slotCameraChanged();
+
 protected slots:
 	void slotFovYChanged(float f) { mFovY->setValue(f); }
-	void slotRotateXChanged(float r) { mRotateX->setValue((int)r); }
-	void slotRotateYChanged(float r) { mRotateY->setValue((int)r); }
-	void slotRotateZChanged(float r) { mRotateZ->setValue((int)r); }
-	void slotCameraXChanged(float c) { mCameraX->setValue(c); }
-	void slotCameraYChanged(float c) { mCameraY->setValue(c); }
-	void slotCameraZChanged(float c) { mCameraZ->setValue(c); }
 	void slotFrameChanged(int f) { mFrame->setValue(f); }
 	void slotLODChanged(int l) { mFrame->setValue(l); }
 
@@ -265,17 +224,12 @@ protected slots:
 
 private:
 	KMyFloatNumInput* mFovY;
-	KMyFloatNumInput* mRotateX;
-	KMyFloatNumInput* mRotateY;
-	KMyFloatNumInput* mRotateZ;
-	KMyFloatNumInput* mCameraX;
-	KMyFloatNumInput* mCameraY;
-	KMyFloatNumInput* mCameraZ;
 	KIntNumInput* mFrame;
 	KIntNumInput* mLOD;
 	QCheckBox* mPlacementPreview;
 	QCheckBox* mDisallowPlacement;
 	QCheckBox* mWireFrame;
+	BoCameraWidget* mCameraWidget;
 };
 
 /**
@@ -288,17 +242,13 @@ public:
 	RenderMain();
 	~RenderMain();
 
+	bool loadCamera(KCmdLineArgs*);
+
 	void changeUnit(const QString& speciesIdentifier, const QString& unit);
 	void changeUnit(const QString& speciesIdentifier, unsigned long int unitType);
 	void changeObject(const QString& speciesIdentifier, const QString& file);
 
 	void emitSignalFovY(float f) { emit mPreview->signalFovYChanged(f); }
-	void emitSignalRotateX(float r) { emit mPreview->signalRotateXChanged(r); }
-	void emitSignalRotateY(float r) { emit mPreview->signalRotateYChanged(r); }
-	void emitSignalRotateZ(float r) { emit mPreview->signalRotateZChanged(r); }
-	void emitSignalCameraX(float c) { emit mPreview->signalCameraXChanged(c); }
-	void emitSignalCameraY(float c) { emit mPreview->signalCameraYChanged(c); }
-	void emitSignalCameraZ(float c) { emit mPreview->signalCameraZChanged(c); }
 	void emitSignalFrame(int f) { emit mPreview->signalFrameChanged(f); }
 	void emitSignalLOD(int l) { emit mPreview->signalLODChanged(l); }
 

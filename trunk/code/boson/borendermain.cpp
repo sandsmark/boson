@@ -34,9 +34,7 @@
 #include "boversion.h"
 #include "boapplication.h"
 #include "bocamera.h"
-#if 0
 #include "bocamerawidget.h"
-#endif
 
 #include <kcmdlineargs.h>
 #include <kaboutdata.h>
@@ -116,7 +114,6 @@ ModelPreview::ModelPreview(QWidget* parent) : BosonGLWidget(parent)
 
  mMouseMoveDiff = new BoMouseMoveDiff;
 
- mRotateX = mRotateY = mRotateZ = 0.0;
  mPlacementPreview = false;
  mDisallowPlacement = false;
  mWireFrame = false;
@@ -125,12 +122,6 @@ ModelPreview::ModelPreview(QWidget* parent) : BosonGLWidget(parent)
 
  mCamera = new BoCamera;
 
- connect(this, SIGNAL(signalRotateXChanged(float)), this, SLOT(slotRotateXChanged(float)));
- connect(this, SIGNAL(signalRotateYChanged(float)), this, SLOT(slotRotateYChanged(float)));
- connect(this, SIGNAL(signalRotateZChanged(float)), this, SLOT(slotRotateZChanged(float)));
- connect(this, SIGNAL(signalCameraXChanged(float)), this, SLOT(slotCameraXChanged(float)));
- connect(this, SIGNAL(signalCameraYChanged(float)), this, SLOT(slotCameraYChanged(float)));
- connect(this, SIGNAL(signalCameraZChanged(float)), this, SLOT(slotCameraZChanged(float)));
  connect(this, SIGNAL(signalFovYChanged(float)), this, SLOT(slotFovYChanged(float)));
  connect(this, SIGNAL(signalFrameChanged(int)), this, SLOT(slotFrameChanged(int)));
  connect(this, SIGNAL(signalLODChanged(int)), this, SLOT(slotLODChanged(int)));
@@ -158,7 +149,6 @@ void ModelPreview::initializeGL()
  glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
  setUpdatesEnabled(false);
  mUpdateTimer->start(GL_UPDATE_TIMER);
- slotResetView();
 }
 
 void ModelPreview::resizeGL(int w, int h)
@@ -177,14 +167,7 @@ void ModelPreview::paintGL()
  glMatrixMode(GL_MODELVIEW);
  glLoadIdentity();
 
-#if 1
- glTranslatef(-mCameraX, -mCameraY, -mCameraZ);
- BoQuaternion q;
- q.setRotation(mRotateX, mRotateY, mRotateZ);
- glMultMatrixf(q.matrix().data());
-#else
  camera()->applyCameraToScene();
-#endif
 
  // AB: try to keep this basically similar to BosonBigDisplay::paintGL()
  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -450,6 +433,11 @@ void ModelPreview::renderMeshSelection()
  mesh->renderBoundingObject();
  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
  glColor3ub(0, 255, 0);
+#if 0
+ glDisable(GL_DEPTH_TEST);
+ mesh->renderVertexRects();
+ glEnable(GL_DEPTH_TEST);
+#endif
  glEnable(GL_TEXTURE_2D);
  glPopMatrix();
  glColor3ub(255, 255, 255);
@@ -555,13 +543,11 @@ void ModelPreview::loadObjectModel(SpeciesTheme* s, const QString& file)
 
 void ModelPreview::slotResetView()
 {
+ BoVector3 cameraPos(0.0f, 0.0f, 2.0f);
+ BoVector3 lookAt(0.0f, 0.0f, 0.0f);
+ BoVector3 up(0.0f, 50.0f, 0.0f);
+ updateCamera(cameraPos, lookAt, up);
  emit signalFovYChanged(60.0);
- emit signalCameraXChanged(0.0);
- emit signalCameraYChanged(0.0);
- emit signalCameraZChanged(3.0);
- emit signalRotateXChanged(0.0);
- emit signalRotateYChanged(0.0);
- emit signalRotateZChanged(0.0);
  resizeGL(width(), height());
 }
 
@@ -627,14 +613,7 @@ int ModelPreview::pickObject(const QPoint& cursor)
  glPushMatrix();
  glLoadIdentity();
 
-#if 1
- glTranslatef(-mCameraX, -mCameraY, -mCameraZ);
- glRotatef(mRotateX, 1.0, 0.0, 0.0);
- glRotatef(mRotateY, 0.0, 1.0, 0.0);
- glRotatef(mRotateZ, 0.0, 0.0, 1.0);
-#else
  camera()->applyCameraToScene();
-#endif
  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
  glColor3f(1.0f, 1.0f, 1.0f);
 
@@ -719,23 +698,16 @@ void ModelPreview::mouseMoveEvent(QMouseEvent* e)
 {
  mMouseMoveDiff->moveEvent(e);
  if (e->state() & LeftButton) {
-	if (e->state() & ControlButton) {
-		int dx = mMouseMoveDiff->dx();
-		int dy = mMouseMoveDiff->dy();
-		emit signalRotateXChanged(mRotateX + (float)(dx) / 2);
-		emit signalRotateYChanged(mRotateY + (float)(dy) / 2);
-	} else {
-	}
  } else if (e->state() & RightButton) {
 	// dx == rot. around x axis. this is equal to d_y_ mouse movement.
 	int dx = mMouseMoveDiff->dy();
 	int dy = mMouseMoveDiff->dx(); // rotation around y axis
 
-	BoQuaternion q;
-	q.setRotation(mRotateX, mRotateY, mRotateZ);
-	BoMatrix m = q.matrix();
+	BoQuaternion q = camera()->quaternion();
+	BoQuaternion inv = q.inverse();
+	BoVector3 cameraPos;
+	q.transform(&cameraPos, &camera()->cameraPos());
 
-	float a, b, c;
 	BoQuaternion q2;
 	q2.setRotation(dx, dy, 0);
 
@@ -748,11 +720,10 @@ void ModelPreview::mouseMoveEvent(QMouseEvent* e)
 	// multiply.
 	q2.multiply(q);
 
-	q2.toRotation(&a, &b, &c);
+	inv = q2.inverse();
+	inv.transform(&cameraPos, &cameraPos);
 
-	signalRotateXChanged(a);
-	signalRotateYChanged(b);
-	signalRotateZChanged(c);
+	updateCamera(cameraPos, q2);
  }
 }
 
@@ -786,6 +757,26 @@ void ModelPreview::slotLODChanged(int l)
  mCurrentLOD = l;
 }
 
+void ModelPreview::updateCamera(const BoVector3& cameraPos, const BoQuaternion& q)
+{
+ updateCamera(cameraPos, q.matrix());
+}
+
+void ModelPreview::updateCamera(const BoVector3& cameraPos, const BoMatrix& rotationMatrix)
+{
+ BoVector3 lookAt;
+ BoVector3 up;
+ rotationMatrix.toGluLookAt(&lookAt, &up, cameraPos);
+ updateCamera(cameraPos, lookAt, up);
+}
+
+void ModelPreview::updateCamera(const BoVector3& cameraPos, const BoVector3& lookAt, const BoVector3& up)
+{
+ BO_CHECK_NULL_RET(camera());
+ camera()->setGluLookAt(cameraPos, lookAt, up);
+ emit signalCameraChanged();
+}
+
 
 RenderMain::RenderMain()
 {
@@ -809,13 +800,11 @@ RenderMain::RenderMain()
  layout->addWidget(mPreview, 1);
  mPreview->show();
 
+ connect(mPreview, SIGNAL(signalCameraChanged()), mConfig, SLOT(slotCameraChanged()));
+ mConfig->setCamera(mPreview->camera());
+
+
  connectBoth(mConfig, mPreview, SIGNAL(signalFovYChanged(float)), SLOT(slotFovYChanged(float)));
- connectBoth(mConfig, mPreview, SIGNAL(signalRotateXChanged(float)), SLOT(slotRotateXChanged(float)));
- connectBoth(mConfig, mPreview, SIGNAL(signalRotateYChanged(float)), SLOT(slotRotateYChanged(float)));
- connectBoth(mConfig, mPreview, SIGNAL(signalRotateZChanged(float)), SLOT(slotRotateZChanged(float)));
- connectBoth(mConfig, mPreview, SIGNAL(signalCameraXChanged(float)), SLOT(slotCameraXChanged(float)));
- connectBoth(mConfig, mPreview, SIGNAL(signalCameraYChanged(float)), SLOT(slotCameraYChanged(float)));
- connectBoth(mConfig, mPreview, SIGNAL(signalCameraZChanged(float)), SLOT(slotCameraZChanged(float)));
  connectBoth(mConfig, mPreview, SIGNAL(signalFrameChanged(int)), SLOT(slotFrameChanged(int)));
  connectBoth(mConfig, mPreview, SIGNAL(signalLODChanged(int)), SLOT(slotLODChanged(int)));
  connect(mConfig, SIGNAL(signalResetDefaults()), mPreview, SLOT(slotResetView()));
@@ -824,20 +813,13 @@ RenderMain::RenderMain()
  connect(mConfig, SIGNAL(signalDisallowPlacementChanged(bool)), mPreview, SLOT(slotDisallowPlacementChanged(bool)));
  connect(mConfig, SIGNAL(signalWireFrameChanged(bool)), mPreview, SLOT(slotWireFrameChanged(bool)));
 
- mPreview->slotResetView();
 
+ mPreview->slotResetView();
  setCentralWidget(w);
 
  initKAction();
 
  mIface = new BoDebugDCOPIface();
-
-
-#if 0
- BoCameraWidget* cameraWidget = new BoCameraWidget(0, "bocamerawidget");
- cameraWidget->setCamera(mPreview->camera());
- cameraWidget->show();
-#endif
 }
 
 RenderMain::~RenderMain()
@@ -850,6 +832,87 @@ void RenderMain::connectBoth(QObject* o1, QObject* o2, const char* signal, const
 {
  connect(o1, signal, o2, slot);
  connect(o2, signal, o1, slot);
+}
+
+bool RenderMain::loadCamera(KCmdLineArgs* args)
+{
+ BoQuaternion quat = mPreview->camera()->quaternion();
+ BoVector3 cameraPos = mPreview->camera()->cameraPos();
+
+ // in borender we use a first translate, then rotate approach, whereas the
+ // camera does it the other way round. we need to transform the vector first.
+ quat.transform(&cameraPos, &cameraPos);
+
+ if (args->isSet("camera-x")) {
+	bool ok = false;
+	float c = args->getOption("camera-x").toFloat(&ok);
+	if (!ok) {
+		boError() << k_funcinfo << "camera-x must be a number" << endl;
+		return false;
+	}
+	cameraPos.setX(c);
+ }
+ if (args->isSet("camera-y")) {
+	bool ok = false;
+	float c = args->getOption("camera-y").toFloat(&ok);
+	if (!ok) {
+		boError() << k_funcinfo << "camera-y must be a number" << endl;
+		return false;
+	}
+	cameraPos.setY(c);
+ }
+ if (args->isSet("camera-z")) {
+	bool ok = false;
+	float c = args->getOption("camera-z").toFloat(&ok);
+	if (!ok) {
+		boError() << k_funcinfo << "camera-z must be a number" << endl;
+		return false;
+	}
+	cameraPos.setZ(c);
+ }
+ if (args->isSet("rotate-x")) {
+	bool ok = false;
+	float r = args->getOption("rotate-x").toFloat(&ok);
+	if (!ok) {
+		boError() << k_funcinfo << "rotate-x must be a number" << endl;
+		return false;
+	}
+	BoQuaternion q;
+	q.setRotation(r, 0.0f, 0.0f);
+	quat.multiply(q);
+ }
+ if (args->isSet("rotate-y")) {
+	bool ok = false;
+	float r = args->getOption("rotate-y").toFloat(&ok);
+	if (!ok) {
+		boError() << k_funcinfo << "rotate-y must be a number" << endl;
+		return false;
+	}
+	BoQuaternion q;
+	q.setRotation(0.0f, r, 0.0f);
+	quat.multiply(q);
+ }
+ if (args->isSet("rotate-z")) {
+	bool ok = false;
+	float r = args->getOption("rotate-z").toFloat(&ok);
+	if (!ok) {
+		boError() << k_funcinfo << "rotate-z must be a number" << endl;
+		return false;
+	}
+	BoQuaternion q;
+	q.setRotation(0.0f, 0.0f, r);
+	quat.multiply(q);
+ }
+ // re-transform to gluLookAt() values
+ quat.inverse().transform(&cameraPos, &cameraPos);
+
+ BoVector3 lookAt, up;
+ quat.matrix().toGluLookAt(&lookAt, &up, cameraPos);
+
+ mPreview->camera()->setGluLookAt(cameraPos, lookAt, up);
+ mConfig->slotCameraChanged();
+
+ return true;
 }
 
 void RenderMain::slotUnitChanged(int index)
@@ -1099,41 +1162,6 @@ PreviewConfig::PreviewConfig(QWidget* parent) : QWidget(parent)
  topLayout->addWidget(mFovY);
  topLayout->addStretch(1);
 
-
- mRotateX = new KMyFloatNumInput(this);
- mRotateY = new KMyFloatNumInput(this);
- mRotateZ = new KMyFloatNumInput(this);
- mRotateX->setLabel(i18n("Rotation around X-axis"));
- mRotateY->setLabel(i18n("Rotation around Y-axis"));
- mRotateZ->setLabel(i18n("Rotation around Z-axis"));
- mRotateX->setRange((int)MIN_ROTATE, (int)MAX_ROTATE, 1, true);
- mRotateY->setRange((int)MIN_ROTATE, (int)MAX_ROTATE, 1, true);
- mRotateZ->setRange((int)MIN_ROTATE, (int)MAX_ROTATE, 1, true);
- connect(mRotateX, SIGNAL(valueChanged(float)), this, SIGNAL(signalRotateXChanged(float)));
- connect(mRotateY, SIGNAL(valueChanged(float)), this, SIGNAL(signalRotateYChanged(float)));
- connect(mRotateZ, SIGNAL(valueChanged(float)), this, SIGNAL(signalRotateZChanged(float)));
- topLayout->addWidget(mRotateX);
- topLayout->addWidget(mRotateY);
- topLayout->addWidget(mRotateZ);
- topLayout->addStretch(1);
-
- mCameraX = new KMyFloatNumInput(this);
- mCameraY = new KMyFloatNumInput(this);
- mCameraZ = new KMyFloatNumInput(this);
- mCameraX->setLabel(i18n("Camera X Position"));
- mCameraY->setLabel(i18n("Camera Y Position"));
- mCameraZ->setLabel(i18n("Camera Z Position"));
- mCameraX->setRange(MIN_CAMERA_X, MAX_CAMERA_X, 0.2, slider);
- mCameraY->setRange(MIN_CAMERA_Y, MAX_CAMERA_Y, 0.2, slider);
- mCameraZ->setRange(MIN_CAMERA_Z, MAX_CAMERA_Z, 0.2, slider);
- connect(mCameraX, SIGNAL(valueChanged(float)), this, SIGNAL(signalCameraXChanged(float)));
- connect(mCameraY, SIGNAL(valueChanged(float)), this, SIGNAL(signalCameraYChanged(float)));
- connect(mCameraZ, SIGNAL(valueChanged(float)), this, SIGNAL(signalCameraZChanged(float)));
- topLayout->addWidget(mCameraX);
- topLayout->addWidget(mCameraY);
- topLayout->addWidget(mCameraZ);
- topLayout->addStretch(1);
-
  mFrame = new KIntNumInput(this);
  mFrame->setLabel(i18n("Frame"));
  mFrame->setRange(0, 0);
@@ -1162,6 +1190,10 @@ PreviewConfig::PreviewConfig(QWidget* parent) : QWidget(parent)
  connect(mWireFrame, SIGNAL(toggled(bool)), this, SIGNAL(signalWireFrameChanged(bool)));
  topLayout->addWidget(mWireFrame);
 
+ mCameraWidget = new BoCameraWidget(this, "bocamerawidget");
+ topLayout->addWidget(mCameraWidget);
+ mCameraWidget->show();
+
  QPushButton* defaults = new QPushButton(i18n("Reset Defaults"), this);
  connect(defaults, SIGNAL(clicked()), this, SIGNAL(signalResetDefaults()));
  topLayout->addStretch(1);
@@ -1171,6 +1203,16 @@ PreviewConfig::PreviewConfig(QWidget* parent) : QWidget(parent)
 
 PreviewConfig::~PreviewConfig()
 {
+}
+
+void PreviewConfig::setCamera(BoCamera* camera)
+{
+ mCameraWidget->setCamera(camera);
+}
+
+void PreviewConfig::slotCameraChanged()
+{
+ mCameraWidget->slotUpdateFromCamera();
 }
 
 int main(int argc, char **argv)
@@ -1255,62 +1297,10 @@ int main(int argc, char **argv)
 	}
  }
 
- // AB: currently this makes sense when unit is specified on command line, as
- // all view parameter are reset on unit loading
- if (args->isSet("camera-x")) {
-	bool ok = false;
-	float c = args->getOption("camera-x").toFloat(&ok);
-	if (!ok) {
-		boError() << k_funcinfo << "camera-x must be a number" << endl;
-		return 1;
-	}
-	main->emitSignalCameraX(c);
+ if (!main->loadCamera(args)) {
+	return 1;
  }
- if (args->isSet("camera-y")) {
-	bool ok = false;
-	float c = args->getOption("camera-y").toFloat(&ok);
-	if (!ok) {
-		boError() << k_funcinfo << "camera-y must be a number" << endl;
-		return 1;
-	}
-	main->emitSignalCameraY(c);
- }
- if (args->isSet("camera-z")) {
-	bool ok = false;
-	float c = args->getOption("camera-z").toFloat(&ok);
-	if (!ok) {
-		boError() << k_funcinfo << "camera-z must be a number" << endl;
-		return 1;
-	}
-	main->emitSignalCameraZ(c);
- }
- if (args->isSet("rotate-x")) {
-	bool ok = false;
-	float r = args->getOption("rotate-x").toFloat(&ok);
-	if (!ok) {
-		boError() << k_funcinfo << "rotate-x must be a number" << endl;
-		return 1;
-	}
-	main->emitSignalRotateX(r);
- }
- if (args->isSet("rotate-y")) {
-	bool ok = false;
-	float r = args->getOption("rotate-y").toFloat(&ok);
-	if (!ok) {
-		boError() << k_funcinfo << "rotate-y must be a number" << endl;
-		return 1;
-	}
-	main->emitSignalRotateY(r);
- }
- if (args->isSet("rotate-z")) {
-	bool ok = false;
-	float r = args->getOption("rotate-z").toFloat(&ok);
-	if (!ok) {
-		boError() << k_funcinfo << "rotate-z must be a number" << endl;
-		return 1;
-	}
-	main->emitSignalRotateZ(r);
- }
+
  if (args->isSet("fovy")) {
 	bool ok = false;
 	float f = args->getOption("fovy").toFloat(&ok);
