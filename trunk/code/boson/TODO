@@ -41,16 +41,8 @@ Game TODOs
   this must NOT depend on the .3ds file!
 - many methods depend on a factory to be a facility. remove this dependance. a
   production plugin can be part of a mobile unit, too
-- maintaining two different files for one map sucks. we should be able to place
-  all map_name.boson data into the .bpf file, too. xml supports i18n, too!
-- particles: there are only very few different textures used by particles
-  (specified in particles.boson). we would gain a lot of speed by grouping all
-  particles with one texture on the screen into a single glBegin()/glEnd() pair
 - Add screenshots support to saving/loading widget
 - Shooting sounds should be specified per weapon, not per unit
-- Particles must be drawn properly. Current drawing sucks. We need to create a
-  list of all particles, sorted by depth and then draw them all with
-  depth-testing enabled.
 
 Editor (map, unit, scenario) TODOs
 - don't place units on invalid tiles (e.g. ship on grass)
