@@ -20,6 +20,7 @@
 #define UNITBASE_H
 
 #include "rtti.h"
+#include "items/bosonitem.h"
 
 #include <kgame/kgameproperty.h>
 
@@ -32,6 +33,7 @@ template<class T, class T2> class QMap;
 
 class Player;
 class PlayerIO;
+class BosonCanvas;
 class UnitProperties;
 class PluginProperties;
 class SpeciesTheme;
@@ -48,7 +50,7 @@ class UnitPropertyHandler;
  * @short The base class of all Units.
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
  **/
-class UnitBase
+class UnitBase : public BosonItem
 {
 public:
 	/**
@@ -98,7 +100,7 @@ public:
 		WorkTurn = 10
 	};
 	
-	UnitBase(const UnitProperties* prop);
+	UnitBase(const UnitProperties* prop, Player* owner, BosonCanvas* canvas);
 	virtual ~UnitBase();
 
 	/**

@@ -87,8 +87,7 @@ public:
 };
 
 Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
-		: UnitBase(prop),
-		BosonItem(owner->speciesTheme() ? owner->speciesTheme()->unitModel(prop->typeId()) : 0, canvas)
+		: UnitBase(prop, owner, canvas)
 {
  if (!mInitialized) {
 	initStatic();

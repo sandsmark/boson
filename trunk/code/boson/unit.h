@@ -20,7 +20,6 @@
 #define UNIT_H
 
 #include "unitbase.h"
-#include "items/bosonitem.h"
 #include "global.h"
 
 class Player;
@@ -51,7 +50,7 @@ class KGameUnitDebug;
  * therefore not possible! This is done to save as much memory as possible.
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
  **/
-class Unit : public UnitBase, public BosonItem
+class Unit : public UnitBase
 {
 public:
 	enum PropertyIds {
