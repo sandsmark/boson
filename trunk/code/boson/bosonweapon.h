@@ -56,23 +56,44 @@ class BosonWeaponProperties
      * @return The number of advance calls until the weapon is reloaded
      **/
     inline unsigned int reloadingTime() const  { return mReload; };
+    /**
+     * The damage this unit makes to other units. Negative values means
+     * repairing
+    **/
+    long int damage() const { return mDamage; };
+    /**
+     * @return Damage range of missile of this unit, e.g. range in what units will be damaged
+     **/
+    float damageRange() const { return mDamageRange; };
+    /**
+     * @return Speed of missile of this unit (per second) or 0 if speed is infinite
+     **/
+    unsigned long int speed() const  { return mSpeed; };
 
-    inline unsigned long int id() const  { return mId; };
+    inline SpeciesTheme* theme() const  { return mTheme; };
+    inline BosonModel* model() const  { return mModel; };
 
-    BosonShot* newShot(Unit* attacker, float x, float y, float z, float tx, float ty, float tz) const
-        { return mShotProp->newShot(attacker, x, y, z, tx, ty, tz); };
+    BosonShot* newShot(Unit* attacker, float x, float y, float z, float tx, float ty, float tz) const;
+
     QPtrList<BosonParticleSystem> newShootParticleSystems(float x, float y, float z) const;
-        //{ if(mShootParticleSystem) return mShootParticleSystem->newSystem(x, y, z); };
+    QPtrList<BosonParticleSystem> newFlyParticleSystems(float x, float y, float z) const;
+    QPtrList<BosonParticleSystem> newHitParticleSystems(float x, float y, float z) const;
 
   private:
     unsigned long int mRange;
+    long int mDamage;
+    float mDamageRange;
     bool mCanShootAtAirUnits;
     bool mCanShootAtLandUnits;
     unsigned int mReload;
-    SpeciesTheme* mTheme;  // NOTE: this may change!
-    unsigned long int mId;
-    BosonShotProperties* mShotProp;
+    SpeciesTheme* mTheme;
+    unsigned long int mSpeed;
+    BosonModel* mModel;
     QPtrList<BosonParticleSystemProperties> mShootParticleSystems;
+    QPtrList<BosonParticleSystemProperties> mFlyParticleSystems;
+    QPtrList<BosonParticleSystemProperties> mHitParticleSystems;
+
+
 };
 
 

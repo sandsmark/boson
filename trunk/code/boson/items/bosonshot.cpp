@@ -20,15 +20,11 @@
 #include "bosonshot.h"
 
 #include "../unit.h"
-#include "../unitproperties.h"
-#include "../speciestheme.h"
-#include "../bosonmodel.h"
 #include "../player.h"
 #include "../global.h"
 #include "../bosoncanvas.h"
 #include "../bosonparticlesystem.h"
-#include "../bosonparticlemanager.h"
-#include "../bosonmodel.h"
+#include "../bosonweapon.h"
 
 #include <kdebug.h>
 #include <ksimpleconfig.h>
@@ -37,63 +33,8 @@
 
 #include <math.h>
 
-/*****  BosonShotProperties  *****/
-BosonShotProperties::BosonShotProperties(SpeciesTheme* theme, KSimpleConfig* cfg)
-{
-  mTheme = theme;
-  mId = cfg->readUnsignedLongNumEntry("Id", 0);
-  if(mId == 0)
-  {
-    kdError() << k_funcinfo << "Invalid id in group " << cfg->group() << endl;
-  }
-  mDamage = cfg->readUnsignedLongNumEntry("Damage", 0);
-  mSpeed = cfg->readLongNumEntry("Speed", 0);
-  mDamageRange = (float)(cfg->readDoubleNumEntry("DamageRange", 1));
-  mFlyParticleSystems = BosonParticleSystemProperties::loadParticleSystemProperties(cfg, "FlyParticles", theme);
-  kdDebug() << "    " << k_funcinfo << "There are " << mFlyParticleSystems.count() << " particle systems in fly list" << endl;
-  mHitParticleSystems = BosonParticleSystemProperties::loadParticleSystemProperties(cfg, "HitParticles", theme);
-  kdDebug() << "    " << k_funcinfo << "There are " << mHitParticleSystems.count() << " particle systems in hit list" << endl;
-  // We need to have some kind of model even for bullet (though it won't be shown),
-  //  because BosonItem will crash otherwise
-  mModel = theme->objectModel(cfg->readEntry("Model", "missile.3ds"));
-}
 
-BosonShotProperties::~BosonShotProperties()
-{
-}
-
-BosonShot* BosonShotProperties::newShot(Unit* attacker, float x, float y, float z, float tx, float ty, float tz)
-{
-  return new BosonShot(this, attacker, x, y, z, tx, ty, tz);
-}
-
-QPtrList<BosonParticleSystem> BosonShotProperties::newFlyParticleSystems(float x, float y, float z) const
-{
-  QPtrList<BosonParticleSystem> list;
-  QPtrListIterator<BosonParticleSystemProperties> it(mFlyParticleSystems);
-  while(it.current())
-  {
-    list.append(it.current()->newSystem(x, y, z));
-    ++it;
-  }
-  return list;
-}
-
-QPtrList<BosonParticleSystem> BosonShotProperties::newHitParticleSystems(float x, float y, float z) const
-{
-  QPtrList<BosonParticleSystem> list;
-  QPtrListIterator<BosonParticleSystemProperties> it(mHitParticleSystems);
-  while(it.current())
-  {
-    list.append(it.current()->newSystem(x, y, z));
-    ++it;
-  }
-  return list;
-}
-
-
-/*****  BosonShot  *****/
-BosonShot::BosonShot(BosonShotProperties* prop, Unit* attacker, float x, float y, float z, float tx, float ty, float tz) :
+BosonShot::BosonShot(const BosonWeaponProperties* prop, Unit* attacker, float x, float y, float z, float tx, float ty, float tz) :
     BosonItem(prop->model(), attacker->canvas())
 {
   kdDebug() << "MISSILE: " << k_funcinfo << "Creating new shot" << endl;

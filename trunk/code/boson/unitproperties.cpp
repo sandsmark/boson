@@ -68,12 +68,14 @@ UnitProperties::UnitProperties(SpeciesTheme* theme, const QString& fileName)
  mTheme = theme;
  mMobileProperties = 0;
  mFacilityProperties = 0;
+ mWeapons.setAutoDelete(true);
 
  loadUnitType(fileName);
 }
 
 UnitProperties::~UnitProperties()
 {
+ mWeapons.clear();
  delete mMobileProperties;
  delete mFacilityProperties;
 }
@@ -109,35 +111,7 @@ void UnitProperties::loadUnitType(const QString& fileName)
  mArmor = conf.readUnsignedLongNumEntry("Armor", 0);
  mSupportMiniMap = conf.readBoolEntry("SupportMiniMap", false);
  isFacility = conf.readBoolEntry("IsFacility", false);
- // KConfig doesn't support reading list of _unsigned_ int's so we must cast
- //  them ourselves
-/* QValueList<int> tmpRequirements = conf.readIntListEntry("Requirements");
- QValueList<int>::Iterator it;
- for(it = tmpRequirements.begin(); it != tmpRequirements.end(); it++) {
-	mRequirements.append((unsigned long int)(*it));
- }*/
  mRequirements = BosonConfig::readUnsignedLongNumList(&conf, "Requirements");
-
- QValueList<unsigned long int> weaponIds = BosonConfig::readUnsignedLongNumList(&conf, "Weapons");
- QValueList<unsigned long int>::Iterator it;
- for(it = weaponIds.begin(); it != weaponIds.end(); it++) {
-	mWeapons.append(mTheme->weaponProperties(*it));
- }
- kdDebug() << k_funcinfo << "Loaded " << mWeapons.count() << " weapons" << endl;
-
- // We cache can-shoot-at values so we don't have to iterate through all the weapons when we need them
- mCanShootAtAirUnits = false;
- mCanShootAtLandUnits = false;
- QPtrListIterator<BosonWeaponProperties> wit(mWeapons);
- while(wit.current()) {
-	if(wit.current()->canShootAtAirUnits()) {
-		mCanShootAtAirUnits = true;
-	}
-	if(wit.current()->canShootAtLandUnits()) {
-		mCanShootAtLandUnits = true;
-	}
-	++wit;
- }
 
  mDestroyedParticleSystems = BosonParticleSystemProperties::loadParticleSystemProperties(&conf, "DestroyedParticles", mTheme);
 
@@ -153,6 +127,7 @@ void UnitProperties::loadUnitType(const QString& fileName)
  loadTextureNames(&conf);
  loadSoundNames(&conf);
  loadUpgrades(&conf);
+ loadWeapons(&conf);
 }
 
 void UnitProperties::loadMobileProperties(KSimpleConfig* conf)
@@ -232,6 +207,25 @@ void UnitProperties::loadSoundNames(KSimpleConfig* conf)
  mSounds.insert(SoundReportProduced, conf->readEntry("ReportProduced", "report_produced"));
  mSounds.insert(SoundReportDestroyed, conf->readEntry("ReportDestroyed", "report_destroyed"));
  mSounds.insert(SoundReportUnderAttack, conf->readEntry("ReportUnderAttack", "report_underattack"));
+}
+
+void UnitProperties::loadWeapons(KSimpleConfig* conf)
+{
+ conf->setGroup("Boson Unit");
+ int num = conf->readNumEntry("Weapons", 0);
+ mCanShootAtAirUnits = false;
+ mCanShootAtLandUnits = false;
+ for (int i = 0; i < num; i++) {
+	conf->setGroup(QString("Weapon_%1").arg(i));
+	BosonWeaponProperties* p = new BosonWeaponProperties(conf, mTheme);
+	mWeapons.append(p);
+	if(p->canShootAtAirUnits()) {
+		mCanShootAtAirUnits = true;
+	}
+	if(p->canShootAtLandUnits()) {
+		mCanShootAtLandUnits = true;
+	}
+ }
 }
 
 bool UnitProperties::isMobile() const

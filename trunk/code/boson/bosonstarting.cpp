@@ -309,8 +309,6 @@ void BosonStarting::loadPlayerData()
 	while (it.current()) {
 		// Order of calls below is very important!!! Don't change this unless you're sure you know what you're doing!!!
 		((Player*)it.current())->speciesTheme()->loadParticleSystems();
-		((Player*)it.current())->speciesTheme()->loadShots();
-		((Player*)it.current())->speciesTheme()->loadWeapons();
 		((Player*)it.current())->speciesTheme()->readUnitConfigs();
 		loadUnitDatas(((Player*)it.current()), progress);
 		((Player*)it.current())->speciesTheme()->loadTechnologies();
