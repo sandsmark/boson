@@ -21,8 +21,8 @@
 
 #include "defines.h"
 #include "bosontexturearray.h"
+#include "bodebug.h"
 
-#include <kdebug.h>
 #include <kimageeffect.h>
 
 #include <qimage.h>
@@ -48,7 +48,7 @@ GLuint SelectBoxData::list(double factor)
  if (!mDisplayLists.contains(list)) {
 	loadBoxes();
 	if (!mDisplayLists.contains(list)) {
-		kdError() << k_funcinfo << "Unable to generate a SelectBox for " << factor << endl;
+		boError() << k_funcinfo << "Unable to generate a SelectBox for " << factor << endl;
 		return 0;
 	}
 	return mDisplayLists[list];
@@ -61,7 +61,7 @@ void SelectBoxData::loadBoxes()
  // TODO: we might want to use mipmaps here - interesting for big units, as well as for zooming
  GLuint list = glGenLists(POWER_LEVELS);
  if (mTextures) {
-	kdWarning() << k_funcinfo << "textures loaded before" << endl;
+	boWarning() << k_funcinfo << "textures loaded before" << endl;
 	delete mTextures;
 	mTextures = 0;
  }
@@ -78,7 +78,7 @@ void SelectBoxData::loadBoxes()
 
  mTextures = new BosonTextureArray(textureImages);
  if (!mTextures->texture(0)) {
-	kdWarning() << k_funcinfo << "textures got loaded improperly" << endl;
+	boWarning() << k_funcinfo << "textures got loaded improperly" << endl;
  }
 
  for (unsigned int i = 0; i < POWER_LEVELS; i++) {

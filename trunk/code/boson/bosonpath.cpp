@@ -23,6 +23,7 @@
 #include "bosoncanvas.h"
 #include "defines.h"
 #include "player.h"
+#include "bodebug.h"
 
 #include <qpoint.h>
 #include <sys/time.h> // only for debug
@@ -112,7 +113,7 @@ BosonPath::BosonPath(Unit* unit, int startx, int starty, int goalx, int goaly, i
   mMinCost = 3;
   mAbortPath = (SEARCH_STEPS * 2 + 1) * (SEARCH_STEPS * 2 + 1);
 
-  kdDebug() << k_funcinfo << "start: " << mStartx << "," << mStarty << " goal: " << mGoalx << "," << mGoaly << " range: " << mRange << endl;
+  boDebug() << k_funcinfo << "start: " << mStartx << "," << mStarty << " goal: " << mGoalx << "," << mGoaly << " range: " << mRange << endl;
 }
 
 BosonPath::~BosonPath()
@@ -124,7 +125,7 @@ QValueList<QPoint> BosonPath::findPath(Unit* unit, int goalx, int goaly, int ran
   QValueList<QPoint> points;
   if (!unit)
   {
-    kdError() << k_funcinfo << "NULL unit" << endl;
+    boError() << k_funcinfo << "NULL unit" << endl;
     return points;
   }
   QPoint p = unit->boundingRect().center();
@@ -132,7 +133,7 @@ QValueList<QPoint> BosonPath::findPath(Unit* unit, int goalx, int goaly, int ran
         goalx / BO_TILE_SIZE, goaly / BO_TILE_SIZE, range);
   if (!path.findPath())
   {
-    kdWarning() << "no path found" << endl;
+    boWarning() << "no path found" << endl;
   }
   points = path.path; // faster than manually coping all points
   return points;
@@ -236,7 +237,7 @@ bool BosonPath::findFastPath()
     {
       // Path can't be found using fast method
       gettimeofday(&time2, 0);
-      kdDebug() << k_funcinfo << "Can't find path using fast method. Time elapsed: " 
+      boDebug() << k_funcinfo << "Can't find path using fast method. Time elapsed: " 
           << time2.tv_usec - time1.tv_usec << " microsec." << endl;
       return false;
     }
@@ -262,7 +263,7 @@ bool BosonPath::findFastPath()
   }
 
   gettimeofday(&time2, 0);
-  kdDebug() << k_funcinfo << "Path found (using fast method)! Time elapsed: " <<
+  boDebug() << k_funcinfo << "Path found (using fast method)! Time elapsed: " <<
       time2.tv_usec - time1.tv_usec << "microsec." << endl;
 
   return true;
@@ -357,7 +358,7 @@ bool BosonPath::findSlowPath()
     // Check if we've gone too long with searching
     if(mNodesRemoved >= mAbortPath)
     {
-      kdDebug() << k_funcinfo << "mNodesRemoved >= mAbortPath" << endl;
+      boDebug() << k_funcinfo << "mNodesRemoved >= mAbortPath" << endl;
       // Pick best node from OPEN
 #ifdef USE_STL
       for(vector<PathNode>::iterator i = open.begin(); i != open.end(); ++i)
@@ -392,7 +393,7 @@ bool BosonPath::findSlowPath()
       // Make sure that position is valid
       if(! mUnit->canvas()->onCanvas(n2.x * BO_TILE_SIZE, n2.y * BO_TILE_SIZE))
       {
-        //kdWarning() << k_lineinfo << "not on canvas" << endl;
+        //boWarning() << k_lineinfo << "not on canvas" << endl;
         continue;
       }
 
@@ -406,7 +407,7 @@ bool BosonPath::findSlowPath()
         {
           goalUnReachable = true;
         }
-        //kdDebug() << k_lineinfo << "ERROR_COST" << endl;
+        //boDebug() << k_lineinfo << "ERROR_COST" << endl;
         continue;
       }
       else // we can go on this cell
@@ -464,7 +465,7 @@ bool BosonPath::findSlowPath()
             }
             if (find == open.end()) 
             {
-              kdError() << "find != open.end()" << endl;
+              boError() << "find != open.end()" << endl;
               break; // or what?
             }
             // Mark new direction from this node to previous one
@@ -530,7 +531,7 @@ bool BosonPath::findSlowPath()
     }
     if (counter >= 100) 
     {
-      kdWarning() << k_lineinfo << "oops - counter >= 100" << endl;
+      boWarning() << k_lineinfo << "oops - counter >= 100" << endl;
     }
 
     // Write normal-ordered path to path
@@ -553,10 +554,10 @@ bool BosonPath::findSlowPath()
   }
   else
   {
-    kdDebug() << k_funcinfo << "path not found" << endl;
-    kdDebug() << "node.x=" << node.x << ",goalx=" << mGoalx << endl;
-    kdDebug() << "node.y=" << node.y << ",goaly=" << mGoaly << endl;
-    kdDebug() << "node.g=" << node.g << ",MAX_PATH_COST=" << MAX_PATH_COST << endl;
+    boDebug() << k_funcinfo << "path not found" << endl;
+    boDebug() << "node.x=" << node.x << ",goalx=" << mGoalx << endl;
+    boDebug() << "node.y=" << node.y << ",goaly=" << mGoaly << endl;
+    boDebug() << "node.g=" << node.g << ",MAX_PATH_COST=" << MAX_PATH_COST << endl;
     // Path wasn't found
     // If path wasn't found we add one point with coordinates -1; -1 to path.
     //  In Unit::advanceMove(), there is check for this and if coordinates are
@@ -565,7 +566,7 @@ bool BosonPath::findSlowPath()
   }
 
   gettimeofday(&time2, 0);
-  kdDebug() << k_funcinfo << "Path found (using slow method)! Time elapsed: " <<
+  boDebug() << k_funcinfo << "Path found (using slow method)! Time elapsed: " <<
       time2.tv_usec - time1.tv_usec << "microsec." << endl;
 
   return (pathfound != NoPath);
@@ -615,20 +616,20 @@ float BosonPath::cost(int x, int y)
   // Check at the very beginning if tile is fogged - if it is, we return one value and save time
   if(mUnit->owner()->isFogged(x, y))
   {
-    //kdDebug() << "Tile at (" << x << ", " << y << ") is fogged, returning FOGGED_COST" << endl;
+    //boDebug() << "Tile at (" << x << ", " << y << ") is fogged, returning FOGGED_COST" << endl;
     return FOGGED_COST + mMinCost;
   }
 
   Cell* c = mUnit->canvas()->cell(x, y);
   if (!c) {
-    kdError() << k_funcinfo << "NULL cell" << endl;
+    boError() << k_funcinfo << "NULL cell" << endl;
     return ERROR_COST;
   }
 
   // Check if we can go to that tile, if we can't, return ERROR_COST
   if(! c->canGo(mUnit->unitProperties()))
   {
-    //kdDebug() << k_lineinfo << "cannot go on " << x << "," << y << endl;
+    //boDebug() << k_lineinfo << "cannot go on " << x << "," << y << endl;
     return ERROR_COST;
   }
 
@@ -679,21 +680,21 @@ Direction BosonPath::reverseDir(Direction d)
 
 void BosonPath::debug() const
 {
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  if (!mUnit) {
-	kdError() << "NULL unit" << endl;
+	boError() << "NULL unit" << endl;
 	return;
  }
- kdDebug() << "unit: " << mUnit->id() << endl;
- kdDebug() << "startx,starty = " << mStartx << "," << mStarty << endl;
- kdDebug() << "goalx,goaly = " << mGoalx << "," << mGoaly << endl;
- kdDebug() << "waypoints: " << path.size() << endl;
+ boDebug() << "unit: " << mUnit->id() << endl;
+ boDebug() << "startx,starty = " << mStartx << "," << mStarty << endl;
+ boDebug() << "goalx,goaly = " << mGoalx << "," << mGoaly << endl;
+ boDebug() << "waypoints: " << path.size() << endl;
  int j = 0;
  for(QValueList<QPoint>::const_iterator i = path.begin(); i != path.end(); ++i, j++) {
-	kdDebug() << "waypoint " << j << ":" << endl;
-	kdDebug() << "x,y=" << (*i).x() << "," << (*i).y() << endl;
+	boDebug() << "waypoint " << j << ":" << endl;
+	boDebug() << "x,y=" << (*i).x() << "," << (*i).y() << endl;
  }
- kdDebug() << k_funcinfo << "(end)" << endl;
+ boDebug() << k_funcinfo << "(end)" << endl;
 }
 
 bool BosonPath::inRange(int x, int y)

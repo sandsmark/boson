@@ -18,8 +18,8 @@
 */
 
 #include "bo3dtools.h"
+#include "bodebug.h"
 
-#include <kdebug.h>
 #include <kconfig.h>
 
 #include <qstring.h>
@@ -47,7 +47,7 @@ BoVector3 BoVector3::load(KConfig* cfg, QString key)
   }
   else if(list.count() != 3)
   {
-    kdError() << k_funcinfo << "BoVector3 entry must have 3 floats, not " << list.count() << endl;
+    boError() << k_funcinfo << "BoVector3 entry must have 3 floats, not " << list.count() << endl;
     return BoVector3();
   }
   return BoVector3(list[0], list[1], list[2]);
@@ -63,7 +63,7 @@ BoVector4 BoVector4::load(KConfig* cfg, QString key)
   }
   else if(list.count() != 4)
   {
-    kdError() << k_funcinfo << "BoVector4 entry must have 4 floats, not " << list.count() << endl;
+    boError() << k_funcinfo << "BoVector4 entry must have 4 floats, not " << list.count() << endl;
     return BoVector4();
   }
   return BoVector4(list[0], list[1], list[2], list[3]);
@@ -88,7 +88,7 @@ void BoMatrix::loadMatrix(GLenum matrix)
    case GL_TEXTURE_MATRIX:
      break;
    default:
-     kdError() << k_funcinfo << "Invalid matrix enum " << (int)matrix << endl;
+     boError() << k_funcinfo << "Invalid matrix enum " << (int)matrix << endl;
  }
  glGetFloatv(matrix, mData);
 }
@@ -246,11 +246,11 @@ bool BoMatrix::invert(BoMatrix* inverse) const
 
 void BoMatrix::debugMatrix(const GLfloat* m)
 {
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  for (int i = 0; i < 4; i++) {
-   kdDebug() << QString("%1 %2 %3 %4").arg(m[i]).arg(m[i + 4]).arg(m[i + 8]).arg(m[i + 12]) << endl;
+   boDebug() << QString("%1 %2 %3 %4").arg(m[i]).arg(m[i + 4]).arg(m[i + 8]).arg(m[i + 12]) << endl;
  }
- kdDebug() << k_funcinfo << "done" << endl;
+ boDebug() << k_funcinfo << "done" << endl;
 }
 
 

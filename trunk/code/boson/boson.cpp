@@ -31,8 +31,8 @@
 #include "bosonplayfield.h"
 #include "global.h"
 #include "upgradeproperties.h"
+#include "bodebug.h"
 
-#include <kdebug.h>
 #include <klocale.h>
 #include <kgame/kgameio.h>
 
@@ -252,7 +252,7 @@ void Boson::setCanvas(BosonCanvas* c)
 
 void Boson::setPlayField(BosonPlayField* p)
 {
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  d->mPlayField = p;
 }
 
@@ -268,7 +268,7 @@ void Boson::setLocalPlayer(Player* p)
 
 void Boson::quitGame()
 {
-// kdDebug() << k_funcinfo << endl;
+// boDebug() << k_funcinfo << endl;
 // reset everything
  d->mGameTimer->stop();
  setGameStatus(KGame::End);
@@ -276,7 +276,7 @@ void Boson::quitGame()
 
  // remove all players from game
  removeAllPlayers();
-// kdDebug() << k_funcinfo << " done" <<  endl;
+// boDebug() << k_funcinfo << " done" <<  endl;
 }
 
 void Boson::removeAllPlayers()
@@ -292,7 +292,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 {
  Player* player = (Player*)p;
  if (player->isOutOfGame()) {
-	kdWarning() << k_funcinfo << "Player must not send input anymore!!" << endl;
+	boWarning() << k_funcinfo << "Player must not send input anymore!!" << endl;
 	return true;
  }
  if (!gameMode()) {
@@ -301,7 +301,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 	Q_UINT32 editor;
 	stream >> editor;
 	if (editor != BosonMessage::MoveEditor) {
-		kdError() << k_funcinfo << "Not an editor message, elthough we're in editor mode!" << endl;
+		boError() << k_funcinfo << "Not an editor message, elthough we're in editor mode!" << endl;
 		return true;
 	}
  }
@@ -318,27 +318,27 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 		for (unsigned int i = 0; i < unitCount; i++) {
 			Q_ULONG unitId;
 			stream >> unitId;
-//			kdDebug() << "pos: " << pos.x() << " " << pos.y() << endl;
+//			boDebug() << "pos: " << pos.x() << " " << pos.y() << endl;
 			Unit* unit = findUnit(unitId, player);
 			if (!unit) {
-				kdDebug() << "unit " << unitId << " not found for this player" << endl;
+				boDebug() << "unit " << unitId << " not found for this player" << endl;
 				continue;
 			}
 			if (unit->owner() != player) {
-				kdDebug() << "unit " << unitId << "only owner can move units!" << endl;
+				boDebug() << "unit " << unitId << "only owner can move units!" << endl;
 				continue;
 			}
 			if (unit->isDestroyed()) {
-				kdDebug() << "cannot move destroyed units" << endl;
+				boDebug() << "cannot move destroyed units" << endl;
 				continue;
 			}
-//			kdDebug() << "move " << unitId << endl;
+//			boDebug() << "move " << unitId << endl;
 			if (unit->unitProperties()->isMobile()) {
 				unitsToMove.append(unit);
 			}
 		}
 		if (unitsToMove.count() == 0) {
-			kdWarning() << k_lineinfo << "no unit to move" << endl;
+			boWarning() << k_lineinfo << "no unit to move" << endl;
 			break;
 		}
 		QPtrListIterator<Unit> it(unitsToMove);
@@ -365,7 +365,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 		stream >> unitCount;
 		Unit* attackedUnit = findUnit(attackedUnitId, 0);
 		if (!attackedUnit) {
-			kdError() << "Cannot attack NULL unit" << endl;
+			boError() << "Cannot attack NULL unit" << endl;
 			return true;
 		}
 		for (unsigned int i = 0; i < unitCount; i++) {
@@ -374,25 +374,25 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			if (unitId == attackedUnitId) {
 				// can become possible one day - e.g. when
 				// repairing a unit
-				kdWarning() << "Can not (yet) attack myself" 
+				boWarning() << "Can not (yet) attack myself" 
 						<< endl;
 				continue;
 			}
 			Unit* unit = findUnit(unitId, player);
 			if (!unit) {
-				kdDebug() << "unit " << unitId << " not found for this player" << endl;
+				boDebug() << "unit " << unitId << " not found for this player" << endl;
 				continue;
 			}
 			if (unit->isDestroyed()) {
-				kdDebug() << "cannot attack with destroyed units" << endl;
+				boDebug() << "cannot attack with destroyed units" << endl;
 				continue;
 			}
 			if (attackedUnit->isDestroyed()) {
-				kdDebug() << "no sense in attacking destroyed units" << endl;
+				boDebug() << "no sense in attacking destroyed units" << endl;
 				continue;
 			}
 			if (unit->unitProperties()->canShoot()) {
-				kdDebug() << unitId << " attacks " << attackedUnitId << endl;
+				boDebug() << unitId << " attacks " << attackedUnitId << endl;
 				unit->setTarget(attackedUnit);
 				if (unit->target()) {
 					unit->setWork(Unit::WorkAttack);
@@ -411,21 +411,21 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			stream >> unitId;
 			Unit* unit = findUnit(unitId, player);
 			if (!unit) {
-				kdDebug() << "unit " << unitId << " not found for this player" << endl;
+				boDebug() << "unit " << unitId << " not found for this player" << endl;
 				continue;
 			}
 			if (unit->owner() != player) {
-				kdDebug() << "unit " << unitId << "only owner can stop units!" << endl;
+				boDebug() << "unit " << unitId << "only owner can stop units!" << endl;
 				continue;
 			}
 			if (unit->isDestroyed()) {
-				kdDebug() << "cannot stop destroyed units" << endl;
+				boDebug() << "cannot stop destroyed units" << endl;
 				continue;
 			}
 			unitsToStop.append(unit);
 		}
 		if (unitsToStop.count() == 0) {
-			kdWarning() << k_lineinfo << "no unit to stop" << endl;
+			boWarning() << k_lineinfo << "no unit to stop" << endl;
 			break;
 		}
 		QPtrListIterator<Unit> it(unitsToStop);
@@ -437,31 +437,31 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 	}
 	case BosonMessage::MoveMine:
 	{
-		kdDebug() << "MoveMine" << endl;
+		boDebug() << "MoveMine" << endl;
 		Q_ULONG unitId;
 		QPoint pos;
 		stream >> unitId;
 		stream >> pos;
 		Unit* u = findUnit(unitId, player);
 		if (!u) {
-			kdError() << k_lineinfo << "cannot find unit " << unitId << " for player " << player << endl;
+			boError() << k_lineinfo << "cannot find unit " << unitId << " for player " << player << endl;
 			break;
 		}
 		if (!u->isMobile()) {
-			kdError() << k_lineinfo << "only mobile units can mine" << endl;
+			boError() << k_lineinfo << "only mobile units can mine" << endl;
 			break;
 		}
 		HarvesterPlugin* h = (HarvesterPlugin*)u->plugin(UnitPlugin::Harvester);
 		if (!h) {
-			kdError() << k_lineinfo << "only harvester can mine" << endl;
+			boError() << k_lineinfo << "only harvester can mine" << endl;
 			break;
 		}
 		if (u->owner() != player) {
-			kdDebug() << k_funcinfo << "unit " << unitId << "only owner can move units!" << endl;
+			boDebug() << k_funcinfo << "unit " << unitId << "only owner can move units!" << endl;
 			break;
 		}
 		if (u->isDestroyed()) {
-			kdDebug() << "cannot mine with destroyed units" << endl;
+			boDebug() << "cannot mine with destroyed units" << endl;
 			break;
 		}
 		h->mineAt(pos);
@@ -469,7 +469,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 	}
 	case BosonMessage::MoveRefine:
 	{
-		kdDebug() << "MoveRefine" << endl;
+		boDebug() << "MoveRefine" << endl;
 		Q_UINT32 refineryOwnerId;
 		Q_ULONG refineryId;
 		Q_UINT32 unitCount;
@@ -478,22 +478,22 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 		stream >> unitCount;
 		Player* refineryOwner = (Player*)findPlayer(refineryOwnerId);
 		if (!refineryOwner) {
-			kdError() << k_lineinfo << "Cannot find player " << refineryOwnerId << endl;
+			boError() << k_lineinfo << "Cannot find player " << refineryOwnerId << endl;
 			break;
 		}
 		if (player->isEnemy(refineryOwner)) {
-			kdError() << k_lineinfo << "Cannot go to enemy refinery" << endl;
+			boError() << k_lineinfo << "Cannot go to enemy refinery" << endl;
 			break;
 		}
 		Unit* refinery = findUnit(refineryId, refineryOwner);
 		if (!refinery) {
-			kdError() << k_lineinfo << "cannot find refinery " << refineryId << " for player " << refineryOwnerId << endl;
+			boError() << k_lineinfo << "cannot find refinery " << refineryId << " for player " << refineryOwnerId << endl;
 			break;
 		}
 #warning TODO
 //		if (!refinery->plugin(UnitPlugin::Refinery)) {
 		if (!refinery->isFacility()) { // FIXME do not depend on facility!
-			kdWarning() << k_lineinfo << "refinery must be a facility" << endl;
+			boWarning() << k_lineinfo << "refinery must be a facility" << endl;
 			break;
 		}
 		for (unsigned int i = 0; i < unitCount; i++) {
@@ -501,7 +501,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			stream >> unitId;
 			Unit* u = findUnit(unitId, player);
 			if (!u) {
-				kdError() << k_lineinfo << "cannot find unit " << unitId << " for player " << player->id() << endl;
+				boError() << k_lineinfo << "cannot find unit " << unitId << " for player " << player->id() << endl;
 				continue;
 			}
 			if (u->isDestroyed()) {
@@ -512,7 +512,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			}
 			HarvesterPlugin* h = (HarvesterPlugin*)u->plugin(UnitPlugin::Harvester);
 			if (!h) {
-				kdError() << k_lineinfo << "must be a harvester" << endl;
+				boError() << k_lineinfo << "must be a harvester" << endl;
 				continue;
 			}
 			h->refineAt((Facility*)refinery);
@@ -538,21 +538,21 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 		stream >> unitCount;
 		Player* repairOwner= (Player*)findPlayer(repairOwnerId);
 		if (!repairOwner) {
-			kdError() << k_lineinfo << "Cannot find player " << repairOwnerId << endl;
+			boError() << k_lineinfo << "Cannot find player " << repairOwnerId << endl;
 			break;
 		}
 		if (player->isEnemy(repairOwner)) {
-			kdError() << k_lineinfo << "Cannot move to enemy repairyard" << endl;
+			boError() << k_lineinfo << "Cannot move to enemy repairyard" << endl;
 			break;
 		}
 		Unit* repairYard = findUnit(repairId, repairOwner);
 		if (!repairYard) {
-			kdError() << k_lineinfo << "Cannot find " << repairId << " for player " << repairOwnerId << endl;
+			boError() << k_lineinfo << "Cannot find " << repairId << " for player " << repairOwnerId << endl;
 			break;
 		}
 		RepairPlugin* repair = repairYard->repairPlugin();
 		if (!repair) {
-			kdError() << k_lineinfo << "repairyard cannot repair?!" << endl;
+			boError() << k_lineinfo << "repairyard cannot repair?!" << endl;
 			break;
 		}
 		for (unsigned int i = 0; i < unitCount; i++) {
@@ -560,11 +560,11 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			stream >> unitId;
 			Unit* u = findUnit(unitId, player);
 			if (!u) {
-				kdError() << k_lineinfo << "cannot find unit " << unitId << " for player " << player->id()  << endl;
+				boError() << k_lineinfo << "cannot find unit " << unitId << " for player " << player->id()  << endl;
 				continue;
 			}
 			if (!u->isMobile()) {
-				kdError() << k_lineinfo << "must be a mobile unit" << endl;
+				boError() << k_lineinfo << "must be a mobile unit" << endl;
 				continue;
 			}
 			repair->repair(u);
@@ -586,23 +586,23 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 
 		Player* p = (Player*)findPlayer(owner);
 		if (!p) {
-			kdError() << k_lineinfo << "Cannot find player " << owner << endl;
+			boError() << k_lineinfo << "Cannot find player " << owner << endl;
 			break;
 		}
 		Unit* factory = findUnit(factoryId, p);
 		if (!factory) {
-			kdError() << "Cannot find unit " << factoryId << endl;
+			boError() << "Cannot find unit " << factoryId << endl;
 			break;
 		}
 
 		ProductionPlugin* production = (ProductionPlugin*)factory->plugin(UnitPlugin::Production);
 		if (!production) {
 			// maybe not yet fully constructed
-			kdWarning() << k_lineinfo << factory->id() << " cannot produce" << endl;
+			boWarning() << k_lineinfo << factory->id() << " cannot produce" << endl;
 			break;
 		}
 		if (id <= 0) {
-			kdError() << k_lineinfo << "Invalid id " << id << endl;
+			boError() << k_lineinfo << "Invalid id " << id << endl;
 			break;
 		}
 
@@ -612,7 +612,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			// Produce unit
 			const UnitProperties* prop = p->unitProperties(id);
 			if (!prop) {
-				kdError() << k_lineinfo << "NULL unit properties (EVIL BUG)" << endl;
+				boError() << k_lineinfo << "NULL unit properties (EVIL BUG)" << endl;
 				break;
 			}
 			mineralCost = prop->mineralCost();
@@ -621,13 +621,13 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			// Produce technology
 			const TechnologyProperties* prop = p->speciesTheme()->technology(id);
 			if (!prop) {
-				kdError() << k_lineinfo << "NULL technology properties (EVIL BUG)" << endl;
+				boError() << k_lineinfo << "NULL technology properties (EVIL BUG)" << endl;
 				break;
 			}
 			mineralCost = prop->mineralCost();
 			oilCost = prop->oilCost();
 		} else {
-			kdError() << k_funcinfo << "Invalid productionType: " << productionType << endl;
+			boError() << k_funcinfo << "Invalid productionType: " << productionType << endl;
 		}
 
 			if (factory->currentPluginType() != UnitPlugin::Production) {
@@ -660,7 +660,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 	}
 	case BosonMessage::MoveProduceStop:
 	{
-		kdDebug() << "MoveProduceStop" << endl;
+		boDebug() << "MoveProduceStop" << endl;
 		Q_UINT32 productionType;
 		Q_UINT32 owner;
 		Q_ULONG factoryId;
@@ -674,28 +674,28 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 
 		Player* p = (Player*)findPlayer(owner);
 		if (!p) {
-			kdError() << k_lineinfo << "Cannot find player " << owner << endl;
+			boError() << k_lineinfo << "Cannot find player " << owner << endl;
 			break;
 		}
 		Unit* factory = findUnit(factoryId, p);
 		if (!factory) {
-			kdError() << "Cannot find unit " << factoryId << endl;
+			boError() << "Cannot find unit " << factoryId << endl;
 			break;
 		}
 
 		ProductionPlugin* production = (ProductionPlugin*)factory->plugin(UnitPlugin::Production);
 		if (!production) {
 			// should not happen here!
-			kdError() << k_lineinfo << factory->id() << "cannot produce?!" << endl;
+			boError() << k_lineinfo << factory->id() << "cannot produce?!" << endl;
 			break;
 		}
 		if (!production->contains((ProductionType)productionType, (unsigned long int)id)) {
-			kdDebug() << k_lineinfo << "Production " << productionType << " with id "
+			boDebug() << k_lineinfo << "Production " << productionType << " with id "
 					 << id << " is not in production queue" << endl;
 			return true;
 		}
 		if (id <= 0) {
-			kdError() << k_lineinfo << "Invalid id " << id << endl;
+			boError() << k_lineinfo << "Invalid id " << id << endl;
 			break;
 		}
 
@@ -704,7 +704,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 		if ((ProductionType)productionType == ProduceUnit) {
 			const UnitProperties* prop = p->unitProperties(id);
 			if (!prop) {
-				kdError() << k_lineinfo << "NULL unit properties (EVIL BUG)" << endl;
+				boError() << k_lineinfo << "NULL unit properties (EVIL BUG)" << endl;
 				break;
 			}
 			mineralCost = prop->mineralCost();
@@ -712,13 +712,13 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 		} else if ((ProductionType)productionType == ProduceTech) {
 			const TechnologyProperties* prop = p->speciesTheme()->technology(id);
 			if (!prop) {
-				kdError() << k_lineinfo << "NULL technology properties (EVIL BUG)" << endl;
+				boError() << k_lineinfo << "NULL technology properties (EVIL BUG)" << endl;
 				break;
 			}
 			mineralCost = prop->mineralCost();
 			oilCost = prop->oilCost();
 		} else {
-			kdError() << k_funcinfo << "Invalid productionType: " << productionType << endl;
+			boError() << k_funcinfo << "Invalid productionType: " << productionType << endl;
 		}
 
 		if ((production->currentProductionId() == id) && (production->currentProductionType() == (ProductionType)productionType)) {
@@ -747,7 +747,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 	}
 	case BosonMessage::MoveBuild:
 	{
-		kdDebug() << "MoveBuild" << endl;
+		boDebug() << "MoveBuild" << endl;
 		Q_UINT32 productionType;
 		Q_ULONG factoryId;
 		Q_UINT32 owner;
@@ -763,32 +763,32 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 
 		// Only units are "built"
 		if ((ProductionType)productionType != ProduceUnit) {
-			kdError() << k_funcinfo << "Invalid productionType: " << productionType << endl;
+			boError() << k_funcinfo << "Invalid productionType: " << productionType << endl;
 			break;
 		}
 
 		Player* p = (Player*)findPlayer(owner);
 		if (!p) {
-			kdError() << k_lineinfo << "Cannot find player " << owner << endl;
+			boError() << k_lineinfo << "Cannot find player " << owner << endl;
 			break;
 		}
 		Unit* factory = findUnit(factoryId, p);
 		if (!factory) {
-			kdError() << "Cannot find unit " << factoryId << endl;
+			boError() << "Cannot find unit " << factoryId << endl;
 			break;
 		}
 		ProductionPlugin* production = (ProductionPlugin*)factory->plugin(UnitPlugin::Production);
 		if (!production) {
 			// should not happen here!
-			kdError() << k_lineinfo << factory->id() << "cannot produce?!" << endl;
+			boError() << k_lineinfo << factory->id() << "cannot produce?!" << endl;
 			break;
 		}
 		if (production->completedProductionType() != ProduceUnit) {
-			kdError() << k_lineinfo << "not producing unit!" << endl;
+			boError() << k_lineinfo << "not producing unit!" << endl;
 			break;
 		}
 		int unitType = production->completedProductionId();
-		kdDebug() << k_lineinfo
+		boDebug() << k_lineinfo
 				<< "factory="
 				<< factory->id()
 				<< ",unitid="
@@ -796,7 +796,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 				<< endl;
 		if (unitType <= 0) {
 			// hope this is working...
-			kdWarning() << k_lineinfo << "not yet completed" << endl;
+			boWarning() << k_lineinfo << "not yet completed" << endl;
 			break;
 		}
 		buildProducedUnit(production, unitType, x, y);
@@ -810,27 +810,27 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 		stream >> unitCount;
 		Unit* followUnit = findUnit(followUnitId, 0);
 		if (!followUnit) {
-			kdError() << "Cannot follow NULL unit" << endl;
+			boError() << "Cannot follow NULL unit" << endl;
 			return true;
 		}
 		for (unsigned int i = 0; i < unitCount; i++) {
 			Q_ULONG unitId;
 			stream >> unitId;
 			if (unitId == followUnitId) {
-				kdWarning() << "Cannot follow myself" << endl;
+				boWarning() << "Cannot follow myself" << endl;
 				continue;
 			}
 			Unit* unit = findUnit(unitId, player);
 			if (!unit) {
-				kdDebug() << "unit " << unitId << " not found for this player" << endl;
+				boDebug() << "unit " << unitId << " not found for this player" << endl;
 				continue;
 			}
 			if (unit->isDestroyed()) {
-				kdDebug() << "cannot follow with destroyed units" << endl;
+				boDebug() << "cannot follow with destroyed units" << endl;
 				continue;
 			}
 			if (followUnit->isDestroyed()) {
-				kdDebug() << "Cannot follow destroyed units" << endl;
+				boDebug() << "Cannot follow destroyed units" << endl;
 				continue;
 			}
 			unit->setTarget(followUnit);
@@ -859,7 +859,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			p = playerList()->at(owner);
 		}
 		if (!p) {
-			kdError() << k_lineinfo << "Cannot find player " << owner << endl;
+			boError() << k_lineinfo << "Cannot find player " << owner << endl;
 			break;
 		}
 
@@ -889,7 +889,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 		break;
 	}
 	default:
-		kdWarning() << k_funcinfo << "unexpected playerInput " << msgid << endl;
+		boWarning() << k_funcinfo << "unexpected playerInput " << msgid << endl;
 		break;
  }
  return true;
@@ -918,7 +918,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 			p = playerList()->at(owner);
 		}
 		if (!p) {
-			kdError() << k_lineinfo << "Cannot find player " << owner << endl;
+			boError() << k_lineinfo << "Cannot find player " << owner << endl;
 			break;
 		}
 		addUnit(unitType, (Player*)p, x, y);
@@ -939,7 +939,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 			p = playerList()->at(owner);
 		}
 		if (!p) {
-			kdError() << k_lineinfo << "Cannot find player " << owner << endl;
+			boError() << k_lineinfo << "Cannot find player " << owner << endl;
 			break;
 		}
 
@@ -960,7 +960,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 		d->mAdvanceDividerCount = 0;
 		lock();
 #ifndef NO_ADVANCE_DEBUG
-		kdDebug() << "Advance - speed (calls per " << ADVANCE_INTERVAL 
+		boDebug() << "Advance - speed (calls per " << ADVANCE_INTERVAL 
 				<< "ms)=" << gameSpeed() << " elapsed: " 
 				<< d->mAdvanceReceived.elapsed() << endl;
 #endif
@@ -993,7 +993,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 		break;
 	case BosonMessage::IdGameIsStarted:
 		if (!isRunning()) {
-			kdError() << "Received IdGameIstarted but it isn't" << endl;
+			boError() << "Received IdGameIstarted but it isn't" << endl;
 			return;
 		}
 		emit signalGameStarted();
@@ -1008,7 +1008,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 		stream >> color;
 		Player* p = (Player*)findPlayer(id);
 		if (!p) {
-			kdError() << k_lineinfo << "Cannot find player " << id << endl;
+			boError() << k_lineinfo << "Cannot find player " << id << endl;
 			return;
 		}
 		p->loadTheme(SpeciesTheme::speciesDirectory(species), QColor(color));
@@ -1023,17 +1023,17 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 		stream >> color;
 		Player* p = (Player*)findPlayer(id);
 		if (!p) {
-			kdError() << k_lineinfo << "Cannot find player " << id << endl;
+			boError() << k_lineinfo << "Cannot find player " << id << endl;
 			return;
 		}
 		if (!p->speciesTheme()) {
-			kdError() << k_lineinfo << "NULL speciesTheme for " << id << endl;
+			boError() << k_lineinfo << "NULL speciesTheme for " << id << endl;
 			return;
 		}
 		if (p->speciesTheme()->setTeamColor(QColor(color))) {
 			emit signalTeamColorChanged(p);
 		} else {
-			kdWarning() << k_lineinfo << "could not change color for " << id << endl;
+			boWarning() << k_lineinfo << "could not change color for " << id << endl;
 		}
 		break;
 	}
@@ -1049,7 +1049,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 		break;
 	}
 	default:
-		kdWarning() << k_funcinfo << "unhandled msgid " << msgid << endl;
+		boWarning() << k_funcinfo << "unhandled msgid " << msgid << endl;
 		break;
  }
 }
@@ -1065,7 +1065,7 @@ void Boson::startGame()
  if (isServer()) {
 	connect(d->mGameTimer, SIGNAL(timeout()), this, SLOT(slotSendAdvance()));
  } else {
-	kdWarning() << "is not server - cannot start the game!" << endl;
+	boWarning() << "is not server - cannot start the game!" << endl;
  }
 }
 
@@ -1077,17 +1077,17 @@ void Boson::slotSendAdvance()
 Unit* Boson::createUnit(unsigned long int unitType, Player* owner)
 {
  if (!owner) {
-	kdError() << k_funcinfo << "NULL owner" << endl;
+	boError() << k_funcinfo << "NULL owner" << endl;
 	return 0;
  }
  SpeciesTheme* theme = owner->speciesTheme();
  if (!theme) {
-	kdError() << k_funcinfo << "No theme for this player" << endl;
+	boError() << k_funcinfo << "No theme for this player" << endl;
 	return 0; // BAAAAD - will crash
  }
  const UnitProperties* prop = theme->unitProperties(unitType);
  if (!prop) {
-	kdError() << "Unknown unitType " << unitType << endl;
+	boError() << "Unknown unitType " << unitType << endl;
 	return 0;
  }
 
@@ -1097,7 +1097,7 @@ Unit* Boson::createUnit(unsigned long int unitType, Player* owner)
  } else if (prop->isFacility()) {
 	unit = new Facility(prop, owner, d->mCanvas);
  } else { // should be impossible
-	kdError() << k_funcinfo << "invalid unit type " << unitType << endl;
+	boError() << k_funcinfo << "invalid unit type " << unitType << endl;
 	return 0;
  }
  owner->addUnit(unit); // can also be in Unit c'tor - is this clean?
@@ -1109,17 +1109,17 @@ Unit* Boson::createUnit(unsigned long int unitType, Player* owner)
 Unit* Boson::loadUnit(unsigned long int unitType, Player* owner)
 {
  if (!owner) {
-	kdError() << k_funcinfo << "NULL owner" << endl;
+	boError() << k_funcinfo << "NULL owner" << endl;
 	return 0;
  }
  SpeciesTheme* theme = owner->speciesTheme();
  if (!theme) {
-	kdError() << k_funcinfo << "No theme for this player" << endl;
+	boError() << k_funcinfo << "No theme for this player" << endl;
 	return 0; // BAAAAD - will crash
  }
  const UnitProperties* prop = theme->unitProperties(unitType);
  if (!prop) {
-	kdError() << "Unknown unitType " << unitType << endl;
+	boError() << "Unknown unitType " << unitType << endl;
 	return 0;
  }
 
@@ -1129,7 +1129,7 @@ Unit* Boson::loadUnit(unsigned long int unitType, Player* owner)
  } else if (prop->isFacility()) {
 	unit = new Facility(prop, owner, d->mCanvas);
  } else { // should be impossible
-	kdError() << k_funcinfo << "invalid unit type " << unitType << endl;
+	boError() << k_funcinfo << "invalid unit type " << unitType << endl;
 	return 0;
  }
 
@@ -1139,7 +1139,7 @@ Unit* Boson::loadUnit(unsigned long int unitType, Player* owner)
 unsigned long int Boson::nextUnitId()
 {
  d->mNextUnitId = d->mNextUnitId + 1;
-//kdDebug() << "next id: " << d->mNextUnitId << endl;
+//boDebug() << "next id: " << d->mNextUnitId << endl;
  return d->mNextUnitId;
 }
 
@@ -1161,7 +1161,7 @@ Unit* Boson::findUnit(unsigned long int id, Player* searchIn) const
 
 KPlayer* Boson::createPlayer(int rtti, int io, bool isVirtual)
 {
- kdDebug() << k_funcinfo << "rtti=" << rtti << ",io=" << io
+ boDebug() << k_funcinfo << "rtti=" << rtti << ",io=" << io
 		<< ",isVirtual=" << isVirtual << endl;
  Player* p = new Player();
  p->setGame(this);
@@ -1181,20 +1181,20 @@ int Boson::gameSpeed() const
 
 void Boson::slotSetGameSpeed(int speed)
 {
- kdDebug() << k_funcinfo << " speed = " << speed << endl;
+ boDebug() << k_funcinfo << " speed = " << speed << endl;
  if (d->mGameSpeed == speed) {
 	return; // do not restart timer
  }
  if (speed < 0) {
-	kdError() << "Invalid speed value " << speed << endl;
+	boError() << "Invalid speed value " << speed << endl;
 	return;
  }
  if ((speed < MIN_GAME_SPEED || speed > MAX_GAME_SPEED) && speed != 0) {
-	kdWarning() << "unexpected speed " << speed << " - pausing" << endl;
+	boWarning() << "unexpected speed " << speed << " - pausing" << endl;
 	d->mGameSpeed = 0;
 	return;
  }
- kdDebug() << k_funcinfo << "Setting speed to " << speed << endl;
+ boDebug() << k_funcinfo << "Setting speed to " << speed << endl;
  d->mGameSpeed = speed;
 }
 
@@ -1202,16 +1202,16 @@ void Boson::slotPropertyChanged(KGamePropertyBase* p)
 {
  switch (p->id()) {
 	case IdGameSpeed:
-		kdDebug() << k_funcinfo << "speed has changed, new speed: " << gameSpeed() << endl;
+		boDebug() << k_funcinfo << "speed has changed, new speed: " << gameSpeed() << endl;
 		if (isServer()) {
 			if (d->mGameSpeed == 0) {
 				if (d->mGameTimer->isActive()) {
-					kdDebug() << "pausing" << endl;
+					boDebug() << "pausing" << endl;
 					d->mGameTimer->stop();
 				}
 			} else {
 				if (!d->mGameTimer->isActive()) {
-					kdDebug() << "start timer - ms="
+					boDebug() << "start timer - ms="
 							<< ADVANCE_INTERVAL
 							<< endl;
 					d->mGameTimer->start(ADVANCE_INTERVAL);
@@ -1231,7 +1231,7 @@ void Boson::slotSave(QDataStream& /*stream*/)
 
 void Boson::slotLoad(QDataStream& /*stream*/)
 {
-// kdDebug() << "next id: " << d->mNextUnitId << endl;
+// boDebug() << "next id: " << d->mNextUnitId << endl;
 }
 
 void Boson::slotSendAddUnit(unsigned long int unitType, int x, int y, Player* owner)
@@ -1240,11 +1240,11 @@ void Boson::slotSendAddUnit(unsigned long int unitType, int x, int y, Player* ow
 	return;
  }
  if (!owner) {
-	kdWarning() << k_funcinfo << "NULL owner! using first player" << endl;
+	boWarning() << k_funcinfo << "NULL owner! using first player" << endl;
 	owner = (Player*)playerList()->at(0);
  }
  if (!owner) { // no player here
-	kdError() << k_funcinfo << "NULL owner" << endl;
+	boError() << k_funcinfo << "NULL owner" << endl;
 	return;
  }
 
@@ -1263,11 +1263,11 @@ void Boson::sendAddUnits(const QString& xmlDocument, Player* owner)
 	return;
  }
  if (!owner) {
-	kdWarning() << k_funcinfo << "NULL owner! using first player" << endl;
+	boWarning() << k_funcinfo << "NULL owner! using first player" << endl;
 	owner = (Player*)playerList()->at(0);
  }
  if (!owner) { // no player here
-	kdError() << k_funcinfo << "NULL owner" << endl;
+	boError() << k_funcinfo << "NULL owner" << endl;
 	return;
  }
  QByteArray buffer;
@@ -1281,35 +1281,35 @@ void Boson::slotReplacePlayerIO(KPlayer* player, bool* remove)
 {
  *remove = false;
  if (!player) {
-	kdError() << k_funcinfo << "NULL player" << endl;
+	boError() << k_funcinfo << "NULL player" << endl;
 	return;
  }
  if (!isAdmin()) {
-	kdError() << k_funcinfo << "only ADMIN can do this" << endl; 
+	boError() << k_funcinfo << "only ADMIN can do this" << endl; 
 	return;
  }
-// kdDebug() << k_funcinfo << endl;
+// boDebug() << k_funcinfo << endl;
 }
 
 bool Boson::buildProducedUnit(ProductionPlugin* factory, unsigned long int unitType, int x, int y)
 {
  if (!factory) {
-	kdError() << k_funcinfo << "NULL factory plugin cannot produce" << endl;
+	boError() << k_funcinfo << "NULL factory plugin cannot produce" << endl;
 	return false;
  }
  Player* p = factory->player();
  if (!p) {
-	kdError() << k_funcinfo << "NULL owner" << endl;
+	boError() << k_funcinfo << "NULL owner" << endl;
 	return false;
  }
  if (!((BosonCanvas*)d->mCanvas)->canPlaceUnitAt(p->unitProperties(unitType), 
 			QPoint(x * BO_TILE_SIZE, y * BO_TILE_SIZE), 0)) {
-	kdDebug() << k_funcinfo << "Cannot create unit here" << endl;
+	boDebug() << k_funcinfo << "Cannot create unit here" << endl;
 	return false;
  }
  Unit* unit = addUnit(unitType, p, x, y);
  if (!unit) {
-	kdError() << k_funcinfo << "NULL unit" << endl;
+	boError() << k_funcinfo << "NULL unit" << endl;
 	return false;
  }
  if (unit->isFacility()) {
@@ -1327,15 +1327,15 @@ bool Boson::buildProducedUnit(ProductionPlugin* factory, unsigned long int unitT
 Unit* Boson::addUnit(unsigned long int unitType, Player* p, int x, int y)
 {
  if (x < 0 || (unsigned int)x >= d->mCanvas->mapWidth()) {
-	kdError() << k_funcinfo << "Invalid x-coordinate " << x << endl;
+	boError() << k_funcinfo << "Invalid x-coordinate " << x << endl;
 	return 0;
  }
  if (y < 0 || (unsigned int)y >= d->mCanvas->mapHeight()) {
-	kdError() << k_funcinfo << "Invalid y-coordinate " << y << endl;
+	boError() << k_funcinfo << "Invalid y-coordinate " << y << endl;
 	return 0;
  }
  if (!p) {
-	kdError() << k_funcinfo << "NULL player" << endl;
+	boError() << k_funcinfo << "NULL player" << endl;
 	return 0;
  }
  Unit* unit = createUnit(unitType, (Player*)p);
@@ -1350,13 +1350,13 @@ Unit* Boson::addUnit(QDomElement& node, Player* p)
  unsigned int x = 0;
  unsigned int y = 0;
  if (!BosonScenario::loadBasicUnit(node, unitType, x, y)) {
-	kdError() << k_funcinfo << "Received invalid XML file from server!!!! (very bad)" << endl;
+	boError() << k_funcinfo << "Received invalid XML file from server!!!! (very bad)" << endl;
 	return 0;
  }
  Unit* unit = createUnit(unitType, (Player*)p);
  unit->setId(nextUnitId());
  if (!BosonScenario::loadUnit(node, unit)) {
-	kdWarning() << k_funcinfo << "Received broken XML file from server. It may be that network is broken now!" << endl;
+	boWarning() << k_funcinfo << "Received broken XML file from server. It may be that network is broken now!" << endl;
 	// don't return - the error should be on every client so with some luck
 	// the player will never know that we had a problem here. Just a few
 	// (non-critical) values were not loaded.
@@ -1397,7 +1397,7 @@ void Boson::slotAdvanceComputerPlayers(unsigned int /*advanceCount*/, bool /*adv
  // introduced to KGameIO just for boson. See KGaneComputerIO documentation for
  // more. Basically this means - let the computer do something.
  QPtrListIterator<KGameComputerIO> it(d->mComputerIOList);
-// kdDebug() << "count = " << d->mComputerIOList.count() << endl;
+// boDebug() << "count = " << d->mComputerIOList.count() << endl;
  while (it.current()) {
 	it.current()->advance();
 	++it;
@@ -1410,7 +1410,7 @@ QValueList<QColor> Boson::availableTeamColors() const
  QPtrListIterator<KPlayer> it(*playerList());
  while (it.current()) {
 	if (((Player*)it.current())->speciesTheme()) {
-		kdDebug() << k_funcinfo <<  endl;
+		boDebug() << k_funcinfo <<  endl;
 		colors.remove(((Player*)it.current())->speciesTheme()->teamColor());
 	}
 	++it;
@@ -1452,7 +1452,7 @@ void Boson::slotReceiveAdvance()
  // - e.g. unit moving, OpenGL rendering, ... so 
  if (d->mAdvanceDividerCount + 1 == d->mAdvanceDivider)  {
 #ifndef NO_ADVANCE_DEBUG
-	kdDebug() << k_funcinfo << "delayed messages: "
+	boDebug() << k_funcinfo << "delayed messages: "
 			<< d->mDelayedMessages.count() << endl;
 #endif
 	unlock();
@@ -1466,14 +1466,14 @@ void Boson::slotReceiveAdvance()
 		next = 0;
 	}
 	if (d->mDelayedMessages.count() > 20) {
-		kdWarning() << k_funcinfo << "more than 20 messages delayed!!" << endl;
+		boWarning() << k_funcinfo << "more than 20 messages delayed!!" << endl;
 		next = 0;
 	}
-//	kdDebug() << "next: " << next << endl;
+//	boDebug() << "next: " << next << endl;
 	QTimer::singleShot(next,  this, SLOT(slotReceiveAdvance()));
 	d->mAdvanceDividerCount++;
  } else {
-	kdError() << k_funcinfo << "count > divider --> This must never happen!!" << endl;
+	boError() << k_funcinfo << "count > divider --> This must never happen!!" << endl;
  }
 }
 
@@ -1486,13 +1486,13 @@ void Boson::networkTransmission(QDataStream& stream, int msgid, Q_UINT32 r, Q_UI
 	m->receiver = r;
 	m->sender = s;
 	m->clientId = clientId;
-	kdDebug() << k_funcinfo << "delayed " << m->debug(this) << endl;
+	boDebug() << k_funcinfo << "delayed " << m->debug(this) << endl;
 	d->mDelayedMessages.enqueue(m);
 	d->mDelayedWaiting = true;
 	switch (msgid - KGameMessage::IdUser) {
 		case BosonMessage::AdvanceN:
 			d->mAdvanceMessageWaiting++;
-			kdDebug() << k_funcinfo << "advance message got delayed" << endl;
+			boDebug() << k_funcinfo << "advance message got delayed" << endl;
 			break;
 		default:
 			break;
@@ -1505,7 +1505,7 @@ void Boson::networkTransmission(QDataStream& stream, int msgid, Q_UINT32 r, Q_UI
 void Boson::lock()
 {
 #ifndef NO_ADVANCE_DEBUG
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
 #endif
  d->mIsLocked = true;
 }
@@ -1513,7 +1513,7 @@ void Boson::lock()
 void Boson::unlock()
 {
 #ifndef NO_ADVANCE_DEBUG
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
 #endif
  d->mIsLocked = false;
  while (!d->mDelayedMessages.isEmpty() && !d->mIsLocked) {
@@ -1525,7 +1525,7 @@ void Boson::slotProcessDelayed() // TODO: rename: processDelayed()
 {
  BoMessage* m = d->mDelayedMessages.dequeue();
  if (!m) {
-	kdWarning() << k_funcinfo << "no message here" << endl;
+	boWarning() << k_funcinfo << "no message here" << endl;
 	return;
  }
  QDataStream s(m->byteArray, IO_ReadOnly);
@@ -1556,7 +1556,7 @@ bool Boson::save(QDataStream& stream, bool saveplayers)
 
 bool Boson::savegame(QDataStream& stream, bool network, bool saveplayers)
 {
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  // KGame::load() doesn't emit signalLoadPrePlayers in KDE 3.0.x, so we have to
  //  rewrite some code to be able to load map before players (because players
  //  need map)
@@ -1571,7 +1571,7 @@ bool Boson::savegame(QDataStream& stream, bool network, bool saveplayers)
  stream << (Q_UINT32)BOSON_SAVEGAME_FORMAT_VERSION;
 
  if (gameStatus() != KGame::Init) {
-	kdDebug() << k_funcinfo << "Saveing started game" << endl;
+	boDebug() << k_funcinfo << "Saveing started game" << endl;
 	stream << (Q_INT8)true;
 	// Save map
 	d->mPlayField->saveMap(stream);
@@ -1580,17 +1580,17 @@ bool Boson::savegame(QDataStream& stream, bool network, bool saveplayers)
 	stream << d->mPlayer->id();
  } else {
 	stream << (Q_INT8)false;
-	kdDebug() << k_funcinfo << "Saveing not-yet started game" << endl;
+	boDebug() << k_funcinfo << "Saveing not-yet started game" << endl;
  }
 
  // Save KGame stuff
 #if !HAVE_KGAME_SAVEGAME
- kdWarning() << k_funcinfo << "Saving without KGame::savegame() is untested! (KDE 3.1 has KGame::savegame())" << endl;
+ boWarning() << k_funcinfo << "Saving without KGame::savegame() is untested! (KDE 3.1 has KGame::savegame())" << endl;
  if (!KGame::save(stream, saveplayers)) {
 #else
  if (!KGame::savegame(stream, network, saveplayers)) {
 #endif
-	kdError() << k_funcinfo << "Can't save KGame!" << endl;
+	boError() << k_funcinfo << "Can't save KGame!" << endl;
 	return false;
  }
 
@@ -1599,11 +1599,11 @@ bool Boson::savegame(QDataStream& stream, bool network, bool saveplayers)
  QPtrListIterator<KPlayer> it(*playerList());
  for (; it.current(); ++it) {
 	if (!((Player*)it.current())->saveUnits(stream)) {
-		kdError() << k_funcinfo << "Error when saving units" << endl;
+		boError() << k_funcinfo << "Error when saving units" << endl;
 	}
  }
 
- kdDebug() << k_funcinfo << " done" << endl;
+ boDebug() << k_funcinfo << " done" << endl;
  return true;
 }
 
@@ -1616,7 +1616,7 @@ bool Boson::load(QDataStream& stream, bool reset)
 bool Boson::loadgame(QDataStream& stream, bool network, bool reset)
 {
  // network is false for normal game-loading
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
 
  d->mLoadingStatus = LoadingInProgress;
 
@@ -1626,14 +1626,14 @@ bool Boson::loadgame(QDataStream& stream, bool network, bool reset)
  stream >> a >> b1 >> b2 >> b3;
  if ((a != 128) || (b1 != 'B' || b2 != 'S' || b3 != 'G')) {
 	// Error - not Boson SaveGame
-	kdError() << k_funcinfo << "This file is not Boson SaveGame" << endl;
+	boError() << k_funcinfo << "This file is not Boson SaveGame" << endl;
 	d->mLoadingStatus = InvalidFileFormat;
 	return false;
  }
  stream >> c;
  if (c != cookie()) {
 	// Error - wrong cookie
-	kdError() << k_funcinfo << "Invalid cookie in header" << endl;
+	boError() << k_funcinfo << "Invalid cookie in header" << endl;
 	d->mLoadingStatus = InvalidCookie;
 	return false;
  }
@@ -1641,7 +1641,7 @@ bool Boson::loadgame(QDataStream& stream, bool network, bool reset)
  if (v != BOSON_SAVEGAME_FORMAT_VERSION) {
 	// Error - older version
 	// TODO: It may be possible to load this version
-	kdError() << k_funcinfo << "Unsupported format version" << endl;
+	boError() << k_funcinfo << "Unsupported format version" << endl;
 	d->mLoadingStatus = InvalidVersion;
 	return false;
  }
@@ -1651,11 +1651,11 @@ bool Boson::loadgame(QDataStream& stream, bool network, bool reset)
  stream >> started;
  QByteArray mapBuffer;
  if (started) {
-	kdDebug() << k_funcinfo << "Loading a previously saved game" << endl;
+	boDebug() << k_funcinfo << "Loading a previously saved game" << endl;
 	// Load map
 	BosonPlayField* f = new BosonPlayField;
 	if (!f->loadMap(stream)) {
-		kdError() << k_funcinfo << "Could not load map" << endl;
+		boError() << k_funcinfo << "Could not load map" << endl;
 		return false;
 	}
 	QDataStream mapstream(mapBuffer, IO_WriteOnly);
@@ -1667,10 +1667,10 @@ bool Boson::loadgame(QDataStream& stream, bool network, bool reset)
  }
 
  // Load KGame stuff
- kdDebug() << "calling KGame::loadgame" << endl;
+ boDebug() << "calling KGame::loadgame" << endl;
  if (!KGame::loadgame(stream, network, reset)) {
 	// KGame loading error
-	kdError() << k_funcinfo << "KGame loading error" << endl;
+	boError() << k_funcinfo << "KGame loading error" << endl;
 	d->mLoadingStatus = KGameError;
 	return false;
  }
@@ -1700,11 +1700,11 @@ bool Boson::loadgame(QDataStream& stream, bool network, bool reset)
  QPtrListIterator<KPlayer> it(*playerList());
  for (; it.current(); ++it) {
 	if (!((Player*)it.current())->loadUnits(stream)) {
-		kdError() << k_funcinfo << "Error when loading units" << endl;
+		boError() << k_funcinfo << "Error when loading units" << endl;
 	}
  }
 
- kdDebug() << k_funcinfo << "kgame loading successful" << endl;
+ boDebug() << k_funcinfo << "kgame loading successful" << endl;
 
  if (started) { // AB (02/09/04): by any reason this was "!started" before - can't work, as localId is not initialized then. is this fix correct?
 	// Set local player
@@ -1712,7 +1712,7 @@ bool Boson::loadgame(QDataStream& stream, bool network, bool reset)
  }
 
  d->mLoadingStatus = LoadingCompleted;
- kdDebug() << k_funcinfo << " done" << endl;
+ boDebug() << k_funcinfo << " done" << endl;
  return true;
 }
 

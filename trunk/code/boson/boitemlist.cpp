@@ -19,10 +19,9 @@
 
 #include "boitemlist.h"
 
+//#include "bodebug.h"
 #include "rtti.h"
 #include "unit.h"
-
-#include <kdebug.h>
 
 QValueList<BosonItem*> BoItemList::items(bool collidingOnly, bool includeMoving, Unit* forUnit) const 
 {

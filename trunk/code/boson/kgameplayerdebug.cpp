@@ -23,9 +23,9 @@
 #include "boson.h"
 #include "player.h"
 #include "speciestheme.h"
+#include "bodebug.h"
 
 #include <klocale.h>
-#include <kdebug.h>
 
 #include <qvgroupbox.h>
 #include <qptrdict.h>

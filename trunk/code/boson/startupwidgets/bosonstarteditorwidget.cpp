@@ -30,9 +30,9 @@
 #include "../bosonplayfield.h"
 #include "../bosonscenario.h"
 #include "../speciestheme.h"
+#include "../bodebug.h"
 
 #include <klocale.h>
-#include <kdebug.h>
 
 #include <qframe.h>
 #include <qlabel.h>
@@ -84,16 +84,16 @@ void BosonStartEditorWidget::initKGame()
  //  KGame in KDE 3.0.0 (what about 3.0.1?) doesn't support infinite number of
  //  players (it's a bug actually)
  boGame->setMaxPlayers(BOSON_MAX_PLAYERS);
- kdDebug() << k_funcinfo << " minPlayers(): " << boGame->minPlayers() << endl;
- kdDebug() << k_funcinfo << " maxPlayers(): " << boGame->maxPlayers() << endl;
+ boDebug() << k_funcinfo << " minPlayers(): " << boGame->minPlayers() << endl;
+ boDebug() << k_funcinfo << " maxPlayers(): " << boGame->maxPlayers() << endl;
 }
 
 void BosonStartEditorWidget::initPlayer()
 {
- kdDebug() << k_funcinfo << "playerCount(): " << boGame->playerCount() << endl;
+ boDebug() << k_funcinfo << "playerCount(): " << boGame->playerCount() << endl;
  player()->setName(boConfig->readLocalPlayerName());
  if (player()->speciesTheme()) {
-	kdDebug() << k_funcinfo << "Player has speciesTheme already loaded, reloading" << endl;
+	boDebug() << k_funcinfo << "Player has speciesTheme already loaded, reloading" << endl;
  }
  mPlayercolor = boConfig->readLocalPlayerColor();
  player()->loadTheme(SpeciesTheme::speciesDirectory(SpeciesTheme::defaultSpecies()), mPlayercolor);
@@ -105,7 +105,7 @@ void BosonStartEditorWidget::slotStart()
  playField()->loadPlayField(BosonPlayField::playFieldFileName(BosonPlayField::defaultPlayField()));
  BosonScenario* scenario = playField()->scenario();
  if (!scenario) {
-	kdError() << k_funcinfo << "NULL scenario" << endl;
+	boError() << k_funcinfo << "NULL scenario" << endl;
 	return;
  }
 

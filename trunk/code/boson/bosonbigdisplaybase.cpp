@@ -40,13 +40,13 @@
 #include "bosonprofiling.h"
 #include "bosonparticlesystem.h"
 #include "boson.h"
+#include "bodebug.h"
 
 #include <kgame/kgameio.h>
 
 #include <klocale.h>
 #include <kmessagebox.h>
 #include <kapplication.h>
-#include <kdebug.h>
 
 #include <qimage.h>
 #include <qtimer.h>
@@ -332,21 +332,21 @@ public:
 BosonBigDisplayBase::BosonBigDisplayBase(BosonCanvas* c, QWidget* parent)
 		: QGLWidget(parent, "bigdisplay")
 {
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  mCanvas = c;
  init();
 }
 
 BosonBigDisplayBase::~BosonBigDisplayBase()
 {
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  quitGame();
  delete mSelection;
  delete d->mChat;
 // delete d->mUnitTips;
  delete d->mDefaultFont;
  delete d;
- kdDebug() << k_funcinfo << "done" << endl;
+ boDebug() << k_funcinfo << "done" << endl;
 }
 
 void BosonBigDisplayBase::init()
@@ -375,7 +375,7 @@ void BosonBigDisplayBase::init()
  }
 
  if (!isValid()) {
-	kdError() << k_funcinfo << "No OpenGL support present on this system??" << endl;
+	boError() << k_funcinfo << "No OpenGL support present on this system??" << endl;
 	return;
  }
  
@@ -426,7 +426,7 @@ void BosonBigDisplayBase::initializeGL()
  glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
 
  if (checkError()) {
-	kdError() << k_funcinfo << endl;
+	boError() << k_funcinfo << endl;
  }
 
  struct timeval time;
@@ -449,7 +449,7 @@ void BosonBigDisplayBase::initializeGL()
 
 void BosonBigDisplayBase::resizeGL(int w, int h)
 {
- kdDebug() << k_funcinfo << w << " " << h << endl;
+ boDebug() << k_funcinfo << w << " " << h << endl;
  setViewport(0, 0, (GLsizei)w, (GLsizei)h);
  glMatrixMode(GL_PROJECTION);
  glLoadIdentity();
@@ -479,7 +479,7 @@ void BosonBigDisplayBase::resizeGL(int w, int h)
  setCamera(d->mCamera);
 
  if (checkError()) {
-	kdError() << k_funcinfo << endl;
+	boError() << k_funcinfo << endl;
  }
 }
 
@@ -493,11 +493,11 @@ void BosonBigDisplayBase::paintGL()
 	return;
  }
  if (!localPlayer()) {
-	kdError() << k_funcinfo << "NULL local player" << endl;
+	boError() << k_funcinfo << "NULL local player" << endl;
  }
  boProfiling->render(true);
  d->mUpdateTimer.stop();
-//kdDebug() << k_funcinfo << endl;
+//boDebug() << k_funcinfo << endl;
  // TODO: use 0,0 as lower left, instead of top left
  // AB: I've dalayed this. since we still use canvas-coordinates it is easier
  // and more logical to use 0,0 as top left.
@@ -564,7 +564,7 @@ void BosonBigDisplayBase::paintGL()
 // glRotatef(a2, 0.0, 1.0, 0.0);
 
  if (checkError()) {
-	kdError() << k_funcinfo << "before unit rendering" << endl;
+	boError() << k_funcinfo << "before unit rendering" << endl;
  }
 
  glEnable(GL_TEXTURE_2D);
@@ -611,7 +611,7 @@ void BosonBigDisplayBase::paintGL()
 	// but concerning z-position they are rendered from bottom to top!
 
 	if (item->displayList() == 0) {
-		kdWarning() << k_funcinfo << "NULL display list for item rtti=" << item->rtti() << endl;
+		boWarning() << k_funcinfo << "NULL display list for item rtti=" << item->rtti() << endl;
 		continue;
 	}
 
@@ -661,7 +661,7 @@ void BosonBigDisplayBase::paintGL()
  boProfiling->renderUnits(false, renderedUnits);
 
  if (checkError()) {
-	kdError() << k_funcinfo << "after unit rendering" << endl;
+	boError() << k_funcinfo << "after unit rendering" << endl;
  }
 
  boProfiling->renderCells(true);
@@ -669,7 +669,7 @@ void BosonBigDisplayBase::paintGL()
  boProfiling->renderCells(false);
 
  if (checkError()) {
-	kdError() << k_funcinfo << "cells rendered" << endl;
+	boError() << k_funcinfo << "cells rendered" << endl;
  }
 
  // Render particle systems
@@ -691,7 +691,7 @@ void BosonBigDisplayBase::paintGL()
  boProfiling->renderParticles(false);
 
  if (checkError()) {
-	kdError() << k_funcinfo << "when particles rendered" << endl;
+	boError() << k_funcinfo << "when particles rendered" << endl;
  }
 
 
@@ -720,7 +720,7 @@ void BosonBigDisplayBase::paintGL()
  }
  glDisable(GL_TEXTURE_2D);
  if (checkError()) {
-	kdError() << k_funcinfo << "GL error when cursor rendered" << endl;
+	boError() << k_funcinfo << "GL error when cursor rendered" << endl;
  }
  renderText();
 
@@ -762,7 +762,7 @@ void BosonBigDisplayBase::paintGL()
 	glPopMatrix();
  }
  if (checkError()) {
-	kdError() << k_funcinfo << "selection rect rendered" << endl;
+	boError() << k_funcinfo << "selection rect rendered" << endl;
  }
 
  if (d->mUpdateInterval) {
@@ -814,7 +814,7 @@ void BosonBigDisplayBase::renderCells()
 {
  BosonTiles* tiles = mCanvas->tileSet();
  if (!tiles) {
-	kdError() << k_funcinfo << "NULL tiles" << endl;
+	boError() << k_funcinfo << "NULL tiles" << endl;
 	return;
  }
  BosonTextureArray* textures = mCanvas->tileSet()->textures();
@@ -823,7 +823,7 @@ void BosonBigDisplayBase::renderCells()
 	tiles->generateTextures();
 	textures = tiles->textures();
 	if (!textures) {
-		kdWarning() << k_funcinfo << "NULL textures for cells" << endl;
+		boWarning() << k_funcinfo << "NULL textures for cells" << endl;
 		return;
 	}
  }
@@ -867,7 +867,7 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 {
  GLdouble posX, posY, posZ;
  if (!mapCoordinates(e->pos(), &posX, &posY, &posZ)) {
-	kdError() << k_funcinfo << "Cannot map coordinates" << endl;
+	boError() << k_funcinfo << "Cannot map coordinates" << endl;
 	return;
  }
  QPoint canvasPos;
@@ -914,7 +914,7 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 				Camera camera = d->mCamera;
 				camera.setZ(cameraZ() + d->mMouseMoveDiff.dy());
 				setCamera(camera);
-				kdDebug() << "posZ: " << d->mCamera.z() << endl;
+				boDebug() << "posZ: " << d->mCamera.z() << endl;
 			} else if (e->state() & RightButton) {
 				Camera camera = d->mCamera;
 				camera.increaseCenterDiffXBy(d->mMouseMoveDiff.dx());
@@ -1053,7 +1053,7 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 		e->accept();
 		break;
 	default:
-		kdWarning() << "unexpected mouse event " << e->type() << endl;
+		boWarning() << "unexpected mouse event " << e->type() << endl;
 		e->ignore();
 		return;
  }
@@ -1061,18 +1061,18 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 
 void BosonBigDisplayBase::addMouseIO(Player* p)
 {
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  if (!p) {
-	kdError() << k_funcinfo << "NULL player" << endl;
+	boError() << k_funcinfo << "NULL player" << endl;
 	return;
  }
  if (d->mMouseIO) {
-	kdError() << k_funcinfo << "mouse IO already present for this display!" << endl;
+	boError() << k_funcinfo << "mouse IO already present for this display!" << endl;
 	return;
  }
  if (p->hasRtti(KGameIO::MouseIO)) {
 	// FIXME: this is only invalid if the IO is for the same big display!
-	kdWarning() << k_funcinfo << "player already has a mouse IO" << endl;
+	boWarning() << k_funcinfo << "player already has a mouse IO" << endl;
 	return;
  }
  d->mMouseIO = new KGameMouseIO(this, true);
@@ -1100,13 +1100,13 @@ void BosonBigDisplayBase::setActive(bool a)
 
 void BosonBigDisplayBase::setLocalPlayer(Player* p) 
 {
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  if (d->mLocalPlayer == p) {
-	kdDebug() << k_funcinfo << "player already set. nothing to do." << endl;
+	boDebug() << k_funcinfo << "player already set. nothing to do." << endl;
 	return;
  }
  if (d->mLocalPlayer) {
-	kdDebug() << k_funcinfo << "already a local player present! unset..." << endl;
+	boDebug() << k_funcinfo << "already a local player present! unset..." << endl;
 	delete d->mMouseIO;
 	d->mMouseIO = 0;
 	d->mLocalPlayer = 0;
@@ -1197,11 +1197,11 @@ bool BosonBigDisplayBase::mapDistance(int windx, int windy, GLdouble* dx, GLdoub
  GLdouble moveX1, moveY1;
  GLdouble moveX2, moveY2;
  if (!mapCoordinates(QPoint(0, 0), &moveX1, &moveY1, &moveZ)) {
-	kdError() << k_funcinfo << "Cannot map coordinates" << endl;
+	boError() << k_funcinfo << "Cannot map coordinates" << endl;
 	return false;
  }
  if (!mapCoordinates(QPoint(windx, windy), &moveX2, &moveY2, &moveZ)) {
-	kdError() << k_funcinfo << "Cannot map coordinates" << endl;
+	boError() << k_funcinfo << "Cannot map coordinates" << endl;
 	return false;
  }
  *dx = moveX2 - moveX1;
@@ -1267,7 +1267,7 @@ bool BosonBigDisplayBase::eventFilter(QObject* o, QEvent* e)
 bool BosonBigDisplayBase::selectAll(const UnitProperties* prop, bool replace)
 {
  if (!localPlayer()) {
-	kdError() << k_funcinfo << "NULL localplayer" << endl;
+	boError() << k_funcinfo << "NULL localplayer" << endl;
 	return false;
  }
  if (prop->isFacility()) {
@@ -1292,7 +1292,7 @@ void BosonBigDisplayBase::slotUnitChanged(Unit* unit)
 {
 // FIXME: we might want to place this code into BoSelection directly (cleaner)
  if (!unit) {
-	kdError() << k_funcinfo << "NULL unit" << endl;
+	boError() << k_funcinfo << "NULL unit" << endl;
 	return;
  }
  if (unit->isDestroyed()) {
@@ -1319,7 +1319,7 @@ void BosonBigDisplayBase::startSelection(GLdouble x, GLdouble y, GLdouble z)
  worldToCanvas(x, y, z, &canvasPos);
  /*
  Unit* unit = canvas()->findUnitAt(canvasPos);
- kdDebug() << k_funcinfo << x << " " << y << " " << z << endl;
+ boDebug() << k_funcinfo << x << " " << y << " " << z << endl;
  if (!unit) {*/
 	// nothing has been found - its a ground click
 	// Here we have to draw the selection rect
@@ -1329,7 +1329,7 @@ void BosonBigDisplayBase::startSelection(GLdouble x, GLdouble y, GLdouble z)
 	/*
  }
 
- kdDebug() << k_funcinfo << "unit" << endl;
+ boDebug() << k_funcinfo << "unit" << endl;
  selection()->selectUnit(unit);
 
  // cannot be placed into mSelection cause we don't have localPlayer
@@ -1377,7 +1377,7 @@ void BosonBigDisplayBase::removeSelectionRect(bool replace)
 	unit = canvas()->findUnitAt(canvasPos);
 	}
 	if (unit) {
-		kdDebug() << k_funcinfo << "unit" << endl;
+		boDebug() << k_funcinfo << "unit" << endl;
 		selection()->selectUnit(unit, replace);
 		// cannot be placed into mSelection cause we don't have localPlayer
 		// there
@@ -1395,7 +1395,7 @@ void BosonBigDisplayBase::removeSelectionRect(bool replace)
 void BosonBigDisplayBase::selectArea(bool replace)
 {
  if (!d->mSelectionRect.isVisible()) {
-	kdDebug() << k_funcinfo << "no rect" << endl;
+	boDebug() << k_funcinfo << "no rect" << endl;
 	return;
  }
  if (boConfig->debugMode() == BosonConfig::DebugSelection) {
@@ -1403,7 +1403,7 @@ void BosonBigDisplayBase::selectArea(bool replace)
 	QRect r = selectionRectCanvas();
 	list = canvas()->bosonCollisions(r);
 	BoItemList::Iterator it;
-	kdDebug() << "Selection count: " << list.count() << endl;
+	boDebug() << "Selection count: " << list.count() << endl;
 	for (it = list.begin(); it != list.end(); ++it) {
 		QString s = QString("Selected: RTTI=%1").arg((*it)->rtti());
 		if (RTTI::isUnit((*it)->rtti())) {
@@ -1413,7 +1413,7 @@ void BosonBigDisplayBase::selectArea(bool replace)
 				s += QString("(destroyed)");
 			}
 		}
-		kdDebug() << s << endl;
+		boDebug() << s << endl;
 	}
  }
 
@@ -1444,7 +1444,7 @@ void BosonBigDisplayBase::selectArea(bool replace)
  }
 
  if (unitList.count() > 0) {
-	kdDebug() << "select " << unitList.count() << " units" << endl;
+	boDebug() << "select " << unitList.count() << " units" << endl;
 	selection()->selectUnits(unitList, replace);
  } else if (fallBackUnit) {
 	selection()->selectUnit(fallBackUnit, replace);
@@ -1547,7 +1547,7 @@ void BosonBigDisplayBase::generateCellList()
  }
  BosonMap* map = mCanvas->map();
  if (!map) {
-	kdError() << k_funcinfo << "NULL map" << endl;
+	boError() << k_funcinfo << "NULL map" << endl;
 	return;
  }
 
@@ -1592,7 +1592,7 @@ void BosonBigDisplayBase::setCamera(const Camera& camera)
 		centerX, centerY, centerZ, 
 		upX, upY, upZ);
  if (checkError()) {
-	kdError() << k_funcinfo << "after gluLookAt()" << endl;
+	boError() << k_funcinfo << "after gluLookAt()" << endl;
  }
 
  // the gluLookAt() above is the most important call for the modelview matrix.
@@ -1634,39 +1634,39 @@ bool BosonBigDisplayBase::checkError() const
  GLenum e = glGetError();
  switch (e) {
 	case GL_INVALID_ENUM:
-		kdError() << "GL_INVALID_ENUM" << endl;
+		boError() << "GL_INVALID_ENUM" << endl;
 		break;
 	case GL_INVALID_VALUE:
-		kdError() << "GL_INVALID_VALUE" << endl;
+		boError() << "GL_INVALID_VALUE" << endl;
 		break;
 	case GL_INVALID_OPERATION:
-		kdError() << "GL_INVALID_OPERATION" << endl;
+		boError() << "GL_INVALID_OPERATION" << endl;
 		break;
 	case GL_STACK_OVERFLOW:
-		kdError() << "GL_STACK_OVERFLOW" << endl;
+		boError() << "GL_STACK_OVERFLOW" << endl;
 		break;
 	case GL_STACK_UNDERFLOW:
-		kdError() << "GL_STACK_UNDERFLOW" << endl;
+		boError() << "GL_STACK_UNDERFLOW" << endl;
 		break;
 	case GL_OUT_OF_MEMORY:
-		kdError() << "GL_OUT_OF_MEMORY" << endl;
+		boError() << "GL_OUT_OF_MEMORY" << endl;
 		break;
 	case GL_NO_ERROR:
 		ret = false;
 		break;
 	default:
-		kdError() << "Unknown OpenGL Error: " << (int)e << endl;
+		boError() << "Unknown OpenGL Error: " << (int)e << endl;
 		break;
  }
  if (e != GL_NO_ERROR) {
-	kdError() << "Error string: " << gluErrorString(e) << endl;
+	boError() << "Error string: " << gluErrorString(e) << endl;
  }
  return ret;
 }
 
 void BosonBigDisplayBase::setUpdateInterval(unsigned int ms)
 {
- kdDebug() << k_funcinfo << ms << endl;
+ boDebug() << k_funcinfo << ms << endl;
  d->mUpdateInterval = ms;
  QTimer::singleShot(d->mUpdateInterval, this, SLOT(updateGL()));
 }
@@ -1685,7 +1685,7 @@ float BosonBigDisplayBase::calcFPS()
 	d->mFps = d->mFramecount / ((now - d->mFpsTime) / 1000000.0);
 	d->mFpsTime = now;
 	d->mFramecount = 0;
-//	kdDebug() << k_funcinfo << "FPS: " << d->mFps << endl;
+//	boDebug() << k_funcinfo << "FPS: " << d->mFps << endl;
  }
  d->mFramecount++;
  return elapsed;
@@ -1698,7 +1698,7 @@ double BosonBigDisplayBase::fps() const
 
 void BosonBigDisplayBase::setZoomFactor(float f)
 {
- kdDebug() << k_funcinfo << f << endl;
+ boDebug() << k_funcinfo << f << endl;
  d->mCamera.setZoomFactor(f); // no need to call setCamera(), since resizeGL() does it
  resizeGL(d->mViewport[2], d->mViewport[3]);
 }

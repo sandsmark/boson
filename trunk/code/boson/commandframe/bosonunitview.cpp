@@ -24,6 +24,7 @@
 #include "../unitproperties.h"
 #include "../speciestheme.h"
 #include "../unit.h"
+#include "../bodebug.h"
 
 #include <klocale.h>
 
@@ -76,11 +77,11 @@ void BosonUnitView::setUnit(Unit* u)
 	return;
  }
  if (!unit->owner()) {
-	kdError() << k_funcinfo << "no owner" << endl;
+	boError() << k_funcinfo << "no owner" << endl;
 	return;
  }
  if (!unit->owner()->speciesTheme()) {
-	kdError() << k_funcinfo << "No speciesTheme" << endl;
+	boError() << k_funcinfo << "No speciesTheme" << endl;
 	return;
  }
  d->mName->setText(unit->unitProperties()->name());
@@ -93,12 +94,12 @@ void BosonUnitView::setUnit(Unit* u)
 void BosonUnitView::displayUnitPixmap(int unitType, Player* owner)
 {
  if (!owner) {
-	kdError() << k_funcinfo << "NULL owner" << endl;
+	boError() << k_funcinfo << "NULL owner" << endl;
 	return;
  }
  QPixmap* big = owner->speciesTheme()->bigOverview(unitType);
  if (!big) {
-	kdError() << "Cannot find Big Overview for " << unitType << endl;
+	boError() << "Cannot find Big Overview for " << unitType << endl;
 	return;
  }
  setPixmap(*big);

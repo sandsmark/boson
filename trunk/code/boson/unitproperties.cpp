@@ -26,10 +26,10 @@
 #include "bosonparticlemanager.h"
 #include "bosonweapon.h"
 #include "bosonconfig.h"
+#include "bodebug.h"
 
 #include <ksimpleconfig.h>
 #include <klocale.h>
-#include <kdebug.h>
 
 class UnitProperties::MobileProperties
 {
@@ -90,12 +90,12 @@ void UnitProperties::loadUnitType(const QString& fileName)
  /// FIXME: maybe rename to Type or TypeID (Id is confusing IMHO) - rivol
  mTypeId = conf.readUnsignedLongNumEntry("Id", 0); // 0 == invalid // Note: Id == Unit::type() , NOT Unit::id() !
  if (typeId() <= 0) {
-	kdError() << "Invalid TypeId: " << typeId() << " in unit file " << fileName << endl;
+	boError() << "Invalid TypeId: " << typeId() << " in unit file " << fileName << endl;
 	// we continue - but we'll crash soon
  }
  mTerrain = (TerrainType)conf.readNumEntry("TerrainType", 0);
  if (mTerrain < 0 || mTerrain > 2) {
-	kdWarning() << k_funcinfo << "Invalid TerrainType value: " << mTerrain << " for unit " << typeId() << ", defaulting to 0" << endl;
+	boWarning() << k_funcinfo << "Invalid TerrainType value: " << mTerrain << " for unit " << typeId() << ", defaulting to 0" << endl;
 	mTerrain = (TerrainType)0;
  }
  mUnitWidth = (unsigned int)(conf.readDoubleNumEntry("UnitWidth", 1.0) * BO_TILE_SIZE);
@@ -136,7 +136,7 @@ void UnitProperties::loadMobileProperties(KSimpleConfig* conf)
  mMobileProperties = new MobileProperties;
  mMobileProperties->mSpeed = (float)conf->readDoubleNumEntry("Speed", 0);
  if(mMobileProperties->mSpeed < 0) {
-	kdWarning() << k_funcinfo << "Invalid Speed value: " << mMobileProperties->mSpeed <<
+	boWarning() << k_funcinfo << "Invalid Speed value: " << mMobileProperties->mSpeed <<
 			" for unit " << typeId() << ", defaulting to 0" << endl;
 	mMobileProperties->mSpeed = 0;
  }
@@ -172,7 +172,7 @@ void UnitProperties::loadAllPluginProperties(KSimpleConfig* conf)
 void UnitProperties::loadPluginProperties(PluginProperties* prop, KSimpleConfig* conf)
 {
  if (!prop || !conf) {
-	kdError() << k_funcinfo << "oops" << endl;
+	boError() << k_funcinfo << "oops" << endl;
 	return;
  }
  prop->loadPlugin(conf);
@@ -191,7 +191,7 @@ void UnitProperties::loadTextureNames(KSimpleConfig* conf)
 	QString longName = conf->readEntry(textures[i], QString::null);
 	if (!longName.isEmpty()) {
 		mTextureNames.insert(textures[i], longName);
-		kdDebug() << "mapping " << textures[i] << "->" << longName << endl;
+		boDebug() << "mapping " << textures[i] << "->" << longName << endl;
 	}
  }
 }
@@ -300,20 +300,20 @@ const PluginProperties* UnitProperties::properties(int pluginType) const
 
 void UnitProperties::loadUpgrades(KSimpleConfig* conf)
 {
-// kdDebug() << k_funcinfo << endl;
+// boDebug() << k_funcinfo << endl;
  conf->setGroup("Boson Unit");
  int count = conf->readNumEntry("Upgrades", 0);
  if (count == 0) {
 	return;
  }
- kdDebug() << k_funcinfo << "Loading " << count << " upgrades for unit " << typeId() << endl;
+ boDebug() << k_funcinfo << "Loading " << count << " upgrades for unit " << typeId() << endl;
  for (int i = 1; i <= count; i++) {
 	UpgradeProperties* upgrade = new UpgradeProperties(this, i);
 	upgrade->loadPlugin(conf);
 	mUpgrades.append(upgrade);
 	mNotResearchedUpgrades.append(upgrade);
  }
- kdDebug() << k_funcinfo << "DONE" << endl;
+ boDebug() << k_funcinfo << "DONE" << endl;
 }
 
 void UnitProperties::setSpeed(float speed)

@@ -34,13 +34,13 @@
 #include "bosonbigdisplay.h"
 #include "commandinput.h"
 #include "gameoverdialog.h"
+#include "bodebug.h"
 #include "commandframe/bosoncommandframe.h"
 #include "sound/bosonmusic.h"
 
 #include <kstdgameaction.h>
 #include <klocale.h>
 #include <kaction.h>
-#include <kdebug.h>
 #include <kdeversion.h>
 
 #include <qregexp.h>
@@ -71,9 +71,9 @@ BosonWidget::BosonWidget(TopWidget* top, QWidget* parent, bool loading)
 
 BosonWidget::~BosonWidget()
 {
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  delete d;
- kdDebug() << k_funcinfo << "done" << endl;
+ boDebug() << k_funcinfo << "done" << endl;
 }
 
 void BosonWidget::initDisplayManager()
@@ -101,7 +101,7 @@ void BosonWidget::initPlayer()
 {
  BosonWidgetBase::initPlayer();
  if (!d->mCmdInput) {
-	kdError() << k_funcinfo << "NULL command input" << endl;
+	boError() << k_funcinfo << "NULL command input" << endl;
  } else {
 	localPlayer()->removeGameIO(d->mCmdInput, false); // in case it was added before
 	localPlayer()->addGameIO(d->mCmdInput);
@@ -133,7 +133,7 @@ BosonCommandFrameBase* BosonWidget::createCommandFrame(QWidget* parent)
 
 void BosonWidget::slotChangeCursor(int mode, const QString& cursorDir_)
 {
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  if (!boGame->gameMode()) {
 	// editor mode
 	mode = CursorKDE;
@@ -168,7 +168,7 @@ void BosonWidget::slotChangeCursor(int mode, const QString& cursorDir_)
 	ok = false;
  }
  if (!ok) {
-	kdError() << k_funcinfo << "Could not load cursor mode " << mode << " from " << cursorDir << endl;
+	boError() << k_funcinfo << "Could not load cursor mode " << mode << " from " << cursorDir << endl;
 	delete b;
 	if (!cursor() && mode != CursorKDE) { // loading *never* fails for CursorKDE. we check here anyway.
 		// load fallback cursor
@@ -237,7 +237,7 @@ void BosonWidget::slotOutOfGame(Player* p)
 	}
  }
  if (inGame <= 1 && winner) {
-	kdDebug() << k_funcinfo << "We have a winner! id=" << winner->id() << endl;
+	boDebug() << k_funcinfo << "We have a winner! id=" << winner->id() << endl;
 	delete d->mGameOverDialog;
 	d->mGameOverDialog = new GameOverDialog(this);
 	d->mGameOverDialog->createStatistics(boGame, winner, localPlayer());
@@ -245,7 +245,7 @@ void BosonWidget::slotOutOfGame(Player* p)
 	connect(d->mGameOverDialog, SIGNAL(finished()), this, SLOT(slotGameOverDialogFinished()));
 	boGame->setGameStatus(KGame::End);
  } else if (!winner) {
-	kdError() << k_funcinfo << "no player left ?!" << endl;
+	boError() << k_funcinfo << "no player left ?!" << endl;
 	return;
  }
 }
@@ -289,13 +289,13 @@ void BosonWidget::saveConfig()
 {
   // note: the game is *not* saved here! just general settings like game speed,
   // player name, ...
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  if (!boGame) {
-	kdError() << k_funcinfo << "NULL game" << endl;
+	boError() << k_funcinfo << "NULL game" << endl;
 	return;
  }
  if (!localPlayer()) {
-	kdError() << k_funcinfo << "NULL local player" << endl;
+	boError() << k_funcinfo << "NULL local player" << endl;
 	return;
  }
  BosonWidgetBase::saveConfig();
@@ -315,7 +315,7 @@ void BosonWidget::saveConfig()
  }
  boConfig->saveCursorDir(mCursorTheme);
 // boConfig->save(editor); //FIXME
- kdDebug() << k_funcinfo << "done" << endl;
+ boDebug() << k_funcinfo << "done" << endl;
 }
 
 void BosonWidget::slotGameOverDialogFinished()

@@ -18,12 +18,12 @@
 */
 #include "bosonconfig.h"
 #include "defines.h"
+//#include "bodebug.h"
 
 #include <kconfig.h>
 #include <kapplication.h>
 #include <kstaticdeleter.h>
 #include <klocale.h>
-#include <kdebug.h>
 
 #include <GL/gl.h>
 

@@ -23,10 +23,10 @@
 #include "bosonmap.h"
 #include "cell.h"
 #include "unit.h"
+#include "bodebug.h"
 
 #include <klocale.h>
 #include <klistview.h>
-#include <kdebug.h>
 
 #include <qvgroupbox.h>
 #include <qptrdict.h>
@@ -98,7 +98,7 @@ void KGameCellDebug::setMap(BosonMap* m)
 	for (unsigned int j = 0; j < d->mMap->height(); j++) {
 		Cell* c = d->mMap->cell(i, j);
 		if (!c) {
-			kdError() << k_funcinfo << "NULL cell" << endl;
+			boError() << k_funcinfo << "NULL cell" << endl;
 			continue;
 		}
 		QListViewItem* item = new QListViewItem(d->mCellList);
@@ -122,12 +122,12 @@ void KGameCellDebug::slotUpdate()
 	for (unsigned int j = 0; j < d->mMap->height(); j++) {
 		Cell* c = d->mMap->cell(i, j);
 		if (!c) {
-			kdError() << k_funcinfo << "NULL cell" << endl;
+			boError() << k_funcinfo << "NULL cell" << endl;
 			continue;
 		}
 		QListViewItem* item = d->mCells[c];
 		if (!item) {
-			kdError() << k_funcinfo << "NULL list item" << endl;
+			boError() << k_funcinfo << "NULL list item" << endl;
 			return;
 		}
 		item->setText(d->mCellUnitCountId, QString::number(c->unitCount()));
@@ -154,7 +154,7 @@ void KGameCellDebug::slotUpdateCell(QListViewItem* item)
 	}
  }
  if (!c) {
-	kdError() << k_funcinfo << "Could not find the cell" << endl;
+	boError() << k_funcinfo << "Could not find the cell" << endl;
 	return;
  }
  const BoItemList* list = c->items();

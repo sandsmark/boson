@@ -22,10 +22,10 @@
 
 #include "global.h"
 #include "bosoncursor.h"
+#include "bodebug.h"
 
 #include <ksimpleconfig.h>
 #include <klocale.h>
-#include <kdebug.h>
 #include <knuminput.h>
 #include <kstandarddirs.h>
 #include <kglobal.h>
@@ -92,10 +92,10 @@ SpriteConfig::~SpriteConfig()
 
 void SpriteConfig::load(const QString& file)
 {
- kdDebug() << k_funcinfo << file << endl;
+ boDebug() << k_funcinfo << file << endl;
  KSimpleConfig cfg(file);
  if (!cfg.hasGroup("Boson Cursor")) {
-	kdError() << k_funcinfo << file << " has no Boson Cursor group" << endl;
+	boError() << k_funcinfo << file << " has no Boson Cursor group" << endl;
 	return;
  }
  cfg.setGroup("Boson Cursor");
@@ -124,7 +124,7 @@ void SpriteConfig::load(const QString& file)
 
 void SpriteConfig::save(const QString& file)
 {
- kdDebug() << k_funcinfo << file << endl;
+ boDebug() << k_funcinfo << file << endl;
  KSimpleConfig cfg(file);
  cfg.setGroup("Boson Cursor");
  cfg.writeEntry("HotspotX", (unsigned int)mHotspotX->value());
@@ -192,7 +192,7 @@ void BosonCursorEditor::loadInitialCursor()
 
 QStringList BosonCursorEditor::findCursorThemes(const QString& directory)
 {
- kdDebug() << k_funcinfo << directory << endl;
+ boDebug() << k_funcinfo << directory << endl;
  QDir dir(directory);
  QStringList subdirs = dir.entryList(QDir::Dirs);
  subdirs.remove(QString::fromLatin1("."));
@@ -267,7 +267,7 @@ void BosonCursorEditor::addType(const QString& theme, const QString& type)
  QString name = type;
  KSimpleConfig cfg(path + type + QString::fromLatin1("/index.desktop"));
  if (!cfg.hasGroup("Boson Cursor")) {
-	kdWarning() << k_funcinfo << "Invalid index.desktop file for " << path + type << endl;
+	boWarning() << k_funcinfo << "Invalid index.desktop file for " << path + type << endl;
 	name += QString::fromLatin1(" (Invalid index.desktop)");
  }
  mCursorType->insertItem(name);
@@ -275,9 +275,9 @@ void BosonCursorEditor::addType(const QString& theme, const QString& type)
 
 void BosonCursorEditor::slotCursorTypeChanged(int index)
 {
- kdDebug() << k_funcinfo << index << endl;
+ boDebug() << k_funcinfo << index << endl;
  if (index < 0 || index > (int)mCursorTypes.count()) {
-	kdError() << k_funcinfo << "index out of range: " << index << endl;
+	boError() << k_funcinfo << "index out of range: " << index << endl;
 	return;
  }
  QString name = mCursorTypes[index];
@@ -326,7 +326,7 @@ void BosonCursorEditor::changeBaseDirectory(const QString& dir)
  for (int i = 0; i < (int)themes.count(); i++) {
 	KSimpleConfig cfg(themes[i] + QString::fromLatin1("/index.desktop"));
 	if (!cfg.hasGroup("Boson Cursor")) {
-		kdWarning() << "invalid cursor " << themes[i] << endl;
+		boWarning() << "invalid cursor " << themes[i] << endl;
 	} else {
 		cfg.setGroup("Boson Cursor");
 		QString name = cfg.readEntry("Name", i18n("Unknown"));

@@ -34,6 +34,7 @@
 #include "global.h"
 #include "bosonbigdisplay.h"
 #include "commandinput.h"
+#include "bodebug.h"
 #include "commandframe/editorcommandframe.h"
 #include "sound/bosonmusic.h"
 
@@ -42,7 +43,6 @@
 #include <kaction.h>
 #include <kdeversion.h>
 #include <kmessagebox.h>
-#include <kdebug.h>
 
 #include <qtimer.h>
 #include <qregexp.h>
@@ -91,9 +91,9 @@ EditorWidget::EditorWidget(TopWidget* top, QWidget* parent, bool loading)
 
 EditorWidget::~EditorWidget()
 {
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  delete d;
- kdDebug() << k_funcinfo << "done" << endl;
+ boDebug() << k_funcinfo << "done" << endl;
 }
 
 void EditorWidget::initDisplayManager()
@@ -121,7 +121,7 @@ void EditorWidget::initMap()
 {
  BosonWidgetBase::initMap();
  if (!playField() || !playField()->map()) {
-	kdError() << k_funcinfo << endl;
+	boError() << k_funcinfo << endl;
 	return;
  }
  connect(playField()->map(), SIGNAL(signalTileSetChanged(BosonTiles*)),
@@ -135,7 +135,7 @@ void EditorWidget::initPlayer()
  BosonWidgetBase::initPlayer();
  /*
  if (!d->mCmdInput) {
-	kdError() << k_funcinfo << "NULL command input" << endl;
+	boError() << k_funcinfo << "NULL command input" << endl;
  } else {
 	localPlayer()->addGameIO(d->mCmdInput);
  }
@@ -211,24 +211,24 @@ void EditorWidget::saveConfig()
 {
   // note: the game is *not* saved here! just general settings like game speed,
   // player name, ...
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  if (!boGame) {
-	kdError() << k_funcinfo << "NULL game" << endl;
+	boError() << k_funcinfo << "NULL game" << endl;
 	return;
  }
  if (!localPlayer()) {
-	kdError() << k_funcinfo << "NULL local player" << endl;
+	boError() << k_funcinfo << "NULL local player" << endl;
 	return;
  }
  BosonWidgetBase::saveConfig();
 
 // boConfig->save(editor); //FIXME
- kdDebug() << k_funcinfo << "done" << endl;
+ boDebug() << k_funcinfo << "done" << endl;
 }
 
 void EditorWidget::slotSavePlayFieldAs()
 {
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  QString startIn; // shall we provide this??
  QString fileName = KFileDialog::getSaveFileName(startIn, "*.bpf", this);
  if (fileName != QString::null) {
@@ -237,13 +237,13 @@ void EditorWidget::slotSavePlayFieldAs()
 	}
 	bool ok = playField()->savePlayField(fileName);
 	if (!ok) {
-		kdError() << k_funcinfo << "An error occured" << endl;
+		boError() << k_funcinfo << "An error occured" << endl;
 
 		// TODO: get an error message from the playfield and display the
 		// reason for the error
 		KMessageBox::sorry(this, i18n("Could not save to %1").arg(fileName));
 	} else {
-		kdDebug() << k_funcinfo << "Saved successful to " << fileName << endl;
+		boDebug() << k_funcinfo << "Saved successful to " << fileName << endl;
 	}
  }
 }
@@ -259,7 +259,7 @@ void EditorWidget::slotChangeLocalPlayer(int index)
  if (p) {
 	emit signalChangeLocalPlayer(p);
  } else {
-	kdWarning() << k_funcinfo << "NULL player for index " << index << endl;
+	boWarning() << k_funcinfo << "NULL player for index " << index << endl;
  }
 }
 
@@ -280,7 +280,7 @@ void EditorWidget::slotPlaceCellSmall()
 
 void EditorWidget::slotPlaceCellPlain()
 {
-	kdDebug() << k_funcinfo << endl;
+	boDebug() << k_funcinfo << endl;
  editorCmdFrame()->placeCells(CellPlain);
 }
 
@@ -302,7 +302,7 @@ void EditorWidget::setBosonXMLFile()
 
 void EditorWidget::slotPlayerJoinedGame(KPlayer* player)
 {
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  if (!player) {
 	return;
  }
@@ -336,7 +336,7 @@ void EditorWidget::slotPlayerLeftGame(KPlayer* player)
 	++it;
  }
  if (!it.current()) {
-	kdError() << k_funcinfo << ": player not found" << endl;
+	boError() << k_funcinfo << ": player not found" << endl;
 	return;
  }
  QStringList players = d->mPlayerAction->items();

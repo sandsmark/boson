@@ -34,6 +34,7 @@
 #include "bodisplaymanager.h"
 #include "bosonbigdisplaybase.h"
 #include "bosonstarting.h"
+#include "bodebug.h"
 #include "startupwidgets/bosonwelcomewidget.h"
 #include "startupwidgets/bosonnewgamewidget.h"
 #include "startupwidgets/bosonloadingwidget.h"
@@ -48,7 +49,6 @@
 #include <kstdaction.h>
 #include <kstdgameaction.h>
 #include <kaction.h>
-#include <kdebug.h>
 #include <kkeydialog.h>
 #include <kmenubar.h>
 #include <kmessagebox.h>
@@ -140,17 +140,17 @@ TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
 
 TopWidget::~TopWidget()
 {
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  bool editor = false;
  if (boGame) {
 	editor = !boGame->gameMode();
  }
  boConfig->save(editor);
- kdDebug() << "endGame()" << endl;
+ boDebug() << "endGame()" << endl;
  endGame();
- kdDebug() << "endGame() done" << endl;
+ boDebug() << "endGame() done" << endl;
  delete d;
- kdDebug() << k_funcinfo << "done" << endl;
+ boDebug() << k_funcinfo << "done" << endl;
 }
 
 void TopWidget::saveProperties(KConfig *config)
@@ -209,7 +209,7 @@ void TopWidget::initKActions()
 void TopWidget::initBoson()
 {
  if (Boson::boson()) {
-	kdWarning() << k_funcinfo << "Oops - Boson object already present! deleting..." << endl;
+	boWarning() << k_funcinfo << "Oops - Boson object already present! deleting..." << endl;
 	Boson::deleteBoson();
  }
  Boson::initBoson();
@@ -275,7 +275,7 @@ void TopWidget::initStatusBar()
 void TopWidget::enableGameActions(bool enable)
 {
  if (enable && ! d->mBosonWidget) {
-	kdWarning() << k_lineinfo << "NULL BosonWidgetBase!" << endl;
+	boWarning() << k_lineinfo << "NULL BosonWidgetBase!" << endl;
  }
 }
 
@@ -288,7 +288,7 @@ void TopWidget::initStartupWidget(StartupWidgetIds id)
  if (id == IdBosonWidget) {
 	// bosonwidget gets initialized from within game starting, not
 	// from here
-	kdError() << k_funcinfo << "BosonWidget must be initialized directly using initBosonWidget() !" << endl;
+	boError() << k_funcinfo << "BosonWidget must be initialized directly using initBosonWidget() !" << endl;
 	return;
  }
  BosonStartupBaseWidget* startup = new BosonStartupBaseWidget(mWs);
@@ -349,12 +349,12 @@ void TopWidget::initStartupWidget(StartupWidgetIds id)
 	{
 		mWs->removeWidget(startup);
 		delete startup;
-		kdWarning() << k_funcinfo << "Invalid id " << id << endl;
+		boWarning() << k_funcinfo << "Invalid id " << id << endl;
 		return;
 	}
  }
  if (!w) {
-	kdError() << k_funcinfo << "NULL widget" << endl;
+	boError() << k_funcinfo << "NULL widget" << endl;
 	return;
  }
  w->installEventFilter(this);
@@ -376,7 +376,7 @@ void TopWidget::showStartupWidget(StartupWidgetIds id)
 		showHideMenubar();
 		break;
 	default:
-		kdWarning() << k_funcinfo << "Invalid id " << id << endl;
+		boWarning() << k_funcinfo << "Invalid id " << id << endl;
 		break;
  }
 }
@@ -385,7 +385,7 @@ void TopWidget::initBosonWidget(bool loading)
 {
  if (d->mBosonWidget) {
 	//should not happen!
-	kdWarning() << k_funcinfo << "widget already allocated!" << endl;
+	boWarning() << k_funcinfo << "widget already allocated!" << endl;
 	return;
  }
  if (boGame->gameMode()) {
@@ -470,7 +470,7 @@ void TopWidget::slotSaveGame()
 
 void TopWidget::slotLoadGame()
 {
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
 
  // Get filename
  QString loadingFileName = KFileDialog::getOpenFileName(QString::null, "*.bsg|Boson SaveGame", this);
@@ -522,7 +522,7 @@ void TopWidget::slotLoadGame()
 				"Probably the game wasn't saved properly");
 	} else {
 		// This should never be reached
-		kdError() << k_funcinfo << "Invalid error type or no error (while loading saved game)!!!" << endl;
+		boError() << k_funcinfo << "Invalid error type or no error (while loading saved game)!!!" << endl;
 	}
 
 	// ... and show messagebox
@@ -535,7 +535,7 @@ void TopWidget::slotLoadGame()
 	showStartupWidget(IdWelcome);
  }
 
- kdDebug() << k_funcinfo << "done" << endl;
+ boDebug() << k_funcinfo << "done" << endl;
 }
 
 void TopWidget::slotShowMainMenu()
@@ -572,36 +572,36 @@ void TopWidget::slotHideNetworkOptions()
 void TopWidget::slotAssignMap()
 {
  if (boGame->gameStatus() != KGame::Init) {
-	kdWarning() << k_funcinfo << "not in Init status" << endl;
+	boWarning() << k_funcinfo << "not in Init status" << endl;
 	return;
  }
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  d->mBosonWidget->initMap();
 }
 
 void TopWidget::slotStartGame()
 {
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  if (boGame->gameStatus() != KGame::Init) {
-	kdWarning() << k_funcinfo << "not in Init status" << endl;
+	boWarning() << k_funcinfo << "not in Init status" << endl;
 	return;
  }
 // AB: first init map (see slotAssginMap()), THEN init player. we need map for
 // player loading (unit positions, ...)
 
- kdDebug() << k_funcinfo << "init player" << endl;
+ boDebug() << k_funcinfo << "init player" << endl;
  if (!mPlayer) {
 	// the local player is in boGame for loaded games
 	mPlayer = boGame->localPlayer();
 	if (!mPlayer) {
-		kdError() << k_funcinfo << "NULL local player" << endl;
+		boError() << k_funcinfo << "NULL local player" << endl;
 		return;
 	}
  }
  changeLocalPlayer(mPlayer);
  d->mBosonWidget->initPlayer();
 /*
- kdDebug() << k_funcinfo << "init map" << endl;
+ boDebug() << k_funcinfo << "init map" << endl;
  d->mBosonWidget->initMap();//AB: see slotAssingMap()!! // FIXME REMOVE
  */
 
@@ -629,7 +629,7 @@ void TopWidget::slotStartGameLoadWorkaround() // I know the name sucks - its int
  boGame->startGame();
  boGame->sendMessage(0, BosonMessage::IdGameIsStarted);
  boGame->slotSetGameSpeed(BosonConfig::readGameSpeed());
- kdDebug() << "speed: " << boGame->gameSpeed() << endl;
+ boDebug() << "speed: " << boGame->gameSpeed() << endl;
 }
 
 void TopWidget::slotToggleSound()
@@ -667,7 +667,7 @@ void TopWidget::slotToggleFullScreen()
 
 void TopWidget::endGame()
 {
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  if (d->mBosonWidget) {
 	d->mBosonWidget->quitGame();
 	disconnect(d->mBosonWidget, 0, 0, 0);
@@ -683,7 +683,7 @@ void TopWidget::endGame()
  mCanvas = 0;
  delete mPlayField;
  mPlayField = 0;
- kdDebug() << k_funcinfo << "done" << endl;
+ boDebug() << k_funcinfo << "done" << endl;
 }
 
 void TopWidget::reinitGame()
@@ -769,7 +769,7 @@ void TopWidget::slotToggleMenubar()
 		// editor without menubar is pretty useless, i guess
 		break;
 	default:
-		kdDebug() << k_funcinfo << "unknown id " << id << endl;
+		boDebug() << k_funcinfo << "unknown id " << id << endl;
 		break;
  }
  showHideMenubar();
@@ -846,7 +846,7 @@ void TopWidget::setGeometry(const QRect& r)
 
 bool TopWidget::queryClose()
 {
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  if (boGame->gameStatus() != KGame::Init) {
 	int answer = KMessageBox::warningYesNo(this, i18n("Are you sure you want to quit Boson?\n"
 			"This will end current game."), i18n("Are you sure?"), KStdGuiItem::yes(),
@@ -926,7 +926,7 @@ void TopWidget::raiseWidget(StartupWidgetIds id)
 		setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
 		break;
 	default:
-		kdDebug() << k_funcinfo << "unknown id " << id << endl;
+		boDebug() << k_funcinfo << "unknown id " << id << endl;
 		break;
  }
  mWs->raiseWidget(id);
@@ -1006,7 +1006,7 @@ void TopWidget::showHideMenubar()
 		showMenubar();
 		break;
 	default:
-		kdDebug() << k_funcinfo << "unknown id " << id << endl;
+		boDebug() << k_funcinfo << "unknown id " << id << endl;
 		break;
  }
 }

@@ -23,11 +23,11 @@
 #include "bosonmessage.h"
 #include "boson.h"
 #include "player.h"
+#include "bodebug.h"
 
 #include <kgame/kgame.h>
 
 #include <klocale.h>
-#include <kdebug.h>
 #include <ksimpleconfig.h>
 
 #include <qpushbutton.h>
@@ -107,15 +107,15 @@ KGameDialogBosonConfig::~KGameDialogBosonConfig()
 void KGameDialogBosonConfig::slotPlayFieldChanged(int index)
 {
  if (!admin()) {
-	kdWarning() << "Only admin can change the map" << endl;
+	boWarning() << "Only admin can change the map" << endl;
 	return;
  }
  if (index >= (int)d->mPlayFieldIndex2Identifier.count()) {
-	kdError() << "invalid index " << index << endl;
+	boError() << "invalid index " << index << endl;
 	return;
  }
  if (!game()) {
-	kdError() << k_lineinfo << "Cannot send message" << endl;
+	boError() << k_lineinfo << "Cannot send message" << endl;
 	return;
  }
  QByteArray buffer;
@@ -163,7 +163,7 @@ void KGameDialogBosonConfig::regenerateColors()
 {
  Boson* g = (Boson*)game();
  if (!g) {
-	kdWarning() << k_funcinfo << "NULL game" << endl;
+	boWarning() << k_funcinfo << "NULL game" << endl;
 	return;
  }
  d->mPlayerColor->clear();
@@ -172,7 +172,7 @@ void KGameDialogBosonConfig::regenerateColors()
  if (p) {
 	addColor(p->speciesTheme()->teamColor());
  } else {
-	kdWarning() << k_funcinfo << "NULL owner" << endl;
+	boWarning() << k_funcinfo << "NULL owner" << endl;
  }
  QValueList<QColor> colors = g->availableTeamColors();
  for (unsigned int i = 0; i < colors.count(); i++) {
@@ -188,13 +188,13 @@ void KGameDialogBosonConfig::slotSpeciesChanged(Player* p)
 void KGameDialogBosonConfig::slotTeamColorChanged(int index)
 {
  QColor c = d->mColorList[index];
-kdDebug() << "?? is " << c.rgb() << endl;
+boDebug() << "?? is " << c.rgb() << endl;
  emit signalTeamColorChanged(c);
 }
 
 void KGameDialogBosonConfig::slotTeamColorChanged(Player* p)
 {
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  regenerateColors();
 }
 

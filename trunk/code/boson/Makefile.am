@@ -62,12 +62,14 @@ BOSON_SRC = \
 	bosonparticlesystem.cpp \
 	bosonparticlemanager.cpp \
 	bosonstarting.cpp \
-	bosonweapon.cpp
+	bosonweapon.cpp \
+	bodebug.cpp
 
 BOPROFILING_SRC= \
 	bosonprofilingdialog.cpp \
 	bosonprofiling.cpp \
-	boprofilingmain.cpp
+	boprofilingmain.cpp \
+	bodebug.cpp
 
 boson_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 boson_LDADD = \
@@ -92,7 +94,8 @@ boprofiling_SOURCES = $(BOPROFILING_SRC)
 bocursor_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 bocursor_LDADD = -lkio $(LIB_KDEUI) -lGLU
 bocursor_SOURCES = bocursormain.cpp bosoncursoreditor.cpp bosoncursor.cpp \
-		bosontexturearray.cpp bosonconfig.cpp
+		bosontexturearray.cpp bosonconfig.cpp \
+		bodebug.cpp
 
 borender_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 borender_LDADD = \

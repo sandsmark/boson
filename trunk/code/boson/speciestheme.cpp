@@ -30,10 +30,10 @@
 #include "upgradeproperties.h"
 #include "bosonparticlemanager.h"
 #include "bosonweapon.h"
+#include "bodebug.h"
 
 #include <kstandarddirs.h>
 #include <ksimpleconfig.h>
-#include <kdebug.h>
 
 #include <qpixmap.h>
 #include <qimage.h>
@@ -112,17 +112,17 @@ SpeciesTheme::SpeciesTheme(const QString& speciesDir, const QColor& teamColor)
  mSound = 0;
 
  if (!loadTheme(speciesDir, teamColor)) {
-	kdError() << "Theme " << speciesDir << " not properly loaded" << endl;
+	boError() << "Theme " << speciesDir << " not properly loaded" << endl;
  }
 }
 
 SpeciesTheme::~SpeciesTheme()
 {
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  reset();
 
  delete d;
- kdDebug() << k_funcinfo << "done" << endl;
+ boDebug() << k_funcinfo << "done" << endl;
 }
 
 void SpeciesTheme::reset()
@@ -151,7 +151,7 @@ bool SpeciesTheme::loadTheme(const QString& speciesDir, const QColor& teamColor)
 	setTeamColor(teamColor);
  }
  mThemePath = speciesDir;
- kdDebug() << "theme path: " << themePath() << endl;
+ boDebug() << "theme path: " << themePath() << endl;
 
  mSound = boMusic->addSounds(themePath());
 
@@ -160,7 +160,7 @@ bool SpeciesTheme::loadTheme(const QString& speciesDir, const QColor& teamColor)
 
  // action pixmaps - it doesn't hurt
  if (!loadActionGraphics()) {
-	kdError() << "Couldn't load action pixmaps" << endl;
+	boError() << "Couldn't load action pixmaps" << endl;
  }
 
  // don't preload units here as the species can still be changed in new game
@@ -178,11 +178,11 @@ bool SpeciesTheme::loadUnitGraphics(const UnitProperties* prop)
 
 // big overview
  if (d->mBigOverview[type]) {
-	kdError() << "BigOverview of " << type << " already there" << endl;
+	boError() << "BigOverview of " << type << " already there" << endl;
  } else {
 	QImage image;
 	if (!loadUnitImage(path + "overview-big.png", image, false)) {
-		kdError() << "SpeciesTheme : Can't load " << path + "overview-big.png" << endl;
+		boError() << "SpeciesTheme : Can't load " << path + "overview-big.png" << endl;
 		return false;
 	}
 	QPixmap* p = new QPixmap(image);
@@ -191,11 +191,11 @@ bool SpeciesTheme::loadUnitGraphics(const UnitProperties* prop)
 
 // small overview
  if (d->mSmallOverview[type]) {
-	kdError() << "SmallOverview of " << type << " already there" << endl;
+	boError() << "SmallOverview of " << type << " already there" << endl;
  } else {
 	QImage image;
 	if (!loadUnitImage(path + "overview-small.png", image, false)) {
-		kdError() << "SpeciesTheme : Can't load " << path + "overview-small.png" << endl;
+		boError() << "SpeciesTheme : Can't load " << path + "overview-small.png" << endl;
 		return false;
 	}
 	OverviewPixmap* p = new OverviewPixmap(image);
@@ -211,7 +211,7 @@ bool SpeciesTheme::loadUnit(unsigned long int type)
  boProfiling->loadUnit();
  const UnitProperties* prop = unitProperties(type);
  if (!prop) {
-	kdError() << "Could not load unit type " << type << endl;
+	boError() << "Could not load unit type " << type << endl;
 	boProfiling->loadUnitDone(type);
 	return false;
  }
@@ -239,11 +239,11 @@ bool SpeciesTheme::loadActionGraphics()
  //  theme path)
  QString actionPath = KGlobal::dirs()->findResourceDir("data", "boson/themes/ui/standard/attack.png");
  actionPath += "boson/themes/ui/standard/";
- kdDebug() << k_funcinfo << "action Path: " << actionPath << endl;
+ boDebug() << k_funcinfo << "action Path: " << actionPath << endl;
 
  QPixmap* attack = new QPixmap(actionPath + "attack.png");
  if (attack->isNull()) {
-	kdError() << k_funcinfo << "NULL attack pixmap!" << endl;
+	boError() << k_funcinfo << "NULL attack pixmap!" << endl;
 	delete attack;
 	return false;
  }
@@ -251,7 +251,7 @@ bool SpeciesTheme::loadActionGraphics()
 
  QPixmap* move = new QPixmap(actionPath + "move.png");
  if (move->isNull()) {
-	kdError() << k_funcinfo << "NULL move pixmap!" << endl;
+	boError() << k_funcinfo << "NULL move pixmap!" << endl;
 	delete move;
 	return false;
  }
@@ -259,7 +259,7 @@ bool SpeciesTheme::loadActionGraphics()
 
  QPixmap* stop = new QPixmap(actionPath + "stop.png");
  if (stop->isNull()) {
-	kdError() << k_funcinfo << "NULL stop pixmap!" << endl;
+	boError() << k_funcinfo << "NULL stop pixmap!" << endl;
 	delete stop;
 	return false;
  }
@@ -267,7 +267,7 @@ bool SpeciesTheme::loadActionGraphics()
 
  QPixmap* follow = new QPixmap(actionPath + "follow.png");
  if (follow->isNull()) {
-	kdError() << k_funcinfo << "NULL follow pixmap!" << endl;
+	boError() << k_funcinfo << "NULL follow pixmap!" << endl;
 	delete follow;
 	return false;
  }
@@ -275,7 +275,7 @@ bool SpeciesTheme::loadActionGraphics()
 
  QPixmap* mine = new QPixmap(actionPath + "mine.png");
  if (mine->isNull()) {
-	kdError() << k_funcinfo << "NULL mine pixmap!" << endl;
+	boError() << k_funcinfo << "NULL mine pixmap!" << endl;
 	delete mine;
 	return false;
  }
@@ -283,7 +283,7 @@ bool SpeciesTheme::loadActionGraphics()
 
  QPixmap* repair = new QPixmap(actionPath + "repair.png");
  if (repair->isNull()) {
-	kdError() << k_funcinfo << "NULL repair pixmap!" << endl;
+	boError() << k_funcinfo << "NULL repair pixmap!" << endl;
 	delete repair;
 	return false;
  }
@@ -302,7 +302,7 @@ QPixmap* SpeciesTheme::upgradePixmapByName(QString name)
  if(!d->mUpgradePixmaps[name]) {
 	QPixmap* p = new QPixmap(themePath() + "pixmaps/" + name);
 	if(p->isNull()) {
-		kdError() << k_funcinfo << "Cannot find pixmap with name " << name << endl;
+		boError() << k_funcinfo << "Cannot find pixmap with name " << name << endl;
 		// Will crash?
 	}
 	d->mUpgradePixmaps[name] = p;
@@ -314,26 +314,26 @@ bool SpeciesTheme::loadTechnologies()
 {
  QFile f(themePath() + "technologies.desktop");
  if(!f.exists()) {
-	kdWarning() << k_funcinfo << "Technologies file (" << f.name() << ") does not exists. No technologies loaded" << endl;
+	boWarning() << k_funcinfo << "Technologies file (" << f.name() << ") does not exists. No technologies loaded" << endl;
 	// We assume that this theme has no technologies and still return true
 	return true;
  }
  KSimpleConfig cfg(f.name());
  QStringList techs = cfg.groupList();
  if(techs.isEmpty()) {
-	kdWarning() << k_funcinfo << "No technologies found in technologies file (" << f.name() << ")" << endl;
+	boWarning() << k_funcinfo << "No technologies found in technologies file (" << f.name() << ")" << endl;
 	return true;
  }
  QStringList::Iterator it;
  for(it = techs.begin(); it != techs.end(); ++it) {
-	kdDebug() << k_funcinfo << "Loading technology from group " << *it << endl;
+	boDebug() << k_funcinfo << "Loading technology from group " << *it << endl;
 	TechnologyProperties* tech = new TechnologyProperties;
 	cfg.setGroup(*it);
 	tech->load(&cfg);
 	if (!d->mTechnologies.find(tech->id())) {
 		d->mTechnologies.insert(tech->id(), tech);
 	} else {
-		kdError() << k_funcinfo << "Technology with id " << tech->id() << " already there!" << endl;
+		boError() << k_funcinfo << "Technology with id " << tech->id() << " already there!" << endl;
 	}
  }
  return true;
@@ -352,7 +352,7 @@ BosonModel* SpeciesTheme::unitModel(unsigned long int unitType)
 	model = d->mUnitModels[unitType];
  }
  if (!model) {
-	kdError() << k_funcinfo << "Cannot load display list for " << unitType 
+	boError() << k_funcinfo << "Cannot load display list for " << unitType 
 			<< endl;
 	return 0;
  }
@@ -367,7 +367,7 @@ QPixmap* SpeciesTheme::bigOverview(unsigned long int unitType)
 	pix = d->mBigOverview[unitType];
  }
  if (!pix) {
-	kdError() << k_funcinfo << "Cannot find unit type " << unitType 
+	boError() << k_funcinfo << "Cannot find unit type " << unitType 
 			<< endl;
 	return 0;
  }
@@ -382,7 +382,7 @@ QPixmap* SpeciesTheme::smallOverview(unsigned long int unitType)
 	pix = d->mSmallOverview[unitType];
  }
  if (!pix) {
-	kdError() << k_funcinfo << "Cannot find unit type " << unitType 
+	boError() << k_funcinfo << "Cannot find unit type " << unitType 
 			<< endl;
 	return 0;
  }
@@ -412,26 +412,26 @@ bool SpeciesTheme::loadUnitImage(const QString &fileName, QImage &_image, bool w
  h = image.height();
 
  if (image.depth() != 32) {
-	kdError() << k_funcinfo << fileName << "depth != 32" << endl;
+	boError() << k_funcinfo << fileName << "depth != 32" << endl;
  }
  if (w < 32) {
-	kdError() << k_funcinfo << fileName << "w < 32" << endl;
+	boError() << k_funcinfo << fileName << "w < 32" << endl;
 	return false;
  }
  if (h < 32) {
-	kdError() << k_funcinfo << fileName << "h < 32" << endl;
+	boError() << k_funcinfo << fileName << "h < 32" << endl;
 	return false;
  }
 
  if (image.isNull()) {
-	kdError() << k_funcinfo << "NULL image" << endl;
+	boError() << k_funcinfo << "NULL image" << endl;
 	return false;
  }
 
  if (withMask) {
 	mask = new QImage ( w, h, 1, 2, QImage::LittleEndian);
 	if (mask->isNull()) {
-		kdError() << k_funcinfo << "NULL mask" << endl;
+		boError() << k_funcinfo << "NULL mask" << endl;
 		return false;
 	}
 	mask->setColor( 0, 0xffffff );
@@ -537,7 +537,7 @@ bool SpeciesTheme::loadUnitImage(const QString &fileName, QImage &_image, bool w
  }
 
  if (image.isNull() || w < 32 || h < 32)  {
-	kdError() << k_funcinfo << "image is null" << endl;
+	boError() << k_funcinfo << "image is null" << endl;
 	return false;
  }
 
@@ -559,12 +559,12 @@ bool SpeciesTheme::loadUnitImage(const QString &fileName, QImage &_image, bool w
 void SpeciesTheme::loadNewUnit(UnitBase* unit)
 {
  if (!unit) {
-	kdError() << k_funcinfo << "NULL unit" << endl;
+	boError() << k_funcinfo << "NULL unit" << endl;
 	return;
  }
  const UnitProperties* prop = unit->unitProperties(); //unitProperties(unit);
  if (!prop) {
-	kdError() << k_funcinfo << "NULL properties for " << unit->type() << endl;
+	boError() << k_funcinfo << "NULL properties for " << unit->type() << endl;
 	return;
  }
 
@@ -585,7 +585,7 @@ void SpeciesTheme::loadNewUnit(UnitBase* unit)
 void SpeciesTheme::readUnitConfigs()
 {
  if (d->mUnitProperties.count() != 0) {
-	kdError() << "Cannot read unit configs again. Returning untouched..."
+	boError() << "Cannot read unit configs again. Returning untouched..."
 			<< endl;
 	return;
  }
@@ -606,7 +606,7 @@ void SpeciesTheme::readUnitConfigs()
  }
 
  if (list.isEmpty()) {
-	kdError() << "No Units found in this theme" << endl;
+	boError() << "No Units found in this theme" << endl;
 	return;
  }
  for (QStringList::ConstIterator it = list.begin(); it != list.end(); ++it) {
@@ -614,7 +614,7 @@ void SpeciesTheme::readUnitConfigs()
 	if (!d->mUnitProperties.find(prop->typeId())) {
 		d->mUnitProperties.insert(prop->typeId(), prop);
 	} else {
-		kdError() << "UnitType " << prop->typeId() << " already there!"
+		boError() << "UnitType " << prop->typeId() << " already there!"
 				<< endl;
 	}
  }
@@ -623,11 +623,11 @@ void SpeciesTheme::readUnitConfigs()
 const UnitProperties* SpeciesTheme::unitProperties(unsigned long int unitType) const
 {
  if (unitType == 0) {
-	kdError() << k_funcinfo << "invalid unit type " << unitType << endl;
+	boError() << k_funcinfo << "invalid unit type " << unitType << endl;
 	return 0;
  }
  if (!d->mUnitProperties[unitType]) {
-	kdError() << k_lineinfo << "oops - no unit properties for " << unitType << endl;
+	boError() << k_lineinfo << "oops - no unit properties for " << unitType << endl;
 	return 0;
  }
  return d->mUnitProperties[unitType];
@@ -636,11 +636,11 @@ const UnitProperties* SpeciesTheme::unitProperties(unsigned long int unitType) c
 UnitProperties* SpeciesTheme::nonConstUnitProperties(unsigned long int unitType) const
 {
  if (unitType == 0) {
-	kdError() << k_funcinfo << "invalid unit type " << unitType << endl;
+	boError() << k_funcinfo << "invalid unit type " << unitType << endl;
 	return 0;
  }
  if (!d->mUnitProperties[unitType]) {
-	kdError() << k_lineinfo << "oops - no unit properties for " << unitType << endl;
+	boError() << k_lineinfo << "oops - no unit properties for " << unitType << endl;
 	return 0;
  }
  return d->mUnitProperties[unitType];
@@ -649,11 +649,11 @@ UnitProperties* SpeciesTheme::nonConstUnitProperties(unsigned long int unitType)
 TechnologyProperties* SpeciesTheme::technology(unsigned long int techType) const
 {
  if (techType == 0) {
-	kdError() << k_funcinfo << "invalid technology type " << techType << endl;
+	boError() << k_funcinfo << "invalid technology type " << techType << endl;
 	return 0;
  }
  if (!d->mTechnologies[techType]) {
-	kdError() << k_lineinfo << "oops - no technology properties for " << techType << endl;
+	boError() << k_lineinfo << "oops - no technology properties for " << techType << endl;
 	return 0;
  }
  return d->mTechnologies[techType];
@@ -746,7 +746,7 @@ QStringList SpeciesTheme::availableSpecies()
  QStringList list = KGlobal::dirs()->findAllResources("data", 
 		"boson/themes/species/*/index.desktop");
  if (list.isEmpty()) {
-	kdWarning() << "No species found!" << endl;
+	boWarning() << "No species found!" << endl;
 	return list;
  }
  return list;
@@ -781,7 +781,7 @@ QString SpeciesTheme::identifier() const
 bool SpeciesTheme::setTeamColor(const QColor& color)
 {
  if (!d->mCanChangeTeamColor) {
-	kdWarning() << "Cannot change team color anymore!" << endl;
+	boWarning() << "Cannot change team color anymore!" << endl;
 	return false;
  }
  mTeamColor = color;
@@ -800,11 +800,11 @@ QValueList<QColor> SpeciesTheme::defaultColors()
 void SpeciesTheme::loadUnitModel(const UnitProperties* prop)
 {
  if (d->mUnitModels[prop->typeId()]) {
-	kdWarning() << k_funcinfo << "Model already loaded" << endl;
+	boWarning() << k_funcinfo << "Model already loaded" << endl;
 	return;
  }
  if (!QFile::exists(prop->unitPath() + QString::fromLatin1("unit.3ds"))) {
-	kdError() << k_funcinfo << "Cannot find unit.3ds file for " << prop->typeId() << endl;
+	boError() << k_funcinfo << "Cannot find unit.3ds file for " << prop->typeId() << endl;
 	return;
  }
  BosonModel* m = new BosonModel(prop->unitPath(), unitModelFile(),
@@ -903,26 +903,26 @@ void SpeciesTheme::loadParticleSystems()
  BosonParticleSystemProperties::init(themePath() + "/particles");
  QFile f(themePath() + "particles/particles.boson");
  if(!f.exists()) {
-	kdWarning() << k_funcinfo << "Particle systems file (" << f.name() << ") does not exists. No particle systems loaded!" << endl;
+	boWarning() << k_funcinfo << "Particle systems file (" << f.name() << ") does not exists. No particle systems loaded!" << endl;
 	// We assume that this theme has no particles and still return true
 	return;
  }
  KSimpleConfig cfg(f.name());
  QStringList particles = cfg.groupList();
  if(particles.isEmpty()) {
-	kdWarning() << k_funcinfo << "No particle systems found in particles file (" << f.name() << ")" << endl;
+	boWarning() << k_funcinfo << "No particle systems found in particles file (" << f.name() << ")" << endl;
 	return;
  }
- kdDebug() << k_funcinfo << "Loading " << particles.count() << " particle systems from config file" << endl;
+ boDebug() << k_funcinfo << "Loading " << particles.count() << " particle systems from config file" << endl;
  QStringList::Iterator it;
  for(it = particles.begin(); it != particles.end(); ++it) {
-	kdDebug() << k_funcinfo << "Loading particle system from group " << *it << endl;
+	boDebug() << k_funcinfo << "Loading particle system from group " << *it << endl;
 	cfg.setGroup(*it);
 	BosonParticleSystemProperties* particleprop = new BosonParticleSystemProperties(&cfg);
 	if (!d->mParticleProps.find(particleprop->id())) {
 		d->mParticleProps.insert(particleprop->id(), particleprop);
 	} else {
-		kdError() << k_funcinfo << "particle system with id " << particleprop->id() << " already there!" << endl;
+		boError() << k_funcinfo << "particle system with id " << particleprop->id() << " already there!" << endl;
 	}
  }
  return;
@@ -935,8 +935,9 @@ BosonParticleSystemProperties* SpeciesTheme::particleSystemProperties(unsigned l
 	return 0;
  }
  if (!d->mParticleProps[id]) {
-	kdError() << k_funcinfo << "oops - no particle system properties for " << id << endl;
+	boError() << k_funcinfo << "oops - no particle system properties for " << id << endl;
 	return 0;
  }
  return d->mParticleProps[id];
 }
+

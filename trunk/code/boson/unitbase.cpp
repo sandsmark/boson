@@ -24,10 +24,9 @@
 #include "pluginproperties.h"
 #include "player.h"
 #include "speciestheme.h"
+#include "bodebug.h"
 
 #include <kgame/kgamepropertyhandler.h>
-
-#include <kdebug.h>
 
 #include <qdom.h>
 #include <qmap.h>
@@ -74,9 +73,9 @@ UnitBase::UnitBase(const UnitProperties* prop)
 
 UnitBase::~UnitBase()
 {
-// kdDebug() << k_funcinfo << endl;
+// boDebug() << k_funcinfo << endl;
  dataHandler()->clear();
-// kdDebug() << k_funcinfo << " done" << endl;
+// boDebug() << k_funcinfo << " done" << endl;
 }
 
 void UnitBase::initStatic()
@@ -95,16 +94,16 @@ void UnitBase::initStatic()
 void UnitBase::registerData(KGamePropertyBase* prop, int id, bool local)
 {
  if (!prop) {
-	kdError() << k_funcinfo << "NULL property" << endl;
+	boError() << k_funcinfo << "NULL property" << endl;
 	return;
  }
  if (id < KGamePropertyBase::IdUser) {
-	kdWarning() << k_funcinfo << "ID < KGamePropertyBase::IdUser" << endl;
+	boWarning() << k_funcinfo << "ID < KGamePropertyBase::IdUser" << endl;
 	// do not return - might still work
  }
  QString name = propertyName(id);
  if (name.isNull()) {
-	kdWarning() << k_funcinfo << "Invalid property name for " << id << endl;
+	boWarning() << k_funcinfo << "Invalid property name for " << id << endl;
 	// a name isn't strictly necessary, so don't return
  }
  prop->registerData(id, dataHandler(),
@@ -115,11 +114,11 @@ void UnitBase::registerData(KGamePropertyBase* prop, int id, bool local)
 void UnitBase::addPropertyId(int id, const QString& name)
 {
  if (mPropertyMap->contains(id)) {
-	kdError() << k_funcinfo << "Cannot add " << id << " twice!" << endl;
+	boError() << k_funcinfo << "Cannot add " << id << " twice!" << endl;
 	return;
  }
 /* if (mPropertyMap->values().contains(name)) {
-	kdError() << k_funcinfo << "Cannot add " << name << " twice!" << endl;
+	boError() << k_funcinfo << "Cannot add " << name << " twice!" << endl;
 	return;
  }*/
  mPropertyMap->insert(id, name);
@@ -185,7 +184,7 @@ bool UnitBase::load(QDataStream& stream)
  Q_UINT32 id;
  stream >> typeId;
  if (!speciesTheme()) {
-	kdError() << k_funcinfo << "NULL speciesTheme" << endl;
+	boError() << k_funcinfo << "NULL speciesTheme" << endl;
 	return false;
  }
  mUnitProperties = speciesTheme()->unitProperties(typeId);
@@ -198,7 +197,7 @@ bool UnitBase::load(QDataStream& stream)
 SpeciesTheme* UnitBase::speciesTheme() const
 {
  if (!owner()) {
-	kdWarning() << k_funcinfo << "NULL owner" << endl;
+	boWarning() << k_funcinfo << "NULL owner" << endl;
 	return 0;
  }
  return owner()->speciesTheme();
@@ -239,7 +238,7 @@ bool UnitBase::saveScenario(QDomElement& unit)
  // FIXME: the unit ID still is a KGameProperty. Should be a normal integer (or
  // we just don't save it here!)
  if (!dataHandler()) {
-	kdError() << k_funcinfo << "NULL property handler" << endl;
+	boError() << k_funcinfo << "NULL property handler" << endl;
 	return false;
  }
  bool ret = true;
@@ -251,7 +250,7 @@ bool UnitBase::saveScenario(QDomElement& unit)
 		// AB: we need to connect to
 		// KGamePropertyHandler::signalRequestValue if this ever
 		// happens!
-		kdWarning() << k_funcinfo << "Cannot save property "
+		boWarning() << k_funcinfo << "Cannot save property "
 				<< it.current()->id() << "="
 				<< dataHandler()->propertyName(it.current()->id())
 				<< " to XML" << endl;

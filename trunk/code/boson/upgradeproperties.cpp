@@ -19,16 +19,17 @@
 
 #include "upgradeproperties.h"
 
-#include <qstring.h>
-#include <qvaluelist.h>
-
-#include <ksimpleconfig.h>
-#include <klocale.h>
-
 #include "player.h"
 #include "unitproperties.h"
 #include "speciestheme.h"
 #include "unit.h"
+#include "bodebug.h"
+
+#include <ksimpleconfig.h>
+#include <klocale.h>
+
+#include <qstring.h>
+#include <qvaluelist.h>
 
 
 /**********  UpgradePropertiesBase  **********/
@@ -81,14 +82,14 @@ bool UpgradePropertiesBase::canBeResearched(Player* player)
 
 void UpgradePropertiesBase::load(KSimpleConfig* cfg)
 {
-  kdDebug() << k_funcinfo << "Loading; isTech: " << isTechnology() << "; id: " << id() << "" << endl;
+  boDebug() << k_funcinfo << "Loading; isTech: " << isTechnology() << "; id: " << id() << "" << endl;
   // Load basic stuff
   if(mTechnology)
   {
     // Config group is set earlier
     mId = cfg->readUnsignedLongNumEntry("Id", 0);
     if(mId == 0) {
-      kdError() << k_funcinfo << "Invalid id: 0" << endl;
+      boError() << k_funcinfo << "Invalid id: 0" << endl;
     }
     mName = cfg->readEntry("Name", i18n("unknown"));
     mMineralCost = cfg->readUnsignedLongNumEntry("MineralCost", 100);
@@ -105,7 +106,7 @@ void UpgradePropertiesBase::load(KSimpleConfig* cfg)
   {
     if(!cfg->hasGroup(QString("Upgrade_%1").arg(mId)))
     {
-      kdError() << k_funcinfo << "While loading upgrade with id " << mId << ": No config group for upgrade" << endl;
+      boError() << k_funcinfo << "While loading upgrade with id " << mId << ": No config group for upgrade" << endl;
       return;
     }
     cfg->setGroup(QString("Upgrade_%1").arg(mId));
@@ -220,10 +221,10 @@ QValueList<unsigned long int> UpgradePropertiesBase::readUIntList(KSimpleConfig*
 
 void UpgradePropertiesBase::apply(Player* player)
 {
-  kdDebug() << k_funcinfo << "isTech: " << isTechnology() << "; id: " << id() << endl;
+  boDebug() << k_funcinfo << "isTech: " << isTechnology() << "; id: " << id() << endl;
   if(!isResearched())
   {
-    kdError() << k_funcinfo << "Trying to apply non-researched upgrade" << endl;
+    boError() << k_funcinfo << "Trying to apply non-researched upgrade" << endl;
   }
 
   // Add unit types to list

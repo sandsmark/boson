@@ -22,12 +22,12 @@
 
 #include "bosoncursor.h"
 #include "defines.h"
+#include "bodebug.h"
 
 #include <klocale.h>
 #include <knuminput.h>
 #include <ksimpleconfig.h>
 #include <kstandarddirs.h>
-#include <kdebug.h>
 
 #include <qlabel.h>
 #include <qcombobox.h>

@@ -21,12 +21,12 @@
 
 #include "bosonmap.h"
 #include "bosonscenario.h"
+#include "bodebug.h"
 
 #include <qdom.h>
 #include <qdatastream.h>
 #include <qfile.h>
 
-#include <kdebug.h>
 #include <kfilterdev.h>
 #include <kstandarddirs.h>
 #include <ksimpleconfig.h>
@@ -71,7 +71,7 @@ QString BosonPlayField::defaultPlayField()
 		identifier = ident;
 	}
  }
- kdWarning() << "cannot find Basic map - using " << identifier << " instead" << endl;
+ boWarning() << "cannot find Basic map - using " << identifier << " instead" << endl;
  return QString::null;
 }
 
@@ -80,7 +80,7 @@ QStringList BosonPlayField::availablePlayFields()
  QStringList list = KGlobal::dirs()->findAllResources("data", 
 		"boson/maps/*.desktop");
  if (list.isEmpty()) {
-	kdError() << k_funcinfo << "Cannot find any playfield?!" << endl;
+	boError() << k_funcinfo << "Cannot find any playfield?!" << endl;
 	return list;
  }
  QStringList validList;
@@ -98,11 +98,11 @@ bool BosonPlayField::loadPlayField(const QString& file)
 {
  QIODevice* dev = KFilterDev::deviceForFile(file);
  if (!dev) {
-	kdError() << k_funcinfo << "No file " << file << endl;
+	boError() << k_funcinfo << "No file " << file << endl;
 	return false;
  }
  if (!dev->open(IO_ReadOnly)) {
-	kdError() << k_funcinfo << "Can't open file " << file << endl;
+	boError() << k_funcinfo << "Can't open file " << file << endl;
 	delete dev;
 	return false;
  }
@@ -110,7 +110,7 @@ bool BosonPlayField::loadPlayField(const QString& file)
  QString errorMsg;
  int lineNo, columnNo;
  if (!doc.setContent(dev->readAll(), &errorMsg, &lineNo, &columnNo)) {
-	kdError() << "Parse error in line " << lineNo << ",column " << columnNo
+	boError() << "Parse error in line " << lineNo << ",column " << columnNo
 			<< " error message: " << errorMsg << endl;
 	delete dev;
 	return false;
@@ -120,11 +120,11 @@ bool BosonPlayField::loadPlayField(const QString& file)
  QDomElement root = doc.documentElement();
 
  if (!loadMap(root)) {
-	kdError() << "Error loading map from " << file << endl;
+	boError() << "Error loading map from " << file << endl;
 	return false;
  }
  if (!loadScenario(root)) {
-	kdError() << "Error loading scenario from " << file << endl;
+	boError() << "Error loading scenario from " << file << endl;
 	return false;
  }
  return true;
@@ -135,11 +135,11 @@ bool BosonPlayField::savePlayField(const QString& fileName)
  // TODO: use KMessageBox here? or maybe add an errorMessage parameter which can
  // be displayed as a msg box in the calling method
  if (!mMap) {
-	kdError() << k_funcinfo << "NULL map" << endl;
+	boError() << k_funcinfo << "NULL map" << endl;
 	return false;
  }
  if (!mScenario) {
-	kdError() << k_funcinfo << "NULL scenario" << endl;
+	boError() << k_funcinfo << "NULL scenario" << endl;
 	return false;
  }
  QDomDocument doc("BosonPlayField");
@@ -147,21 +147,21 @@ bool BosonPlayField::savePlayField(const QString& fileName)
  doc.appendChild(root);
 
  if (!mScenario->saveScenario(root)) {
-	kdError() << k_funcinfo << "Error saving scenario" << endl;
+	boError() << k_funcinfo << "Error saving scenario" << endl;
 	return false;
  }
  if (!mMap->saveMap(root)) {
-	kdError() << k_funcinfo << "Error saving map" << endl;
+	boError() << k_funcinfo << "Error saving map" << endl;
 	return false;
  }
 
  QIODevice* dev = KFilterDev::deviceForFile(fileName, "application/x-gzip");
  if (!dev) {
-	kdError() << k_funcinfo << "Cannot save to " << fileName << endl;
+	boError() << k_funcinfo << "Cannot save to " << fileName << endl;
 	return false;
  }
  if (!dev->open(IO_WriteOnly)) {
-	kdError() << k_funcinfo << "Cannot open " << fileName << endl;
+	boError() << k_funcinfo << "Cannot open " << fileName << endl;
 	delete dev;
 	return false;
  }
@@ -178,10 +178,10 @@ bool BosonPlayField::loadMap(QDomElement& root)
 {
  QDomNodeList list = root.elementsByTagName("BosonMap");
  if (list.count() < 1) {
-	kdError() << k_funcinfo << "No map found in file" << endl;
+	boError() << k_funcinfo << "No map found in file" << endl;
 	return false;
  } else if (list.count() > 1) {
-	kdWarning() << k_funcinfo << "More than one map in file - picking first" << endl;
+	boWarning() << k_funcinfo << "More than one map in file - picking first" << endl;
  }
  QDomElement node = list.item(0).toElement();
  delete mMap;
@@ -195,10 +195,10 @@ bool BosonPlayField::loadScenario(QDomElement& root)
 {
  QDomNodeList list = root.elementsByTagName("BosonScenario");
  if (list.count() < 1) {
-	kdError() << k_funcinfo << "No scenario found in file" << endl;
+	boError() << k_funcinfo << "No scenario found in file" << endl;
 	return false;
  } else if (list.count() > 1) {
-	kdWarning() << k_funcinfo << "More than one scenario in file ... we probably will never support this - but definitely *not* yet. picking first" << endl;
+	boWarning() << k_funcinfo << "More than one scenario in file ... we probably will never support this - but definitely *not* yet. picking first" << endl;
  }
  QDomElement node = list.item(0).toElement();
  delete mScenario;
@@ -223,7 +223,7 @@ bool BosonPlayField::loadMap(QDataStream& stream)
 void BosonPlayField::saveMap(QDataStream& stream)
 {
  if (!mMap) {
-	kdError() << k_funcinfo << "NULL map" << endl;
+	boError() << k_funcinfo << "NULL map" << endl;
 	return;
  }
  mMap->saveMapGeo(stream);
@@ -251,11 +251,11 @@ QString BosonPlayField::playFieldFileName(const QString& identifier)
 		if (QFile::exists(m)) {
 			return m;
 		} else {
-			kdError() << "Cannot find " << m << " for valid .desktop file" << endl;
+			boError() << "Cannot find " << m << " for valid .desktop file" << endl;
 		}
 	}
  }
- kdWarning() << "no map file found for " << identifier << endl;
+ boWarning() << "no map file found for " << identifier << endl;
  return QString::null;
 }
 

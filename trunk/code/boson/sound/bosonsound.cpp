@@ -21,12 +21,12 @@
 
 #include "../defines.h"
 #include "../bosonconfig.h"
+#include "../bodebug.h"
 #include "bosonmusic.h"
 
 #include <kapplication.h>
 #include <kmimetype.h>
 #include <kdeversion.h>
-#include <kdebug.h>
 
 #include <arts/kartsserver.h>
 #include <arts/flowsystem.h>
@@ -64,53 +64,53 @@ public:
 
 	void play()
 	{
-		kdDebug() << k_funcinfo << endl;
+		boDebug() << k_funcinfo << endl;
 		if (!isNull()) {
 			object().play();
 			mPlayed = true;
 		} else {
-			kdDebug() << k_funcinfo << "NULL playobject" << endl;
+			boDebug() << k_funcinfo << "NULL playobject" << endl;
 		}
 	}
 
 	void rewind()
 	{
-		kdDebug() << k_funcinfo << endl;
+		boDebug() << k_funcinfo << endl;
 		if (isNull()) {
 			return;
 		}
 		if (!(object().capabilities() & Arts::capSeek)) {
-			kdDebug() << "cannot seek" << endl;
+			boDebug() << "cannot seek" << endl;
 			reload();
 			return;
 		}
 		if (position() > 0) {
-			kdDebug() << "seek" << endl;
+			boDebug() << "seek" << endl;
 			Arts::poTime begin;
 			begin.seconds = 0;
 			begin.ms = 0;
 			object().seek(begin);
 			if (position() > 0) {
-				kdDebug() << "seeking did not work :-(" << endl;
+				boDebug() << "seeking did not work :-(" << endl;
 				reload();
 			}
 		}
 	}
 	void reload()
 	{
-		kdDebug() << k_funcinfo << endl;
+		boDebug() << k_funcinfo << endl;
 		KMimeType::Ptr mimeType = KMimeType::findByURL(file(), 0, true, true);
 
 		Arts::PlayObject result;
 		if (mParent->server().server().isNull()) {
-			kdWarning() << k_funcinfo << "NULL server" << endl;
+			boWarning() << k_funcinfo << "NULL server" << endl;
 			return;
 		}
 		result = mParent->server().server().createPlayObjectForURL(
 				std::string(file()), std::string(mimeType->name()),
 				false); // false as we connect it to the soundcard ourselfes
 		if (result.isNull()) {
-			kdError() << k_funcinfo << "NULL playobject - file="
+			boError() << k_funcinfo << "NULL playobject - file="
 					<< file() << " mimetype="
 					<< mimeType->name() << endl;
 			return;
@@ -120,7 +120,7 @@ public:
 				mParent->server().server().createObject(
 				"Arts::Synth_BUS_UPLINK"));
 		if (uplink.isNull()) {
-			kdError() << k_funcinfo << "NULL uplink" << endl;
+			boError() << k_funcinfo << "NULL uplink" << endl;
 			return;
 		}
 		uplink.busname("out_soundcard");
@@ -137,13 +137,13 @@ public:
 
 	void playFromBeginning()
 	{
-		kdDebug() << k_funcinfo << endl;
+		boDebug() << k_funcinfo << endl;
 		if (isNull()) {
-			kdWarning() << k_funcinfo << "isNull" << endl;
+			boWarning() << k_funcinfo << "isNull" << endl;
 			return;
 		}
 		if (object().state() != Arts::posIdle) {
-			kdDebug() << k_funcinfo << "not posIdle" << endl;
+			boDebug() << k_funcinfo << "not posIdle" << endl;
 //			return; // AB: ? ??? 
 		}
 		if (mPlayed) {
@@ -159,11 +159,11 @@ protected:
 			return -1;
 		}
 		if (!(object().capabilities() & Arts::capSeek)) {
-			kdDebug() << "cannot seek!!" << endl;
+			boDebug() << "cannot seek!!" << endl;
 			return -1;
 		}
 		Arts::poTime t(object().currentTime());
-		kdDebug() << k_funcinfo << t.ms + t.seconds * 1000 << endl;
+		boDebug() << k_funcinfo << t.ms + t.seconds * 1000 << endl;
 		return t.ms + t.seconds * 1000;
 	}
 private:
@@ -222,7 +222,7 @@ BosonSound::BosonSound()
  // taken from noatun's code:
  d->mAmanPlay = Arts::DynamicCast(server().server().createObject("Arts::Synth_AMAN_PLAY"));
  if (d->mAmanPlay.isNull()) {
-	kdError() << k_lineinfo << "Synth_AMAN_Play is NULL" << endl;
+	boError() << k_lineinfo << "Synth_AMAN_Play is NULL" << endl;
 	d->mPlaySounds = false; // something evil happened...
 	return;
  }
@@ -232,7 +232,7 @@ BosonSound::BosonSound()
 
  d->mEffectStack = Arts::DynamicCast(server().server().createObject("Arts::StereoEffectStack"));
  if (d->mEffectStack.isNull()) {
-	kdError() << k_lineinfo << "NULL effect stack" << endl;
+	boError() << k_lineinfo << "NULL effect stack" << endl;
 	d->mPlaySounds = false; // something evil happened...
 	return;
  }
@@ -243,7 +243,7 @@ BosonSound::BosonSound()
 /*
  d->mVolumeControl = Arts::DynamicCast(server().server().createObject("Arts::StereoVolumeControl"));
  if (d->mVolumeControl.isNull()) {
-	kdError() << k_funcinfo << "NULL volume control" << endl;
+	boError() << k_funcinfo << "NULL volume control" << endl;
 	d->mPlaySounds = false; // something evil happened...
  }
  d->mVolumeControl.start();
@@ -255,7 +255,7 @@ BosonSound::BosonSound()
 
 BosonSound::~BosonSound()
 {
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  d->mSounds.clear();
  d->mUnitSounds.clear();
 
@@ -317,7 +317,7 @@ void BosonSound::addSounds(const QString& speciesPath, QMap<int, QString> sounds
  directory.setNameFilter(QString("*.ogg;*.wav"));
  QStringList allFiles = directory.entryList();
  if (allFiles.isEmpty()) {
-	kdWarning() << k_funcinfo << "no sound files found - is the data module installed?" << endl;
+	boWarning() << k_funcinfo << "no sound files found - is the data module installed?" << endl;
 	return;
  }
  QMap<int, QString>::Iterator it = sounds.begin();
@@ -336,7 +336,7 @@ void BosonSound::addSounds(const QString& speciesPath, QMap<int, QString> sounds
 	if (!playObject->isNull()) {
 		d->mSounds.insert(it.key(), playObject);
 	} else {
-		kdWarning() << k_funcinfo << "NULL sound " << file << endl;
+		boWarning() << k_funcinfo << "NULL sound " << file << endl;
 		delete playObject;
 	}
 
@@ -375,12 +375,12 @@ void BosonSound::addEventSound(const QString& name, const QString& file)
 	}
  }
  BoPlayObject* playObject = new BoPlayObject(this, file);
- kdDebug() << k_funcinfo << "loading " << file << endl;
+ boDebug() << k_funcinfo << "loading " << file << endl;
  if (!playObject->isNull()) {
 	d->mUnitSounds[name].append(playObject);
 	d->mUnitSounds[name].setAutoDelete(true);
  } else {
-	kdWarning() << k_funcinfo << "NULL sound " << file << endl;
+	boWarning() << k_funcinfo << "NULL sound " << file << endl;
 	delete playObject;
  }
 }
@@ -396,7 +396,7 @@ void BosonSound::play(int id)
  if (!boConfig->sound()) {
 	return;
  }
- kdDebug() << k_funcinfo << "id: " << id << endl;
+ boDebug() << k_funcinfo << "id: " << id << endl;
  BoPlayObject* p = d->mSounds[id];
  if (p && !p->isNull()) {
 	p->playFromBeginning();
@@ -425,7 +425,7 @@ void BosonSound::play(const QString& name)
  }
 
  if (!p || p->isNull()) {
-	kdDebug() << k_funcinfo << "NULL sound" << endl;
+	boDebug() << k_funcinfo << "NULL sound" << endl;
 	return;
  }
  p->playFromBeginning();

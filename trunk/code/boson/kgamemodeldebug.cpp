@@ -24,6 +24,7 @@
 #include "speciestheme.h"
 #include "unitproperties.h"
 #include "bo3dtools.h"
+#include "bodebug.h"
 
 #include <qcombobox.h>
 #include <qcheckbox.h>
@@ -41,7 +42,6 @@
 #include <klistbox.h>
 #include <klistview.h>
 #include <klocale.h>
-#include <kdebug.h>
 #include <kpopupmenu.h>
 
 #include <lib3ds/file.h>
@@ -85,7 +85,7 @@ public:
 	void setMatrix(BoMatrix* m)
 	{
 		if (!m) {
-			kdError() << k_funcinfo << "NULL matrix" << endl;
+			boError() << k_funcinfo << "NULL matrix" << endl;
 			return;
 		}
 		for (int i = 0; i < 4; i++) {
@@ -348,19 +348,19 @@ void BoListView::allowHide(int column)
 	mPopup->insertItem(columnText(column), column);
 	mPopup->setItemChecked(column, true);
 
-	kdDebug() << k_funcinfo << columnText(column) << "==" << column << endl;
+	boDebug() << k_funcinfo << columnText(column) << "==" << column << endl;
  }
 }
 
 void BoListView::slotToggleHideColumn(int id)
 {
- kdDebug() << k_funcinfo << id << endl;
+ boDebug() << k_funcinfo << id << endl;
  if (!mPopup) {
-	kdWarning() << k_funcinfo << "NULL popup menu" << endl;
+	boWarning() << k_funcinfo << "NULL popup menu" << endl;
 	return;
  }
  if (mPopup->indexOf(id) == -1) {
-	kdError() << k_funcinfo << "Invalid id " << id << endl;
+	boError() << k_funcinfo << "Invalid id " << id << endl;
 	return;
  }
  bool hide = mPopup->isItemChecked(id);
@@ -552,7 +552,7 @@ void KGameModelDebug::addModel(const QString& file, const QString& _name)
 void KGameModelDebug::addTheme(SpeciesTheme* theme)
 {
  if (!theme) {
-	kdError() << k_funcinfo << "NULL theme" << endl;
+	boError() << k_funcinfo << "NULL theme" << endl;
 	return;
  }
  QValueList<const UnitProperties*> prop = theme->allUnits();
@@ -566,10 +566,10 @@ void KGameModelDebug::addTheme(SpeciesTheme* theme)
 void KGameModelDebug::slotModelChanged(int index)
 {
  if (index < 0) {
-	kdWarning() << k_funcinfo << "index==" << index << endl;
+	boWarning() << k_funcinfo << "index==" << index << endl;
 	return;
  } else if (index >= d->mModelBox->count()) {
-	kdError() << k_funcinfo << "index out of range: " << index << endl;
+	boError() << k_funcinfo << "index out of range: " << index << endl;
 	return;
  }
  if (d->m3ds) {
@@ -625,7 +625,7 @@ void KGameModelDebug::updateMeshPage()
 
 void KGameModelDebug::slotConstructMeshList()
 {
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  d->mMeshView->clear();
  d->mListItem2Mesh.clear();
  if (!d->m3ds) {
@@ -652,7 +652,7 @@ void KGameModelDebug::slotDisplayMesh(QListViewItem* item)
 
  Lib3dsMesh* mesh = d->mListItem2Mesh[item];
  if (!mesh) {
-	kdWarning() << k_funcinfo << "NULL mesh" << endl;
+	boWarning() << k_funcinfo << "NULL mesh" << endl;
 	return;
  }
 
@@ -676,7 +676,7 @@ void KGameModelDebug::slotDisplayMaterial(QListBoxItem* item)
  Lib3dsMaterial* mat = d->mListItem2Material[item];
  d->mMaterialData->setMaterial(mat);
  if (!mat) {
-	kdWarning() << k_funcinfo << "NULL material" << endl;
+	boWarning() << k_funcinfo << "NULL material" << endl;
 	return;
  }
 
@@ -738,14 +738,14 @@ void KGameModelDebug::slotConnectToFace(QListViewItem* item)
  d->mConnectedFacesList->clear();
  d->mUnconnectedFacesList->clear();
  if (!face) {
-	kdWarning() << k_funcinfo << "NULL face" << endl;
+	boWarning() << k_funcinfo << "NULL face" << endl;
 	return;
  }
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  QPtrList<Lib3dsFace> connected;
  Lib3dsMesh* mesh = d->mListItem2Mesh[d->mMeshView->selectedItem()];
  if (!mesh) {
-	kdError() << k_funcinfo << "NULL mesh" << endl;
+	boError() << k_funcinfo << "NULL mesh" << endl;
 	return;
  }
  BosonModel::findAdjacentFaces(&connected, mesh, face);

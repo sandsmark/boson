@@ -35,6 +35,7 @@
 #include "boson.h"
 #include "bosonparticlesystem.h"
 #include "bosonweapon.h"
+#include "bodebug.h"
 
 #include <kgame/kgamepropertylist.h>
 #include <kgame/kgame.h>
@@ -115,7 +116,7 @@ Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
  // TODO: the tooltips do not yet work with OpenGL!!
 // KSpriteToolTip::add(rtti(), unitProperties()->name());
  if (!model()) {
-	kdError() << k_funcinfo << "NULL model - this will most probably crash!" << endl;
+	boError() << k_funcinfo << "NULL model - this will most probably crash!" << endl;
 	return;
  }
 
@@ -214,7 +215,7 @@ Unit* Unit::target() const
 
 void Unit::setTarget(Unit* target)
 {
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  d->mTarget = target;
  if (!d->mTarget) {
 	return;
@@ -224,18 +225,18 @@ void Unit::setTarget(Unit* target)
  }
  // Find weapon
  if (d->mTarget) {
- kdDebug() << k_funcinfo << "Target's there, searching for weapon" << endl;
+	boDebug() << k_funcinfo << "Target's there, searching for weapon" << endl;
 	QPtrListIterator<BosonWeapon> it(d->mWeapons);
 	while (it.current()) {
 		if (it.current()->canShootAt(target)) {
-			kdDebug() << k_funcinfo << "Found weapon that can shoot at target, setting active weapon and returning" << endl;
+			boDebug() << k_funcinfo << "Found weapon that can shoot at target, setting active weapon and returning" << endl;
 			d->mActiveWeapon = it.current();
 			return;
 		}
 		++it;
 	}
  }
- kdDebug() << k_funcinfo << "No weapon found, setting active weapon to NULL" << endl;
+ boDebug() << k_funcinfo << "No weapon found, setting active weapon to NULL" << endl;
  d->mActiveWeapon = 0;
 }
 
@@ -246,7 +247,7 @@ void Unit::setHealth(unsigned long int h)
 	h = maxHealth;
  }
  if (maxHealth == 0) {
-	kdError() << "Ooop - maxHealth == 0" << endl;
+	boError() << "Ooop - maxHealth == 0" << endl;
 	return;
  }
  UnitBase::setHealth(h);
@@ -269,7 +270,7 @@ void Unit::setPluginWork(int pluginType)
 {
  UnitPlugin* p = plugin(pluginType);
  if (!p) {
-	kdError() << k_funcinfo << id() << " does not have plugin " << pluginType << endl;
+	boError() << k_funcinfo << id() << " does not have plugin " << pluginType << endl;
 	return;
  }
  setWork(WorkPlugin);
@@ -405,7 +406,7 @@ void Unit::advanceNone(unsigned int advanceCount)
 	}
  }/* else if (weaponDamage() < 0) {
 	if (!repairPlugin()) {
-		kdWarning() << k_funcinfo << "weaponDamage < 0 but no repair plugin??" << endl;
+		boWarning() << k_funcinfo << "weaponDamage < 0 but no repair plugin??" << endl;
 		return;
 	}
 	repairPlugin()->repairInRange();
@@ -419,30 +420,30 @@ void Unit::advanceAttack(unsigned int advanceCount)
  if (advanceCount % 5 != 0) {
 	return;
  }
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  if (!target()) {
-	kdWarning() << k_funcinfo << "cannot attack NULL target" << endl;
+	boWarning() << k_funcinfo << "cannot attack NULL target" << endl;
 	stopAttacking();
 	return;
  }
  if (!d->mActiveWeapon) {
-	kdError() << k_funcinfo << "Attacking, but no active weapon!" << endl;
+	boError() << k_funcinfo << "Attacking, but no active weapon!" << endl;
 	stopAttacking();
 	return;
  }
  if (target()->isDestroyed()) {
-	kdDebug() << "Target is destroyed!" << endl;
+	boDebug() << "Target is destroyed!" << endl;
 	stopAttacking();
 	return;
  }
- kdDebug() << "    " << k_funcinfo << "checking if unit's in range" << endl;
+ boDebug() << "    " << k_funcinfo << "checking if unit's in range" << endl;
  if (!inRange(d->mActiveWeapon, target())) {
 	if (!canvas()->allBosonItems().contains(target())) {
-		kdDebug() << "Target seems to be destroyed!" << endl;
+		boDebug() << "Target seems to be destroyed!" << endl;
 		stopAttacking();
 		return;
 	}
-	kdDebug() << "unit (" << target()->id() << ") not in range - moving..." << endl;
+	boDebug() << "unit (" << target()->id() << ") not in range - moving..." << endl;
 	if (!moveTo(target()->x(), target()->y(), d->mActiveWeapon->properties()->range())) {
 		setWork(WorkNone);
 	} else {
@@ -450,9 +451,9 @@ void Unit::advanceAttack(unsigned int advanceCount)
 	}
 	return;
  }
- kdDebug() << "    " << k_funcinfo << "shooting at target" << endl;
+ boDebug() << "    " << k_funcinfo << "shooting at target" << endl;
  shootAt(d->mActiveWeapon, target());
- kdDebug() << "    " << k_funcinfo << "done shooting" << endl;
+ boDebug() << "    " << k_funcinfo << "done shooting" << endl;
  if (target()->isDestroyed()) {
 	stopAttacking();
  }
@@ -470,7 +471,7 @@ void Unit::advanceDestroyed(unsigned int advanceCount)
 void Unit::advancePlugin(unsigned int advanceCount)
 {
  if (!currentPlugin()) {
-	kdWarning() << k_funcinfo << "NULL plugin!" << endl;
+	boWarning() << k_funcinfo << "NULL plugin!" << endl;
 	setWork(WorkNone);
  } else {
 	currentPlugin()->advance(advanceCount);
@@ -567,7 +568,7 @@ bool Unit::moveTo(float x, float y, int range)
  if (!owner()->isFogged((int)(x / BO_TILE_SIZE), (int)(y / BO_TILE_SIZE))) {
 	Cell* c = canvas()->cell((int)(x / BO_TILE_SIZE), (int)(y / BO_TILE_SIZE));
 	if (!c) {
-		kdError() << k_funcinfo << "NULL cell at " << x << "," << y << endl;
+		boError() << k_funcinfo << "NULL cell at " << x << "," << y << endl;
 		return false;
 	}
 	// No pathfinding if goal not reachable or occupied and we can see it
@@ -592,7 +593,7 @@ bool Unit::moveTo(float x, float y, int range)
 
 void Unit::newPath()
 {
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  if (!owner()->isFogged(d->mMoveDestX / BO_TILE_SIZE, d->mMoveDestY / BO_TILE_SIZE)) {
 	Cell* destCell = canvas()->cell(d->mMoveDestX / BO_TILE_SIZE,
 			d->mMoveDestY / BO_TILE_SIZE);
@@ -613,7 +614,7 @@ void Unit::newPath()
  }
  if ((currentWaypoint().x() == x() + width() / 2) && (currentWaypoint().y() == y() + height() / 2))
  {
-	kdDebug() << k_funcinfo << "!!!!! First waypoint is unit's current pos! Removing" << endl;
+	boDebug() << k_funcinfo << "!!!!! First waypoint is unit's current pos! Removing" << endl;
 	waypointDone();
  }
  if (waypointCount() == 0)
@@ -635,7 +636,7 @@ const QPoint& Unit::currentWaypoint() const
 
 void Unit::stopMoving()
 {
-// kdDebug() << k_funcinfo << endl;
+// boDebug() << k_funcinfo << endl;
  clearWaypoints();
 
  // Call this only if we are only moving - stopMoving() is also called e.g. on
@@ -662,7 +663,7 @@ bool Unit::save(QDataStream& stream)
  //we should probably add pure virtual methods save() and load() to the plugins,
  //in order to store non-KGameProperty data there, too
  if (!UnitBase::save(stream)) {
-	kdError() << "Unit not saved properly" << endl;
+	boError() << "Unit not saved properly" << endl;
 	return false;
  }
  stream << (float)x();
@@ -674,7 +675,7 @@ bool Unit::save(QDataStream& stream)
 bool Unit::load(QDataStream& stream)
 {
  if (!UnitBase::load(stream)) {
-	kdError() << "Unit not loaded properly" << endl;
+	boError() << "Unit not loaded properly" << endl;
 	return false;
  }
  //AB: the frame number was loaded/saved as well. i removed this because we
@@ -691,7 +692,7 @@ bool Unit::load(QDataStream& stream)
 
  move(x, y, z);
  if (isDestroyed()) {
-	kdError() << k_funcinfo << "unit is already destroyed" << endl;
+	boError() << k_funcinfo << "unit is already destroyed" << endl;
  }
  return true;
 }
@@ -706,18 +707,18 @@ bool Unit::inRange(BosonWeapon* w, Unit* target) const
 void Unit::shootAt(BosonWeapon* w, Unit* target)
 {
  if (!w->reloaded()) {
-//	kdDebug() << "gotta reload first" << endl;
+//	boDebug() << "gotta reload first" << endl;
 	return;
  }
  if (!w->canShootAt(target)) {
-	kdDebug() << k_funcinfo << "can't shoot at target!" << endl;
+	boDebug() << k_funcinfo << "can't shoot at target!" << endl;
 	return;
  }
  if (target->isDestroyed()) {
-	kdWarning() << k_funcinfo << target->id() << " is already destroyed" << endl;
+	boWarning() << k_funcinfo << target->id() << " is already destroyed" << endl;
 	return;
  }
- kdDebug() << id() << " shoots at unit " << target->id() << endl;
+ boDebug() << id() << " shoots at unit " << target->id() << endl;
  w->shoot(target);
  owner()->statistics()->increaseShots();
 }
@@ -788,7 +789,7 @@ QValueList<Unit*> Unit::unitCollisions(bool exact) const
  if (isFlying()) { // flying units never collide - different altitudes
 	return units;
  }
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  BoItemList collisionList = canvas()->bosonCollisions(cells(), (BosonItem*)this, exact);
  if (collisionList.isEmpty()) {
 	return units;
@@ -876,7 +877,7 @@ bool Unit::isNextTo(Unit* target) const
 			QABS(bottomEdge() - target->topEdge()) <= r||
 			topEdge() <= target->topEdge() && bottomEdge() <= target->bottomEdge()// will never happen with current pixmaps
 			) {
-		kdDebug() << "ok - inrange" << endl;
+		boDebug() << "ok - inrange" << endl;
 		return true;
 	}
  }
@@ -893,7 +894,7 @@ void Unit::playSound(UnitSoundEvent event)
 
 void Unit::turnTo(int deg)
 {
- kdDebug() << k_funcinfo << deg << endl;
+ boDebug() << k_funcinfo << deg << endl;
  d->wantedDirection = deg;
 }
 
@@ -984,7 +985,7 @@ MobileUnit::~MobileUnit()
 void MobileUnit::advanceMoveInternal(unsigned int) // this actually needs to be called for every advanceCount.
 {
  if (speed() == 0) {
-	kdWarning() << k_funcinfo << "speed == 0" << endl;
+	boWarning() << k_funcinfo << "speed == 0" << endl;
 	stopMoving();
 	return;
  }
@@ -999,18 +1000,18 @@ void MobileUnit::advanceMoveInternal(unsigned int) // this actually needs to be 
 	// Waypoints were PolicyClean previously but are now PolicyLocal so they
 	//  should arrive immediately. If there are no waypoints but advanceMove is
 	//  called, then probably there's an error somewhere
-	kdError() << k_funcinfo << "No waypoints" << endl;
+	boError() << k_funcinfo << "No waypoints" << endl;
 	stopMoving();
 	return;
  }
 
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  if (advanceWork() != work()) {
 	if (work() == WorkAttack) {
 		// no need to move to the position of the unit...
 		// just check if unit is in range now.
 		if (inRange(activeWeapon(), target())) {
-			kdDebug() << k_funcinfo << "target is in range now" << endl;
+			boDebug() << k_funcinfo << "target is in range now" << endl;
 			stopMoving();
 			return;
 		}
@@ -1043,11 +1044,11 @@ void MobileUnit::advanceMoveInternal(unsigned int) // this actually needs to be 
 
  // First check if we're at waypoint
  if ((x == wp.x()) && (y == wp.y())) {
-	kdDebug() << k_funcinfo << "unit is at waypoint" << endl;
+	boDebug() << k_funcinfo << "unit is at waypoint" << endl;
 	waypointDone();
 
 	if (waypointCount() == 0) {
-		kdDebug() << k_funcinfo << "no more waypoints. Stopping moving" << endl;
+		boDebug() << k_funcinfo << "no more waypoints. Stopping moving" << endl;
 		stopMoving();
 		if (work() == WorkNone) {
 			// Turn a bit
@@ -1077,7 +1078,7 @@ void MobileUnit::advanceMoveInternal(unsigned int) // this actually needs to be 
  //  because we now recalc path after every waypoint (see ~5 lines above)
  if (!canvas()->cell(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE) ||
 		!canvas()->cell(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE)->canGo(unitProperties())) {
-	kdWarning() << k_funcinfo << "cannot go to waypoint, finding new path" << endl;
+	boWarning() << k_funcinfo << "cannot go to waypoint, finding new path" << endl;
 	setVelocity(0.0, 0.0);
 	// We have to clear waypoints first to make sure that they aren't used next
 	//  advance() call (when new waypoints haven't arrived yet)
@@ -1118,22 +1119,22 @@ void MobileUnit::advanceMoveInternal(unsigned int) // this actually needs to be 
 void MobileUnit::advanceMoveCheck()
 {
  if (!canvas()->onCanvas(boundingRectAdvanced().topLeft())) {
-	kdDebug() << k_funcinfo << "not on canvas" << endl;
+	boDebug() << k_funcinfo << "not on canvas" << endl;
 	stopMoving();
 	setWork(WorkNone);
 	return;
  }
  if (!canvas()->onCanvas(boundingRectAdvanced().bottomRight())) {
-	kdDebug() << k_funcinfo << "not on canvas" << endl;
+	boDebug() << k_funcinfo << "not on canvas" << endl;
 	stopMoving();
 	setWork(WorkNone);
 	return;
  }
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  if (canvas()->cellOccupied(currentWaypoint().x() / BO_TILE_SIZE,
 		currentWaypoint().y() / BO_TILE_SIZE, this, false)) {
-//	kdDebug() << k_funcinfo << "collisions" << endl;
-//	kdWarning() << k_funcinfo << "" << id() << " -> " << l.first()->id() 
+//	boDebug() << k_funcinfo << "collisions" << endl;
+//	boWarning() << k_funcinfo << "" << id() << " -> " << l.first()->id() 
 //		<< " (count=" << l.count() <<")"  << endl;
 	// do not move at all. Moving is not stopped completely!
 	// work() is still workMove() so we'll continue moving in the next
@@ -1144,12 +1145,12 @@ void MobileUnit::advanceMoveCheck()
 
 	const int recalculate = 50; // recalculate when 50 advanceMove() failed
 	if (d->mPathRecalculated >= 2) {
-		kdDebug() << k_funcinfo << "Path recalculated 3 times and it didn't help, giving up and stopping" << endl;
+		boDebug() << k_funcinfo << "Path recalculated 3 times and it didn't help, giving up and stopping" << endl;
 		stopMoving();
 		return;
 	}
 	if (d->mMovingFailed >= recalculate) {
-		kdDebug() << "recalculating path" << endl;
+		boDebug() << "recalculating path" << endl;
 		// you must not do anything that changes local variables directly here!
 		// all changed of variables with PolicyClean are ok, as they are sent
 		// over network and do not take immediate effect.
@@ -1166,7 +1167,7 @@ void MobileUnit::advanceMoveCheck()
  }
  d->mMovingFailed = 0;
  d->mPathRecalculated = 0;
- kdDebug() << k_funcinfo << "done" << endl;
+ boDebug() << k_funcinfo << "done" << endl;
 }
 
 void MobileUnit::setSpeed(float speed)
@@ -1182,7 +1183,7 @@ float MobileUnit::speed() const
 void MobileUnit::turnTo(Direction direction)
 {
  if (isDestroyed()) {
-	kdError() << k_funcinfo << "unit is already destroyed!" << endl;
+	boError() << k_funcinfo << "unit is already destroyed!" << endl;
 	return;
  }
  // At the moment, all units are facing south by default, but currect would be
@@ -1216,9 +1217,9 @@ void MobileUnit::turnTo()
  } else if ((xspeed < 0) && (yspeed < 0)) { // NW
 	turnTo(NorthWest);
  } else if (xspeed == 0 && yspeed == 0) {
-//	kdDebug() << k_funcinfo << "xspeed == 0 and yspeed == 0" << endl;
+//	boDebug() << k_funcinfo << "xspeed == 0 and yspeed == 0" << endl;
  } else {
-	kdDebug() << k_funcinfo << "error when setting frame" << endl;
+	boDebug() << k_funcinfo << "error when setting frame" << endl;
  }
 }
 
@@ -1228,14 +1229,14 @@ void MobileUnit::advanceFollow(unsigned int advanceCount)
 	return;
  }
  if (!target()) {
-	kdWarning() << k_funcinfo << "cannot follow NULL unit" << endl;
+	boWarning() << k_funcinfo << "cannot follow NULL unit" << endl;
 	stopAttacking();  // stopAttacking should maybe be renamed to stopEverything
 			//  or just stop because it's used in several places to stop unit from
 			//  doing whatever it does.
 	return;
  }
  if (target()->isDestroyed()) {
-	kdDebug() << k_funcinfo << "Unit is destroyed!" << endl;
+	boDebug() << k_funcinfo << "Unit is destroyed!" << endl;
 	stopAttacking();
 	return;
  }
@@ -1243,11 +1244,11 @@ void MobileUnit::advanceFollow(unsigned int advanceCount)
  if (QMAX(QABS(x() - target()->x()), QABS(y() - target()->y())) > BO_TILE_SIZE) {
 	// We're not next to unit
 	if (!canvas()->allBosonItems().contains(target())) {
-		kdDebug() << k_funcinfo << "Unit seems to be destroyed!" << endl;
+		boDebug() << k_funcinfo << "Unit seems to be destroyed!" << endl;
 		stopAttacking();
 		return;
 	}
-	kdDebug() << k_funcinfo << "unit (" << target()->id() << ") not in range - moving..." << endl;
+	boDebug() << k_funcinfo << "unit (" << target()->id() << ") not in range - moving..." << endl;
 	if (!moveTo(target()->x(), target()->y(), 1)) {
 		setWork(WorkNone);
 	} else {
@@ -1263,7 +1264,7 @@ QRect MobileUnit::boundingRect() const
 // > BO_TILE_SIZE
 // we simply return a boundingrect which has size BO_TILE_SIZE
  if (width() < BO_TILE_SIZE || height() < BO_TILE_SIZE) {
-	kdWarning() << k_funcinfo << "width or height  < BO_TILE_SIZE - not supported!!" << endl;
+	boWarning() << k_funcinfo << "width or height  < BO_TILE_SIZE - not supported!!" << endl;
 	return BosonItem::boundingRect();
  }
  return QRect((int)x(), (int)y(), BO_TILE_SIZE, BO_TILE_SIZE);
@@ -1284,7 +1285,7 @@ void MobileUnit::waypointDone()
 bool MobileUnit::load(QDataStream& stream)
 {
  if (!Unit::load(stream)) {
-	kdError() << "Unit not loaded properly" << endl;
+	boError() << "Unit not loaded properly" << endl;
 	return false;
  }
 
@@ -1294,7 +1295,7 @@ bool MobileUnit::load(QDataStream& stream)
 bool MobileUnit::save(QDataStream& stream)
 {
  if (!Unit::save(stream)) {
-	kdError() << "Unit not loaded properly" << endl;
+	boError() << "Unit not loaded properly" << endl;
 	return false;
  }
 
@@ -1353,7 +1354,7 @@ void Facility::advanceConstruction(unsigned int advanceCount)
 	return;
  }
  if (isDestroyed()) {
-	kdError() << k_funcinfo << "unit is already destroyed" << endl;
+	boError() << k_funcinfo << "unit is already destroyed" << endl;
 	return;
  }
  setConstructionStep(d->mConstructionState + 1);
@@ -1396,7 +1397,7 @@ double Facility::constructionProgress() const
 void Facility::setTarget(Unit* u)
 {
  if (u && !isConstructionComplete()) {
-	kdWarning() << k_funcinfo << "not yet constructed completely" << endl;
+	boWarning() << k_funcinfo << "not yet constructed completely" << endl;
 	return;
  }
  Unit::setTarget(u);
@@ -1405,7 +1406,7 @@ void Facility::setTarget(Unit* u)
 void Facility::moveTo(float x, float y, int range)
 {
  if (!isConstructionComplete()) {
-	kdWarning() << k_funcinfo << "not yet constructed completely" << endl;
+	boWarning() << k_funcinfo << "not yet constructed completely" << endl;
 	return;
  }
  Unit::moveTo(x, y, range);
@@ -1414,7 +1415,7 @@ void Facility::moveTo(float x, float y, int range)
 void Facility::setConstructionStep(unsigned int step)
 {
  if (isDestroyed()) {
-	kdError() << k_funcinfo << "unit is already destroyed" << endl;
+	boError() << k_funcinfo << "unit is already destroyed" << endl;
 	return;
  }
  if (step > constructionSteps()) {
@@ -1427,7 +1428,7 @@ void Facility::setConstructionStep(unsigned int step)
 	modelStep = model()->constructionSteps(); // completed construction
  } else {
 	modelStep = model()->constructionSteps() * step / constructionSteps();
-//	kdDebug() << k_funcinfo << "step="<<step<<",modelstep="<<modelStep<<endl;
+//	boDebug() << k_funcinfo << "step="<<step<<",modelstep="<<modelStep<<endl;
  }
  setGLConstructionStep(modelStep); // the displayed construction step. note that currentConstructionStep() is a *different* value!
  d->mConstructionState = step;

@@ -19,9 +19,9 @@
 
 #include "bosonprofiling.h"
 #include "bosonprofilingprivate.h"
+#include "bodebug.h"
 
 #include <kstaticdeleter.h>
-#include <kdebug.h>
 
 #include <qfile.h>
 
@@ -216,7 +216,7 @@ void BosonProfiling::renderText(bool start)
 
 void BosonProfiling::debugRender()
 {
- kdDebug()
+ boDebug()
 		<< "Clear: " << d->mCurrentRenderTimes.mClear << endl
 		<< "Cells: " << d->mCurrentRenderTimes.mCells << endl
 		<< "Units: " << d->mCurrentRenderTimes.mUnits << endl
@@ -245,7 +245,7 @@ bool BosonProfiling::saveToFile(const QString& fileName)
 {
  QFile file(fileName);
  if (!file.open(IO_WriteOnly)) {
-	kdError() << k_funcinfo << "Could not open " << fileName << " for writing" << endl;
+	boError() << k_funcinfo << "Could not open " << fileName << " for writing" << endl;
 	return false;
  }
  QDataStream stream(&file);
@@ -267,13 +267,13 @@ bool BosonProfiling::loadFromFile(const QString& fileName)
 {
  QFile file(fileName);
  if (!file.open(IO_ReadOnly)) {
-	kdError() << k_funcinfo << "Could not open " << fileName << " for reading" << endl;
+	boError() << k_funcinfo << "Could not open " << fileName << " for reading" << endl;
 	return false;
  }
  QDataStream stream(&file);
  bool ret = load(stream);
  if (!ret) {
-	kdError() << k_funcinfo << "Invalid file " << fileName << endl;
+	boError() << k_funcinfo << "Invalid file " << fileName << endl;
  }
  file.close();
  return ret;
@@ -284,13 +284,13 @@ bool BosonProfiling::load(QDataStream& stream)
  QString s;
  stream >> s;
  if (s != QString::fromLatin1("BosonProfiling")) {
-	kdError() << k_funcinfo << "Invalid stream - not a profiling stream" << endl;
+	boError() << k_funcinfo << "Invalid stream - not a profiling stream" << endl;
 	return false;
  }
  Q_INT32 version;
  stream >> version;
  if (version != PROFILING_VERSION) {
-	kdError() << k_funcinfo << "Invalid profiling format version " << version << endl;
+	boError() << k_funcinfo << "Invalid profiling format version " << version << endl;
 	return false;
  }
 

@@ -18,7 +18,7 @@
 */
 #include "kspritetooltip.h"
 
-#include <kdebug.h>
+//#include "bodebug.h"
 
 #include <qcanvas.h>
 #include <qmap.h>

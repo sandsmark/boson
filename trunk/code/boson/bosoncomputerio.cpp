@@ -19,8 +19,7 @@
 #include "bosoncomputerio.h"
 
 #include "player.h"
-
-#include <kdebug.h>
+#include "bodebug.h"
 
 #include "bosoncomputerio.moc"
 
@@ -38,7 +37,7 @@ BosonComputerIO::~BosonComputerIO()
 
 void BosonComputerIO::reaction()
 {
-// kdDebug() << k_funcinfo << endl;
+// boDebug() << k_funcinfo << endl;
 
 }
 

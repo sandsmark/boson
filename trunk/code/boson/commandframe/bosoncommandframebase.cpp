@@ -27,9 +27,9 @@
 #include "../speciestheme.h"
 #include "../boselection.h"
 #include "../defines.h"
+#include "../bodebug.h"
 
 #include <klocale.h>
-#include <kdebug.h>
 
 #include <qlayout.h>
 #include <qscrollview.h>
@@ -46,7 +46,7 @@ BoUnitDisplayBase::BoUnitDisplayBase(BosonCommandFrameBase* frame, QWidget* pare
  mCommandFrame = frame;
  mUpdateTimer = false;
  if (!frame) {
-	kdError() << k_funcinfo << "NULL cmdFrame" << endl;
+	boError() << k_funcinfo << "NULL cmdFrame" << endl;
 	return;
  }
  cmdFrame()->addUnitDisplayWidget(this);
@@ -161,7 +161,7 @@ void BosonCommandFrameBase::addUnitDisplayWidget(BoUnitDisplayBase* w)
 
 void BosonCommandFrameBase::slotSelectionChanged(BoSelection* selection)
 {
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  if (!selection || selection->count() == 0) {
 	slotShowSingleUnit(0);
 	setAction(0);
@@ -211,11 +211,11 @@ void BosonCommandFrameBase::setAction(Unit* unit)
  }
  Player* owner = unit->owner();
  if (!owner) {
-	kdError() << k_funcinfo << "no owner" << endl;
+	boError() << k_funcinfo << "no owner" << endl;
 	return;
  }
  if (!unit->speciesTheme()) {
-	kdError() << k_funcinfo << "NULL speciestheme" << endl;
+	boError() << k_funcinfo << "NULL speciestheme" << endl;
 	return;
  }
 
@@ -250,11 +250,11 @@ void BosonCommandFrameBase::setLocalPlayer(Player* p)
 void BosonCommandFrameBase::slotPlaceUnit(ProductionType t, unsigned long int unitType)
 {
  if (!d->mOwner) {
-	kdError() << k_funcinfo << "NULL owner" << endl;
+	boError() << k_funcinfo << "NULL owner" << endl;
 	return;
  }
  if (t != ProduceUnit) {
-	kdError() << k_funcinfo << "Only ProduceUnit supported" << endl;
+	boError() << k_funcinfo << "Only ProduceUnit supported" << endl;
 	return;
  }
  emit signalPlaceUnit(unitType, d->mOwner);
@@ -264,7 +264,7 @@ void BosonCommandFrameBase::slotProduce(ProductionType type, unsigned long int i
 {
  if (selectedUnit()) {
 	if (d->mOwner != selectedUnit()->owner()) {
-		kdError() << k_funcinfo << "local owner != selected unit owner" << endl;
+		boError() << k_funcinfo << "local owner != selected unit owner" << endl;
 		return;
 	}
  }
@@ -275,7 +275,7 @@ void BosonCommandFrameBase::slotStopProduction(ProductionType type, unsigned lon
 {
  if (selectedUnit()) {
 	if (d->mOwner != selectedUnit()->owner()) {
-		kdError() << k_funcinfo << "local owner != selected unit owner" << endl;
+		boError() << k_funcinfo << "local owner != selected unit owner" << endl;
 		return;
 	}
  }
@@ -285,7 +285,7 @@ void BosonCommandFrameBase::slotStopProduction(ProductionType type, unsigned lon
 void BosonCommandFrameBase::slotUpdateProduction(Unit* f)
 {
  if (!f) {
-	kdError() << k_funcinfo << "NULL unit" << endl;
+	boError() << k_funcinfo << "NULL unit" << endl;
 	return;
  }
  if (selectedUnit() == f) {
@@ -344,7 +344,7 @@ void BosonCommandFrameBase::slotSetButtonsPerRow(int b)
 void BosonCommandFrameBase::reparentMiniMap(QWidget* map)
 {
  if (!map) {
-	kdError() << k_funcinfo << "NULL map" << endl;
+	boError() << k_funcinfo << "NULL map" << endl;
 	return;
  }
  map->reparent(this, QPoint(0,0));

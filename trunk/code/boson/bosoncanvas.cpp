@@ -32,8 +32,8 @@
 #include "items/bosonshot.h"
 #include "bosonweapon.h"
 #include "bosonstatistics.h"
+#include "bodebug.h"
 
-#include <kdebug.h>
 #include <klocale.h>
 
 #include <qpointarray.h>
@@ -77,10 +77,10 @@ void BosonCanvas::init()
 
 BosonCanvas::~BosonCanvas()
 {
-kdDebug()<< k_funcinfo << endl;
+boDebug()<< k_funcinfo << endl;
  quitGame();
  delete d;
-kdDebug()<< k_funcinfo <<"done"<< endl;
+boDebug()<< k_funcinfo <<"done"<< endl;
 }
 
 void BosonCanvas::quitGame()
@@ -100,7 +100,7 @@ void BosonCanvas::deleteDestroyed()
 Cell* BosonCanvas::cell(int x, int y) const
 {
  if (!d->mMap) {
-	kdError() << k_funcinfo << "NULL map" << endl;
+	boError() << k_funcinfo << "NULL map" << endl;
 	return 0;
  }
  return d->mMap->cell(x, y);
@@ -109,7 +109,7 @@ Cell* BosonCanvas::cell(int x, int y) const
 void BosonCanvas::slotAddUnit(Unit* unit, int x, int y)
 {
  if (!unit) {
-	kdError() << k_funcinfo << "NULL unit!" << endl;
+	boError() << k_funcinfo << "NULL unit!" << endl;
 	return;
  }
 
@@ -172,7 +172,7 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
  deleteUnusedShots();
 
  if (advanceCount == MAXIMAL_ADVANCE_COUNT) {
-	kdDebug() << "MAXIMAL_ADVANCE_COUNT" << endl;
+	boDebug() << "MAXIMAL_ADVANCE_COUNT" << endl;
 	// there are 2 different timers for deletion of canvas items.
 	// The first is done in BosonCanvas - we only delete anything when
 	// advanceCount == MAXIMAL_ADVANCE_COUNT.
@@ -201,21 +201,21 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 
 bool BosonCanvas::canGo(const UnitProperties* prop, const QRect& rect) const
 {
-// kdDebug() << k_funcinfo << endl;
+// boDebug() << k_funcinfo << endl;
  int y = rect.y() / BO_TILE_SIZE; // what about modulu? do we care ?
  do {
 	int x = rect.x() / BO_TILE_SIZE;
 	do {
 		Cell* newCell = cell(x, y);
 		if (!newCell) {
-			kdError() << k_funcinfo << "NULL cell" << endl;
+			boError() << k_funcinfo << "NULL cell" << endl;
 			return false;
 		}
 		if (!newCell->canGo(prop)) {
-			kdDebug() << "can  not go on " << x << "," << y << endl;
+			boDebug() << "can  not go on " << x << "," << y << endl;
 			return false;
 		} else {
-//			kdDebug() << "can go on " << x << "," << y << endl;
+//			boDebug() << "can go on " << x << "," << y << endl;
 		}
 		x++;
 	} while (x * BO_TILE_SIZE <= rect.right());
@@ -269,9 +269,9 @@ void BosonCanvas::updateSight(Unit* unit, float , float)
 		y + sight) - y;
  
  sight *= sight;
-// kdDebug() << k_funcinfo << endl;
-// kdDebug() << "left=" << left << ",right=" << right << endl;
-// kdDebug() << "top=" << top << ",bottom=" << bottom << endl;
+// boDebug() << k_funcinfo << endl;
+// boDebug() << "left=" << left << ",right=" << right << endl;
+// boDebug() << "top=" << top << ",bottom=" << bottom << endl;
 
  for (int i = left; i < right; i++) {
 	for (int j = top; j < bottom; j++) {
@@ -293,7 +293,7 @@ void BosonCanvas::updateSight(Unit* unit, float , float)
 
 void BosonCanvas::newShot(BosonShot* shot)
 {
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
 
  if (!shot->isActive()) {
 	shotHit(shot);
@@ -304,7 +304,7 @@ void BosonCanvas::newShot(BosonShot* shot)
 void BosonCanvas::shotHit(BosonShot* s)
 {
  if (!s) {
-	kdError() << k_funcinfo << "NULL shot" << endl;
+	boError() << k_funcinfo << "NULL shot" << endl;
 	return;
  }
  // Set age of flying particle systems (e.g. smoke traces) to 0 so they wont create any new particles
@@ -425,12 +425,12 @@ void BosonCanvas::destroyUnit(Unit* unit)
 	return;
  }
  if (!d->mDestroyedUnits.contains(unit)) {
-	kdDebug() << "destroy unit " << unit->id() << endl;
+	boDebug() << "destroy unit " << unit->id() << endl;
 	Player* owner = unit->owner();
 	d->mDestroyedUnits.append(unit);
 
 	if (unit->isFacility()) {
-		kdDebug() << k_funcinfo << "destoying facility" << endl;
+		boDebug() << k_funcinfo << "destoying facility" << endl;
 		if (((Facility*)unit)->flamesParticleSystem()) {
 			((Facility*)unit)->flamesParticleSystem()->setAge(0);
 		}
@@ -485,7 +485,7 @@ unsigned int BosonCanvas::mapHeight() const
 
 QValueList<Unit*> BosonCanvas::unitCollisionsInRange(const QPoint& pos, int radius) const
 {
-kdDebug() << k_funcinfo << endl;
+boDebug() << k_funcinfo << endl;
  BoItemList l = bosonCollisions(QRect(
 		(pos.x() - radius > 0) ? pos.x() - radius : 0,
 		(pos.y() - radius > 0) ? pos.y() - radius : 0,
@@ -503,13 +503,13 @@ kdDebug() << k_funcinfo << endl;
 		// this item is not important for us here
 		continue;
 	}
-//	kdDebug() << "unit at x=" << u->x() << ",y=" << u->y() << ",pos=" << pos.x() << "," << pos.y() << endl;
+//	boDebug() << "unit at x=" << u->x() << ",y=" << u->y() << ",pos=" << pos.x() << "," << pos.y() << endl;
 	int w = pos.x() - (int)(u->x() + u->width() / 2);
 	int h = pos.y() - (int)(u->y() + u->height() / 2);
-//	kdDebug() << "w*w=" << w*w << ",h*h=" << h*h << " <= r*r=" << radius*radius<< endl;
+//	boDebug() << "w*w=" << w*w << ",h*h=" << h*h << " <= r*r=" << radius*radius<< endl;
 
 	if (w * w + h * h <= radius * radius) {
-//		kdDebug() << "adding " << u->id() << endl;
+//		boDebug() << "adding " << u->id() << endl;
 		list.append(u);
 	}
  }
@@ -541,7 +541,7 @@ bool BosonCanvas::cellOccupied(int x, int y, Unit* unit, bool excludeMoving) con
 	return false; // even if there are other flying units - different altitudes!
  }
  if (!cell(x, y)) {
-	kdError() << k_funcinfo << "NULL cell" << endl;
+	boError() << k_funcinfo << "NULL cell" << endl;
 	return true;
  }
  bool includeMoving = !excludeMoving; // FIXME: replace exclude by include in parameter
@@ -572,7 +572,7 @@ void BosonCanvas::killPlayer(Player* player)
  }
  player->setMinerals(0);
  player->setOil(0);
- kdDebug() << "player " << player->id() << " is out of game" << endl;
+ boDebug() << "player " << player->id() << " is out of game" << endl;
  emit signalOutOfGame(player);
 }
 
@@ -582,7 +582,7 @@ void BosonCanvas::removeFromCells(BosonItem* item)
  for (unsigned int i = 0; i < cells.count(); i++) {
 	Cell* c = cell(cells[i].x(), cells[i].y());
 	if (!c) {
-		kdError() << k_funcinfo << "NULL cell - x=" << cells[i].x() << ",y=" << cells[i].y() << endl;
+		boError() << k_funcinfo << "NULL cell - x=" << cells[i].x() << ",y=" << cells[i].y() << endl;
 		continue;
 	}
 	c->removeItem(item);
@@ -595,7 +595,7 @@ void BosonCanvas::addToCells(BosonItem* item)
  for (unsigned int i = 0; i < cells.count(); i++) {
 	Cell* c = cell(cells[i].x(), cells[i].y());
 	if (!c) {
-		kdError() << k_funcinfo << "NULL cell - x=" << cells[i].x() << ",y=" << cells[i].y() << endl;
+		boError() << k_funcinfo << "NULL cell - x=" << cells[i].x() << ",y=" << cells[i].y() << endl;
 		continue;
 	}
 	c->addItem(item);
@@ -607,11 +607,11 @@ bool BosonCanvas::canPlaceUnitAt(const UnitProperties* prop, const QPoint& pos, 
  int width = prop->unitWidth();
  int height= prop->unitHeight();
  if (!width) {
-	kdError() << k_funcinfo << "null width for " << prop->typeId() << endl;
+	boError() << k_funcinfo << "null width for " << prop->typeId() << endl;
 	return false;
  }
  if (!height) {
-	kdError() << k_funcinfo << "null height for " << prop->typeId() << endl;
+	boError() << k_funcinfo << "null height for " << prop->typeId() << endl;
 	return false;
  }
  QRect r(pos.x(), pos.y(), width, height);
@@ -631,7 +631,7 @@ bool BosonCanvas::canPlaceUnitAt(const UnitProperties* prop, const QPoint& pos, 
 	// contest, so its ok this way
 	Unit* factoryUnit = factory->unit();
 	if (!factoryUnit) {
-		kdError() << k_funcinfo << "production plugin has NULL owner" << endl;
+		boError() << k_funcinfo << "production plugin has NULL owner" << endl;
 		return false;
 	}
 	int dx = QABS(r.center().x() - factoryUnit->boundingRect().center().x());
@@ -687,7 +687,7 @@ BoItemList BosonCanvas::bosonCollisions(const QPointArray& cells, const BosonIte
  for (unsigned int i = 0; i < cells.count(); i++) {
 	c = cell(cells[i].x(), cells[i].y());
 	if (!c) {
-		kdWarning() << k_funcinfo << "NULL cell " << cells[i].x() << " " << cells[i].y() << endl;
+		boWarning() << k_funcinfo << "NULL cell " << cells[i].x() << " " << cells[i].y() << endl;
 		continue;
 	}
 	cellItems = c->items();
@@ -733,7 +733,7 @@ BoItemList BosonCanvas::bosonCollisions(const QPoint& pos) const
  // pos is canvas coordinates!
  QPointArray cells(1);
  cells[0] = pos / BO_TILE_SIZE;
-// kdDebug() << k_funcinfo << cells[0].x() << " " << cells[0].y() << endl;
+// boDebug() << k_funcinfo << cells[0].x() << " " << cells[0].y() << endl;
  return bosonCollisions(cells, 0, true); // FIXME: ecact = true has no effect
 }
 
@@ -758,7 +758,7 @@ void BosonCanvas::updateParticleSystems(float elapsed)
 	s = d->mParticles.at(i);
 	s->update(elapsed);
 	if (!s->isActive()) {
-		kdDebug() << k_funcinfo << "**********  REMOVING inactive particle system (particle count: " << s->particleCount() << ")!  *****" << endl;
+		boDebug() << k_funcinfo << "**********  REMOVING inactive particle system (particle count: " << s->particleCount() << ")!  *****" << endl;
 		d->mParticles.remove();
 		i--;
 		count--;

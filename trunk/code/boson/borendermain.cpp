@@ -26,6 +26,7 @@
 #include "bosonprofiling.h"
 #include "unitproperties.h"
 #include "kgamemodeldebug.h"
+#include "bodebug.h"
 #include "sound/bosonmusic.h"
 
 #include <kapplication.h>
@@ -34,7 +35,6 @@
 #include <klocale.h>
 #include <kmainwindow.h>
 #include <kaction.h>
-#include <kdebug.h>
 #include <kpopupmenu.h>
 #include <klocale.h>
 #include <kstandarddirs.h>
@@ -165,7 +165,7 @@ void ModelPreview::load(SpeciesTheme* s, const UnitProperties* prop)
 {
  resetModel();
  if (!s || !prop) {
-	kdError() << k_funcinfo << endl;
+	boError() << k_funcinfo << endl;
 	return;
  }
  s->loadUnitModel(prop);
@@ -293,25 +293,25 @@ void RenderMain::connectBoth(QObject* o1, QObject* o2, const char* signal, const
 void RenderMain::slotUnitChanged(int index)
 {
  if (!sender() || !sender()->isA("KPopupMenu")) {
-	kdError() << k_funcinfo << "sender() must be a KPopupMenu" << endl;
+	boError() << k_funcinfo << "sender() must be a KPopupMenu" << endl;
 	return;
  }
  if (index < 0) {
-	kdError() << k_funcinfo << "index < 0" << endl;
+	boError() << k_funcinfo << "index < 0" << endl;
 	return;
  }
  KPopupMenu* p = (KPopupMenu*)sender();
  SpeciesTheme* s = mPopup2Species[p];
- kdDebug() << k_funcinfo << index << endl;
+ boDebug() << k_funcinfo << index << endl;
  QValueList<const UnitProperties*> props = s->allUnits();
  if (index >= (int)props.count()) {
-	kdError() << k_funcinfo << "index " << index << " out of range" << endl;
+	boError() << k_funcinfo << "index " << index << " out of range" << endl;
 	return;
  }
  unsigned long int type = props[index]->typeId();
  const UnitProperties* prop = s->unitProperties(type);
  if (!prop) {
-	kdError() << k_funcinfo << "could not find unitproperties for index=" << index << " type=" << type << endl;
+	boError() << k_funcinfo << "could not find unitproperties for index=" << index << " type=" << type << endl;
 	return;
  }
  changeUnit(s, prop);
@@ -348,7 +348,7 @@ void RenderMain::changeUnit(const QString& theme, const QString& unit)
 	}
  }
  if (!s) {
-	kdError() << k_funcinfo << "Could not find theme " << theme << endl;
+	boError() << k_funcinfo << "Could not find theme " << theme << endl;
 	return;
  }
  QValueList<const UnitProperties*> units = s->allUnits();
@@ -362,7 +362,7 @@ void RenderMain::changeUnit(const QString& theme, const QString& unit)
 	}
  }
  if (!prop) {
-	kdError() << "Could not find unit " << unit << endl;
+	boError() << "Could not find unit " << unit << endl;
  }
  changeUnit(s, prop);
 }
@@ -377,12 +377,12 @@ void RenderMain::changeUnit(const QString& theme, unsigned long int type)
 	}
  }
  if (!s) {
-	kdError() << k_funcinfo << "Could not find theme " << theme << endl;
+	boError() << k_funcinfo << "Could not find theme " << theme << endl;
 	return;
  }
  const UnitProperties* prop = s->unitProperties(type);
  if (!prop) {
-	kdError() << k_funcinfo << "Could not find unit " << type << endl;
+	boError() << k_funcinfo << "Could not find unit " << type << endl;
 	return;
  }
  changeUnit(s, prop);
@@ -391,11 +391,11 @@ void RenderMain::changeUnit(const QString& theme, unsigned long int type)
 void RenderMain::changeUnit(SpeciesTheme* s, const UnitProperties* prop)
 {
  if (!s) {
-	kdError() << k_funcinfo << "NULL species" << endl;
+	boError() << k_funcinfo << "NULL species" << endl;
 	return;
  }
  if (!prop) {
-	kdError() << k_funcinfo << "NULL UnitProperties" << endl;
+	boError() << k_funcinfo << "NULL UnitProperties" << endl;
 	return;
  }
  // TODO: check/uncheck the menu items!
@@ -533,33 +533,33 @@ int main(int argc, char **argv)
  }
  if (args->isSet("unit")) {
 	if (theme.isEmpty()) {
-		kdError() << k_funcinfo << "you have to specify both unit and species!" << endl;
+		boError() << k_funcinfo << "you have to specify both unit and species!" << endl;
 		return 1;
 	}
 	unit = args->getOption("unit");
  } else if (args->isSet("unit-id")) {
 	if (theme.isEmpty()) {
-		kdError() << k_funcinfo << "you have to specify both unit-id and species!" << endl;
+		boError() << k_funcinfo << "you have to specify both unit-id and species!" << endl;
 		return 1;
 	}
 	QString arg = args->getOption("unit-id");
 	bool ok = false;
 	typeId = arg.toULong(&ok);
 	if (!ok) {
-		kdError() << k_funcinfo << "unit-id must be a number" << endl;
+		boError() << k_funcinfo << "unit-id must be a number" << endl;
 		return 1;
 	}
  }
  if (!theme.isEmpty()) {
 	if (typeId == 0 && unit.isEmpty()) {
-		kdError() << k_funcinfo << "you have to specify both unit and species!" << endl;
+		boError() << k_funcinfo << "you have to specify both unit and species!" << endl;
 		return 1;
 	} else if (typeId > 0) {
 		main->changeUnit(theme, typeId);
 	} else if (!unit.isEmpty()) {
 		main->changeUnit(theme, unit);
 	} else {
-		kdError() << k_funcinfo << "you have to specify both unit and species!" << endl;
+		boError() << k_funcinfo << "you have to specify both unit and species!" << endl;
 		return 1;
 	}
  }
@@ -570,7 +570,7 @@ int main(int argc, char **argv)
 	bool ok = false;
 	float c = args->getOption("camera-x").toFloat(&ok);
 	if (!ok) {
-		kdError() << k_funcinfo << "camera-x must be a number" << endl;
+		boError() << k_funcinfo << "camera-x must be a number" << endl;
 		return 1;
 	}
 	main->emitSignalCameraX(c);
@@ -579,7 +579,7 @@ int main(int argc, char **argv)
 	bool ok = false;
 	float c = args->getOption("camera-y").toFloat(&ok);
 	if (!ok) {
-		kdError() << k_funcinfo << "camera-y must be a number" << endl;
+		boError() << k_funcinfo << "camera-y must be a number" << endl;
 		return 1;
 	}
 	main->emitSignalCameraY(c);
@@ -588,7 +588,7 @@ int main(int argc, char **argv)
 	bool ok = false;
 	float c = args->getOption("camera-z").toFloat(&ok);
 	if (!ok) {
-		kdError() << k_funcinfo << "camera-z must be a number" << endl;
+		boError() << k_funcinfo << "camera-z must be a number" << endl;
 		return 1;
 	}
 	main->emitSignalCameraZ(c);
@@ -597,7 +597,7 @@ int main(int argc, char **argv)
 	bool ok = false;
 	float r = args->getOption("rotate-x").toFloat(&ok);
 	if (!ok) {
-		kdError() << k_funcinfo << "rotate-x must be a number" << endl;
+		boError() << k_funcinfo << "rotate-x must be a number" << endl;
 		return 1;
 	}
 	main->emitSignalRotateX(r);
@@ -606,7 +606,7 @@ int main(int argc, char **argv)
 	bool ok = false;
 	float r = args->getOption("rotate-y").toFloat(&ok);
 	if (!ok) {
-		kdError() << k_funcinfo << "rotate-y must be a number" << endl;
+		boError() << k_funcinfo << "rotate-y must be a number" << endl;
 		return 1;
 	}
 	main->emitSignalRotateY(r);
@@ -615,7 +615,7 @@ int main(int argc, char **argv)
 	bool ok = false;
 	float r = args->getOption("rotate-z").toFloat(&ok);
 	if (!ok) {
-		kdError() << k_funcinfo << "rotate-z must be a number" << endl;
+		boError() << k_funcinfo << "rotate-z must be a number" << endl;
 		return 1;
 	}
 	main->emitSignalRotateZ(r);
@@ -624,7 +624,7 @@ int main(int argc, char **argv)
 	bool ok = false;
 	float f = args->getOption("fovy").toFloat(&ok);
 	if (!ok) {
-		kdError() << k_funcinfo << "fovy must be a number" << endl;
+		boError() << k_funcinfo << "fovy must be a number" << endl;
 		return 1;
 	}
 	main->emitSignalFovY(f);
@@ -633,7 +633,7 @@ int main(int argc, char **argv)
 	bool ok = false;
 	int f = args->getOption("frame").toInt(&ok);
 	if (!ok) {
-		kdError() << k_funcinfo << "frame must be a number" << endl;
+		boError() << k_funcinfo << "frame must be a number" << endl;
 		return 1;
 	}
 	main->emitSignalFrame(f);

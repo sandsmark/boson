@@ -24,13 +24,13 @@
 #include "bosontexturearray.h"
 #include "boson.h"
 #include "defines.h"
+#include "bodebug.h"
 
 #include <klocale.h>
 #include <knuminput.h>
 #include <ksimpleconfig.h>
 #include <kstandarddirs.h>
 #include <kmessagebox.h>
-#include <kdebug.h>
 
 #include <qlabel.h>
 #include <qcombobox.h>
@@ -82,7 +82,7 @@ GeneralOptions::~GeneralOptions()
 void GeneralOptions::apply()
 {
  if (!game()) {
-	kdError() << k_funcinfo << "NULL game" << endl;
+	boError() << k_funcinfo << "NULL game" << endl;
 	return;
  }
  if (mGameSpeed->value() != game()->gameSpeed()) {
@@ -99,7 +99,7 @@ void GeneralOptions::apply()
 void GeneralOptions::load()
 {
  if (!game()) {
-	kdError() << k_funcinfo << "NULL game" << endl;
+	boError() << k_funcinfo << "NULL game" << endl;
 	return;
  }
  setGameSpeed(game()->gameSpeed());
@@ -155,7 +155,7 @@ CursorOptions::CursorOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
  for (int i = 0; i < (int)list.count(); i++) {
 	KSimpleConfig cfg(list[i] + QString::fromLatin1("/index.desktop"));
 	if (!cfg.hasGroup("Boson Cursor")) {
-		kdWarning() << "invalid cursor " << list[i] << endl;
+		boWarning() << "invalid cursor " << list[i] << endl;
 	} else {
 		cfg.setGroup("Boson Cursor");
 		QString name = cfg.readEntry("Name", i18n("Unknown"));
@@ -173,7 +173,7 @@ void CursorOptions::apply()
 {
  int mode = mCursor->currentItem();
  if (mode < 0) {
-	kdWarning() << k_funcinfo << "Invalid cursor mode " << mode << endl;
+	boWarning() << k_funcinfo << "Invalid cursor mode " << mode << endl;
 	return;
  }
  QString theme;
@@ -456,7 +456,7 @@ void OpenGLOptions::load()
 
 void OpenGLOptions::setUpdateInterval(int ms)
 {
- kdDebug() << k_funcinfo << ms << endl;
+ boDebug() << k_funcinfo << ms << endl;
  mUpdateInterval->setValue(ms);
 }
 

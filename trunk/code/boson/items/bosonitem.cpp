@@ -22,8 +22,7 @@
 #include "../rtti.h"
 #include "../selectbox.h"
 #include "../bosonmodel.h"
-
-#include <kdebug.h>
+#include "../bodebug.h"
 
 #include <qintdict.h>
 #include <qrect.h>
@@ -58,11 +57,11 @@ BosonItem::BosonItem(BosonModel* model, BosonCanvas* canvas)
  if (mCanvas) {
 	mCanvas->addItem(this);
  } else {
-	kdWarning() << k_funcinfo << "NULL canvas" << endl;
+	boWarning() << k_funcinfo << "NULL canvas" << endl;
  }
 
  if (!mModel) {
-	kdError() << k_funcinfo << "NULL model - we will crash!" << endl;
+	boError() << k_funcinfo << "NULL model - we will crash!" << endl;
 	return;
  }
 
@@ -135,7 +134,7 @@ bool BosonItem::bosonCollidesWith(BosonItem* item) const
 			// this must not happen, since an unknown item here is a major
 			// performance problem - but at least it'll be important to fix it
 			// then :)
-			kdWarning() << k_funcinfo << "unknown item - rtti=" << item->rtti() << endl;
+			boWarning() << k_funcinfo << "unknown item - rtti=" << item->rtti() << endl;
 			return false;
 	}
  }
@@ -220,7 +219,7 @@ void BosonItem::setGLConstructionStep(unsigned int s)
  // constructionStep that is defined in the model until an actual frame is set.
  BoFrame* f = model()->constructionStep(s);
  if (!f) {
-	kdWarning() << k_funcinfo << "NULL construction step " << s << endl;
+	boWarning() << k_funcinfo << "NULL construction step " << s << endl;
 	return;
  }
  mGLConstructionStep = s;
@@ -248,7 +247,7 @@ void BosonItem::setFrame(int _frame)
 			setCurrentFrame(f);
 			mFrame = _frame;
 		} else {
-			kdWarning() << k_funcinfo << "invalid frame " << _frame << endl;
+			boWarning() << k_funcinfo << "invalid frame " << _frame << endl;
 		}
 	}
 }
@@ -276,7 +275,7 @@ void BosonItem::setAnimationMode(int mode)
 	}
 	anim = model()->animation(0);
 	if (!anim) {
-		kdError() << k_funcinfo << "NULL default animation mode!" << endl;
+		boError() << k_funcinfo << "NULL default animation mode!" << endl;
 		return;
 	}
  }
