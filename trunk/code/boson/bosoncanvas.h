@@ -70,10 +70,20 @@ public:
 	void initCell(int x, int y);
 
 	/**
+	 * @param pos The position to check for presence of a unit. In
+	 * <em>canvas</em>-coordinates. See also @ref findUnitAtCell
 	 * @return The unit on this coordinates of the canvas. Won't return a
 	 * destroyed unit (wreckage)
 	 **/
 	Unit* findUnitAt(const QPoint& pos);
+
+	/**
+	 * @param x The x-coordinate of the cell
+	 * @param y The y-coordinate of the cell
+	 * @return The unit on this cell. Won't return a
+	 * destroyed unit (wreckage)
+	 **/
+	Unit* findUnitAtCell(int x, int y);
 
 	/**
 	 * Test whether the unit can go over rect. This method only tests for
@@ -93,9 +103,19 @@ public:
 	void addItem(BosonItem* item);
 	void removeItem(BosonItem* item);
 
-	BoItemList bosonCollisions(const QPointArray& cells, const BosonItem* item, bool exact) const;
-	BoItemList bosonCollisions(const QRect& rect) const;
-	BoItemList bosonCollisions(const QPoint& pos) const;
+	BoItemList collisionsAtCells(const QPointArray& cells, const BosonItem* item, bool exact) const;
+	BoItemList collisions(const QRect& rect) const;
+
+	/**
+	 * @param pos Position in <em>canvas</em> coordinates, i.e. not cell
+	 * values
+	 **/
+	BoItemList collisions(const QPoint& pos) const;
+
+	/**
+	 * @param pos Position in <em>cell</em>-coordinates.
+	 **/
+	BoItemList collisionsAtCell(const QPoint& pos) const;
 
 	/**
 	 * Called by @ref Unit. This informs the canvas about a moved
@@ -258,6 +278,11 @@ public slots:
 	/**
 	 * The game (@ref Boson) reports that a unit shall be added - lets do
 	 * that :-)
+	 *
+	 * Note that unit->x() and unit->y() may return values different to @p x
+	 * and @p y, as the slot which moves the unit to its actual position
+	 * might not have been called yet. So you should prefer the @p x and @p
+	 * y parameters here.
 	 **/
 	void slotAddUnit(Unit* unit, int x, int y);
 

@@ -117,9 +117,9 @@ void BosonCanvas::slotAddUnit(Unit* unit, int x, int y)
 // unit->show();
 }
 
-Unit* BosonCanvas::findUnitAt(const QPoint& pos)
+Unit* BosonCanvas::findUnitAtCell(int x, int y)
 {
- BoItemList list = bosonCollisions(pos);
+ BoItemList list = collisionsAtCell(QPoint(x, y));
  BoItemList::Iterator it;
 
  for (it = list.begin(); it != list.end(); ++it) {
@@ -131,6 +131,11 @@ Unit* BosonCanvas::findUnitAt(const QPoint& pos)
 	}
  }
  return 0;
+}
+
+Unit* BosonCanvas::findUnitAt(const QPoint& pos)
+{
+ return findUnitAtCell(pos.x() / BO_TILE_SIZE, pos.y() / BO_TILE_SIZE);
 }
 
 void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
@@ -556,7 +561,7 @@ unsigned int BosonCanvas::mapHeight() const
 
 QValueList<Unit*> BosonCanvas::unitCollisionsInRange(const QPoint& pos, int radius) const
 {
- BoItemList l = bosonCollisions(QRect(
+ BoItemList l = collisions(QRect(
 		(pos.x() - radius > 0) ? pos.x() - radius : 0,
 		(pos.y() - radius > 0) ? pos.y() - radius : 0,
 		pos.x() + radius,
@@ -590,7 +595,7 @@ QValueList<Unit*> BosonCanvas::unitCollisionsInSphere(const BoVector3& pos, int 
 {
  // FIXME: code duplicated from unitCollisionsInRange
 boDebug() << k_funcinfo << endl;
- BoItemList l = bosonCollisions(QRect(
+ BoItemList l = collisions(QRect(
 		(pos.x() - radius > 0) ? pos.x() - radius : 0,
 		(pos.y() - radius > 0) ? pos.y() - radius : 0,
 		pos.x() + radius,
@@ -781,7 +786,7 @@ void BosonCanvas::removeItem(BosonItem* item)
 
 
 // this is an extremely time-critical function!
-BoItemList BosonCanvas::bosonCollisions(const QPointArray& cells, const BosonItem* item, bool exact) const
+BoItemList BosonCanvas::collisionsAtCells(const QPointArray& cells, const BosonItem* item, bool exact) const
 {
  // FIXME: if exact is true we assume that cells == item->cells() !!
 // AB: item can be NULL, too!
@@ -815,7 +820,15 @@ BoItemList BosonCanvas::bosonCollisions(const QPointArray& cells, const BosonIte
  return collisions;
 }
 
-BoItemList BosonCanvas::bosonCollisions(const QRect& r) const
+BoItemList BosonCanvas::collisionsAtCell(const QPoint& pos) const
+{
+ QPointArray cells(1);
+ cells[0] = pos;
+ boDebug(310) << k_funcinfo << cells[0].x() << " " << cells[0].y() << endl;
+ return collisionsAtCells(cells, 0, true); // FIXME: ecact = true has no effect
+}
+
+BoItemList BosonCanvas::collisions(const QRect& r) const
 {
  // r is canvas coordinates!
  QPointArray cells;
@@ -835,16 +848,16 @@ BoItemList BosonCanvas::bosonCollisions(const QRect& r) const
 		cells[n++] = QPoint(i, j);
 	}
  }
- return bosonCollisions(cells, 0, true);// FIXME: exact = true has no effect
+ return collisionsAtCells(cells, 0, true);// FIXME: exact = true has no effect
 }
 
-BoItemList BosonCanvas::bosonCollisions(const QPoint& pos) const
+BoItemList BosonCanvas::collisions(const QPoint& pos) const
 {
  // pos is canvas coordinates!
  QPointArray cells(1);
  cells[0] = pos / BO_TILE_SIZE;
  boDebug(310) << k_funcinfo << cells[0].x() << " " << cells[0].y() << endl;
- return bosonCollisions(cells, 0, true); // FIXME: ecact = true has no effect
+ return collisionsAtCells(cells, 0, true); // FIXME: ecact = true has no effect
 }
 
 int BosonCanvas::particleSystemsCount() const

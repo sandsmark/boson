@@ -846,7 +846,7 @@ BoItemList Unit::unitsInRange(unsigned long int r) const
 	}
  }
 
- BoItemList items = canvas()->bosonCollisions(cells, (BosonItem*)this, false);
+ BoItemList items = canvas()->collisionsAtCells(cells, (BosonItem*)this, false);
  items.remove((BosonItem*)this);
  BoItemList inRange;
  BoItemList::Iterator it = items.begin();
@@ -890,7 +890,7 @@ QValueList<Unit*> Unit::unitCollisions(bool exact) const
 	return units;
  }
  boDebug(310) << k_funcinfo << endl;
- BoItemList collisionList = canvas()->bosonCollisions(cells(), (BosonItem*)this, exact);
+ BoItemList collisionList = canvas()->collisionsAtCells(cells(), (BosonItem*)this, exact);
  if (collisionList.isEmpty()) {
 	return units;
  }

@@ -273,7 +273,17 @@ signals:
 	 **/
 	void signalUpdateProductionOptions();
 
-	void signalChangeCell(int x, int y, int groundType, unsigned char );
+	/**
+	 * Tell the map to change a cell at @p x, @p y to @p groundType and @p
+	 * version. This must not be connected to a slot in game mode (but it
+	 * also must not be emitted then).
+	 *
+	 * Note that we you can use this to update the minimap as well, but be
+	 * aware that when the minimap slot gets called the map itself might not
+	 * have been updated yet, since we can't safely predict the order in which
+	 * slots get called.
+	 **/
+	void signalChangeCell(int x, int y, int groundType, unsigned char version );
 
 	void signalAddChatSystemMessage(const QString& fromName, const QString& text);
 
