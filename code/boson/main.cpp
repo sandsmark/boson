@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2001 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2001-2002 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@ int main(int argc, char **argv)
 		version,
 		description,
 		KAboutData::License_GPL,
-		"(C) 1999-2000,2001 The Boson team",
+		"(C) 1999-2000,2001-2002 The Boson team",
 		0,
 		"http://boson.eu.org",
 		"b_mann@gmx.de");
