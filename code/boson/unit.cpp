@@ -769,7 +769,7 @@ void Unit::waypointDone()
  d->mWaypoints.remove(d->mWaypoints.at(0));
 }
 
-QValueList<QPoint> Unit::waypointList() const
+const QValueList<QPoint>& Unit::waypointList() const
 {
  return d->mWaypoints;
 }
@@ -794,7 +794,6 @@ bool Unit::moveTo(float x, float y, int range, bool attack, bool slowDownAtDest)
  // If we're moving already, we don't want to set our speed to 0
  // Set slowDownAtDestination temporarily to false to achieve that.
  // Maybe also when advanceWork() == WorkMove ?
- boDebug() << k_funcinfo << "work(): " << work() << "; advanceWork(): " << advanceWork() << endl;
  if (!ownerIO()) {
 	BO_NULL_ERROR(ownerIO());
 	return false;
