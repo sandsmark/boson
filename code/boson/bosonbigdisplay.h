@@ -93,6 +93,9 @@ signals:
 	 **/
 	void signalSingleUnitSelected(Unit* unit);
 
+	void signalSelectUnit(Unit* unit);
+	void signalUnselectUnit(Unit* unit);
+
 	/**
 	 * Emitted by @ref resizeEvent
 	 **/

@@ -77,7 +77,6 @@ public:
 	
 	QPixmap mCursorMove;
 	QPixmap mCursorAttack;
-
 };
 
 BosonBigDisplay::BosonBigDisplay(QCanvas* c, QWidget* parent) : QCanvasView(c, parent)
@@ -141,8 +140,13 @@ void BosonBigDisplay::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseEvent
 				}
 			} else if (selection().first()->isMobile()) {
 				setCursor(QCursor(d->mCursorMove));
+//				kdDebug() << "change cursor" << endl;
+//				setCursor(BlankCursor);
+//				d->mCursorPixmap->show();
 			}
 		}
+//		d->mCursorPixmap->move(e->pos().x(), e->pos().y());
+//		d->mCursorPixmap->move(pos().x(), pos().y());
 		e->accept();
 		break;
 	}
@@ -245,6 +249,7 @@ void BosonBigDisplay::clearSelection()
  }
  d->mSelectionList.clear();
  setCursor(KCursor::arrowCursor());
+ emit signalSingleUnitSelected(0);
 }
 
 void BosonBigDisplay::addUnitSelection(Unit* unit)
@@ -262,6 +267,7 @@ void BosonBigDisplay::addUnitSelection(Unit* unit)
  }
  d->mSelectionList.append(unit);
  unit->select();
+ emit signalSelectUnit(unit);
 }
 
 const QPoint& BosonBigDisplay::selectionStart() const
@@ -512,6 +518,8 @@ void BosonBigDisplay::slotUnitChanged(Unit* unit)
 //	kdDebug() << "is selected" << endl;
 	if (unit->isDestroyed()) {
 		d->mSelectionList.removeRef(unit);
+		unit->unselect();
+		emit signalUnselectUnit(unit);
 	}
 	if (selectionMode() == SelectSingle) {
 //		kdDebug() << "is only unit" << endl;
@@ -544,5 +552,7 @@ void BosonBigDisplay::loadCursors(const QString& dir)
  } else {
 	kdError() << "Cannot load " << attack << endl;
  }
+// d->mCursorPixmap = new QCanvasSprite(&d->mCursorMove, canvas());
+// d->mCursorPixmap->hide();
 }
 
