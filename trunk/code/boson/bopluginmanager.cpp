@@ -23,6 +23,7 @@
 #include "boversion.h"
 
 #include <bodebug.h>
+#include <config.h> // USE_BO_PLUGINS
 
 #include <kapplication.h>
 #include <kstaticdeleter.h>
@@ -156,7 +157,7 @@ bool BoPluginManager::loadLibrary()
 	return false;
  }
  QString lib = libname();
- QString file = KGlobal::dirs()->findResource("lib", QString("kde3/plugins/boson/%1.so").arg(lib));
+ QString file;
 
  QString error;
  bool ret = true;
@@ -165,6 +166,8 @@ bool BoPluginManager::loadLibrary()
  init_function init_func = 0;
  version_function version_func = 0;
 
+#if USE_BO_PLUGINS
+ file = KGlobal::dirs()->findResource("lib", QString("kde3/plugins/boson/%1.so").arg(lib));
  if (file.isEmpty()) {
 	error = i18n("Unable to find a file for this plugin");
 	boError() << k_funcinfo << error << endl;
@@ -172,6 +175,13 @@ bool BoPluginManager::loadLibrary()
  } else {
 	d->mLibrary = new QLibrary(file);
  }
+#else
+ // AB: QLibrary uses dlopen() to open the library. passing NULL to dlopen as
+ // filename causes dlopen to return a handle to the main program, which we want
+ // to do here.
+ file = QString::null;
+ d->mLibrary = new QLibrary(file);
+#endif // USE_BO_PLUGINS
  if (ret) {
 	ret = d->mLibrary->load();
 	if (!ret) {
@@ -227,15 +237,15 @@ bool BoPluginManager::loadLibrary()
  }
  if (ret) {
 	boDebug() << k_funcinfo << "searching for information object" << endl;
-		QCString info_name = QCString("BoPluginInformation");
-		QObject* info = d->mLibraryFactory->create(0, 0, info_name);
-		if (!info) {
-			error = i18n("Could not find the information object. searched for: %1").arg(info_name);
-			boError() << k_funcinfo << error << endl;
-			ret = false;
-		} else {
-			delete info;
-		}
+	QCString info_name = QCString("BoPluginInformation");
+	QObject* info = d->mLibraryFactory->create(0, 0, info_name);
+	if (!info) {
+		error = i18n("Could not find the information object. searched for: %1").arg(info_name);
+		boError() << k_funcinfo << error << endl;
+		ret = false;
+	} else {
+		delete info;
+	}
  }
  if (ret) {
 	boDebug() << k_funcinfo << "library should be ready to use now" << endl;
@@ -305,7 +315,7 @@ bool BoPluginManager::checkCurrentPlugin()
 {
  if (!currentPlugin()) {
 	boDebug() << k_funcinfo << "getting a default plugin" << endl;
-		// pick a default plugin
+	// pick a default plugin
 	bool ret = makePluginCurrent(QString::null);
 	if (ret) {
 		boDebug() << k_funcinfo << "default plugin loaded" << endl;

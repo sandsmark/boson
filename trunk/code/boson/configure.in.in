@@ -248,4 +248,23 @@ XRRConfigSizes(conf, &count);
 ])
 AC_BOSON_CHECK_XRANDR
 
+AC_DEFUN([AC_USE_PLUGINS],
+[
+ AC_ARG_ENABLE(
+  plugins,
+  [  --disable-plugins       disable use of plugins (experimental)],
+  bo_use_plugins=$enableval,
+  bo_use_plugins=yes
+ )
+ if test "x$enable_static" = "xyes"; then
+   bo_use_plugins=no
+ fi
+ if test "$bo_use_plugins" != "yes"; then
+   AC_DEFINE_UNQUOTED(USE_BO_PLUGINS, 0, [Define whether to use plugins.])
+ else
+   AC_DEFINE_UNQUOTED(USE_BO_PLUGINS, 1, [Define whether to use plugins.])
+ fi
+ AM_CONDITIONAL(include_plugins, test x$bo_use_plugins = xyes)
+])
+AC_USE_PLUGINS
 

@@ -38,6 +38,8 @@
 #include <stdlib.h>
 #include <dlfcn.h>
 
+BOPLUGIN_MANAGER(BoGroundRendererManager, libbogroundrendererplugin)
+
 BoGroundRendererManager* BoGroundRendererManager::mManager = 0;
 static KStaticDeleter<BoGroundRendererManager> sd;
 
@@ -88,11 +90,6 @@ QStringList BoGroundRendererManager::availableRenderers()
 BoGroundRenderer* BoGroundRendererManager::createRenderer(const QString& name)
 {
  return (BoGroundRenderer*)createPlugin(name);
-}
-
-QString BoGroundRendererManager::libname() const
-{
- return "libbogroundrendererplugin";
 }
 
 QString BoGroundRendererManager::configKey() const
