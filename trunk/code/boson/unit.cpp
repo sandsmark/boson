@@ -55,6 +55,15 @@
 
 #define USE_SMOOTH_HEIGHT
 
+// If defined, new (not cell based) collision detection method is used
+// WARNING: new collision detection is buggy and doesn't work really well (with
+//  current pathfinder(s))
+//#define USE_NEW_COLLISION_DETECTION
+
+// If defined, units will search and fire at enemy units only when they are at
+//  waypoints. This may make unit movement better for big groups, because units
+//  shouldn't occupy multiple cells while firing at enemies.
+#define CHECK_ENEMIES_ONLY_AT_WAYPOINT
 
 bool Unit::mInitialized = false;
 
@@ -853,7 +862,7 @@ bool Unit::moveTo(float x, float y, int range)
 }
 
 void Unit::newPath()
-{ 
+{
  // Check if we can still go to cell (it may be that cell was fogged previously,
  //  so we couldn't check, but now it's unfogged)
  // FIXME: don't check if cell is valid/invalid if range > 0
@@ -1231,7 +1240,7 @@ QValueList<Unit*> Unit::unitCollisions(bool exact)
 
 void Unit::setAdvanceWork(WorkType w)
 {
- // velicities should be 0 anyway - this is the final fallback in case it was 
+ // velicities should be 0 anyway - this is the final fallback in case it was
  // missing by any reason
  setVelocity(0.0, 0.0, 0.0);
 
@@ -1600,11 +1609,20 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCount) // this actually
 	// Attack any enemy units in range
 	// Don't check for enemies every time (if we don't have a target) because it
 	//  slows things down
+#ifndef CHECK_ENEMIES_ONLY_AT_WAYPOINT
 	if (target() || (advanceCount % 10 == 0)) {
 		if (attackEnemyUnitsInRangeWhileMoving()) {
 			return;
 		}
 	}
+#else
+	// Attack only if we already have target
+	if (target()) {
+		if (attackEnemyUnitsInRangeWhileMoving()) {
+			return;
+		}
+	}
+#endif
  }
 
  // x and y are center of the unit here
@@ -1712,10 +1730,6 @@ float MobileUnit::moveTowardsPoint(const QPoint& p, float x, float y, float maxd
  // TODO: use pythagoras
  return dist;
 }
-
-// WARNING: new collision detection is buggy and doesn't work really well (with
-//  current pathfinder(s))
-//#define USE_NEW_COLLISION_DETECTION
 
 void MobileUnit::advanceMoveCheck()
 {
