@@ -58,7 +58,7 @@ public:
 	 * @return The name of the texture specified or 0 if the texture array
 	 * is not yet initialized.
 	 **/
-	inline GLuint texture(unsigned int i)
+	inline GLuint texture(unsigned int i) const
 	{
 		if (i >= mCount) {
 			return 0;
