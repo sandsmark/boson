@@ -355,7 +355,9 @@ void bosonCanvas::play(char *filename)
 {
 	if(soundserver->isNull()) return; // no sound available
 
-	QString path = *dataPath + "themes/sound/human/" + filename;
+	// XXX make a (char **) cache to speed this up
+	// XXX human should really be handled by speciesTheme..
+	QString path = *dataPath + "themes/sounds/human/" + filename;
 	logf(LOG_INFO, "(sound) playing : %s", path.latin1());
 	soundserver->play(path.latin1());
 }
