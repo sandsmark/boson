@@ -26,8 +26,6 @@ BOSON_SRC = \
 	speciesdata.cpp \
 	player.cpp \
 	bo3dtools.cpp \
-	bosonbigdisplaybase.cpp \
-	bosonbigdisplay.cpp \
 	bosonminimap.cpp \
 	kgameunitdebug.cpp \
 	kgameplayerdebug.cpp \
@@ -36,6 +34,9 @@ BOSON_SRC = \
 	bosonwidgetbase.cpp \
 	bosonwidget.cpp \
 	editorwidget.cpp \
+	bosonglwidget.cpp \
+	bosonbigdisplaybase.cpp \
+	bosonbigdisplay.cpp \
 	bosontiles.cpp \
 	bosonconfig.cpp \
 	optionsdialog.cpp \
@@ -112,7 +113,8 @@ bocursor_LDADD = \
 bocursor_SOURCES = \
 		$(COMMON_SRC) \
 		bocursormain.cpp bosoncursoreditor.cpp bosoncursor.cpp \
-		bosontexturearray.cpp bosonconfig.cpp
+		bosontexturearray.cpp bosonconfig.cpp \
+		bosonglwidget.cpp
 
 borender_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 borender_LDADD = \

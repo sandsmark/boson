@@ -155,7 +155,7 @@ bool BosonTiles::loadTiles(QString dir, bool debug)
  delete mTextures;
 
  // AB: tiles are loaded - but the texturs cannot yet be generated! must be done
- // after construction of the gl-context, aka the QGLWidget
+ // after construction of the gl-context, aka the BosonGLWidget
  emit signalTilesLoaded();
  return true;
 }

@@ -21,12 +21,12 @@
 
 #include "defines.h"
 #include "bosontexturearray.h"
+#include "bosonglwidget.h"
 #include "bodebug.h"
 
 #include <kimageeffect.h>
 
 #include <qimage.h>
-#include <qgl.h>
 
 #define POWER_LEVELS 15
 
@@ -73,7 +73,7 @@ void SelectBoxData::loadBoxes()
 // QImage image = KImageEffect::gradient(QSize(BO_TILE_SIZE, 6), Qt::red, Qt::green, KImageEffect::HorizontalGradient);
 // QImage image = KImageEffect::gradient(QSize(BO_TILE_SIZE, 6), QColor(255,0,0), Qt::green, KImageEffect::HorizontalGradient);
  QImage image = KImageEffect::gradient(QSize(BO_TILE_SIZE, 6), Qt::blue, Qt::green, KImageEffect::HorizontalGradient);
- image = QGLWidget::convertToGLFormat(image);
+ image = BosonGLWidget::convertToGLFormat(image);
  textureImages.append(image);
 
  mTextures = new BosonTextureArray(textureImages);

@@ -23,13 +23,13 @@
 #include "bosonmodeltextures.h"
 #include "bosonprofiling.h"
 #include "bo3dtools.h"
+#include "bosonglwidget.h"
 #include "bodebug.h"
 
 #include <ksimpleconfig.h>
 #include <kstaticdeleter.h>
 
 #include <qimage.h>
-#include <qgl.h>
 #include <qptrlist.h>
 #include <qstringlist.h>
 #include <qvaluelist.h>
@@ -320,7 +320,7 @@ void BosonModel::loadTextures()
 
 void BosonModel::createDisplayLists()
 {
- if (!QGLContext::currentContext()) {
+ if (!BoContext::currentContext()) {
 	boError(100) << k_funcinfo << "NULL current context" << endl;
 	return;
  }
@@ -512,7 +512,7 @@ void BosonModel::computeBoundings(Lib3dsNode* node, BosonModel::BoHelper* helper
 
 void BosonModel::loadNodes(bool reload)
 {
- if (!QGLContext::currentContext()) {
+ if (!BoContext::currentContext()) {
 	boError(100) << k_funcinfo << "NULL current context" << endl;
 	return;
  }

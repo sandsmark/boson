@@ -20,8 +20,8 @@
 #define BORENDERMAIN_H
 
 #include "bodebugdcopiface.h"
+#include "bosonglwidget.h"
 
-#include <qgl.h>
 #include <qptrlist.h>
 #include <qptrdict.h>
 #include <qintdict.h>
@@ -86,7 +86,7 @@ private slots:
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class ModelPreview : public QGLWidget
+class ModelPreview : public BosonGLWidget
 {
 	Q_OBJECT
 public:

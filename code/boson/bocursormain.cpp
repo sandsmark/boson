@@ -24,6 +24,7 @@
 #include "bosoncursor.h"
 #include "bosonconfig.h"
 #include "global.h"
+#include "bosonglwidget.h"
 #include "bodebug.h"
 #include "bodebugdcopiface.h"
 
@@ -32,10 +33,11 @@
 #include <kaboutdata.h>
 #include <klocale.h>
 
-#include <qgl.h>
 #include <qlayout.h>
 #include <qcursor.h>
 #include <qtimer.h>
+
+#include <GL/glu.h>
 
 static const char *description =
     I18N_NOOP("Cursor Editor for Boson");
@@ -47,13 +49,13 @@ static KCmdLineOptions options[] =
     { 0, 0, 0 }
 };
 
-CursorPreview::CursorPreview(QWidget* parent) : QGLWidget(parent)
+CursorPreview::CursorPreview(QWidget* parent) : BosonGLWidget(parent)
 {
  mCursor = new BosonKDECursor;
  setMinimumSize(200, 200);
  setMouseTracking(true);
  mUpdateTimer = new QTimer(this);
- connect(mUpdateTimer, SIGNAL(timeout()), this, SLOT(updateGL()));
+ connect(mUpdateTimer, SIGNAL(timeout()), this, SLOT(slotUpdateGL()));
  mIface = new BoDebugDCOPIface();
 }
 

@@ -19,7 +19,7 @@
 #ifndef BOCURSORMAIN_H
 #define BOCURSORMAIN_H
 
-#include <qgl.h>
+#include "bosonglwidget.h"
 
 class BosonCursor;
 class BoDebugDCOPIface;
@@ -27,7 +27,7 @@ class BoDebugDCOPIface;
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class CursorPreview : public QGLWidget
+class CursorPreview : public BosonGLWidget
 {
 	Q_OBJECT
 public:

@@ -19,10 +19,12 @@
 
 #include "bosontexturearray.h"
 #include "bosonconfig.h"
+#include "bosonglwidget.h"
 #include "bodebug.h"
 
 #include <qimage.h>
-#include <qgl.h>
+
+#include <GL/glu.h>
 
 // warning: mAllTextures is *not* setAutoDelete(true) !
 QIntDict<BoTextureInfo> BosonTextureArray::mAllTextures = QIntDict<BoTextureInfo>();
@@ -81,7 +83,7 @@ BosonTextureArray::~BosonTextureArray()
 
 bool BosonTextureArray::createTexture(const QImage& image, GLuint texture, bool useMipmaps)
 {
- if (!QGLContext::currentContext()) {
+ if (!BoContext::currentContext()) {
 	boError(110) << k_funcinfo << "NULL current context!!" << endl;
 	return false; // baaaad - we should delay loading or so
  }
@@ -112,7 +114,7 @@ bool BosonTextureArray::createTexture(const QImage& image, GLuint texture, bool 
 	// should not appear at all...
  }
 
- buffer = QGLWidget::convertToGLFormat(buffer);
+ buffer = BosonGLWidget::convertToGLFormat(buffer);
  glBindTexture(GL_TEXTURE_2D, texture);
 
  // note: width and height MUST be a power of 2!! they must be >= 64
@@ -196,7 +198,7 @@ bool BosonTextureArray::createTextures(QValueList<QImage> images, bool useMipmap
 	boDebug(110) << k_funcinfo << "textures already generated?!" << endl;
 	return false;
  }
- if (!QGLContext::currentContext()) {
+ if (!BoContext::currentContext()) {
 	boError(110) << k_funcinfo << "NULL current context!!" << endl;
 	return false; // baaaad - we should delay loading or so
  }
