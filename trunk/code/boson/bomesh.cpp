@@ -271,7 +271,6 @@ public:
 			disconnectNodes(allNodes, first);
 		}
 		if (allNodes.isEmpty()) {
-			boError() << k_funcinfo << "no nodes for mesh" << endl;
 			// AB: actually we don't have triangles here, but as
 			// there is nothing at all here we could also render
 			// triangles.
@@ -1661,7 +1660,9 @@ void BoMesh::generateLOD()
  BoLODBuilder builder(this, lod[0]);
  for (unsigned int i = oldCount; i < LODCount; i++) {
 	QValueList<BoFace> faces = builder.generateLOD(i);
-	lod[i]->createFaces(faces.count());
+	if (faces.count() > 0) {
+		lod[i]->createFaces(faces.count());
+	}
 	for (unsigned int j = 0; j < faces.count(); j++) {
 		lod[i]->setFace(j, faces[j]);
 	}
