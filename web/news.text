@@ -4,9 +4,12 @@ date=December 23rd 2004 21:30
 title=Happy holidays!
 text=Once again, we wish you all happy holidays!<br>
     Sorry about the total lack of updates in the last half a year, but we're
-    not dead, we've been working hard and are moving towards Boson 0.11.
-    At this time, we don't have any release dates, but it will probably not
-    come out in next months.<br>
+    not dead, we've been working hard and are moving towards Boson 0.11. We
+    have had some news in our mailing list though, so if you're interested, you
+    could
+    <a href="http://lists.sourceforge.net/lists/listinfo/boson-devel">subscribe</a>
+    there. At this time, we haven't settled a release date for 0.11 yet, but it
+    will probably not come out in next months.<br>
     We have made many improvements in Boson and added many features, including
     new <a href="http://libufo.sourceforge.net">LibUFO</a>-based GUI (which is
     still in very early development phase).<br>
