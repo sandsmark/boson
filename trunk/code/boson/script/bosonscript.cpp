@@ -287,6 +287,24 @@ void BosonScript::mineUnit(int player, int id, int x, int y)
   sendInput(player, msg);
 }
 
+void BosonScript::spawnUnit(int player, int type, int x, int y)
+{
+  if(!game())
+  {
+    boError() << k_funcinfo << "NULL game" << endl;
+    return;
+  }
+  QByteArray b;
+  QDataStream stream(b, IO_WriteOnly);
+
+  stream << (Q_UINT32)player;
+  stream << (Q_UINT32)type;
+  stream << (Q_INT32)x;
+  stream << (Q_INT32)y;
+
+  game()->sendMessage(b, BosonMessage::AddUnit);
+}
+
 QValueList<int> BosonScript::unitsOnCell(int x, int y)
 {
   QValueList<int> list;

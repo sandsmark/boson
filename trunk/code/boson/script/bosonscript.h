@@ -141,6 +141,10 @@ class BosonScript
      * Sends unit with id id to mine at (x, y)
      **/
     static void mineUnit(int player, int id, int x, int y);
+    /**
+     * Spawns unit owned by player, with type type, at (x, y)
+     **/
+    static void spawnUnit(int player, int type, int x, int y);
 
     /**
      * @return List of units on cell (x, y)
