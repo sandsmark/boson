@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -71,7 +71,7 @@ public:
 	 * only (errors are reported). Actually we copy the node to a local xml
 	 * document which is loaded in @ref startScenario.
 	 **/
-	bool loadScenario(QDomElement& node);
+	bool loadScenario(const QDomElement& node);
 
 	/**
 	 * Create a scenario according to the current scenario settings. For
@@ -95,7 +95,7 @@ public:
 	QString saveScenarioToDocument() const;
 
 	/**
-	 * Save the local xml document (i.e. the scenario) to root.
+	 * Save the local xml document (i.e. the scenario) to @p root.
 	 **/
 	bool saveScenario(QDomElement& root) const;
 
@@ -113,27 +113,25 @@ public:
 	bool isValid() const;
 
 
-	static bool saveUnit(QDomElement& node, Unit* unit);
-	static bool loadUnit(QDomElement& node, Unit* unit);
+	static bool loadUnit(const QDomElement& node, Unit* unit);
+	static bool loadBasicUnit(const QDomElement& node, unsigned long int& unitType, unsigned int& x, unsigned int& y);
+
+	static bool saveUnit(QDomElement& node, const Unit* unit);
 
 	static bool saveBasicUnit(QDomElement& node, unsigned long int unitType, unsigned int x, unsigned int y);
-	static bool loadBasicUnit(QDomElement& node, unsigned long int& unitType, unsigned int& x, unsigned int& y);
 
-	static bool savePlayer(QDomElement& node, Player* p);
-	static bool loadPlayer(QDomElement& node, Player* p);
+	static bool savePlayer(QDomElement& node, const Player* p);
 
 
 	bool modified() const { return mModified; }
 	void setModified(bool m) { mModified = m; }
 
 protected:
-	bool saveScenarioSettings(QDomElement&);
-	bool loadScenarioSettings(QDomElement&);
+	bool saveScenarioSettings(QDomElement&) const;
+	bool loadScenarioSettings(const QDomElement&);
 
-	static bool saveFacility(QDomElement&, Facility*);
-	static bool loadFacility(QDomElement&, Facility*);
-	static bool saveMobile(QDomElement&, MobileUnit*);
-	static bool loadMobile(QDomElement&, MobileUnit*);
+	static bool saveFacility(QDomElement&, const Facility*);
+	static bool saveMobile(QDomElement&, const MobileUnit*);
 
 	/**
 	 * Initialize the player node, i.e. set the default values for
@@ -142,6 +140,7 @@ protected:
 	void initPlayerNode(QDomElement& player, unsigned int playerNumber);
 
 private:
+	friend class BosonScenarioBuilder;
 	void init();
 
 private:
