@@ -80,11 +80,11 @@
 #define CAMERA_MAX_Z FAR - 50
 #define CAMERA_MAX_RADIUS 80
 
-//#define BO_LIGHT 1
-//#define CLEAR_DEPTH_FULL 1
+#define BO_LIGHT 1
+#define CLEAR_DEPTH_FULL 1
 
 #ifdef BO_LIGHT
-static float lightPos[] = {10.0, -10.0, 3.0, 1.0};
+static float lightPos[] = {10.0, -10.0, 10.0, 1.0};
 #endif
 
 #include <GL/glu.h>
@@ -586,7 +586,7 @@ void BosonBigDisplayBase::initializeGL()
 
 
 #ifdef BO_LIGHT
- float lightAmb[] = {0.6, 0.6, 0.6, 1.0};
+ float lightAmb[] = {0.8, 0.8, 0.8, 1.0};
  float lightDif[] = {1.0, 1.0, 1.0, 1.0};
 
  glLightfv(GL_LIGHT0, GL_AMBIENT, lightAmb);
