@@ -387,8 +387,7 @@ void BosonBigDisplay::editorActionClicked(const QPoint& pos)
 // kdDebug() << "BosonBigDisplay::editorActionClicked()" << endl;
  int x = pos.x() / BO_TILE_SIZE;
  int y = pos.y() / BO_TILE_SIZE;
-// emit signalEditorAddUnit(10001, x, y, 0);
-// FIXME: should be done on left click
+// FIXME: should be done on left click?
  if (d->mConstruction.unitType > -1) {
 	if (!d->mConstruction.owner) {
 		kdWarning() << "NO OWNER" << endl;
