@@ -51,6 +51,24 @@ void serverMobUnit::increaseContain(void)
 {
 	unitRessMsg_t	m;
 
+	switch( getType() ) {
+		case MOB_MINERAL_HARVESTER:
+			if (server->groundAt(gridRect().topLeft()) != GROUND_GRASS_MINERAL) {
+				logf(LOG_ERROR, "mineral harvester trying to harvest on non mineral ground");
+				return;
+			}
+			break;
+		case MOB_OIL_HARVESTER:
+			if (server->groundAt(gridRect().topLeft()) != GROUND_GRASS_OIL) {
+				logf(LOG_ERROR, "oil harvester trying to harvest on non oil ground");
+				return;
+			}
+			break;
+		default:
+			logf(LOG_ERROR, "unknown harvester type trying to harvest.aborting");
+			return;
+	}
+
 	contain ++;
 
 	m.key = key; m.contain = contain;
