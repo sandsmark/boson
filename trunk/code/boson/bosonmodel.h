@@ -214,7 +214,7 @@ public:
 	void addMesh(BoMesh* mesh);
 
 	/**
-	 * Add @þ count frames. You need to give them useful data using @ref
+	 * Add @p count frames. You need to give them useful data using @ref
 	 * frame
 	 * @return The offset after which the frames where added. E.g. you can
 	 * retrive the first newly added frame using frame(offset + 0)
