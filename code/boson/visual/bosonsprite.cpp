@@ -47,8 +47,6 @@ BosonSprite::~BosonSprite()
 
 void BosonSprite::setCanvas(BosonCanvas* c)
 {
- bool v = isVisible();
- setVisible(false);
  if (boCanvas()) {
 	boCanvas()->removeItem(this);
 	boCanvas()->removeAnimation(this);
@@ -60,7 +58,6 @@ void BosonSprite::setCanvas(BosonCanvas* c)
 	// again
 	// boCanvas()->addAnimation(this);
  }
- setVisible(v);
 }
 
 QPointArray BosonSprite::cells() const

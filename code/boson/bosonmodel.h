@@ -26,8 +26,27 @@
 #include <lib3ds/types.h>
 
 class BosonModelTextures;
-class BoFrame;
 class QColor;
+
+
+class BoFrame
+{
+public:
+	BoFrame();
+	BoFrame(const BoFrame& f);
+
+	void setDisplayList(GLuint l) { mDisplayList = l; }
+	GLuint displayList() const { return mDisplayList; }
+	float depthMultiplier() const { return mDepthMultiplier; }
+	void setDepthMultiplier(float d) { mDepthMultiplier = d; }
+	void setRadius(float r) { mRadius = r; }
+
+private:
+	GLuint mDisplayList;
+	float mDepthMultiplier;
+	float mRadius; // TODO
+};
+
 
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
@@ -35,11 +54,6 @@ class QColor;
 class BosonModel
 {
 public:
-	/**
-	 * Construct a model using an already created display list
-	 **/
-	BosonModel(GLuint list, float width, float height);
-
 	/**
 	 * @param width The final width of the unit. The model will be scaled to
 	 * fit this value, if possible. Distortion will be avoided.
@@ -74,34 +88,11 @@ public:
 	 **/
 	void generateConstructionLists();
 
-	/**
-	 * Note: as long as @ref constructionStep is < @ref constructionSteps
-	 * you can't call this function!
-	 *
-	 * (note also that by default @ref constructionStep == @ref
-	 * constructionSteps == 0)
-	 **/
-	void setFrame(unsigned int frame);
-	unsigned int frame() const { return mFrame; }
+	BoFrame* frame(unsigned int frame) const;
 	inline unsigned int frames() const { return mFrames.count(); }
 
-	void setConstructionStep(unsigned int step);
+	BoFrame* constructionStep(unsigned int step);
 	inline unsigned int constructionSteps() const { return mConstructionSteps.count(); }
-	inline unsigned int constructionStep() const { return mConstructionStep; }
-
-	/**
-	 * @return The display list of the current @ref frame.
-	 **/
-	inline GLuint displayList() const
-	{
-		return mDisplayList;
-	}
-	
-	/**
-	 * @return The factor BO_GL_CELL_SIZE needs to be multiplied with to get
-	 * the actual depth (height in z-direction) of the unit
-	 **/
-	float depthMultiplier() const { return mDepthMultiplier; }
 
 	/**
 	 * Since .3ds files seem to supprt filenames of 8+3 chars only you can
@@ -148,13 +139,8 @@ private:
 	QIntDict<BoFrame> mConstructionSteps;
 	QColor* mTeamColor;
 
-	GLuint mDisplayList;
-	unsigned int mFrame;
-	unsigned int mConstructionStep;
-
 	float mWidth;
 	float mHeight;
-	float mDepthMultiplier;
 };
 #endif
 

@@ -28,8 +28,9 @@ GLSprite::GLSprite(BosonModel* model, BosonCanvas* canvas)
  mX = mY = mZ = 0.0;
  mWidth = mHeight = 0;
  mGLDepthMultiplier = 1.0;
-
- mIsVisible = false;
+ mDisplayList = 0;
+ mFrame = 0;
+ mGLConstructionStep = 0;
 
  mXVelocity = 0.0;
  mYVelocity = 0.0;
@@ -37,6 +38,17 @@ GLSprite::GLSprite(BosonModel* model, BosonCanvas* canvas)
  mModel = model;
 
  mBoundingSphereRadius = 1.0; // TODO: can we extract this from the model? this probably needs to change with different frames!
+
+ if (!mModel) {
+	kdError() << k_funcinfo << "NULL model - we will crash!" << endl;
+	return;
+ }
+ // FIXME the correct frame must be set after this constructor!
+ if (mGLConstructionStep >= mModel->constructionSteps()) {
+	setCurrentFrame(mModel->frame(frame()));
+ } else {
+	setCurrentFrame(mModel->constructionStep(mGLConstructionStep));
+ }
 }
 
 GLSprite::~GLSprite()
@@ -54,19 +66,6 @@ QRect GLSprite::boundingRectAdvanced() const
 		(int)(topEdge() + yVelocity()),
 		(int)(width() + xVelocity()),
 		(int)(height() + yVelocity()));
-}
-
-void GLSprite::setVisible(bool v)
-{
- // FIXME: remove from canvas ;
- if (mIsVisible != v) {
-	mIsVisible = v;
-	if (v) {
-		// FIXME: add to cells ?
-	} else {
-		// FIXME: remove from cells ? 
-	}
- }
 }
 
 void GLSprite::setCanvas(BosonCanvas* c)
@@ -87,5 +86,13 @@ void GLSprite::setHeight(int h)
 void GLSprite::setGLDepthMultiplier(float d)
 {
  mGLDepthMultiplier = d;
+}
+
+void GLSprite::setGLConstructionStep(unsigned int s)
+{
+ // note: in case of s >= model()->constructionSteps() we use the last
+ // constructionStep that is defined in the model until an actual frame is set.
+ BoFrame* f = model()->constructionStep(s);
+ setCurrentFrame(f);
 }
 

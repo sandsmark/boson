@@ -74,6 +74,13 @@ public:
 	 **/
 	void setGLDepthMultiplier(float d);
 
+	void setGLConstructionStep(unsigned int step);
+
+	void setDisplayList(GLuint l) 
+	{
+		mDisplayList = l;
+	}
+
 
 	float leftEdge() const { return x(); }
 	float topEdge() const { return y(); } // note: in OpenGL the top is y-coordinate + height!!
@@ -83,10 +90,6 @@ public:
 	QRect boundingRectAdvanced() const;
 
 
-	void show() { setVisible(true); }
-	void hide() { setVisible(true); }
-	void setVisible(bool v);
-	bool isVisible() const { return mIsVisible; }
 	virtual void setAnimated(bool a) = 0;
 	
 	void move(float x, float y) { move(x, y, z()); }
@@ -103,26 +106,37 @@ public:
 	}
 	void move(float x, float y, float z, int _frame)
 	{
-		if (isVisible()) {
-			setVisible(false);
-			move(x, y, z);
-			if (_frame != frame()) {
-				model()->setFrame(_frame);
-				setGLDepthMultiplier(model()->depthMultiplier());
-			}
-			setVisible(true);
-		} else {
-			move(x, y, z);
-			if (_frame != frame()) {
-				model()->setFrame(_frame);
-				setGLDepthMultiplier(model()->depthMultiplier());
+		if (mGLConstructionStep < model()->constructionSteps()) {
+			// this unit (?) has not yet been constructed
+			// completely.
+			// Note that mGLConstructionStep is totally different
+			// from Unit::constructionStep() !
+			_frame = frame();
+		}
+		move(x, y, z);
+
+		// FIXME: this if is pretty much nonsense, since e.g. frame()
+		// might be 0 and _frame, too - but the frame still changed,
+		// since we had a construction list before!
+		// we mustn't change the frame when moving and so on. these are
+		// old QCanvas compatible functions. need to be fixed.
+		if (_frame != frame()) {
+			BoFrame* f = model()->frame(_frame);
+			if (f) {
+				setCurrentFrame(f);
+				mFrame = _frame;
 			}
 		}
 	}
 
-	inline int frame() const { return model()->frame(); }
+	inline int frame() const { return mFrame; }
 	void setFrame(int frame) { move(x(), y(), z(), frame); }
 	unsigned int frameCount() const { return model() ? model()->frames() : 0; }
+	inline void setCurrentFrame(BoFrame* frame)
+	{
+		setDisplayList(frame->displayList());
+		setGLDepthMultiplier(frame->depthMultiplier());
+	}
 
 	inline float xVelocity() const { return mXVelocity; }
 	inline float yVelocity() const { return mYVelocity; }
@@ -134,9 +148,9 @@ public:
 		mYVelocity = vy;
 	}
 
-	inline GLuint displayList() const 
+	inline GLuint displayList() const
 	{
-		return model()->displayList();
+		return mDisplayList;
 	}
 
 	/**
@@ -158,11 +172,15 @@ private:
 	float mZ;
 	int mWidth;
 	int mHeight;
-	float mGLDepthMultiplier;
 
-	bool mIsVisible;
+	float mGLDepthMultiplier;
+	GLuint mDisplayList;
+	unsigned int mFrame;
+	unsigned int mGLConstructionStep;
+
 	float mXVelocity;
 	float mYVelocity;
+
 	BosonModel* mModel;
 
 	// these are for OpenGL performance only. no need to store on save() and
