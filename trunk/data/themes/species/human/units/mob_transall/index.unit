@@ -35,10 +35,10 @@ UnitHeight=3
 UnitWidth=3
 Weapons=1
 
-[OpenGL]
-FrameRangeIdle=5
-FrameSpeedIdle=1
-FrameStartIdle=0
+[Model]
+Animation-Idle-Start=0
+Animation-Idle-End=4
+Animation-Idle-Speed=1
 
 [Sounds]
 OrderAttack=order_attack
