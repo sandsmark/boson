@@ -46,6 +46,9 @@ public:
 
 	KActionCollection &actions(void) { return m_actions; }
 
+	// should be private, but needed in main.cpp
+	/** actually open the file / set filename */
+	void do_open(QString name);
 public slots:
 
 	/*

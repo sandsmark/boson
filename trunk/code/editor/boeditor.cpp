@@ -44,7 +44,7 @@ int			nb_player;
 
 extern editorCanvas	*ecanvas;
 
-#define UNKNOWN_NAME  "orzel_unknown_name"
+#define UNKNOWN_NAME  "___orzel_unknown_name___" 	// will anybody ever save a file with this name ?
 
 BoEditorApp::BoEditorApp()
 {
@@ -144,11 +144,23 @@ void BoEditorApp::slot_open()
 	QString name = KFileDialog::getOpenFileName( "/opt/be/share/apps/boson/map", "*.bpf" , 0 ); //XXX path still hardcoded
 	if ( name.isEmpty() ) return;
 
-	filename = name;
-	boAssert(filename != QString::null);
+	do_open(name);
+}
 
+void BoEditorApp::do_open(QString name)
+{
+	// internal management
+	boAssert( QString::null == filename);	// should not be called if filame already set
+	boAssert( QString::null != name);	// shoud not be called with a null arg
+	filename = name;
+	
+	// actually read the file
 	boAssert(ecanvas);
-	ecanvas->Load(filename);
+	if (ecanvas->Load(filename)) return;
+
+	// it failed : turning back to nothing
+	logf(LOG_ERROR, "haven't been abled to open %s", name.latin1() );
+	filename = QString::null;
 }
 
 bool BoEditorApp::slot_close()
