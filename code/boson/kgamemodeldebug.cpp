@@ -760,8 +760,10 @@ public:
 		mNodeMatrix = 0;
 		mNodeObjectData = 0;
 
-		mFacesCountLabel = 0;
-		mVertexCountLabel = 0;
+		mMeshFacesCountLabel = 0;
+		mMeshVertexCountLabel = 0;
+		mNodeFacesCountLabel = 0;
+		mNodeVertexCountLabel = 0;
 
 		m3ds = 0;
 	}
@@ -798,8 +800,10 @@ public:
 	BoMatrixWidget* mNodeMatrix;
 	BoNodeObjectDataWidget* mNodeObjectData;
 
-	QLabel* mFacesCountLabel;
-	QLabel* mVertexCountLabel;
+	QLabel* mMeshFacesCountLabel;
+	QLabel* mMeshVertexCountLabel;
+	QLabel* mNodeFacesCountLabel;
+	QLabel* mNodeVertexCountLabel;
 
 	int mCurrentItem;
 	Lib3dsFile* m3ds;
@@ -895,11 +899,12 @@ void KGameModelDebug::initMeshPage()
  connect(d->mMeshView, SIGNAL(executed(QListViewItem*)), this, SLOT(slotDisplayMesh(QListViewItem*)));
  QVBox* modelInfo = new QVBox(meshView); // actually it doesn't fit to "meshView", but rather display info about the model
  QHBox* faces = new QHBox(modelInfo);
- (void)new QLabel(i18n("Faces: "), faces);
- d->mFacesCountLabel = new QLabel(faces);
+ (void)new QLabel(i18n("Mesh Faces: "), faces);
+ d->mMeshFacesCountLabel = new QLabel(faces);
+ QToolTip::add(d->mMeshFacesCountLabel, i18n("This is the total number of faces in (different) meshes. Note that every mesh can appear several times in a model, so this number is <em>not</em> the total number of faces in the model!"));
  QHBox* vertices = new QHBox(modelInfo);
- (void)new QLabel(i18n("Vertices (Faces * 3): "), vertices);
- d->mVertexCountLabel = new QLabel(vertices);
+ (void)new QLabel(i18n("Mesh Vertices (Faces * 3): "), vertices);
+ d->mMeshVertexCountLabel = new QLabel(vertices);
 
  QVBox* faceView = new QVBox(splitter);
  d->mFaceList = new BoFaceView(faceView);
@@ -950,6 +955,15 @@ void KGameModelDebug::initNodePage()
  d->mNodeView->addColumn(i18n("flags2"));
  connect(d->mNodeView, SIGNAL(executed(QListViewItem*)),
 		this, SLOT(slotDisplayNode(QListViewItem*)));
+ QVBox* nodesInfo = new QVBox(nodeView);
+ QHBox* faces = new QHBox(nodesInfo);
+ (void)new QLabel(i18n("Node Faces: "), faces);
+ d->mNodeFacesCountLabel = new QLabel(faces);
+ QHBox* vertices = new QHBox(nodesInfo);
+ (void)new QLabel(i18n("Node Vertices (Faces * 3): "), vertices);
+ QToolTip::add(d->mNodeFacesCountLabel, i18n("This is the total number of faces in <em>all</em> nodes and therefore the total number of rendered faces."));
+ d->mNodeVertexCountLabel = new QLabel(vertices);
+ QToolTip::add(d->mNodeVertexCountLabel, i18n("The actual number of vertices in the nodes. This is the same as the faces number above, multiplied by 3 (a face/triangle has always 3 points)."));
 
  d->mNodeObjectData = new BoNodeObjectDataWidget(splitter);
 
@@ -1046,20 +1060,6 @@ void KGameModelDebug::slotUpdate()
  updateMaterialPage();
  updateMeshPage();
  updateNodePage();
-
- if (!d->m3ds) {
-	return;
- }
- int faces = 0;
- Lib3dsMesh* mesh = d->m3ds->meshes;
- for (; mesh; mesh = mesh->next) {
-	faces += mesh->faces;
- }
- d->mFacesCountLabel->setText(QString::number(faces));
- d->mVertexCountLabel->setText(QString::number(faces * 3));
- //TODO: we could also display how many points will actually get rendered. could
- //be interesting in case we ever use triangle strips. currently those values
- //would be exactly the same.
 }
 
 void KGameModelDebug::updateMaterialPage()
@@ -1092,6 +1092,14 @@ void KGameModelDebug::updateMeshPage()
 	return;
  }
  slotConstructMeshList();
+
+ int faces = 0;
+ Lib3dsMesh* mesh = d->m3ds->meshes;
+ for (; mesh; mesh = mesh->next) {
+	faces += mesh->faces;
+ }
+ d->mMeshFacesCountLabel->setText(QString::number(faces));
+ d->mMeshVertexCountLabel->setText(QString::number(faces * 3));
 }
 
 void KGameModelDebug::updateNodePage()
@@ -1109,6 +1117,17 @@ void KGameModelDebug::updateNodePage()
  slotConstructNodeList();
  d->mCurrentFrame->setRange(0, d->m3ds->frames - 1);
  slotFrameChanged(0);
+
+ int faces = 0;
+ Lib3dsNode* node = d->m3ds->nodes;
+ for (; node; node = node->next) {
+	Lib3dsMesh* mesh = lib3ds_file_mesh_by_name(d->m3ds, node->name);
+	if (mesh) {
+		faces += mesh->faces;
+	}
+ }
+ d->mNodeFacesCountLabel->setText(QString::number(faces));
+ d->mNodeVertexCountLabel->setText(QString::number(faces * 3));
 }
 
 void KGameModelDebug::slotConstructMeshList()
