@@ -239,11 +239,14 @@ void BosonParticleSystem::draw()
 
   // Update particles
 //  int num = 0;
-  glPushMatrix();
 //  boDebug() << "PARTICLE:" << "        " << k_funcinfo << "translating by (" << mPos[0] << ", " << mPos[1] << ", " << mPos[2] << ")" << endl;
   glTranslatef(mPos[0], mPos[1], mPos[2]);
   glBindTexture(GL_TEXTURE_2D, mTexture);
   glBlendFunc(mBlendFunc[0], mBlendFunc[1]);
+
+  // FIXME: between glBegin() and glEnd() there should be as little code as
+  // possible, i.e. try to get around the loop and so.
+  // FIXME: can't we use a display list here?
   glBegin(GL_QUADS);
   for(int i = 0; i < mMaxNum; i++)
   {
@@ -266,9 +269,10 @@ void BosonParticleSystem::draw()
     glTexCoord2f(0.0, 0.0);  glVertex3fv(d.data());
 //    num++;
   }
-  glColor4f(1.0, 1.0, 1.0, 1.0); // Reset color
   glEnd();
-  glPopMatrix();
+
+  glColor4f(1.0, 1.0, 1.0, 1.0); // Reset color
+  glTranslatef(-mPos[0], -mPos[1], -mPos[2]);
 //  boDebug() << "PARTICLE:" << "        " << k_funcinfo << "drawn " << num << " particles" << endl;
 }
 
