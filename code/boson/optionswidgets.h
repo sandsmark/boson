@@ -129,12 +129,14 @@ public:
 	void setCursorEdgeSensity(int);
 	void setRMBScrolling(bool);
 	void setMMBScrolling(bool);
+	void setMouseWheelAction(CameraAction action);
 
 private:
 	KIntNumInput* mArrowSpeed;
 	QCheckBox* mRMBScrolling;
 	QCheckBox* mMMBScrolling;
 	KIntNumInput* mCursorEdgeSensity;
+	QComboBox* mMouseWheelAction;
 };
 
 class SoundOptions : public QVBox, public OptionsWidget

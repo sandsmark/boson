@@ -48,6 +48,9 @@ Game TODOs
   particles with one texture on the screen into a single glBegin()/glEnd() pair
 - Add screenshots support to saving/loading widget
 - Shooting sounds should be specified per weapon, not per unit
+- Particles must be drawn properly. Current drawing sucks. We need to create a
+  list of all particles, sorted by depth and then draw them all with
+  depth-testing enabled.
 
 Editor (map, unit, scenario) TODOs
 - don't place units on invalid tiles (e.g. ship on grass)

@@ -114,6 +114,7 @@ void GeneralOptions::load()
  }
  setGameSpeed(game()->gameSpeed());
  setMiniMapScale(boConfig->miniMapScale());
+ setRMBAction(boConfig->RMBAction());
  // TODO: cmdbackground
 }
 
@@ -243,6 +244,13 @@ ScrollingOptions::ScrollingOptions(QWidget* parent) : QVBox(parent), OptionsWidg
  mArrowSpeed->setRange(1, 200);
  mArrowSpeed->setLabel(i18n("Arrow key steps"));
 
+ hbox = new QHBox(this);
+ (void)new QLabel(i18n("Mouse wheel action"), hbox);
+ mMouseWheelAction = new QComboBox(hbox);
+ mMouseWheelAction->insertItem(i18n("Move camera"), (int)CameraMove);
+ mMouseWheelAction->insertItem(i18n("Zoom camera"), (int)CameraZoom);
+ mMouseWheelAction->insertItem(i18n("Rotate camera"), (int)CameraRotate);
+ mMouseWheelAction->setCurrentItem((int)DEFAULT_MOUSE_WHEEL_ACTION);
 }
 
 ScrollingOptions::~ScrollingOptions()
@@ -262,6 +270,7 @@ void ScrollingOptions::apply()
 	mArrowSpeed->setValue(0);
  }
  boConfig->setArrowKeyStep(mArrowSpeed->value());
+ boConfig->setMouseWheelAction((CameraAction)(mMouseWheelAction->currentItem()));
  boDebug(210) << k_funcinfo << "done" << endl;
 }
 
@@ -271,6 +280,7 @@ void ScrollingOptions::setDefaults()
  setCursorEdgeSensity(DEFAULT_CURSOR_EDGE_SENSITY);
  setRMBScrolling(DEFAULT_USE_RMB_MOVE);
  setMMBScrolling(DEFAULT_USE_MMB_MOVE);
+ mMouseWheelAction->setCurrentItem((int)DEFAULT_MOUSE_WHEEL_ACTION);
 }
 
 void ScrollingOptions::load()
@@ -279,6 +289,7 @@ void ScrollingOptions::load()
  setCursorEdgeSensity(boConfig->cursorEdgeSensity());
  setRMBScrolling(boConfig->rmbMove());
  setMMBScrolling(boConfig->mmbMove());
+ setMouseWheelAction(boConfig->mouseWheelAction());
 }
 
 void ScrollingOptions::setCursorEdgeSensity(int s)
@@ -299,6 +310,11 @@ void ScrollingOptions::setRMBScrolling(bool on)
 void ScrollingOptions::setMMBScrolling(bool on)
 {
  mMMBScrolling->setChecked(on);
+}
+
+void ScrollingOptions::setMouseWheelAction(CameraAction action)
+{
+ mMouseWheelAction->setCurrentItem((int)action);
 }
 
 
