@@ -61,8 +61,6 @@ private:
 	void initStatusBar();
 
 private:
-	class TopPrivate;
-	TopPrivate* d;
 };
 
 #endif // __TOP_H__

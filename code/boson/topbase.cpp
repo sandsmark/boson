@@ -20,21 +20,13 @@
 
 #include "bosonwidget.h"
 
-#include <kapplication.h>
-#include <kglobal.h>
 #include <klocale.h>
 #include <kmenubar.h>
-#include <kkeydialog.h>
-#include <kaccel.h>
 #include <kconfig.h>
-
 #include <kedittoolbar.h>
-
 #include <kstatusbar.h>
-#include <kstdaccel.h>
 #include <kaction.h>
 #include <kstdaction.h>
-#include <kstdgameaction.h>
 #include <kdebug.h>
 
 #include <qwmatrix.h>
@@ -73,8 +65,6 @@ TopBase::TopBase()
  initStatusBar();
 
  showMaximized();
-
-// mBosonWidget->slotNewGame(); // adds a local player, too
 }
 
 TopBase::~TopBase()
