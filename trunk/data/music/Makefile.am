@@ -6,7 +6,7 @@ uninstall-local:
 
 install-data-local:
 	@$(mkinstalldirs) $(DESTDIR)$(musicdir)
-	@for i in $(music_DATA) ; do \
+	@for i in $(music_DATA); do \
 		if test -d $(DESTDIR)$(musicdir)/$$i; then \
 			echo "refreshing and removing $$i" ;\
 				rm -rf $(DESTDIR)$(musicdir)/$$i;\
