@@ -78,7 +78,7 @@ for (i=im ; i<=iM; i++)
 			coo.x = i+x;
 			coo.y = j+y;
 			coo.c = c->_cell;
-			if (GROUND_UNKNOWN != c->groundType() )
+			if (GROUND_UNKNOWN != c->ground() )
 				sendMsg (
 					player[u->who].buffer,
 					MSG_MAP_DISCOVERED,
@@ -280,7 +280,7 @@ bool BosonServer::loadGround()
 	/* checking */
 	for (int i=0; i< 3; i++)
 		for (int j=0; j< 3; j++)
-			boAssert(0 <= cell(i,j).groundType());
+			boAssert(0 <= cell(i,j).ground());
 
 	return isOk();
 }

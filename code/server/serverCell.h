@@ -36,7 +36,7 @@ class serverCell : public knownBy
 public:
 	serverCell() { _cell = cell(GROUND_UNKNOWN); }
 
-	groundType	groundType(void) { return ground(_cell); }
+	groundType	ground(void) { return ::ground(_cell); }
 //	byte		version(void) { return version(_cell); }
 //	void		operator= (cell_t c) { _cell = c; }
 private:
