@@ -1,0 +1,30 @@
+[Boson Unit]
+IsFacility=false
+TerrainType=0
+Name=Batzen
+Id=10010
+Health=100
+MineralCost=150
+OilCost=80
+Producer=0
+Requirements=3
+Armor=1
+ProductionTime=80
+Weapons=1
+DestroyedParticles=1002
+
+[Boson Mobile Unit]
+Speed=10
+CanGoOnLand=true
+CanGoOnWater=false
+
+[Weapon_0]
+Range=4
+Reload=8
+CanShootAtAirUnits=true
+CanShootAtLandUnits=true
+Damage=5
+Speed=8
+DamageRange=1
+HitParticles=2001
+FlyParticles=5001

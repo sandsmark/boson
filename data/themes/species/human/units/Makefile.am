@@ -1,11 +1,13 @@
 MOBILE_UNITS = \
-	mob_aircraft \
+	mob_grizzly \
+	mob_leopard \
 	mob_mineralharvester \
 	mob_oilharvester \
-	mob_quad \
+	mob_panther \
+	mob_piranha \
 	mob_ship \
-	mob_tank \
-	mob_batzen
+	mob_tiger \
+	mob_tornado
 FACILITIES = \
 	fix_barracks \
 	fix_comsat \
