@@ -915,7 +915,7 @@ void BosonWidget::slotCommandFramePosition(int pos)
  } else {
 	emit signalMoveCommandFrame(DockLeft);
  }
- d->mCommandPos = pos;
+ d->mCommandPos = (CmdFramePosition)pos;
 }
 
 void BosonWidget::slotChatFramePosition(int chatPos)
@@ -948,7 +948,7 @@ void BosonWidget::recreateLayout(int chatPos)
 
  d->mTopLayout->addLayout(d->mViewLayout);
 
- d->mChatPos = chatPos;
+ d->mChatPos = (ChatFramePosition)chatPos;
  d->mTopLayout->activate();
 }
 
