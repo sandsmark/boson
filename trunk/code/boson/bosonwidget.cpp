@@ -383,9 +383,6 @@ void BosonWidget::slotChangeGroupMove(int mode)
 
 void BosonWidget::initGameMode()
 {
- // This DOES NOT work correctly
- game()->slotSetGameSpeed(BosonConfig::readGameSpeed());
-
  initLayout();
  slotStartScenario();
 }
@@ -494,7 +491,10 @@ void BosonWidget::slotStartScenario()
  game()->startGame(); // correct here? should be so.
 
  // as soon as this message is received the game is actually started
- game()->sendMessage(0, BosonMessage::IdGameIsStarted);
+ if (game()->isAdmin()) {
+	game()->sendMessage(0, BosonMessage::IdGameIsStarted);
+	game()->slotSetGameSpeed(BosonConfig::readGameSpeed());
+ }
 }
 
 void BosonWidget::slotGamePreferences()

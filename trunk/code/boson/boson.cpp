@@ -752,14 +752,6 @@ void Boson::startGame()
  setGameStatus(KGame::Run);
  if (isServer()) {
 	connect(d->mGameTimer, SIGNAL(timeout()), this, SLOT(slotSendAdvance()));
-	if (gameSpeed() != 0) {
-		if (!d->mGameTimer->isActive()) {
-			kdDebug() << "start timer - ms=" << gameSpeed() << endl;
-			d->mGameTimer->start(gameSpeed());
-		} else {
-			kdWarning() << "timer was already active!" << endl;
-		}
-	}
  } else {
 	kdWarning() << "is not server - cannot start the game!" << endl;
  }
@@ -864,9 +856,12 @@ void Boson::slotPropertyChanged(KGamePropertyBase* p)
  switch (p->id()) {
 	case IdGameSpeed:
 		kdDebug() << k_funcinfo << "speed has changed, new speed: " << gameSpeed() << endl;
-		if (d->mGameTimer->isActive()) {
-			d->mGameTimer->stop();
+		if (isServer()) {
+			if (d->mGameTimer->isActive()) {
+				d->mGameTimer->stop();
+			}
 			if (d->mGameSpeed != 0) {
+				kdDebug() << "start timer - ms=" << gameSpeed() << endl;
 				d->mGameTimer->start(gameSpeed());
 			}
 		}
