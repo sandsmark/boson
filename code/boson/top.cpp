@@ -26,6 +26,7 @@
 #include <kstatusbar.h>
 #include <kstdaction.h>
 #include <kstdgameaction.h>
+#include <kaction.h>
 #include <kdebug.h>
 
 #include "top.moc"
@@ -58,6 +59,7 @@ void Top::initKAction()
  KStdAction::keyBindings(this, SLOT(slotConfigureKeys()), actionCollection());
  KStdAction::preferences(bosonWidget(), SLOT(slotGamePreferences()), actionCollection()); // FIXME: for game only - not editor!
 
+ bosonWidget()->initKeys(false);
  createGUI();
 }
 
@@ -95,6 +97,9 @@ void Top::slotGameNew()
 
 void Top::slotConfigureKeys()
 {
- KKeyDialog::configureKeys(actionCollection(), "bosonui.rc");
+ KKeyDialog dlg(this);
+ dlg.insert(actionCollection());
+ dlg.insert(bosonWidget()->actionCollection());
+ dlg.configure(true);
 }
 
