@@ -19,6 +19,7 @@ CanGoOnLand=true
 CanGoOnWater=false
 
 [Weapon_0]
+Name=Rocket launcher
 Range=6
 Reload=45
 CanShootAtAirUnits=true

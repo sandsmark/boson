@@ -20,12 +20,14 @@ CanGoOnLand=true
 CanGoOnWater=false
 
 [Upgrade_1]
+Name=X-120 cannons for Quad
 RequireTechnologies=12
 Range=5
 Damage=15
 Health=60
 
 [Weapon_0]
+Name=Cannon
 Range=4
 Reload=5
 CanShootAtAirUnits=false

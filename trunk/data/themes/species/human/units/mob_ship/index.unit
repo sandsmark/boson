@@ -20,6 +20,7 @@ CanGoOnLand=false
 CanGoOnWater=true
 
 [Weapon_0]
+Name=Cannon
 Ranage=5
 Reload=15
 CanShootAtAirUnits=false
