@@ -1633,6 +1633,22 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
  }
 }
 
+void Boson::initFogOfWar(BosonStarting* starting)
+{
+ if (!starting) { // ensure that this is actually called from BosonStarting
+	return;
+ }
+ QTimer::singleShot(0, this, SIGNAL(signalInitFogOfWar()));
+}
+
+void Boson::startScenario(BosonStarting* starting)
+{
+ if (!starting) { // ensure that this is actually called from BosonStarting
+	return;
+ }
+ QTimer::singleShot(0, this, SIGNAL(signalStartScenario()));
+}
+
 bool Boson::isServer() const
 {
  return isAdmin(); // or isMaster() ??
