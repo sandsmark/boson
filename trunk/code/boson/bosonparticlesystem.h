@@ -146,10 +146,13 @@ class BosonParticleSystem
      * Sets current position of this system. Position of particles are relative
      * to position of system they belong to, so you can easily move all
      * particles with this method
+     *
+     * WARNING this class uses <em>OpenGL</em> Coordinates!
      * @param p New position of this system
      **/
     void setPosition(BoVector3 p) { mPos = p; };
     /**
+     * WARNING this class uses <em>OpenGL</em> Coordinates!
      * @return Current position of this system
      **/
     inline const BoVector3 position() { return mPos; };
