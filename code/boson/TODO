@@ -7,6 +7,18 @@ Game TODOs
 - selectpart: static memory should be deleted
 - BosonPath doesn't honor fog of war
 - MiniMap does not know about units when removing fog of war
+- remove wreckages after a certain timeout
+- left dbl-click should select ALL units of that type
+- auto-attacking when unit is in range
+- auto positioning of produced units
+- end of game - winner ; statistics
+- display progress of unit production
+- don't allow to build units when player has not enough minerals/oil
+- fullscreen mode
+- scroll if cursor at the edge of the window
+- sam batteries must not attack land units ; land units must not attack
+  aircrafts
+
 
 Editor (map, unit, scenario) TODOs
 - don't place units on invalid tiles (e.g. ship on grass)
@@ -29,8 +41,11 @@ General TODOs
 - use typeId = 0 as invalid (NOT -1!)
 - the selection rect is not drawn correctly if it is started when the mouse is
   already moving
+- bigger minimap
 
 
 Data TODOs
 - replace .bmp files by .png ones
 - fix the pixmap naming: file.00nn.bmp -> file-00nn.png
+- music (background)
+- general sound (e.g. speech)
