@@ -39,7 +39,7 @@ const groundProperties_t groundProp[] = {
 const groundTransProperties_t groundTransProp[] = {
 	{"grass->water", GROUND_GRASS, GROUND_WATER},		// TRANS_GW,
 	{"grass->desert", GROUND_GRASS, GROUND_DESERT},		// TRANS_GD,
-	{"water->desert", GROUND_WATER, GROUND_DESERT},		// TRANS_WD,
+	{"desert->water", GROUND_DESERT, GROUND_WATER},		// TRANS_DW,
 	{"dwater->water", GROUND_DEEP_WATER, GROUND_WATER},	// TRANS_DWD,
 	};
 
