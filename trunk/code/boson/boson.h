@@ -99,8 +99,6 @@ public:
 	void setPlayField(BosonPlayField*);
 	BosonPlayField* playField() const;
 
-	void setLocalPlayer(Player*);
-
 	/**
 	 * Set the object that will get used to start the game. Some starting
 	 * relevant network messages could get forwarded directly to this object

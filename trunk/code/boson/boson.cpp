@@ -741,7 +741,6 @@ public:
 		mGameTimer = 0;
 		mCanvas = 0;
 		mPlayField = 0;
-		mLocalPlayer = 0;
 
 		mLoadingStatus = BosonSaveLoad::NotLoaded;
 
@@ -754,7 +753,6 @@ public:
 
 	BosonCanvas* mCanvas;
 	BosonPlayField* mPlayField;
-	Player* mLocalPlayer;
 	QPtrList<KGameComputerIO> mComputerIOList;
 
 	KGamePropertyInt mGameSpeed;
@@ -860,11 +858,6 @@ void Boson::setPlayField(BosonPlayField* p)
 BosonPlayField* Boson::playField() const
 {
  return d->mPlayField;
-}
-
-void Boson::setLocalPlayer(Player* p)
-{
- d->mLocalPlayer = p;
 }
 
 void Boson::setStartingObject(BosonStarting* s)
@@ -2155,7 +2148,7 @@ bool Boson::saveToFile(const QString& file)
  boDebug() << k_funcinfo << file << endl;
  QMap<QString, QByteArray> files;
  BosonSaveLoad* save = new BosonSaveLoad(this);
- bool ret = save->saveToFiles(files, d->mLocalPlayer);
+ bool ret = save->saveToFiles(files);
  delete save;
  if (!ret) {
 	boError() << k_funcinfo << "saving failed" << endl;
@@ -2170,7 +2163,7 @@ bool Boson::savePlayFieldToFile(const QString& file)
  boDebug() << k_funcinfo << file << endl;
  QMap<QString, QByteArray> files;
  BosonSaveLoad* save = new BosonSaveLoad(this);
- bool ret = save->savePlayFieldToFiles(files, d->mLocalPlayer);
+ bool ret = save->savePlayFieldToFiles(files);
  if (!ret) {
 	boError() << k_funcinfo << "saving failed" << endl;
 	return ret;

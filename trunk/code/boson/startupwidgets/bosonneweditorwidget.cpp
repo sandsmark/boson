@@ -469,7 +469,7 @@ QByteArray BosonNewEditorWidget::createNewMap()
  save->setPlayField(&playField);
  boDebug() << k_funcinfo << "saving to playfield completed" << endl;
  QMap<QString, QByteArray> files;
- if (!save->saveToFiles(files, 0)) {
+ if (!save->saveToFiles(files)) {
 	delete save;
 	boError() << k_funcinfo << "error occured while saving" << endl;
 	KMessageBox::sorry(this, i18n("An error occured while saving the a game to a stream"));
@@ -498,7 +498,6 @@ QByteArray BosonNewEditorWidget::createNewMap()
 		p.setAttribute("IsNeutral", 1);
 	}
  }
-// playersRoot.setAttribute("LocalPlayerId", );
  files.insert("players.xml", playersDoc.toCString());
  files.insert("canvas.xml", canvasDoc.toCString());
 

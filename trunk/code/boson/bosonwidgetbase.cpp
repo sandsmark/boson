@@ -920,7 +920,6 @@ void BosonWidgetBase::setLocalPlayer(Player* p)
 	boError() << k_funcinfo << "NULL game object" << endl;
 	return;
  }
- boGame->setLocalPlayer(localPlayer());
  if (cmdFrame()) {
 	cmdFrame()->setLocalPlayer(localPlayer());
  }
