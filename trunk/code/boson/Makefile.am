@@ -2,9 +2,9 @@
 
 # this has all of the subdirectories that make will recurse into.  if
 # there are none, comment this out
-SUBDIRS = data items commandframe sound startupwidgets bodebug
+SUBDIRS = data items commandframe sound startupwidgets bodebug info
 
-bin_PROGRAMS = boson bounit boprofiling bocursor borender
+bin_PROGRAMS = boson bounit boprofiling bocursor borender boinfo
 
 INCLUDES = -I$(kde_includes)/arts -I$(top_srcdir)/boson/bodebug $(all_includes)
 
@@ -89,6 +89,7 @@ boson_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 boson_LDADD = \
 		$(top_builddir)/boson/items/libbosonitems.la \
 		$(top_builddir)/boson/sound/libbosonsound.la \
+		$(top_builddir)/boson/info/libbosoninfo.la \
 		$(top_builddir)/boson/commandframe/libbosoncommandframe.la \
 		$(top_builddir)/boson/startupwidgets/libbosonstartupwidgets.la \
 		$(top_builddir)/boson/bodebug/libbodebug.la \
@@ -103,6 +104,7 @@ bounit_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 bounit_LDADD = \
 		$(top_builddir)/boson/items/libbosonitems.la \
 		$(top_builddir)/boson/sound/libbosonsound.la \
+		$(top_builddir)/boson/info/libbosoninfo.la \
 		$(top_builddir)/boson/commandframe/libbosoncommandframe.la \
 		$(top_builddir)/boson/startupwidgets/libbosonstartupwidgets.la \
 		$(top_builddir)/boson/bodebug/libbodebug.la \
@@ -136,6 +138,7 @@ borender_LDADD = \
 		$(top_builddir)/boson/bodebug/libbodebug.la \
 		$(top_builddir)/boson/items/libbosonitems.la \
 		$(top_builddir)/boson/sound/libbosonsound.la \
+		$(top_builddir)/boson/info/libbosoninfo.la \
 		$(top_builddir)/boson/commandframe/libbosoncommandframe.la \
 		$(top_builddir)/boson/startupwidgets/libbosonstartupwidgets.la \
 		-lkdegames -lqtmcop -lsoundserver_idl -lartskde \
@@ -145,6 +148,16 @@ borender_SOURCES = \
 		$(BOSON_SRC) \
 		kgamemodeldebug.cpp \
 		borendermain.cpp
+
+boinfo_LDFLAGS = $(KDE_RPATH) $(all_libraries)
+boinfo_LDADD = \
+		$(top_builddir)/boson/bodebug/libbodebug.la \
+		$(top_builddir)/boson/info/libbosoninfo.la \
+		$(GLLIB) \
+		-lkio $(LIB_KDEUI)
+boinfo_SOURCES = \
+		bosonglwidget.cpp \
+		boinfomain.cpp
 
 METASOURCES = AUTO
 
