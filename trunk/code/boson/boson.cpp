@@ -266,7 +266,7 @@ void Boson::setLocalPlayer(Player* p)
 
 void Boson::quitGame()
 {
-// boDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
 // reset everything
  d->mGameTimer->stop();
  setGameStatus(KGame::End);
@@ -274,7 +274,7 @@ void Boson::quitGame()
 
  // remove all players from game
  removeAllPlayers();
-// boDebug() << k_funcinfo << " done" <<  endl;
+ boDebug() << k_funcinfo << " done" <<  endl;
 }
 
 void Boson::removeAllPlayers()

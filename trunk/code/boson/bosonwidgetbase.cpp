@@ -739,9 +739,11 @@ void BosonWidgetBase::slotDebugRequestIdName(int msgid, bool , QString& name)
 void BosonWidgetBase::quitGame()
 {
 // this needs to be done first, before the players are removed
+ boDebug() << k_funcinfo << endl;
  displayManager()->quitGame();
  canvas()->deleteDestroyed();
  boGame->quitGame();
+ boDebug() << k_funcinfo << "done" << endl;
 }
 
 bool BosonWidgetBase::isCmdFrameVisible() const
@@ -918,6 +920,7 @@ void BosonWidgetBase::slotPlayerLeftGame(KPlayer* player)
  if (!player) {
 	return;
  }
+ boDebug() << k_funcinfo << endl;
  KActionMenu* menu = 0;
  QPtrDictIterator<KPlayer> it(d->mPlayers);
  for (; it.current() && !menu; ++it) {
