@@ -1,8 +1,8 @@
 BODY {
-	color: #00ff00;
-	background-color: #000000;
-	font-family: Verdana, sans-serif;
-	font-size: 12px;
+    color: #00ff00;
+    background-color: #000000;
+    font-family: Verdana, sans-serif;
+    font-size: 12px;
 }
 
 /** Stupid buggy Konqueror */
@@ -34,6 +34,11 @@ table.nav {
   color: #00ff00;
 }
 
+.image_border {
+    border-color: navy;
+    border-width: 2px;
+    border-style: groove;
+}
 /** Links **/
 a {
   color: #40d040;
@@ -52,22 +57,22 @@ a:hover {
 }
 
 DL {
-	margin: .8em 0;
-	line-height: 1.2;
+    margin: .8em 0;
+    line-height: 1.2;
 }
 
 
 H1 {
-	font-size: 21px;
-	font-weight : bold;
+    font-size: 21px;
+    font-weight : bold;
 }
 
 H2 {
-	font-size: 12px;
-	font-style: italic;
-	font-weight: normal;
+    font-size: 12px;
+    font-style: italic;
+    font-weight: normal;
 }
 
 H3 {
-	font-size: 18px;
+    font-size: 18px;
 }
