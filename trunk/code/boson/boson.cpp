@@ -1672,7 +1672,11 @@ void Boson::slotBoDebugOutput(const BoDebugMessage& m)
  if (area.isEmpty()) {
 	area = i18n("Debug");
  }
- slotAddChatSystemMessage(area, i18n("ERROR: %1").arg(m.message()));
+ QString message = m.message();
+ if (!message.isEmpty() && message[message.length() - 1] == '\n') {
+	message = message.left(message.length() - 1);
+ }
+ slotAddChatSystemMessage(area, i18n("DEBUG: %1").arg(message));
 }
 
 void Boson::slotBoDebugWarning(const BoDebugMessage& m)
@@ -1681,7 +1685,11 @@ void Boson::slotBoDebugWarning(const BoDebugMessage& m)
  if (area.isEmpty()) {
 	area = i18n("Debug");
  }
- slotAddChatSystemMessage(area, i18n("WARNING: %1").arg(m.message()));
+ QString message = m.message();
+ if (!message.isEmpty() && message[message.length() - 1] == '\n') {
+	message = message.left(message.length() - 1);
+ }
+ slotAddChatSystemMessage(area, i18n("WARNING: %1").arg(message));
 }
 
 void Boson::slotBoDebugError(const BoDebugMessage& m)
@@ -1690,7 +1698,11 @@ void Boson::slotBoDebugError(const BoDebugMessage& m)
  if (area.isEmpty()) {
 	area = i18n("Debug");
  }
- slotAddChatSystemMessage(area, i18n("ERROR: %1").arg(m.message()));
+ QString message = m.message();
+ if (!message.isEmpty() && message[message.length() - 1] == '\n') {
+	message = message.left(message.length() - 1);
+ }
+ slotAddChatSystemMessage(area, i18n("ERROR: %1").arg(message));
 }
 
 void Boson::slotClientLeftGame(int clientId, int oldgamestatus, KGame*)
