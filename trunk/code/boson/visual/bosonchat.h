@@ -52,6 +52,13 @@ public:
 	inline int maxItems() const { return mMaxItems; }
 
 	/**
+	 * Set the time (in s) after that a message will get removed. 0 for
+	 * never.
+	 **/
+	void setRemoveTime(unsigned int s);
+	unsigned int removeTime() const { return mRemoveTime; }
+
+	/**
 	 * @return The id of the messages produced by KGameCanvasChat. This id
 	 * is used by @ref KGame and you should not use it in any other message
 	 * to @ref KGame.
@@ -87,11 +94,18 @@ protected slots:
 	void slotUnsetKGame();
 	void slotReceiveMessage(int msgid, const QByteArray&, Q_UINT32 receiver, Q_UINT32 sender);
 
+	void slotTimeout();
+
+protected:
+	void removeFirstMessage();
+	void startTimer();
+
 private:
 	class BosonChatPrivate;
 	BosonChatPrivate* d;
 
 	int mMaxItems;
+	unsigned int mRemoveTime;
 	KGame* mGame;
 	KGameChat* mChat;
 };

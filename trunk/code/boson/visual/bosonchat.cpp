@@ -26,6 +26,7 @@
 #include <kgame/kgamechat.h>
 
 #include <qstringlist.h>
+#include <qtimer.h>
 
 class BosonChat::BosonChatPrivate
 {
@@ -35,6 +36,8 @@ public:
 	}
 
 	QStringList mMessages;
+	QPtrList<unsigned int> mTimes; // how long the messages in mMessages are here already
+	QTimer mRemoveTimer;
 };
 
 
@@ -43,8 +46,11 @@ BosonChat::BosonChat(QObject* parent) : QObject(parent)
  d = new BosonChatPrivate;
  mChat = 0;
  mGame = 0;
+ d->mTimes.setAutoDelete(true);
+ connect(&d->mRemoveTimer, SIGNAL(timeout()), this, SLOT(slotTimeout()));
 
  setMaxItems(5);
+ setRemoveTime(10); // 10s is default
 }
 
 BosonChat::~BosonChat()
@@ -144,18 +150,66 @@ void BosonChat::addMessage(KPlayer* p, const QString& text)
 void BosonChat::addMessage(const QString& text)
 {
  if (maxItems() >= 0 && d->mMessages.count() + 1 > (unsigned int)maxItems()) {
-	d->mMessages.remove(d->mMessages.begin());
+	removeFirstMessage();
  }
  d->mMessages.append(text);
+ unsigned int* time = new unsigned int;
+ *time = 0;
+ d->mTimes.append(time);
+ startTimer();
+}
+
+void BosonChat::removeFirstMessage()
+{
+ d->mMessages.remove(d->mMessages.begin());
+ d->mTimes.removeFirst();
+ if (d->mMessages.count() == 0) {
+	d->mRemoveTimer.stop();
+ }
 }
 
 void BosonChat::clear()
 {
  d->mMessages.clear();
+ d->mTimes.clear();
+ d->mRemoveTimer.stop();
 }
 
 const QStringList& BosonChat::messages() const
 {
  return d->mMessages;
+}
+
+void BosonChat::startTimer()
+{
+ if (!d->mRemoveTimer.isActive()) {
+	d->mRemoveTimer.start(1000);
+ }
+}
+
+void BosonChat::setRemoveTime(unsigned int s)
+{
+ mRemoveTime = s;
+ if (removeTime() == 0) {
+	d->mRemoveTimer.stop();
+ }
+}
+
+void BosonChat::slotTimeout()
+{
+ if (removeTime() == 0) {
+	d->mRemoveTimer.stop();
+	return;
+ }
+ if (removeTime() > 0) {
+	QPtrListIterator<unsigned int> it(d->mTimes);
+	for (; it.current(); ++it) {
+		(*it.current())++;
+	}
+
+	while (d->mTimes.count() > 0 && *d->mTimes.first() >= removeTime()) {
+		removeFirstMessage();
+	}
+ }
 }
 
