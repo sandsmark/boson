@@ -363,7 +363,8 @@ void BosonWidget::slotPlayerJoinedGame(KPlayer* player)
 	if (it.current() != player) {
 		Player* p2 = (Player*)it.current();
 		if (!p2->speciesTheme()) {
-			kdWarning() << k_lineinfo << "NULL speciesTheme" << endl;
+			kdWarning() << k_lineinfo << "NULL speciesTheme for " << p2->id() << endl;
+			++it;
 			continue;
 		}
 		if (playerColor == p2->speciesTheme()->teamColor()) {
