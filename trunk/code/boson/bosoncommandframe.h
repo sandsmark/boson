@@ -44,7 +44,7 @@ public:
 	~BosonCommandFrame();
 
 	/**
-	 * @param p The player whose units can be constructed here.
+	 * @param p The player whose units can be produced here.
 	 **/
 	void setLocalPlayer(Player* p);
 
@@ -56,17 +56,17 @@ public slots:
 	void slotShowSingleUnit(Unit* unit);
 
 	/**
-	 * Set the orderbuttons to display the possible constructions of this
+	 * Set the orderbuttons to display the possible production of this
 	 * unit. Hide all buttons if none are possible
 	 * @param unit The selected unit
 	 **/
-	void slotSetConstruction(Unit* unit);
+	void slotSetProduction(Unit* unit);
 
 	/**
 	 * Called by @ref Editor when selecting a menu entry. Uses @ref
 	 * OrderType to translate index
 	 **/
-	void slotEditorConstruction(int index, Player* owner);
+	void slotEditorProduction(int index, Player* owner);
 
 	/**
 	 * Load the tile file (currenlty earth.png). Only used by the editor as
@@ -77,6 +77,24 @@ public slots:
 	void slotShowUnit(Unit* unit); // TODO if this is the only unit -> use slotShowSingleUnit 
 
 	void slotSetButtonsPerRow(int b);
+
+	/**
+	 * Re-Enable the order buttons. See @ref slotFacilityProduces
+	 **/
+	void slotProductionCompleted(Facility* factory);
+
+	/**
+	 * Gray out the order buttons that can currently not be used, as another
+	 * units is being produced. (maybe even disable the buttons)
+	 **/
+	void slotFacilityProduces(Facility* factory);
+
+	/**
+	 * If the selected unit is a facility that has not been constructed
+	 * completely (see @ref Unit::completedConstruction) show how far the
+	 * construction is currently.
+	 **/
+	void slotShowConstructionProgress(Facility* fac);
 
 signals:
 	/**
@@ -103,16 +121,7 @@ protected slots:
 
 	void slotProductionAdvanced(Unit* factory, double percentage);
 
-	/**
-	 * Gray out the order buttons that can currently not be used, as another
-	 * units is being produced. (maybe even disable the buttons)
-	 **/
-	void slotFacilityProduces(Facility* factory);
-
-	/**
-	 * Re-Enable the order buttons. See @ref slotFacilityProduces
-	 **/
-	void slotProductionCompleted(Facility* factory);
+	void slotUpdate();
 
 protected:
 	/**
