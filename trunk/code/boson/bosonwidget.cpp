@@ -258,9 +258,6 @@ void BosonWidget::initChat()
  d->mChat = new KGameChat(d->mBoson, BosonMessage::IdChat, this);
  d->mChat->hide();
  d->mBigDisplay->setKGameChat(d->mChat);
-#ifdef BETA1
- d->mBigDisplay->setKGame(d->mBoson);
-#endif
 }
 
 

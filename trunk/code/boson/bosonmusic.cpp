@@ -26,12 +26,8 @@
 #include <kdebug.h>
 #include <arts/kplayobject.h>
 #include <arts/kplayobjectfactory.h>
-#ifndef BETA1
 #include <arts/kartsserver.h>
 #include <arts/kartsdispatcher.h>
-#else
-#include <arts/kmedia2.h>
-#endif
 
 #include <qtimer.h>
 #include <qstringlist.h>
@@ -55,12 +51,8 @@ public:
 		mTicker = 0;
 	}
 
-#ifndef BETA1
 	KArtsDispatcher mDispatcher;
-	KArtsServer mServer;// FIXME we also have one in bosoncanvas.cpp!!!
-#else
-	Arts::SoundServerV2 mServer; // FIXME remove when next beta arrived
-#endif
+	KArtsServer mServer;
 	KPlayObject* mPlayObject;
 
 	QTimer* mTicker;
@@ -72,10 +64,6 @@ public:
 	bool mSound;
 };
 
-//AB: interesting question: we have sounds and we have music. is it better to
-//use 2 KArtsServer and 2 KArtsDispatcher objects or is it better to use a
-//single one??
-
 BosonMusic::BosonMusic(QObject* parent) : QObject(parent)
 {
  d = new BosonMusicPrivate;
@@ -84,10 +72,6 @@ BosonMusic::BosonMusic(QObject* parent) : QObject(parent)
  d->mTicker = new QTimer(this);
  connect(d->mTicker, SIGNAL(timeout()), this, SLOT(slotUpdateTicker()));
  d->mLoop = false;
-#ifdef BETA1
- (void) new Arts::Dispatcher();
- d->mServer = Arts::Reference("global:Arts_SoundServerV2");
-#endif
 }
 
 BosonMusic::~BosonMusic()
@@ -126,16 +110,8 @@ bool BosonMusic::load(const QString& file)
  if (d->mPlayObject) {
 	delete d->mPlayObject;
  }
-#ifndef BETA1
  KPlayObjectFactory factory(d->mServer.server());
  d->mPlayObject = factory.createPlayObject(file, true);
-#else
- if (d->mServer.isNull() || d->mServer.error()) {
-	return false;
- }
- KPlayObjectFactory factory(d->mServer);
- d->mPlayObject = factory.createPlayObject(file, true);
-#endif
  if (d->mPlayObject->isNull()) {
 	delete d->mPlayObject;
 	d->mPlayObject = 0;
@@ -209,24 +185,12 @@ bool BosonMusic::isLoop() const
 
 void BosonMusic::playSound(const QString& file)
 {
-#ifdef BETA1
- if (d->mServer.isNull()) {
-	return;
- }
-#endif
  if (!sound()) {
 	return;
  }
  kdDebug() << k_funcinfo << file << endl;
 
-#ifdef BETA1
- if (d->mServer.isNull() || d->mServer.error()) {
-	return;
- }
- KPlayObjectFactory factory(d->mServer);
-#else
  KPlayObjectFactory factory(d->mServer.server());
-#endif
  KPlayObject* sound = factory.createPlayObject(file, true);
  sound->play();
 }
