@@ -724,6 +724,8 @@ void OpenGLOptions::load()
  mGroundRenderer->setCurrentItem(boConfig->uintValue("GroundRenderer"));
  setUseLOD(boConfig->useLOD());
  setDefaultLOD(boConfig->uintValue("DefaultLOD", 0));
+ mEnableATIDepthWorkaround->setChecked(boConfig->boolValue("EnableATIDepthWorkaround"));
+ mATIDepthWorkaroundValue->setText(QString::number(boConfig->doubleValue("ATIDepthWorkaroundValue")));
 }
 
 void OpenGLOptions::setUpdateInterval(int ms)
