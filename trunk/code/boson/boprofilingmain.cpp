@@ -38,7 +38,7 @@ static KCmdLineOptions options[] =
 
 int main(int argc, char **argv)
 {
- KAboutData about("bounit",
+ KAboutData about("boprofiling",
 		I18N_NOOP("Boson Profiling Reader"),
 		version,
 		description,
