@@ -211,7 +211,12 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			kdError() << "Cannot build without factory" << endl;
 			break;
 		}
-		unsigned int unitType = factory->completedProduction();
+		int unitType = factory->completedProduction();
+		if (unitType < 0) {
+			// hope this is working...
+			kdWarning() << k_lineinfo << "not yet completed" << endl;
+			break;
+		}
 		if (buildUnit(factory, unitType, x, y)) {
 			factory->removeProduction();
 		}
@@ -250,9 +255,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 			kdError() << "Cannot find player " << owner << endl;
 			break;
 		}
-		Unit* unit = createUnit(unitType, (Player*)p);
-		unit->setId(nextUnitId());
-		emit signalAddUnit(unit, x, y);
+		addUnit(unitType, (Player*)p, x, y);
 		break;
 	}
 	case BosonMessage::Advance:
@@ -499,10 +502,16 @@ bool Boson::buildUnit(Facility* factory, int unitType, int x, int y)
 		return false;
 	}
  }
- Unit* unit = createUnit(unitType, p);
+ addUnit(unitType, p, x, y);
+ return true;
+}
+
+Unit* Boson::addUnit(int unitType, Player* p, int x, int y)
+{
+ Unit* unit = createUnit(unitType, (Player*)p);
  unit->setId(nextUnitId());
  emit signalAddUnit(unit, x, y);
- return true;
+ return unit;
 }
 
 void Boson::slotPlayerJoinedGame(KPlayer* p)
