@@ -23,45 +23,99 @@
 #include <qcanvas.h>
 #include <qmap.h>
 
-class KSpriteToolTip::KSpriteToolTipPrivate
+class KTipManager
 {
 public:
-	KSpriteToolTipPrivate()
+	void add(int rtti, const QString& tip)
 	{
-	
+		if (mRttiList.contains(rtti)) {
+			return;
+		}
+		mRttiList.insert(rtti, tip);
+	}
+	void add(QCanvasItem* item, const QString& tip)
+	{
+		if (mItemList.contains(item)) {
+			return;
+		}
+		mItemList.insert(item, tip);
+	}
+	void remove(QCanvasItem* item)
+	{
+		mItemList.remove(item);
+	}
+	void remove(int rtti)
+	{
+		mRttiList.remove(rtti);
 	}
 
+	QString tip(QCanvasItem* item)
+	{
+		QString text;
+		// look first if there is a tip foir this special item. if not look for a tip
+		// for this rtti
+		QMap<QCanvasItem*, QString>::iterator it = mItemList.find(item);
+		if (it != mItemList.end()) {
+			text = it.data();
+		} else {
+			QMap<int, QString>::iterator rttiIt = mRttiList.find(item->rtti());
+			if (rttiIt != mRttiList.end()) {
+				text = rttiIt.data();
+			}
+		}
+		return text;
+	}
+
+private:
 	QMap<int, QString> mRttiList;
 	QMap<QCanvasItem*, QString> mItemList;
 };
 
+static KTipManager* tipManager = 0;
+static void initTipManager()
+{
+ if (tipManager) {
+	return;
+ }
+ tipManager = new KTipManager;
+}
 
 KSpriteToolTip::KSpriteToolTip(QCanvasView* v) : QToolTip(v)
 {
- d = new KSpriteToolTipPrivate;
+ initTipManager();
  mView = v;
 }
 
 KSpriteToolTip::~KSpriteToolTip()
 {
- delete d;
 }
 
 void KSpriteToolTip::add(int rtti, const QString& tip)
 {
- if (d->mRttiList.contains(rtti)) {
-	return;
- }
- d->mRttiList.insert(rtti, tip);
+ initTipManager();
+ tipManager->add(rtti, tip);
 }
 
 void KSpriteToolTip::add(QCanvasItem* item, const QString& tip)
 {
- if (d->mItemList.contains(item)) {
+ initTipManager();
+ tipManager->add(item, tip);
+}
+
+void KSpriteToolTip::remove(QCanvasItem* item)
+{
+ if (!tipManager) {
 	return;
  }
-//TODO remove on destruction of the item
- d->mItemList.insert(item, tip);
+ tipManager->remove(item);
+}
+
+void KSpriteToolTip::remove(int rtti)
+{
+ if (!tipManager) {
+	return;
+ }
+ tipManager->remove(rtti);
 }
 
 void KSpriteToolTip::maybeTip(const QPoint& p)
@@ -73,20 +127,8 @@ void KSpriteToolTip::maybeTip(const QPoint& p)
  if (sprites.isEmpty())  { // Check if there is a sprite
 	return;
  }
- QString text;
  QCanvasItem* item = sprites.front();
-
- // look first if there is a tip foir this special item. if not look for a tip
- // for this rtti
- QMap<QCanvasItem*, QString>::iterator itemIt = d->mItemList.find(item);
- if (itemIt != d->mItemList.end()) {
-	text = itemIt.data();
- } else {
-	QMap<int, QString>::iterator rttiIt = d->mRttiList.find(item->rtti());
-	if (rttiIt != d->mRttiList.end()) {
-		text = rttiIt.data();
-	}
- }
+ QString text = tipManager->tip(item);
 
  if (text != QString::null) {
 	tip (QRect (p, p), text); // display the tool tip

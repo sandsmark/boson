@@ -29,6 +29,7 @@
 #include "bosonmusic.h"
 #include "bosonconfig.h"
 #include "global.h"
+#include "kspritetooltip.h"
 #include "defines.h"
 
 #include <kgame/kgameio.h>
@@ -79,6 +80,8 @@ public:
 
 		mMinerals = 0;
 		mOil = 0;
+
+		mUnitTips = 0;
 	}
 
 	BosonBigDisplay::SelectionMode mSelectionMode;
@@ -98,6 +101,8 @@ public:
 	QLabel* mOil;
 
 	KGameCanvasChat* mChat;
+	
+	KSpriteToolTip* mUnitTips;
 
 	QCanvasRectangle* mSelectionRect;
 };
@@ -142,11 +147,14 @@ void BosonBigDisplay::init()
  d->mChat->setCanvas(canvas());
  d->mChat->setZ(Z_CANVASTEXT);
 
+ d->mUnitTips = new KSpriteToolTip(this);
+
  disconnect(this, SIGNAL(contentsMoving(int,int)), this, SLOT(cMoving(int,int)));
 }
 
 BosonBigDisplay::~BosonBigDisplay()
 {
+ delete d->mUnitTips;
  delete d->mSelectionRect;
  delete d->mChat;
  delete d;
