@@ -27,6 +27,10 @@
     <Action name="options_music" append="show_merge"/>
     <Action name="options_zoom" />
   </Menu>
+  <Menu name="debug"><text>&amp;Debug</text>
+    <Action name="debug_kgame" />
+    <Action name="debug_unfog" />
+  </Menu>
 </MenuBar>
 <ToolBar>
   <Action name="editor_build" />

@@ -31,9 +31,7 @@
 #include <kdebug.h>
 #include <ktoolbar.h>
 #include <kpopupmenu.h>
-#if HAVE_KSHORTCUT
 #include <kshortcut.h>
-#endif
 
 #include <qwmatrix.h>
 #include <qlabel.h>
@@ -199,11 +197,8 @@ TopBase::~TopBase()
 void TopBase::initKAction()
 {
 // Debug - no i18n!
-#if HAVE_KSHORTCUT
- (void)new KAction("Debug", KShortcut(), mBosonWidget, SLOT(slotDebug()), actionCollection(), "game_debug");
-#else
- (void)new KAction("Debug", QKeySequence(), mBosonWidget, SLOT(slotDebug()), actionCollection(), "game_debug");
-#endif
+ (void)new KAction("Debug", KShortcut(), mBosonWidget, SLOT(slotDebug()), actionCollection(), "debug_kgame");
+ (void)new KAction("Unfog", KShortcut(), mBosonWidget, SLOT(slotUnfogAll()), actionCollection(), "debug_unfog");
 
  d->mToolbarAction = KStdAction::showToolbar(this, SLOT(slotShowToolbar()), actionCollection());
  d->mStatusbarAction = KStdAction::showStatusbar(this, SLOT(slotShowStatusbar()), actionCollection());
@@ -211,11 +206,7 @@ void TopBase::initKAction()
  KStdAction::configureToolbars(this, SLOT(slotConfigureToolbars()), actionCollection());
 
  d->mChatAction = new KToggleAction(i18n("Show &Chat"), 
-#if HAVE_KSHORTCUT
 		KShortcut(Qt::CTRL+Qt::Key_H), this, SLOT(slotShowChat()),
-#else
-		QKeySequence(Qt::CTRL+Qt::Key_H), this, SLOT(slotShowChat()),
-#endif
 		actionCollection(), "options_show_chat");
  d->mChatAction->setChecked(false);
  slotShowChat();
@@ -228,11 +219,7 @@ void TopBase::initKAction()
 		SLOT(slotToggleMusic()), actionCollection(), "options_music");
  music->setChecked(mBosonWidget->music());
 
-#if HAVE_KSHORTCUT
  d->mZoomAction = new KSelectAction(i18n("&Zoom"), KShortcut(), actionCollection(), "options_zoom");
-#else
- d->mZoomAction = new KSelectAction(i18n("&Zoom"), QKeySequence(), actionCollection(), "options_zoom");
-#endif
  connect(d->mZoomAction, SIGNAL(activated(int)), 
 		this, SLOT(slotZoom(int)));
  QStringList items;

@@ -124,6 +124,13 @@ public slots:
 
 	void slotSetCommandButtonsPerRow(int b);
 
+	/**
+	 * Unfogs the map for the specified player
+	 * @param player The player that shall see the map or NULL for all
+	 * players
+	 **/
+	void slotUnfogAll(Player* player = 0);
+
 signals:
 	void signalPlayerJoinedGame(KPlayer* p); // used by the map editor
 	void signalPlayerLeftGame(KPlayer* p); // used by the map editor
