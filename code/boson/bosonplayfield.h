@@ -33,7 +33,6 @@ class KArchiveFile;
 class QDomDocument;
 class QDomElement;
 class QDataStream;
-template<class T> class QDict;
 
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
@@ -50,14 +49,12 @@ public:
 	 * memory, so once a map is started all other maps should be cleared
 	 * again.
 	 **/
-	static void preLoadAllPlayFields();
+	static bool preLoadAllPlayFields();
 
 	/**
 	 * Clear all preloaded playfields (see @ref preLoadAllPlayFields)
 	 **/
 	static void clearAllPreLoadedPlayFields();
-
-	static BosonPlayField* playField(const QString& identifier);
 
 	/**
 	 * Load all data from the playField. Needs to be done only once - when
@@ -99,18 +96,6 @@ public:
 	 * didn't select a playfield at all
 	 **/
 	static QString defaultPlayField();
-
-	/**
-	 * @return The identifiers of all playfields that are currently
-	 * available.
-	 **/
-	static QStringList availablePlayFields();
-
-	/**
-	 * @return The i18n'ed name of the specified playfield
-	 **/
-	static QString playFieldName(const QString& identifier);
-	static QString playFieldComment(const QString& identifier);
 
 	/**
 	 * This simply deletes the map. This may be useful for game starting, as
@@ -214,8 +199,6 @@ private:
 	bool mLoaded;
 	bool mPreLoaded;
 	BPFFile* mFile;
-
-	static QDict<BosonPlayField>* mPlayFields;
 };
 
 #endif

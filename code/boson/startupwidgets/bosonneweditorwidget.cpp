@@ -31,6 +31,7 @@
 #include "../bpfdescription.h"
 #include "../bosonscenario.h"
 #include "../bosonmap.h"
+#include "../bosondata.h"
 #include "../cell.h"
 #include "../bosonwidgets/bosonplayfieldview.h"
 #include "bosonstartupnetwork.h"
@@ -97,11 +98,15 @@ BosonNewEditorWidget::~BosonNewEditorWidget()
 
 void BosonNewEditorWidget::initPlayFields()
 {
- QStringList list = BosonPlayField::availablePlayFields();
+ QStringList list = boData->availablePlayFields();
  boDebug() << k_funcinfo << list.count() << endl;
  for (unsigned int i = 0; i < list.count(); i++) {
+	if (!boData->playField(list[i])) {
+		boWarning() << k_funcinfo << "NULL playField " << list[i] << endl;
+		continue;
+	}
 	QListViewItem* item = new QListViewItem(mChooseBosonMap);
-	item->setText(0, BosonPlayField::playFieldName(list[i]));
+	item->setText(0, boData->playField(list[i])->playFieldName());
 	mChooseBosonMap->insertItem(item);
 	d->mItem2Map.insert(item, list[i]);
  }
@@ -177,7 +182,7 @@ void BosonNewEditorWidget::slotNetStart()
 
 	delete map;
  } else {
-	field = BosonPlayField::playField(playFieldIdentifier);
+	field = boData->playField(playFieldIdentifier);
 	if (!field) {
 		boError() << k_funcinfo << "NULL playfield" << endl;
 		return;
@@ -240,7 +245,7 @@ void BosonNewEditorWidget::slotNetPlayFieldChanged(BosonPlayField* field)
  BO_CHECK_NULL_RET(field->description());
  boDebug() << k_funcinfo << "id: " << field->identifier() << endl;
  slotNewMapToggled(false);
- QStringList list = BosonPlayField::availablePlayFields();
+ QStringList list = boData->availablePlayFields();
  boDebug() << k_funcinfo << "loading map: " << field->identifier() << endl;
  // am afraid we need the entire data here :-(
  field->loadPlayField(QString::null); // QString::null is allowed, as we already opened the file using preLoadPlayField()

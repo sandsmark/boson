@@ -24,6 +24,7 @@
 #include "../bosonplayfield.h"
 #include "../player.h"
 #include "../bosonmessage.h"
+#include "../bosondata.h"
 #include "../defines.h"
 #include "bodebug.h"
 
@@ -175,7 +176,7 @@ void BosonStartupNetwork::sendChangePlayField(const QString& identifier)
 	boError() << k_funcinfo << "not ADMIN" << endl;
 	return;
  }
- if (!identifier.isNull() && !BosonPlayField::availablePlayFields().contains(identifier)) {
+ if (!identifier.isNull() && !boData->availablePlayFields().contains(identifier)) {
 	boError() << k_funcinfo << "Invalid playfield identifier " << identifier << endl;
 	return;
  }
@@ -203,13 +204,13 @@ void BosonStartupNetwork::sendStartGameClicked()
 
 void BosonStartupNetwork::sendChangePlayField(int index)
 {
- QStringList list = BosonPlayField::availablePlayFields();
+ QStringList list = boData->availablePlayFields();
  QString identifier;
  if (index < 0) {
 	// warning: valid in editor mode only!
 	identifier = QString::null;
  } else {
-	QStringList list = BosonPlayField::availablePlayFields();
+	QStringList list = boData->availablePlayFields();
 	if (index >= (int)list.count()) {
 		boError() << k_funcinfo << "invalid index " << index << endl;
 		return;
@@ -223,7 +224,7 @@ void BosonStartupNetwork::slotPlayFieldChanged(const QString& id)
 {
  BosonPlayField* field = 0;
  if (!id.isEmpty()) {
-	field = BosonPlayField::playField(id);
+	field = boData->playField(id);
  }
 
  emit signalPlayFieldChanged(id);
