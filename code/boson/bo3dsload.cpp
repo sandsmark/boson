@@ -21,11 +21,10 @@
 
 #include "defines.h"
 #include "bo3dtools.h"
-#include "bosonglwidget.h"
 #include "bomesh.h"
 #include "bomaterial.h"
-#include "bodebug.h"
 #include "bosonmodel.h"
+#include "bodebug.h"
 
 #include <ksimpleconfig.h>
 #include <kstaticdeleter.h>
