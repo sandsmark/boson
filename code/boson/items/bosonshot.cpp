@@ -624,7 +624,7 @@ void BosonShotMissile::advanceMoveInternal()
 
   setVelocity(velo.x(), velo.y(), velo.z());
   setRotation(Bo3dTools::rotationToPoint(velo.x(), velo.y()));
-  setXRotation(Bo3dTools::rotationToPoint(velo.y(), velo.z()) + 90);
+  setXRotation(Bo3dTools::rotationToPoint(sqrt(1 - velo.z() * velo.z()), velo.z()) - 90);
 }
 
 bool BosonShotMissile::saveAsXML(QDomElement& root)
