@@ -43,7 +43,7 @@
 
 #include "bosoncanvas.moc"
 
-#define BOSON_CANVASTEXT_TEST 0
+#define BOSON_CANVASTEXT_TEST 1
 
 #if BOSON_CANVASTEXT_TEST
 #include <qpainter.h>
@@ -1010,37 +1010,14 @@ void BosonCanvas::removeView(QCanvasView* v)
 
 void BosonCanvas::update()
 {
-#if BOSON_CANVASTEXT_TEST
+ QCanvas::update();
+#ifndef DISABLE_BOSON_CANVASTEXT
  QCanvasView* v = d->mViewList.first(); // where we paint minerals, oil and chattext to
-
  int x = v->visibleWidth() - 100;
  int y = 50;
- int cx = 0;
- int cy = 0;
- bool changed = false; // if the view was scrolled
- v->viewportToContents(x, y, cx, cy);
- if (cx != d->mMinerals->x() || cy != d->mMinerals->y()) {
-	changed = true;
-
-	// we can still optimize this: (esp. in move() setVisible() and
-	// setSize())
-	d->mMinerals->setVisible(true);
-	d->mMinerals->setVisible(false);
-	d->mOil->setVisible(true);
-	d->mOil->setVisible(false);
-
-	d->mMinerals->move(cx, cy);
-	d->mMinerals->setSize(400,100);
- }
- 
-#endif
- QCanvas::update();
-#if BOSON_CANVASTEXT_TEST
- if (changed) {
-	QPainter p(v->viewport());
-	p.drawText(x, y, "Test");
-	p.end();
- }
+ QPainter p(v->viewport());
+ p.drawText(x, y, "Test");
+ p.end();
 #endif
 }
 

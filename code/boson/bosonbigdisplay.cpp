@@ -75,8 +75,8 @@ public:
 
 		mCursor = 0;
 
-		mMinerals = 0;
-		mOil = 0;
+//		mMinerals = 0;
+//		mOil = 0;
 
 		mUnitTips = 0;
 	}
@@ -94,8 +94,8 @@ public:
 	
 	BosonCursor* mCursor;
 
-	QLabel* mMinerals;
-	QLabel* mOil;
+//	QLabel* mMinerals;
+//	QLabel* mOil;
 
 	KGameCanvasChat* mChat;
 	
@@ -133,12 +133,14 @@ void BosonBigDisplay::init()
  connect(this, SIGNAL(contentsMoving(int, int)), 
 		this, SLOT(slotContentsMoving(int, int)));
 
+ /*
  d->mMinerals = new QLabel(this, "MineralsLabel", 
 		WX11BypassWM | WRepaintNoErase | WStaticContents |
 		WRepaintNoErase); // does this have effect at all?
  d->mMinerals->hide();
  d->mOil= new QLabel(this, "MineralsLabel", WX11BypassWM);
  d->mOil->hide();
+ */
  
  d->mChat = new KGameCanvasChat(this);
  d->mChat->setCanvas(canvas());
@@ -553,9 +555,11 @@ void BosonBigDisplay::resizeEvent(QResizeEvent* e)
  // use the same line as im resizeContents()!
  emit signalSizeChanged(width(), height());
 
+/*
  int x = visibleWidth() - 5 - QMAX(d->mMinerals->width(), d->mOil->width());
  d->mMinerals->move(x, 5);
  d->mOil->move(x, d->mMinerals->y() + d->mMinerals->height() + 2);
+ */
 
  slotContentsMoving(contentsX(), contentsY());
 }
@@ -710,17 +714,18 @@ void BosonBigDisplay::resizeContents(int w, int h)
 void BosonBigDisplay::slotUpdateMinerals(int minerals)
 {
  QString text = i18n("Minerals: %1").arg(minerals);
- updateLabel(d->mMinerals, text);
+// updateLabel(d->mMinerals, text);
 }
 
 void BosonBigDisplay::slotUpdateOil(int oil)
 {
  QString text = i18n("Oil: %1").arg(oil);
- updateLabel(d->mOil, text);
+// updateLabel(d->mOil, text);
 }
 
 void BosonBigDisplay::updateLabel(QLabel* label, const QString& text)
 {
+/*
  QFont f;
  f.setBold(true);
 
@@ -746,6 +751,7 @@ void BosonBigDisplay::updateLabel(QLabel* label, const QString& text)
  label->setMask(mask);
  label->setPixmap(pix);
  label->show();
+ */
 }
 
 void BosonBigDisplay::slotContentsMoving(int newx, int newy)
@@ -757,7 +763,7 @@ void BosonBigDisplay::slotContentsMoving(int newx, int newy)
 // canvas()->setChanged(QRect(contentsX() + x , contentsY() + 5, 40, 40));
 // canvas()->setAllChanged();
 //TODO: use a QLabel here (just like d->mMinerals and d->mOil)
- d->mChat->move(newx + 10, newy + visibleHeight() - 10); // FIXME: hardcoded!
+// d->mChat->move(newx + 10, newy + visibleHeight() - 10); // FIXME: hardcoded!
 }
 
 void BosonBigDisplay::setKGameChat(KGameChat* c)
@@ -813,4 +819,23 @@ void BosonBigDisplay::slotMoveSelection(int cellX, int cellY)
 void BosonBigDisplay::setActive()
 {
  emit signalMakeActive(this);
+}
+
+void BosonBigDisplay::setContentsPos(int x, int y)
+{
+ if (x < 0) {
+	x = 0;
+ }
+ if (y < 0) {
+	y = 0;
+ }
+#ifndef DISABLE_BOSON_CANVASTEXT
+ viewport()->setUpdatesEnabled(false);
+#endif
+ QScrollView::setContentsPos(x, y);
+#ifndef DISABLE_BOSON_CANVASTEXT
+ viewport()->setUpdatesEnabled(true);
+ viewport()->update();
+#endif
+
 }

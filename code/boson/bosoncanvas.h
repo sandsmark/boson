@@ -21,9 +21,9 @@
 
 #include <qcanvas.h>
 
+class KPlayer;
 class BosonMap;
 class Cell;
-class KPlayer;
 class Player;
 class Unit;
 class UnitProperties;
