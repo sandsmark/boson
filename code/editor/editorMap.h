@@ -28,7 +28,6 @@
 #include "../common/unit.h"	// Facility
 
 #include "visualUnit.h"		// visualMobUnit
-//#include "playerCell.h"
 #include "physMap.h"
 
 class QRect;
@@ -36,6 +35,12 @@ class QPainter;
 class Cell;
 class Unit;
 
+
+struct visualMap {
+	Cell		**cells;
+	int		width;
+	int		height;
+	};
 
 
 /** 
@@ -61,6 +66,8 @@ class editorMap : public physMap
 
   QIntDict<visualMobUnit>	mobile;
   QIntDict<visualFacility>	facility;
+
+  visualMap			map;
 
 };
 

@@ -29,9 +29,10 @@
 //#include "orderWin.h"
 #include "editorMap.h"
 
-
-#define mobileList (((editorMap*)(view->phys))->mobile)
-#define facilityList (((editorMap*)(view->phys))->facility)
+// orzel : quite ugly ....
+#define mobileList	(((editorMap*)(view->phys))->mobile)
+#define facilityList	(((editorMap*)(view->phys))->facility)
+#define eMap		(((editorMap*)(view->phys))->map)
 
 static int selectX, selectY;
 static int oldX, oldY;
@@ -123,6 +124,13 @@ if (e->button() & LeftButton) {
 } /* left button */
 
 if (e->button() & MidButton) {
+	x = e->x() / BO_TILE_SIZE; y = e->y() / BO_TILE_SIZE;
+	x += view->X(); y += view->Y();
+	boAssert(x>0);
+	boAssert(x<eMap.width);
+	boAssert(y>0);
+	boAssert(y<eMap.height);
+	selectedCell = &(eMap.cells[x][y]);
 	popup->exec(QCursor::pos());
 	return;
 }
