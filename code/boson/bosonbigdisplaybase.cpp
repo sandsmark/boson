@@ -652,8 +652,8 @@ void BosonBigDisplayBase::paintGL()
 		GLfloat y;
 		x = (GLfloat)pos.x() - c->hotspotX();
 		y = (GLfloat)d->mH - (GLfloat)pos.y() - c->hotspotY();
-		const GLfloat w = 50;
-		const GLfloat h = 50;
+		const GLfloat w = BO_TILE_SIZE;
+		const GLfloat h = BO_TILE_SIZE;
 		glBindTexture(GL_TEXTURE_2D, tex);
 		glBegin(GL_QUADS);
 			glTexCoord2f(0.0, 0.0); glVertex3f(x, y, 0.0);
