@@ -19,6 +19,7 @@ if [ "x$KDEDIR" = "x" ]; then
 	echo "Oops - \$KDEDIR is not set but this script needs it!"
 	echo "Please enter the top level location of your kde installation now"
 	echo "(e.g. /opt/kde3)"
+	read KDEDIR
 fi
 
 
