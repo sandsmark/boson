@@ -35,6 +35,7 @@
 #include <qtooltip.h>
 #include <qmap.h>
 #include <qvbox.h>
+#include <qhbox.h>
 
 #include <knuminput.h>
 #include <klocale.h>
@@ -311,6 +312,8 @@ public:
 		mUpX = 0;
 		mUpY = 0;
 		mUpZ = 0;
+
+		mOrientation = 0;
 	}
 	BoFloatNumInput* mLookAtX;
 	BoFloatNumInput* mLookAtY;
@@ -321,6 +324,8 @@ public:
 	BoFloatNumInput* mUpX;
 	BoFloatNumInput* mUpY;
 	BoFloatNumInput* mUpZ;
+
+	QLabel* mOrientation;
 };
 
 BoGLUCameraWidget::BoGLUCameraWidget(QWidget* parent, const char* name)
@@ -339,6 +344,10 @@ BoGLUCameraWidget::BoGLUCameraWidget(QWidget* parent, const char* name)
  d->mUpY = new BoFloatNumInput(this);
  d->mUpZ = new BoFloatNumInput(this);
 
+ QHBox* orientationHBox = new QHBox(this);
+ (void)new QLabel(i18n("Orientation: "), orientationHBox);
+ d->mOrientation = new QLabel(orientationHBox);
+
  layout->addWidget(d->mLookAtX);
  layout->addWidget(d->mLookAtY);
  layout->addWidget(d->mLookAtZ);
@@ -348,6 +357,7 @@ BoGLUCameraWidget::BoGLUCameraWidget(QWidget* parent, const char* name)
  layout->addWidget(d->mUpX);
  layout->addWidget(d->mUpY);
  layout->addWidget(d->mUpZ);
+ layout->addWidget(orientationHBox);
 
  d->mLookAtX->setLabel(i18n("Look at X:"), AlignLeft | AlignVCenter);
  d->mLookAtY->setLabel(i18n("Look at Y:"), AlignLeft | AlignVCenter);
@@ -387,6 +397,14 @@ BoGLUCameraWidget::BoGLUCameraWidget(QWidget* parent, const char* name)
 		this, SLOT(slotUpChanged()));
  connect(d->mUpZ, SIGNAL(signalValueChanged(float)),
 		this, SLOT(slotUpChanged()));
+}
+
+void BoGLUCameraWidget::updateMatrixWidget()
+{
+ BoVector3 cameraPos = BoVector3(d->mCameraPosX->value(), d->mCameraPosY->value(), d->mCameraPosZ->value());
+ BoVector3 lookAt = BoVector3(d->mLookAtX->value(), d->mLookAtY->value(), d->mLookAtZ->value());
+ BoVector3 orientation = cameraPos - lookAt;
+ d->mOrientation->setText(i18n("%1").arg(orientation.debugString()));
 }
 
 BoGLUCameraWidget::~BoGLUCameraWidget()
@@ -435,6 +453,8 @@ void BoGLUCameraWidget::updateFromCamera()
  d->mUpX->setValue(camera()->up().x(), false);
  d->mUpY->setValue(camera()->up().y(), false);
  d->mUpZ->setValue(camera()->up().z(), false);
+
+ updateMatrixWidget();
 }
 
 
@@ -930,6 +950,7 @@ void BoOrbiterCameraWidget::updateFromCamera()
 // BoMatrix rotationMatrix = camera()->rotationMatrix();
 // BoVector3 cameraPos = camera()->cameraPos();
 
+ updateMatrixWidget();
 }
 
 void BoOrbiterCameraWidget::updateMatrixWidget()
