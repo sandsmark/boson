@@ -96,7 +96,7 @@ public:
 protected:
 	void storeLogAndSend(const QByteArray& log);
 	void sendAck(const QCString& expectedString, bool verify, unsigned int syncId, const QByteArray& origLog);
-	QByteArray createLongSyncLog(BosonCanvas* canvas) const;
+	QByteArray createLongSyncLog(BosonCanvas* canvas, unsigned int advanceMessageCounter, unsigned int interval) const;
 
 	void addChatSystemMessage(const QString& msg);
 
