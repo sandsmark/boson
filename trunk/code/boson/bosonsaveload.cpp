@@ -778,7 +778,7 @@ bool BosonSaveLoad::convertPlayerIdsToIndices(QMap<QString, QByteArray>& files) 
 	if (pos < 0) {
 		continue;
 	}
-	QString number = hasPlayerId.cap(0);
+	QString number = hasPlayerId.cap(1);
 	bool ok;
 	unsigned int id = number.toUInt(&ok);
 	if (!ok) {
