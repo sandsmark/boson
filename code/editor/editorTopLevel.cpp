@@ -52,6 +52,27 @@ FILE *logfile = (FILE *) 0L;
 visualCanvas		*vcanvas;
 speciesTheme		*species[BOSON_MAX_PLAYERS] = {0l, 0l};
 int			nb_player;
+/*
+ * editor/main.cpp
+ */
+QPixmap			*bigBackground; 
+
+#define BITBLT(_x,_y) bitBlt(p, (_x), (_y) , bigBackground, GET_BIG_X(g), GET_BIG_Y(g), BO_TILE_SIZE, BO_TILE_SIZE)
+static void fillGroundPixmap( QPixmap *p, int g)
+{
+	p->fill(); // clear widget
+
+	g<<=2;
+
+	BITBLT( 0 , 0);
+
+	if (IS_BIG_TRANS(g>>2)) {
+		g+=4; BITBLT( BO_TILE_SIZE, 0);
+		g+=4; BITBLT( 0 , BO_TILE_SIZE);
+		g+=4; BITBLT( BO_TILE_SIZE, BO_TILE_SIZE);
+	}
+}
+#undef BITBLT
 
 
 editorTopLevel::editorTopLevel( const char *name, WFlags f)
@@ -65,6 +86,7 @@ editorTopLevel::editorTopLevel( const char *name, WFlags f)
 
 void editorTopLevel::setSelected(QPixmap *p)
 {
+	boAssert(p);
 	view_one->setPixmap( p?*p:*view_none);
 	emit setSelectedObject (OT_NONE, 0);
 }
@@ -86,69 +108,56 @@ void editorTopLevel::setTransRef(int r)
 
 void editorTopLevel::redrawTiles(void)
 {
-	QCanvasPixmapArray *seq;
 	int 	i;
+	QPixmap p (BO_TILE_SIZE, BO_TILE_SIZE);
+	QPixmap p2 (2*BO_TILE_SIZE, 2*BO_TILE_SIZE);
 
 	
 	switch(which) {
 		case W_BIG_GROUND_1:
-			/* XXXX temp....
-			seq = ground->getPixmap( GET_TRANS_NUMBER(trans, (inverted?16:12) + 0) );
-			bigTiles[0]->setPixmap(*seq->image(0));
-			seq = ground->getPixmap( GET_TRANS_NUMBER(trans, (inverted?16:12) + 1) );
-			bigTiles[1]->setPixmap(*seq->image(0));
-			seq = ground->getPixmap( GET_TRANS_NUMBER(trans, (inverted?16:12) + 2) );
-			bigTiles[2]->setPixmap(*seq->image(0));
-			seq = ground->getPixmap( GET_TRANS_NUMBER(trans, (inverted?16:12) + 3) );
-			bigTiles[3]->setPixmap(*seq->image(0));
-			*/
+			for(i=0; i<4; i++) {
+				fillGroundPixmap( &p2, GET_BIG_TRANS_NUMBER(trans, (inverted?4:0) + i));
+				bigTiles[i]->setPixmap(p2);
+			}
 			break;
 
 		case W_BIG_GROUND_2:
-			/* XXXX temp....
-			seq = ground->getPixmap( GET_TRANS_NUMBER(trans, (inverted?24:20) + 0) );
-			bigTiles[0]->setPixmap(*seq->image(0));
-			seq = ground->getPixmap( GET_TRANS_NUMBER(trans, (inverted?24:20) + 1) );
-			bigTiles[1]->setPixmap(*seq->image(0));
-			seq = ground->getPixmap( GET_TRANS_NUMBER(trans, (inverted?24:20) + 2) );
-			bigTiles[2]->setPixmap(*seq->image(0));
-			seq = ground->getPixmap( GET_TRANS_NUMBER(trans, (inverted?24:20) + 3) );
-			bigTiles[3]->setPixmap(*seq->image(0));
-			*/
+			for(i=0; i<4; i++) {
+				fillGroundPixmap( &p2, GET_BIG_TRANS_NUMBER(trans, (inverted?12:8) + i));
+				bigTiles[i]->setPixmap(p2);
+			}
 			break;
 
 		case W_SMALL_GROUND:
-			/* XXXX temp....
-			seq = ground->getPixmap( GET_TRANS_NUMBER(trans, inverted?TRANS_ULI:TRANS_UL) );
-			tiles[0]->setPixmap(*seq->image(0));
-			seq = ground->getPixmap( GET_TRANS_NUMBER(trans, inverted?TRANS_DOWN:TRANS_UP) );
-			tiles[1]->setPixmap(*seq->image(0));
-			seq = ground->getPixmap( GET_TRANS_NUMBER(trans, inverted?TRANS_URI:TRANS_UR) );
-			tiles[2]->setPixmap(*seq->image(0));
+			fillGroundPixmap ( &p, GET_TRANS_NUMBER(trans, inverted?TRANS_ULI:TRANS_UL) );
+			tiles[0]->setPixmap(p);
+			fillGroundPixmap ( &p, GET_TRANS_NUMBER(trans, inverted?TRANS_DOWN:TRANS_UP) );
+			tiles[1]->setPixmap(p);
+			fillGroundPixmap ( &p, GET_TRANS_NUMBER(trans, inverted?TRANS_URI:TRANS_UR) );
+			tiles[2]->setPixmap(p);
 
-			seq = ground->getPixmap( GET_TRANS_NUMBER(trans, inverted?TRANS_RIGHT:TRANS_LEFT) );
-			tiles[3]->setPixmap(*seq->image(0));
-			seq = ground->getPixmap( GET_TRANS_NUMBER(trans, inverted?TRANS_LEFT:TRANS_RIGHT) );
-			tiles[5]->setPixmap(*seq->image(0));
+			fillGroundPixmap ( &p, GET_TRANS_NUMBER(trans, inverted?TRANS_RIGHT:TRANS_LEFT) );
+			tiles[3]->setPixmap(p);
+			fillGroundPixmap ( &p, GET_TRANS_NUMBER(trans, inverted?TRANS_LEFT:TRANS_RIGHT) );
+			tiles[5]->setPixmap(p);
 
-			seq = ground->getPixmap( GET_TRANS_NUMBER(trans, inverted?TRANS_DLI:TRANS_DL) );
-			tiles[6]->setPixmap(*seq->image(0));
-			seq = ground->getPixmap( GET_TRANS_NUMBER(trans, inverted?TRANS_UP:TRANS_DOWN) );
-			tiles[7]->setPixmap(*seq->image(0));
-			seq = ground->getPixmap( GET_TRANS_NUMBER(trans, inverted?TRANS_DRI:TRANS_DR) );
-			tiles[8]->setPixmap(*seq->image(0));
+			fillGroundPixmap ( &p, GET_TRANS_NUMBER(trans, inverted?TRANS_DLI:TRANS_DL) );
+			tiles[6]->setPixmap(p);
+			fillGroundPixmap ( &p, GET_TRANS_NUMBER(trans, inverted?TRANS_UP:TRANS_DOWN) );
+			tiles[7]->setPixmap(p);
+			fillGroundPixmap ( &p, GET_TRANS_NUMBER(trans, inverted?TRANS_DRI:TRANS_DR) );
+			tiles[8]->setPixmap(p);
 			
 			// middle one
-			seq = ground->getPixmap( inverted?groundTransProp[trans].to:groundTransProp[trans].from);
-			tiles[4]->setPixmap(*seq->image(0));
-			*/
+			fillGroundPixmap ( &p, inverted?groundTransProp[trans].to:groundTransProp[trans].from);
+			tiles[4]->setPixmap(p);
 			break;
 			
 		case W_SMALL_PLAIN:
-			/* XXXX temp
-			for (i=0; i<GROUND_LAST; i++)
-				tiles[i]->setPixmap( *ground->getPixmap( (groundType) i)->image(0) );
-			*/
+			for (i=1; i<GROUND_LAST; i++) {
+				fillGroundPixmap( &p, i );
+				tiles[i-1]->setPixmap(p);
+			}
 			break;
 
 		case W_FACILITIES:
@@ -172,7 +181,7 @@ void editorTopLevel::setInverted(bool b)
 }
 
 
-void editorTopLevel::setOrders(int whatb , int who)
+void editorTopLevel::setOrders(int whatb , int )
 {
 	int i, j;
 	which_t what;
@@ -229,7 +238,7 @@ void editorTopLevel::setOrders(int whatb , int who)
 			invertBox->show();
 			break;
 		case W_SMALL_PLAIN:
-			i = GROUND_LAST;
+			i = GROUND_LAST-1; // -1 caused by GROUND_UNKNOWN
 			qcb_who->hide();
 			qcb_transRef->hide();
 			invertBox->hide();
@@ -283,39 +292,36 @@ void editorTopLevel::handleButton(int but)
 
 		case W_BIG_GROUND_1:
 			boAssert(but<4);
-			g = GET_TRANS_NUMBER(trans, (inverted?16:12) + but);
-
+			g = GET_BIG_TRANS_NUMBER (trans,  (inverted?4:0) + but );
 			otype = OT_GROUND;
-// XXX			setSelected( ground->getPixmap(g)->image(0));
+			setSelected ( & QPixmap( * bigTiles[but]->pixmap()) );
 			emit setSelectedObject (otype, g);		// need to be after the setSelected
 			break;
 
 		case W_BIG_GROUND_2:
 			boAssert(but<4);
-			g = GET_TRANS_NUMBER(trans, (inverted?24:20) + but);
-
+			g = GET_BIG_TRANS_NUMBER (trans,  (inverted?12:8) + but );
 			otype = OT_GROUND;
-// XXX			setSelected( ground->getPixmap(g)->image(0));
+			setSelected ( & QPixmap( * bigTiles[but]->pixmap()) );
 			emit setSelectedObject (otype, g);		// need to be after the setSelected
 			break;
 
 		case W_SMALL_GROUND:
-			boAssert(but!=4);
 			boAssert(but<9);
 
 			if (4 == but)
 				g = inverted?groundTransProp[trans].to:groundTransProp[trans].from;
 			else	g = GET_TRANS_NUMBER(trans, m_map[ (inverted?9:0) + but ]);
 			otype = OT_GROUND;
-// XXX			setSelected( ground->getPixmap(g)->image(0));
+			setSelected( & QPixmap ( * tiles[but]->pixmap()) );
 			emit setSelectedObject (otype, g);		// need to be after the setSelected
 			break;
 
 		case W_SMALL_PLAIN:
-			boAssert(but<6);
-			g = (groundType) but;
+			boAssert(but<GROUND_LAST-1);
+			g = (groundType) (but+1); // +1 cause GROUND_UNKNOWN
 			otype = OT_GROUND;
-// XXX			setSelected( ground->getPixmap(g)->image(0));
+			setSelected( & QPixmap ( * tiles[but]->pixmap()) );
 			emit setSelectedObject (otype, g);		// need to be after the setSelected
 			break;
 
@@ -338,7 +344,7 @@ void editorTopLevel::makeCommandGui(void)
 	stack->setGeometry(10,10,110,110);
 
 	/* stack/one */
-	view_none = new QPixmap(); // XXX : legal ? 
+	view_none   = new QPixmap();
 
 	view_one = new QLabel(stack,"preview");
 	view_one->setPixmap(*view_none);

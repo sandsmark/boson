@@ -34,6 +34,8 @@
 
 #include "visual.h"
  
+extern QPixmap *bigBackground;
+
 int main(int argc, char* argv[])
 { 
 	KAboutData aboutData(
@@ -77,8 +79,8 @@ int main(int argc, char* argv[])
 	QString themePath = KGlobal::instance()->dirs()->findResourceDir("data", "boson/map/basic.bpf");
 	themePath	+= "boson/themes/grounds/earth.png";
 	printf("loading groundTheme : %s\n", themePath.latin1() );
-	QPixmap *p = new QPixmap(themePath);
-	if (p->isNull() ) {
+	bigBackground = new QPixmap(themePath);
+	if (bigBackground->isNull() ) {
 		printf("can't load earth.jpeg\n");
 		exit(1);
 	}
@@ -90,7 +92,7 @@ int main(int argc, char* argv[])
 
 	/* the canvas is created when a game is created */
 	editorCanvas *ecanvas;
-	vcanvas = ecanvas = new editorCanvas(*p);
+	vcanvas = ecanvas = new editorCanvas(*bigBackground);
 	assert (true == ecanvas->Load("/opt/be/share/apps/boson/map/basic.bpf"));
 
 

@@ -84,6 +84,8 @@ enum transition_t {
 
 #define GET_TRANS_NUMBER(transRef,transTile)	\
 	( (groundType)  ( GROUND_LAST + (TILES_PER_TRANSITION*(transRef)) + (transTile) ))
+#define GET_BIG_TRANS_NUMBER(transRef,transTile) \
+	GET_TRANS_NUMBER(transRef, SMALL_TILES_PER_TRANSITION + 4*(transTile))
 
 #define GET_TRANS_REF(g)	(((g)-GROUND_LAST) / TILES_PER_TRANSITION )
 #define GET_TRANS_TILE(g)	(((g)-GROUND_LAST) % TILES_PER_TRANSITION )
