@@ -150,7 +150,10 @@ connect(
 BosonServer::~BosonServer()
 {
 	logf(LOG_INFO, "Closing logfile normally\n+++\n\n");
-	if (logfile != stderr) close(logfile);
+	// raise a bug : 
+	//     after this line, the server loop on the previous
+	//     line forever, filling the logfile
+	// if (logfile != stderr) close(logfile);
 }
 
 
