@@ -609,21 +609,21 @@ void MobileUnit::advanceMove()
 
  // Set correct frame
  if((xspeed == 0) && (yspeed < 0)) { // North
- 	turnTo(0);
+ 	turnTo(North);
  } else if((xspeed > 0) && (yspeed < 0)) { // NE
-	turnTo(1);
+	turnTo(NorthEast);
  } else if((xspeed > 0) && (yspeed == 0)) { // East
-	turnTo(2);
+	turnTo(East);
  } else if((xspeed > 0) && (yspeed > 0)) { // SE
-	turnTo(3);
+	turnTo(SouthEast);
  } else if((xspeed == 0) && (yspeed > 0)) { // South
-	turnTo(4);
+	turnTo(South);
  } else if((xspeed < 0) && (yspeed > 0)) { // SW
-	turnTo(5);
+	turnTo(SouthWest);
  } else if((xspeed < 0) && (yspeed == 0)) { // West
-	turnTo(6);
+	turnTo(West);
  } else if((xspeed < 0) && (yspeed < 0)) { // NW
-	turnTo(7);
+	turnTo(NorthWest);
  } else {
 	kdDebug() << "xspeed == 0 and yspeed == 0 or error when setting frame" << endl;
  }
