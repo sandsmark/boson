@@ -150,7 +150,7 @@ BosonNewGameWidget::BosonNewGameWidget(TopWidget* top, QWidget* parent)
   addaigroupLayout->addItem( spacer_7 );
 
   addaibutton = new QPushButton( addaigroup, "addaibutton" );
-  addaibutton->setText( i18n( "Add" ) );
+  addaibutton->setText( i18n( "&Add" ) );
   addaigroupLayout->addWidget( addaibutton );
   leftlayout->addWidget( addaigroup );
   upperlayout->addLayout( leftlayout );
@@ -170,7 +170,7 @@ BosonNewGameWidget::BosonNewGameWidget(TopWidget* top, QWidget* parent)
 
   removeplayerbutton = new QPushButton( this, "removeplayerbutton" );
   removeplayerbutton->setEnabled( FALSE );
-  removeplayerbutton->setText( i18n( "Remove player" ) );
+  removeplayerbutton->setText( i18n( "&Remove player" ) );
   playerslayout->addWidget( removeplayerbutton );
   upperlayout->addLayout( playerslayout );
   mainlayout->addLayout( upperlayout );
@@ -195,7 +195,7 @@ BosonNewGameWidget::BosonNewGameWidget(TopWidget* top, QWidget* parent)
   startgamelayout = new QHBoxLayout( 0, 0, 6, "startgamelayout"); 
 
   cancelbutton = new QPushButton( this, "cancelbutton" );
-  cancelbutton->setText( i18n( "Cancel" ) );
+  cancelbutton->setText( i18n( "&Cancel" ) );
   startgamelayout->addWidget( cancelbutton );
   QSpacerItem* spacer_9 = new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum );
   startgamelayout->addItem( spacer_9 );
@@ -207,7 +207,7 @@ BosonNewGameWidget::BosonNewGameWidget(TopWidget* top, QWidget* parent)
   startgamelayout->addItem( spacer_10 );
 
   startgamebutton = new QPushButton( this, "startgamebutton" );
-  startgamebutton->setText( i18n( "Start game" ) );
+  startgamebutton->setText( i18n( "S&tart game" ) );
   startgamelayout->addWidget( startgamebutton );
   mainlayout->addLayout( startgamelayout );
   BosonNewGameWidgetLayout->addLayout( mainlayout );
