@@ -1,6 +1,6 @@
 ## Makefile.am for boson
 
-SUBDIRS = data bosonwidgets items commandframe bodebug startupwidgets sound info
+SUBDIRS = data bosonwidgets items commandframe bodebug startupwidgets sound info script
 
 bin_PROGRAMS = boson bounit boprofiling bocursor borender boinfo
 
@@ -108,6 +108,7 @@ boson_LDADD = \
 		$(top_builddir)/boson/startupwidgets/libbosonstartupwidgets.la \
 		$(top_builddir)/boson/bodebug/libbodebug.la \
 		$(top_builddir)/boson/bosonwidgets/libbosonwidgets.la \
+		$(top_builddir)/boson/script/libbosonscript.la \
 		-lkdegames \
 		$(GLLIB) -l3ds \
 		$(LIB_KDEUI)
@@ -124,6 +125,7 @@ bounit_LDADD = \
 		$(top_builddir)/boson/startupwidgets/libbosonstartupwidgets.la \
 		$(top_builddir)/boson/bodebug/libbodebug.la \
 		$(top_builddir)/boson/bosonwidgets/libbosonwidgets.la \
+		$(top_builddir)/boson/script/libbosonscript.la \
 		-lkdegames \
 		$(GLLIB) -l3ds \
 		-lkio $(LIB_KDEUI)
@@ -159,6 +161,7 @@ borender_LDADD = \
 		$(top_builddir)/boson/commandframe/libbosoncommandframe.la \
 		$(top_builddir)/boson/startupwidgets/libbosonstartupwidgets.la \
 		$(top_builddir)/boson/bosonwidgets/libbosonwidgets.la \
+		$(top_builddir)/boson/script/libbosonscript.la \
 		-lkdegames \
 		$(GLLIB) -l3ds \
 		$(LIB_KDEUI)

@@ -49,6 +49,7 @@
 #include "bosongroundtheme.h"
 #include "bocamera.h"
 #include "info/boinfo.h"
+#include "script/bosonscript.h"
 
 #include <kgame/kgameio.h>
 
@@ -444,6 +445,7 @@ void BosonBigDisplayBase::init()
  d->mDebugMapCoordinatesX = 0.0f;
  d->mDebugMapCoordinatesY = 0.0f;
  d->mDebugMapCoordinatesZ = 0.0f;
+ boScript->setDisplay(this);
 
  d->mRenderItemList = new BoItemList(1, false);
 
@@ -1164,7 +1166,8 @@ void BosonBigDisplayBase::renderText()
 	text += i18n("Radius: %1\n").arg(camera()->radius());
 	text += i18n("Height: %1\n").arg(camera()->z());
 	text += i18n("Rotation: %1\n").arg(camera()->rotation());
-	text += i18n("CommitTime: %1\n").arg(camera()->commitTime());
+	text += i18n("Time: %1/%2\n").arg(camera()->remainingTime()).arg(camera()->commitTime());
+	text += i18n("% moved: %1\n").arg(camera()->movedAmount() * 100);
 
 	y -= d->mDefaultFont->renderText(x, y, text, width() - x);
 	y -= d->mDefaultFont->height();

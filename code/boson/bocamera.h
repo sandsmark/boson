@@ -34,6 +34,8 @@ class QDomElement;
 class BoCamera
 {
   public:
+    enum MoveMode { Linear = 1, Sinusoidal = 2, SinusoidStart = 3, SinusoidEnd = 4 };
+
     BoCamera();
     /**
      * Construct camera which will move only in given rectangle
@@ -68,7 +70,13 @@ class BoCamera
      **/
     void commitChanges(int ticks);
 
+    void setMoveMode(MoveMode mode);
+
     int commitTime() const { return mCommitTime; }
+    int remainingTime()  { return mRemainingTime; }
+    float movedAmount()  { return mMovedAmount; }
+
+    void resetDifferences();
 
 
     BoCamera& operator=(const BoCamera& c);
@@ -196,7 +204,9 @@ class BoCamera
     GLfloat mPosZDiff;
     GLfloat mRotationDiff;
     GLfloat mRadiusDiff;
-    int mCommitTime;
+    int mCommitTime, mRemainingTime;
+    MoveMode mMoveMode;
+    float mMovedAmount;
 };
 
 #endif

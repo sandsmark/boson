@@ -45,6 +45,7 @@
 #include "bosonlocalplayerinput.h"
 #include "commandframe/bosoncommandframebase.h"
 #include "sound/bosonaudiointerface.h"
+#include "script/bosonscript.h"
 
 #include <kapplication.h>
 #include <klocale.h>
@@ -54,6 +55,7 @@
 #include <kgame/kgamedebugdialog.h>
 #include <kgame/kgamepropertyhandler.h>
 #include <kgame/kgamechat.h>
+#include <klineedit.h>
 
 #include <qlayout.h>
 #include <qptrlist.h>
@@ -85,6 +87,7 @@ public:
 
 		mChat = 0;
 		mChatDock = 0;
+		mScriptInput = 0;
 	}
 
 	BosonCommandFrameBase* mCommandFrame;
@@ -100,6 +103,8 @@ public:
 
 	QPtrDict<KPlayer> mPlayers; // needed for debug only
 
+	KLineEdit* mScriptInput;
+
 	bool mInitialized;
 };
 
@@ -109,6 +114,11 @@ BosonWidgetBase::BosonWidgetBase(TopWidget* top, QWidget* parent)
  d = new BosonWidgetBasePrivate;
  d->mInitialized = false;
  mTop = top;
+ BosonScript::newScriptParser(BosonScript::Python);
+ d->mScriptInput = new KLineEdit();
+ connect(d->mScriptInput, SIGNAL(returnPressed(const QString&)),
+		this, SLOT(slotRunScriptLine(const QString&)));
+ d->mScriptInput->show();
 
  mMiniMap = 0;
  mDisplayManager = 0;
@@ -134,6 +144,8 @@ BosonWidgetBase::~BosonWidgetBase()
  delete d->mChatDock;
 
  delete mCursor;
+
+ delete boScript;
 
  delete d;
  boDebug() << k_funcinfo << "done" << endl;
@@ -273,6 +285,8 @@ void BosonWidgetBase::initDisplayManager()
 		mDisplayManager, SLOT(slotActiveSelectSingleUnit(Unit*)));
  connect(boGame, SIGNAL(signalAdvance(unsigned int, bool)),
 		mDisplayManager, SLOT(slotAdvance(unsigned int, bool)));
+ connect(boGame, SIGNAL(signalAdvance(unsigned int, bool)),
+		this, SLOT(slotAdvance(unsigned int, bool)));
 
  displayManager()->setLocalPlayer(localPlayer()); // this does nothing.
 
@@ -349,6 +363,8 @@ void BosonWidgetBase::initGameMode()//FIXME: rename! we don't have a difference 
 
  initLayout();
  startScenarioAndGame();
+ boScript->loadScript("script/boson-script.py");
+ boScript->init();
 }
 
 void BosonWidgetBase::initBigDisplay(BosonBigDisplayBase* b)
@@ -700,6 +716,8 @@ void BosonWidgetBase::initKActions()
  fps->setChecked(false);
  connect(fps, SIGNAL(toggled(bool)),
 		this, SLOT(slotSetDebugFPS(bool)));
+ (void)new KAction(i18n("&Unfog"), KShortcut(), this,
+		SLOT(slotUnfogAll()), actionCollection(), "debug_unfog");
 
 
  KSelectAction* debugMode = new KSelectAction(i18n("Mode"), KShortcut(),
@@ -1166,3 +1184,13 @@ void BosonWidgetBase::slotSetDebugFPS(bool debug)
  boConfig->setDebugFPS(debug);
 }
 
+void BosonWidgetBase::slotRunScriptLine(const QString& line)
+{
+ boScript->execLine(line);
+ d->mScriptInput->clear();
+}
+
+void BosonWidgetBase::slotAdvance(unsigned int, bool)
+{
+ boScript->advance();
+}

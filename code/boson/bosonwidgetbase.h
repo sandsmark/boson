@@ -171,6 +171,10 @@ protected slots:
 
 	void slotApplyOptions();
 
+	void slotRunScriptLine(const QString& line);
+
+	void slotAdvance(unsigned int, bool);
+
 signals:
 	// hmm.. these *never* get emitted?
 	// // hmm.. these *never* get emitted?!!
