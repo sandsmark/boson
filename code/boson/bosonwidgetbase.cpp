@@ -18,6 +18,7 @@
 */
 
 #include "bosonwidgetbase.h"
+#include "bosonwidgetbase.moc"
 
 #include "defines.h"
 #include "bosoncanvas.h"
@@ -48,6 +49,7 @@
 #include "script/bosonscript.h"
 #include "bosonwidgets/bogamechat.h"
 #include "bosonpath.h"
+#include "bomeshrenderermanager.h"
 
 #include <kapplication.h>
 #include <klocale.h>
@@ -58,6 +60,7 @@
 #include <kgame/kgamepropertyhandler.h>
 #include <klineedit.h>
 #include <kdockwidget.h>
+#include <kmessagebox.h>
 
 #include <qlayout.h>
 #include <qptrlist.h>
@@ -70,7 +73,7 @@
 #include <qdom.h>
 #include <qimage.h>
 
-#include "bosonwidgetbase.moc"
+#include <stdlib.h>
 
 #define ID_DEBUG_KILLPLAYER 0
 #define ID_DEBUG_ADD_10000_MINERALS 1
@@ -744,6 +747,9 @@ void BosonWidgetBase::initKActions()
  (void)new KAction(i18n("Light0..."), KShortcut(), displayManager(),
 		SLOT(slotShowLight0Widget()), actionCollection(),
 		"debug_light0");
+ (void)new KAction(i18n("Reload meshrenderer plugin"), KShortcut(), this,
+		SLOT(slotReloadMeshRenderer()), actionCollection(),
+		"debug_lazy_reload_meshrenderer");
 
  cheating->setChecked(DEFAULT_CHEAT_MODE);
  slotToggleCheating(DEFAULT_CHEAT_MODE);
@@ -1215,5 +1221,21 @@ void BosonWidgetBase::slotReloadModelTextures()
 {
  BO_CHECK_NULL_RET(BosonModelTextures::modelTextures());
  BosonModelTextures::modelTextures()->reloadTextures();
+}
+
+void BosonWidgetBase::slotReloadMeshRenderer()
+{
+ bool unusable = false;
+ bool r = BoMeshRendererManager::manager()->reloadPlugin(&unusable);
+ if (r) {
+	return;
+ }
+ boError() << "meshrenderer reloading failed" << endl;
+ if (unusable) {
+	KMessageBox::sorry(this, i18n("Reloading meshrenderer failed, library is now unusable. quitting."));
+	exit(1);
+ } else {
+	KMessageBox::sorry(this, i18n("Reloading meshrenderer failed but library should still be usable"));
+ }
 }
 

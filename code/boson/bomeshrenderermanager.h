@@ -47,6 +47,13 @@ public:
 	static void initStatic();
 
 	/**
+	 * @param unusable If non-null this is set to TRUE, when reloading
+	 * failed and the library is unusable now, or to FALSE if it still can
+	 * be used. If reloading succeeded, this is always set to FALSE.
+	 **/
+	bool reloadPlugin(bool* unusable);
+
+	/**
 	 * @return The BoMeshRendererManager object.
 	 **/
 	static BoMeshRendererManager* manager()
@@ -107,7 +114,7 @@ public:
 
 protected:
 	bool loadLibrary();
-	void unloadLibrary();
+	bool unloadLibrary();
 	BoMeshRenderer* createRenderer(const QString& name);
 	bool makeRendererCurrent(BoMeshRenderer* renderer);
 	void unsetCurrentRenderer();
