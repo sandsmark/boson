@@ -89,7 +89,7 @@ void visualTopLevel::checkMove()
 
 void visualTopLevel::fixDestroyed(int k)
 {
-	if (fixSelected->key == k) unSelectFix();
+	if (fixSelected && fixSelected->key == k) unSelectFix();
 }
 
 
@@ -116,7 +116,7 @@ visualMobUnit *visualTopLevel::unSelectMob(long key)
 {
 	visualMobUnit *m = mobSelected[key];
 	if (!m) {
-		logf(LOG_INFO, "asdflkjasdfkahujsdf");
+		logf(LOG_WARNING, "unSelectMob unknown mobile..");
 		return 0l;
 	}
 	mobSelected.remove(key);
