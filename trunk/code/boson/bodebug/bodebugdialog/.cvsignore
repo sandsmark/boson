@@ -4,3 +4,5 @@ Makefile.in
 .libs
 *.moc
 *.lo
+bodebugdialog
+bodebugdialog_meta_unload.cpp
