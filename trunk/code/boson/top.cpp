@@ -575,7 +575,7 @@ void TopWidget::slotLoadGame(const QString& fileName)
  if (!d->mStarting->loadGame(fileName)) {
 	// There was a loading error
 	// Find out what went wrong...
-	BosonSaveLoad::LoadingStatus status = boGame->loadingStatus();
+	BosonSaveLoad::LoadingStatus status = (BosonSaveLoad::LoadingStatus)boGame->loadingStatus();
 	QString text, caption;
 	if (status == BosonSaveLoad::InvalidFileFormat || status == BosonSaveLoad::InvalidCookie) {
 		text = i18n("This file is not a Boson SaveGame!");
