@@ -722,7 +722,7 @@ function counter2_get_browser($ua)
   {
     return "libwww-perl";
   }
-  else if(eregi("(nuhk)|(Googlebot)|(Yammybot)|(Openbot)|(Slurp/cat)|(crawler)|(ContentHarvester)|(ia_archiver)|(Sniffer)|(grub)|(Pompos)", $ua))
+  else if(eregi("(nuhk)|(Googlebot)|(Yammybot)|(Openbot)|(Slurp/cat)|(crawler)|(ContentHarvester)|(ia_archiver)|(Sniffer)|(grub)|(Pompos)|(SpiderKU)|(ZyBorg)|(Bot)|(Microsoft URL Control)|(Ask Jeeves)", $ua))
   {
     return "SearchBot";
   }
@@ -798,7 +798,7 @@ function counter2_get_os($ua)
   {
     return "Amiga";
   }
-  else if(eregi("(nuhk)|(Googlebot)|(Yammybot)|(Openbot)|(Slurp/cat)|(crawler)|(ContentHarvester)|(ia_archiver)|(Sniffer)|(grub)|(Pompos)", $ua))
+  else if(eregi("(nuhk)|(Googlebot)|(Yammybot)|(Openbot)|(Slurp/cat)|(crawler)|(ContentHarvester)|(ia_archiver)|(Sniffer)|(grub)|(Pompos)|(SpiderKU)|(ZyBorg)|(Bot)|(Microsoft URL Control)|(Ask Jeeves)", $ua))
   {
     return "SearchBot";
   }
