@@ -77,7 +77,7 @@ bool BosonShot::init()
   }
   boDebug(350) << "MISSILE: " << k_funcinfo << "Creating new shot" << endl;
   // FIXME: can't we use values from objects config file here?
-  setSize(BO_TILE_SIZE / 2, BO_TILE_SIZE / 2, 1.0f / 2); // AB: pretty much a random value
+  setSize(1.0f / 2, 1.0f / 2, 1.0f / 2); // AB: pretty much a random value
 
   // At first shot is invisible. It will be set visible when it's advanced. This
   //  is needed because x rotation isn't calculated in constructor and it would
@@ -115,20 +115,20 @@ void BosonShot::advanceMoveCheck()
   float xPos = x() + xVelocity();
   float yPos = y() + yVelocity();
   // ensure that the next position will be valid
-  if(xPos < 0 || xPos >= canvas()->mapWidth() * BO_TILE_SIZE)
+  if(xPos < 0 || xPos >= canvas()->mapWidth())
   {
     velocityX = 0.0f;
     xPos = x();
-    if(xPos < 0 || xPos >= canvas()->mapWidth() * BO_TILE_SIZE)
+    if(xPos < 0 || xPos >= canvas()->mapWidth())
     {
       boError() << k_funcinfo << "Internal error! xPos is still invalid: " << xPos << endl;
     }
   }
-  if(yPos < 0 || yPos >= canvas()->mapHeight() * BO_TILE_SIZE)
+  if(yPos < 0 || yPos >= canvas()->mapHeight())
   {
     velocityY = 0.0f;
     yPos = y();
-    if(yPos < 0 || yPos >= canvas()->mapHeight() * BO_TILE_SIZE)
+    if(yPos < 0 || yPos >= canvas()->mapHeight())
     {
       boError() << k_funcinfo << "Internal error! yPos is still invalid: " << yPos << endl;
     }
@@ -316,7 +316,7 @@ void BosonShotMissile::init(const BoVector3& pos, const BoVector3& target)
   setMaxSpeed(properties()->speed());
 
   // Maximum height missile can have
-  mMaxHeight = properties()->height() * (mTotalDist / BO_TILE_SIZE);
+  mMaxHeight = properties()->height() * (mTotalDist);
   // Set correct base velocity. Note that this must be multiplied with speed()
   //  to get actual velocity for given speed
   mVelo.setZ(target.z() - pos.z());
@@ -325,7 +325,7 @@ void BosonShotMissile::init(const BoVector3& pos, const BoVector3& target)
   // Effects
   setEffects(properties()->newFlyEffects(pos, 0.0));
   // FIXME: name: it has nothing to do with effects anymore
-  mEffectVelo = sqrt(mVelo[0] * mVelo[0] + mVelo[1] * mVelo[1]) / (float)BO_TILE_SIZE;
+  mEffectVelo = sqrt(mVelo[0] * mVelo[0] + mVelo[1] * mVelo[1]);
 
   // Initialization
   move(pos[0], pos[1], pos[2]);
@@ -479,7 +479,7 @@ bool BosonShotMissile::loadFromXML(const QDomElement& root)
 
   mVelo.set(xvelo, yvelo, zvelo);
   mTarget.set(targetx, targety, targetz);
-  mEffectVelo = sqrt(mVelo[0] * mVelo[0] + mVelo[1] * mVelo[1]) / (float)BO_TILE_SIZE;
+  mEffectVelo = sqrt(mVelo[0] * mVelo[0] + mVelo[1] * mVelo[1]);
   setRotation(Bo3dTools::rotationToPoint(mVelo[0], mVelo[1]));
   setSpeed(speed);
   setAccelerationSpeed(properties()->accelerationSpeed());

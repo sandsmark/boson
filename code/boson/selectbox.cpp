@@ -72,9 +72,9 @@ void SelectBoxData::loadBoxes()
 
 // AB: the size is hardcoded. mipmaps might be VERY useful here!
 // FIXME: Qt::red simply doesn't work - we need to use Qt::blue .. why???
-// QImage image = KImageEffect::gradient(QSize(BO_TILE_SIZE, 6), Qt::red, Qt::green, KImageEffect::HorizontalGradient);
-// QImage image = KImageEffect::gradient(QSize(BO_TILE_SIZE, 6), QColor(255,0,0), Qt::green, KImageEffect::HorizontalGradient);
- QImage image = KImageEffect::gradient(QSize(BO_TILE_SIZE, 6), Qt::blue, Qt::green, KImageEffect::HorizontalGradient);
+// QImage image = KImageEffect::gradient(QSize(48, 6), Qt::red, Qt::green, KImageEffect::HorizontalGradient);
+// QImage image = KImageEffect::gradient(QSize(48, 6), QColor(255,0,0), Qt::green, KImageEffect::HorizontalGradient);
+ QImage image = KImageEffect::gradient(QSize(48, 6), Qt::blue, Qt::green, KImageEffect::HorizontalGradient);
  image = BosonGLWidget::convertToGLFormat(image);
  textureImages.append(image);
 

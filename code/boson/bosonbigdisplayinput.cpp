@@ -350,7 +350,7 @@ bool BosonBigDisplayInput::actionBuild(const BoVector3& canvasVector)
 
  // create the new unit
  localPlayerInput()->build(production->completedProductionType(), factory,
-		(int)(canvasVector.x() / BO_TILE_SIZE), (int)(canvasVector.y() / BO_TILE_SIZE));
+		(int)(canvasVector.x()), (int)(canvasVector.y()));
  return true;
 }
 
@@ -685,8 +685,8 @@ void BosonBigDisplayInput::slotMoveSelection(int cellX, int cellY)
 	return;
  }
  BoMouseEvent event;
- event.setCanvasVector(BoVector3((float)(cellX * BO_TILE_SIZE + BO_TILE_SIZE / 2),
-		(float)(cellY * BO_TILE_SIZE + BO_TILE_SIZE / 2),
+ event.setCanvasVector(BoVector3((float)(cellX + 1.0f / 2),
+		(float)(cellY + 1.0f / 2),
 		0.0f));
  actionClicked(event);
 }

@@ -370,8 +370,8 @@ void BoUnitEditor::slotUpdateUnitProperties()
     // General page
     mUnit->setName(mUnitName->text());
     mUnit->setTypeId(mUnitId->value());
-    mUnit->setUnitWidth((unsigned int)(mUnitWidth->value() * BO_TILE_SIZE));
-    mUnit->setUnitHeight((unsigned int)(mUnitHeight->value() * BO_TILE_SIZE));
+    mUnit->setUnitWidth((mUnitWidth->value()));
+    mUnit->setUnitHeight((mUnitHeight->value()));
     mUnit->setUnitDepth(mUnitDepth->value());
     
     // Mobile/facility properties
@@ -464,8 +464,8 @@ void BoUnitEditor::slotUpdateWidgets()
     mUnitTypeFacility->setChecked(isFac);
     mUnitTypeMobile->setChecked(!isFac);
     slotTypeChanged();
-    mUnitWidth->setValue(mUnit->unitWidth() / (double)BO_TILE_SIZE);
-    mUnitHeight->setValue(mUnit->unitHeight() / (double)BO_TILE_SIZE);
+    mUnitWidth->setValue(mUnit->unitWidth());
+    mUnitHeight->setValue(mUnit->unitHeight());
     mUnitDepth->setValue(mUnit->unitDepth());
     // Properties page
     mUnitHealth->setValue(mUnit->health());

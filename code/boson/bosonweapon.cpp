@@ -383,7 +383,7 @@ bool BosonWeapon::layMine()
   BoVector3 pos(unit()->x() + unit()->width() / 2, unit()->y() + unit()->height() / 2, 0);
   pos.setZ(unit()->canvas()->heightAtPoint(pos.x(), pos.y()));
   // Substract half the object size from pos, so that mine's center will be at pos
-  pos += BoVector3(-0.25 * BO_TILE_SIZE, -0.25 * BO_TILE_SIZE, 0);  // FIXME: use real object size
+  pos += BoVector3(-0.25, -0.25, 0);  // FIXME: use real object size
   shoot(pos, pos);
   boDebug() << k_funcinfo << "done" << endl;
   return true;
@@ -398,7 +398,7 @@ bool BosonWeapon::dropBomb()
   }
   BoVector3 pos(unit()->x() + unit()->width() / 2, unit()->y() + unit()->height() / 2, unit()->z());
   // Substract half the object size from pos, so that bomb's center will be at pos
-  pos += BoVector3(-0.25 * BO_TILE_SIZE, -0.25 * BO_TILE_SIZE, 0);  // FIXME: use real object size
+  pos += BoVector3(-0.25, -0.25, 0);  // FIXME: use real object size
   shoot(pos, pos);
   boDebug() << k_funcinfo << "done" << endl;
   return true;

@@ -60,7 +60,7 @@ public:
 	void setGLDepthMultiplier(float d);
 
 	/**
-	 * @return The factor you need to multiply BO_GL_CELL_SIZE with to
+	 * @return The factor you need to multiply 1.0 with to
 	 * achieve the depth (height in z-direction) of the unit. Note that this
 	 * value <em>must not</em> be used in pathfinding or so, but only in
 	 * OpenGL!

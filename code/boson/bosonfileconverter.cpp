@@ -708,6 +708,33 @@ bool BosonFileConverter::convertPlayField_From_0_10_To_0_11(QMap<QString, QByteA
 	QString id = e.attribute("Id");
 	e.removeAttribute("Id");
 	e.setAttribute("PlayerId", id);
+
+	// BO_TILE_SIZE is no more
+	QDomNodeList items = e.elementsByTagName("Item");
+	for (unsigned int j = 0; j < items.count(); j++) {
+		QDomElement item = items.item(j).toElement();
+		if (item.isNull()) {
+			boError() << k_funcinfo << "invalid Item tag" << endl;
+			return false;
+		}
+		bool ok;
+		float x = (float)item.attribute("x").toInt(&ok);
+		if (!ok) {
+			boError() << k_funcinfo << "x attribute is not a valid integer" << endl;
+			return false;
+		}
+		float y = (float)item.attribute("y").toInt(&ok);
+		if (!ok) {
+				boError() << k_funcinfo << "y attribute is not a valid integer" << endl;
+				return false;
+		}
+		x /= 48.0f;
+		y /= 48.0f;
+
+#warning this will be changed! -> we need to use fixed point values
+		item.setAttribute("x", x);
+		item.setAttribute("y", y);
+	}
  }
 
 

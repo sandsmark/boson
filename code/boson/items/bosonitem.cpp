@@ -121,7 +121,7 @@ BosonItem::BosonItem(Player* owner, BosonCanvas* canvas)
 
  mId = 0;
  mX = mY = mZ = 0.0f;
- mWidth = mHeight = 0;
+ mWidth = mHeight = 0.0f;
  mDepth = 0.0;
  mCellsDirty = true;
  mRotation = 0.0f;
@@ -250,9 +250,9 @@ bool BosonItem::bosonCollidesWith(const BoVector3& v1, const BoVector3& v2) cons
  // BB 1
  float minx1, miny1, maxx1, maxy1;
  minx1 = x() + xVelocity() - halfw;
- miny1 = y() + xVelocity() - halfh + BO_TILE_SIZE;
+ miny1 = y() + xVelocity() - halfh + 1.0f;
  maxx1 = x() + yVelocity() + width() + halfw;
- maxy1 = y() + yVelocity() + height() + halfw - BO_TILE_SIZE;
+ maxy1 = y() + yVelocity() + height() + halfw - 1.0f;
  if ((centerx > minx1) && (centerx < maxx1) && (centery > miny1) && (centery < maxy1)) {
 	// Box's center is in BB 1
 //	boDebug() << "        " << k_funcinfo << "Items COLLIDE (1)!!!" << endl;
@@ -261,9 +261,9 @@ bool BosonItem::bosonCollidesWith(const BoVector3& v1, const BoVector3& v2) cons
 
  // BB 2
  float minx2, miny2, maxx2, maxy2;
- minx2 = x() + xVelocity() - halfw + BO_TILE_SIZE;
+ minx2 = x() + xVelocity() - halfw + 1.0f;
  miny2 = y() + xVelocity() - halfh;
- maxx2 = x() + yVelocity() + width() + halfw - BO_TILE_SIZE;
+ maxx2 = x() + yVelocity() + width() + halfw - 1.0f;
  maxy2 = y() + yVelocity() + height() + halfw;
  if ((centerx > minx2) && (centerx < maxx2) && (centery > miny2) && (centery < maxy2)) {
 	// Box's center is in BB 2
@@ -274,7 +274,7 @@ bool BosonItem::bosonCollidesWith(const BoVector3& v1, const BoVector3& v2) cons
  // Check manhattan dist between centers
  float mycenterx = x() + xVelocity() + width() / 2;
  float mycentery = y() + yVelocity() + height() / 2;
- if (QABS(mycenterx - centerx) + QABS(mycentery - centery) < (width() / 2 + halfw + height() / 2 + halfh - BO_TILE_SIZE)) {
+ if (QABS(mycenterx - centerx) + QABS(mycentery - centery) < (width() / 2 + halfw + height() / 2 + halfh - 1.0f)) {
 	// Box's center still collides with us
 //	boDebug() << "        " << k_funcinfo << "Items COLLIDE! (3)!!" << endl;
 	return true;
@@ -302,7 +302,7 @@ void BosonItem::unselect()
 QRect BosonItem::boundingRect() const
 {
  return QRect(QPoint((int)leftEdge(), (int)topEdge()),
-		QPoint((int)leftEdge() + width() - 1, (int)topEdge() + height() - 1));
+		QPoint((int)(leftEdge() + width()) - 1, (int)(topEdge() + height()) - 1));
 }
 
 QRect BosonItem::boundingRectAdvanced() const
@@ -310,7 +310,7 @@ QRect BosonItem::boundingRectAdvanced() const
  int left = (int)(leftEdge() + xVelocity());
  int top = (int)(topEdge() + yVelocity());
  return QRect(QPoint(left, top),
-		QPoint(left + width() - 1, top + height() - 1));
+		QPoint((int)(left + width()) - 1, (int)(top + height()) - 1));
 }
 
 void BosonItem::addToCells()
@@ -331,7 +331,7 @@ void BosonItem::removeFromCells()
  canvas()->removeFromCells(this);
 }
 
-void BosonItem::setSize(int width, int height, float depth)
+void BosonItem::setSize(float width, float height, float depth)
 {
  removeFromCells();
  mWidth = width;

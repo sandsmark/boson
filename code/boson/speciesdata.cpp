@@ -51,8 +51,8 @@ public:
 BosonModel* BosonModelFactory::createUnitModel(const UnitProperties* prop, const QString& file)
 {
  BosonModel* m = new BosonModel(prop->unitPath(), file,
-		((float)prop->unitWidth())/ BO_TILE_SIZE,
-		((float)prop->unitHeight()) / BO_TILE_SIZE);
+		((float)prop->unitWidth()),
+		((float)prop->unitHeight()));
  m->setLongNames(prop->longTextureNames());
  m->loadModel();
  if (prop->isFacility()) {

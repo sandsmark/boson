@@ -205,8 +205,8 @@ bool EditorBigDisplayInput::actionPlace(const BoVector3& canvasVector)
 	return false;
  }
  bool ret = false;
- int x = (int)(canvasVector.x()) / BO_TILE_SIZE;
- int y = (int)(canvasVector.y()) / BO_TILE_SIZE;
+ int x = (int)(canvasVector.x());
+ int y = (int)(canvasVector.y());
  if (!canvas()->cell(x, y)) {
 	return false;
  }
@@ -327,25 +327,14 @@ bool EditorBigDisplayInput::actionChangeHeight(const BoVector3& canvasVector, bo
  if (!canvas()->onCanvas(canvasVector)) {
 	return false;
  }
- int cellX = (int)(canvasVector.x()) / BO_TILE_SIZE;
- int cellY = (int)(canvasVector.y()) / BO_TILE_SIZE;
+ int cellX = (int)(canvasVector.x());
+ int cellY = (int)(canvasVector.y());
  if (!canvas()->cell(cellX, cellY)) {
 	return false;
  }
- int cornerX = 0;
- int cornerY = 0;
  // we need the corner that was clicked, not the cell!
- if (((int)canvasVector.x()) % BO_TILE_SIZE >= BO_TILE_SIZE / 2) {
-	// a right corner
-	cornerX = cellX + 1;
- } else {
-	cornerX = cellX;
- }
- if (((int)canvasVector.y()) % BO_TILE_SIZE >= BO_TILE_SIZE / 2) {
-	cornerY = cellY + 1;
- } else {
-	cornerY = cellY;
- }
+ int cornerX = lrint(canvasVector.x());
+ int cornerY = lrint(canvasVector.y());
 
  float height = canvas()->heightAtCorner(cornerX, cornerY);
  if (up) {
@@ -488,8 +477,8 @@ void EditorBigDisplayInput::slotMoveSelection(int cellX, int cellY)
 	return;
  }
  BoMouseEvent event;
- event.setCanvasVector(BoVector3((float)(cellX * BO_TILE_SIZE + BO_TILE_SIZE / 2),
-		(float)(cellY * BO_TILE_SIZE + BO_TILE_SIZE / 2),
+ event.setCanvasVector(BoVector3((float)(cellX + 1.0f / 2),
+		(float)(cellY + 1.0f / 2),
 		0.0f));
  actionClicked(event);
 }

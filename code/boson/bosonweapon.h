@@ -67,8 +67,7 @@ class BosonWeaponProperties : public PluginProperties
      **/
     inline bool canShootAtLandUnits() const  { return mCanShootAtLandUnits; }
     /**
-     * @return The weapon range of this unit. It's a number of cells, so multiply
-     *  with BO_TILE_SIZE to use it on the canvas.
+     * @return The weapon range of this unit. It's a number of cells
     **/
     inline unsigned long int range() const  { return mRange; }
     /**

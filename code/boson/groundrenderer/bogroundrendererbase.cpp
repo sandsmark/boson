@@ -1310,8 +1310,8 @@ QString BoGroundRendererBase::debugStringForPoint(const BoVector3& pos) const
 	arg(pos[1], 6, 'f', 3).
 	arg(pos[2], 6, 'f', 3);
  s += QString("Mouse canvas pos: (%1,%2,%3) ").
-	arg(pos[0] * BO_TILE_SIZE, 6, 'f', 3).
-	arg(-pos[1] * BO_TILE_SIZE, 6, 'f', 3).
+	arg(pos[0], 6, 'f', 3).
+	arg(-pos[1], 6, 'f', 3).
 	arg(pos[2], 6, 'f', 3);
 
  if (!viewFrustum()) {

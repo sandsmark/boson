@@ -303,7 +303,7 @@ bool BosonEffectPropertiesParticleTrail::load(KSimpleConfig* cfg, const QString&
     return false;
   }
 
-  mSpacing = (float)(cfg->readDoubleNumEntry("Spacing", mSpacing)) / BO_TILE_SIZE;
+  mSpacing = (float)(cfg->readDoubleNumEntry("Spacing", mSpacing));
   mMass = (float)(cfg->readDoubleNumEntry("Mass", mMass));
   mMinOffset = BosonConfig::readBoVector3Entry(cfg, "MinOffset", mMinOffset);
   mMaxOffset = BosonConfig::readBoVector3Entry(cfg, "MaxOffset", mMaxOffset);
@@ -314,7 +314,7 @@ bool BosonEffectPropertiesParticleTrail::load(KSimpleConfig* cfg, const QString&
   mStartSize = (float)(cfg->readDoubleNumEntry("StartSize", mStartSize));
   mEndSize = (float)(cfg->readDoubleNumEntry("EndSize", mEndSize));
   // * 20  because in units' config files is speed/tick, but here we want speed/sec
-  mMaxSpeed = (float)(cfg->readDoubleNumEntry("MaxSpeed", mMaxSpeed)) / BO_TILE_SIZE * 20;
+  mMaxSpeed = (float)(cfg->readDoubleNumEntry("MaxSpeed", mMaxSpeed)) * 20;
   mMinLife = (float)(cfg->readDoubleNumEntry("MinLife", mMinLife));
   mMaxLife = (float)(cfg->readDoubleNumEntry("MaxLife", mMaxLife));
   mParticleDist = (float)(cfg->readDoubleNumEntry("ParticleDist", mParticleDist));

@@ -153,8 +153,8 @@ bool BosonOpenGLCursorData::computeDisplayLists(QValueList<QImage> images)
 		y = -(GLfloat)mHotspotY;
 		// FIXME: we currently depend on image width/height == BO_TILE_SIZE
 		// we should use the actual width/height here instead!
-		const GLfloat w = BO_TILE_SIZE;
-		const GLfloat h = BO_TILE_SIZE;
+		const GLfloat w = 1.0f;
+		const GLfloat h = 1.0f;
 		glBindTexture(GL_TEXTURE_2D, mTextureArray->texture(i));
 		glBegin(GL_QUADS);
 			glTexCoord2f(0.0, 0.0); glVertex3f(x, y, 0.0);
