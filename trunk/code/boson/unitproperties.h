@@ -54,7 +54,8 @@ public:
 	unsigned long int health() const { return mHealth; }
 	unsigned long int shields() const;
 	unsigned long int armor() const;
-	unsigned long int prize() const;
+	unsigned long int mineralCost() const;
+	unsigned long int oilCost() const;
 
 	/**
 	 * @return The weapon range of this unit.

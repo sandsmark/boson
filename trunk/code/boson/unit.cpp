@@ -486,6 +486,34 @@ QString Unit::soundShoot() const
  return speciesTheme()->themePath() + "sounds/shoot.wav";
 }
 
+QValueList<Unit*> Unit::unitCollisions(bool exact) const
+{
+ QValueList<Unit*> units;
+ QCanvasItemList collisionList = collisions(exact);
+ if (collisionList.isEmpty()) {
+	return units;
+ }
+ 
+ bool flying = isFlying();
+ QCanvasItemList::Iterator it;
+ for (it = collisionList.begin(); it != collisionList.end(); ++it) {
+	if (!RTTI::isUnit((*it)->rtti())) {
+		continue;
+	}
+	Unit* unit = ((Unit*)*it);
+	if (unit->isDestroyed()) {
+		continue;
+	}
+	if (flying == unit->isFlying()) {
+		units.append(unit);
+	}
+ }
+ return units;
+}
+
+
+
+
 
 /////////////////////////////////////////////////
 // MobileUnit
@@ -497,11 +525,15 @@ public:
 	MobileUnitPrivate()
 	{
 	}
+
+	KGameProperty<double> mSpeed;
 };
 
 MobileUnit::MobileUnit(int type, Player* owner, QCanvas* canvas) : Unit(type, owner, canvas)
 {
  d = new MobileUnitPrivate;
+ d->mSpeed.registerData(IdSpeed, dataHandler(), 
+		KGamePropertyBase::PolicyLocal, "Speed");
 }
 
 MobileUnit::~MobileUnit()
@@ -636,32 +668,15 @@ void MobileUnit::advanceMove()
  }*/
 }
 
-
-QValueList<Unit*> Unit::unitCollisions(bool exact) const
+void MobileUnit::setSpeed(double speed)
 {
- QValueList<Unit*> units;
- QCanvasItemList collisionList = collisions(exact);
- if (collisionList.isEmpty()) {
-	return units;
- }
- 
- bool flying = isFlying();
- QCanvasItemList::Iterator it;
- for (it = collisionList.begin(); it != collisionList.end(); ++it) {
-	if (!RTTI::isUnit((*it)->rtti())) {
-		continue;
-	}
-	Unit* unit = ((Unit*)*it);
-	if (unit->isDestroyed()) {
-		continue;
-	}
-	if (flying == unit->isFlying()) {
-		units.append(unit);
-	}
- }
- return units;
+ d->mSpeed = speed;
 }
 
+double MobileUnit::speed() const
+{
+ return d->mSpeed;
+}
 
 class Facility::FacilityPrivate
 {

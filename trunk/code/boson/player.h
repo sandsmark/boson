@@ -36,6 +36,11 @@ class Player : public KPlayer
 {
 	Q_OBJECT
 public:
+	enum PropertyIds {
+		IdFogged = KGamePropertyBase::IdUser + 1,
+		IdMineralCost = KGamePropertyBase::IdUser + 2,
+		IdOilCost = KGamePropertyBase::IdUser + 3
+	};
 	Player();
 	virtual ~Player();
 
@@ -77,6 +82,11 @@ public:
 	void fog(int x, int y);
 	void unfog(int x, int y);
 	bool isFogged(int x, int y) const;
+
+	unsigned long int minerals() const;
+	unsigned long int oil() const;
+	void setMinerals(unsigned long int m);
+	void setOil(unsigned long int o);
 
 	void initMap(BosonMap* map);
 

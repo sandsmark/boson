@@ -160,6 +160,9 @@ public:
 	virtual ~MobileUnit();
 
 	virtual void advanceMove(); // move one step futher to path
+
+	virtual void setSpeed(double s);
+	virtual double speed() const;
 	
 private:
 	// a d pointer is probably not very good here - far too much memory consumption

@@ -108,6 +108,18 @@ void TopBase::initStatusBar()
 		facilitiesLabel, SLOT(setNum(int)));
  bar->addWidget(box);
 
+ // AB: does the editor use the resources box? maybe move it to Top (the class)
+ QHBox* resources = new QHBox(bar);
+ (void)new QLabel(i18n("Minerals: "), resources);
+ QLabel* mineralLabel = new QLabel(QString::number(0), resources);
+ connect(mBosonWidget, SIGNAL(signalMineralsUpdated(int)), 
+		mineralLabel, SLOT(setNum(int)));
+ (void)new QLabel(i18n("Oil: "), resources);
+ QLabel* oilLabel = new QLabel(QString::number(0), resources);
+ connect(mBosonWidget, SIGNAL(signalOilUpdated(int)), 
+		oilLabel, SLOT(setNum(int)));
+ bar->addWidget(resources);
+
  bar->show();
 }
 

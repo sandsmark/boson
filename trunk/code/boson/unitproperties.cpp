@@ -56,7 +56,8 @@ public:
 
 	unsigned long int mArmor;
 	unsigned long int mShields;
-	unsigned long int mPrize;
+	unsigned long int mMineralCost;
+	unsigned long int mOilCost;
 
 	MobileProperties* mMobileProperties;
 	FacilityProperties* mFacilityProperties;
@@ -96,7 +97,8 @@ void UnitProperties::loadUnitType(const QString& fileName)
  mHealth = conf.readUnsignedLongNumEntry("Health", 100);
  d->mShields = conf.readUnsignedLongNumEntry("Shield", 0); 
  d->mArmor = conf.readUnsignedLongNumEntry("Armor", 0); 
- d->mPrize = conf.readUnsignedLongNumEntry("Prize", 0); 
+ d->mMineralCost= conf.readUnsignedLongNumEntry("MineralCost", 0); 
+ d->mOilCost = conf.readUnsignedLongNumEntry("OilCost", 0); 
  mDamage = conf.readLongNumEntry("Damage", 0); 
  mRange = conf.readUnsignedLongNumEntry("Range", 0); 
  mSightRange = conf.readUnsignedLongNumEntry("SightRange", 5); 
@@ -154,9 +156,14 @@ unsigned long int UnitProperties::shields() const
  return d->mShields;
 }
 
-unsigned long int UnitProperties::prize() const
+unsigned long int UnitProperties::mineralCost() const
 {
- return d->mPrize;
+ return d->mMineralCost;
+}
+
+unsigned long int UnitProperties::oilCost() const
+{
+ return d->mOilCost;
 }
 
 double UnitProperties::speed() const

@@ -68,7 +68,7 @@ KGameUnitDebug::KGameUnitDebug(QWidget* parent) : QWidget(parent)
  d->mUnitList->addColumn(i18n("Name"));
  d->mUnitList->addColumn(i18n("Health"));
 // d->mUnitList->addColumn(i18n("Prize"));
-// d->mUnitList->addColumn(i18n("Speed"));
+ d->mUnitList->addColumn(i18n("Speed"));
 // connect(d->mUnitList, SIGNAL(executed(QListBoxItem*)), 
 //		this, SLOT(slotSelectUnit(QListBoxItem*)));
  layout->addWidget(d->mUnitList);
@@ -152,8 +152,7 @@ void KGameUnitDebug::addUnit(Unit* unit)
  item->setText(5, QString::number(unit->z()));
  item->setText(6, unit->name());
  item->setText(7, QString::number(unit->health()));
- item->setText(8, QString::number(unit->cost()));
- item->setText(9, QString::number(unit->speed()));
+ item->setText(8, QString::number(unit->speed()));
 }
 
 void KGameUnitDebug::updateWaypoints(QListViewItem* item)
