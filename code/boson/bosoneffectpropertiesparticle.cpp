@@ -315,8 +315,7 @@ bool BosonEffectPropertiesParticleTrail::load(KSimpleConfig* cfg, const QString&
   mEndColor = BosonConfig::readBoVector4FloatEntry(cfg, "EndColor", mEndColor);
   mStartSize = (float)(cfg->readDoubleNumEntry("StartSize", mStartSize));
   mEndSize = (float)(cfg->readDoubleNumEntry("EndSize", mEndSize));
-  // * 20  because in units' config files is speed/tick, but here we want speed/sec
-  mMaxSpeed = (float)(cfg->readDoubleNumEntry("MaxSpeed", mMaxSpeed)) * 20 / 48.0f;
+  mMaxSpeed = (float)(cfg->readDoubleNumEntry("MaxSpeed", mMaxSpeed));
   mMinLife = (float)(cfg->readDoubleNumEntry("MinLife", mMinLife));
   mMaxLife = (float)(cfg->readDoubleNumEntry("MaxLife", mMaxLife));
   mParticleDist = (float)(cfg->readDoubleNumEntry("ParticleDist", mParticleDist));
