@@ -214,6 +214,11 @@ public:
 	bool canGo(const Unit* unit, const Cell* cell, bool _default = false) const;
 
 	/**
+	 * @return The item at @p canvasVector, if any.
+	 **/
+	BosonItem* findItemAt(const BosonCanvas* canvas, const BoVector3Fixed& canvasVector) const;
+
+	/**
 	 * @return The unit at @p canvasVector, if any. This returns any unit
 	 * that is visible to this player, also a unit that is not owned by this
 	 * player.
