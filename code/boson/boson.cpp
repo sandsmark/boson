@@ -1689,6 +1689,11 @@ bool Boson::loadgame(QDataStream& stream, bool network, bool reset)
  // units. they must be loaded *after* the players
  QPtrListIterator<KPlayer> it(*playerList());
  for (; it.current(); ++it) {
+	// Order of calls below is very important!!! Don't change this unless you're sure you know what you're doing!!!
+	((Player*)it.current())->speciesTheme()->loadParticleSystems();
+	((Player*)it.current())->speciesTheme()->readUnitConfigs();
+//	loadUnitDatas(((Player*)it.current()), progress);
+	((Player*)it.current())->speciesTheme()->loadTechnologies();
 	if (!((Player*)it.current())->loadUnits(stream)) {
 		boError() << k_funcinfo << "Error when loading units" << endl;
 		return false;
