@@ -122,6 +122,21 @@ bool BosonTextureArray::createTexture(const QImage& image, GLuint texture, bool 
  int w = nextPower2(image.width());
  int h = nextPower2(image.height());
 
+ int maxTextureSize;
+ glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
+ if (w > maxTextureSize || h > maxTextureSize) {
+	boDebug() << k_funcinfo << "cannot use a " << w << "x" << h << w << " texture, max texture size is " << maxTextureSize << endl;
+	int m = QMAX(w, h);
+
+	// d always > 1.0
+	float d = (float)m / (float)maxTextureSize;
+	w = (int)((float)w / d);
+	h = (int)((float)w / d);
+	// in case something went wrong:
+	w = nextPower2(w);
+	h = nextPower2(h);
+ }
+
  if (w != image.width() || h != image.height()) {
 	buffer = image.scale(w, h, QImage::ScaleFree);
  } else {
