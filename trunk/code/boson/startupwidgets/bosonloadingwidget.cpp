@@ -41,20 +41,22 @@ BosonLoadingWidget::BosonLoadingWidget(QWidget* parent)
   header_font.setFamily( "verdana" );
   header_font.setPointSize( 30 );
   header_font.setBold( TRUE );
-  mHeader->setFont( header_font ); 
+  mHeader->setPaletteForegroundColor( QColor( 255, 255, 255 ));
+  mHeader->setFont( header_font );
   mHeader->setText( i18n( "Loading game data..." ) );
   mHeader->setAlignment( int( QLabel::AlignCenter ) );
   mBosonLoadingWidgetLayout->addWidget( mHeader );
   QSpacerItem* spacer = new QSpacerItem( 31, 20, QSizePolicy::Minimum, QSizePolicy::Fixed );
   mBosonLoadingWidgetLayout->addItem( spacer );
 
-  QHBoxLayout* layout5 = new QHBoxLayout( 0, 0, 6, "Layout5"); 
+  QHBoxLayout* layout5 = new QHBoxLayout( 0, 0, 6, "Layout5");
   QSpacerItem* spacer_2 = new QSpacerItem( 30, 20, QSizePolicy::Fixed, QSizePolicy::Minimum );
   layout5->addItem( spacer_2 );
 
   QVBoxLayout* layout4 = new QVBoxLayout( 0, 0, 6, "Layout4"); 
 
   mPleaseWaitLabel = new QLabel( this, "pleasewaitlabel" );
+  mPleaseWaitLabel->setPaletteForegroundColor( QColor( 255, 255, 255 ));
   mPleaseWaitLabel->setText( i18n( "Please wait while Boson's data is being loaded. This may take some time..." ) );
   layout4->addWidget( mPleaseWaitLabel );
   QSpacerItem* spacer_3 = new QSpacerItem( 20, 20, QSizePolicy::Minimum, QSizePolicy::Preferred );
@@ -129,7 +131,7 @@ void BosonLoadingWidget::setLoading(LoadingType load)
 void BosonLoadingWidget::setProgress(int prog)
 {
   mProgress->setProgress(prog);
-}
+  }
 
 void BosonLoadingWidget::setTotalSteps(int steps)
 {
@@ -244,6 +246,7 @@ void BosonLoadingWidget::update()
     }
   }
   mLoadingLabel->setText(text);
+  mLoadingLabel->setPaletteForegroundColor( QColor( 255, 255, 255 ));
   mLoadingLabel->repaint();
 }
 
