@@ -915,7 +915,7 @@ void BosonWidget::slotCommandFramePosition(int pos)
  } else {
 	emit signalMoveCommandFrame(DockLeft);
  }
- d->mCommandPos = (CmdFramePosition)pos;
+ d->mCommandPos = (CommandFramePosition)pos;
 }
 
 void BosonWidget::slotChatFramePosition(int chatPos)
