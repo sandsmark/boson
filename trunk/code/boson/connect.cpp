@@ -159,10 +159,9 @@ switch(State) {
 				data->accepted.sizeX,
 				data->accepted.sizeY);
 			who_am_i	= data->accepted.who_you_are;
-			nb_player	= data->accepted.total_player;
 
 			/* actual creation of the bocanvas */
-			initCanvas (data->accepted.sizeX, data->accepted.sizeY);
+			initCanvas (data->accepted.sizeX, data->accepted.sizeY, data->accepted.total_player);
 			myspecy	= species[data->accepted.who_you_are];
 			break;
 		case MSG_DLG_REFUSED :

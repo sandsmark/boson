@@ -28,6 +28,8 @@
 #include "common/log.h"
 #include "common/boconfig.h" // MAX_PLAYERS
 
+#include "visual/speciesTheme.h"
+
 #include "bosonCanvas.h"
 #include "boshot.h"
 #include "game.h" 	// who_am_i
@@ -38,25 +40,51 @@ Arts::SimpleSoundServer		*soundserver;
 /*
  *  BOSON CANVAS
  */
-bosonCanvas::bosonCanvas( QPixmap p, uint w, uint h)
+bosonCanvas::bosonCanvas( QPixmap p, uint w, uint h, uint np)
 	: visualCanvas(p,w,h)
 	, CellMap (w, h)
 {
+	nb_player = np;
 
+	//
 	// units containers
+	//
 	mobile.resize(149);
 	facility.resize(149);
 
 	my_fix = my_mobiles = 0;
 
+
+
+	//
+	// species themes
+	//
+	boAssert(nb_player<BOSON_MAX_PLAYERS);
+	boAssert(nb_player>1);
+	for (uint i=0; i<nb_player; i++) {
+		species[i]	= new speciesTheme("human");
+		/* XXX todo: test if the theme has been loaded
+			if (!species[1]->isOk()) KMsgBox::message(0l,
+				i18n("Pixmap loading error"),
+				i18n("Error while loading \"blue\" specie theme,\nsome images will show up awfully"),
+				KMsgBox::EXCLAMATION);
+		*/
+	}
+
+	//
 	// ping initialisation, not relevant
+	//
 	last_sync = time(NULL);
 	radar_pulse = 0;
 
+	//
 	// cells
+	//
 	cells = new Cell[w*h];
 
+	//
 	// sound initialisation 
+	//
 	//new Arts::Dispatcher(new Arts::QIOManager); // using this one, the second boson segfaults in Arts::Reference()
 	new Arts::Dispatcher();
 	soundserver =  new Arts::SimpleSoundServer ;

@@ -98,7 +98,7 @@ void BosonApp::initSocket(char *servername)
 }
 
 
-void BosonApp::initCanvas(int w, int h)
+void BosonApp::initCanvas(uint w, uint h, uint nb)
 {
 	/* the field is created when a game is created */
 	QString themePath = *dataPath + "themes/grounds/earth.png";
@@ -111,7 +111,7 @@ void BosonApp::initCanvas(int w, int h)
 	}
 
 	/* the canvas is created when a game is created */
-	vcanvas = bocanvas = new bosonCanvas(*p, w, h);
+	vcanvas = bocanvas = new bosonCanvas(*p, w, h, nb);
 
 	bosonTopLevel *btl = new bosonTopLevel(this);
 	btl->show();
