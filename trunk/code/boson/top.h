@@ -168,24 +168,6 @@ protected:
 	 **/
 	void displayNonModalDialog(KDialogBase* dialog);
 
-	/**
-	 * Initialize and display the game dock widgets (at the moment the chat
-	 * and the commandframe dock widgets).
-	 *
-	 * Note that it is perfectly valid to call this twice - the widgets will
-	 * be displayed only, as initializing has been done in the first call.
-	 * @param display By default this method initializes and displays the
-	 * dock widgets. If you use FALSE here, only initializing occurs.
-	 **/
-	void initGameDockWidgets(bool display = true);
-
-	/**
-	 * @param deinit By default this just hides the dock widgets. If @p
-	 * deinit is TRUE it also deinitializes any previously set widgets,
-	 * i.e. it will call KDockWidget::setWidget(0).
-	 **/
-	void hideGameDockWidgets(bool deinit = false);
-
 protected slots:
 	void slotChangeLocalPlayer(Player* p);
 	void slotUpdateStatusBar();
@@ -224,16 +206,6 @@ protected slots:
 
 	void slotDebugKGame();
 	void slotDebugRequestIdName(int msgid, bool userid, QString& name);
-
-	/**
-	 * Load the dock(-widget) layout for game mode. See also @ref
-	 * BosonWidgetBase::signalLoadBosonGameDock
-	 **/
-	void slotLoadBosonGameDock();
-
-	void slotChangeMaxProfilingEventEntries();
-	void slotChangeMaxProfilingAdvanceEntries();
-	void slotChangeMaxProfilingRenderingEntries();
 
 private:
 	void initDisplayManager();

@@ -427,6 +427,9 @@ protected slots:
 	void slotShowLight0Widget();
 	void slotDebugMemory();
 	void slotDebugPlayer(int);
+	void slotChangeMaxProfilingEventEntries();
+	void slotChangeMaxProfilingAdvanceEntries();
+	void slotChangeMaxProfilingRenderingEntries();
 
 protected:
 	/**
