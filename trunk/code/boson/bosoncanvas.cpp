@@ -284,7 +284,9 @@ void BosonCanvas::setMap(BosonMap* map)
 
 void BosonCanvas::addAnimation(BosonItem* item)
 {
- d->mAnimList.append(item);
+ if (!d->mAnimList.contains(item)) {
+	d->mAnimList.append(item);
+ }
 }
 
 void BosonCanvas::removeAnimation(BosonItem* item)
@@ -349,8 +351,12 @@ void BosonCanvas::newShot(BosonShot* shot)
 
  if (!shot->isActive()) {
 	shotHit(shot);
-	d->mAnimList.removeRef(shot);
-	d->mAllItems.removeItem(shot);
+
+	//AB: check whether this is called inside slotAdvance()! it must NOT be
+	//called there! (don't delete items in a list that we are currently
+	//iterating!)
+	removeAnimation(shot);
+	removeItem(shot);
 	delete shot;
  }
 }
