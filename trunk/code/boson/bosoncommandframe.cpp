@@ -248,8 +248,7 @@ void BoOrderWidget::setOrderButtons(QValueList<unsigned long int> produceList, P
 			d->mOrderButton[i]->setGrayOut(false);
 		}
 	} else {
-		d->mOrderButton[i]->setProductionCount(0);
-		d->mOrderButton[i]->setGrayOut(false);
+		resetButton(d->mOrderButton[i]);
 	}
  }
 }
@@ -273,18 +272,21 @@ void BoOrderWidget::showUnitActions(Unit* unit)
  // Order of action buttons: move, attack, stop. Nothing else yet.
  if(unit->isMobile()) {
 	// If it's mobile, it can move
+	resetButton(d->mOrderButton[d->mButtonOffset]);
 	d->mOrderButton[d->mButtonOffset]->setAction(ActionMove, unit->owner());
 	d->mButtonOffset++;
  }
 
  if(unit->unitProperties()->canShoot()) {
 	// It can shoot
+	resetButton(d->mOrderButton[d->mButtonOffset]);
 	d->mOrderButton[d->mButtonOffset]->setAction(ActionAttack, unit->owner());
 	d->mButtonOffset++;
  }
 
  // If it can't move or attack, then there's no sense in having stop
  if(d->mButtonOffset != 0) {
+	resetButton(d->mOrderButton[d->mButtonOffset]);
 	d->mOrderButton[d->mButtonOffset]->setAction(ActionStop, unit->owner());
 	d->mButtonOffset++;
  }
@@ -422,6 +424,12 @@ void BoOrderWidget::slotEditorLoadTiles()
 	kdError() << k_funcinfo << "Could not load " << d->mTilesDir << endl;
 	return;
  }
+}
+
+void BoOrderWidget::resetButton(BosonCommandWidget* button)
+{
+ button->setProductionCount(0);
+ button->setGrayOut(false);
 }
 
 
