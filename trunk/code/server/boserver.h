@@ -88,24 +88,22 @@ class BosonServer : public KTMainWindow
 
   void  checkUnitVisibility(Unit *u);
 
+/* playing utilities */
+  void checkFixKnown(serverFacility *f);
+  void checkMobileKnown(serverMobUnit *m);
+
   public slots:
   void handleNewConnection(KSocket *);
   void clientClose(KSocket *);
 
-
 /* playing utilities */
   void requestAction();
+  void checkKnownState();
 
   private:
 
   serverState	state;
   KServerSocket	*socket;
-  QString	*worldName;
-  Player	player[BOSON_MAX_CONNECTION];
-
-  uint		jiffies;
-  uint		nbPlayer;
-  uint		nbConnected;
   uint		confirmedJiffies;
 
 

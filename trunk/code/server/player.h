@@ -42,6 +42,7 @@ public slots :
 
 public :
   Player(void);
+
   serverSocketState	 socketState;
   KSocket		*socket;
   QString		*name;

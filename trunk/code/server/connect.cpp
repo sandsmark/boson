@@ -20,6 +20,7 @@
 
 #include "boserver.h"
 #include "connect.h"
+#include "game.h"
 #include <assert.h>
 
 #include "../common/bobuffer.h"
@@ -93,14 +94,14 @@ void BosonServer::clientClose(KSocket *s)
 int i;
 
 for(i=0; i<BOSON_MAX_CONNECTION; i++)
-   if (player[i].socket == s) {
+   if (gpp.player[i].socket == s) {
 
-	player[i].socketState = SSS_NO_CONNECT;
-	delete player[i].buffer;
+	gpp.player[i].socketState = SSS_NO_CONNECT;
+	delete gpp.player[i].buffer;
 	delete s;
-	assert(nbConnected>0);
-	nbConnected--;
-	if (nbConnected<1) state = SS_INIT ;
+	assert(gpp.nbConnected>0);
+	gpp.nbConnected--;
+	if (gpp.nbConnected<1) state = SS_INIT ;
 	logf( LOG_INFO, "Connection[%d] has closed", i);
 	return;
 
