@@ -83,7 +83,14 @@ public:
 
 	void addEditorCommandFrame(QWidget* parent);
 	void addGameCommandFrame(QWidget* parent);
-	void addMiniMap(QWidget* parent);
+
+	/**
+	 * The Mini Map belongs logically to BosonWidget. But we are now using
+	 * QToolBars as parent for the minimap and this is initialized
+	 * elsewhere. So we add reparent and show the minimap as soon as
+	 * reparentMiniMap is called with the "real" parent.
+	 **/
+	void reparentMiniMap(QWidget* parent);
 
 	bool sound() const;
 	bool music() const;
@@ -200,6 +207,9 @@ protected:
 	void recreateMap();
 
 	void recreateLayout(int chatFramePos);
+
+	void addBigDisplay();
+	void addMiniMap();
 
 protected slots:
 	void slotPlayerJoinedGame(KPlayer* p);

@@ -20,6 +20,7 @@
 #define __UNIT_H__
 
 #include "unitbase.h"
+#include "global.h"
 
 #include <qcanvas.h>
 
@@ -48,17 +49,6 @@ public:
 		IdFix_Productions = UnitBase::IdLast + 5,
 		IdFix_ProductionState = UnitBase::IdLast + 6
 
-	};
-
-	enum Direction {
-		North = 0,
-		NorthEast = 1,
-		East = 2, 
-		SouthEast = 3,
-		South = 4,
-		SouthWest = 5,
-		West = 6,
-		NorthWest = 7
 	};
 
 	enum UnitSound {

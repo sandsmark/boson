@@ -18,7 +18,6 @@
 */
 
 #include "top.h"
-//#include "editortop.h"
 
 #include <kapplication.h>
 #include <kaboutdata.h>

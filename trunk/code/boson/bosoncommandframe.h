@@ -40,20 +40,6 @@ class BosonCommandFrame : public QFrame
 	Q_OBJECT
 public:
 
-	//FIXME: this is not the ideal position for this enum. Dunno where it
-	//should be placed though... the correct class must be accessible by
-	//BosonCommandFrame, EditorTop and Top
-	enum OrderType {
-		Facilities = 0,
-		Mobiles = 1,
-		PlainTiles = 2,
-		Small = 3,
-		Big1 = 4,
-		Big2 = 5,
-		
-		OrderLast // should always be the last item - used by loops
-	};
-
 	BosonCommandFrame(QWidget* parent, bool editor = false);
 	~BosonCommandFrame();
 

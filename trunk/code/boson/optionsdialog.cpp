@@ -39,12 +39,14 @@ public:
 		mGameSpeed = 0;
 		mCommandFrame = 0;
 		mChat = 0;
+		mCursor = 0;
 	}
 
 	KIntNumInput* mArrowSpeed;
 	KIntNumInput* mGameSpeed;
 	QComboBox* mCommandFrame;
 	QComboBox* mChat;
+	QComboBox* mCursor;
 };
 
 OptionsDialog::OptionsDialog(QWidget* parent, bool modal)
@@ -72,9 +74,9 @@ OptionsDialog::OptionsDialog(QWidget* parent, bool modal)
  QLabel* commandLabel = new QLabel(i18n("Position of Command Frame"), plainPage());
  l->addWidget(commandLabel);
  d->mCommandFrame = new QComboBox(plainPage());
- d->mCommandFrame->insertItem(i18n("Left"), Left);
- d->mCommandFrame->insertItem(i18n("Right"), Right);
- d->mCommandFrame->insertItem(i18n("Undocked"), Undocked);
+ d->mCommandFrame->insertItem(i18n("Left"), CmdFrameLeft);
+ d->mCommandFrame->insertItem(i18n("Right"), CmdFrameRight);
+ d->mCommandFrame->insertItem(i18n("Undocked"), CmdFrameUndocked);
  connect(d->mCommandFrame, SIGNAL(activated(int)), 
 		this, SIGNAL(signalCommandFramePositionChanged(int)));
  l->addWidget(d->mCommandFrame);
@@ -83,15 +85,26 @@ OptionsDialog::OptionsDialog(QWidget* parent, bool modal)
  QLabel* chatLabel = new QLabel(i18n("Position of Chat Frame"), plainPage());
  l->addWidget(chatLabel);
  d->mChat = new QComboBox(plainPage());
- d->mChat->insertItem(i18n("Top"), Top);
- d->mChat->insertItem(i18n("Bottom"), Bottom);
+ d->mChat->insertItem(i18n("Top"), ChatFrameTop);
+ d->mChat->insertItem(i18n("Bottom"), ChatFrameBottom);
  l->addWidget(d->mChat);
  connect(d->mChat, SIGNAL(activated(int)), 
 		this, SIGNAL(signalChatFramePositionChanged(int)));
 
+ l = new QHBoxLayout(topLayout);
+ QLabel* cursorLabel = new QLabel(i18n("Cursor"), plainPage());
+ l->addWidget(cursorLabel);
+ d->mCursor = new QComboBox(plainPage());
+ d->mCursor->insertItem(i18n("Sprite Cursor"), CursorSprite);
+ d->mCursor->insertItem(i18n("Normal (X) Cursor"), CursorNormal);
+ d->mCursor->insertItem(i18n("Experimental Cursor (*Very* Unstable)"), CursorExperimental);
+ l->addWidget(d->mCursor);
+ connect(d->mCursor, SIGNAL(activated(int)), 
+		this, SIGNAL(signalCursorChanged(int)));
 
- setCommandFramePosition(Left);
- setChatFramePosition(Bottom);
+ setCommandFramePosition(CmdFrameLeft);
+ setChatFramePosition(ChatFrameBottom);
+ setCursor(CursorSprite);
 }
 
 
@@ -136,3 +149,7 @@ void OptionsDialog::setChatFramePosition(ChatFramePosition position)
  d->mChat->setCurrentItem(position);
 }
 
+void OptionsDialog::setCursor(CursorMode mode)
+{
+ d->mCursor->setCurrentItem(mode);
+}

@@ -21,6 +21,8 @@
 
 #include <kdialogbase.h>
 
+#include "global.h"
+
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
@@ -30,16 +32,6 @@ class OptionsDialog : public KDialogBase
 public:
 	OptionsDialog(QWidget* parent, bool modal = false);
 	~OptionsDialog();
-
-	enum CommandFramePosition {
-		Left = 0,
-		Right = 1,
-		Undocked = 2
-	};
-	enum ChatFramePosition {
-		Top = 0,
-		Bottom = 1
-	};
 
 	/**
 	 * Set the shown value for the game speed. Note that this value is the
@@ -53,6 +45,7 @@ public:
 
 	void setCommandFramePosition(CommandFramePosition position);
 	void setChatFramePosition(ChatFramePosition position);
+	void setCursor(CursorMode mode);
 
 protected slots:
 	/**
@@ -73,6 +66,8 @@ signals:
 	 * @param index see @ref ChatFramePosition
 	 **/
 	void signalChatFramePositionChanged(int index); 
+
+	void signalCursorChanged(int index);
 
 private:
 	class OptionsDialogPrivate;

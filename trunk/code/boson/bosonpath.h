@@ -20,6 +20,8 @@
 #define __BOSONPATH_H__
 
 
+#include "global.h"
+
 // Defines whether to use STL (Standard Template Library) or QTL (Qt Template Library)
 // If there is no STL implementation for your compiler, you can use QTL, but I
 //  recommend using STL as it is little bit faster (should be at least)
@@ -48,21 +50,6 @@ class QPoint;
 class BosonPath
 {
   public:
-    /**
-     * Marks direction
-     */
-    enum Direction 
-    { 
-      DirNorth = 0,
-      DirNE = 1,
-      DirEast = 2,
-      DirSE = 3,
-      DirSouth = 4,
-      DirSW = 5,
-      DirWest = 6,
-      DirNW = 7,
-      DirNone = 100 
-    };
 
     /**
      * Constructs BosonPath

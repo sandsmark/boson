@@ -21,6 +21,8 @@
 
 #include <qstring.h>
 
+#include "global.h"
+
 class KConfig;
 
 #define boConfig BosonConfig::bosonConfig()
@@ -70,11 +72,14 @@ public:
 	static void saveGameSpeed(int speed, KConfig* conf = 0);
 	static int readGameSpeed(KConfig* conf = 0);
 
-	static void saveCommandFramePosition(int pos, KConfig* conf = 0);
-	static int readCommandFramePosition(KConfig* conf = 0);
+	static void saveCommandFramePosition(CommandFramePosition pos, KConfig* conf = 0);
+	static CommandFramePosition readCommandFramePosition(KConfig* conf = 0);
 
-	static void saveChatFramePosition(int pos, KConfig* conf = 0);
-	static int readChatFramePosition(KConfig* conf = 0);
+	static void saveChatFramePosition(ChatFramePosition pos, KConfig* conf = 0);
+	static ChatFramePosition readChatFramePosition(KConfig* conf = 0);
+
+	static void saveCursorMode(CursorMode mode, KConfig* conf = 0);
+	static CursorMode readCursorMode(KConfig* conf);
 
 	void setSound(bool s);
 	bool sound() const;

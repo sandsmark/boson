@@ -30,6 +30,7 @@
 #include "bosoncursor.h"
 #include "bosonmusic.h"
 #include "bosonconfig.h"
+#include "global.h"
 
 #include <kgame/kgameio.h>
 #include <kdebug.h>
@@ -145,13 +146,7 @@ void BosonBigDisplay::init()
  d->mChat->setCanvas(canvas());
  d->mChat->setZ(Z_CANVASTEXT);
 
- d->mCursor = new BosonCursor;
- QString cursorDir = KGlobal::dirs()->findResourceDir("data", "boson/themes/cursors/move/index.desktop") + QString::fromLatin1("boson/themes/cursors");
- d->mCursor->insertMode(CursorMove, cursorDir, QString::fromLatin1("move"));
- d->mCursor->insertMode(CursorAttack, cursorDir, QString::fromLatin1("attack"));
- d->mCursor->insertMode(CursorDefault, cursorDir, QString::fromLatin1("default"));
- d->mCursor->setCanvas(canvas(), CursorDefault, Z_CANVAS_CURSOR);
- d->mCursor->setWidgetCursor(this);
+ slotChangeCursor(CursorSprite);
 }
 
 BosonBigDisplay::~BosonBigDisplay()
@@ -212,22 +207,24 @@ void BosonBigDisplay::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseEvent
 						d->mCursor->setCursor(CursorDefault);
 						d->mCursor->setWidgetCursor(this);
 					} else {
-//						kdDebug() << "a" << endl;
 						d->mCursor->setCursor(CursorAttack);
 						d->mCursor->setWidgetCursor(this);
 					}
 				} else if (selection().first()->isMobile()) {
 					d->mCursor->setCursor(CursorMove);
-					d->mCursor->cursorSprite()->show();
 					d->mCursor->setWidgetCursor(this);
+					d->mCursor->showCursor();
 				}
 			} else {
 				d->mCursor->setCursor(CursorDefault);
 				d->mCursor->setWidgetCursor(this);
 			}
 		}
+//		d->mCursor->move(e->globalPos().x(), e->globalPos().y());
 		d->mCursor->move(pos.x(), pos.y());
+
 		canvas()->update();
+		d->mCursor->setWidgetCursor(viewport());
 		e->accept();
 		break;
 	}
@@ -721,3 +718,46 @@ void BosonBigDisplay::leaveEvent(QEvent*)
  d->mCursor->hideCursor();
 }
 
+void BosonBigDisplay::slotChangeCursor(int mode)
+{
+ // note: this doesn't make sense here when we use several views!
+ BosonCursor* b;
+ switch (mode) {
+	case CursorSprite:
+		b = new BosonSpriteCursor;
+		break;
+	case CursorExperimental:
+		b = new BosonExperimentalCursor;
+		break;
+	case CursorNormal:
+	default:
+		b = new BosonNormalCursor;
+		break;
+ }
+ if (d->mCursor) {
+	delete d->mCursor;
+ }
+ d->mCursor = b;
+
+ QString cursorDir = KGlobal::dirs()->findResourceDir("data", 
+		"boson/themes/cursors/move/index.desktop") +
+		QString::fromLatin1("boson/themes/cursors");
+ d->mCursor->insertMode(CursorMove, cursorDir, QString::fromLatin1("move"));
+ d->mCursor->insertMode(CursorAttack, cursorDir, QString::fromLatin1("attack"));
+ d->mCursor->insertMode(CursorDefault, cursorDir, QString::fromLatin1("default"));
+ d->mCursor->setWidgetCursor(this);
+
+ // some cursors need special final initializations. do themn now
+ switch (mode) {
+	case CursorSprite:
+		((BosonSpriteCursor*)d->mCursor)->setCanvas(canvas(),
+				CursorDefault, Z_CANVAS_CURSOR);
+		break;
+	case CursorExperimental:
+		break;
+	case CursorNormal:
+	default:
+		break;
+
+ }
+}

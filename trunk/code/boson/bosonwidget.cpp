@@ -41,6 +41,7 @@
 #include "kgameunitdebug.h"
 #include "bosonmusic.h"
 #include "commandinput.h"
+#include "global.h"
 
 #include "defines.h"
 
@@ -87,6 +88,7 @@ public:
 		mChat = 0;
 	}
 	
+	QPtrList<BosonBigDisplay> mDisplayList;
 	BosonBigDisplay* mBigDisplay;
 	BosonMiniMap* mMiniMap;
 	BosonCommandFrame* mCommandFrame;
@@ -102,8 +104,8 @@ public:
 
 	QHBoxLayout* mTopLayout;
 	QVBoxLayout* mViewLayout; // chat and bigdisplay
-	int mCommandPos;
-	int mChatPos;
+	CommandFramePosition mCommandPos;
+	ChatFramePosition mChatPos;
 
 	// performance variables:
 	int mMobilesCount;
@@ -122,18 +124,6 @@ BosonWidget::BosonWidget(QWidget* parent)
 
  boMusic->setSound(boConfig->sound());
  boMusic->setMusic(boConfig->music());
-
-// the map is also found here. This is currently only used on startup to load
-// the cells (aka map - they contain the groundtypes) and the initial units.
-// do not call in init()  -  connects to commandframe
-
- d->mBoson->setCanvas(d->mCanvas); // should not be stored here - but seems to be necessary :-(
-
-
-// new code
- connect(d->mBigDisplay, SIGNAL(signalBuildUnit(int,int, int, Player*)),
-		d->mBoson, SLOT(slotSendAddUnit(int, int, int, Player*)));
-
 }
 
 void BosonWidget::init()
@@ -142,36 +132,17 @@ void BosonWidget::init()
  d->mArrowKeyStep = ARROW_KEY_STEP;
  d->mMobilesCount = 0;
  d->mFacilitiesCount = 0;
+ d->mDisplayList.setAutoDelete(true);
 
  BosonConfig::initBosonConfig(); // initialize global config
  BosonMusic::initBosonMusic(); 
 
  d->mCanvas = new BosonCanvas(this);
+ connect(d->mCanvas, SIGNAL(signalUnitDestroyed(Unit*)), 
+		this, SLOT(slotRemoveUnit(Unit*)));
 
-// this widget contains at least 3 widgets:
-// - BosonBigDisplay - the actual game view. Inherits QCanvasView
-// - BosonMiniMap - the mini map. what else ;-)
-// - CommandFrame - the frame on the right side e.g. for producing units/cells, data
-// about units,
-// UPDATE: BosonMiniMap and CommandFrame are *not* in BosonWidget anymore. They
-// are still handled here (you can find d->mCommandFrame and d->mMiniMap here
-// and they are also new'ed here) but their parent is now a KToolBar. Add these
-// widgets with addMiniMap() and add[Editor|Game]CommandFrame(). 
-// This is all but a nice solution (they belong to TopBase/Top/Editor) but it
-// seems to be the best solution I can find. All other result in very much
-// signal/slot forwarding (from cmdframe/map through BosonWidget to
-// destination).
- d->mBigDisplay = new BosonBigDisplay(d->mCanvas, this);
-
-// beside the three main widgets this widget contains the game itself. Boson is
-// derived from KGame and should manage the game stuff. BosonWidget also
-// connects Boson to the three main widget (see above) so that they can communicate
-// together.
-// Boson should (!) not contain any pointer to BosonCanvas or so as of
-// readability.
-// AB: but nevertheless this might be necessary - e.g. Boson::signalAddUnit()
-// sends a request to add a unit but Boson should rather create it itself.
  d->mBoson = new Boson(this);
+ d->mBoson->setCanvas(d->mCanvas); // should not be stored here - but seems to be necessary :-(
  connect(d->mBoson, SIGNAL(signalAdvance()),
 		d->mCanvas, SLOT(advance()));
  connect(d->mBoson, SIGNAL(signalAddUnit(Unit*, int, int)),
@@ -201,23 +172,12 @@ void BosonWidget::init()
  connect(d->mBoson, SIGNAL(signalNotEnoughOil(Player*)),
 		this, SLOT(slotNotEnoughOil(Player*)));
 
- connect(d->mBigDisplay, SIGNAL(signalAddCell(int,int, int, unsigned char)),
-		d->mCanvas, SLOT(slotAddCell(int, int, int, unsigned char)));
- connect(this, SIGNAL(signalMineralsUpdated(int)),
-		d->mBigDisplay, SLOT(slotUpdateMinerals(int)));
- connect(this, SIGNAL(signalOilUpdated(int)),
-		d->mBigDisplay, SLOT(slotUpdateOil(int)));
-		
- connect(d->mCanvas, SIGNAL(signalUnitDestroyed(Unit*)), 
-		this, SLOT(slotRemoveUnit(Unit*)));
-
+ addBigDisplay();
+// addBigDisplay();
  initChat();
 
  connect(d->mCanvas, SIGNAL(signalPlaySound(const QString&)), 
 		boMusic, SLOT(slotPlaySound(const QString&)));
-
-// tooltips - added in slotAddUnit
- d->mUnitTips = new KSpriteToolTip(d->mBigDisplay);
 
 // 640*480 is probably not enough (KDE needs at least 800*600) but as a minimum
 // should be ok.
@@ -228,18 +188,18 @@ void BosonWidget::init()
  setFocus();
  d->mBoson->slotSetGameSpeed(BosonConfig::readGameSpeed());
 
- d->mCommandPos = (int)OptionsDialog::Left;
- d->mChatPos = (int)OptionsDialog::Bottom;
+ d->mCommandPos = CmdFrameLeft;
+ d->mChatPos = ChatFrameBottom;
+ addMiniMap();
 }
 
-void BosonWidget::addMiniMap(QWidget* parent)
+void BosonWidget::addMiniMap()
 {
- d->mMiniMap = new BosonMiniMap(parent);
+ d->mMiniMap = new BosonMiniMap(0);
+ d->mMiniMap->hide();
  d->mMiniMap->setCanvas(d->mCanvas);
  connect(d->mBoson, SIGNAL(signalAddUnit(Unit*, int, int)),
 		d->mMiniMap, SLOT(slotAddUnit(Unit*, int, int)));
- connect(d->mBigDisplay, SIGNAL(signalAddCell(int,int, int, unsigned char)), // only EDITOR signal
-		d->mMiniMap, SLOT(slotAddCell(int, int, int, unsigned char)));
  connect(d->mBigDisplay, SIGNAL(contentsMoving(int, int)),
 		d->mMiniMap, SLOT(slotMoveRect(int, int)));
  connect(d->mBigDisplay, SIGNAL(signalSizeChanged(int, int)),
@@ -250,6 +210,16 @@ void BosonWidget::addMiniMap(QWidget* parent)
 		d->mMiniMap, SLOT(slotMoveUnit(Unit*, double, double)));
  connect(d->mCanvas, SIGNAL(signalUnitDestroyed(Unit*)), 
 		d->mMiniMap, SLOT(slotUnitDestroyed(Unit*)));
+
+// only for editor mode:
+ connect(d->mBigDisplay, SIGNAL(signalAddCell(int,int, int, unsigned char)),
+		d->mMiniMap, SLOT(slotAddCell(int, int, int, unsigned char)));
+}
+
+void BosonWidget::reparentMiniMap(QWidget* parent)
+{
+ d->mMiniMap->reparent(parent, QPoint(0, 0));
+ d->mMiniMap->show();
 }
 
 void BosonWidget::initChat()
@@ -264,7 +234,8 @@ BosonWidget::~BosonWidget()
 {
  kdDebug() << k_funcinfo << endl;
  delete d->mUnitTips;
- delete d->mBigDisplay;
+ d->mDisplayList.clear();
+ d->mBigDisplay = 0;
 
 // delete the destroyed units first
  d->mCanvas->deleteDestroyed();
@@ -531,8 +502,8 @@ void BosonWidget::slotGamePreferences()
  connect(dlg, SIGNAL(finished()), dlg, SLOT(slotDelayedDestruct())); // seems not to be called if you quit with "cancel"!
  dlg->setGameSpeed(d->mBoson->gameSpeed());
  dlg->setArrowScrollSpeed(d->mArrowKeyStep);
- dlg->setCommandFramePosition((OptionsDialog::CommandFramePosition)d->mCommandPos);
- dlg->setChatFramePosition((OptionsDialog::ChatFramePosition)d->mChatPos);
+ dlg->setCommandFramePosition(d->mCommandPos);
+ dlg->setChatFramePosition(d->mChatPos);
 
  connect(dlg, SIGNAL(signalArrowScrollChanged(int)),
 		this, SLOT(slotArrowScrollChanged(int)));
@@ -542,6 +513,12 @@ void BosonWidget::slotGamePreferences()
 		this, SLOT(slotCommandFramePosition(int)));
  connect(dlg, SIGNAL(signalChatFramePositionChanged(int)),
 		this, SLOT(slotChatFramePosition(int)));
+
+// note: this is difficult for several views! probably d->mBigDisplay should be
+// the primary view then.
+ connect(dlg, SIGNAL(signalCursorChanged(int)),
+		d->mBigDisplay, SLOT(slotChangeCursor(int)));
+
  dlg->show();
 }
 
@@ -678,6 +655,9 @@ void BosonWidget::addGameCommandFrame(QWidget* parent)
 
 void BosonWidget::startEditor()
 {
+ connect(d->mBigDisplay, SIGNAL(signalBuildUnit(int,int, int, Player*)),
+		d->mBoson, SLOT(slotSendAddUnit(int, int, int, Player*)));
+	
  // this manages the mouse input for bosonBigDisplay. In non-editor mode this is
  // done by KGameMouseIO
  EditorInput* input = new EditorInput(d->mBigDisplay->viewport());
@@ -695,6 +675,7 @@ void BosonWidget::startEditor()
  // FIXME: should be loaded by a dialog!
  slotLoadMap(BosonMap::defaultMap());
  slotLoadScenario(BosonScenario::defaultScenario()); // perhaps this should load the map as well - as it depends on the map...
+
 
 // start the chosen scenario
  d->mBoson->sendMessage(0, BosonMessage::IdStartScenario);
@@ -927,9 +908,9 @@ void BosonWidget::slotInitFogOfWar()
 
 void BosonWidget::slotCommandFramePosition(int pos)
 {
- if (pos == OptionsDialog::Right) {
+ if (pos == CmdFrameRight) {
 	emit signalMoveCommandFrame(DockRight);
- } else if (pos == OptionsDialog::Undocked) {
+ } else if (pos == CmdFrameUndocked) {
 	emit signalMoveCommandFrame(DockUnmanaged);
  } else {
 	emit signalMoveCommandFrame(DockLeft);
@@ -955,11 +936,13 @@ void BosonWidget::recreateLayout(int chatPos)
  d->mTopLayout = new QHBoxLayout(this, 5); // FIXME: 5 is hardcoded
  d->mViewLayout = new QVBoxLayout();
 
- if (chatPos == OptionsDialog::Top) {
+ if (chatPos == ChatFrameTop) {
 	d->mViewLayout->addWidget(d->mChat);
-	d->mViewLayout->addWidget(d->mBigDisplay);
- } else {
-	d->mViewLayout->addWidget(d->mBigDisplay);
+ }
+ for (unsigned int i = 0; i < d->mDisplayList.count(); i++) {
+	d->mViewLayout->addWidget(d->mDisplayList.at(i));
+ }
+ if (chatPos != ChatFrameTop) {
 	d->mViewLayout->addWidget(d->mChat);
  }
 
@@ -1066,4 +1049,33 @@ void BosonWidget::slotUnfogAll(Player* player)
 		}
 	}
  }
+}
+
+void BosonWidget::addBigDisplay()
+{
+ BosonBigDisplay* b = new BosonBigDisplay(d->mCanvas, this);
+ d->mDisplayList.append(b);
+
+ connect(this, SIGNAL(signalMineralsUpdated(int)),
+		b, SLOT(slotUpdateMinerals(int)));
+ connect(this, SIGNAL(signalOilUpdated(int)),
+		b, SLOT(slotUpdateOil(int)));
+
+
+// this signal is for editor mode only. No effect in game mode at all.
+ connect(b, SIGNAL(signalAddCell(int,int, int, unsigned char)),
+		d->mCanvas, SLOT(slotAddCell(int, int, int, unsigned char)));
+		
+
+ static bool init = false;
+ if (!init) {
+	// TODO these should also be done for ALL displays... maybe use static
+	// lists in KSpriteToolTip so we can add them to several views
+	// tooltips - added in slotAddUnit
+	d->mUnitTips = new KSpriteToolTip(b);
+	init = true;
+ }
+
+ d->mBigDisplay = b;
+
 }

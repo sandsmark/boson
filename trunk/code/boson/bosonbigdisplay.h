@@ -110,6 +110,13 @@ public slots:
 	void slotUpdateMinerals(int minerals);
 	void slotUpdateOil(int oil);
 
+	/**
+	 * Change the type of cursor that is used. There are currently @ref
+	 * BosonSpriteCursor and @ref BosonNormalCursor. See @ref CursorMode for
+	 * possible values.
+	 **/
+	void slotChangeCursor(int cursorMode);
+
 signals:
 	/**
 	 * Emitted when a single unit (@ref selectionMode == Select_Single) is
@@ -218,9 +225,9 @@ protected:
 	 **/
 	void removeSelectionRect();
 
-	void enterEvent(QEvent*);
-	void leaveEvent(QEvent*);
-	
+	virtual void enterEvent(QEvent*);
+	virtual void leaveEvent(QEvent*);
+
 protected slots:
 	void slotMouseEvent(KGameIO*, QDataStream& stream, QMouseEvent* e, bool *eatevent);
 
