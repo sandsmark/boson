@@ -221,7 +221,7 @@ void Unit::setTarget(Unit* target)
 	return;
  }
  if (d->mTarget->isDestroyed()) {
-	 d->mTarget = 0;
+	d->mTarget = 0;
  }
 }
 
@@ -407,13 +407,18 @@ void Unit::advance(unsigned int advanceCount)
 	return;
  }
  // Reload weapons
- QPtrListIterator<BosonWeapon> it(d->mWeapons);
- while (it.current()) {
-	it.current()->advance(advanceCount);
-	++it;
+ if (d->mWeapons.count() > 0) {
+	QPtrListIterator<BosonWeapon> it(d->mWeapons);
+	while (it.current()) {
+		it.current()->advance(advanceCount);
+		++it;
+	}
  }
+
 // Reload shields
- reloadShields(); // AB: maybe we make that method inline one day.
+ if (shields() < unitProperties()->shields()) {
+	reloadShields(); // AB: maybe we make that method inline one day.
+ }
 
 // Mostly animation:
  BosonItem::advance(advanceCount);
