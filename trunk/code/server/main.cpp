@@ -35,6 +35,10 @@
 #include "game.h" 
 
 static KCmdLineOptions options[] = {
+	{ "m", 0, 0 }, 
+	{ "map <file.bpf>", 
+		I18N_NOOP("The name of the map to use for the game, refers to $KDEDIR/share/apps/boson/map/"),
+		"basic.bpf"},
 	{ "p", 0, 0 }, 
 	{ "port <port>", 
 		I18N_NOOP("The TCP/IP port the server is listening to. Must be >1000 "),
@@ -63,9 +67,14 @@ int main(int argc, char* argv[])
 	// arguments handling
 	KCmdLineArgs::init( argc, argv, &aboutData );
 	KCmdLineArgs::addCmdLineOptions(options);
-	KCmdLineArgs* args = KCmdLineArgs::parsedArgs();
 
+
+	KApplication	app;  
+	KCmdLineArgs* args = KCmdLineArgs::parsedArgs();
+	//my args
 	int		port;
+	QString		_map("basic.bpf");
+
 	if (args->isSet("port")) {
 		bool ok = true;
 		port = args->getOption("port").toInt(&ok);
@@ -74,10 +83,13 @@ int main(int argc, char* argv[])
 	} else
 		port = BOSON_DEFAULT_PORT;
 
+	if (args->isSet("map"))
+		_map = args->getOption("map");
+	_map = KGlobal::instance()->dirs()->findResourceDir("data", "boson/pics/biglogo.bmp") + "boson/map/" + _map;
+
 	// actual server
-	KApplication	app;  
-	
-	server = new BosonServer (port, locate ("data", "boson/map/basic.bpf"));
+
+	server = new BosonServer (port, _map.latin1() );
 	server->show();
 	return app.exec();
 }  
