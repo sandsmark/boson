@@ -224,6 +224,8 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
  d->mGameSpeed.setLocal(0);
  d->mAdvanceFlag.setLocal(0);
  d->mAdvanceCount.setEmittingSignal(false); // wo don't need it and it would be bad for performance.
+
+ setMinPlayers(1);
 }
 
 Boson::~Boson()
