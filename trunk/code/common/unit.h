@@ -57,8 +57,8 @@ class Unit : public QObject
   virtual	uint	getVisibility(void)=0;
 
   int		who;		// who is the owner ?
-  protected:
   int		key;
+  protected:
   uint		power;		// Power : 0 => death
   uint		contain;	// how much contain (petrol, money);
   uint		countDown;	// work countDown;
