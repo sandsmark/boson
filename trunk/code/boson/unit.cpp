@@ -254,7 +254,7 @@ void Unit::moveTo(const QPoint& pos)
  d->mTarget = 0;
  moveTo(pos.x(), pos.y());
  if (mPathrecalc == 0) {
-	setWork(WorkMove);
+//	setWork(WorkMove); // already done by moveTo(int, int)
 	setAnimated(true);
  }
 }
@@ -295,6 +295,10 @@ void Unit::stopMoving()
 {
  kdDebug() << "stopMoving" << endl;
  clearWaypoints();
+
+ // AB: maybe reimplement in Facility and check for 
+ // completedConstruction() == false. Did not yet do so as this should never be
+ // called, as we check already in moveTo()
  setWork(WorkNone);
  setXVelocity(0);
  setYVelocity(0);
@@ -912,6 +916,10 @@ void Facility::addProduction(int unitType)
 	kdError() << id() << " cannot produce " << unitType << endl;
 	return;
  }
+ if (!completedConstruction()) {
+	kdWarning() << "not yet constructed completely" << endl;
+	return;
+ }
  bool start = false;
  if (!hasProduction()) {
 	start = true;
@@ -947,6 +955,10 @@ QValueList<int> Facility::productionList() const
 
 void Facility::advanceProduction()
 {
+ if (!completedConstruction()) {
+	kdWarning() << "not yet constructed completely" << endl;
+	return;
+ }
  int type = currentProduction();
  if (type < 0) { // no production
 //	setAnimated(false);
@@ -1028,4 +1040,33 @@ double Facility::productionProgress() const
  unsigned int productionTime = owner()->unitProperties(currentProduction())->productionTime();
  double percentage = (double)(d->mProductionState * 100) / (double)productionTime;
  return percentage;
+}
+
+bool Facility::completedConstruction() const
+{
+ if (completedConstruction()) {
+	return false;
+ }
+ if (d->mConstructionState < (constructionSteps() - 1) * unitProperties()->constructionDelay()) {
+	return false;
+ }
+ return true;
+}
+
+void Facility::setTarget(Unit* u)
+{
+ if (!completedConstruction()) {
+	kdWarning() << "not yet constructed completely" << endl;
+	return;
+ }
+ Unit::setTarget(u);
+}
+
+void Facility::moveTo(int x, int y)
+{
+ if (!completedConstruction()) {
+	kdWarning() << "not yet constructed completely" << endl;
+	return;
+ }
+ Unit::moveTo(x, y);
 }

@@ -80,7 +80,7 @@ public:
 	void attackUnit(Unit* target);
 	
 	inline Unit* target() const;
-	void setTarget(Unit* target);
+	virtual void setTarget(Unit* target);
 	bool inRange(Unit* unit) const;
 
 // waypoint stuff: // also in facility - produced units receive this initial waypoint
@@ -101,7 +101,7 @@ public:
 	 * animated and to move to the destination.
 	 * @param pos The point on the canvas to move to.
 	 **/
-	void moveTo(const QPoint& pos);
+	virtual void moveTo(const QPoint& pos);
 	
 	/**
 	 * Nearly similar to the above version (actually this is called by the
@@ -225,6 +225,14 @@ public:
 	static int constructionSteps();
 
 	/**
+	 * Please note that the construction state of a unit specifies if a unit
+	 * <em>has been built</em> completely - it has nothing to do with the
+	 * productions of a facility!
+	 * @return If this unit has been built (constructed) completely
+	 **/
+	inline bool completedConstruction() const;
+
+	/**
 	 * @return Whether there are any productions pending for this unit.
 	 * Always FALSE if unitProperties()->canProduce() is FALSE.
 	 **/
@@ -273,6 +281,18 @@ public:
 	 * production just started, 100 means the production is completed.
 	 **/
 	inline double productionProgress() const;
+
+	/**
+	 * Reimplemented. Does nothing if @ref completedConstruction is false -
+	 * otherwise the same as @ref Unit::setTarget
+	 **/
+	virtual void setTarget(Unit*);
+
+	/**
+	 * Does nothing if @ref completedConstruction is false - otherwise the
+	 * same as @ref Unit::moveTo
+	 **/
+	virtual void moveTo(int x, int y);
 
 protected:
 	virtual void advanceProduction();
