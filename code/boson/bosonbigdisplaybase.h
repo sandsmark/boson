@@ -262,7 +262,6 @@ public:
 
 	void setParticlesDirty(bool dirty);
 
-	const QPoint& cursorCanvasPos() const; // obsolete!
 	const BoVector3& cursorCanvasVector() const;
 	BosonBigDisplayInputBase* displayInput() const;
 

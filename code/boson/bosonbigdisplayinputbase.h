@@ -36,6 +36,11 @@ class BoItemList;
 class BoVector3;
 class BoSpecificAction;
 class BosonLocalPlayerInput;
+class bofixed;
+template<class T> class BoVector2;
+template<class T> class BoRect;
+typedef BoVector2<bofixed> BoVector2Fixed;
+typedef BoRect<bofixed> BoRectFixed;
 
 template<class T> class QPtrList;
 
@@ -53,7 +58,6 @@ public:
 	PlayerIO* localPlayerIO() const;
 	BosonLocalPlayerInput* localPlayerInput() const;
 
-	const QPoint& cursorCanvasPos() const;
 	const BoVector3& cursorCanvasVector() const;
 
 	void setActionType(UnitAction type) { mActionType = type; }

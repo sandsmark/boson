@@ -227,11 +227,11 @@ public:
 		}
 		return false;
 	}
-	const QPoint& canvasPos() const
+	const BoVector2Fixed& canvasPos() const
 	{
 		return mCanvasPos;
 	}
-	void setCanvasPos(const QPoint& pos)
+	void setCanvasPos(const BoVector2Fixed& pos)
 	{
 		mCanvasPos = pos;
 	}
@@ -283,7 +283,7 @@ private:
 	const UnitProperties* mPlacementPreviewProperties;
 	BosonModel* mPlacementPreviewModel;
 	bool mCanPlace;
-	QPoint mCanvasPos;
+	BoVector2Fixed mCanvasPos;
 //	GLuint mCellPlacementTexture;
 	unsigned int mGroundTextureCount;
 	unsigned char* mGroundTextureAlpha;
@@ -351,7 +351,6 @@ public:
 	QTimer mUpdateTimer;
 	int mUpdateInterval;
 
-	QPoint mCanvasPos; // obsolete
 	BoVector3 mCanvasVector;
 
 	BoVisibleEffects mVisibleEffects;
@@ -1124,8 +1123,6 @@ void BosonBigDisplayBase::renderPlacementPreview()
 	return;
  }
 
- // AB: FIXME: BO_TILE_SIZE
-#if 0
  // AB: GL_MODULATE is currently default. if we every change it to
  // GL_REPLACE we should change it here:
 // glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
@@ -1145,29 +1142,16 @@ void BosonBigDisplayBase::renderPlacementPreview()
  bool modelPreview = d->mPlacementPreview.isModelPreview();
  bool groundPreview = d->mPlacementPreview.isGroundPreview();
 
-#warning fixme: we need floats not ints!
- QPoint pos(d->mPlacementPreview.canvasPos());
+ BoVector2Fixed pos(d->mPlacementPreview.canvasPos());
 
- int w = 0;
- int h = 0;
+ bofixed w = 0;
+ bofixed h = 0;
  if (modelPreview) {
 	w = d->mPlacementPreview.unitProperties()->unitWidth();
 	h = d->mPlacementPreview.unitProperties()->unitHeight();
  }
- float x = ((pos.x() + w / 2));
- float y = ((pos.y() + h / 2));
- if (pos.x() >= 0) {
-	x = x - pos.x() % BO_TILE_SIZE;
- } else {
-	x = x - (BO_TILE_SIZE + pos.x() % BO_TILE_SIZE);
- }
- if (pos.y() >= 0) {
-	y = y - pos.y() % BO_TILE_SIZE;
- } else {
-	y = y - (BO_TILE_SIZE + pos.y() % BO_TILE_SIZE);
- }
- x /= BO_TILE_SIZE;
- y /= BO_TILE_SIZE;
+ bofixed x = ((rintf(pos.x()) + w / 2));
+ bofixed y = ((rintf(pos.y()) + h / 2));
  const float z = canvas()->map()->cellAverageHeight((int)x, (int)y) + 0.1f;
  glTranslatef(x, -y, z);
  if (modelPreview) {
@@ -1202,13 +1186,12 @@ void BosonBigDisplayBase::renderPlacementPreview()
  // AB: see above. if GL_REPLACES ever becomes default we have to set it
  // here again.
 // glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-#endif
 }
 
 void BosonBigDisplayBase::renderCursor()
 {
  if (cursor()) {
-	// FIXME: use cursorCanvasPos()
+	// FIXME: use cursorCanvasVector()
 	QPoint pos = mapFromGlobal(QCursor::pos());
 	GLfloat x = (GLfloat)pos.x();
 	GLfloat y = (GLfloat)d->mViewport[3] - (GLfloat)pos.y();
@@ -1273,7 +1256,7 @@ void BosonBigDisplayBase::renderText()
 
  bool renderGroundRendererDebug = false;
  if (renderGroundRendererDebug) {
-	BoVector3 cursor = BoVector3(d->mCanvasPos.x(), d->mCanvasPos.y(), boGame->canvas()->heightAtPoint(d->mCanvasPos.x(), d->mCanvasPos.y()));
+	BoVector3 cursor = BoVector3(cursorCanvasVector().x(), cursorCanvasVector().y(), boGame->canvas()->heightAtPoint(cursorCanvasVector().x(), cursorCanvasVector().y()));
 	cursor.canvasToWorld();
 	BoGroundRenderer* r = BoGroundRendererManager::manager()->currentRenderer();
 	if (r) {
@@ -1323,8 +1306,8 @@ int BosonBigDisplayBase::renderTextMapCoordinates(int x, int y, int w, int borde
 		arg((double)d->mDebugMapCoordinatesY, 6, 'f', 3).
 		arg((double)d->mDebugMapCoordinatesZ, 6, 'f', 3);
  QString canvas = QString::fromLatin1("Canvas: (%1,%2)").
-		arg(d->mCanvasPos.x(), 4, 10).
-		arg(d->mCanvasPos.y(), 4, 10);
+		arg((double)cursorCanvasVector().x(), 6, 'f', 3).
+		arg((double)cursorCanvasVector().y(), 6, 'f', 3);
  QString window = QString::fromLatin1("Window: %1,%2").
 		arg(mapFromGlobal(QCursor::pos()).x(), 4, 10).
 		arg(mapFromGlobal(QCursor::pos()).y(), 4, 10);
@@ -1349,7 +1332,7 @@ int BosonBigDisplayBase::renderTextPFData(int x, int y, int w, int border)
  if (!boConfig->debugPFData()) {
 	return y;
  }
- Cell* cellundercursor = boGame->canvas()->cellAt(d->mCanvasPos.x(), d->mCanvasPos.y());
+ Cell* cellundercursor = boGame->canvas()->cellAt(cursorCanvasVector().x(), cursorCanvasVector().y());
  BosonPathRegion* r = 0;
  if (cellundercursor) {
 	r = cellundercursor->region();
@@ -2101,7 +2084,6 @@ void BosonBigDisplayBase::mouseEventMove(int buttonState, const BoMouseEvent& ev
  d->mDebugMapCoordinatesX = x;
  d->mDebugMapCoordinatesY = y;
  d->mDebugMapCoordinatesZ = z;
- worldToCanvas(x, y, z, &(d->mCanvasPos));
  worldToCanvas(x, y, z, &(d->mCanvasVector)); // AB: are these already real z coordinates?
  displayInput()->updatePlacementPreviewData();
 
@@ -3050,11 +3032,6 @@ float BosonBigDisplayBase::sphereInFrustum(const BoVector3& pos, float radius) c
  return Bo3dTools::sphereInFrustum(d->mViewFrustum, pos, radius);
 }
 
-const QPoint& BosonBigDisplayBase::cursorCanvasPos() const
-{
- return d->mCanvasPos;
-}
-
 const BoVector3& BosonBigDisplayBase::cursorCanvasVector() const
 {
  return d->mCanvasVector;
@@ -3094,7 +3071,7 @@ void BosonBigDisplayBase::setPlacementPreviewData(const UnitProperties* prop, bo
 	d->mPlacementPreview.setData(prop, m);
  }
  d->mPlacementPreview.setCanPlace(canPlace);
- d->mPlacementPreview.setCanvasPos(cursorCanvasPos());
+ d->mPlacementPreview.setCanvasPos(BoVector2Fixed(cursorCanvasVector().x(), cursorCanvasVector().y()));
 }
 
 void BosonBigDisplayBase::setPlacementCellPreviewData(unsigned int textureCount, unsigned char* alpha, bool canPlace)
@@ -3115,7 +3092,7 @@ void BosonBigDisplayBase::setPlacementCellPreviewData(unsigned int textureCount,
  }
  d->mPlacementPreview.setData(textureCount, alpha);
  d->mPlacementPreview.setCanPlace(canPlace);
- d->mPlacementPreview.setCanvasPos(cursorCanvasPos());
+ d->mPlacementPreview.setCanvasPos(BoVector2Fixed(cursorCanvasVector().x(), cursorCanvasVector().y()));
 }
 
 void BosonBigDisplayBase::setDisplayInput(BosonBigDisplayInputBase* input)
