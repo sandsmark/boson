@@ -161,6 +161,10 @@ void Unit::moveBy(double moveX, double moveY)
 {
 // time critical function
 
+ if (!moveX && !moveY) {
+	return;
+ }
+
  // QCanvasItem::moveBy() is called from QCanvasItem::advance(1). I finally
  // found out why it is a bad idea (tm) to do collision detection here.
  // QCanvas::collisions() (and all other collisions()) use imageAdvanced() for
