@@ -31,7 +31,7 @@ public:
 	BoContext(QPaintDevice*);
 	~BoContext();
 
-	bool create(bool wantDirect);
+	bool create(bool wantDirect, bool wantDoubleBuffer = true);
 	void makeCurrent();
 
 	bool isValid() const
@@ -49,15 +49,32 @@ public:
 	}
 	void swapBuffers();
 
+	void doneCurrent();
+
+	bool deviceIsPixmap() const
+	{
+		return (mPaintDevice->devType() == QInternal::Pixmap);
+	}
+
+	bool isInitialized() const
+	{
+		return mIsInitialized;
+	}
+	void setIsInitialized(bool i)
+	{
+		mIsInitialized = i;
+	}
+
 protected:
-	bool chooseContext(bool wantDirect);
-	void* chooseVisual();
+	bool chooseContext(bool wantDirect, bool wantDoubleBuffer);
+	void* chooseVisual(bool wantDoubleBuffer);
 	void* tryVisual(const QGLFormat& fmt);
 	
 private:
 	class BoContextPrivate;
 	BoContextPrivate* d;
 	friend class BosonGLWidget;
+	bool mIsInitialized;
 	QPaintDevice* mPaintDevice;
 	bool mValid;
 	bool mDirect;
@@ -97,6 +114,23 @@ public:
 	void swapBuffers();
 
 	/**
+	 * Switch (usually temporarily) to a new context. This can be used e.g.
+	 * to render to a pixamap - you create a new context for pixmap
+	 * rendering and switch to it until you are done. Then you revert to
+	 * "normal" rendering.
+	 *
+	 * The @p newContext must be a fully @ref BoContext::create'ed context
+	 * and it must be @ref BoContext::isValid.
+	 *
+	 * You should store the old @ref context somewhere in order to switch
+	 * back to it when you are done. If you won't do that you must delete
+	 * it. The old @ref context is not touched here.
+	 *
+	 * @return Whether the switch was actually done.
+	 **/
+	bool switchContext(BoContext* newContext);
+
+	/**
 	 * Reimplemented (workaround for utah GLX driver). See
 	 * @ref QGLWidget::reparent implementation (shamelessy stolen from
 	 * there)
@@ -115,7 +149,7 @@ protected:
 	void initGL();
 	virtual void initializeGL() {}
 	virtual void resizeGL(int width, int height) { Q_UNUSED(width); Q_UNUSED(height); }
-	bool isInitialized() const { return mInitialized; }
+	bool isInitialized() const { return context()->isInitialized(); }
 	void setContext(BoContext*);
 
 	/**
@@ -131,7 +165,6 @@ private:
 private:
 	class BosonGLWidgetPrivate;
 	BosonGLWidgetPrivate* d;
-	bool mInitialized;
 };
 
 #endif

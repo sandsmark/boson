@@ -169,12 +169,15 @@ public:
 	BoContextPrivate()
 	{
 		mContext = 0;
+		mGLXPixmap = 0;
 	}
 	GLXContext mContext;
+	Q_UINT32 mGLXPixmap;
 };
 
 BoContext::BoContext(QPaintDevice* device)
 {
+ mIsInitialized = false;
  mPaintDevice = device;
  mVi = 0;
  mValid = false;
@@ -190,8 +193,8 @@ BoContext::BoContext(QPaintDevice* device)
 	boError() << k_funcinfo << "NULL paint device" << endl;
 	return;
  }
- if (mPaintDevice->devType() != QInternal::Widget) {
-	boError() << k_funcinfo << "context device must be a widget" << endl;
+ if (mPaintDevice->devType() != QInternal::Widget && mPaintDevice->devType() != QInternal::Pixmap) {
+	boError() << k_funcinfo << "context device must be a widget or a pixmap" << endl;
 	return;
  }
 }
@@ -199,6 +202,7 @@ BoContext::BoContext(QPaintDevice* device)
 BoContext::~BoContext()
 {
  boDebug() << k_funcinfo << endl;
+ doneCurrent();
  boDebug() << k_funcinfo << "destroy glx context" << endl;
  glXDestroyContext(mPaintDevice->x11Display(), d->mContext);
  boDebug() << k_funcinfo << "glx context destroyed" << endl;
@@ -211,9 +215,9 @@ BoContext::~BoContext()
  boDebug() << k_funcinfo << "done" << endl;
 }
 
-bool BoContext::create(bool wantDirect)
+bool BoContext::create(bool wantDirect, bool wantDoubleBuffer)
 {
- mValid = chooseContext(wantDirect);
+ mValid = chooseContext(wantDirect, wantDoubleBuffer);
  return mValid;
 }
 
@@ -232,8 +236,27 @@ void BoContext::makeCurrent()
 	boError() << k_funcinfo << "invalid context" << endl;
 	return;
  }
- glXMakeCurrent(mPaintDevice->x11Display(), ((QWidget*)mPaintDevice)->winId(), d->mContext);
- mCurrentContext = this;
+ bool ok = true;
+ if (deviceIsPixmap()) {
+	ok = glXMakeCurrent(mPaintDevice->x11Display(),
+			(GLXPixmap)d->mGLXPixmap,
+			(GLXContext)d->mContext);
+ } else {
+	ok = glXMakeCurrent(mPaintDevice->x11Display(),
+			((QWidget*)mPaintDevice)->winId(),
+			(GLXContext)d->mContext);
+ }
+ if (ok) {
+	mCurrentContext = this;
+ } else {
+	boWarning() << k_funcinfo << "failed" << endl;
+ }
+}
+
+void BoContext::doneCurrent()
+{
+ glXMakeCurrent(mPaintDevice->x11Display(), 0, 0);
+ mCurrentContext = 0;
 }
 
 // AB: shamelessy stolen from QGLContext
@@ -278,7 +301,9 @@ void* BoContext::tryVisual(const QGLFormat& f)
  }
 #endif
 
- spec[i++] = GLX_DOUBLEBUFFER;
+ if (f.doubleBuffer()) {
+	spec[i++] = GLX_DOUBLEBUFFER;
+ }
  spec[i++] = GLX_DEPTH_SIZE;
  spec[i++] = 1;
 
@@ -323,10 +348,10 @@ void* BoContext::tryVisual(const QGLFormat& f)
 }
 
 // AB: shamelessy stolen from QGLContext
-void* BoContext::chooseVisual()
+void* BoContext::chooseVisual(bool wantDoubleBuffer)
 {
  QGLFormat fmt;
- fmt.setDoubleBuffer(true);
+ fmt.setDoubleBuffer(wantDoubleBuffer);
  void* vis = 0;
  bool fail = FALSE;
  bool tryDouble = !fmt.doubleBuffer();  // Some GL impl's only have double
@@ -357,27 +382,55 @@ void* BoContext::chooseVisual()
  }
  return vis;
 }
-bool BoContext::chooseContext(bool wantDirect)
+
+bool BoContext::chooseContext(bool wantDirect, bool wantDoubleBuffer)
 {
  if (!mPaintDevice) {
 	boError() << k_funcinfo << "NULL paint device" << endl;
 	return false;
  }
  Display* disp = mPaintDevice->x11Display();
- mVi = chooseVisual();
+ mVi = chooseVisual(wantDoubleBuffer);
  if ( !mVi ) {
+	boError() << k_funcinfo << "NULL visual returned by chooseVisual()" << endl;
 	return false;
  }
+ if (deviceIsPixmap() &&
+		(((XVisualInfo*)mVi)->depth != mPaintDevice->x11Depth() ||
+		((XVisualInfo*)mVi)->screen != mPaintDevice->x11Screen())) {
+	// AB: copied from Qt 3.2.0
+	boWarning() << "ab1 code" << endl;
+	XFree(mVi);
+	XVisualInfo appVisInfo;
+	memset(&appVisInfo, 0, sizeof(XVisualInfo));
+	appVisInfo.visualid = XVisualIDFromVisual( (Visual*)mPaintDevice->x11Visual() );
+	appVisInfo.screen = mPaintDevice->x11Screen();
+	int nvis;
+	mVi = XGetVisualInfo(disp, VisualIDMask | VisualScreenMask, &appVisInfo, &nvis);
+	if (!mVi) {
+		boError() << k_funcinfo << "NULL visual for painting to pixmap" << endl;
+		return false;
+	}
+	int useGL;
+	glXGetConfig( disp, (XVisualInfo*)mVi, GLX_USE_GL, &useGL );
+	if (!useGL) {
+		boError() << k_funcinfo << "cannot use GL for pixmap ?!" << endl;
+		return false;
+	}
+ }
+
 
  int res;
  glXGetConfig( disp, (XVisualInfo*)mVi, GLX_LEVEL, &res );
  mPlane = res;
 // glFormat.setPlane( res );
  glXGetConfig( disp, (XVisualInfo*)mVi, GLX_DOUBLEBUFFER, &res );
- if (!res) {
+ if (!res && wantDoubleBuffer) {
 	 KMessageBox::error(0, i18n("Double buffering is not supported by your system. Exit now"));
 	kapp->exit(1);
 	return false;
+ } else if (!wantDoubleBuffer && res) {
+	boWarning() << k_funcinfo << "requested non-double buffer, but double buffering is enabled!" << endl;
  }
  glXGetConfig( disp, (XVisualInfo*)mVi, GLX_DEPTH_SIZE, &res );
  mDepth = res;
@@ -396,15 +449,21 @@ bool BoContext::chooseContext(bool wantDirect)
  glXGetConfig( disp, (XVisualInfo*)mVi, GLX_STEREO, &res );
  mStereo = res;
 
- d->mContext = 0;
- if (!d->mContext) {
-	d->mContext = glXCreateContext( disp, (XVisualInfo *)mVi, None, wantDirect);
- }
+ d->mContext = glXCreateContext( disp, (XVisualInfo*)mVi, None, wantDirect);
  if (!d->mContext)  {
 	boError() << k_funcinfo << "NULL context created" << endl;
 	return false;
  }
  mDirect = glXIsDirect(disp, d->mContext);
+
+ if (deviceIsPixmap()) {
+	d->mGLXPixmap = (Q_UINT32)glXCreateGLXPixmap(disp, (XVisualInfo*)mVi,
+			mPaintDevice->handle());
+	if (!d->mGLXPixmap) {
+		boError() << k_funcinfo << "glXCreateGLXPixmap() returned NULL pixmap" << endl;
+		return false;
+	}
+ }
  return true;
 }
 
@@ -438,7 +497,6 @@ BosonGLWidget::~BosonGLWidget()
 
 void BosonGLWidget::init()
 {
- mInitialized = false; // see initGL()
  setBackgroundMode(NoBackground);
  setContext(new BoContext(this));
 }
@@ -491,6 +549,9 @@ void BosonGLWidget::slotUpdateGL()
 	return;
  }
  makeCurrent();
+ if (context()->deviceIsPixmap()) {
+	glDrawBuffer(GL_FRONT_LEFT);
+ }
  if (!isInitialized()) {
 	initGL();
 	//AB: see QGLWidget::glDraw()
@@ -498,7 +559,13 @@ void BosonGLWidget::slotUpdateGL()
 	resizeGL(dm.width(), dm.height());
  }
  paintGL();
- swapBuffers();
+ if (!context()->deviceIsPixmap()) {
+	// non-pixmap devices are _always_ double buffered for us!
+	swapBuffers();
+ } else {
+	// no doublebuffering.
+	glFlush();
+ }
 }
 
 bool BosonGLWidget::isValid() const
@@ -520,7 +587,7 @@ void BosonGLWidget::initGL()
  makeCurrent();
  initializeGL();
  boDebug() << k_funcinfo << "done" << endl;
- mInitialized = true;
+ context()->setIsInitialized(true);
 
  // AB: this might even fix our resize-problem (see slotHack1() in BosonWidget)
  resizeGL(width(), height());
@@ -547,6 +614,31 @@ QImage BosonGLWidget::convertToGLFormat(const QImage& img)
 BoContext* BosonGLWidget::context() const
 {
  return d->mContext;
+}
+
+bool BosonGLWidget::switchContext(BoContext* newContext)
+{
+ if (!newContext) {
+	BO_NULL_ERROR(newContext);
+	return false;
+ }
+ if (!newContext->isValid()) {
+	boError() << k_funcinfo << "new context is not a valid context" << endl;
+	return false;
+ }
+
+ if (context() && BoContext::currentContext() == context()) {
+	context()->doneCurrent();
+ }
+
+ // warning: the old context is not deleted! we leave this to the user!
+ // we will probably switch back to the old context later.
+ d->mContext = newContext;
+
+ if (context()) {
+	context()->makeCurrent();
+ }
+ return true;
 }
 
 void BosonGLWidget::setContext(BoContext* context)
