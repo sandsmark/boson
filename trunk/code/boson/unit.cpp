@@ -449,13 +449,11 @@ void Unit::updateZ(bofixed moveByX, bofixed moveByY, bofixed* moveByZ, bofixed* 
  *moveByZ = newZ - z();
 }
 
-void Unit::advance(unsigned int advanceCallsCount)
-{ // time critical function !!!
+void Unit::reload(unsigned int count)
+{
  if (isDestroyed()) {
 	return;
  }
-
-#warning FIXME
  // FIXME: this reloads _all_ weapons of _all_ units in _all_ advance calls.
  // however only very few weapons per advance call need to be reloaded. even in
  // big battles many weapons don't need to be reloaded (turrets of the player
@@ -463,16 +461,18 @@ void Unit::advance(unsigned int advanceCallsCount)
  // we should add weapons that need to be reloaded to a list and iterate that
  // list only (and remove wepons from the list once they got reloaded)
  // Reload weapons
+ // AB: UPDATE: it has turned out that such a list will probably have a minor
+ // influence on speed only. completely removing weapon reloading improves
+ // performance slightly only.
  if (d->mWeapons[0]) {
 	BosonWeapon** w = &d->mWeapons[0];
 	for (; *w; w++) {
-		(*w)->advance(advanceCallsCount);
+		(*w)->reload(count);
 	}
  }
 
- // Reload shields
  if (shields() < unitProperties()->shields()) {
-	reloadShields(); // AB: maybe we make that method inline one day.
+	reloadShields(count);
  }
 }
 

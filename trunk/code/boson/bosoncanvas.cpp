@@ -227,19 +227,20 @@ void BoCanvasAdvance::advanceItems(const QPtrList<BosonItem>& animItems, unsigne
 
 void BoCanvasAdvance::itemAdvance(const QPtrList<BosonItem>& animItems, unsigned int advanceCallsCount)
 {
- static int profilingAnimateAdvance = boProfiling->requestEventId("Advance: BosonItem::animate() and advance() (in itemAdvance())");
+ static int profilingAnimateReload = boProfiling->requestEventId("Advance: BosonItem::animate() and reload() (in itemAdvance() - whole method)");
  static int profilingAnimate = boProfiling->requestEventId("Advance: BosonItem::animate() (in itemAdvance())");
- static int profilingAdvance = boProfiling->requestEventId("Advance: BosonItem::advance() (in itemAdvance())");
- BosonProfiler profAnimateAdvance(profilingAnimateAdvance);
- BosonProfiler profAnimate(profilingAnimate);
+ static int profilingReload = boProfiling->requestEventId("Advance: BosonItem::reload() (in itemAdvance())");
+ static int profilingWork = boProfiling->requestEventId("Advance: work count (in itemAdvance())");
+ BosonProfiler profAnimateReload(profilingAnimateReload);
 
+ BosonProfiler profAnimate(profilingAnimate);
  QPtrListIterator<BosonItem> animIt(animItems);
  for (; animIt.current(); ++animIt) {
 	animIt.current()->animate(advanceCallsCount);
  }
  profAnimate.stop();
- BosonProfiler profAdvance(profilingAdvance);
 
+ BosonProfiler profWork(profilingWork);
  animIt.toFirst();
  for (; animIt.current(); ++animIt) {
 	unsigned int id;
@@ -253,17 +254,18 @@ void BoCanvasAdvance::itemAdvance(const QPtrList<BosonItem>& animItems, unsigned
 		work = -1;
 	}
 	mCanvas->d->mStatistics->increaseWorkCount(work);
-#if DO_ITEM_ADVANCE_PROFILING
-	boProfiling->advanceItemStart(s->rtti(), id, work);
-	boProfiling->advanceItem(true);
-#endif
-	s->animate(advanceCallsCount);
-	s->advance(advanceCallsCount);
-#if DO_ITEM_ADVANCE_PROFILING
-	boProfiling->advanceItem(false);
-	boProfiling->advanceItemStop();
-#endif
  }
+ profWork.stop();
+
+ BosonProfiler profReload(profilingReload);
+ const unsigned int interval = 5;
+ if (advanceCallsCount % interval == 0) {
+	animIt.toFirst();
+	for (; animIt.current(); ++animIt) {
+		animIt.current()->reload(interval);
+	}
+ }
+ profReload.stop();
 }
 
 void BoCanvasAdvance::advanceFunctionAndMove(unsigned int advanceCallsCount, bool advanceFlag)
