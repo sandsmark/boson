@@ -1,4 +1,4 @@
-SUBDIRS=explosions units
+SUBDIRS=explosions units sounds
 
 species_DATA = index.desktop
 speciesdir = $(kde_datadir)/boson/themes/species/human
