@@ -38,11 +38,13 @@ public:
 		mArrowSpeed = 0;
 		mGameSpeed = 0;
 		mCommandFrame = 0;
+		mChat = 0;
 	}
 
 	KIntNumInput* mArrowSpeed;
 	KIntNumInput* mGameSpeed;
 	QComboBox* mCommandFrame;
+	QComboBox* mChat;
 };
 
 OptionsDialog::OptionsDialog(QWidget* parent, bool modal)
@@ -76,8 +78,19 @@ OptionsDialog::OptionsDialog(QWidget* parent, bool modal)
 		this, SIGNAL(signalCommandFramePositionChanged(int)));
  l->addWidget(d->mCommandFrame);
 
+ l = new QHBoxLayout(topLayout);
+ QLabel* chatLabel = new QLabel(i18n("Position of Chat Frame"), plainPage());
+ l->addWidget(chatLabel);
+ d->mChat = new QComboBox(plainPage());
+ d->mChat->insertItem(i18n("Top"), Left);
+ d->mChat->insertItem(i18n("Bottom"), Right);
+ l->addWidget(d->mChat);
+ connect(d->mChat, SIGNAL(activated(int)), 
+		this, SIGNAL(signalChatFramePositionChanged(int)));
+
 
  setCommandFramePosition(Left);
+ setChatFramePosition(Bottom);
 }
 
 
@@ -115,5 +128,10 @@ void OptionsDialog::setArrowScrollSpeed(int value)
 void OptionsDialog::setCommandFramePosition(CommandFramePosition position)
 {
  d->mCommandFrame->setCurrentItem(position);
+}
+
+void OptionsDialog::setChatFramePosition(ChatFramePosition position)
+{
+ d->mChat->setCurrentItem(position);
 }
 

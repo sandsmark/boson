@@ -41,6 +41,9 @@ public:
 	static void saveCommandFramePosition(int pos, KConfig* conf = 0);
 	static int commandFramePosition(KConfig* conf = 0);
 
+	static void saveChatFramePosition(int pos, KConfig* conf = 0);
+	static int chatFramePosition(KConfig* conf = 0);
+
 	static bool sound(KConfig* conf = 0);
 	static void saveSound(bool sound, KConfig* conf = 0);
 

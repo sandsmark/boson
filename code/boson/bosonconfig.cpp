@@ -92,6 +92,29 @@ void BosonConfig::saveCommandFramePosition(int pos, KConfig* conf)
  conf->setGroup(oldGroup);
 }
 
+void BosonConfig::saveChatFramePosition(int pos, KConfig* conf)
+{
+ if (!conf) {
+	conf = kapp->config();
+ }
+ QString oldGroup = conf->group();
+ conf->setGroup("Boson");
+ conf->writeEntry("ChatFramePosition", pos);
+ conf->setGroup(oldGroup);
+}
+
+int BosonConfig::chatFramePosition(KConfig* conf)
+{
+ if (!conf) {
+	conf = kapp->config();
+ }
+ QString oldGroup = conf->group();
+ conf->setGroup("Boson");
+ int pos = conf->readNumEntry("ChatFramePosition", 0);
+ conf->setGroup(oldGroup);
+ return pos;
+}
+
 void BosonConfig::saveSound(bool sound, KConfig* conf)
 {
  if (!conf) {

@@ -35,6 +35,10 @@ public:
 		Left = 0,
 		Right = 1
 	};
+	enum ChatFramePosition {
+		Top = 0,
+		Bottom = 1
+	};
 
 	/**
 	 * Set the shown value for the game speed. Note that this value is the
@@ -47,6 +51,7 @@ public:
 	void setArrowScrollSpeed(int);
 
 	void setCommandFramePosition(CommandFramePosition position);
+	void setChatFramePosition(ChatFramePosition position);
 
 protected slots:
 	/**
@@ -62,6 +67,11 @@ signals:
 	 * @param index see @ref CommandFramePosition
 	 **/
 	void signalCommandFramePositionChanged(int index); 
+
+	/**
+	 * @param index see @ref ChatFramePosition
+	 **/
+	void signalChatFramePositionChanged(int index); 
 
 private:
 	class OptionsDialogPrivate;
