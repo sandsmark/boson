@@ -70,13 +70,14 @@ ModelPreview::ModelPreview(QWidget* parent) : QGLWidget(parent)
 
  mRotateX = mRotateY = mRotateZ = 0.0;
 
- connect(this, SIGNAL(signalRotateXChanged(float)),this, SLOT(slotRotateXChanged(float)));
- connect(this, SIGNAL(signalRotateYChanged(float)),this, SLOT(slotRotateYChanged(float)));
- connect(this, SIGNAL(signalRotateZChanged(float)),this, SLOT(slotRotateZChanged(float)));
- connect(this, SIGNAL(signalCameraXChanged(float)),this, SLOT(slotCameraXChanged(float)));
- connect(this, SIGNAL(signalCameraYChanged(float)),this, SLOT(slotCameraYChanged(float)));
- connect(this, SIGNAL(signalCameraZChanged(float)),this, SLOT(slotCameraZChanged(float)));
- connect(this, SIGNAL(signalFovYChanged(float)),this, SLOT(slotFovYChanged(float)));
+ connect(this, SIGNAL(signalRotateXChanged(float)), this, SLOT(slotRotateXChanged(float)));
+ connect(this, SIGNAL(signalRotateYChanged(float)), this, SLOT(slotRotateYChanged(float)));
+ connect(this, SIGNAL(signalRotateZChanged(float)), this, SLOT(slotRotateZChanged(float)));
+ connect(this, SIGNAL(signalCameraXChanged(float)), this, SLOT(slotCameraXChanged(float)));
+ connect(this, SIGNAL(signalCameraYChanged(float)), this, SLOT(slotCameraYChanged(float)));
+ connect(this, SIGNAL(signalCameraZChanged(float)), this, SLOT(slotCameraZChanged(float)));
+ connect(this, SIGNAL(signalFovYChanged(float)), this, SLOT(slotFovYChanged(float)));
+ connect(this, SIGNAL(signalFrameChanged(int)), this, SLOT(slotFrameChanged(int)));
 
  setMinimumSize(200, 200);
 }
@@ -144,6 +145,7 @@ void ModelPreview::load(SpeciesTheme* s, const UnitProperties* prop)
  }
  s->loadUnitModel(prop);
  mModel = s->unitModel(prop->typeId());
+ emit signalMaxFramesChanged(mModel->frames() - 1);
 }
 
 void ModelPreview::slotResetView()
@@ -198,6 +200,21 @@ void ModelPreview::mouseMoveEvent(QMouseEvent* e)
  }
 }
 
+void ModelPreview::slotFrameChanged(int f)
+{
+ if (f != 0) {
+	if (!mModel || f < 0) {
+		emit signalFrameChanged(0);
+		return;
+	}
+	if ((unsigned int)f >= mModel->frames()) {
+		emit signalFrameChanged(mModel->frames() - 1);
+		return;
+	}
+  }
+ mCurrentFrame = f;
+}
+
 
 RenderMain::RenderMain()
 {
@@ -226,7 +243,9 @@ RenderMain::RenderMain()
  connectBoth(mConfig, mPreview, SIGNAL(signalCameraXChanged(float)), SLOT(slotCameraXChanged(float)));
  connectBoth(mConfig, mPreview, SIGNAL(signalCameraYChanged(float)), SLOT(slotCameraYChanged(float)));
  connectBoth(mConfig, mPreview, SIGNAL(signalCameraZChanged(float)), SLOT(slotCameraZChanged(float)));
+ connectBoth(mConfig, mPreview, SIGNAL(signalFrameChanged(int)), SLOT(slotFrameChanged(int)));
  connect(mConfig, SIGNAL(signalResetDefaults()), mPreview, SLOT(slotResetView()));
+ connect(mPreview, SIGNAL(signalMaxFramesChanged(int)), mConfig, SLOT(slotMaxFramesChanged(int)));
 
  mPreview->slotResetView();
 
@@ -321,15 +340,15 @@ PreviewConfig::PreviewConfig(QWidget* parent) : QWidget(parent)
 
 
  QLabel* l = new QLabel(i18n("Rotation"), this);
- mRotateX = new KMyFloatNumInput(this);
- mRotateY = new KMyFloatNumInput(this);
- mRotateZ = new KMyFloatNumInput(this);
+ mRotateX = new KMyIntNumInput(this);
+ mRotateY = new KMyIntNumInput(this);
+ mRotateZ = new KMyIntNumInput(this);
  mRotateX->setLabel(i18n("X Rotation"));
  mRotateY->setLabel(i18n("Y Rotation"));
  mRotateZ->setLabel(i18n("Z Rotation"));
- mRotateX->setRange(MIN_ROTATE, MAX_ROTATE, 1.0, slider);
- mRotateY->setRange(MIN_ROTATE, MAX_ROTATE, 1.0, slider);
- mRotateZ->setRange(MIN_ROTATE, MAX_ROTATE, 1.0, slider);
+ mRotateX->setRange(MIN_ROTATE, MAX_ROTATE, 1, true);
+ mRotateY->setRange(MIN_ROTATE, MAX_ROTATE, 1, true);
+ mRotateZ->setRange(MIN_ROTATE, MAX_ROTATE, 1, true);
  mRotateX->setSteps(0.5, 2.0);
  mRotateY->setSteps(0.5, 2.0);
  mRotateZ->setSteps(0.5, 2.0);
@@ -362,6 +381,13 @@ PreviewConfig::PreviewConfig(QWidget* parent) : QWidget(parent)
  topLayout->addWidget(mCameraX);
  topLayout->addWidget(mCameraY);
  topLayout->addWidget(mCameraZ);
+ topLayout->addStretch(1);
+
+ mFrame = new KIntNumInput(this);
+ mFrame->setLabel(i18n("Frame"));
+ mFrame->setRange(0, 0);
+ connect(mFrame, SIGNAL(valueChanged(int)), this, SIGNAL(signalFrameChanged(int)));
+ topLayout->addWidget(mFrame);
  topLayout->addStretch(1);
 
  QPushButton* defaults = new QPushButton(i18n("Reset Defaults"), this);
