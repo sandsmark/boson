@@ -29,7 +29,6 @@
 #include "bosonmessage.h"
 #include "bosonplayfield.h"
 #include "bosonmap.h"
-#include "bosonscenario.h"
 #include "bosonconfig.h"
 #include "bosoncursor.h"
 #include "bodisplaymanager.h"
