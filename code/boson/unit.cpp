@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -44,6 +44,7 @@
 
 #include <qpointarray.h>
 #include <qptrlist.h>
+#include <qdom.h>
 
 #include "defines.h"
 
@@ -860,6 +861,40 @@ void Unit::stopAttacking()
  setWork(WorkNone);
 }
 
+bool Unit::saveAsXML(QDomElement& root)
+{
+ // we should probably add pure virtual methods save() and load() to the plugins,
+ // in order to store non-KGameProperty data there, too
+ // note that UnitBase::save() also saves KGameProperty data of plugins and
+ // weapons
+ if (!UnitBase::saveAsXML(root)) {
+	boError() << "Unit not saved properly" << endl;
+	return false;
+ }
+
+ // AB: we use too many attributes ... maybe we should add a few more elements :)
+ root.setAttribute(QString::fromLatin1("x"), x());
+ root.setAttribute(QString::fromLatin1("y"), y());
+ root.setAttribute(QString::fromLatin1("z"), y());
+
+ // store the current plugin:
+ if (currentPlugin()) {
+	int pluginIndex = d->mPlugins.findRef(currentPlugin());
+	root.setAttribute(QString::fromLatin1("CurrentPlugin"), pluginIndex);
+ } else {
+	// the unit won't have this attribute.
+ }
+
+ // also store the target:
+ unsigned long int targetId = 0;
+ if (target()) {
+	targetId = target()->id();
+ }
+ root.setAttribute(QString::fromLatin1("Target"), (unsigned int)targetId);
+
+ return true;
+}
+
 bool Unit::save(QDataStream& stream)
 {
  //we should probably add pure virtual methods save() and load() to the plugins,
@@ -891,10 +926,72 @@ bool Unit::save(QDataStream& stream)
  return true;
 }
 
+bool Unit::loadFromXML(const QDomElement& root)
+{
+ if (!UnitBase::loadFromXML(root)) {
+	boError(260) << k_funcinfo << "Unit not loaded properly" << endl;
+	return false;
+ }
+ bool ok;
+ float x;
+ float y;
+ float z;
+ x = root.attribute(QString::fromLatin1("x")).toFloat(&ok);
+ if (!ok) {
+	boError() << k_funcinfo << "Invalid value for x tag" << endl;
+	// don't stop (will be broken, but unit won't get deleted)
+ }
+ y = root.attribute(QString::fromLatin1("y")).toFloat(&ok);
+ if (!ok) {
+	boError() << k_funcinfo << "Invalid value for y tag" << endl;
+	// don't stop (will be broken, but unit won't get deleted)
+ }
+ z = root.attribute(QString::fromLatin1("z")).toFloat(&ok);
+ if (!ok) {
+	boError() << k_funcinfo << "Invalid value for z tag" << endl;
+	// don't stop (will be broken, but unit won't get deleted)
+ }
+ int pluginIndex = 0;
+ if (root.hasAttribute(QString::fromLatin1("CurrentPlugin"))) {
+	pluginIndex = root.attribute(QString::fromLatin1("CurrentPlugin")).toInt(&ok);
+	if (!ok) {
+		boError() << k_funcinfo << "Invalid value for CurrentPlugin tag" << endl;
+		pluginIndex = 0;
+	}
+ }
+ if ((unsigned int)pluginIndex >= d->mPlugins.count()) {
+	boWarning(260) << k_funcinfo << "Invalid current plugin index: " << pluginIndex << endl;
+	pluginIndex = 0;
+ }
+ mCurrentPlugin = d->mPlugins.at(pluginIndex);
+
+ // note: don't use setTarget() here, as it does some additional calculations
+ unsigned int targetId = 0;
+ if (root.hasAttribute(QString::fromLatin1("Target"))) {
+	targetId = root.attribute(QString::fromLatin1("Target")).toUInt(&ok);
+	if (!ok) {
+		boError() << k_funcinfo << "Invalid value for Target tag" << endl;
+		targetId = 0;
+	}
+ }
+ if (targetId == 0) {
+	d->mTarget = 0;
+ } else {
+	d->mTarget = boGame->findUnit(targetId, 0);
+	if (!d->mTarget) {
+		boWarning(260) << k_funcinfo << "Could not find target with unitId=" << targetId << endl;
+	}
+ }
+
+ move(x, y, z);
+ setAdvanceWork(advanceWork());
+ return true;
+}
+
 bool Unit::load(QDataStream& stream)
 {
  if (!UnitBase::load(stream)) {
-	boError() << "Unit not loaded properly" << endl;
+	boError() << k_funcinfo << "Unit not loaded properly" << endl;
 	return false;
  }
  //AB: the frame number was loaded/saved as well. i removed this because we
@@ -1555,20 +1652,38 @@ QRect MobileUnit::boundingRect() const
  return QRect((int)x(), (int)y(), BO_TILE_SIZE, BO_TILE_SIZE);
 }
 
+bool MobileUnit::loadFromXML(const QDomElement& root)
+{
+ if (!Unit::loadFromXML(root)) {
+	boError() << k_funcinfo << "Unit not loaded properly" << endl;
+	return false;
+ }
+ return true;
+}
+
 bool MobileUnit::load(QDataStream& stream)
 {
  if (!Unit::load(stream)) {
-	boError() << "Unit not loaded properly" << endl;
+	boError() << k_funcinfo << "Unit not loaded properly" << endl;
 	return false;
  }
 
  return true;
 }
 
+bool MobileUnit::saveAsXML(QDomElement& root)
+{
+ if (!Unit::saveAsXML(root)) {
+	boError() << k_funcinfo << "Unit not saved properly" << endl;
+	return false;
+ }
+ return true;
+}
+
 bool MobileUnit::save(QDataStream& stream)
 {
  if (!Unit::save(stream)) {
-	boError() << "Unit not loaded properly" << endl;
+	boError() << k_funcinfo << "Unit not saved properly" << endl;
 	return false;
  }
 
@@ -1724,15 +1839,33 @@ void Facility::setFlamesParticleSystem(BosonParticleSystem* s)
  d->mFlamesParticleSystem = s;
 }
 
+bool Facility::loadFromXML(const QDomElement& root)
+{
+ if (!Unit::loadFromXML(root)) {
+	boError() << k_funcinfo << "Unit not loaded properly" << endl;
+	return false;
+ }
+ return true;
+}
+
 bool Facility::load(QDataStream& stream)
 {
  if (!Unit::load(stream)) {
-	boError() << "Unit not loaded properly" << endl;
+	boError() << k_funcinfo << "Unit not loaded properly" << endl;
 	return false;
  }
 
  setConstructionStep(d->mConstructionStep);
 
+ return true;
+}
+
+bool Facility::saveAsXML(QDomElement& root)
+{
+ if (!Unit::saveAsXML(root)) {
+	boError() << k_funcinfo << "Unit not loaded properly" << endl;
+	return false;
+ }
  return true;
 }
 
@@ -1742,6 +1875,5 @@ bool Facility::save(QDataStream& stream)
 	boError() << "Unit not loaded properly" << endl;
 	return false;
  }
-
  return true;
 }
