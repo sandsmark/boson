@@ -145,44 +145,13 @@ void visualBigDisplay::mouseReleaseEvent(QMouseEvent *e)
 	view->setSelectionMode( SELECT_NONE);
 
 	/* generate multiple selection */
-
-/*
-	if (selectX > oldX) {
-		t = oldX; 
-		oldX = selectX;
-		selectX = t;
-	}
-
-	if (selectY > oldY) {
-		t = oldY; 
-		oldY = selectY;
-		selectY = t;
-	}
-*/
 	selectX	+= BO_TILE_SIZE * view->X();
 	selectY	+= BO_TILE_SIZE * view->Y();
 	oldX	+= BO_TILE_SIZE * view->X();
 	oldY	+= BO_TILE_SIZE * view->Y();
 	
 	view->selectArea(selectX, selectY, oldX, oldY);
-/*
-	for (mobIt.toFirst(); mobIt; ++mobIt) {
-		m = mobIt.current();
-		if (	selectX<=m->_x() && oldX>m->_x() + m->getWidth() &&
-			selectY<=m->_y() && oldY>m->_y() + m->getHeight() &&
-			!view->mobSelected.find(mobIt.currentKey()) ) 
-
-				view->selectMob(mobIt.currentKey(), m);
-	}
-*/
-
-/*
-	selectX -= BO_TILE_SIZE * view->X();
-	selectY -= BO_TILE_SIZE * view->Y();
-	oldX -= BO_TILE_SIZE * view->X();
-	oldY -= BO_TILE_SIZE * view->Y();
-	repaint (selectX, selectY, oldX, oldY, FALSE);
-*/
+	view->field->update();
 }
 
 void visualBigDisplay::resizeEvent(QResizeEvent *e)

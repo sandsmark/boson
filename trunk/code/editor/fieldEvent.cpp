@@ -71,6 +71,8 @@ void editorBigDisplay::mousePressEvent(QMouseEvent *e)
 			oldX = selectX = e->x();
 			oldY = selectY = e->y();
 			unSelectFix();
+
+			view->field->update();
 			return;
 		}
 	
@@ -84,6 +86,7 @@ void editorBigDisplay::mousePressEvent(QMouseEvent *e)
 			else
 				view->selectMob(m->key, m);
 
+			view->field->update();
 			return;
 		}
 
@@ -92,11 +95,13 @@ void editorBigDisplay::mousePressEvent(QMouseEvent *e)
 			unSelectAll();		// anyway 
 			view->selectFix(f);
 
+			view->field->update();
 			return;
 		}
 
 		// should never be reached !
 		logf(LOG_ERROR, "boson/fieldEvent.c, unexpeted field->findUnitAt() result");
+		view->field->update();
 	
 	} // LeftButton 
 
