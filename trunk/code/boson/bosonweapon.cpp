@@ -56,7 +56,7 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg, bool full)
   m_range.init(cfg->readUnsignedLongNumEntry("Range", 0));
   m_reloadingTime.init(cfg->readUnsignedNumEntry("Reload", 0));
  // We divide speeds with 20, because speeds in config files are cells/second,
- //  but we want cells/advance calls
+ //  but we want cells/advance call
   m_speed.init(cfg->readDoubleNumEntry("Speed", 0) / 20.0f);
   if(speed() == 0 && mShotType == BosonShot::Missile)
   {
