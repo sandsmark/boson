@@ -80,8 +80,9 @@ BosonItem::~BosonItem()
 {
  unselect();
  if (canvas()) {
-	canvas()->removeItem(this);
+	canvas()->removeFromCells(this);
 	canvas()->removeAnimation(this);
+	canvas()->removeItem(this);
  }
 }
 
