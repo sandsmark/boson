@@ -113,7 +113,7 @@ protected:
 				text = i18n("%1\nId: %2").arg(commandWidget()->unit()->unitProperties()->name()).arg(commandWidget()->unit()->id());
 				break;
 			case OrderAction:
-				text = SpeciesTheme::unitActionName(commandWidget()->action());
+				text = SpeciesTheme::unitActionName((UnitAction)commandWidget()->action());
 				break;
 		}
 		return text;
