@@ -2,7 +2,7 @@
 IsFacility=false
 TerrainType=0
 Name=Leopard
-Id=10007
+Id=10001
 Health=100
 MineralCost=150
 OilCost=80
