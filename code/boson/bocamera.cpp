@@ -86,9 +86,7 @@ void BoCamera::setGluLookAt(const BoVector3& lookAt, const BoVector3& cameraPos,
 
 void BoCamera::changeLookAt(const BoVector3& diff)
 {
-  mLookAt += diff;
-  checkPosition();
-  setPositionDirty();
+  setLookAt(lookAt() + diff);
 }
 
 bool BoCamera::loadFromXML(const QDomElement& root)
@@ -282,9 +280,8 @@ void BoGameCamera::changeZ(GLfloat diff)
   // TODO: maybe provide another method for that, e.g. changeZWithRadius().
   //  Then changeZ() would change _only_ z
   float factor = newz / mPosZ;
-  mPosZ = newz;
-  mRadius = radius() * factor;
-  setPositionDirty();
+  setZ(newz);
+  setRadius(radius() * factor);
 }
 
 float BoGameCamera::calculateNewRadius(GLfloat diff) const
@@ -316,15 +313,12 @@ void BoGameCamera::changeRadius(GLfloat diff)
     radius = mPosZ;
   }
   // Update
-  mRadius = radius;
-  setPositionDirty();
+  setRadius(radius);
 }
 
 void BoGameCamera::changeRotation(GLfloat diff)
 {
-  mRotation += diff;
-  checkRotation();
-  setPositionDirty();
+  setRotation(rotation() + diff);
 }
 
 void BoGameCamera::checkPosition()
