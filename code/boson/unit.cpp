@@ -936,9 +936,10 @@ BoItemList Unit::enemyUnitsInRange(unsigned long int range) const
 {
  BoItemList units = unitsInRange(range);
  BoItemList enemy;
+ Unit* u;
  BoItemList::Iterator it = units.begin();
  for (; it != units.end(); ++it) {
-	Unit* u = (Unit*)*it;
+	u = (Unit*)*it;
 	if (owner()->isEnemy(u->owner())) {
 		enemy.append(u);
 	}
@@ -956,11 +957,12 @@ QValueList<Unit*> Unit::unitCollisions(bool exact) const
  }
 
  BoItemList::Iterator it;
+ Unit* unit;
  for (it = collisionList.begin(); it != collisionList.end(); ++it) {
 	if (!RTTI::isUnit((*it)->rtti())) {
 		continue;
 	}
-	Unit* unit = ((Unit*)*it);
+	unit = ((Unit*)*it);
 	if (unit->isDestroyed()) {
 		continue;
 	}
