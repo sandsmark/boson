@@ -38,7 +38,7 @@ NewGameDialog::~NewGameDialog()
 void NewGameDialog::slotOk()
 {
  slotApply();
- if (mGame && mGame->isAdmin()) {
+ if (mGame && mGame->isAdmin() && !mGame->isRunning()) {
 	emit signalStartGame();
  }
  KGameDialog::accept();
