@@ -23,7 +23,25 @@ def advance():
   cycle = cycle + 1;
   if (cycle % 10) == 0:
     print "advance method called, cycle: ", cycle;
-  advanceBigCircle(cycle);
+  #advanceBigCircle(cycle);
+  advanceA10Game(cycle);
+
+def advanceA10Game(cycle):
+  if cycle == 100:
+    print "let's attack with some units";
+    units = [25, 26, 32, 33, 82, 88, 89 ];
+    for unit in units:
+      BoScript.moveUnitWithAttacking(unit, 46 * 48, 46 * 48);
+  elif cycle == 140:
+    print "stop two units";
+    BoScript.stopUnit(25);
+    BoScript.stopUnit(26);
+  elif cycle == 160:
+    print "move unit";
+    BoScript.moveUnit(88, 20 * 48, 46 * 48);
+  elif cycle == 180:
+    print "attack unit";
+    BoScript.attack(32, 1);
 
 def advanceMaxPayne(cycle):
   x = cycle % 150;

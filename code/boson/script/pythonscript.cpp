@@ -30,9 +30,18 @@
 
 PyObject* PythonScript::mDict = 0;
 
-// BoScript methods table (these are accessible from scripts)
+/*****  BoScript methods table (these are accessible from scripts)  *****/
 // Keep this up to date!
 PyMethodDef PythonScript::mCallbacks[] = {
+  // Players
+  { "areEnemies", py_areEnemies, METH_VARARGS, "" },
+  { "playerId", py_playerId, METH_VARARGS, "" },
+  // Units
+  { "moveUnit", py_moveUnit, METH_VARARGS, "" },
+  { "moveUnitWithAttacking", py_moveUnitWithAttacking, METH_VARARGS, "" },
+  { "attack", py_attack, METH_VARARGS, "" },
+  { "stopUnit", py_stopUnit, METH_VARARGS, "" },
+  // Camera
   { "moveCamera", py_moveCamera, METH_VARARGS, "Move camera" },
   { "moveCameraBy", py_moveCameraBy, METH_VARARGS, "" },
   { "setCameraRotation", py_setCameraRotation, METH_VARARGS, "" },
@@ -48,6 +57,8 @@ PyMethodDef PythonScript::mCallbacks[] = {
   { 0, 0, 0, 0 }
 };
 
+
+/*****  Basic stuff  *****/
 
 PythonScript::PythonScript()
 {
@@ -139,6 +150,83 @@ void PythonScript::init()
   callFunction("init");
 }
 
+/*****  Player functions  *****/
+PyObject* PythonScript::py_areEnemies(PyObject*, PyObject* args)
+{
+  int id1, id2;
+  if(!PyArg_ParseTuple(args, "ii", &id1, &id2))
+  {
+    return 0;
+  }
+
+  bool enemies = boScript->areEnemies(id1, id2);
+
+  return Py_BuildValue("i", enemies ? 1 : 0);
+}
+
+PyObject* PythonScript::py_playerId(PyObject*, PyObject*)
+{
+  return Py_BuildValue("i", boScript->playerId());
+}
+
+/*****  Unit functions  *****/
+PyObject* PythonScript::py_moveUnit(PyObject* self, PyObject* args)
+{
+  int id, x, y;
+  if(!PyArg_ParseTuple(args, "iii", &id, &x, &y))
+  {
+    return 0;
+  }
+
+  boScript->moveUnit(id, x, y);
+
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+PyObject* PythonScript::py_moveUnitWithAttacking(PyObject* self, PyObject* args)
+{
+  int id, x, y;
+  if(!PyArg_ParseTuple(args, "iii", &id, &x, &y))
+  {
+    return 0;
+  }
+
+  boScript->moveUnitWithAttacking(id, x, y);
+
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+PyObject* PythonScript::py_attack(PyObject* self, PyObject* args)
+{
+  int id, target;
+  if(!PyArg_ParseTuple(args, "ii", &id, &target))
+  {
+    return 0;
+  }
+
+  boScript->attack(id, target);
+
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+PyObject* PythonScript::py_stopUnit(PyObject* self, PyObject* args)
+{
+  int id;
+  if(!PyArg_ParseTuple(args, "i", &id))
+  {
+    return 0;
+  }
+
+  boScript->stopUnit(id);
+
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+/*****  Camera functions  *****/
 
 PyObject* PythonScript::py_moveCamera(PyObject*, PyObject* args)
 {
