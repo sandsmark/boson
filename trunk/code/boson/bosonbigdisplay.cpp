@@ -146,7 +146,10 @@ void BosonBigDisplay::actionClicked(const BoAction& action, QDataStream& stream,
 	return;
  }
 
- Unit* unit = canvas()->findUnitAt(action.canvasPos());
+ Unit* unit = 0l;
+ if(!localPlayer()->isFogged(action.canvasPos().x() / BO_TILE_SIZE, action.canvasPos().x() / BO_TILE_SIZE)) {
+	unit = canvas()->findUnitAt(action.canvasPos());
+ }
  if (!unit) {
 	//FIXME: first check if a the unit can produce! even mobile units can
 	//have the production plugin!!
