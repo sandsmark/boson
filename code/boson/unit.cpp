@@ -1255,3 +1255,8 @@ void Facility::setConstructionStep(unsigned int step)
 	owner()->facilityCompleted(this);
  }
 }
+
+unsigned int Facility::currentConstructionStep() const
+{
+ return (unsigned int)frame();
+}

@@ -350,6 +350,8 @@ public:
 	 **/
 	void setConstructionStep(unsigned int step);
 
+	unsigned int currentConstructionStep() const;
+
 	/**
 	 * @return Whether there are any productions pending for this unit.
 	 * Always FALSE if unitProperties()->canProduce() is FALSE.
