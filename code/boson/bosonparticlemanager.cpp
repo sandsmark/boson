@@ -279,8 +279,8 @@ BosonParticleSystemProperties::BosonParticleSystemProperties(KSimpleConfig* cfg)
   mEndColor = BoVector4((float)(cfg->readDoubleNumEntry("EndColorR", 0)), (float)(cfg->readDoubleNumEntry("EndColorG", 0)),
       (float)(cfg->readDoubleNumEntry("EndColorB", 0)), (float)(cfg->readDoubleNumEntry("EndColorA", 0)));
   */
-  mMinVelo = BoVector3::load(cfg, "MinVelo");
-  mMaxVelo = BoVector3::load(cfg, "MaxVelo");
+  mMinVelo = BoVector3::load(cfg, "MinVelocity");
+  mMaxVelo = BoVector3::load(cfg, "MaxVelocity");
   mMinPos = BoVector3::load(cfg, "MinPos");
   mMaxPos = BoVector3::load(cfg, "MaxPos");
   mNormalize = cfg->readBoolEntry("Normalize", false);
