@@ -1,6 +1,7 @@
 MOBILE_UNITS = \
 	mob_ferry \
 	mob_grizzly \
+	mob_koyote \
 	mob_leopard \
 	mob_mineralharvester \
 	mob_oilharvester \
