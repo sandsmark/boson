@@ -151,7 +151,7 @@ unsigned int BoGroundRenderer::renderCells(const BosonMap* map)
  BO_CHECK_NULL_RET0(map);
  BO_CHECK_NULL_RET0(map->heightMap());
 
- float* heightMap = map->heightMap();
+ const float* heightMap = map->heightMap();
  int heightMapWidth = map->width() + 1;
 
  int cellsCount = 0;
@@ -168,7 +168,7 @@ unsigned int BoGroundRenderer::renderCells(const BosonMap* map)
  return cellsCount;
 }
 
-void BoGroundRenderer::renderCellGrid(Cell** cells, int cellsCount, float* heightMap, int heightMapWidth)
+void BoGroundRenderer::renderCellGrid(Cell** cells, int cellsCount, const float* heightMap, int heightMapWidth)
 {
  BO_CHECK_NULL_RET(cells);
  BO_CHECK_NULL_RET(heightMap);
@@ -899,7 +899,7 @@ void BoDefaultGroundRenderer::renderVisibleCells(Cell** renderCells, unsigned in
  glDisable(GL_BLEND);
 }
 
-void BoDefaultGroundRenderer::renderCellsNow(Cell** cells, int count, int cornersWidth, float* heightMap, BoVector3* normalMap, unsigned char* texMapStart)
+void BoDefaultGroundRenderer::renderCellsNow(Cell** cells, int count, int cornersWidth, const float* heightMap, const float* normalMap, const unsigned char* texMapStart)
 {
  // Texture offsets
  const int offsetCount = 5;
@@ -914,8 +914,8 @@ void BoDefaultGroundRenderer::renderCellsNow(Cell** cells, int count, int corner
 	int y = c->y();
 
 	int celloffset = y * cornersWidth + x;
-	unsigned char* texMapUpperLeft = texMapStart + celloffset;
-	float* heightMapUpperLeft = heightMap + celloffset;
+	const unsigned char* texMapUpperLeft = texMapStart + celloffset;
+	const float* heightMapUpperLeft = heightMap + celloffset;
 
 	unsigned char upperLeftAlpha = *texMapUpperLeft;
 	unsigned char upperRightAlpha = *(texMapUpperLeft + 1);
@@ -942,25 +942,25 @@ void BoDefaultGroundRenderer::renderCellsNow(Cell** cells, int count, int corner
 	// ignored when light enabled.
 	BoMaterial::setDefaultAlpha((float)upperLeftAlpha / 255.0f);
 	glColor4ub(255, 255, 255, upperLeftAlpha);
-	glNormal3fv(normalMap[y * cornersWidth + x].data());
+	glNormal3fv(normalMap + (y * cornersWidth + x) * 3);
 	glTexCoord2f(texOffsets[x % offsetCount], texOffsets[texy % offsetCount] + offset);
 	glVertex3f(cellXPos, cellYPos, upperLeftHeight);
 
 	BoMaterial::setDefaultAlpha((float)lowerLeftAlpha / 255.0f);
 	glColor4ub(255, 255, 255, lowerLeftAlpha);
-	glNormal3fv(normalMap[(y + 1) * cornersWidth + x].data());
+	glNormal3fv(normalMap + ((y + 1) * cornersWidth + x) * 3);
 	glTexCoord2f(texOffsets[x % offsetCount], texOffsets[texy % offsetCount]);
 	glVertex3f(cellXPos, cellYPos - BO_GL_CELL_SIZE, lowerLeftHeight);
 
 	BoMaterial::setDefaultAlpha((float)lowerRightAlpha / 255.0f);
 	glColor4ub(255, 255, 255, lowerRightAlpha);
-	glNormal3fv(normalMap[(y + 1) * cornersWidth + (x + 1)].data());
+	glNormal3fv(normalMap + ((y + 1) * cornersWidth + (x + 1)) * 3);
 	glTexCoord2f(texOffsets[x % offsetCount] + offset, texOffsets[texy % offsetCount]);
 	glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos - BO_GL_CELL_SIZE, lowerRightHeight);
 
 	BoMaterial::setDefaultAlpha((float)upperRightAlpha / 255.0f);
 	glColor4ub(255, 255, 255, upperRightAlpha);
-	glNormal3fv(normalMap[y * cornersWidth + (x + 1)].data());
+	glNormal3fv(normalMap + (y * cornersWidth + (x + 1)) * 3);
 	glTexCoord2f(texOffsets[x % offsetCount] + offset, texOffsets[texy % offsetCount] + offset);
 	glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos, upperRightHeight);
  }
@@ -987,7 +987,7 @@ void BoFastGroundRenderer::renderVisibleCells(Cell** renderCells, unsigned int c
  BO_CHECK_NULL_RET(map->groundTheme());
 
  BosonGroundTheme* groundTheme = map->groundTheme();
- float* heightMap = map->heightMap();
+ const float* heightMap = map->heightMap();
 
  unsigned int* cellTextures = new unsigned int[cellsCount];
  for (unsigned int i = 0; i < cellsCount; i++) {
@@ -1040,7 +1040,7 @@ void BoFastGroundRenderer::renderVisibleCells(Cell** renderCells, unsigned int c
 		int y = c->y();
 
 		int celloffset = y * cornersWidth + x;
-		float* heightMapUpperLeft = heightMap + celloffset;
+		const float* heightMapUpperLeft = heightMap + celloffset;
 
 		GLfloat cellXPos = (float)x * BO_GL_CELL_SIZE;
 		GLfloat cellYPos = -(float)y * BO_GL_CELL_SIZE;

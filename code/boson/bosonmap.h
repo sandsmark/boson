@@ -339,7 +339,7 @@ public:
 		if (height == 0) {
 			height = 1;
 		}
-		mNormalMap = new BoVector3[arrayPos(width - 1, height - 1) + 1];
+		mNormalMap = new float[normalMapArrayPos(width - 1, height - 1) + 3];
 	}
 
 	virtual ~BoNormalMap()
@@ -351,13 +351,13 @@ public:
 	virtual bool save(QDataStream&) { return true; }
 	virtual bool load(QDataStream&) { return true; }
 
-	inline BoVector3* normalMap() const { return mNormalMap; }
+	inline const float* normalMap() const { return mNormalMap; }
 
 	/**
-	 * @return The height at @p x, @þ y. This function is safe, i.e. if @þ x
+	 * @return The normal at @p x, @þ y. This function is safe, i.e. if @þ x
 	 * or @p y are invalid we won't crash.
 	 **/
-	const BoVector3& normalAt(int x, int y) const
+	const float* normalAt(int x, int y) const
 	{
 		if (x < 0 || y < 0) {
 			// AB: the very first normal in the array is returned. it will
@@ -371,7 +371,7 @@ public:
 			x = 0;
 			y = 0;
 		}
-		return mNormalMap[arrayPos(x, y)];
+		return mNormalMap + normalMapArrayPos(x, y);
 	}
 
 	void setNormalAt(int x, int y, const BoVector3& n)
@@ -382,11 +382,18 @@ public:
 		if ((unsigned int)x >= width() || (unsigned int)y >= height()) {
 			return;
 		}
-		mNormalMap[arrayPos(x, y)] = n;
+		mNormalMap[normalMapArrayPos(x, y) + 0] = n[0];
+		mNormalMap[normalMapArrayPos(x, y) + 1] = n[1];
+		mNormalMap[normalMapArrayPos(x, y) + 2] = n[2];
+	}
+
+	inline int normalMapArrayPos(int x, int y) const
+	{
+		return arrayPos(x, y) * 3;
 	}
 
 private:
-	BoVector3* mNormalMap;
+	float* mNormalMap;
 };
 
 
@@ -537,8 +544,8 @@ public:
 	}
 
 	int currentTexture(int texture) const;
-	inline float* heightMap() const { return mHeightMap->heightMap(); }
-	inline BoVector3* normalMap() const { return mNormalMap->normalMap(); }
+	inline const float* heightMap() const { return mHeightMap->heightMap(); }
+	inline const float* normalMap() const { return mNormalMap->normalMap(); }
 	BosonGroundTheme* groundTheme() const { return mGroundTheme; }
 
 	/**
