@@ -102,10 +102,20 @@ public:
 	QPixmap* smallOverview(int unitType);
 
 	/**
-	 * @return The color of the team of this player. Can only be changed
-	 * on construction!
+	 * @return The color of the team of this player. See also @ref
+	 * setTeamColor
 	 **/
 	QRgb teamColor() const { return mTeamColor; }
+
+	/**
+	 * Change the team color. You can only call this function if no pixmaps
+	 * have been loaded that use the teamcolor (like units)!
+	 *
+	 * So you cannot use this anymore as soon as you called @ref
+	 * loadUnitPixmap
+	 * @return True if the color could be changed, otherwise false.
+	 **/
+	bool setTeamColor(QRgb color);
 
 	/**
 	 * @return A default color. This color differs after every call.
@@ -174,6 +184,7 @@ public:
 	 **/
 	QString identifier() const;
 	
+	static QValueList<QRgb> defaultColors();
 
 protected:
 	/**

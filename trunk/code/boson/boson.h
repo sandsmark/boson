@@ -54,6 +54,8 @@ public:
 
 	Unit* createUnit(int unitType, Player* owner); // public for Player::load
 
+	QValueList<QRgb> availableTeamColors() const;
+
 public slots:
 	void slotSetGameSpeed(int speed);
 
@@ -96,6 +98,18 @@ signals:
 	 * Emitted when a new map in the new game dialog is selected
 	 **/
 	void signalMapChanged(const QString& mapIdentifier);
+
+	/**
+	 * This is only interesting for the new game dialog. Emitted when
+	 * another species has been chosen.
+	 **/
+	void signalSpeciesChanged(Player* player);
+
+	/**
+	 * This is only interesting for the new game dialog. Emitted when
+	 * another species has been chosen.
+	 **/
+	void signalTeamColorChanged(Player* player);
 
 	/**
 	 * Emitted when a new scenario in the new game dialog is selected

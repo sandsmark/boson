@@ -47,10 +47,12 @@ public:
 
 	QIntDict<QCanvasPixmapArray> mFacilityBigShot;
 	QIntDict<QCanvasPixmapArray> mMobileBigShot;
+
+	bool mCanChangeTeamColor;
 };
 
 static int defaultColorIndex = 0;
-QRgb    default_color[BOSON_MAX_PLAYERS] = {
+QRgb default_color[BOSON_MAX_PLAYERS] = {
 	qRgb(0,0,255),
 	qRgb(0,255,0),
 	qRgb(255,0,0),
@@ -72,6 +74,7 @@ SpeciesTheme::SpeciesTheme(const QString& speciesDir, QRgb teamColor)
  d->mSmallOverview.setAutoDelete(true);
  d->mBigOverview.setAutoDelete(true);
  d->mSprite.setAutoDelete(true);
+ d->mCanChangeTeamColor = true;
  mShot = 0;
  
  if (!loadTheme(speciesDir, teamColor)) {
@@ -109,9 +112,9 @@ QRgb SpeciesTheme::defaultColor()
 bool SpeciesTheme::loadTheme(const QString& speciesDir, QRgb teamColor)
 {
  if (teamColor == qRgb(0,0,0)) { // no color specified
-	mTeamColor = defaultColor();
+	setTeamColor(defaultColor());
  } else {
-	mTeamColor = teamColor;
+	setTeamColor(teamColor);
  }
  mThemePath = speciesDir;
  kdDebug() << "theme path: " << themePath() << endl;
@@ -234,6 +237,8 @@ QPixmap* SpeciesTheme::smallOverview(int unitType)
 
 bool SpeciesTheme::loadUnitPixmap(const QString &fileName, QPixmap &pix, bool withMask, bool with_team_color)
 {
+ d->mCanChangeTeamColor = false;
+ 
  QImage image(fileName);
  QImage *mask = 0;
  int x, y, w, h;
@@ -599,3 +604,23 @@ QString SpeciesTheme::identifier() const
  cfg.setGroup("Boson Species");
  return cfg.readEntry("Identifier");
 }
+
+bool SpeciesTheme::setTeamColor(QRgb color)
+{
+ if (!d->mCanChangeTeamColor) {
+	kdWarning() << "Cannot change team color anymore!" << endl;
+	return false;
+ }
+ mTeamColor = color;
+ return true;
+}
+
+QValueList<QRgb> SpeciesTheme::defaultColors()
+{
+ QValueList<QRgb> colors;
+ for (int i = 0; i < BOSON_MAX_PLAYERS; i++) {
+	colors.append(default_color[i]);
+ }
+ return colors;
+}
+

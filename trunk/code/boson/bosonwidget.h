@@ -154,6 +154,7 @@ protected slots:
 	
 	void slotStartScenario();
 	void slotSendChangeSpecies(const QString& species);
+	void slotSendChangeTeamColor(QRgb color);
 
 	void slotUnfog(int x, int y);
 	void slotFog(int x, int y);
@@ -163,6 +164,7 @@ protected slots:
 	void slotInitFogOfWar();
 
 protected:
+	void sendChangeTeamColor(Player* player, QRgb color);
 	void changeSpecies(const QString& species);
 	void addLocalPlayer();
 

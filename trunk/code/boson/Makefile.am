@@ -56,7 +56,7 @@ boson_LDADD = -lkdegames -lqtmcop -lsoundserver_idl -lartskde $(LIB_KDEUI)
 boson_SOURCES = $(BOSON_SRC) $(COMMON_SRC)
 
 boeditor_LDFLAGS = $(KDE_RPATH) $(all_libraries)
-boeditor_LDADD = -lkdegames -lqtmcop -lsoundserver_idl -lartskde $(LIB_KDEUI) $(LIB_KFILE)
+boeditor_LDADD = -lkdegames -lqtmcop -lsoundserver_idl -lartskde $(LIB_KDEUI) 
 boeditor_SOURCES = $(BOEDITOR_SRC) $(COMMON_SRC)
 
 METASOURCES = AUTO

@@ -21,6 +21,7 @@
 #include "player.h"
 #include "bosoncomputerio.h"
 #include "speciestheme.h"
+#include "boson.h"
 
 #include <klocale.h>
 #include <kdebug.h>
@@ -67,7 +68,12 @@ KGameDialogComputerConfig::~KGameDialogComputerConfig()
 
 void KGameDialogComputerConfig::slotAddComputerPlayer()
 {
- // TODO
+ Boson* g = (Boson*)game();
+ if (!g) {
+	kdError() << k_funcinfo << "NULL game" << endl;
+	return;
+ }
+
  Player* p = new Player;
  QString name = d->mName->text();
  if (name.isNull()) {
@@ -78,7 +84,8 @@ void KGameDialogComputerConfig::slotAddComputerPlayer()
  // FIXME: MUST be sent over network! problem: at this point the ID of the
  // player is unknown. Possible solution would be to load the theme as soon as
  // the player is being added.
- p->loadTheme(SpeciesTheme::speciesDirectory(SpeciesTheme::defaultSpecies()), SpeciesTheme::defaultColor());
+ QRgb color = g->availableTeamColors().first();
+ p->loadTheme(SpeciesTheme::speciesDirectory(SpeciesTheme::defaultSpecies()), color);
 
  BosonComputerIO* io = new BosonComputerIO();
  io->setReactionPeriod(50);

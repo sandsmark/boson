@@ -21,6 +21,8 @@
 
 #include <kgame/kgamedialogconfig.h>
 
+class Player;
+
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
@@ -36,16 +38,24 @@ signals:
 	void signalMapChanged(const QString& fileName);
 	void signalScenarioChanged(const QString& fileName);
 	void signalSpeciesChanged(const QString& species);
+	void signalTeamColorChanged(QRgb color);
 
 public slots:
 	void slotMapChanged(int index);
 	void slotMapChanged(const QString& mapIdentifier);
 	void slotScenarioChanged(const QString& scenarioIdentifier);
+	void slotSpeciesChanged(Player*);
+	void slotTeamColorChanged(Player*);
 
 protected slots:
 	void slotStartGame();
 	void slotScenarioChanged(int index);
 	void slotSpeciesChanged(int index);
+	void slotTeamColorChanged(int index);
+
+protected:
+	void regenerateColors();
+	void addColor(const QColor& c);
 
 private:
 	class KGameDialogBosonConfigPrivate;
