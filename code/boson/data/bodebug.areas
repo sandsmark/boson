@@ -13,9 +13,11 @@
 230    Camera
 250    BosonScenario
 
-# LoadGame, as in SaveGame (not as in "loading data on startup")
+# 260 and 270 are equal. the difference has historic reasons only - pick your
+# favourite :)
+# feel free to remove one are completely
 260    LoadGame
-270    GameStarting
+270    LoadGame
 300    Boson Advance
 310    Collisions
 350    BosonShot
