@@ -35,7 +35,6 @@
 
 #include "boufo.h"
 #include <bodebug.h>
-#include "../bosonglwidget.h"
 
 #include <kshortcut.h>
 #include <kstandarddirs.h>
