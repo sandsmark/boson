@@ -58,6 +58,7 @@ public:
 		IdMoveDestX = UnitBase::IdLast + 3,
 		IdMoveDestY = UnitBase::IdLast + 4,
 		IdMoveRange = UnitBase::IdLast + 5,
+		IdWantedRotation = UnitBase::IdLast + 6,
 
 		// properties in MobileUnit
 		IdSpeed = UnitBase::IdLast + 50,
