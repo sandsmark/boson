@@ -19,24 +19,89 @@
 #ifndef TOP_H
 #define TOP_H
 
-#include "topbase.h"
+#include <kdockwidget.h>
+
+class QWidgetStack;
+class Boson;
+class Player;
+class BosonPlayField;
+class BosonCanvas;
 
 /**
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
  **/
-class Top : public TopBase
+class TopWidget : public KDockMainWindow
 {
-	Q_OBJECT
+Q_OBJECT
 public:
 	/**
 	 * Default Constructor
 	 **/
-	Top();
+	TopWidget();
 
 	/**
 	 * Default Destructor
 	 **/
-	virtual ~Top();
+	~TopWidget();
+
+	Boson* game() { return mBoson; };
+	Player* player() { return mPlayer; };
+	BosonPlayField* map() { return mMap; };
+	BosonCanvas* canvas() { return mCanvas; };
+
+	/**
+	  *
+	  */
+public slots:
+	/** Called when user clicks "start new game" button
+	  * This shows BosonStartGameWidget from where you can start new game
+	  */
+	void slotNewGame();
+	/** Quits Boson
+	  * If there is game running, it first end the game and then quits
+	  */
+	void slotQuit();
+	/** Starts loading new game. Called when user clicks "Start game" button in
+	  * BosonStartGameWidget
+	  */
+	void slotStartGame();
+	/** Shows BosonWelcomeWidget
+	  * From there, user can start new game or quit
+	  */
+	void slotShowMainMenu();
+	/** Shows game server options */
+	void slotShowServerOptions();
+	/** Hides game server options and shows BosonStartGameWidget */
+	void slotHideServerOptions();
+	/** Toggles if chat dock is shown or hidden */
+	void slotToggleChat();
+	/** Toggles if  is shown or hidden */
+	void slotToggleCmdFrame();
+	/** Toggles sound */
+	void slotToggleSound();
+	/** Toggles music */
+	void slotToggleMusic();
+	/** Toggles if  is shown or hidden */
+	void slotToggleStatusbar();
+	void slotConfigureKeys();
+	/** Toggles if Boson is shown fullscreen or normally */
+	void slotToggleFullScreen();
+	/** Ends current game */
+	void slotEndGame();
+	/** Shows game preferences dialog */
+	void slotGamePreferences();
+	/** Splits active display horzontally */
+	void slotSplitDisplayHorizontal();
+	/** Splits active display vertically */
+	void slotSplitDisplayVertical();
+	/** Removes active display */
+	void slotRemoveActiveDisplay();
+
+signals:
+	void signalSetMobilesCount(int);
+	void signalSetFacilitiesCount(int);
+	void signalMineralsUpdated(int);
+	void signalOilUpdated(int);
 
 protected:
 	/**
@@ -52,14 +117,60 @@ protected:
 	 **/
 	void readProperties(KConfig *);
 
+protected slots:
+	void slotCanvasTilesLoading(int);
+	void slotCanvasTilesLoaded();
+	void slotReceiveMap(const QByteArray& buffer);
+	void slotCmdFrameDockHidden();
+	void slotChatDockHidden();
+	void slotDebugPlayer(int);
+
 private slots:
-	void slotGameNew();
+	void loadGameData3();
+	void slotDebugMode(int index);
+	void slotZoom(int index);
+	void slotDebug();
+	void slotUnfogAll();
 
 private:
-	void initKAction();
+	void initMusic();
+	void initBoson();
+	void initPlayer();
+	void initMap();
+	void initActions();
 	void initStatusBar();
+	void enableGameActions(bool enable);
+	void initDebugPlayersMenu();
+
+	void loadGameData1();
+	void loadGameData2();
+	void slotWaitForMap();
+	void checkEvents();
+	void checkDockStatus();
+
+	void initWelcomeWidget();
+	void showWelcomeWidget();
+	void initNewGameWidget();
+	void showNewGameWidget();
+	void initBosonWidget();
+	void showBosonWidget();
+	void initServerOptions();
+	void showServerOptions();
+	void initLoadingWidget();
+	void showLoadingWidget();
 
 private:
+	QWidgetStack* mWs;
+	Boson* mBoson;
+	Player* mPlayer;
+	BosonPlayField* mMap;
+	BosonCanvas* mCanvas;
+	bool mMapReceived;
+	KDockWidget* mMainDock;
+	bool mGame;
+
+	class TopWidgetPrivate;
+	TopWidgetPrivate* d;
 };
 
 #endif
