@@ -380,6 +380,16 @@ Texture=flames
 
 
 
+[GeneralBulletTrail]
+Id=9001
+Type=BulletTrail
+Color=1.0,0.8,0.2,0.7
+MinLength=0.2
+MaxLength=2.0
+Width=1
+
+
+
 [VeryLightMineralRefinerySmoke1]
 Id=10001
 Type=ParticleGeneric
