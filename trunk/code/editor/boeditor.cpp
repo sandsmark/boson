@@ -284,7 +284,7 @@ void BoEditorApp::initView()
    this one is the first one, other can pop up as well */
 
 	mainView *mainview = new mainView(field, this, "main_view_0");
-	resize(800,600);
+	resize(800,628);
 	setView(mainview);
 }
 
