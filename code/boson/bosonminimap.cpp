@@ -107,11 +107,9 @@ void BosonMiniMap::slotCreateMap(int w, int h)
 void BosonMiniMap::slotAddCell(int x, int y, int groundType, unsigned char)
 {
  if (x < 0 || x >= mapWidth()) {
-//	kdError() << k_funcinfo << ": invalid cell! x=" << x << endl;
 	return;
  }
  if (y < 0 || y >= mapHeight()) {
-//	kdError() << k_funcinfo << ": invalid cell! y=" << y << endl;
 	return;
  }
  if (!ground()) {
@@ -195,10 +193,7 @@ void BosonMiniMap::slotAddUnit(Unit* unit, int x, int y)
  }
  QColor color = unit->owner()->teamColor();
  if (unit->isFacility()) {
-//	kdDebug() << "paint fac" << endl;
-//	kdDebug() << color.red() << " " << color.green() << " " << color.blue() << endl;
 	setPoint(x, y, color);
-//	kdDebug() << "paint fac done" << endl;
  } else {
 	setPoint(x, y, color);
  }
