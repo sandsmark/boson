@@ -37,7 +37,7 @@ class BosonCanvas;
 class UnitProperties;
 class PluginProperties;
 class SpeciesTheme;
-class UnitPropertyHandler;
+class BosonItemPropertyHandler;
 
 /**
  * Ok, ok - this class is useless. All it does is providing a lot of properties
@@ -102,53 +102,6 @@ public:
 	
 	UnitBase(const UnitProperties* prop, Player* owner, BosonCanvas* canvas);
 	virtual ~UnitBase();
-
-	/**
-	 * Initialize static members
-	 **/
-	static void initStatic();
-
-	/**
-	 * Add a property ID to the list of properties. This must be done before
-	 * calling @ref registerData.
-	 * @param id A <em>unique</em> property ID - you must ensure that one
-	 * unit never uses two identical ids.
-	 * @param name The name of the property. Will be used in the debug
-	 * dialog as well as e.g. in the scenario files. This name must be
-	 * unique as well!
-	 **/
-	static void addPropertyId(int id, const QString& name);
-
-	/**
-	 * @return The id of the specified property name. Or -1 if not found.
-	 * See @ref addPropertyId.
-	 **/
-	static int propertyId(const QString& name);
-
-	/**
-	 * @return A name for the specified property id or QString::null if not
-	 * found. See also @ref addPropertyId
-	 **/
-	static QString propertyName(int id);
-
-	/**
-	 * Shortcut for
-	 * <pre>
-	 * prop->registerData(id, dataHandler(), KGamePropertyBase::PolicyLocal,
-	 * propertyName(id));
-	 * </pre>
-	 *
-	 * Note that you must call @ref addPropertyId before you are able to use
-	 * registerData!
-	 * @param prop The @ref KGamePropertyBase to be registered
-	 * @param id The PropertyId for the @ref KGamePropertyBase. This must be
-	 * unique for every property, i.e. a unit must never have two identical
-	 * property ids.
-	 * @param local If TRUE use @ref KGamePropertyBase::PolicyLocal,
-	 * otherwise @ref KGamePropertyBase::PolicyClean. Don't use FALSE here
-	 * unless you know what you're doing!
-	 **/
-	void registerData(KGamePropertyBase* prop, int id, bool local = true);
 
 	/**
 	 * Change what this unit is currently doing.
@@ -230,13 +183,6 @@ public:
 	 * construction only! We do not yet support changing the owner!
 	 **/
 	void setOwner(Player* owner);
-
-	/**
-	 * @return The @ref KGamePropertyHandler for all @ref KGameProperty
-	 * objects of this unit. Note that you should use @ref weaponDataHandler
-	 * for weapon properties instead.
-	 **/
-	KGamePropertyHandler* dataHandler() const;
 
 	/**
 	 * @return The @ref KGamePropertyHandler for weapon properties. The
@@ -384,11 +330,12 @@ protected:
 	void reloadShields(int by = 1);
 
 private:
+	static void initStatic();
+
+private:
 	Player* mOwner;
 	unsigned long int mId; // not a KGameProperty, to make saving to XML (i.e. scenario files) more easy.
 	bool mIsMoving;
-
-	static QMap<int, QString>* mPropertyMap;
 
 	KGameProperty<unsigned long int> mArmor;
 	KGameProperty<unsigned long int> mShields;
@@ -399,8 +346,7 @@ private:
 	KGamePropertyInt mWork;
 	KGamePropertyInt mAdvanceWork;
 
-	UnitPropertyHandler* mProperties;
-	UnitPropertyHandler* mWeaponProperties;
+	BosonItemPropertyHandler* mWeaponProperties;
 
 	const UnitProperties* mUnitProperties;
 

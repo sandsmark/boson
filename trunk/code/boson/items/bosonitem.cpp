@@ -24,15 +24,99 @@
 #include "../bosonmodel.h"
 #include "../cell.h" // for deleteitem. i dont want this. how can we avoid this? don't use qptrvector probably.
 #include "../bosonparticlesystem.h"
+#include "../bosonpropertyxml.h"
+#include "bosonitempropertyhandler.h"
 #include "bodebug.h"
 
 #include <qrect.h>
 #include <qptrlist.h>
+#include <qptrvector.h>
+#include <qdom.h>
+
+#include <kstaticdeleter.h>
+
+QMap<int, QString>* BosonItemProperties::mPropertyMap = 0;
+KStaticDeleter< QMap<int, QString> > sd;
+
+BosonItemProperties::BosonItemProperties()
+{
+ if (!mPropertyMap) {
+	initStatic();
+ }
+ mProperties = new BosonItemPropertyHandler(this);
+ mProperties->setPolicy(KGamePropertyBase::PolicyLocal); // fallback
+}
+
+BosonItemProperties::~BosonItemProperties()
+{
+ dataHandler()->clear();
+ delete mProperties;
+}
+
+void BosonItemProperties::initStatic()
+{
+ if (mPropertyMap) {
+	return;
+ }
+ delete mPropertyMap;
+ mPropertyMap = new QMap<int, QString>;
+ sd.setObject(mPropertyMap);
+}
+
+KGamePropertyHandler* BosonItemProperties::dataHandler() const
+{
+ return (KGamePropertyHandler*)mProperties;
+}
+
+void BosonItemProperties::registerData(KGamePropertyBase* prop, int id, bool local)
+{
+ if (!prop) {
+	boError() << k_funcinfo << "NULL property" << endl;
+	return;
+ }
+ if (id < KGamePropertyBase::IdUser) {
+	boWarning() << k_funcinfo << "ID < KGamePropertyBase::IdUser" << endl;
+	// do not return - might still work
+ }
+ QString name = propertyName(id);
+ if (name.isNull()) {
+	boWarning() << k_funcinfo << "Invalid property name for " << id << endl;
+	// a name isn't strictly necessary, so don't return
+ }
+ prop->registerData(id, dataHandler(),
+		local ? KGamePropertyBase::PolicyLocal : KGamePropertyBase::PolicyClean,
+		name);
+}
+
+void BosonItemProperties::addPropertyId(int id, const QString& name)
+{
+ if (mPropertyMap->contains(id)) {
+	boError() << k_funcinfo << "Cannot add " << id << " twice!" << endl;
+	boError() << k_funcinfo << "Existing name: " << *mPropertyMap->find(id) << " ; provided name: " << name << endl;
+	return;
+ }
+/* if (mPropertyMap->values().contains(name)) {
+	boError() << k_funcinfo << "Cannot add " << name << " twice!" << endl;
+	return;
+ }*/
+ mPropertyMap->insert(id, name);
+}
+
+QString BosonItemProperties::propertyName(int id)
+{
+ if (!mPropertyMap->contains(id)) {
+	return QString::null;
+ }
+ return (*mPropertyMap)[id];
+}
+
 
 BosonItem::BosonItem(BosonModel* model, BosonCanvas* canvas)
+	: BosonItemProperties()
 {
  mCanvas = canvas;
  mModel = model;
+
  mCurrentAnimation = 0;
  mX = mY = mZ = 0.0f;
  mWidth = mHeight = 0;
@@ -99,6 +183,8 @@ BosonItem::~BosonItem()
 	canvas()->removeItem(this);
  }
 }
+
+
 
 QPtrVector<Cell>* BosonItem::cells()
 {
@@ -415,5 +501,55 @@ void BosonItem::rotateParticleSystems(float angle, float x, float y, float z)
 QPtrList<BosonParticleSystem>* BosonItem::particleSystems() const
 {
  return 0l;
+}
+
+bool BosonItem::saveAsXML(QDomElement& root)
+{
+ if (root.isNull()) {
+	boError() << k_funcinfo << "NULL root node" << endl;
+	return false;
+ }
+ root.setAttribute(QString::fromLatin1("Rtti"), (int)rtti());
+
+ // dummy attributes, if they are used in derived classes, they should get
+ // replaced
+ root.setAttribute(QString::fromLatin1("Type"), (int)0);
+ root.setAttribute(QString::fromLatin1("Group"), (int)0);
+ root.setAttribute(QString::fromLatin1("GroupType"), (int)0);
+
+ // the data handler
+ BosonCustomPropertyXML propertyXML;
+ QDomDocument doc = root.ownerDocument();
+ QDomElement handler = doc.createElement(QString::fromLatin1("DataHandler"));
+ if (!propertyXML.saveAsXML(handler, dataHandler())) {
+	boError() << k_funcinfo << "Unable to save datahandler of item" << endl;
+	return false;
+ }
+ root.setAttribute(QString::fromLatin1("DataHandlerId"), dataHandler()->id());
+ root.appendChild(handler);
+
+ return true;
+}
+
+bool BosonItem::loadFromXML(const QDomElement& root)
+{
+ if (root.isNull()) {
+	boError() << k_funcinfo << "NULL root node" << endl;
+	return false;
+ }
+ // load the data handler
+ BosonCustomPropertyXML propertyXML;
+ QDomElement handler = root.namedItem(QString::fromLatin1("DataHandler")).toElement();
+ if (handler.isNull()) {
+	boError(260) << k_funcinfo << "No DataHandler tag found for Item" << endl;
+	return false;
+ }
+ if (!propertyXML.loadFromXML(handler, dataHandler())) {
+	boError(260) << k_funcinfo << "unable to load item data handler" << endl;
+	return false;
+ }
+
+
+ return true;
 }
 

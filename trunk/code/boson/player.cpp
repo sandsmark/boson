@@ -28,7 +28,7 @@
 #include "bosonstatistics.h"
 #include "boson.h"
 #include "upgradeproperties.h"
-#include "unitpropertyhandler.h"
+#include "items/bosonitempropertyhandler.h"
 #include "bosonpropertyxml.h"
 #include "bosonprofiling.h"
 #include "bodebug.h"
@@ -269,13 +269,16 @@ void Player::slotUnitPropertyChanged(KGamePropertyBase* prop)
  }
 
  // AB: we don't check for sender()->isA() here, for performance reasons.
- UnitPropertyHandler* p = (UnitPropertyHandler*)sender();
- if (!p->unit()) {
-	boError() << k_funcinfo << "NULL parent unit for property handler" << endl;
+ BosonItemPropertyHandler* p = (BosonItemPropertyHandler*)sender();
+ if (!p->item()) {
+	boError() << k_funcinfo << "NULL parent item for property handler" << endl;
 	boDebug() << "player=" << id() << ",propId=" << prop->id() << endl;
 	return;
  }
- Unit* unit = (Unit*)p->unit();
+ if (!RTTI::isUnit(p->item()->rtti())) {
+	return;
+ }
+ Unit* unit = (Unit*)p->item();
  if (!unit) {
 	boError() << k_funcinfo << "NULL unit" << endl;
 	return;

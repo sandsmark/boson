@@ -17,45 +17,51 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef UNITPROPERTYHANDLER_H
-#define UNITPROPERTYHANDLER_H
+#ifndef BOSONITEMPROPERTYHANDLER_H
+#define BOSONITEMPROPERTYHANDLER_H
 
 #include <kgame/kgamepropertyhandler.h>
 
-class UnitBase;
+class BosonItemProperties;
 
 /**
- * In @ref Player we need to know which unit belongs to a @ref
+ * In @ref Player we need to know which unit/item belongs to a @ref
  * KGamePropertyHandler when it emits a signal indicating that a property has
  * changed. Unfortunately iterating the list of all units can take a very long
  * time (about 50-100ms for about 1000 units. this is a lot, since it happens
  * very often!). For this there is this class.
  *
  * All it does it to provide easy access to the owner of this handler - see @ref
- * unit.
+ * item.
  * @author Andreas Beckermann <b_mann@gmx.de>
- * @short Class that provides direct acces to the parent unit of a @ref
+ * @short Class that provides direct acces to the parent item of a @ref
  * KGamePropertyHandler
  **/
-class UnitPropertyHandler : public KGamePropertyHandler
+class BosonItemPropertyHandler : public KGamePropertyHandler
 {
+	Q_OBJECT
 public:
 	/**
 	 * Construct a @ref KGamePropertyHandler with parent @p parent. Note
-	 * that since @ref UnitBase isn't a @ref QObject there will be no auto
+	 * that since @ref BosonItem isn't a @ref QObject there will be no auto
 	 * deletion!
 	 *
-	 * You can retrieve the parent of this property handler using @ref unit
+	 * You can retrieve the parent of this property handler using @ref item
 	 **/
-	UnitPropertyHandler(UnitBase* parent) : KGamePropertyHandler()
+	BosonItemPropertyHandler(BosonItemProperties* parent) : KGamePropertyHandler()
 	{
-		mUnit = parent;
+		mItem = parent;
 	}
 
-	UnitBase* unit() const { return mUnit; }
+	/**
+	 * @return The owner of this handler. You can safely cast it to @ref
+	 * BosonItem (and to anything else if you take
+	 * @ref BosonItemPropreties::rtti into account)
+	 **/
+	BosonItemProperties* item() const { return mItem; }
 
 private:
-	UnitBase* mUnit;
+	BosonItemProperties* mItem;
 };
 
 #endif
