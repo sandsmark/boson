@@ -4,7 +4,7 @@ Boson, a real-time strategy game
 What is it ?
 Boson is an OpenGL real-time strategy game, with the feeling of
 Command&Conquer(tm) or StarCraft(tm) and OpenGL support.
-It is designed to run on Unix (Linux) computers, and is built on top of the libkdegames, kde and Qt libraries.
+It is designed to run on Unix (Linux) computers, and is built on top of the kde and Qt libraries.
 A minimum of two players is required, because the artificial intelligence is very elementary until now.
 
 
@@ -19,7 +19,7 @@ Minimum hardware requirements:
         Optional: Sound card
 
 Minimum software requirements:
-        XFree 4.x server (with OpenGL support, 4.3 and Xrandr for resolution changing) - see http://www.xfree86.org/
+        XFree 4.x server - see http://www.xfree86.org/
         OpenGL - The OpenGL library (should be included in your XFree Server or graphics card driver)
         Qt 3.1 or better - see http://www.trolltech.com/
         kdelibs 3.1 or better (3.0 is untested) - see http://www.kde.org/
