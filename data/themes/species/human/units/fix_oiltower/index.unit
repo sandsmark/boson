@@ -5,10 +5,10 @@ ConstructionSteps=10
 
 [Boson Unit]
 Armor=0
-DestroyedParticles=1001,3002,7001
-ExplodingDamage=0
-ExplodingDamageRange=0
-Health=50
+DestroyedParticles=1011,3011,6011,7010
+ExplodingDamage=120
+ExplodingDamageRange=1.5
+Health=80
 HitPoint=-0.1,0.1,0.92
 Id=7
 IsFacility=true

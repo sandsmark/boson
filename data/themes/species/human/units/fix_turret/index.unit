@@ -5,7 +5,7 @@ ConstructionSteps=12
 
 [Boson Unit]
 Armor=0
-DestroyedParticles=1001,3001,7001
+DestroyedParticles=1001,3001,6001,7001
 ExplodingDamage=0
 ExplodingDamageRange=0
 Health=150
@@ -40,14 +40,14 @@ Shoot=shoot
 [Weapon_0]
 CanShootAtAirUnits=false
 CanShootAtLandUnits=true
-Damage=15
+Damage=25
 DamageRange=1
 FlyParticles=
-HitParticles=2002
+HitParticles=2001
 MaxHeight=1
 Name=Cannon
 Offset=0,0,0
 Range=5
-Reload=5
+Reload=30
 ShootParticles=
 Speed=0

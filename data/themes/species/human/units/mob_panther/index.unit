@@ -5,7 +5,7 @@ Speed=5
 
 [Boson Unit]
 Armor=0
-DestroyedParticles=1002,3003,6001,7001
+DestroyedParticles=1002,3003,6003,7001
 ExplodingDamage=0
 ExplodingDamageRange=0
 Health=80
