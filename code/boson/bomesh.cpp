@@ -1580,7 +1580,7 @@ void BoMesh::setIsTeamColor(bool c)
 
 unsigned int BoMesh::movePoints(float* vertexarray, float* normalarray, float* texelarray, int index)
 {
- boDebug() << k_funcinfo << endl;
+// boDebug() << k_funcinfo << endl;
  unsigned int i = 0;  // How many points have been added
 
  // Create vertex list for each lod
