@@ -48,7 +48,7 @@ public:
 		InvalidFileFormat,
 		InvalidCookie,
 		InvalidVersion,
-		KGameError,
+		KGameError
 	};
 
 	Boson(QObject* parent);
