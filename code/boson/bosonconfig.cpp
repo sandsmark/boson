@@ -216,6 +216,7 @@ BosonConfig::BosonConfig(KConfig* conf)
  mCursorMode = new BoConfigIntEntry(this, "CursorMode", (int)DEFAULT_CURSOR);
  mCursorDir = new BoConfigStringEntry(this, "CursorDir", DEFAULT_CURSOR_DIR);
  mToolTipUpdatePeriod = new BoConfigIntEntry(this, "ToolTipUpdatePeriod", DEFAULT_TOOLTIP_UPDATE_PERIOD);
+ mToolTipCreator = new BoConfigIntEntry(this, "ToolTipCreator", DEFAULT_TOOLTIP_CREATOR);
 
  mDebugMode = DebugNormal;
 

@@ -262,6 +262,9 @@ public:
 	void setToolTipUpdatePeriod(int ms) { mToolTipUpdatePeriod->setValue(ms); }
 	int toolTipUpdatePeriod() const { return mToolTipUpdatePeriod->value(); }
 
+	void setToolTipCreator(int type) { mToolTipCreator->setValue(type); }
+	int toolTipCreator() const { return mToolTipCreator->value(); }
+
 
 // below we have config values that are *not* stored when quitting boson
 public:
@@ -359,6 +362,7 @@ private:
 	BoConfigStringEntry* mCursorDir;
 	BoConfigIntEntry* mCursorMode;
 	BoConfigIntEntry* mToolTipUpdatePeriod;
+	BoConfigIntEntry* mToolTipCreator;
 
 	// NOT stored to config file!
 	bool mDisableSound;

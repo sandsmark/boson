@@ -387,7 +387,6 @@ void BoDisplayManager::slotScroll(int dir)
 
 void BoDisplayManager::slotUpdateIntervalChanged(unsigned int ms)
 {
- boConfig->setUpdateInterval(ms);
  QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
  while (it.current()) {
 	it.current()->setUpdateInterval(ms);
@@ -552,6 +551,24 @@ void BoDisplayManager::unlockAction()
  QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
  while (it.current()) {
 	it.current()->displayInput()->unlockAction();
+	++it;
+ }
+}
+
+void BoDisplayManager::setToolTipUpdatePeriod(int ms)
+{
+ QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
+ while (it.current()) {
+	it.current()->setToolTipUpdatePeriod(ms);
+	++it;
+ }
+}
+
+void BoDisplayManager::setToolTipCreator(int type)
+{
+ QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
+ while (it.current()) {
+	it.current()->setToolTipCreator(type);
 	++it;
  }
 }

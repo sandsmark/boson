@@ -91,7 +91,7 @@ public:
 	bool loadActionPixmaps();
 
 	/**
-	 * Load the model for the specified unit @prop and the color @p
+	 * Load the model for the specified unit @p prop and the color @p
 	 * teamColor.
 	 **/
 	void loadUnitModel(const UnitProperties* prop, const QColor& teamColor);

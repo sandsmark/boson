@@ -3013,6 +3013,16 @@ void BosonBigDisplayBase::setDebugItemWorks(bool debug)
  d->mDebugItemWorks = debug;
 }
 
+void BosonBigDisplayBase::setToolTipCreator(int type)
+{
+ d->mToolTips->setToolTipCreator(type);
+}
+
+void BosonBigDisplayBase::setToolTipUpdatePeriod(int ms)
+{
+ d->mToolTips->setUpdatePeriod(ms);
+}
+
 bool BosonBigDisplayBase::boProject(GLfloat x, GLfloat y, GLfloat z, QPoint* pos) const
 {
  // AB: once again - most credits go to mesa :)

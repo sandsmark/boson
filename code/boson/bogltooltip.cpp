@@ -19,14 +19,12 @@
 #include "bogltooltip.h"
 #include "bogltooltip.moc"
 
+#include "botooltipcreator.h"
 #include "bodebug.h"
-#include "rtti.h"
 #include "bosonbigdisplaybase.h"
 #include "bosoncanvas.h"
-#include "bosonconfig.h"
 #include "bosonglfont.h"
 #include "items/bosonitem.h"
-#include "unit.h"
 
 #include <qmap.h>
 #include <qtimer.h>
@@ -36,32 +34,143 @@
 
 #define TOOLTIP_DELAY 600
 
+
+class BoToolTipCreatorFactoryPrivate
+{
+public:
+	BoToolTipCreatorFactoryPrivate()
+	{
+	}
+	QMap<int, QString> mNames;
+};
+
+BoToolTipCreatorFactory::BoToolTipCreatorFactory()
+{
+ d = new BoToolTipCreatorFactoryPrivate;
+ registerTipCreator(BoToolTipCreator::Basic, i18n("Basic Tooltips"));
+ registerTipCreator(BoToolTipCreator::Extended, i18n("Extended Tooltips"));
+// registerTipCreator(BoToolTipCreator::Debug, i18n("Tooltips for debugging"));
+}
+
+BoToolTipCreatorFactory::~BoToolTipCreatorFactory()
+{
+ delete d;
+}
+
+QValueList<int> BoToolTipCreatorFactory::availableTipCreators() const
+{
+ return d->mNames.keys();
+}
+
+QString BoToolTipCreatorFactory::tipCreatorName(int type) const
+{
+ return d->mNames[type];
+}
+
+BoToolTipCreator* BoToolTipCreatorFactory::tipCreator(int type) const
+{
+ BoToolTipCreator* tipCreator = 0;
+ switch (type) {
+	case BoToolTipCreator::Basic:
+		tipCreator = new BoToolTipCreatorBasic();
+		break;
+	default:
+		boWarning() << k_funcinfo << "Unknown tooltip creator type " << type << endl;
+	case BoToolTipCreator::Extended:
+		tipCreator = new BoToolTipCreatorExtended();
+		break;
+//	case BoToolTipCreator::Debug:
+ }
+ return tipCreator;
+}
+
+void BoToolTipCreatorFactory::registerTipCreator(int type, const QString& name)
+{
+ if (d->mNames.contains(type)) {
+	boError() << k_funcinfo << "type=" << type << " already registered!" << endl;
+	return;
+ }
+ d->mNames.insert(type, name);
+}
+
+
+
 class BoToolTip
 {
 public:
 	BoToolTip();
 	~BoToolTip();
 
+	/**
+	 * Use @p creator to create the tooltip. Note that this class will
+	 * take ownership of the object and therefore will delete it
+	 **/
+	void setToolTipCreator(BoToolTipCreator* creator);
+
+	/**
+	 * Clear the tooltip. This removes any data from this class and ensures
+	 * that @ref isEmpty returns TRUE. This also ensures that the class
+	 * doesn't point to invalid objects (e.g. to deleted items)
+	 **/
 	void clear();
+
+	/**
+	 * Make this tooltip display an item.
+	 **/
+	// AB: we could also add set*() functions for e.g. cells or whatever we
+	// like
+#warning TODO
+	// TODO: we have to ensure this pointer is actually cleared to NULL once
+	// the item gets deleted!!
+	// maybe add a remove() function that gets called whenever an item is
+	// removed from the canvas
 	void setItem(BosonItem* item);
+
+	/**
+	 * Update the data of the tooltip. This does <em>not</em> check what is
+	 * currently under the cursor, but updates the content of the tooltip
+	 * assuming the last called set*() function (e.g. @ref setItem) is still
+	 * valid.
+	 *
+	 * We do not check what is currently under the cursor, because it might
+	 * be expensive under some circumstances and update() could get called
+	 * pretty often.
+	 **/
 	void update();
 
+	/**
+	 * @return TRUE if this tooltip is empty, i.e. does not contain any
+	 * data. No tooltip should be displayed then.
+	 **/
 	inline bool isEmpty() const { return (mTip.isNull() || !mItem); }
 
+	/**
+	 * @return The tooltip that has been created the last time @ref update
+	 * was called.
+	 **/
 	const QString& tip() const { return mTip; }
 
 private:
+	BoToolTipCreator* mCreator;
 	BosonItem* mItem;
 	QString mTip;
 };
 
 BoToolTip::BoToolTip()
 {
+ mCreator = 0;
  mItem = 0;
 }
 
 BoToolTip::~BoToolTip()
 {
+ delete mCreator;
+}
+
+void BoToolTip::setToolTipCreator(BoToolTipCreator* creator)
+{
+ delete mCreator;
+ mCreator = creator;
 }
 
 void BoToolTip::setItem(BosonItem* item)
@@ -82,22 +191,11 @@ void BoToolTip::clear()
 
 void BoToolTip::update()
 {
- if (!mItem) {
-	mTip = QString::null;
+ if (!mCreator) {
+	clear();
 	return;
  }
- if (!RTTI::isUnit(mItem->rtti())) {
-	mTip = QString::null;
-	return;
- }
-
- // AB: not sure about this. we could add a virutal method BosonItem::tooltip()
- // and make each item generate its own tooltip. we could avoid includign unit.h
- // that way.
- // but once we have configurable tooltips we would have to include
- // bosonconfig.h in unit.cpp and maybe in bosonitem.cpp which I like even less.
- Unit* u = (Unit*)mItem;
- mTip = i18n("%1\nHealth: %2").arg(u->name()).arg(u->health());
+ mTip = mCreator->createToolTip(mItem);
 }
 
 class BoGLToolTipPrivate
@@ -118,6 +216,7 @@ BoGLToolTip::BoGLToolTip(BosonBigDisplayBase* v) : QObject(v)
  mView = v;
  mShowTip = false;
  mUpdatePeriod = 0;
+ mCreator = 0;
 
  kapp->setGlobalMouseTracking(true);
  kapp->installEventFilter(this);
@@ -125,6 +224,7 @@ BoGLToolTip::BoGLToolTip(BosonBigDisplayBase* v) : QObject(v)
  connect(&d->mUpdateTimer, SIGNAL(timeout()), this, SLOT(slotUpdate()));
 
  setUpdatePeriod(DEFAULT_TOOLTIP_UPDATE_PERIOD);
+ setToolTipCreator(BoToolTipCreator::Extended);
 }
 
 BoGLToolTip::~BoGLToolTip()
@@ -176,7 +276,7 @@ void BoGLToolTip::slotTimeOut()
 	hideTip();
 	return;
  }
- boDebug() << k_funcinfo << endl;
+// boDebug() << k_funcinfo << endl;
  d->mToolTip.setItem(item);
  if (d->mToolTip.isEmpty()) {
 	hideTip();
@@ -195,7 +295,7 @@ void BoGLToolTip::hideTip()
  d->mToolTip.clear();
 }
 
-void BoGLToolTip::renderToolTip(int cursorX, int cursorY, int* viewport, BosonGLFont* font)
+void BoGLToolTip::renderToolTip(int cursorX, int cursorY, const int* viewport, BosonGLFont* font)
 {
  const int cursorOffset = 15;
  const int minToolTipWidth = 100;
@@ -266,5 +366,12 @@ void BoGLToolTip::setUpdatePeriod(int ms)
  mUpdatePeriod = ms;
  d->mUpdateTimer.stop();
  d->mUpdateTimer.start(ms);
+}
+
+void BoGLToolTip::setToolTipCreator(int type)
+{
+ BoToolTipCreatorFactory factory;
+ BoToolTipCreator* creator = factory.tipCreator(type);
+ d->mToolTip.setToolTipCreator(creator);
 }
 

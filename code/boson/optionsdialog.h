@@ -44,12 +44,20 @@ public:
 	void setCursor(CursorMode mode);
 
 signals:
-	void signalUpdateIntervalChanged(unsigned int);
-
 	void signalCursorChanged(int index, const QString& cursorDir);
-
 	void signalCmdBackgroundChanged(const QString& file);
-	void signalMiniMapScaleChanged(double);
+
+	/**
+	 * Emitted when apply or ok is clicked. At this point all options
+	 * widgets already saved themselves and you are meant to activate the
+	 * settings now, if necessary. I.e. if a timer interval has changed you
+	 * are meant to restart the timer when this is emitted.
+	 *
+	 * Values that depend on @ref BosonConfig anyway (e.g. a timer that uses
+	 * @ref QTimer::singleShot with the current value from @ref BosonConfig)
+	 * do not need to be touched here.
+	 **/
+	void signalApply();
 
 public slots:
 	void slotLoad();
@@ -67,6 +75,7 @@ protected:
 	void initSoundsPage();
 	void initOpenGLPage();
 	void initChatPage();
+	void initToolTipPage();
 
 	void addOptions(OptionsWidget* o);
 
