@@ -629,6 +629,7 @@ protected:
 		unstreamItem(s1, id, x, y, z, rotation, xrotation, yrotation);
 		unstreamItem(s2, id2, x2, y2, z2, rotation2, xrotation2, yrotation2);
 
+		COMPARE(id);
 		COMPARE(x);
 		COMPARE(y);
 		COMPARE(z);
