@@ -264,3 +264,35 @@ h3.announcement {
   background-color: transparent;
   text-align: center;
 }
+
+/** Statistics **/
+a.statslink {
+  color: #000000;
+  text-decoration: none;
+}
+a.statslink:hover {
+  color: #000000;
+  text-decoration: underline;
+}
+
+.stats_views {
+  font-size: large;
+  font-weight: bold;
+}
+
+.stats_visits {
+  font-weight: bold;
+}
+
+.statscell {
+  background-color: #e0e0ff;
+}
+
+.statscell2 {
+  background-color: #d0d0ff;
+}
+
+img.statsbar {
+  vertical-alignment: middle;
+}
+

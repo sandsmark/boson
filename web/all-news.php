@@ -19,7 +19,10 @@
 */
 
 
+/*****  Variables  *****/
 $filename="all-news.php";
+$basedir="";
+
 /*****  Some includes  *****/
 include("common.php");
 include("sidebar.php");

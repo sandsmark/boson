@@ -104,19 +104,21 @@ sidebar_box_end();
 
 function sidebar_stats_box()
 {
-sidebar_box_begin("Statistics");
-
-// Last update
 global $lastupdate;
 global $filename;
 global $basedir;
 global $style;
+
+sidebar_box_begin("<a class=\"statslink\" href=\"${basedir}stats.php\">Statistics</a>");
+
+// Last update
 echo "
 <font class=\"lastupdate\">This page was last updated on<br>
 <font class=\"lastupdatevalue\">$lastupdate GMT</font>.<br></font>";
 
 // Counter
 counter();
+counter2($filename);
 
 // "Valid html" logo
 /*echo "
