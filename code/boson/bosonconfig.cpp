@@ -84,6 +84,7 @@ void BoConfigEntry::activate(KConfig* conf)
 BoConfigBoolEntry::BoConfigBoolEntry(BosonConfig* parent, const QString& key, bool defaultValue, bool saveConfig)
 		: BoConfigEntry(parent, key, saveConfig)
 {
+ mDefaultValue = defaultValue;
  mValue = defaultValue;
 }
 
@@ -102,6 +103,7 @@ void BoConfigBoolEntry::load(KConfig* conf)
 BoConfigIntEntry::BoConfigIntEntry(BosonConfig* parent, const QString& key, int defaultValue, bool saveConfig)
 		: BoConfigEntry(parent, key, saveConfig)
 {
+ mDefaultValue = defaultValue;
  mValue = defaultValue;
 }
 
@@ -120,6 +122,7 @@ void BoConfigIntEntry::load(KConfig* conf)
 BoConfigUIntEntry::BoConfigUIntEntry(BosonConfig* parent, const QString& key, unsigned int defaultValue, bool saveConfig)
 		: BoConfigEntry(parent, key, saveConfig)
 {
+ mDefaultValue = defaultValue;
  mValue = defaultValue;
 }
 
@@ -138,6 +141,7 @@ void BoConfigUIntEntry::load(KConfig* conf)
 BoConfigDoubleEntry::BoConfigDoubleEntry(BosonConfig* parent, const QString& key, double defaultValue, bool saveConfig)
 		: BoConfigEntry(parent, key, saveConfig)
 {
+ mDefaultValue = defaultValue;
  mValue = defaultValue;
 }
 
@@ -156,6 +160,7 @@ void BoConfigDoubleEntry::load(KConfig* conf)
 BoConfigStringEntry::BoConfigStringEntry(BosonConfig* parent, const QString& key, QString defaultValue, bool saveConfig)
 		: BoConfigEntry(parent, key, saveConfig)
 {
+ mDefaultValue = defaultValue;
  mValue = defaultValue;
 }
 
@@ -177,6 +182,7 @@ public:
 	BoConfigIntListEntry(BosonConfig* parent, const QString& key, QValueList<int> defaultValue, bool saveConfig = true)
 		: BoConfigEntry(parent, key, saveConfig)
 	{
+		mDefaultValue = defaultValue;
 		mValue = defaultValue;
 	}
 	~BoConfigIntListEntry() {}
@@ -196,6 +202,7 @@ public:
 
 	void setValue(QValueList<int> list) { mValue = list; }
 	QValueList<int> value() const { return mValue; }
+	QValueList<int> defaultValue() const { return mDefaultValue; }
 
 	void append(int e)
 	{
@@ -208,11 +215,13 @@ public:
 
 private:
 	QValueList<int> mValue;
+	QValueList<int> mDefaultValue;
 };
 
 BoConfigColorEntry::BoConfigColorEntry(BosonConfig* parent, const QString& key, const QColor& defaultValue, bool saveConfig)
 		: BoConfigEntry(parent, key, saveConfig)
 {
+ mDefaultRGBValue = defaultValue.rgb();
  mRGBValue = defaultValue.rgb();
 }
 
@@ -237,6 +246,11 @@ void BoConfigColorEntry::setValue(const QColor& v)
 QColor BoConfigColorEntry::value() const
 {
  return QColor(mRGBValue);
+}
+
+QColor BoConfigColorEntry::defaultValue() const
+{
+ return QColor(mDefaultRGBValue);
 }
 
 
@@ -1002,5 +1016,113 @@ QValueList<int> BosonConfig::intListValue(const QString& key, const QValueList<i
 	return _default;
  }
  return ((BoConfigIntListEntry*)entry)->value();
+}
+
+bool BosonConfig::boolDefaultValue(const QString& key, bool _default) const
+{
+ BoConfigEntry* entry = value(key);
+ if (!entry) {
+	boError() << k_funcinfo << "no key " << key << endl;
+	return _default;
+ }
+ if (entry->type() != BoConfigEntry::Bool) {
+	boError() << k_funcinfo << key << "is not a bool entry. type=" << entry->type() << endl;
+	return _default;
+ }
+ return ((BoConfigBoolEntry*)entry)->defaultValue();
+}
+
+int BosonConfig::intDefaultValue(const QString& key, int _default) const
+{
+ BoConfigEntry* entry = value(key);
+ if (!entry) {
+	boError() << k_funcinfo << "no key " << key << endl;
+	return _default;
+ }
+ if (entry->type() != BoConfigEntry::Int) {
+	boError() << k_funcinfo << key << "is not an integer entry. type=" << entry->type() << endl;
+	return _default;
+ }
+ return ((BoConfigIntEntry*)entry)->defaultValue();
+}
+
+unsigned int BosonConfig::uintDefaultValue(const QString& key, unsigned int _default) const
+{
+ BoConfigEntry* entry = value(key);
+ if (!entry) {
+	boError() << k_funcinfo << "no key " << key << endl;
+	return _default;
+ }
+ if (entry->type() != BoConfigEntry::UInt) {
+	boError() << k_funcinfo << key << "is not an unsigned integer entry. type=" << entry->type() << endl;
+	return _default;
+ }
+ return ((BoConfigUIntEntry*)entry)->defaultValue();
+}
+
+const QString&BosonConfig::stringDefaultValue(const QString& key, const QString& _default) const
+{
+ BoConfigEntry* entry = value(key);
+ if (!entry) {
+	boError() << k_funcinfo << "no key " << key << endl;
+	return _default;
+ }
+ if (entry->type() != BoConfigEntry::String) {
+	boError() << k_funcinfo << key << "is not a string entry. type=" << entry->type() << endl;
+	return _default;
+ }
+ return ((BoConfigStringEntry*)entry)->defaultValue();
+}
+
+double BosonConfig::doubleDefaultValue(const QString& key, double _default) const
+{
+ BoConfigEntry* entry = value(key);
+ if (!entry) {
+	boError() << k_funcinfo << "no key " << key << endl;
+	return _default;
+ }
+ if (entry->type() != BoConfigEntry::Double) {
+	boError() << k_funcinfo << key << "is not a double entry. type=" << entry->type() << endl;
+	return _default;
+ }
+ return ((BoConfigDoubleEntry*)entry)->defaultValue();
+}
+
+QColor BosonConfig::colorDefaultValue(const QString& key) const
+{
+ return colorDefaultValue(key, Qt::black);
+}
+
+QColor BosonConfig::colorDefaultValue(const QString& key, const QColor& _default) const
+{
+ BoConfigEntry* entry = value(key);
+ if (!entry) {
+	boError() << k_funcinfo << "no key " << key << endl;
+	return _default;
+ }
+ if (entry->type() != BoConfigEntry::Color) {
+	boError() << k_funcinfo << key << "is not a color entry. type=" << entry->type() << endl;
+	return _default;
+ }
+ return ((BoConfigColorEntry*)entry)->defaultValue();
+}
+
+QValueList<int> BosonConfig::intListDefaultValue(const QString& key) const
+{
+ return intListDefaultValue(key, QValueList<int>());
+}
+
+QValueList<int> BosonConfig::intListDefaultValue(const QString& key, const QValueList<int>& _default) const
+{
+ BoConfigEntry* entry = value(key);
+ if (!entry) {
+	boError() << k_funcinfo << "no key " << key << endl;
+	return _default;
+ }
+ if (entry->type() != BoConfigEntry::IntList) {
+	boError() << k_funcinfo << key << "is not a IntList entry. type=" << entry->type() << endl;
+	return _default;
+ }
+ return ((BoConfigIntListEntry*)entry)->defaultValue();
 }
 
