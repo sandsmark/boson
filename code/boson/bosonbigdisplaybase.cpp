@@ -2899,80 +2899,12 @@ void BosonBigDisplayBase::setViewport(int x, int y, GLsizei w, GLsizei h)
 void BosonBigDisplayBase::extractFrustum()
 {
  // modelview or projection matrix was changed (and therefore the frustum).
- GLfloat clip[16];
  GLfloat t;
 
- const GLfloat* model = d->mModelviewMatrix.data();
- const GLfloat* proj = d->mProjectionMatrix.data();
-
  // Combine the two matrices (multiply projection by modelview)
- clip[0] = model[0] * proj[0] +
-		model[1] * proj[4] +
-		model[2] * proj[8] +
-		model[3] * proj[12];
- clip[1] = model[0] * proj[1] +
-		model[1] * proj[5] +
-		model[2] * proj[9] +
-		model[3] * proj[13];
- clip[2] = model[0] * proj[2] +
-		model[1] * proj[6] +
-		model[2] * proj[10] +
-		model[3] * proj[14];
- clip[3] = model[0] * proj[3] +
-		model[1] * proj[7] +
-		model[2] * proj[11] +
-		model[3] * proj[15];
+ BoMatrix clip(d->mProjectionMatrix);
+ clip.multiply(&d->mModelviewMatrix);
 
- clip[4] = model[4] * proj[0] +
-		model[5] * proj[4] +
-		model[6] * proj[8] +
-		model[7] * proj[12];
- clip[5] = model[4] * proj[1] +
-		model[5] * proj[5] +
-		model[6] * proj[9] +
-		model[7] * proj[13];
- clip[6] = model[4] * proj[2] +
-		model[5] * proj[6] +
-		model[6] * proj[10] +
-		model[7] * proj[14];
- clip[7] = model[4] * proj[3] +
-		model[5] * proj[7] +
-		model[6] * proj[11] +
-		model[7] * proj[15];
-
- clip[8] = model[8] * proj[0] +
-		model[9] * proj[4] +
-		model[10] * proj[8] +
-		model[11] * proj[12];
- clip[9] = model[8] * proj[1] +
-		model[9] * proj[5] +
-		model[10] * proj[9] +
-		model[11] * proj[13];
- clip[10] = model[8] * proj[2] +
-		model[9] * proj[6] +
-		model[10] * proj[10] +
-		model[11] * proj[14];
- clip[11] = model[8] * proj[3] +
-		model[9] * proj[7] +
-		model[10] * proj[11] +
-		model[11] * proj[15];
-
- clip[12] = model[12] * proj[0] +
-		model[13] * proj[4] +
-		model[14] * proj[8] +
-		model[15] * proj[12];
- clip[13] = model[12] * proj[1] +
-		model[13] * proj[5] +
-		model[14] * proj[9] +
-		model[15] * proj[13];
- clip[14] = model[12] * proj[2] +
-		model[13] * proj[6] +
-		model[14] * proj[10] +
-		model[15] * proj[14];
- clip[15] = model[12] * proj[3] +
-		model[13] * proj[7] +
-		model[14] * proj[11] +
-		model[15] * proj[15];
 
  // Extract the numbers for the RIGHT plane
  d->mViewFrustum[0][0] = clip[3] - clip[0];
