@@ -24,16 +24,17 @@
 #include "rtti.h"
 #include "unit.h"
 
-BoItemList::BoItemList() : QValueList<BosonItem*>()
+BoItemList::BoItemList()
 {
  registerList();
 }
 
-BoItemList::BoItemList(const BoItemList& list, bool _registerList) : QValueList<BosonItem*>(list)
+BoItemList::BoItemList(const BoItemList& list, bool _registerList)
 {
  if (_registerList) {
 	registerList();
  }
+ mList = list.mList;
 }
 
 BoItemList::~BoItemList()

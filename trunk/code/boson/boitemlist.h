@@ -20,6 +20,7 @@
 #define BOITEMLIST_H
 
 #include <qvaluelist.h>
+
 class BosonItem;
 class Unit;
 
@@ -37,12 +38,18 @@ class Unit;
  * UPDATE: the list now consists of BosonItem and therefore <em>items</em>,
  * not just units. we may add some additional code to separate units (in favor
  * of performance) in the future
+ *
+ *
+ * Note that neither operator=() nor any similar operator has been implemented
+ * in this class. Do not use them!
  * @short A list of @ref BosonItem
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class BoItemList : public QValueList<BosonItem*>
+class BoItemList
 {
 public:
+	typedef QValueList<BosonItem*>::Iterator Iterator;
+	typedef QValueList<BosonItem*>::ConstIterator ConstIterator;
 	BoItemList();
 
 	/**
@@ -56,7 +63,6 @@ public:
 	 * you should use TRUE.
 	 **/
 	BoItemList(int foobar, bool _registerList = true)
-		: QValueList<BosonItem*>()
 	{
 		Q_UNUSED(foobar);
 		if (_registerList) {
@@ -69,11 +75,26 @@ public:
 	~BoItemList();
 
 
-	// FIXME: this *should* be Unit* instead of BosonItem but since we
-	// must not include unit.h here we use BosonItem . pointer conversion
-	// without unit.h included would cause problems here :-(
-	iterator appendItem(BosonItem* item) { return QValueList<BosonItem*>::append(item); }
-	uint removeItem(BosonItem* item) { return QValueList<BosonItem*>::remove(item); }
+	// obsolete:
+	Iterator appendItem(BosonItem* item) { return append(item); }
+	unsigned int removeItem(BosonItem* item) { return remove(item); }
+
+	Iterator append(BosonItem* item) { return mList.append(item); }
+	unsigned int remove(BosonItem* item) { return mList.remove(item); }
+	inline unsigned int count() const { return mList.count(); }
+	inline bool isEmpty() const { return mList.isEmpty(); }
+	Iterator begin() { return mList.begin(); }
+	ConstIterator begin() const { return mList.begin(); }
+	inline Iterator end() { return mList.end(); }
+	inline ConstIterator end() const { return mList.end(); }
+	// AB: FIXME: we don't care about the number of items in the list. make
+	// contains() return bool, that would be faster as we can stop once it
+	// is found
+	unsigned int contains(BosonItem* item) const { return mList.contains(item); } // FIXME: gcc does not accept const BosonItem* item
+	int findIndex(BosonItem* item) const { return mList.findIndex(item); } // FIXME: gcc does not accept const BosonItem* item
+	void clear() { mList.clear(); }
+
+
 
 	/**
 	 * @param collidingOnly if TRUE return only items that are interesting
@@ -132,20 +153,10 @@ public:
 	bool isOccupied(bool includeMoving = true) const;
 
 protected:
-	/**
-	 * You are meant to use e.g. @ref appendUnit but not append. We change the
-	 * access permissions to protected here to avoid adding of a
-	 * BosonItem directly.
-	 **/
-	QValueList<BosonItem*>::append;
-
-	/**
-	 * See above. You are meant to use e.g. @ref removeUnit
-	 **/
-	QValueList<BosonItem*>::remove;
-
-protected:
 	void registerList();
+
+private:
+	QValueList<BosonItem*> mList;
 };
 
 #endif
