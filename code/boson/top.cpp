@@ -645,6 +645,10 @@ void TopWidget::loadGameData3() // FIXME rename!
  //  was not known (not loaded) when BosonWidgetBase was constructed. Set and init
  //  it now
  if (mLoading) {
+	kdDebug() << k_funcinfo << "set local player for loaded games now" << endl;
+	if (!mBoson->localPlayer()) {
+		kdWarning() << k_funcinfo << "NULL player" << endl;
+	}
 	changeLocalPlayer(mBoson->localPlayer());
 	d->mBosonWidget->initPlayer();
  }

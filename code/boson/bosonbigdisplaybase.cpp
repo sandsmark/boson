@@ -1037,9 +1037,10 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 void BosonBigDisplayBase::addMouseIO(Player* p)
 {
  kdDebug() << k_funcinfo << endl;
- // FIXME: check if player is valid, mouse IO already present, ... see
- // BosonBigDisplayBase
- // another TODO: implement a GL based widget for the editor!
+ if (!p) {
+	kdError() << k_funcinfo << "NULL player" << endl;
+	return;
+ }
  KGameMouseIO* mouseIO = new KGameMouseIO(this, true);
  connect(mouseIO, SIGNAL(signalMouseEvent(KGameIO*, QDataStream&, QMouseEvent*, bool*)),
 		this, SLOT(slotMouseEvent(KGameIO*, QDataStream&, QMouseEvent*, bool*)));
@@ -1372,7 +1373,7 @@ void BosonBigDisplayBase::selectArea(bool replace)
 		kdDebug() << s << endl;
 	}
  }
- 
+
  QRect r = selectionRectCanvas();
  BoItemList list;
  QPtrList<Unit> unitList;

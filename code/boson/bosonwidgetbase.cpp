@@ -584,7 +584,12 @@ void BosonWidgetBase::slotSetActiveDisplay(BosonBigDisplayBase* active, BosonBig
  connect(minimap(), SIGNAL(signalMoveSelection(int, int)),
 		active, SLOT(slotMoveSelection(int, int)));
 
-  // note: all other bigdisplays should unselect now.
+ // note: all other bigdisplays should unselect now.
+
+ if (!localPlayer()) {
+	kdWarning() << k_funcinfo << "NULL localplayer" << endl;
+	return;
+ }
 
  // BosonBigDisplay knows whether a unit was selected. If a unit changed forward
  // the signal to the big display and let it decide whether the
