@@ -285,9 +285,11 @@ void BosonWidgetBase::initDisplayManager()
 		mDisplayManager, SLOT(slotUnitChanged(Unit*)));
 }
 
+
+// FIXME: rename! only the cursor is loaded here!
 void BosonWidgetBase::addInitialDisplay()
 {
- displayManager()->addInitialDisplay();
+// displayManager()->addInitialDisplay();
 
  // we need to add the display first (in order to create a valid GL context) and
  // then load the cursor
