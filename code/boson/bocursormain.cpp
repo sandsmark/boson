@@ -42,7 +42,7 @@
 static const char *description =
     I18N_NOOP("Cursor Editor for Boson");
 
-static const char *version = "0.7";
+static const char *version = "0.8pre";
 
 static KCmdLineOptions options[] =
 {
