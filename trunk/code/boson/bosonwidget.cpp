@@ -43,6 +43,7 @@
 #include "bosoncursor.h"
 #include "editorinput.h"
 #include "commandinput.h"
+#include "bodisplaymanager.h"
 #include "global.h"
 
 #include "defines.h"
@@ -68,9 +69,9 @@ class BosonWidget::BosonWidgetPrivate
 public:
 	BosonWidgetPrivate()
 	{
-		mBigDisplay = 0;
 		mMiniMap = 0;
 		mCommandFrame = 0;
+		mDisplayManager = 0;
 
 		mCanvas = 0;
 
@@ -88,10 +89,9 @@ public:
 		mCursor = 0;
 	}
 	
-	QPtrList<BosonBigDisplay> mDisplayList;
-	BosonBigDisplay* mBigDisplay;
 	BosonMiniMap* mMiniMap;
 	BosonCommandFrame* mCommandFrame;
+	BoDisplayManager* mDisplayManager;
 
 	BosonCanvas* mCanvas;
 	
@@ -116,6 +116,8 @@ public:
 	QString mCursorTheme; // path to cursor pixmaps
 
 	QPtrDict<KGameMouseIO> mIOList;
+
+	bool mEditorMode;
 };
 
 BosonWidget::BosonWidget(QWidget* parent)
@@ -142,9 +144,8 @@ BosonWidget::~BosonWidget()
  boConfig->saveCursorDir(d->mCursorTheme);
  d->mIOList.clear();
  delete d->mUnitTips;
- d->mDisplayList.clear();
- d->mBigDisplay = 0;
  delete d->mCursor;
+ delete d->mDisplayManager;
 
 // delete the destroyed units first
  d->mCanvas->deleteDestroyed();
@@ -164,8 +165,8 @@ void BosonWidget::init()
  d = new BosonWidgetPrivate;
  d->mMobilesCount = 0;
  d->mFacilitiesCount = 0;
- d->mDisplayList.setAutoDelete(true);
  d->mIOList.setAutoDelete(true);
+ d->mEditorMode = false; // in startGameMode() / startEditor()
 
  BosonMusic::initBosonMusic(); 
 
@@ -176,6 +177,12 @@ void BosonWidget::init()
  d->mCanvas = new BosonCanvas(this);
  connect(d->mCanvas, SIGNAL(signalUnitDestroyed(Unit*)), 
 		this, SLOT(slotRemoveUnit(Unit*)));
+
+ d->mDisplayManager = new BoDisplayManager(d->mCanvas, this);
+ connect(this, SIGNAL(signalMineralsUpdated(int)),
+		d->mDisplayManager, SLOT(slotUpdateMinerals(int)));
+ connect(this, SIGNAL(signalOilUpdated(int)),
+		d->mDisplayManager, SLOT(slotUpdateOil(int)));
 
  d->mBoson = new Boson(this);
  d->mBoson->setCanvas(d->mCanvas); // should not be stored here - but seems to be necessary :-(
@@ -211,7 +218,6 @@ void BosonWidget::init()
  slotChangeCursor(boConfig->readCursorMode(), boConfig->readCursorDir());
  slotChangeGroupMove(boConfig->readGroupMoveMode());
 
- addBigDisplay();
  initChat();
 
 // 640*480 is probably not enough (KDE needs at least 800*600) but as a minimum
@@ -230,28 +236,16 @@ void BosonWidget::init()
 
 void BosonWidget::addMiniMap()
 {
-// FIXME: we have several big displays now (several views) so i we must connect
-// the signals always to the *currently active* view, not to d->mBigDisplay!
-
  d->mMiniMap = new BosonMiniMap(0);
  d->mMiniMap->hide();
  d->mMiniMap->setCanvas(d->mCanvas);
  connect(d->mBoson, SIGNAL(signalAddUnit(Unit*, int, int)),
 		d->mMiniMap, SLOT(slotAddUnit(Unit*, int, int)));
- connect(d->mBigDisplay, SIGNAL(contentsMoving(int, int)),
-		d->mMiniMap, SLOT(slotMoveRect(int, int)));
- connect(d->mBigDisplay, SIGNAL(signalSizeChanged(int, int)),
-		d->mMiniMap, SLOT(slotResizeRect(int, int)));
- connect(d->mMiniMap, SIGNAL(signalReCenterView(const QPoint&)),
-		d->mBigDisplay, SLOT(slotReCenterView(const QPoint&)));
  connect(d->mCanvas, SIGNAL(signalUnitMoved(Unit*, double, double)),
 		d->mMiniMap, SLOT(slotMoveUnit(Unit*, double, double)));
  connect(d->mCanvas, SIGNAL(signalUnitDestroyed(Unit*)), 
 		d->mMiniMap, SLOT(slotUnitDestroyed(Unit*)));
 
-// only for editor mode:
- connect(d->mBigDisplay, SIGNAL(signalAddCell(int,int, int, unsigned char)),
-		d->mMiniMap, SLOT(slotAddCell(int, int, int, unsigned char)));
 }
 
 void BosonWidget::reparentMiniMap(QWidget* parent)
@@ -264,7 +258,6 @@ void BosonWidget::initChat()
 {
  d->mChat = new KGameChat(d->mBoson, BosonMessage::IdChat, this);
  d->mChat->hide();
- d->mBigDisplay->setKGameChat(d->mChat);
 }
 
 void BosonWidget::addLocalPlayer()
@@ -286,8 +279,11 @@ void BosonWidget::addLocalPlayer()
  p->addGameIO(cmdInput);
 
  changeLocalPlayer(p);
- for (unsigned int i = 0; i < d->mDisplayList.count(); i++) {
-	addMouseIO(d->mDisplayList.at(i));
+ QPtrList<BosonBigDisplay> list = d->mDisplayManager->displays();
+ QPtrListIterator<BosonBigDisplay> it(list);
+ while (it.current()) {
+	addMouseIO(it.current());
+	++it;
  }
 }
 
@@ -306,11 +302,6 @@ void BosonWidget::slotPlayerJoinedGame(KPlayer* player)
 	return;
  }
  Player* p = (Player*)player;
- // BosonBigDisplay knows whether a unit was selected. If a unit changed forward
- // the signal to the big display and let it decide whether the
- // signalSingleUnitSelected should be emitted
- connect(p, SIGNAL(signalUnitChanged(Unit*)), 
-		d->mBigDisplay, SLOT(slotUnitChanged(Unit*)));
  connect(p, SIGNAL(signalPropertyChanged(KGamePropertyBase*, KPlayer*)),
 		this, SLOT(slotPlayerPropertyChanged(KGamePropertyBase*, KPlayer*)));
  if (d->mPlayField->map()) {
@@ -347,18 +338,22 @@ void BosonWidget::slotPlayerJoinedGame(KPlayer* player)
 
 void BosonWidget::keyReleaseEvent(QKeyEvent* e)
 {
+ BosonBigDisplay* active = d->mDisplayManager->activeDisplay();
+ if (!active) {
+	return;
+ }
  switch (e->key()) {
 	case Key_Left:
-		d->mBigDisplay->scrollBy(-boConfig->arrowKeyStep(), 0);
+		active->scrollBy(-boConfig->arrowKeyStep(), 0);
 		break;
 	case Key_Right:
-		d->mBigDisplay->scrollBy(boConfig->arrowKeyStep(), 0);
+		active->scrollBy(boConfig->arrowKeyStep(), 0);
 		break;
 	case Key_Up:
-		d->mBigDisplay->scrollBy(0, -boConfig->arrowKeyStep());
+		active->scrollBy(0, -boConfig->arrowKeyStep());
 		break;
 	case Key_Down:
-		d->mBigDisplay->scrollBy(0, boConfig->arrowKeyStep());
+		active->scrollBy(0, boConfig->arrowKeyStep());
 		break;
 	default:
 		break;
@@ -527,8 +522,6 @@ void BosonWidget::slotGamePreferences()
  connect(dlg, SIGNAL(signalChatFramePositionChanged(int)),
 		this, SLOT(slotChatFramePosition(int)));
 
-// note: this is difficult for several views! probably d->mBigDisplay should be
-// the primary view then.
  connect(dlg, SIGNAL(signalCursorChanged(int, const QString&)),
 		this, SLOT(slotChangeCursor(int, const QString&)));
 
@@ -618,18 +611,24 @@ void BosonWidget::slotNewMap(BosonMap* map)
  }
  d->mCanvas->setMap(map);
  d->mMiniMap->setMap(map);
- connect(d->mBigDisplay, SIGNAL(signalAddCell(int,int, int, unsigned char)),
-		map, SLOT(changeCell(int, int, int, unsigned char)));
+ 
+ QPtrList<BosonBigDisplay> list = d->mDisplayManager->displays();
+ QPtrListIterator<BosonBigDisplay> it(list);
+ while (it.current()) {
+	// no need to disconnect (I hope) - the old map should already be
+	// deleted
+	connect(it.current(), SIGNAL(signalAddCell(int,int, int, unsigned char)),
+			map, SLOT(changeCell(int, int, int, unsigned char)));
+	++it;
+ }
 }
 
 void BosonWidget::addEditorCommandFrame(QWidget* parent)
 { // remember to call this *after* init() - otherwise connect()s won't work
  d->mCommandFrame = new BosonCommandFrame(parent, true);
 
- connect(d->mBigDisplay, SIGNAL(signalSingleUnitSelected(Unit*)), 
-		d->mCommandFrame, SLOT(slotShowSingleUnit(Unit*)));
  connect(d->mCommandFrame, SIGNAL(signalCellSelected(int)), 
-		d->mBigDisplay, SLOT(slotWillPlaceCell(int)));
+		d->mDisplayManager, SLOT(slotEditorWillPlaceCell(int)));
  connect(this, SIGNAL(signalEditorLoadTiles(const QString&)), 
 		d->mCommandFrame, SLOT(slotEditorLoadTiles(const QString&)));
 
@@ -637,12 +636,9 @@ void BosonWidget::addEditorCommandFrame(QWidget* parent)
 // we need the values in BosonBigDisplay. So as a temporary solution we have
 // this connect here.
  connect(d->mCommandFrame, SIGNAL(signalProduceUnit(int, UnitBase*, KPlayer*)), 
-		d->mBigDisplay, SLOT(slotWillConstructUnit(int, UnitBase*, KPlayer*)));
+		d->mDisplayManager, SLOT(slotEditorWillPlaceUnit(int, UnitBase*, KPlayer*)));
 
  // AB???
- connect(d->mBigDisplay, SIGNAL(signalSelectUnit(Unit*)), 
-		d->mCommandFrame, SLOT(slotShowUnit(Unit*)));
-
 
  slotChatFramePosition(BosonConfig::readChatFramePosition());
 }
@@ -650,13 +646,6 @@ void BosonWidget::addEditorCommandFrame(QWidget* parent)
 void BosonWidget::addGameCommandFrame(QWidget* parent)
 { // remember to call this *after* init() - otherwise connect()s won't work
  d->mCommandFrame = new BosonCommandFrame(parent, false);
-
- connect(d->mBigDisplay, SIGNAL(signalSingleUnitSelected(Unit*)),
-		d->mCommandFrame, SLOT(slotShowSingleUnit(Unit*)));
- connect(d->mBigDisplay, SIGNAL(signalSingleUnitSelected(Unit*)),
-		d->mCommandFrame, SLOT(slotSetProduction(Unit*)));
- connect(d->mBigDisplay, SIGNAL(signalSelectUnit(Unit*)), 
-		d->mCommandFrame, SLOT(slotShowUnit(Unit*)));
 
  connect(d->mBoson, SIGNAL(signalUpdateProduction(Facility*)),
 		d->mCommandFrame, SLOT(slotFacilityProduces(Facility*)));
@@ -666,28 +655,26 @@ void BosonWidget::addGameCommandFrame(QWidget* parent)
  slotChatFramePosition(BosonConfig::readChatFramePosition());
 }
 
-void BosonWidget::startGame()
+void BosonWidget::startGameMode()
 {
+ d->mEditorMode = false;
  d->mBoson->slotSetGameSpeed(BosonConfig::readGameSpeed());
- 
-// FIXME: not usable with several views!! (see addMiniMap() comment)
- connect(d->mMiniMap, SIGNAL(signalMoveSelection(int, int)),
-		d->mBigDisplay, SLOT(slotMoveSelection(int, int)));
+
+
+ initBigDisplay(d->mDisplayManager->addInitialDisplay());
+ recreateLayout();
 }
 
 void BosonWidget::startEditor()
 {
+ d->mEditorMode = true;
+
+ initBigDisplay(d->mDisplayManager->addInitialDisplay());
+ recreateLayout();
+
+
  slotChangeCursor(CursorKDE, boConfig->readCursorDir());
- connect(d->mBigDisplay, SIGNAL(signalBuildUnit(int,int, int, Player*)),
-		d->mBoson, SLOT(slotSendAddUnit(int, int, int, Player*)));
-
 	
- // this manages the mouse input for bosonBigDisplay. In non-editor mode this is
- // done by KGameMouseIO
- EditorInput* input = new EditorInput(d->mBigDisplay->viewport());
- connect(input, SIGNAL(signalMouseEvent(QMouseEvent*, bool*)), 
-		d->mBigDisplay, SLOT(slotEditorMouseEvent(QMouseEvent*, bool*)));
-
 
 // FIXME - the stuff below should be replaced by a proper dialog and config
 // implementation
@@ -771,11 +758,20 @@ void BosonWidget::slotChangeLocalPlayer(int index)
 void BosonWidget::changeLocalPlayer(Player* localPlayer)
 {
  d->mLocalPlayer = localPlayer;
- d->mBigDisplay->setLocalPlayer(d->mLocalPlayer);
  d->mCommandFrame->setLocalPlayer(d->mLocalPlayer);
  d->mMiniMap->setLocalPlayer(d->mLocalPlayer);
 
+ QPtrList<BosonBigDisplay> list = d->mDisplayManager->displays();
+ QPtrListIterator<BosonBigDisplay> it(list);
+ while (it.current()) {
+	it.current()->setLocalPlayer(d->mLocalPlayer);
+	++it;
+ }
+
  d->mChat->setFromPlayer(d->mLocalPlayer);
+ slotSetActiveDisplay(d->mDisplayManager->activeDisplay() ? 
+		d->mDisplayManager->activeDisplay() : 
+		d->mDisplayManager->displays().first());
 }
 
 void BosonWidget::slotAddComputerPlayer(Player* computer)
@@ -787,7 +783,12 @@ void BosonWidget::editorSavePlayField(const QString& fileName)
 {
  d->mPlayField->applyScenario(d->mBoson);
  if (d->mPlayField->savePlayField(fileName)) {
-	setModified(false);
+	if (d->mPlayField->map()) {
+		d->mPlayField->map()->setModified(false);
+	}
+	if (d->mPlayField->scenario()) {
+		d->mPlayField->scenario()->setModified(false);
+	}
  }
 }
 
@@ -856,7 +857,9 @@ void BosonWidget::sendChangeTeamColor(Player* player, const QColor& color)
 
 void BosonWidget::zoom(const QWMatrix& m)
 {
- d->mBigDisplay->setWorldMatrix(m);
+ if (d->mDisplayManager->activeDisplay()) {
+	d->mDisplayManager->activeDisplay()->setWorldMatrix(m);
+ }
 }
 
 void BosonWidget::slotFog(int x, int y)
@@ -909,10 +912,11 @@ void BosonWidget::slotCommandFramePosition(int pos)
 
 void BosonWidget::slotChatFramePosition(int chatPos)
 {
- recreateLayout(chatPos);
+ d->mChatPos = (ChatFramePosition)chatPos;
+ recreateLayout();
 }
 
-void BosonWidget::recreateLayout(int chatPos)
+void BosonWidget::recreateLayout()
 {
  delete d->mViewLayout;
  d->mViewLayout = 0;
@@ -921,32 +925,16 @@ void BosonWidget::recreateLayout(int chatPos)
  d->mTopLayout = new QHBoxLayout(this, 5); // FIXME: 5 is hardcoded
  d->mViewLayout = new QVBoxLayout();
 
- if (chatPos == ChatFrameTop) {
+ if (d->mChatPos == ChatFrameTop) {
 	d->mViewLayout->addWidget(d->mChat);
  }
- for (unsigned int vpos = 0; vpos < d->mDisplayList.count(); vpos++) {
-	QPtrList<BosonBigDisplay> list;
-	QHBoxLayout* l = 0;
-	for (unsigned int i = 0; i < d->mDisplayList.count(); i++) {
-		if (d->mDisplayList.at(i)->vPos() == vpos) {
-			list.append(d->mDisplayList.at(i));
-		}
-	}
-	if (list.count() > 0) {
-		l = new QHBoxLayout(d->mViewLayout);
-	}
-	for (unsigned int i = 0; i < list.count(); i++) {
-		l->addWidget(list.at(i));
-		l->activate();
-	}
- }
- if (chatPos != ChatFrameTop) {
+ d->mViewLayout->addWidget(d->mDisplayManager);
+ if (d->mChatPos != ChatFrameTop) {
 	d->mViewLayout->addWidget(d->mChat);
  }
 
  d->mTopLayout->addLayout(d->mViewLayout);
 
- d->mChatPos = (ChatFramePosition)chatPos;
  d->mTopLayout->activate();
 }
 
@@ -980,16 +968,6 @@ void BosonWidget::displayAllItems(bool display)
  }
 }
 
-bool BosonWidget::isModified() const
-{
- return d->mBigDisplay->isModified();
-}
-
-void BosonWidget::setModified(bool m)
-{
- d->mBigDisplay->setModified(m);
-}
-
 void BosonWidget::setShowChat(bool s)
 {
  if (s) {
@@ -1017,9 +995,12 @@ void BosonWidget::slotNotEnoughOil(Player* p)
 
 void BosonWidget::addChatSystemMessage(const QString& fromName, const QString& text)
 {
-
  d->mChat->addSystemMessage(fromName, text);
- d->mBigDisplay->addChatMessage(i18n("--- %1: %2").arg(fromName).arg(text));
+
+ // FIXME: only to the current display or to all displays ??
+ if (d->mDisplayManager->activeDisplay()) {
+	d->mDisplayManager->activeDisplay()->addChatMessage(i18n("--- %1: %2").arg(fromName).arg(text));
+ }
 }
 
 void BosonWidget::slotSetCommandButtonsPerRow(int b)
@@ -1049,24 +1030,36 @@ void BosonWidget::slotUnfogAll(Player* player)
  }
 }
 
-void BosonWidget::addBigDisplay()
+void BosonWidget::initBigDisplay(BosonBigDisplay* b)
 {
- BosonBigDisplay* b = new BosonBigDisplay(d->mCanvas, this);
+ if (!b) {
+	kdError() << k_funcinfo << "NULL display" << endl;
+	return;
+ }
+// BosonBigDisplay* b = new BosonBigDisplay(d->mCanvas, d->mDisplayManager);
+ connect(b, SIGNAL(signalMakeActive(BosonBigDisplay*)), 
+		this, SLOT(slotSetActiveDisplay(BosonBigDisplay*)));
+ b->setLocalPlayer(d->mLocalPlayer);
  b->setCursor(d->mCursor);
- b->show();
- d->mDisplayList.append(b);
-
- connect(this, SIGNAL(signalMineralsUpdated(int)),
-		b, SLOT(slotUpdateMinerals(int)));
- connect(this, SIGNAL(signalOilUpdated(int)),
-		b, SLOT(slotUpdateOil(int)));
+ b->setKGameChat(d->mChat);
 
 
-// this signal is for editor mode only. No effect in game mode at all.
- connect(b, SIGNAL(signalAddCell(int,int, int, unsigned char)),
-		d->mCanvas, SLOT(slotAddCell(int, int, int, unsigned char)));
+ if (d->mEditorMode) {
+	connect(b, SIGNAL(signalAddCell(int,int, int, unsigned char)),
+			d->mCanvas, SLOT(slotAddCell(int, int, int, unsigned char)));
+	connect(b, SIGNAL(signalBuildUnit(int,int, int, Player*)),
+			d->mBoson, SLOT(slotSendAddUnit(int, int, int, Player*)));
+	// this manages the mouse input for bosonBigDisplay. In non-editor mode this is
+	// done by KGameMouseIO
+	EditorInput* input = new EditorInput(b->viewport());
+	connect(input, SIGNAL(signalMouseEvent(QMouseEvent*, bool*)), 
+			b, SLOT(slotEditorMouseEvent(QMouseEvent*, bool*)));
+ } else {
+	connect(b, SIGNAL(signalSingleUnitSelected(Unit*)),
+			d->mCommandFrame, SLOT(slotSetProduction(Unit*)));
+	addMouseIO(b);
+ }
 		
-
  static bool init = false;
  if (!init) {
 	// TODO these should also be done for ALL displays... maybe use static
@@ -1076,9 +1069,7 @@ void BosonWidget::addBigDisplay()
 	init = true;
  }
 
- d->mBigDisplay = b;
- addMouseIO(b);
-
+ slotSetActiveDisplay(b);
 }
 
 void BosonWidget::addMouseIO(BosonBigDisplay* b)
@@ -1089,51 +1080,33 @@ void BosonWidget::addMouseIO(BosonBigDisplay* b)
 		return;
 	}
 	KGameMouseIO* bigDisplayIO = 
-			new KGameMouseIO(d->mBigDisplay->viewport(), true);
+			new KGameMouseIO(b->viewport(), true);
 	connect(bigDisplayIO, SIGNAL(signalMouseEvent(KGameIO*, QDataStream&,
 			QMouseEvent*, bool*)),
-			d->mBigDisplay, SLOT(slotMouseEvent(KGameIO*,
+			b, SLOT(slotMouseEvent(KGameIO*,
 			QDataStream&, QMouseEvent*, bool*)));
 	d->mLocalPlayer->addGameIO(bigDisplayIO);
 	d->mIOList.insert(b, bigDisplayIO);
  }
 }
 
-void BosonWidget::slotSplitViewHorizontal()
+void BosonWidget::slotSplitDisplayHorizontal()
 {
- int vp = d->mBigDisplay->vPos();
- int hp = d->mBigDisplay->hPos();
- addBigDisplay();
- d->mBigDisplay->setVPos(vp + 1);
- d->mBigDisplay->setVPos(hp);
- recreateLayout(d->mChatPos);
+ initBigDisplay(d->mDisplayManager->splitActiveDisplayHorizontal());
 }
 
-void BosonWidget::slotSplitViewVertical()
+void BosonWidget::slotSplitDisplayVertical()
 {
- int vp = d->mBigDisplay->vPos();
- int hp = d->mBigDisplay->hPos();
- addBigDisplay();
- d->mBigDisplay->setVPos(vp);
- d->mBigDisplay->setVPos(hp + 1);
- recreateLayout(d->mChatPos);
+ initBigDisplay(d->mDisplayManager->splitActiveDisplayVertical());
 }
 
-void BosonWidget::slotRemoveActiveView()
+void BosonWidget::slotRemoveActiveDisplay()
 {
- if (d->mDisplayList.count() <= 1) {
-	return;
- }
- if (!d->mBigDisplay) {
-	return;
- }
- delete d->mBigDisplay;
- d->mBigDisplay = d->mDisplayList.first();
+ d->mDisplayManager->removeActiveDisplay();
 }
 
 void BosonWidget::slotChangeCursor(int mode, const QString& cursorDir_)
 {
- // note: this doesn't make sense here when we use several views!
  BosonCursor* b;
  switch (mode) {
 	case CursorSprite:
@@ -1152,9 +1125,7 @@ void BosonWidget::slotChangeCursor(int mode, const QString& cursorDir_)
  }
  delete d->mCursor;
  d->mCursor = b;
- for (unsigned int i = 0; i < d->mDisplayList.count(); i++) {
-	d->mDisplayList.at(i)->setCursor(d->mCursor);
- }
+ d->mDisplayManager->setCursor(d->mCursor);
 
  QString cursorDir = cursorDir_;
  if (cursorDir == QString::null) { 
@@ -1165,7 +1136,6 @@ void BosonWidget::slotChangeCursor(int mode, const QString& cursorDir_)
  d->mCursor->insertMode(CursorAttack, cursorDir, QString::fromLatin1("attack"));
  d->mCursor->insertMode(CursorDefault, cursorDir, QString::fromLatin1("default"));
  d->mCursorTheme = cursorDir;
-// d->mCursor->setWidgetCursor(d->mBigDisplay);
 
  // some cursors need special final initializations. do them now
  switch (mode) {
@@ -1185,5 +1155,79 @@ void BosonWidget::slotChangeCursor(int mode, const QString& cursorDir_)
 void BosonWidget::slotChangeGroupMove(int mode)
 {
  boConfig->saveGroupMoveMode((GroupMoveMode)mode);
+}
+
+void BosonWidget::slotSetActiveDisplay(BosonBigDisplay* display)
+{
+ if (display == d->mDisplayManager->activeDisplay()) {
+	return;
+ }
+
+ BosonBigDisplay* old = d->mDisplayManager->activeDisplay();
+ d->mDisplayManager->setActiveDisplay(display);
+ if (!display) {
+	kdWarning() << k_funcinfo << "NULL display" << endl;
+	return;
+ }
+
+ if (old) {
+	disconnect(old, SIGNAL(contentsMoving(int, int)),
+		d->mMiniMap, SLOT(slotMoveRect(int, int)));
+	disconnect(old, SIGNAL(signalSizeChanged(int, int)),
+			d->mMiniMap, SLOT(slotResizeRect(int, int)));
+	disconnect(d->mMiniMap, SIGNAL(signalReCenterView(const QPoint&)),
+			old, SLOT(slotReCenterView(const QPoint&)));
+	disconnect(old, SIGNAL(signalSingleUnitSelected(Unit*)), 
+			d->mCommandFrame, SLOT(slotShowSingleUnit(Unit*)));
+	disconnect(old, SIGNAL(signalSelectUnit(Unit*)), 
+			d->mCommandFrame, SLOT(slotShowUnit(Unit*)));
+ }
+ connect(display, SIGNAL(contentsMoving(int, int)),
+		d->mMiniMap, SLOT(slotMoveRect(int, int)));
+ connect(display, SIGNAL(signalSizeChanged(int, int)),
+		d->mMiniMap, SLOT(slotResizeRect(int, int)));
+ connect(d->mMiniMap, SIGNAL(signalReCenterView(const QPoint&)),
+		display, SLOT(slotReCenterView(const QPoint&)));
+ connect(display, SIGNAL(signalSingleUnitSelected(Unit*)), 
+		d->mCommandFrame, SLOT(slotShowSingleUnit(Unit*)));
+ connect(display, SIGNAL(signalSelectUnit(Unit*)), 
+		d->mCommandFrame, SLOT(slotShowUnit(Unit*)));
+
+
+ if (d->mEditorMode) {
+	if (old) {
+		disconnect(old, SIGNAL(signalAddCell(int,int, int, unsigned char)),
+				d->mMiniMap, SLOT(slotAddCell(int, int, int, unsigned char)));
+	}
+	connect(display, SIGNAL(signalAddCell(int,int, int, unsigned char)),
+			d->mMiniMap, SLOT(slotAddCell(int, int, int, unsigned char)));
+ } else {
+	if (old) {
+		disconnect(d->mMiniMap, SIGNAL(signalMoveSelection(int, int)),
+				old, SLOT(slotMoveSelection(int, int)));
+	}
+	connect(d->mMiniMap, SIGNAL(signalMoveSelection(int, int)),
+			display, SLOT(slotMoveSelection(int, int)));
+ }
+
+
+
+
+ 
+ // note: all other bigdisplays should unselect now.
+ // d->mLocalPlayer must be known at this point. If it isn't we just return. in
+ // changeCurrentPlayer() we call slotSetActiveDisplay() again.
+ if (!d->mLocalPlayer) {
+	return;
+ }
+ // BosonBigDisplay knows whether a unit was selected. If a unit changed forward
+ // the signal to the big display and let it decide whether the
+ // signalSingleUnitSelected should be emitted
+ if (old) {
+	disconnect(d->mLocalPlayer, SIGNAL(signalUnitChanged(Unit*)), 
+			old, SLOT(slotUnitChanged(Unit*)));
+ }
+ connect(d->mLocalPlayer, SIGNAL(signalUnitChanged(Unit*)), 
+		display, SLOT(slotUnitChanged(Unit*)));
 }
 

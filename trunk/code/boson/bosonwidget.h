@@ -33,6 +33,7 @@ class BosonCanvas;
 class BosonCommandFrame;
 class BosonBigDisplay;
 class Unit;
+class UnitBase;
 class Player;
 class BosonMap;
 
@@ -78,7 +79,7 @@ public:
 	 **/
 	virtual ~BosonWidget();
 
-	void startGame();
+	void startGameMode();
 	void startEditor();
 
 	void saveConfig(bool editor = false);
@@ -106,12 +107,10 @@ public:
 	 **/
 	void displayAllItems(bool display);
 
-	bool isModified() const;
-	void setModified(bool);
-
 	void setShowChat(bool s);
 
 	void editorSavePlayField(const QString& fileName);
+
 
 public slots:
 	void slotDebug();
@@ -140,9 +139,9 @@ public slots:
 	 **/
 	void slotUnfogAll(Player* player = 0);
 
-	void slotSplitViewHorizontal();
-	void slotSplitViewVertical();
-	void slotRemoveActiveView(); // TODO
+	void slotSplitDisplayHorizontal();
+	void slotSplitDisplayVertical();
+	void slotRemoveActiveDisplay();
 
 signals:
 	void signalPlayerJoinedGame(KPlayer* p); // used by the map editor
@@ -195,29 +194,6 @@ protected slots:
 	void slotChangeCursor(int mode, const QString& dir);
 	void slotChangeGroupMove(int mode);
 
-protected:
-	void addChatSystemMessage(const QString& fromName, const QString& text);
-	
-	void sendChangeTeamColor(Player* player, const QColor& color);
-	void changeSpecies(const QString& species);
-	void addLocalPlayer();
-
-	void addDummyComputerPlayer(const QString& name); // used by editor only
-
-	virtual void changeLocalPlayer(Player* p);
-	virtual void keyReleaseEvent(QKeyEvent* e);
-
-	void quitGame();
-
-
-	void recreateLayout(int chatFramePos);
-
-	void addBigDisplay();
-	void addMiniMap();
-
-	void addMouseIO(BosonBigDisplay*);
-
-protected slots:
 	void slotPlayerJoinedGame(KPlayer* p);
 	void slotArrowScrollChanged(int speed);
 	void slotAddUnit(Unit* unit, int x, int y);
@@ -233,6 +209,36 @@ protected slots:
 	 * will have to call @ref BosonMap::loadMap before using it!
 	 **/
 	void slotNewMap(BosonMap* map);
+
+	/**
+	 * Make display the currently active view
+	 **/
+	void slotSetActiveDisplay(BosonBigDisplay* display);
+
+protected:
+	void addChatSystemMessage(const QString& fromName, const QString& text);
+	
+	void sendChangeTeamColor(Player* player, const QColor& color);
+	void changeSpecies(const QString& species);
+	void addLocalPlayer();
+
+	void addDummyComputerPlayer(const QString& name); // used by editor only
+
+	virtual void changeLocalPlayer(Player* p);
+	virtual void keyReleaseEvent(QKeyEvent* e);
+
+	void quitGame();
+
+
+	void recreateLayout();
+	void normalizeVPositions();
+	void normalizeHPositions(int vpos);
+
+//	void addBigDisplay();
+	void initBigDisplay(BosonBigDisplay*);
+	void addMiniMap();
+
+	void addMouseIO(BosonBigDisplay*);
 
 
 private:

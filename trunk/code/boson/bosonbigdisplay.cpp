@@ -97,14 +97,9 @@ public:
 	QLabel* mMinerals;
 	QLabel* mOil;
 
-	bool mIsModified; // for editor mode
-
 	KGameCanvasChat* mChat;
 
 	QCanvasRectangle* mSelectionRect;
-
-	unsigned int mHPos;
-	unsigned int mVPos;
 };
 
 BosonBigDisplay::BosonBigDisplay(QCanvas* c, QWidget* parent) : QCanvasView(c,
@@ -125,8 +120,6 @@ BosonBigDisplay::BosonBigDisplay(QWidget* parent) : QCanvasView(parent)
 void BosonBigDisplay::init()
 {
  d = new BosonBigDisplayPrivate;
- d->mHPos = 0;
- d->mVPos = 0;
 
 // setSizePolicy(QSizePolicy( QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding ));
 // setResizePolicy(QScrollView::AutoOne);
@@ -134,8 +127,6 @@ void BosonBigDisplay::init()
  setHScrollBarMode(AlwaysOff);
  d->mConstruction.unitType = -1; // FIXME: 0 would be better but this is a unit...
  d->mConstruction.groundType = -1;
-
- d->mIsModified = false;
 
  connect(this, SIGNAL(contentsMoving(int, int)), 
 		this, SLOT(slotContentsMoving(int, int)));
@@ -170,6 +161,7 @@ void BosonBigDisplay::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseEvent
  wm.map(pos.x(), pos.y(), &pos.rx(), &pos.ry());
  switch(e->type()) {
 	case QEvent::MouseButtonDblClick:
+		setActive();
 	case QEvent::Wheel:
 		break;
 	case QEvent::MouseButtonRelease:
@@ -233,6 +225,7 @@ void BosonBigDisplay::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseEvent
 		break;
 	}
 	case QEvent::MouseButtonPress:
+		setActive();
 		if (e->button() == LeftButton) {
 			startSelection(pos);
 		} else if (e->button() == MidButton) {
@@ -455,7 +448,6 @@ void BosonBigDisplay::actionClicked(const QPoint& pos, QDataStream& stream, bool
 // the KGameIO. this way it is very easy (it should be at least) to write a
 // computer player
  if (selection().isEmpty()) {
-//	d->mChat->sendMessage(i18n("hi"));
 	return;
  }
  if (selectionMode() == SelectNone) {
@@ -563,6 +555,7 @@ void BosonBigDisplay::slotEditorMouseEvent(QMouseEvent* e, bool* eatevent)
  wm.map(pos.x(), pos.y(), &pos.rx(), &pos.ry());
  switch(e->type()) {
 	case QEvent::MouseButtonDblClick:
+		setActive();
 	case QEvent::Wheel:
 		break;
 	case QEvent::MouseButtonRelease:
@@ -588,6 +581,7 @@ void BosonBigDisplay::slotEditorMouseEvent(QMouseEvent* e, bool* eatevent)
 		break;
 	}
 	case QEvent::MouseButtonPress:
+		setActive();
 		if (e->button() == LeftButton) {
 			if (((BosonCanvas*)canvas())->findUnitAt(pos)) {
 				startSelection(pos);
@@ -620,7 +614,7 @@ void BosonBigDisplay::editorActionClicked(const QPoint& pos)
 	
 	emit signalBuildUnit(d->mConstruction.unitType, x, y,
 			d->mConstruction.owner);
-	setModified(true);
+//	setModified(true); // TODO: in BosonPlayField
  } else if (d->mConstruction.groundType > -1) {
 //	kdDebug() << "place ground " << d->mConstruction.groundType << endl;
 	int version = 0; // FIXME: random()%4;
@@ -633,7 +627,7 @@ void BosonBigDisplay::editorActionClicked(const QPoint& pos)
 		emit signalAddCell(x + 1, y + 1, 
 				d->mConstruction.groundType + 3, version);
 	}
-	setModified(true);
+//	setModified(true); // TODO: in BosonPlayField
  }
 }
 
@@ -753,16 +747,6 @@ void BosonBigDisplay::slotContentsMoving(int newx, int newy)
  d->mChat->move(newx + 10, newy + visibleHeight() - 10); // FIXME: hardcoded!
 }
 
-bool BosonBigDisplay::isModified() const
-{
- return d->mIsModified;
-}
-
-void BosonBigDisplay::setModified(bool m)
-{
- d->mIsModified = m;
-}
-
 void BosonBigDisplay::setKGameChat(KGameChat* c)
 {
  d->mChat->setChat(c);
@@ -793,26 +777,6 @@ void BosonBigDisplay::drawContents(QPainter* p, int x, int y, int w, int h)
  QCanvasView::drawContents(p, x, y, w, h);
 }
 
-void BosonBigDisplay::setHPos(unsigned int p)
-{
- d->mHPos = p;
-}
-
-void BosonBigDisplay::setVPos(unsigned int p)
-{
- d->mVPos = p;
-}
-
-unsigned int BosonBigDisplay::hPos() const
-{
- return d->mHPos;
-}
-
-unsigned int BosonBigDisplay::vPos() const
-{
- return d->mVPos;
-}
-
 void BosonBigDisplay::slotMoveSelection(int cellX, int cellY)
 {
  if (!d->mLocalPlayer) {
@@ -833,3 +797,7 @@ void BosonBigDisplay::slotMoveSelection(int cellX, int cellY)
  }
 }
 
+void BosonBigDisplay::setActive()
+{
+ emit signalMakeActive(this);
+}
