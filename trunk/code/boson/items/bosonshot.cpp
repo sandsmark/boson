@@ -738,7 +738,7 @@ void BosonShotBomb::advanceMoveInternal()
   // First check if bomb touches terrain
   // TODO: maybe put item/terrain collison check to generic BosonItem method
   // Maybe check all corners intead of center point
-  if(z() <= canvas()->heightAtPoint(x() + width() / 2, y() + height() / 2))
+  if(z() <= canvas()->heightAtPoint(centerX(), centerY()))
   {
     boDebug() << "BOMB: " << k_funcinfo << "terrain contact. BOOM" << endl;
     explode();
@@ -899,7 +899,7 @@ bool BosonShotFragment::loadFromXML(const QDomElement& root)
 void BosonShotFragment::advanceMoveInternal()
 {
   // TODO: maybe put item/terrain collison check to generic BosonItem method
-  if(z() <= canvas()->heightAtPoint(x() + width() / 2, y() + height() / 2))
+  if(z() <= canvas()->heightAtPoint(centerX(), centerY()))
   {
     boDebug() << "FRAGMENT: " << k_funcinfo << "terrain contact. BOOM" << endl;
     explode();
@@ -915,7 +915,7 @@ void BosonShotFragment::explode()
 {
   BosonShot::explode();
 
-  BoVector3 pos(x() + width() / 2, y() + height() / 2, z());
+  BoVector3 pos(centerX(), centerY(), z());
   canvas()->addEffects(mUnitProperties->newExplodingFragmentHitEffects(pos));
 }
 
