@@ -568,6 +568,21 @@ void BosonCanvas::shootAtUnit(Unit* target, Unit* attackedBy, long int damage)
 	return;
  }
 
+ // Shield
+ if(target->shields() > 0) {
+	if(target->shields() >= (unsigned long int)damage) {
+		// Unit will not be damaged (it has enough shields)
+		target->setShields(target->shields() - damage);
+		// TODO: show some shield animation
+		boMusic->playSound(attackedBy, Unit::SoundShoot);
+		return;
+	} else {
+		damage -= target->shields();
+		target->setShields(0);
+		// Also show shield animation?
+	}
+ }
+
  if (damage < 0) {
 	target->setHealth(target->health() + ((unsigned long)-damage));
  } else {

@@ -44,6 +44,7 @@ public:
 	UnitPrivate()
 	{
 		mTarget = 0;
+		shieldReloadCounter = 0;
 	}
 	KGamePropertyInt mDirection;
 
@@ -58,6 +59,7 @@ public:
 	// network game.
 	Unit* mTarget;
 
+	int shieldReloadCounter;
 };
 
 Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas) 
@@ -211,6 +213,15 @@ void Unit::advance(int phase)
  }
  if (phase == 0) {
 	reloadWeapon();
+	// Reload shields
+	if(d->shieldReloadCounter >= 10) {
+		if(shields() < unitProperties()->shields()) {
+			setShields(shields() + 1);  // Maybe increase by more than 1. Or make configurable (ShieldsReload=xxx)
+		}
+		d->shieldReloadCounter = 0;
+	} else {
+		d->shieldReloadCounter++;
+	}
  } else { // phase == 1
 	// in phase 1 the unit just gets moved *without* collision detection.
 	// That should be done on phase 0 (see e.g. advanceMoveCheck())

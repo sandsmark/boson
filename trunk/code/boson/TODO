@@ -43,6 +43,7 @@ Game TODOs
   frame. player should left click this then in order to select it for placement
   on the map. Currently the player has to click on the cmd bunker only (not on
   the order button) to start placement
+- Make shield reloading speed configurable
 
 Editor (map, unit, scenario) TODOs
 - totally broken, currently
