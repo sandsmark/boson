@@ -28,7 +28,6 @@
 #include "../bosonplayfield.h"
 #include "../bosonmap.h"
 #include "../bosonscenario.h"
-#include "../cell.h"
 #include "bosonstartupnetwork.h"
 #include "bosonneweditorwidget.h"
 #include "bodebug.h"
