@@ -505,24 +505,7 @@ void BosonBigDisplayBase::paintGL()
  }
 
  glEnable(GL_TEXTURE_2D);
- // hmm.. I don't want to enable the depth buffer for cell-drawing, but otherwise we seem to have some overlapping on scrolling
-// glEnable(GL_DEPTH_TEST); // if we enable this we need to change the z-positions of cells and/or units
- if (!d->mMapDisplayList) {
-	generateMapDisplayList();
-	if (!d->mMapDisplayList) {
-		kdError() << k_funcinfo << "Unable to generate map display list" << endl;
-		return;
-	}
- }
- boProfiling->renderCells(true);
- glCallList(d->mMapDisplayList);
- boProfiling->renderCells(false);
-
- if (checkError()) {
-	kdError() << k_funcinfo << "cells rendered" << endl;
- }
-
- glEnable(GL_DEPTH_TEST); // FIXME: this should be the first occurance of glEnable(GL_DEPTH_TEST)!
+ glEnable(GL_DEPTH_TEST);
  glEnable(GL_BLEND); // AB: once we have 3d models for all units we can get rid of this. we need it for the cursor only then.
  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -569,6 +552,18 @@ void BosonBigDisplayBase::paintGL()
  if (checkError()) {
 	kdError() << k_funcinfo << "when units rendered" << endl;
  }
+
+ glDisable(GL_BLEND);
+ // TODO: disable GL_BLEND for cells? we'll need it for the cursor only
+ boProfiling->renderCells(true);
+ glCallList(d->mMapDisplayList);
+ boProfiling->renderCells(false);
+
+ if (checkError()) {
+	kdError() << k_funcinfo << "cells rendered" << endl;
+ }
+
+
  glDisable(GL_DEPTH_TEST);
 
  boProfiling->renderText(true); // AB: actually this is text and cursor
@@ -591,6 +586,7 @@ void BosonBigDisplayBase::paintGL()
 	// Which version would be faster?
 	GLuint tex = c->currentTexture();
 	if (tex != 0) {
+		glEnable(GL_BLEND);
 		QPoint pos = mapFromGlobal(c->pos());
 		GLfloat x;
 		GLfloat y;
@@ -605,9 +601,9 @@ void BosonBigDisplayBase::paintGL()
 			glTexCoord2f(1.0, 1.0); glVertex3f(x + w, y + h, 0.0);
 			glTexCoord2f(1.0, 0.0); glVertex3f(x + w, y, 0.0);
 		glEnd();
+		glDisable(GL_BLEND);
 	}
  }
- glDisable(GL_BLEND);
  glDisable(GL_TEXTURE_2D);
  if (checkError()) {
 	kdError() << k_funcinfo << "cursor rendered" << endl;
