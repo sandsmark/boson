@@ -26,6 +26,8 @@
         name2="helipad" type2="fix"
 #include "simple_facilities.wml" type="Facilities" name="Turret" \
         name2="turret" type2="fix"
+#include "simple_facilities.wml" type="Facilities" name="Air Turret" \
+        name2="airturret" type2="fix"
 #include "simple_facilities.wml" type="Facilities" name="Sam-Site" \
         name2="samsite" type2="fix"
 </grid>

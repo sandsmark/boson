@@ -12,7 +12,7 @@ BO_DOC_DIR = facilities
 BO_DOCS = index.wml commandbunker.wml comsat.wml helipad.wml map.wml \
 	mineralrefinery.wml powerplant.wml \
 	oilrefinery.wml repairpad.wml samsite.wml techcenter.wml turret.wml \
-	weaponsfactory.wml map.wml
+	airturret.wml weaponsfactory.wml map.wml
 
 # list additional data here - these files will get installed
 doc_DATA = commandbunker.jpg comsat.jpg helipad.jpg \
@@ -23,6 +23,7 @@ doc_DATA = commandbunker.jpg comsat.jpg helipad.jpg \
         mineralrefinery_small.jpg  powerplant_small.jpg \
         oilrefinery_small.jpg repairpad_small.jpg samsite_small.jpg \
         techcenter_small.jpg turret_small.jpg \
+	airturret.jpg airturret_small.jpg \
         map_small.jpg weaponsfactory_small.jpg
 
 # Configuration ends here!

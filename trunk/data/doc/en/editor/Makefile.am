@@ -12,7 +12,7 @@ BO_DOC_DIR=editor
 BO_DOCS=index.wml overview.wml facilities.wml map.wml
 
 # list additional data here - these files will get installed
-doc_DATA=
+doc_DATA=up_down.png
 
 # Condiguration ends here!
 
