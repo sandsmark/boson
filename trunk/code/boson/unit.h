@@ -401,7 +401,6 @@ protected:
 	 **/
 	virtual void advanceMoveCheck() { }
 
-	BosonWeapon* activeWeapon() const;
 	/**
 	 * @return Whether unit should attack any enemy units in range while moving
 	 **/

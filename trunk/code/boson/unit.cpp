@@ -56,7 +56,6 @@ public:
 	UnitPrivate()
 	{
 		mTarget = 0;
-		mActiveWeapon = 0;
 		mSmokeParticleSystem = 0;
 	}
 	KGamePropertyList<QPoint> mWaypoints;
@@ -71,7 +70,6 @@ public:
 	// changed before all players entered the game we'll have a broken
 	// network game.
 	Unit* mTarget;
-	BosonWeapon* mActiveWeapon;
 
 	// these must NOT be touched (items added or removed) after the c'tor.
 	// loading code will depend in this list to be at the c'tor state!
@@ -225,22 +223,6 @@ void Unit::setTarget(Unit* target)
  if (d->mTarget->isDestroyed()) {
 	 d->mTarget = 0;
  }
- // Find weapon
- // FIXME: currently we only use 1 weapon. If unit has multiple weapons, why not use them all?
- if (d->mTarget) {
-	boDebug() << k_funcinfo << "Target's there, searching for weapon" << endl;
-	QPtrListIterator<BosonWeapon> it(d->mWeapons);
-	while (it.current()) {
-		if (it.current()->canShootAt(target)) {
-			boDebug() << k_funcinfo << "Found weapon that can shoot at target, setting active weapon and returning" << endl;
-			d->mActiveWeapon = it.current();
-			return;
-		}
-		++it;
-	}
- }
- boDebug() << k_funcinfo << "No weapon found, setting active weapon to NULL" << endl;
- d->mActiveWeapon = 0;
 }
 
 void Unit::setHealth(unsigned long int h)
@@ -443,6 +425,7 @@ Unit* Unit::bestEnemyUnitInRange()
  Unit* best = 0l;
  BoItemList::Iterator it = list.begin();
  Unit* u = 0l;
+ float dist = 0;
  // Candidates to best unit, see below
  Unit* c1 = 0l;
  Unit* c2 = 0l;
@@ -451,13 +434,20 @@ Unit* Unit::bestEnemyUnitInRange()
  // Iterate through the list of enemies and pick the best ones
  for (; it != list.end(); ++it) {
 	u = ((Unit*)*it);
+	dist = QMAX(QABS((int)(u->x() - x()) / BO_TILE_SIZE), QABS((int)(u->y() - y()) / BO_TILE_SIZE));
 	// Quick check if we can shoot at u
 	if (u->isFlying()) {
 		if (!unitProperties()->canShootAtAirUnits()) {
 			continue;
 		}
+		if (dist > unitProperties()->maxAirWeaponRange()) {
+			continue;
+		}
 	} else {
 		if (!unitProperties()->canShootAtLandUnits()) {
+			continue;
+		}
+		if (dist > unitProperties()->maxLandWeaponRange()) {
 			continue;
 		}
 	}
@@ -500,14 +490,10 @@ void Unit::advanceAttack(unsigned int advanceCount)
  if (advanceCount % 5 != 0) {
 	return;
  }
+
  boDebug(300) << k_funcinfo << endl;
  if (!target()) {
 	boWarning() << k_funcinfo << "cannot attack NULL target" << endl;
-	stopAttacking();
-	return;
- }
- if (!d->mActiveWeapon) {
-	boError() << k_funcinfo << "Attacking, but no active weapon!" << endl;
 	stopAttacking();
 	return;
  }
@@ -516,21 +502,30 @@ void Unit::advanceAttack(unsigned int advanceCount)
 	stopAttacking();
 	return;
  }
+
  boDebug(300) << "    " << k_funcinfo << "checking if unit's in range" << endl;
- if (!inRange(d->mActiveWeapon->properties()->range(), target())) {
+ int range;
+ if (target()->isFlying()) {
+	range = unitProperties()->maxAirWeaponRange();
+ } else {
+	range = unitProperties()->maxLandWeaponRange();
+ }
+
+ if (!inRange(range, target())) {
 	if (!canvas()->allItems().contains(target())) {
 		boDebug(300) << "Target seems to be destroyed!" << endl;
 		stopAttacking();
 		return;
 	}
 	boDebug(300) << "unit (" << target()->id() << ") not in range - moving..." << endl;
-	if (!moveTo(target()->x(), target()->y(), d->mActiveWeapon->properties()->range())) {
+	if (!moveTo(target()->x(), target()->y(), range)) {
 		setWork(WorkNone);
 	} else {
 		setAdvanceWork(WorkMove);
 	}
 	return;
  }
+
  if(isMobile()) {
 	float rot = rotationToPoint(target()->x() - x(), target()->y() - y());
 	if(rot < rotation() - 5 || rot > rotation() + 5) {
@@ -543,13 +538,23 @@ void Unit::advanceAttack(unsigned int advanceCount)
 		}
 	}
  }
- boDebug(300) << "    " << k_funcinfo << "shooting at target" << endl;
- shootAt(d->mActiveWeapon, target());
- boDebug(300) << "    " << k_funcinfo << "done shooting" << endl;
- if (target()->isDestroyed()) {
-	stopAttacking();
- }
 
+ // Shoot at target with as many weapons as possible
+ boDebug(300) << "    " << k_funcinfo << "shooting at target" << endl;
+ QPtrListIterator<BosonWeapon> wit(d->mWeapons);
+ BosonWeapon* w;
+ while (( w = wit.current()) != 0) {
+	++wit;
+	if (w->reloaded() && w->canShootAt(target()) && inRange(w->properties()->range(), target())) {
+		shootAt(w, target());
+		if (target()->isDestroyed()) {
+			boDebug(300) << "    " << k_funcinfo << "target destroyed, returning" << endl;
+			stopAttacking();
+			return;
+		}
+	}
+ }
+ boDebug(300) << "    " << k_funcinfo << "done shooting" << endl;
 }
 
 void Unit::advanceDestroyed(unsigned int advanceCount)
@@ -761,7 +766,6 @@ void Unit::stopAttacking()
  stopMoving(); // FIXME not really intuitive... nevertheless its currently useful.
  setTarget(0);
  setWork(WorkNone);
- d->mActiveWeapon = 0l;
 }
 
 bool Unit::save(QDataStream& stream)
@@ -792,12 +796,6 @@ bool Unit::save(QDataStream& stream)
  }
  stream << (Q_UINT32)targetId;
 
- // now we need to store the active weapon:
- int weaponIndex = -1;
- if (activeWeapon()) {
-	weaponIndex = d->mWeapons.findRef(activeWeapon());
- }
- stream << (Q_INT32)weaponIndex;
  return true;
 }
 
@@ -816,14 +814,12 @@ bool Unit::load(QDataStream& stream)
  float z;
  Q_INT32 pluginIndex;
  Q_UINT32 targetId;
- Q_INT32 weaponIndex;
 
  stream >> x;
  stream >> y;
  stream >> z;
  stream >> pluginIndex;
  stream >> targetId;
- stream >> weaponIndex;
 
  if (pluginIndex < 0) {
 	mCurrentPlugin = 0;
@@ -842,15 +838,6 @@ bool Unit::load(QDataStream& stream)
 	d->mTarget = boGame->findUnit(targetId, 0);
 	if (!d->mTarget) {
 		boWarning() << k_funcinfo << "Could not find target with unitId=" << targetId << endl;
-	}
- }
- if (weaponIndex < 0) {
-	d->mActiveWeapon = 0;
- } else {
-	if ((unsigned int)weaponIndex >= d->mWeapons.count()) {
-		boWarning() << k_funcinfo << "Invalid active weapon index: " << weaponIndex << endl;
-	} else {
-		d->mActiveWeapon = d->mWeapons.at(weaponIndex);
 	}
  }
 
@@ -1110,11 +1097,6 @@ bool Unit::canShootAt(Unit *u)
  return false;
 }
 
-BosonWeapon* Unit::activeWeapon() const
-{
- return d->mActiveWeapon;
-}
-
 int Unit::moveAttacking() const
 {
  return d->mMoveAttacking;
@@ -1194,7 +1176,14 @@ void MobileUnit::advanceMoveInternal(unsigned int) // this actually needs to be 
 	if (work() == WorkAttack) {
 		// no need to move to the position of the unit...
 		// just check if unit is in range now.
-		if (inRange(activeWeapon()->properties()->range(), target())) {
+		// TODO: maybe cache range somewhere. OTOH, I don't think it would make things much faster
+		int range;
+		if (target()->isFlying()) {
+			range = unitProperties()->maxAirWeaponRange();
+		} else {
+			range = unitProperties()->maxLandWeaponRange();
+		}
+		if (inRange(range, target())) {
 			boDebug(401) << k_funcinfo << "unit " << id() << ": target is in range now" << endl;
 			stopMoving();
 			return;
