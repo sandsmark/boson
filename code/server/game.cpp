@@ -26,4 +26,5 @@ Player	player[BOSON_MAX_CONNECTION];
 uint	jiffies = 0;
 uint	nbPlayer = 0;
 uint	nbConnected = 0;
+BosonServer	*server = 0;
 

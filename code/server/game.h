@@ -25,11 +25,13 @@
 #include "../common/boconfig.h"
 
 class QString;
+class BosonServer;
 
-extern Player	player[BOSON_MAX_CONNECTION];
-extern QString	*worldName;
-extern uint	jiffies;
-extern uint	nbPlayer;
-extern uint	nbConnected;
+extern Player		player[BOSON_MAX_CONNECTION];
+extern QString		*worldName;
+extern uint		jiffies;
+extern uint		nbPlayer;
+extern uint		nbConnected;
+extern BosonServer	*server;
 
 #endif // SERVER_GAME_H 

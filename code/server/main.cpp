@@ -22,6 +22,7 @@
 #include <kmsgbox.h>
 
 #include "boserver.h" 
+#include "game.h" 
 
 
 void usage(void)
@@ -51,7 +52,7 @@ int main(int argc, char* argv[])
 /*	if (app.isRestored()) 
 		RESTORE(BosonServer);
 	else { */
-	BosonServer* server = new BosonServer (port, mapname);
+	server = new BosonServer (port, mapname);
 	server->show();
 //}  
 	return app.exec();
