@@ -22,7 +22,6 @@
 #include "bosonconfig.h"
 
 #include <klocale.h>
-#include <kconfig.h>
 #include <kedittoolbar.h>
 #include <kstatusbar.h>
 #include <kaction.h>

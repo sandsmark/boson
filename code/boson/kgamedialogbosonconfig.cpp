@@ -29,7 +29,6 @@
 #include <klocale.h>
 #include <kdebug.h>
 #include <ksimpleconfig.h>
-#include <kmessagebox.h>
 
 #include <qpushbutton.h>
 #include <qvgroupbox.h>

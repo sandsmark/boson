@@ -34,9 +34,7 @@
 
 #include <kgame/kgameio.h>
 #include <kdebug.h>
-#include <kcursor.h>
 #include <klocale.h>
-#include <kstandarddirs.h>
 
 #include <qptrlist.h>
 #include <qpoint.h>

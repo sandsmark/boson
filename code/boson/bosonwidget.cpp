@@ -49,9 +49,7 @@
 #include "defines.h"
 
 #include <klocale.h>
-#include <kconfig.h>
 #include <kdebug.h>
-#include <kstandarddirs.h>
 #include <kmessagebox.h>
 #include <kgame/kgameio.h>
 #include <kgame/kgamedebugdialog.h>
