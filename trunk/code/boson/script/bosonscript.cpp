@@ -379,12 +379,30 @@ void BosonScript::stopUnit(int player, int id)
 
 void BosonScript::mineUnit(int player, int id, int x, int y)
 {
+  // First we have to find resource mine
+  // TODO: it sucks to do this here, perhaps we could have something like a
+  //  MoveMineAt message which orders unit to move at specific point, not at
+  //  some unit (then Boson would take care of finding resource mine unit).
+  Unit* resourceUnit = canvas()->findUnitAt(BoVector3(x, y, 0.0));
+  if(!resourceUnit)
+  {
+    boError() << k_funcinfo << "No units found at (" << x << "; " << y << ")" << endl;
+    return;
+  }
+  ResourceMinePlugin* resource = (ResourceMinePlugin*)resourceUnit->plugin(UnitPlugin::ResourceMine);
+  if(!resource)
+  {
+    // there is no mine at destination
+    boError() << k_funcinfo << "No resource mine found at (" << x << "; " << y << ")" << endl;
+    return;
+  }
+
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
 
   stream << (Q_UINT32)BosonMessage::MoveMine;
   stream << (Q_ULONG)id;
-  stream << QPoint(x, y);
+  stream << (Q_ULONG)resourceUnit->id();
 
   QDataStream msg(b, IO_ReadOnly);
   sendInput(player, msg);

@@ -578,6 +578,9 @@ bool HarvesterPlugin::isNextTo(const Unit* u) const
  float distx, disty;
  distx = fabsf((u->x() + u->width() / 2) - (unit()->x() + unit()->width() / 2));
  disty = fabsf((u->y() + u->height() / 2) - (unit()->y() + unit()->height() / 2));
+ // We might get some precision trouble with floats, so we do this:
+ distx = fmaxf(distx - 1, 0);
+ disty = fmaxf(disty - 1, 0);
 
  float allowedx, allowedy;
  allowedx = unit()->width() / 2 + u->width() / 2;
