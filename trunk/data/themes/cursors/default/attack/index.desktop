@@ -1,5 +1,10 @@
+[Animation]
+FrameCount=34
+RotateDegree=0
+Speed=100
+
 [Boson Cursor]
 FilePrefix=cursor-
-FrameCount=34
-HotspotX=23
-HotspotY=23
+HotspotX=24
+HotspotY=24
+IsAnimated=true
