@@ -45,7 +45,6 @@ public:
 
 	void		setGroundType(groundType g)	{ ground = g ; }
 	void		setItem(byte it)		{ item   = it ; }
-//	void		setFacility(void) { ground = GROUND_FACILITY; }
 
 protected:
 	groundType	ground;

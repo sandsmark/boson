@@ -22,7 +22,6 @@
 #define GROUNDTYPE_H 
 
 enum groundType {
-	GROUND_FACILITY = -2,
 	GROUND_UNKNOWN = -1,
 
 	GROUND_DEEP_WATER = 0,
