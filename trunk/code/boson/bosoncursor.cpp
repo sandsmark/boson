@@ -204,6 +204,11 @@ bool BosonKDECursor::insertMode(int , QString , QString )
 BosonSpriteCursorData::BosonSpriteCursorData()
 {
  mArray = 0;
+ mHotspotX = 0;
+ mHotspotY = 0;
+ mAnimated = false;
+ mAnimationSpeed = 0;
+ mRotateDegree = 0;
 }
 
 BosonSpriteCursorData::~BosonSpriteCursorData()
@@ -217,10 +222,12 @@ public:
 	BosonSpriteCursorPrivate()
 	{
 		mCurrentFrame = 0;
+		mCurrentRotate = 0;
 	}
 
-	int mCurrentFrame;
 	QTimer mAnimateTimer;
+	int mCurrentFrame;
+	int mCurrentRotate;
 
 	QIntDict<BosonSpriteCursorData> mCursors;
 };
@@ -294,9 +301,16 @@ void BosonSpriteCursor::slotAdvance()
  if (!mCurrentData || !mCurrentData->mArray) {
 	return;
  }
+ if (!mCurrentData->mAnimated || !mCurrentData->mAnimationSpeed) {
+	return;
+ }
  d->mCurrentFrame++;
  if (d->mCurrentFrame >= (int)mCurrentData->mArray->count()) {
 	d->mCurrentFrame = 0;
+	d->mCurrentRotate += mCurrentData->mRotateDegree;
+	if (QABS(d->mCurrentRotate) >= 360) {
+		d->mCurrentRotate = 0;
+	}
  }
  mCurrentTexture = mCurrentData->mArray->texture(d->mCurrentFrame);
 }
@@ -319,11 +333,24 @@ BosonSpriteCursorData* BosonSpriteCursor::loadSpriteCursor(QString baseDir, QStr
  }
  c.setGroup("Boson Cursor");
  QString filePrefix = c.readEntry("FilePrefix", QString::fromLatin1("cursor-"));
- unsigned int frames = c.readUnsignedNumEntry("FrameCount", 1);
- QValueList<QImage> images;
-
  unsigned int hotspotX = c.readUnsignedNumEntry(QString("HotspotX"), 0);
  unsigned int hotspotY = c.readUnsignedNumEntry(QString("HotspotY"), 0);
+ bool animated = c.readBoolEntry("IsAnimated", false);
+ unsigned int animationSpeed = 0;
+ unsigned int frames = 1;
+ int rotateDegree = 0;
+ if (animated) {
+	if (!c.hasGroup("Animation")) {
+		animated = false;
+	} else {
+		c.setGroup("Animation");
+		frames = c.readUnsignedNumEntry("FrameCount", 1);
+		animationSpeed = c.readUnsignedNumEntry("Speed", 0);
+		rotateDegree = c.readNumEntry("RotateDegree", 0);
+	}
+ }
+
+ QValueList<QImage> images;
  for (unsigned int j = 0; j < frames; j++) {
 	QString number;
 	number.sprintf("%04d", j);
@@ -341,6 +368,9 @@ BosonSpriteCursorData* BosonSpriteCursor::loadSpriteCursor(QString baseDir, QStr
 	data->mArray = new BosonTextureArray(images, false);
 	data->mHotspotX = hotspotX;
 	data->mHotspotY = hotspotY;
+	data->mAnimated = animated;
+	data->mAnimationSpeed = animationSpeed;
+	data->mRotateDegree = rotateDegree;
 	return data;
  } else {
 	kdError() << k_funcinfo << "Could not load from " << baseDir + cursor << endl;
@@ -367,8 +397,12 @@ void BosonSpriteCursor::setCurrentData(BosonSpriteCursorData* data)
  if (d->mCurrentFrame >= (int)mCurrentData->mArray->count()) {
 	d->mCurrentFrame = 0;
  }
- if (mCurrentData->mArray->count() > 1) {
-	d->mAnimateTimer.start(100);
+ if (QABS(d->mCurrentRotate) >= 360) {
+	d->mCurrentRotate = 0;
+ }
+
+ if (mCurrentData->mAnimated && mCurrentData->mAnimationSpeed > 0) {
+	d->mAnimateTimer.start(mCurrentData->mAnimationSpeed);
  }
 }
 
@@ -377,8 +411,14 @@ void BosonSpriteCursor::renderCursor(GLfloat x, GLfloat y)
  GLuint tex = currentTexture();
  if (tex != 0) {
 	glEnable(GL_BLEND);
-	x -= hotspotX();
-	y -= hotspotY();
+	glPushMatrix();
+	glTranslatef(x, y, 0.0);
+	glRotatef(d->mCurrentRotate, 0.0, 0.0, 1.0);
+	x = -(GLfloat)hotspotX();
+	y = -(GLfloat)hotspotY();
+
+	// FIXME: we currently depend on image width/height == BO_TILE_SIZE
+	// we should use the actual width/height here instead!
 	const GLfloat w = BO_TILE_SIZE;
 	const GLfloat h = BO_TILE_SIZE;
 	glBindTexture(GL_TEXTURE_2D, tex);
@@ -388,6 +428,7 @@ void BosonSpriteCursor::renderCursor(GLfloat x, GLfloat y)
 		glTexCoord2f(1.0, 1.0); glVertex3f(x + w, y + h, 0.0);
 		glTexCoord2f(1.0, 0.0); glVertex3f(x + w, y, 0.0);
 	glEnd();
+	glPopMatrix();
 	glDisable(GL_BLEND);
  }
 }
