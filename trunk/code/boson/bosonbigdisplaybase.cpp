@@ -1984,10 +1984,10 @@ void BosonBigDisplayBase::generateCellList()
  maxY = QMAX(0, maxY);
  minX = QMAX(0, minX);
  minY = QMAX(0, minY);
- maxX = QMIN(width(), maxX);
- minX = QMIN(width(), minX);
- maxY = QMIN(height(), maxY);
- minY = QMIN(height(), minY);
+ maxX = QMIN(map->width() - 1, maxX);
+ minX = QMIN(map->width() - 1, minX);
+ maxY = QMIN(map->height() - 1, maxY);
+ minY = QMIN(map->height() - 1, minY);
 
  // if everything went fine we need to add those cells that are in the
  // ((minX,minY),(maxX,maxY)) rectangle only.
@@ -1996,6 +1996,17 @@ void BosonBigDisplayBase::generateCellList()
  int cellMaxX = (int)(maxX / BO_GL_CELL_SIZE) + 1; // +1 because of a modulo (very probably at this point)
  int cellMinY = (int)(minY / BO_GL_CELL_SIZE);
  int cellMaxY = (int)(maxY / BO_GL_CELL_SIZE) + 1;
+
+ // finally we ensure that the cell values are valid, too.
+ // after these lines we mustn't modify cellM* anymore!
+ cellMinX = QMAX(cellMinX, 0);
+ cellMinY = QMAX(cellMinY, 0);
+ cellMaxX = QMAX(cellMaxX, 0);
+ cellMaxY = QMAX(cellMaxY, 0);
+ cellMinX = QMIN(cellMinX, (int)map->width() - 1);
+ cellMinY = QMIN(cellMinY, (int)map->height() - 1);
+ cellMaxX = QMIN(cellMaxX, (int)map->width() - 1);
+ cellMaxY = QMIN(cellMaxY, (int)map->height() - 1);
 
  int size = (cellMaxX - cellMinX + 1) * (cellMaxY - cellMinY + 1);
  size = QMIN((int)(map->width() * map->height()), size);
@@ -2019,7 +2030,7 @@ void BosonBigDisplayBase::generateCellList()
  int count = 0;
  for (int x = cellMinX; x <= cellMaxX; x++) {
 	for (int y = cellMinY; y <= cellMaxY; y++) {
-		// WARNING: x/y MUST be valid!!! there is *no* additional check
+		// WARNING: x,y MUST be valid!!! there is *no* additional check
 		// here!
 		Cell* c = &allCells[x + y * map->width()];
 		
