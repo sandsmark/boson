@@ -1041,6 +1041,11 @@ void BosonBigDisplayBase::addMouseIO(Player* p)
 	kdError() << k_funcinfo << "NULL player" << endl;
 	return;
  }
+ if (p->hasRtti(KGameIO::MouseIO)) {
+	// FIXME: this is only invalid if the IO is for the same big display!
+	kdWarning() << k_funcinfo << "player already has a mouse IO" << endl;
+	return;
+ }
  KGameMouseIO* mouseIO = new KGameMouseIO(this, true);
  connect(mouseIO, SIGNAL(signalMouseEvent(KGameIO*, QDataStream&, QMouseEvent*, bool*)),
 		this, SLOT(slotMouseEvent(KGameIO*, QDataStream&, QMouseEvent*, bool*)));

@@ -25,7 +25,7 @@
 #include "player.h"
 #include "unitproperties.h"
 #include "cell.h"
-//#include "bosonmessage.h"
+#include "bosonmessage.h"
 #include "bosonconfig.h"
 #include "global.h"
 #include "boselection.h"
@@ -36,19 +36,90 @@
 #include <kdebug.h>
 #include <klocale.h>
 
-// this just stores a *selection* for constructing. This means e.g. if you click
+// this just stores a *selection* for placement. This means e.g. if you click
 // on a unit (in the command frame!) the unit type is placed here as well as the
-// facility that shall construct the unit. We'll see if this makes sense at
-// all...
-// for editor mode the facility is 0. As soon as the player left-clicks on the
-// map the unit is placed there.
-// owner should be for Editor mode only.
-struct ConstructUnit
+// player the unit shall belong to.
+class Placement
 {
-	int unitType; // to be constructed unit
-	Unit* factory; // facility that constructs the unit (or NULL in editor mode)
-	Player* owner; // the owner of the unit - probably only for editor mode.
-	int groundType;
+public:
+	enum PlacementType {
+		PlaceNothing = 0,
+		PlaceUnit = 1,
+		PlaceCell = 2
+	};
+
+	Placement()
+	{
+		reset();
+	}
+	void reset()
+	{
+		mType = PlaceNothing;
+		mUnitType = 0;
+		mGroundType = -1;
+		mOwner = 0;
+	}
+
+	void placeUnit(unsigned long int t, Player* owner)
+	{
+		reset();
+		mType = PlaceUnit;
+		mUnitType = t;
+		mOwner = owner;
+	}
+
+	void placeCell(int t)
+	{
+		reset();
+		mType = PlaceCell;
+		mGroundType = t;
+	}
+
+	/**
+	 * @return The ID of the unittype to be placed, or 0 if none is to be
+	 * placed.
+	 **/
+	unsigned long int unitType() const
+	{
+		if (isUnit()) {
+			return mUnitType;
+		}
+		return 0;
+	}
+
+	/**
+	 * @return The player that is currently selected (i.e. that the unit
+	 * should be placed for), if @ref isUnit is TRUE. Otherwise 0.
+	 **/
+	Player* owner() const
+	{
+		if (isUnit()) {
+			return mOwner;
+		}
+		return 0;
+	}
+
+	/**
+	 * @return The tile number of the to-be-placed cell, or -1 if none is to
+	 * be placed.
+	 **/
+	int cell() const
+	{
+		if (isCell()) {
+			return mGroundType;
+		}
+		return -1;
+	}
+
+	PlacementType type() const { return mType; }
+	bool isUnit() const { return type() == PlaceUnit; }
+	bool isCell() const { return type() == PlaceCell; }
+
+private:
+	PlacementType mType;
+	unsigned long int mUnitType;
+	Player* mOwner;
+	int mGroundType;
 };
 
 class EditorBigDisplay::EditorBigDisplayPrivate
@@ -61,7 +132,7 @@ public:
 
 	KGameMouseIO* mMouseIO;
 
-	ConstructUnit mConstruction;
+	Placement mPlacement;
 };
 
 EditorBigDisplay::EditorBigDisplay(BosonCanvas* c, QWidget* parent) 
@@ -73,9 +144,6 @@ EditorBigDisplay::EditorBigDisplay(BosonCanvas* c, QWidget* parent)
 void EditorBigDisplay::init()
 {
  d = new EditorBigDisplayPrivate;
-
- d->mConstruction.unitType = -1; // FIXME: 0 would be better but this is a unit...
- d->mConstruction.groundType = -1;
 }
 
 EditorBigDisplay::~EditorBigDisplay()
@@ -100,68 +168,55 @@ void EditorBigDisplay::setLocalPlayer(Player* p)
  }
 }
 
-void EditorBigDisplay::actionClicked(const BoAction& action, QDataStream& , bool* )
+void EditorBigDisplay::actionClicked(const BoAction& action, QDataStream& stream, bool* send)
 {
 // kdDebug() << k_funcinfo << endl;
  int x = action.canvasPos().x() / BO_TILE_SIZE;
  int y = action.canvasPos().y() / BO_TILE_SIZE;
- if (d->mConstruction.unitType > -1) {
-	if (!d->mConstruction.owner) {
-		kdWarning() << k_funcinfo << "NO OWNER" << endl;
-//		return;
+ if (d->mPlacement.isUnit()) {
+	if (!d->mPlacement.owner()) { // TODO
+		kdError() << k_funcinfo << "NO OWNER" << endl;
+		return;
 	}
-	
-	emit signalBuildUnit(d->mConstruction.unitType, x, y,
-			d->mConstruction.owner);
+	kdDebug() << "place unit " << d->mPlacement.unitType() << endl;
+
+	stream << (Q_UINT32)BosonMessage::MoveEditor;
+	stream << (Q_UINT32)BosonMessage::MovePlaceUnit;
+	stream << (Q_INT32)d->mPlacement.owner()->id();
+	stream << (Q_INT32)d->mPlacement.unitType();
+	stream << (Q_INT32)x;
+	stream << (Q_INT32)y;
+	*send = true;
+
 //	setModified(true); // TODO: in BosonPlayField
- } else if (d->mConstruction.groundType > -1) {
-//	kdDebug() << "place ground " << d->mConstruction.groundType << endl;
-	int version = 0; // FIXME: random()%4;
-	emit signalAddCell(x, y, d->mConstruction.groundType, version);
-	if (Cell::isBigTrans(d->mConstruction.groundType)) {
-		emit signalAddCell(x + 1, y, 
-				d->mConstruction.groundType + 1, version);
-		emit signalAddCell(x, y + 1, 
-				d->mConstruction.groundType + 2, version);
-		emit signalAddCell(x + 1, y + 1, 
-				d->mConstruction.groundType + 3, version);
+ } else if (d->mPlacement.isCell()) {
+	kdDebug() << "place ground " << d->mPlacement.cell() << endl;
+
+	unsigned char version = 0; // FIXME: random()%4;
+
+	stream << (Q_UINT32)BosonMessage::MoveEditor;
+	stream << (Q_UINT32)BosonMessage::MovePlaceCell;
+	stream << (Q_INT32)d->mPlacement.cell();
+	stream << (Q_UINT8)version;
+	stream << (Q_INT8)Cell::isBigTrans(d->mPlacement.cell());
+	stream << (Q_INT32)x;
+	stream << (Q_INT32)y;
+	*send = true;
+
+	/*
+	emit signalPlaceCell(x, y, d->mPlacement.cell(), version);
+	if (Cell::isBigTrans(d->mPlacement.cell())) {
+		emit signalPlaceCell(x + 1, y,
+				d->mPlacement.cell() + 1, version);
+		emit signalPlaceCell(x, y + 1,
+				d->mPlacement.cell() + 2, version);
+		emit signalPlaceCell(x + 1, y + 1,
+				d->mPlacement.cell() + 3, version);
 	}
+	*/
 //	setModified(true); // TODO: in BosonPlayField
  }
 }
-
-/*
-void EditorBigDisplay::slotWillConstructUnit(int unitType, UnitBase* factory, KPlayer* owner)
-{
- if (!owner) {
-	kdDebug() << k_funcinfo << "NULL owner" << endl;
-	d->mConstruction.groundType = -1;
-	d->mConstruction.unitType = -1;
-	return;
- }
-// kdDebug() << unitType << endl;
- if (factory) { // usual production
-//	kdDebug() << "there is a factory " << endl;
-	return;
-	kdError() << "obsolete??" << endl;
-	// this MUST be sent over network - therefore use CommandInput!
-//	((Facility*)factory)->addProduction(unitType); //AB: seems to be
-//	obsolete.. //TODO: test if it is used in any way!
- } else { // we are in editor mode!
-	//FIXME
-	// should be sent over network
-	d->mConstruction.unitType = unitType;
-	d->mConstruction.factory = (Unit*)factory;
-	d->mConstruction.owner = (Player*)owner;
-	d->mConstruction.groundType = -1;
- }
-}
-
-void EditorBigDisplay::slotWillPlaceCell(int groundType)
-{
- d->mConstruction.unitType = -1;
- d->mConstruction.groundType = groundType;
-}*/
 
 /*
 void EditorBigDisplay::addMouseIO(Player* p)
@@ -184,6 +239,8 @@ void EditorBigDisplay::addMouseIO(Player* p)
 }
 */
 
+// the place*() methods get called when an item in (e.g.) the commandframe is
+// selected.
 void EditorBigDisplay::placeUnit(unsigned long int unitType, Player* owner)
 {
  if (!owner) {
@@ -195,10 +252,16 @@ void EditorBigDisplay::placeUnit(unsigned long int unitType, Player* owner)
 	return;
  }
  kdDebug() << k_funcinfo << "now placing unit: " << unitType << " for " << owner->id() << "==" << owner->name() << endl;
+ d->mPlacement.placeUnit(unitType, owner);
 }
 
 void EditorBigDisplay::placeCell(int tile)
 {
  kdDebug() << k_funcinfo << "now placing cell: " << tile << endl;
+ if (tile < 0) {
+	kdError() << k_funcinfo << "invalid tile " << tile << endl;
+	return;
+ }
+ d->mPlacement.placeCell(tile);
 }
 

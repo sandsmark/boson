@@ -61,6 +61,11 @@ public:
 		MoveStop = 108,  // Stop unit(s) from moving or attacking
 		MoveFollow = 109,  // Follow another unit
 
+	// Player Input in Editor mode
+		MoveEditor = 200, // all editor moves/inputs are prefixed with this
+		MovePlaceUnit = 201,
+		MovePlaceCell = 202,
+
 
 	// the last message ID:
 		UnitPropertyHandler = 1000 // + unit id

@@ -240,6 +240,8 @@ signals:
 	void signalNotEnoughMinerals(Player* p);
 	void signalNotEnoughOil(Player* p);
 
+	void signalChangeCell(int x, int y, int groundType, unsigned char );
+
 protected:
 	virtual bool playerInput(QDataStream& stream, KPlayer* player);
 
