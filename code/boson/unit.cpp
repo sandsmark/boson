@@ -55,8 +55,8 @@ public:
 	Unit* mTarget;
 };
 
-Unit::Unit(int type, Player* owner, QCanvas* canvas) 
-		: UnitBase(type), QCanvasSprite(owner->pixmapArray(type), canvas)
+Unit::Unit(const UnitProperties* prop, Player* owner, QCanvas* canvas) 
+		: UnitBase(prop), QCanvasSprite(owner->pixmapArray(prop->typeId()), canvas)
 {
  d = new UnitPrivate;
  setOwner(owner);
@@ -524,7 +524,7 @@ public:
 	KGameProperty<double> mSpeed;
 };
 
-MobileUnit::MobileUnit(int type, Player* owner, QCanvas* canvas) : Unit(type, owner, canvas)
+MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, QCanvas* canvas) : Unit(prop, owner, canvas)
 {
  d = new MobileUnitPrivate;
  d->mSpeed.registerData(IdSpeed, dataHandler(), 
@@ -686,7 +686,7 @@ public:
 	KGameProperty<unsigned int> mProductionState; // state of the unit we are producing
 };
 
-Facility::Facility(int type, Player* owner, QCanvas* canvas) : Unit(type, owner, canvas)
+Facility::Facility(const UnitProperties* prop, Player* owner, QCanvas* canvas) : Unit(prop, owner, canvas)
 {
  d = new FacilityPrivate;
  d->mConstructionState.registerData(IdFix_ConstructionState, dataHandler(), 

@@ -120,7 +120,6 @@ void Player::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 sende
 		case UnitBase::IdHealth:
 		case UnitBase::IdArmor:
 		case UnitBase::IdShields:
-		case UnitBase::IdType: //? Can this change at all?
 		case UnitBase::IdCost: // can change during the game, too!!
 			// currently unused - nevertheless display the value if
 			// selected
@@ -225,7 +224,6 @@ void Player::slotUnitPropertyChanged(KGamePropertyBase* prop)
 	case UnitBase::IdArmor:
 	case UnitBase::IdShields:
 	case UnitBase::IdSpeed:
-	case UnitBase::IdType: // FIXME: can this change at all? (currently not)
 	case UnitBase::IdCost:
 	case UnitBase::IdRange:
 	case UnitBase::IdSightRange:

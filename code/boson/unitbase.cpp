@@ -42,28 +42,20 @@ public:
 
 	KGamePropertyHandler mProperties;
 
-	KGameProperty<unsigned long int> mHealth;
 	KGameProperty<unsigned long int> mArmor;
 	KGameProperty<unsigned long int> mShields;
 	KGameProperty<unsigned long int> mId; // is a KGameProperty clever here?
-//	KGameProperty<unsigned long int> mCost;
-	KGameProperty<unsigned long int> mRange;
-	KGameProperty<unsigned int> mSightRange;
-	KGameProperty<long int> mDamage; // can also repair (negative value)
-	KGameProperty<unsigned int> mReload;
-
-	KGameProperty<int> mType; // *only* touched on construction (at least currently ;))
-	KGamePropertyInt mWork;
 };
 
 
-UnitBase::UnitBase(int type)
+UnitBase::UnitBase(const UnitProperties* prop)
 {
  d = new UnitBasePrivate;
  mOwner = 0;
+ mUnitProperties = prop;
 
 // PolicyLocal?
- d->mHealth.registerData(IdHealth, dataHandler(), 
+ mHealth.registerData(IdHealth, dataHandler(), 
 		KGamePropertyBase::PolicyLocal, "Health");
  d->mArmor.registerData(IdArmor, dataHandler(), 
 		KGamePropertyBase::PolicyLocal, "Armor");
@@ -71,33 +63,27 @@ UnitBase::UnitBase(int type)
 		KGamePropertyBase::PolicyLocal, "Shields");
  d->mId.registerData(IdId, dataHandler(), 
 		KGamePropertyBase::PolicyLocal, "ID"); // perhaps use dataHandler()->id() instead
-// d->mCost.registerData(IdCost, dataHandler(), 
-//		KGamePropertyBase::PolicyLocal, "Cost");
- d->mType.registerData(IdType, dataHandler(), 
-		KGamePropertyBase::PolicyLocal, "Type");
- d->mWork.registerData(IdWork, dataHandler(), 
+ mWork.registerData(IdWork, dataHandler(), 
 		KGamePropertyBase::PolicyLocal, "Work");
- d->mDamage.registerData(IdDamage, dataHandler(), 
+ mDamage.registerData(IdDamage, dataHandler(), 
 		KGamePropertyBase::PolicyLocal, "Damage");
- d->mRange.registerData(IdRange, dataHandler(), 
+ mRange.registerData(IdRange, dataHandler(), 
 		KGamePropertyBase::PolicyLocal, "Range");
- d->mReload.registerData(IdReload, dataHandler(), 
+ mReload.registerData(IdReload, dataHandler(), 
 		KGamePropertyBase::PolicyLocal, "ReloadTime");
- d->mSightRange.registerData(IdSightRange, dataHandler(), 
+ mSightRange.registerData(IdSightRange, dataHandler(), 
 		KGamePropertyBase::PolicyLocal, "SightRange");
 
 
- d->mWork.setLocal((int)WorkNone);
- d->mType.setLocal((int)type);
- d->mHealth.setLocal(0); // initially destroyed
+ mWork.setLocal((int)WorkNone);
+ mHealth.setLocal(0); // initially destroyed
  d->mShields.setLocal(0); // doesn't have any shields
  d->mArmor.setLocal(0); // doesn't have any armor
  d->mId.setLocal(0);
-// d->mCost.setLocal(0);
- d->mDamage.setLocal(0);
- d->mRange.setLocal(0);
- d->mReload.setLocal(0);
- d->mSightRange.setLocal(0);
+ mDamage.setLocal(0);
+ mRange.setLocal(0);
+ mReload.setLocal(0);
+ mSightRange.setLocal(0);
 }
 
 UnitBase::~UnitBase()
@@ -111,20 +97,7 @@ UnitBase::~UnitBase()
 
 const QString& UnitBase::name() const
 {
- if (!unitProperties()) {
-	return QString::null;
- }
  return unitProperties()->name();
-}
-
-unsigned long int UnitBase::health() const
-{
- return d->mHealth;
-}
-
-void UnitBase::setHealth(unsigned long int h)
-{
- d->mHealth = h;
 }
 
 unsigned long int UnitBase::shields() const
@@ -147,18 +120,6 @@ unsigned long int UnitBase::id() const
  return d->mId;
 }
 
-/*
-unsigned long int UnitBase::cost() const
-{
- return d->mCost;
-}
-
-void UnitBase::setCost(unsigned long int c)
-{
- d->mCost = c;
-}
-*/
-
 void UnitBase::setArmor(unsigned long int a)
 {
  d->mArmor = a;
@@ -174,9 +135,9 @@ KGamePropertyHandler* UnitBase::dataHandler() const
  return &d->mProperties;
 }
 
-int UnitBase::type() const
+inline int UnitBase::type() const
 {
- return d->mType.value();
+ return unitProperties()->typeId();
 }
 
 void UnitBase::setOwner(Player* owner)
@@ -184,76 +145,20 @@ void UnitBase::setOwner(Player* owner)
  mOwner = owner;
 }
 
-void UnitBase::setWork(WorkType work)
-{
- d->mWork = (int)work;
-}
-
-UnitBase::WorkType UnitBase::work() const
-{
- return (WorkType)d->mWork.value();
-}
-
-long int UnitBase::damage() const
-{
- return d->mDamage;
-}
-
-void UnitBase::setDamage(long int damage)
-{
- d->mDamage = damage;
-}
-
-unsigned long int UnitBase::range() const
-{
- return d->mRange;
-}
-
-void UnitBase::setRange(unsigned long int range)
-{
- d->mRange= range;
-}
-
-unsigned int UnitBase::sightRange() const
-{
- return d->mSightRange;
-}
-
-void UnitBase::setSightRange(unsigned int range)
-{
- d->mSightRange= range;
-}
-
-void UnitBase::setReload(unsigned int reload)
-{
- d->mReload = reload;
-}
-
-unsigned int UnitBase::reload() const
-{
- return d->mReload;
-}
-
 bool UnitBase::save(QDataStream& stream)
 {
+ stream << (Q_INT32)unitProperties()->typeId();
  bool ret = dataHandler()->save(stream);
  return ret;
 }
 
 bool UnitBase::load(QDataStream& stream)
 {
+ Q_INT32 typeId;
+ stream >> typeId;
+ mUnitProperties = speciesTheme()->unitProperties(typeId); // FIXME: make sure that speciesTheme() is != 0!!!
  bool ret = dataHandler()->load(stream);
  return ret;
-}
-
-inline const UnitProperties* UnitBase::unitProperties() const
-{
- SpeciesTheme* theme = speciesTheme();
- if (!theme) {
-	kdError() << k_funcinfo << ": NULL theme" << endl;
-	return 0;
- }
- return theme->unitProperties(type());
 }
 
 inline SpeciesTheme* UnitBase::speciesTheme() const

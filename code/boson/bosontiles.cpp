@@ -65,7 +65,6 @@ QPixmap BosonTiles::small(int smallNo, Cell::TransType trans, bool inverted)
  return tile(Cell::smallTileNumber(smallNo, trans, inverted));
 }
 	
-// call this like the original fillGroundPixmap() in editorTopLevel.cpp
 QPixmap BosonTiles::tile(int g)
 {
  QPixmap p;

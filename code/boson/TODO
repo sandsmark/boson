@@ -14,7 +14,6 @@ Editor (map, unit, scenario) TODOs
 - unit editor (should be quite easy cause of config files) - mostly done
 - unit editor: check if images are in the directory, provide possibility to copy
   them
-- editor shouldn't show fow
 
 General TODOs
 - zooming (QCanvas::setWorldMatrix()) - mostly done
@@ -34,4 +33,3 @@ General TODOs
 Data TODOs
 - replace .bmp files by .png ones
 - fix the pixmap naming: file.00nn.bmp -> file-00nn.png
-- add hidden.*.bmp to data files
