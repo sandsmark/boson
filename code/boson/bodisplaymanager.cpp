@@ -138,17 +138,33 @@ void BoDisplayManager::slotMakeActiveDisplay(BosonBigDisplay* display)
  if (display == d->mActiveDisplay) {
 	return;
  }
+ kdDebug() << k_funcinfo << endl;
  BosonBigDisplay* old = d->mActiveDisplay;
  d->mActiveDisplay = display;
  
  if (old) {
-	old->setActive(false);
-	old->setLineWidth(style().pixelMetric(QStyle::PM_DefaultFrameWidth, this));
+	markActive(old, false);
  }
- d->mActiveDisplay->setActive(true);
- d->mActiveDisplay->setLineWidth(style().pixelMetric(QStyle::PM_DefaultFrameWidth, this) + 3);
-
+ markActive(d->mActiveDisplay, true);
  emit signalActiveDisplay(d->mActiveDisplay, old);
+}
+
+void BoDisplayManager::markActive(BosonBigDisplay* display, bool active)
+{
+ if (!display) {
+	kdWarning() << k_funcinfo << "NULL display" << endl;
+	return;
+ }
+ display->setActive(active);
+ if (active) {
+	if (d->mDisplayList.count() > 1) {
+		display->setLineWidth(style().pixelMetric(QStyle::PM_DefaultFrameWidth, this) + 3);
+	} else {
+		display->setLineWidth(style().pixelMetric(QStyle::PM_DefaultFrameWidth, this));
+	}
+ } else {
+	display->setLineWidth(style().pixelMetric(QStyle::PM_DefaultFrameWidth, this));
+ }
 }
 
 BosonBigDisplay* BoDisplayManager::activeDisplay() const
@@ -191,6 +207,10 @@ void BoDisplayManager::removeActiveDisplay()
  if (box->count() == 0) {
 	d->mBoxList.removeRef(box);
  }
+
+ // we need to mark twice - once above and once here - it may be that
+ // d->mDisplayList.count() is 1 now
+ markActive(d->mActiveDisplay, true);
  recreateLayout();
 }
 

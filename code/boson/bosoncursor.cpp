@@ -280,6 +280,7 @@ void BosonSpriteCursor::setCursor(int mode)
 			kdError() << k_funcinfo << "pixmap array not valid for mode=" << mode << endl;
 			return;
 		}
+		// workaround for a qt < 3.0.5 bug
 		if (d->mCursor->frame() >= a->count()) {
 			d->mCursor->setFrame(0);
 		}

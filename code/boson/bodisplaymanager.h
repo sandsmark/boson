@@ -131,6 +131,9 @@ protected slots:
 	void slotMakeActiveDisplay(BosonBigDisplay*);
 
 private:
+	void markActive(BosonBigDisplay* display, bool active);
+
+private:
 	class BoDisplayManagerPrivate;
 	BoDisplayManagerPrivate* d;
 };

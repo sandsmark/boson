@@ -76,6 +76,7 @@ General TODOs
 - canvas text: we want a static non-moving text in the upper right corner
   displaying the resources of the player. up to now all implementations flicker
   in any way...
+- use KDock for the dispalys
 
 Data TODOs
 - sound for minimap activated/deactivated
