@@ -147,7 +147,7 @@ void BosonSaveLoad::initBoson()
  connect(this, SIGNAL(signalSaveExternalStuffAsXML(QDomElement&)),
 		d->mBoson, SIGNAL(signalSaveExternalStuffAsXML(QDomElement&)));
 
-
+#if 0
  connect(this, SIGNAL(signalLoadingPlayersCount(int)),
 		d->mBoson, SIGNAL(signalLoadingPlayersCount(int)));
  connect(this, SIGNAL(signalLoadingPlayer(int)),
@@ -157,6 +157,7 @@ void BosonSaveLoad::initBoson()
 
  connect(this, SIGNAL(signalLoadPlayerData(Player*)),
 		d->mBoson, SIGNAL(signalLoadPlayerData(Player*)));
+#endif
  connect(this, SIGNAL(signalInitMap(const QByteArray&)),
 		d->mBoson, SIGNAL(signalInitMap(const QByteArray&)));
 }
@@ -500,12 +501,10 @@ bool BosonSaveLoad::loadNewGame(const QByteArray& playersXML, const QByteArray& 
 	return false;
  }
 
-#if 0
  if (!loadPlayersFromXML(playersXML)) {
 	return false;
  }
  boDebug() << k_funcinfo << d->mBoson->playerCount() << " players loaded" << endl;
-#endif
  emit signalLoadingType(BosonLoadingWidget::ReceiveMap);
 
 
@@ -621,9 +620,10 @@ bool BosonSaveLoad::loadPlayersFromXML(const QString& playersXML)
 	d->mLoadingStatus = InvalidXML;
 	return false;
  }
- boDebug(260) << k_funcinfo << "loading " << list.count() << " players" << endl;
- emit signalLoadingPlayersCount(list.count());
  Player* localPlayer = 0;
+#if 0
+ // obsolete. we do that before already.
+ boDebug(260) << k_funcinfo << "loading " << list.count() << " players" << endl;
  for (unsigned int i = 0; i < list.count(); i++) {
 	boDebug(260) << k_funcinfo << "creating player " << i << endl;
 	QDomElement player = list.item(i).toElement();
@@ -646,15 +646,75 @@ bool BosonSaveLoad::loadPlayersFromXML(const QString& playersXML)
 	if (id == localId) {
 		localPlayer = p;
 	}
-	p->loadFromXML(player);
+//	p->loadFromXML(player);
 	systemAddPlayer((KPlayer*)p);
 
+ }
+#endif
+ for (unsigned int i = 0; i < list.count(); i++) {
+	unsigned int id = list.item(i).toElement().attribute(QString::fromLatin1("Id")).toUInt(&ok);
+	if (!ok) {
+		continue;
+	}
+	boDebug() << "Id in xml file: " << id << endl;
+ }
+ for (unsigned int i = 0; i < d->mBoson->playerCount(); i++) {
+	Player* p = (Player*)d->mBoson->playerList()->at(i);
+	QDomElement player;
+	for (unsigned int j = 0; j < list.count() && player.isNull(); j++) {
+		QDomElement e = list.item(j).toElement();
+		unsigned int id = e.attribute(QString::fromLatin1("Id")).toUInt(&ok);
+		if (!ok) {
+			boError() << k_funcinfo << "missing or invalid Id attribute for Player tag " << j << endl;
+			continue;
+		}
+		if (p->id() != id) {
+			continue;
+		}
+		player = e;
+	}
+	if (player.isNull()) {
+		boError() << k_funcinfo << "no Player tag found for player with id " << p->id() << endl;
+		return false;
+	}
+	if (p->id() == localId) {
+		localPlayer = p;
+	}
+	p->loadFromXML(player);
+ }
+ for (unsigned int i = 0; i < list.count(); i++) {
+	QDomElement player = list.item(i).toElement();
+	if (player.isNull()) {
+		boError(260) << k_funcinfo << "NULL player node" << endl;
+		continue;
+	}
+	bool ok = false;
+	unsigned int id = player.attribute(QString::fromLatin1("Id")).toUInt(&ok);
+	if (!ok) {
+		boError(260) << k_funcinfo << "Id tag of player " << i << " not a valid number" << endl;
+		addLoadError(SaveLoadError::LoadPlayersError, i18n("Id of player %1 not a valid number").arg(i));
+		continue;
+	}
+	Player* p = (Player*)d->mBoson->findPlayer(id);
+	if (!p) {
+		// AB: probably this is totally valid - less players in game
+		// than maxplayers
+		boError() << k_funcinfo << "player with ID " << id << " not found" << endl;
+		continue;
+	}
+	if (id == localId) {
+		localPlayer = p;
+	}
+	if (!p->loadFromXML(player)) {
+		boError(260) << k_funcinfo << "could not load player " << p->id() << endl;
+		return false;
+	}
  }
  if (!localPlayer) {
 	boWarning(260) << k_funcinfo << "local player NOT found" << endl;
 	addLoadError(SaveLoadError::LoadPlayersError, i18n("No local player found"));
  }
- d->mBoson->setLocalPlayer(localPlayer);
+// d->mBoson->setLocalPlayer(localPlayer);// AB: do we need this?
 
  return true;
 }

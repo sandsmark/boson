@@ -694,50 +694,27 @@ bool Player::loadFromXML(const QDomElement& root)
 	return false;
  }
 
- // note: this does NOT load the units.
-
-
- boDebug(260) << k_funcinfo << "loading speciesTheme" << endl;
- QString speciesIdentifier;
- QColor color;
- if (root.hasAttribute(QString::fromLatin1("SpeciesTheme"))) {
-	speciesIdentifier = root.attribute(QString::fromLatin1("SpeciesTheme"));
- }
- if (root.hasAttribute(QString::fromLatin1("TeamColor"))) {
-	unsigned int c = root.attribute(QString::fromLatin1("TeamColor")).toUInt(&ok);
+ if (root.hasAttribute(QString::fromLatin1("UnitPropId"))) {
+	d->mUnitPropID = root.attribute(QString::fromLatin1("UnitPropId")).toUInt(&ok);
 	if (!ok) {
-		boError(260) << k_funcinfo << "Invalid TeamColor value" << endl;
-	} else {
-		color.setRgb(c);
+		boError(260) << k_funcinfo << "Invalid UnitPropId value" << endl;
+		return false;
 	}
- }
- if (speciesIdentifier.isNull()) {
-	// migh be valid if we ever use this for network loading, too!
-	boError(260) << k_funcinfo << "No SpeciesTheme" << endl;
-	return false;
- } else {
-	boDebug(260) << k_funcinfo << "speciesTheme: " << speciesIdentifier << endl;
-	// TODO: check whether this theme actually exists and could be loaded
-	loadTheme(SpeciesTheme::speciesDirectory(speciesIdentifier), color);
- }
-
- d->mUnitPropID = root.attribute(QString::fromLatin1("UnitPropId")).toUInt(&ok);
- if (!ok) {
-	boError(260) << k_funcinfo << "Invalid UnitPropId value" << endl;
-	return false;
  }
 
 
  // Load fog
- boDebug(260) << k_funcinfo << "loading fow" << endl;
- loadFogOfWar(root);
+ if (!root.namedItem(QString::fromLatin1("Fogged")).isNull()) {
+	boDebug(260) << k_funcinfo << "loading fow" << endl;
+	if (!loadFogOfWar(root)) {
+		boError(260) << k_funcinfo << "loading fog of war failed" << endl;
+		return false;
+	}
+ }
 
  // Load statistics
  QDomElement statistics = root.namedItem(QString::fromLatin1("Statistics")).toElement();
- if (statistics.isNull()) {
-	boWarning() << k_funcinfo << "No Statistics tag" << endl;
-	// dont return
- } else {
+ if (!statistics.isNull()) {
 	d->mStatistics->load(statistics);
  }
 
@@ -745,7 +722,7 @@ bool Player::loadFromXML(const QDomElement& root)
  return true;
 }
 
-void Player::saveFogOfWar(QDomElement& root) const
+bool Player::saveFogOfWar(QDomElement& root) const
 {
  // AB: I've tried several ways of doing this but couldn't find the solution. so
  // now we simply stream every single bit as a complete byte. not good, but
@@ -764,21 +741,22 @@ void Player::saveFogOfWar(QDomElement& root) const
  QDomCDATASection fow = doc.createCDATASection(text);
  fog.appendChild(fow);
  root.appendChild(fog);
+ return true;
 }
 
-void Player::loadFogOfWar(const QDomElement& root)
+bool Player::loadFogOfWar(const QDomElement& root)
 {
  QDomElement element = root.namedItem(QString::fromLatin1("Fogged")).toElement();
  if (element.isNull()) {
 	boError() << k_funcinfo << "No Fogged tag found" << endl;
 	d->mFogged.fill(true);
-	return;
+	return false;
  }
  QString text = element.text();
  if (text.isEmpty()) {
 	boError() << k_funcinfo << "no content for Fogged tag found" << endl;
 	d->mFogged.fill(true);
-	return;
+	return false;
  }
  QTextIStream s(&text);
  s.flags(s.flags() & ~QTextStream::skipws);
@@ -791,7 +769,7 @@ void Player::loadFogOfWar(const QDomElement& root)
 	boError() << k_funcinfo << "oops - format error. read: " << space.latin1() << " should be: " << ' ' << endl;
 	// we can not even resize the flog array, because it may be just any
 	// random value. we can't depend on it being correct
-	return;
+	return false;
  }
  d->mFogged.resize(size);
  for (unsigned int i = 0; i < size; i++) {
@@ -799,6 +777,7 @@ void Player::loadFogOfWar(const QDomElement& root)
 	s >> bit;
 	d->mFogged.setBit(i, bit == '1');
  }
+ return true;
 }
 
 void Player::writeGameLog(QTextStream& log)

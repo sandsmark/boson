@@ -224,8 +224,8 @@ public slots:
 	void slotNetworkData(int msgid, const QByteArray& msg, Q_UINT32 sender, KPlayer*);
 
 protected:
-	void saveFogOfWar(QDomElement& root) const;
-	void loadFogOfWar(const QDomElement& root);
+	bool saveFogOfWar(QDomElement& root) const;
+	bool loadFogOfWar(const QDomElement& root);
 
 private:
 	class PlayerPrivate;
