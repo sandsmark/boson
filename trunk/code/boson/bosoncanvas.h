@@ -35,7 +35,6 @@ class ProductionPlugin;
 class BosonParticleSystem;
 class BosonShot;
 class BoVector3;
-class BoParticleManager;
 
 class KPlayer;
 template<class T> class QPtrList;
@@ -251,7 +250,6 @@ public:
 	QPtrList<BosonParticleSystem>* particleSystems();
 	void addParticleSystem(BosonParticleSystem* s);
 	void addParticleSystems(const QPtrList<BosonParticleSystem> systems);
-	BoParticleManager* particleManager() const;
 
 public slots:
 	/**
@@ -269,6 +267,7 @@ signals:
 	void signalUnitMoved(Unit* unit, float oldX, float oldY);
 	void signalUnitRemoved(Unit* unit);
 	void signalOutOfGame(Player*);
+	void signalAdvance();
 
 protected:
 	void lockAdvanceFunction() { mAdvanceFunctionLocked = true; }

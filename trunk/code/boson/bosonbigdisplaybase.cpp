@@ -412,6 +412,9 @@ public:
 	QPoint mCanvasPos;
 
 	BoVector3 mCameraPos;
+
+	BoParticleList mParticleList;
+	bool mParticlesDirty;
 };
 
 BosonBigDisplayBase::BosonBigDisplayBase(BosonCanvas* c, QWidget* parent)
@@ -442,6 +445,7 @@ void BosonBigDisplayBase::init()
  d->mUpdateInterval = 0;
  d->mInitialized = false;
  d->mIsQuit = false;
+ d->mParticlesDirty = true;
 
  mSelection = new BoSelection(this);
  d->mChat = new BosonGLChat(this);
@@ -473,6 +477,8 @@ void BosonBigDisplayBase::init()
 
  connect(&d->mCursorEdgeTimer, SIGNAL(timeout()), 
 		this, SLOT(slotCursorEdgeTimeout()));
+
+ connect(canvas(), SIGNAL(signalAdvance()), this, SLOT(slotAdvance()));
 
  //TODO: sprite tooltips
 
@@ -805,44 +811,7 @@ void BosonBigDisplayBase::paintGL()
  
  // Render particle systems
  boProfiling->renderParticles(true);
- if (canvas()->particleSystemsCount() > 0) {
-	// We sort out non-visible systems ourselves
-	QPtrListIterator<BosonParticleSystem> it(*(canvas()->particleSystems()));
-	QPtrList<BosonParticleSystem> visible;
-	BosonParticleSystem* s;
-	while ((s = it.current()) != 0) {
-		++it;
-		if (sphereInFrustum(s->position(), s->boundingSphereRadius())) {
-#warning FIXME
-			// BosonParticleSystem uses *OpenGL* coordinates for
-			// position, not cell/canvas coordinates.
-			// this is a bug imho, although they are often pretty
-			// similar. the class should do
-			// a) maintain two coordinates (cell and opengl)
-			// b) provide cell values with position() or better with
-			// x() and y() as the rest does (esp. BosonItem)
-			//
-			// cell-coordinates only is not an option, as the
-			// accuracy of opengl coordinates is needed.
-			int cellX = (int)s->position()[0];
-			int cellY = -((int)s->position()[1]);
-			// FIXME: this is wrong: parts of particle system may be visible even if it's center point isn't
-			if (canvas()->onCanvas(cellX, cellY) && !localPlayer()->isFogged(cellX, cellY)) {
-				visible.append(s);
-			}
-		}
-	}
-	if (visible.count() > 0) {
-		glEnable(GL_DEPTH_TEST);
-		glDepthMask(GL_FALSE);
-		glEnable(GL_TEXTURE_2D);
-		glEnable(GL_BLEND);
-		canvas()->particleManager()->draw(&visible, d->mCameraPos);
-		glDepthMask(GL_TRUE);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glDisable(GL_BLEND);
-	}
- }
+ renderParticles();
  boProfiling->renderParticles(false);
 
  if (checkError()) {
@@ -866,6 +835,7 @@ void BosonBigDisplayBase::paintGL()
 
  // alpha blending is used for both, cursor and text
  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+ glDisable(GL_LIGHTING);
 
  if (cursor()) {
 	QPoint pos = mapFromGlobal(QCursor::pos());
@@ -923,6 +893,7 @@ void BosonBigDisplayBase::paintGL()
  if (d->mUpdateInterval) {
 	d->mUpdateTimer.start(d->mUpdateInterval);
  }
+ glEnable(GL_LIGHTING);
 
  glPopMatrix();
 
@@ -1047,6 +1018,166 @@ void BosonBigDisplayBase::renderCells()
 	glEnd();
  }
 }
+
+void BosonBigDisplayBase::renderParticles()
+{
+ //struct timeval start, end, tmvisiblecheck, tmsort;
+ //gettimeofday(&start, 0);
+
+ // Return if there aren't any particle systems
+ if (canvas()->particleSystemsCount() == 0) {
+	//gettimeofday(&end, 0);
+	//boDebug(150) << k_funcinfo << "Returning (no particle systems); time elapsed: " << end.tv_usec - start.tv_usec << " us" << endl;
+	return;
+ }
+
+ // We sort out non-visible systems ourselves
+ QPtrListIterator<BosonParticleSystem> it(*(canvas()->particleSystems()));
+ QPtrList<BosonParticleSystem> visible;
+ BosonParticleSystem* s;
+ while ((s = it.current()) != 0) {
+	++it;
+	if (sphereInFrustum(s->position(), s->boundingSphereRadius())) {
+#warning FIXME
+		// BosonParticleSystem uses *OpenGL* coordinates for
+		// position, not cell/canvas coordinates.
+		// this is a bug imho, although they are often pretty
+		// similar. the class should do
+		// a) maintain two coordinates (cell and opengl)
+		// b) provide cell values with position() or better with
+		// x() and y() as the rest does (esp. BosonItem)
+		//
+		// cell-coordinates only is not an option, as the
+		// accuracy of opengl coordinates is needed.
+		int cellX = (int)s->position()[0];
+		int cellY = -((int)s->position()[1]);
+		// FIXME: this is wrong: parts of particle system may be visible even if it's center point isn't
+		if (canvas()->onCanvas(cellX, cellY) && !localPlayer()->isFogged(cellX, cellY)) {
+			visible.append(s);
+		}
+	}
+ }
+ //gettimeofday(&tmvisiblecheck, 0);
+
+ // Return if none of particle systems are visible
+ if (visible.count() == 0) {
+	//gettimeofday(&end, 0);
+	//boDebug(150) << k_funcinfo << "Returning (no visible particle systems); time elapsed: " << end.tv_usec - start.tv_usec << " us" << endl;
+	return;
+ }
+
+ // Resort list of particles if needed
+ // This sorts all particles by distance from camera and may be pretty slow, so
+ //  we don't resort the list if there hasn't been any advance() calls and
+ //  camera hasn't changed either
+ BosonParticle* p;
+ bool wassorted = d->mParticlesDirty;
+ if (d->mParticlesDirty) {
+	BosonParticleSystem* s;
+	float x, y, z;
+	d->mParticleList.clear();
+	// Add all particles to the list
+	it.toFirst();
+	while ((s = it.current()) != 0) {
+		++it;
+		for (int i = 0; i < s->mMaxNum; i++) {
+			if (s->mParticles[i].life > 0.0) {
+				p = &(s->mParticles[i]);
+				// Calculate distance from camera. Note that for performance reasons,
+				//  we don't calculate actual distance, but square of it.
+				x = p->pos.x() - d->mCameraPos.x();
+				y = p->pos.y() - d->mCameraPos.y();
+				z = p->pos.z() - d->mCameraPos.z();
+				p->distance = (x*x + y*y + z*z);
+				// Append to list
+				d->mParticleList.append(p);
+			}
+		}
+	}
+
+	// If there's no particles, return
+	if(d->mParticleList.count() == 0) {
+		//gettimeofday(&end, 0);
+		//boDebug(150) << k_funcinfo << "Returning (no visible particles); time elapsed: " << end.tv_usec - start.tv_usec << " us" << endl;
+		return;
+	}
+
+	// Sort the list
+	d->mParticleList.sort();
+	d->mParticlesDirty = false;
+ }
+ //gettimeofday(&tmsort, 0);
+
+ /// Draw particles
+ glEnable(GL_DEPTH_TEST);
+ glDepthMask(GL_FALSE);
+ glEnable(GL_TEXTURE_2D);
+ glEnable(GL_BLEND);
+ glDisable(GL_LIGHTING);
+
+ // Matrix stuff for aligned particles
+ BoVector3 x(d->mModelviewMatrix[0], d->mModelviewMatrix[4], d->mModelviewMatrix[8]);
+ BoVector3 y(d->mModelviewMatrix[1], d->mModelviewMatrix[5], d->mModelviewMatrix[9]);
+
+ // Some cache variables
+ int blendfunc = -1;
+ GLuint texture = 0;
+ bool betweenbeginend = false;  // If glBegin has been called, but glEnd() hasn't. Very hackish.
+ BoVector3 a, b, c, e;  // Vertex positions. e is used instead of d which clashes with private class
+
+ QPtrListIterator<BosonParticle> i(d->mParticleList);
+ //boDebug(150) << k_funcinfo << "Drawing " << i.count() << " particles" << endl;
+ while ((p = i.current()) != 0) {
+	++i;
+	// We change blend function and texture only if it's necessary
+	if (blendfunc != p->system->mBlendFunc[1]) {
+		// Note that we only check for dest blending function currently, because src
+		//  is always same. If this changes in the future, change this as well!
+		if (betweenbeginend) {
+			glEnd();
+			betweenbeginend = false;
+		}
+		glBlendFunc(p->system->mBlendFunc[0], p->system->mBlendFunc[1]);
+		blendfunc = p->system->mBlendFunc[1];
+	}
+	if (texture != p->tex) {
+		if (betweenbeginend) {
+			glEnd();
+			betweenbeginend = false;
+		}
+		glBindTexture(GL_TEXTURE_2D, p->tex);
+		texture = p->tex;
+	}
+	if (!betweenbeginend) {
+		glBegin(GL_QUADS);
+		betweenbeginend = true;
+	}
+
+	a = p->system->mPos + p->pos + ((-x + y) * p->size);
+	b = p->system->mPos + p->pos + (( x + y) * p->size);
+	c = p->system->mPos + p->pos + (( x - y) * p->size);
+	e = p->system->mPos + p->pos + ((-x - y) * p->size);
+
+	glColor4fv(p->color.data());  // Is it worth to cache color as well?
+	glTexCoord2f(0.0, 1.0);  glVertex3fv(a.data());
+	glTexCoord2f(1.0, 1.0);  glVertex3fv(b.data());
+	glTexCoord2f(1.0, 0.0);  glVertex3fv(c.data());
+	glTexCoord2f(0.0, 0.0);  glVertex3fv(e.data());
+ }
+ glEnd();
+
+ glColor4f(1.0, 1.0, 1.0, 1.0); // Reset color
+ glDepthMask(GL_TRUE);
+ glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+ glDisable(GL_BLEND);
+ glEnable(GL_LIGHTING);
+ //gettimeofday(&end, 0);
+ //boDebug(150) << k_funcinfo << "Returning (all particles drawn); time elapsed: " << end.tv_usec - start.tv_usec << " us" << endl;
+ //boDebug(150) << k_funcinfo << "        Visibility check:  " << tmvisiblecheck.tv_usec - start.tv_usec << " us" << endl;
+ //boDebug(150) << k_funcinfo << "        Particles sorting: " << tmsort.tv_usec - tmvisiblecheck.tv_usec << " us (wassorted: " << wassorted << ")" << endl;
+ //boDebug(150) << k_funcinfo << "        Particles drawing: " << end.tv_usec - tmsort.tv_usec << " us" << endl;
+}
+
 
 void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseEvent* e, bool *eatevent)
 {
@@ -1796,7 +1927,7 @@ void BosonBigDisplayBase::cameraChanged()
  extractFrustum(); // modelview matrix changed
  generateCellList();
 
- canvas()->particleManager()->viewportChanged();
+ d->mParticlesDirty = true;
 
  QPoint cellTL; // topleft cell
  QPoint cellTR; // topright cell
@@ -1850,7 +1981,7 @@ bool BosonBigDisplayBase::checkError() const
 		break;
  }
  if (e != GL_NO_ERROR) {
-	boError() << "Error string: " << gluErrorString(e) << endl;
+	boError() << "Error string: " << (char*)gluErrorString(e) << endl;
  }
  return ret;
 }
@@ -2115,4 +2246,9 @@ void BosonBigDisplayBase::mapChanged()
 const QPoint& BosonBigDisplayBase::cursorCanvasPos() const
 {
  return d->mCanvasPos;
+}
+
+void BosonBigDisplayBase::slotAdvance()
+{
+ d->mParticlesDirty = true;
 }

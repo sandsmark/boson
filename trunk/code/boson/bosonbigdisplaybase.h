@@ -211,6 +211,8 @@ public slots:
 	 **/
 	void slotUnitChanged(Unit* unit);
 
+	void slotAdvance();
+
 signals:
 	void signalMakeActive(BosonBigDisplayBase*);
 
@@ -251,6 +253,11 @@ protected:
 	 * Called by @ref paintGL only to render the cells on the screen
 	 **/
 	void renderCells();
+
+	/**
+	 * Called by @ref paintGL only to render the particles on the screen
+	 **/
+	void renderParticles();
 
 	virtual void enterEvent(QEvent*);
 	virtual void leaveEvent(QEvent*);

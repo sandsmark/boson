@@ -48,8 +48,6 @@ public:
 	BosonCanvasPrivate()
 	{
 		mMap = 0;
-
-		mParticleManager = 0;
 	}
 	
 	QPtrList<Unit> mDestroyedUnits;
@@ -61,7 +59,6 @@ public:
 	BoItemList mAllItems;
 
 	QPtrList<BosonParticleSystem> mParticles;
-	BoParticleManager* mParticleManager;
 };
 
 BosonCanvas::BosonCanvas(QObject* parent)
@@ -75,7 +72,6 @@ void BosonCanvas::init()
  d = new BosonCanvasPrivate;
  d->mDestroyedUnits.setAutoDelete(false);
  d->mParticles.setAutoDelete(true);
- d->mParticleManager = new BoParticleManager;
  mAdvanceFunctionLocked = false;
 }
 
@@ -217,7 +213,6 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 
  boProfiling->advanceParticles(true);
  updateParticleSystems(0.05);  // With default game speed, delay between advance messages is 1.0 / 20 = 0.05 sec
- particleManager()->particlesMoved();
  boProfiling->advanceParticles(false);
 
  boProfiling->advanceMaximalAdvanceCount(true);
@@ -249,6 +244,7 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
  }
  boProfiling->advanceMaximalAdvanceCount(false);
  boProfiling->advance(false, advanceCount);
+ emit signalAdvance();
 }
 
 bool BosonCanvas::canGo(const UnitProperties* prop, const QRect& rect) const
@@ -915,9 +911,4 @@ void BosonCanvas::addParticleSystems(const QPtrList<BosonParticleSystem> systems
 	++it;
 	addParticleSystem(s);
  }
-}
-
-BoParticleManager* BosonCanvas::particleManager() const
-{
- return d->mParticleManager;
 }
