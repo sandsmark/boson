@@ -314,6 +314,10 @@ void BosonParticleSystem::preDraw()
   if(mAlign)
   {
     float mat[4][4];
+    glPushMatrix();
+    glRotatef(mRot[0], 1.0, 0.0, 0.0);
+    glRotatef(mRot[1], 0.0, 1.0, 0.0);
+    glRotatef(mRot[2], 0.0, 0.0, 1.0);
     glGetFloatv(GL_MODELVIEW_MATRIX, (float*)mat);
     BoVector3 x, y;
 
@@ -324,6 +328,7 @@ void BosonParticleSystem::preDraw()
     ne.set(x[0] - y[0], x[1] - y[1], x[2] - y[2]);
     se.set(x[0] + y[0], x[1] + y[1], x[2] + y[2]);
     sw.set(-x[0] + y[0], -x[1] + y[1], -x[2] + y[2]);
+    glPopMatrix();
   }
   else
   {
