@@ -45,6 +45,9 @@
 // This helps to avoid tiny rounding errors which would be causing infinite loops
 #define CAMERA_Z_ROUNDING_ERROR 0.001
 
+#define NEW_Z_CALCULATIONS
+
+
 #include <GL/glu.h>
 
 #include <math.h>
@@ -290,6 +293,8 @@ BoGameCamera& BoGameCamera::operator=(const BoGameCamera& c)
   mRotation = c.mRotation;
   mRadius = c.mRadius;
 
+  mWantedAbsoluteZ = c.mWantedAbsoluteZ;
+
   mFree = c.mFree;
   mLimits = c.mLimits;
 
@@ -307,6 +312,7 @@ void BoGameCamera::init()
   mPosZ = 8.0f;
   mRotation = 0.0f;
   mRadius = 5.0f;
+  mWantedAbsoluteZ = mPosZ;
   mFree = false;
   mLimits = true;
 }
@@ -436,6 +442,26 @@ void BoGameCamera::checkCameraPosition()
     float groundz = mCanvas->heightAtPoint(camposx, camposy);
     // FIXME: this assumes that lookAt.z() == 0, which may not always be the case
     // TODO: maybe also change radius to keep camera's angle constant
+#ifdef NEW_Z_CALCULATIONS
+    if(mWantedAbsoluteZ < groundz + minCameraZ())
+    {
+      // We may have tiny rounding errors here, so we set z to little bigger
+      //  number than the limit in order to avoid infinite loop
+      //  (otherwise we may have  groundz + minCameraZ() = 0.0000001, which will
+      //  be rounded to 0 when calling setZ(), and then setZ() sets z to 0 and
+      //  this function compares values and finds out that 0 < 0.0000001, so it
+      //  calls setZ() ... )
+      setZ(groundz + minCameraZ() + CAMERA_Z_ROUNDING_ERROR - lookAt().z());
+    }
+    else if(mWantedAbsoluteZ > groundz + maxCameraZ())
+    {
+      setZ(groundz + maxCameraZ() - CAMERA_Z_ROUNDING_ERROR - lookAt().z());
+    }
+    else if(QABS(mWantedAbsoluteZ - lookAt().z() - z()) > CAMERA_Z_ROUNDING_ERROR)
+    {
+      changeZ((mWantedAbsoluteZ - lookAt().z()) - z());
+    }
+#else
     if(cameraPos().z() < groundz + minCameraZ())
     {
       // We may have tiny rounding errors here, so we set z to little bigger
@@ -450,6 +476,7 @@ void BoGameCamera::checkCameraPosition()
     {
       setZ(groundz + maxCameraZ() - CAMERA_Z_ROUNDING_ERROR);
     }
+#endif
   }
 }
 
@@ -590,11 +617,53 @@ void BoGameCamera::changeRotation(GLfloat diff)
 
 void BoGameCamera::setLookAt(const BoVector3& pos)
 {
+#ifdef NEW_Z_CALCULATIONS
+  // We must set lookAt point in 2 passes: first we set it using setLookAt(),
+  //  then we validate it (this may change lookAt) and finally we calculate
+  //  ground height (z) at validated lookAt point.
+  BoCamera::setLookAt(pos);
+  // Validate lookat point (this may change lookat)
+  checkLookAtPosition();
+
+  // Calculate new z
+  float groundz = mCanvas->heightAtPoint(lookAt().x() * BO_TILE_SIZE, -lookAt().y() * BO_TILE_SIZE);
+  // Set lookat again. Note that this time, we don't do any validation, because
+  //  only z-coordinate changed.
+  BoCamera::setLookAt(BoVector3(lookAt().x(), lookAt().y(), groundz));
+
+  // Set the z value (height from ground) to new value, so that
+  //  mWantedAbsoluteZ remains same (this code is from changeZ())
+  float oldz = mPosZ;
+  float newz = mWantedAbsoluteZ - lookAt().z();
+  float zfactor = newz / oldz;
+  mPosZ = newz;
+
+  // Validate lookat point and camera's position
+  checkCameraPosition();
+
+  // We must also update radius to keep camera's angle constant
+  if(mPosZ != newz)
+  {
+    if(mPosZ == oldz)
+    {
+      // Special case - z coordinate didn't change. Probably camera is at it's
+      //  max/min height. Return.
+      return;
+    }
+    // checkCameraPosition changed z coordinate (it was set to too low/high).
+    // recalculate z change factor
+    zfactor = mPosZ / oldz;
+  }
+
+  // Change radius too, so that camera angle will remain same
+  setRadius(mRadius * zfactor);
+#else
   BoCamera::setLookAt(pos);
 
   // Validate lookat point and camera's position
   checkLookAtPosition();
   checkCameraPosition();
+#endif
 }
 
 void BoGameCamera::setCameraPos(const BoVector3& pos)
@@ -632,6 +701,7 @@ void BoGameCamera::setRotation(GLfloat r)
 void BoGameCamera::setZ(GLfloat z)
 {
   mPosZ = z;
+  mWantedAbsoluteZ = lookAt().z() + z;
   setPositionDirty();
 
   // Validate camera pos
