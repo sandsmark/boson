@@ -17,25 +17,25 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef BOSONMISSILE_H
-#define BOSONMISSILE_H
+#ifndef BOSONSHOT_H
+#define BOSONSHOT_H
 
-#include "bo3dtools.h"
+#include "../bo3dtools.h"
+#include "../rtti.h"
+#include "bosonitem.h"
 
 class Unit;
 class Player;
 
-class BosonMissile
+class BosonShot : public BosonItem
 {
   public:
-    //enum Type { Bullet = 1, Missile };
+    BosonShot(Unit* attacker, float x, float y, float z);
+    BosonShot(Unit* attacker, Unit* target);
 
-    BosonMissile(Unit* attacker, float x, float y, float z);
-    BosonMissile(Unit* attacker, Unit* target);
-
-    void update();
+    virtual void advance(unsigned int phase);
     void draw();
-    
+
     inline BoVector3 pos() { return mPos; };
 
     inline unsigned long int damageRange() { return mDamageRange; };
@@ -43,6 +43,8 @@ class BosonMissile
     inline Player* owner() { return mOwner; };
 
     inline bool isActive() { return mActive; };
+
+    inline virtual int rtti() const { return RTTI::Shot; };
 
   protected:
     void init(Unit* attacker, float x, float y, float z);
@@ -55,4 +57,4 @@ class BosonMissile
     Player* mOwner;
 };
 
-#endif // BOSONMISSILE_H
+#endif // BOSONSHOT_H
