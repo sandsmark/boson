@@ -101,8 +101,8 @@ void bosonCanvas::destroyMob(destroyedMsg_t &m)
 	boCheck(m.x, mob->x());
 	boCheck(m.y, mob->y());
 
-	QRect r  = mob->rect();
-	new boShot ( r.x(), r.y(), mob->z(), boShot::SHOT_UNIT);
+	QPoint p  = mob->center();
+	new boShot ( p.x(), p.y(), mob->z(), boShot::SHOT_UNIT);
 
 	emit mobileDestroyed( m.key);
 
@@ -162,8 +162,8 @@ void bosonCanvas::destroyFix(destroyedMsg_t &msg)
 	boCheck(msg.x, f->x());
 	boCheck(msg.y, f->y());
 
-	QRect r  = f->rect();
-	new boShot ( r.x(), r.y(), f->z(), boShot::SHOT_FACILITY);
+	QPoint p = f->center();
+	new boShot ( p.x(), p.y(), f->z(), boShot::SHOT_FACILITY);
 
 	emit fixDestroyed( msg.key);
 
@@ -251,6 +251,9 @@ void bosonCanvas::shoot(shootMsg_t &m)
 		r  = mob->rect();
 		_z = mob->z();
 	}
+
+	r.setSize( r.size()/2 );
+	r.moveBy ( r.size().width()>>1, r.size().height()>>1 );
 
 	new boShot(
 			r.x() + rand()%r.width(),
