@@ -53,7 +53,7 @@ draw_bigbox_text("These requirements apply to the latest stable release
 
     <b>Minimum hardware requirements:</b><br>
     Note: If you have an older graphics card like a TNT2 you will need a fast CPU.<br>
-    * 500 MHz ix86 Processor (don't know anything about other machines)<br>
+    * 500 MHz ix86 Processor (don't know anything about other machines). AMD 64 is also known to work<br>
     * 256 MB RAM<br>
     * 3D accelerator card (this is the most important part!!)<br>
     * Optional: Sound card<br>
