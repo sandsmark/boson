@@ -50,12 +50,17 @@
 #include <kpopupmenu.h>
 
 #define ID_DEBUG_KILLPLAYER 0
+#define ID_WIDGETSTACK_WELCOME 1
+#define ID_WIDGETSTACK_NEWGAME 2
+#define ID_WIDGETSTACK_BOSONWIDGET 3
+#define ID_WIDGETSTACK_NETWORK 4
+#define ID_WIDGETSTACK_LOADING 5
 
 class TopWidget::TopWidgetPrivate
 {
 public:
 	TopWidgetPrivate() {
-		 mWelcome = 0l;
+		mWelcome = 0l;
 		mNewGame = 0l;
 		mServeroptions = 0l;
 		mLoading = 0l;
@@ -102,7 +107,7 @@ TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
  d->mLoadingDockConfig = false;
 #endif
  mGame = false;
- mMainDock = createDockWidget("mainDock1", 0, this, i18n("Map"));
+ mMainDock = createDockWidget("mainDock", 0, this, i18n("Map"));
  mWs = new QWidgetStack(mMainDock);
  mMainDock->setWidget(mWs);
  mMainDock->setDockSite(KDockWidget::DockCorner);
@@ -158,7 +163,7 @@ void TopWidget::initActions()
  // Main actions: Game start/end and quit
  d->mActionNewGame = KStdGameAction::gameNew(this, SLOT(slotNewGame()), actionCollection());
  d->mActionEndGame = KStdGameAction::end(this, SLOT(slotEndGame()), actionCollection());
- d->mActionQuit = KStdGameAction::quit(this, SLOT(slotQuit()), actionCollection());
+ d->mActionQuit = KStdGameAction::quit(this, SLOT(close()), actionCollection());
 
  // Settings
  d->mActionKeys = KStdAction::keyBindings(this, SLOT(slotConfigureKeys()), actionCollection());
@@ -322,8 +327,8 @@ void TopWidget::initWelcomeWidget()
  }
  d->mWelcome = new BosonWelcomeWidget(mWs);
  connect(d->mWelcome, SIGNAL(signalNewGame()), this, SLOT(slotNewGame()));
- connect(d->mWelcome, SIGNAL(signalQuit()), this, SLOT(slotQuit()));
- mWs->addWidget(d->mWelcome, 1);
+ connect(d->mWelcome, SIGNAL(signalQuit()), this, SLOT(close()));
+ mWs->addWidget(d->mWelcome, ID_WIDGETSTACK_WELCOME);
 }
 
 void TopWidget::showWelcomeWidget()
@@ -331,7 +336,8 @@ void TopWidget::showWelcomeWidget()
  if(!d->mWelcome) {
 	initWelcomeWidget();
  }
- mWs->raiseWidget(1);
+ mWs->raiseWidget(ID_WIDGETSTACK_WELCOME);
+ loadInitialDockConfig();
 }
 
 void TopWidget::initNewGameWidget()
@@ -342,7 +348,7 @@ void TopWidget::initNewGameWidget()
  d->mNewGame = new BosonNewGameWidget(this, mWs);
  connect(d->mNewGame, SIGNAL(signalCancelled()), this, SLOT(slotShowMainMenu()));
  connect(d->mNewGame, SIGNAL(signalShowServerOptions()), this, SLOT(slotShowServerOptions()));
- mWs->addWidget(d->mNewGame, 2);
+ mWs->addWidget(d->mNewGame, ID_WIDGETSTACK_NEWGAME);
 }
 
 void TopWidget::showNewGameWidget()
@@ -350,7 +356,7 @@ void TopWidget::showNewGameWidget()
  if(!d->mNewGame) {
 	initNewGameWidget();
  }
- mWs->raiseWidget(2);
+ mWs->raiseWidget(ID_WIDGETSTACK_NEWGAME);
 }
 
 void TopWidget::initBosonWidget()
@@ -359,7 +365,7 @@ void TopWidget::initBosonWidget()
 	return;
  }
  d->mBosonWidget = new BosonWidget(this, mWs);
- mWs->addWidget(d->mBosonWidget, 3);
+ mWs->addWidget(d->mBosonWidget, ID_WIDGETSTACK_BOSONWIDGET);
 }
 
 void TopWidget::showBosonWidget()
@@ -367,7 +373,7 @@ void TopWidget::showBosonWidget()
  if(!d->mBosonWidget) {
 	initBosonWidget();
  }
- mWs->raiseWidget(3);
+ mWs->raiseWidget(ID_WIDGETSTACK_BOSONWIDGET);
 }
 
 void TopWidget::initServerOptions()
@@ -377,7 +383,7 @@ void TopWidget::initServerOptions()
  }
  d->mServeroptions = new BosonServerOptionsWidget(this, mWs);
  connect(d->mServeroptions, SIGNAL(signalOkClicked()), this, SLOT(slotHideServerOptions()));
- mWs->addWidget(d->mServeroptions, 4);
+ mWs->addWidget(d->mServeroptions, ID_WIDGETSTACK_NETWORK);
 }
 
 void TopWidget::showServerOptions()
@@ -385,7 +391,7 @@ void TopWidget::showServerOptions()
  if(!d->mServeroptions) {
 	initServerOptions();
  }
- mWs->raiseWidget(4);
+ mWs->raiseWidget(ID_WIDGETSTACK_NETWORK);
 }
 
 void TopWidget::initLoadingWidget()
@@ -394,7 +400,7 @@ void TopWidget::initLoadingWidget()
 	return;
  }
  d->mLoading = new BosonLoadingWidget(mWs);
- mWs->addWidget(d->mLoading, 5);
+ mWs->addWidget(d->mLoading, ID_WIDGETSTACK_LOADING);
 }
 
 void TopWidget::showLoadingWidget()
@@ -402,39 +408,12 @@ void TopWidget::showLoadingWidget()
  if(!d->mLoading) {
 	initLoadingWidget();
  }
- mWs->raiseWidget(5);
+ mWs->raiseWidget(ID_WIDGETSTACK_LOADING);
 }
 
 void TopWidget::slotNewGame()
 {
  showNewGameWidget();
-}
-
-void TopWidget::slotQuit()
-{
-// FIXME saveGameDockConfig() is just wrong here. we have to ensure that there
-// is actually a game running (not newgame widget or so) and it also has to be
-// called when the player clicks e.g. on the "x", not only when menu->quit is
-// clicked
- saveGameDockConfig();
- // First delete all widgets to give them change to save config
- if(d->mBosonWidget) {
-	d->mBosonWidget->saveConfig(false);
-	d->mBosonWidget->slotEndGame();
-	delete d->mBosonWidget;
- }
- if(d->mLoading) {
-	// TODO: cancel loading
-	delete d->mLoading;
- }
- if(d->mServeroptions) {
-	delete d->mServeroptions;
- }
- if(d->mNewGame) {
-	delete d->mNewGame;
- }
- delete d->mWelcome;
- kapp->quit();
 }
 
 void TopWidget::slotStartGame()
@@ -725,10 +704,11 @@ void TopWidget::slotRemoveActiveDisplay()
 
 void TopWidget::slotToggleStatusbar()
 {
- if(d->mActionStatusbar->isChecked())
+ if(d->mActionStatusbar->isChecked()) {
 	statusBar()->show();
- else
+ } else {
 	statusBar()->hide();
+ }
 }
 
 void TopWidget::slotDebugPlayer(int index)
@@ -768,7 +748,18 @@ void TopWidget::loadGameDockConfig()
 #if KDE_VERSION < 310
  d->mLoadingDockConfig = true;
 #endif
- readDockConfig(kapp->config(), "BosonGameDock"); // FIXME
+ readDockConfig(kapp->config(), "BosonGameDock");
+#if KDE_VERSION < 310
+ d->mLoadingDockConfig = false;
+#endif
+}
+
+void TopWidget::loadInitialDockConfig()
+{
+#if KDE_VERSION < 310
+ d->mLoadingDockConfig = true;
+#endif
+ readDockConfig(kapp->config(), "BosonInitialDock");
 #if KDE_VERSION < 310
  d->mLoadingDockConfig = false;
 #endif
@@ -777,6 +768,11 @@ void TopWidget::loadGameDockConfig()
 void TopWidget::saveGameDockConfig()
 {
  writeDockConfig(kapp->config(), "BosonGameDock");
+}
+
+void TopWidget::saveInitialDockConfig()
+{
+ writeDockConfig(kapp->config(), "BosonInitialDock");
 }
 
 #if KDE_VERSION < 310
@@ -788,4 +784,34 @@ void TopWidget::setGeometry(const QRect& r)
  }
 }
 #endif
+
+bool TopWidget::queryClose()
+{
+ // TODO display "really wanna quit" msgbox
+ return true;
+}
+
+bool TopWidget::queryExit()
+{
+ QWidget* w = mWs->visibleWidget();
+ if (!w) {
+	return true;
+ }
+ switch (mWs->id(w)) {
+	case ID_WIDGETSTACK_BOSONWIDGET:
+		d->mBosonWidget->saveConfig(false);
+		d->mBosonWidget->slotEndGame();
+		saveGameDockConfig();
+		return true;
+	case ID_WIDGETSTACK_NEWGAME:
+	case ID_WIDGETSTACK_LOADING:
+	case ID_WIDGETSTACK_NETWORK:
+	case ID_WIDGETSTACK_WELCOME:
+		saveInitialDockConfig();
+		return true;
+	default:
+		return true;
+ }
+ return true;
+}
 
