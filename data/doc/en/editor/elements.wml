@@ -6,26 +6,26 @@
     <p>&nbsp;</p>
     <h4>The map</h4>
     <p>
-    The map consists of many small parts, like cards in a board game. For example, a desert:<br>
-     If you put many "sand cards" together and add some "stone cards" between them you will get a desert.
+    The map consists of many small tiles. For example, a desert:<br>
+    If you put many sand tiles together and add some stone tiles between them, you will get a desert.
     </p><p>&nbsp;</p>
     
     <h4>The goal</h4>
     <p>
-    There are no changeable targets yet.
-    </p><p>&nbsp;</p>
-    
-    <h4>Structure of a map</h4>
-    <p>
-    For a good game you need a good strucktured map.<br>
-    You can add canyons to place units and for a good battle field, lakes for the ships and so on.
+    There are no changeable goals yet.
     </p><p>&nbsp;</p>
     
     <h4>The player</h4>
     <p>
     You have to switch between the players. You can only create facilities for one player at one time.
     Don't forget to change the player while building units and buildings.<br>
-    If you create or change the map the player doesn't matter.    
+    If you change the tiles on map or remove facilities player doesn't matter.    
+    </p><p>&nbsp;</p>
+    
+    <h4>Properties</h4>
+    <p>
+    Changing of facility, game or map properties is not supported at the moment
     </p>
+    
 #include "nav.wml" before_url="overview.html" before_text="Overview" after_url="map.html" after_text="Working with the map" up_url="index.html"
 #include "footer.wml"

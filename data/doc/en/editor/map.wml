@@ -5,9 +5,9 @@
     </h1>
     <p>&nbsp;</p>
     <p>
-    To create or change the map go to the menu entry <i>Editor --&gt;</i>. There you will find <i>Plain</i>,
-    <i>Small</i>, <i>Big1</i> and <i>Big2</i>.<br>
-    You can also find some things in a drop-down menu in the command frame.
+    In a menu bar at the top you can see two dropdown menus. In the first you can change the current player.
+    In the second you can set your "tiles/facilities collection". Here you can select
+    <i>Plain</i>, <i>Small</i>, <i>Big1</i> and <i>Big2</i>.<br>
     </p>
 #include "nav.wml" before_url="elements.html" before_text="Elements of a game" after_url="facilities.html" after_text="Building facilities" up_url="index.html"
 #include "footer.wml"
