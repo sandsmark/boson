@@ -80,6 +80,17 @@ public:
 	virtual void lock();
 	virtual void unlock();
 
+	void setGameMode(bool isGame = true) { mGameMode = isGame; }
+	
+	/**
+	 * Note: not yet fully supported!
+	 * @return TRUE if we are in game mode or FALSE if we are in editor mode
+	 **/
+	bool gameMode() const //TODO: disallow all actions in Boson that are invalid for this mode
+	{
+		return mGameMode;
+	}
+
 public slots:
 	void slotSetGameSpeed(int speed);
 
@@ -228,6 +239,8 @@ protected slots:
 private:
 	class BosonPrivate;
 	BosonPrivate* d;
+
+	bool mGameMode;
 };
 
 #endif

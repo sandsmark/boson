@@ -20,6 +20,8 @@
 #include "bosonwelcomewidget.h"
 #include "bosonwelcomewidget.moc"
 
+#include "defines.h"
+
 #include <qlabel.h>
 #include <qpushbutton.h>
 #include <qlayout.h>
@@ -32,52 +34,61 @@
  */
 BosonWelcomeWidget::BosonWelcomeWidget(QWidget* parent) : QWidget(parent)
 {
-  BosonWelcomeWidgetLayout = new QVBoxLayout( this, 11, 6, "BosonWelcomeWidgetLayout");
+  mBosonWelcomeWidgetLayout = new QVBoxLayout( this, 11, 6, "BosonWelcomeWidgetLayout");
 
-  mainlayout = new QVBoxLayout( 0, 0, 6, "mainlayout"); 
+  mMainLayout = new QVBoxLayout( 0, 0, 6, "mainlayout"); 
 
-  welcomelabel = new QLabel( this, "welcomelabel" );
-  QFont welcomelabel_font(  welcomelabel->font() );
-  welcomelabel_font.setPointSize( 30 );
-  welcomelabel_font.setBold( TRUE );
-  welcomelabel->setFont( welcomelabel_font ); 
-  welcomelabel->setText( i18n( "Welcome to Boson!" ) );
-  welcomelabel->setAlignment( int( QLabel::AlignCenter ) );
-  mainlayout->addWidget( welcomelabel );
+  mWelcomeLabel = new QLabel( this, "welcomelabel" );
+  QFont mWelcomeLabel_font(  mWelcomeLabel->font() );
+  mWelcomeLabel_font.setPointSize( 30 );
+  mWelcomeLabel_font.setBold( TRUE );
+  mWelcomeLabel->setFont( mWelcomeLabel_font ); 
+  mWelcomeLabel->setText( i18n( "Welcome to Boson!" ) );
+  mWelcomeLabel->setAlignment( int( QLabel::AlignCenter ) );
+  mMainLayout->addWidget( mWelcomeLabel );
   QSpacerItem* spacer = new QSpacerItem( 20, 20, QSizePolicy::Minimum, QSizePolicy::Preferred );
-  mainlayout->addItem( spacer );
+  mMainLayout->addItem( spacer );
 
-  lowerlayout = new QHBoxLayout( 0, 0, 6, "lowerlayout"); 
+  mLowerLayout = new QHBoxLayout( 0, 0, 6, "lowerlayout"); 
 
-  bosonpixmap = new QLabel( this, "bosonpixmap" );
-  bosonpixmap->setAlignment( int( QLabel::AlignCenter ) );
-  lowerlayout->addWidget( bosonpixmap );
+  mBosonPixmap = new QLabel( this, "bosonpixmap" );
+  mBosonPixmap->setAlignment( int( QLabel::AlignCenter ) );
+  mLowerLayout->addWidget( mBosonPixmap );
   //FIXME: at least alignment.. maybe even stretch the pixmap?
-  bosonpixmap->setPixmap(QPixmap(locate("data", "boson/pics/biglogo.png")));
+  mBosonPixmap->setPixmap(QPixmap(locate("data", "boson/pics/biglogo.png")));
   QSpacerItem* spacer_2 = new QSpacerItem( 20, 20, QSizePolicy::Preferred, QSizePolicy::Minimum );
-  lowerlayout->addItem( spacer_2 );
+  mLowerLayout->addItem( spacer_2 );
 
-  buttonslayout = new QVBoxLayout( 0, 0, 6, "buttonslayout"); 
+  mButtonsLayout = new QVBoxLayout( 0, 0, 6, "buttonslayout"); 
 
-  newgamebutton = new QPushButton( this, "newgamebutton" );
-  newgamebutton->setText( i18n( "S&tart new game" ) );
-  buttonslayout->addWidget( newgamebutton );
+  mNewGameButton = new QPushButton( this, "newgamebutton" );
+  mNewGameButton->setText( i18n( "S&tart new game" ) );
+  mButtonsLayout->addWidget( mNewGameButton );
   QSpacerItem* spacer_3 = new QSpacerItem( 20, 20, QSizePolicy::Minimum, QSizePolicy::Expanding );
-  buttonslayout->addItem( spacer_3 );
+  mButtonsLayout->addItem( spacer_3 );
+  
+#ifndef NO_EDITOR
+  mEditorButton = new QPushButton( this, "editorbutton" );
+  mEditorButton->setText( i18n( "Start Editor" ) ); // TODO: accel
+  mButtonsLayout->addWidget( mEditorButton );
+  connect(mEditorButton, SIGNAL(clicked()), this, SIGNAL(signalStartEditor()));
+#else
+  mEditorButton = 0;
+#endif
 
-  quitbutton = new QPushButton( this, "quitbutton" );
-  quitbutton->setText( i18n( "&Quit Boson" ) );
-  buttonslayout->addWidget( quitbutton );
+  mQuitButton = new QPushButton( this, "quitbutton" );
+  mQuitButton->setText( i18n( "&Quit Boson" ) );
+  mButtonsLayout->addWidget( mQuitButton );
   QSpacerItem* spacer_4 = new QSpacerItem( 20, 20, QSizePolicy::Minimum, QSizePolicy::Expanding );
-  buttonslayout->addItem( spacer_4 );
+  mButtonsLayout->addItem( spacer_4 );
   QSpacerItem* spacer_5 = new QSpacerItem( 20, 20, QSizePolicy::Minimum, QSizePolicy::Expanding );
-  buttonslayout->addItem( spacer_5 );
-  lowerlayout->addLayout( buttonslayout );
-  mainlayout->addLayout( lowerlayout );
-  BosonWelcomeWidgetLayout->addLayout( mainlayout );
+  mButtonsLayout->addItem( spacer_5 );
+  mLowerLayout->addLayout( mButtonsLayout );
+  mMainLayout->addLayout( mLowerLayout );
+  mBosonWelcomeWidgetLayout->addLayout( mMainLayout );
 
-  connect(newgamebutton, SIGNAL(clicked()), this, SIGNAL(signalNewGame()));
-  connect(quitbutton, SIGNAL(clicked()), this, SIGNAL(signalQuit()));
+  connect(mNewGameButton, SIGNAL(clicked()), this, SIGNAL(signalNewGame()));
+  connect(mQuitButton, SIGNAL(clicked()), this, SIGNAL(signalQuit()));
 }
 
 /*  

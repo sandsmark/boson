@@ -61,6 +61,8 @@ public slots:
 	 * This shows BosonStartGameWidget from where you can start new game
 	 **/
 	void slotNewGame();
+
+	void slotStartEditor();
 	
 	/**
 	 * Starts loading new game. Called when user clicks "Start game" button in
@@ -162,7 +164,9 @@ private:
 	void initWelcomeWidget();
 	void showWelcomeWidget();
 	void initNewGameWidget();
+	void initStartEditorWidget();
 	void showNewGameWidget();
+	void showStartEditorWidget();
 	void initBosonWidget();
 	void showBosonWidget();
 	void initNetworkOptions();

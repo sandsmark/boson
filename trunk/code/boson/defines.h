@@ -21,6 +21,8 @@
 
 #include "../config.h"
 
+#define NO_EDITOR
+
 // undefine this to enable experimental canvastext. baaad performance!
 #define NO_BOSON_CANVASTEXT
 

@@ -33,6 +33,7 @@
 #include "bosonmessage.h"
 #include "bosonmap.h"
 #include "speciestheme.h"
+#include "defines.h"
 
 #include <kapplication.h>
 #include <klocale.h>
@@ -54,9 +55,14 @@
 #define ID_DEBUG_KILLPLAYER 0
 #define ID_WIDGETSTACK_WELCOME 1
 #define ID_WIDGETSTACK_NEWGAME 2
-#define ID_WIDGETSTACK_BOSONWIDGET 3
-#define ID_WIDGETSTACK_NETWORK 4
-#define ID_WIDGETSTACK_LOADING 5
+#define ID_WIDGETSTACK_BOSONWIDGET 4
+#define ID_WIDGETSTACK_NETWORK 5
+#define ID_WIDGETSTACK_LOADING 6
+
+#ifndef NO_EDITOR
+#include "bosonstarteditorwidget.h"
+#define ID_WIDGETSTACK_STARTEDITOR 3
+#endif
 
 class TopWidget::TopWidgetPrivate
 {
@@ -64,6 +70,9 @@ public:
 	TopWidgetPrivate() {
 		mWelcome = 0;
 		mNewGame = 0;
+#ifndef NO_EDITOR
+		mStartEditor = 0;
+#endif
 		mNetworkOptions = 0;
 		mLoading = 0;
 		mBosonWidget = 0;
@@ -71,6 +80,9 @@ public:
 
 	BosonWelcomeWidget* mWelcome;
 	BosonNewGameWidget* mNewGame;
+#ifndef NO_EDITOR
+	BosonStartEditorWidget* mStartEditor;
+#endif
 	BosonNetworkOptionsWidget* mNetworkOptions;
 	BosonLoadingWidget* mLoading;
 	BosonWidget* mBosonWidget;
@@ -331,6 +343,7 @@ void TopWidget::initWelcomeWidget()
  }
  d->mWelcome = new BosonWelcomeWidget(mWs);
  connect(d->mWelcome, SIGNAL(signalNewGame()), this, SLOT(slotNewGame()));
+ connect(d->mWelcome, SIGNAL(signalStartEditor()), this, SLOT(slotStartEditor()));
  connect(d->mWelcome, SIGNAL(signalQuit()), this, SLOT(close()));
  mWs->addWidget(d->mWelcome, ID_WIDGETSTACK_WELCOME);
 }
@@ -360,6 +373,28 @@ void TopWidget::showNewGameWidget()
 	initNewGameWidget();
  }
  mWs->raiseWidget(ID_WIDGETSTACK_NEWGAME);
+}
+
+void TopWidget::initStartEditorWidget()
+{
+#ifndef NO_EDITOR
+ if(d->mStartEditor) {
+	return;
+ }
+ d->mStartEditor = new BosonStartEditorWidget(this, mWs);
+ connect(d->mStartEditor, SIGNAL(signalCancelled()), this, SLOT(slotShowMainMenu()));
+ mWs->addWidget(d->mStartEditor, ID_WIDGETSTACK_STARTEDITOR);
+#endif
+}
+
+void TopWidget::showStartEditorWidget()
+{
+#ifndef NO_EDITOR
+ if(!d->mStartEditor) {
+	initStartEditorWidget();
+ }
+ mWs->raiseWidget(ID_WIDGETSTACK_STARTEDITOR);
+#endif
 }
 
 void TopWidget::initBosonWidget()
@@ -419,6 +454,13 @@ void TopWidget::slotNewGame()
  showNewGameWidget();
 }
 
+void TopWidget::slotStartEditor()
+{
+#ifndef NO_EDITOR
+ showStartEditorWidget();
+#endif
+}
+
 void TopWidget::slotStartGame()
 {
  showLoadingWidget();
@@ -427,9 +469,17 @@ void TopWidget::slotStartGame()
 
 void TopWidget::slotShowMainMenu()
 {
- disconnect(d->mNewGame);
- delete d->mNewGame;
- d->mNewGame = 0;
+ if (d->mNewGame) {
+	disconnect(d->mNewGame);
+	delete d->mNewGame;
+	d->mNewGame = 0;
+ }
+#ifndef NO_EDITOR
+ if (d->mStartEditor) {
+	delete d->mStartEditor;
+	d->mStartEditor = 0;
+ }
+#endif
  // Delete all players to remove added AI players, then re-init local player
  mBoson->removeAllPlayers();
  initPlayer();
@@ -450,7 +500,7 @@ void TopWidget::slotHideNetworkOptions()
  showNewGameWidget();
 }
 
-void TopWidget::loadGameData1()
+void TopWidget::loadGameData1() // FIXME rename!
 {
  d->mLoading->setSteps(5000);
  d->mLoading->setProgress(0);
@@ -474,7 +524,7 @@ void TopWidget::loadGameData1()
  checkEvents();
 }
 
-void TopWidget::loadGameData2()
+void TopWidget::loadGameData2() //FIXME rename!
 {
  // Init some data structures
  d->mLoading->setLoading(BosonLoadingWidget::InitClasses);
@@ -494,9 +544,10 @@ void TopWidget::loadGameData2()
  mCanvas->loadTiles(QString("earth"));
 }
 
-void TopWidget::loadGameData3()
+void TopWidget::loadGameData3() // FIXME rename!
 {
  // Load unit pixmaps
+ // FIXME: load for *all* players
  d->mLoading->setProgress(3000);
  d->mLoading->setLoading(BosonLoadingWidget::LoadUnits);
  checkEvents();
@@ -517,7 +568,9 @@ void TopWidget::loadGameData3()
  d->mLoading->setLoading(BosonLoadingWidget::InitGame);
  checkEvents();
  if(mBoson->isAdmin()) {
-	mBoson->sendMessage(0, BosonMessage::IdInitFogOfWar);
+	if (mBoson->gameMode()) {
+		mBoson->sendMessage(0, BosonMessage::IdInitFogOfWar);
+	}
 	mBoson->sendMessage(0, BosonMessage::IdStartScenario);
  }
  d->mLoading->setProgress(4700);
@@ -532,6 +585,10 @@ void TopWidget::loadGameData3()
  showBosonWidget();
  delete d->mNewGame;
  d->mNewGame = 0;
+#ifndef NO_EDITOR
+ delete d->mStartEditor;
+ d->mStartEditor = 0;
+#endif
  statusBar()->show();
  d->mBosonWidget->initGameMode();
  enableGameActions(true);
