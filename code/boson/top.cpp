@@ -59,14 +59,14 @@ public:
 		mNewGame = 0l;
 		mServeroptions = 0l;
 		mLoading = 0l;
-		mBosonwidget = 0l;
+		mBosonWidget = 0l;
 	};
 
 	BosonWelcomeWidget* mWelcome;
 	BosonNewGameWidget* mNewGame;
 	BosonServerOptionsWidget* mServeroptions;
 	BosonLoadingWidget* mLoading;
-	BosonWidget* mBosonwidget;
+	BosonWidget* mBosonWidget;
 
 	KAction* mActionNewGame;
 	KAction* mActionEndGame;
@@ -89,11 +89,18 @@ public:
 	KToggleAction* mActionFullScreen;
 
 	QPtrDict<KPlayer> mPlayers; // needed for debug only
+
+#if KDE_VERSION < 310
+	bool mLoadingDockConfig;
+#endif
 };
 
 TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
 {
  d = new TopWidgetPrivate;
+#if KDE_VERSION < 310
+ d->mLoadingDockConfig = false;
+#endif
  mGame = false;
  mMainDock = createDockWidget("mainDock1", 0, this, i18n("Map"));
  mWs = new QWidgetStack(mMainDock);
@@ -272,7 +279,7 @@ void TopWidget::initStatusBar()
 
 void TopWidget::enableGameActions(bool enable)
 {
- if(enable && ! d->mBosonwidget) {
+ if(enable && ! d->mBosonWidget) {
 	kdWarning() << k_lineinfo << "NULL BosonWidget!" << endl;
  }
  d->mActionEndGame->setEnabled(enable);
@@ -348,16 +355,16 @@ void TopWidget::showNewGameWidget()
 
 void TopWidget::initBosonWidget()
 {
- if(d->mBosonwidget) {
+ if(d->mBosonWidget) {
 	return;
  }
- d->mBosonwidget = new BosonWidget(this, mWs);
- mWs->addWidget(d->mBosonwidget, 3);
+ d->mBosonWidget = new BosonWidget(this, mWs);
+ mWs->addWidget(d->mBosonWidget, 3);
 }
 
 void TopWidget::showBosonWidget()
 {
- if(!d->mBosonwidget) {
+ if(!d->mBosonWidget) {
 	initBosonWidget();
  }
  mWs->raiseWidget(3);
@@ -411,9 +418,10 @@ void TopWidget::slotQuit()
 // clicked
  saveGameDockConfig();
  // First delete all widgets to give them change to save config
- if(d->mBosonwidget) {
-	d->mBosonwidget->slotEndGame();
-	delete d->mBosonwidget;
+ if(d->mBosonWidget) {
+	d->mBosonWidget->saveConfig(false);
+	d->mBosonWidget->slotEndGame();
+	delete d->mBosonWidget;
  }
  if(d->mLoading) {
 	// TODO: cancel loading
@@ -538,18 +546,18 @@ void TopWidget::loadGameData3()
  delete d->mNewGame;
  d->mNewGame = 0;
  statusBar()->show();
- d->mBosonwidget->initGameMode();
+ d->mBosonWidget->initGameMode();
  enableGameActions(true);
  initDebugPlayersMenu();
  checkDockStatus();
 
- connect(d->mBosonwidget, SIGNAL(signalMobilesCount(int)), this, SIGNAL(signalSetMobilesCount(int)));
- connect(d->mBosonwidget, SIGNAL(signalFacilitiesCount(int)), this, SIGNAL(signalSetFacilitiesCount(int)));
- connect(d->mBosonwidget, SIGNAL(signalOilUpdated(int)), this, SIGNAL(signalOilUpdated(int)));
- connect(d->mBosonwidget, SIGNAL(signalMineralsUpdated(int)), this, SIGNAL(signalMineralsUpdated(int)));
+ connect(d->mBosonWidget, SIGNAL(signalMobilesCount(int)), this, SIGNAL(signalSetMobilesCount(int)));
+ connect(d->mBosonWidget, SIGNAL(signalFacilitiesCount(int)), this, SIGNAL(signalSetFacilitiesCount(int)));
+ connect(d->mBosonWidget, SIGNAL(signalOilUpdated(int)), this, SIGNAL(signalOilUpdated(int)));
+ connect(d->mBosonWidget, SIGNAL(signalMineralsUpdated(int)), this, SIGNAL(signalMineralsUpdated(int)));
 
- connect(d->mBosonwidget, SIGNAL(signalChatDockHidden()), this, SLOT(slotChatDockHidden()));
- connect(d->mBosonwidget, SIGNAL(signalCmdFrameDockHidden()), this, SLOT(slotCmdFrameDockHidden()));
+ connect(d->mBosonWidget, SIGNAL(signalChatDockHidden()), this, SLOT(slotChatDockHidden()));
+ connect(d->mBosonWidget, SIGNAL(signalCmdFrameDockHidden()), this, SLOT(slotCmdFrameDockHidden()));
 
  d->mLoading->setProgress(5000);
  d->mLoading->setLoading(BosonLoadingWidget::LoadingDone);  // FIXME: This is probably meaningless
@@ -590,29 +598,31 @@ void TopWidget::checkEvents()
 void TopWidget::slotToggleSound()
 {
  boMusic->setSound(!boMusic->sound());
+ boConfig->setSound(boMusic->sound());
 }
 
 void TopWidget::slotToggleMusic()
 {
  boMusic->setMusic(!boMusic->music());
+ boConfig->setMusic(boMusic->music());
 }
 
 void TopWidget::slotToggleChat()
 {
- d->mBosonwidget->toggleChatVisible();
+ d->mBosonWidget->toggleChatVisible();
  checkDockStatus();
 }
 
 void TopWidget::slotToggleCmdFrame()
 {
- d->mBosonwidget->toggleCmdFrameVisible();
+ d->mBosonWidget->toggleCmdFrameVisible();
  checkDockStatus();
 }
 
 void TopWidget::checkDockStatus()
 {
- d->mActionChat->setChecked(d->mBosonwidget->isChatVisible());
- d->mActionCmdFrame->setChecked(d->mBosonwidget->isCmdFrameVisible());
+ d->mActionChat->setChecked(d->mBosonWidget->isChatVisible());
+ d->mActionCmdFrame->setChecked(d->mBosonWidget->isCmdFrameVisible());
 }
 
 void TopWidget::slotChatDockHidden()
@@ -630,7 +640,7 @@ void TopWidget::slotConfigureKeys()
  KKeyDialog dlg(true, this);
  dlg.insert(actionCollection());
  if(mGame) {
-	dlg.insert(d->mBosonwidget->actionCollection());
+	dlg.insert(d->mBosonWidget->actionCollection());
  }
  dlg.configure(true);
 }
@@ -647,7 +657,7 @@ kdDebug() << "zoom index=" << index << endl;
  double factor = (double)percent / 100;
  QWMatrix m;
  m.scale(factor, factor);
- d->mBosonwidget->zoom(m);
+ d->mBosonWidget->zoom(m);
 }
 
 void TopWidget::slotToggleFullScreen()
@@ -661,11 +671,11 @@ void TopWidget::slotToggleFullScreen()
 
 void TopWidget::slotEndGame()
 {
- d->mBosonwidget->slotEndGame();
- disconnect(d->mBosonwidget, 0, 0, 0);
+ d->mBosonWidget->slotEndGame();
+ disconnect(d->mBosonWidget, 0, 0, 0);
  // Delete all objects
- delete d->mBosonwidget;
- d->mBosonwidget = 0;
+ delete d->mBosonWidget;
+ d->mBosonWidget = 0;
  delete mBoson;  // Easiest way to reset game info
  delete mCanvas;
  delete mMap;
@@ -685,32 +695,32 @@ void TopWidget::slotEndGame()
 
 void TopWidget::slotGamePreferences()
 {
- d->mBosonwidget->slotGamePreferences();
+ d->mBosonWidget->slotGamePreferences();
 }
 
 void TopWidget::slotDebug()
 {
- d->mBosonwidget->slotDebug();
+ d->mBosonWidget->slotDebug();
 }
 
 void TopWidget::slotUnfogAll()
 {
- d->mBosonwidget->slotUnfogAll();
+ d->mBosonWidget->slotUnfogAll();
 }
 
 void TopWidget::slotSplitDisplayHorizontal()
 {
- d->mBosonwidget->slotSplitDisplayHorizontal();
+ d->mBosonWidget->slotSplitDisplayHorizontal();
 }
 
 void TopWidget::slotSplitDisplayVertical()
 {
- d->mBosonwidget->slotSplitDisplayVertical();
+ d->mBosonWidget->slotSplitDisplayVertical();
 }
 
 void TopWidget::slotRemoveActiveDisplay()
 {
- d->mBosonwidget->slotRemoveActiveDisplay();
+ d->mBosonWidget->slotRemoveActiveDisplay();
 }
 
 void TopWidget::slotToggleStatusbar()
@@ -741,7 +751,7 @@ void TopWidget::slotDebugPlayer(int index)
 
  switch (index) {
 	case ID_DEBUG_KILLPLAYER:
-		d->mBosonwidget->debugKillPlayer(p);
+		d->mBosonWidget->debugKillPlayer(p);
 		break;
 	default:
 		kdError() << k_funcinfo << "unknown index " << index << endl;
@@ -755,10 +765,27 @@ void TopWidget::loadGameDockConfig()
  // it uses frameGeometry() to save the geometry which is correct. but then it
  // uses setGeometry() to load it again, and since this doesn't work correctly
  // with titlebar and frame we need to adjust here
-// readDockConfig(kapp->config(), "BosonGameDock"); // FIXME
+#if KDE_VERSION < 310
+ d->mLoadingDockConfig = true;
+#endif
+ readDockConfig(kapp->config(), "BosonGameDock"); // FIXME
+#if KDE_VERSION < 310
+ d->mLoadingDockConfig = false;
+#endif
 }
 
 void TopWidget::saveGameDockConfig()
 {
  writeDockConfig(kapp->config(), "BosonGameDock");
 }
+
+#if KDE_VERSION < 310
+void TopWidget::setGeometry(const QRect& r)
+{
+ if (d->mLoadingDockConfig) {
+	move(r.topLeft());
+	resize(r.size());
+ }
+}
+#endif
+
