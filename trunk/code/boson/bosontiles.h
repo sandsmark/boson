@@ -73,12 +73,14 @@ public:
 	 * @param debug Generate a normal pixmap if FALSE or one with a frame
 	 * around every tile if TRUE
 	 **/
-	bool loadTiles(const QString& dir, bool debug = false);
+	bool loadTiles(QString dir, bool debug = false);
 
 	/**
 	 * Save a pixmap created using @ref loadTiles.
 	 **/
 	bool save(const QString& fileName);
+
+	QPixmap pixmap() const;
 
 protected:
 	static int big_x(int g);
