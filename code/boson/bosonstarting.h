@@ -36,6 +36,13 @@ public:
 	~BosonStarting();
 
 	/**
+	 * Set all data that are needed to start a new game. This stream should
+	 * have been sent by the ADMIN to all clients. It should contain at
+	 * least the map and the scenario
+	 **/
+	void setNewGameData(const QByteArray& data);
+
+	/**
 	 * The playfield that gets assigned here should be an <em>empty</em>
 	 * playfield. It is <em>not</em> the playfield that gets loaded, but
 	 * rather the place where it gets loaded to.
@@ -131,6 +138,7 @@ protected:
 	void startGame();
 
 private:
+	QByteArray mNewGameData;
 	BosonPlayField* mPlayField;
 	BosonPlayField* mNewPlayField;
 	Player* mPlayer;

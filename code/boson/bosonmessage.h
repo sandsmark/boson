@@ -37,13 +37,13 @@ public:
 		IdStartGameClicked = 7,
 
 	// once a newgame is started:
-		IdInitFogOfWar = 10,
-		IdStartScenario = 11,
-		AddUnitsXML = 12, // add units from an xml (BosonScenario) file/stream
+//		IdInitFogOfWar = 10,
+//		IdStartScenario = 11,
+//		AddUnitsXML = 12, // add units from an xml (BosonScenario) file/stream
 		IdGameIsStarted = 25, // the game is started as soon as this is received
 
 	// usually withing a game
-		AddUnit = 30, // whenever a unit is added
+//		AddUnit = 30, // whenever a unit is added
 		ChangeMap = 31, // editor only (but comparable to AddUnit)
 
 	// debug/cheat messages

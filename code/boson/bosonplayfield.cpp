@@ -39,6 +39,10 @@
 
 #include "bosonplayfield.moc"
 
+
+// the version of the stream that the ADMIN sends to start a game
+#define BO_ADMIN_STREAM_VERSION (Q_UINT32)0x01
+
 class BosonPlayFieldData : public BosonDataObject
 {
 public:
@@ -491,7 +495,109 @@ bool BosonPlayField::loadMap(QDataStream& stream)
  return true;
 }
 
-bool BosonPlayField::savePlayFieldForRemote(QDataStream& stream)
+// called by the ADMIN before game starts. this stream is sent to all clients,
+// which initiate the game starting process with it.
+bool BosonPlayField::saveAdminPlayField(QDataStream& stream) const
+{
+ if (stream.device()->mode() != IO_WriteOnly) {
+	boError() << k_funcinfo << "no write stream" << endl;
+	return false;
+ }
+ if (!isLoaded()) {
+	boError() << k_funcinfo << "playfield " << identifier()
+			<< " has not yet been loaded completely" << endl;
+	return false;
+ }
+
+ // start with a magic cookie. this is going to be a complex stream, so it's a
+ // good idea.
+ stream << QCString("bostart");
+
+ // continue with a version...
+ stream << (Q_UINT32)BO_ADMIN_STREAM_VERSION;
+
+ // save map and description
+ // AB: do we have to use savePlayFieldForRemote() as a separate function? the
+ // naming scheme sucks... I'd prefer this method to be
+ // savePlayFieldFroRemote(), not saveAdminPlayField()!
+ savePlayFieldForRemote(stream);
+
+
+ // another magic cookie
+ stream << QCString("scenario");
+
+ // the scenario
+ QString scenarioString;
+ if (!scenario()) {
+	// FIXME: AB: this is totally _valid_ for new maps(?) and for loading games!
+	BO_NULL_ERROR(scenario());
+	return false;
+ } else {
+	scenarioString = scenario()->saveScenarioToDocument();
+	if (scenarioString.isEmpty()) {
+		// AB: maybe this is valid for new maps in editor mode?
+		boError() << k_funcinfo << "empty scenario" << endl;
+		return false;
+	}
+ }
+ stream << scenarioString;
+
+ return true;
+}
+
+bool BosonPlayField::loadPlayFieldFromAdmin(QDataStream& stream)
+{
+ if (stream.device()->mode() != IO_ReadOnly) {
+	boError() << k_funcinfo << "no read stream" << endl;
+	return false;
+ }
+ if (scenario()) {
+	boError() << k_funcinfo << "scenario is not NULL!" << endl;
+	return false;
+ }
+ QCString magic;
+ stream >> magic;
+ if (magic != QCString("bostart")) {
+	boError() << k_funcinfo << "invalid magic cookie in stream" << endl;
+	return false;
+ }
+
+ Q_UINT32 version;
+ stream >> version;
+ if (version != BO_ADMIN_STREAM_VERSION) {
+	boError() << k_funcinfo << "network stream from ADMIN has version " << version << " we need version " << BO_ADMIN_STREAM_VERSION << endl;
+	return false;
+ }
+
+ if (!loadPlayFieldFromRemote(stream)) {
+	boError() << k_funcinfo << "loadPlayFieldFromRemote() failed." << endl;
+	return false;
+ }
+
+ stream >> magic;
+ if (magic != QCString("scenario")) {
+	boError() << k_funcinfo << "invalid magic cookie for scenario" << endl;
+	return false;
+ }
+ QString scenarioString;
+ stream >> scenarioString;
+
+ if (!scenarioString.isEmpty()) {
+	boDebug() << k_funcinfo << "loading scenario" << endl;
+	BosonScenario* s = new BosonScenario;
+	if (!s->loadScenarioFromDocument(scenarioString)) {
+		boError() << k_funcinfo << "received scenario string, but could not load it!" << endl;
+		delete s;
+		return false;
+	}
+	changeScenario(s);
+	boDebug() << k_funcinfo << "loaded scenario successfully" << endl;
+ }
+
+ return true;
+}
+
+bool BosonPlayField::savePlayFieldForRemote(QDataStream& stream) const
 {
  if (!saveMap(stream)) {
 	boError() << k_funcinfo << "Could not save map" << endl;
@@ -522,7 +628,7 @@ bool BosonPlayField::loadPlayFieldFromRemote(QDataStream& stream)
  return true;
 }
 
-bool BosonPlayField::saveMap(QDataStream& stream)
+bool BosonPlayField::saveMap(QDataStream& stream) const
 {
  if (!mMap) {
 	boError() << k_funcinfo << "NULL map" << endl;
@@ -535,7 +641,7 @@ bool BosonPlayField::saveMap(QDataStream& stream)
  return true;
 }
 
-bool BosonPlayField::saveDescription(QDataStream& stream)
+bool BosonPlayField::saveDescription(QDataStream& stream) const
 {
  if (!mDescription) {
 	BO_NULL_ERROR(mDescription);

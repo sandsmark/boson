@@ -296,7 +296,10 @@ void BosonNewEditorWidget::slotNetStart()
 	p->loadTheme(SpeciesTheme::speciesDirectory(SpeciesTheme::defaultSpecies()), color);
 	boGame->bosonAddPlayer(p);
  }
- networkInterface()->sendNewGame(true);
+
+#warning FIXME
+ field = 0;
+ networkInterface()->sendNewGame(field, true);
 }
 
 

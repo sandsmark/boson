@@ -668,7 +668,7 @@ bool BosonScenarioBuilder::loadPlayer(const QDomElement& node, Player* p) const
 	root.appendChild(unit.cloneNode(true));
  }
 
- ((Boson*)p->game())->sendAddUnits(doc.toString(), p);
+ ((Boson*)p->game())->addInitialUnits(doc.toString(), p);
  return true;
 }
 

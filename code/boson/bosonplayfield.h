@@ -118,7 +118,12 @@ public:
 	 **/
 	void deleteMap();
 
-	bool savePlayFieldForRemote(QDataStream& stream);
+	// AB: rename to savePlayFieldForRemote() if possible
+	bool saveAdminPlayField(QDataStream& stream) const;
+	bool loadPlayFieldFromAdmin(QDataStream& stream);
+
+	// AB: do we still need these?
+	bool savePlayFieldForRemote(QDataStream& stream) const;
 	bool loadPlayFieldFromRemote(QDataStream& stream);
 
 	BosonMap* map() const { return mMap; }
@@ -188,8 +193,8 @@ protected:
 	QByteArray saveTexMapToFile();
 	QString saveScenarioToFile();
 
-	bool saveMap(QDataStream& stream);
-	bool saveDescription(QDataStream& stream);
+	bool saveMap(QDataStream& stream) const;
+	bool saveDescription(QDataStream& stream) const;
 
 	/**
 	 * Load a @ref BosonMap from stream. Create a new BosonMap object if it

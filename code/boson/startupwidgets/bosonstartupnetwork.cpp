@@ -128,18 +128,42 @@ void BosonStartupNetwork::slotPlayerLeftGame(KPlayer* p)
  emit signalPlayerLeftGame(p);
 }
 
-void BosonStartupNetwork::sendNewGame(bool editor)
+bool BosonStartupNetwork::sendNewGame(BosonPlayField* field, bool editor)
 {
- BO_CHECK_NULL_RET(mGame);
+ if (!mGame) {
+	BO_NULL_ERROR(mGame);
+	return false;
+ }
+ if (!field) {
+	BO_NULL_ERROR(field);
+	return false;
+ }
  if (!mGame->isAdmin()) {
 	boError() << k_funcinfo << "only ADMIN is allowed to send this message" << endl;
-	return;
+	return false;
+ }
+ if (!field->isPreLoaded()) {
+	boError() << k_funcinfo << "playfield " << field->identifier() << " has not yet been preloaded" << endl;
+	return false;
+ }
+ if (!field->isLoaded()) {
+	if (!field->loadPlayField(QString::null)) {
+		boError() << k_funcinfo << "unable to load playfield " << field->identifier() << endl;
+		return false;
+	}
+ }
+ QByteArray data;
+ QDataStream stream(data, IO_WriteOnly);
+ if (!field->saveAdminPlayField(stream)) {
+	boError() << k_funcinfo << "could not save the playfield to a stream" << endl;
+	return false;
  }
  if (editor) {
-	mGame->sendMessage(0, BosonMessage::IdNewEditor);
+	mGame->sendMessage(data, BosonMessage::IdNewEditor);
  } else {
-	mGame->sendMessage(0, BosonMessage::IdNewGame);
+	mGame->sendMessage(data, BosonMessage::IdNewGame);
  }
+ return true;
 }
 
 void BosonStartupNetwork::sendChangeTeamColor(Player* p, const QColor& color)

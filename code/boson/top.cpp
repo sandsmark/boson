@@ -360,6 +360,10 @@ void TopWidget::initBoson()
 	Boson::deleteBoson();
  }
  Boson::initBoson();
+ if (!d->mStarting) {
+	BO_NULL_ERROR(d->mStarting);
+ }
+ boGame->setStartingObject(d->mStarting);
 
  // new games are handled in this order: ADMIN clicks on start games - this
  // sends an IdStartGame over network. Once this is received signalStartNewGame()
@@ -1252,18 +1256,6 @@ void TopWidget::slotDebugRequestIdName(int msgid, bool , QString& name)
 		break;
 	case BosonMessage::ChangeTeamColor:
 		name = "Change TeamColor";
-		break;
-	case BosonMessage::IdInitFogOfWar:
-		name = "Init Fog of War";
-		break;
-	case BosonMessage::IdStartScenario:
-		name = "Start Scenario";
-		break;
-	case BosonMessage::AddUnit:
-		name = "Add Unit";
-		break;
-	case BosonMessage::AddUnitsXML:
-		name = "Add Units from XML";
 		break;
 	case BosonMessage::AdvanceN:
 		name = "Advance";
