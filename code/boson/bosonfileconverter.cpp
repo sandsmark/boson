@@ -491,6 +491,281 @@ bool BosonFileConverter::convertSaveGame_From_0_8_128_To_0_9(QMap<QString, QByte
  return true;
 }
 
+bool BosonFileConverter::convertScenario_From_0_8_To_0_9(const QString& scenarioXML, QString* playersXML, QString* canvasXML)
+{
+ if (!playersXML) {
+	BO_NULL_ERROR(playersXML);
+	return false;
+ }
+ if (!canvasXML) {
+	BO_NULL_ERROR(canvasXML);
+	return false;
+ }
+ boDebug() << k_funcinfo << endl;
+ QDomDocument doc(QString::fromLatin1("BosonScenario"));
+ if (!loadXMLDoc(&doc, scenarioXML)) {
+	boError() << k_funcinfo << "could not load scenario.xml properly" << endl;
+	return false;
+ }
+ QDomElement root = doc.documentElement();
+ if (root.childNodes().count() < 2) {
+	boError() << k_funcinfo << "no scenario found in file" << endl;
+	return false;
+ }
+ QDomElement scenarioSettings = root.namedItem(QString::fromLatin1("ScenarioSettings")).toElement();
+ if (scenarioSettings.isNull()) {
+	boError() << k_funcinfo << "ScenarioSettings not found" << endl;
+	return false;
+ }
+
+ unsigned int minPlayers = 0;
+ int maxPlayers = 0;
+ if ((int)minPlayers > maxPlayers && maxPlayers > 0) {
+	boError() << k_funcinfo << "invalid min/max players: min=" << minPlayers << " max=" << maxPlayers << endl;
+	return false;
+ }
+ if (minPlayers > 10 || maxPlayers > 10) {
+	boError() << k_funcinfo << "more than 10 players is not allowed" << endl;
+	return false;
+ }
+ bool ok = false;
+ minPlayers = scenarioSettings.attribute("MinPlayers").toUInt(&ok);
+ if (!ok) {
+	boError() << k_funcinfo << "MinPlayers is not a valid number" << endl;
+	return false;
+ }
+ maxPlayers = scenarioSettings.attribute("MaxPlayers").toInt(&ok);
+ if (!ok) {
+	boError() << k_funcinfo << "MaxPlayers is not a valid number" << endl;
+	return false;
+ }
+
+ QDomElement players = root.namedItem(QString::fromLatin1("ScenarioPlayers")).toElement();
+ if (players.isNull()) {
+	boError() << k_funcinfo << "ScenarioPlayers not found" << endl;
+	return false;
+ }
+ class UnitNode {
+ public:
+	UnitNode()
+	{
+		type = 0;
+		x = 0;
+		y = 0;
+		isFacility = false;
+
+		constructionCompleted = 0;
+		constructionStep = 0;
+	}
+	~UnitNode()
+	{
+		delete constructionCompleted;
+		delete constructionStep;
+	}
+	unsigned int type;
+	unsigned int x;
+	unsigned int y;
+	bool isFacility;
+
+	// use defaults, when NULL otherwise the value here.
+	bool* constructionCompleted;
+	unsigned int* constructionStep;
+ };
+ class PlayerNode {
+ public:
+	PlayerNode()
+	{
+		isValid = false;
+		playerNumber = 0;
+		minerals = 0;
+		oil = 0;
+		unitCount = 0;
+		units = 0;
+	}
+	~PlayerNode()
+	{
+		delete[] units;
+	}
+	bool isValid;
+	unsigned int playerNumber;
+	unsigned long int minerals;
+	unsigned long int oil;
+	unsigned int unitCount;
+	UnitNode* units;
+ };
+ QDomNodeList list = players.elementsByTagName(QString::fromLatin1("Player"));
+ PlayerNode* scenarioPlayers = new PlayerNode [list.count()];
+ unsigned int scenarioPlayersCount = list.count();
+ for (unsigned int i = 0; i < list.count(); i++) {
+	QDomElement e = list.item(i).toElement();
+	if (e.isNull()) {
+		continue;
+	}
+	PlayerNode* p = &scenarioPlayers[i];
+	p->playerNumber = e.attribute("PlayerNumber").toUInt(&ok);
+	if (!ok) {
+		boWarning() << k_funcinfo << "invalid PlayerNumber attribute " << endl;
+		continue;
+	}
+	QDomElement m = e.namedItem("Minerals").toElement();
+	if (!m.isNull()) {
+		p->minerals  = m.text().toULong(&ok);
+		if (!ok) {
+			boWarning() << k_funcinfo << "invalid Minerals" << endl;
+			p->minerals = 0;
+		}
+	}
+	QDomElement o = e.namedItem("Oil").toElement();
+	if (!o.isNull()) {
+		p->oil = o.text().toULong(&ok);
+		if (!ok) {
+			boWarning() << k_funcinfo << "invalid Oil" << endl;
+			p->oil = 0;
+		}
+	}
+	QDomNodeList units = e.elementsByTagName(QString::fromLatin1("Unit"));
+	p->units = new UnitNode[units.count()];
+	p->unitCount = units.count();
+	for (unsigned int j = 0; j < units.count(); j++) {
+		QDomElement u = units.item(j).toElement();
+		UnitNode* unit = &p->units[j];
+		unit->type = u.attribute("Type").toUInt(&ok);
+		if (!ok) {
+			boWarning() << k_funcinfo << "invalid type value"  << endl;
+			unit->type = 0;
+			continue;
+		}
+		unit->x = u.attribute("x").toUInt(&ok);
+		if (!ok) {
+			boWarning() << k_funcinfo << "invalid x value"  << endl;
+			unit->type = 0; // unit will be ignored with a 0 type
+			continue;
+		}
+		unit->y = u.attribute("y").toUInt(&ok);
+		if (!ok) {
+			boWarning() << k_funcinfo << "invalid y value"  << endl;
+			unit->type = 0; // unit will be ignored with a 0 type
+			continue;
+		}
+
+		// AB: health, armor, shields sightrange and work can also
+		// appear in the scenario files - but only if non-defaults
+		// should get used.
+		// since the editor of boson 0.8 did not include any way to
+		// change these values it is very unlikely that any non-defaults
+		// will appear in the files. so we do not support them here.
+
+		// the same is valid for the "MaxSpeed" setting of mobile units.
+		// but we need to support construction settings of facilities.
+		if (u.hasAttribute("ConstructionCompleted")) {
+			int c = u.attribute("ConstructionCompleted").toInt(&ok);
+			if (ok) {
+				unit->constructionCompleted = new bool;
+				*unit->constructionCompleted = (bool)c;
+			}
+		}
+		if (u.hasAttribute("ConstructionStep")) {
+			unsigned int c = u.attribute("ConstructionStep").toUInt(&ok);
+			if (ok) {
+				unit->constructionStep = new unsigned int;
+				*unit->constructionStep = c;
+			}
+		}
+	}
+	p->isValid = true;
+ }
+
+ QDomDocument playersDoc(QString::fromLatin1("Players"));
+ {
+	QDomElement root = playersDoc.createElement(QString::fromLatin1("Players"));
+	playersDoc.appendChild(root);
+	for (unsigned int i = 0; i < scenarioPlayersCount; i++) {
+		PlayerNode* p = &scenarioPlayers[i];
+		if (!p->isValid) {
+			continue;
+		}
+		QDomElement player = playersDoc.createElement("Player");
+
+		// AB: warning: we use the _number_ for the ID !
+		// this can be very evil!
+		// (same in canvasDoc below)
+		player.setAttribute("Id", p->playerNumber);
+
+		root.appendChild(player);
+		QDomElement dataHandler = playersDoc.createElement("DataHandler");
+		player.appendChild(dataHandler);
+		QDomElement minerals = playersDoc.createElement("KGameProperty");
+		dataHandler.appendChild(minerals);
+		minerals.setAttribute("Id", 258);
+		minerals.appendChild(playersDoc.createTextNode(QString::number(p->minerals)));
+
+		QDomElement oil = playersDoc.createElement("KGameProperty");
+		dataHandler.appendChild(oil);
+		oil.setAttribute("Id", 259);
+		oil.appendChild(playersDoc.createTextNode(QString::number(p->oil)));
+	}
+ }
+
+ QDomDocument canvasDoc(QString::fromLatin1("Canvas"));
+ {
+	QDomElement root = canvasDoc.createElement(QString::fromLatin1("Canvas"));
+	canvasDoc.appendChild(root);
+	for (unsigned int i = 0; i < scenarioPlayersCount; i++) {
+		PlayerNode* p = &scenarioPlayers[i];
+		if (!p->isValid) {
+			continue;
+		}
+		QDomElement items = canvasDoc.createElement("Items");
+
+		// AB: warning: see above in playersDoc. we use the
+		// _playerNumber_ as ID! can be very evil!
+		items.setAttribute("OwnerId", p->playerNumber);
+
+		root.appendChild(items);
+		for (unsigned int j = 0; j < p->unitCount; j++) {
+			UnitNode* u = &p->units[j];
+			QDomElement item = canvasDoc.createElement("Item");
+			items.appendChild(item);
+			item.setAttribute("Rtti", 200 + u->type);
+			item.setAttribute("Type", u->type);
+			item.setAttribute("Group", u->type);
+			item.setAttribute("GroupType", u->type);
+			item.setAttribute("x", (float)u->x * 48);
+			item.setAttribute("y", (float)u->y * 48);
+			QDomElement dataHandler = canvasDoc.createElement("DataHandler");
+			item.appendChild(dataHandler);
+			if (u->isFacility && u->constructionCompleted) {
+				// now _this_ is difficult.
+				// canvas.xml does not support such a task, as
+				// there is no such variable in Unit. we have to
+				// use the constructionStep for this, but we
+				// don't know which value we have to assign to
+				// it!
+				// we simply use a very high value and hope that
+				// it will get reduced to the maximal value on
+				// loading.
+				if (!u->constructionStep) {
+					u->constructionStep = new unsigned int;
+				}
+				*u->constructionStep = 500000;
+			}
+			if (u->isFacility && u->constructionStep) {
+				QDomElement step = canvasDoc.createElement("KGameProperty");
+				step.setAttribute("Id", 372);
+				step.appendChild(canvasDoc.createTextNode(QString::number(*u->constructionStep)));
+			}
+		}
+	}
+ }
+
+ delete[] scenarioPlayers;
+ *playersXML = playersDoc.toString();
+ *canvasXML= canvasDoc.toString();
+
+ return true;
+}
+
+
 
 bool MapToTexMap_From_0_8_To_0_9::convert(int* groundTypes, QByteArray* newMap, QByteArray* texMap)
 {

@@ -70,6 +70,15 @@ public:
 	 **/
 	bool convertSaveGame_From_0_8_128_To_0_9(QMap<QString, QByteArray>& list);
 
+	/**
+	 * Convert a scenario.xml file (from a .bpf archive) from boson 0.8 to
+	 * the file format used in boson 0.9
+	 *
+	 * In boson 0.9 the scenario.xml file is replaced by players.xml and
+	 * canvas.xml - such as they also appear in savegames.
+	 **/
+	bool convertScenario_From_0_8_To_0_9(const QString& scenarioXML, QString* playersXML, QString* canvasXML);
+
 protected:
 	bool loadXMLDoc(QDomDocument* doc, const QString& xml) const;
 };
