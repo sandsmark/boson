@@ -19,18 +19,16 @@
 #ifndef UNITPROPERTIES_H
 #define UNITPROPERTIES_H
 
-#include <qstring.h>
-
-#include <qvaluelist.h>
-#include <qptrlist.h>
-#include <qmap.h>
-
 class SpeciesTheme;
 class PluginProperties;
 class UpgradeProperties;
 class BosonWeaponProperties;
 class BosonParticleSystem;
 class BosonParticleSystemProperties;
+class QString;
+template<class T> class QValueList;
+template<class T> class QPtrList;
+template<class T1, class T2> class QMap;
 
 class KSimpleConfig;
 
@@ -171,7 +169,7 @@ public:
 	 * @return The name of this unit type. Examples are "Aircraft", "Quad",
 	 * "Ship"
 	 **/
-	const QString& name() const { return mName; };
+	const QString& name() const;
 
 	/**
 	 * @return If this is a mobile unit. Better use @ref Unit::isMobile()
@@ -244,7 +242,7 @@ public:
 	 * @return The path to the unit files. That is the directory where the
 	 * index.unit file and the pixmap files are stored.
 	 **/
-	const QString& unitPath() const { return mUnitPath; };
+	const QString& unitPath() const;
 
 	/**
 	 * The time that a unit needs to be produced
@@ -276,7 +274,7 @@ public:
 	 *  of this type
 	 * @see Player::canBuild
 	 **/
-	QValueList<unsigned long int> requirements() const { return mRequirements; };
+	QValueList<unsigned long int> requirements() const;
 
 	/**
 	 * .3ds files seem to support only filenames of 8+3 length. We work
@@ -284,7 +282,7 @@ public:
 	 * @return All map of all texture names that have a longer name assigned
 	 * to.
 	 **/
-	QMap<QString, QString> longTextureNames() const { return mTextureNames; }
+	QMap<QString, QString> longTextureNames() const;
 
 	const PluginProperties* properties(int pluginType) const;
 
@@ -293,27 +291,27 @@ public:
 	 * name should be "move_00.ogg". the _00 is added dynamically (randomly)
 	 * by @ref BosonSound
 	 **/
-	QString sound(int soundEvent) const { return mSounds[soundEvent]; }
+	QString sound(int soundEvent) const;
 
-	QMap<int, QString> sounds() const { return mSounds; }
+	QMap<int, QString> sounds() const;
 
 	/**
 	 * @return List of all possible upgrades to this unit. Note that this
 	 * <em>does not</em> include technologies
 	 **/
-	QPtrList<UpgradeProperties> possibleUpgrades() const { return mUpgrades; }
+	QPtrList<UpgradeProperties> possibleUpgrades() const;
 
 	/**
 	 * @return List of all not researched upgrades to this unit. Note that this
 	 * <em>does not</em> include technologies
 	 **/
-	QPtrList<UpgradeProperties> unresearchedUpgrades() const { return mNotResearchedUpgrades; }
+	QPtrList<UpgradeProperties> unresearchedUpgrades() const;
 
-	void upgradeResearched(UpgradeProperties* upgrade) { mNotResearchedUpgrades.removeRef(upgrade); };
+	void upgradeResearched(UpgradeProperties* upgrade);
 
 	QPtrList<BosonParticleSystem> newDestroyedParticleSystems(float x, float y, float z) const;
 
-	const QPtrList<PluginProperties>* plugins() const  { return &mPlugins; };
+	const QPtrList<PluginProperties>* plugins() const;
 
 protected:
 	void loadMobileProperties(KSimpleConfig* conf);
@@ -335,8 +333,8 @@ protected:
 
 	// Methods to set values. They are only meant to be used by upgrades and unit
 	//  editor. Don't use them unless you know what you are doing
-	void setName(QString name)  { mName = name; };
-	void setUnitPath(QString unitPath)  { mUnitPath = unitPath; };
+	void setName(const QString& name);
+	void setUnitPath(const QString& unitPath); // AB: WHY THE HECK IS THIS HERE ????? unitPath MUST NOT be changeable
 	void setUnitWidth(unsigned int unitWidth)  { mUnitWidth = unitWidth; };
 	void setUnitHeight(unsigned int unitHeight)  { mUnitHeight = unitHeight; };
 	void setUnitDepth(unsigned int unitDepth)  { mUnitDepth = unitDepth; };
@@ -348,22 +346,31 @@ protected:
 	void setOilCost(unsigned long int oilCost)  { mOilCost = oilCost; };
 	void setTerrainType(TerrainType terrain)  { mTerrain = terrain; };
 	void setSupportMiniMap(bool supportMiniMap)  { mSupportMiniMap = supportMiniMap; };
-	void setRequirements(QValueList<unsigned long int> requirements)  { mRequirements = requirements; };
+	void setRequirements(QValueList<unsigned long int> requirements);
 	void setArmor(unsigned long int armor)  { mArmor = armor; };
 	void setShields(unsigned long int shields)  { mShields = shields; };
-	void setLongTextureNames(QMap<QString, QString> textureNames)  { mTextureNames = textureNames; };
-	void setSounds(QMap<int, QString> sounds)  { mSounds = sounds; };
 
 	friend class BoUnitEditor;
 
 private:
+	void init();
+	void setSpeed(float speed);
+
+private:
+	// AB: i consider this as a design problem. direct access to private
+	// members shouldn't be allowed - direct access to private method would
+	// be fine
+	friend class UpgradePropertiesBase; // UpgradePropertiesBase::apply() modifies our private vars
+
+private:
+	class UnitPropertiesPrivate;
+	class MobileProperties;
+	class FacilityProperties;
+
+private:
+	UnitPropertiesPrivate* d;
 	SpeciesTheme* mTheme;
 
-	friend class UpgradePropertiesBase; // UpgradePropertiesBase::apply() modifies our private vars
-	void setSpeed(float speed); // Because speed is in MobileProperties
-
-	QString mName;
-	QString mUnitPath; // the path to the unit files
 	unsigned long int mTypeId; // note: 0 is invalid!
 	unsigned int mUnitWidth;
 	unsigned int mUnitHeight;
@@ -376,25 +383,13 @@ private:
 	unsigned long int mOilCost;
 	TerrainType mTerrain;
 	bool mSupportMiniMap;
-	QValueList<unsigned long int> mRequirements;
 	unsigned long int mArmor;
 	unsigned long int mShields;
 	bool mCanShootAtAirUnits;
 	bool mCanShootAtLandUnits;
 
-	class MobileProperties;
-	class FacilityProperties;
 	MobileProperties* mMobileProperties;
 	FacilityProperties* mFacilityProperties;
-	QPtrList<PluginProperties> mPlugins;
-
-	QMap<QString, QString> mTextureNames;
-	QMap<int, QString> mSounds;
-
-	QPtrList<UpgradeProperties> mUpgrades;
-	QPtrList<UpgradeProperties> mNotResearchedUpgrades;
-
-	QPtrList<BosonParticleSystemProperties> mDestroyedParticleSystems;
 };
 
 #endif

@@ -21,11 +21,11 @@
 
 #include "global.h"
 #include <qstring.h>
-#include <qvaluelist.h>
 
 class QColor;
 class KConfig;
 class BosonConfig;
+template<class T> class QValueList;
 
 #define boConfig BosonConfig::bosonConfig()
 

@@ -31,6 +31,29 @@
 #include <ksimpleconfig.h>
 #include <klocale.h>
 
+class UnitProperties::UnitPropertiesPrivate
+{
+public:
+	UnitPropertiesPrivate()
+	{
+	}
+
+	QString mName;
+	QString mUnitPath; // the path to the unit files
+	QValueList<unsigned long int> mRequirements;
+
+
+	QPtrList<PluginProperties> mPlugins;
+
+	QMap<QString, QString> mTextureNames;
+	QMap<int, QString> mSounds;
+
+	QPtrList<UpgradeProperties> mUpgrades;
+	QPtrList<UpgradeProperties> mNotResearchedUpgrades;
+
+	QPtrList<BosonParticleSystemProperties> mDestroyedParticleSystems;
+};
+
 class UnitProperties::MobileProperties
 {
 public:
@@ -58,31 +81,35 @@ public:
 
 UnitProperties::UnitProperties()
 {
- mTheme = 0;
- mMobileProperties = 0;
- mFacilityProperties = 0;
+ init();
 }
 
 UnitProperties::UnitProperties(SpeciesTheme* theme)
 {
+ init();
  mTheme = theme;
- mMobileProperties = 0;
- mFacilityProperties = 0;
 }
 
 UnitProperties::UnitProperties(SpeciesTheme* theme, const QString& fileName)
 {
+ init();
  mTheme = theme;
+ loadUnitType(fileName, true);
+}
+
+void UnitProperties::init()
+{
+ d = new UnitPropertiesPrivate;
+ mTheme = 0;
  mMobileProperties = 0;
  mFacilityProperties = 0;
-
- loadUnitType(fileName, true);
 }
 
 UnitProperties::~UnitProperties()
 {
  delete mMobileProperties;
  delete mFacilityProperties;
+ delete d;
 }
 
 void UnitProperties::loadUnitType(const QString& fileName, bool full)
@@ -91,7 +118,7 @@ void UnitProperties::loadUnitType(const QString& fileName, bool full)
  KSimpleConfig conf(fileName);
  conf.setGroup(QString::fromLatin1("Boson Unit"));
 
- mUnitPath = fileName.left(fileName.length() - QString("index.unit").length());
+ d->mUnitPath = fileName.left(fileName.length() - QString("index.unit").length());
  /// FIXME: maybe rename to Type or TypeID (Id is confusing IMHO) - rivol
  mTypeId = conf.readUnsignedLongNumEntry("Id", 0); // 0 == invalid // Note: Id == Unit::type() , NOT Unit::id() !
  if (typeId() <= 0) {
@@ -106,7 +133,7 @@ void UnitProperties::loadUnitType(const QString& fileName, bool full)
  mUnitWidth = (unsigned int)(conf.readDoubleNumEntry("UnitWidth", 1.0) * BO_TILE_SIZE);
  mUnitHeight = (unsigned int)(conf.readDoubleNumEntry("UnitHeight", 1.0) * BO_TILE_SIZE);
  mUnitDepth = (unsigned int)(conf.readDoubleNumEntry("UnitDepth", 1.0) * BO_TILE_SIZE);
- mName = conf.readEntry("Name", i18n("Unknown"));
+ d->mName = conf.readEntry("Name", i18n("Unknown"));
  mHealth = conf.readUnsignedLongNumEntry("Health", 100);
  mMineralCost = conf.readUnsignedLongNumEntry("MineralCost", 100);
  mOilCost = conf.readUnsignedLongNumEntry("OilCost", 0);
@@ -116,10 +143,10 @@ void UnitProperties::loadUnitType(const QString& fileName, bool full)
  mArmor = conf.readUnsignedLongNumEntry("Armor", 0);
  mSupportMiniMap = conf.readBoolEntry("SupportMiniMap", false);
  isFacility = conf.readBoolEntry("IsFacility", false);
- mRequirements = BosonConfig::readUnsignedLongNumList(&conf, "Requirements");
+ d->mRequirements = BosonConfig::readUnsignedLongNumList(&conf, "Requirements");
 
  if (full) {
-	mDestroyedParticleSystems = BosonParticleSystemProperties::loadParticleSystemProperties(&conf, "DestroyedParticles", mTheme);
+	d->mDestroyedParticleSystems = BosonParticleSystemProperties::loadParticleSystemProperties(&conf, "DestroyedParticles", mTheme);
  }
 
  if (isFacility) {
@@ -147,8 +174,8 @@ void UnitProperties::saveUnitType(const QString& fileName)
  conf.writeEntry("UnitWidth", (double)mUnitWidth / BO_TILE_SIZE);
  conf.writeEntry("UnitHeight", (double)mUnitHeight / BO_TILE_SIZE);
  conf.writeEntry("UnitDepth", (double)mUnitDepth / BO_TILE_SIZE);
- conf.writeEntry("Name", mName);
- conf.writeEntry("Health", mName);
+ conf.writeEntry("Name", d->mName);
+ conf.writeEntry("Health", mHealth);
  conf.writeEntry("MineralCost", mMineralCost);
  conf.writeEntry("OilCost", mOilCost);
  conf.writeEntry("SightRange", mSightRange);
@@ -157,11 +184,11 @@ void UnitProperties::saveUnitType(const QString& fileName)
  conf.writeEntry("Armor", mArmor);
  conf.writeEntry("SupportMiniMap", mSupportMiniMap);
  conf.writeEntry("IsFacility", isFacility());
- BosonConfig::writeUnsignedLongNumList(&conf, "Requirements", mRequirements);
+ BosonConfig::writeUnsignedLongNumList(&conf, "Requirements", d->mRequirements);
  conf.writeEntry("Producer", mProducer);
 
  /// TODO
-//	mDestroyedParticleSystems = BosonParticleSystemProperties::loadParticleSystemProperties(&conf, "DestroyedParticles", mTheme);
+//	d->mDestroyedParticleSystems = BosonParticleSystemProperties::loadParticleSystemProperties(&conf, "DestroyedParticles", mTheme);
 
  if (isFacility()) {
 	saveFacilityProperties(&conf);
@@ -221,7 +248,7 @@ void UnitProperties::loadPluginProperties(PluginProperties* prop, KSimpleConfig*
 	return;
  }
  prop->loadPlugin(conf);
- mPlugins.append(prop);
+ d->mPlugins.append(prop);
 }
 
 void UnitProperties::loadTextureNames(KSimpleConfig* conf)
@@ -229,13 +256,13 @@ void UnitProperties::loadTextureNames(KSimpleConfig* conf)
  if (!conf->hasGroup("Textures")) {
 	return;
  }
- mTextureNames.clear();
+ d->mTextureNames.clear();
  conf->setGroup("Textures");
  QStringList textures = conf->readListEntry("Textures");
  for (unsigned int i = 0; i < textures.count(); i++) {
 	QString longName = conf->readEntry(textures[i], QString::null);
 	if (!longName.isEmpty()) {
-		mTextureNames.insert(textures[i], longName);
+		d->mTextureNames.insert(textures[i], longName);
 		boDebug() << "mapping " << textures[i] << "->" << longName << endl;
 	}
  }
@@ -243,15 +270,15 @@ void UnitProperties::loadTextureNames(KSimpleConfig* conf)
 
 void UnitProperties::loadSoundNames(KSimpleConfig* conf)
 {
- mSounds.clear();
+ d->mSounds.clear();
  conf->setGroup("Sounds");
- mSounds.insert(SoundShoot, conf->readEntry("Shoot", "shoot"));
- mSounds.insert(SoundOrderMove, conf->readEntry("OrderMove", "order_move"));
- mSounds.insert(SoundOrderAttack, conf->readEntry("OrderAttack", "order_attack"));
- mSounds.insert(SoundOrderSelect, conf->readEntry("OrderSelect", "order_select"));
- mSounds.insert(SoundReportProduced, conf->readEntry("ReportProduced", "report_produced"));
- mSounds.insert(SoundReportDestroyed, conf->readEntry("ReportDestroyed", "report_destroyed"));
- mSounds.insert(SoundReportUnderAttack, conf->readEntry("ReportUnderAttack", "report_underattack"));
+ d->mSounds.insert(SoundShoot, conf->readEntry("Shoot", "shoot"));
+ d->mSounds.insert(SoundOrderMove, conf->readEntry("OrderMove", "order_move"));
+ d->mSounds.insert(SoundOrderAttack, conf->readEntry("OrderAttack", "order_attack"));
+ d->mSounds.insert(SoundOrderSelect, conf->readEntry("OrderSelect", "order_select"));
+ d->mSounds.insert(SoundReportProduced, conf->readEntry("ReportProduced", "report_produced"));
+ d->mSounds.insert(SoundReportDestroyed, conf->readEntry("ReportDestroyed", "report_destroyed"));
+ d->mSounds.insert(SoundReportUnderAttack, conf->readEntry("ReportUnderAttack", "report_underattack"));
 }
 
 void UnitProperties::loadWeapons(KSimpleConfig* conf)
@@ -264,7 +291,7 @@ void UnitProperties::loadWeapons(KSimpleConfig* conf)
 	conf->setGroup(QString("Weapon_%1").arg(i));
 	BosonWeaponProperties* p = new BosonWeaponProperties(this);
 	p->loadPlugin(conf);
-	mPlugins.append(p);
+	d->mPlugins.append(p);
 	if(p->canShootAtAirUnits()) {
 		mCanShootAtAirUnits = true;
 	}
@@ -292,7 +319,7 @@ void UnitProperties::saveFacilityProperties(KSimpleConfig* conf)
 
 void UnitProperties::saveAllPluginProperties(KSimpleConfig* conf)
 {
- QPtrListIterator<PluginProperties> it(mPlugins);
+ QPtrListIterator<PluginProperties> it(d->mPlugins);
  while (it.current()) {
 	it.current()->savePlugin(conf);
  }
@@ -300,13 +327,13 @@ void UnitProperties::saveAllPluginProperties(KSimpleConfig* conf)
 
 void UnitProperties::saveTextureNames(KSimpleConfig* conf)
 {
- if (mTextureNames.count() == 0) {
+ if (d->mTextureNames.count() == 0) {
 	return;
  }
  conf->setGroup("Textures");
  QMap<QString, QString>::Iterator it;
  QStringList textures;
- for(it = mTextureNames.begin(); it != mTextureNames.end(); ++it) {
+ for(it = d->mTextureNames.begin(); it != d->mTextureNames.end(); ++it) {
 	textures.append(it.key());
 	conf->writeEntry(it.key(), it.data());
  }
@@ -315,15 +342,80 @@ void UnitProperties::saveTextureNames(KSimpleConfig* conf)
 
 void UnitProperties::saveSoundNames(KSimpleConfig* conf)
 {
- mSounds.clear();
  conf->setGroup("Sounds");
- conf->writeEntry("Shoot", mSounds[SoundShoot]);
- conf->writeEntry("OrderMove", mSounds[SoundOrderMove]);
- conf->writeEntry("OrderAttack", mSounds[SoundOrderAttack]);
- conf->writeEntry("OrderSelect", mSounds[SoundOrderSelect]);
- conf->writeEntry("ReportProduced", mSounds[SoundReportProduced]);
- conf->writeEntry("ReportDestroyed", mSounds[SoundReportDestroyed]);
- conf->writeEntry("ReportUnderAttack", mSounds[SoundReportUnderAttack]);
+ conf->writeEntry("Shoot", d->mSounds[SoundShoot]);
+ conf->writeEntry("OrderMove", d->mSounds[SoundOrderMove]);
+ conf->writeEntry("OrderAttack", d->mSounds[SoundOrderAttack]);
+ conf->writeEntry("OrderSelect", d->mSounds[SoundOrderSelect]);
+ conf->writeEntry("ReportProduced", d->mSounds[SoundReportProduced]);
+ conf->writeEntry("ReportDestroyed", d->mSounds[SoundReportDestroyed]);
+ conf->writeEntry("ReportUnderAttack", d->mSounds[SoundReportUnderAttack]);
+}
+
+void UnitProperties::setName(const QString& n)
+{
+ d->mName = n;
+}
+
+const QString& UnitProperties::name() const
+{
+ return d->mName;
+}
+
+void UnitProperties::setUnitPath(const QString& p)
+{
+ d->mUnitPath = p;
+}
+
+const QString& UnitProperties::unitPath() const
+{
+ return d->mUnitPath;
+}
+
+const QPtrList<PluginProperties>* UnitProperties::plugins() const
+{
+ return &d->mPlugins;
+}
+
+QMap<QString, QString> UnitProperties::longTextureNames() const
+{
+ return d->mTextureNames;
+}
+
+QValueList<unsigned long int> UnitProperties::requirements() const
+{
+ return d->mRequirements;
+}
+
+QString UnitProperties::sound(int soundEvent) const
+{
+ return d->mSounds[soundEvent];
+}
+
+QMap<int, QString> UnitProperties::sounds() const
+{
+ return d->mSounds;
+}
+
+QPtrList<UpgradeProperties> UnitProperties::possibleUpgrades() const
+{
+ return d->mUpgrades;
+}
+
+QPtrList<UpgradeProperties> UnitProperties::unresearchedUpgrades() const
+{
+ return d->mNotResearchedUpgrades;
+}
+
+void UnitProperties::upgradeResearched(UpgradeProperties* upgrade)
+{
+ d->mNotResearchedUpgrades.removeRef(upgrade);
+}
+
+
+void UnitProperties::setRequirements(QValueList<unsigned long int> requirements)
+{
+ d->mRequirements = requirements;
 }
 
 bool UnitProperties::isMobile() const
@@ -386,7 +478,7 @@ unsigned int UnitProperties::constructionSteps() const
 
 const PluginProperties* UnitProperties::properties(int pluginType) const
 {
- QPtrListIterator<PluginProperties> it(mPlugins);
+ QPtrListIterator<PluginProperties> it(d->mPlugins);
  for (; it.current(); ++it) {
 	if (it.current()->pluginType() == pluginType) {
 		return it.current();
@@ -407,8 +499,8 @@ void UnitProperties::loadUpgrades(KSimpleConfig* conf)
  for (int i = 1; i <= count; i++) {
 	UpgradeProperties* upgrade = new UpgradeProperties(this, i);
 	upgrade->loadPlugin(conf);
-	mUpgrades.append(upgrade);
-	mNotResearchedUpgrades.append(upgrade);
+	d->mUpgrades.append(upgrade);
+	d->mNotResearchedUpgrades.append(upgrade);
  }
  boDebug() << k_funcinfo << "DONE" << endl;
 }
@@ -424,7 +516,7 @@ void UnitProperties::setSpeed(float speed)
 QPtrList<BosonParticleSystem> UnitProperties::newDestroyedParticleSystems(float x, float y, float z) const
 {
  QPtrList<BosonParticleSystem> list;
- QPtrListIterator<BosonParticleSystemProperties> it(mDestroyedParticleSystems);
+ QPtrListIterator<BosonParticleSystemProperties> it(d->mDestroyedParticleSystems);
  while(it.current())
  {
 	list.append(it.current()->newSystem(x, y, z));

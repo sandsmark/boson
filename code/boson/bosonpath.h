@@ -19,12 +19,16 @@
 #ifndef BOSONPATH_H
 #define BOSONPATH_H
 
-
 #include "global.h"
+
+#include <qvaluelist.h>
 
 // Defines whether to use STL (Standard Template Library) or QTL (Qt Template Library)
 // If there is no STL implementation for your compiler, you can use QTL, but I
 //  recommend using STL as it is little bit faster (should be at least)
+// AB: I recommend QTL, since there are *many* compiler problems less! speedup
+// with STL is extremely low and QTL is way more stable, concerning compilation
+// (and easier to use).
 #include <config.h>
 #if defined(HAVE_HP_STL) || defined(HAVE_SGI_STL)
  #define USE_STL 1
@@ -35,11 +39,10 @@
  #include <queue>
 #endif
 
-#include <qvaluelist.h>
-
 class Unit;
 class PathNode;
 class QPoint;
+template<class T> class QValueList;
 
 /**
  * Boson's pathfinder class
@@ -61,7 +64,7 @@ class BosonPath
      */
     BosonPath(Unit* unit, int startx, int starty, int goalx, int goaly, int range = 0);
     ~BosonPath();
-    
+
     /**
      * Finds path. Path is stored in @ref path
      * Note that if path wasn't found goal may be set to last waypoint
@@ -75,12 +78,7 @@ class BosonPath
      * @param goaly the y <em>coordinate</em> of the goal. Not the cell!
      **/
     static QValueList<QPoint> findPath(Unit* unit, int goalx, int goaly, int range = 0);
-    
-    /**
-     * In this list are waypoints of path
-     */
-    QValueList<QPoint> path;
-    
+
     /**
      * Returns lenght of path (in tiles)
      */
@@ -93,7 +91,12 @@ class BosonPath
 
   public:
     class PathNode;
-    
+
+    /**
+     * In this list are waypoints of path
+     */
+    QValueList<QPoint> path;
+
   private:
     class Marking;
     /// TODO: QTL impl.
@@ -112,10 +115,10 @@ class BosonPath
     bool inRange(int x, int y);
 
     void debug() const;
-    
+
     bool findFastPath();
     bool findSlowPath();
-  
+
   private:
     int mStartx;
     int mStarty;
@@ -123,7 +126,7 @@ class BosonPath
     int mGoaly;
 
     Unit* mUnit;
-    
+
     float mModifier;
     float mCrossDivider;
     float mMinCost;

@@ -23,8 +23,6 @@
 #include "items/bosonitem.h"
 #include "global.h"
 
-#include <qvaluelist.h>
-
 class Player;
 class BosonCanvas;
 class BoItemList;
@@ -36,6 +34,7 @@ class UnitPlugin;
 class RepairPlugin;
 class BosonParticleSystem;
 class BosonWeapon;
+template<class T> class QValueList;
 
 class KGameUnitDebug;
 
