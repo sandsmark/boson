@@ -131,6 +131,7 @@ void serverFacility::reportCreated(boBuffer * b)
 	data.facility.x = __x;
 	data.facility.y = __y;
 	data.facility.type = type;
+	data.facility.state = state;
 
 	sendMsg ( b, MSG_FACILITY_CREATED, sizeof(data.facility), &data);
 }
