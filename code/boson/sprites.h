@@ -22,9 +22,9 @@
 #define SPRITES_H 
 
 #define	S_BASE		1234
-#define	S_GROUND	(S_BASE+1)
-#define	S_MOBILE	(S_BASE+2)
-#define	S_FACILITY	(S_BASE+3)
+#define	S_GROUND	(S_BASE+100)
+#define	S_MOBILE	(S_BASE+200)
+#define	S_FACILITY	(S_BASE+300)
 
 
 #define Z_SELECT	(+20)

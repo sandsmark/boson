@@ -40,8 +40,8 @@ physMap::physMap(uint w, uint h, QObject *parent, const char *name=0L)
 maxX = w; maxY = h;
 
 /* Dictionaries */
-mobile.resize(149);
-facility.resize(149);
+mobile.resize(23);
+facility.resize(23);
 mobile.setAutoDelete(true);
 facility.setAutoDelete(true);
 

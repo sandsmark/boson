@@ -61,7 +61,7 @@ class playerMobUnit : public mobUnit, public QwSprite
   void  s_moveBy(int dx, int dy, int direction);
 
 /* Qw stuff */
-  virtual int rtti() { return S_MOBILE; }
+  virtual int rtti() { return S_MOBILE+type; }
 
  protected:
   int	getLeft(int a=1) {return (direction+12-a)%12; }
@@ -109,7 +109,7 @@ class playerFacility : public Facility, public QwSprite
   void		s_setState(int );
 
 /* Qw stuff */
-  virtual int	rtti() { return S_FACILITY; }
+  virtual int	rtti() { return S_FACILITY+type; }
 
  private:
 /* attachement */

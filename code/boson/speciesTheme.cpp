@@ -50,17 +50,15 @@ for(i=0; i<mobilePropNb; i++) {
 	if (!loadMob(i, path + mobileProp[i].name)) isLoaded = false;
 	progress.setProgress(i);
 	}
-printf("mobilePropNb = %d\n", mobilePropNb);
 
 for(i=0; i<facilityPropNb; i++) {
 	if (!loadFix(i, path + facilityProp[i].name )) isLoaded = false;
 	progress.setProgress(i+mobilePropNb);
 	}
-printf("facilityPropNb = %d\n", facilityPropNb);
 
 progress.setProgress(i++);
 
-if (isLoaded) printf("\nSpeciesTheme : %d mobiles and %d facilities loaded\n", mobilePropNb, facilityPropNb);
+if (isLoaded) logf(LOG_INFO, "SpeciesTheme loaded : %d mobiles, %d facilities", mobilePropNb, facilityPropNb);
 	else printf("\nSpeciesTheme : problem while loading pixmaps\n");
 }
 

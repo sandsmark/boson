@@ -86,7 +86,7 @@ switch(state){
 		// turning 
 		newdir =  (vp1<0)?getLeft():getRight();
 		vp2 = VECT_PRODUCT( newdir);
-		printf("vp1 = %d, vp2 = %d \n", vp1, vp2);
+		//printf("vp1 = %d, vp2 = %d \n", vp1, vp2);
 		if ( (vp1<0 && vp2>0) || (vp1>0 && vp2<0) ) { // it's the end
 			newdir =   (abs(vp1) > abs(vp2))? newdir:direction;
 			state = MUS_MOVING;
@@ -200,7 +200,7 @@ if ( MUS_MOVING != state && (dx!=0 || dy!=0) ) {
 
 //printf("      dx = %d,       dy = %d\n", dx, dy);
 //printf("asked_dx = %d, asked_dy = %d\n", asked_dx, asked_dy);
-if (dx != asked_dx || dy != asked_dy)
+if (asked_dx !=0 && asked_dy !=0 && (dx != asked_dx || dy != asked_dy) )
 	logf(LOG_ERROR, "playerMobUnit::s_moveBy : unexpected dx,dy");
 if (dir != direction)
 	logf(LOG_ERROR, "playerMobUnit::s_moveBy : unexpected direction");
