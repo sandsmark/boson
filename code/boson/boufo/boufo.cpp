@@ -24,6 +24,9 @@
 #include <ufo/events/umousewheelevent.hpp>
 #include <ufo/events/ukeysym.hpp>
 #include <ufo/widgets/uslider.hpp>
+#include <ufo/ui/uuidefs.hpp>
+//#include <ufo/ui/uuimanager.hpp>
+#include "ubolabelui.h"
 
 // AB: make sure that we are compatible to system that have QT_NO_STL defined
 #ifndef QT_NO_STL
@@ -418,6 +421,11 @@ BoUfoManager::BoUfoManager(int w, int h, bool opaque)
  ufo::URectangle deviceRect(0, 0, w, h);
  ufo::URectangle contextRect(0, 0, w, h);
  mContext = new ufo::UXContext(deviceRect, contextRect);
+ if (!mContext->getUIManager()) {
+	BO_NULL_ERROR(mContext->getUIManager());
+ } else {
+	mContext->getUIManager()->setUI("ULabelUI", (ufo::UI_HANDLER)&ufo::UBoLabelUI::createUI);
+ }
 
  mRootPane = mContext->getRootPane();
  mContentPane = 0;

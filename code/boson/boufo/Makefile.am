@@ -10,6 +10,7 @@ METASOURCES = AUTO
 KDE_CXXFLAGS = $(UFO_CFLAGS)
 
 libboufo_la_SOURCES = \
+	ubolabelui.cpp \
 	boufo.cpp \
 	boufoaction.cpp
 
