@@ -156,6 +156,7 @@ protected:
 	 * elements in @p actualIds.
 	 **/
 	bool fixPlayerIds(int* actualIds, unsigned int players, QDomElement& root) const;
+	bool fixPlayerIdsInFileNames(int* actualIds, unsigned int players, QMap<QString, QByteArray>& files) const;
 
 	/**
 	 * Add the players for a loaded game.
