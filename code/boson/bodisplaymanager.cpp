@@ -297,6 +297,15 @@ void BoDisplayManager::setLocalPlayer(Player* p)
  }
 }
 
+void BoDisplayManager::quitGame()
+{
+  QPtrListIterator<BosonBigDisplay> it(d->mDisplayList);
+ while (it.current()) {
+	it.current()->quitGame();
+	++it;
+ }
+}
+
 BoBox* BoDisplayManager::findBox(BosonBigDisplay* b) const
 {
  QPtrListIterator<BoBox> it(d->mBoxList); 

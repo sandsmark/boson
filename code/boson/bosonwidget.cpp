@@ -580,6 +580,7 @@ void BosonWidget::slotRemoveUnit(Unit* unit)
 void BosonWidget::quitGame()
 {
 // TODO: set SpeciesTheme::defaultColor() back!! is a static variable!!
+ d->mDisplayManager->quitGame();
  d->mIOList.clear();
  d->mCanvas->quitGame();
  d->mBoson->quitGame();

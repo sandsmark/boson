@@ -78,6 +78,8 @@ public:
 	 **/
 	void setLocalPlayer(Player* player);
 
+	void quitGame();
+
 	void removeActiveDisplay();
 	BosonBigDisplay* splitActiveDisplayVertical();
 	BosonBigDisplay* splitActiveDisplayHorizontal();

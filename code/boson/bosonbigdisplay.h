@@ -103,6 +103,11 @@ public:
 
 	BoSelection* selection() const;
 
+	/**
+	 * Clear the selection and so on.
+	 **/
+	void quitGame();
+
 public slots:
 	/**
 	 * @param pos The new position - cell coordinates! so you have to

@@ -947,3 +947,7 @@ void BosonBigDisplay::updateCursor()
  d->mCursor->setWidgetCursor(viewport());
 }
 
+void BosonBigDisplay::quitGame()
+{
+ d->mSelection->clear();
+}
