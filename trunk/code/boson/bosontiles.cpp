@@ -175,15 +175,6 @@ void BosonTiles::generateTextures()
  mTextureImages.clear(); // free some space - we won't need it anymore, except for reloading the game/map.
 }
 
-bool BosonTiles::save(const QString& fileName)
-{
- if (!mTilesImage) {
-	kdError() << k_funcinfo << "NULL image" << endl;
-	return false;
- }
- return mTilesImage->save(fileName, "PNG");
-}
-
 bool BosonTiles::loadGround(int j, const QString& path)
 {
  QString tile;
