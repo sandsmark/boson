@@ -98,9 +98,9 @@ if (u->inherits("mobUnit")) {
 //printf("at %d,%d\n", x, y);
 
 im = QMAX(0, x-dist)	- x;
-iM = QMIN(map.width, x+dist)	- x;
+iM = QMIN(map.width-1, x+dist)	- x;
 jm = QMAX(0, y-dist)	- y;
-jM = QMIN(map.height, y+dist)	- y;
+jM = QMIN(map.height-1, y+dist)	- y;
 
 //printf("im iM jm jM : %d %d %d %d\n", im, iM, jm, jM);
 
@@ -109,6 +109,8 @@ dist *= dist;
 for (i=im ; i<=iM; i++)
     for (j=jm ; j<=jM; j++)
 	if ( i*i+j*j < dist) {
+		assert(i+x<map.width);
+		assert(j+y<map.height);
 		c = &map.cells[i+x][j+y];
 		if ( ! c->isKnownBy(mask)) {
 			c->setKnown(mask);
