@@ -56,25 +56,31 @@ draw_bigbox_text("This is a list of features that I consider as
     <li>Preload map information on startup</li>
     <li>Decrease size of textures (fixes problems for 24bpp and 32bpp)</li>
     <li>Don't draw invisible particles</li>
+    <li>Big performance improvements</li>
   </ul>
   <h4>Game</h4>
   <ul>
-    <li>Big performance improvements</li>
     <li>Technology upgrades are working now</li>
     <li>Added minimap image for disabled minimap</li>
     <li>Weapon specific sound support</li>
-    <li>Smoke for powerplant and oilrefinery</li>
+    <li>Smoke support for powerplant, oilrefinery, mineralrefinery etc.</li>
+    <li>Particle system improvements</li>
+    <li>Damaged units are getting darker</li>
+    <li>Save screenshots as jpg and show the full path as a chat message</li>
+    <li>New minimap zooming buttons</li>
   </ul>
   <h4>Data</h4>
   <ul>
     <li>New facility: Ferry</li>
     <li>Unit models improvements</li>
     <li>Warfactory is now Weapons Factory</li>
+    <li>Handbook switched from png images to jpg</li>
   </ul>
   <h4>Editor</h4>
   <ul>
     <li>Some bugs are fixed</li>
     <li>Buildings are placed in constructed mode</li>
+    <li>Better support for big maps</li>
     <li>Support for changing map name and description</li>
   </ul>
   
