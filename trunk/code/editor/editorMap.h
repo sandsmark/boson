@@ -24,6 +24,7 @@
 #include <qintdict.h>
 
 #include "../common/msgData.h"
+#include "../common/playField.h" // origPeople
 //#include "../common/unitType.h"
 #include "../common/unit.h"	// Facility
 
@@ -59,6 +60,9 @@ class editorMap : public physMap
   void createFix(facilityMsg_t &);
   void destroyFix(destroyedMsg_t &);
 
+  bool load(QString filename);
+  bool save(QString filename);
+
 /* concerning contents */
   visualFacility *getFacility(long key) { return facility.find(key); }
 
@@ -67,7 +71,10 @@ class editorMap : public physMap
   QIntDict<visualMobUnit>	mobile;
   QIntDict<visualFacility>	facility;
 
-  visualMap			map;
+  visualMap	map;
+  origPeople	people;
+
+  bool		isModified;
 
 };
 

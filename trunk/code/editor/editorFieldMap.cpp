@@ -84,7 +84,6 @@ editorFieldMap::editorFieldMap(viewMap *v, QWidget *p, const char *n, WFlags f)
 
 void editorFieldMap::setCell(int g)
 {
-	printf("set g=%d\n", g);
 	selectedCell->set((groundType)g);
 	view->phys->update();
 }
