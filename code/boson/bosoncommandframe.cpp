@@ -47,7 +47,7 @@
 
 #include "bosoncommandframe.moc"
 
-#define UPDATE_TIMEOUT 500
+#define UPDATE_TIMEOUT 200
 
 class BoMinerWidget : public QWidget
 {
@@ -290,6 +290,7 @@ void BoOrderWidget::showUnitActions(Unit* unit)
 	d->mOrderButton[d->mButtonOffset]->setAction(ActionStop, unit->owner());
 	d->mButtonOffset++;
  }
+ d->mTopLayout->activate();
 }
 
 void BoOrderWidget::slotRedrawTiles()
