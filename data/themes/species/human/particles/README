@@ -25,6 +25,14 @@ The entries marked with * are mandatory.
         ID of this particle system. This must be unique! It is used to identify
         particle system. It must be > 0
         No default!
+Inherits=group
+        Name of the group of particle system this system inherits.
+        Inheritance works by first loading inherited system and then replacing
+        all values specified in this system.
+        Multiple level of inheritance is possible (system A can inherit system
+        B which in turn can inherit system C), but multiple inheritance is not
+        possible (system A can't inherit both B and C).
+        Default is none.
 MinVelocity=vector
 MaxVelocity=vector
         These two entries specify minimal and maximal velocity of particles.
@@ -36,29 +44,39 @@ MinPos=vector
 MaxPos=vector
         These entries specify initial position of particle.
         Default is 0,0,0 for both.
-Normalize=bool
-        Whether to normalize velocity vector. If you normalize velocities,
-        particle system's shape will be sphere, otherwise they might look like
-        boxes, but normalizing takes some time. It's usually good to leave it
-        to false for little effects like missile hits or little explosions and
-        to set it to true for bigger effects like big explosions or shockwaves.
+NormalizePos=bool
+        Whether to normalize particle position vectors. If you normalize
+        positions, particle system's shape will be sphere, otherwise they might
+        look like boxes, but normalizing takes some time. It's usually good to
+        leave it to false for little effects like missile hits or little
+        explosions and to set it to true for bigger effects like big explosions
+        or shockwaves.
         Default is false.
-MinScale=float
-MaxScale=float
-        How much to scale vector after normalizing. This has any effect only
-        when Normalize is set to true.
+MinPosScale=float
+MaxPosScale=float
+        How much to scale position vector after normalizing. This has any effect
+        only when NormalizePos is set to true.
+        Default is 1 for both.
+NormalizeVelo=bool
+        Same as NormalizePos, but specifies whether to normalize particle
+        velocity vectors.
+        Default is false.
+MinVeloScale=float
+MaxVeloScale=float
+        How much to scale velocity vector after normalizing. This has any effect
+        only when NormalizeVelo is set to true.
         Default is 1 for both.
 StartColor=color
 EndColor=color
         Specifies color of particle when it borns and when it dies. During
         particle's life, color is dynamically changed from StartColor to
-        EndColor.
-        Default is 0,0,0,0 for both
+        EndColor. Components are red, green, blue and alpha (transparency).
+        Default is 0,0,0,0 (transparent black) for both
 MinLife=float
 MaxLife=float
         Specifies minimal and maximal lifetime of particle i.e. how long
         particle lives. This is in seconds for normal game speed.
-        Default is 0 for both.
+        Default is 1 for both.
 MaxNum=integer
         How many particles this particle system may have?
         If this value is too big, particle systems will use too much memory, but
@@ -68,21 +86,27 @@ MaxNum=integer
 InitNum=integer
         How many particles to create when particle system is created?
         Usually, for explosions, you create all particles or at least most
-        particles initially and for smoke you don't create any initial
+        particles initially and for e.g smoke you don't create any initial
         particles.
         Default is 0.
 BlendFunc=string
         What OpenGL blending function to use? This must be either
-        "GL_ONE_MINUS_SRC_ALPHA" or "GL_ONE".
+        "GL_ONE_MINUS_SRC_ALPHA" or "GL_ONE". GL_ONE_MINUS_SRC_ALPHA is more
+        "natural" and is good for e.g. smoke. However, for explosions and fire,
+        it's usually better to use GL_ONE.
         Default is "GL_ONE_MINUS_SRC_ALPHA".
 Rate=float
         How many particles to create per second (with default game speed) when
         particle system is active.
         Default is 0.
-Size=float
-        Specifies sizes of particles. The bigger this number is, the bigger the
-        particles are.
-        Default is 1.
+StartSize=float
+EndSize=float
+        Specifies sizes of particles. When particle borns, it's size will be
+        StartSize, over time, it will dynamically change to EndSize when
+        particle dies.
+        The bigger this number is, the bigger the particles are. 1.0 is size of
+        a cell.
+        Default is 1 for both.
 SystemLife=float
         Specifies how much particle system lives (in seconds with normal game
         speed). When this time passes, particle system doesn't create any new
@@ -95,7 +119,15 @@ Align=bool
         be aligned to x-y plane (like cells).
         Default is true.
 Texture=string
-        Texture to use for particles. Textures will be tinted with particles'
+        Texture set to use for particles. Textures will be tinted with particles'
         colors.
-        Default is "default.png"
+        Texture set includes all textures, whose filename begins with specified
+        string. If you e.g. specify "smoke" as Texture, all files with name
+        smoke*.png are included in texture set. Particle's texture will change
+        over time in case there are multiple textures in the set. You can create
+        "animated" textures by having files e.g. smoke-0.png, smoke-1.png etc.
+        Then particle will have texture smoke-0.png when it borns, then it will
+        change to smoke-1.png and so on.
+        Textures in the texture set are sorted by their filenames.
+        Default is "explosion"
 
