@@ -371,6 +371,10 @@ protected:
 
 	void removeFromAdvanceLists(BosonItem* item);
 
+
+	bool loadUnitFromXML(const QDomElement& unit);
+	bool loadShotFromXML(const QDomElement& shot);
+
 private:
 	void init();
 
