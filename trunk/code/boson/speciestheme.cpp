@@ -6,6 +6,7 @@
 
 #include <kstandarddirs.h>
 #include <kdebug.h>
+#include <ksimpleconfig.h>
 
 #include <qcanvas.h>
 #include <qpixmap.h>
@@ -125,13 +126,8 @@ bool SpeciesTheme::loadTheme(const QString& speciesDir, QRgb teamColor)
 	kdError() << "Could not load shot sequence" << endl;
  }
 
-//AB: shall we preload all units?
-
-// original boson just preloads some units:
-// // preload some units 
-// loadFix(FACILITY_CMDBUNKER);
-// loadMob(MOB_QUAD);
-
+ // don't preload units here as the species can still be changed in new game
+ // dialog
  return true;
 }
 
@@ -592,8 +588,20 @@ QStringList SpeciesTheme::availableSpecies()
 
 QString SpeciesTheme::defaultSpecies()
 {
- QString s = KGlobal::dirs()->findResourceDir("data", 
-		"boson/themes/species/human/index.desktop");
- s += QString::fromLatin1("boson/themes/species/human/");
- return s;
+ return QString::fromLatin1("Human");
 }
+
+QString SpeciesTheme::speciesDirectory(const QString& identifier)
+{
+ QStringList l = availableSpecies();
+ for (unsigned int i = 0; i < l.count(); i++) {
+	KSimpleConfig cfg(l[i]);
+	cfg.setGroup("Boson Species");
+	if (cfg.readEntry("Identifier") == identifier) {
+		QString d = l[i].left(l[i].length() - strlen("index.desktop"));
+		return d;
+	}
+ }
+ return QString::null;
+}
+

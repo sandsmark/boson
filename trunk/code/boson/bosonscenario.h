@@ -64,6 +64,8 @@ public:
 
 	bool isValid() const;
 
+	static QString scenarioFileName(const QString& scenarioIdentifier);
+
 protected:
 	/**
 	 * Save the scenario to the stream.

@@ -5,12 +5,15 @@ class BosonMessage
 {
 public:
 	enum BosonMessages {
-		InitMap = 0,
-		AddUnit = 3,
-		Advance = 4,
-		IdChat = 5,
-		IdStopMoving = 6,
-		IdStartScenario = 7,
+		InitMap = 0, // for new game dialog
+		ChangeSpecies = 1, // for new game dialog
+		ChangeMap = 2, // for new game dialog
+		ChangeScenario = 3, // for new game dialog
+		IdStartScenario = 10, // for new game dialog
+		AddUnit = 50, // whenever a unit is added
+		Advance = 51, // call BosonCanvas::advance()
+		IdChat = 52, // a chat message
+		IdStopMoving = 53, // a unit shall stop moving. obsolete.
 
 	// Player Moves:
 		MoveMove = 100, // Unit(s) is/are moved

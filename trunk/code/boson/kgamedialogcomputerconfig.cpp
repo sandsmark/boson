@@ -56,7 +56,11 @@ void KGameDialogComputerConfig::slotAddComputerPlayer()
 	name = i18n("Computer");
  }
  p->setName(name);
- p->loadTheme(SpeciesTheme::defaultSpecies(), SpeciesTheme::defaultColor());
+ 
+ // FIXME: MUST be sent over network! problem: at this point the ID of the
+ // player is unknown. Possible solution would be to load the theme as soon as
+ // the player is being added.
+ p->loadTheme(SpeciesTheme::speciesDirectory(SpeciesTheme::defaultSpecies()), SpeciesTheme::defaultColor());
 
  BosonComputerIO* io = new BosonComputerIO();
  io->setReactionPeriod(50);

@@ -15,10 +15,12 @@ signals:
 	void signalStartGame();
 	void signalMapChanged(const QString& fileName);
 	void signalScenarioChanged(const QString& fileName);
-	void signalSpeciesChanged(const QString& directory);
+	void signalSpeciesChanged(const QString& species);
 
 public slots:
 	void slotMapChanged(int index);
+	void slotMapChanged(const QString& mapIdentifier);
+	void slotScenarioChanged(const QString& scenarioIdentifier);
 
 protected slots:
 	void slotStartGame();

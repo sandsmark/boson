@@ -13,6 +13,7 @@
 #include <kdebug.h>
 #include <kstandarddirs.h>
 #include <kfilterdev.h>
+#include <ksimpleconfig.h>
 
 #include "defines.h"
 
@@ -645,3 +646,22 @@ void BosonMap::changeCell(int x, int y, int groundType, unsigned char b)
  }
 }
 
+QString BosonMap::mapFileName(const QString& identifier)
+{
+ QStringList l = availableMaps();
+ for (unsigned int i = 0; i < l.count(); i++) {
+	KSimpleConfig cfg(l[i]);
+	cfg.setGroup("Boson Map");
+	if (cfg.readEntry("Identifier") == identifier) {
+		QString m = l[i].left(l[i].length() - strlen(".desktop"));
+		m += QString::fromLatin1(".bpf");
+		if (QFile::exists(m)) {
+			return m;
+		} else {
+			kdError() << "Cannot find " << m << " for valid .desktop file" << endl;
+		}
+	}
+ }
+ kdWarning() << "no map file found for " << identifier << endl;
+ return QString::null;
+}
