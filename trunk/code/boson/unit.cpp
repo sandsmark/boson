@@ -28,6 +28,7 @@
 #include "selectbox.h"
 #include "bosonmessage.h"
 #include "bosonstatistics.h"
+#include "kspritetooltip.h"
 
 #include <kgame/kgamepropertylist.h>
 #include <kgame/kgame.h>
@@ -75,10 +76,13 @@ Unit::Unit(const UnitProperties* prop, Player* owner, QCanvas* canvas)
 
  d->mDirection.setLocal(0); // not yet used
  setAnimated(true);
+
+ KSpriteToolTip::add(rtti(), unitProperties()->name());
 }
 
 Unit::~Unit()
 {
+ KSpriteToolTip::remove(this);
  d->mWaypoints.setEmittingSignal(false); // just to prevent warning in Player::slotUnitPropertyChanged()
  d->mWaypoints.clear();
  unselect();

@@ -27,7 +27,6 @@
 #include "unitproperties.h"
 #include "unit.h"
 #include "speciestheme.h"
-#include "kspritetooltip.h"
 #include "bosoncommandframe.h"
 #include "bosonmessage.h"
 #include "bosonmap.h"
@@ -80,8 +79,6 @@ public:
 		mLocalPlayer = 0;
 		mPlayField = 0;
 
-		mUnitTips = 0;
-
 		mTopLayout = 0;
 		mViewLayout = 0;
 
@@ -101,8 +98,6 @@ public:
 	Boson* mBoson;
 	Player* mLocalPlayer;
 	BosonPlayField* mPlayField;
-
-	KSpriteToolTip* mUnitTips;
 
 	QHBoxLayout* mTopLayout;
 	QVBoxLayout* mViewLayout; // chat and bigdisplay
@@ -148,7 +143,6 @@ BosonWidget::~BosonWidget()
  }
  boConfig->saveCursorDir(d->mCursorTheme);
  d->mIOList.clear();
- delete d->mUnitTips;
  delete d->mCursor;
  delete d->mDisplayManager;
 
@@ -553,7 +547,6 @@ void BosonWidget::slotAddUnit(Unit* unit, int, int)
 	kdError() << k_funcinfo << ": NULL owner" << endl;
 	return;
  }
- d->mUnitTips->add(unit->rtti(), unit->unitProperties()->name());
  if (unit->owner() != d->mLocalPlayer) {
 	return;
  }
@@ -1068,18 +1061,7 @@ void BosonWidget::initBigDisplay(BosonBigDisplay* b)
 	connect(input, SIGNAL(signalMouseEvent(QMouseEvent*, bool*)), 
 			b, SLOT(slotEditorMouseEvent(QMouseEvent*, bool*)));
  } else {
-//	connect(b, SIGNAL(signalSingleUnitSelected(Unit*)),
-//			d->mCommandFrame, SLOT(slotSetAction(Unit*)));
 	addMouseIO(b);
- }
-		
- static bool init = false;
- if (!init) {
-	// TODO these should also be done for ALL displays... maybe use static
-	// lists in KSpriteToolTip so we can add them to several views
-	// tooltips - added in slotAddUnit
-	d->mUnitTips = new KSpriteToolTip(b);
-	init = true;
  }
 
  slotSetActiveDisplay(b);
