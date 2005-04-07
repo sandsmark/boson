@@ -99,9 +99,9 @@ UThemeLookAndFeel::load(const std::string & themeFile) {
 }
 
 #if defined UFO_GFX_X11
-#include <X11/Xlib.h>
 #include <bogl.h>
-#include <GL/glx.h>
+#include <boglx.h>
+#include <X11/Xlib.h>
 inline std::string _theme_toString(const char * p) {
 	if (p) {
 		return std::string(p);

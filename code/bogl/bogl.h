@@ -43,7 +43,15 @@ class QStringList;
 // Include OpenGL headers
 #include <GL/gl.h>
 #include <GL/glu.h>
-// TODO: glx
+
+// AB: the Qt includes are required to avoid conflicts with GLX
+//#include <qnamespace.h>
+//#include <qglobal.h>
+//#include <qevent.h>
+//#include <GL/glx.h>
+
+
+#include <bogl_decl_p.h>
 
 #undef GLsizeiptrARB
 
@@ -53,6 +61,7 @@ extern bool bogl_inited;
 
 // bogl functions
 void boglInit();
+bool boglResolveGLSymbols();
 unsigned int boglGetOpenGLVersion();
 QString boglGetOpenGLVersionString();
 QString boglGetOpenGLVendorString();
