@@ -23,12 +23,12 @@
 #include "bodebug.h"
 #include "boglquerystates.h"
 #include <bogl.h>
+#include <boglx.h>
 
 #include <qwidget.h>
 #include <qregexp.h>
 #include <qstringlist.h>
 
-#include <GL/glx.h>
 #include <X11/Xlib.h>
 
 void BoInfo::updateOpenGLInfo(QWidget* widget)
