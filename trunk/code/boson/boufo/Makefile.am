@@ -27,6 +27,7 @@ libboufo_la_LIBADD = \
 boufodesigner_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 boufodesigner_LDADD = \
 		$(top_builddir)/bodebug/libbodebug.la \
+		$(top_builddir)/bogl/libbogl.la \
 		$(top_builddir)/boson/boufo/libboufo.la \
 		$(LIB_QT) \
 		$(LIB_KDECORE) \
@@ -38,6 +39,7 @@ boufodesigner_SOURCES = \
 boufotest_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 boufotest_LDADD = \
 		$(top_builddir)/bodebug/libbodebug.la \
+		$(top_builddir)/bogl/libbogl.la \
 		$(top_builddir)/boson/boufo/libboufo.la \
 		$(LIB_QT) \
 		$(LIB_KDECORE) \
