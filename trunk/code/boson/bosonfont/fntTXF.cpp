@@ -25,10 +25,9 @@
 
 #include "fntLocal.h"
 #include <bogl.h>
+#include <boglx.h>
 
 #include <bodebug.h>
-
-#include <GL/glx.h>
 
 static bool glIsValidContext( void )
 {

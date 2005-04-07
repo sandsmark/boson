@@ -21,6 +21,7 @@
 #include "boglobal.h"
 
 #include <config.h>
+#include <bogl.h>
 
 #include <kglobal.h>
 #include <kstandarddirs.h>
@@ -47,6 +48,10 @@ static QString resolveSymlinks( const QString& path, int depth = 0 );
 BoApplication::BoApplication(const QCString& argv0, bool allowStyles, bool enableGUI)
 	: KApplication(allowStyles, enableGUI)
 {
+ if (!boglResolveGLSymbols()) {
+//	boError() << k_funcinfo << "GL/GLU/GLX symbols could not be resolved" << endl;
+	qDebug("ERROR: GL/GLU/GLX symbols could not be resolved");
+ }
  // this is for broken installations. people tend to install to /usr/local or
  // similar (which is 100% correct), but don't set $KDEDIRS (note that S)
  // correct. This is (I guess) a distribution bug in most (all?) distributions

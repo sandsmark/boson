@@ -47,9 +47,9 @@
 
 #if defined(UFO_GFX_X11)
 
-#include <X11/Xlib.h>
 #include <bogl.h>
-#include <GL/glx.h>
+#include <boglx.h>
+#include <X11/Xlib.h>
 
 namespace ufo {
 struct USystemInfo {

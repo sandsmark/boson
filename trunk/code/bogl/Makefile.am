@@ -5,7 +5,8 @@ noinst_LTLIBRARIES = libbogl.la
 METASOURCES = AUTO
 
 libbogl_la_SOURCES = \
-	bogl.cpp
+	bogl.cpp \
+	bogl_resolve.cpp
 
 include ../admin/Doxyfile.am
 

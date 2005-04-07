@@ -32,7 +32,7 @@
 #include "../uvideodevice.hpp"
 
 #include "../events/ukeysym.hpp"
-#include "GL/glx.h"
+#include <boglx.h>
 #include <X11/Xlib.h>
 
 namespace ufo {

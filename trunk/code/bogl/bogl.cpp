@@ -23,13 +23,12 @@
 #define QT_CLEAN_NAMESPACE
 
 #include "bogl.h"
+#include "boglx.h"
 
 #include "bodebug.h"
 
 #include <qstringlist.h>
-
-#include <GL/glx.h>
-
+#include <qlibrary.h>
 
 // bogl variables
 bool bogl_inited = false;
@@ -53,6 +52,11 @@ void boglInit()
   if(bogl_inited)
   {
     boDebug() << k_funcinfo << "OpenGL already inited, returning" << endl;
+    return;
+  }
+  if (!boglResolveGLSymbols())
+  {
+    boError() << k_funcinfo << "OpenGL symbols could bot be resolved" << endl;
     return;
   }
 

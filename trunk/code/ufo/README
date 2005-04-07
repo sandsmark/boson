@@ -7,6 +7,9 @@ Patches applied currently (this list may not be complete):
 - Patch to include/ufo/ufo_gl.hpp and usysteminfo.hpp to include bogl.h instead
   of gl.h and glu.h
 - Patch to uthemelookandfeel.cpp to include bogl.h before glx.h
+- Patch to ufo/include/ufo/usysteminfo.hpp, ufo/include/ufo/ux/uxglxdriver.hpp
+  and ufo/src/ui/uthemelookandfeel.cpp to include boglx.h instead of glx.h
+  note that this must be included before X11/Xlib.h
 
 Use
  make_ufo_dir.sh ufo_dir code/ufo

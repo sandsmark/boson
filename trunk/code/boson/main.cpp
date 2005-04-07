@@ -27,6 +27,7 @@
 #include "bo3dtools.h"
 #include "boeventloop.h"
 #include <config.h>
+#include <bogl.h>
 
 #include <kaboutdata.h>
 #include <kcmdlineargs.h>
@@ -97,6 +98,15 @@ int main(int argc, char **argv)
 #if BOSON_LINK_STATIC
  KApplication::disableAutoDcopRegistration();
 #endif
+
+ boDebug() << k_funcinfo << "resolving GL, GLX and GLU symbols" << endl;
+ if (!boglResolveGLSymbols()) {
+#warning TODO: messagebox
+	// TODO: open a messagebox
+	boError() << k_funcinfo << "Could not resolve all symbols!" << endl;
+	return 1;
+ }
+ boDebug() << k_funcinfo << "GL, GLX and GLU symbols successfully resolved" << endl;
 
  BoEventLoop eventLoop(0, "main event loop");
  BoApplication app(argv0);

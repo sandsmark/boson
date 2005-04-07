@@ -23,12 +23,12 @@
 #include "fnt.h"
 
 #include "bodebug.h"
+#include <boglx.h>
 
 #include <klocale.h>
 #include <kglobal.h>
 #include <kstandarddirs.h>
 
-#include <GL/glx.h>
 #include <X11/Xlib.h>
 #include <math.h>
 
