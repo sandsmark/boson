@@ -23,13 +23,13 @@
 #include "global.h"
 #include "bosoncursor.h"
 #include "bodebug.h"
+#include "bofiledialog.h"
 
 #include <ksimpleconfig.h>
 #include <klocale.h>
 #include <knuminput.h>
 #include <kstandarddirs.h>
 #include <kglobal.h>
-#include <kfiledialog.h>
 
 #include <qlayout.h>
 #include <qlineedit.h>
