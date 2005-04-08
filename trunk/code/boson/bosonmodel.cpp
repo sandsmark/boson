@@ -313,7 +313,12 @@ public:
 	float mBoundingSphereRadius;
 
 	QCString mMD5;
+
+	unsigned int id;
+	static unsigned int maxId;
 };
+
+unsigned int BosonModelPrivate::maxId = 0;
 
 BosonModel::BosonModel(const QString& dir, const QString& file)
 {
@@ -328,6 +333,9 @@ void BosonModel::init()
  d->mAnimations.setAutoDelete(true);
  d->mBoundingSphereRadius = 0.0f;
  mMeshRendererModelData = 0;
+
+ d->maxId++;
+ d->id = d->maxId;
 
  // add the default mode 0 (always shows the first frame)
  insertAnimationMode(0, 0, 0, 0.0f, false);
@@ -352,6 +360,16 @@ BosonModel::~BosonModel()
  delete[] d->mPoints;
  delete d;
  boDebug(100) << k_funcinfo << "done" << endl;
+}
+
+unsigned int BosonModel::id() const
+{
+ return d->id;
+}
+
+unsigned int BosonModel::maxId()
+{
+ return BosonModelPrivate::maxId;
 }
 
 BoMaterial* BosonModel::material(unsigned int index) const
