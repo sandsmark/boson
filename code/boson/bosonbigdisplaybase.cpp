@@ -96,6 +96,7 @@
 #include <qimage.h>
 #include <qdir.h>
 #include <qdom.h>
+#include <qvaluevector.h>
 
 #if HAVE_SYS_TIME_H
 #include <sys/time.h>
@@ -356,6 +357,15 @@ public:
 
 static void updateEffects(BoVisibleEffects& v);
 
+class BoRenderItem
+{
+public:
+	BoRenderItem() { modelId = 0; item = 0; }
+	BoRenderItem(unsigned int _modelId, BosonItem* _item) { modelId = _modelId, item = _item; }
+
+	BosonItem* item;
+	unsigned int modelId;
+ };
 
 class BosonCanvasRendererPrivate
 {
@@ -363,13 +373,12 @@ public:
 	BosonCanvasRendererPrivate(const BoGLMatrices& gameMatrices)
 		: mGameMatrices(gameMatrices)
 	{
-		mRenderItemList = 0;
 		mSelectBoxData = 0;
 
 		mCamera = 0;
 		mLocalPlayerIO = 0;
 	}
-	BoItemList* mRenderItemList;
+	QValueVector<BoRenderItem> mRenderItemList;
 	SelectBoxData* mSelectBoxData;
 	BoVisibleEffects mVisibleEffects;
 	unsigned int mRenderedItems;
@@ -388,7 +397,6 @@ public:
 BosonCanvasRenderer::BosonCanvasRenderer(const BoGLMatrices& gameMatrices)
 {
  d = new BosonCanvasRendererPrivate(gameMatrices);
- d->mRenderItemList = new BoItemList(1, false);
  d->mRenderedItems = 0;
  d->mRenderedCells = 0;
  d->mRenderedParticles = 0;
@@ -402,7 +410,6 @@ BosonCanvasRenderer::BosonCanvasRenderer(const BoGLMatrices& gameMatrices)
 
 BosonCanvasRenderer::~BosonCanvasRenderer()
 {
- delete d->mRenderItemList;
  delete d->mSelectBoxData;
  delete d;
 }
@@ -607,11 +614,14 @@ void BosonCanvasRenderer::renderBoundingBox(const BoVector3Float& c1, const BoVe
  glEnd();
 }
 
-void BosonCanvasRenderer::createRenderItemList(BoItemList* renderItemList, const BoItemList* allItems)
+void BosonCanvasRenderer::createRenderItemList(QValueVector<BoRenderItem>* renderItemList, const BoItemList* allItems)
 {
  BO_CHECK_NULL_RET(viewFrustum());
  BO_CHECK_NULL_RET(localPlayerIO());
+
  renderItemList->clear();
+ renderItemList->reserve(allItems->count());
+
  BoItemList::const_iterator it = allItems->begin();
  for (; it != allItems->end(); ++it) {
 	BosonItem* item = *it;
@@ -645,7 +655,7 @@ void BosonCanvasRenderer::createRenderItemList(BoItemList* renderItemList, const
 
 	bool visible = localPlayerIO()->canSee(item);
 	if (visible) {
-		renderItemList->append(*it);
+		renderItemList->append(BoRenderItem(item->getModelForItem()->id(), item));
 	}
  }
 }
@@ -663,21 +673,55 @@ void BosonCanvasRenderer::renderItems(const BoItemList* allCanvasItems)
 	glEnable(GL_NORMALIZE);
  }
 
- createRenderItemList(d->mRenderItemList, allCanvasItems); // AB: this is very fast. < 1.5ms on experimental5 for me
+ createRenderItemList(&d->mRenderItemList, allCanvasItems); // AB: this is very fast. < 1.5ms on experimental5 for me
+
+
+ unsigned int itemcount = d->mRenderItemList.count();
+
+ {
+	// Sort the list of to-be-rendered items by their models, so that items with
+	//  same models are rendered after each other. This increases rendering
+	//  performance (especially with vbos).
+	// We use radix sort, which is (much) faster than quicksort with many items.
+	// Radix sort
+	unsigned int m = 1;
+	unsigned int maxM = BosonModel::maxId();
+	unsigned int k;
+	BoRenderItem* helperlist = new BoRenderItem[itemcount];
+	while (m <= maxM) {
+		k = 0;
+		for (unsigned int i = 0; i < itemcount; i++) {
+			if((d->mRenderItemList[i].modelId & m) == 0) {
+				helperlist[k++] = d->mRenderItemList[i];
+			}
+		}
+		for(unsigned int i = 0; i < itemcount; i++) {
+			if((d->mRenderItemList[i].modelId & m) == m) {
+				helperlist[k++] = d->mRenderItemList[i];
+			}
+		}
+		for(unsigned int i = 0; i < itemcount; i++) {
+			d->mRenderItemList[i] = helperlist[i];
+		}
+		m *= 2;
+	}
+ }
 
  bool useLOD = boConfig->boolValue("UseLOD");
 
  if (Bo3dTools::checkError()) {
 	boError() << k_funcinfo << "OpenGL error before rendering items" << endl;
  }
- BoItemList::Iterator it = d->mRenderItemList->begin();
- for (; it != d->mRenderItemList->end(); ++it) {
-	BosonItem* item = *it;
 
-	// FIXME: can't we use BoVector3 and it's conversion methods here?
-	GLfloat x = (item->x() + item->width() / 2);
-	GLfloat y = -((item->y() + item->height() / 2));
-	GLfloat z = item->z(); // this is already in the correct format!
+ // Model that is being used currently
+ BosonModel* currentmodel = 0;
+ // Render all items
+ for (unsigned int i = 0; i < itemcount; i++) {
+	BosonItem* item = d->mRenderItemList[i].item;
+
+	GLfloat x = item->centerX();
+	GLfloat y = -item->centerY();
+	GLfloat z = item->z();
 
 	// AB: note units are rendered in the *center* point of their
 	// width/height.
@@ -707,6 +751,11 @@ void BosonCanvasRenderer::renderItems(const BoItemList* allCanvasItems)
 		float dist = (camera()->cameraPos() - BoVector3Float(x, y, z)).length();
 		lod = item->preferredLod(dist);
 	}
+	// If this item has different model then change current model
+	if (item->getModelForItem() != currentmodel) {
+		currentmodel = item->getModelForItem();
+		currentmodel->prepareRendering();
+	}
 	item->renderItem(lod);
 	glColor3ub(255, 255, 255);
 	glPopMatrix();
@@ -720,7 +769,7 @@ void BosonCanvasRenderer::renderItems(const BoItemList* allCanvasItems)
  }
 
  BoItemList* selectedItems = new BoItemList(0, false);
- createSelectionsList(selectedItems, d->mRenderItemList);
+ createSelectionsList(selectedItems, &d->mRenderItemList);
  renderSelections(selectedItems);
  delete selectedItems;
  selectedItems = 0;
@@ -729,8 +778,8 @@ void BosonCanvasRenderer::renderItems(const BoItemList* allCanvasItems)
  }
 
  boTextureManager->invalidateCache();
- d->mRenderedItems += d->mRenderItemList->count();
- d->mRenderItemList->clear();
+ d->mRenderedItems += d->mRenderItemList.count();
+ d->mRenderItemList.clear();
 
  BosonItemRenderer::stopItemRendering();
  if (boConfig->boolValue("debug_wireframes")) {
@@ -738,12 +787,12 @@ void BosonCanvasRenderer::renderItems(const BoItemList* allCanvasItems)
  }
 }
 
-void BosonCanvasRenderer::createSelectionsList(BoItemList* selectedItems, const BoItemList* items)
+void BosonCanvasRenderer::createSelectionsList(BoItemList* selectedItems, const QValueVector<BoRenderItem>* items)
 {
  selectedItems->clear();
- BoItemList::const_iterator it = items->begin();
- for (; it != d->mRenderItemList->end(); ++it) {
-	BosonItem* item = *it;
+ unsigned int itemcount = d->mRenderItemList.count();
+ for (unsigned int i = 0; i < itemcount; i++) {
+	BosonItem* item = d->mRenderItemList[i].item;
 	if (item->isSelected()) {
 		selectedItems->append(item);
 	}
@@ -3273,9 +3322,9 @@ QByteArray BosonBigDisplayBase::grabMovieFrame()
 		owner2Items.insert(p->id(), items);
 	}
 
-	BoItemList::Iterator it;
-	for (it = d->mRenderItemList->begin(); it != d->mRenderItemList->end(); ++it) {
-		BosonItem* i = *it;
+	unsigned int itemcount = d->mRenderItemList.count();
+	for (unsigned int j = 0; j < itemcount; j++) {
+		BosonItem* i = d->mRenderItemList[j];
 		QDomElement items;
 		if (RTTI::isShot(i->rtti())) {
 			BosonShot* s = (BosonShot*)i;
