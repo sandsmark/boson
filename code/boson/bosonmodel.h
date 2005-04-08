@@ -172,6 +172,9 @@ public:
 	BosonModel(const QString& dir, const QString& file);
 	~BosonModel();
 
+	unsigned int id() const;
+	static unsigned int maxId();
+
 #if 0
 	/**
 	 * @return The width of the model in the OpenGL coordinate system. This
