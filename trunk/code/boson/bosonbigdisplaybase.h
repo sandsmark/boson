@@ -45,11 +45,13 @@ class BosonMap;
 class BosonEffect;
 class BoSpecificAction;
 class BoGLMatrices;
+class BoRenderItem;
 
 class KGameChat;
 class KGameIO;
 class QDomElement;
 template<class T> class QPtrList;
+template<class T> class QValueVector;
 
 class BosonCanvasRendererPrivate;
 /**
@@ -99,8 +101,8 @@ protected:
 	void renderParticles(BoVisibleEffects&);
 	void renderBulletTrailEffects(BoVisibleEffects& visible);
 	void renderFadeEffects(BoVisibleEffects& visible);
-	void createRenderItemList(BoItemList* renderItemList, const BoItemList* allItems);
-	void createSelectionsList(BoItemList* selections, const BoItemList* relevantItems);
+	void createRenderItemList(QValueVector<BoRenderItem>* renderItemList, const BoItemList* allItems);
+	void createSelectionsList(BoItemList* selections, const QValueVector<BoRenderItem>* relevantItems);
 	void createVisibleEffectsList(BoVisibleEffects*, const QPtrList<BosonEffect>& allEffects, unsigned int mapWidth, unsigned int mapHeight);
 
 	void renderBoundingBox(const BosonItem* item);
