@@ -1,4 +1,4 @@
-AC_DEFUN(AC_BOSON_HAVE_OGG,
+AC_DEFUN([AC_BOSON_HAVE_OGG],
 [
 VORBISLIBS=""
 AC_MSG_CHECKING(for ogg/vorbis headers)
@@ -22,7 +22,7 @@ dnl TODO we should check that OpenAL actually supports .ogg and .mp3 files
 AC_BOSON_HAVE_OGG
 
 
-AC_DEFUN(AC_BOSON_HAVE_OPENAL,
+AC_DEFUN([AC_BOSON_HAVE_OPENAL],
 [
 AC_ARG_ENABLE(
   openal,
