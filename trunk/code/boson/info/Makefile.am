@@ -9,3 +9,6 @@ libbosoninfo_la_SOURCES = \
 	boinfo_x11.cpp \
 	boinfodialog.cpp \
 	boglquerystates.cpp
+
+libbosoninfo_la_LIBADD = \
+	$(top_builddir)/bogl/libbogl.la
