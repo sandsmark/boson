@@ -194,7 +194,6 @@ public slots:
 	{
 		mWireFrame = on;
 	}
-	void slotConstructionChanged(bool on);
 	void slotRenderAxisChanged(bool on)
 	{
 		mRenderAxis = on;
@@ -252,7 +251,6 @@ protected:
 	}
 
 	void setModel(BosonModel*);
-	BoFrame* frame(unsigned int f) const;
 
 	void updateCamera(const BoVector3Float& cameraPos, const BoQuaternion& q);
 	void updateCamera(const BoVector3Float& cameraPos, const BoMatrix& rotationMatrix);
@@ -304,7 +302,6 @@ private:
 	bool mPlacementPreview;
 	bool mDisallowPlacement;
 	bool mWireFrame;
-	bool mConstruction;
 	bool mRenderAxis;
 	bool mRenderGrid;
 

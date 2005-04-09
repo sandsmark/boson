@@ -160,7 +160,6 @@ ModelPreview::ModelPreview(const QPtrList<SpeciesTheme>& species, QWidget* paren
  mPlacementPreview = false;
  mDisallowPlacement = false;
  mWireFrame = false;
- mConstruction = false;
  mRenderAxis = false;
  mRenderGrid = false;
 
@@ -305,7 +304,6 @@ void ModelPreview::initUfoGUI()
  placementWidget->addWidget(placement);
  placementWidget->addWidget(disallowPlacement);
  BoUfoCheckBox* wireframe = new BoUfoCheckBox(i18n("Show wireframe"));
- BoUfoCheckBox* construction = new BoUfoCheckBox(i18n("Show construction"));
  BoUfoCheckBox* axis = new BoUfoCheckBox(i18n("Render axis"));
  BoUfoCheckBox* grid = new BoUfoCheckBox(i18n("Render grid"));
  BoUfoCheckBox* light = new BoUfoCheckBox(i18n("Enable Light"), boConfig->boolValue("UseLight"));
@@ -313,7 +311,6 @@ void ModelPreview::initUfoGUI()
  connect(placement, SIGNAL(signalToggled(bool)), this, SLOT(slotPlacementPreviewChanged(bool)));
  connect(disallowPlacement, SIGNAL(signalToggled(bool)), this, SLOT(slotDisallowPlacementChanged(bool)));
  connect(wireframe, SIGNAL(signalToggled(bool)), this, SLOT(slotWireFrameChanged(bool)));
- connect(construction, SIGNAL(signalToggled(bool)), this, SLOT(slotConstructionChanged(bool)));
  connect(axis, SIGNAL(signalToggled(bool)), this, SLOT(slotRenderAxisChanged(bool)));
  connect(grid, SIGNAL(signalToggled(bool)), this, SLOT(slotRenderGridChanged(bool)));
  connect(light, SIGNAL(signalToggled(bool)), this, SLOT(slotEnableLight(bool)));
@@ -336,14 +333,13 @@ void ModelPreview::initUfoGUI()
  topWidget->addWidget(mSelectedMeshLabel);
 
  topWidget->addWidget(fovy);
- topWidget->addWidget(frame);
  topWidget->addWidget(lod);
+ topWidget->addWidget(frame);
  topWidget->addSpacing(10);
  topWidget->addWidget(hideWidget);
  topWidget->addSpacing(10);
  topWidget->addWidget(placementWidget);
  topWidget->addWidget(wireframe);
- topWidget->addWidget(construction);
  topWidget->addWidget(axis);
  topWidget->addWidget(grid);
  topWidget->addWidget(light);
@@ -515,6 +511,8 @@ void ModelPreview::paintGL()
  renderText();
 
  if (ufoManager()) {
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	ufoManager()->dispatchEvents();
 	glEnable(GL_BLEND);
 	ufoManager()->render();
@@ -599,8 +597,9 @@ void ModelPreview::renderModel(int mode)
 // glEnable(GL_CULL_FACE);
 // glCullFace(GL_BACK);
 
- if (mModel && mCurrentFrame >= 0) {
-	BoFrame* f = frame(mCurrentFrame);
+ if (mModel && mCurrentLOD >= 0) {
+	BoLOD* lod = mModel->lod(mCurrentLOD);
+	BoFrame* f = lod->frame(mCurrentFrame);
 	if (f) {
 		if (mPlacementPreview) {
 			glEnable(GL_BLEND);
@@ -624,7 +623,7 @@ void ModelPreview::renderModel(int mode)
 		}
 		BosonModel::startModelRendering();
 		mModel->prepareRendering();
-		f->renderFrame(0, mCurrentLOD, mode);
+		f->renderFrame(0, mode);
 		BosonModel::stopModelRendering();
 		if (mPlacementPreview) {
 			// AB: do not reset the actual color - if it will get
@@ -644,6 +643,8 @@ void ModelPreview::renderModel(int mode)
 
 void ModelPreview::renderGrid()
 {
+#warning FIXME!!!
+#if 0
  glPushAttrib(GL_ENABLE_BIT);
  glDisable(GL_TEXTURE_2D);
  glEnable(GL_DEPTH_TEST);
@@ -678,7 +679,7 @@ void ModelPreview::renderGrid()
 
  glColor3ub(255, 255, 255);
  glPopAttrib();
-
+#endif
 }
 
 void ModelPreview::renderMeshSelection()
@@ -689,20 +690,23 @@ void ModelPreview::renderMeshSelection()
  if (mSelectedMesh < 0) {
 	return;
  }
- if (mCurrentFrame < 0) {
+ if (mCurrentLOD < 0 || mCurrentFrame < 0) {
 	return;
  }
- if ((unsigned int)mCurrentFrame >= mModel->frames()) {
+ if ((unsigned int)mCurrentLOD >= mModel->lodCount()) {
 	return;
  }
- BoMesh* mesh = 0;
- BoFrame* f = frame(mCurrentFrame);
- if ((unsigned int)mSelectedMesh >= f->meshCount()) {
-	f = 0;
-	mesh = 0;
- } else {
-	mesh = f->mesh(mSelectedMesh);
+
+ BoLOD* lod = mModel->lod(mCurrentLOD);
+ if ((unsigned int)mCurrentFrame >= lod->frameCount()) {
+	return;
  }
+
+ BoFrame* f = lod->frame(mCurrentFrame);
+ if ((unsigned int)mSelectedMesh >= f->nodeCount()) {
+	return;
+ }
+ BoMesh* mesh = f->mesh(mSelectedMesh);
  if (!mesh) {
 	return;
  }
@@ -710,6 +714,7 @@ void ModelPreview::renderMeshSelection()
  if (!matrix) {
 	return;
  }
+
  glPushAttrib(GL_POLYGON_BIT | GL_ENABLE_BIT | GL_CURRENT_BIT);
  glPushMatrix();
  glMultMatrixf(matrix->data());
@@ -717,7 +722,8 @@ void ModelPreview::renderMeshSelection()
  glColor3ub(0, 255, 0);
  glDisable(GL_TEXTURE_2D);
  glDisable(GL_LIGHTING);
- mesh->renderBoundingObject();
+#warning FIXME!!!
+ //mesh->renderBoundingObject();
  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
  if (boConfig->boolValue("ShowVertexPoints")) {
@@ -725,7 +731,7 @@ void ModelPreview::renderMeshSelection()
 	float size = (float)boConfig->uintValue("VertexPointSize", 3);
 	glPointSize(size);
 	glDisable(GL_DEPTH_TEST);
-	mesh->renderVertexPoints();
+	mesh->renderVertexPoints(mModel);
  }
 
  glPopMatrix();
@@ -735,20 +741,6 @@ void ModelPreview::renderMeshSelection()
 
 void ModelPreview::renderText()
 {
-}
-
-BoFrame* ModelPreview::frame(unsigned int f) const
-{
- if (!haveModel()) {
-	return 0;
- }
- BoFrame* frame = 0;
- if (mConstruction) {
-	frame = mModel->constructionStep(f);
- } else {
-	frame = mModel->frame(f);
- }
- return frame;
 }
 
 void ModelPreview::load(SpeciesTheme* s, const UnitProperties* prop)
@@ -786,10 +778,15 @@ void ModelPreview::setModel(BosonModel* model)
 {
  mModel = model;
  if (mModel) {
-	emit signalMaxFramesChanged((int)(mModel->frames() - 1));
-	emit signalMaxFramesChanged((float)(mModel->frames() - 1));
-	emit signalMaxLODChanged((int)(mModel->lodCount() - 1));
-	emit signalMaxLODChanged((float)(mModel->lodCount() - 1));
+	unsigned int lodcount = mModel->lodCount();
+	emit signalMaxLODChanged((int)(lodcount - 1));
+	emit signalMaxLODChanged((float)(lodcount - 1));
+	if ((unsigned int)mCurrentLOD >= lodcount) {
+		mCurrentLOD = lodcount - 1;
+	}
+	unsigned int framecount = mModel->lod(mCurrentLOD)->frameCount();
+	emit signalMaxFramesChanged((int)(framecount - 1));
+	emit signalMaxFramesChanged((float)(framecount - 1));
  }
 }
 
@@ -1002,23 +999,6 @@ void ModelPreview::slotSetGridUnitSize(float size)
  boConfig->setDoubleValue("GridUnitSize", size);
 }
 
-void ModelPreview::slotConstructionChanged(bool on)
-{
- mConstruction = on;
- int max = 0;
- if (mModel) {
-	if (mConstruction) {
-		max = mModel->constructionSteps() - 1;
-	} else {
-		max = mModel->frames() - 1;
-	}
- }
- max = QMAX(0, max);
- boDebug() << k_funcinfo << max << endl;
- emit signalMaxFramesChanged((int)max);
- emit signalMaxFramesChanged((float)max);
-}
-
 void ModelPreview::uncheckAllBut(BoUfoAction* action)
 {
  if (!action || !action->isA("BoUfoSelectAction")) {
@@ -1194,12 +1174,13 @@ void ModelPreview::updateMeshUnderMouseLabel()
  BO_CHECK_NULL_RET(mSelectedMeshLabel);
  QString meshUnderCursor;
  QString selectedMeshText;
+ BoMesh* mesh = 0;
  if (mMeshUnderMouse >= 0) {
-	BoMesh* mesh = 0;
-	if (mModel && mCurrentFrame >= 0) {
-		BoFrame* f = frame(mCurrentFrame);
+	if (mModel && mCurrentLOD >= 0 && mCurrentFrame >= 0) {
+		BoLOD* lod = mModel->lod(mCurrentLOD);
+		BoFrame* f = lod->frame(mCurrentFrame);
 		if (f) {
-			if ((unsigned int)mMeshUnderMouse >= f->meshCount()) {
+			if ((unsigned int)mMeshUnderMouse >= f->nodeCount()) {
 				f = 0;
 			} else {
 				mesh = f->mesh(mMeshUnderMouse);
@@ -1214,13 +1195,6 @@ void ModelPreview::updateMeshUnderMouseLabel()
 	meshUnderCursor = i18n("(no mesh under cursor)");
  }
  if (mSelectedMesh >= 0) {
-	BoMesh* mesh = 0;
-	if (mModel && mCurrentFrame >= 0) {
-		BoFrame* f = frame(mCurrentFrame);
-		if ((unsigned int)mSelectedMesh < f->meshCount()) {
-			mesh = f->mesh(mSelectedMesh);
-		}
-	}
 	if (mesh) {
 		QString name = mesh->name();
 		QString material;
@@ -1231,7 +1205,7 @@ void ModelPreview::updateMeshUnderMouseLabel()
 		}
 		selectedMeshText = i18n("Selected mesh: %1 points: %2 material: %3")
 				.arg(name)
-				.arg(mesh->points())
+				.arg(mesh->pointCount())
 				.arg(material);
 	}
  }
@@ -1255,11 +1229,12 @@ void ModelPreview::updateCursorDisplay(const QPoint& pos)
  if (picked < 0) {
 	return;
  }
- BoFrame* f = frame(mCurrentFrame);
+ BoLOD* lod = mModel->lod(mCurrentLOD);
+ BoFrame* f = lod->frame(mCurrentFrame);
  if (!f) {
 	return;
  }
- if ((unsigned int)picked >= f->meshCount()) {
+ if ((unsigned int)picked >= f->nodeCount()) {
 	boError() << k_funcinfo << "invalid mesh number: " << picked << endl;
 	return;
  }
@@ -1269,11 +1244,11 @@ void ModelPreview::updateCursorDisplay(const QPoint& pos)
 
 int ModelPreview::pickObject(const QPoint& cursor)
 {
- BoFrame* f = 0;
  if (!haveModel()) {
 	return -1;
  }
- f = frame(mCurrentFrame);
+ BoLOD* lod = mModel->lod(mCurrentLOD);
+ BoFrame* f = lod->frame(mCurrentFrame);
  if (!f) {
 	return -1;
  }
@@ -1331,7 +1306,7 @@ int ModelPreview::pickObject(const QPoint& cursor)
 	}
 	unsigned int name = buffer[pos];
 	BoMesh* m = 0;
-	if (name < f->meshCount()) {
+	if (name < f->nodeCount()) {
 		m = f->mesh(name);
 	}
 	if (m) {
@@ -1488,12 +1463,7 @@ void ModelPreview::slotFrameChanged(int f)
 		emit signalFrameChanged((float)0.0f);
 		return;
 	}
-	int frames = 0;
-	if (mConstruction) {
-		frames = mModel->constructionSteps();
-	} else {
-		frames = mModel->frames();
-	}
+	int frames = mModel->lod(mCurrentLOD)->frameCount();
 	if (f >= frames) {
 		emit signalFrameChanged((int)(frames - 1));
 		emit signalFrameChanged((float)(frames - 1));
@@ -1511,7 +1481,7 @@ void ModelPreview::slotLODChanged(int l)
 		emit signalLODChanged((float)0.0f);
 		return;
 	}
-	if ((unsigned int)l + 1 > mModel->lodCount()) {
+	if ((unsigned int)l >= mModel->lodCount()) {
 		emit signalLODChanged((int)(mModel->lodCount() - 1));
 		emit signalLODChanged((float)(mModel->lodCount() - 1));
 		return;
@@ -1542,13 +1512,16 @@ void ModelPreview::updateCamera(const BoVector3Float& cameraPos, const BoVector3
 
 void ModelPreview::hideMesh(unsigned int mesh, bool hide)
 {
+#warning FIXME!!! Do we even need this?
+#if 0
  if (!haveModel()) {
 	return;
  }
- for (unsigned int i = 0; i < mModel->frames(); i++) {
-	BoFrame* f = mModel->frame(i);
-	if (mesh >= f->meshCount()) {
-		boWarning() << k_funcinfo << "mesh does not exist: " << mesh << " meshes in frame: " << f->meshCount() << endl;
+ BoLOD* l = mModel->lod(mCurrentLOD);
+ for (unsigned int i = 0; i < lod->frameCount(); i++) {
+	BoFrame* f = lod->frame(i);
+	if (mesh >= f->nodeCount()) {
+		boWarning() << k_funcinfo << "mesh does not exist: " << mesh << " meshes in frame: " << f->nodeCount() << endl;
 		return;
 	}
 	if (!f) {
@@ -1560,6 +1533,7 @@ void ModelPreview::hideMesh(unsigned int mesh, bool hide)
  if (isSelected(mesh)) {
 	selectMesh(-1);
  }
+#endif
 }
 
 bool ModelPreview::isSelected(unsigned int mesh) const
@@ -1576,6 +1550,7 @@ bool ModelPreview::isSelected(unsigned int mesh) const
 
 void ModelPreview::slotHideSelectedMesh()
 {
+#if 0
  if (!haveModel()) {
 	return;
  }
@@ -1583,10 +1558,12 @@ void ModelPreview::slotHideSelectedMesh()
 	return;
  }
  hideMesh((unsigned int)mSelectedMesh);
+#endif
 }
 
 void ModelPreview::slotHideUnSelectedMeshes()
 {
+#if 0
  if (!haveModel()) {
 	return;
  }
@@ -1604,10 +1581,12 @@ void ModelPreview::slotHideUnSelectedMeshes()
 	}
 	hideMesh(i);
  }
+#endif
 }
 
 void ModelPreview::slotUnHideAllMeshes()
 {
+#if 0
  boDebug() << k_funcinfo << endl;
  if (!haveModel()) {
 	return;
@@ -1620,6 +1599,7 @@ void ModelPreview::slotUnHideAllMeshes()
  for (unsigned int i = 0; i < f->meshCount(); i++) {
 	hideMesh(i, false);
  }
+#endif
 }
 
 void ModelPreview::slotEnableLight(bool e)
