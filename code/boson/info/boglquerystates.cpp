@@ -148,6 +148,7 @@ public:
         ADD(GL_MAX_PROJECTION_STACK_DEPTH, "GL_MAX_PROJECTION_STACK_DEPTH");
         ADD(GL_MAX_TEXTURE_SIZE, "GL_MAX_TEXTURE_SIZE");
         ADD(GL_MAX_TEXTURE_STACK_DEPTH, "GL_MAX_TEXTURE_STACK_DEPTH");
+        ADD(GL_MAX_TEXTURE_UNITS, "GL_MAX_TEXTURE_UNITS");
         ADD(GL_MAX_VIEWPORT_DIMS, "GL_MAX_VIEWPORT_DIMS");
         ADD(GL_RED_BITS, "GL_RED_BITS");
         ADD(GL_RGBA_MODE, "GL_RGBA_MODE");
@@ -158,8 +159,6 @@ public:
         ADD(GL_STENCIL_BITS, "GL_STENCIL_BITS");
         ADD(GL_STEREO, "GL_STEREO");
         ADD(GL_SUBPIXEL_BITS, "GL_SUBPIXEL_BITS");
-        // ARB
-        ADD(GL_MAX_TEXTURE_UNITS_ARB, "GL_MAX_TEXTURE_UNITS_ARB");
 #undef ADD
     }
 
@@ -195,6 +194,7 @@ public:
         UPDATE(GL_MAX_PROJECTION_STACK_DEPTH);
         UPDATE(GL_MAX_TEXTURE_SIZE);
         UPDATE(GL_MAX_TEXTURE_STACK_DEPTH);
+        UPDATE(GL_MAX_TEXTURE_UNITS);
         UPDATE(GL_MAX_VIEWPORT_DIMS);
         UPDATE(GL_RED_BITS);
         UPDATE(GL_RGBA_MODE);
@@ -205,8 +205,6 @@ public:
         UPDATE(GL_STENCIL_BITS);
         UPDATE(GL_STEREO);
         UPDATE(GL_SUBPIXEL_BITS);
-        // ARB
-        UPDATE(GL_MAX_TEXTURE_UNITS_ARB);
 #undef UPDATE
     }
     QStringList list() const
@@ -253,6 +251,7 @@ public:
     BO_VAR(GLint, GL_MAX_PROJECTION_STACK_DEPTH, 1)
     BO_VAR(GLint, GL_MAX_TEXTURE_SIZE, 1)
     BO_VAR(GLint, GL_MAX_TEXTURE_STACK_DEPTH, 1)
+    BO_VAR(GLint, GL_MAX_TEXTURE_UNITS, 1)
     BO_VAR(GLint, GL_MAX_VIEWPORT_DIMS, 1)
     BO_VAR(GLint, GL_RED_BITS, 1)
     BO_VAR(GLint, GL_RGBA_MODE, 1)
@@ -263,9 +262,6 @@ public:
     BO_VAR(GLint, GL_STENCIL_BITS, 1)
     BO_VAR(GLint, GL_STEREO, 1)
     BO_VAR(GLint, GL_SUBPIXEL_BITS, 1)
-
-    // ARB
-    BO_VAR(GLint, GL_MAX_TEXTURE_UNITS_ARB, 1)
 
 private:
     QMap<int, QString> mNameDict;
@@ -364,6 +360,7 @@ public:
 
 #define ADD(a, b) g_nameDict.insert(a, b); mNameDict.insert(a, b);
         ADD(GL_ACCUM_CLEAR_VALUE, "GL_ACCUM_CLEAR_VALUE");
+        ADD(GL_ACTIVE_TEXTURE, "GL_ACTIVE_TEXTURE");
         ADD(GL_ALPHA_BIAS, "GL_ALPHA_BIAS");
         ADD(GL_ALPHA_SCALE, "GL_ALPHA_SCALE");
         ADD(GL_ALPHA_TEST, "GL_ALPHA_TEST");
@@ -380,6 +377,7 @@ public:
         ADD(GL_BLUE_BIAS, "GL_BLUE_BIAS");
         ADD(GL_BLUE_SCALE, "GL_BLUE_SCALE");
 
+        ADD(GL_CLIENT_ACTIVE_TEXTURE, "GL_CLIENT_ACTIVE_TEXTURE");
         ADD(GL_CLIENT_ATTRIB_STACK_DEPTH, "GL_CLIENT_ATTRIB_STACK_DEPTH");
         ADD(GL_COLOR_ARRAY, "GL_COLOR_ARRAY");
         ADD(GL_COLOR_ARRAY_POINTER, "GL_COLOR_ARRAY_POINTER"); // pointer
@@ -606,10 +604,6 @@ public:
         // TODO: GL_LIGHT_i
         // TODO: GL_CLIP_PLANE_i
 
-
-        // ARB
-        ADD(GL_ACTIVE_TEXTURE_ARB, "GL_ACTIVE_TEXTURE_ARB");
-        ADD(GL_CLIENT_ACTIVE_TEXTURE_ARB, "GL_CLIENT_ACTIVE_TEXTURE_ARB");
 #undef ADD
 
     }
@@ -624,6 +618,7 @@ public:
         // FIXME: AB: is sizeof(array) == arrayizse portable?
 #define BO_UPDATE(x) mValues.insert((int)x, GLGetValue::get(x, m_##x, sizeof(m_##x) / sizeof(m_##x[0])));
         BO_UPDATE(GL_ACCUM_CLEAR_VALUE);
+        BO_UPDATE(GL_ACTIVE_TEXTURE);
         BO_UPDATE(GL_ALPHA_BIAS);
         BO_UPDATE(GL_ALPHA_SCALE);
         BO_UPDATE(GL_ALPHA_TEST);
@@ -640,6 +635,7 @@ public:
         BO_UPDATE(GL_BLUE_BIAS);
         BO_UPDATE(GL_BLUE_SCALE);
 
+        BO_UPDATE(GL_CLIENT_ACTIVE_TEXTURE);
         BO_UPDATE(GL_CLIENT_ATTRIB_STACK_DEPTH);
         BO_UPDATE(GL_COLOR_ARRAY);
         BO_UPDATE(GL_COLOR_ARRAY_POINTER); // pointer
@@ -866,9 +862,6 @@ public:
         // TODO: GL_CLIP_PLANE_i
         // TODO: GL_LIGHT_i
 
-        // ARB
-        BO_UPDATE(GL_ACTIVE_TEXTURE_ARB);
-        BO_UPDATE(GL_CLIENT_ACTIVE_TEXTURE_ARB);
 #undef BO_UPDATE
 
 
@@ -968,6 +961,7 @@ public:
     }
 
     BO_VAR(GLint,     GL_ACCUM_CLEAR_VALUE, 1)
+    BO_VAR(GLint,     GL_ACTIVE_TEXTURE, 1)
     BO_VAR(GLfloat,   GL_ALPHA_BIAS, 1)
     BO_VAR(GLfloat,   GL_ALPHA_SCALE, 1)
     BO_VAR(BOboolean, GL_ALPHA_TEST, 1)
@@ -984,6 +978,7 @@ public:
     BO_VAR(GLfloat,   GL_BLUE_BIAS, 1)
     BO_VAR(GLfloat,   GL_BLUE_SCALE, 1)
 
+    BO_VAR(GLint,     GL_CLIENT_ACTIVE_TEXTURE, 1)
     BO_VAR(GLint,     GL_CLIENT_ATTRIB_STACK_DEPTH, 1)
     BO_VAR(BOboolean, GL_COLOR_ARRAY, 1)
     BO_VAR(void*,     GL_COLOR_ARRAY_POINTER, 1)
@@ -1211,11 +1206,6 @@ public:
     bool mLight_i; // FIXME: i is implementation dependant (at least 8 - see GL_MAX_LIGHTS)
     int mPixelMap_x_Size; // FIXME what is x?
 
-
-
-    // ARB
-    BO_VAR(GLint,     GL_ACTIVE_TEXTURE_ARB, 1)
-    BO_VAR(GLint,     GL_CLIENT_ACTIVE_TEXTURE_ARB, 1)
 
 
     // values outside of glGet()...
