@@ -555,7 +555,15 @@ bool PythonScript::save(QDataStream& stream)
   PyObject* savedmodule = saveModule(mMainModule);
 
   // Save all items in savedict
+#ifdef Py_MARSHAL_VERSION
+  // Py_MARSHAL_VERSION is a macro that tells the version of marshal.c (Python >= 2.4)
+  // Note that we use version 0 here to keep compatibility with savegames saved
+  //  with older python version
+  PyObject* data = PyMarshal_WriteObjectToString(savedmodule, 0);
+#else
+  // Python < 2.4 does not have Py_MARSHAL_VERSION
   PyObject* data = PyMarshal_WriteObjectToString(savedmodule);
+#endif
   if(!data)
   {
     boError() << k_funcinfo << "null data!" << endl;
