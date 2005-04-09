@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2003-2004 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2003-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -113,13 +113,9 @@ protected:
 		QPtrList<BosonModel> models = allModels();
 		QPtrListIterator<BosonModel> modelIt(models);
 		for (; modelIt.current(); ++modelIt) {
-			QIntDict<BoMesh> allMeshes = modelIt.current()->allMeshes();
-			QIntDictIterator<BoMesh> meshIt(allMeshes);
-			for (; meshIt.current(); ++meshIt) {
-				meshes.append(meshIt.current());
-				if (meshIt.current()->points() == 0) {
-					boWarning() << k_funcinfo << "0 points in mesh from model " << modelIt.current()->file() << endl;
-				}
+			BoLOD* lod = modelIt.current()->lod(0);
+			for (unsigned int i = 0; i < lod->meshCount(); i++) {
+				meshes.append(lod->mesh(i));
 			}
 		}
 		return meshes;
@@ -139,12 +135,13 @@ protected:
 		QPtrList<BosonModel> models = allModels();
 		QPtrListIterator<BosonModel> it(models);
 		for (; it.current(); ++it) {
-			*all += it.current()->meshCount();
-			if (it.current()->meshCount() > *max) {
-				*max = it.current()->meshCount();
+			unsigned int meshCount = it.current()->lod(0)->meshCount();
+			*all += meshCount;
+			if (meshCount > *max) {
+				*max = meshCount;
 			}
-			if (it.current()->meshCount() < *min || it.current() == models.getFirst()) {
-				*min = it.current()->meshCount();
+			if (meshCount < *min || it.current() == models.getFirst()) {
+				*min = meshCount;
 			}
 		}
 	}
@@ -165,12 +162,13 @@ protected:
 		QPtrListIterator<BosonModel> it(models);
 		for (; it.current(); ++it) {
 			BosonModel* m = it.current();
-			*all += (m->frames() + m->constructionSteps());
-			if ((m->frames() + m->constructionSteps()) > *max) {
-				*max = (m->frames() + m->constructionSteps());
+			unsigned int frameCount = m->lod(0)->frameCount();
+			*all += frameCount;
+			if (frameCount > *max) {
+				*max = frameCount;
 			}
-			if ((m->frames() + m->constructionSteps()) < *min || m == models.getFirst()) {
-				*min = (m->frames() + m->constructionSteps());
+			if (frameCount < *min || m == models.getFirst()) {
+				*min = frameCount;
 			}
 		}
 	}
@@ -190,36 +188,12 @@ protected:
 		QPtrListIterator<BoMesh> it(meshes);
 		for (; it.current(); ++it) {
 			BoMesh* mesh = it.current();
-			*all += mesh->points();
-			if (mesh->points() > *max) {
-				*max = mesh->points();
+			*all += mesh->pointCount();
+			if (mesh->pointCount() > *max) {
+				*max = mesh->pointCount();
 			}
-			if (mesh->points() < *min || mesh == meshes.getFirst()) {
-				*min = mesh->points();
-			}
-		}
-	}
-	void countNodes(unsigned int* all, unsigned int* min, unsigned int* max)
-	{
-		if (!all || !min || !max) {
-			return;
-		}
-		*all = 0;
-		*min = 0;
-		*max = 0;
-		if (!mSpecies) {
-			return;
-		}
-		QPtrList<BoMesh> meshes = allMeshes();
-		QPtrListIterator<BoMesh> it(meshes);
-		for (; it.current(); ++it) {
-			BoMesh* mesh = it.current();
-			*all += mesh->facesCount(0);
-			if (mesh->facesCount(0) > *max) {
-				*max = mesh->facesCount(0);
-			}
-			if (mesh->facesCount(0) < *min || mesh == meshes.getFirst()) {
-				*min = mesh->facesCount(0);
+			if (mesh->pointCount() < *min || mesh == meshes.getFirst()) {
+				*min = mesh->pointCount();
 			}
 		}
 	}
@@ -232,7 +206,6 @@ private:
 	QLabel* mMeshCount;
 	QLabel* mFrameCount;
 	QLabel* mPointCount;
-	QLabel* mNodeCount;
 };
 
 BosonModelsView::BosonModelsView(QWidget* parent) : QWidget(parent, "bosonmodelsview")
@@ -276,16 +249,7 @@ BosonModelsView::BosonModelsView(QWidget* parent) : QWidget(parent, "bosonmodels
  mPointCount = new QLabel(this);
  hLayout->addWidget(pointCountLabel);
  hLayout->addWidget(mPointCount);
- QToolTip::add(mPointCount, i18n("These are the points of all (different!) meshes in all models summed up.\nRemember that a single mesh can be rendered several times, but the points are counted only once here!\nThis number can give you an impression on how much memory is used for the points of the meshes - every points takes 3 coordinates + 2 texture coordinates, each 4 bytes.\nSo multiply the number of points by 20 and you have the number of allocated bytes for this\n\nAlso remember that every point can be used several times (even among different meshes), but for every occurance in a mesh there is an additional index variable (4 bytes) in memory.\nSo add a small overhead to you calculated number."));
-
- hLayout = new QHBoxLayout(topLayout);
- QLabel* nodeCountLabel = new QLabel(i18n("Nodes (all / minimal per mesh / maximal per mesh): "), this);
- mNodeCount = new QLabel(this);
- hLayout->addWidget(nodeCountLabel);
- hLayout->addWidget(mNodeCount);
- QToolTip::add(mNodeCount, i18n("These are the nodes of all (different!) meshes in all models summed up.\nNodes are an internal representation of faces/triangles (3 points) - if a single face (i.e. 3 points) is rendered 10 times (e.g. in 10 different meshes) it will have 10 nodes.\n\nNote that if a single mesh appears 10 times in a model, then all nodes are counted only once (and it is only once in memory)."));
-
-
+ QToolTip::add(mPointCount, i18n("These are the points of all (different!) meshes in all models summed up.\nRemember that a single mesh can be rendered several times, but the points are counted only once here!\nThis number can give you an impression on how much memory is used for the points of the meshes - every points takes 3 coordinates + 3 normal coordinates + 2 texture coordinates, each 4 bytes.\nSo multiply the number of points by 32 and you have the number of allocated bytes for this\n\nAlso remember that every point can be used several times (even among different meshes), but for every occurance in a mesh there is an additional index variable (4 bytes) in memory.\nSo add a small overhead to you calculated number."));
 }
 
 void BosonModelsView::update()
@@ -311,13 +275,6 @@ void BosonModelsView::update()
  max = 0;
  countPoints(&all, &min, &max);
  mPointCount->setText(i18n("%1 / %2 / %3").arg(all).arg(min).arg(max));
-
- all = 0;
- min = 0;
- max = 0;
- countNodes(&all, &min, &max);
- mNodeCount->setText(i18n("%1 / %2 / %3").arg(all).arg(min).arg(max));
-
 }
 
 

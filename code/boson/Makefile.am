@@ -215,7 +215,7 @@ borender_LDFLAGS = $(KDE_RPATH) $(all_libraries) -Xlinker -export-dynamic
 borender_LDADD = \
 		$(top_builddir)/boson/libboson.la \
 		$(top_builddir)/boson/libborender.la \
-		$(LIB_BOMEMORY)
+		$(LIB_BOMEMORY) -l3ds
 borender_SOURCES = \
 		kgamespeciesdebug.cpp \
 		borendermain.cpp
