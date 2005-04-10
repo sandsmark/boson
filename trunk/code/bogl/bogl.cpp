@@ -45,6 +45,25 @@ _boglMapBuffer boglMapBuffer = 0;
 _boglUnmapBuffer boglUnmapBuffer = 0;
 // Textures
 _boglActiveTexture boglActiveTexture = 0;
+// Shaders
+_boglAttachShader boglAttachShader = 0;
+_boglCompileShader boglCompileShader = 0;
+_boglCreateProgram boglCreateProgram = 0;
+_boglCreateShader boglCreateShader = 0;
+_boglDeleteProgram boglDeleteProgram = 0;
+_boglDeleteShader boglDeleteShader = 0;
+_boglGetProgramInfoLog boglGetProgramInfoLog = 0;
+_boglGetProgramiv boglGetProgramiv = 0;
+_boglGetShaderInfoLog boglGetShaderInfoLog = 0;
+_boglGetShaderiv boglGetShaderiv = 0;
+_boglGetUniformLocation boglGetUniformLocation = 0;
+_boglLinkProgram boglLinkProgram = 0;
+_boglShaderSource boglShaderSource = 0;
+_boglUniform1f boglUniform1f = 0;
+_boglUniform1i boglUniform1i = 0;
+_boglUniform3fv boglUniform3fv = 0;
+_boglUniform4fv boglUniform4fv = 0;
+_boglUseProgram boglUseProgram = 0;
 
 
 void boglInit()
@@ -85,6 +104,30 @@ void boglInit()
     boglBufferData = (_boglBufferData)glXGetProcAddressARB((const GLubyte*)"glBufferDataARB");
     boglMapBuffer = (_boglMapBuffer)glXGetProcAddressARB((const GLubyte*)"glMapBufferARB");
     boglUnmapBuffer = (_boglUnmapBuffer)glXGetProcAddressARB((const GLubyte*)"glUnmapBufferARB");
+  }
+  // TODO: check for OpenGL 1.5
+
+  // Shaders
+  if(extensions.contains("GL_ARB_shader_objects"))
+  {
+    boglAttachShader = (_boglAttachShader)glXGetProcAddressARB((const GLubyte*)"glAttachObjectARB");
+    boglCompileShader = (_boglCompileShader)glXGetProcAddressARB((const GLubyte*)"glCompileShaderARB");
+    boglCreateProgram = (_boglCreateProgram)glXGetProcAddressARB((const GLubyte*)"glCreateProgramObjectARB");
+    boglCreateShader = (_boglCreateShader)glXGetProcAddressARB((const GLubyte*)"glCreateShaderObjectARB");
+    boglDeleteProgram = (_boglDeleteProgram)glXGetProcAddressARB((const GLubyte*)"glDeleteObjectARB");
+    boglDeleteShader = (_boglDeleteShader)glXGetProcAddressARB((const GLubyte*)"glDeleteObjectARB");
+    boglGetProgramInfoLog = (_boglGetProgramInfoLog)glXGetProcAddressARB((const GLubyte*)"glGetInfoLogARB");
+    boglGetProgramiv = (_boglGetProgramiv)glXGetProcAddressARB((const GLubyte*)"glGetObjectParameterivARB");
+    boglGetShaderInfoLog = (_boglGetShaderInfoLog)glXGetProcAddressARB((const GLubyte*)"glGetInfoLogARB");
+    boglGetShaderiv = (_boglGetShaderiv)glXGetProcAddressARB((const GLubyte*)"glGetObjectParameterivARB");
+    boglGetUniformLocation = (_boglGetUniformLocation)glXGetProcAddressARB((const GLubyte*)"glGetUniformLocationARB");
+    boglLinkProgram = (_boglLinkProgram)glXGetProcAddressARB((const GLubyte*)"glLinkProgramARB");
+    boglShaderSource = (_boglShaderSource)glXGetProcAddressARB((const GLubyte*)"glShaderSourceARB");
+    boglUniform1f = (_boglUniform1f)glXGetProcAddressARB((const GLubyte*)"glUniform1fARB");
+    boglUniform1i = (_boglUniform1i)glXGetProcAddressARB((const GLubyte*)"glUniform1iARB");
+    boglUniform3fv = (_boglUniform3fv)glXGetProcAddressARB((const GLubyte*)"glUniform3fvARB");
+    boglUniform4fv = (_boglUniform4fv)glXGetProcAddressARB((const GLubyte*)"glUniform4fvARB");
+    boglUseProgram = (_boglUseProgram)glXGetProcAddressARB((const GLubyte*)"glUseProgramObjectARB");
   }
   // TODO: check for OpenGL 2.0
 

@@ -74,7 +74,12 @@ QStringList boglGetGLUExtensions();
 
 // Typedefs
 // This type was added for vbo extension.
+// TODO: why do we use "ARB" here?
 typedef int GLsizeiptrARB;
+#ifndef GL_ARB_shader_objects
+/* GL types for handling shader object handles and characters */
+typedef char GLcharARB;		/* native character */
+#endif
 
 // Function prototypes
 typedef void (*_boglBlendColor) (GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha);
@@ -85,6 +90,25 @@ typedef void (*_boglBufferData)(GLenum, GLsizeiptrARB, const GLvoid*, GLenum);
 typedef GLvoid* (* _boglMapBuffer) (GLenum target, GLenum access);
 typedef GLboolean (* _boglUnmapBuffer) (GLenum target);
 typedef void (*_boglActiveTexture)(GLenum);
+
+typedef void (*_boglAttachShader) (GLuint, GLuint);
+typedef void (*_boglCompileShader) (GLuint);
+typedef GLuint (*_boglCreateProgram) (void);
+typedef GLuint (*_boglCreateShader) (GLenum);
+typedef void (*_boglDeleteProgram) (GLuint);
+typedef void (*_boglDeleteShader) (GLuint);
+typedef void (*_boglGetProgramInfoLog) (GLuint, GLsizei, GLsizei *, GLcharARB *);
+typedef void (*_boglGetProgramiv) (GLuint, GLenum, GLint *);
+typedef void (*_boglGetShaderInfoLog) (GLuint, GLsizei, GLsizei *, GLcharARB *);
+typedef void (*_boglGetShaderiv) (GLuint, GLenum, GLint *);
+typedef GLint (*_boglGetUniformLocation) (GLuint, const GLcharARB *);
+typedef void (*_boglLinkProgram) (GLuint);
+typedef void (*_boglShaderSource) (GLuint, GLsizei, const GLcharARB* *, const GLint *);
+typedef void (*_boglUniform1f) (GLint, GLfloat);
+typedef void (*_boglUniform1i) (GLint, GLint);
+typedef void (*_boglUniform3fv) (GLint, GLsizei, const GLfloat *);
+typedef void (*_boglUniform4fv) (GLint, GLsizei, const GLfloat *);
+typedef void (*_boglUseProgram) (GLuint);
 
 
 // Function pointers for extensions
@@ -99,6 +123,26 @@ extern _boglMapBuffer boglMapBuffer;
 extern _boglUnmapBuffer boglUnmapBuffer;
 // Textures
 extern _boglActiveTexture boglActiveTexture;
+// Shaders
+extern _boglAttachShader boglAttachShader;
+extern _boglCompileShader boglCompileShader;
+extern _boglCreateProgram boglCreateProgram;
+extern _boglCreateShader boglCreateShader;
+extern _boglDeleteProgram boglDeleteProgram;
+extern _boglDeleteShader boglDeleteShader;
+extern _boglGetProgramInfoLog boglGetProgramInfoLog;
+extern _boglGetProgramiv boglGetProgramiv;
+extern _boglGetShaderInfoLog boglGetShaderInfoLog;
+extern _boglGetShaderiv boglGetShaderiv;
+extern _boglGetUniformLocation boglGetUniformLocation;
+extern _boglLinkProgram boglLinkProgram;
+extern _boglShaderSource boglShaderSource;
+extern _boglUniform1f boglUniform1f;
+extern _boglUniform1i boglUniform1i;
+extern _boglUniform3fv boglUniform3fv;
+extern _boglUniform4fv boglUniform4fv;
+extern _boglUseProgram boglUseProgram;
+
 
 
 // Defines
@@ -240,6 +284,14 @@ extern _boglActiveTexture boglActiveTexture;
 #define GL_DOT3_RGB                       0x86AE
 #define GL_DOT3_RGBA                      0x86AF
 
+#define GL_PROGRAM_OBJECT                 0x8B40
+#define GL_SHADER_OBJECT                  0x8B48
+#define GL_COMPILE_STATUS                 0x8B81
+#define GL_LINK_STATUS                    0x8B82
+#define GL_VERTEX_SHADER                  0x8B31
+#define GL_FRAGMENT_SHADER                0x8B30
+
+
 
 /**
  * This header includes more or less complete support for following extensions:
@@ -248,6 +300,7 @@ extern _boglActiveTexture boglActiveTexture;
  * @li GL_texture_env_combine_ARB (GL 1.3) - full support
  * @li GL_texture_env_dot3_ARB (GL 1.3) - full support
  * @li GL_vertex_buffer_object_ARB (GL 1.5) - necessary VBO functionality
+ * @li GL_shader_object_ARB and other shader extensions (GL 2.0) - necessary stuff
  * ...
  **/
 
