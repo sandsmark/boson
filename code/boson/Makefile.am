@@ -114,7 +114,8 @@ libboson_la_SOURCES = \
 	bodebuglogdialog.cpp \
 	bowater.cpp \
 	botexture.cpp \
-	bobmfload.cpp
+	bobmfload.cpp \
+	boshader.cpp
 
 
 libboson_la_LIBADD = \

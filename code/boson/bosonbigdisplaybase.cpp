@@ -81,6 +81,7 @@
 #include "boaction.h"
 #include "boeventlistener.h"
 #include "bosonmenuinput.h"
+#include "boshader.h"
 
 #include <kgame/kgameio.h>
 #include <kgame/kplayer.h>
@@ -655,7 +656,11 @@ void BosonCanvasRenderer::createRenderItemList(QValueVector<BoRenderItem>* rende
 
 	bool visible = localPlayerIO()->canSee(item);
 	if (visible) {
-		renderItemList->append(BoRenderItem(item->getModelForItem()->id(), item));
+		unsigned int modelid = 0;
+		if (item->getModelForItem()) {
+			modelid = item->getModelForItem()->id();
+		}
+		renderItemList->append(BoRenderItem(modelid, item));
 	}
  }
 }
@@ -1791,6 +1796,7 @@ void BosonBigDisplayBase::initializeGL()
  l->setEnabled(true);
 
  boWaterManager->setSun(l);
+ BoShader::setSun(l);
 
  d->mCanvasRenderer->initGL();
 
@@ -2939,6 +2945,7 @@ void BosonBigDisplayBase::cameraChanged()
 
  boWaterManager->modelviewMatrixChanged(d->mModelviewMatrix);
  boWaterManager->setCameraPos(camera()->cameraPos());
+ BoShader::setCameraPos(camera()->cameraPos());
 
  QPoint cellTL; // topleft cell
  QPoint cellTR; // topright cell
