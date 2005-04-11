@@ -30,6 +30,7 @@ class BosonMap;
 class BoTexture;
 class BoLight;
 class PlayerIO;
+class BoShader;
 
 class QRect;
 class QDomElement;
@@ -373,6 +374,7 @@ class BoWaterManager
     BoVector3Float mCameraPos;
     PlayerIO* mLocalPlayerIO;
     bool mRenderEnvironmentSetUp;
+    BoShader* mShader;
 
     bool mSupports_texlod;
     bool mSupports_env_combine;
@@ -380,8 +382,7 @@ class BoWaterManager
     bool mSupports_vbo;
     bool mSupports_blendcolor;
     bool mSupports_blendcolor_ext;
-    bool mSupports_nv_register_combiners;
-    bool mSupports_ati_fragment_shader;
+    bool mSupports_shaders;
 
     bool mEnableWaves;
     bool mEnableReflections;
@@ -390,6 +391,7 @@ class BoWaterManager
     bool mEnableTranslucency;
     bool mEnableVBO;
     bool mEnableSpecular;
+    bool mEnableShader;
 
     float mReflectionSharpness;
     float mReflectionStrength;

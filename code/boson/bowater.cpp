@@ -29,6 +29,7 @@
 #include "bolight.h"
 #include "bosonconfig.h"
 #include "playerio.h"
+#include "boshader.h"
 
 #include <qrect.h>
 #include <qpoint.h>
@@ -345,6 +346,7 @@ BoWaterManager::BoWaterManager()
   mEnvMap = 0;
   mWaterAnimBump.setAutoDelete(true);
   mWaterAnimBumpCurrent = 0.0f;
+  mShader = 0;
 }
 
 BoWaterManager::~BoWaterManager()
@@ -356,6 +358,7 @@ BoWaterManager::~BoWaterManager()
   delete mWaterTex;
   delete mWaterBump;
   delete mEnvMap;
+  delete mShader;
   mWaterAnimBump.clear();
 }
 
@@ -616,6 +619,13 @@ void BoWaterManager::initOpenGL()
     boDebug() << k_funcinfo << "GL_ARB_vertex_buffer_object not supported!" << endl;
   }
 
+  mSupports_shaders = extensions.contains("GL_ARB_shader_objects") &&
+      extensions.contains("GL_ARB_fragment_shader");
+  if(!mSupports_shaders)
+  {
+    boDebug() << k_funcinfo << "Shaders not supported!" << endl;
+  }
+
   boDebug() << k_funcinfo << "Extensions checking done" << endl;
 
 
@@ -636,6 +646,20 @@ void BoWaterManager::initOpenGL()
   mEnableTranslucency = boConfig->boolValue("WaterTranslucency");
   mEnableWaves = boConfig->boolValue("WaterWaves");
   // TODO: settings for: VBO, specular
+
+  if(boTextureManager->textureUnits() < 3)
+  {
+    mSupports_shaders = false;
+  }
+
+  mEnableShader = mSupports_shaders;
+  if(mEnableShader)
+  {
+    mEnableReflections = true;
+    mEnableBumpmapping = true;
+    mEnableTranslucency = true;
+  }
+
 
   // Check if loaded config is actually supported
   // Note that we can't use supports*() methods here because opengl stuff isn't
@@ -843,7 +867,7 @@ float BoWaterManager::time() const
 void BoWaterManager::update(float elapsed)
 {
   mTime += elapsed;
-  mWaterAnimBumpCurrent += elapsed * 5;
+  mWaterAnimBumpCurrent += elapsed * 15;
   if(mWaterAnimBump.count() && ((unsigned int)mWaterAnimBumpCurrent >= mWaterAnimBump.count()))
   {
     mWaterAnimBumpCurrent -= mWaterAnimBump.count();
@@ -1004,6 +1028,10 @@ void BoWaterManager::render()
   {
     // Something was drawn and textures (and other OpenGL stuff was inited).
     // Pop attributes.
+    if(mEnableShader)
+    {
+      mShader->unbind();
+    }
     if(mEnableReflections && !mEnableBumpmapping)
     {
       boTextureManager->activateTextureUnit(1);
@@ -1190,7 +1218,7 @@ void BoWaterManager::renderChunk(BoLake* lake, BoLake::WaterChunk* chunk, float 
 
   // Light vector for bumpmapping. Sun is directional light, so we don't need
   //  to calculate this per-vertex.
-  if(mEnableBumpmapping)
+  if(mEnableBumpmapping && !mEnableShader)
   {
     if(!mSun)
     {
@@ -1231,6 +1259,11 @@ void BoWaterManager::renderChunk(BoLake* lake, BoLake::WaterChunk* chunk, float 
   if(info->constalpha == 1.0f)
   {
     glDisable(GL_BLEND);
+  }
+  else if(mEnableShader)
+  {
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   }
   else if(mEnableBumpmapping)
   {
@@ -1277,7 +1310,7 @@ void BoWaterManager::renderChunk(BoLake* lake, BoLake::WaterChunk* chunk, float 
   {
     glVertexPointer(3, GL_FLOAT, 0, chunk->vertices);
   }
-  if(mEnableBumpmapping)
+  if(mEnableBumpmapping && !mEnableShader)
   {
     // Tangent-space light vectors are sent as colors
     glEnableClientState(GL_COLOR_ARRAY);
@@ -1309,7 +1342,7 @@ void BoWaterManager::renderChunk(BoLake* lake, BoLake::WaterChunk* chunk, float 
       }
     }
   }
-  else
+  else if(!mEnableShader)
   {
     // For OpenGL lighting (and reflections), we need normals
     glEnableClientState(GL_NORMAL_ARRAY);
@@ -1353,7 +1386,7 @@ void BoWaterManager::renderChunk(BoLake* lake, BoLake::WaterChunk* chunk, float 
   glPopClientAttrib();
 
 
-  if(mEnableBumpmapping)
+  if(mEnableBumpmapping && !mEnableShader)
   {
     // Pass 2: ambient lighting and reflection pass.
     // TODO: combine this with diffuse pass on programmable hardware.
@@ -1524,6 +1557,11 @@ void BoWaterManager::calculateChunkBorders(RenderInfo* info)
 
 void BoWaterManager::calculatePerCellStuff(RenderInfo* info)
 {
+  if(mEnableShader)
+  {
+    return;
+  }
+
   int xi, yi;
   xi = 0;  // X Index
   for(float x = info->cellminx; x < info->cellmaxx; x += info->detail, xi++)
@@ -1631,23 +1669,33 @@ void BoWaterManager::calculatePerCornerStuff(RenderInfo* info)
         // Reset all variables, just in case...
         // TODO: find out if this is really needed or is it just waste of time
         ARRAY_CORNER(info->vertices_p, x, y) = BoVector3Float(posx, -posy, 10);  // 10 is random
-        ARRAY_CORNER(info->normals_p, x, y) = BoVector3Float(0, 0, 1);
-        if(mEnableBumpmapping)
+        if(!mEnableShader)
         {
-          if(mEnableTranslucency)
+          ARRAY_CORNER(info->normals_p, x, y) = BoVector3Float(0, 0, 1);
+          if(mEnableBumpmapping)
           {
-            ARRAY_CORNER(info->tangentlights_p4, x, y) = BoVector4Float(0, 0, 1, 0);
+            if(mEnableTranslucency)
+            {
+              ARRAY_CORNER(info->tangentlights_p4, x, y) = BoVector4Float(0, 0, 1, 0);
+            }
+            else
+            {
+              ARRAY_CORNER(info->tangentlights_p, x, y) = BoVector3Float(0, 0, 1);
+            }
+            ARRAY_CORNER(info->halfvectors_p, x, y) = BoVector3Float(0, 0, 1);
           }
-          else
+          else if(mEnableTranslucency)
           {
-            ARRAY_CORNER(info->tangentlights_p, x, y) = BoVector3Float(0, 0, 1);
+            ARRAY_CORNER(info->colors_p, x, y) = BoVector4Float(1, 1, 1, 1);
           }
-          ARRAY_CORNER(info->halfvectors_p, x, y) = BoVector3Float(0, 0, 1);
         }
-        else if(mEnableTranslucency)
-        {
-          ARRAY_CORNER(info->colors_p, x, y) = BoVector4Float(1, 1, 1, 1);
-        }
+        continue;
+      }
+
+      if(mEnableShader)
+      {
+        // That's really easy :-)
+        ARRAY_CORNER(info->vertices_p, x, y) = BoVector3Float(posx, -posy, posz);
         continue;
       }
 
@@ -1870,32 +1918,35 @@ void BoWaterManager::initDataBuffersForStorage(RenderInfo* info)
     boglBindBuffer(GL_ARRAY_BUFFER, info->chunk->vbo_vertex);
     boglBufferData(GL_ARRAY_BUFFER, corners * sizeof(BoVector3Float), 0, WATER_VBO_MODE);
     info->vertices_p = (BoVector3Float*)boglMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-    boglBindBuffer(GL_ARRAY_BUFFER, info->chunk->vbo_normal);
-    boglBufferData(GL_ARRAY_BUFFER, corners * sizeof(BoVector3Float), 0, WATER_VBO_MODE);
-    info->normals_p = (BoVector3Float*)boglMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-    if(mEnableBumpmapping)
+    if(!mEnableShader)
     {
-      if(mEnableTranslucency)
-      {
-        boglBindBuffer(GL_ARRAY_BUFFER, info->chunk->vbo_tangentlight4);
-        boglBufferData(GL_ARRAY_BUFFER, corners * sizeof(BoVector4Float), 0, WATER_VBO_MODE);
-        info->tangentlights_p4 = (BoVector4Float*)boglMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-      }
-      else
-      {
-        boglBindBuffer(GL_ARRAY_BUFFER, info->chunk->vbo_tangentlight);
-        boglBufferData(GL_ARRAY_BUFFER, corners * sizeof(BoVector3Float), 0, WATER_VBO_MODE);
-        info->tangentlights_p = (BoVector3Float*)boglMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-      }
-      boglBindBuffer(GL_ARRAY_BUFFER, info->chunk->vbo_halfvector);
+      boglBindBuffer(GL_ARRAY_BUFFER, info->chunk->vbo_normal);
       boglBufferData(GL_ARRAY_BUFFER, corners * sizeof(BoVector3Float), 0, WATER_VBO_MODE);
-      info->halfvectors_p = (BoVector3Float*)boglMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-    }
-    else if(mEnableTranslucency)
-    {
-      boglBindBuffer(GL_ARRAY_BUFFER, info->chunk->vbo_color);
-      boglBufferData(GL_ARRAY_BUFFER, corners * sizeof(BoVector4Float), 0, WATER_VBO_MODE);
-      info->colors_p = (BoVector4Float*)boglMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+      info->normals_p = (BoVector3Float*)boglMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+      if(mEnableBumpmapping)
+      {
+        if(mEnableTranslucency)
+        {
+          boglBindBuffer(GL_ARRAY_BUFFER, info->chunk->vbo_tangentlight4);
+          boglBufferData(GL_ARRAY_BUFFER, corners * sizeof(BoVector4Float), 0, WATER_VBO_MODE);
+          info->tangentlights_p4 = (BoVector4Float*)boglMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+        }
+        else
+        {
+          boglBindBuffer(GL_ARRAY_BUFFER, info->chunk->vbo_tangentlight);
+          boglBufferData(GL_ARRAY_BUFFER, corners * sizeof(BoVector3Float), 0, WATER_VBO_MODE);
+          info->tangentlights_p = (BoVector3Float*)boglMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+        }
+        boglBindBuffer(GL_ARRAY_BUFFER, info->chunk->vbo_halfvector);
+        boglBufferData(GL_ARRAY_BUFFER, corners * sizeof(BoVector3Float), 0, WATER_VBO_MODE);
+        info->halfvectors_p = (BoVector3Float*)boglMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+      }
+      else if(mEnableTranslucency)
+      {
+        boglBindBuffer(GL_ARRAY_BUFFER, info->chunk->vbo_color);
+        boglBufferData(GL_ARRAY_BUFFER, corners * sizeof(BoVector4Float), 0, WATER_VBO_MODE);
+        info->colors_p = (BoVector4Float*)boglMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+      }
     }
     // Buffer for indices
     boglBindBuffer(GL_ELEMENT_ARRAY_BUFFER, info->chunk->vbo_index);
@@ -1911,20 +1962,23 @@ void BoWaterManager::initDataBuffersForStorage(RenderInfo* info)
       delete[] info->chunk->vertices;
       delete[] info->chunk->normals;
       info->chunk->vertices = new BoVector3Float[info->chunkcornerw * info->chunkcornerh];
-      info->chunk->normals = new BoVector3Float[info->chunkcornerw * info->chunkcornerh];
-      if(mEnableBumpmapping)
+      if(!mEnableShader)
       {
-        delete[] info->chunk->tangentlight;
-        delete[] info->chunk->tangentlight4;
-        delete[] info->chunk->halfvector;
-        info->chunk->tangentlight = new BoVector3Float[info->chunkcornerw * info->chunkcornerh];
-        info->chunk->tangentlight4 = new BoVector4Float[info->chunkcornerw * info->chunkcornerh];
-        info->chunk->halfvector = new BoVector3Float[info->chunkcornerw * info->chunkcornerh];
-      }
-      else if(mEnableTranslucency)
-      {
-        delete[] info->chunk->colors;
-        info->chunk->colors = new BoVector4Float[info->chunkcornerw * info->chunkcornerh];
+        info->chunk->normals = new BoVector3Float[info->chunkcornerw * info->chunkcornerh];
+        if(mEnableBumpmapping)
+        {
+          delete[] info->chunk->tangentlight;
+          delete[] info->chunk->tangentlight4;
+          delete[] info->chunk->halfvector;
+          info->chunk->tangentlight = new BoVector3Float[info->chunkcornerw * info->chunkcornerh];
+          info->chunk->tangentlight4 = new BoVector4Float[info->chunkcornerw * info->chunkcornerh];
+          info->chunk->halfvector = new BoVector3Float[info->chunkcornerw * info->chunkcornerh];
+        }
+        else if(mEnableTranslucency)
+        {
+          delete[] info->chunk->colors;
+          info->chunk->colors = new BoVector4Float[info->chunkcornerw * info->chunkcornerh];
+        }
       }
       delete[] info->chunk->indices;
       info->chunk->indices = new unsigned int[(info->chunkcornerw - 1) * (info->chunkcornerh - 1) * 4];
@@ -1973,37 +2027,40 @@ void BoWaterManager::uninitDataBuffersForStorage(RenderInfo* info)
     {
       boError() << k_funcinfo << "can't unmap vertices' vbo!" << endl;
     }
-    boglBindBuffer(GL_ARRAY_BUFFER, info->chunk->vbo_normal);
-    if(!boglUnmapBuffer(GL_ARRAY_BUFFER))
+    if(!mEnableShader)
     {
-      boError() << k_funcinfo << "can't unmap normals' vbo!" << endl;
-    }
-    if(mEnableBumpmapping)
-    {
-      if(mEnableTranslucency)
-      {
-        boglBindBuffer(GL_ARRAY_BUFFER, info->chunk->vbo_tangentlight4);
-      }
-      else
-      {
-        boglBindBuffer(GL_ARRAY_BUFFER, info->chunk->vbo_tangentlight);
-      }
+      boglBindBuffer(GL_ARRAY_BUFFER, info->chunk->vbo_normal);
       if(!boglUnmapBuffer(GL_ARRAY_BUFFER))
       {
-        boError() << k_funcinfo << "can't unmap tangentlights' vbo!" << endl;
+        boError() << k_funcinfo << "can't unmap normals' vbo!" << endl;
       }
-      boglBindBuffer(GL_ARRAY_BUFFER, info->chunk->vbo_halfvector);
-      if(!boglUnmapBuffer(GL_ARRAY_BUFFER))
+      if(mEnableBumpmapping)
       {
-        boError() << k_funcinfo << "can't unmap halfvectors' vbo!" << endl;
+        if(mEnableTranslucency)
+        {
+          boglBindBuffer(GL_ARRAY_BUFFER, info->chunk->vbo_tangentlight4);
+        }
+        else
+        {
+          boglBindBuffer(GL_ARRAY_BUFFER, info->chunk->vbo_tangentlight);
+        }
+        if(!boglUnmapBuffer(GL_ARRAY_BUFFER))
+        {
+          boError() << k_funcinfo << "can't unmap tangentlights' vbo!" << endl;
+        }
+        boglBindBuffer(GL_ARRAY_BUFFER, info->chunk->vbo_halfvector);
+        if(!boglUnmapBuffer(GL_ARRAY_BUFFER))
+        {
+          boError() << k_funcinfo << "can't unmap halfvectors' vbo!" << endl;
+        }
       }
-    }
-    else if(mEnableTranslucency)
-    {
-      boglBindBuffer(GL_ARRAY_BUFFER, info->chunk->vbo_color);
-      if(!boglUnmapBuffer(GL_ARRAY_BUFFER))
+      else if(mEnableTranslucency)
       {
-        boError() << k_funcinfo << "can't unmap colors' vbo!" << endl;
+        boglBindBuffer(GL_ARRAY_BUFFER, info->chunk->vbo_color);
+        if(!boglUnmapBuffer(GL_ARRAY_BUFFER))
+        {
+          boError() << k_funcinfo << "can't unmap colors' vbo!" << endl;
+        }
       }
     }
     boglBindBuffer(GL_ELEMENT_ARRAY_BUFFER, info->chunk->vbo_index);
@@ -2174,7 +2231,32 @@ void BoWaterManager::initRenderEnvironment()
   if(mRenderEnvironmentSetUp)
   {
     // Rebind textures, because they may have been disabled.
-    if(mEnableReflections && !mEnableBumpmapping)
+    if(mEnableShader)
+    {
+      mShader->bind();
+
+      // Texture 0 is water texture
+      boTextureManager->activateTextureUnit(0);
+      mWaterTex->bind();
+
+      // Texture 1 is bumpmap
+      boTextureManager->activateTextureUnit(1);
+      if(mEnableAnimBumpmaps)
+      {
+        mWaterAnimBump.at((int)mWaterAnimBumpCurrent)->bind();
+      }
+      else
+      {
+        mWaterBump->bind();
+      }
+
+      // Texture 2 is envmap
+      boTextureManager->activateTextureUnit(2);
+      mEnvMap->bind();
+
+      boTextureManager->activateTextureUnit(0);
+    }
+    else if(mEnableReflections && !mEnableBumpmapping)
     {
       boTextureManager->activateTextureUnit(1);
       mEnvMap->bind();
@@ -2209,7 +2291,15 @@ void BoWaterManager::initRenderEnvironment()
 
   // Attributes will be popped at the end of render().
   glPushAttrib(/*GL_LIGHTING_BIT | GL_TEXTURE_BIT | GL_ENABLE_BIT | GL_TRANSFORM_BIT | GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT*/GL_ALL_ATTRIB_BITS);
-  if(mEnableReflections && !mEnableBumpmapping)
+  if(mEnableShader)
+  {
+    glDisable(GL_LIGHTING);
+
+    setupDiffuseTexture(0);
+    setupBumpMapTexture(1);
+    setupEnvMapTexture(2);
+  }
+  else if(mEnableReflections && !mEnableBumpmapping)
   {
     // If we have environment mapping but no bumpmapping then we have:
     //  * tex0: water texture
@@ -2257,7 +2347,7 @@ void BoWaterManager::initRenderEnvironment()
     setupDiffuseTexture(0);
   }
 
-  if(!mEnableBumpmapping)
+  if(!mEnableBumpmapping && !mEnableShader)
   {
     float ambientcolor[] = { mWaterAmbientColor, mWaterAmbientColor, mWaterAmbientColor, 1.0f };
     float diffusecolor[] = { mWaterDiffuseColor, mWaterDiffuseColor, mWaterDiffuseColor, 1.0f };
@@ -2321,6 +2411,22 @@ void BoWaterManager::loadNecessaryTextures()
     else if(!mWaterBump)
     {
       mWaterBump = new BoTexture(path + "water-bumpmap.png", BoTexture::NormalMap);
+    }
+    /*if(!mNormalizationMap)
+    {
+      createNormalizationMap();
+    }*/
+  }
+
+  if(mSupports_shaders)
+  {
+    mShader = new BoShader(path + "water.shader");
+    if(!mShader->valid())
+    {
+      boDebug() << k_funcinfo << "Shader loading failed (from file '" << path << "water.shader'), disabling shader" << endl;
+      delete mShader;
+      mShader = 0;
+      mSupports_shaders = false;
     }
   }
 }
