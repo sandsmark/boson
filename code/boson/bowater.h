@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2004 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2004-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -58,15 +58,6 @@ class BoLake
     ~BoLake();
 
     /**
-     * Describes surface type of the lake.
-     * @li Flat surface is completely flat.
-     * @li Waves surface is calculated using sine waves.
-     * @li Complex surface has arbitrary shape which cannot be described by any
-     *     mathematical formula.
-     **/
-    enum SurfaceType { Flat = 0, Waves = 1, Complex };
-
-    /**
      * Finds all corners that belong to this lake.
      * It performs a flood-fill search, starting from point (x; y) and takes
      *  all corners whose height is less than lake's level.
@@ -74,13 +65,6 @@ class BoLake
      **/
     void findWater(int x, int y, const QRect& searcharea);
 
-    /**
-     * @return Height of water at given point.
-     * Note that it doesn't return water's depth, but absolute level of water
-     *  at given point.
-     * Point is in cell coordinates.
-     **/
-    float height(float x, float y);
     /**
      * @return Whether this lake has given corner.
      **/
@@ -107,15 +91,9 @@ class BoLake
     // Origin point of lake, used for saving
     int originx, originy;
 
-    // x- and y- component: wave's direction and length
-    // z-componenet: wave's height
-    BoVector3Float waveVector;
-    float waveSpeed;
-    float waveHeightMin;
-    float waveHeightMax;
+    // direction and speed of the waves
+    BoVector2Float waveVector;
     BoMatrix textureMatrix;
-
-    SurfaceType type;
 
     float alphaMultiplier;
     float alphaBase;
@@ -140,35 +118,17 @@ class BoLake
           dirty = true;
           lastdetail = -1.0f;
           vertices = 0;
-          normals = 0;
-          tangentlight = 0;
-          tangentlight4 = 0;
-          halfvector = 0;
           colors = 0;
-          cellnormals = 0;
-          celltangentlight = 0;
-          cellhalfvector = 0;
           indices = 0;
           indices_count = 0;
           vbo_vertex = 0;
-          vbo_normal = 0;
-          vbo_tangentlight = 0;
-          vbo_tangentlight4 = 0;
-          vbo_halfvector = 0;
           vbo_color = 0;
           vbo_index = 0;
         }
         ~WaterChunk()
         {
           delete[] vertices;
-          delete[] normals;
-          delete[] tangentlight;
-          delete[] tangentlight4;
-          delete[] halfvector;
           delete[] colors;
-          delete[] cellnormals;
-          delete[] celltangentlight;
-          delete[] cellhalfvector;
           delete[] indices;
         }
 
@@ -189,22 +149,11 @@ class BoLake
         float lastdetail;
         // Caches
         BoVector3Float* vertices;
-        BoVector3Float* normals;
-        BoVector3Float* tangentlight;
-        BoVector4Float* tangentlight4;
-        BoVector3Float* halfvector;
         BoVector4Float* colors;
-        BoVector3Float* cellnormals;
-        BoVector3Float* celltangentlight;
-        BoVector3Float* cellhalfvector;
         unsigned int* indices;
         int indices_count;
         // VBO ids
         unsigned int vbo_vertex;
-        unsigned int vbo_normal;
-        unsigned int vbo_tangentlight;
-        unsigned int vbo_tangentlight4;
-        unsigned int vbo_halfvector;
         unsigned int vbo_color;
         unsigned int vbo_index;
     };
@@ -264,11 +213,10 @@ class BoWaterManager
 
     void reloadConfiguration();
 
+    bool supportsShaders() const;
     bool supportsReflections() const;
     bool supportsTranslucency() const;
     bool supportsBumpmapping() const;
-
-    bool wavesEnabled() const  { return mEnableWaves; }
 
   protected:
     float sphereInFrustum(const BoVector3Float& pos, float radius) const;
@@ -305,27 +253,17 @@ class BoWaterManager
         // Pointers to whereever data is stored - either vbos or plain arrays.
         BoVector3Float* vertices_p;
         BoVector3Float* normals_p;
-        BoVector3Float* tangentlights_p;
-        BoVector4Float* tangentlights_p4;
-        BoVector3Float* halfvectors_p;
         BoVector4Float* colors_p;
         // Same, but for indices
         unsigned int* indices_p;
         // Rendering tehniques stuff
         float constalpha;
-        bool useDerivations;
         bool singleQuad;
-        bool flat;
     };
 
     // renderChunk() helper methods:
-    // Calculates size of chunk's border for chunk. Border is used to calculate
-    //  per-cell stuff.
-    void calculateChunkBorders(RenderInfo* info);
     // Reallocates various (e.g. normal) arrays in the chunk.
     void reallocateArrays(RenderInfo* info);
-    // Calculates per-cell stuff for chunk
-    void calculatePerCellStuff(RenderInfo* info);
     // Calculates per-corner stuff for chunk
     void calculatePerCornerStuff(RenderInfo* info);
     // Inits whatever data buffers are used (vbos/arrays), so that you can use
@@ -384,7 +322,6 @@ class BoWaterManager
     bool mSupports_blendcolor_ext;
     bool mSupports_shaders;
 
-    bool mEnableWaves;
     bool mEnableReflections;
     bool mEnableBumpmapping;
     bool mEnableAnimBumpmaps;
