@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2004 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2004-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -30,6 +30,7 @@
 #include "bosonconfig.h"
 #include "playerio.h"
 #include "boshader.h"
+#include "bosonprofiling.h"
 
 #include <qrect.h>
 #include <qpoint.h>
@@ -74,31 +75,11 @@ void BoLake::init(BoWaterManager* _manager, float _level)
   originx = -1; originy = -1;
   cornercount = 0;
   corners = 0;
-  waveVector.set(0.866, 0.5, 0.3);
-  waveSpeed = 1.0;
-  waveHeightMin = 0.2;
-  waveHeightMax = 2.0;
-  //textureMatrix.rotate(30, 0, 0, 1);
-  type = Flat;
+  waveVector.set(0.866, 0.5);
+  textureMatrix.rotate(30, 0, 0, 1);
   alphaMultiplier = 0.8;
-  alphaBase = 0.2;
+  alphaBase = 0.0;
   chunks.setAutoDelete(true);
-}
-
-float BoLake::height(float x, float y)
-{
-  if(type == Flat || !manager->wavesEnabled())
-  {
-    return level;
-  }
-  else
-  {
-    return level +
-        sin(((x * waveVector.x()) + (y * waveVector.y())) + waveSpeed * manager->time()) *
-        QMAX(waveHeightMin, QMIN(waveHeightMax,
-            (manager->groundHeightAt(x, y) - level) * waveVector.z()
-        ));
-  }
 }
 
 void BoLake::findWater(int x, int y, const QRect& searcharea)
@@ -445,18 +426,7 @@ bool BoWaterManager::loadFromXML(const QDomElement& root)
       continue;
     }
 
-    // Load surface type
-    BoLake::SurfaceType type;
-    type = (BoLake::SurfaceType)lake.attribute("SurfaceType").toInt(&ok);
-    if(!ok)
-    {
-      boError() << k_funcinfo << "Error loading SurfaceType attribute ('" << root.attribute("SurfaceType") << "')" << endl;
-      ret = false;
-      continue;
-    }
-
     BoLake* bolake = new BoLake(this, level);
-    bolake->type = type;
     bolake->findWater(originx, originy, QRect(QPoint(minx, miny), QPoint(maxx, maxy)));
     mLakes.append(bolake);
   }
@@ -483,7 +453,6 @@ bool BoWaterManager::saveToXML(QDomElement& root)
     l.setAttribute("OriginX", lake->originx);
     l.setAttribute("OriginY", lake->originy);
     l.setAttribute("Level", lake->level);
-    l.setAttribute("SurfaceType", (int)lake->type);
   }
 
   return true;
@@ -620,7 +589,7 @@ void BoWaterManager::initOpenGL()
   }
 
   mSupports_shaders = extensions.contains("GL_ARB_shader_objects") &&
-      extensions.contains("GL_ARB_fragment_shader");
+      extensions.contains("GL_ARB_fragment_shader") && (boTextureManager->textureUnits() >= 3);
   if(!mSupports_shaders)
   {
     boDebug() << k_funcinfo << "Shaders not supported!" << endl;
@@ -634,8 +603,8 @@ void BoWaterManager::initOpenGL()
   //  settings.
   mReflectionSharpness = 1.5f;
   mReflectionStrength = 0.25f;
-  mWaterAmbientColor = 0.2f;
-  mWaterDiffuseColor = 0.6f;
+  mWaterAmbientColor = 0.8f;
+  mWaterDiffuseColor = 0.8f;
   mWaterSpecularColor = 1.0f;
   mWaterShininess = 32.0f;
 
@@ -644,21 +613,8 @@ void BoWaterManager::initOpenGL()
   mEnableBumpmapping = boConfig->boolValue("WaterBumpmapping");
   mEnableAnimBumpmaps = boConfig->boolValue("WaterAnimatedBumpmaps");
   mEnableTranslucency = boConfig->boolValue("WaterTranslucency");
-  mEnableWaves = boConfig->boolValue("WaterWaves");
+  mEnableShader = boConfig->boolValue("WaterShaders");
   // TODO: settings for: VBO, specular
-
-  if(boTextureManager->textureUnits() < 3)
-  {
-    mSupports_shaders = false;
-  }
-
-  mEnableShader = mSupports_shaders;
-  if(mEnableShader)
-  {
-    mEnableReflections = true;
-    mEnableBumpmapping = true;
-    mEnableTranslucency = true;
-  }
 
 
   // Check if loaded config is actually supported
@@ -681,6 +637,12 @@ void BoWaterManager::initOpenGL()
     boWarning() << k_funcinfo << "Translucency is enabled, but not supported. Disabling." << endl;
     mEnableTranslucency = false;
     boConfig->setBoolValue("WaterTranslucency", false);
+  }
+  if(mEnableShader && !supportsShaders())
+  {
+    boWarning() << k_funcinfo << "Shaders are enabled, but not supported. Disabling." << endl;
+    mEnableShader = false;
+    boConfig->setBoolValue("WaterShaders", false);
   }
 
   mEnableVBO = false;
@@ -719,10 +681,11 @@ void BoWaterManager::reloadConfiguration()
     mEnableTranslucency = boConfig->boolValue("WaterTranslucency");
     configDirty = true;
   }
-  if(boConfig->boolValue("WaterWaves") != mEnableWaves)
+  if(boConfig->boolValue("WaterShaders") != mEnableShader)
   {
-    mEnableWaves = boConfig->boolValue("WaterWaves");
+    mEnableShader = boConfig->boolValue("WaterShaders");
     configDirty = true;
+    texturesHaveChanged = true;
   }
 
   // TODO: check if config is valid? (if everything's supported)
@@ -741,24 +704,10 @@ void BoWaterManager::reloadConfiguration()
       {
         BoLake::WaterChunk* chunk = cit.current();
         delete[] chunk->vertices;
-        delete[] chunk->normals;
-        delete[] chunk->tangentlight;
-        delete[] chunk->tangentlight4;
-        delete[] chunk->halfvector;
         delete[] chunk->colors;
-        delete[] chunk->cellnormals;
-        delete[] chunk->celltangentlight;
-        delete[] chunk->cellhalfvector;
         delete[] chunk->indices;
         chunk->vertices = 0;
-        chunk->normals = 0;
-        chunk->tangentlight = 0;
-        chunk->tangentlight4 = 0;
-        chunk->halfvector = 0;
         chunk->colors = 0;
-        chunk->cellnormals = 0;
-        chunk->celltangentlight = 0;
-        chunk->cellhalfvector = 0;
         chunk->indices = 0;
 
         chunk->lastdetail = -1.0f;
@@ -769,6 +718,16 @@ void BoWaterManager::reloadConfiguration()
   {
     loadNecessaryTextures();
   }
+}
+
+bool BoWaterManager::supportsShaders() const
+{
+  if(!mOpenGLInited)
+  {
+    return false;
+  }
+
+  return mSupports_shaders;
 }
 
 bool BoWaterManager::supportsReflections() const
@@ -820,7 +779,7 @@ float BoWaterManager::groundHeightAt(float x, float y) const
 
 float BoWaterManager::waterAlphaAt(BoLake* lake, float x, float y)
 {
-  return QMIN(1.0, ((lake->height(x, y) - groundHeightAt(x, y)) * lake->alphaMultiplier + lake->alphaBase)/* * mWaterDiffuseColor*/);
+  return QMIN(1.0, ((lake->level - groundHeightAt(x, y)) * lake->alphaMultiplier + lake->alphaBase)/* * mWaterDiffuseColor*/);
 }
 
 float BoWaterManager::waterDepth(int x, int y)
@@ -838,7 +797,7 @@ float BoWaterManager::waterDepth(int x, int y)
     {
       if(lake->hasCorner(x, y))
       {
-        return QMAX(0.0f, lake->height(x, y) - groundHeight(x, y));
+        return QMAX(0.0f, lake->level - groundHeight(x, y));
       }
     }
   }
@@ -872,7 +831,6 @@ void BoWaterManager::update(float elapsed)
   {
     mWaterAnimBumpCurrent -= mWaterAnimBump.count();
   }
-  setDirty(true);
 }
 
 void BoWaterManager::modelviewMatrixChanged(const BoMatrix& modelview)
@@ -894,7 +852,6 @@ void BoWaterManager::modelviewMatrixChanged(const BoMatrix& modelview)
   {
     boError() << k_funcinfo << "Couldn't invert affine matrix!" << endl;
   }
-  setDirty(true);
 }
 
 float BoWaterManager::sphereInFrustum(const BoVector3Float& pos, float radius) const
@@ -945,72 +902,6 @@ void BoWaterManager::render()
   mRenderedChunks = 0;
   mRenderedQuads = 0;
 
-  /*if(mSupports_cubemap)
-  {
-    // Render skybox
-    glPushAttrib(GL_LIGHTING_BIT | GL_TEXTURE_BIT | GL_ENABLE_BIT | GL_TRANSFORM_BIT);
-
-    glDisable(GL_LIGHTING);
-
-    mEnvMap->bind();
-    // We have z-axis pointing upwards, but most cubemaps are made for programs
-    //  where y-axis points upwards. So we rotate texture matrix to get correct
-    //  texture coords
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    glLoadMatrixf(mModelview.data());
-    glMatrixMode(GL_TEXTURE);
-    glPushMatrix();
-    glLoadIdentity();
-    //glRotatef(-90, 1, 0, 0);
-    //glScalef(1, -1, 1);  // Because y is mirrored
-
-    const float sky_radius = 400.0f;
-
-    glBegin(GL_QUADS);
-      // Sky (positive z)
-      glTexCoord3f(-1, -1,  1); glVertex3f(-sky_radius, -sky_radius,  sky_radius);
-      glTexCoord3f(-1,  1,  1); glVertex3f(-sky_radius,  sky_radius,  sky_radius);
-      glTexCoord3f( 1,  1,  1); glVertex3f( sky_radius,  sky_radius,  sky_radius);
-      glTexCoord3f( 1, -1,  1); glVertex3f( sky_radius, -sky_radius,  sky_radius);
-
-      // Ground (negative z)
-      glTexCoord3f(-1, -1, -1); glVertex3f(-sky_radius, -sky_radius, -sky_radius);
-      glTexCoord3f(-1,  1, -1); glVertex3f(-sky_radius,  sky_radius, -sky_radius);
-      glTexCoord3f( 1,  1, -1); glVertex3f( sky_radius,  sky_radius, -sky_radius);
-      glTexCoord3f( 1, -1, -1); glVertex3f( sky_radius, -sky_radius, -sky_radius);
-
-      // negative x
-      glTexCoord3f(-1, -1,  1); glVertex3f(-sky_radius, -sky_radius,  sky_radius);
-      glTexCoord3f(-1, -1, -1); glVertex3f(-sky_radius, -sky_radius, -sky_radius);
-      glTexCoord3f(-1,  1, -1); glVertex3f(-sky_radius,  sky_radius, -sky_radius);
-      glTexCoord3f(-1,  1,  1); glVertex3f(-sky_radius,  sky_radius,  sky_radius);
-
-      // positive x
-      glTexCoord3f( 1, -1,  1); glVertex3f( sky_radius, -sky_radius,  sky_radius);
-      glTexCoord3f( 1, -1, -1); glVertex3f( sky_radius, -sky_radius, -sky_radius);
-      glTexCoord3f( 1,  1, -1); glVertex3f( sky_radius,  sky_radius, -sky_radius);
-      glTexCoord3f( 1,  1,  1); glVertex3f( sky_radius,  sky_radius,  sky_radius);
-
-      // negative y
-      glTexCoord3f(-1, -1,  1); glVertex3f(-sky_radius, -sky_radius,  sky_radius);
-      glTexCoord3f( 1, -1,  1); glVertex3f( sky_radius, -sky_radius,  sky_radius);
-      glTexCoord3f( 1, -1, -1); glVertex3f( sky_radius, -sky_radius, -sky_radius);
-      glTexCoord3f(-1, -1, -1); glVertex3f(-sky_radius, -sky_radius, -sky_radius);
-
-      // positive y
-      glTexCoord3f(-1,  1,  1); glVertex3f(-sky_radius,  sky_radius,  sky_radius);
-      glTexCoord3f( 1,  1,  1); glVertex3f( sky_radius,  sky_radius,  sky_radius);
-      glTexCoord3f( 1,  1, -1); glVertex3f( sky_radius,  sky_radius, -sky_radius);
-      glTexCoord3f(-1,  1, -1); glVertex3f(-sky_radius,  sky_radius, -sky_radius);
-    glEnd();
-
-    glPopMatrix();
-    glMatrixMode(GL_MODELVIEW);
-    glPopMatrix();
-    glPopAttrib();
-    boTextureManager->invalidateCache();
-  }*/
 
   // Textures (and other OpenGL stuff) will be inited when they will be used
   //  first. This indicates that they're not inited yet.
@@ -1031,6 +922,10 @@ void BoWaterManager::render()
     if(mEnableShader)
     {
       mShader->unbind();
+      // Pop envmap's texture matrix
+      boTextureManager->activateTextureUnit(2);
+      glPopMatrix();
+      boTextureManager->activateTextureUnit(0);
     }
     if(mEnableReflections && !mEnableBumpmapping)
     {
@@ -1061,8 +956,8 @@ void BoWaterManager::renderLake(BoLake* lake)
     return;
   }
   // Box test is slower than sphere test, but often more accurate
-  BoVector3Float lakemin(lake->minx, -lake->miny, lake->level - lake->waveHeightMax);
-  BoVector3Float lakemax(lake->maxx, -lake->maxy, lake->level + lake->waveHeightMax);
+  BoVector3Float lakemin(lake->minx, -lake->miny, lake->level);
+  BoVector3Float lakemax(lake->maxx, -lake->maxy, lake->level);
   if(!Bo3dTools::boxInFrustum(mViewFrustum, lakemin, lakemax))
   {
     return;
@@ -1080,8 +975,8 @@ void BoWaterManager::renderLake(BoLake* lake)
       continue;
     }
     // Test with more accurate box-in-frustum test
-    BoVector3Float chunkmin(chunk->minx, -chunk->miny, lake->level - lake->waveHeightMax);
-    BoVector3Float chunkmax(chunk->maxx, -chunk->maxy, lake->level + lake->waveHeightMax);
+    BoVector3Float chunkmin(chunk->minx, -chunk->miny, lake->level);
+    BoVector3Float chunkmax(chunk->maxx, -chunk->maxy, lake->level);
     if(!Bo3dTools::boxInFrustum(mViewFrustum, chunkmin, chunkmax))
     {
       continue;
@@ -1105,25 +1000,27 @@ void BoWaterManager::renderLake(BoLake* lake)
   mRenderedLakes++;
 }
 
-// Some macros for easily accessing data in arrays.
-#define NORM(x, y) info->chunk->cellnormals[(y) * info->chunkcellw + (x)]
-#define TANGENTLIGHT(x, y) info->chunk->celltangentlight[(y) * info->chunkcellw + (x)]
-#define HALFVECTOR(x, y) info->chunk->cellhalfvector[(y) * info->chunkcellw + (x)]
-
+// Macro for easily accessing data in arrays.
 #define ARRAY_CORNER(array, x, y)  array[(y) * info->chunkcornerw + (x)]
 
 void BoWaterManager::renderChunk(BoLake* lake, BoLake::WaterChunk* chunk, float chunkdetail)
 {
+  static int eventid = -boProfiling->requestEventId("Water - renderchunk");
+  long int tm_initinfo, tm_initenv, tm_texmatrix, tm_miscinit, tm_dirty, tm_renderinit, tm_render, tm_uninit;
+  BosonProfiler profiler(eventid);
+
   // Create new RenderInfo object
   RenderInfo* info = new RenderInfo;
   info->lake = lake;
   info->chunk = chunk;
   info->detail = chunkdetail;
   info->texrepeat = 10;
+  tm_initinfo = profiler.elapsed();
 
   // If nothing has been rendered yet, OpenGL stuff (e.g. textures) are
   //  uninited. Init them now.
   initRenderEnvironment();
+  tm_initenv = profiler.elapsed();
 
   // Set texture matrices. They make textures move slowly to create an illusion
   //  that water surface is moving.
@@ -1133,51 +1030,33 @@ void BoWaterManager::renderChunk(BoLake* lake, BoLake::WaterChunk* chunk, float 
   boTextureManager->activateTextureUnit(0);  // Either diffuse or bump
   glPushMatrix();
   glLoadMatrixf(texMatrix.data());
-  if(mEnableBumpmapping)
+  if(mEnableBumpmapping || mEnableShader)
   {
     boTextureManager->activateTextureUnit(1);  // Diffuse
     glPushMatrix();
     glLoadMatrixf(texMatrix.data());
   }
+  tm_texmatrix = profiler.elapsed();
 
   // First find out which rendering tehniques to use for the chunk:
-  // Check if we'll render flat surface or not.
-  info->flat = (lake->type == BoLake::Flat) || !mEnableWaves;
   // Check whether water's alpha in chunk is variable or constant.
   info->constalpha = -1.0f;  // -1.0f means variable alpha
   if(mEnableTranslucency)
   {
-    if(info->flat)
+    if(chunk->mingroundheight == chunk->maxgroundheight)
     {
-      if(chunk->mingroundheight == chunk->maxgroundheight)
-      {
-        // Ground depth doesn't vary within chunk. Alpha is certainly const.
-        info->constalpha = waterAlphaAt(lake, chunk->minx, chunk->miny);
-      }
-      else if(lake->level - chunk->maxgroundheight > 0.0f)
-      {
-        // Whole chunk is underwater. Maybe water is deep enough so that alpha
-        //  is 1?
-        float minalpha = (lake->level - chunk->maxgroundheight) * lake->alphaMultiplier + lake->alphaBase;
-        if(minalpha >= 1.0f)
-        {
-          // Alpha is always at least 1.0f, i.e. constant
-          info->constalpha = 1.0f;
-        }
-      }
+      // Ground depth doesn't vary within chunk. Alpha is certainly const.
+      info->constalpha = waterAlphaAt(lake, chunk->minx, chunk->miny);
     }
-    else if(lake->type == BoLake::Waves)
+    else if(lake->level - chunk->maxgroundheight > 0.0f)
     {
-      if(lake->level - chunk->maxgroundheight > 0.0f)
+      // Whole chunk is underwater. Maybe water is deep enough so that alpha
+      //  is 1?
+      float minalpha = (lake->level - chunk->maxgroundheight) * lake->alphaMultiplier + lake->alphaBase;
+      if(minalpha >= 1.0f)
       {
-        // Whole chunk is underwater. Maybe water is deep enough so that alpha
-        //  is 1?
-        float minalpha = (lake->level - lake->waveHeightMax - chunk->maxgroundheight) * lake->alphaMultiplier + lake->alphaBase;
-        if(minalpha >= 1.0f)
-        {
-          // Alpha is always at least 1.0f, i.e. constant
-          info->constalpha = 1.0f;
-        }
+        // Alpha is always at least 1.0f, i.e. constant
+        info->constalpha = 1.0f;
       }
     }
   }
@@ -1186,16 +1065,9 @@ void BoWaterManager::renderChunk(BoLake* lake, BoLake::WaterChunk* chunk, float 
     // Translucency isn't used. Set alpha to 1.0f
     info->constalpha = 1.0f;
   }
-  // Check if we can use derivations to calculate normals and tangent-space
-  //  vectors.
-  info->useDerivations = false;
-  if(lake->type == BoLake::Waves && mEnableWaves)
-  {
-    info->useDerivations = true;
-  }
   // If we're very lucky, we may be able to render whole chunk as a single quad
   info->singleQuad = false;
-  if(info->flat && info->constalpha != -1.0f && !mEnableReflections)
+  if(info->constalpha != -1.0f && !mEnableReflections)
   {
     info->singleQuad = true;
     info->detail = 1000;
@@ -1203,30 +1075,28 @@ void BoWaterManager::renderChunk(BoLake* lake, BoLake::WaterChunk* chunk, float 
   }
 
 
-  // If we'll calculate per-cell normals and tangent-space vectors, we need
-  //  to set up chunk borders first.
-  if(!info->flat && !info->useDerivations)
-  {
-    calculateChunkBorders(info);
-  }
-
   // Chunk size in corners (depends on detail level) and doesn't include
   //  border.
   // This is for stuff which is calculated per-corner.
   info->chunkcornerw = (int)ceilf((chunk->maxx - chunk->minx) / chunkdetail + 1.0f);
   info->chunkcornerh = (int)ceilf((chunk->maxy - chunk->miny) / chunkdetail + 1.0f);
 
-  // Light vector for bumpmapping. Sun is directional light, so we don't need
-  //  to calculate this per-vertex.
   if(mEnableBumpmapping && !mEnableShader)
   {
+    // Light vector for bumpmapping. Sun is directional light, so we don't need
+    //  to calculate this per-vertex.
     if(!mSun)
     {
       boError() << k_funcinfo << "NULL sun!" << endl;
     }
     info->lightvector = mSun->position3();
     info->lightvector.normalize();
+
+    boTextureManager->activateTextureUnit(0);
+    float lightv[] = { info->lightvector.x(), info->lightvector.y(), info->lightvector.z(), 1.0f };
+    glTexEnvfv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR, lightv);
   }
+  tm_miscinit = profiler.elapsed();
 
 
   // Recalculate all the data if necessary
@@ -1235,15 +1105,7 @@ void BoWaterManager::renderChunk(BoLake* lake, BoLake::WaterChunk* chunk, float 
     // Init dat buffers (vbos/arrays)
     initDataBuffersForStorage(info);
 
-    // Pass 1: calculate normals of each cell (unless derivations are used)
-    //  Here, we also fill vertex and texcoords vbos if they're used
-    if(!info->flat && !info->useDerivations)
-    {
-      calculatePerCellStuff(info);
-    }
-
-    // Pass 2: calculate normal for each corner by taking average of normals of all
-    //  cells that have this corner.
+    // Calculate normal for each corner.
     //  Also fill in normal, tangentlight and halfvector vbos.
     calculatePerCornerStuff(info);
 
@@ -1253,17 +1115,20 @@ void BoWaterManager::renderChunk(BoLake* lake, BoLake::WaterChunk* chunk, float 
 
     chunk->dirty = false;
   }
+  tm_dirty = profiler.elapsed();
 
 
   // Render all the cells in this chunk
-  if(info->constalpha == 1.0f)
-  {
-    glDisable(GL_BLEND);
-  }
-  else if(mEnableShader)
+
+  // Enable/disable blending and other opengl states
+  if(mEnableShader)
   {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  }
+  else if(info->constalpha == 1.0f)
+  {
+    glDisable(GL_BLEND);
   }
   else if(mEnableBumpmapping)
   {
@@ -1310,67 +1175,29 @@ void BoWaterManager::renderChunk(BoLake* lake, BoLake::WaterChunk* chunk, float 
   {
     glVertexPointer(3, GL_FLOAT, 0, chunk->vertices);
   }
-  if(mEnableBumpmapping && !mEnableShader)
+  // For translucency, we supply alpha in the primary color
+  if(mEnableTranslucency && !mEnableShader)
   {
-    // Tangent-space light vectors are sent as colors
+    // If translucency is enabled but bumpmapping is not, then we need to
+    //  supply alpha.
     glEnableClientState(GL_COLOR_ARRAY);
-    if(mEnableTranslucency)
-    {
-      // If we have translucency enabled, water's translucency is sent as
-      //  color's alpha
-      if(mEnableVBO)
-      {
-        boglBindBuffer(GL_ARRAY_BUFFER, chunk->vbo_tangentlight4);
-        glColorPointer(4, GL_FLOAT, 0, 0);
-      }
-      else
-      {
-        glColorPointer(4, GL_FLOAT, 0, chunk->tangentlight4);
-      }
-    }
-    else
-    {
-      // No translucency
-      if(mEnableVBO)
-      {
-        boglBindBuffer(GL_ARRAY_BUFFER, chunk->vbo_tangentlight);
-        glColorPointer(3, GL_FLOAT, 0, 0);
-      }
-      else
-      {
-        glColorPointer(3, GL_FLOAT, 0, chunk->tangentlight);
-      }
-    }
-  }
-  else if(!mEnableShader)
-  {
-    // For OpenGL lighting (and reflections), we need normals
-    glEnableClientState(GL_NORMAL_ARRAY);
     if(mEnableVBO)
     {
-      boglBindBuffer(GL_ARRAY_BUFFER, chunk->vbo_normal);
-      glNormalPointer(GL_FLOAT, 0, 0);
+      boglBindBuffer(GL_ARRAY_BUFFER, chunk->vbo_color);
+      glColorPointer(4, GL_FLOAT, 0, 0);
     }
     else
     {
-      glNormalPointer(GL_FLOAT, 0, chunk->normals);
-    }
-    if(mEnableTranslucency)
-    {
-      // If translucency is enabled but bumpmapping is not, then we need to
-      //  supply alpha.
-      glEnableClientState(GL_COLOR_ARRAY);
-      if(mEnableVBO)
-      {
-        boglBindBuffer(GL_ARRAY_BUFFER, chunk->vbo_color);
-        glColorPointer(4, GL_FLOAT, 0, 0);
-      }
-      else
-      {
-        glColorPointer(4, GL_FLOAT, 0, chunk->colors);
-      }
+      glColorPointer(4, GL_FLOAT, 0, chunk->colors);
     }
   }
+
+  // We need to supply normal in case we use OpenGL lighting
+  if(!mEnableBumpmapping && !mEnableShader)
+  {
+    glNormal3f(0.0f, 0.0f, 1.0f);
+  }
+  tm_renderinit = profiler.elapsed();
 
   // Do the drawing
   if(mEnableVBO)
@@ -1384,24 +1211,17 @@ void BoWaterManager::renderChunk(BoLake* lake, BoLake::WaterChunk* chunk, float 
   }
   mRenderedQuads += chunk->indices_count / 4;
   glPopClientAttrib();
+  tm_render = profiler.elapsed();
 
 
   if(mEnableBumpmapping && !mEnableShader)
   {
     // Pass 2: ambient lighting and reflection pass.
-    // TODO: combine this with diffuse pass on programmable hardware.
 
     // Push attribute stack
     glPushAttrib(/*GL_COLOR_BUFFER_BIT | GL_LIGHTING_BIT | GL_TEXTURE_BIT | */GL_ALL_ATTRIB_BITS);
 
-    setupDiffuseTexture(0);
-    // Modulate with primary color
-    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-
-    if(mEnableReflections)
-    {
-      setupEnvMapTexture(1);
-    }
+    // Lighting calculations
 
     // Amount of ambient light water will receive.
     BoVector4Float ambientcolor = mSun ? mSun->ambient() : BoVector4Float(1.0f, 1.0f, 1.0f, 1.0f);
@@ -1418,10 +1238,16 @@ void BoWaterManager::renderChunk(BoLake* lake, BoLake::WaterChunk* chunk, float 
     // We want final color to be:
     //    diffusetex * ambientcolor + reflectiontex * reflectioncolor
     //  (note that both ambient and diffuse lighting use same texture)
-
     BoVector4Float resultcolor = ambientcolor;
     if(mEnableReflections)
     {
+      // Setup envmap
+      setupEnvMapTexture(1);
+      // Use alpha from previous texture
+      glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
+      glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, GL_REPLACE);
+      glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_ALPHA, GL_PREVIOUS);
+      glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_ALPHA, GL_SRC_ALPHA);
       // If reflections are used, then we use:
       //    reflectiontex * reflectioncolor + diffusetex * primarycolor * (1 - reflectioncolor)
       //  (reflectioncolor is used for interpolating)
@@ -1438,9 +1264,29 @@ void BoWaterManager::renderChunk(BoLake* lake, BoLake::WaterChunk* chunk, float 
       resultcolor.scale(1.0f - mReflectionStrength);
       resultcolor.setW(1.0f);
     }
-    // Set primary color.  Whole model will be drawn using that color (and no
-    //  shading/lighting).
-    glColor4fv(resultcolor.data());
+    else
+    {
+      // Disable TU1
+      boTextureManager->activateTextureUnit(1);
+      boTextureManager->disableTexturing();
+    }
+
+    // Setup diffuse tex
+    setupDiffuseTexture(0);
+    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
+    // Texture will be modulated by resultcolor.
+    glTexEnvfv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR, resultcolor.data());
+    glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_MODULATE);
+    glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB, GL_CONSTANT);
+    glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB, GL_SRC_COLOR);
+    if(mEnableTranslucency)
+    {
+      // Set alpha to the one given in primary color
+      glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, GL_REPLACE);
+      glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_ALPHA, GL_PRIMARY_COLOR);
+      glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_ALPHA, GL_SRC_ALPHA);
+    }
+
 
     // Use additive blending.
     glEnable(GL_BLEND);
@@ -1452,6 +1298,22 @@ void BoWaterManager::renderChunk(BoLake* lake, BoLake::WaterChunk* chunk, float 
     // FIXME!!! We need to send alpha for ambient lighting as well.
 
     glPushClientAttrib(GL_ALL_ATTRIB_BITS);
+    // For translucency, we supply alpha in the primary color
+    if(mEnableTranslucency)
+    {
+      // If translucency is enabled but bumpmapping is not, then we need to
+      //  supply alpha.
+      glEnableClientState(GL_COLOR_ARRAY);
+      if(mEnableVBO)
+      {
+        boglBindBuffer(GL_ARRAY_BUFFER, chunk->vbo_color);
+        glColorPointer(4, GL_FLOAT, 0, 0);
+      }
+      else
+      {
+        glColorPointer(4, GL_FLOAT, 0, chunk->colors);
+      }
+    }
     // Vertices
     glEnableClientState(GL_VERTEX_ARRAY);
     if(mEnableVBO)
@@ -1463,17 +1325,9 @@ void BoWaterManager::renderChunk(BoLake* lake, BoLake::WaterChunk* chunk, float 
     {
       glVertexPointer(3, GL_FLOAT, 0, chunk->vertices);
     }
-    // We need normals for the automatic texgen
-    glEnableClientState(GL_NORMAL_ARRAY);
-    if(mEnableVBO)
-    {
-      boglBindBuffer(GL_ARRAY_BUFFER, chunk->vbo_normal);
-      glNormalPointer(GL_FLOAT, 0, 0);
-    }
-    else
-    {
-      glNormalPointer(GL_FLOAT, 0, chunk->normals);
-    }
+    // We need normal for the automatic texgen
+    // As the water is flat, we can supply the normal just once
+    glNormal3f(0.0f, 0.0f, 1.0f);
 
     // Do the drawing
     if(mEnableVBO)
@@ -1501,7 +1355,7 @@ void BoWaterManager::renderChunk(BoLake* lake, BoLake::WaterChunk* chunk, float 
     glPopAttrib();
     boTextureManager->invalidateCache();
   }
-  if(mEnableBumpmapping)
+  if(mEnableBumpmapping || mEnableShader)
   {
     // Diffuse texture's matrix was also pushed. Pop this one as well.
     glMatrixMode(GL_TEXTURE);
@@ -1514,140 +1368,18 @@ void BoWaterManager::renderChunk(BoLake* lake, BoLake::WaterChunk* chunk, float 
   glPopMatrix();
 
   delete info;
-}
 
-void BoWaterManager::calculateChunkBorders(RenderInfo* info)
-{
-  // First find out size of the border of the chunk. Border is used to
-  //  calculate flat normals (we calculate them for cells both in the chunk and
-  //  on the border).
-  // Reset all borders to 1 first.
-  info->border_left = 1, info->border_right = 1, info->border_top = 1, info->border_bottom = 1;
-  // FIXME: name
-  info->cellminx = info->chunk->minx - info->detail;
-  if(info->cellminx < info->lake->minx)
-  {
-    info->cellminx = info->lake->minx;
-    info->border_left = 0;
-  }
-  info->cellminy = info->chunk->miny - info->detail;
-  if(info->cellminy < info->lake->miny)
-  {
-    info->cellminy = info->lake->miny;
-    info->border_top = 0;
-  }
-  info->cellmaxx = info->chunk->maxx + info->detail;
-  if(info->cellmaxx > info->lake->maxx)
-  {
-    info->cellmaxx = info->lake->maxx;
-    info->border_right = 0;
-  }
-  info->cellmaxy = info->chunk->maxy + info->detail;
-  if(info->cellmaxy > info->lake->maxy)
-  {
-    info->cellmaxy = info->lake->maxy;
-    info->border_bottom = 0;
-  }
+  tm_uninit = profiler.elapsed();
 
-  // Chunk size in cells (depends on detail level). Includes border.
-  // Use this only for stuff which is calculated per-cell!!!
-  info->chunkcellw = (int)ceilf((info->cellmaxx - info->cellminx) / info->detail);
-  info->chunkcellh = (int)ceilf((info->cellmaxy - info->cellminy) / info->detail);
-}
-
-void BoWaterManager::calculatePerCellStuff(RenderInfo* info)
-{
-  if(mEnableShader)
-  {
-    return;
-  }
-
-  int xi, yi;
-  xi = 0;  // X Index
-  for(float x = info->cellminx; x < info->cellmaxx; x += info->detail, xi++)
-  {
-    yi = 0;  // Y Index
-    for(float y = info->cellminy; y < info->cellmaxy; y += info->detail, yi++)
-    {
-      if(xi >= info->chunkcellw || yi >= info->chunkcellh)
-      {
-        boError() << k_funcinfo << "ERROR: invalid index coords: (" << xi << "; " << yi <<
-            ")  (chunk size: " << info->chunkcellw << "x" << info->chunkcellh << ")" << endl;
-      }
-      if(!info->lake->hasAnyCorner(x, y, x + info->detail, y + info->detail))
-      {
-        NORM(xi, yi) = BoVector3Float();
-        if(mEnableBumpmapping)
-        {
-          TANGENTLIGHT(xi, yi) = BoVector3Float();
-          HALFVECTOR(xi, yi) = BoVector3Float();
-        }
-        continue;
-      }
-      // Calculate normal for this cell
-      BoVector3Float a, b, c;
-      float x2 = QMIN(x + info->detail, info->cellmaxx);
-      float y2 = QMIN(y + info->detail, info->cellmaxy);
-      a = BoVector3Float(x, y, info->lake->height(x, y));
-      b = BoVector3Float(x2, y, info->lake->height(x2, y));
-      c = BoVector3Float(x, y2, info->lake->height(x, y2));
-      NORM(xi, yi) = BoVector3Float::crossProduct(c - b, a - b);
-      NORM(xi, yi).normalize();
-      if(mEnableBumpmapping)
-      {
-        // Calculate tangent space light position
-        // Calculate tangents of the quad
-        /*** Original equation  (for triangle abc):
-        BoVector3Float side0 = b - a;
-        BoVector3Float side1 = c - a;
-        float deltaT0 = y / texrepeat - y / texrepeat;  // b.texcoord.y - a.texcoord.y
-        float deltaT1 = y2 / texrepeat - y / texrepeat;  // c.texcoord.y - a.texcoord.y
-        BoVector3Float sTangent = deltaT1*side0-deltaT0*side1;
-        sTangent.normalize();
-
-        //Calculate t tangent
-        float deltaS0 = x2 / texrepeat - x / texrepeat;  // b.texcoord.x - a.texcoord.x
-        float deltaS1 = x / texrepeat - x / texrepeat;  // c.texcoord.x - a.texcoord.x
-        BoVector3Float tTangent = deltaS1*side0-deltaS0*side1;
-        tTangent.normalize();*/
-        // Simplified & optimized:
-        BoVector3Float side0 = b - a;
-        BoVector3Float side1 = a - c;
-        BoVector3Float sTangent = side0 * ((x2 - x) / info->texrepeat);
-        sTangent.normalize();
-        BoVector3Float tTangent = (side1 * ((y2 - y) / info->texrepeat));
-        tTangent.normalize();
-        // reverse tangents if necessary
-        BoVector3Float tangentCross = BoVector3Float::crossProduct(sTangent, tTangent);
-        if(BoVector3Float::dotProduct(tangentCross, NORM(xi, yi)) < 0.0f)
-        {
-          sTangent = -sTangent;
-          tTangent = -tTangent;
-        }
-        // Calculate base tangent space light vector (real vector depends on
-        //  surface normal and thus differs for each corner)
-        BoVector3Float tangentSpaceLight;
-        tangentSpaceLight.setX(BoVector3Float::dotProduct(sTangent, info->lightvector));
-        tangentSpaceLight.setY(BoVector3Float::dotProduct(tTangent, info->lightvector));
-        tangentSpaceLight.setZ(BoVector3Float::dotProduct(NORM(xi, yi), info->lightvector));
-        tangentSpaceLight.normalize();
-        TANGENTLIGHT(xi, yi) = tangentSpaceLight;
-
-        // Calculate H (half-angle vector)
-        // H is average of light and view vectors
-        BoVector3Float viewvector = mCameraPos - a;
-        viewvector.normalize();
-        BoVector3Float halfvector = viewvector + info->lightvector;
-        halfvector.normalize();
-        BoVector3Float tangenthalfvector;
-        tangenthalfvector.setX(BoVector3Float::dotProduct(sTangent, halfvector));
-        tangenthalfvector.setY(BoVector3Float::dotProduct(tTangent, halfvector));
-        tangenthalfvector.setZ(BoVector3Float::dotProduct(NORM(xi, yi), halfvector));
-        HALFVECTOR(xi, yi) = tangenthalfvector;
-        HALFVECTOR(xi, yi).normalize();
-      }
-    }
-  }
+  /*boDebug() << k_funcinfo << "Took " << tm_uninit << "us IN TOTAL" << endl << "   " <<
+      " IInfo: " << tm_initinfo <<
+      " IEnv: " << tm_initenv - tm_initinfo <<
+      " TexMatrix: " << tm_texmatrix - tm_initenv <<
+      " IMisc: " << tm_miscinit - tm_texmatrix <<
+      " Dirty: " << tm_dirty - tm_miscinit <<
+      " RenderI: " << tm_renderinit - tm_dirty <<
+      " Render: " << tm_render - tm_renderinit <<
+      " Uninit: " << tm_uninit - tm_render << endl;*/
 }
 
 void BoWaterManager::calculatePerCornerStuff(RenderInfo* info)
@@ -1659,7 +1391,6 @@ void BoWaterManager::calculatePerCornerStuff(RenderInfo* info)
       // Position of current corner, in cell coordinates
       float posx = QMIN(info->chunk->minx + x * info->detail, info->chunk->maxx);
       float posy = QMIN(info->chunk->miny + y * info->detail, info->chunk->maxy);
-      float posz = info->lake->height(posx, posy);
 
 //      if(!info->lake->hasAnyCorner(posx, posy, posx + info->detail, posy + info->detail))
       // hasAnyCorner() does automatic limits checking, so no need to worry about
@@ -1668,228 +1399,12 @@ void BoWaterManager::calculatePerCornerStuff(RenderInfo* info)
       {
         // Reset all variables, just in case...
         // TODO: find out if this is really needed or is it just waste of time
-        ARRAY_CORNER(info->vertices_p, x, y) = BoVector3Float(posx, -posy, 10);  // 10 is random
-        if(!mEnableShader)
-        {
-          ARRAY_CORNER(info->normals_p, x, y) = BoVector3Float(0, 0, 1);
-          if(mEnableBumpmapping)
-          {
-            if(mEnableTranslucency)
-            {
-              ARRAY_CORNER(info->tangentlights_p4, x, y) = BoVector4Float(0, 0, 1, 0);
-            }
-            else
-            {
-              ARRAY_CORNER(info->tangentlights_p, x, y) = BoVector3Float(0, 0, 1);
-            }
-            ARRAY_CORNER(info->halfvectors_p, x, y) = BoVector3Float(0, 0, 1);
-          }
-          else if(mEnableTranslucency)
-          {
-            ARRAY_CORNER(info->colors_p, x, y) = BoVector4Float(1, 1, 1, 1);
-          }
-        }
         continue;
       }
 
-      if(mEnableShader)
-      {
-        // That's really easy :-)
-        ARRAY_CORNER(info->vertices_p, x, y) = BoVector3Float(posx, -posy, posz);
-        continue;
-      }
+      ARRAY_CORNER(info->vertices_p, x, y) = BoVector3Float(posx, -posy, info->lake->level);
 
-      // Corner's normal
-      BoVector3Float n;
-      // Corner's Tangent-Space Light vector
-      BoVector3Float tsl;
-      // Corner's half-angle vector (also tangent-space)
-      BoVector3Float halfv;
-
-      if(info->flat)
-      {
-        // For flat lakes, things are _really_ easy (and fast :-))
-        n.set(0, 0, 1);
-        if(mEnableBumpmapping)
-        {
-          // When surface's normal points upwards (is (0; 0; 1)), then
-          //  tangent-space is same as world-space.
-          tsl = info->lightvector;
-          BoVector3Float viewvector = mCameraPos - BoVector3Float(posx, -posy, posz);
-          viewvector.normalize();
-          halfv = viewvector + info->lightvector;
-          // halfv will be normalized later
-        }
-      }
-      else if(info->useDerivations)
-      {
-        // We use derivation to calculate water's normal directly, without having
-        //  to first calculate per-cell normals and then averaging.
-        float derivation = cos(((posx * info->lake->waveVector.x()) + (posy * info->lake->waveVector.y())) + info->lake->waveSpeed * time()) *
-            QMAX(info->lake->waveHeightMin, QMIN(info->lake->waveHeightMax, (groundHeightAt(posx, posy) - info->lake->level) * info->lake->waveVector.z()));
-        // Calculate point's normal on 2d plane (xz plane), by rotating it 90 degrees cw or ccw
-        BoVector3Float planenormal(-derivation, 0, 1);
-        // Now rotate 2dnormal around z axis, according to direction of waves, to get real normal
-        // Z will remain same
-        n.setZ(planenormal.z());
-        // Calculate x and y components
-        n.setX(planenormal.x() * info->lake->waveVector.x());
-        n.setY(planenormal.x() * info->lake->waveVector.y());
-        n.normalize();
-
-        // Now calculate bumpmapping stuff
-        if(mEnableBumpmapping)
-        {
-          // Both tangents are perpendicular to normal and their either x- or
-          //  y-component is 0.
-          // Calculate s-tangent (y=0). x*nx + z*nz = 0
-          BoVector3Float sTangent;
-          if(n.x() == 0)
-          {
-            // Special case. Tangent's z is also 0, x can be anything, but we
-            //  want normalized vector, so let it be 1.
-            sTangent.set(1, 0, 0);
-          }
-          /*else if(n.z() == 0)
-          {
-            // Another special case, very unlikely.
-            sTangent.set(0, 0, 1);
-          }*/
-          else
-          {
-            // Let tangent's x be 1 first, then z = -nx / nz
-            sTangent.set(1, 0, -n.x() / n.z());
-            sTangent.normalize();
-          }
-          // Calculate t-tangent (x=0). y*ny + z*nz = 0
-          BoVector3Float tTangent;
-          if(n.y() == 0)
-          {
-            // Special case. Tangent's z is also 0, y can be anything, but we
-            //  want normalized vector, so let it be 1.
-            tTangent.set(0, 1, 0);
-          }
-          /*else if(n.z() == 0)
-          {
-            // Another special case, very unlikely.
-            tTangent.set(0, 0, 1);
-          }*/
-          else
-          {
-            // Let tangent's y be 1 first, then z = -ny / nz
-            tTangent.set(1, 0, -n.y() / n.z());
-            tTangent.normalize();
-          }
-
-          // Calculate tangent-space light vector.
-          tsl.setX(BoVector3Float::dotProduct(sTangent, info->lightvector));
-          tsl.setY(BoVector3Float::dotProduct(tTangent, info->lightvector));
-          tsl.setZ(BoVector3Float::dotProduct(n, info->lightvector));
-          // Will be normalized later
-
-          // Calculate H (half-angle vector).
-          // H is average of light and view vectors (vector which is between them).
-          BoVector3Float viewvector = mCameraPos - BoVector3Float(posx, -posy, posz);
-          viewvector.normalize();
-          BoVector3Float halfvector = viewvector + info->lightvector;
-          //halfvector.normalize();
-          halfv.setX(BoVector3Float::dotProduct(sTangent, halfvector));
-          halfv.setY(BoVector3Float::dotProduct(tTangent, halfvector));
-          halfv.setZ(BoVector3Float::dotProduct(n, halfvector));
-          // halfv will also be normalized later
-        }
-      }
-      else
-      {
-        // Don't use derivations.
-        // Use average of pre-calculated cell normals to get smooth normal.
-
-        // Coordinates of cell which is bottom-right of current corner.
-        int cellx = x + info->border_left;
-        int celly = y + info->border_top;
-        // upper-left cell
-        if (cellx > 0 && celly > 0)
-        {
-          n += NORM(cellx - 1, celly - 1);
-          if(mEnableBumpmapping)
-          {
-            tsl += TANGENTLIGHT(cellx - 1, celly - 1);
-            halfv += HALFVECTOR(cellx - 1, celly - 1);
-          }
-        }
-        // upper-right cell
-        if (cellx < (info->chunkcellw - info->border_left) && celly > 0)
-        {
-          n += NORM(cellx, celly - 1);
-          if(mEnableBumpmapping)
-          {
-            tsl += TANGENTLIGHT(cellx, celly - 1);
-            halfv += HALFVECTOR(cellx, celly - 1);
-          }
-        }
-        // lower-right cell
-        if (cellx < (info->chunkcellw - info->border_left) && celly < (info->chunkcellh - info->border_top))
-        {
-          n += NORM(cellx, celly);
-          if(mEnableBumpmapping)
-          {
-            tsl += TANGENTLIGHT(cellx, celly);
-            halfv += HALFVECTOR(cellx, celly);
-          }
-        }
-        // lower-left cell
-        if (cellx > 0 && celly < (info->chunkcellh - info->border_top))
-        {
-          n += NORM(cellx - 1, celly);
-          if(mEnableBumpmapping)
-          {
-            tsl += TANGENTLIGHT(cellx - 1, celly);
-            halfv += HALFVECTOR(cellx - 1, celly);
-          }
-        }
-        if(n.x() * n.x() + n.y() * n.y() + n.z() * n.z() < 0.05)
-        {
-          printf("WARNING: vec(%f, %f, %f) has length %f\n", n.x(), n.y(), n.z(), n.length());
-          info->chunk->normals[y * info->chunkcornerw + x] = BoVector3Float(0, 0, 1);
-          //continue;
-        }
-        if(n.z() < 0.1)
-        {
-          printf("ERROR: z too low: vec(%f, %f, %f)\n", n.x(), n.y(), n.z());
-        }
-        n.normalize();
-      }
-
-
-      ARRAY_CORNER(info->vertices_p, x, y) = BoVector3Float(posx, -posy, posz);
-      ARRAY_CORNER(info->normals_p, x, y) = n;
-
-      if(mEnableBumpmapping)
-      {
-        // Tangent-space light vector
-        tsl.normalize();
-        // Convert it from range [-1; 1] into [0; 1] ...
-        tsl.scale(0.5);
-        tsl += BoVector3Float(0.5, 0.5, 0.5);
-        BoVector4Float tsl4;
-        if(mEnableTranslucency)
-        {
-          tsl4 = BoVector4Float(tsl.x(), tsl.y(), tsl.z(), waterAlphaAt(info->lake, posx, posy));
-          ARRAY_CORNER(info->tangentlights_p4, x, y) = tsl4;
-        }
-        else
-        {
-          ARRAY_CORNER(info->tangentlights_p, x, y) = tsl;
-        }
-
-        // Half-angle vector
-        halfv.normalize();
-        // Convert it from range [-1; 1] into [0; 1] ...
-        halfv.scale(0.5);
-        halfv += BoVector3Float(0.5, 0.5, 0.5);
-        ARRAY_CORNER(info->halfvectors_p, x, y) = halfv;
-      }
-      else if(mEnableTranslucency)
+      if(mEnableTranslucency && !mEnableShader)
       {
         ARRAY_CORNER(info->colors_p, x, y) = BoVector4Float(1, 1, 1, waterAlphaAt(info->lake, posx, posy));
       }
@@ -1907,10 +1422,6 @@ void BoWaterManager::initDataBuffersForStorage(RenderInfo* info)
     if(!info->chunk->vbo_vertex)
     {
       boglGenBuffers(1, &info->chunk->vbo_vertex);
-      boglGenBuffers(1, &info->chunk->vbo_normal);
-      boglGenBuffers(1, &info->chunk->vbo_tangentlight);
-      boglGenBuffers(1, &info->chunk->vbo_tangentlight4);
-      boglGenBuffers(1, &info->chunk->vbo_halfvector);
       boglGenBuffers(1, &info->chunk->vbo_color);
       boglGenBuffers(1, &info->chunk->vbo_index);
     }
@@ -1920,28 +1431,7 @@ void BoWaterManager::initDataBuffersForStorage(RenderInfo* info)
     info->vertices_p = (BoVector3Float*)boglMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
     if(!mEnableShader)
     {
-      boglBindBuffer(GL_ARRAY_BUFFER, info->chunk->vbo_normal);
-      boglBufferData(GL_ARRAY_BUFFER, corners * sizeof(BoVector3Float), 0, WATER_VBO_MODE);
-      info->normals_p = (BoVector3Float*)boglMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-      if(mEnableBumpmapping)
-      {
-        if(mEnableTranslucency)
-        {
-          boglBindBuffer(GL_ARRAY_BUFFER, info->chunk->vbo_tangentlight4);
-          boglBufferData(GL_ARRAY_BUFFER, corners * sizeof(BoVector4Float), 0, WATER_VBO_MODE);
-          info->tangentlights_p4 = (BoVector4Float*)boglMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-        }
-        else
-        {
-          boglBindBuffer(GL_ARRAY_BUFFER, info->chunk->vbo_tangentlight);
-          boglBufferData(GL_ARRAY_BUFFER, corners * sizeof(BoVector3Float), 0, WATER_VBO_MODE);
-          info->tangentlights_p = (BoVector3Float*)boglMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-        }
-        boglBindBuffer(GL_ARRAY_BUFFER, info->chunk->vbo_halfvector);
-        boglBufferData(GL_ARRAY_BUFFER, corners * sizeof(BoVector3Float), 0, WATER_VBO_MODE);
-        info->halfvectors_p = (BoVector3Float*)boglMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-      }
-      else if(mEnableTranslucency)
+      if(mEnableTranslucency)
       {
         boglBindBuffer(GL_ARRAY_BUFFER, info->chunk->vbo_color);
         boglBufferData(GL_ARRAY_BUFFER, corners * sizeof(BoVector4Float), 0, WATER_VBO_MODE);
@@ -1960,21 +1450,10 @@ void BoWaterManager::initDataBuffersForStorage(RenderInfo* info)
     {
       // Reallocate arrays
       delete[] info->chunk->vertices;
-      delete[] info->chunk->normals;
       info->chunk->vertices = new BoVector3Float[info->chunkcornerw * info->chunkcornerh];
       if(!mEnableShader)
       {
-        info->chunk->normals = new BoVector3Float[info->chunkcornerw * info->chunkcornerh];
-        if(mEnableBumpmapping)
-        {
-          delete[] info->chunk->tangentlight;
-          delete[] info->chunk->tangentlight4;
-          delete[] info->chunk->halfvector;
-          info->chunk->tangentlight = new BoVector3Float[info->chunkcornerw * info->chunkcornerh];
-          info->chunk->tangentlight4 = new BoVector4Float[info->chunkcornerw * info->chunkcornerh];
-          info->chunk->halfvector = new BoVector3Float[info->chunkcornerw * info->chunkcornerh];
-        }
-        else if(mEnableTranslucency)
+        if(mEnableTranslucency)
         {
           delete[] info->chunk->colors;
           info->chunk->colors = new BoVector4Float[info->chunkcornerw * info->chunkcornerh];
@@ -1987,10 +1466,6 @@ void BoWaterManager::initDataBuffersForStorage(RenderInfo* info)
     // Update pointers in RenderInfo. Note that some of those pointers may be
     //  invalid, but those shouldn't be used anyway.
     info->vertices_p = info->chunk->vertices;
-    info->normals_p = info->chunk->normals;
-    info->tangentlights_p = info->chunk->tangentlight;
-    info->tangentlights_p4 = info->chunk->tangentlight4;
-    info->halfvectors_p = info->chunk->halfvector;
     info->colors_p = info->chunk->colors;
     info->indices_p = info->chunk->indices;
   }
@@ -1999,16 +1474,6 @@ void BoWaterManager::initDataBuffersForStorage(RenderInfo* info)
   //  are enabled, beause they aren't used for rendering.
   if(info->chunk->lastdetail != info->detail)
   {
-    // Init/resize them only if they are actually needed
-    if(!info->flat && !info->useDerivations)
-    {
-      delete[] info->chunk->cellnormals;
-      delete[] info->chunk->celltangentlight;
-      delete[] info->chunk->cellhalfvector;
-      info->chunk->cellnormals = new BoVector3Float[info->chunkcellw * info->chunkcellh];
-      info->chunk->celltangentlight = new BoVector3Float[info->chunkcellw * info->chunkcellh];
-      info->chunk->cellhalfvector = new BoVector3Float[info->chunkcellw * info->chunkcellh];
-    }
     info->chunk->lastdetail = info->detail;
   }
 
@@ -2029,32 +1494,7 @@ void BoWaterManager::uninitDataBuffersForStorage(RenderInfo* info)
     }
     if(!mEnableShader)
     {
-      boglBindBuffer(GL_ARRAY_BUFFER, info->chunk->vbo_normal);
-      if(!boglUnmapBuffer(GL_ARRAY_BUFFER))
-      {
-        boError() << k_funcinfo << "can't unmap normals' vbo!" << endl;
-      }
-      if(mEnableBumpmapping)
-      {
-        if(mEnableTranslucency)
-        {
-          boglBindBuffer(GL_ARRAY_BUFFER, info->chunk->vbo_tangentlight4);
-        }
-        else
-        {
-          boglBindBuffer(GL_ARRAY_BUFFER, info->chunk->vbo_tangentlight);
-        }
-        if(!boglUnmapBuffer(GL_ARRAY_BUFFER))
-        {
-          boError() << k_funcinfo << "can't unmap tangentlights' vbo!" << endl;
-        }
-        boglBindBuffer(GL_ARRAY_BUFFER, info->chunk->vbo_halfvector);
-        if(!boglUnmapBuffer(GL_ARRAY_BUFFER))
-        {
-          boError() << k_funcinfo << "can't unmap halfvectors' vbo!" << endl;
-        }
-      }
-      else if(mEnableTranslucency)
+      if(mEnableTranslucency)
       {
         boglBindBuffer(GL_ARRAY_BUFFER, info->chunk->vbo_color);
         if(!boglUnmapBuffer(GL_ARRAY_BUFFER))
@@ -2090,7 +1530,7 @@ void BoWaterManager::calculateIndices(RenderInfo* info)
       }
       int posx = (int)x;
       int posy = (int)y;
-      if(mEnableReflections && mLocalPlayerIO->isFogged(posx, posy))
+      if(mLocalPlayerIO->isFogged(posx, posy))
       {
         continue;
       }
@@ -2165,15 +1605,7 @@ void BoWaterManager::setupBumpMapTexture(int unit)
 
   if(mEnableAnimBumpmaps)
   {
-    // TODO: 3d texture support!
-    /*if(boTextureManager->supportsTexture3D())
-    {
-      waterbump_anim_3d->bind();
-    }
-    else*/
-    {
-      mWaterAnimBump.at((int)mWaterAnimBumpCurrent)->bind();
-    }
+    mWaterAnimBump.at((int)mWaterAnimBumpCurrent)->bind();
   }
   else
   {
@@ -2191,10 +1623,10 @@ void BoWaterManager::setupBumpMapTexture(int unit)
   glEnable(GL_TEXTURE_GEN_T);
 
   // Tangent space light vector will be encoded in primary color.
-  // Do dot3 between primary color (light vector) and normal. (N.L)
+  // Do dot3 between texenv constant color (light vector) and normal. (N.L)
   glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
   glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_DOT3_RGB);
-  glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB, GL_PRIMARY_COLOR);
+  glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB, GL_CONSTANT);
   glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB, GL_SRC_COLOR);
   glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_RGB, GL_TEXTURE);
   glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_RGB, GL_SRC_COLOR);
@@ -2290,10 +1722,14 @@ void BoWaterManager::initRenderEnvironment()
   }
 
   // Attributes will be popped at the end of render().
-  glPushAttrib(/*GL_LIGHTING_BIT | GL_TEXTURE_BIT | GL_ENABLE_BIT | GL_TRANSFORM_BIT | GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT*/GL_ALL_ATTRIB_BITS);
+  glPushAttrib(GL_ALL_ATTRIB_BITS);
+
+  // Setup textures
   if(mEnableShader)
   {
     glDisable(GL_LIGHTING);
+
+    mShader->bind();
 
     setupDiffuseTexture(0);
     setupBumpMapTexture(1);
@@ -2305,9 +1741,8 @@ void BoWaterManager::initRenderEnvironment()
     //  * tex0: water texture
     //  * tex1: environment cubemap
 
-    setupEnvMapTexture(1);
-
     setupDiffuseTexture(0);
+    setupEnvMapTexture(1);
   }
   else if(mEnableBumpmapping)
   {
@@ -2339,7 +1774,6 @@ void BoWaterManager::initRenderEnvironment()
       glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_ALPHA, GL_PREVIOUS);
       glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_ALPHA, GL_SRC_ALPHA);
     }
-    boTextureManager->activateTextureUnit(0);
   }
   else
   {
@@ -2361,6 +1795,9 @@ void BoWaterManager::initRenderEnvironment()
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specularcolor);
     glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, mWaterShininess);
   }
+
+  // Just in case...
+  boTextureManager->activateTextureUnit(0);
 
   mRenderEnvironmentSetUp = true;
 }
@@ -2387,14 +1824,14 @@ void BoWaterManager::loadNecessaryTextures()
     mWaterTex = new BoTexture(path + "water.jpg", BoTexture::Terrain);
   }
   // Load environment map if we need it
-  if(mEnableReflections && !mEnvMap)
+  if((mEnableShader || mEnableReflections) && !mEnvMap)
   {
     mEnvMap = new BoTexture(path + "sky-%1.jpg",
         BoTexture::FilterLinearMipmapLinear | BoTexture::FormatAuto, BoTexture::TextureCube);
   }
 
   // Create bumpmaps if necessary
-  if(mEnableBumpmapping)
+  if(mEnableShader || mEnableBumpmapping)
   {
     if(mEnableAnimBumpmaps && (mWaterAnimBump.count() == 0))
     {
@@ -2412,21 +1849,18 @@ void BoWaterManager::loadNecessaryTextures()
     {
       mWaterBump = new BoTexture(path + "water-bumpmap.png", BoTexture::NormalMap);
     }
-    /*if(!mNormalizationMap)
-    {
-      createNormalizationMap();
-    }*/
   }
 
-  if(mSupports_shaders)
+  if(mEnableShader)
   {
+    delete mShader;
     mShader = new BoShader(path + "water.shader");
     if(!mShader->valid())
     {
       boDebug() << k_funcinfo << "Shader loading failed (from file '" << path << "water.shader'), disabling shader" << endl;
       delete mShader;
       mShader = 0;
-      mSupports_shaders = false;
+      mEnableShader = false;
     }
   }
 }

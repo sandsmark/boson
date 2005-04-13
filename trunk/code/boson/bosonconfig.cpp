@@ -302,7 +302,7 @@ BosonConfig::BosonConfig(KConfig* conf)
  addDynamicEntryInt("GameLogInterval", 10);
  addDynamicEntryBool("UseLOD", DEFAULT_USE_LOD);
  addDynamicEntryBool("UseVBO", DEFAULT_USE_VBO);
- addDynamicEntryBool("WaterWaves", DEFAULT_WATER_WAVES);
+ addDynamicEntryBool("WaterShaders", DEFAULT_WATER_SHADERS);
  addDynamicEntryBool("WaterReflections", DEFAULT_WATER_REFLECTIONS);
  addDynamicEntryBool("WaterTranslucency", DEFAULT_WATER_TRANSLUCENCY);
  addDynamicEntryBool("WaterBumpmapping", DEFAULT_WATER_BUMPMAPPING);

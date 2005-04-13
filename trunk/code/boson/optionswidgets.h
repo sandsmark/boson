@@ -267,8 +267,11 @@ public:
 	virtual void setDefaults();
 	virtual void load();
 
+protected slots:
+	void slotEnableShaders(bool);
+
 private:
-	QCheckBox* mWaves;
+	QCheckBox* mShaders;
 	QCheckBox* mReflections;
 	QCheckBox* mTranslucency;
 	QCheckBox* mBumpmapping;

@@ -1002,7 +1002,8 @@ void OpenGLOptions::setCurrentGroundRenderer(const QString& renderer)
 WaterOptions::WaterOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
 {
 // QHBox* hbox = new QHBox(this);
- mWaves = new QCheckBox(i18n("Enable waves"), this);
+ mShaders = new QCheckBox(i18n("Enable shaders"), this);
+ mShaders->setEnabled(boWaterManager->supportsShaders());
  mReflections = new QCheckBox(i18n("Enable reflections"), this);
  mReflections->setEnabled(boWaterManager->supportsReflections());
  mTranslucency = new QCheckBox(i18n("Enable translucent water"), this);
@@ -1011,6 +1012,8 @@ WaterOptions::WaterOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
  mBumpmapping->setEnabled(boWaterManager->supportsBumpmapping());
  mAnimatedBumpmaps = new QCheckBox(i18n("Enable animated bumpmaps"), this);
  mAnimatedBumpmaps->setEnabled(boWaterManager->supportsBumpmapping());
+
+ connect(mShaders, SIGNAL(toggled(bool)), this, SLOT(slotEnableShaders(bool)));
 }
 
 WaterOptions::~WaterOptions()
@@ -1021,7 +1024,7 @@ WaterOptions::~WaterOptions()
 void WaterOptions::apply()
 {
  boDebug(210) << k_funcinfo << endl;
- boConfig->setBoolValue("WaterWaves", mWaves->isChecked());
+ boConfig->setBoolValue("WaterShaders", mShaders->isChecked());
  boConfig->setBoolValue("WaterReflections", mReflections->isChecked());
  boConfig->setBoolValue("WaterTranslucency", mTranslucency->isChecked());
  boConfig->setBoolValue("WaterBumpmapping", mBumpmapping->isChecked());
@@ -1032,20 +1035,29 @@ void WaterOptions::apply()
 
 void WaterOptions::setDefaults()
 {
- mWaves->setChecked(DEFAULT_WATER_WAVES);
+ mShaders->setChecked(DEFAULT_WATER_SHADERS);
  mReflections->setChecked(DEFAULT_WATER_REFLECTIONS);
  mTranslucency->setChecked(DEFAULT_WATER_TRANSLUCENCY);
  mBumpmapping->setChecked(DEFAULT_WATER_BUMPMAPPING);
  mAnimatedBumpmaps->setChecked(DEFAULT_WATER_ANIMATED_BUMPMAPS);
+ slotEnableShaders(mShaders->isChecked());
 }
 
 void WaterOptions::load()
 {
- mWaves->setChecked(boConfig->boolValue("WaterWaves"));
+ mShaders->setChecked(boConfig->boolValue("WaterShaders"));
  mReflections->setChecked(boConfig->boolValue("WaterReflections"));
  mTranslucency->setChecked(boConfig->boolValue("WaterTranslucency"));
  mBumpmapping->setChecked(boConfig->boolValue("WaterBumpmapping"));
  mAnimatedBumpmaps->setChecked(boConfig->boolValue("WaterAnimatedBumpmaps"));
+ slotEnableShaders(mShaders->isChecked());
+}
+
+void WaterOptions::slotEnableShaders(bool)
+{
+ mReflections->setEnabled(!mShaders->isChecked());
+ mTranslucency->setEnabled(!mShaders->isChecked());
+ mBumpmapping->setEnabled(!mShaders->isChecked());
 }
 
 //////////////////////////////////////////////////////////////////////
