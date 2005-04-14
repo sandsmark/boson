@@ -438,6 +438,10 @@ bool BosonStartupWidget::eventFilter(QObject* o, QEvent* e)
 				boError() << k_funcinfo << "NULL main widget?!" << endl;
 				return true;
 			}
+			if (!main->factory()) {
+				boError() << k_funcinfo << "NULL factory (this is expected until the startup widgets are ported to libufo)" << endl;
+				return true;
+			}
 			QPopupMenu* p = (QPopupMenu*)main->factory()->container("welcomepopup", main);
 			if (p) {
 				p->popup(QCursor::pos());
