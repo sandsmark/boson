@@ -1863,5 +1863,10 @@ void BoWaterManager::loadNecessaryTextures()
       mEnableShader = false;
     }
   }
+  else if(mShader)
+  {
+    delete mShader;
+    mShader = 0;
+  }
 }
 
