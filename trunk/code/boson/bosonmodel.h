@@ -150,7 +150,7 @@ public:
 	void allocateFrames(unsigned int count);
 	unsigned int addFrames(unsigned int count);
 	unsigned int frameCount() const { return mFrameCount; }
-	BoFrame* frame(unsigned int i) const { return mFrames[i]; }
+	BoFrame* frame(unsigned int i) const;
 	void setFrame(unsigned int i, BoFrame* f);
 
 

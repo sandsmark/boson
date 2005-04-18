@@ -277,7 +277,20 @@ void BoLOD::setFrame(unsigned int i, BoFrame* f)
 
 BoMesh* BoLOD::mesh(unsigned int i) const
 {
+ BO_CHECK_NULL_RET0(d->mMeshes);
+ if (i >= meshCount()) {
+	return 0;
+ }
  return mMeshes[i];
+}
+
+BoFrame* BoLOD::frame(unsigned int i) const
+{
+ BO_CHECK_NULL_RET0(d->mFrames);
+ if (i >= frameCount()) {
+	return 0;
+ }
+ return mFrames[i];
 }
 
 
@@ -715,16 +728,24 @@ unsigned int BosonModel::lodCount() const
 
 BoLOD* BosonModel::lod(unsigned int index) const
 {
+ BO_CHECK_NULL_RET0(d->mLODs);
+ if (index >= lodCount()) {
+	return 0;
+ }
  return &d->mLODs[index];
 }
 
 float BosonModel::lodDistance(unsigned int index) const
 {
+ if (!d->mLODDistances || index >= d->mLODCount) {
+	return 0.0;
+ }
  return d->mLODDistances[index];
 }
 
 void BosonModel::setLodDistance(unsigned int index, float distance) const
 {
+ BO_CHECK_NULL_RET(d->mLODDistances);
  d->mLODDistances[index] = distance;
 }
 
@@ -776,4 +797,5 @@ void BosonModel::setBoundingSphereRadius(float r)
 {
  d->mBoundingSphereRadius = r;
 }
+
 
