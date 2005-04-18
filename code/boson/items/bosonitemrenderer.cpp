@@ -210,7 +210,11 @@ void BosonItemModelRenderer::animate()
 void BosonItemModelRenderer::renderItem(unsigned int lod)
 {
  BO_CHECK_NULL_RET(mModel);
- mModel->lod(lod)->frame((unsigned int)mCurrentFrame)->renderFrame(teamColor());
+ BoLOD* l = mModel->lod(lod);
+ BO_CHECK_NULL_RET(l);
+ BoFrame* frame = l->frame((unsigned int)mCurrentFrame);
+ BO_CHECK_NULL_RET(frame);
+ frame->renderFrame(teamColor());
 }
 
 unsigned int BosonItemModelRenderer::lodCount() const
