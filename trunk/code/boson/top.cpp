@@ -600,7 +600,7 @@ void TopWidget::slotGameStarted()
  d->mWidgetStack->raiseWidget(d->mDisplay);
 // d->mDisplay->show();
 // d->mStartup->hide();
- setMinimumSize(BOSON_MINIMUM_WIDTH, BOSON_MINIMUM_HEIGHT);
+// setMinimumSize(BOSON_MINIMUM_WIDTH, BOSON_MINIMUM_HEIGHT);
  setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
 
  int progress = 0; // FIXME: wrong value!
