@@ -33,6 +33,7 @@
 #include <qtimer.h>
 #include <qdatetime.h>
 
+#include <iostream>
 #include <math.h>
 #include <stdlib.h>
 
@@ -239,6 +240,15 @@ void BoUfoTest::keyReleaseEvent(QKeyEvent* e)
 
 int main(int argc, char **argv)
 {
+ std::cout << "resolving GL, GLX and GLU symbols" << std::endl;
+ if (!boglResolveGLSymbols()) {
+#warning TODO: messagebox
+	// TODO: open a messagebox
+	std::cerr << "Could not resolve all symbols!" << std::endl;
+    return 1;
+ }
+ std::cout << "GL, GLX and GLU symbols successfully resolved" << std::endl;
+
  QApplication app(argc, argv);
  QObject::connect(&app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()));
 
