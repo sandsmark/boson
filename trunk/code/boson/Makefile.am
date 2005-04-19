@@ -132,7 +132,7 @@ libboson_la_LIBADD = \
 		$(LIB_KGAME) \
 		$(LIB_KDEUI) \
 		$(LIB_KIO) \
-		$(GLLIB) -l3ds \
+		-l3ds \
 		$(LIB_XRANDR)
 
 boson_LDFLAGS = $(KDE_RPATH) $(all_libraries) -Xlinker -export-dynamic
@@ -205,8 +205,7 @@ bocursor_LDADD = \
 		$(top_builddir)/boson/info/libbosoninfo.la \
 		$(LIB_BOMEMORY) \
 		$(LIB_KDEUI) \
-		$(LIB_KIO) \
-		$(GLLIB)
+		$(LIB_KIO)
 bocursor_SOURCES = \
 		bocursormain.cpp bosoncursoreditor.cpp
 
@@ -232,7 +231,6 @@ boinfo_LDADD = \
 		$(top_builddir)/boson/info/libbosoninfo.la \
 		$(top_builddir)/bogl/libbogl.la \
 		$(LIB_BOMEMORY) \
-		$(GLLIB) \
 		-lkio $(LIB_KDEUI)
 boinfo_SOURCES = \
 		boinfomain.cpp
@@ -252,7 +250,6 @@ bo3dsdebug_LDADD = \
 		$(top_builddir)/boson/boufo/libboufo.la \
 		$(LIB_BOMEMORY) \
 		-l3ds \
-		$(GLLIB) \
 		-lkio $(LIB_KDEUI)
 bo3dsdebug_SOURCES = \
 		bo3dsdebugmain.cpp
