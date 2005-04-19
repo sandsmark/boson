@@ -277,7 +277,7 @@ void BoLOD::setFrame(unsigned int i, BoFrame* f)
 
 BoMesh* BoLOD::mesh(unsigned int i) const
 {
- BO_CHECK_NULL_RET0(d->mMeshes);
+ BO_CHECK_NULL_RET0(mMeshes);
  if (i >= meshCount()) {
 	return 0;
  }
@@ -286,7 +286,7 @@ BoMesh* BoLOD::mesh(unsigned int i) const
 
 BoFrame* BoLOD::frame(unsigned int i) const
 {
- BO_CHECK_NULL_RET0(d->mFrames);
+ BO_CHECK_NULL_RET0(mFrames);
  if (i >= frameCount()) {
 	return 0;
  }
