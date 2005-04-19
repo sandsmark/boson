@@ -1,55 +1,107 @@
 <!DOCTYPE BoUfoDesigner>
 <BoUfoDesigner>
- <Widgets preferredHeight="" minimumHeight="" opaque="" constraints="" preferredWidth="" ClassName="BoUfoWidget" layout="UBorderLayout" name="BosonUfoNewGameWidget" minimumWidth="" backgroundImageFile="pics/boson-startup-bg.png" >
-  <Widget preferredHeight="" minimumHeight="" opaque="" constraints="north" preferredWidth="" ClassName="BoUfoWidget" layout="UVBoxLayout" name="mWidget2" minimumWidth="" backgroundImageFile="" >
-   <Widget preferredHeight="" minimumHeight="" opaque="" constraints="" preferredWidth="" ClassName="BoUfoLabel" layout="" iconFile="pics/boson-startup-logo.png" name="mLogo" text="" minimumWidth="" backgroundImageFile="" />
+ <Widgets opaque="" minimumHeight="" preferredHeight="" constraints="" verticalAlignment="" ClassName="BoUfoWidget" preferredWidth="" horizontalAlignment="" layout="UBorderLayout" name="BosonUfoNewGameWidgetBase" minimumWidth="" backgroundImageFile="pics/boson-startup-bg.png" >
+  <Widget opaque="" minimumHeight="" preferredHeight="" constraints="north" verticalAlignment="" ClassName="BoUfoWidget" preferredWidth="" horizontalAlignment="" layout="UVBoxLayout" name="mWidget2" minimumWidth="" backgroundImageFile="" >
+   <Widget opaque="" minimumHeight="" preferredHeight="" constraints="" verticalAlignment="" ClassName="BoUfoLabel" preferredWidth="" horizontalAlignment="" layout="" name="mLogo" iconFile="pics/boson-startup-logo.png" minimumWidth="" text="" backgroundImageFile="" />
   </Widget>
-  <Widget preferredHeight="" minimumHeight="" opaque="" constraints="center" preferredWidth="" ClassName="BoUfoWidget" layout="UBorderLayout" name="mWidget4" minimumWidth="" backgroundImageFile="" >
-   <Widget preferredHeight="" minimumHeight="" opaque="" constraints="west" preferredWidth="" ClassName="BoUfoWidget" layout="UVBoxLayout" name="mWidget9" minimumWidth="" backgroundImageFile="" >
-    <Widget preferredHeight="" minimumHeight="" opaque="" constraints="" preferredWidth="" ClassName="BoUfoWidget" layout="UHBoxLayout" name="mChooseMapBox" minimumWidth="" backgroundImageFile="" >
-     <Widget preferredHeight="300" minimumHeight="" opaque="" constraints="" preferredWidth="200" ClassName="BoUfoListBox" layout="" name="mSelectBox" minimumWidth="" backgroundImageFile="" />
-     <Widget preferredHeight="" minimumHeight="" opaque="" constraints="" preferredWidth="" ClassName="BoUfoWidget" layout="UVBoxLayout" name="mMapBox" minimumWidth="" backgroundImageFile="" >
-      <Widget preferredHeight="" minimumHeight="" opaque="" constraints="" preferredWidth="" ClassName="BoUfoWidget" layout="UHBoxLayout" name="mWidget16" minimumWidth="" backgroundImageFile="" >
-       <Widget preferredHeight="" minimumHeight="" opaque="" constraints="" preferredWidth="" ClassName="BoUfoLabel" layout="" iconFile="" name="mWidget15" text="Size:" minimumWidth="" backgroundImageFile="" />
-       <Widget preferredHeight="" minimumHeight="" opaque="" constraints="" preferredWidth="" ClassName="BoUfoLabel" layout="" iconFile="" name="mMapSize" text="" minimumWidth="" backgroundImageFile="" />
+  <Widget opaque="" minimumHeight="" preferredHeight="" constraints="center" verticalAlignment="" ClassName="BoUfoWidget" preferredWidth="" horizontalAlignment="" layout="UBorderLayout" name="mWidget4" minimumWidth="" backgroundImageFile="" >
+   <Widget opaque="" minimumHeight="" preferredHeight="" constraints="west" verticalAlignment="" ClassName="BoUfoWidget" preferredWidth="" horizontalAlignment="" layout="UVBoxLayout" name="mWidget9" minimumWidth="" backgroundImageFile="" >
+    <Widget opaque="" minimumHeight="" preferredHeight="" constraints="" verticalAlignment="" ClassName="BoUfoWidget" preferredWidth="" horizontalAlignment="" layout="UHBoxLayout" name="mChooseMapBox" minimumWidth="" backgroundImageFile="" >
+     <Widget selection="" opaque="" minimumHeight="" preferredHeight="300" constraints="" verticalAlignment="" ClassName="BoUfoListBox" preferredWidth="200" horizontalAlignment="" layout="" name="mSelectBox" minimumWidth="" backgroundImageFile="" />
+     <Widget opaque="" minimumHeight="" preferredHeight="" constraints="" verticalAlignment="" ClassName="BoUfoWidget" preferredWidth="" horizontalAlignment="" layout="UVBoxLayout" name="mMapBox" minimumWidth="" backgroundImageFile="" >
+      <Widget opaque="" minimumHeight="" preferredHeight="" constraints="" verticalAlignment="" ClassName="BoUfoWidget" preferredWidth="" horizontalAlignment="" layout="UHBoxLayout" name="mWidget16" minimumWidth="" backgroundImageFile="" >
+       <Widget opaque="" minimumHeight="" preferredHeight="" constraints="" verticalAlignment="" ClassName="BoUfoLabel" preferredWidth="" horizontalAlignment="" layout="" name="mWidget15" iconFile="" minimumWidth="" text="Size:" backgroundImageFile="" />
+       <Widget opaque="" minimumHeight="" preferredHeight="" constraints="" verticalAlignment="" ClassName="BoUfoLabel" preferredWidth="" horizontalAlignment="" layout="" name="mMapSize" iconFile="" minimumWidth="" text="" backgroundImageFile="" />
       </Widget>
-      <Widget preferredHeight="" minimumHeight="" opaque="" constraints="" preferredWidth="" ClassName="BoUfoWidget" layout="UHBoxLayout" name="mWidget18" minimumWidth="" backgroundImageFile="" >
-       <Widget preferredHeight="" minimumHeight="" opaque="" constraints="" preferredWidth="" ClassName="BoUfoLabel" layout="" iconFile="" name="mWidget19" text="Players:" minimumWidth="" backgroundImageFile="" />
-       <Widget preferredHeight="" minimumHeight="" opaque="" constraints="" preferredWidth="" ClassName="BoUfoLabel" layout="" iconFile="" name="mMapPlayers" text="" minimumWidth="" backgroundImageFile="" />
+      <Widget opaque="" minimumHeight="" preferredHeight="" constraints="" verticalAlignment="" ClassName="BoUfoWidget" preferredWidth="" horizontalAlignment="" layout="UHBoxLayout" name="mWidget18" minimumWidth="" backgroundImageFile="" >
+       <Widget opaque="" minimumHeight="" preferredHeight="" constraints="" verticalAlignment="" ClassName="BoUfoLabel" preferredWidth="" horizontalAlignment="" layout="" name="mWidget19" iconFile="" minimumWidth="" text="Players:" backgroundImageFile="" />
+       <Widget opaque="" minimumHeight="" preferredHeight="" constraints="" verticalAlignment="" ClassName="BoUfoLabel" preferredWidth="" horizontalAlignment="" layout="" name="mMapPlayers" iconFile="" minimumWidth="" text="" backgroundImageFile="" />
       </Widget>
-      <Widget preferredHeight="100" minimumHeight="" opaque="" constraints="" preferredWidth="150" ClassName="BoUfoTextEdit" layout="" name="mMapDescription" text="" minimumWidth="" backgroundImageFile="" />
-      <Widget preferredHeight="" minimumHeight="" opaque="" constraints="" preferredWidth="" ClassName="BoUfoLabel" layout="" iconFile="" name="mMapScreenshot" text="" minimumWidth="" backgroundImageFile="" />
+      <Widget opaque="" minimumHeight="" preferredHeight="100" constraints="" verticalAlignment="" ClassName="BoUfoTextEdit" preferredWidth="150" horizontalAlignment="" layout="" name="mMapDescription" minimumWidth="" text="" backgroundImageFile="" />
+      <Widget opaque="" minimumHeight="" preferredHeight="" constraints="" verticalAlignment="" ClassName="BoUfoLabel" preferredWidth="" horizontalAlignment="" layout="" name="mMapScreenshot" iconFile="" minimumWidth="" text="" backgroundImageFile="" />
      </Widget>
     </Widget>
-    <Widget preferredHeight="" minimumHeight="" opaque="" constraints="" preferredWidth="" ClassName="BoUfoWidget" layout="UVBoxLayout" name="mChatBox" minimumWidth="" backgroundImageFile="" />
+    <Widget opaque="" minimumHeight="" preferredHeight="" constraints="" verticalAlignment="" ClassName="BoUfoWidget" preferredWidth="" horizontalAlignment="" layout="UVBoxLayout" name="mChatBox" minimumWidth="" backgroundImageFile="" />
    </Widget>
-   <Widget preferredHeight="" minimumHeight="" opaque="" constraints="east" preferredWidth="" ClassName="BoUfoWidget" layout="UVBoxLayout" name="mWidget10" minimumWidth="" backgroundImageFile="" >
-    <Widget opaque="" minimumHeight="" preferredHeight="" constraints="" ClassName="BoUfoWidget" preferredWidth="" layout="UVBoxLayout" name="mPlayerOptionsBox" minimumWidth="" backgroundImageFile="" >
-     <Widget preferredHeight="" minimumHeight="" opaque="" constraints="" preferredWidth="" ClassName="BoUfoHBox" layout="UHBoxLayout" name="mWidget28" minimumWidth="" backgroundImageFile="" >
-      <Widget preferredHeight="" minimumHeight="" opaque="" constraints="" preferredWidth="" ClassName="BoUfoLabel" layout="" iconFile="" name="mWidget29" text="Name:" minimumWidth="" backgroundImageFile="" />
-      <Widget preferredHeight="" minimumHeight="" opaque="" constraints="" preferredWidth="100" ClassName="BoUfoLineEdit" layout="" name="mPlayerName" text="" minimumWidth="" backgroundImageFile="" />
+   <Widget opaque="" minimumHeight="" preferredHeight="" constraints="east" verticalAlignment="" ClassName="BoUfoWidget" preferredWidth="" horizontalAlignment="" layout="UVBoxLayout" name="mWidget10" minimumWidth="" backgroundImageFile="" >
+    <Widget preferredHeight="" minimumHeight="" opaque="" constraints="" verticalAlignment="" preferredWidth="" ClassName="BoUfoWidget" horizontalAlignment="" layout="UVBoxLayout" name="mPlayerOptionsBox" minimumWidth="" backgroundImageFile="" >
+     <Widget opaque="" minimumHeight="" preferredHeight="" constraints="" verticalAlignment="" ClassName="BoUfoHBox" preferredWidth="" horizontalAlignment="" layout="UHBoxLayout" name="mWidget28" minimumWidth="" backgroundImageFile="" >
+      <Widget opaque="" minimumHeight="" preferredHeight="" constraints="" verticalAlignment="" ClassName="BoUfoLabel" preferredWidth="" horizontalAlignment="" layout="" name="mWidget29" iconFile="" minimumWidth="" text="Name:" backgroundImageFile="" />
+      <Widget opaque="" minimumHeight="" preferredHeight="" constraints="" verticalAlignment="" ClassName="BoUfoLineEdit" preferredWidth="100" horizontalAlignment="" layout="" name="mPlayerName" minimumWidth="" text="" backgroundImageFile="" />
      </Widget>
-     <Widget opaque="" minimumHeight="" preferredHeight="" constraints="" ClassName="BoUfoHBox" preferredWidth="" layout="UHBoxLayout" name="mWidget31" minimumWidth="" backgroundImageFile="" >
-      <Widget opaque="" minimumHeight="" preferredHeight="" constraints="" ClassName="BoUfoLabel" preferredWidth="" layout="" name="mWidget32" iconFile="" minimumWidth="" text="Color:" backgroundImageFile="" />
-      <Widget opaque="" minimumHeight="" preferredHeight="" constraints="" ClassName="BoUfoWidget" preferredWidth="100" layout="" name="mPlayerColor" minimumWidth="" backgroundImageFile="" />
+     <Widget preferredHeight="" minimumHeight="" opaque="" constraints="" verticalAlignment="" preferredWidth="" ClassName="BoUfoHBox" horizontalAlignment="" layout="UHBoxLayout" name="mWidget31" minimumWidth="" backgroundImageFile="" >
+      <Widget preferredHeight="" minimumHeight="" opaque="" constraints="" verticalAlignment="" preferredWidth="" ClassName="BoUfoLabel" horizontalAlignment="" layout="" iconFile="" name="mWidget32" text="Color:" minimumWidth="" backgroundImageFile="" />
+      <Widget preferredHeight="" minimumHeight="" opaque="" constraints="" verticalAlignment="" preferredWidth="100" ClassName="BoUfoWidget" horizontalAlignment="" layout="" name="mPlayerColor" minimumWidth="" backgroundImageFile="" />
      </Widget>
-     <Widget opaque="" minimumHeight="" preferredHeight="" constraints="" ClassName="BoUfoHBox" preferredWidth="" layout="UHBoxLayout" name="mWidget34" minimumWidth="" backgroundImageFile="" >
-      <Widget opaque="" minimumHeight="" preferredHeight="" constraints="" ClassName="BoUfoLabel" preferredWidth="" layout="" name="mWidget35" iconFile="" minimumWidth="" text="Species:" backgroundImageFile="" />
-      <Widget opaque="" minimumHeight="" preferredHeight="" constraints="" ClassName="BoUfoComboBox" preferredWidth="100" layout="" name="mPlayerSpecies" minimumWidth="" backgroundImageFile="" />
+     <Widget preferredHeight="" minimumHeight="" opaque="" constraints="" verticalAlignment="" preferredWidth="" ClassName="BoUfoHBox" horizontalAlignment="" layout="UHBoxLayout" name="mWidget34" minimumWidth="" backgroundImageFile="" >
+      <Widget preferredHeight="" minimumHeight="" opaque="" constraints="" verticalAlignment="" preferredWidth="" ClassName="BoUfoLabel" horizontalAlignment="" layout="" iconFile="" name="mWidget35" text="Species:" minimumWidth="" backgroundImageFile="" />
+      <Widget preferredHeight="" minimumHeight="" opaque="" constraints="" verticalAlignment="" preferredWidth="100" ClassName="BoUfoComboBox" horizontalAlignment="" layout="" name="mPlayerSpecies" minimumWidth="" backgroundImageFile="" />
      </Widget>
-     <Widget opaque="" minimumHeight="" preferredHeight="" constraints="" ClassName="BoUfoPushButton" preferredWidth="" layout="" name="mAddAIPlayer" iconFile="" minimumWidth="" text="&amp;Add AI player" backgroundImageFile="" />
+     <Widget preferredHeight="" minimumHeight="" opaque="" constraints="" verticalAlignment="" preferredWidth="" ClassName="BoUfoPushButton" horizontalAlignment="" layout="" iconFile="" name="mAddAIPlayer" text="&amp;Add AI player" minimumWidth="" backgroundImageFile="" />
     </Widget>
-    <Widget opaque="" minimumHeight="" preferredHeight="" constraints="" ClassName="BoUfoWidget" preferredWidth="" layout="UVBoxLayout" name="mConnectedPlayersBox" minimumWidth="" backgroundImageFile="" >
-     <Widget opaque="" minimumHeight="" preferredHeight="" constraints="" ClassName="BoUfoLabel" preferredWidth="" layout="" name="mWidget25" iconFile="" minimumWidth="" text="Connected players" backgroundImageFile="" />
-     <Widget opaque="" minimumHeight="100" preferredHeight="150" constraints="" ClassName="BoUfoListBox" preferredWidth="150" layout="" name="mConnectedPlayersList" minimumWidth="100" backgroundImageFile="" />
-     <Widget opaque="" minimumHeight="" preferredHeight="" constraints="" ClassName="BoUfoPushButton" preferredWidth="" layout="" name="mRemovePlayer" iconFile="" minimumWidth="" text="&amp;Remove player" backgroundImageFile="" />
+    <Widget preferredHeight="" minimumHeight="" opaque="" constraints="" verticalAlignment="" preferredWidth="" ClassName="BoUfoWidget" horizontalAlignment="" layout="UVBoxLayout" name="mConnectedPlayersBox" minimumWidth="" backgroundImageFile="" >
+     <Widget preferredHeight="" minimumHeight="" opaque="" constraints="" verticalAlignment="" preferredWidth="" ClassName="BoUfoLabel" horizontalAlignment="" layout="" iconFile="" name="mWidget25" text="Connected players" minimumWidth="" backgroundImageFile="" />
+     <Widget selection="" preferredHeight="150" minimumHeight="100" opaque="" constraints="" verticalAlignment="" preferredWidth="150" ClassName="BoUfoListBox" horizontalAlignment="" layout="" name="mConnectedPlayersList" minimumWidth="100" backgroundImageFile="" />
+     <Widget preferredHeight="" minimumHeight="" opaque="" constraints="" verticalAlignment="" preferredWidth="" ClassName="BoUfoPushButton" horizontalAlignment="" layout="" iconFile="" name="mRemovePlayer" text="&amp;Remove player" minimumWidth="" backgroundImageFile="" />
     </Widget>
    </Widget>
   </Widget>
-  <Widget preferredHeight="" minimumHeight="" opaque="" constraints="south" preferredWidth="" ClassName="BoUfoWidget" layout="UHBoxLayout" name="mWidget5" minimumWidth="" backgroundImageFile="" >
-   <Widget preferredHeight="" minimumHeight="" opaque="" constraints="" preferredWidth="" ClassName="BoUfoPushButton" layout="" iconFile="" name="mCancel" text="&amp;Cancel" minimumWidth="" backgroundImageFile="" />
-   <Widget preferredHeight="" minimumHeight="" opaque="" constraints="" preferredWidth="" ClassName="BoUfoPushButton" layout="" iconFile="" name="mNetworkOptions" text="&amp;Network options" minimumWidth="" backgroundImageFile="" />
-   <Widget preferredHeight="" minimumHeight="" opaque="" constraints="" preferredWidth="" ClassName="BoUfoPushButton" layout="" iconFile="" name="mStartGame" text="&amp;Start game" minimumWidth="" backgroundImageFile="" />
+  <Widget opaque="" minimumHeight="" preferredHeight="" constraints="south" verticalAlignment="" ClassName="BoUfoWidget" preferredWidth="" horizontalAlignment="" layout="UHBoxLayout" name="mWidget5" minimumWidth="" backgroundImageFile="" >
+   <Widget opaque="" minimumHeight="" preferredHeight="" constraints="" verticalAlignment="" ClassName="BoUfoPushButton" preferredWidth="" horizontalAlignment="" layout="" name="mCancel" iconFile="" minimumWidth="" text="&amp;Cancel" backgroundImageFile="" />
+   <Widget opaque="" minimumHeight="" preferredHeight="" constraints="" verticalAlignment="" ClassName="BoUfoPushButton" preferredWidth="" horizontalAlignment="" layout="" name="mNetworkOptions" iconFile="" minimumWidth="" text="&amp;Network options" backgroundImageFile="" />
+   <Widget opaque="" minimumHeight="" preferredHeight="" constraints="" verticalAlignment="" ClassName="BoUfoPushButton" preferredWidth="" horizontalAlignment="" layout="" name="mStartGame" iconFile="" minimumWidth="" text="&amp;Start game" backgroundImageFile="" />
   </Widget>
  </Widgets>
+ <Methods>
+  <Method return="void" visibility="protected" type="slot" name="slotAddComputerPlayer()" >
+   <Connections>
+    <Connection sender="mAddAIPlayer" signal="clicked()" type="receiver" />
+   </Connections>
+  </Method>
+  <Method return="void" visibility="public" type="slot" name="slotCancel()" >
+   <Connections>
+    <Connection sender="mCancel" signal="clicked()" type="receiver" />
+   </Connections>
+  </Method>
+  <Method return="void" visibility="public" type="slot" name="slotNetworkOptions()" >
+   <Connections>
+    <Connection sender="mNetworkOptions" signal="clicked()" type="receiver" />
+   </Connections>
+  </Method>
+  <Method return="void" visibility="protected" type="slot" name="slotPlayFieldSelected(int, int)" >
+   <Connections>
+    <Connection sender="mSelectBox" signal="selectionChanged(int, int)" type="receiver" />
+   </Connections>
+  </Method>
+  <Method return="void" visibility="protected" type="slot" name="slotPlayerColorChanged(int)" >
+   <Connections>
+    <Connection sender="mPlayerColor" signal="signalColorSelected(int)" type="receiver" />
+   </Connections>
+  </Method>
+  <Method return="void" visibility="protected" type="slot" name="slotPlayerNameChanged()" >
+   <Connections>
+    <Connection sender="mPlayerName" signal="returnPressed()" type="receiver" />
+   </Connections>
+  </Method>
+  <Method return="void" visibility="protected" type="slot" name="slotPlayerSelected(int, int)" >
+   <Connections>
+    <Connection sender="mConnectedPlayersList" signal="selectionChanged(int, int)" type="receiver" />
+   </Connections>
+  </Method>
+  <Method return="void" visibility="protected" type="slot" name="slotPlayerSpeciesChanged(int)" >
+   <Connections>
+    <Connection sender="mPlayerSpecies" signal="activated(int)" type="receiver" />
+   </Connections>
+  </Method>
+  <Method return="void" visibility="protected" type="slot" name="slotRemovePlayer()" >
+   <Connections>
+    <Connection sender="mRemovePlayer" signal="clicked()" type="receiver" />
+   </Connections>
+  </Method>
+  <Method return="void" visibility="public" type="slot" name="slotStartGame()" >
+   <Connections>
+    <Connection sender="mStartGame" signal="clicked()" type="receiver" />
+   </Connections>
+  </Method>
+ </Methods>
 </BoUfoDesigner>
