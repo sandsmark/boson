@@ -144,6 +144,7 @@ TopWidget::~TopWidget()
 
 QString TopWidget::checkInstallation()
 {
+ boDebug() << k_funcinfo << endl;
  QPixmap p1(locate("data", "boson/pics/boson-startup-bg.png"));
  QPixmap p2(locate("data", "boson/pics/boson-startup-logo.png"));
   if (p1.isNull() || p2.isNull()) {
@@ -155,6 +156,7 @@ QString TopWidget::checkInstallation()
  if (!BosonPlayField::preLoadAllPlayFields()) {
 	return i18n("Unable to preload playFields. Check your installation!");
  }
+ boDebug() << k_funcinfo << "successful" << endl;
  return QString::null;
 }
 
