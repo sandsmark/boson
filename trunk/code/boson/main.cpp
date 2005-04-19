@@ -102,9 +102,9 @@ int main(int argc, char **argv)
  boDebug() << k_funcinfo << "resolving GL, GLX and GLU symbols" << endl;
  if (!boglResolveGLSymbols()) {
 #warning TODO: messagebox
-	// TODO: open a messagebox
-	boError() << k_funcinfo << "Could not resolve all symbols!" << endl;
-	return 1;
+    // TODO: open a messagebox
+    boError() << k_funcinfo << "Could not resolve all symbols!" << endl;
+    return 1;
  }
  boDebug() << k_funcinfo << "GL, GLX and GLU symbols successfully resolved" << endl;
 
