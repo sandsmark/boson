@@ -3176,6 +3176,10 @@ void BoUfoWidgetStack::init()
 {
  mId2Widget = new QMap<int, BoUfoWidget*>();
  mVisibleWidget = 0;
+
+ // we just need some layout. there is only a single widget visible at any time,
+ // so it doesnt matter so much which layout we use
+ setLayoutClass(BoUfoWidget::UVBoxLayout);
 }
 
 int BoUfoWidgetStack::insertWidget(BoUfoWidget* widget, int id)
