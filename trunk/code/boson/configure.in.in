@@ -94,7 +94,7 @@ gluLookAt(0.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 100.0, 0.0);
  if test "$GL_LDFLAGS" = ""; then
 	GLLIB='-lXmu -lGLU -lGL $(LIB_X11)'
  else
-	GLLIB="$GL_LDFLAGS -Xmu -lGLU -lGL "'$(LIB_X11)'
+	GLLIB="$GL_LDFLAGS -lXmu -lGLU -lGL "'$(LIB_X11)'
  fi
  if test "$GL_INCLUDE" = ""; then
 	GLINC=""
