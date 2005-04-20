@@ -1730,7 +1730,7 @@ void BoPropertiesWidget::slotItemRenamed(QListViewItem* item, int col)
  QString name = item->text(0);
  QString value = item->text(1);
 
- QDomElement properties = mWidgetElement.namedItem("Properites").toElement();
+ QDomElement properties = mWidgetElement.namedItem("Properties").toElement();
  if (properties.isNull()) {
 	boError() << k_funcinfo << "NULL Properties element" << endl;
 	return;
