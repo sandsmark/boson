@@ -1197,6 +1197,37 @@ private:
 };
 
 
+class BoUfoWidgetStack : public BoUfoWidget
+{
+	Q_OBJECT
+public:
+	BoUfoWidgetStack();
+	~BoUfoWidgetStack();
+
+	int insertWidget(BoUfoWidget*, int id = -1);
+	void raiseWidget(BoUfoWidget*);
+	void raiseWidget(int id);
+	void removeWidget(BoUfoWidget*);
+	void removeWidget(int id);
+	BoUfoWidget* widget(int id) const;
+	BoUfoWidget* visibleWidget() const
+	{
+		return mVisibleWidget;
+	}
+	int id(BoUfoWidget* widget) const;
+
+private:
+	void init();
+
+private:
+	QMap<int, BoUfoWidget*>* mId2Widget;
+	BoUfoWidget* mVisibleWidget;
+};
+
+// A layered pane is comparable to a widget stack, but there can be multiple
+// widgets visible at any time. The bottom widgets are drawn first, the top
+// widgets are drawn later, so that on the screen they are actually "on top" of
+// the other widgets.
 class BoUfoLayeredPane : public BoUfoWidget
 {
 	Q_OBJECT

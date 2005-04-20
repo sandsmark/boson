@@ -3162,3 +3162,98 @@ BoUfoInputDialog* BoUfoInputDialog::createNumDialog(BoUfoManager* manager, const
  return dialog;
 }
 
+BoUfoWidgetStack::BoUfoWidgetStack() : BoUfoWidget()
+{
+ init();
+}
+
+BoUfoWidgetStack::~BoUfoWidgetStack()
+{
+ delete mId2Widget;
+}
+
+void BoUfoWidgetStack::init()
+{
+ mId2Widget = new QMap<int, BoUfoWidget*>();
+ mVisibleWidget = 0;
+}
+
+int BoUfoWidgetStack::insertWidget(BoUfoWidget* widget, int id)
+{
+ if (id < 0) {
+	id = mId2Widget->count();
+	while (mId2Widget->contains(id)) {
+		id++;
+	}
+ }
+ mId2Widget->insert(id, widget);
+ widget->hide();
+ if (!mVisibleWidget) {
+	raiseWidget(id);
+ }
+ return id;
+}
+
+void BoUfoWidgetStack::raiseWidget(BoUfoWidget* widget)
+{
+ raiseWidget(id(widget));
+}
+
+void BoUfoWidgetStack::raiseWidget(int id)
+{
+ if (mVisibleWidget) {
+	mVisibleWidget->hide();
+ }
+ if (mId2Widget->contains(id)) {
+	mVisibleWidget = *mId2Widget->find(id);
+ } else {
+	mVisibleWidget = 0;
+ }
+ if (mVisibleWidget) {
+	mVisibleWidget->show();
+ }
+}
+
+void BoUfoWidgetStack::removeWidget(BoUfoWidget* w)
+{
+ removeWidget(id(w));
+}
+
+void BoUfoWidgetStack::removeWidget(int id)
+{
+ if (id < 0) {
+	return;
+ }
+ BoUfoWidget* w = widget(id);
+ mId2Widget->remove(id);
+ if (mVisibleWidget == w) {
+	if (mId2Widget->count() > 0) {
+		raiseWidget(mId2Widget->begin().key());
+	} else {
+		raiseWidget(-1);
+	}
+ }
+}
+
+BoUfoWidget* BoUfoWidgetStack::widget(int id) const
+{
+ if (id < 0) {
+	return 0;
+ }
+ if (!mId2Widget->contains(id)) {
+	return 0;
+ }
+ return *mId2Widget->find(id);
+}
+
+int BoUfoWidgetStack::id(BoUfoWidget* widget) const
+{
+ QMap<int, BoUfoWidget*>::iterator it;
+ for (it = mId2Widget->begin(); it != mId2Widget->end(); ++it) {
+	if ((*it) == widget) {
+		return it.key();
+	}
+ }
+ return -1;
+}
+
