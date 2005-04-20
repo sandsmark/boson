@@ -20,36 +20,27 @@
 #include "boufostartupwidget.h"
 #include "boufostartupwidget.moc"
 
-#include "bosonwelcomewidget.h"
-#include "bosonloadingwidget.h"
+#include "boufoloadingwidget.h"
 #include "boufonewgamewidget.h"
-#include "bosonneweditorwidget.h"
-#include "bosonnetworkoptionswidget.h"
-#include "kloadsavegamewidget.h"
+#include "welcomewidget.h"
 #include "bosonstartupnetwork.h"
 #include "bodebug.h"
 #include "../boson.h"
 #include "../defines.h"
-#include "welcomewidget.h"
 
 #include <kmainwindow.h> // AB: urghs
 #include <kstandarddirs.h>
-#include <kmessagebox.h>
 #include <klocale.h>
 #include <kcmdlineargs.h>
 
 #include <qpixmap.h>
-#include <qlabel.h>
-#include <qlayout.h>
 #include <qpopupmenu.h>
 #include <qcursor.h>
-#include <qobjectlist.h>
 #include <qguardedptr.h>
 
 #include <stdlib.h>
 
 #define LOADSAVE_WIDGET 0
-#define LOADING_WIDGET 0
 #define NETWORK_WIDGET 0
 #define EDITOR_WIDGET 0
 
@@ -131,6 +122,7 @@ void BoUfoStartupWidget::setLocalPlayer(Player* p)
 void BoUfoStartupWidget::slotLoadGame()
 {
  showWidget(IdLoadSaveGame);
+#if LOADSAVE_WIDGET
  KLoadSaveGameWidget* loadSave = (KLoadSaveGameWidget*)d->mWidgetStack->widget(IdLoadSaveGame);
  if (!loadSave) {
 	boError() << k_funcinfo << "load/save widget hasn't been initialized?!" << endl;
@@ -138,12 +130,14 @@ void BoUfoStartupWidget::slotLoadGame()
  }
  loadSave->setSaveMode(false);
  loadSave->updateGames();
+#endif
 }
 
 void BoUfoStartupWidget::slotSaveGame()
 {
  // TODO pause game!
  showWidget(IdLoadSaveGame);
+#if LOADSAVE_WIDGET
  KLoadSaveGameWidget* loadSave = (KLoadSaveGameWidget*)d->mWidgetStack->widget(IdLoadSaveGame);
  if (!loadSave) {
 	boError() << k_funcinfo << "load/save widget hasn't been initialized?!" << endl;
@@ -151,6 +145,7 @@ void BoUfoStartupWidget::slotSaveGame()
  }
  loadSave->setSaveMode(true);
  loadSave->updateGames();
+#endif
 }
 
 void BoUfoStartupWidget::slotNewGame(KCmdLineArgs* args)
@@ -257,11 +252,8 @@ void BoUfoStartupWidget::initWidget(WidgetId widgetId)
 	}
 	case IdLoading:
 	{
-#if LOADING_WIDGET
-		BosonLoadingWidget* loadingWidget = new BosonLoadingWidget(d->mWidgetStack);
-
+		BoUfoLoadingWidget* loadingWidget = new BoUfoLoadingWidget();
 		w = loadingWidget;
-#endif
 		break;
 	}
 	case IdLoadSaveGame:
@@ -345,9 +337,9 @@ void BoUfoStartupWidget::initWidget(WidgetId widgetId)
  }
 }
 
-BosonLoadingWidget* BoUfoStartupWidget::loadingWidget() const
+BoUfoLoadingWidget* BoUfoStartupWidget::loadingWidget() const
 {
- return (BosonLoadingWidget*)d->mWidgetStack->widget(IdLoading);
+ return (BoUfoLoadingWidget*)d->mWidgetStack->widget(IdLoading);
 }
 
 void BoUfoStartupWidget::showLoadingWidget()
@@ -358,7 +350,7 @@ void BoUfoStartupWidget::showLoadingWidget()
 void BoUfoStartupWidget::slotLoadingType(int type)
 {
  if (loadingWidget()) {
-	loadingWidget()->setLoading((BosonLoadingWidget::LoadingType)type);
+	loadingWidget()->setLoading((BoUfoLoadingWidget::LoadingType)type);
  }
 }
 

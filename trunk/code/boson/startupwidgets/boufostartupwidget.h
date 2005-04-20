@@ -23,7 +23,7 @@
 #include <boufo/boufo.h>
 
 class Player;
-class BosonLoadingWidget;
+class BoUfoLoadingWidget;
 class KCmdLineArgs;
 class BosonStartupNetwork;
 
@@ -138,7 +138,7 @@ protected:
 	virtual bool eventFilter(QObject* o, QEvent* e);
 
 	// AB: do NOT make this public!
-	BosonLoadingWidget* loadingWidget() const;
+	BoUfoLoadingWidget* loadingWidget() const;
 
 protected slots:
 	void slotShowNetworkOptions();
