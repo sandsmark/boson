@@ -116,7 +116,9 @@ unsigned int BoUfoFontMetrics::viewToModel(const char* text, unsigned int length
 
 	advance += getCharWidth(text[index]);
 	if (advance > w) {
-		index--;
+		if (index > 0) {
+			index--;
+		}
 		break;
 	}
  }

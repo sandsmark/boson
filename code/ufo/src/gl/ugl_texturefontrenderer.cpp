@@ -484,7 +484,9 @@ UGL_TextureFontMetrics::viewToModel(const char * text, unsigned int nChar,
 	for (;index < nChar; ++index) {
 		advance += m_renderer->m_data->m_chars[uint8_t(text[index])].width;
 		if (advance > w) {
-			index--;
+			if (index > 0) {
+				index--;
+			}
 			break;
 		}
 	}
