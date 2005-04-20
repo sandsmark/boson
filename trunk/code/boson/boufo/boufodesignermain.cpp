@@ -1665,7 +1665,7 @@ void BoPropertiesWidget::createProperties(const QDomElement& e)
  QString className;
  QMetaObject* metaObject = 0;
 
- className = e.namedItem("ClassName").toElement().text().isEmpty();
+ className = e.namedItem("ClassName").toElement().text();
  if (!className.isEmpty()) {
 	// WARNING: trolltech marks this as internal!
 	// but it is sooo useful
