@@ -230,7 +230,9 @@ UGL_BuiltinFontMetrics::viewToModel(const char * text, unsigned int nChar,
 	for (;index < nChar; ++index) {
 		advance += (m_renderer->m_fontStruct.m_characters[text[index]])[0];
 		if (advance > w) {
-			index--;
+			if (index > 0) {
+				index--;
+			}
 			break;
 		}
 	}

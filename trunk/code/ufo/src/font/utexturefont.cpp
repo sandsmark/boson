@@ -562,7 +562,9 @@ UTextureFontMetrics::viewToModel(const char * text, unsigned int nChar,
 //				m_renderer->m_multiplier;
 
 		if (advance > w) {
-			index--;
+			if (index > 0) {
+				index--;
+			}
 			break;
 		}
 	}

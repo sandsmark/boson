@@ -298,6 +298,9 @@ UGL_Style::paintControlCaption(UGraphics * g, UWidget * w,
 		int minusWidth = metrics->getStringWidth(appendString);
 
 		unsigned int index = metrics->viewToModel(text, rect.w - minusWidth);
+		if (index >= text.length()) {
+			index = text.length() - 1;
+		}
 
 		clipText.append(text.begin(), text.begin() + index).append(appendString);
 	} else {
@@ -806,6 +809,9 @@ UGL_Style::paintTitledBorder(UGraphics * g, UWidget * w,
 
 			int minusWidth = metrics->getStringWidth(appendString);
 			unsigned int index = metrics->viewToModel(title, rect.w - minusWidth);
+			if (index >= title.length()) {
+				index = title.length() - 1;
+			}
 
 			clipText.append(title.begin(), title.begin() + index).append(appendString);
 		} else {
