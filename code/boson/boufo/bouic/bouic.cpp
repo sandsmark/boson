@@ -434,6 +434,7 @@ bool writeConnections(QTextStream& cpp, const QDomElement& root)
 		continue;
 	}
 	QString methodName = e.attribute("name");
+	QString methodType = e.attribute("type");
 	for (QDomNode n2 = c.firstChild(); !n2.isNull(); n2 = n2.nextSibling()) {
 		QDomElement e2 = n2.toElement();
 		if (e2.isNull() || e2.tagName() != "Connection") {
@@ -462,8 +463,28 @@ bool writeConnections(QTextStream& cpp, const QDomElement& root)
 		cpp << " connect("
 				<< sender
 				<< ", SIGNAL(" << signal << "),\n"
-				<< "\t\t" << receiver
-				<< ", SLOT(" << slot << "));\n";
+				<< "\t\t" << receiver;
+		if (methodType == "signal" && type == "receiver") {
+			// usually the receiver is a SLOT, but there are two
+			// cases when it is a signal:
+			// 1. methodType == signal && type == receiver
+			//    -> this signal is called by some other signal
+			// 2. type == sender && ???
+			//    -> this signal calls another signal
+			//       (methodType == signal is implicated, as a slot
+			//        can never be sender)
+			// the first case is easy to recognize, as we know that
+			// we are a signal. the second case is not, as we have
+			// no way to find out whether the receiver is a signal
+			// as well. we could add a GUI element in the editor,
+			// but that would make things complex to the user.
+			// however i think (hope?) this case should be very
+			// rare, as it makes little sense to add a signal that
+			// just calls another signal.
+			cpp << ", SIGNAL(" << slot << "));\n";
+		} else {
+			cpp << ", SLOT(" << slot << "));\n";
+		}
 	}
  }
  return true;
