@@ -11,7 +11,7 @@
    <preferredWidth></preferredWidth>
    <horizontalAlignment>4</horizontalAlignment>
    <layout>UBorderLayout</layout>
-   <name>BoClassName</name>
+   <name>BoUfoWelcomeWidget</name>
    <minimumWidth></minimumWidth>
    <backgroundImageFile>pics/boson-startup-bg.png</backgroundImageFile>
   </Properties>
