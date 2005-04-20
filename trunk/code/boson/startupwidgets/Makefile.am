@@ -16,7 +16,8 @@ libbosonstartupwidgets_la_SOURCES = \
 	kloadsavegamewidget.cpp \
 	welcomewidget.boui \
 	newgamewidget.boui \
-	boufonewgamewidget.cpp
+	boufonewgamewidget.cpp \
+	boufostartupwidget.cpp
 
 METASOURCES = AUTO
 
