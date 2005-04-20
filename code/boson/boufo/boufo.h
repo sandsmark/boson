@@ -26,9 +26,9 @@
 class QMouseEvent;
 class QWheelEvent;
 class QKeyEvent;
-class QDomNamedNodeMap;
 template<class T1, class T2> class QMap;
 template<class T1> class QValueList;
+class QDomElement;
 
 class BoUfoActionCollection;
 class BoUfoMenuBar;
@@ -584,7 +584,7 @@ public:
 	void render(BoUfoManager*);
 
 
-	void loadPropertiesFromXML(const QDomNamedNodeMap&);
+	void loadPropertiesFromXML(const QDomElement&);
 	void loadProperties(const QMap<QString, QString>&);
 
 	virtual void setMinimumSize(const ufo::UDimension& size);
@@ -826,6 +826,8 @@ public:
 
 	virtual void setOpaque(bool o);
 
+	void setEditable(bool);
+
 signals:
 	void signalActivated();
 	void signalActivated(const QString& text);
@@ -897,6 +899,10 @@ public:
 	void setItems(const QStringList& items);
 	void clear();
 	unsigned int count() const;
+	QString itemText(int i) const;
+	void setItemText(int i, const QString& text);
+	void insertItem(const QString& text, int index = -1);
+	void removeItem(int index);
 
 
 signals:
@@ -968,6 +974,10 @@ public:
 	void setItems(const QStringList& items);
 	void clear();
 	unsigned int count() const;
+	QString itemText(int i) const;
+	void setItemText(int i, const QString& text);
+	void insertItem(const QString& text, int index = -1);
+	void removeItem(int index);
 
 
 	// note: libufo does not yet implement MultiSelection

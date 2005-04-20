@@ -52,6 +52,74 @@
 
 //static const char *version = BOSON_VERSION_STRING;
 
+#if 0
+static void removeElementChildren(QDomElement& e)
+{
+ if (e.isNull() || !e.hasChildren()) {
+	return;
+ }
+ while (!e.firstChild().isNull()) {
+	e.removeChild(e.firstChild());
+ }
+}
+#endif
+
+static void setElementText(QDomNode element, const QString& text)
+{
+ QDomElement e = element.toElement();
+ if (e.isNull()) {
+	return;
+ }
+ QDomNode n = e.firstChild();
+ while (!n.isNull()) {
+	if (n.isText()) {
+		QDomNode n2 = n.nextSibling();
+		e.removeChild(n);
+		n = n2;
+	} else {
+		n = n.nextSibling();
+	}
+ }
+ QDomDocument doc = e.ownerDocument();
+ e.appendChild(doc.createTextNode(text));
+}
+
+static void convertFromAttributeFormat(QDomElement& widgets)
+{
+ for (QDomNode n = widgets.firstChild(); !n.isNull(); n = n.nextSibling()) {
+	QDomElement e = n.toElement();
+	if (e.isNull()) {
+		continue;
+	}
+	if (e.tagName() != "Widget") {
+		continue;
+	}
+	convertFromAttributeFormat(e);
+ }
+
+ QDomDocument doc = widgets.ownerDocument();
+ QDomElement className = doc.createElement("ClassName");
+ widgets.insertBefore(className, widgets.firstChild());
+ className.appendChild(doc.createTextNode(widgets.attribute("ClassName")));
+
+ QDomElement properties = doc.createElement("Properties");
+ widgets.insertAfter(properties, className);
+
+ QDomNamedNodeMap attributes = widgets.attributes();
+ for (unsigned int i = 0; i < attributes.count(); i++) {
+	QDomAttr a = attributes.item(i).toAttr();
+	if (a.name() == "ClassName") {
+		continue;
+	}
+	QDomElement e = doc.createElement(a.name());
+	e.appendChild(doc.createTextNode(a.value()));
+	properties.appendChild(e);
+ }
+ while (widgets.attributes().count() != 0) {
+	widgets.removeAttributeNode(widgets.attributes().item(0).toAttr());
+ }
+}
+
 class QEnumContainerListItem : public QCheckListItem
 {
 public:
@@ -891,7 +959,7 @@ BoUfoWidget* FormPreview::getContainerWidgetAt(int x, int y)
  QDomElement e = mUfoWidget2Element[w->widget()];
  QString className;
  if (!e.isNull()) {
-	className = e.attribute("ClassName");
+	className = e.namedItem("ClassName").toElement().text();
  }
  while (w && !isContainerWidget(className)) {
 	ufo::UWidget* widget = w->widget();
@@ -908,19 +976,18 @@ BoUfoWidget* FormPreview::getContainerWidgetAt(int x, int y)
 		boError() << k_funcinfo << "NULL element for BoUfoWidget() !" << endl;
 		return 0;
 	}
-	className = e.attribute("ClassName");
+	className = e.namedItem("ClassName").toElement().text();
  }
  return w;
 }
 
 void FormPreview::updateGUI(const QDomElement& root)
 {
- boDebug() << k_funcinfo << endl;
  glInit();
  BO_CHECK_NULL_RET(mUfoManager);
  makeCurrent();
  mUfoManager->contentWidget()->widget()->removeAll();
- mContentWidget->loadPropertiesFromXML(root.attributes());
+ mContentWidget->loadPropertiesFromXML(root.namedItem("Properties").toElement());
 
  mUfoWidget2Element.clear();
  mUfoWidget2Widget.clear();
@@ -930,6 +997,7 @@ void FormPreview::updateGUI(const QDomElement& root)
 
 void FormPreview::updateGUI(const QDomElement& root, BoUfoWidget* parent)
 {
+ boDebug() << k_funcinfo << endl;
  if (root.isNull() || !parent) {
 	return;
  }
@@ -942,7 +1010,7 @@ void FormPreview::updateGUI(const QDomElement& root, BoUfoWidget* parent)
 	if (e.tagName() != "Widget") {
 		continue;
 	}
-	QString className = e.attribute("ClassName");
+	QString className = e.namedItem("ClassName").toElement().text();
 	if (className.isEmpty()) {
 		boWarning() << k_funcinfo << "empty ClassName" << endl;
 	}
@@ -954,7 +1022,7 @@ void FormPreview::updateGUI(const QDomElement& root, BoUfoWidget* parent)
 	parent->addWidget(widget);
 	addWidget(widget, e);
 
-	widget->loadPropertiesFromXML(e.attributes());
+	widget->loadPropertiesFromXML(e.namedItem("Properties").toElement());
 
 	updateGUI(e, widget);
  }
@@ -1188,7 +1256,7 @@ BoWidgetTree::BoWidgetTree(QWidget* parent, const char* name) : QWidget(parent, 
  layout->addWidget(mListView);
 
  mListView->addColumn(tr("ClassName"));
- mListView->addColumn(tr("Name"));
+ mListView->addColumn(tr("name"));
 
  QHBoxLayout* buttonLayout = new QHBoxLayout(layout);
  mInsertWidget = new QPushButton(tr("Insert"), this);
@@ -1226,7 +1294,7 @@ bool BoWidgetTree::isContainer(const QDomElement& e) const
  if (e.isNull()) {
 	return false;
  }
- QString className = e.attribute("ClassName");
+ QString className = e.namedItem("ClassName").toElement().text();
  return isContainerWidget(className);
 }
 
@@ -1409,11 +1477,14 @@ void BoWidgetTree::updateGUI(const QDomElement& root)
 	boDebug() << k_funcinfo << "NULL root element" << endl;
 	return;
  }
- if (root.attribute("ClassName") != "BoUfoWidget" || root.tagName() != "Widgets") {
+ if (root.namedItem("ClassName").toElement().text() != "BoUfoWidget" || root.tagName() != "Widgets") {
 	boError() << k_funcinfo << "invalid root element" << endl;
+	boDebug() << root.ownerDocument().toString() << endl;
 	return;
  }
- QListViewItem* itemRoot = new QListViewItem(mListView, root.attribute("ClassName"), root.attribute("name"));
+ QListViewItem* itemRoot = new QListViewItem(mListView,
+		root.namedItem("ClassName").toElement().text(),
+		root.namedItem("Properties").namedItem("name").toElement().text());
  itemRoot->setOpen(true);
  mItem2Element.insert(itemRoot, root);
  updateGUI(root, itemRoot);
@@ -1433,11 +1504,11 @@ void BoWidgetTree::updateGUI(const QDomElement& root, QListViewItem* itemParent)
 	if (e.tagName() != "Widget") {
 		continue;
 	}
-	QString className = e.attribute("ClassName");
+	QString className = e.namedItem("ClassName").toElement().text();
 	if (className.isEmpty()) {
 		boWarning() << k_funcinfo << "empty ClassName" << endl;
 	}
-	QString name = e.attribute("name");
+	QString name = e.namedItem("Properties").namedItem("name").toElement().text();
 	QListViewItem* item = new QListViewItem(itemParent, after, className, name);
 	after = item; // new items are appended to the end
 	item->setOpen(true);
@@ -1526,7 +1597,7 @@ void BoPropertiesWidget::displayProperties(const QDomElement& e)
  }
  createProperties(e);
 
- QString className = e.attribute("ClassName");
+ QString className = e.namedItem("ClassName").toElement().text();
  QMetaObject* metaObject = 0;
 
  // WARNING: trolltech marks this as internal!
@@ -1538,6 +1609,7 @@ void BoPropertiesWidget::displayProperties(const QDomElement& e)
 	return;
  }
 
+ QDomElement properties = e.namedItem("Properties").toElement();
  QListViewItem* child = mListView->firstChild();
  for (; child; child = child->nextSibling()) {
 	QString name = child->text(0);
@@ -1547,7 +1619,7 @@ void BoPropertiesWidget::displayProperties(const QDomElement& e)
 		continue;
 	}
 	const QMetaProperty* prop = metaObject->property(index, true);
-	QString value = e.attribute(name);
+	QString value = properties.namedItem(name).toElement().text();
 	if (prop->isSetType()) {
 		boWarning() << k_funcinfo << "property is a set - this is not supported yet" << endl;
 		// it'll be displayed as normal text.
@@ -1592,30 +1664,32 @@ void BoPropertiesWidget::createProperties(const QDomElement& e)
 {
  QString className;
  QMetaObject* metaObject = 0;
- QDomNamedNodeMap attributes = e.attributes();
- for (unsigned int i = 0; i < attributes.count(); i++) {
-	QDomAttr a = attributes.item(i).toAttr();
-	if (a.name() == "ClassName") {
-		className = a.value();
 
-		// WARNING: trolltech marks this as internal!
-		// but it is sooo useful
-		metaObject = QMetaObject::metaObject(className);
-		continue;
-	}
+ className = e.namedItem("ClassName").toElement().text().isEmpty();
+ if (!className.isEmpty()) {
+	// WARNING: trolltech marks this as internal!
+	// but it is sooo useful
+	metaObject = QMetaObject::metaObject(className);
  }
+
  if (!metaObject) {
 	boError() << k_funcinfo << "cannot find class " << className << endl;
 	return;
  }
- for (unsigned int i = 0; i < attributes.count(); i++) {
-	QDomAttr a = attributes.item(i).toAttr();
-	if (a.name() == "ClassName") {
+
+ QDomElement properties = e.namedItem("Properties").toElement();
+ if (properties.isNull()) {
+	boError() << k_funcinfo << "Cannot find Properties element" << endl;
+	return;
+ }
+ for (QDomNode n = properties.firstChild(); !n.isNull(); n = n.nextSibling()) {
+	QDomElement e = n.toElement();
+	if (e.isNull()) {
 		continue;
 	}
-	int index = metaObject->findProperty(a.name(), true);
+	int index = metaObject->findProperty(e.tagName(), true);
 	if (index < 0) {
-		boWarning() << k_funcinfo << "don't know property " << a.name() << " in class " << className << endl;
+		boWarning() << k_funcinfo << "don't know property " << e.tagName() << " in class " << className << endl;
 		continue;
 	}
 	const QMetaProperty* prop = metaObject->property(index, true);
@@ -1629,7 +1703,7 @@ void BoPropertiesWidget::createProperties(const QDomElement& e)
 		// but we probably don't need that anyway
 	}
 	if (prop->isEnumType() && !prop->isSetType()) {
-		QEnumContainerListItem* item = new QEnumContainerListItem(mListView, a.name());
+		QEnumContainerListItem* item = new QEnumContainerListItem(mListView, e.tagName());
 		item->setOpen(true);
 		QStrList enums = prop->enumKeys();
 		QStrListIterator it(enums);
@@ -1638,9 +1712,11 @@ void BoPropertiesWidget::createProperties(const QDomElement& e)
 			++it;
 		}
 	} else {
-		QListViewItem* item = new QListViewItem(mListView, a.name(), a.value());
+		QListViewItem* item = new QListViewItem(mListView, e.tagName(), e.text());
 		item->setRenameEnabled(1, true);
 	}
+
+
  }
 
 }
@@ -1653,7 +1729,13 @@ void BoPropertiesWidget::slotItemRenamed(QListViewItem* item, int col)
  }
  QString name = item->text(0);
  QString value = item->text(1);
- mWidgetElement.setAttribute(name, value);
+
+ QDomElement properties = mWidgetElement.namedItem("Properites").toElement();
+ if (properties.isNull()) {
+	boError() << k_funcinfo << "NULL Properties element" << endl;
+	return;
+ }
+ setElementText(properties.namedItem(name), value);
  emit signalChanged(mWidgetElement);
 
  // TODO: if the name of the widget was changed: update the widget tree!
@@ -1717,9 +1799,10 @@ bool BoUfoDesignerMain::slotCreateNew()
  QDomElement root = doc.createElement("BoUfoDesigner");
  doc.appendChild(root);
  QDomElement widgets = doc.createElement("Widgets");
- initAttributes(widgets, "BoUfoWidget"); // root widget
- widgets.setAttribute("name", "BoClassName"); // the name of the root widget is the name of the generated class
  root.appendChild(widgets);
+ initProperties(widgets, "BoUfoWidget"); // root widget
+ setElementText(widgets.namedItem("Properties").namedItem("name"), "BoClassName"); // the name of the root widget is the name of the generated class
+
  return slotLoadFromXML(doc.toCString());
 }
 
@@ -1775,11 +1858,18 @@ bool BoUfoDesignerMain::slotLoadFromXML(const QByteArray& xml)
 	boError() << k_funcinfo << "no Widgets element" << endl;
 	return false;
  }
- initAttributes(widgetsRoot, widgetsRoot.attribute("ClassName"));
+
+ if (widgetsRoot.hasAttribute("ClassName") && widgetsRoot.namedItem("ClassName").isNull()) {
+	boDebug() << k_funcinfo << "converting from obsolete file format..." << endl;
+	convertFromAttributeFormat(widgetsRoot);
+	boDebug() << k_funcinfo << "converted." << endl;
+ }
+
+ initProperties(widgetsRoot, widgetsRoot.namedItem("ClassName").toElement().text());
  QDomNodeList list = widgetsRoot.elementsByTagName("Widget");
  for (unsigned int i = 0; i < list.count(); i++) {
 	QDomElement e = list.item(i).toElement();
-	initAttributes(e, e.attribute("ClassName"));
+	initProperties(e, e.namedItem("ClassName").toElement().text());
  }
  boDebug() << k_funcinfo << endl;
  mDocument = doc;
@@ -1814,8 +1904,10 @@ void BoUfoDesignerMain::slotPlaceWidget(const QDomElement& _parent)
 	boDebug() << k_funcinfo << "no widget selected" << endl;
 	return;
  }
- if (!isContainerWidget(parent.attribute("ClassName"))) {
-	boError() << k_funcinfo << "Can add to container widgets only. selected parent is a " << parent.attribute("ClassName") << " which is not a container widget" << endl;
+ if (!isContainerWidget(parent.namedItem("ClassName").toElement().text())) {
+	boError() << k_funcinfo << "Can add to container widgets only. selected parent is a "
+			<< parent.namedItem("ClassName").toElement().text()
+			<< " which is not a container widget" << endl;
 	return;
  }
 
@@ -1845,15 +1937,15 @@ void BoUfoDesignerMain::slotPlaceWidget(const QDomElement& _parent)
 		if (e == widget) {
 			continue;
 		}
-		if (e.attribute("name") == name) {
+		if (e.namedItem("Properties").namedItem("name").toElement().text() == name) {
 			ok = false;
 			break;
 		}
 	}
  } while (!ok);
- widget.setAttribute("name", name);
+ setElementText(widget.namedItem("Properties").namedItem("name"), name);
 
- initAttributes(widget, mPlaceWidgetClass);
+ initProperties(widget, mPlaceWidgetClass);
  slotUpdateGUI();
 }
 
@@ -1871,17 +1963,23 @@ void BoUfoDesignerMain::slotRemoveWidget(const QDomElement& widget)
  slotUpdateGUI();
 }
 
-void BoUfoDesignerMain::initAttributes(QDomElement& widget, const QString& className)
+void BoUfoDesignerMain::initProperties(QDomElement& widget, const QString& className)
 {
  if (className.isEmpty()) {
-	boError() << k_funcinfo << "empty Classname" << endl;
+	boError() << k_funcinfo << "empty ClassName" << endl;
 	return;
  }
  if (widget.isNull()) {
 	boError() << k_funcinfo << "NULL widget element" << endl;
 	return;
  }
- widget.setAttribute("ClassName", className);
+ QDomDocument doc = widget.ownerDocument();
+ QDomElement classNameElement = widget.namedItem("ClassName").toElement();
+ if (classNameElement.isNull()) {
+	classNameElement = doc.createElement("ClassName");
+	widget.appendChild(classNameElement);
+ }
+ setElementText(classNameElement, className);
 
  // WARNING: trolltech marks this as internal!
  // but it is sooo useful
@@ -1890,6 +1988,12 @@ void BoUfoDesignerMain::initAttributes(QDomElement& widget, const QString& class
  if (!metaObject) {
 	boError() << k_funcinfo << "don't know class " << className << endl;
 	return;
+ }
+
+ QDomElement propertiesElement = widget.namedItem("Properties").toElement();
+ if (propertiesElement.isNull()) {
+	propertiesElement = doc.createElement("Properties");
+	widget.appendChild(propertiesElement);
  }
 
  // AB: non-boson superclasses are QObject and Qt. Only QObject has properties
@@ -1908,9 +2012,9 @@ void BoUfoDesignerMain::initAttributes(QDomElement& widget, const QString& class
  // so atm we take care of the layout property only, which is the most important
  // property that has a default value in some widgets.
  if (className == "BoUfoVBox") {
-	widget.setAttribute("layout", "UVBoxLayout");
+	setElementText(propertiesElement.namedItem("layout"), "UVBoxLayout");
  } else if (className == "BoUfoHBox") {
-	widget.setAttribute("layout", "UHBoxLayout");
+	setElementText(propertiesElement.namedItem("layout"), "UHBoxLayout");
  }
 }
 
@@ -1924,14 +2028,14 @@ void BoUfoDesignerMain::slotSelectWidget(const QDomElement& widget)
 
 void BoUfoDesignerMain::slotPropertiesChanged(const QDomElement& widget)
 {
- QString name = widget.attribute("name");
+ QString name = widget.namedItem("Properties").namedItem("name").toElement().text();
  QDomNodeList list = mDocument.documentElement().elementsByTagName("Widget");
  for (unsigned int i = 0; i < list.count(); i++) {
 	QDomElement e = list.item(i).toElement();
 	if (e == widget) {
 		continue;
 	}
-	if (e.attribute("name") == name) {
+	if (e.namedItem("Properties").namedItem("name").toElement().text() == name) {
 		// TODO: somehow revert to the old name
 		boError() << k_funcinfo << "used the same name more than once - this won't compile eventually!" << endl;
 		break;
@@ -1981,8 +2085,9 @@ void BoUfoDesignerMain::slotUpdateGUI()
 
 void BoUfoDesignerMain::provideProperty(QDomElement& e, const QString& property)
 {
- if (!e.hasAttribute(property)) {
-	e.setAttribute(property, "");
+ if (e.namedItem("Properties").namedItem(property).toElement().isNull()) {
+	QDomDocument doc = e.ownerDocument();
+	e.namedItem("Properties").appendChild(doc.createElement(property));
  }
 }
 

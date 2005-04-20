@@ -327,7 +327,7 @@ public slots:
 	void slotEditSignalsSlots();
 
 protected:
-	void initAttributes(QDomElement& widget, const QString& className);
+	void initProperties(QDomElement& widget, const QString& className);
 	void provideProperty(QDomElement& element, const QString& property);
 
 	void initActions();
