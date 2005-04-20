@@ -1386,13 +1386,19 @@ bool BoUfoWidget::isVisible() const
  return widget()->isVisible();
 }
 
-void BoUfoWidget::loadPropertiesFromXML(const QDomNamedNodeMap& map)
+void BoUfoWidget::loadPropertiesFromXML(const QDomElement& root)
 {
+ if (root.isNull()) {
+	return;
+ }
  QMap<QString, QString> properties;
 
- for (unsigned int i = 0; i < map.count(); i++) {
-	QDomAttr a = map.item(i).toAttr();
-	properties.insert(a.name(), a.value());
+ for (QDomNode n = root.firstChild(); !n.isNull(); n = n.nextSibling()) {
+	QDomElement e = n.toElement();
+	if (e.isNull()) {
+		continue;
+	}
+	properties.insert(e.tagName(), e.text());
  }
  loadProperties(properties);
 }
@@ -2006,6 +2012,11 @@ void BoUfoLineEdit::setOpaque(bool o)
  mLineEdit->setOpaque(o);
 }
 
+void BoUfoLineEdit::setEditable(bool e)
+{
+ mLineEdit->setEditable(!e);
+}
+
 void BoUfoLineEdit::uslotActivated(ufo::UActionEvent*)
 {
  emit signalActivated();
@@ -2167,6 +2178,45 @@ void BoUfoComboBox::setItems(const QStringList& items)
 unsigned int BoUfoComboBox::count() const
 {
  return mComboBox->getItemCount();
+}
+
+QString BoUfoComboBox::itemText(int i) const
+{
+ // TODO: implement properly. this is only a trivail and slow implementation.
+ if (i < 0 || (unsigned int)i >= count()) {
+	return QString::null;
+ }
+ return items()[i];
+}
+
+void BoUfoComboBox::setItemText(int i, const QString& text)
+{
+ // TODO: implement properly. this is only a trivail and slow implementation.
+ if (i < 0 || (unsigned int)i >= count()) {
+	return;
+ }
+ QStringList list = items();
+ list[i] = text;
+ setItems(list);
+}
+
+void BoUfoComboBox::insertItem(const QString& text, int index)
+{
+ // TODO: implement properly. this is only a trivail and slow implementation.
+ QStringList list = items();
+ if (index < 0) {
+	index = list.count();
+ }
+ list.insert(list.at(index), text);
+ setItems(list);
+}
+
+void BoUfoComboBox::removeItem(int index)
+{
+ // TODO: implement properly. this is only a trivail and slow implementation.
+ QStringList list = items();
+ list.remove(list.at(index));
+ setItems(list);
 }
 
 
@@ -2334,6 +2384,45 @@ void BoUfoListBox::setItems(const QStringList& items)
 unsigned int BoUfoListBox::count() const
 {
  return mListBox->getItemCount();
+}
+
+QString BoUfoListBox::itemText(int i) const
+{
+ // TODO: implement properly. this is only a trivail and slow implementation.
+ if (i < 0 || (unsigned int)i >= count()) {
+	return QString::null;
+ }
+ return items()[i];
+}
+
+void BoUfoListBox::setItemText(int i, const QString& text)
+{
+ // TODO: implement properly. this is only a trivail and slow implementation.
+ if (i < 0 || (unsigned int)i >= count()) {
+	return;
+ }
+ QStringList list = items();
+ list[i] = text;
+ setItems(list);
+}
+
+void BoUfoListBox::insertItem(const QString& text, int index)
+{
+ // TODO: implement properly. this is only a trivail and slow implementation.
+ QStringList list = items();
+ if (index < 0) {
+	index = list.count();
+ }
+ list.insert(list.at(index), text);
+ setItems(list);
+}
+
+void BoUfoListBox::removeItem(int index)
+{
+ // TODO: implement properly. this is only a trivail and slow implementation.
+ QStringList list = items();
+ list.remove(list.at(index));
+ setItems(list);
 }
 
 void BoUfoListBox::setOpaque(bool o)
