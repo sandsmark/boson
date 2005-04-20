@@ -4,174 +4,196 @@
   <ClassName>BoUfoWidget</ClassName>
   <Properties>
    <opaque>true</opaque>
-   <minimumHeight></minimumHeight>
-   <preferredHeight></preferredHeight>
-   <constraints></constraints>
-   <verticalAlignment></verticalAlignment>
-   <preferredWidth></preferredWidth>
+   <minimumHeight/>
+   <preferredHeight/>
+   <constraints/>
+   <verticalAlignment/>
+   <preferredWidth/>
    <horizontalAlignment>4</horizontalAlignment>
    <layout>UBorderLayout</layout>
    <name>BoUfoWelcomeWidget</name>
-   <minimumWidth></minimumWidth>
+   <minimumWidth/>
    <backgroundImageFile>pics/boson-startup-bg.png</backgroundImageFile>
   </Properties>
   <Widget>
    <ClassName>BoUfoWidget</ClassName>
    <Properties>
-    <opaque></opaque>
-    <minimumHeight></minimumHeight>
-    <preferredHeight></preferredHeight>
+    <opaque/>
+    <minimumHeight/>
+    <preferredHeight/>
     <constraints>north</constraints>
-    <verticalAlignment></verticalAlignment>
-    <preferredWidth></preferredWidth>
+    <verticalAlignment/>
+    <preferredWidth/>
     <horizontalAlignment>4</horizontalAlignment>
     <layout>UVBoxLayout</layout>
     <name>mWidget10</name>
-    <minimumWidth></minimumWidth>
-    <backgroundImageFile></backgroundImageFile>
+    <minimumWidth/>
+    <backgroundImageFile/>
    </Properties>
    <Widget>
     <ClassName>BoUfoLabel</ClassName>
     <Properties>
-     <opaque></opaque>
-     <minimumHeight></minimumHeight>
-     <preferredHeight></preferredHeight>
-     <constraints></constraints>
-     <verticalAlignment></verticalAlignment>
-     <preferredWidth></preferredWidth>
+     <opaque/>
+     <minimumHeight/>
+     <preferredHeight/>
+     <constraints/>
+     <verticalAlignment/>
+     <preferredWidth/>
      <horizontalAlignment>4</horizontalAlignment>
-     <layout></layout>
+     <layout/>
      <name>mLogo</name>
      <iconFile>pics/boson-startup-logo.png</iconFile>
-     <minimumWidth></minimumWidth>
-     <text></text>
-     <backgroundImageFile></backgroundImageFile>
+     <minimumWidth/>
+     <text/>
+     <backgroundImageFile/>
     </Properties>
    </Widget>
    <Widget>
     <ClassName>BoUfoLabel</ClassName>
     <Properties>
-     <preferredHeight></preferredHeight>
-     <minimumHeight></minimumHeight>
+     <preferredHeight/>
+     <minimumHeight/>
      <opaque>false</opaque>
-     <constraints></constraints>
-     <verticalAlignment></verticalAlignment>
-     <preferredWidth></preferredWidth>
+     <constraints/>
+     <verticalAlignment/>
+     <preferredWidth/>
      <horizontalAlignment>4</horizontalAlignment>
-     <layout></layout>
+     <layout/>
      <name>mBosonBanner</name>
      <iconFile>pics/boson-startup-banner.png</iconFile>
-     <text></text>
-     <minimumWidth></minimumWidth>
-     <backgroundImageFile></backgroundImageFile>
+     <text/>
+     <minimumWidth/>
+     <backgroundImageFile/>
     </Properties>
    </Widget>
   </Widget>
   <Widget>
    <ClassName>BoUfoLabel</ClassName>
    <Properties>
-    <preferredHeight></preferredHeight>
-    <minimumHeight></minimumHeight>
+    <preferredHeight/>
+    <minimumHeight/>
     <opaque>false</opaque>
     <constraints>center</constraints>
-    <verticalAlignment></verticalAlignment>
-    <preferredWidth></preferredWidth>
+    <verticalAlignment/>
+    <preferredWidth/>
     <horizontalAlignment>4</horizontalAlignment>
-    <layout></layout>
+    <layout/>
     <name>mTextPix</name>
     <iconFile>pics/boson-startup-textframe.png</iconFile>
-    <text></text>
-    <minimumWidth></minimumWidth>
-    <backgroundImageFile></backgroundImageFile>
+    <text/>
+    <minimumWidth/>
+    <backgroundImageFile/>
    </Properties>
   </Widget>
   <Widget>
    <ClassName>BoUfoWidget</ClassName>
    <Properties>
-    <preferredHeight></preferredHeight>
-    <minimumHeight></minimumHeight>
-    <opaque></opaque>
+    <preferredHeight/>
+    <minimumHeight/>
+    <opaque/>
     <constraints>south</constraints>
-    <verticalAlignment></verticalAlignment>
-    <preferredWidth></preferredWidth>
+    <verticalAlignment/>
+    <preferredWidth/>
     <horizontalAlignment>4</horizontalAlignment>
     <layout>UHBoxLayout</layout>
     <name>mWidget4</name>
-    <minimumWidth></minimumWidth>
-    <backgroundImageFile></backgroundImageFile>
+    <minimumWidth/>
+    <backgroundImageFile/>
    </Properties>
    <Widget>
     <ClassName>BoUfoPushButton</ClassName>
     <Properties>
-     <preferredHeight></preferredHeight>
-     <minimumHeight></minimumHeight>
-     <opaque></opaque>
-     <constraints></constraints>
-     <verticalAlignment></verticalAlignment>
-     <preferredWidth></preferredWidth>
-     <horizontalAlignment></horizontalAlignment>
-     <layout></layout>
+     <preferredHeight/>
+     <minimumHeight/>
+     <opaque/>
+     <constraints/>
+     <verticalAlignment/>
+     <preferredWidth/>
+     <horizontalAlignment/>
+     <layout/>
      <name>mStartNewGame</name>
-     <iconFile></iconFile>
+     <iconFile/>
      <text>S&amp;tart new game</text>
-     <minimumWidth></minimumWidth>
-     <backgroundImageFile></backgroundImageFile>
+     <minimumWidth/>
+     <backgroundImageFile/>
     </Properties>
    </Widget>
    <Widget>
     <ClassName>BoUfoPushButton</ClassName>
     <Properties>
-     <preferredHeight></preferredHeight>
-     <minimumHeight></minimumHeight>
-     <opaque></opaque>
-     <constraints></constraints>
-     <verticalAlignment></verticalAlignment>
-     <preferredWidth></preferredWidth>
-     <horizontalAlignment></horizontalAlignment>
-     <layout></layout>
+     <preferredHeight/>
+     <minimumHeight/>
+     <opaque/>
+     <constraints/>
+     <verticalAlignment/>
+     <preferredWidth/>
+     <horizontalAlignment/>
+     <layout/>
      <name>mLoadGame</name>
-     <iconFile></iconFile>
+     <iconFile/>
      <text>&amp;Load saved game</text>
-     <minimumWidth></minimumWidth>
-     <backgroundImageFile></backgroundImageFile>
+     <minimumWidth/>
+     <backgroundImageFile/>
     </Properties>
    </Widget>
    <Widget>
     <ClassName>BoUfoPushButton</ClassName>
     <Properties>
-     <preferredHeight></preferredHeight>
-     <minimumHeight></minimumHeight>
-     <opaque></opaque>
-     <constraints></constraints>
-     <verticalAlignment></verticalAlignment>
-     <preferredWidth></preferredWidth>
-     <horizontalAlignment></horizontalAlignment>
-     <layout></layout>
+     <preferredHeight/>
+     <minimumHeight/>
+     <opaque/>
+     <constraints/>
+     <verticalAlignment/>
+     <preferredWidth/>
+     <horizontalAlignment/>
+     <layout/>
      <name>mStartEditor</name>
-     <iconFile></iconFile>
+     <iconFile/>
      <text>Start &amp;Editor</text>
-     <minimumWidth></minimumWidth>
-     <backgroundImageFile></backgroundImageFile>
+     <minimumWidth/>
+     <backgroundImageFile/>
     </Properties>
    </Widget>
    <Widget>
     <ClassName>BoUfoPushButton</ClassName>
     <Properties>
-     <preferredHeight></preferredHeight>
-     <minimumHeight></minimumHeight>
-     <opaque></opaque>
-     <constraints></constraints>
-     <verticalAlignment></verticalAlignment>
-     <preferredWidth></preferredWidth>
-     <horizontalAlignment></horizontalAlignment>
-     <layout></layout>
+     <preferredHeight/>
+     <minimumHeight/>
+     <opaque/>
+     <constraints/>
+     <verticalAlignment/>
+     <preferredWidth/>
+     <horizontalAlignment/>
+     <layout/>
      <name>mQuit</name>
-     <iconFile></iconFile>
+     <iconFile/>
      <text>&amp;Quit Boson</text>
-     <minimumWidth></minimumWidth>
-     <backgroundImageFile></backgroundImageFile>
+     <minimumWidth/>
+     <backgroundImageFile/>
     </Properties>
    </Widget>
   </Widget>
  </Widgets>
+ <Methods>
+  <Method return="void" visibility="public" type="signal" name="signalLoadGame()" >
+   <Connections>
+    <Connection sender="mLoadGame" signal="clicked()" type="receiver" />
+   </Connections>
+  </Method>
+  <Method return="void" visibility="public" type="signal" name="signalNewGame()" >
+   <Connections>
+    <Connection sender="mStartNewGame" signal="clicked()" type="receiver" />
+   </Connections>
+  </Method>
+  <Method return="void" visibility="public" type="signal" name="signalQuit()" >
+   <Connections>
+    <Connection sender="mQuit" signal="clicked()" type="receiver" />
+   </Connections>
+  </Method>
+  <Method return="void" visibility="public" type="signal" name="signalStartEditor()" >
+   <Connections>
+    <Connection sender="mStartEditor" signal="clicked()" type="receiver" />
+   </Connections>
+  </Method>
+ </Methods>
 </BoUfoDesigner>
