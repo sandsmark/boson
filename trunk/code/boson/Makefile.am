@@ -133,6 +133,7 @@ libboson_la_LIBADD = \
 		$(LIB_KDEUI) \
 		$(LIB_KIO) \
 		-l3ds \
+		-lXmu \
 		$(LIB_XRANDR)
 
 boson_LDFLAGS = $(KDE_RPATH) $(all_libraries) -Xlinker -export-dynamic
