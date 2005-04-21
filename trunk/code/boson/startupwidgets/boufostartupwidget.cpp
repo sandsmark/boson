@@ -34,6 +34,7 @@
 #include <kcmdlineargs.h>
 
 #include <qpixmap.h>
+#include <qimage.h>
 #include <qpopupmenu.h>
 #include <qcursor.h>
 #include <qguardedptr.h>
@@ -51,18 +52,12 @@ public:
 	{
 		mWidgetStack = 0;
 
-		mBackgroundPix = 0;
-		mLogoPix = 0;
-
 		mNetworkInterface = 0;
 
 		mLocalPlayer = 0;
 	}
 
 	BoUfoWidgetStack* mWidgetStack;
-
-	QPixmap* mBackgroundPix;
-	QPixmap* mLogoPix;
 
 	BosonStartupNetwork* mNetworkInterface;
 
@@ -79,18 +74,14 @@ void BoUfoStartupWidget::init()
  d = new BoUfoStartupWidgetPrivate;
  d->mWidgetStack = new BoUfoWidgetStack();
 
- d->mBackgroundPix = new QPixmap(locate("data", "boson/pics/boson-startup-bg.png"));
- d->mLogoPix = new QPixmap(locate("data", "boson/pics/boson-startup-logo.png"));
+ QImage backgroundImage(locate("data", "boson/pics/boson-startup-bg.png"));
+ QImage logoImage(locate("data", "boson/pics/boson-startup-logo.png"));
 
-#if 0
- setBackgroundMode(FixedPixmap);
- setPaletteBackgroundPixmap(*d->mBackgroundPix);
- d->mWidgetStack->setPaletteBackgroundPixmap(*d->mBackgroundPix);
-#endif
+ setBackgroundImage(backgroundImage);
+ setOpaque(true);
 
  BoUfoLabel* logo = new BoUfoLabel();
-// logo->setPixmap(*d->mLogoPix);
- logo->setIcon(*d->mLogoPix);
+ logo->setIcon(logoImage);
 
  setLayoutClass(BoUfoWidget::UVBoxLayout);
 // addSpacing(5); // FIXME: hardcoded
@@ -105,8 +96,6 @@ void BoUfoStartupWidget::init()
 
 BoUfoStartupWidget::~BoUfoStartupWidget()
 {
- delete d->mLogoPix;
- delete d->mBackgroundPix;
  delete d;
 }
 
