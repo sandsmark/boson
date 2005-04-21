@@ -189,8 +189,9 @@ UGL_Image::paint(UGraphics * g, const URectangle & rect) const {
 		ugl_driver->glColor4f(1, 1, 1, 1);
 
 		if (m_imageComponents == 2 || m_imageComponents == 4) {
-			//ugl_driver->glEnable(GL_BLEND);
-			//ugl_driver->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			ugl_driver->glPushAttrib(GL_COLOR_BUFFER_BIT);
+			ugl_driver->glEnable(GL_BLEND);
+			ugl_driver->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		}
 
 		ugl_driver->glBegin(GL_QUADS);
@@ -207,7 +208,7 @@ UGL_Image::paint(UGraphics * g, const URectangle & rect) const {
 		ugl_driver->glEnd();
 
 		if (m_imageComponents == 2 || m_imageComponents == 4) {
-			//ugl_driver->glDisable(GL_BLEND);
+			ugl_driver->glPopAttrib();
 		}
 
 		ugl_driver->glDisable(GL_TEXTURE_2D);
