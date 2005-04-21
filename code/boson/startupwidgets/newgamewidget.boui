@@ -629,22 +629,22 @@
  <Methods>
   <Method return="void" visibility="protected" type="slot" name="slotAddComputerPlayer()" >
    <Connections>
-    <Connection sender="mAddAIPlayer" signal="clicked()" type="receiver" />
+    <Connection sender="mAddAIPlayer" signal="signalClicked()" type="receiver" />
    </Connections>
   </Method>
   <Method return="void" visibility="public" type="slot" name="slotCancel()" >
    <Connections>
-    <Connection sender="mCancel" signal="clicked()" type="receiver" />
+    <Connection sender="mCancel" signal="signalClicked()" type="receiver" />
    </Connections>
   </Method>
   <Method return="void" visibility="public" type="slot" name="slotNetworkOptions()" >
    <Connections>
-    <Connection sender="mNetworkOptions" signal="clicked()" type="receiver" />
+    <Connection sender="mNetworkOptions" signal="signalClicked()" type="receiver" />
    </Connections>
   </Method>
   <Method return="void" visibility="protected" type="slot" name="slotPlayFieldSelected(int, int)" >
    <Connections>
-    <Connection sender="mSelectMap" signal="selectionChanged(int, int)" type="receiver" />
+    <Connection sender="mSelectMap" signal="signalSelectionChanged(int, int)" type="receiver" />
    </Connections>
   </Method>
   <Method return="void" visibility="protected" type="slot" name="slotPlayerColorChanged(int)" >
@@ -654,27 +654,27 @@
   </Method>
   <Method return="void" visibility="protected" type="slot" name="slotPlayerNameChanged()" >
    <Connections>
-    <Connection sender="mPlayerName" signal="returnPressed()" type="receiver" />
+    <Connection sender="mPlayerName" signal="signalActivated()" type="receiver" />
    </Connections>
   </Method>
   <Method return="void" visibility="protected" type="slot" name="slotPlayerSelected(int, int)" >
    <Connections>
-    <Connection sender="mConnectedPlayersList" signal="selectionChanged(int, int)" type="receiver" />
+    <Connection sender="mConnectedPlayersList" signal="signalSelectionChanged(int, int)" type="receiver" />
    </Connections>
   </Method>
   <Method return="void" visibility="protected" type="slot" name="slotPlayerSpeciesChanged(int)" >
    <Connections>
-    <Connection sender="mPlayerSpecies" signal="activated(int)" type="receiver" />
+    <Connection sender="mPlayerSpecies" signal="signalActivated(int)" type="receiver" />
    </Connections>
   </Method>
   <Method return="void" visibility="protected" type="slot" name="slotRemovePlayer()" >
    <Connections>
-    <Connection sender="mRemovePlayer" signal="clicked()" type="receiver" />
+    <Connection sender="mRemovePlayer" signal="signalClicked()" type="receiver" />
    </Connections>
   </Method>
   <Method return="void" visibility="public" type="slot" name="slotStartGame()" >
    <Connections>
-    <Connection sender="mStartGame" signal="clicked()" type="receiver" />
+    <Connection sender="mStartGame" signal="signalClicked()" type="receiver" />
    </Connections>
   </Method>
  </Methods>
