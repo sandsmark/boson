@@ -1498,6 +1498,27 @@ QString BoUfoWidget::constraints() const
  return o->toString().c_str();
 }
 
+void BoUfoWidget::setStretch(int factor)
+{
+ QString f = QString::number(factor);
+ widget()->put("stretch", new ufo::UString(f.latin1()));
+}
+
+int BoUfoWidget::stretch() const
+{
+ ufo::UObject* o = widget()->get("stretch");
+ if (!o) {
+	return 0;
+ }
+ bool ok;
+ QString f = o->toString().c_str();
+ int factor = f.toInt(&ok);
+ if (!ok || factor < 0) {
+	return 0;
+ }
+ return factor;
+}
+
 BoUfoWidget::~BoUfoWidget()
 {
  // AB: do NOT delete the mWidget!
