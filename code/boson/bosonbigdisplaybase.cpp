@@ -3680,6 +3680,7 @@ void BosonBigDisplayBase::resetGameMode()
 {
  BO_CHECK_NULL_RET(ufoManager());
 
+ makeCurrent();
  slotChangeCursor(boConfig->intValue("CursorMode"), boConfig->stringValue("CursorDir"));
 
  d->mUfoGameWidget->setGameMode(true);
