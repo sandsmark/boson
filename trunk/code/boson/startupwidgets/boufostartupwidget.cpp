@@ -93,7 +93,7 @@ void BoUfoStartupWidget::init()
  logo->setIcon(*d->mLogoPix);
 
  setLayoutClass(BoUfoWidget::UVBoxLayout);
- addSpacing(5); // FIXME: hardcoded
+// addSpacing(5); // FIXME: hardcoded
  addWidget(logo); // TODO: AlignHCenter
  addWidget(d->mWidgetStack); // TODO: stretch factor 1
 
@@ -227,9 +227,7 @@ void BoUfoStartupWidget::showWidget(WidgetId widgetId)
 	return;
  }
 
- // TODO: see Top::raiseWidget() ?
  d->mWidgetStack->raiseWidget((int)widgetId);
- d->mWidgetStack->widget((int)widgetId)->show();
 }
 
 void BoUfoStartupWidget::initWidget(WidgetId widgetId)
@@ -326,6 +324,7 @@ void BoUfoStartupWidget::initWidget(WidgetId widgetId)
  }
  w->installEventFilter(this); // for the popup menu
 
+ d->mWidgetStack->addWidget(w);
  d->mWidgetStack->insertWidget(w, (int)widgetId);
 
  if (widgetId == IdNewGame) {
