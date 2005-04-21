@@ -1943,9 +1943,9 @@ void BoUfoDesignerMain::slotPlaceWidget(const QDomElement& _parent)
 		}
 	}
  } while (!ok);
+ initProperties(widget, mPlaceWidgetClass);
  setElementText(widget.namedItem("Properties").namedItem("name"), name);
 
- initProperties(widget, mPlaceWidgetClass);
  slotUpdateGUI();
 }
 
