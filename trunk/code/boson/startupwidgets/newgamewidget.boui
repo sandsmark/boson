@@ -13,42 +13,8 @@
    <layout>UBorderLayout</layout>
    <name>BosonUfoNewGameWidgetBase</name>
    <minimumWidth></minimumWidth>
-   <backgroundImageFile>pics/boson-startup-bg.png</backgroundImageFile>
+   <backgroundImageFile></backgroundImageFile>
   </Properties>
-  <Widget>
-   <ClassName>BoUfoWidget</ClassName>
-   <Properties>
-    <preferredHeight></preferredHeight>
-    <minimumHeight></minimumHeight>
-    <opaque></opaque>
-    <constraints>north</constraints>
-    <verticalAlignment></verticalAlignment>
-    <preferredWidth></preferredWidth>
-    <horizontalAlignment></horizontalAlignment>
-    <layout>UVBoxLayout</layout>
-    <name>mWidget2</name>
-    <minimumWidth></minimumWidth>
-    <backgroundImageFile></backgroundImageFile>
-   </Properties>
-   <Widget>
-    <ClassName>BoUfoLabel</ClassName>
-    <Properties>
-     <preferredHeight></preferredHeight>
-     <minimumHeight></minimumHeight>
-     <opaque></opaque>
-     <constraints></constraints>
-     <verticalAlignment></verticalAlignment>
-     <preferredWidth></preferredWidth>
-     <horizontalAlignment></horizontalAlignment>
-     <layout></layout>
-     <iconFile>pics/boson-startup-logo.png</iconFile>
-     <name>mLogo</name>
-     <text></text>
-     <minimumWidth></minimumWidth>
-     <backgroundImageFile></backgroundImageFile>
-    </Properties>
-   </Widget>
-  </Widget>
   <Widget>
    <ClassName>BoUfoWidget</ClassName>
    <Properties>

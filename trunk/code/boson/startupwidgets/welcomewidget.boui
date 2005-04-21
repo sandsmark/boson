@@ -3,7 +3,7 @@
  <Widgets>
   <ClassName>BoUfoWidget</ClassName>
   <Properties>
-   <opaque>true</opaque>
+   <opaque>false</opaque>
    <minimumHeight/>
    <preferredHeight/>
    <constraints/>
@@ -13,7 +13,7 @@
    <layout>UBorderLayout</layout>
    <name>BoUfoWelcomeWidget</name>
    <minimumWidth/>
-   <backgroundImageFile>pics/boson-startup-bg.png</backgroundImageFile>
+   <backgroundImageFile/>
   </Properties>
   <Widget>
    <ClassName>BoUfoWidget</ClassName>
@@ -30,24 +30,6 @@
     <minimumWidth/>
     <backgroundImageFile/>
    </Properties>
-   <Widget>
-    <ClassName>BoUfoLabel</ClassName>
-    <Properties>
-     <opaque/>
-     <minimumHeight/>
-     <preferredHeight/>
-     <constraints/>
-     <verticalAlignment/>
-     <preferredWidth/>
-     <horizontalAlignment>4</horizontalAlignment>
-     <layout/>
-     <name>mLogo</name>
-     <iconFile>pics/boson-startup-logo.png</iconFile>
-     <minimumWidth/>
-     <text/>
-     <backgroundImageFile/>
-    </Properties>
-   </Widget>
    <Widget>
     <ClassName>BoUfoLabel</ClassName>
     <Properties>
