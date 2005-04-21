@@ -11,6 +11,7 @@ Patches applied currently (this list may not be complete):
   and ufo/src/ui/uthemelookandfeel.cpp to include boglx.h instead of glx.h
   note that this must be included before X11/Xlib.h
 - Patch to fix index underflow in UFontMetrics::viewToModel()
+- Patch to ugl_image.cpp to enable blending for images with 4 components
 
 Use
  make_ufo_dir.sh ufo_dir code/ufo
