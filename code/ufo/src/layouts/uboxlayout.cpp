@@ -35,7 +35,7 @@
 using namespace ufo;
 
 static std::vector<URectangle>
-getBounds(int axis, int hgap, int vgap, const UWidget* container, const URectangle & bounds);
+getBounds(int axis, int hgap, int vgap, const UWidget* container, const URectangle & bounds, bool useAvailableSize = true);
 
 UFO_IMPLEMENT_DYNAMIC_CLASS(UBoxLayout, ULayoutManager)
 
@@ -64,7 +64,7 @@ UBoxLayout::getPreferredLayoutSize(const UWidget * container,
 	// AB: x, y don't matter in this method
 	bounds.w = maxSize.w;
 	bounds.h = maxSize.h;
-	std::vector<URectangle> childBounds = getBounds(m_axis, m_hgap, m_vgap, container, bounds);
+	std::vector<URectangle> childBounds = getBounds(m_axis, m_hgap, m_vgap, container, bounds, false);
 	UDimension ret(0, 0);
 
 
@@ -102,7 +102,7 @@ UBoxLayout::getPreferredLayoutSize(const UWidget * container,
 }
 
 std::vector<URectangle>
-getBounds(int axis, int hgap, int vgap, const UWidget * container, const URectangle & bounds) {
+getBounds(int axis, int hgap, int vgap, const UWidget * container, const URectangle & bounds, bool useAvailableSize) {
 	std::vector<URectangle> ret(container->getWidgetCount());
 
 	int x = bounds.x;
@@ -158,6 +158,72 @@ getBounds(int axis, int hgap, int vgap, const UWidget * container, const URectan
 			ret[i].h = 0;
 		}
 	}
+
+	// When useAvailableSize is true, we use the whole size in bounds, by
+	// assigning additional space to the widgets. However this is not always
+	// intended (getPreferredSize() must not use that).
+	if (!useAvailableSize) {
+		return ret;
+	}
+
+	unsigned int visibleWidgets = 0;
+	for (unsigned int i = 0 ; i < container->getWidgetCount() ; i++) {
+		const UWidget * w = container->getWidget(i);
+
+		if (w->isVisible()) {
+			visibleWidgets++;
+		}
+	}
+
+	// the visible widgets share the remaining space
+	// TODO:
+	// 1. maintain the aspect? probably it makes little sense if a widget
+	//    with w=10 receives the same additional width as a widget with
+	//    w=1000.
+	//    testing will reveal whether aspect maintaining looks better or
+	//    not.
+	// 2. we totally ignore any maximum size currently
+	// 3. using some kind of "stretch" property, like Qt uses would be cool
+	//    (and pretty easy to implement)
+	int widgetsLeft = visibleWidgets;
+	int fixX = 0;
+	int fixY = 0;
+	for (unsigned int i = 0 ; i < container->getWidgetCount() ; i++) {
+		const UWidget * w = container->getWidget(i);
+
+		ret[i].x += fixX;
+		ret[i].y += fixY;
+
+		if (w->isVisible()) {
+			if (axis == UBoxLayout::XAxis) {
+				int add = dim.w / visibleWidgets;
+				if (widgetsLeft == 1) {
+					// one widget must get the remaining few
+					// pixels. we pick the last one.
+					// (random choice)
+					add += dim.w % visibleWidgets;
+				}
+
+				fixX += add;
+				ret[i].w += add;
+			} else {
+				int add = dim.h / visibleWidgets;
+				if (widgetsLeft == 1) {
+					// one widget must get the remaining few
+					// pixels. we pick the last one.
+					// (random choice)
+					add += dim.h % visibleWidgets;
+				}
+
+				fixY += add;
+				ret[i].h += add;
+			}
+			widgetsLeft--;
+		}
+	}
+	dim.w = 0;
+	dim.h = 0;
+
 	return ret;
 }
 

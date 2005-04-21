@@ -12,6 +12,7 @@ Patches applied currently (this list may not be complete):
   note that this must be included before X11/Xlib.h
 - Patch to fix index underflow in UFontMetrics::viewToModel()
 - Patch to ugl_image.cpp to enable blending for images with 4 components
+- Patch to uboboxlayout.cpp to make widgets use all remaining space
 
 Use
  make_ufo_dir.sh ufo_dir code/ufo
