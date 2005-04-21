@@ -495,7 +495,9 @@ void BoUfoNewGameWidget::slotNetSpeciesChanged(Player* p)
     QMap<int, QString>::Iterator it;
     for (it = d->mSpeciesIndex2Identifier.begin(); it != d->mSpeciesIndex2Identifier.end(); it++) {
         if (it.data() == p->speciesTheme()->identifier()) {
+            mPlayerSpecies->blockSignals(true);
             mPlayerSpecies->setCurrentItem(it.key());
+            mPlayerSpecies->blockSignals(false);
             break;
         }
     }
