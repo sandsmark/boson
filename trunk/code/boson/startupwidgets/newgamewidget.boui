@@ -3,196 +3,208 @@
  <Widgets>
   <ClassName>BoUfoWidget</ClassName>
   <Properties>
-   <preferredHeight></preferredHeight>
-   <minimumHeight></minimumHeight>
-   <opaque></opaque>
-   <constraints></constraints>
-   <verticalAlignment></verticalAlignment>
-   <preferredWidth></preferredWidth>
-   <horizontalAlignment></horizontalAlignment>
+   <preferredHeight/>
+   <minimumHeight/>
+   <opaque/>
+   <constraints/>
+   <verticalAlignment/>
+   <preferredWidth/>
+   <horizontalAlignment/>
    <layout>UBorderLayout</layout>
    <name>BosonUfoNewGameWidgetBase</name>
-   <minimumWidth></minimumWidth>
-   <backgroundImageFile></backgroundImageFile>
+   <minimumWidth/>
+   <backgroundImageFile/>
+   <stretch/>
   </Properties>
   <Widget>
    <ClassName>BoUfoWidget</ClassName>
    <Properties>
-    <preferredHeight></preferredHeight>
-    <minimumHeight></minimumHeight>
-    <opaque></opaque>
+    <preferredHeight/>
+    <minimumHeight/>
+    <opaque/>
     <constraints>center</constraints>
-    <verticalAlignment></verticalAlignment>
-    <preferredWidth></preferredWidth>
-    <horizontalAlignment></horizontalAlignment>
+    <verticalAlignment/>
+    <preferredWidth/>
+    <horizontalAlignment/>
     <layout>UBorderLayout</layout>
     <name>mWidget4</name>
-    <minimumWidth></minimumWidth>
-    <backgroundImageFile></backgroundImageFile>
+    <minimumWidth/>
+    <backgroundImageFile/>
+    <stretch/>
    </Properties>
    <Widget>
     <ClassName>BoUfoWidget</ClassName>
     <Properties>
-     <preferredHeight></preferredHeight>
-     <minimumHeight></minimumHeight>
-     <opaque></opaque>
+     <preferredHeight/>
+     <minimumHeight/>
+     <opaque/>
      <constraints>west</constraints>
-     <verticalAlignment></verticalAlignment>
-     <preferredWidth></preferredWidth>
-     <horizontalAlignment></horizontalAlignment>
+     <verticalAlignment/>
+     <preferredWidth/>
+     <horizontalAlignment/>
      <layout>UVBoxLayout</layout>
      <name>mWidget9</name>
-     <minimumWidth></minimumWidth>
-     <backgroundImageFile></backgroundImageFile>
+     <minimumWidth/>
+     <backgroundImageFile/>
+     <stretch/>
     </Properties>
     <Widget>
      <ClassName>BoUfoWidget</ClassName>
      <Properties>
-      <preferredHeight></preferredHeight>
-      <minimumHeight></minimumHeight>
-      <opaque></opaque>
-      <constraints></constraints>
-      <verticalAlignment></verticalAlignment>
-      <preferredWidth></preferredWidth>
-      <horizontalAlignment></horizontalAlignment>
+      <preferredHeight/>
+      <minimumHeight/>
+      <opaque/>
+      <constraints/>
+      <verticalAlignment/>
+      <preferredWidth/>
+      <horizontalAlignment/>
       <layout>UHBoxLayout</layout>
       <name>mChooseMapBox</name>
-      <minimumWidth></minimumWidth>
-      <backgroundImageFile></backgroundImageFile>
+      <minimumWidth/>
+      <backgroundImageFile/>
+      <stretch/>
      </Properties>
      <Widget>
       <ClassName>BoUfoListBox</ClassName>
       <Properties>
-       <selection></selection>
+       <selection/>
        <preferredHeight>300</preferredHeight>
-       <minimumHeight></minimumHeight>
-       <opaque></opaque>
-       <constraints></constraints>
-       <verticalAlignment></verticalAlignment>
+       <minimumHeight/>
+       <opaque/>
+       <constraints/>
+       <verticalAlignment/>
        <preferredWidth>200</preferredWidth>
-       <horizontalAlignment></horizontalAlignment>
-       <layout></layout>
+       <horizontalAlignment/>
+       <layout/>
        <name>mSelectMap</name>
-       <minimumWidth></minimumWidth>
-       <backgroundImageFile></backgroundImageFile>
+       <minimumWidth/>
+       <backgroundImageFile/>
+       <stretch/>
       </Properties>
      </Widget>
      <Widget>
       <ClassName>BoUfoWidget</ClassName>
       <Properties>
-       <preferredHeight></preferredHeight>
-       <minimumHeight></minimumHeight>
-       <opaque></opaque>
-       <constraints></constraints>
-       <verticalAlignment></verticalAlignment>
-       <preferredWidth></preferredWidth>
-       <horizontalAlignment></horizontalAlignment>
+       <preferredHeight/>
+       <minimumHeight/>
+       <opaque/>
+       <constraints/>
+       <verticalAlignment/>
+       <preferredWidth/>
+       <horizontalAlignment/>
        <layout>UVBoxLayout</layout>
        <name>mMapBox</name>
-       <minimumWidth></minimumWidth>
-       <backgroundImageFile></backgroundImageFile>
+       <minimumWidth/>
+       <backgroundImageFile/>
+       <stretch/>
       </Properties>
       <Widget>
        <ClassName>BoUfoWidget</ClassName>
        <Properties>
-        <preferredHeight></preferredHeight>
-        <minimumHeight></minimumHeight>
-        <opaque></opaque>
-        <constraints></constraints>
-        <verticalAlignment></verticalAlignment>
-        <preferredWidth></preferredWidth>
-        <horizontalAlignment></horizontalAlignment>
+        <preferredHeight/>
+        <minimumHeight/>
+        <opaque/>
+        <constraints/>
+        <verticalAlignment/>
+        <preferredWidth/>
+        <horizontalAlignment/>
         <layout>UHBoxLayout</layout>
         <name>mWidget16</name>
-        <minimumWidth></minimumWidth>
-        <backgroundImageFile></backgroundImageFile>
+        <minimumWidth/>
+        <backgroundImageFile/>
+        <stretch/>
        </Properties>
        <Widget>
         <ClassName>BoUfoLabel</ClassName>
         <Properties>
-         <preferredHeight></preferredHeight>
-         <minimumHeight></minimumHeight>
-         <opaque></opaque>
-         <constraints></constraints>
-         <verticalAlignment></verticalAlignment>
-         <preferredWidth></preferredWidth>
-         <horizontalAlignment></horizontalAlignment>
-         <layout></layout>
-         <iconFile></iconFile>
+         <preferredHeight/>
+         <minimumHeight/>
+         <opaque/>
+         <constraints/>
+         <verticalAlignment/>
+         <preferredWidth/>
+         <horizontalAlignment/>
+         <layout/>
+         <iconFile/>
          <name>mWidget15</name>
          <text>Size:</text>
-         <minimumWidth></minimumWidth>
-         <backgroundImageFile></backgroundImageFile>
+         <minimumWidth/>
+         <backgroundImageFile/>
+         <stretch/>
         </Properties>
        </Widget>
        <Widget>
         <ClassName>BoUfoLabel</ClassName>
         <Properties>
-         <preferredHeight></preferredHeight>
-         <minimumHeight></minimumHeight>
-         <opaque></opaque>
-         <constraints></constraints>
-         <verticalAlignment></verticalAlignment>
-         <preferredWidth></preferredWidth>
-         <horizontalAlignment></horizontalAlignment>
-         <layout></layout>
-         <iconFile></iconFile>
+         <preferredHeight/>
+         <minimumHeight/>
+         <opaque/>
+         <constraints/>
+         <verticalAlignment/>
+         <preferredWidth/>
+         <horizontalAlignment/>
+         <layout/>
+         <iconFile/>
          <name>mMapSize</name>
-         <text></text>
-         <minimumWidth></minimumWidth>
-         <backgroundImageFile></backgroundImageFile>
+         <text/>
+         <minimumWidth/>
+         <backgroundImageFile/>
+         <stretch/>
         </Properties>
        </Widget>
       </Widget>
       <Widget>
        <ClassName>BoUfoWidget</ClassName>
        <Properties>
-        <preferredHeight></preferredHeight>
-        <minimumHeight></minimumHeight>
-        <opaque></opaque>
-        <constraints></constraints>
-        <verticalAlignment></verticalAlignment>
-        <preferredWidth></preferredWidth>
-        <horizontalAlignment></horizontalAlignment>
+        <preferredHeight/>
+        <minimumHeight/>
+        <opaque/>
+        <constraints/>
+        <verticalAlignment/>
+        <preferredWidth/>
+        <horizontalAlignment/>
         <layout>UHBoxLayout</layout>
         <name>mWidget18</name>
-        <minimumWidth></minimumWidth>
-        <backgroundImageFile></backgroundImageFile>
+        <minimumWidth/>
+        <backgroundImageFile/>
+        <stretch/>
        </Properties>
        <Widget>
         <ClassName>BoUfoLabel</ClassName>
         <Properties>
-         <preferredHeight></preferredHeight>
-         <minimumHeight></minimumHeight>
-         <opaque></opaque>
-         <constraints></constraints>
-         <verticalAlignment></verticalAlignment>
-         <preferredWidth></preferredWidth>
-         <horizontalAlignment></horizontalAlignment>
-         <layout></layout>
-         <iconFile></iconFile>
+         <preferredHeight/>
+         <minimumHeight/>
+         <opaque/>
+         <constraints/>
+         <verticalAlignment/>
+         <preferredWidth/>
+         <horizontalAlignment/>
+         <layout/>
+         <iconFile/>
          <name>mWidget19</name>
          <text>Players:</text>
-         <minimumWidth></minimumWidth>
-         <backgroundImageFile></backgroundImageFile>
+         <minimumWidth/>
+         <backgroundImageFile/>
+         <stretch/>
         </Properties>
        </Widget>
        <Widget>
         <ClassName>BoUfoLabel</ClassName>
         <Properties>
-         <preferredHeight></preferredHeight>
-         <minimumHeight></minimumHeight>
-         <opaque></opaque>
-         <constraints></constraints>
-         <verticalAlignment></verticalAlignment>
-         <preferredWidth></preferredWidth>
-         <horizontalAlignment></horizontalAlignment>
-         <layout></layout>
-         <iconFile></iconFile>
+         <preferredHeight/>
+         <minimumHeight/>
+         <opaque/>
+         <constraints/>
+         <verticalAlignment/>
+         <preferredWidth/>
+         <horizontalAlignment/>
+         <layout/>
+         <iconFile/>
          <name>mMapPlayers</name>
-         <text></text>
-         <minimumWidth></minimumWidth>
-         <backgroundImageFile></backgroundImageFile>
+         <text/>
+         <minimumWidth/>
+         <backgroundImageFile/>
+         <stretch/>
         </Properties>
        </Widget>
       </Widget>
@@ -200,35 +212,37 @@
        <ClassName>BoUfoTextEdit</ClassName>
        <Properties>
         <preferredHeight>100</preferredHeight>
-        <minimumHeight></minimumHeight>
-        <opaque></opaque>
-        <constraints></constraints>
-        <verticalAlignment></verticalAlignment>
+        <minimumHeight/>
+        <opaque/>
+        <constraints/>
+        <verticalAlignment/>
         <preferredWidth>150</preferredWidth>
-        <horizontalAlignment></horizontalAlignment>
-        <layout></layout>
+        <horizontalAlignment/>
+        <layout/>
         <name>mMapDescription</name>
-        <text></text>
-        <minimumWidth></minimumWidth>
-        <backgroundImageFile></backgroundImageFile>
+        <text/>
+        <minimumWidth/>
+        <backgroundImageFile/>
+        <stretch>1</stretch>
        </Properties>
       </Widget>
       <Widget>
        <ClassName>BoUfoLabel</ClassName>
        <Properties>
-        <preferredHeight></preferredHeight>
-        <minimumHeight></minimumHeight>
-        <opaque></opaque>
-        <constraints></constraints>
-        <verticalAlignment></verticalAlignment>
-        <preferredWidth></preferredWidth>
-        <horizontalAlignment></horizontalAlignment>
-        <layout></layout>
-        <iconFile></iconFile>
+        <preferredHeight/>
+        <minimumHeight/>
+        <opaque/>
+        <constraints/>
+        <verticalAlignment/>
+        <preferredWidth/>
+        <horizontalAlignment/>
+        <layout/>
+        <iconFile/>
         <name>mMapScreenshot</name>
-        <text></text>
-        <minimumWidth></minimumWidth>
-        <backgroundImageFile></backgroundImageFile>
+        <text/>
+        <minimumWidth/>
+        <backgroundImageFile/>
+        <stretch>1</stretch>
        </Properties>
       </Widget>
      </Widget>
@@ -236,286 +250,320 @@
     <Widget>
      <ClassName>BoUfoWidget</ClassName>
      <Properties>
-      <preferredHeight></preferredHeight>
-      <minimumHeight></minimumHeight>
-      <opaque></opaque>
-      <constraints></constraints>
-      <verticalAlignment></verticalAlignment>
-      <preferredWidth></preferredWidth>
-      <horizontalAlignment></horizontalAlignment>
+      <preferredHeight/>
+      <minimumHeight/>
+      <opaque/>
+      <constraints/>
+      <verticalAlignment/>
+      <preferredWidth/>
+      <horizontalAlignment/>
       <layout>UVBoxLayout</layout>
       <name>mChatBox</name>
-      <minimumWidth></minimumWidth>
-      <backgroundImageFile></backgroundImageFile>
+      <minimumWidth/>
+      <backgroundImageFile/>
+      <stretch/>
      </Properties>
     </Widget>
    </Widget>
    <Widget>
     <ClassName>BoUfoWidget</ClassName>
     <Properties>
-     <preferredHeight></preferredHeight>
-     <minimumHeight></minimumHeight>
-     <opaque></opaque>
+     <preferredHeight/>
+     <minimumHeight/>
+     <opaque/>
      <constraints>east</constraints>
-     <verticalAlignment></verticalAlignment>
-     <preferredWidth></preferredWidth>
-     <horizontalAlignment></horizontalAlignment>
+     <verticalAlignment/>
+     <preferredWidth/>
+     <horizontalAlignment/>
      <layout>UVBoxLayout</layout>
      <name>mWidget10</name>
-     <minimumWidth></minimumWidth>
-     <backgroundImageFile></backgroundImageFile>
+     <minimumWidth/>
+     <backgroundImageFile/>
+     <stretch/>
     </Properties>
     <Widget>
      <ClassName>BoUfoWidget</ClassName>
      <Properties>
-      <opaque></opaque>
-      <minimumHeight></minimumHeight>
-      <preferredHeight></preferredHeight>
-      <constraints></constraints>
-      <verticalAlignment></verticalAlignment>
-      <preferredWidth></preferredWidth>
-      <horizontalAlignment></horizontalAlignment>
+      <opaque/>
+      <minimumHeight/>
+      <preferredHeight/>
+      <constraints/>
+      <verticalAlignment/>
+      <preferredWidth/>
+      <horizontalAlignment/>
       <layout>UVBoxLayout</layout>
       <name>mPlayerOptionsBox</name>
-      <minimumWidth></minimumWidth>
-      <backgroundImageFile></backgroundImageFile>
+      <minimumWidth/>
+      <backgroundImageFile/>
+      <stretch/>
      </Properties>
      <Widget>
       <ClassName>BoUfoHBox</ClassName>
       <Properties>
-       <preferredHeight></preferredHeight>
-       <minimumHeight></minimumHeight>
-       <opaque></opaque>
-       <constraints></constraints>
-       <verticalAlignment></verticalAlignment>
-       <preferredWidth></preferredWidth>
-       <horizontalAlignment></horizontalAlignment>
+       <preferredHeight/>
+       <minimumHeight/>
+       <opaque/>
+       <constraints/>
+       <verticalAlignment/>
+       <preferredWidth/>
+       <horizontalAlignment/>
        <layout>UHBoxLayout</layout>
        <name>mWidget28</name>
-       <minimumWidth></minimumWidth>
-       <backgroundImageFile></backgroundImageFile>
+       <minimumWidth/>
+       <backgroundImageFile/>
+       <stretch/>
       </Properties>
       <Widget>
        <ClassName>BoUfoLabel</ClassName>
        <Properties>
-        <preferredHeight></preferredHeight>
-        <minimumHeight></minimumHeight>
-        <opaque></opaque>
-        <constraints></constraints>
-        <verticalAlignment></verticalAlignment>
-        <preferredWidth></preferredWidth>
-        <horizontalAlignment></horizontalAlignment>
-        <layout></layout>
-        <iconFile></iconFile>
+        <preferredHeight/>
+        <minimumHeight/>
+        <opaque/>
+        <constraints/>
+        <verticalAlignment/>
+        <preferredWidth/>
+        <horizontalAlignment/>
+        <layout/>
+        <iconFile/>
         <name>mWidget29</name>
         <text>Name:</text>
-        <minimumWidth></minimumWidth>
-        <backgroundImageFile></backgroundImageFile>
+        <minimumWidth/>
+        <backgroundImageFile/>
+        <stretch/>
        </Properties>
       </Widget>
       <Widget>
        <ClassName>BoUfoLineEdit</ClassName>
        <Properties>
-        <preferredHeight></preferredHeight>
-        <minimumHeight></minimumHeight>
-        <opaque></opaque>
-        <constraints></constraints>
-        <verticalAlignment></verticalAlignment>
+        <preferredHeight/>
+        <minimumHeight/>
+        <opaque/>
+        <constraints/>
+        <verticalAlignment/>
         <preferredWidth>100</preferredWidth>
-        <horizontalAlignment></horizontalAlignment>
-        <layout></layout>
+        <horizontalAlignment/>
+        <layout/>
         <name>mPlayerName</name>
-        <text></text>
-        <minimumWidth></minimumWidth>
-        <backgroundImageFile></backgroundImageFile>
+        <text/>
+        <minimumWidth/>
+        <backgroundImageFile/>
+        <stretch/>
        </Properties>
       </Widget>
      </Widget>
      <Widget>
       <ClassName>BoUfoHBox</ClassName>
       <Properties>
-       <opaque></opaque>
-       <minimumHeight></minimumHeight>
-       <preferredHeight></preferredHeight>
-       <constraints></constraints>
-       <verticalAlignment></verticalAlignment>
-       <preferredWidth></preferredWidth>
-       <horizontalAlignment></horizontalAlignment>
+       <opaque/>
+       <minimumHeight/>
+       <preferredHeight/>
+       <constraints/>
+       <verticalAlignment/>
+       <preferredWidth/>
+       <horizontalAlignment/>
        <layout>UHBoxLayout</layout>
        <name>mWidget31</name>
-       <minimumWidth></minimumWidth>
-       <backgroundImageFile></backgroundImageFile>
+       <minimumWidth/>
+       <backgroundImageFile/>
+       <stretch/>
       </Properties>
       <Widget>
        <ClassName>BoUfoLabel</ClassName>
        <Properties>
-        <opaque></opaque>
-        <minimumHeight></minimumHeight>
-        <preferredHeight></preferredHeight>
-        <constraints></constraints>
-        <verticalAlignment></verticalAlignment>
-        <preferredWidth></preferredWidth>
-        <horizontalAlignment></horizontalAlignment>
-        <layout></layout>
+        <opaque/>
+        <minimumHeight/>
+        <preferredHeight/>
+        <constraints/>
+        <verticalAlignment/>
+        <preferredWidth/>
+        <horizontalAlignment/>
+        <layout/>
         <name>mWidget32</name>
-        <iconFile></iconFile>
-        <minimumWidth></minimumWidth>
+        <iconFile/>
+        <minimumWidth/>
         <text>Color:</text>
-        <backgroundImageFile></backgroundImageFile>
+        <backgroundImageFile/>
+        <stretch/>
        </Properties>
       </Widget>
       <Widget>
        <ClassName>BoUfoWidget</ClassName>
        <Properties>
-        <opaque></opaque>
-        <minimumHeight></minimumHeight>
-        <preferredHeight></preferredHeight>
-        <constraints></constraints>
-        <verticalAlignment></verticalAlignment>
+        <opaque/>
+        <minimumHeight/>
+        <preferredHeight/>
+        <constraints/>
+        <verticalAlignment/>
         <preferredWidth>100</preferredWidth>
-        <horizontalAlignment></horizontalAlignment>
-        <layout></layout>
+        <horizontalAlignment/>
+        <layout/>
         <name>mPlayerColor</name>
-        <minimumWidth></minimumWidth>
-        <backgroundImageFile></backgroundImageFile>
+        <minimumWidth/>
+        <backgroundImageFile/>
+        <stretch/>
        </Properties>
       </Widget>
      </Widget>
      <Widget>
       <ClassName>BoUfoHBox</ClassName>
       <Properties>
-       <opaque></opaque>
-       <minimumHeight></minimumHeight>
-       <preferredHeight></preferredHeight>
-       <constraints></constraints>
-       <verticalAlignment></verticalAlignment>
-       <preferredWidth></preferredWidth>
-       <horizontalAlignment></horizontalAlignment>
+       <opaque/>
+       <minimumHeight/>
+       <preferredHeight/>
+       <constraints/>
+       <verticalAlignment/>
+       <preferredWidth/>
+       <horizontalAlignment/>
        <layout>UHBoxLayout</layout>
        <name>mWidget34</name>
-       <minimumWidth></minimumWidth>
-       <backgroundImageFile></backgroundImageFile>
+       <minimumWidth/>
+       <backgroundImageFile/>
+       <stretch/>
       </Properties>
       <Widget>
        <ClassName>BoUfoLabel</ClassName>
        <Properties>
-        <opaque></opaque>
-        <minimumHeight></minimumHeight>
-        <preferredHeight></preferredHeight>
-        <constraints></constraints>
-        <verticalAlignment></verticalAlignment>
-        <preferredWidth></preferredWidth>
-        <horizontalAlignment></horizontalAlignment>
-        <layout></layout>
+        <opaque/>
+        <minimumHeight/>
+        <preferredHeight/>
+        <constraints/>
+        <verticalAlignment/>
+        <preferredWidth/>
+        <horizontalAlignment/>
+        <layout/>
         <name>mWidget35</name>
-        <iconFile></iconFile>
-        <minimumWidth></minimumWidth>
+        <iconFile/>
+        <minimumWidth/>
         <text>Species:</text>
-        <backgroundImageFile></backgroundImageFile>
+        <backgroundImageFile/>
+        <stretch/>
        </Properties>
       </Widget>
       <Widget>
        <ClassName>BoUfoComboBox</ClassName>
        <Properties>
-        <opaque></opaque>
-        <minimumHeight></minimumHeight>
-        <preferredHeight></preferredHeight>
-        <constraints></constraints>
-        <verticalAlignment></verticalAlignment>
+        <opaque/>
+        <minimumHeight/>
+        <preferredHeight/>
+        <constraints/>
+        <verticalAlignment/>
         <preferredWidth>100</preferredWidth>
-        <horizontalAlignment></horizontalAlignment>
-        <layout></layout>
+        <horizontalAlignment/>
+        <layout/>
         <name>mPlayerSpecies</name>
-        <minimumWidth></minimumWidth>
-        <backgroundImageFile></backgroundImageFile>
+        <minimumWidth/>
+        <backgroundImageFile/>
+        <stretch/>
        </Properties>
       </Widget>
      </Widget>
      <Widget>
       <ClassName>BoUfoPushButton</ClassName>
       <Properties>
-       <opaque></opaque>
-       <minimumHeight></minimumHeight>
-       <preferredHeight></preferredHeight>
-       <constraints></constraints>
-       <verticalAlignment></verticalAlignment>
-       <preferredWidth></preferredWidth>
-       <horizontalAlignment></horizontalAlignment>
-       <layout></layout>
+       <opaque/>
+       <minimumHeight/>
+       <preferredHeight/>
+       <constraints/>
+       <verticalAlignment/>
+       <preferredWidth/>
+       <horizontalAlignment/>
+       <layout/>
        <name>mAddAIPlayer</name>
-       <iconFile></iconFile>
-       <minimumWidth></minimumWidth>
+       <iconFile/>
+       <minimumWidth/>
        <text>&amp;Add AI player</text>
-       <backgroundImageFile></backgroundImageFile>
+       <backgroundImageFile/>
+       <stretch/>
       </Properties>
      </Widget>
     </Widget>
     <Widget>
      <ClassName>BoUfoWidget</ClassName>
      <Properties>
-      <opaque></opaque>
-      <minimumHeight></minimumHeight>
-      <preferredHeight></preferredHeight>
-      <constraints></constraints>
-      <verticalAlignment></verticalAlignment>
-      <preferredWidth></preferredWidth>
-      <horizontalAlignment></horizontalAlignment>
+      <opaque/>
+      <minimumHeight/>
+      <preferredHeight/>
+      <constraints/>
+      <verticalAlignment/>
+      <preferredWidth/>
+      <horizontalAlignment/>
       <layout>UVBoxLayout</layout>
       <name>mConnectedPlayersBox</name>
-      <minimumWidth></minimumWidth>
-      <backgroundImageFile></backgroundImageFile>
+      <minimumWidth/>
+      <backgroundImageFile/>
+      <stretch>1</stretch>
      </Properties>
      <Widget>
       <ClassName>BoUfoLabel</ClassName>
       <Properties>
-       <opaque></opaque>
-       <minimumHeight></minimumHeight>
-       <preferredHeight></preferredHeight>
-       <constraints></constraints>
-       <verticalAlignment></verticalAlignment>
-       <preferredWidth></preferredWidth>
-       <horizontalAlignment></horizontalAlignment>
-       <layout></layout>
+       <opaque/>
+       <minimumHeight/>
+       <preferredHeight/>
+       <constraints/>
+       <verticalAlignment/>
+       <preferredWidth/>
+       <horizontalAlignment/>
+       <layout/>
        <name>mWidget25</name>
-       <iconFile></iconFile>
-       <minimumWidth></minimumWidth>
+       <iconFile/>
+       <minimumWidth/>
        <text>Connected players</text>
-       <backgroundImageFile></backgroundImageFile>
+       <backgroundImageFile/>
+       <stretch/>
       </Properties>
      </Widget>
      <Widget>
       <ClassName>BoUfoListBox</ClassName>
       <Properties>
-       <selection></selection>
-       <opaque></opaque>
+       <selection/>
+       <opaque/>
        <minimumHeight>100</minimumHeight>
        <preferredHeight>150</preferredHeight>
-       <constraints></constraints>
-       <verticalAlignment></verticalAlignment>
+       <constraints/>
+       <verticalAlignment/>
        <preferredWidth>150</preferredWidth>
-       <horizontalAlignment></horizontalAlignment>
-       <layout></layout>
+       <horizontalAlignment/>
+       <layout/>
        <name>mConnectedPlayersList</name>
        <minimumWidth>100</minimumWidth>
-       <backgroundImageFile></backgroundImageFile>
+       <backgroundImageFile/>
+       <stretch>1</stretch>
       </Properties>
      </Widget>
      <Widget>
       <ClassName>BoUfoPushButton</ClassName>
       <Properties>
-       <opaque></opaque>
-       <minimumHeight></minimumHeight>
-       <preferredHeight></preferredHeight>
-       <constraints></constraints>
-       <verticalAlignment></verticalAlignment>
-       <preferredWidth></preferredWidth>
-       <horizontalAlignment></horizontalAlignment>
-       <layout></layout>
+       <opaque/>
+       <minimumHeight/>
+       <preferredHeight/>
+       <constraints/>
+       <verticalAlignment/>
+       <preferredWidth/>
+       <horizontalAlignment/>
+       <layout/>
        <name>mRemovePlayer</name>
-       <iconFile></iconFile>
-       <minimumWidth></minimumWidth>
+       <iconFile/>
+       <minimumWidth/>
        <text>&amp;Remove player</text>
-       <backgroundImageFile></backgroundImageFile>
+       <backgroundImageFile/>
+       <stretch/>
+      </Properties>
+     </Widget>
+     <Widget>
+      <ClassName>BoUfoWidget</ClassName>
+      <Properties>
+       <name>mWidget40</name>
+       <constraints/>
+       <opaque/>
+       <layout/>
+       <minimumWidth/>
+       <minimumHeight/>
+       <preferredWidth/>
+       <preferredHeight/>
+       <backgroundImageFile/>
+       <verticalAlignment/>
+       <horizontalAlignment/>
+       <stretch>1</stretch>
       </Properties>
      </Widget>
     </Widget>
@@ -524,70 +572,142 @@
   <Widget>
    <ClassName>BoUfoWidget</ClassName>
    <Properties>
-    <preferredHeight></preferredHeight>
-    <minimumHeight></minimumHeight>
-    <opaque></opaque>
+    <preferredHeight/>
+    <minimumHeight/>
+    <opaque/>
     <constraints>south</constraints>
-    <verticalAlignment></verticalAlignment>
-    <preferredWidth></preferredWidth>
-    <horizontalAlignment></horizontalAlignment>
+    <verticalAlignment/>
+    <preferredWidth/>
+    <horizontalAlignment/>
     <layout>UHBoxLayout</layout>
     <name>mWidget5</name>
-    <minimumWidth></minimumWidth>
-    <backgroundImageFile></backgroundImageFile>
+    <minimumWidth/>
+    <backgroundImageFile/>
+    <stretch/>
    </Properties>
    <Widget>
+    <ClassName>BoUfoWidget</ClassName>
+    <Properties>
+     <name>mWidget36</name>
+     <constraints/>
+     <opaque/>
+     <layout/>
+     <minimumWidth/>
+     <minimumHeight/>
+     <preferredWidth/>
+     <preferredHeight/>
+     <backgroundImageFile/>
+     <verticalAlignment/>
+     <horizontalAlignment/>
+     <stretch>1</stretch>
+    </Properties>
+   </Widget>
+   <Widget>
     <ClassName>BoUfoPushButton</ClassName>
     <Properties>
-     <preferredHeight></preferredHeight>
-     <minimumHeight></minimumHeight>
-     <opaque></opaque>
-     <constraints></constraints>
-     <verticalAlignment></verticalAlignment>
-     <preferredWidth></preferredWidth>
-     <horizontalAlignment></horizontalAlignment>
-     <layout></layout>
-     <iconFile></iconFile>
+     <preferredHeight/>
+     <minimumHeight/>
+     <opaque/>
+     <constraints/>
+     <verticalAlignment/>
+     <preferredWidth/>
+     <horizontalAlignment/>
+     <layout/>
+     <iconFile/>
      <name>mCancel</name>
      <text>&amp;Cancel</text>
-     <minimumWidth></minimumWidth>
-     <backgroundImageFile></backgroundImageFile>
+     <minimumWidth/>
+     <backgroundImageFile/>
+     <stretch/>
+    </Properties>
+   </Widget>
+   <Widget>
+    <ClassName>BoUfoWidget</ClassName>
+    <Properties>
+     <name>mWidget37</name>
+     <constraints/>
+     <opaque/>
+     <layout/>
+     <minimumWidth/>
+     <minimumHeight/>
+     <preferredWidth/>
+     <preferredHeight/>
+     <backgroundImageFile/>
+     <verticalAlignment/>
+     <horizontalAlignment/>
+     <stretch>1</stretch>
     </Properties>
    </Widget>
    <Widget>
     <ClassName>BoUfoPushButton</ClassName>
     <Properties>
-     <preferredHeight></preferredHeight>
-     <minimumHeight></minimumHeight>
-     <opaque></opaque>
-     <constraints></constraints>
-     <verticalAlignment></verticalAlignment>
-     <preferredWidth></preferredWidth>
-     <horizontalAlignment></horizontalAlignment>
-     <layout></layout>
-     <iconFile></iconFile>
+     <preferredHeight/>
+     <minimumHeight/>
+     <opaque/>
+     <constraints/>
+     <verticalAlignment/>
+     <preferredWidth/>
+     <horizontalAlignment/>
+     <layout/>
+     <iconFile/>
      <name>mNetworkOptions</name>
      <text>&amp;Network options</text>
-     <minimumWidth></minimumWidth>
-     <backgroundImageFile></backgroundImageFile>
+     <minimumWidth/>
+     <backgroundImageFile/>
+     <stretch/>
+    </Properties>
+   </Widget>
+   <Widget>
+    <ClassName>BoUfoWidget</ClassName>
+    <Properties>
+     <name>mWidget38</name>
+     <constraints/>
+     <opaque/>
+     <layout/>
+     <minimumWidth/>
+     <minimumHeight/>
+     <preferredWidth/>
+     <preferredHeight/>
+     <backgroundImageFile/>
+     <verticalAlignment/>
+     <horizontalAlignment/>
+     <stretch>1</stretch>
     </Properties>
    </Widget>
    <Widget>
     <ClassName>BoUfoPushButton</ClassName>
     <Properties>
-     <preferredHeight></preferredHeight>
-     <minimumHeight></minimumHeight>
-     <opaque></opaque>
-     <constraints></constraints>
-     <verticalAlignment></verticalAlignment>
-     <preferredWidth></preferredWidth>
-     <horizontalAlignment></horizontalAlignment>
-     <layout></layout>
-     <iconFile></iconFile>
+     <preferredHeight/>
+     <minimumHeight/>
+     <opaque/>
+     <constraints/>
+     <verticalAlignment/>
+     <preferredWidth/>
+     <horizontalAlignment/>
+     <layout/>
+     <iconFile/>
      <name>mStartGame</name>
      <text>&amp;Start game</text>
-     <minimumWidth></minimumWidth>
-     <backgroundImageFile></backgroundImageFile>
+     <minimumWidth/>
+     <backgroundImageFile/>
+     <stretch/>
+    </Properties>
+   </Widget>
+   <Widget>
+    <ClassName>BoUfoWidget</ClassName>
+    <Properties>
+     <name>mWidget39</name>
+     <constraints/>
+     <opaque/>
+     <layout/>
+     <minimumWidth/>
+     <minimumHeight/>
+     <preferredWidth/>
+     <preferredHeight/>
+     <backgroundImageFile/>
+     <verticalAlignment/>
+     <horizontalAlignment/>
+     <stretch>1</stretch>
     </Properties>
    </Widget>
   </Widget>

@@ -28,6 +28,7 @@
 #include "ufo/layouts/uboxlayout.hpp"
 
 #include "ufo/util/udimension.hpp"
+#include "ufo/util/uinteger.hpp"
 #include "ufo/widgets/uwidget.hpp"
 
 #include <algorithm>
@@ -166,12 +167,20 @@ getBounds(int axis, int hgap, int vgap, const UWidget * container, const URectan
 		return ret;
 	}
 
+	unsigned int stretchCount = 0;
 	unsigned int visibleWidgets = 0;
 	for (unsigned int i = 0 ; i < container->getWidgetCount() ; i++) {
 		const UWidget * w = container->getWidget(i);
 
 		if (w->isVisible()) {
 			visibleWidgets++;
+			ufo::UObject* o = w->get("stretch");
+			if (o) {
+				int stretch = UInteger::toInt(o->toString());
+				if (stretch > 0) {
+					stretchCount += stretch;
+				}
+			}
 		}
 	}
 
@@ -183,9 +192,22 @@ getBounds(int axis, int hgap, int vgap, const UWidget * container, const URectan
 	//    testing will reveal whether aspect maintaining looks better or
 	//    not.
 	// 2. we totally ignore any maximum size currently
-	// 3. using some kind of "stretch" property, like Qt uses would be cool
-	//    (and pretty easy to implement)
-	int widgetsLeft = visibleWidgets;
+	int addW;
+	if (visibleWidgets > 0) {
+		if (stretchCount > 0) {
+			addW = dim.w / stretchCount;
+		} else {
+			addW = dim.w / visibleWidgets;
+		}
+	}
+	int addH;
+	if (visibleWidgets > 0) {
+		if (stretchCount > 0) {
+			addH = dim.h / stretchCount;
+		} else {
+			addH = dim.h / visibleWidgets;
+		}
+	}
 	int fixX = 0;
 	int fixY = 0;
 	for (unsigned int i = 0 ; i < container->getWidgetCount() ; i++) {
@@ -195,30 +217,32 @@ getBounds(int axis, int hgap, int vgap, const UWidget * container, const URectan
 		ret[i].y += fixY;
 
 		if (w->isVisible()) {
-			if (axis == UBoxLayout::XAxis) {
-				int add = dim.w / visibleWidgets;
-				if (widgetsLeft == 1) {
-					// one widget must get the remaining few
-					// pixels. we pick the last one.
-					// (random choice)
-					add += dim.w % visibleWidgets;
+			int stretchFactor = 0;
+			if (stretchCount > 0) {
+				ufo::UObject* o = w->get("stretch");
+				if (o) {
+					stretchFactor = UInteger::toInt(o->toString());
+					if (stretchFactor < 0) {
+						stretchFactor = 0;
+					}
 				}
+			} else {
+				stretchFactor = 1;
+			}
+
+			if (axis == UBoxLayout::XAxis) {
+				int add = addW;
+				add *= stretchFactor;
 
 				fixX += add;
 				ret[i].w += add;
 			} else {
-				int add = dim.h / visibleWidgets;
-				if (widgetsLeft == 1) {
-					// one widget must get the remaining few
-					// pixels. we pick the last one.
-					// (random choice)
-					add += dim.h % visibleWidgets;
-				}
+				int add = addH;
+				add *= stretchFactor;
 
 				fixY += add;
 				ret[i].h += add;
 			}
-			widgetsLeft--;
 		}
 	}
 	dim.w = 0;

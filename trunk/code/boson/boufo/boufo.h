@@ -467,6 +467,7 @@ class BoUfoWidget : public QObject
 	Q_PROPERTY(QString backgroundImageFile READ backgroundImageFile WRITE setBackgroundImageFile);
 	Q_PROPERTY(int verticalAlignment READ verticalAlignment WRITE setVerticalAlignment);
 	Q_PROPERTY(int horizontalAlignment READ horizontalAlignment WRITE setHorizontalAlignment);
+	Q_PROPERTY(int stretch READ stretch WRITE setStretch);
 	Q_ENUMS(LayoutClass);
 public:
 	// AB: we must not use a QObject parent here. otherwise garbage
@@ -552,8 +553,19 @@ public:
 		return mLayoutClass;
 	}
 
+	/**
+	 * A hint to the layout manager. See libufo layout documentation.
+	 *
+	 * The constraints property is currently used by the @ref UBorderLayout
+	 * only, where it specifies the position of the widget inside the border
+	 * layout. Its value may be "north", "south", "east", "west" or
+	 * "center".
+	 **/
 	void setConstraints(const QString&);
 	QString constraints() const;
+
+	void setStretch(int stretchFactor);
+	int stretch() const;
 
 	void setMinimumWidth(int w);
 	int minimumWidth() const;
