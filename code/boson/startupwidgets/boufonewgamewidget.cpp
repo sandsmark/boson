@@ -690,11 +690,12 @@ void BoUfoNewGameWidget::slotPlayerColorChanged(int index)
 
 void BoUfoNewGameWidget::slotPlayFieldSelected(int first, int last)
 {
- if (first != last) {
-   boWarning() << "first != last. only one item should be selectable" << endl;
-   last = first;
- }
- slotPlayFieldSelected(first);
+ // AB: first and last are barely usable. there is no way to find out _which_
+ // one of these is selected _currently_. better just ignore them.
+ Q_UNUSED(first);
+ Q_UNUSED(last);
+ int selected = mSelectMap->selectedItem();
+ slotPlayFieldSelected(selected);
 }
 
 void BoUfoNewGameWidget::slotPlayFieldSelected(int index)
@@ -780,10 +781,11 @@ void BoUfoNewGameWidget::slotRemovePlayer()
 
 void BoUfoNewGameWidget::slotPlayerSelected(int first, int last)
 {
- if (first != last) {
-   boWarning() << "first != last. only one item should be selectable" << endl;
-   last = first;
- }
+ // AB: first and last are barely usable. there is no way to find out _which_
+ // one of these is selected _currently_. better just ignore them.
+ Q_UNUSED(first);
+ Q_UNUSED(last);
+ int selected = mConnectedPlayersList->selectedItem();
  slotPlayerSelected(first);
 }
 
