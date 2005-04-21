@@ -177,22 +177,22 @@
  <Methods>
   <Method return="void" visibility="public" type="signal" name="signalLoadGame()" >
    <Connections>
-    <Connection sender="mLoadGame" signal="clicked()" type="receiver" />
+    <Connection sender="mLoadGame" signal="signalClicked()" type="receiver" />
    </Connections>
   </Method>
   <Method return="void" visibility="public" type="signal" name="signalNewGame()" >
    <Connections>
-    <Connection sender="mStartNewGame" signal="clicked()" type="receiver" />
+    <Connection sender="mStartNewGame" signal="signalClicked()" type="receiver" />
    </Connections>
   </Method>
   <Method return="void" visibility="public" type="signal" name="signalQuit()" >
    <Connections>
-    <Connection sender="mQuit" signal="clicked()" type="receiver" />
+    <Connection sender="mQuit" signal="signalClicked()" type="receiver" />
    </Connections>
   </Method>
   <Method return="void" visibility="public" type="signal" name="signalStartEditor()" >
    <Connections>
-    <Connection sender="mStartEditor" signal="clicked()" type="receiver" />
+    <Connection sender="mStartEditor" signal="signalClicked()" type="receiver" />
    </Connections>
   </Method>
  </Methods>
