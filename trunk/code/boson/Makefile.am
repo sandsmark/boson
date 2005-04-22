@@ -206,7 +206,8 @@ bocursor_LDADD = \
 		$(top_builddir)/boson/info/libbosoninfo.la \
 		$(LIB_BOMEMORY) \
 		$(LIB_KDEUI) \
-		$(LIB_KIO)
+		$(LIB_KIO) \
+		-lXmu
 bocursor_SOURCES = \
 		bocursormain.cpp bosoncursoreditor.cpp
 
@@ -232,7 +233,8 @@ boinfo_LDADD = \
 		$(top_builddir)/boson/info/libbosoninfo.la \
 		$(top_builddir)/bogl/libbogl.la \
 		$(LIB_BOMEMORY) \
-		-lkio $(LIB_KDEUI)
+		-lkio $(LIB_KDEUI) \
+		-lXmu
 boinfo_SOURCES = \
 		boinfomain.cpp
 
