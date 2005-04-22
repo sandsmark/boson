@@ -1180,11 +1180,14 @@ void BoUfoWidget::render(BoUfoManager* ufoManager)
 void BoUfoWidget::addSpacing(int spacing)
 {
  BO_CHECK_NULL_RET(widget());
- ufo::UWidget* w = new ufo::UWidget();
-// w->setMinimumSize(ufo::UDimension(spacing, spacing)); // AB: no effect
- w->setSize(ufo::UDimension(spacing, spacing));
+ BoUfoWidget* w = new BoUfoWidget();
+ w->setSize(spacing, spacing);
+ w->setMinimumWidth(spacing);
+ w->setMinimumHeight(spacing);
+ w->setPreferredWidth(spacing);
+ w->setPreferredHeight(spacing);
  w->setOpaque(false);
- widget()->add(w);
+ addWidget(w);
 }
 
 void BoUfoWidget::setVerticalAlignment(int a)

@@ -84,7 +84,7 @@ void BoUfoStartupWidget::init()
  logo->setIcon(logoImage);
 
  setLayoutClass(BoUfoWidget::UVBoxLayout);
-// addSpacing(5); // FIXME: hardcoded
+ addSpacing(5);
  addWidget(logo); // TODO: AlignHCenter
  addWidget(d->mWidgetStack);
  d->mWidgetStack->setStretch(1);
