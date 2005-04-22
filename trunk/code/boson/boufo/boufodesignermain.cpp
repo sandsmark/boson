@@ -2187,8 +2187,27 @@ int main(int argc, char **argv)
  BoUfoDesignerMain* main = new BoUfoDesignerMain();
  app.setMainWidget(main);
  main->show();
- if (!main->slotCreateNew()) {
-	boError() << k_funcinfo << "could not create new document" << endl;
+
+ QString file;
+ for (int i = 0; i < app.argc(); i++) {
+	QString a = app.argv()[i];
+	if (a == "--file") {
+		if (i + 1 >= app.argc()) {
+			boError() << "--file expects a filename" << endl;
+			return 1;
+		}
+		file = app.argv()[i + 1];
+	}
+ }
+
+ if (file.isEmpty()) {
+	if (!main->slotCreateNew()) {
+		boError() << k_funcinfo << "could not create new document" << endl;
+	}
+ } else {
+	if (!main->slotLoadFromFile(file)) {
+		boError() << k_funcinfo << "could not load " << file << endl;
+	}
  }
 
  return app.exec();
