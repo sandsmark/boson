@@ -10,7 +10,7 @@
    <verticalAlignment/>
    <preferredWidth/>
    <horizontalAlignment>4</horizontalAlignment>
-   <layout>UBorderLayout</layout>
+   <layout>UVBoxLayout</layout>
    <name>BoUfoWelcomeWidget</name>
    <minimumWidth/>
    <backgroundImageFile/>
@@ -22,7 +22,7 @@
     <opaque/>
     <minimumHeight/>
     <preferredHeight/>
-    <constraints>north</constraints>
+    <constraints></constraints>
     <verticalAlignment/>
     <preferredWidth/>
     <horizontalAlignment>4</horizontalAlignment>
@@ -53,12 +53,29 @@
    </Widget>
   </Widget>
   <Widget>
+   <ClassName>BoUfoWidget</ClassName>
+   <Properties>
+    <name>mWidget17</name>
+    <constraints/>
+    <opaque/>
+    <layout/>
+    <minimumWidth/>
+    <minimumHeight/>
+    <preferredWidth/>
+    <preferredHeight/>
+    <backgroundImageFile/>
+    <verticalAlignment/>
+    <horizontalAlignment/>
+    <stretch>1</stretch>
+   </Properties>
+  </Widget>
+  <Widget>
    <ClassName>BoUfoLabel</ClassName>
    <Properties>
     <preferredHeight/>
     <minimumHeight/>
     <opaque>false</opaque>
-    <constraints>center</constraints>
+    <constraints></constraints>
     <verticalAlignment/>
     <preferredWidth/>
     <horizontalAlignment>4</horizontalAlignment>
@@ -74,10 +91,27 @@
   <Widget>
    <ClassName>BoUfoWidget</ClassName>
    <Properties>
+    <name>mWidget16</name>
+    <constraints/>
+    <opaque/>
+    <layout/>
+    <minimumWidth/>
+    <minimumHeight/>
+    <preferredWidth/>
+    <preferredHeight/>
+    <backgroundImageFile/>
+    <verticalAlignment/>
+    <horizontalAlignment/>
+    <stretch>1</stretch>
+   </Properties>
+  </Widget>
+  <Widget>
+   <ClassName>BoUfoWidget</ClassName>
+   <Properties>
     <preferredHeight/>
     <minimumHeight/>
     <opaque/>
-    <constraints>south</constraints>
+    <constraints></constraints>
     <verticalAlignment/>
     <preferredWidth/>
     <horizontalAlignment>4</horizontalAlignment>

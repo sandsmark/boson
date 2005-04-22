@@ -10,7 +10,7 @@
    <verticalAlignment/>
    <preferredWidth/>
    <horizontalAlignment/>
-   <layout>UBorderLayout</layout>
+   <layout>UVBoxLayout</layout>
    <name>BosonUfoNewGameWidgetBase</name>
    <minimumWidth/>
    <backgroundImageFile/>
@@ -22,15 +22,15 @@
     <preferredHeight/>
     <minimumHeight/>
     <opaque/>
-    <constraints>center</constraints>
+    <constraints></constraints>
     <verticalAlignment/>
     <preferredWidth/>
     <horizontalAlignment/>
-    <layout>UBorderLayout</layout>
+    <layout>UHBoxLayout</layout>
     <name>mWidget4</name>
     <minimumWidth/>
     <backgroundImageFile/>
-    <stretch/>
+    <stretch>1</stretch>
    </Properties>
    <Widget>
     <ClassName>BoUfoWidget</ClassName>
@@ -38,7 +38,7 @@
      <preferredHeight/>
      <minimumHeight/>
      <opaque/>
-     <constraints>west</constraints>
+     <constraints></constraints>
      <verticalAlignment/>
      <preferredWidth/>
      <horizontalAlignment/>
@@ -46,7 +46,7 @@
      <name>mWidget9</name>
      <minimumWidth/>
      <backgroundImageFile/>
-     <stretch/>
+     <stretch>1</stretch>
     </Properties>
     <Widget>
      <ClassName>BoUfoWidget</ClassName>
@@ -271,7 +271,7 @@
      <preferredHeight/>
      <minimumHeight/>
      <opaque/>
-     <constraints>east</constraints>
+     <constraints></constraints>
      <verticalAlignment/>
      <preferredWidth/>
      <horizontalAlignment/>
@@ -575,7 +575,7 @@
     <preferredHeight/>
     <minimumHeight/>
     <opaque/>
-    <constraints>south</constraints>
+    <constraints></constraints>
     <verticalAlignment/>
     <preferredWidth/>
     <horizontalAlignment/>
