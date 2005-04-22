@@ -249,23 +249,6 @@
     </Properties>
    </Widget>
   </Widget>
-  <Widget>
-   <ClassName>BoUfoWidget</ClassName>
-   <Properties>
-    <name>mWidget9</name>
-    <constraints/>
-    <opaque/>
-    <layout/>
-    <minimumWidth/>
-    <minimumHeight/>
-    <preferredWidth/>
-    <preferredHeight/>
-    <backgroundImageFile/>
-    <verticalAlignment/>
-    <horizontalAlignment/>
-    <stretch>1</stretch>
-   </Properties>
-  </Widget>
  </Widgets>
  <Methods>
   <Method return="void" visibility="public" type="signal" name="signalLoadGame()" >
