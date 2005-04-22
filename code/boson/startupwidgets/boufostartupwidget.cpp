@@ -86,7 +86,8 @@ void BoUfoStartupWidget::init()
  setLayoutClass(BoUfoWidget::UVBoxLayout);
 // addSpacing(5); // FIXME: hardcoded
  addWidget(logo); // TODO: AlignHCenter
- addWidget(d->mWidgetStack); // TODO: stretch factor 1
+ addWidget(d->mWidgetStack);
+ d->mWidgetStack->setStretch(1);
 
  d->mNetworkInterface = new BosonStartupNetwork(this);
  d->mNetworkInterface->setGame(boGame);
