@@ -1,10 +1,12 @@
+? kio/kio/kgzipfilter.cpp
+? kio/kio/kgzipfilter.h
 Index: admin/acinclude.m4.in
 ===================================================================
 RCS file: /home/kde/kde-common/admin/acinclude.m4.in,v
 retrieving revision 2.461.2.2
 diff -u -3 -p -r2.461.2.2 acinclude.m4.in
 --- admin/acinclude.m4.in	12 Nov 2004 22:48:09 -0000	2.461.2.2
-+++ admin/acinclude.m4.in	18 Mar 2005 16:48:32 -0000
++++ admin/acinclude.m4.in	23 Apr 2005 18:03:31 -0000
 @@ -1492,6 +1492,8 @@ LDFLAGS="$ac_ldflags_safe"
  LIBS="$ac_libs_safe"
  
@@ -29,7 +31,7 @@ RCS file: /home/kde/kdelibs/dcop/dcopclient.cpp,v
 retrieving revision 1.181
 diff -u -3 -p -r1.181 dcopclient.cpp
 --- dcop/dcopclient.cpp	13 Jul 2004 12:45:47 -0000	1.181
-+++ dcop/dcopclient.cpp	18 Mar 2005 16:48:35 -0000
++++ dcop/dcopclient.cpp	23 Apr 2005 18:03:31 -0000
 @@ -699,11 +699,40 @@ static bool isServerSocketOwnedByUser(co
  }
  #endif
@@ -72,41 +74,64 @@ diff -u -3 -p -r1.181 dcopclient.cpp
      if ( isAttached() )
          detach();
  
+Index: kio/kio/Makefile.am
+===================================================================
+RCS file: /home/kde/kdelibs/kio/kio/Makefile.am,v
+retrieving revision 1.212
+diff -u -3 -p -r1.212 Makefile.am
+--- kio/kio/Makefile.am	10 May 2004 20:23:14 -0000	1.212
++++ kio/kio/Makefile.am	23 Apr 2005 18:03:39 -0000
+@@ -34,6 +34,7 @@ libksycoca_la_SOURCES = \
+ 	kuserprofile.cpp kservicegroupfactory.cpp \
+ 	kurifilter.cpp \
+ 	kfilterbase.cpp kfilterdev.cpp \
++	kgzipfilter.cpp \
+ 	kshellcompletion.cpp kurlcompletion.cpp \
+ 	kautomount.cpp krun.cpp \
+ 	kfileitem.cpp kdirlister.cpp kimageio.cpp \
 Index: kio/kio/kfilterbase.cpp
 ===================================================================
 RCS file: /home/kde/kdelibs/kio/kio/kfilterbase.cpp,v
 retrieving revision 1.13.6.1
 diff -u -3 -p -r1.13.6.1 kfilterbase.cpp
 --- kio/kio/kfilterbase.cpp	1 Sep 2004 17:30:01 -0000	1.13.6.1
-+++ kio/kio/kfilterbase.cpp	18 Mar 2005 16:48:43 -0000
-@@ -46,8 +46,32 @@ KFilterBase * KFilterBase::findFilterByF
++++ kio/kio/kfilterbase.cpp	23 Apr 2005 18:03:40 -0000
+@@ -46,8 +46,40 @@ KFilterBase * KFilterBase::findFilterByF
      return findFilterByMimeType(mime->name());
  }
  
 +#define BOSON_STATIC 1
++#ifdef BOSON_STATIC
++#include "kgzipfilter.h"
++#include "../../kdecore/kstaticdeleter.h"
++
++class KGzipFilterFactory : public KLibFactory
++{
++public:
++    KGzipFilterFactory() : KLibFactory() {}
++    ~KGzipFilterFactory(){}
++    QObject *createObject( QObject *, const char *, const char*, const QStringList & )
++    {
++        return new KGzipFilter;
++    }
++};
++
++
++static KGzipFilterFactory *g_gzipFilterFactory = 0;
++static KStaticDeleter<KGzipFilterFactory> g_sdGzipFilterFactory;
++#endif
  KFilterBase * KFilterBase::findFilterByMimeType( const QString & mimeType )
  {
 +#ifdef BOSON_STATIC
 +    if (mimeType == "application/x-gzip")
 +    {
-+        kdDebug(7005) << "filter for application/x-gzip requested, using hardcoded filter" << endl;
-+        QString library = "kgzipfilter";
-+        QString desktopEntryName = "kgzipfilter";
-+
-+        KLibFactory *factory = KLibLoader::self()->factory(library.latin1());
-+        if (factory)
++        kdDebug() << "filter for application/x-gzip requested, using hardcoded filter" << endl;
++        if (!g_gzipFilterFactory)
 +        {
-+            KFilterBase *filter = static_cast<KFilterBase*>( factory->create(0, desktopEntryName.latin1() ) );
-+            if ( filter )
-+            {
-+                return filter;
-+            }
++          g_sdGzipFilterFactory.setObject(g_gzipFilterFactory, new KGzipFilterFactory());
 +        }
-+        else
-+        {
-+            kdError(7005) << k_funcinfo << "factory for hardcoded filter of application/x-gzip could not be found" << endl;
-+        }
-+        kdError(7005) << k_funcinfo << "hardcoded filter for application/x-gzip could not be used" << endl;
++        return static_cast<KFilterBase*>(g_gzipFilterFactory->create(0, "kgzipfilter"));
++#endif
 +    }
 +#endif
      KTrader::OfferList offers = KTrader::self()->query( "KDECompressionFilter",
@@ -118,7 +143,7 @@ RCS file: /home/kde/kdelibs/kio/kio/kprotocolinfo.cpp,v
 retrieving revision 1.21.6.1
 diff -u -3 -p -r1.21.6.1 kprotocolinfo.cpp
 --- kio/kio/kprotocolinfo.cpp	8 Aug 2004 10:43:50 -0000	1.21.6.1
-+++ kio/kio/kprotocolinfo.cpp	18 Mar 2005 16:48:43 -0000
++++ kio/kio/kprotocolinfo.cpp	23 Apr 2005 18:03:40 -0000
 @@ -72,43 +72,18 @@ bool KProtocolInfo::isFilterProtocol( co
    return isFilterProtocol (url.protocol());
  }
@@ -169,7 +194,7 @@ RCS file: /home/kde/kdelibs/kio/kio/slave.cpp,v
 retrieving revision 1.61.2.1
 diff -u -3 -p -r1.61.2.1 slave.cpp
 --- kio/kio/slave.cpp	8 Sep 2004 12:36:20 -0000	1.61.2.1
-+++ kio/kio/slave.cpp	18 Mar 2005 16:48:44 -0000
++++ kio/kio/slave.cpp	23 Apr 2005 18:03:40 -0000
 @@ -353,6 +353,10 @@ Slave* Slave::createSlave( const QString
      if (protocol == "data")
          return new DataProtocol();
