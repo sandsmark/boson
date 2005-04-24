@@ -53,12 +53,19 @@ TODO: arts?
  * edit kio/kio/kprotocolinfo.cpp, remove isFilterProtocol(), isHelperProtocol(),
    isKnownProtocol() each with parameter const QString&. they are already
    defined in kdecore/kprotocolinfo_kdecore.cpp
+ * copy kioslave/gzip/kgzipfilter.[cpp|h] to kio/kio/ and add the .cpp to Makefile.am
+   (right after kfilterbase.cpp)
+ * edit kio/kfilterbase.cpp: move KGzipFilterFactory from kgzipfilter.cpp to here.
  * edit kio/kfilterbase.cpp, so that KFilterBase::findFilterByMimeType() returns filter from
    the kgzipfilter library without doing a KTrader::query() (which would require the dcopserver
    to be running).
+   This can be done by maintaining a KStaticDeleter<KGzipFilterFactory> which is created
+   in findFilterByMimeType when an "application/x-gzip" filter is requested and returns
+   KGzipFilterFactory::create(0, "kgzipfilter"); from it then.
 
 make -f Makefile.cvs
 TODO: --prefix=?
+      UPDATE: probably use --prefix=/home/andi/kde/boson/static/kdedir, same about KDEDIR
 TODO: really disable debug?
 QTDIR=/home/andi/kde/boson/static/qt-copy ./configure --disable-libfam --without-java --disable-debug --enable-static
 make
@@ -66,21 +73,9 @@ make
  AB: note: with arts not being installed this will output an error in the arts
  directory. however it can safely be ignored as long as the required dirs have
  been compiled successfully
- boson requires: kdecore, kdeui, kdewidgets (for uic), kabc (for kdewidgets),
-                 kresources (for kabc), kioslave (for the kgzipfilter)
+ boson requires: kdecore, kdeui, kio, kdewidgets (for uic), kabc (for kdewidgets),
+                 kresources (for kabc)
  -> just make -k should do the trick.
-
- * copy kioslave/gzip/.libs/kgzipfilter.[la|so] to the lib/kde3/ directory of the boson package.
-   modify kgzipfilter.la: replace 
-    dependency_libs='...'
-   (where ... is a lot of stuff)
-   by
-    dependency_libs=''
-   and
-    libdir='...'
-   (where ... is a path)
-   by
-    libdir='.'
 
 
 
