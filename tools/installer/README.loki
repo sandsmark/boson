@@ -81,7 +81,6 @@ incomplete) list for boson:
    is:
    <files>
      share
-     lib
      patches
    </files>
  * music option element: add a install="yes" attribute
@@ -108,13 +107,6 @@ cp /path/to/static/binaries/boson bin/Linux/x86/glibc-2.1/
 cp /path/to/static/binaries/* bin/Linux/x86/glibc-2.1
 -> AB: copy all binaries as listed in setup.xml. This is a TODO, as currently
        only boson is a static binary.
-
-mkdir -p lib/kde3
-cp /path/to/kdelibs/kioslave/gzip/.libs/kgzipfilter.so lib/kde3/
-cp /path/to/kdelibs/kioslave/gzip/.libs/kgzipfilter.la lib/kde3/
--> edit kgzipfilter.la, as discussed in README.boson-static
--> keep in mind that you must use the kgzipfilter.* files from the same
-   kdelibs package that was linked to boson, as discussed in README.boson-static
 
 mkdir -p share/apps/boson
 mkdir -p share/config/ui

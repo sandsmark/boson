@@ -59,7 +59,6 @@
     -->
     <files>
       share
-      lib
       patches
     </files>
    </option>
