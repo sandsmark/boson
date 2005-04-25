@@ -276,7 +276,7 @@ void BoTexture::load(unsigned char* data, int width, int height, int side)
 
   // Ensure that texture has correct size
   unsigned char* newdata = ensureCorrectSize(data, width, height);
-  if(!newdata)
+  if(data && !newdata)
   {
     return;
   }
@@ -287,7 +287,25 @@ void BoTexture::load(unsigned char* data, int width, int height, int side)
   if((mOptions & useMipmaps) && !(mOptions & DontGenMipmaps))
   {
     // Generate mipmaps
-    if(boTextureManager->useColoredMipmaps())
+    if(newdata == 0)
+    {
+      // Just specify null data for every mipmap level
+      int w = width;
+      int h = height;
+      int level = 0;
+      while(true)
+      {
+        glTexImage2D(type, level, internalFormat, w, h, 0, format, GL_UNSIGNED_BYTE, 0);
+        if(w == 1 && h == 1)
+        {
+          break;
+        }
+        w = (w < 2) ? 1 : w / 2;
+        h = (h < 2) ? 1 : h / 2;
+        level++;
+      }
+    }
+    else if(boTextureManager->useColoredMipmaps())
     {
       if(boTextureManager->supportsGenerateMipmap())
       {
@@ -382,6 +400,15 @@ unsigned char* BoTexture::ensureCorrectSize(unsigned char* data, int &width, int
   if(newH > maxSize)
   {
     newH = maxSize;
+  }
+
+  if(!data)
+  {
+    // Update dimensions
+    width = newW;
+    height = newH;
+    // Return NULL data
+    return 0;
   }
 
   if((newW != width) || (newH != height))
