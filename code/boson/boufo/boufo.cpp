@@ -324,6 +324,30 @@ static ufo::UKeyCode_t convertQtKeyToUfo(int key)
 }
 
 
+/**
+ * Layout class that is primarily meant for layered panes, that is for @ref
+ * BoUfoLayeredPane. This layout simply gives all available size to all its
+ * children.
+ *
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+class BoUFullLayout : public ufo::ULayoutManager
+{
+	UFO_DECLARE_DYNAMIC_CLASS(BoUFullLayout)
+public:
+	BoUFullLayout()
+	{
+	}
+	~BoUFullLayout()
+	{
+	}
+
+	virtual void layoutContainer(const ufo::UWidget* parent);
+	virtual ufo::UDimension getPreferredLayoutSize(const ufo::UWidget* parent, const ufo::UDimension& maxSize) const;
+};
+UFO_IMPLEMENT_DYNAMIC_CLASS(BoUFullLayout, ufo::ULayoutManager)
+
+
 BoUfoFontInfo::BoUfoFontInfo()
 {
  mPointSize = 12.0f;
@@ -671,7 +695,7 @@ BoUfoManager::BoUfoManager(int w, int h, bool opaque)
 	BO_NULL_ERROR(mRootPane);
  } else {
 	if (mRootPane->getLayeredPane()) {
-		mLayeredPaneWidget = new BoUfoLayeredPane(mRootPane->getLayeredPane());
+		mLayeredPaneWidget = new BoUfoLayeredPane(mRootPane->getLayeredPane(), false);
 	} else {
 		BO_NULL_ERROR(mRootPane->getLayeredPane());
 	}
@@ -1190,6 +1214,7 @@ void BoUfoWidget::addSpacing(int spacing)
  addWidget(w);
 }
 
+// TODO: reimplement for certain widgets (e.g. labels)!
 void BoUfoWidget::setVerticalAlignment(int a)
 {
  if (a & Qt::AlignTop) {
@@ -1220,6 +1245,7 @@ int BoUfoWidget::verticalAlignment() const
  return a;
 }
 
+// TODO: reimplement for certain widgets (e.g. labels)!
 void BoUfoWidget::setHorizontalAlignment(int a)
 {
  if (a & Qt::AlignLeft) {
@@ -1272,6 +1298,9 @@ void BoUfoWidget::setLayoutClass(LayoutClass layout)
 		break;
 	case UBorderLayout:
 		setLayout(new ufo::UBorderLayout());
+		break;
+	case UFullLayout:
+		setLayout(new BoUFullLayout());
 		break;
  }
 }
@@ -2907,6 +2936,8 @@ BoUfoWidget* BoUfoFactory::createWidget(const QString& className)
  CLASSNAME(BoUfoListBox)
  CLASSNAME(BoUfoMatrix)
  CLASSNAME(BoUfoTabWidget)
+ CLASSNAME(BoUfoWidgetStack)
+ CLASSNAME(BoUfoLayeredPane)
 #undef CLASSNAME
  return 0;
 }
@@ -2925,19 +2956,40 @@ QStringList BoUfoFactory::widgets()
  list.append("BoUfoTextEdit");
  list.append("BoUfoComboBox");
  list.append("BoUfoListBox");
+ list.append("BoUfoWidgetStack");
+ list.append("BoUfoLayeredPane");
  return list;
+}
+
+
+
+void BoUFullLayout::layoutContainer(const ufo::UWidget* container)
+{
+ for (unsigned int i = 0 ; i < container->getWidgetCount() ; i++) {
+	 ufo::UWidget* w = container->getWidget(i);
+	if (w->isVisible()) {
+		w->setBounds(container->getBounds());
+	}
+ }
+}
+
+ufo::UDimension BoUFullLayout::getPreferredLayoutSize(const ufo::UWidget* container, const ufo::UDimension& maxSize) const
+{
+ return maxSize;
 }
 
 BoUfoLayeredPane::BoUfoLayeredPane()
 	: BoUfoWidget(new ufo::ULayeredPane())
 {
- boDebug() << k_funcinfo << endl;
+ setLayoutClass(BoUfoWidget::UFullLayout);
 }
 
-BoUfoLayeredPane::BoUfoLayeredPane(ufo::ULayeredPane* p)
+BoUfoLayeredPane::BoUfoLayeredPane(ufo::ULayeredPane* p, bool provideLayout)
 	: BoUfoWidget(p)
 {
- boDebug() << k_funcinfo << endl;
+ if (provideLayout) {
+	setLayoutClass(BoUfoWidget::UFullLayout);
+ }
 }
 
 BoUfoLayeredPane::~BoUfoLayeredPane()
