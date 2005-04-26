@@ -481,7 +481,8 @@ public:
 		UFlowLayout,
 		UHBoxLayout,
 		UVBoxLayout,
-		UBorderLayout
+		UBorderLayout,
+		UFullLayout
 	};
 
 	ufo::UWidget* widget() const
@@ -1245,7 +1246,7 @@ class BoUfoLayeredPane : public BoUfoWidget
 	Q_OBJECT
 public:
 	BoUfoLayeredPane();
-	BoUfoLayeredPane(ufo::ULayeredPane*);
+	BoUfoLayeredPane(ufo::ULayeredPane*, bool provideLayout = true);
 	~BoUfoLayeredPane();
 
 	void addLayer(BoUfoWidget* w, int layer = 0, int position = -1);
