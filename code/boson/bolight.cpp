@@ -249,3 +249,24 @@ void BoLight::refreshPosition()
   glLightfv(GL_LIGHT0 + mId, GL_POSITION, mPos.data());
 }
 
+void BoLight::updateStates()
+{
+  if(mEnabled)
+  {
+    glEnable(GL_LIGHT0 + mId);
+  }
+  else
+  {
+    glDisable(GL_LIGHT0 + mId);
+  }
+
+  glLightfv(GL_LIGHT0 + mId, GL_AMBIENT, mAmbient.data());
+  glLightfv(GL_LIGHT0 + mId, GL_DIFFUSE, mDiffuse.data());
+  glLightfv(GL_LIGHT0 + mId, GL_SPECULAR, mSpecular.data());
+
+  glLightf(GL_LIGHT0 + mId, GL_CONSTANT_ATTENUATION, mAttenuation.x());
+  glLightf(GL_LIGHT0 + mId, GL_LINEAR_ATTENUATION, mAttenuation.y());
+  glLightf(GL_LIGHT0 + mId, GL_QUADRATIC_ATTENUATION, mAttenuation.z());
+
+  glLightfv(GL_LIGHT0 + mId, GL_POSITION, mPos.data());
+}

@@ -146,6 +146,14 @@ class BoLight
 
     void refreshPosition();
 
+    /**
+     * Updates all OpenGL states that this light affects.
+     * You usually won't need to call it because the states are automatically
+     *  updated when you change light's parameters. It might be necessary after
+     *  doing e.g. context switches though.
+     **/
+    void updateStates();
+
   private:
     BoVector4Float mAmbient;
     BoVector4Float mDiffuse;
