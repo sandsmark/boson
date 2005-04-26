@@ -638,7 +638,7 @@ void BoWaterManager::initOpenGL()
     mEnableTranslucency = false;
     boConfig->setBoolValue("WaterTranslucency", false);
   }
-  if(mEnableShader && !supportsShaders())
+  if(mEnableShader && !mSupports_shaders)
   {
     boWarning() << k_funcinfo << "Shaders are enabled, but not supported. Disabling." << endl;
     mEnableShader = false;
