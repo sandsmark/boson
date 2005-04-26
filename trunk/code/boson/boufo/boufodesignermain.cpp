@@ -212,6 +212,12 @@ static bool isContainerWidget(const QString& className)
  if (className == "BoUfoVBox") {
 	return true;
  }
+ if (className == "BoUfoWidgetStack") {
+	return true;
+ }
+ if (className == "BoUfoLayeredPane") {
+	return true;
+ }
  return false;
 }
 
