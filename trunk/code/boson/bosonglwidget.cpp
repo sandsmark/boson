@@ -749,6 +749,30 @@ void BosonGLWidget::paintEvent(QPaintEvent*)
  slotUpdateGL();
 }
 
+// TODO: current QGLWidget has a method grabFrameBuffer() that also handles
+// endianness!
+// -> we should use that one instead of our own here!
+QImage BosonGLWidget::screenShot()
+{
+ glFinish();
+ int w = width();
+ int h = height();
+ unsigned char* buffer = new unsigned char[w * h * 4];
+ glReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+ QImage image(w, h, 32);
+ for (int y = 0; y < h; y++) {
+	QRgb* line = (QRgb*)image.scanLine(y); // AB: use setPixel() instead of scanLine() ! -> endianness must be handled
+	int opengl_y = h - y;
+	for (int x = 0; x < w; x++) {
+		unsigned char* pixel = &buffer[(opengl_y * w + x) * 4];
+		line[x] = qRgb(pixel[0], pixel[1], pixel[2]);
+	}
+ }
+ delete[] buffer;
+ return image;
+}
+
+
 
 
 BoMouseMoveDiff::BoMouseMoveDiff()

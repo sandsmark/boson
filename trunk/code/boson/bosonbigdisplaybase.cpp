@@ -2029,7 +2029,6 @@ void BosonBigDisplayBase::paintGL()
 
  boTextureManager->disableTexturing();
  d->mSelectionRect.render();
- renderText();
 
  glMatrixMode(GL_PROJECTION);
  glPopMatrix();
@@ -2221,10 +2220,6 @@ void BosonBigDisplayBase::renderCursor()
  if (Bo3dTools::checkError()) {
 	boError() << k_funcinfo << "OpenGL error" << endl;
  }
-}
-
-void BosonBigDisplayBase::renderText()
-{
 }
 
 // one day we might support swapping LMB and RMB so let's use defines already to
@@ -2947,6 +2942,7 @@ void BosonBigDisplayBase::cameraChanged()
  boWaterManager->setCameraPos(camera()->cameraPos());
  BoShader::setCameraPos(camera()->cameraPos());
 
+#if 0
  QPoint cellTL; // topleft cell
  QPoint cellTR; // topright cell
  QPoint cellBL; // bottomleft cell
@@ -2956,6 +2952,7 @@ void BosonBigDisplayBase::cameraChanged()
  mapCoordinatesToCell(QPoint(d->mViewport[2], 0), &cellTR);
  mapCoordinatesToCell(QPoint(d->mViewport[2], d->mViewport[3]), &cellBR);
  emit signalChangeViewport(this, cellTL, cellTR, cellBL, cellBR);
+#endif
 
  updateCursorCanvasVector();
 }
@@ -3307,68 +3304,6 @@ QByteArray BosonBigDisplayBase::grabMovieFrame()
 {
  boDebug() << k_funcinfo << "Grabbing movie frame..." << endl;
 
-#if 0
- QByteArray data;
- QDataStream stream(data, IO_WriteOnly);
- QDomDocument doc("BosonMovie");
- QDomElement root = doc.createElement("BosonMovie");
- doc.appendChild(root);
- {
-	QDomElement c = doc.createElement("Camera");
-	root.appendChild(c);
-	camera()->saveAsXML(c);
- }
-
- createRenderItemList();
- {
-	QMap<unsigned int, QDomElement> owner2Items;
-	for (KPlayer* p = boGame->playerList()->first(); p; p = boGame->playerList()->next()) {
-		QDomElement items = doc.createElement(QString::fromLatin1("Items"));
-		items.setAttribute(QString::fromLatin1("OwnerId"), p->id());
-		root.appendChild(items);
-		owner2Items.insert(p->id(), items);
-	}
-
-	unsigned int itemcount = d->mRenderItemList.count();
-	for (unsigned int j = 0; j < itemcount; j++) {
-		BosonItem* i = d->mRenderItemList[j];
-		QDomElement items;
-		if (RTTI::isShot(i->rtti())) {
-			BosonShot* s = (BosonShot*)i;
-			if (!s->owner()) {
-				BO_NULL_ERROR(s->owner());
-				continue;
-			}
-			unsigned int id = s->owner()->id();
-			items = owner2Items[id];
-		} else if (RTTI::isUnit(i->rtti())) {
-			Unit* u = (Unit*)i;
-			if (!u->owner()) {
-				BO_NULL_ERROR(u->owner());
-				continue;
-			}
-			unsigned int id = u->owner()->id();
-			items = owner2Items[id];
-		}
-		if (items.isNull()) {
-			boError() << k_funcinfo << "no Items element found" << endl;
-			continue;
-		}
-		QDomElement item = doc.createElement("Item");
-		if (!i->saveAsXML(item)) {
-			boError() << k_funcinfo << "error saving item" << endl;
-			continue;
-		}
-		items.appendChild(item);
-	}
- }
-
-
-
- stream << doc.toString();
-
- return data;
-#else
  // Repaint
  slotUpdateGL();
  glFinish();
@@ -3395,7 +3330,6 @@ QByteArray BosonBigDisplayBase::grabMovieFrame()
  io.setQuality(90);
  io.write();
  return ba;
-#endif
 }
 
 void BosonBigDisplayBase::advanceCamera()
@@ -3419,148 +3353,6 @@ void BosonBigDisplayBase::updateOpenGLSettings()
  }
 }
 
-void BosonBigDisplayBase::generateMovieFrames(const QValueList<QByteArray>& data, const QString& directory)
-{
- if (data.count() == 0) {
-	return;
- }
-#if 0
- BO_CHECK_NULL_RET(d->mGroundRenderer);
- QDir dir(directory);
- if (!dir.exists()) {
-	boError() << k_funcinfo << "direcotry " << directory << " does not exist" << endl;
-	return;
- }
- // TODO QDir has no isWritable() :-(
-#if 0
- if (!dir.isWritable()) {
-	boError() << k_funcinfo << "directory " << dir.absPath() << " is not writable!" << endl;
-	return;
- }
-#endif
- if (data.count() > 999999999) {
-	// currently filenames are fixed to 8 digits, so we cannot have more
-	// files.
-	boError() << k_funcinfo << "too many files!" << endl;
-	return;
- }
- QString prefix = "boson-movie";
- QString suffix = ".jpg";
- bool ok = false;
-
- // try to find a filename prefix for data.count() files.
- unsigned int tries = 0;
- do {
-	tries++;
-	QString prefix2 = prefix;
-	if (tries > 1) {
-		prefix2 += "_";
-		prefix2 += QString::number(tries);
-	}
-	QString file;
-	bool success = true;
-	for (unsigned int i = 0; i < data.count() && success; i++) {
-		file.sprintf("%s-%08d%s", prefix2.latin1(), i, suffix.latin1());
-		if (dir.exists(file)) {
-			success = false;
-		}
-	}
-	if (success) {
-		ok = true;
-		prefix = prefix2;
-	}
-
- } while (!ok && tries < 100);
- if (!ok) {
-	boError() << k_funcinfo << "could not find usable filename prefix for " << data.count() << " files" << endl;
-	return;
- }
-
- // TODO: we should save the game here and load it again when we are done.
- // all units will be removed from the game when generating the frames...
- //
- // maybe we just use a different canvas?
-
- BosonCanvas* old = mCanvas;
-
- // WARNING: units that are added to the canvas get added to the player, too!
- // --> we must remove them asap again, as game can continue
- mCanvas = new BosonCanvas(this);
- mCanvas->setMap(old->map());
-
- // now generate the frames
- BoPixmapRenderer* renderer = new BoPixmapRenderer(this);
- for (unsigned int i = 0; i < data.count(); i++) {
-	QString file;
-	file.sprintf("%s-%08d%s", prefix.latin1(), i, suffix.latin1());
-	file = dir.filePath(file);
-	renderer->startPixmap();
-	generateMovieFrame(data[i], renderer);
-	renderer->pixmapDone(file);
-	renderer->flush();
- }
- delete renderer;
- delete mCanvas;
- mCanvas = old;
-#endif
-}
-
-void BosonBigDisplayBase::generateMovieFrame(const QByteArray& data, BoPixmapRenderer* renderer)
-{
-#if 0
- if (data.size() == 0) {
-	return;
- }
- if (!renderer) {
-	return;
- }
- BO_CHECK_NULL_RET(d->mGroundRenderer);
-
- QDataStream stream(data, IO_ReadOnly);
- QString xml;
- stream >> xml;
- if (xml.isEmpty()) {
-	boError() << "empty xml string" << endl;
-	return;
- }
- QDomDocument doc;
- doc.setContent(xml);
- QDomElement root = doc.documentElement();
-
- QDomNodeList list;
- list = root.elementsByTagName("Camera");
- if (list.count() == 0) {
-	boError() << k_funcinfo << "no camera node" << endl;
-	return;
- }
- QDomElement cameraElement = list.item(0).toElement();
- if (cameraElement.isNull()) {
-	boError() << k_funcinfo << "invalid camera element" << endl;
-	return;
- }
- camera()->loadFromXML(cameraElement);
-
-
- // remove _all_ items from the canvas.
- canvas()->allItems()->clear();
- mCanvas->loadFromXML(root);
-
- // remove _all_ particle systems from the canvas
- canvas()->particleSystems()->clear();
-// canvas()->particleSystems()->append(data.particleSystems); // TODO
-
- // AB: placement preview, cursor and selection rect are not rendered into the
- // movie
-
- // TODO: text
- // --> player data must be saved! - e.g. minerals/oil
- // localPlayer()->load(data.localPlayer);
-
-
- slotUpdateGL();
-#endif
-}
-
 BoLight* BosonBigDisplayBase::light(int id) const
 {
  return BoLightManager::light(id);
@@ -3574,27 +3366,6 @@ BoLight* BosonBigDisplayBase::newLight()
 void BosonBigDisplayBase::removeLight(int id)
 {
  BoLightManager::deleteLight(id);
-}
-
-QImage BosonBigDisplayBase::screenShot()
-{
- glFinish();
- // btw: equal to width() and height()
- int w = d->mViewport[2];
- int h = d->mViewport[3];
- unsigned char* buffer = new unsigned char[w * h * 4];
- glReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
- QImage image(w, h, 32);
- for (int y = 0; y < h; y++) {
-	QRgb* line = (QRgb*)image.scanLine(y); // AB: use setPixel() instead of scanLine() ! -> endianness must be handled
-	int opengl_y = h - y;
-	for (int x = 0; x < w; x++) {
-		unsigned char* pixel = &buffer[(opengl_y * w + x) * 4];
-		line[x] = qRgb(pixel[0], pixel[1], pixel[2]);
-	}
- }
- delete[] buffer;
- return image;
 }
 
 void BosonBigDisplayBase::slotInitMiniMapFogOfWar()
@@ -3851,20 +3622,6 @@ void BosonBigDisplayBase::grabMovieFrameAndSave()
 	return;
  }
  boDebug() << k_funcinfo << "Movie frame saved to file " << file << endl;
-
-#if 0
- static QValueList<QByteArray> allMovieFrames;
- allMovieFrames.append(shot);
-
-
- // TODO: use a shortcut for this. do not do this after a certain number of
- // frames, but when a key was pressed.
- if (allMovieFrames.count() == 10) {
-	boDebug() << k_funcinfo << "generating " << allMovieFrames.count() << " frames" << endl;
-	d->mActiveDisplay->generateMovieFrames(allMovieFrames, "./11/");
-	allMovieFrames.clear();
- }
-#endif
 }
 
 void BosonBigDisplayBase::slotAdvance(unsigned int, bool)

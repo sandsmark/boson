@@ -288,7 +288,6 @@ public:
 	BoSelection* selection() const { return mSelection; }
 
 	void setFont(const BoFontInfo& font);
-	QImage screenShot();
 
 	/**
 	 * Final cleanups. This should remove basically all game relevant data
@@ -377,18 +376,6 @@ public:
 	 **/
 	QByteArray grabMovieFrame();
 
-	/**
-	 * Generate a movie frame for every @ref QByteArray object in @ref data.
-	 * The frames will be placed into @p dir. You should be able to create a
-	 * movie from this using something like
-	 * <pre>
-	 * 'mencoder -mf on:fps=20 -ovc lavc -lavcopts
-	 *    vcodec=mpeg4:vbitrate=2000
-	 *    -o boson-movie.avi boson-movie-\*.jpg'
-	 * </pre>
-	 **/
-	void generateMovieFrames(const QValueList<QByteArray>& data, const QString& dir);
-
 public slots:
 	void slotAction(const BoSpecificAction&);
 
@@ -411,10 +398,6 @@ public slots:
 	void slotUnfog(int x, int y);
 
 signals:
-	void signalMakeActive(BosonBigDisplayBase*);
-
-	void signalChangeViewport(BosonBigDisplayBase* display, const QPoint& topLeft, const QPoint& topRight, const QPoint& bottomLeft, const QPoint& bottomRight);
-
 	/**
 	 * Emitted when the selection for this big display has changed. See also
 	 * @ref BoSelection::signalSelectionChanged
@@ -537,10 +520,6 @@ protected:
 	void renderPathLines(QValueList<QPoint>& path, bool isFlying = false, float z = 0.05f);
 	void renderCursor();
 	void renderPlacementPreview();
-	/**
-	 * Called by @ref paintGL only to render text on the screen
-	 **/
-	void renderText();
 
 	virtual void enterEvent(QEvent*);
 	virtual void leaveEvent(QEvent*);
@@ -616,7 +595,6 @@ protected:
 
 	void addMouseIO(PlayerIO* playerIO);
 
-	void generateMovieFrame(const QByteArray& data, BoPixmapRenderer* renderer);
 	void resetGameMode();
 	void setGameMode(bool);
 
