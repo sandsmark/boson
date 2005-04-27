@@ -237,7 +237,7 @@ void BoUfoNewGameWidget::initPlayFields(BosonCampaign* campaign)
     boDebug() << k_funcinfo << "default campaign" << endl;
  } else {
     boDebug() << k_funcinfo << campaign->identifier() << endl;
-    campaingPrefix = campaign->name() + ":" ;
+    campaingPrefix = campaign->name() + ": " ;
  }
  QStringList list = campaign->playFields();
  QStringList items = mSelectMap->items();
