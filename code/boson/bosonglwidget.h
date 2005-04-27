@@ -153,6 +153,8 @@ public:
 	 **/
 	static QImage convertToGLFormat( const QImage& img );
 
+	QImage screenShot();
+
 public slots:
 	void slotUpdateGL();
 
