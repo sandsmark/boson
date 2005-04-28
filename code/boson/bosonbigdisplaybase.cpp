@@ -1798,8 +1798,6 @@ void BosonBigDisplayBase::initializeGL()
  boWaterManager->setSun(l);
  BoShader::setSun(l);
 
- d->mCanvasRenderer->initGL();
-
  if (Bo3dTools::checkError()) {
 	boError() << k_funcinfo << endl;
  }
@@ -1828,6 +1826,9 @@ void BosonBigDisplayBase::initializeGL()
 
  boTextureManager->initOpenGL();
  boWaterManager->initOpenGL();
+
+
+ d->mCanvasRenderer->initGL();
 
  boConfig->setBoolValue("TextureFOW", boTextureManager->textureUnits() > 1);
 
@@ -3624,7 +3625,7 @@ void BosonBigDisplayBase::grabMovieFrameAndSave()
  boDebug() << k_funcinfo << "Movie frame saved to file " << file << endl;
 }
 
-void BosonBigDisplayBase::slotAdvance(unsigned int, bool)
+void BosonBigDisplayBase::slotAdvance(unsigned int advcalls, bool)
 {
  // AB: note that in the big display no game logic must be done!
  // -> this slotAdvance() is here for certain optimizations on rendering, not
@@ -3633,6 +3634,7 @@ void BosonBigDisplayBase::slotAdvance(unsigned int, bool)
  advanceCamera();
  advanceLineVisualization();
  grabMovieFrameAndSave();
+ BoShader::setTime(advcalls / 20.0f);
 }
 
 void BosonBigDisplayBase::slotAction(const BoSpecificAction& action)

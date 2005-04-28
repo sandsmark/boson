@@ -61,6 +61,7 @@ _boglLinkProgram boglLinkProgram = 0;
 _boglShaderSource boglShaderSource = 0;
 _boglUniform1f boglUniform1f = 0;
 _boglUniform1i boglUniform1i = 0;
+_boglUniform2fv boglUniform2fv = 0;
 _boglUniform3fv boglUniform3fv = 0;
 _boglUniform4fv boglUniform4fv = 0;
 _boglUseProgram boglUseProgram = 0;
@@ -125,6 +126,7 @@ void boglInit()
     boglShaderSource = (_boglShaderSource)glXGetProcAddressARB((const GLubyte*)"glShaderSourceARB");
     boglUniform1f = (_boglUniform1f)glXGetProcAddressARB((const GLubyte*)"glUniform1fARB");
     boglUniform1i = (_boglUniform1i)glXGetProcAddressARB((const GLubyte*)"glUniform1iARB");
+    boglUniform2fv = (_boglUniform3fv)glXGetProcAddressARB((const GLubyte*)"glUniform2fvARB");
     boglUniform3fv = (_boglUniform3fv)glXGetProcAddressARB((const GLubyte*)"glUniform3fvARB");
     boglUniform4fv = (_boglUniform4fv)glXGetProcAddressARB((const GLubyte*)"glUniform4fvARB");
     boglUseProgram = (_boglUseProgram)glXGetProcAddressARB((const GLubyte*)"glUseProgramObjectARB");
