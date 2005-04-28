@@ -31,6 +31,7 @@
 BoShader* BoShader::mCurrentShader = 0;
 BoVector3Float BoShader::mCameraPos;
 BoLight* BoShader::mSun = 0;
+float BoShader::mTime = 0.0f;
 
 
 BoShader::BoShader(const QString& vertex, const QString& fragment)
@@ -257,6 +258,16 @@ bool BoShader::setUniform(QString name, int value)
   return (location >= 0);
 }
 
+bool BoShader::setUniform(QString name, const BoVector2Float& value)
+{
+  int location = uniformLocation(name);
+  if(location >= 0)
+  {
+    boglUniform2fv(location, 1, value.data());
+  }
+  return (location >= 0);
+}
+
 bool BoShader::setUniform(QString name, const BoVector3Float& value)
 {
   int location = uniformLocation(name);
@@ -285,6 +296,7 @@ void BoShader::bind()
     mCurrentShader = this;
     setUniform("cameraPos", mCameraPos);
     setUniform("lightPos", mSun->position3());
+    setUniform("time", mTime);
   }
 }
 
@@ -305,5 +317,10 @@ void BoShader::setCameraPos(const BoVector3Float& pos)
 void BoShader::setSun(BoLight* sun)
 {
   mSun = sun;
+}
+
+void BoShader::setTime(float time)
+{
+  mTime = time;
 }
 
