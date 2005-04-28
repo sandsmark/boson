@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2004 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2004-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@
 
 #include <qfile.h>
 #include <qdatastream.h>
+#include <qapplication.h>
 
 
 BoBMFLoad::BoBMFLoad(const QString& file, BosonModel* model)
@@ -374,14 +375,21 @@ bool BoBMFLoad::loadMeshes(QDataStream& stream, int lod)
     // Load the points
     // Read the whole block of floats into memory at once - should be faster
     //  this way.
-    //stream.readRawBytes((char*)(mPointArray + mPointArrayOffset * BoMesh::pointSize()),
-    //    sizeof(float) * BoMesh::pointSize() * vertexcount);
-    for(unsigned int j = 0; j < vertexcount; j++)
+    float* array = mPointArray + (mPointArrayOffset * 8);
+    stream.readRawBytes((char*)array, vertexcount * 8 * sizeof(float));
+
+    int wordsize;
+    bool bigendian;
+    qSysInfo(&wordsize, &bigendian);
+    if(!bigendian)
     {
-      // Every vertex has 8 floats
-      for(unsigned int k = 0; k < 8; k++)
+      // Convert to little endian
+      char* p = (char*)array;
+      char x[4];
+      for(unsigned int i = 0; i < vertexcount * 8 * sizeof(float); i += 4)
       {
-        stream >> mPointArray[(mPointArrayOffset + j) * 8 + k];
+        x[0] = p[i+0]; x[1] = p[i+1]; x[2] = p[i+2]; x[3] = p[i+3];
+        p[i+0] = x[3]; p[i+1] = x[2]; p[i+2] = x[1]; p[i+3] = x[0];
       }
     }
 
