@@ -115,7 +115,8 @@ libboson_la_SOURCES = \
 	bowater.cpp \
 	botexture.cpp \
 	bobmfload.cpp \
-	boshader.cpp
+	boshader.cpp \
+	borendertarget.cpp
 
 
 libboson_la_LIBADD = \
