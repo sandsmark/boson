@@ -186,7 +186,7 @@ ULayeredPane::indexForLayer(int layer, int position) const {
 		ret = layerBegin + position;
 	} else {
 		// insert at the end of the given layer
-		ret = layerEnd;
+		ret = layerBegin;
 	}
 
 	// clamp
