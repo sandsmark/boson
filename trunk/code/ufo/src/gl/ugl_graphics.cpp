@@ -290,7 +290,7 @@ UGL_Graphics::setClipRect(const URectangle & rect) {
 	// ensure at least zero size
 	m_clipRect.expand(UDimension(0, 0));
 
-	if (m_clipRect.isInvalid()) {
+	if (m_clipRect.isInvalid() || m_clipRect.w * m_clipRect.h <= 0) {
 		ugl_driver->glDisable(GL_SCISSOR_TEST);
 	} else {
 		ugl_driver->glEnable(GL_SCISSOR_TEST);
@@ -299,7 +299,7 @@ UGL_Graphics::setClipRect(const URectangle & rect) {
 		// FIXME: Is +1 correct? This allows modifying the border
 		ugl_driver->glScissor(
 			clipRect.x, clipRect.y,
-			clipRect.w + 1, clipRect.h + 1
+			clipRect.w + 1, std::max(0, clipRect.h + 1)
 		);
 	}
 }

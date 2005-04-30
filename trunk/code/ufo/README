@@ -15,6 +15,9 @@ Patches applied currently (this list may not be complete):
 - Patch to uboboxlayout.cpp to make widgets use all remaining space
 - Patch to ulayeredpane.cpp to insert new widgets at the beginning of a layer
   (which makes it the last widget that is painted), if not specified otherwise
+- Patch to gl/ugl_graphics.cpp, to fix setClipRect() for invalid rectangles
+  after the mapToDevice() call (it could create negative height rects for input
+  rects that are larger than the viewport)
 
 Use
  make_ufo_dir.sh ufo_dir code/ufo
