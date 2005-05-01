@@ -253,9 +253,11 @@ void BosonFPSCounter::cleanOldFrames()
 
 long long BosonFPSCounter::timeSinceLastFrame() const
 {
+ struct timeval now;
+ gettimeofday(&now, 0);
  Frame* f = d->mFrameQueue.getLast();
  if (f) {
-	return f->mFrameEnd.tv_sec * 1000000 + f->mFrameEnd.tv_usec;
+	return (now.tv_sec - f->mFrameEnd.tv_sec )* 1000000 + (now.tv_usec - f->mFrameEnd.tv_usec);
  }
  return 0;
 }
