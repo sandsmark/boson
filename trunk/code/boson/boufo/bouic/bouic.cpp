@@ -412,6 +412,9 @@ bool writePropertiesList(QTextStream& cpp, const QDomElement& root)
 	if (e.isNull()) {
 		continue;
 	}
+	if (e.text().isEmpty()) {
+		continue;
+	}
 	cpp << " properties.insert(\"" << e.tagName() << "\", \"" << e.text() << "\");\n";
  }
  return true;
