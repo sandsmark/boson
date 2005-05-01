@@ -123,6 +123,8 @@ BoLight::BoLight()
 
   // Disable
   mEnabled = false;
+
+  mAttenuation.setX(1);
 }
 
 BoLight::~BoLight()
