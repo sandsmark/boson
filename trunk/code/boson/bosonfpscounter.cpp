@@ -215,6 +215,7 @@ void BosonFPSCounter::skipFrame()
 	return;
  }
  d->mCurrentFrame->mSkipped = true;
+ emit signalSkipFrame();
 }
 
 void BosonFPSCounter::startFrame()
@@ -251,15 +252,24 @@ void BosonFPSCounter::cleanOldFrames()
  }
 }
 
-long long BosonFPSCounter::timeSinceLastFrame() const
+long long BosonFPSCounter::timeSinceLastFrame(bool onlyNonSkippedFrames) const
 {
  struct timeval now;
  gettimeofday(&now, 0);
- Frame* f = d->mFrameQueue.getLast();
+ Frame* f = 0;
+ QPtrListIterator<Frame> it(d->mFrameQueue);
+ for (it.toLast(); it.current() && !f; --it) {
+	if (onlyNonSkippedFrames && it.current()->mSkipped) {
+		continue;
+	}
+	f = it.current();
+ }
  if (f) {
 	return (now.tv_sec - f->mFrameEnd.tv_sec )* 1000000 + (now.tv_usec - f->mFrameEnd.tv_usec);
  }
- return 0;
+
+ // return a large value (10 minutes)
+ return 10 * 60 * 1000000;
 }
 
 

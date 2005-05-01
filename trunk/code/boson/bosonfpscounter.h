@@ -123,9 +123,15 @@ public:
 
 	/**
 	 * @return The number of us since the last frame was rendered (reminder:
-	 * 1s == 1000,000us)
+	 * 1s == 1000,000us), or a very large value if no frame is stored.
+	 * @param onlyNonSkippedFrames If FALSE, this returns the time since the
+	 * last frame. If TRUE, this returns the time since the last frame that
+	 * was not skipped.
 	 **/
-	long long int timeSinceLastFrame() const;
+	long long int timeSinceLastFrame(bool onlyNonSkippedFrames = false) const;
+
+signals:
+	void signalSkipFrame();
 
 protected:
 	void cleanOldFrames();
