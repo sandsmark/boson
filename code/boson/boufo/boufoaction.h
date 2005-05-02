@@ -221,6 +221,8 @@ public:
 	bool hasAction(const QString& name) const;
 	BoUfoAction* action(const QString& name) const;
 
+	void clearActions();
+
 	void setActionEnabled(const QString& name, bool);
 
 	bool createGUI(const QString& file);
