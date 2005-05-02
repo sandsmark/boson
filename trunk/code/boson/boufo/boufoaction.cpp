@@ -948,10 +948,7 @@ BoUfoActionCollection::BoUfoActionCollection(QObject* parent, const char* name)
 
 BoUfoActionCollection::~BoUfoActionCollection()
 {
- if (parent() && parent()->inherits("BoUfoManager")) {
-	BoUfoManager* m = (BoUfoManager*)parent();
-	m->setMenuBar(0);
- }
+ clearActions();
  d->mActionDict.clear();
  delete d->mAccel;
  delete d;
@@ -1010,6 +1007,15 @@ void BoUfoActionCollection::remove(BoUfoAction* action, bool deleteIt)
  if (deleteIt) {
 	delete a;
  }
+}
+
+void BoUfoActionCollection::clearActions()
+{
+ if (parent() && parent()->inherits("BoUfoManager")) {
+	BoUfoManager* m = (BoUfoManager*)parent();
+	m->setMenuBar(0);
+ }
+ d->mActionDict.clear();
 }
 
 BoUfoAction* BoUfoActionCollection::action(const QString& name) const
