@@ -83,18 +83,16 @@ UBoProgressUI::paintGradient(UGraphics * g, const UBoProgress * progress, const 
 	g->setColor(from);
 	glPushAttrib(GL_LIGHTING_BIT);
 	glShadeModel(GL_SMOOTH);
-#warning fixme
-	// FIXME: the gradient is not correct - it will always be from colors
-	// "from" to "to", no matter how large the factor is. e.g. if factor is
-	// 0.5, then 50% of the bar are drawn, but one end will be "from", the
-	// other "to", but correct would be "from" at one end and at the other
-	// end the "color that would be at that position, if we would use
-	// factor=1"
+
+	UColor realTo(  (float)(to.getRed()   * factor + from.getRed()   * (1.0 - factor)),
+			(float)(to.getGreen() * factor + from.getGreen() * (1.0 - factor)),
+			(float)(to.getBlue()  * factor + from.getBlue()  * (1.0 - factor)),
+			1.0f);
 	if (progress->getOrientation() == Horizontal) {
 		glBegin(GL_QUADS);
 			glVertex2i(rect.x, rect.y);
 			glVertex2i(rect.x, rect.y + rect.h);
-			g->setColor(to);
+			g->setColor(realTo);
 			glVertex2i(rect.x + (int)(rect.w * factor), rect.y + rect.h);
 			glVertex2i(rect.x + (int)(rect.w * factor), rect.y);
 		glEnd();
@@ -102,7 +100,7 @@ UBoProgressUI::paintGradient(UGraphics * g, const UBoProgress * progress, const 
 		glBegin(GL_QUADS);
 			glVertex2i(rect.x, rect.y + rect.h);
 			glVertex2i(rect.x + rect.w, rect.y + rect.h);
-			g->setColor(to);
+			g->setColor(realTo);
 			glVertex2i(rect.x + rect.w, rect.y + rect.h - (int)(rect.h * factor));
 			glVertex2i(rect.x, rect.y + rect.h - (int)(rect.h * factor));
 		glEnd();
