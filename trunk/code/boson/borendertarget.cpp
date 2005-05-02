@@ -168,8 +168,11 @@ void BoRenderTarget::initPBuffer()
   }
   if(mFlags & Float)
   {
+#warning FIXME
+#if 0
     attrib[i++] = GLX_FLOAT_COMPONENTS_NV;
     attrib[i++] = 1;
+#endif
   }
   //attrib[i++] = GLX_LEVEL;
   //attrib[i++] = 0;
@@ -194,6 +197,8 @@ void BoRenderTarget::initPBuffer()
 
 bool BoRenderTarget::createContext(int* attrib, int& i, int* pattrib, int& pi)
 {
+#warning FIXME
+#if 0
   Display *display = glXGetCurrentDisplay();
   int screen = DefaultScreen(display);
   GLXContext oldcontext = glXGetCurrentContext();
@@ -280,5 +285,8 @@ bool BoRenderTarget::createContext(int* attrib, int& i, int* pattrib, int& pi)
   mPBufferData->oldcontext = oldcontext;
 
   return true;
+#else
+  return false;
+#endif
 }
 
