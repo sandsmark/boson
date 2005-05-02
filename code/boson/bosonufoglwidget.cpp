@@ -27,6 +27,7 @@ BosonUfoGLWidget::BosonUfoGLWidget(QWidget* parent, const char* name, bool direc
 	: BosonGLWidget(parent, name, direct)
 {
  mUfoManager = 0;
+ mSendEvents = true;
 }
 
 BosonUfoGLWidget::~BosonUfoGLWidget()
