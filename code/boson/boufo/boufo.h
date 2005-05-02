@@ -63,6 +63,7 @@ namespace ufo {
 	class UInternalFrame;
 	class UBoProgress;
 	class ULayeredPane;
+	class UWidgetUI;
 
 
 	class UActionEvent;
@@ -607,12 +608,40 @@ public:
 	int width() const;
 	int height() const;
 
+	void setMouseEventsEnabled(bool enabled, bool moveEnabled);
+	void setKeyEventsEnabled(bool enabled);
+	void setFocusEventsEnabled(bool enabled);
+	void setWidgetEventsEnabled(bool enabled);
+	bool hasMouse() const;
+
+	QPoint rootLocation() const;
+
+	/**
+	 * @return A rectangle that describes the widget in normal OpenGL space
+	 * (that is with (0,0) at bottom-left). This rect can be used to define
+	 * a viewport for the widget (using glViewport()).
+	 **/
+	QRect widgetViewportRect() const;
+
+	/**
+	 * Used by @ref BoUfoCustomWidget only
+	 **/
+	virtual void paint() {}
+	/**
+	 * Used by @ref BoUfoCustomWidget only
+	 **/
+	virtual void paintWidget() {}
+	/**
+	 * Used by @ref BoUfoCustomWidget only
+	 **/
+	virtual void paintBorder() {}
+
 
 signals: // TODO: remove ufo::* parameters. use Qt or custom parameters only
 	void signalMouseEntered(ufo::UMouseEvent* e);
 	void signalMouseExited(ufo::UMouseEvent* e);
 	void signalMouseMoved(QMouseEvent* e);
-	void signalMouseDragged(ufo::UMouseEvent* e);
+	void signalMouseDragged(QMouseEvent* e);
 	void signalMousePressed(QMouseEvent* e);
 	void signalMouseReleased(QMouseEvent* e);
 	void signalMouseClicked(ufo::UMouseEvent* e);
@@ -627,7 +656,7 @@ signals: // TODO: remove ufo::* parameters. use Qt or custom parameters only
 	void signalWidgetAdded();
 	void signalWidgetRemoved();
 	void signalWidgetMoved(ufo::UWidgetEvent* e);
-	void signalWidgetResized(ufo::UWidgetEvent* e);
+	void signalWidgetResized();
 	void signalWidgetShown(ufo::UWidgetEvent* e);
 	void signalWidgetHidden(ufo::UWidgetEvent* e);
 	void signalFocusGained(ufo::UFocusEvent* e);
@@ -1209,6 +1238,24 @@ private:
 	BoUfoTabWidgetPrivate* d;
 };
 
+/**
+ * This widget uses a modified ufo widget as base. The methods @ref
+ * BoUfoWidget::paint, @ref BoUfoWidget::paintWidget and @ref
+ * BoUfoWidget::paintBorder are used for rendering.
+ *
+ * By default, they just call the original implementation of @ref ufo::UWidget.
+ **/
+class BoUfoCustomWidget : public BoUfoWidget
+{
+	Q_OBJECT
+public:
+	BoUfoCustomWidget();
+	~BoUfoCustomWidget();
+
+	virtual void paint();
+	virtual void paintWidget();
+	virtual void paintBorder();
+};
 
 class BoUfoWidgetStack : public BoUfoWidget
 {

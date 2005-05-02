@@ -630,6 +630,136 @@ void BoUfoImage::set(ufo::UImage* img)
  mImage->reference();
 }
 
+class UCustomWidgetRenderer : public ufo::UWidget
+{
+	UFO_DECLARE_DYNAMIC_CLASS(UCustomWidgetRenderer)
+public:
+	UCustomWidgetRenderer(BoUfoWidget* widget)
+		: ufo::UWidget()
+	{
+		mWidget = widget;
+	}
+
+	virtual void paint(ufo::UGraphics* g)
+	{
+		Q_UNUSED(g);
+		mWidget->paint();
+	}
+	virtual void paintWidget(ufo::UGraphics* g)
+	{
+		Q_UNUSED(g);
+		mWidget->paintWidget();
+	}
+	virtual void paintBorder(ufo::UGraphics* g)
+	{
+		Q_UNUSED(g);
+		mWidget->paintBorder();
+	}
+#if 0
+	virtual ufo::UDimension getPreferredSize()
+	{
+		QSize s = mWidget->preferredSize();
+		return ufo::UDimension(s.width(), s.height());
+	}
+	virtual ufo::UDimension getPreferredSize(const ufo::UDimension& maxSize)
+	{
+		QSize s = mRenderer->preferredSize(QSize(maxSize.w, maxSize.h));
+		return ufo::UDimension(s.width(), s.height());
+	}
+	virtual ufo::UDimension getMinimumSize()
+	{
+		QSize s = mRenderer->minimumSize();
+		return ufo::UDimension(s.width(), s.height());
+	}
+	virtual ufo::UDimension getMaximumSize()
+	{
+		QSize s = mRenderer->maximumSize();
+		return ufo::UDimension(s.width(), s.height());
+	}
+#endif
+
+
+	void ufoPaint(ufo::UGraphics* g)
+	{
+		ufo::UWidget::paint(g);
+	}
+	void ufoPaintWidget(ufo::UGraphics* g)
+	{
+		ufo::UWidget::paintWidget(g);
+	}
+	void ufoPaintBorder(ufo::UGraphics* g)
+	{
+		ufo::UWidget::paintBorder(g);
+	}
+	ufo::UDimension getUfoPreferredSize()
+	{
+		return ufo::UWidget::getPreferredSize();
+	}
+	ufo::UDimension getUfoPreferredSize(const ufo::UDimension& maxSize)
+	{
+		return ufo::UWidget::getPreferredSize(maxSize);
+	}
+	ufo::UDimension getUfoMinimumSize()
+	{
+		return ufo::UWidget::getMinimumSize();
+	}
+	ufo::UDimension getUfoMaximumSize()
+	{
+		return ufo::UWidget::getMaximumSize();
+	}
+
+private:
+	BoUfoWidget* mWidget;
+};
+
+UFO_IMPLEMENT_DYNAMIC_CLASS(UCustomWidgetRenderer, UWidget)
+
+BoUfoCustomWidget::BoUfoCustomWidget()
+	: BoUfoWidget(new UCustomWidgetRenderer(this))
+{
+ setLayoutClass(UVBoxLayout);
+}
+
+BoUfoCustomWidget::~BoUfoCustomWidget()
+{
+}
+
+void BoUfoCustomWidget::paint()
+{
+ BO_CHECK_NULL_RET(widget());
+ ufo::UToolkit* tk = ufo::UToolkit::getToolkit();
+ BO_CHECK_NULL_RET(tk);
+ ufo::UContext* c = tk->getCurrentContext();
+ BO_CHECK_NULL_RET(c);
+ ufo::UGraphics* g = c->getGraphics();
+ BO_CHECK_NULL_RET(g);
+ ((UCustomWidgetRenderer*)widget())->ufoPaint(g);
+}
+
+void BoUfoCustomWidget::paintWidget()
+{
+ BO_CHECK_NULL_RET(widget());
+ ufo::UToolkit* tk = ufo::UToolkit::getToolkit();
+ BO_CHECK_NULL_RET(tk);
+ ufo::UContext* c = tk->getCurrentContext();
+ BO_CHECK_NULL_RET(c);
+ ufo::UGraphics* g = c->getGraphics();
+ BO_CHECK_NULL_RET(g);
+ ((UCustomWidgetRenderer*)widget())->ufoPaintWidget(g);
+}
+
+void BoUfoCustomWidget::paintBorder()
+{
+ BO_CHECK_NULL_RET(widget());
+ ufo::UToolkit* tk = ufo::UToolkit::getToolkit();
+ BO_CHECK_NULL_RET(tk);
+ ufo::UContext* c = tk->getCurrentContext();
+ BO_CHECK_NULL_RET(c);
+ ufo::UGraphics* g = c->getGraphics();
+  BO_CHECK_NULL_RET(g);
+ ((UCustomWidgetRenderer*)widget())->ufoPaintBorder(g);
+}
+
 
 BoUfoManager::BoUfoManager(int w, int h, bool opaque)
 	: QObject(0, "ufomanager")
@@ -1144,6 +1274,7 @@ BoUfoWidget::BoUfoWidget(ufo::UWidget* w) : QObject(0, 0)
 void BoUfoWidget::init(ufo::UWidget* w)
 {
  mWidget = w;
+ w->setClipping(false);
 
  mWidget->setOpaque(false);
  mBackgroundImageDrawable = 0;
@@ -1182,6 +1313,42 @@ void BoUfoWidget::invalidate()
 {
 // boDebug() << k_funcinfo << endl;
  widget()->invalidateTree();
+}
+
+void BoUfoWidget::setMouseEventsEnabled(bool enabled, bool moveEnabled)
+{
+ widget()->setEventState(ufo::UEvent::MousePressed, enabled);
+ widget()->setEventState(ufo::UEvent::MouseReleased, enabled);
+ widget()->setEventState(ufo::UEvent::MouseClicked, enabled);
+ widget()->setEventState(ufo::UEvent::MouseWheel, enabled);
+ widget()->setEventState(ufo::UEvent::MouseMoved, moveEnabled);
+ widget()->setEventState(ufo::UEvent::MouseDragged, moveEnabled);
+
+ // AB: I do not consider these to be "move" events, however libufo does
+ // (enabling one of these also enables MouseMoved).
+ widget()->setEventState(ufo::UEvent::MouseEntered, moveEnabled);
+ widget()->setEventState(ufo::UEvent::MouseExited, moveEnabled);
+}
+
+void BoUfoWidget::setKeyEventsEnabled(bool enabled)
+{
+ widget()->setEventState(ufo::UEvent::KeyPressed, enabled);
+ widget()->setEventState(ufo::UEvent::KeyReleased, enabled);
+ widget()->setEventState(ufo::UEvent::KeyTyped, enabled);
+}
+
+void BoUfoWidget::setFocusEventsEnabled(bool enabled)
+{
+ widget()->setEventState(ufo::UEvent::FocusGained, enabled);
+ widget()->setEventState(ufo::UEvent::FocusLost, enabled);
+}
+
+void BoUfoWidget::setWidgetEventsEnabled(bool enabled)
+{
+ widget()->setEventState(ufo::UEvent::WidgetMoved, enabled);
+ widget()->setEventState(ufo::UEvent::WidgetResized, enabled);
+ widget()->setEventState(ufo::UEvent::WidgetShown, enabled);
+ widget()->setEventState(ufo::UEvent::WidgetHidden, enabled);
 }
 
 void BoUfoWidget::addWidget(BoUfoWidget* w)
@@ -1551,6 +1718,42 @@ int BoUfoWidget::stretch() const
  return factor;
 }
 
+bool BoUfoWidget::hasMouse() const
+{
+ return widget()->hasMouseFocus();
+}
+
+QPoint BoUfoWidget::rootLocation() const
+{
+ ufo::UPoint p = widget()->getRootLocation();
+ return QPoint(p.x, p.y);
+}
+
+QRect BoUfoWidget::widgetViewportRect() const
+{
+ ufo::UContext* context = widget()->getContext();
+ if (!context) {
+	BO_NULL_ERROR(context);
+	return QRect(0, 0, width(), height());
+ }
+ const ufo::URectangle& deviceBounds = context->getDeviceBounds();
+ const ufo::URectangle& contextBounds = context->getContextBounds();
+
+ QPoint pos = rootLocation();
+ int w = width();
+ if (pos.x() + w > contextBounds.w) {
+	w = contextBounds.w - pos.x();
+ }
+ int h = height();
+ if (pos.y() + h > contextBounds.h) {
+	h = contextBounds.h - pos.y();
+ }
+ return QRect(contextBounds.x + pos.x(),
+		(deviceBounds.h - contextBounds.y - contextBounds.h) + (contextBounds.h - pos.y() - h),
+		w,
+		h);
+}
+
 BoUfoWidget::~BoUfoWidget()
 {
  // AB: do NOT delete the mWidget!
@@ -1575,20 +1778,23 @@ void BoUfoWidget::uslotMouseExited(ufo::UMouseEvent* e)
 void BoUfoWidget::uslotMouseMoved(ufo::UMouseEvent* e)
 {
  int button = convertUfoMouseButtonToQt(e->getButton());
- int state = convertUfoModifierStateToQt(e->getButton());
+ int state = convertUfoModifierStateToQt(e->getModifiers());
  QMouseEvent me(QEvent::MouseMove, QPoint(e->getX(), e->getY()), button, state);
- emit signalMousePressed(&me);
+ emit signalMouseMoved(&me);
 }
 
 void BoUfoWidget::uslotMouseDragged(ufo::UMouseEvent* e)
 {
- emit signalMouseDragged(e);
+ int button = convertUfoMouseButtonToQt(e->getButton());
+ int state = convertUfoModifierStateToQt(e->getModifiers());
+ QMouseEvent me(QEvent::MouseMove, QPoint(e->getX(), e->getY()), button, state);
+ emit signalMouseDragged(&me);
 }
 
 void BoUfoWidget::uslotMousePressed(ufo::UMouseEvent* e)
 {
  int button = convertUfoMouseButtonToQt(e->getButton());
- int state = convertUfoModifierStateToQt(e->getButton());
+ int state = convertUfoModifierStateToQt(e->getModifiers());
  state &= ~button;
  QMouseEvent me(QEvent::MouseButtonPress, QPoint(e->getX(), e->getY()), button, state);
  emit signalMousePressed(&me);
@@ -1597,7 +1803,7 @@ void BoUfoWidget::uslotMousePressed(ufo::UMouseEvent* e)
 void BoUfoWidget::uslotMouseReleased(ufo::UMouseEvent* e)
 {
  int button = convertUfoMouseButtonToQt(e->getButton());
- int state = convertUfoModifierStateToQt(e->getButton());
+ int state = convertUfoModifierStateToQt(e->getModifiers());
  state |= button;
  QMouseEvent me(QEvent::MouseButtonRelease, QPoint(e->getX(), e->getY()), button, state);
  emit signalMouseReleased(&me);
@@ -1605,6 +1811,12 @@ void BoUfoWidget::uslotMouseReleased(ufo::UMouseEvent* e)
 
 void BoUfoWidget::uslotMouseClicked(ufo::UMouseEvent* e)
 {
+#if 0
+ int button = convertUfoMouseButtonToQt(e->getButton());
+ int state = convertUfoModifierStateToQt(e->getModifiers());
+ state |= button;
+ QMouseEvent me(QEvent::MouseButtonXYZ, QPoint(e->getX(), e->getY()), button, state);
+#endif
  emit signalMouseClicked(e);
 }
 
@@ -1654,7 +1866,7 @@ void BoUfoWidget::uslotWidgetMoved(ufo::UWidgetEvent* e)
 
 void BoUfoWidget::uslotWidgetResized(ufo::UWidgetEvent* e)
 {
- emit signalWidgetResized(e);
+ emit signalWidgetResized();
 }
 
 void BoUfoWidget::uslotWidgetShown(ufo::UWidgetEvent* e)
@@ -2706,11 +2918,11 @@ BoUfoMatrix::~BoUfoMatrix()
 
 void BoUfoMatrix::init()
 {
- setLayoutClass(UHBoxLayout);
+ setLayoutClass(UVBoxLayout);
 
- BoUfoVBox* rows[4];
+ BoUfoHBox* rows[4];
  for (int i = 0; i < 4; i++) {
-	rows[i] = new BoUfoVBox();
+	rows[i] = new BoUfoHBox();
 	addWidget(rows[i]);
  }
 
@@ -2968,7 +3180,7 @@ void BoUFullLayout::layoutContainer(const ufo::UWidget* container)
  for (unsigned int i = 0 ; i < container->getWidgetCount() ; i++) {
 	 ufo::UWidget* w = container->getWidget(i);
 	if (w->isVisible()) {
-		w->setBounds(container->getBounds());
+		w->setBounds(0, 0, container->getWidth(), container->getHeight());
 	}
  }
 }
