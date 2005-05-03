@@ -149,6 +149,13 @@ public:
 	static QStringList availableThemes();
 	static QString defaultTheme();
 
+signals:
+	/**
+	 * You do not need to use this signal directly,
+	 * see @ref BosonCursorCollection::signalSetWidgetCursor.
+	 **/
+	void signalSetWidgetCursor(BosonCursor* c);
+
 private:
 	int mMode;
 };
@@ -240,10 +247,11 @@ private:
  *
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class BosonCursorCollection
+class BosonCursorCollection : public QObject
 {
+	Q_OBJECT
 public:
-	BosonCursorCollection();
+	BosonCursorCollection(QObject* parent = 0);
 	~BosonCursorCollection();
 
 	/**
@@ -302,6 +310,15 @@ public:
 	 * used (it might differ from @p cursorDir).
 	 **/
 	BosonCursor* loadCursor(int type , const QString& cursorDir, QString& actualDir);
+
+signals:
+	/**
+	 * Emitted when the cursor requests that @ref
+	 * BosonCursor::setWidgetCursor should be called. The Qt widget should
+	 * call that method with itself as parameter, so that the cursor can set
+	 * the X11 cursor for that widget.
+	 **/
+	void signalSetWidgetCursor(BosonCursor* c);
 
 private:
 	QMap<int, QMap<QString, BosonCursor*> > mCursors;

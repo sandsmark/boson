@@ -37,6 +37,7 @@
 
 
 BosonCursor::BosonCursor()
+	: QObject()
 {
  mMode = -1;
 }
@@ -48,6 +49,7 @@ BosonCursor::~BosonCursor()
 void BosonCursor::setCursor(int mode)
 {
  mMode = mode;
+ emit signalSetWidgetCursor(this);
 }
 
 QCursor BosonCursor::cursor() const
@@ -373,7 +375,8 @@ void BosonOpenGLCursor::renderCursor(GLfloat x, GLfloat y)
 
 
 
-BosonCursorCollection::BosonCursorCollection()
+BosonCursorCollection::BosonCursorCollection(QObject* parent)
+	: QObject(parent)
 {
  mCursor = 0;
  mCursorType = -1;
@@ -441,9 +444,14 @@ BosonCursor* BosonCursorCollection::changeCursor(int type, const QString& cursor
  }
 
  if (b) {
+	if (mCursor) {
+		disconnect(mCursor, 0, this, 0);
+	}
 	mCursor = b;
 	mCursorDir = dir;
 	mCursorType = type;
+	connect(mCursor, SIGNAL(signalSetWidgetCursor(BosonCursor*)),
+			this, SIGNAL(signalSetWidgetCursor(BosonCursor*)));
  } else {
 	// will never happen, as loadCursor() falls back to CursorKDE.
 	boError() << k_funcinfo << "loading cursor failed." << endl;
